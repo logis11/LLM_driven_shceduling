@@ -76,7 +76,7 @@ which algorithm was chosen, so validation branches on the algorithm rather than
 checking a flat field list.
 
 **Config schedule** — the sequence of configs a single run will apply, with the
-times they take effect. If recognition is precomputed rather than live (Q1),
+times they take effect. If recognition is precomputed rather than live (Q2),
 this is the file the simulator consumes, and it is the only thing that differs
 between conditions.
 
@@ -175,7 +175,7 @@ denominator.
 to perfect recognition, and table headroom, from perfect recognition to perfect
 configuration. A condition's shortfall decomposes the same way, which is what
 lets a result say how much of a miss was the model and how much was the table.
-Section Q5 of `OPEN_QUESTIONS.md`.
+Q6 of `OPEN_QUESTIONS.md`.
 
 ---
 
@@ -220,4 +220,4 @@ config, rather than preempting mid-slice.
 **t_observe, t_return, t_apply** — the three instants around a config change:
 when telemetry was snapshotted, when the daemon's answer landed, and when the
 new config became active after the drain. Configuration age is measured from
-the first to the last. Q2 of `OPEN_QUESTIONS.md`.
+the first to the last. Q3 of `OPEN_QUESTIONS.md`.

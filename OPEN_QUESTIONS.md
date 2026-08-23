@@ -129,7 +129,58 @@ built in parallel. Section 8.3 requires it frozen early.
 
 ---
 
-## Q1 — Are the simulator and the daemon ever alive at the same time?
+## Q1 — One core, or several?
+
+The simulator primer assumes a single lane. The decision should be deliberate,
+because core count changes the size of the effect being measured.
+
+### What multi-core adds
+
+```text
+  SINGLE CORE                        MULTI-CORE
+  scheduler = who runs next          + load balancing
+                                     + migration cost
+                                     + affinity and cache warmth
+                                     + per-core queues
+```
+
+### Effect on the measurable gap
+
+```text
+  game (9ms of CPU per 16ms frame) + encoder + download
+
+  on 1 core   they contend. the scheduler decides who loses.
+  on 8 cores  everyone fits. the scheduler barely matters.
+```
+
+Section 5.3 makes the experiment conditional on a large gap between the random
+and oracle recognizers. Additional cores shrink that gap by removing the need
+to choose. Single core is where recognition quality is most visible.
+
+EDF optimality also holds only on a single core.
+
+### The objection
+
+A reviewer will observe that the effect depends on a one-core machine while
+real machines have eight or more.
+
+### Options
+
+```text
+  (i)   single core, stated as scope
+  (ii)  single core, with workloads whose total demand clearly exceeds
+        one core, framed as the same contention regime as N cores
+        carrying 3N worth of work
+  (iii) N cores, global queue, no migration cost
+```
+
+**Current lean:** build (i), frame with (ii). Workloads are designed so total
+demand exceeds one core, and the core count is stated as a deliberate choice
+rather than left implicit.
+
+---
+
+## Q2 — Are the simulator and the daemon ever alive at the same time?
 
 The simulator finishes a simulated hour in under a second. The daemon needs
 hundreds of real milliseconds to answer once. They do not share a clock.
@@ -199,7 +250,7 @@ abandoning a task because the machine felt slow.
 
 ---
 
-## Q2 — What happens inside the simulator when a config lands mid-run?
+## Q3 — What happens inside the simulator when a config lands mid-run?
 
 At some virtual time the algorithm changes. Processes are already running and
 already sorted into the outgoing algorithm's structures.
@@ -258,7 +309,7 @@ rule and makes the LLM conditions marginally worse rather than better.
 Independent of the choice: emit a trace event at every algorithm change, so the
 harness can report how much of each run was spent immediately after a switch.
 
-### Q2 follow-up — which instant does a config trace event record?
+### Q3 follow-up — which instant does a config trace event record?
 
 Three instants are distinct and separately meaningful.
 
@@ -295,7 +346,275 @@ last write wins on the pending slot.
 
 ---
 
-## Q3 — The ladder needs two ceilings, and the proposal names only one
+## Q4 — How is the driver table built in the first place?
+
+Section 4.6 states that the table is hand-tuned offline. It does not state
+against what. The table is section 8.2 decision 3, and every conclusion about
+RQ2 and RQ3 is measured through it.
+
+### What the table is
+
+Roughly twenty rows. Each answers one question: given this situation, what
+should the scheduler do.
+
+```text
+  SITUATION                          CONFIG
+  gaming, encoder=no, wanted=yes  -> EDF, cap 0.12
+  gaming, encoder=no, wanted=no   -> EDF, cap 0.02
+  compile, wanted=yes             -> FIFO, long slice
+  interactive                     -> MLFQ, default
+```
+
+The build problem is where the right-hand values come from.
+
+### The overfitting exposure
+
+```text
+  tune the table on the evaluation workloads
+       |
+  the table has seen the test set
+       |
+  variant A and the oracle condition both inherit that knowledge
+```
+
+Section 4.6 argues that tuning the table offline makes variant A a stronger
+experiment rather than a weaker one. That holds only if the tuning did not see
+the workloads the results are reported on.
+
+### The ordering constraint
+
+```text
+  the Phase 1 gate needs the oracle condition
+  the oracle condition needs the table
+  tuning the table needs the search engine
+  the search engine needs the simulator
+```
+
+A tuned table cannot exist before the gate, and should not.
+
+---
+
+### Proposal: build it twice, in five steps
+
+```text
+  1  write v0 by hand              theory only, no data
+  2  run the Phase 1 gate with v0  may stop the project here
+  3  write throwaway workloads     separate from the evaluation set
+  4  search each row against them  produces v1
+  5  freeze v1, run the matrix     on the evaluation workloads
+```
+
+#### Step 1 — v0 from theory
+
+Each row is reasoned out, not measured. Search moves only the constants later.
+
+```text
+  (gaming, encoder=false, wanted=true)
+     frame deadlines dominate          -> EDF
+     download is wanted, must progress -> batch cap nonzero
+     but must never cost a frame       -> cap small
+
+  (gaming, encoder=false, wanted=false)
+     same deadlines                    -> EDF
+     background nobody asked for       -> cap at the starvation floor,
+                                          not zero (section 4.7)
+
+  (compile, wanted=true)
+     throughput wants long slices      -> FIFO in the contended class
+     the shell must stay alive         -> interactive class unchanged
+```
+
+The last row shows that the algorithm applies inside a fixed class structure
+rather than globally. Section 4.7 already forbids altering priority ordering
+between classes, so a row is an algorithm for the contended class, its
+parameters, and the per-class caps.
+
+The constants in v0 are guesses. That is acceptable, because v0 is not used for
+any performance claim.
+
+#### Step 2 — the gate runs on v0
+
+The Phase 1 gate compares a random recognizer against the oracle condition, and
+the oracle condition needs a table. v0 is that table.
+
+v0 may be run against the evaluation workloads freely. It was tuned against
+nothing, so there is nothing to contaminate.
+
+If the gate fails, the project stops and v1 is never built.
+
+#### Step 3 — the tuning workloads
+
+During tuning no model runs. Nothing reads process names. The tuning workloads
+are therefore behaviour plus a label, with generic names and no command lines.
+
+```text
+  EVALUATION workload                TUNING workload
+  the model reads the names          nothing reads the names
+  names must be believable           names are placeholders
+  reported                           never reported
+```
+
+Full example for one row, `(gaming, encoder=false, wanted=true)`. Illustrative:
+only the workload file of section 5.5 is specified.
+
+```yaml
+name: tune_gaming_wanted_02
+set: tuning
+duration_ms: 30000
+primary_metric: p99_frame_latency_ms
+
+ground_truth:
+  - t_ms: 0
+    mode: gaming
+    has_realtime_encoder: false
+    background_is_wanted: true
+
+processes:
+  - name: proc_a                 # stands in for the game
+    start_ms: 0
+    pattern:
+      type: latency_critical
+      period_ms: 16
+      deadline_ms: 16
+      cpu_burst_ms: [4, 9]
+
+  - name: proc_b                 # stands in for a chat client
+    start_ms: 0
+    pattern:
+      type: interactive
+      cpu_burst_ms: [1, 4]
+      io_wait_ms: [100, 800]
+
+  - name: proc_c                 # stands in for the wanted download
+    start_ms: 0
+    pattern:
+      type: io_heavy
+      cpu_burst_ms: [2, 10]
+      io_wait_ms: [1, 5]
+```
+
+Three variants per row, differing in one knob only.
+
+```text
+             deadline process   background   interactive   total demand
+  01 light   burst [3, 6]        ~70%         ~2%          ~100%
+  02 medium  burst [4, 9]        ~70%         ~2%          ~113%
+  03 heavy   burst [8, 14]       ~70%         ~2%          ~141%
+```
+
+Every variant exceeds one core. A variant that fits comfortably gives the
+scheduler nothing to decide, and that row of the search returns noise. This is
+Q1's oversubscribed framing made concrete.
+
+Only the deadline process's demand varies. Period, deadline, background greed
+and duration are held fixed, so a change in the winning config is attributable
+to one cause.
+
+Two constraints worth stating:
+
+- No command lines, and placeholder names. This is a guard rather than
+  laziness. Real software names in the tuning pool could be pointed at a
+  recognizer by accident, and the separation from the evaluation set would leak
+  silently.
+- The same `primary_metric` as the evaluation workloads for that situation. A
+  constant tuned on the mean and reported on the tail was optimised for the
+  wrong thing.
+
+#### Step 4 — the search
+
+Per row, sweep candidate configurations across that row's tuning workloads and
+keep the best average.
+
+```text
+  ROW: (gaming, encoder=no, wanted=yes)
+
+                   | tune_01 | tune_02 | tune_03 |  avg
+  EDF cap 0.02     |   19    |   22    |   31    |  24.0
+  EDF cap 0.05     |   12    |   14    |   21    |  15.7   <- winner
+  EDF cap 0.12     |   14    |   18    |   24    |  18.7
+  EDF cap 0.30     |   21    |   26    |   34    |  27.0
+  MLFQ tuned       |   30    |   35    |   44    |  36.3
+  FIFO             |   80    |   88    |  101    |  89.7
+
+  ROW: (gaming, encoder=no, wanted=yes) -> EDF, cap 0.05
+```
+
+Averaging across load levels is what makes the constant a property of the
+situation rather than of one burst range.
+
+Rows no tuning workload reaches keep their v0 values.
+
+#### Step 5 — freeze and run
+
+```text
+  +-- step 3 ------------+        +-- step 5 --------------+
+  | TUNING workloads     |        | EVALUATION workloads   |
+  | placeholder names    |        | real software names    |
+  | ~3 per row           |        | the section 5.5 set    |
+  +----------+-----------+        +-----------+------------+
+             |                                |
+        step 4 search                    the experiment
+             |                                |
+             v                                v
+       +-----------+                    +-----------+
+       |  v1 TABLE |------------------->|  results  |
+       +-----------+  frozen, unchanged +-----------+
+
+       the two workload pools never meet
+```
+
+---
+
+### Which table each result uses
+
+```text
+  v0   untuned, from theory
+       Phase 1 gate                          RQ0
+       reported beside v1                    RQ5
+
+  v1   tuned on the throwaway pool
+       the condition ladder                  RQ2, RQ3
+       the transition sweep                  RQ4
+       table headroom                        RQ5
+
+  no table at all
+       Layer 1 recognition accuracy          RQ1
+```
+
+RQ1 never touches the table. Layer 1 compares labels against labels with no
+simulator involved, which is why section 5.4 separates the two layers.
+
+### Two consequences
+
+**v0 is not discarded.** Running the ladder on both tables costs one extra
+sweep and answers most of RQ5 directly. If v0 and v1 score alike, the table is
+not a fragile artifact and no reader can claim the result hinges on tuning
+choices. If v1 is far better, the size of the gap is itself worth reporting.
+
+**Re-run the gate on v1.** The gate asks whether there is room to measure
+anything. The honest version of that question uses the table the experiment
+actually runs on.
+
+```text
+  gate on v0   early, cheap, may stop the project
+  gate on v1   the figure that goes in the paper
+```
+
+### Row count
+
+Some combinations are unreachable, such as an idle mode carrying a real-time
+encoder. Others are reachable but produced by no workload. Both still need an
+entry, because an unreachable row reached at runtime is a validator event
+rather than a crash, but both take textbook defaults and never enter the
+search.
+
+Counting the rows any workload actually exercises gives the real size of
+section 8.2 decision 3, and the real size of the tuning pool: roughly three
+files per reachable row, most of them one file with different numbers.
+
+---
+
+## Q5 — The ladder needs two ceilings, and the proposal names only one
 
 Two sentences in the proposal describe different machines under the same word.
 
@@ -362,58 +681,7 @@ two uses of the word in sections 5.2 and 7.
 
 ---
 
-## Q4 — One core, or several?
-
-The simulator primer assumes a single lane. The decision should be deliberate,
-because core count changes the size of the effect being measured.
-
-### What multi-core adds
-
-```text
-  SINGLE CORE                        MULTI-CORE
-  scheduler = who runs next          + load balancing
-                                     + migration cost
-                                     + affinity and cache warmth
-                                     + per-core queues
-```
-
-### Effect on the measurable gap
-
-```text
-  game (9ms of CPU per 16ms frame) + encoder + download
-
-  on 1 core   they contend. the scheduler decides who loses.
-  on 8 cores  everyone fits. the scheduler barely matters.
-```
-
-Section 5.3 makes the experiment conditional on a large gap between the random
-and oracle recognizers. Additional cores shrink that gap by removing the need
-to choose. Single core is where recognition quality is most visible.
-
-EDF optimality also holds only on a single core.
-
-### The objection
-
-A reviewer will observe that the effect depends on a one-core machine while
-real machines have eight or more.
-
-### Options
-
-```text
-  (i)   single core, stated as scope
-  (ii)  single core, with workloads whose total demand clearly exceeds
-        one core, framed as the same contention regime as N cores
-        carrying 3N worth of work
-  (iii) N cores, global queue, no migration cost
-```
-
-**Current lean:** build (i), frame with (ii). Workloads are designed so total
-demand exceeds one core, and the core count is stated as a deliberate choice
-rather than left implicit.
-
----
-
-## Q5 — Grading strategy across heterogeneous workloads
+## Q6 — Grading strategy across heterogeneous workloads
 
 Each workload is scored on a different metric, so raw values cannot be averaged.
 
@@ -595,269 +863,3 @@ background work exists.
 ```
 
 ---
-
-## Q6 — How is the driver table built in the first place?
-
-Section 4.6 states that the table is hand-tuned offline. It does not state
-against what. The table is section 8.2 decision 3, and every conclusion about
-RQ2 and RQ3 is measured through it.
-
-### What the table is
-
-Roughly twenty rows. Each answers one question: given this situation, what
-should the scheduler do.
-
-```text
-  SITUATION                          CONFIG
-  gaming, encoder=no, wanted=yes  -> EDF, cap 0.12
-  gaming, encoder=no, wanted=no   -> EDF, cap 0.02
-  compile, wanted=yes             -> FIFO, long slice
-  interactive                     -> MLFQ, default
-```
-
-The build problem is where the right-hand values come from.
-
-### The overfitting exposure
-
-```text
-  tune the table on the evaluation workloads
-       |
-  the table has seen the test set
-       |
-  variant A and the oracle condition both inherit that knowledge
-```
-
-Section 4.6 argues that tuning the table offline makes variant A a stronger
-experiment rather than a weaker one. That holds only if the tuning did not see
-the workloads the results are reported on.
-
-### The ordering constraint
-
-```text
-  the Phase 1 gate needs the oracle condition
-  the oracle condition needs the table
-  tuning the table needs the search engine
-  the search engine needs the simulator
-```
-
-A tuned table cannot exist before the gate, and should not.
-
----
-
-### Proposal: build it twice, in five steps
-
-```text
-  1  write v0 by hand              theory only, no data
-  2  run the Phase 1 gate with v0  may stop the project here
-  3  write throwaway workloads     separate from the evaluation set
-  4  search each row against them  produces v1
-  5  freeze v1, run the matrix     on the evaluation workloads
-```
-
-#### Step 1 — v0 from theory
-
-Each row is reasoned out, not measured. Search moves only the constants later.
-
-```text
-  (gaming, encoder=false, wanted=true)
-     frame deadlines dominate          -> EDF
-     download is wanted, must progress -> batch cap nonzero
-     but must never cost a frame       -> cap small
-
-  (gaming, encoder=false, wanted=false)
-     same deadlines                    -> EDF
-     background nobody asked for       -> cap at the starvation floor,
-                                          not zero (section 4.7)
-
-  (compile, wanted=true)
-     throughput wants long slices      -> FIFO in the contended class
-     the shell must stay alive         -> interactive class unchanged
-```
-
-The last row shows that the algorithm applies inside a fixed class structure
-rather than globally. Section 4.7 already forbids altering priority ordering
-between classes, so a row is an algorithm for the contended class, its
-parameters, and the per-class caps.
-
-The constants in v0 are guesses. That is acceptable, because v0 is not used for
-any performance claim.
-
-#### Step 2 — the gate runs on v0
-
-The Phase 1 gate compares a random recognizer against the oracle condition, and
-the oracle condition needs a table. v0 is that table.
-
-v0 may be run against the evaluation workloads freely. It was tuned against
-nothing, so there is nothing to contaminate.
-
-If the gate fails, the project stops and v1 is never built.
-
-#### Step 3 — the tuning workloads
-
-During tuning no model runs. Nothing reads process names. The tuning workloads
-are therefore behaviour plus a label, with generic names and no command lines.
-
-```text
-  EVALUATION workload                TUNING workload
-  the model reads the names          nothing reads the names
-  names must be believable           names are placeholders
-  reported                           never reported
-```
-
-Full example for one row, `(gaming, encoder=false, wanted=true)`. Illustrative:
-only the workload file of section 5.5 is specified.
-
-```yaml
-name: tune_gaming_wanted_02
-set: tuning
-duration_ms: 30000
-primary_metric: p99_frame_latency_ms
-
-ground_truth:
-  - t_ms: 0
-    mode: gaming
-    has_realtime_encoder: false
-    background_is_wanted: true
-
-processes:
-  - name: proc_a                 # stands in for the game
-    start_ms: 0
-    pattern:
-      type: latency_critical
-      period_ms: 16
-      deadline_ms: 16
-      cpu_burst_ms: [4, 9]
-
-  - name: proc_b                 # stands in for a chat client
-    start_ms: 0
-    pattern:
-      type: interactive
-      cpu_burst_ms: [1, 4]
-      io_wait_ms: [100, 800]
-
-  - name: proc_c                 # stands in for the wanted download
-    start_ms: 0
-    pattern:
-      type: io_heavy
-      cpu_burst_ms: [2, 10]
-      io_wait_ms: [1, 5]
-```
-
-Three variants per row, differing in one knob only.
-
-```text
-             deadline process   background   interactive   total demand
-  01 light   burst [3, 6]        ~70%         ~2%          ~100%
-  02 medium  burst [4, 9]        ~70%         ~2%          ~113%
-  03 heavy   burst [8, 14]       ~70%         ~2%          ~141%
-```
-
-Every variant exceeds one core. A variant that fits comfortably gives the
-scheduler nothing to decide, and that row of the search returns noise. This is
-Q4's oversubscribed framing made concrete.
-
-Only the deadline process's demand varies. Period, deadline, background greed
-and duration are held fixed, so a change in the winning config is attributable
-to one cause.
-
-Two constraints worth stating:
-
-- No command lines, and placeholder names. This is a guard rather than
-  laziness. Real software names in the tuning pool could be pointed at a
-  recognizer by accident, and the separation from the evaluation set would leak
-  silently.
-- The same `primary_metric` as the evaluation workloads for that situation. A
-  constant tuned on the mean and reported on the tail was optimised for the
-  wrong thing.
-
-#### Step 4 — the search
-
-Per row, sweep candidate configurations across that row's tuning workloads and
-keep the best average.
-
-```text
-  ROW: (gaming, encoder=no, wanted=yes)
-
-                   | tune_01 | tune_02 | tune_03 |  avg
-  EDF cap 0.02     |   19    |   22    |   31    |  24.0
-  EDF cap 0.05     |   12    |   14    |   21    |  15.7   <- winner
-  EDF cap 0.12     |   14    |   18    |   24    |  18.7
-  EDF cap 0.30     |   21    |   26    |   34    |  27.0
-  MLFQ tuned       |   30    |   35    |   44    |  36.3
-  FIFO             |   80    |   88    |  101    |  89.7
-
-  ROW: (gaming, encoder=no, wanted=yes) -> EDF, cap 0.05
-```
-
-Averaging across load levels is what makes the constant a property of the
-situation rather than of one burst range.
-
-Rows no tuning workload reaches keep their v0 values.
-
-#### Step 5 — freeze and run
-
-```text
-  +-- step 3 ------------+        +-- step 5 --------------+
-  | TUNING workloads     |        | EVALUATION workloads   |
-  | placeholder names    |        | real software names    |
-  | ~3 per row           |        | the section 5.5 set    |
-  +----------+-----------+        +-----------+------------+
-             |                                |
-        step 4 search                    the experiment
-             |                                |
-             v                                v
-       +-----------+                    +-----------+
-       |  v1 TABLE |------------------->|  results  |
-       +-----------+  frozen, unchanged +-----------+
-
-       the two workload pools never meet
-```
-
----
-
-### Which table each result uses
-
-```text
-  v0   untuned, from theory
-       Phase 1 gate                          RQ0
-       reported beside v1                    RQ5
-
-  v1   tuned on the throwaway pool
-       the condition ladder                  RQ2, RQ3
-       the transition sweep                  RQ4
-       table headroom                        RQ5
-
-  no table at all
-       Layer 1 recognition accuracy          RQ1
-```
-
-RQ1 never touches the table. Layer 1 compares labels against labels with no
-simulator involved, which is why section 5.4 separates the two layers.
-
-### Two consequences
-
-**v0 is not discarded.** Running the ladder on both tables costs one extra
-sweep and answers most of RQ5 directly. If v0 and v1 score alike, the table is
-not a fragile artifact and no reader can claim the result hinges on tuning
-choices. If v1 is far better, the size of the gap is itself worth reporting.
-
-**Re-run the gate on v1.** The gate asks whether there is room to measure
-anything. The honest version of that question uses the table the experiment
-actually runs on.
-
-```text
-  gate on v0   early, cheap, may stop the project
-  gate on v1   the figure that goes in the paper
-```
-
-### Row count
-
-Some combinations are unreachable, such as an idle mode carrying a real-time
-encoder. Others are reachable but produced by no workload. Both still need an
-entry, because an unreachable row reached at runtime is a validator event
-rather than a crash, but both take textbook defaults and never enter the
-search.
-
-Counting the rows any workload actually exercises gives the real size of
-section 8.2 decision 3, and the real size of the tuning pool: roughly three
-files per reachable row, most of them one file with different numbers.
