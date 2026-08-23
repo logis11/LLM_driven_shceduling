@@ -24,6 +24,7 @@
 - [Part 9 — Milestones](#part-9--milestones)
 - [Part 10 — Future work](#part-10--future-work)
 - [Appendix A — Glossary](#appendix-a--glossary)
+- [Appendix B — A worked example](#appendix-b--a-worked-example)
 
 ---
 
@@ -845,3 +846,106 @@ Phase 1 is the critical gate. It requires no model, no prompts, and no API keys,
 **Time slice (quantum)** — how long a process may run before the scheduler reconsiders. Typically 1–10 ms.
 
 **Turnaround time** — arrival to completion. The metric batch work cares about.
+
+---
+
+# Appendix B — A worked example
+
+One workload followed from file to metric. The workload file is specified in §5.5; the telemetry and trace shapes below are illustrative, not frozen — they are part of decision 2 in §8.2.
+
+## B.1 One file, three audiences
+
+The `gaming_wanted_vs_unwanted_bulk` definition in §5.5 is read by three consumers, each of which sees a different slice:
+
+```text
+   name / cmdline  ──►  recognizer only
+   pattern         ──►  simulator only
+   ground_truth    ──►  oracle and the Layer 1 grader only
+```
+
+The partition is enforced by which module is handed which slice, not by prompt wording.
+
+## B.2 Telemetry — simulator to daemon
+
+The projection of the workload the recognizer is permitted to see:
+
+```json
+{
+  "t_ms": 12400,
+  "processes": [
+    { "name": "League of Legends", "cmdline": "/opt/riot/LeagueClient --game" },
+    { "name": "Discord",           "cmdline": "/usr/bin/discord" },
+    { "name": "steam",             "cmdline": "/usr/bin/steam -applaunch download" }
+  ],
+  "counts": { "total": 3, "runnable": 2 }
+}
+```
+
+| In | Out | Why excluded |
+|---|---|---|
+| names, command lines | PIDs | §4.7 — instances die and PIDs are recycled |
+| coarse counts | burst patterns | that is the ground truth being tested against |
+| | mode and attribute labels | that is the answer |
+
+Telemetry is a pure function of which processes exist, and launches and exits are scripted in the workload. Nothing here depends on scheduling order, which is why one record/replay cache serves every condition (§4.8).
+
+## B.3 Trace — simulator to harness
+
+The timetable, written down. Every performance metric is read off this; nothing is timed.
+
+```text
+  CPU │ Discord │   steam   │ LoL │   steam   │ LoL │ Discord │
+      └─────────┴───────────┴─────┴───────────┴─────┴─────────┘
+      0        3          11    15          23    27        30   ms
+```
+
+```jsonl
+{"t_ms": 0,  "event": "run_start", "proc": "Discord", "class": "interactive"}
+{"t_ms": 3,  "event": "block",     "proc": "Discord", "reason": "io_wait"}
+{"t_ms": 3,  "event": "run_start", "proc": "steam",   "class": "background"}
+{"t_ms": 11, "event": "preempt",   "proc": "steam",   "reason": "bandwidth_cap"}
+{"t_ms": 15, "event": "deadline",  "proc": "LoL",     "met": true, "slack_ms": 1}
+{"t_ms": 16, "event": "config",    "algorithm": "EDF", "provenance": "clamped"}
+```
+
+Two event kinds carry information that block boundaries alone do not:
+
+- **`deadline`** — the outcome of one periodic job. P99 frame latency and deadline miss rate are computed from these.
+- **`config`** — every configuration change, stamped with provenance. §6.3 requires this alongside every performance figure: a condition that scored well while most of its configurations were fallbacks demonstrated nothing about recognition.
+
+## B.4 Reading the deadline metrics off the trace
+
+A `latency_critical` process is not one job. `period_ms: 16` means a new job arrives every 16 ms, and `deadline_ms: 16` means each is due 16 ms after its own arrival.
+
+```text
+  frame 1        frame 2        frame 3        frame 4
+  ├──────┤       ├──────┤       ├──────┤       ├──────┤
+  0     16      16     32      32     48      48     64   ms
+  ↑      ↑
+  arrives  due
+```
+
+Each frame needs the same 4–9 ms of CPU regardless of policy. Whether it lands before its deadline depends entirely on what the scheduler ran ahead of it — which is the effect this experiment measures, reduced to one number per frame.
+
+```text
+  slack_ms  =  deadline  −  completion
+              positive → room to spare
+              negative → late by that much
+```
+
+**Deadline miss rate** is the fraction of `deadline` events with `met: false`.
+
+```text
+  frame:  ✓ ✓ ✓ ✗ ✓ ✓ ✓ ✓ ✗ ✓ ✓ ✓     →  2/12 = 17%
+```
+
+**P99 frame latency** keeps the distribution that a miss rate discards — it cannot distinguish "finished instantly" from "barely made it every time."
+
+```text
+  frames sorted by completion time
+  │▁▁▁▁▂▂▂▃▃▃▃▃▃▄▄▄▄▃▃▂▂▁▁                       ▁ ▁
+  └──────────────┬──────────────────────────────┬────►
+              mean 7 ms                     P99 = 31 ms
+```
+
+Both are reported because they fail differently. At 60 fps the 99th percentile is reached roughly once per second — often enough to be perceived as stutter while the mean still looks healthy. A scheduler can also hold the miss rate at zero while the tail creeps toward the deadline, which is a system about to fail under slightly more load. This is the §6.1 requirement to report percentiles rather than means, made concrete.
