@@ -5,6 +5,130 @@ Nothing here is settled.
 
 ---
 
+## Module sketch
+
+The layout the questions below hang off. Not settled either.
+
+```text
+              WORKLOAD DEFINITION  (the experiment itself)
+       +--------------+------------------+--------------+
+       | names +      | burst / sleep    | ground-truth |
+       | cmdlines     | patterns         | timeline     |
+       +------+-------+--------+---------+------+-------+
+              |                |                |
+       only recognizer   only simulator   only oracle and
+       sees this         sees this        grader see this
+              |                |                |
+              v                v                v
+   +-------------------+  +-----------+   +-------------+
+   |  POLICY DAEMON    |  | SIMULATOR |   |   HARNESS   |
+   |     Python        |  |    C++    |   |   Python    |
+   +---------+---------+  +-----+-----+   +------+------+
+             |  config          | trace          |
+             +------------------+----------------+
+                        drives everything
+```
+
+The information asymmetry of section 5.5 is enforced by which module receives
+which slice of the workload file, not by prompt wording.
+
+### Policy daemon
+
+```text
+   telemetry in
+        |
+        v
+   +-------------------------------------+
+   | RECOGNIZER   the only swapped part  |
+   |  fixed | random | whitelist | llm    |
+   |  | oracle                            |
+   |        prompt . model client         |
+   |        (hosted API and local, one    |
+   |         interface)                   |
+   +------------------+------------------+
+                      | proposal
+                      v
+   +-------------------------------------+
+   | VALIDATOR    schema, clamp, fallback|
+   | + PROVENANCE stamp                  |
+   +------------------+------------------+
+                      | system block
+                      v
+   +-------------------------------------+
+   | CPU DRIVER   (mode, attrs) -> config|
+   +------------------+------------------+
+                      v  config out
+```
+
+Two stages fixed, one swapped. That is the experiment expressed as code.
+
+The driver table sits downstream of the validator, inside the daemon. It must
+be identical for `random`, `whitelist`, `oracle` and variant A, and the
+simulator never learns that a recognizer exists.
+
+A consequence worth stating plainly: a condition is a function from a workload
+to a configuration schedule. Seven producers, one simulator binary.
+
+### Simulator
+
+```text
+   config in --->+--------------------------------+
+                 | EXECUTOR   identical always    |
+                 |  class assignment . bandwidth  |
+                 |  caps . starvation floor       |
+                 +---------------+----------------+
+                                 | selects
+                 +---------------v----------------+
+                 | ALGORITHMS  MLFQ EDF LOT FIFO  |  one interface
+                 +---------------+----------------+
+                 +---------------v----------------+
+                 | EVENT ENGINE   virtual clock   |
+                 | PROCESS MODEL  scripted bursts |
+                 |                one RNG stream  |
+                 |                per process     |
+                 +---------------+----------------+
+                                 v  trace out
+```
+
+The executor is the part that must never vary across conditions (section 5.1).
+
+### Harness
+
+```text
+   matrix runner  --->  condition x workload x seed x repeat
+        |
+        +---> LAYER 1 grader   proposal vs ground truth, no simulator
+        +---> LAYER 2 metrics  read off the trace
+        +---> search engine    tunes the driver table, and produces
+        |                      the perfect-configuration diagnostic
+        +---> report and plots
+```
+
+The search engine drives the simulator repeatedly, so it belongs here rather
+than in the daemon.
+
+### Shared contracts
+
+```text
+   telemetry out . proposal in . config . workload file . trace
+```
+
+Not a module, but the artifact that decides whether the three areas can be
+built in parallel. Section 8.3 requires it frozen early.
+
+### Tech stack
+
+| Component | Language | Rationale |
+|---|---|---|
+| Simulator | C++ | logic carries over to a `sched_ext` port; deterministic |
+| Policy daemon | Python | prompts change constantly; model SDKs live here |
+| Harness | Python | pandas and matplotlib |
+| Wire format | JSON | survives the simulator being replaced by a real kernel |
+| Workload files | YAML | hand-authored and human-reviewed |
+| Model hosting | one client interface, two backends | hosted API for iteration, local quantised model for the measurements in the paper |
+
+---
+
 ## Q1 — Are the simulator and the daemon ever alive at the same time?
 
 The simulator finishes a simulated hour in under a second. The daemon needs
