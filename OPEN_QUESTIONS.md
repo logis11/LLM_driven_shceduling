@@ -593,3 +593,90 @@ background work exists.
 
   split          well-known vs unregistered software (section 5.5).
 ```
+
+---
+
+## Q6 — How is the driver table built in the first place?
+
+Section 4.6 states that the table is hand-tuned offline. It does not state on
+what.
+
+### The overfitting exposure
+
+```text
+  tune the table on the evaluation workloads
+       |
+  the table has seen the test set
+       |
+  variant A and the oracle condition both inherit that knowledge
+```
+
+Section 4.6 argues that tuning the table offline makes variant A a stronger
+experiment rather than a weaker one. That holds only if the tuning did not see
+the workloads the results are reported on.
+
+### The ordering constraint
+
+```text
+  the Phase 1 gate needs the oracle condition
+  the oracle condition needs the table
+  tuning the table needs the search engine
+  the search engine needs the simulator
+```
+
+A tuned table cannot exist before the gate, and should not.
+
+### Proposal: build it twice
+
+```text
+  v0   TEXTBOOK PRIORS      written from scheduling theory alone.
+                            no search, no data. used for Phase 1.
+
+  v1   TUNED                tuned against a separate set of workloads
+                            that exercises the rows. used thereafter.
+```
+
+```text
+  TUNING SET       exercises the rows. crude, mechanical, never reported.
+  EVALUATION SET   the scenarios of section 5.5. never tuned against.
+```
+
+Reporting v0 alongside v1 costs almost nothing and answers a question of its
+own: how much did tuning matter. If the two score alike, the table is not a
+delicate artifact and RQ5 is answered cheaply.
+
+### How a row is written
+
+Rows come from reasoning. Search moves only the constants.
+
+```text
+  (gaming, encoder=false, wanted=true)
+     frame deadlines dominate          -> EDF
+     download is wanted, must progress -> batch cap nonzero
+     but must never cost a frame       -> cap small
+
+  (gaming, encoder=false, wanted=false)
+     same deadlines                    -> EDF
+     background nobody asked for       -> cap at the starvation floor,
+                                          not zero (section 4.7)
+
+  (compile, wanted=true)
+     throughput wants long slices      -> FIFO in the contended class
+     the shell must stay alive         -> interactive class unchanged
+```
+
+The last row shows that the algorithm applies inside a fixed class structure
+rather than globally. Section 4.7 already forbids altering priority ordering
+between classes, so a row is really an algorithm for the contended class, its
+parameters, and the per-class caps.
+
+### Row count
+
+Some combinations are unreachable, such as an idle mode carrying a real-time
+encoder. Others are reachable but produced by no workload. Both still need an
+entry, because an unreachable row reached at runtime is a validator event
+rather than a crash, but both take textbook defaults and never enter the
+search.
+
+Counting the rows any workload actually exercises gives the real size of
+section 8.2, decision 3.

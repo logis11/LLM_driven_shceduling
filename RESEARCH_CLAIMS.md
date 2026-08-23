@@ -2,9 +2,9 @@
 
 What this project asserts, what would falsify it, and what it does not claim.
 
-RQ1 through RQ4 are section 3 of `RESEARCH_PROPOSAL_v2.md`, restated. RQ0 and
-RQ5, and the mechanism split under RQ1 and RQ2, are proposed additions and are
-marked as such.
+RQ0 through RQ5 are section 3 of `RESEARCH_PROPOSAL_v2.md`, restated with the
+reasoning behind them. The mechanism split under RQ1 and RQ2 is a proposed
+addition and is marked as such.
 
 ---
 
@@ -98,7 +98,7 @@ combination axis explicitly, not only the familiarity axis.
 
 ## The research questions
 
-### RQ0 — Does configuration matter on these workloads at all? *(proposed)*
+### RQ0 — Does configuration matter on these workloads at all?
 
 Compare a random recognizer against perfect recognition, with no model in the
 loop. If a perfect recognizer scores close to a random one, no recognizer can
@@ -164,7 +164,7 @@ because reporting a figure measured without them would be dishonest.
 Produces a statement of the form: semantic configuration pays off only when a
 situation persists at least N times the model's round-trip latency.
 
-### RQ5 — Is the instrument sound? *(proposed)*
+### RQ5 — Is the instrument sound?
 
 Every conclusion about RQ2 and RQ3 is measured through the driver table. If the
 table is poor, a correct reading is discarded before it reaches the scheduler,

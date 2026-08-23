@@ -208,6 +208,8 @@ Stating this plainly makes the proposal narrower and considerably more defensibl
 
 # Part 3 — Research questions
 
+**RQ0 — Measurability.** Before any model exists: does the choice of scheduling configuration change outcomes enough to measure on these workloads at all? A random recognizer is compared against perfect recognition, with no model in the loop. If a perfect recognizer scores close to a random one, no recognizer can demonstrate anything and every question below is unanswerable. Section 5.3 develops this. It requires no prompt, no model, and no API key, and it is the cheapest available falsification of the premise.
+
 **RQ1 — Reading the situation.** Given only the names and command lines of currently running processes, can an LLM correctly work out what the system is being used for?
 
 **RQ2 — Value.** Does correct reading produce measurably better scheduling than (a) no situation awareness, and (b) the whitelist approach real operating systems currently use?
@@ -215,6 +217,8 @@ Stating this plainly makes the proposal narrower and considerably more defensibl
 **RQ3 — Vocabulary sufficiency.** Is the shared signal — mode plus attributes — enough for a consumer to act well, or does the consumer need the model to hand it configuration directly? This is the architecture question: if the vocabulary is sufficient, drivers stay thin and new consumers cost nothing. Section 4.6 measures it.
 
 **RQ4 — Timing.** LLM inference takes hundreds of milliseconds to seconds. Scheduling decisions take microseconds. How long must a situation last before semantic scheduling pays for its own latency?
+
+**RQ5 — Instrument soundness.** Every conclusion about RQ2 and RQ3 is measured through the CPU driver's mapping table. If that table maps distinct situations to indistinguishable configurations, or maps them to configurations far from what the situation admits, a correct reading is discarded before it reaches the scheduler — and the result reads as a negative finding about the signal when it is a finding about the mapping. Three checks answer this, all without a model and all before the full matrix: whether different rows of the table yield different configurations; whether those configurations yield different metrics; and how far each row sits from the best configuration a search can find for that situation. The last of these is the gap between perfect recognition and perfect configuration, and a large gap invalidates the interpretation of every other result rather than merely weakening it.
 
 RQ1 and RQ2 can come apart, and that is the most interesting possible outcome. "The model reads situations accurately but scheduling performance does not improve" tells us the existing heuristics were already sufficient for this particular consumer — a real result, and one the architecture survives.
 
