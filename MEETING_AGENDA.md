@@ -6,8 +6,7 @@ Read beforehand: `OPEN_QUESTIONS.md`, module sketch section.
 
 ---
 
-## 1 — One core, or several?          5 min
-
+## 1 — One core, or several?
 Single core, or a multi-core model with load balancing and migration.
 
 More cores shrink the effect being measured: with slack, the scheduler has
@@ -20,8 +19,7 @@ state the core count as a deliberate choice.
 
 ---
 
-## 2 — Are the simulator and daemon ever alive at the same time?   20 min
-
+## 2 — Are the simulator and daemon ever alive at the same time?
 ```text
   A  live socket, measured latency injected into virtual time
   B  daemon runs first, emits a config schedule the simulator replays
@@ -38,8 +36,7 @@ B holds only while nothing feeds scheduling outcomes back into the workload.
 
 ---
 
-## 3 — What happens when a config lands mid-run?    10 min
-
+## 3 — What happens when a config lands mid-run?
 Two independent halves: when the switch happens, and what carries across it.
 
 **Lean:** drain to a slice boundary, then start the new algorithm cold. Only
@@ -50,8 +47,7 @@ proposals stay visible in the trace.
 
 ---
 
-## 4 — How is the driver table built?     25 min
-
+## 4 — How is the driver table built?
 The table cannot be tuned on the workloads the results are reported on, and no
 tuned table can exist before the Phase 1 gate.
 
@@ -70,8 +66,7 @@ rows are actually reachable.
 
 ---
 
-## 5 — The ladder needs two ceilings      15 min
-
+## 5 — The ladder needs two ceilings
 Sections 5.2 and 7 of the proposal use "oracle" for two different machines:
 perfect recognition, and a search over configurations.
 
@@ -82,8 +77,7 @@ word.
 
 ---
 
-## 6 — Grading across heterogeneous workloads    10 min
-
+## 6 — Grading across heterogeneous workloads
 Each workload has a different primary metric, so raw values cannot be averaged.
 
 **Proposal:** demote variant C to a subset diagnostic, grade everything against
