@@ -863,3 +863,317 @@ background work exists.
 ```
 
 ---
+
+# Q7 — What is a workload, and where do labels attach?
+
+Raised while reviewing the workload schema. Blocks the schema freeze, §5.5, and decision 5 of §8.2.
+
+## The problem
+
+The Family tables of §5.5 read as if each row were a workload file. They are not. Each row is a static tableau: one process set, one label, one instant.
+
+```
+Family 2, row 1:   Game + Steam download    gaming, wanted=true
+```
+
+That is a cell of the driver table with processes attached. A workload runs for tens of seconds, and across that span processes arrive and depart. When A, B, C are running and D arrives, the process set has changed. When A then exits, it has changed again. Nothing in the documents says what the ground truth is at those moments, because the documents never distinguish a workload from a snapshot.
+
+The consequence is not cosmetic. It is why "which workloads should we build" currently has no answer.
+
+## Two event streams, currently treated as one
+
+```
+process-set changes   ●────●──●─────────●───●──●────●──●───●     query points
+
+ground-truth segments ├──────────────────┼──────────────────┤    label boundaries
+                            gaming              compile
+```
+
+**Query points** — every material change to the process set. §4.2 requires the daemon be re-queried on change rather than on a timer. Many per run.
+
+**Segments** — intervals over which mode and attributes are constant. Far fewer.
+
+Segment boundaries are a strict subset of process-set changes. Every label change is a set change; most set changes are not label changes.
+
+The two were conflated. Once separated, the design questions become answerable.
+
+## Why ground truth became hard
+
+Under the conflated reading, every arrival and departure demands a label, and the labeller is asked:
+
+> given this set of processes, what mode is the machine in?
+
+That is a classification task, performed by hand, at every transition, with a consistency obligation across recurrences of the same set. For any workload with realistic churn it does not terminate.
+
+Under the separated reading the labeller is asked something else:
+
+> does this arrival change the label?
+
+A yes/no per transition, decided by the author, at authoring time. That is the question ground_truth was always meant to answer — TERMINOLOGY.md already states the workload is "the experiment itself, not an input to the experiment."
+
+## Resolution
+
+A workload is an ordered list of segments, each segment a cell of the driver table, plus the process-set changes that carry it from one to the next.
+
+The path is chosen, not discovered. Process churn scripted inside a segment inherits that segment's label by construction. The author never classifies; the author specifies.
+
+```
+workload = [ segment ]                  labels attach here
+segment  = (mode, attributes, [ process-set change ])
+```
+
+Labels per workload: the number of segments written, which is a decision, not a consequence.
+
+## What "material" means: the canonical set
+
+"Materially" in §4.2 was undefined and load-bearing. It now has a definition.
+
+A raw `/proc` snapshot is the wrong unit for change detection. A desktop session at app-granularity is stable for minutes; at PID-granularity it churns constantly — a browser spawns a renderer per tab, `make -j16` creates and destroys hundreds of compiler processes per second, every shell command is an arrival and a departure. "Query on every set change" read against raw PIDs does not describe a slow loop. It describes a flood.
+
+Define a canonicalization function:
+
+```
+canon : raw PID multiset  →  canonical app set
+```
+
+which folds structure and preserves identity. Example. The raw snapshot
+
+```
+league of legends.exe (wine)   4812      chrome            2101
+LeagueClientUx.exe             4820      chrome (renderer) 2110..2133
+wineserver                     4790      chrome (gpu)      2105
+Discord                        3201      systemd --user, dbus,
+Discord (renderer)             3215      pipewire, gnome-shell, ...
+Discord (gpu)                  3218
+```
+
+canonicalizes to
+
+```
+{ league-of-legends (wine, 3 procs),
+  discord (3 procs),
+  chrome (25 procs),
+  [system: gnome-shell, pipewire, ...] }
+```
+
+The function may consult three kinds of evidence, all structural:
+
+1. **Process ancestry** — children folding into the parent they descend from. That chrome's 25 renderers share an ancestor is a fact the kernel provides.
+2. **String identity of names** — that "chrome" equals "chrome". Equality, not meaning.
+3. **Session scope** — cgroup / systemd slice metadata separating the user session from system daemons. The separation is marked, never dropped.
+
+**A material change is a change in the canonical set.** An arrival or departure that leaves the canonical set unchanged — a new compiler child under an existing build, one more renderer under an existing browser — is not a query point.
+
+### The rule that keeps this from becoming a whitelist
+
+The obvious objection: naming a canonicalization function smells like smuggling the whitelist back in. It is not, and the boundary is statable in one sentence:
+
+> The canonicalization function may reference only structural metadata — process ancestry, cgroup membership, string identity — and performs no classification, filtering, or prioritization based on the meaning of any name.
+
+The function does not know chrome is a browser. It knows 25 PIDs share an ancestor. Compare signatures: a whitelist is `name → policy`, with the semantic judgment baked into the table by a human, in advance. Canonicalization is `PID multiset → name set`, with no semantic judgment anywhere. What is removed is multiplicity and lineage, never identity. Everything that is running remains visible; only how many kernel tasks it is running as is folded.
+
+All semantic work — that {league-of-legends, discord, chrome} is a gaming session and discord is its voice companion — remains with the recognizer. That is the experiment.
+
+Two corollaries:
+
+- **No name-based noise removal.** Dropping systemd/dbus/pipewire "because they are noise" is a semantic judgment about those names — a mini-whitelist. System-scope processes are marked `[system: ...]` via cgroup structure and passed through. Whether to ignore them is the recognizer's call.
+- **Multiplicity survives as annotation.** `chrome (25 procs)` hands the recognizer a structural hint (a many-tabbed browser) without the function interpreting it. Structural facts may flow *into* semantic inference; they may not preempt it.
+
+Note the function was already present implicitly: the daemon cannot serialize 400 raw PIDs into a prompt, so some normalization was always happening at prompt construction. This section makes it explicit, named, and shared — without it, three people implement three different rules and query counts stop being comparable across conditions (the original item 1 of this document).
+
+Spoofing inherits unchanged: canonicalization does not authenticate names, so a process masquerading as chrome enters the canonical set as chrome. Family 5's stated resolution limit, not a new one.
+
+## Set-keyed caching: system optimization, not experimental condition
+
+With the canonical set defined, a deployment cache falls out for free: `canonical set → proposal`. On a hit, no LLM call. Returning to a previously-seen set (A+B → A+B+C → A+B) is silent.
+
+Two caches now exist in the design and must not be confused:
+
+| | record/replay cache | system cache |
+|---|---|---|
+| purpose | deterministic re-run of the condition matrix | skip redundant LLM calls in deployment |
+| lives in | methodology (§6) | system design, one paragraph |
+| during Layer 1 measurement | on (it is the instrument) | **off** |
+| in deployment / sched_ext demo | n/a | on |
+
+The system cache is **off during measurement** because run-to-run consistency (RQ1) requires multiple samples of the same input, and a cache collapses them to one. It is **on in deployment** because RQ1 is precisely the license for it: high consistency means set-keyed caching is a semantics-preserving optimization. The dependency runs both ways — if consistency were low, the cache would change behavior, which is one more reading of "consistency is a precondition for deployability."
+
+## What within-segment churn becomes
+
+Not a nuisance — an instrument.
+
+If Discord launches during a gaming segment and the proposal flips to interactive, that is a distractor-robustness failure: a real Layer 1 result, reportable, and currently unmeasured by any part of the design.
+
+It is the same instrument as RQ1's run-to-run consistency, perturbed by an irrelevant process rather than by sampling noise. A recognizer that changes its answer because an unrelated process appeared is not deployable, for the same reason one that changes its answer on identical input is not.
+
+This is a strictly better experiment than the one currently described.
+
+## A free metric: query economics
+
+Once query points are defined against the canonical set, the simulator can count them. Report, per workload and aggregated:
+
+- query points per hour (canonical-set changes)
+- of those, cache hits under the deployment cache (novel sets per hour)
+
+This answers the standing reviewer objection — "an LLM in the loop is economically unrealistic" — with a number instead of an argument. "A typical desktop session surfaces N novel sets per hour" is the cost side of the slow-loop design. A few counters in the simulator; disproportionate value in §evaluation.
+
+## What this changes
+
+1. ~~"materially" in §4.2 is undefined~~ — **resolved above**: material = change in the canonical set. The canonicalization function itself moves to the schema as a shared, versioned definition.
+
+2. §5.5 balance counts the wrong unit. Domain and familiarity balance are stated per workload file. If a workload is a path, balance applies per segment. Thirteen files could be forty segments with a distribution nothing in the table constrains.
+
+3. Family 2 pairs are pairs of segments. Cleaner than written: two files identical in every segment but one. The load-bearing pair reduces to a one-segment diff, which is a tighter control than two independently authored scenarios.
+
+4. Layer 1's grading unit needs stating. Each proposal grades against the segment it falls in. Twenty proposals inside one segment yield twenty gradings against one label — correct, and the source of the consistency measurement above.
+
+5. Workload files script raw process events; ground truth attaches to segments; query points are computed by `canon`, not authored. The three layers are now distinct artifacts.
+
+## Edge case
+
+A label change with no process-set change — the user stops typing, interactive → idle, nothing launches or exits.
+
+Never queried, therefore a guaranteed miss. Either forbid it by authoring rule, or admit it to Family 5 beside the Chrome-40-tabs case as a stated resolution limit. It should not arrive by accident.
+
+Canonicalization adds a sibling: a label change whose only evidence is *within* a fold — e.g. the browser's 40 tabs are now a video call. The canonical set is unchanged, so no query fires. Same disposition: stated resolution limit, not accidental.
+
+## What is unaffected
+
+Event engine, executor, algorithms, config schedule, validator, driver table, the two-layer split, the condition ladder. None of them observe segments or canonical sets — the executor still schedules raw kernel tasks.
+
+This is a schema and documentation problem. It is expensive only if found after the schema freeze.
+
+## To settle
+
+1. ~~the definition of a material process-set change~~ — **proposed resolved**: canonical-set change, per the structural-only rule above. Ratify the rule sentence verbatim.
+2. segment as the unit of §5.5 balance, and the resulting counts
+3. whether within-segment distractors become a reported Layer 1 metric
+4. ground-truth schema: segment list with explicit boundaries; `canon` as a versioned schema artifact
+5. disposition of the two unqueried label changes (no-set-change, and within-fold)
+6. adopt the two-cache separation: system cache off during Layer 1 measurement, on in deployment/demo
+7. add query-rate and novel-set-rate counters to the simulator, reported in evaluation
+
+Items 1 and 4 block the schema freeze. Items 2 and 3 change what gets reported and belong with decision 5 of §8.2.
+
+Lean: adopt the segment framing; ratify the structural-only canonicalization rule; make within-segment distractors a reported metric rather than an accident; forbid the unqueried transitions by authoring rule and note them as scope boundaries; report query economics.
+
+---
+
+## Q8 — What makes the workload set strong enough?
+
+Raised from Q7: once a workload is a chosen path of segments, "which
+workloads should we build" needs a criterion. Blocks decision 5 of section
+8.2.
+
+### Two candidate generators, both insufficient alone
+
+```text
+  derive from the vocabulary            mirror the real world
+  (5 modes x 2 attributes)
+```
+
+**Derivation from the grid is circular.** The vocabulary is itself under test
+(RQ3). A workload set generated from it makes every situation expressible by
+construction — the exam written from the answer key. Grid coverage has a
+different job: an instrument check (RQ5 — are all reachable driver-table rows
+exercised), not evidence for the claim.
+
+**Realism is unfalsifiable without data.** No telemetry corpus of real
+desktop machines exists (see below). "Realistic" would mean hand-authoring
+what the team imagines is typical, which nothing can defend under review. And
+genuinely realistic usage is mostly steady state — the Part 7
+measurable-window risk. A faithful sample of reality dilutes the effect being
+measured.
+
+### The criterion: discriminative construction
+
+The set is constructed to force rival hypotheses apart. Each family is a
+probe aimed at one of them.
+
+| Family | Rival hypothesis it can kill or bound |
+|---|---|
+| 2 — same set, different intent | behavioural heuristics were already sufficient |
+| 3 — unregistered software | a whitelist is all you need |
+| 5 — renamed miner | name-based reading always works |
+| 4 — transition speed | the latency is affordable |
+| 1 — single situation | sanity floor: does awareness help at all |
+
+The evidence shape is a predicted differential pattern, not an average win:
+the whitelist ties the LLM on well-known software, loses structurally on
+Family 3, and cannot separate the Family 2 pairs. Results landing where the
+theory predicts — including where the LLM is predicted *not* to win — is the
+claim's strongest form. The section 5.5 familiarity split exists to surface
+exactly this.
+
+### Where realism does enter
+
+Two layers, neither of them composition:
+
+- **Surface features must be believable.** Names and command lines are what
+  the model reads: real software, real invocation shapes.
+- **Behavioural magnitudes must be plausible.** 16 ms frames, 1–3 ms audio
+  deadlines, ~70% background greed — the numbers are anchored to the real
+  world even though the combinations are adversarially chosen.
+
+### Admission checklist
+
+The workload set is strong enough when:
+
+```text
+  1  every claim in RESEARCH_CLAIMS.md has a family whose result can
+     falsify it, and every rival hypothesis gets its best-case workloads
+     (the whitelist gets well-known gaming)
+  2  each workload passes a headroom admission test: an oracle-vs-random
+     gap measurable on that workload. RQ0 applied per file; Q1's
+     oversubscription rule is the mechanism. A workload with no headroom
+     dilutes every summary statistic
+  3  balance quotas hold at the segment level (Q7 item 2)
+  4  every reachable driver-table cell is covered by some segment —
+     reported as coverage (RQ5), not as claim evidence
+```
+
+Scope sentence to accompany the set: it demonstrates that the signal carries
+information that behaviour and whitelists structurally cannot, on situations
+constructed to separate those hypotheses — it does not estimate average
+real-world benefit.
+
+### Why no public dataset can serve
+
+Standard scheduling traces exist — Google Borg, Alibaba, Azure, the Parallel
+Workloads Archive, MIT Supercloud. None is usable here, for three structural
+reasons:
+
+```text
+  1  wrong world      datacenter batch jobs. no interactive session, no
+                      foreground, no frame deadline, no user at a keyboard
+  2  anonymised       job names, users, and commands are hashed for
+                      privacy. the one field the recognizer reads is the
+                      field no organisation can publish
+  3  no ground truth  background_is_wanted lives in the user's head. a
+                      behavioural dataset that could supply it would
+                      falsify section 2.4
+```
+
+The absence is a prediction the theory makes, and it answers the reviewer
+question "why not evaluate on a standard trace." The datasets retain one
+legitimate use: calibrating the magnitudes inside `pattern` blocks, alongside
+measurements from the team's own machines.
+
+The flip side: a hand-authored, intent-labelled desktop workload set with the
+Q7 segment structure is itself a releasable artifact — none exists publicly,
+for the reasons above. The Parallel Workloads Archive's Standard Workload
+Format is the precedent for a community-reusable workload file format.
+
+### Sequencing consequence
+
+The admission test makes authorship iterative: author a file, run the
+oracle-vs-random gate on it, keep or redesign. The workload set therefore
+cannot be frozen before Phase 1 tooling exists. Section 8.2 lists workload
+scenarios as a one-shot freeze; it is a loop.
+
+**Current lean:** adopt the discriminative criterion with the four-item
+admission checklist; anchor magnitudes to measurement rather than to public
+datasets; state the no-public-dataset argument in the paper; release the
+workload set as an artifact.
+
+---
