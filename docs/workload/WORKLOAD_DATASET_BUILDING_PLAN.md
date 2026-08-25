@@ -35,6 +35,8 @@ The binding rule: **numeric behavior parameters exist only in Layer 1.** Scenari
 
 ## 2. Layer 1 — Archetype library (build first)
 
+> **Pin:** this section is superseded in detail by **ARCHETYPE_LIBRARY_PLAN.md**, which is normative for Layer 1 — it adds the formal event grammar (RUN/SLEEP/WAIT/WAKE/FORK-EXIT), the two-tier grounding of the inventory itself (`category_source` harvesting for existence; falsifiable spanning-claim protocol for sufficiency), the emergent-vs-static multiplicity rule, per-entry `category_source` and `validation_stats` schema fields, and open questions OQ-1–OQ-6 (GPU axis, video-conference split, renderer reuse, parallelism default, distribution families, grammar completeness). The table below remains as the quick-reference inventory.
+
 An archetype is a named, sourced behavior specification for one process kind. Format follows the rt-app JSON task model as explicit precedent (run/period/deadline in µs; cite rt-app for the schema shape). Every numeric field carries a `source:` tag (§6).
 
 ### 2.1 Initial archetype inventory (~12 entries)
@@ -165,3 +167,4 @@ On the three team desktops, re-enact each Family scenario for real; collect `/pr
 4. Pin the Steam "Allow downloads during gameplay" documentation coordinates (S10 footnote).
 5. Decide default browser per file (chrome vs firefox) or vary for familiarity balance.
 6. Decide the naturalistic distribution family (lognormal vs power-law) — provisional until Role D fit.
+7. Resolve ARCHETYPE_LIBRARY_PLAN.md open questions OQ-1 (GPU axis flag) and OQ-4 (build parallelism default) — these two touch the schema; OQ-2/3/5/6 are deferred to Role D by design and need no pre-freeze decision.
