@@ -220,6 +220,11 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - role: structural/shape claims about software behavior only (fork structure, counts, lifetime shapes, periods, heartbeats, comm strings); machine-relative absolutes carry the runner spec and rank as convention-informed-by-measurement. Never desktop-performance claims. N-run spread reported.
 - status: reserved (no runs yet; `meas-pending` placeholders in archetypes until freeze)
 
+### `meas-pending`
+- cite: none — not a source; the placeholder sentinel for parameters awaiting the CI campaign.
+- role: valid as a `source:` tag only until the schema freeze; the linter rejects it after. Exists here only so the yaml-subset lint holds without exceptions.
+- status: sentinel
+
 ## Related work only (never in the yaml registry)
 
 ### `ghost-sosp21`

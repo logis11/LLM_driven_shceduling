@@ -1,0 +1,256 @@
+# workload-dataset-sources.yaml — machine registry of everything the workload
+# dataset derives values or structure from.
+#
+# Companion to docs/REFERENCES.md, which owns every citation string and all
+# citation-constituent fields (cite, url, accessed, pinned_version). This file
+# carries machine/derivation fields only.
+#
+# Rules (enforced by the dataset linter):
+#   - every id here MUST have an entry in docs/REFERENCES.md (subset lint);
+#     ids here without a REFERENCES.md entry fail CI
+#   - source tags in dataset files are `<id>` or `<id>:<locator>`; when an entry
+#     declares `locator_pattern`, the linter validates the locator against it;
+#     no `locator_pattern` = bare-id tags only
+#   - `type`: scholarly | deployed-system | measurement (citation tier follows
+#     via REFERENCES.md: scholarly -> numbered bib; deployed-system -> footnote,
+#     existence claims only)
+#   - `notes`: what the source establishes and its scope limits — never our
+#     modeling on top of it (that lives in archetypes.yaml `modeling_notes`).
+#     A source tag justifies values and described structure, never field names.
+#   - adding a source: mint the id per the REFERENCES.md id rule, add the entry
+#     there, then add it here only if the dataset derives from it
+#   - `meas-pending` is the placeholder sentinel for parameters awaiting the CI
+#     measurement campaign; the linter rejects it after the schema freeze
+
+sources:
+
+  # ---- behavior parameters (Role B) --------------------------------------
+
+  interbench:
+    type: deployed-system
+    locator_pattern: "^(man|src)-[a-z]+$"
+    notes: >-
+      Establishes the community's interactive task models: audio wakes every
+      50 ms needing 5% CPU (SCHED_FIFO variant exists); video 60 Hz (16.7 ms)
+      at 40% CPU; X variable 0-100% (window-drag emulation); gaming unbounded.
+      Background loads: Burn (4 CPU-bound threads), Write/Read (RAM-scale
+      streaming, cache-defeating), Compile (Burn+Write+Read, "heavy make -j4").
+      Scope: "the community models interactivity this way" — never "desktops
+      behave this way".
+
+  rt-app:
+    type: deployed-system
+    notes: >-
+      Establishes the JSON task-model precedent: run/period/deadline in
+      microseconds; timer{ref,period} gives drift-free absolute periodic wakes
+      (the precedent for our TIMER primitive). Schema-shape precedent only;
+      no numeric values are derived from it.
+
+  lavd-ossna24:
+    type: deployed-system
+    locator_pattern: "^s\\d+$"
+    notes: >-
+      Talk slides; observations established: ~300 tasks per game, ~90%
+      long-lived, wine/graphics/audio servers take 30-40% of scheduling (s12);
+      per-schedule runtimes few-hundred-us average to few-ms max (wineserver
+      ~260 us, worker ~1.65 ms), stable and predictable per task (s13); 70-75%
+      of scheduling initiated by waiting syscalls (s14); tasks tightly linked
+      in waiter-waker graphs, a task sequence serving one job from input to
+      display (s16-s17); 16.7 ms frame budget, 15 ms targeted latency; top
+      30-40 tasks = 95% of scheduling, 15-20 game tasks take 60-70%. LAVD
+      defines no spec format: any schema encoding of these observations
+      (topology/chain fields, linearizing the s16 graph) is our modeling and
+      lives in archetypes.yaml modeling_notes. Slides are footnote-tier
+      despite carrying numbers.
+
+  ocallahan-atc17:
+    type: scholarly
+    locator_pattern: "^sec-[0-9.]+$"
+    notes: >-
+      "make forks and execs 2430 processes, mostly short-lived" (sec-4.3,
+      Linux kernel-build workload; written "2430" in the paper). Grounds the
+      fork-burst count and short-lived character of compiler children only;
+      the paper gives no lifetime distribution.
+
+  coetzee-arxiv12:
+    type: scholarly
+    locator_pattern: "^sec-[0-9.]+$"
+    notes: >-
+      "the Linux kernel build's enormous number of short-lived processes"
+      (sec-9). The characterization is specific to the Linux kernel build,
+      not builds generally — cite it that way. Preprint (UCB TR); secondary
+      corroboration behind ocallahan-atc17.
+
+  # ---- scenario taxonomy (Role A) ----------------------------------------
+
+  cpsmark-tbench23:
+    type: scholarly
+    locator_pattern: "^(table-\\d+|sec-[0-9.]+)$"
+    notes: >-
+      Establishes: four office usage scenarios merged into two modules
+      (CA light/middleweight, CC heavyweight); user-profile tiers (table-1);
+      named applications with versions (table-2); CA cooperative workflow
+      ordering (Internet -> creation -> document processing -> email
+      delivery); per-workload hardware sensitivity (table-4: CC up to 1.77x
+      GPU-sensitive, CA ~1.0x). Scope limits: Windows 10 applications — the
+      Linux name mapping is ours; no gaming scenario; no process-level burst
+      timing.
+
+  pcmark10:
+    type: deployed-system
+    notes: >-
+      Establishes existence of scenario groups and their application lists:
+      Essentials (web browsing, video conferencing, app start-up),
+      Productivity (spreadsheets, writing), Digital Content Creation (photo/
+      video editing, rendering), Gaming. Activity composition only; no
+      per-process timing.
+
+  sysmark30:
+    type: deployed-system
+    notes: >-
+      Establishes existence of scenario/application lists: Office
+      Applications, General Productivity (incl. archiving/compression, OCR,
+      browsing), Photo Editing, Advanced Content Creation (incl. a
+      multitasking workload switching photo<->video editing). Second
+      independent industry taxonomy beside PCMark. Scenario lists are
+      documented separately from the contested scoring.
+
+  sysmark25:
+    type: deployed-system
+    notes: >-
+      Adds software development (code compilation) and a Responsiveness
+      scenario to the BAPCo taxonomy — grounds compile as a mainstream
+      desktop scenario.
+
+  procyon:
+    type: deployed-system
+    notes: >-
+      Establishes existence of a local-AI-inference desktop scenario (S12
+      precedent). Public docs are light on internals; scenario-existence
+      citation only.
+
+  gamemode-docs:
+    type: deployed-system
+    notes: >-
+      Establishes that a foreground-game resource-priority category ships in
+      a major OS: exclusive/priority CPU access for the focused foreground
+      game, background preemption reduced, updates deferred; documented APIs
+      (expandedresources.h). Existence of the category and of the whitelist
+      design point only.
+
+  ananicy-rules:
+    type: deployed-system
+    notes: >-
+      Community-maintained process-name -> behavior-class taxonomy: rule
+      `type` classes (Heavy_CPU, Game, Player, BG_CPUIO, ...) with nice /
+      ioclass / cgroup values; indexers run ioclass idle, audio at nice -11;
+      Proton/wine vs native game classes. Establishes the classes' existence,
+      deployed name->class mappings, and the wanted/unwanted-background
+      distinction as deployed practice (category_source for harvested
+      archetypes).
+
+  steam-downloads:
+    type: deployed-system
+    notes: >-
+      Establishes the "Allow Downloads During Gameplay" checkbox (Steam ->
+      Settings -> Downloads), that downloads pause during gameplay by
+      default, and the per-game override — the wanted/unwanted background
+      toggle as a real user-facing setting (S10). Existence only.
+
+  # ---- segment structure & user behavior (Role C) ------------------------
+
+  zhang-chb15:
+    type: scholarly
+    notes: >-
+      31 days, 3,000 subjects, 15M+ log records, 16,406 distinct processes
+      (CNNIC data, unreleased). Establishes power-law task-switching
+      structure concentrated on hub tasks ("hub" is the paper's term; "star"
+      is our paraphrase), and an average PC-task switch roughly every 3
+      minutes (independently corroborates gonzalez-chi04). Shapes and
+      averages only — no sampled distributions.
+
+  gonzalez-chi04:
+    type: scholarly
+    notes: >-
+      Establishes the working-sphere averages: ~12 min per working sphere
+      (11 min 28 s raw; 12 min 18 s excluding brief disruptions), ~10 spheres
+      per person-day; ~3 min per task and ~2 min 11 s per tool/document
+      before switching. Averages only, knowledge workers. (The figures our
+      earlier docs attributed to CHI 2005/2008 live here.)
+
+  mark-chi05:
+    type: scholarly
+    notes: >-
+      Companion figure ~11 min per working sphere before switching; internal
+      vs external interruptions roughly equal (managers 59.2%/40.8%).
+      Averages only.
+
+  dhakal-chi18:
+    type: scholarly
+    notes: >-
+      Mean inter-key interval 238.66 ms (SD 111.60 across participants'
+      means), right-skewed; 136M keystrokes, 169k volunteers. Scope limit:
+      within-burst transcription typing — no mouse events, no inter-burst
+      think-pauses. Grounds the intra-burst input gap of interactive
+      archetypes only; burst/pause macro-structure is not established here.
+
+  roeser-rw24:
+    type: scholarly
+    notes: >-
+      Establishes the inter-key-interval distribution family: two-component
+      log-normal mixture (fluent component ~158 ms; disfluency/pause
+      component at probability ~0.34 — parameters are task-dependent). Cite
+      the family shape, never a single parameter set.
+
+  dubroy-chi10:
+    type: scholarly
+    notes: >-
+      Logged concurrent-tab distributions: modal count 1, per-user medians
+      mostly 1-6, long right tail (max 42). Scope limits: N=21 recruited tab
+      users, 2009 single-process Firefox. No public dataset.
+
+  chang-chi21:
+    type: scholarly
+    notes: >-
+      Modern tab-behavior corrector: median tab-overwhelm threshold 8 tabs
+      (IQR 5-12); ~8% of participants had >10 tabs open at a capped snapshot.
+      Self-report, not logging — justifies a fatter modern tail over the
+      2010 logged data, not a distribution.
+
+  mozilla-testpilot10:
+    type: deployed-system
+    notes: >-
+      Only large-N logged concurrent-tab data: mean ~3.2 tabs (N~27k, one
+      week, 2010); median per-user weekly max <8; 25% of users reached >=11.
+      Only aggregate tables survive (mirror). Carries the honest-limitation
+      line: no post-2010 large-scale logged tab distribution exists publicly.
+
+  focal-arxiv26:
+    type: scholarly
+    notes: >-
+      Establishes the A->B->A interruption session structure (100 sessions:
+      long creative task interrupted by short browsing) and 320 interleaved
+      multitask sessions with app names + window titles. Structure precedent
+      only: preprint, and the sessions are scripted reconstructions from
+      VideoGUI, not natural usage. Data terms restrict redistribution;
+      methodological reuse is unrestricted.
+
+  # ---- our measurements --------------------------------------------------
+
+  meas-ci:
+    type: measurement
+    locator_pattern: "^[a-z0-9_-]+:\\d+$"
+    notes: >-
+      Our CI measurement campaign (workflow:run locator). Supports structural
+      and shape claims about software behavior only — fork structure, counts,
+      lifetime shapes, periods, heartbeat rates, comm strings. Machine-
+      relative absolutes (CPU %, IO throughput, io-wait fractions) carry the
+      recorded runner spec and rank as convention-informed-by-measurement,
+      never desktop truth. Workflows run N times; spread reported.
+
+  meas-pending:
+    type: measurement
+    notes: >-
+      Placeholder sentinel for parameters awaiting the CI campaign. Valid
+      only until the schema freeze; the linter rejects any meas-pending tag
+      after freeze.
