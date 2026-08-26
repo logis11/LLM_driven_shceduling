@@ -78,3 +78,16 @@ The minting rule lives as a section of `REFERENCES.md`; contributor recipe: read
 
 - `_dev/TODO.md` Phase 1 = the documentation pass landing all of the above.
 - Team memo written after the docs (links, not restatements); simulator-side items for 인경민 flagged there: single lane ratified, interpretation contract as the pre-built simulator spec, lane-scaling pass, what multi-lane would have cost.
+
+---
+
+## Addendum — sub-task 1.1 citation verification (same day)
+
+Written during 1.1 (`REFERENCES.md`); every entry there is verified or explicitly marked `to-pin`/`provisional`. Corrections found beyond the session ledger above:
+
+- **Mark-line reattribution:** both headline figures — ~12 min/working sphere (~10/day) AND ~3 min/task (>2 min/tool) — are **González & Mark, CHI 2004** (`gonzalez-chi04`, DOI 10.1145/985692.985707), verified against full text. CHI 2005 (`mark-chi05`) carries the companion ~11-min figure and the internal/external interruption split. **CHI 2008 contains neither figure** (it's the interruption-stress lab experiment). The "half of switches self-initiated" claim is NOT in the CHI 2014 paper. The 23:15 figure exists only in the 2006 Gallup Business Journal interview (`mark-gallup06`) — confirmed absent from all peer-reviewed papers. Cascades into 1.4 (§4 text) and 1.6 (vetting doc).
+- **arXiv 1705.05937 identified:** O'Callahan et al., "Engineering Record and Replay for Deployability," **USENIX ATC '17** (extended TR = the arXiv id) → `ocallahan-atc17`; "make forks and execs 2430 processes, mostly short-lived" confirmed verbatim (§4.3).
+- **arXiv 1203.2704 identified:** Coetzee, Bhaskar & Necula, "A model and framework for reliable build systems," preprint/UCB TR only → `coetzee-arxiv12`; the short-lived-processes quote is specifically about the *Linux kernel build*.
+- **LAVD talk pinned:** Min, "Optimizing Scheduler for Linux Gaming," OSS NA 2024 (2024-04-17); slides `static.sched.com/hosted_files/ossna2024/9b/scx-lavd-oss-na24.pdf`. LWN secondary: Corbet, "Sched_ext at LPC 2024" (lwn.net/Articles/991205/) → `corbet-lwn24`.
+- **Related-work corrections:** Park's title is "Learning-**Augmented** Computer Systems" (NeurIPS 2019); EEVDF is Stoica & Abdel-Wahab **1995** (ODU TR-95-22); Kgent's authors differ from SchedCP's (Zheng, Yang, Chen & Quinn, eBPF '24, DOI 10.1145/3672197.3673434); ASA = Wang et al., "Mixture-of-Schedulers…" (arXiv:2511.11628, no venue); SchedCP = "Towards Agentic OS…" (arXiv:2509.01245 v4, MLforSystems@NeurIPS 2025) — **no conference successor as of 2026-08-26** (re-check each submission); TuneAgent = arXiv:2508.12551; hpc-llm = Jadhav et al., arXiv:2506.02025 (alternate: 2511.11612); ghOSt/Decima/Firm confirmed as believed with DOIs; sched_ext + EEVDF kernel doc URLs verified live.
+- **Still to-pin (submission-time, per standing policy):** PCMark 10 / SYSmark 30/25 / Procyon / Game Mode doc URLs + editions; OSTEP edition; VideoGUI full author list; SWELL-KW author list re-confirm; repo commit pins.
