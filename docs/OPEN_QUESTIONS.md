@@ -129,7 +129,17 @@ built in parallel. Section 8.3 requires it frozen early.
 
 ---
 
-## Q1 — One core, or several?
+## Q1 — One core, or several? — **DECIDED (2026-08-26): single core**
+
+Options (i)+(ii) ratified in the 2026-08-26 workload-generation grill: single
+lane, with workloads authored into the oversubscription regime. Two additions
+operationalize it: the **demand-budget rule** (~100–150% of the lane, enforced
+per file by the Q8 admission test) and the **lane-scaling compile pass** for
+archetype values measured on multi-core machines — both in
+WORKLOAD_DATASET_BUILDING_PLAN §5a; execution semantics in
+INTERPRETATION_CONTRACT.md. Decision record:
+`_dev/archive/2026-08-26-workload-generation-grill.md` (D15). The analysis
+below is retained as the rationale.
 
 The simulator primer assumes a single lane. The decision should be deliberate,
 because core count changes the size of the effect being measured.
@@ -174,7 +184,7 @@ real machines have eight or more.
   (iii) N cores, global queue, no migration cost
 ```
 
-**Current lean:** build (i), frame with (ii). Workloads are designed so total
+**Decided:** build (i), frame with (ii). Workloads are designed so total
 demand exceeds one core, and the core count is stated as a deliberate choice
 rather than left implicit.
 

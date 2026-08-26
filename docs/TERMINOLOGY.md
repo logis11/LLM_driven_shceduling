@@ -9,7 +9,7 @@ MLFQ, EDF, preemption, turnaround time — is in Appendix A of
 ## Where everything sits
 
 ```text
-   WORKLOAD                                    a file, hand-authored
+   WORKLOAD                                    a file, compiled from a timeline
       |
       +--> names + cmdlines ---> RECOGNIZER          a component
       |                              |
@@ -39,9 +39,28 @@ and emits a trace; the harness turns traces and proposals into metrics.
 
 ## Artifacts
 
-**Workload** — a file describing one scenario: which processes exist, when they
-start, how they behave, and what the true situation is. It is the experiment
-itself, not an input to the experiment. Example in section 5.5.
+**Workload** — the experiment-ready canonical file: which processes exist, when
+they start, how they behave, and what the true situation is. It is the
+experiment itself, not an input to the experiment. Compiled from a timeline —
+never hand-edited. Example in section 5.5.
+
+**Timeline** — the human-facing authoring file a workload is compiled from:
+segments with labels, plus (name, archetype) bindings on a time axis. Core
+timelines are hand-authored; naturalistic timelines are emitted by the
+generator. `archetypes.yaml + timeline (+ scenario catalog) + seed → workload`.
+
+**Archetype** — a sourced generative model of how one process kind behaves, as
+the scheduler sees it: a program over the six-primitive event grammar plus
+parameter distributions. Layer 1 of the dataset; never carries a process name.
+See ARCHETYPE_LIBRARY_PLAN.md and INTERPRETATION_CONTRACT.md.
+
+**Workload variants** — each timeline compiles in two modes: `-single`
+(lane-scaled; the only variant experiments run on) and `-native` (as-measured
+demand; released for reuse, not executed in this work).
+
+**meas-ci** — the source id for our CI measurement campaign
+(`meas-ci:<workflow>:<run>`). Supports structural/shape claims about software
+behavior only; see workload-dataset-sources.yaml.
 
 **Pattern** — the part of a workload entry describing how a process behaves:
 its CPU bursts, its sleeps, and for periodic work its period and deadline. A

@@ -1,6 +1,8 @@
 # Source Vetting for the Synthetic Desktop Workload Dataset — rev. 2
 
 > rev. 2 (2026-08-25): CpsMark+ upgraded from CONDITIONALLY USABLE to USABLE after full-text review — verdict, extracted content, role assignment, and recommendations revised accordingly. All other sections carried over from the original research report unchanged except where marked [rev.2].
+>
+> rev. 3 (2026-08-26): citation corrections from the verification pass (marked [rev.3]) — the task-switching study's authors, the true home of the Gloria Mark figures, and the identities of the two kernel-build arXiv papers. Final citations live in **docs/REFERENCES.md**, which supersedes this document for citation strings; this document remains the vetting/extraction record.
 
 ## TL;DR
 - Of the ~20 candidate sources, the strongest numeric grounding comes from the community scheduler tools (interbench, rt-app, schbench, hackbench) and the LAVD gaming characterization. The scenario-taxonomy sources (PCMark 10, SYSmark 30/25, CpsMark+) provide named scenario/application lists.
@@ -64,13 +66,13 @@
 - github.com/ColinIanKing/stress-ng, GPL-2.0. Generic CPU/VM/IO stressors; no behavioral timing.
 
 #### B7. Kernel build (make -jN) — Verdict: USABLE
-- Record-and-replay study (arXiv 1705.05937): kernel build forks/execs **2,430 mostly short-lived processes** (next workload: 89). Build-systems paper (arXiv 1203.2704): "enormous number of short-lived processes." Kernel docs: sched_child_runs_first, SCHED_AUTOGROUP motivated by make -j. SchedCP benchmarks make -j172 on Linux 6.14. Grounds compile family: fork-heavy burst of short-lived cc1/ld/as + few long-lived make/linker.
+- Record-and-replay study [rev.3 — identified]: **O'Callahan et al., "Engineering Record and Replay for Deployability," USENIX ATC '17** (extended TR = arXiv 1705.05937; `ocallahan-atc17`): kernel build forks/execs **2,430 mostly short-lived processes** ("2430" in the paper, §4.3; next workload: 89). Build-systems paper [rev.3 — identified]: **Coetzee, Bhaskar & Necula** (arXiv 1203.2704, preprint/UCB TR only; `coetzee-arxiv12`): "the Linux kernel build's enormous number of short-lived processes" — kernel-build-specific, cite it that way. Kernel docs: sched_child_runs_first, SCHED_AUTOGROUP motivated by make -j. SchedCP benchmarks make -j172 on Linux 6.14. Grounds compile family: fork-heavy burst of short-lived cc1/ld/as + few long-lived make/linker.
 
 ### ROLE C — Segment Structure & Switching Statistics (highest risk)
 
 #### C1. Task-switching log studies — Verdict: CONDITIONALLY USABLE
-- **CNNIC study identified:** Yun et al., "A look at task-switching and multi-tasking behaviors…", Computers in Human Behavior, 2015. 31 days, 3,000 subjects, 15M+ records, 16,406 distinct processes; power-law switching, hub/star task structure; dataset not released.
-- **Gloria Mark line:** CHI 2005 (~12 min per working sphere, ~10 spheres); CHI 2008 "The Cost of Interrupted Work" — "about three minutes on a task, somewhat more than two minutes using any electronic tool" before switching; CHI 2014 rhythm-of-attention (~half of switches self-initiated); Czerwinski/Horvitz/Wilhite CHI 2004 diary study. **The "23 min 15 s to resume" figure traces to a 2006 Gallup interview, not a peer-reviewed paper — cite the interview explicitly or omit.**
+- **CNNIC study identified [rev.3 — authors corrected]:** **Zhang, T., Sun, X., Chai, Y., & Aghajan, H.** (not "Yun et al."), "A look at task-switching and multi-tasking behaviors…", Computers in Human Behavior 49, 237–244, 2015, DOI 10.1016/j.chb.2015.03.012 (`zhang-chb15`). 31 days, 3,000 subjects, 15M+ records, 16,406 distinct processes — all verified in the paper; power-law switching concentrated on **hub** tasks (the paper's term; "star" is our paraphrase); average PC-task switch ~every 3 minutes; dataset not released.
+- **Gloria Mark line [rev.3 — attributions corrected against full texts]:** both headline figures — ~12 min per working sphere (~10 spheres/day) AND ~3 min per task / >2 min per tool — belong to **González & Mark, CHI 2004** ("Constant, Constant, Multi-tasking Craziness", `gonzalez-chi04`). CHI 2005 ("No Task Left Behind?", `mark-chi05`) carries the companion ~11-min figure and the internal/external interruption split. **CHI 2008 ("The Cost of Interrupted Work") contains neither figure** — it is the interruption-stress lab experiment; never cite it for the averages. The CHI 2014 rhythm-of-attention paper does **not** contain the "~half of switches self-initiated" claim. Czerwinski/Horvitz/Wilhite CHI 2004 diary study confirmed as stated. **The "23 min 15 s to resume" figure exists only in the 2006 Gallup interview (`mark-gallup06`) — verified absent from all the peer-reviewed papers; cite the interview explicitly or omit.**
 - Use for segment-duration means and heavy-tailed switching shape; exact distribution parameters must be fitted/assumed and flagged.
 - [rev.2] Supplemented by CpsMark+'s ordered cooperative workflow (see A1) as a citable precedent for *which* segment orderings are realistic, complementing these sources' *how often* statistics.
 
