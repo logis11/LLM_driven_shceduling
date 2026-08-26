@@ -1,6 +1,8 @@
 # Workload Grounding — Sources by Role
 
-> Companion to Q7 and §5.5. The suite is synthetic by necessity (see "The negative result" below); this document lists what grounds each layer of the synthesis. Each source is annotated with *what it is allowed to justify* — do not cite a source outside its role. Verify all links and versions before the schema freeze.
+> Companion to Q7 and §5.5. The suite is synthetic by necessity (see "The negative result" below); this document lists what grounds each layer of the synthesis. Each source is annotated with *what it is allowed to justify* — do not cite a source outside its role.
+>
+> **Normative homes (2026-08-26):** citation strings, tiers, and per-entry role lines live in **docs/REFERENCES.md**; the machine registry is **docs/workload-dataset-sources.yaml**; the measurement campaign is **meas-ci** (WORKLOAD_DATASET_BUILDING_PLAN §7). The A–D role letters remain this document's vocabulary for *what kind of grounding* a source provides.
 
 ## Role A — Scenario taxonomy: "these situations are standard, not imagined"
 
@@ -40,12 +42,9 @@ Grounds the *Q7 layer*: how long segments last, how often labels change, what wi
 
 ## Role D — Measured validation: "the synthesis matches reality"
 
-Grounds the *appendix defense*. No external source; a small internal measurement campaign. Common systems-paper pattern: "we validated our synthetic traces against measurements."
+Grounds the *appendix defense*. No external source; our own measurement campaign.
 
-- Re-enact each Family scenario for real on team machines (3 people × their actual desktops covers Linux variety cheaply).
-- Collect: `/proc` snapshots at 1s intervals (names, PIDs, ppid, cgroup), plus per-process CPU/IO deltas. A few dozen lines of script; store raw dumps in the repo under `validation/`.
-- Report per Family: measured vs. synthetic burst/period distributions (one CDF plot each), and measured canonical-set change rate vs. the workload file's scripted rate.
-- Doubles as the data for the query-economics counters (novel canonical sets per hour) proposed in Q7.
+> **Superseded (2026-08-26):** the campaign is **meas-ci** — scripted re-enactments on public CI runners, workflow files released, anyone can re-run — normative in WORKLOAD_DATASET_BUILDING_PLAN §7, with its scope discipline (structural/shape claims only; machine-relative absolutes carry the runner spec). The team-desktop plan this section previously described is retired. User-behavioral parameters (input inter-arrival, tab counts, segment durations) are literature-grounded under Role C; **live-usage validation was not performed and is a stated limitation**, with the collection + privacy-scrub tool released as an open falsification invitation.
 
 ## The negative result — why the suite is synthetic (write this into §5.5's preamble)
 
@@ -67,6 +66,8 @@ The absence is structural: process names are exactly the field privacy review st
 
 ## Citation-tier rule (style for the paper)
 
+> Normative home now **docs/REFERENCES.md** (each entry carries its tier and role line); the rule is restated here for the scope-discipline sentence.
+
 Sources in this document fall into two citation tiers, and the paper must keep them visually and functionally separate:
 
 1. **Scholarly citations** (numbered bibliography): peer-reviewed papers and archived preprints — CpsMark+, LAVD/LWN-covered work, Gloria Mark line, CNNIC study, SchedCP, FOCAL, kernel-build characterizations.
@@ -74,10 +75,10 @@ Sources in this document fall into two citation tiers, and the paper must keep t
 
 Scope discipline: a deployed-system citation may support only *existence claims* ("this scenario/setting/category exists in shipped software") — never empirical, behavioral, or statistical claims. If a sentence makes a claim about how often, how much, or how users behave, it needs a tier-1 source or our own Role D measurement. This is the same artifact-scope rule as for interbench ("the community *models* interactivity this way", not "desktops *behave* this way"), applied uniformly.
 
-## Standing verification tasks
+## Standing verification tasks — resolved (2026-08-26)
 
-1. Locate the exact citation for the large-scale task-switching study before writing §5.5 (currently identified by description, not bibkey).
-2. Confirm DesktopBench's license permits methodological reuse and check its venue status.
-3. Pin versions: PCMark 10 whitepaper edition, SYSmark 30 vs 25 (pick one primary), ananicy catalog commit, scx commit.
-4. Decide whether SWELL-KW's app logs are analyzed quantitatively (adds work) or cited qualitatively (safe minimum).
-5. Locate the exact Valve documentation coordinates (Steam Support page or client docs) for the "Allow downloads during gameplay" setting, for the S10 footnote (URL + accessed date).
+1. ~~Task-switching study citation~~ — resolved: `zhang-chb15` (authors corrected from "Yun et al."; see REFERENCES.md).
+2. ~~DesktopBench license/venue~~ — resolved: released on HuggingFace, restrictive data terms, MIT scripts; methodological reuse unrestricted; FOCAL still a preprint (`focal-arxiv26`).
+3. Version pins — tracked as `to-pin` statuses in REFERENCES.md; pin at submission.
+4. SWELL-KW — cited qualitatively (`swell-icmi14`, REFERENCES-only; not in the registry).
+5. ~~Valve coordinates~~ — resolved: `steam-downloads` (Steam Support article 4F9E-6328-E9B8-47F9, accessed 2026-08-26).
