@@ -139,8 +139,8 @@ plainly, and it is why Family 3 is primary.
 ### RQ3 — How much authority does the model need?
 
 The variant ladder. Vocabulary only, versus vocabulary plus algorithm, with
-full configuration writing demoted to a subset diagnostic (Q6 of
-`OPEN_QUESTIONS.md`).
+full configuration writing demoted to a subset diagnostic (Q6 of the archived
+open-questions record, `_dev/archive/2026-08-23-design-meeting-open-questions.md`).
 
 ```text
   A close to B      vocabulary is sufficient. drivers stay thin.

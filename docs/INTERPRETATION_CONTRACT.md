@@ -6,7 +6,7 @@ The simulator reads **canonical workload files only** — never timelines, never
 
 ## 1. The simulated machine
 
-- **One lane** (OPEN_QUESTIONS Q1, ratified): the scheduler answers "who holds the lane until the next event." CPU-only; no GPU axis in any schema.
+- **One lane** (Q1 of the archived open-questions record, ratified — `_dev/archive/2026-08-23-design-meeting-open-questions.md`): the scheduler answers "who holds the lane until the next event." CPU-only; no GPU axis in any schema.
 - **Virtual time**, discrete-event; integer microseconds throughout (rt-app precedent).
 - **RNG-free simulator.** All randomness is resolved at compile time into the canonical file. Same file + same scheduler ⇒ identical run. (`meta.sampled` records `{seed, archetypes.yaml@commit}`, so every concrete number traces to its distribution.)
 
@@ -63,7 +63,7 @@ One closed type per file; the parser has zero case-splits. The JSON Schema is a 
 ## 7. Lane scaling and the demand budget
 
 - Archetype values whose sources are machine-aggregate (measured on multi-core machines) are scaled to the single lane by a **compile pass**, per-archetype declared fields with the evidence in `modeling_notes` — never by editing archetype values. Two compile modes per timeline: `-native` (as-measured, released only, never executed here) and `-single` (lane-scaled; the only thing this simulator runs).
-- **Demand budget:** every compiled `-single` workload's aggregate demand lands in the measurable oversubscription regime (~100–150% of the lane); the per-file oracle-vs-random admission test (OPEN_QUESTIONS Q8) is the enforcement mechanism.
+- **Demand budget:** every compiled `-single` workload's aggregate demand lands in the measurable oversubscription regime (~100–150% of the lane); the per-file oracle-vs-random admission test (open-questions record Q8) is the enforcement mechanism.
 
 ## 8. Boundaries
 

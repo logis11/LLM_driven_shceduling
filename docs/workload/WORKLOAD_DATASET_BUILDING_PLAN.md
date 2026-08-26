@@ -154,10 +154,10 @@ Contract-first: compiler (3) and simulator (5) are built to the same written con
 
 ### 5a. Lane scaling and the demand budget
 
-The simulated machine has one lane (OPEN_QUESTIONS Q1, ratified; INTERPRETATION_CONTRACT §1). Two rules connect the dataset to it:
+The simulated machine has one lane (Q1 of the archived open-questions record, ratified — `_dev/archive/2026-08-23-design-meeting-open-questions.md`; INTERPRETATION_CONTRACT §1). Two rules connect the dataset to it:
 
 - **Lane-scaling compile pass:** archetype values whose sources are machine-aggregate (measured on multi-core machines — the gaming chain's utilization and worker concurrency; almost nothing else, since RUN durations are intrinsic CPU demands) are scaled to the lane by a per-archetype declared compile pass — declared fields, declared rule, evidence in `modeling_notes` (`game-task-chain`'s defense: LAVD's own concentration statistics, top 30–40 tasks = 95% of scheduling). Archetype values themselves are never edited. CI invariant: the `-native` and `-single` variants of one timeline differ only in the declared-scalable fields.
-- **Demand budget:** every compiled `-single` workload's aggregate demand lands in the measurable oversubscription regime (~100–150% of the lane). The per-file oracle-vs-random admission test (OPEN_QUESTIONS Q8) is the enforcement mechanism; a file outside the regime is redesigned, not scaled further.
+- **Demand budget:** every compiled `-single` workload's aggregate demand lands in the measurable oversubscription regime (~100–150% of the lane). The per-file oracle-vs-random admission test (open-questions record Q8) is the enforcement mechanism; a file outside the regime is redesigned, not scaled further.
 
 ## 6. Provenance manifest and linter
 
@@ -190,7 +190,7 @@ One campaign on public CI runners (GitHub Actions): workflow files released, any
 
 ## 9. Remaining open before schema freeze
 
-1. **Ratify Q7's rule sentences with the team** (canonicalization structural-only rule; segment schema) — flagged in the Phase-1 team memo; the rest of OPEN_QUESTIONS Q7's lean is adopted by this plan.
+1. **Ratify Q7's rule sentences with the team** (canonicalization structural-only rule; segment schema) — flagged in the Phase-1 team memo; the rest of the open-questions record's Q7 lean is adopted by this plan.
 2. **Coverage grid fill** for the ~50 core segments (build step 4); sign off holes or add files.
 3. **Wineserver's place in the game-task-chain topology** — decided at constructor implementation (INTERPRETATION_CONTRACT §6), recorded in `modeling_notes`.
 4. **Submission-time pins** — the `to-pin` entries in REFERENCES.md (benchmark-guide URLs/editions, repo commits, remaining author-list confirmations).
