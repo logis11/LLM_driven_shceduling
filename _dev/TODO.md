@@ -1,6 +1,6 @@
 # Dev TODO
 
-## Phase 1 [WIP] — Workload dataset groundwork
+## Phase 1 [done] — Workload dataset groundwork
 Land every decision from the 2026-08-26 workload-generation grill (`_dev/archive/2026-08-26-workload-generation-grill.md`) into the docs. Docs and registry files only — no compiler/simulator code.
 
 Execution order: 1.1 → 1.2 (needs 1.1's id rule) → 1.3 / 1.4 / 1.5 in any order (1.4 and 1.5 tag against 1.2's keys) → 1.6 → 1.7 → 1.8 last (links to the finished docs).
