@@ -14,5 +14,8 @@ Execution order: 1.1 → 1.2 (needs 1.1's id rule) → 1.3 / 1.4 / 1.5 in any or
 - [x] **1.7** `docs/workload/` cleanup: fix `grounding-sources (1).md` filename; one normative home per topic, superseded passages removed or marked
 - [x] **1.8** Team memo (one page, links to the updated docs instead of restating): per-owner impact — simulator side (spec now exists before the simulator; single lane ratified; what was avoided), recognition side (canonical folds, C5 tiers, chrome-default multiplicity)
 
+## Phase 2 [WIP] — Workload dataset generation
+Spec pending (grill → spec). Scope drawn from the Backlog build-pipeline line.
+
 ## Backlog
 - Build pipeline, in the adopted order: (1) `archetypes.yaml` v0.1 → (2) canonical JSON Schema → (3) timeline→canonical compiler + scaling pass + linter + invariant tests → (4) core timelines → (5) simulator Phase 0 to the contract → (6) RQ0 gate; meas-ci workflows as a parallel track from any point after Phase 1
