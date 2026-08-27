@@ -1,0 +1,12 @@
+# Test fixture — a default-class (oversubscribed) file inside the demand window:
+# cpu-batch 66s of work + audio 5% over a 60s file ≈ 1.15 utilization.
+meta:
+  id: fx-oversub
+  seed: 3
+
+segments:
+  - {from: 0s, to: 60s, mode: office}
+
+tasks:
+  - {id: player, name: mpv, archetype: audio-playback, arrive: 0s, depart: 60s}
+  - {id: train, name: python3, archetype: cpu-batch, arrive: 0s, bind: {total_work: 66s}}

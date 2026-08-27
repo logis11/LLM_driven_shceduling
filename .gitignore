@@ -1,0 +1,8 @@
+# compiled workload artifacts — hashes tracked in dataset/build.manifest.json
+dataset/build/
+
+__pycache__/
+.pytest_cache/
+*.pyc
+venv/
+.venv/

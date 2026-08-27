@@ -1,0 +1,24 @@
+# Test fixture — exercises unbounded loops, interactive unroll, orchestrator
+# spawn tables, finite jobs, and static multiplicity. Not a dataset file.
+meta:
+  id: fx-mixed
+  seed: 7
+  demand: calibration
+
+segments:
+  - {from: 0s, to: 60s, mode: compile, attributes: {wanted: true}, scenario: [S11]}
+
+tasks:
+  - {id: player, name: mpv, archetype: audio-playback, arrive: 0s, depart: 60s}
+  - {id: editor, name: code, archetype: desktop-interactive, arrive: 0s, depart: 60s}
+  - id: build
+    name: make
+    archetype: build-orchestrator
+    arrive: 5s
+    bind: {spawn_count: 6, parallelism_cap: 2, child_name: cc1}
+  - {id: transcode, name: ffmpeg, archetype: io-stream, arrive: 2s, bind: {total_work: 500ms}}
+  - {id: renderers, name: chrome, archetype: electron-comms, arrive: 0s, depart: 60s, count: 3}
+
+focus:
+  - {from: 1s, to: 20s, task: editor}
+  - {from: 25s, to: 30s, task: editor}
