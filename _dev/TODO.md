@@ -15,7 +15,15 @@ Execution order: 1.1 → 1.2 (needs 1.1's id rule) → 1.3 / 1.4 / 1.5 in any or
 - [x] **1.8** Team memo (one page, links to the updated docs instead of restating): per-owner impact — simulator side (spec now exists before the simulator; single lane ratified; what was avoided), recognition side (canonical folds, C5 tiers, chrome-default multiplicity)
 
 ## Phase 2 [WIP] — Workload dataset generation
-Spec pending (grill → spec). Scope drawn from the Backlog build-pipeline line.
+Build steps 1–4 of the adopted build order plus repo handoff. Spec: `_dev/docs/spec/phase-2-workload-dataset-generation.md`.
+
+Execution order: 2.1 ∥ 2.2 in any order or parallel → 2.3 (needs both) → 2.4 → 2.5 last.
+
+- [ ] **2.1** `dataset/archetypes.yaml` v0.1 — 12 entries per archetype-plan §4–§5; `meas-pending` placeholders allowed; `modeling_notes` from day one incl. the two decided binding notes (wineserver provisional, P1 tracker-miner → cpu-batch)
+- [ ] **2.2** Canonical JSON Schema — machine form of interpretation-contract §4 (`meta` / `ground_truth` / `events`, closed `{arrive, wake}` op set)
+- [ ] **2.3** Timeline→canonical compiler + lane-scaling pass + linter + invariant tests, wired into GitHub Actions; emits per-file static demand estimate; base timeline format fixed in this sub-task's spec session
+- [ ] **2.4** Core timelines — ~6 novel designs + derivation scripts → ~24 files × 2 modes (`coreset-single`/`coreset-native`); coverage-grid fill; files land in the ~100–150% demand window by the static estimate; authoring sugar (`variants:`/`inherit()`/`inject:`) fixed in this sub-task's spec session
+- [ ] **2.5** Repo prep + onboarding docs — per-teammate reading paths + repo working-structure prep; contents decided in its own session
 
 ## Backlog
-- Build pipeline, in the adopted order: (1) `archetypes.yaml` v0.1 → (2) canonical JSON Schema → (3) timeline→canonical compiler + scaling pass + linter + invariant tests → (4) core timelines → (5) simulator Phase 0 to the contract → (6) RQ0 gate; meas-ci workflows as a parallel track from any point after Phase 1
+- Remaining build pipeline after Phase 2: (5) simulator Phase 0 to the contract → (6) RQ0 gate → (7) naturalistic generator + generalset + full condition matrix; meas-ci workflows as a parallel track from any point after Phase 1
