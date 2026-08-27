@@ -222,7 +222,7 @@ archetypes:
          sampling: per-iteration, source: "meas-pending"}
     lifetime: finite
     spawns: compiler-child
-    binding_params: [spawn_count, parallelism_cap]
+    binding_params: [spawn_count, parallelism_cap, child_name]
     scalable: []
     validation_stats:
       referee: meas-ci
@@ -416,7 +416,7 @@ archetypes:
         {dist: lognormal, median_us: 2000, sigma_log: 0.5,
          sampling: per-iteration, source: "meas-pending"}
     lifetime: segment-bound
-    binding_params: [renderer_children]
+    binding_params: []
     scalable: []
     validation_stats:
       referee: meas-ci
@@ -425,12 +425,13 @@ archetypes:
         Electron-app CDF comparison decides whether this entry splits.
     modeling_notes: >-
       Mostly idle plus periodic short wakes; the TIMER/RUN encoding and all
-      field names are ours, params await the Xvfb workflow. renderer_children
-      is a static binding-time multiplicity (archetype-plan §3): values bind
-      in timelines against the Chromium process model from the tab-count
-      literature (dubroy-chi10, mozilla-testpilot10, chang-chi21) plus
-      meas-ci Xvfb counts — order-of-magnitude fidelity suffices for
-      recognition; precision matters only for executor load.
+      field names are ours, params await the Xvfb workflow. Renderer-children
+      multiplicity is a static binding-time count (archetype-plan §3),
+      expressed through the timeline task entry's count field: values bind
+      against the Chromium process model from the tab-count literature
+      (dubroy-chi10, mozilla-testpilot10, chang-chi21) plus meas-ci Xvfb
+      counts — order-of-magnitude fidelity suffices for recognition;
+      precision matters only for executor load.
 
   system-daemon:
     category_source: meas
