@@ -1,0 +1,75 @@
+name: meas-names
+
+# Name-verification batch (task-2.6 spec §6; scenario-catalog Note 4).
+# Three distro containers; best-effort execution with per-name verification
+# levels (runtime | binary-only | package-not-found | not-attempted).
+# Deterministic strings, not distributions — one job per distro, no repeat
+# matrix. Registry tag meas-ci:names:<run_number>.
+
+on: workflow_dispatch
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: ubuntu
+            image: ubuntu:24.04
+          - distro: fedora
+            image: fedora:41
+          - distro: arch
+            image: archlinux:latest
+    container:
+      image: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install candidate packages (best-effort)
+        run: |
+          case "${{ matrix.distro }}" in
+            ubuntu)
+              apt-get update
+              apt-get install -y python3 || true
+              for p in libreoffice-core gcc make tar xz-utils plocate clamav \
+                       rsync mpv tracker-miner-fs baloo-kf5 wine gamescope \
+                       handbrake-cli transmission-daemon borgbackup rclone \
+                       thunderbird gimp kdenlive ffmpeg; do
+                DEBIAN_FRONTEND=noninteractive apt-get install -y "$p" \
+                  || echo "install failed: $p"
+              done ;;
+            fedora)
+              for p in libreoffice-core gcc make tar xz plocate clamav rsync \
+                       mpv tracker-miners kf5-baloo wine-core gamescope \
+                       transmission-daemon borgbackup rclone thunderbird \
+                       gimp kdenlive; do
+                dnf install -y "$p" || echo "install failed: $p"
+              done ;;
+            arch)
+              pacman -Syu --noconfirm python || true
+              for p in libreoffice-fresh gcc make tar xz plocate clamav rsync \
+                       mpv tracker3-miners baloo wine gamescope handbrake-cli \
+                       transmission-cli borg rclone thunderbird gimp kdenlive \
+                       ffmpeg; do
+                pacman -S --noconfirm "$p" || echo "install failed: $p"
+              done ;;
+          esac
+
+      - name: Verify names
+        run: |
+          mkdir -p /tmp/meas
+          python3 dataset/tools/meas/runner_spec.py > /tmp/meas/spec.json
+          python3 dataset/tools/meas/verify_names.py \
+            > /tmp/meas/names-${{ matrix.distro }}.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meas-names-${{ matrix.distro }}
+          path: /tmp/meas
+          if-no-files-found: error

@@ -1,0 +1,81 @@
+name: meas-cli
+
+# Headless CLI measurement batch (task-2.6 spec §4; building-plan §7 wf-1).
+# One dispatch = one citable batch: registry tag meas-ci:cli:<run_number>.
+# Kernel defconfig build (comparable to ocallahan-atc17) + the kernel tree
+# as the single corpus for the IO/scan phases; the tarball download is the
+# network-bulk measurement; the idle phase grounds the system-daemon baseline.
+
+on: workflow_dispatch
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        repeat: [1, 2, 3, 4, 5]
+    env:
+      MEAS_DIR: /tmp/meas
+      CORPUS: /tmp/linux-6.6
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install instruments and build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y forkstat clamav plocate rsync xz-utils \
+            flex bison libssl-dev libelf-dev bc
+
+      - name: Record runner spec
+        run: |
+          mkdir -p "$MEAS_DIR"
+          python3 dataset/tools/meas/runner_spec.py > "$MEAS_DIR/spec.json"
+
+      - name: Start sidecars
+        run: |
+          date +%s%6N > "$MEAS_DIR/sidecar_start_us"
+          sudo sh -c "nohup forkstat -e fork,exec,exit,comm \
+            > '$MEAS_DIR/lifecycle.log' 2> '$MEAS_DIR/forkstat.err' &"
+          nohup python3 dataset/tools/meas/proc_sampler.py --interval 1.0 \
+            --out "$MEAS_DIR/proc_samples.jsonl" \
+            2> "$MEAS_DIR/sampler.err" &
+          sleep 2
+
+      - name: Measured phases
+        run: |
+          P="$MEAS_DIR/phases.jsonl"
+          PH="dataset/tools/meas/phase.sh $P"
+          $PH idle-baseline        -- sleep 60
+          $PH network-bulk         -- wget -q \
+            https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.6.tar.xz \
+            -O /tmp/linux-6.6.tar.xz
+          $PH untar                -- tar -xf /tmp/linux-6.6.tar.xz -C /tmp
+          $PH kernel-defconfig     -- make -C "$CORPUS" defconfig
+          $PH kernel-build-j8      -- make -C "$CORPUS" -j8
+          $PH archive-tar-xz       -- env XZ_OPT=-T0 \
+            tar -cJf /tmp/corpus.tar.xz -C /tmp linux-6.6
+          $PH rsync-copy           -- rsync -a "$CORPUS/" /tmp/linux-copy/
+          $PH updatedb             -- sudo updatedb
+          $PH locate-query         -- locate -c linux-6.6
+          $PH freshclam            -- sudo freshclam
+          $PH clamscan             -- clamscan -r -i "$CORPUS/Documentation"
+
+      - name: Stop sidecars
+        if: always()
+        run: |
+          sudo pkill -INT forkstat || true
+          pkill -INT -f proc_sampler.py || true
+          sleep 3
+          date +%s%6N > "$MEAS_DIR/sidecar_stop_us"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meas-cli-r${{ matrix.repeat }}
+          path: /tmp/meas
+          if-no-files-found: error

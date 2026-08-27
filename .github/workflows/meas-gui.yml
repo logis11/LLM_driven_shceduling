@@ -1,0 +1,88 @@
+name: meas-gui
+
+# GUI app-intrinsic measurement batch (task-2.6 spec §5; building-plan §7
+# wf-2). Chromium under Xvfb with 10 local tabs (renderer-count structure,
+# renderer side of the OQ-3 comparison) + Element Desktop idle (the stated
+# open-source electron-comms substitute; unauthenticated idle is a stated
+# limitation). Registry tag meas-ci:gui:<run_number>. The sampler runs at
+# 200 ms with context-switch counters for heartbeat/wakeup-rate estimation.
+
+on: workflow_dispatch
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        repeat: [1, 2, 3, 4, 5]
+    env:
+      MEAS_DIR: /tmp/meas
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install instruments and apps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y forkstat xvfb wget gnupg apt-transport-https
+          sudo snap install chromium
+          sudo wget -qO /usr/share/keyrings/element-io-archive-keyring.gpg \
+            https://packages.element.io/debian/element-io-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/element-io-archive-keyring.gpg] https://packages.element.io/debian/ default main" \
+            | sudo tee /etc/apt/sources.list.d/element-io.list
+          sudo apt-get update
+          sudo apt-get install -y element-desktop
+
+      - name: Record runner spec and tab pages
+        run: |
+          mkdir -p "$MEAS_DIR" /tmp/tabs
+          python3 dataset/tools/meas/runner_spec.py > "$MEAS_DIR/spec.json"
+          for i in $(seq 1 10); do
+            printf '<html><body><h1>tab %s</h1></body></html>' "$i" \
+              > "/tmp/tabs/tab$i.html"
+          done
+
+      - name: Start sidecars
+        run: |
+          date +%s%6N > "$MEAS_DIR/sidecar_start_us"
+          sudo sh -c "nohup forkstat -e fork,exec,exit,comm \
+            > '$MEAS_DIR/lifecycle.log' 2> '$MEAS_DIR/forkstat.err' &"
+          nohup python3 dataset/tools/meas/proc_sampler.py --interval 0.2 \
+            --ctxt --out "$MEAS_DIR/proc_samples.jsonl" \
+            2> "$MEAS_DIR/sampler.err" &
+          sleep 2
+
+      - name: Measured phases
+        run: |
+          P="$MEAS_DIR/phases.jsonl"
+          PH="dataset/tools/meas/phase.sh $P"
+          TABS=$(for i in $(seq 1 10); do printf 'file:///tmp/tabs/tab%s.html ' "$i"; done)
+          $PH chromium-10-tabs -- bash -c "
+            xvfb-run -a snap run chromium --no-sandbox --no-first-run \
+              --disable-gpu $TABS & CHROMIUM_PID=\$!
+            sleep 300
+            kill \$CHROMIUM_PID || true; sleep 3; pkill -f chromium || true"
+          $PH element-idle -- bash -c "
+            xvfb-run -a element-desktop --no-sandbox --disable-gpu \
+              & ELEMENT_PID=\$!
+            sleep 600
+            kill \$ELEMENT_PID || true; sleep 3; pkill -f element || true"
+
+      - name: Stop sidecars
+        if: always()
+        run: |
+          sudo pkill -INT forkstat || true
+          pkill -INT -f proc_sampler.py || true
+          sleep 3
+          date +%s%6N > "$MEAS_DIR/sidecar_stop_us"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meas-gui-r${{ matrix.repeat }}
+          path: /tmp/meas
+          if-no-files-found: error
