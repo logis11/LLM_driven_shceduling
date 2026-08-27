@@ -173,7 +173,7 @@ The simulated machine has one lane (Q1 of the archived open-questions record, ra
 One campaign on public CI runners (GitHub Actions): workflow files released, anyone can re-run. Outputs get registry tags `meas-ci:<workflow>:<run>`.
 
 **Workflows:**
-1. *Headless CLI measurements:* real `make -jN` build, `tar`/`xz`, `rsync`, `clamscan`, `updatedb` with a sidecar sampling `/proc` at 1 s → lifetime CDFs, fork rates, wakeup patterns. Covers: compiler-child, build-orchestrator, io-stream, background-crawler, network-bulk, system-daemon baselines.
+1. *Headless CLI measurements:* real `make -jN` build, `tar`/`xz`, `rsync`, `clamscan`, `updatedb` with two sidecars — a process-lifecycle event tracer (netlink proc events: exact fork/exec/exit timestamps) and a 1 s `/proc` state sampler → lifetime CDFs, fork rates, wakeup patterns. Covers: compiler-child, build-orchestrator, io-stream, background-crawler, network-bulk, system-daemon baselines.
 2. *GUI app-intrinsic measurements:* Electron apps / a browser under **Xvfb** — heartbeat periods, renderer-children counts, multiplicities. Open-source substitutes for account-gated apps, substitution stated. Also referees OQ-3 (electron-comms vs chromium renderer CDF comparison).
 3. *Name verification:* install packages in distro containers, record actual `comm`/`cmdline` strings (soffice.bin vs soffice, updatedb.plocate, cc1 path) — scenario-catalog Note 4.
 
