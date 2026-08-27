@@ -436,7 +436,7 @@ This mirrors what Linux already does — `SCHED_DEADLINE` is EDF, `SCHED_FIFO` i
 
 **Two consequences for other parts of this document:**
 
-- EDF requires deadlines in the process model. Workload `pattern` entries for periodic work must carry `period_ms` and `deadline_ms`, not just burst sizes. This must land before the schema freeze.
+- EDF requires deadlines in the process model. Satisfied: periodic work carries `TIMER(period)` and deadlines in the archetype grammar (`docs/simulator/interpretation-contract.md` §3).
 - Configuration fields are algorithm-dependent. MLFQ uses `timeslice_ms` / `num_queues` / `boost_interval_ms`; lottery uses ticket allocations; EDF uses admission parameters. Validation is conditional on the selected algorithm rather than a flat field list.
 
 ## 4.6 Measuring whether the vocabulary is sufficient — the RQ3 ladder
@@ -491,7 +491,7 @@ The two sides communicate over JSON across a process boundary. If we later repla
 
 **Model hosting.** The client module supports both a hosted API and a local server (Ollama or vLLM) behind one interface. We use the API for fast prompt iteration and a local quantized model for the measurements that go in the paper: a deployment story that sends the running process list to a remote server is not credible; local inference is substantially faster on short structured outputs; and constrained decoding (GBNF grammars, guided decoding) can make malformed output structurally impossible, removing an entire class of validator branches. Comparing a frontier API model against a local 8B model is a cheap and worthwhile appendix result — if a small local model reads situations nearly as well, the deployment claim stops being hypothetical.
 
-**Record and replay.** Running the full condition matrix against a live model would be slow, expensive, and non-reproducible. The daemon therefore runs in two modes. In *record* mode it queries the model once per distinct telemetry snapshot and stores `(prompt hash → response, measured latency)`. In *replay* mode it serves from that cache with no model in the loop. Because the cache key is `(workload id, process set hash, prompt version)` and telemetry does not depend on scheduling order, one cache serves every condition. This makes the full matrix deterministic and free to re-run.
+**Record and replay.** Running the full condition matrix against a live model would be slow, expensive, and non-reproducible. The daemon therefore runs in two modes. In *record* mode it queries the model once per distinct telemetry snapshot and stores `(prompt hash → response, measured latency)`. In *replay* mode it serves from that cache with no model in the loop. Because the cache key is `(workload id, process set hash, prompt version)`, one cache serves every condition for every set it visits. One caveat: exogenous arrivals are pinned, but *finite* tasks depart when the scheduler lets them finish, so the times of canonical-set changes — and in overlap edge cases, which sets get visited — are scheduler-dependent (open item, `docs/workload/building-plan.md` §9). The full matrix remains deterministic and free to re-run.
 
 ---
 
@@ -573,6 +573,8 @@ Separating these makes the ambiguous outcome interpretable. If Layer 1 is high a
 ## 5.5 Workloads
 
 Workload definitions are the experiment. Each carries a ground-truth timeline — mode and attributes — that only the simulator, the oracle condition, and the Layer 1 grader can see.
+
+> **Normative home:** the workload set is now specified by `docs/workload/building-plan.md` (core set C1–C6, ~24 files, balance counted per segment; authored as timelines, compiled to canonical — behavior parameters live in archetypes, never inline). The Family tables below remain the *claims* framing — each Family maps onto core-set groups — and the YAML example below is illustrative of the information asymmetry only, not the file format.
 
 ```yaml
 name: gaming_wanted_vs_unwanted_bulk
@@ -722,7 +724,7 @@ The provenance breakdown must accompany every performance figure. A condition th
 
 ## 6.4 Experiment hygiene
 
-Seeded randomness, with **one independent random stream per simulated process**. This is not a detail: with a single global stream, changing the scheduler changes the order in which random draws are consumed, so two conditions face different workloads and the comparison is void.
+**The simulator contains no randomness at all.** Every distribution is sampled at dataset-compile time with a recorded seed (`docs/simulator/interpretation-contract.md` §1); the simulator replays concrete values. Two conditions therefore face byte-identical workloads by construction — the concern that scheduler-dependent draw order could make conditions face different workloads cannot arise, because there are no draws at run time.
 
 Beyond that: repeated runs with variance reported, one variable changed at a time, identical workload traces across all conditions. Every result that cannot be reproduced from a config file and a seed does not count.
 
@@ -756,7 +758,7 @@ Beyond that: repeated runs with variance reported, one variable changed at a tim
 
 ## 8.1 Areas
 
-**인경민 — simulator and executor.** The discrete-event engine, virtual clock, process model. All scheduling algorithms and the per-class executor. Bandwidth caps and starvation protection. Telemetry extraction. The zero-delay oracle mode. Per-process random streams (§6.4). If we later port to `sched_ext`, that lands here.
+**인경민 — simulator and executor.** The discrete-event engine, virtual clock, process model. All scheduling algorithms and the per-class executor. Bandwidth caps and starvation protection. Telemetry extraction. The zero-delay oracle mode. The canonical workload loader and task-program interpreter, built to `docs/simulator/interpretation-contract.md`. If we later port to `sched_ext`, that lands here.
 
 **박이안 — recognition.** Prompt construction, model integration and local hosting, output schema design, Layer 1 evaluation. Also **the whitelist baseline** — putting the strongest counter-hypothesis in the hands of the person arguing for the LLM keeps the result honest.
 
@@ -783,7 +785,7 @@ This layout puts every integration point in one person's hands, making integrati
 
 | Phase | Deliverable | Gate |
 |---|---|---|
-| 0 | Discrete-event simulator, MLFQ executor, workload loader, per-process RNG streams | A workload runs and produces reproducible metrics |
+| 0 | Discrete-event simulator, MLFQ executor, canonical workload loader (per `docs/simulator/interpretation-contract.md`) | A workload runs and produces reproducible metrics |
 | 1 | `fixed`, `random`, `oracle` — **modes only, no attributes** | **Is the random-to-oracle gap large enough to measure?** If not, redesign before proceeding |
 | 2 | Full vocabulary, CPU driver mapping table, `whitelist` condition | Whitelist beats fixed on gaming workloads |
 | 3 | Mock generator, IPC, validator, provenance, record/replay cache | Full pipeline runs end to end with no model |
@@ -892,7 +894,7 @@ The projection of the workload the recognizer is permitted to see:
 | coarse counts | burst patterns | that is the ground truth being tested against |
 | | mode and attribute labels | that is the answer |
 
-Telemetry is a pure function of which processes exist, and launches and exits are scripted in the workload. Nothing here depends on scheduling order, which is why one record/replay cache serves every condition (§4.8).
+Telemetry is a pure function of which processes exist. Launches are pinned in the workload; finite-task exits (and the `runnable` count shown above) are scheduler-dependent — see the §4.8 caveat and the open item in `docs/workload/building-plan.md` §9. The cache is keyed by set hash, so it serves every condition for the sets visited.
 
 ## B.3 Trace — simulator to harness
 

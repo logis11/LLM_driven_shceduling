@@ -26,14 +26,14 @@ If you want to compare two different decision rules, you have two options:
 
 Our simulator is option 2.
 
-In this picture, each process is a customer carrying a **pre-written script** — a fixed alternating sequence of "needs the counter for N minutes" and "steps away for M minutes."
+In this picture, each process is a customer carrying a **pre-written script** — a fixed alternating sequence of "needs the counter for N minutes" and "steps away for M minutes." (The scripts are compiled from the workload dataset; `docs/simulator/interpretation-contract.md` defines their exact form.)
 
 ```text
   Discord    = 3 min at counter -> away 20 min -> 2 min at counter -> away 15 min -> ...
   Compiler   = 8 hours at the counter, continuously
 ```
 
-The critical property: **the script never changes.** Whatever the scheduler decides, Discord still needs the same total amount of counter time in the same sized pieces. What the scheduler changes is only **where those pieces land on the timetable.**
+The critical property: **the script never changes.** Whatever the scheduler decides, Discord still needs the same total amount of counter time in the same sized pieces. What the scheduler changes is only **where those pieces land on the timetable.** (A script may also say "when my current errand finishes, send in my next helper" — the helpers and their scripts are fixed too; only *when* they walk in depends on the timetable.)
 
 ---
 
