@@ -28,8 +28,11 @@
 #   - `validation_stats`: what the meas-ci re-enactment must match, or the
 #     stated reason no referee exists
 #   - `modeling_notes`: what our encoding invented on top of the sources
-#   - `meas-pending` params are placeholders awaiting the CI campaign;
-#     rejected by the linter after schema freeze
+#   - `meas-pending` params carry explicit placeholder values (building-plan
+#     §2.1) — the tag marks every number in that param as provisional until
+#     the CI campaign replaces it; rejected by the linter after schema freeze
+#   - lognormal params are `{median_us, sigma_log}`; the compiler samples
+#     median * exp(sigma_log * z)
 #   - all source ids resolve against dataset/sources.yaml; locators validate
 #     against each entry's locator_pattern
 
@@ -104,7 +107,8 @@ archetypes:
     params:
       input_gap:
         {dist: lognormal-mixture, fluent_mean_us: 158000,
-         pause_probability: 0.34, pause_mean_us: 395235,
+         fluent_sigma_log: 0.35, pause_probability: 0.34,
+         pause_mean_us: 395235, pause_sigma_log: 0.6,
          overall_mean_us: 238660, sampling: per-iteration,
          source: "dhakal-chi18"}
       input_gap_family:
@@ -129,10 +133,12 @@ archetypes:
       (fluent ~158 ms, pause component p~0.34 — task-dependent, cite the
       family not a parameter set). pause_mean_us is our arithmetic closing
       the mixture on dhakal's overall mean: (238,660 - 0.66*158,000)/0.34 ~
-      395,235 us. Burst CPU cost linearizes interbench man-x's "variable
-      0-100%" as a uniform fraction of the preceding input gap; the
-      burst/pause macro-structure beyond the mixture is our modeling with no
-      external referee.
+      395,235 us. The sigma_log values are our convention within the cited
+      log-normal family (roeser-rw24 states the family; its parameters are
+      task-dependent, so no single set is citable). Burst CPU cost
+      linearizes interbench man-x's "variable 0-100%" as a uniform fraction
+      of the preceding input gap; the burst/pause macro-structure beyond the
+      mixture is our modeling with no external referee.
 
   # ---- compute/batch family — interbench loads + kernel-build literature --
 
@@ -174,11 +180,14 @@ archetypes:
         - EXIT: {}
     params:
       cpu_burst:
-        {dist: lognormal, sampling: per-instance, source: "meas-pending"}
+        {dist: lognormal, median_us: 400000, sigma_log: 1.0,
+         sampling: per-instance, source: "meas-pending"}
       cpu_tail:
-        {dist: lognormal, sampling: per-instance, source: "meas-pending"}
+        {dist: lognormal, median_us: 50000, sigma_log: 0.8,
+         sampling: per-instance, source: "meas-pending"}
       disk_wait:
-        {dist: lognormal, sampling: per-instance, source: "meas-pending"}
+        {dist: lognormal, median_us: 20000, sigma_log: 0.8,
+         sampling: per-instance, source: "meas-pending"}
     lifetime: spawned
     spawned_by: build-orchestrator
     binding_params: []
@@ -209,7 +218,8 @@ archetypes:
         - EXIT: {}
     params:
       dispatch_overhead:
-        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+        {dist: lognormal, median_us: 2000, sigma_log: 0.5,
+         sampling: per-iteration, source: "meas-pending"}
     lifetime: finite
     spawns: compiler-child
     binding_params: [spawn_count, parallelism_cap]
@@ -240,9 +250,11 @@ archetypes:
         - EXIT: {}
     params:
       block_cpu:
-        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+        {dist: lognormal, median_us: 3000, sigma_log: 0.6,
+         sampling: per-iteration, source: "meas-pending"}
       io_wait:
-        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+        {dist: lognormal, median_us: 8000, sigma_log: 0.6,
+         sampling: per-iteration, source: "meas-pending"}
     lifetime: finite
     binding_params: [total_work]
     scalable: []
@@ -268,11 +280,14 @@ archetypes:
             - SLEEP: throttle
     params:
       scan_burst:
-        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+        {dist: lognormal, median_us: 5000, sigma_log: 0.6,
+         sampling: per-iteration, source: "meas-pending"}
       io_wait:
-        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+        {dist: lognormal, median_us: 15000, sigma_log: 0.6,
+         sampling: per-iteration, source: "meas-pending"}
       throttle:
-        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+        {dist: lognormal, median_us: 250000, sigma_log: 0.5,
+         sampling: per-iteration, source: "meas-pending"}
     lifetime: segment-bound
     binding_params: []
     scalable: []
@@ -315,8 +330,17 @@ archetypes:
       frame_period:
         {dist: constant, value_us: 16667, sampling: per-instance,
          source: "lavd-ossna24"}
+      chain_length:
+        {dist: constant, value: 16, sampling: per-instance,
+         source: "lavd-ossna24"}
+      tail_idle_gap:
+        {dist: lognormal, median_us: 500000, sigma_log: 0.5,
+         sampling: per-task, source: "lavd-ossna24:s12"}
+      tail_run:
+        {dist: lognormal, median_us: 200, sigma_log: 0.5,
+         sampling: per-task, source: "lavd-ossna24:s12"}
     lifetime: segment-bound
-    binding_params: []
+    binding_params: [lane_share]
     scalable:
       - fields: [chain aggregate demand]
         rule: instantiate the full task population with the long tail
@@ -334,10 +358,16 @@ archetypes:
       ours. per_schedule_run samples per-task because the source states
       per-task runtime is stable (s13); anchors are the source's wineserver
       ~260 us and worker ~1.65 ms endpoints, lognormal family by OQ-5
-      convention. Lane-scaling defense: LAVD's own concentration statistics
-      (top 30-40 tasks = 95% of scheduling; 15-20 game tasks take 60-70%)
-      justify scaling the frame-critical chain while keeping the near-idle
-      tail. Wineserver's place — inside this constructed graph vs a separate
+      convention (the compiler derives median/sigma treating the anchors as
+      the p05/p95 span). chain_length 16 sits in the source's 15-20
+      frame-critical band; the tail (n_tasks - chain_length near-idle tasks)
+      encodes the source's "mostly waiting" long tail — tail param values
+      are our placeholder encoding of near-idle, provisional like any
+      meas-pending value. Lane-scaling defense: LAVD's own concentration
+      statistics (top 30-40 tasks = 95% of scheduling; 15-20 game tasks take
+      60-70%) justify scaling the frame-critical chain while keeping the
+      near-idle tail; lane_share (binding-time) is the -single compile
+      target for the chain's aggregate demand. Wineserver's place — inside this constructed graph vs a separate
       system-daemon binding — is decided at constructor implementation
       (interpretation-contract §6); see system-daemon.
 
@@ -353,9 +383,11 @@ archetypes:
         - EXIT: {}
     params:
       chunk_cpu:
-        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+        {dist: lognormal, median_us: 1000, sigma_log: 0.5,
+         sampling: per-iteration, source: "meas-pending"}
       net_wait:
-        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+        {dist: lognormal, median_us: 10000, sigma_log: 0.5,
+         sampling: per-iteration, source: "meas-pending"}
     lifetime: finite
     binding_params: [total_work]
     scalable: []
@@ -378,9 +410,11 @@ archetypes:
             - RUN: heartbeat_work
     params:
       heartbeat:
-        {dist: lognormal, sampling: per-task, source: "meas-pending"}
+        {dist: lognormal, median_us: 500000, sigma_log: 0.4,
+         sampling: per-task, source: "meas-pending"}
       heartbeat_work:
-        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+        {dist: lognormal, median_us: 2000, sigma_log: 0.5,
+         sampling: per-iteration, source: "meas-pending"}
     lifetime: segment-bound
     binding_params: [renderer_children]
     scalable: []
@@ -407,9 +441,11 @@ archetypes:
             - RUN: wake_burst
     params:
       idle_gap:
-        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+        {dist: lognormal, median_us: 2000000, sigma_log: 0.7,
+         sampling: per-iteration, source: "meas-pending"}
       wake_burst:
-        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+        {dist: lognormal, median_us: 500, sigma_log: 0.5,
+         sampling: per-iteration, source: "meas-pending"}
     lifetime: segment-bound
     binding_params: []
     scalable: []
