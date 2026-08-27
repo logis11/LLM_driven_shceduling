@@ -1,0 +1,427 @@
+# dataset/archetypes.yaml — Layer 1 archetype library (v0.1)
+#
+# One entry per process behavior kind: the rule-plus-parameters bundle that
+# emits a task's event stream. Normative writing plan: docs/workload/
+# archetype-plan.md; execution semantics: docs/simulator/interpretation-
+# contract.md; layer rules: docs/workload/building-plan.md §1–§2.
+#
+# Encoding rules (this file's schema is our invention — source tags justify
+# values and described structure, never field names):
+#   - top-level key = archetype id
+#   - `category_source`: Tier-1 provenance — the taxonomy the entry was
+#     harvested from, or `meas` (behavior class observed in our measurements)
+#   - `pattern.program`: program over the six grammar primitives
+#     (RUN/SLEEP/TIMER/WAIT/WAKE/FORK+EXIT), referencing `params` by name
+#   - `params`: every numeric is a distribution object
+#     `{dist, <parameters>, sampling, source}`; times are integer
+#     microseconds (`_us`); `dist: constant` for point values; distribution
+#     family defaults to lognormal by stated convention (archetype-plan OQ-5)
+#   - `sampling`: per-instance | per-task | per-iteration (bounded only) —
+#     interpretation-contract §5
+#   - `lifetime`: segment-bound | finite | spawned (canonical classes,
+#     interpretation-contract §5)
+#   - `binding_params`: names only — knobs the timeline/scenario binding must
+#     supply (counts, caps, total work). Counts never carry values here
+#     (archetype-plan §3); binding-time defaults live in modeling_notes prose.
+#   - `scalable`: fields the lane-scaling compile pass may transform, with
+#     the rule; empty list = intrinsic demand, never scaled
+#   - `validation_stats`: what the meas-ci re-enactment must match, or the
+#     stated reason no referee exists
+#   - `modeling_notes`: what our encoding invented on top of the sources
+#   - `meas-pending` params are placeholders awaiting the CI campaign;
+#     rejected by the linter after schema freeze
+#   - all source ids resolve against dataset/sources.yaml; locators validate
+#     against each entry's locator_pattern
+
+archetypes:
+
+  # ---- periodic-interactive family — harvested from interbench ------------
+
+  audio-playback:
+    category_source: interbench
+    pattern:
+      program:
+        - loop:
+            - TIMER: period
+            - RUN: burst
+    params:
+      period:
+        {dist: constant, value_us: 50000, sampling: per-task,
+         source: "interbench:man-audio"}
+      burst:
+        {dist: constant, value_us: 2500, sampling: per-task,
+         source: "interbench:man-audio"}
+    lifetime: segment-bound
+    binding_params: []
+    scalable: []
+    validation_stats:
+      referee: self-consistency
+      stats: [wakeup-rate 20 Hz, cpu-share 5%]
+      note: values are interbench's community interactivity model, not a
+        measured behavior; no meas-ci referee.
+    modeling_notes: >-
+      interbench man-audio states "wakes every 50 ms needing 5% CPU"; the
+      TIMER/RUN transcription and the duty-cycle-to-duration arithmetic
+      (5% of 50 ms = 2,500 us per period) are ours.
+
+  video-playback:
+    category_source: interbench
+    pattern:
+      program:
+        - loop:
+            - TIMER: period
+            - RUN: burst
+    params:
+      period:
+        {dist: constant, value_us: 16667, sampling: per-task,
+         source: "interbench:man-video"}
+      burst:
+        {dist: constant, value_us: 6667, sampling: per-task,
+         source: "interbench:man-video"}
+    lifetime: segment-bound
+    binding_params: []
+    scalable: []
+    validation_stats:
+      referee: self-consistency
+      stats: [wakeup-rate 60 Hz, cpu-share 40%]
+      note: values are interbench's community interactivity model, not a
+        measured behavior; no meas-ci referee.
+    modeling_notes: >-
+      interbench man-video states 60 Hz (16.7 ms) at 40% CPU; the 16,667 us
+      period and 40%-duty burst (6,667 us) arithmetic are ours. S3 video
+      conferencing stays bound to this archetype as a stated modeling
+      approximation (archetype-plan OQ-2): conferencing's encode + network
+      components are out of measurement reach, and inventing parameters for
+      them is forbidden.
+
+  desktop-interactive:
+    category_source: interbench
+    pattern:
+      program:
+        - loop:
+            - WAIT: input          # exogenous wake events, pre-sampled at compile
+            - RUN: burst
+    params:
+      input_gap:
+        {dist: lognormal-mixture, fluent_mean_us: 158000,
+         pause_probability: 0.34, pause_mean_us: 395235,
+         overall_mean_us: 238660, sampling: per-iteration,
+         source: "dhakal-chi18"}
+      input_gap_family:
+        {dist: family-declaration, family: two-component-lognormal,
+         sampling: per-iteration, source: "roeser-rw24"}
+      burst_fraction:
+        {dist: uniform, min: 0.0, max: 1.0, sampling: per-iteration,
+         source: "interbench:man-x"}
+    lifetime: segment-bound
+    binding_params: []
+    scalable: []
+    validation_stats:
+      referee: none
+      reason: no full behavioral referee exists — live-usage validation was
+        not performed (stated limitation, building-plan §7); the released
+        sampler + privacy-scrub tool is the open falsification invitation.
+    modeling_notes: >-
+      Input arrives as pre-sampled exogenous wake events (canonical `wake`
+      ops); the task blocks on WAIT(input). Inter-key gaps ground intra-burst
+      input only (dhakal-chi18 scope: within-burst transcription, no mouse,
+      no think-pauses); the two-component log-normal family is roeser-rw24's
+      (fluent ~158 ms, pause component p~0.34 — task-dependent, cite the
+      family not a parameter set). pause_mean_us is our arithmetic closing
+      the mixture on dhakal's overall mean: (238,660 - 0.66*158,000)/0.34 ~
+      395,235 us. Burst CPU cost linearizes interbench man-x's "variable
+      0-100%" as a uniform fraction of the preceding input gap; the
+      burst/pause macro-structure beyond the mixture is our modeling with no
+      external referee.
+
+  # ---- compute/batch family — interbench loads + kernel-build literature --
+
+  cpu-batch:
+    category_source: interbench
+    pattern:
+      program:
+        - RUN: total_work          # run-to-completion, sustained
+        - EXIT: {}
+    params: {}
+    lifetime: finite
+    binding_params: [total_work]
+    scalable: []
+    validation_stats:
+      referee: self-consistency
+      stats: [sustained full-lane cpu-share while runnable]
+      note: interbench Burn is the community's saturation load model; no
+        meas-ci referee needed for "burns CPU until done".
+    modeling_notes: >-
+      interbench Burn (cross-confirmed by ananicy-rules Heavy_CPU) defines
+      the class: sustained core saturation. Burn's 4-thread structure is not
+      carried — one task saturates the demand it is given; multiplicity is a
+      binding-time count (archetype-plan §3). total_work (the job size, hence
+      the finite lifetime) is scenario design, so it binds in the timeline,
+      not here. Binding note (decided, archetype-plan §5): P1 binds
+      tracker-miner-fs-3 to cpu-batch deliberately — it models an indexer in
+      full-rescan CPU-saturating state so the P1 pair is behaviorally
+      identical; the everyday low-intensity indexer remains
+      background-crawler elsewhere (C4/S14). The two bindings of one name
+      are intentional, not an inconsistency.
+
+  compiler-child:
+    category_source: ocallahan-atc17
+    pattern:
+      program:
+        - RUN: cpu_burst
+        - WAIT: disk
+        - RUN: cpu_tail
+        - EXIT: {}
+    params:
+      cpu_burst:
+        {dist: lognormal, sampling: per-instance, source: "meas-pending"}
+      cpu_tail:
+        {dist: lognormal, sampling: per-instance, source: "meas-pending"}
+      disk_wait:
+        {dist: lognormal, sampling: per-instance, source: "meas-pending"}
+    lifetime: spawned
+    spawned_by: build-orchestrator
+    binding_params: []
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      stats: [child lifetime CDF, concurrent-children time series]
+      note: headless real-build workflow (make -jN with /proc sidecar);
+        lifetime absolutes are machine-relative — recorded with the runner
+        spec, convention-informed-by-measurement.
+    modeling_notes: >-
+      The kernel-build literature grounds the class's existence and
+      short-lived character only (ocallahan-atc17 sec-4.3: "make forks and
+      execs 2430 processes, mostly short-lived"; coetzee-arxiv12 sec-9
+      corroborates, kernel-build-specific); neither paper gives a lifetime
+      distribution — hence meas-pending params. The RUN/WAIT/RUN/EXIT shape
+      and the lognormal family (OQ-5 convention) are ours. Spawn-table
+      entries sample per-instance (interpretation-contract §5).
+
+  build-orchestrator:
+    category_source: ocallahan-atc17
+    pattern:
+      program:
+        - loop:                    # consumes the pre-sampled spawn table
+            - RUN: dispatch_overhead
+            - FORK: {}             # blocks on wait-for-slot at the parallelism cap
+        - WAIT: children
+        - EXIT: {}
+    params:
+      dispatch_overhead:
+        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+    lifetime: finite
+    spawns: compiler-child
+    binding_params: [spawn_count, parallelism_cap]
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      stats: [fork rate, concurrent-children time series vs make -jN run]
+    modeling_notes: >-
+      FORK consumes a pre-sampled ordered spawn table (one fully resolved
+      compiler-child program per entry); spawn timing emerges from the
+      fork/wait-for-slot loop at run time (interpretation-contract §5).
+      spawn_count binds per timeline — the kernel-build default is 2,430
+      (ocallahan-atc17 sec-4.3). parallelism_cap defaults to -j8 by stated
+      convention (archetype-plan OQ-4: between interbench's documented -j4
+      and desktop nproc conventions), overridable at binding time; on one
+      lane it shapes fork-storm width and queue depth, not throughput. The
+      loop shape and dispatch_overhead field are ours.
+
+  # ---- IO family — interbench loads + ananicy types -----------------------
+
+  io-stream:
+    category_source: interbench
+    pattern:
+      program:
+        - loop:                    # per-block streaming until total_work consumed
+            - RUN: block_cpu
+            - WAIT: io
+        - EXIT: {}
+    params:
+      block_cpu:
+        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+      io_wait:
+        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+    lifetime: finite
+    binding_params: [total_work]
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      stats: [cpu/io duty pattern of tar/xz/rsync runs]
+      note: throughput absolutes are machine-relative — runner spec recorded,
+        convention-informed-by-measurement, never desktop truth.
+    modeling_notes: >-
+      interbench man-write/man-read establish the class (RAM-scale
+      sequential, cache-defeating streaming) but publish no per-block timing;
+      the RUN/WAIT block loop, the lognormal family (OQ-5), and total_work as
+      a binding param are ours. Shapes refined by the meas-ci headless
+      workflow.
+
+  background-crawler:
+    category_source: ananicy-rules
+    pattern:
+      program:
+        - loop:
+            - RUN: scan_burst
+            - WAIT: io
+            - SLEEP: throttle
+    params:
+      scan_burst:
+        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+      io_wait:
+        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+      throttle:
+        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+    lifetime: segment-bound
+    binding_params: []
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      stats: [burst/idle duty cycle of updatedb + clamscan runs]
+    modeling_notes: >-
+      ananicy-rules establishes the class (BG_CPUIO/indexer, ioclass idle —
+      deployed practice) but carries no rates — hence meas-pending. The
+      burst/wait/throttle loop shape is ours; the ioclass-idle character is
+      expressed through low scheduling priority at binding, not encoded here.
+      The daemon-mode (low-intensity, segment-bound) crawler lives here; a
+      full-rescan CPU-saturating indexer is deliberately bound to cpu-batch
+      in P1 (see cpu-batch modeling_notes).
+
+  # ---- structural-special family — harvested from LAVD --------------------
+
+  game-task-chain:
+    category_source: lavd-ossna24
+    pattern:
+      constructor: chain           # expanded at load time, interpretation-contract §6
+      program:                     # per constructed chain member
+        - loop:
+            - WAIT: upstream
+            - RUN: per_schedule_run
+            - WAKE: downstream
+    params:
+      n_tasks:
+        {dist: constant, value: 300, sampling: per-instance,
+         source: "lavd-ossna24:s12"}
+      frac_long_lived:
+        {dist: constant, value: 0.90, sampling: per-instance,
+         source: "lavd-ossna24:s12"}
+      per_schedule_run:
+        {dist: lognormal, anchor_min_us: 260, anchor_max_us: 1650,
+         sampling: per-task, source: "lavd-ossna24:s13"}
+      frac_wakeups_from_wait:
+        {dist: uniform, min: 0.70, max: 0.75, sampling: per-instance,
+         source: "lavd-ossna24:s14"}
+      frame_period:
+        {dist: constant, value_us: 16667, sampling: per-instance,
+         source: "lavd-ossna24"}
+    lifetime: segment-bound
+    binding_params: []
+    scalable:
+      - fields: [chain aggregate demand]
+        rule: instantiate the full task population with the long tail
+          near-idle; scale the frame-critical chain's aggregate demand to
+          the lane's oversubscription regime (building-plan §5a).
+    validation_stats:
+      referee: none
+      reason: validation against LAVD would be circular — LAVD is also the
+        parameter source (stated as such, building-plan §7).
+    modeling_notes: >-
+      The only entry whose topology is a parameter: the compiler's chain
+      constructor expands it into n_tasks ordinary tasks with WAIT/WAKE
+      channels wired input -> engine -> ... -> display; the linearization of
+      the s16-s17 waker-waiter graph into a chain, and every field name, are
+      ours. per_schedule_run samples per-task because the source states
+      per-task runtime is stable (s13); anchors are the source's wineserver
+      ~260 us and worker ~1.65 ms endpoints, lognormal family by OQ-5
+      convention. Lane-scaling defense: LAVD's own concentration statistics
+      (top 30-40 tasks = 95% of scheduling; 15-20 game tasks take 60-70%)
+      justify scaling the frame-critical chain while keeping the near-idle
+      tail. Wineserver's place — inside this constructed graph vs a separate
+      system-daemon binding — is decided at constructor implementation
+      (interpretation-contract §6); see system-daemon.
+
+  # ---- meas family — no literature taxonomy exists ------------------------
+
+  network-bulk:
+    category_source: meas
+    pattern:
+      program:
+        - loop:                    # per-chunk download until total_work consumed
+            - WAIT: net
+            - RUN: chunk_cpu
+        - EXIT: {}
+    params:
+      chunk_cpu:
+        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+      net_wait:
+        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+    lifetime: finite
+    binding_params: [total_work]
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      stats: [cpu/net duty pattern of a saturating download]
+      note: throughput absolutes are machine-relative — runner spec recorded.
+    modeling_notes: >-
+      No literature taxonomy names this class; category_source is honestly
+      meas (behavior class observed in our measurements). Link-saturating,
+      moderate-CPU shape per building-plan §2.1; all params await the CI
+      campaign. The chunk loop shape is ours.
+
+  electron-comms:
+    category_source: meas
+    pattern:
+      program:
+        - loop:
+            - TIMER: heartbeat
+            - RUN: heartbeat_work
+    params:
+      heartbeat:
+        {dist: lognormal, sampling: per-task, source: "meas-pending"}
+      heartbeat_work:
+        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+    lifetime: segment-bound
+    binding_params: [renderer_children]
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      stats: [heartbeat period CDF, renderer-children count under Xvfb]
+      note: the same Xvfb workflow referees OQ-3 — chromium-renderer vs
+        Electron-app CDF comparison decides whether this entry splits.
+    modeling_notes: >-
+      Mostly idle plus periodic short wakes; the TIMER/RUN encoding and all
+      field names are ours, params await the Xvfb workflow. renderer_children
+      is a static binding-time multiplicity (archetype-plan §3): values bind
+      in timelines against the Chromium process model from the tab-count
+      literature (dubroy-chi10, mozilla-testpilot10, chang-chi21) plus
+      meas-ci Xvfb counts — order-of-magnitude fidelity suffices for
+      recognition; precision matters only for executor load.
+
+  system-daemon:
+    category_source: meas
+    pattern:
+      program:
+        - loop:
+            - SLEEP: idle_gap
+            - RUN: wake_burst
+    params:
+      idle_gap:
+        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+      wake_burst:
+        {dist: lognormal, sampling: per-iteration, source: "meas-pending"}
+    lifetime: segment-bound
+    binding_params: []
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      stats: [wakeup rate and burst-length CDF of stock daemons via /proc sidecar]
+    modeling_notes: >-
+      Near-idle with intermittent sub-millisecond wakes; SLEEP (not TIMER)
+      because stock daemons are not drift-free periodic — aperiodicity is the
+      class's character; the encoding is ours, params await the CI campaign.
+      Binding note (decided, archetype-plan §5): wineserver -> system-daemon
+      is a provisional approximation — LAVD treats wine as part of the game's
+      task graph (lavd-ossna24:s12); whether wineserver joins the constructed
+      game-task-chain instead is decided at constructor implementation, and
+      this note is superseded by that decision.
