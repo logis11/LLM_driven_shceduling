@@ -1,4 +1,5 @@
 # Related Work — Draft
+> Status: draft · Created 2026-08-25 · Updated 2026-08-27
 
 > Draft v0. Structure follows the two-axis landscape: *what recognition reads* (behavior vs. meaning) × *what recognition produces* (generated policy vs. selected signal). Each subsection ends with an italicized note — the reviewer objection that paragraph exists to absorb, plus writing notes. Delete the notes before submission. Citation keys are placeholders; verify all arXiv versions at submission time (the SchedCP group iterates fast).
 

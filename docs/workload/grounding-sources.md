@@ -1,8 +1,9 @@
 # Workload Grounding — Sources by Role
+> Status: normative · Created 2026-08-25 · Updated 2026-08-27
 
 > Companion to Q7 and §5.5. The suite is synthetic by necessity (see "The negative result" below); this document lists what grounds each layer of the synthesis. Each source is annotated with *what it is allowed to justify* — do not cite a source outside its role.
 >
-> **Normative homes (2026-08-26):** citation strings, tiers, and per-entry role lines live in **docs/REFERENCES.md**; the machine registry is **docs/workload-dataset-sources.yaml**; the measurement campaign is **meas-ci** (WORKLOAD_DATASET_BUILDING_PLAN §7). The A–D role letters remain this document's vocabulary for *what kind of grounding* a source provides.
+> **Normative homes (2026-08-26):** citation strings, tiers, and per-entry role lines live in **docs/references.md**; the machine registry is **dataset/sources.yaml**; the measurement campaign is **meas-ci** (docs/workload/building-plan.md §7). The A–D role letters remain this document's vocabulary for *what kind of grounding* a source provides.
 
 ## Role A — Scenario taxonomy: "these situations are standard, not imagined"
 
@@ -44,7 +45,7 @@ Grounds the *Q7 layer*: how long segments last, how often labels change, what wi
 
 Grounds the *appendix defense*. No external source; our own measurement campaign.
 
-> **Superseded (2026-08-26):** the campaign is **meas-ci** — scripted re-enactments on public CI runners, workflow files released, anyone can re-run — normative in WORKLOAD_DATASET_BUILDING_PLAN §7, with its scope discipline (structural/shape claims only; machine-relative absolutes carry the runner spec). The team-desktop plan this section previously described is retired. User-behavioral parameters (input inter-arrival, tab counts, segment durations) are literature-grounded under Role C; **live-usage validation was not performed and is a stated limitation**, with the collection + privacy-scrub tool released as an open falsification invitation.
+> **Superseded (2026-08-26):** the campaign is **meas-ci** — scripted re-enactments on public CI runners, workflow files released, anyone can re-run — normative in docs/workload/building-plan.md §7, with its scope discipline (structural/shape claims only; machine-relative absolutes carry the runner spec). The team-desktop plan this section previously described is retired. User-behavioral parameters (input inter-arrival, tab counts, segment durations) are literature-grounded under Role C; **live-usage validation was not performed and is a stated limitation**, with the collection + privacy-scrub tool released as an open falsification invitation.
 
 ## The negative result — why the suite is synthetic (write this into §5.5's preamble)
 
@@ -66,7 +67,7 @@ The absence is structural: process names are exactly the field privacy review st
 
 ## Citation-tier rule (style for the paper)
 
-> Normative home now **docs/REFERENCES.md** (each entry carries its tier and role line); the rule is restated here for the scope-discipline sentence.
+> Normative home now **docs/references.md** (each entry carries its tier and role line); the rule is restated here for the scope-discipline sentence.
 
 Sources in this document fall into two citation tiers, and the paper must keep them visually and functionally separate:
 
@@ -77,8 +78,8 @@ Scope discipline: a deployed-system citation may support only *existence claims*
 
 ## Standing verification tasks — resolved (2026-08-26)
 
-1. ~~Task-switching study citation~~ — resolved: `zhang-chb15` (authors corrected from "Yun et al."; see REFERENCES.md).
+1. ~~Task-switching study citation~~ — resolved: `zhang-chb15` (authors corrected from "Yun et al."; see docs/references.md).
 2. ~~DesktopBench license/venue~~ — resolved: released on HuggingFace, restrictive data terms, MIT scripts; methodological reuse unrestricted; FOCAL still a preprint (`focal-arxiv26`).
-3. Version pins — tracked as `to-pin` statuses in REFERENCES.md; pin at submission.
+3. Version pins — tracked as `to-pin` statuses in docs/references.md; pin at submission.
 4. SWELL-KW — cited qualitatively (`swell-icmi14`, REFERENCES-only; not in the registry).
 5. ~~Valve coordinates~~ — resolved: `steam-downloads` (Steam Support article 4F9E-6328-E9B8-47F9, accessed 2026-08-26).

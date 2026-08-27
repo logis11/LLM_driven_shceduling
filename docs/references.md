@@ -1,6 +1,7 @@
 # REFERENCES — master citation index
+> Status: normative · Created 2026-08-26 · Updated 2026-08-27
 
-The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `workload-dataset-sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
+The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
 ## Id-minting rule
 
@@ -12,7 +13,7 @@ Id derivation by `type`:
 - **deployed-system** → project name, no year; `pinned_version` carries freshness (`interbench`, `rt-app`, `steam-downloads`).
 - **measurement** → `meas-ci`, with run identification in the locator (`meas-ci:<workflow>:<run>`).
 
-**Contributor recipe:** (1) read this rule and mint the id; (2) add the entry here; (3) add a `workload-dataset-sources.yaml` entry *only if the dataset derives values or structure from it*.
+**Contributor recipe:** (1) read this rule and mint the id; (2) add the entry here; (3) add a `dataset/sources.yaml` entry *only if the dataset derives values or structure from it*.
 
 ## Citation-tier rule
 
@@ -29,12 +30,12 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 ### `cpsmark-tbench23`
 - cite: Zhang, Y., & Wu, T. (2023). CpsMark+: A scenario-oriented benchmark system for office desktop performance evaluation in centralized procurement via simulating user experience. *BenchCouncil Transactions on Benchmarks, Standards and Evaluations*, 100084. DOI 10.1016/j.tbench.2023.100084.
 - role: Role A academic anchor — scenario taxonomy, named app lists (Table 2), CA workflow ordering (Role C), resource-mix sensitivity (Table 4, Role B). Open-source artifact: github.com/wanghong3116/CpsMarkPLUS (pin commit) + NMDC resource package.
-- status: verified (SOURCE_VETTING_rev2 full-text review, 2026-08-25)
+- status: verified (source-vetting full-text review, 2026-08-25)
 
 ### `zhang-chb15`
 - cite: Zhang, T., Sun, X., Chai, Y., & Aghajan, H. (2015). A look at task-switching and multi-tasking behaviors: From the perspective of the computer usage among a large number of people. *Computers in Human Behavior*, 49, 237–244. DOI 10.1016/j.chb.2015.03.012.
 - role: Role C — power-law switching, hub task structure ("star" is our paraphrase — say "hub"), ~3-min average PC-task switch (independently corroborates `gonzalez-chi04`). 31 days / 3,000 subjects / 15M+ records / 16,406 processes, CNNIC data. Dataset unreleased.
-- status: verified (2026-08-26; corrects SOURCE_VETTING's "Yun et al." misattribution)
+- status: verified (2026-08-26; corrects source-vetting's "Yun et al." misattribution)
 
 ### `gonzalez-chi04`
 - cite: González, V. M., & Mark, G. (2004). "Constant, Constant, Multi-tasking Craziness": Managing Multiple Working Spheres. *Proc. CHI 2004*, 113–120. DOI 10.1145/985692.985707.

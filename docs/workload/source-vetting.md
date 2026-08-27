@@ -1,8 +1,9 @@
 # Source Vetting for the Synthetic Desktop Workload Dataset — rev. 2
+> Status: record — append-only · Created 2026-08-25 · Updated 2026-08-27
 
 > rev. 2 (2026-08-25): CpsMark+ upgraded from CONDITIONALLY USABLE to USABLE after full-text review — verdict, extracted content, role assignment, and recommendations revised accordingly. All other sections carried over from the original research report unchanged except where marked [rev.2].
 >
-> rev. 3 (2026-08-26): citation corrections from the verification pass (marked [rev.3]) — the task-switching study's authors, the true home of the Gloria Mark figures, and the identities of the two kernel-build arXiv papers. Final citations live in **docs/REFERENCES.md**, which supersedes this document for citation strings; this document remains the vetting/extraction record.
+> rev. 3 (2026-08-26): citation corrections from the verification pass (marked [rev.3]) — the task-switching study's authors, the true home of the Gloria Mark figures, and the identities of the two kernel-build arXiv papers. Final citations live in **docs/references.md**, which supersedes this document for citation strings; this document remains the vetting/extraction record.
 
 ## TL;DR
 - Of the ~20 candidate sources, the strongest numeric grounding comes from the community scheduler tools (interbench, rt-app, schbench, hackbench) and the LAVD gaming characterization. The scenario-taxonomy sources (PCMark 10, SYSmark 30/25, CpsMark+) provide named scenario/application lists.

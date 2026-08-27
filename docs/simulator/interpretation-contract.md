@@ -1,8 +1,9 @@
 # Interpretation Contract — workload ⇄ simulator
+> Status: normative · Created 2026-08-26 · Updated 2026-08-27
 
 The contract between the workload dataset and the simulator: what a canonical workload file contains and how the simulator turns it into scheduled tasks. Written before the simulator exists; simulator Phase 0 is built to this document. Decision record: `_dev/archive/2026-08-26-workload-generation-grill.md` (D10–D16).
 
-The simulator reads **canonical workload files only** — never timelines, never `archetypes.yaml`. (Pipeline: `archetypes.yaml + timeline (+ scenario catalog) + seed → workload`; see WORKLOAD_DATASET_BUILDING_PLAN.)
+The simulator reads **canonical workload files only** — never timelines, never `archetypes.yaml`. (Pipeline: `archetypes.yaml + timeline (+ scenario catalog) + seed → workload`; see docs/workload/building-plan.md.)
 
 ## 1. The simulated machine
 

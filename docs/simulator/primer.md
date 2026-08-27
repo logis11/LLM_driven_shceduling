@@ -1,6 +1,7 @@
 # What the Simulator Actually Does
+> Status: normative · Created 2026-08-15 · Updated 2026-08-27
 
-**A plain-language companion to `RESEARCH_PROPOSAL_v2.md` §4.8**
+**A plain-language companion to `docs/research-proposal.md` §4.8**
 
 This note answers one question: *if we are not running real processes, what exactly is the simulator doing?* It assumes no operating systems background and contains no code. Readers who want the implementation details should go to the simulator design notes instead.
 

@@ -1,12 +1,13 @@
 # Archetype Library — Writing Plan
+> Status: normative · Created 2026-08-25 · Updated 2026-08-27
 
-> Expands §2 of WORKLOAD_DATASET_BUILDING_PLAN.md into a buildable specification for `archetypes.yaml`. Normative for Layer 1. Source ids reference `workload-dataset-sources.yaml`; citations live in REFERENCES.md; execution semantics live in INTERPRETATION_CONTRACT.md.
+> Expands §2 of docs/workload/building-plan.md into a buildable specification for `archetypes.yaml`. Normative for Layer 1. Source ids reference `dataset/sources.yaml`; citations live in docs/references.md; execution semantics live in docs/simulator/interpretation-contract.md.
 
 ## 1. What an archetype is
 
 An archetype is a **generative model of one process as the scheduler sees it**. To the scheduler a process has no name and no meaning — only an event stream: when it becomes runnable, how long it runs, what it blocks on, whom it wakes, when it forks and exits. An archetype is the rule-plus-parameters bundle that emits that stream.
 
-**Event grammar** (six primitives — semantics normative in INTERPRETATION_CONTRACT §3; rt-app cited as the schema precedent, including `timer{ref,period}` for TIMER):
+**Event grammar** (six primitives — semantics normative in interpretation-contract §3; rt-app cited as the schema precedent, including `timer{ref,period}` for TIMER):
 
 ```
 RUN(duration)      burn CPU
@@ -50,14 +51,14 @@ Observation: counts matter differently to the two consumers. The executor needs 
 ### Compute/batch family — harvested from interbench loads + kernel-build literature
 4. **`cpu-batch`** — run-to-completion, sustained core saturation. category_source: interbench (Burn; cross-confirmed by ananicy-rules `Heavy_CPU`). Consumed by: S12 training loop; S7 render phases.
 5. **`compiler-child`** — short RUN + disk WAIT, then EXIT. category_source: kernel-build characterization (`ocallahan-atc17`: 2,430 mostly short-lived procs; cross-confirmed by interbench Compile, `coetzee-arxiv12`). Lifetime CDF: `meas-pending`. Consumed by: S11 cc1/ld.
-6. **`build-orchestrator`** — FORK/wait loop consuming a pre-sampled spawn table up to the parallelism cap (INTERPRETATION_CONTRACT §5). category_source: kernel-build literature + make -jN convention. Consumed by: S11 make/cargo. cc1 counts emerge here (§3).
+6. **`build-orchestrator`** — FORK/wait loop consuming a pre-sampled spawn table up to the parallelism cap (interpretation-contract §5). category_source: kernel-build literature + make -jN convention. Consumed by: S11 make/cargo. cc1 counts emerge here (§3).
 
 ### IO family — harvested from interbench loads + ananicy types
 7. **`io-stream`** — streaming sequential read/write, throughput-bound. category_source + params: `interbench:man-write` / `interbench:man-read`; shapes refined by `meas-ci`. Consumed by: S8, S15, S16.
 8. **`background-crawler`** — low-priority filesystem walk, ioclass-idle. category_source: `ananicy-rules` (BG_CPUIO/indexer class); rates: `meas-pending`. Consumed by: S14, S17.
 
 ### Structural-special family — harvested from LAVD
-9. **`game-task-chain`** — waker–waiter chain topology: ~300 tasks, ~90% long-lived; per-schedule RUN 260 µs–1.65 ms (per-task sampling — the source says per-task runtime is stable); 70–75% wakeups from waiting syscalls; 16.7 ms frame budget. category_source + params: `lavd-ossna24`. Consumed by: S9. The only entry whose *topology* is a parameter — expanded by the constructor at load time (INTERPRETATION_CONTRACT §6). **Lane scaling:** the full task population is instantiated with the long tail near-idle (the source: ~90% long-lived, mostly waiting) and the frame-critical chain's aggregate demand scaled to the lane regime — defended by the source's own concentration statistics (top 30–40 tasks = 95% of scheduling; 15–20 take 60–70%); declared scalable fields + this defense go in `modeling_notes`.
+9. **`game-task-chain`** — waker–waiter chain topology: ~300 tasks, ~90% long-lived; per-schedule RUN 260 µs–1.65 ms (per-task sampling — the source says per-task runtime is stable); 70–75% wakeups from waiting syscalls; 16.7 ms frame budget. category_source + params: `lavd-ossna24`. Consumed by: S9. The only entry whose *topology* is a parameter — expanded by the constructor at load time (interpretation-contract §6). **Lane scaling:** the full task population is instantiated with the long tail near-idle (the source: ~90% long-lived, mostly waiting) and the frame-critical chain's aggregate demand scaled to the lane regime — defended by the source's own concentration statistics (top 30–40 tasks = 95% of scheduling; 15–20 take 60–70%); declared scalable fields + this defense go in `modeling_notes`.
 
 ### meas family — category itself sourced from our measurements (no literature taxonomy exists)
 10. **`network-bulk`** — link-saturating download, moderate CPU. category_source: meas; params: `meas-pending`. Consumed by: S10.
@@ -69,10 +70,10 @@ S1–S18 all compose from these 12. Creative apps (S6/S7) are time-shared compos
 
 ## 5. Schema fields (for `archetypes.yaml` + linter)
 
-Per entry: `id`, `category_source` (Tier-1 provenance), `pattern` (grammar program), numeric params (each with `source:`), `sampling` (per-instance | per-task | per-iteration — INTERPRETATION_CONTRACT §5), `lifetime` (segment-bound | finite | spawned), `spawns`/`spawned_by` (orchestration edges), `scalable` (fields the lane-scaling pass may transform, with rule), `validation_stats` (which CDFs/rates `meas-ci` must match, or the stated reason none exist), and **`modeling_notes`** — prose recording what our encoding invented on top of the sources: field names, structure linearizations, scaling defenses, binding choices. The registry's `notes` records what a source establishes; `modeling_notes` records what we built on it — together they are the paper-writing guardrail against over-claiming.
+Per entry: `id`, `category_source` (Tier-1 provenance), `pattern` (grammar program), numeric params (each with `source:`), `sampling` (per-instance | per-task | per-iteration — interpretation-contract §5), `lifetime` (segment-bound | finite | spawned), `spawns`/`spawned_by` (orchestration edges), `scalable` (fields the lane-scaling pass may transform, with rule), `validation_stats` (which CDFs/rates `meas-ci` must match, or the stated reason none exist), and **`modeling_notes`** — prose recording what our encoding invented on top of the sources: field names, structure linearizations, scaling defenses, binding choices. The registry's `notes` records what a source establishes; `modeling_notes` records what we built on it — together they are the paper-writing guardrail against over-claiming.
 
 **Binding notes to record in `modeling_notes` at authoring time (decided):**
-- *wineserver → `system-daemon` is a provisional approximation* — LAVD treats wine as part of the game's task graph (`lavd-ossna24:s12`); whether wineserver joins the constructed chain instead is decided at constructor implementation (INTERPRETATION_CONTRACT §6).
+- *wineserver → `system-daemon` is a provisional approximation* — LAVD treats wine as part of the game's task graph (`lavd-ossna24:s12`); whether wineserver joins the constructed chain instead is decided at constructor implementation (interpretation-contract §6).
 - *P1 binds tracker-miner-fs-3 to `cpu-batch`, not `background-crawler`* — deliberate: P1 models an indexer in full-rescan (CPU-saturating) state so the pair is behaviorally identical; the everyday low-intensity indexer remains `background-crawler` elsewhere (C4/S14). Recorded so the two bindings of one name don't read as an inconsistency.
 
 Linter rules for this layer: reject entries missing `category_source`; reject `meas-pending` params after freeze; reject `source:` ids absent from the registry or locators violating the entry's `locator_pattern`.

@@ -4,8 +4,8 @@ Lands every decision from the 2026-08-26 workload-generation grill into the proj
 
 ## Scope
 
-- Create the reference/registry pair (`REFERENCES.md`, `workload-dataset-sources.yaml`) and the interpretation-contract doc.
-- Rewrite `WORKLOAD_DATASET_BUILDING_PLAN` and `ARCHETYPE_LIBRARY_PLAN` to the grilled decisions; touch up `SOURCE_VETTING_rev2`, `OPEN_QUESTIONS`, `TERMINOLOGY`, project `CLAUDE.md`; clean up `docs/workload/`.
+- Create the reference/registry pair (`docs/references.md`, `dataset/sources.yaml`) and the interpretation-contract doc.
+- Rewrite `docs/workload/building-plan.md` and `docs/workload/archetype-plan.md` to the grilled decisions; touch up `source-vetting`, `OPEN_QUESTIONS`, `TERMINOLOGY`, project `CLAUDE.md`; clean up `docs/workload/`.
 - Write the one-page team memo (last, linking to the finished docs).
 - Docs and registry files only — no compiler, simulator, or archetype-content work.
 
@@ -13,7 +13,7 @@ Lands every decision from the 2026-08-26 workload-generation grill into the proj
 
 ### 1. Reference/registry split and ownership
 
-`REFERENCES.md` is the master index: it owns the id-minting rule (as a section of itself), every citation string, and all citation-constituent fields (`cite`, `url`, `accessed`, `pinned_version`), including related-work-only bibkeys. `workload-dataset-sources.yaml` is the machine registry for dataset derivation only: bare source-id keys with `type`, `locator_pattern`, `notes`. Subset relation, lint-checked: every yaml id must have a REFERENCES.md entry. Contributor recipe: read the id rule → add REFERENCES.md entry → add yaml entry only if the dataset derives from it.
+`docs/references.md` is the master index: it owns the id-minting rule (as a section of itself), every citation string, and all citation-constituent fields (`cite`, `url`, `accessed`, `pinned_version`), including related-work-only bibkeys. `dataset/sources.yaml` is the machine registry for dataset derivation only: bare source-id keys with `type`, `locator_pattern`, `notes`. Subset relation, lint-checked: every yaml id must have a docs/references.md entry. Contributor recipe: read the id rule → add docs/references.md entry → add yaml entry only if the dataset derives from it.
 
 ### 2. Id minting
 
@@ -33,7 +33,7 @@ Registry `notes:` record what a source establishes and its scope limits; archety
 
 ### 6. Timeline / workload terminology and pipeline
 
-Authoring files are **timelines** (`*.timeline.yaml`); `archetypes.yaml + timeline (+ scenario catalog) + seed → workload` (canonical, experiment-ready — "workload" keeps its TERMINOLOGY.md meaning). Core timelines hand-authored; the naturalistic generator emits timelines too — one compile path for both sets.
+Authoring files are **timelines** (`*.timeline.yaml`); `archetypes.yaml + timeline (+ scenario catalog) + seed → workload` (canonical, experiment-ready — "workload" keeps its docs/terminology.md meaning). Core timelines hand-authored; the naturalistic generator emits timelines too — one compile path for both sets.
 
 ### 7. Interpretation contract (the simulator spec — written before the simulator exists)
 
@@ -49,7 +49,7 @@ Means/switch-rates from literature (`mark-chi08`, corroborated by `zhang-chb15`)
 
 ### 10. Build order
 
-(0) REFERENCES.md + registry → (1) archetypes.yaml v0.1 → (2) contract + canonical JSON Schema → (3) compiler → (4) core timelines → (5) simulator Phase 0 to the contract → (6) RQ0 gate → (7) generator/generalset/matrix; meas-ci workflows as an independent parallel track. (Phase 1 of the TODO covers step 0 plus the doc rewrites; later steps are Backlog.)
+(0) docs/references.md + registry → (1) archetypes.yaml v0.1 → (2) contract + canonical JSON Schema → (3) compiler → (4) core timelines → (5) simulator Phase 0 to the contract → (6) RQ0 gate → (7) generator/generalset/matrix; meas-ci workflows as an independent parallel track. (Phase 1 of the TODO covers step 0 plus the doc rewrites; later steps are Backlog.)
 
 ### 11. Archetype-plan closures
 
@@ -57,7 +57,7 @@ OQ-1: no GPU flag (closed by fact). OQ-2: S3 stays `video-playback`, stated appr
 
 ### 12. Corrections and verified sources
 
-SOURCE_VETTING's "Yun et al." is wrong — the task-switching study is Zhang, Sun, Chai & Aghajan, CHB 49 (2015). All standing-search items are resolved with full coordinates in the archive doc (Steam setting article, keystroke and tab-count citations, DesktopBench release + license status, FOCAL preprint status) and go into REFERENCES.md.
+source-vetting's "Yun et al." is wrong — the task-switching study is Zhang, Sun, Chai & Aghajan, CHB 49 (2015). All standing-search items are resolved with full coordinates in the archive doc (Steam setting article, keystroke and tab-count citations, DesktopBench release + license status, FOCAL preprint status) and go into docs/references.md.
 
 ### 13. Ownership and the team memo
 
@@ -65,8 +65,8 @@ SOURCE_VETTING's "Yun et al." is wrong — the task-switching study is Zhang, Su
 
 ## Invariants
 
-- Every yaml registry id has a REFERENCES.md entry (subset lint).
-- Citation strings exist in exactly one place (REFERENCES.md).
+- Every yaml registry id has a docs/references.md entry (subset lint).
+- Citation strings exist in exactly one place (docs/references.md).
 - No "Role D will validate X" sentence survives without a named replacement.
 - One normative home per topic after the `docs/workload/` cleanup.
 

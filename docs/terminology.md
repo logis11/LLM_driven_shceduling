@@ -1,8 +1,9 @@
 # Terminology
+> Status: normative · Created 2026-08-23 · Updated 2026-08-27
 
 Terms this project uses for its own parts. Operating systems vocabulary —
 MLFQ, EDF, preemption, turnaround time — is in Appendix A of
-`RESEARCH_PROPOSAL_v2.md` and is not repeated here.
+`docs/research-proposal.md` and is not repeated here.
 
 ---
 
@@ -52,7 +53,7 @@ generator. `archetypes.yaml + timeline (+ scenario catalog) + seed → workload`
 **Archetype** — a sourced generative model of how one process kind behaves, as
 the scheduler sees it: a program over the six-primitive event grammar plus
 parameter distributions. Layer 1 of the dataset; never carries a process name.
-See ARCHETYPE_LIBRARY_PLAN.md and INTERPRETATION_CONTRACT.md.
+See docs/workload/archetype-plan.md and docs/simulator/interpretation-contract.md.
 
 **Workload variants** — each timeline compiles in two modes: `-single`
 (lane-scaled; the only variant experiments run on) and `-native` (as-measured
@@ -60,7 +61,7 @@ demand; released for reuse, not executed in this work).
 
 **meas-ci** — the source id for our CI measurement campaign
 (`meas-ci:<workflow>:<run>`). Supports structural/shape claims about software
-behavior only; see workload-dataset-sources.yaml.
+behavior only; see dataset/sources.yaml.
 
 **Pattern** — the part of a workload entry describing how a process behaves:
 its CPU bursts, its sleeps, and for periodic work its period and deadline. A
@@ -110,7 +111,7 @@ Example in Appendix B.
 
 **Simulator** — the discrete-event engine. Advances a virtual clock from one
 event to the next, never in real time, and never executes any real work. It
-draws the timetable a computer would have produced. See `SIMULATOR_PRIMER.md`.
+draws the timetable a computer would have produced. See `docs/simulator/primer.md`.
 
 **Executor** — the part of the simulator that applies a config: assigning
 processes to classes, enforcing bandwidth caps, holding the starvation floor.

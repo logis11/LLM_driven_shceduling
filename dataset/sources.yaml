@@ -1,23 +1,23 @@
-# workload-dataset-sources.yaml — machine registry of everything the workload
+# dataset/sources.yaml — machine registry of everything the workload
 # dataset derives values or structure from.
 #
-# Companion to docs/REFERENCES.md, which owns every citation string and all
+# Companion to docs/references.md, which owns every citation string and all
 # citation-constituent fields (cite, url, accessed, pinned_version). This file
 # carries machine/derivation fields only.
 #
 # Rules (enforced by the dataset linter):
-#   - every id here MUST have an entry in docs/REFERENCES.md (subset lint);
-#     ids here without a REFERENCES.md entry fail CI
+#   - every id here MUST have an entry in docs/references.md (subset lint);
+#     ids here without a docs/references.md entry fail CI
 #   - source tags in dataset files are `<id>` or `<id>:<locator>`; when an entry
 #     declares `locator_pattern`, the linter validates the locator against it;
 #     no `locator_pattern` = bare-id tags only
 #   - `type`: scholarly | deployed-system | measurement (citation tier follows
-#     via REFERENCES.md: scholarly -> numbered bib; deployed-system -> footnote,
+#     via docs/references.md: scholarly -> numbered bib; deployed-system -> footnote,
 #     existence claims only)
 #   - `notes`: what the source establishes and its scope limits — never our
 #     modeling on top of it (that lives in archetypes.yaml `modeling_notes`).
 #     A source tag justifies values and described structure, never field names.
-#   - adding a source: mint the id per the REFERENCES.md id rule, add the entry
+#   - adding a source: mint the id per the docs/references.md id rule, add the entry
 #     there, then add it here only if the dataset derives from it
 #   - `meas-pending` is the placeholder sentinel for parameters awaiting the CI
 #     measurement campaign; the linter rejects it after the schema freeze

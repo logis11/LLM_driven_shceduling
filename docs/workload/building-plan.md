@@ -1,6 +1,7 @@
 # Workload Dataset Building Plan
+> Status: normative · Created 2026-08-25 · Updated 2026-08-27
 
-> Consolidates the dataset methodology decided across Q7 (segments, canonicalization, caches), SOURCE_VETTING_rev2 (per-source verdicts and extracted parameters), SCENARIO_CATALOG (S1–S18, names-only schema, source-column rules), REFERENCES.md + workload-dataset-sources.yaml (citation index and machine registry), and INTERPRETATION_CONTRACT.md (simulator-facing semantics). Those documents are normative for their own content; this plan defines how their pieces compose into the dataset and in what order it gets built. Decision record: `_dev/archive/2026-08-26-workload-generation-grill.md`.
+> Consolidates the dataset methodology decided across Q7 (segments, canonicalization, caches), source-vetting (per-source verdicts and extracted parameters), SCENARIO_CATALOG (S1–S18, names-only schema, source-column rules), docs/references.md + dataset/sources.yaml (citation index and machine registry), and docs/simulator/interpretation-contract.md (simulator-facing semantics). Those documents are normative for their own content; this plan defines how their pieces compose into the dataset and in what order it gets built. Decision record: `_dev/archive/2026-08-26-workload-generation-grill.md`.
 
 ## 0. Design tension and the two-set resolution
 
@@ -34,17 +35,17 @@ Everything composes through three layers. Lower layers never reference higher on
 
 ```
 Layer 1  ARCHETYPE LIBRARY   how one process behaves        (archetypes.yaml)
-Layer 2  SCENARIO CATALOG    which processes co-occur       (SCENARIO_CATALOG.md, S1–S18)
+Layer 2  SCENARIO CATALOG    which processes co-occur       (docs/workload/scenario-catalog.md, S1–S18)
 Layer 3  TIMELINES           how scenarios arrange in time  (*.timeline.yaml, this plan §3–§4)
 ```
 
-**Two workload formats.** Timelines are the human-facing authoring format (segments + labels + (name, archetype) bindings on a time axis, with `variants:`/`inherit()`/`inject:` sugar), consumed only by the derivation scripts. `make dataset` compiles them into the **canonical format** — the only thing the simulator and harness ever read: `archetypes.yaml + timeline (+ scenario catalog) + seed → workload`. Canonical semantics (event ops, lifetime classes, timing principle) are fixed by INTERPRETATION_CONTRACT.md. Same timeline + same library commit + same seed ⇒ byte-identical canonical file — which is what the controlled-experiment invariants diff (e.g. "P1a and P1b are byte-identical outside seg2's interval"), checked as CI tests on compiled artifacts. The naturalistic generator emits timelines too, so both sets share one compile path, one linter, and one provenance mechanism.
+**Two workload formats.** Timelines are the human-facing authoring format (segments + labels + (name, archetype) bindings on a time axis, with `variants:`/`inherit()`/`inject:` sugar), consumed only by the derivation scripts. `make dataset` compiles them into the **canonical format** — the only thing the simulator and harness ever read: `archetypes.yaml + timeline (+ scenario catalog) + seed → workload`. Canonical semantics (event ops, lifetime classes, timing principle) are fixed by docs/simulator/interpretation-contract.md. Same timeline + same library commit + same seed ⇒ byte-identical canonical file — which is what the controlled-experiment invariants diff (e.g. "P1a and P1b are byte-identical outside seg2's interval"), checked as CI tests on compiled artifacts. The naturalistic generator emits timelines too, so both sets share one compile path, one linter, and one provenance mechanism.
 
 The binding rule: **numeric behavior parameters exist only in Layer 1.** Scenarios reference archetypes by id; timelines reference scenarios and archetypes by id; no file copies a number. Consequences: (a) a literature or measurement update touches one library entry, not dozens of files; (b) the provenance linter (§6) has a single layer to audit; (c) the familiarity ladder (C5) is definable as "same archetype, different name," guaranteeing that recognition differences come from the name alone.
 
 ## 2. Layer 1 — Archetype library (build first)
 
-> **Pin:** this section is superseded in detail by **ARCHETYPE_LIBRARY_PLAN.md**, which is normative for Layer 1. The table below remains as the quick-reference inventory.
+> **Pin:** this section is superseded in detail by **docs/workload/archetype-plan.md**, which is normative for Layer 1. The table below remains as the quick-reference inventory.
 
 An archetype is a named, sourced behavior specification for one process kind. Format follows the rt-app JSON task model as explicit precedent. Every numeric field carries a `source:` tag (§6).
 
@@ -138,7 +139,7 @@ Role: ecological validity, and the **query-economics numbers** — novel canonic
 ## 5. Build order (and why)
 
 ```
-(0) REFERENCES.md + workload-dataset-sources.yaml      [done]
+(0) docs/references.md + dataset/sources.yaml      [done]
 (1) archetypes.yaml v0.1        meas-pending placeholders allowed; modeling_notes from day one
 (2) INTERPRETATION_CONTRACT + canonical JSON Schema    [contract done]
 (3) compiler: timeline → canonical                     scaling pass, linter, invariant tests
@@ -154,17 +155,17 @@ Contract-first: compiler (3) and simulator (5) are built to the same written con
 
 ### 5a. Lane scaling and the demand budget
 
-The simulated machine has one lane (Q1 of the archived open-questions record, ratified — `_dev/archive/2026-08-23-design-meeting-open-questions.md`; INTERPRETATION_CONTRACT §1). Two rules connect the dataset to it:
+The simulated machine has one lane (Q1 of the archived open-questions record, ratified — `_dev/archive/2026-08-23-design-meeting-open-questions.md`; interpretation-contract §1). Two rules connect the dataset to it:
 
 - **Lane-scaling compile pass:** archetype values whose sources are machine-aggregate (measured on multi-core machines — the gaming chain's utilization and worker concurrency; almost nothing else, since RUN durations are intrinsic CPU demands) are scaled to the lane by a per-archetype declared compile pass — declared fields, declared rule, evidence in `modeling_notes` (`game-task-chain`'s defense: LAVD's own concentration statistics, top 30–40 tasks = 95% of scheduling). Archetype values themselves are never edited. CI invariant: the `-native` and `-single` variants of one timeline differ only in the declared-scalable fields.
 - **Demand budget:** every compiled `-single` workload's aggregate demand lands in the measurable oversubscription regime (~100–150% of the lane). The per-file oracle-vs-random admission test (open-questions record Q8) is the enforcement mechanism; a file outside the regime is redesigned, not scaled further.
 
 ## 6. Provenance manifest and linter
 
-- Every numeric field in the archetype library carries `source: <id>` or `source: <id>:<locator>` — ids from **workload-dataset-sources.yaml**. The linter validates: the id exists in the registry; when the entry declares `locator_pattern`, the locator matches it.
-- The registry is a **subset of REFERENCES.md** (every registry id has a REFERENCES.md entry — CI-checked); citation strings live only in REFERENCES.md.
+- Every numeric field in the archetype library carries `source: <id>` or `source: <id>:<locator>` — ids from **dataset/sources.yaml**. The linter validates: the id exists in the registry; when the entry declares `locator_pattern`, the locator matches it.
+- The registry is a **subset of docs/references.md** (every registry id has a docs/references.md entry — CI-checked); citation strings live only in docs/references.md.
 - Layers 2–3 carry no inline numerics (reference-only rule); the linter enforces both.
-- CI fails on: untagged numerics anywhere; inline numerics above Layer 1; `meas-pending` after freeze; an id absent from the registry; a locator violating its pattern; a registry id absent from REFERENCES.md.
+- CI fails on: untagged numerics anywhere; inline numerics above Layer 1; `meas-pending` after freeze; an id absent from the registry; a locator violating its pattern; a registry id absent from docs/references.md.
 - Payoff: the paper states, machine-checkably, **"every numeric parameter in the dataset traces to an external source or to our released measurements."**
 
 ## 7. Measurement campaign — meas-ci
@@ -174,7 +175,7 @@ One campaign on public CI runners (GitHub Actions): workflow files released, any
 **Workflows:**
 1. *Headless CLI measurements:* real `make -jN` build, `tar`/`xz`, `rsync`, `clamscan`, `updatedb` with a sidecar sampling `/proc` at 1 s → lifetime CDFs, fork rates, wakeup patterns. Covers: compiler-child, build-orchestrator, io-stream, background-crawler, network-bulk, system-daemon baselines.
 2. *GUI app-intrinsic measurements:* Electron apps / a browser under **Xvfb** — heartbeat periods, renderer-children counts, multiplicities. Open-source substitutes for account-gated apps, substitution stated. Also referees OQ-3 (electron-comms vs chromium renderer CDF comparison).
-3. *Name verification:* install packages in distro containers, record actual `comm`/`cmdline` strings (soffice.bin vs soffice, updatedb.plocate, cc1 path) — SCENARIO_CATALOG Note 4.
+3. *Name verification:* install packages in distro containers, record actual `comm`/`cmdline` strings (soffice.bin vs soffice, updatedb.plocate, cc1 path) — scenario-catalog Note 4.
 
 **Scope discipline (the trust package, mirrored in the registry's `meas-ci` entry):** CI measurements support **structural and shape claims about software behavior only** — fork structure, counts, lifetime shapes, periods, heartbeats, name strings. Machine-relative absolutes (CPU %, IO throughput, io-wait fractions) are recorded with the runner spec and rank as *convention informed by measurement*, never desktop truth. Each workflow runs N times; spread is reported. Framing: characterization of software behavior, never desktop-performance measurement.
 
@@ -184,7 +185,7 @@ One campaign on public CI runners (GitHub Actions): workflow files released, any
 
 - **Names only** in the workload schema; no executable paths (SCENARIO_CATALOG header).
 - **No circular grounding:** our own Family/driver-table definitions never appear as sources; internal cross-references live in notes, not source columns.
-- **Citation tiers** are carried per-entry in REFERENCES.md: scholarly (numbered bib) vs deployed-system (footnote; existence claims only).
+- **Citation tiers** are carried per-entry in docs/references.md: scholarly (numbered bib) vs deployed-system (footnote; existence claims only).
 - **Caches:** record/replay cache on during all measurement (it is the instrument); deployment cache off during Layer 1 measurement, on only in deployment/demo (Q7).
 - **Canonicalization is structural-only** (ancestry, cgroup, string identity — never name semantics); it defines query points and the cache key (Q7).
 
@@ -192,5 +193,5 @@ One campaign on public CI runners (GitHub Actions): workflow files released, any
 
 1. **Ratify Q7's rule sentences with the team** (canonicalization structural-only rule; segment schema) — flagged in the Phase-1 team memo; the rest of the open-questions record's Q7 lean is adopted by this plan.
 2. **Coverage grid fill** for the ~50 core segments (build step 4); sign off holes or add files.
-3. **Wineserver's place in the game-task-chain topology** — decided at constructor implementation (INTERPRETATION_CONTRACT §6), recorded in `modeling_notes`.
-4. **Submission-time pins** — the `to-pin` entries in REFERENCES.md (benchmark-guide URLs/editions, repo commits, remaining author-list confirmations).
+3. **Wineserver's place in the game-task-chain topology** — decided at constructor implementation (interpretation-contract §6), recorded in `modeling_notes`.
+4. **Submission-time pins** — the `to-pin` entries in docs/references.md (benchmark-guide URLs/editions, repo commits, remaining author-list confirmations).

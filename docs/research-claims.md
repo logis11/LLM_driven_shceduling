@@ -1,8 +1,9 @@
 # Research Claims and Questions
+> Status: normative · Created 2026-08-23 · Updated 2026-08-27
 
 What this project asserts, what would falsify it, and what it does not claim.
 
-RQ0 through RQ5 are section 3 of `RESEARCH_PROPOSAL_v2.md`, restated with the
+RQ0 through RQ5 are section 3 of `docs/research-proposal.md`, restated with the
 reasoning behind them. The mechanism split under RQ1 and RQ2 is a proposed
 addition and is marked as such.
 
