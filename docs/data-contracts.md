@@ -136,9 +136,9 @@ meta:
   seed: 201
 
 segments:
-  - {from: 0s,  to: 60s,  mode: dev,      attributes: {wanted: true},
+  - {from: 0s,  to: 60s,  mode: dev,      attributes: {background_wanted: true},
      scenario: [S11]}
-  - {from: 60s, to: 180s, mode: ml-train, attributes: {wanted: true},
+  - {from: 60s, to: 180s, mode: ml-train, attributes: {background_wanted: true},
      scenario: [S11, S12]}
 
 tasks:
@@ -164,7 +164,7 @@ variants:
     ops:
       - rename: {from: python3, to: tracker-miner-fs-3}
       - patch-segment: {index: 1, mode: indexing,
-                        attributes: {wanted: false}}
+                        attributes: {background_wanted: false}}
 ```
 
 In sentences: many coreset files are deliberate near-copies of each other, and rather than maintaining two hand-written files that must stay identical except in one spot, we write the difference itself. This recipe says: take `c2-p1a` from Example A, rename the process `python3` to `tracker-miner-fs-3` (the GNOME file indexer), and re-label the second segment as `indexing` with `wanted: false`. Nothing else changes — same behavior, same seed, same timings, byte for byte. The result is the project's sharpest experimental pair: two workloads a scheduler cannot tell apart by any measurement, where the *right* treatment differs, and the only distinguishing information is the name. The derivation ops (`rename`, `patch-segment`, `patch-task`, …) are executed by wlc's deriver, and the derived timeline is regenerated and verified in CI, so the "identical except for exactly this" property is enforced by machinery rather than by care.
@@ -186,8 +186,8 @@ This is the file at the center of everything — everything soft in the two cont
   "sampled": { "seed": 201, "archetypes": "archetypes.yaml@99495a3…" }
 },
 "ground_truth": [
-  { "t_start": 0,        "t_end": 60000000,  "mode": "dev",      "attributes": { "wanted": true } },
-  { "t_start": 60000000, "t_end": 180000000, "mode": "ml-train", "attributes": { "wanted": true } }
+  { "t_start": 0,        "t_end": 60000000,  "mode": "dev",      "attributes": { "background_wanted": true } },
+  { "t_start": 60000000, "t_end": 180000000, "mode": "ml-train", "attributes": { "background_wanted": true } }
 ]
 ```
 
@@ -313,7 +313,7 @@ In sentences: a config schedule is a small, finished list of "at virtual time T,
                       developer just started; work the user initiated should keep
                       progressing in the background.",
         "situation": "Development with a user-initiated training run",
-        "system": { "mode": "ml-train", "wanted": true }
+        "system": { "mode": "ml-train", "background_wanted": true }
       },
       "validation": "unmodified",
       "latency_us": 450000 }
@@ -355,7 +355,7 @@ In sentences: the daemon walks the visible projection's pinned events (arrivals 
 
   "system": {
     "mode": "ml-train",
-    "wanted": true
+    "background_wanted": true
   },
 
   "subsystems": {
@@ -368,7 +368,7 @@ In sentences: the daemon walks the visible projection's pinned events (arrivals 
 }
 ```
 
-In sentences: the proposal has four parts with sharply different fates. `reasoning` is mandatory prose — the model must explain its reading *before* concluding; it flows to the recognition log only. `situation` is a one-line human summary, same destination. `system` is the heart of the contract: the machine-readable claim about the world, in a closed shared vocabulary — one `mode` from a fixed menu plus a small set of `attributes`. It is subsystem-neutral: a power-management driver could act on this very same block. `subsystems` is a namespace of per-consumer suggestions — this project only ever fills `cpu_scheduler` — and it is the *least* trusted part: depending on the experiment variant it is ignored entirely (variant A: only `system` is used, and the daemon's own driver table picks the configuration), consulted for the algorithm choice only (variant B), or taken in full (variant C). The model may never invent vocabulary: an unknown mode, attribute, or subsystem key is rejected by the validator, full stop.
+In sentences: the proposal has four parts with sharply different fates. `reasoning` is mandatory prose — the model must explain its reading *before* concluding; it flows to the recognition log only. `situation` is a one-line human summary, same destination. `system` is the heart of the contract: the machine-readable claim about the world, in the closed shared vocabulary fixed by `recognition-vocabulary.md` — exactly one `mode` from the 16-entry menu plus the boolean `background_wanted`. It is subsystem-neutral: a power-management driver could act on this very same block. `subsystems` is a namespace of per-consumer suggestions — this project only ever fills `cpu_scheduler` — and it is the *least* trusted part: depending on the experiment variant it is ignored entirely (variant A: only `system` is used, and the daemon's own driver table picks the configuration), consulted for the algorithm choice only (variant B), or taken in full (variant C). The model may never invent vocabulary: an unknown mode, attribute, or subsystem key is rejected by the validator, full stop.
 
 ---
 

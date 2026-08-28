@@ -63,7 +63,7 @@ We keep the executor **absolutely identical** across all experiments and swap in
 
 The oracle deserves a beat of explanation, because it sounds like cheating. Every workload file in our dataset carries a hidden **ground truth**: a label saying what situation the file represents at every moment, written by whoever authored the file. The oracle recognizer just reads that label. It can't be wrong. That gives us the *ceiling*: the best any recognizer could possibly do on this executor. The interesting question is always "where between `random` and `oracle` does the LLM land, and does it clear `whitelist`?"
 
-What does a recognizer's answer actually look like? Two parts. A **mode** — one label from a small fixed menu saying what the machine is primarily being used for (`gaming`, `compile`, `office`, `idle`, …). And **attributes** — independent extra facts that a single label can't carry, like `wanted: true` ("the background work here is something the user asked for"). The two-part shape matters: "gaming", "gaming while a wanted download runs", and "gaming while an unwanted scan runs" are all `mode: gaming`, and only the attribute separates the last two — which is exactly the game-download-vs-virus-scan story from section 1. With 5 modes and 2 boolean attributes you can express 20 distinct situations while only ever validating 7 small vocabularies, which is why the design uses dimensions instead of piling up more labels.
+What does a recognizer's answer actually look like? Two parts, fixed by the ratified vocabulary contract (`recognition-vocabulary.md` — the normative list). A **mode** — exactly one label from a closed menu of 16 saying what the machine is primarily being used for (`gaming`, `compile`, `dev`, `ml-train`, `browsing`, `office`, `idle`, …). And one **attribute** — an independent fact the mode label can't carry: `background_wanted: true|false`, "is the sustained background work here something the user asked for?" The two-part shape matters: "gaming", "gaming while a wanted download runs", and "gaming while an unwanted scan runs" are all `mode: gaming`, and only the attribute separates the last two — which is exactly the game-download-vs-virus-scan story from section 1. That's why the design uses an orthogonal dimension instead of minting extra labels: the same wanted-vs-unwanted distinction recurs inside *every* mode, so it multiplies against the menu rather than growing it.
 
 The executor's side of the bargain is a **configuration**: a small bundle of scheduler settings like "use the MLFQ algorithm with these queue parameters" or "switch to deadline-first scheduling and cap background work at 12% of the CPU." A fixed lookup table — the **driver table**, living on the daemon side — maps (mode, attributes) to configuration; the recognizer's only job is to land on the right row. (In the most permissive LLM variant the model proposes the configuration itself — that's variant C — but the table is the default path.)
 
@@ -131,8 +131,8 @@ The whole experiment's raw material is a directory of **canonical workload files
   },
 
   "ground_truth": [
-    { "t_start": 0,        "t_end": 60000000,  "mode": "dev",      "attributes": { "wanted": true } },
-    { "t_start": 60000000, "t_end": 180000000, "mode": "ml-train", "attributes": { "wanted": true } }
+    { "t_start": 0,        "t_end": 60000000,  "mode": "dev",      "attributes": { "background_wanted": true } },
+    { "t_start": 60000000, "t_end": 180000000, "mode": "ml-train", "attributes": { "background_wanted": true } }
   ],
 
   "events": [
@@ -153,7 +153,7 @@ The whole experiment's raw material is a directory of **canonical workload files
 Three blocks, three different audiences:
 
 - **`meta`** — provenance. Where this file came from, which random seed produced it. Nobody's scheduler reads this; it exists so every number in the file can be traced back to its origin.
-- **`ground_truth`** — the answer key, sealed in an envelope. A list of time intervals, each labeled with a **mode** (what the machine is being used for during that interval: `dev`, `ml-train`, `gaming`, `office`…) and **attributes** (independent extra facts, like `wanted: true` — "the background work here is something the user asked for"). Only the oracle recognizer and the grading code ever open this envelope. The simulator's scheduler never sees it; the LLM never sees it. All times are integer **microseconds** — `60000000` is the 60-second mark.
+- **`ground_truth`** — the answer key, sealed in an envelope. A list of time intervals, each labeled with a **mode** (what the machine is being used for during that interval: `dev`, `ml-train`, `gaming`, `office`…) and **attributes** (independent extra facts, like `background_wanted: true` — "the background work here is something the user asked for"). Only the oracle recognizer and the grading code ever open this envelope. The simulator's scheduler never sees it; the LLM never sees it. All times are integer **microseconds** — `60000000` is the 60-second mark.
 - **`events`** — the workload itself. This is what the simulator actually executes, and there are only two kinds of event, ever:
   - **`arrive`** — a task pops into existence, carrying its complete pre-written script (its `program`). The editor above arrives at t=0 and its script says: wait for a keystroke, compute for 23.4 ms, wait for the next keystroke, compute for 253.6 ms… Its `depart` field says the user closes it at t=180 s sharp.
   - **`wake`** — an external stimulus arrives: a keystroke, a network reply. The wake at t≈2.098 s above is "the user pressed a key in the editor." A task sitting in a `WAIT` gets unblocked by it. This is how "a human is using the machine" exists in the simulation without simulating a human.
@@ -206,7 +206,7 @@ A reference table — skim now, return when a term bites you. These are the mean
 | **FIFO** | run to completion in arrival order. Maximal throughput, no interactivity |
 | **deadline** | for periodic work: each job must finish within its period or the frame drops / audio pops |
 | **mode** | the ground-truth label for what the machine is being used for in an interval (`gaming`, `office`, `dev`…) |
-| **attribute** | an orthogonal ground-truth fact alongside the mode, e.g. `wanted: true` |
+| **attribute** | an orthogonal ground-truth fact alongside the mode; the one graded attribute is `background_wanted` |
 | **segment** | one labeled interval of a workload: a stretch with a constant mode+attributes |
 | **recognizer / executor** | the two halves from section 3: situation-reader / configuration-applier |
 | **condition** | one rung of the experiment ladder (`fixed`, `random`, `whitelist`, `llm_*`, `oracle`) |
