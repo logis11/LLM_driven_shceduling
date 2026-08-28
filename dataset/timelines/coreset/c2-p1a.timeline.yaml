@@ -1,0 +1,22 @@
+# C2 P1 (load-bearing pair, base) — {code, python3-train}: behaviorally
+# identical CPU saturation beside an editor; the pair flips to
+# tracker-miner-fs-3 by rename only (c2-pairs.variant.yaml), so any
+# recognition difference is attributable to the name alone.
+meta:
+  id: c2-p1a
+  seed: 201
+
+segments:
+  - {from: 0s, to: 60s, mode: dev, attributes: {wanted: true},
+     scenario: [S11]}
+  - {from: 60s, to: 180s, mode: ml-train, attributes: {wanted: true},
+     scenario: [S11, S12]}
+
+tasks:
+  - {id: editor, name: code, archetype: desktop-interactive,
+     arrive: 0s, depart: 180s}
+  - {id: hog, name: python3, archetype: cpu-batch, arrive: 60s,
+     bind: {total_work: 130s}}
+
+focus:
+  - {from: 2s, to: 178s, task: editor}

@@ -1,0 +1,23 @@
+# C2 P2 (base) — {game + steam download workers}: same game-plus-background
+# shape as the clamscan variant; wanted flips (S10 vs S17).
+meta:
+  id: c2-p2a
+  seed: 202
+
+segments:
+  - {from: 0s, to: 60s, mode: gaming, attributes: {wanted: true},
+     scenario: [S9]}
+  - {from: 60s, to: 120s, mode: gaming,
+     attributes: {wanted: true, background: download}, scenario: [S9, S10]}
+
+tasks:
+  - {id: game, name: game.exe, archetype: game-task-chain,
+     arrive: 0s, depart: 120s, bind: {lane_share: 0.95}}
+  - {id: steam, name: steam, archetype: electron-comms,
+     arrive: 0s, depart: 120s}
+  - {id: wine, name: wineserver, archetype: system-daemon,
+     arrive: 0s, depart: 120s}
+  - {id: download, name: steam, archetype: network-bulk, arrive: 60s,
+     bind: {total_work: 25s}}
+
+focus: []

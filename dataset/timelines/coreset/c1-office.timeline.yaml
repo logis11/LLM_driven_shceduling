@@ -1,0 +1,22 @@
+# C1 — single-situation calibration: pure office (building-plan §3 C1).
+meta:
+  id: c1-office
+  seed: 101
+  demand: calibration
+
+segments:
+  - {from: 0s, to: 60s, mode: office, attributes: {wanted: true},
+     scenario: [S1, S2, S4]}
+
+tasks:
+  - {id: writer, name: soffice.bin, archetype: desktop-interactive,
+     arrive: 0s, depart: 60s}
+  - {id: browser, name: chrome, archetype: desktop-interactive,
+     arrive: 0s, depart: 60s}
+  - {id: renderers, name: chrome, archetype: electron-comms,
+     arrive: 0s, depart: 60s, count: 8}
+  - {id: mail, name: thunderbird, archetype: electron-comms,
+     arrive: 0s, depart: 60s}
+
+focus:
+  - {from: 2s, to: 58s, task: writer}

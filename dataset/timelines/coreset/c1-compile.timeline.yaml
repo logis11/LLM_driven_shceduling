@@ -1,0 +1,18 @@
+# C1 — single-situation calibration: pure compile (building-plan §3 C1).
+meta:
+  id: c1-compile
+  seed: 103
+  demand: calibration
+
+segments:
+  - {from: 0s, to: 60s, mode: compile, attributes: {wanted: true},
+     scenario: [S11]}
+
+tasks:
+  - {id: editor, name: code, archetype: desktop-interactive,
+     arrive: 0s, depart: 60s}
+  - {id: build, name: make, archetype: build-orchestrator, arrive: 2s,
+     bind: {spawn_count: 100, parallelism_cap: 8, child_name: cc1}}
+
+focus:
+  - {from: 2s, to: 58s, task: editor}

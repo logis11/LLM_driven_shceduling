@@ -1,0 +1,25 @@
+# C3 — creation arc (building-plan §3 C3): gimp -> kdenlive -> HandBrakeCLI
+# batch handoff (CpsMark+ CC; SYSmark 30 ACC photo<->video multitasking).
+meta:
+  id: c3-creation
+  seed: 303
+
+segments:
+  - {from: 0s, to: 120s, mode: photo, attributes: {wanted: true},
+     scenario: [S6]}
+  - {from: 120s, to: 240s, mode: video-edit, attributes: {wanted: true},
+     scenario: [S7]}
+  - {from: 240s, to: 420s, mode: transcode,
+     attributes: {wanted: true, initiated: user}, scenario: [S8]}
+
+tasks:
+  - {id: photo-editor, name: gimp, archetype: desktop-interactive,
+     arrive: 0s, depart: 120s}
+  - {id: video-editor, name: kdenlive, archetype: desktop-interactive,
+     arrive: 120s, depart: 420s}
+  - {id: batch, name: HandBrakeCLI, archetype: cpu-batch, arrive: 240s,
+     bind: {total_work: 320s}}
+
+focus:
+  - {from: 2s, to: 118s, task: photo-editor}
+  - {from: 122s, to: 238s, task: video-editor}

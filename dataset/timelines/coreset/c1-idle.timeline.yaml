@@ -1,0 +1,21 @@
+# C1 — single-situation calibration: idle / [system] only (building-plan §3).
+meta:
+  id: c1-idle
+  seed: 106
+  demand: calibration
+
+segments:
+  - {from: 0s, to: 60s, mode: idle, attributes: {}, scenario: [S18]}
+
+tasks:
+  - {id: shell, name: gnome-shell, archetype: system-daemon,
+     arrive: 0s, depart: 60s}
+  - {id: xorg, name: Xorg, archetype: system-daemon, arrive: 0s, depart: 60s}
+  - {id: audio-srv, name: pipewire, archetype: system-daemon,
+     arrive: 0s, depart: 60s}
+  - {id: init, name: systemd, archetype: system-daemon,
+     arrive: 0s, depart: 60s}
+  - {id: bus, name: dbus-daemon, archetype: system-daemon,
+     arrive: 0s, depart: 60s}
+
+focus: []

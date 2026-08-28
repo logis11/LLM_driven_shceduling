@@ -1,0 +1,25 @@
+# C4 — distractor injection (building-plan §3 C4): clones of C1 files with
+# a label-invariant process injected mid-segment; paired with their clean
+# originals for the within-segment distractor-robustness measurement.
+# Calibration class inherited from the C1 bases.
+variants:
+  - id: c4-gaming
+    from: c1-gaming.timeline.yaml
+    ops:
+      - add-task: {id: injected-overlay, name: discord,
+                   archetype: electron-comms, arrive: 30s, depart: 60s}
+
+  - id: c4-office
+    from: c1-office.timeline.yaml
+    ops:
+      - add-task: {id: injected-burst, name: 7z, archetype: io-stream,
+                   arrive: 30s, bind: {total_work: 6s}}
+
+  - id: c4-compile
+    from: c1-compile.timeline.yaml
+    ops:
+      - add-task: {id: injected-browser, name: chrome,
+                   archetype: desktop-interactive, arrive: 30s, depart: 60s}
+      - add-task: {id: injected-renderers, name: chrome,
+                   archetype: electron-comms, arrive: 30s, depart: 60s,
+                   count: 6}

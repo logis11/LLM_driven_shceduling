@@ -1,0 +1,23 @@
+# C6 — dual-active ambiguity (building-plan §3 C6): equally-active dual
+# foregrounds — gaming while actively awaiting a compile. The point where
+# even the oracle cannot assign a label; shipped so the limit is concrete.
+meta:
+  id: c6-dual
+  seed: 601
+
+segments:
+  - {from: 0s, to: 240s, mode: ambiguous,
+     attributes: {dual_active: true}, scenario: [S9, S11]}
+
+tasks:
+  - {id: game, name: game.exe, archetype: game-task-chain,
+     arrive: 0s, depart: 240s, bind: {lane_share: 0.6}}
+  - {id: editor, name: code, archetype: desktop-interactive,
+     arrive: 0s, depart: 240s}
+  - {id: build, name: make, archetype: build-orchestrator, arrive: 10s,
+     bind: {spawn_count: 85, parallelism_cap: 8, child_name: cc1}}
+  - {id: wine, name: wineserver, archetype: system-daemon,
+     arrive: 0s, depart: 240s}
+
+focus:
+  - {from: 2s, to: 238s, task: editor}

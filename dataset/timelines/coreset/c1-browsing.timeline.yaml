@@ -1,0 +1,19 @@
+# C1 — single-situation calibration: pure browsing (building-plan §3 C1).
+# Also the C6 base: spoof + fold-internal variants derive from this file.
+meta:
+  id: c1-browsing
+  seed: 105
+  demand: calibration
+
+segments:
+  - {from: 0s, to: 60s, mode: browsing, attributes: {wanted: true},
+     scenario: [S2]}
+
+tasks:
+  - {id: browser, name: chrome, archetype: desktop-interactive,
+     arrive: 0s, depart: 60s}
+  - {id: renderers, name: chrome, archetype: electron-comms,
+     arrive: 0s, depart: 60s, count: 12}
+
+focus:
+  - {from: 2s, to: 58s, task: browser}

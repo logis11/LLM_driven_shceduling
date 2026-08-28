@@ -1,0 +1,24 @@
+# C1 — single-situation calibration: pure gaming (building-plan §3 C1).
+# gamescope -> video-playback: frame-periodic compositor approximation (ours).
+meta:
+  id: c1-gaming
+  seed: 102
+  demand: calibration
+
+segments:
+  - {from: 0s, to: 60s, mode: gaming, attributes: {wanted: true},
+     scenario: [S9]}
+
+tasks:
+  - {id: game, name: game.exe, archetype: game-task-chain,
+     arrive: 0s, depart: 60s, bind: {lane_share: 0.9}}
+  - {id: steam, name: steam, archetype: electron-comms,
+     arrive: 0s, depart: 60s}
+  - {id: webhelper, name: steamwebhelper, archetype: electron-comms,
+     arrive: 0s, depart: 60s, count: 3}
+  - {id: wine, name: wineserver, archetype: system-daemon,
+     arrive: 0s, depart: 60s}
+  - {id: compositor, name: gamescope, archetype: video-playback,
+     arrive: 0s, depart: 60s}
+
+focus: []

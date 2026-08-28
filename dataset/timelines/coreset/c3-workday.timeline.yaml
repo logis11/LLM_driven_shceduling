@@ -1,0 +1,35 @@
+# C3 — workday arc (building-plan §3 C3): chrome research -> +soffice
+# writing -> +make compile -> mail send. Ordering grounded in the CpsMark+
+# CA cooperative workflow (cpsmark-tbench23).
+meta:
+  id: c3-workday
+  seed: 301
+
+segments:
+  - {from: 0s, to: 60s, mode: browsing, attributes: {wanted: true},
+     scenario: [S2]}
+  - {from: 60s, to: 120s, mode: office, attributes: {wanted: true},
+     scenario: [S1, S2]}
+  - {from: 120s, to: 360s, mode: compile, attributes: {wanted: true},
+     scenario: [S11]}
+  - {from: 360s, to: 420s, mode: mail, attributes: {wanted: true},
+     scenario: [S4]}
+
+tasks:
+  - {id: browser, name: chrome, archetype: desktop-interactive,
+     arrive: 0s, depart: 420s}
+  - {id: renderers, name: chrome, archetype: electron-comms,
+     arrive: 0s, depart: 420s, count: 8}
+  - {id: writer, name: soffice.bin, archetype: desktop-interactive,
+     arrive: 60s, depart: 420s}
+  - {id: build, name: make, archetype: build-orchestrator, arrive: 120s,
+     bind: {spawn_count: 1000, parallelism_cap: 8, child_name: cc1}}
+  - {id: mailer, name: thunderbird, archetype: desktop-interactive,
+     arrive: 360s, depart: 420s}
+  - {id: send, name: thunderbird, archetype: network-bulk, arrive: 400s,
+     bind: {total_work: 3s}}
+
+focus:
+  - {from: 2s, to: 58s, task: browser}
+  - {from: 62s, to: 118s, task: writer}
+  - {from: 362s, to: 418s, task: mailer}

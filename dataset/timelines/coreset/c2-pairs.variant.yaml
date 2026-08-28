@@ -1,0 +1,35 @@
+# C2 pair variants (building-plan §3 C2): each derived file differs from
+# its base by exactly the ops below — the one-segment-diff discipline is
+# structural. Seeds inherit from the bases (byte-discipline).
+variants:
+  # P1b — the load-bearing flip: rename ONLY (plus the segment label).
+  # tracker-miner-fs-3 stays bound to cpu-batch deliberately (full-rescan
+  # state; archetypes.yaml binding note).
+  - id: c2-p1b
+    from: c2-p1a.timeline.yaml
+    ops:
+      - rename: {from: python3, to: tracker-miner-fs-3}
+      - patch-segment: {index: 1, mode: indexing,
+                        attributes: {wanted: false}}
+
+  # P2b — same game-plus-background shape; wanted flips (S17 vs S10).
+  # clamscan binds cpu-batch: full-scan state is CPU-saturating
+  # (meas-ci:cli:1 finding: foreground clamscan per-proc duty ~1.0).
+  - id: c2-p2b
+    from: c2-p2a.timeline.yaml
+    ops:
+      - patch-task: {id: download, name: clamscan, archetype: cpu-batch,
+                     arrive: 60s, bind: {total_work: 25s}}
+      - patch-segment: {index: 1,
+                        attributes: {wanted: false, background: av-scan},
+                        scenario: [S9, S17]}
+
+  # P3b — user-initiated bulk -> scheduled bulk (S15).
+  - id: c2-p3b
+    from: c2-p3a.timeline.yaml
+    ops:
+      - patch-task: {id: bulk, name: borg, archetype: io-stream,
+                     arrive: 60s, bind: {total_work: 75s}}
+      - patch-segment: {index: 1, mode: backup,
+                        attributes: {wanted: true, initiated: scheduled},
+                        scenario: [S7, S15]}

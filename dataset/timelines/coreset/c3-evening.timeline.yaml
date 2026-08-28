@@ -1,0 +1,34 @@
+# C3 — evening arc (building-plan §3 C3): browsing -> gaming (+discord
+# overlay) -> media playback.
+meta:
+  id: c3-evening
+  seed: 302
+
+segments:
+  - {from: 0s, to: 60s, mode: browsing, attributes: {wanted: true},
+     scenario: [S2]}
+  - {from: 60s, to: 300s, mode: gaming, attributes: {wanted: true},
+     scenario: [S9, S5]}
+  - {from: 300s, to: 420s, mode: media, attributes: {wanted: true},
+     scenario: [S13]}
+
+tasks:
+  - {id: browser, name: chrome, archetype: desktop-interactive,
+     arrive: 0s, depart: 60s}
+  - {id: renderers, name: chrome, archetype: electron-comms,
+     arrive: 0s, depart: 60s, count: 10}
+  - {id: game, name: game.exe, archetype: game-task-chain,
+     arrive: 60s, depart: 300s, bind: {lane_share: 1.45}}
+  - {id: overlay, name: discord, archetype: electron-comms,
+     arrive: 60s, depart: 300s}
+  - {id: steam, name: steam, archetype: electron-comms,
+     arrive: 60s, depart: 300s}
+  - {id: wine, name: wineserver, archetype: system-daemon,
+     arrive: 60s, depart: 300s}
+  - {id: video, name: mpv, archetype: video-playback,
+     arrive: 300s, depart: 420s}
+  - {id: music, name: spotify, archetype: audio-playback,
+     arrive: 300s, depart: 420s}
+
+focus:
+  - {from: 2s, to: 58s, task: browser}

@@ -1,0 +1,19 @@
+# C1 — single-situation calibration: pure media (building-plan §3 C1).
+# Also the C5 familiarity-ladder base: tiers rebind these archetypes under
+# other name tiers (c5.variant.yaml).
+meta:
+  id: c1-media
+  seed: 104
+  demand: calibration
+
+segments:
+  - {from: 0s, to: 60s, mode: media, attributes: {wanted: true},
+     scenario: [S13]}
+
+tasks:
+  - {id: video, name: mpv, archetype: video-playback,
+     arrive: 0s, depart: 60s}
+  - {id: music, name: spotify, archetype: audio-playback,
+     arrive: 0s, depart: 60s}
+
+focus: []

@@ -1,0 +1,453 @@
+{
+  "grid": {
+    "ambiguous": {
+      "t1": 0,
+      "t2": 1,
+      "t3": 0,
+      "t4": 0,
+      "t5": 0
+    },
+    "backup": {
+      "t1": 1,
+      "t2": 0,
+      "t3": 0,
+      "t4": 0,
+      "t5": 0
+    },
+    "browsing": {
+      "t1": 5,
+      "t2": 0,
+      "t3": 0,
+      "t4": 0,
+      "t5": 0
+    },
+    "compile": {
+      "t1": 2,
+      "t2": 1,
+      "t3": 0,
+      "t4": 0,
+      "t5": 0
+    },
+    "dev": {
+      "t1": 2,
+      "t2": 0,
+      "t3": 0,
+      "t4": 0,
+      "t5": 0
+    },
+    "gaming": {
+      "t1": 0,
+      "t2": 7,
+      "t3": 0,
+      "t4": 0,
+      "t5": 0
+    },
+    "idle": {
+      "t1": 0,
+      "t2": 1,
+      "t3": 0,
+      "t4": 0,
+      "t5": 0
+    },
+    "indexing": {
+      "t1": 0,
+      "t2": 0,
+      "t3": 1,
+      "t4": 0,
+      "t5": 0
+    },
+    "mail": {
+      "t1": 0,
+      "t2": 1,
+      "t3": 0,
+      "t4": 0,
+      "t5": 0
+    },
+    "media": {
+      "t1": 2,
+      "t2": 0,
+      "t3": 1,
+      "t4": 1,
+      "t5": 1
+    },
+    "meeting": {
+      "t1": 1,
+      "t2": 0,
+      "t3": 0,
+      "t4": 0,
+      "t5": 0
+    },
+    "ml-train": {
+      "t1": 1,
+      "t2": 0,
+      "t3": 0,
+      "t4": 0,
+      "t5": 0
+    },
+    "office": {
+      "t1": 0,
+      "t2": 3,
+      "t3": 0,
+      "t4": 0,
+      "t5": 0
+    },
+    "photo": {
+      "t1": 1,
+      "t2": 0,
+      "t3": 0,
+      "t4": 0,
+      "t5": 0
+    },
+    "render": {
+      "t1": 1,
+      "t2": 0,
+      "t3": 0,
+      "t4": 0,
+      "t5": 0
+    },
+    "transcode": {
+      "t1": 0,
+      "t2": 1,
+      "t3": 0,
+      "t4": 0,
+      "t5": 0
+    },
+    "video-edit": {
+      "t1": 3,
+      "t2": 0,
+      "t3": 0,
+      "t4": 0,
+      "t5": 0
+    }
+  },
+  "per_file": {
+    "c1-browsing": [
+      {
+        "mode": "browsing",
+        "scenario": [
+          "S2"
+        ],
+        "tier": 1
+      }
+    ],
+    "c1-compile": [
+      {
+        "mode": "compile",
+        "scenario": [
+          "S11"
+        ],
+        "tier": 1
+      }
+    ],
+    "c1-gaming": [
+      {
+        "mode": "gaming",
+        "scenario": [
+          "S9"
+        ],
+        "tier": 2
+      }
+    ],
+    "c1-idle": [
+      {
+        "mode": "idle",
+        "scenario": [
+          "S18"
+        ],
+        "tier": 2
+      }
+    ],
+    "c1-media": [
+      {
+        "mode": "media",
+        "scenario": [
+          "S13"
+        ],
+        "tier": 1
+      }
+    ],
+    "c1-office": [
+      {
+        "mode": "office",
+        "scenario": [
+          "S1",
+          "S2",
+          "S4"
+        ],
+        "tier": 2
+      }
+    ],
+    "c2-p1a": [
+      {
+        "mode": "dev",
+        "scenario": [
+          "S11"
+        ],
+        "tier": 1
+      },
+      {
+        "mode": "ml-train",
+        "scenario": [
+          "S11",
+          "S12"
+        ],
+        "tier": 1
+      }
+    ],
+    "c2-p1b": [
+      {
+        "mode": "dev",
+        "scenario": [
+          "S11"
+        ],
+        "tier": 1
+      },
+      {
+        "mode": "indexing",
+        "scenario": [
+          "S11",
+          "S12"
+        ],
+        "tier": 3
+      }
+    ],
+    "c2-p2a": [
+      {
+        "mode": "gaming",
+        "scenario": [
+          "S9"
+        ],
+        "tier": 2
+      },
+      {
+        "mode": "gaming",
+        "scenario": [
+          "S9",
+          "S10"
+        ],
+        "tier": 2
+      }
+    ],
+    "c2-p2b": [
+      {
+        "mode": "gaming",
+        "scenario": [
+          "S9"
+        ],
+        "tier": 2
+      },
+      {
+        "mode": "gaming",
+        "scenario": [
+          "S9",
+          "S17"
+        ],
+        "tier": 2
+      }
+    ],
+    "c2-p3a": [
+      {
+        "mode": "video-edit",
+        "scenario": [
+          "S7"
+        ],
+        "tier": 1
+      },
+      {
+        "mode": "render",
+        "scenario": [
+          "S7",
+          "S8"
+        ],
+        "tier": 1
+      }
+    ],
+    "c2-p3b": [
+      {
+        "mode": "video-edit",
+        "scenario": [
+          "S7"
+        ],
+        "tier": 1
+      },
+      {
+        "mode": "backup",
+        "scenario": [
+          "S7",
+          "S15"
+        ],
+        "tier": 1
+      }
+    ],
+    "c3-creation": [
+      {
+        "mode": "photo",
+        "scenario": [
+          "S6"
+        ],
+        "tier": 1
+      },
+      {
+        "mode": "video-edit",
+        "scenario": [
+          "S7"
+        ],
+        "tier": 1
+      },
+      {
+        "mode": "transcode",
+        "scenario": [
+          "S8"
+        ],
+        "tier": 2
+      }
+    ],
+    "c3-evening": [
+      {
+        "mode": "browsing",
+        "scenario": [
+          "S2"
+        ],
+        "tier": 1
+      },
+      {
+        "mode": "gaming",
+        "scenario": [
+          "S9",
+          "S5"
+        ],
+        "tier": 2
+      },
+      {
+        "mode": "media",
+        "scenario": [
+          "S13"
+        ],
+        "tier": 1
+      }
+    ],
+    "c3-workday": [
+      {
+        "mode": "browsing",
+        "scenario": [
+          "S2"
+        ],
+        "tier": 1
+      },
+      {
+        "mode": "office",
+        "scenario": [
+          "S1",
+          "S2"
+        ],
+        "tier": 2
+      },
+      {
+        "mode": "compile",
+        "scenario": [
+          "S11"
+        ],
+        "tier": 2
+      },
+      {
+        "mode": "mail",
+        "scenario": [
+          "S4"
+        ],
+        "tier": 2
+      }
+    ],
+    "c4-compile": [
+      {
+        "mode": "compile",
+        "scenario": [
+          "S11"
+        ],
+        "tier": 1
+      }
+    ],
+    "c4-gaming": [
+      {
+        "mode": "gaming",
+        "scenario": [
+          "S9"
+        ],
+        "tier": 2
+      }
+    ],
+    "c4-office": [
+      {
+        "mode": "office",
+        "scenario": [
+          "S1",
+          "S2",
+          "S4"
+        ],
+        "tier": 2
+      }
+    ],
+    "c5-t3": [
+      {
+        "mode": "media",
+        "scenario": [
+          "S13"
+        ],
+        "tier": 3
+      }
+    ],
+    "c5-t4": [
+      {
+        "mode": "media",
+        "scenario": [
+          "S13"
+        ],
+        "tier": 4
+      }
+    ],
+    "c5-t5": [
+      {
+        "mode": "media",
+        "scenario": [
+          "S13"
+        ],
+        "tier": 5
+      }
+    ],
+    "c6-dual": [
+      {
+        "mode": "ambiguous",
+        "scenario": [
+          "S9",
+          "S11"
+        ],
+        "tier": 2
+      }
+    ],
+    "c6-fold": [
+      {
+        "mode": "browsing",
+        "scenario": [
+          "S2"
+        ],
+        "tier": 1
+      },
+      {
+        "mode": "meeting",
+        "scenario": [
+          "S3"
+        ],
+        "tier": 1
+      }
+    ],
+    "c6-spoof": [
+      {
+        "mode": "browsing",
+        "scenario": [
+          "S2"
+        ],
+        "tier": 1
+      }
+    ]
+  },
+  "segments_total": 38
+}

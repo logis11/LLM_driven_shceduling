@@ -58,9 +58,13 @@ class Timeline:
                 "mode": seg["mode"],
                 "attributes": seg.get("attributes") or {},
                 "scenario": seg.get("scenario") or [],
+                "familiarity": seg.get("familiarity"),
             }
             if entry["t_start"] >= entry["t_end"]:
                 self._err(f"segment {seg['mode']!r}: from >= to")
+            if entry["familiarity"] is not None and \
+                    entry["familiarity"] not in (1, 2, 3, 4, 5):
+                self._err(f"segment {seg['mode']!r}: familiarity must be 1-5")
             self.segments.append(entry)
         self.segments.sort(key=lambda s: s["t_start"])
         for a, b in zip(self.segments, self.segments[1:]):

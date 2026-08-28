@@ -1,0 +1,20 @@
+# C2 P3 (base) — {kdenlive + ffmpeg render}: user-initiated bulk; the
+# variant swaps in borg (scheduled bulk).
+meta:
+  id: c2-p3a
+  seed: 203
+
+segments:
+  - {from: 0s, to: 60s, mode: video-edit, attributes: {wanted: true},
+     scenario: [S7]}
+  - {from: 60s, to: 120s, mode: render,
+     attributes: {wanted: true, initiated: user}, scenario: [S7, S8]}
+
+tasks:
+  - {id: editor, name: kdenlive, archetype: desktop-interactive,
+     arrive: 0s, depart: 120s}
+  - {id: bulk, name: ffmpeg, archetype: cpu-batch, arrive: 60s,
+     bind: {total_work: 75s}}
+
+focus:
+  - {from: 2s, to: 118s, task: editor}

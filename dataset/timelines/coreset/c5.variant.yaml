@@ -1,0 +1,25 @@
+# C5 — familiarity ladder (building-plan §3 C5): same structure and
+# archetypes as c1-media; only the name tier changes, so any recognition
+# difference is attributable to the name alone. Tiers 1-2 already appear
+# across C1; these files cover tiers 3-5.
+variants:
+  - id: c5-t3   # opaque real names (corpus-recallable, not inferable)
+    from: c1-media.timeline.yaml
+    ops:
+      - rename: {from: mpv, to: baloo_file}
+      - rename: {from: spotify, to: tracker-miner-fs-3}
+      - patch-segment: {index: 0, familiarity: 3}
+
+  - id: c5-t4   # nonexistent-compositional (inferable from word semantics)
+    from: c1-media.timeline.yaml
+    ops:
+      - rename: {from: mpv, to: video-playback-svc}
+      - rename: {from: spotify, to: audio-stream-helper}
+      - patch-segment: {index: 0, familiarity: 4}
+
+  - id: c5-t5   # nonexistent-opaque (neither recall nor inference possible)
+    from: c1-media.timeline.yaml
+    ops:
+      - rename: {from: mpv, to: qzvd}
+      - rename: {from: spotify, to: xkrr}
+      - patch-segment: {index: 0, familiarity: 5}
