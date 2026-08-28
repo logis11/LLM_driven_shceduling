@@ -14,7 +14,7 @@ variants:
 
   # P2b — same game-plus-background shape; wanted flips (S17 vs S10).
   # clamscan binds cpu-batch: full-scan state is CPU-saturating
-  # (meas-ci:cli:1 finding: foreground clamscan per-proc duty ~1.0).
+  # (meas-ci:cli:3 finding: foreground clamscan per-proc duty ~1.0).
   - id: c2-p2b
     from: c2-p2a.timeline.yaml
     ops:

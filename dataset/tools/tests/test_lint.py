@@ -15,11 +15,34 @@ def test_real_repo_lint_clean(repo_root):
     assert errors == []
 
 
-def test_freeze_rejects_meas_pending(repo_root):
+def test_repo_is_freeze_clean(repo_root):
+    """All meas-pending placeholders have been folded in (cli:3/gui:2)."""
     errors = lint_repo(repo_root / "dataset" / "archetypes.yaml",
                        repo_root / "dataset" / "sources.yaml",
                        repo_root / "docs" / "references.md", freeze=True)
-    assert errors and all("meas-pending after freeze" in e for e in errors)
+    assert errors == []
+
+
+def test_freeze_rejects_meas_pending(repo_root, tmp_path):
+    archetypes = tmp_path / "archetypes.yaml"
+    archetypes.write_text(
+        "archetypes:\n"
+        "  probe:\n"
+        "    category_source: meas\n"
+        "    pattern: {program: []}\n"
+        "    params:\n"
+        "      x: {dist: constant, value_us: 1, sampling: per-task,\n"
+        "          source: meas-pending}\n"
+        "    lifetime: finite\n"
+        "    binding_params: []\n"
+        "    scalable: []\n"
+        "    validation_stats: {}\n"
+        "    modeling_notes: probe\n")
+    sources = repo_root / "dataset" / "sources.yaml"
+    references = repo_root / "docs" / "references.md"
+    assert lint_repo(archetypes, sources, references, freeze=False) == []
+    errors = lint_repo(archetypes, sources, references, freeze=True)
+    assert errors == ["probe.x: meas-pending after freeze"]
 
 
 def test_registry_subset_rule(repo_root, tmp_path):

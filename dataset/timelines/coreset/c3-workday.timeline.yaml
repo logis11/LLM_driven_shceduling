@@ -23,7 +23,7 @@ tasks:
   - {id: writer, name: soffice.bin, archetype: desktop-interactive,
      arrive: 60s, depart: 420s}
   - {id: build, name: make, archetype: build-orchestrator, arrive: 120s,
-     bind: {spawn_count: 1000, parallelism_cap: 8, child_name: cc1}}
+     bind: {spawn_count: 4200, parallelism_cap: 8, child_name: cc1}}
   - {id: mailer, name: thunderbird, archetype: desktop-interactive,
      arrive: 360s, depart: 420s}
   - {id: send, name: thunderbird, archetype: network-bulk, arrive: 400s,

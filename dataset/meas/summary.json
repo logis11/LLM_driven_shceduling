@@ -4,6 +4,7 @@
       "phase_rc": {
         "idle-baseline": 0,
         "network-bulk": 0,
+        "download-verify": 0,
         "untar": 0,
         "kernel-defconfig": 0,
         "kernel-build-j8": 0,
@@ -12,47 +13,102 @@
         "updatedb": 0,
         "locate-query": 1,
         "freshclam": 2,
-        "clamscan": 0
+        "clamscan": 0,
+        "drop-1": 0,
+        "tar-read-cold": 0,
+        "drop-2": 0,
+        "rsync-copy-cold": 0,
+        "drop-3": 0,
+        "clamscan-cold": 0,
+        "drop-4": 0,
+        "updatedb-cold": 0,
+        "kernel-clean": 0,
+        "drop-5": 0,
+        "kernel-build-cold": 0,
+        "drop-6": 0,
+        "tracker-daemon": 0
       },
       "phase_wall_us": {
-        "idle-baseline": 60002682,
-        "network-bulk": 11202312,
-        "untar": 8454414,
-        "kernel-defconfig": 5381041,
-        "kernel-build-j8": 513843007,
-        "archive-tar-xz": 187706617,
-        "rsync-copy": 8299646,
-        "updatedb": 2299848,
-        "locate-query": 9302,
-        "freshclam": 16743,
-        "clamscan": 86616278
+        "idle-baseline": 60003023,
+        "network-bulk": 701263,
+        "download-verify": 7744610,
+        "untar": 8970287,
+        "kernel-defconfig": 6475110,
+        "kernel-build-j8": 498845693,
+        "archive-tar-xz": 208344404,
+        "rsync-copy": 7697178,
+        "updatedb": 2508380,
+        "locate-query": 10076,
+        "freshclam": 19133,
+        "clamscan": 90834648,
+        "drop-1": 2696390,
+        "tar-read-cold": 1486224,
+        "drop-2": 301176,
+        "rsync-copy-cold": 16984957,
+        "drop-3": 1178593,
+        "clamscan-cold": 100148538,
+        "drop-4": 342804,
+        "updatedb-cold": 19812352,
+        "kernel-clean": 4907396,
+        "drop-5": 546924,
+        "kernel-build-cold": 504088872,
+        "drop-6": 321125,
+        "tracker-daemon": 301526906
       },
       "compiler_lifetime": {
-        "n": 11806,
-        "median_us": 103106,
-        "sigma_log": 2.37,
-        "p90_us": 1715000
+        "n": 11913,
+        "median_us": 99801,
+        "sigma_log": 2.351,
+        "p90_us": 1657000
       },
-      "compiler_children": 11806,
-      "compiler_cpu_frac": 0.084,
+      "compiler_children": 11913,
+      "compiler_cpu_mean_us": 89997,
+      "compiler_life_mean_us": 625335,
       "compiler_peak_concurrent": 16,
-      "make_dispatch_us": 253,
-      "fork_rate_hz": 23.2,
-      "rsync_duty": 1.093,
-      "rsync_proc_duty": 0.259,
-      "untar_duty": 1.215,
-      "untar_proc_duty": 0.734,
-      "clamscan_duty": 0.993,
+      "make_dispatch_us": 234,
+      "fork_rate_hz": 24.2,
+      "compiler_cold_lifetime": {
+        "n": 11863,
+        "median_us": 103397,
+        "sigma_log": 2.329,
+        "p90_us": 1672000
+      },
+      "compiler_cold_children": 11863,
+      "compiler_cold_cpu_mean_us": 91465,
+      "compiler_cold_life_mean_us": 633185,
+      "compiler_cold_peak_concurrent": 16,
+      "rsync_duty": 1.316,
+      "rsync_proc_duty": 0.307,
+      "untar_duty": 1.346,
+      "untar_proc_duty": 0.754,
+      "clamscan_duty": 0.99,
       "clamscan_proc_duty": 1.0,
-      "updatedb_duty": 0.426,
+      "updatedb_duty": 0.785,
       "updatedb_proc_duty": null,
-      "wget_duty": 0.03,
-      "wget_proc_duty": 0.031
+      "wget_duty": 0.314,
+      "wget_proc_duty": null,
+      "tar_cold_duty": 0.404,
+      "tar_cold_proc_duty": null,
+      "rsync_cold_duty": 0.737,
+      "rsync_cold_proc_duty": 0.256,
+      "clamscan_cold_duty": 0.973,
+      "clamscan_cold_proc_duty": 0.984,
+      "updatedb_cold_duty": 0.206,
+      "updatedb_cold_proc_duty": 0.215,
+      "tracker_wakes": [
+        {
+          "comm": "tracker-miner-f",
+          "wakes": 55,
+          "gap_us": 5436363.636363637,
+          "work_us": 545.4545454545455
+        }
+      ]
     },
     "meas-cli-r2": {
       "phase_rc": {
         "idle-baseline": 0,
         "network-bulk": 0,
+        "download-verify": 0,
         "untar": 0,
         "kernel-defconfig": 0,
         "kernel-build-j8": 0,
@@ -61,47 +117,102 @@
         "updatedb": 0,
         "locate-query": 1,
         "freshclam": 2,
-        "clamscan": 0
+        "clamscan": 0,
+        "drop-1": 0,
+        "tar-read-cold": 0,
+        "drop-2": 0,
+        "rsync-copy-cold": 0,
+        "drop-3": 0,
+        "clamscan-cold": 0,
+        "drop-4": 0,
+        "updatedb-cold": 0,
+        "kernel-clean": 0,
+        "drop-5": 0,
+        "kernel-build-cold": 0,
+        "drop-6": 0,
+        "tracker-daemon": 0
       },
       "phase_wall_us": {
-        "idle-baseline": 60002913,
-        "network-bulk": 5606799,
-        "untar": 8727568,
-        "kernel-defconfig": 4921564,
-        "kernel-build-j8": 523138315,
-        "archive-tar-xz": 190185097,
-        "rsync-copy": 8785185,
-        "updatedb": 2323298,
-        "locate-query": 9499,
-        "freshclam": 17102,
-        "clamscan": 86780252
+        "idle-baseline": 60002961,
+        "network-bulk": 560805,
+        "download-verify": 7692337,
+        "untar": 8868374,
+        "kernel-defconfig": 6299416,
+        "kernel-build-j8": 486155879,
+        "archive-tar-xz": 199139908,
+        "rsync-copy": 7966004,
+        "updatedb": 2437301,
+        "locate-query": 9834,
+        "freshclam": 18301,
+        "clamscan": 88284222,
+        "drop-1": 2574965,
+        "tar-read-cold": 1476152,
+        "drop-2": 264521,
+        "rsync-copy-cold": 17169384,
+        "drop-3": 1031719,
+        "clamscan-cold": 91288172,
+        "drop-4": 332162,
+        "updatedb-cold": 16816867,
+        "kernel-clean": 4852259,
+        "drop-5": 495499,
+        "kernel-build-cold": 486485300,
+        "drop-6": 287503,
+        "tracker-daemon": 301446424
       },
       "compiler_lifetime": {
-        "n": 11846,
-        "median_us": 105317,
-        "sigma_log": 2.361,
-        "p90_us": 1753000
+        "n": 11883,
+        "median_us": 97993,
+        "sigma_log": 2.344,
+        "p90_us": 1588000
       },
-      "compiler_children": 11846,
-      "compiler_cpu_frac": 0.086,
+      "compiler_children": 11883,
+      "compiler_cpu_mean_us": 86375,
+      "compiler_life_mean_us": 610516,
       "compiler_peak_concurrent": 16,
-      "make_dispatch_us": 253,
-      "fork_rate_hz": 23.0,
-      "rsync_duty": 0.96,
-      "rsync_proc_duty": 0.249,
-      "untar_duty": 1.365,
-      "untar_proc_duty": 0.744,
+      "make_dispatch_us": 230,
+      "fork_rate_hz": 24.8,
+      "compiler_cold_lifetime": {
+        "n": 11829,
+        "median_us": 99897,
+        "sigma_log": 2.332,
+        "p90_us": 1625000
+      },
+      "compiler_cold_children": 11829,
+      "compiler_cold_cpu_mean_us": 86421,
+      "compiler_cold_life_mean_us": 612651,
+      "compiler_cold_peak_concurrent": 16,
+      "rsync_duty": 1.188,
+      "rsync_proc_duty": 0.269,
+      "untar_duty": 1.36,
+      "untar_proc_duty": 0.67,
       "clamscan_duty": 0.991,
-      "clamscan_proc_duty": 1.0,
-      "updatedb_duty": 0.848,
+      "clamscan_proc_duty": 0.994,
+      "updatedb_duty": 0.812,
       "updatedb_proc_duty": null,
-      "wget_duty": 0.009,
-      "wget_proc_duty": 0.013
+      "wget_duty": 0.571,
+      "wget_proc_duty": null,
+      "tar_cold_duty": 0.386,
+      "tar_cold_proc_duty": null,
+      "rsync_cold_duty": 0.722,
+      "rsync_cold_proc_duty": 0.267,
+      "clamscan_cold_duty": 0.973,
+      "clamscan_cold_proc_duty": 0.976,
+      "updatedb_cold_duty": 0.225,
+      "updatedb_cold_proc_duty": 0.237,
+      "tracker_wakes": [
+        {
+          "comm": "tracker-miner-f",
+          "wakes": 125,
+          "gap_us": 2400000.0,
+          "work_us": 1760.0
+        }
+      ]
     },
     "meas-cli-r3": {
       "phase_rc": {
         "idle-baseline": 0,
         "network-bulk": 0,
+        "download-verify": 0,
         "untar": 0,
         "kernel-defconfig": 0,
         "kernel-build-j8": 0,
@@ -110,47 +221,102 @@
         "updatedb": 0,
         "locate-query": 1,
         "freshclam": 2,
-        "clamscan": 0
+        "clamscan": 0,
+        "drop-1": 0,
+        "tar-read-cold": 0,
+        "drop-2": 0,
+        "rsync-copy-cold": 0,
+        "drop-3": 0,
+        "clamscan-cold": 0,
+        "drop-4": 0,
+        "updatedb-cold": 0,
+        "kernel-clean": 0,
+        "drop-5": 0,
+        "kernel-build-cold": 0,
+        "drop-6": 0,
+        "tracker-daemon": 0
       },
       "phase_wall_us": {
-        "idle-baseline": 60002877,
-        "network-bulk": 624831,
-        "untar": 8695467,
-        "kernel-defconfig": 7638674,
-        "kernel-build-j8": 532064568,
-        "archive-tar-xz": 195162162,
-        "rsync-copy": 8100087,
-        "updatedb": 2333746,
-        "locate-query": 9481,
-        "freshclam": 17158,
-        "clamscan": 87863217
+        "idle-baseline": 60002454,
+        "network-bulk": 2928154,
+        "download-verify": 6017109,
+        "untar": 7161890,
+        "kernel-defconfig": 4993979,
+        "kernel-build-j8": 399383947,
+        "archive-tar-xz": 169480605,
+        "rsync-copy": 6180593,
+        "updatedb": 2001229,
+        "locate-query": 7093,
+        "freshclam": 15051,
+        "clamscan": 70549674,
+        "drop-1": 2158442,
+        "tar-read-cold": 1505276,
+        "drop-2": 249094,
+        "rsync-copy-cold": 20153815,
+        "drop-3": 891305,
+        "clamscan-cold": 78515005,
+        "drop-4": 368928,
+        "updatedb-cold": 20090161,
+        "kernel-clean": 5448471,
+        "drop-5": 441951,
+        "kernel-build-cold": 386246456,
+        "drop-6": 234380,
+        "tracker-daemon": 301503065
       },
       "compiler_lifetime": {
-        "n": 11832,
-        "median_us": 106629,
-        "sigma_log": 2.366,
-        "p90_us": 1774000
+        "n": 11914,
+        "median_us": 76885,
+        "sigma_log": 2.379,
+        "p90_us": 1346000
       },
-      "compiler_children": 11832,
-      "compiler_cpu_frac": 0.088,
-      "compiler_peak_concurrent": 17,
-      "make_dispatch_us": 253,
-      "fork_rate_hz": 22.5,
-      "rsync_duty": 1.177,
-      "rsync_proc_duty": 0.283,
-      "untar_duty": 1.349,
-      "untar_proc_duty": 0.733,
-      "clamscan_duty": 0.99,
-      "clamscan_proc_duty": 1.0,
-      "updatedb_duty": 0.84,
+      "compiler_children": 11914,
+      "compiler_cpu_mean_us": 61620,
+      "compiler_life_mean_us": 499646,
+      "compiler_peak_concurrent": 16,
+      "make_dispatch_us": 183,
+      "fork_rate_hz": 30.1,
+      "compiler_cold_lifetime": {
+        "n": 11837,
+        "median_us": 76155,
+        "sigma_log": 2.363,
+        "p90_us": 1302000
+      },
+      "compiler_cold_children": 11837,
+      "compiler_cold_cpu_mean_us": 58188,
+      "compiler_cold_life_mean_us": 484926,
+      "compiler_cold_peak_concurrent": 16,
+      "rsync_duty": 1.244,
+      "rsync_proc_duty": 0.277,
+      "untar_duty": 1.325,
+      "untar_proc_duty": 0.678,
+      "clamscan_duty": 0.991,
+      "clamscan_proc_duty": 0.999,
+      "updatedb_duty": 0.74,
       "updatedb_proc_duty": null,
-      "wget_duty": 0.0,
-      "wget_proc_duty": null
+      "wget_duty": 0.014,
+      "wget_proc_duty": 0.013,
+      "tar_cold_duty": 0.312,
+      "tar_cold_proc_duty": null,
+      "rsync_cold_duty": 0.46,
+      "rsync_cold_proc_duty": 0.155,
+      "clamscan_cold_duty": 0.913,
+      "clamscan_cold_proc_duty": 0.919,
+      "updatedb_cold_duty": 0.147,
+      "updatedb_cold_proc_duty": 0.147,
+      "tracker_wakes": [
+        {
+          "comm": "tracker-miner-f",
+          "wakes": 58,
+          "gap_us": 5172413.793103448,
+          "work_us": 1896.551724137931
+        }
+      ]
     },
     "meas-cli-r4": {
       "phase_rc": {
         "idle-baseline": 0,
         "network-bulk": 0,
+        "download-verify": 0,
         "untar": 0,
         "kernel-defconfig": 0,
         "kernel-build-j8": 0,
@@ -159,47 +325,102 @@
         "updatedb": 0,
         "locate-query": 1,
         "freshclam": 2,
-        "clamscan": 0
+        "clamscan": 0,
+        "drop-1": 0,
+        "tar-read-cold": 0,
+        "drop-2": 0,
+        "rsync-copy-cold": 0,
+        "drop-3": 0,
+        "clamscan-cold": 0,
+        "drop-4": 0,
+        "updatedb-cold": 0,
+        "kernel-clean": 0,
+        "drop-5": 0,
+        "kernel-build-cold": 0,
+        "drop-6": 0,
+        "tracker-daemon": 0
       },
       "phase_wall_us": {
-        "idle-baseline": 60002803,
-        "network-bulk": 591517,
-        "untar": 8621957,
-        "kernel-defconfig": 4777903,
-        "kernel-build-j8": 525855268,
-        "archive-tar-xz": 197345515,
-        "rsync-copy": 8473535,
-        "updatedb": 2296830,
-        "locate-query": 9622,
-        "freshclam": 17721,
-        "clamscan": 87775860
+        "idle-baseline": 60002898,
+        "network-bulk": 1464495,
+        "download-verify": 7668750,
+        "untar": 8545788,
+        "kernel-defconfig": 4915517,
+        "kernel-build-j8": 523666352,
+        "archive-tar-xz": 193798533,
+        "rsync-copy": 8180339,
+        "updatedb": 2345198,
+        "locate-query": 9554,
+        "freshclam": 17532,
+        "clamscan": 90577011,
+        "drop-1": 2609215,
+        "tar-read-cold": 1736800,
+        "drop-2": 274642,
+        "rsync-copy-cold": 23914208,
+        "drop-3": 1057627,
+        "clamscan-cold": 89863616,
+        "drop-4": 324708,
+        "updatedb-cold": 17953815,
+        "kernel-clean": 5022052,
+        "drop-5": 472268,
+        "kernel-build-cold": 525164827,
+        "drop-6": 287748,
+        "tracker-daemon": 302113961
       },
       "compiler_lifetime": {
-        "n": 11914,
-        "median_us": 103546,
-        "sigma_log": 2.368,
-        "p90_us": 1750000
+        "n": 11835,
+        "median_us": 105273,
+        "sigma_log": 2.366,
+        "p90_us": 1769000
       },
-      "compiler_children": 11914,
-      "compiler_cpu_frac": 0.085,
-      "compiler_peak_concurrent": 17,
-      "make_dispatch_us": 255,
+      "compiler_children": 11835,
+      "compiler_cpu_mean_us": 97348,
+      "compiler_life_mean_us": 665188,
+      "compiler_peak_concurrent": 16,
+      "make_dispatch_us": 262,
       "fork_rate_hz": 22.9,
-      "rsync_duty": 1.211,
-      "rsync_proc_duty": 0.255,
-      "untar_duty": 1.347,
-      "untar_proc_duty": 0.726,
-      "clamscan_duty": 0.991,
-      "clamscan_proc_duty": 1.0,
-      "updatedb_duty": 0.431,
+      "compiler_cold_lifetime": {
+        "n": 11838,
+        "median_us": 106019,
+        "sigma_log": 2.361,
+        "p90_us": 1774000
+      },
+      "compiler_cold_children": 11838,
+      "compiler_cold_cpu_mean_us": 97495,
+      "compiler_cold_life_mean_us": 665766,
+      "compiler_cold_peak_concurrent": 16,
+      "rsync_duty": 1.309,
+      "rsync_proc_duty": 0.276,
+      "untar_duty": 1.439,
+      "untar_proc_duty": 0.738,
+      "clamscan_duty": 0.999,
+      "clamscan_proc_duty": 1.006,
+      "updatedb_duty": 0.627,
       "updatedb_proc_duty": null,
-      "wget_duty": 0.0,
-      "wget_proc_duty": null
+      "wget_duty": 0.184,
+      "wget_proc_duty": null,
+      "tar_cold_duty": 0.305,
+      "tar_cold_proc_duty": null,
+      "rsync_cold_duty": 0.603,
+      "rsync_cold_proc_duty": 0.215,
+      "clamscan_cold_duty": 0.967,
+      "clamscan_cold_proc_duty": 0.976,
+      "updatedb_cold_duty": 0.245,
+      "updatedb_cold_proc_duty": 0.244,
+      "tracker_wakes": [
+        {
+          "comm": "tracker-miner-f",
+          "wakes": 60,
+          "gap_us": 4983333.333333333,
+          "work_us": 3000.0
+        }
+      ]
     },
     "meas-cli-r5": {
       "phase_rc": {
         "idle-baseline": 0,
         "network-bulk": 0,
+        "download-verify": 0,
         "untar": 0,
         "kernel-defconfig": 0,
         "kernel-build-j8": 0,
@@ -208,42 +429,96 @@
         "updatedb": 0,
         "locate-query": 1,
         "freshclam": 2,
-        "clamscan": 0
+        "clamscan": 0,
+        "drop-1": 0,
+        "tar-read-cold": 0,
+        "drop-2": 0,
+        "rsync-copy-cold": 0,
+        "drop-3": 0,
+        "clamscan-cold": 0,
+        "drop-4": 0,
+        "updatedb-cold": 0,
+        "kernel-clean": 0,
+        "drop-5": 0,
+        "kernel-build-cold": 0,
+        "drop-6": 0,
+        "tracker-daemon": 0
       },
       "phase_wall_us": {
-        "idle-baseline": 60002872,
-        "network-bulk": 1117467,
-        "untar": 8774560,
-        "kernel-defconfig": 23307556,
-        "kernel-build-j8": 518680749,
-        "archive-tar-xz": 196086639,
-        "rsync-copy": 8183057,
-        "updatedb": 2342128,
-        "locate-query": 9768,
-        "freshclam": 17143,
-        "clamscan": 93302325
+        "idle-baseline": 60002818,
+        "network-bulk": 4737501,
+        "download-verify": 7665663,
+        "untar": 8793441,
+        "kernel-defconfig": 13402314,
+        "kernel-build-j8": 527648674,
+        "archive-tar-xz": 196849525,
+        "rsync-copy": 8621772,
+        "updatedb": 2377780,
+        "locate-query": 9502,
+        "freshclam": 17294,
+        "clamscan": 89431763,
+        "drop-1": 2499030,
+        "tar-read-cold": 1682720,
+        "drop-2": 266047,
+        "rsync-copy-cold": 23102975,
+        "drop-3": 1088954,
+        "clamscan-cold": 93524644,
+        "drop-4": 337404,
+        "updatedb-cold": 21482346,
+        "kernel-clean": 5089465,
+        "drop-5": 500000,
+        "kernel-build-cold": 526674788,
+        "drop-6": 287698,
+        "tracker-daemon": 302105562
       },
       "compiler_lifetime": {
-        "n": 11844,
-        "median_us": 103548,
-        "sigma_log": 2.371,
-        "p90_us": 1724000
+        "n": 11861,
+        "median_us": 105713,
+        "sigma_log": 2.366,
+        "p90_us": 1737000
       },
-      "compiler_children": 11844,
-      "compiler_cpu_frac": 0.085,
+      "compiler_children": 11861,
+      "compiler_cpu_mean_us": 98793,
+      "compiler_life_mean_us": 669059,
       "compiler_peak_concurrent": 16,
-      "make_dispatch_us": 243,
-      "fork_rate_hz": 23.2,
-      "rsync_duty": 1.135,
-      "rsync_proc_duty": 0.277,
-      "untar_duty": 1.166,
-      "untar_proc_duty": 0.731,
-      "clamscan_duty": 0.986,
-      "clamscan_proc_duty": 0.999,
-      "updatedb_duty": 0.841,
+      "make_dispatch_us": 257,
+      "fork_rate_hz": 22.8,
+      "compiler_cold_lifetime": {
+        "n": 11850,
+        "median_us": 105725,
+        "sigma_log": 2.362,
+        "p90_us": 1763000
+      },
+      "compiler_cold_children": 11850,
+      "compiler_cold_cpu_mean_us": 98642,
+      "compiler_cold_life_mean_us": 666895,
+      "compiler_cold_peak_concurrent": 16,
+      "rsync_duty": 1.181,
+      "rsync_proc_duty": 0.264,
+      "untar_duty": 1.4,
+      "untar_proc_duty": 0.684,
+      "clamscan_duty": 0.989,
+      "clamscan_proc_duty": 0.994,
+      "updatedb_duty": 0.833,
       "updatedb_proc_duty": null,
-      "wget_duty": 0.0,
-      "wget_proc_duty": null
+      "wget_duty": 0.084,
+      "wget_proc_duty": 0.1,
+      "tar_cold_duty": 0.481,
+      "tar_cold_proc_duty": null,
+      "rsync_cold_duty": 0.625,
+      "rsync_cold_proc_duty": 0.231,
+      "clamscan_cold_duty": 0.967,
+      "clamscan_cold_proc_duty": 0.973,
+      "updatedb_cold_duty": 0.201,
+      "updatedb_cold_proc_duty": 0.206,
+      "tracker_wakes": [
+        {
+          "comm": "tracker-miner-f",
+          "wakes": 127,
+          "gap_us": 2362204.724409449,
+          "work_us": 1968.5039370078741
+        }
+      ]
     }
   },
   "gui_repeats": {
@@ -1012,94 +1287,188 @@
   "across_repeats": {
     "compiler_lifetime_median_us": {
       "n_repeats": 5,
-      "median": 103548,
-      "min": 103106,
-      "max": 106629
+      "median": 99801,
+      "min": 76885,
+      "max": 105713
     },
     "compiler_lifetime_sigma_log": {
       "n_repeats": 5,
-      "median": 2.368,
-      "min": 2.361,
-      "max": 2.371
+      "median": 2.366,
+      "min": 2.344,
+      "max": 2.379
     },
     "compiler_children": {
       "n_repeats": 5,
-      "median": 11844,
-      "min": 11806,
+      "median": 11883,
+      "min": 11835,
       "max": 11914
     },
-    "compiler_cpu_frac": {
+    "compiler_cpu_mean_us": {
       "n_repeats": 5,
-      "median": 0.085,
-      "min": 0.084,
-      "max": 0.088
+      "median": 89997,
+      "min": 61620,
+      "max": 98793
+    },
+    "compiler_life_mean_us": {
+      "n_repeats": 5,
+      "median": 625335,
+      "min": 499646,
+      "max": 669059
+    },
+    "compiler_cold_lifetime_median_us": {
+      "n_repeats": 5,
+      "median": 103397,
+      "min": 76155,
+      "max": 106019
+    },
+    "compiler_cold_lifetime_sigma_log": {
+      "n_repeats": 5,
+      "median": 2.361,
+      "min": 2.329,
+      "max": 2.363
+    },
+    "compiler_cold_children": {
+      "n_repeats": 5,
+      "median": 11838,
+      "min": 11829,
+      "max": 11863
+    },
+    "compiler_cold_cpu_mean_us": {
+      "n_repeats": 5,
+      "median": 91465,
+      "min": 58188,
+      "max": 98642
+    },
+    "compiler_cold_life_mean_us": {
+      "n_repeats": 5,
+      "median": 633185,
+      "min": 484926,
+      "max": 666895
     },
     "make_dispatch_us": {
       "n_repeats": 5,
-      "median": 253,
-      "min": 243,
-      "max": 255
+      "median": 234,
+      "min": 183,
+      "max": 262
     },
     "fork_rate_hz": {
       "n_repeats": 5,
-      "median": 23.0,
-      "min": 22.5,
-      "max": 23.2
+      "median": 24.2,
+      "min": 22.8,
+      "max": 30.1
     },
     "rsync_duty": {
       "n_repeats": 5,
-      "median": 1.135,
-      "min": 0.96,
-      "max": 1.211
+      "median": 1.244,
+      "min": 1.181,
+      "max": 1.316
+    },
+    "rsync_proc_duty": {
+      "n_repeats": 5,
+      "median": 0.276,
+      "min": 0.264,
+      "max": 0.307
     },
     "untar_duty": {
       "n_repeats": 5,
-      "median": 1.347,
-      "min": 1.166,
-      "max": 1.365
+      "median": 1.36,
+      "min": 1.325,
+      "max": 1.439
+    },
+    "untar_proc_duty": {
+      "n_repeats": 5,
+      "median": 0.684,
+      "min": 0.67,
+      "max": 0.754
     },
     "clamscan_duty": {
       "n_repeats": 5,
       "median": 0.991,
-      "min": 0.986,
-      "max": 0.993
-    },
-    "updatedb_duty": {
-      "n_repeats": 5,
-      "median": 0.84,
-      "min": 0.426,
-      "max": 0.848
-    },
-    "wget_duty": {
-      "n_repeats": 5,
-      "median": 0.0,
-      "min": 0.0,
-      "max": 0.03
-    },
-    "rsync_proc_duty": {
-      "n_repeats": 5,
-      "median": 0.259,
-      "min": 0.249,
-      "max": 0.283
-    },
-    "untar_proc_duty": {
-      "n_repeats": 5,
-      "median": 0.733,
-      "min": 0.726,
-      "max": 0.744
+      "min": 0.989,
+      "max": 0.999
     },
     "clamscan_proc_duty": {
       "n_repeats": 5,
-      "median": 1.0,
-      "min": 0.999,
-      "max": 1.0
+      "median": 0.999,
+      "min": 0.994,
+      "max": 1.006
+    },
+    "updatedb_duty": {
+      "n_repeats": 5,
+      "median": 0.785,
+      "min": 0.627,
+      "max": 0.833
     },
     "updatedb_proc_duty": null,
+    "wget_duty": {
+      "n_repeats": 5,
+      "median": 0.184,
+      "min": 0.014,
+      "max": 0.571
+    },
     "wget_proc_duty": {
       "n_repeats": 2,
-      "median": 0.022,
+      "median": 0.0565,
       "min": 0.013,
-      "max": 0.031
+      "max": 0.1
+    },
+    "tar_cold_duty": {
+      "n_repeats": 5,
+      "median": 0.386,
+      "min": 0.305,
+      "max": 0.481
+    },
+    "tar_cold_proc_duty": null,
+    "rsync_cold_duty": {
+      "n_repeats": 5,
+      "median": 0.625,
+      "min": 0.46,
+      "max": 0.737
+    },
+    "rsync_cold_proc_duty": {
+      "n_repeats": 5,
+      "median": 0.231,
+      "min": 0.155,
+      "max": 0.267
+    },
+    "clamscan_cold_duty": {
+      "n_repeats": 5,
+      "median": 0.967,
+      "min": 0.913,
+      "max": 0.973
+    },
+    "clamscan_cold_proc_duty": {
+      "n_repeats": 5,
+      "median": 0.976,
+      "min": 0.919,
+      "max": 0.984
+    },
+    "updatedb_cold_duty": {
+      "n_repeats": 5,
+      "median": 0.206,
+      "min": 0.147,
+      "max": 0.245
+    },
+    "updatedb_cold_proc_duty": {
+      "n_repeats": 5,
+      "median": 0.215,
+      "min": 0.147,
+      "max": 0.244
+    },
+    "tracker": {
+      "procs": 5,
+      "gap": {
+        "n": 5,
+        "median_us": 3801982,
+        "sigma_log": 0.428,
+        "p90_us": 5436364
+      },
+      "work": {
+        "n": 5,
+        "median_us": 1608,
+        "sigma_log": 0.639,
+        "p90_us": 3000
+      }
     },
     "chromium_peak_procs": {
       "n_repeats": 5,

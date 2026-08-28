@@ -180,14 +180,14 @@ archetypes:
         - EXIT: {}
     params:
       cpu_burst:
-        {dist: lognormal, median_us: 24000, sigma_log: 2.37,
-         sampling: per-instance, source: "meas-ci:cli:1"}
+        {dist: lognormal, median_us: 12900, sigma_log: 1.91,
+         sampling: per-instance, source: "meas-ci:cli:3"}
       cpu_tail:
-        {dist: lognormal, median_us: 2700, sigma_log: 2.37,
-         sampling: per-instance, source: "meas-ci:cli:1"}
+        {dist: lognormal, median_us: 1440, sigma_log: 1.91,
+         sampling: per-instance, source: "meas-ci:cli:3"}
       disk_wait:
-        {dist: lognormal, median_us: 20000, sigma_log: 0.8,
-         sampling: per-instance, source: "meas-pending"}
+        {dist: lognormal, median_us: 3600, sigma_log: 0.8,
+         sampling: per-instance, source: "meas-ci:cli:3"}
     lifetime: spawned
     spawned_by: build-orchestrator
     binding_params: []
@@ -202,20 +202,23 @@ archetypes:
       The kernel-build literature grounds the class's existence and
       short-lived character only (ocallahan-atc17 sec-4.3: "make forks and
       execs 2430 processes, mostly short-lived"; coetzee-arxiv12 sec-9
-      corroborates, kernel-build-specific). meas-ci:cli:1 (linux-6.6
-      defconfig, make -j8, 5 repeats): ~11.8k compiler-family children per
-      build, lifetime median ~103 ms sigma_log ~2.37 (forkstat exit
-      durations; repeat spread 103.1-106.6 ms). cpu_burst/cpu_tail derive
-      from that lifetime shape times a utilization-derived cpu share ~0.26
-      (4 saturated cores x build wall over aggregate child lifetime; the 1 s
-      sampler's direct estimate, 0.085, is censored for sub-second procs and
-      is the stated lower bound), split 90/10 between burst and tail — the
-      share, the split, and carrying the lifetime sigma onto cpu are our
-      modeling. disk_wait stays meas-pending: the CI corpus is page-cache-
-      hot, so disk waits were unobservably small (finding, meas-ci:cli:1);
-      value needs a cold-cache referee. The RUN/WAIT/RUN/EXIT shape and the
-      lognormal family (OQ-5 convention) are ours. Spawn-table entries
-      sample per-instance (interpretation-contract §5).
+      corroborates, kernel-build-specific). meas-ci:cli:3 (linux-6.6
+      defconfig, make -j8, 5 repeats): ~11.9k compiler-family children per
+      build, lifetime median ~100 ms sigma_log ~2.37 (forkstat exit
+      durations). cpu params are moment-matched: the 500 ms sampler measures
+      mean cpu/child ~90 ms directly (still a lower bound — sub-500 ms
+      children are partially censored; the 4-core utilization bound is
+      ~165 ms); median cpu = (cpu_mean/life_mean) x life_median ~ 14.4 ms;
+      sigma_log 1.91 from mean/median = 6.25 — matching the measured mean
+      rather than carrying the lifetime log-std (which overshot the mean
+      2.4x). The 90/10 burst/tail split is ours. disk_wait: the cold-cache
+      rebuild (vm.drop_caches=3) is statistically identical to the warm
+      build (cpu and lifetime means within repeat spread) — per-child disk
+      waits are noise-bounded at ~4 ms on runner NVMe; median 3.6 ms is that
+      measured bound (machine-relative, runner spec recorded). The
+      RUN/WAIT/RUN/EXIT shape and the lognormal family (OQ-5 convention)
+      are ours. Spawn-table entries sample per-instance
+      (interpretation-contract §5).
 
   build-orchestrator:
     category_source: ocallahan-atc17
@@ -228,8 +231,8 @@ archetypes:
         - EXIT: {}
     params:
       dispatch_overhead:
-        {dist: lognormal, median_us: 253, sigma_log: 0.5,
-         sampling: per-iteration, source: "meas-ci:cli:1"}
+        {dist: lognormal, median_us: 234, sigma_log: 0.5,
+         sampling: per-iteration, source: "meas-ci:cli:3"}
     lifetime: finite
     spawns: compiler-child
     binding_params: [spawn_count, parallelism_cap, child_name]
@@ -247,8 +250,8 @@ archetypes:
       and desktop nproc conventions), overridable at binding time; on one
       lane it shapes fork-storm width and queue depth, not throughput. The
       loop shape and dispatch_overhead field are ours. dispatch_overhead is
-      make's own cpu time per spawned child, meas-ci:cli:1 (5-repeat medians
-      243-255 us; observed fork rate ~23 children/s at -j8); sigma_log is
+      make's own cpu time per spawned child, meas-ci:cli:3 (5-repeat medians
+      183-262 us; observed fork rate ~24 children/s at -j8); sigma_log is
       our convention.
 
   # ---- IO family — interbench loads + ananicy types -----------------------
@@ -264,10 +267,10 @@ archetypes:
     params:
       block_cpu:
         {dist: lognormal, median_us: 3000, sigma_log: 0.6,
-         sampling: per-iteration, source: "meas-ci:cli:1"}
+         sampling: per-iteration, source: "meas-ci:cli:3"}
       io_wait:
-        {dist: lognormal, median_us: 8600, sigma_log: 0.6,
-         sampling: per-iteration, source: "meas-ci:cli:1"}
+        {dist: lognormal, median_us: 10000, sigma_log: 0.6,
+         sampling: per-iteration, source: "meas-ci:cli:3"}
     lifetime: finite
     binding_params: [total_work]
     scalable: []
@@ -280,12 +283,13 @@ archetypes:
       interbench man-write/man-read establish the class (RAM-scale
       sequential, cache-defeating streaming) but publish no per-block timing;
       the RUN/WAIT block loop, the lognormal family (OQ-5), and total_work as
-      a binding param are ours. The meas-ci:cli:1 tag covers the block pair
+      a binding param are ours. The meas-ci:cli:3 tag covers the block pair
       jointly: the 3 ms block granularity and sigmas are our convention; the
-      measured quantity is the per-process cpu:wall duty of a stream — rsync
-      copy of the kernel tree 0.259 (5-repeat spread 0.249-0.283) -> io_wait
-      = block_cpu x (1/0.259 - 1) ~ 8.6 ms. Compressing streams run hotter
-      (tar+xz per-proc duty ~0.73), noted as the class's upper range.
+      measured quantity is the per-process cpu:wall duty of a stream. The
+      cold-cache rsync copy (vm.drop_caches=3 — matching interbench's
+      cache-defeating intent) measures 0.231 (spread 0.155-0.267) -> io_wait
+      = block_cpu x (1/0.231 - 1) ~ 10 ms; warm-cache rsync runs 0.276 and
+      compressing streams ~0.73, noted as the class's upper range.
 
   background-crawler:
     category_source: ananicy-rules
@@ -297,14 +301,14 @@ archetypes:
             - SLEEP: throttle
     params:
       scan_burst:
-        {dist: lognormal, median_us: 5000, sigma_log: 0.6,
-         sampling: per-iteration, source: "meas-pending"}
+        {dist: lognormal, median_us: 1608, sigma_log: 0.639,
+         sampling: per-iteration, source: "meas-ci:cli:3"}
       io_wait:
-        {dist: lognormal, median_us: 15000, sigma_log: 0.6,
-         sampling: per-iteration, source: "meas-pending"}
+        {dist: lognormal, median_us: 5870, sigma_log: 0.6,
+         sampling: per-iteration, source: "meas-ci:cli:3"}
       throttle:
-        {dist: lognormal, median_us: 250000, sigma_log: 0.5,
-         sampling: per-iteration, source: "meas-pending"}
+        {dist: lognormal, median_us: 3800000, sigma_log: 0.428,
+         sampling: per-iteration, source: "meas-ci:cli:3"}
     lifetime: segment-bound
     binding_params: []
     scalable: []
@@ -313,12 +317,17 @@ archetypes:
       stats: [burst/idle duty cycle of updatedb + clamscan runs]
     modeling_notes: >-
       ananicy-rules establishes the class (BG_CPUIO/indexer, ioclass idle —
-      deployed practice) but carries no rates — hence meas-pending. All
-      three params stay meas-pending after meas-ci:cli:1 by finding: the CI
-      runs are foreground on a page-cache-hot corpus, so clamscan measured
-      cpu-saturated (per-proc duty ~1.0) and updatedb completed in ~2 s flat
-      out — neither ioclass-idle throttling nor real disk waits are
-      observable there; a daemon-mode cold-cache referee is needed. The
+      deployed practice) but carries no rates. Params from meas-ci:cli:3's
+      daemon-mode referee: tracker-miner-fs-3 under dbus-run-session
+      indexing a corpus copy for 300 s per repeat (5 repeats, one miner
+      process each) — cpu-per-wake median ~1.6 ms sigma_log ~0.64
+      (scan_burst), inter-wake gap median ~3.8 s sigma_log ~0.43 (throttle:
+      the daemon's observed self-paced wake structure across index + idle).
+      io_wait derives from the cold-cache updatedb duty 0.215 (spread
+      0.147-0.244): scan_burst x (1/0.215 - 1) ~ 5.9 ms; its sigma is our
+      convention. Foreground finding retained: foreground scans never
+      throttle (clamscan per-proc duty ~1.0 warm AND ~0.98 cold) — the
+      daemon-mode run is the only valid pacing referee. The
       burst/wait/throttle loop shape is ours; the ioclass-idle character is
       expressed through low scheduling priority at binding, not encoded here.
       The daemon-mode (low-intensity, segment-bound) crawler lives here; a
@@ -406,10 +415,10 @@ archetypes:
     params:
       chunk_cpu:
         {dist: lognormal, median_us: 1000, sigma_log: 0.5,
-         sampling: per-iteration, source: "meas-ci:cli:1"}
+         sampling: per-iteration, source: "meas-ci:cli:3"}
       net_wait:
-        {dist: lognormal, median_us: 44500, sigma_log: 0.5,
-         sampling: per-iteration, source: "meas-ci:cli:1"}
+        {dist: lognormal, median_us: 16700, sigma_log: 0.5,
+         sampling: per-iteration, source: "meas-ci:cli:3"}
     lifetime: finite
     binding_params: [total_work]
     scalable: []
@@ -420,11 +429,12 @@ archetypes:
     modeling_notes: >-
       No literature taxonomy names this class; category_source is honestly
       meas (behavior class observed in our measurements). Link-saturating,
-      moderate-CPU shape per building-plan §2.1. The meas-ci:cli:1 tag
+      moderate-CPU shape per building-plan §2.1. The meas-ci:cli:3 tag
       covers the chunk pair jointly: the 1 ms chunk granularity and sigmas
       are our convention; the measured quantity is wget's cpu:wall duty
-      saturating the runner link (kernel tarball, ~0.022, spread
-      0.013-0.031) -> net_wait = chunk_cpu x (1/0.022 - 1) ~ 44.5 ms.
+      saturating the runner link (kernel tarball, ~0.057, wide spread
+      0.013-0.1 and only 2 of 5 repeats' downloads ran long enough to
+      sample — stated) -> net_wait = chunk_cpu x (1/0.057 - 1) ~ 16.7 ms.
       Structural claim only — the runner link is datacenter-class; the duty
       ratio, not the throughput, is the grounded quantity. The chunk loop
       shape is ours.

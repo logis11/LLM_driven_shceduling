@@ -310,21 +310,34 @@ def main():
 
     summary = {"cli_repeats": cli, "gui_repeats": gui, "across_repeats": {}}
     across = summary["across_repeats"]
-    across["compiler_lifetime_median_us"] = spread(
-        [r["compiler_lifetime"]["median_us"] for r in cli.values()])
-    across["compiler_lifetime_sigma_log"] = spread(
-        [r["compiler_lifetime"]["sigma_log"] for r in cli.values()])
-    across["compiler_children"] = spread(
-        [r["compiler_children"] for r in cli.values()])
-    across["compiler_cpu_frac"] = spread(
-        [r["compiler_cpu_frac"] for r in cli.values()])
+    for prefix in ("compiler", "compiler_cold"):
+        across[f"{prefix}_lifetime_median_us"] = spread(
+            [r[f"{prefix}_lifetime"]["median_us"] for r in cli.values()
+             if r.get(f"{prefix}_lifetime")])
+        across[f"{prefix}_lifetime_sigma_log"] = spread(
+            [r[f"{prefix}_lifetime"]["sigma_log"] for r in cli.values()
+             if r.get(f"{prefix}_lifetime")])
+        for key in ("children", "cpu_mean_us", "life_mean_us"):
+            across[f"{prefix}_{key}"] = spread(
+                [r.get(f"{prefix}_{key}") for r in cli.values()])
     across["make_dispatch_us"] = spread(
-        [r["make_dispatch_us"] for r in cli.values()])
-    across["fork_rate_hz"] = spread([r["fork_rate_hz"] for r in cli.values()])
-    for key in ("rsync_duty", "untar_duty", "clamscan_duty", "updatedb_duty",
-                "wget_duty", "rsync_proc_duty", "untar_proc_duty",
-                "clamscan_proc_duty", "updatedb_proc_duty", "wget_proc_duty"):
-        across[key] = spread([r[key] for r in cli.values()])
+        [r.get("make_dispatch_us") for r in cli.values()])
+    across["fork_rate_hz"] = spread(
+        [r.get("fork_rate_hz") for r in cli.values()])
+    for key in ("rsync", "untar", "clamscan", "updatedb", "wget", "tar_cold",
+                "rsync_cold", "clamscan_cold", "updatedb_cold"):
+        across[f"{key}_duty"] = spread(
+            [r.get(f"{key}_duty") for r in cli.values()])
+        across[f"{key}_proc_duty"] = spread(
+            [r.get(f"{key}_proc_duty") for r in cli.values()])
+
+    tracker_gaps = [w["gap_us"] for r in cli.values()
+                    for w in r.get("tracker_wakes", [])]
+    tracker_work = [w["work_us"] for r in cli.values()
+                    for w in r.get("tracker_wakes", [])]
+    across["tracker"] = {
+        "procs": sum(len(r.get("tracker_wakes", [])) for r in cli.values()),
+        "gap": lognormal_fit(tracker_gaps), "work": lognormal_fit(tracker_work)}
     across["chromium_peak_procs"] = spread(
         [r["chromium_peak_procs"] for r in gui.values()])
 
