@@ -3,7 +3,7 @@
 
 Everything the three of us build talks to everything else through data — a file one side writes and another side reads. Each such format is a **contract**: as long as both sides honor it, we can work independently and integration stays boring. This document lists every contract in the project, shows what each one looks like with real (or, where not yet frozen, illustrative) examples, and explains every example in plain sentences. Same audience as `background-guide.md`: general CS knowledge is enough, no OS background needed.
 
-Three contracts are **frozen** — real files exist today and code already enforces them. The rest are **drafts** — their shape is agreed at the level shown here, but the exact schemas are a decision the three of us make together at the protocol freeze (and once frozen, changing one requires everyone's sign-off plus a changelog entry).
+Some contracts are **frozen** — by shipped files and enforcing code (archetype, timeline, workload), or by ratified decision (the `cpu_scheduler` config schema in `recognition-vocabulary.md`, and the trace). The rest are **drafts** — their shape is agreed at the level shown here, but the exact schemas are a decision the three of us make together at the protocol freeze. Frozen is not untouchable: changing a frozen contract is always possible, it just takes everyone's sign-off plus a changelog entry — so propose edits rather than deviating quietly.
 
 ---
 
@@ -63,7 +63,7 @@ The dotted lines are the deliberate cheat paths, and they are the experiment's c
 | 5 | Proposal | JSON, internal to the daemon | daemon-internal (recorded in 6) | draft |
 | 6 | Config schedule | JSON | daemon → simulator | draft |
 | 7 | Recognition log | JSON | daemon → harness | draft |
-| 8 | Trace | event log (e.g. JSONL) | simulator → harness | draft |
+| 8 | Trace | JSONL, `*.trace.jsonl(.gz)` | simulator → harness | **frozen** |
 
 ---
 
@@ -375,19 +375,59 @@ In sentences: one entry per **query point** — each pinned set change that made
 
 ## 9. Trace — what happened, written down
 
-**Draft — the harness and simulator sides propose and freeze the exact format together. Flows simulator → harness. Illustrative lines:**
+**Frozen 2026-08-28. Flows simulator → harness — the simulator's only real product: an append-only log of everything that happened, from which the harness computes every metric after the fact; the simulator itself computes no statistics.** (As with every frozen contract: not untouchable — if implementing it surfaces something awkward, propose the change rather than deviating quietly.)
 
-```jsonl
-{"t": 0,        "event": "config_applied", "algorithm": "MLFQ", "provenance": "fallback"}
-{"t": 0,        "event": "run_start", "task": "editor"}
-{"t": 3000,     "event": "block",     "task": "editor",  "reason": "wait"}
-{"t": 3000,     "event": "run_start", "task": "hog"}
-{"t": 11000,    "event": "preempt",   "task": "hog",     "reason": "slice_expired"}
-{"t": 16667,    "event": "deadline",  "task": "game.chain.16", "met": true, "slack_us": 1042}
-{"t": 60450000, "event": "config_applied", "algorithm": "MLFQ", "provenance": "unmodified"}
+The format is **JSONL** — one JSON object per line, lines ordered by `t`, ties resolved by the simulator's deterministic tie-break rule. All times integer microseconds. Traces may be gzipped on disk (`*.trace.jsonl.gz`); the harness streams either. Same workload events + same config schedule ⇒ byte-identical trace — this doubles as the reproducibility test and the golden-trace regression net.
+
+The first line is a header identifying the run:
+
+```jsonc
+{"event":"meta", "workload_id":"c1-office", "condition":"fixed",
+ "sim":"simulator@<version-or-commit>", "schedule_entries":1}
 ```
 
-In sentences: the trace is the simulator's only real product — an append-only log of everything that happened, from which the harness computes every metric after the fact; the simulator itself computes no statistics. The `run_start`/`block`/`preempt` lines carve the CPU timetable: the editor started running at t = 0, gave up the lane at t = 3 ms because it hit a `WAIT`, the hog took over, and at t = 11 ms the scheduler forcibly paused the hog because its time slice ran out. Response time, turnaround, throughput and starvation all fall out of lines like these. The `deadline` line is emitted once per periodic job: this frame met its due time with 1,042 µs to spare — deadline miss rate and P99 frame latency are computed from these. The `config_applied` lines record each config-schedule entry taking effect, echoing its provenance, so any stretch of the timetable can be attributed to the configuration that governed it. Two properties matter more than the exact field names: the trace must be **deterministic** (same run file + same schedule ⇒ bit-identical log — this doubles as the reproducibility test) and **flat** (a simple line-per-event log that can be streamed; these files get large).
+Then **seven runtime event types**, and nothing else the harness reads:
+
+```jsonc
+// task lifecycle — arrivals included even though file tasks' arrivals are in the
+// input, because spawned children's start times are EMERGENT and belong here:
+{"event":"task_arrive", "t":2000000, "task":"build",    "source":"file"}
+{"event":"task_arrive", "t":2000105, "task":"build.c1", "source":"spawn", "parent":"build"}
+{"event":"task_end",    "t":2158000, "task":"build.c1", "reason":"exit"}      // or "depart"
+
+// readiness — the moment a task becomes runnable, with why:
+{"event":"ready", "t":10000, "task":"editor", "cause":"wake"}
+//   cause ∈ arrive | wake | sleep_end | timer_tick | fork_slot
+
+// lane occupancy — who held the CPU, from when to when, and why it ended:
+{"event":"run_start", "t":20000, "task":"editor"}
+{"event":"run_end",   "t":23000, "task":"editor", "reason":"block", "blocked_on":"wait"}
+//   reason ∈ block | preempt | exit | depart;  blocked_on ∈ wait | sleep | timer | fork_slot
+
+// one line per periodic job:
+{"event":"deadline", "t":15625, "task":"game.chain.16", "due":16667, "met":true, "slack_us":1042}
+
+// each config-schedule entry taking effect:
+{"event":"config_applied", "t":60450000, "index":1, "algorithm":"MLFQ", "provenance":"unmodified"}
+```
+
+Why `ready` is its own event — the one non-obvious call: for interactive work, the number that matters is *per-stimulus* scheduling delay, keystroke → service, which is `run_start − ready`. The harness cannot reconstruct readiness from the input file, because it is emergent: a keystroke queued while the task is mid-burst makes the task runnable at a different moment than the wake event's timestamp, and `sleep_end`/`timer_tick`/`fork_slot` readiness times all depend on scheduling. Emitting readiness explicitly means the harness never re-implements simulator semantics — the class of bug that produces silently wrong papers. The same logic puts spawned children's `task_arrive` in the trace: fork times are emergent, and "how fast did the build fan out" reads straight off it.
+
+How every metric maps:
+
+| Metric | Computed from |
+|---|---|
+| Response time (per task) | first `run_start` − `task_arrive` |
+| Interaction latency (per stimulus) | `run_start` − matching `ready(cause=wake)` |
+| Turnaround | `task_end` − `task_arrive` |
+| Throughput | Σ run intervals of batch tasks / elapsed |
+| Starvation | longest gap where a task has `ready` but no `run_start` |
+| Deadline miss rate / P99 frame latency | `deadline` lines (`met`, `slack_us`) |
+| Context-switch count | `run_end(reason=preempt)` count |
+| Provenance breakdown / config age | `config_applied` lines joined with occupancy |
+| Utilization / idle | complement of run intervals |
+
+Two rules complete the contract. **The harness set is closed**: the eight event types above are what the harness reads — but anything the simulator wants to emit for its own debugging is welcome under an `x_`-prefixed event name (`{"event":"x_mlfq_boost", …}`); the harness ignores the prefix wholesale, so diagnostics need no schema negotiation. And **two definitions ride with the metric-definitions freeze**, not with this format: what "a periodic job completes" means (working definition: job k starts when its TIMER tick is consumed and completes when the task next reaches a TIMER; `due` = tick k + period — the `deadline` line's shape is unaffected if this is adjusted, but the numbers move), and that starvation is measured from `ready`, never from arrival (a task sleeping voluntarily is not starving).
 
 ---
 
@@ -413,4 +453,4 @@ In sentences: the trace is the simulator's only real product — an append-only 
 
 ## 11. The freeze rule
 
-The three frozen contracts (archetype, timeline, workload) are enforced by schema and CI today. The drafts — the two views, the config schedule, the recognition log, the daemon-internal telemetry/proposal shapes, and the trace — harden in one deliberate step, the **protocol freeze**, because they are exactly the seams where the three of us could silently build against three slightly different assumptions and discover it at integration time. The config schedule freezes first: both the daemon and the simulator build against it from day one. After the freeze, any change to any contract needs all three of us and a changelog entry. Until then, the drafts above are the shared starting point: build to them, and bring friction to the freeze discussion rather than working around it quietly.
+The dataset contracts (archetype, timeline, workload) are frozen and enforced by schema and CI today; the `cpu_scheduler` config schema and the trace are frozen by ratified decision (2026-08-28). The remaining drafts — the two views, the config schedule envelope, the recognition log, and the daemon-internal telemetry/proposal shapes — harden in one deliberate step, the **protocol freeze**, because they are exactly the seams where the three of us could silently build against three slightly different assumptions and discover it at integration time. The config schedule freezes first: both the daemon and the simulator build against it from day one. Frozen or draft, the operating rule is the same: any change to a frozen contract needs all three of us and a changelog entry, and until a draft freezes it is the shared starting point — build to it, and bring friction to the freeze discussion rather than working around it quietly.

@@ -209,14 +209,15 @@ Its configuration is exactly the frozen MLFQ `params` from `../recognition-vocab
 
 The simulator's product is a **trace**: a machine-readable record from which every metric is computed *after the fact* by the harness. The simulator times nothing and computes no statistics; it writes down what happened.
 
-The exact format is deliberately **not frozen here** — it's one of the protocol schemas the team freezes together, and you should come to that conversation with a proposal shaped by what was convenient to emit. What it must be able to answer, since all metrics derive from these:
+The format is **frozen** in `../data-contracts.md` §9 (ratified 2026-08-28): JSONL, one `meta` header line, then seven event types — `task_arrive`, `task_end`, `ready`, `run_start`, `run_end`, `deadline`, `config_applied` — with `x_`-prefixed event names free for your own diagnostics (the harness ignores them). The full field lists, the metric-to-event mapping, and the rationale (notably why `ready` is its own event) live there; the shape of what you must be able to answer:
 
-- when each task arrived, first ran, and ended (→ response time, turnaround);
-- every interval of lane occupancy: who, from when, to when, and why it ended (block? preempt? exit?) (→ throughput, starvation);
-- for TIMER-driven work: each tick's due time and actual completion (→ deadline miss rate, P99 frame latency);
-- each config-schedule entry taking effect (`config_applied`, echoing its provenance) (→ the "was the LLM actually driving?" accounting).
+- when each task arrived (spawned children included — their start times are emergent), first ran, and ended (→ response time, turnaround);
+- when each task *became runnable* and why (→ per-stimulus interaction latency, starvation);
+- every interval of lane occupancy: who, from when, to when, and why it ended (→ throughput, context switches);
+- for TIMER-driven work: each job's due time and outcome (→ deadline miss rate, P99 frame latency);
+- each config-schedule entry taking effect, echoing its provenance (→ the "was the LLM actually driving?" accounting).
 
-Plus two properties: **deterministic** (bit-identical across reruns — trace stability is your reproducibility test) and **append-only simple** (a flat event log, e.g. JSONL, beats a clever nested structure; logs get big, and the harness will stream them).
+Plus the two properties the freeze bakes in: **deterministic** (same inputs ⇒ byte-identical trace, `x_` lines included — trace stability is your reproducibility test) and **flat/streamable** (these files get big; gzip on disk is fine). Frozen is not final-forever: if emitting some event turns out awkward mid-implementation, or a field you need is missing, propose the change in `data-contracts.md` — the format bends deliberately, together, not silently per-tree.
 
 ## 7. The first integration gate, and a suggested path to it
 
