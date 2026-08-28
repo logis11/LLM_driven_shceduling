@@ -11,6 +11,7 @@ Every doc answers one question. Statuses: **normative** (states what is; kept cu
 | [related-work.md](related-work.md) | how we position against prior work | draft |
 | [references.md](references.md) | what we cite, in what form, for what claim — and the id-minting rule | normative |
 | [terminology.md](terminology.md) | what our words mean | normative |
+| [data-contracts.md](data-contracts.md) | every data format in the project, with explained examples and how they connect | draft |
 | [simulator/primer.md](simulator/primer.md) | what the simulator does and does not model | normative |
 | [simulator/background-guide.md](simulator/background-guide.md) | self-contained onboarding: the experiment, the simulator's role, the dataset, the vocabulary | draft |
 | [simulator/simulator-guide.md](simulator/simulator-guide.md) | what the simulator must do, what's decided, what's the builder's to decide | draft |

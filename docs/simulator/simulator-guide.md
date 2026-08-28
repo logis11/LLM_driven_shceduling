@@ -83,11 +83,15 @@ Each task's `program` is a list of instructions; the task VM steps through them 
 ### `{ "op": "RUN", "us": N }`
 Consume N microseconds of *lane time*. This is CPU demand, not wall time: if the task gets preempted after 300 µs of a 1000 µs RUN, the remaining 700 µs demand survives and continues whenever the task next holds the lane. A RUN's wall-clock extent is exactly what the experiment measures — never treat it as a fixed interval.
 
+A concrete arithmetic check for your implementation: task A executes `RUN 1000` starting at t=5000. At t=5300 the scheduler preempts it for 2000 µs of other work, then lets it back on. A's remaining demand at re-entry is 700 µs, so the RUN completes at t=8000. Total demand delivered: exactly 1000 µs. Wall-time extent: 3000 µs. If your simulator ever "loses" or "duplicates" demand across a preemption, every downstream metric silently corrupts — worth a dedicated unit test.
+
 ### `{ "op": "SLEEP", "us": N }`
 Leave the lane voluntarily; become runnable again at `now + N`. Relative to whenever the sleep starts.
 
 ### `{ "op": "TIMER", "period_us": P }`
 The metronome. Block until the next tick of this task's period grid — ticks at t₀, t₀+P, t₀+2P, … regardless of how late previous iterations ran (that's the difference from SLEEP: a SLEEP-loop drifts later and later under load; a TIMER doesn't, which is what a 60 fps game actually does). Late ticks **accumulate as backlog**: if the task was stuck so long that two ticks passed, the next two TIMERs complete immediately — missed frames turn into pressure, not silence.
+
+Worked example of the backlog rule, using the 60 fps grid (P = 16,667 µs, ticks at 0, 16667, 33334, 50001, …): a frame task finishes frame work and reaches its next TIMER at t=14000 — it blocks until the t=16667 tick. Fine so far. Now suppose a heavy stretch keeps the task off the CPU and it doesn't reach its TIMER again until t=40000. Two ticks (16667 and 33334… whichever it hadn't consumed yet) have passed unconsumed. The rule: those TIMERs complete *immediately*, one per loop iteration, so the task rattles off the overdue frames back-to-back, and only once it has caught up with the grid does a TIMER actually block again (until t=50001). The effect is that a starved periodic task piles up pressure and fights to catch up — like a real game engine — instead of quietly skipping frames, which would *reduce* CPU demand exactly when the scheduler misbehaves and mask the damage the experiment wants to see.
 
 In the compiled coreset, TIMER appears in shapes like the frame producer of the gaming files:
 
@@ -107,8 +111,43 @@ Make the target task runnable (it's the sending half of task-to-task WAIT/WAKE e
 ### `{ "op": "FORK" }` and `{ "op": "EXIT" }`
 `EXIT` terminates the executing task. `FORK` is for orchestrators like `make`: the arrive event carries a `spawn_table` — an ordered, fully pre-written list of children (their ids, names, and complete programs — e.g. 100 `cc1` entries) — and a `fork_cap` (e.g. 8, as in `make -j8`). Each `FORK` instruction creates the *next* unconsumed table entry as a live task. The cap is a wait-for-slot rule: at most `fork_cap` of this parent's children alive at once; a `FORK` while the cap is full blocks until a child exits. So *which* children exist and *what they do* is fixed in the file; *when* each one starts is an emergent, scheduler-dependent time — under a generous scheduler the build fans out fast, under a starved one it crawls. That divergence is signal, not a bug.
 
+Worked example of the cap: `make` has `fork_cap: 8` and rattles off eight FORKs — children c1…c8 now exist and compete for the lane alongside everyone else. Make reaches its ninth FORK while all eight are still alive: the FORK **blocks**. At some later, scheduler-dependent moment c3 happens to finish and EXITs; a slot opens; make's blocked FORK completes and c9 is born. Note what this implies: c9's start time depends on how the scheduler treated c1–c8 — starve the compile family and the whole table drains slowly; favor it and the pipeline stays full. The total *work* is identical either way; the *shape in time* is not.
+
 ### `{ "op": "LOOP", "count": N | "unbounded", "body": [ … ] }`
 VM-internal repetition — the DES core never sees it as an event; your VM just cycles the body. `count: N` repeats N times. `count: "unbounded"` repeats forever and is legal only for segment-bound tasks: the loop's true terminator is the task's pinned `depart`. (Bounded repetition with per-iteration variety is instead unrolled flat by the compiler — that's why editor programs are hundreds of literal WAIT/RUN pairs while a game frame loop is one compact unbounded LOOP.)
+
+## 4½. A complete worked run, event by event
+
+Nothing builds intuition for a discrete-event core like tracing one tiny run by hand. Here's a miniature workload — two tasks, two keystrokes, all times in µs:
+
+```jsonc
+"events": [
+  { "op": "arrive", "t": 0, "id": "editor", "name": "code", "depart": 50000,
+    "program": [ { "op": "WAIT", "channel": "input:e" }, { "op": "RUN", "us": 3000 },
+                 { "op": "WAIT", "channel": "input:e" }, { "op": "RUN", "us": 2000 } ] },
+  { "op": "arrive", "t": 0, "id": "hog", "name": "python3",
+    "program": [ { "op": "RUN", "us": 20000 }, { "op": "EXIT" } ] },
+  { "op": "wake", "t": 10000, "channel": "input:e", "target": "editor" },
+  { "op": "wake", "t": 30000, "channel": "input:e", "target": "editor" }
+]
+```
+
+Run it under the dumbest legal scheduler — non-preemptive run-until-block ("whoever has the lane keeps it until they block or exit"):
+
+| clock | event popped | what happens | lane |
+|---|---|---|---|
+| 0 | arrive `editor` | its VM starts, first instruction is WAIT → blocks instantly, consuming nothing | — |
+| 0 | arrive `hog` | its VM starts on RUN 20000 → runnable; lane is free, scheduler hands it over | hog |
+| 10000 | wake `input:e` | editor's WAIT completes → editor runnable. Our scheduler doesn't preempt, so it merely joins the ready set | hog |
+| 20000 | hog's RUN completes | next instruction EXIT → hog is gone. Scheduler picks the only runnable task | editor |
+| 23000 | editor's RUN 3000 completes | next instruction WAIT → blocks. Nobody runnable | idle |
+| 30000 | wake `input:e` | editor runnable again, takes the free lane | editor |
+| 32000 | editor's RUN 2000 completes | next instruction WAIT → blocks (no more wakes will come) | idle |
+| 50000 | editor's `depart` | segment-bound task removed while blocked. Event queue empty → run over | — |
+
+Now read the metrics off it, exactly as the harness will: the hog's turnaround is 20000 − 0 = 20 ms, and its response time is 0 (it ran immediately). The editor's response to keystroke #1 is 20000 − 10000 = **10 ms** — the keystroke sat unserved while the hog finished — versus effectively 0 for keystroke #2, which arrived to an idle lane. Total lane utilization: 25 ms of work in 50 ms of virtual time, 50%.
+
+The punchline: replace the scheduler with one that preempts on wake, rerun the *identical file*, and keystroke #1's response drops from 10 ms to ~0 while the hog's turnaround stretches from 20 ms to 23 ms. Same input, different timetable, different numbers — that difference is the entire experiment, in miniature. (Also notice everything the walkthrough needed: a clock, an ordered future-event queue, per-task VM state, a ready set, and a policy consulted at decision points. That's your whole architecture checklist.)
 
 ## 5. The scheduler seat
 
@@ -126,6 +165,8 @@ The scheduler sits behind a narrow interface, because *swapping it is the entire
 3. A task that burns its whole slice at level i is demoted to i+1 (it's acting like batch work).
 4. A task that blocks (WAIT/SLEEP/TIMER) before its slice ends stays at its level (it's acting interactive).
 5. Every `boost_interval`, everything returns to the top queue — the anti-starvation reset.
+
+To see the rules bite, replay the §4½ miniature under a 3-level MLFQ with a 2000 µs slice: both tasks start in Q0. The hog burns its full 2000 µs slice → demoted to Q1; burns another → Q2, the bottom, where it grinds on. At t=10000 the keystroke makes the editor runnable *in Q0*, which outranks Q2 — the editor preempts, runs its 3000 µs burst (blocking once at slice end and resuming, or spanning slices, depending on your within-queue rule — decide and document), then WAITs again, never demoted because it always blocks early. Keystroke response: ~0 ms instead of the 10 ms the naive scheduler produced. The hog resumes in Q2 and finishes around t=23000 instead of 20000. MLFQ *learned* which task was interactive from behavior alone, in two observations — that's the self-tuning quality every experimental condition stands on.
 
 Its configuration is roughly `{ num_queues, timeslice_ms (per level or schedule), boost_interval_ms }` — exact schema is one of the protocol decisions the three of us freeze together, so keep it in one obvious struct.
 
@@ -178,6 +219,24 @@ Real ambiguities you'll hit; none has a decided answer today. When you hit one, 
 5. **Fork-slot wakeups.** Cap-full parent with several children exiting at once, or a child exiting at the same instant the parent would fork: exact unblock ordering (interacts with question 3).
 
 Running this list to ground early — even before code — would make a good first working session with the dataset side.
+
+## 10. Terms for the inside of the machine
+
+The background guide's glossary covers the project vocabulary; these are the extra words this guide uses for simulator internals.
+
+| Term | Meaning here |
+|---|---|
+| **event queue** | the priority queue of future moments the core must handle: arrivals, wakes, timer ticks, slice expiries, departs. The main loop pops the earliest, always |
+| **decision point** | any moment the scheduler is consulted: a task arrived/woke, the running task blocked/exited/departed, or its slice expired. Between decision points, nothing to decide |
+| **runnable / blocked / running** | the three task states: wants the lane / waiting on something (WAIT, SLEEP, TIMER, a fork slot) / currently holding the lane |
+| **ready set** | the runnable tasks the scheduler chooses among (in MLFQ, structured as the queues) |
+| **task VM** | the tiny per-task interpreter stepping through its program; a coroutine in spirit — it advances until the program blocks or ends |
+| **remaining demand** | the unconsumed portion of a preempted RUN; must be conserved exactly across preemptions |
+| **slice expiry** | the scheduled future event "if this task still holds the lane at t, preempt it"; cancelled if the task blocks first |
+| **backlog (of a TIMER)** | grid ticks that passed while the task couldn't consume them; each completes a TIMER instantly until the task catches up |
+| **tie-break rule** | your written, deterministic answer to "two events at the same microsecond — who first?" (open question 3) |
+| **golden trace** | a committed known-good trace for a fixture workload; tests diff current output against it byte-for-byte — the cheapest strong regression net for a deterministic simulator |
+| **idle** | the lane with no runnable task; virtual time jumps straight to the next event (never "spin") |
 
 ---
 

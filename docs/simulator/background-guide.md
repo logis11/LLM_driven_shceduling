@@ -61,6 +61,10 @@ We keep the executor **absolutely identical** across all experiments and swap in
 
 The oracle deserves a beat of explanation, because it sounds like cheating. Every workload file in our dataset carries a hidden **ground truth**: a label saying what situation the file represents at every moment, written by whoever authored the file. The oracle recognizer just reads that label. It can't be wrong. That gives us the *ceiling*: the best any recognizer could possibly do on this executor. The interesting question is always "where between `random` and `oracle` does the LLM land, and does it clear `whitelist`?"
 
+What does a recognizer's answer actually look like? Two parts. A **mode** — one label from a small fixed menu saying what the machine is primarily being used for (`gaming`, `compile`, `office`, `idle`, …). And **attributes** — independent extra facts that a single label can't carry, like `wanted: true` ("the background work here is something the user asked for"). The two-part shape matters: "gaming", "gaming while a wanted download runs", and "gaming while an unwanted scan runs" are all `mode: gaming`, and only the attribute separates the last two — which is exactly the game-download-vs-virus-scan story from section 1. With 5 modes and 2 boolean attributes you can express 20 distinct situations while only ever validating 7 small vocabularies, which is why the design uses dimensions instead of piling up more labels.
+
+The executor's side of the bargain is a **configuration**: a small bundle of scheduler settings like "use the MLFQ algorithm with these queue parameters" or "switch to deadline-first scheduling and cap background work at 12% of the CPU." The executor keeps a fixed lookup table from (mode, attributes) to configuration; the recognizer's only job is to land on the right row. (In the most permissive LLM variant the model proposes the configuration itself — that's variant C — but the table is the default path.)
+
 And before any LLM enters the picture, there's a cheap kill-check called **RQ0**: run just `random` and `oracle` first. If perfect recognition barely beats random guessing, then recognition quality doesn't matter on these workloads — the experiment is dead and no prompt engineering can revive it. That check needs no model, no API key, just the simulator. It's the first real experiment the simulator will run.
 
 One more mindset note: **a negative result is a real result here.** "The LLM reads situations correctly but scheduling doesn't improve" is a publishable finding — it means the ordinary scheduler's behavioral heuristics were already good enough. We are set up so that honest failure is informative, not embarrassing.
@@ -95,6 +99,18 @@ All performance numbers are then *read off the timetable*, not measured with any
 | P99 latency | the 99th-percentile completion time of periodic jobs — the *bad* frames | games; a good average with a bad tail still feels like stutter |
 | Throughput | total CPU time delivered to batch work per unit time | compiles |
 | Starvation | the longest stretch any task went without CPU at all | everyone — the safety check |
+
+Let's read one metric off the little timetable above to make this concrete. Suppose the editor's keystroke arrived at t=2.5 ms, while `cc1` held the CPU, and the editor's next block starts at t=11. Then the editor's response time for that keystroke is 11 − 2.5 = 8.5 ms — the user waited 8.5 ms to see their character appear, because the scheduler chose to let the compiler finish its stretch first. A different scheduler might have preempted `cc1` at 2.5 ms and gotten the editor's response time near zero, at the cost of stretching the compile. Neither choice is free; the whole game is *which* trade-off each configuration makes, and whether knowing the situation lets you pick the right one.
+
+### How the default scheduler thinks — MLFQ in one story
+
+Since every experiment stands on MLFQ (Multi-Level Feedback Queue), it's worth seeing how it actually behaves. MLFQ maintains several priority queues and *learns* what each task is by watching it:
+
+- A task that uses up its entire turn (its **time slice**) without pausing looks like batch work — demote it one queue down.
+- A task that gives up the CPU early to wait (for a keystroke, for disk) looks interactive — keep it in the high queue.
+- Every so often, boost everything back to the top queue, so a low-queue task can never be starved forever.
+
+Watch it run on our two customers. The editor wakes for a keystroke, computes 0.5 ms of a 2 ms slice, and goes back to waiting — it stays in the top queue, so the next keystroke gets served almost instantly. The compiler chews through its full 2 ms slice, gets demoted; chews through the next, demoted again; and settles at the bottom, where it runs in long uninterrupted stretches whenever nothing interactive is awake. Nobody told MLFQ which task was which — three or four observations were enough. That's why MLFQ is the honest baseline: it's *genuinely good*, and any claimed improvement has to beat this self-tuning behavior, not a strawman. It's also why the project's sharpest workloads are ones where behavior-watching **cannot** work even in principle — a wanted training run and an unwanted indexer behave identically, so MLFQ necessarily treats them identically, and only something that knows what the software *is* can do better.
 
 Because the scripts are fixed and the simulator has no randomness of its own (more on that below), two runs with the same workload and same scheduler produce **byte-identical** timetables. Perfect reproducibility is the reason we simulate instead of using a real machine, where thermal throttling and background noise would drown the effect we're measuring.
 
@@ -154,6 +170,8 @@ You won't build any of this — it's already built and frozen in `dataset/` — 
 
 The compiled set the simulator will run is the **coreset**: 24 workload files, each a scenario designed to probe one specific question — six "pure single situation" calibration files, six paired files that behave identically but mean different things (the story from section 1, made literal), transition arcs where the situation changes mid-run, files with deliberate distractions, files where familiar software is renamed to gibberish, and files designed to fool name-based recognition on purpose. A second, generated set (the **generalset**) comes much later.
 
+One design property worth understanding, because it explains why the files look "too busy": every coreset file is deliberately **oversubscribed** — the tasks collectively demand roughly 100–150% of what one CPU lane can supply. That's not sloppiness; it's the precondition for measuring anything. If total demand were, say, 40% of the lane, every task would get all the CPU it wants no matter how dumb the scheduler is, all conditions would score identically, and the experiment would be blind. Scarcity is what forces the scheduler to make real choices, and real choices are what recognition quality can improve. (Each compiled file's demand is checked against this window at build time.)
+
 One practical note: the compiled files live in `dataset/build/`, which is *not* checked into git (a manifest of hashes is). After cloning, run `make dataset` inside `dataset/` once to produce them.
 
 ## 6. The three of us
@@ -202,6 +220,16 @@ A reference table — skim now, return when a term bites you. These are the mean
 | **channel** | a named mailbox a task can WAIT on; wakes are addressed to channels |
 | **spawn table** | a pre-written list of children an orchestrator task (like `make`) creates at run time via FORK |
 | **trace** | the simulator's output: the timetable plus everything that happened, from which all metrics are computed |
+| **daemon** | the recognition-side process (박이안's tree): receives telemetry, queries the LLM (or a baseline), emits proposals |
+| **driver / consumer** | any subsystem that subscribes to the recognition signal and translates it into its own settings; the CPU scheduler is the one driver this project builds |
+| **validator** | the gatekeeper between the daemon's proposal and the executor: rejects unknown vocabulary, clamps out-of-range values, falls back when proposals fail |
+| **provenance** | the stamp on every applied configuration saying how it came to be: `unmodified`, `clamped`, `held`, or `fallback` — reported next to every result |
+| **RQ0** | the first experiment: is the random-to-oracle gap even big enough to measure? Run before any LLM work |
+| **Layer 1 / Layer 2** | the two measurement layers: recognition accuracy (was the situation read correctly?) vs. consumer performance (did scheduling actually improve?) — kept separate so "read right, didn't help" is a distinguishable outcome |
+| **oversubscription / demand** | how much CPU the tasks collectively want, relative to the lane; coreset files sit at ~100–150% on purpose so schedulers must make real choices |
+| **telemetry** | the snapshots of "which processes exist right now" the simulator sends the daemon — names and counts only, never behavior or labels |
+| **proposal** | the daemon's full answer: reasoning + situation summary + `system` block (mode/attributes) + optional per-subsystem suggestions |
+| **configuration (config)** | the validated scheduler settings the executor actually applies — algorithm choice plus its parameters plus caps |
 
 ---
 
