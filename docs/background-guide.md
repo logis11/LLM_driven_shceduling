@@ -1,7 +1,7 @@
-# Background Guide — everything to know before building the simulator
+# Background Guide — everything to know before building your part
 > Status: draft · Created 2026-08-28 · Updated 2026-08-28
 
-This is the first half of the simulator onboarding guide, written for a reader who has skimmed the research proposal once and has general CS knowledge but no OS background. It is deliberately self-contained: it re-explains everything it needs, in plain language, so you can read it top to bottom without opening another document. The second half — what the simulator itself must do — is `simulator-guide.md`, which assumes you've read this one.
+This is the shared first half of onboarding for both builders — the simulator (인경민) and the daemon (박이안) — written for a reader who has skimmed the research proposal once and has general CS knowledge but no OS background. It is deliberately self-contained: it re-explains everything it needs, in plain language, so you can read it top to bottom without opening another document. The component-specific second halves — what your program must do — are `simulator/simulator-guide.md` and `daemon/daemon-guide.md`, each of which assumes you've read this one.
 
 ---
 
@@ -40,6 +40,8 @@ Think of a restaurant: the LLM is the manager who occasionally walks through the
 
 A nice safety property falls out of this: if the LLM is slow, wrong, or dead, the fast loop keeps running its last (or default) configuration. The worst case is a slightly mistuned ordinary scheduler — never a broken system.
 
+One important thing about *our experiment specifically*: in a deployed system these two loops would run live, side by side. In our experiment they don't even run at the same time. Because every workload is fully pre-scripted (more on that in section 5), the slow loop can be run **entirely in advance**: the daemon reads what a recognizer would have seen, does all its recognition work offline, and writes down a finished *schedule* of configurations — "at t = 0 use these settings; from t = 60.45 s use those." The simulator then runs the fast loop alone, consuming that schedule as one of its inputs. The two programs never talk to each other; they only pass files. This buys enormous simplicity (each side can be built and tested completely independently) and costs nothing in fidelity, because everything the live loop would have known is derivable in advance — including the LLM's slowness, which is honestly preserved by stamping each configuration to take effect *late* by the measured recognition latency.
+
 ## 3. What exactly are we testing?
 
 Here's the part that makes this an *experiment* rather than a demo, and it's the single most important thing to understand about the project.
@@ -63,7 +65,7 @@ The oracle deserves a beat of explanation, because it sounds like cheating. Ever
 
 What does a recognizer's answer actually look like? Two parts. A **mode** — one label from a small fixed menu saying what the machine is primarily being used for (`gaming`, `compile`, `office`, `idle`, …). And **attributes** — independent extra facts that a single label can't carry, like `wanted: true` ("the background work here is something the user asked for"). The two-part shape matters: "gaming", "gaming while a wanted download runs", and "gaming while an unwanted scan runs" are all `mode: gaming`, and only the attribute separates the last two — which is exactly the game-download-vs-virus-scan story from section 1. With 5 modes and 2 boolean attributes you can express 20 distinct situations while only ever validating 7 small vocabularies, which is why the design uses dimensions instead of piling up more labels.
 
-The executor's side of the bargain is a **configuration**: a small bundle of scheduler settings like "use the MLFQ algorithm with these queue parameters" or "switch to deadline-first scheduling and cap background work at 12% of the CPU." The executor keeps a fixed lookup table from (mode, attributes) to configuration; the recognizer's only job is to land on the right row. (In the most permissive LLM variant the model proposes the configuration itself — that's variant C — but the table is the default path.)
+The executor's side of the bargain is a **configuration**: a small bundle of scheduler settings like "use the MLFQ algorithm with these queue parameters" or "switch to deadline-first scheduling and cap background work at 12% of the CPU." A fixed lookup table — the **driver table**, living on the daemon side — maps (mode, attributes) to configuration; the recognizer's only job is to land on the right row. (In the most permissive LLM variant the model proposes the configuration itself — that's variant C — but the table is the default path.)
 
 And before any LLM enters the picture, there's a cheap kill-check called **RQ0**: run just `random` and `oracle` first. If perfect recognition barely beats random guessing, then recognition quality doesn't matter on these workloads — the experiment is dead and no prompt engineering can revive it. That check needs no model, no API key, just the simulator. It's the first real experiment the simulator will run.
 
@@ -116,9 +118,9 @@ Because the scripts are fixed and the simulator has no randomness of its own (mo
 
 What simulation costs us, honestly: no cache effects (real context switches trash CPU caches; our timetable doesn't model that), one CPU lane only (no multi-core interactions), no real kernel overheads. The claim we can make is "the semantic signal carries usable information for scheduling" — a prerequisite for a real implementation, not a substitute for one.
 
-## 5. The dataset: what the simulator eats
+## 5. The dataset: what everything eats
 
-The simulator's entire input is a directory of **canonical workload files** — one JSON file per experiment scenario. Here's a real one, abbreviated (`c2-p1a`, "an editor plus an ML training run"):
+The whole experiment's raw material is a directory of **canonical workload files** — one JSON file per experiment scenario. Neither of your programs reads a whole file: each gets a derived *view* containing only its permitted slice (the simulator gets the events without the answer key; the daemon gets the names without the behavior — details in `data-contracts.md` and your own guide). But you should know what the master file contains. Here's a real one, abbreviated (`c2-p1a`, "an editor plus an ML training run"):
 
 ```jsonc
 {
@@ -177,8 +179,8 @@ One practical note: the compiled files live in `dataset/build/`, which is *not* 
 ## 6. The three of us
 
 - **인지오** — owns the dataset above and the experiment infrastructure: the harness that runs conditions, computes metrics from traces, and produces plots; plus the contract documents that pin down formats.
-- **인경민** — owns the simulator: everything in `simulator-guide.md`.
-- **박이안** — owns recognition: the LLM prompts and model hosting, and also the `whitelist` baseline (the strongest competitor deliberately lives with the person arguing for the LLM).
+- **인경민** — owns the simulator: everything in `simulator/simulator-guide.md`.
+- **박이안** — owns the daemon: everything in `daemon/daemon-guide.md` — the LLM prompts and model hosting, and also the `whitelist` baseline (the strongest competitor deliberately lives with the person arguing for the LLM).
 
 The trees in the repo mirror this: `dataset/`, `simulator/`, `daemon/` (recognition), `harness/`. Ownership as listed is the current draft and can shift — the tree boundaries are what's stable.
 
@@ -220,17 +222,22 @@ A reference table — skim now, return when a term bites you. These are the mean
 | **channel** | a named mailbox a task can WAIT on; wakes are addressed to channels |
 | **spawn table** | a pre-written list of children an orchestrator task (like `make`) creates at run time via FORK |
 | **trace** | the simulator's output: the timetable plus everything that happened, from which all metrics are computed |
-| **daemon** | the recognition-side process (박이안's tree): receives telemetry, queries the LLM (or a baseline), emits proposals |
+| **daemon** | the recognition-side program (박이안's tree): reads a workload's visible projection, runs a recognizer over it offline, emits a config schedule + recognition log |
+| **run file** | the simulator's view of a workload: the events, with the answer key stripped |
+| **visible projection** | the daemon's view of a workload: process names, counts, and pinned lifetimes — no behavior, no labels |
+| **config schedule** | the daemon's output for the simulator: a list of (virtual time, configuration) pairs, applied as the run plays out |
+| **recognition log** | the daemon's output for the grader: per query point, the telemetry shown, the full proposal, validation outcome, latency |
+| **query point** | a moment the process set changes (per pinned events), triggering one recognizer consultation |
 | **driver / consumer** | any subsystem that subscribes to the recognition signal and translates it into its own settings; the CPU scheduler is the one driver this project builds |
 | **validator** | the gatekeeper between the daemon's proposal and the executor: rejects unknown vocabulary, clamps out-of-range values, falls back when proposals fail |
 | **provenance** | the stamp on every applied configuration saying how it came to be: `unmodified`, `clamped`, `held`, or `fallback` — reported next to every result |
 | **RQ0** | the first experiment: is the random-to-oracle gap even big enough to measure? Run before any LLM work |
 | **Layer 1 / Layer 2** | the two measurement layers: recognition accuracy (was the situation read correctly?) vs. consumer performance (did scheduling actually improve?) — kept separate so "read right, didn't help" is a distinguishable outcome |
 | **oversubscription / demand** | how much CPU the tasks collectively want, relative to the lane; coreset files sit at ~100–150% on purpose so schedulers must make real choices |
-| **telemetry** | the snapshots of "which processes exist right now" the simulator sends the daemon — names and counts only, never behavior or labels |
-| **proposal** | the daemon's full answer: reasoning + situation summary + `system` block (mode/attributes) + optional per-subsystem suggestions |
-| **configuration (config)** | the validated scheduler settings the executor actually applies — algorithm choice plus its parameters plus caps |
+| **telemetry** | the "which processes exist right now" snapshots the daemon derives from the visible projection — names and counts only, never behavior or labels |
+| **proposal** | a recognizer's full answer to one snapshot: reasoning + situation summary + `system` block (mode/attributes) + optional per-subsystem suggestions |
+| **configuration (config)** | the validated scheduler settings the executor actually applies — algorithm choice plus its parameters plus caps; one entry of a config schedule |
 
 ---
 
-*Next: `simulator-guide.md` — what the simulator must do, in what order to build it, and which decisions are yours.*
+*Next: your component's own guide — `simulator/simulator-guide.md` or `daemon/daemon-guide.md` — what your program must do, in what order to build it, and which decisions are yours. `data-contracts.md` is the shared reference for every format both guides mention.*

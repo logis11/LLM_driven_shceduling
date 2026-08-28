@@ -1,59 +1,59 @@
 # Simulator Guide — what to build, what's fixed, what's yours
 > Status: draft · Created 2026-08-28 · Updated 2026-08-28
 
-The second half of the simulator onboarding guide (read `background-guide.md` first — this one assumes it). It's a spec, but a deliberately breathing one: the **contract surface** (input format, execution semantics, determinism, output obligations) is fixed and stated here in full; the **inside of the machine** (language details, data structures, code layout, testing) is yours. Fixed things say "must." Everything else is a suggestion you may overrule in your own tree.
+The second half of the simulator builder's onboarding (read `../background-guide.md` first — this one assumes it). It's a spec, but a deliberately breathing one: the **contract surface** (input format, execution semantics, determinism, output obligations) is fixed and stated here in full; the **inside of the machine** (language details, data structures, code layout, testing) is yours. Fixed things say "must." Everything else is a suggestion you may overrule in your own tree.
 
 ---
 
 ## 1. The machine at a glance
 
 ```text
-   dataset/build/coreset-single/*.workload.json
-                    │
-                    ▼
-            ┌──────────────┐
-            │   loader     │  parse + validate one canonical file
-            └──────┬───────┘
-                   ▼
+   run file (workload events,          config schedule (from the daemon:
+   answer key stripped)                [{t, config, provenance}, …])
+            │                                   │
+            └────────────┬──────────────────────┘
+                         ▼
+                 ┌──────────────┐
+                 │   loader     │  parse + validate both inputs
+                 └──────┬───────┘
+                        ▼
    ┌───────────────────────────────┐
    │   discrete-event core         │   virtual clock (integer µs)
    │                               │   event queue (arrivals, wakes,
-   │   ┌─────────┐  ┌─────────┐    │    timers, slice expiries, departs)
-   │   │ task VM │  │ task VM │ …  │   one tiny interpreter per task,
-   │   └─────────┘  └─────────┘    │    stepping through its program
+   │   ┌─────────┐  ┌─────────┐    │    timers, slice expiries, departs,
+   │   │ task VM │  │ task VM │ …  │    config applications)
+   │   └─────────┘  └─────────┘    │   one tiny interpreter per task
    │            ▲                  │
    │            │ "who runs now?"  │
    │      ┌─────┴─────┐            │
-   │      │ scheduler │  ◀── swappable policy (MLFQ first)
-   │      └───────────┘            │
+   │      │ scheduler │  ◀── swappable policy (MLFQ first),
+   │      └───────────┘      configured by the schedule entries
    └──────────────┬────────────────┘
                   ▼
               trace file      →  the harness reads this and computes metrics
 ```
 
-Four pieces: a **loader**, a **DES core** with one **task VM** per live task, a **scheduler** behind a narrow interface, and a **trace writer**. That's the whole simulator.
+Four pieces: a **loader**, a **DES core** with one **task VM** per live task, a **scheduler** behind a narrow interface, and a **trace writer**. That's the whole simulator. Note what is *not* in the picture: no daemon, no LLM, no network — the simulator is a pure function `(run file, config schedule) → trace`, and it neither knows nor cares whether a schedule came from the oracle, a whitelist, or a model. That ignorance is a design requirement, not an accident: it's what makes experimental conditions comparable.
 
 ## 2. The non-negotiables
 
 Everything in this section is contract, not preference.
 
-1. **Input is canonical workload JSON only.** The simulator never reads timelines, never reads `archetypes.yaml`, never sees an archetype name. Validation reference: `dataset/schema/workload.schema.json`.
+1. **Two inputs, nothing else.** A **run file** — the workload's events with the answer key stripped — and a **config schedule** from the daemon. The simulator never reads timelines, never reads `archetypes.yaml`, never sees an archetype name, and never talks to a daemon or a model. (Until the dataset tooling emits dedicated run files, load `dataset/build/…/*.workload.json` directly — but your loader must extract only `events` and `meta.id` and discard the rest at the parse boundary. Validation reference for event shapes: `dataset/schema/workload.schema.json`.)
 2. **One lane.** Exactly one simulated CPU. The scheduler answers one question: *who holds the lane until the next event*.
 3. **Integer microseconds.** All times and durations are integer µs. No floats in time arithmetic, ever — floats drift, and drift breaks reproducibility.
-4. **Zero runtime randomness.** The simulator contains no RNG. Same workload file + same scheduler + same configuration ⇒ **byte-identical trace**. (When lottery scheduling arrives later, its draws will come from a seeded PRNG whose seed is part of the configuration — still deterministic.) This property should be a test you run constantly, not a hope.
-5. **The scheduler never sees `ground_truth` or `meta`.** Hand the scheduler the events and nothing else. The answer key stays sealed; enforce it with code structure (the scheduler module simply never receives those objects), not discipline.
+4. **Zero runtime randomness.** The simulator contains no RNG. Same run file + same config schedule ⇒ **byte-identical trace**. (When lottery scheduling arrives later, its draws will come from a seeded PRNG whose seed is part of the configuration — still deterministic.) This property should be a test you run constantly, not a hope.
+5. **The answer key never enters the building.** The run file contains no `ground_truth`; while loading full workload files directly, that block (and `meta` beyond the id) must die at the parse boundary — no simulator data structure holds it, so no scheduler code could ever branch on it. Enforce with structure, not discipline.
 6. **Names are labels, ids are identity.** All internal bookkeeping keys on `id` (unique per file, linter-enforced). `name` is what a future recognizer will see; names can repeat and can lie. Nothing in scheduling may branch on `name`.
 7. **The timing principle.** Times pinned in the file (arrivals, wakes, departs) happen at exactly those times no matter what the scheduler does. Times *not* in the file (when a finite task finishes, when a forked child starts) emerge from scheduling. Never "helpfully" pin an emergent time or delay a pinned one.
 
-## 3. The input, field by field
+## 3. The inputs, field by field
 
-One file = one run. Top level: `meta`, `ground_truth`, `events`.
+One run = one run file + one config schedule.
 
-**`meta`** — read it for logging/provenance if you like; it must not influence execution. (`meta.expectations`, when present, is harness-owned grading data — skip it.)
+### Input 1 — the run file
 
-**`ground_truth`** — do not deliver this to the scheduler (non-negotiable 5). The simulator itself has no use for it in Phase 0.
-
-**`events`** — a flat list, sorted by `t`, with exactly two shapes:
+Its `events` is a flat list, sorted by `t`, with exactly two shapes:
 
 ```jsonc
 // A task comes into existence:
@@ -75,6 +75,28 @@ Three task lifetime classes, distinguishable at a glance:
 | segment-bound | has `depart` | at `depart`, sharp — the "user" closed the app. Remove it whatever it was doing |
 | finite | top-level arrive, no `depart` | its program reaches `EXIT`; *when* that happens is a scheduling outcome |
 | spawned | never in `events` — lives inside a `spawn_table` | created at run time by its parent's `FORK`; ends via its own `EXIT` |
+
+### Input 2 — the config schedule
+
+The daemon's finished output for this workload under one experimental condition (full contract and rationale: `../data-contracts.md`). Shape:
+
+```jsonc
+{ "workload_id": "c2-p1a",
+  "condition": "llm_vocab",
+  "schedule": [
+    { "t_us": 0,
+      "config": { "algorithm": "MLFQ",
+                  "params": { "num_queues": 3, "timeslice_us": 2000,
+                              "boost_interval_us": 100000 },
+                  "batch_bandwidth_cap": null },
+      "provenance": "fallback" },
+    { "t_us": 60450000,
+      "config": { /* same shape, new values */ },
+      "provenance": "unmodified" }
+  ] }
+```
+
+How the simulator treats it: each entry becomes one **config-application event** in the event queue at its `t_us`. When it fires, the scheduler's configuration is replaced, the running task is *not* disturbed beyond whatever the new policy implies at the next decision point, and a `config_applied` line (echoing `provenance`) goes to the trace. Requirements: the first entry is always at `t_us: 0` (reject a schedule without one); entries are applied in order; the simulator never edits, reorders, or reinterprets a config — validation happened on the daemon side, and what arrives here is law. `condition` and `provenance` are opaque strings to you: log them, never branch on them. For Phase 0 you'll run with hand-written one-entry schedules (a default MLFQ config at t=0); multi-entry schedules and cross-algorithm switches only matter once more than one policy exists.
 
 ## 4. The instruction set
 
@@ -170,7 +192,7 @@ To see the rules bite, replay the §4½ miniature under a 3-level MLFQ with a 20
 
 Its configuration is roughly `{ num_queues, timeslice_ms (per level or schedule), boost_interval_ms }` — exact schema is one of the protocol decisions the three of us freeze together, so keep it in one obvious struct.
 
-**Coming later — design for their existence, but do not build them now:** EDF, lottery, FIFO policies; *runtime configuration swaps* (a "config changed" event mid-run — which means policy state handoff needs a story eventually); per-class bandwidth caps; and telemetry taps (the future daemon needs "the set of live task names changed" notifications — trivial to emit from arrive/depart/exit handling when the time comes). If the scheduler interface is narrow, each of these is an addition, not a rewrite.
+**Coming later — design for their existence, but do not build them now:** EDF, lottery, FIFO policies; *mid-run config applications* from multi-entry schedules — in particular cross-algorithm switches, which means policy state handoff (what happens to MLFQ's queue positions when EDF takes over at t=60.45 s?) needs a story eventually; and per-class bandwidth caps, enforced by the executor regardless of what any config says. If the scheduler interface is narrow, each of these is an addition, not a rewrite.
 
 ## 6. The output: a trace
 
@@ -181,7 +203,7 @@ The exact format is deliberately **not frozen here** — it's one of the protoco
 - when each task arrived, first ran, and ended (→ response time, turnaround);
 - every interval of lane occupancy: who, from when, to when, and why it ended (block? preempt? exit?) (→ throughput, starvation);
 - for TIMER-driven work: each tick's due time and actual completion (→ deadline miss rate, P99 frame latency);
-- later, config-change events with provenance (→ the "was the LLM actually driving?" accounting).
+- each config-schedule entry taking effect (`config_applied`, echoing its provenance) (→ the "was the LLM actually driving?" accounting).
 
 Plus two properties: **deterministic** (bit-identical across reruns — trace stability is your reproducibility test) and **append-only simple** (a flat event log, e.g. JSONL, beats a clever nested structure; logs get big, and the harness will stream them).
 
@@ -190,7 +212,7 @@ Plus two properties: **deterministic** (bit-identical across reruns — trace st
 From the project milestones, Phase 0 is: **a workload runs end-to-end and produces reproducible results.** Concretely:
 
 1. Load `dataset/build/coreset-single/c1-office.workload.json` (or any C1 file — they're the simplest: one segment, no forks in some, modest task counts).
-2. Run it under MLFQ with some sane default configuration.
+2. Run it under a hand-written one-entry config schedule: default MLFQ at t=0.
 3. Emit a trace; run it twice; the traces are identical.
 4. The trace passes sanity checks: total delivered CPU ≤ elapsed virtual time; every RUN's demand fully delivered for tasks that completed; segment-bound tasks gone at their departs; no event processed out of time order.
 
@@ -233,6 +255,7 @@ The background guide's glossary covers the project vocabulary; these are the ext
 | **task VM** | the tiny per-task interpreter stepping through its program; a coroutine in spirit — it advances until the program blocks or ends |
 | **remaining demand** | the unconsumed portion of a preempted RUN; must be conserved exactly across preemptions |
 | **slice expiry** | the scheduled future event "if this task still holds the lane at t, preempt it"; cancelled if the task blocks first |
+| **config-application event** | the event-queue entry created for each config-schedule row; when it fires, the scheduler's settings are replaced and `config_applied` is traced |
 | **backlog (of a TIMER)** | grid ticks that passed while the task couldn't consume them; each completes a TIMER instantly until the task catches up |
 | **tie-break rule** | your written, deterministic answer to "two events at the same microsecond — who first?" (open question 3) |
 | **golden trace** | a committed known-good trace for a fixture workload; tests diff current output against it byte-for-byte — the cheapest strong regression net for a deterministic simulator |
