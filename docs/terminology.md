@@ -1,5 +1,5 @@
 # Terminology
-> Status: normative · Created 2026-08-23 · Updated 2026-08-27
+> Status: normative · Created 2026-08-23 · Updated 2026-08-28
 
 Terms this project uses for its own parts. Operating systems vocabulary —
 MLFQ, EDF, preemption, turnaround time — is in Appendix A of
@@ -111,7 +111,7 @@ Example in Appendix B.
 
 **Simulator** — the discrete-event engine. Advances a virtual clock from one
 event to the next, never in real time, and never executes any real work. It
-draws the timetable a computer would have produced. See `docs/simulator/primer.md`.
+draws the timetable a computer would have produced. See `docs/background-guide.md`.
 
 **Executor** — the part of the simulator that applies a config: assigning
 processes to classes, enforcing bandwidth caps, holding the starvation floor.

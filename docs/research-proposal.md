@@ -468,7 +468,7 @@ Every applied configuration is stamped with **provenance**: unmodified, clamped,
 
 ## 4.8 Implementation
 
-We build a userspace discrete-event simulator rather than modifying a real kernel. Booting, interrupt handling, and memory management are a full semester of work on their own and answer none of our research questions. The simulator gives us fast iteration, easy metric collection, and deterministic replay. See `docs/simulator/primer.md` for a non-technical explanation of what it does and does not model.
+We build a userspace discrete-event simulator rather than modifying a real kernel. Booting, interrupt handling, and memory management are a full semester of work on their own and answer none of our research questions. The simulator gives us fast iteration, easy metric collection, and deterministic replay. See `docs/background-guide.md` for a non-technical explanation of what it does and does not model.
 
 | Component | Language | Rationale |
 |---|---|---|

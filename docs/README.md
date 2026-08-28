@@ -14,7 +14,6 @@ Every doc answers one question. Statuses: **normative** (states what is; kept cu
 | [data-contracts.md](data-contracts.md) | every data format in the project, with explained examples and how they connect | draft |
 | [recognition-vocabulary.md](recognition-vocabulary.md) | the shared mode/attribute vocabulary: the 16-mode menu, `background_wanted`, the output schema | normative |
 | [background-guide.md](background-guide.md) | self-contained onboarding for both builders: the experiment, the offline pipeline, the dataset, the vocabulary | draft |
-| [simulator/primer.md](simulator/primer.md) | what the simulator does and does not model | normative |
 | [simulator/simulator-guide.md](simulator/simulator-guide.md) | what the simulator must do, what's decided, what's the builder's to decide | draft |
 | [daemon/daemon-guide.md](daemon/daemon-guide.md) | what the daemon must do, what's decided, what's the builder's to decide | draft |
 | [simulator/interpretation-contract.md](simulator/interpretation-contract.md) | how a canonical workload becomes scheduled tasks — the spec the simulator is built to | normative |
@@ -26,7 +25,7 @@ Every doc answers one question. Statuses: **normative** (states what is; kept cu
 
 ## Reading paths
 
-**New member (~40 min):** research-proposal → simulator/primer → terminology → research-claims. That is the whole mental model; everything else is depth.
+**New member (~40 min):** research-proposal → background-guide → terminology → research-claims. That is the whole mental model; everything else is depth.
 
 **Working on the workload dataset:** workload/building-plan → workload/archetype-plan → simulator/interpretation-contract → the citation recipe in references.md. Machine registry: `dataset/sources.yaml`.
 

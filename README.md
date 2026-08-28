@@ -1,12 +1,16 @@
-# LLM_driven_shceduling
+# LLM-driven scheduling
 
-Design documents live in [`docs/`](docs/).
+A semantic recognition layer for operating systems, validated on CPU scheduling. An LLM reads the names of the processes a machine is running, works out what the machine is being used for ("gaming, with a download the user is waiting on"), and that reading — never the LLM itself — configures an ordinary scheduler. The experiment measures whether knowing the *meaning* of a workload schedules better than the behavior-watching heuristics and hardcoded app lists shipping systems use today. Full story: [`docs/research-proposal.md`](docs/research-proposal.md).
 
-| Document | What it is |
+## Repo structure
+
+| tree | what lives there |
 |---|---|
-| [`RESEARCH_PROPOSAL_v2.md`](docs/RESEARCH_PROPOSAL_v2.md) | The proposal. Architecture, research questions, experimental design, ownership, milestones |
-| [`RESEARCH_CLAIMS.md`](docs/RESEARCH_CLAIMS.md) | What the project asserts, what would falsify it, and what it does not claim |
-| [`TERMINOLOGY.md`](docs/TERMINOLOGY.md) | Terms this project uses for its own parts |
-| [`OPEN_QUESTIONS.md`](docs/OPEN_QUESTIONS.md) | Module sketch and the six design questions needing a team decision |
-| [`MEETING_AGENDA.md`](docs/MEETING_AGENDA.md) | Those six decisions, condensed for the design meeting |
-| [`SIMULATOR_PRIMER.md`](docs/SIMULATOR_PRIMER.md) | Plain-language explanation of what the simulator does and does not model |
+| [`dataset/`](dataset/) | the workload dataset: behavior library, authored timelines, the wlc compiler, compiled coresets (own README) |
+| `simulator/` | the discrete-event simulator that plays workloads out under swappable scheduling policies |
+| `daemon/` | the recognition side: telemetry → recognizer (LLM and baselines) → validated config schedules |
+| `harness/` | the experiment harness: condition matrix, metrics from traces, plots |
+| [`docs/`](docs/) | all prose — proposal, contracts, onboarding guides; index and reading paths in [`docs/README.md`](docs/README.md) |
+| `_dev/` | team task tracker and working docs |
+
+New here? [`docs/README.md`](docs/README.md) has per-role reading paths; builders start with [`docs/background-guide.md`](docs/background-guide.md).
