@@ -3,6 +3,8 @@
 
 The shared vocabulary of the recognition signal — the one list that the recognizer's output schema, the validator's menu, the driver table's input axis, and the Layer-1 grader all agree on. Ratified 2026-08-28 (인지오 · 인경민 · 박이안 — pending team review of this doc). The vocabulary is identical to the dataset's ground-truth labels: recognizer answers and ground truth are compared directly, with no mapping layer.
 
+These labels were not invented for this doc — they come out of the dataset itself. Every mode below appears as a segment label in the released coreset, and each labeled segment carries `scenario` tags keying it to the scenario catalog (`workload/scenario-catalog.md`), whose co-occurrence patterns are grounded in cited sources — desktop-usage taxonomies, workload-benchmark suites, and our own CI measurements — resolvable through `references.md`. The same holds for `background_wanted`: it is the intent axis the C2 pair files were authored around. Adopting the dataset's labels as the vocabulary therefore means every term the recognizer can answer is backed by the citations that justified authoring a workload for it.
+
 ## Modes
 
 A **mode** is the label for what the machine is primarily being used for during a segment. The recognizer answers exactly one mode per query, from this closed menu of 16:
