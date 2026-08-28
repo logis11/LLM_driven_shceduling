@@ -55,6 +55,65 @@ The machine-readable core of every proposal:
 
 The validator rejects any answer whose `mode` is not on the menu, whose `background_wanted` is missing or non-boolean, or which carries any other key inside `system`.
 
+## Config schema — `subsystems.cpu_scheduler` (frozen 2026-08-28)
+
+The configuration language: what a scheduler configuration may say. This is the value space of the driver table, the field list the validator enforces, and the exact surface the simulator implements.
+
+### Envelope
+
+Every configuration, regardless of algorithm:
+
+```jsonc
+{
+  "algorithm": "MLFQ" | "EDF" | "LOTTERY" | "FIFO",
+  "params": { /* exactly the fields defined for that algorithm */ },
+  "batch_bandwidth_cap": null | 0.05–0.95
+}
+```
+
+`batch_bandwidth_cap` is the ceiling on the fraction of the lane the **batch class** may consume while non-batch work is runnable; `null` means no ceiling. The batch class is determined behaviorally by the executor (observed CPU-bound behavior — the same evidence MLFQ demotion uses); the classification rule is identical across algorithms, frozen in the simulator's docs, and not configurable. Starvation protection is executor-owned and has no config field: every runnable task makes progress within a bounded window regardless of what any configuration says.
+
+### MLFQ
+
+| field | type / range | default | meaning |
+|---|---|---|---|
+| `num_queues` | int, 2–8 | 3 | number of priority levels |
+| `timeslice_us` | int, 500–100000 | 2000 | the top queue's time slice |
+| `timeslice_growth` | number, 1–8 | 2 | level *i*'s slice = `timeslice_us · timeslice_growth^i` |
+| `boost_interval_us` | int, 10000–10000000 | 100000 | everything returns to the top queue this often |
+
+Demotion on a fully consumed slice and stay-on-block are fixed MLFQ rules, not configuration. The defaults above, with `batch_bandwidth_cap: null`, are the **boot default configuration** — every config schedule's t = 0 entry.
+
+### EDF
+
+| field | type / range | default | meaning |
+|---|---|---|---|
+| `residual_timeslice_us` | int, 500–100000 | 2000 | round-robin slice for the residual (non-deadline) class |
+
+The deadline class is the TIMER-driven tasks, behaviorally observed; each job's deadline is its next period boundary (period-implicit). Deadline tasks run earliest-deadline-first (ties broken by a fixed executor rule); the residual class round-robins in the remaining lane time. No admission control in v1.
+
+### LOTTERY
+
+| field | type / range | default | meaning |
+|---|---|---|---|
+| `batch_share` | number, 0.01–0.90 | 0.15 | target lane fraction for the batch class; the non-batch class holds the remainder |
+| `timeslice_us` | int, 500–100000 | 2000 | one draw's tenure before the next draw |
+
+Two classes, tickets split `batch_share : (1 − batch_share)`, equal tickets per task within a class. The draw PRNG is seeded by the simulator per run (derived from the workload id) — not a config field.
+
+### FIFO
+
+No fields: `"params": {}`. Run in arrival order until each task blocks or exits. The cap and the executor safety net still apply.
+
+### Validation rules
+
+1. `algorithm` outside the four-string menu → the config is rejected (previous config stays in force, `held`).
+2. `params` must contain exactly the declared fields for the chosen algorithm — missing, extra, or wrongly typed fields reject the config (`held`).
+3. Out-of-range numerics are pulled to the nearest bound (`clamped`), never rejected.
+4. `batch_bandwidth_cap` is `null` or clamped into 0.05–0.95.
+5. Cross-field: LOTTERY's `batch_share ≤ batch_bandwidth_cap` when the cap is non-null (`batch_share` clamps down).
+6. Per experiment variant: A reads nothing from the model's `subsystems` block (the driver table supplies the whole config); B reads `algorithm` only; C reads the full block, subject to rules 1–5.
+
 ## Extension rule
 
-Adding or removing a mode, promoting an annotation to a graded attribute, or changing an attribute's semantics is an all-three decision, recorded here with a changelog entry and a statement of its re-labeling and re-grading impact.
+Adding or removing a mode, promoting an annotation to a graded attribute, changing an attribute's semantics, or changing the config schema (fields, ranges, algorithms) is an all-three decision, recorded here with a changelog entry and a statement of its re-labeling, re-grading, or re-implementation impact.

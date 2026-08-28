@@ -45,7 +45,7 @@ flowchart TB
 Read it as one piece of data's life story:
 
 1. **Compile time** (already done, lives in `dataset/`): the **archetype** library says how each kind of process behaves, **timelines** say which processes are on stage when and what each moment truly means, and **wlc** — the workload compiler — combines them, rolls all the dice once, and writes **canonical workload files**. This half is finished and frozen; nobody re-runs it during experiments.
-2. From each workload file, two **views** are derived, one per consumer, so that the information asymmetry is enforced by *which file a program is handed*, not by trusting code to skip keys: the **run file** (the events, stripped of the answer key — everything the simulator may see) and the **visible projection** (just the process names, counts, and pinned lifetimes — everything a recognizer may see).
+2. Each consumer's **own loader** extracts its permitted **view** of the workload file — the dataset tree ships only the raw canonical files and knows nothing about its consumers. The simulator's loader keeps the **run file** view (the events, stripped of the answer key) and discards everything else at the parse boundary; the daemon's loader keeps the **visible projection** view (just the process names, counts, and pinned lifetimes). The information asymmetry is enforced by each loader discarding what its program may not see — structurally, at the boundary, so nothing downstream could branch on it even by accident.
 3. The **daemon** takes the visible projection and runs the whole recognition pipeline offline: it renders the projection into **telemetry** snapshots, feeds each one to a **recognizer** (the LLM, or the whitelist, or random — one per experimental condition; the oracle condition reads `ground_truth` instead of the projection), validates and clamps what comes back, maps it to scheduler settings, and writes two outputs: a **config schedule** (for the simulator) and a **recognition log** (for the grader).
 4. The **simulator** takes the run file plus a config schedule and plays the workload out under it, writing a **trace** of everything that happened.
 5. The **harness** reads traces and recognition logs after the fact and computes every metric and plot in the paper — comparing conditions, and comparing recognition logs against `ground_truth`.
@@ -57,8 +57,8 @@ The dotted lines are the deliberate cheat paths, and they are the experiment's c
 | 1 | Archetype | YAML, `dataset/archetypes.yaml` | measurements/literature → wlc | **frozen** (v0.1) |
 | 2 | Timeline (+ variant) | YAML, `dataset/timelines/` | human authors → wlc | **frozen** |
 | 3 | Workload (canonical) | JSON, `dataset/build/`, schema `dataset/schema/workload.schema.json` | wlc → the two views, oracle, grader | **frozen** |
-| 3a | Run file (view of 3) | JSON | dataset tooling → simulator | draft |
-| 3b | Visible projection (view of 3) | JSON | dataset tooling → daemon | draft |
+| 3a | Run file (view of 3) | extracted by the simulator's loader | workload file → simulator | draft |
+| 3b | Visible projection (view of 3) | extracted by the daemon's loader | workload file → daemon | draft |
 | 4 | Config schedule | JSON | daemon → simulator | draft |
 | 5 | Recognition log | JSON | daemon → harness | draft |
 | 6 | Telemetry / Proposal | JSON, internal to the daemon | daemon-internal (recorded in 5) | draft |
@@ -241,7 +241,7 @@ In sentences: at exactly t = 2.098333 s, a keystroke arrives for the editor. If 
 
 ### The two derived views
 
-**Draft — the shapes below are agreed; wiring them into wlc as build artifacts is pending dataset-side work. Until then, consumers read `*.workload.json` and take only their slice.**
+**Draft. These views are not files the dataset ships — each consumer's own loader extracts its view from `*.workload.json` and discards the rest at the parse boundary. The dataset tree stays consumer-agnostic: it provides the raw canonical files and nothing else.**
 
 **Run file** (`simulator` input): the workload minus everything the simulator must not see — `ground_truth` gone, `meta` reduced to the id. Structurally it is just the `events` list:
 
@@ -277,21 +277,21 @@ In sentences: the projection says a process named `code` exists from 0 to 60 s (
     { "t_us": 0,                                // every schedule starts at t=0
       "config": { "algorithm": "MLFQ",
                   "params": { "num_queues": 3, "timeslice_us": 2000,
-                              "boost_interval_us": 100000 },
+                              "timeslice_growth": 2, "boost_interval_us": 100000 },
                   "batch_bandwidth_cap": null },
       "provenance": "fallback" },               // boot default — no recognition yet
 
     { "t_us": 60450000,                         // set changed at 60 s + 450 ms latency
       "config": { "algorithm": "MLFQ",
                   "params": { "num_queues": 3, "timeslice_us": 2000,
-                              "boost_interval_us": 100000 },
+                              "timeslice_growth": 2, "boost_interval_us": 100000 },
                   "batch_bandwidth_cap": 0.15 },
       "provenance": "unmodified" }
   ]
 }
 ```
 
-In sentences: a config schedule is a small, finished list of "at virtual time T, the scheduler's settings become C." The simulator applies each entry at its time as just another event — it neither knows nor cares whether the schedule came from an LLM, a whitelist, a random draw, or the oracle; that ignorance is what makes conditions comparable. The first entry is always at t = 0 and is the boot default (plain MLFQ), because recognition hasn't seen anything yet. The second entry is the daemon's reaction to the training run appearing at 60 s — note its timestamp is 60 s *plus 450 ms*: the daemon stamps configs late by its measured recognition latency, which is how LLM slowness remains an honest, measured part of the experiment even though inference ran offline. (The oracle daemon stamps exactly 60000000 — perfect recognition has zero delay; the `fixed` condition emits a one-entry schedule and never changes.) The `config` payload is algorithm-dependent — an EDF entry would carry `{ "algorithm": "EDF", "params": { "admission_slack_us": 2000 }, "batch_bandwidth_cap": 0.12 }`, a lottery entry ticket shares — and each entry carries its `provenance`: `unmodified` (proposal applied as-is), `clamped` (pulled into legal bounds), `held` (proposal rejected; previous config carried forward), or `fallback` (the default, from boot or after repeated failures). Every performance figure in the paper is reported next to the provenance breakdown of the schedule that produced it, because a condition that scored well while mostly running fallback demonstrated nothing about recognition.
+In sentences: a config schedule is a small, finished list of "at virtual time T, the scheduler's settings become C." The simulator applies each entry at its time as just another event — it neither knows nor cares whether the schedule came from an LLM, a whitelist, a random draw, or the oracle; that ignorance is what makes conditions comparable. The first entry is always at t = 0 and is the boot default (plain MLFQ), because recognition hasn't seen anything yet. The second entry is the daemon's reaction to the training run appearing at 60 s — note its timestamp is 60 s *plus 450 ms*: the daemon stamps configs late by its measured recognition latency, which is how LLM slowness remains an honest, measured part of the experiment even though inference ran offline. (The oracle daemon stamps exactly 60000000 — perfect recognition has zero delay; the `fixed` condition emits a one-entry schedule and never changes.) The `config` payload is algorithm-dependent — an EDF entry would carry `{ "algorithm": "EDF", "params": { "residual_timeslice_us": 2000 }, "batch_bandwidth_cap": 0.12 }`, a lottery entry its `batch_share`. The full field lists, ranges, and defaults for all four algorithms are frozen in `recognition-vocabulary.md` (the config schema section) — and each entry carries its `provenance`: `unmodified` (proposal applied as-is), `clamped` (pulled into legal bounds), `held` (proposal rejected; previous config carried forward), or `fallback` (the default, from boot or after repeated failures). Every performance figure in the paper is reported next to the provenance breakdown of the schedule that produced it, because a condition that scored well while mostly running fallback demonstrated nothing about recognition.
 
 ---
 
@@ -361,7 +361,7 @@ In sentences: the daemon walks the visible projection's pinned events (arrivals 
   "subsystems": {
     "cpu_scheduler": {
       "algorithm": "MLFQ",
-      "params": { "num_queues": 3, "timeslice_us": 2000, "boost_interval_us": 100000 },
+      "params": { "num_queues": 3, "timeslice_us": 2000, "timeslice_growth": 2, "boost_interval_us": 100000 },
       "batch_bandwidth_cap": 0.15
     }
   }
