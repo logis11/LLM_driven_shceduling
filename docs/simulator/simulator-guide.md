@@ -306,6 +306,12 @@ The background guide's glossary covers the project vocabulary; these are the ext
 | **golden trace** | a committed known-good trace for a fixture workload; tests diff current output against it byte-for-byte — the cheapest strong regression net for a deterministic simulator |
 | **idle** | the lane with no runnable task; virtual time jumps straight to the next event (never "spin") |
 
+## 11. A question worth keeping — "shouldn't LLM inference occupy the lane?"
+
+Asked by 경민, and good enough to record with its answer. In a real deployment the daemon runs on the same machine, so wouldn't calling the LLM be something like a kernel operation — taking over the CPU between tasks while it thinks?
+
+**No — and by design, not by oversight.** The simulated machine contains only the workload's tasks; recognition cost enters the experiment purely as **latency** (each config-schedule entry is stamped late by the measured inference time), never as lane occupancy. The reason is the experiment's foundation: every condition must face **byte-identical demand**. If inference burned simulated CPU, the LLM conditions would carry extra load that the oracle, whitelist, and fixed conditions don't — and any measured difference would be part recognition quality, part self-inflicted overhead, inseparably. The real CPU cost of local inference is acknowledged where it belongs: in the paper's deployment cost accounting (and in practice a deployed daemon would run on efficiency cores or an NPU/GPU, off the contended path). So if you ever find yourself tempted to model the daemon as a task — don't; that would be the experiment measuring itself.
+
 ---
 
 *The binding fine print behind sections 2–4 lives in `docs/simulator/interpretation-contract.md` (semantics) and `dataset/schema/workload.schema.json` (shapes); this guide restates them completely, but if a discrepancy ever slips in, those two win — and tell 인지오, since a discrepancy is a bug in this guide.*
