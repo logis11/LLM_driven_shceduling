@@ -59,10 +59,11 @@ The dotted lines are the deliberate cheat paths, and they are the experiment's c
 | 3 | Workload (canonical) | JSON, `dataset/build/`, schema `dataset/schema/workload.schema.json` | wlc → the two views, oracle, grader | **frozen** |
 | 3a | Run file (view of 3) | extracted by the simulator's loader | workload file → simulator | draft |
 | 3b | Visible projection (view of 3) | extracted by the daemon's loader | workload file → daemon | draft |
-| 4 | Config schedule | JSON | daemon → simulator | draft |
-| 5 | Recognition log | JSON | daemon → harness | draft |
-| 6 | Telemetry / Proposal | JSON, internal to the daemon | daemon-internal (recorded in 5) | draft |
-| 7 | Trace | event log (e.g. JSONL) | simulator → harness | draft |
+| 4 | Telemetry | JSON, internal to the daemon | daemon-internal (recorded in 6) | draft |
+| 5 | Proposal | JSON, internal to the daemon | daemon-internal (recorded in 6) | draft |
+| 6 | Config schedule | JSON | daemon → simulator | draft |
+| 7 | Recognition log | JSON | daemon → harness | draft |
+| 8 | Trace | event log (e.g. JSONL) | simulator → harness | draft |
 
 ---
 
@@ -265,71 +266,9 @@ In sentences: the projection says a process named `code` exists from 0 to 60 s (
 
 ---
 
-## 5. Config schedule — what the daemon hands the simulator
+## 5. Telemetry — what the recognizer is shown
 
-**Draft — this is the contract to freeze first, since both sides build against it. Flows daemon → simulator, one file per workload × condition.**
-
-```jsonc
-{
-  "workload_id": "c2-p1a",
-  "condition": "llm_vocab",                     // who produced this schedule
-  "schedule": [
-    { "t_us": 0,                                // every schedule starts at t=0
-      "config": { "algorithm": "MLFQ",
-                  "params": { "num_queues": 3, "timeslice_us": 2000,
-                              "timeslice_growth": 2, "boost_interval_us": 100000 },
-                  "batch_bandwidth_cap": null },
-      "provenance": "fallback" },               // boot default — no recognition yet
-
-    { "t_us": 60450000,                         // set changed at 60 s + 450 ms latency
-      "config": { "algorithm": "MLFQ",
-                  "params": { "num_queues": 3, "timeslice_us": 2000,
-                              "timeslice_growth": 2, "boost_interval_us": 100000 },
-                  "batch_bandwidth_cap": 0.15 },
-      "provenance": "unmodified" }
-  ]
-}
-```
-
-In sentences: a config schedule is a small, finished list of "at virtual time T, the scheduler's settings become C." The simulator applies each entry at its time as just another event — it neither knows nor cares whether the schedule came from an LLM, a whitelist, a random draw, or the oracle; that ignorance is what makes conditions comparable. The first entry is always at t = 0 and is the boot default (plain MLFQ), because recognition hasn't seen anything yet. The second entry is the daemon's reaction to the training run appearing at 60 s — note its timestamp is 60 s *plus 450 ms*: the daemon stamps configs late by its measured recognition latency, which is how LLM slowness remains an honest, measured part of the experiment even though inference ran offline. (The oracle daemon stamps exactly 60000000 — perfect recognition has zero delay; the `fixed` condition emits a one-entry schedule and never changes.) The `config` payload is algorithm-dependent — an EDF entry would carry `{ "algorithm": "EDF", "params": { "residual_timeslice_us": 2000 }, "batch_bandwidth_cap": 0.12 }`, a lottery entry its `batch_share`. The full field lists, ranges, and defaults for all four algorithms are frozen in `recognition-vocabulary.md` (the config schema section) — and each entry carries its `provenance`: `unmodified` (proposal applied as-is), `clamped` (pulled into legal bounds), `held` (proposal rejected; previous config carried forward), or `fallback` (the default, from boot or after repeated failures). Every performance figure in the paper is reported next to the provenance breakdown of the schedule that produced it, because a condition that scored well while mostly running fallback demonstrated nothing about recognition.
-
----
-
-## 6. Recognition log — what the daemon hands the grader
-
-**Draft. Flows daemon → harness, one file per workload × condition. The config schedule is what recognition *decided*; this is the record of what it *thought*.**
-
-```jsonc
-{
-  "workload_id": "c2-p1a",
-  "condition": "llm_vocab",
-  "queries": [
-    { "t_set_change": 60000000,                 // the pinned event that triggered this query
-      "telemetry": { "processes": [ { "name": "code",    "count": 1 },
-                                    { "name": "python3", "count": 1 } ] },
-      "proposal": {
-        "reasoning": "code is an editor in active use. python3 alongside an editor at
-                      sustained CPU most plausibly reads as a training or data job the
-                      developer just started; work the user initiated should keep
-                      progressing in the background.",
-        "situation": "Development with a user-initiated training run",
-        "system": { "mode": "ml-train", "background_wanted": true }
-      },
-      "validation": "unmodified",
-      "latency_us": 450000 }
-  ]
-}
-```
-
-In sentences: one entry per **query point** — each pinned set change that made the daemon consult its recognizer. The entry records the exact telemetry snapshot the recognizer was shown (so grading is self-contained and auditable), the full proposal that came back, what the validator did with it, and how long recognition took. Layer-1 metrics — mode accuracy, per-attribute accuracy, the confusion matrix, consistency across repeated runs, accuracy split by software familiarity — are all computed by comparing these entries against `ground_truth`, with no simulator involved at all. The `reasoning` field is never scored automatically; it is read by humans during failure analysis, because it distinguishes "the model didn't know what the software was" (a knowledge limit) from "it knew and drew the wrong conclusion" (a fixable prompt or mapping problem). For non-LLM conditions the log still exists but is thinner — the whitelist logs which rule matched; the oracle logs the ground-truth row it read; `random` logs its draw — so every condition's decisions are auditable in the same place.
-
----
-
-## 7. Telemetry and proposal — the shapes inside the daemon
-
-**Draft. These two never cross a tree boundary as files of their own — telemetry is built inside the daemon from the visible projection, and the proposal is the recognizer's raw answer before validation. Both are preserved verbatim inside the recognition log. They still deserve their own section, because they are the shapes the daemon's internals — and the LLM prompt — are built around.**
-
-### Telemetry — a snapshot of "what exists right now"
+**Draft. Telemetry never crosses a tree boundary as a file of its own — it is built inside the daemon from the visible projection, and each snapshot is preserved verbatim inside the recognition log. It still gets its own section, because it is the shape the daemon's internals — and the LLM prompt — are built around.**
 
 ```jsonc
 // just before the 60-second mark: only the editor exists
@@ -342,7 +281,9 @@ In sentences: one entry per **query point** — each pinned set change that made
 
 In sentences: the daemon walks the visible projection's pinned events (arrivals and pinned departs) in time order and maintains the set of live process names with counts; each change of that set is one telemetry snapshot, and each snapshot is one query point. The transition between the two snapshots above is the moment the whole system turns on: the set changed, so the recognizer is consulted. During the 59 stable seconds before it, *nothing* is queried — an unchanged set means an unchanged answer, and re-asking would produce 59 identical responses for nothing. Names arrive with counts (`chrome × 13`, `game.exe × 300`, `cc1 × 100`) because the count is itself signal: thirteen chromes read as a browser with tabs; a hundred `cc1` read as a parallel build. What telemetry deliberately **excludes** defines the experiment: no PIDs, no CPU or burst statistics (that is the hidden behavioral ground truth being tested against), no mode labels (that is the answer), and no command lines (canonical files carry names only — a frozen dataset decision). Two consequences of the pinned-events-only rule, stated honestly: the recognizer reacts to *launches* and *user-closes*, never to background jobs finishing (a finite task that exits never disappears from telemetry), and spawn children appear when their parent does. When results look ambiguous there will be a temptation to "just give the model a bit more context"; the frozen telemetry shape is what makes that a visible protocol change rather than a quiet experiment-invalidating tweak.
 
-### Proposal — the recognizer's raw answer
+## 6. Proposal — what the recognizer answers
+
+**Draft. Like telemetry, the proposal is internal to the daemon — the recognizer's raw answer before validation, preserved verbatim inside the recognition log.**
 
 ```jsonc
 {
@@ -372,7 +313,67 @@ In sentences: the proposal has four parts with sharply different fates. `reasoni
 
 ---
 
-## 8. Trace — what happened, written down
+## 7. Config schedule — what the daemon hands the simulator
+
+**Draft — this is the contract to freeze first, since both sides build against it. Flows daemon → simulator, one file per workload × condition.**
+
+```jsonc
+{
+  "workload_id": "c2-p1a",
+  "condition": "llm_vocab",                     // who produced this schedule
+  "schedule": [
+    { "t_us": 0,                                // every schedule starts at t=0
+      "config": { "algorithm": "MLFQ",
+                  "params": { "num_queues": 3, "timeslice_us": 2000,
+                              "timeslice_growth": 2, "boost_interval_us": 100000 },
+                  "batch_bandwidth_cap": null },
+      "provenance": "fallback" },               // boot default — no recognition yet
+
+    { "t_us": 60450000,                         // set changed at 60 s + 450 ms latency
+      "config": { "algorithm": "MLFQ",
+                  "params": { "num_queues": 3, "timeslice_us": 2000,
+                              "timeslice_growth": 2, "boost_interval_us": 100000 },
+                  "batch_bandwidth_cap": 0.15 },
+      "provenance": "unmodified" }
+  ]
+}
+```
+
+In sentences: a config schedule is a small, finished list of "at virtual time T, the scheduler's settings become C." The simulator applies each entry at its time as just another event — it neither knows nor cares whether the schedule came from an LLM, a whitelist, a random draw, or the oracle; that ignorance is what makes conditions comparable. The first entry is always at t = 0 and is the boot default (plain MLFQ), because recognition hasn't seen anything yet. The second entry is the daemon's reaction to the training run appearing at 60 s — note its timestamp is 60 s *plus 450 ms*: the daemon stamps configs late by its measured recognition latency, which is how LLM slowness remains an honest, measured part of the experiment even though inference ran offline. (The oracle daemon stamps exactly 60000000 — perfect recognition has zero delay; the `fixed` condition emits a one-entry schedule and never changes.) The `config` payload is algorithm-dependent — an EDF entry would carry `{ "algorithm": "EDF", "params": { "residual_timeslice_us": 2000 }, "batch_bandwidth_cap": 0.12 }`, a lottery entry its `batch_share`. The full field lists, ranges, and defaults for all four algorithms are frozen in `recognition-vocabulary.md` (the config schema section) — and each entry carries its `provenance`: `unmodified` (proposal applied as-is), `clamped` (pulled into legal bounds), `held` (proposal rejected; previous config carried forward), or `fallback` (the default, from boot or after repeated failures). Every performance figure in the paper is reported next to the provenance breakdown of the schedule that produced it, because a condition that scored well while mostly running fallback demonstrated nothing about recognition.
+
+---
+
+## 8. Recognition log — what the daemon hands the grader
+
+**Draft. Flows daemon → harness, one file per workload × condition. The config schedule is what recognition *decided*; this is the record of what it *thought*.**
+
+```jsonc
+{
+  "workload_id": "c2-p1a",
+  "condition": "llm_vocab",
+  "queries": [
+    { "t_set_change": 60000000,                 // the pinned event that triggered this query
+      "telemetry": { "processes": [ { "name": "code",    "count": 1 },
+                                    { "name": "python3", "count": 1 } ] },
+      "proposal": {
+        "reasoning": "code is an editor in active use. python3 alongside an editor at
+                      sustained CPU most plausibly reads as a training or data job the
+                      developer just started; work the user initiated should keep
+                      progressing in the background.",
+        "situation": "Development with a user-initiated training run",
+        "system": { "mode": "ml-train", "background_wanted": true }
+      },
+      "validation": "unmodified",
+      "latency_us": 450000 }
+  ]
+}
+```
+
+In sentences: one entry per **query point** — each pinned set change that made the daemon consult its recognizer. The entry records the exact telemetry snapshot the recognizer was shown (so grading is self-contained and auditable), the full proposal that came back, what the validator did with it, and how long recognition took. Layer-1 metrics — mode accuracy, per-attribute accuracy, the confusion matrix, consistency across repeated runs, accuracy split by software familiarity — are all computed by comparing these entries against `ground_truth`, with no simulator involved at all. The `reasoning` field is never scored automatically; it is read by humans during failure analysis, because it distinguishes "the model didn't know what the software was" (a knowledge limit) from "it knew and drew the wrong conclusion" (a fixable prompt or mapping problem). For non-LLM conditions the log still exists but is thinner — the whitelist logs which rule matched; the oracle logs the ground-truth row it read; `random` logs its draw — so every condition's decisions are auditable in the same place.
+
+---
+
+## 9. Trace — what happened, written down
 
 **Draft — the harness and simulator sides propose and freeze the exact format together. Flows simulator → harness. Illustrative lines:**
 
@@ -390,7 +391,7 @@ In sentences: the trace is the simulator's only real product — an append-only 
 
 ---
 
-## 9. Terms used in this document
+## 10. Terms used in this document
 
 | Term | Meaning here |
 |---|---|
@@ -410,6 +411,6 @@ In sentences: the trace is the simulator's only real product — an append-only 
 | **JSONL** | "JSON Lines": a log where each line is one standalone JSON object; trivially appendable and streamable |
 | **protocol freeze** | the deliberate moment the draft contracts harden; afterwards, changes require all three of us plus a changelog entry |
 
-## 10. The freeze rule
+## 11. The freeze rule
 
 The three frozen contracts (archetype, timeline, workload) are enforced by schema and CI today. The drafts — the two views, the config schedule, the recognition log, the daemon-internal telemetry/proposal shapes, and the trace — harden in one deliberate step, the **protocol freeze**, because they are exactly the seams where the three of us could silently build against three slightly different assumptions and discover it at integration time. The config schedule freezes first: both the daemon and the simulator build against it from day one. After the freeze, any change to any contract needs all three of us and a changelog entry. Until then, the drafts above are the shared starting point: build to them, and bring friction to the freeze discussion rather than working around it quietly.
