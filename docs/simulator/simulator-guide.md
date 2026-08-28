@@ -217,6 +217,28 @@ The format is **frozen** in `../data-contracts.md` §9 (ratified 2026-08-28): JS
 - for TIMER-driven work: each job's due time and outcome (→ deadline miss rate, P99 frame latency);
 - each config-schedule entry taking effect, echoing its provenance (→ the "was the LLM actually driving?" accounting).
 
+To make it concrete, here is the complete trace of the §4½ worked run — the two-task miniature under the non-preemptive run-until-block scheduler:
+
+```jsonl
+{"event":"meta", "workload_id":"mini", "condition":"fixed", "sim":"simulator@dev", "schedule_entries":1}
+{"event":"config_applied", "t":0, "index":0, "algorithm":"MLFQ", "provenance":"fallback"}
+{"event":"task_arrive", "t":0, "task":"editor", "source":"file"}
+{"event":"task_arrive", "t":0, "task":"hog", "source":"file"}
+{"event":"ready", "t":0, "task":"hog", "cause":"arrive"}
+{"event":"run_start", "t":0, "task":"hog"}
+{"event":"ready", "t":10000, "task":"editor", "cause":"wake"}
+{"event":"run_end", "t":20000, "task":"hog", "reason":"exit"}
+{"event":"task_end", "t":20000, "task":"hog", "reason":"exit"}
+{"event":"run_start", "t":20000, "task":"editor"}
+{"event":"run_end", "t":23000, "task":"editor", "reason":"block", "blocked_on":"wait"}
+{"event":"ready", "t":30000, "task":"editor", "cause":"wake"}
+{"event":"run_start", "t":30000, "task":"editor"}
+{"event":"run_end", "t":32000, "task":"editor", "reason":"block", "blocked_on":"wait"}
+{"event":"task_end", "t":50000, "task":"editor", "reason":"depart"}
+```
+
+Read the walkthrough's headline number straight off it: keystroke #1's latency is `run_start(20000) − ready(10000)` = 10 ms, while keystroke #2's is `30000 − 30000` = 0. The hog's turnaround is `task_end(20000) − task_arrive(0)` = 20 ms. (One deliberate simplification to notice: the editor's arrival-instant WAIT blocks it without any `ready`/`run_start` pair — whether an arriving task whose first instruction immediately blocks costs a zero-length occupancy is exactly the kind of semantic you'll pin down alongside §9's questions; whatever you decide, the trace makes the decision visible.)
+
 Plus the two properties the freeze bakes in: **deterministic** (same inputs ⇒ byte-identical trace, `x_` lines included — trace stability is your reproducibility test) and **flat/streamable** (these files get big; gzip on disk is fine). Frozen is not final-forever: if emitting some event turns out awkward mid-implementation, or a field you need is missing, propose the change in `data-contracts.md` — the format bends deliberately, together, not silently per-tree.
 
 ## 7. The first integration gate, and a suggested path to it
