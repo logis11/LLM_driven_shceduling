@@ -191,7 +191,7 @@ The scheduler sits behind a narrow interface, because *swapping it is the entire
 - It never sees ground truth, names, or archetypes — only scheduling-relevant task state.
 - Adding a second policy must not require touching the core.
 
-**Build MLFQ first**, since it's the default policy and every experiment's floor. The concrete rules (this is the standard textbook construction; parameters are configuration, not constants in code):
+Of the four policies, **MLFQ is the one the project needs soonest** — it's the default configuration and every experiment's floor — so it's the natural first pick, though the order you build things in is yours. Its concrete rules (the standard textbook construction; parameters are configuration, not constants in code):
 
 1. K priority queues. New/woken tasks enter the top queue.
 2. Always run from the highest non-empty queue; round-robin within a queue.
@@ -203,7 +203,7 @@ To see the rules bite, replay the §4½ miniature under a 3-level MLFQ with a 20
 
 Its configuration is exactly the frozen MLFQ `params` from `../recognition-vocabulary.md` — `num_queues`, `timeslice_us`, `timeslice_growth` (level *i*'s slice = `timeslice_us · growth^i`), `boost_interval_us` — plus the envelope's `batch_bandwidth_cap`. That schema is frozen for all four algorithms; if implementing a field turns out awkward, propose the edit there rather than deviating quietly.
 
-**Coming later — design for their existence, but do not build them now:** EDF, lottery, FIFO policies; *mid-run config applications* from multi-entry schedules — in particular cross-algorithm switches, which means policy state handoff (what happens to MLFQ's queue positions when EDF takes over at t=60.45 s?) needs a story eventually; and per-class bandwidth caps, enforced by the executor regardless of what any config says. If the scheduler interface is narrow, each of these is an addition, not a rewrite.
+**Needed eventually, in whatever order suits you** — worth keeping in mind while shaping the interface, but nothing requires building them early: EDF, lottery, and FIFO policies; *mid-run config applications* from multi-entry schedules — in particular cross-algorithm switches, which means policy state handoff (what happens to MLFQ's queue positions when EDF takes over at t=60.45 s?) needs a story at some point; and per-class bandwidth caps, enforced by the executor regardless of what any config says. If the scheduler interface is narrow, each of these is an addition, not a rewrite.
 
 ## 6. The output: a trace
 
