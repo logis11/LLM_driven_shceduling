@@ -58,6 +58,9 @@ jobs:
 
       - name: Measured phases
         run: |
+          # Teardown pkills match the process name (comm) only — never -f:
+          # the phase.sh/bash -c argv contains "chromium"/"element", so a
+          # full-cmdline match SIGTERMs the harness itself (exit 143).
           P="$MEAS_DIR/phases.jsonl"
           PH="dataset/tools/meas/phase.sh $P"
           TABS=$(for i in $(seq 1 10); do printf 'file:///tmp/tabs/tab%s.html ' "$i"; done)
@@ -65,12 +68,12 @@ jobs:
             xvfb-run -a snap run chromium --no-sandbox --no-first-run \
               --disable-gpu $TABS & CHROMIUM_PID=\$!
             sleep 300
-            kill \$CHROMIUM_PID || true; sleep 3; pkill -f chromium || true"
+            kill \$CHROMIUM_PID || true; sleep 3; pkill chrome || true"
           $PH element-idle -- bash -c "
             xvfb-run -a element-desktop --no-sandbox --disable-gpu \
               & ELEMENT_PID=\$!
             sleep 600
-            kill \$ELEMENT_PID || true; sleep 3; pkill -f element || true"
+            kill \$ELEMENT_PID || true; sleep 3; pkill element || true"
 
       - name: Stop sidecars
         if: always()
