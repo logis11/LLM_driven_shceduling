@@ -19,7 +19,11 @@ Workflows upload raw data as Actions artifacts. The fold-in is a human commit th
 
 ### 3. Batches: N=5 matrix, dispatch-only
 
-Each workflow runs its 5 repeats as matrix jobs inside one workflow run — one run id per citable batch (`meas-ci:<workflow>:<run>`), spread computed within the batch. Trigger is `workflow_dispatch` only; batches exist only when deliberately dispatched.
+Each workflow runs its 5 repeats as matrix jobs inside one workflow run — one run id per citable batch (`meas-ci:<workflow>:<run>`), spread computed within the batch. Trigger is `workflow_dispatch` only; batches exist only when deliberately dispatched. The run number is the value→evidence pin: it resolves a param to the specific archived raw-data batch backing it, keeping the evidence archive append-only.
+
+### 3a. Pre-freeze supersession (amended 2026-08-28)
+
+At most one cited batch per workflow at any time: a superseding batch (e.g. cli:2, a superset of cli:1) re-derives and re-points **all** of that workflow's params, and the superseded batch leaves the citations entirely. At schema freeze, one final consolidation dispatch of all workflows re-folds everything into a single closing campaign.
 
 ### 4. CLI workflow: kernel anchor, single corpus
 
