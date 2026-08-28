@@ -41,6 +41,11 @@ def segment_tier(segment, tasks):
         depart = parse_us(task["depart"]) if "depart" in task else None
         if arrive < t_end and (depart is None or depart > t_start):
             tiers.append(_TIER_BY_NAME.get(task["name"], 5))
+            # an orchestrator's spawned children are recognizer-visible
+            # processes too (e.g. make's cc1) — count their bound name
+            child = (task.get("bind") or {}).get("child_name")
+            if child:
+                tiers.append(_TIER_BY_NAME.get(child, 5))
     return max(tiers, default=1)
 
 
