@@ -23,7 +23,6 @@ Every doc answers one question. Statuses: **normative** (states what is; kept cu
 | [workload/scenario-catalog.md](workload/scenario-catalog.md) | which processes co-occur (S1–S18) and their taxonomy sources | normative |
 | [workload/grounding-sources.md](workload/grounding-sources.md) | which source may justify which kind of claim (roles A–D) | normative |
 | [workload/source-vetting.md](workload/source-vetting.md) | per-source verdicts and extracted numbers | record |
-| [memos/](memos/) | point-in-time notes to the team | memo |
 
 ## Reading paths
 

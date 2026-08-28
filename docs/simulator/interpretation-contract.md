@@ -1,5 +1,5 @@
 # Interpretation Contract — workload ⇄ simulator
-> Status: normative · Created 2026-08-26 · Updated 2026-08-27
+> Status: normative · Created 2026-08-26 · Updated 2026-08-28
 
 The contract between the workload dataset and the simulator: what a canonical workload file contains and how the simulator turns it into scheduled tasks. Written before the simulator exists; simulator Phase 0 is built to this document. Decision record: `_dev/archive/2026-08-26-workload-generation-grill.md` (D10–D16).
 
@@ -9,7 +9,7 @@ The simulator reads **canonical workload files only** — never timelines, never
 
 - **One lane** (Q1 of the archived open-questions record, ratified — `_dev/archive/2026-08-23-design-meeting-open-questions.md`): the scheduler answers "who holds the lane until the next event." CPU-only; no GPU axis in any schema.
 - **Virtual time**, discrete-event; integer microseconds throughout (rt-app precedent).
-- **RNG-free simulator.** All randomness is resolved at compile time into the canonical file. Same file + same scheduler ⇒ identical run. (`meta.sampled` records `{seed, archetypes.yaml@commit}`, so every concrete number traces to its distribution.)
+- **RNG-free simulator.** All randomness is resolved at compile time into the canonical file. Same workload file + same config schedule ⇒ identical run; any policy-internal randomness (e.g. lottery draws) comes from a PRNG the simulator seeds deterministically per run. (`meta.sampled` records `{seed, archetypes.yaml@commit}`, so every concrete number traces to its distribution.)
 
 ## 2. The governing timing principle
 
@@ -67,6 +67,8 @@ One closed type per file; the parser has zero case-splits. The JSON Schema is a 
 - **Demand budget:** every compiled `-single` workload's aggregate demand lands in the measurable oversubscription regime (~100–150% of the lane); the per-file oracle-vs-random admission test (open-questions record Q8) is the enforcement mechanism.
 
 ## 8. Boundaries
+
+- **Scope of this contract:** the workload file and its execution semantics only. The simulator's second input (the config schedule) and every runtime-side contract are specified in `docs/data-contracts.md`; the scheduler-configuration language is frozen in `docs/recognition-vocabulary.md`.
 
 - **What the numbers are for:** archetype numbers never reach the recognizer or the driver table — they build the simulated machine the executor schedules. They set the cost of misrecognition; realistic deadlines, fork storms, and chains are what make good and bad configs diverge in Layer 2.
 - **Unaffected components:** DES core, executor, algorithms, config schedule, validator, driver table, condition ladder (the Q7 "unaffected" list). The interpreter is a new front-end that feeds events in; the executor still schedules plain tasks.

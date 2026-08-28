@@ -1,5 +1,5 @@
 # A Semantic Recognition Layer for Operating Systems
-> Status: draft — for team review · Created 2026-08-15 · Updated 2026-08-27
+> Status: draft — for team review · Created 2026-08-15 · Updated 2026-08-28
 
 **Removing hardcoded semantic knowledge from the OS, validated on CPU scheduling**
 
@@ -211,7 +211,7 @@ Stating this plainly makes the proposal narrower and considerably more defensibl
 
 **RQ0 — Measurability.** Before any model exists: does the choice of scheduling configuration change outcomes enough to measure on these workloads at all? A random recognizer is compared against perfect recognition, with no model in the loop. If a perfect recognizer scores close to a random one, no recognizer can demonstrate anything and every question below is unanswerable. Section 5.3 develops this. It requires no prompt, no model, and no API key, and it is the cheapest available falsification of the premise.
 
-**RQ1 — Reading the situation.** Given only the names and command lines of currently running processes, can an LLM correctly work out what the system is being used for?
+**RQ1 — Reading the situation.** Given only the names (and coarse counts) of currently running processes, can an LLM correctly work out what the system is being used for?
 
 **RQ2 — Value.** Does correct reading produce measurably better scheduling than (a) no situation awareness, and (b) the whitelist approach real operating systems currently use?
 
@@ -270,7 +270,7 @@ A note on the latency figure. A quantized 3–8B model running locally emits a s
                 ▼
    ┌────────────────────────────────┐
    │  telemetry: process names,     │
-   │  command lines, coarse stats   │
+   │  counts, coarse stats          │
    └────────────┬───────────────────┘
                 │  (asynchronous — no consumer ever waits)
                 ▼
@@ -309,24 +309,21 @@ The proposal has two layers, and keeping them separate is what makes the archite
 ```json
 {
   "reasoning": "LeagueClient is a game running in the foreground, so frame
-                deadlines dominate. OBS is capturing and encoding that game
-                in real time, which gives it a hard deadline of its own —
-                it cannot be treated as background work. The Steam process
-                is downloading, which the user started deliberately, so it
-                should be throttled rather than deferred.",
+                deadlines dominate. The Steam process is downloading, which
+                the user started deliberately, so it should be throttled
+                rather than deferred.",
 
-  "situation": "Gaming while streaming, with a user-initiated download",
+  "situation": "Gaming, with a user-initiated download",
 
   "system": {
     "mode": "gaming",
-    "has_realtime_encoder": true,
-    "background_is_wanted": true
+    "background_wanted": true
   },
 
   "subsystems": {
     "cpu_scheduler": {
       "algorithm": "EDF",
-      "params": { "admission_slack_ms": 2 },
+      "params": { "residual_timeslice_us": 2000 },
       "batch_bandwidth_cap": 0.12
     }
   }
@@ -355,7 +352,7 @@ If the model emitted configuration for every subsystem and nothing else, it woul
 
 **Consumers are not known in advance.** The CPU scheduler is in the kernel; a network shaper is a separate daemon; a third party might add something we never anticipated. If a new consumer requires editing the prompt, consumers are coupled to the model. With a shared vocabulary, a new consumer subscribes and brings its own interpretation — the model need not know it exists.
 
-**The model has never seen any of these subsystems.** It knows what Blender is; it does not know what `timeslice_ms: 4` does on this machine, and it knows even less about a shaper it was never told about. Trusting direct configuration multiplies that risk by the number of consumers. Trusting the vocabulary does not.
+**The model has never seen any of these subsystems.** It knows what Blender is; it does not know what `timeslice_us: 2000` does on this machine, and it knows even less about a shaper it was never told about. Trusting direct configuration multiplies that risk by the number of consumers. Trusting the vocabulary does not.
 
 **Failures need to be isolated.** If the model's CPU block is malformed but its reading is sound, the CPU driver should fall back to its own mapping while every other consumer proceeds normally. A flat output makes that impossible.
 
@@ -375,31 +372,24 @@ Table is the default. Agents multiply latency and cost, and — more seriously �
 
 ### 4.4.3 The vocabulary
 
-**Modes** — what the machine is primarily doing:
+The vocabulary is ratified and normative in `docs/recognition-vocabulary.md`; this section summarizes it and keeps the design argument.
 
-| Mode | Situation |
-|---|---|
-| `interactive` | User at the keyboard, light work |
-| `gaming` | Latency-critical foreground application |
-| `compile` | Throughput-oriented batch work |
-| `media` | Encoding, streaming, real-time capture |
-| `idle` | No human present, maintenance only |
+**Modes** — what the machine is primarily doing. Sixteen, taken verbatim from the dataset's source-backed ground-truth labels: `browsing`, `office`, `mail`, `dev`, `photo`, `meeting`, `gaming`, `media`, `video-edit`, `compile`, `ml-train`, `render`, `transcode`, `indexing`, `backup`, `idle`. (`ambiguous` exists as a ground-truth-only label for the C6 boundary case; it is not on the recognizer menu.)
 
-**Attributes** — independent facts that a mode label alone cannot carry:
+**Attribute** — an independent fact that a mode label alone cannot carry:
 
 | Attribute | Question |
 |---|---|
-| `has_realtime_encoder` | Is a periodic real-time producer running (encoder, DAW, capture)? |
-| `background_is_wanted` | Is the sustained background work something the user asked for? |
+| `background_wanted` | Is the sustained background work something the user asked for? |
 
-Five labels alone cannot express the §2.3 table — plain gaming, gaming with a stream, and gaming with a download all collapse into `gaming`. Adding more labels does not fix this, because every new situation multiplies against the existing ones and the same distinctions recur inside every mode. Adding *dimensions* does:
+Mode labels alone cannot express the §2.3 table — gaming with a wanted download and gaming with an unwanted scan both collapse into `gaming`. Adding more labels does not fix this, because the same wanted-vs-unwanted distinction recurs inside every mode. Adding a *dimension* does:
 
 ```text
-  5 labels                  →  5 situations,   5 validation rules
-  5 labels + 2 attributes   →  20 situations,  7 validation rules
+  16 labels                       →  16 situations,  16 validation entries
+  16 labels + 1 boolean attribute →  32 situations,  17 validation entries
 ```
 
-Expressiveness grows multiplicatively while validation cost grows additively, and orthogonal attributes let "both true" be a natural answer rather than a conflict.
+Expressiveness grows multiplicatively while validation cost grows additively.
 
 ### 4.4.4 The admission test for vocabulary terms
 
@@ -408,12 +398,11 @@ A term belongs in the shared vocabulary only if it is meaningful to more than on
 | Term | CPU scheduler | Power governor | I/O scheduler | Network QoS |
 |---|---|---|---|---|
 | `mode` | Algorithm selection | Clock ceiling, thermal budget | Queue depth, readahead | Shaping policy |
-| `has_realtime_encoder` | EDF becomes admissible | Hold a clock floor | Raise write priority | Reserve uplink |
-| `background_is_wanted` | Throttle vs. defer | Suppress deep sleep | Bandwidth split | Background class |
+| `background_wanted` | Throttle vs. defer | Suppress deep sleep | Bandwidth split | Background class |
 
-Every row is filled in at least three columns. Filling this table is the concrete procedure for the vocabulary freeze in §8.2: a candidate attribute that lands in one column is configuration wearing a vocabulary costume, and gets rejected.
+Every row is filled in at least three columns. Filling this table is the concrete procedure for admitting any future vocabulary term: a candidate attribute that lands in one column is configuration wearing a vocabulary costume, and gets rejected.
 
-We stop at two attributes deliberately — each one multiplies the oracle search space (Part 7) — and the design extends to more without restructuring.
+We ship one graded attribute deliberately — each additional one multiplies the oracle search space (Part 7) — and the design extends to more without restructuring (promotion is governed by the extension rule in `docs/recognition-vocabulary.md`).
 
 ## 4.5 Algorithm menu
 
@@ -426,7 +415,7 @@ This section describes the CPU scheduler driver specifically. An algorithm earns
 | **Lottery / Stride** | Contention with background work the user wants finished | MLFQ cannot guarantee proportions. "Roughly less" is easy; "exactly 15% to background" is not |
 | **FIFO** | Pure batch throughput | Throughput wants minimum context switching and maximum cache locality; MLFQ keeps interrupting |
 
-Note what selects between EDF and Lottery inside a gaming session: not the mode, but the attributes. This is the concrete payoff of §4.4.3 — with mode labels alone there were two candidate algorithms for `gaming` and no principled way to choose.
+Note what tunes the treatment of background work inside a gaming session: not the mode, but the attribute — `background_wanted` decides whether the bulk work is capped-but-progressing or freely deferred. This is the concrete payoff of §4.4.3: the mode picks the algorithm family, the attribute picks how the rest of the machine is treated under it.
 
 **Round Robin is deliberately excluded.** RR is MLFQ with a single queue — a special case, not an alternative. It remains a baseline for reporting, but there is no situation where a model should choose it.
 
@@ -437,7 +426,7 @@ This mirrors what Linux already does — `SCHED_DEADLINE` is EDF, `SCHED_FIFO` i
 **Two consequences for other parts of this document:**
 
 - EDF requires deadlines in the process model. Satisfied: periodic work carries `TIMER(period)` and deadlines in the archetype grammar (`docs/simulator/interpretation-contract.md` §3).
-- Configuration fields are algorithm-dependent. MLFQ uses `timeslice_ms` / `num_queues` / `boost_interval_ms`; lottery uses ticket allocations; EDF uses admission parameters. Validation is conditional on the selected algorithm rather than a flat field list.
+- Configuration fields are algorithm-dependent, and the per-algorithm field lists are frozen in `docs/recognition-vocabulary.md` (MLFQ: `num_queues`/`timeslice_us`/`timeslice_growth`/`boost_interval_us`; EDF: `residual_timeslice_us`; lottery: `batch_share`/`timeslice_us`; FIFO: none — plus the cross-algorithm `batch_bandwidth_cap`). Validation is conditional on the selected algorithm rather than a flat field list.
 
 ## 4.6 Measuring whether the vocabulary is sufficient — the RQ3 ladder
 
@@ -461,7 +450,7 @@ All three keep `reasoning`, `situation`, and `system`.
 
 **Reading the outcome.** If A performs close to C, the vocabulary is sufficient and the architecture works as designed: thin drivers, cheap new consumers. If C substantially beats A, the vocabulary is under-specified for this consumer and we should ask what it is missing rather than accept that every driver must be thick.
 
-We expect improvement to stop somewhere around B. The model knows what Blender is; it has never observed what `timeslice_ms: 4` does in *our* simulator, and no amount of authority supplies that. If B works and C does not, the finding is "the model should read the situation and choose the algorithm class; the driver tunes the constants" — a deployable architecture, not a failure.
+We expect improvement to stop somewhere around B. The model knows what Blender is; it has never observed what `timeslice_us: 2000` does in *our* simulator, and no amount of authority supplies that. If B works and C does not, the finding is "the model should read the situation and choose the algorithm class; the driver tunes the constants" — a deployable architecture, not a failure.
 
 Note that hand-tuning the driver's table offline makes A *stronger* as an experiment, not weaker: if the table is near-optimal, A's performance reflects purely how well the situation was read.
 
@@ -491,7 +480,7 @@ The two sides communicate over JSON across a process boundary. If we later repla
 
 **Model hosting.** The client module supports both a hosted API and a local server (Ollama or vLLM) behind one interface. We use the API for fast prompt iteration and a local quantized model for the measurements that go in the paper: a deployment story that sends the running process list to a remote server is not credible; local inference is substantially faster on short structured outputs; and constrained decoding (GBNF grammars, guided decoding) can make malformed output structurally impossible, removing an entire class of validator branches. Comparing a frontier API model against a local 8B model is a cheap and worthwhile appendix result — if a small local model reads situations nearly as well, the deployment claim stops being hypothetical.
 
-**Record and replay.** Running the full condition matrix against a live model would be slow, expensive, and non-reproducible. The daemon therefore runs in two modes. In *record* mode it queries the model once per distinct telemetry snapshot and stores `(prompt hash → response, measured latency)`. In *replay* mode it serves from that cache with no model in the loop. Because the cache key is `(workload id, process set hash, prompt version)`, one cache serves every condition for every set it visits. One caveat: exogenous arrivals are pinned, but *finite* tasks depart when the scheduler lets them finish, so the times of canonical-set changes — and in overlap edge cases, which sets get visited — are scheduler-dependent (open item, `docs/workload/building-plan.md` §9). The full matrix remains deterministic and free to re-run.
+**Record and replay.** Running the full condition matrix against a live model would be slow, expensive, and non-reproducible. The daemon therefore runs in two modes. In *record* mode it queries the model once per distinct telemetry snapshot and stores `(prompt hash → response, measured latency)`. In *replay* mode it serves from that cache with no model in the loop. Because the cache key is `(workload id, process set hash, prompt version)`, one cache serves every condition for every set it visits. Set changes are defined by pinned events only — arrivals and scripted user-closes (decision 2026-08-28; finite-task exits do not appear in telemetry) — so query points are scheduler-independent by construction, and the full matrix is deterministic and free to re-run.
 
 ---
 
@@ -560,7 +549,7 @@ Phase 1 runs with modes only and no attributes. Attributes multiply the oracle c
 - Run-to-run consistency (LLMs are non-deterministic; a single good output means nothing)
 - Accuracy split by well-known vs. unregistered software
 
-Attribute accuracy is reported separately because the two failure types have different consequences. Getting `background_is_wanted` wrong on a gaming workload produces a specific, predictable performance failure; getting the mode wrong produces a diffuse one.
+Attribute accuracy is reported separately because the two failure types have different consequences. Getting `background_wanted` wrong on a gaming workload produces a specific, predictable performance failure; getting the mode wrong produces a diffuse one.
 
 The `reasoning` field is read during failure analysis, not scored automatically. When a run produces a wrong configuration, the reasoning tells us which of two very different things went wrong: the model did not know what the software was, or it knew and drew the wrong conclusion. The first is a limit of the approach; the second is a prompt or mapping problem we can fix.
 
@@ -581,27 +570,23 @@ name: gaming_wanted_vs_unwanted_bulk
 ground_truth:
   - t_ms: 0
     mode: gaming
-    has_realtime_encoder: false
-    background_is_wanted: true
+    background_wanted: true
 
 processes:
   - name: League of Legends
-    cmdline: "/opt/riot/LeagueClient --game"
     visible_to_llm: true
     pattern: { type: latency_critical, period_ms: 16, deadline_ms: 16, cpu_burst_ms: [4, 9] }
   - name: Discord
-    cmdline: "/usr/bin/discord"
     visible_to_llm: true
     pattern: { type: interactive, cpu_burst_ms: [1, 4], io_wait_ms: [100, 800] }
   - name: steam
-    cmdline: "/usr/bin/steam -applaunch download"
     visible_to_llm: true
     pattern: { type: io_heavy, cpu_burst_ms: [2, 10], io_wait_ms: [5, 20] }
 ```
 
 **The information asymmetry is the core of the design:**
 
-- `name` and `cmdline` — visible to the model only. No other condition receives them.
+- `name` — visible to the model only, and names only: no paths, no command lines (the ratified telemetry decision). No other condition receives it.
 - `pattern` — visible to the simulator only. The model never sees ground truth about behaviour.
 - `ground_truth` — visible to the oracle condition and the Layer 1 grader only.
 
@@ -623,11 +608,11 @@ Does situation awareness help at all in the easy case?
 
 | Scenario | Mode | Attributes | What splits it |
 |---|---|---|---|
-| Game + Steam download | `gaming` | `wanted: true` | Throttle, never starve |
-| Game + antivirus full scan | `gaming` | `wanted: false` | Freely defer |
-| Game + OBS capture | `gaming` | `encoder: true` | Two deadlines |
-| ML training run + editor | `compile` | `wanted: true` | Long batch the user asked for |
-| File indexer + editor | `interactive` | `wanted: false` | Long batch nobody asked for |
+| Game + Steam download | `gaming` | `background_wanted: true` | Throttle, never starve |
+| Game + antivirus full scan | `gaming` | `background_wanted: false` | Freely defer |
+| Game + OBS capture | `gaming` | — | Two deadlines (encoder distinctions are carried by mode under the ratified vocabulary) |
+| ML training run + editor | `compile` | `background_wanted: true` | Long batch the user asked for |
+| File indexer + editor | `interactive` | `background_wanted: false` | Long batch nobody asked for |
 
 The last two are the sharpest pair in the whole design: both are "one sustained CPU-bound process plus an editor," and no behavioural heuristic can separate them even in principle.
 
@@ -637,10 +622,10 @@ Where the whitelist fails structurally, and where the world-knowledge claim in �
 
 | Scenario | Mode | Attributes |
 |---|---|---|
-| Audio DAW + plugin chain | `media` | `encoder: true` |
+| Audio DAW + plugin chain | `media` | — |
 | Godot-built indie game + Discord | `gaming` | — |
-| Blender background render + Resolve timeline playback | `media` | `encoder: true`, `wanted: true` |
-| Local Kubernetes + database + dev server | `compile` | `wanted: true` |
+| Blender background render + Resolve timeline playback | `media` | `background_wanted: true` |
+| Local Kubernetes + database + dev server | `compile` | `background_wanted: true` |
 
 The DAW case is the most valuable single workload we have. Its deadlines are 1–3 ms rather than gaming's 16 ms, buffer underruns are audible rather than a dropped frame, and no shipping Game Mode covers it. It is simultaneously our hardest deadline test and a clean whitelist-failure case.
 
@@ -746,7 +731,7 @@ Beyond that: repeated runs with variance reported, one variable changed at a tim
 
 **Reasoning costs latency.** Requiring the model to explain itself adds tokens to every query. The low duty cycle should absorb this, but the RQ4 answer must be computed from latencies measured with reasoning included. Reporting a fast latency measured without it would be dishonest.
 
-**Oracle cost grows multiplicatively.** With five modes, two attributes, and four algorithms, the oracle searches up to 80 combinations per workload segment, and variant C's parameter oracle requires a grid search on top. Mitigations, in order of preference: run the full oracle on a representative subset and report the ceiling only for those; prune structurally inadmissible combinations (EDF with no deadline-bearing processes); keep the attribute count at two. If the full oracle becomes impractical we report a partial ceiling explicitly rather than quietly dropping it.
+**Oracle cost grows multiplicatively.** With sixteen modes, one boolean attribute, and four algorithms, the oracle searches up to 128 combinations per workload segment, and variant C's parameter oracle requires a grid search on top. Mitigations, in order of preference: run the full oracle on a representative subset and report the ceiling only for those; prune structurally inadmissible combinations (EDF with no deadline-bearing processes); keep the graded attribute count at one. If the full oracle becomes impractical we report a partial ceiling explicitly rather than quietly dropping it.
 
 **Conditional validation is a real cost.** The validator must dispatch on subsystem key, then branch on algorithm within the CPU driver, with its own bounds and clamping rules per branch. Attributes add cross-field consistency checks on top. This is the largest single piece of added complexity, and it lands on one person.
 
@@ -768,12 +753,12 @@ This layout puts every integration point in one person's hands, making integrati
 
 ## 8.2 Decisions requiring all three
 
-1. **The shared vocabulary** — five modes plus two attributes (§4.4.3). Frozen before workload labelling begins; adding a third attribute later requires re-labelling every workload and re-running every oracle. **Use the admission test in §4.4.4 as the procedure**: fill the cross-consumer table for each candidate term and reject anything that lands in one column.
+1. **The shared vocabulary** — ratified 2026-08-28: the dataset's sixteen modes plus `background_wanted` (normative: `docs/recognition-vocabulary.md`, together with the frozen `cpu_scheduler` config schema). Adding an attribute later requires re-labelling every workload and re-running every oracle. **Use the admission test in §4.4.4 as the procedure** for any candidate: fill the cross-consumer table and reject anything that lands in one column.
 2. **The two protocol schemas** — telemetry out, proposal in. The `system` block is the contract; the `subsystems` block is per-consumer namespace.
-3. **The CPU driver's mapping table.** Twenty entries, `(mode, attributes) → configuration`. This is effectively the executor's behaviour specification.
+3. **The CPU driver's mapping table.** Thirty-two entries, `(mode, background_wanted) → configuration`. This is effectively the executor's behaviour specification.
 4. **Metric definitions.** Ambiguity here invalidates every interpretation.
 5. **Workload scenarios**, including the domain and familiarity balance in §5.5.
-6. **What the model may see.** Names, command lines, and coarse process counts are in. PIDs, ground-truth burst patterns, and ground-truth labels are out. Enforced in the telemetry schema, not in the prompt.
+6. **What the model may see.** Names and coarse process counts are in (names only — no paths or command lines). PIDs, ground-truth burst patterns, and ground-truth labels are out. Enforced in the telemetry schema, not in the prompt.
 
 ## 8.3 Operating rule
 
@@ -814,7 +799,7 @@ Phase 1 is the critical gate. It requires no model, no prompts, and no API keys,
 
 # Appendix A — Glossary
 
-**Attribute** — an independent fact about the running process set, orthogonal to the mode label. Two are specified: `has_realtime_encoder` and `background_is_wanted`.
+**Attribute** — an independent fact about the running process set, orthogonal to the mode label. One is graded: `background_wanted`.
 
 **Batch process** — work with no human waiting on it. Consumes all available CPU. Cares about total completion time.
 
@@ -834,7 +819,7 @@ Phase 1 is the critical gate. It requires no model, no prompts, and no API keys,
 
 **MLFQ** — Multi-Level Feedback Queue. Multiple priority levels; processes are demoted for using a full time slice and periodically boosted to prevent starvation. The basis of most production schedulers.
 
-**Mode** — a label describing what the whole system is primarily being used for. One of five values, part of the shared vocabulary in §4.4.3.
+**Mode** — a label describing what the whole system is primarily being used for. One of sixteen values, part of the shared vocabulary (`docs/recognition-vocabulary.md`).
 
 **Preemption** — the kernel forcibly taking the CPU away from a running process, made possible by timer interrupts.
 
@@ -865,7 +850,7 @@ One workload followed from file to metric. The workload file is specified in §5
 The `gaming_wanted_vs_unwanted_bulk` definition in §5.5 is read by three consumers, each of which sees a different slice:
 
 ```text
-   name / cmdline  ──►  recognizer only
+   name            ──►  recognizer only
    pattern         ──►  simulator only
    ground_truth    ──►  oracle and the Layer 1 grader only
 ```
@@ -880,9 +865,9 @@ The projection of the workload the recognizer is permitted to see:
 {
   "t_ms": 12400,
   "processes": [
-    { "name": "League of Legends", "cmdline": "/opt/riot/LeagueClient --game" },
-    { "name": "Discord",           "cmdline": "/usr/bin/discord" },
-    { "name": "steam",             "cmdline": "/usr/bin/steam -applaunch download" }
+    { "name": "League of Legends", "count": 1 },
+    { "name": "Discord",           "count": 1 },
+    { "name": "steam",             "count": 1 }
   ],
   "counts": { "total": 3, "runnable": 2 }
 }
@@ -890,11 +875,11 @@ The projection of the workload the recognizer is permitted to see:
 
 | In | Out | Why excluded |
 |---|---|---|
-| names, command lines | PIDs | §4.7 — instances die and PIDs are recycled |
+| names, counts | PIDs | §4.7 — instances die and PIDs are recycled |
 | coarse counts | burst patterns | that is the ground truth being tested against |
 | | mode and attribute labels | that is the answer |
 
-Telemetry is a pure function of which processes exist. Launches are pinned in the workload; finite-task exits (and the `runnable` count shown above) are scheduler-dependent — see the §4.8 caveat and the open item in `docs/workload/building-plan.md` §9. The cache is keyed by set hash, so it serves every condition for the sets visited.
+Telemetry is a pure function of pinned events — launches and scripted user-closes — so the visited set sequence is scheduler-independent by construction (finite-task exits do not appear; the `runnable` count shown above is illustrative and not part of the kept schema). The cache is keyed by set hash, so it serves every condition for the sets visited.
 
 ## B.3 Trace — simulator to harness
 
