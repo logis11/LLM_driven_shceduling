@@ -5,6 +5,13 @@ name: meas-cli
 # Kernel defconfig build (comparable to ocallahan-atc17) + the kernel tree
 # as the single corpus for the IO/scan phases; the tarball download is the
 # network-bulk measurement; the idle phase grounds the system-daemon baseline.
+#
+# Run 2 additions (cli:1 findings — page-cache-hot corpus hid disk waits;
+# foreground runs never throttle): cold-cache variants of the IO/scan/build
+# phases (vm.drop_caches=3 before each), and a best-effort daemon-mode
+# tracker-miner-fs-3 phase under dbus-run-session for the crawler's
+# self-throttled pacing. The warm phase set is unchanged — a superset batch
+# stays comparable to cli:1. Sampler runs at 500 ms with ctxt counters.
 
 on: workflow_dispatch
 
@@ -29,7 +36,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y forkstat clamav plocate rsync xz-utils \
-            flex bison libssl-dev libelf-dev bc
+            flex bison libssl-dev libelf-dev bc \
+            tracker tracker-miner-fs dbus-daemon dbus-user-session
 
       - name: Record runner spec
         run: |
@@ -41,8 +49,8 @@ jobs:
           date +%s%6N > "$MEAS_DIR/sidecar_start_us"
           sudo sh -c "nohup forkstat -e fork,exec,exit,comm \
             > '$MEAS_DIR/lifecycle.log' 2> '$MEAS_DIR/forkstat.err' &"
-          nohup python3 dataset/tools/meas/proc_sampler.py --interval 1.0 \
-            --out "$MEAS_DIR/proc_samples.jsonl" \
+          nohup python3 dataset/tools/meas/proc_sampler.py --interval 0.5 \
+            --ctxt --out "$MEAS_DIR/proc_samples.jsonl" \
             2> "$MEAS_DIR/sampler.err" &
           sleep 2
 
@@ -64,6 +72,30 @@ jobs:
           $PH locate-query         -- locate -c linux-6.6
           $PH freshclam            -- sudo freshclam
           $PH clamscan             -- clamscan -r -i "$CORPUS/Documentation"
+
+          # ---- cold-cache variants (cli:1 finding: warm corpus hid IO) ----
+          $PH drop-1               -- sudo sysctl -q vm.drop_caches=3
+          $PH tar-read-cold        -- tar -cf /dev/null -C /tmp linux-6.6
+          $PH drop-2               -- sudo sysctl -q vm.drop_caches=3
+          $PH rsync-copy-cold      -- rsync -a "$CORPUS/" /tmp/linux-cold/
+          $PH drop-3               -- sudo sysctl -q vm.drop_caches=3
+          $PH clamscan-cold        -- clamscan -r -i "$CORPUS/Documentation"
+          $PH drop-4               -- sudo sysctl -q vm.drop_caches=3
+          $PH updatedb-cold        -- sudo updatedb
+          $PH kernel-clean         -- make -C "$CORPUS" clean
+          $PH drop-5               -- sudo sysctl -q vm.drop_caches=3
+          $PH kernel-build-cold    -- make -C "$CORPUS" -j8
+
+          # ---- daemon-mode crawler (best-effort; rc recorded, never fatal) --
+          $PH drop-6               -- sudo sysctl -q vm.drop_caches=3
+          $PH tracker-daemon       -- bash -c '
+            export HOME=/tmp/tracker-home XDG_DATA_HOME=/tmp/tracker-home/.local/share
+            mkdir -p "$HOME/Documents"
+            cp -r "$CORPUS/Documentation" "$HOME/Documents/corpus" 2>/dev/null || true
+            MINER=$(ls /usr/libexec/tracker-miner-fs-3 \
+                       /usr/libexec/tracker-miner-fs 2>/dev/null | head -1)
+            [ -z "$MINER" ] && { echo "no tracker miner binary"; exit 3; }
+            timeout 300 dbus-run-session -- "$MINER" || true'
 
       - name: Stop sidecars
         if: always()
