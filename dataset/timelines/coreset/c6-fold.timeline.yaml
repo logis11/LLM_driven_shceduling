@@ -10,14 +10,14 @@ meta:
   seed: 105
 segments:
 - attributes:
-    wanted: true
+    background_wanted: true
   from: 0s
   mode: browsing
   scenario:
   - S2
   to: 30s
 - attributes:
-    wanted: true
+    background_wanted: true
   from: 30s
   mode: meeting
   scenario:

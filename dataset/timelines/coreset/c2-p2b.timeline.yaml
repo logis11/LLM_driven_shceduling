@@ -6,7 +6,7 @@ meta:
   seed: 202
 segments:
 - attributes:
-    wanted: true
+    background_wanted: true
   from: 0s
   mode: gaming
   scenario:
@@ -14,7 +14,7 @@ segments:
   to: 60s
 - attributes:
     background: av-scan
-    wanted: false
+    background_wanted: false
   from: 60s
   mode: gaming
   scenario:

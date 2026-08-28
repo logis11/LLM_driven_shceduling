@@ -7,7 +7,7 @@ meta:
   demand: calibration
 
 segments:
-  - {from: 0s, to: 60s, mode: media, attributes: {wanted: true},
+  - {from: 0s, to: 60s, mode: media, attributes: {background_wanted: true},
      scenario: [S13]}
 
 tasks:

@@ -10,8 +10,8 @@ meta:
   seed: 105
 segments:
 - attributes:
+    background_wanted: true
     spoof: true
-    wanted: true
   from: 0s
   mode: browsing
   scenario:

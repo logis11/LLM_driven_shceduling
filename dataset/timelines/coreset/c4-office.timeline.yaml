@@ -10,7 +10,7 @@ meta:
   seed: 101
 segments:
 - attributes:
-    wanted: true
+    background_wanted: true
   from: 0s
   mode: office
   scenario:

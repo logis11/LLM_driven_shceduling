@@ -5,10 +5,10 @@ meta:
   seed: 202
 
 segments:
-  - {from: 0s, to: 60s, mode: gaming, attributes: {wanted: true},
+  - {from: 0s, to: 60s, mode: gaming, attributes: {background_wanted: true},
      scenario: [S9]}
   - {from: 60s, to: 120s, mode: gaming,
-     attributes: {wanted: true, background: download}, scenario: [S9, S10]}
+     attributes: {background_wanted: true, background: download}, scenario: [S9, S10]}
 
 tasks:
   - {id: game, name: game.exe, archetype: game-task-chain,

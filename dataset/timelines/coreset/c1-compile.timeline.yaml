@@ -5,7 +5,7 @@ meta:
   demand: calibration
 
 segments:
-  - {from: 0s, to: 60s, mode: compile, attributes: {wanted: true},
+  - {from: 0s, to: 60s, mode: compile, attributes: {background_wanted: true},
      scenario: [S11]}
 
 tasks:

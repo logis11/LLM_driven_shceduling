@@ -10,7 +10,7 @@ variants:
     ops:
       - rename: {from: python3, to: tracker-miner-fs-3}
       - patch-segment: {index: 1, mode: indexing,
-                        attributes: {wanted: false}}
+                        attributes: {background_wanted: false}}
 
   # P2b — same game-plus-background shape; wanted flips (S17 vs S10).
   # clamscan binds cpu-batch: full-scan state is CPU-saturating
@@ -21,7 +21,7 @@ variants:
       - patch-task: {id: download, name: clamscan, archetype: cpu-batch,
                      arrive: 60s, bind: {total_work: 25s}}
       - patch-segment: {index: 1,
-                        attributes: {wanted: false, background: av-scan},
+                        attributes: {background_wanted: false, background: av-scan},
                         scenario: [S9, S17]}
 
   # P3b — user-initiated bulk -> scheduled bulk (S15).
@@ -31,5 +31,5 @@ variants:
       - patch-task: {id: bulk, name: borg, archetype: io-stream,
                      arrive: 60s, bind: {total_work: 75s}}
       - patch-segment: {index: 1, mode: backup,
-                        attributes: {wanted: true, initiated: scheduled},
+                        attributes: {background_wanted: true, initiated: scheduled},
                         scenario: [S7, S15]}

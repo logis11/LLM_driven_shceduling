@@ -7,7 +7,7 @@ meta:
   seed: 104
 segments:
 - attributes:
-    wanted: true
+    background_wanted: true
   familiarity: 5
   from: 0s
   mode: media

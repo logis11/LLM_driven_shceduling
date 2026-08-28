@@ -6,13 +6,13 @@ meta:
   seed: 301
 
 segments:
-  - {from: 0s, to: 60s, mode: browsing, attributes: {wanted: true},
+  - {from: 0s, to: 60s, mode: browsing, attributes: {background_wanted: true},
      scenario: [S2]}
-  - {from: 60s, to: 120s, mode: office, attributes: {wanted: true},
+  - {from: 60s, to: 120s, mode: office, attributes: {background_wanted: true},
      scenario: [S1, S2]}
-  - {from: 120s, to: 360s, mode: compile, attributes: {wanted: true},
+  - {from: 120s, to: 360s, mode: compile, attributes: {background_wanted: true},
      scenario: [S11]}
-  - {from: 360s, to: 420s, mode: mail, attributes: {wanted: true},
+  - {from: 360s, to: 420s, mode: mail, attributes: {background_wanted: true},
      scenario: [S4]}
 
 tasks:

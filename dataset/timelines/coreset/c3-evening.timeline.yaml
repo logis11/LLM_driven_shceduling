@@ -5,11 +5,11 @@ meta:
   seed: 302
 
 segments:
-  - {from: 0s, to: 60s, mode: browsing, attributes: {wanted: true},
+  - {from: 0s, to: 60s, mode: browsing, attributes: {background_wanted: true},
      scenario: [S2]}
-  - {from: 60s, to: 300s, mode: gaming, attributes: {wanted: true},
+  - {from: 60s, to: 300s, mode: gaming, attributes: {background_wanted: true},
      scenario: [S9, S5]}
-  - {from: 300s, to: 420s, mode: media, attributes: {wanted: true},
+  - {from: 300s, to: 420s, mode: media, attributes: {background_wanted: true},
      scenario: [S13]}
 
 tasks:

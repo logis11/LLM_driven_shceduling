@@ -9,7 +9,7 @@ via a closed op set applied to the raw yaml:
         ops:
           - rename: {from: python3, to: tracker-miner-fs-3}
           - patch-segment: {index: 1, mode: indexing,
-                            attributes: {wanted: false}}
+                            attributes: {background_wanted: false}}
           - patch-task: {id: bulk, name: borg, archetype: io-stream}
           - add-task: {id: overlay, name: discord, ...}
           - set-segments: [...]     # wholesale segment-list replacement

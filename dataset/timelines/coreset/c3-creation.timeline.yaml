@@ -5,12 +5,12 @@ meta:
   seed: 303
 
 segments:
-  - {from: 0s, to: 120s, mode: photo, attributes: {wanted: true},
+  - {from: 0s, to: 120s, mode: photo, attributes: {background_wanted: true},
      scenario: [S6]}
-  - {from: 120s, to: 240s, mode: video-edit, attributes: {wanted: true},
+  - {from: 120s, to: 240s, mode: video-edit, attributes: {background_wanted: true},
      scenario: [S7]}
   - {from: 240s, to: 420s, mode: transcode,
-     attributes: {wanted: true, initiated: user}, scenario: [S8]}
+     attributes: {background_wanted: true, initiated: user}, scenario: [S8]}
 
 tasks:
   - {id: photo-editor, name: gimp, archetype: desktop-interactive,

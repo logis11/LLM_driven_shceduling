@@ -9,15 +9,15 @@ meta:
   seed: 203
 segments:
 - attributes:
-    wanted: true
+    background_wanted: true
   from: 0s
   mode: video-edit
   scenario:
   - S7
   to: 60s
 - attributes:
+    background_wanted: true
     initiated: scheduled
-    wanted: true
   from: 60s
   mode: backup
   scenario:

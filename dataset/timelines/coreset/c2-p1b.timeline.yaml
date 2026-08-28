@@ -9,14 +9,14 @@ meta:
   seed: 201
 segments:
 - attributes:
-    wanted: true
+    background_wanted: true
   from: 0s
   mode: dev
   scenario:
   - S11
   to: 60s
 - attributes:
-    wanted: false
+    background_wanted: false
   from: 60s
   mode: indexing
   scenario:

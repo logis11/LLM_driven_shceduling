@@ -7,9 +7,9 @@ meta:
   seed: 201
 
 segments:
-  - {from: 0s, to: 60s, mode: dev, attributes: {wanted: true},
+  - {from: 0s, to: 60s, mode: dev, attributes: {background_wanted: true},
      scenario: [S11]}
-  - {from: 60s, to: 180s, mode: ml-train, attributes: {wanted: true},
+  - {from: 60s, to: 180s, mode: ml-train, attributes: {background_wanted: true},
      scenario: [S11, S12]}
 
 tasks:

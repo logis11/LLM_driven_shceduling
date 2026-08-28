@@ -10,7 +10,7 @@ variants:
     ops:
       - add-task: {id: spoof, name: chrome, archetype: cpu-batch,
                    arrive: 20s, bind: {total_work: 30s}}
-      - patch-segment: {index: 0, attributes: {wanted: true, spoof: true}}
+      - patch-segment: {index: 0, attributes: {background_wanted: true, spoof: true}}
 
   # Fold-internal change: browsing becomes a video call with the task set
   # unchanged — the canonical set does not change, no query fires; a
@@ -19,7 +19,7 @@ variants:
     from: c1-browsing.timeline.yaml
     ops:
       - set-segments:
-          - {from: 0s, to: 30s, mode: browsing, attributes: {wanted: true},
+          - {from: 0s, to: 30s, mode: browsing, attributes: {background_wanted: true},
              scenario: [S2]}
-          - {from: 30s, to: 60s, mode: meeting, attributes: {wanted: true},
+          - {from: 30s, to: 60s, mode: meeting, attributes: {background_wanted: true},
              scenario: [S3]}
