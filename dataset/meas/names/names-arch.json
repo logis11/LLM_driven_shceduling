@@ -1,0 +1,307 @@
+{
+  "distro": "arch",
+  "not_attempted": {
+    "Xorg": "session infra",
+    "blender": "GUI",
+    "chrome": "measured in meas-gui",
+    "code": "microsoft branding build",
+    "darktable": "GUI",
+    "dbus-daemon": "session infra",
+    "discord": "proprietary",
+    "evince": "GUI; covered by name only",
+    "game.exe": "placeholder name by construction",
+    "gnome-shell": "session infra",
+    "ollama": "not packaged in distro repos",
+    "pipewire": "session infra",
+    "slack": "proprietary",
+    "spotify": "proprietary",
+    "steam": "proprietary/account-gated",
+    "steamwebhelper": "ships with steam",
+    "systemd": "pid 1",
+    "teams-for-linux": "third-party packaging",
+    "vlc": "GUI",
+    "zoom": "proprietary"
+  },
+  "results": {
+    "HandBrakeCLI": {
+      "binaries": [
+        "/usr/bin/HandBrakeCLI"
+      ],
+      "level": "runtime",
+      "note": "fedora needs rpmfusion; recorded as package-not-found there",
+      "observed": {
+        "HandBrakeCLI": "HandBrakeCLI --version"
+      },
+      "package": "handbrake-cli"
+    },
+    "baloo_file": {
+      "binaries": [
+        "/usr/lib/kf6/baloo_file",
+        "/usr/lib/kf6/baloo_file_extractor"
+      ],
+      "level": "binary-only",
+      "note": "desktop-session daemon; binary-only in containers",
+      "package": "baloo"
+    },
+    "borg": {
+      "binaries": [
+        "/usr/bin/borg",
+        "/usr/bin/borgfs"
+      ],
+      "level": "runtime",
+      "note": null,
+      "observed": {
+        "borg": "/usr/bin/python /usr/sbin/borg --version"
+      },
+      "package": "borg"
+    },
+    "cc1": {
+      "binaries": [
+        "/usr/bin/gcc",
+        "/usr/bin/gcc-ar",
+        "/usr/bin/gcc-nm",
+        "/usr/bin/gcc-ranlib",
+        "/usr/bin/x86_64-linux-gnu-gcc",
+        "/usr/bin/x86_64-linux-gnu-gcc-ar",
+        "/usr/bin/x86_64-linux-gnu-gcc-nm",
+        "/usr/bin/x86_64-linux-gnu-gcc-ranlib",
+        "/usr/bin/x86_64-pc-linux-gnu-gcc",
+        "/usr/bin/x86_64-pc-linux-gnu-gcc-16"
+      ],
+      "level": "runtime",
+      "note": null,
+      "observed": {
+        "gcc": "gcc -O2 -c /tmp/meas-names-oquv_65j/probe.c -o /tmp/meas-names-oquv_65j/probe.c.o"
+      },
+      "package": "gcc"
+    },
+    "clamscan": {
+      "binaries": [
+        "/usr/bin/clamscan"
+      ],
+      "level": "binary-only",
+      "note": null,
+      "observed": {},
+      "package": "clamav"
+    },
+    "ffmpeg": {
+      "binaries": [
+        "/usr/bin/ffmpeg"
+      ],
+      "level": "runtime",
+      "note": "fedora needs rpmfusion for full ffmpeg",
+      "observed": {
+        "ffmpeg": "ffmpeg -version"
+      },
+      "package": "ffmpeg"
+    },
+    "gamescope": {
+      "binaries": [
+        "/usr/bin/gamescope",
+        "/usr/bin/gamescope-type",
+        "/usr/bin/gamescopectl",
+        "/usr/bin/gamescopereaper",
+        "/usr/bin/gamescopestream",
+        "/usr/lib/libVkLayer_FROG_gamescope_wsi_x86_64.so"
+      ],
+      "level": "binary-only",
+      "note": "needs a session/GPU; binary-only",
+      "package": "gamescope"
+    },
+    "gimp": {
+      "binaries": [
+        "/usr/bin/gimp",
+        "/usr/bin/gimp-3",
+        "/usr/bin/gimp-3.2",
+        "/usr/bin/gimp-console",
+        "/usr/bin/gimp-console-3",
+        "/usr/bin/gimp-console-3.2",
+        "/usr/bin/gimp-debug-tool",
+        "/usr/bin/gimp-debug-tool-3",
+        "/usr/bin/gimp-debug-tool-3.2",
+        "/usr/bin/gimp-script-fu-interpreter-3.0"
+      ],
+      "level": "binary-only",
+      "note": "GUI; binary-only",
+      "package": "gimp"
+    },
+    "kdenlive": {
+      "binaries": [
+        "/usr/bin/kdenlive",
+        "/usr/bin/kdenlive_render",
+        "/usr/lib/libkdenliveLibplugin.a",
+        "/usr/lib/qt6/qml/org/kde/kdenlive/kdenliveLib.qmltypes"
+      ],
+      "level": "binary-only",
+      "note": "GUI; binary-only",
+      "package": "kdenlive"
+    },
+    "make": {
+      "binaries": [
+        "/usr/bin/make"
+      ],
+      "level": "binary-only",
+      "note": null,
+      "observed": {},
+      "package": "make"
+    },
+    "mpv": {
+      "binaries": [
+        "/usr/bin/mpv",
+        "/usr/lib/libmpv.so",
+        "/usr/lib/libmpv.so.2",
+        "/usr/lib/libmpv.so.2.5.0",
+        "/usr/lib/pkgconfig/mpv.pc"
+      ],
+      "level": "runtime",
+      "note": null,
+      "observed": {
+        "mpv": "mpv --no-config --version"
+      },
+      "package": "mpv"
+    },
+    "python3": {
+      "binaries": [
+        "/usr/bin/python",
+        "/usr/bin/python-config",
+        "/usr/bin/python3",
+        "/usr/bin/python3-config",
+        "/usr/bin/python3.14",
+        "/usr/bin/python3.14-config",
+        "/usr/lib/libpython3.14.so",
+        "/usr/lib/libpython3.14.so.1.0",
+        "/usr/lib/libpython3.so",
+        "/usr/lib/pkgconfig/python-3.14-embed.pc"
+      ],
+      "level": "runtime",
+      "note": null,
+      "observed": {
+        "python3": "python3 dataset/tools/meas/verify_names.py"
+      },
+      "package": "python"
+    },
+    "rclone": {
+      "binaries": [
+        "/usr/bin/mount.rclone",
+        "/usr/bin/rclone",
+        "/usr/bin/rclonefs"
+      ],
+      "level": "runtime",
+      "note": null,
+      "observed": {
+        "rclone": "rclone version"
+      },
+      "package": "rclone"
+    },
+    "rsync": {
+      "binaries": [
+        "/usr/bin/rrsync",
+        "/usr/bin/rsync",
+        "/usr/bin/rsync-ssl",
+        "/usr/lib/systemd/system/rsyncd.service",
+        "/usr/lib/systemd/system/rsyncd.socket",
+        "/usr/lib/systemd/system/rsyncd@.service"
+      ],
+      "level": "binary-only",
+      "note": null,
+      "observed": {},
+      "package": "rsync"
+    },
+    "soffice.bin": {
+      "binaries": [
+        "/usr/bin/soffice",
+        "/usr/lib/libreoffice/program/libsofficeapp.so",
+        "/usr/lib/libreoffice/program/soffice",
+        "/usr/lib/libreoffice/program/soffice.bin",
+        "/usr/lib/libreoffice/program/sofficerc"
+      ],
+      "level": "runtime",
+      "note": null,
+      "observed": {
+        "soffice.bin": "/usr/lib/libreoffice/program/soffice.bin --headless --invisible"
+      },
+      "package": "libreoffice-fresh"
+    },
+    "tar": {
+      "binaries": [
+        "/usr/bin/tar"
+      ],
+      "level": "binary-only",
+      "note": null,
+      "observed": {},
+      "package": "tar"
+    },
+    "thunderbird": {
+      "binaries": [
+        "/usr/bin/thunderbird",
+        "/usr/lib/thunderbird/thunderbird",
+        "/usr/lib/thunderbird/thunderbird-bin"
+      ],
+      "level": "binary-only",
+      "note": "GUI; binary-only (ubuntu 24.04 apt package is a snap stub \u2014 recorded as found only if a real binary ships)",
+      "package": "thunderbird"
+    },
+    "tracker-miner-fs-3": {
+      "binaries": [],
+      "level": "binary-only",
+      "note": "desktop-session daemon; binary-only in containers",
+      "package": "tracker3-miners"
+    },
+    "transmission-daemon": {
+      "binaries": [
+        "/usr/bin/transmission-cli",
+        "/usr/bin/transmission-create",
+        "/usr/bin/transmission-daemon",
+        "/usr/bin/transmission-edit",
+        "/usr/bin/transmission-remote",
+        "/usr/bin/transmission-show",
+        "/usr/lib/systemd/system/transmission-daemon.service",
+        "/usr/lib/sysusers.d/transmission.conf",
+        "/usr/lib/tmpfiles.d/transmission.conf"
+      ],
+      "level": "binary-only",
+      "note": null,
+      "package": "transmission-cli"
+    },
+    "updatedb": {
+      "binaries": [
+        "/usr/bin/updatedb",
+        "/usr/lib/systemd/system/plocate-updatedb.service",
+        "/usr/lib/systemd/system/plocate-updatedb.timer",
+        "/usr/lib/systemd/system/timers.target.wants/plocate-updatedb.timer"
+      ],
+      "level": "runtime",
+      "note": "expect updatedb.plocate on plocate systems",
+      "observed": {
+        "updatedb": "updatedb"
+      },
+      "package": "plocate"
+    },
+    "wineserver": {
+      "binaries": [
+        "/usr/bin/wineserver"
+      ],
+      "level": "binary-only",
+      "note": "binary-only; runtime topology decided at constructor time",
+      "package": "wine"
+    },
+    "xz": {
+      "binaries": [
+        "/usr/bin/unxz",
+        "/usr/bin/xz",
+        "/usr/bin/xzcat",
+        "/usr/bin/xzcmp",
+        "/usr/bin/xzdec",
+        "/usr/bin/xzdiff",
+        "/usr/bin/xzegrep",
+        "/usr/bin/xzfgrep",
+        "/usr/bin/xzgrep",
+        "/usr/bin/xzless"
+      ],
+      "level": "binary-only",
+      "note": null,
+      "observed": {},
+      "package": "xz"
+    }
+  }
+}

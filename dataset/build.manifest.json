@@ -1,7 +1,7 @@
 {
   "artifacts": {},
   "inputs": {
-    "dataset/archetypes.yaml": "c3e18c3769f5117f3e7dcffd43ee6fef342dc9e2e781dad74d9d2f80f181d148",
+    "dataset/archetypes.yaml": "cd2cf41cb39755bebab5187129fe3331fa2ff4256d8e74d3923bed3e396bb580",
     "dataset/schema/workload.schema.json": "b71d20570af038b1bdf68698189845dd0efa743643742216f7ef188f9e68ef69"
   }
 }

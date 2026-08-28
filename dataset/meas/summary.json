@@ -1,0 +1,1156 @@
+{
+  "cli_repeats": {
+    "meas-cli-r1": {
+      "phase_rc": {
+        "idle-baseline": 0,
+        "network-bulk": 0,
+        "untar": 0,
+        "kernel-defconfig": 0,
+        "kernel-build-j8": 0,
+        "archive-tar-xz": 0,
+        "rsync-copy": 0,
+        "updatedb": 0,
+        "locate-query": 1,
+        "freshclam": 2,
+        "clamscan": 0
+      },
+      "phase_wall_us": {
+        "idle-baseline": 60002682,
+        "network-bulk": 11202312,
+        "untar": 8454414,
+        "kernel-defconfig": 5381041,
+        "kernel-build-j8": 513843007,
+        "archive-tar-xz": 187706617,
+        "rsync-copy": 8299646,
+        "updatedb": 2299848,
+        "locate-query": 9302,
+        "freshclam": 16743,
+        "clamscan": 86616278
+      },
+      "compiler_lifetime": {
+        "n": 11806,
+        "median_us": 103106,
+        "sigma_log": 2.37,
+        "p90_us": 1715000
+      },
+      "compiler_children": 11806,
+      "compiler_cpu_frac": 0.084,
+      "compiler_peak_concurrent": 16,
+      "make_dispatch_us": 253,
+      "fork_rate_hz": 23.2,
+      "rsync_duty": 1.093,
+      "rsync_proc_duty": 0.259,
+      "untar_duty": 1.215,
+      "untar_proc_duty": 0.734,
+      "clamscan_duty": 0.993,
+      "clamscan_proc_duty": 1.0,
+      "updatedb_duty": 0.426,
+      "updatedb_proc_duty": null,
+      "wget_duty": 0.03,
+      "wget_proc_duty": 0.031
+    },
+    "meas-cli-r2": {
+      "phase_rc": {
+        "idle-baseline": 0,
+        "network-bulk": 0,
+        "untar": 0,
+        "kernel-defconfig": 0,
+        "kernel-build-j8": 0,
+        "archive-tar-xz": 0,
+        "rsync-copy": 0,
+        "updatedb": 0,
+        "locate-query": 1,
+        "freshclam": 2,
+        "clamscan": 0
+      },
+      "phase_wall_us": {
+        "idle-baseline": 60002913,
+        "network-bulk": 5606799,
+        "untar": 8727568,
+        "kernel-defconfig": 4921564,
+        "kernel-build-j8": 523138315,
+        "archive-tar-xz": 190185097,
+        "rsync-copy": 8785185,
+        "updatedb": 2323298,
+        "locate-query": 9499,
+        "freshclam": 17102,
+        "clamscan": 86780252
+      },
+      "compiler_lifetime": {
+        "n": 11846,
+        "median_us": 105317,
+        "sigma_log": 2.361,
+        "p90_us": 1753000
+      },
+      "compiler_children": 11846,
+      "compiler_cpu_frac": 0.086,
+      "compiler_peak_concurrent": 16,
+      "make_dispatch_us": 253,
+      "fork_rate_hz": 23.0,
+      "rsync_duty": 0.96,
+      "rsync_proc_duty": 0.249,
+      "untar_duty": 1.365,
+      "untar_proc_duty": 0.744,
+      "clamscan_duty": 0.991,
+      "clamscan_proc_duty": 1.0,
+      "updatedb_duty": 0.848,
+      "updatedb_proc_duty": null,
+      "wget_duty": 0.009,
+      "wget_proc_duty": 0.013
+    },
+    "meas-cli-r3": {
+      "phase_rc": {
+        "idle-baseline": 0,
+        "network-bulk": 0,
+        "untar": 0,
+        "kernel-defconfig": 0,
+        "kernel-build-j8": 0,
+        "archive-tar-xz": 0,
+        "rsync-copy": 0,
+        "updatedb": 0,
+        "locate-query": 1,
+        "freshclam": 2,
+        "clamscan": 0
+      },
+      "phase_wall_us": {
+        "idle-baseline": 60002877,
+        "network-bulk": 624831,
+        "untar": 8695467,
+        "kernel-defconfig": 7638674,
+        "kernel-build-j8": 532064568,
+        "archive-tar-xz": 195162162,
+        "rsync-copy": 8100087,
+        "updatedb": 2333746,
+        "locate-query": 9481,
+        "freshclam": 17158,
+        "clamscan": 87863217
+      },
+      "compiler_lifetime": {
+        "n": 11832,
+        "median_us": 106629,
+        "sigma_log": 2.366,
+        "p90_us": 1774000
+      },
+      "compiler_children": 11832,
+      "compiler_cpu_frac": 0.088,
+      "compiler_peak_concurrent": 17,
+      "make_dispatch_us": 253,
+      "fork_rate_hz": 22.5,
+      "rsync_duty": 1.177,
+      "rsync_proc_duty": 0.283,
+      "untar_duty": 1.349,
+      "untar_proc_duty": 0.733,
+      "clamscan_duty": 0.99,
+      "clamscan_proc_duty": 1.0,
+      "updatedb_duty": 0.84,
+      "updatedb_proc_duty": null,
+      "wget_duty": 0.0,
+      "wget_proc_duty": null
+    },
+    "meas-cli-r4": {
+      "phase_rc": {
+        "idle-baseline": 0,
+        "network-bulk": 0,
+        "untar": 0,
+        "kernel-defconfig": 0,
+        "kernel-build-j8": 0,
+        "archive-tar-xz": 0,
+        "rsync-copy": 0,
+        "updatedb": 0,
+        "locate-query": 1,
+        "freshclam": 2,
+        "clamscan": 0
+      },
+      "phase_wall_us": {
+        "idle-baseline": 60002803,
+        "network-bulk": 591517,
+        "untar": 8621957,
+        "kernel-defconfig": 4777903,
+        "kernel-build-j8": 525855268,
+        "archive-tar-xz": 197345515,
+        "rsync-copy": 8473535,
+        "updatedb": 2296830,
+        "locate-query": 9622,
+        "freshclam": 17721,
+        "clamscan": 87775860
+      },
+      "compiler_lifetime": {
+        "n": 11914,
+        "median_us": 103546,
+        "sigma_log": 2.368,
+        "p90_us": 1750000
+      },
+      "compiler_children": 11914,
+      "compiler_cpu_frac": 0.085,
+      "compiler_peak_concurrent": 17,
+      "make_dispatch_us": 255,
+      "fork_rate_hz": 22.9,
+      "rsync_duty": 1.211,
+      "rsync_proc_duty": 0.255,
+      "untar_duty": 1.347,
+      "untar_proc_duty": 0.726,
+      "clamscan_duty": 0.991,
+      "clamscan_proc_duty": 1.0,
+      "updatedb_duty": 0.431,
+      "updatedb_proc_duty": null,
+      "wget_duty": 0.0,
+      "wget_proc_duty": null
+    },
+    "meas-cli-r5": {
+      "phase_rc": {
+        "idle-baseline": 0,
+        "network-bulk": 0,
+        "untar": 0,
+        "kernel-defconfig": 0,
+        "kernel-build-j8": 0,
+        "archive-tar-xz": 0,
+        "rsync-copy": 0,
+        "updatedb": 0,
+        "locate-query": 1,
+        "freshclam": 2,
+        "clamscan": 0
+      },
+      "phase_wall_us": {
+        "idle-baseline": 60002872,
+        "network-bulk": 1117467,
+        "untar": 8774560,
+        "kernel-defconfig": 23307556,
+        "kernel-build-j8": 518680749,
+        "archive-tar-xz": 196086639,
+        "rsync-copy": 8183057,
+        "updatedb": 2342128,
+        "locate-query": 9768,
+        "freshclam": 17143,
+        "clamscan": 93302325
+      },
+      "compiler_lifetime": {
+        "n": 11844,
+        "median_us": 103548,
+        "sigma_log": 2.371,
+        "p90_us": 1724000
+      },
+      "compiler_children": 11844,
+      "compiler_cpu_frac": 0.085,
+      "compiler_peak_concurrent": 16,
+      "make_dispatch_us": 243,
+      "fork_rate_hz": 23.2,
+      "rsync_duty": 1.135,
+      "rsync_proc_duty": 0.277,
+      "untar_duty": 1.166,
+      "untar_proc_duty": 0.731,
+      "clamscan_duty": 0.986,
+      "clamscan_proc_duty": 0.999,
+      "updatedb_duty": 0.841,
+      "updatedb_proc_duty": null,
+      "wget_duty": 0.0,
+      "wget_proc_duty": null
+    }
+  },
+  "gui_repeats": {
+    "meas-gui-r1": {
+      "phase_rc": {
+        "chromium-10-tabs": 0,
+        "element-idle": 0
+      },
+      "chromium_peak_procs": 21,
+      "chromium_wakes": [
+        {
+          "comm": "chrome",
+          "wakes": 5311,
+          "gap_us": 56863.11429109395,
+          "work_us": 642.0636414987762
+        },
+        {
+          "comm": "chrome",
+          "wakes": 6,
+          "gap_us": 50333333.333333336,
+          "work_us": 0.0
+        },
+        {
+          "comm": "chrome",
+          "wakes": 142,
+          "gap_us": 2126760.563380282,
+          "work_us": 422.53521126760563
+        },
+        {
+          "comm": "chrome",
+          "wakes": 288,
+          "gap_us": 1045138.8888888889,
+          "work_us": 416.6666666666667
+        },
+        {
+          "comm": "chrome",
+          "wakes": 109,
+          "gap_us": 2761467.889908257,
+          "work_us": 2935.7798165137615
+        },
+        {
+          "comm": "chrome",
+          "wakes": 116,
+          "gap_us": 2594827.5862068967,
+          "work_us": 172.41379310344828
+        },
+        {
+          "comm": "chrome",
+          "wakes": 449,
+          "gap_us": 670378.6191536748,
+          "work_us": 1870.8240534521158
+        },
+        {
+          "comm": "chrome",
+          "wakes": 181,
+          "gap_us": 1662983.4254143646,
+          "work_us": 1049.7237569060774
+        },
+        {
+          "comm": "chrome",
+          "wakes": 43,
+          "gap_us": 348837.20930232556,
+          "work_us": 0.0
+        },
+        {
+          "comm": "chrome",
+          "wakes": 24,
+          "gap_us": 12541666.666666666,
+          "work_us": 416.6666666666667
+        }
+      ],
+      "element_wakes": [
+        {
+          "comm": "element-desktop",
+          "wakes": 1400,
+          "gap_us": 430714.28571428574,
+          "work_us": 821.4285714285714
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 156,
+          "gap_us": 3858974.358974359,
+          "work_us": 192.30769230769232
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 154,
+          "gap_us": 3909090.909090909,
+          "work_us": 194.80519480519482
+        }
+      ],
+      "daemon_wakes": [
+        {
+          "comm": "systemd",
+          "wakes": 113,
+          "gap_us": 5336283.185840708,
+          "work_us": 265.4867256637168
+        },
+        {
+          "comm": "systemd-journal",
+          "wakes": 30,
+          "gap_us": 20100000.0,
+          "work_us": 333.3333333333333
+        },
+        {
+          "comm": "multipathd",
+          "wakes": 603,
+          "gap_us": 1000000.0,
+          "work_us": 66.33499170812604
+        },
+        {
+          "comm": "systemd-udevd",
+          "wakes": 5,
+          "gap_us": 120600000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "systemd-resolve",
+          "wakes": 30,
+          "gap_us": 20100000.0,
+          "work_us": 333.3333333333333
+        },
+        {
+          "comm": "systemd-network",
+          "wakes": 6,
+          "gap_us": 100500000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "dbus-daemon",
+          "wakes": 81,
+          "gap_us": 7444444.444444444,
+          "work_us": 123.45679012345678
+        },
+        {
+          "comm": "systemd-logind",
+          "wakes": 83,
+          "gap_us": 7265060.240963856,
+          "work_us": 0.0
+        },
+        {
+          "comm": "cron",
+          "wakes": 13,
+          "gap_us": 46384615.384615384,
+          "work_us": 0.0
+        },
+        {
+          "comm": "chronyd",
+          "wakes": 2430,
+          "gap_us": 248148.14814814815,
+          "work_us": 78.18930041152264
+        }
+      ]
+    },
+    "meas-gui-r2": {
+      "phase_rc": {
+        "chromium-10-tabs": 0,
+        "element-idle": 0
+      },
+      "chromium_peak_procs": 22,
+      "chromium_wakes": [
+        {
+          "comm": "chrome",
+          "wakes": 4563,
+          "gap_us": 65965.37365768135,
+          "work_us": 701.2930089853166
+        },
+        {
+          "comm": "chrome",
+          "wakes": 5,
+          "gap_us": 60200000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "chrome",
+          "wakes": 138,
+          "gap_us": 2181159.420289855,
+          "work_us": 434.7826086956522
+        },
+        {
+          "comm": "chrome",
+          "wakes": 292,
+          "gap_us": 1030821.9178082192,
+          "work_us": 376.71232876712327
+        },
+        {
+          "comm": "chrome",
+          "wakes": 106,
+          "gap_us": 2839622.6415094337,
+          "work_us": 3018.867924528302
+        },
+        {
+          "comm": "chrome",
+          "wakes": 110,
+          "gap_us": 2736363.6363636362,
+          "work_us": 181.8181818181818
+        },
+        {
+          "comm": "chrome",
+          "wakes": 531,
+          "gap_us": 566854.9905838041,
+          "work_us": 1619.5856873822975
+        },
+        {
+          "comm": "chrome",
+          "wakes": 191,
+          "gap_us": 1570680.6282722512,
+          "work_us": 1465.9685863874345
+        },
+        {
+          "comm": "chrome",
+          "wakes": 53,
+          "gap_us": 283018.8679245283,
+          "work_us": 754.7169811320755
+        },
+        {
+          "comm": "chrome",
+          "wakes": 41,
+          "gap_us": 7317073.1707317075,
+          "work_us": 487.8048780487805
+        }
+      ],
+      "element_wakes": [
+        {
+          "comm": "element-desktop",
+          "wakes": 1424,
+          "gap_us": 423455.0561797753,
+          "work_us": 856.7415730337078
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 154,
+          "gap_us": 3863636.3636363638,
+          "work_us": 194.80519480519482
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 152,
+          "gap_us": 3914473.6842105263,
+          "work_us": 131.57894736842104
+        }
+      ],
+      "daemon_wakes": [
+        {
+          "comm": "systemd",
+          "wakes": 107,
+          "gap_us": 5635514.018691589,
+          "work_us": 280.3738317757009
+        },
+        {
+          "comm": "systemd-journal",
+          "wakes": 26,
+          "gap_us": 23192307.692307692,
+          "work_us": 0.0
+        },
+        {
+          "comm": "multipathd",
+          "wakes": 603,
+          "gap_us": 1000000.0,
+          "work_us": 49.75124378109453
+        },
+        {
+          "comm": "systemd-udevd",
+          "wakes": 5,
+          "gap_us": 120600000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "systemd-resolve",
+          "wakes": 39,
+          "gap_us": 15461538.461538462,
+          "work_us": 256.4102564102564
+        },
+        {
+          "comm": "systemd-network",
+          "wakes": 6,
+          "gap_us": 100500000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "dbus-daemon",
+          "wakes": 78,
+          "gap_us": 7730769.230769231,
+          "work_us": 128.2051282051282
+        },
+        {
+          "comm": "systemd-logind",
+          "wakes": 79,
+          "gap_us": 7632911.392405063,
+          "work_us": 0.0
+        },
+        {
+          "comm": "cron",
+          "wakes": 11,
+          "gap_us": 54818181.81818182,
+          "work_us": 0.0
+        },
+        {
+          "comm": "chronyd",
+          "wakes": 2430,
+          "gap_us": 248148.14814814815,
+          "work_us": 61.72839506172839
+        }
+      ]
+    },
+    "meas-gui-r3": {
+      "phase_rc": {
+        "chromium-10-tabs": 0,
+        "element-idle": 0
+      },
+      "chromium_peak_procs": 22,
+      "chromium_wakes": [
+        {
+          "comm": "chrome",
+          "wakes": 4957,
+          "gap_us": 60923.94593504135,
+          "work_us": 687.9160782731491
+        },
+        {
+          "comm": "chrome",
+          "wakes": 28,
+          "gap_us": 10750000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "chrome",
+          "wakes": 169,
+          "gap_us": 1781065.0887573964,
+          "work_us": 473.37278106508876
+        },
+        {
+          "comm": "chrome",
+          "wakes": 309,
+          "gap_us": 974110.0323624596,
+          "work_us": 388.3495145631068
+        },
+        {
+          "comm": "chrome",
+          "wakes": 93,
+          "gap_us": 3236559.139784946,
+          "work_us": 3655.9139784946237
+        },
+        {
+          "comm": "chrome",
+          "wakes": 129,
+          "gap_us": 2333333.3333333335,
+          "work_us": 155.03875968992247
+        },
+        {
+          "comm": "chrome",
+          "wakes": 466,
+          "gap_us": 643776.8240343347,
+          "work_us": 1845.4935622317596
+        },
+        {
+          "comm": "chrome",
+          "wakes": 189,
+          "gap_us": 1587301.5873015872,
+          "work_us": 1428.5714285714287
+        },
+        {
+          "comm": "chrome",
+          "wakes": 32,
+          "gap_us": 468750.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "chrome",
+          "wakes": 27,
+          "gap_us": 11111111.111111112,
+          "work_us": 0.0
+        }
+      ],
+      "element_wakes": [
+        {
+          "comm": "element-desktop",
+          "wakes": 1502,
+          "gap_us": 400798.9347536618,
+          "work_us": 825.565912117177
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 154,
+          "gap_us": 3883116.883116883,
+          "work_us": 194.80519480519482
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 154,
+          "gap_us": 3883116.883116883,
+          "work_us": 194.80519480519482
+        }
+      ],
+      "daemon_wakes": [
+        {
+          "comm": "systemd",
+          "wakes": 111,
+          "gap_us": 5441441.441441442,
+          "work_us": 270.27027027027026
+        },
+        {
+          "comm": "systemd-journal",
+          "wakes": 25,
+          "gap_us": 24160000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "multipathd",
+          "wakes": 604,
+          "gap_us": 1000000.0,
+          "work_us": 82.78145695364239
+        },
+        {
+          "comm": "systemd-udevd",
+          "wakes": 5,
+          "gap_us": 120800000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "systemd-resolve",
+          "wakes": 26,
+          "gap_us": 23230769.230769232,
+          "work_us": 384.61538461538464
+        },
+        {
+          "comm": "systemd-network",
+          "wakes": 6,
+          "gap_us": 100666666.66666667,
+          "work_us": 0.0
+        },
+        {
+          "comm": "dbus-daemon",
+          "wakes": 82,
+          "gap_us": 7365853.658536585,
+          "work_us": 243.90243902439025
+        },
+        {
+          "comm": "systemd-logind",
+          "wakes": 90,
+          "gap_us": 6711111.111111111,
+          "work_us": 111.11111111111111
+        },
+        {
+          "comm": "cron",
+          "wakes": 11,
+          "gap_us": 54909090.90909091,
+          "work_us": 0.0
+        },
+        {
+          "comm": "chronyd",
+          "wakes": 2432,
+          "gap_us": 248355.26315789475,
+          "work_us": 82.23684210526316
+        }
+      ]
+    },
+    "meas-gui-r4": {
+      "phase_rc": {
+        "chromium-10-tabs": 0,
+        "element-idle": 0
+      },
+      "chromium_peak_procs": 22,
+      "chromium_wakes": [
+        {
+          "comm": "chrome",
+          "wakes": 5336,
+          "gap_us": 56596.70164917541,
+          "work_us": 446.02698650674665
+        },
+        {
+          "comm": "chrome",
+          "wakes": 6,
+          "gap_us": 50333333.333333336,
+          "work_us": 0.0
+        },
+        {
+          "comm": "chrome",
+          "wakes": 155,
+          "gap_us": 1948387.0967741935,
+          "work_us": 258.06451612903226
+        },
+        {
+          "comm": "chrome",
+          "wakes": 270,
+          "gap_us": 1114814.8148148148,
+          "work_us": 296.2962962962963
+        },
+        {
+          "comm": "chrome",
+          "wakes": 87,
+          "gap_us": 3459770.114942529,
+          "work_us": 3103.448275862069
+        },
+        {
+          "comm": "chrome",
+          "wakes": 100,
+          "gap_us": 3010000.0,
+          "work_us": 100.0
+        },
+        {
+          "comm": "chrome",
+          "wakes": 588,
+          "gap_us": 511904.7619047619,
+          "work_us": 1139.455782312925
+        },
+        {
+          "comm": "chrome",
+          "wakes": 219,
+          "gap_us": 1374429.2237442923,
+          "work_us": 867.5799086757991
+        },
+        {
+          "comm": "chrome",
+          "wakes": 26,
+          "gap_us": 576923.0769230769,
+          "work_us": 384.61538461538464
+        },
+        {
+          "comm": "chrome",
+          "wakes": 49,
+          "gap_us": 6142857.142857143,
+          "work_us": 204.08163265306123
+        }
+      ],
+      "element_wakes": [
+        {
+          "comm": "element-desktop",
+          "wakes": 1431,
+          "gap_us": 421383.6477987421,
+          "work_us": 531.0971348707197
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 156,
+          "gap_us": 3839743.5897435895,
+          "work_us": 128.2051282051282
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 153,
+          "gap_us": 3915032.679738562,
+          "work_us": 196.07843137254903
+        }
+      ],
+      "daemon_wakes": [
+        {
+          "comm": "systemd",
+          "wakes": 107,
+          "gap_us": 5635514.018691589,
+          "work_us": 280.3738317757009
+        },
+        {
+          "comm": "systemd-journal",
+          "wakes": 25,
+          "gap_us": 24120000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "multipathd",
+          "wakes": 604,
+          "gap_us": 998344.3708609272,
+          "work_us": 49.66887417218543
+        },
+        {
+          "comm": "systemd-udevd",
+          "wakes": 5,
+          "gap_us": 120600000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "systemd-resolve",
+          "wakes": 32,
+          "gap_us": 18843750.0,
+          "work_us": 312.5
+        },
+        {
+          "comm": "systemd-network",
+          "wakes": 6,
+          "gap_us": 100500000.0,
+          "work_us": 1666.6666666666667
+        },
+        {
+          "comm": "dbus-daemon",
+          "wakes": 82,
+          "gap_us": 7353658.536585365,
+          "work_us": 121.95121951219512
+        },
+        {
+          "comm": "systemd-logind",
+          "wakes": 71,
+          "gap_us": 8492957.746478872,
+          "work_us": 140.8450704225352
+        },
+        {
+          "comm": "udisksd",
+          "wakes": 5,
+          "gap_us": 120600000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "cron",
+          "wakes": 11,
+          "gap_us": 54818181.81818182,
+          "work_us": 0.0
+        },
+        {
+          "comm": "chronyd",
+          "wakes": 2419,
+          "gap_us": 249276.5605622158,
+          "work_us": 49.60727573377429
+        }
+      ]
+    },
+    "meas-gui-r5": {
+      "phase_rc": {
+        "chromium-10-tabs": 0,
+        "element-idle": 0
+      },
+      "chromium_peak_procs": 22,
+      "chromium_wakes": [
+        {
+          "comm": "chrome",
+          "wakes": 5542,
+          "gap_us": 54312.52255503428,
+          "work_us": 544.929628293035
+        },
+        {
+          "comm": "chrome",
+          "wakes": 5,
+          "gap_us": 60200000.0,
+          "work_us": 2000.0
+        },
+        {
+          "comm": "chrome",
+          "wakes": 153,
+          "gap_us": 1967320.2614379085,
+          "work_us": 326.797385620915
+        },
+        {
+          "comm": "chrome",
+          "wakes": 255,
+          "gap_us": 1180392.156862745,
+          "work_us": 352.94117647058823
+        },
+        {
+          "comm": "chrome",
+          "wakes": 112,
+          "gap_us": 2687500.0,
+          "work_us": 3035.714285714286
+        },
+        {
+          "comm": "chrome",
+          "wakes": 122,
+          "gap_us": 2467213.1147540985,
+          "work_us": 163.9344262295082
+        },
+        {
+          "comm": "chrome",
+          "wakes": 575,
+          "gap_us": 523478.26086956525,
+          "work_us": 1234.7826086956522
+        },
+        {
+          "comm": "chrome",
+          "wakes": 200,
+          "gap_us": 1500000.0,
+          "work_us": 1100.0
+        },
+        {
+          "comm": "chrome",
+          "wakes": 58,
+          "gap_us": 258620.6896551724,
+          "work_us": 344.82758620689657
+        },
+        {
+          "comm": "chrome",
+          "wakes": 30,
+          "gap_us": 10000000.0,
+          "work_us": 0.0
+        }
+      ],
+      "element_wakes": [
+        {
+          "comm": "element-desktop",
+          "wakes": 1448,
+          "gap_us": 416436.4640883978,
+          "work_us": 732.0441988950276
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 152,
+          "gap_us": 3907894.736842105,
+          "work_us": 197.3684210526316
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 153,
+          "gap_us": 3882352.9411764704,
+          "work_us": 196.07843137254903
+        }
+      ],
+      "daemon_wakes": [
+        {
+          "comm": "systemd",
+          "wakes": 112,
+          "gap_us": 5383928.571428572,
+          "work_us": 267.85714285714283
+        },
+        {
+          "comm": "systemd-journal",
+          "wakes": 29,
+          "gap_us": 20793103.44827586,
+          "work_us": 0.0
+        },
+        {
+          "comm": "multipathd",
+          "wakes": 604,
+          "gap_us": 998344.3708609272,
+          "work_us": 82.78145695364239
+        },
+        {
+          "comm": "systemd-udevd",
+          "wakes": 5,
+          "gap_us": 120600000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "systemd-resolve",
+          "wakes": 40,
+          "gap_us": 15075000.0,
+          "work_us": 250.0
+        },
+        {
+          "comm": "systemd-network",
+          "wakes": 5,
+          "gap_us": 120600000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "dbus-daemon",
+          "wakes": 80,
+          "gap_us": 7537500.0,
+          "work_us": 125.0
+        },
+        {
+          "comm": "systemd-logind",
+          "wakes": 85,
+          "gap_us": 7094117.647058823,
+          "work_us": 0.0
+        },
+        {
+          "comm": "cron",
+          "wakes": 13,
+          "gap_us": 46384615.384615384,
+          "work_us": 0.0
+        },
+        {
+          "comm": "chronyd",
+          "wakes": 2422,
+          "gap_us": 248967.79521056978,
+          "work_us": 78.44756399669694
+        }
+      ]
+    }
+  },
+  "across_repeats": {
+    "compiler_lifetime_median_us": {
+      "n_repeats": 5,
+      "median": 103548,
+      "min": 103106,
+      "max": 106629
+    },
+    "compiler_lifetime_sigma_log": {
+      "n_repeats": 5,
+      "median": 2.368,
+      "min": 2.361,
+      "max": 2.371
+    },
+    "compiler_children": {
+      "n_repeats": 5,
+      "median": 11844,
+      "min": 11806,
+      "max": 11914
+    },
+    "compiler_cpu_frac": {
+      "n_repeats": 5,
+      "median": 0.085,
+      "min": 0.084,
+      "max": 0.088
+    },
+    "make_dispatch_us": {
+      "n_repeats": 5,
+      "median": 253,
+      "min": 243,
+      "max": 255
+    },
+    "fork_rate_hz": {
+      "n_repeats": 5,
+      "median": 23.0,
+      "min": 22.5,
+      "max": 23.2
+    },
+    "rsync_duty": {
+      "n_repeats": 5,
+      "median": 1.135,
+      "min": 0.96,
+      "max": 1.211
+    },
+    "untar_duty": {
+      "n_repeats": 5,
+      "median": 1.347,
+      "min": 1.166,
+      "max": 1.365
+    },
+    "clamscan_duty": {
+      "n_repeats": 5,
+      "median": 0.991,
+      "min": 0.986,
+      "max": 0.993
+    },
+    "updatedb_duty": {
+      "n_repeats": 5,
+      "median": 0.84,
+      "min": 0.426,
+      "max": 0.848
+    },
+    "wget_duty": {
+      "n_repeats": 5,
+      "median": 0.0,
+      "min": 0.0,
+      "max": 0.03
+    },
+    "rsync_proc_duty": {
+      "n_repeats": 5,
+      "median": 0.259,
+      "min": 0.249,
+      "max": 0.283
+    },
+    "untar_proc_duty": {
+      "n_repeats": 5,
+      "median": 0.733,
+      "min": 0.726,
+      "max": 0.744
+    },
+    "clamscan_proc_duty": {
+      "n_repeats": 5,
+      "median": 1.0,
+      "min": 0.999,
+      "max": 1.0
+    },
+    "updatedb_proc_duty": null,
+    "wget_proc_duty": {
+      "n_repeats": 2,
+      "median": 0.022,
+      "min": 0.013,
+      "max": 0.031
+    },
+    "chromium_peak_procs": {
+      "n_repeats": 5,
+      "median": 22,
+      "min": 21,
+      "max": 22
+    },
+    "element": {
+      "procs": 15,
+      "gap": {
+        "n": 15,
+        "median_us": 1848645,
+        "sigma_log": 1.088,
+        "p90_us": 3914474
+      },
+      "work": {
+        "n": 15,
+        "median_us": 289,
+        "sigma_log": 0.713,
+        "p90_us": 826
+      }
+    },
+    "chromium": {
+      "procs": 50,
+      "gap": {
+        "n": 50,
+        "median_us": 1609098,
+        "sigma_log": 1.718,
+        "p90_us": 12541667
+      },
+      "work": {
+        "n": 42,
+        "median_us": 647,
+        "sigma_log": 0.94,
+        "p90_us": 2936
+      }
+    },
+    "daemons": {
+      "procs": 51,
+      "gap": {
+        "n": 51,
+        "median_us": 11239013,
+        "sigma_log": 1.898,
+        "p90_us": 120600000
+      },
+      "work": {
+        "n": 29,
+        "median_us": 155,
+        "sigma_log": 0.809,
+        "p90_us": 280
+      }
+    }
+  }
+}
