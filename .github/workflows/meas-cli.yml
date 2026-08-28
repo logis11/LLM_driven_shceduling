@@ -59,9 +59,19 @@ jobs:
           P="$MEAS_DIR/phases.jsonl"
           PH="dataset/tools/meas/phase.sh $P"
           $PH idle-baseline        -- sleep 60
-          $PH network-bulk         -- wget -q \
+          $PH network-bulk         -- wget -q --tries=5 --waitretry=15 \
+            --retry-connrefused \
             https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.6.tar.xz \
             -O /tmp/linux-6.6.tar.xz
+          # a failed download poisons every downstream phase — verify and
+          # fall back to the git CDN mirror before proceeding
+          $PH download-verify      -- bash -c '
+            xz -t /tmp/linux-6.6.tar.xz 2>/dev/null && exit 0
+            echo "primary download bad; falling back to mirror"
+            wget -q --tries=5 --waitretry=15 \
+              https://mirrors.edge.kernel.org/pub/linux/kernel/v6.x/linux-6.6.tar.xz \
+              -O /tmp/linux-6.6.tar.xz
+            xz -t /tmp/linux-6.6.tar.xz'
           $PH untar                -- tar -xf /tmp/linux-6.6.tar.xz -C /tmp
           $PH kernel-defconfig     -- make -C "$CORPUS" defconfig
           $PH kernel-build-j8      -- make -C "$CORPUS" -j8

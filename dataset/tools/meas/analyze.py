@@ -63,6 +63,20 @@ def load_phases(repeat_dir):
     return phases
 
 
+def good(phases, name):
+    """Phase window iff it ran and exited 0 — failed phases are excluded
+    from analysis (e.g. cli:2 r1's transient download failure)."""
+    entry = phases.get(name)
+    return entry if entry and entry[3] == 0 else None
+
+
+def moment_matched(median_us, mean_us_value):
+    """Lognormal sigma from the median/mean pair: mean = median·e^{σ²/2}."""
+    if not median_us or not mean_us_value or mean_us_value <= median_us:
+        return None
+    return round(math.sqrt(2 * math.log(mean_us_value / median_us)), 3)
+
+
 def lognormal_fit(values_us):
     logs = [math.log(v) for v in values_us if v > 0]
     if len(logs) < 2:
@@ -207,33 +221,52 @@ def analyze_cli_repeat(repeat_dir):
     out = {"phase_rc": {k: v[3] for k, v in phases.items()},
            "phase_wall_us": {k: v[2] for k, v in phases.items()}}
 
-    build = phases["kernel-build-j8"]
-    lifetimes = exits_in_window(repeat_dir, build, COMPILER_NAMES)
-    out["compiler_lifetime"] = lognormal_fit(lifetimes)
-    out["compiler_children"] = len(lifetimes)
-    cpu_us, peak = phase_cpu(repeat_dir, build,
-                             lambda c: c in COMPILER_NAMES)
-    total_life = sum(lifetimes)
-    out["compiler_cpu_frac"] = round(min(cpu_us / total_life, 1.0), 3) \
-        if total_life else None
-    out["compiler_peak_concurrent"] = peak
-
-    make_cpu, _ = phase_cpu(repeat_dir, build, lambda c: c == "make")
-    forks = count_execs(repeat_dir, build, COMPILER_NAMES)
-    out["make_dispatch_us"] = round(make_cpu / forks) if forks else None
-    out["fork_rate_hz"] = round(forks / (build[2] / 1e6), 1)
+    for build_phase, prefix in (("kernel-build-j8", "compiler"),
+                                ("kernel-build-cold", "compiler_cold")):
+        build = good(phases, build_phase)
+        if build is None:
+            continue
+        lifetimes = exits_in_window(repeat_dir, build, COMPILER_NAMES)
+        out[f"{prefix}_lifetime"] = lognormal_fit(lifetimes)
+        out[f"{prefix}_children"] = len(lifetimes)
+        cpu_us, peak = phase_cpu(repeat_dir, build,
+                                 lambda c: c in COMPILER_NAMES)
+        if lifetimes:
+            out[f"{prefix}_cpu_mean_us"] = round(cpu_us / len(lifetimes))
+            out[f"{prefix}_life_mean_us"] = round(
+                sum(lifetimes) / len(lifetimes))
+        out[f"{prefix}_peak_concurrent"] = peak
+        if prefix == "compiler":
+            make_cpu, _ = phase_cpu(repeat_dir, build, lambda c: c == "make")
+            forks = count_execs(repeat_dir, build, COMPILER_NAMES)
+            out["make_dispatch_us"] = round(make_cpu / forks) if forks else None
+            out["fork_rate_hz"] = round(forks / (build[2] / 1e6), 1)
 
     for phase_name, comms, key in (
             ("rsync-copy", {"rsync"}, "rsync"),
             ("untar", {"tar", "xz"}, "untar"),
             ("clamscan", {"clamscan"}, "clamscan"),
             ("updatedb", {"updatedb.plocate", "updatedb"}, "updatedb"),
-            ("network-bulk", {"wget"}, "wget")):
-        window = phases[phase_name]
+            ("network-bulk", {"wget"}, "wget"),
+            ("tar-read-cold", {"tar"}, "tar_cold"),
+            ("rsync-copy-cold", {"rsync"}, "rsync_cold"),
+            ("clamscan-cold", {"clamscan"}, "clamscan_cold"),
+            ("updatedb-cold", {"updatedb.plocate", "updatedb"},
+             "updatedb_cold")):
+        window = good(phases, phase_name)
+        if window is None:
+            out[f"{key}_duty"] = out[f"{key}_proc_duty"] = None
+            continue
         cpu_us, _ = phase_cpu(repeat_dir, window, lambda c, s=comms: c in s)
         out[f"{key}_duty"] = round(cpu_us / window[2], 3)
         out[f"{key}_proc_duty"] = per_proc_duty(repeat_dir, window,
                                                 lambda c, s=comms: c in s)
+
+    tracker = good(phases, "tracker-daemon")
+    out["tracker_wakes"] = wake_stats(
+        repeat_dir, tracker,
+        lambda c: c.startswith(("tracker", "localsearch"))) \
+        if tracker else []
     return out
 
 
