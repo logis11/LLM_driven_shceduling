@@ -3,7 +3,7 @@
 
 Everything the three of us build talks to everything else through data — a file one side writes and another side reads. Each such format is a **contract**: as long as both sides honor it, we can work independently and integration stays boring. This document lists every contract in the project, shows what each one looks like with real (or, where not yet frozen, illustrative) examples, and explains every example in plain sentences. Same audience as `background-guide.md`: general CS knowledge is enough, no OS background needed.
 
-Some contracts are **frozen** — by shipped files and enforcing code (archetype, timeline, workload), or by ratified decision (the `cpu_scheduler` config schema in `recognition-vocabulary.md`, and the trace). The rest are **drafts** — their shape is agreed at the level shown here, but the exact schemas are a decision the three of us make together at the protocol freeze. Frozen is not untouchable: changing a frozen contract is always possible, it just takes everyone's sign-off plus a changelog entry — so propose edits rather than deviating quietly.
+Some contracts are **frozen** — by shipped files and enforcing code (archetype, timeline, workload), or by ratified decision (the `cpu_scheduler` config schema in `recognition-vocabulary.md`, and the trace). The protocol contracts froze on 2026-09-06 (§12). One **draft** remains — the proposal — whose shape is agreed at the level shown here and hardens with the driver-table contract. Frozen is not untouchable: changing a frozen contract is always possible, it just takes everyone's sign-off plus a changelog entry — so propose edits rather than deviating quietly.
 
 ---
 
@@ -57,12 +57,12 @@ The dotted lines are the deliberate cheat paths, and they are the experiment's c
 | 1 | Archetype | YAML, `dataset/archetypes.yaml` | measurements/literature → wlc | **frozen** (v0.1) |
 | 2 | Timeline (+ variant) | YAML, `dataset/timelines/` | human authors → wlc | **frozen** |
 | 3 | Workload (canonical) | JSON, `dataset/build/`, schema `dataset/schema/workload.schema.json` | wlc → the two views, oracle, grader | **frozen** |
-| 3a | Run file (view of 3) | extracted by the simulator's loader | workload file → simulator | draft |
-| 3b | Visible projection (view of 3) | extracted by the daemon's loader | workload file → daemon | draft |
-| 4 | Telemetry | JSON, internal to the daemon | daemon-internal (recorded in 6) | draft |
+| 3a | Run file (view of 3) | extracted by the simulator's loader | workload file → simulator | **frozen** |
+| 3b | Visible projection (view of 3) | extracted by the daemon's loader | workload file → daemon | **frozen** |
+| 4 | Telemetry | JSON, internal to the daemon | daemon-internal (recorded in 6) | **frozen** |
 | 5 | Proposal | JSON, internal to the daemon | daemon-internal (recorded in 6) | draft |
-| 6 | Config schedule | JSON | daemon → simulator | draft |
-| 7 | Recognition log | JSON | daemon → harness | draft |
+| 6 | Config schedule | JSON | daemon → simulator | **frozen** |
+| 7 | Recognition log | JSON | daemon → harness | **frozen** (envelope; the `proposal` slot follows contract 5) |
 | 8 | Trace | JSONL, `*.trace.jsonl(.gz)` | simulator → harness | **frozen** |
 
 ---
@@ -242,7 +242,7 @@ In sentences: at exactly t = 2.098333 s, a keystroke arrives for the editor. If 
 
 ### The two derived views
 
-**Draft. These views are not files the dataset ships — each consumer's own loader extracts its view from `*.workload.json` and discards the rest at the parse boundary. The dataset tree stays consumer-agnostic: it provides the raw canonical files and nothing else.**
+**Frozen 2026-09-06. These views are not files the dataset ships — each consumer's own loader extracts its view from `*.workload.json` and discards the rest at the parse boundary. The dataset tree stays consumer-agnostic: it provides the raw canonical files and nothing else.**
 
 **Run file** (`simulator` input): the workload minus everything the simulator must not see — `ground_truth` gone, `meta` reduced to the id. Structurally it is just the `events` list:
 
@@ -262,28 +262,28 @@ In sentences: at exactly t = 2.098333 s, a keystroke arrives for the editor. If 
   ] }
 ```
 
-In sentences: the projection says a process named `code` exists from 0 to 60 s (its depart is pinned, so the projection may know it), and a process named `make` appears at 2 s with no known end (it's finite — when it ends is a scheduling outcome, so the projection *cannot* contain it). The `children` entry handles spawn tables: *which* children `make` will create is compile-time knowledge — a hundred processes named `cc1` — so they are visible, attributed to their parent's lifetime; *when* each individually starts and stops is emergent and therefore absent. This is what lets a recognizer see the `{code, make, cc1×100}` swarm that reads as "compile," without leaking any behavioral ground truth. Multiplicity from `count:` expansion shows up the same way: `c1-browsing`'s projection is simply `chrome` with a count of 13.
+In sentences: the projection says a process named `code` exists from 0 to 60 s (its depart is pinned, so the projection may know it), and a process named `make` appears at 2 s with no known end (it's finite — when it ends is a scheduling outcome, so the projection *cannot* contain it). The `children` entry handles spawn tables: *which* children `make` will create is compile-time knowledge — a hundred processes named `cc1` — so they are visible, attributed to their parent's lifetime; *when* each individually starts and stops is emergent and therefore absent. This is what lets a recognizer see the `{code, make, cc1×100}` swarm that reads as "compile," without leaking any behavioral ground truth. Top-level tasks are **one entry per canonical task instance, never folded**: `c1-browsing`'s 13 `chrome` tasks are 13 entries with their own pinned times, and it is the telemetry builder that aggregates them into `chrome × 13`. Only `children` carry a `count`, because a spawn table's children have no pinned times of their own.
 
 ---
 
 ## 5. Telemetry — what the recognizer is shown
 
-**Draft. Telemetry never crosses a tree boundary as a file of its own — it is built inside the daemon from the visible projection, and each snapshot is preserved verbatim inside the recognition log. It still gets its own section, because it is the shape the daemon's internals — and the LLM prompt — are built around.**
+**Frozen 2026-09-06. Telemetry never crosses a tree boundary as a file of its own — it is built inside the daemon from the visible projection, and each snapshot is preserved verbatim inside the recognition log. It still gets its own section, because it is the shape the daemon's internals — and the LLM prompt — are built around.**
 
 ```jsonc
-// just before the 60-second mark: only the editor exists
-{ "t_us": 59000000, "processes": [ { "name": "code", "count": 1 } ] }
+// t = 0: the editor arrives — the first set change, and the first snapshot
+{ "t_us": 0, "processes": [ { "name": "code", "count": 1 } ] }
 
 // at the 60-second mark the training run arrives — the set changed
 { "t_us": 60000000, "processes": [ { "name": "code",    "count": 1 },
                                    { "name": "python3", "count": 1 } ] }
 ```
 
-In sentences: the daemon walks the visible projection's pinned events (arrivals and pinned departs) in time order and maintains the set of live process names with counts; each change of that set is one telemetry snapshot, and each snapshot is one query point. The transition between the two snapshots above is the moment the whole system turns on: the set changed, so the recognizer is consulted. During the 59 stable seconds before it, *nothing* is queried — an unchanged set means an unchanged answer, and re-asking would produce 59 identical responses for nothing. Names arrive with counts (`chrome × 13`, `game.exe × 300`, `cc1 × 100`) because the count is itself signal: thirteen chromes read as a browser with tabs; a hundred `cc1` read as a parallel build. What telemetry deliberately **excludes** defines the experiment: no PIDs, no CPU or burst statistics (that is the hidden behavioral ground truth being tested against), no mode labels (that is the answer), and no command lines (canonical files carry names only — a frozen dataset decision). Two consequences of the pinned-events-only rule, stated honestly: the recognizer reacts to *launches* and *user-closes*, never to background jobs finishing (a finite task that exits never disappears from telemetry), and spawn children appear when their parent does. When results look ambiguous there will be a temptation to "just give the model a bit more context"; the frozen telemetry shape is what makes that a visible protocol change rather than a quiet experiment-invalidating tweak.
+In sentences: the daemon walks the visible projection's pinned events (arrivals and pinned departs) in time order and maintains the set of live process names with counts; each change of that set is one telemetry snapshot, and each snapshot is one query point. The transition between the two snapshots above is the moment the whole system turns on: the set changed, so the recognizer is consulted. During the 60 stable seconds between them, *nothing* is queried — an unchanged set means an unchanged answer, and re-asking would produce identical responses for nothing. Five rules fix what "the set changed" means, so two builders emit the same snapshots: **(1)** the set is the name→count multiset, so a count-only change (a 14th `chrome`, another download worker) is a change and emits a snapshot — `c6-spoof` depends on this, since its spoofing `chrome` arrives among 13 existing ones; **(2)** all pinned events at one timestamp are applied first and produce exactly one snapshot; **(3)** `processes` is sorted by name, so reruns are byte-identical; **(4)** the snapshot at the workload's final instant — every coreset file has one, because segment-bound tasks depart at the end — is emitted and logged like any other, because the projection carries no duration and the daemon cannot know it is the end; the schedule entry it produces lands at or after the end, where the simulator has nothing left to apply it to and the grader no segment to grade it against; **(5)** nothing else emits a snapshot — no timers, no periodic re-asks. Names arrive with counts (`chrome × 13`, `game.exe × 300`, `cc1 × 100`) because the count is itself signal: thirteen chromes read as a browser with tabs; a hundred `cc1` read as a parallel build. What telemetry deliberately **excludes** defines the experiment: no PIDs, no CPU or burst statistics (that is the hidden behavioral ground truth being tested against), no mode labels (that is the answer), and no command lines (canonical files carry names only — a frozen dataset decision). Two consequences of the pinned-events-only rule, stated honestly: the recognizer reacts to *launches* and *user-closes*, never to background jobs finishing (a finite task that exits never disappears from telemetry), and spawn children appear when their parent does. When results look ambiguous there will be a temptation to "just give the model a bit more context"; the frozen telemetry shape is what makes that a visible protocol change rather than a quiet experiment-invalidating tweak.
 
 ## 6. Proposal — what the recognizer answers
 
-**Draft. Like telemetry, the proposal is internal to the daemon — the recognizer's raw answer before validation, preserved verbatim inside the recognition log.**
+**Draft — the one protocol contract still open. It hardens with the driver-table contract (Phase 4), because the `subsystems.cpu_scheduler` slot's meaning under variant B (the model choosing `algorithm` while `params` come from the table) depends on the table's format. The `system` block is already fixed by `recognition-vocabulary.md`. Like telemetry, the proposal is internal to the daemon — the recognizer's raw answer before validation, preserved verbatim inside the recognition log.**
 
 ```jsonc
 {
@@ -315,7 +315,7 @@ In sentences: the proposal has four parts with sharply different fates. `reasoni
 
 ## 7. Config schedule — what the daemon hands the simulator
 
-**Draft — this is the contract to freeze first, since both sides build against it. Flows daemon → simulator, one file per workload × condition.**
+**Frozen 2026-09-06 — the first of the protocol contracts to freeze, since both sides build against it. Flows daemon → simulator, one file per workload × condition.**
 
 ```jsonc
 {
@@ -339,21 +339,23 @@ In sentences: the proposal has four parts with sharply different fates. `reasoni
 }
 ```
 
-In sentences: a config schedule is a small, finished list of "at virtual time T, the scheduler's settings become C." The simulator applies each entry at its time as just another event — it neither knows nor cares whether the schedule came from an LLM, a whitelist, a random draw, or the oracle; that ignorance is what makes conditions comparable. The first entry is always at t = 0 and is the boot default (plain MLFQ), because recognition hasn't seen anything yet. The second entry is the daemon's reaction to the training run appearing at 60 s — note its timestamp is 60 s *plus 450 ms*: the daemon stamps configs late by its measured recognition latency, which is how LLM slowness remains an honest, measured part of the experiment even though inference ran offline. (The oracle daemon stamps exactly 60000000 — perfect recognition has zero delay; the `fixed` condition emits a one-entry schedule and never changes.) The `config` payload is algorithm-dependent — an EDF entry would carry `{ "algorithm": "EDF", "params": { "residual_timeslice_us": 2000 }, "batch_bandwidth_cap": 0.12 }`, a lottery entry its `batch_share`. The full field lists, ranges, and defaults for all four algorithms are frozen in `recognition-vocabulary.md` (the config schema section) — and each entry carries its `provenance`: `unmodified` (proposal applied as-is), `clamped` (pulled into legal bounds), `held` (proposal rejected; previous config carried forward), or `fallback` (the default, from boot or after repeated failures). Every performance figure in the paper is reported next to the provenance breakdown of the schedule that produced it, because a condition that scored well while mostly running fallback demonstrated nothing about recognition. For that breakdown to be computable from the schedule alone, **every query point yields exactly one schedule entry**: a rejected proposal still produces an entry, repeating the configuration in force with provenance `held`, stamped at the query point plus that recognition's latency. Entries are never elided because the config did not change (the `fixed` condition consults no recognizer, so its schedule stays one entry).
+In sentences: a config schedule is a small, finished list of "at virtual time T, the scheduler's settings become C." The simulator applies each entry at its time as just another event — it neither knows nor cares whether the schedule came from an LLM, a whitelist, a random draw, or the oracle; that ignorance is what makes conditions comparable. The first entry is always at t = 0 and is the boot default (plain MLFQ), because recognition hasn't seen anything yet. The second entry is the daemon's reaction to the training run appearing at 60 s — note its timestamp is 60 s *plus 450 ms*: the daemon stamps configs late by its measured recognition latency, which is how LLM slowness remains an honest, measured part of the experiment even though inference ran offline. (The oracle daemon stamps exactly 60000000 — perfect recognition has zero delay; the `fixed` condition emits a one-entry schedule and never changes.) The `config` payload is algorithm-dependent — an EDF entry would carry `{ "algorithm": "EDF", "params": { "residual_timeslice_us": 2000 }, "batch_bandwidth_cap": 0.12 }`, a lottery entry its `batch_share`. The full field lists, ranges, and defaults for all four algorithms are frozen in `recognition-vocabulary.md` (the config schema section) — and each entry carries its `provenance`: `unmodified` (proposal applied as-is), `clamped` (pulled into legal bounds), `held` (proposal rejected; previous config carried forward), or `fallback` (the default, from boot or after repeated failures). Every performance figure in the paper is reported next to the provenance breakdown of the schedule that produced it, because a condition that scored well while mostly running fallback demonstrated nothing about recognition. For that breakdown to be computable from the schedule alone, **every query point yields exactly one schedule entry**: a rejected proposal still produces an entry, repeating the configuration in force with provenance `held`, stamped at the query point plus that recognition's latency. Entries are never elided because the config did not change (the `fixed` condition consults no recognizer, so its schedule stays one entry). Four more rules fix the mechanics so both builders read one file the same way. **Order:** the boot entry is always first; the rest are sorted by `t_us`, ties broken by emission order; the simulator applies same-time entries in list order and the last one applied is in force — this matters at t = 0, where zero-latency conditions (`oracle`, `random`) stamp their first answer at the same instant as the boot entry. Sorting also means a slow answer to an older snapshot can land after, and overwrite, the answer to a newer one; the schedule records exactly that, and any policy for stale answers (skipping a query whose snapshot has since been superseded) is the daemon's, visible in the recognition log, not something this format expresses. **Payload:** `config` is the post-validation configuration actually in force after the entry — clamped values for `clamped`, the carried-forward config for `held`; the raw proposal lives only in the recognition log. **Validity:** every `config` is valid under the frozen schema in `recognition-vocabulary.md`; the simulator rejects the whole file on a violation rather than repairing or skipping an entry, because a malformed entry is a daemon bug and silent repair would hide it from every provenance count. **End:** entries at or after the workload's end (the terminal snapshot's, telemetry rule 4) are ignored by the simulator.
 
 ---
 
 ## 8. Recognition log — what the daemon hands the grader
 
-**Draft. Flows daemon → harness, one file per workload × condition. The config schedule is what recognition *decided*; this is the record of what it *thought*.**
+**Frozen 2026-09-06 — the envelope. The `proposal` object inside each entry is contract 5 and follows its freeze. Flows daemon → harness, one file per workload × condition. The config schedule is what recognition *decided*; this is the record of what it *thought*.**
 
 ```jsonc
 {
   "workload_id": "c2-p1a",
   "condition": "llm_vocab",
+  "seed": null,                                 // the PRNG seed for `random`; null otherwise
   "queries": [
-    { "t_set_change": 60000000,                 // the pinned event that triggered this query
-      "telemetry": { "processes": [ { "name": "code",    "count": 1 },
+    { "t_set_change": 60000000,                 // = the snapshot's t_us
+      "telemetry": { "t_us": 60000000,
+                     "processes": [ { "name": "code",    "count": 1 },
                                     { "name": "python3", "count": 1 } ] },
       "proposal": {
         "reasoning": "code is an editor in active use. python3 alongside an editor at
@@ -364,12 +366,18 @@ In sentences: a config schedule is a small, finished list of "at virtual time T,
         "system": { "mode": "ml-train", "background_wanted": true }
       },
       "validation": "unmodified",
-      "latency_us": 450000 }
+      "latency_us": 450000
+      // optional: "raw": "<verbatim model text>" when the answer could not be parsed
+      //           (then "proposal" is null and "validation" is "held");
+      //           "source": { … } — per-condition audit detail, ignored by the grader
+      //           (oracle: the ground-truth segment it read; random: its draw;
+      //            whitelist: the rule that matched)
+    }
   ]
 }
 ```
 
-In sentences: one entry per **query point** — each pinned set change that made the daemon consult its recognizer. The entry records the exact telemetry snapshot the recognizer was shown (so grading is self-contained and auditable), the full proposal that came back, what the validator did with it, and how long recognition took. Layer-1 metrics — mode accuracy, per-attribute accuracy, the confusion matrix, consistency across repeated runs, accuracy split by software familiarity — are all computed by comparing these entries against `ground_truth`, with no simulator involved at all. The `reasoning` field is never scored automatically; it is read by humans during failure analysis, because it distinguishes "the model didn't know what the software was" (a knowledge limit) from "it knew and drew the wrong conclusion" (a fixable prompt or mapping problem). For non-LLM conditions the log still exists but is thinner — the whitelist logs which rule matched; the oracle logs the ground-truth row it read; `random` logs its draw — so every condition's decisions are auditable in the same place.
+In sentences: one entry per **query point** — each pinned set change that made the daemon consult its recognizer. The entry records the exact telemetry snapshot the recognizer was shown (so grading is self-contained and auditable), the full proposal that came back, what the validator did with it, and how long recognition took. Layer-1 metrics — mode accuracy, per-attribute accuracy, the confusion matrix, consistency across repeated runs, accuracy split by software familiarity — are all computed by comparing these entries against `ground_truth`, with no simulator involved at all. The `reasoning` field is never scored automatically; it is read by humans during failure analysis, because it distinguishes "the model didn't know what the software was" (a knowledge limit) from "it knew and drew the wrong conclusion" (a fixable prompt or mapping problem). For non-LLM conditions the log still exists but is thinner — the whitelist logs which rule matched; the oracle logs the ground-truth row it read; `random` logs its draw — so every condition's decisions are auditable in the same place. The shape of that thinner entry is fixed, not left to each builder: **every condition fills `proposal.system` the same way** (it is what the validator consumes); `reasoning` and `situation` may be absent for non-LLM conditions; the per-condition detail goes in the optional `source` object, which the grader ignores; `random`'s seed is the top-level `seed`. When the model's answer cannot be parsed, `proposal` is `null`, `validation` is `held`, and the optional `raw` string keeps the verbatim text — the log never loses what was said. **`validation` mirrors the schedule:** one query produces one schedule entry (§7), so the log's `validation` sequence equals the schedule's `provenance` sequence minus the boot entry, over the same four values — a consistency check the harness guards run for free. **Grading scope:** an entry is graded only if a non-`ambiguous` ground-truth segment covers its `t_set_change`; the terminal snapshot (telemetry rule 4) has no covering segment and is skipped, and `ambiguous` segments are excluded by `recognition-vocabulary.md` §1. **Latency:** non-LLM conditions record 0; LLM conditions in replay mode record the latency measured at record time (daemon-guide §7), never the replay's. `t_set_change` is the embedded snapshot's `t_us`.
 
 ---
 
@@ -436,8 +444,8 @@ Two rules complete the contract. **The harness set is closed**: the eight event 
 | Term | Meaning here |
 |---|---|
 | **contract** | a data format two components agree on, so each side can be built and tested alone |
-| **frozen** | the format exists, real files conform to it, and code/CI enforces it; changing it is a team decision |
-| **draft** | the intended shape is agreed at the level shown here, but the exact schema awaits the protocol freeze |
+| **frozen** | the format is fixed by ratified decision and changing it is a team decision with a changelog entry; where a consumer exists, real files conform and a schema or CI enforces it — enforcement follows the first consumer, it is not a precondition of the freeze |
+| **draft** | the intended shape is agreed at the level shown here, but the exact schema awaits a named decision (for the proposal: the driver-table contract) |
 | **schema** | a machine-checkable description of a format (like `workload.schema.json`) — validation, not documentation |
 | **view** | a derived file containing only the slice of the workload one consumer may see (run file, visible projection) |
 | **binding** | a timeline attaching a concrete process name and scenario-specific values (like `total_work`) to an archetype |
@@ -453,4 +461,13 @@ Two rules complete the contract. **The harness set is closed**: the eight event 
 
 ## 11. The freeze rule
 
-The dataset contracts (archetype, timeline, workload) are frozen and enforced by schema and CI today; the `cpu_scheduler` config schema and the trace are frozen by ratified decision (2026-08-28). The remaining drafts — the two views, the config schedule envelope, the recognition log, and the daemon-internal telemetry/proposal shapes — harden in one deliberate step, the **protocol freeze**, because they are exactly the seams where the three of us could silently build against three slightly different assumptions and discover it at integration time. The config schedule freezes first: both the daemon and the simulator build against it from day one. Frozen or draft, the operating rule is the same: any change to a frozen contract needs all three of us and a changelog entry, and until a draft freezes it is the shared starting point — build to it, and bring friction to the freeze discussion rather than working around it quietly.
+The dataset contracts (archetype, timeline, workload) are frozen and enforced by schema and CI today; the `cpu_scheduler` config schema and the trace are frozen by ratified decision (2026-08-28). The protocol contracts — the two views, telemetry, the config schedule, and the recognition log's envelope — froze on 2026-09-06, the **protocol freeze**, because they are exactly the seams where the three of us could silently build against three slightly different assumptions and discover it at integration time. One draft remains: the proposal (contract 5), which hardens together with the driver-table contract in Phase 4, since its `subsystems` slot depends on the table's format. Frozen or draft, the operating rule is the same: any change to a frozen contract needs all three of us and a changelog entry, and until a draft freezes it is the shared starting point — build to it, and bring friction to the freeze discussion rather than working around it quietly.
+
+---
+
+## 12. Changelog
+
+Every change to a frozen contract lands here, dated, with the sub-task that made it.
+
+- **2026-09-06 — protocol freeze (jioh 3.3).** Run file (3a), visible projection (3b), telemetry (4), config schedule (6), and the recognition log's envelope (7) move from draft to frozen by ratified decision; the proposal (5) stays draft until the driver-table contract lands (Phase 4). Fixed in the same step, so that two builders read one file the same way: 3b — one entry per canonical task instance, never folded; 4 — the five snapshot rules (name→count multiset; one snapshot per timestamp; `processes` sorted by name; the terminal snapshot is emitted; nothing else emits) and the example's first snapshot corrected from 59 s to t = 0; 6 — one entry per query point including `held` (from 3.2), ordering with tie-break, post-validation payload, validity on load, entries at or after the end ignored, stale-answer policy deferred to the daemon; 7 — non-LLM entry shape (`proposal.system` for every condition, optional `source`, top-level `seed`), `proposal: null` + `raw` for unparseable answers, `validation` mirrors schedule `provenance`, grading scope, latency for non-LLM and replay. Glossary: `frozen` no longer requires enforcing code as a precondition. Recorded choice for 3a: the run file keeps only `workload_id` of `meta`; a trace is tied to a build through the manifest and the simulator version in its header, not through the run file.
+
