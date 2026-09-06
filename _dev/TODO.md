@@ -30,10 +30,25 @@ Execution order: 2.1 ∥ 2.2 in any order or parallel → 2.3 (needs both) → 2
 - [x] **2.5** Repo prep + onboarding docs — per-teammate reading paths + repo working-structure prep; contents decided in its own session — component trees + per-tree Makefiles; dataset README; background/simulator/daemon guides; data-contracts; recognition vocabulary + config schema + trace format frozen; team-wide TODO restructure; proposal/contract sweeps (archive: `_dev/archive/2026-08-28-task-2.5-repo-prep-and-contracts.md`)
 - [x] **2.6** meas-ci campaign — three workflow families in `.github/workflows/` (headless CLI, Xvfb GUI, name verification; building-plan §7), N runs with spread; analysis folds measured parameters into `archetypes.yaml` replacing the 15 `meas-pending` tags (registry tags `meas-ci:<workflow>:<run>`); fold-in lands before 2.4's final compile — batches cli:1/gui:2/names:1; 11/15 folded, 4 stay pending with stated findings (cache-hot corpus, foreground no-throttle); raw data: release `meas-ci-2026-08-28`
 
+### Phase 3 — Verification and protocol freeze
+Stage 0 of `_dev/docs/rq0-preparation-notes.md`. Read the per-file static demand estimates to settle C1's demand class and the size of the RQ0 judging set; record `c6-dual`'s out-of-vocabulary labels against oracle and validator behaviour; flip config schedule, telemetry, and recognition log from `draft` to `frozen`; correct the stale lines in `research-proposal` Part 9 and `terminology.md`, sweeping for other status labels that lag the freezes.
+
+### Phase 4 — Driver table format
+Stage 0.5. Fix the driver table's schema so v0 and v1 are instances of it, under the invariant that every `system`-only condition receives an identical configuration for the same `(mode, background_wanted)`. Settle whether variant B passes through the table at all (archive Q5's ceiling claim); correct `research-proposal` §5.2/§4.6 and `daemon-guide` §5; promote the table to a data contract alongside the others.
+
+### Phase 5 — Layer-1 metrics and the records pipeline
+Stages 1–2. Hand-written mock traces drive the Layer-1 metric decisions, written up as a metrics doc; `records` schema; trace reader, primitives, and records output checked against hand-computed values. No simulator needed.
+
+### Phase 6 — Driver table v0 and the scoring spec
+Stage 3. Scope the rows C1–C4 exercise; write v0 with one-sentence justifications; the Layer-2 scoring spec (C2 pair weighting, `c1-compile` trade-off, `c1-media` audio/video weighting); fill the remaining rows with defaults; pair review of same-mode `wanted=true/false` rows for distinctness.
+
+### Phase 7 — Harness upper half through pre-registration
+Stages 4–5. Scorer, guards, L1 grader, mock daemon + mock simulator with the full pipeline run on mocks, runner with execution cache, report with provenance. Ends at the committed gate spec: judging set, threshold, `random` draw definition and seed count (with 박이안), failure procedure, frozen scoring spec.
+
+### Phase 8 — Integration and the RQ0 run
+Stage 6. Swap mocks for the real simulator and daemon, end-to-end smoke, run all coreset files × 3 conditions, check guards before looking at results, judge per the gate spec; on failure, config search before workload redesign. Depends on 경민's integration gate and algorithm extension and 이안's daemon.
+
 ### Backlog
-- Driver table on the ratified vocabulary (`docs/recognition-vocabulary.md`): fill the 32 `(mode, background_wanted)` rows, verify row-distinctness before the full matrix
-- RQ0 gate (random vs oracle on coreset-single C1/C2) — needs 경민's integration gate and 이안's trivial-recognizer schedules
-- Experiment harness (`harness/`): condition matrix runner, metrics from traces, plots; mock generator
 - Naturalistic generator + generalset + full condition matrix
 
 ## 인경민 (kyungmin)
