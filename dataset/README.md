@@ -14,7 +14,7 @@ timelines/
 build/                 # compiled artifacts — NOT committed; verified via build.manifest.json
   coreset-native/      # 24 workloads, native lane counts
   coreset-single/      # same 24, lane-scaled to a single lane (experiments run on these)
-build.manifest.json    # lockfile: input/output hashes of the last blessed build
+build.manifest.json    # lockfile: input/output hashes of the last blessed build + per-file static demand (utilization, demand_class)
 coverage-grid.json     # mode × tier coverage grid over all segments (signed off)
 meas/                  # meas-ci campaign outputs: analysis summary + verified name tables
 tools/                 # all executable tooling (see below)
@@ -127,7 +127,7 @@ tools/tests/           # invariant suite (47 tests) + fixtures
 - **Canonical semantics live in the docs, not here.** The compiler implements `docs/simulator/interpretation-contract.md`; the build order and set design follow `docs/workload/building-plan.md`; archetype authoring follows `docs/workload/archetype-plan.md`. When code and doc disagree, the doc wins — fix the code.
 - **Behavior parameters live in `archetypes.yaml`, never inline in a timeline.** Timelines bind `(name, archetype)` and supply only the knobs listed in the archetype's `binding_params`.
 - **Every parameter value is sourced.** Numbers carry a `source` tag resolving through `sources.yaml` → `docs/references.md`. Measured values are tagged `meas-ci:<workflow>:<run>`; raw data lives on the GitHub release named in the tag's registry entry.
-- **Demand window.** Every compiled `-single` file must land in the ~100–150% window by the static estimate (`compile.py` prints per-file demand). Files outside it get redesigned, not waved through.
+- **Demand window.** Every compiled `-single` file of demand class `oversubscribed` must land in the ~100–150% window by the static estimate (`compile.py` prints per-file demand and records it under `demand` in the manifest); `calibration` files are exempt. Files outside it get redesigned, not waved through.
 - **Zero `meas-pending`.** The library is fully measured; the linter keeps it that way.
 
 ## Where to go deeper

@@ -39,7 +39,7 @@ def build_all(root):
     schema = load_schema(dataset / "schema" / "workload.schema.json")
     timelines_dir = dataset / "timelines"
 
-    artifacts, errors, reports = {}, [], []
+    artifacts, demand, errors, reports = {}, {}, [], []
     for path in discover(timelines_dir):
         rel_path = path.relative_to(root).as_posix()
         try:
@@ -56,6 +56,8 @@ def build_all(root):
             out = (f"{artifact_set(timelines_dir, path)}-{mode}/"
                    f"{timeline.id}.workload.json")
             artifacts[out] = canonical_bytes(canonical)
+            demand[out] = {"utilization": round(report["utilization"], 4),
+                           "demand_class": report["demand_class"]}
             reports.append((timeline.id, mode, report))
 
     manifest = {
@@ -67,6 +69,7 @@ def build_all(root):
         },
         "artifacts": {rel: sha256(data)
                       for rel, data in sorted(artifacts.items())},
+        "demand": {rel: demand[rel] for rel in sorted(demand)},
     }
     return manifest, artifacts, errors, reports
 

@@ -49,6 +49,200 @@
     "coreset-single/c6-fold.workload.json": "69dcd05358d2860df187161dea1b6a2409597f7aa5a311b37f61228f5e2ab8b7",
     "coreset-single/c6-spoof.workload.json": "abe5905a1ef9c8e64585cd45ab582bbda30994bba0f55e4db01dff3c1408cec3"
   },
+  "demand": {
+    "coreset-native/c1-browsing.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.4486
+    },
+    "coreset-native/c1-compile.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.5391
+    },
+    "coreset-native/c1-gaming.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 1.2257
+    },
+    "coreset-native/c1-idle.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.0004
+    },
+    "coreset-native/c1-media.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.45
+    },
+    "coreset-native/c1-office.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.5008
+    },
+    "coreset-native/c2-p1a.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.2039
+    },
+    "coreset-native/c2-p1b.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.2039
+    },
+    "coreset-native/c2-p2a.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.086
+    },
+    "coreset-native/c2-p2b.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.086
+    },
+    "coreset-native/c2-p3a.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.1217
+    },
+    "coreset-native/c2-p3b.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.1217
+    },
+    "coreset-native/c3-creation.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.0352
+    },
+    "coreset-native/c3-evening.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 0.6498
+    },
+    "coreset-native/c3-workday.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.0434
+    },
+    "coreset-native/c4-compile.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.5394
+    },
+    "coreset-native/c4-gaming.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 1.2259
+    },
+    "coreset-native/c4-office.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.6008
+    },
+    "coreset-native/c5-t3.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.45
+    },
+    "coreset-native/c5-t4.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.45
+    },
+    "coreset-native/c5-t5.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.45
+    },
+    "coreset-native/c6-dual.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.5497
+    },
+    "coreset-native/c6-fold.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.4486
+    },
+    "coreset-native/c6-spoof.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.9486
+    },
+    "coreset-single/c1-browsing.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.4486
+    },
+    "coreset-single/c1-compile.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.5391
+    },
+    "coreset-single/c1-gaming.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 1.4557
+    },
+    "coreset-single/c1-idle.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.0004
+    },
+    "coreset-single/c1-media.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.45
+    },
+    "coreset-single/c1-office.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.5008
+    },
+    "coreset-single/c2-p1a.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.2039
+    },
+    "coreset-single/c2-p1b.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.2039
+    },
+    "coreset-single/c2-p2a.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.2926
+    },
+    "coreset-single/c2-p2b.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.2926
+    },
+    "coreset-single/c2-p3a.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.1217
+    },
+    "coreset-single/c2-p3b.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.1217
+    },
+    "coreset-single/c3-creation.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.0352
+    },
+    "coreset-single/c3-evening.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.1141
+    },
+    "coreset-single/c3-workday.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.0434
+    },
+    "coreset-single/c4-compile.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.5394
+    },
+    "coreset-single/c4-gaming.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 1.4559
+    },
+    "coreset-single/c4-office.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.6008
+    },
+    "coreset-single/c5-t3.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.45
+    },
+    "coreset-single/c5-t4.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.45
+    },
+    "coreset-single/c5-t5.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.45
+    },
+    "coreset-single/c6-dual.workload.json": {
+      "demand_class": "oversubscribed",
+      "utilization": 1.2751
+    },
+    "coreset-single/c6-fold.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.4486
+    },
+    "coreset-single/c6-spoof.workload.json": {
+      "demand_class": "calibration",
+      "utilization": 0.9486
+    }
+  },
   "inputs": {
     "dataset/archetypes.yaml": "97f4f197b0b3e9bcf4e9bff83baf8881cd0724687184b657c2581d9bcde76d97",
     "dataset/schema/workload.schema.json": "b71d20570af038b1bdf68698189845dd0efa743643742216f7ef188f9e68ef69"
