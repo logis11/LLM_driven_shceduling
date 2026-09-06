@@ -1,5 +1,5 @@
 # Daemon Guide — what to build, what's fixed, what's yours
-> Status: draft · Created 2026-08-28 · Updated 2026-08-28
+> Status: draft · Created 2026-08-28 · Updated 2026-09-06
 
 The second half of the daemon builder's onboarding (read `../background-guide.md` first — this one assumes it, and only it). It's a spec, but a deliberately breathing one: the **contract surface** (inputs, outputs, the information rules, determinism) is fixed and stated here in full; the **inside of the machine** (language details, prompt engineering, code layout, model hosting choices) is yours. Fixed things say "must." Everything else is a suggestion you may overrule in your own tree.
 
@@ -94,6 +94,8 @@ Like the simulator's scheduler, the recognizer sits behind a narrow interface, b
 | `llm_algo` (B) | as A, plus the model's choice of *algorithm* is honored; parameters still come from the table | prompt + model |
 | `llm_full` (C) | the model's entire suggested configuration is used, after validation | prompt + model |
 | `oracle` | reads the true `(mode, attributes)` for this instant straight from the answer key | `ground_truth` |
+
+One known gap, deferred past RQ0: a ground-truth segment can carry a label the recognizer menu does not allow (`c6-dual` is `mode: ambiguous` with `dual_active` and no `background_wanted` — see `../recognition-vocabulary.md` §1), and what the oracle emits at a query point inside such a segment is **undefined** — under the rules as written its answer is rejected and the file runs on `fallback`, so the oracle is not "perfect recognition" there. The file is already excluded from scoring; the oracle's behaviour on it is a decision still to be made, not something to improvise while building.
 
 The three LLM variants exist to answer one of the project's central questions: *how much authority does the model deserve?* Variant A trusts it only to read the situation; variant C trusts it to tune scheduler constants for a machine it has never observed. If A performs close to C, the situation-reading alone was the valuable part — which is the architecture we hope for, because it keeps every future consumer of the signal thin.
 
