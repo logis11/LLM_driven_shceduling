@@ -44,7 +44,9 @@ Per-file static utilization now recorded under `demand` in the manifest (rounded
 | c6-fold | 0.45 | calibration |
 | c6-spoof | 0.95 | calibration |
 
-**Answer to §4.1 of the notes.** `calibration` does mean low contention for five of the six C1 files: they sit at 0.00–0.54 of one lane, so a scheduler has nothing to trade off and no random-vs-oracle gap can appear by design. `c1-gaming` is the exception at 1.46, inside the oversubscribed window (the notes' suspicion about its `lane_share: 0.9` task chain was right). **The RQ0 judging set is C2's 6 files, not 12.** C1 stays reporting-only. `c1-gaming` (and its C4 sibling at the same 1.46) is worth flagging when Phase 7 fixes the gate spec, as the one single-situation file with real headroom.
+**Answer to §4.1 of the notes.** Five of the six C1 files sit at 0.00–0.54 of one lane; `c1-gaming` is at 1.46, inside the oversubscribed window (the notes' suspicion about its `lane_share: 0.9` chain was right). **The RQ0 judging set is C2's 6 files, not 12**; all six sit inside the demand window; C1 stays reporting-only.
+
+The inference in §4.1 — calibration implies low contention, therefore little random-vs-oracle separation — does not hold as stated. Demand bounds throughput headroom, not latency headroom: at 0.8 utilisation two tasks still become runnable at the same instant, and a keystroke arriving while a batch task holds the lane still waits a slice. C1 is excluded from judging because its designed role is the baseline where the whitelist scores perfectly (building-plan §3 C1), not because it has no headroom. Recorded so that nonzero C1 gap numbers are not read as a surprise when they come in.
 
 Side findings: `c6-spoof` and `c6-fold` are declared `calibration` (0.95 and 0.45), `c6-dual` is `oversubscribed` (1.28); native and single modes differ only for `c1-gaming`/`c4-gaming` (1.23 native vs 1.46 single), every other file's lane scaling is the identity. The dataset README's demand-window sentence claimed every `-single` file must land in the window; corrected in the same commit to say `oversubscribed`-class files, `calibration` exempt.
 

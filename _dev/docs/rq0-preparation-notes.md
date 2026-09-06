@@ -103,7 +103,7 @@ explicitly deferred to it), and the **simulator semantics questions** in
 
 ## 4. Open questions
 
-### 4.1 C1's demand class — **[unverified, check first]**
+### 4.1 C1's demand class — **[closed 09-06]**
 
 `task-2.4` spec §3 fixes C1 as demand class `calibration` and C2–C6 as
 `oversubscribed` (hard-checked 100–150%). The TODO's RQ0 entry scopes the gate
@@ -118,6 +118,18 @@ tighter than the class name suggests.
 
 This matters because it determines whether the gate's judging set is 6 files or
 12.
+
+**Closed 2026-09-06 (task 3.1).** Read from the compiled estimates, now recorded
+per file in `dataset/build.manifest.json` under `demand`: five C1 files sit at
+0.00–0.54 of the lane, `c1-gaming` at 1.46. Judging set = the six C2 files, all
+inside the demand window; C1 stays reporting-only.
+
+The inference above does not hold as stated. Demand bounds *throughput*
+headroom, not *latency* headroom: at 0.8 utilisation two tasks still become
+runnable at the same instant, and a keystroke arriving while a batch task holds
+the lane still waits a slice. C1 is excluded from judging because its designed
+role is the baseline where the whitelist scores perfectly — not because it has
+no headroom. Nonzero C1 gap numbers are expected, not a contradiction.
 
 ### 4.2 The gate is asymmetric — **[proposal]**
 
@@ -505,7 +517,7 @@ hand-writing a mock trace forces Layer-1 gaps into the open immediately.
 
 ## 8. Gate design
 
-Judging scope — **[proposal, pending §4.1 verification]**:
+Judging scope — **[proposal; §4.1 closed 09-06]**:
 
 - **C2 (6 files)** — the judging set.
 - **C1 (6)** — run; used for executor-mapping sanity and as the honest baseline
