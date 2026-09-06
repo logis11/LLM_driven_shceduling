@@ -1,6 +1,6 @@
-# 2026-09-06 — Phase 3 spec session and task 3.1: demand estimate into the manifest
+# 2026-09-06 — Phase 3: verification and protocol freeze (spec session and tasks 3.1–3.4)
 
-Decision session record for the Phase 3 (verification and protocol freeze) spec, plus the finding from sub-task 3.1. Source: `_dev/docs/rq0-preparation-notes.md` Stage 0. Decisions with rationale; facts verified in-session noted as such.
+Decision session record for the Phase 3 (verification and protocol freeze) spec session and its four sub-tasks, all run on 2026-09-06. Source: `_dev/docs/rq0-preparation-notes.md` Stage 0. Decisions with rationale; facts verified in-session noted as such.
 
 ## Phase split (preceding the spec session)
 
