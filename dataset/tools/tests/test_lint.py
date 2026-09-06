@@ -58,7 +58,8 @@ def test_registry_subset_rule(repo_root, tmp_path):
 
 BASE = {
     "meta": {"id": "bad", "seed": 1, "demand": "calibration"},
-    "segments": [{"from": "0s", "to": "10s", "mode": "office"}],
+    "segments": [{"from": "0s", "to": "10s", "mode": "office",
+                  "attributes": {"background_wanted": True}}],
     "tasks": [{"id": "player", "name": "mpv", "archetype": "audio-playback",
                "arrive": "0s", "depart": "10s"}],
 }
@@ -94,7 +95,8 @@ def load_bad(tmp_path, mutate):
     ("duplicate task id",
      lambda d: d["tasks"].append(dict(d["tasks"][0]))),
     ("segments overlap",
-     lambda d: d["segments"].append({"from": "5s", "to": "15s", "mode": "x"})),
+     lambda d: d["segments"].append({"from": "5s", "to": "15s", "mode": "x",
+                                     "attributes": {"background_wanted": True}})),
     ("no input channel",
      lambda d: d["focus"].append({"from": "1s", "to": "2s", "task": "player"})),
     ("focus windows overlap",
@@ -110,6 +112,13 @@ def load_bad(tmp_path, mutate):
                 d["focus"].append({"from": "1s", "to": "5s", "task": "ed"}))),
     ("meta.demand",
      lambda d: d["meta"].update(demand="whatever")),
+    ("segment 'office': background_wanted missing",
+     lambda d: d["segments"][0].pop("attributes")),
+    ("segment 'office': background_wanted must be a boolean",
+     lambda d: d["segments"][0].update(attributes={"background_wanted": "yes"})),
+    ("segment 'ambiguous': background_wanted must be absent",
+     lambda d: d["segments"][0].update(
+         mode="ambiguous", attributes={"background_wanted": True})),
 ])
 def test_timeline_rules(tmp_path, library, expect, mutate):
     with pytest.raises(TimelineError, match=expect):
@@ -120,7 +129,8 @@ def test_demand_window_enforced(tmp_path, library, schema):
     """An underloaded default-class file fails -single lint; the calibration
     class and -native mode are exempt."""
     data = {"meta": {"id": "under", "seed": 1},
-            "segments": [{"from": "0s", "to": "60s", "mode": "office"}],
+            "segments": [{"from": "0s", "to": "60s", "mode": "office",
+                          "attributes": {"background_wanted": True}}],
             "tasks": [{"id": "job", "name": "python3", "archetype": "cpu-batch",
                        "arrive": "0s", "bind": {"total_work": "20s"}}]}
     path = tmp_path / "under.timeline.yaml"

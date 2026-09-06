@@ -65,11 +65,24 @@ class Timeline:
             if entry["familiarity"] is not None and \
                     entry["familiarity"] not in (1, 2, 3, 4, 5):
                 self._err(f"segment {seg['mode']!r}: familiarity must be 1-5")
+            self._check_background_wanted(seg["mode"], entry["attributes"])
             self.segments.append(entry)
         self.segments.sort(key=lambda s: s["t_start"])
         for a, b in zip(self.segments, self.segments[1:]):
             if a["t_end"] > b["t_start"]:
                 self._err(f"segments overlap at {b['t_start']} µs")
+
+    def _check_background_wanted(self, mode, attributes):
+        """Every segment carries the graded attribute — except `ambiguous`,
+        whose label is the explicit marker that no legal value exists."""
+        present = "background_wanted" in attributes
+        if mode == "ambiguous":
+            if present:
+                self._err(f"segment {mode!r}: background_wanted must be absent")
+        elif not present:
+            self._err(f"segment {mode!r}: background_wanted missing")
+        elif not isinstance(attributes["background_wanted"], bool):
+            self._err(f"segment {mode!r}: background_wanted must be a boolean")
 
     def _load_tasks(self, raw, library):
         self.tasks = []

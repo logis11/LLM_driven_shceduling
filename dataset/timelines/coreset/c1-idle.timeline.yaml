@@ -5,7 +5,7 @@ meta:
   demand: calibration
 
 segments:
-  - {from: 0s, to: 60s, mode: idle, attributes: {}, scenario: [S18]}
+  - {from: 0s, to: 60s, mode: idle, attributes: {background_wanted: true}, scenario: [S18]}
 
 tasks:
   - {id: shell, name: gnome-shell, archetype: system-daemon,

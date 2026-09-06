@@ -5,7 +5,7 @@ meta:
   demand: calibration
 
 segments:
-  - {from: 0s, to: 30s, mode: gaming}
+  - {from: 0s, to: 30s, mode: gaming, attributes: {background_wanted: true}}
 
 tasks:
   - id: game

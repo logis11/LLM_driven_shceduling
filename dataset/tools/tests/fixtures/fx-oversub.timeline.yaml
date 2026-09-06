@@ -5,7 +5,7 @@ meta:
   seed: 3
 
 segments:
-  - {from: 0s, to: 60s, mode: office}
+  - {from: 0s, to: 60s, mode: office, attributes: {background_wanted: true}}
 
 tasks:
   - {id: player, name: mpv, archetype: audio-playback, arrive: 0s, depart: 60s}
