@@ -1,5 +1,5 @@
 # Terminology
-> Status: normative · Created 2026-08-23 · Updated 2026-08-28
+> Status: normative · Created 2026-08-23 · Updated 2026-09-06
 
 Terms this project uses for its own parts. Operating systems vocabulary —
 MLFQ, EDF, preemption, turnaround time — is in Appendix A of
@@ -202,14 +202,18 @@ Q6 of the archived open-questions record
 
 ## Signal vocabulary
 
-**Mode** — what the machine is primarily doing. One of `interactive`, `gaming`,
-`compile`, `media`, `idle`. Part of the shared contract; a recognizer may not
-invent new ones.
+**Mode** — what the machine is primarily doing. One of the sixteen ratified
+labels in `recognition-vocabulary.md` §1 (`browsing`, `office`, `mail`, `dev`,
+`photo`, `meeting`, `gaming`, `media`, `video-edit`, `compile`, `ml-train`,
+`render`, `transcode`, `indexing`, `backup`, `idle`). Part of the shared
+contract; a recognizer may not invent new ones. Ground truth may additionally
+carry `ambiguous`, which is never on the recognizer's menu.
 
-**Attribute** — an independent fact orthogonal to the mode label. Two are
-specified: `has_realtime_encoder` and `background_is_wanted`. They exist
-because five labels cannot express the distinction between gaming, gaming while
-streaming, and gaming during a download. Section 4.4.3.
+**Attribute** — an independent fact orthogonal to the mode label. One is
+specified: `background_wanted` — whether the sustained background work is
+something the user asked for. It exists because a mode label alone cannot
+separate gaming during a wanted download from gaming during an unwanted scan.
+`recognition-vocabulary.md` §1; proposal §4.4.3.
 
 **Admission test** — the rule deciding whether a candidate term belongs in the
 shared vocabulary: it must be meaningful to more than one consumer, and not

@@ -1,5 +1,5 @@
 # A Semantic Recognition Layer for Operating Systems
-> Status: draft — for team review · Created 2026-08-15 · Updated 2026-08-28
+> Status: draft — for team review · Created 2026-08-15 · Updated 2026-09-06
 
 **Removing hardcoded semantic knowledge from the OS, validated on CPU scheduling**
 
@@ -537,7 +537,7 @@ This can happen for a concrete reason worth watching for: if the per-class heuri
 
 **Both `random` and `oracle` can be run before any LLM integration exists.** The ground truth is already written in the workload file; random is one line of code. This is the cheapest possible early kill check, and it should be the first experiment we run. If the gap is narrow, we redesign workloads or deliberately weaken the executor's self-correction before investing in prompt engineering.
 
-Phase 1 runs with modes only and no attributes. Attributes multiply the oracle cost and are not needed to answer "is anything measurable here at all."
+Phase 1 runs on the full ratified vocabulary — sixteen modes plus `background_wanted`. The attribute is not optional there: the C2 pairs that form the RQ0 judging set differ *only* in `background_wanted`, so a modes-only gate could not express its own judging set.
 
 ## 5.4 Two layers of measurement
 
@@ -600,7 +600,7 @@ Does situation awareness help at all in the easy case?
 |---|---|---|
 | Nightly maintenance: indexer + backup + updater, no input | `idle` | — |
 | Parallel compile ×8 + editor | `compile` | — |
-| Document work + mail client | `interactive` | — |
+| Document work + mail client | `office` | — |
 
 ### Family 2 — Same process set, different intent ★
 
@@ -611,8 +611,8 @@ Does situation awareness help at all in the easy case?
 | Game + Steam download | `gaming` | `background_wanted: true` | Throttle, never starve |
 | Game + antivirus full scan | `gaming` | `background_wanted: false` | Freely defer |
 | Game + OBS capture | `gaming` | — | Two deadlines (encoder distinctions are carried by mode under the ratified vocabulary) |
-| ML training run + editor | `compile` | `background_wanted: true` | Long batch the user asked for |
-| File indexer + editor | `interactive` | `background_wanted: false` | Long batch nobody asked for |
+| ML training run + editor | `ml-train` | `background_wanted: true` | Long batch the user asked for |
+| File indexer + editor | `indexing` | `background_wanted: false` | Long batch nobody asked for |
 
 The last two are the sharpest pair in the whole design: both are "one sustained CPU-bound process plus an editor," and no behavioural heuristic can separate them even in principle.
 
@@ -771,8 +771,8 @@ This layout puts every integration point in one person's hands, making integrati
 | Phase | Deliverable | Gate |
 |---|---|---|
 | 0 | Discrete-event simulator, MLFQ executor, canonical workload loader (per `docs/simulator/interpretation-contract.md`) | A workload runs and produces reproducible metrics |
-| 1 | `fixed`, `random`, `oracle` — **modes only, no attributes** | **Is the random-to-oracle gap large enough to measure?** If not, redesign before proceeding |
-| 2 | Full vocabulary, CPU driver mapping table, `whitelist` condition | Whitelist beats fixed on gaming workloads |
+| 1 | `fixed`, `random`, `oracle` on the full vocabulary (16 modes + `background_wanted`), through driver table v0 | **Is the random-to-oracle gap large enough to measure?** If not, config search before workload redesign |
+| 2 | `whitelist` condition; driver table v1 on the throwaway tuning pool | Whitelist beats fixed on gaming workloads |
 | 3 | Mock generator, IPC, validator, provenance, record/replay cache | Full pipeline runs end to end with no model |
 | 4 | `llm_vocab` (variant A), local model hosting | Layer 1 accuracy measured, split by software familiarity |
 | 5 | `llm_algo` (variant B) | Does algorithm choice beat the driver's table? |
