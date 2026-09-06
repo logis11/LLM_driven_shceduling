@@ -1,5 +1,5 @@
 # Background Guide — everything to know before building your part
-> Status: draft · Created 2026-08-28 · Updated 2026-08-28
+> Status: normative · Created 2026-08-28 · Updated 2026-09-06
 
 This is the shared first half of onboarding for both builders — the simulator (인경민) and the daemon (박이안) — written for a reader who has skimmed the research proposal once and has general CS knowledge but no OS background. It is deliberately self-contained: it re-explains everything it needs, in plain language, so you can read it top to bottom without opening another document. The component-specific second halves — what your program must do — are `simulator/simulator-guide.md` and `daemon/daemon-guide.md`, each of which assumes you've read this one.
 

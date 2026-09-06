@@ -1,5 +1,5 @@
 # Simulator Guide — what to build, what's fixed, what's yours
-> Status: draft · Created 2026-08-28 · Updated 2026-08-28
+> Status: normative · Created 2026-08-28 · Updated 2026-09-06
 
 The second half of the simulator builder's onboarding (read `../background-guide.md` first — this one assumes it). It's a spec, but a deliberately breathing one: the **contract surface** (input format, execution semantics, determinism, output obligations) is fixed and stated here in full; the **inside of the machine** (language details, data structures, code layout, testing) is yours. Fixed things say "must." Everything else is a suggestion you may overrule in your own tree.
 
@@ -106,6 +106,8 @@ The daemon's finished output for this workload under one experimental condition 
 ```
 
 The `config` payload's shape — the four algorithms, their exact `params` fields with ranges and defaults, and the `batch_bandwidth_cap` envelope field — is **frozen** in `../recognition-vocabulary.md` (the "Config schema" section). Build to it as law; if implementing it surfaces something awkward — a field that's hard to honor, a missing knob, a better shape — propose the edit rather than working around it. Frozen means "changed deliberately, together," not "untouchable."
+
+Three mechanics were fixed with the contract's freeze (2026-09-06; `../data-contracts.md` §7): the list is ordered — boot entry first, then by `t_us`, and same-time entries apply in list order with the last one in force (this happens at t = 0 for zero-latency conditions, whose first answer lands alongside the boot entry); every `config` must be valid under the schema, and a violation rejects the **whole file** — never repair or skip an entry, a malformed one is a daemon bug and silent repair would hide it from the provenance counts; entries at or after the workload's end are ignored (every file has one — the terminal telemetry snapshot). Where a schedule entry and a task event share a microsecond, your §9.3 tie-break rule decides.
 
 How the simulator treats a schedule: each entry takes effect at its `t_us` — the natural implementation is one more event in the event queue, however you structure it. When it fires, the scheduler's settings are replaced; the running task is not disturbed beyond whatever the new policy implies at the next decision point; and a `config_applied` line (echoing `provenance`) goes to the trace. Requirements: the first entry is always at `t_us: 0` (reject a schedule without one); entries apply in order; the simulator never edits, reorders, or reinterprets a config — validation happened on the daemon side, and what arrives here is law. `condition` and `provenance` are opaque strings to you: log them, never branch on them.
 

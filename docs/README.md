@@ -1,6 +1,6 @@
 # Docs index
 
-> Status: normative · Created 2026-08-27 · Updated 2026-08-28
+> Status: normative · Created 2026-08-27 · Updated 2026-09-06
 
 Prose only, organized by domain — one `##` section per area below, the full index table at the bottom. Statuses: **normative** (states what is; kept current) · **draft** (content real, form not final) · **record** (append-only history; never rewritten). Decision history lives in `_dev/archive/`; machine-read files live outside `docs/` (see the placement rule in `CLAUDE.md`).
 
@@ -62,12 +62,12 @@ Reserved — no docs yet; the experiment-harness docs land here when that work s
 | [related-work.md](related-work.md) | how we position against prior work | draft |
 | [references.md](references.md) | what we cite, in what form, for what claim — and the id-minting rule | normative |
 | [terminology.md](terminology.md) | what our words mean | normative |
-| [background-guide.md](background-guide.md) | self-contained onboarding for both builders | draft |
-| [data-contracts.md](data-contracts.md) | every data format in the project, with explained examples | draft |
+| [background-guide.md](background-guide.md) | self-contained onboarding for both builders | normative |
+| [data-contracts.md](data-contracts.md) | every data format in the project, with explained examples | normative |
 | [recognition-vocabulary.md](recognition-vocabulary.md) | the shared vocabulary and the frozen config schema | normative |
-| [simulator/simulator-guide.md](simulator/simulator-guide.md) | what the simulator must do; what's the builder's to decide | draft |
+| [simulator/simulator-guide.md](simulator/simulator-guide.md) | what the simulator must do; what's the builder's to decide | normative |
 | [simulator/interpretation-contract.md](simulator/interpretation-contract.md) | how a canonical workload becomes scheduled tasks | normative |
-| [daemon/daemon-guide.md](daemon/daemon-guide.md) | what the daemon must do; what's the builder's to decide | draft |
+| [daemon/daemon-guide.md](daemon/daemon-guide.md) | what the daemon must do; what's the builder's to decide | normative |
 | [workload/building-plan.md](workload/building-plan.md) | how the dataset is built | normative |
 | [workload/archetype-plan.md](workload/archetype-plan.md) | how one process kind is specified and grounded | normative |
 | [workload/scenario-catalog.md](workload/scenario-catalog.md) | which processes co-occur and their sources | normative |

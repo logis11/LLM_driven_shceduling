@@ -1,5 +1,5 @@
 # Data Contracts — every format in the project, with examples
-> Status: draft · Created 2026-08-28 · Updated 2026-09-06
+> Status: normative · Created 2026-08-28 · Updated 2026-09-06
 
 Everything the three of us build talks to everything else through data — a file one side writes and another side reads. Each such format is a **contract**: as long as both sides honor it, we can work independently and integration stays boring. This document lists every contract in the project, shows what each one looks like with real (or, where not yet frozen, illustrative) examples, and explains every example in plain sentences. Same audience as `background-guide.md`: general CS knowledge is enough, no OS background needed.
 

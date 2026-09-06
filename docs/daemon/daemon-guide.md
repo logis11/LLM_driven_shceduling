@@ -1,5 +1,5 @@
 # Daemon Guide — what to build, what's fixed, what's yours
-> Status: draft · Created 2026-08-28 · Updated 2026-09-06
+> Status: normative · Created 2026-08-28 · Updated 2026-09-06
 
 The second half of the daemon builder's onboarding (read `../background-guide.md` first — this one assumes it, and only it). It's a spec, but a deliberately breathing one: the **contract surface** (inputs, outputs, the information rules, determinism) is fixed and stated here in full; the **inside of the machine** (language details, prompt engineering, code layout, model hosting choices) is yours. Fixed things say "must." Everything else is a suggestion you may overrule in your own tree.
 
