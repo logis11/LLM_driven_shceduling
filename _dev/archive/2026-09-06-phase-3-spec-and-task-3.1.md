@@ -88,3 +88,21 @@ Presented and approved one at a time; each froze with the clarifications below. 
 - **Glossary `frozen`** no longer requires enforcing code as a precondition; enforcement follows the first consumer. **§12 Changelog** added, first entry this freeze. §11 and the intro rewritten from future to past tense.
 - **Left for 3.4:** the doc-level `> Status: draft` header on data-contracts itself, and other docs' references to these contracts as drafts.
 
+## Task 3.4 — vocabulary and status sweep
+
+**Retired vocabulary — fixed.** `terminology.md` Mode/Attribute paragraphs rewritten on the ratified vocabulary (16 modes, `ambiguous` ground-truth-only, one attribute `background_wanted`). `research-proposal` Part 5 tables: `interactive` → `office` (document work + mail) and → `indexing` (indexer + editor); the ML-training row said `compile` where the coreset file it describes (`c2-p1a`) is labelled `ml-train` — corrected to match the dataset. Repo-wide grep for `has_realtime_encoder`, `background_is_wanted`, `interactive`-as-mode and "modes only" is clean.
+
+**Milestone table — fixed.** Part 9 Phase 1 no longer says "modes only, no attributes"; it runs on the full vocabulary through driver table v0, because the C2 judging set differs only in `background_wanted`. §7's matching prose rewritten. Phase 2's "full vocabulary" deliverable dropped (now Phase 1's); reads `whitelist` + driver table v1 on the throwaway tuning pool. **Judgment call, flagged to the user:** Phase 1's gate text changed from "redesign before proceeding" to "config search before workload redesign" (notes §4.3), which the notes marked as needing agreement.
+
+**Status headers — decided one by one.** data-contracts → normative (nine of ten contracts frozen; the open section is labelled at section level). daemon-guide → normative and simulator-guide → normative: a `draft` label on a builder guide is the §8.3 failure mode — it invites quiet deviation on the fixed parts — and a normative doc can state its open items (daemon-guide's oracle gap, simulator-guide §9). background-guide → normative (states what is, kept current). research-proposal and related-work stay draft, genuinely in progress. Index rows and `Updated` dates bumped; verified: all 16 headers match their index rows.
+
+**Stale against the freeze — fixed.** simulator-guide's config-schedule input section gained the three mechanics the simulator must honour (ordering with same-time last-wins, whole-file rejection on schema violation, entries at/after end ignored), pointing the schedule-vs-task-event tie at §9.3.
+
+**Design divergences — listed for Phase 4, not fixed:**
+1. `research-proposal` §5.2, `llm_algo` row: "params from table" — cannot hold under validator rule 2 (notes §4.7).
+2. `research-proposal` §4.6, the variant-B narrative.
+3. `recognition-vocabulary.md` variant table, row B: "params and cap from the table".
+4. `daemon-guide` §5: the config mapper presented as straightforward wiring once the table lands.
+5. `data-contracts` §6 (proposal contract) — stays draft; its `subsystems` slot's meaning under variant B follows the table format.
+6. Archive Q5's ceiling claim (A and B bounded above by the oracle) — needs settling before or with the format decision.
+
