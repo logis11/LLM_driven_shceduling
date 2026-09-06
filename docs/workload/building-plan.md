@@ -1,5 +1,5 @@
 # Workload Dataset Building Plan
-> Status: normative · Created 2026-08-25 · Updated 2026-08-27
+> Status: normative · Created 2026-08-25 · Updated 2026-09-06
 
 > Consolidates the dataset methodology decided across Q7 (segments, canonicalization, caches), source-vetting (per-source verdicts and extracted parameters), SCENARIO_CATALOG (S1–S18, names-only schema, source-column rules), docs/references.md + dataset/sources.yaml (citation index and machine registry), and docs/simulator/interpretation-contract.md (simulator-facing semantics). Those documents are normative for their own content; this plan defines how their pieces compose into the dataset and in what order it gets built. Decision record: `_dev/archive/2026-08-26-workload-generation-grill.md`.
 
@@ -84,6 +84,7 @@ Organizing frame: a coverage grid of driver-table cell × familiarity tier × di
 ### C1 — Single-situation calibration (~6 files)
 One file per mode, one segment each: pure office {soffice.bin, chrome, thunderbird}, pure gaming {steam, game.exe, wineserver, gamescope}, pure compile {code, make, cc1×N}, pure media {mpv, spotify}, pure browsing, idle/[system] only.
 Role: recognition floor; executor mapping sanity; and the honest baseline — **this is where the whitelist should score perfectly**, reported as part of the condition-ladder narrative.
+Every C1 timeline declares `demand: calibration`, which exempts it from the §5a demand window. The class marks exemption from the check, not low demand: a calibration file's utilization is whatever its bindings produce, and `c1-gaming` lands inside the oversubscription regime through its `lane_share` binding while the other five sit well below one lane. The compiled values are recorded per file in `dataset/build.manifest.json` under `demand`.
 
 ### C2 — Intent pairs, one-segment diffs (3 pairs = 6 files)
 All segments identical except one:
@@ -158,7 +159,7 @@ Contract-first: compiler (3) and simulator (5) are built to the same written con
 The simulated machine has one lane (Q1 of the archived open-questions record, ratified — `_dev/archive/2026-08-23-design-meeting-open-questions.md`; interpretation-contract §1). Two rules connect the dataset to it:
 
 - **Lane-scaling compile pass:** archetype values whose sources are machine-aggregate (measured on multi-core machines — the gaming chain's utilization and worker concurrency; almost nothing else, since RUN durations are intrinsic CPU demands) are scaled to the lane by a per-archetype declared compile pass — declared fields, declared rule, evidence in `modeling_notes` (`game-task-chain`'s defense: LAVD's own concentration statistics, top 30–40 tasks = 95% of scheduling). Archetype values themselves are never edited. CI invariant: the `-native` and `-single` variants of one timeline differ only in the declared-scalable fields.
-- **Demand budget:** every compiled `-single` workload's aggregate demand lands in the measurable oversubscription regime (~100–150% of the lane). The per-file oracle-vs-random admission test (open-questions record Q8) is the enforcement mechanism; a file outside the regime is redesigned, not scaled further.
+- **Demand budget:** every compiled `-single` workload of demand class `oversubscribed` (the default) lands in the measurable oversubscription regime (~100–150% of the lane), lint-checked at compile time. A timeline may declare `demand: calibration` to exempt itself from the window; the class says nothing about the file's actual demand. The per-file oracle-vs-random admission test (open-questions record Q8) is the enforcement mechanism; a file outside the regime is redesigned, not scaled further.
 
 ## 6. Provenance manifest and linter
 
