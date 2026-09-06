@@ -1,6 +1,6 @@
 # Escalating to a deployment claim — what it would take
 
-> Status: **personal working notes, not ratified** · Created 2026-09-06
+> Status: **personal working notes, not ratified** · Created 2026-09-06 · Revised 2026-09-06
 > Author: 인지오. Nothing here has been through team sign-off.
 > Items marked **[proposal]** are suggestions from a review session, not
 > decisions. Items marked **[verified]** are quotations from or direct readings
@@ -69,10 +69,32 @@ project.
 
 Instead, run a bounded sensitivity sweep:
 
-> **C2's six files × `random` and `oracle` only, at lane counts 1, 2, 4, 8.
+> **C2's six files × `random` and `oracle` only, at lane counts 1, 2, 4, 8,
+> with demand scaled with lane count so that per-lane demand stays constant.
 > Report the gap as a function of lane count.**
 
 No other conditions, no other families, no tuning, no LLM.
+
+**Why demand must scale with lanes — [revised 09-06].** The first draft of this
+sweep ran the fixed-demand workloads at more lanes. That is wrong as written:
+scaling touched only the gaming files, so most workloads were authored at
+1-lane scale, and running a 1.29-utilisation file at 4 lanes turns it into 0.32.
+The gap would vanish — not because parallelism dilutes recognition value, but
+because contention was removed outright. That is a tautology, not evidence.
+
+Corrected form:
+
+```
+1 lane  → total demand 1.2
+2 lanes → total demand 2.4
+4 lanes → total demand 4.8
+8 lanes → total demand 9.6
+```
+
+This asks the question actually at issue: holding contention intensity fixed,
+does parallelism itself dilute the gap? That is what archive D15's recorded
+"more cores shrink the random-vs-oracle gap" claims, and the only version worth
+answering.
 
 **Why C2 specifically makes this tractable.** The Dhall's-effect objection
 attaches to EDF, and C2 is not an EDF-dominated group: P1 is `dev`/`ml-train`
@@ -82,9 +104,28 @@ the multiprocessor-EDF question entirely. **[proposal, needs checking against
 the v0 table's actual rows for C2 — if P2 (gaming) resolves to EDF, exclude P2
 from the sweep or accept the caveat explicitly.]**
 
-**Cost.** Parameterising the executor's lane count, plus a small sweep. It is
-1.5× the C2 gate runs at three additional lane settings. This should be raised
-with 인경민 as part of the Phase-2 scope conversation, not added afterwards.
+**Cost — [verified 09-06, partly].** The compiler's lane-scaling path exists and
+is what produces `coreset-single`, but it scales only declared-scalable fields,
+and the only archetype declaring any is `game-task-chain` (every other entry in
+`archetypes.yaml` carries `scalable: []`; RUN durations are intrinsic and never
+edited by design). So:
+
+- **P2** (game + background): the existing path applies at other multipliers —
+  reuse, not new work.
+- **P1, P3**: nothing the compiler can scale. Holding per-lane demand constant
+  needs a mechanism that does not exist yet — replicating the batch and
+  interactive tasks per lane at compile time, or authoring K-lane timeline
+  variants. **[open — which route is a dataset decision, not decided here.]**
+
+Plus parameterising the executor's lane count, and the sweep itself: 1.5× the
+C2 gate runs at three additional lane settings. Raise with 인경민 as part of the
+Phase-2 scope conversation, not added afterwards.
+
+**One open risk.** Files binding `lane_share` compress many-core-measured
+archetypes (D15: LAVD gaming, ~300 tasks) down to one lane. Re-expanding them
+to 8 is a round trip through a lossy transform. This applies to P2 inside the
+sweep, and to `c1-gaming` if its separate reporting line is ever swept. Either
+exclude those files from the sweep or use `-native` as their reference point.
 
 ### Why this is worth doing either way
 
@@ -225,7 +266,7 @@ return:
 
 | # | Item | Cost | What it buys |
 |---|---|---|---|
-| 1 | **C2 lane sweep (1/2/4/8)** | Executor lane parameterisation + small sweep | The only item touching **transfer**. Wins either way (§3) |
+| 1 | **C2 lane sweep (1/2/4/8), per-lane demand held constant** | Executor lane parameterisation + demand scaling for P1/P3 (mechanism open) + small sweep | The only item touching **transfer**. Wins either way (§3) |
 | 2 | **Run the collection tool ourselves** | Half a day to a day | Moves **frequency** from unmeasured to weakly estimated |
 | 3 | **Query economics + resource accounting** | Reuses §4's numbers | Closes the self-contradiction; converts the slow-loop argument into a measurement |
 | 4 | **Perceptual-threshold reporting** | Absorbed into Stage 1 | Reduces proxy distance and one Layer-2 assumption |
