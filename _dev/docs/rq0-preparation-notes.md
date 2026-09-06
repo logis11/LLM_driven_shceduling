@@ -536,6 +536,17 @@ git trace.
 rq0:
   judging_files: [c2-p1a, c2-p1b, c2-p2a, c2-p2b, c2-p3a, c2-p3b]
   reporting_only: [c1-*, c3-*, c4-*]
+  separate_reporting:
+    c1-gaming:
+      reason: >
+        Added 2026-09-06 after reading demand estimates (task 3.1), before
+        execution. Single-situation file at demand 1.46, the highest in the
+        coreset; lets gap size be read against demand level separately from
+        family type. Not in the judging set: no pair, so no attribute
+        variation (C2 asks whether attribute recognition matters, this file
+        asks whether mode recognition matters, with a different primary
+        metric); and selecting the highest-demand file after reading demand
+        numbers is selection along an axis correlated with expected gap size.
   excluded_layer2: [c5-*, c6-*]
   threshold: <set after metric definitions are fixed>
   random_seeds: <N>
@@ -543,6 +554,24 @@ rq0:
   driver_table_version: v0
   driver_table_schema: <set in Stage 0.5>
 ```
+
+**`c1-gaming` as an accidental natural experiment — [decided 09-06].** The
+confound that family membership changes both what is tested and how much
+headroom exists is partly broken by one file:
+
+```
+c1-gaming    single situation  ·  demand 1.46   ← highest in the coreset
+other C1     single situation  ·  demand < 1.0
+C2           intent pairs      ·  demand 1.12–1.29
+```
+
+This makes it possible to ask whether gap size tracks family type or demand
+level. It is **not** added to the judging set — no pair, so no attribute
+variation; and choosing the highest-demand file after reading demand numbers
+is an optimistic choice (demand is an input property, not an outcome, so not
+p-hacking — but selection along an axis correlated with expected gap size). It
+is a pre-registered separate reporting line in the gate spec, reason recorded
+in-file, so whichever way the result lands the timing of the choice is in git.
 
 Note that `random` as a condition is **not yet defined**: what it draws
 uniformly from (one of 16 modes? one of the table's rows? the whole config
