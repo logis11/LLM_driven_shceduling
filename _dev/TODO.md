@@ -35,7 +35,7 @@ Stage 0 of `_dev/docs/rq0-preparation-notes.md`. Spec: `_dev/docs/spec/jioh/phas
 
 Execution order: 3.3 → 3.4 (the sweep checks labels against 3.3's freeze); 3.1 and 3.2 independent, any time.
 
-- [WIP] **3.1** Demand estimate into the build manifest — compiler writes per-file `utilization` and `demand_class` into `dataset/build.manifest.json`, tests cover it; run the check, record the six C1 values and the judging-set conclusion (6 or 12 files) in the session archive
+- [x] **3.1** Demand estimate into the build manifest — compiler writes per-file `utilization` and `demand_class` into `dataset/build.manifest.json`, tests cover it; run the check, record the six C1 values and the judging-set conclusion (6 or 12 files) in the session archive
 - [ ] **3.2** `c6-dual` check — state what oracle and validator do with `mode: ambiguous` / `dual_active`; one sentence in `daemon-guide` at the oracle spec (out-of-menu labels undefined for the oracle, deferred past RQ0); finding in the archive
 - [ ] **3.3** Protocol freeze — run file, visible projection, telemetry, config schedule, recognition log → `frozen` by ratified decision (table + section leads); proposal stays `draft` with its Phase 4 note; glossary `frozen` definition amended; changelog section added to `data-contracts` with the freeze as first entry
 - [ ] **3.4** Vocabulary and status sweep — grep `docs/` for the retired vocabulary and audit every status label against the two freezes; fix stale lines (`terminology.md` five-mode paragraph + attributes, proposal Part 9 Phase 1 row, proposal Part 5 `interactive` mode values, building-plan's `demand: calibration` sentence); list variant-B divergences for Phase 4 in the archive
