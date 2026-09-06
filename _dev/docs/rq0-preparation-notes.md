@@ -440,7 +440,8 @@ Should be declared excluded **in advance**, not discovered afterwards:
 Must accompany every reported number:
 
 - provenance breakdown (`fallback` / `held` share) — a condition that scored
-  well while mostly running fallback demonstrated nothing;
+  well while mostly running fallback demonstrated nothing; exemptions live in
+  the gate spec as data (`guard_exemptions`), never in guard code;
 - config age;
 - starvation floor respected in every condition;
 - determinism (same input twice → byte-identical trace);
@@ -548,6 +549,14 @@ rq0:
         metric); and selecting the highest-demand file after reading demand
         numbers is selection along an axis correlated with expected gap size.
   excluded_layer2: [c5-*, c6-*]
+  guard_exemptions:
+    c6-dual:
+      guards: [random-beats-oracle, fallback-share]   # audit the full guard list in Stage 4
+      reason: >
+        Ground truth is `mode: ambiguous` with no `background_wanted`; the
+        vocabulary admits no legal oracle answer, so the oracle condition runs
+        the file on fallback/held by construction (task 3.2). Random draws legal
+        answers and may beat it; the fallback share is 100% by design.
   threshold: <set after metric definitions are fixed>
   random_seeds: <N>
   on_failure: config-search-first
