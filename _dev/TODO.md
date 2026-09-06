@@ -30,7 +30,7 @@ Execution order: 2.1 ∥ 2.2 in any order or parallel → 2.3 (needs both) → 2
 - [x] **2.5** Repo prep + onboarding docs — per-teammate reading paths + repo working-structure prep; contents decided in its own session — component trees + per-tree Makefiles; dataset README; background/simulator/daemon guides; data-contracts; recognition vocabulary + config schema + trace format frozen; team-wide TODO restructure; proposal/contract sweeps (archive: `_dev/archive/2026-08-28-task-2.5-repo-prep-and-contracts.md`)
 - [x] **2.6** meas-ci campaign — three workflow families in `.github/workflows/` (headless CLI, Xvfb GUI, name verification; building-plan §7), N runs with spread; analysis folds measured parameters into `archetypes.yaml` replacing the 15 `meas-pending` tags (registry tags `meas-ci:<workflow>:<run>`); fold-in lands before 2.4's final compile — batches cli:1/gui:2/names:1; 11/15 folded, 4 stay pending with stated findings (cache-hot corpus, foreground no-throttle); raw data: release `meas-ci-2026-08-28`
 
-### Phase 3 [WIP] — Verification and protocol freeze
+### Phase 3 [done] — Verification and protocol freeze
 Stage 0 of `_dev/docs/rq0-preparation-notes.md`. Spec: `_dev/docs/spec/jioh/phase-3-verification-and-protocol-freeze.md`.
 
 Execution order: 3.3 → 3.4 (the sweep checks labels against 3.3's freeze); 3.1 and 3.2 independent, any time.
@@ -38,7 +38,7 @@ Execution order: 3.3 → 3.4 (the sweep checks labels against 3.3's freeze); 3.1
 - [x] **3.1** Demand estimate into the build manifest — compiler writes per-file `utilization` and `demand_class` into `dataset/build.manifest.json`, tests cover it; run the check, record the six C1 values and the judging-set conclusion (6 or 12 files) in the session archive
 - [x] **3.2** `c6-dual` check — state what oracle and validator do with `mode: ambiguous` / `dual_active`; one sentence in `daemon-guide` at the oracle spec (out-of-menu labels undefined for the oracle, deferred past RQ0); finding in the archive
 - [x] **3.3** Protocol freeze — run file, visible projection, telemetry, config schedule, recognition log → `frozen` by ratified decision (table + section leads); proposal stays `draft` with its Phase 4 note; glossary `frozen` definition amended; changelog section added to `data-contracts` with the freeze as first entry
-- [WIP] **3.4** Vocabulary and status sweep — grep `docs/` for the retired vocabulary and audit every status label against the two freezes; fix stale lines (`terminology.md` five-mode paragraph + attributes, proposal Part 9 Phase 1 row, proposal Part 5 `interactive` mode values, building-plan's `demand: calibration` sentence); list variant-B divergences for Phase 4 in the archive
+- [x] **3.4** Vocabulary and status sweep — grep `docs/` for the retired vocabulary and audit every status label against the two freezes; fix stale lines (`terminology.md` five-mode paragraph + attributes, proposal Part 9 Phase 1 row, proposal Part 5 `interactive` mode values, building-plan's `demand: calibration` sentence); list variant-B divergences for Phase 4 in the archive
 
 ### Phase 4 — Driver table format
 Stage 0.5. Fix the driver table's schema so v0 and v1 are instances of it, under the invariant that every `system`-only condition receives an identical configuration for the same `(mode, background_wanted)`. Settle whether variant B passes through the table at all (archive Q5's ceiling claim); correct `research-proposal` §5.2/§4.6 and `daemon-guide` §5; promote the table to a data contract alongside the others.

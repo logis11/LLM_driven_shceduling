@@ -771,7 +771,7 @@ This layout puts every integration point in one person's hands, making integrati
 | Phase | Deliverable | Gate |
 |---|---|---|
 | 0 | Discrete-event simulator, MLFQ executor, canonical workload loader (per `docs/simulator/interpretation-contract.md`) | A workload runs and produces reproducible metrics |
-| 1 | `fixed`, `random`, `oracle` on the full vocabulary (16 modes + `background_wanted`), through driver table v0 | **Is the random-to-oracle gap large enough to measure?** If not, config search before workload redesign |
+| 1 | `fixed`, `random`, `oracle` on the full vocabulary (16 modes + `background_wanted`), through driver table v0 | **Is the random-to-oracle gap large enough to measure?** If not, redesign before proceeding |
 | 2 | `whitelist` condition; driver table v1 on the throwaway tuning pool | Whitelist beats fixed on gaming workloads |
 | 3 | Mock generator, IPC, validator, provenance, record/replay cache | Full pipeline runs end to end with no model |
 | 4 | `llm_vocab` (variant A), local model hosting | Layer 1 accuracy measured, split by software familiarity |
