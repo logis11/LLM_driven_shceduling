@@ -1,5 +1,5 @@
 # A Semantic Recognition Layer for Operating Systems
-> Status: draft — for team review · Created 2026-08-15 · Updated 2026-09-06
+> Status: draft — for team review · Created 2026-08-15 · Updated 2026-09-07
 
 **Removing hardcoded semantic knowledge from the OS, validated on CPU scheduling**
 
@@ -432,13 +432,15 @@ This mirrors what Linux already does — `SCHED_DEADLINE` is EDF, `SCHED_FIFO` i
 
 If a consumer can act well on the `system` block alone, drivers stay thin and new consumers cost nothing. If it needs the model to fill its `subsystems` block, every future consumer inherits that burden. This is the architecture's central open question, and we measure it by running the CPU scheduler driver at three levels.
 
-**Variant A — vocabulary only.** The `subsystems` block is empty. Algorithm and parameters come from the driver's own offline-tuned table.
+In the large, the project asks two questions in order. First, **does reading names semantically improve scheduling?** That is `llm_vocab` against the whitelist and the oracle, and it needs nothing beyond the `system` block. Second, **if it does, how much can be delegated to the model?** That is the three-rung ladder below.
 
-**Variant B — vocabulary plus algorithm.** The model fills `algorithm` but not parameters.
+**Variant A — `llm_vocab`, vocabulary only.** The `subsystems` block is unread. Algorithm and parameters come from the driver table's default entry for the row the model's reading selects.
 
-**Variant C — full configuration.** The model fills the whole `cpu_scheduler` block, as in §4.3.
+**Variant B — `llm_algo`, vocabulary plus algorithm.** The model fills `algorithm` but not parameters. The daemon takes the row's entry for that algorithm — the driver table carries one tuned entry per algorithm per row (§8.2 decision 3) — so the choice is the algorithm class alone; the cap and the constants remain the table's.
 
-All three keep `reasoning`, `situation`, and `system`.
+**Variant C — `llm_full`, full configuration.** The model fills the whole `cpu_scheduler` block, as in §4.3. Runs as a subset diagnostic against perfect configuration, not as a scored rung (archive Q5).
+
+All three keep `reasoning`, `situation`, and `system`. The read scope is applied before validation: the validator checks the configuration the simulator will actually receive.
 
 **What each level asks:**
 
@@ -448,11 +450,17 @@ All three keep `reasoning`, `situation`, and `system`.
 | B | Understanding of which algorithm class fits a situation | General CS knowledge |
 | C | Ability to calibrate constants for a system it has never seen | System-specific knowledge it does not have |
 
-**Reading the outcome.** If A performs close to C, the vocabulary is sufficient and the architecture works as designed: thin drivers, cheap new consumers. If C substantially beats A, the vocabulary is under-specified for this consumer and we should ask what it is missing rather than accept that every driver must be thick.
+**Two tables.** The **prior table** is written from scheduling theory before any measurement and is used only for the pre-registered headroom gate (RQ0). The **calibrated table** is tuned per row on a disjoint throwaway pool and produces every reported result; its default per row is the algorithm whose tuned entry scored best there.
 
-We expect improvement to stop somewhere around B. The model knows what Blender is; it has never observed what `timeslice_us: 2000` does in *our* simulator, and no amount of authority supplies that. If B works and C does not, the finding is "the model should read the situation and choose the algorithm class; the driver tunes the constants" — a deployable architecture, not a failure.
+**Reading the outcome — and the tie built into it.** Because the calibrated default is, by construction, the best-scoring algorithm for the row, `llm_algo` cannot beat `llm_vocab` on it when the situation reading is correct: naming the default reproduces `llm_vocab`, naming anything else gets a tuned-but-worse entry. The only way `llm_algo` gains is when the reading was wrong and the named algorithm suits the true situation better than the misread row's default. The delegation rung is therefore scored three ways, none of which asks for a gain that the design forbids:
 
-Note that hand-tuning the driver's table offline makes A *stronger* as an experiment, not weaker: if the table is near-optimal, A's performance reflects purely how well the situation was read.
+1. **Algorithm-choice accuracy** — the model's named algorithm against the calibrated default for the true row, graded like a Layer-1 metric: agreement rate, a four-class confusion matrix, split by software familiarity. No simulator involved. This is the direct measurement of "does the model know which algorithm class fits."
+2. **Cost of delegation** — `llm_algo` against `llm_vocab` on the calibrated table, read as non-inferiority: what handing the model the algorithm choice costs in headroom, or whether it costs nothing. A deployment number: it is the case of a driver with no table, or a situation the table does not cover.
+3. **Delegation under vocabulary gaps** — *proposed, deferred until the main experiments are complete.* If `llm_algo` scores close to `llm_vocab` on covered situations, the model's algorithm knowledge can act where the vocabulary has no row and `llm_vocab` can only fall back. Measurable by blanking rows of the calibrated table to the schema defaults and comparing the two conditions on the files that exercise those rows. Not observable in the main design, because the validator forces a legal mode on every condition.
+
+`llm_full` against perfect configuration answers whether generated constants can beat a hand-tuned table at all; we expect not — the model knows what Blender is but has never observed what `timeslice_us: 2000` does in *our* simulator, and no amount of authority supplies that.
+
+Note that calibrating the table offline makes A *stronger* as an experiment, not weaker: if the table is near-optimal, A's performance reflects purely how well the situation was read. The same fact is what makes the tie above unavoidable, and we state it rather than handicap the table to give B room.
 
 ## 4.7 What the model is never allowed to do
 
@@ -521,7 +529,7 @@ We hold the executor completely fixed across every condition and swap only the r
 | `random` | uniformly random proposal | driver table | Control: what a useless recognizer scores |
 | `whitelist` | hardcoded name matching | driver table | **Reproduces Windows / macOS Game Mode** |
 | `llm_vocab` | LLM fills `system` only | driver table | Variant A |
-| `llm_algo` | LLM fills `system` + algorithm | params from table | Variant B |
+| `llm_algo` | LLM fills `system` + algorithm | driver table — the row's entry for the named algorithm | Variant B |
 | `llm_full` | LLM fills the whole block | LLM | Variant C |
 | `oracle` | ground truth from the workload file | driver table | Ceiling: perfect recognition |
 
@@ -731,7 +739,7 @@ Beyond that: repeated runs with variance reported, one variable changed at a tim
 
 **Reasoning costs latency.** Requiring the model to explain itself adds tokens to every query. The low duty cycle should absorb this, but the RQ4 answer must be computed from latencies measured with reasoning included. Reporting a fast latency measured without it would be dishonest.
 
-**Oracle cost grows multiplicatively.** With sixteen modes, one boolean attribute, and four algorithms, the oracle searches up to 128 combinations per workload segment, and variant C's parameter oracle requires a grid search on top. Mitigations, in order of preference: run the full oracle on a representative subset and report the ceiling only for those; prune structurally inadmissible combinations (EDF with no deadline-bearing processes); keep the graded attribute count at one. If the full oracle becomes impractical we report a partial ceiling explicitly rather than quietly dropping it.
+**Perfect-configuration search cost grows multiplicatively.** The oracle condition itself is free — it reads the true `(mode, background_wanted)` from the workload file and passes through the same driver table as every other condition (perfect recognition). The expensive ceiling is **perfect configuration**: ignoring labels and sweeping the configuration space per workload — four algorithms with their parameter grids and the cap — which is also the search that calibrates the table (one tool, in the harness). Mitigations, in order of preference: run the search on a representative subset and report that ceiling only for those; prune structurally inadmissible combinations (EDF with no deadline-bearing processes); keep the graded attribute count at one. If the full search becomes impractical we report a partial ceiling explicitly rather than quietly dropping it.
 
 **Conditional validation is a real cost.** The validator must dispatch on subsystem key, then branch on algorithm within the CPU driver, with its own bounds and clamping rules per branch. Attributes add cross-field consistency checks on top. This is the largest single piece of added complexity, and it lands on one person.
 
@@ -755,7 +763,7 @@ This layout puts every integration point in one person's hands, making integrati
 
 1. **The shared vocabulary** — ratified 2026-08-28: the dataset's sixteen modes plus `background_wanted` (normative: `docs/recognition-vocabulary.md`, together with the frozen `cpu_scheduler` config schema). Adding an attribute later requires re-labelling every workload and re-running every oracle. **Use the admission test in §4.4.4 as the procedure** for any candidate: fill the cross-consumer table and reject anything that lands in one column.
 2. **The two protocol schemas** — telemetry out, proposal in. The `system` block is the contract; the `subsystems` block is per-consumer namespace.
-3. **The CPU driver's mapping table.** Thirty-two entries, `(mode, background_wanted) → configuration`. This is effectively the executor's behaviour specification.
+3. **The CPU driver's mapping table.** Format frozen 2026-09-07 (`docs/data-contracts.md` §10): thirty-two rows keyed by `(mode, background_wanted)`; each row carries a `batch_bandwidth_cap`, a `default` algorithm, and one to four per-algorithm entries with their provenance (`theory` / `schema-default` / `tuned`). `system`-only conditions receive the default; `llm_algo` receives the entry for the algorithm it named. Two instances of one schema — the **prior table** (one entry per row, theory) and the **calibrated table** (four, tuned). Filling it is effectively the executor's behaviour specification.
 4. **Metric definitions.** Ambiguity here invalidates every interpretation.
 5. **Workload scenarios**, including the domain and familiarity balance in §5.5.
 6. **What the model may see.** Names and coarse process counts are in (names only — no paths or command lines). PIDs, ground-truth burst patterns, and ground-truth labels are out. Enforced in the telemetry schema, not in the prompt.
@@ -771,8 +779,8 @@ This layout puts every integration point in one person's hands, making integrati
 | Phase | Deliverable | Gate |
 |---|---|---|
 | 0 | Discrete-event simulator, MLFQ executor, canonical workload loader (per `docs/simulator/interpretation-contract.md`) | A workload runs and produces reproducible metrics |
-| 1 | `fixed`, `random`, `oracle` on the full vocabulary (16 modes + `background_wanted`), through driver table v0 | **Is the random-to-oracle gap large enough to measure?** If not, redesign before proceeding |
-| 2 | `whitelist` condition; driver table v1 on the throwaway tuning pool | Whitelist beats fixed on gaming workloads |
+| 1 | `fixed`, `random`, `oracle` on the full vocabulary (16 modes + `background_wanted`), through the prior driver table | **Is the random-to-oracle gap large enough to measure?** If not, redesign before proceeding |
+| 2 | `whitelist` condition; the calibrated driver table, tuned on the throwaway pool | Whitelist beats fixed on gaming workloads |
 | 3 | Mock generator, IPC, validator, provenance, record/replay cache | Full pipeline runs end to end with no model |
 | 4 | `llm_vocab` (variant A), local model hosting | Layer 1 accuracy measured, split by software familiarity |
 | 5 | `llm_algo` (variant B) | Does algorithm choice beat the driver's table? |

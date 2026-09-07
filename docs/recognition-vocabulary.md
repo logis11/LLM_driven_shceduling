@@ -147,12 +147,12 @@ The machine-readable core of every proposal, putting the two blocks together:
 }
 ```
 
-`system` is mandatory and validated against §1: an answer whose `mode` is off the menu, whose `background_wanted` is missing or non-boolean, or which carries any other key inside `system`, is rejected. `subsystems` is optional and validated against §2 — but how much of it is *used* depends on the experiment variant:
+`system` is mandatory and validated against §1: an answer whose `mode` is off the menu, whose `background_wanted` is missing or non-boolean, or which carries any other key inside `system`, is rejected. `subsystems` is optional. How much of it is *used* depends on the experiment variant, and the read scope is applied **before** validation: the five rules of §2 run on the composed configuration the simulator will receive, not on the raw block (so an `llm_algo` answer carrying only `algorithm` is not rejected by rule 2). Only under `llm_full` is the raw block itself validated:
 
 | Variant | Reads from the answer |
 |---|---|
 | A (`llm_vocab`) — and all non-LLM conditions | `system` only; the driver table supplies the whole configuration |
-| B (`llm_algo`) | `system` + the `algorithm` field; `params` and cap from the table |
+| B (`llm_algo`) | `system` + the `algorithm` field; the driver table's entry for that algorithm in the selected row, with the row's cap |
 | C (`llm_full`) | `system` + the full `cpu_scheduler` block, subject to §2's validation |
 
 (The full proposal object also carries `reasoning` and `situation` — prose for logs and failure analysis, never validated, never consumed by any driver; see `data-contracts.md`.)

@@ -1,5 +1,5 @@
 # Terminology
-> Status: normative · Created 2026-08-23 · Updated 2026-09-06
+> Status: normative · Created 2026-08-23 · Updated 2026-09-07
 
 Terms this project uses for its own parts. Operating systems vocabulary —
 MLFQ, EDF, preemption, turnaround time — is in Appendix A of
@@ -139,10 +139,21 @@ what a driver does internally; drivers do not know about each other. Section
 4.4.2.
 
 **Driver table** — this project's CPU driver, implemented as a static lookup
-from mode and attributes to config. Roughly twenty rows, hand-written and tuned
-offline. Identical across every condition that uses it. It exists because the
-model knows what OBS is and has never observed what a given time slice does on
-this machine.
+from `(mode, background_wanted)` to configuration. Thirty-two rows; each carries
+a batch cap, a default algorithm, and one entry per algorithm (`docs/data-contracts.md`
+§10). Identical across every condition that uses it: `system`-only conditions
+receive the row's default, `llm_algo` the entry for the algorithm it named. It
+exists because the model knows what OBS is and has never observed what a given
+time slice does on this machine. Two instances: the prior table and the
+calibrated table.
+
+**Prior table** — the driver table written from scheduling theory before any
+measurement: one entry per row, one sentence of justification each. Runs the
+RQ0 gate and is the baseline of RQ5's fragility check. Never tuned.
+
+**Calibrated table** — the driver table tuned per row on the disjoint throwaway
+pool: four entries per row, the default being the algorithm whose tuned entry
+scored best there. Produces every reported result.
 
 **Harness** — the experiment runner. Executes the matrix, grades recognition
 against ground truth, computes performance metrics from traces, and produces
