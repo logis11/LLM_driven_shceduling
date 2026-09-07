@@ -1,5 +1,5 @@
 # Recognition Vocabulary
-> Status: normative · Created 2026-08-28 · Updated 2026-08-28
+> Status: normative · Created 2026-08-28 · Updated 2026-09-07
 
 The shared vocabulary of the recognition signal — the one contract that the recognizer's output schema, the validator's menu, the driver table, and the Layer-1 grader all agree on. Ratified 2026-08-28 (인지오 · 인경민 · 박이안 — pending team review of this doc).
 
@@ -101,6 +101,22 @@ Two classes, tickets split `batch_share : (1 − batch_share)`, equal tickets pe
 
 No fields: `"params": {}`. Run in arrival order until each task blocks or exits. The cap and the executor safety net still apply.
 
+### Provenance of the boot default
+
+The seven default values above are the **boot default configuration** and the `fixed` condition, so they are the floor every normalised score is measured against. None was measured; each is a **stated assumption**, and this table records how far a primary source bounds it (references in `references.md`). Values were not changed by this audit.
+
+| field | default | grounding | status |
+|---|---|---|---|
+| MLFQ `num_queues` | 3 | `ostep` §8.2: the worked examples use "a three-queue scheduler". Shipped tables differ (`illumos-ts`: 60 levels). | assumption, matches OSTEP's example |
+| MLFQ `timeslice_us` | 2000 | `ostep` §8.5: high-priority queues get "10 or fewer milliseconds"; `linux-sched-fair`: 0.75 ms base slice, 6 ms target latency (both scaled by 1 + ilog ncpus); `ostep` §8.5 on Solaris TS: 20 ms at the highest priority. 2 ms lies inside that range; no source names it. | assumption, bounded |
+| MLFQ `timeslice_growth` | 2 | `ostep` Fig. 8.6: 10 ms / 20 ms / 40 ms per queue — doubling per level. | assumption, matches OSTEP's example |
+| MLFQ `boost_interval_us` | 100000 | `ostep` Fig. 8.4: a boost "every 100 ms (which is likely too small of a value, but used here for the example)"; OSTEP names S a voo-doo constant. Shipped: `illumos-ts` ages once per second; `ostep` §8.5 "around every 1 second or so". | assumption, matches OSTEP's illustrative value; flagged by OSTEP itself |
+| EDF `residual_timeslice_us` | 2000 | No source. Set equal to MLFQ `timeslice_us` so the residual class round-robins at the same granularity. | assumption, tied to `timeslice_us` |
+| LOTTERY `batch_share` | 0.15 | No source names a batch-class share. `waldspurger-osdi94` defines shares as proportional to tickets and gives no ratio between classes. | assumption, unbounded |
+| LOTTERY `timeslice_us` | 2000 | `waldspurger-osdi94` §2: prototype quantum 10 ms ("100 lotteries per second"), with "shorter time quanta can be used to further improve accuracy". Set equal to MLFQ `timeslice_us`. | assumption, bounded |
+
+**Sensitivity check (planned, pre-registered in the gate spec at Phase 7).** Because the floor is assumed, the `fixed` condition is re-run under two alternative boot defaults drawn from the cited sources' own values — OSTEP's example configuration (10 ms top slice, three queues, doubling, 100 ms boost) and a Linux-like short slice (0.75 ms base) — with the exact pair fixed before execution. If the RQ0 gap's sign or the ordering of normalised scores changes across the three floors, the floor is reported as a range rather than a point.
+
 ### Validation rules
 
 1. `algorithm` outside the four-string menu → the config is rejected (previous config stays in force, `held`).
@@ -144,3 +160,10 @@ The machine-readable core of every proposal, putting the two blocks together:
 ## 4. Extension rule
 
 Adding or removing a mode, promoting an annotation to a graded attribute, changing an attribute's semantics, or changing the config schema (fields, ranges, algorithms) is an all-three decision, recorded here with a changelog entry and a statement of its re-labeling, re-grading, or re-implementation impact.
+
+---
+
+## 5. Changelog
+
+- **2026-09-07 — boot-default provenance (jioh 4.1).** No value changed. The seven config-schema defaults now carry their grounding in §2 "Provenance of the boot default": three match OSTEP's worked-example values (`num_queues`, `timeslice_growth`, `boost_interval_us`), two are bounded by shipped or published quanta (`timeslice_us`, LOTTERY `timeslice_us`), two have no source (EDF `residual_timeslice_us`, LOTTERY `batch_share`). All seven are stated assumptions; a `fixed`-under-alternative-floors sensitivity check is planned for the gate spec. New references: `linux-sched-fair`, `illumos-ts`, `waldspurger-osdi94`; `ostep` verified at Version 1.10.
+
