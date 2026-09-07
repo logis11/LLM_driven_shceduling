@@ -40,7 +40,7 @@ Execution order: 3.3 → 3.4 (the sweep checks labels against 3.3's freeze); 3.1
 - [x] **3.3** Protocol freeze — run file, visible projection, telemetry, config schedule, recognition log → `frozen` by ratified decision (table + section leads); proposal stays `draft` with its Phase 4 note; glossary `frozen` definition amended; changelog section added to `data-contracts` with the freeze as first entry
 - [x] **3.4** Vocabulary and status sweep — grep `docs/` for the retired vocabulary and audit every status label against the two freezes; fix stale lines (`terminology.md` five-mode paragraph + attributes, proposal Part 9 Phase 1 row, proposal Part 5 `interactive` mode values, building-plan's `demand: calibration` sentence); list variant-B divergences for Phase 4 in the archive
 
-### Phase 4 — Driver table format
+### Phase 4 [WIP] — Driver table format
 Stage 0.5. Fix the driver table's schema so v0 and v1 are instances of it, under the invariant that every `system`-only condition receives an identical configuration for the same `(mode, background_wanted)`. Settle whether variant B passes through the table at all (archive Q5's ceiling claim); correct `research-proposal` §5.2/§4.6 and `daemon-guide` §5; promote the table to a data contract alongside the others.
 
 ### Phase 5 — Layer-1 metrics and the records pipeline
