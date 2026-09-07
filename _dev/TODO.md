@@ -41,7 +41,13 @@ Execution order: 3.3 → 3.4 (the sweep checks labels against 3.3's freeze); 3.1
 - [x] **3.4** Vocabulary and status sweep — grep `docs/` for the retired vocabulary and audit every status label against the two freezes; fix stale lines (`terminology.md` five-mode paragraph + attributes, proposal Part 9 Phase 1 row, proposal Part 5 `interactive` mode values, building-plan's `demand: calibration` sentence); list variant-B divergences for Phase 4 in the archive
 
 ### Phase 4 [WIP] — Driver table format
-Stage 0.5. Fix the driver table's schema so v0 and v1 are instances of it, under the invariant that every `system`-only condition receives an identical configuration for the same `(mode, background_wanted)`. Settle whether variant B passes through the table at all (archive Q5's ceiling claim); correct `research-proposal` §5.2/§4.6 and `daemon-guide` §5; promote the table to a data contract alongside the others.
+Stage 0.5. Spec: `_dev/docs/spec/jioh/phase-4-driver-table-format.md`. Branch: `jioh/driver-table-v0`.
+
+Execution order: 4.1 → 4.2 → 4.3.
+
+- [ ] **4.1** Ground the boot default — each config-schema default traced to a primary source (`docs/references.md` entry) or marked an unverified stated assumption with the `fixed`-under-alternative-defaults sensitivity check written down; changelog entry in `recognition-vocabulary`
+- [ ] **4.2** Driver table contract — JSON schema + lint (structure, legality, byte-identical `wanted` pairs, calibrated-full) with tests and fixtures in the daemon tree; `data-contracts` driver-table section with the row structure and an example; proposal contract frozen with the `llm_algo` read-scope rule; changelog
+- [ ] **4.3** Doc corrections — proposal §5.2 / §4.6 + RQ3 (delegation rung reframed; prior/calibrated naming; held-out-rows arm as a proposal) / §8.2 decision 3; `daemon-guide` §5 mapper steps; vocabulary variant row; terminology; archive note superseding Q4's row shape
 
 ### Phase 5 — Layer-1 metrics and the records pipeline
 Stages 1–2. Hand-written mock traces drive the Layer-1 metric decisions, written up as a metrics doc; `records` schema; trace reader, primitives, and records output checked against hand-computed values. No simulator needed.
