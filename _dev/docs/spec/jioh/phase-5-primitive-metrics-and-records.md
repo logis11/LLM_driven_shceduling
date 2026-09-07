@@ -36,7 +36,7 @@ Every primitive is measured over `[0, T_end]`, `T_end` being the workload's end 
 
 ### 6. `ready_wait`
 
-One row per `ready` line: `t` = the ready time, value = the wait until that task's next `run_start`, `cause` carried on the row. Interaction latency, response time, timer dispatch delay, and starvation are filters and aggregates over it: interaction latency is `cause=wake` on the task scoring names; starvation is a task's maximum `ready_wait` over the window, measured from `ready`, never from arrival.
+One row per `ready` line: `t` = the ready time, value = the wait until that task's next `run_start`, or zero when the `ready` falls inside the task's own occupancy, `cause` carried on the row. Interaction latency, response time, timer dispatch delay, and starvation are filters and aggregates over it: interaction latency is `cause=wake` on the task scoring names; starvation is a task's maximum `ready_wait` over the window, measured from `ready`, never from arrival.
 
 ### 7. Periodic jobs and chain frames
 
