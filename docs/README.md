@@ -1,6 +1,6 @@
 # Docs index
 
-> Status: normative · Created 2026-08-27 · Updated 2026-09-06
+> Status: normative · Created 2026-08-27 · Updated 2026-09-07
 
 Prose only, organized by domain — one `##` section per area below, the full index table at the bottom. Statuses: **normative** (states what is; kept current) · **draft** (content real, form not final) · **record** (append-only history; never rewritten). Decision history lives in `_dev/archive/`; machine-read files live outside `docs/` (see the placement rule in `CLAUDE.md`).
 
@@ -53,6 +53,13 @@ How the dataset was designed and grounded. Reading order: building-plan → arch
 
 Reserved — no docs yet; the experiment-harness docs land here when that work starts.
 
+## Memos (`memos/`)
+
+Point-in-time notes to a named reader; each is absorbed into a normative doc or dropped once acted on.
+
+- [memos/2026-09-07-trace-clarifications-for-the-simulator.md](memos/2026-09-07-trace-clarifications-for-the-simulator.md) — to 인경민: the `ready`-line rule, the §9 positions the harness assumes, frame latency for the chain, the workload's end
+- [memos/2026-09-07-repeat-samples-for-the-daemon.md](memos/2026-09-07-repeat-samples-for-the-daemon.md) — to 박이안: the repeat index run-to-run consistency needs from the recognition log
+
 ## Full index
 
 | doc | answers | status |
@@ -73,3 +80,5 @@ Reserved — no docs yet; the experiment-harness docs land here when that work s
 | [workload/scenario-catalog.md](workload/scenario-catalog.md) | which processes co-occur and their sources | normative |
 | [workload/grounding-sources.md](workload/grounding-sources.md) | which source may justify which claim | normative |
 | [workload/source-vetting.md](workload/source-vetting.md) | per-source verdicts and extracted numbers | record |
+| [memos/2026-09-07-trace-clarifications-for-the-simulator.md](memos/2026-09-07-trace-clarifications-for-the-simulator.md) | to 인경민: what the harness needs from the trace, and why | memo |
+| [memos/2026-09-07-repeat-samples-for-the-daemon.md](memos/2026-09-07-repeat-samples-for-the-daemon.md) | to 박이안: the repeat index consistency needs from the log | memo |
