@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-08-27
+> Status: normative · Created 2026-08-26 · Updated 2026-09-07
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -214,6 +214,16 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - role: the ONLY source of the "23 min 15 s to resume" figure — appears in no peer-reviewed paper (independently audited). Cite as interview or omit the figure.
 - status: verified (2026-08-26)
 
+### `linux-sched-fair`
+- cite: Linux kernel source, `kernel/sched/fair.c`. Tag v6.5 (CFS): `sysctl_sched_latency = 6000000ULL` ("default: 6ms * (1 + ilog(ncpus))"), `sysctl_sched_min_granularity = 750000ULL` ("default: 0.75 msec * (1 + ilog(ncpus))"). Tag v6.6 (EEVDF): `sysctl_sched_base_slice = 750000ULL` ("Minimal preemption granularity for CPU-bound tasks: default: 0.75 msec * (1 + ilog(ncpus))"). github.com/torvalds/linux/blob/v6.5/kernel/sched/fair.c and /v6.6/kernel/sched/fair.c (accessed 2026-09-07).
+- role: existence claim only — the slice magnitudes a shipped general-purpose scheduler uses (sub-millisecond base slice, single-digit-millisecond target latency). Bounds the boot default's `timeslice_us`; does not name our value.
+- status: verified (2026-09-07; values read from the tagged source)
+
+### `illumos-ts`
+- cite: illumos-gate source, `usr/src/uts/common/disp/ts_dptbl.c` (default `config_ts_dptbl[]`: 60 user-priority levels, `ts_quantum` in clock ticks, columns `glbpri qntm tqexp slprt mxwt lwt`) and `usr/src/uts/common/disp/ts.c` (`ts_update`: "Called once per second via timeout", `timeout(ts_update, NULL, hz)`). Commit de1199e40761fcb5ed5cf82b16414ce4e4840999 (2026-09-05). Man page: illumos.org/man/5/ts_dptbl ("The length of the time quantum allocated to processes at this level in ticks (hz)"). Accessed 2026-09-07.
+- role: existence claim only — a shipped MLFQ (Solaris/illumos Time-Sharing class) is table-driven with per-level quanta and a once-per-second aging pass. Bounds the boot default's `num_queues` and `boost_interval_us` from the other side (60 levels; ~1 s boost); does not name our values. For the described millisecond ranges cite `ostep` §8.5, not this source.
+- status: verified (2026-09-07; source and man page read)
+
 ## Grounding — measurement
 
 ### `meas-ci`
@@ -270,8 +280,15 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 
 ### `ostep`
 - cite: Arpaci-Dusseau, R. H., & Arpaci-Dusseau, A. C. *Operating Systems: Three Easy Pieces*. Arpaci-Dusseau Books. Chapter: "Scheduling: The Multi-Level Feedback Queue" (pages.cs.wisc.edu/~remzi/OSTEP/cpu-sched-mlfq.pdf).
-- role: MLFQ textbook citation. Edition/year to pin at submission. status: to-pin (edition)
+- role: MLFQ textbook citation, and the grounding of the boot default's MLFQ values (recognition-vocabulary §2): the worked examples use "a three-queue scheduler" with a 10 ms top slice (§8.2, Fig. 8.2); Fig. 8.6's queues run 10 ms / 20 ms / 40 ms slices ("Lower Priority, Longer Quanta", §8.5); Fig. 8.4's example boosts "every 100 ms (which is likely too small of a value, but used here for the example)" (§8.3) and S is named a "voo-doo constant" after Ousterhout; Solaris TS described as "60 queues, with slowly increasing time-slice lengths from 20 milliseconds (highest priority) to a few hundred milliseconds (lowest), and priorities boosted around every 1 second or so" (§8.5). Rules 1–5 as restated in §8.6.
+- status: verified (2026-09-07; PDF read; "[VERSION 1.10]", © 2008–23). Pin Version 1.10 at submission.
 
 ### `corbato-sjcc62`
 - cite: Corbató, F. J., Merwin-Daggett, M., & Daley, R. C. (1962). An Experimental Time-Sharing System. *Proc. Spring Joint Computer Conference (AFIPS '62)*, 335–344. DOI 10.1145/1460833.1460871.
 - role: MLFQ original (CTSS). status: verified (2026-08-26)
+
+### `waldspurger-osdi94`
+- cite: Waldspurger, C. A., & Weihl, W. E. (1994). Lottery Scheduling: Flexible Proportional-Share Resource Management. *Proc. First Symposium on Operating Systems Design and Implementation (OSDI '94)*, USENIX. PDF: waldspurger.org/carl/papers/lottery-osdi94.pdf (accessed 2026-09-07).
+- role: LOTTERY algorithm origin, and the grounding of the boot default's lottery values (recognition-vocabulary §2): "the resource consumption rates of active computations are proportional to the relative shares that they are allocated" (§1); "With a scheduling quantum of 10 milliseconds (100 lotteries per second), reasonable fairness can be achieved over subsecond time intervals. As computation speeds continue to increase, shorter time quanta can be used to further improve accuracy" (§2). Names no ticket ratio between classes.
+- status: verified (2026-09-07; PDF read)
+

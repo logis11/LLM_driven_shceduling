@@ -1,5 +1,5 @@
 # Workload Dataset Building Plan
-> Status: normative · Created 2026-08-25 · Updated 2026-09-06
+> Status: normative · Created 2026-08-25 · Updated 2026-09-07
 
 > Consolidates the dataset methodology decided across Q7 (segments, canonicalization, caches), source-vetting (per-source verdicts and extracted parameters), SCENARIO_CATALOG (S1–S18, names-only schema, source-column rules), docs/references.md + dataset/sources.yaml (citation index and machine registry), and docs/simulator/interpretation-contract.md (simulator-facing semantics). Those documents are normative for their own content; this plan defines how their pieces compose into the dataset and in what order it gets built. Decision record: `_dev/archive/2026-08-26-workload-generation-grill.md`.
 
@@ -147,7 +147,7 @@ Role: ecological validity, and the **query-economics numbers** — novel canonic
 (4) core timelines                                     ~6 novel designs + derivation scripts → ~24 files × 2 modes
 (5) simulator Phase 0 built to the contract            DES core, MLFQ executor, canonical loader
                                                        → first integration test: one C1 workload end-to-end
-(6) RQ0 gate                                           v0 driver table, random vs oracle, on coreset-single C1/C2
+(6) RQ0 gate                                           the prior driver table, random vs oracle, on coreset-single C1/C2
 (∥) meas-ci workflows                                  independent track from (0); results land before freeze
 (7) on gate pass: generator → naturalistic set (both distribution families) → full condition matrix
 ```
