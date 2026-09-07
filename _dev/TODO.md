@@ -45,7 +45,7 @@ Stage 0.5. Spec: `_dev/docs/spec/jioh/phase-4-driver-table-format.md`. Branch: `
 
 Execution order: 4.1 → 4.2 → 4.3.
 
-- [ ] **4.1** Ground the boot default — each config-schema default traced to a primary source (`docs/references.md` entry) or marked an unverified stated assumption with the `fixed`-under-alternative-defaults sensitivity check written down; changelog entry in `recognition-vocabulary`
+- [WIP] **4.1** Ground the boot default — each config-schema default traced to a primary source (`docs/references.md` entry) or marked an unverified stated assumption with the `fixed`-under-alternative-defaults sensitivity check written down; changelog entry in `recognition-vocabulary`
 - [ ] **4.2** Driver table contract — JSON schema + lint (structure, legality, byte-identical `wanted` pairs, calibrated-full) with tests and fixtures in the daemon tree; `data-contracts` driver-table section with the row structure and an example; proposal contract frozen with the `llm_algo` read-scope rule; changelog
 - [ ] **4.3** Doc corrections — proposal §5.2 / §4.6 + RQ3 (delegation rung reframed; prior/calibrated naming; held-out-rows arm as a proposal) / §8.2 decision 3; `daemon-guide` §5 mapper steps; vocabulary variant row; terminology; archive note superseding Q4's row shape
 
