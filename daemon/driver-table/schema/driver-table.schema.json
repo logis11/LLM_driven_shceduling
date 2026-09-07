@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "driver-table.schema.json",
+  "title": "Driver table",
+  "description": "One row per (mode, background_wanted); a per-row batch_bandwidth_cap and default; one to four entries, one per algorithm, each an algorithm's params with its provenance. Cross-checks the schema cannot express (32-row key space, default present, role entry counts, LOTTERY batch_share <= cap, byte-identical wanted pairs) live in tools/drivertable/lint.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "role",
+    "rows"
+  ],
+  "properties": {
+    "role": {
+      "enum": [
+        "prior",
+        "calibrated"
+      ]
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/row"
+      }
+    }
+  },
+  "$defs": {
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "background_wanted",
+        "batch_bandwidth_cap",
+        "default",
+        "justification",
+        "entries"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "browsing",
+            "office",
+            "mail",
+            "dev",
+            "photo",
+            "meeting",
+            "gaming",
+            "media",
+            "video-edit",
+            "compile",
+            "ml-train",
+            "render",
+            "transcode",
+            "indexing",
+            "backup",
+            "idle"
+          ]
+        },
+        "background_wanted": {
+          "type": "boolean"
+        },
+        "batch_bandwidth_cap": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0.05,
+          "maximum": 0.95
+        },
+        "default": {
+          "enum": [
+            "MLFQ",
+            "EDF",
+            "LOTTERY",
+            "FIFO"
+          ]
+        },
+        "justification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entries": {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
+          "properties": {
+            "MLFQ": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "params",
+                "basis"
+              ],
+              "properties": {
+                "params": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "num_queues",
+                    "timeslice_us",
+                    "timeslice_growth",
+                    "boost_interval_us"
+                  ],
+                  "properties": {
+                    "num_queues": {
+                      "type": "integer",
+                      "minimum": 2,
+                      "maximum": 8
+                    },
+                    "timeslice_us": {
+                      "type": "integer",
+                      "minimum": 500,
+                      "maximum": 100000
+                    },
+                    "timeslice_growth": {
+                      "type": "number",
+                      "minimum": 1,
+                      "maximum": 8
+                    },
+                    "boost_interval_us": {
+                      "type": "integer",
+                      "minimum": 10000,
+                      "maximum": 10000000
+                    }
+                  }
+                },
+                "basis": {
+                  "enum": [
+                    "theory",
+                    "schema-default",
+                    "tuned"
+                  ]
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "EDF": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "params",
+                "basis"
+              ],
+              "properties": {
+                "params": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "residual_timeslice_us"
+                  ],
+                  "properties": {
+                    "residual_timeslice_us": {
+                      "type": "integer",
+                      "minimum": 500,
+                      "maximum": 100000
+                    }
+                  }
+                },
+                "basis": {
+                  "enum": [
+                    "theory",
+                    "schema-default",
+                    "tuned"
+                  ]
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "LOTTERY": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "params",
+                "basis"
+              ],
+              "properties": {
+                "params": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "batch_share",
+                    "timeslice_us"
+                  ],
+                  "properties": {
+                    "batch_share": {
+                      "type": "number",
+                      "minimum": 0.01,
+                      "maximum": 0.9
+                    },
+                    "timeslice_us": {
+                      "type": "integer",
+                      "minimum": 500,
+                      "maximum": 100000
+                    }
+                  }
+                },
+                "basis": {
+                  "enum": [
+                    "theory",
+                    "schema-default",
+                    "tuned"
+                  ]
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "FIFO": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "params",
+                "basis"
+              ],
+              "properties": {
+                "params": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [],
+                  "properties": {}
+                },
+                "basis": {
+                  "enum": [
+                    "theory",
+                    "schema-default",
+                    "tuned"
+                  ]
+                },
+                "justification": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
