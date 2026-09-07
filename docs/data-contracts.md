@@ -3,7 +3,7 @@
 
 Everything the three of us build talks to everything else through data — a file one side writes and another side reads. Each such format is a **contract**: as long as both sides honor it, we can work independently and integration stays boring. This document lists every contract in the project, shows what each one looks like with real (or, where not yet frozen, illustrative) examples, and explains every example in plain sentences. Same audience as `background-guide.md`: general CS knowledge is enough, no OS background needed.
 
-Some contracts are **frozen** — by shipped files and enforcing code (archetype, timeline, workload), or by ratified decision (the `cpu_scheduler` config schema in `recognition-vocabulary.md`, and the trace). The protocol contracts froze on 2026-09-06 (§12). One **draft** remains — the proposal — whose shape is agreed at the level shown here and hardens with the driver-table contract. Frozen is not untouchable: changing a frozen contract is always possible, it just takes everyone's sign-off plus a changelog entry — so propose edits rather than deviating quietly.
+Some contracts are **frozen** — by shipped files and enforcing code (archetype, timeline, workload), or by ratified decision (the `cpu_scheduler` config schema in `recognition-vocabulary.md`, and the trace). The protocol contracts froze on 2026-09-06 (§13). The proposal and the driver table's format froze on 2026-09-07. Every contract in this document is now frozen. Frozen is not untouchable: changing a frozen contract is always possible, it just takes everyone's sign-off plus a changelog entry — so propose edits rather than deviating quietly.
 
 ---
 
@@ -60,10 +60,11 @@ The dotted lines are the deliberate cheat paths, and they are the experiment's c
 | 3a | Run file (view of 3) | extracted by the simulator's loader | workload file → simulator | **frozen** |
 | 3b | Visible projection (view of 3) | extracted by the daemon's loader | workload file → daemon | **frozen** |
 | 4 | Telemetry | JSON, internal to the daemon | daemon-internal (recorded in 6) | **frozen** |
-| 5 | Proposal | JSON, internal to the daemon | daemon-internal (recorded in 6) | draft |
+| 5 | Proposal | JSON, internal to the daemon | daemon-internal (recorded in 6) | **frozen** |
 | 6 | Config schedule | JSON | daemon → simulator | **frozen** |
 | 7 | Recognition log | JSON | daemon → harness | **frozen** (envelope; the `proposal` slot follows contract 5) |
 | 8 | Trace | JSONL, `*.trace.jsonl(.gz)` | simulator → harness | **frozen** |
+| 9 | Driver table | YAML, `daemon/driver-table/{prior,calibrated}.yaml`, schema `daemon/driver-table/schema/driver-table.schema.json` | 인지오 → daemon (config mapper) | **frozen** (format; the prior table's content lands in Phase 6) |
 
 ---
 
@@ -283,7 +284,7 @@ In sentences: the daemon walks the visible projection's pinned events (arrivals 
 
 ## 6. Proposal — what the recognizer answers
 
-**Draft — the one protocol contract still open. It hardens with the driver-table contract (Phase 4), because the `subsystems.cpu_scheduler` slot's meaning under variant B (the model choosing `algorithm` while `params` come from the table) depends on the table's format. The `system` block is already fixed by `recognition-vocabulary.md`. Like telemetry, the proposal is internal to the daemon — the recognizer's raw answer before validation, preserved verbatim inside the recognition log.**
+**Frozen 2026-09-07, together with the driver table (§10). Like telemetry, the proposal is internal to the daemon — the recognizer's raw answer before validation, preserved verbatim inside the recognition log.**
 
 ```jsonc
 {
@@ -309,7 +310,7 @@ In sentences: the daemon walks the visible projection's pinned events (arrivals 
 }
 ```
 
-In sentences: the proposal has four parts with sharply different fates. `reasoning` is mandatory prose — the model must explain its reading *before* concluding; it flows to the recognition log only. `situation` is a one-line human summary, same destination. `system` is the heart of the contract: the machine-readable claim about the world, in the closed shared vocabulary fixed by `recognition-vocabulary.md` — exactly one `mode` from the 16-entry menu plus the boolean `background_wanted`. It is subsystem-neutral: a power-management driver could act on this very same block. `subsystems` is a namespace of per-consumer suggestions — this project only ever fills `cpu_scheduler` — and it is the *least* trusted part: depending on the experiment variant it is ignored entirely (variant A: only `system` is used, and the daemon's own driver table picks the configuration), consulted for the algorithm choice only (variant B), or taken in full (variant C). The model may never invent vocabulary: an unknown mode, attribute, or subsystem key is rejected by the validator, full stop.
+In sentences: the proposal has four parts with sharply different fates. `reasoning` is mandatory prose — the model must explain its reading *before* concluding; it flows to the recognition log only. `situation` is a one-line human summary, same destination. `system` is the heart of the contract: the machine-readable claim about the world, in the closed shared vocabulary fixed by `recognition-vocabulary.md` — exactly one `mode` from the 16-entry menu plus the boolean `background_wanted`. It is subsystem-neutral: a power-management driver could act on this very same block. `subsystems` is a namespace of per-consumer suggestions — this project only ever fills `cpu_scheduler` — and it is the *least* trusted part: depending on the condition it is ignored entirely (`llm_vocab` and every non-LLM condition: only `system` is used, and the driver table picks the configuration), consulted for the algorithm choice only (`llm_algo`), or taken in full (`llm_full`). **The read scope is applied before validation, and the validator's five rules run on the composed configuration — the thing the simulator will receive — not on the raw block.** Under `llm_algo` the block is `{ "algorithm": … }`; any other field in it is unread and stays in the log. Only under `llm_full` is the raw block itself what gets validated. Without this rule an `llm_algo` answer carrying only `algorithm` would fail rule 2 (exact `params`) whenever it disagreed with the row — the one case in which the condition differs from `llm_vocab` at all. The model may never invent vocabulary: an unknown mode, attribute, or subsystem key is rejected by the validator, full stop.
 
 ---
 
@@ -439,13 +440,42 @@ Two rules complete the contract. **The harness set is closed**: the eight event 
 
 ---
 
-## 10. Terms used in this document
+## 10. Driver table — what the mapper looks up
+
+**Frozen 2026-09-07 (the format). Files: `daemon/driver-table/prior.yaml` and `calibrated.yaml`; schema `daemon/driver-table/schema/driver-table.schema.json`; lint `daemon/tools/lint.py` (CI: `daemon` workflow). Authored by 인지오; read by the daemon's config mapper. The prior table's content is Phase 6.**
+
+The table turns an accepted situation reading into a scheduler configuration. It is keyed by `(mode, background_wanted)` — 32 rows, every combination present. One row, from a prior table (values illustrative):
+
+```yaml
+role: prior                       # prior | calibrated
+rows:
+  - mode: ml-train
+    background_wanted: true
+    batch_bandwidth_cap: 0.30     # per row — the attribute's decision, shared by every entry
+    default: MLFQ                 # what every system-only condition receives
+    justification: "A training run the user started should progress but never take the editor's slice."
+    entries:                      # one to four, one per algorithm
+      MLFQ:
+        params: { num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000 }
+        basis: theory             # theory | schema-default | tuned
+        justification: "Interactive editor plus one CPU-bound job is MLFQ's home case."
+```
+
+In sentences: a row says what the situation *wants* (the cap) and what the driver *does on its own* (the default), and then lists what each algorithm would be configured as in that situation. Which entry a condition receives depends only on how much of the recognizer's answer the condition reads: `random`, `whitelist`, `llm_vocab`, and `oracle` read `system` only and receive the row's **default** entry — the invariant that makes the executor byte-identical across those conditions at the table as well as in the simulator. `llm_algo` additionally reads the algorithm the model named and receives **that algorithm's entry** from the same row; if the row has no such entry, the mapper composes one from the config schema's defaults for that algorithm with the row's cap, and because LOTTERY's default `batch_share` (0.15) can exceed a small cap, rule 5 then clamps it and the schedule entry is stamped `clamped`. Nothing is rejected on this path. The composed configuration — `{algorithm, params, batch_bandwidth_cap}` — is what the validator checks and the simulator receives.
+
+The two tables are instances of one schema and differ by `role`. The **prior table** is written from theory before any measurement: exactly one entry per row, `basis: theory`, one sentence of justification on the row and on the entry. It runs the RQ0 gate and serves as the baseline of RQ5's fragility check; `llm_algo` does not run on it. The **calibrated table** is tuned per row on the disjoint throwaway pool: all four entries present (lint-required), `basis: tuned` where the search moved a value, and its `default` is the algorithm whose tuned entry scored best. Every reported result runs on it. Because the calibrated default is by construction the best-scoring algorithm on the tuning pool, `llm_algo` cannot beat `llm_vocab` there when the situation reading is correct; the delegation rung is therefore scored as algorithm-choice accuracy against the default plus the cost of delegation (research-proposal §4.6).
+
+What the lint enforces, beyond the schema's shape: all 32 rows present, none duplicated; the default names a present entry; each entry's `params` are exactly its algorithm's fields, in range (the machine-readable field lists live in `daemon/tools/drivertable/config_schema.py`, the first importable copy of `recognition-vocabulary.md` §2 — the daemon's validator should import it, not re-type it); the cap is `null` or within 0.05–0.95; LOTTERY `batch_share ≤ cap`; a justification on every row and on every entry whose `basis` is not `schema-default`; the prior table carries exactly one entry per row and the calibrated table four; and, per mode, the `wanted=true` and `wanted=false` rows must not compose to byte-identical default configurations — identical is a bug, and it is the case that would make a C2 pair's gap zero for reasons unrelated to recognition. How far apart is far enough is a research judgement and stays with the pair review.
+
+---
+
+## 11. Terms used in this document
 
 | Term | Meaning here |
 |---|---|
 | **contract** | a data format two components agree on, so each side can be built and tested alone |
 | **frozen** | the format is fixed by ratified decision and changing it is a team decision with a changelog entry; where a consumer exists, real files conform and a schema or CI enforces it — enforcement follows the first consumer, it is not a precondition of the freeze |
-| **draft** | the intended shape is agreed at the level shown here, but the exact schema awaits a named decision (for the proposal: the driver-table contract) |
+| **draft** | the intended shape is agreed at the level shown here, but the exact schema awaits a named decision (no contract is in this state today) |
 | **schema** | a machine-checkable description of a format (like `workload.schema.json`) — validation, not documentation |
 | **view** | a derived file containing only the slice of the workload one consumer may see (run file, visible projection) |
 | **binding** | a timeline attaching a concrete process name and scenario-specific values (like `total_work`) to an archetype |
@@ -457,17 +487,19 @@ Two rules complete the contract. **The harness set is closed**: the eight event 
 | **provenance** | the recorded origin story of a piece of data — a config entry's `unmodified/clamped/held/fallback` stamp, or a workload's `meta` block |
 | **condition** | one rung of the experiment ladder (`fixed`, `random`, `whitelist`, `llm_*`, `oracle`) — realized as one daemon recognizer |
 | **JSONL** | "JSON Lines": a log where each line is one standalone JSON object; trivially appendable and streamable |
+| **prior table / calibrated table** | the driver table written from theory before measurement (one entry per row; runs the RQ0 gate) / the one tuned on the throwaway pool (four entries per row; runs every reported result) — one schema, two `role`s |
 | **protocol freeze** | the deliberate moment the draft contracts harden; afterwards, changes require all three of us plus a changelog entry |
 
-## 11. The freeze rule
+## 12. The freeze rule
 
-The dataset contracts (archetype, timeline, workload) are frozen and enforced by schema and CI today; the `cpu_scheduler` config schema and the trace are frozen by ratified decision (2026-08-28). The protocol contracts — the two views, telemetry, the config schedule, and the recognition log's envelope — froze on 2026-09-06, the **protocol freeze**, because they are exactly the seams where the three of us could silently build against three slightly different assumptions and discover it at integration time. One draft remains: the proposal (contract 5), which hardens together with the driver-table contract in Phase 4, since its `subsystems` slot depends on the table's format. Frozen or draft, the operating rule is the same: any change to a frozen contract needs all three of us and a changelog entry, and until a draft freezes it is the shared starting point — build to it, and bring friction to the freeze discussion rather than working around it quietly.
+The dataset contracts (archetype, timeline, workload) are frozen and enforced by schema and CI today; the `cpu_scheduler` config schema and the trace are frozen by ratified decision (2026-08-28). The protocol contracts — the two views, telemetry, the config schedule, and the recognition log's envelope — froze on 2026-09-06, the **protocol freeze**, because they are exactly the seams where the three of us could silently build against three slightly different assumptions and discover it at integration time. The proposal (contract 5) and the driver table's format (contract 9) followed on 2026-09-07, once the table's row structure settled what the proposal's `subsystems` slot means under `llm_algo`. Frozen or draft, the operating rule is the same: any change to a frozen contract needs all three of us and a changelog entry, and until a draft freezes it is the shared starting point — build to it, and bring friction to the freeze discussion rather than working around it quietly.
 
 ---
 
-## 12. Changelog
+## 13. Changelog
 
 Every change to a frozen contract lands here, dated, with the sub-task that made it.
 
 - **2026-09-06 — protocol freeze (jioh 3.3).** Run file (3a), visible projection (3b), telemetry (4), config schedule (6), and the recognition log's envelope (7) move from draft to frozen by ratified decision; the proposal (5) stays draft until the driver-table contract lands (Phase 4). Fixed in the same step, so that two builders read one file the same way: 3b — one entry per canonical task instance, never folded; 4 — the five snapshot rules (name→count multiset; one snapshot per timestamp; `processes` sorted by name; the terminal snapshot is emitted; nothing else emits) and the example's first snapshot corrected from 59 s to t = 0; 6 — one entry per query point including `held` (from 3.2), ordering with tie-break, post-validation payload, validity on load, entries at or after the end ignored, stale-answer policy deferred to the daemon; 7 — non-LLM entry shape (`proposal.system` for every condition, optional `source`, top-level `seed`), `proposal: null` + `raw` for unparseable answers, `validation` mirrors schedule `provenance`, grading scope, latency for non-LLM and replay. Glossary: `frozen` no longer requires enforcing code as a precondition. Recorded choice for 3a: the run file keeps only `workload_id` of `meta`; a trace is tied to a build through the manifest and the simulator version in its header, not through the run file.
+- **2026-09-07 — driver table and proposal (jioh 4.2).** New §10: the driver table becomes contract 9, format frozen — rows keyed by `(mode, background_wanted)`, per-row cap and default, one to four per-algorithm entries with `basis` and justification; two `role`s, prior and calibrated, one schema; the missing-entry rule for `llm_algo`; schema and lint in `daemon/driver-table/` and `daemon/tools/`. §6 proposal frozen: the read scope is applied before validation and the validator checks the composed configuration; under `llm_algo` the block is `{algorithm}`. Every protocol contract is now frozen.
 
