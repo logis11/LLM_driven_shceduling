@@ -63,6 +63,7 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 
 - [memos/2026-09-07-trace-clarifications-for-the-simulator.md](memos/2026-09-07-trace-clarifications-for-the-simulator.md) — to 인경민: the `ready`-line rule, the §9 positions the harness assumes, frame latency for the chain, the workload's end
 - [memos/2026-09-07-repeat-samples-for-the-daemon.md](memos/2026-09-07-repeat-samples-for-the-daemon.md) — to 박이안: the repeat index run-to-run consistency needs from the recognition log
+- [memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md](memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md) — to 인경민: what happens to the task queue, the running task, and scheduler state when a config with a different algorithm lands mid-run
 
 ## Full index
 
@@ -89,3 +90,4 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 | [harness/harness-and-records-guide.md](harness/harness-and-records-guide.md) | 공부용: harness, records, primitives, mocks by hand, scores | draft |
 | [memos/2026-09-07-trace-clarifications-for-the-simulator.md](memos/2026-09-07-trace-clarifications-for-the-simulator.md) | to 인경민: what the harness needs from the trace, and why | memo |
 | [memos/2026-09-07-repeat-samples-for-the-daemon.md](memos/2026-09-07-repeat-samples-for-the-daemon.md) | to 박이안: the repeat index consistency needs from the log | memo |
+| [memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md](memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md) | to 인경민: queue takeover, preemption, and overhead at an algorithm switch | memo |
