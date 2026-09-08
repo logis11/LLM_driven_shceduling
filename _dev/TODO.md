@@ -55,7 +55,7 @@ Stages 1–2. Spec: `_dev/docs/spec/jioh/phase-5-primitive-metrics-and-records.m
 Execution order: 5.1 → 5.2 ∥ 5.3 → 5.4.
 
 - [x] **5.1** Mock traces — four reduced run-file + trace pairs (`c1-office` with a queued keystroke and an unfocused task; `c1-media` with backlog; `c2-p1a` with the config switch and an unfinished batch; a three-stage chain with one late frame) and their hand-computed expected records CSVs
-- [ ] **5.2** Metrics doc — trace and recognition primitives, the aggregate list, normalisation and floors, constants with verified sources, the simulator assumptions, the records schema description; doc corrections (`data-contracts` §9 pointers + `deadline` example + changelog, docs index, terminology wording)
+- [WIP] **5.2** Metrics doc — trace and recognition primitives, the aggregate list, normalisation and floors, constants with verified sources, the simulator assumptions, the records schema description; doc corrections (`data-contracts` §9 pointers + `deadline` example + changelog, docs index, terminology wording)
 - [ ] **5.3** Trace reader — streams plain/gzipped JSONL, validates the closed event set, ignores `x_`, captures `meta`; run-file inputs (chain topology, demand, `T_end`); test-first against the mocks
 - [ ] **5.4** Primitives + records output — `ready_wait`, `job` with chain reconstruction, lifetime rows, `config_interval`, `preempt_count`, `busy`; CSV writer + machine schema beside the code; CI workflow; byte-for-byte match against 5.1's expected CSVs
 
