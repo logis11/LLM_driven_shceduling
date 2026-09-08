@@ -1,0 +1,15 @@
+{
+  "meta": {
+    "id": "mini-ambiguous",
+    "derived_from": "tests/fixtures/mini.timeline.yaml@0000000",
+    "sampled": {"seed": 0, "archetypes": "archetypes.yaml@0000000"}
+  },
+  "ground_truth": [
+    {"t_start": 0, "t_end": 1000000, "mode": "ambiguous",
+     "attributes": {"dual_active": true}}
+  ],
+  "events": [
+    {"t": 0, "op": "arrive", "id": "a", "name": "vlc", "depart": 1000000,
+     "program": [{"op": "RUN", "us": 10}]}
+  ]
+}

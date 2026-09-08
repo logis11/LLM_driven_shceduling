@@ -6,13 +6,19 @@ on:
   pull_request:
 
 jobs:
-  driver-table:
+  daemon:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      # The workload corpus is build output, not committed. Building it here is
+      # what lets the daemon tests run against the real 24 files instead of
+      # skipping to a green tick on fixtures alone.
+      - run: pip install -r dataset/tools/requirements.txt
+      - run: make -C dataset dataset
       - run: pip install -r daemon/tools/requirements.txt
+      - run: make -C daemon corpus
       - run: make -C daemon lint
       - run: make -C daemon test

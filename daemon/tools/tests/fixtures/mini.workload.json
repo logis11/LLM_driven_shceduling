@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "id": "mini",
+    "derived_from": "tests/fixtures/mini.timeline.yaml@0000000",
+    "sampled": {"seed": 0, "archetypes": "archetypes.yaml@0000000"}
+  },
+  "ground_truth": [
+    {"t_start": 0, "t_end": 1000000, "mode": "dev",
+     "attributes": {"background_wanted": true}, "familiarity": 2},
+    {"t_start": 1000000, "t_end": 2000000, "mode": "compile",
+     "attributes": {"background_wanted": true, "background": "build",
+                    "initiated": "user"}}
+  ],
+  "events": [
+    {"t": 0, "op": "arrive", "id": "editor", "name": "code", "depart": 2000000,
+     "program": [{"op": "WAIT", "channel": "input:editor"},
+                 {"op": "RUN", "us": 500}]},
+    {"t": 500000, "op": "wake", "target": "editor", "channel": "input:editor"},
+    {"t": 1000000, "op": "arrive", "id": "build", "name": "make", "fork_cap": 2,
+     "program": [{"op": "FORK"}, {"op": "FORK"}, {"op": "FORK"}, {"op": "EXIT"}],
+     "spawn_table": [
+       {"id": "build.c1", "name": "cc1", "program": [{"op": "RUN", "us": 10}, {"op": "EXIT"}]},
+       {"id": "build.c2", "name": "ld", "program": [{"op": "RUN", "us": 20}, {"op": "EXIT"}]},
+       {"id": "build.c3", "name": "cc1", "program": [{"op": "RUN", "us": 30}, {"op": "EXIT"}]}
+     ]}
+  ]
+}

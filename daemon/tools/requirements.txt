@@ -1,3 +1,9 @@
+# The daemon itself (tools/daemon/) is standard library only, on purpose: its
+# outputs must be byte-identical across reruns and machines, so every
+# dependency is a way for that to stop being true. Additions belong to a
+# specific need, argued in the sub-task that introduces them.
+#
+# These three are the driver-table tooling's (tools/drivertable/) and the tests'.
 PyYAML>=6.0
 jsonschema>=4.20
 pytest>=8.0

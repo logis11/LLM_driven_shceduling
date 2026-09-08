@@ -11,6 +11,15 @@ sys.path.insert(0, str(TOOLS))
 from drivertable.config_schema import ALGORITHMS, MODES  # noqa: E402
 
 REPO = TOOLS.parents[1]
+FIXTURES = pathlib.Path(__file__).resolve().parent / "fixtures"
+
+# The workload corpus is build output, not committed (dataset/.gitignore), so
+# every test that needs a real workload skips rather than fails when the tree
+# has not been built. CI builds it first; see .github/workflows/daemon.yml.
+_BUILD = REPO / "dataset" / "build"
+needs_corpus = pytest.mark.skipif(
+    not _BUILD.exists(),
+    reason="dataset/build/ absent — run `make -C dataset dataset`")
 
 
 def schema_default_params(algorithm):
@@ -74,3 +83,15 @@ def row(table, mode, wanted):
 
 def clone(table):
     return copy.deepcopy(table)
+
+
+@pytest.fixture
+def fixtures():
+    """The synthetic workload files, which are committed and never rebuilt."""
+    return FIXTURES
+
+
+@pytest.fixture
+def corpus():
+    from daemon.corpus import open_corpus
+    return open_corpus(REPO)
