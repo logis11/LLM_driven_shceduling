@@ -66,18 +66,19 @@ int main() {
   int running = -1;
   i64 now = 0;
 
-  auto log = [&](const char* what, int id) {
-    std::printf("t=%6lld  %-12s %s\n", (long long)now, what, tasks[id].name);
+  auto log = [&](const char* what, int id, const char* cause = nullptr) {
+    std::printf("t=%6lld  %-12s %-8s%s%s\n", (long long)now, what, tasks[id].name,
+                cause ? "  cause=" : "", cause ? cause : "");
   };
 
-
+  // (memo 2026-09-07-trace-clarifications-for-the-simulator §4)
   auto step = [&](int id) {
     Task& t = tasks[id];
     for (;;) {
       if (t.pc >= t.prog.size()) { t.state = State::Done; log("task_end", id); return; }
       const Instr& in = t.prog[t.pc];
-      if (in.op == Op::RUN)  { t.state = State::Ready;   ready.push_back(id); log("ready", id); return; }
-      if (in.op == Op::WAIT) { t.state = State::Blocked;                      log("block", id); return; }
+      if (in.op == Op::RUN)  { t.state = State::Ready;   ready.push_back(id);   return; }
+      if (in.op == Op::WAIT) { t.state = State::Blocked;                      log("x_block", id); return; }
       if (in.op == Op::EXIT) { t.state = State::Done;                         log("task_end", id); return; }
       ++t.pc;
     }
@@ -93,9 +94,11 @@ int main() {
       case Kind::Arrive:
         log("task_arrive", e.task);
         step(e.task);
+        if (t.state == State::Ready) log("ready", e.task, "arrive");
         break;
       case Kind::Wake:
-        if (t.state == State::Blocked) { 
+        if (t.state == State::Blocked) {
+          log("ready", e.task, "wake");  // WAIT 완료 — 블록했든 안 했든 이 자리에서
           ++t.pc;
           step(e.task);
         }
