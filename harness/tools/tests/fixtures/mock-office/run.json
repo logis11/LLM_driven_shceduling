@@ -1,0 +1,73 @@
+{
+ "workload_id": "mock-office",
+ "events": [
+  {
+   "op": "arrive",
+   "t": 0,
+   "id": "writer",
+   "name": "soffice.bin",
+   "depart": 60000,
+   "program": [
+    {
+     "op": "WAIT",
+     "channel": "input:writer"
+    },
+    {
+     "op": "RUN",
+     "us": 8000
+    },
+    {
+     "op": "WAIT",
+     "channel": "input:writer"
+    },
+    {
+     "op": "RUN",
+     "us": 3000
+    },
+    {
+     "op": "WAIT",
+     "channel": "input:writer"
+    },
+    {
+     "op": "RUN",
+     "us": 5000
+    },
+    {
+     "op": "WAIT",
+     "channel": "input:writer"
+    }
+   ]
+  },
+  {
+   "op": "arrive",
+   "t": 0,
+   "id": "browser",
+   "name": "chrome",
+   "depart": 60000,
+   "program": [
+    {
+     "op": "WAIT",
+     "channel": "input:browser"
+    }
+   ]
+  },
+  {
+   "op": "wake",
+   "t": 10000,
+   "channel": "input:writer",
+   "target": "writer"
+  },
+  {
+   "op": "wake",
+   "t": 15000,
+   "channel": "input:writer",
+   "target": "writer"
+  },
+  {
+   "op": "wake",
+   "t": 16000,
+   "channel": "input:writer",
+   "target": "writer"
+  }
+ ]
+}

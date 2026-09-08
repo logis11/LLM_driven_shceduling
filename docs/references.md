@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-09-07
+> Status: normative · Created 2026-08-26 · Updated 2026-09-08
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -292,3 +292,18 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - role: LOTTERY algorithm origin, and the grounding of the boot default's lottery values (recognition-vocabulary §2): "the resource consumption rates of active computations are proportional to the relative shares that they are allocated" (§1); "With a scheduling quantum of 10 milliseconds (100 lotteries per second), reasonable fairness can be achieved over subsecond time intervals. As computation speeds continue to increase, shorter time quanta can be used to further improve accuracy" (§2). Names no ticket ratio between classes.
 - status: verified (2026-09-07; PDF read)
 
+
+### `miller-fjcc68`
+- cite: Miller, R. B. (1968). Response time in man-computer conversational transactions. *Proc. AFIPS Fall Joint Computer Conference (FJCC '68)*, 267–277. DOI 10.1145/1476589.1476628. Scan: Computer History Museum collection (yusufarslan.net/sites/yusufarslan.net/files/upload/content/Miller1968.pdf, accessed 2026-09-08).
+- role: the grounding of the interaction-latency threshold `T_interaction` = 0.1 s (harness/metrics.md §10). Topic 1, "Response to control activation": the response "should be immediate and perceived as a part of the mechanical action induced by the operator. Time delay: No more than 0.1 second."; for typed-text echo, "the delay between depressing the key and the visual feedback should be no more than 0.1 to 0.2 seconds", noting "this delay in feedback may be far too slow for skilled keyboard users". Cite for these two statements only; the paper's other seventeen topics carry other values.
+- status: verified (2026-09-08; PDF text read, pp. 267–277 confirmed from running heads)
+
+### `nielsen-ue93`
+- cite: Nielsen, J. (1993). *Usability Engineering*. Academic Press. Chapter 5, "Usability Heuristics", response-time section — the author's own excerpt: "Response Times: The 3 Important Limits", nngroup.com/articles/response-times-3-important-limits/ (accessed 2026-09-08).
+- role: secondary grounding of `T_interaction` = 0.1 s: "0.1 second is about the limit for having the user feel that the system is reacting instantaneously" (with the 1 s and 10 s limits beside it); the excerpt cites Miller 1968 and Card et al. 1991 as its sources. Cite the excerpt text as verified; the book's page numbers are not pinned.
+- status: verified (2026-09-08; the author's excerpt read; book pages to-pin)
+
+### `shneiderman-csur84`
+- cite: Shneiderman, B. (1984). Response Time and Display Rate in Human Performance with Computers. *ACM Computing Surveys*, 16(3), 265–285. DOI 10.1145/2514.2517. PDF: cs.umd.edu/users/ben/papers/Shneiderman1984Response.pdf (accessed 2026-09-08).
+- role: the range beside the threshold (harness/metrics.md §10): reporting Long [1976], "delays of approximately 0.1–0.5 second in the time for a keystroke to produce a character on an impact printer … unskilled and skilled typists worked more slowly and made more errors with longer response times. Even these brief delays were distracting in the rapid process of typing." A review reporting a primary study; cite as Shneiderman's report of Long, never as Long directly.
+- status: verified (2026-09-08; PDF text read; volume/issue from the running foot)

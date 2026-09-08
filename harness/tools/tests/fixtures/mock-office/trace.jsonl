@@ -1,0 +1,17 @@
+{"event":"meta","workload_id":"mock-office","condition":"fixed","sim":"mock@0","schedule_entries":1}
+{"event":"config_applied","t":0,"index":0,"algorithm":"MLFQ","provenance":"fallback"}
+{"event":"task_arrive","t":0,"task":"writer","source":"file"}
+{"event":"task_arrive","t":0,"task":"browser","source":"file"}
+{"event":"ready","t":0,"task":"writer","cause":"arrive"}
+{"event":"ready","t":0,"task":"browser","cause":"arrive"}
+{"event":"run_start","t":0,"task":"writer"}
+{"event":"run_end","t":0,"task":"writer","reason":"block","blocked_on":"wait"}
+{"event":"run_start","t":0,"task":"browser"}
+{"event":"run_end","t":0,"task":"browser","reason":"block","blocked_on":"wait"}
+{"event":"ready","t":10000,"task":"writer","cause":"wake"}
+{"event":"run_start","t":10000,"task":"writer"}
+{"event":"ready","t":18000,"task":"writer","cause":"wake"}
+{"event":"ready","t":21000,"task":"writer","cause":"wake"}
+{"event":"run_end","t":26000,"task":"writer","reason":"block","blocked_on":"wait"}
+{"event":"task_end","t":60000,"task":"writer","reason":"depart"}
+{"event":"task_end","t":60000,"task":"browser","reason":"depart"}

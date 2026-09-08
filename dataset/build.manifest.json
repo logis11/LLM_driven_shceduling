@@ -18,9 +18,9 @@
     "coreset-native/c4-compile.workload.json": "53da788170ef8a409144502ce1e32bb7ee8d5a46e069bb5a38ee2e7e7497e28e",
     "coreset-native/c4-gaming.workload.json": "a56bf41b1b2c7c9d79437ab31c6b4717595328197bea8b6b5ba52483e41b7616",
     "coreset-native/c4-office.workload.json": "acc36a76cd0ff92212fae78d5e599426b0edd188b045641b0bb8cf685227677a",
-    "coreset-native/c5-t3.workload.json": "fbf04b2f48db726c1ef669b2daa3a435235866735e8d9b58140c0168a7f76027",
-    "coreset-native/c5-t4.workload.json": "a8f25c8e2e353d42caf10b4da1f0ec6eb84dce84d8bed146b388a575b6f30ef0",
-    "coreset-native/c5-t5.workload.json": "267418f45055bb8210956b7508b7a565f43bd349c69e72607839ae3e84af4675",
+    "coreset-native/c5-t3.workload.json": "a57c141eca6bf59cb21ad52c4184ebd1905037702bcc8c791a736f757fe77bef",
+    "coreset-native/c5-t4.workload.json": "8d97cf5f91bd923d327dc4ec8524a4ef9ca0f626102b82e38d77d15237915dc9",
+    "coreset-native/c5-t5.workload.json": "53875e11747fc6c3e137e708a3a75fda19321a226c107e93528869a140574514",
     "coreset-native/c6-dual.workload.json": "f73a2d00b897ff42cad68139a27e6d7401c7d7a098565ae54a848944e2b1de6b",
     "coreset-native/c6-fold.workload.json": "69dcd05358d2860df187161dea1b6a2409597f7aa5a311b37f61228f5e2ab8b7",
     "coreset-native/c6-spoof.workload.json": "abe5905a1ef9c8e64585cd45ab582bbda30994bba0f55e4db01dff3c1408cec3",
@@ -42,9 +42,9 @@
     "coreset-single/c4-compile.workload.json": "53da788170ef8a409144502ce1e32bb7ee8d5a46e069bb5a38ee2e7e7497e28e",
     "coreset-single/c4-gaming.workload.json": "4188db7d851ce5ed8a607e3f7a73f9d2126e4be23092f65249f5377bdcc4688b",
     "coreset-single/c4-office.workload.json": "acc36a76cd0ff92212fae78d5e599426b0edd188b045641b0bb8cf685227677a",
-    "coreset-single/c5-t3.workload.json": "fbf04b2f48db726c1ef669b2daa3a435235866735e8d9b58140c0168a7f76027",
-    "coreset-single/c5-t4.workload.json": "a8f25c8e2e353d42caf10b4da1f0ec6eb84dce84d8bed146b388a575b6f30ef0",
-    "coreset-single/c5-t5.workload.json": "267418f45055bb8210956b7508b7a565f43bd349c69e72607839ae3e84af4675",
+    "coreset-single/c5-t3.workload.json": "a57c141eca6bf59cb21ad52c4184ebd1905037702bcc8c791a736f757fe77bef",
+    "coreset-single/c5-t4.workload.json": "8d97cf5f91bd923d327dc4ec8524a4ef9ca0f626102b82e38d77d15237915dc9",
+    "coreset-single/c5-t5.workload.json": "53875e11747fc6c3e137e708a3a75fda19321a226c107e93528869a140574514",
     "coreset-single/c6-dual.workload.json": "831df4dd4143bb4b2a098e50fba68b6fbebb0973db49d008824237e6ad10d5dd",
     "coreset-single/c6-fold.workload.json": "69dcd05358d2860df187161dea1b6a2409597f7aa5a311b37f61228f5e2ab8b7",
     "coreset-single/c6-spoof.workload.json": "abe5905a1ef9c8e64585cd45ab582bbda30994bba0f55e4db01dff3c1408cec3"
@@ -245,6 +245,6 @@
   },
   "inputs": {
     "dataset/archetypes.yaml": "97f4f197b0b3e9bcf4e9bff83baf8881cd0724687184b657c2581d9bcde76d97",
-    "dataset/schema/workload.schema.json": "b71d20570af038b1bdf68698189845dd0efa743643742216f7ef188f9e68ef69"
+    "dataset/schema/workload.schema.json": "2c18ae37151a4d00fc33ee20a71f24382b3767cd1e8323dbbe2b869ff599c0dd"
   }
 }

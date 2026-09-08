@@ -49,8 +49,15 @@ Execution order: 4.1 → 4.2 → 4.3.
 - [x] **4.2** Driver table contract — JSON schema + lint (structure, legality, byte-identical `wanted` pairs, calibrated-full) with tests and fixtures in the daemon tree; `data-contracts` driver-table section with the row structure and an example; proposal contract frozen with the `llm_algo` read-scope rule; changelog
 - [x] **4.3** Doc corrections — proposal §5.2 / §4.6 + RQ3 (delegation rung reframed; prior/calibrated naming; held-out-rows arm as a proposal) / §8.2 decision 3; `daemon-guide` §5 mapper steps; vocabulary variant row; terminology; archive note superseding Q4's row shape
 
-### Phase 5 — Layer-1 metrics and the records pipeline
-Stages 1–2. Hand-written mock traces drive the Layer-1 metric decisions, written up as a metrics doc; `records` schema; trace reader, primitives, and records output checked against hand-computed values. No simulator needed.
+### Phase 5 [done] — Primitive metrics and the records pipeline
+Stages 1–2. Spec: `_dev/docs/spec/jioh/phase-5-primitive-metrics-and-records.md`. Branch: `jioh/primitive-metrics`.
+
+Execution order: 5.1 → 5.2 ∥ 5.3 → 5.4.
+
+- [x] **5.1** Mock traces — four reduced run-file + trace pairs (`c1-office` with a queued keystroke and an unfocused task; `c1-media` with backlog; `c2-p1a` with the config switch and an unfinished batch; a three-stage chain with one late frame) and their hand-computed expected records CSVs
+- [x] **5.2** Metrics doc — trace and recognition primitives, the aggregate list, normalisation and floors, constants with verified sources, the simulator assumptions, the records schema description; doc corrections (`data-contracts` §9 pointers + `deadline` example + changelog, docs index, terminology wording)
+- [x] **5.3** Trace reader — streams plain/gzipped JSONL, validates the closed event set, ignores `x_`, captures `meta`; run-file inputs (chain topology, demand, `T_end`); test-first against the mocks
+- [x] **5.4** Primitives + records output — `ready_wait`, `job` with chain reconstruction, lifetime rows, `config_interval`, `preempt_count`, `busy`; CSV writer + machine schema beside the code; CI workflow; byte-for-byte match against 5.1's expected CSVs
 
 ### Phase 6 — Driver table v0 and the scoring spec
 Stage 3. Scope the rows C1–C4 exercise; write v0 with one-sentence justifications; the Layer-2 scoring spec (C2 pair weighting, `c1-compile` trade-off, `c1-media` audio/video weighting); fill the remaining rows with defaults; pair review of same-mode `wanted=true/false` rows for distinctness.

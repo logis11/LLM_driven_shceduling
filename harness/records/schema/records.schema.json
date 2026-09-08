@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "records.schema.json",
+  "title": "Records row",
+  "description": "One row of the harness's records file (docs/harness/metrics.md §5): one raw observation with its run identity and the attributes its metric carries. CSV cells that are empty are absent here; integer columns are integers.",
+  "type": "object",
+  "required": ["workload_id", "condition", "sim", "source_sha256", "entity", "metric", "t", "value"],
+  "additionalProperties": false,
+  "properties": {
+    "workload_id": {"type": "string", "minLength": 1},
+    "condition": {"type": "string", "enum": ["fixed", "random", "whitelist", "llm_vocab", "llm_algo", "llm_full", "oracle"]},
+    "table": {"type": "string", "enum": ["prior", "calibrated"]},
+    "seed": {"type": "string", "minLength": 1},
+    "sim": {"type": "string"},
+    "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "entity": {"type": "string", "minLength": 1},
+    "metric": {"type": "string", "enum": ["ready_wait", "job", "cpu_delivered", "demand", "completed", "turnaround", "preempt_count", "config_interval", "busy", "mode_correct", "attr_correct", "latency_us", "algo_choice_correct"]},
+    "t": {"type": "integer", "minimum": 0},
+    "value": {"type": "integer"},
+    "cause": {"type": "string", "enum": ["arrive", "wake", "sleep_end", "timer_tick", "fork_slot"]},
+    "provenance": {"type": "string", "enum": ["unmodified", "clamped", "held", "fallback"]},
+    "algorithm": {"type": "string", "enum": ["MLFQ", "EDF", "LOTTERY", "FIFO"]},
+    "index": {"type": "integer", "minimum": 0},
+    "period_us": {"type": "integer", "minimum": 1},
+    "predicted": {"type": "string"},
+    "truth": {"type": "string"},
+    "validation": {"type": "string", "enum": ["unmodified", "clamped", "held", "fallback"]},
+    "familiarity": {"type": "integer", "minimum": 1, "maximum": 5}
+  },
+  "allOf": [
+    {"if": {"properties": {"metric": {"const": "ready_wait"}}}, "then": {"required": ["cause"]}},
+    {"if": {"properties": {"metric": {"const": "job"}}}, "then": {"required": ["period_us"]}},
+    {"if": {"properties": {"metric": {"const": "config_interval"}}}, "then": {"required": ["provenance", "algorithm", "index"], "properties": {"entity": {"const": "schedule"}}}},
+    {"if": {"properties": {"metric": {"const": "busy"}}}, "then": {"properties": {"entity": {"const": "lane"}}}},
+    {"if": {"properties": {"metric": {"enum": ["mode_correct", "attr_correct", "latency_us", "algo_choice_correct"]}}}, "then": {"required": ["validation"], "properties": {"entity": {"const": "recognizer"}}}},
+    {"if": {"properties": {"metric": {"enum": ["mode_correct", "attr_correct", "algo_choice_correct"]}}}, "then": {"properties": {"value": {"enum": [0, 1]}}}},
+    {"if": {"properties": {"metric": {"const": "completed"}}}, "then": {"properties": {"value": {"enum": [0, 1]}}}}
+  ]
+}

@@ -1,5 +1,5 @@
 # Terminology
-> Status: normative · Created 2026-08-23 · Updated 2026-09-07
+> Status: normative · Created 2026-08-23 · Updated 2026-09-08
 
 Terms this project uses for its own parts. Operating systems vocabulary —
 MLFQ, EDF, preemption, turnaround time — is in Appendix A of
@@ -54,6 +54,11 @@ generator. `archetypes.yaml + timeline (+ scenario catalog) + seed → workload`
 the scheduler sees it: a program over the six-primitive event grammar plus
 parameter distributions. Layer 1 of the dataset; never carries a process name.
 See docs/workload/archetype-plan.md and docs/simulator/interpretation-contract.md.
+
+**Records** — the harness's intermediate file: one CSV row per raw
+observation computed from a trace or a recognition log, with an anchor time,
+an entity, a metric, and a value. No aggregate is stored; scoring reads records
+and never a trace. Defined in docs/harness/metrics.md.
 
 **Workload variants** — each timeline compiles in two modes: `-single`
 (lane-scaled; the only variant experiments run on) and `-native` (as-measured
@@ -191,6 +196,27 @@ contaminate it.
 
 **Layer 2** — consumer performance. Metrics computed from traces across the
 condition ladder.
+
+**Primitives** — the raw observations the harness computes from a trace or a
+recognition log, one row of records each: `ready_wait`, `job`, `cpu_delivered`,
+`mode_correct`, and the rest. A primitive knows nothing about which file,
+task role, or condition it is looking at. Changing one means recomputing from
+traces.
+
+**Scoring** — everything computed from records: aggregates, the normalisation
+to a share of headroom, per-file weights, the gate. Changing scoring never
+touches a trace. The records/scores boundary is the primitives/scoring
+boundary.
+
+**Entity** — whom a records row is about: a task id from the trace, or a
+reserved name — `lane` (the CPU), `schedule` (the config schedule),
+`recognizer` (the recognizer's answers).
+
+**Familiarity tier** — how recognisable a process *name* is to a language
+model from its training corpus, 1 (transparent: `firefox`) to 5
+(nonexistent-opaque: `qzvd`), per docs/workload/building-plan.md C5. A property
+of the name, never of behaviour; carried on ground-truth segments when
+authored, and used only as a split key when recognition accuracy is reported.
 
 **Perfect recognition** — the result of feeding ground-truth labels through the
 shared driver table. The upper bound for every condition that passes through

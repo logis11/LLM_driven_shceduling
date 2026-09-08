@@ -1,0 +1,89 @@
+{
+ "workload_id": "mock-p1a",
+ "events": [
+  {
+   "op": "arrive",
+   "t": 0,
+   "id": "editor",
+   "name": "code",
+   "depart": 120000,
+   "program": [
+    {
+     "op": "WAIT",
+     "channel": "input:editor"
+    },
+    {
+     "op": "RUN",
+     "us": 4000
+    },
+    {
+     "op": "WAIT",
+     "channel": "input:editor"
+    },
+    {
+     "op": "RUN",
+     "us": 6000
+    },
+    {
+     "op": "WAIT",
+     "channel": "input:editor"
+    },
+    {
+     "op": "RUN",
+     "us": 2000
+    },
+    {
+     "op": "WAIT",
+     "channel": "input:editor"
+    },
+    {
+     "op": "RUN",
+     "us": 3000
+    },
+    {
+     "op": "WAIT",
+     "channel": "input:editor"
+    }
+   ]
+  },
+  {
+   "op": "arrive",
+   "t": 50000,
+   "id": "hog",
+   "name": "python3",
+   "program": [
+    {
+     "op": "RUN",
+     "us": 90000
+    },
+    {
+     "op": "EXIT"
+    }
+   ]
+  },
+  {
+   "op": "wake",
+   "t": 8000,
+   "channel": "input:editor",
+   "target": "editor"
+  },
+  {
+   "op": "wake",
+   "t": 30000,
+   "channel": "input:editor",
+   "target": "editor"
+  },
+  {
+   "op": "wake",
+   "t": 54500,
+   "channel": "input:editor",
+   "target": "editor"
+  },
+  {
+   "op": "wake",
+   "t": 71000,
+   "channel": "input:editor",
+   "target": "editor"
+  }
+ ]
+}

@@ -1,0 +1,66 @@
+{
+ "workload_id": "mock-media",
+ "events": [
+  {
+   "op": "arrive",
+   "t": 0,
+   "id": "video",
+   "name": "mpv",
+   "depart": 95000,
+   "program": [
+    {
+     "op": "LOOP",
+     "count": "unbounded",
+     "body": [
+      {
+       "op": "TIMER",
+       "period_us": 16667
+      },
+      {
+       "op": "RUN",
+       "us": 6667
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "op": "arrive",
+   "t": 0,
+   "id": "music",
+   "name": "spotify",
+   "depart": 95000,
+   "program": [
+    {
+     "op": "LOOP",
+     "count": "unbounded",
+     "body": [
+      {
+       "op": "TIMER",
+       "period_us": 50000
+      },
+      {
+       "op": "RUN",
+       "us": 2500
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "op": "arrive",
+   "t": 20000,
+   "id": "scan",
+   "name": "clamscan",
+   "program": [
+    {
+     "op": "RUN",
+     "us": 31000
+    },
+    {
+     "op": "EXIT"
+    }
+   ]
+  }
+ ]
+}

@@ -63,11 +63,7 @@ def compile_timeline(timeline, library, mode, rel_path=None):
             "sampled": {"seed": timeline.seed,
                         "archetypes": f"archetypes.yaml@{library.blob_hex}"},
         },
-        "ground_truth": [
-            {"t_start": s["t_start"], "t_end": s["t_end"], "mode": s["mode"],
-             "attributes": s["attributes"]}
-            for s in timeline.segments
-        ],
+        "ground_truth": [_ground_truth_segment(s) for s in timeline.segments],
         "events": events,
     }
     duration = timeline.duration_us
@@ -86,6 +82,17 @@ def canonical_bytes(canonical):
     """The byte form the manifest hashes and the invariants diff."""
     return (json.dumps(canonical, sort_keys=True, separators=(",", ":"))
             + "\n").encode()
+
+
+def _ground_truth_segment(segment):
+    """A labeled interval. `familiarity` is carried only when the timeline
+    authored it — never null, never derived — so the grader's split key is
+    exactly what the author declared."""
+    entry = {"t_start": segment["t_start"], "t_end": segment["t_end"],
+             "mode": segment["mode"], "attributes": segment["attributes"]}
+    if segment.get("familiarity") is not None:
+        entry["familiarity"] = segment["familiarity"]
+    return entry
 
 
 def _arrive_event(build):
