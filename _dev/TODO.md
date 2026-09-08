@@ -59,7 +59,7 @@ Execution order: 5.1 → 5.2 ∥ 5.3 → 5.4.
 - [x] **5.3** Trace reader — streams plain/gzipped JSONL, validates the closed event set, ignores `x_`, captures `meta`; run-file inputs (chain topology, demand, `T_end`); test-first against the mocks
 - [x] **5.4** Primitives + records output — `ready_wait`, `job` with chain reconstruction, lifetime rows, `config_interval`, `preempt_count`, `busy`; CSV writer + machine schema beside the code; CI workflow; byte-for-byte match against 5.1's expected CSVs
 
-### Phase 6 — Driver table v0 and the scoring spec
+### Phase 6 [WIP] — Driver table v0 and the scoring spec
 Stage 3. Scope the rows C1–C4 exercise; write v0 with one-sentence justifications; the Layer-2 scoring spec (C2 pair weighting, `c1-compile` trade-off, `c1-media` audio/video weighting); fill the remaining rows with defaults; pair review of same-mode `wanted=true/false` rows for distinctness.
 
 ### Phase 7 — Harness upper half through pre-registration
