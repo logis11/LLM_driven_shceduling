@@ -70,3 +70,23 @@ Read from the compiled `coreset-single` workloads and the docs, not inferred:
 - Familiarity tag in the dataset (fact to check before defining the split).
 - C1-derived files' inherited demand class (Phase 3 archive).
 - Gate-spec items (Phase 7): threshold; `random` draw + seeds; boot-default sensitivity pair; `c1-gaming` separate line; guard exemptions; guard-list audit.
+
+## Task 5.1 — mock fixtures (2026-09-08)
+
+Four fixture directories under `harness/tools/tests/fixtures/` (`mock-office`, `mock-media`, `mock-p1a`, `mock-chain`), each with `run.json` (run-file view: `workload_id` + `events`), `trace.jsonl`, `expected.csv`, and `worked.md` deriving every row; a fixtures README carries the decisions and the assumption list. Designed fresh — the harness guide's sample mocks were deliberately not reused. Commit `119e97a`. Reviewed by the user: "looks good".
+
+Decisions taken at sub-task level, to be documented in the metrics doc (5.2):
+- **Row order**: `entity`, `metric`, `t` (numeric), `cause`. Byte comparison needs one order; this keeps a task's rows contiguous.
+- **Anchor `t`**: window-level rows (`cpu_delivered`, `demand`, `preempt_count`, `busy`, `completed`=0) at `T_end`; `completed`=1 and `turnaround` at the `task_end` time.
+- **`T_end`** = the largest pinned time in the run file (arrivals, departs, wakes). The run file carries no `ground_truth`, so this is the only source; in the coreset it coincides with the end of ground truth.
+- **`demand`** rows only for programs whose RUN total is finite; unbounded LOOPs have none.
+- **Window edges**: a `job` is emitted only if its completion ≤ `T_end`; a `ready_wait` only if its `run_start` ≤ `T_end`; occupancy open at `T_end` is clipped.
+- **Arrival whose first instruction blocks**: scheduled like any task, reaches the WAIT, blocks — a zero-length occupancy when the lane is free (mock-local choice; listed as an assumption).
+- **Same-instant order** assumed by the mocks: config entries first in list order, then arrivals in file order.
+- **TIMER `t₀`** assumed = arrival (simulator-guide §9.2), so tick 0 is consumed instantly at arrival with a `ready(timer_tick)` inside the occupancy.
+- **Identity for mocks**: `sim` = `mock@0`; `source_sha256` = SHA-256 of the committed `trace.jsonl`.
+- **`deadline` lines** are included in the media and chain traces and are never the source of `job` rows; they agree for length-one chains and disagree by design for the three-stage chain (head says met at 29900 for a frame that completed at 34600, latency 17933).
+- **Chain ids** `input`/`engine`/`display` on purpose, so the reader must take topology from WAKE targets.
+- **Media mock carries a distractor** (`clamscan`, RUN 31000 at 20000) because `c1-media`'s two players alone cannot produce backlog; labelled as reduction plus distractor.
+
+Verified in-session: an independent script recomputed occupancy sums, preemption counts, `busy`, `slack_us = due − t`, and ready-row counts from the four traces; all agree with the hand-derived rows; traces are time-ordered. Row counts 15 / 33 / 17 / 32.
