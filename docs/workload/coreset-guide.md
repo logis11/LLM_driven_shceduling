@@ -324,7 +324,7 @@ simulator와 harness가 읽는 유일한 형식. `dataset/build/coreset-single/<
 ]
 ```
 
-label이 붙은 segment 목록. `mode`는 16개 중 하나(또는 `ambiguous`), `attributes.background_wanted`는 boolean. 그 외 `background`, `initiated`, `dual_active`, `spoof`, `familiarity` 같은 key는 채점 split과 실패 분석용 annotation이고 recognizer의 답에는 없어요.
+label이 붙은 segment 목록. `mode`는 16개 중 하나(또는 `ambiguous`), `attributes.background_wanted`는 boolean. 그 외 `background`, `initiated`, `dual_active`, `spoof`(`attributes` 안)와 `familiarity`(segment 자체의 key, 적혀 있을 때만) 같은 것은 채점 split과 실패 분석용 annotation이고 recognizer의 답에는 없어요.
 
 **마지막 segment의 `t_end`가 harness의 `T_end`예요.**
 
@@ -826,7 +826,7 @@ recognizer: 0 s 두 이름. 60 s 빈 집합.
 
 **metric 계산에서 어떻게 쓰이나.** primitive에는 전혀 안 들어가요. **aggregate할 때의 split key**예요. recognition row 하나(이 query에서 mode를 맞췄나)는 정확히 하나의 ground-truth segment에 덮이고, 그 segment의 tier를 grouping label로 물려받아요. 그래서 accuracy를 전체 평균 하나로 내지 않고 "tier 1–2 이름에서 정확도", "tier 3에서", "tier 4에서", "tier 5에서"로 condition마다 따로 내요. `condition`이나 `workload_id`처럼 **묶는 기준**이지 계산하는 숫자가 아니에요. tier를 섞어 평균 내면 위의 계단이 사라져요.
 
-**지금 tier가 어디에 적혀 있나.** 명시적으로는 C5 세 파일의 segment에만(`familiarity: 3/4/5`). 나머지 파일은 annotation이 없고, coverage-grid tool이 내부 이름표(`_TIER_BY_NAME`)로 계산하며 모르는 이름은 tier 5로 쳐요. 그리고 **compiler가 이 annotation을 떨어뜨려요** — compiled `ground_truth`에는 `mode`, `attributes`, `t_start`, `t_end`뿐이에요. 그래서 grader가 읽는 파일에는 split 기준이 없어요. 12장의 열린 항목이 이거예요.
+**지금 tier가 어디에 적혀 있나.** 명시적으로는 C5 세 파일의 segment에만(`familiarity: 3/4/5`). 나머지 파일은 annotation이 없고, coverage-grid tool이 내부 이름표(`_TIER_BY_NAME`)로 계산하며 모르는 이름은 tier 5로 쳐요. 2026-09-08부터 compiler가 이 annotation을 `ground_truth`의 segment key로 그대로 실어 보내요 — author가 적은 경우에만이고, 안 적었으면 key 자체가 없어요(grid tool의 추정값은 싣지 않아요). 그래서 C5 세 파일의 compiled `ground_truth`에는 `familiarity: 3/4/5`가 있고, 나머지 21개 파일에는 없어요. grader는 이 key로 accuracy를 tier별로 묶어요. 어느 segment에 annotation을 더 달지(tier 1 기준선으로 `c1-media`가 자연스러운 첫 후보)는 열린 항목이에요(12장).
 
 ---
 
@@ -934,7 +934,7 @@ recipe는 `dataset/timelines/coreset/*.variant.yaml` 넷(`c2-pairs`, `c4`, `c5`,
 - C1에서 파생된 8개 파일(`c4-*`, `c5-*`, `c6-fold`, `c6-spoof`)의 `demand: calibration`은 variant recipe에 적힌 게 아니라 base의 `meta`를 통째로 복사해서 상속된 거예요. `c6-spoof`(0.95)가 그 덕에 window 검사를 피하고 있어요. 명시적 선언으로 바꿀지 상속을 허용한다고 spec을 고칠지 미결. C6는 내부적으로 calibration 둘 + oversubscribed 하나라 논문 표에 각주 필요.
 - `wineserver`를 `system-daemon`으로 두는 건 provisional. LAVD는 wine을 게임 task graph의 일부로 봐요. constructor 구현 때 결정.
 - TIMER의 t₀(등장 시각 vs 전역 0)는 simulator의 미결 질문. `c3-evening`처럼 TIMER task가 중간에 등장하는 파일에서 영향.
-- familiarity tag가 파일별(`c5-*`의 segment annotation)로만 있고 이름별로는 없어요. 게다가 compiler가 annotation을 `ground_truth`로 넘기지 않아서 grader가 읽는 파일에는 tier가 없어요(10장 C5 참고). Phase 5의 5.2에서 split을 정의하기 전에 결정할 것: compile 시 `ground_truth`로 실어 보낼지, grader가 timeline을 읽을지, 파일 단위로 정할지.
+- familiarity tag는 2026-09-08부터 compile을 통과해 `ground_truth`에 실려요(`dataset/schema/workload.schema.json`의 optional 필드; C5 세 파일의 hash가 바뀜). 남은 것: C5 밖의 segment에 annotation을 달지 — `c1-media`가 tier 1 기준선으로 자연스러운 첫 후보예요. 이름별 tag는 여전히 없고, 파일(segment) 단위예요.
 - `random` condition이 무엇에서 uniform하게 뽑는지(16 mode? 32 row?) 미정. 박이안과.
 
 ---

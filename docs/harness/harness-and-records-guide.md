@@ -2,7 +2,7 @@
 
 > Status: draft · Created 2026-09-08 · Updated 2026-09-08
 
-이 문서는 **공부용 문서**예요. Phase 5(primitive metrics and the records pipeline)를 직접 수행하기 위해, harness가 무엇을 읽고 무엇을 쓰는지, `records`의 row 하나가 무슨 뜻인지, 그리고 그 위에 어떤 score가 올라가는지를 OS/시스템 지식이 거의 없는 사람 기준으로 바닥부터 풀어 쓴 거예요. 규범적(normative)인 정의는 Phase 5의 sub-task 5.2에서 쓰게 될 metrics doc이 갖고, 이 문서는 그 문서를 읽고 쓸 수 있게 만드는 다리예요.
+이 문서는 **공부용 문서**예요. Phase 5(primitive metrics and the records pipeline)를 직접 수행하기 위해, harness가 무엇을 읽고 무엇을 쓰는지, `records`의 row 하나가 무슨 뜻인지, 그리고 그 위에 어떤 score가 올라가는지를 OS/시스템 지식이 거의 없는 사람 기준으로 바닥부터 풀어 쓴 거예요. 규범적(normative)인 정의는 `docs/harness/metrics.md`(metrics doc)가 갖고, 이 문서는 그 문서를 읽을 수 있게 만드는 다리예요. 둘이 다르면 metrics doc이 맞아요.
 
 읽는 규칙 두 가지. 첫째, term은 영어 그대로 써요. `ready_wait`, `entity`, `trace`, `records` 같은 말은 번역하지 않아요. 둘째, 다른 문서를 가리킬 때 절 번호 대신 내용으로 말해요. "data-contracts 문서의 trace 절"처럼요.
 
@@ -302,7 +302,7 @@ records는 long format이에요. 이유는 셋.
 2. 손으로 계산한 expected value가 그대로 CSV fixture가 돼요. review에서 diff로 보고, CI에서 byte 비교해요.
 3. row 하나가 self-contained라서 실험 matrix 전체를 그냥 이어 붙일 수 있어요.
 
-### 6.2 column 18개
+### 6.2 column 19개
 
 세 묶음이에요.
 
@@ -326,7 +326,7 @@ records는 long format이에요. 이유는 셋.
 | `t` | **언제**의 일인가 (anchor time, µs) |
 | `value` | **얼마**였나 |
 
-**attribute 8개** — metric에 따라 채워지는 부가 정보. 해당 없으면 빈칸.
+**attribute 9개** — metric에 따라 채워지는 부가 정보. 해당 없으면 빈칸.
 
 | column | 어느 metric이 채우나 | 뜻 |
 |---|---|---|
@@ -338,6 +338,7 @@ records는 long format이에요. 이유는 셋.
 | `predicted` | `mode_correct`, `attr_correct` | recognizer가 뭐라고 답했나 |
 | `truth` | `mode_correct`, `attr_correct` | 정답이 뭐였나 |
 | `validation` | recognizer row | validator가 그 답을 어떻게 처리했나 |
+| `familiarity` | recognizer row | 이 query를 덮는 segment의 familiarity tier (segment에 적혀 있을 때만). accuracy를 tier별로 나눠 볼 때 묶는 기준 |
 
 ### 6.3 `entity`는 어디서 나온 말인가
 
@@ -645,7 +646,7 @@ run-to-run consistency(같은 snapshot에 매번 같은 답을 하나)는 같은
 
 ## 9. observation window — `T_end` 규칙
 
-모든 primitive는 `[0, T_end]` 안에서 측정돼요. `T_end`는 run file의 마지막 segment의 끝.
+모든 primitive는 `[0, T_end]` 안에서 측정돼요. `T_end`는 run file에서 가장 늦은 pinned 시각 — arrive, depart, wake event 중 최대. run file에는 `ground_truth`가 없으니 이게 유일한 출처이고, coreset에서는 마지막 segment의 끝과 같아요.
 
 - `t > T_end`인 observation은 버려요. `ready`가 `T_end` 뒤면 row 없음.
 - CPU 회계는 `T_end`에서 잘라요. `T_end`에 열려 있는 occupancy interval은 `T_end`까지만 세요.
@@ -785,7 +786,7 @@ hog:
 | `hog, demand, 100000, 80000` |
 | `hog, preempt_count, 100000, 1` |
 
-task 전체에 대한 값의 `t`는 `T_end`로 적었어요. `completed=1`이면 `t`는 `task_end`의 시각이에요. 이 anchor 규칙은 spec에 "completed는 그 시각에"라고만 있고 나머지는 5.2에서 확정해요.
+task 전체에 대한 값의 `t`는 `T_end`로 적었어요. `completed=1`이면 `t`는 `task_end`의 시각이에요. 이 anchor 규칙은 5.1에서 확정됐어요: window 전체에 대한 값(`cpu_delivered`, `demand`, `preempt_count`, `busy`, 그리고 0인 `completed`)은 `T_end`, `completed=1`과 `turnaround`는 `task_end`의 시각.
 
 **`config_interval`** — `config_applied` 2개 → row 2개.
 
@@ -803,26 +804,26 @@ task 전체에 대한 값의 `t`는 `T_end`로 적었어요. `completed=1`이면
 ### 10.5 완성된 expected CSV
 
 ```
-workload_id,condition,table,seed,sim,source_sha256,entity,metric,t,value,cause,provenance,algorithm,index,period_us,predicted,truth,validation
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,ready_wait,0,0,arrive,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,ready_wait,10000,0,wake,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,ready_wait,22000,0,wake,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,ready_wait,40000,0,arrive,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,ready_wait,45000,1000,wake,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,cpu_delivered,100000,9000,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,completed,100000,0,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,demand,100000,9000,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,preempt_count,100000,0,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,cpu_delivered,100000,58000,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,completed,100000,0,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,demand,100000,80000,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,preempt_count,100000,1,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,schedule,config_interval,0,40450,,fallback,MLFQ,0,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,schedule,config_interval,40450,59550,,unmodified,MLFQ,1,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,lane,busy,100000,67000,,,,,,,,
+workload_id,condition,table,seed,sim,source_sha256,entity,metric,t,value,cause,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,ready_wait,0,0,arrive,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,ready_wait,10000,0,wake,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,ready_wait,22000,0,wake,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,ready_wait,40000,0,arrive,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,ready_wait,45000,1000,wake,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,cpu_delivered,100000,9000,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,completed,100000,0,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,demand,100000,9000,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,preempt_count,100000,0,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,cpu_delivered,100000,58000,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,completed,100000,0,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,demand,100000,80000,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,preempt_count,100000,1,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,schedule,config_interval,0,40450,,fallback,MLFQ,0,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,schedule,config_interval,40450,59550,,unmodified,MLFQ,1,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,lane,busy,100000,67000,,,,,,,,,
 ```
 
-row의 순서(entity별? metric별? t별?)는 5.2에서 정해요. byte 비교를 하려면 정해져 있어야 해요.
+row의 순서는 정해져 있어요: `entity`, `metric`, `t`(숫자), `cause` 순. 위 표는 계산 순서대로 적은 것이라 정렬 전이에요. `<sha>` 자리에는 실제 fixture에서 trace 파일의 sha256이 그대로 들어가고, 마지막 `familiarity` column은 recognizer row에만 쓰이니 여기서는 전부 빈칸이에요.
 
 ### 10.6 이 records에서 읽히는 것
 
