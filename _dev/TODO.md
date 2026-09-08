@@ -60,7 +60,14 @@ Execution order: 5.1 → 5.2 ∥ 5.3 → 5.4.
 - [x] **5.4** Primitives + records output — `ready_wait`, `job` with chain reconstruction, lifetime rows, `config_interval`, `preempt_count`, `busy`; CSV writer + machine schema beside the code; CI workflow; byte-for-byte match against 5.1's expected CSVs
 
 ### Phase 6 [WIP] — Driver table v0 and the scoring spec
-Stage 3. Scope the rows C1–C4 exercise; write v0 with one-sentence justifications; the Layer-2 scoring spec (C2 pair weighting, `c1-compile` trade-off, `c1-media` audio/video weighting); fill the remaining rows with defaults; pair review of same-mode `wanted=true/false` rows for distinctness.
+Stage 3 plus the harness side of the 2026-09-08 switch-semantics memo. Spec: `_dev/docs/spec/jioh/phase-6-driver-table-v0-and-scoring-spec.md`. Branch: `jioh/driver-table-v0`.
+
+Execution order: 6.1 → 6.2 → 6.3 → 6.4.
+
+- [ ] **6.1** Switch overhead — `switch_window` primitive in the metrics doc and in code; `hogs` records column; the two aggregates (per-switch excess wake `ready_wait`, switch and boost variants; share of the window inside switch windows); FIFO → MLFQ mock fixture with hand-computed values; `x_mlfq_level` check tool beside the harness; boost-timer restart at `t_apply` as a stated assumption
+- [ ] **6.2** Scoring spec — the terms and weights locked in the spec (P99 / miss rate / progress / makespan; C2 window 60 s–`T_end`; derived files equal their base; `c6-dual` two foregrounds; `c1-idle` none) as YAML in the harness tree with schema, lint (entity exists in the compiled workload, legal metric/aggregate pairs, fixed direction, positive weights, windows in range, derived-equals-base), tests, CI; metrics doc pointer, docs index, harness study guide
+- [ ] **6.3** Prior table — all 32 rows, any algorithm by theory, `basis: theory`, one sentence on row and entry, references ids only where they exist; `make -C daemon lint` green
+- [ ] **6.4** Pair review — the 16 same-mode pairs and the three C2 row-pairs as exercised (`ml-train/true`–`indexing/false`, `gaming/true`–`gaming/false`, `render/true`–`backup/true`); one sentence each naming the knob, the scored term it moves, and agreement with the weights; fixes fed back into 6.3; recorded in the phase archive with the intended file classification for Phase 7
 
 ### Phase 7 — Harness upper half through pre-registration
 Stages 4–5. Scorer, guards, L1 grader, mock daemon + mock simulator with the full pipeline run on mocks, runner with execution cache, report with provenance. Ends at the committed gate spec: judging set, threshold, `random` draw definition and seed count (with 박이안), failure procedure, frozen scoring spec.
