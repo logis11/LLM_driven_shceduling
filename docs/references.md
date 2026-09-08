@@ -307,8 +307,3 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - cite: Shneiderman, B. (1984). Response Time and Display Rate in Human Performance with Computers. *ACM Computing Surveys*, 16(3), 265–285. DOI 10.1145/2514.2517. PDF: cs.umd.edu/users/ben/papers/Shneiderman1984Response.pdf (accessed 2026-09-08).
 - role: the range beside the threshold (harness/metrics.md §10): reporting Long [1976], "delays of approximately 0.1–0.5 second in the time for a keystroke to produce a character on an impact printer … unskilled and skilled typists worked more slowly and made more errors with longer response times. Even these brief delays were distracting in the rapid process of typing." A review reporting a primary study; cite as Shneiderman's report of Long, never as Long directly.
 - status: verified (2026-09-08; PDF text read; volume/issue from the running foot)
-
-### `card-chi91`
-- cite: Card, S. K., Robertson, G. G., & Mackinlay, J. D. (1991). The Information Visualizer, an Information Workspace. *Proc. SIGCHI Conference on Human Factors in Computing Systems (CHI '91)*, New Orleans, 181–186. ACM Press. DOI 10.1145/108844.108874.
-- role: the second source Nielsen's excerpt names for the 0.1 s limit (`nielsen-ue93`). Coordinates verified through Crossref and OpenAlex; the text has not been read — no open copy was reachable (ACM DL 403; no OA location listed). Until it is read, cite it only as "the source Nielsen names", never for a time constant in its own words.
-- status: to-pin (2026-09-08; identification certain; passage unverified — obtain the PDF through library access and upgrade to verified)
