@@ -73,3 +73,15 @@ def test_demand_estimate(fixture_path, library):
     _, _, report = compiled(fixture_path, library, "fx-oversub.timeline.yaml")
     # cpu-batch 66s/60s + audio duty 2500/50000 = 1.10 + 0.05
     assert abs(report["utilization"] - 1.15) < 0.005
+
+
+def test_familiarity_annotation_carried_into_ground_truth(fixture_path, library,
+                                                          schema):
+    # authored on the segment -> present in ground_truth, and schema-clean
+    _, canonical, report = compiled(fixture_path, library,
+                                    "fx-mixed.timeline.yaml")
+    assert canonical["ground_truth"][0]["familiarity"] == 3
+    assert lint_canonical(canonical, schema, report=report, mode="single") == []
+    # not authored -> the key is absent, never null or derived
+    _, canonical, _ = compiled(fixture_path, library, "fx-game.timeline.yaml")
+    assert all("familiarity" not in s for s in canonical["ground_truth"])

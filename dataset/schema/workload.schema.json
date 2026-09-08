@@ -62,6 +62,12 @@
             "description": "Mode attributes (e.g. wanted): flat scalar map.",
             "type": "object",
             "additionalProperties": {"type": ["string", "number", "boolean"]}
+          },
+          "familiarity": {
+            "description": "Familiarity tier of the segment's process names, 1 (transparent) to 5 (nonexistent-opaque). Carried from the timeline's authored annotation only; absent when not authored. A reporting split key for the grader, never a recognizer input.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
           }
         }
       }
