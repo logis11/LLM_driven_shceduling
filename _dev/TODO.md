@@ -49,7 +49,7 @@ Execution order: 4.1 → 4.2 → 4.3.
 - [x] **4.2** Driver table contract — JSON schema + lint (structure, legality, byte-identical `wanted` pairs, calibrated-full) with tests and fixtures in the daemon tree; `data-contracts` driver-table section with the row structure and an example; proposal contract frozen with the `llm_algo` read-scope rule; changelog
 - [x] **4.3** Doc corrections — proposal §5.2 / §4.6 + RQ3 (delegation rung reframed; prior/calibrated naming; held-out-rows arm as a proposal) / §8.2 decision 3; `daemon-guide` §5 mapper steps; vocabulary variant row; terminology; archive note superseding Q4's row shape
 
-### Phase 5 [WIP] — Primitive metrics and the records pipeline
+### Phase 5 [done] — Primitive metrics and the records pipeline
 Stages 1–2. Spec: `_dev/docs/spec/jioh/phase-5-primitive-metrics-and-records.md`. Branch: `jioh/primitive-metrics`.
 
 Execution order: 5.1 → 5.2 ∥ 5.3 → 5.4.
