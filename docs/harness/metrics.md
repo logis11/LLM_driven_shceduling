@@ -135,7 +135,7 @@ A chain stage's WAIT completing is also `cause = wake`; the trace does not name 
 
 One row per tick inside the window whose completion is also inside it. Entity = the chain head (for a single-stage task, the task itself). `t` = the tick. `value` = completion − tick. `period_us` on the row.
 
-**How it is computed.** Ticks are the head's `ready(cause = timer_tick)` lines. A stage's k-th iteration ends at its k-th `run_end` with reason `block`, `exit`, or `depart` — or, when the next iteration began without blocking, at the k+1-th `ready` line of that stage. The reader pairs iterations by index, which is valid because wakes queue with depth (§11).
+**How it is computed.** The head's k-th `ready(cause = timer_tick)` line marks the consumption of tick k; the tick itself is `t₀ + k·period` on the TIMER grid, `t₀` being the task's arrival (§11, assumption 4); a tick is consumed late whenever the lane was busy or the task was in backlog, so the line's time is never taken as the tick's. A stage's k-th iteration ends at its k-th `run_end` with reason `block`, `exit`, or `depart` — or, when the next iteration began without blocking, at the k+1-th `ready` line of that stage. The reader pairs iterations by index, which is valid because wakes queue with depth (§11).
 
 **Guard.** For every chain, the tail's iteration count equals the head's tick count; a shortfall means a wake was lost. For a length-one chain, each `job` row must agree with the simulator's `deadline` line for that job (`slack_us = period_us − value`). `deadline` lines are never the source of a `job` row; for a chain longer than one they measure the head stage alone and are expected to differ from frame latency.
 
