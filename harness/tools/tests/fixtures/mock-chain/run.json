@@ -1,0 +1,97 @@
+{
+ "workload_id": "mock-chain",
+ "events": [
+  {
+   "op": "arrive",
+   "t": 0,
+   "id": "input",
+   "name": "game.exe",
+   "depart": 50000,
+   "program": [
+    {
+     "op": "LOOP",
+     "count": "unbounded",
+     "body": [
+      {
+       "op": "TIMER",
+       "period_us": 16667
+      },
+      {
+       "op": "RUN",
+       "us": 900
+      },
+      {
+       "op": "WAKE",
+       "target": "engine"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "op": "arrive",
+   "t": 0,
+   "id": "engine",
+   "name": "game.exe",
+   "depart": 50000,
+   "program": [
+    {
+     "op": "LOOP",
+     "count": "unbounded",
+     "body": [
+      {
+       "op": "WAIT",
+       "channel": "chain:engine"
+      },
+      {
+       "op": "RUN",
+       "us": 2600
+      },
+      {
+       "op": "WAKE",
+       "target": "display"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "op": "arrive",
+   "t": 0,
+   "id": "display",
+   "name": "game.exe",
+   "depart": 50000,
+   "program": [
+    {
+     "op": "LOOP",
+     "count": "unbounded",
+     "body": [
+      {
+       "op": "WAIT",
+       "channel": "chain:display"
+      },
+      {
+       "op": "RUN",
+       "us": 2100
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "op": "arrive",
+   "t": 15000,
+   "id": "hog",
+   "name": "7z",
+   "program": [
+    {
+     "op": "RUN",
+     "us": 14000
+    },
+    {
+     "op": "EXIT"
+    }
+   ]
+  }
+ ]
+}
