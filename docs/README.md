@@ -1,6 +1,6 @@
 # Docs index
 
-> Status: normative · Created 2026-08-27 · Updated 2026-09-07
+> Status: normative · Created 2026-08-27 · Updated 2026-09-08
 
 Prose only, organized by domain — one `##` section per area below, the full index table at the bottom. Statuses: **normative** (states what is; kept current) · **draft** (content real, form not final) · **record** (append-only history; never rewritten). Decision history lives in `_dev/archive/`; machine-read files live outside `docs/` (see the placement rule in `CLAUDE.md`).
 
@@ -48,10 +48,13 @@ How the dataset was designed and grounded. Reading order: building-plan → arch
 - [workload/scenario-catalog.md](workload/scenario-catalog.md) — which processes co-occur (S1–S18) and their taxonomy sources
 - [workload/grounding-sources.md](workload/grounding-sources.md) — which source may justify which kind of claim (roles A–D)
 - [workload/source-vetting.md](workload/source-vetting.md) — per-source verdicts and extracted numbers
+- [workload/coreset-guide.md](workload/coreset-guide.md) — 공부용 (Korean): the three layers, the twelve archetypes, how compile works, and all 24 coreset files with their compiled numbers
 
 ## Harness (`harness/`)
 
-Reserved — no docs yet; the experiment-harness docs land here when that work starts.
+The experiment harness: trace → records → scores. The normative metrics doc lands here with Phase 5's sub-task 5.2; until then the study guide below is the reading path.
+
+- [harness/harness-and-records-guide.md](harness/harness-and-records-guide.md) — 공부용 (Korean): what the harness reads and writes, every primitive with worked examples, three mock traces computed by hand, and what sits on top of records
 
 ## Memos (`memos/`)
 
@@ -80,5 +83,7 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 | [workload/scenario-catalog.md](workload/scenario-catalog.md) | which processes co-occur and their sources | normative |
 | [workload/grounding-sources.md](workload/grounding-sources.md) | which source may justify which claim | normative |
 | [workload/source-vetting.md](workload/source-vetting.md) | per-source verdicts and extracted numbers | record |
+| [workload/coreset-guide.md](workload/coreset-guide.md) | 공부용: every coreset file explained, with compiled numbers | draft |
+| [harness/harness-and-records-guide.md](harness/harness-and-records-guide.md) | 공부용: harness, records, primitives, mocks by hand, scores | draft |
 | [memos/2026-09-07-trace-clarifications-for-the-simulator.md](memos/2026-09-07-trace-clarifications-for-the-simulator.md) | to 인경민: what the harness needs from the trace, and why | memo |
 | [memos/2026-09-07-repeat-samples-for-the-daemon.md](memos/2026-09-07-repeat-samples-for-the-daemon.md) | to 박이안: the repeat index consistency needs from the log | memo |
