@@ -28,7 +28,7 @@ A single normative doc with a changelog section opens the Harness section of `do
 
 ### 4. Records schema
 
-CSV, one file per trace, every row self-contained. Identity columns: `workload_id`, `condition`, `table` (prior or calibrated; empty for `fixed`), `seed`, `sim`, `source_sha256` (the trace or log the row came from). Observation columns: `entity`, `metric`, `t`, `value`. Nullable attribute columns, filled per metric: `cause`, `provenance`, `algorithm`, `index`, `period_us`, `predicted`, `truth`, `validation`. Entities are task ids from the trace plus the reserved names `lane`, `schedule`, and `recognizer`; the reader refuses a trace whose task id collides with a reserved name. The schema is described in the doc and enforced by a machine schema beside the harness code; it is not a data contract.
+CSV, one file per trace, every row self-contained. Identity columns: `workload_id`, `condition`, `table` (prior or calibrated; empty for `fixed`), `seed`, `sim`, `source_sha256` (the trace or log the row came from). Observation columns: `entity`, `metric`, `t`, `value`. Nullable attribute columns, filled per metric: `cause`, `provenance`, `algorithm`, `index`, `period_us`, `predicted`, `truth`, `validation`, and `familiarity` (recognition rows: the covering segment's tier, carried through compilation into `ground_truth` — decided after the grill, 5.2). Entities are task ids from the trace plus the reserved names `lane`, `schedule`, and `recognizer`; the reader refuses a trace whose task id collides with a reserved name. The schema is described in the doc and enforced by a machine schema beside the harness code; it is not a data contract.
 
 ### 5. Observation window
 
