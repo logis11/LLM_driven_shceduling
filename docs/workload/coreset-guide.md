@@ -820,6 +820,14 @@ recognizer: 0 s 두 이름. 60 s 빈 집합.
 
 **주의 (t3):** `baloo_file`과 `tracker-miner-fs-3`는 **실제로는 indexer**인데 여기서는 동영상/음악 player처럼 행동해요. 이름이 행동을 오도하는 tier예요. whitelist는 t4, t5에서 구조적으로 0점(등록할 이름이 없음). tier 4와 5를 나눈 이유는 "corpus에서 본 적 있는가"와 "단어 조합으로 추론하는가"를 분리하려고.
 
+**familiarity란 무엇인가.** process **이름**이 language model에게 얼마나 알아볼 만한가를 나타내는 등급이에요. 행동과는 무관하고, 오직 이름의 속성이에요. 기준은 사람이 아니라 **corpus**예요 — "model이 학습 데이터에서 이 이름을 봤을 법한가". 그래서 `soffice.bin`은 사람에게는 낯설어도 corpus에는 충분히 있으니 tier 2이고, `video-playback-svc`는 세상에 없는 이름이지만 단어 뜻으로 추론이 되니 tier 4예요.
+
+**왜 필요한가.** research-claims 문서는 whitelist가 실패하는 이유를 둘로 나눠요. 하나는 조합(같은 process가 옆에 뭐가 있느냐에 따라 뜻이 다름, C2가 검사), 다른 하나는 **세상 지식**(등록된 적 없는 소프트웨어는 목록에 없음). 두 번째를 검사하는 게 tier 4–5예요. whitelist는 거기서 구조적으로 0점이고, model은 tier 4는 읽고 tier 5는 못 읽을 것으로 예측해요. 이 계단 모양이 예측대로 나오는 게 증거예요.
+
+**metric 계산에서 어떻게 쓰이나.** primitive에는 전혀 안 들어가요. **aggregate할 때의 split key**예요. recognition row 하나(이 query에서 mode를 맞췄나)는 정확히 하나의 ground-truth segment에 덮이고, 그 segment의 tier를 grouping label로 물려받아요. 그래서 accuracy를 전체 평균 하나로 내지 않고 "tier 1–2 이름에서 정확도", "tier 3에서", "tier 4에서", "tier 5에서"로 condition마다 따로 내요. `condition`이나 `workload_id`처럼 **묶는 기준**이지 계산하는 숫자가 아니에요. tier를 섞어 평균 내면 위의 계단이 사라져요.
+
+**지금 tier가 어디에 적혀 있나.** 명시적으로는 C5 세 파일의 segment에만(`familiarity: 3/4/5`). 나머지 파일은 annotation이 없고, coverage-grid tool이 내부 이름표(`_TIER_BY_NAME`)로 계산하며 모르는 이름은 tier 5로 쳐요. 그리고 **compiler가 이 annotation을 떨어뜨려요** — compiled `ground_truth`에는 `mode`, `attributes`, `t_start`, `t_end`뿐이에요. 그래서 grader가 읽는 파일에는 split 기준이 없어요. 12장의 열린 항목이 이거예요.
+
 ---
 
 ### C6 — resolution limits (미리 약속된 miss)
@@ -926,7 +934,7 @@ recipe는 `dataset/timelines/coreset/*.variant.yaml` 넷(`c2-pairs`, `c4`, `c5`,
 - C1에서 파생된 8개 파일(`c4-*`, `c5-*`, `c6-fold`, `c6-spoof`)의 `demand: calibration`은 variant recipe에 적힌 게 아니라 base의 `meta`를 통째로 복사해서 상속된 거예요. `c6-spoof`(0.95)가 그 덕에 window 검사를 피하고 있어요. 명시적 선언으로 바꿀지 상속을 허용한다고 spec을 고칠지 미결. C6는 내부적으로 calibration 둘 + oversubscribed 하나라 논문 표에 각주 필요.
 - `wineserver`를 `system-daemon`으로 두는 건 provisional. LAVD는 wine을 게임 task graph의 일부로 봐요. constructor 구현 때 결정.
 - TIMER의 t₀(등장 시각 vs 전역 0)는 simulator의 미결 질문. `c3-evening`처럼 TIMER task가 중간에 등장하는 파일에서 영향.
-- familiarity tag가 파일별(`c5-*`의 segment annotation)로만 있고 이름별로는 없어요. familiarity split을 정의하기 전에 확인 필요.
+- familiarity tag가 파일별(`c5-*`의 segment annotation)로만 있고 이름별로는 없어요. 게다가 compiler가 annotation을 `ground_truth`로 넘기지 않아서 grader가 읽는 파일에는 tier가 없어요(10장 C5 참고). Phase 5의 5.2에서 split을 정의하기 전에 결정할 것: compile 시 `ground_truth`로 실어 보낼지, grader가 timeline을 읽을지, 파일 단위로 정할지.
 - `random` condition이 무엇에서 uniform하게 뽑는지(16 mode? 32 row?) 미정. 박이안과.
 
 ---
@@ -960,6 +968,7 @@ recipe는 `dataset/timelines/coreset/*.variant.yaml` 넷(`c2-pairs`, `c4`, `c5`,
 | **lane scaling** | `-single` compile의 scale pass. game-task-chain에만 적용 |
 | **utilization** | Σ RUN / T_end. 파일이 lane을 얼마나 요구하나 |
 | **demand class** | `oversubscribed`(1.0–1.5 window 검사) 또는 `calibration`(면제) |
+| **familiarity** | process 이름이 corpus에서 얼마나 알아볼 만한가, 1–5 tier. 이름의 속성, 행동과 무관. recognition accuracy를 묶어서 보고하는 split key. 명시 annotation은 C5 segment에만 |
 | **seed** | timeline의 난수 seed. 모든 draw를 결정 |
 | **per-task / per-iteration / per-instance** | sampling 단위 |
 | **unroll** | bounded 반복을 구체적 값으로 펼치는 것 |
