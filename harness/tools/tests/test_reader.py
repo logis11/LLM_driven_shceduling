@@ -190,10 +190,11 @@ def test_spawn_table_children_are_tasks_with_demand(tmp_path):
     run = read_run_file(p)
     assert run.t_end == 5000
     assert run.tasks["build"].demand == 200
-    assert run.tasks["build.c1"].demand == 500 and run.tasks["build.c1"].spawned
+    assert run.tasks["build.c1"].demand == 500
+    assert run.tasks["build.c1"].arrive is None      # a spawn-table child has no pinned arrival
     assert run.tasks["build.c2"].demand == 705
     assert run.tasks["editor"].demand == 120                 # bounded LOOP
-    assert run.tasks["build"].spawned is False
+    assert run.tasks["build"].arrive == 0
 
 
 def test_reserved_task_id_in_run_file_is_refused(tmp_path):

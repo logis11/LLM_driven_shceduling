@@ -146,12 +146,11 @@ def read_trace(path) -> Trace:
 class TaskInfo:
     id: str
     name: str
-    arrive: Optional[int]          # pinned arrival; None for spawned children
+    arrive: Optional[int]          # pinned arrival; None for a spawn-table child (contract §5: spawned)
     depart: Optional[int]          # pinned depart for segment-bound tasks
     demand: Optional[int]          # total RUN work; None when unbounded
     period_us: Optional[int]       # the TIMER period, when the program has one
     wake_targets: List[str] = field(default_factory=list)
-    spawned: bool = False
 
 
 @dataclass
@@ -188,7 +187,7 @@ def _run_total(program) -> Optional[int]:
     return total
 
 
-def _task_info(tid, name, program, arrive=None, depart=None, spawned=False):
+def _task_info(tid, name, program, arrive=None, depart=None):
     if tid in RESERVED_ENTITIES:
         raise RunFileError(f"task id {tid!r} is a reserved entity name")
     period = next((int(op["period_us"]) for op in _walk(program)
@@ -196,7 +195,7 @@ def _task_info(tid, name, program, arrive=None, depart=None, spawned=False):
     targets = [op["target"] for op in _walk(program) if op.get("op") == "WAKE"]
     return TaskInfo(id=tid, name=name, arrive=arrive, depart=depart,
                     demand=_run_total(program), period_us=period,
-                    wake_targets=targets, spawned=spawned)
+                    wake_targets=targets)
 
 
 def read_run_file(path) -> RunFile:
@@ -222,8 +221,7 @@ def read_run_file(path) -> RunFile:
                 cid = child["id"]
                 if cid in tasks:
                     raise RunFileError(f"duplicate task id {cid!r}")
-                tasks[cid] = _task_info(cid, child["name"], child["program"],
-                                        spawned=True)
+                tasks[cid] = _task_info(cid, child["name"], child["program"])
         elif op == "wake":
             pinned.append(int(ev["t"]))
             wakes[ev["target"]] = wakes.get(ev["target"], 0) + 1
