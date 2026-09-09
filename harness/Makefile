@@ -1,7 +1,8 @@
 PY ?= python3
 
-lint:               ## every fixture pair (run file + trace) parses under the frozen contracts
+lint:               ## fixture pairs under the frozen contracts; the scoring spec against schema, coreset, recipes
 	$(PY) tools/lint.py
+	$(PY) tools/scoring_lint.py
 
 test:               ## reader / primitives / records tests
 	$(PY) -m pytest tools/tests -q

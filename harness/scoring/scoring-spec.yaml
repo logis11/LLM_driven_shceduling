@@ -1,0 +1,135 @@
+# Scoring spec — how each coreset file's records are valued (Phase 6 spec,
+# decisions 5–15; vocabulary: docs/harness/metrics.md §6, §8, §9).
+#
+# One term: entity (a task id from the compiled workload, or lane/schedule),
+# metric (the primitive), cause (ready_wait filter), window (a filter on t; absent
+# = the whole file), aggregate, direction (fixed by the aggregate), weight.
+# A file's score = the weighted sum of its terms' normalised shares
+# (fixed − condition)/(fixed − oracle), sign by direction, per aggregate.
+# Every other aggregate of metrics doc §8 is reported beside the score, unweighted.
+#
+# This file carries terms only. Which files judge, report, are read as deltas,
+# or are excluded from aggregation is the gate spec's (Phase 7). c1-idle has no
+# entry: no performance metric. A derived file declares `base` and repeats the
+# base's terms verbatim (the lint checks both against dataset/timelines/coreset).
+#
+# Expected "no headroom" (metrics doc §9 floors), stated here so it is not
+# discovered later: c1-media and C5 — no legal configuration can miss a tick
+# (video needs > 10 ms of wait, music can cause 2.5 ms; music needs > 47.5 ms,
+# video can cause 6.67 ms); c3-evening's media segment likewise; c3-creation's
+# batch progress — HandBrake runs uncontended after 240 s, so the cap never bites.
+# c1-media's 1.0 : 0.5 audio : video weighting is a stated assumption (an audio
+# dropout is heard at once; a dropped frame at 60 Hz often is not).
+
+files:
+
+  # ---- C1 — single-situation calibration
+  c1-office:
+    terms:
+      - {entity: writer, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c1-browsing:
+    terms:
+      - {entity: browser, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c1-compile:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: build, metric: turnaround, aggregate: turnaround, direction: lower, weight: 1.0}
+  c1-gaming:
+    terms:
+      - {entity: game.chain.1, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: compositor, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+  c1-media:
+    terms:
+      - {entity: music, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+
+  # ---- C2 — intent pairs. Latency and frame terms over the second segment,
+  # 60 s to T_end; progress terms unwindowed (the batch task arrives at 60 s).
+  c2-p1a:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, window: {start_us: 60000000, end_us: 180000000}, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: hog, metric: cpu_delivered, aggregate: progress, direction: higher, weight: 0.5}
+  c2-p1b:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, window: {start_us: 60000000, end_us: 180000000}, aggregate: p99, direction: lower, weight: 1.0}
+  c2-p2a:
+    terms:
+      - {entity: game.chain.1, metric: job, window: {start_us: 60000000, end_us: 120000000}, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: download, metric: cpu_delivered, aggregate: progress, direction: higher, weight: 0.5}
+  c2-p2b:
+    terms:
+      - {entity: game.chain.1, metric: job, window: {start_us: 60000000, end_us: 120000000}, aggregate: miss_rate, direction: lower, weight: 1.0}
+  c2-p3a:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, window: {start_us: 60000000, end_us: 120000000}, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: bulk, metric: cpu_delivered, aggregate: progress, direction: higher, weight: 0.5}
+  c2-p3b:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, window: {start_us: 60000000, end_us: 120000000}, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: bulk, metric: cpu_delivered, aggregate: progress, direction: higher, weight: 0.25}
+
+  # ---- C3 — transition arcs. Per-task terms; focus and task lifetimes window them.
+  c3-workday:
+    terms:
+      - {entity: browser, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: writer, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: mailer, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: build, metric: cpu_delivered, aggregate: progress, direction: higher, weight: 0.5}
+  c3-evening:
+    terms:
+      - {entity: browser, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: game.chain.1, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: music, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+  c3-creation:
+    terms:
+      - {entity: photo-editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: video-editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: batch, metric: cpu_delivered, aggregate: progress, direction: higher, weight: 0.5}
+
+  # ---- C4 — distractor injection: the C1 base's terms verbatim
+  c4-office:
+    base: c1-office
+    terms:
+      - {entity: writer, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c4-compile:
+    base: c1-compile
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: build, metric: turnaround, aggregate: turnaround, direction: lower, weight: 1.0}
+  c4-gaming:
+    base: c1-gaming
+    terms:
+      - {entity: game.chain.1, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: compositor, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+
+  # ---- C5 — familiarity ladder: c1-media's terms verbatim (a differing number is a bug signal)
+  c5-t3:
+    base: c1-media
+    terms:
+      - {entity: music, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+  c5-t4:
+    base: c1-media
+    terms:
+      - {entity: music, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+  c5-t5:
+    base: c1-media
+    terms:
+      - {entity: music, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+
+  # ---- C6 — resolution limits
+  c6-spoof:
+    base: c1-browsing
+    terms:
+      - {entity: browser, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c6-fold:
+    base: c1-browsing
+    terms:
+      - {entity: browser, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c6-dual:
+    terms:
+      - {entity: game.chain.1, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}

@@ -2,7 +2,7 @@
 
 > Status: normative · Created 2026-09-08 · Updated 2026-09-09
 
-Every number the project reports is defined here. The document fixes three things: the **primitives** — the raw observations the harness computes from a trace or a recognition log; the **records** file they land in; and the **aggregates** — the statistics, the normalisation rule, and the constants that turn records into the figures the research questions ask for. Per-file weights are not here; they belong to the scoring spec (Phase 6). The code that implements the trace primitives lives in `harness/`; the grader that implements the recognition primitives is built in Phase 7 to the definitions below.
+Every number the project reports is defined here. The document fixes three things: the **primitives** — the raw observations the harness computes from a trace or a recognition log; the **records** file they land in; and the **aggregates** — the statistics, the normalisation rule, and the constants that turn records into the figures the research questions ask for. Per-file weights are not here; they are data, in the scoring spec (`harness/scoring/scoring-spec.yaml`, §2). The code that implements the trace primitives lives in `harness/`; the grader that implements the recognition primitives is built in Phase 7 to the definitions below.
 
 Changing a primitive invalidates every records file and requires recomputation from traces. Changing an aggregate, a constant, or a floor requires re-reading records only. Both kinds of change land in the changelog (§13).
 
@@ -28,7 +28,7 @@ grader(recognition_log, ground_truth, calibrated_table) → records rows   (enti
 scoring(records, scoring_spec)                    → aggregates, normalised shares, scores
 ```
 
-The first function is Phase 5's harness lower half. The second is Phase 7's grader, implementing §7. The third is Phase 6's scoring spec applied by Phase 7's scorer, using §8–§10. All three write or read the one records shape of §5.
+The first function is Phase 5's harness lower half. The second is Phase 7's grader, implementing §7. The third is Phase 7's scorer applying the **scoring spec** — `harness/scoring/scoring-spec.yaml`, with its schema and lint beside it: per coreset file, the terms (entity, primitive, `cause`, time window, aggregate, direction, weight) whose normalised shares (§9) the file's score sums — using §8–§10. All three write or read the one records shape of §5.
 
 ---
 
@@ -301,5 +301,6 @@ The definitions above, and the mock traces that test them, assume the following 
 
 Every change to a primitive, an aggregate, a constant, or a floor lands here, dated, with the sub-task that made it.
 
+- **2026-09-09 — scoring spec (jioh 6.2).** The per-file terms land as data in the harness tree (`harness/scoring/scoring-spec.yaml`, schema and lint beside it, in CI): scored aggregates are `ready_wait` P99, `job` miss rate, progress, `turnaround`; C2 latency and frame terms windowed 60 s–`T_end`; derived files carry their base's terms verbatim. §2 points at it. No primitive, aggregate, constant, or floor changed.
 - **2026-09-09 — switch overhead (jioh 6.1).** New primitive `switch_window` (§6.9) with the `hogs` attribute, the twentieth records column; the config schedule becomes the third input (§3), read by `index`; two aggregates over switch windows (§8: per-switch excess wake `ready_wait`, switch and boost variants; share inside switch windows), reported and never weighted; §11 gains 7 (boost timer restarts at `t_apply`), 8 (FIFO-outgoing rule (a)) and 9 (a same-algorithm entry applies at its stamped time), all three confirmed with 인경민 on 2026-09-09; fixture `mock-switch` and the `x_mlfq_level` check tool (§12). From the 2026-09-08 memo on algorithm-switch semantics, whose window the same day's spec session re-sized in lane time (memo §7) after the mock showed the wall-clock window closing before the hog's descent. `mock-media`'s same-instant boot + oracle pair is a switch into FIFO and gains a zero-valued row; `mock-chain` gains the same oracle FIFO entry so its scheduler matches its config line; `mock-p1a` now follows the guide's MLFQ rules (its editor falls to the bottom queue on its own bursts).
 - **2026-09-08 — first version (jioh 5.2).** Trace primitives §6, recognition primitives §7, aggregate list §8, per-aggregate normalisation with absolute floors §9, constants §10 (`T_interaction` grounded in `miller-fjcc68` and `nielsen-ue93`, with `shneiderman-csur84` on the range; floors as stated assumptions), simulator assumptions §11. Records take a `familiarity` attribute column for recognition rows, carried from `ground_truth` (data-contracts changelog, same date). The two definitions `../data-contracts.md` §9 deferred to this freeze — periodic job completion, and starvation from `ready` — are §6.2 and §6.1.

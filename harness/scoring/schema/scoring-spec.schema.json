@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "scoring-spec.schema.json",
+  "title": "Scoring spec",
+  "description": "Per-file terms over records (Phase 6 spec, decisions 5–15): each term names an entity, a primitive, a filter (cause, time window), an aggregate, a direction, and a weight; a file's score is the weighted sum of its terms' normalised shares. A derived file declares its base and carries the base's terms verbatim. Cross-checks the schema cannot express (entity exists in the compiled workload, scored metric/aggregate pairs and their direction, windows inside [0, T_end], base per the dataset's recipes) live in tools/harness/scoring.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["files"],
+  "properties": {
+    "files": {
+      "type": "object",
+      "propertyNames": {"pattern": "^c[1-6]-[a-z0-9-]+$"},
+      "additionalProperties": {"$ref": "#/$defs/file"}
+    }
+  },
+  "$defs": {
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["terms"],
+      "properties": {
+        "base": {"type": "string", "minLength": 1},
+        "terms": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/term"}}
+      }
+    },
+    "term": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entity", "metric", "aggregate", "direction", "weight"],
+      "properties": {
+        "entity": {"type": "string", "minLength": 1},
+        "metric": {"enum": ["ready_wait", "job", "cpu_delivered", "turnaround"]},
+        "cause": {"enum": ["arrive", "wake", "sleep_end", "timer_tick", "fork_slot"]},
+        "window": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start_us", "end_us"],
+          "properties": {
+            "start_us": {"type": "integer", "minimum": 0},
+            "end_us": {"type": "integer", "minimum": 1}
+          }
+        },
+        "aggregate": {"enum": ["p99", "miss_rate", "progress", "turnaround"]},
+        "direction": {"enum": ["lower", "higher"]},
+        "weight": {"type": "number", "exclusiveMinimum": 0}
+      }
+    }
+  }
+}

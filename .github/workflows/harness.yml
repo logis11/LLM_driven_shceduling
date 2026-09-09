@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -r harness/tools/requirements.txt
+      - run: pip install -r harness/tools/requirements.txt -r dataset/tools/requirements.txt
+      - run: make -C dataset dataset        # the scoring lint reads the compiled coreset
       - run: make -C harness lint
       - run: make -C harness test
