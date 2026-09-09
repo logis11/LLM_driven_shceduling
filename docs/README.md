@@ -1,6 +1,6 @@
 # Docs index
 
-> Status: normative · Created 2026-08-27 · Updated 2026-09-08
+> Status: normative · Created 2026-08-27 · Updated 2026-09-09
 
 Prose only, organized by domain — one `##` section per area below, the full index table at the bottom. Statuses: **normative** (states what is; kept current) · **draft** (content real, form not final) · **record** (append-only history; never rewritten). Decision history lives in `_dev/archive/`; machine-read files live outside `docs/` (see the placement rule in `CLAUDE.md`).
 
@@ -38,6 +38,7 @@ Reading order: background-guide → simulator-guide → data-contracts → inter
 Reading order: background-guide → daemon-guide → data-contracts.
 
 - [daemon/daemon-guide.md](daemon/daemon-guide.md) — what the daemon must do, what's decided, what's the builder's to decide
+- [daemon/prior-table-pair-review.md](daemon/prior-table-pair-review.md) — the pre-execution check on the prior driver table: nineteen written judgements (16 same-mode pairs, 3 C2 row-pairs) naming the knob, the scored term it moves, and the direction; its findings
 
 ## Workload (`workload/`)
 
@@ -64,6 +65,7 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 - [memos/2026-09-07-trace-clarifications-for-the-simulator.md](memos/2026-09-07-trace-clarifications-for-the-simulator.md) — to 인경민: the `ready`-line rule, the §9 positions the harness assumes, frame latency for the chain, the workload's end
 - [memos/2026-09-07-repeat-samples-for-the-daemon.md](memos/2026-09-07-repeat-samples-for-the-daemon.md) — to 박이안: the repeat index run-to-run consistency needs from the recognition log
 - [memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md](memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md) — to 인경민: what happens to the task queue, the running task, and scheduler state when a config with a different algorithm lands mid-run, and how the MLFQ re-learning overhead is measured
+- [memos/2026-09-09-batch-class-rule-for-the-simulator.md](memos/2026-09-09-batch-class-rule-for-the-simulator.md) — to 인경민: which tasks `batch_bandwidth_cap` applies to — the behavioural rule (one full slice since the last voluntary block; the periodic class never), worked task by task, and why a wrong rule flips the gaming rows
 
 ## Full index
 
@@ -80,6 +82,7 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 | [simulator/simulator-guide.md](simulator/simulator-guide.md) | what the simulator must do; what's the builder's to decide | normative |
 | [simulator/interpretation-contract.md](simulator/interpretation-contract.md) | how a canonical workload becomes scheduled tasks | normative |
 | [daemon/daemon-guide.md](daemon/daemon-guide.md) | what the daemon must do; what's the builder's to decide | normative |
+| [daemon/prior-table-pair-review.md](daemon/prior-table-pair-review.md) | pair review of the prior driver table: knob, scored term, direction per pair; findings | record |
 | [workload/building-plan.md](workload/building-plan.md) | how the dataset is built | normative |
 | [workload/archetype-plan.md](workload/archetype-plan.md) | how one process kind is specified and grounded | normative |
 | [workload/scenario-catalog.md](workload/scenario-catalog.md) | which processes co-occur and their sources | normative |
@@ -91,3 +94,4 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 | [memos/2026-09-07-trace-clarifications-for-the-simulator.md](memos/2026-09-07-trace-clarifications-for-the-simulator.md) | to 인경민: what the harness needs from the trace, and why | memo |
 | [memos/2026-09-07-repeat-samples-for-the-daemon.md](memos/2026-09-07-repeat-samples-for-the-daemon.md) | to 박이안: the repeat index consistency needs from the log | memo |
 | [memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md](memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md) | to 인경민: queue takeover, preemption, and measuring overhead at an algorithm switch | memo |
+| [memos/2026-09-09-batch-class-rule-for-the-simulator.md](memos/2026-09-09-batch-class-rule-for-the-simulator.md) | to 인경민: the batch-class rule the cap applies to, with worked examples and an action plan | memo |

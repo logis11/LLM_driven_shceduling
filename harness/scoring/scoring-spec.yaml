@@ -9,7 +9,7 @@
 # Every other aggregate of metrics doc §8 is reported beside the score, unweighted.
 #
 # This file carries terms only. Which files judge, report, are read as deltas,
-# or are excluded from aggregation is the gate spec's (Phase 7). c1-idle has no
+# or are excluded from aggregation is the gate spec's (Phase 8). c1-idle has no
 # entry: no performance metric. A derived file declares `base` and repeats the
 # base's terms verbatim (the lint checks both against dataset/timelines/coreset).
 #
@@ -53,6 +53,9 @@ files:
     terms:
       - {entity: editor, metric: ready_wait, cause: wake, window: {start_us: 60000000, end_us: 180000000}, aggregate: p99, direction: lower, weight: 1.0}
   c2-p2a:
+    # The download runs ~1 ms then waits ~5.7 ms per chunk, so it never enters the executor's
+    # batch class and no row's cap acts on it; its progress is the algorithm's residual share
+    # alone and is expected "no headroom" (pair review finding 1; batch-class memo 2026-09-09).
     terms:
       - {entity: game.chain.1, metric: job, window: {start_us: 60000000, end_us: 120000000}, aggregate: miss_rate, direction: lower, weight: 1.0}
       - {entity: download, metric: cpu_delivered, aggregate: progress, direction: higher, weight: 0.5}
