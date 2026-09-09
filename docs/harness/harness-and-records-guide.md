@@ -1082,16 +1082,20 @@ floor를 절대값으로 두는 이유: 독자가 숫자를 보고 직접 확인
 
 ### 14.4 score — weight를 곱하기
 
-normalised aggregate에 파일별 weight를 곱해 합친 게 score예요. weight는 연구 판단이라 code가 아니라 committed data file(scoring spec)에 있어요. Phase 6.
+normalised aggregate에 파일별 weight를 곱해 합친 게 score예요. weight는 연구 판단이라 code가 아니라 committed data file(**scoring spec**, `harness/scoring/scoring-spec.yaml`)에 있어요. Phase 6에서 확정됐어요. 실제 파일의 한 조각:
 
 ```yaml
 c2-p1a:
-  editor.ready_wait.p95:      {weight: 1.0, direction: lower}
-  hog.progress:               {weight: 0.4, direction: higher}
+  terms:
+    - {entity: editor, metric: ready_wait, cause: wake, window: {start_us: 60000000, end_us: 180000000}, aggregate: p99, direction: lower, weight: 1.0}
+    - {entity: hog, metric: cpu_delivered, aggregate: progress, direction: higher, weight: 0.5}
 c2-p1b:
-  editor.ready_wait.p95:      {weight: 1.0, direction: lower}
-  # hog.progress 없음 — 아무도 원하지 않은 indexing의 진행은 가치가 0
+  terms:
+    - {entity: editor, metric: ready_wait, cause: wake, window: {start_us: 60000000, end_us: 180000000}, aggregate: p99, direction: lower, weight: 1.0}
+    # hog의 progress 항 없음 — 아무도 원하지 않은 indexing의 진행은 가치가 0
 ```
+
+term 하나 = entity(누구), metric(어느 primitive), cause와 window(어느 row만), aggregate(어떤 통계), direction(aggregate가 정함), weight. 옆의 lint가 entity가 compiled workload에 실제로 있는 task인지, metric/aggregate 짝이 허용된 것인지, window가 파일 안인지, 파생 파일이 base와 같은지를 CI에서 검사해요.
 
 이 예시가 records 설계의 이유를 보여줘요. `c2-p1a`와 `c2-p1b`는 **behaviour가 완전히 같아요.** trace도 같고 records도 같아요. 차이는 오직 이 weight뿐이에요. training run(wanted)의 progress는 점수에 들어가고, indexer(unwanted)의 progress는 0점이에요.
 
@@ -1099,7 +1103,7 @@ c2-p1b:
 
 ## 15. 어떤 score가 좋을까 — 파일별로
 
-Phase 6의 일이지만 미리 생각해두면 Phase 5에서 "이 row가 왜 필요한지"가 보여요. 아래는 준비 노트와 spec 세션의 논의를 정리한 것이고, 확정은 아니에요.
+Phase 6 spec 세션(2026-09-08)에서 확정됐고, 15.2와 15.3은 그 결과예요. 규범은 `harness/scoring/scoring-spec.yaml` 자체이고, 여기는 왜 그렇게 정했는지의 요약이에요.
 
 ### 15.1 어느 파일이 판정에 들어가나
 
@@ -1114,26 +1118,36 @@ RQ0 gate("perfect recognition이 random보다 나은 headroom이 있나")의 jud
 | C6 (3) | Layer 2 제외. 미리 약속된 miss |
 | `c1-idle` | 성능 metric 없음. contention이 없음 |
 
-### 15.2 파일별 primary metric 후보
+### 15.2 파일별 term (확정)
 
-| 파일 | 사용자의 주의 | 후보 |
-|---|---|---|
-| `c1-office` | `soffice.bin` | writer의 `ready_wait(wake)` P95/P99, over_threshold |
-| `c1-browsing` | `chrome` | browser의 `ready_wait(wake)` |
-| `c1-compile` | `code` | **양면**: editor latency + `make`의 turnaround (makespan) |
-| `c1-gaming` | 없음 (게임 자체) | chain의 `job` miss rate + P99 |
-| `c1-media` | 없음 | `mpv`(60 Hz)와 `spotify`(20 Hz)의 `job` miss rate |
-| `c2-p1a/b` | `code` | editor latency + `hog`의 progress (p1a만) |
-| `c2-p2a/b` | 없음 | chain `job` + `download`의 progress (p2a만) |
-| `c2-p3a/b` | `kdenlive` | editor latency + `bulk`의 progress (둘 다 wanted지만 성격이 다름) |
+채점되는 aggregate는 넷뿐이에요: `ready_wait`는 **P99**, `job`은 **miss rate**, batch는 **progress**(`cpu_delivered / demand`), `c1-compile`의 build는 **turnaround**(makespan). 나머지 aggregate는 옆에 보고만 해요.
 
-### 15.3 판단이 필요한 세 곳
+| 파일 | term (entity · aggregate · weight) |
+|---|---|
+| `c1-office` | writer P99 1.0 |
+| `c1-browsing` | browser P99 1.0 |
+| `c1-compile` | editor P99 1.0 · build makespan 1.0 |
+| `c1-gaming` | `game.chain.1` miss rate 1.0 · compositor miss rate 0.5 |
+| `c1-media` | music miss rate 1.0 · video miss rate 0.5 (stated assumption) |
+| `c1-idle` | 없음 |
+| `c2-p1a` / `c2-p1b` | editor P99 1.0 (60–180 s) · hog progress 0.5 / 없음 |
+| `c2-p2a` / `c2-p2b` | chain miss rate 1.0 (60–120 s) · download progress 0.5 / 없음 |
+| `c2-p3a` / `c2-p3b` | editor P99 1.0 (60–120 s) · bulk progress 0.5 / **0.25** (scheduled backup) |
+| `c3-workday` | browser · writer · mailer P99 각 1.0 · build progress 0.5 |
+| `c3-evening` | browser P99 1.0 · chain miss rate 1.0 · music 1.0 · video 0.5 |
+| `c3-creation` | photo-editor · video-editor P99 각 1.0 · batch progress 0.5 |
+| C4, C5, `c6-spoof`, `c6-fold` | base 파일의 term 그대로 (lint가 강제) |
+| `c6-dual` | chain miss rate 1.0 · editor P99 1.0 |
 
-**C2는 파일별로 채점할 수 없어요.** 위에서 봤듯 pair의 두 파일은 raw 숫자가 같아요. 차이는 weight vector에만 있어요. 그래서 scoring spec은 "공유 primitive 위의 weight vector"여야 하고, pair마다 달라야 해요.
+C2의 latency/frame term은 60초부터 `T_end`까지만 봐요. 첫 1분은 a와 b가 byte 단위로 같아서 차이를 희석시키기만 하거든요. 60초의 switch와 그 transient는 창 안이라 condition의 비용으로 잡혀요. progress는 창이 없어요(batch task가 60초에 등장하니까). C3는 focus와 task 수명이 알아서 창 역할을 해서 명시적 창이 없어요.
 
-**`c1-compile`의 trade-off.** editor latency와 build makespan은 서로 당겨요. `batch_bandwidth_cap`이 정확히 그 교환비를 정하는 손잡이예요. 교환비 없이는 cap 값에 근거가 없어요. 제안된 형태: scalar 합이 아니라 "makespan이 cap 없을 때보다 X% 이상 나빠지지 않는 조건에서 editor latency 최소화"라는 constrained objective.
+### 15.3 판단이 필요했던 세 곳 — 어떻게 정했나
 
-**`c1-media`의 audio/video weighting.** 오디오 끊김은 frame 하나 빠지는 것보다 훨씬 잘 느껴져요. 같은 weight를 주면 scheduler를 잘못된 방향으로 밀어요. 문헌 근거를 찾거나 stated assumption으로 적어요.
+**C2 pair의 weight.** pair의 두 파일은 raw 숫자가 같고(p1은 완전히, p2·p3는 모양이) 차이는 weight에만 있어요. 원한 batch(training, download, render)는 progress 0.5, 원하지 않은 batch(indexer, av-scan)는 0, 예약된 backup은 wanted지만 아무도 기다리지 않으니 0.25. foreground는 항상 1.0. 사용자가 파일 내내 타이핑 중이라 foreground가 앞서고, batch는 window 안에서 어차피 못 끝나요.
+
+**`c1-compile`의 trade-off.** constrained objective 대신 weight 1.0 : 1.0으로 했어요. normalised share는 이미 `fixed`(cap 없음) 대비 부호가 있어서, build를 늦추는 config는 makespan share가 음수로 나오고 weight가 그 교환비예요. 별도의 constraint 형태는 필요 없었어요. mode 이름이 `compile`이라 build도 상황 그 자체이고, 이 파일은 gate에 안 들어가니 cap의 효과를 깨끗이 읽는 게 목적이에요.
+
+**`c1-media`의 audio/video weighting.** music 1.0 : video 0.5, stated assumption(문헌 검색 안 함). 단, 이 파일에서는 어떤 legal config도 tick을 놓칠 수 없어서(video는 10 ms 넘게 기다려야 miss인데 music이 줄 수 있는 대기는 2.5 ms, 반대는 47.5 ms 대 6.67 ms) 두 miss rate가 전부 0이고 floor 규칙대로 "no headroom"이 나와요. weight는 나중에 contention 있는 media 파일이 들어올 때를 위해 지금 적어두는 거예요. C5와 `c3-evening`의 media 구간도 같아요.
 
 ### 15.4 사람에게 전달되는 숫자
 
