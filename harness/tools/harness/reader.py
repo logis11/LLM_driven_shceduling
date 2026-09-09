@@ -7,7 +7,12 @@ time order, refusing the file with a line number on the first violation.
 
 `read_run_file` reads the run-file view of a workload (data-contracts §4) for
 the three facts a trace does not carry (metrics doc §3): `T_end`, chain
-topology, and per-task demand. Nothing here computes a metric.
+topology, and per-task demand.
+
+`read_config_schedule` reads the daemon's config schedule (data-contracts §7)
+for the one fact neither of the other two carries: the params of each applied
+entry, looked up by `index` — what the `switch_window` primitive needs for a
+switch into MLFQ. Nothing here computes a metric.
 """
 
 import gzip
@@ -46,6 +51,10 @@ class TraceError(ValueError):
 
 class RunFileError(ValueError):
     """The run file cannot be used as the reader's second input."""
+
+
+class ScheduleError(ValueError):
+    """The config schedule cannot be used as the reader's third input."""
 
 
 @dataclass(frozen=True)
@@ -242,3 +251,56 @@ def read_run_file(path) -> RunFile:
         chains.append(chain)
     return RunFile(workload_id=doc.get("workload_id", ""), t_end=max(pinned),
                    tasks=tasks, chains=chains, wakes=wakes)
+
+
+# ---------------------------------------------------------- config schedule
+
+_SCHEDULE_ALGORITHMS = ("MLFQ", "EDF", "LOTTERY", "FIFO")
+
+
+@dataclass(frozen=True)
+class ScheduleEntry:
+    index: int                     # position in the schedule = `index` on the trace's config_applied line
+    t_us: int                      # when the daemon stamped it (t_return); the trace carries t_apply
+    algorithm: str
+    params: dict
+    batch_bandwidth_cap: Optional[float]
+    provenance: str
+
+
+@dataclass
+class ConfigSchedule:
+    workload_id: str
+    condition: str
+    entries: List[ScheduleEntry]
+
+    def entry(self, index) -> Optional[ScheduleEntry]:
+        return self.entries[index] if 0 <= index < len(self.entries) else None
+
+
+def read_config_schedule(path) -> ConfigSchedule:
+    with open(path, "r", encoding="utf-8") as f:
+        doc = json.load(f)
+    if not isinstance(doc, dict) or not isinstance(doc.get("schedule"), list):
+        raise ScheduleError("config schedule has no 'schedule' list")
+    entries = []
+    for i, ent in enumerate(doc["schedule"]):
+        cfg = ent.get("config") if isinstance(ent, dict) else None
+        if not isinstance(cfg, dict):
+            raise ScheduleError(f"schedule entry {i}: no 'config' object")
+        alg = cfg.get("algorithm")
+        if alg not in _SCHEDULE_ALGORITHMS:
+            raise ScheduleError(f"schedule entry {i}: algorithm {alg!r} not in "
+                                f"{list(_SCHEDULE_ALGORITHMS)}")
+        params = cfg.get("params")
+        if not isinstance(params, dict):
+            raise ScheduleError(f"schedule entry {i}: config has no 'params' object")
+        for key in ("t_us", "provenance"):
+            if key not in ent:
+                raise ScheduleError(f"schedule entry {i}: missing {key!r}")
+        entries.append(ScheduleEntry(index=i, t_us=int(ent["t_us"]), algorithm=alg,
+                                     params=dict(params),
+                                     batch_bandwidth_cap=cfg.get("batch_bandwidth_cap"),
+                                     provenance=ent["provenance"]))
+    return ConfigSchedule(workload_id=doc.get("workload_id", ""),
+                          condition=doc.get("condition", ""), entries=entries)

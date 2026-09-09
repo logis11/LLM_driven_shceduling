@@ -1,0 +1,48 @@
+{
+ "workload_id": "mock-switch",
+ "events": [
+  {
+   "op": "arrive",
+   "t": 0,
+   "id": "editor",
+   "name": "code",
+   "depart": 100000,
+   "program": [
+    {"op": "WAIT", "channel": "input:editor"},
+    {"op": "RUN", "us": 3000},
+    {"op": "WAIT", "channel": "input:editor"},
+    {"op": "RUN", "us": 3000},
+    {"op": "WAIT", "channel": "input:editor"},
+    {"op": "RUN", "us": 3000},
+    {"op": "WAIT", "channel": "input:editor"},
+    {"op": "RUN", "us": 3000},
+    {"op": "WAIT", "channel": "input:editor"}
+   ]
+  },
+  {
+   "op": "arrive",
+   "t": 10000,
+   "id": "hog",
+   "name": "python3",
+   "program": [
+    {"op": "RUN", "us": 300000},
+    {"op": "EXIT"}
+   ]
+  },
+  {
+   "op": "arrive",
+   "t": 40000,
+   "id": "probe",
+   "name": "gnome-calculator",
+   "depart": 100000,
+   "program": [
+    {"op": "RUN", "us": 500},
+    {"op": "WAIT", "channel": "input:probe"}
+   ]
+  },
+  {"op": "wake", "t": 20000, "channel": "input:editor", "target": "editor"},
+  {"op": "wake", "t": 46000, "channel": "input:editor", "target": "editor"},
+  {"op": "wake", "t": 62000, "channel": "input:editor", "target": "editor"},
+  {"op": "wake", "t": 90000, "channel": "input:editor", "target": "editor"}
+ ]
+}

@@ -2,7 +2,10 @@
 """records: one (run file, trace) pair -> one records CSV.
 
     records.py --run RUN.json --trace TRACE.jsonl[.gz] --out RECORDS.csv
-               [--table prior|calibrated] [--seed N]
+               [--schedule CONFIG-SCHEDULE.json] [--table prior|calibrated] [--seed N]
+
+The config schedule is the third input (metrics doc §3): without it a switch
+into MLFQ has no params to size its window from, and a guard says so.
 
 Guard messages go to stderr; the file is written regardless, and the exit
 code is 2 when any guard fired."""
@@ -20,10 +23,12 @@ def main():
     ap.add_argument("--run", required=True)
     ap.add_argument("--trace", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--schedule", default=None, help="the daemon's config schedule for this run")
     ap.add_argument("--table", default="", choices=["", "prior", "calibrated"])
     ap.add_argument("--seed", default="")
     args = ap.parse_args()
-    rows, guards = build(args.run, args.trace, table=args.table, seed=args.seed)
+    rows, guards = build(args.run, args.trace, table=args.table, seed=args.seed,
+                         schedule_path=args.schedule)
     write_csv(rows, args.out)
     for g in guards:
         print(f"guard: {g}", file=sys.stderr)

@@ -1,6 +1,6 @@
 # mock-chain — worked derivation
 
-A three-stage frame pipeline, the game chain reduced: the head ticks on a TIMER and wakes the engine, the engine wakes the display. A batch task arrives at 15 s and holds the lane through one tick. Condition `fixed`. Scheduler: FIFO, run until block, no preemption. All times µs.
+A three-stage frame pipeline, the game chain reduced: the head ticks on a TIMER and wakes the engine, the engine wakes the display. A batch task arrives at 15 s and holds the lane through one tick. Condition `oracle` on the prior table: the oracle's entry (FIFO) is stamped at t = 0 beside the boot entry, as in `mock-media`, so the scheduler stated here is the one the config lines name. Scheduler: FIFO, run until block, no preemption. All times µs.
 
 The ids are `input`, `engine`, `display` on purpose: the reader must find the chain by following WAKE targets from the TIMER-headed task, not by a naming convention.
 
@@ -78,8 +78,10 @@ The head's `deadline` lines say 900 / 29900 / 35500, all met. They measure the i
 | `display` | 3 × 2100 = 6300 | — | 0 | — | 0 |
 | `hog` | 14000 | 14000 | 1 at 29000 | 14000 | 0 |
 
-**`config_interval`** — one entry: `schedule`, t 0, value 50000, `fallback`, `MLFQ`, index 0.
+**`config_interval`** — two entries at the same instant: index 0 (`fallback`, MLFQ) with value 0, superseded at once; index 1 (`unmodified`, FIFO) with value 50000.
+
+**`switch_window`** — index 1 changes the algorithm (MLFQ → FIFO) at t 0: value 0 (not into MLFQ), `hogs` 0 (`input`, `engine`, `display` are alive at 0 and each blocks first; `hog` arrives later).
 
 **`busy`** — 2700 + 7800 + 6300 + 14000 = 30800.
 
-Total 32 rows.
+Total 34 rows.

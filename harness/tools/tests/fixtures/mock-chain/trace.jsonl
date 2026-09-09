@@ -1,5 +1,6 @@
-{"event":"meta","workload_id":"mock-chain","condition":"fixed","sim":"mock@0","schedule_entries":1}
+{"event":"meta","workload_id":"mock-chain","condition":"oracle","sim":"mock@0","schedule_entries":2}
 {"event":"config_applied","t":0,"index":0,"algorithm":"MLFQ","provenance":"fallback"}
+{"event":"config_applied","t":0,"index":1,"algorithm":"FIFO","provenance":"unmodified"}
 {"event":"task_arrive","t":0,"task":"input","source":"file"}
 {"event":"task_arrive","t":0,"task":"engine","source":"file"}
 {"event":"task_arrive","t":0,"task":"display","source":"file"}

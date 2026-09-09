@@ -1,6 +1,6 @@
 # Metrics — primitives, records, and the aggregates the research reads
 
-> Status: normative · Created 2026-09-08 · Updated 2026-09-08
+> Status: normative · Created 2026-09-08 · Updated 2026-09-09
 
 Every number the project reports is defined here. The document fixes three things: the **primitives** — the raw observations the harness computes from a trace or a recognition log; the **records** file they land in; and the **aggregates** — the statistics, the normalisation rule, and the constants that turn records into the figures the research questions ask for. Per-file weights are not here; they belong to the scoring spec (Phase 6). The code that implements the trace primitives lives in `harness/`; the grader that implements the recognition primitives is built in Phase 7 to the definitions below.
 
@@ -23,7 +23,7 @@ Changing a primitive invalidates every records file and requires recomputation f
 ## 2. The pipeline
 
 ```
-primitives(run_file, trace)                       → records rows   (entities: tasks, lane, schedule)
+primitives(run_file, trace, config_schedule)      → records rows   (entities: tasks, lane, schedule)
 grader(recognition_log, ground_truth, calibrated_table) → records rows   (entity: recognizer)
 scoring(records, scoring_spec)                    → aggregates, normalised shares, scores
 ```
@@ -44,6 +44,8 @@ The first function is Phase 5's harness lower half. The second is Phase 7's grad
 | chain topology | a **chain** is the WAKE path starting at a task whose program contains a TIMER: the head, then each task the previous stage's WAKE targets, until a stage wakes no one (the tail). A TIMER task that wakes no one is a chain of length one. |
 | `demand` | a task's total RUN work, summed over its program; defined only when the program has no unbounded LOOP |
 
+**Config schedule** — the daemon's input to the simulator (`../data-contracts.md` §7). The reader takes it as a third input for the one fact neither of the others carries: the **params** of each applied entry, looked up by the `index` the trace's `config_applied` line names. Only `switch_window` (§6.9) reads it, for a switch into MLFQ. The schedule's `t_us` is the daemon's stamp (`t_return`); the trace's `config_applied` time is the applied instant (`t_apply`), which is what every schedule row anchors on. When the schedule is not given, a switch into MLFQ produces a guard and no row; an applied entry the schedule lacks, or carries with another algorithm, is a guard.
+
 Recognition primitives read the recognition log (`../data-contracts.md` §8), `ground_truth` from the canonical workload file, and the calibrated driver table (§10 of the same document).
 
 ---
@@ -61,7 +63,7 @@ Every primitive is measured over `[0, T_end]`.
 
 ## 5. Records
 
-One CSV file per trace (or per recognition log), every row self-contained, nineteen columns.
+One CSV file per trace (or per recognition log), every row self-contained, twenty columns.
 
 **Identity** — which run the row came from.
 
@@ -89,13 +91,14 @@ One CSV file per trace (or per recognition log), every row self-contained, ninet
 |---|---|---|
 | `cause` | `ready_wait` | why the task became runnable: `arrive`, `wake`, `sleep_end`, `timer_tick`, `fork_slot` |
 | `provenance` | `config_interval` | `unmodified`, `clamped`, `held`, `fallback` |
-| `algorithm` | `config_interval` | `MLFQ`, `EDF`, `LOTTERY`, `FIFO` |
-| `index` | `config_interval` | the schedule entry's index |
+| `algorithm` | `config_interval`, `switch_window` | `MLFQ`, `EDF`, `LOTTERY`, `FIFO` |
+| `index` | `config_interval`, `switch_window` | the schedule entry's index |
 | `period_us` | `job` | the TIMER period; a miss is `value > period_us`, slack is `period_us − value` |
 | `predicted` | `mode_correct`, `attr_correct`, `algo_choice_correct` | what the recognizer answered |
 | `truth` | `mode_correct`, `attr_correct`, `algo_choice_correct` | the answer key's value |
 | `validation` | every recognition row | what the validator did with the answer |
 | `familiarity` | every recognition row | the covering segment's familiarity tier, when the segment carries one |
+| `hogs` | `switch_window` | the hog count H at the switch (§6.9) |
 
 **Rules.**
 
@@ -163,11 +166,23 @@ One row per tick inside the window whose completion is also inside it. Entity = 
 
 *How long each configuration was in force.* One row per `config_applied` line, entity `schedule`, `t` = the applied time, `value` = time until the next `config_applied` or `T_end`, with `provenance`, `algorithm`, `index`. Two entries at the same instant give the earlier a value of 0. Provenance shares (time-weighted and count-weighted), config age, and the fallback share are aggregates over these rows.
 
-### 6.9 `busy`
+### 6.9 `switch_window`
+
+*How long, after a switch into MLFQ, the scheduler was re-learning who is batch.* From the 2026-09-08 memo on algorithm-switch semantics (`../memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md` §4): a cold start into MLFQ puts every task in the top queue, the state MLFQ's own boost produces, so a switch is one extra boost and is measured in those units.
+
+One row per `config_applied` line inside the window whose algorithm differs from the previous applied entry's; the boot entry has no predecessor and never produces a row, and an entry that changes only params or the cap is not a switch (it applies at its stamped time with queue levels kept, §11 item 9). Entity `schedule`, `t` = the applied time (`t_apply`), with `algorithm` (incoming), `index`, and `hogs` on the row.
+
+- **`W_single`** is the CPU a CPU-bound task must receive to fall from the top queue to the bottom, one full slice per upper level: `timeslice_us · Σ_{l=0}^{num_queues−2} timeslice_growth^l`, rounded down to whole µs, from the **incoming** entry's params in the config schedule (6 000 µs at the boot default). No parameter is ever inferred from behaviour.
+- **`H`**, the hog count, is behavioural: a task alive at `t_apply` (arrived at or before it, not ended at or before it) whose first `run_end` after `t_apply`, at or before `T_end`, has reason `preempt`. Known bias: a task preempted by a wake into a higher queue is counted too. `hogs` carries H for every switch row, including the zero-valued ones.
+- **`value`** for a switch into MLFQ is the length of the window `[t_apply, t_close]`, where `t_close` is the instant the **last** counted hog has received `W_single` of CPU since `t_apply`, summed from its occupancy intervals (the sum `cpu_delivered` takes, started at `t_apply`). The window is therefore sized in lane time: other tasks holding the lane stretch it rather than escape it. If a hog has not received `W_single` by the next algorithm switch or by `T_end`, the window is clipped there and a guard names the hog. With no hogs the value is 0. For a switch into EDF, LOTTERY, or FIFO the value is 0: nothing those algorithms need is discarded (deadlines come from the process model, tickets from the config, arrival order is always known).
+
+What the window can still miss — a hog boosted before it reaches the bottom, a hog the preempt rule did not count — is what the `x_mlfq_level` check (§12) measures.
+
+### 6.10 `busy`
 
 *How long the lane was occupied.* The sum of every task's clipped occupancy, entity `lane`, one row at `T_end`. Idle is `T_end − busy`; utilisation is `busy / T_end`.
 
-### 6.10 Summary
+### 6.11 Summary
 
 | metric | entity | rows | from the trace | from the run file | anchor `t` |
 |---|---|---|---|---|---|
@@ -179,6 +194,7 @@ One row per tick inside the window whose completion is also inside it. Entity = 
 | `turnaround` | task | 0 or 1 | `task_arrive` → `task_end(exit)` | — | end time |
 | `preempt_count` | task | 1 | `run_end(preempt)` count | — | `T_end` |
 | `config_interval` | `schedule` | per entry | `config_applied` → next | `T_end` | applied time |
+| `switch_window` | `schedule` | per algorithm change | `config_applied`, first `run_end` per alive task, the hogs' occupancy after it | `W_single` from params by `index` (config schedule) | applied time |
 | `busy` | `lane` | 1 | all occupancy, clipped | `T_end` | `T_end` |
 
 ---
@@ -216,6 +232,7 @@ A fixed list, computed from records at scoring time, always per workload, condit
 | `completed`, `turnaround` | completion (0/1); turnaround as is |
 | `preempt_count` | as is; summed over tasks for the lane |
 | `config_interval` rows | time-weighted share per `provenance`; count share per `provenance`; **fallback share** (time-weighted `fallback` + `held`); config age — the distribution of `value` |
+| `switch_window` rows with `ready_wait` rows | **per-switch excess** — for each switch into MLFQ, the mean of the `ready_wait(cause = wake)` values of the scoring spec's interactive task inside the switch window `[t, t + value]`, minus the mean of the same task's rows in the rest of that config interval outside any window, in µs; the **boost variant** takes the same excess over the boost windows of that interval, one at each instant `t + k · boost_interval_us` (k ≥ 1), each sized by the §6.9 rule from that instant (H counted there, closing when the last hog has its `W_single`) and clipped at the next boost; switch excess ≈ boost excess means the switch cost one boost, the difference above it is backlog carried from the outgoing algorithm. **Share inside switch windows** — Σ `value`, each clipped at `T_end`, over `T_end`. Neither is weighted in any score; both are reported beside it |
 | `busy` | utilisation `busy / T_end`; idle `T_end − busy` |
 | recognition rows | mode accuracy; attribute accuracy; confusion matrix over (`truth`, `predicted`) for mode and for attribute; algorithm-choice accuracy and its confusion; latency P50/P99 over rows with `mode_correct = 1`; each also **per familiarity tier** |
 
@@ -266,12 +283,17 @@ The definitions above, and the mock traces that test them, assume the following 
 4. TIMER's `t₀` is the task's arrival time, so a TIMER task arriving at 0 consumes tick 0 at 0 without blocking.
 5. An arriving task whose first instruction blocks is scheduled like any other, reaches the WAIT, and blocks: a zero-length occupancy when the lane is free.
 6. The simulator keeps emitting `deadline` lines as the contract says; the harness uses them only as the §6.2 cross-check.
+7. **The boost timer restarts at `t_apply`** after a switch into MLFQ, so the boost grid of §8 is `t_apply + k · boost_interval_us`. Confirmed with 인경민 on 2026-09-09 (memo §5, §7).
+8. A switch out of FIFO applies immediately and the running task is treated as freshly dispatched by the incoming algorithm (the memo's rule (a)); a switch out of any other algorithm applies at the running task's slice boundary (the drain). Confirmed with 인경민 on 2026-09-09. The primitives read the applied instant off the trace either way.
+9. **An entry with the same algorithm is not a switch.** It applies at its stamped time, no drain, queue levels kept; the running task finishes the slice it was granted and the new params govern from its next dispatch; the cap takes effect at once. Confirmed with 인경민 on 2026-09-09 (memo §7).
 
 ---
 
 ## 12. Mock fixtures
 
-`harness/tools/tests/fixtures/` holds four hand-written pairs (run file, trace) with hand-computed expected records and a worked derivation each: `mock-office` (queued keystrokes, an unfocused task), `mock-media` (backlog, a same-instant config pair, a completing batch task), `mock-p1a` (config switch, preemptions, a batch task clipped at `T_end`), `mock-chain` (a three-stage frame pipeline with one late frame). They are the tests of §6 and the seeds of Phase 7's mock simulator.
+`harness/tools/tests/fixtures/` holds five hand-written pairs (run file, trace) with hand-computed expected records and a worked derivation each: `mock-office` (queued keystrokes, an unfocused task), `mock-media` (backlog, a same-instant config pair that is also a switch into FIFO, a completing batch task), `mock-p1a` (config change without an algorithm switch, preemptions, a batch task clipped at `T_end`), `mock-chain` (a three-stage frame pipeline with one late frame), `mock-switch` (MLFQ → FIFO → MLFQ with a config schedule, one hog, the §8 excess aggregates worked by hand). `mock-media` and `mock-chain` run FIFO under an oracle entry stamped beside the boot entry, so their stated scheduler and their config lines agree. They are the tests of §6 and the seeds of Phase 7's mock simulator.
+
+**`x_mlfq_level` check.** The simulator emits `x_mlfq_level` `{t, task, from, to}` on every MLFQ demotion and boost; the harness ignores it by the `x_` rule. `harness/tools/check_mlfq_levels.py`, beside the harness and not part of it, reads those lines and reports, per switch into MLFQ, whether the window covered each hog's last demotion (the run of demotions after `t_apply`, ending at the next boost or the bottom queue). A systematic miss is the evidence for proposing a field in the closed trace set; until then the trace contract stays frozen. On `mock-switch` the check passes at the window's edge; under the memo's original wall-clock window it failed there, which is what led to the lane-time definition (memo §7).
 
 ---
 
@@ -279,4 +301,5 @@ The definitions above, and the mock traces that test them, assume the following 
 
 Every change to a primitive, an aggregate, a constant, or a floor lands here, dated, with the sub-task that made it.
 
+- **2026-09-09 — switch overhead (jioh 6.1).** New primitive `switch_window` (§6.9) with the `hogs` attribute, the twentieth records column; the config schedule becomes the third input (§3), read by `index`; two aggregates over switch windows (§8: per-switch excess wake `ready_wait`, switch and boost variants; share inside switch windows), reported and never weighted; §11 gains 7 (boost timer restarts at `t_apply`), 8 (FIFO-outgoing rule (a)) and 9 (a same-algorithm entry applies at its stamped time), all three confirmed with 인경민 on 2026-09-09; fixture `mock-switch` and the `x_mlfq_level` check tool (§12). From the 2026-09-08 memo on algorithm-switch semantics, whose window the same day's spec session re-sized in lane time (memo §7) after the mock showed the wall-clock window closing before the hog's descent. `mock-media`'s same-instant boot + oracle pair is a switch into FIFO and gains a zero-valued row; `mock-chain` gains the same oracle FIFO entry so its scheduler matches its config line; `mock-p1a` now follows the guide's MLFQ rules (its editor falls to the bottom queue on its own bursts).
 - **2026-09-08 — first version (jioh 5.2).** Trace primitives §6, recognition primitives §7, aggregate list §8, per-aggregate normalisation with absolute floors §9, constants §10 (`T_interaction` grounded in `miller-fjcc68` and `nielsen-ue93`, with `shneiderman-csur84` on the range; floors as stated assumptions), simulator assumptions §11. Records take a `familiarity` attribute column for recognition rows, carried from `ground_truth` (data-contracts changelog, same date). The two definitions `../data-contracts.md` §9 deferred to this freeze — periodic job completion, and starvation from `ready` — are §6.2 and §6.1.

@@ -8,8 +8,9 @@ import json
 import pytest
 
 from conftest import MOCKS
-from harness.reader import (RESERVED_ENTITIES, RunFileError, TraceError,
-                            read_run_file, read_trace)
+from harness.reader import (RESERVED_ENTITIES, RunFileError, ScheduleError,
+                            TraceError, read_config_schedule, read_run_file,
+                            read_trace)
 
 
 # ------------------------------------------------------------------ trace
@@ -18,7 +19,8 @@ EXPECTED_HEADER = {
     "mock-office": ("mock-office", "fixed", 1),
     "mock-media": ("mock-media", "oracle", 2),
     "mock-p1a": ("mock-p1a", "llm_vocab", 2),
-    "mock-chain": ("mock-chain", "fixed", 1),
+    "mock-chain": ("mock-chain", "oracle", 2),
+    "mock-switch": ("mock-switch", "llm_algo", 3),
 }
 
 
@@ -123,7 +125,9 @@ def test_reserved_task_id_in_trace_is_refused(tmp_path):
 # --------------------------------------------------------------- run file
 
 EXPECTED_T_END = {"mock-office": 60000, "mock-media": 95000,
-                  "mock-p1a": 120000, "mock-chain": 50000}
+                  "mock-p1a": 120000, "mock-chain": 50000,
+    "mock-switch": 100000,
+}
 
 
 @pytest.mark.parametrize("mock", MOCKS)
@@ -204,3 +208,37 @@ def test_reserved_task_id_in_run_file_is_refused(tmp_path):
             {"op": "arrive", "t": 0, "id": name, "name": "x", "program": [{"op": "EXIT"}]}]}))
         with pytest.raises(RunFileError, match="reserved"):
             read_run_file(p)
+
+
+# --------------------------------------------------------- config schedule
+
+def test_config_schedule_entries_are_read_by_index(fixture_dir):
+    sched = read_config_schedule(fixture_dir("mock-switch") / "config-schedule.json")
+    assert sched.workload_id == "mock-switch"
+    assert sched.condition == "llm_algo"
+    assert [e.index for e in sched.entries] == [0, 1, 2]
+    assert [e.algorithm for e in sched.entries] == ["MLFQ", "FIFO", "MLFQ"]
+    assert [e.t_us for e in sched.entries] == [0, 10600, 40600]
+    assert sched.entries[2].params == {"num_queues": 3, "timeslice_us": 2000,
+                                       "timeslice_growth": 2, "boost_interval_us": 20000}
+    assert sched.entries[1].params == {}
+    assert sched.entries[1].batch_bandwidth_cap == 0.15
+    assert sched.entries[0].provenance == "fallback"
+    assert sched.entry(2).algorithm == "MLFQ"
+    assert sched.entry(7) is None
+
+
+def test_config_schedule_refuses_a_malformed_file(tmp_path):
+    bad = tmp_path / "s.json"
+    bad.write_text(json.dumps({"workload_id": "w", "condition": "fixed"}))
+    with pytest.raises(ScheduleError, match="schedule"):
+        read_config_schedule(bad)
+    bad.write_text(json.dumps({"workload_id": "w", "condition": "fixed",
+                               "schedule": [{"t_us": 0, "provenance": "fallback"}]}))
+    with pytest.raises(ScheduleError, match="config"):
+        read_config_schedule(bad)
+    bad.write_text(json.dumps({"workload_id": "w", "condition": "fixed",
+                               "schedule": [{"t_us": 0, "provenance": "fallback",
+                                             "config": {"algorithm": "RR", "params": {}}}]}))
+    with pytest.raises(ScheduleError, match="algorithm"):
+        read_config_schedule(bad)

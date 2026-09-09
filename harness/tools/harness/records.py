@@ -1,7 +1,7 @@
 """Records — docs/harness/metrics.md §5.
 
-`build` runs the readers and the primitives on one (run file, trace) pair and
-returns fully identified rows; `write_csv` writes them in the fixed column
+`build` runs the readers and the primitives on one (run file, trace) pair —
+plus the config schedule when given — and returns fully identified rows; `write_csv` writes them in the fixed column
 order and row order; `read_csv` reads a records file back into typed rows;
 `validate_rows` checks rows against the machine schema in
 `harness/records/schema/records.schema.json`.
@@ -14,13 +14,13 @@ import pathlib
 import jsonschema
 
 from .primitives import compute
-from .reader import read_run_file, read_trace
+from .reader import read_config_schedule, read_run_file, read_trace
 
 COLUMNS = ("workload_id", "condition", "table", "seed", "sim", "source_sha256",
            "entity", "metric", "t", "value",
            "cause", "provenance", "algorithm", "index", "period_us",
-           "predicted", "truth", "validation", "familiarity")
-_INT_COLUMNS = ("t", "value", "index", "period_us", "familiarity")
+           "predicted", "truth", "validation", "familiarity", "hogs")
+_INT_COLUMNS = ("t", "value", "index", "period_us", "familiarity", "hogs")
 
 SCHEMA_PATH = (pathlib.Path(__file__).resolve().parents[2]
                / "records" / "schema" / "records.schema.json")
@@ -35,11 +35,12 @@ def sort_key(row):
     return (row["entity"], row["metric"], int(row["t"]), str(row.get("cause", "")))
 
 
-def build(run_path, trace_path, table="", seed=""):
+def build(run_path, trace_path, table="", seed="", schedule_path=None):
     """Rows for one pair, sorted, with identity filled. Returns (rows, guards)."""
     run = read_run_file(run_path)
     trace = read_trace(trace_path)
-    result = compute(run, trace)
+    schedule = read_config_schedule(schedule_path) if schedule_path else None
+    result = compute(run, trace, schedule)
     identity = {"workload_id": trace.meta.workload_id,
                 "condition": trace.meta.condition,
                 "table": table, "seed": seed,
