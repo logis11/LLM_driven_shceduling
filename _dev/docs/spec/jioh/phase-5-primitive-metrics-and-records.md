@@ -10,7 +10,7 @@ Stages 1–2 of `_dev/docs/rq0-preparation-notes.md`, as decided in the 2026-09-
 - Build the harness's lower half — trace reader, primitives, records output — checked against the hand-computed values. No simulator needed.
 - Correct the documents that defer to this freeze.
 
-Out of scope: the scorer, guards, and the grader code (Phase 7); per-file weights (Phase 6); the daemon-side instrument for run-to-run consistency.
+Out of scope: the scorer, guards, and the grader code (Phase 8); per-file weights (Phase 6); the daemon-side instrument for run-to-run consistency.
 
 ## Locked decisions
 
@@ -20,7 +20,7 @@ Layer 1 and Layer 2 keep the meaning in `terminology.md`: recognition accuracy a
 
 ### 2. One metrics doc, both families
 
-A single normative doc with a changelog section opens the Harness section of `docs/`. It defines the trace primitives, the recognition primitives, the fixed aggregate list, the normalisation rule, and the constants. Recognition metrics are aggregates over per-query primitives. The grader that implements the recognition definitions is Phase 7's.
+A single normative doc with a changelog section opens the Harness section of `docs/`. It defines the trace primitives, the recognition primitives, the fixed aggregate list, the normalisation rule, and the constants. Recognition metrics are aggregates over per-query primitives. The grader that implements the recognition definitions is Phase 8's.
 
 ### 3. Records are raw observations
 

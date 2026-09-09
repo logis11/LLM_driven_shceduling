@@ -273,7 +273,7 @@ recognition 쪽은 같은 모양의 row를 내지만 input이 달라요.
 grader(recognition_log, ground_truth, calibrated_table) → records rows (entity=recognizer)
 ```
 
-이 함수의 **정의**는 Phase 5의 metrics doc에 들어가고, **code**는 Phase 7에서 만들어요.
+이 함수의 **정의**는 Phase 5의 metrics doc에 들어가고, **code**는 Phase 8에서 만들어요.
 
 ---
 

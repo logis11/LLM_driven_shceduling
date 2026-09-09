@@ -115,7 +115,7 @@ The seven default values above are the **boot default configuration** and the `f
 | LOTTERY `batch_share` | 0.15 | No source names a batch-class share. `waldspurger-osdi94` defines shares as proportional to tickets and gives no ratio between classes. | assumption, unbounded |
 | LOTTERY `timeslice_us` | 2000 | `waldspurger-osdi94` §2: prototype quantum 10 ms ("100 lotteries per second"), with "shorter time quanta can be used to further improve accuracy". Set equal to MLFQ `timeslice_us`. | assumption, bounded |
 
-**Sensitivity check (planned, pre-registered in the gate spec at Phase 7).** Because the floor is assumed, the `fixed` condition is re-run under two alternative boot defaults drawn from the cited sources' own values — OSTEP's example configuration (10 ms top slice, three queues, doubling, 100 ms boost) and a Linux-like short slice (0.75 ms base) — with the exact pair fixed before execution. If the RQ0 gap's sign or the ordering of normalised scores changes across the three floors, the floor is reported as a range rather than a point.
+**Sensitivity check (planned, pre-registered in the gate spec at Phase 8).** Because the floor is assumed, the `fixed` condition is re-run under two alternative boot defaults drawn from the cited sources' own values — OSTEP's example configuration (10 ms top slice, three queues, doubling, 100 ms boost) and a Linux-like short slice (0.75 ms base) — with the exact pair fixed before execution. If the RQ0 gap's sign or the ordering of normalised scores changes across the three floors, the floor is reported as a range rather than a point.
 
 ### Validation rules
 

@@ -30,4 +30,4 @@ Written 2026-09-09. Repo `LLM_driven_shceduling`, branch `jioh/driver-table-v0` 
 
 ## Carried forward (not 6.3's)
 
-- 박이안 on the repeat index; `c1-media` tier-1 familiarity annotation; C1-derived `demand: calibration`; gate spec items (Phase 7).
+- 박이안 on the repeat index; `c1-media` tier-1 familiarity annotation; C1-derived `demand: calibration`; gate spec items (Phase 8).

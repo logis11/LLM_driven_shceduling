@@ -69,10 +69,13 @@ Execution order: 6.1 → 6.2 → 6.3 → 6.4.
 - [x] **6.3** Prior table — all 32 rows, any algorithm by theory, `basis: theory`, one sentence on row and entry, references ids only where they exist; `make -C daemon lint` green
 - [WIP] **6.4** Pair review — the 16 same-mode pairs and the three C2 row-pairs as exercised (`ml-train/true`–`indexing/false`, `gaming/true`–`gaming/false`, `render/true`–`backup/true`); one sentence each naming the knob, the scored term it moves, and agreement with the weights; fixes fed back into 6.3; recorded in the phase archive with the intended file classification for Phase 7
 
-### Phase 7 — Harness upper half through pre-registration
+### Phase 7 — Coreset attribute coverage
+Fix from the Phase 6 pair review: the coverage grid tracked mode × familiarity only, so the coreset carries two `background_wanted: false` segments and 14 of the 32 driver-table cells have no instance, which leaves the attribute-accuracy metric near-degenerate and the calibrated table untunable on those rows. Add the attribute axis to the coverage grid; derive a family of `false` files for the interactive modes from their C1 bases (an injected unwanted CPU-bound job, label flipped); write the all-32-cells requirement for the generalset; update the manifest, the dataset-design table, the building plan's family list, and the study guides. Downstream: a scoring-spec entry per new file (the base's terms verbatim, `base` declared; the coverage test enforces it) and the pair review's sentences for the newly exercised `false` rows. Records and harness code unchanged; contracts, simulator, and daemon unchanged.
+
+### Phase 8 — Harness upper half through pre-registration
 Stages 4–5. Scorer, guards, L1 grader, mock daemon + mock simulator with the full pipeline run on mocks, runner with execution cache, report with provenance. Ends at the committed gate spec: judging set, threshold, `random` draw definition and seed count (with 박이안), failure procedure, frozen scoring spec.
 
-### Phase 8 — Integration and the RQ0 run
+### Phase 9 — Integration and the RQ0 run
 Stage 6. Swap mocks for the real simulator and daemon, end-to-end smoke, run all coreset files × 3 conditions, check guards before looking at results, judge per the gate spec; on failure, config search before workload redesign. Depends on 경민's integration gate and algorithm extension and 이안's daemon.
 
 ### Backlog

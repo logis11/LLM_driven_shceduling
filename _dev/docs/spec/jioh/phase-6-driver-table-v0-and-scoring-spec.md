@@ -9,7 +9,7 @@ Stage 3 of `_dev/docs/rq0-preparation-notes.md`, plus the harness side of `docs/
 - The switch-overhead primitive, aggregates, fixture and check tool from the 2026-09-08 memo's harness-side action plan.
 - The pair review of the prior table.
 
-Out of scope: file classification for the gate (judging, reporting-only, separate, excluded), the `random` draw definition, the threshold — all Phase 7's gate spec. The calibrated table.
+Out of scope: file classification for the gate (judging, reporting-only, separate, excluded), the `random` draw definition, the threshold — all Phase 8's gate spec. The calibrated table.
 
 ## Locked decisions
 
@@ -67,7 +67,7 @@ Per-task terms, no explicit windows (focus and task lifetimes window them). Each
 
 ### 14. Exclusions
 
-The scoring spec carries terms only, no file classification. Derived files carry their base's terms verbatim: C4 from its C1 base, C5 from `c1-media`, `c6-spoof` and `c6-fold` from `c1-browsing`. `c6-dual` carries chain miss rate 1.0 and editor P99 1.0. `c1-idle` has no entry. Which files judge, report, are read as deltas, or are excluded from aggregation is the gate spec's list alone; the intended classification is recorded in the phase archive for Phase 7.
+The scoring spec carries terms only, no file classification. Derived files carry their base's terms verbatim: C4 from its C1 base, C5 from `c1-media`, `c6-spoof` and `c6-fold` from `c1-browsing`. `c6-dual` carries chain miss rate 1.0 and editor P99 1.0. `c1-idle` has no entry. Which files judge, report, are read as deltas, or are excluded from aggregation is the gate spec's list alone; the intended classification is recorded in the phase archive for Phase 8.
 
 ### 15. Scoring spec placement and lint
 

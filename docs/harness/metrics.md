@@ -2,7 +2,7 @@
 
 > Status: normative · Created 2026-09-08 · Updated 2026-09-09
 
-Every number the project reports is defined here. The document fixes three things: the **primitives** — the raw observations the harness computes from a trace or a recognition log; the **records** file they land in; and the **aggregates** — the statistics, the normalisation rule, and the constants that turn records into the figures the research questions ask for. Per-file weights are not here; they are data, in the scoring spec (`harness/scoring/scoring-spec.yaml`, §2). The code that implements the trace primitives lives in `harness/`; the grader that implements the recognition primitives is built in Phase 7 to the definitions below.
+Every number the project reports is defined here. The document fixes three things: the **primitives** — the raw observations the harness computes from a trace or a recognition log; the **records** file they land in; and the **aggregates** — the statistics, the normalisation rule, and the constants that turn records into the figures the research questions ask for. Per-file weights are not here; they are data, in the scoring spec (`harness/scoring/scoring-spec.yaml`, §2). The code that implements the trace primitives lives in `harness/`; the grader that implements the recognition primitives is built in Phase 8 to the definitions below.
 
 Changing a primitive invalidates every records file and requires recomputation from traces. Changing an aggregate, a constant, or a floor requires re-reading records only. Both kinds of change land in the changelog (§13).
 
@@ -28,7 +28,7 @@ grader(recognition_log, ground_truth, calibrated_table) → records rows   (enti
 scoring(records, scoring_spec)                    → aggregates, normalised shares, scores
 ```
 
-The first function is Phase 5's harness lower half. The second is Phase 7's grader, implementing §7. The third is Phase 7's scorer applying the **scoring spec** — `harness/scoring/scoring-spec.yaml`, with its schema and lint beside it: per coreset file, the terms (entity, primitive, `cause`, time window, aggregate, direction, weight) whose normalised shares (§9) the file's score sums — using §8–§10. All three write or read the one records shape of §5.
+The first function is Phase 5's harness lower half. The second is Phase 8's grader, implementing §7. The third is Phase 8's scorer applying the **scoring spec** — `harness/scoring/scoring-spec.yaml`, with its schema and lint beside it: per coreset file, the terms (entity, primitive, `cause`, time window, aggregate, direction, weight) whose normalised shares (§9) the file's score sums — using §8–§10. All three write or read the one records shape of §5.
 
 ---
 
@@ -254,7 +254,7 @@ with `fixed` and `oracle` the same workload under the same table. The rule appli
 
 **Floor.** Each aggregate has an absolute floor in its own units (§10). When `|improvement(oracle)|` is below the floor, the share is **undefined** for that workload and aggregate: the raw values are reported with the mark *no headroom*, and no ratio is formed.
 
-**Sensitivity.** `fixed` is the boot default, whose values are stated assumptions (`../recognition-vocabulary.md` §2). The gate spec pre-registers `fixed` under two alternative boot defaults; where the sign or ordering of a share moves, the floor is reported as a range. That reporting rule is the gate spec's (Phase 7); the formula here does not change.
+**Sensitivity.** `fixed` is the boot default, whose values are stated assumptions (`../recognition-vocabulary.md` §2). The gate spec pre-registers `fixed` under two alternative boot defaults; where the sign or ordering of a share moves, the floor is reported as a range. That reporting rule is the gate spec's (Phase 8); the formula here does not change.
 
 ---
 
@@ -291,7 +291,7 @@ The definitions above, and the mock traces that test them, assume the following 
 
 ## 12. Mock fixtures
 
-`harness/tools/tests/fixtures/` holds five hand-written pairs (run file, trace) with hand-computed expected records and a worked derivation each: `mock-office` (queued keystrokes, an unfocused task), `mock-media` (backlog, a same-instant config pair that is also a switch into FIFO, a completing batch task), `mock-p1a` (config change without an algorithm switch, preemptions, a batch task clipped at `T_end`), `mock-chain` (a three-stage frame pipeline with one late frame), `mock-switch` (MLFQ → FIFO → MLFQ with a config schedule, one hog, the §8 excess aggregates worked by hand). `mock-media` and `mock-chain` run FIFO under an oracle entry stamped beside the boot entry, so their stated scheduler and their config lines agree. They are the tests of §6 and the seeds of Phase 7's mock simulator.
+`harness/tools/tests/fixtures/` holds five hand-written pairs (run file, trace) with hand-computed expected records and a worked derivation each: `mock-office` (queued keystrokes, an unfocused task), `mock-media` (backlog, a same-instant config pair that is also a switch into FIFO, a completing batch task), `mock-p1a` (config change without an algorithm switch, preemptions, a batch task clipped at `T_end`), `mock-chain` (a three-stage frame pipeline with one late frame), `mock-switch` (MLFQ → FIFO → MLFQ with a config schedule, one hog, the §8 excess aggregates worked by hand). `mock-media` and `mock-chain` run FIFO under an oracle entry stamped beside the boot entry, so their stated scheduler and their config lines agree. They are the tests of §6 and the seeds of Phase 8's mock simulator.
 
 **`x_mlfq_level` check.** The simulator emits `x_mlfq_level` `{t, task, from, to}` on every MLFQ demotion and boost; the harness ignores it by the `x_` rule. `harness/tools/check_mlfq_levels.py`, beside the harness and not part of it, reads those lines and reports, per switch into MLFQ, whether the window covered each hog's last demotion (the run of demotions after `t_apply`, ending at the next boost or the bottom queue). A systematic miss is the evidence for proposing a field in the closed trace set; until then the trace contract stays frozen. On `mock-switch` the check passes at the window's edge; under the memo's original wall-clock window it failed there, which is what led to the lane-time definition (memo §7).
 
