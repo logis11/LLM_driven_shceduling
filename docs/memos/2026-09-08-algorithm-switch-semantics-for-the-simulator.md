@@ -1,6 +1,6 @@
 # Algorithm switch semantics for the simulator — the task queue, preemption, and overhead at a mid-run config change
 
-> Status: memo · Created 2026-09-08 · Updated 2026-09-08
+> Status: memo · Created 2026-09-08 · Updated 2026-09-09
 > From 인지오 to 인경민. Settles three questions about what the simulator does at the instant a config with a different algorithm lands mid-run, and how the MLFQ re-learning overhead is measured. Builds on the Q3 lean in `_dev/archive/2026-08-23-design-meeting-open-questions.md` (drain to a slice boundary, then start cold) and does not overturn it. Absorb into `simulator/simulator-guide.md` once implemented.
 
 ## 1. The task queue: the new algorithm takes it immediately
@@ -26,7 +26,7 @@ Worked case, FIFO → MLFQ, hog running, editor woken and pending: MLFQ starts c
 
 Apply instant: the current slice finishes first (the Q3 drain), so t_apply lags t_return by at most one slice of the outgoing algorithm.
 
-**Open — FIFO outgoing.** FIFO has no slice, so "drain to the slice boundary" out of FIFO is unbounded (until the hog blocks or exits). Two candidate rules, not yet chosen:
+**FIFO outgoing — settled 2026-09-09, rule (a).** FIFO has no slice, so "drain to the slice boundary" out of FIFO is unbounded (until the hog blocks or exits). The two candidates were:
 
 - (a) apply immediately; the running task is treated as freshly dispatched by the new algorithm, so its tenure is bounded by the new algorithm's slice
 - (b) bound the drain by the executor safety-net window
@@ -52,6 +52,8 @@ Reporting: §4.
 
 ## 4. Measuring the MLFQ re-learning overhead
 
+*Revised 2026-09-09 — the window's length: see §7. The rest of this section stands.*
+
 A cold start into MLFQ places every task in the top queue — the same state MLFQ's own periodic boost produces. One switch into MLFQ is one extra boost, and it is measured in those units.
 
 **Window.** A CPU-bound task reaches the bottom queue after one full slice at each upper level: `W_single = timeslice_us · Σ_{l=0}^{num_queues−2} timeslice_growth^l` (boot default: 2000 + 4000 = 6000 µs of lane time). The window after a switch into MLFQ is `[t_apply, t_apply + W_single · H]`, where H is the hog count below. The window is a function of the incoming params and H only; nothing is read off occupancy lengths.
@@ -68,7 +70,7 @@ A cold start into MLFQ places every task in the top queue — the same state MLF
 
 Settled: §1 (immediate takeover of the pending queue), §2 (no switch-triggered preemption; new algorithm's rule from t_apply), §3 (cold start; no invented switch cost), §4 (window from config + behavioural hog count; excess wake `ready_wait` per switch; boost baseline; `x_mlfq_level` as ground truth).
 
-Open: FIFO-outgoing apply rule (§2, a or b); whether the boost timer restarts at t_apply (§4 baseline grid).
+Settled 2026-09-09 with 인경민: the FIFO-outgoing apply rule is (a) — apply immediately, the running task freshly dispatched by the incoming algorithm; the boost timer restarts at t_apply (§4 baseline grid). Also settled the same day: a same-algorithm entry is not a switch (§7).
 
 ## 6. Action plan
 
@@ -76,14 +78,24 @@ Open: FIFO-outgoing apply rule (§2, a or b); whether the boost timer restarts a
 
 - Pending queue holds task facts and remaining demand only; the algorithm is a pick function over it. On `config_applied` with a new algorithm, re-sort the pending set under the new algorithm, cold.
 - No preemption at t_apply. The running task finishes its current slice; the new algorithm's rule governs it from then on.
-- Choose and document the FIFO-outgoing apply rule (§2 a or b) and the boost-timer behaviour at t_apply; add both to the simulator's written tie-break/semantics notes.
+- Document the three settled rules in the simulator's written tie-break/semantics notes: FIFO-outgoing applies immediately with the running task freshly dispatched (§2, rule a); the boost timer restarts at t_apply; a same-algorithm entry applies at its stamped time with queue levels kept (§7).
 - Emit `x_mlfq_level` `{t, task, from, to}` on every MLFQ demotion and boost.
 - Unit test: remaining demand conserved across a switch, in both directions between a preemptive algorithm and FIFO.
 
 ### Harness side (인지오)
 
-- `metrics.md` §6: add the `switch_window` primitive — entity `schedule`, one row per `config_applied` whose algorithm differs from the previous entry's, `t` = t_apply, `value` = `W_single · H` for MLFQ and 0 for EDF, LOTTERY, FIFO; `algorithm`, `index`, `hogs` on the row.
+- `metrics.md` §6: add the `switch_window` primitive — entity `schedule`, one row per `config_applied` whose algorithm differs from the previous entry's, `t` = t_apply, `value` = the window length of §7 (was `W_single · H`) for MLFQ and 0 for EDF, LOTTERY, FIFO; `algorithm`, `index`, `hogs` on the row.
 - `metrics.md` §8: add the two aggregates — per-switch excess wake `ready_wait` (switch and boost variants) and share of the window inside switch windows.
 - `metrics.md` §11: add the boost-timer assumption once 인경민 decides it.
 - Mock fixture: one trace with a FIFO → MLFQ switch, hog + editor, values computed by hand.
 - Check tool (outside the harness): reads `x_mlfq_level`, reports per switch whether the window covered the last hog demotion.
+
+## 7. Revision 2026-09-09
+
+Two changes after the harness implemented §4 against a hand-written switch trace (`harness/tools/tests/fixtures/mock-switch/`).
+
+**An entry with the same algorithm is not a switch.** §1–§2 cover an entry whose algorithm differs from the one in force. An entry that changes only params or the cap — every `llm_vocab` entry in a C2 file — is applied at its stamped time, as the config-schedule contract says for any entry: no drain, no cold start, queue levels kept; the running task keeps the slice it was granted and the new params govern from its next dispatch; the cap takes effect at once. Confirmed with 인경민 on 2026-09-09. The harness emits no `switch_window` row for it.
+
+**The window is sized in lane time, not laid on the wall clock.** §4 defined the window as `[t_apply, t_apply + W_single · H]`. `W_single` is CPU a hog must *receive* to reach the bottom queue, but the interval was measured on the wall clock, so whenever other tasks hold the lane inside it — the situation the window exists to measure — the hogs' descent outlasts it. In the mock, one hog and `W_single` = 6000 µs: the editor and a third task held the lane for 6500 µs inside the window, the hog reached the bottom queue 6500 µs after the window closed, and the `x_mlfq_level` check of §4 reported the miss. The window now ends **when the last counted hog has received `W_single` of CPU since t_apply**, summed from that hog's occupancy intervals in the trace; `value` = that instant − t_apply. If a hog has not received that much by the next algorithm switch or by `T_end`, the window is clipped there and the harness raises a guard naming the hog. H and `W_single` are unchanged; the boost windows of the baseline use the same rule from each boost instant, clipped at the next boost. The sentence "nothing is read off occupancy lengths" narrows to its purpose: no *parameter* is inferred from behaviour — `W_single` still comes from the config schedule — while a hog's delivered CPU is the same occupancy sum `cpu_delivered` already takes. In the mock the window becomes 12500 µs and the check passes at its edge.
+
+**Confirmed the same day**, closing §5's open list: the FIFO-outgoing apply rule is (a), and the boost timer restarts at t_apply. Nothing changes on the simulator side beyond writing the three rules into the semantics notes; `x_mlfq_level` is still wanted, since the check tool remains the ground truth for whatever this definition still misses (a hog boosted mid-descent, for one).

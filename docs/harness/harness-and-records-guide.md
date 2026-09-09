@@ -1,6 +1,6 @@
 # Harness와 records 이해하기 — trace에서 논문의 숫자까지
 
-> Status: draft · Created 2026-09-08 · Updated 2026-09-08
+> Status: draft · Created 2026-09-08 · Updated 2026-09-09
 
 이 문서는 **공부용 문서**예요. Phase 5(primitive metrics and the records pipeline)를 직접 수행하기 위해, harness가 무엇을 읽고 무엇을 쓰는지, `records`의 row 하나가 무슨 뜻인지, 그리고 그 위에 어떤 score가 올라가는지를 OS/시스템 지식이 거의 없는 사람 기준으로 바닥부터 풀어 쓴 거예요. 규범적(normative)인 정의는 `docs/harness/metrics.md`(metrics doc)가 갖고, 이 문서는 그 문서를 읽을 수 있게 만드는 다리예요. 둘이 다르면 metrics doc이 맞아요.
 
@@ -246,6 +246,12 @@ batch task의 program은 `RUN(130000000) → EXIT`예요. 즉 130초짜리 일. 
 
 세 가지 다 "scheduler가 바꿀 수 없는 것"이에요. `T_end`는 사용자가 정한 시간, chain topology는 프로그램의 구조, demand는 일의 양. scheduler가 바꾸는 건 "언제"뿐이고, "언제"는 trace가 갖고 있어요.
 
+### 4.4 세 번째 input — config schedule (Phase 6에서 추가)
+
+trace의 `config_applied` line은 `index`, `algorithm`, `provenance`만 실어요. **params**(MLFQ면 `num_queues`, `timeslice_us`, …)는 안 실어요. 그래서 "algorithm이 MLFQ로 바뀐 뒤 scheduler가 다시 배우는 데 얼마나 걸리나"(7.10의 `switch_window`)를 재려면 그 params가 필요하고, 그건 daemon이 simulator에 넘긴 **config schedule** 파일(data-contracts 문서의 config schedule 절)에서 `index`로 찾아 읽어요. reader의 세 번째 input이에요. 없어도 다른 primitive는 전부 계산되고, MLFQ로의 switch가 있을 때만 "schedule이 없어서 이 row는 못 만들었다"는 guard가 나와요.
+
+schedule의 `t_us`는 daemon이 답을 찍은 시각(t_return)이고, trace의 `config_applied`의 `t`는 실제로 적용된 시각(t_apply)이에요. schedule row의 `t`는 항상 후자예요.
+
 ---
 
 ## 5. Phase 5의 함수 한 줄 — `(run file, trace) → records`
@@ -302,7 +308,7 @@ records는 long format이에요. 이유는 셋.
 2. 손으로 계산한 expected value가 그대로 CSV fixture가 돼요. review에서 diff로 보고, CI에서 byte 비교해요.
 3. row 하나가 self-contained라서 실험 matrix 전체를 그냥 이어 붙일 수 있어요.
 
-### 6.2 column 19개
+### 6.2 column 20개
 
 세 묶음이에요.
 
@@ -326,19 +332,20 @@ records는 long format이에요. 이유는 셋.
 | `t` | **언제**의 일인가 (anchor time, µs) |
 | `value` | **얼마**였나 |
 
-**attribute 9개** — metric에 따라 채워지는 부가 정보. 해당 없으면 빈칸.
+**attribute 10개** — metric에 따라 채워지는 부가 정보. 해당 없으면 빈칸.
 
 | column | 어느 metric이 채우나 | 뜻 |
 |---|---|---|
 | `cause` | `ready_wait` | 왜 runnable해졌나 (`wake`, `timer_tick`, …) |
 | `provenance` | `config_interval` | 설정이 어디서 왔나 |
-| `algorithm` | `config_interval` | 어떤 algorithm이었나 |
-| `index` | `config_interval` | schedule의 몇 번째 entry였나 |
+| `algorithm` | `config_interval`, `switch_window` | 어떤 algorithm이었나 |
+| `index` | `config_interval`, `switch_window` | schedule의 몇 번째 entry였나 |
 | `period_us` | `job` | 이 주기 작업의 period. `value > period_us`면 miss |
 | `predicted` | `mode_correct`, `attr_correct` | recognizer가 뭐라고 답했나 |
 | `truth` | `mode_correct`, `attr_correct` | 정답이 뭐였나 |
 | `validation` | recognizer row | validator가 그 답을 어떻게 처리했나 |
 | `familiarity` | recognizer row | 이 query를 덮는 segment의 familiarity tier (segment에 적혀 있을 때만). accuracy를 tier별로 나눠 볼 때 묶는 기준 |
+| `hogs` | `switch_window` | 그 switch 순간에 센 hog(CPU만 먹는 task)의 수 H (7.10) |
 
 ### 6.3 `entity`는 어디서 나온 말인가
 
@@ -350,7 +357,7 @@ records는 long format이에요. 이유는 셋.
 |---|---|---|
 | task id (`editor`, `mpv`, `build.c1`, `game.chain.1`, …) | task 하나 | `ready_wait`, `cpu_delivered`, `job` |
 | `lane` | CPU 그 자체 | `busy` — CPU가 총 얼마나 바빴나 |
-| `schedule` | config schedule | `config_interval` — 설정이 얼마나 유지됐나 |
+| `schedule` | config schedule | `config_interval` — 설정이 얼마나 유지됐나; `switch_window` — algorithm이 바뀐 뒤 다시 배우는 구간 |
 | `recognizer` | recognizer의 답 | `mode_correct` — 이 query에서 mode를 맞췄나 |
 
 `lane`, `schedule`, `recognizer`는 **예약된 이름**이에요. run file에 이 이름의 task가 있으면 reader가 trace를 거부해요. "누구 얘기인지" 헷갈리면 안 되니까.
@@ -589,7 +596,35 @@ entity=schedule, metric=config_interval, t=60450, value=119550, provenance=unmod
 
 이 row들에서 provenance 비율("`fallback`으로 돈 시간의 비율")과 config age가 나와요. guard가 trace를 직접 읽지 않고 records를 읽게 하려고 여기 넣어요.
 
-### 7.10 한 줄 요약표
+### 7.10 `switch_window` — algorithm이 바뀐 뒤 다시 배우는 구간 (Phase 6에서 추가)
+
+**"algorithm이 다른 것으로 바뀐 순간부터, 새 scheduler가 '누가 batch인지'를 다시 알아내는 데 걸리는 구간의 길이."**
+
+배경은 2026-09-08의 memo(`docs/memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md`)예요. algorithm이 바뀌면 이전 scheduler가 배운 상태는 버려져요. EDF의 deadline, LOTTERY의 ticket, FIFO의 도착 순서는 config나 program에서 다시 나오니 잃는 게 없지만, **MLFQ의 queue level**은 행동을 보고 배운 것이라 잃어요. MLFQ로 바뀌면 모든 task가 맨 위 queue에서 다시 시작하고, CPU만 먹는 task(hog)는 slice를 한 번씩 다 쓰면서 한 칸씩 내려가요. 그동안 editor 같은 interactive task는 응답이 나빠져요. 이건 MLFQ 자신의 주기적 boost가 만드는 상태와 같아서, "switch 한 번 = boost 한 번 더"라는 단위로 재요.
+
+row는 `config_applied` 중 **직전 entry와 algorithm이 다른 것**마다 하나예요(boot entry는 직전이 없으니 row 없음; params만 바뀐 entry는 switch가 아님). entity `schedule`, `t`는 적용 시각.
+
+- `W_single` = hog 하나가 맨 위 queue에서 맨 아래까지 떨어지는 데 **받아야 하는 CPU 시간**. 위쪽 level마다 slice 하나씩: `timeslice_us × (1 + growth + growth² + …)`, level이 `num_queues − 1`개. boot default(3 queue, 2000 µs, growth 2)면 2000 + 4000 = 6000 µs. **바뀐 뒤의 params**로 계산하고, 그래서 config schedule이 필요해요(4.4).
+- `H` = 그 순간 살아 있는 task 중, 적용 시각 뒤 **첫 `run_end`가 `preempt`인** task의 수. 행동으로 세요(이름이나 archetype은 모름). `hogs` column에 실려요. FIFO 등으로 바뀔 때도 세어서 적지만 value는 0.
+- `value` = MLFQ로 바뀔 때, 적용 시각부터 **마지막 hog가 CPU를 `W_single`만큼 받은 순간**까지의 길이. hog가 실제로 앉아 있던 구간(occupancy)을 적용 시각부터 더해서 6000이 차는 시각을 찾아요. 그 사이 editor가 의자를 쓰면 hog의 시계는 멈추고 창은 그만큼 길어져요. 다음 algorithm switch나 `T_end`까지도 못 채우면 거기서 자르고 guard를 내요. EDF/LOTTERY/FIFO로 바뀔 때는 0.
+
+```
+t=40600   config_applied  index=2  algorithm=MLFQ   (직전 entry는 FIFO)
+          살아 있는 task: editor, hog, probe
+          40600 뒤 첫 run_end: editor 45600 block / hog 42600 preempt / probe 46100 block → H = 1
+          incoming params 3 / 2000 / 2 → W_single = 6000
+          hog의 CPU: [40600,42600] 2000, (editor·probe가 씀), [49100,53100] 4000 → 53100에 6000 참
+```
+
+```
+entity=schedule, metric=switch_window, t=40600, value=12500, algorithm=MLFQ, index=2, hogs=1
+```
+
+이 row 위에서 나오는 숫자(metrics doc의 aggregate 절): window `[t, t + value]` 안에 있는 editor의 `ready_wait(wake)` 평균에서 같은 config interval의 window 밖 평균을 뺀 **초과분**(switch 변형), 그리고 같은 계산을 boost 시점들(`t + k × boost_interval_us`)의 window로 한 것(boost 변형). 둘이 비슷하면 "switch는 boost 한 번 값이었다", 더 크면 이전 algorithm에서 넘어온 backlog. 그리고 전체 시간 중 switch window 안에 든 비율. **score에 weight로 들어가지 않고 옆에 보고만 해요.**
+
+fixture `mock-switch`(`harness/tools/tests/fixtures/mock-switch/worked.md`)가 이걸 처음부터 끝까지 손으로 계산한 예예요. memo의 처음 정의는 창을 `W_single × H`의 **벽시계** 길이로 그었는데, 거기서는 창이 46600에 닫히고 hog는 53100에야 맨 밑에 닿아서 재학습 기간을 다 못 덮었어요. 그래서 창을 위처럼 hog가 실제로 받은 CPU로 재도록 고쳤고(memo 7절), 지금은 창이 53100에 닫혀요. 정의가 현실과 맞는지 감시하는 도구가 `harness/tools/check_mlfq_levels.py`예요: simulator가 `x_mlfq_level`(demotion/boost마다 한 줄)을 내면, harness는 `x_` 규칙대로 무시하지만 이 도구는 읽어서 "각 switch의 창이 hog들의 마지막 demotion을 덮었나"를 보고해요. 체계적으로 못 덮으면 그게 정의를 다시 고치거나 closed set에 field를 추가하자고 제안할 근거예요.
+
+### 7.11 한 줄 요약표
 
 | metric | 한국어로 | entity | 몇 row | trace의 어디서 | run file에서 |
 |---|---|---|---|---|---|
@@ -602,6 +637,7 @@ entity=schedule, metric=config_interval, t=60450, value=119550, provenance=unmod
 | `preempt_count` | 끌려온 횟수 | task | task당 1 | `run_end(preempt)` 개수 | — |
 | `busy` | 의자가 찬 시간 합 | `lane` | trace당 1 | 모든 run interval | `T_end` |
 | `config_interval` | 설정 유지 시간 | `schedule` | `config_applied`마다 | `config_applied` → 다음 것 | `T_end` |
+| `switch_window` | algorithm 전환 뒤 재학습 구간 | `schedule` | algorithm이 바뀌는 `config_applied`마다 | `config_applied`, 각 task의 첫 `run_end` | config schedule의 params (`index`로) |
 
 ---
 
@@ -695,11 +731,11 @@ run file에서 읽는 세 가지:
 
 ### 10.2 config schedule (이 trace를 만든 조건)
 
-condition `llm_vocab`, prior table. boot 설정이 0에, recognizer의 답이 40000 + latency 450 = 40450에 적용돼요.
+condition `llm_vocab`, prior table. boot 설정이 0에, recognizer의 답이 40000 + latency 450 = 40450에 적용돼요. algorithm은 그대로 MLFQ이고 cap만 바뀌는 entry라서 찍힌 시각에 바로 적용되고(drain 없음), hog의 queue level과 받은 slice는 그대로예요. algorithm이 바뀌는 entry만 지금 도는 task의 slice가 끝난 뒤 적용돼요(2026-09-08 memo, 7절).
 
 ### 10.3 trace
 
-scheduler는 아무 legal한 것이어도 돼요. 이 mock은 "keystroke가 오면 1 ms 안에 editor에게 의자를 넘기는 MLFQ"를 가정했어요. 시각은 µs.
+scheduler는 아무 legal한 것이어도 돼요. 이 mock은 boot MLFQ(queue 3개, slice 2000, growth 2)를 simulator guide의 규칙대로 돌려요: slice를 다 쓰면 한 칸 내려가고, block하면 그 자리에 머물고, 더 높은 queue로 깨어나면 즉시 preempt, 같거나 낮은 queue면 slice 경계까지 기다려요. 시각은 µs.
 
 ```jsonl
 {"event":"meta","workload_id":"mock-c2-p1a","condition":"llm_vocab","sim":"mock@0","schedule_entries":2}
@@ -733,12 +769,13 @@ scheduler는 아무 legal한 것이어도 돼요. 이 mock은 "keystroke가 오�
 | 시각 | 일어난 일 |
 |---|---|
 | 0 | boot 설정 적용. editor 등장, 앉자마자 첫 명령이 `WAIT`라 바로 일어남(길이 0짜리 occupancy) |
-| 10000 | keystroke 1. 의자가 비어 있어 바로 앉음. 3000 일하고 다음 keystroke 기다림 |
-| 22000 | keystroke 2. 바로 앉음. 4000 일함 |
-| 40000 | hog 등장, 바로 앉음. 80000짜리 일 시작 |
-| 40450 | recognizer의 답(ml-train, wanted) 적용. `unmodified` |
-| 45000 | keystroke 3. 의자에 hog가 있음. editor는 줄 섬 |
-| 46000 | scheduler가 hog를 끌어내림(`preempt`). editor 앉음. 2000 일함 |
+| 10000 | keystroke 1. 의자가 비어 있어 바로 앉음. 3000 일함 — Q0 slice 2000을 다 써서 12000에 Q1로 내려감. 13000에 block, Q1에 머묾 |
+| 22000 | keystroke 2. 바로 앉음. 4000 일함 — Q1 slice 4000을 26000에 다 쓰고 Q2로. block |
+| 40000 | hog 등장, Q0에 바로 앉음. 80000짜리 일 시작 |
+| 40450 | recognizer의 답(ml-train, wanted) 적용. `unmodified`. 같은 algorithm이라 hog는 그대로 |
+| 42000 | hog의 Q0 slice 다 써서 Q1 |
+| 45000 | keystroke 3. editor는 Q2, hog는 Q1 → preempt 없음. editor는 줄 섬 |
+| 46000 | hog의 Q1 slice가 끝나 Q2 뒤로 감. editor(Q2, 45000부터 대기) 앉음(`preempt`). 2000 일함 |
 | 48000 | editor 끝. hog 다시 앉음 |
 | 100000 | `T_end`. editor 퇴장(`depart`). hog는 아직 앉아 있음 |
 | 122000 | hog 일 끝남(`exit`). window 밖 |
@@ -804,23 +841,23 @@ task 전체에 대한 값의 `t`는 `T_end`로 적었어요. `completed=1`이면
 ### 10.5 완성된 expected CSV
 
 ```
-workload_id,condition,table,seed,sim,source_sha256,entity,metric,t,value,cause,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,ready_wait,0,0,arrive,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,ready_wait,10000,0,wake,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,ready_wait,22000,0,wake,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,ready_wait,40000,0,arrive,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,ready_wait,45000,1000,wake,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,cpu_delivered,100000,9000,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,completed,100000,0,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,demand,100000,9000,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,preempt_count,100000,0,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,cpu_delivered,100000,58000,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,completed,100000,0,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,demand,100000,80000,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,preempt_count,100000,1,,,,,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,schedule,config_interval,0,40450,,fallback,MLFQ,0,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,schedule,config_interval,40450,59550,,unmodified,MLFQ,1,,,,,
-mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,lane,busy,100000,67000,,,,,,,,,
+workload_id,condition,table,seed,sim,source_sha256,entity,metric,t,value,cause,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,ready_wait,0,0,arrive,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,ready_wait,10000,0,wake,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,ready_wait,22000,0,wake,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,ready_wait,40000,0,arrive,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,ready_wait,45000,1000,wake,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,cpu_delivered,100000,9000,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,completed,100000,0,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,demand,100000,9000,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,editor,preempt_count,100000,0,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,cpu_delivered,100000,58000,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,completed,100000,0,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,demand,100000,80000,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,hog,preempt_count,100000,1,,,,,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,schedule,config_interval,0,40450,,fallback,MLFQ,0,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,schedule,config_interval,40450,59550,,unmodified,MLFQ,1,,,,,,
+mock-c2-p1a,llm_vocab,prior,,mock@0,<sha>,lane,busy,100000,67000,,,,,,,,,,
 ```
 
 row의 순서는 정해져 있어요: `entity`, `metric`, `t`(숫자), `cause` 순. 위 표는 계산 순서대로 적은 것이라 정렬 전이에요. `<sha>` 자리에는 실제 fixture에서 trace 파일의 sha256이 그대로 들어가고, 마지막 `familiarity` column은 recognizer row에만 쓰이니 여기서는 전부 빈칸이에요.
@@ -983,6 +1020,9 @@ mock trace는 어떤 simulator 동작을 전제하고 쓰여요. 그 전제가 m
 | 2 | wake는 깊이를 갖고 큐에 쌓임. stage 6이 stage 7을 두 번 깨우면 stage 7은 나중에 `WAIT` 두 개를 완료 | chain 중간에서 frame이 빠지고 그 뒤 모든 tick/iteration 짝이 어긋남 (12장) |
 | 3 | 같은 µs에 일어난 event의 순서가 문서화된 deterministic 규칙을 따름 | mock과 실제 trace를 byte 비교할 수 없음 |
 | 4 | `deadline` line은 contract대로 계속 emit | cross-check를 잃음 |
+| 5 | MLFQ로 switch된 뒤 boost timer는 `t_apply`에서 다시 시작 (인경민 확인, 2026-09-09) | 7.10의 boost 변형이 보는 시점들이 달라짐 |
+| 6 | FIFO에서 나가는 switch는 즉시 적용, 다른 algorithm에서 나갈 때는 slice 경계에서 (memo의 규칙 (a), 인경민 확인, 2026-09-09) | `mock-switch`의 적용 시각이 달라짐 |
+| 7 | 같은 algorithm의 entry(params나 cap만 바뀜)는 찍힌 시각에 바로 적용, queue level 유지 (인경민 확인, 2026-09-09) | `mock-p1a`와 10장의 적용 시각이 달라짐 |
 
 그리고 조언 하나: `T_end` 뒤는 harness가 안 읽으니 거기서 멈춰도 돼요. 이건 contract가 아니에요.
 
@@ -1151,16 +1191,20 @@ harness/
       reader.py            # trace + run file → yields
       primitives.py        # pure functions
       records.py           # CSV writer
+    check_mlfq_levels.py   # harness 밖의 점검 도구 (7.10) — Phase 6
     tests/
       fixtures/
         mock-c1-office/    # run file + trace + expected.csv
         mock-c1-media/
         mock-c2-p1a/
         mock-chain/
+        mock-switch/       # + config-schedule.json — Phase 6
       test_reader.py
       test_primitives.py
 .github/workflows/harness.yml
 ```
+
+Phase 6의 6.1(switch overhead)이 여기 얹은 것: 4.4의 세 번째 input, 7.10의 primitive와 `hogs` column, `mock-switch`, 점검 도구.
 
 파일 이름은 예시예요. 원칙은 machine이 읽는 것(schema, fixture)은 code 옆에, 사람이 읽는 것(metrics doc)은 `docs/harness/`에.
 
