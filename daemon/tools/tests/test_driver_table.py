@@ -4,7 +4,9 @@ import json
 
 import pytest
 
-from conftest import REPO, clone, row, schema_default_params
+import yaml
+
+from conftest import REPO, clone, make_table, row, schema_default_params
 from drivertable.config_schema import ALGORITHMS, MODES
 from drivertable.lint import lint_table
 
@@ -127,3 +129,58 @@ def test_json_schema_matches_config_schema_data():
             assert p["type"] == spec.json_type
             assert p["minimum"] == spec.lo and p["maximum"] == spec.hi
     assert set(schema["$defs"]["row"]["properties"]["mode"]["enum"]) == set(MODES)
+
+
+# ------------------------------------------------------------------ sources
+# Every judgement in the prior table rests on a docs/references.md id
+# (Phase 6 spec, decision 2 as amended 2026-09-09).
+
+PRIOR_TABLE = REPO / "daemon" / "driver-table" / "prior.yaml"
+
+
+def test_unknown_source_id_is_an_error(table_file, prior):
+    row(prior, "office", True)["sources"] = ["ostep", "nope-xx99"]
+    errs = errors_of(table_file, prior)
+    assert any("nope-xx99" in e and "references.md" in e for e in errs)
+    row(prior, "office", True)["sources"] = ["ostep"]
+    row(prior, "office", True)["entries"]["MLFQ"]["sources"] = ["liu-jacm73", "nope-xx99"]
+    errs = errors_of(table_file, prior)
+    assert any("entry MLFQ" in e and "nope-xx99" in e for e in errs)
+
+
+def test_prior_rows_and_theory_entries_require_sources(table_file, prior, calibrated):
+    row(prior, "office", True).pop("sources")
+    errs = errors_of(table_file, prior)
+    assert any("(office, background_wanted=true)" in e and "sources" in e for e in errs)
+    prior = make_table("prior")
+    row(prior, "office", True)["entries"]["MLFQ"].pop("sources")
+    errs = errors_of(table_file, prior)
+    assert any("entry MLFQ" in e and "sources" in e and "theory" in e for e in errs)
+    # a tuned entry on the calibrated table needs no source; its row still does not either
+    r = row(calibrated, "office", True)
+    r.pop("sources")
+    for alg in ("EDF", "LOTTERY", "FIFO"):
+        r["entries"][alg].pop("sources", None)
+    assert errors_of(table_file, calibrated) == []
+
+
+def test_empty_sources_list_is_a_schema_error(table_file, prior):
+    row(prior, "office", True)["sources"] = []
+    errs = errors_of(table_file, prior)
+    assert any("sources" in e for e in errs)
+
+
+def test_committed_prior_table_is_clean():
+    assert PRIOR_TABLE.exists(), "daemon/driver-table/prior.yaml is Phase 6's artifact"
+    assert lint_table(PRIOR_TABLE, SCHEMA) == []
+    table = yaml.safe_load(PRIOR_TABLE.read_text())
+    assert table["role"] == "prior"
+    for r in table["rows"]:
+        assert r["batch_bandwidth_cap"] is not None            # Q1: never null
+        assert r["default"] != "FIFO"                          # Q2: FIFO nowhere
+        entry = r["entries"][r["default"]]
+        assert entry["basis"] == "theory"
+        if r["default"] == "LOTTERY":                          # Q4: share equals the cap
+            assert entry["params"]["batch_share"] == r["batch_bandwidth_cap"]
+        if not r["background_wanted"]:
+            assert r["batch_bandwidth_cap"] == 0.05

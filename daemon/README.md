@@ -6,6 +6,7 @@ One artifact in this tree is not the daemon builder's: **`driver-table/`** — t
 
 ```
 driver-table/
+  prior.yaml                        # the prior table (Phase 6): 32 rows from theory, every judgement with its references.md ids
   schema/driver-table.schema.json   # the table's shape (frozen with the contract)
   prior.yaml                        # the prior table  — written from theory (Phase 6)
   calibrated.yaml                   # the calibrated table — tuned on the throwaway pool (later)
@@ -20,6 +21,6 @@ tools/
 
 ```
 pip install -r tools/requirements.txt
-make lint      # exit 1 on any violation; "nothing to lint" until the tables land
+make lint      # exit 1 on any violation; also resolves every `sources` id against docs/references.md
 make test
 ```

@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-09-08
+> Status: normative · Created 2026-08-26 · Updated 2026-09-09
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -292,6 +292,11 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - role: LOTTERY algorithm origin, and the grounding of the boot default's lottery values (recognition-vocabulary §2): "the resource consumption rates of active computations are proportional to the relative shares that they are allocated" (§1); "With a scheduling quantum of 10 milliseconds (100 lotteries per second), reasonable fairness can be achieved over subsecond time intervals. As computation speeds continue to increase, shorter time quanta can be used to further improve accuracy" (§2). Names no ticket ratio between classes.
 - status: verified (2026-09-07; PDF read)
 
+
+### `liu-jacm73`
+- cite: Liu, C. L., & Layland, J. W. (1973). Scheduling Algorithms for Multiprogramming in a Hard-Real-Time Environment. *Journal of the ACM*, 20(1), 46–61. DOI 10.1145/321738.321743. Scan with OCR text layer: cs.ru.nl/~hooman/DES/liu-layland.pdf (accessed 2026-09-09).
+- role: EDF grounding for the prior driver table's periodic-consumer rows (`daemon/driver-table/prior.yaml`): assumption (A2), "each task must be completed before the next request for it occurs" — the period-implicit deadline the config schema uses; Theorem 7, "the deadline driven scheduling algorithm is feasible if and only if (C₁/T₁) + (C₂/T₂) + … + (Cₘ/Tₘ) ≤ 1"; the abstract's contrast with an optimum fixed-priority scheduler, whose utilisation bound "may be as low as 70 percent for large task sets". Cite for periodic tasks on one processor under its assumptions (A1)–(A5); it says nothing about behaviour above utilisation 1.
+- status: verified (2026-09-09; OCR text read; JACM Vol. 20, No. 1, January 1973, pp. 46–61 confirmed from the running head)
 
 ### `miller-fjcc68`
 - cite: Miller, R. B. (1968). Response time in man-computer conversational transactions. *Proc. AFIPS Fall Joint Computer Conference (FJCC '68)*, 267–277. DOI 10.1145/1476589.1476628. Scan: Computer History Museum collection (yusufarslan.net/sites/yusufarslan.net/files/upload/content/Miller1968.pdf, accessed 2026-09-08).

@@ -26,7 +26,8 @@ def make_table(role="prior"):
         for wanted in (True, False):
             entries = {"MLFQ": {"params": schema_default_params("MLFQ"),
                                 "basis": "theory",
-                                "justification": "MLFQ keeps the editor responsive."}}
+                                "justification": "MLFQ keeps the editor responsive.",
+                                "sources": ["ostep"]}}
             cap = 0.30 if wanted else 0.05
             if role == "calibrated":
                 for alg in ALGORITHMS:
@@ -39,6 +40,7 @@ def make_table(role="prior"):
                          "batch_bandwidth_cap": cap,
                          "default": "MLFQ",
                          "justification": "Interactive work dominates; MLFQ default.",
+                         "sources": ["ostep"],
                          "entries": entries})
     return {"role": role, "rows": rows}
 

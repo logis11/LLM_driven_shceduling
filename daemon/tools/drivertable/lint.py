@@ -2,17 +2,31 @@
 
 Everything JSON Schema can say lives in driver-table.schema.json; this module
 adds the cross-checks it cannot: the 32-row key space, default ∈ entries,
-role-specific entry counts, LOTTERY's batch_share ≤ cap, and the
-byte-identical wanted-pair check.
+role-specific entry counts, LOTTERY's batch_share ≤ cap, the byte-identical
+wanted-pair check, and `sources`: every id resolves to a heading in
+docs/references.md, and the prior table carries a non-empty list on every row
+and every `basis: theory` entry (a judgement rests on a reference).
 """
 
 import json
 import pathlib
+import re
 
 import jsonschema
 import yaml
 
 from .config_schema import ALGORITHMS, CAP_RANGE, MODES
+
+REFERENCES = pathlib.Path(__file__).resolve().parents[3] / "docs" / "references.md"
+_HEADING = re.compile(r"^### `([^`]+)`\s*$", re.M)
+
+
+def reference_ids(path=REFERENCES):
+    """The ids docs/references.md defines, one per `### \`id\`` heading."""
+    try:
+        return set(_HEADING.findall(pathlib.Path(path).read_text(encoding="utf-8")))
+    except OSError:
+        return set()
 
 
 def load_schema(path):
@@ -32,9 +46,10 @@ def compose(row, algorithm):
     return json.dumps(config, sort_keys=True, separators=(",", ":"))
 
 
-def lint_table(path, schema_path):
+def lint_table(path, schema_path, references_path=REFERENCES):
     """Returns a list of error strings; empty means the table is legal."""
     path = pathlib.Path(path)
+    known = reference_ids(references_path)
     try:
         table = yaml.safe_load(path.read_text())
     except yaml.YAMLError as err:
@@ -81,10 +96,24 @@ def lint_table(path, schema_path):
             for alg in ALGORITHMS:
                 if alg not in entries:
                     errors.append(f"{path.name}: calibrated table: row {k} missing entry for {alg}")
+        for src in row.get("sources", []):
+            if src not in known:
+                errors.append(f"{path.name}: row {k}: sources: {src!r} is not a heading in "
+                              f"docs/references.md")
+        if role == "prior" and not row.get("sources"):
+            errors.append(f"{path.name}: prior table: row {k}: sources required (the row's "
+                          f"judgement rests on a docs/references.md id)")
         for alg, entry in entries.items():
             if entry.get("basis") != "schema-default" and not entry.get("justification"):
                 errors.append(f"{path.name}: row {k}: entry {alg}: justification required "
                               f"unless basis is schema-default")
+            for src in entry.get("sources", []):
+                if src not in known:
+                    errors.append(f"{path.name}: row {k}: entry {alg}: sources: {src!r} is not "
+                                  f"a heading in docs/references.md")
+            if role == "prior" and entry.get("basis") == "theory" and not entry.get("sources"):
+                errors.append(f"{path.name}: prior table: row {k}: entry {alg}: sources required "
+                              f"on a theory entry")
             if alg == "LOTTERY" and cap is not None:
                 share = entry["params"].get("batch_share")
                 if isinstance(share, (int, float)) and share > cap:
@@ -143,4 +172,4 @@ def _describe_path(table, abs_path):
     return ("/".join(str(p) for p in parts) + ": ") if parts else ""
 
 
-__all__ = ["lint_table", "load_schema", "compose"]
+__all__ = ["lint_table", "load_schema", "compose", "reference_ids"]
