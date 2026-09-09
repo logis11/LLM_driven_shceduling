@@ -1,21 +1,23 @@
-# Handoff — Phase 6: 6.1 done, 6.2 picked up
+# Handoff — Phase 6: 6.1 and 6.2 done, 6.3 picked up
 
-Written 2026-09-09. Repo `LLM_driven_shceduling`, branch `jioh/driver-table-v0` (off `main` after PR #4; `_dev/` edits land on this branch by the user's call). Pushed at handoff time.
+Written 2026-09-09. Repo `LLM_driven_shceduling`, branch `jioh/driver-table-v0` (off `main` after PR #4; `_dev/` edits land on this branch by the user's call). Local commits not yet pushed at handoff time (`git log origin/jioh/driver-table-v0..HEAD`).
 
 ## Where things stand
 
 - **Phase 6 `[WIP]`**, spec `_dev/docs/spec/jioh/phase-6-driver-table-v0-and-scoring-spec.md`. Order 6.1 → 6.2 → 6.3 → 6.4.
-- **6.1 Switch overhead — done.** `switch_window` primitive (lane-time window: closes when the last hog has received `W_single` of CPU since `t_apply`; clipped at the next switch or `T_end` with a guard), `hogs` twentieth records column, config schedule as the harness's third input (`--schedule`, matched by `index`, cross-checked against the trace), `x_mlfq_level` check tool `harness/tools/check_mlfq_levels.py`, fixture `mock-switch`. 63 tests, lint clean. Metrics doc §3/§5/§6.9/§8/§11/§12/§13; memo §7 revision.
-- **Settled with 인경민 on 2026-09-09** (memo §5/§7, metrics doc §11 items 7–9): a same-algorithm entry applies at its stamped time with queue levels kept and is not a switch; FIFO-outgoing applies immediately with the running task freshly dispatched (rule a); the boost timer restarts at `t_apply`. Nothing on the switch semantics is open.
-- **Mocks follow the guide's MLFQ rules and the memo** (fixtures README item 7). `mock-p1a` was rewritten to them; `mock-chain` and `mock-media` run FIFO under an oracle entry beside the boot entry.
-- **6.2 Scoring spec — `[WIP]`, not started.** Next: brief from the spec's decisions 5–15, then implementation test-first (the user's route; no plan doc, no worktree).
+- **6.1 Switch overhead — done.** Lane-time `switch_window`, `hogs` column, config schedule as third input, `check_mlfq_levels.py`, `mock-switch`. All switch semantics settled with 인경민 on 2026-09-09 (memo §5/§7; metrics doc §11 items 7–9).
+- **6.2 Scoring spec — done.** `harness/scoring/scoring-spec.yaml` (23 files, 44 terms), schema, lint (`tools/harness/scoring.py`, `tools/scoring_lint.py`, in `make lint`), 20 tests; harness CI builds the coreset first (`make -C dataset dataset`). 83 harness tests, lint clean.
+- **6.3 Prior table — `[WIP]`, not started.** Next: brief from spec decisions 1–2 and 4, then straight to authoring (test-first for any code; the table is data).
+- **Mocks follow the guide's MLFQ rules and the memo** (fixtures README item 7).
 
-## 6.2 inputs
+## 6.3 inputs
 
-- Spec decisions 5–15: term shape, scored aggregates (P99 / miss rate / progress / makespan), per-file weights, C2 window 60 s–`T_end`, derived files equal their base, `c6-dual` two foregrounds, `c1-idle` none, placement (YAML in the harness tree, JSON schema, lint, CI) and the lint's checks.
-- Entity names from `dataset/build/coreset-single/*.workload.json` (task ids: `editor`, `hog`, `writer`, `browser`, `game.chain.1`, `video`, `music`, `build`, `bulk`, `download`, `batch`, `photo-editor`, `video-editor`, `mailer`, `compositor`, `spoof`, …) — read them, do not guess; the lint enforces existence.
-- Metrics doc §8 for the aggregate vocabulary; §9 floors are not the scoring spec's.
-- Harness tree conventions: `harness/README.md`, `harness/Makefile`, `.github/workflows/harness.yml`, `harness/records/schema/` (machine schemas beside the code).
+- Contract: `docs/data-contracts.md` §10 (prior table: exactly one entry per row, `basis: theory`, a justification sentence on the row and on the entry; 32 rows keyed `(mode, background_wanted)`; per-row `batch_bandwidth_cap` null or 0.05–0.95, `default`).
+- Machine schema and lint: `daemon/driver-table/schema/driver-table.schema.json`, `daemon/tools/drivertable/{config_schema,lint}.py`; `make -C daemon lint` looks for `daemon/driver-table/*.yaml`. Config schema: 16 modes; MLFQ `num_queues` 2–8 (3), `timeslice_us` 500–100000 (2000), `timeslice_growth` 1–8 (2), `boost_interval_us` 10000–10000000 (100000); EDF `residual_timeslice_us` 500–100000 (2000); LOTTERY `batch_share` 0.01–0.90 (0.15) ≤ cap, `timeslice_us`; FIFO no params.
+- Spec decisions: all 32 rows `basis: theory`, one sentence each on row and entry; any of the four algorithms by theory; references ids only where they already exist (`ostep`, `waldspurger-osdi94`); no new sources.
+- Rows the coreset exercises (17): browsing/T, compile/T, dev/T, gaming/T, gaming/F, idle/T, indexing/F, mail/T, media/T, meeting/T, ml-train/T, office/T, photo/T, render/T, backup/T, transcode/T, video-edit/T. The pair review (6.4) will compare the 16 same-mode pairs and the three C2 row-pairs (`ml-train/T`–`indexing/F`, `gaming/T`–`gaming/F`, `render/T`–`backup/T`); a row's justification should name the scored term it serves (scoring spec).
+- Mode semantics: `docs/recognition-vocabulary.md` §1; boot default provenance §2.
+- Scoring terms per file: `harness/scoring/scoring-spec.yaml`.
 
 ## Rules of this project the session must keep
 
@@ -25,8 +27,8 @@ Written 2026-09-09. Repo `LLM_driven_shceduling`, branch `jioh/driver-table-v0` 
 
 ## Environment
 
-- venv in the session scratchpad: `pip install -r dataset/tools/requirements.txt -r daemon/tools/requirements.txt -r harness/tools/requirements.txt`; pass `PY=<venv>/bin/python` to the Makefiles.
+- venv in the session scratchpad: `pip install -r dataset/tools/requirements.txt -r daemon/tools/requirements.txt -r harness/tools/requirements.txt`; pass `PY=<venv>/bin/python` to the Makefiles. The harness lint needs `make -C dataset dataset` once.
 
-## Carried forward (not 6.2's)
+## Carried forward (not 6.3's)
 
 - 박이안 on the repeat index; `c1-media` tier-1 familiarity annotation; C1-derived `demand: calibration`; gate spec items (Phase 7).
