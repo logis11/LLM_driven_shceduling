@@ -1,5 +1,5 @@
 # A Semantic Recognition Layer for Operating Systems
-> Status: draft — for team review · Created 2026-08-15 · Updated 2026-09-07
+> Status: draft — for team review · Created 2026-08-15 · Updated 2026-09-09
 
 **Removing hardcoded semantic knowledge from the OS, validated on CPU scheduling**
 
@@ -413,7 +413,7 @@ This section describes the CPU scheduler driver specifically. An algorithm earns
 | **MLFQ** | Ordinary interactive use, idle | — this is the default and the right answer for mixed, unknown work |
 | **EDF** (earliest deadline first) | Gaming, media, anything with a real-time producer | MLFQ has no concept of a deadline. It knows priority, not "this must complete within 3 ms or a frame drops" |
 | **Lottery / Stride** | Contention with background work the user wants finished | MLFQ cannot guarantee proportions. "Roughly less" is easy; "exactly 15% to background" is not |
-| **FIFO** | Pure batch throughput | Throughput wants minimum context switching and maximum cache locality; MLFQ keeps interrupting |
+| **FIFO** | Pure batch throughput | Throughput wants minimum context switching and maximum cache locality; MLFQ keeps interrupting. *Note (2026-09-09): the simulator charges no context-switch cost and models no cache (switch memo §3), so inside this experiment this advantage does not exist and what remains of FIFO is non-preemption, which only hurts the foreground term every scored file carries; the prior driver table therefore names FIFO on no row. FIFO stays in the menu as a choice the LLM conditions can make and be scored on, a point in the `random` draw and the configuration search, and an entry every calibrated row carries.* |
 
 Note what tunes the treatment of background work inside a gaming session: not the mode, but the attribute — `background_wanted` decides whether the bulk work is capped-but-progressing or freely deferred. This is the concrete payoff of §4.4.3: the mode picks the algorithm family, the attribute picks how the rest of the machine is treated under it.
 

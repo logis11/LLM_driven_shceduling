@@ -19,7 +19,7 @@ All 32 rows are authored, each with `basis: theory` and a one-sentence justifica
 
 ### 2. Algorithm policy
 
-Any of the four algorithms may be named per row, chosen by theory. How many algorithms the table uses is a result, not a target. Justifications are plain sentences; a `docs/references.md` id appears only where one already exists, and no new sources are added for the table.
+Any of the four algorithms may be named per row, chosen by theory. How many algorithms the table uses is a result, not a target. Justifications are plain sentences, and every algorithm assignment and every non-default parameter value rests on a `docs/references.md` id; where no held reference grounds a choice, the primary source is added per the citation rule before the row is written (amended 2026-09-09: the earlier "no new sources" clause is withdrawn — research judgements are not made without references).
 
 ### 3. Pair review scope
 
