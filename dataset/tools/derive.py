@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 """Run the variant deriver + coverage-grid generator over dataset/timelines.
 
-Usage: derive.py [--check] [--repo ROOT]
-  --check   re-derive and fail on drift against the committed derived
-            timelines and coverage grid (CI gate; writes nothing)
+Usage: derive.py [--check] [--require-coverage] [--repo ROOT]
+  --check             re-derive and fail on drift against the committed
+                      derived timelines and coverage grid (CI gate; writes
+                      nothing)
+  --require-coverage  fail when any driver-table cell has no segment (the
+                      all-32-cells requirement, Phase 7 spec decision 11).
+                      The empty-cell report prints on every run regardless;
+                      the Makefile's check target adopts the flag once the
+                      coreset is meant to satisfy it (7.3).
 """
 
 import argparse
@@ -18,6 +24,7 @@ from wlc import deriver, grid  # noqa: E402
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--require-coverage", action="store_true")
     parser.add_argument("--repo", default=None)
     args = parser.parse_args()
     root = (pathlib.Path(args.repo).resolve() if args.repo
@@ -27,6 +34,8 @@ def main():
     errors = deriver.run(timelines, check=args.check)
     errors += grid.write(timelines, root / "dataset" / "coverage-grid.json",
                          check=args.check)
+    if args.require_coverage and not errors:
+        errors += grid.coverage_errors(grid.build_grid(timelines))
     if errors:
         print(f"{len(errors)} error(s):", file=sys.stderr)
         for message in errors:

@@ -1,5 +1,5 @@
 # Recognition Vocabulary
-> Status: normative · Created 2026-08-28 · Updated 2026-09-07
+> Status: normative · Created 2026-08-28 · Updated 2026-09-10
 
 The shared vocabulary of the recognition signal — the one contract that the recognizer's output schema, the validator's menu, the driver table, and the Layer-1 grader all agree on. Ratified 2026-08-28 (인지오 · 인경민 · 박이안 — pending team review of this doc).
 
@@ -47,7 +47,7 @@ One graded attribute:
 
 ### Ground-truth annotations (never recognizer-facing)
 
-Ground-truth segments may carry additional descriptive keys used for grading splits and failure analysis only: `background` (what the background work is, e.g. `download`, `av-scan`), `initiated` (`user` | `scheduled`), `dual_active`, `spoof`. They are not part of the recognizer's output schema, not on the validator's menu, and not graded.
+Ground-truth segments may carry additional descriptive keys used for grading splits and failure analysis only: `background` (what the background work is, e.g. `download`, `av-scan`), `initiated` (`user` | `scheduled`), `dual_active`, `spoof`, `pre_committed_miss` (`true` on a segment whose label no recognizer can reach from names and behaviour — the C6 resolution-limit case and the Phase 7 same-name intent flips; the segment is excluded from accuracy and reported separately, and the coverage grid marks its cell as instanced but recognition-limited). They are not part of the recognizer's output schema, not on the validator's menu, and not graded.
 
 ---
 
@@ -165,5 +165,6 @@ Adding or removing a mode, promoting an annotation to a graded attribute, changi
 
 ## 5. Changelog
 
+- **2026-09-10 — `pre_committed_miss` annotation (jioh 7.1).** No label or schema value changed. A fifth ground-truth annotation, `pre_committed_miss: true`, marks a segment whose label cannot be reached from names and behaviour; it is what the coverage grid reads to mark a driver-table cell as instanced but recognition-limited, and what the grader will read to exclude the segment from accuracy (Phase 8). Set first by the Phase 7 counterparts (7.3).
 - **2026-09-07 — boot-default provenance (jioh 4.1).** No value changed. The seven config-schema defaults now carry their grounding in §2 "Provenance of the boot default": three match OSTEP's worked-example values (`num_queues`, `timeslice_growth`, `boost_interval_us`), two are bounded by shipped or published quanta (`timeslice_us`, LOTTERY `timeslice_us`), two have no source (EDF `residual_timeslice_us`, LOTTERY `batch_share`). All seven are stated assumptions; a `fixed`-under-alternative-floors sensitivity check is planned for the gate spec. New references: `linux-sched-fair`, `illumos-ts`, `waldspurger-osdi94`; `ostep` verified at Version 1.10.
 

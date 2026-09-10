@@ -15,7 +15,7 @@ build/                 # compiled artifacts — NOT committed; verified via buil
   coreset-native/      # 24 workloads, native lane counts
   coreset-single/      # same 24, lane-scaled to a single lane (experiments run on these)
 build.manifest.json    # lockfile: input/output hashes of the last blessed build + per-file static demand (utilization, demand_class)
-coverage-grid.json     # mode × tier coverage grid over all segments (signed off)
+coverage-grid.json     # driver-table cell (mode × background_wanted) × tier coverage grid over all segments; empty cells listed (Phase 7 fills them)
 meas/                  # meas-ci campaign outputs: analysis summary + verified name tables
 tools/                 # all executable tooling (see below)
 Makefile               # entry point for everything in this tree
@@ -110,7 +110,7 @@ CI (`.github/workflows/dataset.yml`) runs `lint` / `test` / `check` on every PR 
 
 ```
 tools/compile.py       # CLI: timelines -> canonical (+ --check verify mode)
-tools/derive.py        # CLI: variant recipes -> derived timelines + coverage grid (+ --check)
+tools/derive.py        # CLI: variant recipes -> derived timelines + coverage grid (+ --check; --require-coverage fails on an empty cell)
 tools/lint.py          # CLI: all lints (+ --freeze for freeze-readiness)
 tools/wlc/             # wlc, the workload compiler — the library behind those CLIs:
                        #   timeline.py / compiler.py  parse + compile
@@ -119,7 +119,7 @@ tools/wlc/             # wlc, the workload compiler — the library behind those
                        #   estimate.py                static per-file CPU-demand estimate
                        #   linter.py / grid.py        lint rules, coverage grid
 tools/meas/            # meas-ci campaign tooling (samplers, analyzer, name verification)
-tools/tests/           # invariant suite (47 tests) + fixtures
+tools/tests/           # invariant suite (65 tests) + fixtures
 ```
 
 ## Rules of the tree
