@@ -11,7 +11,7 @@ The fix from the Phase 6 pair review (`docs/daemon/prior-table-pair-review.md`, 
 - The generalset coverage requirement; the vocabulary's attribute clause; the demand-class declarations.
 - Docs: building plan, dataset-design table, dataset README, terminology, docs index, both study guides.
 
-Out of scope: records and scoring code; contracts, simulator, daemon; the grader's exclusion rule for pre-committed misses; the throwaway pool's definition; the judging set (all Phase 8's gate spec).
+Out of scope: records and scoring code; contracts, simulator, daemon; the grader's exclusion rule for pre-committed misses; the throwaway pool's definition; the judging set (all the RQ0 gate spec, Phase 8).
 
 ## Locked decisions
 
@@ -75,5 +75,6 @@ The pair review gains one sentence per new pair, sixteen, in the form Phase 6 fi
 
 ## Open items
 
-- The throwaway pool the calibrated table is tuned on is undefined in every document; its definition belongs to Phase 8's gate spec. This spec names the gap only.
+- The throwaway pool the calibrated table is tuned on is undefined in every document; its definition belongs to the RQ0 gate spec (Phase 8). This spec names the gap only.
 - Phase 8 note: C1 is now sixteen files, which touches the judging set and the building plan's "this is where the whitelist should score perfectly" line.
+- Inputs to the RQ0 gate spec from the 7.5 pair review (decided 2026-09-10): the calibration class stays on C7 with the reason stated in the building plan's demand-budget paragraph (a counterpart's demand is its base's plus the injected job by construction; the pair, not the window, is the control); `c7-meeting` and `c7-media` count toward the RQ0 headroom like any file, with two reporting lines — their `oracle`-versus-`fixed` gap is an EDF-versus-MLFQ result with the cap axis unmeasured, and a condition reading the mode right and the attribute wrong is predicted to score the same as `llm_vocab` there.
