@@ -47,6 +47,11 @@ CANDIDATES = {
               "run": ["rsync", "--version"], "run_secs": 5, "watch": ["rsync"]},
     "make": {"pkg": {"ubuntu": "make", "fedora": "make", "arch": "make"},
              "run": ["make", "--version"], "run_secs": 5, "watch": ["make"]},
+    # Phase 7 (7.3): compile/false candidate — the kernel-module rebuild
+    # framework's orchestrator, run by the distro on kernel change, not by
+    # the user (dkms(8) autoinstall). A shell script: comm is the script name.
+    "dkms": {"pkg": {"ubuntu": "dkms", "fedora": "dkms", "arch": "dkms"},
+             "run": ["dkms", "status"], "run_secs": 5, "watch": ["dkms"]},
     "tar": {"pkg": {"ubuntu": "tar", "fedora": "tar", "arch": "tar"},
             "run": ["tar", "--version"], "run_secs": 5, "watch": ["tar"]},
     "xz": {"pkg": {"ubuntu": "xz-utils", "fedora": "xz", "arch": "xz"},

@@ -39,7 +39,7 @@ jobs:
               for p in libreoffice-core gcc make tar xz-utils plocate clamav \
                        rsync mpv tracker-miner-fs baloo-kf5 wine gamescope \
                        handbrake-cli transmission-daemon borgbackup rclone \
-                       thunderbird gimp kdenlive ffmpeg; do
+                       thunderbird gimp kdenlive ffmpeg dkms; do
                 DEBIAN_FRONTEND=noninteractive apt-get install -y "$p" \
                   || echo "install failed: $p"
               done ;;
@@ -47,7 +47,7 @@ jobs:
               for p in libreoffice-core gcc make tar xz plocate clamav rsync \
                        mpv tracker-miners kf5-baloo wine-core gamescope \
                        transmission-daemon borgbackup rclone thunderbird \
-                       gimp kdenlive; do
+                       gimp kdenlive dkms; do
                 dnf install -y "$p" || echo "install failed: $p"
               done ;;
             arch)
@@ -55,7 +55,7 @@ jobs:
               for p in libreoffice-fresh gcc make tar xz plocate clamav rsync \
                        mpv tracker3-miners baloo wine gamescope handbrake-cli \
                        transmission-cli borg rclone thunderbird gimp kdenlive \
-                       ffmpeg; do
+                       ffmpeg dkms; do
                 pacman -S --noconfirm "$p" || echo "install failed: $p"
               done ;;
           esac
