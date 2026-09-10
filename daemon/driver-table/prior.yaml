@@ -44,7 +44,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "Web browsing while work nobody asked for runs behind it: the batch class gets the schema floor and the browser the rest, so the page never waits on the indexer."
+    justification: "Web browsing while work nobody asked for runs behind it (c7-browsing's clamscan): the batch class gets the schema floor and the browser the rest, so the page never waits on the indexer."
     sources: [ostep]
     entries:
       MLFQ:
@@ -70,7 +70,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "Typing into a document while an unwanted job runs: the writer's echo leads and the job gets the floor (c4-office's 7z burst is the shape of it)."
+    justification: "Typing into a document while an unwanted job runs (c7-office's clamscan): the writer's echo leads and the job gets the floor (c4-office's 7z burst is the shape of it)."
     sources: [ostep]
     entries:
       MLFQ:
@@ -96,7 +96,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "Email with an unwanted job behind it: the mailer leads, the job gets the floor."
+    justification: "Email with an unwanted job behind it (c7-mail's clamscan): the mailer leads, the job gets the floor."
     sources: [ostep]
     entries:
       MLFQ:
@@ -122,7 +122,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "Writing code while an unwanted job runs: the editor leads, the job gets the floor."
+    justification: "Writing code while an unwanted job runs (c7-dev's clamscan): the editor leads, the job gets the floor."
     sources: [ostep]
     entries:
       MLFQ:
@@ -148,7 +148,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "Photo editing while an unwanted job runs: the editor leads, the job gets the floor."
+    justification: "Photo editing while an unwanted job runs (c7-photo's clamscan): the editor leads, the job gets the floor."
     sources: [ostep]
     entries:
       MLFQ:
@@ -174,7 +174,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: EDF
-    justification: "A live video call with an unwanted job behind it: frames keep their deadlines and the job gets the floor so it never steals one."
+    justification: "A live video call with an unwanted job behind it (c7-meeting's clamscan): frames keep their deadlines and the job gets the floor so it never steals one."
     sources: [liu-jacm73]
     entries:
       EDF:
@@ -200,7 +200,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: EDF
-    justification: "A game with a scan nobody asked for behind it (c2-p2b's clamscan): the frames keep their deadlines and the scan gets the floor, the only scored term being the chain's miss rate."
+    justification: "A game with a scan nobody asked for behind it (c2-p2b's and c7-gaming's clamscan): the frames keep their deadlines and the scan gets the floor, the only scored term being the chain's miss rate."
     sources: [liu-jacm73]
     entries:
       EDF:
@@ -226,7 +226,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: EDF
-    justification: "Playback with an unwanted job behind it: the ticks keep their deadlines and the job gets the floor."
+    justification: "Playback with an unwanted job behind it (c7-media's clamscan): the ticks keep their deadlines and the job gets the floor."
     sources: [liu-jacm73]
     entries:
       EDF:
@@ -252,7 +252,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "Video editing while an unwanted job runs: the editor leads, the job gets the floor."
+    justification: "Video editing while an unwanted job runs (c7-video-edit's clamscan): the editor leads, the job gets the floor."
     sources: [ostep]
     entries:
       MLFQ:
@@ -278,7 +278,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "A build nobody asked for (someone else's job, an unrequested CI run) behind interactive work: sink it and hold it to the floor; no user is waiting on its makespan."
+    justification: "A build nobody asked for (c7-compile's dkms module rebuild after a kernel update) behind interactive work: sink it and hold it to the floor; no user is waiting on its makespan."
     sources: [ostep]
     entries:
       MLFQ:
@@ -304,7 +304,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "A training run nobody asked for behind interactive work: sink it and hold it to the floor; its progress carries no weight."
+    justification: "A training run nobody asked for behind interactive work (c7-ml-train, the same run flipped by intent — a pre-committed miss): sink it and hold it to the floor; its progress carries no weight."
     sources: [ostep]
     entries:
       MLFQ:
@@ -330,7 +330,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "A render nobody asked for behind interactive work: sink it and hold it to the floor."
+    justification: "A render nobody asked for behind interactive work (c7-render, flipped by intent — a pre-committed miss): sink it and hold it to the floor."
     sources: [ostep]
     entries:
       MLFQ:
@@ -356,7 +356,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "A conversion nobody asked for behind interactive work: sink it and hold it to the floor."
+    justification: "A conversion nobody asked for behind interactive work (c7-transcode, flipped by intent — a pre-committed miss): sink it and hold it to the floor."
     sources: [ostep]
     entries:
       MLFQ:
@@ -382,7 +382,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "An indexer's rescan nobody called (c2-p1b's tracker-miner under an editor): sink it and hold it to the floor; the only scored term is the editor's keystroke echo."
+    justification: "An indexer's rescan nobody called (c2-p1b's and c7-indexing's tracker-miner under an editor): sink it and hold it to the floor; the only scored term is the editor's keystroke echo."
     sources: [ostep]
     entries:
       MLFQ:
@@ -408,7 +408,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "A backup nobody asked for behind interactive work: sink it and hold it to the floor."
+    justification: "A backup nobody asked for behind interactive work (c7-backup, flipped by intent — a pre-committed miss): sink it and hold it to the floor."
     sources: [ostep]
     entries:
       MLFQ:
@@ -434,7 +434,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "Nobody present but work nobody asked for is running: hold it to the floor so a returning user or a wanted job finds the lane free."
+    justification: "Nobody present but work nobody asked for is running (c7-idle's clamscan): hold it to the floor so a returning user or a wanted job finds the lane free."
     sources: [ostep]
     entries:
       MLFQ:

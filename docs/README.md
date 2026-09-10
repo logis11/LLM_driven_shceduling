@@ -38,7 +38,7 @@ Reading order: background-guide → simulator-guide → data-contracts → inter
 Reading order: background-guide → daemon-guide → data-contracts.
 
 - [daemon/daemon-guide.md](daemon/daemon-guide.md) — what the daemon must do, what's decided, what's the builder's to decide
-- [daemon/prior-table-pair-review.md](daemon/prior-table-pair-review.md) — the pre-execution check on the prior driver table: nineteen written judgements (16 same-mode pairs, 3 C2 row-pairs) naming the knob, the scored term it moves, and the direction; its findings
+- [daemon/prior-table-pair-review.md](daemon/prior-table-pair-review.md) — the pre-execution check on the prior driver table: thirty-five written judgements (16 same-mode pairs, 3 C2 row-pairs, 16 C7 pairs) naming the knob, the scored term it moves, and the direction; its findings
 
 ## Workload (`workload/`)
 
