@@ -43,7 +43,8 @@ NAME_TIERS = {
     2: {"soffice.bin", "gamescope", "wineserver", "steamwebhelper",
         "HandBrakeCLI", "freshclam", "gnome-shell", "Xorg", "pipewire",
         "systemd", "dbus-daemon"},
-    3: {"tracker-miner-fs-3", "cc1", "baloo_file", "updatedb", "ld", "cc1plus"},
+    3: {"tracker-miner-fs-3", "cc1", "baloo_file", "updatedb", "ld", "cc1plus",
+        "dkms"},
 }
 _TIER_BY_NAME = {name: tier for tier, names in NAME_TIERS.items()
                  for name in names}

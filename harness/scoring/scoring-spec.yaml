@@ -9,9 +9,13 @@
 # Every other aggregate of metrics doc §8 is reported beside the score, unweighted.
 #
 # This file carries terms only. Which files judge, report, are read as deltas,
-# or are excluded from aggregation is the gate spec's (Phase 8). c1-idle has no
-# entry: no performance metric. A derived file declares `base` and repeats the
-# base's terms verbatim (the lint checks both against dataset/timelines/coreset).
+# or are excluded from aggregation is the gate spec's (Phase 8). c1-idle and
+# c7-idle have no entry: no performance metric. A derived file declares `base`
+# and repeats the base's terms verbatim (the lint checks both against
+# dataset/timelines/coreset). Unwanted work carries no term (Phase 7 spec
+# decision 10): a counterpart whose label flips the base's background_wanted to
+# false repeats the base's terms minus the batch terms (turnaround, progress) —
+# the rule P1b and P2b already follow, now checked by the lint.
 #
 # Expected "no headroom" (metrics doc §9 floors), stated here so it is not
 # discovered later: c1-media and C5 — no legal configuration can miss a tick
@@ -180,4 +184,72 @@ files:
   c6-dual:
     terms:
       - {entity: game.chain.1, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+
+  # ---- C7 — attribute counterparts (Phase 7 spec decision 10): the C1 base's
+  # terms, minus the batch term where the label flips it to unwanted. The
+  # injected scan and the renamed or flipped batch job carry no term, so the
+  # false row's floor cap is free to act.
+  c7-browsing:
+    base: c1-browsing
+    terms:
+      - {entity: browser, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-office:
+    base: c1-office
+    terms:
+      - {entity: writer, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-mail:
+    base: c1-mail
+    terms:
+      - {entity: mailer, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-dev:
+    base: c1-dev
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-photo:
+    base: c1-photo
+    terms:
+      - {entity: photo-editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-meeting:
+    base: c1-meeting
+    terms:
+      - {entity: voice, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+  c7-gaming:
+    base: c1-gaming
+    terms:
+      - {entity: game.chain.1, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: compositor, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+  c7-media:
+    base: c1-media
+    terms:
+      - {entity: music, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+  c7-video-edit:
+    base: c1-video-edit
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-compile:
+    base: c1-compile
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-ml-train:
+    base: c1-ml-train
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-render:
+    base: c1-render
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-transcode:
+    base: c1-transcode
+    terms:
+      - {entity: video-editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-indexing:
+    base: c1-indexing
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-backup:
+    base: c1-backup
+    terms:
       - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}

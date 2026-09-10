@@ -11,8 +11,11 @@ coreset: every entity is a task id in that file's compiled workload or a
 reserved name; metric and aggregate form a scored pair; the direction is the
 pair's; weights are positive; windows lie inside [0, T_end]; a file that
 declares a `base` is that base's variant in the dataset's recipes and carries
-its terms verbatim; a variant that declares no base must differ from its base
-(identical terms without the declaration are a forgotten line, not a decision).
+its terms verbatim — or, when its ground truth flips the base's
+`background_wanted` to false, the base's terms minus the batch terms (unwanted
+work carries no term, Phase 7 spec decision 10); a variant that declares no
+base must differ from its base (identical terms without the declaration are a
+forgotten line, not a decision).
 """
 
 import json
@@ -26,6 +29,9 @@ from .reader import RESERVED_ENTITIES, RunFileError, read_run_file
 HARNESS = pathlib.Path(__file__).resolve().parents[2]
 SPEC_PATH = HARNESS / "scoring" / "scoring-spec.yaml"
 SCHEMA_PATH = HARNESS / "scoring" / "schema" / "scoring-spec.schema.json"
+
+# Terms an unwanted-flipped counterpart drops: the batch job's (decision 10).
+BATCH_METRICS = {"turnaround", "cpu_delivered"}
 
 # (metric, aggregate) → direction. The scored aggregates of spec decision 6;
 # every other aggregate of metrics doc §8 is reported beside the score.
@@ -56,6 +62,18 @@ def variant_bases(recipes_dir):
             src = str(v.get("from", ""))
             bases[v["id"]] = src.replace(".timeline.yaml", "")
     return bases
+
+
+def label_flipped(build_dir, base, variant):
+    """True when some segment is background_wanted true in the base's compiled
+    ground truth and false in the variant's (the C7 counterpart shape)."""
+    def segments(wid):
+        with open(pathlib.Path(build_dir) / f"{wid}.workload.json", encoding="utf-8") as f:
+            return json.load(f).get("ground_truth") or []
+    pairs = zip(segments(base), segments(variant))
+    return any((b.get("attributes") or {}).get("background_wanted") is True
+               and (v.get("attributes") or {}).get("background_wanted") is False
+               for b, v in pairs)
 
 
 def lint_spec(spec_path, schema_path, build_dir, recipes_dir):
@@ -124,9 +142,19 @@ def lint_spec(spec_path, schema_path, build_dir, recipes_dir):
                 errors.append(f"{wid}: declares base {base!r} but the recipe says {bases[wid]!r}")
             if base not in files:
                 errors.append(f"{wid}: base {base!r} has no entry in the spec")
-            elif (entry.get("terms") != files[base].get("terms")):
-                errors.append(f"{wid}: a derived file carries its base's terms verbatim; "
-                              f"they differ from {base!r}")
+            elif entry.get("terms") != files[base].get("terms"):
+                base_terms = files[base].get("terms") or []
+                compiled_base = build_dir / f"{base}.workload.json"
+                if compiled_base.exists() and label_flipped(build_dir, base, wid):
+                    kept = [t for t in base_terms
+                            if not (isinstance(t, dict) and t.get("metric") in BATCH_METRICS)]
+                    if entry.get("terms") != kept:
+                        errors.append(f"{wid}: a counterpart that flips {base!r} to unwanted "
+                                      f"carries the base's terms minus its batch terms; "
+                                      f"they differ")
+                else:
+                    errors.append(f"{wid}: a derived file carries its base's terms verbatim; "
+                                  f"they differ from {base!r}")
     return errors
 
 

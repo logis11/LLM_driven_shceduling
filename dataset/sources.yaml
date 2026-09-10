@@ -157,6 +157,21 @@ sources:
       default, and the per-game override — the wanted/unwanted background
       toggle as a real user-facing setting (S10). Existence only.
 
+  dkms-man:
+    type: deployed-system
+    notes: >-
+      Establishes the DKMS framework and its autoinstall action / autoinstaller
+      service: kernel modules rebuilt and installed for a newly booted kernel
+      without user action, under the process name `dkms` (S11 unwanted
+      counterpart, C7). Existence only.
+
+  dkms-debian:
+    type: deployed-system
+    notes: >-
+      Establishes that dkms is a packaged distribution component whose stated
+      purpose includes rebuilding modules as kernels are upgraded (S11 unwanted
+      counterpart, C7). Existence only.
+
   # ---- segment structure & user behavior (Role C) ------------------------
 
   zhang-chb15:

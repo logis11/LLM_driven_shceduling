@@ -9,7 +9,7 @@
   "properties": {
     "files": {
       "type": "object",
-      "propertyNames": {"pattern": "^c[1-6]-[a-z0-9-]+$"},
+      "propertyNames": {"pattern": "^c[1-7]-[a-z0-9-]+$"},
       "additionalProperties": {"$ref": "#/$defs/file"}
     }
   },

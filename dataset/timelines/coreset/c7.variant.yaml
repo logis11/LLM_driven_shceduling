@@ -1,0 +1,172 @@
+# C7 — attribute counterparts (building-plan §3 C7; Phase 7 spec decisions 4–7,
+# 10). One counterpart per mode, derived from its C1 base, so every driver-table
+# cell has a one-diff pair: the base is the `true` cell, the counterpart the
+# `false` cell of the same mode (indexing the other way round — c1-indexing is
+# the user-initiated `true` cell).
+#
+# Interactive modes: one injected unwanted job — clamscan bound cpu-batch (full-
+# scan state is CPU-saturating, meas-ci:cli:3), the same name in every file so
+# the ten `false` cells differ only in mode; tier 1, so no pair changes
+# familiarity tier. Arrives at 0 s with total_work equal to the segment, so the
+# label holds at every instant under every policy.
+#
+# Batch modes: the batch job is itself the background work the attribute judges
+# (recognition-vocabulary §1), so the counterpart is the same job unwanted — the
+# P1b move, rename and label flip, mode unchanged. compile: make -> dkms, the
+# kernel-module rebuild the distro runs on a kernel change (dkms-man,
+# dkms-debian; names workflow meas-ci:names:2 observed comm `dkms` at runtime
+# level on all three distros, Fedora shipping a kernel-install hook and a
+# dkms.service unit — dataset/meas/names/run-2/). ml-train, render, transcode, backup: no same-mode orchestrator a
+# distro or vendor runs unasked under a distinct name exists (transcode: Jellyfin
+# installs its transcoder as plain `ffmpeg`), so the label flips alone and the
+# file ships as a pre-committed miss.
+#
+# Every counterpart declares demand: calibration in its own recipe (Phase 7 spec
+# decision 7); the regime is read from the manifest.
+variants:
+  - id: c7-browsing
+    from: c1-browsing.timeline.yaml
+    ops:
+      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
+                   arrive: 0s, bind: {total_work: 60s}}
+      - patch-segment: {index: 0,
+                        attributes: {background_wanted: false, background: av-scan},
+                        scenario: [S2, S17]}
+      - patch-meta: {demand: calibration}
+
+  - id: c7-office
+    from: c1-office.timeline.yaml
+    ops:
+      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
+                   arrive: 0s, bind: {total_work: 60s}}
+      - patch-segment: {index: 0,
+                        attributes: {background_wanted: false, background: av-scan},
+                        scenario: [S1, S2, S4, S17]}
+      - patch-meta: {demand: calibration}
+
+  - id: c7-mail
+    from: c1-mail.timeline.yaml
+    ops:
+      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
+                   arrive: 0s, bind: {total_work: 60s}}
+      - patch-segment: {index: 0,
+                        attributes: {background_wanted: false, background: av-scan},
+                        scenario: [S4, S17]}
+      - patch-meta: {demand: calibration}
+
+  - id: c7-dev
+    from: c1-dev.timeline.yaml
+    ops:
+      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
+                   arrive: 0s, bind: {total_work: 60s}}
+      - patch-segment: {index: 0,
+                        attributes: {background_wanted: false, background: av-scan},
+                        scenario: [S11, S17]}
+      - patch-meta: {demand: calibration}
+
+  - id: c7-photo
+    from: c1-photo.timeline.yaml
+    ops:
+      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
+                   arrive: 0s, bind: {total_work: 60s}}
+      - patch-segment: {index: 0,
+                        attributes: {background_wanted: false, background: av-scan},
+                        scenario: [S6, S17]}
+      - patch-meta: {demand: calibration}
+
+  - id: c7-meeting
+    from: c1-meeting.timeline.yaml
+    ops:
+      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
+                   arrive: 0s, bind: {total_work: 60s}}
+      - patch-segment: {index: 0,
+                        attributes: {background_wanted: false, background: av-scan},
+                        scenario: [S3, S17]}
+      - patch-meta: {demand: calibration}
+
+  - id: c7-gaming
+    from: c1-gaming.timeline.yaml
+    ops:
+      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
+                   arrive: 0s, bind: {total_work: 60s}}
+      - patch-segment: {index: 0,
+                        attributes: {background_wanted: false, background: av-scan},
+                        scenario: [S9, S17]}
+      - patch-meta: {demand: calibration}
+
+  - id: c7-media
+    from: c1-media.timeline.yaml
+    ops:
+      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
+                   arrive: 0s, bind: {total_work: 60s}}
+      - patch-segment: {index: 0,
+                        attributes: {background_wanted: false, background: av-scan},
+                        scenario: [S13, S17]}
+      - patch-meta: {demand: calibration}
+
+  - id: c7-video-edit
+    from: c1-video-edit.timeline.yaml
+    ops:
+      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
+                   arrive: 0s, bind: {total_work: 60s}}
+      - patch-segment: {index: 0,
+                        attributes: {background_wanted: false, background: av-scan},
+                        scenario: [S7, S17]}
+      - patch-meta: {demand: calibration}
+
+  - id: c7-idle
+    from: c1-idle.timeline.yaml
+    ops:
+      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
+                   arrive: 0s, bind: {total_work: 60s}}
+      - patch-segment: {index: 0,
+                        attributes: {background_wanted: false, background: av-scan},
+                        scenario: [S18, S17]}
+      - patch-meta: {demand: calibration}
+
+  - id: c7-compile
+    from: c1-compile.timeline.yaml
+    ops:
+      - rename: {from: make, to: dkms}
+      - patch-segment: {index: 0,
+                        attributes: {background_wanted: false, initiated: scheduled}}
+      - patch-meta: {demand: calibration}
+
+  - id: c7-indexing
+    from: c1-indexing.timeline.yaml
+    ops:
+      - patch-segment: {index: 0,
+                        attributes: {background_wanted: false, initiated: scheduled}}
+      - patch-meta: {demand: calibration}
+
+  - id: c7-ml-train
+    from: c1-ml-train.timeline.yaml
+    ops:
+      - patch-segment: {index: 0,
+                        attributes: {background_wanted: false, initiated: scheduled,
+                                     pre_committed_miss: true}}
+      - patch-meta: {demand: calibration}
+
+  - id: c7-render
+    from: c1-render.timeline.yaml
+    ops:
+      - patch-segment: {index: 0,
+                        attributes: {background_wanted: false, initiated: scheduled,
+                                     pre_committed_miss: true}}
+      - patch-meta: {demand: calibration}
+
+  - id: c7-transcode
+    from: c1-transcode.timeline.yaml
+    ops:
+      - patch-segment: {index: 0,
+                        attributes: {background_wanted: false, initiated: scheduled,
+                                     pre_committed_miss: true}}
+      - patch-meta: {demand: calibration}
+
+  - id: c7-backup
+    from: c1-backup.timeline.yaml
+    ops:
+      - patch-segment: {index: 0,
+                        attributes: {background_wanted: false, initiated: scheduled,
+                                     pre_committed_miss: true}}
+      - patch-meta: {demand: calibration}

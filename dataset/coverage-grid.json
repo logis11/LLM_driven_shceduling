@@ -17,9 +17,9 @@
       "background_wanted": false,
       "mode": "browsing",
       "pre_committed_miss": 0,
-      "segments": 0,
+      "segments": 1,
       "tiers": {
-        "t1": 0,
+        "t1": 1,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -43,10 +43,10 @@
       "background_wanted": false,
       "mode": "office",
       "pre_committed_miss": 0,
-      "segments": 0,
+      "segments": 1,
       "tiers": {
         "t1": 0,
-        "t2": 0,
+        "t2": 1,
         "t3": 0,
         "t4": 0,
         "t5": 0
@@ -69,9 +69,9 @@
       "background_wanted": false,
       "mode": "mail",
       "pre_committed_miss": 0,
-      "segments": 0,
+      "segments": 1,
       "tiers": {
-        "t1": 0,
+        "t1": 1,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -95,9 +95,9 @@
       "background_wanted": false,
       "mode": "dev",
       "pre_committed_miss": 0,
-      "segments": 0,
+      "segments": 1,
       "tiers": {
-        "t1": 0,
+        "t1": 1,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -121,9 +121,9 @@
       "background_wanted": false,
       "mode": "photo",
       "pre_committed_miss": 0,
-      "segments": 0,
+      "segments": 1,
       "tiers": {
-        "t1": 0,
+        "t1": 1,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -147,9 +147,9 @@
       "background_wanted": false,
       "mode": "meeting",
       "pre_committed_miss": 0,
-      "segments": 0,
+      "segments": 1,
       "tiers": {
-        "t1": 0,
+        "t1": 1,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -173,10 +173,10 @@
       "background_wanted": false,
       "mode": "gaming",
       "pre_committed_miss": 0,
-      "segments": 1,
+      "segments": 2,
       "tiers": {
         "t1": 0,
-        "t2": 1,
+        "t2": 2,
         "t3": 0,
         "t4": 0,
         "t5": 0
@@ -199,9 +199,9 @@
       "background_wanted": false,
       "mode": "media",
       "pre_committed_miss": 0,
-      "segments": 0,
+      "segments": 1,
       "tiers": {
-        "t1": 0,
+        "t1": 1,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -225,9 +225,9 @@
       "background_wanted": false,
       "mode": "video-edit",
       "pre_committed_miss": 0,
-      "segments": 0,
+      "segments": 1,
       "tiers": {
-        "t1": 0,
+        "t1": 1,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -251,11 +251,11 @@
       "background_wanted": false,
       "mode": "compile",
       "pre_committed_miss": 0,
-      "segments": 0,
+      "segments": 1,
       "tiers": {
         "t1": 0,
         "t2": 0,
-        "t3": 0,
+        "t3": 1,
         "t4": 0,
         "t5": 0
       }
@@ -276,10 +276,10 @@
     {
       "background_wanted": false,
       "mode": "ml-train",
-      "pre_committed_miss": 0,
-      "segments": 0,
+      "pre_committed_miss": 1,
+      "segments": 1,
       "tiers": {
-        "t1": 0,
+        "t1": 1,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -302,10 +302,10 @@
     {
       "background_wanted": false,
       "mode": "render",
-      "pre_committed_miss": 0,
-      "segments": 0,
+      "pre_committed_miss": 1,
+      "segments": 1,
       "tiers": {
-        "t1": 0,
+        "t1": 1,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -328,11 +328,11 @@
     {
       "background_wanted": false,
       "mode": "transcode",
-      "pre_committed_miss": 0,
-      "segments": 0,
+      "pre_committed_miss": 1,
+      "segments": 1,
       "tiers": {
         "t1": 0,
-        "t2": 0,
+        "t2": 1,
         "t3": 0,
         "t4": 0,
         "t5": 0
@@ -355,11 +355,11 @@
       "background_wanted": false,
       "mode": "indexing",
       "pre_committed_miss": 0,
-      "segments": 1,
+      "segments": 2,
       "tiers": {
         "t1": 0,
         "t2": 0,
-        "t3": 1,
+        "t3": 2,
         "t4": 0,
         "t5": 0
       }
@@ -380,10 +380,10 @@
     {
       "background_wanted": false,
       "mode": "backup",
-      "pre_committed_miss": 0,
-      "segments": 0,
+      "pre_committed_miss": 1,
+      "segments": 1,
       "tiers": {
-        "t1": 0,
+        "t1": 1,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -407,32 +407,17 @@
       "background_wanted": false,
       "mode": "idle",
       "pre_committed_miss": 0,
-      "segments": 0,
+      "segments": 1,
       "tiers": {
         "t1": 0,
-        "t2": 0,
+        "t2": 1,
         "t3": 0,
         "t4": 0,
         "t5": 0
       }
     }
   ],
-  "empty_cells": [
-    "backup/false",
-    "browsing/false",
-    "compile/false",
-    "dev/false",
-    "idle/false",
-    "mail/false",
-    "media/false",
-    "meeting/false",
-    "ml-train/false",
-    "office/false",
-    "photo/false",
-    "render/false",
-    "transcode/false",
-    "video-edit/false"
-  ],
+  "empty_cells": [],
   "outside": [
     {
       "file": "c6-dual",
@@ -910,7 +895,187 @@
         ],
         "tier": 1
       }
+    ],
+    "c7-backup": [
+      {
+        "background_wanted": false,
+        "mode": "backup",
+        "pre_committed_miss": true,
+        "scenario": [
+          "S7",
+          "S15"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-browsing": [
+      {
+        "background_wanted": false,
+        "mode": "browsing",
+        "scenario": [
+          "S2",
+          "S17"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-compile": [
+      {
+        "background_wanted": false,
+        "mode": "compile",
+        "scenario": [
+          "S11"
+        ],
+        "tier": 3
+      }
+    ],
+    "c7-dev": [
+      {
+        "background_wanted": false,
+        "mode": "dev",
+        "scenario": [
+          "S11",
+          "S17"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-gaming": [
+      {
+        "background_wanted": false,
+        "mode": "gaming",
+        "scenario": [
+          "S9",
+          "S17"
+        ],
+        "tier": 2
+      }
+    ],
+    "c7-idle": [
+      {
+        "background_wanted": false,
+        "mode": "idle",
+        "scenario": [
+          "S18",
+          "S17"
+        ],
+        "tier": 2
+      }
+    ],
+    "c7-indexing": [
+      {
+        "background_wanted": false,
+        "mode": "indexing",
+        "scenario": [
+          "S11",
+          "S14"
+        ],
+        "tier": 3
+      }
+    ],
+    "c7-mail": [
+      {
+        "background_wanted": false,
+        "mode": "mail",
+        "scenario": [
+          "S4",
+          "S17"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-media": [
+      {
+        "background_wanted": false,
+        "mode": "media",
+        "scenario": [
+          "S13",
+          "S17"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-meeting": [
+      {
+        "background_wanted": false,
+        "mode": "meeting",
+        "scenario": [
+          "S3",
+          "S17"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-ml-train": [
+      {
+        "background_wanted": false,
+        "mode": "ml-train",
+        "pre_committed_miss": true,
+        "scenario": [
+          "S11",
+          "S12"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-office": [
+      {
+        "background_wanted": false,
+        "mode": "office",
+        "scenario": [
+          "S1",
+          "S2",
+          "S4",
+          "S17"
+        ],
+        "tier": 2
+      }
+    ],
+    "c7-photo": [
+      {
+        "background_wanted": false,
+        "mode": "photo",
+        "scenario": [
+          "S6",
+          "S17"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-render": [
+      {
+        "background_wanted": false,
+        "mode": "render",
+        "pre_committed_miss": true,
+        "scenario": [
+          "S7",
+          "S8"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-transcode": [
+      {
+        "background_wanted": false,
+        "mode": "transcode",
+        "pre_committed_miss": true,
+        "scenario": [
+          "S8"
+        ],
+        "tier": 2
+      }
+    ],
+    "c7-video-edit": [
+      {
+        "background_wanted": false,
+        "mode": "video-edit",
+        "scenario": [
+          "S7",
+          "S17"
+        ],
+        "tier": 1
+      }
     ]
   },
-  "segments_total": 48
+  "segments_total": 64
 }

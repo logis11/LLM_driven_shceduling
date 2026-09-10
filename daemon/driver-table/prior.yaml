@@ -17,7 +17,8 @@
 # - batch_bandwidth_cap is never null. A wanted row's cap is the batch term's share of the file's
 #   scoring weight, w_batch / (w_fg + w_batch): 0.5 against 1.0 gives 1/3 (0.333), 1.0 against 1.0
 #   gives 0.5, 0.25 gives 0.2. A wanted row whose files carry no batch term gets 0.5 — equal
-#   shares, the one stated assumption in this table. An unwanted row sits at the schema floor,
+#   shares, a stated assumption (since Phase 7's C1 bases every wanted batch row has a term;
+#   the interactive-only rows' 0.5 remains the assumption). An unwanted row sits at the schema floor,
 #   0.05; the executor's starvation net lies beneath it. A LOTTERY row's batch_share equals its cap.
 # - Params are the boot values (recognition-vocabulary §2, provenance table); no held reference
 #   names a different value for a situation, so the rows differ by algorithm and cap only.
@@ -369,7 +370,7 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.5
     default: LOTTERY
-    justification: "An indexing run the user asked for: no coreset file weighs it, so it gets equal shares with the foreground — the table's stated assumption for wanted work without a scored term."
+    justification: "An indexing run the user asked for (c1-indexing: the reindex's turnaround weighed 1.0 against the editor's 1.0): equal shares, the cap derived as w_batch / (w_fg + w_batch) like compile/true."
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:

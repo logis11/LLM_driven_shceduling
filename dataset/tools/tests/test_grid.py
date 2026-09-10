@@ -15,15 +15,12 @@ MODES = ["browsing", "office", "mail", "dev", "photo", "meeting", "gaming",
          "indexing", "backup", "idle"]
 
 # Recounted 2026-09-09 from the compiled coreset ground truth (Phase 7 spec,
-# decision 1): 17 cells exercised before Phase 7; 7.2 added indexing/true
-# (c1-indexing, a pre-committed miss). 7.3 fills the remaining 14.
-EXERCISED_AFTER_7_2 = {
-    ("browsing", True), ("office", True), ("mail", True), ("dev", True),
-    ("photo", True), ("meeting", True), ("gaming", True), ("gaming", False),
-    ("media", True), ("video-edit", True), ("compile", True),
-    ("ml-train", True), ("render", True), ("transcode", True),
-    ("indexing", True), ("indexing", False), ("backup", True), ("idle", True),
-}
+# decision 1): 17 cells exercised before Phase 7. 7.2 added indexing/true,
+# 7.3 the fifteen remaining false cells: all 32 instanced. Five segments are
+# pre-committed misses (decision 3): indexing/true and the ml-train, render,
+# transcode, backup false cells.
+MISS_CELLS = {("indexing", True), ("ml-train", False), ("render", False),
+              ("transcode", False), ("backup", False)}
 
 
 @pytest.fixture(scope="module")
@@ -46,18 +43,30 @@ def test_tier_columns_and_counts_agree(coverage):
         assert 0 <= cell["pre_committed_miss"] <= cell["segments"]
 
 
-def test_current_coreset_exercises_the_recorded_18(coverage):
+def test_coreset_instances_all_32_cells(coverage):
     exercised = {(c["mode"], c["background_wanted"])
                  for c in coverage["cells"] if c["segments"]}
-    assert exercised == EXERCISED_AFTER_7_2
-    empty = {(m, w) for m in MODES for w in (True, False)} - exercised
-    assert coverage["empty_cells"] == sorted(
-        f"{m}/{str(w).lower()}" for m, w in empty)
-    assert len(coverage["empty_cells"]) == 14
-    indexing_true = next(c for c in coverage["cells"]
-                         if (c["mode"], c["background_wanted"]) == ("indexing", True))
-    assert indexing_true["segments"] == 1 and indexing_true["pre_committed_miss"] == 1
+    assert exercised == {(m, w) for m in MODES for w in (True, False)}
+    assert coverage["empty_cells"] == []
+    misses = {(c["mode"], c["background_wanted"])
+              for c in coverage["cells"] if c["pre_committed_miss"]}
+    assert misses == MISS_CELLS
+    for cell in coverage["cells"]:
+        assert cell["pre_committed_miss"] <= 1
     assert coverage["per_file"]["c1-indexing"][0]["pre_committed_miss"] is True
+    assert coverage["per_file"]["c7-backup"][0]["pre_committed_miss"] is True
+    assert "pre_committed_miss" not in coverage["per_file"]["c7-compile"][0]
+
+
+def test_every_c7_counterpart_is_the_false_cell_of_its_base(coverage):
+    for mode in MODES:
+        base, counterpart = (coverage["per_file"][f"c1-{mode}"],
+                             coverage["per_file"][f"c7-{mode}"])
+        assert len(base) == len(counterpart) == 1
+        assert base[0]["mode"] == counterpart[0]["mode"] == mode
+        assert base[0]["background_wanted"] is True
+        assert counterpart[0]["background_wanted"] is False
+        assert base[0]["tier"] == counterpart[0]["tier"], mode
 
 
 def test_ambiguous_is_outside_the_grid(coverage):
@@ -81,18 +90,22 @@ def test_committed_grid_matches_the_timelines(repo_root):
                       check=True) == []
 
 
-def test_coverage_errors_name_every_empty_cell(coverage):
+def test_coverage_errors_are_empty_on_the_coreset(coverage):
+    assert grid.coverage_errors(coverage) == []
+
+
+def test_coverage_errors_name_every_empty_cell():
+    coverage = {"empty_cells": ["browsing/false", "idle/false"]}
     errors = grid.coverage_errors(coverage)
     assert len(errors) == 1
-    assert "14 empty" in errors[0]
-    assert "browsing/false" in errors[0]
+    assert "2 empty" in errors[0] and "browsing/false" in errors[0]
 
 
 def test_render_lists_cells_outside_and_empties(coverage):
     text = grid.render(coverage)
     assert "browsing/true" in text and "browsing/false" in text
     assert "outside the grid: ambiguous" in text
-    assert "empty cells: 14" in text
+    assert "empty cells: 0" in text
 
 
 # --- synthetic timelines -----------------------------------------------

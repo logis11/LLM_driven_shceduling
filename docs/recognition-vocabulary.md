@@ -43,7 +43,7 @@ A **mode** is the label for what the machine is primarily being used for during 
 
 One graded attribute:
 
-- **`background_wanted`** (boolean) — *is the sustained background work something the user asked for?* `true` for work the user deliberately initiated or is waiting on (a download, a kicked-off training run, a render); `false` for work nobody asked for right now (a scheduled scan, an indexer's rescan). **Convention: when a segment has no sustained background work at all, `background_wanted` is `true`** — nothing unwanted is running — keeping the attribute a plain boolean.
+- **`background_wanted`** (boolean) — *is the sustained background work something the user asked for?* `true` for work the user deliberately initiated or is waiting on (a download, a kicked-off training run, a render); `false` for work nobody asked for right now (a scheduled scan, an indexer's rescan). **Convention: when a segment has no sustained background work at all, `background_wanted` is `true`** — nothing unwanted is running — keeping the attribute a plain boolean. In the batch modes (`compile`, `ml-train`, `render`, `transcode`, `indexing`, `backup`) the batch job is itself the sustained background work the attribute judges: `false` means that job is one nobody asked for (a module rebuild after a kernel update in place of the user's build, an indexer's scheduled rescan), not that a second job runs beside it.
 
 ### Ground-truth annotations (never recognizer-facing)
 
@@ -165,6 +165,7 @@ Adding or removing a mode, promoting an annotation to a graded attribute, changi
 
 ## 5. Changelog
 
+- **2026-09-10 — batch-mode reading of `background_wanted` (jioh 7.3).** No value changed. One clarifying clause in §1: in the six batch modes the batch job is itself the background work the attribute judges, so its `false` cell is that job unwanted, the reading `c2-p1b` already used. The C7 counterparts are built on it.
 - **2026-09-10 — `pre_committed_miss` annotation (jioh 7.1).** No label or schema value changed. A fifth ground-truth annotation, `pre_committed_miss: true`, marks a segment whose label cannot be reached from names and behaviour; it is what the coverage grid reads to mark a driver-table cell as instanced but recognition-limited, and what the grader will read to exclude the segment from accuracy (Phase 8). Set first by `c1-indexing` (7.2), the user-initiated reindex.
 - **2026-09-07 — boot-default provenance (jioh 4.1).** No value changed. The seven config-schema defaults now carry their grounding in §2 "Provenance of the boot default": three match OSTEP's worked-example values (`num_queues`, `timeslice_growth`, `boost_interval_us`), two are bounded by shipped or published quanta (`timeslice_us`, LOTTERY `timeslice_us`), two have no source (EDF `residual_timeslice_us`, LOTTERY `batch_share`). All seven are stated assumptions; a `fixed`-under-alternative-floors sensitivity check is planned for the gate spec. New references: `linux-sched-fair`, `illumos-ts`, `waldspurger-osdi94`; `ostep` verified at Version 1.10.
 

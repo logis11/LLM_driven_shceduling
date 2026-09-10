@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-09-09
+> Status: normative · Created 2026-08-26 · Updated 2026-09-10
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -193,6 +193,16 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - cite: Valve. "Downloads automatically pause when launching a game." Steam Support, help.steampowered.com/en/faqs/view/4F9E-6328-E9B8-47F9 (accessed 2026-08-26). Secondary: "Managing Steam Downloads & Updates", …/71AB-698D-57EB-178C (updated 2024-09-24).
 - role: S10 — documents the "Allow Downloads During Gameplay" checkbox (Steam → Settings → Downloads), default pause-during-gameplay, and the per-game counterpart: the wanted/unwanted toggle as a real user-facing setting. Note: 2021 article title-cases the toggle; current client UI sentence-cases it.
 - status: verified (2026-08-26)
+
+### `dkms-man`
+- cite: dkms(8) manual page, dkms 3.0.11. Ubuntu Manpage Repository (noble), manpages.ubuntu.com/manpages/noble/man8/dkms.8.html (accessed 2026-09-10).
+- role: S11 unwanted counterpart (C7) — existence of the DKMS framework ("kernel modules to be dynamically built for each kernel on your system") and of its `autoinstall` action and `dkms_autoinstaller` service, which build and install module revisions for a newly booted kernel without user action; `dkms` as the orchestrator's process name. Existence only.
+- status: verified (2026-09-10)
+
+### `dkms-debian`
+- cite: Debian package `dkms` 3.0.10-8+deb12u1 (bookworm). packages.debian.org/bookworm/dkms (accessed 2026-09-10).
+- role: S11 unwanted counterpart (C7) — the package description ("very easy to rebuild modules as you upgrade kernels") and the fact that the framework is packaged in the distributions the names workflow covers. Existence only.
+- status: verified (2026-09-10)
 
 ### `schedext-docs`
 - cite: Linux kernel documentation. "Extensible Scheduler Class." docs.kernel.org/scheduler/sched-ext.html (accessed 2026-08-26). Merged in Linux 6.12.
