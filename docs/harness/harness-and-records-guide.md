@@ -1,6 +1,6 @@
 # Harness와 records 이해하기 — trace에서 논문의 숫자까지
 
-> Status: draft · Created 2026-09-08 · Updated 2026-09-09
+> Status: draft · Created 2026-09-08 · Updated 2026-09-10
 
 이 문서는 **공부용 문서**예요. Phase 5(primitive metrics and the records pipeline)를 직접 수행하기 위해, harness가 무엇을 읽고 무엇을 쓰는지, `records`의 row 하나가 무슨 뜻인지, 그리고 그 위에 어떤 score가 올라가는지를 OS/시스템 지식이 거의 없는 사람 기준으로 바닥부터 풀어 쓴 거예요. 규범적(normative)인 정의는 `docs/harness/metrics.md`(metrics doc)가 갖고, 이 문서는 그 문서를 읽을 수 있게 만드는 다리예요. 둘이 다르면 metrics doc이 맞아요.
 
@@ -39,7 +39,7 @@
 
 ```
  workload dataset                daemon                      simulator                 harness
- (run file, 24개)     ──▶   recognizer + validator   ──▶   scheduler 실행   ──▶   trace 읽기
+ (run file, 50개)     ──▶   recognizer + validator   ──▶   scheduler 실행   ──▶   trace 읽기
                                     │                            │                    │
                                     ├─▶ config schedule ─────────┘                    │
                                     │   (언제 어떤 설정으로 바꿀지)                        │
@@ -264,7 +264,7 @@ primitives(run_file, trace) → records.csv
 
 - 실행 파일을 호출하지 않아요. 파일 둘을 읽어서 파일 하나를 써요.
 - simulator도 daemon도 필요 없어요. 손으로 쓴 mock trace로 test할 수 있어요.
-- trace 하나당 records 파일 하나예요. 24 workload × N condition이면 그만큼의 CSV.
+- trace 하나당 records 파일 하나예요. 50 workload × N condition이면 그만큼의 CSV.
 - 이 함수는 "이 파일에서 editor가 interactive task다" 같은 걸 **몰라요.** `ready` line이 있으면 row 하나를 내요. 어느 row가 중요한지는 다음 단계(scoring)가 정해요.
 
 recognition 쪽은 같은 모양의 row를 내지만 input이 달라요.
@@ -1095,7 +1095,7 @@ c2-p1b:
     # hog의 progress 항 없음 — 아무도 원하지 않은 indexing의 진행은 가치가 0
 ```
 
-term 하나 = entity(누구), metric(어느 primitive), cause와 window(어느 row만), aggregate(어떤 통계), direction(aggregate가 정함), weight. 옆의 lint가 entity가 compiled workload에 실제로 있는 task인지, metric/aggregate 짝이 허용된 것인지, window가 파일 안인지, 파생 파일이 base와 같은지를 CI에서 검사해요.
+term 하나 = entity(누구), metric(어느 primitive), cause와 window(어느 row만), aggregate(어떤 통계), direction(aggregate가 정함), weight. 옆의 lint가 entity가 compiled workload에 실제로 있는 task인지, metric/aggregate 짝이 허용된 것인지, window가 파일 안인지, 파생 파일이 base와 같은지(label을 unwanted로 뒤집은 C7 counterpart는 base에서 batch term만 뺀 것과 같은지)를 CI에서 검사해요.
 
 이 예시가 records 설계의 이유를 보여줘요. `c2-p1a`와 `c2-p1b`는 **behaviour가 완전히 같아요.** trace도 같고 records도 같아요. 차이는 오직 이 weight뿐이에요. training run(wanted)의 progress는 점수에 들어가고, indexer(unwanted)의 progress는 0점이에요.
 
@@ -1112,11 +1112,12 @@ RQ0 gate("perfect recognition이 random보다 나은 headroom이 있나")의 jud
 | 그룹 | 역할 |
 |---|---|
 | C2 (6) | judging set |
-| C1 (6) | 보고만. whitelist가 만점을 받아야 하는 baseline. 단 `c1-gaming`은 demand가 가장 높은 파일이라 별도 보고 line |
+| C1 (16) | 보고만. whitelist가 만점을 받아야 하는 baseline. 단 `c1-gaming`은 demand가 가장 높은 파일이라 별도 보고 line. Phase 7부터 mode당 하나(16개) — judging set을 다시 정하는 건 RQ0 gate spec(Phase 8)의 일 |
 | C3 (3), C4 (3) | 보고만. C4는 clean한 C1 원본과의 차이(delta)로 |
 | C5 (3) | Layer 2 제외. `c1-media`와 behaviour가 같으니 성능 숫자도 같아야 함. 다르면 bug 신호 |
 | C6 (3) | Layer 2 제외. 미리 약속된 miss |
-| `c1-idle` | 성능 metric 없음. contention이 없음 |
+| C7 (16) | 보고만, base(C1)와의 pair로. `c7-meeting`·`c7-media`의 headroom은 EDF-vs-MLFQ 결과이고 cap 축은 측정 불가(pair review finding 5) — RQ0 gate spec의 reporting line |
+| `c1-idle`, `c7-idle` | 성능 metric 없음. `c1-idle`은 contention이 없고, `c7-idle`은 scan만 있어 보호할 foreground가 없음 |
 
 ### 15.2 파일별 term (확정)
 
@@ -1130,6 +1131,12 @@ RQ0 gate("perfect recognition이 random보다 나은 headroom이 있나")의 jud
 | `c1-gaming` | `game.chain.1` miss rate 1.0 · compositor miss rate 0.5 |
 | `c1-media` | music miss rate 1.0 · video miss rate 0.5 (stated assumption) |
 | `c1-idle` | 없음 |
+| `c1-dev` · `c1-video-edit` · `c1-photo` · `c1-mail` | foreground P99 1.0 (editor / editor / photo-editor / mailer) |
+| `c1-meeting` | voice miss rate 1.0 · video miss rate 0.5 (c1-media와 같은 가정) |
+| `c1-ml-train` · `c1-render` · `c1-transcode` | editor(video-editor) P99 1.0 · job turnaround **0.5** (해당 mode의 기존 weight) |
+| `c1-backup` | editor P99 1.0 · bulk turnaround **0.25** |
+| `c1-indexing` | editor P99 1.0 · hog turnaround **1.0** (stated assumption: 사용자가 기다리는 reindex) |
+| C7 (`c7-<mode>`) | base의 term에서 batch term을 뺀 것. interactive mode는 base와 동일, batch mode는 foreground P99만 (**unwanted work carries no term**; lint가 강제) |
 | `c2-p1a` / `c2-p1b` | editor P99 1.0 (60–180 s) · hog progress 0.5 / 없음 |
 | `c2-p2a` / `c2-p2b` | chain miss rate 1.0 (60–120 s) · download progress 0.5 / 없음 |
 | `c2-p3a` / `c2-p3b` | editor P99 1.0 (60–120 s) · bulk progress 0.5 / **0.25** (scheduled backup) |

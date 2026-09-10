@@ -1,5 +1,5 @@
 # A Semantic Recognition Layer for Operating Systems
-> Status: draft — for team review · Created 2026-08-15 · Updated 2026-09-09
+> Status: draft — for team review · Created 2026-08-15 · Updated 2026-09-10
 
 **Removing hardcoded semantic knowledge from the OS, validated on CPU scheduling**
 
@@ -456,7 +456,7 @@ All three keep `reasoning`, `situation`, and `system`. The read scope is applied
 
 1. **Algorithm-choice accuracy** — the model's named algorithm against the calibrated default for the true row, graded like a Layer-1 metric: agreement rate, a four-class confusion matrix, split by software familiarity. No simulator involved. This is the direct measurement of "does the model know which algorithm class fits."
 2. **Cost of delegation** — `llm_algo` against `llm_vocab` on the calibrated table, read as non-inferiority: what handing the model the algorithm choice costs in headroom, or whether it costs nothing. A deployment number: it is the case of a driver with no table, or a situation the table does not cover.
-3. **Delegation under vocabulary gaps** — *proposed, deferred until the main experiments are complete.* If `llm_algo` scores close to `llm_vocab` on covered situations, the model's algorithm knowledge can act where the vocabulary has no row and `llm_vocab` can only fall back. Measurable by blanking rows of the calibrated table to the schema defaults and comparing the two conditions on the files that exercise those rows. Not observable in the main design, because the validator forces a legal mode on every condition.
+3. **Delegation under vocabulary gaps** — *proposed, deferred until the main experiments are complete.* If `llm_algo` scores close to `llm_vocab` on covered situations, the model's algorithm knowledge can act where the vocabulary has no row and `llm_vocab` can only fall back. Measurable by blanking rows of the calibrated table to the schema defaults and comparing the two conditions on the files that exercise those rows. Not observable in the main design, because the validator forces a legal mode on every condition. *Design fixed 2026-09-10 (Phase 7):* since every one of the 32 rows now has a single-segment coreset pair, the files per blanked row are fixed by rule, not picked — the row's C1 base for a `true` row, its C7 counterpart for a `false` row, plus any C2 or C3 segment labelled with that row; blanking means the schema defaults, so the table format needs no new field; the arm runs on the calibrated table after the main experiments, and its row set is pre-registered in the RQ0 gate spec as "every row" unless a stated reason excludes one.
 
 `llm_full` against perfect configuration answers whether generated constants can beat a hand-tuned table at all; we expect not — the model knows what Blender is but has never observed what `timeslice_us: 2000` does in *our* simulator, and no amount of authority supplies that.
 
@@ -571,7 +571,7 @@ Separating these makes the ambiguous outcome interpretable. If Layer 1 is high a
 
 Workload definitions are the experiment. Each carries a ground-truth timeline — mode and attributes — that only the simulator, the oracle condition, and the Layer 1 grader can see.
 
-> **Normative home:** the workload set is now specified by `docs/workload/building-plan.md` (core set C1–C6, ~24 files, balance counted per segment; authored as timelines, compiled to canonical — behavior parameters live in archetypes, never inline). The Family tables below remain the *claims* framing — each Family maps onto core-set groups — and the YAML example below is illustrative of the information asymmetry only, not the file format.
+> **Normative home:** the workload set is now specified by `docs/workload/building-plan.md` (core set C1–C7, 50 files, balance counted per segment; authored as timelines, compiled to canonical — behavior parameters live in archetypes, never inline). The Family tables below remain the *claims* framing — each Family maps onto core-set groups — and the YAML example below is illustrative of the information asymmetry only, not the file format.
 
 ```yaml
 name: gaming_wanted_vs_unwanted_bulk

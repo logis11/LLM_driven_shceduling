@@ -20,7 +20,11 @@
 # Expected "no headroom" (metrics doc §9 floors), stated here so it is not
 # discovered later: c1-media and C5 — no legal configuration can miss a tick
 # (video needs > 10 ms of wait, music can cause 2.5 ms; music needs > 47.5 ms,
-# video can cause 6.67 ms); c3-evening's media segment likewise; c3-creation's
+# video can cause 6.67 ms); c1-meeting by the same arithmetic (voice 2.5 ms
+# against video's 10 ms, video 6.67 ms against voice's 47.5 ms; the helper is
+# near-idle); c3-evening's media segment likewise; c7-meeting and c7-media
+# have headroom against fixed (MLFQ demotes the 6.67 ms video burst) but none
+# between their own two EDF rows (pair review finding 5); c3-creation's
 # batch progress — HandBrake runs uncontended after 240 s, so the cap never bites.
 # c1-media's 1.0 : 0.5 audio : video weighting is a stated assumption (an audio
 # dropout is heard at once; a dropped frame at 60 Hz often is not).

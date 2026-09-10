@@ -136,6 +136,6 @@ tools/tests/           # invariant suite (71 tests) + fixtures
 | Question | Doc |
 |---|---|
 | What do the canonical ops/fields *mean*? | `docs/simulator/interpretation-contract.md` |
-| Why this set design, what are C1–C6? | `docs/workload/building-plan.md` |
+| Why this set design, what are C1–C7? | `docs/workload/building-plan.md` |
 | How is an archetype authored/measured? | `docs/workload/archetype-plan.md` |
 | Where does a number come from? | `docs/references.md` + `sources.yaml` |

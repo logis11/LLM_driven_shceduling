@@ -1,5 +1,5 @@
 # Archetype Library — Writing Plan
-> Status: normative · Created 2026-08-25 · Updated 2026-08-27
+> Status: normative · Created 2026-08-25 · Updated 2026-09-10
 
 > Expands §2 of docs/workload/building-plan.md into a buildable specification for `archetypes.yaml`. Normative for Layer 1. Source ids reference `dataset/sources.yaml`; citations live in docs/references.md; execution semantics live in docs/simulator/interpretation-contract.md.
 
@@ -44,12 +44,12 @@ Observation: counts matter differently to the two consumers. The executor needs 
 ## 4. The inventory (12 entries)
 
 ### Periodic-interactive family — harvested from interbench's task menu
-1. **`audio-playback`** — TIMER/RUN loop, 50 ms period @ 5% CPU. category_source: interbench; params: `interbench:man-audio`. Consumed by: S13; S9 audio path.
+1. **`audio-playback`** — TIMER/RUN loop, 50 ms period @ 5% CPU. category_source: interbench; params: `interbench:man-audio`. Consumed by: S13; S9 audio path; S3 audio path (`c1-meeting`, Phase 7).
 2. **`video-playback`** — TIMER/RUN loop, 16.7 ms period @ 40% CPU. category_source + params: `interbench:man-video`. Consumed by: S13; S3 (stated approximation — see OQ-2, resolved).
 3. **`desktop-interactive`** — input-driven variable bursts, 0–100% CPU; input arrives as pre-sampled exogenous wake events. category_source + params: `interbench:man-x` (burst shape); intra-burst input gaps `dhakal-chi18` (mean IKI 238.66 ms) with family shape `roeser-rw24`; burst/pause macro-structure is our modeling (recorded in `modeling_notes`). Consumed by: foreground of S1, S2, S4, S6.
 
 ### Compute/batch family — harvested from interbench loads + kernel-build literature
-4. **`cpu-batch`** — run-to-completion, sustained core saturation. category_source: interbench (Burn; cross-confirmed by ananicy-rules `Heavy_CPU`). Consumed by: S12 training loop; S7 render phases.
+4. **`cpu-batch`** — run-to-completion, sustained core saturation. category_source: interbench (Burn; cross-confirmed by ananicy-rules `Heavy_CPU`). Consumed by: S12 training loop; S7 render phases; S8 (`HandBrakeCLI` in `c3-creation`, `c1-transcode`); S14 in full-rescan state (the P1b binding note); S17 (`clamscan` in `c2-p2b` and the ten C7 interactive counterparts).
 5. **`compiler-child`** — short RUN + disk WAIT, then EXIT. category_source: kernel-build characterization (`ocallahan-atc17`: 2,430 mostly short-lived procs; cross-confirmed by interbench Compile, `coetzee-arxiv12`). Lifetime CDF: `meas-pending`. Consumed by: S11 cc1/ld.
 6. **`build-orchestrator`** — FORK/wait loop consuming a pre-sampled spawn table up to the parallelism cap (interpretation-contract §5). category_source: kernel-build literature + make -jN convention. Consumed by: S11 make/cargo. cc1 counts emerge here (§3).
 
@@ -62,7 +62,7 @@ Observation: counts matter differently to the two consumers. The executor needs 
 
 ### meas family — category itself sourced from our measurements (no literature taxonomy exists)
 10. **`network-bulk`** — link-saturating download, moderate CPU. category_source: meas; params: `meas-pending`. Consumed by: S10.
-11. **`electron-comms`** — mostly idle + periodic short wakes; renderer children. category_source: meas; params: `meas-pending` (Xvfb workflow). Consumed by: S5, S4 slack; chrome-renderer reuse refereed by `meas-ci` (OQ-3, resolved).
+11. **`electron-comms`** — mostly idle + periodic short wakes; renderer children. category_source: meas; params: `meas-pending` (Xvfb workflow). Consumed by: S5, S4 slack; S3 helper (`c1-meeting`); chrome-renderer reuse refereed by `meas-ci` (OQ-3, resolved).
 12. **`system-daemon`** — near-idle, intermittent sub-ms wakes. category_source: meas; params: `meas-pending`. Consumed by: S18.
 
 ### Spanning check

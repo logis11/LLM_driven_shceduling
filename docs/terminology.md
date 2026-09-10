@@ -1,5 +1,5 @@
 # Terminology
-> Status: normative · Created 2026-08-23 · Updated 2026-09-08
+> Status: normative · Created 2026-08-23 · Updated 2026-09-10
 
 Terms this project uses for its own parts. Operating systems vocabulary —
 MLFQ, EDF, preemption, turnaround time — is in Appendix A of
@@ -217,6 +217,10 @@ model from its training corpus, 1 (transparent: `firefox`) to 5
 (nonexistent-opaque: `qzvd`), per docs/workload/building-plan.md C5. A property
 of the name, never of behaviour; carried on ground-truth segments when
 authored, and used only as a split key when recognition accuracy is reported.
+
+**Counterpart (C7)** — the coreset file that instances the `false` cell of a mode, derived from that mode's C1 base by one op: an injected unwanted job (`clamscan`) in the interactive modes, the same batch job re-cast as unwanted in the batch modes. Base and counterpart are a one-diff pair, and a counterpart repeats its base's scored terms minus the batch term.
+
+**Pre-committed miss** — a ground-truth segment whose label no recognizer can reach from names and behaviour, shipped anyway with `pre_committed_miss: true` so the limit is measured rather than claimed: the three C6 files and, on the attribute side, the segments that differ from their pair by intent alone (`c1-indexing`; the `ml-train`, `render`, `transcode`, `backup` counterparts). Excluded from accuracy and reported separately; the `oracle` condition still measures the cell's driver-table row.
 
 **Perfect recognition** — the result of feeding ground-truth labels through the
 shared driver table. The upper bound for every condition that passes through

@@ -55,4 +55,4 @@ The schema's per-field defaults have no source. Each is traced to a primary sour
 
 ## Open items
 
-- Held-out-rows arm (blank rows to schema defaults, compare `llm_vocab` and `llm_algo` on the affected files): recorded in the proposal as a proposal, run after the main experiments. The format does not carry a "no default" field now.
+- Held-out-rows arm (blank rows to schema defaults, compare `llm_vocab` and `llm_algo` on the affected files): recorded in the proposal as a proposal, run after the main experiments. The format does not carry a "no default" field now. *2026-09-10 (Phase 7): the exercising files per row are now fixed by rule — the row's C1 base or C7 counterpart plus any C2/C3 segment on that row — so the arm is scheduled in `_dev/TODO.md`'s backlog with its design, not left as a proposal.*

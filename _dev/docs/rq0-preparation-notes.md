@@ -124,6 +124,16 @@ per file in `dataset/build.manifest.json` under `demand`: five C1 files sit at
 0.00–0.54 of the lane, `c1-gaming` at 1.46. Judging set = the six C2 files, all
 inside the demand window; C1 stays reporting-only.
 
+*Phase 7 note (2026-09-10), input to the RQ0 gate spec:* C1 is now sixteen
+files (the ten new bases sit at 0.45–0.97) and C7 adds one counterpart per mode
+(interactive ones at 1.45–1.53, `c7-gaming` 2.46, batch ones equal to their
+bases), every derived file `calibration` by authored declaration. The judging
+set is re-decided in the RQ0 gate spec with these in view; the building plan's
+"whitelist scores perfectly here" line now covers sixteen files. Pair review
+findings 4–5 (`docs/daemon/prior-table-pair-review.md`) are RQ0 gate spec
+reporting lines: `c7-meeting`/`c7-media` headroom is EDF-versus-MLFQ with the
+cap axis unmeasured.
+
 The inference above does not hold as stated. Demand bounds *throughput*
 headroom, not *latency* headroom: at 0.8 utilisation two tasks still become
 runnable at the same instant, and a keystroke arriving while a batch task holds

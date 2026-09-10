@@ -1,8 +1,8 @@
-# Coreset 안내 — 24개 workload를 하나씩 뜯어보기
+# Coreset 안내 — 50개 workload를 하나씩 뜯어보기
 
-> Status: draft · Created 2026-09-08 · Updated 2026-09-08
+> Status: draft · Created 2026-09-08 · Updated 2026-09-10
 
-이 문서는 **공부용 문서**예요. dataset이 무엇이고, 어떻게 만들어지고, 24개 coreset 파일 각각이 무슨 상황을 담고 있으며 어떤 숫자를 갖고 있는지를 OS/시스템 지식이 거의 없는 사람 기준으로 풀어 써요. 설계의 규범적 근거는 building-plan(`docs/workload/building-plan.md`), archetype의 규범적 정의는 archetype-plan(`docs/workload/archetype-plan.md`), 실행 semantics는 interpretation contract(`docs/simulator/interpretation-contract.md`)에 있어요. 이 문서는 그 셋을 읽을 수 있게 만드는 다리이고, 숫자는 2026-09-08에 `make dataset`으로 빌드한 `coreset-single`에서 직접 읽은 값이에요.
+이 문서는 **공부용 문서**예요. dataset이 무엇이고, 어떻게 만들어지고, 50개 coreset 파일 각각이 무슨 상황을 담고 있으며 어떤 숫자를 갖고 있는지를 OS/시스템 지식이 거의 없는 사람 기준으로 풀어 써요. 설계의 규범적 근거는 building-plan(`docs/workload/building-plan.md`), archetype의 규범적 정의는 archetype-plan(`docs/workload/archetype-plan.md`), 실행 semantics는 interpretation contract(`docs/simulator/interpretation-contract.md`)에 있어요. 이 문서는 그 셋을 읽을 수 있게 만드는 다리이고, 숫자는 2026-09-08에 `make dataset`으로 빌드한 `coreset-single`에서 직접 읽은 값이에요.
 
 읽는 규칙: term은 영어 그대로, 다른 문서는 절 번호 대신 내용으로 가리켜요.
 
@@ -18,8 +18,8 @@
 6. canonical workload file의 해부
 7. recognizer가 보는 것 — telemetry snapshot과 query point
 8. demand와 utilization — 의자를 얼마나 요구하나
-9. 여섯 그룹 C1–C6 — 각 그룹이 답하는 질문
-10. 24개 파일 상세
+9. 일곱 그룹 C1–C7 — 각 그룹이 답하는 질문
+10. 50개 파일 상세
 11. 파일들 사이의 관계 — 무엇이 무엇에서 파생됐나
 12. 알아둘 특이점과 열린 항목
 13. 용어 정리
@@ -324,7 +324,7 @@ simulator와 harness가 읽는 유일한 형식. `dataset/build/coreset-single/<
 ]
 ```
 
-label이 붙은 segment 목록. `mode`는 16개 중 하나(또는 `ambiguous`), `attributes.background_wanted`는 boolean. 그 외 `background`, `initiated`, `dual_active`, `spoof`(`attributes` 안)와 `familiarity`(segment 자체의 key, 적혀 있을 때만) 같은 것은 채점 split과 실패 분석용 annotation이고 recognizer의 답에는 없어요.
+label이 붙은 segment 목록. `mode`는 16개 중 하나(또는 `ambiguous`), `attributes.background_wanted`는 boolean. 그 외 `background`, `initiated`, `dual_active`, `spoof`, `pre_committed_miss`(`attributes` 안)와 `familiarity`(segment 자체의 key, 적혀 있을 때만) 같은 것은 채점 split과 실패 분석용 annotation이고 recognizer의 답에는 없어요.
 
 **마지막 segment의 `t_end`가 harness의 `T_end`예요.**
 
@@ -398,7 +398,7 @@ editor는 focus window 안의 burst 합, batch는 total_work, periodic은 (RUN/p
 
 **demand window 규칙:** `-single` 파일 중 demand class가 `oversubscribed`인 것은 utilization이 1.00–1.50 안에 있어야 해요. lint가 검사. `calibration` class는 면제. class는 timeline의 `meta.demand`로 선언하고, 파일의 실제 demand가 낮다는 뜻이 아니라 "검사 면제"라는 뜻이에요(`c1-gaming`은 calibration인데 1.46).
 
-24개 전부 (`coreset-single`, 2026-09-08 빌드):
+원래 24개 (`coreset-single`, 2026-09-08 빌드; Phase 7의 26개는 §10의 C1 추가분과 C7 표에):
 
 | 파일 | utilization | class | native | 비고 |
 |---|---|---|---|---|
@@ -426,24 +426,25 @@ editor는 focus window 안의 burst 합, batch는 total_work, periodic은 (RUN/p
 
 ---
 
-## 9. 여섯 그룹 C1–C6 — 각 그룹이 답하는 질문
+## 9. 일곱 그룹 C1–C7 — 각 그룹이 답하는 질문
 
-24개 파일은 여섯 그룹이고, 각 그룹은 하나의 측정을 가능하게 하려고 존재해요. "이 파일이 없으면 깨지는 RQ가 없다"면 그 파일은 없어야 해요.
+50개 파일은 일곱 그룹이고, 각 그룹은 하나의 측정을 가능하게 하려고 존재해요. "이 파일이 없으면 깨지는 RQ가 없다"면 그 파일은 없어야 해요.
 
 | 그룹 | 파일 수 | 질문 | 구성 방식 |
 |---|---|---|---|
-| **C1** calibration | 6 | 한 가지 명백한 상황을 맞히나. 바닥. **whitelist가 만점을 받아야 하는 곳** | mode당 하나, segment 하나 |
+| **C1** calibration | 16 | 한 가지 명백한 상황을 맞히나. 바닥. **whitelist가 만점을 받아야 하는 곳** | mode당 하나(16 mode 전부, Phase 7부터), segment 하나 — 그 mode의 `true` cell |
 | **C2** intent pairs | 6 (3쌍) | **행동이 완전히 같고 의도만 다를 때** 구분되나. RQ0 judging set | base + 한 segment만 다른 변형 |
 | **C3** transition arcs | 3 | 상황이 중간에 바뀔 때 얼마나 빨리 정확히 따라가나 | 3–4 segment |
 | **C4** distractor | 3 | 무관한 process가 중간에 나타나면 답이 흔들리나 | C1 clone + 주입 1개. 원본과 paired |
 | **C5** familiarity | 3 | 이름이 낯설어져도 알아보나 | c1-media + 이름만 교체 |
 | **C6** resolution limits | 3 | 이름 기반 recognition이 **설계상** 못 하는 곳. 미리 약속된 miss | 각각 다름 |
+| **C7** attribute counterparts | 16 | 배경 작업이 **원하지 않은 것**일 때 답이 뒤집히나. driver table의 32 cell 전부에 pair를 줌 | mode당 하나, C1 base + op 하나(scan 주입 또는 rename) + label flip — 그 mode의 `false` cell |
 
-파생 관계: C4 = C1 + injection, C5 = C1 + rename, C2의 b = a + 한 segment 수정, C6 둘은 c1-browsing 파생. 진짜 새로 쓴 timeline은 13개이고 나머지 11개는 `*.variant.yaml`의 recipe로 생성돼요. 파생 파일은 base의 seed를 물려받아서 "변경한 것 외에는 byte-identical"이 보장돼요.
+파생 관계: C4 = C1 + injection, C5 = C1 + rename, C7 = C1 + unwanted job 또는 rename + label flip, C2의 b = a + 한 segment 수정, C6 둘은 c1-browsing 파생. 진짜 새로 쓴 timeline은 23개(C1 16, C2의 a 3, C3 3, c6-dual)이고 나머지 27개는 `*.variant.yaml` recipe 다섯 개로 생성돼요. 파생 파일은 base의 seed를 물려받아서 "변경한 것 외에는 byte-identical"이 보장돼요.
 
 ---
 
-## 10. 24개 파일 상세
+## 10. 50개 파일 상세
 
 각 파일에 대해: 한 문단 이야기, segment, task(compile된 실제 수치), recognizer가 보는 snapshot, harness가 볼 것. RUN 수치는 `coreset-single`에서 읽은 값. "RUN/iter"는 LOOP body 한 바퀴의 RUN, "RUN 총"은 파일 전체의 합.
 
@@ -564,6 +565,27 @@ harness: 두 task의 `job`. utilization 0.45라 contention이 거의 없어요(�
 recognizer: 0 s 다섯 이름. 60 s 빈 집합.
 
 harness: **성능 metric 없음.** utilization 0.0004. 이 파일의 역할은 "recognizer가 idle이라고 하나"뿐이에요.
+
+---
+
+#### Phase 7에서 추가된 열 개의 C1 (2026-09-10)
+
+원래 C1은 여섯이었고 나머지 열 mode는 다른 파일의 segment 안에만 있었어요. Phase 7이 mode당 하나씩 채웠어요 — 모양은 위와 같아요(60 s, segment 하나, `background_wanted: true`, `demand: calibration`, focus 2–58 s). task set은 그 mode를 이미 담고 있던 segment에서 그대로 가져왔고(파일 header에 출처가 적혀 있어요), batch job은 60 s 안에 끝나도록 30 s로 줄였어요(turnaround term을 갖기 위해). `c1-meeting`만 새로 설계했어요 — `c6-fold`의 meeting segment는 browser 그대로라 가져올 task set이 없었고, S3는 archetype-plan OQ-2대로 video-playback에 묶어요.
+
+| 파일 | task set | 출처 segment | utilization |
+|---|---|---|---|
+| `c1-dev` | code 편집기 혼자 | c2-p1a seg 0 | 0.46 |
+| `c1-video-edit` | kdenlive 혼자 | c2-p3a seg 0 | 0.46 |
+| `c1-photo` | gimp 혼자 | c3-creation seg 0 | 0.47 |
+| `c1-mail` | thunderbird + 40초의 send burst(network-bulk) | c3-workday seg 3 | 0.53 |
+| `c1-meeting` | zoom: video-playback + audio-playback + electron-comms helper (신규 설계, OQ-2) | — | 0.45 |
+| `c1-ml-train` | code + python3 cpu-batch 30 s | c2-p1a seg 1 | 0.97 |
+| `c1-render` | kdenlive + ffmpeg cpu-batch 30 s, initiated: user | c2-p3a seg 1 | 0.90 |
+| `c1-transcode` | kdenlive + HandBrakeCLI cpu-batch 30 s, initiated: user | c3-creation seg 2 | 0.97 |
+| `c1-indexing` | code + tracker-miner-fs-3 cpu-batch 30 s, initiated: user, **pre_committed_miss** | c2-p1b seg 1 | 0.95 |
+| `c1-backup` | kdenlive + borg io-stream 30 s, initiated: scheduled (wanted: true, p3b와 같음) | c2-p3b seg 1 | 0.97 |
+
+`c1-indexing`은 indexing의 **`true`** cell이에요 — 사용자가 직접 돌린 reindex. 같은 indexer가 같은 일을 하니 이름·행동으로는 `c2-p1b`의 unwanted rescan과 구분이 안 돼요. 그래서 `pre_committed_miss: true`가 붙어요(§12).
 
 ---
 
@@ -885,6 +907,41 @@ harness: `ambiguous`는 recognizer의 menu에 없어요. oracle이 이 파일에
 
 ---
 
+### C7 — attribute counterparts (2026-09-10)
+
+mode마다 하나, `c7-<mode>`는 `c1-<mode>`에서 파생돼요. base가 그 mode의 `true` cell, counterpart가 `false` cell(indexing만 반대). 이렇게 해서 driver table의 32 cell 전부가 coreset 안에 한 쌍씩 있어요 — Phase 6 pair review가 발견한 구멍(false cell 14개가 비어 있었음)을 메운 것.
+
+두 가지 만드는 법:
+- **interactive mode 10개**: base + `clamscan`(cpu-batch) 하나. 0초에 도착해 60 s 일을 하니 segment 내내 살아 있어요 — label이 매 순간 맞도록. 이름을 하나로 통일한 건 열 개 `false` cell이 mode로만 다르게 하려고, tier 1이라 어떤 pair도 familiarity tier가 안 바뀌어요.
+- **batch mode 6개**: batch job 자체가 attribute가 판단하는 배경 작업이에요(vocabulary §1의 batch-mode clause, `c2-p1b`가 이미 쓰던 읽기). 그래서 counterpart는 "같은 일인데 아무도 안 시킨 것" — P1b의 rename 수법. `compile`은 `make`→`dkms`(kernel 업데이트 때 배포판이 알아서 돌리는 module rebuild). 나머지 넷은 배포판·vendor가 다른 이름으로 돌리는 같은 mode의 unwanted job이 없어서(Jellyfin의 transcoder도 process 이름은 그냥 `ffmpeg`) label만 뒤집고 pre-committed miss로 배송해요.
+
+| 파일 | base + op | mode / attributes | utilization | miss |
+|---|---|---|---|---|
+| `c7-browsing` | `c1-browsing` + `clamscan`(cpu-batch, 0 s부터 60 s) | browsing / **false**, background: av-scan | 1.45 | — |
+| `c7-office` | `c1-office` + `clamscan`(cpu-batch, 0 s부터 60 s) | office / **false**, background: av-scan | 1.50 | — |
+| `c7-mail` | `c1-mail` + `clamscan`(cpu-batch, 0 s부터 60 s) | mail / **false**, background: av-scan | 1.53 | — |
+| `c7-dev` | `c1-dev` + `clamscan`(cpu-batch, 0 s부터 60 s) | dev / **false**, background: av-scan | 1.46 | — |
+| `c7-photo` | `c1-photo` + `clamscan`(cpu-batch, 0 s부터 60 s) | photo / **false**, background: av-scan | 1.47 | — |
+| `c7-meeting` | `c1-meeting` + `clamscan`(cpu-batch, 0 s부터 60 s) | meeting / **false**, background: av-scan | 1.45 | — |
+| `c7-gaming` | `c1-gaming` + `clamscan`(cpu-batch, 0 s부터 60 s) | gaming / **false**, background: av-scan | 2.46 | — |
+| `c7-media` | `c1-media` + `clamscan`(cpu-batch, 0 s부터 60 s) | media / **false**, background: av-scan | 1.45 | — |
+| `c7-video-edit` | `c1-video-edit` + `clamscan`(cpu-batch, 0 s부터 60 s) | video-edit / **false**, background: av-scan | 1.46 | — |
+| `c7-idle` | `c1-idle` + `clamscan`(cpu-batch, 0 s부터 60 s) | idle / **false**, background: av-scan | 1.00 | — |
+| `c7-compile` | `make` → `dkms` rename (kernel 업데이트 뒤 module rebuild, meas-ci:names:2로 검증) | compile / **false**, initiated: scheduled | 0.54 | — |
+| `c7-indexing` | `c1-indexing`에서 label만 뒤집음 | indexing / **false**, initiated: scheduled | 0.95 | — (miss는 `c1-indexing` 쪽) |
+| `c7-ml-train` | label만 뒤집음 (같은 이름, 같은 일) | ml-train / **false**, initiated: scheduled | 0.97 | **pre_committed_miss** |
+| `c7-render` | label만 뒤집음 (같은 이름, 같은 일) | render / **false**, initiated: scheduled | 0.90 | **pre_committed_miss** |
+| `c7-transcode` | label만 뒤집음 (같은 이름, 같은 일) | transcode / **false**, initiated: scheduled | 0.97 | **pre_committed_miss** |
+| `c7-backup` | label만 뒤집음 (같은 이름, 같은 일) | backup / **false**, initiated: scheduled | 0.97 | **pre_committed_miss** |
+
+**score.** counterpart는 base의 term에서 batch term을 뺀 것을 가져요 — unwanted work carries no term. interactive mode는 base와 같고(scan에는 term이 없으니), batch mode는 foreground P99만 남아요. lint가 이 규칙을 강제해요.
+
+**demand.** 전부 `demand: calibration`을 recipe에 명시해서 window 검사에서 면제예요 — counterpart의 demand는 "base + 주입한 job"이라 pair가 통제이지 window가 아니에요. interactive counterpart는 1.45–1.53, `c7-gaming`은 2.46(base가 이미 lane_share 0.9), `c7-idle`은 정확히 1.00, batch counterpart는 base와 같아요.
+
+**측정에서 알아둘 것.** `c7-meeting`과 `c7-media`는 두 row(true/false)가 모두 EDF라, TIMER task는 deadline class로 scan보다 먼저 돌고 한 slice(2 ms)의 지연은 tick 허용치(video 10 ms, audio 47.5 ms)보다 작아요. 그래서 cap 값이 채점 term에 닿지 않아요 — 두 row의 점수가 같아요. 이 두 파일이 주는 건 recognition(attribute accuracy)과 `oracle` 대 `fixed`의 headroom(EDF 대 MLFQ)이고, cap 축은 측정 불가로 RQ0 gate spec에 reporting line으로 적어요(pair review finding 5).
+
+---
+
 ## 11. 파일들 사이의 관계 — 무엇이 무엇에서 파생됐나
 
 ```
@@ -899,15 +956,18 @@ c1-browsing ──┬───────▶ c6-spoof      (+chrome cpu-batch a
 c2-p1a ───────────────▶ c2-p1b        (rename python3 → tracker-miner-fs-3; seg 2 → indexing, unwanted)
 c2-p2a ───────────────▶ c2-p2b        (download → clamscan cpu-batch; seg 2 → unwanted, av-scan)
 c2-p3a ───────────────▶ c2-p3b        (ffmpeg → borg io-stream; seg 2 → backup, scheduled)
-c1-idle, c3-workday, c3-evening, c3-creation, c6-dual: 독립 (파생 없음)
+c1-<mode> ×16 ────────▶ c7-<mode>     (interactive 10: +clamscan cpu-batch at 0 s; compile: make → dkms;
+                                       indexing, ml-train, render, transcode, backup: label만 flip; 전부 wanted → false)
+c3-workday, c3-evening, c3-creation, c6-dual: 독립 (파생 없음)
 ```
 
-recipe는 `dataset/timelines/coreset/*.variant.yaml` 넷(`c2-pairs`, `c4`, `c5`, `c6`). op는 `rename`, `patch-task`, `add-task`, `patch-segment`, `set-segments`. 파생 파일은 base의 seed를 물려받아요.
+recipe는 `dataset/timelines/coreset/*.variant.yaml` 다섯(`c2-pairs`, `c4`, `c5`, `c6`, `c7`). op는 `rename`, `patch-task`, `add-task`, `patch-segment`, `set-segments`, `patch-meta`(seed·id는 못 바꿈). 파생 파일은 base의 seed를 물려받아요.
 
 이 관계가 실험에 주는 것:
 - C4는 "원본과의 delta"로만 의미가 있어요.
 - C5는 성능이 c1-media와 같아야 하고, 그 자체가 pipeline의 sanity check예요.
 - C2의 b는 a와 한 곳만 다르니 gap이 그 한 곳에 귀속돼요.
+- C7은 base와 task 하나(또는 이름 하나, 또는 label만) 다르니 attribute의 효과가 그 한 곳에 귀속돼요.
 
 ---
 
@@ -931,11 +991,12 @@ recipe는 `dataset/timelines/coreset/*.variant.yaml` 넷(`c2-pairs`, `c4`, `c5`,
 - spawn 자식은 부모와 함께 보여요(`cc1 ×100`, `×4200`, `×85`).
 
 **열린 항목** (결정된 것이 아님)
-- C1에서 파생된 8개 파일(`c4-*`, `c5-*`, `c6-fold`, `c6-spoof`)의 `demand: calibration`은 variant recipe에 적힌 게 아니라 base의 `meta`를 통째로 복사해서 상속된 거예요. `c6-spoof`(0.95)가 그 덕에 window 검사를 피하고 있어요. 명시적 선언으로 바꿀지 상속을 허용한다고 spec을 고칠지 미결. C6는 내부적으로 calibration 둘 + oversubscribed 하나라 논문 표에 각주 필요.
+- ~~C1에서 파생된 8개 파일의 `demand: calibration`이 상속인지 선언인지 미결~~ → **2026-09-10 결정(Phase 7)**: 모든 파생 파일(`c4-*`, `c5-*`, `c6-fold`, `c6-spoof`, `c7-*`)이 recipe에 `patch-meta: {demand: calibration}`을 명시해요. 파일의 실제 regime은 manifest의 utilization으로 읽어요. C6는 여전히 calibration 둘 + oversubscribed 하나라 논문 표에 각주 필요.
 - `wineserver`를 `system-daemon`으로 두는 건 provisional. LAVD는 wine을 게임 task graph의 일부로 봐요. constructor 구현 때 결정.
 - TIMER의 t₀(등장 시각 vs 전역 0)는 simulator의 미결 질문. `c3-evening`처럼 TIMER task가 중간에 등장하는 파일에서 영향.
 - familiarity tag는 2026-09-08부터 compile을 통과해 `ground_truth`에 실려요(`dataset/schema/workload.schema.json`의 optional 필드; C5 세 파일의 hash가 바뀜). 남은 것: C5 밖의 segment에 annotation을 달지 — `c1-media`가 tier 1 기준선으로 자연스러운 첫 후보예요. 이름별 tag는 여전히 없고, 파일(segment) 단위예요.
 - `random` condition이 무엇에서 uniform하게 뽑는지(16 mode? 32 row?) 미정. 박이안과.
+- **pre_committed_miss**(2026-09-10): 이름·행동으로는 label에 닿을 수 없는 segment에 붙는 다섯 번째 annotation. attribute 쪽에서는 `c1-indexing`과 `c7-ml-train`·`c7-render`·`c7-transcode`·`c7-backup`. coverage grid가 이걸 읽어 cell을 "채워졌지만 recognition-limited"로 표시하고, grader는 Phase 8에서 accuracy에서 제외해요.
 
 ---
 
@@ -979,7 +1040,9 @@ recipe는 `dataset/timelines/coreset/*.variant.yaml` 넷(`c2-pairs`, `c4`, `c5`,
 | **pinned event** | 시각이 파일에 박힌 event. 등장, depart, wake |
 | **emergent** | scheduler에 따라 달라지는 시각. spawn, exit, 모든 실행 |
 | **meas-ci** | 우리 CI 측정 캠페인의 source id |
-| **C1–C6** | coreset의 여섯 그룹 |
+| **C1–C7** | coreset의 일곱 그룹 |
+| **counterpart (C7)** | 한 mode의 `false` cell을 담는 파일. 그 mode의 C1 base + op 하나 |
+| **pre_committed_miss** | 이름·행동으로는 맞힐 수 없는 segment의 annotation. accuracy에서 제외, 따로 보고 |
 | **judging set** | RQ0 gate 판정에 쓰는 파일. C2의 6개 |
 
 ---
