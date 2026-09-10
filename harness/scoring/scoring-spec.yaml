@@ -43,6 +43,51 @@ files:
       - {entity: music, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
       - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
 
+  # ---- C1, Phase 7 bases (spec decision 9): the pattern by mode class with the
+  # weight the mode's existing instance carries. Interactive-only modes score the
+  # foreground's P99; periodic modes the consumer's miss rate (audio 1.0, video
+  # 0.5 as c1-media); batch-beside-editor modes the editor's P99 plus the job's
+  # turnaround at the mode's weight (ml-train/render/transcode 0.5 from the C2
+  # and C3 progress terms, backup 0.25 from c2-p3b). c1-indexing's turnaround at
+  # 1.0 is a stated assumption — a user waiting on a reindex as c1-compile's
+  # user waits on a build — and makes the indexing/true cap derived, not assumed.
+  c1-dev:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c1-video-edit:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c1-photo:
+    terms:
+      - {entity: photo-editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c1-mail:
+    terms:
+      - {entity: mailer, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c1-meeting:
+    terms:
+      - {entity: voice, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+  c1-ml-train:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: hog, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.5}
+  c1-render:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: bulk, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.5}
+  c1-transcode:
+    terms:
+      - {entity: video-editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: batch, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.5}
+  c1-indexing:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: hog, metric: turnaround, aggregate: turnaround, direction: lower, weight: 1.0}
+  c1-backup:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: bulk, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.25}
+
   # ---- C2 — intent pairs. Latency and frame terms over the second segment,
   # 60 s to T_end; progress terms unwindowed (the batch task arrives at 60 s).
   c2-p1a:

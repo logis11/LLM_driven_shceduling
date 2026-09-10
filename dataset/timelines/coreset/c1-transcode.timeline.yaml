@@ -1,0 +1,21 @@
+# C1 — single-situation calibration: pure transcode (building-plan §3 C1;
+# Phase 7 spec decision 8). Task set lifted from c3-creation segment 2
+# (kdenlive + HandBrakeCLI batch); total_work resized from 320 s to 30 s so the
+# job finishes inside the 60 s segment (turnaround term).
+meta:
+  id: c1-transcode
+  seed: 114
+  demand: calibration
+
+segments:
+  - {from: 0s, to: 60s, mode: transcode,
+     attributes: {background_wanted: true, initiated: user}, scenario: [S8]}
+
+tasks:
+  - {id: video-editor, name: kdenlive, archetype: desktop-interactive,
+     arrive: 0s, depart: 60s}
+  - {id: batch, name: HandBrakeCLI, archetype: cpu-batch, arrive: 2s,
+     bind: {total_work: 30s}}
+
+focus:
+  - {from: 2s, to: 58s, task: video-editor}

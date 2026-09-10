@@ -56,9 +56,9 @@
       "background_wanted": true,
       "mode": "mail",
       "pre_committed_miss": 0,
-      "segments": 1,
+      "segments": 2,
       "tiers": {
-        "t1": 0,
+        "t1": 1,
         "t2": 0,
         "t3": 1,
         "t4": 0,
@@ -82,9 +82,9 @@
       "background_wanted": true,
       "mode": "dev",
       "pre_committed_miss": 0,
-      "segments": 2,
+      "segments": 3,
       "tiers": {
-        "t1": 2,
+        "t1": 3,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -108,9 +108,9 @@
       "background_wanted": true,
       "mode": "photo",
       "pre_committed_miss": 0,
-      "segments": 1,
+      "segments": 2,
       "tiers": {
-        "t1": 1,
+        "t1": 2,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -134,9 +134,9 @@
       "background_wanted": true,
       "mode": "meeting",
       "pre_committed_miss": 0,
-      "segments": 1,
+      "segments": 2,
       "tiers": {
-        "t1": 1,
+        "t1": 2,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -212,9 +212,9 @@
       "background_wanted": true,
       "mode": "video-edit",
       "pre_committed_miss": 0,
-      "segments": 3,
+      "segments": 4,
       "tiers": {
-        "t1": 3,
+        "t1": 4,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -264,9 +264,9 @@
       "background_wanted": true,
       "mode": "ml-train",
       "pre_committed_miss": 0,
-      "segments": 1,
+      "segments": 2,
       "tiers": {
-        "t1": 1,
+        "t1": 2,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -290,9 +290,9 @@
       "background_wanted": true,
       "mode": "render",
       "pre_committed_miss": 0,
-      "segments": 1,
+      "segments": 2,
       "tiers": {
-        "t1": 1,
+        "t1": 2,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -316,10 +316,10 @@
       "background_wanted": true,
       "mode": "transcode",
       "pre_committed_miss": 0,
-      "segments": 1,
+      "segments": 2,
       "tiers": {
         "t1": 0,
-        "t2": 1,
+        "t2": 2,
         "t3": 0,
         "t4": 0,
         "t5": 0
@@ -341,12 +341,12 @@
     {
       "background_wanted": true,
       "mode": "indexing",
-      "pre_committed_miss": 0,
-      "segments": 0,
+      "pre_committed_miss": 1,
+      "segments": 1,
       "tiers": {
         "t1": 0,
         "t2": 0,
-        "t3": 0,
+        "t3": 1,
         "t4": 0,
         "t5": 0
       }
@@ -368,9 +368,9 @@
       "background_wanted": true,
       "mode": "backup",
       "pre_committed_miss": 0,
-      "segments": 1,
+      "segments": 2,
       "tiers": {
-        "t1": 1,
+        "t1": 2,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -423,7 +423,6 @@
     "compile/false",
     "dev/false",
     "idle/false",
-    "indexing/true",
     "mail/false",
     "media/false",
     "meeting/false",
@@ -443,6 +442,17 @@
     }
   ],
   "per_file": {
+    "c1-backup": [
+      {
+        "background_wanted": true,
+        "mode": "backup",
+        "scenario": [
+          "S7",
+          "S15"
+        ],
+        "tier": 1
+      }
+    ],
     "c1-browsing": [
       {
         "background_wanted": true,
@@ -461,6 +471,16 @@
           "S11"
         ],
         "tier": 3
+      }
+    ],
+    "c1-dev": [
+      {
+        "background_wanted": true,
+        "mode": "dev",
+        "scenario": [
+          "S11"
+        ],
+        "tier": 1
       }
     ],
     "c1-gaming": [
@@ -483,12 +503,55 @@
         "tier": 2
       }
     ],
+    "c1-indexing": [
+      {
+        "background_wanted": true,
+        "mode": "indexing",
+        "pre_committed_miss": true,
+        "scenario": [
+          "S11",
+          "S14"
+        ],
+        "tier": 3
+      }
+    ],
+    "c1-mail": [
+      {
+        "background_wanted": true,
+        "mode": "mail",
+        "scenario": [
+          "S4"
+        ],
+        "tier": 1
+      }
+    ],
     "c1-media": [
       {
         "background_wanted": true,
         "mode": "media",
         "scenario": [
           "S13"
+        ],
+        "tier": 1
+      }
+    ],
+    "c1-meeting": [
+      {
+        "background_wanted": true,
+        "mode": "meeting",
+        "scenario": [
+          "S3"
+        ],
+        "tier": 1
+      }
+    ],
+    "c1-ml-train": [
+      {
+        "background_wanted": true,
+        "mode": "ml-train",
+        "scenario": [
+          "S11",
+          "S12"
         ],
         "tier": 1
       }
@@ -503,6 +566,47 @@
           "S4"
         ],
         "tier": 2
+      }
+    ],
+    "c1-photo": [
+      {
+        "background_wanted": true,
+        "mode": "photo",
+        "scenario": [
+          "S6"
+        ],
+        "tier": 1
+      }
+    ],
+    "c1-render": [
+      {
+        "background_wanted": true,
+        "mode": "render",
+        "scenario": [
+          "S7",
+          "S8"
+        ],
+        "tier": 1
+      }
+    ],
+    "c1-transcode": [
+      {
+        "background_wanted": true,
+        "mode": "transcode",
+        "scenario": [
+          "S8"
+        ],
+        "tier": 2
+      }
+    ],
+    "c1-video-edit": [
+      {
+        "background_wanted": true,
+        "mode": "video-edit",
+        "scenario": [
+          "S7"
+        ],
+        "tier": 1
       }
     ],
     "c2-p1a": [
@@ -808,5 +912,5 @@
       }
     ]
   },
-  "segments_total": 38
+  "segments_total": 48
 }

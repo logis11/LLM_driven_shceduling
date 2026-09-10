@@ -15,14 +15,14 @@ MODES = ["browsing", "office", "mail", "dev", "photo", "meeting", "gaming",
          "indexing", "backup", "idle"]
 
 # Recounted 2026-09-09 from the compiled coreset ground truth (Phase 7 spec,
-# decision 1): 17 cells exercised. 7.2 and 7.3 fill the rest; this list is
-# the baseline they are measured against.
-EXERCISED_BEFORE_PHASE_7 = {
+# decision 1): 17 cells exercised before Phase 7; 7.2 added indexing/true
+# (c1-indexing, a pre-committed miss). 7.3 fills the remaining 14.
+EXERCISED_AFTER_7_2 = {
     ("browsing", True), ("office", True), ("mail", True), ("dev", True),
     ("photo", True), ("meeting", True), ("gaming", True), ("gaming", False),
     ("media", True), ("video-edit", True), ("compile", True),
     ("ml-train", True), ("render", True), ("transcode", True),
-    ("indexing", False), ("backup", True), ("idle", True),
+    ("indexing", True), ("indexing", False), ("backup", True), ("idle", True),
 }
 
 
@@ -46,14 +46,18 @@ def test_tier_columns_and_counts_agree(coverage):
         assert 0 <= cell["pre_committed_miss"] <= cell["segments"]
 
 
-def test_current_coreset_exercises_the_recorded_17(coverage):
+def test_current_coreset_exercises_the_recorded_18(coverage):
     exercised = {(c["mode"], c["background_wanted"])
                  for c in coverage["cells"] if c["segments"]}
-    assert exercised == EXERCISED_BEFORE_PHASE_7
+    assert exercised == EXERCISED_AFTER_7_2
     empty = {(m, w) for m in MODES for w in (True, False)} - exercised
     assert coverage["empty_cells"] == sorted(
         f"{m}/{str(w).lower()}" for m, w in empty)
-    assert len(coverage["empty_cells"]) == 15
+    assert len(coverage["empty_cells"]) == 14
+    indexing_true = next(c for c in coverage["cells"]
+                         if (c["mode"], c["background_wanted"]) == ("indexing", True))
+    assert indexing_true["segments"] == 1 and indexing_true["pre_committed_miss"] == 1
+    assert coverage["per_file"]["c1-indexing"][0]["pre_committed_miss"] is True
 
 
 def test_ambiguous_is_outside_the_grid(coverage):
@@ -80,7 +84,7 @@ def test_committed_grid_matches_the_timelines(repo_root):
 def test_coverage_errors_name_every_empty_cell(coverage):
     errors = grid.coverage_errors(coverage)
     assert len(errors) == 1
-    assert "15 empty" in errors[0]
+    assert "14 empty" in errors[0]
     assert "browsing/false" in errors[0]
 
 
@@ -88,7 +92,7 @@ def test_render_lists_cells_outside_and_empties(coverage):
     text = grid.render(coverage)
     assert "browsing/true" in text and "browsing/false" in text
     assert "outside the grid: ambiguous" in text
-    assert "empty cells: 15" in text
+    assert "empty cells: 14" in text
 
 
 # --- synthetic timelines -----------------------------------------------

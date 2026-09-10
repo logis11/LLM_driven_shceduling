@@ -12,8 +12,8 @@ schema/
 timelines/
   coreset/             # authored core set: *.timeline.yaml (novel) + *.variant.yaml (derivation recipes)
 build/                 # compiled artifacts — NOT committed; verified via build.manifest.json
-  coreset-native/      # 24 workloads, native lane counts
-  coreset-single/      # same 24, lane-scaled to a single lane (experiments run on these)
+  coreset-native/      # 34 workloads, native lane counts
+  coreset-single/      # same 34, lane-scaled to a single lane (experiments run on these)
 build.manifest.json    # lockfile: input/output hashes of the last blessed build + per-file static demand (utilization, demand_class)
 coverage-grid.json     # driver-table cell (mode × background_wanted) × tier coverage grid over all segments; empty cells listed (Phase 7 fills them)
 meas/                  # meas-ci campaign outputs: analysis summary + verified name tables
@@ -71,18 +71,18 @@ Field semantics are normative in `docs/simulator/interpretation-contract.md`; th
 
 ### Coresets
 
-Two compiled variants of the same 24 workloads (~50 labeled segments total):
+Two compiled variants of the same 34 workloads (48 labeled segments total):
 
 | Set | What it is | Use |
 |---|---|---|
 | `build/coreset-single/` | lane-scaled so total demand targets one CPU lane (~100–150%) | **all experiments run on these** |
 | `build/coreset-native/` | native lane counts, no scaling | reference / sanity |
 
-The 24 files come in six groups (design rationale: `docs/workload/building-plan.md`):
+The 34 files come in six groups (design rationale: `docs/workload/building-plan.md`):
 
 | Group | Files | The question it answers |
 |---|---|---|
-| **C1** calibration | 6 | Can a recognizer handle the *easy* case — one unmistakable situation per file (pure gaming, pure office, pure compile…)? This is the floor everything should pass, and the ground where a name whitelist looks perfect. |
+| **C1** calibration | 16 | Can a recognizer handle the *easy* case — one unmistakable situation per file, one file per mode of the menu (pure gaming, pure office, pure compile…)? This is the floor everything should pass, and the ground where a name whitelist looks perfect. |
 | **C2** intent pairs | 6 (3 pairs) | When two workloads **behave identically** and differ only in intent — an ML training run vs. an indexer nobody asked for, a game download vs. a virus scan — can anything separate them? The two files in a pair differ in exactly one segment, so any difference in outcome is attributable to that one change. |
 | **C3** transition arcs | 3 | When the situation *changes mid-run* (browsing → gaming → media over an evening), how quickly and correctly does recognition follow the change? |
 | **C4** distractor injection | 3 | If an irrelevant process appears mid-situation (Discord pops up during a game, chrome opens during a compile), does the reading wrongly flip? Each file is a clone of a C1/C3 file plus one injected process, so it's measured against its own clean original. |

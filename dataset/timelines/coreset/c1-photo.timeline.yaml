@@ -1,0 +1,17 @@
+# C1 — single-situation calibration: pure photo (building-plan §3 C1; Phase 7
+# spec decision 8). Task set lifted from c3-creation segment 0 (gimp alone).
+meta:
+  id: c1-photo
+  seed: 109
+  demand: calibration
+
+segments:
+  - {from: 0s, to: 60s, mode: photo, attributes: {background_wanted: true},
+     scenario: [S6]}
+
+tasks:
+  - {id: photo-editor, name: gimp, archetype: desktop-interactive,
+     arrive: 0s, depart: 60s}
+
+focus:
+  - {from: 2s, to: 58s, task: photo-editor}
