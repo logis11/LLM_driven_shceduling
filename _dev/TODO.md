@@ -72,23 +72,25 @@ Execution order: 6.1 → 6.2 → 6.3 → 6.4.
 ### Phase 7 [WIP] — Coreset attribute coverage
 Fix from the Phase 6 pair review: the coverage grid tracked mode × familiarity only, so the coreset instances 17 of the 32 driver-table cells. All 32 cells in the coreset, paired. Spec: `_dev/docs/spec/jioh/phase-7-coreset-attribute-coverage.md`.
 
-Execution order: 7.1 → 7.2 → 7.3 → 7.4 → 7.5; 7.6 parallel with 7.4 and 7.5.
+Execution order: 7.1 → 7.2 → 7.3 → 7.4 → 7.5; 7.6 parallel with 7.4 and 7.5; 7.7 after 7.5 and 7.6 (added 2026-09-10).
 
 - [x] **7.1** Grid attribute axis — one row per driver-table cell (32 × five tiers), `ambiguous` outside, recognition-limited cells marked; CI fails on an empty cell; committed grid regenerated; the recounted 17-cell baseline recorded
 - [x] **7.2** Ten new C1 bases — `mail`, `dev`, `photo`, `meeting`, `video-edit`, `ml-train`, `render`, `transcode`, `indexing`, `backup`; task sets lifted from their source segments with the source in the header, batch jobs sized to 60 s, `meeting` designed as a live call with a periodic consumer, `c1-indexing` the user-initiated `true` cell
 - [x] **7.3** C7 counterparts — the C7 variant file and sixteen `c7-<mode>` files: interactive modes inject `clamscan`/`cpu-batch` at 0 s for 60 s; batch modes swap the orchestrator name (name search + name-verification workflow, tier rule, `docs/references.md` entries where cited); cells with no visible cue shipped as pre-committed misses with `initiated`; authored `demand: calibration` on all C7 files and the eight existing derived files; the vocabulary's batch-mode clause + changelog
 - [x] **7.4** (absorbed into 7.3 on 2026-09-10 so CI is green after 7.3) Scoring entries — the ten bases by the mode-class pattern with the mode's existing weight (exact entities and numbers fixed here), the sixteen C7 entries with `base` and the "unwanted work carries no term" rule, the lint clause, tests green; `indexing/true` cap fed to the prior table as derived
 - [x] **7.5** Pair review — one sentence per new pair (16), per-pair window landing from the manifest, tier mismatches and pre-committed-miss cells recorded; fixes fed back into `prior.yaml`; `make -C daemon lint` green
-- [WIP] **7.6** Docs sweep — building plan §3 C1/C7 entries and counts, §5a demand-budget paragraph naming C7 among the exempt families with the reason, §4 generalset all-32 requirement, throwaway pool named as open; dataset-design table; dataset README; terminology; docs index; coreset guide and harness guide; Phase 8 note on C1 at sixteen files
+- [x] **7.6** Docs sweep — building plan §3 C1/C7 entries and counts, §5a demand-budget paragraph naming C7 among the exempt families with the reason, §4 generalset all-32 requirement, throwaway pool named as open; dataset-design table; dataset README; terminology; docs index; coreset guide and harness guide; Phase 8 note on C1 at sixteen files
+- [WIP] **7.7** RQ0 judging set after the coreset change — the set is re-decided now, not deferred: the six C2 files plus every C7 counterpart whose manifest utilization lies inside the demand window as the lint defines it (1.00–1.50) — browsing, dev, media, meeting, photo, video-edit — twelve files; excluded by the same rule with a reporting line each: office (1.5008) and mail (1.53) above the bound, gaming (2.46) saturated, idle (no term), the six batch counterparts below the floor like their C1 bases; C7 bases stay reporting-only as C1 always was. Written as a spec decision, and into the harness study guide §15.1, the team memo §8, the RQ0 preparation notes §4.1 and the §8 gate sketch (judging_files, reporting_only, a separate line for c7-gaming beside c1-gaming, c7-meeting/c7-media as EDF-versus-MLFQ lines, and a Layer-1 exclusion list for the five pre-committed-miss segments, which are excluded from accuracy but not from Layer 2), the building plan's build-order line (6) and §3 C1 role sentence, and the proposal's Part 9 row where they name the judging set; threshold, `random` draw, and failure procedure stay Phase 8's
 
 ### Phase 8 — Harness upper half through pre-registration
-Stages 4–5. Scorer, guards, L1 grader, mock daemon + mock simulator with the full pipeline run on mocks, runner with execution cache, report with provenance. Ends at the committed gate spec: judging set, threshold, `random` draw definition and seed count (with 박이안), failure procedure, frozen scoring spec.
+Stages 4–5. Scorer, guards, L1 grader, mock daemon + mock simulator with the full pipeline run on mocks, runner with execution cache, report with provenance. Ends at the committed RQ0 gate spec: judging set (re-decided with C1 at sixteen files and C7's sixteen counterparts in view), threshold, `random` draw definition and seed count (with 박이안), failure procedure, frozen scoring spec, and the reporting lines from the Phase 7 pair review (findings 4–5) and the throwaway pool's definition.
 
 ### Phase 9 — Integration and the RQ0 run
 Stage 6. Swap mocks for the real simulator and daemon, end-to-end smoke, run all coreset files × 3 conditions, check guards before looking at results, judge per the gate spec; on failure, config search before workload redesign. Depends on 경민's integration gate and algorithm extension and 이안's daemon.
 
 ### Backlog
 - Naturalistic generator + generalset + full condition matrix
+- Held-out-rows arm (research-proposal §4.6 item 3) — after the main experiments, on the calibrated table: blank a row to the schema defaults, compare `llm_vocab` and `llm_algo` on the files that exercise it. Design fixed by Phase 7 (2026-09-10): every row has a fixed pair, so the files per row are the C1 base (`true`) or C7 counterpart (`false`) plus any C2/C3 segment on that row; the row set is pre-registered as every row unless a stated reason excludes one; the RQ0 gate spec carries the pre-registration line. Needs the calibrated table, whose per-row tuning pool must itself cover all 32 cells (the generalset requirement, building plan §4) — the throwaway pool's definition (7.7 / Phase 8) decides that
 
 ## 인경민 (kyungmin)
 
@@ -100,6 +102,6 @@ Build the simulator per `docs/simulator/simulator-guide.md` (binding fine print:
 ## 박이안 (ian)
 
 ### Phase 1 — Daemon through the validator
-Build the daemon per `docs/daemon/daemon-guide.md`: telemetry builder → recognizer interface with `fixed`/`random`/`oracle` → validator, emitting recognition logs for all 24 workloads, bit-identical across reruns; local LLM inference setup (hosting, client interface, record/replay skeleton) in parallel. Working order and sub-tasks are 이안's to define.
+Build the daemon per `docs/daemon/daemon-guide.md`: telemetry builder → recognizer interface with `fixed`/`random`/`oracle` → validator, emitting recognition logs for all 50 workloads (24 before Phase 7; format unchanged), bit-identical across reruns; local LLM inference setup (hosting, client interface, record/replay skeleton) in parallel. Working order and sub-tasks are 이안's to define.
 
 - [ ] **1.1** (sub-tasks to be defined by 이안)
