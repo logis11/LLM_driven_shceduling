@@ -4,7 +4,7 @@
 run file's `T_end`, chains, and demands, into raw observation rows: one dict
 per row with `entity`, `metric`, `t`, `value`, and the attributes that metric
 carries. It knows nothing about which file, task role, or condition it is
-looking at. The config schedule is the third input (§3): `switch_window` reads
+looking at. The config schedule is the third input (§3): `switch_window` and `boost_window` read
 the incoming entry's params from it by `index`.
 
 Alongside the rows it returns the guard messages the metrics doc names: tail
@@ -220,6 +220,32 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
                     reached = limit
                 end = max(end, reached)
             value = end - t_apply
+            # ---- boost windows (§6.10): one per boost instant t_apply + k·boost_interval_us
+            # inside this MLFQ interval, sized by the same rule from that instant with the
+            # params in force there, clipped at the next boost (or the interval's end)
+            boost = int(entry.params["boost_interval_us"])
+            k = 1
+            while t_apply + k * boost < limit:
+                t_b = t_apply + k * boost
+                t_next = min(t_apply + (k + 1) * boost, limit)
+                in_force = ev
+                for later in configs[i + 1:]:
+                    if later["t"] > t_b:
+                        break
+                    if later["algorithm"] == "MLFQ" and later["t"] <= t_b:
+                        in_force = later
+                force_entry = schedule.entry(in_force["index"])
+                need_b = w_single(force_entry.params) if force_entry is not None else need
+                hogs_b = [tid for tid in order if _is_hog(tasks[tid], t_b)]
+                end_b = t_b
+                for tid in hogs_b:
+                    reached = _time_of_cpu_since(tasks[tid].occupancy, t_b, need_b)
+                    if reached is None or reached > t_next:
+                        reached = t_next
+                    end_b = max(end_b, reached)
+                rows.append(_row("schedule", "boost_window", t_b, end_b - t_b,
+                                 algorithm="MLFQ", index=in_force["index"], hogs=len(hogs_b)))
+                k += 1
         else:
             value = 0
         switches.append(Switch(t=t_apply, index=ev["index"], algorithm=ev["algorithm"],

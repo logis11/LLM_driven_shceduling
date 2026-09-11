@@ -132,3 +132,17 @@ def test_percentile_is_numpy_linear_and_exact():
     assert abs(float(agg.percentile(vals, 99)) - float(np.percentile(vals, 99, method="linear"))) < 1e-6
     assert agg.percentile([7], 50) == Fraction(7)
     assert agg.fmt(agg.percentile([1000, 2000, 3000, 4000], 99), 6) == "3970.000000"
+
+
+def test_excess_aggregates_on_mock_switch(fixture_dir):
+    """Metrics doc §8 on mock-switch's worked values: the switch window [40600, 53100] holds the
+    46000 wake (100), the boost windows [60600, 69600] and [80600, 86600] hold the 62000 wake (600),
+    the rest of the MLFQ interval holds the 90000 wake (0): excess 100 (switch), 600 (boost)."""
+    d = fixture_dir("mock-switch")
+    rows, _ = records.build(d / "run.json", d / "trace.jsonl", table="calibrated",
+                            schedule_path=d / "config-schedule.json")
+    out = {(r["aggregate"], r["index"]): r["value"]
+           for r in agg.compute_aggregates(rows, interactive=("editor",)) if r["metric"] == "switch_window"}
+    assert out[("excess_switch", "3")] == "100.000000000000"
+    assert out[("excess_boost", "3")] == "600.000000000000"
+    assert out[("share_inside_switch_windows", "")] == "0.125000000000"

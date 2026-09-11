@@ -179,11 +179,15 @@ One row per `config_applied` line inside the window whose algorithm differs from
 
 What the window can still miss — a hog boosted before it reaches the bottom, a hog the preempt rule did not count — is what the `x_mlfq_level` check (§12) measures.
 
-### 6.10 `busy`
+### 6.10 `boost_window`
+
+*How long, after each boost inside an MLFQ interval entered by a switch, the scheduler was re-learning who is batch.* The boost variant of §6.9, so the §8 excess aggregates can tell a switch's cost from an ordinary boost's. One row per boost instant `t_apply + k · boost_interval_us` (k ≥ 1) that falls before the interval's end (the next algorithm switch or `T_end`), the grid from the switch's incoming entry (§11 item 7: the boost timer restarts at `t_apply`). Entity `schedule`, `t` = the boost instant, with `algorithm` (`MLFQ`), `index` (the entry in force at the instant, so a params-only entry inside the interval is honoured), and `hogs`. `value` is the window's length by the §6.9 rule from that instant — H counted there, closing when the last counted hog has received `W_single` of CPU since it — clipped at the next boost instant or the interval's end without a guard, since a boost window running into the next boost is the normal case, not a hog escaping. With no hogs the value is 0. Added 2026-09-11 (8.10).
+
+### 6.11 `busy`
 
 *How long the lane was occupied.* The sum of every task's clipped occupancy, entity `lane`, one row at `T_end`. Idle is `T_end − busy`; utilisation is `busy / T_end`.
 
-### 6.11 Summary
+### 6.12 Summary
 
 | metric | entity | rows | from the trace | from the run file | anchor `t` |
 |---|---|---|---|---|---|
@@ -196,6 +200,7 @@ What the window can still miss — a hog boosted before it reaches the bottom, a
 | `preempt_count` | task | 1 | `run_end(preempt)` count | — | `T_end` |
 | `config_interval` | `schedule` | per entry | `config_applied` → next | `T_end` | applied time |
 | `switch_window` | `schedule` | per algorithm change | `config_applied`, first `run_end` per alive task, the hogs' occupancy after it | `W_single` from params by `index` (config schedule) | applied time |
+| `boost_window` | `schedule` | per boost instant inside an MLFQ interval entered by a switch | the boost grid from the switch, first `run_end` per alive task, the hogs' occupancy after it | `boost_interval_us` and `W_single` from params by `index` (config schedule) | boost instant |
 | `busy` | `lane` | 1 | all occupancy, clipped | `T_end` | `T_end` |
 
 ---
@@ -304,7 +309,8 @@ The definitions above, and the mock traces that test them, assume the following 
 
 Every change to a primitive, an aggregate, a constant, or a floor lands here, dated, with the sub-task that made it.
 
-- **2026-09-11 — aggregates and scores (jioh 8.2).** Records gain a twenty-first column, `boot_default` (§5). §8 states the percentile convention. §9 gains the composition rules: the no-headroom term's share 1, the censored turnaround, the empty filter as an error, the file precisions. The trace-derived aggregates of §8 land in code (`harness/tools/harness/aggregates.py`) writing an `aggregates` file, the scorer (`scorer.py`) a `scores` file, both with schemas beside them and the `score.py` CLI; the recognition aggregates are the grader's (8.4). Not computed yet: the per-switch excess and its boost variant, whose boost windows are sized from occupancy intervals records do not carry; they need boost-window rows from the primitives. No primitive, constant, or floor changed.
+- **2026-09-11 — boost windows (jioh 8.10).** New primitive `boost_window` (§6.10), one row per boost instant inside an MLFQ interval entered by a switch, on `switch_window`'s columns with a new `metric` value; `busy` is §6.11, the summary §6.12. With it the aggregates module computes §8's per-switch excess in both variants (the switch window against the rest of the config interval outside any window; the boost windows against the same), closing the gap 8.2 left. `mock-switch` gains its two hand-worked boost rows. No simulator or daemon output changes: the grid and the windows come from the trace and the config schedule the harness already reads.
+- **2026-09-11 — aggregates and scores (jioh 8.2).** Records gain a twenty-first column, `boot_default` (§5). §8 states the percentile convention. §9 gains the composition rules: the no-headroom term's share 1, the censored turnaround, the empty filter as an error, the file precisions. The trace-derived aggregates of §8 land in code (`harness/tools/harness/aggregates.py`) writing an `aggregates` file, the scorer (`scorer.py`) a `scores` file, both with schemas beside them and the `score.py` CLI; the recognition aggregates are the grader's (8.4). The per-switch excess and its boost variant followed in 8.10, once `boost_window` rows existed. No primitive, constant, or floor changed.
 - **2026-09-11 — latency floor untied from the slice (jioh 8.1).** No value changed: the latency floor stays 1 000 µs. Its stated reason was half the boot default's 2 000 µs slice; the boot default is now OSTEP's example with a 10 ms slice (`recognition-vocabulary.md` §2, changelog), and the floor is not moved with it. It is a plain stated assumption, defended by a pre-registered floor-sensitivity reporting line in the RQ0 gate spec (the verdict recomputed under a band of floors at scoring time, no reruns) rather than by a derivation. §10's row says so.
 - **2026-09-09 — scoring spec (jioh 6.2).** The per-file terms land as data in the harness tree (`harness/scoring/scoring-spec.yaml`, schema and lint beside it, in CI): scored aggregates are `ready_wait` P99, `job` miss rate, progress, `turnaround`; C2 latency and frame terms windowed 60 s–`T_end`; derived files carry their base's terms verbatim. §2 points at it. No primitive, aggregate, constant, or floor changed.
 - **2026-09-09 — switch overhead (jioh 6.1).** New primitive `switch_window` (§6.9) with the `hogs` attribute, the twentieth records column; the config schedule becomes the third input (§3), read by `index`; two aggregates over switch windows (§8: per-switch excess wake `ready_wait`, switch and boost variants; share inside switch windows), reported and never weighted; §11 gains 7 (boost timer restarts at `t_apply`), 8 (FIFO-outgoing rule (a)) and 9 (a same-algorithm entry applies at its stamped time), all three confirmed with 인경민 on 2026-09-09; fixture `mock-switch` and the `x_mlfq_level` check tool (§12). From the 2026-09-08 memo on algorithm-switch semantics, whose window the same day's spec session re-sized in lane time (memo §7) after the mock showed the wall-clock window closing before the hog's descent. `mock-media`'s same-instant boot + oracle pair is a switch into FIFO and gains a zero-valued row; `mock-chain` gains the same oracle FIFO entry so its scheduler matches its config line; `mock-p1a` now follows the guide's MLFQ rules (its editor falls to the bottom queue on its own bursts).

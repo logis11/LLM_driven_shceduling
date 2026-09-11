@@ -12,12 +12,13 @@ scoring spec's terms name — the caller passes them. A window keeps rows whose
 anchor `t` lies in the closed interval, as the observation window keeps
 observations "at or before" `T_end`.
 
-Two §8 aggregates are not computed here: the per-switch excess and its boost
-variant. Both subtract the interactive task's waits outside every switch and
-boost window, and the boost windows are sized from the hogs' occupancy
-intervals after each boost instant (§8), which records do not carry. They need
-boost-window rows from the primitives first; until then the share inside switch
-windows is the switch aggregate written.
+The per-switch excess and its boost variant (§8) need the interactive task the
+scoring spec names for the file — the caller passes `interactive`, the entities
+of the file's `ready_wait` terms — and the `boost_window` rows the primitives
+emit (§6.10, sub-task 8.10). Inside a switch window (or the boost windows of that
+config interval) means the wake row's `t` lies in it; "the rest of that config
+interval outside any window" is the interval's wake rows in neither. A variant
+is written only when both sides have rows.
 
 Values are written as decimal strings at a fixed precision (`fmt`) so identical
 records give identical files: twelve places here, because the scorer divides
@@ -79,8 +80,9 @@ def _in_window(t, window):
     return (start is None or t >= start) and (end is None or t <= end)
 
 
-def compute_aggregates(rows, windows=None):
-    """Aggregate rows for one run. `windows`: {(entity, metric): [(start_us, end_us), …]}."""
+def compute_aggregates(rows, windows=None, interactive=()):
+    """Aggregate rows for one run. `windows`: {(entity, metric): [(start_us, end_us), …]};
+    `interactive`: the entities whose wake waits the per-switch excess aggregates measure."""
     windows = windows or {}
     identity = run_identity(rows)
     df = pd.DataFrame(rows)
@@ -181,11 +183,36 @@ def compute_aggregates(rows, windows=None):
             emit("schedule", "config_interval", name, percentile(vals, p))
         emit("schedule", "config_interval", "config_age_max", max(vals))
 
-    # --- switch_window: share of the window inside switch windows
+    # --- switch_window: share of the window inside switch windows; per-switch excess (two variants)
     sw = df[df["metric"] == "switch_window"]
     if len(sw) and t_end:
         inside = sum(min(int(v), t_end - int(t)) for t, v in zip(sw["t"], sw["value"]))
         emit("schedule", "switch_window", "share_inside_switch_windows", Fraction(inside, t_end))
+        bw = df[df["metric"] == "boost_window"]
+        ci = df[df["metric"] == "config_interval"]
+        wakes = rw[rw["cause"] == "wake"]
+        for _, s_row in sw[sw["algorithm"] == "MLFQ"].iterrows():
+            t_s, v_s, idx = int(s_row["t"]), int(s_row["value"]), int(s_row["index"])
+            interval = ci[ci["index"].astype("Int64") == idx]
+            if interval.empty:
+                continue
+            t_i_end = int(interval["t"].iloc[0]) + int(interval["value"].iloc[0])
+            boosts = [(int(t), int(t) + int(v)) for t, v in zip(bw["t"], bw["value"]) if t_s <= int(t) <= t_i_end]
+            for entity in interactive:
+                g = wakes[wakes["entity"] == entity]
+                pts = [(int(t), int(v)) for t, v in zip(g["t"], g["value"]) if t_s <= int(t) <= t_i_end]
+                in_switch = [v for t, v in pts if t <= t_s + v_s]
+                in_boost = [v for t, v in pts if any(a <= t <= b for a, b in boosts)]
+                outside = [v for t, v in pts if t > t_s + v_s and not any(a <= t <= b for a, b in boosts)]
+                if not outside:
+                    continue
+                mean_out = Fraction(sum(outside), len(outside))
+                if in_switch:
+                    emit(entity, "switch_window", "excess_switch",
+                         Fraction(sum(in_switch), len(in_switch)) - mean_out, index=idx)
+                if in_boost:
+                    emit(entity, "switch_window", "excess_boost",
+                         Fraction(sum(in_boost), len(in_boost)) - mean_out, index=idx)
 
     # --- busy: utilisation and idle
     if t_end:

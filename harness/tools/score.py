@@ -33,6 +33,14 @@ def windows_from_spec(spec, workload_id):
     return out
 
 
+def interactive_from_spec(spec, workload_id):
+    """The entities of the workload's `ready_wait` terms — the interactive tasks the excess aggregates measure."""
+    entry = spec["files"].get(workload_id)
+    if not entry:
+        return ()
+    return tuple(dict.fromkeys(t["entity"] for t in entry["terms"] if t["metric"] == "ready_wait"))
+
+
 def collect(paths):
     files = []
     for p in paths:
@@ -47,7 +55,8 @@ def aggregate_files(files, spec):
         run_rows = records.read_csv(f)
         if not run_rows:
             continue
-        rows.extend(agg.compute_aggregates(run_rows, windows_from_spec(spec, run_rows[0]["workload_id"])))
+        wid = run_rows[0]["workload_id"]
+        rows.extend(agg.compute_aggregates(run_rows, windows_from_spec(spec, wid), interactive_from_spec(spec, wid)))
     return rows
 
 

@@ -1,6 +1,6 @@
 # mock-switch — worked derivation
 
-An editor and a batch task under a schedule that switches algorithm twice: boot MLFQ → FIFO (the recognizer named FIFO at the batch task's arrival) → MLFQ (named at a third task's arrival). Condition `llm_algo` on the calibrated table. The fixture exercises the `switch_window` primitive (metrics doc §6.9) in both directions, the config schedule as the harness's third input, and the `x_mlfq_level` check tool. All times µs.
+An editor and a batch task under a schedule that switches algorithm twice: boot MLFQ → FIFO (the recognizer named FIFO at the batch task's arrival) → MLFQ (named at a third task's arrival). Condition `llm_algo` on the calibrated table. The fixture exercises the `switch_window` primitive (metrics doc §6.9) in both directions, the `boost_window` primitive (§6.10, added 2026-09-11), the config schedule as the harness's third input, and the `x_mlfq_level` check tool. All times µs.
 
 Scheduler behaviour assumed here, beyond the fixtures README list: MLFQ with 3 queues, slice 2000 µs, growth 2, stamped by entry 1 at 600 µs beside the boot entry (the boot default's own slice is 10 ms since 2026-09-11 and governs nothing here, since no task runs before 600); a task that consumes a full slice is demoted and one that blocks keeps its level; a fresh slice at every dispatch and at every boost; a wake into a strictly higher queue preempts at once, a wake into the same or a lower queue waits for the slice boundary; slice expiry with no competitor demotes without a `run_end`; a switch **out of** MLFQ applies at the running task's slice boundary (the drain); a switch **out of** FIFO applies immediately and the running task is treated as freshly dispatched by MLFQ (the memo's rule (a)); the boost timer restarts at `t_apply` (metrics doc §11, items 7–8, both confirmed). `x_mlfq_level` lines are written for the hog only, whenever its level changes.
 
@@ -93,9 +93,16 @@ The window closes when the hog has received `W_single` = 6000 of CPU since 40600
 
 The FIFO row's hog count is the memo's known bias in the other direction: the hog's first occupancy after 12000 ends in a preempt only because MLFQ took over 30 ms later. The count is informational there; the value is 0 regardless.
 
+**`boost_window`** (§6.10) — inside the MLFQ interval entered at 40600 (entry 3, boost 20000), one row per boost instant `40600 + k · 20000` before the interval's end at `T_end`: 60600 and 80600 (100600 is past `T_end`). Each is sized like a switch window from its instant, with `W_single` = 6000 from entry 3, clipped at the next boost.
+
+| boost | alive | first `run_end` after | hogs | window | value |
+|---|---|---|---|---|---|
+| 60600 | `editor`, `hog`, `probe` | `editor` 65600 `block`; `hog` 62600 `preempt`; `probe` none | 1 (`hog`) | 2000 in [60600, 62600], 4000 more in [65600, 69600] → [60600, 69600] | 9000 |
+| 80600 | `editor`, `hog`, `probe` | `editor` 93000 `block`; `hog` 90000 `preempt`; `probe` none | 1 (`hog`) | uninterrupted → [80600, 86600] | 6000 |
+
 **`busy`** — 12000 + 77500 + 500 = 90000.
 
-Total 26 rows.
+Total 28 rows.
 
 ## The aggregates, by hand (metrics doc §8)
 
