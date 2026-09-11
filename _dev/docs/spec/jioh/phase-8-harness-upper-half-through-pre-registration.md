@@ -9,6 +9,7 @@ Stages 4–5 of `_dev/docs/rq0-preparation-notes.md`: the harness from `records`
 - Mock daemon and mock simulator; the invocation contract they are the first implementations of.
 - Pre-registration: the RQ0 gate spec committed with its threshold, seed count, failure procedure, reporting lines, exemptions, and pins; the scoring spec and the guard spec frozen.
 - The driver table tuning set's rule, written into the building plan; the term "throwaway pool" retired.
+- The boot default re-sourced from OSTEP before any harness code is written (added 2026-09-11, sub-task 8.1, its own spec).
 - Docs: the metrics doc, the data-contracts doc, the harness study guide, terminology, docs index, the RQ0 preparation notes.
 
 Out of scope: the real simulator and daemon, the whitelist and LLM conditions, the configuration search tool, the generalset and the driver table tuning set's files, the K, g, and N values (each sub-task's own grill).
@@ -63,7 +64,7 @@ Faithful for `fixed`, `oracle`, and `random`: it walks the visible projection's 
 
 ### 12. Sensitivity as a reporting line
 
-The verdict is computed once, on the primary boot default. The two alternative-default `fixed` runs the vocabulary names (OSTEP's example configuration, a Linux-like short slice) are two more runs per judging file; the gaps are recomputed under each and the three verdict counts are a pre-registered reporting line in the RQ0 gate spec.
+The verdict is computed once, on the primary boot default. The two alternative-default `fixed` runs are two more runs per judging file; the gaps are recomputed under each and the three verdict counts are a pre-registered reporting line in the RQ0 gate spec. *Amended 2026-09-11 (sub-task 8.1): the primary boot default is now OSTEP's example; the alternative pair is the team's decision after 8.1 lands, not the pair the vocabulary named before.*
 
 ### 13. L1 grader exclusion
 
@@ -99,7 +100,7 @@ The RQ0 gate spec commits N, its grounding, and the `random` reading marked as p
 
 ### 21. Reporting lines carried from Phase 7
 
-The RQ0 gate spec carries as fields: the `c7-gaming`, `c7-meeting`, `c7-media` judging notes, `c1-gaming`'s separate line, balanced accuracy with the confusion matrix as the Layer-1 headline, the sensitivity line (decision 12), and the with-and-without-exclusion accuracy line (decision 13).
+The RQ0 gate spec carries as fields: the `c7-gaming`, `c7-meeting`, `c7-media` judging notes, `c1-gaming`'s separate line, balanced accuracy with the confusion matrix as the Layer-1 headline, the sensitivity line (decision 12), the with-and-without-exclusion accuracy line (decision 13), and the floor-sensitivity line (added 2026-09-11, sub-task 8.1 decision 4: the verdict count recomputed under a band of latency floors at scoring time).
 
 ## Invariants
 
