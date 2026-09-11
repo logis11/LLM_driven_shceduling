@@ -146,3 +146,21 @@ def test_excess_aggregates_on_mock_switch(fixture_dir):
     assert out[("excess_switch", "3")] == "100.000000000000"
     assert out[("excess_boost", "3")] == "600.000000000000"
     assert out[("share_inside_switch_windows", "")] == "0.125000000000"
+
+
+def test_scorer_floors_are_overridable_with_the_same_default():
+    """8.7 spec, decision 11: an optional floors argument for the floor band."""
+    from fractions import Fraction
+    spec = _spec()
+    rows = _aggregate_all(sorted((MS / "records").glob("*.csv")), spec)
+    terms, files = scorer.score(rows, spec)
+    terms_default, files_default = scorer.score(rows, spec, floors=scorer.FLOOR)
+    assert (terms, files) == (terms_default, files_default)
+    assert scorer.floors_for(latency_floor_us=1000) == scorer.FLOOR
+    raised = scorer.floors_for(latency_floor_us=40000)
+    assert raised["p99"] == Fraction(40000) and raised["miss_rate"] == scorer.FRACTION_FLOOR
+    terms_r, files_r = scorer.score(rows, spec, floors=raised)
+    editor = [t for t in terms_r if t["entity"] == "editor" and t["boot_default"] == ""]
+    assert editor and all(t["no_headroom"] == 1 for t in editor)
+    s1 = next(f for f in files_r if f["condition"] == "random" and f["seed"] == "s1" and f["boot_default"] == "")
+    assert s1["score"] == "2.250000" and s1["n_no_headroom"] == 3

@@ -1,0 +1,40 @@
+{
+ "meta": {
+  "id": "mock-score",
+  "derived_from": "hand-written (mock-experiment/worked.md)"
+ },
+ "ground_truth": [
+  {
+   "t_start": 0,
+   "t_end": 50000,
+   "mode": "dev",
+   "attributes": {
+    "background_wanted": true
+   }
+  },
+  {
+   "t_start": 50000,
+   "t_end": 100000,
+   "mode": "ml-train",
+   "attributes": {
+    "background_wanted": false,
+    "pre_committed_miss": true
+   }
+  }
+ ],
+ "events": [
+  {
+   "op": "arrive",
+   "t": 0,
+   "id": "t1",
+   "name": "placeholder",
+   "depart": 100000,
+   "program": [
+    {
+     "op": "RUN",
+     "us": 1000
+    }
+   ]
+  }
+ ]
+}

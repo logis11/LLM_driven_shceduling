@@ -33,6 +33,13 @@ TERM_AGGREGATE = {("ready_wait", "p99"): "p99", ("job", "miss_rate"): "miss_rate
 FLOOR = {"p99": LATENCY_FLOOR_US, "turnaround": LATENCY_FLOOR_US,
          "miss_rate": FRACTION_FLOOR, "progress": FRACTION_FLOOR}
 
+
+def floors_for(latency_floor_us=LATENCY_FLOOR_US, fraction_floor=FRACTION_FLOOR):
+    """The floors table with another latency floor (and fraction floor): what the
+    RQ0 gate evaluator's floor-band line re-scores with (8.7 spec, decision 11)."""
+    lat, frac = Fraction(latency_floor_us), Fraction(fraction_floor)
+    return {"p99": lat, "turnaround": lat, "miss_rate": frac, "progress": frac}
+
 IDENTITY = ("workload_id", "condition", "table", "seed", "boot_default")
 COLUMNS = IDENTITY + ("level", "entity", "metric", "aggregate", "cause",
                       "window_start_us", "window_end_us", "direction", "weight",
@@ -84,8 +91,11 @@ def _improve(direction, fixed, value):
     return fixed - value if direction == "lower" else value - fixed
 
 
-def score(agg_rows, spec):
-    """(term_rows, file_rows) for every run whose workload has a scoring entry."""
+def score(agg_rows, spec, floors=None):
+    """(term_rows, file_rows) for every run whose workload has a scoring entry.
+    `floors` overrides the no-headroom floors per aggregate (default `FLOOR`,
+    the metrics doc §10 constants); the floor-band line passes `floors_for(...)`."""
+    floors = FLOOR if floors is None else floors
     runs = _runs(agg_rows)
     files = spec["files"]
     fixed_runs = {(k[0], k[4]): v for k, v in runs.items() if k[1] == "fixed"}
@@ -121,7 +131,7 @@ def score(agg_rows, spec):
                     direction = term["direction"]
                     imp_o = _improve(direction, v_fixed, v_oracle)
                     imp_c = _improve(direction, v_fixed, v_cond)
-                    no_headroom = abs(imp_o) < FLOOR[tk[2]]
+                    no_headroom = abs(imp_o) < floors[tk[2]]
                     share = None if no_headroom else imp_c / imp_o
                     weight = Fraction(str(term["weight"]))
                     wsum += weight

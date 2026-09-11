@@ -1,0 +1,45 @@
+# mock-experiment — a per-experiment spec over the mock-scores workload (sub-task 8.7).
+# The invalid variant: no exemption, so random s2's failed starvation_floor invalidates.
+# One judging file, `mock-score`, under `fixed`, `oracle`, and `random` with two seeds,
+# plus `fixed` under the alternative boot default `alt`. Pins name fixture copies so the
+# fixture never moves when the committed specs do. Derivation: worked.md.
+
+experiment: mock-experiment
+
+conditions: [fixed, oracle, random]
+seed_count: 2
+
+boot_defaults:
+  primary: ostep
+  alternatives: [alt]
+
+files:
+  judging: [mock-score]
+  reporting: []
+
+# derived from the `pre_committed_miss` annotation in the compiled files; the lint checks it
+layer1_exclusions: [mock-score]
+
+guard_exemptions: []
+
+reporting_lines:
+  - {type: sensitivity, boot_defaults: [alt]}
+  - {type: floor_band, latency_floors_us: [500, 1000, 40000]}
+  - {type: exclusion_accuracy}
+  - {type: layer1_headline}
+  - {type: random_beats_oracle}
+  - {type: note, workload: mock-score, text: "A pre-registered note bound to the judging file, shown beside its row."}
+
+pins:
+  scoring_spec: {path: harness/tools/tests/fixtures/mock-scores/scoring-spec.yaml, sha256: da3b9f9c4adb9a75f195925abe49d0a24ad690f2333b27df383cb8012c82e1fb}
+  guard_spec:   {path: harness/tools/tests/fixtures/mock-experiment/guard-spec.yaml, version: "0.1", sha256: 40bdfb01dd8bbfc451ebf3ee84d9f1d48b641400f01eb38fbe64b088212f9fb0}
+  driver_table: {path: harness/tools/tests/fixtures/mock-grades/driver-table.yaml, sha256: 04fdb608c64661905af94f1a01e5502f5f84f004cd4c433b9297fc284c99f3de}
+  dataset:      {path: harness/tools/tests/fixtures/mock-experiment/build.manifest.json, sha256: b60942339c09f9ea6155bdac98c293a8184de082f4fd95f1b9134dee98bdd44f}
+
+criterion:
+  type: k_of_n_gap
+  k: 1
+  g: 0.5
+  reference: oracle
+  compared: random
+  seed_statistic: mean

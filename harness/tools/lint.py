@@ -4,7 +4,8 @@ contracts — the trace through the trace reader, the run file through the
 run-file reader, the config schedule (when the fixture has one) through the
 schedule reader, any recognition log through the log reader — and its expected
 records validate against the records schema; `mock-scores` and `mock-guards`
-expected outputs validate against their schemas; every boot-default file under
+expected outputs validate against their schemas; `mock-experiment`'s spec variants
+lint clean and its expected reports validate; every boot-default file under
 harness/boot-defaults validates against its schema. Exit 1 on the first refusal."""
 import pathlib
 import sys
@@ -20,11 +21,13 @@ from harness.outputs import AGGREGATES_SCHEMA, GRADES_SCHEMA, SCORES_SCHEMA  # n
 from harness.outputs import read_csv as read_table  # noqa: E402
 from harness.outputs import validate_rows as validate_table  # noqa: E402
 from harness.records import read_csv, validate_rows  # noqa: E402
+from harness import evaluator  # noqa: E402
 import json  # noqa: E402
 
 import jsonschema  # noqa: E402
 
 FIXTURES = pathlib.Path(__file__).resolve().parent / "tests" / "fixtures"
+REPO = pathlib.Path(__file__).resolve().parents[2]
 BOOT_DEFAULTS = pathlib.Path(__file__).resolve().parents[1] / "boot-defaults"
 
 
@@ -95,6 +98,28 @@ def main():
         except (LogError, GradeError, ValueError, OSError) as exc:
             failed += 1
             print(f"  mock-grades: {exc}")
+    me = FIXTURES / "mock-experiment"
+    if me.exists():
+        try:
+            g = read_table(me / "guards.csv", guards.COLUMNS)
+            validate_table(g, guards.GUARDS_SCHEMA)
+            gr = read_table(me / "grades.csv", grader.COLUMNS)
+            validate_table(gr, GRADES_SCHEMA)
+            n_spec = 0
+            for spec in sorted(me.glob("experiment*.yaml")):
+                errors = evaluator.lint_spec(spec, evaluator.SPEC_SCHEMA, me / "workloads", REPO)
+                if errors:
+                    raise ValueError(f"{spec.name}: " + "; ".join(errors))
+                n_spec += 1
+            n_rep = 0
+            for rep in sorted(me.glob("expected-report*.json")):
+                evaluator.validate_report(json.loads(rep.read_text()))
+                n_rep += 1
+            print(f"  mock-experiment: {n_spec} spec variant(s) lint clean, {len(g)} guard rows valid, "
+                  f"{len(gr)} grade rows valid, {n_rep} expected report(s) valid")
+        except (ValueError, OSError) as exc:
+            failed += 1
+            print(f"  mock-experiment: {exc}")
     if BOOT_DEFAULTS.exists():
         schema = json.loads((BOOT_DEFAULTS / "schema" / "boot-default.schema.json").read_text())
         validator = jsonschema.Draft202012Validator(schema)
