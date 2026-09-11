@@ -4,7 +4,8 @@ contracts — the trace through the trace reader, the run file through the
 run-file reader, the config schedule (when the fixture has one) through the
 schedule reader, any recognition log through the log reader — and its expected
 records validate against the records schema; `mock-scores` and `mock-guards`
-expected outputs validate against their schemas. Exit 1 on the first refusal."""
+expected outputs validate against their schemas; every boot-default file under
+harness/boot-defaults validates against its schema. Exit 1 on the first refusal."""
 import pathlib
 import sys
 
@@ -19,8 +20,12 @@ from harness.outputs import AGGREGATES_SCHEMA, GRADES_SCHEMA, SCORES_SCHEMA  # n
 from harness.outputs import read_csv as read_table  # noqa: E402
 from harness.outputs import validate_rows as validate_table  # noqa: E402
 from harness.records import read_csv, validate_rows  # noqa: E402
+import json  # noqa: E402
+
+import jsonschema  # noqa: E402
 
 FIXTURES = pathlib.Path(__file__).resolve().parent / "tests" / "fixtures"
+BOOT_DEFAULTS = pathlib.Path(__file__).resolve().parents[1] / "boot-defaults"
 
 
 def main():
@@ -90,6 +95,18 @@ def main():
         except (LogError, GradeError, ValueError, OSError) as exc:
             failed += 1
             print(f"  mock-grades: {exc}")
+    if BOOT_DEFAULTS.exists():
+        schema = json.loads((BOOT_DEFAULTS / "schema" / "boot-default.schema.json").read_text())
+        validator = jsonschema.Draft202012Validator(schema)
+        for f in sorted(BOOT_DEFAULTS.glob("*.json")):
+            try:
+                error = jsonschema.exceptions.best_match(validator.iter_errors(json.loads(f.read_text())))
+                if error is not None:
+                    raise ValueError(error.message)
+                print(f"  boot-defaults/{f.name}: valid")
+            except (ValueError, OSError) as exc:
+                failed += 1
+                print(f"  boot-defaults/{f.name}: {exc}")
     print("lint clean" if not failed else f"{failed} fixture(s) refused")
     return 1 if failed else 0
 

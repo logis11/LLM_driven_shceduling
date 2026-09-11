@@ -84,7 +84,7 @@
 #   so their traces must differ — identical traces mean the configuration never
 #   changed between wanted and unwanted and a zero gap is a table defect, not a
 #   recognition result (_dev/docs/rq0-preparation-notes.md, stage 4.2;
-#   data-contracts §11 lints the table for the same case). Under `fixed` the two
+#   data-contracts §10 lints the table for the same case). Under `fixed` the two
 #   files run the same boot default, so where their events are identical apart
 #   from the label (P1: a rename plus the label, c2-pairs.variant.yaml) their
 #   traces must be identical; P2 and P3 change the background task itself, so

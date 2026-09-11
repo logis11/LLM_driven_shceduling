@@ -1,0 +1,45 @@
+"""The boot-default files (8.5 spec, decisions 8, 9, 19): the frozen
+configuration shape under their own schema, and `ostep.json` pinned to the
+composition of the daemon's config-schema defaults."""
+
+import json
+import sys
+
+import jsonschema
+
+from conftest import REPO
+
+BOOT_DIR = REPO / "harness" / "boot-defaults"
+SCHEMA = BOOT_DIR / "schema" / "boot-default.schema.json"
+
+
+def _schema():
+    return json.loads(SCHEMA.read_text())
+
+
+def test_every_boot_default_validates_against_the_schema():
+    files = sorted(BOOT_DIR.glob("*.json"))
+    assert [f.name for f in files] == ["ostep.json"]
+    for f in files:
+        jsonschema.Draft202012Validator(_schema()).validate(json.loads(f.read_text()))
+
+
+def test_the_schema_refuses_a_foreign_field_and_a_bad_cap():
+    v = jsonschema.Draft202012Validator(_schema())
+    good = json.loads((BOOT_DIR / "ostep.json").read_text())
+    bad = dict(good, extra=1)
+    assert next(v.iter_errors(bad), None) is not None
+    bad = dict(good, batch_bandwidth_cap=1.5)
+    assert next(v.iter_errors(bad), None) is not None
+    bad = dict(good, algorithm="RR")
+    assert next(v.iter_errors(bad), None) is not None
+
+
+def test_ostep_is_the_composition_of_the_daemons_schema_defaults():
+    """The harness never imports the daemon's modules; the test pins the two
+    (8.5 spec, decision 19, on the `compose_row` precedent)."""
+    sys.path.insert(0, str(REPO / "daemon" / "tools"))
+    from drivertable.config_schema import schema_default
+    ostep = json.loads((BOOT_DIR / "ostep.json").read_text())
+    assert ostep == {"algorithm": "MLFQ", "params": schema_default("MLFQ"),
+                     "batch_bandwidth_cap": None}

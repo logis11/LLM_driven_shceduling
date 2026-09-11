@@ -3,7 +3,7 @@
 
 Everything the three of us build talks to everything else through data — a file one side writes and another side reads. Each such format is a **contract**: as long as both sides honor it, we can work independently and integration stays boring. This document lists every contract in the project, shows what each one looks like with real (or, where not yet frozen, illustrative) examples, and explains every example in plain sentences. Same audience as `background-guide.md`: general CS knowledge is enough, no OS background needed.
 
-Some contracts are **frozen** — by shipped files and enforcing code (archetype, timeline, workload), or by ratified decision (the `cpu_scheduler` config schema in `recognition-vocabulary.md`, and the trace). The protocol contracts froze on 2026-09-06 (§13). The proposal and the driver table's format froze on 2026-09-07. Every contract in this document is now frozen. Frozen is not untouchable: changing a frozen contract is always possible, it just takes everyone's sign-off plus a changelog entry — so propose edits rather than deviating quietly.
+Some contracts are **frozen** — by shipped files and enforcing code (archetype, timeline, workload), or by ratified decision (the `cpu_scheduler` config schema in `recognition-vocabulary.md`, and the trace). The protocol contracts froze on 2026-09-06 (§14). The proposal and the driver table's format froze on 2026-09-07. Every contract in this document is now frozen. Frozen is not untouchable: changing a frozen contract is always possible, it just takes everyone's sign-off plus a changelog entry — so propose edits rather than deviating quietly.
 
 ---
 
@@ -65,6 +65,7 @@ The dotted lines are the deliberate cheat paths, and they are the experiment's c
 | 7 | Recognition log | JSON | daemon → harness | **frozen** (envelope; the `proposal` slot follows contract 5) |
 | 8 | Trace | JSONL, `*.trace.jsonl(.gz)` | simulator → harness | **frozen** |
 | 9 | Driver table | YAML, `daemon/driver-table/{prior,calibrated}.yaml`, schema `daemon/driver-table/schema/driver-table.schema.json` | 인지오 → daemon (config mapper) | **frozen** (format; the prior table's content lands in Phase 6) |
+| 10 | Invocation | a command line — named flags, absolute paths, an exit code | runner → daemon, runner → simulator | **frozen** (2026-09-11) |
 
 ---
 
@@ -471,7 +472,32 @@ What the lint enforces, beyond the schema's shape: all 32 rows present, none dup
 
 ---
 
-## 11. Terms used in this document
+## 11. Invocation — how the runner calls the daemon and the simulator (contract 10)
+
+**Frozen 2026-09-11 (jioh 8.5). Not a file: the command line each program is started with. Flows runner → daemon and runner → simulator, once per run. The mock daemon and the mock simulator under `harness/tools/tests/mocks/` are its first two implementations; 인경민's simulator and 박이안's daemon meet it when they deliver.**
+
+```sh
+# the daemon — one run: one workload × one condition, × one seed where the condition draws
+<daemon command> --workload   /abs/dataset/build/coreset-single/c2-p1a.workload.json \
+                 --condition  random  --seed 5 \
+                 --driver-table /abs/daemon/driver-table/prior.yaml \
+                 --boot-default /abs/harness/boot-defaults/ostep.json \
+                 --out-schedule /abs/runs/c2-p1a/random-5/schedule.json \
+                 --out-log      /abs/runs/c2-p1a/random-5/log.json
+
+# the simulator — the same run
+<simulator command> --workload  /abs/dataset/build/coreset-single/c2-p1a.workload.json \
+                    --schedule  /abs/runs/c2-p1a/random-5/schedule.json \
+                    --out-trace /abs/runs/c2-p1a/random-5/trace.jsonl.gz
+```
+
+In sentences: the runner (harness, sub-task 8.6) drives every experiment by starting the daemon and then the simulator once per **run** — one workload file, one condition, and one seed where the condition draws — and nothing crosses between the runner and a program except what is on that command line, the files it names, and the exit code. **Inputs and outputs are named flags**, every one required, none with a default, no positional arguments: a missing input is a failure, never a silent default. The daemon takes the canonical workload file, the condition (one of the daemon guide's names, §4 there), the driver table (contract 9), the boot default, and the seed; it writes the config schedule (§7) and the recognition log (§8). The simulator takes the canonical workload file and the config schedule and writes the trace (§9); it receives no condition and copies the schedule's `condition` into the trace header. Both programs receive the **canonical workload file** (§4) and extract their own view at the parse boundary, exactly as their guides already require. **The seed** (`--seed`, an integer) is present exactly when the condition draws — `random` today, any LLM condition that samples later — and absent otherwise; the daemon refuses the wrong pairing. The recognition log's top-level `seed` is then the value given or `null`, as §8 says. `--driver-table` is required on every daemon invocation, including `fixed`, which consults no table: one shape serves every condition, and the runner passes the experiment's table. **The boot default** (`--boot-default`) is a small JSON file of the frozen configuration shape — `{algorithm, params, batch_bandwidth_cap}` — which the daemon copies verbatim into the schedule's first entry (§7, provenance `fallback`) and retreats to on `fallback` thereafter; the runner owns that data and the daemon carries no copy of its own, so the sensitivity runs under an alternative default are the same invocation with another file. The files live in `harness/boot-defaults/` under `harness/boot-defaults/schema/boot-default.schema.json`, named by content, never by role (`ostep.json` is the OSTEP example the vocabulary adopted on 2026-09-11); the records' `boot_default` column, empty for the primary, carries the file's stem for the alternatives.
+
+Six rules fix the mechanics. **Paths:** the runner passes absolute paths and creates the output directory beforehand; the program writes exactly the declared output files and nothing else, so its working directory never matters and the output directory's contents are wholly the runner's to hash; scratch space, if any, is the system temporary directory, about which this contract says nothing; a trace is written gzipped exactly when its output path ends in `.gz`. **Exit code:** 0 means every declared output was written; any other code is failure and the runner treats the run's outputs as absent whatever is on disk — contract-invalid input (a schedule without an entry at t = 0, a condition the program does not implement) is a non-zero exit like any other failure; the runner validates the outputs itself through its readers, so the exit code is the only claim of success a program makes. **Streams:** standard output is ignored; standard error is captured to a log file beside the outputs, for humans, and never parsed. **Determinism** — the one behavioural clause: the same argument line, seed included, produces byte-identical declared outputs, and the seed is the only permitted source of randomness; the harness's determinism guard and the runner's execution cache stand on this. **Identity:** the contract carries no version channel — a program's identity is not the program's to report. The runner's own configuration names each command together with a version string and hashes that into its cache key; the trace's existing `sim` header (§9) is cross-checked against it. **Command prefix:** the runner appends the flags above to a configured command, and whatever that prefix carries is the program's own business — a simulator's threading option, the mock simulator's `--replay` — never part of this contract.
+
+---
+
+## 12. Terms used in this document
 
 | Term | Meaning here |
 |---|---|
@@ -491,17 +517,20 @@ What the lint enforces, beyond the schema's shape: all 32 rows present, none dup
 | **JSONL** | "JSON Lines": a log where each line is one standalone JSON object; trivially appendable and streamable |
 | **prior table / calibrated table** | the driver table written from theory before measurement (one entry per row; runs the RQ0 gate) / the one tuned on the throwaway pool (four entries per row; runs every reported result) — one schema, two `role`s |
 | **protocol freeze** | the deliberate moment the draft contracts harden; afterwards, changes require all three of us plus a changelog entry |
+| **run** | one workload file × one condition × one seed where the condition draws — the unit of one invocation of the daemon and of the simulator (§11), and of every identity column downstream |
+| **boot default** | the configuration in force at t = 0 before any recognition, and the one `fallback` retreats to; a committed file the runner hands the daemon (§11, `harness/boot-defaults/`) |
 
-## 12. The freeze rule
+## 13. The freeze rule
 
 The dataset contracts (archetype, timeline, workload) are frozen and enforced by schema and CI today; the `cpu_scheduler` config schema and the trace are frozen by ratified decision (2026-08-28). The protocol contracts — the two views, telemetry, the config schedule, and the recognition log's envelope — froze on 2026-09-06, the **protocol freeze**, because they are exactly the seams where the three of us could silently build against three slightly different assumptions and discover it at integration time. The proposal (contract 5) and the driver table's format (contract 9) followed on 2026-09-07, once the table's row structure settled what the proposal's `subsystems` slot means under `llm_algo`. Frozen or draft, the operating rule is the same: any change to a frozen contract needs all three of us and a changelog entry, and until a draft freezes it is the shared starting point — build to it, and bring friction to the freeze discussion rather than working around it quietly.
 
 ---
 
-## 13. Changelog
+## 14. Changelog
 
 Every change to a frozen contract lands here, dated, with the sub-task that made it.
 
+- **2026-09-11 — invocation contract (jioh 8.5).** New §11: the command line the runner starts the daemon and the simulator with becomes contract 10, frozen — one run per invocation; named required flags (the daemon: workload, condition, driver table, boot default, seed exactly when the condition draws; the simulator: workload, schedule); absolute paths, declared outputs only, gzip by `.gz`; exit 0 or failure, stdout ignored, stderr captured; byte-identical outputs from the same argument line as the one behavioural clause; no version channel; a configured command prefix. The boot default becomes a committed file under `harness/boot-defaults/` with its schema. The mock daemon and mock simulator (`harness/tools/tests/mocks/`) are the first implementations. No frozen contract changed; Terms, the freeze rule, and this changelog renumber to §12–§14; the glossary gains *run* and *boot default*.
 - **2026-09-11 — boot default example values (jioh 8.1).** No contract changed. The example schedules in §6 and §7 and the EDF example sentence carry the re-sourced boot default (`recognition-vocabulary.md` §2, changelog): MLFQ `timeslice_us` 10000, EDF `residual_timeslice_us` 10000. Field lists, ranges, and provenance rules are as frozen.
 - **2026-09-09 — `sources` on driver-table rows and entries (jioh 6.3).** Contract 9 gains an optional `sources` list of `docs/references.md` ids on the row and on each entry (schema), checked by the lint; the prior table requires it on every row and every `basis: theory` entry. Nothing else in the format changes; the calibrated table's `tuned` entries carry no sources.
 - **2026-09-06 — protocol freeze (jioh 3.3).** Run file (3a), visible projection (3b), telemetry (4), config schedule (6), and the recognition log's envelope (7) move from draft to frozen by ratified decision; the proposal (5) stays draft until the driver-table contract lands (Phase 4). Fixed in the same step, so that two builders read one file the same way: 3b — one entry per canonical task instance, never folded; 4 — the five snapshot rules (name→count multiset; one snapshot per timestamp; `processes` sorted by name; the terminal snapshot is emitted; nothing else emits) and the example's first snapshot corrected from 59 s to t = 0; 6 — one entry per query point including `held` (from 3.2), ordering with tie-break, post-validation payload, validity on load, entries at or after the end ignored, stale-answer policy deferred to the daemon; 7 — non-LLM entry shape (`proposal.system` for every condition, optional `source`, top-level `seed`), `proposal: null` + `raw` for unparseable answers, `validation` mirrors schedule `provenance`, grading scope, latency for non-LLM and replay. Glossary: `frozen` no longer requires enforcing code as a precondition. Recorded choice for 3a: the run file keeps only `workload_id` of `meta`; a trace is tied to a build through the manifest and the simulator version in its header, not through the run file.
