@@ -1107,16 +1107,18 @@ Phase 6 spec 세션(2026-09-08)에서 확정됐고, 15.2와 15.3은 그 결과�
 
 ### 15.1 어느 파일이 판정에 들어가나
 
-RQ0 gate("perfect recognition이 random보다 나은 headroom이 있나")의 judging set은 **C2의 6개 파일**이에요. 이유: 짝(pair)이 있어서 attribute(`background_wanted`)의 차이만 남기고 나머지를 통제할 수 있어요.
+RQ0 gate("perfect recognition이 random보다 나은 headroom이 있나")의 judging set은 Phase 3에서는 **C2의 6개 파일**이었고, Phase 7(2026-09-10)에서 coreset이 바뀌면서 다시 정했어요. 규칙: **label이 다른 pair의 한쪽이고, 그 파일의 scored term이 row 차이를 설계상 감지하는 파일**. demand는 기준이 아니에요(Q8의 per-file admission test가 gate 자체의 per-file 기준이 됐어요). 그래서 27개: C2 6개 + batch C1 base 6개(wanted LOTTERY share를 random row가 빼앗음) + term이 있는 C7 counterpart 15개.
 
 | 그룹 | 역할 |
 |---|---|
 | C2 (6) | judging set |
-| C1 (16) | 보고만. whitelist가 만점을 받아야 하는 baseline. 단 `c1-gaming`은 demand가 가장 높은 파일이라 별도 보고 line. Phase 7부터 mode당 하나(16개) — judging set을 다시 정하는 건 RQ0 gate spec(Phase 8)의 일 |
+| C1 batch 6 (`compile`·`ml-train`·`render`·`transcode`·`indexing`·`backup`) | judging set — C7 counterpart와 양쪽 |
+| C7 15 (idle 제외) | judging set. `c7-gaming`(frame은 어떤 row에서도 miss, gap만 읽음)과 `c7-meeting`·`c7-media`(gap은 EDF 대 뽑힌 algorithm, cap 축은 측정 불가)는 note가 붙은 채로 judging |
+| C1 interactive·periodic 10 | 보고만. whitelist가 만점을 받아야 하는 baseline(16개 전부에 해당). foreground 뒤에 아무것도 없어 row가 움직일 게 없음. `c1-gaming`은 Phase 3의 별도 보고 line 유지 |
 | C3 (3), C4 (3) | 보고만. C4는 clean한 C1 원본과의 차이(delta)로 |
 | C5 (3) | Layer 2 제외. `c1-media`와 behaviour가 같으니 성능 숫자도 같아야 함. 다르면 bug 신호 |
 | C6 (3) | Layer 2 제외. 미리 약속된 miss |
-| C7 (16) | 보고만, base(C1)와의 pair로. `c7-meeting`·`c7-media`의 headroom은 EDF-vs-MLFQ 결과이고 cap 축은 측정 불가(pair review finding 5) — RQ0 gate spec의 reporting line |
+| pre-committed miss 5 (`c1-indexing`, `c7-ml-train`·`render`·`transcode`·`backup`) | judging에는 들어가고(gate는 label만 필요), Layer 1 accuracy에서만 제외 |
 | `c1-idle`, `c7-idle` | 성능 metric 없음. `c1-idle`은 contention이 없고, `c7-idle`은 scan만 있어 보호할 foreground가 없음 |
 
 ### 15.2 파일별 term (확정)

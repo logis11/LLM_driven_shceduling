@@ -159,7 +159,7 @@ pair review의 finding 5. `c7-meeting`과 `c7-media`는 `true` row도 `false` ro
 - repeat index memo(9월 7일)는 그대로 유효해요.
 
 **공통 (RQ0 gate spec, Phase 8).**
-- judging set을 다시 정해야 해요 — C1이 16, C7이 16. Phase 3 때 "C1은 reporting-only, C2 여섯이 judging"으로 결론 냈던 건 C1이 여섯일 때였어요.
+- judging set은 Phase 7에서 다시 정했어요(7.7, 2026-09-10). 규칙: label이 다른 pair의 한쪽이고 scored term이 row 차이를 설계상 감지하는 파일 — demand는 기준이 아니에요. 27개: C2 6 + batch C1 base 6 + term 있는 C7 15. interactive·periodic C1 base 10개, C3, C4, idle 둘은 보고만. `c7-gaming`·`c7-meeting`·`c7-media`는 note가 붙은 채로 judging, pre-committed miss 5개는 judging에 들어가되 Layer 1 accuracy에서만 제외. Q8의 per-file admission test가 gate의 per-file 기준이 돼요("27개 중 K개 이상이 gap ≥ g", K·g는 Phase 8이 실행 전에 확정). 자세한 건 RQ0 preparation notes §8.
 - reporting line 후보: `c7-meeting`·`c7-media`의 headroom은 EDF-vs-MLFQ(§7); pre-committed miss 다섯 segment는 accuracy 제외; C7의 demand는 calibration class로 면제(pair가 통제).
 - attribute accuracy의 headline은 **balanced accuracy + confusion matrix**, raw accuracy는 majority baseline과 함께만. `false`가 18/63 segment라 raw accuracy 혼자서는 majority에 끌려요. 파일을 더 늘려 50:50을 맞추는 대신 metric 정의로 푸는 거예요.
 - calibrated table을 tuning하는 "throwaway pool"이 어디에도 정의돼 있지 않아요. RQ0 gate spec에서 정해야 해요.

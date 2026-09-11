@@ -545,7 +545,7 @@ This can happen for a concrete reason worth watching for: if the per-class heuri
 
 **Both `random` and `oracle` can be run before any LLM integration exists.** The ground truth is already written in the workload file; random is one line of code. This is the cheapest possible early kill check, and it should be the first experiment we run. If the gap is narrow, we redesign workloads or deliberately weaken the executor's self-correction before investing in prompt engineering.
 
-Phase 1 runs on the full ratified vocabulary — sixteen modes plus `background_wanted`. The attribute is not optional there: the C2 pairs that form the RQ0 judging set differ *only* in `background_wanted`, so a modes-only gate could not express its own judging set.
+Phase 1 runs on the full ratified vocabulary — sixteen modes plus `background_wanted`. The attribute is not optional there: the RQ0 judging set is built from label-varying pairs — the C2 pairs, and since Phase 7 the C1 base and C7 counterpart of every batch mode and the interactive counterparts — whose two sides differ in `background_wanted`, so a modes-only gate could not express its own judging set.
 
 ## 5.4 Two layers of measurement
 
