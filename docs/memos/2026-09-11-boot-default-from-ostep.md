@@ -76,6 +76,8 @@ option B일 때 생기는 상황이에요. `scan`이 t = 100000에 slice를 시�
 
 interpretation contract가 "같은 순간의 event는 적어 둔 결정적 순서로 처리한다"고 하는 게 이 규칙이에요. 저희 mock fixture는 "config entry 먼저, 그 다음 arrival을 파일 순서로"까지만 정해 뒀고, slice 경계와 TIMER 만료의 순서는 안 정해져 있어요. 어느 순서든 괜찮아요. 다만 (a) 어느 쪽인지, (b) 그 순서가 trace의 line 순서에도 그대로 나타나는지(harness는 trace의 순서를 그대로 믿어요)를 알려주시면 돼요.
 
+**지오 생각 (참고만).** 둘 다 교과서 쪽으로 답하면 될 것 같아요. 질문 1은 **option A(바로 뺏는다)**. deadline class를 두는 이유가 마감 있는 일이 깨어나는 순간 다른 모든 일보다 앞서게 하려는 것이라, residual slice가 끝날 때까지 기다리게 하면 non-preemptive EDF가 되어 다른(더 약한) scheduler가 돼요. 우리 MLFQ가 이미 "더 높은 queue로 깨어나면 즉시 preempt"인 것과도 맞고, Linux의 `SCHED_DEADLINE`이 fair class를 다루는 방식과도 같아요. 구현도 더 단순해요 — residual round-robin은 deadline class가 비워 둔 lane에서만 돌면 되니까요. 질문 2는 **TIMER 만료(깨어남)를 먼저, dispatch 결정을 나중에**. 같은 µs에 두 일이 있으면, scheduler가 결정을 내리기 전에 깨어난 task가 보이는 순서가 "정보를 다 가지고 결정하는" 유일한 순서예요. 반대로 dispatch부터 하고 그 다음에 runnable task를 발견하는 순서는, 물리적 이유 없이 정확히 slice 하나만큼의 대기를 만들어내요. 둘 다 이렇게 정해지면 `c7-media`·`c7-meeting`의 답은 확정이에요: 어느 config에서도 `fixed`에서도 miss가 없고, 두 파일은 headroom 없음. 어디까지나 제 생각이고, 정하는 건 경민 님이에요 — 다르게 정하셔도 적혀 있기만 하면 돼요.
+
 **왜 이게 중요한가.** simulator에는 난수가 없어서, 이 두 규칙만 적히면 `c7-media`·`c7-meeting`에서 `video`가 tick을 놓치는지 안 놓치는지가 **실행 전에** 계산으로 나와요. 그 답에 따라 두 파일이 RQ0 판정 set에 남을지가 정해져요(§6). 반대로 규칙이 안 적혀 있으면, 결과가 나온 뒤에 "왜 miss가 났지/안 났지"를 구현 세부에서 찾아야 하고, 그건 pre-registration이 막으려는 상황이에요.
 
 **박이안 (daemon).**
