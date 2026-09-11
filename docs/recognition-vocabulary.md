@@ -74,7 +74,7 @@ Every configuration, regardless of algorithm:
 | field | type / range | default | meaning |
 |---|---|---|---|
 | `num_queues` | int, 2–8 | 3 | number of priority levels |
-| `timeslice_us` | int, 500–100000 | 2000 | the top queue's time slice |
+| `timeslice_us` | int, 500–100000 | 10000 | the top queue's time slice |
 | `timeslice_growth` | number, 1–8 | 2 | level *i*'s slice = `timeslice_us · timeslice_growth^i` |
 | `boost_interval_us` | int, 10000–10000000 | 100000 | everything returns to the top queue this often |
 
@@ -84,7 +84,7 @@ Demotion on a fully consumed slice and stay-on-block are fixed MLFQ rules, not c
 
 | field | type / range | default | meaning |
 |---|---|---|---|
-| `residual_timeslice_us` | int, 500–100000 | 2000 | round-robin slice for the residual (non-deadline) class |
+| `residual_timeslice_us` | int, 500–100000 | 10000 | round-robin slice for the residual (non-deadline) class |
 
 The deadline class is the TIMER-driven tasks, behaviorally observed; each job's deadline is its next period boundary (period-implicit). Deadline tasks run earliest-deadline-first (ties broken by a fixed executor rule); the residual class round-robins in the remaining lane time. No admission control in v1.
 
@@ -93,7 +93,7 @@ The deadline class is the TIMER-driven tasks, behaviorally observed; each job's 
 | field | type / range | default | meaning |
 |---|---|---|---|
 | `batch_share` | number, 0.01–0.90 | 0.15 | target lane fraction for the batch class; the non-batch class holds the remainder |
-| `timeslice_us` | int, 500–100000 | 2000 | one draw's tenure before the next draw |
+| `timeslice_us` | int, 500–100000 | 10000 | one draw's tenure before the next draw |
 
 Two classes, tickets split `batch_share : (1 − batch_share)`, equal tickets per task within a class. The draw PRNG is seeded by the simulator per run (derived from the workload id) — not a config field.
 
@@ -103,19 +103,23 @@ No fields: `"params": {}`. Run in arrival order until each task blocks or exits.
 
 ### Provenance of the boot default
 
-The seven default values above are the **boot default configuration** and the `fixed` condition, so they are the floor every normalised score is measured against. None was measured; each is a **stated assumption**, and this table records how far a primary source bounds it (references in `references.md`). Values were not changed by this audit.
+The seven default values above are the **boot default configuration** and the `fixed` condition, so they are the floor every normalised score is measured against. None was measured. Since 2026-09-11 the four MLFQ values are OSTEP §8's worked example, whole (`ostep`, read in Version 1.10); the two other slices equal the MLFQ slice by the same-granularity rule below; LOTTERY `batch_share` has no source. A configuration whose numbers come from one text is one claim; a value assembled from several sources is not used.
 
 | field | default | grounding | status |
 |---|---|---|---|
-| MLFQ `num_queues` | 3 | `ostep` §8.2: the worked examples use "a three-queue scheduler". Shipped tables differ (`illumos-ts`: 60 levels). | assumption, matches OSTEP's example |
-| MLFQ `timeslice_us` | 2000 | `ostep` §8.5: high-priority queues get "10 or fewer milliseconds"; `linux-sched-fair`: 0.75 ms base slice, 6 ms target latency (both scaled by 1 + ilog ncpus); `ostep` §8.5 on Solaris TS: 20 ms at the highest priority. 2 ms lies inside that range; no source names it. | assumption, bounded |
-| MLFQ `timeslice_growth` | 2 | `ostep` Fig. 8.6: 10 ms / 20 ms / 40 ms per queue — doubling per level. | assumption, matches OSTEP's example |
-| MLFQ `boost_interval_us` | 100000 | `ostep` Fig. 8.4: a boost "every 100 ms (which is likely too small of a value, but used here for the example)"; OSTEP names S a voo-doo constant. Shipped: `illumos-ts` ages once per second; `ostep` §8.5 "around every 1 second or so". | assumption, matches OSTEP's illustrative value; flagged by OSTEP itself |
-| EDF `residual_timeslice_us` | 2000 | No source. Set equal to MLFQ `timeslice_us` so the residual class round-robins at the same granularity. | assumption, tied to `timeslice_us` |
+| MLFQ `num_queues` | 3 | `ostep` §8.2: the worked examples run in "a three-queue scheduler"; every figure has Q2, Q1, Q0. | OSTEP's example |
+| MLFQ `timeslice_us` | 10000 | `ostep` §8.2, Example 1: "with a time slice of 10 ms (and with the allotment set equal to the time slice)". | OSTEP's example |
+| MLFQ `timeslice_growth` | 2 | `ostep` §8.5, Fig. 8.6 ("Lower Priority, Longer Quanta"): 10 ms, 20 ms, 40 ms per level. | OSTEP's example |
+| MLFQ `boost_interval_us` | 100000 | `ostep` §8.3, Fig. 8.4: "a priority boost every 100 ms (which is likely too small of a value, but used here for the example)"; OSTEP names S a voo-doo constant after Ousterhout. | OSTEP's example; the caveat is OSTEP's own |
+| EDF `residual_timeslice_us` | 10000 | Equal to MLFQ `timeslice_us` by the same-granularity rule. | stated rule, no source |
 | LOTTERY `batch_share` | 0.15 | No source names a batch-class share. `waldspurger-osdi94` defines shares as proportional to tickets and gives no ratio between classes. | assumption, unbounded |
-| LOTTERY `timeslice_us` | 2000 | `waldspurger-osdi94` §2: prototype quantum 10 ms ("100 lotteries per second"), with "shorter time quanta can be used to further improve accuracy". Set equal to MLFQ `timeslice_us`. | assumption, bounded |
+| LOTTERY `timeslice_us` | 10000 | Equal to MLFQ `timeslice_us` by the same-granularity rule. | stated rule, no source |
 
-**Sensitivity check (planned, pre-registered in the RQ0 gate spec at Phase 8).** Because the floor is assumed, the `fixed` condition is re-run under two alternative boot defaults drawn from the cited sources' own values — OSTEP's example configuration (10 ms top slice, three queues, doubling, 100 ms boost) and a Linux-like short slice (0.75 ms base) — with the exact pair fixed before execution. If the RQ0 gap's sign or the ordering of normalised scores changes across the three floors, the floor is reported as a range rather than a point.
+**Allotment.** OSTEP's Rule 4 demotes a job once it "uses up its time allotment at a given level". Example 1 sets the allotment equal to the slice; Figure 8.6 gives the top two levels two slices each. This schema has no allotment field and demotes on one fully consumed slice, so the boot default is OSTEP's slice ladder and boost with the allotment equal to the slice, as in Example 1. That is the one point where this model and the example differ.
+
+**Same-granularity rule.** EDF's residual slice and LOTTERY's slice equal the MLFQ slice. The rule is this project's, not a source's: dispatch tenure is held equal across the four algorithms so that a difference between two driver-table rows is the policy and the cap, never the quantum one algorithm was handed. No shipped EDF has a residual round-robin slice to cite (Liu and Layland's EDF is preemptive without a quantum), and no second source is introduced for LOTTERY. Per-algorithm tenure is the calibrated table's to tune.
+
+**Sensitivity check (planned, pre-registered in the RQ0 gate spec at Phase 8).** Because the floor is one example's values, the `fixed` condition is re-run under two alternative boot defaults, the pair fixed by the team before execution. If the RQ0 gap's sign or the ordering of normalised scores changes across the three floors, the floor is reported as a range rather than a point. Because the same-granularity rule makes tenure one knob, the pair varies all three slices together.
 
 ### Validation rules
 
@@ -140,7 +144,7 @@ The machine-readable core of every proposal, putting the two blocks together:
   "subsystems": {                   // §2 — optional suggestions, per consumer
     "cpu_scheduler": {
       "algorithm": "LOTTERY",
-      "params": { "batch_share": 0.15, "timeslice_us": 2000 },
+      "params": { "batch_share": 0.15, "timeslice_us": 10000 },
       "batch_bandwidth_cap": 0.20
     }
   }
@@ -165,6 +169,7 @@ Adding or removing a mode, promoting an annotation to a graded attribute, changi
 
 ## 5. Changelog
 
+- **2026-09-11 — boot default from OSTEP (jioh 8.1).** Three values changed: MLFQ `timeslice_us` 2000 → 10000, EDF `residual_timeslice_us` 2000 → 10000, LOTTERY `timeslice_us` 2000 → 10000. The MLFQ boot default is now OSTEP §8's worked example whole (3 queues, 10 ms, doubling, 100 ms boost, allotment equal to slice), one source for all four values; the other two slices follow by the same-granularity rule, now stated in §2 as the project's own; the alternative pair of the sensitivity check is the team's to fix before execution. The former 2 ms slice named no source (it lay inside the range `linux-sched-fair`, `illumos-ts`, and `ostep` bound). The prior table's rows follow by their header rule; the metrics doc's latency floor is untied from the slice (its changelog). Research behind the change: no source read claims a standard MLFQ configuration; memo `docs/memos/2026-09-11-boot-default-from-ostep.md`.
 - **2026-09-11 — the cap's shipped counterpart (jioh).** No value changed. §2's `batch_bandwidth_cap` paragraph now points to `linux-sched-bwc` (Linux CFS bandwidth control) as the existence reference for a per-class CPU bandwidth ceiling; what the class is, the range, and the floor remain this project's.
 - **2026-09-10 — batch-mode reading of `background_wanted` (jioh 7.3).** No value changed. One clarifying clause in §1: in the six batch modes the batch job is itself the background work the attribute judges, so its `false` cell is that job unwanted, the reading `c2-p1b` already used. The C7 counterparts are built on it.
 - **2026-09-10 — `pre_committed_miss` annotation (jioh 7.1).** No label or schema value changed. A fifth ground-truth annotation, `pre_committed_miss: true`, marks a segment whose label cannot be reached from names and behaviour; it is what the coverage grid reads to mark a driver-table cell as instanced but recognition-limited, and what the grader will read to exclude the segment from accuracy (Phase 8). Set first by `c1-indexing` (7.2), the user-initiated reindex.

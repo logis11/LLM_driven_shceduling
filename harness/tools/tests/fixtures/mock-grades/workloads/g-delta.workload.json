@@ -1,0 +1,31 @@
+{
+ "meta": {
+  "id": "g-delta",
+  "derived_from": "hand-written (mock-grades/worked.md)"
+ },
+ "ground_truth": [
+  {
+   "t_start": 0,
+   "t_end": 60000000,
+   "mode": "ambiguous",
+   "attributes": {
+    "dual_active": true
+   }
+  }
+ ],
+ "events": [
+  {
+   "op": "arrive",
+   "t": 0,
+   "id": "t1",
+   "name": "placeholder",
+   "depart": 60000000,
+   "program": [
+    {
+     "op": "RUN",
+     "us": 1000
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,6 @@
+workload_id,condition,table,seed,boot_default,sim,source_sha256,entity,metric,t,value,cause,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss
+g-beta,llm_algo,calibrated,,,,0ef232a07f9eca21ecd0739cc89c0519e43a47dc096a30a03e9b8b5a2d24ed76,recognizer,algo_choice_correct,0,0,,,,,,MLFQ,EDF,unmodified,5,,0
+g-beta,llm_algo,calibrated,,,,0ef232a07f9eca21ecd0739cc89c0519e43a47dc096a30a03e9b8b5a2d24ed76,recognizer,attr_correct,0,1,,,,,,true,true,unmodified,5,,0
+g-beta,llm_algo,calibrated,,,,0ef232a07f9eca21ecd0739cc89c0519e43a47dc096a30a03e9b8b5a2d24ed76,recognizer,config_correct,0,1,,,,,,,,unmodified,5,,0
+g-beta,llm_algo,calibrated,,,,0ef232a07f9eca21ecd0739cc89c0519e43a47dc096a30a03e9b8b5a2d24ed76,recognizer,latency_us,0,520000,,,,,,,,unmodified,5,,0
+g-beta,llm_algo,calibrated,,,,0ef232a07f9eca21ecd0739cc89c0519e43a47dc096a30a03e9b8b5a2d24ed76,recognizer,mode_correct,0,1,,,,,,media,media,unmodified,5,,0

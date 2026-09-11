@@ -1,0 +1,5 @@
+workload_id,condition,table,seed,boot_default,sim,source_sha256,entity,metric,t,value,cause,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss
+g-epsilon,random,calibrated,s1,,,9c410948d33cb2420219edd16aced708f605cb34b4fa66627b72eed9dc5114db,recognizer,attr_correct,0,0,,,,,,true,false,unmodified,,,0
+g-epsilon,random,calibrated,s1,,,9c410948d33cb2420219edd16aced708f605cb34b4fa66627b72eed9dc5114db,recognizer,config_correct,0,0,,,,,,,,unmodified,,,0
+g-epsilon,random,calibrated,s1,,,9c410948d33cb2420219edd16aced708f605cb34b4fa66627b72eed9dc5114db,recognizer,latency_us,0,0,,,,,,,,unmodified,,,0
+g-epsilon,random,calibrated,s1,,,9c410948d33cb2420219edd16aced708f605cb34b4fa66627b72eed9dc5114db,recognizer,mode_correct,0,0,,,,,,gaming,indexing,unmodified,,,0

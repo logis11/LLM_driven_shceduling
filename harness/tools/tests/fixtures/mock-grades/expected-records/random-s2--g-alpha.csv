@@ -1,0 +1,9 @@
+workload_id,condition,table,seed,boot_default,sim,source_sha256,entity,metric,t,value,cause,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss
+g-alpha,random,calibrated,s2,,,b5a47f6f0f4259e826732880d8a3205401fb7b9a8ed7957d03e492013a2330ea,recognizer,attr_correct,0,1,,,,,,true,true,unmodified,,,0
+g-alpha,random,calibrated,s2,,,b5a47f6f0f4259e826732880d8a3205401fb7b9a8ed7957d03e492013a2330ea,recognizer,attr_correct,60000000,1,,,,,,true,true,unmodified,,,0
+g-alpha,random,calibrated,s2,,,b5a47f6f0f4259e826732880d8a3205401fb7b9a8ed7957d03e492013a2330ea,recognizer,config_correct,0,1,,,,,,,,unmodified,,,0
+g-alpha,random,calibrated,s2,,,b5a47f6f0f4259e826732880d8a3205401fb7b9a8ed7957d03e492013a2330ea,recognizer,config_correct,60000000,1,,,,,,,,unmodified,,,0
+g-alpha,random,calibrated,s2,,,b5a47f6f0f4259e826732880d8a3205401fb7b9a8ed7957d03e492013a2330ea,recognizer,latency_us,0,0,,,,,,,,unmodified,,,0
+g-alpha,random,calibrated,s2,,,b5a47f6f0f4259e826732880d8a3205401fb7b9a8ed7957d03e492013a2330ea,recognizer,latency_us,60000000,0,,,,,,,,unmodified,,,0
+g-alpha,random,calibrated,s2,,,b5a47f6f0f4259e826732880d8a3205401fb7b9a8ed7957d03e492013a2330ea,recognizer,mode_correct,0,1,,,,,,dev,dev,unmodified,,,0
+g-alpha,random,calibrated,s2,,,b5a47f6f0f4259e826732880d8a3205401fb7b9a8ed7957d03e492013a2330ea,recognizer,mode_correct,60000000,1,,,,,,ml-train,ml-train,unmodified,,,0

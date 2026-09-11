@@ -1,0 +1,42 @@
+{
+ "workload_id": "g-epsilon",
+ "condition": "oracle",
+ "seed": null,
+ "queries": [
+  {
+   "t_set_change": 0,
+   "telemetry": {
+    "t_us": 0,
+    "processes": [
+     {
+      "name": "placeholder",
+      "count": 1
+     }
+    ]
+   },
+   "proposal": {
+    "system": {
+     "mode": "indexing",
+     "background_wanted": false
+    }
+   },
+   "validation": "unmodified",
+   "latency_us": 0
+  },
+  {
+   "t_set_change": 60000000,
+   "telemetry": {
+    "t_us": 60000000,
+    "processes": []
+   },
+   "proposal": {
+    "system": {
+     "mode": "idle",
+     "background_wanted": true
+    }
+   },
+   "validation": "unmodified",
+   "latency_us": 0
+  }
+ ]
+}

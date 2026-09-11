@@ -26,7 +26,7 @@ def schedule(*entries):
         for (i, alg, params) in entries])
 
 
-MLFQ_BOOT = {"num_queues": 3, "timeslice_us": 2000, "timeslice_growth": 2,
+MLFQ_2MS = {"num_queues": 3, "timeslice_us": 2000, "timeslice_growth": 2,
              "boost_interval_us": 100000}
 
 
@@ -229,7 +229,7 @@ def _switch_events():
 def test_switch_into_mlfq_window_ends_when_the_last_hog_has_w_single_of_cpu():
     run = runfile(20000, [task("gone"), task("a", arrive=100), task("b", arrive=200),
                           task("e", arrive=300), task("late", arrive=3200)])
-    sched = schedule((0, "MLFQ", MLFQ_BOOT), (1, "FIFO", {}),
+    sched = schedule((0, "MLFQ", MLFQ_2MS), (1, "FIFO", {}),
                      (2, "MLFQ", {"num_queues": 4, "timeslice_us": 1000,
                                   "timeslice_growth": 2, "boost_interval_us": 50000}))
     r = compute(run, _switch_events(), sched)
@@ -249,7 +249,7 @@ def test_switch_into_mlfq_window_ends_when_the_last_hog_has_w_single_of_cpu():
 
 def test_hog_that_never_receives_w_single_clips_the_window_at_t_end_with_a_guard():
     run = runfile(5000, [task("a", arrive=100)])
-    sched = schedule((0, "MLFQ", MLFQ_BOOT), (1, "FIFO", {}), (2, "MLFQ", MLFQ_BOOT))  # W = 6000
+    sched = schedule((0, "MLFQ", MLFQ_2MS), (1, "FIFO", {}), (2, "MLFQ", MLFQ_2MS))  # W = 6000
     events = [cfg(0, 0, "MLFQ"), cfg(10, 1, "FIFO"),
               {"event": "task_arrive", "t": 100, "task": "a", "source": "file"},
               {"event": "ready", "t": 100, "task": "a", "cause": "arrive"},
@@ -264,7 +264,7 @@ def test_hog_that_never_receives_w_single_clips_the_window_at_t_end_with_a_guard
 
 def test_window_is_clipped_at_the_next_algorithm_switch():
     run = runfile(20000, [task("a", arrive=100)])
-    sched = schedule((0, "MLFQ", MLFQ_BOOT), (1, "FIFO", {}), (2, "MLFQ", MLFQ_BOOT),
+    sched = schedule((0, "MLFQ", MLFQ_2MS), (1, "FIFO", {}), (2, "MLFQ", MLFQ_2MS),
                      (3, "EDF", {"residual_timeslice_us": 2000}))
     events = [cfg(0, 0, "MLFQ"), cfg(10, 1, "FIFO"),
               {"event": "task_arrive", "t": 100, "task": "a", "source": "file"},
@@ -282,7 +282,7 @@ def test_window_is_clipped_at_the_next_algorithm_switch():
 
 def test_w_single_rounds_down_to_whole_microseconds():
     run = runfile(10000, [task("a", arrive=100)])
-    sched = schedule((0, "MLFQ", MLFQ_BOOT), (1, "FIFO", {}),
+    sched = schedule((0, "MLFQ", MLFQ_2MS), (1, "FIFO", {}),
                      (2, "MLFQ", {"num_queues": 3, "timeslice_us": 1001,
                                   "timeslice_growth": 1.5, "boost_interval_us": 50000}))
     events = [cfg(0, 0, "MLFQ"), cfg(10, 1, "FIFO"),
@@ -301,7 +301,7 @@ def test_w_single_rounds_down_to_whole_microseconds():
 
 def test_same_algorithm_entry_is_not_a_switch():
     run = runfile(10000, [task("a", arrive=100)])
-    sched = schedule((0, "MLFQ", MLFQ_BOOT), (1, "MLFQ", MLFQ_BOOT))
+    sched = schedule((0, "MLFQ", MLFQ_2MS), (1, "MLFQ", MLFQ_2MS))
     events = [cfg(0, 0, "MLFQ"),
               {"event": "task_arrive", "t": 100, "task": "a", "source": "file"},
               {"event": "ready", "t": 100, "task": "a", "cause": "arrive"},
@@ -315,14 +315,14 @@ def test_same_algorithm_entry_is_not_a_switch():
 
 def test_switch_at_or_after_t_end_is_ignored():
     run = runfile(1000, [])
-    sched = schedule((0, "MLFQ", MLFQ_BOOT), (1, "EDF", {"residual_timeslice_us": 2000}))
+    sched = schedule((0, "MLFQ", MLFQ_2MS), (1, "EDF", {"residual_timeslice_us": 2000}))
     r = compute(run, [cfg(0, 0, "MLFQ"), cfg(1000, 1, "EDF")], sched)
     assert rows_of(r, "switch_window") == []
 
 
 def test_hog_whose_first_run_end_is_past_t_end_is_not_counted():
     run = runfile(1500, [task("a", arrive=100)])
-    sched = schedule((0, "MLFQ", MLFQ_BOOT), (1, "FIFO", {}), (2, "MLFQ", MLFQ_BOOT))
+    sched = schedule((0, "MLFQ", MLFQ_2MS), (1, "FIFO", {}), (2, "MLFQ", MLFQ_2MS))
     events = [cfg(0, 0, "MLFQ"), cfg(10, 1, "FIFO"),
               {"event": "task_arrive", "t": 100, "task": "a", "source": "file"},
               {"event": "ready", "t": 100, "task": "a", "cause": "arrive"},
@@ -349,7 +349,7 @@ def test_switch_into_mlfq_without_a_schedule_is_a_guard_and_no_row():
 
 def test_schedule_disagreeing_with_the_trace_is_a_guard():
     run = runfile(10000, [])
-    sched = schedule((0, "MLFQ", MLFQ_BOOT), (1, "FIFO", {}))
+    sched = schedule((0, "MLFQ", MLFQ_2MS), (1, "FIFO", {}))
     r = compute(run, [cfg(0, 0, "MLFQ"), cfg(10, 1, "EDF")], sched)
     assert any("index 1" in g and "EDF" in g and "FIFO" in g for g in r.guards)
     r = compute(run, [cfg(0, 0, "MLFQ"), cfg(10, 3, "EDF")], sched)

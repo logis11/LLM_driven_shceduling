@@ -12,7 +12,12 @@ topology, and per-task demand.
 `read_config_schedule` reads the daemon's config schedule (data-contracts §7)
 for the one fact neither of the other two carries: the params of each applied
 entry, looked up by `index` — what the `switch_window` primitive needs for a
-switch into MLFQ. Nothing here computes a metric.
+switch into MLFQ.
+
+`read_recognition_log` reads the daemon's recognition log (data-contracts §8)
+for the query sequence: each query's `t_set_change`, `validation`, and
+`latency_us` — what the guards (8.3) and the grader (8.4) read. Nothing here
+computes a metric.
 """
 
 import gzip
@@ -55,6 +60,10 @@ class RunFileError(ValueError):
 
 class ScheduleError(ValueError):
     """The config schedule cannot be used as the reader's third input."""
+
+
+class LogError(ValueError):
+    """The recognition log cannot be used as the guards' or the grader's input."""
 
 
 @dataclass(frozen=True)
@@ -304,3 +313,50 @@ def read_config_schedule(path) -> ConfigSchedule:
                                      provenance=ent["provenance"]))
     return ConfigSchedule(workload_id=doc.get("workload_id", ""),
                           condition=doc.get("condition", ""), entries=entries)
+
+
+# --------------------------------------------------------- recognition log
+
+_VALIDATIONS = ("unmodified", "clamped", "held", "fallback")
+
+
+@dataclass(frozen=True)
+class Query:
+    index: int                     # position in `queries` = the schedule entry index minus one
+    t_set_change: int              # the snapshot's t_us
+    validation: str
+    latency_us: int
+    proposal: Optional[dict]       # None when the answer could not be parsed
+
+
+@dataclass
+class RecognitionLog:
+    workload_id: str
+    condition: str
+    seed: Optional[str]
+    queries: List[Query]
+
+
+def read_recognition_log(path) -> RecognitionLog:
+    with open(path, "r", encoding="utf-8") as f:
+        doc = json.load(f)
+    if not isinstance(doc, dict) or not isinstance(doc.get("queries"), list):
+        raise LogError("recognition log has no 'queries' list")
+    queries = []
+    for i, q in enumerate(doc["queries"]):
+        if not isinstance(q, dict):
+            raise LogError(f"query {i}: not an object")
+        for key in ("t_set_change", "validation", "latency_us"):
+            if key not in q:
+                raise LogError(f"query {i}: missing {key!r}")
+        if q["validation"] not in _VALIDATIONS:
+            raise LogError(f"query {i}: validation {q['validation']!r} not in "
+                           f"{list(_VALIDATIONS)}")
+        proposal = q.get("proposal")
+        queries.append(Query(index=i, t_set_change=int(q["t_set_change"]),
+                             validation=q["validation"], latency_us=int(q["latency_us"]),
+                             proposal=proposal if isinstance(proposal, dict) else None))
+    seed = doc.get("seed")
+    return RecognitionLog(workload_id=doc.get("workload_id", ""),
+                          condition=doc.get("condition", ""),
+                          seed=None if seed is None else str(seed), queries=queries)

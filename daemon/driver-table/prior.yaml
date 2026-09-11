@@ -36,7 +36,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "MLFQ serves the interactive job first and sinks CPU-bound work by observed behaviour without prior knowledge (OSTEP ch. 8, rules 1–5); boot params, whose provenance is recognition-vocabulary §2."
         sources: [ostep]
@@ -48,7 +48,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "Unwanted CPU-bound work is what MLFQ's demotion rule sinks (OSTEP ch. 8, rule 4a); the cap bounds what the bottom queue can still take; boot params."
         sources: [ostep]
@@ -62,7 +62,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "A keystroke-driven task blocks before its slice ends and stays on top under MLFQ (OSTEP ch. 8, rule 4b), which is the property the writer needs; boot params."
         sources: [ostep]
@@ -74,7 +74,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "MLFQ demotes the CPU-bound intruder within a few slices and the floor cap keeps it there (OSTEP ch. 8); boot params."
         sources: [ostep]
@@ -88,7 +88,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "Interactive-first by observed behaviour (OSTEP ch. 8); the mail client's short bursts stay in the top queue; boot params."
         sources: [ostep]
@@ -100,7 +100,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "MLFQ sinks the CPU-bound job by demotion and the floor cap bounds it (OSTEP ch. 8); boot params."
         sources: [ostep]
@@ -114,7 +114,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "The editor blocks on every keystroke and stays on top under MLFQ (OSTEP ch. 8, rule 4b); boot params."
         sources: [ostep]
@@ -126,7 +126,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "MLFQ demotes the intruder within a few slices and the floor cap keeps it there (OSTEP ch. 8); boot params."
         sources: [ostep]
@@ -140,7 +140,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "An editor whose bursts outlast a slice is demoted and boosted back every 100 ms under MLFQ's rules (OSTEP ch. 8, rules 4a and 5), which keeps it responsive against CPU-bound work; boot params."
         sources: [ostep]
@@ -152,7 +152,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "MLFQ sinks the CPU-bound job by demotion and the floor cap bounds it (OSTEP ch. 8); boot params."
         sources: [ostep]
@@ -166,7 +166,7 @@ rows:
     sources: [liu-jacm73]
     entries:
       EDF:
-        params: {residual_timeslice_us: 2000}
+        params: {residual_timeslice_us: 10000}
         basis: theory
         justification: "Deadline ordering meets every periodic deadline whenever any policy can (Liu & Layland 1973, Theorem 7, under their assumption A2 that a job is due at its next request); the residual slice is the boot value (recognition-vocabulary §2)."
         sources: [liu-jacm73]
@@ -178,7 +178,7 @@ rows:
     sources: [liu-jacm73]
     entries:
       EDF:
-        params: {residual_timeslice_us: 2000}
+        params: {residual_timeslice_us: 10000}
         basis: theory
         justification: "Deadline-driven scheduling keeps the periodic frames (Liu & Layland 1973, Theorem 7) while the floor cap bounds the residual intruder; boot residual slice."
         sources: [liu-jacm73]
@@ -192,7 +192,7 @@ rows:
     sources: [liu-jacm73, waldspurger-osdi94]
     entries:
       EDF:
-        params: {residual_timeslice_us: 2000}
+        params: {residual_timeslice_us: 10000}
         basis: theory
         justification: "Deadline ordering meets every periodic deadline whenever any policy can (Liu & Layland 1973, Theorem 7); c1-gaming and c3-evening run above utilisation 1, outside that theorem, where EDF orders the misses rather than preventing them; boot residual slice."
         sources: [liu-jacm73]
@@ -204,7 +204,7 @@ rows:
     sources: [liu-jacm73]
     entries:
       EDF:
-        params: {residual_timeslice_us: 2000}
+        params: {residual_timeslice_us: 10000}
         basis: theory
         justification: "Deadline-driven scheduling keeps the frame chain first (Liu & Layland 1973, Theorem 7) while the floor cap bounds the CPU-bound scan; boot residual slice."
         sources: [liu-jacm73]
@@ -218,7 +218,7 @@ rows:
     sources: [liu-jacm73]
     entries:
       EDF:
-        params: {residual_timeslice_us: 2000}
+        params: {residual_timeslice_us: 10000}
         basis: theory
         justification: "Two periodic tasks with period-implicit deadlines are the case Liu & Layland 1973 prove deadline ordering optimal for (Theorem 7); boot residual slice."
         sources: [liu-jacm73]
@@ -230,7 +230,7 @@ rows:
     sources: [liu-jacm73]
     entries:
       EDF:
-        params: {residual_timeslice_us: 2000}
+        params: {residual_timeslice_us: 10000}
         basis: theory
         justification: "Deadline-driven scheduling keeps both players' ticks (Liu & Layland 1973, Theorem 7) while the floor cap bounds the residual intruder; boot residual slice."
         sources: [liu-jacm73]
@@ -244,7 +244,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "Interactive-first by observed behaviour, with long edit bursts demoted and boosted back every 100 ms (OSTEP ch. 8, rules 4a and 5); boot params."
         sources: [ostep]
@@ -256,7 +256,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "MLFQ sinks the CPU-bound job by demotion and the floor cap bounds it (OSTEP ch. 8); boot params."
         sources: [ostep]
@@ -270,7 +270,7 @@ rows:
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:
-        params: {batch_share: 0.5, timeslice_us: 2000}
+        params: {batch_share: 0.5, timeslice_us: 10000}
         basis: theory
         justification: "Lottery makes consumption proportional to allocated shares (Waldspurger & Weihl 1994, §1), which is a wanted build's contract; the share equals the cap so the two cannot disagree; 2 ms quantum per the boot value, inside the range their §2 recommends."
         sources: [waldspurger-osdi94]
@@ -282,7 +282,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "MLFQ demotes each CPU-bound compiler child within a few slices (OSTEP ch. 8, rule 4a) and the floor cap bounds the whole class; boot params."
         sources: [ostep]
@@ -296,7 +296,7 @@ rows:
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:
-        params: {batch_share: 0.333, timeslice_us: 2000}
+        params: {batch_share: 0.333, timeslice_us: 10000}
         basis: theory
         justification: "Lottery makes consumption proportional to allocated shares (Waldspurger & Weihl 1994, §1) and is starvation-free for the minority class; the share equals the cap; 2 ms quantum per the boot value."
         sources: [waldspurger-osdi94]
@@ -308,7 +308,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "One CPU-bound job under an interactive editor is MLFQ's textbook case (OSTEP ch. 8); the floor cap bounds the bottom queue; boot params."
         sources: [ostep]
@@ -322,7 +322,7 @@ rows:
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:
-        params: {batch_share: 0.333, timeslice_us: 2000}
+        params: {batch_share: 0.333, timeslice_us: 10000}
         basis: theory
         justification: "Proportional share by tickets (Waldspurger & Weihl 1994, §1) gives the render a rate the user can count on without taking the editor's remainder; share equals cap; 2 ms quantum per the boot value."
         sources: [waldspurger-osdi94]
@@ -334,7 +334,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "MLFQ sinks the CPU-bound render by demotion and the floor cap bounds it (OSTEP ch. 8); boot params."
         sources: [ostep]
@@ -348,7 +348,7 @@ rows:
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:
-        params: {batch_share: 0.333, timeslice_us: 2000}
+        params: {batch_share: 0.333, timeslice_us: 10000}
         basis: theory
         justification: "Proportional share by tickets (Waldspurger & Weihl 1994, §1); share equals cap; 2 ms quantum per the boot value."
         sources: [waldspurger-osdi94]
@@ -360,7 +360,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "MLFQ sinks the CPU-bound conversion by demotion and the floor cap bounds it (OSTEP ch. 8); boot params."
         sources: [ostep]
@@ -374,7 +374,7 @@ rows:
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:
-        params: {batch_share: 0.5, timeslice_us: 2000}
+        params: {batch_share: 0.5, timeslice_us: 10000}
         basis: theory
         justification: "Proportional share by tickets (Waldspurger & Weihl 1994, §1); share equals cap; 2 ms quantum per the boot value."
         sources: [waldspurger-osdi94]
@@ -386,7 +386,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "One CPU-bound intruder under an interactive editor is MLFQ's textbook case (OSTEP ch. 8); the floor cap bounds the bottom queue; boot params."
         sources: [ostep]
@@ -400,7 +400,7 @@ rows:
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:
-        params: {batch_share: 0.2, timeslice_us: 2000}
+        params: {batch_share: 0.2, timeslice_us: 10000}
         basis: theory
         justification: "Proportional share by tickets (Waldspurger & Weihl 1994, §1) states a small guaranteed rate exactly; share equals cap; 2 ms quantum per the boot value."
         sources: [waldspurger-osdi94]
@@ -412,7 +412,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "MLFQ sinks the CPU-bound job by demotion and the floor cap bounds it (OSTEP ch. 8); boot params."
         sources: [ostep]
@@ -426,7 +426,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "MLFQ is the right answer for mixed, unknown work (OSTEP ch. 8; research-proposal §4.5 names idle under it); boot params."
         sources: [ostep]
@@ -438,7 +438,7 @@ rows:
     sources: [ostep]
     entries:
       MLFQ:
-        params: {num_queues: 3, timeslice_us: 2000, timeslice_growth: 2, boost_interval_us: 100000}
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
         justification: "MLFQ sinks the CPU-bound job by demotion and the floor cap bounds it (OSTEP ch. 8); boot params."
         sources: [ostep]

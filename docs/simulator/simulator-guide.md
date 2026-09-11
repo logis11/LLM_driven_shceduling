@@ -1,5 +1,5 @@
 # Simulator Guide — what to build, what's fixed, what's yours
-> Status: normative · Created 2026-08-28 · Updated 2026-09-06
+> Status: normative · Created 2026-08-28 · Updated 2026-09-11
 
 The second half of the simulator builder's onboarding (read `../background-guide.md` first — this one assumes it). It's a spec, but a deliberately breathing one: the **contract surface** (input format, execution semantics, determinism, output obligations) is fixed and stated here in full; the **inside of the machine** (language details, data structures, code layout, testing) is yours. Fixed things say "must." Everything else is a suggestion you may overrule in your own tree.
 
@@ -95,7 +95,7 @@ The daemon's finished output for this workload under one experimental condition 
   "schedule": [
     { "t_us": 0,
       "config": { "algorithm": "MLFQ",
-                  "params": { "num_queues": 3, "timeslice_us": 2000,
+                  "params": { "num_queues": 3, "timeslice_us": 10000,
                               "timeslice_growth": 2, "boost_interval_us": 100000 },
                   "batch_bandwidth_cap": null },
       "provenance": "fallback" },
@@ -201,7 +201,7 @@ Of the four policies, **MLFQ is the one the project needs soonest** — it's the
 4. A task that blocks (WAIT/SLEEP/TIMER) before its slice ends stays at its level (it's acting interactive).
 5. Every `boost_interval`, everything returns to the top queue — the anti-starvation reset.
 
-To see the rules bite, replay the §4½ miniature under a 3-level MLFQ with a 2000 µs slice: both tasks start in Q0. The hog burns its full 2000 µs slice → demoted to Q1; burns another → Q2, the bottom, where it grinds on. At t=10000 the keystroke makes the editor runnable *in Q0*, which outranks Q2 — the editor preempts, runs its 3000 µs burst (blocking once at slice end and resuming, or spanning slices, depending on your within-queue rule — decide and document), then WAITs again, never demoted because it always blocks early. Keystroke response: ~0 ms instead of the 10 ms the naive scheduler produced. The hog resumes in Q2 and finishes around t=23000 instead of 20000. MLFQ *learned* which task was interactive from behavior alone, in two observations — that's the self-tuning quality every experimental condition stands on.
+To see the rules bite, replay the §4½ miniature under a 3-level MLFQ with a 2000 µs slice (an illustration chosen to fit the miniature's 20 ms hog, not the boot default, whose slice is 10 ms): both tasks start in Q0. The hog burns its full 2000 µs slice → demoted to Q1; burns another → Q2, the bottom, where it grinds on. At t=10000 the keystroke makes the editor runnable *in Q0*, which outranks Q2 — the editor preempts, runs its 3000 µs burst (blocking once at slice end and resuming, or spanning slices, depending on your within-queue rule — decide and document), then WAITs again, never demoted because it always blocks early. Keystroke response: ~0 ms instead of the 10 ms the naive scheduler produced. The hog resumes in Q2 and finishes around t=23000 instead of 20000. MLFQ *learned* which task was interactive from behavior alone, in two observations — that's the self-tuning quality every experimental condition stands on.
 
 Its configuration is exactly the frozen MLFQ `params` from `../recognition-vocabulary.md` — `num_queues`, `timeslice_us`, `timeslice_growth` (level *i*'s slice = `timeslice_us · growth^i`), `boost_interval_us` — plus the envelope's `batch_bandwidth_cap`. That schema is frozen for all four algorithms; if implementing a field turns out awkward, propose the edit there rather than deviating quietly.
 

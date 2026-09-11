@@ -45,12 +45,23 @@ def test_fixture_csv_validates_against_schema(fixture_dir, mock):
     validate_rows(rows)            # raises on the first invalid row
 
 
-def test_columns_are_the_twenty_in_order(fixture_dir):
+def test_columns_are_the_twenty_two_in_order(fixture_dir):
     with open(fixture_dir("mock-office") / "expected.csv", newline="") as f:
         header = next(csv.reader(f))
     assert header == list(COLUMNS)
-    assert len(COLUMNS) == 20
-    assert COLUMNS[-1] == "hogs"
+    assert len(COLUMNS) == 22
+    assert COLUMNS[-2:] == ("hogs", "pre_committed_miss")
+
+
+def test_pre_committed_miss_is_zero_or_one():
+    rec = {"workload_id": "w", "condition": "oracle", "sim": "", "source_sha256": "0" * 64,
+           "entity": "recognizer", "metric": "mode_correct", "t": 0, "value": 1,
+           "validation": "unmodified", "predicted": "dev", "truth": "dev",
+           "pre_committed_miss": 2}
+    with pytest.raises(ValueError, match="pre_committed_miss"):
+        validate_rows([rec])
+    rec["pre_committed_miss"] = 1
+    validate_rows([rec])                                    # 0 and 1 are the only values
 
 
 def test_schema_rejects_bad_rows(fixture_dir):

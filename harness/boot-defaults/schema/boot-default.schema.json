@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "harness/boot-defaults/schema/boot-default.schema.json",
+  "title": "Boot default",
+  "description": "One boot-default configuration the runner hands the daemon (data-contracts, the invocation contract): the frozen cpu_scheduler config shape of recognition-vocabulary.md section 2, which the daemon copies verbatim into the schedule's first entry and retreats to on fallback. Named by content, never by role.",
+  "type": "object",
+  "required": ["algorithm", "params", "batch_bandwidth_cap"],
+  "additionalProperties": false,
+  "properties": {
+    "algorithm": {"enum": ["MLFQ", "EDF", "LOTTERY", "FIFO"]},
+    "params": {"type": "object"},
+    "batch_bandwidth_cap": {
+      "oneOf": [{"type": "null"}, {"type": "number", "minimum": 0.05, "maximum": 0.95}]
+    }
+  },
+  "allOf": [
+    {"if": {"properties": {"algorithm": {"const": "MLFQ"}}},
+     "then": {"properties": {"params": {
+       "type": "object", "additionalProperties": false,
+       "required": ["num_queues", "timeslice_us", "timeslice_growth", "boost_interval_us"],
+       "properties": {
+         "num_queues": {"type": "integer", "minimum": 2, "maximum": 8},
+         "timeslice_us": {"type": "integer", "minimum": 500, "maximum": 100000},
+         "timeslice_growth": {"type": "number", "minimum": 1, "maximum": 8},
+         "boost_interval_us": {"type": "integer", "minimum": 10000, "maximum": 10000000}}}}}},
+    {"if": {"properties": {"algorithm": {"const": "EDF"}}},
+     "then": {"properties": {"params": {
+       "type": "object", "additionalProperties": false,
+       "required": ["residual_timeslice_us"],
+       "properties": {
+         "residual_timeslice_us": {"type": "integer", "minimum": 500, "maximum": 100000}}}}}},
+    {"if": {"properties": {"algorithm": {"const": "LOTTERY"}}},
+     "then": {"properties": {"params": {
+       "type": "object", "additionalProperties": false,
+       "required": ["batch_share", "timeslice_us"],
+       "properties": {
+         "batch_share": {"type": "number", "minimum": 0.01, "maximum": 0.90},
+         "timeslice_us": {"type": "integer", "minimum": 500, "maximum": 100000}}}}}},
+    {"if": {"properties": {"algorithm": {"const": "FIFO"}}},
+     "then": {"properties": {"params": {
+       "type": "object", "additionalProperties": false, "properties": {}}}}}
+  ]
+}

@@ -1,0 +1,9 @@
+workload_id,condition,table,seed,boot_default,sim,source_sha256,entity,metric,t,value,cause,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss
+g-alpha,random,calibrated,s1,,,5f3c959867f2b925adf27bcf6ae291eb33d0ff19e4222af86421e39fe0548ad2,recognizer,attr_correct,0,0,,,,,,false,true,unmodified,,,0
+g-alpha,random,calibrated,s1,,,5f3c959867f2b925adf27bcf6ae291eb33d0ff19e4222af86421e39fe0548ad2,recognizer,attr_correct,60000000,1,,,,,,true,true,unmodified,,,0
+g-alpha,random,calibrated,s1,,,5f3c959867f2b925adf27bcf6ae291eb33d0ff19e4222af86421e39fe0548ad2,recognizer,config_correct,0,0,,,,,,,,unmodified,,,0
+g-alpha,random,calibrated,s1,,,5f3c959867f2b925adf27bcf6ae291eb33d0ff19e4222af86421e39fe0548ad2,recognizer,config_correct,60000000,0,,,,,,,,unmodified,,,0
+g-alpha,random,calibrated,s1,,,5f3c959867f2b925adf27bcf6ae291eb33d0ff19e4222af86421e39fe0548ad2,recognizer,latency_us,0,0,,,,,,,,unmodified,,,0
+g-alpha,random,calibrated,s1,,,5f3c959867f2b925adf27bcf6ae291eb33d0ff19e4222af86421e39fe0548ad2,recognizer,latency_us,60000000,0,,,,,,,,unmodified,,,0
+g-alpha,random,calibrated,s1,,,5f3c959867f2b925adf27bcf6ae291eb33d0ff19e4222af86421e39fe0548ad2,recognizer,mode_correct,0,0,,,,,,backup,dev,unmodified,,,0
+g-alpha,random,calibrated,s1,,,5f3c959867f2b925adf27bcf6ae291eb33d0ff19e4222af86421e39fe0548ad2,recognizer,mode_correct,60000000,0,,,,,,media,ml-train,unmodified,,,0

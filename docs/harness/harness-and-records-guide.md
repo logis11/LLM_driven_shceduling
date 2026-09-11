@@ -604,7 +604,7 @@ entity=schedule, metric=config_interval, t=60450, value=119550, provenance=unmod
 
 row는 `config_applied` 중 **직전 entry와 algorithm이 다른 것**마다 하나예요(boot entry는 직전이 없으니 row 없음; params만 바뀐 entry는 switch가 아님). entity `schedule`, `t`는 적용 시각.
 
-- `W_single` = hog 하나가 맨 위 queue에서 맨 아래까지 떨어지는 데 **받아야 하는 CPU 시간**. 위쪽 level마다 slice 하나씩: `timeslice_us × (1 + growth + growth² + …)`, level이 `num_queues − 1`개. boot default(3 queue, 2000 µs, growth 2)면 2000 + 4000 = 6000 µs. **바뀐 뒤의 params**로 계산하고, 그래서 config schedule이 필요해요(4.4).
+- `W_single` = hog 하나가 맨 위 queue에서 맨 아래까지 떨어지는 데 **받아야 하는 CPU 시간**. 위쪽 level마다 slice 하나씩: `timeslice_us × (1 + growth + growth² + …)`, level이 `num_queues − 1`개. 예를 들어 3 queue, 2000 µs, growth 2면 2000 + 4000 = 6000 µs(boot default는 2026-09-11부터 OSTEP 예시의 10 ms slice라 10000 + 20000 = 30000 µs). **바뀐 뒤의 params**로 계산하고, 그래서 config schedule이 필요해요(4.4).
 - `H` = 그 순간 살아 있는 task 중, 적용 시각 뒤 **첫 `run_end`가 `preempt`인** task의 수. 행동으로 세요(이름이나 archetype은 모름). `hogs` column에 실려요. FIFO 등으로 바뀔 때도 세어서 적지만 value는 0.
 - `value` = MLFQ로 바뀔 때, 적용 시각부터 **마지막 hog가 CPU를 `W_single`만큼 받은 순간**까지의 길이. hog가 실제로 앉아 있던 구간(occupancy)을 적용 시각부터 더해서 6000이 차는 시각을 찾아요. 그 사이 editor가 의자를 쓰면 hog의 시계는 멈추고 창은 그만큼 길어져요. 다음 algorithm switch나 `T_end`까지도 못 채우면 거기서 자르고 guard를 내요. EDF/LOTTERY/FIFO로 바뀔 때는 0.
 
@@ -658,11 +658,15 @@ recognition log는 query point마다 entry 하나예요. query point는 "process
 이 entry 하나에서 나오는 row들. entity는 `recognizer`, `t`는 `t_set_change`.
 
 ```
-recognizer, mode_correct, 60000000, 1, predicted=ml-train, truth=ml-train, validation=unmodified
-recognizer, attr_correct, 60000000, 1, predicted=true,     truth=true,     validation=unmodified
-recognizer, latency_us,   60000000, 450000
-recognizer, validation,   60000000, unmodified
+recognizer, mode_correct,   60000000, 1, predicted=ml-train, truth=ml-train, validation=unmodified
+recognizer, attr_correct,   60000000, 1, predicted=true,     truth=true,     validation=unmodified
+recognizer, latency_us,     60000000, 450000,                                validation=unmodified
+recognizer, config_correct, 60000000, 1,                                     validation=unmodified
 ```
+
+`validation`은 **column**이지 metric이 아니에요 — 모든 recognition row에 붙어요(§6.2). 예전 판에는 `recognizer, validation, …` 이라는 row가 하나 더 적혀 있었는데, records schema의 `metric` 목록에 `validation`이 없고 `value`는 정수라서 그 row는 애초에 만들 수 없어요. 2026-09-11(8.4)에 고쳤어요.
+
+`config_correct`(8.4에 추가)는 **틀린 답이 실제로 scheduler를 바꿨나**를 재요. 예측한 `(mode, background_wanted)` row에서 만들어지는 config(algorithm + params + cap)가 정답 row의 config와 byte 단위로 같으면 1이에요. 이름을 틀렸어도 두 row가 같은 config로 이어지면 scheduler는 똑같이 돌았다는 뜻이라, Layer 1의 accuracy와 Layer 2의 결과가 어긋날 때 그 이유를 여기서 읽어요. 쓰는 table은 **그 run이 실제로 쓴 table**(row의 `table` column)이에요.
 
 `llm_algo` condition(LLM이 algorithm까지 고르는 조건)에서만 row 하나 더:
 
@@ -670,11 +674,25 @@ recognizer, validation,   60000000, unmodified
 recognizer, algo_choice_correct, 60000000, 1, predicted=MLFQ, truth=MLFQ
 ```
 
-`truth`는 calibrated driver table에서 정답 row의 default algorithm이에요. 그래서 grader는 table 파일도 input으로 받아요.
+`truth`는 calibrated driver table에서 정답 row의 default algorithm이에요. 그래서 grader는 table 파일도 input으로 받아요. 이 metric만은 **calibrated** table이어야 하고, prior table을 주면 grader가 거부해요(delegation rung을 엉뚱한 table로 채점하면 안 되니까).
 
-**채점 범위:** `ambiguous`가 아닌 `ground_truth` segment가 `t_set_change`를 덮는 query만 채점해요. 마지막 snapshot(모든 앱이 닫힌 순간)은 덮는 segment가 없으니 건너뛰어요. `c6-dual`의 `ambiguous` segment도 채점 대상이 아니에요.
+**채점 범위:** `ambiguous`가 아닌 `ground_truth` segment가 `t_set_change`를 덮는 query만 채점해요. 마지막 snapshot(모든 앱이 닫힌 순간)은 덮는 segment가 없으니 건너뛰어요. `c6-dual`의 `ambiguous` segment도 채점 대상이 아니에요. 지금 coreset에서 이 규칙을 적용하면 **50개 파일의 query point 134개 중 82개가 채점 대상**이고(49개 파일), `pre_committed_miss` 10개를 빼면 headline은 **72개(44개 파일)**예요.
 
-mode accuracy, attribute accuracy, confusion matrix, latency 분포는 전부 이 row들의 aggregate예요.
+`pre_committed_miss`가 붙은 segment는 이름과 행동만으로는 누구도 맞힐 수 없는 label이라, headline accuracy에서는 빼고 포함한 숫자를 두 번째 줄로 같이 보고해요. 어느 row가 빠졌는지는 records의 `pre_committed_miss` column(8.4에 추가한 22번째)에 적혀 있어요.
+
+이 row들의 aggregate는 `grades` 파일에 나와요. 어떤 축에 어떤 통계를 쓰는지는 **정해져 있어요**:
+
+| 축 | headline | 왜 |
+|---|---|---|
+| attribute (`true`/`false`) | **balanced accuracy** + Matthews 계수, confusion matrix | 늘 `true`라고만 답해도 69.5%가 나와요(측정값). 그래서 raw accuracy는 majority baseline을 옆에 적을 때만 써요 |
+| mode (16개) | raw accuracy + **측정한** majority baseline, confusion matrix, class별 recall | Phase 7이 32개 cell을 전부 채워서 늘 같은 답만 하면 11.0%밖에 안 나와요 — 보정할 병이 없어요. macro 평균은 어느 축에서도 안 내요 |
+| algorithm choice (4개) | mode와 동일 | |
+| configuration | `config_correct` 비율과, 틀린 답 중 config를 실제로 바꾼 비율 | 두 layer를 잇는 숫자 |
+| latency | `mode_correct = 1`인 row의 P50/P99 | |
+
+**신뢰구간은 query point가 아니라 workload 파일을 resample해요.** 한 파일 안의 query point들은 같은 process 이름과 같은 상황을 공유하니 독립이 아니에요. 조건끼리 비교할 때는 **같은 draw 위에서 짝지어** 계산해요 — 모든 조건이 똑같은 query point에서 채점되니까요. seed와 반복 횟수는 고정이라 다시 돌려도 bound가 byte 단위로 같아요.
+
+**familiarity tier는 row에 적기만 하고 tier별 aggregate는 안 내요.** 지금 coreset에서 tier가 적힌 segment는 3개(C5 파일 셋)뿐이고 각각 채점되는 query point가 **1개**예요. tier 1·2는 아예 없어요. 답 하나로 비율을 내면 안 되니까, tier가 답하는 질문(rule 기반 recognizer의 천장)은 **별도 experiment**로 빼뒀어요.
 
 run-to-run consistency(같은 snapshot에 매번 같은 답을 하나)는 같은 query point의 sample이 여러 개 있어야 계산돼요. 지금 log 형식에는 "이게 몇 번째 sample인지"의 index가 없어서 박이안에게 memo로 요청해뒀어요.
 
@@ -735,7 +753,7 @@ condition `llm_vocab`, prior table. boot 설정이 0에, recognizer의 답이 40
 
 ### 10.3 trace
 
-scheduler는 아무 legal한 것이어도 돼요. 이 mock은 boot MLFQ(queue 3개, slice 2000, growth 2)를 simulator guide의 규칙대로 돌려요: slice를 다 쓰면 한 칸 내려가고, block하면 그 자리에 머물고, 더 높은 queue로 깨어나면 즉시 preempt, 같거나 낮은 queue면 slice 경계까지 기다려요. 시각은 µs.
+scheduler는 아무 legal한 것이어도 돼요. 이 mock은 MLFQ(queue 3개, slice 2000, growth 2)를 simulator guide의 규칙대로 돌려요(boot default는 2026-09-11부터 OSTEP 예시의 10 ms slice예요; 이 mock의 2 ms는 계산을 짧게 하려고 고른 legal config예요): slice를 다 쓰면 한 칸 내려가고, block하면 그 자리에 머물고, 더 높은 queue로 깨어나면 즉시 preempt, 같거나 낮은 queue면 slice 경계까지 기다려요. 시각은 µs.
 
 ```jsonl
 {"event":"meta","workload_id":"mock-c2-p1a","condition":"llm_vocab","sim":"mock@0","schedule_entries":2}
@@ -1173,19 +1191,20 @@ C2의 latency/frame term은 60초부터 `T_end`까지만 봐요. 첫 1분은 a�
 
 ## 16. guard — score와 별개로 항상 확인하는 것
 
-score가 아니라 pass/fail이에요. 모든 보고 숫자 옆에 붙어요.
+score가 아니라 pass/fail이에요. 모든 보고 숫자 옆에 붙어요. guard 여덟 개의 목록, threshold, 그리고 그 threshold를 왜 그렇게 잡았는지(grounding)는 **guard spec**(`harness/guards/guard-spec.yaml`, 8.3)이 데이터로 갖고, 코드(`harness/tools/harness/guards.py`)는 guard마다 이름 붙은 함수 하나예요. 결과는 run마다 guard 하나에 row 하나인 `guards` 파일(pass / fail / not_applicable, 잰 값, 적용된 threshold, 짝 run, fail이면 이유)로 나와요. 입력이 없어서 못 잰 guard는 fail이에요(통과시킨 게 아니니까). `not_applicable`은 guard의 범위가 그 run을 애초에 안 보는 경우만이에요(예: `fixed`에는 recognition이 없으니 provenance 비율을 안 봐요).
 
-| guard | records에서 | 왜 |
-|---|---|---|
-| provenance 비율 | `config_interval` row의 provenance별 합 | fallback/held로 대부분 돌았으면 recognition이 증명한 게 없음 |
-| config age | `config_interval`의 `t` − 그 query의 `t_set_change` | 얼마나 오래된 관측으로 설정했나 |
-| starvation floor | task별 `ready_wait` max | 어떤 condition도 task를 굶기면 안 됨 |
-| determinism | trace 파일의 hash 비교 (records 밖) | 같은 입력 두 번 → byte-identical |
-| utilisation sanity | `busy ≤ T_end` | 물리적으로 말이 되나 |
-| tick/iteration 일치 | `ready(timer_tick)` 개수 = tick 개수, tail iteration = head tick | simulator가 frame을 빠뜨리지 않았나 |
-| `validation` = `provenance` | recognizer row의 `validation` 순서 = `config_interval`의 provenance 순서(boot 제외) | log와 schedule이 서로 맞나 |
+| guard | 무엇을 재나 | threshold | 왜 |
+|---|---|---|---|
+| provenance 비율 | `config_interval`의 시간 가중 `fallback` + `held` 비율(aggregates의 fallback share) | 0.5 미만 (stated assumption) | fallback/held로 대부분 돌았으면 recognition이 증명한 게 없음. `fixed`는 not_applicable |
+| config age | non-boot schedule entry마다, 그 entry가 찍힌 시각이 **그 query의 `t_set_change`를 덮는 ground-truth segment가 끝나기 전**인가 | 숫자 없음, 구조적 검사 | 상황 A를 보고 낸 config가 상황 B가 시작된 뒤에 적용되면, log의 채점(A)과 trace의 결과(B)가 서로 다른 segment 얘기가 돼서 결과를 recognition에 귀속시킬 수 없음. 값으로는 가장 큰 관측 나이(적용 시각 − `t_set_change`)를 기록. metrics doc §8의 `config_age_*` aggregate는 "config가 얼마나 오래 유효했나"(time in force)라서 다른 양이고, 보고만 해요 |
+| starvation floor | task별 `ready_wait` max(cause 무관, 파일 전체) | 1 000 000 µs 이하 (stated assumption; 경민이 executor의 starvation window를 정하면 그 값으로 교체) | 어떤 condition도 task를 굶기면 안 됨 — 굶겼다면 executor의 안전망이 깨진 거지 config 탓이 아님 |
+| determinism | trace 파일의 SHA-256 vs 같은 run을 한 번 더 돌린 trace의 SHA-256 | byte-identical | 같은 입력 두 번 → 같은 trace. 두 번째 실행을 언제 어떻게 만드는지는 runner(8.6)의 일 |
+| utilisation sanity | `busy / T_end` | 1.0 이하, 그리고 scoring spec에 term이 있는 파일이면 0 초과 | 물리적으로 말이 되나; 파싱은 됐는데 비어 있는 trace를 잡음 |
+| tick count | primitives가 records를 만들면서 낸 consistency 메시지(tail iteration = head tick, wake 개수, `deadline` 교차검사, `config_applied`와 schedule의 일치) | 메시지 0개 | simulator가 frame이나 wake를 빠뜨리지 않았나 |
+| `validation` = `provenance` | recognition log의 `validation` 순서 = config schedule의 `provenance` 순서(boot 제외), 위치별 비교 | 불일치 0개 | log와 schedule이 서로 맞나 |
+| C2 pair | C2 pair 두 파일의 trace **body** hash 비교 (header 줄 제외 — header에 workload id가 있어서) | recognition 조건(`oracle`, LLM)에서는 **달라야** 함; `fixed`에서는 두 파일의 event가 label 빼고 같은 pair(P1)만 **같아야** 함, P2·P3는 not_applicable; `random`은 not_applicable | 두 파일이 같은 trace를 냈으면 config가 wanted/unwanted 사이에서 바뀐 적이 없다는 뜻이라, gap 0을 recognition 결과로 읽으면 안 됨 |
 
-`c6-dual` 같은 파일은 guard 예외를 미리 RQ0 gate spec에 데이터로 적어요(`ground_truth`가 `ambiguous`라 oracle이 legal한 답을 낼 수 없어서 fallback 100%가 정상).
+`c6-dual` 같은 파일은 guard 예외를 미리 RQ0 gate spec에 데이터로 적어요(`ground_truth`가 `ambiguous`라 oracle이 legal한 답을 낼 수 없어서 fallback 100%가 정상). 예외는 실험별 데이터고 guard spec에는 없어요.
 
 ---
 

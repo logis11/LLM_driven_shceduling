@@ -1,0 +1,27 @@
+name: harness-smoke
+
+# The full pipeline on the mocks over every scored coreset file (8.6 spec, decision 7,
+# amended 2026-09-11): about eight minutes, so not on every push — on main, on demand,
+# and on a pull request only when something it can catch changed.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "harness/**"
+      - "dataset/**"
+      - "daemon/driver-table/**"
+      - ".github/workflows/harness-smoke.yml"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r harness/tools/requirements.txt -r dataset/tools/requirements.txt
+      - run: make -C dataset dataset
+      - run: make -C harness smoke

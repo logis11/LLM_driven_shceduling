@@ -1,0 +1,12 @@
+# Scoring spec for the mock-scores fixture (sub-task 8.2): four terms shaped to hit every scorer rule.
+files:
+  mock-score:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, window: {start_us: 10000, end_us: 100000}, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+      - {entity: train, metric: cpu_delivered, aggregate: progress, direction: higher, weight: 0.5}
+      - {entity: build, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.5}
+  mock-p1a:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, window: {start_us: 50000, end_us: 120000}, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: hog, metric: cpu_delivered, aggregate: progress, direction: higher, weight: 0.5}

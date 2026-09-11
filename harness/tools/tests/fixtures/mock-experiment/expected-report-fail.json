@@ -1,0 +1,1108 @@
+{
+ "experiment": "mock-experiment",
+ "spec_sha256": "cc92555fa4fac8c99b62defe3d6b5fdcdd59164f5eb40a6f6dcba42cb311f667",
+ "pins": {
+  "scoring_spec": {
+   "path": "harness/tools/tests/fixtures/mock-scores/scoring-spec.yaml",
+   "sha256": "da3b9f9c4adb9a75f195925abe49d0a24ad690f2333b27df383cb8012c82e1fb"
+  },
+  "guard_spec": {
+   "path": "harness/tools/tests/fixtures/mock-experiment/guard-spec.yaml",
+   "version": "0.1",
+   "sha256": "40bdfb01dd8bbfc451ebf3ee84d9f1d48b641400f01eb38fbe64b088212f9fb0"
+  },
+  "driver_table": {
+   "path": "harness/tools/tests/fixtures/mock-grades/driver-table.yaml",
+   "sha256": "04fdb608c64661905af94f1a01e5502f5f84f004cd4c433b9297fc284c99f3de"
+  },
+  "dataset": {
+   "path": "harness/tools/tests/fixtures/mock-experiment/build.manifest.json",
+   "sha256": "b60942339c09f9ea6155bdac98c293a8184de082f4fd95f1b9134dee98bdd44f"
+  }
+ },
+ "conditions": [
+  "fixed",
+  "oracle",
+  "random"
+ ],
+ "seed_count": 2,
+ "boot_defaults": {
+  "primary": "ostep",
+  "alternatives": [
+   "alt"
+  ]
+ },
+ "criterion": {
+  "type": "k_of_n_gap",
+  "k": 1,
+  "g": "0.600000",
+  "reference": "oracle",
+  "compared": "random",
+  "seed_statistic": "mean"
+ },
+ "verdict": "fail",
+ "verdict_detail": {
+  "met": 0,
+  "judging": 1,
+  "k": 1,
+  "invalid_runs": []
+ },
+ "gaps": [
+  {
+   "workload_id": "mock-score",
+   "judging": true,
+   "boot_default": "",
+   "reference_score": "2.500000",
+   "compared_scores": [
+    {
+     "seed": "s1",
+     "score": "1.639359"
+    },
+    {
+     "seed": "s2",
+     "score": "0.433333"
+    }
+   ],
+   "compared_mean": "1.036346",
+   "gap": "0.585462",
+   "meets_g": false,
+   "all_no_headroom": false,
+   "n_no_headroom": 1,
+   "n_terms": 4,
+   "random_beats_oracle": false,
+   "available": true
+  },
+  {
+   "workload_id": "mock-score",
+   "judging": true,
+   "boot_default": "alt",
+   "reference_score": "2.500000",
+   "compared_scores": [
+    {
+     "seed": "s1",
+     "score": "1.533876"
+    },
+    {
+     "seed": "s2",
+     "score": "0.210172"
+    }
+   ],
+   "compared_mean": "0.872024",
+   "gap": "0.651190",
+   "meets_g": true,
+   "all_no_headroom": false,
+   "n_no_headroom": 1,
+   "n_terms": 4,
+   "random_beats_oracle": false,
+   "available": true
+  }
+ ],
+ "scores": [
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "prior",
+   "seed": "",
+   "boot_default": "",
+   "score": "0.500000",
+   "weight_sum": "2.500000",
+   "n_terms": 4,
+   "n_no_headroom": 1,
+   "n_censored": 0
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "prior",
+   "seed": "",
+   "boot_default": "alt",
+   "score": "0.500000",
+   "weight_sum": "2.500000",
+   "n_terms": 4,
+   "n_no_headroom": 1,
+   "n_censored": 0
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "oracle",
+   "table": "prior",
+   "seed": "",
+   "boot_default": "",
+   "score": "2.500000",
+   "weight_sum": "2.500000",
+   "n_terms": 4,
+   "n_no_headroom": 1,
+   "n_censored": 0
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "oracle",
+   "table": "prior",
+   "seed": "",
+   "boot_default": "alt",
+   "score": "2.500000",
+   "weight_sum": "2.500000",
+   "n_terms": 4,
+   "n_no_headroom": 1,
+   "n_censored": 0
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s1",
+   "boot_default": "",
+   "score": "1.639359",
+   "weight_sum": "2.500000",
+   "n_terms": 4,
+   "n_no_headroom": 1,
+   "n_censored": 0
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s1",
+   "boot_default": "alt",
+   "score": "1.533876",
+   "weight_sum": "2.500000",
+   "n_terms": 4,
+   "n_no_headroom": 1,
+   "n_censored": 0
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s2",
+   "boot_default": "",
+   "score": "0.433333",
+   "weight_sum": "2.500000",
+   "n_terms": 4,
+   "n_no_headroom": 1,
+   "n_censored": 1
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s2",
+   "boot_default": "alt",
+   "score": "0.210172",
+   "weight_sum": "2.500000",
+   "n_terms": 4,
+   "n_no_headroom": 1,
+   "n_censored": 1
+  }
+ ],
+ "provenance": [
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "",
+   "fallback_share": "1.000000000000",
+   "time_share_clamped": "0.000000000000",
+   "time_share_fallback": "1.000000000000",
+   "time_share_held": "0.000000000000",
+   "time_share_unmodified": "0.000000000000"
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "alt",
+   "fallback_share": "1.000000000000",
+   "time_share_clamped": "0.000000000000",
+   "time_share_fallback": "1.000000000000",
+   "time_share_held": "0.000000000000",
+   "time_share_unmodified": "0.000000000000"
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "oracle",
+   "table": "prior",
+   "seed": "",
+   "boot_default": "",
+   "fallback_share": "0.000000000000",
+   "time_share_clamped": "0.000000000000",
+   "time_share_fallback": "0.000000000000",
+   "time_share_held": "0.000000000000",
+   "time_share_unmodified": "1.000000000000"
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s1",
+   "boot_default": "",
+   "fallback_share": "0.000000000000",
+   "time_share_clamped": "0.000000000000",
+   "time_share_fallback": "0.000000000000",
+   "time_share_held": "0.000000000000",
+   "time_share_unmodified": "1.000000000000"
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s2",
+   "boot_default": "",
+   "fallback_share": "0.000000000000",
+   "time_share_clamped": "0.000000000000",
+   "time_share_fallback": "0.000000000000",
+   "time_share_held": "0.000000000000",
+   "time_share_unmodified": "1.000000000000"
+  }
+ ],
+ "guards": [
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "",
+   "guard": "provenance_share",
+   "result": "not_applicable",
+   "value": "",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "",
+   "guard": "config_age",
+   "result": "not_applicable",
+   "value": "",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "",
+   "guard": "starvation_floor",
+   "result": "pass",
+   "value": "20000.000000000000",
+   "threshold": "1000000.000000000000",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "",
+   "guard": "determinism",
+   "result": "pass",
+   "value": "",
+   "threshold": "",
+   "partner": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "",
+   "guard": "utilisation_sanity",
+   "result": "pass",
+   "value": "0.600000000000",
+   "threshold": "1.000000000000",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "",
+   "guard": "tick_count",
+   "result": "pass",
+   "value": "0.000000000000",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "",
+   "guard": "validation_matches_provenance",
+   "result": "not_applicable",
+   "value": "",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "",
+   "guard": "c2_pair",
+   "result": "not_applicable",
+   "value": "",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "alt",
+   "guard": "provenance_share",
+   "result": "not_applicable",
+   "value": "",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "alt",
+   "guard": "config_age",
+   "result": "not_applicable",
+   "value": "",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "alt",
+   "guard": "starvation_floor",
+   "result": "pass",
+   "value": "20000.000000000000",
+   "threshold": "1000000.000000000000",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "alt",
+   "guard": "determinism",
+   "result": "pass",
+   "value": "",
+   "threshold": "",
+   "partner": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "alt",
+   "guard": "utilisation_sanity",
+   "result": "pass",
+   "value": "0.600000000000",
+   "threshold": "1.000000000000",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "alt",
+   "guard": "tick_count",
+   "result": "pass",
+   "value": "0.000000000000",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "alt",
+   "guard": "validation_matches_provenance",
+   "result": "not_applicable",
+   "value": "",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "fixed",
+   "table": "",
+   "seed": "",
+   "boot_default": "alt",
+   "guard": "c2_pair",
+   "result": "not_applicable",
+   "value": "",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "oracle",
+   "table": "prior",
+   "seed": "",
+   "boot_default": "",
+   "guard": "provenance_share",
+   "result": "pass",
+   "value": "0.000000000000",
+   "threshold": "0.500000000000",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "oracle",
+   "table": "prior",
+   "seed": "",
+   "boot_default": "",
+   "guard": "config_age",
+   "result": "pass",
+   "value": "0.000000000000",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "oracle",
+   "table": "prior",
+   "seed": "",
+   "boot_default": "",
+   "guard": "starvation_floor",
+   "result": "pass",
+   "value": "20000.000000000000",
+   "threshold": "1000000.000000000000",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "oracle",
+   "table": "prior",
+   "seed": "",
+   "boot_default": "",
+   "guard": "determinism",
+   "result": "pass",
+   "value": "",
+   "threshold": "",
+   "partner": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "oracle",
+   "table": "prior",
+   "seed": "",
+   "boot_default": "",
+   "guard": "utilisation_sanity",
+   "result": "pass",
+   "value": "0.600000000000",
+   "threshold": "1.000000000000",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "oracle",
+   "table": "prior",
+   "seed": "",
+   "boot_default": "",
+   "guard": "tick_count",
+   "result": "pass",
+   "value": "0.000000000000",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "oracle",
+   "table": "prior",
+   "seed": "",
+   "boot_default": "",
+   "guard": "validation_matches_provenance",
+   "result": "pass",
+   "value": "0.000000000000",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "oracle",
+   "table": "prior",
+   "seed": "",
+   "boot_default": "",
+   "guard": "c2_pair",
+   "result": "not_applicable",
+   "value": "",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s1",
+   "boot_default": "",
+   "guard": "provenance_share",
+   "result": "pass",
+   "value": "0.000000000000",
+   "threshold": "0.500000000000",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s1",
+   "boot_default": "",
+   "guard": "config_age",
+   "result": "pass",
+   "value": "0.000000000000",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s1",
+   "boot_default": "",
+   "guard": "starvation_floor",
+   "result": "pass",
+   "value": "20000.000000000000",
+   "threshold": "1000000.000000000000",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s1",
+   "boot_default": "",
+   "guard": "determinism",
+   "result": "pass",
+   "value": "",
+   "threshold": "",
+   "partner": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s1",
+   "boot_default": "",
+   "guard": "utilisation_sanity",
+   "result": "pass",
+   "value": "0.600000000000",
+   "threshold": "1.000000000000",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s1",
+   "boot_default": "",
+   "guard": "tick_count",
+   "result": "pass",
+   "value": "0.000000000000",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s1",
+   "boot_default": "",
+   "guard": "validation_matches_provenance",
+   "result": "pass",
+   "value": "0.000000000000",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s1",
+   "boot_default": "",
+   "guard": "c2_pair",
+   "result": "not_applicable",
+   "value": "",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s2",
+   "boot_default": "",
+   "guard": "provenance_share",
+   "result": "pass",
+   "value": "0.000000000000",
+   "threshold": "0.500000000000",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s2",
+   "boot_default": "",
+   "guard": "config_age",
+   "result": "pass",
+   "value": "0.000000000000",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s2",
+   "boot_default": "",
+   "guard": "starvation_floor",
+   "result": "fail",
+   "value": "1500000.000000000000",
+   "threshold": "1000000.000000000000",
+   "partner": "",
+   "reason": "train: max ready_wait 1500000 exceeds 1000000",
+   "exempt": true,
+   "exemption_reason": "The fixture's random s2 run starves `train` by construction; the exemption keeps the pass variant judgeable (worked.md).",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s2",
+   "boot_default": "",
+   "guard": "determinism",
+   "result": "pass",
+   "value": "",
+   "threshold": "",
+   "partner": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s2",
+   "boot_default": "",
+   "guard": "utilisation_sanity",
+   "result": "pass",
+   "value": "0.600000000000",
+   "threshold": "1.000000000000",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s2",
+   "boot_default": "",
+   "guard": "tick_count",
+   "result": "pass",
+   "value": "0.000000000000",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s2",
+   "boot_default": "",
+   "guard": "validation_matches_provenance",
+   "result": "pass",
+   "value": "0.000000000000",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  },
+  {
+   "workload_id": "mock-score",
+   "condition": "random",
+   "table": "prior",
+   "seed": "s2",
+   "boot_default": "",
+   "guard": "c2_pair",
+   "result": "not_applicable",
+   "value": "",
+   "threshold": "",
+   "partner": "",
+   "reason": "",
+   "exempt": false,
+   "exemption_reason": "",
+   "invalidating": false
+  }
+ ],
+ "lines": [
+  {
+   "type": "sensitivity",
+   "boot_defaults": [
+    "alt"
+   ],
+   "rows": [
+    {
+     "boot_default": "",
+     "met": 0,
+     "judging": 1,
+     "verdict": "fail",
+     "available": true
+    },
+    {
+     "boot_default": "alt",
+     "met": 1,
+     "judging": 1,
+     "verdict": "pass",
+     "available": true
+    }
+   ]
+  },
+  {
+   "type": "floor_band",
+   "latency_floors_us": [
+    500,
+    1000,
+    40000
+   ],
+   "rows": [
+    {
+     "latency_floor_us": 500,
+     "met": 0,
+     "judging": 1,
+     "verdict": "fail"
+    },
+    {
+     "latency_floor_us": 1000,
+     "met": 0,
+     "judging": 1,
+     "verdict": "fail"
+    },
+    {
+     "latency_floor_us": 40000,
+     "met": 0,
+     "judging": 1,
+     "verdict": "fail"
+    }
+   ],
+   "gaps": [
+    {
+     "latency_floor_us": 500,
+     "workload_id": "mock-score",
+     "reference_score": "2.500000",
+     "compared_mean": "1.036346",
+     "gap": "0.585462",
+     "meets_g": false,
+     "all_no_headroom": false
+    },
+    {
+     "latency_floor_us": 1000,
+     "workload_id": "mock-score",
+     "reference_score": "2.500000",
+     "compared_mean": "1.036346",
+     "gap": "0.585462",
+     "meets_g": false,
+     "all_no_headroom": false
+    },
+    {
+     "latency_floor_us": 40000,
+     "workload_id": "mock-score",
+     "reference_score": "2.500000",
+     "compared_mean": "2.175000",
+     "gap": "0.130000",
+     "meets_g": false,
+     "all_no_headroom": false
+    }
+   ]
+  },
+  {
+   "type": "exclusion_accuracy",
+   "rows": [
+    {
+     "condition": "oracle",
+     "table": "prior",
+     "axis": "attribute",
+     "statistic": "balanced_accuracy",
+     "excluded": "1.000000",
+     "included": "1.000000",
+     "n_excluded": 2,
+     "n_included": 4
+    },
+    {
+     "condition": "oracle",
+     "table": "prior",
+     "axis": "mode",
+     "statistic": "raw_accuracy",
+     "excluded": "1.000000",
+     "included": "1.000000",
+     "n_excluded": 2,
+     "n_included": 4
+    },
+    {
+     "condition": "random",
+     "table": "prior",
+     "axis": "attribute",
+     "statistic": "balanced_accuracy",
+     "excluded": "0.750000",
+     "included": "0.625000",
+     "n_excluded": 2,
+     "n_included": 4
+    },
+    {
+     "condition": "random",
+     "table": "prior",
+     "axis": "mode",
+     "statistic": "raw_accuracy",
+     "excluded": "0.500000",
+     "included": "0.375000",
+     "n_excluded": 2,
+     "n_included": 4
+    }
+   ]
+  },
+  {
+   "type": "layer1_headline",
+   "rows": [
+    {
+     "condition": "oracle",
+     "table": "prior",
+     "balanced_accuracy": "1.000000",
+     "ci_low": "",
+     "ci_high": "",
+     "n": 2,
+     "n_files": 1,
+     "n_seeds": 1,
+     "confusion": [
+      {
+       "seed": "",
+       "truth": "true",
+       "predicted": "false",
+       "count": 0
+      },
+      {
+       "seed": "",
+       "truth": "true",
+       "predicted": "true",
+       "count": 2
+      }
+     ]
+    },
+    {
+     "condition": "random",
+     "table": "prior",
+     "balanced_accuracy": "0.750000",
+     "ci_low": "",
+     "ci_high": "",
+     "n": 2,
+     "n_files": 1,
+     "n_seeds": 2,
+     "confusion": [
+      {
+       "seed": "s1",
+       "truth": "true",
+       "predicted": "false",
+       "count": 1
+      },
+      {
+       "seed": "s1",
+       "truth": "true",
+       "predicted": "true",
+       "count": 1
+      },
+      {
+       "seed": "s2",
+       "truth": "true",
+       "predicted": "false",
+       "count": 0
+      },
+      {
+       "seed": "s2",
+       "truth": "true",
+       "predicted": "true",
+       "count": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "type": "random_beats_oracle",
+   "rows": [
+    {
+     "workload_id": "mock-score",
+     "flagged": false,
+     "gap": "0.585462"
+    }
+   ]
+  },
+  {
+   "type": "note",
+   "workload_id": "mock-score",
+   "text": "A pre-registered note bound to the judging file, shown beside its row."
+  }
+ ]
+}

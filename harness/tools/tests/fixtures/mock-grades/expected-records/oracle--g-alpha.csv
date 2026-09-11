@@ -1,0 +1,9 @@
+workload_id,condition,table,seed,boot_default,sim,source_sha256,entity,metric,t,value,cause,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss
+g-alpha,oracle,calibrated,,,,0565e5ff9e120c860891e84a8d9a5306f1c3bc57e4472dee2dc544ef24d195a2,recognizer,attr_correct,0,1,,,,,,true,true,unmodified,,,0
+g-alpha,oracle,calibrated,,,,0565e5ff9e120c860891e84a8d9a5306f1c3bc57e4472dee2dc544ef24d195a2,recognizer,attr_correct,60000000,1,,,,,,true,true,unmodified,,,0
+g-alpha,oracle,calibrated,,,,0565e5ff9e120c860891e84a8d9a5306f1c3bc57e4472dee2dc544ef24d195a2,recognizer,config_correct,0,1,,,,,,,,unmodified,,,0
+g-alpha,oracle,calibrated,,,,0565e5ff9e120c860891e84a8d9a5306f1c3bc57e4472dee2dc544ef24d195a2,recognizer,config_correct,60000000,1,,,,,,,,unmodified,,,0
+g-alpha,oracle,calibrated,,,,0565e5ff9e120c860891e84a8d9a5306f1c3bc57e4472dee2dc544ef24d195a2,recognizer,latency_us,0,0,,,,,,,,unmodified,,,0
+g-alpha,oracle,calibrated,,,,0565e5ff9e120c860891e84a8d9a5306f1c3bc57e4472dee2dc544ef24d195a2,recognizer,latency_us,60000000,0,,,,,,,,unmodified,,,0
+g-alpha,oracle,calibrated,,,,0565e5ff9e120c860891e84a8d9a5306f1c3bc57e4472dee2dc544ef24d195a2,recognizer,mode_correct,0,1,,,,,,dev,dev,unmodified,,,0
+g-alpha,oracle,calibrated,,,,0565e5ff9e120c860891e84a8d9a5306f1c3bc57e4472dee2dc544ef24d195a2,recognizer,mode_correct,60000000,1,,,,,,ml-train,ml-train,unmodified,,,0

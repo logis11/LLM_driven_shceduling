@@ -2,18 +2,56 @@
  "workload_id": "mock-switch",
  "condition": "llm_algo",
  "schedule": [
-  {"t_us": 0,
-   "config": {"algorithm": "MLFQ",
-              "params": {"num_queues": 3, "timeslice_us": 2000, "timeslice_growth": 2, "boost_interval_us": 100000},
-              "batch_bandwidth_cap": null},
-   "provenance": "fallback"},
-  {"t_us": 10600,
-   "config": {"algorithm": "FIFO", "params": {}, "batch_bandwidth_cap": 0.15},
-   "provenance": "unmodified"},
-  {"t_us": 40600,
-   "config": {"algorithm": "MLFQ",
-              "params": {"num_queues": 3, "timeslice_us": 2000, "timeslice_growth": 2, "boost_interval_us": 20000},
-              "batch_bandwidth_cap": 0.15},
-   "provenance": "unmodified"}
+  {
+   "t_us": 0,
+   "config": {
+    "algorithm": "MLFQ",
+    "params": {
+     "num_queues": 3,
+     "timeslice_us": 10000,
+     "timeslice_growth": 2,
+     "boost_interval_us": 100000
+    },
+    "batch_bandwidth_cap": null
+   },
+   "provenance": "fallback"
+  },
+  {
+   "t_us": 600,
+   "config": {
+    "algorithm": "MLFQ",
+    "params": {
+     "num_queues": 3,
+     "timeslice_us": 2000,
+     "timeslice_growth": 2,
+     "boost_interval_us": 100000
+    },
+    "batch_bandwidth_cap": null
+   },
+   "provenance": "unmodified"
+  },
+  {
+   "t_us": 10600,
+   "config": {
+    "algorithm": "FIFO",
+    "params": {},
+    "batch_bandwidth_cap": 0.15
+   },
+   "provenance": "unmodified"
+  },
+  {
+   "t_us": 40600,
+   "config": {
+    "algorithm": "MLFQ",
+    "params": {
+     "num_queues": 3,
+     "timeslice_us": 2000,
+     "timeslice_growth": 2,
+     "boost_interval_us": 20000
+    },
+    "batch_bandwidth_cap": 0.15
+   },
+   "provenance": "unmodified"
+  }
  ]
 }

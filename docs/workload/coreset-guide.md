@@ -938,7 +938,7 @@ mode마다 하나, `c7-<mode>`는 `c1-<mode>`에서 파생돼요. base가 그 mo
 
 **demand.** 전부 `demand: calibration`을 recipe에 명시해서 window 검사에서 면제예요 — counterpart의 demand는 "base + 주입한 job"이라 pair가 통제이지 window가 아니에요. interactive counterpart는 1.45–1.53, `c7-gaming`은 2.46(base가 이미 lane_share 0.9), `c7-idle`은 정확히 1.00, batch counterpart는 base와 같아요.
 
-**측정에서 알아둘 것.** `c7-meeting`과 `c7-media`는 두 row(true/false)가 모두 EDF라, TIMER task는 deadline class로 scan보다 먼저 돌고 한 slice(2 ms)의 지연은 tick 허용치(video 10 ms, audio 47.5 ms)보다 작아요. 그래서 cap 값이 채점 term에 닿지 않아요 — 두 row의 점수가 같아요. 이 두 파일이 주는 건 recognition(attribute accuracy)과 `oracle` 대 `fixed`의 headroom(EDF 대 MLFQ)이고, cap 축은 측정 불가로 RQ0 gate spec에 reporting line으로 적어요(pair review finding 5).
+**측정에서 알아둘 것.** `c7-meeting`과 `c7-media`는 두 row(true/false)가 모두 EDF라, TIMER task는 deadline class로 scan보다 먼저 돌아요. 2026-09-11에 boot default가 OSTEP 예시(10 ms slice)로 바뀌면서 residual slice도 10 ms가 됐고, 이건 video의 tick 허용치(10 ms)와 정확히 같아요. 계산상으로는 어느 row에서도, 그리고 `fixed`에서도(10 ms slice는 video의 6.67 ms burst를 강등시키지 않아요) tick을 놓치지 않아 headroom이 없지만, 경계에서 1 µs로 갈리는 knife edge라 simulator의 규칙 두 개(deadline task가 residual slice 도중에 lane을 뺏는지, 같은 순간 event의 처리 순서)가 답을 정해요(memo 2026-09-11 §5). 이 두 파일이 RQ0 판정 set에 남는지는 그 답을 받은 뒤 RQ0 gate spec에서 정해요(pair review finding 5 addendum).
 
 ---
 

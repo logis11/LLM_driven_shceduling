@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "aggregates.schema.json",
+  "title": "Aggregates row",
+  "description": "One row of the harness's aggregates file (docs/harness/metrics.md §8, the trace-derived aggregates; sub-task 8.2): one aggregate of one run, per entity, metric, cause filter, and window. Empty CSV cells are absent here. Values are decimal strings with twelve places.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "workload_id",
+    "condition",
+    "entity",
+    "metric",
+    "aggregate",
+    "value"
+  ],
+  "properties": {
+    "workload_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "fixed",
+        "random",
+        "whitelist",
+        "llm_vocab",
+        "llm_algo",
+        "llm_full",
+        "oracle"
+      ]
+    },
+    "table": {
+      "type": "string",
+      "enum": [
+        "prior",
+        "calibrated"
+      ]
+    },
+    "seed": {
+      "type": "string",
+      "minLength": 1
+    },
+    "boot_default": {
+      "type": "string",
+      "minLength": 1
+    },
+    "entity": {
+      "type": "string",
+      "minLength": 1
+    },
+    "metric": {
+      "type": "string",
+      "enum": [
+        "ready_wait",
+        "job",
+        "cpu_delivered",
+        "completed",
+        "turnaround",
+        "preempt_count",
+        "config_interval",
+        "switch_window",
+        "busy"
+      ]
+    },
+    "aggregate": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cause": {
+      "type": "string",
+      "enum": [
+        "arrive",
+        "wake",
+        "sleep_end",
+        "timer_tick",
+        "fork_slot"
+      ]
+    },
+    "window_start_us": {
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    },
+    "window_end_us": {
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    },
+    "index": {
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    },
+    "value": {
+      "type": "string",
+      "pattern": "^-?[0-9]+\\.[0-9]{12}$"
+    }
+  }
+}

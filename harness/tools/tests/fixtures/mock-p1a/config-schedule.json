@@ -1,0 +1,48 @@
+{
+ "workload_id": "mock-p1a",
+ "condition": "llm_vocab",
+ "schedule": [
+  {
+   "t_us": 0,
+   "config": {
+    "algorithm": "MLFQ",
+    "params": {
+     "num_queues": 3,
+     "timeslice_us": 10000,
+     "timeslice_growth": 2,
+     "boost_interval_us": 100000
+    },
+    "batch_bandwidth_cap": null
+   },
+   "provenance": "fallback"
+  },
+  {
+   "t_us": 600,
+   "config": {
+    "algorithm": "MLFQ",
+    "params": {
+     "num_queues": 3,
+     "timeslice_us": 2000,
+     "timeslice_growth": 2,
+     "boost_interval_us": 100000
+    },
+    "batch_bandwidth_cap": 0.5
+   },
+   "provenance": "unmodified"
+  },
+  {
+   "t_us": 50600,
+   "config": {
+    "algorithm": "MLFQ",
+    "params": {
+     "num_queues": 3,
+     "timeslice_us": 2000,
+     "timeslice_growth": 2,
+     "boost_interval_us": 100000
+    },
+    "batch_bandwidth_cap": 0.333
+   },
+   "provenance": "unmodified"
+  }
+ ]
+}

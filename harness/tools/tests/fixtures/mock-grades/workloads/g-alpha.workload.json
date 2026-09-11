@@ -1,0 +1,39 @@
+{
+ "meta": {
+  "id": "g-alpha",
+  "derived_from": "hand-written (mock-grades/worked.md)"
+ },
+ "ground_truth": [
+  {
+   "t_start": 0,
+   "t_end": 60000000,
+   "mode": "dev",
+   "attributes": {
+    "background_wanted": true
+   }
+  },
+  {
+   "t_start": 60000000,
+   "t_end": 180000000,
+   "mode": "ml-train",
+   "attributes": {
+    "background_wanted": true
+   }
+  }
+ ],
+ "events": [
+  {
+   "op": "arrive",
+   "t": 0,
+   "id": "t1",
+   "name": "placeholder",
+   "depart": 180000000,
+   "program": [
+    {
+     "op": "RUN",
+     "us": 1000
+    }
+   ]
+  }
+ ]
+}

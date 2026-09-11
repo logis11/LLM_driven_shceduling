@@ -1,0 +1,190 @@
+# Guard spec — the checks that must pass before any run's numbers are read
+# (Phase 8 spec, decisions 6–7; sub-task 8.3 spec). Research-wide: every
+# experiment runs the same eight guards; which runs are exempt is per-experiment
+# data in that experiment's spec (the RQ0 gate spec for RQ0), never here.
+#
+# Each guard is a named function in tools/harness/guards.py; this file supplies
+# its parameters. `threshold` is null where the guard is structural (a
+# comparison the code makes without a number). `direction` says how the
+# measured value meets the threshold. `applies_to` lists the conditions the
+# guard judges; every other condition gets `not_applicable`. `reads` names the
+# input the guard measures from. `grounding` is the argument behind the
+# threshold, required for every entry: an arithmetic identity, a structural
+# rule, or a stated assumption written as such (docs/harness/metrics.md §10
+# uses the same status for its floors). The lint (tools/harness/guards.py,
+# `lint_spec`) checks the ids against the code's registry, every grounding
+# non-empty, and `pairs` against dataset/timelines/coreset/c2-pairs.variant.yaml.
+#
+# Output: one row per (run, guard) in the `guards` file (schema/guards.schema.json)
+# — result pass / fail / not_applicable, the measured value, the threshold in
+# force, the partner run for the two pair guards, and a reason on fail.
+#
+# Groundings, in one place:
+#
+# provenance_share — 0.5, stated assumption. The guard exists for the case the
+#   research proposal §6.3 names: "a condition that scores well while 70% of its
+#   configurations were fallbacks did not demonstrate anything about recognition".
+#   "Mostly" is read as a majority of the run's time, so the time-weighted share
+#   of `fallback` + `held` intervals (metrics doc §8, fallback share) must stay
+#   below one half. Under `fixed` the whole run is the boot default by
+#   definition, so the guard does not apply. `c6-dual`, whose ground truth is
+#   `ambiguous` and where 100% fallback is the correct outcome, is an exemption
+#   in the RQ0 gate spec.
+#
+# config_age — structural, no number. The failure it catches is attribution
+#   breaking: a config computed from one situation's telemetry taking effect
+#   after that situation has ended governs a segment it was never computed for,
+#   so the recognition log's grade (against the segment covering `t_set_change`)
+#   and the trace's outcome (in the next segment) decouple. For every non-boot
+#   schedule entry, the entry's stamped time must lie before the end of the
+#   ground-truth segment containing its query's `t_set_change`; an entry whose
+#   query has no covering segment (the terminal snapshot, data-contracts §8) is
+#   skipped. The row's value is the largest observation age (stamped time minus
+#   `t_set_change`) over the checked entries. The `config_age_*` aggregates of
+#   metrics doc §8 measure time in force, a different quantity, and are reported
+#   beside the score, not guarded.
+#
+# starvation_floor — 1 000 000 µs, stated assumption. The executor's starvation
+#   net promises every ready task progress within a bounded window regardless of
+#   configuration (docs/memos/2026-09-09-batch-class-rule-for-the-simulator.md);
+#   the window's length is not yet stated by the simulator's owner. One second of
+#   virtual time is an order of magnitude above `T_interaction` (metrics doc §10),
+#   so no interactive term's own latency can trip it, and any wait that long in a
+#   segment of tens of seconds is a broken net, not a configuration. Superseded by
+#   the executor's declared window when 인경민 states it (changelog entry). Read as
+#   each task's maximum `ready_wait` over any cause on the whole file (metrics doc
+#   §6.1, starvation). Applies under every condition, `fixed` included.
+#
+# determinism — structural. Same run file + same config schedule ⇒ byte-identical
+#   trace (docs/simulator/simulator-guide.md, non-negotiable 4; data-contracts §9).
+#   The guard compares the run's trace hash (records `source_sha256`) with the
+#   hash of a second execution's trace; when and how the rerun happens is the
+#   runner's (8.6). A run without a rerun trace fails: it has not been shown
+#   deterministic.
+#
+# utilisation_sanity — 1.0, and strictly above 0 where the scoring spec carries
+#   terms for the file; arithmetic. Delivered CPU cannot exceed the lane's
+#   elapsed time (`busy ≤ T_end`, metrics doc §8), and a workload with scored
+#   terms that delivered no CPU at all is an empty trace that parsed.
+#
+# tick_count — structural. The primitives' own consistency checks (metrics doc
+#   §6.2 guard: a chain tail's iteration count equals its head's tick count; the
+#   `deadline` cross-check; the stimulus count against the run file's wake
+#   events; config_applied lines against the schedule): their messages, returned
+#   by the records build, are this guard's input. Any message is a fail. A run
+#   whose messages were not recorded fails: the check was not run.
+#
+# validation_matches_provenance — structural. One query produces one schedule
+#   entry, so the log's `validation` sequence equals the schedule's `provenance`
+#   sequence minus the boot entry (data-contracts §8). Compared positionally;
+#   a length mismatch or a differing value fails, naming the first index.
+#
+# c2_pair — structural. The two files of a C2 pair differ in one segment's
+#   label; under a recognition-driven condition their configurations must differ,
+#   so their traces must differ — identical traces mean the configuration never
+#   changed between wanted and unwanted and a zero gap is a table defect, not a
+#   recognition result (_dev/docs/rq0-preparation-notes.md, stage 4.2;
+#   data-contracts §10 lints the table for the same case). Under `fixed` the two
+#   files run the same boot default, so where their events are identical apart
+#   from the label (P1: a rename plus the label, c2-pairs.variant.yaml) their
+#   traces must be identical; P2 and P3 change the background task itself, so
+#   no identity is expected there (`fixed_identical: false`). Under `random` the
+#   draws ignore telemetry and a shared seed legitimately yields identical
+#   traces, so the guard does not apply. Partner: the other file of the pair
+#   under the same condition, seed, and boot default.
+
+version: "0.1"
+
+guards:
+  - id: provenance_share
+    reads: aggregates
+    threshold: 0.5
+    unit: fraction
+    direction: below
+    applies_to: [oracle, random, whitelist, llm_vocab, llm_algo, llm_full]
+    grounding: >
+      Stated assumption: "mostly running fallback" (research-proposal §6.3) read as a
+      majority of the run's time; time-weighted fallback + held share below one half.
+
+  - id: config_age
+    reads: schedule+log+workload
+    threshold: null
+    unit: us
+    direction: structural
+    applies_to: [oracle, random, whitelist, llm_vocab, llm_algo, llm_full]
+    grounding: >
+      Structural: every non-boot entry takes effect before the ground-truth segment
+      containing its query's t_set_change ends, or the recognition grade and the
+      scheduling outcome belong to different segments. Value: the largest observation age.
+
+  - id: starvation_floor
+    reads: aggregates
+    threshold: 1000000
+    unit: us
+    direction: at_or_below
+    applies_to: all
+    grounding: >
+      Stated assumption pending the executor's declared window: one second of virtual
+      time, an order of magnitude above T_interaction; per task, max ready_wait over
+      any cause on the whole file (metrics doc §6.1).
+
+  - id: determinism
+    reads: records+rerun_trace
+    threshold: null
+    unit: sha256
+    direction: structural
+    applies_to: all
+    grounding: >
+      Structural: same inputs ⇒ byte-identical trace (simulator-guide non-negotiable 4,
+      data-contracts §9); the run's trace hash equals its rerun's.
+
+  - id: utilisation_sanity
+    reads: aggregates
+    threshold: 1.0
+    unit: fraction
+    direction: at_or_below
+    min_exclusive: 0.0
+    applies_to: all
+    grounding: >
+      Arithmetic: busy ≤ T_end (metrics doc §8); strictly above 0 where the scoring
+      spec carries terms for the file, so an empty trace that parsed is caught.
+
+  - id: tick_count
+    reads: records-build
+    threshold: null
+    unit: messages
+    direction: structural
+    applies_to: all
+    grounding: >
+      Structural: the primitives' consistency messages (metrics doc §6.2 guard, the
+      stimulus count, the deadline cross-check, config_applied against the schedule)
+      returned by the records build; any message fails the run.
+
+  - id: validation_matches_provenance
+    reads: schedule+log
+    threshold: null
+    unit: index
+    direction: structural
+    applies_to: [oracle, random, whitelist, llm_vocab, llm_algo, llm_full]
+    grounding: >
+      Structural: the log's validation sequence equals the schedule's provenance
+      sequence minus the boot entry (data-contracts §8), compared positionally.
+
+  - id: c2_pair
+    reads: records
+    threshold: null
+    unit: sha256
+    direction: structural
+    applies_to: [fixed, oracle, whitelist, llm_vocab, llm_algo, llm_full]
+    grounding: >
+      Structural: under a recognition-driven condition the two files of a C2 pair
+      must produce different traces (rq0-preparation-notes stage 4.2); under fixed,
+      identical ones where the pair's events are identical apart from the label.
+
+# The C2 pairs (dataset/timelines/coreset/c2-pairs.variant.yaml): `a` is the base,
+# `b` its variant. `fixed_identical` says whether the pair's events are identical
+# apart from the label, so that `fixed` must reproduce one trace for both.
+pairs:
+  - {a: c2-p1a, b: c2-p1b, fixed_identical: true}
+  - {a: c2-p2a, b: c2-p2b, fixed_identical: false}
+  - {a: c2-p3a, b: c2-p3b, fixed_identical: false}

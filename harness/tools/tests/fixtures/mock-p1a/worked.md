@@ -1,6 +1,6 @@
 # mock-p1a — worked derivation
 
-Reduced `c2-p1a`: an editor, and a training run arriving at 50 s with more work than the window holds. Condition `llm_vocab` on the prior table, recognition latency 600 µs. Scheduler: the boot MLFQ (3 queues, 2000 µs slice, growth 2, boost 100000) under the rules of the simulator guide and the 2026-09-08 switch memo — a task that consumes a full slice is demoted, blocking keeps its level, a fresh slice at every dispatch, a wake into a strictly higher queue preempts at once and a wake into the same or a lower queue waits for the slice boundary; entry 1 changes params only, so it applies at its stamped time with queue levels kept (memo §7). The row's cap is not modelled. All times µs.
+Reduced `c2-p1a`: an editor, and a training run arriving at 50 s with more work than the window holds. Condition `llm_vocab` on the prior table, recognition latency 600 µs. Scheduler: an MLFQ with 3 queues, a 2000 µs slice, growth 2, boost 100000, stamped by entry 1 at 600 µs (the recognizer's answer to the t = 0 snapshot, `unmodified`) beside the boot entry, whose own 10 ms slice governs nothing since no task runs before 600 (the boot default is OSTEP's example since 2026-09-11); under the rules of the simulator guide and the 2026-09-08 switch memo — a task that consumes a full slice is demoted, blocking keeps its level, a fresh slice at every dispatch, a wake into a strictly higher queue preempts at once and a wake into the same or a lower queue waits for the slice boundary; entries 1 and 2 change params only, so each applies at its stamped time with queue levels kept (memo §7). The row's cap is not modelled. All times µs.
 
 ## Run file
 
@@ -15,11 +15,12 @@ Keystrokes on `input:editor`: 8000, 30000, 54500, 71000. `T_end` = 120000. The h
 
 | t | event |
 |---|---|
-| 0 | boot config (index 0, `fallback`). `editor` arrives in Q0, reaches WAIT, blocks (zero-length occupancy). |
+| 0 | boot config (index 0, `fallback`, 10 ms slice). `editor` arrives in Q0, reaches WAIT, blocks (zero-length occupancy). Set change → the recognizer is consulted. |
+| 600 | entry 1 (`unmodified`, MLFQ, 2000 µs slice) applies: same algorithm, levels kept; the lane is idle. |
 | 8000 | keystroke 1; lane free; RUN 4000: the Q0 slice (2000) is consumed at 10000 → demoted to Q1; blocks at 12000, stays Q1. |
 | 30000 | keystroke 2; RUN 6000: the Q1 slice (4000) is consumed at 34000 → demoted to Q2; blocks at 36000, stays Q2. |
 | 50000 | `hog` arrives in Q0, lane free, runs. Set change → the recognizer is consulted. |
-| 50600 | entry 1 (`unmodified`, MLFQ with the row's cap) applies at its stamped time: same algorithm, levels kept, `hog` finishes its granted slice. |
+| 50600 | entry 2 (`unmodified`, MLFQ with the row's cap) applies at its stamped time: same algorithm, levels kept, `hog` finishes its granted slice. |
 | 52000 | `hog`'s Q0 slice consumed → Q1, slice 4000. |
 | 54500 | keystroke 3; `editor` is Q2, `hog` is Q1 → no preemption. `editor` waits. |
 | 56000 | `hog`'s Q1 slice consumed → Q2, to the back; `editor` (Q2, ready 54500) runs: preempt. RUN 2000 → blocks at 58000. |
@@ -56,11 +57,12 @@ No `turnaround` rows. Progress for the hog, computed later by scoring: 65000 / 9
 
 | index | applied | until | value |
 |---|---|---|---|
-| 0 (`fallback`, MLFQ) | 0 | 50600 | 50600 |
-| 1 (`unmodified`, MLFQ) | 50600 | 120000 | 69400 |
+| 0 (`fallback`, MLFQ) | 0 | 600 | 600 |
+| 1 (`unmodified`, MLFQ) | 600 | 50600 | 50000 |
+| 2 (`unmodified`, MLFQ) | 50600 | 120000 | 69400 |
 
 **`busy`** — 15000 + 65000 = 80000.
 
-No `switch_window` row: entry 1 changes params, not the algorithm.
+No `switch_window` row: entries 1 and 2 change params, not the algorithm.
 
-Total 17 rows.
+Total 18 rows.

@@ -41,16 +41,16 @@ class Field:
 ALGORITHMS = {
     "MLFQ": {
         "num_queues":        Field("integer", 2, 8, 3),
-        "timeslice_us":      Field("integer", 500, 100000, 2000),
+        "timeslice_us":      Field("integer", 500, 100000, 10000),
         "timeslice_growth":  Field("number", 1, 8, 2),
         "boost_interval_us": Field("integer", 10000, 10000000, 100000),
     },
     "EDF": {
-        "residual_timeslice_us": Field("integer", 500, 100000, 2000),
+        "residual_timeslice_us": Field("integer", 500, 100000, 10000),
     },
     "LOTTERY": {
         "batch_share":  Field("number", 0.01, 0.90, 0.15),
-        "timeslice_us": Field("integer", 500, 100000, 2000),
+        "timeslice_us": Field("integer", 500, 100000, 10000),
     },
     "FIFO": {},
 }

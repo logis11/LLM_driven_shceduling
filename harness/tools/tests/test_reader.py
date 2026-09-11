@@ -18,9 +18,9 @@ from harness.reader import (RESERVED_ENTITIES, RunFileError, ScheduleError,
 EXPECTED_HEADER = {
     "mock-office": ("mock-office", "fixed", 1),
     "mock-media": ("mock-media", "oracle", 2),
-    "mock-p1a": ("mock-p1a", "llm_vocab", 2),
+    "mock-p1a": ("mock-p1a", "llm_vocab", 3),
     "mock-chain": ("mock-chain", "oracle", 2),
-    "mock-switch": ("mock-switch", "llm_algo", 3),
+    "mock-switch": ("mock-switch", "llm_algo", 4),
 }
 
 
@@ -216,15 +216,15 @@ def test_config_schedule_entries_are_read_by_index(fixture_dir):
     sched = read_config_schedule(fixture_dir("mock-switch") / "config-schedule.json")
     assert sched.workload_id == "mock-switch"
     assert sched.condition == "llm_algo"
-    assert [e.index for e in sched.entries] == [0, 1, 2]
-    assert [e.algorithm for e in sched.entries] == ["MLFQ", "FIFO", "MLFQ"]
-    assert [e.t_us for e in sched.entries] == [0, 10600, 40600]
-    assert sched.entries[2].params == {"num_queues": 3, "timeslice_us": 2000,
+    assert [e.index for e in sched.entries] == [0, 1, 2, 3]
+    assert [e.algorithm for e in sched.entries] == ["MLFQ", "MLFQ", "FIFO", "MLFQ"]
+    assert [e.t_us for e in sched.entries] == [0, 600, 10600, 40600]
+    assert sched.entries[3].params == {"num_queues": 3, "timeslice_us": 2000,
                                        "timeslice_growth": 2, "boost_interval_us": 20000}
-    assert sched.entries[1].params == {}
-    assert sched.entries[1].batch_bandwidth_cap == 0.15
+    assert sched.entries[2].params == {}
+    assert sched.entries[2].batch_bandwidth_cap == 0.15
     assert sched.entries[0].provenance == "fallback"
-    assert sched.entry(2).algorithm == "MLFQ"
+    assert sched.entry(3).algorithm == "MLFQ"
     assert sched.entry(7) is None
 
 
@@ -242,3 +242,41 @@ def test_config_schedule_refuses_a_malformed_file(tmp_path):
                                              "config": {"algorithm": "RR", "params": {}}}]}))
     with pytest.raises(ScheduleError, match="algorithm"):
         read_config_schedule(bad)
+
+
+# ------------------------------------------------------- recognition log (8.3)
+
+from harness.reader import LogError, read_recognition_log  # noqa: E402
+
+
+def test_recognition_log_reads_the_query_sequence(fixture_dir):
+    log = read_recognition_log(fixture_dir("mock-guards") / "recognition-log.json")
+    assert log.workload_id == "mock-guards" and log.condition == "llm_vocab"
+    assert [q.t_set_change for q in log.queries] == [0, 50000, 100000, 3000000]
+    assert [q.validation for q in log.queries] == ["unmodified", "held", "clamped", "unmodified"]
+    assert [q.latency_us for q in log.queries] == [600, 40000, 600, 600]
+
+
+def test_recognition_log_without_queries_is_refused(tmp_path):
+    p = tmp_path / "log.json"
+    p.write_text(json.dumps({"workload_id": "w", "condition": "oracle"}))
+    with pytest.raises(LogError, match="queries"):
+        read_recognition_log(p)
+
+
+def test_recognition_log_bad_validation_is_refused(tmp_path):
+    p = tmp_path / "log.json"
+    p.write_text(json.dumps({"workload_id": "w", "condition": "oracle", "queries": [
+        {"t_set_change": 0, "telemetry": {"t_us": 0, "processes": []},
+         "proposal": None, "validation": "rejected", "latency_us": 0}]}))
+    with pytest.raises(LogError, match="query 0.*validation"):
+        read_recognition_log(p)
+
+
+def test_recognition_log_missing_t_set_change_is_refused(tmp_path):
+    p = tmp_path / "log.json"
+    p.write_text(json.dumps({"workload_id": "w", "condition": "oracle", "queries": [
+        {"telemetry": {"t_us": 0, "processes": []}, "proposal": None,
+         "validation": "held", "latency_us": 0}]}))
+    with pytest.raises(LogError, match="query 0.*t_set_change"):
+        read_recognition_log(p)

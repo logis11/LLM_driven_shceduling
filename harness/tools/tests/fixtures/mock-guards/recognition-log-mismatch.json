@@ -1,0 +1,28 @@
+{
+ "workload_id": "mock-guards",
+ "condition": "llm_vocab",
+ "seed": null,
+ "queries": [
+  {"t_set_change": 0,
+   "telemetry": {"t_us": 0, "processes": [{"name": "code", "count": 1}]},
+   "proposal": {"system": {"mode": "dev", "background_wanted": true}},
+   "validation": "unmodified",
+   "latency_us": 600},
+  {"t_set_change": 50000,
+   "telemetry": {"t_us": 50000, "processes": [{"name": "code", "count": 1}, {"name": "python3", "count": 1}]},
+   "proposal": null,
+   "validation": "unmodified",
+   "latency_us": 40000,
+   "raw": "<unparseable>"},
+  {"t_set_change": 100000,
+   "telemetry": {"t_us": 100000, "processes": [{"name": "code", "count": 1}, {"name": "make", "count": 1}, {"name": "python3", "count": 1}]},
+   "proposal": {"system": {"mode": "build", "background_wanted": true}},
+   "validation": "clamped",
+   "latency_us": 600},
+  {"t_set_change": 3000000,
+   "telemetry": {"t_us": 3000000, "processes": [{"name": "make", "count": 1}, {"name": "python3", "count": 1}]},
+   "proposal": {"system": {"mode": "build", "background_wanted": true}},
+   "validation": "unmodified",
+   "latency_us": 600}
+ ]
+}
