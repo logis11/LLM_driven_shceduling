@@ -1,7 +1,7 @@
 # Boot default 변경 안내 — MLFQ 기본값을 OSTEP 예시 그대로, slice 2 ms에서 10 ms로
 
 > Status: memo · Created 2026-09-11 · Updated 2026-09-11
-> From 인지오 to 인경민, 박이안. scheduler의 **boot default configuration**(모든 config schedule의 t = 0 entry이자 `fixed` condition)의 값을 바꿨어요. 이 memo는 왜 바꿨는지, 무엇이 얼마로 바뀌었는지, 그리고 simulator와 daemon 쪽에 무엇이 달라지고 무엇이 그대로인지를 적어요. 규범 문서는 §8에 링크했어요. 급하면 §1과 §5만 읽어도 돼요. §5에 인경민께 여쭤볼 질문 두 개가 있어요.
+> From 인지오 to 인경민, 박이안. scheduler의 **boot default configuration**(모든 config schedule의 t = 0 entry이자 `fixed` condition)의 값을 바꿨어요. 이 memo는 왜 바꿨는지, 무엇이 얼마로 바뀌었는지, 그리고 simulator와 daemon 쪽에 무엇이 달라지고 무엇이 그대로인지를 적어요. 규범 문서는 §8에 링크했어요. 급하면 §1과 §5만 읽어도 돼요. §5에 인경민께 여쭤볼 질문 세 개가 있어요(세 번째는 8.3에서 추가한, starvation 안전망의 길이).
 
 ## 1. 한 문단 요약
 
@@ -56,7 +56,7 @@ harness의 채점은 모든 조건을 `fixed`(= boot default) 대비 얼마나 �
 - 그대로인 것: config schema의 field, 타입, 범위. schedule·trace 형식. MLFQ의 다섯 규칙, switch memo의 규칙, batch-class memo의 규칙 B1·B2. batch-class memo에 "FIFO는 slice가 없으니 boot default의 2000 µs를 쓴다"고 적힌 부분은 규칙 자체가 "boot default의 `timeslice_us`"라서 이제 **10000**으로 읽으면 돼요(memo는 시점 기록이라 안 고쳤어요).
 - 해석 예시(simulator guide §5의 "2000 µs slice로 돌려보기")는 그 miniature에 맞춘 예시라 그대로 두고 "boot default가 아니다"라고만 적었어요.
 
-**여쭤볼 것 두 가지.** 아래 §6의 판정에 이 두 규칙이 그대로 결과를 정해요. 둘 다 interpretation contract가 "정해서 적어 두라"고 하는 종류의 규칙이라, 어느 쪽이든 괜찮고 **적혀 있기만 하면** 돼요. 이미 정해 두셨다면 어디에 적혀 있는지만 알려주셔도 돼요.
+**여쭤볼 것 세 가지.** 앞의 둘은 아래 §6의 판정에 그대로 결과를 정하는 규칙이고, 셋째는 harness의 guard 하나가 기다리는 숫자예요. 둘 다 interpretation contract가 "정해서 적어 두라"고 하는 종류의 규칙이라, 어느 쪽이든 괜찮고 **적혀 있기만 하면** 돼요. 이미 정해 두셨다면 어디에 적혀 있는지만 알려주셔도 돼요.
 
 **질문 1 — EDF에서, residual task가 slice를 쓰는 도중에 deadline task가 깨어나면 바로 lane을 넘기나요, 아니면 그 slice가 끝날 때까지 기다리나요?**
 
@@ -76,7 +76,11 @@ option B일 때 생기는 상황이에요. `scan`이 t = 100000에 slice를 시�
 
 interpretation contract가 "같은 순간의 event는 적어 둔 결정적 순서로 처리한다"고 하는 게 이 규칙이에요. 저희 mock fixture는 "config entry 먼저, 그 다음 arrival을 파일 순서로"까지만 정해 뒀고, slice 경계와 TIMER 만료의 순서는 안 정해져 있어요. 어느 순서든 괜찮아요. 다만 (a) 어느 쪽인지, (b) 그 순서가 trace의 line 순서에도 그대로 나타나는지(harness는 trace의 순서를 그대로 믿어요)를 알려주시면 돼요.
 
-**지오 생각 (참고만).** 둘 다 교과서 쪽으로 답하면 될 것 같아요. 질문 1은 **option A(바로 뺏는다)**. deadline class를 두는 이유가 마감 있는 일이 깨어나는 순간 다른 모든 일보다 앞서게 하려는 것이라, residual slice가 끝날 때까지 기다리게 하면 non-preemptive EDF가 되어 다른(더 약한) scheduler가 돼요. 우리 MLFQ가 이미 "더 높은 queue로 깨어나면 즉시 preempt"인 것과도 맞고, Linux의 `SCHED_DEADLINE`이 fair class를 다루는 방식과도 같아요. 구현도 더 단순해요 — residual round-robin은 deadline class가 비워 둔 lane에서만 돌면 되니까요. 질문 2는 **TIMER 만료(깨어남)를 먼저, dispatch 결정을 나중에**. 같은 µs에 두 일이 있으면, scheduler가 결정을 내리기 전에 깨어난 task가 보이는 순서가 "정보를 다 가지고 결정하는" 유일한 순서예요. 반대로 dispatch부터 하고 그 다음에 runnable task를 발견하는 순서는, 물리적 이유 없이 정확히 slice 하나만큼의 대기를 만들어내요. 둘 다 이렇게 정해지면 `c7-media`·`c7-meeting`의 답은 확정이에요: 어느 config에서도 `fixed`에서도 miss가 없고, 두 파일은 headroom 없음. 어디까지나 제 생각이고, 정하는 건 경민 님이에요 — 다르게 정하셔도 적혀 있기만 하면 돼요.
+**질문 3 — executor의 starvation 안전망은 ready 상태의 task를 최대 얼마까지 기다리게 하나요? (숫자 하나, µs)**
+
+batch-class memo에 "runnable한 task는 batch든 아니든, cap이 얼마든, **bounded window** 안에 반드시 진행한다"고 적혀 있고, 그 안전망은 config가 못 건드리는 executor의 것이라고 돼 있어요. 그런데 그 window가 얼마인지는 어디에도 숫자로 안 적혀 있어요. harness의 guard 중 하나(`starvation_floor`, `harness/guards/guard-spec.yaml`)가 그 숫자를 threshold로 써요: 모든 run에서 task마다 가장 길게 ready 상태로 기다린 시간(`ready_wait`의 max, 원인 무관)이 그 window를 넘으면 안전망이 깨진 것이니 run을 fail로 표시해요 — 그 run의 결과는 config가 아니라 깨진 executor의 증상이라서요. 지금은 **1 000 000 µs(가상 시간 1초)를 임시값**으로 적어 두고 "경민이 executor의 window를 정하면 그 값으로 교체"라고 grounding에 써 놨어요. 경민 님이 정하신 값(또는 정해질 값)을 알려주시면 guard spec의 threshold를 그 값으로 바꾸고 changelog에 남겨요. 이미 구현에 상수가 있다면 그 상수와 그 위치만 알려주셔도 돼요. 참고로 1초는 `T_interaction`(0.1초)의 열 배라 interactive term의 latency로는 걸릴 일이 없고, 수십 초짜리 segment에서 1초를 굶는 건 config가 아니라 안전망의 문제라는 게 임시값의 근거예요.
+
+**지오 생각 (참고만).** 질문 1·2는 교과서 쪽으로 답하면 될 것 같아요. 질문 3은 제 의견이 없어요 — executor가 실제로 보장하는 값이 답이에요. 질문 1은 **option A(바로 뺏는다)**. deadline class를 두는 이유가 마감 있는 일이 깨어나는 순간 다른 모든 일보다 앞서게 하려는 것이라, residual slice가 끝날 때까지 기다리게 하면 non-preemptive EDF가 되어 다른(더 약한) scheduler가 돼요. 우리 MLFQ가 이미 "더 높은 queue로 깨어나면 즉시 preempt"인 것과도 맞고, Linux의 `SCHED_DEADLINE`이 fair class를 다루는 방식과도 같아요. 구현도 더 단순해요 — residual round-robin은 deadline class가 비워 둔 lane에서만 돌면 되니까요. 질문 2는 **TIMER 만료(깨어남)를 먼저, dispatch 결정을 나중에**. 같은 µs에 두 일이 있으면, scheduler가 결정을 내리기 전에 깨어난 task가 보이는 순서가 "정보를 다 가지고 결정하는" 유일한 순서예요. 반대로 dispatch부터 하고 그 다음에 runnable task를 발견하는 순서는, 물리적 이유 없이 정확히 slice 하나만큼의 대기를 만들어내요. 둘 다 이렇게 정해지면 `c7-media`·`c7-meeting`의 답은 확정이에요: 어느 config에서도 `fixed`에서도 miss가 없고, 두 파일은 headroom 없음. 어디까지나 제 생각이고, 정하는 건 경민 님이에요 — 다르게 정하셔도 적혀 있기만 하면 돼요.
 
 **왜 이게 중요한가.** simulator에는 난수가 없어서, 이 두 규칙만 적히면 `c7-media`·`c7-meeting`에서 `video`가 tick을 놓치는지 안 놓치는지가 **실행 전에** 계산으로 나와요. 그 답에 따라 두 파일이 RQ0 판정 set에 남을지가 정해져요(§6). 반대로 규칙이 안 적혀 있으면, 결과가 나온 뒤에 "왜 miss가 났지/안 났지"를 구현 세부에서 찾아야 하고, 그건 pre-registration이 막으려는 상황이에요.
 
