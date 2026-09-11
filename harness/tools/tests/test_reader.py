@@ -18,9 +18,9 @@ from harness.reader import (RESERVED_ENTITIES, RunFileError, ScheduleError,
 EXPECTED_HEADER = {
     "mock-office": ("mock-office", "fixed", 1),
     "mock-media": ("mock-media", "oracle", 2),
-    "mock-p1a": ("mock-p1a", "llm_vocab", 2),
+    "mock-p1a": ("mock-p1a", "llm_vocab", 3),
     "mock-chain": ("mock-chain", "oracle", 2),
-    "mock-switch": ("mock-switch", "llm_algo", 3),
+    "mock-switch": ("mock-switch", "llm_algo", 4),
 }
 
 
@@ -216,15 +216,15 @@ def test_config_schedule_entries_are_read_by_index(fixture_dir):
     sched = read_config_schedule(fixture_dir("mock-switch") / "config-schedule.json")
     assert sched.workload_id == "mock-switch"
     assert sched.condition == "llm_algo"
-    assert [e.index for e in sched.entries] == [0, 1, 2]
-    assert [e.algorithm for e in sched.entries] == ["MLFQ", "FIFO", "MLFQ"]
-    assert [e.t_us for e in sched.entries] == [0, 10600, 40600]
-    assert sched.entries[2].params == {"num_queues": 3, "timeslice_us": 2000,
+    assert [e.index for e in sched.entries] == [0, 1, 2, 3]
+    assert [e.algorithm for e in sched.entries] == ["MLFQ", "MLFQ", "FIFO", "MLFQ"]
+    assert [e.t_us for e in sched.entries] == [0, 600, 10600, 40600]
+    assert sched.entries[3].params == {"num_queues": 3, "timeslice_us": 2000,
                                        "timeslice_growth": 2, "boost_interval_us": 20000}
-    assert sched.entries[1].params == {}
-    assert sched.entries[1].batch_bandwidth_cap == 0.15
+    assert sched.entries[2].params == {}
+    assert sched.entries[2].batch_bandwidth_cap == 0.15
     assert sched.entries[0].provenance == "fallback"
-    assert sched.entry(2).algorithm == "MLFQ"
+    assert sched.entry(3).algorithm == "MLFQ"
     assert sched.entry(7) is None
 
 

@@ -604,7 +604,7 @@ entity=schedule, metric=config_interval, t=60450, value=119550, provenance=unmod
 
 row는 `config_applied` 중 **직전 entry와 algorithm이 다른 것**마다 하나예요(boot entry는 직전이 없으니 row 없음; params만 바뀐 entry는 switch가 아님). entity `schedule`, `t`는 적용 시각.
 
-- `W_single` = hog 하나가 맨 위 queue에서 맨 아래까지 떨어지는 데 **받아야 하는 CPU 시간**. 위쪽 level마다 slice 하나씩: `timeslice_us × (1 + growth + growth² + …)`, level이 `num_queues − 1`개. boot default(3 queue, 2000 µs, growth 2)면 2000 + 4000 = 6000 µs. **바뀐 뒤의 params**로 계산하고, 그래서 config schedule이 필요해요(4.4).
+- `W_single` = hog 하나가 맨 위 queue에서 맨 아래까지 떨어지는 데 **받아야 하는 CPU 시간**. 위쪽 level마다 slice 하나씩: `timeslice_us × (1 + growth + growth² + …)`, level이 `num_queues − 1`개. 예를 들어 3 queue, 2000 µs, growth 2면 2000 + 4000 = 6000 µs(boot default는 2026-09-11부터 OSTEP 예시의 10 ms slice라 10000 + 20000 = 30000 µs). **바뀐 뒤의 params**로 계산하고, 그래서 config schedule이 필요해요(4.4).
 - `H` = 그 순간 살아 있는 task 중, 적용 시각 뒤 **첫 `run_end`가 `preempt`인** task의 수. 행동으로 세요(이름이나 archetype은 모름). `hogs` column에 실려요. FIFO 등으로 바뀔 때도 세어서 적지만 value는 0.
 - `value` = MLFQ로 바뀔 때, 적용 시각부터 **마지막 hog가 CPU를 `W_single`만큼 받은 순간**까지의 길이. hog가 실제로 앉아 있던 구간(occupancy)을 적용 시각부터 더해서 6000이 차는 시각을 찾아요. 그 사이 editor가 의자를 쓰면 hog의 시계는 멈추고 창은 그만큼 길어져요. 다음 algorithm switch나 `T_end`까지도 못 채우면 거기서 자르고 guard를 내요. EDF/LOTTERY/FIFO로 바뀔 때는 0.
 
@@ -735,7 +735,7 @@ condition `llm_vocab`, prior table. boot 설정이 0에, recognizer의 답이 40
 
 ### 10.3 trace
 
-scheduler는 아무 legal한 것이어도 돼요. 이 mock은 boot MLFQ(queue 3개, slice 2000, growth 2)를 simulator guide의 규칙대로 돌려요: slice를 다 쓰면 한 칸 내려가고, block하면 그 자리에 머물고, 더 높은 queue로 깨어나면 즉시 preempt, 같거나 낮은 queue면 slice 경계까지 기다려요. 시각은 µs.
+scheduler는 아무 legal한 것이어도 돼요. 이 mock은 MLFQ(queue 3개, slice 2000, growth 2)를 simulator guide의 규칙대로 돌려요(boot default는 2026-09-11부터 OSTEP 예시의 10 ms slice예요; 이 mock의 2 ms는 계산을 짧게 하려고 고른 legal config예요): slice를 다 쓰면 한 칸 내려가고, block하면 그 자리에 머물고, 더 높은 queue로 깨어나면 즉시 preempt, 같거나 낮은 queue면 slice 경계까지 기다려요. 시각은 µs.
 
 ```jsonl
 {"event":"meta","workload_id":"mock-c2-p1a","condition":"llm_vocab","sim":"mock@0","schedule_entries":2}

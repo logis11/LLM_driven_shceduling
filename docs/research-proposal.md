@@ -1,5 +1,5 @@
 # A Semantic Recognition Layer for Operating Systems
-> Status: draft — for team review · Created 2026-08-15 · Updated 2026-09-10
+> Status: draft — for team review · Created 2026-08-15 · Updated 2026-09-11
 
 **Removing hardcoded semantic knowledge from the OS, validated on CPU scheduling**
 
@@ -120,7 +120,7 @@ The standard resolution is: give interactive work high priority but a very short
 - Went to sleep for I/O before your slice ran out? → probably interactive → stay high
 - Periodically, boost everything back up so nothing starves forever
 
-This is genuinely clever, and it explains why the diagram above works as a classifier: `bash` given a 2 ms slice uses 0.5 ms of it, while `cc1plus` burns all 2 ms. A few observations are enough to tell them apart.
+This is genuinely clever, and it explains why the diagram above works as a classifier: `bash` given a 10 ms slice uses 0.5 ms of it, while `cc1plus` burns all 10 ms. A few observations are enough to tell them apart.
 
 **MLFQ is our real baseline.** Beating round-robin proves nothing.
 
@@ -323,7 +323,7 @@ The proposal has two layers, and keeping them separate is what makes the archite
   "subsystems": {
     "cpu_scheduler": {
       "algorithm": "EDF",
-      "params": { "residual_timeslice_us": 2000 },
+      "params": { "residual_timeslice_us": 10000 },
       "batch_bandwidth_cap": 0.12
     }
   }
@@ -352,7 +352,7 @@ If the model emitted configuration for every subsystem and nothing else, it woul
 
 **Consumers are not known in advance.** The CPU scheduler is in the kernel; a network shaper is a separate daemon; a third party might add something we never anticipated. If a new consumer requires editing the prompt, consumers are coupled to the model. With a shared vocabulary, a new consumer subscribes and brings its own interpretation — the model need not know it exists.
 
-**The model has never seen any of these subsystems.** It knows what Blender is; it does not know what `timeslice_us: 2000` does on this machine, and it knows even less about a shaper it was never told about. Trusting direct configuration multiplies that risk by the number of consumers. Trusting the vocabulary does not.
+**The model has never seen any of these subsystems.** It knows what Blender is; it does not know what `timeslice_us: 10000` does on this machine, and it knows even less about a shaper it was never told about. Trusting direct configuration multiplies that risk by the number of consumers. Trusting the vocabulary does not.
 
 **Failures need to be isolated.** If the model's CPU block is malformed but its reading is sound, the CPU driver should fall back to its own mapping while every other consumer proceeds normally. A flat output makes that impossible.
 

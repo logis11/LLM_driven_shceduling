@@ -22,7 +22,7 @@ def test_mock_switch_window_covers_the_hogs_last_demotion(fixture_dir):
     d = fixture_dir("mock-switch")
     p = run_tool(d, d / "trace.jsonl")
     assert p.returncode == 0, p.stdout + p.stderr
-    assert "index 2" in p.stdout and "hog" in p.stdout and "53100" in p.stdout
+    assert "index 3" in p.stdout and "hog" in p.stdout and "53100" in p.stdout
     assert "not covered" not in p.stdout and "all covered" in p.stdout
 
 

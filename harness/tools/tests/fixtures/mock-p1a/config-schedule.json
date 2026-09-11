@@ -1,6 +1,6 @@
 {
- "workload_id": "mock-switch",
- "condition": "llm_algo",
+ "workload_id": "mock-p1a",
+ "condition": "llm_vocab",
  "schedule": [
   {
    "t_us": 0,
@@ -26,30 +26,21 @@
      "timeslice_growth": 2,
      "boost_interval_us": 100000
     },
-    "batch_bandwidth_cap": null
+    "batch_bandwidth_cap": 0.5
    },
    "provenance": "unmodified"
   },
   {
-   "t_us": 10600,
-   "config": {
-    "algorithm": "FIFO",
-    "params": {},
-    "batch_bandwidth_cap": 0.15
-   },
-   "provenance": "unmodified"
-  },
-  {
-   "t_us": 40600,
+   "t_us": 50600,
    "config": {
     "algorithm": "MLFQ",
     "params": {
      "num_queues": 3,
      "timeslice_us": 2000,
      "timeslice_growth": 2,
-     "boost_interval_us": 20000
+     "boost_interval_us": 100000
     },
-    "batch_bandwidth_cap": 0.15
+    "batch_bandwidth_cap": 0.333
    },
    "provenance": "unmodified"
   }
