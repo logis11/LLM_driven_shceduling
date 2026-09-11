@@ -1,6 +1,6 @@
 # Docs index
 
-> Status: normative · Created 2026-08-27 · Updated 2026-09-09
+> Status: normative · Created 2026-08-27 · Updated 2026-09-11
 
 Prose only, organized by domain — one `##` section per area below, the full index table at the bottom. Statuses: **normative** (states what is; kept current) · **draft** (content real, form not final) · **record** (append-only history; never rewritten). Decision history lives in `_dev/archive/`; machine-read files live outside `docs/` (see the placement rule in `CLAUDE.md`).
 
@@ -67,6 +67,7 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 - [memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md](memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md) — to 인경민: what happens to the task queue, the running task, and scheduler state when a config with a different algorithm lands mid-run, and how the MLFQ re-learning overhead is measured
 - [memos/2026-09-09-batch-class-rule-for-the-simulator.md](memos/2026-09-09-batch-class-rule-for-the-simulator.md) — to 인경민: which tasks `batch_bandwidth_cap` applies to — the behavioural rule (one full slice since the last voluntary block; the periodic class never), worked task by task, and why a wrong rule flips the gaming rows
 - [memos/2026-09-10-coreset-before-and-after-phase-7.md](memos/2026-09-10-coreset-before-and-after-phase-7.md) — to 인경민, 박이안 (Korean): the 2026-09-10 coreset change and why — 24 → 50 files, all 32 driver-table cells paired, C1 at sixteen, the new C7 group, pre-committed misses, the two EDF pairs the cap cannot reach, what stays the same for the simulator and the daemon
+- [memos/2026-09-11-boot-default-from-ostep.md](memos/2026-09-11-boot-default-from-ostep.md) — to 인경민, 박이안 (Korean): the boot default re-sourced whole from OSTEP's MLFQ example (slice 2 ms → 10 ms; EDF and LOTTERY slices follow by the same-granularity rule), the research that found no standard MLFQ configuration, what changes and what stays for each owner, two executor-rule questions for 인경민 that decide `c7-meeting` and `c7-media`
 
 ## Full index
 
@@ -97,3 +98,4 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 | [memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md](memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md) | to 인경민: queue takeover, preemption, and measuring overhead at an algorithm switch | memo |
 | [memos/2026-09-09-batch-class-rule-for-the-simulator.md](memos/2026-09-09-batch-class-rule-for-the-simulator.md) | to 인경민: the batch-class rule the cap applies to, with worked examples and an action plan | memo |
 | [memos/2026-09-10-coreset-before-and-after-phase-7.md](memos/2026-09-10-coreset-before-and-after-phase-7.md) | to 인경민, 박이안 (Korean): the coreset before and after the 2026-09-10 change — what changed, why, and what it means for each owner | memo |
+| [memos/2026-09-11-boot-default-from-ostep.md](memos/2026-09-11-boot-default-from-ostep.md) | to 인경민, 박이안 (Korean): the boot default from OSTEP — what changed, why, what it means for each owner, two rule questions for the simulator | memo |

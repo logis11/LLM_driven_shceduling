@@ -570,9 +570,13 @@ rq0:
       row, so only the gap between rows reads, not the absolute miss rate.
     c7-meeting: >
       Both of its rows are EDF; TIMER consumers sit in the deadline class and
-      one residual slice (2 ms) is under every tick tolerance, so the gap
-      against a drawn row comes from the algorithm (EDF vs MLFQ/LOTTERY/FIFO),
-      the cap axis is unmeasured (pair review finding 5).
+      one residual slice (10 ms since the 2026-09-11 boot default) equals
+      video's tick tolerance exactly, and fixed no longer demotes the video
+      burst, so on the arithmetic the rows tie and fixed ties too: expected no
+      headroom on every term, on a knife edge that two executor rules decide
+      (memo 2026-09-11 §5, asked of 인경민). Membership re-decided in the
+      pre-registration sub-task once the rules are in (pair review finding 5
+      addendum).
     c7-media: same as c7-meeting.
   excluded_layer1: [c1-indexing, c7-ml-train, c7-render, c7-transcode, c7-backup]   # pre_committed_miss segments: out of recognition accuracy, in Layer 2
   per_file_criterion: >
