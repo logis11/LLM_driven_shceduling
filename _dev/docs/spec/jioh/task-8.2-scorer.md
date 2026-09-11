@@ -32,7 +32,7 @@ A `turnaround` term whose task did not complete inside the window is scored as t
 
 ### 5. numpy and pandas
 
-The aggregates module and the scorer use numpy and pandas, added to the harness's pinned requirements; the harness will carry them for the paper's tables and plots regardless. Percentiles call numpy with the interpolation method named explicitly, never the default, and the metrics doc states the convention. Every output value is written at one fixed decimal precision so identical records give identical files under the pinned versions and the tests stay byte for byte.
+The aggregates module and the scorer use numpy and pandas, added to the harness's pinned requirements; the harness will carry them for the paper's tables and plots regardless. Percentiles call numpy with the interpolation method named explicitly, never the default, and the metrics doc states the convention. Every output value is written at a fixed decimal precision so identical records give identical files under the pinned versions and the tests stay byte for byte. *Amended 2026-09-11 after the seam case: the two files differ, twelve places in `aggregates` and six in `scores`, because the scorer divides `aggregates` values and a six-place input made an exactly −0.5 share read −0.499995; twelve places keeps a six-place share exact to its last digit. Exact rationals in the file and twelve places in both were rejected.*
 
 ### 6. Two files with schemas beside the code
 
@@ -45,6 +45,10 @@ A run's `fixed` baseline is found by (`workload_id`, `boot_default`); `fixed` is
 ### 8. Tests
 
 A new fixture of hand-written records files, not traces: one small workload with two terms under `fixed`, `oracle`, and `random` with two seeds, plus one `fixed` under an alternative `boot_default`; a `worked.md` deriving every aggregate, share, and score by hand; shaped to hit each rule above (a windowed P99, a miss rate, a progress term, a turnaround that finishes under `oracle` and is censored under `random`, one no-headroom term, the alternative-default pairing); the written `aggregates` and `scores` files compared byte for byte. One end-to-end case runs `mock-p1a`'s records as the `llm_vocab` run with hand-written `fixed` and `oracle` records for the same reduced workload, proving the seam between the records writer and the scorer.
+
+### 9. Boost windows are a separate sub-task
+
+The per-switch excess and its boost variant (metrics doc §8) are not computed in 8.2: both need the boost windows, which are sized from hog occupancy intervals that records do not carry. Decided 2026-09-11 after the implementation: a new primitive, `boost_window`, one records row per boost instant inside an MLFQ interval on `switch_window`'s columns with a new `metric` value, done as its own small sub-task (8.10) before the report; the aggregates module then computes both variants. No simulator or daemon output changes. Emitting occupancy intervals as rows, and dropping the two aggregates from §8, were rejected.
 
 ## Invariants
 
