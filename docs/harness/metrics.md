@@ -63,7 +63,7 @@ Every primitive is measured over `[0, T_end]`.
 
 ## 5. Records
 
-One CSV file per trace (or per recognition log), every row self-contained, twenty columns.
+One CSV file per trace (or per recognition log), every row self-contained, twenty-one columns.
 
 **Identity** — which run the row came from.
 
@@ -73,6 +73,7 @@ One CSV file per trace (or per recognition log), every row self-contained, twent
 | `condition` | the recognizer condition (`fixed`, `random`, `whitelist`, `llm_vocab`, `llm_algo`, `llm_full`, `oracle`) |
 | `table` | `prior` or `calibrated`; empty for `fixed`, which uses no table |
 | `seed` | `random`'s PRNG seed; empty otherwise |
+| `boot_default` | the id of the boot configuration the run started in; empty for the primary. Only the `fixed` runs of the RQ0 gate spec's sensitivity check carry one; the scorer pairs a run with the `fixed` run of the same `boot_default` (added 2026-09-11, 8.2) |
 | `sim` | the simulator version from the trace header; empty for recognition rows |
 | `source_sha256` | SHA-256 of the trace or log file the row was computed from |
 
@@ -236,7 +237,7 @@ A fixed list, computed from records at scoring time, always per workload, condit
 | `busy` | utilisation `busy / T_end`; idle `T_end − busy` |
 | recognition rows | mode accuracy; attribute accuracy; confusion matrix over (`truth`, `predicted`) for mode and for attribute; algorithm-choice accuracy and its confusion; latency P50/P99 over rows with `mode_correct = 1`; each also **per familiarity tier** |
 
-Percentiles are computed on the raw values with linear interpolation. Mean is reported for sanity only, never as a headline. Counts (stimuli per task, ticks per chain) are guard inputs: stimulus count is checked against the workload's wake events, tick count against the window's tick grid.
+Percentiles are computed on the raw values with linear interpolation: position `(n − 1) · p / 100` on the sorted values, interpolating between the two neighbours (numpy's `linear` method, R's type 7), computed exactly on the integer records. Mean is reported for sanity only, never as a headline. Counts (stimuli per task, ticks per chain) are guard inputs: stimulus count is checked against the workload's wake events, tick count against the window's tick grid.
 
 ---
 
@@ -253,6 +254,8 @@ improvement(c) = fixed_A − c_A        when lower A is better
 with `fixed` and `oracle` the same workload under the same table. The rule applies **per aggregate**, so every share is unit-free before any weighting; weights are the scoring spec's. Values are shown as computed: negative when a condition scored worse than `fixed`, above 1 when it beat the oracle; never clipped.
 
 **Floor.** Each aggregate has an absolute floor in its own units (§10). When `|improvement(oracle)|` is below the floor, the share is **undefined** for that workload and aggregate: the raw values are reported with the mark *no headroom*, and no ratio is formed.
+
+**Composition.** A file's score is the scoring spec's weighted sum of its terms' shares. A term marked *no headroom* keeps its weight and enters the sum as if the condition had captured all of the headroom (share 1), so it never makes a file easier to pass; the mark is carried on the term (Phase 8 spec, decision 4; 8.2). A `turnaround` term whose task did not complete inside the window has no `turnaround` row (§6.6); it is scored on the censored lower bound `T_end − arrival`, the row marked *censored*, so not finishing is worse than every finishing value (8.2 spec, decision 4). A term whose filter selects no rows stops the scorer: every scored entity is linted to exist, so an empty filter is a scoring-spec mistake. The `aggregates` file carries twelve decimal places and the `scores` file six, so a six-place share is exact to its last digit (`harness/aggregates/schema/`, `harness/scores/schema/`).
 
 **Sensitivity.** `fixed` is the boot default, whose values are stated assumptions (`../recognition-vocabulary.md` §2). The RQ0 gate spec pre-registers `fixed` under two alternative boot defaults; where the sign or ordering of a share moves, the floor is reported as a range. That reporting rule is the RQ0 gate spec's (Phase 8); the formula here does not change.
 
@@ -291,7 +294,7 @@ The definitions above, and the mock traces that test them, assume the following 
 
 ## 12. Mock fixtures
 
-`harness/tools/tests/fixtures/` holds five hand-written pairs (run file, trace) with hand-computed expected records and a worked derivation each: `mock-office` (queued keystrokes, an unfocused task), `mock-media` (backlog, a same-instant config pair that is also a switch into FIFO, a completing batch task), `mock-p1a` (config change without an algorithm switch, preemptions, a batch task clipped at `T_end`), `mock-chain` (a three-stage frame pipeline with one late frame), `mock-switch` (MLFQ → FIFO → MLFQ with a config schedule, one hog, the §8 excess aggregates worked by hand). `mock-media` and `mock-chain` run FIFO under an oracle entry stamped beside the boot entry, so their stated scheduler and their config lines agree. They are the tests of §6 and the seeds of Phase 8's mock simulator.
+`harness/tools/tests/fixtures/` holds five hand-written pairs (run file, trace) with hand-computed expected records and a worked derivation each, plus `mock-scores` (8.2): hand-written records for one small workload under `fixed`, `oracle`, `random` × 2 seeds, and `fixed` under an alternative boot default, with the expected `aggregates` and `scores` files and a worked derivation, shaped to hit every scorer rule of §9. The five pairs: `mock-office` (queued keystrokes, an unfocused task), `mock-media` (backlog, a same-instant config pair that is also a switch into FIFO, a completing batch task), `mock-p1a` (config change without an algorithm switch, preemptions, a batch task clipped at `T_end`), `mock-chain` (a three-stage frame pipeline with one late frame), `mock-switch` (MLFQ → FIFO → MLFQ with a config schedule, one hog, the §8 excess aggregates worked by hand). `mock-media` and `mock-chain` run FIFO under an oracle entry stamped beside the boot entry, so their stated scheduler and their config lines agree. They are the tests of §6 and the seeds of Phase 8's mock simulator.
 
 **`x_mlfq_level` check.** The simulator emits `x_mlfq_level` `{t, task, from, to}` on every MLFQ demotion and boost; the harness ignores it by the `x_` rule. `harness/tools/check_mlfq_levels.py`, beside the harness and not part of it, reads those lines and reports, per switch into MLFQ, whether the window covered each hog's last demotion (the run of demotions after `t_apply`, ending at the next boost or the bottom queue). A systematic miss is the evidence for proposing a field in the closed trace set; until then the trace contract stays frozen. On `mock-switch` the check passes at the window's edge; under the memo's original wall-clock window it failed there, which is what led to the lane-time definition (memo §7).
 
@@ -301,6 +304,7 @@ The definitions above, and the mock traces that test them, assume the following 
 
 Every change to a primitive, an aggregate, a constant, or a floor lands here, dated, with the sub-task that made it.
 
+- **2026-09-11 — aggregates and scores (jioh 8.2).** Records gain a twenty-first column, `boot_default` (§5). §8 states the percentile convention. §9 gains the composition rules: the no-headroom term's share 1, the censored turnaround, the empty filter as an error, the file precisions. The trace-derived aggregates of §8 land in code (`harness/tools/harness/aggregates.py`) writing an `aggregates` file, the scorer (`scorer.py`) a `scores` file, both with schemas beside them and the `score.py` CLI; the recognition aggregates are the grader's (8.4). Not computed yet: the per-switch excess and its boost variant, whose boost windows are sized from occupancy intervals records do not carry; they need boost-window rows from the primitives. No primitive, constant, or floor changed.
 - **2026-09-11 — latency floor untied from the slice (jioh 8.1).** No value changed: the latency floor stays 1 000 µs. Its stated reason was half the boot default's 2 000 µs slice; the boot default is now OSTEP's example with a 10 ms slice (`recognition-vocabulary.md` §2, changelog), and the floor is not moved with it. It is a plain stated assumption, defended by a pre-registered floor-sensitivity reporting line in the RQ0 gate spec (the verdict recomputed under a band of floors at scoring time, no reruns) rather than by a derivation. §10's row says so.
 - **2026-09-09 — scoring spec (jioh 6.2).** The per-file terms land as data in the harness tree (`harness/scoring/scoring-spec.yaml`, schema and lint beside it, in CI): scored aggregates are `ready_wait` P99, `job` miss rate, progress, `turnaround`; C2 latency and frame terms windowed 60 s–`T_end`; derived files carry their base's terms verbatim. §2 points at it. No primitive, aggregate, constant, or floor changed.
 - **2026-09-09 — switch overhead (jioh 6.1).** New primitive `switch_window` (§6.9) with the `hogs` attribute, the twentieth records column; the config schedule becomes the third input (§3), read by `index`; two aggregates over switch windows (§8: per-switch excess wake `ready_wait`, switch and boost variants; share inside switch windows), reported and never weighted; §11 gains 7 (boost timer restarts at `t_apply`), 8 (FIFO-outgoing rule (a)) and 9 (a same-algorithm entry applies at its stamped time), all three confirmed with 인경민 on 2026-09-09; fixture `mock-switch` and the `x_mlfq_level` check tool (§12). From the 2026-09-08 memo on algorithm-switch semantics, whose window the same day's spec session re-sized in lane time (memo §7) after the mock showed the wall-clock window closing before the hog's descent. `mock-media`'s same-instant boot + oracle pair is a switch into FIFO and gains a zero-valued row; `mock-chain` gains the same oracle FIFO entry so its scheduler matches its config line; `mock-p1a` now follows the guide's MLFQ rules (its editor falls to the bottom queue on its own bursts).

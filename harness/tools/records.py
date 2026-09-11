@@ -26,9 +26,11 @@ def main():
     ap.add_argument("--schedule", default=None, help="the daemon's config schedule for this run")
     ap.add_argument("--table", default="", choices=["", "prior", "calibrated"])
     ap.add_argument("--seed", default="")
+    ap.add_argument("--boot-default", default="", dest="boot_default",
+                    help="id of the boot configuration the run started in; empty = the primary")
     args = ap.parse_args()
     rows, guards = build(args.run, args.trace, table=args.table, seed=args.seed,
-                         schedule_path=args.schedule)
+                         schedule_path=args.schedule, boot_default=args.boot_default)
     write_csv(rows, args.out)
     for g in guards:
         print(f"guard: {g}", file=sys.stderr)

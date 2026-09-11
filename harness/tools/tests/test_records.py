@@ -45,11 +45,11 @@ def test_fixture_csv_validates_against_schema(fixture_dir, mock):
     validate_rows(rows)            # raises on the first invalid row
 
 
-def test_columns_are_the_twenty_in_order(fixture_dir):
+def test_columns_are_the_twenty_one_in_order(fixture_dir):
     with open(fixture_dir("mock-office") / "expected.csv", newline="") as f:
         header = next(csv.reader(f))
     assert header == list(COLUMNS)
-    assert len(COLUMNS) == 20
+    assert len(COLUMNS) == 21
     assert COLUMNS[-1] == "hogs"
 
 

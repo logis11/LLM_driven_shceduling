@@ -11,6 +11,10 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 from harness.reader import (RunFileError, ScheduleError, TraceError,  # noqa: E402
                             read_config_schedule, read_run_file, read_trace)
+from harness import aggregates, scorer  # noqa: E402
+from harness.outputs import AGGREGATES_SCHEMA, SCORES_SCHEMA  # noqa: E402
+from harness.outputs import read_csv as read_table  # noqa: E402
+from harness.outputs import validate_rows as validate_table  # noqa: E402
 from harness.records import read_csv, validate_rows  # noqa: E402
 
 FIXTURES = pathlib.Path(__file__).resolve().parent / "tests" / "fixtures"
@@ -37,6 +41,23 @@ def main():
         except (TraceError, RunFileError, ScheduleError, ValueError, OSError) as exc:
             failed += 1
             print(f"  {d.name}: {exc}")
+    ms = FIXTURES / "mock-scores"
+    if ms.exists():
+        try:
+            n_rec = 0
+            for f in sorted((ms / "records").glob("*.csv")) + sorted((ms / "seam").glob("*.csv")):
+                rows = read_csv(f)
+                validate_rows(rows)
+                n_rec += len(rows)
+            a = read_table(ms / "expected-aggregates.csv", aggregates.COLUMNS)
+            validate_table(a, AGGREGATES_SCHEMA)
+            sc = read_table(ms / "expected-scores.csv", scorer.COLUMNS)
+            validate_table(sc, SCORES_SCHEMA)
+            print(f"  mock-scores: {n_rec} records rows valid, {len(a)} expected aggregate rows valid, "
+                  f"{len(sc)} expected score rows valid")
+        except (ValueError, OSError) as exc:
+            failed += 1
+            print(f"  mock-scores: {exc}")
     print("lint clean" if not failed else f"{failed} fixture(s) refused")
     return 1 if failed else 0
 

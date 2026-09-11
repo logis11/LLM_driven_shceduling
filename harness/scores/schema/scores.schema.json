@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "scores.schema.json",
+  "title": "Scores row",
+  "description": "One row of the harness's scores file (docs/harness/metrics.md §9; sub-task 8.2): level `term` carries one scoring-spec term of one run with its aggregate under fixed, oracle, and the run's condition, both improvements, the share, and the no_headroom and censored marks; level `file` carries the run's weighted score. `boot_default` names the fixed baseline the row was scored against (empty = the primary). Empty CSV cells are absent here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "workload_id",
+    "condition",
+    "level"
+  ],
+  "properties": {
+    "workload_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "fixed",
+        "random",
+        "whitelist",
+        "llm_vocab",
+        "llm_algo",
+        "llm_full",
+        "oracle"
+      ]
+    },
+    "table": {
+      "type": "string",
+      "enum": [
+        "prior",
+        "calibrated"
+      ]
+    },
+    "seed": {
+      "type": "string",
+      "minLength": 1
+    },
+    "boot_default": {
+      "type": "string",
+      "minLength": 1
+    },
+    "level": {
+      "type": "string",
+      "enum": [
+        "term",
+        "file"
+      ]
+    },
+    "entity": {
+      "type": "string",
+      "minLength": 1
+    },
+    "metric": {
+      "type": "string",
+      "enum": [
+        "ready_wait",
+        "job",
+        "cpu_delivered",
+        "turnaround"
+      ]
+    },
+    "aggregate": {
+      "type": "string",
+      "enum": [
+        "p99",
+        "miss_rate",
+        "progress",
+        "turnaround"
+      ]
+    },
+    "cause": {
+      "type": "string",
+      "enum": [
+        "arrive",
+        "wake",
+        "sleep_end",
+        "timer_tick",
+        "fork_slot"
+      ]
+    },
+    "window_start_us": {
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    },
+    "window_end_us": {
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "lower",
+        "higher"
+      ]
+    },
+    "weight": {
+      "type": "string",
+      "pattern": "^-?[0-9]+\\.[0-9]{6}$"
+    },
+    "value_fixed": {
+      "type": "string",
+      "pattern": "^-?[0-9]+\\.[0-9]{6}$"
+    },
+    "value_oracle": {
+      "type": "string",
+      "pattern": "^-?[0-9]+\\.[0-9]{6}$"
+    },
+    "value_condition": {
+      "type": "string",
+      "pattern": "^-?[0-9]+\\.[0-9]{6}$"
+    },
+    "improvement_oracle": {
+      "type": "string",
+      "pattern": "^-?[0-9]+\\.[0-9]{6}$"
+    },
+    "improvement_condition": {
+      "type": "string",
+      "pattern": "^-?[0-9]+\\.[0-9]{6}$"
+    },
+    "share": {
+      "type": "string",
+      "pattern": "^-?[0-9]+\\.[0-9]{6}$"
+    },
+    "no_headroom": {
+      "type": "integer",
+      "enum": [
+        0,
+        1
+      ]
+    },
+    "censored": {
+      "type": "integer",
+      "enum": [
+        0,
+        1
+      ]
+    },
+    "score": {
+      "type": "string",
+      "pattern": "^-?[0-9]+\\.[0-9]{6}$"
+    },
+    "weight_sum": {
+      "type": "string",
+      "pattern": "^-?[0-9]+\\.[0-9]{6}$"
+    },
+    "n_terms": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "n_no_headroom": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "n_censored": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "level": {
+            "const": "term"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "entity",
+          "metric",
+          "aggregate",
+          "direction",
+          "weight",
+          "value_fixed",
+          "value_oracle",
+          "value_condition",
+          "improvement_oracle",
+          "improvement_condition",
+          "no_headroom",
+          "censored"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "level": {
+            "const": "file"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "score",
+          "weight_sum",
+          "n_terms",
+          "n_no_headroom",
+          "n_censored"
+        ]
+      }
+    }
+  ]
+}

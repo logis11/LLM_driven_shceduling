@@ -16,6 +16,10 @@ Five mock pairs for the harness's lower half (Phase 5, sub-task 5.1; `mock-switc
 | `mock-chain` | the game chain, three stages | frame latency reconstructed from the WAKE topology (ids deliberately not `.chain.N`), one late frame overlapping the next tick, the head's `deadline` lines disagreeing with frame latency by design; FIFO under an oracle entry beside the boot entry |
 | `mock-switch` | an editor, a batch task, a third task, under MLFQ → FIFO → MLFQ | `switch_window` in both directions (zero-valued into FIFO; into MLFQ the lane-time window closing when the hog has its `W_single` of CPU, sized from the config schedule), a hog counted by its first preempt, `x_mlfq_level` lines the harness ignores and the check tool reads, the §8 excess aggregates worked by hand; the check tool passes at the window's edge |
 
+## `mock-scores` — hand-written records with expected aggregates and scores (8.2)
+
+Not a trace pair: `records/` holds five hand-written records files for one small workload (`fixed`, `oracle`, `random` × 2 seeds, `fixed` under an alternative `boot_default`), `scoring-spec.yaml` a four-term spec shaped to hit every scorer rule (a windowed P99, a no-headroom miss rate, a progress term, a turnaround censored under one seed), `expected-aggregates.csv` and `expected-scores.csv` the files `tools/score.py` must reproduce byte for byte, and `worked.md` the derivation of every share and score. `seam/` holds hand-written `fixed` and `oracle` records for `mock-p1a`, scored together with the records the writer produces from `mock-p1a`'s trace (the end-to-end seam test).
+
 ## Fixed here, documented in the metrics doc (5.2)
 
 - **Row order:** `entity`, then `metric`, then `t` (numeric), then `cause`. Byte comparison needs one order.
