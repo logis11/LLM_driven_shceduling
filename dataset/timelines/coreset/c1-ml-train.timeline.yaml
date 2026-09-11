@@ -1,0 +1,21 @@
+# C1 — single-situation calibration: pure ml-train (building-plan §3 C1;
+# Phase 7 spec decision 8). Task set lifted from c2-p1a segment 1 (editor +
+# python3 training job); total_work resized from 130 s to 30 s so the job
+# finishes inside the 60 s segment (turnaround term).
+meta:
+  id: c1-ml-train
+  seed: 112
+  demand: calibration
+
+segments:
+  - {from: 0s, to: 60s, mode: ml-train, attributes: {background_wanted: true},
+     scenario: [S11, S12]}
+
+tasks:
+  - {id: editor, name: code, archetype: desktop-interactive,
+     arrive: 0s, depart: 60s}
+  - {id: hog, name: python3, archetype: cpu-batch, arrive: 2s,
+     bind: {total_work: 30s}}
+
+focus:
+  - {from: 2s, to: 58s, task: editor}

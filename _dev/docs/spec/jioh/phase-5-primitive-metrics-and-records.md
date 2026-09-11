@@ -87,4 +87,4 @@ The harness assumes: wakes queue with depth, so iteration k of every chain stage
 - The three-signature line in proposal §8.2 for metric definitions versus 인지오 deciding: settled with the team, not here.
 - Whether the dataset carries a familiarity tag per file or per name; checked before the familiarity split is defined.
 - Run-to-run consistency needs several samples per query point and the log envelope has no repeat index. Note for 박이안.
-- The C1-derived files' inherited demand class (Phase 3 archive) remains undecided.
+- The C1-derived files' inherited demand class (Phase 3 archive) remains undecided. *Resolved 2026-09-10 (Phase 7 decision 7): every derived file declares `demand: calibration` in its recipe.*

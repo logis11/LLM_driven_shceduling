@@ -15,11 +15,11 @@ Novel timelines are plain base-format files; each derived file is a small yaml v
 
 ### 2. Coverage grid: annotation-driven, generated
 
-Segments gain an optional `familiarity:` annotation (tier 1–5) beside `scenario:` — compiler-ignored, linter-read; unannotated segments default to tier-by-name lookup. The grid (domain × familiarity, counted in segments) is emitted mechanically from the annotations across all core timelines as a generated committed artifact — the paper table derives from the files it describes and cannot drift. Hole sign-off stays human (building-plan §9.2).
+Segments gain an optional `familiarity:` annotation (tier 1–5) beside `scenario:` — compiler-ignored, linter-read; unannotated segments default to tier-by-name lookup. The grid (domain × familiarity, counted in segments) is emitted mechanically from the annotations across all core timelines as a generated committed artifact — the paper table derives from the files it describes and cannot drift. Hole sign-off stays human (building-plan §9.2). *Superseded 2026-09-10 (Phase 7 decision 11): the grid counts the driver-table cell, mode × `background_wanted`, against the tier columns, and an empty cell fails CI — the human sign-off had missed the attribute's `false` side.*
 
 ### 3. Duration and demand-class conventions
 
-Default segment length 120 s; C1 single-segment files 60 s. Demand classes: C1 = `calibration`; C2–C6 default `oversubscribed` (hard-checked 100–150%), any per-file exception a visible authored declaration.
+Default segment length 120 s; C1 single-segment files 60 s. Demand classes: C1 = `calibration`; C2–C6 default `oversubscribed` (hard-checked 100–150%), any per-file exception a visible authored declaration. *Amended 2026-09-10 (Phase 7 decision 7): the derived files of C4, C5, C6 and all of C7 declare `calibration` in their recipes, which is the visible authored declaration this sentence asks for.*
 
 ### 4. Seed policy
 

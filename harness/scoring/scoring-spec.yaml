@@ -9,14 +9,22 @@
 # Every other aggregate of metrics doc §8 is reported beside the score, unweighted.
 #
 # This file carries terms only. Which files judge, report, are read as deltas,
-# or are excluded from aggregation is the gate spec's (Phase 8). c1-idle has no
-# entry: no performance metric. A derived file declares `base` and repeats the
-# base's terms verbatim (the lint checks both against dataset/timelines/coreset).
+# or are excluded from aggregation is the RQ0 gate spec's (Phase 8). c1-idle and
+# c7-idle have no entry: no performance metric. A derived file declares `base`
+# and repeats the base's terms verbatim (the lint checks both against
+# dataset/timelines/coreset). Unwanted work carries no term (Phase 7 spec
+# decision 10): a counterpart whose label flips the base's background_wanted to
+# false repeats the base's terms minus the batch terms (turnaround, progress) —
+# the rule P1b and P2b already follow, now checked by the lint.
 #
 # Expected "no headroom" (metrics doc §9 floors), stated here so it is not
 # discovered later: c1-media and C5 — no legal configuration can miss a tick
 # (video needs > 10 ms of wait, music can cause 2.5 ms; music needs > 47.5 ms,
-# video can cause 6.67 ms); c3-evening's media segment likewise; c3-creation's
+# video can cause 6.67 ms); c1-meeting by the same arithmetic (voice 2.5 ms
+# against video's 10 ms, video 6.67 ms against voice's 47.5 ms; the helper is
+# near-idle); c3-evening's media segment likewise; c7-meeting and c7-media
+# have headroom against fixed (MLFQ demotes the 6.67 ms video burst) but none
+# between their own two EDF rows (pair review finding 5); c3-creation's
 # batch progress — HandBrake runs uncontended after 240 s, so the cap never bites.
 # c1-media's 1.0 : 0.5 audio : video weighting is a stated assumption (an audio
 # dropout is heard at once; a dropped frame at 60 Hz often is not).
@@ -42,6 +50,51 @@ files:
     terms:
       - {entity: music, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
       - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+
+  # ---- C1, Phase 7 bases (spec decision 9): the pattern by mode class with the
+  # weight the mode's existing instance carries. Interactive-only modes score the
+  # foreground's P99; periodic modes the consumer's miss rate (audio 1.0, video
+  # 0.5 as c1-media); batch-beside-editor modes the editor's P99 plus the job's
+  # turnaround at the mode's weight (ml-train/render/transcode 0.5 from the C2
+  # and C3 progress terms, backup 0.25 from c2-p3b). c1-indexing's turnaround at
+  # 1.0 is a stated assumption — a user waiting on a reindex as c1-compile's
+  # user waits on a build — and makes the indexing/true cap derived, not assumed.
+  c1-dev:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c1-video-edit:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c1-photo:
+    terms:
+      - {entity: photo-editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c1-mail:
+    terms:
+      - {entity: mailer, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c1-meeting:
+    terms:
+      - {entity: voice, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+  c1-ml-train:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: hog, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.5}
+  c1-render:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: bulk, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.5}
+  c1-transcode:
+    terms:
+      - {entity: video-editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: batch, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.5}
+  c1-indexing:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: hog, metric: turnaround, aggregate: turnaround, direction: lower, weight: 1.0}
+  c1-backup:
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+      - {entity: bulk, metric: turnaround, aggregate: turnaround, direction: lower, weight: 0.25}
 
   # ---- C2 — intent pairs. Latency and frame terms over the second segment,
   # 60 s to T_end; progress terms unwindowed (the batch task arrives at 60 s).
@@ -135,4 +188,72 @@ files:
   c6-dual:
     terms:
       - {entity: game.chain.1, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+
+  # ---- C7 — attribute counterparts (Phase 7 spec decision 10): the C1 base's
+  # terms, minus the batch term where the label flips it to unwanted. The
+  # injected scan and the renamed or flipped batch job carry no term, so the
+  # false row's floor cap is free to act.
+  c7-browsing:
+    base: c1-browsing
+    terms:
+      - {entity: browser, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-office:
+    base: c1-office
+    terms:
+      - {entity: writer, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-mail:
+    base: c1-mail
+    terms:
+      - {entity: mailer, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-dev:
+    base: c1-dev
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-photo:
+    base: c1-photo
+    terms:
+      - {entity: photo-editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-meeting:
+    base: c1-meeting
+    terms:
+      - {entity: voice, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+  c7-gaming:
+    base: c1-gaming
+    terms:
+      - {entity: game.chain.1, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: compositor, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+  c7-media:
+    base: c1-media
+    terms:
+      - {entity: music, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+  c7-video-edit:
+    base: c1-video-edit
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-compile:
+    base: c1-compile
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-ml-train:
+    base: c1-ml-train
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-render:
+    base: c1-render
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-transcode:
+    base: c1-transcode
+    terms:
+      - {entity: video-editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-indexing:
+    base: c1-indexing
+    terms:
+      - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}
+  c7-backup:
+    base: c1-backup
+    terms:
       - {entity: editor, metric: ready_wait, cause: wake, aggregate: p99, direction: lower, weight: 1.0}

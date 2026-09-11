@@ -69,17 +69,28 @@ Execution order: 6.1 → 6.2 → 6.3 → 6.4.
 - [x] **6.3** Prior table — all 32 rows, any algorithm by theory, `basis: theory`, one sentence on row and entry, references ids only where they exist; `make -C daemon lint` green
 - [x] **6.4** Pair review — the 16 same-mode pairs and the three C2 row-pairs as exercised (`ml-train/true`–`indexing/false`, `gaming/true`–`gaming/false`, `render/true`–`backup/true`); one sentence each naming the knob, the scored term it moves, and agreement with the weights; fixes fed back into 6.3; recorded in the phase archive with the intended file classification for Phase 7
 
-### Phase 7 — Coreset attribute coverage
-Fix from the Phase 6 pair review: the coverage grid tracked mode × familiarity only, so the coreset carries two `background_wanted: false` segments and 14 of the 32 driver-table cells have no instance, which leaves the attribute-accuracy metric near-degenerate and the calibrated table untunable on those rows. Add the attribute axis to the coverage grid; derive a family of `false` files for the interactive modes from their C1 bases (an injected unwanted CPU-bound job, label flipped); write the all-32-cells requirement for the generalset; update the manifest, the dataset-design table, the building plan's family list, and the study guides. Downstream: a scoring-spec entry per new file (the base's terms verbatim, `base` declared; the coverage test enforces it) and the pair review's sentences for the newly exercised `false` rows. Records and harness code unchanged; contracts, simulator, and daemon unchanged.
+### Phase 7 [done] — Coreset attribute coverage
+Fix from the Phase 6 pair review: the coverage grid tracked mode × familiarity only, so the coreset instances 17 of the 32 driver-table cells. All 32 cells in the coreset, paired. Spec: `_dev/docs/spec/jioh/phase-7-coreset-attribute-coverage.md`. Branch: `jioh/coreset-fix`. Archive: `_dev/archive/2026-09-11-phase-7-coreset-attribute-coverage.md`.
+
+Execution order: 7.1 → 7.2 → 7.3 → 7.4 → 7.5; 7.6 parallel with 7.4 and 7.5; 7.7 after 7.5 and 7.6 (added 2026-09-10).
+
+- [x] **7.1** Grid attribute axis — one row per driver-table cell (32 × five tiers), `ambiguous` outside, recognition-limited cells marked; CI fails on an empty cell; committed grid regenerated; the recounted 17-cell baseline recorded
+- [x] **7.2** Ten new C1 bases — `mail`, `dev`, `photo`, `meeting`, `video-edit`, `ml-train`, `render`, `transcode`, `indexing`, `backup`; task sets lifted from their source segments with the source in the header, batch jobs sized to 60 s, `meeting` designed as a live call with a periodic consumer, `c1-indexing` the user-initiated `true` cell
+- [x] **7.3** C7 counterparts — the C7 variant file and sixteen `c7-<mode>` files: interactive modes inject `clamscan`/`cpu-batch` at 0 s for 60 s; batch modes swap the orchestrator name (name search + name-verification workflow, tier rule, `docs/references.md` entries where cited); cells with no visible cue shipped as pre-committed misses with `initiated`; authored `demand: calibration` on all C7 files and the eight existing derived files; the vocabulary's batch-mode clause + changelog
+- [x] **7.4** (absorbed into 7.3 on 2026-09-10 so CI is green after 7.3) Scoring entries — the ten bases by the mode-class pattern with the mode's existing weight (exact entities and numbers fixed here), the sixteen C7 entries with `base` and the "unwanted work carries no term" rule, the lint clause, tests green; `indexing/true` cap fed to the prior table as derived
+- [x] **7.5** Pair review — one sentence per new pair (16), per-pair window landing from the manifest, tier mismatches and pre-committed-miss cells recorded; fixes fed back into `prior.yaml`; `make -C daemon lint` green
+- [x] **7.6** Docs sweep — building plan §3 C1/C7 entries and counts, §5a demand-budget paragraph naming C7 among the exempt families with the reason, §4 generalset all-32 requirement, throwaway pool named as open; dataset-design table; dataset README; terminology; docs index; coreset guide and harness guide; Phase 8 note on C1 at sixteen files
+- [x] **7.7** RQ0 judging set after the coreset change — re-decide the judging set now, in its own grill, with C1 at sixteen files and C7's sixteen counterparts in view (Phase 3 set it as the six C2 files when C1 was six); write the decision as a Phase 7 spec decision and into every place that names the set: the harness study guide §15.1, the team memo §8, the RQ0 preparation notes §4.1 and the §8 gate sketch (file lists, separate lines, Layer-1 exclusion of pre-committed misses), the building plan's build-order line (6) and §3 C1 role sentence, the proposal's Phase 1 sentence; threshold, `random` draw, and failure procedure stay Phase 8's
 
 ### Phase 8 — Harness upper half through pre-registration
-Stages 4–5. Scorer, guards, L1 grader, mock daemon + mock simulator with the full pipeline run on mocks, runner with execution cache, report with provenance. Ends at the committed gate spec: judging set, threshold, `random` draw definition and seed count (with 박이안), failure procedure, frozen scoring spec.
+Stages 4–5. Scorer, guards, L1 grader, mock daemon + mock simulator with the full pipeline run on mocks, runner with execution cache, report with provenance. Ends at the committed RQ0 gate spec: judging set (re-decided with C1 at sixteen files and C7's sixteen counterparts in view), threshold, `random` draw definition and seed count (with 박이안), failure procedure, frozen scoring spec, and the reporting lines from the Phase 7 pair review (findings 4–5) and the throwaway pool's definition.
 
 ### Phase 9 — Integration and the RQ0 run
-Stage 6. Swap mocks for the real simulator and daemon, end-to-end smoke, run all coreset files × 3 conditions, check guards before looking at results, judge per the gate spec; on failure, config search before workload redesign. Depends on 경민's integration gate and algorithm extension and 이안's daemon.
+Stage 6. Swap mocks for the real simulator and daemon, end-to-end smoke, run all coreset files × 3 conditions, check guards before looking at results, judge per the RQ0 gate spec; on failure, config search before workload redesign. Depends on 경민's integration gate and algorithm extension and 이안's daemon.
 
 ### Backlog
 - Naturalistic generator + generalset + full condition matrix
+- Held-out-rows arm (research-proposal §4.6 item 3) — after the main experiments, on the calibrated table: blank a row to the schema defaults, compare `llm_vocab` and `llm_algo` on the files that exercise it. Design fixed by Phase 7 (2026-09-10): every row has a fixed pair, so the files per row are the C1 base (`true`) or C7 counterpart (`false`) plus any C2/C3 segment on that row; the row set is pre-registered as every row unless a stated reason excludes one; the RQ0 gate spec carries the pre-registration line. Needs the calibrated table, whose per-row tuning pool must itself cover all 32 cells (the generalset requirement, building plan §4) — the throwaway pool's definition (7.7 / Phase 8) decides that
 
 ## 인경민 (kyungmin)
 
@@ -91,6 +102,6 @@ Build the simulator per `docs/simulator/simulator-guide.md` (binding fine print:
 ## 박이안 (ian)
 
 ### Phase 1 — Daemon through the validator
-Build the daemon per `docs/daemon/daemon-guide.md`: telemetry builder → recognizer interface with `fixed`/`random`/`oracle` → validator, emitting recognition logs for all 24 workloads, bit-identical across reruns; local LLM inference setup (hosting, client interface, record/replay skeleton) in parallel. Working order and sub-tasks are 이안's to define.
+Build the daemon per `docs/daemon/daemon-guide.md`: telemetry builder → recognizer interface with `fixed`/`random`/`oracle` → validator, emitting recognition logs for all 50 workloads (24 before Phase 7; format unchanged), bit-identical across reruns; local LLM inference setup (hosting, client interface, record/replay skeleton) in parallel. Working order and sub-tasks are 이안's to define.
 
 - [ ] **1.1** (sub-tasks to be defined by 이안)

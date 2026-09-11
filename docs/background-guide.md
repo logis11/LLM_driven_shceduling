@@ -1,5 +1,5 @@
 # Background Guide — everything to know before building your part
-> Status: normative · Created 2026-08-28 · Updated 2026-09-06
+> Status: normative · Created 2026-08-28 · Updated 2026-09-10
 
 This is the shared first half of onboarding for both builders — the simulator (인경민) and the daemon (박이안) — written for a reader who has skimmed the research proposal once and has general CS knowledge but no OS background. It is deliberately self-contained: it re-explains everything it needs, in plain language, so you can read it top to bottom without opening another document. The component-specific second halves — what your program must do — are `simulator/simulator-guide.md` and `daemon/daemon-guide.md`, each of which assumes you've read this one.
 
@@ -170,7 +170,7 @@ You won't build any of this — it's already built and frozen in `dataset/` — 
 2. **Timelines** (`dataset/timelines/`): hand-authored scenario scripts — "an editor from 0–180 s; at 60 s a training run starts" — that say *who* is present *when* and what each moment should be labeled. Timelines reference archetypes by name and carry the ground-truth labels.
 3. **wlc**, the workload compiler (`dataset/tools/wlc/`): takes a timeline + the archetype library + a seed, and **samples every distribution down to a concrete number**, producing the canonical JSON above. All randomness happens here, at compile time, recorded by the seed. That's why the simulator itself must contain no randomness: the dice were already rolled, the results are in the file, and rerunning anything reproduces it exactly.
 
-The compiled set the simulator will run is the **coreset**: 24 workload files, each a scenario designed to probe one specific question — six "pure single situation" calibration files, six paired files that behave identically but mean different things (the story from section 1, made literal), transition arcs where the situation changes mid-run, files with deliberate distractions, files where familiar software is renamed to gibberish, and files designed to fool name-based recognition on purpose. A second, generated set (the **generalset**) comes much later.
+The compiled set the simulator will run is the **coreset**: 50 workload files, each a scenario designed to probe one specific question — sixteen "pure single situation" calibration files, one per mode, six paired files that behave identically but mean different things (the story from section 1, made literal), transition arcs where the situation changes mid-run, files with deliberate distractions, files where familiar software is renamed to gibberish, files designed to fool name-based recognition on purpose, and, since Phase 7, one counterpart per mode in which the background work is something nobody asked for, so every row of the driver table has a matched pair. A second, generated set (the **generalset**) comes much later.
 
 One design property worth understanding, because it explains why the files look "too busy": every coreset file is deliberately **oversubscribed** — the tasks collectively demand roughly 100–150% of what one CPU lane can supply. That's not sloppiness; it's the precondition for measuring anything. If total demand were, say, 40% of the lane, every task would get all the CPU it wants no matter how dumb the scheduler is, all conditions would score identically, and the experiment would be blind. Scarcity is what forces the scheduler to make real choices, and real choices are what recognition quality can improve. (Each compiled file's demand is checked against this window at build time.)
 
@@ -217,7 +217,7 @@ A reference table — skim now, return when a term bites you. These are the mean
 | **archetype** | a reusable process-behavior template in the library, with sourced distributions |
 | **wlc** | the workload compiler: timeline + archetypes + seed → canonical file |
 | **seed** | the recorded RNG seed used at compile time; same seed ⇒ byte-identical file |
-| **coreset** | the 24 hand-designed workloads (in `-single`, the lane-scaled variant we run) |
+| **coreset** | the 50 hand-designed workloads (in `-single`, the lane-scaled variant we run) |
 | **generalset** | the future generated naturalistic set. Not built yet |
 | **channel** | a named mailbox a task can WAIT on; wakes are addressed to channels |
 | **spawn table** | a pre-written list of children an orchestrator task (like `make`) creates at run time via FORK |

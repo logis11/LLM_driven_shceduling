@@ -1,128 +1,446 @@
 {
-  "grid": {
-    "ambiguous": {
-      "t1": 0,
-      "t2": 0,
-      "t3": 1,
-      "t4": 0,
-      "t5": 0
+  "cells": [
+    {
+      "background_wanted": true,
+      "mode": "browsing",
+      "pre_committed_miss": 0,
+      "segments": 5,
+      "tiers": {
+        "t1": 5,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
     },
-    "backup": {
-      "t1": 1,
-      "t2": 0,
-      "t3": 0,
-      "t4": 0,
-      "t5": 0
+    {
+      "background_wanted": false,
+      "mode": "browsing",
+      "pre_committed_miss": 0,
+      "segments": 1,
+      "tiers": {
+        "t1": 1,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
     },
-    "browsing": {
-      "t1": 5,
-      "t2": 0,
-      "t3": 0,
-      "t4": 0,
-      "t5": 0
+    {
+      "background_wanted": true,
+      "mode": "office",
+      "pre_committed_miss": 0,
+      "segments": 3,
+      "tiers": {
+        "t1": 0,
+        "t2": 3,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
     },
-    "compile": {
-      "t1": 0,
-      "t2": 0,
-      "t3": 3,
-      "t4": 0,
-      "t5": 0
+    {
+      "background_wanted": false,
+      "mode": "office",
+      "pre_committed_miss": 0,
+      "segments": 1,
+      "tiers": {
+        "t1": 0,
+        "t2": 1,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
     },
-    "dev": {
-      "t1": 2,
-      "t2": 0,
-      "t3": 0,
-      "t4": 0,
-      "t5": 0
+    {
+      "background_wanted": true,
+      "mode": "mail",
+      "pre_committed_miss": 0,
+      "segments": 2,
+      "tiers": {
+        "t1": 1,
+        "t2": 0,
+        "t3": 1,
+        "t4": 0,
+        "t5": 0
+      }
     },
-    "gaming": {
-      "t1": 0,
-      "t2": 7,
-      "t3": 0,
-      "t4": 0,
-      "t5": 0
+    {
+      "background_wanted": false,
+      "mode": "mail",
+      "pre_committed_miss": 0,
+      "segments": 1,
+      "tiers": {
+        "t1": 1,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
     },
-    "idle": {
-      "t1": 0,
-      "t2": 1,
-      "t3": 0,
-      "t4": 0,
-      "t5": 0
+    {
+      "background_wanted": true,
+      "mode": "dev",
+      "pre_committed_miss": 0,
+      "segments": 3,
+      "tiers": {
+        "t1": 3,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
     },
-    "indexing": {
-      "t1": 0,
-      "t2": 0,
-      "t3": 1,
-      "t4": 0,
-      "t5": 0
+    {
+      "background_wanted": false,
+      "mode": "dev",
+      "pre_committed_miss": 0,
+      "segments": 1,
+      "tiers": {
+        "t1": 1,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
     },
-    "mail": {
-      "t1": 0,
-      "t2": 0,
-      "t3": 1,
-      "t4": 0,
-      "t5": 0
+    {
+      "background_wanted": true,
+      "mode": "photo",
+      "pre_committed_miss": 0,
+      "segments": 2,
+      "tiers": {
+        "t1": 2,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
     },
-    "media": {
-      "t1": 2,
-      "t2": 0,
-      "t3": 1,
-      "t4": 1,
-      "t5": 1
+    {
+      "background_wanted": false,
+      "mode": "photo",
+      "pre_committed_miss": 0,
+      "segments": 1,
+      "tiers": {
+        "t1": 1,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
     },
-    "meeting": {
-      "t1": 1,
-      "t2": 0,
-      "t3": 0,
-      "t4": 0,
-      "t5": 0
+    {
+      "background_wanted": true,
+      "mode": "meeting",
+      "pre_committed_miss": 0,
+      "segments": 2,
+      "tiers": {
+        "t1": 2,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
     },
-    "ml-train": {
-      "t1": 1,
-      "t2": 0,
-      "t3": 0,
-      "t4": 0,
-      "t5": 0
+    {
+      "background_wanted": false,
+      "mode": "meeting",
+      "pre_committed_miss": 0,
+      "segments": 1,
+      "tiers": {
+        "t1": 1,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
     },
-    "office": {
-      "t1": 0,
-      "t2": 3,
-      "t3": 0,
-      "t4": 0,
-      "t5": 0
+    {
+      "background_wanted": true,
+      "mode": "gaming",
+      "pre_committed_miss": 0,
+      "segments": 6,
+      "tiers": {
+        "t1": 0,
+        "t2": 6,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
     },
-    "photo": {
-      "t1": 1,
-      "t2": 0,
-      "t3": 0,
-      "t4": 0,
-      "t5": 0
+    {
+      "background_wanted": false,
+      "mode": "gaming",
+      "pre_committed_miss": 0,
+      "segments": 2,
+      "tiers": {
+        "t1": 0,
+        "t2": 2,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
     },
-    "render": {
-      "t1": 1,
-      "t2": 0,
-      "t3": 0,
-      "t4": 0,
-      "t5": 0
+    {
+      "background_wanted": true,
+      "mode": "media",
+      "pre_committed_miss": 0,
+      "segments": 5,
+      "tiers": {
+        "t1": 2,
+        "t2": 0,
+        "t3": 1,
+        "t4": 1,
+        "t5": 1
+      }
     },
-    "transcode": {
-      "t1": 0,
-      "t2": 1,
-      "t3": 0,
-      "t4": 0,
-      "t5": 0
+    {
+      "background_wanted": false,
+      "mode": "media",
+      "pre_committed_miss": 0,
+      "segments": 1,
+      "tiers": {
+        "t1": 1,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
     },
-    "video-edit": {
-      "t1": 3,
-      "t2": 0,
-      "t3": 0,
-      "t4": 0,
-      "t5": 0
+    {
+      "background_wanted": true,
+      "mode": "video-edit",
+      "pre_committed_miss": 0,
+      "segments": 4,
+      "tiers": {
+        "t1": 4,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
+    },
+    {
+      "background_wanted": false,
+      "mode": "video-edit",
+      "pre_committed_miss": 0,
+      "segments": 1,
+      "tiers": {
+        "t1": 1,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
+    },
+    {
+      "background_wanted": true,
+      "mode": "compile",
+      "pre_committed_miss": 0,
+      "segments": 3,
+      "tiers": {
+        "t1": 0,
+        "t2": 0,
+        "t3": 3,
+        "t4": 0,
+        "t5": 0
+      }
+    },
+    {
+      "background_wanted": false,
+      "mode": "compile",
+      "pre_committed_miss": 0,
+      "segments": 1,
+      "tiers": {
+        "t1": 0,
+        "t2": 0,
+        "t3": 1,
+        "t4": 0,
+        "t5": 0
+      }
+    },
+    {
+      "background_wanted": true,
+      "mode": "ml-train",
+      "pre_committed_miss": 0,
+      "segments": 2,
+      "tiers": {
+        "t1": 2,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
+    },
+    {
+      "background_wanted": false,
+      "mode": "ml-train",
+      "pre_committed_miss": 1,
+      "segments": 1,
+      "tiers": {
+        "t1": 1,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
+    },
+    {
+      "background_wanted": true,
+      "mode": "render",
+      "pre_committed_miss": 0,
+      "segments": 2,
+      "tiers": {
+        "t1": 2,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
+    },
+    {
+      "background_wanted": false,
+      "mode": "render",
+      "pre_committed_miss": 1,
+      "segments": 1,
+      "tiers": {
+        "t1": 1,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
+    },
+    {
+      "background_wanted": true,
+      "mode": "transcode",
+      "pre_committed_miss": 0,
+      "segments": 2,
+      "tiers": {
+        "t1": 0,
+        "t2": 2,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
+    },
+    {
+      "background_wanted": false,
+      "mode": "transcode",
+      "pre_committed_miss": 1,
+      "segments": 1,
+      "tiers": {
+        "t1": 0,
+        "t2": 1,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
+    },
+    {
+      "background_wanted": true,
+      "mode": "indexing",
+      "pre_committed_miss": 1,
+      "segments": 1,
+      "tiers": {
+        "t1": 0,
+        "t2": 0,
+        "t3": 1,
+        "t4": 0,
+        "t5": 0
+      }
+    },
+    {
+      "background_wanted": false,
+      "mode": "indexing",
+      "pre_committed_miss": 0,
+      "segments": 2,
+      "tiers": {
+        "t1": 0,
+        "t2": 0,
+        "t3": 2,
+        "t4": 0,
+        "t5": 0
+      }
+    },
+    {
+      "background_wanted": true,
+      "mode": "backup",
+      "pre_committed_miss": 0,
+      "segments": 2,
+      "tiers": {
+        "t1": 2,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
+    },
+    {
+      "background_wanted": false,
+      "mode": "backup",
+      "pre_committed_miss": 1,
+      "segments": 1,
+      "tiers": {
+        "t1": 1,
+        "t2": 0,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
+    },
+    {
+      "background_wanted": true,
+      "mode": "idle",
+      "pre_committed_miss": 0,
+      "segments": 1,
+      "tiers": {
+        "t1": 0,
+        "t2": 1,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
+    },
+    {
+      "background_wanted": false,
+      "mode": "idle",
+      "pre_committed_miss": 0,
+      "segments": 1,
+      "tiers": {
+        "t1": 0,
+        "t2": 1,
+        "t3": 0,
+        "t4": 0,
+        "t5": 0
+      }
     }
-  },
+  ],
+  "empty_cells": [],
+  "outside": [
+    {
+      "file": "c6-dual",
+      "mode": "ambiguous",
+      "segment": 0,
+      "tier": 3
+    }
+  ],
   "per_file": {
+    "c1-backup": [
+      {
+        "background_wanted": true,
+        "mode": "backup",
+        "scenario": [
+          "S7",
+          "S15"
+        ],
+        "tier": 1
+      }
+    ],
     "c1-browsing": [
       {
+        "background_wanted": true,
         "mode": "browsing",
         "scenario": [
           "S2"
@@ -132,6 +450,7 @@
     ],
     "c1-compile": [
       {
+        "background_wanted": true,
         "mode": "compile",
         "scenario": [
           "S11"
@@ -139,8 +458,19 @@
         "tier": 3
       }
     ],
+    "c1-dev": [
+      {
+        "background_wanted": true,
+        "mode": "dev",
+        "scenario": [
+          "S11"
+        ],
+        "tier": 1
+      }
+    ],
     "c1-gaming": [
       {
+        "background_wanted": true,
         "mode": "gaming",
         "scenario": [
           "S9"
@@ -150,6 +480,7 @@
     ],
     "c1-idle": [
       {
+        "background_wanted": true,
         "mode": "idle",
         "scenario": [
           "S18"
@@ -157,8 +488,31 @@
         "tier": 2
       }
     ],
+    "c1-indexing": [
+      {
+        "background_wanted": true,
+        "mode": "indexing",
+        "pre_committed_miss": true,
+        "scenario": [
+          "S11",
+          "S14"
+        ],
+        "tier": 3
+      }
+    ],
+    "c1-mail": [
+      {
+        "background_wanted": true,
+        "mode": "mail",
+        "scenario": [
+          "S4"
+        ],
+        "tier": 1
+      }
+    ],
     "c1-media": [
       {
+        "background_wanted": true,
         "mode": "media",
         "scenario": [
           "S13"
@@ -166,8 +520,30 @@
         "tier": 1
       }
     ],
+    "c1-meeting": [
+      {
+        "background_wanted": true,
+        "mode": "meeting",
+        "scenario": [
+          "S3"
+        ],
+        "tier": 1
+      }
+    ],
+    "c1-ml-train": [
+      {
+        "background_wanted": true,
+        "mode": "ml-train",
+        "scenario": [
+          "S11",
+          "S12"
+        ],
+        "tier": 1
+      }
+    ],
     "c1-office": [
       {
+        "background_wanted": true,
         "mode": "office",
         "scenario": [
           "S1",
@@ -177,8 +553,50 @@
         "tier": 2
       }
     ],
+    "c1-photo": [
+      {
+        "background_wanted": true,
+        "mode": "photo",
+        "scenario": [
+          "S6"
+        ],
+        "tier": 1
+      }
+    ],
+    "c1-render": [
+      {
+        "background_wanted": true,
+        "mode": "render",
+        "scenario": [
+          "S7",
+          "S8"
+        ],
+        "tier": 1
+      }
+    ],
+    "c1-transcode": [
+      {
+        "background_wanted": true,
+        "mode": "transcode",
+        "scenario": [
+          "S8"
+        ],
+        "tier": 2
+      }
+    ],
+    "c1-video-edit": [
+      {
+        "background_wanted": true,
+        "mode": "video-edit",
+        "scenario": [
+          "S7"
+        ],
+        "tier": 1
+      }
+    ],
     "c2-p1a": [
       {
+        "background_wanted": true,
         "mode": "dev",
         "scenario": [
           "S11"
@@ -186,6 +604,7 @@
         "tier": 1
       },
       {
+        "background_wanted": true,
         "mode": "ml-train",
         "scenario": [
           "S11",
@@ -196,6 +615,7 @@
     ],
     "c2-p1b": [
       {
+        "background_wanted": true,
         "mode": "dev",
         "scenario": [
           "S11"
@@ -203,6 +623,7 @@
         "tier": 1
       },
       {
+        "background_wanted": false,
         "mode": "indexing",
         "scenario": [
           "S11",
@@ -213,6 +634,7 @@
     ],
     "c2-p2a": [
       {
+        "background_wanted": true,
         "mode": "gaming",
         "scenario": [
           "S9"
@@ -220,6 +642,7 @@
         "tier": 2
       },
       {
+        "background_wanted": true,
         "mode": "gaming",
         "scenario": [
           "S9",
@@ -230,6 +653,7 @@
     ],
     "c2-p2b": [
       {
+        "background_wanted": true,
         "mode": "gaming",
         "scenario": [
           "S9"
@@ -237,6 +661,7 @@
         "tier": 2
       },
       {
+        "background_wanted": false,
         "mode": "gaming",
         "scenario": [
           "S9",
@@ -247,6 +672,7 @@
     ],
     "c2-p3a": [
       {
+        "background_wanted": true,
         "mode": "video-edit",
         "scenario": [
           "S7"
@@ -254,6 +680,7 @@
         "tier": 1
       },
       {
+        "background_wanted": true,
         "mode": "render",
         "scenario": [
           "S7",
@@ -264,6 +691,7 @@
     ],
     "c2-p3b": [
       {
+        "background_wanted": true,
         "mode": "video-edit",
         "scenario": [
           "S7"
@@ -271,6 +699,7 @@
         "tier": 1
       },
       {
+        "background_wanted": true,
         "mode": "backup",
         "scenario": [
           "S7",
@@ -281,6 +710,7 @@
     ],
     "c3-creation": [
       {
+        "background_wanted": true,
         "mode": "photo",
         "scenario": [
           "S6"
@@ -288,6 +718,7 @@
         "tier": 1
       },
       {
+        "background_wanted": true,
         "mode": "video-edit",
         "scenario": [
           "S7"
@@ -295,6 +726,7 @@
         "tier": 1
       },
       {
+        "background_wanted": true,
         "mode": "transcode",
         "scenario": [
           "S8"
@@ -304,6 +736,7 @@
     ],
     "c3-evening": [
       {
+        "background_wanted": true,
         "mode": "browsing",
         "scenario": [
           "S2"
@@ -311,6 +744,7 @@
         "tier": 1
       },
       {
+        "background_wanted": true,
         "mode": "gaming",
         "scenario": [
           "S9",
@@ -319,6 +753,7 @@
         "tier": 2
       },
       {
+        "background_wanted": true,
         "mode": "media",
         "scenario": [
           "S13"
@@ -328,6 +763,7 @@
     ],
     "c3-workday": [
       {
+        "background_wanted": true,
         "mode": "browsing",
         "scenario": [
           "S2"
@@ -335,6 +771,7 @@
         "tier": 1
       },
       {
+        "background_wanted": true,
         "mode": "office",
         "scenario": [
           "S1",
@@ -343,6 +780,7 @@
         "tier": 2
       },
       {
+        "background_wanted": true,
         "mode": "compile",
         "scenario": [
           "S11"
@@ -350,6 +788,7 @@
         "tier": 3
       },
       {
+        "background_wanted": true,
         "mode": "mail",
         "scenario": [
           "S4"
@@ -359,6 +798,7 @@
     ],
     "c4-compile": [
       {
+        "background_wanted": true,
         "mode": "compile",
         "scenario": [
           "S11"
@@ -368,6 +808,7 @@
     ],
     "c4-gaming": [
       {
+        "background_wanted": true,
         "mode": "gaming",
         "scenario": [
           "S9"
@@ -377,6 +818,7 @@
     ],
     "c4-office": [
       {
+        "background_wanted": true,
         "mode": "office",
         "scenario": [
           "S1",
@@ -388,6 +830,7 @@
     ],
     "c5-t3": [
       {
+        "background_wanted": true,
         "mode": "media",
         "scenario": [
           "S13"
@@ -397,6 +840,7 @@
     ],
     "c5-t4": [
       {
+        "background_wanted": true,
         "mode": "media",
         "scenario": [
           "S13"
@@ -406,6 +850,7 @@
     ],
     "c5-t5": [
       {
+        "background_wanted": true,
         "mode": "media",
         "scenario": [
           "S13"
@@ -425,6 +870,7 @@
     ],
     "c6-fold": [
       {
+        "background_wanted": true,
         "mode": "browsing",
         "scenario": [
           "S2"
@@ -432,6 +878,7 @@
         "tier": 1
       },
       {
+        "background_wanted": true,
         "mode": "meeting",
         "scenario": [
           "S3"
@@ -441,13 +888,194 @@
     ],
     "c6-spoof": [
       {
+        "background_wanted": true,
         "mode": "browsing",
         "scenario": [
           "S2"
         ],
         "tier": 1
       }
+    ],
+    "c7-backup": [
+      {
+        "background_wanted": false,
+        "mode": "backup",
+        "pre_committed_miss": true,
+        "scenario": [
+          "S7",
+          "S15"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-browsing": [
+      {
+        "background_wanted": false,
+        "mode": "browsing",
+        "scenario": [
+          "S2",
+          "S17"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-compile": [
+      {
+        "background_wanted": false,
+        "mode": "compile",
+        "scenario": [
+          "S11"
+        ],
+        "tier": 3
+      }
+    ],
+    "c7-dev": [
+      {
+        "background_wanted": false,
+        "mode": "dev",
+        "scenario": [
+          "S11",
+          "S17"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-gaming": [
+      {
+        "background_wanted": false,
+        "mode": "gaming",
+        "scenario": [
+          "S9",
+          "S17"
+        ],
+        "tier": 2
+      }
+    ],
+    "c7-idle": [
+      {
+        "background_wanted": false,
+        "mode": "idle",
+        "scenario": [
+          "S18",
+          "S17"
+        ],
+        "tier": 2
+      }
+    ],
+    "c7-indexing": [
+      {
+        "background_wanted": false,
+        "mode": "indexing",
+        "scenario": [
+          "S11",
+          "S14"
+        ],
+        "tier": 3
+      }
+    ],
+    "c7-mail": [
+      {
+        "background_wanted": false,
+        "mode": "mail",
+        "scenario": [
+          "S4",
+          "S17"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-media": [
+      {
+        "background_wanted": false,
+        "mode": "media",
+        "scenario": [
+          "S13",
+          "S17"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-meeting": [
+      {
+        "background_wanted": false,
+        "mode": "meeting",
+        "scenario": [
+          "S3",
+          "S17"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-ml-train": [
+      {
+        "background_wanted": false,
+        "mode": "ml-train",
+        "pre_committed_miss": true,
+        "scenario": [
+          "S11",
+          "S12"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-office": [
+      {
+        "background_wanted": false,
+        "mode": "office",
+        "scenario": [
+          "S1",
+          "S2",
+          "S4",
+          "S17"
+        ],
+        "tier": 2
+      }
+    ],
+    "c7-photo": [
+      {
+        "background_wanted": false,
+        "mode": "photo",
+        "scenario": [
+          "S6",
+          "S17"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-render": [
+      {
+        "background_wanted": false,
+        "mode": "render",
+        "pre_committed_miss": true,
+        "scenario": [
+          "S7",
+          "S8"
+        ],
+        "tier": 1
+      }
+    ],
+    "c7-transcode": [
+      {
+        "background_wanted": false,
+        "mode": "transcode",
+        "pre_committed_miss": true,
+        "scenario": [
+          "S8"
+        ],
+        "tier": 2
+      }
+    ],
+    "c7-video-edit": [
+      {
+        "background_wanted": false,
+        "mode": "video-edit",
+        "scenario": [
+          "S7",
+          "S17"
+        ],
+        "tier": 1
+      }
     ]
   },
-  "segments_total": 38
+  "segments_total": 64
 }

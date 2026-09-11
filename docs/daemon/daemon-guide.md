@@ -1,5 +1,5 @@
 # Daemon Guide — what to build, what's fixed, what's yours
-> Status: normative · Created 2026-08-28 · Updated 2026-09-07
+> Status: normative · Created 2026-08-28 · Updated 2026-09-10
 
 The second half of the daemon builder's onboarding (read `../background-guide.md` first — this one assumes it, and only it). It's a spec, but a deliberately breathing one: the **contract surface** (inputs, outputs, the information rules, determinism) is fixed and stated here in full; the **inside of the machine** (language details, prompt engineering, code layout, model hosting choices) is yours. Fixed things say "must." Everything else is a suggestion you may overrule in your own tree.
 
@@ -146,7 +146,7 @@ Plan for two model hosting setups behind one client interface: a hosted API for 
 **박이안's scope, now:** telemetry builder → recognizer interface with the trivial recognizers → validator, plus the local LLM inference setup (hosting, client interface, record/replay skeleton) in parallel. Concretely, the first milestone — no LLM and no driver table anywhere in it:
 
 1. Load one C1 workload's `*.workload.json`, extract the visible projection at the parse boundary, and produce its telemetry sequence — snapshot count and contents checkable by hand against the timeline.
-2. Run the `fixed`, `random` (seeded), and `oracle` recognizers through the machine as far as it exists — through the validator — and emit complete, valid **recognition logs** for all 24 workloads.
+2. Run the `fixed`, `random` (seeded), and `oracle` recognizers through the machine as far as it exists — through the validator — and emit complete, valid **recognition logs** for all 50 workloads (24 before Phase 7; the sixteen C1 additions and the sixteen C7 counterparts change nothing in the format — two new process names, `zoom` and `dkms`, and one more ground-truth annotation, `pre_committed_miss`, which the validator does not read).
 3. Rerun everything and diff: outputs bit-identical.
 
 **인지오's scope, alongside:** build the driver table on the ratified vocabulary (`../recognition-vocabulary.md`). When it lands, the config mapper + latency stamping close the loop and the daemon starts emitting **config schedules** — at which point `fixed`/`random`/`oracle` become the exact three conditions of the **RQ0 gate**, the project's first real experiment (is the gap between random and perfect recognition even big enough to measure?). Your milestone plus the simulator's milestone 0 *is* that experiment's machinery. The whitelist comes next (needs your rule list, no model), and the LLM conditions after that, once record/replay keeps them cheap.

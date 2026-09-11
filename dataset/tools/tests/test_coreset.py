@@ -82,6 +82,73 @@ def test_c5_names_only(coreset):
             assert trimmed == event  # identical but for the name
 
 
+C7_INTERACTIVE = ("browsing", "office", "mail", "dev", "photo", "meeting",
+                  "gaming", "media", "video-edit", "idle")
+C7_SAME_NAME = ("ml-train", "render", "transcode", "indexing", "backup")
+
+
+def ground_truth(canonical):
+    return [(s["mode"], s["attributes"]["background_wanted"])
+            for s in canonical["ground_truth"]]
+
+
+def test_c7_interactive_counterparts_inject_one_scan(coreset):
+    """Phase 7 spec decision 5: base plus exactly one task, clamscan on
+    cpu-batch alive for the whole segment; label flipped."""
+    for mode in C7_INTERACTIVE:
+        base, _ = coreset[f"c1-{mode}"]
+        variant, _ = coreset[f"c7-{mode}"]
+        base_events, variant_events = events_by_id(base), events_by_id(variant)
+        assert set(variant_events) - set(base_events) == {"scan"}, mode
+        for task_id, event in base_events.items():
+            assert variant_events[task_id] == event, (mode, task_id)
+        scan = variant_events["scan"]
+        assert scan["name"] == "clamscan" and scan["t"] == 0
+        assert ground_truth(base) == [(mode, True)]
+        assert ground_truth(variant) == [(mode, False)]
+
+
+def test_c7_compile_is_a_rename_only(coreset):
+    """Phase 7 spec decision 6: the P1b move — the orchestrator's name and
+    the label, nothing else."""
+    base, _ = coreset["c1-compile"]
+    variant, _ = coreset["c7-compile"]
+    base_events, variant_events = events_by_id(base), events_by_id(variant)
+    assert set(base_events) == set(variant_events)
+    for task_id, event in base_events.items():
+        if task_id == "build":
+            assert variant_events[task_id]["name"] == "dkms"
+            assert {**variant_events[task_id], "name": "make"} == event
+        else:
+            assert variant_events[task_id] == event
+    assert ground_truth(variant) == [("compile", False)]
+
+
+def test_c7_same_name_counterparts_flip_the_label_only(coreset):
+    """Phase 7 spec decision 3: events byte-identical to the base, only the
+    ground truth differs; four of the five are pre-committed misses."""
+    for mode in C7_SAME_NAME:
+        base, _ = coreset[f"c1-{mode}"]
+        variant, _ = coreset[f"c7-{mode}"]
+        assert events_by_id(base) == events_by_id(variant), mode
+        assert base["events"] == variant["events"], mode
+        assert ground_truth(variant) == [(mode, False)]
+        attrs = variant["ground_truth"][0]["attributes"]
+        assert bool(attrs.get("pre_committed_miss")) is (mode != "indexing"), mode
+
+
+def test_c7_and_derived_files_declare_calibration(repo_root):
+    """Phase 7 spec decision 7: an authored declaration, not inheritance."""
+    import yaml
+    for path in sorted((repo_root / "dataset" / "timelines" / "coreset").glob(
+            "*.variant.yaml")):
+        for variant in yaml.safe_load(path.read_text())["variants"]:
+            if variant["id"].startswith("c2-"):
+                continue
+            metas = [op["patch-meta"] for op in variant["ops"] if "patch-meta" in op]
+            assert metas == [{"demand": "calibration"}], variant["id"]
+
+
 def test_c6_fold_tasks_unchanged(coreset):
     base, _ = coreset["c1-browsing"]
     variant, _ = coreset["c6-fold"]

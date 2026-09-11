@@ -18,4 +18,5 @@ The dev workflow (phases → sub-tasks, dispatch, branching, wrap-up) lives in t
 - **Index.** `docs/README.md` lists every doc with what it answers, plus onboarding reading paths. A new, renamed, or re-statused doc updates the index in the same commit.
 - **Implementation plans go to `_dev/docs/plan/<slug>/`** as `task-<N.M>-<short>.md`.
 - **Nightly routine.** A scheduled Claude cloud Routine drains `autonomous-ready` issues into labelled PRs per the harness's autonomous contract; triage with `daily-work-harness:review-nightly`. Labels must be provisioned on the repo.
+- **Plan mode.** When the model is Fable at high effort or above, plan mode is not needed: go straight to implementation after the sub-task brief.
 - **Commit convention:** conventional commits — `<type>(<slug>/phase-<N>): …` for phase/sub-task work, bare `<type>: …` off-phase.

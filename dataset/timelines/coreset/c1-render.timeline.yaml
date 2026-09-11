@@ -1,0 +1,21 @@
+# C1 — single-situation calibration: pure render (building-plan §3 C1; Phase 7
+# spec decision 8). Task set lifted from c2-p3a segment 1 (kdenlive + ffmpeg
+# render); total_work resized from 75 s to 30 s so the job finishes inside the
+# 60 s segment (turnaround term).
+meta:
+  id: c1-render
+  seed: 113
+  demand: calibration
+
+segments:
+  - {from: 0s, to: 60s, mode: render,
+     attributes: {background_wanted: true, initiated: user}, scenario: [S7, S8]}
+
+tasks:
+  - {id: editor, name: kdenlive, archetype: desktop-interactive,
+     arrive: 0s, depart: 60s}
+  - {id: bulk, name: ffmpeg, archetype: cpu-batch, arrive: 2s,
+     bind: {total_work: 30s}}
+
+focus:
+  - {from: 2s, to: 58s, task: editor}

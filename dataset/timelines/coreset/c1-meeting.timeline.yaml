@@ -1,0 +1,25 @@
+# C1 — single-situation calibration: pure meeting (building-plan §3 C1; Phase 7
+# spec decision 8). The one novel C1 design: no other coreset segment carries a
+# call's own task set (c6-fold's meeting segment is the browser unchanged).
+# S3 binds to video-playback as the stated approximation of archetype-plan OQ-2
+# (encode + network components out of measurement reach); the call's audio
+# path binds audio-playback as S9's does; one electron-comms helper as C4's
+# discord overlay does. zoom per the S3 catalog row.
+meta:
+  id: c1-meeting
+  seed: 111
+  demand: calibration
+
+segments:
+  - {from: 0s, to: 60s, mode: meeting, attributes: {background_wanted: true},
+     scenario: [S3]}
+
+tasks:
+  - {id: video, name: zoom, archetype: video-playback,
+     arrive: 0s, depart: 60s}
+  - {id: voice, name: zoom, archetype: audio-playback,
+     arrive: 0s, depart: 60s}
+  - {id: helper, name: zoom, archetype: electron-comms,
+     arrive: 0s, depart: 60s}
+
+focus: []

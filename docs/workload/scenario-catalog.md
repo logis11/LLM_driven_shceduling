@@ -1,5 +1,5 @@
 # Workload Scenario Catalog — Scenarios, Processes, and Source Attribution
-> Status: normative · Created 2026-08-25 · Updated 2026-08-27
+> Status: normative · Created 2026-08-25 · Updated 2026-09-10
 
 > Companion to source-vetting and Q7. Naming decision: **Linux-native process names** (the daemon reads Linux /proc; canonicalization and cgroup logic assume the Linux process model). Where a taxonomy source names a Windows application, the mapping is recorded in the Source column.
 >
@@ -19,7 +19,7 @@
 | S8 | Batch transcode (background bulk) | HandBrakeCLI · ffmpeg | CpsMark+ multimedia processing (HandBrake CLI 1.3.0 — verbatim, cross-platform); SchedCP batch workloads (video transcoding) |
 | S9 | Gaming (native + Proton) | steam · steamwebhelper · gamescope · wineserver · <game>.exe (Proton) | PCMark 10 Gaming; Windows Game Mode (foreground-game category); LAVD characterization (wine/graphics/audio task chains); ananicy/CachyOS (Proton vs linux-native game classes) |
 | S10 | Game/content download (background, wanted) | steam (download workers) · transmission-daemon | Steam client "Allow downloads during gameplay" setting (Valve — documents both the scenario and the wanted/unwanted decision as a real user-facing toggle); ananicy catalog (download class) |
-| S11 | Software development: edit + compile | code · make · gcc · cc1 · ld · cargo · rustc | SYSmark 25 Productivity (software development / code compilation); kernel-build characterization (2,430 short-lived procs, arXiv 1705.05937); interbench Compile load; SchedCP (make -j) |
+| S11 | Software development: edit + compile | code · make · gcc · cc1 · ld · cargo · rustc · dkms (unwanted counterpart: the module rebuild the distro runs on a kernel change, C7) | SYSmark 25 Productivity (software development / code compilation); kernel-build characterization (2,430 short-lived procs, arXiv 1705.05937); interbench Compile load; SchedCP (make -j); dkms: `dkms-man`, `dkms-debian` |
 | S12 | ML training / local AI (background CPU/GPU hog, wanted) | python3 (pytorch train) · ollama | UL Procyon (local AI inference scenario); SchedCP evaluation (batch/ML-adjacent workloads on desktops-class machines) |
 | S13 | Media playback (audio/video) | mpv · vlc · spotify | PCMark 10 Battery Video profile; interbench Audio (50 ms/5%) + Video (16.7 ms/40%) task models; ananicy audio class (nice −11) |
 | S14 | File indexing (background, unwanted-deferrable) | tracker-miner-fs-3 · baloo_file · updatedb | ananicy/CachyOS catalog (ioclass idle indexer class); shipped defaults (GNOME tracker-miner, KDE baloo, plocate timers are stock background services) |

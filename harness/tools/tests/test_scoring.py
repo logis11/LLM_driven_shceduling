@@ -44,7 +44,7 @@ def test_committed_spec_lints_clean():
 
 def test_every_coreset_file_but_idle_has_terms(spec):
     compiled = {p.name.replace(".workload.json", "") for p in BUILD.glob("*.workload.json")}
-    assert compiled - set(spec["files"]) == {"c1-idle"}
+    assert compiled - set(spec["files"]) == {"c1-idle", "c7-idle"}
     assert set(spec["files"]) <= compiled
     assert all(f["terms"] for f in spec["files"].values())
 
@@ -100,13 +100,31 @@ def test_c3_terms(spec):
         ("batch", "cpu_delivered", 0.5)}
 
 
+C7_MODES = ["browsing", "office", "mail", "dev", "photo", "meeting", "gaming", "media",
+            "video-edit", "compile", "ml-train", "render", "transcode", "indexing", "backup"]
+BATCH_C7 = {"compile", "ml-train", "render", "transcode", "indexing", "backup"}
+
+
 def test_derived_files_carry_their_base_terms_verbatim(spec):
     bases = {wid: f["base"] for wid, f in spec["files"].items() if "base" in f}
-    assert bases == {"c4-office": "c1-office", "c4-compile": "c1-compile", "c4-gaming": "c1-gaming",
-                     "c5-t3": "c1-media", "c5-t4": "c1-media", "c5-t5": "c1-media",
-                     "c6-spoof": "c1-browsing", "c6-fold": "c1-browsing"}
+    expected = {"c4-office": "c1-office", "c4-compile": "c1-compile", "c4-gaming": "c1-gaming",
+                "c5-t3": "c1-media", "c5-t4": "c1-media", "c5-t5": "c1-media",
+                "c6-spoof": "c1-browsing", "c6-fold": "c1-browsing"}
+    expected.update({f"c7-{m}": f"c1-{m}" for m in C7_MODES})
+    assert bases == expected
     for wid, base in bases.items():
+        if wid.startswith("c7-") and wid[3:] in BATCH_C7:
+            continue
         assert terms(spec, wid) == terms(spec, base), wid
+
+
+def test_c7_batch_counterparts_drop_only_the_batch_term(spec):
+    """Unwanted work carries no term (Phase 7 spec decision 10)."""
+    for mode in BATCH_C7:
+        base, variant = terms(spec, f"c1-{mode}"), terms(spec, f"c7-{mode}")
+        kept = [t for t in base if t["metric"] not in ("turnaround", "cpu_delivered")]
+        assert variant == kept, mode
+        assert len(base) == len(variant) + 1, mode
 
 
 def test_c6_dual_scores_its_two_foregrounds(spec):
@@ -204,6 +222,27 @@ def test_declared_base_must_match_the_variant_recipe_and_terms_must_equal(tmp_pa
     doc = minimal(**{"c1-office": {"terms": base_terms, "base": "c1-media"}})
     errs = errors_of(tmp_path, doc)
     assert any("c1-office" in e and "not a variant" in e for e in errs)
+
+
+def test_flipped_counterpart_may_drop_only_batch_terms(tmp_path):
+    base_terms = [term(entity="editor"),
+                  term(entity="build", metric="turnaround", aggregate="turnaround",
+                       direction="lower", weight=1.0)]
+    # c7-compile flips c1-compile to unwanted: dropping the build's term is the rule
+    doc = minimal(**{"c1-compile": {"terms": base_terms},
+                     "c7-compile": {"base": "c1-compile", "terms": [term(entity="editor")]}})
+    assert not any("c7-compile" in e for e in errors_of(tmp_path, doc))
+    # keeping the batch term, or dropping the foreground's, is an error
+    doc = minimal(**{"c1-compile": {"terms": base_terms},
+                     "c7-compile": {"base": "c1-compile", "terms": copy.deepcopy(base_terms)}})
+    assert not any("c7-compile" in e for e in errors_of(tmp_path, doc))  # verbatim is always legal
+    doc = minimal(**{"c1-compile": {"terms": base_terms},
+                     "c7-compile": {"base": "c1-compile", "terms": [base_terms[1]]}})
+    assert any("c7-compile" in e and "batch terms" in e for e in errors_of(tmp_path, doc))
+    # a label-invariant variant gets no such latitude
+    doc = minimal(**{"c1-compile": {"terms": base_terms},
+                     "c4-compile": {"base": "c1-compile", "terms": [term(entity="editor")]}})
+    assert any("c4-compile" in e and "verbatim" in e for e in errors_of(tmp_path, doc))
 
 
 def test_variant_without_a_base_must_differ_from_its_base(tmp_path):

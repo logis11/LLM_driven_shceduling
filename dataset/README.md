@@ -12,11 +12,11 @@ schema/
 timelines/
   coreset/             # authored core set: *.timeline.yaml (novel) + *.variant.yaml (derivation recipes)
 build/                 # compiled artifacts — NOT committed; verified via build.manifest.json
-  coreset-native/      # 24 workloads, native lane counts
-  coreset-single/      # same 24, lane-scaled to a single lane (experiments run on these)
+  coreset-native/      # 50 workloads, native lane counts
+  coreset-single/      # same 50, lane-scaled to a single lane (experiments run on these)
 build.manifest.json    # lockfile: input/output hashes of the last blessed build + per-file static demand (utilization, demand_class)
-coverage-grid.json     # mode × tier coverage grid over all segments (signed off)
-meas/                  # meas-ci campaign outputs: analysis summary + verified name tables
+coverage-grid.json     # driver-table cell (mode × background_wanted) × tier coverage grid over all segments; all 32 cells instanced (CI-enforced)
+meas/                  # meas-ci campaign outputs: analysis summary + verified name tables (names/: run 1; names/run-2/: the Phase 7 dkms run)
 tools/                 # all executable tooling (see below)
 Makefile               # entry point for everything in this tree
 ```
@@ -71,23 +71,24 @@ Field semantics are normative in `docs/simulator/interpretation-contract.md`; th
 
 ### Coresets
 
-Two compiled variants of the same 24 workloads (~50 labeled segments total):
+Two compiled variants of the same 50 workloads (64 labeled segments total):
 
 | Set | What it is | Use |
 |---|---|---|
 | `build/coreset-single/` | lane-scaled so total demand targets one CPU lane (~100–150%) | **all experiments run on these** |
 | `build/coreset-native/` | native lane counts, no scaling | reference / sanity |
 
-The 24 files come in six groups (design rationale: `docs/workload/building-plan.md`):
+The 50 files come in seven groups (design rationale: `docs/workload/building-plan.md`):
 
 | Group | Files | The question it answers |
 |---|---|---|
-| **C1** calibration | 6 | Can a recognizer handle the *easy* case — one unmistakable situation per file (pure gaming, pure office, pure compile…)? This is the floor everything should pass, and the ground where a name whitelist looks perfect. |
+| **C1** calibration | 16 | Can a recognizer handle the *easy* case — one unmistakable situation per file, one file per mode of the menu (pure gaming, pure office, pure compile…)? This is the floor everything should pass, and the ground where a name whitelist looks perfect. |
 | **C2** intent pairs | 6 (3 pairs) | When two workloads **behave identically** and differ only in intent — an ML training run vs. an indexer nobody asked for, a game download vs. a virus scan — can anything separate them? The two files in a pair differ in exactly one segment, so any difference in outcome is attributable to that one change. |
 | **C3** transition arcs | 3 | When the situation *changes mid-run* (browsing → gaming → media over an evening), how quickly and correctly does recognition follow the change? |
 | **C4** distractor injection | 3 | If an irrelevant process appears mid-situation (Discord pops up during a game, chrome opens during a compile), does the reading wrongly flip? Each file is a clone of a C1/C3 file plus one injected process, so it's measured against its own clean original. |
 | **C5** familiarity ladder | 3 | Does recognition survive as process names get less recognizable — `firefox` → `soffice.bin` → `tracker-miner-fs-3` → invented names no software carries? Behavior is held identical across tiers; only the names change. A whitelist scores zero on the invented tiers by construction. |
 | **C6** resolution limits | 3 | Where does name-based recognition break *by design*? A miner named `chrome`, a change happening inside one process (browser tab → video call), two equally-active foregrounds. These are known, pre-committed misses — shipped so the limits are measured, not just claimed. |
+| **C7** attribute counterparts | 16 | Does the reading flip when the background work is *unwanted*? One counterpart per mode, derived from its C1 base: interactive modes gain an unwanted scan, batch modes have their job re-cast as one nobody asked for. Every driver-table cell has a one-diff pair; the five cells that differ by intent alone ship as pre-committed misses. |
 
 ### Generalsets
 
@@ -110,7 +111,7 @@ CI (`.github/workflows/dataset.yml`) runs `lint` / `test` / `check` on every PR 
 
 ```
 tools/compile.py       # CLI: timelines -> canonical (+ --check verify mode)
-tools/derive.py        # CLI: variant recipes -> derived timelines + coverage grid (+ --check)
+tools/derive.py        # CLI: variant recipes -> derived timelines + coverage grid (+ --check; --require-coverage fails on an empty cell)
 tools/lint.py          # CLI: all lints (+ --freeze for freeze-readiness)
 tools/wlc/             # wlc, the workload compiler — the library behind those CLIs:
                        #   timeline.py / compiler.py  parse + compile
@@ -119,7 +120,7 @@ tools/wlc/             # wlc, the workload compiler — the library behind those
                        #   estimate.py                static per-file CPU-demand estimate
                        #   linter.py / grid.py        lint rules, coverage grid
 tools/meas/            # meas-ci campaign tooling (samplers, analyzer, name verification)
-tools/tests/           # invariant suite (47 tests) + fixtures
+tools/tests/           # invariant suite (71 tests) + fixtures
 ```
 
 ## Rules of the tree
@@ -135,6 +136,6 @@ tools/tests/           # invariant suite (47 tests) + fixtures
 | Question | Doc |
 |---|---|
 | What do the canonical ops/fields *mean*? | `docs/simulator/interpretation-contract.md` |
-| Why this set design, what are C1–C6? | `docs/workload/building-plan.md` |
+| Why this set design, what are C1–C7? | `docs/workload/building-plan.md` |
 | How is an archetype authored/measured? | `docs/workload/archetype-plan.md` |
 | Where does a number come from? | `docs/references.md` + `sources.yaml` |

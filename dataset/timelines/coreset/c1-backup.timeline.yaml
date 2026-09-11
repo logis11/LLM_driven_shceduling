@@ -1,0 +1,21 @@
+# C1 — single-situation calibration: pure backup (building-plan §3 C1; Phase 7
+# spec decision 8). Task set lifted from c2-p3b segment 1 (kdenlive + borg,
+# scheduled and wanted, as P3b labels it); total_work resized from 75 s to
+# 30 s so the job finishes inside the 60 s segment (turnaround term).
+meta:
+  id: c1-backup
+  seed: 116
+  demand: calibration
+
+segments:
+  - {from: 0s, to: 60s, mode: backup,
+     attributes: {background_wanted: true, initiated: scheduled}, scenario: [S7, S15]}
+
+tasks:
+  - {id: editor, name: kdenlive, archetype: desktop-interactive,
+     arrive: 0s, depart: 60s}
+  - {id: bulk, name: borg, archetype: io-stream, arrive: 2s,
+     bind: {total_work: 30s}}
+
+focus:
+  - {from: 2s, to: 58s, task: editor}

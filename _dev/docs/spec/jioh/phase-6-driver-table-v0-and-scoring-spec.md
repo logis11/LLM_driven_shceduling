@@ -9,13 +9,13 @@ Stage 3 of `_dev/docs/rq0-preparation-notes.md`, plus the harness side of `docs/
 - The switch-overhead primitive, aggregates, fixture and check tool from the 2026-09-08 memo's harness-side action plan.
 - The pair review of the prior table.
 
-Out of scope: file classification for the gate (judging, reporting-only, separate, excluded), the `random` draw definition, the threshold — all Phase 8's gate spec. The calibrated table.
+Out of scope: file classification for the gate (judging, reporting-only, separate, excluded), the `random` draw definition, the threshold — all Phase 8's RQ0 gate spec. The calibrated table.
 
 ## Locked decisions
 
 ### 1. Row scope
 
-All 32 rows are authored, each with `basis: theory` and a one-sentence justification on the row and on the entry. No row is filled with schema defaults. The coreset exercises 17 legal rows (16 in C1–C4); the other 15 are authored the same way because the `random` condition may land on any row.
+All 32 rows are authored, each with `basis: theory` and a one-sentence justification on the row and on the entry. No row is filled with schema defaults. The coreset exercises 17 legal rows (16 in C1–C4); the other 15 are authored the same way because the `random` condition may land on any row. *Superseded 2026-09-10 (Phase 7 decision 1): all 32 rows have a coreset instance, one pair per mode.*
 
 ### 2. Algorithm policy
 
@@ -23,7 +23,7 @@ Any of the four algorithms may be named per row, chosen by theory. How many algo
 
 ### 3. Pair review scope
 
-Two lists. The 16 same-mode `wanted=true/false` pairs, and the three C2 row-pairs as the files actually exercise them: `ml-train/true` vs `indexing/false` (p1), `gaming/true` vs `gaming/false` (p2), `render/true` vs `backup/true` (p3). Only p2 is a same-mode pair; the other two are cross-mode distances the lint does not see.
+*Extended 2026-09-10 (Phase 7 decision 13): a third list, the 16 C7 pairs.* Two lists. The 16 same-mode `wanted=true/false` pairs, and the three C2 row-pairs as the files actually exercise them: `ml-train/true` vs `indexing/false` (p1), `gaming/true` vs `gaming/false` (p2), `render/true` vs `backup/true` (p3). Only p2 is a same-mode pair; the other two are cross-mode distances the lint does not see.
 
 ### 4. "Far enough apart"
 
@@ -31,7 +31,7 @@ A written judgement per pair, no numeric threshold: one sentence naming which kn
 
 ### 5. Score form
 
-One term type. A term names an entity, a primitive, a filter (`cause`, time window), an aggregate, a direction, and a weight. A file's score is the weighted sum of its terms' normalised shares. No constraint form; anything constraint-shaped is a guard and belongs to the gate spec.
+One term type. A term names an entity, a primitive, a filter (`cause`, time window), an aggregate, a direction, and a weight. A file's score is the weighted sum of its terms' normalised shares. No constraint form; anything constraint-shaped is a guard and belongs to the RQ0 gate spec.
 
 ### 6. Scored aggregate per term kind
 
@@ -67,7 +67,7 @@ Per-task terms, no explicit windows (focus and task lifetimes window them). Each
 
 ### 14. Exclusions
 
-The scoring spec carries terms only, no file classification. Derived files carry their base's terms verbatim: C4 from its C1 base, C5 from `c1-media`, `c6-spoof` and `c6-fold` from `c1-browsing`. `c6-dual` carries chain miss rate 1.0 and editor P99 1.0. `c1-idle` has no entry. Which files judge, report, are read as deltas, or are excluded from aggregation is the gate spec's list alone; the intended classification is recorded in the phase archive for Phase 8.
+The scoring spec carries terms only, no file classification. *Amended 2026-09-10 (Phase 7 decision 10): a C7 counterpart that flips its base to unwanted carries the base's terms minus the batch term; verbatim holds for every other derived file.* Derived files carry their base's terms verbatim: C4 from its C1 base, C5 from `c1-media`, `c6-spoof` and `c6-fold` from `c1-browsing`. `c6-dual` carries chain miss rate 1.0 and editor P99 1.0. `c1-idle` has no entry. Which files judge, report, are read as deltas, or are excluded from aggregation is the RQ0 gate spec's list alone; the intended classification is recorded in the phase archive for Phase 8.
 
 ### 15. Scoring spec placement and lint
 

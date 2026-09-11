@@ -124,6 +124,20 @@ per file in `dataset/build.manifest.json` under `demand`: five C1 files sit at
 0.00–0.54 of the lane, `c1-gaming` at 1.46. Judging set = the six C2 files, all
 inside the demand window; C1 stays reporting-only.
 
+**Re-decided 2026-09-10 (Phase 7, 7.7).** C1 is sixteen files (the ten new
+bases sit at 0.45–0.97) and C7 adds one counterpart per mode (interactive ones
+at 1.45–1.53, `c7-gaming` 2.46, batch ones equal to their bases), every derived
+file `calibration` by authored declaration. The judging set is no longer the
+six C2 files: a file judges when it is one side of a label-varying pair and its
+scored term registers the rows' difference by design — demand is not a
+criterion (Q8's per-file headroom admission test is the gate's own per-file
+criterion, §8). Twenty-seven files: C2, the six batch C1 bases, the fifteen C7
+counterparts with a term. The ten interactive and periodic C1 bases stay
+reporting-only, and the building plan's "whitelist scores perfectly here" line
+covers all sixteen. Pair review findings 4–5
+(`docs/daemon/prior-table-pair-review.md`) are notes on judging members, not
+exclusions. Full lists and reasons in §8.
+
 The inference above does not hold as stated. Demand bounds *throughput*
 headroom, not *latency* headroom: at 0.8 utilisation two tasks still become
 runnable at the same instant, and a keystroke arriving while a batch task holds
@@ -441,7 +455,7 @@ Must accompany every reported number:
 
 - provenance breakdown (`fallback` / `held` share) — a condition that scored
   well while mostly running fallback demonstrated nothing; exemptions live in
-  the gate spec as data (`guard_exemptions`), never in guard code;
+  the RQ0 gate spec as data (`guard_exemptions`), never in guard code;
 - config age;
 - starvation floor respected in every condition;
 - determinism (same input twice → byte-identical trace);
@@ -518,16 +532,24 @@ hand-writing a mock trace forces Layer-1 gaps into the open immediately.
 
 ## 8. Gate design
 
-Judging scope — **[proposal; §4.1 closed 09-06]**:
+Judging scope — **[§4.1 closed 09-06; re-decided 09-10 with Phase 7's coreset]**:
 
-- **C2 (6 files)** — the judging set.
-- **C1 (6)** — run; used for executor-mapping sanity and as the honest baseline
-  where the whitelist should score perfectly (`building-plan` §3 C1). Gap sizes
-  recorded, not used for the pass/fail decision.
-- **C3 (3), C4 (3)** — run and record. C3 is oversubscribed and multi-segment,
-  so it may carry more headroom than C2; worth considering for the judging set,
-  though transition effects would need to be isolated.
+- **Rule.** A file judges when it is one side of a label-varying pair and its
+  scored term registers the rows' difference by design. Demand is not a
+  criterion: the per-file headroom admission test (open-questions Q8) is the
+  gate's own per-file criterion, below.
+- **Judging (27):** C2 (6); the six batch C1 bases (their wanted LOTTERY share
+  is what a random row removes, the turnaround term registers it); the fifteen
+  C7 counterparts with a term.
+- **Reporting-only, by the same rule:** the ten interactive and periodic C1
+  bases (nothing runs behind the foreground) — still the honest baseline where
+  the whitelist should score perfectly (`building-plan` §3 C1); C3 (no pair;
+  transition costs are reported through the switch-window aggregates, not mixed
+  into the gate); C4 (label-invariant pairs, read as deltas against their
+  originals); `c1-idle`, `c7-idle` (no term).
 - **C5, C6** — run, but excluded from Layer-2 aggregation.
+- **Layer-1 exclusion (new):** the five pre-committed-miss files judge (the
+  gate needs labels, not recognizability) but leave recognition accuracy.
 
 The pass criterion should be **fixed in a committed file before execution**, not
 in a meeting. Written down as data, a change after seeing the numbers leaves a
@@ -535,8 +557,29 @@ git trace.
 
 ```yaml
 rq0:
-  judging_files: [c2-p1a, c2-p1b, c2-p2a, c2-p2b, c2-p3a, c2-p3b]
-  reporting_only: [c1-*, c3-*, c4-*]
+  judging_rule: >
+    Decided 2026-09-10 (Phase 7, 7.7). A file judges when it is one side of a
+    label-varying pair and its scored term registers the rows' difference by
+    design. Demand is not a criterion; the per-file admission test below is.
+  judging_files: [c2-p1a, c2-p1b, c2-p2a, c2-p2b, c2-p3a, c2-p3b, c1-compile, c1-ml-train, c1-render, c1-transcode, c1-indexing, c1-backup, c7-browsing, c7-office, c7-mail, c7-dev, c7-photo, c7-meeting, c7-gaming, c7-media, c7-video-edit, c7-compile, c7-ml-train, c7-render, c7-transcode, c7-indexing, c7-backup]
+  reporting_only: [c1-browsing, c1-office, c1-mail, c1-dev, c1-photo, c1-meeting, c1-media, c1-video-edit,
+                   c1-idle, c7-idle, c3-*, c4-*]
+  judging_notes:                     # caveats on members — how to read the number, never a reason to drop it
+    c7-gaming: >
+      Base already needs 1.46 lanes; with the scan, frames miss under every
+      row, so only the gap between rows reads, not the absolute miss rate.
+    c7-meeting: >
+      Both of its rows are EDF; TIMER consumers sit in the deadline class and
+      one residual slice (2 ms) is under every tick tolerance, so the gap
+      against a drawn row comes from the algorithm (EDF vs MLFQ/LOTTERY/FIFO),
+      the cap axis is unmeasured (pair review finding 5).
+    c7-media: same as c7-meeting.
+  excluded_layer1: [c1-indexing, c7-ml-train, c7-render, c7-transcode, c7-backup]   # pre_committed_miss segments: out of recognition accuracy, in Layer 2
+  per_file_criterion: >
+    The open-questions record's Q8 admission test, applied as the gate's own
+    rule: pass = at least K of the judging files show a per-file oracle-vs-random
+    gap of at least g. K and g set here before execution (Stage 5). No file is
+    removed after its gap is seen; a statistic no single file can dominate.
   separate_reporting:
     c1-gaming:
       reason: >
@@ -579,7 +622,7 @@ level. It is **not** added to the judging set — no pair, so no attribute
 variation; and choosing the highest-demand file after reading demand numbers
 is an optimistic choice (demand is an input property, not an outcome, so not
 p-hacking — but selection along an axis correlated with expected gap size). It
-is a pre-registered separate reporting line in the gate spec, reason recorded
+is a pre-registered separate reporting line in the RQ0 gate spec, reason recorded
 in-file, so whichever way the result lands the timing of the choice is in git.
 
 Note that `random` as a condition is **not yet defined**: what it draws
@@ -590,14 +633,16 @@ distribution. Both the draw definition and the seed count need agreement with
 
 ### What passing does and does not establish
 
-Passing supports exactly this: *in these three pairs, perfect recognition
-through the v0 table beats random recognition, so recognition quality has room
+Passing supports exactly this: *on at least K of the twenty-seven judging
+files — the three C2 pairs, the six batch C1 bases with their counterparts, and
+the interactive and periodic counterparts — perfect recognition through the v0
+table beats random recognition by at least g, so recognition quality has room
 to matter.* That is what RQ0 asks, and it is enough to proceed.
 
 Passing with an untuned table is, if anything, stronger evidence than passing
 with a tuned one — the "you tuned it to the test set" objection does not apply.
 
-It does not establish that C1/C3/C4 will show gaps, and it does not establish
+It does not establish that the interactive C1 bases, C3, or C4 will show gaps, and it does not establish
 that the table chose *good* configurations — only that its rows differ. A bad
 table can produce a gap. That question is RQ5's third check and remains open
 after the gate.
@@ -705,7 +750,7 @@ Meaningful only once the table's format (0.5) and both metric layers (1, 3) are
 fixed — the shape of the instrument has to be settled before a threshold on its
 output means anything.
 
-- [ ] **5.1** Commit the gate spec file.
+- [ ] **5.1** Commit the RQ0 gate spec file.
 - [ ] **5.2** Set the threshold — possible only now that both layers are fixed,
       and necessarily before seeing any numbers.
 - [ ] **5.3** Fix the `random` condition's draw definition and seed count
@@ -728,7 +773,7 @@ Dependent on the two builders.
 - [ ] **6.5** End-to-end smoke: one file, `fixed`, daemon → simulator → harness.
 - [ ] **6.6** Run RQ0: all coreset files × 3 conditions, `random` across N seeds.
 - [ ] **6.7** **Check guards before looking at results.**
-- [ ] **6.8** Judge per the gate spec. On failure, config search before anything
+- [ ] **6.8** Judge per the RQ0 gate spec. On failure, config search before anything
       else (§4.3).
 
 ---
