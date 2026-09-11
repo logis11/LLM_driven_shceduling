@@ -204,35 +204,45 @@ def test_utilisation_zero_fails_only_where_the_file_has_terms(tmp_path, spec):
 
 # ------------------------------------------------------------- pair guards
 
-def _pair_run(tmp_path, wid, condition, sha, seed="", boot=""):
-    out = tmp_path / f"{wid}-{condition}-{seed or 'x'}-{boot or 'x'}.csv"
+def _pair_run(tmp_path, wid, condition, body, seed="", boot="", trace=True):
+    """A run whose trace is a header naming `wid` plus `body`: two pair members
+    with the same body differ in their header line alone."""
+    stem = f"{wid}-{condition}-{seed or 'x'}-{boot or 'x'}"
+    out = tmp_path / f"{stem}.csv"
+    tr = tmp_path / f"{stem}.trace.jsonl"
+    tr.write_text(f'{{"event":"meta","workload_id":"{wid}","condition":"{condition}","sim":"mock@0",'
+                  f'"schedule_entries":1}}\n' + body)
+    sha = hashlib.sha256(tr.read_bytes()).hexdigest()
     records.write_csv([{"workload_id": wid, "condition": condition, "table": "prior", "seed": seed,
                         "boot_default": boot, "sim": "mock@0", "source_sha256": sha,
                         "entity": "lane", "metric": "busy", "t": 100, "value": 50}], out)
     return Run(workload_id=wid, condition=condition, table="prior", seed=seed, boot_default=boot,
                records=out, schedule=None, log=None, workload=None, rerun_trace=None,
-               guard_messages=[])
+               guard_messages=[], trace=tr if trace else None)
 
 
-SAME = "a" * 64
-OTHER = "b" * 64
+SAME = '{"event":"task_arrive","t":0,"task":"editor","source":"file"}\n'
+OTHER = '{"event":"task_arrive","t":0,"task":"editor","source":"file"}\n' \
+        '{"event":"ready","t":0,"task":"editor","cause":"arrive"}\n'
 
 
-def test_c2_pair_under_oracle_fails_on_identical_traces(tmp_path, spec):
+def test_c2_pair_under_oracle_fails_on_identical_bodies_despite_differing_headers(tmp_path, spec):
     runs = [_pair_run(tmp_path, "c2-p1a", "oracle", SAME), _pair_run(tmp_path, "c2-p1b", "oracle", SAME)]
     rows = evaluate(runs, spec, [])
     a = _row(rows, "c2_pair", workload_id="c2-p1a")
     b = _row(rows, "c2_pair", workload_id="c2-p1b")
     assert a["result"] == "fail" and a["partner"] == "c2-p1b"
     assert b["result"] == "fail" and b["partner"] == "c2-p1a"
+    assert hashlib.sha256(runs[0].trace.read_bytes()).hexdigest() != \
+        hashlib.sha256(runs[1].trace.read_bytes()).hexdigest()          # the whole files do differ
 
 
-def test_c2_pair_under_oracle_passes_on_different_traces(tmp_path, spec):
+def test_c2_pair_under_oracle_passes_on_different_bodies(tmp_path, spec):
     runs = [_pair_run(tmp_path, "c2-p1a", "oracle", SAME), _pair_run(tmp_path, "c2-p1b", "oracle", OTHER)]
     assert _row(evaluate(runs, spec, []), "c2_pair", workload_id="c2-p1a")["result"] == "pass"
 
 
-def test_c2_pair_under_fixed_requires_identity_where_flagged(tmp_path, spec):
+def test_c2_pair_under_fixed_requires_identical_bodies_where_flagged(tmp_path, spec):
     runs = [_pair_run(tmp_path, "c2-p1a", "fixed", SAME), _pair_run(tmp_path, "c2-p1b", "fixed", OTHER),
             _pair_run(tmp_path, "c2-p2a", "fixed", SAME), _pair_run(tmp_path, "c2-p2b", "fixed", OTHER)]
     rows = evaluate(runs, spec, [])
@@ -240,6 +250,13 @@ def test_c2_pair_under_fixed_requires_identity_where_flagged(tmp_path, spec):
     assert _row(rows, "c2_pair", workload_id="c2-p2a")["result"] == "not_applicable"
     same = [_pair_run(tmp_path, "c2-p1a", "fixed", SAME), _pair_run(tmp_path, "c2-p1b", "fixed", SAME)]
     assert _row(evaluate(same, spec, []), "c2_pair", workload_id="c2-p1b")["result"] == "pass"
+
+
+def test_c2_pair_without_a_trace_fails_with_a_reason(tmp_path, spec):
+    runs = [_pair_run(tmp_path, "c2-p1a", "oracle", SAME, trace=False),
+            _pair_run(tmp_path, "c2-p1b", "oracle", OTHER)]
+    row = _row(evaluate(runs, spec, []), "c2_pair", workload_id="c2-p1a")
+    assert row["result"] == "fail" and "trace" in row["reason"]
 
 
 def test_c2_pair_under_random_is_not_applicable(tmp_path, spec):

@@ -15,8 +15,9 @@ check; a `fixed` run of a pair whose events differ).
 
 Inputs per run (`Run`): its records file (identity and the trace hash), the
 config schedule, the recognition log, the compiled workload (ground truth), an
-optional rerun trace, and the primitives' guard messages the records build
-returned. The aggregates rows are passed once for the set. Exemptions are
+optional rerun trace, the trace itself (the pair check hashes its body, header
+left out, since the header names the workload), and the primitives' guard
+messages the records build returned. The aggregates rows are passed once for the set. Exemptions are
 per-experiment data (the RQ0 gate spec), never here.
 
 `lint_spec` checks the spec against its schema, its ids against this module's
@@ -65,6 +66,7 @@ class Run:
     workload: Optional[pathlib.Path]
     rerun_trace: Optional[pathlib.Path]
     guard_messages: Optional[List[str]]
+    trace: Optional[pathlib.Path] = None      # the trace itself, for the pair check's body hash
 
     @property
     def identity(self):
@@ -111,6 +113,18 @@ def _agg(ctx, entity, metric, aggregate):
 def _sha256(path) -> str:
     h = hashlib.sha256()
     with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _body_sha256(path) -> str:
+    """The trace's hash with its header line left out: the header names the
+    workload, so two files' traces could never be byte-identical as wholes.
+    The pair check compares what the simulator did, not what it was called."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        f.readline()
         for chunk in iter(lambda: f.read(1 << 20), b""):
             h.update(chunk)
     return h.hexdigest()
@@ -242,15 +256,20 @@ def c2_pair(run, ctx, params):
     if partner is None:
         return _fail(f"partner {other} not in the run set (condition {run.condition}, seed {run.seed!r}, "
                      f"boot_default {run.boot_default!r})")
-    same = ctx["hashes"][partner.identity] == ctx["sha256"]
+    if run.trace is None or partner.trace is None:
+        missing = run.workload_id if run.trace is None else other
+        return _fail(f"no trace recorded for {missing}; the pair check compares the traces' bodies",
+                     partner=other)
+    mine, theirs = _body_sha256(run.trace), _body_sha256(partner.trace)
+    same = mine == theirs
     if run.condition == "fixed":
         if not same:
             return _fail(f"traces differ under fixed where the pair's events are identical apart from the label "
                          f"({run.workload_id} vs {other})", partner=other)
         return _pass(partner=other)
     if same:
-        return _fail(f"identical traces under {run.condition}: the configuration never changed between "
-                     f"{run.workload_id} and {other}", partner=other)
+        return _fail(f"identical trace bodies under {run.condition}: the configuration never changed "
+                     f"between {run.workload_id} and {other} ({mine[:12]})", partner=other)
     return _pass(partner=other)
 
 

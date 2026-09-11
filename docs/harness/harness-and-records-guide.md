@@ -1202,7 +1202,7 @@ score가 아니라 pass/fail이에요. 모든 보고 숫자 옆에 붙어요. gu
 | utilisation sanity | `busy / T_end` | 1.0 이하, 그리고 scoring spec에 term이 있는 파일이면 0 초과 | 물리적으로 말이 되나; 파싱은 됐는데 비어 있는 trace를 잡음 |
 | tick count | primitives가 records를 만들면서 낸 consistency 메시지(tail iteration = head tick, wake 개수, `deadline` 교차검사, `config_applied`와 schedule의 일치) | 메시지 0개 | simulator가 frame이나 wake를 빠뜨리지 않았나 |
 | `validation` = `provenance` | recognition log의 `validation` 순서 = config schedule의 `provenance` 순서(boot 제외), 위치별 비교 | 불일치 0개 | log와 schedule이 서로 맞나 |
-| C2 pair | C2 pair 두 파일의 trace hash 비교 | recognition 조건(`oracle`, LLM)에서는 **달라야** 함; `fixed`에서는 두 파일의 event가 label 빼고 같은 pair(P1)만 **같아야** 함, P2·P3는 not_applicable; `random`은 not_applicable | 두 파일이 같은 trace를 냈으면 config가 wanted/unwanted 사이에서 바뀐 적이 없다는 뜻이라, gap 0을 recognition 결과로 읽으면 안 됨 |
+| C2 pair | C2 pair 두 파일의 trace **body** hash 비교 (header 줄 제외 — header에 workload id가 있어서) | recognition 조건(`oracle`, LLM)에서는 **달라야** 함; `fixed`에서는 두 파일의 event가 label 빼고 같은 pair(P1)만 **같아야** 함, P2·P3는 not_applicable; `random`은 not_applicable | 두 파일이 같은 trace를 냈으면 config가 wanted/unwanted 사이에서 바뀐 적이 없다는 뜻이라, gap 0을 recognition 결과로 읽으면 안 됨 |
 
 `c6-dual` 같은 파일은 guard 예외를 미리 RQ0 gate spec에 데이터로 적어요(`ground_truth`가 `ambiguous`라 oracle이 legal한 답을 낼 수 없어서 fallback 100%가 정상). 예외는 실험별 데이터고 guard spec에는 없어요.
 

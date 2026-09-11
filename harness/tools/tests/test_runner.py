@@ -160,7 +160,7 @@ def test_the_pipeline_runs_a_handful_of_files_through_to_the_report(tmp_path):
     assert {r["condition"] for r in guard_rows} == {"fixed", "oracle", "random"}
     assert len({(r["workload_id"], r["condition"], r["seed"]) for r in guard_rows}) == 3 * 4
     manifest = json.loads((exp / "guards-manifest.json").read_text())
-    assert all(r["guard_messages"] == [] and r["rerun_trace"] for r in manifest["runs"])
+    assert all(r["guard_messages"] == [] and r["rerun_trace"] and r["trace"] for r in manifest["runs"])
     assert result.executed > 0 and result.cached == 0
     again = run_experiment(spec, machine, REPO)
     assert again.executed == 0 and again.cached == result.executed

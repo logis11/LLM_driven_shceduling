@@ -321,13 +321,15 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
                  "seed": run.seed, "boot_default": run.boot_default,
                  "records": str(run_dir / "records.csv"), "schedule": str(run_dir / "schedule.json"),
                  "log": str(run_dir / "log.json"), "workload": str(run.workload_file),
-                 "rerun_trace": str(run_dir / "trace.rerun.jsonl"), "guard_messages": b["messages"]}
+                 "rerun_trace": str(run_dir / "trace.rerun.jsonl"), "trace": str(run_dir / "trace.jsonl"),
+                 "guard_messages": b["messages"]}
         manifest["runs"].append(entry)
         guard_runs.append(guards.Run(workload_id=run.workload_id, condition=run.condition, table=run.table,
                                      seed=run.seed, boot_default=run.boot_default,
                                      records=run_dir / "records.csv", schedule=run_dir / "schedule.json",
                                      log=run_dir / "log.json", workload=run.workload_file,
-                                     rerun_trace=run_dir / "trace.rerun.jsonl", guard_messages=b["messages"]))
+                                     rerun_trace=run_dir / "trace.rerun.jsonl", guard_messages=b["messages"],
+                                     trace=run_dir / "trace.jsonl"))
     (exp_dir / "guards-manifest.json").write_text(json.dumps(manifest, indent=1) + "\n")
     guard_rows = guards.evaluate(guard_runs, guards.load_spec(guard_spec_path), agg_rows, scoring_spec)
     write_csv(guard_rows, guards.COLUMNS, exp_dir / "guards.csv")

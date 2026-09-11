@@ -62,6 +62,8 @@ The guard reads the recognition log directly through a new `read_recognition_log
 
 The guard spec carries the pair list as data, each pair with a `fixed_identical` flag: true for the P1 pair, false for P2 and P3. Under `fixed` the guard checks identical traces where the flag is true and is `not_applicable` where false. Under `random` it is `not_applicable`. Under every other condition it checks that the two traces differ. Pairing key: same condition, seed, and boot default. Identity is the trace hash.
 
+*Amended 2026-09-11 (after the 8.6 smoke run): identity is the trace's body hash, every line after the header, and the manifest names each run's trace beside its rerun trace. The header carries the workload id, so two files' traces are never byte-identical as wholes: the whole-file hash failed every `fixed` pair and passed every recognition-driven pair vacuously. The determinism guard (decision 4) keeps the whole-file hash, since it compares one file with its own rerun.*
+
 ### 13. `random-beats-oracle` is not a guard
 
 Handed to 8.7 as a non-blocking, per-judging-file flag in the report.

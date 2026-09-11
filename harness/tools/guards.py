@@ -6,7 +6,7 @@
 
 The manifest is JSON: {"aggregates": "<aggregates csv>", "scoring_spec": "<optional path>",
 "runs": [{"workload_id", "condition", "table", "seed", "boot_default", "records",
-"schedule", "log", "workload", "rerun_trace", "guard_messages": [...]}, …]} — identity plus
+"schedule", "log", "workload", "rerun_trace", "trace", "guard_messages": [...]}, …]} — identity plus
 the paths each run's guards read; a missing path is a missing input and that guard fails.
 The runner (8.6) writes it. Every run gets one row per guard. Exit 2 when any guard failed."""
 import argparse
@@ -21,7 +21,7 @@ from harness import scoring  # noqa: E402
 from harness.guards import COLUMNS, SPEC_PATH, GuardError, Run, evaluate, load_spec  # noqa: E402
 from harness.outputs import read_csv, write_csv  # noqa: E402
 
-_PATHS = ("records", "schedule", "log", "workload", "rerun_trace")
+_PATHS = ("records", "schedule", "log", "workload", "rerun_trace", "trace")
 
 
 def runs_from_manifest(doc):

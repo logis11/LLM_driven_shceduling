@@ -91,7 +91,12 @@
 #   no identity is expected there (`fixed_identical: false`). Under `random` the
 #   draws ignore telemetry and a shared seed legitimately yields identical
 #   traces, so the guard does not apply. Partner: the other file of the pair
-#   under the same condition, seed, and boot default.
+#   under the same condition, seed, and boot default. Identity is the trace's
+#   body hash — every line after the header — because the header names the
+#   workload, so two files' traces can never be byte-identical as wholes and a
+#   whole-file hash would fail every `fixed` pair and pass every other one
+#   vacuously (found by the 8.6 smoke run, 2026-09-11; 8.3 spec, amendment to
+#   decision 12).
 
 version: "0.1"
 
@@ -171,7 +176,7 @@ guards:
       sequence minus the boot entry (data-contracts §8), compared positionally.
 
   - id: c2_pair
-    reads: records
+    reads: trace
     threshold: null
     unit: sha256
     direction: structural
@@ -180,6 +185,8 @@ guards:
       Structural: under a recognition-driven condition the two files of a C2 pair
       must produce different traces (rq0-preparation-notes stage 4.2); under fixed,
       identical ones where the pair's events are identical apart from the label.
+      Compared on the traces' bodies, header line excluded, since the header names
+      the workload (2026-09-11).
 
 # The C2 pairs (dataset/timelines/coreset/c2-pairs.variant.yaml): `a` is the base,
 # `b` its variant. `fixed_identical` says whether the pair's events are identical
