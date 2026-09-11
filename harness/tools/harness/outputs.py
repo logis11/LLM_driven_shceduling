@@ -36,7 +36,7 @@ def validate_rows(rows, schema_path):
     for i, row in enumerate(rows):
         clean = {k: v for k, v in row.items() if v not in ("", None)}
         for k in ("no_headroom", "censored", "n_terms", "n_no_headroom", "n_censored",
-                  "pre_committed_miss_excluded", "n", "n_files"):
+                  "pre_committed_miss_excluded", "over_seeds", "n", "n_files", "n_seeds"):
             if k in clean:
                 clean[k] = int(clean[k])
         error = jsonschema.exceptions.best_match(validator.iter_errors(clean))

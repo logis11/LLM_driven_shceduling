@@ -2,36 +2,230 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "grades.schema.json",
   "title": "Grades row",
-  "description": "One row of the harness's grades file (docs/harness/metrics.md §8, the recognition aggregates; sub-task 8.4). Layer-1 numbers are pooled across workloads, so identity is condition, table and seed, with no workload. `level` says what the row is: a `statistic` over an axis, a `class_recall`, one `confusion` cell, or a `paired` difference against another condition. Every row carries `pre_committed_miss_excluded`, its sample count `n`, and the number of files behind it. Interval bounds appear only where an interval was computed. Empty CSV cells are absent here; values are decimal strings with six places.",
+  "description": "One row of the harness's grades file (docs/harness/metrics.md \u00a78, the recognition aggregates; sub-task 8.4). Layer-1 numbers are pooled across workloads, so identity is condition, table and seed, with no workload. `level` says what the row is: a `statistic` over an axis, a `class_recall`, one `confusion` cell, or a `paired` difference against another condition. Every row carries `pre_committed_miss_excluded`, `over_seeds`, its sample count `n`, the number of files behind it, and `n_seeds`. A seed is a repetition of the same question, so it is averaged over rather than pooled: `over_seeds` 0 is one seed's own value and 1 the mean over the condition's seeds, with `seed` empty and `n` still the per-seed count. Where a statistic's denominator is itself a result and the seeds disagree (`errors_changing_config`), the mean row carries the largest per-seed count. Raw confusion cell counts are emitted per seed only, since averaging counts gives fractional cells. Interval bounds appear only where an interval was computed. Empty CSV cells are absent here; values are decimal strings with six places.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["condition", "pre_committed_miss_excluded", "level", "axis", "n", "n_files"],
+  "required": [
+    "condition",
+    "pre_committed_miss_excluded",
+    "over_seeds",
+    "level",
+    "axis",
+    "n",
+    "n_files",
+    "n_seeds"
+  ],
   "properties": {
-    "condition": {"type": "string", "enum": ["fixed", "random", "whitelist", "llm_vocab", "llm_algo", "llm_full", "oracle"]},
-    "table": {"type": "string", "enum": ["prior", "calibrated"]},
-    "seed": {"type": "string", "minLength": 1},
-    "pre_committed_miss_excluded": {"type": "integer", "enum": [0, 1]},
-    "level": {"type": "string", "enum": ["statistic", "class_recall", "confusion", "paired"]},
-    "axis": {"type": "string", "enum": ["mode", "attribute", "algo_choice", "configuration", "latency"]},
-    "statistic": {"type": "string", "enum": ["raw_accuracy", "majority_baseline", "balanced_accuracy", "matthews", "correct_rate", "errors_changing_config", "p50", "p99"]},
-    "class": {"type": "string", "minLength": 1},
-    "truth": {"type": "string", "minLength": 1},
-    "predicted": {"type": "string", "minLength": 1},
-    "partner_condition": {"type": "string", "enum": ["fixed", "random", "whitelist", "llm_vocab", "llm_algo", "llm_full", "oracle"]},
-    "value": {"type": "string", "pattern": "^-?[0-9]+\\.[0-9]{6}$"},
-    "ci_low": {"type": "string", "pattern": "^-?[0-9]+\\.[0-9]{6}$"},
-    "ci_high": {"type": "string", "pattern": "^-?[0-9]+\\.[0-9]{6}$"},
-    "n": {"type": "integer", "minimum": 0},
-    "n_files": {"type": "integer", "minimum": 1}
+    "condition": {
+      "type": "string",
+      "enum": [
+        "fixed",
+        "random",
+        "whitelist",
+        "llm_vocab",
+        "llm_algo",
+        "llm_full",
+        "oracle"
+      ]
+    },
+    "table": {
+      "type": "string",
+      "enum": [
+        "prior",
+        "calibrated"
+      ]
+    },
+    "seed": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pre_committed_miss_excluded": {
+      "type": "integer",
+      "enum": [
+        0,
+        1
+      ]
+    },
+    "level": {
+      "type": "string",
+      "enum": [
+        "statistic",
+        "class_recall",
+        "confusion",
+        "paired"
+      ]
+    },
+    "axis": {
+      "type": "string",
+      "enum": [
+        "mode",
+        "attribute",
+        "algo_choice",
+        "configuration",
+        "latency"
+      ]
+    },
+    "statistic": {
+      "type": "string",
+      "enum": [
+        "raw_accuracy",
+        "majority_baseline",
+        "balanced_accuracy",
+        "matthews",
+        "correct_rate",
+        "errors_changing_config",
+        "p50",
+        "p99"
+      ]
+    },
+    "class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "truth": {
+      "type": "string",
+      "minLength": 1
+    },
+    "predicted": {
+      "type": "string",
+      "minLength": 1
+    },
+    "partner_condition": {
+      "type": "string",
+      "enum": [
+        "fixed",
+        "random",
+        "whitelist",
+        "llm_vocab",
+        "llm_algo",
+        "llm_full",
+        "oracle"
+      ]
+    },
+    "value": {
+      "type": "string",
+      "pattern": "^-?[0-9]+\\.[0-9]{6}$"
+    },
+    "ci_low": {
+      "type": "string",
+      "pattern": "^-?[0-9]+\\.[0-9]{6}$"
+    },
+    "ci_high": {
+      "type": "string",
+      "pattern": "^-?[0-9]+\\.[0-9]{6}$"
+    },
+    "n": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "n_files": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "over_seeds": {
+      "type": "integer",
+      "enum": [
+        0,
+        1
+      ]
+    },
+    "n_seeds": {
+      "type": "integer",
+      "minimum": 1
+    }
   },
   "allOf": [
-    {"if": {"properties": {"level": {"const": "statistic"}}},
-     "then": {"required": ["statistic", "value"]}},
-    {"if": {"properties": {"level": {"const": "class_recall"}}},
-     "then": {"required": ["class", "value"]}},
-    {"if": {"properties": {"level": {"const": "confusion"}}},
-     "then": {"required": ["truth"]}},
-    {"if": {"properties": {"level": {"const": "paired"}}},
-     "then": {"required": ["statistic", "partner_condition", "value"]}}
+    {
+      "if": {
+        "properties": {
+          "level": {
+            "const": "statistic"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "statistic",
+          "value"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "level": {
+            "const": "class_recall"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "class",
+          "value"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "level": {
+            "const": "confusion"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "truth"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "level": {
+            "const": "paired"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "statistic",
+          "partner_condition",
+          "value"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "over_seeds": {
+            "const": 1
+          }
+        }
+      },
+      "then": {
+        "not": {
+          "required": [
+            "seed"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "level": {
+            "const": "confusion"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "over_seeds": {
+            "const": 0
+          }
+        }
+      }
+    }
   ]
 }

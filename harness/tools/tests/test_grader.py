@@ -19,19 +19,27 @@ from harness.outputs import read_csv, validate_rows, write_csv
 MG = TOOLS / "tests" / "fixtures" / "mock-grades"
 TABLE = MG / "driver-table.yaml"
 GRADED = ("g-alpha", "g-beta", "g-gamma", "g-epsilon")      # g-delta is `ambiguous` throughout
-CONDITIONS = ("llm_algo", "llm_vocab", "oracle", "random")
+# `random` runs twice, so the seed-averaging path is exercised
+RUNS = (("llm_algo", ""), ("llm_vocab", ""), ("oracle", ""), ("random", "s1"), ("random", "s2"))
+CONDITIONS = tuple(dict.fromkeys(c for c, _ in RUNS))
 
 
-def _identity(condition, workload):
+def _stem(condition, seed):
+    return f"{condition}-{seed}" if seed else condition
+
+
+def _identity(condition, workload, seed=""):
     return {"workload_id": workload, "condition": condition, "table": "calibrated",
-            "seed": "s1" if condition == "random" else "", "boot_default": ""}
+            "seed": seed, "boot_default": ""}
 
 
-def _runs(conditions=CONDITIONS, workloads=None):
+def _runs(conditions=None, workloads=None):
+    pairs = RUNS if conditions is None else [(c, sd) for c, sd in RUNS if c in conditions]
     out = []
-    for c in conditions:
+    for c, sd in pairs:
         for w in (workloads if workloads is not None else GRADED):
-            out.append(Run(**_identity(c, w), log=MG / "logs" / f"{c}--{w}.json",
+            out.append(Run(**_identity(c, w, sd),
+                           log=MG / "logs" / f"{_stem(c, sd)}--{w}.json",
                            workload=MG / "workloads" / f"{w}.workload.json", table_path=TABLE))
     return out
 
@@ -44,11 +52,13 @@ def _rows(runs=None):
     return rows
 
 
-def _stat(grades, condition, axis, statistic, excluded=1):
+def _stat(grades, condition, axis, statistic, excluded=1, over_seeds=1, seed=""):
+    """The seed-averaged row by default; pass over_seeds=0 with a seed for one draw's own."""
     found = [g for g in grades if g["level"] == "statistic" and g["condition"] == condition
              and g["axis"] == axis and g["statistic"] == statistic
-             and int(g["pre_committed_miss_excluded"]) == excluded]
-    assert len(found) == 1, (condition, axis, statistic, excluded, found)
+             and int(g["pre_committed_miss_excluded"]) == excluded
+             and int(g["over_seeds"]) == over_seeds and g["seed"] == seed]
+    assert len(found) == 1, (condition, axis, statistic, excluded, over_seeds, seed, found)
     return found[0]
 
 
@@ -202,7 +212,7 @@ def test_counts_match_the_hand_worked_table(grades):
 
 @pytest.mark.parametrize("condition,axis,expected", [
     ("oracle", "mode", Fraction(4, 4)), ("oracle", "attribute", Fraction(4, 4)),
-    ("random", "mode", Fraction(1, 4)), ("random", "attribute", Fraction(2, 4)),
+    ("random", "mode", Fraction(1, 2)), ("random", "attribute", Fraction(3, 4)),
     ("llm_vocab", "mode", Fraction(3, 4)), ("llm_vocab", "attribute", Fraction(3, 4)),
     ("llm_algo", "mode", Fraction(4, 4)), ("llm_algo", "attribute", Fraction(4, 4)),
 ])
@@ -211,7 +221,7 @@ def test_raw_accuracy_excluded(grades, condition, axis, expected):
 
 
 @pytest.mark.parametrize("condition,axis,expected", [
-    ("random", "mode", Fraction(1, 5)), ("random", "attribute", Fraction(3, 5)),
+    ("random", "mode", Fraction(2, 5)), ("random", "attribute", Fraction(4, 5)),
     ("llm_vocab", "mode", Fraction(4, 5)), ("llm_vocab", "attribute", Fraction(3, 5)),
     ("llm_algo", "attribute", Fraction(4, 5)),
 ])
@@ -228,7 +238,9 @@ def test_majority_baselines(grades):
 def test_balanced_accuracy_is_the_attribute_only(grades):
     assert [g for g in grades if g["statistic"] == "balanced_accuracy" and g["axis"] != "attribute"] == []
     # true recall 2/3 and false recall 0/1 for random; 2/3 and 1/1 for llm_vocab
-    assert _stat(grades, "random", "attribute", "balanced_accuracy")["value"] == grader.fmt(Fraction(1, 3))
+    assert _stat(grades, "random", "attribute", "balanced_accuracy")["value"] == grader.fmt(Fraction(2, 3))
+    assert _stat(grades, "random", "attribute", "balanced_accuracy",
+                 over_seeds=0, seed="s1")["value"] == grader.fmt(Fraction(1, 3))
     assert _stat(grades, "llm_vocab", "attribute", "balanced_accuracy")["value"] == grader.fmt(Fraction(5, 6))
     assert _stat(grades, "oracle", "attribute", "balanced_accuracy")["value"] == grader.fmt(Fraction(1))
 
@@ -238,7 +250,8 @@ def test_matthews_is_computed_over_answered_points_only(grades):
     mcc = _stat(grades, "llm_vocab", "attribute", "matthews")
     assert mcc["value"] == grader.fmt(Fraction(1)) and int(mcc["n"]) == 3
     # random: TP 2, FN 1, TN 0, FP 1
-    assert _stat(grades, "random", "attribute", "matthews")["value"] == grader.fmt(Fraction(-1, 3))
+    assert _stat(grades, "random", "attribute", "matthews",
+                 over_seeds=0, seed="s1")["value"] == grader.fmt(Fraction(-1, 3))
     assert [g for g in grades if g["statistic"] == "matthews" and g["axis"] != "attribute"] == []
 
 
@@ -257,7 +270,8 @@ def test_per_class_recall(grades):
 def test_confusion_cells(grades):
     cells = {(g["truth"], g["predicted"]): int(g["n"]) for g in grades
              if g["level"] == "confusion" and g["condition"] == "random"
-             and g["axis"] == "mode" and int(g["pre_committed_miss_excluded"]) == 1}
+             and g["axis"] == "mode" and int(g["pre_committed_miss_excluded"]) == 1
+             and g["seed"] == "s1"}
     assert cells == {("dev", "backup"): 1, ("ml-train", "media"): 1,
                      ("media", "media"): 1, ("indexing", "gaming"): 1}
     # a null prediction gets its own column rather than being folded into a class
@@ -269,12 +283,15 @@ def test_confusion_cells(grades):
 
 def test_configuration_distance(grades):
     # excluded: oracle 4/4, random 1/4, llm_vocab 3/4, llm_algo 4/4
-    assert _stat(grades, "random", "configuration", "correct_rate")["value"] == grader.fmt(Fraction(1, 4))
+    assert _stat(grades, "random", "configuration", "correct_rate")["value"] == grader.fmt(Fraction(5, 8))
+    assert _stat(grades, "random", "configuration", "correct_rate",
+                 over_seeds=0, seed="s1")["value"] == grader.fmt(Fraction(1, 4))
     assert _stat(grades, "llm_vocab", "configuration", "correct_rate")["value"] == grader.fmt(Fraction(3, 4))
     # unexcluded, random makes 4 errors and only 3 of them changed the configuration:
     # g-gamma names office/false where the truth is ml-train/false, and those two rows
     # compose to identical configurations
-    errors = _stat(grades, "random", "configuration", "errors_changing_config", excluded=0)
+    errors = _stat(grades, "random", "configuration", "errors_changing_config",
+                   excluded=0, over_seeds=0, seed="s1")
     assert errors["value"] == grader.fmt(Fraction(3, 4)) and int(errors["n"]) == 4
 
 
@@ -326,7 +343,7 @@ def test_paired_rows_compare_on_the_same_draws():
               and int(r["pre_committed_miss_excluded"]) == 1]
     assert len(paired) == 1
     row = paired[0]
-    assert row["value"] == grader.fmt(Fraction(3, 4) - Fraction(1, 4))
+    assert row["value"] == grader.fmt(Fraction(3, 4) - Fraction(1, 2))
     assert Fraction(row["ci_low"]) <= Fraction(row["value"]) <= Fraction(row["ci_high"])
 
 
@@ -350,7 +367,7 @@ def test_expected_records_byte_for_byte(tmp_path):
         rows, _ = grade_log(run)
         out = tmp_path / "r.csv"
         records.write_csv(rows, out)
-        name = f"{run.condition}--{run.workload_id}.csv"
+        name = f"{_stem(run.condition, run.seed)}--{run.workload_id}.csv"
         assert out.read_bytes() == (MG / "expected-records" / name).read_bytes(), name
 
 
@@ -359,16 +376,17 @@ def test_cli_writes_records_and_grades(tmp_path):
     manifest.write_text(json.dumps({
         "driver_table": str(TABLE),
         "bootstrap": {"seed": 20260911, "repetitions": 500},
-        "runs": [{**_identity(c, w), "log": str(MG / "logs" / f"{c}--{w}.json"),
+        "runs": [{**_identity(c, w, sd),
+                  "log": str(MG / "logs" / f"{_stem(c, sd)}--{w}.json"),
                   "workload": str(MG / "workloads" / f"{w}.workload.json")}
-                 for c in CONDITIONS for w in GRADED]}))
+                 for c, sd in RUNS for w in GRADED]}))
     out = tmp_path / "grades.csv"
     r = subprocess.run([sys.executable, str(TOOLS / "grade.py"), "--manifest", str(manifest),
                         "--out-grades", str(out), "--out-records", str(tmp_path / "records")],
                        capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
     assert out.read_bytes() == (MG / "expected-grades.csv").read_bytes()
-    assert len(list((tmp_path / "records").glob("*.csv"))) == 16
+    assert len(list((tmp_path / "records").glob("*.csv"))) == 20
 
 
 def test_cli_exits_non_zero_when_the_oracle_is_not_perfect(tmp_path):
@@ -385,3 +403,71 @@ def test_cli_exits_non_zero_when_the_oracle_is_not_perfect(tmp_path):
                         "--out-grades", str(tmp_path / "g.csv")], capture_output=True, text=True)
     assert r.returncode == 2
     assert "oracle" in r.stderr and "g-beta" in r.stderr
+
+
+# ------------------------------------------------------------------- seeds
+
+def test_both_seeds_and_their_mean_are_in_the_file(grades):
+    """A seed is a repetition of the same question, so it is averaged over, not
+    pooled; both readings are kept (8.4 spec, decision 21)."""
+    s1 = _stat(grades, "random", "mode", "raw_accuracy", over_seeds=0, seed="s1")
+    s2 = _stat(grades, "random", "mode", "raw_accuracy", over_seeds=0, seed="s2")
+    mean = _stat(grades, "random", "mode", "raw_accuracy")
+    assert (s1["value"], s2["value"]) == (grader.fmt(Fraction(1, 4)), grader.fmt(Fraction(3, 4)))
+    assert mean["value"] == grader.fmt(Fraction(1, 2))
+    assert mean["seed"] == "" and int(mean["n_seeds"]) == 2
+    assert int(s1["n_seeds"]) == 1
+
+
+def test_the_mean_row_does_not_inflate_the_sample_count(grades):
+    """Averaging keeps the denominator honest: four graded points measured twice
+    is still four points, not eight."""
+    mean = _stat(grades, "random", "mode", "raw_accuracy")
+    per_seed = _stat(grades, "random", "mode", "raw_accuracy", over_seeds=0, seed="s1")
+    assert int(mean["n"]) == int(per_seed["n"]) == 4
+    assert int(mean["n_files"]) == 3
+
+
+def test_a_condition_with_one_seed_still_gets_a_mean_row(grades):
+    """So the report always reads the headline from over_seeds = 1."""
+    one = _stat(grades, "llm_vocab", "mode", "raw_accuracy")
+    assert one["seed"] == "" and int(one["n_seeds"]) == 1
+    assert one["value"] == _stat(grades, "llm_vocab", "mode", "raw_accuracy",
+                                 over_seeds=0, seed="")["value"]
+
+
+def test_the_seed_mean_is_taken_before_rounding(grades):
+    """Per seed, balanced accuracy is 1/3 and 1; the mean is 2/3 = 0.666667.
+    Averaging the two *written* values instead would give 0.666666, so the
+    statistic is averaged exactly and rounded once, at the end."""
+    s1 = _stat(grades, "random", "attribute", "balanced_accuracy", over_seeds=0, seed="s1")
+    s2 = _stat(grades, "random", "attribute", "balanced_accuracy", over_seeds=0, seed="s2")
+    assert (s1["value"], s2["value"]) == ("0.333333", "1.000000")
+    mean = _stat(grades, "random", "attribute", "balanced_accuracy")
+    assert mean["value"] == grader.fmt(Fraction(2, 3)) == "0.666667"
+    assert mean["value"] != grader.fmt((Fraction(s1["value"]) + Fraction(s2["value"])) / 2)
+
+
+def test_confusion_cells_stay_per_seed(grades):
+    """Averaging raw counts would give fractional cells, so it is not done."""
+    assert [g for g in grades if g["level"] == "confusion" and int(g["over_seeds"]) == 1] == []
+    seeds = {g["seed"] for g in grades if g["level"] == "confusion" and g["condition"] == "random"}
+    assert seeds == {"s1", "s2"}
+
+
+def test_paired_rows_never_compare_two_seeds_of_one_condition(grades):
+    paired = [g for g in grades if g["level"] == "paired"]
+    assert paired
+    assert all(g["condition"] != g["partner_condition"] for g in paired)
+    assert all(int(g["over_seeds"]) == 1 and g["seed"] == "" for g in paired)
+    pairs = {(g["condition"], g["partner_condition"]) for g in paired}
+    assert ("random", "random") not in pairs and len(pairs) == 6
+
+
+def test_a_seed_averaged_interval_still_resamples_files():
+    g = compute_grades(_rows(), bootstrap=grader.Bootstrap(seed=7, repetitions=200))
+    mean = _stat(g, "random", "mode", "raw_accuracy")
+    lo, hi = Fraction(mean["ci_low"]), Fraction(mean["ci_high"])
+    assert lo <= Fraction(mean["value"]) <= hi
+    again = compute_grades(_rows(), bootstrap=grader.Bootstrap(seed=7, repetitions=200))
+    assert _stat(again, "random", "mode", "raw_accuracy") == mean

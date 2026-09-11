@@ -14,6 +14,17 @@ segment's `familiarity` when it has one, and `pre_committed_miss`.
 seed — there is no workload, because Layer 1's numbers are pooled, and the boot
 default has no bearing on recognition.
 
+A seed is a repetition of the same question, not a new question, so it is
+averaged over rather than pooled: pooling would multiply the observation count
+while the query points stayed the same, and hand back intervals that are too
+narrow. Each statistic is computed per seed and then averaged, exactly as the
+Phase 8 spec's decision 3 does for Layer 2, and both readings are kept — rows
+carry `over_seeds` 0 for one seed's own value and 1 for the mean, the latter with
+`seed` empty and `n_seeds` saying how many went in. Rates average that way;
+raw confusion cell counts do not, because averaging counts gives fractional cells,
+so those stay per seed. Paired comparisons run between distinct conditions only,
+on seed-averaged values (added 2026-09-11).
+
 Which statistic goes on which axis is decided, not free (spec decision 4). The
 attribute is two classes and lopsided, so its headline is balanced accuracy with
 the Matthews correlation coefficient beside it. Mode and algorithm choice are
@@ -60,9 +71,9 @@ BOOTSTRAP_REPETITIONS = 10_000   # metrics doc §10
 INTERVAL_LEVEL = Fraction(95, 100)
 
 IDENTITY = ("condition", "table", "seed")
-COLUMNS = IDENTITY + ("pre_committed_miss_excluded", "level", "axis", "statistic",
-                      "class", "truth", "predicted", "partner_condition",
-                      "value", "ci_low", "ci_high", "n", "n_files")
+COLUMNS = IDENTITY + ("pre_committed_miss_excluded", "over_seeds", "level", "axis",
+                      "statistic", "class", "truth", "predicted", "partner_condition",
+                      "value", "ci_low", "ci_high", "n", "n_files", "n_seeds")
 
 AXES = ("mode", "attribute", "algo_choice", "configuration", "latency")
 HEADLINE = {"mode": "raw_accuracy", "attribute": "balanced_accuracy",
@@ -440,6 +451,36 @@ def _statistic(name, points, axis):
     return None, 0
 
 
+def _by_condition(by_run):
+    """{(condition, table): {seed: {workload_id: [Point]}}} — the seed is a
+    dimension inside a condition, never a condition of its own."""
+    out = {}
+    for (condition, table, seed), files in by_run.items():
+        out.setdefault((condition, table), {})[seed] = files
+    return {k: dict(sorted(v.items())) for k, v in sorted(out.items())}
+
+
+def _shared_files(seed_files):
+    """The files every seed of this condition graded, so each seed weighs the same."""
+    sets = [set(f) for f in seed_files.values()]
+    return sorted(set.intersection(*sets)) if sets else []
+
+
+def _seed_mean(seed_files, names, axis, statistic):
+    """The statistic per seed over `names`, then the unweighted mean of those.
+    Returns (value, per-seed n, seed count); value is None if any seed lacks it."""
+    values, n = [], 0
+    for seed in sorted(seed_files):
+        value, seed_n = _statistic(statistic, _flat(seed_files[seed], names), axis)
+        if value is None:
+            return None, 0, 0
+        values.append(value)
+        n = max(n, seed_n)
+    if not values:
+        return None, 0, 0
+    return Fraction(sum(values), len(values)), n, len(values)
+
+
 # ---------------------------------------------------------------- bootstrap
 
 @dataclass(frozen=True)
@@ -463,14 +504,19 @@ def sample_bootstrap(rows, condition, axis, statistic, excluded, seed, repetitio
 
 
 def _sample(files, axis, statistic, seed, repetitions):
-    names = sorted(files)
+    return _sample_seeds({"": files}, sorted(files), axis, statistic, seed, repetitions)
+
+
+def _sample_seeds(seed_files, names, axis, statistic, seed, repetitions):
+    """Draw the files once per repetition, then average the statistic over the
+    condition's seeds on that same draw: the file stays the cluster."""
     if not names:
         return []
     rng = random.Random(seed)
     out = []
     for _ in range(repetitions):
         drawn = [names[rng.randrange(len(names))] for _ in names]
-        value, _n = _statistic(statistic, _flat(files, drawn), axis)
+        value, _n, _k = _seed_mean(seed_files, drawn, axis, statistic)
         if value is not None:
             out.append(value)
     return out
@@ -489,14 +535,26 @@ def enumerate_bootstrap(rows, condition, axis, statistic, excluded):
 
 
 def _ident_of(rows, condition):
-    for r in rows:
-        if r.get("condition") == condition:
-            return (condition, str(r.get("table", "")), str(r.get("seed", "")))
-    raise GradeError(f"no rows for condition {condition!r}")
+    """The one identity a condition names. These two samplers are inspection
+    helpers over a single run group, so a condition run under several seeds is
+    an error here rather than an arbitrary pick; `compute_grades` handles seeds."""
+    found = sorted({(condition, str(r.get("table", "")), str(r.get("seed", "")))
+                    for r in rows if r.get("condition") == condition})
+    if not found:
+        raise GradeError(f"no rows for condition {condition!r}")
+    if len(found) > 1:
+        raise GradeError(f"condition {condition!r} has {len(found)} identities "
+                         f"{[i[2] for i in found]}; name the seed instead")
+    return found[0]
 
 
-def _interval(files, axis, statistic, boot):
-    values = sorted(_sample(files, axis, statistic, boot.seed, boot.repetitions))
+def _interval(seed_files, names, axis, statistic, boot):
+    values = sorted(_sample_seeds(seed_files, names, axis, statistic,
+                                  boot.seed, boot.repetitions))
+    return _bounds(values, boot)
+
+
+def _bounds(values, boot):
     if not values:
         return "", ""
     tail = (1 - boot.level) / 2
@@ -505,95 +563,124 @@ def _interval(files, axis, statistic, boot):
 
 # ----------------------------------------------------------- the grades file
 
+STATS = {"mode": ("raw_accuracy", "majority_baseline"),
+         "attribute": ("raw_accuracy", "majority_baseline", "balanced_accuracy", "matthews"),
+         "algo_choice": ("raw_accuracy", "majority_baseline"),
+         "configuration": ("correct_rate", "errors_changing_config"),
+         "latency": ("p50", "p99")}
+
+
 def compute_grades(rows, bootstrap: Optional[Bootstrap] = None):
     """The `grades` file's rows: statistics, per-class recall, confusion cells,
-    and paired condition differences, each with its sample and file counts."""
-    by_run = points_by_run(rows)
+    and paired condition differences, each per seed and again averaged over the
+    condition's seeds, with its sample, file and seed counts."""
+    by_condition = _by_condition(points_by_run(rows))
     out = []
 
-    def row(ident, excluded, level, axis, **kw):
-        base = dict(zip(IDENTITY, ident))
-        base.update({"pre_committed_miss_excluded": 1 if excluded else 0,
-                     "level": level, "axis": axis, "statistic": "", "class": "",
-                     "truth": "", "predicted": "", "partner_condition": "",
-                     "value": "", "ci_low": "", "ci_high": "", "n": "", "n_files": ""})
+    def row(condition, table, seed, excluded, over_seeds, level, axis, **kw):
+        base = {"condition": condition, "table": table, "seed": seed,
+                "pre_committed_miss_excluded": 1 if excluded else 0,
+                "over_seeds": 1 if over_seeds else 0, "level": level, "axis": axis,
+                "statistic": "", "class": "", "truth": "", "predicted": "",
+                "partner_condition": "", "value": "", "ci_low": "", "ci_high": "",
+                "n": "", "n_files": "", "n_seeds": ""}
         base.update(kw)
         out.append(base)
 
-    for ident, all_files in sorted(by_run.items()):
-        for excluded in (False, True):
-            files = _select(all_files, excluded)
-            if not files:
+    def shapes(condition, table, seed, excluded, over_seeds, axis, seed_files, names):
+        """Per-class recall and confusion cells. Recall is a rate and averages over
+        seeds; raw cell counts do not, so they are emitted per seed only."""
+        per_seed = {sd: _pairs(_flat(f, names), axis) for sd, f in seed_files.items()}
+        classes = sorted({t for pairs in per_seed.values() for t, _, _ in pairs})
+        for klass in classes:
+            values, n = [], 0
+            for pairs in per_seed.values():
+                recall = per_class_recall(pairs).get(klass)
+                if recall is None:
+                    values = []
+                    break
+                values.append(recall)
+                n = max(n, sum(1 for t, _, _ in pairs if t == klass))
+            if not values:
                 continue
-            flat = _flat(files, sorted(files))
-            n_files = len(files)
-            for axis in AXES:
-                names = {"mode": ("raw_accuracy", "majority_baseline"),
-                         "attribute": ("raw_accuracy", "majority_baseline",
-                                       "balanced_accuracy", "matthews"),
-                         "algo_choice": ("raw_accuracy", "majority_baseline"),
-                         "configuration": ("correct_rate", "errors_changing_config"),
-                         "latency": ("p50", "p99")}[axis]
-                for name in names:
-                    value, n = _statistic(name, flat, axis)
-                    if value is None:
-                        continue
-                    lo = hi = ""
-                    if bootstrap is not None and name != "majority_baseline":
-                        lo, hi = _interval(files, axis, name, bootstrap)
-                    row(ident, excluded, "statistic", axis, statistic=name,
-                        value=fmt(value), ci_low=lo, ci_high=hi, n=n, n_files=n_files)
-                if axis in ("mode", "algo_choice", "attribute"):
-                    pairs = _pairs(flat, axis)
-                    for klass, recall in sorted(per_class_recall(pairs).items()):
-                        n = sum(1 for t, _, _ in pairs if t == klass)
-                        row(ident, excluded, "class_recall", axis, **{"class": klass},
-                            value=fmt(recall), n=n, n_files=n_files)
-                    cells = Counter((t, p) for t, p, _ in pairs)
-                    for (truth, predicted), n in sorted(cells.items()):
-                        row(ident, excluded, "confusion", axis, truth=truth,
-                            predicted=predicted, n=n, n_files=n_files)
+            row(condition, table, seed, excluded, over_seeds, "class_recall", axis,
+                **{"class": klass}, value=fmt(Fraction(sum(values), len(values))),
+                n=n, n_files=len(names), n_seeds=len(values))
+        if over_seeds:
+            return
+        for (truth, predicted), n in sorted(Counter(
+                (t, p) for pairs in per_seed.values() for t, p, _ in pairs).items()):
+            row(condition, table, seed, excluded, over_seeds, "confusion", axis,
+                truth=truth, predicted=predicted, n=n, n_files=len(names), n_seeds=1)
 
-    # paired differences, on the same files and the same draws
-    idents = sorted(by_run)
-    for i, a in enumerate(idents):
-        for b in idents[i + 1:]:
+    for (condition, table), seeds in by_condition.items():
+        # ---- one row set per seed, and one for the mean over them
+        variants = [(sd, {sd: files}, False) for sd, files in seeds.items()]
+        variants.append(("", seeds, True))
+        for seed, group, over_seeds in variants:
             for excluded in (False, True):
-                fa = _select(by_run[a], excluded)
-                fb = _select(by_run[b], excluded)
-                shared = sorted(set(fa) & set(fb))
-                if not shared:
+                selected = {sd: _select(f, excluded) for sd, f in group.items()}
+                selected = {sd: f for sd, f in selected.items() if f}
+                if not selected:
                     continue
-                fa = {k: fa[k] for k in shared}
-                fb = {k: fb[k] for k in shared}
+                names = _shared_files(selected)
+                if not names:
+                    continue
+                for axis in AXES:
+                    for name in STATS[axis]:
+                        value, n, k = _seed_mean(selected, names, axis, name)
+                        if value is None:
+                            continue
+                        lo = hi = ""
+                        if bootstrap is not None and name != "majority_baseline":
+                            lo, hi = _interval(selected, names, axis, name, bootstrap)
+                        row(condition, table, seed, excluded, over_seeds, "statistic", axis,
+                            statistic=name, value=fmt(value), ci_low=lo, ci_high=hi,
+                            n=n, n_files=len(names), n_seeds=k)
+                    if axis in ("mode", "attribute", "algo_choice"):
+                        shapes(condition, table, seed, excluded, over_seeds, axis,
+                               selected, names)
+
+    # ---- paired differences: between distinct conditions only, seed-averaged,
+    # both sides rescored on identical draws of identical files
+    groups = sorted(by_condition)
+    for i, a in enumerate(groups):
+        for b in groups[i + 1:]:
+            for excluded in (False, True):
+                sa = {sd: f for sd, f in ((sd, _select(f, excluded))
+                                          for sd, f in by_condition[a].items()) if f}
+                sb = {sd: f for sd, f in ((sd, _select(f, excluded))
+                                          for sd, f in by_condition[b].items()) if f}
+                if not sa or not sb:
+                    continue
+                names = sorted(set(_shared_files(sa)) & set(_shared_files(sb)))
+                if not names:
+                    continue
                 for axis, name in sorted(HEADLINE.items()):
-                    va, na = _statistic(name, _flat(fa, shared), axis)
-                    vb, _nb = _statistic(name, _flat(fb, shared), axis)
+                    va, na, ka = _seed_mean(sa, names, axis, name)
+                    vb, _nb, _kb = _seed_mean(sb, names, axis, name)
                     if va is None or vb is None:
                         continue
                     lo = hi = ""
                     if bootstrap is not None:
-                        diffs = sorted(_paired_sample(fa, fb, axis, name, bootstrap))
-                        if diffs:
-                            tail = (1 - bootstrap.level) / 2
-                            lo, hi = fmt(quantile(diffs, tail)), fmt(quantile(diffs, 1 - tail))
-                    row(a, excluded, "paired", axis, statistic=name,
+                        lo, hi = _bounds(sorted(_paired_sample(sa, sb, names, axis, name,
+                                                               bootstrap)), bootstrap)
+                    row(a[0], a[1], "", excluded, True, "paired", axis, statistic=name,
                         partner_condition=b[0], value=fmt(va - vb), ci_low=lo, ci_high=hi,
-                        n=na, n_files=len(shared))
+                        n=na, n_files=len(names), n_seeds=ka)
 
     out.sort(key=sort_key)
     return out
 
 
-def _paired_sample(fa, fb, axis, name, boot):
-    """Both conditions rescored on identical draws, difference by difference."""
-    names = sorted(fa)
+def _paired_sample(sa, sb, names, axis, name, boot):
+    """Both conditions rescored on identical draws, each seed-averaged first."""
     rng = random.Random(boot.seed)
     out = []
     for _ in range(boot.repetitions):
         drawn = [names[rng.randrange(len(names))] for _ in names]
-        va, _ = _statistic(name, _flat(fa, drawn), axis)
-        vb, _ = _statistic(name, _flat(fb, drawn), axis)
+        va, _n, _k = _seed_mean(sa, drawn, axis, name)
+        vb, _n, _k = _seed_mean(sb, drawn, axis, name)
         if va is not None and vb is not None:
             out.append(va - vb)
     return out
@@ -602,7 +689,7 @@ def _paired_sample(fa, fb, axis, name, boot):
 def sort_key(row):
     return (_LEVEL_ORDER[row["level"]], row["condition"], row["partner_condition"],
             row["axis"], row["statistic"], row["class"], row["truth"], row["predicted"],
-            int(row["pre_committed_miss_excluded"]))
+            int(row["pre_committed_miss_excluded"]), int(row["over_seeds"]), str(row["seed"]))
 
 
 __all__ = ["ALGORITHMS", "AXES", "BOOTSTRAP_REPETITIONS", "BOOTSTRAP_SEED", "Bootstrap",

@@ -110,6 +110,14 @@ The attribute is corrected because its baseline is high; mode is not because its
 
 Two limitations are written into this spec rather than discovered while writing the paper. At 44 to 49 independent units a proportion near one half carries an interval of roughly eleven percentage points before clustering widens it, so Layer 1 is well powered against `random`, whose separation needs no statistics, and underpowered for the whitelist comparison that carries the scientific content. And the whitelist-ceiling contrast at familiarity tiers 4 and 5 rests on one graded query point per tier, so it is reportable as a demonstration, which needs no sample size because the whitelist's failure there is true by construction, and never as a rate.
 
+### 21. Seeds are averaged over, not pooled
+
+*Added 2026-09-11, after implementation surfaced the gap.* The grill settled nothing about `random`'s several seeds, and the Phase 8 spec's decision 3 covers only Layer 2, where a file's gap uses the mean of the `random` scores over its seeds with every per-seed value kept beside it. Layer 1 reads the same way, because a seed is the same thing in both places: a repetition of the same question, not a new question. So each statistic is computed per seed and then averaged, and both readings stay in the file. Pooling is rejected for a reason, not a preference: it would multiply the observation count while the query points stayed the same, which is the non-independence the cluster bootstrap exists to correct, and it would return intervals that are too narrow.
+
+Three consequences. Rates average over seeds, so statistics and per-class recall gain a mean row; raw confusion cell counts do not, because averaging counts gives fractional cells, so they stay per seed. Paired comparisons are emitted between distinct conditions only, on seed-averaged values, which removes a meaningless comparison of one condition's seeds against each other. The bootstrap draws files once per repetition and averages each seed's statistic on that draw, so the file stays the cluster and the seed stays a dimension averaged over.
+
+The `grades` file carries a second boolean column, `over_seeds`, mirroring `pre_committed_miss_excluded`: zero is one seed's own value, one is the mean, with the seed left empty and `n_seeds` recording how many went in. The sample count stays the per-seed count, so a mean never reads as more evidence than it is. A condition with a single seed still gets its mean row, so the report always reads the headline from one place.
+
 ## Invariants
 
 - Every number in the `grades` file carries its sample count, so no figure can be read without its denominator.

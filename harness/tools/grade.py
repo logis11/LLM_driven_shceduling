@@ -75,7 +75,8 @@ def main():
             rows.extend(run_rows)
             messages.extend(run_messages)
             if out_dir is not None:
-                records.write_csv(run_rows, out_dir / f"{run.condition}--{run.workload_id}.csv")
+                stem = f"{run.condition}-{run.seed}" if run.seed else run.condition
+                records.write_csv(run_rows, out_dir / f"{stem}--{run.workload_id}.csv")
         grades = compute_grades(rows, bootstrap=bootstrap)
     except (GradeError, OSError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
