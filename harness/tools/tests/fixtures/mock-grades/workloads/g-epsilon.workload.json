@@ -1,0 +1,32 @@
+{
+ "meta": {
+  "id": "g-epsilon",
+  "derived_from": "hand-written (mock-grades/worked.md)"
+ },
+ "ground_truth": [
+  {
+   "t_start": 0,
+   "t_end": 60000000,
+   "mode": "indexing",
+   "attributes": {
+    "background_wanted": false,
+    "initiated": "scheduled"
+   }
+  }
+ ],
+ "events": [
+  {
+   "op": "arrive",
+   "t": 0,
+   "id": "t1",
+   "name": "placeholder",
+   "depart": 60000000,
+   "program": [
+    {
+     "op": "RUN",
+     "us": 1000
+    }
+   ]
+  }
+ ]
+}

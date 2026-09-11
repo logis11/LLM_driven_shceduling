@@ -1,0 +1,6 @@
+workload_id,condition,table,seed,boot_default,sim,source_sha256,entity,metric,t,value,cause,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss
+g-epsilon,llm_algo,calibrated,,,,7cc1bb88ad5ffd58b8ec4b8c7d5b8273994c6c954f604780cd2fcd2b0c14051f,recognizer,algo_choice_correct,0,1,,,,,,MLFQ,MLFQ,unmodified,,,0
+g-epsilon,llm_algo,calibrated,,,,7cc1bb88ad5ffd58b8ec4b8c7d5b8273994c6c954f604780cd2fcd2b0c14051f,recognizer,attr_correct,0,1,,,,,,false,false,unmodified,,,0
+g-epsilon,llm_algo,calibrated,,,,7cc1bb88ad5ffd58b8ec4b8c7d5b8273994c6c954f604780cd2fcd2b0c14051f,recognizer,config_correct,0,1,,,,,,,,unmodified,,,0
+g-epsilon,llm_algo,calibrated,,,,7cc1bb88ad5ffd58b8ec4b8c7d5b8273994c6c954f604780cd2fcd2b0c14051f,recognizer,latency_us,0,520000,,,,,,,,unmodified,,,0
+g-epsilon,llm_algo,calibrated,,,,7cc1bb88ad5ffd58b8ec4b8c7d5b8273994c6c954f604780cd2fcd2b0c14051f,recognizer,mode_correct,0,1,,,,,,indexing,indexing,unmodified,,,0

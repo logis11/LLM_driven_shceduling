@@ -19,8 +19,10 @@ from .reader import read_config_schedule, read_run_file, read_trace
 COLUMNS = ("workload_id", "condition", "table", "seed", "boot_default", "sim", "source_sha256",
            "entity", "metric", "t", "value",
            "cause", "provenance", "algorithm", "index", "period_us",
-           "predicted", "truth", "validation", "familiarity", "hogs")
-_INT_COLUMNS = ("t", "value", "index", "period_us", "familiarity", "hogs")
+           "predicted", "truth", "validation", "familiarity", "hogs",
+           "pre_committed_miss")
+_INT_COLUMNS = ("t", "value", "index", "period_us", "familiarity", "hogs",
+                "pre_committed_miss")
 
 SCHEMA_PATH = (pathlib.Path(__file__).resolve().parents[2]
                / "records" / "schema" / "records.schema.json")

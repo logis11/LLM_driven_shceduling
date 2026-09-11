@@ -1,0 +1,38 @@
+{
+ "workload_id": "g-beta",
+ "condition": "llm_vocab",
+ "seed": null,
+ "queries": [
+  {
+   "t_set_change": 0,
+   "telemetry": {
+    "t_us": 0,
+    "processes": [
+     {
+      "name": "placeholder",
+      "count": 1
+     }
+    ]
+   },
+   "proposal": null,
+   "validation": "held",
+   "raw": "<unparseable>",
+   "latency_us": 450000
+  },
+  {
+   "t_set_change": 60000000,
+   "telemetry": {
+    "t_us": 60000000,
+    "processes": []
+   },
+   "proposal": {
+    "system": {
+     "mode": "idle",
+     "background_wanted": true
+    }
+   },
+   "validation": "unmodified",
+   "latency_us": 450000
+  }
+ ]
+}

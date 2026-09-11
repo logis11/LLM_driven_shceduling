@@ -1,0 +1,114 @@
+# Miniature calibrated driver table for the mock-grades fixture (8.4). Six rows,
+# hand-written, covering every (mode, background_wanted) pair the fixture's truths
+# and predictions name. Same schema and shape as daemon/driver-table/prior.yaml.
+#
+# The three `false` rows share cap 0.05 and the same MLFQ entry on purpose: their
+# composed configurations are byte-identical, so a prediction that names the wrong
+# one of them is a mode error that changes nothing the scheduler does. That is the
+# case the configuration-distance line exists to count.
+
+role: calibrated
+rows:
+  - mode: dev
+    background_wanted: true
+    batch_bandwidth_cap: 0.5
+    default: MLFQ
+    justification: "Fixture row; not a research claim."
+    sources: []
+    entries:
+      MLFQ:
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
+        basis: tuned
+        justification: "Fixture entry."
+        sources: []
+
+  - mode: ml-train
+    background_wanted: true
+    batch_bandwidth_cap: 0.333
+    default: LOTTERY
+    justification: "Fixture row; not a research claim."
+    sources: []
+    entries:
+      LOTTERY:
+        params: {batch_share: 0.333, timeslice_us: 10000}
+        basis: tuned
+        justification: "Fixture entry."
+        sources: []
+
+  - mode: ml-train
+    background_wanted: false
+    batch_bandwidth_cap: 0.05
+    default: MLFQ
+    justification: "Fixture row; not a research claim."
+    sources: []
+    entries:
+      MLFQ:
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
+        basis: tuned
+        justification: "Fixture entry."
+        sources: []
+
+  - mode: media
+    background_wanted: true
+    batch_bandwidth_cap: 0.5
+    default: EDF
+    justification: "Fixture row; not a research claim."
+    sources: []
+    entries:
+      EDF:
+        params: {residual_timeslice_us: 10000}
+        basis: tuned
+        justification: "Fixture entry."
+        sources: []
+
+  - mode: backup
+    background_wanted: false
+    batch_bandwidth_cap: 0.05
+    default: MLFQ
+    justification: "Fixture row; not a research claim."
+    sources: []
+    entries:
+      MLFQ:
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
+        basis: tuned
+        justification: "Fixture entry."
+        sources: []
+
+  - mode: office
+    background_wanted: false
+    batch_bandwidth_cap: 0.05
+    default: MLFQ
+    justification: "Fixture row; not a research claim."
+    sources: []
+    entries:
+      MLFQ:
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
+        basis: tuned
+        justification: "Fixture entry."
+        sources: []
+
+  - mode: indexing
+    background_wanted: false
+    batch_bandwidth_cap: 0.05
+    default: MLFQ
+    justification: "Fixture row; not a research claim."
+    sources: []
+    entries:
+      MLFQ:
+        params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
+        basis: tuned
+        justification: "Fixture entry."
+        sources: []
+
+  - mode: gaming
+    background_wanted: true
+    batch_bandwidth_cap: 0.5
+    default: EDF
+    justification: "Fixture row; not a research claim."
+    sources: []
+    entries:
+      EDF:
+        params: {residual_timeslice_us: 10000}
+        basis: tuned
+        justification: "Fixture entry."
+        sources: []

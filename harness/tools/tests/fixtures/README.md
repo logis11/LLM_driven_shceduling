@@ -21,6 +21,14 @@ Six mock pairs (five for the harness's lower half — Phase 5, sub-task 5.1; `mo
 
 Not a trace pair: `records/` holds five hand-written records files for one small workload (`fixed`, `oracle`, `random` × 2 seeds, `fixed` under an alternative `boot_default`), `scoring-spec.yaml` a four-term spec shaped to hit every scorer rule (a windowed P99, a no-headroom miss rate, a progress term, a turnaround censored under one seed), `expected-aggregates.csv` and `expected-scores.csv` the files `tools/score.py` must reproduce byte for byte, and `worked.md` the derivation of every share and score. `seam/` holds hand-written `fixed` and `oracle` records for `mock-p1a`, scored together with the records the writer produces from `mock-p1a`'s trace (the end-to-end seam test).
 
+## `mock-grades` — hand-written recognition logs with expected records and grades (8.4)
+
+Also not a trace pair. `workloads/` holds five compiled workloads carrying only `ground_truth` and a placeholder event, `logs/` seventeen recognition logs over four conditions, and `driver-table.yaml` a miniature **calibrated** driver table whose four `background_wanted: false` rows compose to one identical configuration on purpose. `expected-records/` holds the recognition records rows for the sixteen graded runs and `expected-grades.csv` the pooled grades file; `worked.md` derives every point estimate by hand.
+
+It covers, deliberately: a `null` proposal, an `ambiguous` segment that is skipped, a terminal snapshot that is skipped, a `pre_committed_miss` segment that leaves the headline and stays in the second line, a familiarity annotation riding on the row, the algorithm axis against the miniature table, and one case where a wrong mode composes to the right configuration. Five graded query points over four files, four over three once the pre-committed miss drops out.
+
+The bootstrap bounds in `expected-grades.csv` are the only numbers not hand-derived: they are the seeded sampler's output at a pinned seed and repetition count. The sampler is checked separately against an exhaustive enumeration of all 3³ draws of the three files in the headline set.
+
 ## Fixed here, documented in the metrics doc (5.2)
 
 - **Row order:** `entity`, then `metric`, then `t` (numeric), then `cause`. Byte comparison needs one order.

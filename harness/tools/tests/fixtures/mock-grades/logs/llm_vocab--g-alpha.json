@@ -1,0 +1,62 @@
+{
+ "workload_id": "g-alpha",
+ "condition": "llm_vocab",
+ "seed": null,
+ "queries": [
+  {
+   "t_set_change": 0,
+   "telemetry": {
+    "t_us": 0,
+    "processes": [
+     {
+      "name": "placeholder",
+      "count": 1
+     }
+    ]
+   },
+   "proposal": {
+    "system": {
+     "mode": "dev",
+     "background_wanted": true
+    }
+   },
+   "validation": "unmodified",
+   "latency_us": 450000
+  },
+  {
+   "t_set_change": 60000000,
+   "telemetry": {
+    "t_us": 60000000,
+    "processes": [
+     {
+      "name": "placeholder",
+      "count": 1
+     }
+    ]
+   },
+   "proposal": {
+    "system": {
+     "mode": "ml-train",
+     "background_wanted": true
+    }
+   },
+   "validation": "unmodified",
+   "latency_us": 450000
+  },
+  {
+   "t_set_change": 180000000,
+   "telemetry": {
+    "t_us": 180000000,
+    "processes": []
+   },
+   "proposal": {
+    "system": {
+     "mode": "idle",
+     "background_wanted": true
+    }
+   },
+   "validation": "unmodified",
+   "latency_us": 450000
+  }
+ ]
+}

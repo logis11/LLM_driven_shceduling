@@ -1,4 +1,5 @@
-"""The two files sub-task 8.2 writes — `aggregates` and `scores` — as CSV in a fixed column and row order."""
+"""The long-format CSVs the harness writes — `aggregates` and `scores` (8.2), `guards` (8.3),
+`grades` (8.4) — each in a fixed column and row order."""
 
 import csv
 import json
@@ -9,6 +10,7 @@ import jsonschema
 HARNESS = pathlib.Path(__file__).resolve().parents[2]
 AGGREGATES_SCHEMA = HARNESS / "aggregates" / "schema" / "aggregates.schema.json"
 SCORES_SCHEMA = HARNESS / "scores" / "schema" / "scores.schema.json"
+GRADES_SCHEMA = HARNESS / "grades" / "schema" / "grades.schema.json"
 
 
 def write_csv(rows, columns, path):
@@ -33,7 +35,8 @@ def validate_rows(rows, schema_path):
     validator = jsonschema.Draft202012Validator(schema)
     for i, row in enumerate(rows):
         clean = {k: v for k, v in row.items() if v not in ("", None)}
-        for k in ("no_headroom", "censored", "n_terms", "n_no_headroom", "n_censored"):
+        for k in ("no_headroom", "censored", "n_terms", "n_no_headroom", "n_censored",
+                  "pre_committed_miss_excluded", "n", "n_files"):
             if k in clean:
                 clean[k] = int(clean[k])
         error = jsonschema.exceptions.best_match(validator.iter_errors(clean))

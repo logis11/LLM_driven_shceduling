@@ -1,0 +1,5 @@
+workload_id,condition,table,seed,boot_default,sim,source_sha256,entity,metric,t,value,cause,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss
+g-beta,oracle,calibrated,,,,3ba51906705dbe7035d6d3f2be4b2a28c073c57b495425b830a2c0d79a0da1b2,recognizer,attr_correct,0,1,,,,,,true,true,unmodified,5,,0
+g-beta,oracle,calibrated,,,,3ba51906705dbe7035d6d3f2be4b2a28c073c57b495425b830a2c0d79a0da1b2,recognizer,config_correct,0,1,,,,,,,,unmodified,5,,0
+g-beta,oracle,calibrated,,,,3ba51906705dbe7035d6d3f2be4b2a28c073c57b495425b830a2c0d79a0da1b2,recognizer,latency_us,0,0,,,,,,,,unmodified,5,,0
+g-beta,oracle,calibrated,,,,3ba51906705dbe7035d6d3f2be4b2a28c073c57b495425b830a2c0d79a0da1b2,recognizer,mode_correct,0,1,,,,,,media,media,unmodified,5,,0

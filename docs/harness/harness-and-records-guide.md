@@ -658,11 +658,15 @@ recognition log는 query point마다 entry 하나예요. query point는 "process
 이 entry 하나에서 나오는 row들. entity는 `recognizer`, `t`는 `t_set_change`.
 
 ```
-recognizer, mode_correct, 60000000, 1, predicted=ml-train, truth=ml-train, validation=unmodified
-recognizer, attr_correct, 60000000, 1, predicted=true,     truth=true,     validation=unmodified
-recognizer, latency_us,   60000000, 450000
-recognizer, validation,   60000000, unmodified
+recognizer, mode_correct,   60000000, 1, predicted=ml-train, truth=ml-train, validation=unmodified
+recognizer, attr_correct,   60000000, 1, predicted=true,     truth=true,     validation=unmodified
+recognizer, latency_us,     60000000, 450000,                                validation=unmodified
+recognizer, config_correct, 60000000, 1,                                     validation=unmodified
 ```
+
+`validation`은 **column**이지 metric이 아니에요 — 모든 recognition row에 붙어요(§6.2). 예전 판에는 `recognizer, validation, …` 이라는 row가 하나 더 적혀 있었는데, records schema의 `metric` 목록에 `validation`이 없고 `value`는 정수라서 그 row는 애초에 만들 수 없어요. 2026-09-11(8.4)에 고쳤어요.
+
+`config_correct`(8.4에 추가)는 **틀린 답이 실제로 scheduler를 바꿨나**를 재요. 예측한 `(mode, background_wanted)` row에서 만들어지는 config(algorithm + params + cap)가 정답 row의 config와 byte 단위로 같으면 1이에요. 이름을 틀렸어도 두 row가 같은 config로 이어지면 scheduler는 똑같이 돌았다는 뜻이라, Layer 1의 accuracy와 Layer 2의 결과가 어긋날 때 그 이유를 여기서 읽어요. 쓰는 table은 **그 run이 실제로 쓴 table**(row의 `table` column)이에요.
 
 `llm_algo` condition(LLM이 algorithm까지 고르는 조건)에서만 row 하나 더:
 
@@ -670,11 +674,25 @@ recognizer, validation,   60000000, unmodified
 recognizer, algo_choice_correct, 60000000, 1, predicted=MLFQ, truth=MLFQ
 ```
 
-`truth`는 calibrated driver table에서 정답 row의 default algorithm이에요. 그래서 grader는 table 파일도 input으로 받아요.
+`truth`는 calibrated driver table에서 정답 row의 default algorithm이에요. 그래서 grader는 table 파일도 input으로 받아요. 이 metric만은 **calibrated** table이어야 하고, prior table을 주면 grader가 거부해요(delegation rung을 엉뚱한 table로 채점하면 안 되니까).
 
-**채점 범위:** `ambiguous`가 아닌 `ground_truth` segment가 `t_set_change`를 덮는 query만 채점해요. 마지막 snapshot(모든 앱이 닫힌 순간)은 덮는 segment가 없으니 건너뛰어요. `c6-dual`의 `ambiguous` segment도 채점 대상이 아니에요.
+**채점 범위:** `ambiguous`가 아닌 `ground_truth` segment가 `t_set_change`를 덮는 query만 채점해요. 마지막 snapshot(모든 앱이 닫힌 순간)은 덮는 segment가 없으니 건너뛰어요. `c6-dual`의 `ambiguous` segment도 채점 대상이 아니에요. 지금 coreset에서 이 규칙을 적용하면 **50개 파일의 query point 134개 중 82개가 채점 대상**이고(49개 파일), `pre_committed_miss` 10개를 빼면 headline은 **72개(44개 파일)**예요.
 
-mode accuracy, attribute accuracy, confusion matrix, latency 분포는 전부 이 row들의 aggregate예요.
+`pre_committed_miss`가 붙은 segment는 이름과 행동만으로는 누구도 맞힐 수 없는 label이라, headline accuracy에서는 빼고 포함한 숫자를 두 번째 줄로 같이 보고해요. 어느 row가 빠졌는지는 records의 `pre_committed_miss` column(8.4에 추가한 22번째)에 적혀 있어요.
+
+이 row들의 aggregate는 `grades` 파일에 나와요. 어떤 축에 어떤 통계를 쓰는지는 **정해져 있어요**:
+
+| 축 | headline | 왜 |
+|---|---|---|
+| attribute (`true`/`false`) | **balanced accuracy** + Matthews 계수, confusion matrix | 늘 `true`라고만 답해도 69.5%가 나와요(측정값). 그래서 raw accuracy는 majority baseline을 옆에 적을 때만 써요 |
+| mode (16개) | raw accuracy + **측정한** majority baseline, confusion matrix, class별 recall | Phase 7이 32개 cell을 전부 채워서 늘 같은 답만 하면 11.0%밖에 안 나와요 — 보정할 병이 없어요. macro 평균은 어느 축에서도 안 내요 |
+| algorithm choice (4개) | mode와 동일 | |
+| configuration | `config_correct` 비율과, 틀린 답 중 config를 실제로 바꾼 비율 | 두 layer를 잇는 숫자 |
+| latency | `mode_correct = 1`인 row의 P50/P99 | |
+
+**신뢰구간은 query point가 아니라 workload 파일을 resample해요.** 한 파일 안의 query point들은 같은 process 이름과 같은 상황을 공유하니 독립이 아니에요. 조건끼리 비교할 때는 **같은 draw 위에서 짝지어** 계산해요 — 모든 조건이 똑같은 query point에서 채점되니까요. seed와 반복 횟수는 고정이라 다시 돌려도 bound가 byte 단위로 같아요.
+
+**familiarity tier는 row에 적기만 하고 tier별 aggregate는 안 내요.** 지금 coreset에서 tier가 적힌 segment는 3개(C5 파일 셋)뿐이고 각각 채점되는 query point가 **1개**예요. tier 1·2는 아예 없어요. 답 하나로 비율을 내면 안 되니까, tier가 답하는 질문(rule 기반 recognizer의 천장)은 **별도 experiment**로 빼뒀어요.
 
 run-to-run consistency(같은 snapshot에 매번 같은 답을 하나)는 같은 query point의 sample이 여러 개 있어야 계산돼요. 지금 log 형식에는 "이게 몇 번째 sample인지"의 index가 없어서 박이안에게 memo로 요청해뒀어요.
 
