@@ -1,6 +1,6 @@
 # Harness와 records 이해하기 — trace에서 논문의 숫자까지
 
-> Status: draft · Created 2026-09-08 · Updated 2026-09-10
+> Status: draft · Created 2026-09-08 · Updated 2026-09-11
 
 이 문서는 **공부용 문서**예요. Phase 5(primitive metrics and the records pipeline)를 직접 수행하기 위해, harness가 무엇을 읽고 무엇을 쓰는지, `records`의 row 하나가 무슨 뜻인지, 그리고 그 위에 어떤 score가 올라가는지를 OS/시스템 지식이 거의 없는 사람 기준으로 바닥부터 풀어 쓴 거예요. 규범적(normative)인 정의는 `docs/harness/metrics.md`(metrics doc)가 갖고, 이 문서는 그 문서를 읽을 수 있게 만드는 다리예요. 둘이 다르면 metrics doc이 맞아요.
 
@@ -1185,7 +1185,7 @@ score가 아니라 pass/fail이에요. 모든 보고 숫자 옆에 붙어요.
 | tick/iteration 일치 | `ready(timer_tick)` 개수 = tick 개수, tail iteration = head tick | simulator가 frame을 빠뜨리지 않았나 |
 | `validation` = `provenance` | recognizer row의 `validation` 순서 = `config_interval`의 provenance 순서(boot 제외) | log와 schedule이 서로 맞나 |
 
-`c6-dual` 같은 파일은 guard 예외를 미리 gate spec에 데이터로 적어요(`ground_truth`가 `ambiguous`라 oracle이 legal한 답을 낼 수 없어서 fallback 100%가 정상).
+`c6-dual` 같은 파일은 guard 예외를 미리 RQ0 gate spec에 데이터로 적어요(`ground_truth`가 `ambiguous`라 oracle이 legal한 답을 낼 수 없어서 fallback 100%가 정상).
 
 ---
 

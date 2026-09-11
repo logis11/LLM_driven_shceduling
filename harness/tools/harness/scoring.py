@@ -4,7 +4,7 @@
 valued: a list of terms, each naming an entity, a primitive, a filter (`cause`,
 a time window), an aggregate, a direction, and a weight. A file's score is the
 weighted sum of its terms' normalised shares (metrics doc §9). The file carries
-terms only — which files judge, report, or are excluded is the gate spec's.
+terms only — which files judge, report, or are excluded is the RQ0 gate spec's.
 
 `lint_spec` checks the file against its JSON schema and against the compiled
 coreset: every entity is a task id in that file's compiled workload or a

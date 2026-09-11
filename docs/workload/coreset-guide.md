@@ -1,6 +1,6 @@
 # Coreset 안내 — 50개 workload를 하나씩 뜯어보기
 
-> Status: draft · Created 2026-09-08 · Updated 2026-09-10
+> Status: draft · Created 2026-09-08 · Updated 2026-09-11
 
 이 문서는 **공부용 문서**예요. dataset이 무엇이고, 어떻게 만들어지고, 50개 coreset 파일 각각이 무슨 상황을 담고 있으며 어떤 숫자를 갖고 있는지를 OS/시스템 지식이 거의 없는 사람 기준으로 풀어 써요. 설계의 규범적 근거는 building-plan(`docs/workload/building-plan.md`), archetype의 규범적 정의는 archetype-plan(`docs/workload/archetype-plan.md`), 실행 semantics는 interpretation contract(`docs/simulator/interpretation-contract.md`)에 있어요. 이 문서는 그 셋을 읽을 수 있게 만드는 다리이고, 숫자는 2026-09-08에 `make dataset`으로 빌드한 `coreset-single`에서 직접 읽은 값이에요.
 
@@ -903,7 +903,7 @@ harness: 성능은 c1-browsing과 동일(같은 task, 같은 trace). Layer 1에�
 
 recognizer: 0 s `code, game.exe ×300, wineserver` → 10 s `+make, cc1 ×85` → 240 s `make, cc1`.
 
-harness: `ambiguous`는 recognizer의 menu에 없어요. oracle이 이 파일에서 뭘 내는지는 **미결**이고(규칙대로면 답이 거부되어 fallback), 그래서 gate spec에 guard 예외를 미리 적어둬요("random이 oracle을 이겨도 됨", "fallback 100%가 정상"). Layer 2 채점에서 제외. 단 oracle이 crash하면 안 되고 valid한 schedule과 log를 내야 해요. utilization 1.28.
+harness: `ambiguous`는 recognizer의 menu에 없어요. oracle이 이 파일에서 뭘 내는지는 **미결**이고(규칙대로면 답이 거부되어 fallback), 그래서 RQ0 gate spec에 guard 예외를 미리 적어둬요("random이 oracle을 이겨도 됨", "fallback 100%가 정상"). Layer 2 채점에서 제외. 단 oracle이 crash하면 안 되고 valid한 schedule과 log를 내야 해요. utilization 1.28.
 
 ---
 

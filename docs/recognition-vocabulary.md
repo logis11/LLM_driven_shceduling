@@ -1,5 +1,5 @@
 # Recognition Vocabulary
-> Status: normative · Created 2026-08-28 · Updated 2026-09-10
+> Status: normative · Created 2026-08-28 · Updated 2026-09-11
 
 The shared vocabulary of the recognition signal — the one contract that the recognizer's output schema, the validator's menu, the driver table, and the Layer-1 grader all agree on. Ratified 2026-08-28 (인지오 · 인경민 · 박이안 — pending team review of this doc).
 
@@ -67,7 +67,7 @@ Every configuration, regardless of algorithm:
 }
 ```
 
-`batch_bandwidth_cap` is the ceiling on the fraction of the lane the **batch class** may consume while non-batch work is runnable; `null` means no ceiling. The batch class is determined behaviorally by the executor (observed CPU-bound behavior — the same evidence MLFQ demotion uses); the classification rule is identical across algorithms, frozen in the simulator's docs, and not configurable. Starvation protection is executor-owned and has no config field: every runnable task makes progress within a bounded window regardless of what any configuration says.
+`batch_bandwidth_cap` is the ceiling on the fraction of the lane the **batch class** may consume while non-batch work is runnable; `null` means no ceiling. The idea has a shipped counterpart, a per-class CPU bandwidth ceiling (`linux-sched-bwc`, existence only); the range, the floor, and the class rule below are ours. The batch class is determined behaviorally by the executor (observed CPU-bound behavior — the same evidence MLFQ demotion uses); the classification rule is identical across algorithms, frozen in the simulator's docs, and not configurable. Starvation protection is executor-owned and has no config field: every runnable task makes progress within a bounded window regardless of what any configuration says.
 
 ### MLFQ
 
@@ -115,7 +115,7 @@ The seven default values above are the **boot default configuration** and the `f
 | LOTTERY `batch_share` | 0.15 | No source names a batch-class share. `waldspurger-osdi94` defines shares as proportional to tickets and gives no ratio between classes. | assumption, unbounded |
 | LOTTERY `timeslice_us` | 2000 | `waldspurger-osdi94` §2: prototype quantum 10 ms ("100 lotteries per second"), with "shorter time quanta can be used to further improve accuracy". Set equal to MLFQ `timeslice_us`. | assumption, bounded |
 
-**Sensitivity check (planned, pre-registered in the gate spec at Phase 8).** Because the floor is assumed, the `fixed` condition is re-run under two alternative boot defaults drawn from the cited sources' own values — OSTEP's example configuration (10 ms top slice, three queues, doubling, 100 ms boost) and a Linux-like short slice (0.75 ms base) — with the exact pair fixed before execution. If the RQ0 gap's sign or the ordering of normalised scores changes across the three floors, the floor is reported as a range rather than a point.
+**Sensitivity check (planned, pre-registered in the RQ0 gate spec at Phase 8).** Because the floor is assumed, the `fixed` condition is re-run under two alternative boot defaults drawn from the cited sources' own values — OSTEP's example configuration (10 ms top slice, three queues, doubling, 100 ms boost) and a Linux-like short slice (0.75 ms base) — with the exact pair fixed before execution. If the RQ0 gap's sign or the ordering of normalised scores changes across the three floors, the floor is reported as a range rather than a point.
 
 ### Validation rules
 
@@ -165,7 +165,8 @@ Adding or removing a mode, promoting an annotation to a graded attribute, changi
 
 ## 5. Changelog
 
+- **2026-09-11 — the cap's shipped counterpart (jioh).** No value changed. §2's `batch_bandwidth_cap` paragraph now points to `linux-sched-bwc` (Linux CFS bandwidth control) as the existence reference for a per-class CPU bandwidth ceiling; what the class is, the range, and the floor remain this project's.
 - **2026-09-10 — batch-mode reading of `background_wanted` (jioh 7.3).** No value changed. One clarifying clause in §1: in the six batch modes the batch job is itself the background work the attribute judges, so its `false` cell is that job unwanted, the reading `c2-p1b` already used. The C7 counterparts are built on it.
 - **2026-09-10 — `pre_committed_miss` annotation (jioh 7.1).** No label or schema value changed. A fifth ground-truth annotation, `pre_committed_miss: true`, marks a segment whose label cannot be reached from names and behaviour; it is what the coverage grid reads to mark a driver-table cell as instanced but recognition-limited, and what the grader will read to exclude the segment from accuracy (Phase 8). Set first by `c1-indexing` (7.2), the user-initiated reindex.
-- **2026-09-07 — boot-default provenance (jioh 4.1).** No value changed. The seven config-schema defaults now carry their grounding in §2 "Provenance of the boot default": three match OSTEP's worked-example values (`num_queues`, `timeslice_growth`, `boost_interval_us`), two are bounded by shipped or published quanta (`timeslice_us`, LOTTERY `timeslice_us`), two have no source (EDF `residual_timeslice_us`, LOTTERY `batch_share`). All seven are stated assumptions; a `fixed`-under-alternative-floors sensitivity check is planned for the gate spec. New references: `linux-sched-fair`, `illumos-ts`, `waldspurger-osdi94`; `ostep` verified at Version 1.10.
+- **2026-09-07 — boot-default provenance (jioh 4.1).** No value changed. The seven config-schema defaults now carry their grounding in §2 "Provenance of the boot default": three match OSTEP's worked-example values (`num_queues`, `timeslice_growth`, `boost_interval_us`), two are bounded by shipped or published quanta (`timeslice_us`, LOTTERY `timeslice_us`), two have no source (EDF `residual_timeslice_us`, LOTTERY `batch_share`). All seven are stated assumptions; a `fixed`-under-alternative-floors sensitivity check is planned for the RQ0 gate spec. New references: `linux-sched-fair`, `illumos-ts`, `waldspurger-osdi94`; `ostep` verified at Version 1.10.
 

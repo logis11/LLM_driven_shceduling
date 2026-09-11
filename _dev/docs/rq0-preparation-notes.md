@@ -455,7 +455,7 @@ Must accompany every reported number:
 
 - provenance breakdown (`fallback` / `held` share) — a condition that scored
   well while mostly running fallback demonstrated nothing; exemptions live in
-  the gate spec as data (`guard_exemptions`), never in guard code;
+  the RQ0 gate spec as data (`guard_exemptions`), never in guard code;
 - config age;
 - starvation floor respected in every condition;
 - determinism (same input twice → byte-identical trace);
@@ -622,7 +622,7 @@ level. It is **not** added to the judging set — no pair, so no attribute
 variation; and choosing the highest-demand file after reading demand numbers
 is an optimistic choice (demand is an input property, not an outcome, so not
 p-hacking — but selection along an axis correlated with expected gap size). It
-is a pre-registered separate reporting line in the gate spec, reason recorded
+is a pre-registered separate reporting line in the RQ0 gate spec, reason recorded
 in-file, so whichever way the result lands the timing of the choice is in git.
 
 Note that `random` as a condition is **not yet defined**: what it draws
@@ -750,7 +750,7 @@ Meaningful only once the table's format (0.5) and both metric layers (1, 3) are
 fixed — the shape of the instrument has to be settled before a threshold on its
 output means anything.
 
-- [ ] **5.1** Commit the gate spec file.
+- [ ] **5.1** Commit the RQ0 gate spec file.
 - [ ] **5.2** Set the threshold — possible only now that both layers are fixed,
       and necessarily before seeing any numbers.
 - [ ] **5.3** Fix the `random` condition's draw definition and seed count
@@ -773,7 +773,7 @@ Dependent on the two builders.
 - [ ] **6.5** End-to-end smoke: one file, `fixed`, daemon → simulator → harness.
 - [ ] **6.6** Run RQ0: all coreset files × 3 conditions, `random` across N seeds.
 - [ ] **6.7** **Check guards before looking at results.**
-- [ ] **6.8** Judge per the gate spec. On failure, config search before anything
+- [ ] **6.8** Judge per the RQ0 gate spec. On failure, config search before anything
       else (§4.3).
 
 ---

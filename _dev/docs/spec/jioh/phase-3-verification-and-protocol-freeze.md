@@ -35,7 +35,7 @@ A changelog section is added to `docs/data-contracts.md`, a dated entry list, wi
 
 ### 6. Demand estimate becomes a build artifact
 
-The compiler writes each file's `utilization` and `demand_class` into `dataset/build.manifest.json`. The six C1 values and the resulting judging-set conclusion (6 files or 12) are recorded in the session archive for Phase 8's gate spec to consume.
+The compiler writes each file's `utilization` and `demand_class` into `dataset/build.manifest.json`. The six C1 values and the resulting judging-set conclusion (6 files or 12) are recorded in the session archive for Phase 8's RQ0 gate spec to consume.
 
 ### 7. `c6-dual` finding gets a normative home
 

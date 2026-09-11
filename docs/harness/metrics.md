@@ -1,6 +1,6 @@
 # Metrics — primitives, records, and the aggregates the research reads
 
-> Status: normative · Created 2026-09-08 · Updated 2026-09-09
+> Status: normative · Created 2026-09-08 · Updated 2026-09-11
 
 Every number the project reports is defined here. The document fixes three things: the **primitives** — the raw observations the harness computes from a trace or a recognition log; the **records** file they land in; and the **aggregates** — the statistics, the normalisation rule, and the constants that turn records into the figures the research questions ask for. Per-file weights are not here; they are data, in the scoring spec (`harness/scoring/scoring-spec.yaml`, §2). The code that implements the trace primitives lives in `harness/`; the grader that implements the recognition primitives is built in Phase 8 to the definitions below.
 
@@ -254,7 +254,7 @@ with `fixed` and `oracle` the same workload under the same table. The rule appli
 
 **Floor.** Each aggregate has an absolute floor in its own units (§10). When `|improvement(oracle)|` is below the floor, the share is **undefined** for that workload and aggregate: the raw values are reported with the mark *no headroom*, and no ratio is formed.
 
-**Sensitivity.** `fixed` is the boot default, whose values are stated assumptions (`../recognition-vocabulary.md` §2). The gate spec pre-registers `fixed` under two alternative boot defaults; where the sign or ordering of a share moves, the floor is reported as a range. That reporting rule is the gate spec's (Phase 8); the formula here does not change.
+**Sensitivity.** `fixed` is the boot default, whose values are stated assumptions (`../recognition-vocabulary.md` §2). The RQ0 gate spec pre-registers `fixed` under two alternative boot defaults; where the sign or ordering of a share moves, the floor is reported as a range. That reporting rule is the RQ0 gate spec's (Phase 8); the formula here does not change.
 
 ---
 
@@ -269,7 +269,7 @@ with `fixed` and `oracle` the same workload under the same table. The rule appli
 
 **`T_interaction` = 0.1 s.** Miller (1968), Topic 1, "Response to control activation": the feedback that a key or control has been activated "should be immediate and perceived as a part of the mechanical action induced by the operator. Time delay: No more than 0.1 second"; for the echo of typed text, "the delay between depressing the key and the visual feedback should be no more than 0.1 to 0.2 seconds", with the caveat that "this delay in feedback may be far too slow for skilled keyboard users". Nielsen (1993), *Usability Engineering* ch. 5: "0.1 second is about the limit for having the user feel that the system is reacting instantaneously", which names Miller 1968 as its source. Shneiderman (1984) reports Long's 1976 finding that keystroke-echo delays of "approximately 0.1–0.5 second" already slowed both unskilled and skilled typists and raised their error rates, so 0.1 s is the loose end of the range, not a comfortable target; the percentile aggregates carry what the fraction discards. The constant applies to `ready_wait` rows with `cause = wake` on interactive tasks. It is one input to the `c1-media` weighting question in the scoring spec, not its answer.
 
-Floors are stated assumptions and may be revised by the gate spec with a changelog entry here.
+Floors are stated assumptions and may be revised by the RQ0 gate spec with a changelog entry here.
 
 ---
 

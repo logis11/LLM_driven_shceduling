@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-09-10
+> Status: normative · Created 2026-08-26 · Updated 2026-09-11
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -228,6 +228,11 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - cite: Linux kernel source, `kernel/sched/fair.c`. Tag v6.5 (CFS): `sysctl_sched_latency = 6000000ULL` ("default: 6ms * (1 + ilog(ncpus))"), `sysctl_sched_min_granularity = 750000ULL` ("default: 0.75 msec * (1 + ilog(ncpus))"). Tag v6.6 (EEVDF): `sysctl_sched_base_slice = 750000ULL` ("Minimal preemption granularity for CPU-bound tasks: default: 0.75 msec * (1 + ilog(ncpus))"). github.com/torvalds/linux/blob/v6.5/kernel/sched/fair.c and /v6.6/kernel/sched/fair.c (accessed 2026-09-07).
 - role: existence claim only — the slice magnitudes a shipped general-purpose scheduler uses (sub-millisecond base slice, single-digit-millisecond target latency). Bounds the boot default's `timeslice_us`; does not name our value.
 - status: verified (2026-09-07; values read from the tagged source)
+
+### `linux-sched-bwc`
+- cite: Linux kernel documentation. "CFS Bandwidth Control." docs.kernel.org/scheduler/sched-bwc.html (accessed 2026-09-10): "CFS bandwidth control is a CONFIG_FAIR_GROUP_SCHED extension which allows the specification of the maximum CPU bandwidth available to a group or hierarchy"; "within each given 'period' (microseconds), a task group is allocated up to 'quota' microseconds of CPU time."
+- role: existence claim only — a shipped general-purpose scheduler carries a per-class CPU bandwidth ceiling (quota per period on a cgroup). Grounds the *idea* behind `batch_bandwidth_cap` (recognition-vocabulary §2); does not name our range, floor, or class rule, and differs in what the class is (an administrator-assigned cgroup there, a behaviourally inferred batch class here).
+- status: verified (2026-09-10)
 
 ### `illumos-ts`
 - cite: illumos-gate source, `usr/src/uts/common/disp/ts_dptbl.c` (default `config_ts_dptbl[]`: 60 user-priority levels, `ts_quantum` in clock ticks, columns `glbpri qntm tqexp slprt mxwt lwt`) and `usr/src/uts/common/disp/ts.c` (`ts_update`: "Called once per second via timeout", `timeout(ts_update, NULL, hz)`). Commit de1199e40761fcb5ed5cf82b16414ce4e4840999 (2026-09-05). Man page: illumos.org/man/5/ts_dptbl ("The length of the time quantum allocated to processes at this level in ticks (hz)"). Accessed 2026-09-07.

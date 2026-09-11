@@ -86,7 +86,7 @@ Execution order: 7.1 → 7.2 → 7.3 → 7.4 → 7.5; 7.6 parallel with 7.4 and 
 Stages 4–5. Scorer, guards, L1 grader, mock daemon + mock simulator with the full pipeline run on mocks, runner with execution cache, report with provenance. Ends at the committed RQ0 gate spec: judging set (re-decided with C1 at sixteen files and C7's sixteen counterparts in view), threshold, `random` draw definition and seed count (with 박이안), failure procedure, frozen scoring spec, and the reporting lines from the Phase 7 pair review (findings 4–5) and the throwaway pool's definition.
 
 ### Phase 9 — Integration and the RQ0 run
-Stage 6. Swap mocks for the real simulator and daemon, end-to-end smoke, run all coreset files × 3 conditions, check guards before looking at results, judge per the gate spec; on failure, config search before workload redesign. Depends on 경민's integration gate and algorithm extension and 이안's daemon.
+Stage 6. Swap mocks for the real simulator and daemon, end-to-end smoke, run all coreset files × 3 conditions, check guards before looking at results, judge per the RQ0 gate spec; on failure, config search before workload redesign. Depends on 경민's integration gate and algorithm extension and 이안's daemon.
 
 ### Backlog
 - Naturalistic generator + generalset + full condition matrix

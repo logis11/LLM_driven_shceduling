@@ -66,7 +66,7 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 - [memos/2026-09-07-repeat-samples-for-the-daemon.md](memos/2026-09-07-repeat-samples-for-the-daemon.md) — to 박이안: the repeat index run-to-run consistency needs from the recognition log
 - [memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md](memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md) — to 인경민: what happens to the task queue, the running task, and scheduler state when a config with a different algorithm lands mid-run, and how the MLFQ re-learning overhead is measured
 - [memos/2026-09-09-batch-class-rule-for-the-simulator.md](memos/2026-09-09-batch-class-rule-for-the-simulator.md) — to 인경민: which tasks `batch_bandwidth_cap` applies to — the behavioural rule (one full slice since the last voluntary block; the periodic class never), worked task by task, and why a wrong rule flips the gaming rows
-- [memos/2026-09-10-coreset-before-and-after-phase-7.md](memos/2026-09-10-coreset-before-and-after-phase-7.md) — to 인경민, 박이안 (Korean): what Phase 7 changed in the coreset and why — 24 → 50 files, all 32 driver-table cells paired, C1 at sixteen, the new C7 group, pre-committed misses, the two EDF pairs the cap cannot reach, what stays the same for the simulator and the daemon
+- [memos/2026-09-10-coreset-before-and-after-phase-7.md](memos/2026-09-10-coreset-before-and-after-phase-7.md) — to 인경민, 박이안 (Korean): the 2026-09-10 coreset change and why — 24 → 50 files, all 32 driver-table cells paired, C1 at sixteen, the new C7 group, pre-committed misses, the two EDF pairs the cap cannot reach, what stays the same for the simulator and the daemon
 
 ## Full index
 
@@ -96,4 +96,4 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 | [memos/2026-09-07-repeat-samples-for-the-daemon.md](memos/2026-09-07-repeat-samples-for-the-daemon.md) | to 박이안: the repeat index consistency needs from the log | memo |
 | [memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md](memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md) | to 인경민: queue takeover, preemption, and measuring overhead at an algorithm switch | memo |
 | [memos/2026-09-09-batch-class-rule-for-the-simulator.md](memos/2026-09-09-batch-class-rule-for-the-simulator.md) | to 인경민: the batch-class rule the cap applies to, with worked examples and an action plan | memo |
-| [memos/2026-09-10-coreset-before-and-after-phase-7.md](memos/2026-09-10-coreset-before-and-after-phase-7.md) | to 인경민, 박이안 (Korean): the coreset before and after Phase 7 — what changed, why, and what it means for each owner | memo |
+| [memos/2026-09-10-coreset-before-and-after-phase-7.md](memos/2026-09-10-coreset-before-and-after-phase-7.md) | to 인경민, 박이안 (Korean): the coreset before and after the 2026-09-10 change — what changed, why, and what it means for each owner | memo |
