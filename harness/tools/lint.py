@@ -2,16 +2,18 @@
 """Lint: every fixture pair under tools/tests/fixtures parses under the frozen
 contracts — the trace through the trace reader, the run file through the
 run-file reader, the config schedule (when the fixture has one) through the
-schedule reader — and its expected records validate against the records
-schema. Exit 1 on the first refusal."""
+schedule reader, any recognition log through the log reader — and its expected
+records validate against the records schema; `mock-scores` and `mock-guards`
+expected outputs validate against their schemas. Exit 1 on the first refusal."""
 import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
-from harness.reader import (RunFileError, ScheduleError, TraceError,  # noqa: E402
-                            read_config_schedule, read_run_file, read_trace)
-from harness import aggregates, scorer  # noqa: E402
+from harness.reader import (LogError, RunFileError, ScheduleError, TraceError,  # noqa: E402
+                            read_config_schedule, read_recognition_log, read_run_file,
+                            read_trace)
+from harness import aggregates, guards, scorer  # noqa: E402
 from harness.outputs import AGGREGATES_SCHEMA, SCORES_SCHEMA  # noqa: E402
 from harness.outputs import read_csv as read_table  # noqa: E402
 from harness.outputs import validate_rows as validate_table  # noqa: E402
@@ -34,11 +36,19 @@ def main():
             sched = ""
             if (d / "config-schedule.json").exists():
                 sched = f", {len(read_config_schedule(d / 'config-schedule.json').entries)} schedule entries"
+            logs = ""
+            for lg in sorted(d.glob("recognition-log*.json")):
+                logs += f", {len(read_recognition_log(lg).queries)} queries in {lg.name}"
             rows = read_csv(d / "expected.csv")
             validate_rows(rows)
+            extra = ""
+            if (d / "expected-guards.csv").exists():
+                g = read_table(d / "expected-guards.csv", guards.COLUMNS)
+                validate_table(g, guards.GUARDS_SCHEMA)
+                extra = f", {len(g)} expected guard rows valid"
             print(f"  {d.name}: {n} events, T_end {run.t_end}, "
-                  f"{len(run.chains)} chain(s){sched}, {len(rows)} expected rows valid")
-        except (TraceError, RunFileError, ScheduleError, ValueError, OSError) as exc:
+                  f"{len(run.chains)} chain(s){sched}{logs}, {len(rows)} expected rows valid{extra}")
+        except (TraceError, RunFileError, ScheduleError, LogError, ValueError, OSError) as exc:
             failed += 1
             print(f"  {d.name}: {exc}")
     ms = FIXTURES / "mock-scores"

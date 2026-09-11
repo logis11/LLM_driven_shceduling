@@ -1,0 +1,19 @@
+{
+ "workload_id": "mock-guards",
+ "events": [
+  {"op": "arrive", "t": 0, "id": "editor", "name": "code", "depart": 3000000,
+   "program": [
+    {"op": "WAIT", "channel": "input:editor"},
+    {"op": "RUN", "us": 4000},
+    {"op": "WAIT", "channel": "input:editor"},
+    {"op": "RUN", "us": 4000},
+    {"op": "WAIT", "channel": "input:editor"}
+   ]},
+  {"op": "arrive", "t": 50000, "id": "hog", "name": "python3",
+   "program": [{"op": "RUN", "us": 2000000}, {"op": "EXIT"}]},
+  {"op": "arrive", "t": 100000, "id": "batch", "name": "make",
+   "program": [{"op": "RUN", "us": 500000}, {"op": "EXIT"}]},
+  {"op": "wake", "t": 2600000, "channel": "input:editor", "target": "editor"},
+  {"op": "wake", "t": 2700000, "channel": "input:editor", "target": "editor"}
+ ]
+}

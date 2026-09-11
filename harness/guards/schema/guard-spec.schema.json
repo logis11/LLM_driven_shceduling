@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "guard-spec.schema.json",
+  "title": "Guard spec",
+  "description": "The eight research-wide guards with their parameters and groundings (Phase 8 spec decisions 6–7; sub-task 8.3). Each guard is a named function in tools/harness/guards.py; this file supplies threshold, direction, the conditions it applies to, and the grounding behind the number. `pairs` lists the C2 pairs the c2_pair guard reads. Cross-checks the schema cannot express (ids equal the code registry, pairs equal the dataset's variant recipe) live in tools/harness/guards.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "guards", "pairs"],
+  "properties": {
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+$"},
+    "guards": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/guard"}},
+    "pairs": {"type": "array", "items": {"$ref": "#/$defs/pair"}}
+  },
+  "$defs": {
+    "condition": {"enum": ["fixed", "random", "whitelist", "llm_vocab", "llm_algo", "llm_full", "oracle"]},
+    "guard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "reads", "threshold", "unit", "direction", "applies_to", "grounding"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "reads": {"type": "string", "minLength": 1},
+        "threshold": {"type": ["number", "null"]},
+        "unit": {"type": "string", "minLength": 1},
+        "direction": {"enum": ["below", "at_or_below", "structural"]},
+        "min_exclusive": {"type": "number"},
+        "applies_to": {
+          "oneOf": [
+            {"const": "all"},
+            {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/condition"}}
+          ]
+        },
+        "grounding": {"type": "string", "minLength": 1, "pattern": "\\S"}
+      }
+    },
+    "pair": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["a", "b", "fixed_identical"],
+      "properties": {
+        "a": {"type": "string", "pattern": "^c2-[a-z0-9-]+$"},
+        "b": {"type": "string", "pattern": "^c2-[a-z0-9-]+$"},
+        "fixed_identical": {"type": "boolean"}
+      }
+    }
+  }
+}

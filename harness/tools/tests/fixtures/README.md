@@ -1,6 +1,6 @@
 # Mock fixtures — hand-written traces with hand-computed records
 
-Five mock pairs for the harness's lower half (Phase 5, sub-task 5.1; `mock-switch` added in Phase 6, sub-task 6.1). Each directory holds:
+Six mock pairs (five for the harness's lower half — Phase 5, sub-task 5.1; `mock-switch` added in Phase 6, sub-task 6.1 — and `mock-guards` for the guards, Phase 8, sub-task 8.3). Each directory holds:
 
 - `run.json` — the run-file view (`workload_id` + `events`), reduced from a coreset file. This is the reader's second input: it supplies `T_end`, the chain topology, and each task's `demand`.
 - `trace.jsonl` — the trace a simulator would emit for that run file under the scheduler behaviour stated in `worked.md`. Hand-written, 20–50 lines, every line in the frozen format (`docs/data-contracts.md` §9).
@@ -14,6 +14,7 @@ Five mock pairs for the harness's lower half (Phase 5, sub-task 5.1; `mock-switc
 | `mock-media` | `c1-media` + a batch distractor | two TIMER tasks, backlog on the video task (instant TIMER completions inside one occupancy, two misses), a same-instant boot + oracle config pair (a zero-length `config_interval`), a batch task that completes |
 | `mock-p1a` | `c2-p1a` | editor versus batch, the config switch at set change + latency, two preemptions, a batch task that cannot finish before `T_end` (its exit lies past the window and is clipped) |
 | `mock-chain` | the game chain, three stages | frame latency reconstructed from the WAKE topology (ids deliberately not `.chain.N`), one late frame overlapping the next tick, the head's `deadline` lines disagreeing with frame latency by design; FIFO under an oracle entry beside the boot entry |
+| `mock-guards` | an editor, a 2 s hog, a batch task, under FIFO stamped beside the boot entry | the guards' fixture (8.3): a schedule mixing `fallback`, `unmodified`, `held`, and `clamped`, a recognition log whose `validation` sequence mirrors it (`recognition-log.json`; `recognition-log-mismatch.json` swaps one), `workload.json` with ground-truth segments, and `expected-guards.csv`: config age fails (an entry stamped after its query's segment ended), starvation fails (the batch task waits 1.95 s under FIFO), the other run-level guards pass; the C2 pair check is `not_applicable`. The two pair guards are unit-tested over synthetic runs |
 | `mock-switch` | an editor, a batch task, a third task, under MLFQ → FIFO → MLFQ | `switch_window` in both directions (zero-valued into FIFO; into MLFQ the lane-time window closing when the hog has its `W_single` of CPU, sized from the config schedule), two `boost_window` rows on the boost grid after the switch (8.10), a hog counted by its first preempt, `x_mlfq_level` lines the harness ignores and the check tool reads, the §8 excess aggregates worked by hand; the check tool passes at the window's edge |
 
 ## `mock-scores` — hand-written records with expected aggregates and scores (8.2)

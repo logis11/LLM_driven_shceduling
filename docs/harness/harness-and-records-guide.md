@@ -1173,19 +1173,20 @@ C2의 latency/frame term은 60초부터 `T_end`까지만 봐요. 첫 1분은 a�
 
 ## 16. guard — score와 별개로 항상 확인하는 것
 
-score가 아니라 pass/fail이에요. 모든 보고 숫자 옆에 붙어요.
+score가 아니라 pass/fail이에요. 모든 보고 숫자 옆에 붙어요. guard 여덟 개의 목록, threshold, 그리고 그 threshold를 왜 그렇게 잡았는지(grounding)는 **guard spec**(`harness/guards/guard-spec.yaml`, 8.3)이 데이터로 갖고, 코드(`harness/tools/harness/guards.py`)는 guard마다 이름 붙은 함수 하나예요. 결과는 run마다 guard 하나에 row 하나인 `guards` 파일(pass / fail / not_applicable, 잰 값, 적용된 threshold, 짝 run, fail이면 이유)로 나와요. 입력이 없어서 못 잰 guard는 fail이에요(통과시킨 게 아니니까). `not_applicable`은 guard의 범위가 그 run을 애초에 안 보는 경우만이에요(예: `fixed`에는 recognition이 없으니 provenance 비율을 안 봐요).
 
-| guard | records에서 | 왜 |
-|---|---|---|
-| provenance 비율 | `config_interval` row의 provenance별 합 | fallback/held로 대부분 돌았으면 recognition이 증명한 게 없음 |
-| config age | `config_interval`의 `t` − 그 query의 `t_set_change` | 얼마나 오래된 관측으로 설정했나 |
-| starvation floor | task별 `ready_wait` max | 어떤 condition도 task를 굶기면 안 됨 |
-| determinism | trace 파일의 hash 비교 (records 밖) | 같은 입력 두 번 → byte-identical |
-| utilisation sanity | `busy ≤ T_end` | 물리적으로 말이 되나 |
-| tick/iteration 일치 | `ready(timer_tick)` 개수 = tick 개수, tail iteration = head tick | simulator가 frame을 빠뜨리지 않았나 |
-| `validation` = `provenance` | recognizer row의 `validation` 순서 = `config_interval`의 provenance 순서(boot 제외) | log와 schedule이 서로 맞나 |
+| guard | 무엇을 재나 | threshold | 왜 |
+|---|---|---|---|
+| provenance 비율 | `config_interval`의 시간 가중 `fallback` + `held` 비율(aggregates의 fallback share) | 0.5 미만 (stated assumption) | fallback/held로 대부분 돌았으면 recognition이 증명한 게 없음. `fixed`는 not_applicable |
+| config age | non-boot schedule entry마다, 그 entry가 찍힌 시각이 **그 query의 `t_set_change`를 덮는 ground-truth segment가 끝나기 전**인가 | 숫자 없음, 구조적 검사 | 상황 A를 보고 낸 config가 상황 B가 시작된 뒤에 적용되면, log의 채점(A)과 trace의 결과(B)가 서로 다른 segment 얘기가 돼서 결과를 recognition에 귀속시킬 수 없음. 값으로는 가장 큰 관측 나이(적용 시각 − `t_set_change`)를 기록. metrics doc §8의 `config_age_*` aggregate는 "config가 얼마나 오래 유효했나"(time in force)라서 다른 양이고, 보고만 해요 |
+| starvation floor | task별 `ready_wait` max(cause 무관, 파일 전체) | 1 000 000 µs 이하 (stated assumption; 경민이 executor의 starvation window를 정하면 그 값으로 교체) | 어떤 condition도 task를 굶기면 안 됨 — 굶겼다면 executor의 안전망이 깨진 거지 config 탓이 아님 |
+| determinism | trace 파일의 SHA-256 vs 같은 run을 한 번 더 돌린 trace의 SHA-256 | byte-identical | 같은 입력 두 번 → 같은 trace. 두 번째 실행을 언제 어떻게 만드는지는 runner(8.6)의 일 |
+| utilisation sanity | `busy / T_end` | 1.0 이하, 그리고 scoring spec에 term이 있는 파일이면 0 초과 | 물리적으로 말이 되나; 파싱은 됐는데 비어 있는 trace를 잡음 |
+| tick count | primitives가 records를 만들면서 낸 consistency 메시지(tail iteration = head tick, wake 개수, `deadline` 교차검사, `config_applied`와 schedule의 일치) | 메시지 0개 | simulator가 frame이나 wake를 빠뜨리지 않았나 |
+| `validation` = `provenance` | recognition log의 `validation` 순서 = config schedule의 `provenance` 순서(boot 제외), 위치별 비교 | 불일치 0개 | log와 schedule이 서로 맞나 |
+| C2 pair | C2 pair 두 파일의 trace hash 비교 | recognition 조건(`oracle`, LLM)에서는 **달라야** 함; `fixed`에서는 두 파일의 event가 label 빼고 같은 pair(P1)만 **같아야** 함, P2·P3는 not_applicable; `random`은 not_applicable | 두 파일이 같은 trace를 냈으면 config가 wanted/unwanted 사이에서 바뀐 적이 없다는 뜻이라, gap 0을 recognition 결과로 읽으면 안 됨 |
 
-`c6-dual` 같은 파일은 guard 예외를 미리 RQ0 gate spec에 데이터로 적어요(`ground_truth`가 `ambiguous`라 oracle이 legal한 답을 낼 수 없어서 fallback 100%가 정상).
+`c6-dual` 같은 파일은 guard 예외를 미리 RQ0 gate spec에 데이터로 적어요(`ground_truth`가 `ambiguous`라 oracle이 legal한 답을 낼 수 없어서 fallback 100%가 정상). 예외는 실험별 데이터고 guard spec에는 없어요.
 
 ---
 

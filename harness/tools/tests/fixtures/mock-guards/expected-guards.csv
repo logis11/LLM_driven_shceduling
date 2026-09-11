@@ -1,0 +1,9 @@
+workload_id,condition,table,seed,boot_default,guard,result,value,threshold,partner,reason
+mock-guards,llm_vocab,prior,,,provenance_share,pass,0.003733333333,0.500000000000,,
+mock-guards,llm_vocab,prior,,,config_age,fail,40000.000000000000,,,"entry 2 (query 1, t_set_change 50000) stamped at 90000, after its segment ended at 80000"
+mock-guards,llm_vocab,prior,,,starvation_floor,fail,1950000.000000000000,1000000.000000000000,,batch: max ready_wait 1950000 exceeds 1000000
+mock-guards,llm_vocab,prior,,,determinism,pass,,,4455b6fabd3e6828c4d47d491e26948b7fe5fa59bc945f4f9d3d4db0e920efb4,
+mock-guards,llm_vocab,prior,,,utilisation_sanity,pass,0.836000000000,1.000000000000,,
+mock-guards,llm_vocab,prior,,,tick_count,pass,0.000000000000,,,
+mock-guards,llm_vocab,prior,,,validation_matches_provenance,pass,0.000000000000,,,
+mock-guards,llm_vocab,prior,,,c2_pair,not_applicable,,,,

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "guards.schema.json",
+  "title": "Guards row",
+  "description": "One row of the harness's guards file (sub-task 8.3): one guard's result on one run. Dense: every run has one row per guard in the guard spec. `result` is pass, fail, or not_applicable; `value` the measured quantity as a twelve-place decimal string, absent when the guard measured nothing; `threshold` the bound in force from the guard spec, absent for structural guards; `partner` the other run's workload id (c2_pair) or the rerun trace's hash (determinism); `reason` is required on fail. Empty CSV cells are absent here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["workload_id", "condition", "guard", "result"],
+  "properties": {
+    "workload_id": {"type": "string", "minLength": 1},
+    "condition": {"type": "string", "enum": ["fixed", "random", "whitelist", "llm_vocab", "llm_algo", "llm_full", "oracle"]},
+    "table": {"type": "string", "enum": ["prior", "calibrated"]},
+    "seed": {"type": "string", "minLength": 1},
+    "boot_default": {"type": "string", "minLength": 1},
+    "guard": {"type": "string", "enum": ["provenance_share", "config_age", "starvation_floor", "determinism", "utilisation_sanity", "tick_count", "validation_matches_provenance", "c2_pair"]},
+    "result": {"type": "string", "enum": ["pass", "fail", "not_applicable"]},
+    "value": {"type": "string", "pattern": "^-?[0-9]+\\.[0-9]{12}$"},
+    "threshold": {"type": "string", "pattern": "^-?[0-9]+\\.[0-9]{12}$"},
+    "partner": {"type": "string", "minLength": 1},
+    "reason": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {"if": {"properties": {"result": {"const": "fail"}}}, "then": {"required": ["reason"]}}
+  ]
+}
