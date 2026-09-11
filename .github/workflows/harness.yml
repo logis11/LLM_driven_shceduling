@@ -17,4 +17,3 @@ jobs:
       - run: make -C dataset dataset        # the scoring lint reads the compiled coreset
       - run: make -C harness lint
       - run: make -C harness test
-      - run: make -C harness smoke       # the full pipeline on the mocks over the compiled coreset (8.6)

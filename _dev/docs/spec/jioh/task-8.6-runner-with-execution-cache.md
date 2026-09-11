@@ -44,6 +44,8 @@ One directory per experiment, per workload, per run, holding the daemon and simu
 
 The routine test suite drives the whole pipeline, runner through report, on a handful of coreset files; the full 50-file run on the mocks is a make target with its own CI step after the suite.
 
+*Amended 2026-09-11: the CI step is its own workflow, run on pushes to `main`, on manual dispatch, and on a pull request only when the harness, dataset, or driver-table paths changed, so a docs-only push keeps the two-minute suite.*
+
 ### 8. The smoke spec is generated, never committed
 
 The make target and the suite generate a throwaway experiment spec at run time, computing the pins from the files as they are, listing every coreset file with scoring terms as judging, with a placeholder criterion and no alternative boot defaults, and discard it afterwards. `harness/experiments/` holds pre-registered experiments only.
