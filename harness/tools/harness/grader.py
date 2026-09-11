@@ -120,39 +120,10 @@ def covering(segments, t) -> Optional[Segment]:
 
 
 # -------------------------------------------------------------- driver table
-
-@dataclass
-class DriverTable:
-    role: str
-    rows: Dict[tuple, dict] = field(default_factory=dict)
-
-    def row(self, mode, wanted) -> Optional[dict]:
-        return self.rows.get((mode, bool(wanted)))
-
-    def default_algorithm(self, mode, wanted) -> Optional[str]:
-        row = self.row(mode, wanted)
-        return None if row is None else row["default"]
-
-
-def compose_row(row) -> str:
-    """The configuration a `system`-only condition receives from this row: the
-    envelope the simulator sees, as canonical bytes (data-contracts §10). Kept
-    byte-identical with the daemon's own `compose`, which a test pins."""
-    algorithm = row["default"]
-    entry = row["entries"][algorithm]
-    config = {"algorithm": algorithm, "params": entry["params"],
-              "batch_bandwidth_cap": row["batch_bandwidth_cap"]}
-    return json.dumps(config, sort_keys=True, separators=(",", ":"))
-
-
-def read_driver_table(path) -> DriverTable:
-    doc = yaml.safe_load(pathlib.Path(path).read_text())
-    if not isinstance(doc, dict) or not isinstance(doc.get("rows"), list):
-        raise GradeError(f"{path}: not a driver table")
-    rows = {}
-    for r in doc["rows"]:
-        rows[(r["mode"], bool(r["background_wanted"]))] = r
-    return DriverTable(role=doc.get("role", ""), rows=rows)
+# The table reader and the composition live in `drivertable.py`, which imports
+# nothing heavy, so the mock daemon can load them without numpy and pandas;
+# re-exported here for the grader's callers.
+from .drivertable import DriverTable, DriverTableError, compose_row, read_driver_table  # noqa: E402,F401
 
 
 # -------------------------------------------------------------------- a run

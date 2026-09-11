@@ -6,7 +6,10 @@ lint:               ## fixture pairs under the frozen contracts; the scoring spe
 	$(PY) tools/guards_lint.py
 	$(PY) tools/experiment_lint.py
 
-test:               ## reader / primitives / records tests
+test:               ## the suite
 	$(PY) -m pytest tools/tests -q
 
-.PHONY: lint test
+smoke:              ## the full pipeline on the mocks over every scored coreset file (8.6): a generated throwaway spec, runs under runs/
+	$(PY) tools/smoke.py --machine runner.example.yaml
+
+.PHONY: lint test smoke

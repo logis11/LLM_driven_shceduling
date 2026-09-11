@@ -6,3 +6,7 @@ __pycache__/
 *.pyc
 venv/
 .venv/
+
+# runner outputs and the machine configuration (harness/runner.example.yaml is the committed example)
+/runs/
+harness/runner.yaml

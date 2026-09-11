@@ -15,7 +15,7 @@ import json
 import random
 from collections import Counter, defaultdict
 
-from harness.grader import compose_row
+from harness.drivertable import compose_row
 
 CONDITIONS = ("fixed", "oracle", "random")
 DRAWING = ("random",)                   # the conditions that take a seed

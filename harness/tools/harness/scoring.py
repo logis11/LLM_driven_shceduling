@@ -171,3 +171,24 @@ def _where(path):
 
 
 __all__ = ["LEGAL", "SPEC_PATH", "SCHEMA_PATH", "lint_spec", "load_spec", "variant_bases"]
+
+
+def windows_from_spec(spec, workload_id):
+    """{(entity, metric): [(start_us, end_us), …]} named by the workload's terms."""
+    out = {}
+    entry = spec["files"].get(workload_id)
+    if not entry:
+        return out
+    for term in entry["terms"]:
+        w = term.get("window")
+        if w:
+            out.setdefault((term["entity"], term["metric"]), []).append((w["start_us"], w["end_us"]))
+    return out
+
+
+def interactive_from_spec(spec, workload_id):
+    """The entities of the workload's `ready_wait` terms — the interactive tasks the excess aggregates measure."""
+    entry = spec["files"].get(workload_id)
+    if not entry:
+        return ()
+    return tuple(dict.fromkeys(t["entity"] for t in entry["terms"] if t["metric"] == "ready_wait"))

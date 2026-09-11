@@ -1,0 +1,17 @@
+# The runner's machine configuration (8.6 spec, decision 1): how *this machine*
+# runs an experiment — never anything experiment-shaped, which lives in the
+# per-experiment spec under harness/experiments/. Copy to a file of your own
+# (harness/runner.yaml is git-ignored) and edit; relative paths resolve against
+# the repository root. This example drives the two mocks.
+
+daemon:
+  command: [python3, harness/tools/tests/mocks/mock_daemon.py]   # the prefix contract 10 flags are appended to
+  version: mock-daemon@0                                          # hashed into every cache key
+simulator:
+  command: [python3, harness/tools/tests/mocks/mock_simulator.py]
+  version: mock-simulator@0                                       # cross-checked against the trace header's `sim`
+
+build_dir: dataset/build/coreset-single      # the compiled workloads
+boot_defaults_dir: harness/boot-defaults     # <stem>.json per boot default the spec names
+runs_dir: runs                               # <runs_dir>/<experiment>/<workload>/<run>/
+cache_dir: runs/.cache                       # one entry per invocation key, both executions kept

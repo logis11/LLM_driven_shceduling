@@ -382,11 +382,11 @@ def line_layer1_headline(rs, params, ctx):
         head = _grade_stat(rs.grade_rows, condition, table, "attribute", "balanced_accuracy", 1)
         if head is None:
             continue
-        cells = [{"seed": r["seed"], "truth": r["truth"], "predicted": r["predicted"],
-                  "count": int(Fraction(r["value"]))}
+        cells = [{"seed": r["seed"], "truth": r["truth"], "predicted": r["predicted"], "count": int(r["n"])}
                  for r in rs.grade_rows
                  if r["condition"] == condition and r["table"] == table and r["level"] == "confusion"
-                 and r["axis"] == "attribute" and int(r["pre_committed_miss_excluded"]) == 1]
+                 and r["axis"] == "attribute" and int(r["pre_committed_miss_excluded"]) == 1
+                 and int(r["over_seeds"]) == 0]                 # cells are counts, per seed only
         cells.sort(key=lambda c: (c["seed"], c["truth"], c["predicted"]))
         rows.append({"condition": condition, "table": table, "balanced_accuracy": head["value"],
                      "ci_low": head["ci_low"], "ci_high": head["ci_high"], "n": int(head["n"]),

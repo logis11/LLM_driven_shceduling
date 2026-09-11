@@ -20,7 +20,7 @@ HERE = pathlib.Path(__file__).resolve()
 sys.path.insert(0, str(HERE.parents[2]))        # tools/: the harness package
 sys.path.insert(0, str(HERE.parents[1]))        # tests/: the mocks package
 
-from harness.grader import GradeError, read_driver_table  # noqa: E402
+from harness.drivertable import DriverTableError, read_driver_table  # noqa: E402
 from mocks.daemon import CONDITIONS, MockDaemonError, run, write  # noqa: E402
 
 
@@ -41,7 +41,7 @@ def main(argv=None) -> int:
             boot = json.load(f)
         table = read_driver_table(args.driver_table)
         schedule, log = run(doc, args.condition, table, boot, seed=args.seed)
-    except (MockDaemonError, GradeError, OSError, ValueError, KeyError) as exc:
+    except (MockDaemonError, DriverTableError, OSError, ValueError, KeyError) as exc:
         print(f"mock_daemon: {exc}", file=sys.stderr)
         return 1
     write(schedule, args.out_schedule)
