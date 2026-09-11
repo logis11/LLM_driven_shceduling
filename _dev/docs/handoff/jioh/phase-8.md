@@ -1,49 +1,46 @@
 # Handoff — Phase 8 (jioh), written 2026-09-11
 
-Branch `jioh/harness-upper`, off `main` after the Phase 7 merge (PR #5). All Phase 8 work, `_dev/` included, is committed there; `main` has none of it. The remote is current through the 8.3 session; the 8.4 commits are local until pushed.
+Phase 8's code half is finished on `jioh/harness-upper`: 8.1 to 8.7 and 8.10 are ticked, and a PR from that branch to `main` carries all of it, `_dev/` included. **8.8 and 8.9 are worked on a new branch, `jioh/rq0-gate-spec`, cut from `main` after the PR merges.** Nothing on `main` is needed from anywhere else first.
 
 ## Where things stand
 
-- Phase spec: `_dev/docs/spec/jioh/phase-8-harness-upper-half-through-pre-registration.md` (21 decisions, three dated amendments).
-- Done: **8.1** boot default, **8.2** scorer, **8.10** boost windows, **8.3** guard spec and guards, **8.4** L1 grader.
-- **175 tests green**, three lints clean (fixtures, scoring spec, guard spec) under `/usr/local/bin/python3.12` — the only local interpreter with the pinned deps, so every command needs `PY=/usr/local/bin/python3.12`. Dataset `make check` and the daemon's driver-table lint both pass. The harness lint needs the compiled coreset: `make -C dataset dataset` first.
+- Phase spec: `_dev/docs/spec/jioh/phase-8-harness-upper-half-through-pre-registration.md` (21 decisions, three dated amendments). Sub-task specs for 8.1 to 8.7 sit beside it; 8.3's carries a dated amendment to decision 12 from this session.
+- Done: 8.1 boot default, 8.2 scorer, 8.10 boost windows, 8.3 guards, 8.4 L1 grader, 8.5 invocation contract and mocks, 8.7 per-experiment spec, RQ0 gate evaluator, report, 8.6 runner with execution cache. Order was 8.7 before 8.6 so the runner reads a spec that already had its schema.
+- **246 tests green**, four lints clean, under `/usr/local/bin/python3.12` (`PY=/usr/local/bin/python3.12` on every make call; the harness lint needs the compiled coreset, `make -C dataset dataset`). `make -C harness smoke` runs the whole pipeline on the mocks over all 48 scored coreset files, 192 runs, 384 invocations, and CI runs it after the suite; about eight minutes cold, five on a warm cache.
 
-## Next: 8.5 — invocation contract and mocks
+## Next: 8.8 — pre-registration
 
-The only startable sub-task. Three deliverables, from phase spec decisions 9, 10, and 11.
+Its own grill decides K, g, and N with their groundings written beside the numbers (phase spec decisions 5, 16; K after g, N after both). What already exists for it to fill:
 
-**The invocation contract (decision 9).** The runner fixes one command shape for both the daemon and the simulator: input paths and the condition in, output paths out, an exit code, and no other channel. The mock daemon and mock simulator are its first two implementations, and 인경민 and 박이안 meet it when they deliver. It goes into `docs/data-contracts.md` with a changelog entry and is told to both. Note that this is a **new** contract rather than a change to a frozen one, so §12's all-three-signatures rule does not gate writing it; whether it freezes is 8.5's own call. The doc's contracts currently run 1 to 9 across §2 to §10, so this becomes a new section.
+- **The per-experiment spec's schema and lint** (`harness/experiments/schema/experiment-spec.schema.json`, `tools/experiment_lint.py`). The RQ0 gate spec is `harness/experiments/rq0-gate.yaml`, the first real instance; the `mock-experiment` fixture (`harness/tools/tests/fixtures/mock-experiment/experiment.yaml`) shows every field filled. The generic part: conditions, `seed_count`, `boot_defaults` (primary stem plus alternative stems, files under `harness/boot-defaults/`), judging and reporting files, `layer1_exclusions` derived from `pre_committed_miss` and linted, `guard_exemptions` each with a reason, typed `reporting_lines`, and `pins` as SHA-256 hashes of the scoring spec, guard spec, driver table, and `dataset/build.manifest.json`. The criterion section is typed: `k_of_n_gap` with `k`, `g`, `reference`, `compared`, `seed_statistic`.
+- **The reporting-line types** the evaluator knows: `sensitivity` (the alternative boot defaults), `floor_band` (latency floors), `exclusion_accuracy`, `layer1_headline`, `random_beats_oracle`, and `note` bound to a workload, which is how the `c7-gaming`, `c7-meeting`, `c7-media` judging notes and `c1-gaming`'s separate line are declared (decision 21).
+- **The judging set** is still only prose: 27 files in `_dev/docs/rq0-preparation-notes.md` §8's YAML sketch and the rule at its "Judging (27)" paragraph (C2's six, the six batch C1 bases, the fifteen C7 counterparts with a term). The scoring spec disclaims owning it. The lint requires every judging file to have scoring terms.
+- **Exemptions the smoke run predicts**: `c6-dual`'s `provenance_share` under `oracle` (the oracle is undefined inside its `ambiguous` segment and runs on `fallback`, so the share is 1). The old sketch also named `random-beats-oracle` and `fallback-share`, which are not guard ids; the first is a report line now.
+- **The freeze** (decision 19): 인지오 alone, in a harness changelog that does not exist yet; the guard spec bumps from 0.1 there; the RQ0 gate spec pins the frozen hashes. The driver table tuning set rule into the building plan §4 with the rename sweep across nine files and the terminology entry (decision 18). The memo to 박이안 and 인경민 with the `random` reading and N pending (decision 20); the invocation contract was already told to both in `docs/memos/2026-09-11-invocation-contract.md`.
+- **The alternative boot-default pair** is still the team's to pick (decision 12, amended in 8.1). Until it lands as two files under `harness/boot-defaults/`, the RQ0 gate spec's `alternatives` list is empty and the sensitivity line has no rows.
 
-**The mock daemon (decision 11).** Faithful for `fixed`, `oracle`, and `random` only. It walks the visible projection's pinned events for query points, reads ground truth or draws, maps through the **prior** table, and emits contract-valid config schedules (§7) and recognition logs (§8) for any coreset file. It emits `unmodified` only — no validator, no clamping, no `held`, no LLM path — and lives in the harness test tree, discarded in Phase 9. `mock-guards` already supplies the hand-written schedule that covers `held` and `clamped` for the guards, precisely because the mock daemon will not produce them.
-
-Two rules it must implement exactly, both already written down. Query points are the five telemetry rules in data-contracts §5: the set is a name-to-count multiset so a count-only change counts; all pinned events at one timestamp produce exactly one snapshot; `processes` is sorted by name so reruns are byte-identical; the snapshot at the workload's final instant is emitted and logged like any other; nothing else emits one. And `random`'s draw is phase spec decision 15: at every set change, one uniform draw over the 32 driver-table rows, independent of previous draws and of the telemetry, from a seeded generator, logged with its draw and seed, at zero latency.
-
-One known edge: inside `c6-dual`'s `ambiguous` segment the oracle's answer is undefined per the daemon guide, and under the rules as written it is rejected and the file runs on fallback. The grader already excludes those query points, so nothing downstream breaks, but the mock must not pretend otherwise.
-
-**The mock simulator (decision 10).** Both a trivial generator and a replay. The generator emits a contract-valid trace (§9) for any coreset file and schedule from a trivial rule with **no scheduling modelled at all** — it never models a queue — so all 50 files flow through the whole pipeline. The replay returns the hand-written fixture traces so values stay checkable. Both live under `harness/`, never under the simulator tree, and are discarded in Phase 9.
-
-**What already consumes their output, unchanged.** The readers for trace, run file, config schedule, and recognition log are all in `harness/tools/harness/reader.py`. A config schedule feeds the records builder and the guards; a recognition log feeds the grader (`tools/grade.py`) and the `validation` equals `provenance` guard; a trace feeds records. So if the mocks are contract-valid, nothing above them needs touching.
-
-**One thing 8.5 retires.** In 8.4 the graded-set profile was derived once by hand-applying the telemetry rules to the compiled coreset, because no log existed. The mock daemon is the real implementation of those rules, so from 8.6 onward the counts come out of the grades file and the one-off derivation can be forgotten.
-
-Then: **8.6** runner with execution cache, which writes the guards and grades manifests and owns the determinism rerun policy; **8.7** per-experiment spec schema, RQ0 gate evaluator, report — it also inherits the `random-beats-oracle` flag from 8.3 as a non-blocking per-judging-file report line, not a guard; **8.8** pre-registration and the freeze; **8.9** docs sweep.
+Then **8.9** docs sweep: the harness guide's chapters for the upper half (scorer, guards, grader, mocks and the invocation contract, evaluator and report, runner and cache), the docs index, terminology (RQ0 gate evaluator, per-experiment spec, guard spec, driver table tuning set), the RQ0 preparation notes' stage 4 and 5 ticks, the proposal pointers. The runner's README row is the only prose on the runner today.
 
 ## Conventions worth not relearning
 
-- Segments are half-open, `t_start <= t < t_end`, everywhere. The terminal snapshot at exactly `t_end` is therefore uncovered by design.
-- A records file is per source artifact. Recognition rows leave `sim` empty and the schema no longer requires it.
-- The harness never imports the daemon's or the dataset's modules. Where it must reproduce their logic, a test pins the two together — `compose_row` against the daemon's `compose` on every row of the prior table is the precedent.
+- Segments are half-open, `t_start <= t < t_end`; the terminal snapshot at `t_end` is uncovered by design.
+- The harness never imports the daemon's or the dataset's modules; where it must reproduce their logic a test pins the two (`compose_row` against the daemon's `compose`; `ostep.json` against the config schema's defaults). The driver-table reader now lives in `harness/drivertable.py`, re-exported by the grader.
+- `fixed` runs carry an empty `table`; the scorer stamps its score rows with the group's table, and the evaluator maps them back. The scores' `boot_default` names the baseline scored against, the records' and guards' the run's own.
+- The evaluator checks the compared condition's seed **count**, not the labels; the runner labels seeds 1 to N.
+- Traces are asked for uncompressed: a gzip header carries a timestamp, so a `.gz` trace is never byte-stable across writes.
+- The `c2_pair` guard compares trace **bodies**, header excluded, since the header names the workload; the determinism guard compares whole files with their own rerun.
 
 ## Measured facts worth not rediscovering
 
-Derived from the compiled coreset on 2026-09-11 and recorded in the 8.4 spec: 134 query points, 50 terminal and 2 `ambiguous` skipped, **82 graded over 49 files**, 10 carrying `pre_committed_miss`, so the headline set is **72 over 44**. The attribute majority baseline is 69.5 per cent and mode's is 11.0, which is why the attribute is corrected and mode is not. Files contribute 1.67 graded points on average, 22 of them exactly one.
+- Graded set on the coreset, now reproduced by the mock daemon in a test: 134 query points, 50 terminal and 2 `ambiguous` skipped, 82 graded over 49 files, 10 carrying `pre_committed_miss`, 72 over 44 headline.
+- The mock daemon starts in 0.1 s after the driver-table split; the records build costs up to eight seconds on the heaviest mock trace (`c1-gaming`, 193k lines), which is what the smoke's runtime is.
+- Smoke guard failures on the mocks, all expected: `c6-dual` provenance share under `oracle`; the P2 and P3 pairs under `oracle`, whose trace bodies are identical because the mock simulator models no scheduling, so a params-only change leaves its output untouched.
 
 ## Open threads
 
-- **인경민's three questions** (8.1 memo §5): the two executor rules, which decide `c7-meeting`/`c7-media` and their judging-set membership in 8.8, and the executor's starvation window, which replaces the `starvation_floor` guard's 1 000 000 µs stated assumption. Memo not yet sent as far as this session knows.
-- **Boot-default sensitivity pair**: the team's to pick; written into the RQ0 gate spec in 8.8.
-- **Freeze (8.8)**: scoring spec and guard spec (bump the guard spec from 0.1) by 인지오 alone, in a harness changelog that does not exist yet; team ratification afterwards.
-- **Docs sweep (8.9)**: the harness guide's missing chapters for the upper half, terminology entries (RQ0 gate evaluator, per-experiment spec, guard spec, driver table tuning set), docs index, the "throwaway pool" rename across nine files.
-- **Layer 1 is underpowered** for the whitelist comparison at 44 to 49 independent units, and the familiarity contrast at tiers 4 and 5 rests on one graded query point per tier. Both are stated in the 8.4 spec rather than left to be discovered.
-- **The familiarity experiment** needs its own per-experiment spec; run-to-run consistency stays blocked on the recognition log's missing repeat index.
+- **인경민's three questions** (8.1 memo §5): the two executor rules deciding `c7-meeting`/`c7-media` and their judging-set membership, re-decided in 8.8 once answered; the executor's starvation window, which replaces the `starvation_floor` guard's 1 000 000 µs stated assumption.
+- **The alternative boot-default pair** (above).
+- **Layer 1 is underpowered** for the whitelist comparison at 44 to 49 independent units; the familiarity contrast at tiers 4 and 5 rests on one graded point per tier (8.4 spec).
+- **Run-to-run consistency** stays blocked on the recognition log's missing repeat index (memo 2026-09-07).
+- **The CI smoke step** adds several minutes to every push; if that grows with the real programs, it can move to a schedule.
 - **No archive written** for Phase 8 (archives only on request).
