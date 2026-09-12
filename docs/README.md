@@ -6,6 +6,12 @@ Prose only, organized by domain — one `##` section per area below, the full in
 
 **New member (~40 min):** [research-proposal](research-proposal.md) → [background-guide](background-guide.md) → [terminology](terminology.md) → [research-claims](research-claims.md). That is the whole mental model; everything else is depth.
 
+## Guidebook (`guidebook/`)
+
+A textbook series that teaches the whole research from zero operating-systems background, in Korean with English terms. Self-contained: no status headers, no section-number cross references — a concept needed again is restated where it is needed. Volume list and the four in-text devices: [guidebook/README.md](guidebook/README.md).
+
+- [guidebook/vol-01-systems-and-scheduling.md](guidebook/vol-01-systems-and-scheduling.md) — 공부용 (Korean): processes and states, context switch cost, the performance metrics and why averages lie, FIFO / SJF / STCF / Round Robin / priority / MLFQ / lottery / fair-share / EDF worked by hand, periodic work and chains, what Linux, Windows and macOS actually ship, and the hand-written semantic tables inside them
+
 ## Research
 
 The project itself: what it proposes, what it claims, how it is positioned, and the shared onboarding.
@@ -92,6 +98,7 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 | [workload/scenario-catalog.md](workload/scenario-catalog.md) | which processes co-occur and their sources | normative |
 | [workload/grounding-sources.md](workload/grounding-sources.md) | which source may justify which claim | normative |
 | [workload/source-vetting.md](workload/source-vetting.md) | per-source verdicts and extracted numbers | record |
+| [guidebook/vol-01-systems-and-scheduling.md](guidebook/vol-01-systems-and-scheduling.md) | 공부용: everything about scheduling needed before the research, from zero OS background | draft |
 | [workload/coreset-guide.md](workload/coreset-guide.md) | 공부용: every coreset file explained, with compiled numbers | draft |
 | [harness/metrics.md](harness/metrics.md) | primitives, records, aggregates, normalisation, constants — every reported number's definition | normative |
 | [harness/harness-and-records-guide.md](harness/harness-and-records-guide.md) | 공부용: harness, records, primitives, mocks by hand, scores, guards, grader, mocks, evaluator, runner | draft |
