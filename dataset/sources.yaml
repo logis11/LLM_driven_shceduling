@@ -134,20 +134,30 @@ sources:
     notes: >-
       Establishes that a foreground-game resource-priority category ships in
       a major OS: exclusive/priority CPU access for the focused foreground
-      game, background preemption reduced, updates deferred; documented APIs
+      game, granted as exclusive CPU sets to an app that is in the foreground
+      and has focus, with a user opt-out in Settings; documented APIs
       (expandedresources.h). Existence of the category and of the whitelist
-      design point only.
+      design point only. NOT established here, per the verification note in
+      docs/references.md (2026-09-12): how a game is detected, and whether
+      background activity is suppressed, updates deferred or notifications
+      held. The conceptual portal page carrying those claims has not been
+      read; do not derive them from this source.
 
   ananicy-rules:
     type: deployed-system
     notes: >-
       Community-maintained process-name -> behavior-class taxonomy: rule
-      `type` classes (Heavy_CPU, Game, Player, BG_CPUIO, ...) with nice /
-      ioclass / cgroup values; indexers run ioclass idle, audio at nice -11;
+      `type` classes (Game, Heavy_CPU, BG_CPUIO, Doc-View, LowLatency_RT,
+      Player-Audio, Player-Video, ...) with nice / ioclass / sched values;
+      background CPU/IO runs ioclass idle at nice 16, Player-Audio and
+      Player-Video at nice -4, LowLatency_RT at nice -12, Game at nice -5;
       Proton/wine vs native game classes. Establishes the classes' existence,
       deployed name->class mappings, and the wanted/unwanted-background
       distinction as deployed practice (category_source for harvested
-      archetypes).
+      archetypes). Values and entry counts measured at the commit named in
+      docs/references.md (2026-09-12); the capitalized type vocabulary
+      belongs to this catalogue, not to upstream Ananicy, whose current
+      types file marks those types deprecated.
 
   steam-downloads:
     type: deployed-system

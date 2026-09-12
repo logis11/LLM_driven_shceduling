@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-09-11
+> Status: normative · Created 2026-08-26 · Updated 2026-09-12
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -161,8 +161,9 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 
 ### `scx`
 - cite: sched-ext/scx repository. github.com/sched-ext/scx, GPLv2 (pin commit).
-- role: existence of production sched_ext schedulers (scx_lavd, scx_rusty, scx_layered); the deployment-path claim.
-- status: verified-in-vetting (2026-08-25); pin commit
+- role: existence of production sched_ext schedulers (scx_lavd, scx_rusty, scx_layered); the deployment-path claim. This repository, not the kernel documentation, is the home of the **watchdog** statement: "there are two more ways to disable a `sched_ext` scheduler - `sysrq-S` and the watchdog timer. Ignoring kernel bugs, the worst damage a `sched_ext` scheduler can do to a system is starving some threads until the watchdog timer triggers."
+- **Bound on the deployment claim (checked 2026-09-12).** What the repository supports is that upstream carries sched_ext from 6.12, that "Both Meta and Google are fully committed to `sched_ext` and Meta is in the process of mass production deployment", and that "Distros are able to package and release these schedulers". It contains **no statement that any distribution or vendor enables an scx scheduler by default** — that claim needs a separate source. Note also that the C example schedulers have moved out of this repository; the Rust set now holds scx_lavd, scx_rusty, scx_layered, scx_bpfland, scx_flash and others, each with its own README and its own "Production Ready?" line.
+- status: verified-in-vetting (2026-08-25); watchdog wording, deployment statements and the scheduler list re-confirmed 2026-09-12. Pin commit.
 
 ### `lavd-ossna24`
 - cite: Min, C. (2024). "Optimizing Scheduler for Linux Gaming." Talk, Open Source Summit North America 2024, Seattle, 2024-04-17. Slides: static.sched.com/hosted_files/ossna2024/9b/scx-lavd-oss-na24.pdf; schedule page: ossna2024.sched.com/event/1aBOT (accessed 2026-08-26).
@@ -176,13 +177,16 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 
 ### `ananicy`
 - cite: Nefelim4ag. Ananicy. github.com/Nefelim4ag/Ananicy (GPL); ananicy-cpp: gitlab.com/ananicy-cpp/ananicy-cpp (GPL-3.0).
-- role: Role A — deployed per-process priority-class daemon; rule schema (`type`, nice, ioclass, cgroup).
-- status: verified-in-vetting (2026-08-25); pin version
+- role: Role A — deployed per-process priority-class daemon; rule schema. Self-description: "a shell daemon created to manage processes' IO and CPU priorities, with community-driven set of rules for popular applications … mainly for desktop usage". Matching is by executable name, optionally narrowed by command line: `name` is the only required field ("used for match processes by exec bin name"), with `cmdlines`, `type`, `nice`, `latency_nice`, `sched`, `rtprio`, `ioclass`, `ionice`, `oom_score_adj`, `cpuset` and `cgroup` optional (field list from the ananicy-cpp README).
+- **Two lineages, and they no longer share a type vocabulary.** Upstream Ananicy's current `ananicy.d/00-types.types` uses lowercase types (`game`, `compiler`, `file-sync`, `service`) and carries the capitalized ones (`Heavy_CPU`, `BG_CPUIO`, `LowLatency_RT`) commented out beneath a heading reading "Depricated types". The capitalized vocabulary belongs to the ananicy-cpp / CachyOS-catalogue lineage — cite `ananicy-rules` for it, never this entry. Any claim naming `Game`, `Heavy_CPU` or `BG_CPUIO` must say which lineage it is about.
+- status: verified-in-vetting (2026-08-25); the lineage split and the field list re-confirmed 2026-09-12 from both projects' READMEs and from upstream's types file at HEAD. Pin version and commit at submission.
 
 ### `ananicy-rules`
 - cite: CachyOS ananicy rules catalog. github.com/CachyOS/ananicy-rules (pin commit).
-- role: Role A + archetype `category_source` — a community-maintained process-name → behavior-class taxonomy (`Heavy_CPU`, `Game`, `BG_CPUIO`, …); grounds the wanted/unwanted-background distinction as deployed practice.
-- status: verified-in-vetting (2026-08-25); pin commit
+- role: Role A + archetype `category_source` — a community-maintained process-name → behavior-class taxonomy (`Heavy_CPU`, `Game`, `BG_CPUIO`, …); grounds the wanted/unwanted-background distinction as deployed practice. **This catalogue, not upstream Ananicy, is where the capitalized types live** (see the lineage note on `ananicy`); it is maintained "by the CachyOS team and the community" and contributors are asked to paste the game's store URL beside each entry.
+- **Measured at commit `03ef03fbf7e834385377432ccecaedd32e3414bb` (authored 2026-09-08, counted 2026-09-12):** 361 `.rules` files; 15 815 rule entries; 13 528 of them carry `"type": "Game"` (85 per cent), then `BG_CPUIO` 1 614, `Service` 194, `Doc-View` 160, `LowLatency_RT` 110, `Chat` 51, `Heavy_CPU` 33. `00-types.types` sets `Game` nice −5 (ioclass best-effort, sched normal); `Player-Audio`, `Player-Video`, `Image-View` and `Doc-View` nice −4; `LowLatency_RT` nice −12 (ioclass best-effort); `BG_CPUIO` nice 16 (ioclass idle, sched idle); `BG_CPU` nice 14; `Launcher` nice 16; `Heavy_CPU` nice 9; `Chat` nice −3; `Service` nice 10. Exact spelling is `Doc-View`, hyphenated. One game can hold several entries under different types — the catalogue's own example gives one title an orchestrator executable as `BG_CPUIO` and its shipping executable as `Game`.
+- The counts support the **enumeration-cost** argument (how many hand-written entries one distinction costs, and how few distinctions the eleven types express) and nothing else; they are existence-and-count claims, never a claim about the approach's effectiveness.
+- status: verified (2026-09-12; catalogue cloned and counted at the named commit). Re-count and re-pin the commit at submission — the catalogue changes weekly.
 
 ### `pcmark10`
 - cite: UL Solutions. PCMark 10 Technical Guide. [Edition/URL to pin.]
@@ -207,6 +211,7 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 ### `gamemode-docs`
 - cite: Microsoft. Game Mode documentation, Microsoft Learn (+ `<expandedresources.h>` APIs). [Exact URLs to pin.]
 - role: Role A — shipped foreground-game resource-priority category; the whitelist design point we reconstruct.
+- **What is verified, and what is not, as of 2026-09-12.** Verified from Microsoft's public documentation *source* repositories on GitHub, the upstream of the Learn pages: the feature gives an app "exclusive or priority access to hardware resources using Game Mode APIs" (`MicrosoftDocs/windows-dev-docs`, `uwp/gaming/e2e.md`); the resource unit is exclusive CPU sets, queried by `GetExpandedResourceExclusiveCpuCount` ("the expected number of exclusive CPU sets that are available to the app when in Game Mode"), which returns 0 "if the customer opted out of Game Mode via the Settings"; state is polled per frame via `HasExpandedResources`, and "the app must be in the foreground and have focus before exclusive resources are granted" (`MicrosoftDocs/sdk-api`, `expandedresources`). **Not verified: how a game is detected** — no reachable page states any mechanism, whether a curated executable list, a heuristic or developer registration — **and not verified: background-activity suppression, deferred updates, or held notifications.** Those three must not be asserted from this entry until the conceptual portal page is read; it lives only on the `previous-versions` archive and is absent from the public docs source repos.
 - status: to-pin
 
 ### `steam-downloads`
@@ -225,9 +230,10 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - status: verified (2026-09-10)
 
 ### `schedext-docs`
-- cite: Linux kernel documentation. "Extensible Scheduler Class." docs.kernel.org/scheduler/sched-ext.html (accessed 2026-08-26). Merged in Linux 6.12.
-- role: existence and mechanism of runtime-loadable scheduling policy; the deployment path.
-- status: verified (2026-08-26)
+- cite: Linux kernel documentation. "Extensible Scheduler Class." docs.kernel.org/scheduler/sched-ext.html (accessed 2026-08-26). Merged in Linux 6.12. Rendered from `Documentation/scheduler/sched-ext.rst` in the kernel tree; quote the tagged source file when a version matters.
+- role: existence and mechanism of runtime-loadable scheduling policy; the deployment path. The safety claim this document actually makes is integrity, not verification: "The system integrity is maintained no matter what the BPF scheduler does. The default scheduling behavior is restored anytime an error is detected, a runnable task stalls, or on invoking the SysRq key sequence `SysRq-S`."
+- **Three constraints on citing it, from reading the source file at both tags on 2026-09-12.** (1) It makes **no general BPF-verifier guarantee**: the word appears once, inside a code comment in the example scheduler. Do not source a verifier-safety claim here. (2) It never says **watchdog** — that word is the `scx` repository's, not the kernel doc's; cite `scx` for it. (3) The sentence placing the fair class above `SCHED_EXT` in `sched_class` precedence exists in **mainline only**; the v6.12 text of the same sentence omits the precedence clause and says CFS where mainline says fair-class. Cite mainline for precedence, v6.12 for the merged-version wording.
+- status: verified (2026-08-26); re-read at mainline and v6.12 on 2026-09-12 from the `.rst` source, docs.kernel.org being unreachable at that check.
 
 ### `mozilla-testpilot10`
 - cite: Mozilla Labs Test Pilot. "A Week in the Life of a Browser" study v2 (2010), N≈27,000, CC-BY 3.0 US; aggregate tables mirrored at github.com/mozilla/testpilotweb (testcases/a-week-life-2/aggregated-data.html).
@@ -303,12 +309,14 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - role: closest LLM-scheduling prior — agentic policy synthesis for servers; our differences: signal-not-policy contract, desktop setting, recognition measured directly. **No conference successor exists as of 2026-08-26** (re-check before every submission). status: verified (2026-08-26)
 
 ### `kgent-ebpf24`
-- cite: Zheng, Y., Yang, Y., Chen, M., & Quinn, A. (2024). Kgent: Kernel Extensions Large Language Model Agent. *Proc. SIGCOMM 2024 Workshop on eBPF and Kernel Extensions (eBPF '24)*, 30–36. DOI 10.1145/3672197.3673434.
-- role: LLM-agents-for-kernel-policy line. Author list differs from SchedCP's. status: verified (2026-08-26)
+- cite: Zheng, Yusheng, Yang, Yiwei, Chen, Maolin, & Quinn, Andrew. (2024). Kgent: Kernel Extensions Large Language Model Agent. *Proc. SIGCOMM 2024 Workshop on eBPF and Kernel Extensions (eBPF '24)*, 30–36. DOI 10.1145/3672197.3673434. ISBN 9798400707124; Sydney, NSW, Australia.
+- role: LLM-agents-for-kernel-policy line. Author list differs from SchedCP's in two slots (Yang and Chen here; Hu and Zhang there), and the shared surname is spelled differently by the two papers: **Andrew Quinn here, Andi Quinn on SchedCP**. Keep both spellings as their papers give them and do not merge the two into one bibliography author — a reference manager will otherwise split or fuse them silently.
+- status: verified (2026-08-26); given names, page range, ISBN and location re-confirmed 2026-09-12 from the authors' own BibTeX entry in the `eunomia-bpf/KEN` README. ACM DL was unreachable at that check, so the DOI record itself is unchanged from the 2026-08-26 verification.
 
 ### `tuneagent-arxiv25`
-- cite: Lin, H., Li, Y., Luo, H., Lin, Z., Zhang, L., Xing, M., & Wu, Y. (2025). TuneAgent: Agentic Operating System Kernel Tuning with Reinforcement Learning. arXiv:2508.12551 (no venue).
-- role: adjacent LLM-in-the-loop kernel tuning. status: verified (2026-08-26)
+- cite: Lin, H., Li, Y., Luo, H., Lin, Z., Zhang, L., Xing, M., & Wu, Y. (2025). TuneAgent: Agentic Operating System Kernel Tuning with Reinforcement Learning. arXiv:2508.12551 (v2).
+- role: adjacent LLM-in-the-loop kernel tuning. **The title, one author and the venue all changed after the 2026-08-26 verification, and the cite line above is v2, not the entry as first minted.** v1 (announced 2025-08-19) is titled *OS-R1: Agentic Operating System Kernel Tuning with Reinforcement Learning* and carries Kaichun Yao in the slot v2 gives to Zhenghong Lin; v2 (announced 2026-06-02) is the TuneAgent title and the author list above. The authors' repository (`github.com/LHY-24/TuneAgent`) names **KDD 2026** as the venue, so the former "(no venue)" line is retired: cite the conference if the acceptance is confirmed, and the preprint with its version otherwise. Per-benchmark numbers on that README are described there as the camera-ready's and are not verified against any paper.
+- status: **to-pin (2026-09-12)** — downgraded from verified. Version history, both titles and both author lists were read from a GitHub mirror of arXiv's own RSS announcement feeds, and the venue from the authors' repository README; arXiv and the KDD record were both unreachable at that check. Confirm the current version, its title, its author list and the venue before any submission.
 
 ### `jadhav-arxiv25`
 - cite: Jadhav, P., Jin, H., Deelman, E., & Balaprakash, P. (2025). Evaluating the Efficacy of LLM-Based Reasoning for Multiobjective HPC Job Scheduling. arXiv:2506.02025 (under review).
