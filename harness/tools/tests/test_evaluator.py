@@ -86,8 +86,8 @@ def test_the_fail_variant_fails_on_the_primary_and_passes_under_alt():
     assert report["verdict"] == "fail"
     assert _gap(report)["meets_g"] is False and _gap(report, "alt")["meets_g"] is True
     assert _line(report, "sensitivity")["rows"] == [
-        {"boot_default": "", "met": 0, "judging": 1, "verdict": "fail", "available": True},
-        {"boot_default": "alt", "met": 1, "judging": 1, "verdict": "pass", "available": True}]
+        {"boot_default": "", "met": 0, "judging": 1, "verdict": "fail", "available": True, "reason": ""},
+        {"boot_default": "alt", "met": 1, "judging": 1, "verdict": "pass", "available": True, "reason": ""}]
 
 
 def test_the_invalid_variant_names_the_guard_and_the_run():
@@ -237,3 +237,43 @@ def test_cli_refuses_without_writing(tmp_path):
     proc = _cli(p, tmp_path)
     assert proc.returncode == 1 and "dataset" in proc.stderr
     assert not (tmp_path / "report.json").exists() and not (tmp_path / "report.md").exists()
+
+
+# ------------------------------------------------- 8.8's added lines
+
+def test_the_g_band_recomputes_the_verdict_count_per_g():
+    line = _line(_evaluate(), "g_band")
+    assert line["gaps"] == ["0.25", "0.33", "0.5", "0.67"]
+    assert line["rows"] == [
+        {"g": "0.25", "met": 1, "judging": 1, "verdict": "pass"},
+        {"g": "0.33", "met": 1, "judging": 1, "verdict": "pass"},
+        {"g": "0.5", "met": 1, "judging": 1, "verdict": "pass"},
+        {"g": "0.67", "met": 0, "judging": 1, "verdict": "fail"}]
+
+
+def test_the_seed_standard_error_line_is_half_the_difference_over_two_seeds():
+    from fractions import Fraction
+    from harness.evaluator import fmt
+    report = _evaluate()
+    row = _line(report, "seed_standard_error")["rows"][0]
+    scores = read_csv(INPUTS["scores"], scorer.COLUMNS)
+    s = {r["seed"]: Fraction(r["score"]) for r in scores
+         if r["level"] == "file" and r["workload_id"] == "mock-score" and r["condition"] == "random"
+         and r["boot_default"] == ""}
+    d = abs(s["s1"] - s["s2"])
+    assert row["workload_id"] == "mock-score" and row["n_seeds"] == 2
+    assert row["standard_error"] == fmt(d / 2)                  # sd = d/√2, se = sd/√2
+    assert row["standard_error_share"] == fmt(d / 2 / Fraction("2.5"))
+    assert row["compared_mean"] == _gap(report)["compared_mean"]
+
+
+def test_the_sensitivity_line_carries_the_per_point_reasons():
+    line = _line(_evaluate(), "sensitivity")
+    assert line["reasons"] == {"ostep": "the primary", "alt": "the fixture's alternative"}
+    assert [r["reason"] for r in line["rows"]] == ["the primary", "the fixture's alternative"]
+
+
+def test_statements_are_echoed_into_the_report_in_order():
+    report = _evaluate()
+    assert report["statements"] == [{"id": "fixture", "text": "A pre-registered statement, echoed verbatim."}]
+    assert "## Statements" in render(report) and "A pre-registered statement" in render(report)

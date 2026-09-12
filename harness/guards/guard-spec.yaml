@@ -98,7 +98,9 @@
 #   vacuously (found by the 8.6 smoke run, 2026-09-11; 8.3 spec, amendment to
 #   decision 12).
 
-version: "0.1"
+# 1.0 is the freeze of 2026-09-12 (Phase 8 spec, decision 19; harness/CHANGELOG.md), pinned by
+# the RQ0 gate spec. A change after it is a new version and a changelog entry.
+version: "1.0"
 
 guards:
   - id: provenance_share

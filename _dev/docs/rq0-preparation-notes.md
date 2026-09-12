@@ -208,7 +208,7 @@ The driver table and the workloads share an owner. v0 is written from theory
 with no measurement, so this is not test-set contamination in the usual sense,
 but the person writing the table knows what is in the coreset. For RQ0
 (headroom detection) this is minor. For RQ2 it matters, and the existing design
-already handles it by tuning v1 on a separate throwaway pool. If any v0-based
+already handles it by tuning v1 on the separate driver table tuning set. If any v0-based
 number reaches the paper, the overlap should be stated.
 
 ### 4.6 `c6-dual` uses vocabulary outside the ratified set — **[unverified]**
@@ -555,6 +555,8 @@ The pass criterion should be **fixed in a committed file before execution**, not
 in a meeting. Written down as data, a change after seeing the numbers leaves a
 git trace.
 
+> **Superseded 2026-09-12.** The committed RQ0 gate spec is `harness/experiments/rq0-gate.yaml` (sub-task 8.8): 25 judging files — `c7-meeting` and `c7-media` reporting-only under the executor assumptions, with a re-entry condition — K = 13, g = 0.5, N = 100, a nine-point boot-default sweep, the failure procedure with its file-selection rule, one exemption (`c6-dual`'s `provenance_share` under `oracle`; `random-beats-oracle` is a report line and `fallback-share` was never a guard id), and every grounding in its `statements`. The sketch below is kept as the 2026-09-06 record.
+
 ```yaml
 rq0:
   judging_rule: >
@@ -740,28 +742,32 @@ each other; expect to alternate.
 
 ### Stage 4 — harness upper half
 
-- [ ] **4.1** scorer — weights plus normalisation, with the denominator floor.
-- [ ] **4.2** guards, including: do the two files of a C2 pair produce
+*Done in Phase 8 (2026-09-11): 8.2 scorer, 8.3 guards, 8.4 L1 grader, 8.5 mocks, 8.6 runner, 8.7 report; `harness/README.md`.*
+
+- [x] **4.1** scorer — weights plus normalisation, with the denominator floor.
+- [x] **4.2** guards, including: do the two files of a C2 pair produce
       *identical* traces? If so, the configuration never actually changed — catch
       this before a zero gap gets interpreted. Plus the §6 global checks.
-- [ ] **4.3** mock daemon + mock simulator; run the whole pipeline on mocks.
-- [ ] **4.4** runner with the execution cache.
-- [ ] **4.5** report — every number accompanied by its provenance breakdown.
+- [x] **4.3** mock daemon + mock simulator; run the whole pipeline on mocks.
+- [x] **4.4** runner with the execution cache.
+- [x] **4.5** report — every number accompanied by its provenance breakdown.
 
 ### Stage 5 — pre-registration (the point of no return)
+
+*Done 2026-09-12 (8.8): `harness/experiments/rq0-gate.yaml`, `harness/CHANGELOG.md`. 5.3 and 5.5 are committed with confirmations pending (박이안: the `random` reading and N; 인경민: the three executor rules); the freeze is 인지오's alone, team ratification in a meeting rather than three signatures (Phase 8 spec, decision 19).*
 
 Meaningful only once the table's format (0.5) and both metric layers (1, 3) are
 fixed — the shape of the instrument has to be settled before a threshold on its
 output means anything.
 
-- [ ] **5.1** Commit the RQ0 gate spec file.
-- [ ] **5.2** Set the threshold — possible only now that both layers are fixed,
+- [x] **5.1** Commit the RQ0 gate spec file.
+- [x] **5.2** Set the threshold — possible only now that both layers are fixed,
       and necessarily before seeing any numbers.
-- [ ] **5.3** Fix the `random` condition's draw definition and seed count
+- [x] **5.3** Fix the `random` condition's draw definition and seed count
       **with 박이안**.
-- [ ] **5.4** Write down the failure procedure (config search before workload
+- [x] **5.4** Write down the failure procedure (config search before workload
       redesign).
-- [ ] **5.5** Freeze the scoring spec; later changes need a changelog and three
+- [x] **5.5** Freeze the scoring spec; later changes need a changelog and three
       signatures.
 
 ### Stage 6 — integration and execution

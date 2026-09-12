@@ -214,5 +214,6 @@ def test_smoke_cli_generates_runs_and_discards_the_spec(tmp_path):
                            "--files", "1"], capture_output=True, text=True)
     assert proc.returncode == 0, proc.stderr                  # the smoke's code is not the verdict's
     assert "verdict:" in proc.stdout
-    assert not list((REPO / "harness" / "experiments").glob("*.yaml"))
+    # the generated spec is gone; only pre-registered experiments remain (the RQ0 gate spec since 8.8)
+    assert [p.name for p in (REPO / "harness" / "experiments").glob("*.yaml")] == ["rq0-gate.yaml"]
     assert not list(tmp_path.glob("*.yaml")) or all(p.name == "machine.yaml" for p in tmp_path.glob("*.yaml"))

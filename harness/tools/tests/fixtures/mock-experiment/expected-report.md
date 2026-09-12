@@ -1,6 +1,6 @@
 # Report — mock-experiment
 
-**Verdict: pass** — 1 of 1 judging files met the criterion (K = 1). Spec `71736b062545`.
+**Verdict: pass** — 1 of 1 judging files met the criterion (K = 1). Spec `1b9669bbafb9`.
 
 ## Criterion
 
@@ -22,6 +22,10 @@
 | driver_table | harness/tools/tests/fixtures/mock-grades/driver-table.yaml | 04fdb608c64661905af94f1a01e5502f5f84f004cd4c433b9297fc284c99f3de |  |
 | dataset | harness/tools/tests/fixtures/mock-experiment/build.manifest.json | b60942339c09f9ea6155bdac98c293a8184de082f4fd95f1b9134dee98bdd44f |  |
 
+## Statements
+
+**fixture** — A pre-registered statement, echoed verbatim.
+
 ## Per-file gaps
 
 | workload | judging | boot default | reference | compared (per seed) | mean | gap | meets g | no headroom | random beats oracle | available |
@@ -31,10 +35,25 @@
 
 ## Line: sensitivity
 
-| boot default | met | judging | verdict | available |
-|---|---|---|---|---|
-| (primary) | 1 | 1 | pass | True |
-| alt | 1 | 1 | pass | True |
+| boot default | met | judging | verdict | available | reason |
+|---|---|---|---|---|---|
+| (primary) | 1 | 1 | pass | True | the primary |
+| alt | 1 | 1 | pass | True | the fixture's alternative |
+
+## Line: g_band
+
+| g | met | judging | verdict |
+|---|---|---|---|
+| 0.25 | 1 | 1 | pass |
+| 0.33 | 1 | 1 | pass |
+| 0.5 | 1 | 1 | pass |
+| 0.67 | 0 | 1 | fail |
+
+## Line: seed_standard_error
+
+| workload | seeds | mean | sd | standard error | as share of reference |
+|---|---|---|---|---|---|
+| mock-score | 2 | 1.036346 | 0.852789 | 0.603013 | 0.241205 |
 
 ## Line: floor_band
 

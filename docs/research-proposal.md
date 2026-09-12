@@ -1,5 +1,5 @@
 # A Semantic Recognition Layer for Operating Systems
-> Status: draft — for team review · Created 2026-08-15 · Updated 2026-09-11
+> Status: draft — for team review · Created 2026-08-15 · Updated 2026-09-12
 
 **Removing hardcoded semantic knowledge from the OS, validated on CPU scheduling**
 
@@ -450,7 +450,7 @@ All three keep `reasoning`, `situation`, and `system`. The read scope is applied
 | B | Understanding of which algorithm class fits a situation | General CS knowledge |
 | C | Ability to calibrate constants for a system it has never seen | System-specific knowledge it does not have |
 
-**Two tables.** The **prior table** is written from scheduling theory before any measurement and is used only for the pre-registered headroom gate (RQ0). The **calibrated table** is tuned per row on a disjoint throwaway pool and produces every reported result; its default per row is the algorithm whose tuned entry scored best there.
+**Two tables.** The **prior table** is written from scheduling theory before any measurement and is used only for the pre-registered headroom gate (RQ0). The **calibrated table** is tuned per row on the disjoint driver table tuning set (workload building plan §4) and produces every reported result; its default per row is the algorithm whose tuned entry scored best there.
 
 **Reading the outcome — and the tie built into it.** Because the calibrated default is, by construction, the best-scoring algorithm for the row, `llm_algo` cannot beat `llm_vocab` on it when the situation reading is correct: naming the default reproduces `llm_vocab`, naming anything else gets a tuned-but-worse entry. The only way `llm_algo` gains is when the reading was wrong and the named algorithm suits the true situation better than the misread row's default. The delegation rung is therefore scored three ways, none of which asks for a gain that the design forbids:
 
@@ -544,6 +544,8 @@ Ownership note: 박이안 builds the whitelist baseline as well as the LLM condi
 This can happen for a concrete reason worth watching for: if the per-class heuristics are strong enough, they self-correct misclassification. Put a compiler in the interactive class and the MLFQ demotion rule will move it within a few time slices anyway. The heuristics do not steal credit from the model — they eliminate the variance we are trying to measure.
 
 **Both `random` and `oracle` can be run before any LLM integration exists.** The ground truth is already written in the workload file; random is one line of code. This is the cheapest possible early kill check, and it should be the first experiment we run. If the gap is narrow, we redesign workloads or deliberately weaken the executor's self-correction before investing in prompt engineering.
+
+*Pre-registered 2026-09-12:* the criterion is committed as data in `harness/experiments/rq0-gate.yaml`, the RQ0 gate spec — at least 13 of 25 judging files must show a gap of at least 0.5 between perfect and random recognition, `random` over 100 seeds, with the boot-default, latency-floor, and threshold sensitivity lines, the failure procedure (configuration search before any workload change), and the grounding of every number written beside it. The harness's RQ0 gate evaluator reads that file and nothing else.
 
 Phase 1 runs on the full ratified vocabulary — sixteen modes plus `background_wanted`. The attribute is not optional there: the RQ0 judging set is built from label-varying pairs — the C2 pairs, and since Phase 7 the C1 base and C7 counterpart of every batch mode and the interactive counterparts — whose two sides differ in `background_wanted`, so a modes-only gate could not express its own judging set.
 
@@ -779,8 +781,8 @@ This layout puts every integration point in one person's hands, making integrati
 | Phase | Deliverable | Gate |
 |---|---|---|
 | 0 | Discrete-event simulator, MLFQ executor, canonical workload loader (per `docs/simulator/interpretation-contract.md`) | A workload runs and produces reproducible metrics |
-| 1 | `fixed`, `random`, `oracle` on the full vocabulary (16 modes + `background_wanted`), through the prior driver table | **Is the random-to-oracle gap large enough to measure?** If not, redesign before proceeding |
-| 2 | `whitelist` condition; the calibrated driver table, tuned on the throwaway pool | Whitelist beats fixed on gaming workloads |
+| 1 | `fixed`, `random`, `oracle` on the full vocabulary (16 modes + `background_wanted`), through the prior driver table; criterion pre-registered in `harness/experiments/rq0-gate.yaml` | **Is the random-to-oracle gap large enough to measure?** If not, the pre-registered failure procedure: configuration search first, then redesign |
+| 2 | `whitelist` condition; the calibrated driver table, tuned on the driver table tuning set | Whitelist beats fixed on gaming workloads |
 | 3 | Mock generator, IPC, validator, provenance, record/replay cache | Full pipeline runs end to end with no model |
 | 4 | `llm_vocab` (variant A), local model hosting | Layer 1 accuracy measured, split by software familiarity |
 | 5 | `llm_algo` (variant B) | Does algorithm choice beat the driver's table? |

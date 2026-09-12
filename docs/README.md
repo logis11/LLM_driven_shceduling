@@ -1,6 +1,6 @@
 # Docs index
 
-> Status: normative · Created 2026-08-27 · Updated 2026-09-11
+> Status: normative · Created 2026-08-27 · Updated 2026-09-12
 
 Prose only, organized by domain — one `##` section per area below, the full index table at the bottom. Statuses: **normative** (states what is; kept current) · **draft** (content real, form not final) · **record** (append-only history; never rewritten). Decision history lives in `_dev/archive/`; machine-read files live outside `docs/` (see the placement rule in `CLAUDE.md`).
 
@@ -56,7 +56,7 @@ How the dataset was designed and grounded. Reading order: building-plan → arch
 The experiment harness: trace → records → scores. Reading order: background-guide → harness-and-records-guide → metrics → data-contracts (trace, recognition log).
 
 - [harness/metrics.md](harness/metrics.md) — every number the project reports: the primitives computed from traces and recognition logs, the records format, the aggregate list, normalisation and floors, the constants and their sources, the simulator assumptions
-- [harness/harness-and-records-guide.md](harness/harness-and-records-guide.md) — 공부용 (Korean): what the harness reads and writes, every primitive with worked examples, three mock traces computed by hand, and what sits on top of records
+- [harness/harness-and-records-guide.md](harness/harness-and-records-guide.md) — 공부용 (Korean): what the harness reads and writes, every primitive with worked examples, three mock traces computed by hand, and the upper half — scores, guards, the Layer-1 grader, the mocks and the invocation contract, the per-experiment spec and the RQ0 gate evaluator, the runner. Each folder under `harness/` also has its own README
 
 ## Memos (`memos/`)
 
@@ -69,6 +69,7 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 - [memos/2026-09-10-coreset-before-and-after-phase-7.md](memos/2026-09-10-coreset-before-and-after-phase-7.md) — to 인경민, 박이안 (Korean): the 2026-09-10 coreset change and why — 24 → 50 files, all 32 driver-table cells paired, C1 at sixteen, the new C7 group, pre-committed misses, the two EDF pairs the cap cannot reach, what stays the same for the simulator and the daemon
 - [memos/2026-09-11-boot-default-from-ostep.md](memos/2026-09-11-boot-default-from-ostep.md) — to 인경민, 박이안 (Korean): the boot default re-sourced whole from OSTEP's MLFQ example (slice 2 ms → 10 ms; EDF and LOTTERY slices follow by the same-granularity rule), the research that found no standard MLFQ configuration, what changes and what stays for each owner, two executor-rule questions for 인경민 that decide `c7-meeting` and `c7-media`
 - [memos/2026-09-11-invocation-contract.md](memos/2026-09-11-invocation-contract.md) — to 인경민, 박이안 (Korean): the invocation contract (data-contracts §11, contract 10) — the command line the harness starts the daemon and the simulator with, its flags and rules, and what each program must do to be run by the harness unchanged
+- [memos/2026-09-12-rq0-pre-registration.md](memos/2026-09-12-rq0-pre-registration.md) — to 인경민, 박이안 (Korean): the RQ0 gate spec is committed — what it fixes (K, g, N, the judging set, the boot-default sweep), the three executor rules committed as assumptions pending 인경민, the `random` reading and N pending 박이안, and what each owner must confirm before Phase 9
 
 ## Full index
 
@@ -93,7 +94,7 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 | [workload/source-vetting.md](workload/source-vetting.md) | per-source verdicts and extracted numbers | record |
 | [workload/coreset-guide.md](workload/coreset-guide.md) | 공부용: every coreset file explained, with compiled numbers | draft |
 | [harness/metrics.md](harness/metrics.md) | primitives, records, aggregates, normalisation, constants — every reported number's definition | normative |
-| [harness/harness-and-records-guide.md](harness/harness-and-records-guide.md) | 공부용: harness, records, primitives, mocks by hand, scores | draft |
+| [harness/harness-and-records-guide.md](harness/harness-and-records-guide.md) | 공부용: harness, records, primitives, mocks by hand, scores, guards, grader, mocks, evaluator, runner | draft |
 | [memos/2026-09-07-trace-clarifications-for-the-simulator.md](memos/2026-09-07-trace-clarifications-for-the-simulator.md) | to 인경민: what the harness needs from the trace, and why | memo |
 | [memos/2026-09-07-repeat-samples-for-the-daemon.md](memos/2026-09-07-repeat-samples-for-the-daemon.md) | to 박이안: the repeat index consistency needs from the log | memo |
 | [memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md](memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md) | to 인경민: queue takeover, preemption, and measuring overhead at an algorithm switch | memo |
@@ -101,3 +102,4 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 | [memos/2026-09-10-coreset-before-and-after-phase-7.md](memos/2026-09-10-coreset-before-and-after-phase-7.md) | to 인경민, 박이안 (Korean): the coreset before and after the 2026-09-10 change — what changed, why, and what it means for each owner | memo |
 | [memos/2026-09-11-boot-default-from-ostep.md](memos/2026-09-11-boot-default-from-ostep.md) | to 인경민, 박이안 (Korean): the boot default from OSTEP — what changed, why, what it means for each owner, two rule questions for the simulator | memo |
 | [memos/2026-09-11-invocation-contract.md](memos/2026-09-11-invocation-contract.md) | to 인경민, 박이안 (Korean): the command line the harness invokes the daemon and the simulator with — flags, rules, exit code | memo |
+| [memos/2026-09-12-rq0-pre-registration.md](memos/2026-09-12-rq0-pre-registration.md) | to 인경민, 박이안 (Korean): the RQ0 gate spec committed — what is fixed, what each owner confirms before Phase 9 | memo |

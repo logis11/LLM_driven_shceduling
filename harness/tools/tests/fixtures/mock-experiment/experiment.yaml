@@ -1,6 +1,6 @@
 # mock-experiment — a per-experiment spec over the mock-scores workload (sub-task 8.7).
 # One judging file, `mock-score`, under `fixed`, `oracle`, and `random` with two seeds,
-# plus `fixed` under the alternative boot default `alt`. Pins name fixture copies so the
+# plus `fixed` under the alternative boot default `alt`; 8.8's lines and a statement. Pins name fixture copies so the
 # fixture never moves when the committed specs do. Derivation: worked.md.
 
 experiment: mock-experiment
@@ -26,12 +26,18 @@ guard_exemptions:
     reason: "The fixture's random s2 run starves `train` by construction; the exemption keeps the pass variant judgeable (worked.md)."
 
 reporting_lines:
-  - {type: sensitivity, boot_defaults: [alt]}
+  - {type: sensitivity, boot_defaults: [alt], reasons: {ostep: "the primary", alt: "the fixture's alternative"}}
+  - {type: g_band, gaps: [0.25, 0.33, 0.5, 0.67]}
+  - {type: seed_standard_error}
   - {type: floor_band, latency_floors_us: [500, 1000, 40000]}
   - {type: exclusion_accuracy}
   - {type: layer1_headline}
   - {type: random_beats_oracle}
   - {type: note, workload: mock-score, text: "A pre-registered note bound to the judging file, shown beside its row."}
+
+# pre-registered text the evaluator copies into the report verbatim (8.8)
+statements:
+  - {id: fixture, text: "A pre-registered statement, echoed verbatim."}
 
 pins:
   scoring_spec: {path: harness/tools/tests/fixtures/mock-scores/scoring-spec.yaml, sha256: da3b9f9c4adb9a75f195925abe49d0a24ad690f2333b27df383cb8012c82e1fb}

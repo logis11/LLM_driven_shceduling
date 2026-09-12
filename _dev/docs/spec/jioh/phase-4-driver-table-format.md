@@ -23,7 +23,7 @@ The table is keyed by `(mode, background_wanted)`, 32 rows. A row holds: a `batc
 
 ### 3. Prior table and calibrated table
 
-`v0` is the **prior table**: written from theory before any measurement, exactly one entry per row (`basis: theory`), used for the RQ0 gate and as the baseline of RQ5's fragility check. `v1` is the **calibrated table**: tuned on the disjoint throwaway pool, lint-required to carry all four entries per row, used for every reported result. The names replace v0/v1 everywhere.
+`v0` is the **prior table**: written from theory before any measurement, exactly one entry per row (`basis: theory`), used for the RQ0 gate and as the baseline of RQ5's fragility check. `v1` is the **calibrated table**: tuned on the disjoint driver table tuning set (renamed 2026-09-12), lint-required to carry all four entries per row, used for every reported result. The names replace v0/v1 everywhere.
 
 ### 4. Missing-entry rule
 

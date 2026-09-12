@@ -64,7 +64,7 @@ Faithful for `fixed`, `oracle`, and `random`: it walks the visible projection's 
 
 ### 12. Sensitivity as a reporting line
 
-The verdict is computed once, on the primary boot default. The two alternative-default `fixed` runs are two more runs per judging file; the gaps are recomputed under each and the three verdict counts are a pre-registered reporting line in the RQ0 gate spec. *Amended 2026-09-11 (sub-task 8.1): the primary boot default is now OSTEP's example; the alternative pair is the team's decision after 8.1 lands, not the pair the vocabulary named before.*
+The verdict is computed once, on the primary boot default. The two alternative-default `fixed` runs are two more runs per judging file; the gaps are recomputed under each and the three verdict counts are a pre-registered reporting line in the RQ0 gate spec. *Amended 2026-09-11 (sub-task 8.1): the primary boot default is now OSTEP's example; the alternative pair is the team's decision after 8.1 lands, not the pair the vocabulary named before.* *Amended 2026-09-12 (sub-task 8.8): the pair is a sweep of nine alternatives, a backbone plus threshold points, each with its reason in the RQ0 gate spec; only the `fixed` run varies.*
 
 ### 13. L1 grader exclusion
 
@@ -88,7 +88,7 @@ The procedure is written into the RQ0 gate spec as ordered steps with their deci
 
 ### 18. Driver table tuning set
 
-The proposal's "disjoint throwaway pool" is renamed the driver table tuning set. Phase 8 commits its rule, not a file list, into the building plan's §4 as the dataset's normative home; the lines that say the definition belongs to the RQ0 gate spec are corrected to point there. The term is renamed in every document outside the append-only archives and added to the terminology doc. The rule's exact wording, and how disjointness is guaranteed, is the sub-task's.
+The proposal's "disjoint throwaway pool" is renamed the driver table tuning set. Phase 8 commits its rule, not a file list, into the building plan's §4 as the dataset's normative home; the lines that say the definition belongs to the RQ0 gate spec are corrected to point there. The term is renamed in every document outside the append-only archives and added to the terminology doc. The rule's exact wording, and how disjointness is guaranteed, is the sub-task's. *Amended 2026-09-12 (sub-task 8.8): the rename, the terminology entry, and the disjointness sentence in the building plan's §4 land in Phase 8; the composition rule is fixed with the calibrated table's tuning method, after Phase 9.*
 
 ### 19. Freeze
 

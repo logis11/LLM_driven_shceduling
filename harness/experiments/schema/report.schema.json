@@ -6,7 +6,7 @@
   "type": "object",
   "additionalProperties": false,
   "required": ["experiment", "spec_sha256", "pins", "conditions", "seed_count", "boot_defaults", "criterion",
-               "verdict", "verdict_detail", "gaps", "scores", "provenance", "guards", "lines"],
+               "verdict", "verdict_detail", "gaps", "scores", "provenance", "guards", "statements", "lines"],
   "$defs": {
     "identity": {
       "workload_id": {"type": "string", "minLength": 1},
@@ -94,6 +94,10 @@
                                "partner": {"type": "string"}, "reason": {"type": "string"},
                                "exempt": {"type": "boolean"}, "exemption_reason": {"type": "string"},
                                "invalidating": {"type": "boolean"}}}},
+    "statements": {
+      "type": "array", "description": "the spec's pre-registered statements, copied verbatim and in order (8.8)",
+      "items": {"type": "object", "additionalProperties": false, "required": ["id", "text"],
+                "properties": {"id": {"type": "string"}, "text": {"type": "string"}}}},
     "lines": {
       "type": "array",
       "items": {"type": "object", "required": ["type"], "properties": {"type": {"type": "string"}}}}

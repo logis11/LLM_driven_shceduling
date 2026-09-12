@@ -67,3 +67,13 @@ The headline line carries the excluded balanced accuracy per condition with the 
 ## Provenance breakdown
 
 From the aggregates' `config_interval` shares per run: the two `fixed` runs are all `fallback` (fallback share 1), the other three all `unmodified` (fallback share 0), as `../mock-scores/worked.md` states for their schedule rows.
+
+## 8.8's lines: the g band, the seed standard error, the sensitivity reasons, and the statements
+
+**g band.** The same primary gap, 0.585462, judged against each g of the band {0.25, 0.33, 0.5, 0.67}: met at the first three, not at 0.67 → the line reads pass, pass, pass, fail. Nothing is re-scored; only the threshold changes.
+
+**Seed standard error.** The two `random` file scores on the primary are s1 = 1.639359 and s2 = 0.433333 (mean 1.036346). With n = 2 the sample variance is d²/2 for d = s1 − s2 = 1.206026, so sd = d/√2 = **0.852789** and the standard error sd/√n = d/2 = **0.603013**; as a share of the reference score 2.5 that is **0.241205**. Square roots are taken exactly at 40 digits, so the printed values are the rounded exact ones.
+
+**Sensitivity reasons.** The spec names one reason per boot default in the sweep, the primary included; the line echoes the map and prints each row's reason beside it. The fail and invalid variants name none, so their rows carry an empty reason.
+
+**Statements.** The spec's `statements` are copied into the report in order, id and text verbatim, and rendered as their own section before the per-file gaps.

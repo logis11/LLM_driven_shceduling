@@ -899,26 +899,30 @@
    "invalidating": false
   }
  ],
+ "statements": [],
  "lines": [
   {
    "type": "sensitivity",
    "boot_defaults": [
     "alt"
    ],
+   "reasons": {},
    "rows": [
     {
      "boot_default": "",
      "met": 0,
      "judging": 1,
      "verdict": "fail",
-     "available": true
+     "available": true,
+     "reason": ""
     },
     {
      "boot_default": "alt",
      "met": 1,
      "judging": 1,
      "verdict": "pass",
-     "available": true
+     "available": true,
+     "reason": ""
     }
    ]
   },

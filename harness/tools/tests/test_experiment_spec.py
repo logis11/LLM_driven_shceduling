@@ -104,3 +104,24 @@ def test_lint_cli(tmp_path):
     proc = subprocess.run([sys.executable, str(TOOLS / "experiment_lint.py"), "--spec", str(bad),
                            "--build", str(BUILD)], capture_output=True, text=True)
     assert proc.returncode == 1 and "majority_vote" in proc.stdout
+
+
+# ------------------------------------------------- 8.8's added fields
+
+def test_lint_refuses_a_sensitivity_reason_naming_no_boot_default(tmp_path):
+    def mutate(s):
+        line = next(l for l in s["reporting_lines"] if l["type"] == "sensitivity")
+        line["reasons"] = {"nope": "a reason for a stem that is not a boot default"}
+    errs = _errors(_broken(tmp_path, mutate))
+    assert errs and "nope" in errs[0]
+
+
+def test_schema_refuses_a_g_band_value_outside_the_unit_interval_and_a_bad_statement():
+    v = jsonschema.Draft202012Validator(_schema())
+    spec = load_spec(FX / "experiment.yaml")
+    bad = copy.deepcopy(spec)
+    next(l for l in bad["reporting_lines"] if l["type"] == "g_band")["gaps"] = [0.5, 1.5]
+    assert next(v.iter_errors(bad), None) is not None
+    bad = copy.deepcopy(spec)
+    bad["statements"] = [{"id": "x"}]
+    assert next(v.iter_errors(bad), None) is not None

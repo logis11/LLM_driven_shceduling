@@ -1,5 +1,5 @@
 # Workload Dataset Building Plan
-> Status: normative · Created 2026-08-25 · Updated 2026-09-10
+> Status: normative · Created 2026-08-25 · Updated 2026-09-12
 
 > Consolidates the dataset methodology decided across Q7 (segments, canonicalization, caches), source-vetting (per-source verdicts and extracted parameters), SCENARIO_CATALOG (S1–S18, names-only schema, source-column rules), docs/references.md + dataset/sources.yaml (citation index and machine registry), and docs/simulator/interpretation-contract.md (simulator-facing semantics). Those documents are normative for their own content; this plan defines how their pieces compose into the dataset and in what order it gets built. Decision record: `_dev/archive/2026-08-26-workload-generation-grill.md`.
 
@@ -141,6 +141,8 @@ A small generation model emitting timelines, sampled to any size (regeneration i
 
 Role: ecological validity, and the **query-economics numbers** — novel canonical sets per hour and deployment-cache hit rate, measured with the simulator counters from Q7. Controlled claims never rest on this set.
 
+**Driver table tuning set.** The set the calibrated table is tuned on (research-proposal §4.6). It is disjoint from the core set and from the naturalistic set; its composition is fixed together with the calibrated table's tuning method, after Phase 9.
+
 ## 5. Build order (and why)
 
 ```
@@ -201,4 +203,4 @@ One campaign on public CI runners (GitHub Actions): workflow files released, any
 3. **Wineserver's place in the game-task-chain topology** — decided at constructor implementation (interpretation-contract §6), recorded in `modeling_notes`.
 4. **Submission-time pins** — the `to-pin` entries in docs/references.md (benchmark-guide URLs/editions, repo commits, remaining author-list confirmations).
 5. **Canonical-set timing under emergent departs** — finite top-level tasks (clamscan, 7z, render jobs) depart at scheduler-dependent times, so the times of canonical-set changes — and, in overlap edge cases, which sets a condition visits — can differ across conditions (affects proposal §4.8's one-cache claim and precomputed-timeline assumptions). Resolve after the dataset is generated, when the actual overlap cases are visible: candidate dispositions are an authoring rule (finite tasks don't straddle segment boundaries), or accepting and reporting the divergence.
-6. **The throwaway pool** the calibrated table is tuned on (research-proposal §4.6: "tuned per row on a disjoint throwaway pool") is defined nowhere; its definition belongs to the RQ0 gate spec (Phase 8).
+6. **The driver table tuning set** (formerly "the throwaway pool") the calibrated table is tuned on. *Closed 2026-09-12 (Phase 8, 8.8):* renamed, and its normative home is §4 above — disjoint from the core set and the naturalistic set, composition fixed with the tuning method after Phase 9.

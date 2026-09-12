@@ -71,6 +71,10 @@ A `mock-experiment` fixture: an experiment spec over the `mock-scores` workload 
 
 An evaluator module in the harness package with an evaluate CLI and an experiment-lint CLI beside the existing ones. The harness README gains rows for the new directory and modules; the fixtures README gains the `mock-experiment` entry.
 
+## Amendments
+
+- *2026-09-12 (sub-task 8.8):* the schema gains an optional `statements` list the evaluator echoes verbatim into the report, per-point `reasons` on the sensitivity line, a `g_band` line (the verdict count recomputed under each gap threshold), and a `seed_standard_error` line (per judging file, the compared condition's sd, standard error, and error as a share of the reference); the report schema gains `statements`. Made in place: the gate had not run.
+
 ## Invariants
 
 - Every judgement the evaluator applies is data in the committed spec, never a constant in code.
