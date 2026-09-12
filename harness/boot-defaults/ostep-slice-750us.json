@@ -1,0 +1,5 @@
+{
+ "algorithm": "MLFQ",
+ "params": {"num_queues": 3, "timeslice_us": 750, "timeslice_growth": 2, "boost_interval_us": 100000},
+ "batch_bandwidth_cap": null
+}

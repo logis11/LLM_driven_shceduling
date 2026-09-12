@@ -17,11 +17,25 @@ def _schema():
     return json.loads(SCHEMA.read_text())
 
 
+SWEEP_US = (500, 750, 900, 1200, 2000, 3000, 5000, 20000, 100000)   # the RQ0 gate spec's sweep (8.8)
+
+
 def test_every_boot_default_validates_against_the_schema():
     files = sorted(BOOT_DIR.glob("*.json"))
-    assert [f.name for f in files] == ["ostep.json"]
+    assert [f.name for f in files] == sorted(["ostep.json"] + [f"ostep-slice-{us}us.json" for us in SWEEP_US])
     for f in files:
         jsonschema.Draft202012Validator(_schema()).validate(json.loads(f.read_text()))
+
+
+def test_each_sweep_point_is_ostep_with_only_the_slice_swapped():
+    """The alternative boot defaults of the RQ0 gate spec's sensitivity sweep
+    (8.8 spec, decision 1): named by content, the slice in the name is the
+    slice in the file, every other value OSTEP's."""
+    ostep = json.loads((BOOT_DIR / "ostep.json").read_text())
+    for us in SWEEP_US:
+        alt = json.loads((BOOT_DIR / f"ostep-slice-{us}us.json").read_text())
+        assert alt["params"]["timeslice_us"] == us
+        assert alt == {**ostep, "params": {**ostep["params"], "timeslice_us": us}}
 
 
 def test_the_schema_refuses_a_foreign_field_and_a_bad_cap():

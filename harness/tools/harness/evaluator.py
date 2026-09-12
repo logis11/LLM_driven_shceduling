@@ -537,7 +537,7 @@ def validate_report(report):
 def _table(headers, rows):
     out = ["| " + " | ".join(headers) + " |", "|" + "---|" * len(headers)]
     for r in rows:
-        out.append("| " + " | ".join("" if v is None else str(v) for v in r) + " |")
+        out.append("| " + " | ".join("" if v is None else " ".join(str(v).split()) for v in r) + " |")
     return "\n".join(out)
 
 
@@ -563,7 +563,7 @@ def render(report) -> str:
             "## Pins", "",
             _table(["pin", "path", "sha256", "version"],
                    [[k, v["path"], v["sha256"], v.get("version", "")] for k, v in report["pins"].items()]), "",
-            *(["## Statements", ""] + [f"**{s['id']}** — {s['text']}\n" for s in report["statements"]]
+            *(["## Statements", ""] + [f"**{s['id']}** — {s['text'].strip()}\n" for s in report["statements"]]
               if report["statements"] else []),
             "## Per-file gaps", "",
             _table(["workload", "judging", "boot default", "reference", "compared (per seed)", "mean", "gap",
@@ -617,7 +617,7 @@ def render(report) -> str:
             out.append(_table(["workload", "flagged", "gap"],
                               [[r["workload_id"], r["flagged"], r["gap"]] for r in line["rows"]]))
         elif t == "note":
-            out.append(f"**{line['workload_id']}** — {line['text']}")
+            out.append(f"**{line['workload_id']}** — {line['text'].strip()}")
         out.append("")
     fails = [r for r in report["guards"] if r["result"] == "fail"]
     out += ["## Guards", "",

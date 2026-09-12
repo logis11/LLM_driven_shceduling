@@ -246,7 +246,7 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 
 ### `linux-sched-fair`
 - cite: Linux kernel source, `kernel/sched/fair.c`. Tag v6.5 (CFS): `sysctl_sched_latency = 6000000ULL` ("default: 6ms * (1 + ilog(ncpus))"), `sysctl_sched_min_granularity = 750000ULL` ("default: 0.75 msec * (1 + ilog(ncpus))"). Tag v6.6 (EEVDF): `sysctl_sched_base_slice = 750000ULL` ("Minimal preemption granularity for CPU-bound tasks: default: 0.75 msec * (1 + ilog(ncpus))"). github.com/torvalds/linux/blob/v6.5/kernel/sched/fair.c and /v6.6/kernel/sched/fair.c (accessed 2026-09-07).
-- role: existence claim only — the slice magnitudes a shipped general-purpose scheduler uses (sub-millisecond base slice, single-digit-millisecond target latency). Bounded the former 2 ms boot slice (retired 2026-09-11 for OSTEP's 10 ms example); a candidate for the sensitivity pair's short-slice end; does not name our value.
+- role: existence claim only — the slice magnitudes a shipped general-purpose scheduler uses (sub-millisecond base slice, single-digit-millisecond target latency). Bounded the former 2 ms boot slice (retired 2026-09-11 for OSTEP's 10 ms example); one point of the RQ0 gate spec's boot-default sensitivity sweep (`harness/boot-defaults/ostep-slice-750us.json`, 8.8); does not name our value.
 - status: verified (2026-09-07; values read from the tagged source)
 
 ### `linux-sched-bwc`
@@ -254,9 +254,14 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - role: existence claim only — a shipped general-purpose scheduler carries a per-class CPU bandwidth ceiling (quota per period on a cgroup). Grounds the *idea* behind `batch_bandwidth_cap` (recognition-vocabulary §2); does not name our range, floor, or class rule, and differs in what the class is (an administrator-assigned cgroup there, a behaviourally inferred batch class here).
 - status: verified (2026-09-10)
 
+### `linux-sched-ext`
+- cite: Linux kernel source, `include/linux/sched/ext.h`. Tag v6.12: `enum scx_public_consts { SCX_SLICE_DFL = 20 * 1000000, /* 20ms */ SCX_SLICE_INF = U64_MAX, /* infinite, implies nohz */ }`. github.com/torvalds/linux/blob/v6.12/include/linux/sched/ext.h (accessed 2026-09-12).
+- role: existence claim only — the sched_ext scheduler class's default slice constant, `SCX_SLICE_DFL`, is 20 ms in a shipped kernel. One point of the RQ0 gate spec's boot-default sensitivity sweep (`harness/boot-defaults/ostep-slice-20000us.json`); does not name our values.
+- status: verified (2026-09-12)
+
 ### `illumos-ts`
 - cite: illumos-gate source, `usr/src/uts/common/disp/ts_dptbl.c` (default `config_ts_dptbl[]`: 60 user-priority levels, `ts_quantum` in clock ticks, columns `glbpri qntm tqexp slprt mxwt lwt`) and `usr/src/uts/common/disp/ts.c` (`ts_update`: "Called once per second via timeout", `timeout(ts_update, NULL, hz)`). Commit de1199e40761fcb5ed5cf82b16414ce4e4840999 (2026-09-05). Man page: illumos.org/man/5/ts_dptbl ("The length of the time quantum allocated to processes at this level in ticks (hz)"). Accessed 2026-09-07.
-- role: existence claim only — a shipped MLFQ (Solaris/illumos Time-Sharing class) is table-driven with per-level quanta and a once-per-second aging pass. Bounded the boot default's `num_queues` and `boost_interval_us` from the other side (60 levels; ~1 s aging) until 2026-09-11, when the boot default became OSTEP's example whole; a candidate for the sensitivity pair; does not name our values. At the default `hz` of 1000 the table's quanta are 2 ms (highest priority) to 20 ms (lowest); the 20-to-200 ms figures in OSTEP §8.5 and in Arpaci-Dusseau's Solaris 2.6 handout are the same tick table at 100 Hz. For the described millisecond ranges cite `ostep` §8.5, not this source.
+- role: existence claim only — a shipped MLFQ (Solaris/illumos Time-Sharing class) is table-driven with per-level quanta and a once-per-second aging pass. Bounded the boot default's `num_queues` and `boost_interval_us` from the other side (60 levels; ~1 s aging) until 2026-09-11, when the boot default became OSTEP's example whole; one point of the RQ0 gate spec's boot-default sensitivity sweep (`harness/boot-defaults/ostep-slice-2000us.json`, 8.8); does not name our values. At the default `hz` of 1000 the table's quanta are 2 ms (highest priority) to 20 ms (lowest); the 20-to-200 ms figures in OSTEP §8.5 and in Arpaci-Dusseau's Solaris 2.6 handout are the same tick table at 100 Hz. For the described millisecond ranges cite `ostep` §8.5, not this source.
 - status: verified (2026-09-07; source and man page read)
 
 ## Grounding — measurement

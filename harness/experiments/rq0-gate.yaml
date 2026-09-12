@@ -1,0 +1,234 @@
+# RQ0 gate spec — the pre-registered description of the RQ0 run (research-proposal
+# §5.3; Phase 8 spec, decisions 1–8, 12, 16, 17, 20, 21; sub-task 8.8, decided in
+# the 2026-09-12 grill). Executable data: the runner reads the generic part as its
+# run matrix, the RQ0 gate evaluator reads the whole file and writes the report.
+# Every number here has its reason beside it — in `reasons`, in `statements`, or
+# in the comment on its line. Nothing changes after execution begins except by an
+# entry in harness/CHANGELOG.md made before any run; the two pending items
+# (statements `executor-assumptions`, `random-reading`) are the ones expected to.
+#
+# Committed 2026-09-12 by 인지오 on the freeze of the scoring spec and the guard
+# spec (harness/CHANGELOG.md). Team ratification follows in a team meeting.
+
+experiment: rq0-gate
+
+conditions: [fixed, random, oracle]
+
+# N — statement `n-grounding`
+seed_count: 100
+
+# The primary is OSTEP §8's example (recognition-vocabulary §2, 2026-09-11). Each
+# alternative is the same configuration with only the top slice changed; the
+# reason for each point is on the sensitivity line below (statement `boot-default-sweep`).
+boot_defaults:
+  primary: ostep
+  alternatives: [ostep-slice-500us, ostep-slice-750us, ostep-slice-900us, ostep-slice-1200us,
+                 ostep-slice-2000us, ostep-slice-3000us, ostep-slice-5000us, ostep-slice-20000us,
+                 ostep-slice-100000us]
+
+# Judging (25): a file judges when it is one side of a label-varying pair and its
+# scored term registers the rows' difference by design (7.7, 2026-09-10; RQ0
+# preparation notes §8) — the three C2 pairs, the six batch C1 bases, and the C7
+# counterparts with a term, less c7-meeting and c7-media (statement `judging-set`).
+# Reporting (25): every other coreset file — the interactive and periodic C1 bases,
+# c1-gaming on its own line, the idle pair, C3, C4, and C5 and C6, which run and
+# report but are excluded from Layer-2 aggregation.
+files:
+  judging: [c2-p1a, c2-p1b, c2-p2a, c2-p2b, c2-p3a, c2-p3b,
+            c1-compile, c1-ml-train, c1-render, c1-transcode, c1-indexing, c1-backup,
+            c7-browsing, c7-office, c7-mail, c7-dev, c7-photo, c7-gaming, c7-video-edit,
+            c7-compile, c7-ml-train, c7-render, c7-transcode, c7-indexing, c7-backup]
+  reporting: [c1-browsing, c1-office, c1-mail, c1-dev, c1-photo, c1-meeting, c1-media, c1-video-edit,
+              c1-gaming, c1-idle, c7-idle, c7-meeting, c7-media,
+              c3-creation, c3-evening, c3-workday, c4-compile, c4-gaming, c4-office,
+              c5-t3, c5-t4, c5-t5, c6-dual, c6-fold, c6-spoof]
+
+# derived from the `pre_committed_miss` annotation in the compiled files; the lint
+# checks it (Phase 8 spec, decision 13). These files judge (the gate needs labels,
+# not recognizability) and leave recognition accuracy.
+layer1_exclusions: [c1-indexing, c7-backup, c7-ml-train, c7-render, c7-transcode]
+
+guard_exemptions:
+  - guard: provenance_share
+    workload: c6-dual
+    conditions: [oracle]
+    reason: >
+      c6-dual's ground truth is `mode: ambiguous` with no `background_wanted`; the
+      vocabulary admits no legal oracle answer inside that segment, so the oracle
+      condition runs it on fallback by construction and the fallback share is 1
+      (task 3.2; the 8.6 smoke run). The file is reporting-only and excluded from
+      Layer-2 aggregation; the exemption keeps the report's guard table honest.
+
+reporting_lines:
+  # decision 12 as amended 2026-09-12: the fixed run re-run under each alternative,
+  # the gaps recomputed against each, the verdict count printed per boot default.
+  - type: sensitivity
+    boot_defaults: [ostep-slice-500us, ostep-slice-750us, ostep-slice-900us, ostep-slice-1200us,
+                    ostep-slice-2000us, ostep-slice-3000us, ostep-slice-5000us, ostep-slice-20000us,
+                    ostep-slice-100000us]
+    reasons:
+      ostep: "the primary: OSTEP §8's worked example whole, 10 ms top slice (recognition-vocabulary §2)"
+      ostep-slice-500us: "backbone: the config schema's lower bound on the top slice"
+      ostep-slice-750us: "backbone: Linux's base slice (linux-sched-fair); also below the C2 gaming pair's 831 µs frame slack"
+      ostep-slice-900us: "threshold: between the 831 µs frame slack (c2-p2a, c2-p2b) and the 1 ms point where a slice after the 100 ms boost reaches 1% of the boost interval and enters the wake-latency p99"
+      ostep-slice-1200us: "threshold: above the 1 ms post-boost point, below c7-gaming's longest chain stage (1 470 µs)"
+      ostep-slice-2000us: "backbone: illumos TS's top-level quantum (illumos-ts); also between c7-gaming's longest stage (1 470 µs) and the C2 gaming pair's (2 176 µs)"
+      ostep-slice-3000us: "threshold: above the C2 gaming pair's longest chain stage (2 176 µs), below the 6 667 µs compositor burst"
+      ostep-slice-5000us: "threshold: below the 6 667 µs compositor burst (c7-gaming), nearer than 3 ms"
+      ostep-slice-20000us: "backbone: sched_ext's default slice (linux-sched-ext); above the primary"
+      ostep-slice-100000us: "backbone: the config schema's upper bound on the top slice"
+  # 8.1 decision 4: the verdict count recomputed under a band of latency floors at scoring time
+  - {type: floor_band, latency_floors_us: [500, 1000, 2000, 5000]}
+  # 8.8 decision 4: the verdict count recomputed under a band of g at scoring time
+  - {type: g_band, gaps: [0.25, 0.33, 0.5, 0.67]}
+  # 8.8 decision 6: the precision N buys, per judging file, checked against the data
+  - {type: seed_standard_error}
+  - {type: exclusion_accuracy}
+  - {type: layer1_headline}
+  - {type: random_beats_oracle}
+  - type: note
+    workload: c7-gaming
+    text: >
+      Judging note (Phase 7 pair review): the base already needs 1.46 lanes; with the
+      scan, frames miss under every row, so only the gap between rows reads, not the
+      absolute miss rate.
+  - type: note
+    workload: c1-gaming
+    text: >
+      Separate line, added 2026-09-06 after reading demand estimates and before
+      execution: single-situation file at demand 1.46, the highest in the coreset;
+      lets gap size be read against demand level separately from family type. Not
+      judging: no pair, so no attribute variation, and selecting the highest-demand
+      file after reading demand numbers is selection along an axis correlated with
+      expected gap size.
+  - type: note
+    workload: c7-meeting
+    text: >
+      Reporting-only under the executor assumptions (statement `judging-set`): both
+      rows are EDF; TIMER consumers sit in the deadline class and one 10 ms residual
+      slice equals video's tick tolerance exactly, and fixed no longer demotes the
+      video burst, so on the arithmetic the rows tie and fixed ties too — no headroom
+      on every term. Re-enters the judging set before any run if 인경민's answers are
+      slice-end waiting with dispatch before wake.
+  - type: note
+    workload: c7-media
+    text: "Same as c7-meeting."
+
+statements:
+  - id: judging-set
+    text: >
+      A file judges when it is one side of a label-varying pair and its scored term
+      registers the rows' difference by design (7.7, 2026-09-10). That admits the
+      three C2 pairs, the six batch C1 bases, and the C7 counterparts with a term.
+      c7-meeting and c7-media are reporting-only: under the executor assumptions
+      below their two EDF rows tie on every term and tie with fixed, so the term does
+      not register the rows' difference by design. Re-entry condition: if 인경민's
+      answers to memo 2026-09-11 §5 questions 1 and 2 are that a residual task keeps
+      its slice when a deadline task wakes and that a slice boundary is dispatched
+      before a same-microsecond wake, both files re-enter the judging set before any
+      run, as a harness changelog entry, and K is restated by its reading (14 of 27).
+      A judging file whose every term shows no headroom at scoring time stays in the
+      set and counts as not meeting g (Phase 8 spec, decision 4); it is also a
+      trigger for the table check in the failure procedure.
+  - id: executor-assumptions
+    text: >
+      Proposed 2026-09-11 (memo 2026-09-11-boot-default-from-ostep §5), pending
+      인경민's confirmation, and committed as stated assumptions: (1) under EDF a waking
+      deadline-class task preempts a running residual task at once; (2) when a
+      residual slice boundary and a TIMER expiry fall on the same microsecond, the
+      wake is processed before the dispatch decision, and the trace's line order
+      shows it; (3) the executor's starvation window is 1 000 000 µs, the guard spec's
+      starvation_floor threshold. The answers are recorded here when they arrive; a
+      changed value is a harness changelog entry before any run. Confirmation is a
+      Phase 9 prerequisite.
+  - id: g-grounding
+    text: >
+      g = 0.5 reads: recognition accounts for at least half of the achievable
+      improvement — the compared condition captures at most half of the oracle's
+      headroom over fixed. It is a stated minimum effect of interest fixed before
+      execution; no source grounds a value. The g band line prints the verdict
+      count under 0.25, 0.33, 0.5, and 0.67 beside the primary; if the count moves
+      inside the band, the verdict is reported as a range over g, not as a point.
+  - id: prior-table-structure
+    text: >
+      A known property of the prior driver table, stated before execution: its 32
+      rows carry 8 distinct configurations, since params are boot values in every
+      row and rows differ by algorithm and cap only. Thirteen rows share MLFQ with
+      cap 0.05 (every unwanted row of a non-periodic mode), so on the 13 judging
+      files whose scored segment maps to that row — the twelve C7 counterparts of the
+      interactive and batch modes other than gaming, and c2-p1b — a uniform draw is the
+      oracle's configuration 41% of the time, and their gap has a structural ceiling.
+      The other twelve judging files map to rows shared by at most three (9% or
+      less). The duplicate structure makes the gate conservative; a fail
+      concentrated in the 13-file class routes to the failure procedure's table check
+      first.
+  - id: k-grounding
+    text: >
+      K = 13 reads: a majority of the 25 judging files. The report prints the count
+      whatever K is; K draws the pass line. On re-entry of c7-meeting and c7-media
+      the number is restated to 14 by the same reading before any run.
+  - id: n-grounding
+    text: >
+      N = 100, by two arguments. Precision: the gap uses the mean of the compared
+      condition's file score over seeds; with per-seed shares spread at most about
+      0.5, the worst-case sampling error of that mean at N = 100 is 0.05, one tenth
+      of g. Coverage: each draw is uniform over the 32 rows, and the chance a
+      single-row configuration is never drawn in N seeds is (31/32)^N, below 5% at
+      N = 95. The seed standard-error line prints the measured error per judging
+      file beside the mean. If the real simulator's measured cost makes N = 100
+      unaffordable, N changes by a harness changelog entry before any run (Phase 8
+      spec, decision 20).
+  - id: random-reading
+    text: >
+      The random condition draws, at every telemetry set change, one uniform draw
+      over the 32 driver-table rows, independent of previous draws and of the
+      telemetry, from a PRNG seeded per run, logged with its draw and seed, at zero
+      latency (daemon guide's definition; Phase 8 spec, decision 15). Proposed to
+      박이안 with N on 2026-09-12 (memo 2026-09-12-rq0-pre-registration) and pending
+      confirmation; enumerating the draw space instead of sampling it is a named
+      future option, not adopted.
+  - id: boot-default-sweep
+    text: >
+      Only the fixed run varies across the sweep: it is re-run under each alternative
+      boot default, and every judging file's gaps are recomputed against that fixed
+      run. The oracle and random runs stay on the primary and on the pinned driver
+      table. The sweep is a backbone the dataset does not inform — the config
+      schema's two bounds and three shipped defaults — plus one point either side of
+      each step the judging set's periodic tasks have (frame slack, longest chain
+      stage, compositor burst) and of the 1 ms post-boost point; every point's reason
+      is on the sensitivity line. If the verdict count changes across the sweep, the
+      verdict is reported as a range over the boot default.
+  - id: failure-procedure
+    text: >
+      On a fail, in order: (1) a configuration search on three failing judging
+      files chosen by rule — the failing file with the largest oracle improvement
+      over fixed in the 13-file duplicate-heavy class, the same in the low-duplicate
+      class, and the failing file whose gap fell furthest below g anywhere; ties by
+      workload id order; files with no headroom are skipped for the first two picks,
+      since they already trigger the table check — before any workload change; (2)
+      no spread found by the search means workload redesign; (3) spread the prior
+      table missed means the table is rewritten; (4) a judging file with no headroom
+      on every term is an additional trigger for the table check. The search tool is
+      built in Phase 9 only if the gate fails.
+  - id: held-out-rows
+    text: >
+      Pre-registration for the held-out-rows arm (research-proposal §4.6 item 3):
+      its row set is every row of the calibrated table unless a stated reason
+      excludes one; the files per blanked row are fixed by rule — the row's C1 base
+      for a true row, its C7 counterpart for a false row, plus any C2 or C3 segment
+      labelled with that row.
+
+# SHA-256 of the frozen files at the freeze commit (harness/CHANGELOG.md, 2026-09-12)
+pins:
+  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: e0f46d3f8717c610dd6ea9dfa6ce3695b60e68c69352fc79b4a17798562e87ad}
+  guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.0", sha256: 1eaf8ab0c202cc3780bfbb2d852d06203e684561e4c6e528d4124676eae8a258}
+  driver_table: {path: daemon/driver-table/prior.yaml, sha256: 9adc44399c6c5ba5a43413629ff6efec6b7bf7100913f4672e9bc270d7f20686}
+  dataset:      {path: dataset/build.manifest.json, sha256: f457247215a45ede6a8b46c2010ab38989c8f964101142037731a8c121fdfb7c}
+
+criterion:
+  type: k_of_n_gap
+  k: 13            # statement `k-grounding`
+  g: 0.5           # statement `g-grounding`
+  reference: oracle
+  compared: random
+  seed_statistic: mean
