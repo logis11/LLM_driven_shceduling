@@ -46,7 +46,7 @@ The configuration search of phase spec decision 17 runs on three files chosen by
 
 ### 8. Tuning set: rename now, composition later
 
-"Throwaway pool" is renamed "driver table tuning set" in every document outside the archives, and the terminology doc gains the entry. Building plan §4's open item 6 becomes one sentence: the driver table tuning set is disjoint from the coreset and the generalset, and its composition is fixed together with the calibrated table's tuning method, after Phase 9. Phase spec decision 18 is amended on that date to record the move. The harness's "throwaway experiment spec" of 8.6 is a different thing and is not renamed.
+"Throwaway pool" is renamed "driver table tuning set" in every document outside the archives, and the terminology doc gains the entry. Building plan §4 gains one sentence, and its §9 open item 6 closes pointing to it: the driver table tuning set is disjoint from the coreset and the generalset, and its composition is fixed together with the calibrated table's tuning method, after Phase 9. Phase spec decision 18 is amended on that date to record the move. The harness's "throwaway experiment spec" of 8.6 is a different thing and is not renamed.
 
 ### 9. Reporting lines and exemptions carried
 

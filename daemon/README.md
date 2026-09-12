@@ -9,7 +9,7 @@ driver-table/
   prior.yaml                        # the prior table (Phase 6): 32 rows from theory, every judgement with its references.md ids
   schema/driver-table.schema.json   # the table's shape (frozen with the contract)
   prior.yaml                        # the prior table  — written from theory (Phase 6)
-  calibrated.yaml                   # the calibrated table — tuned on the throwaway pool (later)
+  calibrated.yaml                   # the calibrated table — tuned on the driver table tuning set (later)
 tools/
   drivertable/config_schema.py      # importable copy of the frozen cpu_scheduler config schema + vocabulary
   drivertable/lint.py               # table lint: schema + the cross-checks JSON Schema cannot express

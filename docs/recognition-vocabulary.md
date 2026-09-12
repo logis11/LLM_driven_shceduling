@@ -1,5 +1,5 @@
 # Recognition Vocabulary
-> Status: normative · Created 2026-08-28 · Updated 2026-09-11
+> Status: normative · Created 2026-08-28 · Updated 2026-09-12
 
 The shared vocabulary of the recognition signal — the one contract that the recognizer's output schema, the validator's menu, the driver table, and the Layer-1 grader all agree on. Ratified 2026-08-28 (인지오 · 인경민 · 박이안 — pending team review of this doc).
 
@@ -119,7 +119,7 @@ The seven default values above are the **boot default configuration** and the `f
 
 **Same-granularity rule.** EDF's residual slice and LOTTERY's slice equal the MLFQ slice. The rule is this project's, not a source's: dispatch tenure is held equal across the four algorithms so that a difference between two driver-table rows is the policy and the cap, never the quantum one algorithm was handed. No shipped EDF has a residual round-robin slice to cite (Liu and Layland's EDF is preemptive without a quantum), and no second source is introduced for LOTTERY. Per-algorithm tenure is the calibrated table's to tune.
 
-**Sensitivity check (planned, pre-registered in the RQ0 gate spec at Phase 8).** Because the floor is one example's values, the `fixed` condition is re-run under two alternative boot defaults, the pair fixed by the team before execution. If the RQ0 gap's sign or the ordering of normalised scores changes across the three floors, the floor is reported as a range rather than a point. Because the same-granularity rule makes tenure one knob, the pair varies all three slices together.
+**Sensitivity check (pre-registered in the RQ0 gate spec, `harness/experiments/rq0-gate.yaml`, 2026-09-12).** Because the floor is one example's values, the `fixed` condition is re-run under a sweep of nine alternative boot defaults — this configuration with only the top slice changed, at 0.5, 0.75, 0.9, 1.2, 2, 3, 5, 20, and 100 ms, each point with its reason in the spec — and every judging file's gaps are recomputed against each. If the verdict count changes across the sweep, the verdict is reported as a range over the boot default rather than a point. Only the `fixed` run's slice varies: the `oracle` and `random` runs stay on the primary and the pinned driver table, whose EDF and LOTTERY slices keep the boot value by the same-granularity rule.
 
 ### Validation rules
 
@@ -169,6 +169,7 @@ Adding or removing a mode, promoting an annotation to a graded attribute, changi
 
 ## 5. Changelog
 
+- **2026-09-12 — the sensitivity check is a sweep (jioh 8.8).** No value changed. §2's sensitivity paragraph now states the pre-registered form: nine alternative boot defaults varying the top slice only, the reasons per point in the RQ0 gate spec, and the correction that only the `fixed` run varies — the earlier sentence that the pair varies all three slices together described a design the runner never had. Reference added: `linux-sched-ext` (the 20 ms point).
 - **2026-09-11 — boot default from OSTEP (jioh 8.1).** Three values changed: MLFQ `timeslice_us` 2000 → 10000, EDF `residual_timeslice_us` 2000 → 10000, LOTTERY `timeslice_us` 2000 → 10000. The MLFQ boot default is now OSTEP §8's worked example whole (3 queues, 10 ms, doubling, 100 ms boost, allotment equal to slice), one source for all four values; the other two slices follow by the same-granularity rule, now stated in §2 as the project's own; the alternative pair of the sensitivity check is the team's to fix before execution. The former 2 ms slice named no source (it lay inside the range `linux-sched-fair`, `illumos-ts`, and `ostep` bound). The prior table's rows follow by their header rule; the metrics doc's latency floor is untied from the slice (its changelog). Research behind the change: no source read claims a standard MLFQ configuration; memo `docs/memos/2026-09-11-boot-default-from-ostep.md`.
 - **2026-09-11 — the cap's shipped counterpart (jioh).** No value changed. §2's `batch_bandwidth_cap` paragraph now points to `linux-sched-bwc` (Linux CFS bandwidth control) as the existence reference for a per-class CPU bandwidth ceiling; what the class is, the range, and the floor remain this project's.
 - **2026-09-10 — batch-mode reading of `background_wanted` (jioh 7.3).** No value changed. One clarifying clause in §1: in the six batch modes the batch job is itself the background work the attribute judges, so its `false` cell is that job unwanted, the reading `c2-p1b` already used. The C7 counterparts are built on it.

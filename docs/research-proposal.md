@@ -1,5 +1,5 @@
 # A Semantic Recognition Layer for Operating Systems
-> Status: draft — for team review · Created 2026-08-15 · Updated 2026-09-11
+> Status: draft — for team review · Created 2026-08-15 · Updated 2026-09-12
 
 **Removing hardcoded semantic knowledge from the OS, validated on CPU scheduling**
 
@@ -450,7 +450,7 @@ All three keep `reasoning`, `situation`, and `system`. The read scope is applied
 | B | Understanding of which algorithm class fits a situation | General CS knowledge |
 | C | Ability to calibrate constants for a system it has never seen | System-specific knowledge it does not have |
 
-**Two tables.** The **prior table** is written from scheduling theory before any measurement and is used only for the pre-registered headroom gate (RQ0). The **calibrated table** is tuned per row on a disjoint throwaway pool and produces every reported result; its default per row is the algorithm whose tuned entry scored best there.
+**Two tables.** The **prior table** is written from scheduling theory before any measurement and is used only for the pre-registered headroom gate (RQ0). The **calibrated table** is tuned per row on the disjoint driver table tuning set (workload building plan §4) and produces every reported result; its default per row is the algorithm whose tuned entry scored best there.
 
 **Reading the outcome — and the tie built into it.** Because the calibrated default is, by construction, the best-scoring algorithm for the row, `llm_algo` cannot beat `llm_vocab` on it when the situation reading is correct: naming the default reproduces `llm_vocab`, naming anything else gets a tuned-but-worse entry. The only way `llm_algo` gains is when the reading was wrong and the named algorithm suits the true situation better than the misread row's default. The delegation rung is therefore scored three ways, none of which asks for a gain that the design forbids:
 
@@ -780,7 +780,7 @@ This layout puts every integration point in one person's hands, making integrati
 |---|---|---|
 | 0 | Discrete-event simulator, MLFQ executor, canonical workload loader (per `docs/simulator/interpretation-contract.md`) | A workload runs and produces reproducible metrics |
 | 1 | `fixed`, `random`, `oracle` on the full vocabulary (16 modes + `background_wanted`), through the prior driver table | **Is the random-to-oracle gap large enough to measure?** If not, redesign before proceeding |
-| 2 | `whitelist` condition; the calibrated driver table, tuned on the throwaway pool | Whitelist beats fixed on gaming workloads |
+| 2 | `whitelist` condition; the calibrated driver table, tuned on the driver table tuning set | Whitelist beats fixed on gaming workloads |
 | 3 | Mock generator, IPC, validator, provenance, record/replay cache | Full pipeline runs end to end with no model |
 | 4 | `llm_vocab` (variant A), local model hosting | Layer 1 accuracy measured, split by software familiarity |
 | 5 | `llm_algo` (variant B) | Does algorithm choice beat the driver's table? |

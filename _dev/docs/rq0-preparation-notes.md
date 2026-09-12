@@ -208,7 +208,7 @@ The driver table and the workloads share an owner. v0 is written from theory
 with no measurement, so this is not test-set contamination in the usual sense,
 but the person writing the table knows what is in the coreset. For RQ0
 (headroom detection) this is minor. For RQ2 it matters, and the existing design
-already handles it by tuning v1 on a separate throwaway pool. If any v0-based
+already handles it by tuning v1 on the separate driver table tuning set. If any v0-based
 number reaches the paper, the overlap should be stated.
 
 ### 4.6 `c6-dual` uses vocabulary outside the ratified set — **[unverified]**

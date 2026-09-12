@@ -1,5 +1,5 @@
 # Terminology
-> Status: normative · Created 2026-08-23 · Updated 2026-09-10
+> Status: normative · Created 2026-08-23 · Updated 2026-09-12
 
 Terms this project uses for its own parts. Operating systems vocabulary —
 MLFQ, EDF, preemption, turnaround time — is in Appendix A of
@@ -156,9 +156,14 @@ calibrated table.
 measurement: one entry per row, one sentence of justification each. Runs the
 RQ0 gate and is the baseline of RQ5's fragility check. Never tuned.
 
-**Calibrated table** — the driver table tuned per row on the disjoint throwaway
-pool: four entries per row, the default being the algorithm whose tuned entry
-scored best there. Produces every reported result.
+**Calibrated table** — the driver table tuned per row on the driver table
+tuning set: four entries per row, the default being the algorithm whose tuned
+entry scored best there. Produces every reported result.
+
+**Driver table tuning set** — the workload set the calibrated table is tuned on
+(formerly "the throwaway pool"). Disjoint from the core set and the
+naturalistic set; its composition is fixed with the tuning method, after
+Phase 9. Normative home: workload building plan §4.
 
 **Harness** — the experiment runner. Executes the matrix, grades recognition
 against ground truth, computes performance metrics from traces, and produces

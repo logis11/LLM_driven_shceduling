@@ -11,7 +11,7 @@ The fix from the Phase 6 pair review (`docs/daemon/prior-table-pair-review.md`, 
 - The generalset coverage requirement; the vocabulary's attribute clause; the demand-class declarations.
 - Docs: building plan, dataset-design table, dataset README, terminology, docs index, both study guides.
 
-Out of scope: records and scoring code; contracts, simulator, daemon; the grader's exclusion rule for pre-committed misses; the throwaway pool's definition; the judging set (all the RQ0 gate spec, Phase 8).
+Out of scope: records and scoring code; contracts, simulator, daemon; the grader's exclusion rule for pre-committed misses; the driver table tuning set's definition (the term renamed 2026-09-12); the judging set (all the RQ0 gate spec, Phase 8).
 
 ## Locked decisions
 
@@ -79,6 +79,6 @@ A file judges when it is one side of a label-varying pair and its scored term re
 
 ## Open items
 
-- The throwaway pool the calibrated table is tuned on is undefined in every document; its definition belongs to the RQ0 gate spec (Phase 8). This spec names the gap only.
+- The driver table tuning set (renamed from "throwaway pool" 2026-09-12) the calibrated table is tuned on is undefined in every document; its definition belongs to the RQ0 gate spec (Phase 8). This spec names the gap only. *Phase 8 (8.8) renamed it and deferred its composition past Phase 9.*
 - Phase 8 note: C1 is now sixteen files, which touches the judging set and the building plan's "this is where the whitelist should score perfectly" line.
 - Inputs to the RQ0 gate spec from the 7.5 pair review (decided 2026-09-10; the judging set itself is decision 14): the calibration class stays on C7 with the reason stated in the building plan's demand-budget paragraph (a counterpart's demand is its base's plus the injected job by construction; the pair, not the window, is the control); `c7-meeting` and `c7-media` count toward the RQ0 headroom like any file, with two reporting lines — their `oracle`-versus-`fixed` gap is an EDF-versus-MLFQ result with the cap axis unmeasured, and a condition reading the mode right and the attribute wrong is predicted to score the same as `llm_vocab` there. The attribute-accuracy headline is balanced accuracy with the confusion matrix beside it, raw accuracy only next to its majority baseline: the coreset's `false` share is 18 of 63 segments, so raw accuracy alone stays majority-flattered, and the imbalance is answered by the metric definition rather than by adding files.
