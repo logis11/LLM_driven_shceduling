@@ -56,7 +56,7 @@ How the dataset was designed and grounded. Reading order: building-plan → arch
 The experiment harness: trace → records → scores. Reading order: background-guide → harness-and-records-guide → metrics → data-contracts (trace, recognition log).
 
 - [harness/metrics.md](harness/metrics.md) — every number the project reports: the primitives computed from traces and recognition logs, the records format, the aggregate list, normalisation and floors, the constants and their sources, the simulator assumptions
-- [harness/harness-and-records-guide.md](harness/harness-and-records-guide.md) — 공부용 (Korean): what the harness reads and writes, every primitive with worked examples, three mock traces computed by hand, and what sits on top of records
+- [harness/harness-and-records-guide.md](harness/harness-and-records-guide.md) — 공부용 (Korean): what the harness reads and writes, every primitive with worked examples, three mock traces computed by hand, and the upper half — scores, guards, the Layer-1 grader, the mocks and the invocation contract, the per-experiment spec and the RQ0 gate evaluator, the runner. Each folder under `harness/` also has its own README
 
 ## Memos (`memos/`)
 
@@ -94,7 +94,7 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 | [workload/source-vetting.md](workload/source-vetting.md) | per-source verdicts and extracted numbers | record |
 | [workload/coreset-guide.md](workload/coreset-guide.md) | 공부용: every coreset file explained, with compiled numbers | draft |
 | [harness/metrics.md](harness/metrics.md) | primitives, records, aggregates, normalisation, constants — every reported number's definition | normative |
-| [harness/harness-and-records-guide.md](harness/harness-and-records-guide.md) | 공부용: harness, records, primitives, mocks by hand, scores | draft |
+| [harness/harness-and-records-guide.md](harness/harness-and-records-guide.md) | 공부용: harness, records, primitives, mocks by hand, scores, guards, grader, mocks, evaluator, runner | draft |
 | [memos/2026-09-07-trace-clarifications-for-the-simulator.md](memos/2026-09-07-trace-clarifications-for-the-simulator.md) | to 인경민: what the harness needs from the trace, and why | memo |
 | [memos/2026-09-07-repeat-samples-for-the-daemon.md](memos/2026-09-07-repeat-samples-for-the-daemon.md) | to 박이안: the repeat index consistency needs from the log | memo |
 | [memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md](memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md) | to 인경민: queue takeover, preemption, and measuring overhead at an algorithm switch | memo |

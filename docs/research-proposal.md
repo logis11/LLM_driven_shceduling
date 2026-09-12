@@ -545,6 +545,8 @@ This can happen for a concrete reason worth watching for: if the per-class heuri
 
 **Both `random` and `oracle` can be run before any LLM integration exists.** The ground truth is already written in the workload file; random is one line of code. This is the cheapest possible early kill check, and it should be the first experiment we run. If the gap is narrow, we redesign workloads or deliberately weaken the executor's self-correction before investing in prompt engineering.
 
+*Pre-registered 2026-09-12:* the criterion is committed as data in `harness/experiments/rq0-gate.yaml`, the RQ0 gate spec — at least 13 of 25 judging files must show a gap of at least 0.5 between perfect and random recognition, `random` over 100 seeds, with the boot-default, latency-floor, and threshold sensitivity lines, the failure procedure (configuration search before any workload change), and the grounding of every number written beside it. The harness's RQ0 gate evaluator reads that file and nothing else.
+
 Phase 1 runs on the full ratified vocabulary — sixteen modes plus `background_wanted`. The attribute is not optional there: the RQ0 judging set is built from label-varying pairs — the C2 pairs, and since Phase 7 the C1 base and C7 counterpart of every batch mode and the interactive counterparts — whose two sides differ in `background_wanted`, so a modes-only gate could not express its own judging set.
 
 ## 5.4 Two layers of measurement
@@ -779,7 +781,7 @@ This layout puts every integration point in one person's hands, making integrati
 | Phase | Deliverable | Gate |
 |---|---|---|
 | 0 | Discrete-event simulator, MLFQ executor, canonical workload loader (per `docs/simulator/interpretation-contract.md`) | A workload runs and produces reproducible metrics |
-| 1 | `fixed`, `random`, `oracle` on the full vocabulary (16 modes + `background_wanted`), through the prior driver table | **Is the random-to-oracle gap large enough to measure?** If not, redesign before proceeding |
+| 1 | `fixed`, `random`, `oracle` on the full vocabulary (16 modes + `background_wanted`), through the prior driver table; criterion pre-registered in `harness/experiments/rq0-gate.yaml` | **Is the random-to-oracle gap large enough to measure?** If not, the pre-registered failure procedure: configuration search first, then redesign |
 | 2 | `whitelist` condition; the calibrated driver table, tuned on the driver table tuning set | Whitelist beats fixed on gaming workloads |
 | 3 | Mock generator, IPC, validator, provenance, record/replay cache | Full pipeline runs end to end with no model |
 | 4 | `llm_vocab` (variant A), local model hosting | Layer 1 accuracy measured, split by software familiarity |

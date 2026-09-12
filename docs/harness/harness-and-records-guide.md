@@ -1,6 +1,6 @@
 # Harness와 records 이해하기 — trace에서 논문의 숫자까지
 
-> Status: draft · Created 2026-09-08 · Updated 2026-09-11
+> Status: draft · Created 2026-09-08 · Updated 2026-09-12
 
 이 문서는 **공부용 문서**예요. Phase 5(primitive metrics and the records pipeline)를 직접 수행하기 위해, harness가 무엇을 읽고 무엇을 쓰는지, `records`의 row 하나가 무슨 뜻인지, 그리고 그 위에 어떤 score가 올라가는지를 OS/시스템 지식이 거의 없는 사람 기준으로 바닥부터 풀어 쓴 거예요. 규범적(normative)인 정의는 `docs/harness/metrics.md`(metrics doc)가 갖고, 이 문서는 그 문서를 읽을 수 있게 만드는 다리예요. 둘이 다르면 metrics doc이 맞아요.
 
@@ -28,8 +28,12 @@
 14. records 위에 올라가는 것 — aggregate, normalisation, score
 15. 어떤 score가 좋을까 — 파일별로
 16. guard — score와 별개로 항상 확인하는 것
-17. Phase 5의 sub-task와 이 문서의 대응, harness tree
-18. 용어 정리
+17. Layer 1 — recognition log를 채점하는 grader
+18. mock daemon과 mock simulator — invocation contract의 첫 구현
+19. per-experiment spec과 RQ0 gate evaluator — 판정을 데이터로
+20. runner와 execution cache — 5 550 run을 돌리는 법
+21. harness tree — 지금 모습
+22. 용어 정리
 
 ---
 
@@ -1131,7 +1135,7 @@ RQ0 gate("perfect recognition이 random보다 나은 headroom이 있나")의 jud
 |---|---|
 | C2 (6) | judging set |
 | C1 batch 6 (`compile`·`ml-train`·`render`·`transcode`·`indexing`·`backup`) | judging set — C7 counterpart와 양쪽 |
-| C7 15 (idle 제외) | judging set. `c7-gaming`(frame은 어떤 row에서도 miss, gap만 읽음)과 `c7-meeting`·`c7-media`(gap은 EDF 대 뽑힌 algorithm, cap 축은 측정 불가)는 note가 붙은 채로 judging |
+| C7 13 (idle·meeting·media 제외) | judging set. `c7-gaming`은 note가 붙은 채로 judging(frame은 어떤 row에서도 miss, gap만 읽음). `c7-meeting`·`c7-media`는 2026-09-12 RQ0 gate spec에서 **보고 전용**으로 — 10 ms boot slice와 executor 가정 아래에서는 두 EDF row가 모든 term에서 비겨서 판정 규칙에 안 맞아요. 인경민의 executor 규칙 답에 따라 되돌아오는 조건이 spec에 적혀 있어요 |
 | C1 interactive·periodic 10 | 보고만. whitelist가 만점을 받아야 하는 baseline(16개 전부에 해당). foreground 뒤에 아무것도 없어 row가 움직일 게 없음. `c1-gaming`은 Phase 3의 별도 보고 line 유지 |
 | C3 (3), C4 (3) | 보고만. C4는 clean한 C1 원본과의 차이(delta)로 |
 | C5 (3) | Layer 2 제외. `c1-media`와 behaviour가 같으니 성능 숫자도 같아야 함. 다르면 bug 신호 |
@@ -1208,51 +1212,151 @@ score가 아니라 pass/fail이에요. 모든 보고 숫자 옆에 붙어요. gu
 
 ---
 
-## 17. Phase 5의 sub-task와 이 문서의 대응, harness tree
+## 17. Layer 1 — recognition log를 채점하는 grader
 
-| sub-task | 하는 일 | 이 문서의 어디 |
+8장에서 recognition log의 entry 하나가 어떤 row가 되는지 봤어요. 그 row들을 실제로 만들고, 파일들을 모아 숫자 하나로 만드는 것이 **grader**(`harness/tools/harness/grader.py`, 8.4)예요. simulator는 전혀 안 끼어요. 입력은 recognition log와 compiled workload의 `ground_truth`, 그리고 driver table이에요(driver table은 "이 답이 어떤 config가 됐나"를 알기 위해서예요 — algorithm 선택의 정답은 label이 아니라 label을 table에 넣었을 때 나오는 algorithm이니까요).
+
+### 17.1 어떤 query가 채점되나
+
+log의 entry마다 `t_set_change`가 있어요. 그 순간을 덮는 `ground_truth` segment가 있고 그 segment가 `ambiguous`가 아닐 때만 채점해요. 그래서 마지막 snapshot(파일이 끝나는 순간의 것)과 `c6-dual`의 ambiguous segment는 빠져요. coreset 전체로는 query point 134개 중 50개가 terminal, 2개가 ambiguous라 **82개**가 채점되고(49개 파일), 그중 10개가 `pre_committed_miss` segment 위에 있어요. 이 수는 mock daemon으로 재현되고 test가 pin해요.
+
+row마다 `validation`(daemon이 그 답을 어떻게 처리했나), segment의 `familiarity`(있으면), `pre_committed_miss`가 붙어요. `pre_committed_miss`는 "이름과 행동만으로는 맞출 수 없다고 미리 약속한 segment"라는 표시예요. headline accuracy는 그 segment를 **빼고** 계산하고, 안 뺀 값을 옆에 같이 보고해요(exclusion accuracy line). 어느 쪽이 headline인지는 미리 정해져 있어요.
+
+### 17.2 어떤 통계인가 — 축마다 하나씩, 정해져 있음
+
+축은 셋이에요: `background_wanted`(binary), mode(16개), algorithm 선택(4개). 어느 축에 어느 통계를 쓰는지는 metrics doc이 정하고 설정할 수 없어요.
+
+| 축 | headline | 옆에 같이 |
 |---|---|---|
-| **5.1** mock traces | 10–12장 같은 걸 넷 만들기. reduced run file + 20–40줄 trace + expected CSV | 10, 11, 12장 |
-| **5.2** metrics doc | 7, 8, 13, 14장의 내용을 normative하게. 상수의 출처. `data-contracts` 수정(`deadline` 예시를 head로, 두 deferred 정의를 이 문서로 pointing). docs index. terminology | 7, 8, 9, 13, 14장 |
-| **5.3** trace reader | 3, 4장을 code로. gzip stream, closed set 검증, `x_` 무시, `meta`, run file의 셋 | 3, 4장 |
-| **5.4** primitives + writer | 7장을 pure function으로. CSV writer + machine schema. CI. expected CSV와 byte 일치 | 6, 7, 10장 |
+| attribute (binary) | **balanced accuracy** (두 class의 recall 평균) | Matthews correlation coefficient, confusion matrix |
+| mode | **raw accuracy** | 측정된 majority baseline("제일 흔한 답만 하면 몇 점인가"), class별 recall, confusion matrix |
+| algorithm choice | raw accuracy | 같음 |
 
-순서: 5.1 → (5.2 ∥ 5.3) → 5.4. mock이 먼저인 이유는 doc과 reader가 expected value를 보고 병렬로 갈 수 있어서예요.
+macro-average는 어디에도 없어요. binary 축에 balanced accuracy를 쓰는 이유는 `true`가 훨씬 많아서 "다 true"라고 답해도 raw accuracy가 높게 나오기 때문이에요. 다중 class 축에서 raw accuracy 옆에 majority baseline을 놓는 것도 같은 이유예요.
 
-**harness tree**는 daemon tree를 그대로 따라요.
+### 17.3 seed는 평균, 파일은 cluster
 
-```
-harness/
-  README.md
-  Makefile                 # make lint / make test
-  records/
-    schema/records.schema.json   # CSV column의 machine schema
-  tools/
-    requirements.txt       # pinned. pandas 없음
-    harness/
-      reader.py            # trace + run file → yields
-      primitives.py        # pure functions
-      records.py           # CSV writer
-    check_mlfq_levels.py   # harness 밖의 점검 도구 (7.10) — Phase 6
-    tests/
-      fixtures/
-        mock-c1-office/    # run file + trace + expected.csv
-        mock-c1-media/
-        mock-c2-p1a/
-        mock-chain/
-        mock-switch/       # + config-schedule.json — Phase 6
-      test_reader.py
-      test_primitives.py
-.github/workflows/harness.yml
-```
+`random`은 seed마다 한 번씩 돌아요. seed는 "같은 질문을 다시 던진 것"이지 새 질문이 아니라서, 채점 row를 seed끼리 **합치지(pool) 않고 평균**해요. 합치면 관측 수가 seed 수만큼 부풀어서 평균이 실제보다 많은 증거처럼 읽혀요. grades 파일의 `over_seeds` column이 그 구분이에요(0이면 seed 하나의 값, 1이면 seed 평균).
 
-Phase 6의 6.1(switch overhead)이 여기 얹은 것: 4.4의 세 번째 input, 7.10의 primitive와 `hogs` column, `mock-switch`, 점검 도구.
+신뢰구간은 **파일을 단위로 하는 cluster bootstrap**이에요. 같은 파일 안의 query들은 독립이 아니니까(같은 process 집합, 같은 저자) 파일 단위로 다시 뽑아요. seed와 반복 횟수는 metrics doc에 고정돼 있어요. condition끼리의 비교는 같은 bootstrap draw 위에서 **paired**로 해요.
 
-파일 이름은 예시예요. 원칙은 machine이 읽는 것(schema, fixture)은 code 옆에, 사람이 읽는 것(metrics doc)은 `docs/harness/`에.
+솔직한 한계: 독립 단위가 44–49개 파일이라 Layer 1은 whitelist 비교에 힘이 부족해요. familiarity tier별 비교는 tier 4·5에 채점 query가 하나씩뿐이라 아예 집계하지 않고 row에 tier만 실어요. 이건 8.4 spec이 인정하고 적은 사실이에요.
+
+### 17.4 출력
+
+`grades` 파일(`harness/grades/schema/`): row의 identity는 condition·table·seed이고 workload는 **없어요** — Layer 1 숫자는 파일을 가로질러 모은 것이니까요. `level`이 row의 종류예요: `statistic`(축 하나의 통계), `class_recall`, `confusion`(cell 하나), `paired`(다른 condition과의 차이). 명령은 `tools/grade.py`이고, 채점 중 "oracle이 채점 query에서 만점이 아니다"라는 consistency 메시지가 나오면 exit 2예요 — 그건 결과가 아니라 bug예요.
 
 ---
 
-## 18. 용어 정리
+## 18. mock daemon과 mock simulator — invocation contract의 첫 구현
+
+harness는 daemon과 simulator를 **프로세스로 실행**해요. 그래서 "어떤 명령으로 실행하는가"가 계약이어야 해요. 그 계약이 **invocation contract**(data-contracts 문서의 contract 10, 8.5)예요. 규칙은 넷: 입력은 전부 이름 있는 flag(`--workload`, `--schedule`, …)로, 출력은 flag로 받은 경로에 쓰고, 성공 여부는 exit code로, 그 외의 채널(stdout, 환경변수, 현재 디렉토리)은 없음. runner는 여기에 한 가지 행동 규칙을 더 요구해요: **같은 입력으로 두 번 실행하면 출력이 byte 단위로 같아야** 해요.
+
+```
+daemon:    --workload W.json --condition fixed|oracle|random --driver-table T.yaml --boot-default B.json
+           --out-schedule S.json --out-log L.json [--seed N]
+simulator: --workload W.json --schedule S.json --out-trace TRACE.jsonl
+```
+
+실제 프로그램이 오기 전에 이 계약을 지키는 두 대역(`harness/tools/tests/mocks/`)이 있어요. 둘 다 test tree에 있고 Phase 9에서 버려요.
+
+**mock daemon**은 `fixed`·`oracle`·`random`에 대해 **충실**해요. workload에서 visible projection(daemon이 실제로 보게 될 process 이름들)을 뽑고, 다섯 가지 telemetry 규칙으로 query point를 찾고, `oracle`이면 ground truth를, `random`이면 seed된 균등 draw로 table의 row 하나를, `fixed`면 아무것도 답하지 않고, contract에 맞는 schedule과 log를 써요. validator가 없어서 `unmodified`만 내고, `held`·`clamped`·LLM 경로는 없어요. oracle의 답이 정의되지 않는 곳(ambiguous segment, terminal snapshot)에서는 query가 `fallback`을 달고 schedule entry가 boot default를 반복해요 — `c6-dual`의 fallback 100%가 여기서 나와요.
+
+**mock simulator**는 두 가지예요. **generator**는 어떤 workload와 schedule에도 contract에 맞는 trace를 내지만, **scheduling을 전혀 모델하지 않아요**: 자극이 올 때마다 그 task가 ready가 되고 정확히 1 µs 돌고 끝나요. 그래서 50개 파일 전부가 pipeline을 통과하지만, `fixed`·`oracle`·`random`의 점수가 같고, 모든 judging 파일이 no headroom으로 나오고, C2 pair guard가 `oracle`에서 fail해요. 이건 queue를 모델하지 않는 simulator의 **정상 결과**이지 결함이 아니에요. **replay**는 손으로 쓴 fixture trace를 그대로 복사해요 — 10–12장에서 손으로 계산한 값이 runner의 같은 경로로 흘러가게 하려고요.
+
+두 mock이 있어서 harness의 위쪽 절반 전체가 실제 프로그램 없이 test되고 CI에서 돌아요(`make smoke`). 인경민의 simulator와 박이안의 daemon이 오면 runner의 machine 설정(명령 prefix와 version 문자열)만 바뀌고 나머지는 그대로예요.
+
+---
+
+## 19. per-experiment spec과 RQ0 gate evaluator — 판정을 데이터로
+
+Phase 8 전체를 관통하는 원칙 하나: **evaluator가 적용하는 판단은 전부 committed 파일 안의 데이터이고, 코드 안의 상수가 아니다.** 그래야 숫자를 본 뒤에 판정 기준을 슬쩍 바꾸는 일이 git에 남지 않고는 불가능해져요. 그 파일이 **per-experiment spec**이고, RQ0의 것이 **RQ0 gate spec**(`harness/experiments/rq0-gate.yaml`, 2026-09-12 commit)이에요.
+
+### 19.1 spec에 무엇이 있나
+
+- **generic part** — 어떤 실험에나 필요한 것: condition 목록, seed 수 N, boot default(primary와 alternatives), judging 파일과 reporting 파일, `pre_committed_miss`에서 **유도된** Layer-1 exclusion(lint가 실제 annotation과 맞는지 확인해요 — 손으로 고를 수 없어요), guard 예외(이유 필수), typed reporting line, 그리고 **pin** — scoring spec·guard spec·driver table·dataset manifest의 SHA-256.
+- **statements** — 숫자의 근거를 적은 글. evaluator가 보고서에 그대로 옮겨 적어요. RQ0 gate spec에는 판정 set의 규칙, executor 가정(인경민 확인 대기), g·K·N의 근거, prior table의 중복 구조, sweep의 설계, 실패 절차, held-out-rows 사전등록이 들어 있어요.
+- **criterion** — 실험별 판정 규칙. RQ0는 `k_of_n_gap`: judging 파일 N개 중 **K개 이상**이 gap **g 이상**이면 pass.
+
+### 19.2 gap 하나 손으로
+
+파일 하나의 gap은 "oracle의 headroom 중 random이 못 가져간 몫"이에요.
+
+```
+gap = 1 − mean_seeds(score_random) / score_oracle
+```
+
+`score_oracle`은 그 파일의 weight 합이에요(oracle의 share는 term마다 1이니까). `mock-experiment` fixture의 숫자로: weight 합 2.5, random의 파일 점수가 seed 1에서 1.639359, seed 2에서 0.433333 → 평균 1.036346 → gap = 1 − 1.036346 / 2.5 = **0.585462**. g = 0.5보다 크니 이 파일은 "met". seed별 값은 전부 보고서에 평균 옆에 찍혀요.
+
+no headroom 규칙 둘. term 하나가 no headroom이면(oracle 자신의 개선이 floor 아래) 그 term은 random이 다 가져간 것처럼 share 1로 들어가요 — 이건 scorer의 research-wide 규칙이에요. judging 파일의 **모든** term이 no headroom이면 그 파일은 set에 남되 "g를 못 넘긴 것"으로 세요 — 이건 RQ0 gate spec의 규칙이에요.
+
+### 19.3 verdict는 셋
+
+pass, fail, 그리고 **invalid**. criterion이 읽는 run(judging 파일의 `fixed`·`oracle`·`random`)에서 예외 처리되지 않은 guard가 하나라도 fail이면 verdict는 pass/fail 대신 invalid이고 어느 guard가 어느 run에서 걸렸는지를 이름으로 적어요. gap row는 그래도 다 계산해서 보여줘요. pin이 안 맞거나 run set이 불완전하면(어떤 파일의 random seed가 N개가 아니면) verdict가 아니라 **거부**(GateError)예요 — 아무것도 안 써요.
+
+### 19.4 reporting line — 판정을 흔들어 보기
+
+verdict는 primary boot default에서 한 번만 계산해요. 그 판정이 우연한 선택에 기대고 있지 않다는 걸 보이려고 미리 등록한 line들이 있어요.
+
+| line | 무엇을 다시 세나 | 비용 |
+|---|---|---|
+| `sensitivity` | boot default를 sweep의 9개 지점으로 바꿔 `fixed`를 다시 돌리고, gap을 다시 계산한 뒤 통과 개수 | `fixed` run 9개 × 파일 수 |
+| `floor_band` | latency floor를 0.5 / 1 / 2 / 5 ms로 바꿔 채점을 다시 하고 통과 개수 | 재채점만 |
+| `g_band` | g를 0.25 / 0.33 / 0.5 / 0.67로 바꿔 통과 개수 | 재계산만 |
+| `seed_standard_error` | 파일마다 random 점수의 seed 평균의 표준오차 — N이 산 정밀도 | 계산만 |
+| `exclusion_accuracy`, `layer1_headline` | grades 파일에서 | — |
+| `random_beats_oracle` | random 평균이 oracle을 넘은 파일 표시 | — |
+| `note` | 파일 하나에 묶인 미리 쓴 문장(`c7-gaming`의 읽는 법, `c1-gaming`의 별도 line 등) | — |
+
+개수가 band 안에서 움직이면 결과를 점이 아니라 **범위**로 보고해요. 이게 "왜 0.5인가"에 대한 방어예요: 숫자 자체보다, 그 숫자를 바꿔도 결론이 안 바뀐다는 걸 보이는 것.
+
+### 19.5 report
+
+실험 run 하나당 machine-readable 보고서 하나(`report.json`, schema `harness/experiments/schema/report.schema.json`)가 진실이고, `report.md`는 거기서 렌더링만 한 것이라 손으로 고치지 않아요. 논문 표는 JSON에서 나와요. 안에는 verdict와 그 근거, 파일별 gap과 seed별 점수, 채점된 run 전부, run마다 provenance 비율(unmodified / clamped / held / fallback), guard 결과 전부, statements, line들이 있어요.
+
+---
+
+## 20. runner와 execution cache — 5 550 run을 돌리는 법
+
+**runner**(`harness/tools/harness/runner.py`, `tools/run.py`, 8.6)는 spec의 generic part를 **run matrix**로 펼치고, run마다 daemon과 simulator를 invocation contract로 실행하고, 위의 모든 단계를 순서대로 돌려 보고서까지 써요.
+
+### 20.1 matrix
+
+listed 파일(judging + reporting) 하나마다: `fixed`를 primary boot default로 한 번, alternative마다 한 번씩; 다른 condition은 primary로; draw하는 condition(`random`)은 seed 1..N마다 한 번. RQ0 gate spec으로는 50 × (1 + 9 + 1 + 100) = **5 550 run**이에요(`fixed` 500, `oracle` 50, `random` 5 000).
+
+### 20.2 두 번 실행, byte 일치
+
+run마다 daemon도 simulator도 **두 번** 실행해요. determinism guard가 rerun trace를 요구하기도 하고, contract의 행동 규칙("같은 입력 → 같은 출력")을 runner가 직접 확인하기도 해서예요. 두 실행의 출력이 다르면 그 run은 실패이고, 실패한 run은 출력이 없는 채로 남고 runner는 채점 전에 멈춰요(`failures.json`에 이름). trace는 압축 없이 요청해요 — gzip header에 timestamp가 있어서 `.gz`는 byte 단위로 안정적일 수 없거든요.
+
+### 20.3 cache
+
+모든 실행은 key로 cache돼요: 프로그램의 version 문자열, 명령 prefix, condition과 seed, 입력 파일들의 hash. 같은 key는 다시 실행하지 않고 두 실행의 출력과 stderr를 그대로 꺼내요. 실패한 실행은 cache되지 않아요. 그래서 spec의 파일 하나를 바꾸면 그 파일의 run만 다시 돌고, 프로그램 version이 바뀌면 전부 다시 돌아요 — 정확히 그래야 하는 만큼만이에요. 참고로 key에 seed가 들어 있어서, 두 seed가 같은 row를 뽑아 schedule이 같아도 simulator는 따로 돌아요.
+
+### 20.4 machine 설정과 layout
+
+실험 모양(어떤 파일, 어떤 condition)은 spec에 있고, **이 기계에서 어떻게 돌리나**(명령 prefix, version, build 경로, runs·cache 디렉토리)는 uncommitted `runner.yaml`에 있어요. committed 예시 `runner.example.yaml`은 mock 둘을 가리켜요. 출력은 `runs/<experiment>/<workload>/<run>/`에 run별로, `aggregates.csv`·`scores.csv`·`guards.csv`·`grades.csv`·`report.json`·`report.md`는 experiment 수준에 놓여요. `make smoke`는 coreset의 채점 대상 48개 파일로 throwaway spec을 만들어 이 경로 전체를 mock으로 돌리고(약 5–8분) CI에서도 돌아요.
+
+---
+
+## 21. harness tree — 지금 모습
+
+Phase 5 때의 tree 그림은 오래됐어요. 지금은 폴더마다 README가 있고, 그 README가 "무엇을 위한 폴더인지, 파일이 어떻게 만들어지고 읽히는지, 어떻게 돌리는지"를 설명해요. 이 문서에서 다룬 장과 폴더의 대응은 이래요.
+
+| 폴더 | 이 문서의 장 | README |
+|---|---|---|
+| `harness/records/` | 5, 6, 7, 10–12 | `harness/records/README.md` |
+| `harness/aggregates/`, `harness/scores/`, `harness/scoring/` | 14, 15 | 각 폴더의 README |
+| `harness/guards/` | 16 | `harness/guards/README.md` |
+| `harness/grades/` | 8, 17 | `harness/grades/README.md` |
+| `harness/tools/tests/mocks/` | 18 | `harness/tools/tests/mocks/README.md` |
+| `harness/experiments/`, `harness/boot-defaults/` | 19 | 각 폴더의 README |
+| `harness/tools/harness/runner.py` | 20 | `harness/tools/harness/README.md` |
+
+시작점은 `harness/README.md`예요. 원칙은 그대로예요: machine이 읽는 것(schema, spec, fixture)은 code 옆에, 사람이 읽는 것(metrics doc, 이 문서)은 `docs/harness/`에. 규범 정의는 언제나 metrics doc이고, 판정 규칙은 언제나 RQ0 gate spec이에요.
+
+---
+
+## 22. 용어 정리
 
 | term | 뜻 |
 |---|---|

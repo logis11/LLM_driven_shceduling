@@ -213,6 +213,30 @@ to a share of headroom, per-file weights, the gate. Changing scoring never
 touches a trace. The records/scores boundary is the primitives/scoring
 boundary.
 
+**Guard spec** — the frozen data file (`harness/guards/guard-spec.yaml`)
+listing the eight research-wide guards a run must pass before its numbers are
+read, each with its threshold, the conditions it applies to, and the grounding
+behind the number. Exemptions are never in it; they are per-experiment data.
+
+**Per-experiment spec** — one experiment's pre-registration as data the harness
+executes (`harness/experiments/<id>.yaml`): conditions, seed count, boot
+defaults, judging and reporting files, guard exemptions with reasons, typed
+reporting lines, pre-registered statements, hash pins of the scoring spec,
+guard spec, driver table, and dataset, and a typed criterion. The runner reads
+its generic part as the run matrix.
+
+**RQ0 gate spec** — the per-experiment spec of RQ0,
+`harness/experiments/rq0-gate.yaml`, committed 2026-09-12: 25 judging files,
+K = 13, g = 0.5, N = 100, the boot-default sweep, the executor assumptions, the
+failure procedure, and the grounding of every number beside it.
+
+**RQ0 gate evaluator** — the harness module (`harness/tools/harness/evaluator.py`)
+that reads a per-experiment spec and the aggregates, scores, guards, and grades
+files, verifies the pins, applies the criterion and the reporting lines, and
+writes the one machine-readable report and its rendering. Every judgement it
+applies is data in the spec; a failed non-exempt guard on a run the criterion
+reads makes the verdict `invalid`. Always named in full, never "the gate".
+
 **Entity** — whom a records row is about: a task id from the trace, or a
 reserved name — `lane` (the CPU), `schedule` (the config schedule),
 `recognizer` (the recognizer's answers).
