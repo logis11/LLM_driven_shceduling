@@ -538,9 +538,13 @@ Judging scope — **[§4.1 closed 09-06; re-decided 09-10 with Phase 7's coreset
   scored term registers the rows' difference by design. Demand is not a
   criterion: the per-file headroom admission test (open-questions Q8) is the
   gate's own per-file criterion, below.
-- **Judging (27):** C2 (6); the six batch C1 bases (their wanted LOTTERY share
-  is what a random row removes, the turnaround term registers it); the fifteen
-  C7 counterparts with a term.
+- **Judging (25, was 27 on 09-10):** C2 (6); the six batch C1 bases (their
+  wanted LOTTERY share is what a random row removes, the turnaround term
+  registers it); the C7 counterparts with a term. That last group was fifteen
+  when this rule was written on 09-10; the committed gate spec of 09-12 moved
+  `c7-meeting` and `c7-media` to reporting-only under the executor assumptions,
+  with a re-entry condition, leaving thirteen. The list that governs is
+  `harness/experiments/rq0-gate.yaml`.
 - **Reporting-only, by the same rule:** the ten interactive and periodic C1
   bases (nothing runs behind the foreground) — still the honest baseline where
   the whitelist should score perfectly (`building-plan` §3 C1); C3 (no pair;
@@ -639,11 +643,14 @@ distribution. Both the draw definition and the seed count need agreement with
 
 ### What passing does and does not establish
 
-Passing supports exactly this: *on at least K of the twenty-seven judging
-files — the three C2 pairs, the six batch C1 bases with their counterparts, and
-the interactive and periodic counterparts — perfect recognition through the v0
-table beats random recognition by at least g, so recognition quality has room
-to matter.* That is what RQ0 asks, and it is enough to proceed.
+Passing supports exactly this: *on at least K of the twenty-five judging
+files — the three C2 pairs, the six batch C1 bases, and the C7 counterparts
+carrying a term — perfect recognition through the v0 table beats random
+recognition by at least g, so recognition quality has room to matter.* That is
+what RQ0 asks, and it is enough to proceed.
+
+(Twenty-five, and K = 13, per the committed gate spec; this paragraph said
+twenty-seven while the 09-10 count stood.)
 
 Passing with an untuned table is, if anything, stronger evidence than passing
 with a tuned one — the "you tuned it to the test set" objection does not apply.
