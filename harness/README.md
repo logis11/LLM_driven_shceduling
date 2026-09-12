@@ -1,17 +1,80 @@
-# harness/
+# harness
 
-The experiment harness. This tree is 인지오's. Definitions the code implements: `docs/harness/metrics.md`; input formats: `docs/data-contracts.md` (§9 trace, §4 run-file view, §7 config schedule, §8 recognition log).
+The experiment harness turns what the simulator and the daemon leave behind into the numbers the paper reports, and into one verdict for RQ0. It never schedules anything and never recognizes anything: it reads a trace and a recognition log, measures, scores against a frozen scoring spec, checks the run with frozen guards, and judges against a pre-registered experiment spec.
 
-- `tools/harness/` — the Python package: `reader.py` (trace, run-file, config-schedule, and recognition-log readers), `primitives.py` (raw observations from one pair, plus the schedule for `switch_window` and `boost_window`), `records.py` (identity, row order, CSV, schema validation), `aggregates.py` (every trace-derived aggregate of metrics doc §8 over one run's records), `scorer.py` (per-term shares and file scores per the scoring spec, metrics doc §9), `outputs.py` (the aggregates, scores, and guards CSVs), `guards.py` (the eight guards over a run set, per the guard spec, writing the `guards` file). `grader.py` (the Layer-1 grader: one recognition log graded against ground truth into recognition records rows, and the pooled `grades` file over them). `tools/records.py` is the CLI: one pair → one records CSV, `--schedule` for the config schedule, `--boot-default` for a sensitivity-check `fixed` run, guard messages on stderr. `tools/score.py`: records CSVs → an aggregates CSV and a scores CSV. `tools/grade.py`: a manifest of recognition logs with their ground truth and the driver table → one recognition records CSV per run plus the grades CSV, exit 2 when a consistency message fired (the oracle not perfect on a graded point). `tools/guards.py`: a run-set manifest (identity plus the records, schedule, log, workload, rerun-trace paths and the records build's guard messages per run) and the aggregates CSV → the guards CSV, exit 2 when any guard failed.
-- `tools/check_mlfq_levels.py` — beside the harness, not part of it: reads the `x_mlfq_level` lines the reader skips and checks that each switch window covers its hogs' last demotion (metrics doc §12). Exit 1 on a miss, 2 when a switch into MLFQ has no schedule to size it.
-- `records/schema/records.schema.json` — the machine schema for one records row (metrics doc §5); `aggregates/schema/` and `scores/schema/` the schemas for the two files the scorer writes (8.2).
-- `grades/schema/grades.schema.json` — the schema of the `grades` file (8.4): Layer-1 numbers pooled across workloads, keyed by condition, table and seed, at four levels (statistic, class recall, confusion cell, paired difference), each row carrying its exclusion flag, its `over_seeds` flag, and its sample, file and seed counts. Seeds are averaged over rather than pooled, so a mean never reads as more evidence than it is. Which statistic goes on which axis is decided in `docs/harness/metrics.md` §8, not configurable: balanced accuracy and the Matthews coefficient on the binary attribute, raw accuracy against a measured majority baseline with confusion matrix and per-class recall on mode and algorithm choice, no macro-average anywhere. Intervals come from a cluster bootstrap over workload files; comparisons are paired on the same draws.
-- `guards/guard-spec.yaml` — the guard spec (8.3): the eight research-wide guards with threshold, direction, the conditions they apply to, the C2 pair list, and a grounding per entry; `guards/schema/guard-spec.schema.json` its schema, `guards/schema/guards.schema.json` the schema of the `guards` file the guards write; `tools/harness/guards.py` the registry, `evaluate`, and the lint (ids equal the registry, groundings non-empty, thresholds on bounded guards, pairs equal the dataset's C2 recipe); `tools/guards_lint.py` the CLI. Exemptions are the RQ0 gate spec's data, never here.
-- `CHANGELOG.md` — the harness tree's own changelog (8.8): the freeze of the scoring spec and the guard spec on 2026-09-12, and every change to the committed data files or the programs since; the RQ0 gate spec pins the frozen bytes.
-- `scoring/scoring-spec.yaml` — the scoring spec (Phase 6), frozen 2026-09-12 (`CHANGELOG.md`): per coreset file, the terms whose normalised shares the file's score sums; `scoring/schema/scoring-spec.schema.json` its schema; `tools/harness/scoring.py` the loader and lint (entity exists in the compiled workload, scored metric/aggregate pairs and directions, positive weights, windows inside the file, derived files verbatim from their base per the dataset's recipes, and a variant without a declared base must differ from it); `tools/scoring_lint.py` the CLI.
-- `experiments/` — the per-experiment specs (8.7): one YAML file per experiment — the generic part every experiment needs (conditions, seed count, boot defaults, judging and reporting files, the Layer-1 exclusions derived from `pre_committed_miss`, guard exemptions with reasons, typed reporting lines, hash pins of the scoring spec, guard spec, driver table, and dataset manifest) and a typed criterion section (`k_of_n_gap` for RQ0: K, g, the reference and compared conditions, the seed statistic). `schema/experiment-spec.schema.json` its schema, `schema/report.schema.json` the schema of the report the evaluator writes; `tools/harness/evaluator.py` the RQ0 gate evaluator — the lint, the registries of criterion and line types, `evaluate` (pins verified, run set checked complete, per-file scores per condition, the criterion, the reporting lines) and `render`; `tools/evaluate.py` the CLI (spec plus the aggregates, scores, guards, and grades files → the JSON report and its Markdown, exit 0 on pass, 2 on fail or invalid, 1 on a refusal — a pin mismatch or an incomplete run set writes nothing); `tools/experiment_lint.py` the lint CLI. `rq0-gate.yaml` is the RQ0 gate spec (8.8): 25 judging and 25 reporting files, K 13, g 0.5, N 100, the nine-point boot-default sweep with a reason per point, the executor-rule assumptions and the other pre-registered `statements` the report echoes verbatim, the failure procedure, the one exemption, and pins on the frozen scoring spec and guard spec; the runner (8.6) reads the generic part as its run matrix. 8.8 added the `g_band` and `seed_standard_error` lines and the per-point `reasons` on the sensitivity line.
-- `tools/harness/runner.py` — the runner (8.6): the per-experiment spec's generic part expanded into the run matrix (`fixed` under the primary boot default and each alternative, every other condition under the primary, a drawing condition once per seed 1..N); every run invoked through the invocation contract (data-contracts §11) — a configured command prefix plus the named flags, absolute paths, stdout ignored, stderr captured — **twice**, the daemon and the simulator both, with byte-identical outputs required; an execution cache keyed on the program's version, its prefix, the condition and seed, and the input files' bytes, one entry per key holding both executions (a failed invocation is never cached); traces asked for uncompressed; then records per run, aggregates and scores, the guards through the manifest `tools/guards.py` reads, the grader through its own manifest, and the RQ0 gate evaluator. A failed run leaves its outputs absent and stops the pipeline before scoring, named in `failures.json`. `tools/run.py` is the CLI (a spec and a machine configuration → everything under `<runs_dir>/<experiment>/<workload>/<run>/`, exit 1 on a failed run, else by verdict); `tools/smoke.py` generates a throwaway spec over every scored coreset file (pins from the files as they are, the mock conditions, two seeds, a placeholder criterion), runs it, and discards it — `make smoke`, run in CI as its own workflow on `main`, on demand, and on pull requests that touch the harness, the dataset, or the driver table. `runner.example.yaml` is the committed machine configuration for the mocks; copy it to `runner.yaml` (git-ignored) for a real machine.
-- `boot-defaults/` — the boot-default configurations the runner hands the daemon by path (data-contracts §11, the invocation contract): `ostep.json` is the OSTEP example the vocabulary adopted on 2026-09-11, pinned by test to the daemon's config-schema defaults; `ostep-slice-<µs>us.json` are the nine points of the RQ0 gate spec's boot-default sweep (8.8), the same configuration with only the top slice changed, each pinned by test to that. `schema/boot-default.schema.json` is the frozen configuration shape; `make lint` validates every file here against it.
-- `tools/tests/mocks/` — the two test doubles the runner invokes through the invocation contract until the real programs land, discarded in Phase 9 (8.5): `daemon.py` and `mock_daemon.py`, the mock daemon — the visible projection and the five telemetry rules, `fixed` / `oracle` / `random` through the driver table, contract-valid schedules and logs, `unmodified` only, no validator; `simulator.py` and `mock_simulator.py`, the mock simulator — a generator that emits a contract-valid trace from one unit run per stimulus with no scheduling modelled, and a replay (`--replay`) that returns a fixture trace byte for byte. The tests pin the mock daemon to the 8.4 spec's measured graded set and run every coreset file through the generator and the primitives with no consistency message.
-- `tools/tests/` — tests; `fixtures/` holds the six hand-written mock pairs with their expected records (`mock-guards` also carries a recognition log, ground truth, and its expected guards file), plus three fixtures that are not trace pairs: `mock-scores`, hand-written records with their expected aggregates and scores; `mock-grades`, hand-written recognition logs with their ground truth, a miniature calibrated driver table, and the expected recognition records and grades; and `mock-experiment`, a per-experiment spec in three variants over the `mock-scores` workload with hand-written guards and grades files and the expected reports (`fixtures/README.md`).
-- `make lint` parses every fixture pair under the frozen contracts, validates its expected records against the schema, lints the scoring spec against the compiled coreset under `dataset/build/coreset-single` (build it first: `make -C dataset dataset`), lints the guard spec against its schema, the code's registry, and the C2 variant recipe, lints every experiment spec under `experiments/` against its schema, the compiled coreset, and its pins, and validates every boot-default file against its schema; `make test` runs the suite. CI: `.github/workflows/harness.yml`. Dependencies: `tools/requirements.txt`.
+```
+                daemon ──► config schedule + recognition log ──┐
+workload ──►                                                   ├──► harness ──► report
+                simulator ─────────► trace ────────────────────┘
+```
+
+Inside the harness the flow is one direction, one file per stage, every file long-format CSV or JSON with a schema beside it:
+
+```
+(run file, trace, schedule) ──► records ──► aggregates ──► scores ──┐
+                                   │                                 ├──► RQ0 gate evaluator ──► report.json + report.md
+                                   ├──► guards ──────────────────────┤
+recognition log + ground truth ──► grades ───────────────────────────┘
+```
+
+## Reading order
+
+If you are new, read `docs/background-guide.md`, then `docs/harness/harness-and-records-guide.md` (Korean, worked examples), then `docs/harness/metrics.md`, which defines every number. Each folder below has its own README that says what it is for and how its files are produced and read.
+
+| folder | what lives there | README |
+|---|---|---|
+| `records/` | the schema of the records file, the harness's first product: one raw observation per row | [records/README.md](records/README.md) |
+| `aggregates/` | the schema of the aggregates file: every aggregate of a run, whether scored or not | [aggregates/README.md](aggregates/README.md) |
+| `scores/` | the schema of the scores file: per-term shares and per-file scores against the fixed baseline | [scores/README.md](scores/README.md) |
+| `scoring/` | the scoring spec, frozen: which terms value each coreset file, with what weight | [scoring/README.md](scoring/README.md) |
+| `guards/` | the guard spec, frozen, and the schema of the guards file: the checks a run must pass before its numbers are read | [guards/README.md](guards/README.md) |
+| `grades/` | the schema of the grades file: Layer-1 recognition accuracy, pooled | [grades/README.md](grades/README.md) |
+| `boot-defaults/` | the boot-default configurations the runner hands the daemon: the primary and the sweep | [boot-defaults/README.md](boot-defaults/README.md) |
+| `experiments/` | the per-experiment specs and the report schema; `rq0-gate.yaml` is the RQ0 gate spec | [experiments/README.md](experiments/README.md) |
+| `tools/` | the code: the `harness` package, the command-line tools, the tests, the mocks | [tools/README.md](tools/README.md) |
+
+Beside the folders: `CHANGELOG.md`, the harness tree's own changelog, where the scoring spec and the guard spec were frozen on 2026-09-12 and every later change to a committed data file or a program is recorded; `Makefile`, the three targets below; `runner.example.yaml`, the machine configuration that drives the mocks.
+
+## Running it
+
+Everything runs from this directory with Python 3.12 and `tools/requirements.txt`. The scoring lint and the experiment lint read the compiled coreset, so build the dataset once first.
+
+```
+pip install -r tools/requirements.txt -r ../dataset/tools/requirements.txt
+make -C ../dataset dataset        # compiles dataset/build/coreset-single
+make lint                         # fixtures, scoring spec, guard spec, experiment specs, boot defaults
+make test                         # the suite, about 90 s
+make smoke                        # the whole pipeline on the mocks over every scored coreset file, 5–8 min
+```
+
+`make smoke` generates a throwaway experiment spec over the files as they are, runs it through the runner with the mock daemon and mock simulator, writes everything under `runs/`, and discards the spec. To run a real experiment, copy `runner.example.yaml` to `runner.yaml` (git-ignored), point it at the real programs, and run:
+
+```
+python3 tools/run.py --spec experiments/rq0-gate.yaml --machine runner.yaml
+```
+
+The runner invokes each program twice per run and requires byte-identical outputs, caches every invocation, and stops before scoring if any run fails. The report lands at `runs/<experiment>/report.json` with a Markdown rendering beside it. Exit codes: 0 pass, 2 fail or invalid, 1 a failed run or a refusal.
+
+Every stage is also its own command, so a single pair can be inspected by hand:
+
+```
+python3 tools/records.py --run RUN.json --trace TRACE.jsonl --schedule SCHEDULE.json --out records.csv
+python3 tools/score.py --records records.csv --out-aggregates aggregates.csv --out-scores scores.csv
+python3 tools/guards.py --manifest guards-manifest.json --out guards.csv
+python3 tools/grade.py --manifest grade-manifest.json --out-grades grades.csv
+python3 tools/evaluate.py --spec experiments/rq0-gate.yaml --aggregates … --scores … --guards … --grades … --out-report report.json --out-render report.md
+```
+
+## What is frozen, and what changes how
+
+Three files are data the code obeys and never a constant in code: the scoring spec, the guard spec, and the per-experiment spec. The first two are frozen; the RQ0 gate spec pins their bytes by SHA-256 along with the prior driver table and the dataset build manifest, and the evaluator refuses to judge if any pin no longer matches. A change to a frozen file is an entry in `CHANGELOG.md` made before any run reads it, and a new pin. The reasons behind every number in the RQ0 gate spec are written in that file, beside the number.
+
+CI runs `make lint` and `make test` on every push (`.github/workflows/harness.yml`) and the smoke on `main`, on demand, and on pull requests that touch the harness, the dataset, or the driver table (`harness-smoke.yml`).
+
+## Where the definitions are
+
+- `docs/harness/metrics.md` — every primitive, aggregate, normalisation rule, floor, and constant, with its source.
+- `docs/data-contracts.md` — the input formats (§9 trace, §4 run file, §7 config schedule, §8 recognition log, §10 driver table) and the invocation contract (§11).
+- `_dev/docs/spec/jioh/` — the decision records behind each module, by sub-task.
+
+This tree is 인지오's.
