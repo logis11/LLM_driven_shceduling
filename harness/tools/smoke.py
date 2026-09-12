@@ -6,7 +6,10 @@ are, run through `run.py`'s path, and discarded.
     smoke.py [--machine harness/runner.example.yaml] [--files N] [--root REPO]
 
 `--files N` limits the judging set to the first N scored files (the test suite
-uses a handful; the make target runs them all). Exit codes as run.py's."""
+uses a handful; the make target runs them all). The smoke checks the plumbing,
+not the mocks' verdict, which is `invalid` by construction (c6-dual's oracle runs
+on fallback and the spec exempts nothing): exit 0 once a report was written,
+1 when a run failed or the spec was refused. The verdict is printed."""
 import argparse
 import pathlib
 import sys
@@ -36,7 +39,8 @@ def main():
     except (GateError, RunError, OSError, ValueError, KeyError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
-    return report_result(result)
+    code = report_result(result)
+    return 1 if code == 1 else 0            # a report was written: the plumbing held
 
 
 if __name__ == "__main__":

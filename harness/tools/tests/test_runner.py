@@ -212,7 +212,7 @@ def test_smoke_cli_generates_runs_and_discards_the_spec(tmp_path):
     machine_path.write_text(yaml.safe_dump(doc))
     proc = subprocess.run([sys.executable, str(TOOLS / "smoke.py"), "--machine", str(machine_path),
                            "--files", "1"], capture_output=True, text=True)
-    assert proc.returncode in (0, 2), proc.stderr
+    assert proc.returncode == 0, proc.stderr                  # the smoke's code is not the verdict's
     assert "verdict:" in proc.stdout
     assert not list((REPO / "harness" / "experiments").glob("*.yaml"))
     assert not list(tmp_path.glob("*.yaml")) or all(p.name == "machine.yaml" for p in tmp_path.glob("*.yaml"))
