@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "experiment-spec.schema.json",
   "title": "Per-experiment spec",
-  "description": "One experiment's pre-registered description (Phase 8 spec, decision 8; sub-task 8.7): a generic part every experiment needs — the conditions, the seed count, the boot defaults, the judging and reporting files, the Layer-1 exclusions derived from the pre_committed_miss annotation, the guard exemptions, the reporting lines, and the pins of the scoring spec, guard spec, driver table, and dataset — and a typed criterion section. The runner reads the generic part as its run matrix; the RQ0 gate evaluator reads the whole file. Every judgement the evaluator applies is data here, never a constant in code. The lint (tools/experiment_lint.py) checks what the schema cannot: files against the compiled build, judging files against the pinned scoring spec's terms, exemptions against the guard registry, pins against the files' bytes.",
+  "description": "One experiment's pre-registered description (Phase 8 spec, decision 8; sub-task 8.7): a generic part every experiment needs — the conditions, the seed count, the boot defaults, the judging and reporting files, the Layer-1 exclusions derived from the pre_committed_miss annotation, the guard exemptions, the reporting lines, and the pins of the scoring spec, guard spec, driver table, and dataset — and a typed criterion section. The runner reads the generic part as its run matrix; the RQ0 gate evaluator reads the whole file. Every judgement the evaluator applies is data here, never a constant in code. The lint (tools/experiment_lint.py) checks what the schema cannot: files against the compiled build, judging files against the pinned scoring spec's terms, exemptions against the guard registry, pins against the files' bytes. Added in 8.8: `statements` echoed verbatim into the report, per-point `reasons` on the sensitivity line, the `g_band` line, and the `seed_standard_error` line.",
   "type": "object",
   "additionalProperties": false,
   "required": ["experiment", "conditions", "seed_count", "boot_defaults", "files", "layer1_exclusions",
@@ -53,7 +53,15 @@
         "allOf": [
           {"if": {"properties": {"type": {"const": "sensitivity"}}},
            "then": {"additionalProperties": false, "required": ["type", "boot_defaults"],
-                    "properties": {"type": true, "boot_defaults": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/stem"}}}}},
+                    "properties": {"type": true, "boot_defaults": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/stem"}},
+                                   "reasons": {"type": "object", "propertyNames": {"$ref": "#/$defs/stem"}, "additionalProperties": {"type": "string", "minLength": 1},
+                                               "description": "one reason per boot default in the sweep, the primary included, keyed by stem (8.8)"}}}},
+          {"if": {"properties": {"type": {"const": "g_band"}}},
+           "then": {"additionalProperties": false, "required": ["type", "gaps"],
+                    "properties": {"type": true, "gaps": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+                                                          "description": "the verdict count recomputed under each gap threshold at scoring time (8.8)"}}}},
+          {"if": {"properties": {"type": {"const": "seed_standard_error"}}},
+           "then": {"additionalProperties": false, "properties": {"type": true}}},
           {"if": {"properties": {"type": {"const": "floor_band"}}},
            "then": {"additionalProperties": false, "required": ["type", "latency_floors_us"],
                     "properties": {"type": true, "latency_floors_us": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 0}}}}},
@@ -67,6 +75,12 @@
            "then": {"additionalProperties": false, "required": ["type", "workload", "text"],
                     "properties": {"type": true, "workload": {"$ref": "#/$defs/workload"}, "text": {"type": "string", "minLength": 1}}}}
         ]}},
+    "statements": {
+      "type": "array",
+      "description": "pre-registered statements the RQ0 gate evaluator copies into the report verbatim, in order: the grounding written beside each number, the failure procedure, the conditions under which the spec changes before a run (Phase 8 spec, decisions 16, 17, 20; sub-task 8.8)",
+      "items": {"type": "object", "additionalProperties": false, "required": ["id", "text"],
+                "properties": {"id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
+                               "text": {"type": "string", "minLength": 1}}}},
     "pins": {
       "type": "object", "additionalProperties": false,
       "required": ["scoring_spec", "guard_spec", "driver_table", "dataset"],

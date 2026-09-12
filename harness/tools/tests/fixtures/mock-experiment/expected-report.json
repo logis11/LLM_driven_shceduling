@@ -1,6 +1,6 @@
 {
  "experiment": "mock-experiment",
- "spec_sha256": "71736b06254587276332b1bbe63ee34ba11ab4e33ecdfdd628dbd8c8d1fac3a6",
+ "spec_sha256": "1b9669bbafb9b543866d49b5b5a5e8c675752a992843185f624c408d72f9dd05",
  "pins": {
   "scoring_spec": {
    "path": "harness/tools/tests/fixtures/mock-scores/scoring-spec.yaml",
@@ -899,26 +899,86 @@
    "invalidating": false
   }
  ],
+ "statements": [
+  {
+   "id": "fixture",
+   "text": "A pre-registered statement, echoed verbatim."
+  }
+ ],
  "lines": [
   {
    "type": "sensitivity",
    "boot_defaults": [
     "alt"
    ],
+   "reasons": {
+    "ostep": "the primary",
+    "alt": "the fixture's alternative"
+   },
    "rows": [
     {
      "boot_default": "",
      "met": 1,
      "judging": 1,
      "verdict": "pass",
-     "available": true
+     "available": true,
+     "reason": "the primary"
     },
     {
      "boot_default": "alt",
      "met": 1,
      "judging": 1,
      "verdict": "pass",
-     "available": true
+     "available": true,
+     "reason": "the fixture's alternative"
+    }
+   ]
+  },
+  {
+   "type": "g_band",
+   "gaps": [
+    "0.25",
+    "0.33",
+    "0.5",
+    "0.67"
+   ],
+   "rows": [
+    {
+     "g": "0.25",
+     "met": 1,
+     "judging": 1,
+     "verdict": "pass"
+    },
+    {
+     "g": "0.33",
+     "met": 1,
+     "judging": 1,
+     "verdict": "pass"
+    },
+    {
+     "g": "0.5",
+     "met": 1,
+     "judging": 1,
+     "verdict": "pass"
+    },
+    {
+     "g": "0.67",
+     "met": 0,
+     "judging": 1,
+     "verdict": "fail"
+    }
+   ]
+  },
+  {
+   "type": "seed_standard_error",
+   "rows": [
+    {
+     "workload_id": "mock-score",
+     "n_seeds": 2,
+     "compared_mean": "1.036346",
+     "standard_deviation": "0.852789",
+     "standard_error": "0.603013",
+     "standard_error_share": "0.241205"
     }
    ]
   },
