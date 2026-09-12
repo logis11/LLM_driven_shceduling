@@ -1129,7 +1129,7 @@ Phase 6 spec 세션(2026-09-08)에서 확정됐고, 15.2와 15.3은 그 결과�
 
 ### 15.1 어느 파일이 판정에 들어가나
 
-RQ0 gate("perfect recognition이 random보다 나은 headroom이 있나")의 judging set은 Phase 3에서는 **C2의 6개 파일**이었고, Phase 7(2026-09-10)에서 coreset이 바뀌면서 다시 정했어요. 규칙: **label이 다른 pair의 한쪽이고, 그 파일의 scored term이 row 차이를 설계상 감지하는 파일**. demand는 기준이 아니에요(Q8의 per-file admission test가 gate 자체의 per-file 기준이 됐어요). 그래서 27개: C2 6개 + batch C1 base 6개(wanted LOTTERY share를 random row가 빼앗음) + term이 있는 C7 counterpart 15개.
+RQ0 gate("perfect recognition이 random보다 나은 headroom이 있나")의 judging set은 Phase 3에서는 **C2의 6개 파일**이었고, Phase 7(2026-09-10)에서 coreset이 바뀌면서 다시 정했어요. 규칙: **label이 다른 pair의 한쪽이고, 그 파일의 scored term이 row 차이를 설계상 감지하는 파일**. demand는 기준이 아니에요(Q8의 per-file admission test가 gate 자체의 per-file 기준이 됐어요). 그래서 25개: C2 6개 + batch C1 base 6개(wanted LOTTERY share를 random row가 빼앗음) + term이 있는 C7 counterpart 13개. 2026-09-10 재정의 시점에는 C7이 15개여서 27개였는데, 2026-09-12 RQ0 gate spec이 `c7-meeting`·`c7-media`를 보고 전용으로 빼면서 25개가 됐어요(아래 표의 C7 줄). 규범은 `harness/experiments/rq0-gate.yaml`이에요.
 
 | 그룹 | 역할 |
 |---|---|

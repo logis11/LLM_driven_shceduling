@@ -1,5 +1,5 @@
 # Research Claims and Questions
-> Status: normative · Created 2026-08-23 · Updated 2026-08-27
+> Status: normative · Created 2026-08-23 · Updated 2026-09-12
 
 What this project asserts, what would falsify it, and what it does not claim.
 
@@ -39,7 +39,7 @@ The claim is not one proposition. It is six links, each failing independently.
   C2  some of those differences are invisible to behavioural
       observation
                                                   no model involved
-  C3  they are present in names and command lines
+  C3  they are present in the process names
                                                   no model involved
   ------------------------------------------------------------------
   C4  a language model can read them                        RQ1
@@ -113,7 +113,7 @@ the model; they eliminate the variance being measured.
 Runs before any prompt exists. Cheapest possible falsification of the whole
 premise.
 
-### RQ1 — Can a model read the situation from names and command lines?
+### RQ1 — Can a model read the situation from the process names?
 
 Layer 1: the proposal's system block against ground-truth labels, with no
 simulator involved, so scheduling heuristics cannot contaminate the result.
@@ -207,8 +207,8 @@ Three checks, all without a model, all before the matrix:
 The paper does not rest on the matrix. It rests on one pair.
 
 ```text
-  ML training run + editor      compile,     background wanted
-  file indexer + editor         interactive, background not wanted
+  ML training run + editor      ml-train,  background wanted
+  file indexer + editor         indexing,  background not wanted
 ```
 
 Both are one sustained CPU-bound process beside an editor. No behavioural
