@@ -40,3 +40,10 @@ One entry per decision applied to `dataset/archetypes.yaml` (and the registry li
 - `game-task-chain.params.chain_length`: value 16 unchanged; tag `lavd-ossna24` (no locator) → `lavd-ossna24:s12` ("There are 15-20 game-specific tasks, which takes 60-70% scheduling"). Label: design within a source range. `modeling_notes`: "15-20 frame-critical band" → the slide's own words; the wineserver member is stated to be outside the count (K2 C-lavd-11 WORDING-FIX and borderline OURS-UNDER-SOURCE-TAG).
 - No compiled value changes (manifest hashes move with the library hash only).
 - Alternative not taken: a per-instance uniform draw over 15–20.
+
+## D6 — `per_schedule_run` (2026-09-13)
+
+- `game-task-chain.params.per_schedule_run`: values unchanged (lognormal, anchors 260 / 1650 µs, per-task, `lavd-ossna24:s13`). Label fixed in `modeling_notes`: the anchors are the source's two named per-schedule runtimes (a coordination task, a work task) spanning its "a few 100s usec on average to a few msec maximum"; the statistic behind them is unlabelled on the slide; the slide's plot (one game, ~128 tasks, median ~0.04 ms) is a different population and is not used; the p05/p95 reading, the lognormal family and the one draw per member are ours; the per-member draw rests on "Task execution time is very stable and is predictable using its average" (K2 C-lavd-5 OURS-UNDER-SOURCE-TAG, C-lavd-6). The sampled logs' tens-of-µs game threads (S3-01, S3-02) are noted as not a source.
+- `docs/references.md` `lavd-ossna24` role line: "per-schedule runtimes ~260 µs–1.65 ms" → the slide's average/maximum wording with the two examples named; "70–75% wakeups" → "70–75% of scheduling events initiated by waiting syscalls" (K2 C-lavd-5, C-lavd-7 WORDING-FIX).
+- No compiled value changes.
+- Alternatives not taken: fit the slide-13 plot (median ~40 µs); anchor on the text's words alone.

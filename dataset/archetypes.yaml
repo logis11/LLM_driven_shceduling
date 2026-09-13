@@ -386,11 +386,20 @@ archetypes:
       constructor expands it into chain_length ordinary tasks with WAIT/WAKE
       channels wired input -> engine -> ... -> display; the linearization of
       the s16-s17 waker-waiter graph into a chain, and every field name, are
-      ours. per_schedule_run samples per-task because the source states
-      per-task runtime is stable (s13); anchors are the source's wineserver
-      ~260 us and worker ~1.65 ms endpoints, lognormal family by OQ-5
-      convention (the compiler derives median/sigma treating the anchors as
-      the p05/p95 span). chain_length 16 is a point chosen inside the
+      ours. per_schedule_run: the anchors are the source's two named
+      per-schedule runtimes, a coordination task (wineserver, 260 us) and a
+      work task (a task worker, 1.65 ms), spanning its stated "a few 100s
+      usec on average to a few msec maximum" (s13); the statistic behind the
+      two examples is not labelled on the slide, and the slide's plot of
+      per-task runtime averages (one game, ~128 tasks, median ~0.04 ms) is a
+      different population from the chain's most-scheduled tasks and is not
+      used. Reading the anchors as a p05/p95 span, the lognormal family
+      (OQ-5 convention; the compiler derives median/sigma from the span) and
+      the one draw per member are ours; the per-member draw rests on the
+      source's "Task execution time is very stable and is predictable using
+      its average" (s13). Sampled scheduler logs of four other games under
+      scx_lavd show game threads at tens of us per schedule (different
+      accounting; not a source here). chain_length 16 is a point chosen inside the
       source's "15-20 game-specific tasks" (s12) — design within a source
       range; the wineserver member is outside that count (the source files
       wine among the system tasks). The entry models the chain only: the source

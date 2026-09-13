@@ -167,7 +167,7 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 
 ### `lavd-ossna24`
 - cite: Min, C. (2024). "Optimizing Scheduler for Linux Gaming." Talk, Open Source Summit North America 2024, Seattle, 2024-04-17. Slides: static.sched.com/hosted_files/ossna2024/9b/scx-lavd-oss-na24.pdf; schedule page: ossna2024.sched.com/event/1aBOT (accessed 2026-08-26).
-- role: Role B — richest gaming numbers: ~300 tasks, ~90% long-lived, top 30–40 tasks = 95% of scheduling (15–20 take 60–70%), per-schedule runtimes ~260 µs–1.65 ms, 70–75% wakeups from waiting syscalls. Also the concentration statistics defending our single-lane scaling of `game-task-chain`. Talk slides — footnote tier despite carrying numbers; pair with `corbet-lwn24` for prose-citable coverage.
+- role: Role B — richest gaming numbers: ~300 tasks, ~90% long-lived, top 30–40 tasks = 95% of scheduling (15–20 take 60–70%), per-schedule runtimes "a few 100s usec on average to a few msec maximum" (named examples: wineserver 260 µs, a task worker 1.65 ms), 70–75% of scheduling events initiated by waiting syscalls. Also the concentration statistics defending our single-lane scaling of `game-task-chain`. Talk slides — footnote tier despite carrying numbers; pair with `corbet-lwn24` for prose-citable coverage.
 - status: verified (2026-08-26)
 
 ### `corbet-lwn24`
