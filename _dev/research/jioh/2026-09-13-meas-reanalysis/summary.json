@@ -1,0 +1,1301 @@
+{
+  "cli_repeats": {
+    "meas-cli-r1": {
+      "phase_rc": {
+        "idle-baseline": 0,
+        "network-bulk": 0,
+        "download-verify": 0,
+        "untar": 0,
+        "kernel-defconfig": 0,
+        "kernel-build-j8": 0,
+        "archive-tar-xz": 0,
+        "rsync-copy": 0,
+        "updatedb": 0,
+        "locate-query": 1,
+        "freshclam": 2,
+        "clamscan": 0,
+        "drop-1": 0,
+        "tar-read-cold": 0,
+        "drop-2": 0,
+        "rsync-copy-cold": 0,
+        "drop-3": 0,
+        "clamscan-cold": 0,
+        "drop-4": 0,
+        "updatedb-cold": 0,
+        "kernel-clean": 0,
+        "drop-5": 0,
+        "kernel-build-cold": 0,
+        "drop-6": 0,
+        "tracker-daemon": 0
+      },
+      "phase_wall_us": {
+        "idle-baseline": 60003023,
+        "network-bulk": 701263,
+        "download-verify": 7744610,
+        "untar": 8970287,
+        "kernel-defconfig": 6475110,
+        "kernel-build-j8": 498845693,
+        "archive-tar-xz": 208344404,
+        "rsync-copy": 7697178,
+        "updatedb": 2508380,
+        "locate-query": 10076,
+        "freshclam": 19133,
+        "clamscan": 90834648,
+        "drop-1": 2696390,
+        "tar-read-cold": 1486224,
+        "drop-2": 301176,
+        "rsync-copy-cold": 16984957,
+        "drop-3": 1178593,
+        "clamscan-cold": 100148538,
+        "drop-4": 342804,
+        "updatedb-cold": 19812352,
+        "kernel-clean": 4907396,
+        "drop-5": 546924,
+        "kernel-build-cold": 504088872,
+        "drop-6": 321125,
+        "tracker-daemon": 301526906
+      },
+      "compiler_lifetime": {
+        "n": 2973,
+        "median_us": 840515,
+        "sigma_log": 1.146,
+        "p90_us": 2187000
+      },
+      "compiler_children": 2973,
+      "compiler_cpu_mean_us": 358103,
+      "compiler_life_mean_us": 1225528,
+      "compiler_peak_concurrent": 8,
+      "compiler_family_exits": 11913,
+      "compiler_family_peak_concurrent": 16,
+      "make_children": 5951,
+      "make_dispatch_us": 474,
+      "fork_rate_hz": 11.9,
+      "compiler_cold_lifetime": {
+        "n": 2957,
+        "median_us": 872707,
+        "sigma_log": 1.067,
+        "p90_us": 2200000
+      },
+      "compiler_cold_children": 2957,
+      "compiler_cold_cpu_mean_us": 364403,
+      "compiler_cold_life_mean_us": 1242026,
+      "compiler_cold_peak_concurrent": 8,
+      "compiler_cold_family_exits": 11863,
+      "compiler_cold_family_peak_concurrent": 16,
+      "rsync_duty": 1.316,
+      "rsync_proc_duty": 0.307,
+      "untar_duty": 1.346,
+      "untar_proc_duty": 0.754,
+      "clamscan_duty": 0.99,
+      "clamscan_proc_duty": 1.0,
+      "updatedb_duty": 0.785,
+      "updatedb_proc_duty": null,
+      "wget_duty": 0.314,
+      "wget_proc_duty": null,
+      "tar_cold_duty": 0.404,
+      "tar_cold_proc_duty": null,
+      "rsync_cold_duty": 0.737,
+      "rsync_cold_proc_duty": 0.256,
+      "clamscan_cold_duty": 0.973,
+      "clamscan_cold_proc_duty": 0.984,
+      "updatedb_cold_duty": 0.206,
+      "updatedb_cold_proc_duty": 0.215,
+      "tracker_wakes": [
+        {
+          "comm": "tracker-miner-f",
+          "wakes": 55,
+          "gap_us": 5436363.636363637,
+          "work_us": 545.4545454545455
+        }
+      ]
+    },
+    "meas-cli-r2": {
+      "phase_rc": {
+        "idle-baseline": 0,
+        "network-bulk": 0,
+        "download-verify": 0,
+        "untar": 0,
+        "kernel-defconfig": 0,
+        "kernel-build-j8": 0,
+        "archive-tar-xz": 0,
+        "rsync-copy": 0,
+        "updatedb": 0,
+        "locate-query": 1,
+        "freshclam": 2,
+        "clamscan": 0,
+        "drop-1": 0,
+        "tar-read-cold": 0,
+        "drop-2": 0,
+        "rsync-copy-cold": 0,
+        "drop-3": 0,
+        "clamscan-cold": 0,
+        "drop-4": 0,
+        "updatedb-cold": 0,
+        "kernel-clean": 0,
+        "drop-5": 0,
+        "kernel-build-cold": 0,
+        "drop-6": 0,
+        "tracker-daemon": 0
+      },
+      "phase_wall_us": {
+        "idle-baseline": 60002961,
+        "network-bulk": 560805,
+        "download-verify": 7692337,
+        "untar": 8868374,
+        "kernel-defconfig": 6299416,
+        "kernel-build-j8": 486155879,
+        "archive-tar-xz": 199139908,
+        "rsync-copy": 7966004,
+        "updatedb": 2437301,
+        "locate-query": 9834,
+        "freshclam": 18301,
+        "clamscan": 88284222,
+        "drop-1": 2574965,
+        "tar-read-cold": 1476152,
+        "drop-2": 264521,
+        "rsync-copy-cold": 17169384,
+        "drop-3": 1031719,
+        "clamscan-cold": 91288172,
+        "drop-4": 332162,
+        "updatedb-cold": 16816867,
+        "kernel-clean": 4852259,
+        "drop-5": 495499,
+        "kernel-build-cold": 486485300,
+        "drop-6": 287503,
+        "tracker-daemon": 301446424
+      },
+      "compiler_lifetime": {
+        "n": 2964,
+        "median_us": 830182,
+        "sigma_log": 1.106,
+        "p90_us": 2180000
+      },
+      "compiler_children": 2964,
+      "compiler_cpu_mean_us": 343758,
+      "compiler_life_mean_us": 1197004,
+      "compiler_peak_concurrent": 8,
+      "compiler_family_exits": 11883,
+      "compiler_family_peak_concurrent": 16,
+      "make_children": 5948,
+      "make_dispatch_us": 467,
+      "fork_rate_hz": 12.2,
+      "compiler_cold_lifetime": {
+        "n": 2946,
+        "median_us": 854755,
+        "sigma_log": 1.032,
+        "p90_us": 2172000
+      },
+      "compiler_cold_children": 2946,
+      "compiler_cold_cpu_mean_us": 344464,
+      "compiler_cold_life_mean_us": 1202945,
+      "compiler_cold_peak_concurrent": 8,
+      "compiler_cold_family_exits": 11829,
+      "compiler_cold_family_peak_concurrent": 16,
+      "rsync_duty": 1.188,
+      "rsync_proc_duty": 0.269,
+      "untar_duty": 1.36,
+      "untar_proc_duty": 0.67,
+      "clamscan_duty": 0.991,
+      "clamscan_proc_duty": 0.994,
+      "updatedb_duty": 0.812,
+      "updatedb_proc_duty": null,
+      "wget_duty": 0.571,
+      "wget_proc_duty": null,
+      "tar_cold_duty": 0.386,
+      "tar_cold_proc_duty": null,
+      "rsync_cold_duty": 0.722,
+      "rsync_cold_proc_duty": 0.267,
+      "clamscan_cold_duty": 0.973,
+      "clamscan_cold_proc_duty": 0.976,
+      "updatedb_cold_duty": 0.225,
+      "updatedb_cold_proc_duty": 0.237,
+      "tracker_wakes": [
+        {
+          "comm": "tracker-miner-f",
+          "wakes": 125,
+          "gap_us": 2400000.0,
+          "work_us": 1760.0
+        }
+      ]
+    },
+    "meas-cli-r3": {
+      "phase_rc": {
+        "idle-baseline": 0,
+        "network-bulk": 0,
+        "download-verify": 0,
+        "untar": 0,
+        "kernel-defconfig": 0,
+        "kernel-build-j8": 0,
+        "archive-tar-xz": 0,
+        "rsync-copy": 0,
+        "updatedb": 0,
+        "locate-query": 1,
+        "freshclam": 2,
+        "clamscan": 0,
+        "drop-1": 0,
+        "tar-read-cold": 0,
+        "drop-2": 0,
+        "rsync-copy-cold": 0,
+        "drop-3": 0,
+        "clamscan-cold": 0,
+        "drop-4": 0,
+        "updatedb-cold": 0,
+        "kernel-clean": 0,
+        "drop-5": 0,
+        "kernel-build-cold": 0,
+        "drop-6": 0,
+        "tracker-daemon": 0
+      },
+      "phase_wall_us": {
+        "idle-baseline": 60002454,
+        "network-bulk": 2928154,
+        "download-verify": 6017109,
+        "untar": 7161890,
+        "kernel-defconfig": 4993979,
+        "kernel-build-j8": 399383947,
+        "archive-tar-xz": 169480605,
+        "rsync-copy": 6180593,
+        "updatedb": 2001229,
+        "locate-query": 7093,
+        "freshclam": 15051,
+        "clamscan": 70549674,
+        "drop-1": 2158442,
+        "tar-read-cold": 1505276,
+        "drop-2": 249094,
+        "rsync-copy-cold": 20153815,
+        "drop-3": 891305,
+        "clamscan-cold": 78515005,
+        "drop-4": 368928,
+        "updatedb-cold": 20090161,
+        "kernel-clean": 5448471,
+        "drop-5": 441951,
+        "kernel-build-cold": 386246456,
+        "drop-6": 234380,
+        "tracker-daemon": 301503065
+      },
+      "compiler_lifetime": {
+        "n": 2976,
+        "median_us": 674901,
+        "sigma_log": 1.11,
+        "p90_us": 1723000
+      },
+      "compiler_children": 2976,
+      "compiler_cpu_mean_us": 244842,
+      "compiler_life_mean_us": 979110,
+      "compiler_peak_concurrent": 8,
+      "compiler_family_exits": 11914,
+      "compiler_family_peak_concurrent": 16,
+      "make_children": 5944,
+      "make_dispatch_us": 370,
+      "fork_rate_hz": 14.9,
+      "compiler_cold_lifetime": {
+        "n": 2949,
+        "median_us": 673556,
+        "sigma_log": 1.042,
+        "p90_us": 1723000
+      },
+      "compiler_cold_children": 2949,
+      "compiler_cold_cpu_mean_us": 231865,
+      "compiler_cold_life_mean_us": 952855,
+      "compiler_cold_peak_concurrent": 8,
+      "compiler_cold_family_exits": 11837,
+      "compiler_cold_family_peak_concurrent": 16,
+      "rsync_duty": 1.244,
+      "rsync_proc_duty": 0.277,
+      "untar_duty": 1.325,
+      "untar_proc_duty": 0.678,
+      "clamscan_duty": 0.991,
+      "clamscan_proc_duty": 0.999,
+      "updatedb_duty": 0.74,
+      "updatedb_proc_duty": null,
+      "wget_duty": 0.014,
+      "wget_proc_duty": 0.013,
+      "tar_cold_duty": 0.312,
+      "tar_cold_proc_duty": null,
+      "rsync_cold_duty": 0.46,
+      "rsync_cold_proc_duty": 0.155,
+      "clamscan_cold_duty": 0.913,
+      "clamscan_cold_proc_duty": 0.919,
+      "updatedb_cold_duty": 0.147,
+      "updatedb_cold_proc_duty": 0.147,
+      "tracker_wakes": [
+        {
+          "comm": "tracker-miner-f",
+          "wakes": 58,
+          "gap_us": 5172413.793103448,
+          "work_us": 1896.551724137931
+        }
+      ]
+    },
+    "meas-cli-r4": {
+      "phase_rc": {
+        "idle-baseline": 0,
+        "network-bulk": 0,
+        "download-verify": 0,
+        "untar": 0,
+        "kernel-defconfig": 0,
+        "kernel-build-j8": 0,
+        "archive-tar-xz": 0,
+        "rsync-copy": 0,
+        "updatedb": 0,
+        "locate-query": 1,
+        "freshclam": 2,
+        "clamscan": 0,
+        "drop-1": 0,
+        "tar-read-cold": 0,
+        "drop-2": 0,
+        "rsync-copy-cold": 0,
+        "drop-3": 0,
+        "clamscan-cold": 0,
+        "drop-4": 0,
+        "updatedb-cold": 0,
+        "kernel-clean": 0,
+        "drop-5": 0,
+        "kernel-build-cold": 0,
+        "drop-6": 0,
+        "tracker-daemon": 0
+      },
+      "phase_wall_us": {
+        "idle-baseline": 60002898,
+        "network-bulk": 1464495,
+        "download-verify": 7668750,
+        "untar": 8545788,
+        "kernel-defconfig": 4915517,
+        "kernel-build-j8": 523666352,
+        "archive-tar-xz": 193798533,
+        "rsync-copy": 8180339,
+        "updatedb": 2345198,
+        "locate-query": 9554,
+        "freshclam": 17532,
+        "clamscan": 90577011,
+        "drop-1": 2609215,
+        "tar-read-cold": 1736800,
+        "drop-2": 274642,
+        "rsync-copy-cold": 23914208,
+        "drop-3": 1057627,
+        "clamscan-cold": 89863616,
+        "drop-4": 324708,
+        "updatedb-cold": 17953815,
+        "kernel-clean": 5022052,
+        "drop-5": 472268,
+        "kernel-build-cold": 525164827,
+        "drop-6": 287748,
+        "tracker-daemon": 302113961
+      },
+      "compiler_lifetime": {
+        "n": 2948,
+        "median_us": 928511,
+        "sigma_log": 1.056,
+        "p90_us": 2336000
+      },
+      "compiler_children": 2948,
+      "compiler_cpu_mean_us": 388945,
+      "compiler_life_mean_us": 1307307,
+      "compiler_peak_concurrent": 8,
+      "compiler_family_exits": 11835,
+      "compiler_family_peak_concurrent": 16,
+      "make_children": 5945,
+      "make_dispatch_us": 528,
+      "fork_rate_hz": 11.4,
+      "compiler_cold_lifetime": {
+        "n": 2951,
+        "median_us": 928843,
+        "sigma_log": 1.053,
+        "p90_us": 2342000
+      },
+      "compiler_cold_children": 2951,
+      "compiler_cold_cpu_mean_us": 389072,
+      "compiler_cold_life_mean_us": 1307464,
+      "compiler_cold_peak_concurrent": 8,
+      "compiler_cold_family_exits": 11838,
+      "compiler_cold_family_peak_concurrent": 16,
+      "rsync_duty": 1.309,
+      "rsync_proc_duty": 0.276,
+      "untar_duty": 1.439,
+      "untar_proc_duty": 0.738,
+      "clamscan_duty": 0.999,
+      "clamscan_proc_duty": 1.006,
+      "updatedb_duty": 0.627,
+      "updatedb_proc_duty": null,
+      "wget_duty": 0.184,
+      "wget_proc_duty": null,
+      "tar_cold_duty": 0.305,
+      "tar_cold_proc_duty": null,
+      "rsync_cold_duty": 0.603,
+      "rsync_cold_proc_duty": 0.215,
+      "clamscan_cold_duty": 0.967,
+      "clamscan_cold_proc_duty": 0.976,
+      "updatedb_cold_duty": 0.245,
+      "updatedb_cold_proc_duty": 0.244,
+      "tracker_wakes": [
+        {
+          "comm": "tracker-miner-f",
+          "wakes": 60,
+          "gap_us": 4983333.333333333,
+          "work_us": 3000.0
+        }
+      ]
+    },
+    "meas-cli-r5": {
+      "phase_rc": {
+        "idle-baseline": 0,
+        "network-bulk": 0,
+        "download-verify": 0,
+        "untar": 0,
+        "kernel-defconfig": 0,
+        "kernel-build-j8": 0,
+        "archive-tar-xz": 0,
+        "rsync-copy": 0,
+        "updatedb": 0,
+        "locate-query": 1,
+        "freshclam": 2,
+        "clamscan": 0,
+        "drop-1": 0,
+        "tar-read-cold": 0,
+        "drop-2": 0,
+        "rsync-copy-cold": 0,
+        "drop-3": 0,
+        "clamscan-cold": 0,
+        "drop-4": 0,
+        "updatedb-cold": 0,
+        "kernel-clean": 0,
+        "drop-5": 0,
+        "kernel-build-cold": 0,
+        "drop-6": 0,
+        "tracker-daemon": 0
+      },
+      "phase_wall_us": {
+        "idle-baseline": 60002818,
+        "network-bulk": 4737501,
+        "download-verify": 7665663,
+        "untar": 8793441,
+        "kernel-defconfig": 13402314,
+        "kernel-build-j8": 527648674,
+        "archive-tar-xz": 196849525,
+        "rsync-copy": 8621772,
+        "updatedb": 2377780,
+        "locate-query": 9502,
+        "freshclam": 17294,
+        "clamscan": 89431763,
+        "drop-1": 2499030,
+        "tar-read-cold": 1682720,
+        "drop-2": 266047,
+        "rsync-copy-cold": 23102975,
+        "drop-3": 1088954,
+        "clamscan-cold": 93524644,
+        "drop-4": 337404,
+        "updatedb-cold": 21482346,
+        "kernel-clean": 5089465,
+        "drop-5": 500000,
+        "kernel-build-cold": 526674788,
+        "drop-6": 287698,
+        "tracker-daemon": 302105562
+      },
+      "compiler_lifetime": {
+        "n": 2957,
+        "median_us": 925548,
+        "sigma_log": 1.077,
+        "p90_us": 2361000
+      },
+      "compiler_children": 2957,
+      "compiler_cpu_mean_us": 394244,
+      "compiler_life_mean_us": 1313751,
+      "compiler_peak_concurrent": 8,
+      "compiler_family_exits": 11861,
+      "compiler_family_peak_concurrent": 16,
+      "make_children": 5947,
+      "make_dispatch_us": 520,
+      "fork_rate_hz": 11.3,
+      "compiler_cold_lifetime": {
+        "n": 2954,
+        "median_us": 922768,
+        "sigma_log": 1.071,
+        "p90_us": 2396000
+      },
+      "compiler_cold_children": 2954,
+      "compiler_cold_cpu_mean_us": 393846,
+      "compiler_cold_life_mean_us": 1309474,
+      "compiler_cold_peak_concurrent": 8,
+      "compiler_cold_family_exits": 11850,
+      "compiler_cold_family_peak_concurrent": 16,
+      "rsync_duty": 1.181,
+      "rsync_proc_duty": 0.264,
+      "untar_duty": 1.4,
+      "untar_proc_duty": 0.684,
+      "clamscan_duty": 0.989,
+      "clamscan_proc_duty": 0.994,
+      "updatedb_duty": 0.833,
+      "updatedb_proc_duty": null,
+      "wget_duty": 0.084,
+      "wget_proc_duty": 0.1,
+      "tar_cold_duty": 0.481,
+      "tar_cold_proc_duty": null,
+      "rsync_cold_duty": 0.625,
+      "rsync_cold_proc_duty": 0.231,
+      "clamscan_cold_duty": 0.967,
+      "clamscan_cold_proc_duty": 0.973,
+      "updatedb_cold_duty": 0.201,
+      "updatedb_cold_proc_duty": 0.206,
+      "tracker_wakes": [
+        {
+          "comm": "tracker-miner-f",
+          "wakes": 127,
+          "gap_us": 2362204.724409449,
+          "work_us": 1968.5039370078741
+        }
+      ]
+    }
+  },
+  "gui_repeats": {
+    "meas-gui-r1": {
+      "phase_rc": {
+        "chromium-10-tabs": 0,
+        "element-idle": 0
+      },
+      "chromium_peak_procs": 21,
+      "chromium_wakes": [],
+      "element_wakes": [
+        {
+          "comm": "element-desktop",
+          "wakes": 1400,
+          "gap_us": 430714.28571428574,
+          "work_us": 821.4285714285714
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 156,
+          "gap_us": 3858974.358974359,
+          "work_us": 192.30769230769232
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 154,
+          "gap_us": 3909090.909090909,
+          "work_us": 194.80519480519482
+        }
+      ],
+      "daemon_wakes": [
+        {
+          "comm": "systemd",
+          "wakes": 113,
+          "gap_us": 5336283.185840708,
+          "work_us": 265.4867256637168
+        },
+        {
+          "comm": "systemd-journal",
+          "wakes": 30,
+          "gap_us": 20100000.0,
+          "work_us": 333.3333333333333
+        },
+        {
+          "comm": "multipathd",
+          "wakes": 603,
+          "gap_us": 1000000.0,
+          "work_us": 66.33499170812604
+        },
+        {
+          "comm": "systemd-udevd",
+          "wakes": 5,
+          "gap_us": 120600000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "systemd-resolve",
+          "wakes": 30,
+          "gap_us": 20100000.0,
+          "work_us": 333.3333333333333
+        },
+        {
+          "comm": "systemd-network",
+          "wakes": 6,
+          "gap_us": 100500000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "dbus-daemon",
+          "wakes": 81,
+          "gap_us": 7444444.444444444,
+          "work_us": 123.45679012345678
+        },
+        {
+          "comm": "systemd-logind",
+          "wakes": 83,
+          "gap_us": 7265060.240963856,
+          "work_us": 0.0
+        },
+        {
+          "comm": "cron",
+          "wakes": 13,
+          "gap_us": 46384615.384615384,
+          "work_us": 0.0
+        },
+        {
+          "comm": "chronyd",
+          "wakes": 2430,
+          "gap_us": 248148.14814814815,
+          "work_us": 78.18930041152264
+        }
+      ]
+    },
+    "meas-gui-r2": {
+      "phase_rc": {
+        "chromium-10-tabs": 0,
+        "element-idle": 0
+      },
+      "chromium_peak_procs": 22,
+      "chromium_wakes": [
+        {
+          "comm": "chrome",
+          "wakes": 531,
+          "gap_us": 566854.9905838041,
+          "work_us": 1619.5856873822975
+        }
+      ],
+      "element_wakes": [
+        {
+          "comm": "element-desktop",
+          "wakes": 1424,
+          "gap_us": 423455.0561797753,
+          "work_us": 856.7415730337078
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 154,
+          "gap_us": 3863636.3636363638,
+          "work_us": 194.80519480519482
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 152,
+          "gap_us": 3914473.6842105263,
+          "work_us": 131.57894736842104
+        }
+      ],
+      "daemon_wakes": [
+        {
+          "comm": "systemd",
+          "wakes": 107,
+          "gap_us": 5635514.018691589,
+          "work_us": 280.3738317757009
+        },
+        {
+          "comm": "systemd-journal",
+          "wakes": 26,
+          "gap_us": 23192307.692307692,
+          "work_us": 0.0
+        },
+        {
+          "comm": "multipathd",
+          "wakes": 603,
+          "gap_us": 1000000.0,
+          "work_us": 49.75124378109453
+        },
+        {
+          "comm": "systemd-udevd",
+          "wakes": 5,
+          "gap_us": 120600000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "systemd-resolve",
+          "wakes": 39,
+          "gap_us": 15461538.461538462,
+          "work_us": 256.4102564102564
+        },
+        {
+          "comm": "systemd-network",
+          "wakes": 6,
+          "gap_us": 100500000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "dbus-daemon",
+          "wakes": 78,
+          "gap_us": 7730769.230769231,
+          "work_us": 128.2051282051282
+        },
+        {
+          "comm": "systemd-logind",
+          "wakes": 79,
+          "gap_us": 7632911.392405063,
+          "work_us": 0.0
+        },
+        {
+          "comm": "cron",
+          "wakes": 11,
+          "gap_us": 54818181.81818182,
+          "work_us": 0.0
+        },
+        {
+          "comm": "chronyd",
+          "wakes": 2430,
+          "gap_us": 248148.14814814815,
+          "work_us": 61.72839506172839
+        }
+      ]
+    },
+    "meas-gui-r3": {
+      "phase_rc": {
+        "chromium-10-tabs": 0,
+        "element-idle": 0
+      },
+      "chromium_peak_procs": 22,
+      "chromium_wakes": [
+        {
+          "comm": "chrome",
+          "wakes": 27,
+          "gap_us": 11111111.111111112,
+          "work_us": 0.0
+        }
+      ],
+      "element_wakes": [
+        {
+          "comm": "element-desktop",
+          "wakes": 1502,
+          "gap_us": 400798.9347536618,
+          "work_us": 825.565912117177
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 154,
+          "gap_us": 3883116.883116883,
+          "work_us": 194.80519480519482
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 154,
+          "gap_us": 3883116.883116883,
+          "work_us": 194.80519480519482
+        }
+      ],
+      "daemon_wakes": [
+        {
+          "comm": "systemd",
+          "wakes": 111,
+          "gap_us": 5441441.441441442,
+          "work_us": 270.27027027027026
+        },
+        {
+          "comm": "systemd-journal",
+          "wakes": 25,
+          "gap_us": 24160000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "multipathd",
+          "wakes": 604,
+          "gap_us": 1000000.0,
+          "work_us": 82.78145695364239
+        },
+        {
+          "comm": "systemd-udevd",
+          "wakes": 5,
+          "gap_us": 120800000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "systemd-resolve",
+          "wakes": 26,
+          "gap_us": 23230769.230769232,
+          "work_us": 384.61538461538464
+        },
+        {
+          "comm": "systemd-network",
+          "wakes": 6,
+          "gap_us": 100666666.66666667,
+          "work_us": 0.0
+        },
+        {
+          "comm": "dbus-daemon",
+          "wakes": 82,
+          "gap_us": 7365853.658536585,
+          "work_us": 243.90243902439025
+        },
+        {
+          "comm": "systemd-logind",
+          "wakes": 90,
+          "gap_us": 6711111.111111111,
+          "work_us": 111.11111111111111
+        },
+        {
+          "comm": "cron",
+          "wakes": 11,
+          "gap_us": 54909090.90909091,
+          "work_us": 0.0
+        },
+        {
+          "comm": "chronyd",
+          "wakes": 2432,
+          "gap_us": 248355.26315789475,
+          "work_us": 82.23684210526316
+        }
+      ]
+    },
+    "meas-gui-r4": {
+      "phase_rc": {
+        "chromium-10-tabs": 0,
+        "element-idle": 0
+      },
+      "chromium_peak_procs": 22,
+      "chromium_wakes": [
+        {
+          "comm": "chrome",
+          "wakes": 219,
+          "gap_us": 1374429.2237442923,
+          "work_us": 867.5799086757991
+        }
+      ],
+      "element_wakes": [
+        {
+          "comm": "element-desktop",
+          "wakes": 1431,
+          "gap_us": 421383.6477987421,
+          "work_us": 531.0971348707197
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 156,
+          "gap_us": 3839743.5897435895,
+          "work_us": 128.2051282051282
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 153,
+          "gap_us": 3915032.679738562,
+          "work_us": 196.07843137254903
+        }
+      ],
+      "daemon_wakes": [
+        {
+          "comm": "systemd",
+          "wakes": 107,
+          "gap_us": 5635514.018691589,
+          "work_us": 280.3738317757009
+        },
+        {
+          "comm": "systemd-journal",
+          "wakes": 25,
+          "gap_us": 24120000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "multipathd",
+          "wakes": 604,
+          "gap_us": 998344.3708609272,
+          "work_us": 49.66887417218543
+        },
+        {
+          "comm": "systemd-udevd",
+          "wakes": 5,
+          "gap_us": 120600000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "systemd-resolve",
+          "wakes": 32,
+          "gap_us": 18843750.0,
+          "work_us": 312.5
+        },
+        {
+          "comm": "systemd-network",
+          "wakes": 6,
+          "gap_us": 100500000.0,
+          "work_us": 1666.6666666666667
+        },
+        {
+          "comm": "dbus-daemon",
+          "wakes": 82,
+          "gap_us": 7353658.536585365,
+          "work_us": 121.95121951219512
+        },
+        {
+          "comm": "systemd-logind",
+          "wakes": 71,
+          "gap_us": 8492957.746478872,
+          "work_us": 140.8450704225352
+        },
+        {
+          "comm": "udisksd",
+          "wakes": 5,
+          "gap_us": 120600000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "cron",
+          "wakes": 11,
+          "gap_us": 54818181.81818182,
+          "work_us": 0.0
+        },
+        {
+          "comm": "chronyd",
+          "wakes": 2419,
+          "gap_us": 249276.5605622158,
+          "work_us": 49.60727573377429
+        }
+      ]
+    },
+    "meas-gui-r5": {
+      "phase_rc": {
+        "chromium-10-tabs": 0,
+        "element-idle": 0
+      },
+      "chromium_peak_procs": 22,
+      "chromium_wakes": [],
+      "element_wakes": [
+        {
+          "comm": "element-desktop",
+          "wakes": 1448,
+          "gap_us": 416436.4640883978,
+          "work_us": 732.0441988950276
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 152,
+          "gap_us": 3907894.736842105,
+          "work_us": 197.3684210526316
+        },
+        {
+          "comm": "element-desktop",
+          "wakes": 153,
+          "gap_us": 3882352.9411764704,
+          "work_us": 196.07843137254903
+        }
+      ],
+      "daemon_wakes": [
+        {
+          "comm": "systemd",
+          "wakes": 112,
+          "gap_us": 5383928.571428572,
+          "work_us": 267.85714285714283
+        },
+        {
+          "comm": "systemd-journal",
+          "wakes": 29,
+          "gap_us": 20793103.44827586,
+          "work_us": 0.0
+        },
+        {
+          "comm": "multipathd",
+          "wakes": 604,
+          "gap_us": 998344.3708609272,
+          "work_us": 82.78145695364239
+        },
+        {
+          "comm": "systemd-udevd",
+          "wakes": 5,
+          "gap_us": 120600000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "systemd-resolve",
+          "wakes": 40,
+          "gap_us": 15075000.0,
+          "work_us": 250.0
+        },
+        {
+          "comm": "systemd-network",
+          "wakes": 5,
+          "gap_us": 120600000.0,
+          "work_us": 0.0
+        },
+        {
+          "comm": "dbus-daemon",
+          "wakes": 80,
+          "gap_us": 7537500.0,
+          "work_us": 125.0
+        },
+        {
+          "comm": "systemd-logind",
+          "wakes": 85,
+          "gap_us": 7094117.647058823,
+          "work_us": 0.0
+        },
+        {
+          "comm": "cron",
+          "wakes": 13,
+          "gap_us": 46384615.384615384,
+          "work_us": 0.0
+        },
+        {
+          "comm": "chronyd",
+          "wakes": 2422,
+          "gap_us": 248967.79521056978,
+          "work_us": 78.44756399669694
+        }
+      ]
+    }
+  },
+  "across_repeats": {
+    "compiler_lifetime_median_us": {
+      "n_repeats": 5,
+      "median": 840515,
+      "min": 674901,
+      "max": 928511
+    },
+    "compiler_lifetime_sigma_log": {
+      "n_repeats": 5,
+      "median": 1.106,
+      "min": 1.056,
+      "max": 1.146
+    },
+    "compiler_children": {
+      "n_repeats": 5,
+      "median": 2964,
+      "min": 2948,
+      "max": 2976
+    },
+    "compiler_cpu_mean_us": {
+      "n_repeats": 5,
+      "median": 358103,
+      "min": 244842,
+      "max": 394244
+    },
+    "compiler_life_mean_us": {
+      "n_repeats": 5,
+      "median": 1225528,
+      "min": 979110,
+      "max": 1313751
+    },
+    "compiler_family_exits": {
+      "n_repeats": 5,
+      "median": 11883,
+      "min": 11835,
+      "max": 11914
+    },
+    "compiler_family_peak_concurrent": {
+      "n_repeats": 5,
+      "median": 16,
+      "min": 16,
+      "max": 16
+    },
+    "compiler_cold_lifetime_median_us": {
+      "n_repeats": 5,
+      "median": 872707,
+      "min": 673556,
+      "max": 928843
+    },
+    "compiler_cold_lifetime_sigma_log": {
+      "n_repeats": 5,
+      "median": 1.053,
+      "min": 1.032,
+      "max": 1.071
+    },
+    "compiler_cold_children": {
+      "n_repeats": 5,
+      "median": 2951,
+      "min": 2946,
+      "max": 2957
+    },
+    "compiler_cold_cpu_mean_us": {
+      "n_repeats": 5,
+      "median": 364403,
+      "min": 231865,
+      "max": 393846
+    },
+    "compiler_cold_life_mean_us": {
+      "n_repeats": 5,
+      "median": 1242026,
+      "min": 952855,
+      "max": 1309474
+    },
+    "compiler_cold_family_exits": {
+      "n_repeats": 5,
+      "median": 11838,
+      "min": 11829,
+      "max": 11863
+    },
+    "compiler_cold_family_peak_concurrent": {
+      "n_repeats": 5,
+      "median": 16,
+      "min": 16,
+      "max": 16
+    },
+    "make_children": {
+      "n_repeats": 5,
+      "median": 5947,
+      "min": 5944,
+      "max": 5951
+    },
+    "make_dispatch_us": {
+      "n_repeats": 5,
+      "median": 474,
+      "min": 370,
+      "max": 528
+    },
+    "fork_rate_hz": {
+      "n_repeats": 5,
+      "median": 11.9,
+      "min": 11.3,
+      "max": 14.9
+    },
+    "rsync_duty": {
+      "n_repeats": 5,
+      "median": 1.244,
+      "min": 1.181,
+      "max": 1.316
+    },
+    "rsync_proc_duty": {
+      "n_repeats": 5,
+      "median": 0.276,
+      "min": 0.264,
+      "max": 0.307
+    },
+    "untar_duty": {
+      "n_repeats": 5,
+      "median": 1.36,
+      "min": 1.325,
+      "max": 1.439
+    },
+    "untar_proc_duty": {
+      "n_repeats": 5,
+      "median": 0.684,
+      "min": 0.67,
+      "max": 0.754
+    },
+    "clamscan_duty": {
+      "n_repeats": 5,
+      "median": 0.991,
+      "min": 0.989,
+      "max": 0.999
+    },
+    "clamscan_proc_duty": {
+      "n_repeats": 5,
+      "median": 0.999,
+      "min": 0.994,
+      "max": 1.006
+    },
+    "updatedb_duty": {
+      "n_repeats": 5,
+      "median": 0.785,
+      "min": 0.627,
+      "max": 0.833
+    },
+    "updatedb_proc_duty": null,
+    "wget_duty": {
+      "n_repeats": 5,
+      "median": 0.184,
+      "min": 0.014,
+      "max": 0.571
+    },
+    "wget_proc_duty": {
+      "n_repeats": 2,
+      "median": 0.0565,
+      "min": 0.013,
+      "max": 0.1
+    },
+    "tar_cold_duty": {
+      "n_repeats": 5,
+      "median": 0.386,
+      "min": 0.305,
+      "max": 0.481
+    },
+    "tar_cold_proc_duty": null,
+    "rsync_cold_duty": {
+      "n_repeats": 5,
+      "median": 0.625,
+      "min": 0.46,
+      "max": 0.737
+    },
+    "rsync_cold_proc_duty": {
+      "n_repeats": 5,
+      "median": 0.231,
+      "min": 0.155,
+      "max": 0.267
+    },
+    "clamscan_cold_duty": {
+      "n_repeats": 5,
+      "median": 0.967,
+      "min": 0.913,
+      "max": 0.973
+    },
+    "clamscan_cold_proc_duty": {
+      "n_repeats": 5,
+      "median": 0.976,
+      "min": 0.919,
+      "max": 0.984
+    },
+    "updatedb_cold_duty": {
+      "n_repeats": 5,
+      "median": 0.206,
+      "min": 0.147,
+      "max": 0.245
+    },
+    "updatedb_cold_proc_duty": {
+      "n_repeats": 5,
+      "median": 0.215,
+      "min": 0.147,
+      "max": 0.244
+    },
+    "tracker": {
+      "procs": 5,
+      "gap": {
+        "n": 5,
+        "median_us": 3801982,
+        "sigma_log": 0.428,
+        "p90_us": 5436364
+      },
+      "work": {
+        "n": 5,
+        "median_us": 1608,
+        "sigma_log": 0.639,
+        "p90_us": 3000
+      }
+    },
+    "chromium_peak_procs": {
+      "n_repeats": 5,
+      "median": 22,
+      "min": 21,
+      "max": 22
+    },
+    "element": {
+      "procs": 15,
+      "gap": {
+        "n": 15,
+        "median_us": 1848645,
+        "sigma_log": 1.088,
+        "p90_us": 3914474
+      },
+      "work": {
+        "n": 15,
+        "median_us": 289,
+        "sigma_log": 0.713,
+        "p90_us": 826
+      }
+    },
+    "chromium": {
+      "procs": 3,
+      "gap": {
+        "n": 3,
+        "median_us": 2053292,
+        "sigma_log": 1.528,
+        "p90_us": 11111111
+      },
+      "work": {
+        "n": 2,
+        "median_us": 1185,
+        "sigma_log": 0.441,
+        "p90_us": 1620,
+        "n_nonpositive": 1,
+        "median_all_us": 868
+      }
+    },
+    "daemons": {
+      "procs": 51,
+      "gap": {
+        "n": 51,
+        "median_us": 11239013,
+        "sigma_log": 1.898,
+        "p90_us": 120600000
+      },
+      "work": {
+        "n": 29,
+        "median_us": 155,
+        "sigma_log": 0.809,
+        "p90_us": 333,
+        "n_nonpositive": 22,
+        "median_all_us": 62
+      }
+    },
+    "wake_counter": "main-thread"
+  }
+}
