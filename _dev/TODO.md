@@ -107,7 +107,7 @@ Execution order: 9.1 ∥ 9.2 ∥ 9.3 first → 9.4–9.12 in parallel, after 9.1
 
 - [x] **9.1** Verification records — the 2026-09-13 claim inventory, independent reads, comparisons, measurement audit and compiled-number audit persisted into the repository
 - [x] **9.2** Heads-up memo to 인경민 and 박이안 — what will change, what stays stable, the three executor questions (spec decision 7)
-- [ ] **9.3** Measurement tools fixed — including `meas-ci:names:2` preserved before its Actions artifacts expire on 2026-12-09
+- [WIP] **9.3** Measurement tools fixed — including `meas-ci:names:2` preserved before its Actions artifacts expire on 2026-12-09
 - [ ] **9.4** Gaming — research and decisions
 - [ ] **9.5** Interactive and typing — research and decisions
 - [ ] **9.6** Compile — research and decisions
