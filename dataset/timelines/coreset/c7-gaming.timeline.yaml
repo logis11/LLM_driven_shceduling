@@ -34,11 +34,6 @@ tasks:
   depart: 60s
   id: webhelper
   name: steamwebhelper
-- archetype: system-daemon
-  arrive: 0s
-  depart: 60s
-  id: wine
-  name: wineserver
 - archetype: video-playback
   arrive: 0s
   depart: 60s

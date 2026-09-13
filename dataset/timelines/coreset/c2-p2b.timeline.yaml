@@ -34,11 +34,6 @@ tasks:
   depart: 120s
   id: steam
   name: steam
-- archetype: system-daemon
-  arrive: 0s
-  depart: 120s
-  id: wine
-  name: wineserver
 - archetype: cpu-batch
   arrive: 60s
   bind:

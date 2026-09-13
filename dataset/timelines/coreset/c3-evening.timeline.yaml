@@ -23,8 +23,6 @@ tasks:
      arrive: 60s, depart: 300s}
   - {id: steam, name: steam, archetype: electron-comms,
      arrive: 60s, depart: 300s}
-  - {id: wine, name: wineserver, archetype: system-daemon,
-     arrive: 60s, depart: 300s}
   - {id: video, name: mpv, archetype: video-playback,
      arrive: 300s, depart: 420s}
   - {id: music, name: spotify, archetype: audio-playback,

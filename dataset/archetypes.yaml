@@ -340,12 +340,15 @@ archetypes:
     category_source: lavd-ossna24
     pattern:
       constructor: chain           # expanded at load time, interpretation-contract §6
-      program:                     # per constructed chain member
-        - loop:
+      program:                     # per constructed chain member; the
+        - loop:                    # wineserver member runs wineserver_run
             - WAIT: upstream
             - RUN: per_schedule_run
             - WAKE: downstream
     params:
+      wineserver_run:
+        {dist: constant, value_us: 260, sampling: per-instance,
+         source: "lavd-ossna24:s13"}
       frac_long_lived:
         {dist: constant, value: 0.90, sampling: per-instance,
          source: "lavd-ossna24:s12"}
@@ -397,9 +400,18 @@ archetypes:
       tasks = 95% of scheduling; 15-20 game-specific tasks take 60-70%, s12)
       are scheduling-frequency shares; scaling the chain's RUN values so its
       per-frame demand equals lane_share is our calibration, not the
-      source's. Wineserver's place — inside this constructed graph vs a separate
-      system-daemon binding — is decided at constructor implementation
-      (interpretation-contract §6); see system-daemon.
+      source's. Wineserver is a member of the constructed chain, named
+      `wineserver`, placed right after the head with RUN = wineserver_run:
+      the source names it as a coordination task at 260 us per schedule
+      (s13), draws it as the hub of the game's dispatcher threads (s11), and
+      gives its edges to and from the game process the largest counts in the
+      s16 graph (epoll from wineserver to the game, pipe_read from the game
+      to wineserver). Those edges are a request/reply round trip (each Wine
+      call is a request write and a blocking reply read); a linear relay
+      cannot return to a node, so the relay passes the wake on to the next
+      member instead — the same linearization applied to the whole graph,
+      ours. Its RUN scales with the chain in -single mode (design). The
+      earlier wineserver -> system-daemon timeline binding is withdrawn.
 
   # ---- meas family — no literature taxonomy exists ------------------------
 
@@ -509,8 +521,5 @@ archetypes:
       processes across 5 repeats): voluntary-wakeup gap median ~11.2 s
       sigma_log ~1.9, cpu-per-wake median ~155 us. The cli:1 idle-baseline
       phase corroborates near-zero daemon cpu at 1 s sampling.
-      Binding note (decided, archetype-plan §5): wineserver -> system-daemon
-      is a provisional approximation — LAVD treats wine as part of the game's
-      task graph (lavd-ossna24:s12); whether wineserver joins the constructed
-      game-task-chain instead is decided at constructor implementation, and
-      this note is superseded by that decision.
+      wineserver is not bound here: it is a member of the constructed
+      game-task-chain (see that entry's modeling_notes).

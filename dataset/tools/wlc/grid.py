@@ -49,6 +49,11 @@ NAME_TIERS = {
 _TIER_BY_NAME = {name: tier for tier, names in NAME_TIERS.items()
                  for name in names}
 
+# Names a compile-time constructor emits beside the bound task's own name
+# (recognizer-visible like a spawned child): the chain constructor adds a
+# `wineserver` member to every game-task-chain (archetypes.yaml).
+CONSTRUCTOR_NAMES = {"game-task-chain": ("wineserver",)}
+
 
 class GridError(Exception):
     """A segment the grid cannot place: a menu mode without the attribute,
@@ -74,6 +79,8 @@ def segment_tier(segment, tasks):
             child = (task.get("bind") or {}).get("child_name")
             if child:
                 tiers.append(_TIER_BY_NAME.get(child, 5))
+            for name in CONSTRUCTOR_NAMES.get(task.get("archetype"), ()):
+                tiers.append(_TIER_BY_NAME.get(name, 5))
     return max(tiers, default=1)
 
 

@@ -312,23 +312,33 @@ def _chain_constructor(timeline, task, iid, entry, mode):
                                     "chain_length", 0))
     frame = sampling.sample(params["frame_period"], seed, iid, "frame_period", 0)
 
+    # Members in wake order: the game head, then wineserver (the source's
+    # coordination hop, fixed RUN), then the remaining game-specific members.
+    # The relay stands in for the request/reply round trip the source draws
+    # (archetypes.yaml modeling_notes).
+    member_ids = [f"{iid}.chain.1", f"{iid}.wineserver"] + \
+        [f"{iid}.chain.{k + 1}" for k in range(1, chain_len)]
+    names = [task["name"], "wineserver"] + [task["name"]] * (chain_len - 1)
     runs = [sampling.sample(params["per_schedule_run"], seed, iid,
-                            "per_schedule_run", k)  # per-task: keyed by member
-            for k in range(chain_len)]
+                            "per_schedule_run", 0),
+            sampling.sample(params["wineserver_run"], seed, iid,
+                            "wineserver_run", 0)] + \
+        [sampling.sample(params["per_schedule_run"], seed, iid,
+                         "per_schedule_run", k)  # per-task: keyed by member
+         for k in range(1, chain_len)]
     if mode == "single":  # the declared-scalable pass: chain demand -> lane_share
         lane_share = float(task["bind"]["lane_share"])
         factor = lane_share * frame / sum(runs)
         runs = [max(1, round(r * factor)) for r in runs]
 
     builds = []
-    member_ids = [f"{iid}.chain.{k + 1}" for k in range(chain_len)]
     for k, member_id in enumerate(member_ids):
-        member = _TaskBuild(member_id, task["name"])
+        member = _TaskBuild(member_id, names[k])
         member.arrive, member.depart = task["arrive"], task["depart"]
         body = ([{"op": "TIMER", "period_us": frame}] if k == 0 else
                 [{"op": "WAIT", "channel": f"chain:{member_id}"}])
         body.append({"op": "RUN", "us": runs[k]})
-        if k + 1 < chain_len:
+        if k + 1 < len(member_ids):
             body.append({"op": "WAKE", "target": member_ids[k + 1]})
         member.program = [{"op": "LOOP", "count": "unbounded", "body": body}]
         member.demand_us = round(runs[k] / frame * lifespan)

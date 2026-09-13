@@ -113,5 +113,12 @@ def test_chain_population(fixture_path, library):
                                    library, "single")
     arrivals = arrivals_by_id(canonical)
     chain = [i for i in arrivals if ".chain." in i]
-    assert len(chain) == 16 and len(chain) == len(arrivals)  # chain only, no tail
-    assert all(arrivals[i]["name"] == "game.exe" for i in arrivals)
+    wine = [i for i in arrivals if i.endswith(".wineserver")]
+    assert len(chain) == 16 and len(wine) == 1 and len(arrivals) == 17  # no tail
+    assert all(arrivals[i]["name"] == "game.exe" for i in chain)
+    assert arrivals[wine[0]]["name"] == "wineserver"
+    # wake order: head -> wineserver -> chain.2
+    head_body = arrivals[f"{chain[0].rsplit('.', 2)[0]}.chain.1"]["program"][0]["body"]
+    assert head_body[-1] == {"op": "WAKE", "target": wine[0]}
+    wine_body = arrivals[wine[0]]["program"][0]["body"]
+    assert wine_body[-1]["op"] == "WAKE" and wine_body[-1]["target"].endswith(".chain.2")

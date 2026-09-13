@@ -132,6 +132,18 @@ def test_pre_committed_miss_is_counted_and_marked(tmp_path):
     assert "indexing/true" not in coverage["empty_cells"]
 
 
+def test_constructor_emitted_names_count_toward_the_tier(tmp_path):
+    # game.exe is tier 1; the chain constructor emits a wineserver member
+    # (tier 2) beside it, so the segment's default tier is 2
+    _timeline(tmp_path, "x-game", [
+        {"from": "0s", "to": "60s", "mode": "gaming",
+         "attributes": {"background_wanted": True}}],
+        [{"id": "game", "name": "game.exe", "archetype": "game-task-chain",
+          "arrive": "0s", "depart": "60s", "bind": {"lane_share": 0.9}}])
+    coverage = grid.build_grid(tmp_path)
+    assert coverage["per_file"]["x-game"][0]["tier"] == 2
+
+
 def test_full_coverage_has_no_errors(tmp_path):
     segments = [{"from": "0s", "to": "10s", "mode": m,
                  "attributes": {"background_wanted": w}}

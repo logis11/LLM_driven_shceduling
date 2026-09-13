@@ -15,8 +15,6 @@ tasks:
      arrive: 0s, depart: 120s, bind: {lane_share: 0.95}}
   - {id: steam, name: steam, archetype: electron-comms,
      arrive: 0s, depart: 120s}
-  - {id: wine, name: wineserver, archetype: system-daemon,
-     arrive: 0s, depart: 120s}
   - {id: download, name: steam, archetype: network-bulk, arrive: 60s,
      bind: {total_work: 25s}}
 

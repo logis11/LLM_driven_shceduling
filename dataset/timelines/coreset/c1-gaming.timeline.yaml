@@ -16,8 +16,6 @@ tasks:
      arrive: 0s, depart: 60s}
   - {id: webhelper, name: steamwebhelper, archetype: electron-comms,
      arrive: 0s, depart: 60s, count: 3}
-  - {id: wine, name: wineserver, archetype: system-daemon,
-     arrive: 0s, depart: 60s}
   - {id: compositor, name: gamescope, archetype: video-playback,
      arrive: 0s, depart: 60s}
 
