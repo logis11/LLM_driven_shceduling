@@ -34,3 +34,9 @@ One entry per decision applied to `dataset/archetypes.yaml` (and the registry li
 - `dataset/tools/tests/test_invariants.py`: chain population is 16 game members plus one `wineserver`, wake order checked.
 - Compiled effect: every gaming file has a `wineserver` task that runs each frame (c1-gaming `single`: RUN 341 µs after scaling; `native`: 260 µs) instead of one that slept 1 225 s. Demand (`single` / `native`): c1-gaming 1.30 / 1.09, c2-p2a and c2-p2b 1.16 / 0.97, c3-evening 1.03 / 0.57, c6-dual 1.13 / 1.42, c7-gaming 2.30 / 2.09. `make lint` clean, `make check` verified, 83 tests pass.
 - Alternatives not taken: a separate `wine-server` archetype wired by channel; the `system-daemon` binding (contradicted by slides 11, 13, 16 and by every sampled log, S3-01/S3-02).
+
+## D5 — `chain_length` (2026-09-13)
+
+- `game-task-chain.params.chain_length`: value 16 unchanged; tag `lavd-ossna24` (no locator) → `lavd-ossna24:s12` ("There are 15-20 game-specific tasks, which takes 60-70% scheduling"). Label: design within a source range. `modeling_notes`: "15-20 frame-critical band" → the slide's own words; the wineserver member is stated to be outside the count (K2 C-lavd-11 WORDING-FIX and borderline OURS-UNDER-SOURCE-TAG).
+- No compiled value changes (manifest hashes move with the library hash only).
+- Alternative not taken: a per-instance uniform draw over 15–20.

@@ -363,7 +363,7 @@ archetypes:
          source: "steamos-refresh"}
       chain_length:
         {dist: constant, value: 16, sampling: per-instance,
-         source: "lavd-ossna24"}
+         source: "lavd-ossna24:s12"}
     lifetime: segment-bound
     binding_params: [lane_share]
     scalable:
@@ -390,8 +390,10 @@ archetypes:
       per-task runtime is stable (s13); anchors are the source's wineserver
       ~260 us and worker ~1.65 ms endpoints, lognormal family by OQ-5
       convention (the compiler derives median/sigma treating the anchors as
-      the p05/p95 span). chain_length 16 sits in the source's 15-20
-      frame-critical band. The entry models the chain only: the source
+      the p05/p95 span). chain_length 16 is a point chosen inside the
+      source's "15-20 game-specific tasks" (s12) — design within a source
+      range; the wineserver member is outside that count (the source files
+      wine among the system tasks). The entry models the chain only: the source
       counts ~300 tasks scheduled system-wide while a game runs (s12,
       including system tasks) and says nothing about what the tasks outside
       its top 30-40 do, so no tail population is constructed here; how many
