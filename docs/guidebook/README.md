@@ -13,7 +13,7 @@
 | 3 | [이 연구의 큰 그림](vol-03-the-research.md) | 무엇이 gap이고, recognition layer는 어떤 architecture이며, 무엇이 이 주장을 무너뜨리나 | 완성 |
 | 4 | [실험의 뼈대](vol-04-experiment-design.md) | 이 주장을 어떻게 측정 가능한 형태로 바꾸나 | 초고 |
 | 5 | [공유 어휘](vol-05-shared-vocabulary.md) | mode와 attribute는 왜 이 목록인가 | 완성 |
-| 6 | Workload 1: 재료와 근거 | archetype의 숫자들은 어디서 왔나 | 예정 |
+| 6 | [Workload 1: 재료와 근거](vol-06-archetypes-and-grounding.md) | archetype의 숫자들은 어디서 왔나 | 완성 |
 | 7 | Workload 2: 조립과 compile | timeline이 어떻게 실행 가능한 workload가 되나 | 예정 |
 | 8 | Workload 3: 50개 coreset | 각 파일이 어떤 질문에 답하나 | 예정 |
 | 9 | Simulator와 interpretation contract | workload가 어떻게 실행되는 task가 되나 | 예정 |
