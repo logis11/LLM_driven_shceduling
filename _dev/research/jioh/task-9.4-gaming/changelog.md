@@ -47,3 +47,9 @@ One entry per decision applied to `dataset/archetypes.yaml` (and the registry li
 - `docs/references.md` `lavd-ossna24` role line: "per-schedule runtimes ~260 µs–1.65 ms" → the slide's average/maximum wording with the two examples named; "70–75% wakeups" → "70–75% of scheduling events initiated by waiting syscalls" (K2 C-lavd-5, C-lavd-7 WORDING-FIX).
 - No compiled value changes.
 - Alternatives not taken: fit the slide-13 plot (median ~40 µs); anchor on the text's words alone.
+
+## D7 — the two inert parameters (2026-09-13)
+
+- `game-task-chain.params.frac_long_lived` (constant 0.90, `lavd-ossna24:s12`) and `frac_wakeups_from_wait` (uniform 0.70–0.75, `lavd-ossna24:s14`): removed. Neither was read by any tool (memo finding B1; K2 C-lavd-2, C-lavd-7). Both facts stay in `modeling_notes` with their locators as what the encoding does not model: every member lives for the whole segment; the wake mix is fixed by the wiring.
+- No compiled value changes.
+- Alternatives not taken: keep them inert; make 10 % of members terminate (window unstated in the source).

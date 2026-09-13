@@ -349,15 +349,9 @@ archetypes:
       wineserver_run:
         {dist: constant, value_us: 260, sampling: per-instance,
          source: "lavd-ossna24:s13"}
-      frac_long_lived:
-        {dist: constant, value: 0.90, sampling: per-instance,
-         source: "lavd-ossna24:s12"}
       per_schedule_run:
         {dist: lognormal, anchor_min_us: 260, anchor_max_us: 1650,
          sampling: per-task, source: "lavd-ossna24:s13"}
-      frac_wakeups_from_wait:
-        {dist: uniform, min: 0.70, max: 0.75, sampling: per-instance,
-         source: "lavd-ossna24:s14"}
       frame_period:
         {dist: constant, value_us: 16667, sampling: per-instance,
          source: "steamos-refresh"}
@@ -407,7 +401,12 @@ archetypes:
       including system tasks) and says nothing about what the tasks outside
       its top 30-40 do, so no tail population is constructed here; how many
       further game threads a timeline carries, and bound to what, is the
-      timeline's. Lane-scaling: the concentration statistics (top 30-40
+      timeline's. Two source facts the encoding does not model: "Around 90%
+      are long-living tasks; only 10% of tasks are terminated" (s12, window
+      unstated) — every member here lives for the whole segment; "70-75% of
+      scheduling is initiated by waiting system calls" against 25-30%
+      preemption (s14) — the wake mix here is fixed by the wiring (one
+      TIMER head, WAIT members), not sampled. Lane-scaling: the concentration statistics (top 30-40
       tasks = 95% of scheduling; 15-20 game-specific tasks take 60-70%, s12)
       are scheduling-frequency shares; scaling the chain's RUN values so its
       per-frame demand equals lane_share is our calibration, not the
