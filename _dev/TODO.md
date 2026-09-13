@@ -98,8 +98,27 @@ Execution order: 8.1 first (added 2026-09-11; every later sub-task reads the boo
 - [x] **8.9** Docs sweep — harness guide chapters for the upper half, docs index, terminology (RQ0 gate evaluator, per-experiment spec, guard spec), RQ0 preparation notes' stage ticks, proposal pointers; README sweep (added 2026-09-12): `harness/README.md` rewritten as a front door and one README per folder under `harness/` — what the folder is for, how its files are produced and read, how to run it — written as READMEs, not file indexes
 - [x] **8.10** Boost windows — a new primitive `boost_window` (one records row per boost instant inside an MLFQ interval, sized by the §6.9 rule and clipped at the next boost, on `switch_window`'s columns with a new `metric` value); the aggregates module computes the per-switch excess and its boost variant; `mock-switch`'s expected records gain its two hand-worked boost rows; metrics doc §6 primitive, §8, changelog; no simulator or daemon change (decided 2026-09-11 from 8.2's finding; 8.2 spec decision 9)
 
-### Phase 9 — Workload dataset rebuild from the critical findings
-Every finding in `docs/memos/2026-09-13-critical-findings.md` resolved against its primary source; the workload dataset rebuilt; the decisions the prior driver table and the RQ0 gate spec took from the workload data redone; the docs that explain the workload dataset brought in line.
+### Phase 9 [WIP] — Workload dataset rebuild from the critical findings
+Every finding in `docs/memos/2026-09-13-critical-findings.md` and the 2026-09-13 verification resolved against its primary source; the workload dataset rebuilt; the decisions the prior driver table and the RQ0 gate spec took from the workload data redone; citations outside the dataset held to the same standard; the docs that explain the workload dataset brought in line; the project back where Phase 8 ended, ready for the RQ0 run. Spec: `_dev/docs/spec/jioh/phase-9-workload-dataset-rebuild.md`.
+
+Execution order: 9.1 ∥ 9.2 ∥ 9.3 first → 9.4–9.12 in parallel, after 9.1 and 9.3 → 9.13 → 9.14 → 9.15 → 9.16.
+
+- [ ] **9.1** Verification records — the 2026-09-13 claim inventory, independent reads, comparisons, measurement audit and compiled-number audit persisted into the repository
+- [ ] **9.2** Heads-up memo to 인경민 and 박이안 — what will change, what stays stable, the three executor questions (spec decision 7)
+- [ ] **9.3** Measurement tools fixed — including `meas-ci:names:2` preserved before its Actions artifacts expire on 2026-12-09
+- [ ] **9.4** Gaming — research and decisions
+- [ ] **9.5** Interactive and typing — research and decisions
+- [ ] **9.6** Compile — research and decisions
+- [ ] **9.7** Background and IO — research and decisions
+- [ ] **9.8** Browser and comms — research and decisions
+- [ ] **9.9** Daemons and session processes — research and decisions
+- [ ] **9.10** Scenarios and timelines — research and decisions
+- [ ] **9.11** Scheduler-side constants and groundings — research and decisions
+- [ ] **9.12** Related-work and proposal prose — research and decisions
+- [ ] **9.13** Rebuild — the dataset rebuilt once from 9.4–9.12's decisions
+- [ ] **9.14** Consumer rework — scoring spec, guard spec, prior table and pair review, RQ0 gate spec; one harness changelog entry and one re-pin
+- [ ] **9.15** Docs, memos and guidebook corrections — including the final memo to 인경민 and 박이안
+- [ ] **9.16** Exit audits — the claim, measurement and compiled-number audits re-run on the final state (spec decision 8)
 
 ### Phase 10 — Integration and the RQ0 run
 Stage 6. Swap mocks for the real simulator and daemon, end-to-end smoke, run all coreset files × 3 conditions, check guards before looking at results, judge per the RQ0 gate spec; on failure, config search before workload redesign. Depends on Phase 9, 경민's integration gate and algorithm extension, and 이안's daemon.
