@@ -101,6 +101,8 @@ Execution order: 8.1 first (added 2026-09-11; every later sub-task reads the boo
 ### Phase 9 [WIP] — Workload dataset rebuild from the critical findings
 Every finding in `docs/memos/2026-09-13-critical-findings.md` and the 2026-09-13 verification resolved against its primary source; the workload dataset rebuilt; the decisions the prior driver table and the RQ0 gate spec took from the workload data redone; citations outside the dataset held to the same standard; the docs that explain the workload dataset brought in line; the project back where Phase 8 ended, ready for the RQ0 run. Spec: `_dev/docs/spec/jioh/phase-9-workload-dataset-rebuild.md`.
 
+always work on branch `jioh/dataset-rebuild`
+
 Execution order: 9.1 ∥ 9.2 ∥ 9.3 first → 9.4–9.12 in parallel, after 9.1 and 9.3 → 9.13 → 9.14 → 9.15 → 9.16.
 
 - [ ] **9.1** Verification records — the 2026-09-13 claim inventory, independent reads, comparisons, measurement audit and compiled-number audit persisted into the repository
