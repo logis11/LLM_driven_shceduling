@@ -346,9 +346,6 @@ archetypes:
             - RUN: per_schedule_run
             - WAKE: downstream
     params:
-      n_tasks:
-        {dist: constant, value: 300, sampling: per-instance,
-         source: "lavd-ossna24:s12"}
       frac_long_lived:
         {dist: constant, value: 0.90, sampling: per-instance,
          source: "lavd-ossna24:s12"}
@@ -364,19 +361,12 @@ archetypes:
       chain_length:
         {dist: constant, value: 16, sampling: per-instance,
          source: "lavd-ossna24"}
-      tail_idle_gap:
-        {dist: lognormal, median_us: 500000, sigma_log: 0.5,
-         sampling: per-task, source: "lavd-ossna24:s12"}
-      tail_run:
-        {dist: lognormal, median_us: 200, sigma_log: 0.5,
-         sampling: per-task, source: "lavd-ossna24:s12"}
     lifetime: segment-bound
     binding_params: [lane_share]
     scalable:
       - fields: [chain aggregate demand]
-        rule: instantiate the full task population with the long tail
-          near-idle; scale the frame-critical chain's aggregate demand to
-          the lane's oversubscription regime (building-plan §5a).
+        rule: scale the chain's aggregate demand per frame to lane_share of
+          the lane (building-plan §5a).
     validation_stats:
       referee: none
       reason: validation against LAVD would be circular — LAVD is also the
@@ -390,7 +380,7 @@ archetypes:
       Deck LCD default refresh with the 1:1 frame limit (steamos-refresh:
       60 Hz; 16667 us is 1/60 s arithmetic) — design, ours.
       The only entry whose topology is a parameter: the compiler's chain
-      constructor expands it into n_tasks ordinary tasks with WAIT/WAKE
+      constructor expands it into chain_length ordinary tasks with WAIT/WAKE
       channels wired input -> engine -> ... -> display; the linearization of
       the s16-s17 waker-waiter graph into a chain, and every field name, are
       ours. per_schedule_run samples per-task because the source states
@@ -398,14 +388,16 @@ archetypes:
       ~260 us and worker ~1.65 ms endpoints, lognormal family by OQ-5
       convention (the compiler derives median/sigma treating the anchors as
       the p05/p95 span). chain_length 16 sits in the source's 15-20
-      frame-critical band; the tail (n_tasks - chain_length near-idle tasks)
-      encodes the source's "mostly waiting" long tail — tail param values
-      are our placeholder encoding of near-idle, provisional like any
-      meas-pending value. Lane-scaling defense: LAVD's own concentration
-      statistics (top 30-40 tasks = 95% of scheduling; 15-20 game tasks take
-      60-70%) justify scaling the frame-critical chain while keeping the
-      near-idle tail; lane_share (binding-time) is the -single compile
-      target for the chain's aggregate demand. Wineserver's place — inside this constructed graph vs a separate
+      frame-critical band. The entry models the chain only: the source
+      counts ~300 tasks scheduled system-wide while a game runs (s12,
+      including system tasks) and says nothing about what the tasks outside
+      its top 30-40 do, so no tail population is constructed here; how many
+      further game threads a timeline carries, and bound to what, is the
+      timeline's. Lane-scaling: the concentration statistics (top 30-40
+      tasks = 95% of scheduling; 15-20 game-specific tasks take 60-70%, s12)
+      are scheduling-frequency shares; scaling the chain's RUN values so its
+      per-frame demand equals lane_share is our calibration, not the
+      source's. Wineserver's place — inside this constructed graph vs a separate
       system-daemon binding — is decided at constructor implementation
       (interpretation-contract §6); see system-daemon.
 

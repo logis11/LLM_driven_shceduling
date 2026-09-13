@@ -50,8 +50,9 @@ sources:
     type: deployed-system
     locator_pattern: "^s\\d+$"
     notes: >-
-      Talk slides; observations established: ~300 tasks per game, ~90%
-      long-lived, wine/graphics/audio servers take 30-40% of scheduling (s12);
+      Talk slides; observations established: ~300 tasks scheduled system-wide
+      while running a game (including system tasks), ~90% long-lived,
+      wine/graphics/audio servers take 30-40% of scheduling (s12);
       per-schedule runtimes few-hundred-us average to few-ms max (wineserver
       ~260 us, worker ~1.65 ms), stable and predictable per task (s13); 70-75%
       of scheduling initiated by waiting syscalls (s14); tasks tightly linked

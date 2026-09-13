@@ -94,9 +94,6 @@ def test_lane_scaling_touches_only_chain_runs(fixture_path, library):
     frame = None
     for task_id, native_event in native_arrivals.items():
         single_event = single_arrivals[task_id]
-        if ".tail." in task_id:
-            assert single_event == native_event
-            continue
         body_native = native_event["program"][0]["body"]
         body_single = single_event["program"][0]["body"]
         assert len(body_native) == len(body_single)
@@ -116,6 +113,5 @@ def test_chain_population(fixture_path, library):
                                    library, "single")
     arrivals = arrivals_by_id(canonical)
     chain = [i for i in arrivals if ".chain." in i]
-    tail = [i for i in arrivals if ".tail." in i]
-    assert len(chain) == 16 and len(chain) + len(tail) == 300
+    assert len(chain) == 16 and len(chain) == len(arrivals)  # chain only, no tail
     assert all(arrivals[i]["name"] == "game.exe" for i in arrivals)

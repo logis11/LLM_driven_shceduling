@@ -11,7 +11,7 @@ scheduling can influence. Concretely:
   waits with no waker task and compile to SLEEP(sampled); WAIT operands
   without one are real channels (input, children, chain wiring).
 - The chain constructor (contract §6) expands game-task-chain at compile
-  time into chain_length driven members + a near-idle tail.
+  time into chain_length driven members.
 - The lane-scaling pass (`single` mode) transforms declared-scalable fields
   only — for game-task-chain, chain RUN values are scaled so the chain's
   aggregate demand is lane_share of the lane; nothing else differs from
@@ -308,7 +308,6 @@ def _chain_constructor(timeline, task, iid, entry, mode):
     seed = timeline.seed
     params = entry["params"]
     lifespan = task["depart"] - task["arrive"]
-    n_tasks = int(sampling.sample(params["n_tasks"], seed, iid, "n_tasks", 0))
     chain_len = int(sampling.sample(params["chain_length"], seed, iid,
                                     "chain_length", 0))
     frame = sampling.sample(params["frame_period"], seed, iid, "frame_period", 0)
@@ -335,16 +334,4 @@ def _chain_constructor(timeline, task, iid, entry, mode):
         member.demand_us = round(runs[k] / frame * lifespan)
         builds.append(member)
 
-    for j in range(n_tasks - chain_len):
-        tail_id = f"{iid}.tail.{j + 1}"
-        tail = _TaskBuild(tail_id, task["name"])
-        tail.arrive, tail.depart = task["arrive"], task["depart"]
-        gap = sampling.sample(params["tail_idle_gap"], seed, tail_id,
-                              "tail_idle_gap", 0)
-        run = sampling.sample(params["tail_run"], seed, tail_id, "tail_run", 0)
-        tail.program = [{"op": "LOOP", "count": "unbounded",
-                         "body": [{"op": "SLEEP", "us": gap},
-                                  {"op": "RUN", "us": run}]}]
-        tail.demand_us = round(run / (gap + run) * lifespan)
-        builds.append(tail)
     return builds
