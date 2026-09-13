@@ -1,0 +1,233 @@
+
+######## 1 recompile in-process: byte identity with build + per-task demand
+files compiled: 100 byte mismatches vs build: 0
+
+######## 2 demand breakdown (single) per file, lanes over file duration
+c1-backup: total single=0.9742 native=0.9742 :: {'editor': 0.4742, 'bulk': 0.5}
+c1-browsing: total single=0.4486 native=0.4486 :: {'browser': 0.4438, 'renderers.*': 0.0048}
+c1-compile: total single=0.5391 native=0.5391 :: {'editor': 0.4745, 'build': 0.0645}
+c1-dev: total single=0.4634 native=0.4634 :: {'editor': 0.4634}
+c1-gaming: total single=1.4557 native=1.2257 :: {'game.chain.*': 0.8999, 'game.tail.*': 0.1549, 'steam': 0.0001, 'webhelper.*': 0.0008, 'wine': 0.0, 'compositor': 0.4}
+c1-idle: total single=0.0004 native=0.0004 :: {'shell': 0.0, 'xorg': 0.0, 'audio-srv': 0.0002, 'init': 0.0001, 'bus': 0.0001}
+c1-indexing: total single=0.955 native=0.955 :: {'editor': 0.455, 'hog': 0.5}
+c1-mail: total single=0.527 native=0.527 :: {'mailer': 0.477, 'send': 0.05}
+c1-media: total single=0.45 native=0.45 :: {'video': 0.4, 'music': 0.05}
+c1-meeting: total single=0.4503 native=0.4503 :: {'video': 0.4, 'voice': 0.05, 'helper': 0.0003}
+c1-ml-train: total single=0.9723 native=0.9723 :: {'editor': 0.4723, 'hog': 0.5}
+c1-office: total single=0.5008 native=0.5008 :: {'writer': 0.4972, 'browser': 0.0, 'renderers.*': 0.0036, 'mail': 0.0}
+c1-photo: total single=0.4677 native=0.4677 :: {'photo-editor': 0.4677}
+c1-render: total single=0.9021 native=0.9021 :: {'editor': 0.4021, 'bulk': 0.5}
+c1-transcode: total single=0.9705 native=0.9705 :: {'video-editor': 0.4705, 'batch': 0.5}
+c1-video-edit: total single=0.4589 native=0.4589 :: {'editor': 0.4589}
+c2-p1a: total single=1.2039 native=1.2039 :: {'editor': 0.4817, 'hog': 0.7222}
+c2-p1b: total single=1.2039 native=1.2039 :: {'editor': 0.4817, 'hog': 0.7222}
+c2-p2a: total single=1.2926 native=1.086 :: {'game.chain.*': 0.9501, 'game.tail.*': 0.1338, 'steam': 0.0002, 'wine': 0.0001, 'download': 0.2083}
+c2-p2b: total single=1.2926 native=1.086 :: {'game.chain.*': 0.9501, 'game.tail.*': 0.1338, 'steam': 0.0002, 'wine': 0.0001, 'download': 0.2083}
+c2-p3a: total single=1.1217 native=1.1217 :: {'editor': 0.4967, 'bulk': 0.625}
+c2-p3b: total single=1.1217 native=1.1217 :: {'editor': 0.4967, 'bulk': 0.625}
+c3-creation: total single=1.0352 native=1.0352 :: {'photo-editor': 0.1386, 'video-editor': 0.1347, 'batch': 0.7619}
+c3-evening: total single=1.1141 native=0.6498 :: {'browser': 0.0684, 'renderers.*': 0.0002, 'game.chain.*': 0.8286, 'game.tail.*': 0.0871, 'overlay': 0.001, 'steam': 0.0, 'wine': 0.0, 'video': 0.1143, 'music': 0.0143}
+c3-workday: total single=1.0434 native=1.0434 :: {'browser': 0.0654, 'renderers.*': 0.0054, 'writer': 0.0662, 'build': 0.8335, 'mailer': 0.0659, 'send': 0.0071}
+c4-compile: total single=0.5394 native=0.5394 :: {'editor': 0.4745, 'build': 0.0645, 'injected-browser': 0.0, 'injected-renderers.*': 0.0004}
+c4-gaming: total single=1.4559 native=1.2259 :: {'game.chain.*': 0.8999, 'game.tail.*': 0.1549, 'steam': 0.0001, 'webhelper.*': 0.0008, 'wine': 0.0, 'compositor': 0.4, 'injected-overlay': 0.0002}
+c4-office: total single=0.6008 native=0.6008 :: {'writer': 0.4972, 'browser': 0.0, 'renderers.*': 0.0036, 'mail': 0.0, 'injected-burst': 0.1}
+c5-t3: total single=0.45 native=0.45 :: {'video': 0.4, 'music': 0.05}
+c5-t4: total single=0.45 native=0.45 :: {'video': 0.4, 'music': 0.05}
+c5-t5: total single=0.45 native=0.45 :: {'video': 0.4, 'music': 0.05}
+c6-dual: total single=1.2751 native=1.5497 :: {'game.chain.*': 0.6, 'game.tail.*': 0.1404, 'editor': 0.4904, 'build': 0.0441, 'wine': 0.0002}
+c6-fold: total single=0.4486 native=0.4486 :: {'browser': 0.4438, 'renderers.*': 0.0048}
+c6-spoof: total single=0.9486 native=0.9486 :: {'browser': 0.4438, 'renderers.*': 0.0048, 'spoof': 0.5}
+c7-backup: total single=0.9742 native=0.9742 :: {'editor': 0.4742, 'bulk': 0.5}
+c7-browsing: total single=1.4486 native=1.4486 :: {'browser': 0.4438, 'renderers.*': 0.0048, 'scan': 1.0}
+c7-compile: total single=0.5391 native=0.5391 :: {'editor': 0.4745, 'build': 0.0645}
+c7-dev: total single=1.4634 native=1.4634 :: {'editor': 0.4634, 'scan': 1.0}
+c7-gaming: total single=2.4557 native=2.2257 :: {'game.chain.*': 0.8999, 'game.tail.*': 0.1549, 'steam': 0.0001, 'webhelper.*': 0.0008, 'wine': 0.0, 'compositor': 0.4, 'scan': 1.0}
+c7-idle: total single=1.0004 native=1.0004 :: {'shell': 0.0, 'xorg': 0.0, 'audio-srv': 0.0002, 'init': 0.0001, 'bus': 0.0001, 'scan': 1.0}
+c7-indexing: total single=0.955 native=0.955 :: {'editor': 0.455, 'hog': 0.5}
+c7-mail: total single=1.527 native=1.527 :: {'mailer': 0.477, 'send': 0.05, 'scan': 1.0}
+c7-media: total single=1.45 native=1.45 :: {'video': 0.4, 'music': 0.05, 'scan': 1.0}
+c7-meeting: total single=1.4503 native=1.4503 :: {'video': 0.4, 'voice': 0.05, 'helper': 0.0003, 'scan': 1.0}
+c7-ml-train: total single=0.9723 native=0.9723 :: {'editor': 0.4723, 'hog': 0.5}
+c7-office: total single=1.5008 native=1.5008 :: {'writer': 0.4972, 'browser': 0.0, 'renderers.*': 0.0036, 'mail': 0.0, 'scan': 1.0}
+c7-photo: total single=1.4677 native=1.4677 :: {'photo-editor': 0.4677, 'scan': 1.0}
+c7-render: total single=0.9021 native=0.9021 :: {'editor': 0.4021, 'bulk': 0.5}
+c7-transcode: total single=0.9705 native=0.9705 :: {'video-editor': 0.4705, 'batch': 0.5}
+c7-video-edit: total single=1.4589 native=1.4589 :: {'editor': 0.4589, 'scan': 1.0}
+
+######## 3 chains: sum of stage RUNs, frame slack, longest stage, compositor
+c1-gaming[native] game: stages=16 sum=11166 period=16667 frame_slack=5501 longest=chain.5=1094 second=907 min=218 compositor RUN=6667; chain+compositor per frame=17833 (1.070 lanes) slack=-1166
+c1-gaming[single] game: stages=16 sum=14999 period=16667 frame_slack=1668 longest=chain.5=1470 second=1218 min=293 compositor RUN=6667; chain+compositor per frame=21666 (1.300 lanes) slack=-4999
+c2-p2a[native] game: stages=16 sum=12393 period=16667 frame_slack=4274 longest=chain.14=1703 second=1677 min=180
+c2-p2a[single] game: stages=16 sum=15836 period=16667 frame_slack=831 longest=chain.14=2176 second=2143 min=230
+c2-p2b[native] game: stages=16 sum=12393 period=16667 frame_slack=4274 longest=chain.14=1703 second=1677 min=180
+c2-p2b[single] game: stages=16 sum=15836 period=16667 frame_slack=831 longest=chain.14=2176 second=2143 min=230
+c3-evening[native] game: stages=16 sum=10626 period=16667 frame_slack=6041 longest=chain.2=1073 second=1045 min=336
+c3-evening[single] game: stages=16 sum=24168 period=16667 frame_slack=-7501 longest=chain.2=2440 second=2377 min=764
+c4-gaming[native] game: stages=16 sum=11166 period=16667 frame_slack=5501 longest=chain.5=1094 second=907 min=218 compositor RUN=6667; chain+compositor per frame=17833 (1.070 lanes) slack=-1166
+c4-gaming[single] game: stages=16 sum=14999 period=16667 frame_slack=1668 longest=chain.5=1470 second=1218 min=293 compositor RUN=6667; chain+compositor per frame=21666 (1.300 lanes) slack=-4999
+c6-dual[native] game: stages=16 sum=14578 period=16667 frame_slack=2089 longest=chain.13=1589 second=1440 min=265
+c6-dual[single] game: stages=16 sum=10000 period=16667 frame_slack=6667 longest=chain.13=1090 second=988 min=182
+c7-gaming[native] game: stages=16 sum=11166 period=16667 frame_slack=5501 longest=chain.5=1094 second=907 min=218 compositor RUN=6667; chain+compositor per frame=17833 (1.070 lanes) slack=-1166
+c7-gaming[single] game: stages=16 sum=14999 period=16667 frame_slack=1668 longest=chain.5=1470 second=1218 min=293 compositor RUN=6667; chain+compositor per frame=21666 (1.300 lanes) slack=-4999
+
+######## 4 interactive bursts vs slices (fraction of bursts < slice; CPU beyond the slice)
+c1-backup editor (kdenlive): n=255 median=84543 p10=14552 mean=111567 max=502728 | <2ms 1.6% (cpu past slice 98.2%); <10ms 7.5% (cpu past slice 91.4%); <20ms 11.8% (cpu past slice 83.3%); <100ms 57.6% (cpu past slice 36.2%)
+c1-browsing browser (chrome): n=229 median=90427 p10=18044 mean=116267 max=857492 | <2ms 1.3% (cpu past slice 98.3%); <10ms 7.0% (cpu past slice 91.7%); <20ms 10.9% (cpu past slice 83.9%); <100ms 55.5% (cpu past slice 38.2%)
+c1-compile editor (code): n=239 median=79943 p10=14019 mean=119125 max=1337206 | <2ms 0.4% (cpu past slice 98.3%); <10ms 4.2% (cpu past slice 91.8%); <20ms 13.0% (cpu past slice 84.2%); <100ms 62.8% (cpu past slice 43.5%)
+c1-dev editor (code): n=237 median=87599 p10=16797 mean=117316 max=729764 | <2ms 0.0% (cpu past slice 98.3%); <10ms 4.2% (cpu past slice 91.6%); <20ms 11.0% (cpu past slice 83.8%); <100ms 57.0% (cpu past slice 38.1%)
+c1-indexing editor (code): n=238 median=73673 p10=10118 mean=114718 max=759279 | <2ms 1.7% (cpu past slice 98.3%); <10ms 9.7% (cpu past slice 91.7%); <20ms 20.2% (cpu past slice 84.3%); <100ms 60.1% (cpu past slice 43.7%)
+c1-mail mailer (thunderbird): n=234 median=84300 p10=21372 mean=122301 max=1095558 | <2ms 1.7% (cpu past slice 98.4%); <10ms 3.8% (cpu past slice 92.0%); <20ms 9.4% (cpu past slice 84.4%); <100ms 57.3% (cpu past slice 41.6%)
+c1-ml-train editor (code): n=232 median=95498 p10=17804 mean=122137 max=724342 | <2ms 1.7% (cpu past slice 98.4%); <10ms 3.9% (cpu past slice 92.0%); <20ms 11.6% (cpu past slice 84.5%); <100ms 53.4% (cpu past slice 39.4%)
+c1-office browser (chrome): no bursts (never focused)
+c1-office writer (soffice.bin): n=234 median=89716 p10=24819 mean=127499 max=1035087 | <2ms 0.4% (cpu past slice 98.4%); <10ms 4.7% (cpu past slice 92.3%); <20ms 7.7% (cpu past slice 84.9%); <100ms 55.6% (cpu past slice 42.2%)
+c1-photo photo-editor (gimp): n=226 median=85116 p10=15931 mean=124163 max=1038021 | <2ms 1.3% (cpu past slice 98.4%); <10ms 4.4% (cpu past slice 92.2%); <20ms 10.6% (cpu past slice 84.8%); <100ms 56.2% (cpu past slice 42.4%)
+c1-render editor (kdenlive): n=230 median=83798 p10=11995 mean=104890 max=1280753 | <2ms 0.9% (cpu past slice 98.1%); <10ms 8.3% (cpu past slice 90.8%); <20ms 16.1% (cpu past slice 82.5%); <100ms 58.7% (cpu past slice 34.7%)
+c1-transcode video-editor (kdenlive): n=225 median=86677 p10=22110 mean=125463 max=938310 | <2ms 1.3% (cpu past slice 98.4%); <10ms 4.4% (cpu past slice 92.2%); <20ms 8.0% (cpu past slice 84.7%); <100ms 57.8% (cpu past slice 42.9%)
+c1-video-edit editor (kdenlive): n=238 median=87284 p10=15776 mean=115683 max=696131 | <2ms 0.0% (cpu past slice 98.3%); <10ms 6.3% (cpu past slice 91.6%); <20ms 13.4% (cpu past slice 83.7%); <100ms 56.7% (cpu past slice 38.9%)
+c2-p1a editor (code): n=774 median=80406 p10=16343 mean=112017 max=1341639 | <2ms 2.3% (cpu past slice 98.2%); <10ms 7.0% (cpu past slice 91.4%); <20ms 13.2% (cpu past slice 83.4%); <100ms 59.3% (cpu past slice 38.8%)
+c2-p1b editor (code): n=774 median=80406 p10=16343 mean=112017 max=1341639 | <2ms 2.3% (cpu past slice 98.2%); <10ms 7.0% (cpu past slice 91.4%); <20ms 13.2% (cpu past slice 83.4%); <100ms 59.3% (cpu past slice 38.8%)
+c2-p3a editor (kdenlive): n=480 median=89375 p10=18023 mean=124176 max=1206604 | <2ms 1.0% (cpu past slice 98.4%); <10ms 5.2% (cpu past slice 92.1%); <20ms 10.8% (cpu past slice 84.7%); <100ms 55.2% (cpu past slice 41.9%)
+c2-p3b editor (kdenlive): n=480 median=89375 p10=18023 mean=124176 max=1206604 | <2ms 1.0% (cpu past slice 98.4%); <10ms 5.2% (cpu past slice 92.1%); <20ms 10.8% (cpu past slice 84.7%); <100ms 55.2% (cpu past slice 41.9%)
+c3-creation photo-editor (gimp): n=488 median=87211 p10=18042 mean=119282 max=897336 | <2ms 1.8% (cpu past slice 98.3%); <10ms 5.5% (cpu past slice 91.9%); <20ms 11.5% (cpu past slice 84.2%); <100ms 55.7% (cpu past slice 40.7%)
+c3-creation video-editor (kdenlive): n=510 median=82802 p10=15191 mean=110958 max=3298883 | <2ms 1.0% (cpu past slice 98.2%); <10ms 7.1% (cpu past slice 91.3%); <20ms 13.5% (cpu past slice 83.2%); <100ms 59.6% (cpu past slice 38.0%)
+c3-evening browser (chrome): n=229 median=86247 p10=19596 mean=125509 max=985838 | <2ms 0.4% (cpu past slice 98.4%); <10ms 3.5% (cpu past slice 92.2%); <20ms 10.0% (cpu past slice 84.7%); <100ms 62.0% (cpu past slice 42.6%)
+c3-workday browser (chrome): n=242 median=83393 p10=19983 mean=113457 max=967732 | <2ms 1.2% (cpu past slice 98.2%); <10ms 5.4% (cpu past slice 91.4%); <20ms 10.3% (cpu past slice 83.4%); <100ms 57.9% (cpu past slice 38.2%)
+c3-workday writer (soffice.bin): n=244 median=84914 p10=14299 mean=113875 max=893255 | <2ms 0.4% (cpu past slice 98.3%); <10ms 7.8% (cpu past slice 91.6%); <20ms 13.1% (cpu past slice 83.7%); <100ms 56.6% (cpu past slice 38.6%)
+c3-workday mailer (thunderbird): n=220 median=89180 p10=15177 mean=125799 max=1295981 | <2ms 3.6% (cpu past slice 98.4%); <10ms 8.2% (cpu past slice 92.5%); <20ms 13.2% (cpu past slice 85.3%); <100ms 56.8% (cpu past slice 44.4%)
+c4-compile editor (code): n=239 median=79943 p10=14019 mean=119125 max=1337206 | <2ms 0.4% (cpu past slice 98.3%); <10ms 4.2% (cpu past slice 91.8%); <20ms 13.0% (cpu past slice 84.2%); <100ms 62.8% (cpu past slice 43.5%)
+c4-compile injected-browser (chrome): no bursts (never focused)
+c4-office browser (chrome): no bursts (never focused)
+c4-office writer (soffice.bin): n=234 median=89716 p10=24819 mean=127499 max=1035087 | <2ms 0.4% (cpu past slice 98.4%); <10ms 4.7% (cpu past slice 92.3%); <20ms 7.7% (cpu past slice 84.9%); <100ms 55.6% (cpu past slice 42.2%)
+c6-dual editor (code): n=976 median=84368 p10=15412 mean=120590 max=1314596 | <2ms 1.9% (cpu past slice 98.4%); <10ms 7.0% (cpu past slice 92.0%); <20ms 12.0% (cpu past slice 84.5%); <100ms 57.6% (cpu past slice 41.4%)
+c6-fold browser (chrome): n=229 median=90427 p10=18044 mean=116267 max=857492 | <2ms 1.3% (cpu past slice 98.3%); <10ms 7.0% (cpu past slice 91.7%); <20ms 10.9% (cpu past slice 83.9%); <100ms 55.5% (cpu past slice 38.2%)
+c6-spoof browser (chrome): n=229 median=90427 p10=18044 mean=116267 max=857492 | <2ms 1.3% (cpu past slice 98.3%); <10ms 7.0% (cpu past slice 91.7%); <20ms 10.9% (cpu past slice 83.9%); <100ms 55.5% (cpu past slice 38.2%)
+c7-backup editor (kdenlive): n=255 median=84543 p10=14552 mean=111567 max=502728 | <2ms 1.6% (cpu past slice 98.2%); <10ms 7.5% (cpu past slice 91.4%); <20ms 11.8% (cpu past slice 83.3%); <100ms 57.6% (cpu past slice 36.2%)
+c7-browsing browser (chrome): n=229 median=90427 p10=18044 mean=116267 max=857492 | <2ms 1.3% (cpu past slice 98.3%); <10ms 7.0% (cpu past slice 91.7%); <20ms 10.9% (cpu past slice 83.9%); <100ms 55.5% (cpu past slice 38.2%)
+c7-compile editor (code): n=239 median=79943 p10=14019 mean=119125 max=1337206 | <2ms 0.4% (cpu past slice 98.3%); <10ms 4.2% (cpu past slice 91.8%); <20ms 13.0% (cpu past slice 84.2%); <100ms 62.8% (cpu past slice 43.5%)
+c7-dev editor (code): n=237 median=87599 p10=16797 mean=117316 max=729764 | <2ms 0.0% (cpu past slice 98.3%); <10ms 4.2% (cpu past slice 91.6%); <20ms 11.0% (cpu past slice 83.8%); <100ms 57.0% (cpu past slice 38.1%)
+c7-indexing editor (code): n=238 median=73673 p10=10118 mean=114718 max=759279 | <2ms 1.7% (cpu past slice 98.3%); <10ms 9.7% (cpu past slice 91.7%); <20ms 20.2% (cpu past slice 84.3%); <100ms 60.1% (cpu past slice 43.7%)
+c7-mail mailer (thunderbird): n=234 median=84300 p10=21372 mean=122301 max=1095558 | <2ms 1.7% (cpu past slice 98.4%); <10ms 3.8% (cpu past slice 92.0%); <20ms 9.4% (cpu past slice 84.4%); <100ms 57.3% (cpu past slice 41.6%)
+c7-ml-train editor (code): n=232 median=95498 p10=17804 mean=122137 max=724342 | <2ms 1.7% (cpu past slice 98.4%); <10ms 3.9% (cpu past slice 92.0%); <20ms 11.6% (cpu past slice 84.5%); <100ms 53.4% (cpu past slice 39.4%)
+c7-office browser (chrome): no bursts (never focused)
+c7-office writer (soffice.bin): n=234 median=89716 p10=24819 mean=127499 max=1035087 | <2ms 0.4% (cpu past slice 98.4%); <10ms 4.7% (cpu past slice 92.3%); <20ms 7.7% (cpu past slice 84.9%); <100ms 55.6% (cpu past slice 42.2%)
+c7-photo photo-editor (gimp): n=226 median=85116 p10=15931 mean=124163 max=1038021 | <2ms 1.3% (cpu past slice 98.4%); <10ms 4.4% (cpu past slice 92.2%); <20ms 10.6% (cpu past slice 84.8%); <100ms 56.2% (cpu past slice 42.4%)
+c7-render editor (kdenlive): n=230 median=83798 p10=11995 mean=104890 max=1280753 | <2ms 0.9% (cpu past slice 98.1%); <10ms 8.3% (cpu past slice 90.8%); <20ms 16.1% (cpu past slice 82.5%); <100ms 58.7% (cpu past slice 34.7%)
+c7-transcode video-editor (kdenlive): n=225 median=86677 p10=22110 mean=125463 max=938310 | <2ms 1.3% (cpu past slice 98.4%); <10ms 4.4% (cpu past slice 92.2%); <20ms 8.0% (cpu past slice 84.7%); <100ms 57.8% (cpu past slice 42.9%)
+c7-video-edit editor (kdenlive): n=238 median=87284 p10=15776 mean=115683 max=696131 | <2ms 0.0% (cpu past slice 98.3%); <10ms 6.3% (cpu past slice 91.6%); <20ms 13.4% (cpu past slice 83.7%); <100ms 56.7% (cpu past slice 38.9%)
+
+######## 5 finite IO-shaped jobs: B1 batch-class exposure per slice, wall time, completion vs file end
+c1-backup bulk (borg): arrive=2s chunks=8447 RUN sum=30.001s med=2995 mean=3552 max=28905 SLEEP med=9854 mean=11860 duty=0.230 uncontended finish=132.2s vs segment end 60s / file end 60s; uncontended CPU by file end=13.398s (44.7% of total_work; 0.2233 lanes vs static 0.5000)
+    slice    500: chunks reaching a full slice 8431/8447 (99.8%); CPU in batch class 85.93%
+    slice    750: chunks reaching a full slice 8362/8447 (99.0%); CPU in batch class 78.92%
+    slice    900: chunks reaching a full slice 8260/8447 (97.8%); CPU in batch class 74.76%
+    slice   1000: chunks reaching a full slice 8178/8447 (96.8%); CPU in batch class 72.02%
+    slice   1200: chunks reaching a full slice 7908/8447 (93.6%); CPU in batch class 66.65%
+    slice   2000: chunks reaching a full slice 6367/8447 (75.4%); CPU in batch class 47.53%
+    slice   3000: chunks reaching a full slice 4217/8447 (49.9%); CPU in batch class 29.94%
+    slice   5000: chunks reaching a full slice 1608/8447 (19.0%); CPU in batch class 11.66%
+    slice  10000: chunks reaching a full slice 162/8447 (1.9%); CPU in batch class 1.49%
+    slice  20000: chunks reaching a full slice 7/8447 (0.1%); CPU in batch class 0.08%
+    slice 100000: chunks reaching a full slice 0/8447 (0.0%); CPU in batch class 0.00%
+c1-mail send (thunderbird): arrive=40s chunks=2561 RUN sum=3.001s med=1035 mean=1172 max=6696 SLEEP med=16506 mean=18903 duty=0.058 uncontended finish=91.4s vs segment end 60s / file end 60s; uncontended CPU by file end=1.154s (38.4% of total_work; 0.0192 lanes vs static 0.0500)
+    slice    500: chunks reaching a full slice 2367/2561 (92.4%); CPU in batch class 57.96%
+    slice    750: chunks reaching a full slice 1900/2561 (74.2%); CPU in batch class 40.00%
+    slice    900: chunks reaching a full slice 1584/2561 (61.9%); CPU in batch class 31.29%
+    slice   1000: chunks reaching a full slice 1369/2561 (53.5%); CPU in batch class 26.37%
+    slice   1200: chunks reaching a full slice 986/2561 (38.5%); CPU in batch class 18.59%
+    slice   2000: chunks reaching a full slice 241/2561 (9.4%); CPU in batch class 4.24%
+    slice   3000: chunks reaching a full slice 29/2561 (1.1%); CPU in batch class 0.70%
+    slice   5000: chunks reaching a full slice 3/2561 (0.1%); CPU in batch class 0.07%
+    slice  10000: chunks reaching a full slice 0/2561 (0.0%); CPU in batch class 0.00%
+    slice  20000: chunks reaching a full slice 0/2561 (0.0%); CPU in batch class 0.00%
+    slice 100000: chunks reaching a full slice 0/2561 (0.0%); CPU in batch class 0.00%
+c2-p2a download (steam): arrive=60s chunks=22072 RUN sum=25.001s med=993 mean=1133 max=6944 SLEEP med=16712 mean=18954 duty=0.056 uncontended finish=503.3s vs segment end 120s / file end 120s; uncontended CPU by file end=3.382s (13.5% of total_work; 0.0282 lanes vs static 0.2083)
+    slice    500: chunks reaching a full slice 20220/22072 (91.6%); CPU in batch class 56.56%
+    slice    750: chunks reaching a full slice 15885/22072 (72.0%); CPU in batch class 38.40%
+    slice    900: chunks reaching a full slice 12889/22072 (58.4%); CPU in batch class 29.79%
+    slice   1000: chunks reaching a full slice 10919/22072 (49.5%); CPU in batch class 25.03%
+    slice   1200: chunks reaching a full slice 7831/22072 (35.5%); CPU in batch class 17.59%
+    slice   2000: chunks reaching a full slice 1882/22072 (8.5%); CPU in batch class 4.21%
+    slice   3000: chunks reaching a full slice 308/22072 (1.4%); CPU in batch class 0.78%
+    slice   5000: chunks reaching a full slice 19/22072 (0.1%); CPU in batch class 0.04%
+    slice  10000: chunks reaching a full slice 0/22072 (0.0%); CPU in batch class 0.00%
+    slice  20000: chunks reaching a full slice 0/22072 (0.0%); CPU in batch class 0.00%
+    slice 100000: chunks reaching a full slice 0/22072 (0.0%); CPU in batch class 0.00%
+c2-p3b bulk (borg): arrive=60s chunks=21078 RUN sum=75.002s med=2968 mean=3558 max=38430 SLEEP med=10022 mean=12013 duty=0.229 uncontended finish=388.2s vs segment end 120s / file end 120s; uncontended CPU by file end=13.546s (18.1% of total_work; 0.1129 lanes vs static 0.6250)
+    slice    500: chunks reaching a full slice 21049/21078 (99.9%); CPU in batch class 85.95%
+    slice    750: chunks reaching a full slice 20864/21078 (99.0%); CPU in batch class 78.96%
+    slice    900: chunks reaching a full slice 20648/21078 (98.0%); CPU in batch class 74.81%
+    slice   1000: chunks reaching a full slice 20400/21078 (96.8%); CPU in batch class 72.07%
+    slice   1200: chunks reaching a full slice 19793/21078 (93.9%); CPU in batch class 66.70%
+    slice   2000: chunks reaching a full slice 15765/21078 (74.8%); CPU in batch class 47.61%
+    slice   3000: chunks reaching a full slice 10395/21078 (49.3%); CPU in batch class 30.29%
+    slice   5000: chunks reaching a full slice 4058/21078 (19.3%); CPU in batch class 12.33%
+    slice  10000: chunks reaching a full slice 446/21078 (2.1%); CPU in batch class 1.70%
+    slice  20000: chunks reaching a full slice 20/21078 (0.1%); CPU in batch class 0.11%
+    slice 100000: chunks reaching a full slice 0/21078 (0.0%); CPU in batch class 0.00%
+c3-workday send (thunderbird): arrive=400s chunks=2615 RUN sum=3.000s med=1021 mean=1147 max=5390 SLEEP med=17050 mean=18969 duty=0.057 uncontended finish=452.6s vs segment end 420s / file end 420s; uncontended CPU by file end=1.108s (36.9% of total_work; 0.0026 lanes vs static 0.0071)
+    slice    500: chunks reaching a full slice 2408/2615 (92.1%); CPU in batch class 57.07%
+    slice    750: chunks reaching a full slice 1906/2615 (72.9%); CPU in batch class 39.11%
+    slice    900: chunks reaching a full slice 1567/2615 (59.9%); CPU in batch class 30.44%
+    slice   1000: chunks reaching a full slice 1349/2615 (51.6%); CPU in batch class 25.60%
+    slice   1200: chunks reaching a full slice 981/2615 (37.5%); CPU in batch class 17.90%
+    slice   2000: chunks reaching a full slice 220/2615 (8.4%); CPU in batch class 4.29%
+    slice   3000: chunks reaching a full slice 39/2615 (1.5%); CPU in batch class 0.98%
+    slice   5000: chunks reaching a full slice 3/2615 (0.1%); CPU in batch class 0.02%
+    slice  10000: chunks reaching a full slice 0/2615 (0.0%); CPU in batch class 0.00%
+    slice  20000: chunks reaching a full slice 0/2615 (0.0%); CPU in batch class 0.00%
+    slice 100000: chunks reaching a full slice 0/2615 (0.0%); CPU in batch class 0.00%
+c4-office injected-burst (7z): arrive=30s chunks=1651 RUN sum=6.000s med=3006 mean=3634 max=20588 SLEEP med=9803 mean=11716 duty=0.237 uncontended finish=55.3s vs segment end 60s / file end 60s; uncontended CPU by file end=6.000s (100.0% of total_work; 0.1000 lanes vs static 0.1000)
+    slice    500: chunks reaching a full slice 1648/1651 (99.8%); CPU in batch class 86.25%
+    slice    750: chunks reaching a full slice 1637/1651 (99.2%); CPU in batch class 79.40%
+    slice    900: chunks reaching a full slice 1608/1651 (97.4%); CPU in batch class 75.34%
+    slice   1000: chunks reaching a full slice 1590/1651 (96.3%); CPU in batch class 72.68%
+    slice   1200: chunks reaching a full slice 1559/1651 (94.4%); CPU in batch class 67.42%
+    slice   2000: chunks reaching a full slice 1242/1651 (75.2%); CPU in batch class 48.64%
+    slice   3000: chunks reaching a full slice 829/1651 (50.2%); CPU in batch class 31.47%
+    slice   5000: chunks reaching a full slice 328/1651 (19.9%); CPU in batch class 13.64%
+    slice  10000: chunks reaching a full slice 43/1651 (2.6%); CPU in batch class 1.93%
+    slice  20000: chunks reaching a full slice 1/1651 (0.1%); CPU in batch class 0.01%
+    slice 100000: chunks reaching a full slice 0/1651 (0.0%); CPU in batch class 0.00%
+c7-backup bulk (borg): arrive=2s chunks=8447 RUN sum=30.001s med=2995 mean=3552 max=28905 SLEEP med=9854 mean=11860 duty=0.230 uncontended finish=132.2s vs segment end 60s / file end 60s; uncontended CPU by file end=13.398s (44.7% of total_work; 0.2233 lanes vs static 0.5000)
+    slice    500: chunks reaching a full slice 8431/8447 (99.8%); CPU in batch class 85.93%
+    slice    750: chunks reaching a full slice 8362/8447 (99.0%); CPU in batch class 78.92%
+    slice    900: chunks reaching a full slice 8260/8447 (97.8%); CPU in batch class 74.76%
+    slice   1000: chunks reaching a full slice 8178/8447 (96.8%); CPU in batch class 72.02%
+    slice   1200: chunks reaching a full slice 7908/8447 (93.6%); CPU in batch class 66.65%
+    slice   2000: chunks reaching a full slice 6367/8447 (75.4%); CPU in batch class 47.53%
+    slice   3000: chunks reaching a full slice 4217/8447 (49.9%); CPU in batch class 29.94%
+    slice   5000: chunks reaching a full slice 1608/8447 (19.0%); CPU in batch class 11.66%
+    slice  10000: chunks reaching a full slice 162/8447 (1.9%); CPU in batch class 1.49%
+    slice  20000: chunks reaching a full slice 7/8447 (0.1%); CPU in batch class 0.08%
+    slice 100000: chunks reaching a full slice 0/8447 (0.0%); CPU in batch class 0.00%
+c7-mail send (thunderbird): arrive=40s chunks=2561 RUN sum=3.001s med=1035 mean=1172 max=6696 SLEEP med=16506 mean=18903 duty=0.058 uncontended finish=91.4s vs segment end 60s / file end 60s; uncontended CPU by file end=1.154s (38.4% of total_work; 0.0192 lanes vs static 0.0500)
+    slice    500: chunks reaching a full slice 2367/2561 (92.4%); CPU in batch class 57.96%
+    slice    750: chunks reaching a full slice 1900/2561 (74.2%); CPU in batch class 40.00%
+    slice    900: chunks reaching a full slice 1584/2561 (61.9%); CPU in batch class 31.29%
+    slice   1000: chunks reaching a full slice 1369/2561 (53.5%); CPU in batch class 26.37%
+    slice   1200: chunks reaching a full slice 986/2561 (38.5%); CPU in batch class 18.59%
+    slice   2000: chunks reaching a full slice 241/2561 (9.4%); CPU in batch class 4.24%
+    slice   3000: chunks reaching a full slice 29/2561 (1.1%); CPU in batch class 0.70%
+    slice   5000: chunks reaching a full slice 3/2561 (0.1%); CPU in batch class 0.07%
+    slice  10000: chunks reaching a full slice 0/2561 (0.0%); CPU in batch class 0.00%
+    slice  20000: chunks reaching a full slice 0/2561 (0.0%); CPU in batch class 0.00%
+    slice 100000: chunks reaching a full slice 0/2561 (0.0%); CPU in batch class 0.00%
+
+######## 6 periodic / sleep loops: wineserver, daemons, electron — wakes inside lifetime
+c1-gaming wine: SLEEP=1225245899 RUN=97 lifetime=60000000 -> completed wake-runs in lifetime=0 (first RUN at t=1225245899)
+c2-p2a wine: SLEEP=2117324 RUN=212 lifetime=120000000 -> completed wake-runs in lifetime=56 (first RUN at t=2117324)
+c2-p2b wine: SLEEP=2117324 RUN=212 lifetime=120000000 -> completed wake-runs in lifetime=56 (first RUN at t=2117324)
+c3-evening wine: SLEEP=457381676 RUN=873 lifetime=240000000 -> completed wake-runs in lifetime=0 (first RUN at t=517381676)
+c4-gaming wine: SLEEP=1225245899 RUN=97 lifetime=60000000 -> completed wake-runs in lifetime=0 (first RUN at t=1225245899)
+c6-dual wine: SLEEP=2769255 RUN=583 lifetime=240000000 -> completed wake-runs in lifetime=86 (first RUN at t=2769255)
+c7-gaming wine: SLEEP=1225245899 RUN=97 lifetime=60000000 -> completed wake-runs in lifetime=0 (first RUN at t=1225245899)
+
+######## 7 c3-creation: external wakes of video-editor after 240 s
+video-editor wakes: first 122143756 last 237940408 count 510 after 240s: 0
+photo-editor wakes: last 117389584
+
+######## 8 C2 P1 event identity apart from name
+p1 events identical apart from names: True
+p1 name diffs: [('hog', 'python3', 'tracker-miner-fs-3')]
+p2 events identical apart from names: False
+p3 events identical apart from names: False

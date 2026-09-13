@@ -1,0 +1,100 @@
+meas-cli-r1 kernel-build-j8 total 11913 unparsed(non-s) compiler exits anywhere: {}
+   gcc        n=  2991 median_us=  860072 sl=1.096 floored1ms=0
+   cc1        n=  2973 median_us=  840515 sl=1.146 floored1ms=0
+   as         n=  2951 median_us=    9123 sl=0.736 floored1ms=7
+   fixdep     n=  2890 median_us=   14793 sl=0.680 floored1ms=84
+   ld         n=    53 median_us=   16416 sl=1.459 floored1ms=0
+   objcopy    n=    26 median_us=    6708 sl=1.159 floored1ms=0
+   collect2   n=    18 median_us=   39367 sl=0.507 floored1ms=0
+   objtool    n=    10 median_us=   11924 sl=1.955 floored1ms=0
+   modpost    n=     1 median_us= 4301000 sl=0.000 floored1ms=0
+meas-cli-r1 kernel-build-cold total 11863 unparsed(non-s) compiler exits anywhere: {}
+   gcc        n=  2970 median_us=  897778 sl=1.011 floored1ms=0
+   cc1        n=  2957 median_us=  872707 sl=1.067 floored1ms=0
+   as         n=  2939 median_us=    9489 sl=0.711 floored1ms=6
+   fixdep     n=  2886 median_us=   15399 sl=0.658 floored1ms=64
+   ld         n=    55 median_us=   15749 sl=1.475 floored1ms=0
+   objcopy    n=    26 median_us=    5814 sl=1.218 floored1ms=0
+   collect2   n=    19 median_us=   38669 sl=0.562 floored1ms=0
+   objtool    n=    10 median_us=   17266 sl=1.849 floored1ms=0
+   modpost    n=     1 median_us= 4300000 sl=0.000 floored1ms=0
+meas-cli-r2 kernel-build-j8 total 11883 unparsed(non-s) compiler exits anywhere: {}
+   gcc        n=  2981 median_us=  849889 sl=1.056 floored1ms=0
+   cc1        n=  2964 median_us=  830182 sl=1.106 floored1ms=0
+   as         n=  2943 median_us=    8992 sl=0.724 floored1ms=8
+   fixdep     n=  2886 median_us=   14386 sl=0.670 floored1ms=81
+   ld         n=    54 median_us=   15084 sl=1.522 floored1ms=0
+   objcopy    n=    26 median_us=    5519 sl=1.241 floored1ms=0
+   collect2   n=    18 median_us=   41907 sl=0.518 floored1ms=0
+   objtool    n=    10 median_us=   14865 sl=1.863 floored1ms=0
+   modpost    n=     1 median_us= 4301000 sl=0.000 floored1ms=0
+meas-cli-r2 kernel-build-cold total 11829 unparsed(non-s) compiler exits anywhere: {}
+   gcc        n=  2957 median_us=  879936 sl=0.975 floored1ms=0
+   cc1        n=  2946 median_us=  854755 sl=1.032 floored1ms=0
+   as         n=  2935 median_us=    9058 sl=0.714 floored1ms=10
+   fixdep     n=  2888 median_us=   14784 sl=0.655 floored1ms=69
+   ld         n=    50 median_us=   14942 sl=1.525 floored1ms=0
+   objcopy    n=    25 median_us=    7029 sl=1.193 floored1ms=0
+   collect2   n=    17 median_us=   37809 sl=0.559 floored1ms=0
+   objtool    n=    10 median_us=   13191 sl=1.935 floored1ms=0
+   modpost    n=     1 median_us= 4294000 sl=0.000 floored1ms=0
+meas-cli-r3 kernel-build-j8 total 11914 unparsed(non-s) compiler exits anywhere: {}
+   gcc        n=  2996 median_us=  689630 sl=1.069 floored1ms=1
+   cc1        n=  2976 median_us=  674901 sl=1.110 floored1ms=0
+   as         n=  2952 median_us=    7209 sl=0.749 floored1ms=57
+   fixdep     n=  2881 median_us=   10108 sl=0.633 floored1ms=86
+   ld         n=    54 median_us=   12386 sl=1.514 floored1ms=4
+   objcopy    n=    26 median_us=    4085 sl=1.387 floored1ms=3
+   collect2   n=    18 median_us=   34157 sl=0.418 floored1ms=0
+   objtool    n=    10 median_us=   11522 sl=1.909 floored1ms=0
+   modpost    n=     1 median_us= 3374000 sl=0.000 floored1ms=0
+meas-cli-r3 kernel-build-cold total 11837 unparsed(non-s) compiler exits anywhere: {}
+   gcc        n=  2966 median_us=  686267 sl=1.010 floored1ms=0
+   cc1        n=  2949 median_us=  673556 sl=1.042 floored1ms=0
+   as         n=  2933 median_us=    7143 sl=0.713 floored1ms=33
+   fixdep     n=  2883 median_us=   10138 sl=0.655 floored1ms=105
+   ld         n=    53 median_us=   12331 sl=1.547 floored1ms=2
+   objcopy    n=    23 median_us=    4317 sl=1.454 floored1ms=3
+   collect2   n=    19 median_us=   30617 sl=0.642 floored1ms=0
+   objtool    n=    10 median_us=   12604 sl=1.882 floored1ms=0
+   modpost    n=     1 median_us= 3325000 sl=0.000 floored1ms=0
+meas-cli-r4 kernel-build-j8 total 11835 unparsed(non-s) compiler exits anywhere: {}
+   gcc        n=  2965 median_us=  947893 sl=1.013 floored1ms=0
+   cc1        n=  2948 median_us=  928511 sl=1.056 floored1ms=0
+   as         n=  2930 median_us=    9504 sl=0.746 floored1ms=9
+   fixdep     n=  2885 median_us=   14653 sl=0.657 floored1ms=65
+   ld         n=    52 median_us=   16988 sl=1.431 floored1ms=0
+   objcopy    n=    26 median_us=    7021 sl=1.271 floored1ms=2
+   collect2   n=    18 median_us=   41767 sl=0.401 floored1ms=0
+   objtool    n=    10 median_us=   13347 sl=1.885 floored1ms=0
+   modpost    n=     1 median_us= 3964000 sl=0.000 floored1ms=0
+meas-cli-r4 kernel-build-cold total 11838 unparsed(non-s) compiler exits anywhere: {}
+   gcc        n=  2965 median_us=  950875 sl=1.004 floored1ms=0
+   cc1        n=  2951 median_us=  928843 sl=1.053 floored1ms=0
+   as         n=  2935 median_us=    9461 sl=0.739 floored1ms=15
+   fixdep     n=  2878 median_us=   15158 sl=0.658 floored1ms=74
+   ld         n=    53 median_us=   15705 sl=1.396 floored1ms=0
+   objcopy    n=    26 median_us=    5801 sl=1.288 floored1ms=2
+   collect2   n=    19 median_us=   33174 sl=0.534 floored1ms=0
+   objtool    n=    10 median_us=    9832 sl=2.047 floored1ms=0
+   modpost    n=     1 median_us= 3947000 sl=0.000 floored1ms=0
+meas-cli-r5 kernel-build-j8 total 11861 unparsed(non-s) compiler exits anywhere: {}
+   gcc        n=  2971 median_us=  948847 sl=1.024 floored1ms=0
+   cc1        n=  2957 median_us=  925548 sl=1.077 floored1ms=0
+   as         n=  2938 median_us=    9631 sl=0.748 floored1ms=7
+   fixdep     n=  2886 median_us=   14744 sl=0.650 floored1ms=71
+   ld         n=    54 median_us=   15305 sl=1.449 floored1ms=0
+   objcopy    n=    26 median_us=    6315 sl=1.269 floored1ms=2
+   collect2   n=    18 median_us=   40216 sl=0.465 floored1ms=0
+   objtool    n=    10 median_us=   13682 sl=1.910 floored1ms=0
+   modpost    n=     1 median_us= 3970000 sl=0.000 floored1ms=0
+meas-cli-r5 kernel-build-cold total 11850 unparsed(non-s) compiler exits anywhere: {}
+   gcc        n=  2968 median_us=  945056 sl=1.022 floored1ms=0
+   cc1        n=  2954 median_us=  922768 sl=1.071 floored1ms=0
+   as         n=  2935 median_us=    9531 sl=0.748 floored1ms=6
+   fixdep     n=  2884 median_us=   15042 sl=0.650 floored1ms=63
+   ld         n=    53 median_us=   14381 sl=1.547 floored1ms=0
+   objcopy    n=    26 median_us=    6422 sl=1.259 floored1ms=2
+   collect2   n=    19 median_us=   37696 sl=0.562 floored1ms=0
+   objtool    n=    10 median_us=   13865 sl=1.863 floored1ms=0
+   modpost    n=     1 median_us= 3951000 sl=0.000 floored1ms=0

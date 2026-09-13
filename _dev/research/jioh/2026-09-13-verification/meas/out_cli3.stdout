@@ -1,0 +1,238 @@
+{
+  "compiler_lifetime_median_us": {
+    "n_repeats": 5,
+    "median": 99801,
+    "min": 76885,
+    "max": 105713
+  },
+  "compiler_lifetime_sigma_log": {
+    "n_repeats": 5,
+    "median": 2.366,
+    "min": 2.344,
+    "max": 2.379
+  },
+  "compiler_children": {
+    "n_repeats": 5,
+    "median": 11883,
+    "min": 11835,
+    "max": 11914
+  },
+  "compiler_cpu_mean_us": {
+    "n_repeats": 5,
+    "median": 89997,
+    "min": 61620,
+    "max": 98793
+  },
+  "compiler_life_mean_us": {
+    "n_repeats": 5,
+    "median": 625335,
+    "min": 499646,
+    "max": 669059
+  },
+  "compiler_cold_lifetime_median_us": {
+    "n_repeats": 5,
+    "median": 103397,
+    "min": 76155,
+    "max": 106019
+  },
+  "compiler_cold_lifetime_sigma_log": {
+    "n_repeats": 5,
+    "median": 2.361,
+    "min": 2.329,
+    "max": 2.363
+  },
+  "compiler_cold_children": {
+    "n_repeats": 5,
+    "median": 11838,
+    "min": 11829,
+    "max": 11863
+  },
+  "compiler_cold_cpu_mean_us": {
+    "n_repeats": 5,
+    "median": 91465,
+    "min": 58188,
+    "max": 98642
+  },
+  "compiler_cold_life_mean_us": {
+    "n_repeats": 5,
+    "median": 633185,
+    "min": 484926,
+    "max": 666895
+  },
+  "make_dispatch_us": {
+    "n_repeats": 5,
+    "median": 234,
+    "min": 183,
+    "max": 262
+  },
+  "fork_rate_hz": {
+    "n_repeats": 5,
+    "median": 24.2,
+    "min": 22.8,
+    "max": 30.1
+  },
+  "rsync_duty": {
+    "n_repeats": 5,
+    "median": 1.244,
+    "min": 1.181,
+    "max": 1.316
+  },
+  "rsync_proc_duty": {
+    "n_repeats": 5,
+    "median": 0.276,
+    "min": 0.264,
+    "max": 0.307
+  },
+  "untar_duty": {
+    "n_repeats": 5,
+    "median": 1.36,
+    "min": 1.325,
+    "max": 1.439
+  },
+  "untar_proc_duty": {
+    "n_repeats": 5,
+    "median": 0.684,
+    "min": 0.67,
+    "max": 0.754
+  },
+  "clamscan_duty": {
+    "n_repeats": 5,
+    "median": 0.991,
+    "min": 0.989,
+    "max": 0.999
+  },
+  "clamscan_proc_duty": {
+    "n_repeats": 5,
+    "median": 0.999,
+    "min": 0.994,
+    "max": 1.006
+  },
+  "updatedb_duty": {
+    "n_repeats": 5,
+    "median": 0.785,
+    "min": 0.627,
+    "max": 0.833
+  },
+  "updatedb_proc_duty": null,
+  "wget_duty": {
+    "n_repeats": 5,
+    "median": 0.184,
+    "min": 0.014,
+    "max": 0.571
+  },
+  "wget_proc_duty": {
+    "n_repeats": 2,
+    "median": 0.0565,
+    "min": 0.013,
+    "max": 0.1
+  },
+  "tar_cold_duty": {
+    "n_repeats": 5,
+    "median": 0.386,
+    "min": 0.305,
+    "max": 0.481
+  },
+  "tar_cold_proc_duty": null,
+  "rsync_cold_duty": {
+    "n_repeats": 5,
+    "median": 0.625,
+    "min": 0.46,
+    "max": 0.737
+  },
+  "rsync_cold_proc_duty": {
+    "n_repeats": 5,
+    "median": 0.231,
+    "min": 0.155,
+    "max": 0.267
+  },
+  "clamscan_cold_duty": {
+    "n_repeats": 5,
+    "median": 0.967,
+    "min": 0.913,
+    "max": 0.973
+  },
+  "clamscan_cold_proc_duty": {
+    "n_repeats": 5,
+    "median": 0.976,
+    "min": 0.919,
+    "max": 0.984
+  },
+  "updatedb_cold_duty": {
+    "n_repeats": 5,
+    "median": 0.206,
+    "min": 0.147,
+    "max": 0.245
+  },
+  "updatedb_cold_proc_duty": {
+    "n_repeats": 5,
+    "median": 0.215,
+    "min": 0.147,
+    "max": 0.244
+  },
+  "tracker": {
+    "procs": 5,
+    "gap": {
+      "n": 5,
+      "median_us": 3801982,
+      "sigma_log": 0.428,
+      "p90_us": 5436364
+    },
+    "work": {
+      "n": 5,
+      "median_us": 1608,
+      "sigma_log": 0.639,
+      "p90_us": 3000
+    }
+  },
+  "chromium_peak_procs": {
+    "n_repeats": 5,
+    "median": 22,
+    "min": 21,
+    "max": 22
+  },
+  "element": {
+    "procs": 15,
+    "gap": {
+      "n": 15,
+      "median_us": 1848645,
+      "sigma_log": 1.088,
+      "p90_us": 3914474
+    },
+    "work": {
+      "n": 15,
+      "median_us": 289,
+      "sigma_log": 0.713,
+      "p90_us": 826
+    }
+  },
+  "chromium": {
+    "procs": 50,
+    "gap": {
+      "n": 50,
+      "median_us": 1609098,
+      "sigma_log": 1.718,
+      "p90_us": 12541667
+    },
+    "work": {
+      "n": 42,
+      "median_us": 647,
+      "sigma_log": 0.94,
+      "p90_us": 2936
+    }
+  },
+  "daemons": {
+    "procs": 51,
+    "gap": {
+      "n": 51,
+      "median_us": 11239013,
+      "sigma_log": 1.898,
+      "p90_us": 120600000
+    },
+    "work": {
+      "n": 29,
+      "median_us": 155,
+      "sigma_log": 0.809,
+      "p90_us": 280
+    }
+  }
+}

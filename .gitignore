@@ -10,3 +10,15 @@ venv/
 # runner outputs and the machine configuration (harness/runner.example.yaml is the committed example)
 /runs/
 harness/runner.yaml
+
+# research source copies and raw measurement data — local only; origins in each research folder's README.md
+_dev/research/*/*/sources/
+_dev/research/jioh/2026-09-13-verification/meas/release/
+_dev/research/jioh/2026-09-13-verification/meas/cli1/
+_dev/research/jioh/2026-09-13-verification/meas/cli3/
+_dev/research/jioh/2026-09-13-verification/meas/gui/
+_dev/research/jioh/2026-09-13-verification/meas/names/
+_dev/research/jioh/2026-09-13-verification/meas/run_cli1/
+_dev/research/jioh/2026-09-13-verification/meas/run_cli3/
+_dev/research/jioh/2026-09-13-verification/meas/array.c
+_dev/research/jioh/2026-09-13-verification/meas/tar_*
