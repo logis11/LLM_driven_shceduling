@@ -103,6 +103,8 @@ Every finding in `docs/memos/2026-09-13-critical-findings.md` and the 2026-09-13
 
 always work on branch `jioh/dataset-rebuild`
 
+9.4–9.12 follow `_dev/research/jioh/research-slice-workflow.md`: domain slices own archetypes, 9.10 owns timelines; decisions are applied to `dataset/archetypes.yaml` as they land, logged in the slice's research folder, never in the public docs.
+
 Execution order: 9.1 ∥ 9.2 ∥ 9.3 first → 9.4–9.12 in parallel, after 9.1 and 9.3 → 9.13 → 9.14 → 9.15 → 9.16.
 
 - [x] **9.1** Verification records — the 2026-09-13 claim inventory, independent reads, comparisons, measurement audit and compiled-number audit persisted into the repository
