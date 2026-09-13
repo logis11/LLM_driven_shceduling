@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-09-12
+> Status: normative · Created 2026-08-26 · Updated 2026-09-13
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -167,7 +167,7 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 
 ### `lavd-ossna24`
 - cite: Min, C. (2024). "Optimizing Scheduler for Linux Gaming." Talk, Open Source Summit North America 2024, Seattle, 2024-04-17. Slides: static.sched.com/hosted_files/ossna2024/9b/scx-lavd-oss-na24.pdf; schedule page: ossna2024.sched.com/event/1aBOT (accessed 2026-08-26).
-- role: Role B — richest gaming numbers: ~300 tasks, ~90% long-lived, top 30–40 tasks = 95% of scheduling (15–20 take 60–70%), per-schedule runtimes ~260 µs–1.65 ms, 70–75% wakeups from waiting syscalls, 16.7 ms frame budget. Also the concentration statistics defending our single-lane scaling of `game-task-chain`. Talk slides — footnote tier despite carrying numbers; pair with `corbet-lwn24` for prose-citable coverage.
+- role: Role B — richest gaming numbers: ~300 tasks, ~90% long-lived, top 30–40 tasks = 95% of scheduling (15–20 take 60–70%), per-schedule runtimes ~260 µs–1.65 ms, 70–75% wakeups from waiting syscalls. Also the concentration statistics defending our single-lane scaling of `game-task-chain`. Talk slides — footnote tier despite carrying numbers; pair with `corbet-lwn24` for prose-citable coverage.
 - status: verified (2026-08-26)
 
 ### `corbet-lwn24`
@@ -220,6 +220,11 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - cite: Valve. "Downloads automatically pause when launching a game." Steam Support, help.steampowered.com/en/faqs/view/4F9E-6328-E9B8-47F9 (accessed 2026-08-26). Secondary: "Managing Steam Downloads & Updates", …/71AB-698D-57EB-178C (updated 2024-09-24).
 - role: S10 — documents the "Allow Downloads During Gameplay" checkbox (Steam → Settings → Downloads), default pause-during-gameplay, and the per-game counterpart: the wanted/unwanted toggle as a real user-facing setting. Note: 2021 article title-cases the toggle; current client UI sentence-cases it.
 - status: verified (2026-08-26)
+
+### `steamos-refresh`
+- cite: Valve. "The SteamOS 3.2 Update." Steam Deck news, 2022-05-26, store.steampowered.com/news/app/1675200/view/4437747060827905309 (accessed 2026-09-13 through the ISteamNews API, app 1675200). Secondary: Steam Deck tech specs, steamdeck.com/en/tech/deck (accessed 2026-09-13).
+- role: existence of the Steam Deck LCD's 60 Hz default refresh and of the in-game refresh and frame-limit setting: "The default is 60Hz (which can be frame-limited to 60, 30, and 15fps), but you can now slide it down to 40Hz (with frame limits at 40, 20, and 10fps)"; "60hz = 16.66ms/frame"; tech specs "Refresh rate 60Hz". Grounds `game-task-chain.frame_period` as the display-paced default; that the game is modelled as display-paced is our choice (archetypes.yaml `modeling_notes`). Existence only.
+- status: verified (2026-09-13)
 
 ### `dkms-man`
 - cite: dkms(8) manual page, dkms 3.0.11. Ubuntu Manpage Repository (noble), manpages.ubuntu.com/manpages/noble/man8/dkms.8.html (accessed 2026-09-10).

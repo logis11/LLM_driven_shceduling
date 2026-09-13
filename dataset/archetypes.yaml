@@ -360,7 +360,7 @@ archetypes:
          source: "lavd-ossna24:s14"}
       frame_period:
         {dist: constant, value_us: 16667, sampling: per-instance,
-         source: "lavd-ossna24"}
+         source: "steamos-refresh"}
       chain_length:
         {dist: constant, value: 16, sampling: per-instance,
          source: "lavd-ossna24"}
@@ -382,6 +382,13 @@ archetypes:
       reason: validation against LAVD would be circular — LAVD is also the
         parameter source (stated as such, building-plan §7).
     modeling_notes: >-
+      Source: lavd-ossna24 slides 12-17 taken as one observation of an
+      unnamed game on an unnamed machine, collected with perf sched record;
+      the deck's figures draw on at least three process trees and the text
+      does not say which feeds slides 12-14 (recorded decision). frame_period
+      is not in the deck: the game is modelled as display-paced at the Steam
+      Deck LCD default refresh with the 1:1 frame limit (steamos-refresh:
+      60 Hz; 16667 us is 1/60 s arithmetic) — design, ours.
       The only entry whose topology is a parameter: the compiler's chain
       constructor expands it into n_tasks ordinary tasks with WAIT/WAKE
       channels wired input -> engine -> ... -> display; the linearization of

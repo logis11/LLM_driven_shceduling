@@ -56,8 +56,8 @@ sources:
       ~260 us, worker ~1.65 ms), stable and predictable per task (s13); 70-75%
       of scheduling initiated by waiting syscalls (s14); tasks tightly linked
       in waiter-waker graphs, a task sequence serving one job from input to
-      display (s16-s17); 16.7 ms frame budget, 15 ms targeted latency; top
-      30-40 tasks = 95% of scheduling, 15-20 game tasks take 60-70%. LAVD
+      display (s16-s17); top 30-40 tasks = 95% of scheduling, 15-20 game
+      tasks take 60-70%. States no frame period or frame budget. LAVD
       defines no spec format: any schema encoding of these observations
       (topology/chain fields, linearizing the s16 graph) is our modeling and
       lives in archetypes.yaml modeling_notes. Slides are footnote-tier
@@ -166,6 +166,15 @@ sources:
       Settings -> Downloads), that downloads pause during gameplay by
       default, and the per-game override — the wanted/unwanted background
       toggle as a real user-facing setting (S10). Existence only.
+
+  steamos-refresh:
+    type: deployed-system
+    notes: >-
+      Establishes the Steam Deck LCD's 60 Hz default refresh and the in-game
+      refresh / frame-limit setting (default 60 Hz limited to 60, 30 or 15
+      fps; slider down to 40 Hz; "60hz = 16.66ms/frame"). Existence only;
+      the value 16667 us is 1/60 s arithmetic and the display-paced modeling
+      is ours (archetypes.yaml modeling_notes).
 
   dkms-man:
     type: deployed-system
