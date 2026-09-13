@@ -172,7 +172,7 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 
 ### `corbet-lwn24`
 - cite: Corbet, J. "Sched_ext at LPC 2024." *LWN.net*, 2024-09-26. lwn.net/Articles/991205/ (accessed 2026-08-26).
-- role: prose-citable secondary for the LAVD characterization (dedicated "Higher frame rates" section on scx_lavd). Later option to evaluate: "Lessons from creating a gaming-oriented scheduler", LWN, Jan 2026 (lwn.net/Articles/1051430/ — byline unverified).
+- role: prose-citable secondary for the qualitative LAVD characterization only (dedicated "Higher frame rates" section on scx_lavd: short-running, tightly linked tasks, a critical path); it carries none of the slide numbers, and its "typically no more than 100µs at a time" differs from slide 13's "a few 100s usec on average to a few msec maximum". Later option to evaluate: "Lessons from creating a gaming-oriented scheduler", LWN, Jan 2026 (lwn.net/Articles/1051430/ — byline unverified).
 - status: verified (2026-08-26)
 
 ### `ananicy`

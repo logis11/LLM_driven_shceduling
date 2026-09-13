@@ -53,3 +53,10 @@ One entry per decision applied to `dataset/archetypes.yaml` (and the registry li
 - `game-task-chain.params.frac_long_lived` (constant 0.90, `lavd-ossna24:s12`) and `frac_wakeups_from_wait` (uniform 0.70–0.75, `lavd-ossna24:s14`): removed. Neither was read by any tool (memo finding B1; K2 C-lavd-2, C-lavd-7). Both facts stay in `modeling_notes` with their locators as what the encoding does not model: every member lives for the whole segment; the wake mix is fixed by the wiring.
 - No compiled value changes.
 - Alternatives not taken: keep them inert; make 10 % of members terminate (window unstated in the source).
+
+## D8 — residual wording (2026-09-13)
+
+- `modeling_notes`: "wired input -> engine -> ... -> display" → the source's "from a user input to display update" (s17) with no intermediate stage named (K2 C-lavd-8 premise not in source); the linearisation sentence now states the source's graph shapes (fan-in, two-step chain, 2-cycles, hub; s11, s16) and that s17's individually periodic tasks are encoded as one timer-driven head (K2 C-lavd-8 OURS-UNDER-SOURCE-TAG).
+- `validation_stats.reason`: circularity kept; adds that a CI runner cannot observe a Proton game's structure (S4 §4).
+- `docs/references.md` `corbet-lwn24` role line narrowed to the qualitative characterisation; the slide numbers are not in it and its 100 µs figure differs from slide 13 (K2 C-corbet-1 WORDING-FIX).
+- No compiled value changes.

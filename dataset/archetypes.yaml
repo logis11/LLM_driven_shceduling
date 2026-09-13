@@ -367,7 +367,10 @@ archetypes:
     validation_stats:
       referee: none
       reason: validation against LAVD would be circular — LAVD is also the
-        parameter source (stated as such, building-plan §7).
+        parameter source (stated as such, building-plan §7) — and a CI
+        runner cannot observe a Proton game's Wine, DXVK or audio structure
+        (no GPU; Proton runs only under the Steam client), so no own
+        measurement referees it.
     modeling_notes: >-
       Source: lavd-ossna24 slides 12-17 taken as one observation of an
       unnamed game on an unnamed machine, collected with perf sched record;
@@ -378,9 +381,15 @@ archetypes:
       60 Hz; 16667 us is 1/60 s arithmetic) — design, ours.
       The only entry whose topology is a parameter: the compiler's chain
       constructor expands it into chain_length ordinary tasks with WAIT/WAKE
-      channels wired input -> engine -> ... -> display; the linearization of
-      the s16-s17 waker-waiter graph into a chain, and every field name, are
-      ours. per_schedule_run: the anchors are the source's two named
+      channels wired from the head to the last member, standing in for the
+      source's "from a user input to display update" (s17); no intermediate
+      stage is named by the source. The linearization of the s16-s17
+      waker-waiter graph into one chain, and every field name, are ours:
+      the source's graphs are a fan-in (four task workers -> dxvk-cs), a
+      two-step chain (dxvk-cs -> dxvk-submit), 2-cycles among the audio
+      threads and a hub around wineserver (s11, s16), and s17 says the
+      majority of game tasks are individually periodic, whereas here only
+      the head is timer-driven. per_schedule_run: the anchors are the source's two named
       per-schedule runtimes, a coordination task (wineserver, 260 us) and a
       work task (a task worker, 1.65 ms), spanning its stated "a few 100s
       usec on average to a few msec maximum" (s13); the statistic behind the
