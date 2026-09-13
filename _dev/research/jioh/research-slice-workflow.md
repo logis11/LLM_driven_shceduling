@@ -18,7 +18,7 @@ How the Phase 9 research-and-decision sub-tasks (9.4–9.12) run. Fixed on 2026-
 
 ## Records
 
-- Each slice has its own dated folder under `_dev/research/jioh/`: scope card, search logs, reads, candidates, changelog.
+- Each slice has its own folder `_dev/research/jioh/task-<N.M>-<domain>/`: scope card, search logs, reads, candidates, changelog.
 - **Changelog** — one entry per amendment: parameter, old value, new value, source id and locator or the label, commit. It lives in the slice's research folder only.
 - The public docs (`docs/`, `dataset/README.md`) carry no changelog of Phase 9 corrections and no account of the prior values. They describe the final state; 9.15 brings them there.
 
