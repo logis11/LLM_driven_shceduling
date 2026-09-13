@@ -24,6 +24,10 @@ TICK_US = 10_000  # USER_HZ=100 on the runners (spec.json corroborates)
 
 COMPILER_NAMES = {"cc1", "cc1plus", "gcc", "g++", "as", "ld", "collect2",
                   "objtool", "fixdep", "objcopy", "genksyms", "modpost"}
+# The compiler child a timeline binds (`child_name: cc1`): one per translation
+# unit, carrying ~99% of the family's sampled CPU. The rest of the family
+# (gcc driver, as, fixdep, ...) is counted separately, never pooled with it.
+CHILD_NAMES = {"cc1", "cc1plus"}
 DAEMON_NAMES = {"systemd", "systemd-journal", "systemd-udevd", "systemd-resolve",
                 "systemd-network", "systemd-logind", "dbus-daemon", "cron",
                 "rsyslogd", "polkitd", "chronyd", "multipathd", "agetty",
@@ -33,6 +37,7 @@ _DUR = re.compile(r"(?:(\d+)h)?(?:(\d+)m)?([\d.]+)s")
 _EXIT = re.compile(
     r"^(\d\d:\d\d:\d\d)\s+exit\s+(\d+)\s+\S+\s+(\S+)\s+(.*)$")
 _EXEC = re.compile(r"^(\d\d:\d\d:\d\d)\s+exec\s+(\d+)\s+(.*)$")
+_FORK_PARENT = re.compile(r"^(\d\d:\d\d:\d\d)\s+fork\s+(\d+)\s+parent\s+(.*)$")
 
 
 def parse_duration_us(text):
@@ -78,13 +83,21 @@ def moment_matched(median_us, mean_us_value):
 
 
 def lognormal_fit(values_us):
-    logs = [math.log(v) for v in values_us if v > 0]
-    if len(logs) < 2:
+    """Fit over the positive values. Zeros (e.g. no CPU tick between two
+    samples) cannot enter a log fit; when present, their count and the plain
+    median over all values are reported beside the fit."""
+    positive = [v for v in values_us if v > 0]
+    if len(positive) < 2:
         return None
+    logs = [math.log(v) for v in positive]
     median = math.exp(statistics.mean(logs))
-    return {"n": len(logs), "median_us": round(median),
-            "sigma_log": round(statistics.stdev(logs), 3),
-            "p90_us": round(sorted(values_us)[int(len(values_us) * 0.9)])}
+    fit = {"n": len(logs), "median_us": round(median),
+           "sigma_log": round(statistics.stdev(logs), 3),
+           "p90_us": round(sorted(positive)[int(len(positive) * 0.9)])}
+    if len(positive) < len(values_us):
+        fit["n_nonpositive"] = len(values_us) - len(positive)
+        fit["median_all_us"] = round(statistics.median(values_us))
+    return fit
 
 
 def in_phase(t, window):
@@ -115,10 +128,12 @@ def exits_in_window(repeat_dir, window, names=None):
     return durations
 
 
-def count_execs(repeat_dir, window, names):
+def count_forks_by(repeat_dir, window, names):
+    """Forks made by processes whose argv0 is in names — their own children,
+    not the descendants those children exec."""
     count = 0
     for line in (repeat_dir / "lifecycle.log").open(errors="replace"):
-        m = _EXEC.match(line)
+        m = _FORK_PARENT.match(line)
         if not m:
             continue
         t, _pid, cmdline = m.groups()
@@ -130,11 +145,37 @@ def count_execs(repeat_dir, window, names):
     return count
 
 
+def pids_with_arg(repeat_dir, window, arg):
+    """Pids whose logged cmdline carries arg (e.g. Chromium's --type=renderer)
+    in any lifecycle event inside the window."""
+    pids = set()
+    for line in (repeat_dir / "lifecycle.log").open(errors="replace"):
+        if arg not in line:
+            continue
+        parts = line.split(None, 3)
+        if len(parts) < 3 or not parts[2].isdigit():
+            continue
+        try:
+            t = hms_str(parts[0])
+        except ValueError:
+            continue
+        if in_phase(t, window):
+            pids.add(int(parts[2]))
+    return pids
+
+
 # ---- /proc samples ----------------------------------------------------------
 
 def iter_samples(repeat_dir):
     for line in (repeat_dir / "proc_samples.jsonl").open():
         yield json.loads(line)
+
+
+def has_thread_ctxt(repeat_dir):
+    """Whether the sampler recorded per-thread ctxt counters (`tctxt`)."""
+    for rec in iter_samples(repeat_dir):
+        return any("tctxt" in proc for proc in rec["procs"])
+    return False
 
 
 def phase_cpu(repeat_dir, window, match):
@@ -186,8 +227,12 @@ def per_proc_duty(repeat_dir, window, match):
     return round(statistics.median(duties), 3) if duties else None
 
 
-def wake_stats(repeat_dir, window, match):
-    """Per-process voluntary-wakeup rate and cpu-per-wake from ctxt samples."""
+def wake_stats(repeat_dir, window, match, pids=None):
+    """Per-process voluntary-wakeup rate and cpu-per-wake from ctxt samples.
+
+    CPU is thread-group. Wakes are summed over threads (per-thread deltas)
+    when the samples carry `tctxt`; older samples carry the main thread's
+    counter only (see `wake_counter`)."""
     series = {}
     for rec in iter_samples(repeat_dir):
         t = hms_us(rec["t"])
@@ -196,16 +241,25 @@ def wake_stats(repeat_dir, window, match):
         for proc in rec["procs"]:
             if not match(proc["comm"]) or proc.get("vctxt") is None:
                 continue
+            if pids is not None and proc["pid"] not in pids:
+                continue
             key = (proc["pid"], proc["starttime"])
             entry = series.setdefault(
                 key, {"comm": proc["comm"], "t0": t, "v0": proc["vctxt"],
-                      "c0": proc["utime"] + proc["stime"]})
+                      "c0": proc["utime"] + proc["stime"], "threads": None})
             entry.update(t1=t, v1=proc["vctxt"],
                          c1=proc["utime"] + proc["stime"])
+            if proc.get("tctxt") is not None:
+                threads = entry["threads"] = entry["threads"] or {}
+                for tid, (volun, _nonvol) in proc["tctxt"].items():
+                    threads.setdefault(tid, [volun, volun])[1] = volun
     out = []
     for entry in series.values():
         span_s = entry["t1"] - entry["t0"]  # window times are seconds-of-day
-        wakes = entry["v1"] - entry["v0"]
+        if entry["threads"] is not None:
+            wakes = sum(last - first for first, last in entry["threads"].values())
+        else:
+            wakes = entry["v1"] - entry["v0"]
         if span_s < 5 or wakes < 5:
             continue
         out.append({"comm": entry["comm"], "wakes": wakes,
@@ -226,19 +280,25 @@ def analyze_cli_repeat(repeat_dir):
         build = good(phases, build_phase)
         if build is None:
             continue
-        lifetimes = exits_in_window(repeat_dir, build, COMPILER_NAMES)
+        lifetimes = exits_in_window(repeat_dir, build, CHILD_NAMES)
         out[f"{prefix}_lifetime"] = lognormal_fit(lifetimes)
         out[f"{prefix}_children"] = len(lifetimes)
         cpu_us, peak = phase_cpu(repeat_dir, build,
-                                 lambda c: c in COMPILER_NAMES)
+                                 lambda c: c in CHILD_NAMES)
         if lifetimes:
             out[f"{prefix}_cpu_mean_us"] = round(cpu_us / len(lifetimes))
             out[f"{prefix}_life_mean_us"] = round(
                 sum(lifetimes) / len(lifetimes))
         out[f"{prefix}_peak_concurrent"] = peak
+        out[f"{prefix}_family_exits"] = len(
+            exits_in_window(repeat_dir, build, COMPILER_NAMES))
+        _, family_peak = phase_cpu(repeat_dir, build,
+                                   lambda c: c in COMPILER_NAMES)
+        out[f"{prefix}_family_peak_concurrent"] = family_peak
         if prefix == "compiler":
             make_cpu, _ = phase_cpu(repeat_dir, build, lambda c: c == "make")
-            forks = count_execs(repeat_dir, build, COMPILER_NAMES)
+            forks = count_forks_by(repeat_dir, build, {"make"})
+            out["make_children"] = forks
             out["make_dispatch_us"] = round(make_cpu / forks) if forks else None
             out["fork_rate_hz"] = round(forks / (build[2] / 1e6), 1)
 
@@ -278,7 +338,11 @@ def analyze_gui_repeat(repeat_dir):
     is_chrome = lambda c: c.startswith(("chrom", "chrome"))
     _, peak = phase_cpu(repeat_dir, chromium, is_chrome)
     out["chromium_peak_procs"] = peak
-    out["chromium_wakes"] = wake_stats(repeat_dir, chromium, is_chrome)
+    # Renderers only: the browser, zygotes, GPU/network/storage services and
+    # crashpad share the chrom* comm but are not the renderer set.
+    renderers = pids_with_arg(repeat_dir, chromium, "--type=renderer")
+    out["chromium_wakes"] = wake_stats(repeat_dir, chromium, is_chrome,
+                                       pids=renderers)
 
     element = phases["element-idle"]
     is_element = lambda c: c.lower().startswith("element")
@@ -317,9 +381,12 @@ def main():
         across[f"{prefix}_lifetime_sigma_log"] = spread(
             [r[f"{prefix}_lifetime"]["sigma_log"] for r in cli.values()
              if r.get(f"{prefix}_lifetime")])
-        for key in ("children", "cpu_mean_us", "life_mean_us"):
+        for key in ("children", "cpu_mean_us", "life_mean_us",
+                    "family_exits", "family_peak_concurrent"):
             across[f"{prefix}_{key}"] = spread(
                 [r.get(f"{prefix}_{key}") for r in cli.values()])
+    across["make_children"] = spread(
+        [r.get("make_children") for r in cli.values()])
     across["make_dispatch_us"] = spread(
         [r.get("make_dispatch_us") for r in cli.values()])
     across["fork_rate_hz"] = spread(
@@ -352,6 +419,11 @@ def main():
     across["element"] = wake_summary("element_wakes")
     across["chromium"] = wake_summary("chromium_wakes")
     across["daemons"] = wake_summary("daemon_wakes")
+    across["wake_counter"] = (
+        "thread-group" if any(has_thread_ctxt(d) for d in
+                              [*(base / "cli").iterdir(), *(base / "gui").iterdir()]
+                              if d.is_dir())
+        else "main-thread")
 
     text = json.dumps(summary["across_repeats"], indent=2)
     print(text)

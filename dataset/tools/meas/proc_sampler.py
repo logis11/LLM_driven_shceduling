@@ -3,8 +3,11 @@
 
 Emits one JSONL line per sample: epoch-µs timestamp, loadavg, and per-process
 {pid, ppid, comm, state, utime, stime, threads, starttime} from /proc/<pid>/stat.
-With --ctxt, also voluntary/nonvoluntary context-switch counters from
-/proc/<pid>/status (wakeup-rate estimation for the GUI workflow).
+With --ctxt, also voluntary/nonvoluntary context-switch counters (wakeup-rate
+estimation for the GUI workflow): `vctxt`/`nvctxt` from /proc/<pid>/status,
+which the kernel prints for the main thread only, and `tctxt`
+{tid: [voluntary, nonvoluntary]} from every /proc/<pid>/task/<tid>/status, so
+wakes can be summed over the same threads /proc/<pid>/stat's CPU covers.
 
 Linux-only; runs until SIGINT/SIGTERM. Structural/shape claims only —
 absolutes carry the runner spec (building-plan §7).
@@ -18,6 +21,7 @@ import sys
 import time
 
 RUNNING = True
+PROC = "/proc"
 
 
 def _stop(_sig, _frm):
@@ -25,8 +29,8 @@ def _stop(_sig, _frm):
     RUNNING = False
 
 
-def read_stat(pid):
-    with open(f"/proc/{pid}/stat", "rb") as handle:
+def read_stat(pid, proc=PROC):
+    with open(f"{proc}/{pid}/stat", "rb") as handle:
         raw = handle.read().decode("ascii", "replace")
     left, _, right = raw.partition("(")
     comm, _, rest = right.rpartition(")")
@@ -43,9 +47,9 @@ def read_stat(pid):
     }
 
 
-def read_ctxt(pid):
+def read_ctxt(pid, proc=PROC):
     volun = nonvol = None
-    with open(f"/proc/{pid}/status", "rb") as handle:
+    with open(f"{proc}/{pid}/status", "rb") as handle:
         for line in handle:
             if line.startswith(b"voluntary_ctxt_switches:"):
                 volun = int(line.split()[1])
@@ -54,15 +58,29 @@ def read_ctxt(pid):
     return volun, nonvol
 
 
-def sample(with_ctxt):
+def read_thread_ctxt(pid, proc=PROC):
+    """{tid: [voluntary, nonvoluntary]} for every live thread of the process."""
+    counters = {}
+    for tid in os.listdir(f"{proc}/{pid}/task"):
+        try:
+            volun, nonvol = read_ctxt(f"{pid}/task/{tid}", proc)
+        except OSError:
+            continue  # thread exited mid-read
+        if volun is not None:
+            counters[tid] = [volun, nonvol]
+    return counters
+
+
+def sample(with_ctxt, proc=PROC):
     procs = []
-    for entry in os.listdir("/proc"):
+    for entry in os.listdir(proc):
         if not entry.isdigit():
             continue
         try:
-            record = read_stat(entry)
+            record = read_stat(entry, proc)
             if with_ctxt:
-                record["vctxt"], record["nvctxt"] = read_ctxt(entry)
+                record["vctxt"], record["nvctxt"] = read_ctxt(entry, proc)
+                record["tctxt"] = read_thread_ctxt(entry, proc)
             procs.append(record)
         except (OSError, IndexError, ValueError):
             continue  # process vanished mid-read

@@ -6,7 +6,15 @@ step), query the package manifest for the shipped binaries, and — where the
 process is headless-launchable — run it while a fast /proc watcher records
 the comm/cmdline strings that actually appear. Output: one JSON table,
 catalog name -> observed strings -> verification level
-(runtime | binary-only | package-not-found | not-attempted).
+(runtime | binary-only | package-no-binary | package-not-found | not-attempted).
+
+`runtime` means the catalog name itself was observed: comm equals the name cut
+to the kernel's 15-character comm limit, or argv[0]'s basename equals the name.
+Other watched prefixes are recorded under `observed` but do not count.
+`binary-only` needs at least one real shipped binary (snap stub scripts
+excluded); a package with none is `package-no-binary`. A `--version` process
+can exit between two watcher scans, so a name not observed is not proof that
+it does not run.
 
 Container-hostile desktop daemons stay binary-only; account-gated apps stay
 not-attempted — stated, never conflated (task-2.6 spec §6).
@@ -183,7 +191,36 @@ def package_binaries(distro, package):
     if result.returncode != 0:
         return None
     return [line for line in result.stdout.splitlines()
-            if "/bin/" in line or "/libexec/" in line or "/lib/" in line]
+            if any(part in line
+                   for part in ("/bin/", "/sbin/", "/libexec/", "/lib/"))]
+
+
+COMM_LEN = 15  # TASK_COMM_LEN 16 minus the terminating NUL
+
+
+def is_snap_stub(path):
+    """A small launcher script that hands off to a snap, not a real binary."""
+    try:
+        with open(path, "rb") as handle:
+            head = handle.read(4096)
+    except OSError:
+        return False
+    return head.startswith(b"#!") and b"snap" in head
+
+
+def name_observed(name, observed):
+    """Whether the catalog name itself appeared among the watched processes."""
+    for comm, cmdline in observed.items():
+        argv0 = os.path.basename(cmdline.split()[0]) if cmdline else ""
+        if comm == name[:COMM_LEN] or argv0 == name:
+            return True
+    return False
+
+
+def decide_level(name, binaries, observed):
+    if observed and "error" not in observed and name_observed(name, observed):
+        return "runtime"
+    return "binary-only" if binaries else "package-no-binary"
 
 
 def run_and_watch(candidate, workdir):
@@ -234,18 +271,22 @@ def main():
             record["level"] = "package-not-found"
             table["results"][name] = record
             continue
-        record["binaries"] = [b for b in binaries
-                              if any(part in os.path.basename(b).lower()
-                                     for part in (name.lower().split(".")[0],
-                                                  *candidate["watch"]))][:10]
-        if candidate["run"] and (shutil.which(candidate["run"][0])
-                                 if candidate["run"] != "COMPILE" else True):
+        matching = [b for b in binaries
+                    if any(part in os.path.basename(b).lower()
+                           for part in (name.lower().split(".")[0],
+                                        *candidate["watch"]))]
+        stubs = [b for b in matching if is_snap_stub(b)]
+        record["binaries"] = [b for b in matching if b not in stubs][:10]
+        if stubs:
+            record["snap_stubs"] = stubs[:10]
+        observed = None
+        record["run_attempted"] = bool(
+            candidate["run"] and (shutil.which(candidate["run"][0])
+                                  if candidate["run"] != "COMPILE" else True))
+        if record["run_attempted"]:
             observed = run_and_watch(candidate, workdir)
             record["observed"] = observed
-            record["level"] = ("runtime" if observed and "error" not in observed
-                              else "binary-only")
-        else:
-            record["level"] = "binary-only"
+        record["level"] = decide_level(name, record["binaries"], observed)
         table["results"][name] = record
     json.dump(table, sys.stdout, indent=2, sort_keys=True)
     print()

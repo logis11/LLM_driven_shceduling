@@ -1,0 +1,154 @@
+"""Constructed cases for the meas-ci instruments and analyzer."""
+
+import json
+import subprocess
+
+from meas import analyze, proc_sampler, verify_names
+
+
+def _stat(pid, comm, utime, stime, threads, starttime):
+    fields = ["S", "1", str(pid), str(pid), "0", "-1", "0", "0", "0", "0", "0",
+              str(utime), str(stime), "0", "0", "20", "0", str(threads), "0",
+              str(starttime)]
+    return f"{pid} ({comm}) " + " ".join(fields) + "\n"
+
+
+def _status(volun, nonvol):
+    return (f"Name:\tx\nvoluntary_ctxt_switches:\t{volun}\n"
+            f"nonvoluntary_ctxt_switches:\t{nonvol}\n")
+
+
+def _fake_proc(root, threads):
+    """A /proc tree with one process (pid 100) whose threads carry the given
+    voluntary counts; /proc/100/status shows the main thread only."""
+    pid_dir = root / "100"
+    (pid_dir / "task").mkdir(parents=True)
+    (pid_dir / "stat").write_text(
+        _stat(100, "worker", 250, 30, len(threads), 5000))
+    (pid_dir / "status").write_text(_status(threads[100], 1))
+    for tid, volun in threads.items():
+        (pid_dir / "task" / str(tid)).mkdir()
+        (pid_dir / "task" / str(tid) / "status").write_text(_status(volun, 1))
+    (root / "meminfo").write_text("MemTotal: 1 kB\n")
+
+
+def test_sampler_records_every_thread(tmp_path):
+    _fake_proc(tmp_path, {100: 5, 101: 40, 102: 7})
+    record = proc_sampler.sample(True, proc=str(tmp_path))["procs"][0]
+    assert (record["vctxt"], record["threads"]) == (5, 3)
+    assert record["tctxt"] == {"100": [5, 1], "101": [40, 1], "102": [7, 1]}
+
+
+def _write_samples(repeat_dir, samples):
+    repeat_dir.mkdir()
+    with (repeat_dir / "proc_samples.jsonl").open("w") as out:
+        for t_s, procs in samples:
+            out.write(json.dumps({"t": t_s * 1_000_000, "procs": procs}) + "\n")
+
+
+def _proc(ticks, main_volun, tctxt=None):
+    proc = {"pid": 100, "starttime": 5000, "comm": "worker", "utime": ticks,
+            "stime": 0, "vctxt": main_volun, "nvctxt": 0}
+    if tctxt is not None:
+        proc["tctxt"] = tctxt
+    return proc
+
+
+def test_wakes_sum_thread_deltas(tmp_path):
+    repeat = tmp_path / "r1"
+    _write_samples(repeat, [
+        (10, [_proc(0, 5, {"100": [5, 0], "101": [40, 0]})]),
+        (20, [_proc(10, 6, {"100": [6, 0], "101": [60, 0], "102": [3, 0]})]),
+    ])
+    (entry,) = analyze.wake_stats(repeat, (0, 86_399), lambda c: c == "worker")
+    assert entry["wakes"] == 1 + 20  # thread 102 appeared once: no delta
+    assert entry["work_us"] == 10 * analyze.TICK_US / 21
+    assert analyze.has_thread_ctxt(repeat)
+
+
+def test_wakes_fall_back_to_main_thread(tmp_path):
+    repeat = tmp_path / "r1"
+    _write_samples(repeat, [(10, [_proc(0, 5)]), (20, [_proc(10, 15)])])
+    (entry,) = analyze.wake_stats(repeat, (0, 86_399), lambda c: c == "worker")
+    assert entry["wakes"] == 10
+    assert not analyze.has_thread_ctxt(repeat)
+
+
+def test_wake_stats_pid_filter(tmp_path):
+    repeat = tmp_path / "r1"
+    _write_samples(repeat, [(10, [_proc(0, 5)]), (20, [_proc(10, 15)])])
+    assert analyze.wake_stats(repeat, (0, 86_399), lambda c: True,
+                              pids={999}) == []
+
+
+def test_lognormal_fit_reports_zeros():
+    fit = analyze.lognormal_fit([0, 0, 100, 200, 400])
+    assert (fit["n"], fit["median_us"], fit["p90_us"]) == (3, 200, 400)
+    assert (fit["n_nonpositive"], fit["median_all_us"]) == (2, 100)
+    assert "n_nonpositive" not in analyze.lognormal_fit([100, 200, 400])
+
+
+LIFECYCLE = """\
+Time     Event     PID Info   Duration Process
+00:00:10 fork     3775 parent          make -C /tmp/linux-6.6 -j8
+00:00:10 fork     3776 child           make -C /tmp/linux-6.6 -j8
+00:00:11 fork     3776 parent          /bin/sh -c gcc -c foo.c
+00:00:11 fork     3777 child           /bin/sh -c gcc -c foo.c
+00:00:12 fork     3790 parent          /usr/bin/make -f ./scripts/Makefile.build obj=init
+00:00:12 fork     3791 child           /usr/bin/make -f ./scripts/Makefile.build obj=init
+00:00:40 fork     3775 parent          make -C /tmp/linux-6.6 -j8
+00:00:40 fork     3799 child           make -C /tmp/linux-6.6 -j8
+00:00:15 exit     4001      0   0.350s /snap/chromium/current/usr/lib/chromium-browser/chrome --type=renderer --renderer-client-id=6
+00:00:16 comm     4010                 /snap/chromium/current/usr/lib/chromium-browser/chrome --type=zygote
+00:00:17 exit     4020      0   9.000s /snap/chromium/current/usr/lib/chromium-browser/chrome --type=renderer --renderer-client-id=5
+"""
+
+
+def test_forks_counted_by_parent_only(tmp_path):
+    repeat = tmp_path / "r1"
+    repeat.mkdir()
+    (repeat / "lifecycle.log").write_text(LIFECYCLE)
+    # make's own forks inside the window; the shell's fork of gcc is not make's
+    assert analyze.count_forks_by(repeat, (10, 30), {"make"}) == 2
+
+
+def test_renderer_pids_from_lifecycle(tmp_path):
+    repeat = tmp_path / "r1"
+    repeat.mkdir()
+    (repeat / "lifecycle.log").write_text(LIFECYCLE)
+    assert analyze.pids_with_arg(repeat, (10, 30), "--type=renderer") == {4001, 4020}
+
+
+def test_name_level_needs_the_catalog_name():
+    gcc_only = {"gcc": "gcc -O2 -c /tmp/probe.c"}
+    assert verify_names.decide_level("cc1", ["/usr/bin/gcc"], gcc_only) == "binary-only"
+    cc1 = {"cc1": "/usr/libexec/gcc/x86_64-linux-gnu/13/cc1 -quiet probe.c"}
+    assert verify_names.decide_level("cc1", ["/usr/bin/gcc"], cc1) == "runtime"
+    assert verify_names.decide_level("cc1", [], {"error": "ENOENT"}) == "package-no-binary"
+    assert verify_names.decide_level("borg", [], None) == "package-no-binary"
+
+
+def test_name_level_matches_truncated_comm():
+    truncated = {"tracker-miner-f": "/usr/libexec/tracker-miner-fs-3"}
+    assert verify_names.name_observed("tracker-miner-fs-3", truncated)
+    assert verify_names.name_observed("tracker-miner-fs-3",
+                                      {"tracker-miner-f": ""})
+    assert not verify_names.name_observed("tracker-miner-fs-3",
+                                          {"tracker-extract": ""})
+
+
+def test_snap_stub_is_not_a_binary(tmp_path):
+    stub = tmp_path / "thunderbird"
+    stub.write_text("#!/bin/sh\necho 'install the snap: snap install thunderbird'\n")
+    elf = tmp_path / "rsync"
+    elf.write_bytes(b"\x7fELF\x02\x01\x01")
+    assert verify_names.is_snap_stub(stub)
+    assert not verify_names.is_snap_stub(elf)
+
+
+def test_package_binaries_include_sbin(monkeypatch):
+    listing = "/.\n/usr/sbin/dkms\n/usr/share/man/man8/dkms.8.gz\n/usr/lib/dkms/common.postinst\n"
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(
+        a, 0, stdout=listing, stderr=""))
+    assert verify_names.package_binaries("ubuntu", "dkms") == [
+        "/usr/sbin/dkms", "/usr/lib/dkms/common.postinst"]
