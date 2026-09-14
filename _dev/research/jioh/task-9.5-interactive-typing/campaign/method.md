@@ -1,0 +1,71 @@
+# Task 9.5 — measurement campaign method (draft, 2026-09-14)
+
+The observation behind the eight archetypes of changelog D2 and D11, run on GitHub-hosted runners (phase decision 5). Written before any measurement; amended only by a dated entry in §9. Items marked **open** wait on the runner probe (`.github/workflows/meas-probe.yml`, run 34835910916) or on a decision in the changelog.
+
+## 1. Runs
+
+One run per archetype; each run is one observation (D3, D10), tagged `meas-ci:<workflow>:<run_number>`.
+
+| Run | Archetype for | Program | Stimulus (D4, D5) | Workflow |
+|---|---|---|---|---|
+| `code` | `code` | Visual Studio Code, a text file open | SWELL-KW Word keystroke stream (nearest; no code-editing dataset exists) | `meas-interactive` |
+| `soffice` | `soffice.bin` | LibreOffice Writer, a new document | SWELL-KW Word keystroke stream | `meas-interactive` |
+| `thunderbird` | `thunderbird` | Thunderbird, a compose window; a reading phase over a local mailbox | SWELL-KW Outlook keystroke stream (compose); SWELL-KW Outlook click/wheel stream (reading) | `meas-interactive` |
+| `chrome` | `chrome` (browser task) | Google Chrome, local pages | SWELL-KW Internet Explorer click/wheel stream; keystrokes into a form field from the IE stream | `meas-interactive` |
+| `gimp` | `gimp` | GIMP, an 800×600 image open | scripted canvas edit (design) | `meas-interactive` |
+| `kdenlive` | `kdenlive` | Kdenlive, a project with one clip | scripted timeline scrub (design) | `meas-interactive` |
+| `mpv-video` | video playback (`mpv`, `zoom` video, `gamescope` by approximation) | mpv `--vo=x11 --ao=null`, a 1280×720 30 fps H.264 file with AAC audio | none | `meas-playback` |
+| `mpv-audio` | audio playback (`spotify`, `zoom` voice by approximation) | mpv `--no-video --ao=null`, the same file | none | `meas-playback` |
+| `webrtc` (**open**) | conferencing, replacing `zoom`'s approximation if driveable | Chrome loopback call with a synthetic camera | none | `meas-playback` |
+
+Applications are installed from the distribution's or vendor's current package at run time; the exact version is recorded in the run's `spec.json` and becomes part of the archetype's scope (D10).
+
+## 2. Phases
+
+Every run has two phases, in this order, after a settle period of 30 s from the window's appearance:
+
+1. **idle** — no input for 120 s. Gives the timer-driven wake cadence and per-tick run (D9). For the playback runs this is the whole measurement: playback proceeds with no input.
+2. **driven** — the stimulus stream replayed for its length (§3). Gives the per-input run (D9). Not run for the playback runs.
+
+Between phases a 10 s gap; the phase boundaries are logged with `phase.sh`.
+
+## 3. Stimulus
+
+- **Keystroke streams.** Extracted from SWELL-KW uLog XML (`swell-icmi14`; DANS doi:10.17026/dans-x55-69zp, v4) by `swell_streams.py` (**to write**): for each file, consecutive `Keyboard` events with the same `ControlApplication` form a stream; the gap before each event is the difference of `TimeStamp` values. Application map: `WINWORD` → Word stream, `OUTLOOK` → Outlook stream, `iexplore` → IE stream. Keys are replayed as a fixed letter cycle: the recording's key values are not used, only the timing. **Open:** which participants and conditions (the neutral condition of every participant, concatenated in participant order, is the default candidate), and the stream length per run (candidate: 600 s of recorded time).
+- **Pointer streams.** The same files' `Mouse` events (`clicked`, `dragged`, `wheel turned`) with their timing per application. Motion between recorded events is design: one straight move to the next event's position, issued at the event's time (**open:** whether an intermediate motion cadence is added; the record has no motion).
+- **Scripted interactions** for `gimp` and `kdenlive`: a fixed script of drags, clicks and wheel turns at fixed times, committed with the workflow, labelled design.
+- **Replay driver.** Per-event xdotool through `replay.py`, timing on the monotonic clock. Fidelity is the probe's `timing` job; the delivered-versus-requested error it reports is written here and into each archetype's scope.
+
+## 4. Instruments
+
+- `perf sched record -a` over each phase (**open:** the probe establishes that `perf` for the runner's kernel installs and records as root), read with `perf sched timehist` for per-schedule run time, wait time and wake gaps of every thread in the application's process tree, plus the waker.
+- `/proc` snapshots (`snapshot.py`) at phase boundaries: thread population, CPU time, voluntary and involuntary switches.
+- `runner_spec.py` for the machine record; `apt-cache policy` for the application version.
+- Screenshots at phase boundaries, to show what the application displayed (first-run dialogs, focus).
+
+## 5. Wake attribution (D9)
+
+A schedule-in of a thread of the application within **W** ms after a replayed input event's send time is input-driven; every other schedule-in is timer-driven. W is set from the probe's delivery latency (**open**; candidate: the p99 delivered-versus-sent delay plus 5 ms). The input-driven run of an event is the sum of run time of all input-attributed schedule-ins of the main thread until the next event or until W expires, whichever is first (**open:** whether other threads' input-attributed run time is added to the same task, since D9 makes the archetype one task).
+
+## 6. Derived parameters per archetype
+
+From the pooled data of the run's repeats:
+
+- `input_run` — distribution of the per-event input-driven run (driven phase).
+- `tick_gap` and `tick_run` — distribution of gaps between timer-driven schedule-ins and their run times (idle phase), per thread class (**open:** whether the archetype's single task carries the main thread only or the whole tree's timer wakes merged).
+- For the playback runs: `period` and `burst` from the schedule-in cadence and run time of the decoding and output threads (**open:** which thread is the task; mpv's thread names are recorded).
+- Thread population and comm strings, for the modeling notes and the recognizer-visible names.
+
+Distribution families follow the library's convention (log-normal by median and sigma) unless the data reject it, in which case the empirical quantiles are recorded and the choice is a changelog entry.
+
+## 7. Repeats and tags
+
+Five repeats per run in one batch (D10; as `meas-cli` and `meas-gui` did), matrix `repeat: [1..5]`; one run id per batch; the archetype takes the pooled distribution; the method's analysis reports the across-repeat spread of every derived parameter.
+
+## 8. Scope, written into every archetype (D10)
+
+Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no display refresh, so paint cadence is the toolkit's fallback timer; software rasterisation on CPU threads; mpv's null audio output simulates a perfect device against the system clock; no human; replayed timing from recordings made on Windows in 2012 (D6).
+
+## 9. Amendments
+
+(none yet)
