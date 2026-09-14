@@ -16,7 +16,11 @@ share. Driven phase, per replayed input event i with send time s_i: (a)
 first-wake rule — the first application wake in [s_i, s_i + W] and the run
 of that sched-in; (b) window rule — total application run in
 [s_i, min(s_{i+1}, s_i + cap)) with the idle phase's CPU rate over the same
-span subtracted. Both are reported; the method chooses (9.5 changelog).
+span subtracted; (c) waker rule — from perf.<phase>.wakeups.txt.gz (rows
+`time [cpu] waker[tid/pid] ... awakened: wakee[tid/pid]`), the application
+wakes whose waker is the X server (comm Xvfb), which is how replayed input
+reaches the application, and the run of those schedule-ins per input
+window. All three are reported; the method chooses (9.5 changelog).
 """
 
 import argparse
@@ -70,6 +74,31 @@ def load_rows(path, pids):
     return rows
 
 
+WAKE = re.compile(r"^\s*(\d+\.\d+)\s+\[(\d+)\]\s+(.*?)\s+awakened:\s+(.*?)\s*$")
+
+
+def load_wakeups(path, pids, waker_rx):
+    """Return sorted wake times of application threads woken by a waker matching waker_rx."""
+    out = []
+    with open_text(path) as handle:
+        for line in handle:
+            m = WAKE.match(line)
+            if not m:
+                continue
+            t, _, waker, wakee = m.groups()
+            wm, km = TASK.match(waker.strip()), TASK.match(wakee.strip())
+            if not km:
+                continue
+            kpid = int(km.group(3)) if km.group(3) else int(km.group(2))
+            if kpid not in pids:
+                continue
+            wcomm = wm.group(1) if wm else waker.strip()
+            if re.search(waker_rx, wcomm):
+                out.append((float(t), km.group(1), int(km.group(2))))
+    out.sort()
+    return out
+
+
 def per_thread(rows, span_s):
     out = {}
     by_tid = {}
@@ -96,6 +125,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("run_dir"); ap.add_argument("--w-ms", type=float, default=5.0)
     ap.add_argument("--cap-ms", type=float, default=0.0); ap.add_argument("--json", default=None)
+    ap.add_argument("--waker", default="^Xvfb$|^Xorg$")
     args = ap.parse_args()
     D = args.run_dir
     report = json.load(open(os.path.join(D, "report.json")))
@@ -120,6 +150,11 @@ def main():
               "threads": per_thread(rows, span)}
         if phase == "idle":
             idle_rate = total_run_s / span
+        wk_path = next((p for p in (f"perf.{phase}.wakeups.txt.gz", f"perf.{phase}.wakeups.txt") if os.path.exists(os.path.join(D, p))), None)
+        xwakes = load_wakeups(os.path.join(D, wk_path), pids, args.waker) if wk_path else []
+        if xwakes:
+            ph["x_wakes_per_s"] = round(len(xwakes) / span, 2)
+            ph["x_wakes_by_comm"] = {c: n for c, n in sorted(((c, sum(1 for w in xwakes if w[1] == c)) for c in {w[1] for w in xwakes}), key=lambda kv: -kv[1])[:8]}
         if phase == "driven" and os.path.exists(os.path.join(D, "replay.jsonl")):
             sent = [json.loads(l) for l in open(os.path.join(D, "replay.jsonl")) if l.strip()]
             s_times = [e["sent_us"] / 1e6 for e in sent]
@@ -128,6 +163,14 @@ def main():
             t_in = [r["t_in"] for r in rows]
             import bisect
             first_lat, first_run, win_run, win_len, win_wakes, win_run_corr = [], [], [], [], [], []
+            xw_times = [w[0] for w in xwakes]
+            # index rows by (tid, t_wake) to find the schedule-in that followed an X wake
+            by_tid = {}
+            for r in rows:
+                by_tid.setdefault(r["tid"], []).append(r)
+            for rs in by_tid.values():
+                rs.sort(key=lambda r: r["t_in"])
+            xw_run, xw_count, xw_lat = [], [], []
             for i, s in enumerate(s_times):
                 if s < t0 or s > t1:
                     continue
@@ -141,12 +184,26 @@ def main():
                 win_run.append(run_sum); win_len.append((end - s) * 1000); win_wakes.append(b - a)
                 if idle_rate is not None:
                     win_run_corr.append(run_sum - idle_rate * (end - s) * 1000)
+                if xwakes:
+                    xa, xb = bisect.bisect_left(xw_times, s), bisect.bisect_left(xw_times, end)
+                    xw_count.append(xb - xa)
+                    run_x = 0.0
+                    for (tw, comm, tid) in xwakes[xa:xb]:
+                        rs = by_tid.get(tid, [])
+                        k = bisect.bisect_left([r["t_in"] for r in rs], tw)
+                        if k < len(rs) and rs[k]["t_in"] - tw < 0.05:
+                            run_x += rs[k]["run"]
+                    xw_run.append(run_x)
+                    if xb > xa:
+                        xw_lat.append((xw_times[xa] - s) * 1000)
             ph["per_input"] = {"events_in_phase": len(win_run), "kinds": {k: s_kinds.count(k) for k in set(s_kinds)},
                                "first_wake": {"attributed_share": round(len(first_lat) / max(len(win_run), 1), 3),
                                               "latency_ms": dist(first_lat), "run_ms": dist(first_run)},
                                "window": {"len_ms": dist(win_len), "wakes": dist(win_wakes), "run_ms": dist(win_run),
                                           "run_ms_minus_idle": dist(win_run_corr) if win_run_corr else None,
-                                          "idle_rate_ms_per_ms": round(idle_rate, 5) if idle_rate is not None else None}}
+                                          "idle_rate_ms_per_ms": round(idle_rate, 5) if idle_rate is not None else None},
+                               "waker": {"x_wakes_per_input": dist(xw_count), "first_x_wake_latency_ms": dist(xw_lat),
+                                         "run_ms": dist(xw_run)} if xwakes else None}
         result["phases"][phase] = ph
     if args.json:
         json.dump(result, open(args.json, "w"), indent=1)
@@ -157,6 +214,11 @@ def main():
         if "per_input" in ph:
             pi = ph["per_input"]
             print(f"   per input: events {pi['events_in_phase']} {pi['kinds']}; first-wake attributed {pi['first_wake']['attributed_share']}, latency p50 {pi['first_wake']['latency_ms']['p50']}, run p50 {pi['first_wake']['run_ms']['p50']}; window run p50/p90 {pi['window']['run_ms']['p50']}/{pi['window']['run_ms']['p90']} minus idle p50 {pi['window']['run_ms_minus_idle']['p50'] if pi['window']['run_ms_minus_idle'] else None}")
+            if pi.get("waker"):
+                w = pi["waker"]
+                print(f"   waker rule: X wakes per input p50/p90 {w['x_wakes_per_input']['p50']}/{w['x_wakes_per_input']['p90']}, first X wake latency p50/p90 {w['first_x_wake_latency_ms']['p50']}/{w['first_x_wake_latency_ms']['p90']} ms, run p50/p90/p99 {w['run_ms']['p50']}/{w['run_ms']['p90']}/{w['run_ms']['p99']} ms")
+        if ph.get("x_wakes_by_comm"):
+            print(f"   X-woken: {ph['x_wakes_per_s']}/s {ph['x_wakes_by_comm']}")
 
 
 if __name__ == "__main__":
