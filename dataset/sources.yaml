@@ -30,7 +30,7 @@ sources:
     type: deployed-system
     locator_pattern: "^(man|src)-[a-z]+$"
     notes: >-
-      Establishes the community's interactive task models: audio wakes every
+      Establishes interbench's own interactive task emulations: audio wakes every
       50 ms needing 5% CPU (SCHED_FIFO variant exists); video 60 Hz (16.7 ms)
       at 40% CPU; X variable 0-100% (window-drag emulation); gaming unbounded.
       Background loads: Burn (4 CPU-bound threads), Write/Read (RAM-scale

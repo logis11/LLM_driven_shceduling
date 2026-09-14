@@ -135,9 +135,9 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 ## Grounding — deployed-system (footnotes; existence claims only)
 
 ### `interbench`
-- cite: Kolivas, C. interbench. github.com/ckolivas/interbench, GPL-2.0, v0.31 (pin master commit).
-- role: Role B — the community's interactivity task models: audio 50 ms @ 5%, video 16.7 ms @ 40%, X 0–100% variable, Burn/Write/Read/Compile loads. Frame as "the community models interactivity this way", never "desktops behave this way".
-- status: verified-in-vetting (2026-08-25); pin commit at submission
+- cite: Kolivas, C. interbench. github.com/ckolivas/interbench, master commit e612a65 (2016-10-24), version string 0.31; its load defaults differ from tag v0.31. Licence GPL-2.0-or-later per the source headers; COPYING is GPLv2 and a GPLv3 LICENSE file also ships, which GitHub reports.
+- role: Role B — interbench's own interactive task emulations: audio 50 ms @ 5%, video 16.7 ms @ 40%, X 0–100% variable, Burn/Write/Read/Compile loads. Frame as "interbench models interactivity this way", never "desktops behave this way".
+- status: verified-in-vetting (2026-08-25); pinned 2026-09-14 on the 2026-09-13 verification (`_dev/research/jioh/2026-09-13-verification/compare/K1.md` C-interbench-13)
 
 ### `rt-app`
 - cite: rt-app. github.com/scheduler-tools/rt-app, GPLv2.
