@@ -7,7 +7,7 @@ mkdir -p "$OUT"
 KV="$OUT/report.kv"
 TOOLS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-rec() { printf '%s=%s\n' "$1" "$2" >> "$KV"; echo "  $1=$2"; }
+rec() { printf '%s=%s\n' "$1" "$2" >> "$KV"; echo "  $1=$2" >&2; }  # stderr: callers use command substitution
 run_rec() { # run_rec <key> <cmd...> : records rc and captures output to a file
   local key="$1"; shift
   "$@" > "$OUT/$key.out" 2> "$OUT/$key.err"; local rc=$?
@@ -78,7 +78,7 @@ probe_phase() {
   local left=$(( secs - 7 )); [ "$left" -gt 0 ] && sleep "$left"
   wait "$drv" 2>/dev/null
   snap "$pat" "" "$phase.after"
-  python3 - "$OUT/snap.$phase.before.json" "$OUT/snap.$phase.after.json" "$phase" >> "$KV" <<'PY'
+  python3 - "$OUT/snap.$phase.before.json" "$OUT/snap.$phase.after.json" "$phase" <<'PY' | tee -a "$KV" | sed 's/^/  /' >&2
 import json, sys
 a, b, ph = json.load(open(sys.argv[1])), json.load(open(sys.argv[2])), sys.argv[3]
 dt = b["t_mono"] - a["t_mono"]
