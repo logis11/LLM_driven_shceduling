@@ -112,7 +112,7 @@ Execution order: 9.1 ∥ 9.2 ∥ 9.3 first → 9.4–9.12 in parallel, after 9.1
 - [x] **9.3** Measurement tools fixed — including `meas-ci:names:2` preserved before its Actions artifacts expire on 2026-12-09
 - [x] **9.4** Gaming — research and decisions — `game-task-chain` on the LAVD deck as its one source; frame period on `steamos-refresh` as design; tail and count removed; wineserver a chain member; changelog `_dev/research/jioh/task-9.4-gaming/changelog.md`
 - [WIP] **9.5** Interactive and typing — research and decisions
-- [WIP] **9.6** Compile — research and decisions (#9)
+- [WIP] **9.6** Compile — research and decisions
 - [ ] **9.7** Background and IO — research and decisions (#10)
 - [ ] **9.8** Browser and comms — research and decisions
 - [ ] **9.9** Daemons and session processes — research and decisions
