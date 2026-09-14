@@ -1,0 +1,174 @@
+{
+ "rule": "D12: c1 for word and ie, c2+c3 for outlook; participant order; 2000 ms per segment/file boundary; 600 s windows",
+ "dataset": "SWELL-KW, DANS doi:10.17026/dans-x55-69zp (swell-icmi14)",
+ "windows": {
+  "word-r1": {
+   "sources": [
+    "a_pp1_c1_uLog_20120918_131425.xml"
+   ],
+   "events": 1579,
+   "keys": 1569,
+   "pointer": 10,
+   "span_s": 599.8
+  },
+  "word-r2": {
+   "sources": [
+    "a_pp1_c1_uLog_20120918_131425.xml"
+   ],
+   "events": 1681,
+   "keys": 1619,
+   "pointer": 62,
+   "span_s": 589.5
+  },
+  "word-r3": {
+   "sources": [
+    "a_pp1_c1_uLog_20120918_131425.xml",
+    "a_pp2_c1_uLog_20120919_130952.xml"
+   ],
+   "events": 1551,
+   "keys": 1500,
+   "pointer": 51,
+   "span_s": 595.9
+  },
+  "word-r4": {
+   "sources": [
+    "a_pp2_c1_uLog_20120919_130952.xml"
+   ],
+   "events": 1078,
+   "keys": 996,
+   "pointer": 82,
+   "span_s": 590.3
+  },
+  "word-r5": {
+   "sources": [
+    "a_pp2_c1_uLog_20120919_130952.xml"
+   ],
+   "events": 977,
+   "keys": 886,
+   "pointer": 91,
+   "span_s": 599.0
+  },
+  "ie-r1": {
+   "sources": [
+    "a_pp1_c1_uLog_20120918_131425.xml"
+   ],
+   "events": 394,
+   "keys": 153,
+   "pointer": 241,
+   "span_s": 596.2
+  },
+  "ie-r2": {
+   "sources": [
+    "a_pp1_c1_uLog_20120918_131425.xml",
+    "a_pp2_c1_uLog_20120919_130952.xml"
+   ],
+   "events": 290,
+   "keys": 110,
+   "pointer": 180,
+   "span_s": 597.0
+  },
+  "ie-r3": {
+   "sources": [
+    "a_pp2_c1_uLog_20120919_130952.xml",
+    "a_pp3_c1_uLog_20120924_132145.xml"
+   ],
+   "events": 374,
+   "keys": 85,
+   "pointer": 289,
+   "span_s": 595.2
+  },
+  "ie-r4": {
+   "sources": [
+    "a_pp3_c1_uLog_20120924_132145.xml",
+    "a_pp4_c1_uLog_20120925_131357.xml"
+   ],
+   "events": 554,
+   "keys": 185,
+   "pointer": 369,
+   "span_s": 556.5
+  },
+  "ie-r5": {
+   "sources": [
+    "a_pp4_c1_uLog_20120925_131357.xml",
+    "a_pp5_c1_uLog_20120926_092435.xml"
+   ],
+   "events": 219,
+   "keys": 194,
+   "pointer": 25,
+   "span_s": 437.3
+  },
+  "outlook-r1": {
+   "sources": [
+    "a_pp1_c2_uLog_20120918_142524.xml",
+    "a_pp1_c3_uLog_20120918_152106.xml",
+    "a_pp2_c2_uLog_20120919_142009.xml",
+    "a_pp2_c3_uLog_20120919_151558.xml",
+    "a_pp3_c3_uLog_20120924_152017.xml"
+   ],
+   "events": 741,
+   "keys": 604,
+   "pointer": 137,
+   "span_s": 588.8
+  },
+  "outlook-r2": {
+   "sources": [
+    "a_pp3_c3_uLog_20120924_152017.xml",
+    "a_pp4_c2_uLog_20120925_141606.xml"
+   ],
+   "events": 1155,
+   "keys": 1060,
+   "pointer": 95,
+   "span_s": 598.4
+  },
+  "outlook-r3": {
+   "sources": [
+    "a_pp4_c2_uLog_20120925_141606.xml",
+    "a_pp4_c3_uLog_20120925_152048.xml",
+    "a_pp5_c2_uLog_20120926_102855.xml",
+    "a_pp5_c3_uLog_20120926_111547.xml",
+    "a_pp6_c2_uLog_20121001_151650.xml",
+    "a_pp6_c3_uLog_20121001_161707.xml",
+    "a_pp7_c2_uLog_20121002_142522.xml",
+    "a_pp7_c3_uLog_20121002_151126.xml"
+   ],
+   "events": 1325,
+   "keys": 1209,
+   "pointer": 116,
+   "span_s": 593.1
+  },
+  "outlook-r4": {
+   "sources": [
+    "a_pp10_c2_uLog_20121008_142012.xml",
+    "a_pp7_c3_uLog_20121002_151126.xml",
+    "a_pp8_c2_uLog_20121004_103718.xml",
+    "a_pp8_c3_uLog_20121004_113621.xml",
+    "a_pp9_c2_uLog_20121004_150408.xml",
+    "a_pp9_c3_uLog_20121004_155357.xml"
+   ],
+   "events": 392,
+   "keys": 253,
+   "pointer": 139,
+   "span_s": 599.0
+  },
+  "outlook-r5": {
+   "sources": [
+    "a_pp10_c2_uLog_20121008_142012.xml",
+    "a_pp10_c3_uLog_20121008_153246.xml",
+    "a_pp11_c2_uLog_20121009_102916.xml",
+    "a_pp11_c3_uLog_20121009_112449.xml",
+    "a_pp12_c2_uLog_20121009_161315.xml",
+    "a_pp12_c3_uLog_20121009_171829.xml",
+    "a_pp13_c2_uLog_20121010_103743.xml",
+    "a_pp13_c3_uLog_20121010_112726.xml",
+    "a_pp14_c2_uLog_20121010_142319.xml",
+    "a_pp14_c3uLog_20121010_153646.xml",
+    "a_pp15_c2_uLog_20121015_102648.xml",
+    "a_pp15_c3_uLog_20121015_111304.xml"
+   ],
+   "events": 724,
+   "keys": 572,
+   "pointer": 152,
+   "span_s": 563.7
+  }
+ }
+}

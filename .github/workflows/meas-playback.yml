@@ -1,0 +1,58 @@
+name: meas-playback
+
+# 9.5 campaign, playback family (research-slice changelog D3, D9–D12; method
+# _dev/research/jioh/task-9.5-interactive-typing/campaign/method.md).
+# Started by a push changing .github/campaign.json; that file names the
+# applications, repeats and mode (dry | full). Registry tag
+# meas-ci:playback:<run_number>. One artifact per (app, repeat).
+
+on:
+  push:
+    branches: [jioh/dataset-rebuild]
+    paths: [.github/campaign.json]
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      mode: ${{ steps.plan.outputs.mode }}
+      count: ${{ steps.plan.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        run: |
+          python3 - >> "$GITHUB_OUTPUT" <<'PY'
+          import json
+          c = json.load(open(".github/campaign.json"))
+          fam = c.get("playback", {})
+          inc = [{"app": a, "repeat": r} for a in fam.get("apps", []) for r in fam.get("repeats", [])]
+          print("matrix=" + json.dumps({"include": inc}))
+          print("mode=" + c.get("mode", "full"))
+          print("count=" + str(len(inc)))
+          PY
+  run:
+    needs: plan
+    if: needs.plan.outputs.count != '0'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update > /dev/null && sudo apt-get install -y --no-install-recommends xvfb > /dev/null
+      - run: MEAS_OUT=/tmp/meas bash dataset/tools/meas/campaign/run.sh ${{ matrix.app }} ${{ matrix.repeat }} ${{ needs.plan.outputs.mode }}
+      - name: own the output
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" /tmp/meas && sudo chmod -R a+rX /tmp/meas
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meas-playback-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}
+          path: /tmp/meas
+          if-no-files-found: error
