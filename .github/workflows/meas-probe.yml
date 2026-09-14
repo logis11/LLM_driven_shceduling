@@ -7,7 +7,11 @@ name: meas-probe
 # driven CPU, threads, switches, perf rows). Never a measurement; one
 # artifact per job; a failed check is a recorded rc, not a failed job.
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    branches: [jioh/dataset-rebuild]
+    paths: [.github/workflows/meas-probe.yml, dataset/tools/meas/probe/**]
 
 permissions:
   contents: read
