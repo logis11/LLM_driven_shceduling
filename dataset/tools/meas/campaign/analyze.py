@@ -53,13 +53,18 @@ def open_text(path):
 
 
 def load_rows(path, pids):
+    """Rows of the application's threads, plus the capture window (first, last) over all tasks."""
     rows = []
+    t_min, t_max = None, None
     with open_text(path) as handle:
         for line in handle:
             m = ROW.match(line)
             if not m:
                 continue
             t, cpu, task, wait, delay, run = m.groups()
+            tf = float(t)
+            t_min = tf if t_min is None or tf < t_min else t_min
+            t_max = tf if t_max is None or tf > t_max else t_max
             tm = TASK.match(task.strip())
             if not tm:
                 continue
@@ -71,7 +76,7 @@ def load_rows(path, pids):
             rows.append({"t_end": t, "run": run, "delay": delay, "wait": wait, "comm": comm, "tid": tid, "pid": pid,
                          "t_in": t - run / 1000.0, "t_wake": t - run / 1000.0 - delay / 1000.0})
     rows.sort(key=lambda r: r["t_in"])
-    return rows
+    return rows, (t_min or 0.0, t_max or 0.0)
 
 
 WAKE = re.compile(r"^\s*(\d+\.\d+)\s+\[(\d+)\]\s+(.*?)\s+awakened:\s+(.*?)\s*$")
@@ -121,13 +126,16 @@ def phase_span(rows):
     return (rows[0]["t_in"], rows[-1]["t_end"]) if rows else (0, 0)
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("run_dir"); ap.add_argument("--w-ms", type=float, default=5.0)
-    ap.add_argument("--cap-ms", type=float, default=0.0); ap.add_argument("--json", default=None)
-    ap.add_argument("--waker", default="^Xvfb$|^Xorg$")
-    args = ap.parse_args()
+def analyze_run(D, w_ms=5.0, cap_ms=0.0, waker="^Xvfb$|^Xorg$"):
+    """Return (result, raw): result as printed/dumped by the CLI; raw = per-phase rows and per-input lists for pooling."""
+    class A: pass
+    args = A(); args.run_dir = D; args.w_ms = w_ms; args.cap_ms = cap_ms; args.waker = waker; args.json = None
+    return _analyze(args)
+
+
+def _analyze(args):
     D = args.run_dir
+    raw = {"phases": {}}
     report = json.load(open(os.path.join(D, "report.json")))
     result = {"app": report.get("app"), "repeat": report.get("repeat"), "mode": report.get("mode"),
               "version": report.get("version"), "phases": {}}
@@ -141,8 +149,7 @@ def main():
             p = os.path.join(D, snap)
             if os.path.exists(p):
                 pids |= {pr["pid"] for pr in json.load(open(p))["procs"]}
-        rows = load_rows(os.path.join(D, th), pids)
-        t0, t1 = phase_span(rows)
+        rows, (t0, t1) = load_rows(os.path.join(D, th), pids)
         span = max(t1 - t0, 1e-6)
         total_run_s = sum(r["run"] for r in rows) / 1000
         ph = {"pids": sorted(pids), "rows": len(rows), "span_s": round(span, 2),
@@ -205,6 +212,21 @@ def main():
                                "waker": {"x_wakes_per_input": dist(xw_count), "first_x_wake_latency_ms": dist(xw_lat),
                                          "run_ms": dist(xw_run)} if xwakes else None}
         result["phases"][phase] = ph
+        raw["phases"][phase] = {"rows": rows, "span": span, "idle_rate": idle_rate}
+        if "per_input" in ph:
+            raw["phases"][phase]["per_input"] = {"first_lat": first_lat, "first_run": first_run, "win_run": win_run,
+                                                 "win_len": win_len, "win_wakes": win_wakes, "win_run_corr": win_run_corr,
+                                                 "xw_run": xw_run, "xw_count": xw_count, "xw_lat": xw_lat}
+    return result, raw
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("run_dir"); ap.add_argument("--w-ms", type=float, default=5.0)
+    ap.add_argument("--cap-ms", type=float, default=0.0); ap.add_argument("--json", default=None)
+    ap.add_argument("--waker", default="^Xvfb$|^Xorg$")
+    args = ap.parse_args()
+    result, _ = _analyze(args)
     if args.json:
         json.dump(result, open(args.json, "w"), indent=1)
     for phase, ph in result["phases"].items():
