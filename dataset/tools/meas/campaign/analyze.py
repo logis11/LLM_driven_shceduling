@@ -104,6 +104,41 @@ def load_wakeups(path, pids, waker_rx):
     return out
 
 
+def pid_roles(D, phase):
+    """pid -> role from the snapshots' command lines: main | renderer | gpu | utility | zygote | other."""
+    roles = {}
+    for snap in (f"snap.{phase}.before.json", f"snap.{phase}.after.json", "snap.launch.json"):
+        p = os.path.join(D, snap)
+        if not os.path.exists(p):
+            continue
+        for pr in json.load(open(p))["procs"]:
+            cmd = pr.get("cmd", "")
+            if "--type=renderer" in cmd:
+                role = "renderer"
+            elif "--type=gpu-process" in cmd:
+                role = "gpu"
+            elif "--type=utility" in cmd:
+                role = "utility"
+            elif "--type=zygote" in cmd or "--type=broker" in cmd:
+                role = "zygote"
+            elif "--type=" in cmd:
+                role = "other"
+            else:
+                role = "main"
+            roles.setdefault(pr["pid"], role)
+    return roles
+
+
+def per_role(rows, roles, span_s):
+    out = {}
+    for r in rows:
+        role = roles.get(r["pid"], "main")
+        c = out.setdefault(role, {"pids": set(), "wakes": 0, "run": 0.0})
+        c["pids"].add(r["pid"]); c["wakes"] += 1; c["run"] += r["run"]
+    return {role: {"pids": len(c["pids"]), "wakes_per_s": round(c["wakes"] / span_s, 2), "cpu_share": round(c["run"] / 1000 / span_s, 4)}
+            for role, c in sorted(out.items(), key=lambda kv: -kv[1]["run"])}
+
+
 def per_thread(rows, span_s):
     out = {}
     by_tid = {}
@@ -152,9 +187,10 @@ def _analyze(args):
         rows, (t0, t1) = load_rows(os.path.join(D, th), pids)
         span = max(t1 - t0, 1e-6)
         total_run_s = sum(r["run"] for r in rows) / 1000
+        roles = pid_roles(D, phase)
         ph = {"pids": sorted(pids), "rows": len(rows), "span_s": round(span, 2),
               "cpu_share": round(total_run_s / span, 4), "wakes_per_s": round(len(rows) / span, 2),
-              "threads": per_thread(rows, span)}
+              "roles": per_role(rows, roles, span), "threads": per_thread(rows, span)}
         if phase == "idle":
             idle_rate = total_run_s / span
         wk_path = next((p for p in (f"perf.{phase}.wakeups.txt.gz", f"perf.{phase}.wakeups.txt") if os.path.exists(os.path.join(D, p))), None)
@@ -212,7 +248,7 @@ def _analyze(args):
                                "waker": {"x_wakes_per_input": dist(xw_count), "first_x_wake_latency_ms": dist(xw_lat),
                                          "run_ms": dist(xw_run)} if xwakes else None}
         result["phases"][phase] = ph
-        raw["phases"][phase] = {"rows": rows, "span": span, "idle_rate": idle_rate}
+        raw["phases"][phase] = {"rows": rows, "span": span, "idle_rate": idle_rate, "roles": roles}
         if "per_input" in ph:
             raw["phases"][phase]["per_input"] = {"first_lat": first_lat, "first_run": first_run, "win_run": win_run,
                                                  "win_len": win_len, "win_wakes": win_wakes, "win_run_corr": win_run_corr,
@@ -231,6 +267,7 @@ def main():
         json.dump(result, open(args.json, "w"), indent=1)
     for phase, ph in result["phases"].items():
         print(f"== {result['app']} r{result['repeat']} {phase}: span {ph['span_s']} s, rows {ph['rows']}, cpu share {ph['cpu_share']}, wakes/s {ph['wakes_per_s']}")
+        print(f"   roles: {ph['roles']}")
         for comm, c in list(ph["threads"].items())[:8]:
             print(f"   {comm:16s} thr {c['threads']:3d} wakes/s {c['wakes_per_s']:8.2f} cpu {c['cpu_share']:.4f} gap p50/p90 {c['gap_ms']['p50']}/{c['gap_ms']['p90']} run p50/p90/p99 {c['run_ms']['p50']}/{c['run_ms']['p90']}/{c['run_ms']['p99']}")
         if "per_input" in ph:

@@ -53,7 +53,8 @@ def main():
         for phase in ("idle", "driven", "play"):
             if not all(phase in raws[r]["phases"] for r in reps):
                 continue
-            ph = {"span_s": [round(raws[r]["phases"][phase]["span"], 1) for r in reps],
+            ph = {"roles": {r: results[r]["phases"][phase]["roles"] for r in reps},
+                  "span_s": [round(raws[r]["phases"][phase]["span"], 1) for r in reps],
                   "cpu_share": [results[r]["phases"][phase]["cpu_share"] for r in reps],
                   "wakes_per_s": [results[r]["phases"][phase]["wakes_per_s"] for r in reps],
                   "threads": {}}
@@ -95,6 +96,7 @@ def main():
         print(f"== {app} ({info['family']}, {info['mode']}, repeats {reps}, {entry['version']})")
         for phase, ph in entry["phases"].items():
             print(f"   {phase}: span {ph['span_s']} cpu {ph['cpu_share']} wakes/s {ph['wakes_per_s']}")
+            print(f"     roles r{reps[0]}: {ph['roles'][reps[0]]}")
             for comm, c in list(ph["threads"].items())[:5]:
                 print(f"     {comm:16s} thr {c['threads']} wakes/s {c['wakes_per_s']} gap p50 {c['gap_ms']['p50']} ({c['gap_ms']['repeat_p50']}) run p50/p90/p99 {c['run_ms']['p50']}/{c['run_ms']['p90']}/{c['run_ms']['p99']}")
             if "per_input" in ph:
