@@ -1,0 +1,64 @@
+name: meas-probe
+
+# Runner probe for the 9.5 campaign (research-slice changelog D3, D11): what
+# the hosted runner can drive and observe before the campaign is designed —
+# perf sched for its kernel, tracefs, uinput, sound, audio servers, per-event
+# xdotool replay fidelity, and each application under Xvfb (window, idle and
+# driven CPU, threads, switches, perf rows). Never a measurement; one
+# artifact per job; a failed check is a recorded rc, not a failed job.
+
+on: workflow_dispatch
+
+permissions:
+  contents: read
+
+jobs:
+  tools:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: PROBE_OUT=/tmp/probe bash dataset/tools/meas/probe/tools.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: probe-tools
+          path: /tmp/probe
+          if-no-files-found: error
+
+  timing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get install -y --no-install-recommends xvfb > /dev/null
+      - run: PROBE_OUT=/tmp/probe bash dataset/tools/meas/probe/timing.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: probe-timing
+          path: /tmp/probe
+          if-no-files-found: error
+
+  app:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [code, soffice, thunderbird, gimp, kdenlive, chrome, webrtc, mpv-video, mpv-audio]
+    steps:
+      - uses: actions/checkout@v4
+      - name: perf and Xvfb
+        run: |
+          sudo apt-get update > /dev/null
+          sudo apt-get install -y --no-install-recommends xvfb linux-tools-common "linux-tools-$(uname -r)" > /dev/null 2>&1 \
+            || sudo apt-get install -y --no-install-recommends xvfb linux-tools-azure > /dev/null 2>&1 || true
+          perf --version || true
+      - run: PROBE_OUT=/tmp/probe bash dataset/tools/meas/probe/apps.sh ${{ matrix.app }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: probe-app-${{ matrix.app }}
+          path: /tmp/probe
+          if-no-files-found: error

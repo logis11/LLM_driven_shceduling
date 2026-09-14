@@ -1,0 +1,30 @@
+<!doctype html>
+<title>webrtc-loopback</title>
+<video id="v" autoplay playsinline muted></video>
+<script>
+// Loopback call in one page: getUserMedia -> pc1 -> pc2 -> <video>.
+// Writes progress to document.title so a driver can read it with
+// `xdotool getwindowname` without any network. Needs Chromium's
+// --use-fake-device-for-media-stream --use-fake-ui-for-media-stream.
+(async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({video: {width: 1280, height: 720, frameRate: 30}, audio: true});
+    const pc1 = new RTCPeerConnection(), pc2 = new RTCPeerConnection();
+    pc1.onicecandidate = e => e.candidate && pc2.addIceCandidate(e.candidate);
+    pc2.onicecandidate = e => e.candidate && pc1.addIceCandidate(e.candidate);
+    pc2.ontrack = e => { document.getElementById('v').srcObject = e.streams[0]; };
+    stream.getTracks().forEach(t => pc1.addTrack(t, stream));
+    const offer = await pc1.createOffer(); await pc1.setLocalDescription(offer);
+    await pc2.setRemoteDescription(offer);
+    const answer = await pc2.createAnswer(); await pc2.setLocalDescription(answer);
+    await pc1.setRemoteDescription(answer);
+    document.title = 'webrtc-loopback connecting';
+    setInterval(async () => {
+      let decoded = 0, encoded = 0, fps = 0;
+      (await pc2.getStats()).forEach(r => { if (r.type === 'inbound-rtp' && r.kind === 'video') { decoded = r.framesDecoded; fps = r.framesPerSecond || 0; } });
+      (await pc1.getStats()).forEach(r => { if (r.type === 'outbound-rtp' && r.kind === 'video') encoded = r.framesEncoded; });
+      document.title = `webrtc-loopback enc=${encoded} dec=${decoded} fps=${fps}`;
+    }, 1000);
+  } catch (e) { document.title = 'webrtc-loopback error ' + e.name + ' ' + e.message; }
+})();
+</script>
