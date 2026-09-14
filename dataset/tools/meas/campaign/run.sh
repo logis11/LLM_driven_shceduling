@@ -27,6 +27,13 @@ setsid bash -c "$LAUNCH" > "$OUT/app.log" 2>&1 &
 APP_PID=$!
 WID=$(wait_window "$CLASS" 120)
 if [ -z "$WID" ]; then screenshot no-window; rec finished_utc "$(date -u +%FT%TZ)"; finish_report; exit 0; fi
+if [ -n "$POSTLAUNCH" ]; then
+  xdotool windowactivate --sync "$WID"; bash -c "$POSTLAUNCH" > "$OUT/postlaunch.log" 2>&1
+  W2=$(wait_window "$POSTCLASS" 30); rec postlaunch.window "$W2"
+  if [ -n "$W2" ]; then WID="$W2"; fi
+  screenshot after-postlaunch
+fi
+rec area "$AREA"
 sleep "$SETTLE"; screenshot after-settle
 snap "$PAT" "" launch
 
@@ -46,6 +53,8 @@ phase() {
   sudo perf sched timehist -i "$OUT/perf.$name.data" 2>> "$OUT/perf.$name.log" | gzip > "$OUT/perf.$name.timehist.txt.gz"
   rec "perf.$name.timehist.rc" "${PIPESTATUS[0]}"
   rec "perf.$name.rows_matching" "$(gzip -dc "$OUT/perf.$name.timehist.txt.gz" | grep -cE "$RX" || echo 0)"
+  sudo perf sched timehist -w -i "$OUT/perf.$name.data" 2>> "$OUT/perf.$name.log" | grep -E "awakened|wakeup|\bwaker\b|^\s*[0-9]+\.[0-9]+ +\[[0-9]+\] +\S.*\[[0-9/]+\] +awakened" | gzip > "$OUT/perf.$name.wakeups.txt.gz"
+  rec "perf.$name.wakeups.rows" "$(gzip -dc "$OUT/perf.$name.wakeups.txt.gz" | wc -l)"
   python3 - "$OUT/snap.$name.before.json" "$OUT/snap.$name.after.json" "$name" <<'PY' | tee -a "$KV" | sed 's/^/  /' >&2
 import json, sys
 a, b, ph = json.load(open(sys.argv[1])), json.load(open(sys.argv[2])), sys.argv[3]
@@ -54,7 +63,7 @@ print(f"{ph}.wall_s={dt:.2f}"); print(f"{ph}.n_procs={b['n_procs']}"); print(f"{
 print(f"{ph}.cpu_s={b['cpu_s']-a['cpu_s']:.3f}"); print(f"{ph}.cpu_share={(b['cpu_s']-a['cpu_s'])/dt if dt else 0:.4f}")
 print(f"{ph}.switches_per_s={(b['vol_switches']-a['vol_switches']+b['nonvol_switches']-a['nonvol_switches'])/dt if dt else 0:.1f}")
 PY
-  gzip -f "$OUT/perf.$name.data"
+  if [ "$MODE" = dry ]; then gzip -f "$OUT/perf.$name.data"; else rm -f "$OUT/perf.$name.data"; fi
 }
 
 case "$DRIVER" in
@@ -62,7 +71,7 @@ case "$DRIVER" in
     $PH idle -- bash -c "true"; phase idle "$IDLE" ""
     sleep 10
     SFILE="$STREAMS/$STREAM-r$REPEAT.jsonl"; rec stream_file "$(basename "$SFILE")"
-    DRV="python3 $TOOLS/replay_stream.py $SFILE $WID $OUT/replay.jsonl --seconds $DRIVEN"
+    DRV="python3 $TOOLS/replay_stream.py $SFILE $WID $OUT/replay.jsonl --seconds $DRIVEN --area $AREA"
     $PH driven -- bash -c "true"; phase driven "$((DRIVEN + 5))" "$DRV"
     rec replay.sent "$(wc -l < "$OUT/replay.jsonl" 2>/dev/null || echo 0)" ;;
   pointer)

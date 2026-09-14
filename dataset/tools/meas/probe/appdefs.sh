@@ -9,18 +9,18 @@
 appdef() {
   local app="$1"
   export DEBIAN_FRONTEND=noninteractive
-  STREAM=""
+  STREAM=""; AREA="0,0,0,0"; POSTLAUNCH=""; POSTCLASS=""
   case "$app" in
     code)
       wget -qO /tmp/code.deb "https://update.code.visualstudio.com/latest/linux-deb-x64/stable"; rec download.rc "$?"
       apt_install_full /tmp/code.deb; ver code --version
       printf 'hello sample\n' > /tmp/sample.txt
       LAUNCH="code --no-sandbox --disable-gpu --user-data-dir=/tmp/vscode-data --disable-workspace-trust --skip-welcome --skip-release-notes /tmp/sample.txt"
-      CLASS="code"; PAT="vscode-data"; RX="code|Code"; DRIVER=stream; STREAM=word ;;
+      CLASS="code"; PAT="vscode-data"; RX="code|Code"; DRIVER=stream; STREAM=word; AREA="0.10,0.08,0.05,0.03" ;;
     soffice)
       apt_install libreoffice-writer libreoffice-gtk3; ver soffice --version
       LAUNCH="soffice --norestore --nologo --nofirststartwizard --writer"
-      CLASS="libreoffice|soffice"; PAT="soffice"; RX="soffice"; DRIVER=stream; STREAM=word ;;
+      CLASS="libreoffice|soffice"; PAT="soffice"; RX="soffice"; DRIVER=stream; STREAM=word; AREA="0.30,0.15,0.08,0.20" ;;
     thunderbird)
       apt_install_full thunderbird; ver thunderbird --version
       mkdir -p "$HOME/tbprofile"
@@ -49,7 +49,8 @@ user_pref("mail.smtpserver.smtp1.hostname", "smtp.example.invalid");
 user_pref("mail.smtpserver.smtp1.username", "measure");
 PREFS
       LAUNCH="thunderbird --profile $HOME/tbprofile -compose to=someone@example.invalid,subject=measure,body=measure"
-      CLASS="Msgcompose|thunderbird"; PAT="thunderbird"; RX="thunderbird|Isolated|Web Content"; DRIVER=stream; STREAM=outlook ;;
+      CLASS="thunderbird"; PAT="thunderbird"; RX="thunderbird|Isolated|Web Content"; DRIVER=stream; STREAM=outlook; AREA="0.30,0.02,0.05,0.02"
+      POSTLAUNCH="sleep 8; xdotool key Escape; sleep 2; xdotool key ctrl+n; sleep 6"; POSTCLASS="Write" ;;
     gimp)
       apt_install gimp; ver gimp --version
       convert -size 800x600 xc:white /tmp/sample.png
@@ -68,7 +69,7 @@ for i in range(400): print(f'<p>Paragraph {i}: the quick brown fox jumps over th
 print('</body></html>')
 PY
       LAUNCH="google-chrome --no-sandbox --disable-gpu --no-first-run --user-data-dir=/tmp/chrome-data file:///tmp/page.html"
-      CLASS="google-chrome|Google-chrome"; PAT="chrome-data"; RX="chrome"; DRIVER=stream; STREAM=ie ;;
+      CLASS="google-chrome|Google-chrome"; PAT="chrome-data"; RX="chrome"; DRIVER=stream; STREAM=ie; AREA="0.13,0,0.02,0.02" ;;
     webrtc)
       ver google-chrome --version
       LAUNCH="google-chrome --no-sandbox --disable-gpu --no-first-run --user-data-dir=/tmp/chrome-data --use-fake-device-for-media-stream --use-fake-ui-for-media-stream --allow-file-access-from-files file://$TOOLS/webrtc-loopback.html"

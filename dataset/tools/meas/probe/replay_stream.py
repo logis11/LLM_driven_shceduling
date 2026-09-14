@@ -8,7 +8,7 @@ Events are issued at their recorded gaps on the monotonic clock; segment
 breaks (a change of `seg`) are joined with a fixed 2 000 ms gap, since the
 recording's time between segments belonged to another application. Keys are
 a fixed letter cycle (D4: timing only). Pointer events go to the recorded
-cursor position scaled from --rec-size (default 1600x1200: the recordings' cursor range is 0–1599 × 0–1197) into the target
+cursor position scaled from --rec-size into the window's content area (--area insets) (default 1600x1200: the recordings' cursor range is 0–1599 × 0–1197) into the target
 window's geometry; a click is xdotool `click 1`, a drag is mousedown, a move
 to the next event's position, mouseup; a wheel is `click 4`/`click 5` repeated by the
 recorded amount (unit counts 1–3 in the recordings; sign gives direction). With --motion-ms M, the move preceding a
@@ -45,10 +45,14 @@ def main():
     ap.add_argument("--motion-ms", type=float, default=0)
     ap.add_argument("--rec-size", default="1600x1200")
     ap.add_argument("--seg-gap-ms", type=float, default=2000)
+    ap.add_argument("--area", default="0,0,0,0", help="content insets top,left,bottom,right as window fractions")
     args = ap.parse_args()
     kinds = set(args.kinds.split(","))
     rw, rh = (int(v) for v in args.rec_size.split("x"))
     wx, wy, ww, wh = geometry(args.window)
+    it, il, ib, ir = (float(v) for v in args.area.split(","))
+    wx, wy = wx + int(ww * il), wy + int(wh * it)
+    ww, wh = int(ww * (1 - il - ir)), int(wh * (1 - it - ib))
 
     def pos(ev):
         x = wx + int((ev["x"] or 0) * ww / rw)
