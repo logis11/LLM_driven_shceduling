@@ -8,10 +8,10 @@ One run per archetype; each run is one observation (D3, D10), tagged `meas-ci:<w
 
 | Run | Archetype for | Program | Stimulus (D4, D5) | Workflow |
 |---|---|---|---|---|
-| `code` | `code` | Visual Studio Code, a text file open | SWELL-KW Word keystroke stream (nearest; no code-editing dataset exists) | `meas-interactive` |
-| `soffice` | `soffice.bin` | LibreOffice Writer, a new document | SWELL-KW Word keystroke stream | `meas-interactive` |
-| `thunderbird` | `thunderbird` | Thunderbird, a compose window; a reading phase over a local mailbox | SWELL-KW Outlook keystroke stream (compose); SWELL-KW Outlook click/wheel stream (reading) | `meas-interactive` |
-| `chrome` | `chrome` (browser task) | Google Chrome, local pages | SWELL-KW Internet Explorer click/wheel stream; keystrokes into a form field from the IE stream | `meas-interactive` |
+| `code` | `code` | Visual Studio Code, a text file open | SWELL-KW Word stream, keys and pointer (nearest; no code-editing dataset exists) | `meas-interactive` |
+| `soffice` | `soffice.bin` | LibreOffice Writer, a new document | SWELL-KW Word stream, keys and pointer | `meas-interactive` |
+| `thunderbird` | `thunderbird` | Thunderbird with a pre-seeded local account, a compose window open | SWELL-KW Outlook stream, keys and pointer (c2 and c3) | `meas-interactive` |
+| `chrome` | `chrome` (browser task) | Google Chrome, a local page with a text area and scrollable content | SWELL-KW Internet Explorer stream, keys and pointer | `meas-interactive` |
 | `gimp` | `gimp` | GIMP, an 800×600 image open | scripted canvas edit (design) | `meas-interactive` |
 | `kdenlive` | `kdenlive` | Kdenlive, a project with one clip | scripted timeline scrub (design) | `meas-interactive` |
 | `mpv-video` | video playback (`mpv`, `zoom` video, `gamescope` by approximation) | mpv `--vo=x11 --ao=null`, a 1280×720 30 fps H.264 file with AAC audio | none | `meas-playback` |
@@ -31,8 +31,8 @@ Between phases a 10 s gap; the phase boundaries are logged with `phase.sh`.
 
 ## 3. Stimulus
 
-- **Keystroke streams.** Extracted from SWELL-KW uLog XML (`swell-icmi14`; DANS doi:10.17026/dans-x55-69zp, v4) by `swell_streams.py` (**to write**): for each file, consecutive `Keyboard` events with the same `ControlApplication` form a stream; the gap before each event is the difference of `TimeStamp` values. Application map: `WINWORD` → Word stream, `OUTLOOK` → Outlook stream, `iexplore` → IE stream. Keys are replayed as a fixed letter cycle: the recording's key values are not used, only the timing. **Open:** which participants and conditions (the neutral condition of every participant, concatenated in participant order, is the default candidate), and the stream length per run (candidate: 600 s of recorded time).
-- **Pointer streams.** The same files' `Mouse` events (`clicked`, `dragged`, `wheel turned`) with their timing per application. Motion between recorded events is design: one straight move to the next event's position, issued at the event's time (**open:** whether an intermediate motion cadence is added; the record has no motion).
+- **Keystroke streams.** Extracted from SWELL-KW uLog XML (`swell-icmi14`; DANS doi:10.17026/dans-x55-69zp, v4) by `swell_streams.py` (**to write**): for each file, consecutive `Keyboard` events with the same `ControlApplication` form a stream; the gap before each event is the difference of `TimeStamp` values. Application map: `WINWORD` → Word stream, `OUTLOOK` → Outlook stream, `iexplore` → IE stream. Keys are replayed as a fixed letter cycle: the recording's key values are not used, only the timing. Selection (D12): each run replays its application's whole stream, keys and pointer events together; condition c1 for Word and Internet Explorer, c2 and c3 for Outlook (no c1 keystrokes); files concatenated in participant order; repeat r replays the r-th 600 s window of recorded time (`build_windows.py` → `dataset/meas/streams/<app>-r<r>.jsonl`, committed). Timestamps are quantised at the 15.6 ms Windows tick; 7 % of gaps are zero.
+- **Pointer streams.** The same files' `Mouse` events (`clicked`, `dragged`, `wheel turned`) with their timing per application. Motion between recorded events is design: one straight move to the next event's position, issued at the event's time; no intermediate motion cadence is added (the record has no motion; `replay_stream.py --motion-ms` exists but is off).
 - **Scripted interactions** for `gimp` and `kdenlive`: a fixed script of drags, clicks and wheel turns at fixed times, committed with the workflow, labelled design.
 - **Replay driver.** Per-event xdotool through `replay.py`, timing on the monotonic clock. Fidelity (probe `timing` job, 120 events): absolute gap error p50 0.30 ms, p90 0.75 ms, p99 1.24 ms, max 1.41 ms.
 
@@ -68,4 +68,5 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-14, D12: §3 stimulus selection and motion rule settled; §1 stimulus column updated.
 - 2026-09-14, after the runner probe (`probe.md`): §1 `webrtc` run confirmed and its scope stated; §4 instruments settled; §5 W = 5 ms; Thunderbird's profile must carry a local account and identity for `-compose` (dry-run item); MLT audio and every audio path run without a device (§8).
