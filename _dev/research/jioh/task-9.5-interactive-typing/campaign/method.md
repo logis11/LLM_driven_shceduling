@@ -32,20 +32,20 @@ Between phases a 10 s gap; the phase boundaries are logged with `phase.sh`.
 ## 3. Stimulus
 
 - **Keystroke streams.** Extracted from SWELL-KW uLog XML (`swell-icmi14`; DANS doi:10.17026/dans-x55-69zp, v4) by `swell_streams.py` (**to write**): for each file, consecutive `Keyboard` events with the same `ControlApplication` form a stream; the gap before each event is the difference of `TimeStamp` values. Application map: `WINWORD` → Word stream, `OUTLOOK` → Outlook stream, `iexplore` → IE stream. Keys are replayed as a fixed letter cycle: the recording's key values are not used, only the timing. Selection (D12): each run replays its application's whole stream, keys and pointer events together; condition c1 for Word and Internet Explorer, c2 and c3 for Outlook (no c1 keystrokes); files concatenated in participant order; repeat r replays the r-th 600 s window of recorded time (`build_windows.py` → `dataset/meas/streams/<app>-r<r>.jsonl`, committed). Timestamps are quantised at the 15.6 ms Windows tick; 7 % of gaps are zero.
-- **Pointer streams.** The same files' `Mouse` events (`clicked`, `dragged`, `wheel turned`) with their timing per application. Motion between recorded events is design: one straight move to the next event's position, issued at the event's time; no intermediate motion cadence is added (the record has no motion; `replay_stream.py --motion-ms` exists but is off).
+- **Pointer streams.** The same files' `Mouse` events (`clicked`, `dragged`, `wheel turned`) with their timing per application. Recorded positions (a 1600×1200 screen) are scaled into the application's content area — the window minus per-application insets for tab strips, toolbars and side bars (`appdefs.sh` AREA; design, so that replayed clicks land in the document, page or editor as the recorded ones did in theirs). Motion between recorded events is design: one straight move to the next event's position, issued at the event's time; no intermediate motion cadence is added (the record has no motion; `replay_stream.py --motion-ms` exists but is off).
 - **Scripted interactions** for `gimp` and `kdenlive`: a fixed script of drags, clicks and wheel turns at fixed times, committed with the workflow, labelled design.
 - **Replay driver.** Per-event xdotool through `replay.py`, timing on the monotonic clock. Fidelity (probe `timing` job, 120 events): absolute gap error p50 0.30 ms, p90 0.75 ms, p99 1.24 ms, max 1.41 ms.
 
 ## 4. Instruments
 
-- `perf sched record -a` as root over each phase (probe: `linux-tools-<kernel>` installs; `perf_event_paranoid` 4 blocks the runner user), read with `perf sched timehist` for per-schedule run time, wait time and wake gaps of every thread in the application's process tree, plus the waker.
+- `perf sched record -k CLOCK_MONOTONIC -a` as root over each whole phase (probe: `linux-tools-<kernel>` installs; `perf_event_paranoid` 4 blocks the runner user), read with `perf sched timehist` for per-schedule run time, wait time and scheduling delay of every thread, and `perf sched timehist -w` for the wakeup rows with the waker (Xvfb wakes the application when it delivers input). The two text outputs, gzipped, are the released raw record; the `perf.data` file (up to ~1 GB per 600 s phase on Kdenlive) is kept in dry runs only.
 - `/proc` snapshots (`snapshot.py`) at phase boundaries: thread population, CPU time, voluntary and involuntary switches.
 - `runner_spec.py` for the machine record; `apt-cache policy` for the application version.
 - Screenshots at phase boundaries, to show what the application displayed (first-run dialogs, focus).
 
 ## 5. Wake attribution (D9)
 
-A schedule-in of a thread of the application within **W** ms after a replayed input event's send time is input-driven; every other schedule-in is timer-driven. W = 5 ms (probe: per-event replay error p99 1.24 ms, max 1.41 ms). The input-driven run of an event is the sum of run time of all input-attributed schedule-ins of the main thread until the next event or until W expires, whichever is first (**open:** whether other threads' input-attributed run time is added to the same task, since D9 makes the archetype one task).
+Two rules are computed by `analyze.py` and the choice is a changelog decision on the dry-run data: (a) first-wake — the first application wake within W = 5 ms of a replayed event's send time (replay error p99 1.24 ms) and that schedule-in's run; the dry run attributed only 14–36 % of events this way for Writer, VS Code and Thunderbird, because busy applications wake every few milliseconds on their own; (b) window — all application run time in [s_i, s_{i+1}) minus the idle phase's CPU rate over that span, which charges each input with everything the application did until the next input, net of its timer load. A third signal, the waker of each wake (Xvfb = input delivery), is recorded for the analysis.
 
 ## 6. Derived parameters per archetype
 
@@ -68,5 +68,6 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-14, after dry run 1 (runs 34838057273, 34838057243): §3 content-area insets; §4 wakeup rows kept, `perf.data` dropped in full mode; §5 two attribution rules with the dry-run rates; Thunderbird's compose window opened by Escape and ctrl+n after the Account Hub.
 - 2026-09-14, D12: §3 stimulus selection and motion rule settled; §1 stimulus column updated.
 - 2026-09-14, after the runner probe (`probe.md`): §1 `webrtc` run confirmed and its scope stated; §4 instruments settled; §5 W = 5 ms; Thunderbird's profile must carry a local account and identity for `-compose` (dry-run item); MLT audio and every audio path run without a device (§8).
