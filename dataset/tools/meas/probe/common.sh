@@ -53,7 +53,7 @@ wait_window() { # wait_window <class-regex> <seconds> -> prints window id or emp
 
 screenshot() { import -window root "$OUT/$1.png" 2>/dev/null || xwd -root -silent | convert xwd:- "$OUT/$1.png" 2>/dev/null; rec "shot.$1" "$([ -f "$OUT/$1.png" ] && echo 1 || echo 0)"; }
 
-snap() { python3 "$TOOLS/snapshot.py" "$1" "${2:-snapshot.py|xdotool|probe|perf}" > "$OUT/snap.$3.json"; }
+snap() { python3 "$TOOLS/snapshot.py" "$1" "${2:-snapshot\.py|xdotool|apps\.sh|perf sched|replay\.py}" > "$OUT/snap.$3.json"; }
 
 perf_capture() { # perf_capture <label> <seconds> <comm-regex> — runs in background over the window
   local label="$1" secs="$2" rx="$3"

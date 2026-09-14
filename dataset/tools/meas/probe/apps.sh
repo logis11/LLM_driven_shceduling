@@ -12,13 +12,14 @@ apt_install_full() { sudo apt-get install -y "$@" > "$OUT/apt.log" 2>&1; rec apt
 ver() { rec version "$("$@" 2>&1 | head -1 | tr -d '\n' | head -c 200)"; }
 
 sudo apt-get update > /dev/null 2>&1
-apt_install xdotool imagemagick x11-apps python3-xlib
+apt_install xdotool imagemagick x11-apps python3-xlib dbus-x11
+start_xvfb
 case "$APP" in
   code)
     wget -qO /tmp/code.deb "https://update.code.visualstudio.com/latest/linux-deb-x64/stable"; rec download.rc "$?"
     apt_install_full /tmp/code.deb; ver code --version
-    printf 'hello probe\n' > /tmp/probe.txt
-    LAUNCH="code --no-sandbox --disable-gpu --user-data-dir=/tmp/vscode-data --disable-workspace-trust --skip-welcome --skip-release-notes /tmp/probe.txt"
+    printf 'hello sample\n' > /tmp/sample.txt
+    LAUNCH="code --no-sandbox --disable-gpu --user-data-dir=/tmp/vscode-data --disable-workspace-trust --skip-welcome --skip-release-notes /tmp/sample.txt"
     CLASS="code"; PAT="vscode-data"; RX="code|Code"; DRIVER=type ;;
   soffice)
     apt_install libreoffice-writer libreoffice-gtk3; ver soffice --version
@@ -26,19 +27,19 @@ case "$APP" in
     CLASS="libreoffice|soffice"; PAT="soffice"; RX="soffice"; DRIVER=type ;;
   thunderbird)
     apt_install_full thunderbird; ver thunderbird --version
-    mkdir -p /tmp/tbprofile
-    printf 'user_pref("mail.shell.checkDefaultClient", false);\nuser_pref("mail.provider.enabled", false);\nuser_pref("app.update.enabled", false);\nuser_pref("datareporting.policy.dataSubmissionPolicyBypassNotification", true);\n' > /tmp/tbprofile/user.js
-    LAUNCH="thunderbird --profile /tmp/tbprofile -compose to=probe@example.invalid,subject=probe,body=probe"
+    mkdir -p "$HOME/tbprofile"
+    printf 'user_pref("mail.shell.checkDefaultClient", false);\nuser_pref("mail.provider.enabled", false);\nuser_pref("app.update.enabled", false);\nuser_pref("datareporting.policy.dataSubmissionPolicyBypassNotification", true);\n' > "$HOME/tbprofile/user.js"
+    LAUNCH="thunderbird --profile $HOME/tbprofile -compose to=probe@example.invalid,subject=probe,body=probe"
     CLASS="thunderbird|Msgcompose|Mail"; PAT="thunderbird"; RX="thunderbird|Isolated|Web Content"; DRIVER=type ;;
   gimp)
     apt_install gimp; ver gimp --version
-    convert -size 800x600 xc:white /tmp/probe.png
-    LAUNCH="gimp --no-splash --new-instance /tmp/probe.png"
+    convert -size 800x600 xc:white /tmp/sample.png
+    LAUNCH="gimp --no-splash --new-instance /tmp/sample.png"
     CLASS="gimp"; PAT="gimp"; RX="gimp"; DRIVER=pointer ;;
   kdenlive)
     apt_install_full kdenlive; ver kdenlive --version
     export QT_QPA_PLATFORM=xcb KDE_FULL_SESSION=true
-    LAUNCH="kdenlive --nocrashhandler"
+    LAUNCH="kdenlive"
     CLASS="kdenlive"; PAT="kdenlive"; RX="kdenlive|melt"; DRIVER=pointer ;;
   chrome)
     ver google-chrome --version
@@ -57,10 +58,9 @@ case "$APP" in
   *) echo "unknown app $APP"; exit 0 ;;
 esac
 
-start_xvfb
 rec launch "$LAUNCH"
 T_LAUNCH=$(now_us)
-bash -c "$LAUNCH" > "$OUT/app.log" 2>&1 &
+setsid bash -c "$LAUNCH" > "$OUT/app.log" 2>&1 &
 APP_PID=$!
 WID=$(wait_window "$CLASS" 90)
 sleep 5; screenshot after-launch
@@ -78,6 +78,7 @@ if [ -n "$WID" ]; then
   rec window.name_after "$(xdotool getwindowname "$WID" 2>/dev/null | tr -d '\n' | head -c 120)"
   [ -f "$OUT/replay.jsonl" ] && rec replay.sent "$(wc -l < "$OUT/replay.jsonl")"
 fi
-kill "$APP_PID" 2>/dev/null; sleep 2; pkill -f "$PAT" 2>/dev/null; kill "$(cat "$OUT/xvfb.pid")" 2>/dev/null
+# never pkill -f: the script's own argv carries the app name (Phase 2 note)
+kill -- "-$APP_PID" 2>/dev/null; sleep 2; kill -9 -- "-$APP_PID" 2>/dev/null; kill "$(cat "$OUT/xvfb.pid")" 2>/dev/null
 rec finished_utc "$(date -u +%FT%TZ)"
 finish_report
