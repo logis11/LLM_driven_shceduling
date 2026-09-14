@@ -64,13 +64,13 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 
 ### `dhakal-chi18`
 - cite: Dhakal, V., Feit, A. M., Kristensson, P. O., & Oulasvirta, A. (2018). Observations on Typing from 136 Million Keystrokes. *Proc. CHI 2018*. DOI 10.1145/3173574.3174220.
-- role: Role C (former D-live substitute) — input inter-arrival: mean inter-key interval 238.66 ms (SD 111.60). Scope limit: within-burst transcription typing only — no mouse, no think-pauses; grounds intra-burst gaps, not burst/pause macro-structure. Dataset public (Aalto, research use).
-- status: verified (2026-08-26)
+- role: Role C, typing study: 168 960 self-selected online volunteers transcribing 15 memorised English sentences on their own devices. Reports the mean of per-participant average inter-key intervals, 238.66 ms, SD 111.60 across participants; skew 1.98 and kurtosis 7.1 describe that across-participant distribution, not keystroke-level gaps. IKIs over 5 000 ms dropped, so within-sentence pauses up to 5 s remain; mouse editing allowed but not logged. Fits no distribution and no mixture. Raw per-keystroke timestamps released, non-commercial with attribution. Paper-only after Phase 9: no dataset value derives from it.
+- status: verified (2026-08-26; role corrected 2026-09-14 on the 2026-09-13 verification, `_dev/research/jioh/2026-09-13-verification/reads/R08-typing.md`)
 
 ### `roeser-rw24`
 - cite: Roeser, J., De Maeyer, S., Leijten, M., & Van Waes, L. (2024). Modelling typing disfluencies as finite mixture process. *Reading and Writing*, 37, 359–384. DOI 10.1007/s11145-021-10203-z.
-- role: Role C — inter-key-interval distribution family: two-component log-normal mixture (fluent ~158 ms; pause component p≈0.34, task-dependent). Cite the mixture shape, not a single parameter set. Data + code on OSF (osf.io/y3p4d).
-- status: verified (2026-08-26)
+- role: Role C, Inputlog copy task: 250 Dutch participants aged 18 to 25 fitted; data and code on OSF (osf.io/y3p4d, 1 662 subjects, CC0). A two-component log-normal mixture fixed by assumption, log-normal being the field's convention, with only one- versus two-component models compared. Table 3 gives one parameter set per task: LF bigrams fluent location 158 ms [139, 180] as the posterior mean of the back-transformed log location, disfluency slowdown 95 ms, disfluency probability 0.34; consonants 429 ms, 414 ms, 0.73; fluent spread 0.29 in both tasks. Paper-only after Phase 9: no dataset value derives from it.
+- status: verified (2026-08-26; role corrected 2026-09-14 on the 2026-09-13 verification, `_dev/research/jioh/2026-09-13-verification/reads/R08-typing.md`)
 
 ### `killourhy-dsn09`
 - cite: Killourhy, K. S., & Maxion, R. A. (2009). Comparing Anomaly-Detection Algorithms for Keystroke Dynamics. *Proc. DSN 2009*, 125–134. DOI 10.1109/DSN.2009.5270346.
