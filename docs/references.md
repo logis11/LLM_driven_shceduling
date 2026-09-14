@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-09-13
+> Status: normative · Created 2026-08-26 · Updated 2026-09-14
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -88,9 +88,9 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - status: verified (2026-08-26)
 
 ### `swell-icmi14`
-- cite: Koldijk, S., Sappelli, M., Verberne, S., Neerincx, M. A., & Kraaij, W. (2014). The SWELL Knowledge Work Dataset for Stress and User Modeling Research. *Proc. ICMI 2014*. DOI 10.1145/2663204.2663257. Data: DANS, DOI 10.17026/dans-x55-69zp (registration required).
-- role: Role C — qualitative citation for knowledge-worker computer logging with app names; quantitative use only if raw logs are requested and analyzed.
-- status: verified-in-vetting (2026-08-25); author list to re-confirm at submission
+- cite: Koldijk, S., Sappelli, M., Verberne, S., Neerincx, M. A., & Kraaij, W. (2014). The SWELL Knowledge Work Dataset for Stress and User Modeling Research. *Proc. ICMI 2014*. DOI 10.1145/2663204.2663257. Data: DANS Data Station SSH, DOI 10.17026/dans-x55-69zp, version 4 (2025-06-04), CC-BY-NC-SA-4.0, no access request; uLog XML files `<a|b>_pp<N>_c<K>_uLog_<date>_<time>.xml` (accessed 2026-09-13).
+- role: Role C — knowledge-worker computer logging with application names: 25 participants, ~3 h each, free composition (report writing in Word 2010, e-mail in Outlook 2010, browsing in Internet Explorer) under neutral / interruption / time-pressure conditions, Windows, Sept–Nov 2012. Per-keystroke `TimeStamp` (100 ns digits) with `ControlApplication` and window title; mouse as click/drag/wheel only, no motion. Quantitative use: the recorded inter-keystroke timing per application is the typing stimulus the 9.5 measurement campaign replays (Word → `soffice.bin` and `code`, Outlook → `thunderbird`); the archetype values cite the run, whose method cites this entry.
+- status: verified (paper full text in vetting 2026-08-25; dataset copy read 2026-09-13 — `_dev/research/jioh/task-9.5-interactive-typing/search/S3-traces-datasets.md` S3-swell-kw, with SHA-256 of the two files read)
 
 ### `focal-arxiv26`
 - cite: Yin, H., Wen, Z., Cao, J., Yuan, B., & Yang, R. (2026). FOCAL: Filtered On-device Continuous Activity Logging for Efficient Personal Desktop Summarization. arXiv:2604.19541 (v2, 2026-07-18). **Preprint — no venue.**
