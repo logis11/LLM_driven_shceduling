@@ -70,8 +70,8 @@ def load_rows(path, pids):
                 continue
             comm, a, b = tm.group(1), int(tm.group(2)), tm.group(3)
             tid, pid = (a, int(b)) if b else (a, a)
-            if pid not in pids:
-                continue
+            if pid not in pids or comm in ("bash", "sh", "sleep", "setsid"):
+                continue  # the launcher's shell wrapper is in the tree but is not the application
             t, wait, delay, run = float(t), float(wait), float(delay), float(run)
             rows.append({"t_end": t, "run": run, "delay": delay, "wait": wait, "comm": comm, "tid": tid, "pid": pid,
                          "t_in": t - run / 1000.0, "t_wake": t - run / 1000.0 - delay / 1000.0})
