@@ -78,6 +78,6 @@ if [ -n "$WID" ]; then
   rec window.name_after "$(xdotool getwindowname "$WID" 2>/dev/null | tr -d '\n' | head -c 120)"
   [ -f "$OUT/replay.jsonl" ] && rec replay.sent "$(wc -l < "$OUT/replay.jsonl")"
 fi
-kill "$APP_PID" 2>/dev/null; sleep 2; pkill -f "$PAT" 2>/dev/null
+kill "$APP_PID" 2>/dev/null; sleep 2; pkill -f "$PAT" 2>/dev/null; kill "$(cat "$OUT/xvfb.pid")" 2>/dev/null
 rec finished_utc "$(date -u +%FT%TZ)"
 finish_report

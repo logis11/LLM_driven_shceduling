@@ -72,11 +72,11 @@ probe_phase() {
   local phase="$1" pat="$2" rx="$3" secs="$4" driver="$5"
   snap "$pat" "" "$phase.before"
   local t0; t0=$(now_us)
-  if [ -n "$driver" ]; then bash -c "$driver" > "$OUT/driver.$phase.log" 2>&1 & fi
-  local drv=$!
+  local drv=""
+  if [ -n "$driver" ]; then bash -c "$driver" > "$OUT/driver.$phase.log" 2>&1 & drv=$!; fi
   sleep 2; perf_capture "$phase" 5 "$rx"
   local left=$(( secs - 7 )); [ "$left" -gt 0 ] && sleep "$left"
-  wait "$drv" 2>/dev/null
+  if [ -n "$drv" ]; then wait "$drv" 2>/dev/null; fi
   snap "$pat" "" "$phase.after"
   python3 - "$OUT/snap.$phase.before.json" "$OUT/snap.$phase.after.json" "$phase" <<'PY' | tee -a "$KV" | sed 's/^/  /' >&2
 import json, sys

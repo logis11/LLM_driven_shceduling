@@ -7,6 +7,7 @@ sudo apt-get update > /dev/null 2>&1
 sudo apt-get install -y --no-install-recommends xdotool python3-xlib > "$OUT/apt.log" 2>&1; rec apt.rc "$?"
 start_xvfb
 python3 "$TOOLS/xkeylog.py" "$OUT/delivered.jsonl" 60 > "$OUT/xkeylog.log" 2>&1 &
+XKL=$!
 sleep 2
 WID=$(wait_window "xkeylog" 20)
 if [ -n "$WID" ]; then
@@ -20,5 +21,5 @@ if [ -n "$WID" ]; then
   xdotool type --window "$WID" --delay 100 "$(head -c 60 < /dev/zero | tr '\0' 'a')"; rec type_delay.rc "$?"
   sleep 1; rec type_delay.delivered "$(wc -l < "$OUT/delivered.jsonl")"
 fi
-wait; rec finished_utc "$(date -u +%FT%TZ)"
+wait "$XKL" 2>/dev/null; kill "$(cat "$OUT/xvfb.pid")" 2>/dev/null; rec finished_utc "$(date -u +%FT%TZ)"
 finish_report
