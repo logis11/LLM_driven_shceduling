@@ -34,7 +34,7 @@ snap "$PAT" "" launch
 phase() {
   local name="$1" secs="$2" driver="$3"
   snap "$PAT" "" "$name.before"
-  sudo perf sched record -a -o "$OUT/perf.$name.data" -- sleep "$secs" > "$OUT/perf.$name.log" 2>&1 &
+  sudo perf sched record -k CLOCK_MONOTONIC -a -o "$OUT/perf.$name.data" -- sleep "$secs" > "$OUT/perf.$name.log" 2>&1 &
   local perf_pid=$!
   sleep 1
   if [ -n "$driver" ]; then
