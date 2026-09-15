@@ -1,36 +1,25 @@
-# Handoff — task 9.5 Interactive and typing, stages 1–2 (research routine, 2026-09-13)
+# Handoff — task 9.5 Interactive and typing (2026-09-15)
 
-Stages 1 and 2 of `_dev/research/jioh/research-slice-workflow.md` are done on `jioh/dataset-rebuild`; stage 3 (decisions) is 인지오's. Issue #8.
+Branch `jioh/dataset-rebuild` (all of 9.5 lives there, `_dev/` included). The slice's records: `_dev/research/jioh/task-9.5-interactive-typing/` — `changelog.md` (D1–D20, the decision record), `campaign/method.md`, `campaign/probe.md`, `campaign/results.md`, `campaign/results/` (pooled JSON, per-run reports).
 
-## Files
+## Where it stands
 
-- `_dev/research/jioh/task-9.5-interactive-typing/scope-card.md` — 33 items: `desktop-interactive` (params 1–9, structure and bindings 10–18, registry lines 19–23) and, by this run's boundary assumption, `audio-playback` and `video-playback` (24–33).
-- `…/search/input.md` — topics T1–T7 in neutral form, classes, record format.
-- `…/search/S1-literature.md` (27 sources read), `S2-project-docs.md` (20 candidates, 20 shallow clones), `S3-traces-datasets.md` (19 entries, computations labelled), `S4-ci-observability.md` (25 candidates).
-- `…/search/candidates.md` — observations that exist, per-item findings, not-found across classes.
-- Source copies under `…/sources/` were local to the routine's clone and are gone; every record is self-sufficient (URL or commit, SHA-256, verbatim passages with locators).
+- **Stage 3 decisions done and applied (D1–D20).** `desktop-interactive`, `audio-playback`, `video-playback` are gone; nine measured per-application archetypes are in `dataset/archetypes.yaml` (`office-writer`, `code-editor`, `mail-client`, `web-browser`, `image-editor`, `video-editor`, `video-player`, `audio-player`, `video-call`), each one observation from the 9.5 campaign (`meas-ci:interactive:3`, `meas-ci:playback:3`; Thunderbird repeats 2–3 from `interactive:4`), quantile tables (D17), per-thread timer components (D16), replayed SWELL-KW stimulus under `dataset/stimulus/` (D18), one explicit event stream per task (D9). Timelines rebound (30 bindings), derived files regenerated, grid unchanged, registry edited (`swell-icmi14` in; `dhakal-chi18`, `roeser-rw24` out; interbench trimmed).
+- **Campaign**: workflows `meas-interactive.yml` / `meas-playback.yml` driven by `.github/campaign.json` (push-triggered; dispatch is unavailable off `main`); tools under `dataset/tools/meas/campaign/` (`run.sh`, `analyze.py`, `pool.py`, `fold_in.py`, `render_results.py`, `build_windows.py`) and `dataset/tools/meas/probe/` (appdefs, replay drivers, extractor). Raw data: release `meas-ci-2026-09-14` (D20).
+- **Build state on the branch**: `make -C dataset lint/test` green (90 passed, 1 xfailed: the window test); `compile.py --allow-window` writes; CI's window gate and the harness's RQ0 pin check fail by design until 9.14 (D19). Compile ≈ 5 min, compiled set 112 MB.
 
-## Boundary assumption to confirm first
+## Next — follow-ups 인지오 took on 2026-09-15 (in this order)
 
-The routine took `audio-playback` and `video-playback` into 9.5 because the library files them with `desktop-interactive` under one interbench family header and no other slice name covers them. If they belong elsewhere, items 24–33 and topics T4–T5 move with them; nothing else on the card depends on them.
+1. **Single-core campaign.** The runner has 4 vCPUs and the simulator one lane; the measured trees ran their threads in parallel. Re-run the campaign with the application's process tree pinned to one CPU (`taskset` in `run.sh`), same phases and stimulus. Decision to take first: whether the pinned run *replaces* the unpinned one as the archetypes' observation or is carried beside it; then re-pool, `fold_in.py`, re-splice, rebuild. Changelog entry.
+2. **Heavy-operation driven phases.** Scripted phases whose trigger is design and whose cost is measured, per application: VS Code with a project open and a language server; a GIMP filter; a Kdenlive preview render; Chrome loading a page with scripts; Writer with a large document. Grill: which operations, how they enter the archetype (further `focus_components` or a separate operation kind), and how a timeline invokes them (9.10 boundary). Then campaign, pool, fold-in.
+3. **Stimulus sensitivity.** Replay the 136M Keystrokes data (S3-aalto136m; transcription) as a second stream for the typing-driven runs and compare per-input distributions with the SWELL-KW ones; state whether the stimulus choice moves the values. Needs an extraction tool for that dataset (raw press/release timestamps, non-commercial licence) and one campaign batch.
+4. **Display and GPU — discuss in depth** (no decision yet): recovering a real display server, compositor and GPU means a self-hosted runner or a volunteer machine, which touches phase decision 5 (CI runners only). Bring the options with what each recovers (paint cadence at refresh, rasterisation off the CPU) and costs.
+- **Deferred**: real-desktop validation traces (volunteer `perf sched` captures, comm names and timing only) — needs a decision-5 exception; not now.
 
-## The one-observation situation
+## Open threads and hand-offs (also in the changelog entries)
 
-No single observation covers `desktop-interactive`. The archetype is a montage: wake gaps from two typing studies (Roeser's LF-bigram parameter set sits under Dhakal's tag), CPU per wake from interbench's timer-driven window-drag emulation, and the coupling of burst to gap ours. What the search found:
-
-- **Gaps.** Two observations with raw data that could each ground the whole gap parameter alone: the 136M Keystrokes dataset (S3-aalto136m; keystroke-level p50 171 ms, p90 396, p99 934 in a six-participant sample; transcription; non-commercial licence) and Roeser's OSF `ct.csv` (S3-osf-y3p4d; 1 662 subjects, per-component IKIs, CC0). Free-composition alternatives with pauses retained: SWELL-KW (S3-swell-kw, Word/Outlook/IE per keystroke, Windows 2012) and Chukharev-Hudilainen's ex-Gaussian chat fits (S1-chukharev2014). Free-text distribution shape: log-logistic best, log-normal second (S1-gonzalez2021).
-- **CPU per input.** No Linux observation newer than 2004. The candidates are Lorch & Smith's VTrace study (S1-lorch2003: eight Windows NT/2000 users over months; per-event CPU CDFs; UI events 20 % of CPU, timers 35 %; applications differ significantly), Flautner's interactive-episode traces (S1-flautner2000/2001: six Linux X11 apps; keystroke echo sub-millisecond; per-application episode buckets), Etsion/Tsafrir's klogger traces (S1-tsafrir2003/S1-etsion2004: Emacs at 8 char/s ≈ 0.2 % CPU, OpenOffice 2.6 %, quanta well under 10 ms), and Firefox Profiler profiles (S3-firefox-profiles: wall-clock per-keypress 4–55 ms on Linux Firefox 70–85, no CPU deltas). All contradict the compiled editors' 74–96 ms bursts on 90–96 % of keystrokes.
-- **Wake structure.** Every observation and every toolkit document says GUI wakeups are not input-only: timer messages exceed UI messages in CPU share (S1-lorch2003), cursor blink (1 200 / 1 000 / 500 ms), autosave, spell timers, refresh-driver ticks at ~16.7 ms when painting, compositor frame callbacks (S2-01…S2-08, S3-firefox-profiles, S3-sysprof-gnome).
-- **Audio and video.** No observation of a desktop audio player's wake period with per-wake CPU; PipeWire's default period is 21.3 ms (1 024 at 48 kHz), PulseAudio's adaptive with a 10 ms minimum sleep (S2-09, S2-10); pw-top snapshots show client `BUSY` of 3–30 µs per cycle (S3-pipewire-pwtop). Video: Xine on Linux 2.4 is the only player measurement (4 ms content-clock pacing, ≈ 40 % CPU + X 20 %; S1-tsafrir2003); mpv times to the audio clock by default (S2-12); conferencing CPU exists only whole-client on Windows and Android.
-- **Own measurement.** A runner can drive VS Code under Xvfb (VS Code's own CI does, S4-09), browsers, LibreOffice through its UI-test framework, mpv with null audio; `perf sched timehist` gives per-schedule run time and wake gaps (root; S4-17, S4-25). It cannot observe display refresh, device audio timing or GPU work, and per-key interval replay is documented only via xdotool script sleeps or evemu-play (S4-05, S4-07). Whether the runner has `/dev/uinput`, a sound device, or a permissive `perf_event_paranoid` is not established by any document.
-
-## Stage 3's first question
-
-Whether `desktop-interactive` keeps one archetype for six applications at all, or splits — every observation found says applications differ by an order of magnitude in CPU per input, and none covers a video editor — and, under decision 2, which single observation grounds the gap side (136M Keystrokes raw data; Roeser's CC0 data; SWELL-KW with pauses) given that no observation grounds gap and CPU together. Only after that: whether the CPU side is re-sourced from a runner measurement (a `perf sched` capture of an editor under replayed intervals, S4) or from the 2000–2004 literature.
-
-## Flags from the readers
-
-- Unreachable on 2026-09-13: github.com issue pages and `api.github.com` (403 through the proxy; the GitHub MCP is scoped to this repository), so VS Code typing-latency `.cpuprofile` attachments and mpv issue bodies were not read; gitlab.freedesktop.org wikis and uploads (Anubis / 401 / 404); freedesktop.org PulseAudio wiki (418); dl.acm.org (403); web.eecs.umich.edu (TLS; Wayback used); Zoom support (JS shell; Wayback used).
-- Paywalled and unread: Blake et al. ISCA 2010 (desktop TLP), Wong et al. 2008, Wimmer et al. CHI EA 2023 (X11 toolkit latency), Salthouse 1986.
-- Request-only datasets: Clarkson II, Buffalo CUBS, IMC 2021 conferencing data.
-- S3's numbers are the reader's own computations on samples (six of 168 593 participant files; one of 919 SWELL files); they locate candidates, they are not values.
+- 9.10: `c1-meeting` carries two `video-call` tasks (zoom voice + video), doubling one call (D19); VS Code's helper processes as named tasks for recognition realism (D14); **SWELL-KW's `Window Activated` events give real per-participant sequences of application focus and durations over ~3 h — a source for task sets, focus windows and switching from a recording the dataset already cites** (noted 2026-09-15).
+- 9.14: demand-window rule (eight `-single` files at 0.63–0.90), `tick_count`'s stimulus-count part (image-editor and video-editor emit no input wakes), prior-table editor rows and H1, the RQ0 gate's dataset pin.
+- 9.13: compile time and compiled size (explicit event streams; a faster sampler or compact timer encoding).
+- 9.15: docs for the nine entries and the retired three; the seven docs citing the two typing studies.
+- 9.8: Chrome renderer rows from the campaign as an observation of renderers on a static page (D14). 9.11: TIMER backlog vs players' frame skipping (D11).

@@ -111,12 +111,12 @@ Execution order: 9.1 ∥ 9.2 ∥ 9.3 first → 9.4–9.12 in parallel, after 9.1
 - [x] **9.2** Heads-up memo to 인경민 and 박이안 — what will change, what stays stable, the three executor questions (spec decision 7)
 - [x] **9.3** Measurement tools fixed — including `meas-ci:names:2` preserved before its Actions artifacts expire on 2026-12-09
 - [x] **9.4** Gaming — research and decisions — `game-task-chain` on the LAVD deck as its one source; frame period on `steamos-refresh` as design; tail and count removed; wineserver a chain member; changelog `_dev/research/jioh/task-9.4-gaming/changelog.md`
-- [WIP] **9.5** Interactive and typing — research and decisions
+- [WIP] **9.5** Interactive and typing — research and decisions — D1–D20 applied: nine measured per-application archetypes replace `desktop-interactive`/`audio-playback`/`video-playback` (campaign `meas-ci:interactive:3`, `playback:3`; release `meas-ci-2026-09-14`); follow-ups taken 2026-09-15: single-core (pinned) campaign, heavy-operation driven phases, stimulus sensitivity (136M Keystrokes), display/GPU discussion; real-desktop validation deferred
 - [WIP] **9.6** Compile — research and decisions
 - [ ] **9.7** Background and IO — research and decisions (#10)
 - [ ] **9.8** Browser and comms — research and decisions
 - [ ] **9.9** Daemons and session processes — research and decisions
-- [ ] **9.10** Scenarios and timelines — research and decisions
+- [ ] **9.10** Scenarios and timelines — research and decisions — note from 9.5: SWELL-KW's window-activation events give real per-participant application-focus sequences and durations (~3 h each), a source for task sets, focus windows and switching; `c1-meeting`'s two `video-call` tasks double one call
 - [ ] **9.11** Scheduler-side constants and groundings — research and decisions
 - [ ] **9.12** Related-work and proposal prose — research and decisions
 - [ ] **9.13** Rebuild — the dataset rebuilt once from 9.4–9.12's decisions
