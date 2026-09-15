@@ -17,6 +17,7 @@ import json
 import os
 import re
 import sys
+from array import array
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from analyze import analyze_run, pct  # noqa: E402
@@ -47,7 +48,22 @@ def main():
         reps = sorted(info["repeats"])
         results, raws = {}, {}
         for r in reps:
-            results[r], raws[r] = analyze_run(info["repeats"][r], args.w_ms, args.cap_ms)
+            results[r], raw = analyze_run(info["repeats"][r], args.w_ms, args.cap_ms)
+            # keep only compact samples per phase: per-comm gaps/runs/wakes/threads, span, per-input lists
+            slim = {"phases": {}}
+            for phase, pd in raw["phases"].items():
+                comms = {}
+                by_tid = {}
+                for row in pd["rows"]:
+                    by_tid.setdefault((row.comm, row.tid), []).append((row.t_in, row.run))
+                for (comm, tid), rs in by_tid.items():
+                    c = comms.setdefault(comm, {"gaps": array("d"), "runs": array("d"), "wakes": 0, "threads": 0})
+                    c["gaps"].extend((b[0] - a[0]) * 1000 for a, b in zip(rs, rs[1:]))
+                    c["runs"].extend(x[1] for x in rs)
+                    c["wakes"] += len(rs); c["threads"] += 1
+                slim["phases"][phase] = {"span": pd["span"], "comms": comms, "per_input": pd.get("per_input")}
+            raws[r] = slim
+            del raw
         entry = {"family": info["family"], "mode": info["mode"], "repeats": reps,
                  "version": results[reps[0]].get("version"), "phases": {}}
         for phase in ("idle", "driven", "play"):
@@ -60,16 +76,10 @@ def main():
                   "threads": {}}
             comms = {}
             for r in reps:
-                by_tid = {}
-                for row in raws[r]["phases"][phase]["rows"]:
-                    by_tid.setdefault((row["comm"], row["tid"]), []).append(row)
-                for (comm, tid), rows in by_tid.items():
-                    rows.sort(key=lambda x: x["t_in"])
+                for comm, cc in raws[r]["phases"][phase]["comms"].items():
                     c = comms.setdefault(comm, {"gaps": {}, "runs": {}, "wakes": {}, "threads": {}})
-                    c["gaps"].setdefault(r, []).extend((b["t_in"] - a["t_in"]) * 1000 for a, b in zip(rows, rows[1:]))
-                    c["runs"].setdefault(r, []).extend(x["run"] for x in rows)
-                    c["wakes"][r] = c["wakes"].get(r, 0) + len(rows)
-                    c["threads"][r] = c["threads"].get(r, 0) + 1
+                    c["gaps"][r] = cc["gaps"]; c["runs"][r] = cc["runs"]
+                    c["wakes"][r] = cc["wakes"]; c["threads"][r] = cc["threads"]
             for comm, c in sorted(comms.items(), key=lambda kv: -sum(sum(v) for v in kv[1]["runs"].values())):
                 spans = {r: raws[r]["phases"][phase]["span"] for r in reps}
                 ph["threads"][comm] = {
@@ -78,7 +88,7 @@ def main():
                     "cpu_share": [round(sum(c["runs"].get(r, [])) / 1000 / spans[r], 4) for r in reps],
                     "gap_ms": summary([c["gaps"].get(r, []) for r in reps]),
                     "run_ms": summary([c["runs"].get(r, []) for r in reps])}
-            if phase == "driven" and all("per_input" in raws[r]["phases"][phase] for r in reps):
+            if phase == "driven" and all(raws[r]["phases"][phase].get("per_input") for r in reps):
                 pi = {r: raws[r]["phases"][phase]["per_input"] for r in reps}
                 ph["per_input"] = {
                     "events": [len(pi[r]["win_run"]) for r in reps],

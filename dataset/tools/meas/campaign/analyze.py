@@ -30,6 +30,9 @@ import os
 import re
 import statistics
 
+from collections import namedtuple
+Row = namedtuple("Row", "t_in t_wake t_end run comm tid pid")  # compact: one tuple per schedule row
+
 ROW = re.compile(r"^\s*(\d+\.\d+)\s+\[(\d+)\]\s+(.*?)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s*$")
 TASK = re.compile(r"^(.*)\[(\d+)(?:/(\d+))?\]$")
 
@@ -72,10 +75,9 @@ def load_rows(path, pids):
             tid, pid = (a, int(b)) if b else (a, a)
             if pid not in pids or comm in ("bash", "sh", "sleep", "setsid"):
                 continue  # the launcher's shell wrapper is in the tree but is not the application
-            t, wait, delay, run = float(t), float(wait), float(delay), float(run)
-            rows.append({"t_end": t, "run": run, "delay": delay, "wait": wait, "comm": comm, "tid": tid, "pid": pid,
-                         "t_in": t - run / 1000.0, "t_wake": t - run / 1000.0 - delay / 1000.0})
-    rows.sort(key=lambda r: r["t_in"])
+            t, delay, run = float(t), float(delay), float(run)
+            rows.append(Row(t - run / 1000.0, t - run / 1000.0 - delay / 1000.0, t, run, comm, tid, pid))
+    rows.sort(key=lambda r: r.t_in)
     return rows, (t_min or 0.0, t_max or 0.0)
 
 
@@ -132,9 +134,9 @@ def pid_roles(D, phase):
 def per_role(rows, roles, span_s):
     out = {}
     for r in rows:
-        role = roles.get(r["pid"], "main")
+        role = roles.get(r.pid, "main")
         c = out.setdefault(role, {"pids": set(), "wakes": 0, "run": 0.0})
-        c["pids"].add(r["pid"]); c["wakes"] += 1; c["run"] += r["run"]
+        c["pids"].add(r.pid); c["wakes"] += 1; c["run"] += r.run
     return {role: {"pids": len(c["pids"]), "wakes_per_s": round(c["wakes"] / span_s, 2), "cpu_share": round(c["run"] / 1000 / span_s, 4)}
             for role, c in sorted(out.items(), key=lambda kv: -kv[1]["run"])}
 
@@ -143,13 +145,13 @@ def per_thread(rows, span_s):
     out = {}
     by_tid = {}
     for r in rows:
-        by_tid.setdefault((r["comm"], r["tid"]), []).append(r)
+        by_tid.setdefault((r.comm, r.tid), []).append(r)
     by_comm = {}
     for (comm, tid), rs in by_tid.items():
-        gaps = [(b["t_in"] - a["t_in"]) * 1000 for a, b in zip(rs, rs[1:])]
+        gaps = [(b.t_in - a.t_in) * 1000 for a, b in zip(rs, rs[1:])]
         by_comm.setdefault(comm, {"threads": 0, "wakes": 0, "gaps": [], "runs": []})
         c = by_comm[comm]
-        c["threads"] += 1; c["wakes"] += len(rs); c["gaps"] += gaps; c["runs"] += [r["run"] for r in rs]
+        c["threads"] += 1; c["wakes"] += len(rs); c["gaps"] += gaps; c["runs"] += [r.run for r in rs]
     for comm, c in sorted(by_comm.items(), key=lambda kv: -sum(kv[1]["runs"])):
         out[comm] = {"threads": c["threads"], "wakes_per_s": round(c["wakes"] / span_s, 2),
                      "cpu_share": round(sum(c["runs"]) / 1000 / span_s, 4),
@@ -158,7 +160,7 @@ def per_thread(rows, span_s):
 
 
 def phase_span(rows):
-    return (rows[0]["t_in"], rows[-1]["t_end"]) if rows else (0, 0)
+    return (rows[0].t_in, rows[-1].t_end) if rows else (0, 0)
 
 
 def analyze_run(D, w_ms=5.0, cap_ms=0.0, waker="^Xvfb$|^Xorg$"):
@@ -186,7 +188,7 @@ def _analyze(args):
                 pids |= {pr["pid"] for pr in json.load(open(p))["procs"]}
         rows, (t0, t1) = load_rows(os.path.join(D, th), pids)
         span = max(t1 - t0, 1e-6)
-        total_run_s = sum(r["run"] for r in rows) / 1000
+        total_run_s = sum(r.run for r in rows) / 1000
         roles = pid_roles(D, phase)
         ph = {"pids": sorted(pids), "rows": len(rows), "span_s": round(span, 2),
               "cpu_share": round(total_run_s / span, 4), "wakes_per_s": round(len(rows) / span, 2),
@@ -202,17 +204,16 @@ def _analyze(args):
             sent = [json.loads(l) for l in open(os.path.join(D, "replay.jsonl")) if l.strip()]
             s_times = [e["sent_us"] / 1e6 for e in sent]
             s_kinds = [e.get("kind", "key") for e in sent]
-            wakes = [r["t_wake"] for r in rows]
-            t_in = [r["t_in"] for r in rows]
+            wakes = [r.t_wake for r in rows]
+            t_in = [r.t_in for r in rows]
             import bisect
             first_lat, first_run, win_run, win_len, win_wakes, win_run_corr = [], [], [], [], [], []
             xw_times = [w[0] for w in xwakes]
             # index rows by (tid, t_wake) to find the schedule-in that followed an X wake
             by_tid = {}
             for r in rows:
-                by_tid.setdefault(r["tid"], []).append(r)
-            for rs in by_tid.values():
-                rs.sort(key=lambda r: r["t_in"])
+                by_tid.setdefault(r.tid, []).append(r)
+            by_tid_tin = {tid: [r.t_in for r in rs] for tid, rs in by_tid.items()}
             xw_run, xw_count, xw_lat = [], [], []
             for i, s in enumerate(s_times):
                 if s < t0 or s > t1:
@@ -221,9 +222,9 @@ def _analyze(args):
                 end = min(nxt, t1, s + args.cap_ms / 1000 if args.cap_ms > 0 else nxt)
                 j = bisect.bisect_left(wakes, s)
                 if j < len(wakes) and wakes[j] - s <= args.w_ms / 1000:
-                    first_lat.append((wakes[j] - s) * 1000); first_run.append(rows[j]["run"])
+                    first_lat.append((wakes[j] - s) * 1000); first_run.append(rows[j].run)
                 a, b = bisect.bisect_left(t_in, s), bisect.bisect_left(t_in, end)
-                run_sum = sum(r["run"] for r in rows[a:b])
+                run_sum = sum(r.run for r in rows[a:b])
                 win_run.append(run_sum); win_len.append((end - s) * 1000); win_wakes.append(b - a)
                 if idle_rate is not None:
                     win_run_corr.append(run_sum - idle_rate * (end - s) * 1000)
@@ -233,9 +234,9 @@ def _analyze(args):
                     run_x = 0.0
                     for (tw, comm, tid) in xwakes[xa:xb]:
                         rs = by_tid.get(tid, [])
-                        k = bisect.bisect_left([r["t_in"] for r in rs], tw)
-                        if k < len(rs) and rs[k]["t_in"] - tw < 0.05:
-                            run_x += rs[k]["run"]
+                        k = bisect.bisect_left(by_tid_tin.get(tid, []), tw)
+                        if k < len(rs) and rs[k].t_in - tw < 0.05:
+                            run_x += rs[k].run
                     xw_run.append(run_x)
                     if xb > xa:
                         xw_lat.append((xw_times[xa] - s) * 1000)
