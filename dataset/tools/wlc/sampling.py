@@ -58,7 +58,43 @@ def sample(param, seed, *key):
             mean, sigma = param["fluent_mean_us"], param["fluent_sigma_log"]
         median = mean / math.exp(sigma**2 / 2)  # mean -> median for lognormal
         return _lognormal_us(median, sigma, uniform(seed, *key, "value"))
+    if dist == "quantiles":
+        return _quantile_sample(param, uniform(seed, *key))
     raise ValueError(f"unknown dist {dist!r}")
+
+
+# Quantile tables (9.5 changelog D17): measured distributions carried as the
+# pooled percentiles QUANTILE_PROBS, in integer microseconds, sampled by
+# linear interpolation on u; below p1 and above p99.9 the tail is held at
+# the end value (no extrapolation beyond the observation).
+QUANTILE_PROBS = (0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999)
+
+
+def _quantile_sample(param, u):
+    q = param["p"]
+    if len(q) != len(QUANTILE_PROBS):
+        raise ValueError("quantiles param needs %d values" % len(QUANTILE_PROBS))
+    if u <= QUANTILE_PROBS[0]:
+        return max(1, round(q[0]))
+    if u >= QUANTILE_PROBS[-1]:
+        return max(1, round(q[-1]))
+    for i in range(1, len(QUANTILE_PROBS)):
+        if u <= QUANTILE_PROBS[i]:
+            p0, p1 = QUANTILE_PROBS[i - 1], QUANTILE_PROBS[i]
+            v0, v1 = q[i - 1], q[i]
+            return max(1, round(v0 + (v1 - v0) * (u - p0) / (p1 - p0)))
+    return max(1, round(q[-1]))
+
+
+def quantile_mean_us(param):
+    """Mean of the piecewise-linear quantile function (trapezoids between
+    the tabulated probabilities; the tails held flat)."""
+    q = param["p"]
+    total = q[0] * QUANTILE_PROBS[0]
+    for i in range(1, len(QUANTILE_PROBS)):
+        total += (q[i - 1] + q[i]) / 2 * (QUANTILE_PROBS[i] - QUANTILE_PROBS[i - 1])
+    total += q[-1] * (1 - QUANTILE_PROBS[-1])
+    return total
 
 
 def mean_us(param):
@@ -78,4 +114,6 @@ def mean_us(param):
     if dist == "lognormal-mixture":
         p = param["pause_probability"]
         return (1 - p) * param["fluent_mean_us"] + p * param["pause_mean_us"]
+    if dist == "quantiles":
+        return quantile_mean_us(param)
     raise ValueError(f"unknown dist {dist!r}")

@@ -25,10 +25,51 @@ from analyze import analyze_run, pct  # noqa: E402
 NAME = re.compile(r"^meas-(interactive|playback)-(.+)-r(\d+)-(dry|full)$")
 
 
+QUANTILE_PROBS = (0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999)
+COVERAGE = 0.95  # D16: components in descending wake rate until this share of idle wakes; the rest pooled as one residual
+
+
+def qtable(values):
+    """The D17 quantile table (ms, 3 decimals) of a pooled sample."""
+    if not values:
+        return None
+    v = sorted(values)
+    return [pct(v, q) for q in QUANTILE_PROBS]
+
+
 def summary(samples_by_repeat):
     pooled = [v for vs in samples_by_repeat for v in vs]
     return {"n": len(pooled), "p50": pct(pooled, .5), "p90": pct(pooled, .9), "p99": pct(pooled, .99),
+            "q": qtable(pooled),
             "repeat_p50": [pct(vs, .5) for vs in samples_by_repeat], "repeat_n": [len(vs) for vs in samples_by_repeat]}
+
+
+def select_components(comms, spans, reps):
+    """D16: comms in descending mean wake rate until COVERAGE of the wakes; the remaining comms merged
+    into one residual component whose gaps are those of their merged wake times."""
+    rate = {c: sum(cc["wakes"].get(r, 0) / spans[r] for r in reps) / len(reps) for c, cc in comms.items()}
+    total = sum(rate.values())
+    order = sorted(comms, key=lambda c: -rate[c])
+    chosen, cum = [], 0.0
+    for c in order:
+        if total and cum / total >= COVERAGE:
+            break
+        chosen.append(c); cum += rate[c]
+    rest = [c for c in order if c not in chosen]
+    residual = None
+    if rest:
+        gaps_by_rep, runs_by_rep, wakes_by_rep, threads_by_rep = [], [], [], []
+        for r in reps:
+            times = sorted(t for c in rest for t in comms[c]["t_in"].get(r, []))
+            gaps_by_rep.append([(b - a) * 1000 for a, b in zip(times, times[1:])])
+            runs_by_rep.append([x for c in rest for x in comms[c]["runs"].get(r, [])])
+            wakes_by_rep.append(len(times)); threads_by_rep.append(sum(comms[c]["threads"].get(r, 0) for c in rest))
+        residual = {"comms": rest, "threads": threads_by_rep,
+                    "wakes_per_s": [round(wakes_by_rep[i] / spans[r], 3) for i, r in enumerate(reps)],
+                    "cpu_share": [round(sum(runs_by_rep[i]) / 1000 / spans[r], 5) for i, r in enumerate(reps)],
+                    "gap_ms": summary(gaps_by_rep), "run_ms": summary(runs_by_rep)}
+    return chosen, residual, {"coverage": COVERAGE, "covered_share": round(cum / total, 4) if total else None,
+                              "total_wakes_per_s": round(total, 3)}
 
 
 def main():
@@ -57,9 +98,10 @@ def main():
                 for row in pd["rows"]:
                     by_tid.setdefault((row.comm, row.tid), []).append((row.t_in, row.run))
                 for (comm, tid), rs in by_tid.items():
-                    c = comms.setdefault(comm, {"gaps": array("d"), "runs": array("d"), "wakes": 0, "threads": 0})
+                    c = comms.setdefault(comm, {"gaps": array("d"), "runs": array("d"), "t_in": array("d"), "wakes": 0, "threads": 0})
                     c["gaps"].extend((b[0] - a[0]) * 1000 for a, b in zip(rs, rs[1:]))
                     c["runs"].extend(x[1] for x in rs)
+                    c["t_in"].extend(x[0] for x in rs)
                     c["wakes"] += len(rs); c["threads"] += 1
                 slim["phases"][phase] = {"span": pd["span"], "comms": comms, "per_input": pd.get("per_input")}
             raws[r] = slim
@@ -77,9 +119,12 @@ def main():
             comms = {}
             for r in reps:
                 for comm, cc in raws[r]["phases"][phase]["comms"].items():
-                    c = comms.setdefault(comm, {"gaps": {}, "runs": {}, "wakes": {}, "threads": {}})
-                    c["gaps"][r] = cc["gaps"]; c["runs"][r] = cc["runs"]
+                    c = comms.setdefault(comm, {"gaps": {}, "runs": {}, "t_in": {}, "wakes": {}, "threads": {}})
+                    c["gaps"][r] = cc["gaps"]; c["runs"][r] = cc["runs"]; c["t_in"][r] = cc["t_in"]
                     c["wakes"][r] = cc["wakes"]; c["threads"][r] = cc["threads"]
+            spans = {r: raws[r]["phases"][phase]["span"] for r in reps}
+            chosen, residual, cov = select_components(comms, spans, reps)
+            ph["components"] = {"selected": chosen, "residual": residual, **cov}
             for comm, c in sorted(comms.items(), key=lambda kv: -sum(sum(v) for v in kv[1]["runs"].values())):
                 spans = {r: raws[r]["phases"][phase]["span"] for r in reps}
                 ph["threads"][comm] = {
