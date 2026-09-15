@@ -33,6 +33,10 @@ import statistics
 from collections import namedtuple
 Row = namedtuple("Row", "t_in t_wake t_end run comm tid pid")  # compact: one tuple per schedule row
 
+# comms of the measurement harness itself: the snapshot roots the tree at run.sh, whose children include these
+HARNESS_COMMS = {"bash", "sh", "sleep", "setsid", "Xvfb", "perf", "python3", "xdotool", "gzip", "sudo", "tee", "sed",
+                 "grep", "import", "convert", "date", "xwd", "wc", "cat", "kill", "sort", "awk", "run.sh", "phase.sh"}
+
 ROW = re.compile(r"^\s*(\d+\.\d+)\s+\[(\d+)\]\s+(.*?)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s*$")
 TASK = re.compile(r"^(.*)\[(\d+)(?:/(\d+))?\]$")
 
@@ -73,8 +77,8 @@ def load_rows(path, pids):
                 continue
             comm, a, b = tm.group(1), int(tm.group(2)), tm.group(3)
             tid, pid = (a, int(b)) if b else (a, a)
-            if pid not in pids or comm in ("bash", "sh", "sleep", "setsid"):
-                continue  # the launcher's shell wrapper is in the tree but is not the application
+            if pid not in pids or comm in HARNESS_COMMS:
+                continue  # the run script's own children (Xvfb, perf, the replay driver) share the tree
             t, delay, run = float(t), float(delay), float(run)
             rows.append(Row(t - run / 1000.0, t - run / 1000.0 - delay / 1000.0, t, run, comm, tid, pid))
     rows.sort(key=lambda r: r.t_in)
