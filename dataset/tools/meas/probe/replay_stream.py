@@ -85,8 +85,11 @@ def main():
                     while time.monotonic() < t_step:
                         time.sleep(0.001)
                     xdo("mousemove", cur[0] + (target[0] - cur[0]) * s // steps, cur[1] + (target[1] - cur[1]) * s // steps)
-            while time.monotonic() < due:
-                time.sleep(min(0.002, due - time.monotonic()))
+            while True:
+                remaining = due - time.monotonic()
+                if remaining <= 0:
+                    break
+                time.sleep(min(0.002, remaining))
             sent = time.monotonic()
             if ev["kind"] == "key":
                 xdo("key", KEYS[n_key % len(KEYS)]); n_key += 1

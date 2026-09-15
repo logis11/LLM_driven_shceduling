@@ -25,10 +25,10 @@ with open(out_path, "w") as log:
     for i, gap in enumerate(gaps):
         due += gap / 1000.0
         while True:
-            now = time.monotonic()
-            if now >= due:
+            remaining = due - time.monotonic()
+            if remaining <= 0:
                 break
-            time.sleep(min(0.002, due - now))
+            time.sleep(min(0.002, remaining))
         sent = time.monotonic()
         subprocess.run(["xdotool", "key"] + target + [keys[i % len(keys)]],
                        check=False)
