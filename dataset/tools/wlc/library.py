@@ -31,6 +31,12 @@ class Library:
     def lifetime(self, archetype_id):
         return self.entries[archetype_id]["lifetime"]
 
+    def is_measured(self, archetype_id):
+        """True iff the entry is a measured archetype (9.5 fold-in): its params
+        carry timer `components` (D16) and/or a replayed `stimulus` (D18)."""
+        params = self.entries[archetype_id].get("params") or {}
+        return "components" in params or "stimulus" in params or "focus_components" in params
+
     def has_input_channel(self, archetype_id):
         """True iff the archetype's program waits on exogenous input."""
         return _mentions_wait(self.entries[archetype_id]["pattern"]["program"],

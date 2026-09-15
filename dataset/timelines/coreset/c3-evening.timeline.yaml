@@ -13,7 +13,7 @@ segments:
      scenario: [S13]}
 
 tasks:
-  - {id: browser, name: chrome, archetype: desktop-interactive,
+  - {id: browser, name: chrome, archetype: web-browser,
      arrive: 0s, depart: 60s}
   - {id: renderers, name: chrome, archetype: electron-comms,
      arrive: 0s, depart: 60s, count: 10}
@@ -23,9 +23,9 @@ tasks:
      arrive: 60s, depart: 300s}
   - {id: steam, name: steam, archetype: electron-comms,
      arrive: 60s, depart: 300s}
-  - {id: video, name: mpv, archetype: video-playback,
+  - {id: video, name: mpv, archetype: video-player,
      arrive: 300s, depart: 420s}
-  - {id: music, name: spotify, archetype: audio-playback,
+  - {id: music, name: spotify, archetype: audio-player,
      arrive: 300s, depart: 420s}
 
 focus:

@@ -45,7 +45,7 @@ Between phases a 10 s gap; the phase boundaries are logged with `phase.sh`.
 
 ## 5. Wake attribution (D9)
 
-Two rules are computed by `analyze.py` and the choice is a changelog decision on the dry-run data: (a) first-wake — the first application wake within W = 5 ms of a replayed event's send time (replay error p99 1.24 ms) and that schedule-in's run; the dry run attributed only 14–36 % of events this way for Writer, VS Code and Thunderbird, because busy applications wake every few milliseconds on their own; (b) window — all application run time in [s_i, s_{i+1}) minus the idle phase's CPU rate over that span, which charges each input with everything the application did until the next input, net of its timer load. A third signal, the waker of each wake (Xvfb = input delivery), is recorded for the analysis.
+Two rules are computed by `analyze.py` and the choice is a changelog decision on the dry-run data: (a) first-wake — the first application wake within W = 5 ms of a replayed event's send time (replay error p99 1.24 ms) and that schedule-in's run; the dry run attributed only 14–36 % of events this way for Writer, VS Code and Thunderbird, because busy applications wake every few milliseconds on their own; (b) window — all application run time in [s_i, s_{i+1}) minus the idle phase's CPU rate over that span, bounded below at zero, which charges each input with everything the application did until the next input, net of its timer load. A third signal, the waker of each wake (Xvfb = input delivery), is recorded for the analysis.
 
 ## 6. Derived parameters per archetype
 
@@ -68,6 +68,7 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-15, fold-in (D19): the archetypes are in the library; the campaign's numbers are in `results.md`; the release of the raw data awaits 인지오's word.
 - 2026-09-14, after dry run 1 (runs 34838057273, 34838057243): §3 content-area insets; §4 wakeup rows kept, `perf.data` dropped in full mode; §5 two attribution rules with the dry-run rates; Thunderbird's compose window opened by Escape and ctrl+n after the Account Hub.
 - 2026-09-14, D12: §3 stimulus selection and motion rule settled; §1 stimulus column updated.
 - 2026-09-14, after the runner probe (`probe.md`): §1 `webrtc` run confirmed and its scope stated; §4 instruments settled; §5 W = 5 ms; Thunderbird's profile must carry a local account and identity for `-compose` (dry-run item); MLT audio and every audio path run without a device (§8).

@@ -16,15 +16,15 @@ segments:
      scenario: [S4]}
 
 tasks:
-  - {id: browser, name: chrome, archetype: desktop-interactive,
+  - {id: browser, name: chrome, archetype: web-browser,
      arrive: 0s, depart: 420s}
   - {id: renderers, name: chrome, archetype: electron-comms,
      arrive: 0s, depart: 420s, count: 8}
-  - {id: writer, name: soffice.bin, archetype: desktop-interactive,
+  - {id: writer, name: soffice.bin, archetype: office-writer,
      arrive: 60s, depart: 420s}
   - {id: build, name: make, archetype: build-orchestrator, arrive: 120s,
      bind: {spawn_count: 4200, parallelism_cap: 8, child_name: cc1}}
-  - {id: mailer, name: thunderbird, archetype: desktop-interactive,
+  - {id: mailer, name: thunderbird, archetype: mail-client,
      arrive: 360s, depart: 420s}
   - {id: send, name: thunderbird, archetype: network-bulk, arrive: 400s,
      bind: {total_work: 3s}}

@@ -10,7 +10,7 @@ segments:
      scenario: [S6]}
 
 tasks:
-  - {id: photo-editor, name: gimp, archetype: desktop-interactive,
+  - {id: photo-editor, name: gimp, archetype: image-editor,
      arrive: 0s, depart: 60s}
 
 focus:

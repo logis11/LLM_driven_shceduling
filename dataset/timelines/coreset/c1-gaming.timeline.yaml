@@ -16,7 +16,7 @@ tasks:
      arrive: 0s, depart: 60s}
   - {id: webhelper, name: steamwebhelper, archetype: electron-comms,
      arrive: 0s, depart: 60s, count: 3}
-  - {id: compositor, name: gamescope, archetype: video-playback,
+  - {id: compositor, name: gamescope, archetype: video-player,
      arrive: 0s, depart: 60s}
 
 focus: []

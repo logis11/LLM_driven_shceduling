@@ -15,9 +15,9 @@ segments:
      scenario: [S3]}
 
 tasks:
-  - {id: video, name: zoom, archetype: video-playback,
+  - {id: video, name: zoom, archetype: video-call,
      arrive: 0s, depart: 60s}
-  - {id: voice, name: zoom, archetype: audio-playback,
+  - {id: voice, name: zoom, archetype: video-call,
      arrive: 0s, depart: 60s}
   - {id: helper, name: zoom, archetype: electron-comms,
      arrive: 0s, depart: 60s}

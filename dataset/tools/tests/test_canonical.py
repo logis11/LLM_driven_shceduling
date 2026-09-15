@@ -65,14 +65,14 @@ def test_focus_wakes_inside_windows(fixture_path, library):
         assert any(lo <= event["t"] < hi for lo, hi in windows)
     editor = next(e for e in canonical["events"]
                   if e["op"] == "arrive" and e["id"] == "editor")
-    bursts = [i for i in editor["program"] if i["op"] == "RUN"]
-    assert len(bursts) == len(wake_events)  # one unrolled burst per wake
+    waits = [i for i in editor["program"] if i["op"] == "WAIT"]
+    assert len(waits) == len(wake_events)  # one WAIT per input wake (timer wakes are TIMER steps, 9.5 D9)
 
 
 def test_demand_estimate(fixture_path, library):
     _, _, report = compiled(fixture_path, library, "fx-oversub.timeline.yaml")
-    # cpu-batch 66s/60s + audio duty 2500/50000 = 1.10 + 0.05
-    assert abs(report["utilization"] - 1.15) < 0.005
+    # cpu-batch 66s/60s = 1.10 + the measured audio-player's mean duty (9.5 D19: mpv audio ≈ 0.0076)
+    assert abs(report["utilization"] - 1.1076) < 0.005
 
 
 def test_familiarity_annotation_carried_into_ground_truth(fixture_path, library,

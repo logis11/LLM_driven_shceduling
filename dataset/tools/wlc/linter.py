@@ -52,15 +52,45 @@ def lint_repo(archetypes_path, sources_path, references_md, freeze=False):
             errors.append(f"{aid}: spawned but no spawned_by")
         for pname, param in (entry.get("params") or {}).items():
             where = f"{aid}.{pname}"
-            tag = param.get("source")
-            if tag is None:
-                errors.append(f"{where}: numeric param without source tag")
-            else:
-                errors.extend(_check_tag(where, tag, registry))
-                if freeze and tag == "meas-pending":
-                    errors.append(f"{where}: meas-pending after freeze")
-            if param.get("sampling") not in SAMPLING:
-                errors.append(f"{where}: bad sampling {param.get('sampling')!r}")
+            if pname in ("components", "focus_components"):
+                # 9.5 fold-in (D16): a list of measured timer components, each with gap and run distributions
+                if not isinstance(param, list) or not param:
+                    errors.append(f"{where}: must be a non-empty list of components")
+                    continue
+                for i, comp in enumerate(param):
+                    for field in ("comm", "gap", "run"):
+                        if field not in comp:
+                            errors.append(f"{where}[{i}]: missing {field!r}")
+                    for field in ("gap", "run"):
+                        if field in comp:
+                            errors.extend(_check_param(f"{where}[{i}].{field}", comp[field], registry, freeze))
+                continue
+            if pname == "stimulus":
+                # 9.5 fold-in (D18): a replayed stream; the file must exist beside the library
+                stream = param.get("stream")
+                path = pathlib.Path(archetypes_path).resolve().parent / "stimulus" / f"{stream}.jsonl"
+                if not stream or not path.exists():
+                    errors.append(f"{where}: stream {stream!r} has no file at dataset/stimulus/")
+            errors.extend(_check_param(where, param, registry, freeze))
+    return errors
+
+
+def _check_param(where, param, registry, freeze):
+    errors = []
+    tag = param.get("source")
+    if tag is None:
+        errors.append(f"{where}: numeric param without source tag")
+    else:
+        errors.extend(_check_tag(where, tag, registry))
+        if freeze and tag == "meas-pending":
+            errors.append(f"{where}: meas-pending after freeze")
+    if param.get("sampling") not in SAMPLING:
+        errors.append(f"{where}: bad sampling {param.get('sampling')!r}")
+    if param.get("dist") == "quantiles":
+        q = param.get("p")
+        if not isinstance(q, list) or len(q) != 10 or any((not isinstance(v, (int, float))) or v < 0 for v in q) \
+                or any(b < a for a, b in zip(q, q[1:])):
+            errors.append(f"{where}: quantiles need 10 non-decreasing non-negative values (p1 … p99.9, µs)")
     return errors
 
 

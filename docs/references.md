@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-09-14
+> Status: normative · Created 2026-08-26 · Updated 2026-09-15
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -136,7 +136,7 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 
 ### `interbench`
 - cite: Kolivas, C. interbench. github.com/ckolivas/interbench, master commit e612a65 (2016-10-24), version string 0.31; its load defaults differ from tag v0.31. Licence GPL-2.0-or-later per the source headers; COPYING is GPLv2 and a GPLv3 LICENSE file also ships, which GitHub reports.
-- role: Role B — interbench's own interactive task emulations: audio 50 ms @ 5%, video 16.7 ms @ 40%, X 0–100% variable, Burn/Write/Read/Compile loads. Frame as "interbench models interactivity this way", never "desktops behave this way".
+- role: Role B — interbench's own load emulations: Burn/Write/Read/Compile. Its Audio (50 ms @ 5%), Video (16.7 ms @ 40%) and X (0–100% variable) interactive emulations are no longer cited by the dataset (Phase 9, 9.5: no observation behind them; measured per-application archetypes replace them). Frame as "interbench models it this way", never "desktops behave this way".
 - status: verified-in-vetting (2026-08-25); pinned 2026-09-14 on the 2026-09-13 verification (`_dev/research/jioh/2026-09-13-verification/compare/K1.md` C-interbench-13)
 
 ### `rt-app`

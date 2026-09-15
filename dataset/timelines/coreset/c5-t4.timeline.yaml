@@ -15,12 +15,12 @@ segments:
   - S13
   to: 60s
 tasks:
-- archetype: video-playback
+- archetype: video-player
   arrive: 0s
   depart: 60s
   id: video
   name: video-playback-svc
-- archetype: audio-playback
+- archetype: audio-player
   arrive: 0s
   depart: 60s
   id: music

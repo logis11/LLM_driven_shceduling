@@ -12,7 +12,7 @@ segments:
      scenario: [S4]}
 
 tasks:
-  - {id: mailer, name: thunderbird, archetype: desktop-interactive,
+  - {id: mailer, name: thunderbird, archetype: mail-client,
      arrive: 0s, depart: 60s}
   - {id: send, name: thunderbird, archetype: network-bulk, arrive: 40s,
      bind: {total_work: 3s}}

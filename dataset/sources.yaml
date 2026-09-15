@@ -24,19 +24,36 @@
 
 sources:
 
+  # ---- stimulus recordings (replayed input; any platform, D6) -------------
+
+  swell-icmi14:
+    type: scholarly
+    locator_pattern: "^(word|outlook|ie)-c[0-9]+$"
+    notes: >-
+      SWELL-KW uLog recordings (DANS doi:10.17026/dans-x55-69zp v4,
+      CC-BY-NC-SA-4.0): per-keystroke and per-click/drag/wheel timestamps with
+      the focused application, 25 knowledge workers, ~3 h each, free
+      composition on Windows (2012). Establishes the replayed input streams
+      of the measured interactive archetypes — timing only (keys and
+      positions unused): word-c1 (Word, neutral condition), outlook-c23
+      (Outlook, interruption conditions; no c1 keystrokes), ie-c1 (Internet
+      Explorer, neutral). Timestamps quantised at the 15.6 ms Windows tick;
+      motion between pointer events not recorded. Streams built by
+      dataset/tools/stimulus/build_streams.py from the files listed in
+      dataset/tools/meas/probe/swell-ulog-files.json.
+
   # ---- behavior parameters (Role B) --------------------------------------
 
   interbench:
     type: deployed-system
     locator_pattern: "^(man|src)-[a-z]+$"
     notes: >-
-      Establishes interbench's own interactive task emulations: audio wakes every
-      50 ms needing 5% CPU (SCHED_FIFO variant exists); video 60 Hz (16.7 ms)
-      at 40% CPU; X variable 0-100% (window-drag emulation); gaming unbounded.
-      Background loads: Burn (4 CPU-bound threads), Write/Read (RAM-scale
-      streaming, cache-defeating), Compile (Burn+Write+Read, "heavy make -j4").
-      Scope: "the community models interactivity this way" — never "desktops
-      behave this way".
+      Establishes interbench's own load emulations: Burn (4 CPU-bound threads),
+      Write/Read (RAM-scale streaming, cache-defeating), Compile
+      (Burn+Write+Read, "heavy make -j4"); gaming unbounded. Its Audio, Video
+      and X interactive emulations are no longer cited by the dataset (Phase 9
+      research slice 9.5: measured per-application archetypes replace them).
+      Scope: "interbench models it this way" — never "desktops behave this way".
 
   rt-app:
     type: deployed-system
@@ -220,22 +237,7 @@ sources:
       vs external interruptions roughly equal (managers 59.2%/40.8%).
       Averages only.
 
-  dhakal-chi18:
-    type: scholarly
-    notes: >-
-      Mean inter-key interval 238.66 ms (SD 111.60 across participants'
-      means), right-skewed; 136M keystrokes, 169k volunteers. Scope limit:
-      within-burst transcription typing — no mouse events, no inter-burst
-      think-pauses. Grounds the intra-burst input gap of interactive
-      archetypes only; burst/pause macro-structure is not established here.
 
-  roeser-rw24:
-    type: scholarly
-    notes: >-
-      Establishes the inter-key-interval distribution family: two-component
-      log-normal mixture (fluent component ~158 ms; disfluency/pause
-      component at probability ~0.34 — parameters are task-dependent). Cite
-      the family shape, never a single parameter set.
 
   dubroy-chi10:
     type: scholarly

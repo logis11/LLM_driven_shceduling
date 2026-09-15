@@ -9,7 +9,7 @@ segments:
      scenario: [S11]}
 
 tasks:
-  - {id: editor, name: code, archetype: desktop-interactive,
+  - {id: editor, name: code, archetype: code-editor,
      arrive: 0s, depart: 60s}
   - {id: build, name: make, archetype: build-orchestrator, arrive: 2s,
      bind: {spawn_count: 100, parallelism_cap: 8, child_name: cc1}}

@@ -13,9 +13,9 @@ segments:
      attributes: {background_wanted: true, initiated: user}, scenario: [S8]}
 
 tasks:
-  - {id: photo-editor, name: gimp, archetype: desktop-interactive,
+  - {id: photo-editor, name: gimp, archetype: image-editor,
      arrive: 0s, depart: 120s}
-  - {id: video-editor, name: kdenlive, archetype: desktop-interactive,
+  - {id: video-editor, name: kdenlive, archetype: video-editor,
      arrive: 120s, depart: 420s}
   - {id: batch, name: HandBrakeCLI, archetype: cpu-batch, arrive: 240s,
      bind: {total_work: 320s}}

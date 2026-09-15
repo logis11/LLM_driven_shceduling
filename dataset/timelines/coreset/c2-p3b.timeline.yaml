@@ -25,7 +25,7 @@ segments:
   - S15
   to: 120s
 tasks:
-- archetype: desktop-interactive
+- archetype: video-editor
   arrive: 0s
   depart: 120s
   id: editor

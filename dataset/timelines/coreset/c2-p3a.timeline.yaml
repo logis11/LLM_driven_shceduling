@@ -11,7 +11,7 @@ segments:
      attributes: {background_wanted: true, initiated: user}, scenario: [S7, S8]}
 
 tasks:
-  - {id: editor, name: kdenlive, archetype: desktop-interactive,
+  - {id: editor, name: kdenlive, archetype: video-editor,
      arrive: 0s, depart: 120s}
   - {id: bulk, name: ffmpeg, archetype: cpu-batch, arrive: 60s,
      bind: {total_work: 75s}}

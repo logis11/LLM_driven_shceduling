@@ -21,7 +21,7 @@ variants:
     from: c1-compile.timeline.yaml
     ops:
       - add-task: {id: injected-browser, name: chrome,
-                   archetype: desktop-interactive, arrive: 30s, depart: 60s}
+                   archetype: web-browser, arrive: 30s, depart: 60s}
       - add-task: {id: injected-renderers, name: chrome,
                    archetype: electron-comms, arrive: 30s, depart: 60s,
                    count: 6}

@@ -10,7 +10,7 @@ segments:
      scenario: [S2]}
 
 tasks:
-  - {id: browser, name: chrome, archetype: desktop-interactive,
+  - {id: browser, name: chrome, archetype: web-browser,
      arrive: 0s, depart: 60s}
   - {id: renderers, name: chrome, archetype: electron-comms,
      arrive: 0s, depart: 60s, count: 12}

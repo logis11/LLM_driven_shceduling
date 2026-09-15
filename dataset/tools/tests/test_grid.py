@@ -149,7 +149,7 @@ def test_full_coverage_has_no_errors(tmp_path):
                  "attributes": {"background_wanted": w}}
                 for m in MODES for w in (True, False)]
     _timeline(tmp_path, "x-full", segments,
-              [{"id": "a", "name": "chrome", "archetype": "desktop-interactive",
+              [{"id": "a", "name": "chrome", "archetype": "web-browser",
                 "arrive": "0s", "depart": "10s"}])
     coverage = grid.build_grid(tmp_path)
     assert coverage["empty_cells"] == []
@@ -160,7 +160,7 @@ def test_full_coverage_has_no_errors(tmp_path):
 def test_menu_mode_without_the_attribute_is_an_error(tmp_path):
     _timeline(tmp_path, "x-bad", [
         {"from": "0s", "to": "10s", "mode": "office", "attributes": {}}],
-        [{"id": "a", "name": "chrome", "archetype": "desktop-interactive",
+        [{"id": "a", "name": "chrome", "archetype": "web-browser",
           "arrive": "0s", "depart": "10s"}])
     with pytest.raises(grid.GridError, match="x-bad.*background_wanted"):
         grid.build_grid(tmp_path)
@@ -172,7 +172,7 @@ def test_unknown_mode_is_an_error(tmp_path):
     _timeline(tmp_path, "x-mode", [
         {"from": "0s", "to": "10s", "mode": "cooking",
          "attributes": {"background_wanted": True}}],
-        [{"id": "a", "name": "chrome", "archetype": "desktop-interactive",
+        [{"id": "a", "name": "chrome", "archetype": "web-browser",
           "arrive": "0s", "depart": "10s"}])
     with pytest.raises(grid.GridError, match="cooking"):
         grid.build_grid(tmp_path)

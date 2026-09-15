@@ -11,9 +11,9 @@ segments:
      scenario: [S13]}
 
 tasks:
-  - {id: video, name: mpv, archetype: video-playback,
+  - {id: video, name: mpv, archetype: video-player,
      arrive: 0s, depart: 60s}
-  - {id: music, name: spotify, archetype: audio-playback,
+  - {id: music, name: spotify, archetype: audio-player,
      arrive: 0s, depart: 60s}
 
 focus: []

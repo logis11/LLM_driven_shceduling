@@ -19,12 +19,12 @@ segments:
   - S4
   to: 60s
 tasks:
-- archetype: desktop-interactive
+- archetype: office-writer
   arrive: 0s
   depart: 60s
   id: writer
   name: soffice.bin
-- archetype: desktop-interactive
+- archetype: web-browser
   arrive: 0s
   depart: 60s
   id: browser

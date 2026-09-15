@@ -60,7 +60,7 @@ BASE = {
     "meta": {"id": "bad", "seed": 1, "demand": "calibration"},
     "segments": [{"from": "0s", "to": "10s", "mode": "office",
                   "attributes": {"background_wanted": True}}],
-    "tasks": [{"id": "player", "name": "mpv", "archetype": "audio-playback",
+    "tasks": [{"id": "player", "name": "mpv", "archetype": "audio-player",
                "arrive": "0s", "depart": "10s"}],
 }
 
@@ -78,7 +78,7 @@ def load_bad(tmp_path, mutate):
 @pytest.mark.parametrize("expect,mutate", [
     ("unknown archetype",
      lambda d: d["tasks"][0].update(archetype="nonesuch")),
-    ("not in 'audio-playback' binding_params",
+    ("not in 'audio-player' binding_params",
      lambda d: d["tasks"][0].update(bind={"burst_len": 5})),
     ("missing bind keys",
      lambda d: d["tasks"].append({"id": "job", "name": "ffmpeg",
@@ -101,13 +101,13 @@ def load_bad(tmp_path, mutate):
      lambda d: d["focus"].append({"from": "1s", "to": "2s", "task": "player"})),
     ("focus windows overlap",
      lambda d: (d["tasks"].append({"id": "ed", "name": "code",
-                                   "archetype": "desktop-interactive",
+                                   "archetype": "code-editor",
                                    "arrive": "0s", "depart": "10s"}),
                 d["focus"].extend([{"from": "1s", "to": "5s", "task": "ed"},
                                    {"from": "4s", "to": "6s", "task": "ed"}]))),
     ("outside task",
      lambda d: (d["tasks"].append({"id": "ed", "name": "code",
-                                   "archetype": "desktop-interactive",
+                                   "archetype": "code-editor",
                                    "arrive": "2s", "depart": "10s"}),
                 d["focus"].append({"from": "1s", "to": "5s", "task": "ed"}))),
     ("meta.demand",

@@ -12,7 +12,7 @@ segments:
      attributes: {background_wanted: true, initiated: user}, scenario: [S8]}
 
 tasks:
-  - {id: video-editor, name: kdenlive, archetype: desktop-interactive,
+  - {id: video-editor, name: kdenlive, archetype: video-editor,
      arrive: 0s, depart: 60s}
   - {id: batch, name: HandBrakeCLI, archetype: cpu-batch, arrive: 2s,
      bind: {total_work: 30s}}

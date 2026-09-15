@@ -12,7 +12,7 @@ segments:
 tasks:
   - {id: game, name: game.exe, archetype: game-task-chain,
      arrive: 0s, depart: 240s, bind: {lane_share: 0.6}}
-  - {id: editor, name: code, archetype: desktop-interactive,
+  - {id: editor, name: code, archetype: code-editor,
      arrive: 0s, depart: 240s}
   - {id: build, name: make, archetype: build-orchestrator, arrive: 10s,
      bind: {spawn_count: 85, parallelism_cap: 8, child_name: cc1}}

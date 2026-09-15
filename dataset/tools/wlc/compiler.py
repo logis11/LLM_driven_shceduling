@@ -18,7 +18,9 @@ scheduling can influence. Concretely:
   `native` output.
 """
 
+import bisect
 import json
+import pathlib
 
 from . import sampling
 from .units import parse_us
@@ -121,7 +123,9 @@ def _compile_instance(timeline, library, task, iid, mode, wakes):
     params = entry.get("params") or {}
     program = entry["pattern"]["program"]
 
-    if library.has_input_channel(task["archetype"]):
+    if library.is_measured(task["archetype"]):
+        _measured_unroll(build, timeline, task, iid, params, wakes)
+    elif library.has_input_channel(task["archetype"]):
         _interactive_unroll(build, timeline, task, iid, params, wakes)
     elif _is_fork_loop(program):
         _orchestrator_unroll(build, library, task, iid, seed, params, program)
@@ -191,6 +195,96 @@ def _unbounded_loop(build, iid, seed, params, program, lifespan):
     build.program = [{"op": "LOOP", "count": "unbounded", "body": body}]
     cycle = period if period is not None else max(cycle_wall, 1)
     build.demand_us = round(cycle_run / cycle * lifespan)
+
+
+# ---- measured archetypes (9.5 fold-in: D9, D13, D16, D17, D18) ----------------
+#
+# One task, one explicit time-ordered event stream over its lifetime:
+#   - timer components (`components`): each comm's wakes are sampled from its
+#     measured gap quantiles over the whole lifetime, each wake's RUN from its
+#     run quantiles; cadence archetypes (`focus_components`) swap to the
+#     driven-phase components inside focus windows;
+#   - replayed stimulus (`stimulus`): inside each focus window a contiguous
+#     slice of the named stream (dataset/stimulus/<stream>.jsonl) of the
+#     window's length, at an offset drawn from the seed; each input is an
+#     exogenous wake on the task's input channel with a RUN from `input_run`.
+# Timer wakes compile to TIMER steps whose periods chain from the previous
+# timer deadline (drift-free absolute times, contract §3); input wakes to
+# WAIT steps plus `wake` events, as before.
+
+_STREAMS = {}
+
+
+def _load_stream(name):
+    if name not in _STREAMS:
+        path = pathlib.Path(__file__).resolve().parents[2] / "stimulus" / f"{name}.jsonl"
+        times = [json.loads(line)["t_us"] for line in path.read_text().splitlines() if line.strip()]
+        _STREAMS[name] = times
+    return _STREAMS[name]
+
+
+def _component_events(components, seed, iid, t0, t1, tag):
+    events = []
+    for index, comp in enumerate(components):
+        key = (tag, index, comp["comm"])
+        t, k = t0, 0
+        while True:
+            t += sampling.sample(comp["gap"], seed, iid, *key, k, "gap")
+            if t >= t1:
+                break
+            run = sampling.sample(comp["run"], seed, iid, *key, k, "run")
+            events.append((t, run, "timer"))
+            k += 1
+    return events
+
+
+def _measured_unroll(build, timeline, task, iid, params, wakes):
+    seed = timeline.seed
+    channel = f"input:{iid}"
+    t0 = task["arrive"]
+    t1 = task["depart"] or timeline.duration_us
+    windows = [w for w in timeline.focus if w["task"] == task["id"]]
+    events = []
+    # timer components over the lifetime; cadence archetypes swap inside focus windows
+    focus_components = params.get("focus_components")
+    for ev in _component_events(params.get("components") or [], seed, iid, t0, t1, "idle"):
+        if focus_components and any(w["from"] <= ev[0] < w["to"] for w in windows):
+            continue
+        events.append(ev)
+    if focus_components:
+        for j, w in enumerate(windows):
+            events.extend(_component_events(focus_components, seed, iid, w["from"], w["to"], ("focus", j)))
+    # replayed stimulus inside focus windows
+    stimulus = params.get("stimulus")
+    if stimulus:
+        stream = _load_stream(stimulus["stream"])
+        span = stream[-1] if stream else 0
+        k = 0
+        for j, w in enumerate(windows):
+            length = w["to"] - w["from"]
+            offset = round(sampling.uniform(seed, iid, "stimulus", j) * max(0, span - length))
+            lo = bisect.bisect_left(stream, offset)
+            for t_rel in stream[lo:]:
+                if t_rel >= offset + length:
+                    break
+                t = w["from"] + (t_rel - offset)
+                run = sampling.sample(params["input_run"], seed, iid, "input", k)
+                events.append((t, run, "input"))
+                k += 1
+    events.sort(key=lambda e: (e[0], e[2] != "timer"))
+    last_deadline = t0
+    for t, run, kind in events:
+        if kind == "timer":
+            period = max(1, t - last_deadline)
+            last_deadline += period
+            build.program.append({"op": "TIMER", "period_us": period})
+        else:
+            wakes.append((t, iid, channel))
+            build.program.append({"op": "WAIT", "channel": channel})
+        build.program.append({"op": "RUN", "us": run})
+        build.demand_us += run
+    if not build.program:  # alive but silent: block forever
+        build.program = [{"op": "WAIT", "channel": channel}]
 
 
 # ---- input-driven tasks (desktop-interactive) -------------------------------

@@ -16,12 +16,12 @@ segments:
   - S17
   to: 60s
 tasks:
-- archetype: video-playback
+- archetype: video-call
   arrive: 0s
   depart: 60s
   id: video
   name: zoom
-- archetype: audio-playback
+- archetype: video-call
   arrive: 0s
   depart: 60s
   id: voice

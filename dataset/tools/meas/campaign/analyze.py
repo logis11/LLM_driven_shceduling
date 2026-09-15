@@ -231,7 +231,9 @@ def _analyze(args):
                 run_sum = sum(r.run for r in rows[a:b])
                 win_run.append(run_sum); win_len.append((end - s) * 1000); win_wakes.append(b - a)
                 if idle_rate is not None:
-                    win_run_corr.append(run_sum - idle_rate * (end - s) * 1000)
+                    # D13: the input's work is the window's run net of the idle rate, bounded below by zero —
+                    # a window quieter than the idle rate carries no input work (negative values are not physical)
+                    win_run_corr.append(max(0.0, run_sum - idle_rate * (end - s) * 1000))
                 if xwakes:
                     xa, xb = bisect.bisect_left(xw_times, s), bisect.bisect_left(xw_times, end)
                     xw_count.append(xb - xa)
