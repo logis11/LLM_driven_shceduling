@@ -1,0 +1,19 @@
+{
+  "recorded_utc": "2026-09-14T11:44:04Z",
+  "uname": "Linux runnervmlun5p 6.17.0-1022-azure #22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026 x86_64 x86_64",
+  "nproc": 4,
+  "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+  "mem_total": "16372440 kB",
+  "os_release": {
+    "ID": "ubuntu",
+    "VERSION_ID": "24.04",
+    "PRETTY_NAME": "Ubuntu 24.04.5 LTS"
+  },
+  "github_run": {
+    "GITHUB_WORKFLOW": "meas-playback",
+    "GITHUB_RUN_ID": "34839671139",
+    "GITHUB_RUN_NUMBER": "3",
+    "GITHUB_SHA": "342b0b9e1cd6f0027e444c4e771d585e8f619791",
+    "GITHUB_JOB": "run"
+  }
+}
