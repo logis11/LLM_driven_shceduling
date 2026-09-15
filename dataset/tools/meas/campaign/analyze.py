@@ -77,8 +77,8 @@ def load_rows(path, pids):
                 continue
             comm, a, b = tm.group(1), int(tm.group(2)), tm.group(3)
             tid, pid = (a, int(b)) if b else (a, a)
-            if pid not in pids or comm in HARNESS_COMMS:
-                continue  # the run script's own children (Xvfb, perf, the replay driver) share the tree
+            if pid not in pids or comm in HARNESS_COMMS or comm.startswith("llvmpipe-"):
+                continue  # harness processes share the tree; llvmpipe-* is the runner's software rasteriser (D15)
             t, delay, run = float(t), float(delay), float(run)
             rows.append(Row(t - run / 1000.0, t - run / 1000.0 - delay / 1000.0, t, run, comm, tid, pid))
     rows.sort(key=lambda r: r.t_in)
