@@ -68,7 +68,7 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
-- 2026-09-15, fold-in (D19): the archetypes are in the library; the campaign's numbers are in `results.md`; the release of the raw data awaits 인지오's word.
+- 2026-09-15, fold-in (D19): the archetypes are in the library; the campaign's numbers are in `results.md`; raw data released as `meas-ci-2026-09-14` (D20).
 - 2026-09-14, after dry run 1 (runs 34838057273, 34838057243): §3 content-area insets; §4 wakeup rows kept, `perf.data` dropped in full mode; §5 two attribution rules with the dry-run rates; Thunderbird's compose window opened by Escape and ctrl+n after the Account Hub.
 - 2026-09-14, D12: §3 stimulus selection and motion rule settled; §1 stimulus column updated.
 - 2026-09-14, after the runner probe (`probe.md`): §1 `webrtc` run confirmed and its scope stated; §4 instruments settled; §5 W = 5 ms; Thunderbird's profile must carry a local account and identity for `-compose` (dry-run item); MLT audio and every audio path run without a device (§8).
