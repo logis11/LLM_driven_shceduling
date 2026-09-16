@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the measured archetype entries (9.5 fold-in) from pool.py output.
 
-fold_in.py <results-dir> <out.yaml>
+fold_in.py <results-dir> <out.yaml> [--tag interactive=meas-ci:interactive:N --tag playback=meas-ci:playback:M]
 
 One entry per campaign run, per the 9.5 changelog: D2/D11 ids, D9 shape,
 D13 per-input run (window rule), D16 timer components with a pooled
@@ -14,25 +14,27 @@ import json
 import os
 import sys
 
-RUN_TAG = {"interactive": "meas-ci:interactive:3", "playback": "meas-ci:playback:3"}
+RUN_TAG = {"interactive": "meas-ci:interactive:3", "playback": "meas-ci:playback:3"}  # the D3 campaign; --tag overrides
+
+# the observed setup per run — `{version}` is filled from the run's recorded application version (report.json)
 
 ARCHETYPES = {
     # id: (run, program observed, kind, stimulus stream, stimulus tag, bound names by approximation)
-    "office-writer": ("soffice", "LibreOffice Writer 24.2.7.2 (Ubuntu 24.04 apt), a new document", "input",
+    "office-writer": ("soffice", "{version} (Ubuntu 24.04 apt), a generated document of about 76 pages (100 sections of five 100-word paragraphs, ten 1024×768 pictures; design — no source states a length, S7) with the stream typing at its end", "input",
                       "swell-word-c1", "swell-icmi14:word-c1", []),
-    "code-editor": ("code", "Visual Studio Code 1.137.0 (vendor .deb), a text file open", "input",
+    "code-editor": ("code", "Visual Studio Code {version} (vendor .deb), the TypeScript project sindresorhus/got at commit 64f21e2a (tag v16.0.0, dependencies installed; design) open on source/index.ts with the built-in TypeScript language server running", "input",
                     "swell-word-c1", "swell-icmi14:word-c1", []),
-    "mail-client": ("thunderbird", "Mozilla Thunderbird 155.0.1 (snap via apt), a compose window over a pre-seeded local account", "input",
+    "mail-client": ("thunderbird", "{version} (snap via apt), a compose window over a pre-seeded local account", "input",
                     "swell-outlook-c23", "swell-icmi14:outlook-c23", []),
-    "web-browser": ("chrome", "Google Chrome 152.0.7977.82 (preinstalled), a local page with a text area and 400 paragraphs; the browser process, GPU and utility processes — renderer processes excluded (electron-comms)", "input",
+    "web-browser": ("chrome", "{version} (preinstalled), a local page with a text area and 400 paragraphs; the browser process, GPU and utility processes — renderer processes excluded (electron-comms); operation page-load: the scripted feed page feed.html (300 posts, thirty 1600×1200 pictures, a 200 000-record sort; design after PCMark 10 pp. 52–53 and CpsMark+ §4.3.3) from a local server, completion by the page's title after first paint", "input",
                     "swell-ie-c1", "swell-icmi14:ie-c1", []),
-    "image-editor": ("gimp", "GIMP 2.10.36 (apt), an 800×600 image open; driven by a scripted pointer loop (drag, click, wheel; design)", "cadence", None, None, []),
-    "video-editor": ("kdenlive", "Kdenlive (Ubuntu 24.04 apt), a new project; driven by a scripted pointer loop that scrubs the clip monitor (design); llvmpipe software-rasteriser threads excluded (D15)", "cadence", None, None, []),
-    "video-player": ("mpv-video", "mpv 0.37.0, --vo=x11 --ao=null, a 1280×720 30 fps H.264 file with AAC audio, looped", "play", None, None,
+    "image-editor": ("gimp", "{version} (apt), a 4952×3288 image open (PCMark 10 Photo Editing's interactive image size, Technical Guide p. 71; synthetic content, imported as 16-bit; design); driven by a scripted pointer loop (drag, click, wheel; design); operation unsharp-mask: plug-in-unsharp-mask std-dev 4.0, amount 0.32, threshold 8 (PCMark 10's batch unsharp parameters mapped onto GIMP's PDB, p. 74; design) through the Script-Fu server, completion by its reply", "cadence", None, None, []),
+    "video-editor": ("kdenlive", "Kdenlive 23.08.5 (Ubuntu 24.04 apt), a project with one 20 s 1920×1080 30 fps H.264 clip (PCMark 10 Video Editing's 1080p H.264, p. 76; synthetic content, design) on V1 with an avfilter.unsharp effect at PCMark 10's sharpening parameters (p. 76); driven by a scripted pointer loop that scrubs the clip monitor (design); llvmpipe software-rasteriser threads excluded (D15); operation preview-render: the whole-clip timeline preview rendered by Kdenlive's external kdenlive_render process (part of the tree), completion when it exits", "cadence", None, None, []),
+    "video-player": ("mpv-video", "{version}, --vo=x11 --ao=null, a 1280×720 30 fps H.264 file with AAC audio, looped", "play", None, None,
                      ["zoom (video) → video-call instead (D12)", "gamescope: compositor, not a decoder (9.4's record)"]),
-    "audio-player": ("mpv-audio", "mpv 0.37.0, --no-video --ao=null, the same file's AAC audio, looped", "play", None, None,
+    "audio-player": ("mpv-audio", "{version}, --no-video --ao=null, the same file's AAC audio, looped", "play", None, None,
                      ["spotify: streaming client with network fetch, decode and a Chromium-based interface (S2-18: no documentation)"]),
-    "video-call": ("webrtc", "Google Chrome 152.0.7977.82, a loopback WebRTC call in one page with a synthetic 1280×720 30 fps camera and microphone (--use-fake-device-for-media-stream); encode and decode at ~20 fps", "play", None, None,
+    "video-call": ("webrtc", "{version}, a loopback WebRTC call in one page with a synthetic 1280×720 30 fps camera and microphone (--use-fake-device-for-media-stream); encode and decode at ~20 fps", "play", None, None,
                    ["zoom voice and video: a proprietary client with capture, encode, network and playback threads (S2-17; S6: whole-client CPU only)"]),
 }
 
@@ -91,6 +93,7 @@ def components_block(ph, tag, key, indent="      "):
 def entry(aid, spec, d):
     run, observed, kind, stream, stim_tag, approx = spec
     tag = RUN_TAG[d["family"]]
+    observed = observed.replace("{version}", (d.get("version") or "?").strip()[:60])
     out = [f"  {aid}:", "    category_source: meas", "    pattern:", "      program:"]
     if kind == "play":
         out += ["        - loop:                    # measured timer components merged at compile time (D9, D16)",
@@ -121,7 +124,7 @@ def entry(aid, spec, d):
     reps = d["repeats"]
     phase_names = list(d["phases"])
     run_line = f"{tag.split(':', 1)[1]}, repeats {reps}"
-    if run == "thunderbird":
+    if run == "thunderbird" and tag == "meas-ci:interactive:3":
         run_line += " (repeats 2 and 3 from interactive:4 after a replay-driver fix)"
     out.append(f"      run: \"{run_line}\"")
     stats = []
@@ -185,7 +188,13 @@ def entry(aid, spec, d):
 
 def main():
     R, out = sys.argv[1], sys.argv[2]
-    blocks = ["  # ---- measured per-application archetypes — 9.5 campaign (meas-ci:interactive:3, meas-ci:playback:3) ----", ""]
+    rest = sys.argv[3:]
+    while rest:  # --tag interactive=meas-ci:interactive:N (repeatable)
+        if rest[0] == "--tag" and len(rest) > 1 and "=" in rest[1]:
+            fam, tag = rest[1].split("=", 1); RUN_TAG[fam] = tag; rest = rest[2:]
+        else:
+            raise SystemExit(f"unknown argument {rest[0]!r}")
+    blocks = [f"  # ---- measured per-application archetypes — 9.5 campaign ({RUN_TAG['interactive']}, {RUN_TAG['playback']}) ----", ""]
     for aid, spec in ARCHETYPES.items():
         d = json.load(open(os.path.join(R, f"pool-{spec[0]}.json")))["runs"][spec[0]]
         blocks.append(entry(aid, spec, d))
