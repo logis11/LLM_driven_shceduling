@@ -269,11 +269,13 @@ def phase_span(rows):
     return (rows[0].t_in, rows[-1].t_end) if rows else (0, 0)
 
 
-def analyze_run(D, w_ms=5.0, cap_ms=0.0, waker="^Xvfb$|^Xorg$", wake_def="wakeup"):
-    """Return (result, raw): result as printed/dumped by the CLI; raw = per-phase wakes, segments and per-input lists for pooling."""
+def analyze_run(D, w_ms=5.0, cap_ms=0.0, waker="^Xvfb$|^Xorg$", wake_def="wakeup", exclude_roles=()):
+    """Return (result, raw): result as printed/dumped by the CLI; raw = per-phase wakes, segments and per-input lists for pooling.
+    exclude_roles: process roles (pid_roles) whose rows leave the tree — D14: Chrome's renderer processes belong to
+    electron-comms, so the web-browser archetype is pooled with exclude_roles=("renderer",)."""
     class A: pass
     args = A(); args.run_dir = D; args.w_ms = w_ms; args.cap_ms = cap_ms; args.waker = waker; args.json = None
-    args.wake_def = wake_def
+    args.wake_def = wake_def; args.exclude_roles = set(exclude_roles)
     return _analyze(args)
 
 
@@ -295,8 +297,11 @@ def _analyze(args):
                 pids |= {pr["pid"] for pr in json.load(open(p))["procs"]}
         segments, (t0, t1), extra_pids = load_rows(os.path.join(D, th), pids, report.get("rx") if phase == "op" else None)
         span = max(t1 - t0, 1e-6)
-        total_run_s = sum(r.run for r in segments) / 1000
         roles = pid_roles(D, phase)
+        excluded = getattr(args, "exclude_roles", set())
+        if excluded:  # D14: rows of processes another archetype owns leave the tree (web-browser: renderers)
+            segments = [r for r in segments if roles.get(r.pid, "main") not in excluded]
+        total_run_s = sum(r.run for r in segments) / 1000
         wk_path = next((p for p in (f"perf.{phase}.wakeups.txt.gz", f"perf.{phase}.wakeups.txt") if os.path.exists(os.path.join(D, p))), None)
         wake_def = getattr(args, "wake_def", "wakeup")
         if wk_path and wake_def == "wakeup":
@@ -394,6 +399,8 @@ def main():
     ap.add_argument("run_dir"); ap.add_argument("--w-ms", type=float, default=5.0)
     ap.add_argument("--cap-ms", type=float, default=0.0); ap.add_argument("--json", default=None)
     ap.add_argument("--waker", default="^Xvfb$|^Xorg$")
+    ap.add_argument("--exclude-roles", dest="exclude_roles", default="", type=lambda v: set(x for x in v.split(",") if x),
+                    help="process roles whose rows leave the tree, e.g. renderer (D14, web-browser)")
     ap.add_argument("--wake-def", dest="wake_def", choices=("wakeup", "row"), default="wakeup",
                     help="wakeup: a wake needs a wakeup event (default); row: every timehist row is a wake (the D1-D20 analysis)")
     args = ap.parse_args()

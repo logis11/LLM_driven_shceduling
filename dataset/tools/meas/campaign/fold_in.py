@@ -148,8 +148,9 @@ def entry(aid, spec, d):
         alt = d["phases"].get("driven-alt", {}).get("per_input")
         if alt:  # spec decision 11: the pre-registered sensitivity result, one sentence, no value changed
             a = pi["window"]["run_ms_minus_idle"]["p50"]; b = alt["window"]["run_ms_minus_idle"]["p50"]
+            change = f" ({(b - a) / a * 100:+.0f} %)" if a else " (the SWELL-KW median is at the zero bound, D13)"
             scope += (f"Stimulus sensitivity (pre-registered, method §3): under a 136M Keystrokes transcription stream (dhakal-chi18) "
-                      f"the per-input run p50 is {b:.2f} ms against {a:.2f} ms under SWELL-KW ({(b - a) / a * 100:+.0f} %); "
+                      f"the per-input run p50 is {b:.2f} ms against {a:.2f} ms under SWELL-KW{change}; "
                       f"the archetype carries SWELL-KW. ")
     elif kind == "cadence":
         scope += "Stimulus: a scripted pointer loop (design); no per-input run exists, the driven cadence is carried as focus_components. "

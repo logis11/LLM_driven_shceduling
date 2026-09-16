@@ -76,7 +76,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("artifacts"); ap.add_argument("out")
     ap.add_argument("--w-ms", type=float, default=5.0); ap.add_argument("--cap-ms", type=float, default=0.0)
+    ap.add_argument("--exclude-roles", default="", help="comma-separated process roles left out of the tree (D14: renderer for chrome)")
     args = ap.parse_args()
+    exclude_roles = tuple(x for x in args.exclude_roles.split(",") if x)
     runs = {}
     for d in sorted(glob.glob(os.path.join(args.artifacts, "meas-*"))):
         m = NAME.match(os.path.basename(d))
@@ -84,12 +86,12 @@ def main():
             continue
         fam, app, rep, mode = m.group(1), m.group(2), int(m.group(3)), m.group(4)
         runs.setdefault(app, {"family": fam, "mode": mode, "repeats": {}})["repeats"][rep] = d
-    out = {"w_ms": args.w_ms, "cap_ms": args.cap_ms, "runs": {}}
+    out = {"w_ms": args.w_ms, "cap_ms": args.cap_ms, "exclude_roles": list(exclude_roles), "runs": {}}
     for app, info in runs.items():
         reps = sorted(info["repeats"])
         results, raws = {}, {}
         for r in reps:
-            results[r], raw = analyze_run(info["repeats"][r], args.w_ms, args.cap_ms)
+            results[r], raw = analyze_run(info["repeats"][r], args.w_ms, args.cap_ms, exclude_roles=exclude_roles)
             # keep only compact samples per phase: per-comm gaps/runs/wakes/threads, span, per-input lists
             slim = {"phases": {}}
             for phase, pd in raw["phases"].items():
