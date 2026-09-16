@@ -113,11 +113,11 @@ Execution order: 9.1 ∥ 9.2 ∥ 9.3 first → 9.4–9.12 in parallel, after 9.1
 - [x] **9.4** Gaming — research and decisions — `game-task-chain` on the LAVD deck as its one source; frame period on `steamos-refresh` as design; tail and count removed; wineserver a chain member; changelog `_dev/research/jioh/task-9.4-gaming/changelog.md`
 - [WIP] **9.5** Interactive and typing — research and decisions — D1–D20 applied: nine measured per-application archetypes replace `desktop-interactive`/`audio-playback`/`video-playback` (campaign `meas-ci:interactive:3`, `playback:3`; release `meas-ci-2026-09-14`). Follow-ups spec'd 2026-09-16: `_dev/docs/spec/jioh/task-9.5-interactive-typing-follow-ups.md`; real-desktop validation deferred
   - [x] shared tooling: single-core pin, wakeup-defined wake, checked once on the existing data (D21)
-  - [ ] appdefs: setup states (VS Code project + language server, Writer large document), three operations (GIMP filter, Kdenlive preview render, Chrome scripted local page), inputs from PCMark 10 / SYSmark 30 / CpsMark+ where stated
+  - [WIP] appdefs: setup states (VS Code project + language server, Writer large document), three operations (GIMP filter, Kdenlive preview render, Chrome scripted local page), inputs from PCMark 10 / SYSmark 30 / CpsMark+ where stated
   - [ ] 136M Keystrokes extraction tool, registry re-entry, pre-registration written
   - [ ] display/GPU literature search — scope bounds only; compositor findings to 9.9
   - [ ] one pinned campaign → pool → fold-in (operation kind + duration) → rebuild → hand-offs
-- [WIP] **9.6** Compile — research and decisions — from 9.5 (spec decision 3): `build-orchestrator`, `compiler-child` carry four-vCPU Phase 2 measurements; every runner measurement is single-core from now on, re-run is this slice's decision
+- [ ] **9.6** Compile — research and decisions — from 9.5 (spec decision 3): `build-orchestrator`, `compiler-child` carry four-vCPU Phase 2 measurements; every runner measurement is single-core from now on, re-run is this slice's decision
 - [ ] **9.7** Background and IO — research and decisions (#10) — from 9.5 (spec decision 3): `background-crawler`, `io-stream`, `network-bulk` carry four-vCPU Phase 2 measurements; single-core from now on, re-run is this slice's decision
 - [ ] **9.8** Browser and comms — research and decisions — from 9.5 (spec decision 3): `electron-comms` carries a four-vCPU Phase 2 measurement; single-core from now on, re-run is this slice's decision
 - [ ] **9.9** Daemons and session processes — research and decisions — from 9.5: `system-daemon` carries a four-vCPU Phase 2 measurement (spec decision 3); compositor per-frame findings from the display/GPU search (spec decision 12)
