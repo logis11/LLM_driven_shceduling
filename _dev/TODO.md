@@ -111,18 +111,23 @@ Execution order: 9.1 ∥ 9.2 ∥ 9.3 first → 9.4–9.12 in parallel, after 9.1
 - [x] **9.2** Heads-up memo to 인경민 and 박이안 — what will change, what stays stable, the three executor questions (spec decision 7)
 - [x] **9.3** Measurement tools fixed — including `meas-ci:names:2` preserved before its Actions artifacts expire on 2026-12-09
 - [x] **9.4** Gaming — research and decisions — `game-task-chain` on the LAVD deck as its one source; frame period on `steamos-refresh` as design; tail and count removed; wineserver a chain member; changelog `_dev/research/jioh/task-9.4-gaming/changelog.md`
-- [WIP] **9.5** Interactive and typing — research and decisions — D1–D20 applied: nine measured per-application archetypes replace `desktop-interactive`/`audio-playback`/`video-playback` (campaign `meas-ci:interactive:3`, `playback:3`; release `meas-ci-2026-09-14`); follow-ups taken 2026-09-15: single-core (pinned) campaign, heavy-operation driven phases, stimulus sensitivity (136M Keystrokes), display/GPU discussion; real-desktop validation deferred
-- [WIP] **9.6** Compile — research and decisions
-- [ ] **9.7** Background and IO — research and decisions (#10)
-- [ ] **9.8** Browser and comms — research and decisions
-- [ ] **9.9** Daemons and session processes — research and decisions
-- [ ] **9.10** Scenarios and timelines — research and decisions — note from 9.5: SWELL-KW's window-activation events give real per-participant application-focus sequences and durations (~3 h each), a source for task sets, focus windows and switching; `c1-meeting`'s two `video-call` tasks double one call
+- [WIP] **9.5** Interactive and typing — research and decisions — D1–D20 applied: nine measured per-application archetypes replace `desktop-interactive`/`audio-playback`/`video-playback` (campaign `meas-ci:interactive:3`, `playback:3`; release `meas-ci-2026-09-14`). Follow-ups spec'd 2026-09-16: `_dev/docs/spec/jioh/task-9.5-interactive-typing-follow-ups.md`; real-desktop validation deferred
+  - [ ] shared tooling: single-core pin, wakeup-defined wake, checked once on the existing data
+  - [ ] appdefs: setup states (VS Code project + language server, Writer large document), three operations (GIMP filter, Kdenlive preview render, Chrome scripted local page), inputs from PCMark 10 / SYSmark 30 / CpsMark+ where stated
+  - [ ] 136M Keystrokes extraction tool, registry re-entry, pre-registration written
+  - [ ] display/GPU literature search — scope bounds only; compositor findings to 9.9
+  - [ ] one pinned campaign → pool → fold-in (operation kind + duration) → rebuild → hand-offs
+- [WIP] **9.6** Compile — research and decisions — from 9.5 (spec decision 3): `build-orchestrator`, `compiler-child` carry four-vCPU Phase 2 measurements; every runner measurement is single-core from now on, re-run is this slice's decision
+- [ ] **9.7** Background and IO — research and decisions (#10) — from 9.5 (spec decision 3): `background-crawler`, `io-stream`, `network-bulk` carry four-vCPU Phase 2 measurements; single-core from now on, re-run is this slice's decision
+- [ ] **9.8** Browser and comms — research and decisions — from 9.5 (spec decision 3): `electron-comms` carries a four-vCPU Phase 2 measurement; single-core from now on, re-run is this slice's decision
+- [ ] **9.9** Daemons and session processes — research and decisions — from 9.5: `system-daemon` carries a four-vCPU Phase 2 measurement (spec decision 3); compositor per-frame findings from the display/GPU search (spec decision 12)
+- [ ] **9.10** Scenarios and timelines — research and decisions — note from 9.5: SWELL-KW's window-activation events give real per-participant application-focus sequences and durations (~3 h each), a source for task sets, focus windows and switching; `c1-meeting`'s two `video-call` tasks double one call; operations (filter, preview render, page load) are placed by the timeline — start, count, whether inside focus (spec decisions 8–9); `thunderbird` is bound three ways across the coreset and each non-identity binding needs a stated role
 - [ ] **9.11** Scheduler-side constants and groundings — research and decisions
 - [ ] **9.12** Related-work and proposal prose — research and decisions
-- [ ] **9.13** Rebuild — the dataset rebuilt once from 9.4–9.12's decisions
-- [ ] **9.14** Consumer rework — scoring spec, guard spec, prior table and pair review, RQ0 gate spec; one harness changelog entry and one re-pin
-- [ ] **9.15** Docs, memos and guidebook corrections — including the final memo to 인경민 and 박이안
-- [ ] **9.16** Exit audits — the claim, measurement and compiled-number audits re-run on the final state (spec decision 8)
+- [ ] **9.13** Rebuild — the dataset rebuilt once from 9.4–9.12's decisions — from 9.5: native compiled set dropped, single only (spec decision 14)
+- [ ] **9.14** Consumer rework — scoring spec, guard spec, prior table and pair review, RQ0 gate spec; one harness changelog entry and one re-pin — from 9.5: sensitivity check of the demand-window rule and the prior-table rows to the scale of literature-grounded archetypes (spec decision 13); operations emit no input wakes
+- [ ] **9.15** Docs, memos and guidebook corrections — including the final memo to 인경민 and 박이안 — from 9.5: native set removed from every doc (spec decision 14); library-level scale limitation stated (spec decision 13); archetype plan's existence wording for the nine measured entries
+- [ ] **9.16** Exit audits — the claim, measurement and compiled-number audits re-run on the final state (spec decision 8) — from 9.5: venue mix listed per timeline (9.5 spec decision 13)
 
 ### Phase 10 — Integration and the RQ0 run
 Stage 6. Swap mocks for the real simulator and daemon, end-to-end smoke, run all coreset files × 3 conditions, check guards before looking at results, judge per the RQ0 gate spec; on failure, config search before workload redesign. Depends on Phase 9, 경민's integration gate and algorithm extension, and 이안's daemon.
