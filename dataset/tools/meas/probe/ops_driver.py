@@ -16,7 +16,7 @@ Operations (the trigger is design; the cost and duration are the observation):
             default shortcuts: Start Preview Render (Shift+Return) adds the
             timeline zone itself when no preview zone is defined
             (TimelineController::startPreviewRender, 23.08); before every
-            later render, Select All, Delete, Undo dirty the zone's chunks
+            later render, a click on the clip, Delete, Undo dirty the zone's chunks
             (manual: any change to the video under a preview zone triggers a
             new render pass). Done when the external kdenlive_render process
             has appeared and exited. Probes 35087191213 and 35088110333:
@@ -113,10 +113,14 @@ def op_kdenlive(i, wid, args):
     time.sleep(0.5)
     how = "shift+Return"
     if i > 0:
-        for key in ("ctrl+a", "Delete", "ctrl+z"):
+        # select the clip by clicking it on track V1 (window-relative; the 1280×800 layout puts the first clip at
+        # x 170–455, y 595–690, probe 35088785783's screenshot), so Delete and Undo act on the timeline, not the bin
+        xdo("mousemove", "--window", wid, str(args.clip_x), str(args.clip_y)); time.sleep(0.2)
+        xdo("click", "1"); time.sleep(0.5)
+        for key in ("Delete", "ctrl+z"):
             xdo("key", "--clearmodifiers", key)
-            time.sleep(0.7)
-        how = "ctrl+a, Delete, ctrl+z, shift+Return"
+            time.sleep(1.0)
+        how = f"click clip ({args.clip_x},{args.clip_y}), Delete, ctrl+z, shift+Return"
     t0 = now_us()
     xdo("key", "--clearmodifiers", "shift+Return")
     seen, gone = wait_proc("kdenlive_render", appear_s=30, gone_s=args.op_timeout)
@@ -160,6 +164,7 @@ def main():
     ap.add_argument("--pause", type=float, default=10.0, help="seconds between operations")
     ap.add_argument("--op-timeout", type=float, default=600.0)
     ap.add_argument("--url", default="http://127.0.0.1:8088/feed.html")
+    ap.add_argument("--clip-x", type=int, default=300); ap.add_argument("--clip-y", type=int, default=640)
     args = ap.parse_args()
     name, fn = OPS[args.app]
     t_end = time.monotonic() + args.seconds

@@ -36,6 +36,14 @@ ARCHETYPES = {
                    ["zoom voice and video: a proprietary client with capture, encode, network and playback threads (S2-17; S6: whole-client CPU only)"]),
 }
 
+VENUE_BOUND = {
+    'web-browser': "Venue bound (D24, S8): without display vsync Chromium drives its compositor from a default 60 Hz timer (Chromium docs, life of a frame; BeginFrameArgs::DefaultInterval), so the compositor cadence has a 60 Hz display's period but not its phase; rasterisation and compositing run on CPU threads under --disable-gpu, so those threads' run lengths overcount what a GPU desktop would show, by an amount no source states.",
+    'video-call': "Venue bound (D24, S8): without display vsync Chromium drives its compositor from a default 60 Hz timer (Chromium docs, life of a frame; BeginFrameArgs::DefaultInterval), so the compositor cadence has a 60 Hz display's period but not its phase; rasterisation and compositing run on CPU threads under --disable-gpu, so those threads' run lengths overcount what a GPU desktop would show, by an amount no source states.",
+    'code-editor': "Venue bound (D24, S8): without display vsync Chromium drives its compositor from a default 60 Hz timer (Chromium docs, life of a frame; BeginFrameArgs::DefaultInterval), so the compositor cadence has a 60 Hz display's period but not its phase; rasterisation and compositing run on CPU threads under --disable-gpu, so those threads' run lengths overcount what a GPU desktop would show, by an amount no source states.",
+    'video-editor': "Venue bound (D24, S8): Qt Quick's render loop paces on a blocking buffer swap; the runner's software rasteriser does not block, so the rendering path's wake rate overcounts a vsync-throttled display (Qt 5.15 qsgthreadedrenderloop.cpp); the excluded llvmpipe threads carried 93 % of the driven phase's CPU (D15).",
+    'video-player': "Venue bound (D24, S8): mpv's default --video-sync=audio paces frames on the audio clock, not the display (mpv 0.37 manual), so the missing refresh does not change its cadence; the x11 output copies frames on the CPU, work a GPU output would move.",
+}
+
 APPROX_BY = {"video-player": ["gamescope"], "audio-player": ["spotify"], "video-call": ["zoom"]}
 
 
@@ -132,6 +140,8 @@ def entry(aid, spec, d):
     else:
         scope += "No stimulus; the play phase's thread cadence is the whole behaviour. "
     scope += "Values are this software on this machine, not desktop truth (D10)."
+    if aid in VENUE_BOUND:  # D24: the direction of the venue's error, from the toolkits' own sources (search log S8)
+        scope += " " + VENUE_BOUND[aid]
     out += ["        " + scope]
     out.append("    modeling_notes: >-")
     notes = (f"Per-application archetype (D2): one task carries the whole process tree merged (D14)")

@@ -115,12 +115,12 @@ Execution order: 9.1 ∥ 9.2 ∥ 9.3 first → 9.4–9.12 in parallel, after 9.1
   - [x] shared tooling: single-core pin, wakeup-defined wake, checked once on the existing data (D21)
   - [WIP] appdefs: setup states (VS Code project + language server, Writer large document), three operations (GIMP filter, Kdenlive preview render, Chrome scripted local page), inputs from PCMark 10 / SYSmark 30 / CpsMark+ where stated — written (D22), runner probe pending
   - [x] 136M Keystrokes extraction tool, registry re-entry, pre-registration written (D23; `driven-alt` phase in run.sh)
-  - [ ] display/GPU literature search — scope bounds only; compositor findings to 9.9
+  - [x] display/GPU literature search — scope bounds only; compositor findings to 9.9 (D24, S8)
   - [ ] one pinned campaign → pool → fold-in (operation kind + duration) → rebuild → hand-offs
 - [ ] **9.6** Compile — research and decisions — from 9.5 (spec decision 3): `build-orchestrator`, `compiler-child` carry four-vCPU Phase 2 measurements; every runner measurement is single-core from now on, re-run is this slice's decision
 - [ ] **9.7** Background and IO — research and decisions — from 9.5 (spec decision 3): `background-crawler`, `io-stream`, `network-bulk` carry four-vCPU Phase 2 measurements; single-core from now on, re-run is this slice's decision
 - [ ] **9.8** Browser and comms — research and decisions — from 9.5 (spec decision 3): `electron-comms` carries a four-vCPU Phase 2 measurement; single-core from now on, re-run is this slice's decision
-- [ ] **9.9** Daemons and session processes — research and decisions — from 9.5: `system-daemon` carries a four-vCPU Phase 2 measurement (spec decision 3); compositor per-frame findings from the display/GPU search (spec decision 12)
+- [ ] **9.9** Daemons and session processes — research and decisions — from 9.5: `system-daemon` carries a four-vCPU Phase 2 measurement (spec decision 3); display/GPU search (D24, S8): no source states a compositor's per-frame CPU cost on a GPU desktop, the KWin and Mutter developer write-ups are the nearest description of the schedule
 - [ ] **9.10** Scenarios and timelines — research and decisions — note from 9.5: SWELL-KW's window-activation events give real per-participant application-focus sequences and durations (~3 h each), a source for task sets, focus windows and switching; `c1-meeting`'s two `video-call` tasks double one call; operations (filter, preview render, page load) are placed by the timeline — start, count, whether inside focus (spec decisions 8–9); `thunderbird` is bound three ways across the coreset and each non-identity binding needs a stated role
 - [ ] **9.11** Scheduler-side constants and groundings — research and decisions
 - [ ] **9.12** Related-work and proposal prose — research and decisions
