@@ -46,6 +46,9 @@ jobs:
 
       - name: Start sidecars
         run: |
+          # single-core measurement (dataset/tools/meas/pin.sh): sidecars on the harness CPUs,
+          # each measured phase on the one measured CPU (phase.sh, MEAS_PIN=load)
+          source dataset/tools/meas/pin.sh; pin_self_harness; pin_record | tee "$MEAS_DIR/pin.kv"
           date +%s%6N > "$MEAS_DIR/sidecar_start_us"
           sudo sh -c "nohup forkstat -e fork,exec,exit,comm \
             > '$MEAS_DIR/lifecycle.log' 2> '$MEAS_DIR/forkstat.err' &"

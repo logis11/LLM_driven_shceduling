@@ -48,12 +48,18 @@ jobs:
 
       - name: Start sidecars
         run: |
+          # single-core measurement (dataset/tools/meas/pin.sh): sidecars on the harness CPUs,
+          # each measured phase on the one measured CPU (phase.sh, MEAS_PIN=load)
+          source dataset/tools/meas/pin.sh; pin_self_harness; pin_record | tee "$MEAS_DIR/pin.kv"
           date +%s%6N > "$MEAS_DIR/sidecar_start_us"
           sudo sh -c "nohup forkstat -e fork,exec,exit,comm \
             > '$MEAS_DIR/lifecycle.log' 2> '$MEAS_DIR/forkstat.err' &"
           nohup python3 dataset/tools/meas/proc_sampler.py --interval 0.2 \
             --ctxt --out "$MEAS_DIR/proc_samples.jsonl" \
             2> "$MEAS_DIR/sampler.err" &
+          # the display server is harness, not load: started here on the harness CPUs
+          # (spec decision 5), never inside a pinned phase via xvfb-run
+          nohup Xvfb :99 -screen 0 1280x800x24 -ac > "$MEAS_DIR/xvfb.log" 2>&1 &
           sleep 2
 
       - name: Measured phases
@@ -63,14 +69,15 @@ jobs:
           # full-cmdline match SIGTERMs the harness itself (exit 143).
           P="$MEAS_DIR/phases.jsonl"
           PH="dataset/tools/meas/phase.sh $P"
+          export DISPLAY=:99
           TABS=$(for i in $(seq 1 10); do printf 'file:///tmp/tabs/tab%s.html ' "$i"; done)
           $PH chromium-10-tabs -- bash -c "
-            xvfb-run -a snap run chromium --no-sandbox --no-first-run \
+            snap run chromium --no-sandbox --no-first-run \
               --disable-gpu $TABS & CHROMIUM_PID=\$!
             sleep 300
             kill \$CHROMIUM_PID || true; sleep 3; pkill chrome || true"
           $PH element-idle -- bash -c "
-            xvfb-run -a element-desktop --no-sandbox --disable-gpu \
+            element-desktop --no-sandbox --disable-gpu \
               & ELEMENT_PID=\$!
             sleep 600
             kill \$ELEMENT_PID || true; sleep 3; pkill element || true"

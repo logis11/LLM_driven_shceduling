@@ -152,3 +152,45 @@ def test_package_binaries_include_sbin(monkeypatch):
         a, 0, stdout=listing, stderr=""))
     assert verify_names.package_binaries("ubuntu", "dkms") == [
         "/usr/sbin/dkms", "/usr/lib/dkms/common.postinst"]
+
+
+# ---- campaign analyzer: the wake definition (9.5 follow-ups spec, decision 4) ----
+
+import pytest  # noqa: E402
+from meas.campaign import analyze as campaign  # noqa: E402
+
+
+def _row(t_in, run_ms, tid=7, comm="app"):
+    return campaign.Row(t_in, t_in, t_in + run_ms / 1000, run_ms, comm, tid, 100)
+
+
+def test_resume_after_preemption_extends_the_preceding_wake():
+    # one thread: woken at 1.000, runs 2 ms, preempted, resumes at 1.0025 for 1 ms
+    # with no wakeup in between; then sleeps, is woken at 1.0095 and runs 0.5 ms
+    rows = [_row(1.000, 2.0), _row(1.0025, 1.0), _row(1.010, 0.5)]
+    wakeups = {7: [0.9999, 1.0095]}
+    wakes, merged = campaign.merge_resumes(rows, wakeups)
+    assert merged == 1
+    got = [x for w in wakes for x in (w.t_in, w.run, w.t_end)]
+    assert got == pytest.approx([1.000, 3.0, 1.0035, 1.010, 0.5, 1.0105])
+
+
+def test_first_row_without_a_wakeup_in_the_capture_is_a_wake():
+    rows = [_row(1.000, 2.0), _row(1.005, 1.0)]
+    wakes, merged = campaign.merge_resumes(rows, {})  # no wakeups file rows for this thread
+    assert merged == 1 and len(wakes) == 1 and wakes[0].run == 3.0
+
+
+def test_threads_are_merged_independently():
+    rows = sorted([_row(1.000, 2.0, tid=7), _row(1.001, 1.0, tid=8), _row(1.0025, 1.0, tid=7)], key=lambda r: r.t_in)
+    wakes, merged = campaign.merge_resumes(rows, {7: [0.9999], 8: [1.0009]})
+    assert merged == 1
+    assert sorted((w.tid, w.run) for w in wakes) == [(7, 3.0), (8, 1.0)]
+
+
+def test_all_wakeups_indexed_by_wakee_tid(tmp_path):
+    p = tmp_path / "perf.idle.wakeups.txt"
+    p.write_text("   1.000500 [0001]  Xvfb[500]  awakened: app[7/100]\n"
+                 "   1.000600 [0002]  app[8/100]  awakened: app[7/100]\n"
+                 "   1.000700 [0002]  other[9/200]  awakened: other[9/200]\n")
+    assert campaign.load_all_wakeups(str(p), {100}) == {7: [1.0005, 1.0006]}

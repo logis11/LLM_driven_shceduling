@@ -5,10 +5,20 @@ and run distributions per phase and, for the driven phase, per-input run.
 analyze.py <run-dir> [--w-ms 5] [--cap-ms 0] [--json out.json]
 
 Reads report.json, snap.<phase>.{before,after}.json (the application's pid
-set), perf.<phase>.timehist.txt[.gz] and, if present, replay.jsonl. A
-timehist row is the end of one run of a thread: sched-in = time − run,
-wake = sched-in − sch delay. Rows are kept when the pid in `comm[tid/pid]`
-(or `comm[pid]`) belongs to the application's process tree.
+set), perf.<phase>.timehist.txt[.gz], perf.<phase>.wakeups.txt[.gz] and, if
+present, replay.jsonl. A timehist row is one schedule-in of a thread and the
+run that followed it (a *segment*): sched-in = time − run, wake = sched-in −
+sch delay. Rows are kept when the pid in `comm[tid/pid]` (or `comm[pid]`)
+belongs to the application's process tree.
+
+Wake definition (9.5 follow-ups spec, decision 4): a segment is a *wake* only
+when a wakeup event for that thread (the wakeups file, `perf sched timehist
+-w`) lies between the thread's previous schedule-out and this schedule-in.
+A segment with no such event is a resume after preemption: its run is added
+to the preceding wake's run and the preempted time is neither run nor gap.
+Wake rates, gap and run distributions are computed over wakes; the per-input
+window rule (b) sums segments, so it is unaffected. Without a wakeups file
+every segment counts as a wake (`wake_definition: row`).
 
 Per phase and per thread comm: wakes per second, gap between consecutive
 sched-ins (p50, p90, p99, ms), run per sched-in (p50, p90, p99, ms), CPU
@@ -110,6 +120,58 @@ def load_wakeups(path, pids, waker_rx):
     return out
 
 
+def load_all_wakeups(path, pids):
+    """tid -> sorted wakeup times, for every wakee thread of the application's tree (any waker)."""
+    out = {}
+    with open_text(path) as handle:
+        for line in handle:
+            m = WAKE.match(line)
+            if not m:
+                continue
+            t, _, _, wakee = m.groups()
+            km = TASK.match(wakee.strip())
+            if not km:
+                continue
+            kpid = int(km.group(3)) if km.group(3) else int(km.group(2))
+            if kpid in pids:
+                out.setdefault(int(km.group(2)), []).append(float(t))
+    for v in out.values():
+        v.sort()
+    return out
+
+
+EPS = 1e-6  # timehist prints microseconds
+
+
+def merge_resumes(rows, wakeups_by_tid):
+    """Fold resume-after-preemption segments into the wake they continue.
+
+    rows: segments sorted by t_in. A segment is a wake when a wakeup event for its
+    tid falls in (previous segment's t_end, this t_in]; the first segment of a
+    thread in the capture is always a wake. Returns (wakes sorted by t_in,
+    number of segments merged)."""
+    import bisect
+    last = {}      # tid -> index into out of that thread's current wake
+    out = []
+    merged = 0
+    for r in rows:
+        i = last.get(r.tid)
+        if i is None:
+            out.append(r); last[r.tid] = len(out) - 1
+            continue
+        prev = out[i]
+        wk = wakeups_by_tid.get(r.tid, [])
+        k = bisect.bisect_right(wk, prev.t_end - EPS)
+        woken = k < len(wk) and wk[k] <= r.t_in + EPS
+        if woken:
+            out.append(r); last[r.tid] = len(out) - 1
+        else:
+            out[i] = prev._replace(run=prev.run + r.run, t_end=r.t_end)
+            merged += 1
+    out.sort(key=lambda r: r.t_in)
+    return out, merged
+
+
 def pid_roles(D, phase):
     """pid -> role from the snapshots' command lines: main | renderer | gpu | utility | zygote | other."""
     roles = {}
@@ -167,10 +229,11 @@ def phase_span(rows):
     return (rows[0].t_in, rows[-1].t_end) if rows else (0, 0)
 
 
-def analyze_run(D, w_ms=5.0, cap_ms=0.0, waker="^Xvfb$|^Xorg$"):
-    """Return (result, raw): result as printed/dumped by the CLI; raw = per-phase rows and per-input lists for pooling."""
+def analyze_run(D, w_ms=5.0, cap_ms=0.0, waker="^Xvfb$|^Xorg$", wake_def="wakeup"):
+    """Return (result, raw): result as printed/dumped by the CLI; raw = per-phase wakes, segments and per-input lists for pooling."""
     class A: pass
     args = A(); args.run_dir = D; args.w_ms = w_ms; args.cap_ms = cap_ms; args.waker = waker; args.json = None
+    args.wake_def = wake_def
     return _analyze(args)
 
 
@@ -190,16 +253,22 @@ def _analyze(args):
             p = os.path.join(D, snap)
             if os.path.exists(p):
                 pids |= {pr["pid"] for pr in json.load(open(p))["procs"]}
-        rows, (t0, t1) = load_rows(os.path.join(D, th), pids)
+        segments, (t0, t1) = load_rows(os.path.join(D, th), pids)
         span = max(t1 - t0, 1e-6)
-        total_run_s = sum(r.run for r in rows) / 1000
+        total_run_s = sum(r.run for r in segments) / 1000
         roles = pid_roles(D, phase)
-        ph = {"pids": sorted(pids), "rows": len(rows), "span_s": round(span, 2),
+        wk_path = next((p for p in (f"perf.{phase}.wakeups.txt.gz", f"perf.{phase}.wakeups.txt") if os.path.exists(os.path.join(D, p))), None)
+        wake_def = getattr(args, "wake_def", "wakeup")
+        if wk_path and wake_def == "wakeup":
+            rows, merged = merge_resumes(segments, load_all_wakeups(os.path.join(D, wk_path), pids))
+        else:
+            rows, merged, wake_def = segments, 0, "row"
+        ph = {"pids": sorted(pids), "rows": len(rows), "segments": len(segments), "resumes_merged": merged,
+              "wake_definition": wake_def, "span_s": round(span, 2),
               "cpu_share": round(total_run_s / span, 4), "wakes_per_s": round(len(rows) / span, 2),
               "roles": per_role(rows, roles, span), "threads": per_thread(rows, span)}
         if phase == "idle":
             idle_rate = total_run_s / span
-        wk_path = next((p for p in (f"perf.{phase}.wakeups.txt.gz", f"perf.{phase}.wakeups.txt") if os.path.exists(os.path.join(D, p))), None)
         xwakes = load_wakeups(os.path.join(D, wk_path), pids, args.waker) if wk_path else []
         if xwakes:
             ph["x_wakes_per_s"] = round(len(xwakes) / span, 2)
@@ -209,7 +278,7 @@ def _analyze(args):
             s_times = [e["sent_us"] / 1e6 for e in sent]
             s_kinds = [e.get("kind", "key") for e in sent]
             wakes = [r.t_wake for r in rows]
-            t_in = [r.t_in for r in rows]
+            t_in = [r.t_in for r in segments]  # rule (b) sums segments: CPU time in the window, however it was split
             import bisect
             first_lat, first_run, win_run, win_len, win_wakes, win_run_corr = [], [], [], [], [], []
             xw_times = [w[0] for w in xwakes]
@@ -228,7 +297,7 @@ def _analyze(args):
                 if j < len(wakes) and wakes[j] - s <= args.w_ms / 1000:
                     first_lat.append((wakes[j] - s) * 1000); first_run.append(rows[j].run)
                 a, b = bisect.bisect_left(t_in, s), bisect.bisect_left(t_in, end)
-                run_sum = sum(r.run for r in rows[a:b])
+                run_sum = sum(r.run for r in segments[a:b])
                 win_run.append(run_sum); win_len.append((end - s) * 1000); win_wakes.append(b - a)
                 if idle_rate is not None:
                     # D13: the input's work is the window's run net of the idle rate, bounded below by zero —
@@ -255,7 +324,7 @@ def _analyze(args):
                                "waker": {"x_wakes_per_input": dist(xw_count), "first_x_wake_latency_ms": dist(xw_lat),
                                          "run_ms": dist(xw_run)} if xwakes else None}
         result["phases"][phase] = ph
-        raw["phases"][phase] = {"rows": rows, "span": span, "idle_rate": idle_rate, "roles": roles}
+        raw["phases"][phase] = {"rows": rows, "segments": segments, "span": span, "idle_rate": idle_rate, "roles": roles}
         if "per_input" in ph:
             raw["phases"][phase]["per_input"] = {"first_lat": first_lat, "first_run": first_run, "win_run": win_run,
                                                  "win_len": win_len, "win_wakes": win_wakes, "win_run_corr": win_run_corr,
@@ -268,12 +337,14 @@ def main():
     ap.add_argument("run_dir"); ap.add_argument("--w-ms", type=float, default=5.0)
     ap.add_argument("--cap-ms", type=float, default=0.0); ap.add_argument("--json", default=None)
     ap.add_argument("--waker", default="^Xvfb$|^Xorg$")
+    ap.add_argument("--wake-def", dest="wake_def", choices=("wakeup", "row"), default="wakeup",
+                    help="wakeup: a wake needs a wakeup event (default); row: every timehist row is a wake (the D1-D20 analysis)")
     args = ap.parse_args()
     result, _ = _analyze(args)
     if args.json:
         json.dump(result, open(args.json, "w"), indent=1)
     for phase, ph in result["phases"].items():
-        print(f"== {result['app']} r{result['repeat']} {phase}: span {ph['span_s']} s, rows {ph['rows']}, cpu share {ph['cpu_share']}, wakes/s {ph['wakes_per_s']}")
+        print(f"== {result['app']} r{result['repeat']} {phase}: span {ph['span_s']} s, wakes {ph['rows']} of {ph['segments']} segments ({ph['wake_definition']}, {ph['resumes_merged']} resumes merged), cpu share {ph['cpu_share']}, wakes/s {ph['wakes_per_s']}")
         print(f"   roles: {ph['roles']}")
         for comm, c in list(ph["threads"].items())[:8]:
             print(f"   {comm:16s} thr {c['threads']:3d} wakes/s {c['wakes_per_s']:8.2f} cpu {c['cpu_share']:.4f} gap p50/p90 {c['gap_ms']['p50']}/{c['gap_ms']['p90']} run p50/p90/p99 {c['run_ms']['p50']}/{c['run_ms']['p90']}/{c['run_ms']['p99']}")

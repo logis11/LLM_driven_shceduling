@@ -4,16 +4,22 @@
 # window, then runs the phases with `perf sched record -a` over each whole
 # phase: interactive apps — settle, idle, driven (stream or scripted pointer);
 # playback and webrtc — settle, play. Everything lands in $MEAS_OUT.
+# Single-core (pin.sh; 9.5 follow-ups spec decisions 2 and 5): this script and
+# everything it starts — Xvfb, perf, the replay driver, snapshots — run on the
+# harness CPUs; only the application tree is launched on the measured CPU.
 set -u
 export PROBE_OUT="${MEAS_OUT:-/tmp/meas}"
 PROBE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../probe" && pwd)"
 source "$PROBE_DIR/common.sh"
+source "$TOOLS/../pin.sh"
+pin_self_harness
 source "$TOOLS/appdefs.sh"
 APP="$1"; REPEAT="$2"; MODE="${3:-full}"
 STREAMS="$(cd "$TOOLS/../../.." && pwd)/meas/streams"
 if [ "$MODE" = dry ]; then SETTLE=10; IDLE=30; DRIVEN=60; PLAY=60; else SETTLE=30; IDLE=120; DRIVEN=600; PLAY=300; fi
 rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE"; rec started_utc "$(date -u +%FT%TZ)"
 rec settle_s "$SETTLE"; rec idle_s "$IDLE"; rec driven_s "$DRIVEN"; rec play_s "$PLAY"
+pin_record | tee -a "$KV" | sed 's/^/  /' >&2
 python3 "$TOOLS/../runner_spec.py" > "$OUT/spec.json"
 sudo apt-get update > /dev/null 2>&1
 apt_install xdotool imagemagick x11-apps python3-xlib dbus-x11
@@ -23,8 +29,10 @@ start_xvfb
 appdef "$APP" || exit 0
 rec launch "$LAUNCH"; rec driver "$DRIVER"; rec stream "${STREAM:-}"
 PH="$TOOLS/../phase.sh $OUT/phases.jsonl"
-setsid bash -c "$LAUNCH" > "$OUT/app.log" 2>&1 &
+export MEAS_PIN=harness   # phase.sh here wraps drivers, which stimulate the pinned application from the harness CPUs
+pin_load setsid bash -c "$LAUNCH" > "$OUT/app.log" 2>&1 &
 APP_PID=$!
+rec app.affinity "$(taskset -p "$APP_PID" 2>/dev/null | sed 's/.*: //' || echo unknown)"
 WID=$(wait_window "$CLASS" 120)
 if [ -z "$WID" ]; then screenshot no-window; rec finished_utc "$(date -u +%FT%TZ)"; finish_report; exit 0; fi
 if [ -n "$POSTLAUNCH" ]; then

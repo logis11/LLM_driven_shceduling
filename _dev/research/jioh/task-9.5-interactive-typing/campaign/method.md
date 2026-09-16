@@ -39,6 +39,7 @@ Between phases a 10 s gap; the phase boundaries are logged with `phase.sh`.
 ## 4. Instruments
 
 - `perf sched record -k CLOCK_MONOTONIC -a` as root over each whole phase (probe: `linux-tools-<kernel>` installs; `perf_event_paranoid` 4 blocks the runner user), read with `perf sched timehist` for per-schedule run time, wait time and scheduling delay of every thread, and `perf sched timehist -w` for the wakeup rows with the waker (Xvfb wakes the application when it delivers input). The two text outputs, gzipped, are the released raw record; the `perf.data` file (up to ~1 GB per 600 s phase on Kdenlive) is kept in dry runs only.
+- **Single core** (from the follow-up campaign on; 9.5 follow-ups spec decisions 2, 3 and 5): the application's process tree is launched pinned to one CPU (`pin.sh`, the runner's last vCPU); `run.sh` itself, Xvfb, perf, the replay driver and the snapshots run on the other vCPUs. The observation is the tree's own serialisation on one CPU with the display server idealised; the pin is recorded in `report.kv` (`pin.*`, `app.affinity`) and per phase in `phases.jsonl`. The D3 campaign (`interactive:3`, `playback:3`) ran unpinned on 4 vCPUs.
 - `/proc` snapshots (`snapshot.py`) at phase boundaries: thread population, CPU time, voluntary and involuntary switches.
 - `runner_spec.py` for the machine record; `apt-cache policy` for the application version.
 - Screenshots at phase boundaries, to show what the application displayed (first-run dialogs, focus).
@@ -46,6 +47,8 @@ Between phases a 10 s gap; the phase boundaries are logged with `phase.sh`.
 ## 5. Wake attribution (D9)
 
 Two rules are computed by `analyze.py` and the choice is a changelog decision on the dry-run data: (a) first-wake — the first application wake within W = 5 ms of a replayed event's send time (replay error p99 1.24 ms) and that schedule-in's run; the dry run attributed only 14–36 % of events this way for Writer, VS Code and Thunderbird, because busy applications wake every few milliseconds on their own; (b) window — all application run time in [s_i, s_{i+1}) minus the idle phase's CPU rate over that span, bounded below at zero, which charges each input with everything the application did until the next input, net of its timer load. A third signal, the waker of each wake (Xvfb = input delivery), is recorded for the analysis.
+
+**What one wake is** (2026-09-16; spec decision 4): a timehist row is one schedule-in and its run, a *segment*. A segment is a wake only when a wakeup event for that thread (the `-w` rows) lies between the thread's previous schedule-out and this schedule-in; a segment without one is a resume after preemption, whose run is added to the preceding wake's and whose preempted time is neither run nor gap. Wake rates and the gap and run distributions are over wakes; rule (b) sums segments and is unaffected. The check of this definition on the D3 data is `wake-check.md`.
 
 ## 6. Derived parameters per archetype
 
@@ -67,6 +70,8 @@ Five repeats per run in one batch (D10; as `meas-cli` and `meas-gui` did), matri
 Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no display refresh, so paint cadence is the toolkit's fallback timer; software rasterisation on CPU threads; mpv's null audio output simulates a perfect device against the system clock; no human; replayed timing from recordings made on Windows in 2012 (D6).
 
 ## 9. Amendments
+
+- 2026-09-16, follow-ups (spec `_dev/docs/spec/jioh/task-9.5-interactive-typing-follow-ups.md`): §4 single-core pin from the next campaign on; §5 the wake definition (wakeup-defined, resumes merged), checked on the D3 data (`wake-check.md`).
 
 - 2026-09-15, fold-in (D19): the archetypes are in the library; the campaign's numbers are in `results.md`; raw data released as `meas-ci-2026-09-14` (D20).
 - 2026-09-14, after dry run 1 (runs 34838057273, 34838057243): §3 content-area insets; §4 wakeup rows kept, `perf.data` dropped in full mode; §5 two attribution rules with the dry-run rates; Thunderbird's compose window opened by Escape and ctrl+n after the Account Hub.
