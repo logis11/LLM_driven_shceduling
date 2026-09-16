@@ -32,7 +32,9 @@ appdef "$APP" || exit 0
 rec launch "$LAUNCH"; rec driver "$DRIVER"; rec stream "${STREAM:-}"; rec op "${OP:-}"; rec rx "$RX"; rec pat "$PAT"
 PH="$TOOLS/../phase.sh $OUT/phases.jsonl"
 export MEAS_PIN=harness   # phase.sh here wraps drivers, which stimulate the pinned application from the harness CPUs
-pin_load setsid bash -c "$LAUNCH" > "$OUT/app.log" 2>&1 &
+# launched directly under taskset (not through the pin_load function: a function run in the background forks a
+# subshell, so $! would be the subshell, not the session leader the kill and the affinity record need)
+if [ "$MEAS_PIN_AVAILABLE" = 1 ]; then taskset -c "$MEAS_CPU" setsid bash -c "$LAUNCH" > "$OUT/app.log" 2>&1 & else setsid bash -c "$LAUNCH" > "$OUT/app.log" 2>&1 & fi
 APP_PID=$!
 rec app.affinity "$(taskset -p "$APP_PID" 2>/dev/null | sed 's/.*: //' || echo unknown)"
 WID=$(wait_window "$CLASS" 120)
@@ -51,7 +53,7 @@ snap "$PAT" "" launch
 phase() {
   local name="$1" secs="$2" driver="$3"
   snap "$PAT" "" "$name.before"
-  sudo perf sched record -k CLOCK_MONOTONIC -a -o "$OUT/perf.$name.data" -- sleep "$secs" > "$OUT/perf.$name.log" 2>&1 &
+  pin_harness sudo perf sched record -k CLOCK_MONOTONIC -a -o "$OUT/perf.$name.data" -- sleep "$secs" > "$OUT/perf.$name.log" 2>&1 &
   local perf_pid=$!
   sleep 1
   if [ -n "$driver" ]; then
