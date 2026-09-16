@@ -157,6 +157,6 @@ apt_install_full() { sudo apt-get install -y "$@" > "$OUT/apt.log" 2>&1; rec apt
 ver() { rec version "$("$@" 2>&1 | head -1 | tr -d '\n' | head -c 200)"; }
 op_driver() { # op_driver <window-id> <seconds> [extra ops_driver args] — the operation loop for the `op` phase
   local wid="$1" secs="$2"; shift 2
-  echo "python3 $TOOLS/ops_driver.py $APP $wid $secs $OUT/ops.jsonl $*"
+  echo "python3 $TOOLS/ops_driver.py $APP $wid $secs $OUT/ops.jsonl --pat '$PAT' $*"
 }
 appdef_cleanup() { [ -f "$OUT/httpd.pid" ] && kill "$(cat "$OUT/httpd.pid")" 2>/dev/null; return 0; }

@@ -172,6 +172,27 @@ def op_chrome(i, wid, args):
 OPS = {"gimp": ("unsharp-mask", op_gimp), "kdenlive": ("preview-render", op_kdenlive), "chrome": ("page-load", op_chrome)}
 
 
+def tree_procs(pattern):
+    """pid -> process type of every live process whose command line matches the appdef's PAT, read from /proc right
+    after an operation: the roles of processes that live only during the operation (a navigation's renderer, a
+    render helper), which the phase snapshots never see (dry run 35091798507: eight transient Chrome pids)."""
+    out = {}
+    if not pattern:
+        return out
+    for pid in os.listdir("/proc"):
+        if not pid.isdigit():
+            continue
+        try:
+            cmd = open(f"/proc/{pid}/cmdline", "rb").read().replace(b"\0", b" ").decode(errors="replace")
+        except OSError:
+            continue
+        if pattern not in cmd:
+            continue
+        m = [a for a in cmd.split() if a.startswith("--type=")]
+        out[int(pid)] = m[0][7:] if m else "main"
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("app"); ap.add_argument("wid"); ap.add_argument("seconds", type=float); ap.add_argument("out")
@@ -180,6 +201,7 @@ def main():
     ap.add_argument("--op-timeout", type=float, default=600.0)
     ap.add_argument("--url", default="http://127.0.0.1:8088/feed.html")
     ap.add_argument("--clip-x", type=int, default=300); ap.add_argument("--clip-y", type=int, default=640)
+    ap.add_argument("--pat", default="", help="the appdef's PAT: command-line pattern of the application's tree")
     args = ap.parse_args()
     name, fn = OPS[args.app]
     t_end = time.monotonic() + args.seconds
@@ -191,6 +213,10 @@ def main():
             except Exception as exc:  # a failed trigger is recorded, never fatal
                 t0, t1, rc, note = now_us(), now_us(), 9, f"{type(exc).__name__}: {exc}"[:160]
             rec = {"op": name, "i": i, "trigger_us": t0, "done_us": t1, "rc": rc, "note": note}
+            try:
+                rec["procs"] = tree_procs(args.pat)
+            except Exception:  # never touches the operation's own record
+                pass
             out.write(json.dumps(rec) + "\n"); out.flush()
             print(f"op {name} #{i}: rc={rc} {((t1 or 0) - (t0 or 0)) / 1000:.0f} ms {note}", file=sys.stderr, flush=True)
             i += 1

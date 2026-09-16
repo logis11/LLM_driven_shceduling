@@ -205,8 +205,16 @@ def operation_windows(rows, ops):
 
 
 def pid_roles(D, phase):
-    """pid -> role from the snapshots' command lines: main | renderer | gpu | utility | zygote | other."""
+    """pid -> role from the snapshots' command lines: main | renderer | gpu | utility | zygote | other; for the op
+    phase also from the per-operation process lists in ops.jsonl (transient processes the snapshots never see)."""
     roles = {}
+    if phase == "op" and os.path.exists(os.path.join(D, "ops.jsonl")):
+        for line in open(os.path.join(D, "ops.jsonl")):
+            if not line.strip():
+                continue
+            for pid, kind in (json.loads(line).get("procs") or {}).items():
+                roles.setdefault(int(pid), {"renderer": "renderer", "gpu-process": "gpu", "utility": "utility",
+                                            "zygote": "zygote", "broker": "zygote", "main": "main"}.get(kind, "other"))
     for snap in (f"snap.{phase}.before.json", f"snap.{phase}.after.json", "snap.launch.json"):
         p = os.path.join(D, snap)
         if not os.path.exists(p):
