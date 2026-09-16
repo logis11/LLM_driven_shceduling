@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the measured archetype entries (9.5 fold-in) from pool.py output.
 
-fold_in.py <results-dir> <out.yaml> [--tag interactive=meas-ci:interactive:N --tag playback=meas-ci:playback:M]
+fold_in.py <results-dir> <out.yaml> [--tag interactive=meas-ci:interactive:N --tag playback=meas-ci:playback:M --tag <app>=meas-ci:interactive:K]
 
 One entry per campaign run, per the 9.5 changelog: D2/D11 ids, D9 shape,
 D13 per-input run (window rule), D16 timer components with a pooled
@@ -92,7 +92,7 @@ def components_block(ph, tag, key, indent="      "):
 
 def entry(aid, spec, d):
     run, observed, kind, stream, stim_tag, approx = spec
-    tag = RUN_TAG[d["family"]]
+    tag = RUN_TAG.get(run) or RUN_TAG[d["family"]]  # --tag <app>=… overrides the family tag for one run (re-run batch)
     observed = observed.replace("{version}", (d.get("version") or "?").strip()[:60])
     out = [f"  {aid}:", "    category_source: meas", "    pattern:", "      program:"]
     if kind == "play":

@@ -22,7 +22,7 @@
 appdef() {
   local app="$1"
   export DEBIAN_FRONTEND=noninteractive
-  STREAM=""; AREA="0,0,0,0"; POSTLAUNCH=""; POSTCLASS=""; OP=""
+  STREAM=""; AREA="0,0,0,0"; POSTLAUNCH=""; POSTCLASS=""; OP=""; ALTPRELUDE=""
   case "$app" in
     code)
       wget -qO /tmp/code.deb "https://update.code.visualstudio.com/latest/linux-deb-x64/stable"; rec download.rc "$?"
@@ -37,8 +37,13 @@ appdef() {
       rec project.files "$(find /tmp/project -name '*.ts' -not -path '*/node_modules/*' | wc -l)"
       rec node.version "$(node --version 2>/dev/null)"
       LAUNCH="code --no-sandbox --disable-gpu --user-data-dir=/tmp/vscode-data --disable-workspace-trust --skip-welcome --skip-release-notes /tmp/project /tmp/project/source/index.ts"
-      CLASS="code"; PAT="vscode-data"; RX="code|Code"; DRIVER=stream; STREAM=word; AREA="0.10,0.08,0.05,0.03"
-      POSTLAUNCH="sleep 20; xdotool key ctrl+End" ;;
+      # the replayed pointer events must stay in the editor: the Explorer (27 % of the width) and the secondary side
+      # bar are hidden after launch (Ctrl+B, Ctrl+Alt+B) — with the 8 % left inset of run 35092593907 the SWELL-KW clicks
+      # opened files in the Explorer and the typing drifted into Markdown files; before the second stream the file is
+      # reopened so both streams start on source/index.ts
+      CLASS="code"; PAT="vscode-data"; RX="code|Code"; DRIVER=stream; STREAM=word; AREA="0.12,0.03,0.05,0.03"
+      POSTLAUNCH="sleep 20; xdotool key ctrl+b; sleep 1; xdotool key ctrl+alt+b; sleep 1; xdotool key ctrl+End"
+      ALTPRELUDE="code --user-data-dir=/tmp/vscode-data --reuse-window /tmp/project/source/index.ts; sleep 8; xdotool key ctrl+End" ;;
     soffice)
       apt_install libreoffice-writer libreoffice-gtk3; ver soffice --version
       # setup state (design): a large document — 100 pages of running text (≈ 50 000 words) with ten
