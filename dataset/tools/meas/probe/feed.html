@@ -61,6 +61,11 @@ body{font-family:sans-serif;max-width:900px;margin:0 auto;padding:16px}
     });
   }
   if (document.readyState === 'complete') done(); else window.addEventListener('load', done);
+  // the driver advances to the next load with the "n" key: the page navigates itself to ?i=<i+1>, so no later load
+  // goes through the omnibox (run 35092593907: a history suggestion won over the typed ?i=12 and the driver timed out)
+  window.addEventListener('keydown', function (ev) {
+    if (ev.key === 'n') { ev.preventDefault(); location.search = '?i=' + (parseInt(i, 10) + 1); }
+  });
 })();
 </script>
 </body></html>

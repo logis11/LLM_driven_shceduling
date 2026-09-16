@@ -152,14 +152,20 @@ def window_title(wid):
 
 
 def op_chrome(i, wid, args):
-    url = f"{args.url}?i={i}"
+    """First load through the omnibox (from the typing page to feed.html?i=0); every later load by pressing "n" on the
+    feed page, which navigates itself to ?i=<i+1> — the omnibox's history suggestions are never involved again
+    (run 35092593907: typing ?i=12 loaded the suggested ?i=1 and the driver waited out its timeout)."""
     xdo("windowactivate", "--sync", wid)
     time.sleep(0.3)
-    xdo("key", "--clearmodifiers", "ctrl+l")
-    time.sleep(0.2)
-    xdo("type", "--clearmodifiers", "--delay", "5", url)
-    t0 = now_us()
-    xdo("key", "--clearmodifiers", "Return")
+    if i == 0:
+        xdo("key", "--clearmodifiers", "ctrl+l")
+        time.sleep(0.2)
+        xdo("type", "--clearmodifiers", "--delay", "5", f"{args.url}?i=0")
+        t0 = now_us()
+        xdo("key", "--clearmodifiers", "Return")
+    else:
+        t0 = now_us()
+        xdo("key", "--clearmodifiers", "n")
     t = time.monotonic()
     while time.monotonic() - t < args.op_timeout:
         title = window_title(wid)
@@ -198,12 +204,15 @@ def main():
     ap.add_argument("app"); ap.add_argument("wid"); ap.add_argument("seconds", type=float); ap.add_argument("out")
     ap.add_argument("--count", type=int, default=0, help="stop after N operations (0: run for --seconds)")
     ap.add_argument("--pause", type=float, default=10.0, help="seconds between operations")
-    ap.add_argument("--op-timeout", type=float, default=600.0)
+    ap.add_argument("--op-timeout", type=float, default=None,
+                    help="seconds to wait for one operation's completion (default: 60 for chrome, 600 otherwise)")
     ap.add_argument("--url", default="http://127.0.0.1:8088/feed.html")
     ap.add_argument("--clip-x", type=int, default=300); ap.add_argument("--clip-y", type=int, default=640)
     ap.add_argument("--pat", default="", help="the appdef's PAT: command-line pattern of the application's tree")
     args = ap.parse_args()
     name, fn = OPS[args.app]
+    if args.op_timeout is None:
+        args.op_timeout = 60.0 if args.app == "chrome" else 600.0
     t_end = time.monotonic() + args.seconds
     i = 0
     with open(args.out, "a") as out:
