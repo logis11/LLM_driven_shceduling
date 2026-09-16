@@ -27,7 +27,8 @@ Every run has two phases, in this order, after a settle period of 30 s from the 
 1. **idle** — no input for 120 s. Gives the timer-driven wake cadence and per-tick run (D9). For the playback runs this is the whole measurement: playback proceeds with no input.
 2. **driven** — the stimulus stream replayed for its length (§3). Gives the per-input run (D9). Not run for the playback runs.
 
-3. **op** (2026-09-16; applications with an operation, §3) — the operation triggered repeatedly by `ops_driver.py` with 10 s pauses for 600 s; each trigger and completion is logged to `ops.jsonl` on the monotonic clock. Gives the operation's duration table and the components inside its window (spec decisions 8–9).
+3. **driven-alt** (2026-09-16; the four typing-driven runs, §3 "Stimulus sensitivity") — the driven phase again under the 136M Keystrokes stream.
+4. **op** (2026-09-16; applications with an operation, §3) — the operation triggered repeatedly by `ops_driver.py` with 10 s pauses for 600 s; each trigger and completion is logged to `ops.jsonl` on the monotonic clock. Gives the operation's duration table and the components inside its window (spec decisions 8–9).
 
 Between phases a 10 s gap; the phase boundaries are logged with `phase.sh`.
 
@@ -43,6 +44,8 @@ Between phases a 10 s gap; the phase boundaries are logged with `phase.sh`.
 - `gimp` **unsharp-mask**: `plug-in-unsharp-mask` on the open 4952 × 3288 image through GIMP's Script-Fu server (started with the GUI by `-b`), std-dev 4.0, amount 0.32, threshold 8 — PCMark 10's batch unsharp "radius 8, sigma 4, amount 32, threshold 3" (p. 74) mapped onto the PDB (std-dev ← sigma; amount ← 32 % on the percent-scaled slider; threshold ← 3 % of 255); undo disabled so memory does not grow across repeats. Completion: the server's reply.
 - `kdenlive` **preview-render**: Remove All Preview Zones, Add Preview Zone (the timeline zone is the whole clip; shortcuts seeded in `kdenliverc`), Start Preview Render (Shift+Return). Kdenlive renders the 25-frame chunks in an external `kdenlive_render preview-chunks` process, part of the tree. Completion: that process has appeared and exited.
 - `chrome` **page-load**: navigate to `feed.html?i=<n>` on a local server (harness CPUs): the script builds a 300-post feed with thirty 1600 × 1200 pictures and runs a 200 000-record sort-and-aggregate pass (PCMark 10's social-feed and shop pages, pp. 52–53; CpsMark+'s pages "contain text, pictures, JS scripts", §4.3.3; sizes design). Completion: the page sets its title after the first paint of the built feed.
+
+**Stimulus sensitivity — pre-registered before the campaign runs** (2026-09-16; spec decision 11). For the four typing-driven runs a `driven-alt` phase follows `driven` with the same length, replaying a stream cut from the 136M Keystrokes data (`dhakal-chi18`; transcription of memorised sentences) instead of SWELL-KW's free composition. Streams: `dataset/meas/streams/aalto-r{1..5}.jsonl`, built by `dataset/tools/meas/probe/aalto_streams.py` from participants with a full or laptop QWERTY keyboard, shuffled with seed 20260916 and taken in order until 600 s per repeat, recorded gaps kept within a participant (sentence pauses included), 2 000 ms per participant boundary, keys not exported (D4); selection and checksums in `aalto-windows.json`. Built streams: 3–4 participants and 1 892–2 375 keys per window; gap p50 157–183 ms, p90 376–595 ms, p99 2.2–2.9 s; share of gaps over 1 s 2.4–5.6 % (SWELL-KW Word c1: p50 156 ms, p90 702 ms, p99 4 477 ms; 15 %). **What is compared**: per application, the per-input run tables under rule (b) and the driven-phase wake rate and run distributions, SWELL-KW against 136M, pooled over repeats, in `results.md`. **What may change**: nothing in the archetypes — they carry SWELL-KW whatever the result (D6's grounds were the stimulus's realism, which the comparison does not test). The result lands as one sentence per typing archetype's scope stating how far `input_run` p50 moved under the transcription stream; a large difference is a stated limitation of D6, not a re-decision. No threshold is set because no decision hangs on one.
 
 ## 4. Instruments
 
@@ -79,6 +82,7 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-16, stimulus sensitivity (spec decision 11): §2 the `driven-alt` phase; §3 the 136M streams and the pre-registration.
 - 2026-09-16, appdefs (spec decisions 6–10): §1 setup states for `code` (project + language server) and `soffice` (large document), inputs for `gimp` and `kdenlive`; §2 the `op` phase; §3 the three operations with their triggers, completion signals and cited inputs (`search/S7-benchmark-inputs.md`). Pending the runner probe.
 
 - 2026-09-16, follow-ups (spec `_dev/docs/spec/jioh/task-9.5-interactive-typing-follow-ups.md`): §4 single-core pin from the next campaign on; §5 the wake definition (wakeup-defined, resumes merged), checked on the D3 data (`wake-check.md`).

@@ -13,9 +13,17 @@ Operations (the trigger is design; the cost and duration are the observation):
             PCMark 10's batch unsharp parameters mapped onto GIMP's PDB, see
             method §3); done when the server answers.
   kdenlive  timeline preview render of the whole clip: Remove All Preview
-            Zones, Add Preview Zone (custom shortcuts seeded in kdenliverc),
-            Start Preview Render (Shift+Return); done when the external
-            kdenlive_render process has appeared and exited.
+            Zones, then Start Preview Render, which adds the timeline zone
+            itself when no preview zone is defined (TimelineController::
+            startPreviewRender, 23.08) and renders it in an external
+            kdenlive_render process; done when that process has appeared and
+            exited. The actions are triggered over D-Bus — KXmlGuiWindow
+            exports the action collection at /kdenlive/MainWindow_1/actions/
+            <name> (kxmlguiwindow.cpp), so `trigger` on
+            clear_render_timeline_zone and prerender_timeline_zone needs no
+            focus and no shortcut; Shift+Return through xdotool is the
+            fallback when the bus is unavailable (probe 35087191213: seeded
+            shortcuts in kdenliverc did not fire).
   chrome    load the scripted feed page from the local server (a fresh query
             string per load); done when the page sets its title to
             "loaded …" after building the feed.
@@ -97,20 +105,58 @@ def wait_proc(comm, appear_s, gone_s):
     return t_seen, False
 
 
+_KDENLIVE_BUS = {}
+
+
+def kdenlive_bus():
+    """(bus name, main-window path) of the running Kdenlive on the session bus, or None."""
+    if "v" in _KDENLIVE_BUS:
+        return _KDENLIVE_BUS["v"]
+    found = None
+    try:
+        r = subprocess.run(["dbus-send", "--session", "--print-reply", "--dest=org.freedesktop.DBus", "/org/freedesktop/DBus",
+                            "org.freedesktop.DBus.ListNames"], capture_output=True, text=True, timeout=10)
+        names = [l.split('"')[1] for l in r.stdout.splitlines() if 'string "org.kde.kdenlive' in l]
+        for name in names:
+            r2 = subprocess.run(["dbus-send", "--session", "--print-reply", f"--dest={name}", "/kdenlive",
+                                 "org.freedesktop.DBus.Introspectable.Introspect"], capture_output=True, text=True, timeout=10)
+            for l in r2.stdout.splitlines():
+                if 'node name="MainWindow' in l:
+                    found = (name, "/kdenlive/" + l.split('"')[1]); break
+            if found:
+                break
+    except Exception:
+        found = None
+    _KDENLIVE_BUS["v"] = found
+    return found
+
+
+def kdenlive_action(bus, action):
+    name, path = bus
+    r = subprocess.run(["dbus-send", "--session", "--print-reply", f"--dest={name}", f"{path}/actions/{action}",
+                        "org.qtproject.Qt.QAction.trigger"], capture_output=True, text=True, timeout=10)
+    return r.returncode == 0
+
+
 def op_kdenlive(i, wid, args):
-    xdo("windowactivate", "--sync", wid)
-    time.sleep(0.5)
-    xdo("key", "--clearmodifiers", "ctrl+shift+F10")   # Remove All Preview Zones (seeded shortcut)
-    time.sleep(1.0)
-    xdo("key", "--clearmodifiers", "ctrl+shift+F9")    # Add Preview Zone (seeded shortcut) — the timeline zone is the whole clip
-    time.sleep(1.0)
-    t0 = now_us()
-    xdo("key", "--clearmodifiers", "shift+Return")     # Start Preview Render (Kdenlive default)
+    bus = kdenlive_bus()
+    if bus:
+        ok1 = kdenlive_action(bus, "clear_render_timeline_zone")   # Remove All Preview Zones (drops rendered chunks)
+        time.sleep(1.0)
+        t0 = now_us()
+        ok2 = kdenlive_action(bus, "prerender_timeline_zone")      # Start Preview Render (adds the timeline zone when none is defined)
+        how = f"dbus {bus[1]} clear={int(ok1)} start={int(ok2)}"
+    else:
+        xdo("windowactivate", "--sync", wid)
+        time.sleep(0.5)
+        t0 = now_us()
+        xdo("key", "--clearmodifiers", "shift+Return")               # fallback: Start Preview Render's default shortcut
+        how = "keys (no session bus)"
     seen, gone = wait_proc("kdenlive_render", appear_s=30, gone_s=args.op_timeout)
     t1 = now_us()
     if seen is None:
-        return t0, t1, 2, "kdenlive_render never appeared"
-    return t0, t1, (0 if gone else 4), f"renderer seen at +{(seen - t0) / 1000:.0f} ms" + ("" if gone else "; timeout")
+        return t0, t1, 2, f"kdenlive_render never appeared; {how}"
+    return t0, t1, (0 if gone else 4), f"renderer seen at +{(seen - t0) / 1000:.0f} ms; {how}" + ("" if gone else "; timeout")
 
 
 # ---- Chrome

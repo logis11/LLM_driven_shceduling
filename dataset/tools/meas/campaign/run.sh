@@ -83,7 +83,15 @@ case "$DRIVER" in
     SFILE="$STREAMS/$STREAM-r$REPEAT.jsonl"; rec stream_file "$(basename "$SFILE")"
     DRV="python3 $TOOLS/replay_stream.py $SFILE $WID $OUT/replay.jsonl --seconds $DRIVEN --area $AREA"
     $PH driven -- bash -c "true"; phase driven "$((DRIVEN + 5))" "$DRV"
-    rec replay.sent "$(wc -l < "$OUT/replay.jsonl" 2>/dev/null || echo 0)" ;;
+    rec replay.sent "$(wc -l < "$OUT/replay.jsonl" 2>/dev/null || echo 0)"
+    # driven-alt (spec decision 11): the same phase under the 136M Keystrokes stream, for the stimulus-sensitivity check
+    AFILE="$STREAMS/aalto-r$REPEAT.jsonl"
+    if [ -f "$AFILE" ]; then
+      sleep 10; rec stream_alt_file "$(basename "$AFILE")"
+      DRVA="python3 $TOOLS/replay_stream.py $AFILE $WID $OUT/replay-alt.jsonl --seconds $DRIVEN --area $AREA"
+      $PH driven-alt -- bash -c "true"; phase driven-alt "$((DRIVEN + 5))" "$DRVA"
+      rec replay_alt.sent "$(wc -l < "$OUT/replay-alt.jsonl" 2>/dev/null || echo 0)"
+    fi ;;
   pointer)
     $PH idle -- bash -c "true"; phase idle "$IDLE" ""
     sleep 10

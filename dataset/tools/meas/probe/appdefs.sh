@@ -56,7 +56,8 @@ for page in range(100):
         print(f'<p><img src="pic-{page // 10}.png" width="480" height="360"></p>')
 print("</body></html>")
 PY
-      (cd /tmp/doc && soffice --headless --convert-to odt:writer8 large.html > /tmp/doc/convert.log 2>&1); rec doc.convert.rc "$?"
+      # --infilter forces the Writer module: without it LibreOffice imports HTML into Writer/Web and the result opens as a web document (probe 35087191213)
+      (cd /tmp/doc && soffice --headless --infilter="HTML (StarWriter)" --convert-to odt:writer8 large.html > /tmp/doc/convert.log 2>&1); rec doc.convert.rc "$?"
       rec doc.bytes "$(stat -c %s /tmp/doc/large.odt 2>/dev/null || echo 0)"
       LAUNCH="soffice --norestore --nologo --nofirststartwizard /tmp/doc/large.odt"
       CLASS="libreoffice|soffice"; PAT="soffice"; RX="soffice"; DRIVER=stream; STREAM=word; AREA="0.30,0.15,0.08,0.20"
@@ -105,9 +106,11 @@ PREFS
       ffmpeg -loglevel error -y -f lavfi -i testsrc=size=1920x1080:rate=30 -t 20 -an -c:v libx264 -preset veryfast -pix_fmt yuv420p /tmp/clip.mp4; rec ffmpeg.rc "$?"
       python3 "$TOOLS/kdenlive_project.py" /tmp/clip.mp4 600 30 /tmp/project.kdenlive; rec project.rc "$?"
       rec melt.unsharp "$(melt -query filter=avfilter.unsharp 2>/dev/null | grep -c identifier)"
-      # shortcuts for the zone actions (they ship without defaults) and no auto-preview: KXMLGUI reads [Shortcuts]
-      mkdir -p "$HOME/.config"
-      printf '[Shortcuts]\nset_render_timeline_zone=Ctrl+Shift+F9\nclear_render_timeline_zone=Ctrl+Shift+F10\n\n[timeline]\nautopreview=false\n' > "$HOME/.config/kdenliverc"
+      # a session bus, so ops_driver.py can trigger the preview actions over D-Bus (KXmlGuiWindow exports them);
+      # the daemon is harness (started here, on the harness CPUs) and dies in appdef_cleanup
+      eval "$(dbus-launch --sh-syntax)"; export DBUS_SESSION_BUS_ADDRESS; echo "$DBUS_SESSION_BUS_PID" > "$OUT/dbus.pid"
+      rec dbus.address "$DBUS_SESSION_BUS_ADDRESS"
+      mkdir -p "$HOME/.config"; printf '[timeline]\nautopreview=false\n' > "$HOME/.config/kdenliverc"
       LAUNCH="kdenlive /tmp/project.kdenlive"
       CLASS="kdenlive"; PAT="kdenlive"; RX="kdenlive|melt"; DRIVER=pointer; OP=preview-render ;;
     chrome)
@@ -145,4 +148,8 @@ op_driver() { # op_driver <window-id> <seconds> [extra ops_driver args] — the 
   local wid="$1" secs="$2"; shift 2
   echo "python3 $TOOLS/ops_driver.py $APP $wid $secs $OUT/ops.jsonl $*"
 }
-appdef_cleanup() { [ -f "$OUT/httpd.pid" ] && kill "$(cat "$OUT/httpd.pid")" 2>/dev/null; return 0; }
+appdef_cleanup() {
+  [ -f "$OUT/httpd.pid" ] && kill "$(cat "$OUT/httpd.pid")" 2>/dev/null
+  [ -f "$OUT/dbus.pid" ] && kill "$(cat "$OUT/dbus.pid")" 2>/dev/null
+  return 0
+}
