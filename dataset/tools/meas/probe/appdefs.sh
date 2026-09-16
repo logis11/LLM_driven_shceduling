@@ -106,10 +106,7 @@ PREFS
       ffmpeg -loglevel error -y -f lavfi -i testsrc=size=1920x1080:rate=30 -t 20 -an -c:v libx264 -preset veryfast -pix_fmt yuv420p /tmp/clip.mp4; rec ffmpeg.rc "$?"
       python3 "$TOOLS/kdenlive_project.py" /tmp/clip.mp4 600 30 /tmp/project.kdenlive; rec project.rc "$?"
       rec melt.unsharp "$(melt -query filter=avfilter.unsharp 2>/dev/null | grep -c identifier)"
-      # a session bus, so ops_driver.py can trigger the preview actions over D-Bus (KXmlGuiWindow exports them);
-      # the daemon is harness (started here, on the harness CPUs) and dies in appdef_cleanup
-      eval "$(dbus-launch --sh-syntax)"; export DBUS_SESSION_BUS_ADDRESS; echo "$DBUS_SESSION_BUS_PID" > "$OUT/dbus.pid"
-      rec dbus.address "$DBUS_SESSION_BUS_ADDRESS"
+      # the operation uses Kdenlive's default shortcuts only (ops_driver.py); no auto-preview
       mkdir -p "$HOME/.config"; printf '[timeline]\nautopreview=false\n' > "$HOME/.config/kdenliverc"
       LAUNCH="kdenlive /tmp/project.kdenlive"
       CLASS="kdenlive"; PAT="kdenlive"; RX="kdenlive|melt"; DRIVER=pointer; OP=preview-render ;;
@@ -148,8 +145,4 @@ op_driver() { # op_driver <window-id> <seconds> [extra ops_driver args] — the 
   local wid="$1" secs="$2"; shift 2
   echo "python3 $TOOLS/ops_driver.py $APP $wid $secs $OUT/ops.jsonl $*"
 }
-appdef_cleanup() {
-  [ -f "$OUT/httpd.pid" ] && kill "$(cat "$OUT/httpd.pid")" 2>/dev/null
-  [ -f "$OUT/dbus.pid" ] && kill "$(cat "$OUT/dbus.pid")" 2>/dev/null
-  return 0
-}
+appdef_cleanup() { [ -f "$OUT/httpd.pid" ] && kill "$(cat "$OUT/httpd.pid")" 2>/dev/null; return 0; }
