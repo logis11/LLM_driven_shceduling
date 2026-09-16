@@ -29,7 +29,7 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 
 ### `cpsmark-tbench23`
 - cite: Zhang, Y., & Wu, T. (2023). CpsMark+: A scenario-oriented benchmark system for office desktop performance evaluation in centralized procurement via simulating user experience. *BenchCouncil Transactions on Benchmarks, Standards and Evaluations*, 100084. DOI 10.1016/j.tbench.2023.100084.
-- role: Role A academic anchor — scenario taxonomy, named app lists (Table 2), CA workflow ordering (Role C), resource-mix sensitivity (Table 4, Role B). Open-source artifact: github.com/wanghong3116/CpsMarkPLUS (pin commit) + NMDC resource package.
+- role: Role A academic anchor — scenario taxonomy, named app lists (Table 2), CA workflow ordering (Role C), resource-mix sensitivity (Table 4, Role B). Open-source artifact: github.com/wanghong3116/CpsMarkPLUS (pin commit) + NMDC resource package. Also, with `pcmark10`, the ground for the 9.5 campaign's Chrome page-load input: §4.3.3, pages "accessed through locally configured network services" that "contain text, pictures, JS (JavaScript) scripts" (follow-ups spec decision 10).
 - status: verified (source-vetting full-text review, 2026-08-25)
 
 ### `zhang-chb15`
@@ -191,9 +191,9 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - status: verified (2026-09-12; catalogue cloned and counted at the named commit by the method stated above). Re-count and re-pin the commit at submission — the catalogue changes weekly, and any recount must carry its own commit and date.
 
 ### `pcmark10`
-- cite: UL Solutions. PCMark 10 Technical Guide. [Edition/URL to pin.]
-- role: Role A — scenario groups (Essentials/Productivity/DCC/Gaming) and their application lists. Taxonomy existence only.
-- status: to-pin (submission-time, per standing task)
+- cite: UL. *PCMark 10 Technical Guide*, updated February 11, 2021 (application 2.1.2508), 141 pp. https://s3.amazonaws.com/download-aws.futuremark.com/pcmark10-technical-guide.pdf (accessed 2026-09-13; SHA-256 d7603a6cb96c78bd22b2721418361ecb92168d785846f241423bd943bb956067). The PDF has since been replaced by UL's online user guide (support.benchmarks.ul.com article 44002150078, application 2.3.2912), whose test-group structure is the same.
+- role: Role A — scenario groups (Essentials/Productivity/DCC/Gaming) and their application lists; taxonomy existence. Also the ground for the *choice of inputs* of the 9.5 campaign's setup states and operations (follow-ups spec decision 10): the Photo Editing interactive image 4952 × 3288 and the unsharp-mask filter with its batch parameters (pp. 71–74); the Video Editing 1080p H.264 clip and its ffmpeg unsharp sharpening (p. 76); the Web Browsing page archetypes served by a local server (pp. 52–53). Those inputs are the campaign method's; the archetypes cite the run.
+- status: verified (2026-09-13 read R05 in `_dev/research/jioh/2026-09-13-verification/`; inputs read 2026-09-16, `_dev/research/jioh/task-9.5-interactive-typing/search/S7-benchmark-inputs.md`)
 
 ### `sysmark30`
 - cite: BAPCo. *SYSmark 30 User Guide*. bapco.com/wp-content/uploads/2025/04/bapco-sysmark30-user-guide-v1.2.pdf, 40 pp. (accessed 2026-09-12). Cover reads "Revision: 1.1"; the revision history runs through 1.2 — cite the file's version, and note the cover discrepancy if a reviewer might check.

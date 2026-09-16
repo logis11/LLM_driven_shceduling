@@ -8,12 +8,12 @@ One run per archetype; each run is one observation (D3, D10), tagged `meas-ci:<w
 
 | Run | Archetype for | Program | Stimulus (D4, D5) | Workflow |
 |---|---|---|---|---|
-| `code` | `code` | Visual Studio Code, a text file open | SWELL-KW Word stream, keys and pointer (nearest; no code-editing dataset exists) | `meas-interactive` |
-| `soffice` | `soffice.bin` | LibreOffice Writer, a new document | SWELL-KW Word stream, keys and pointer | `meas-interactive` |
+| `code` | `code` | Visual Studio Code with a TypeScript project open (sindresorhus/got at 64f21e2a, dependencies installed; design) and `source/index.ts` in the editor, so the built-in TypeScript language server runs (setup state, spec decision 6; the D3 campaign opened a text file) | SWELL-KW Word stream, keys and pointer (nearest; no code-editing dataset exists) | `meas-interactive` |
+| `soffice` | `soffice.bin` | LibreOffice Writer with a large document open — 100 sections of five 100-word paragraphs, about 100 pages, ten pictures (design; no source states a length, S7); the stream types at its end (setup state; the D3 campaign used a new document) | SWELL-KW Word stream, keys and pointer | `meas-interactive` |
 | `thunderbird` | `thunderbird` | Thunderbird with a pre-seeded local account, a compose window open | SWELL-KW Outlook stream, keys and pointer (c2 and c3) | `meas-interactive` |
-| `chrome` | `chrome` (browser task) | Google Chrome, a local page with a text area and scrollable content | SWELL-KW Internet Explorer stream, keys and pointer | `meas-interactive` |
-| `gimp` | `gimp` | GIMP, an 800×600 image open | scripted canvas edit (design) | `meas-interactive` |
-| `kdenlive` | `kdenlive` | Kdenlive, a project with one clip | scripted timeline scrub (design) | `meas-interactive` |
+| `chrome` | `chrome` (browser task) | Google Chrome, a local page with a text area and scrollable content | SWELL-KW Internet Explorer stream, keys and pointer; operation `page-load` (§3) | `meas-interactive` |
+| `gimp` | `gimp` | GIMP, a 4952 × 3288 image open (PCMark 10 Photo Editing's interactive image size, Technical Guide p. 71; synthetic content, design; the D3 campaign used 800×600) | scripted canvas edit (design); operation `unsharp-mask` (§3) | `meas-interactive` |
+| `kdenlive` | `kdenlive` | Kdenlive, a project with one 1920 × 1080 H.264 clip (PCMark 10 Video Editing, p. 76; 20 s, synthetic, design) on the timeline with an unsharp effect | scripted timeline scrub (design); operation `preview-render` (§3) | `meas-interactive` |
 | `mpv-video` | video playback (`mpv`, `zoom` video, `gamescope` by approximation) | mpv `--vo=x11 --ao=null`, a 1280×720 30 fps H.264 file with AAC audio | none | `meas-playback` |
 | `mpv-audio` | audio playback (`spotify`, `zoom` voice by approximation) | mpv `--no-video --ao=null`, the same file | none | `meas-playback` |
 | `webrtc` | conferencing (`zoom` voice and video; replaces D11's approximation for `zoom`) | Google Chrome, a loopback WebRTC call in one page with a synthetic camera and microphone (`--use-fake-device-for-media-stream`) | none | `meas-playback` |
@@ -27,6 +27,8 @@ Every run has two phases, in this order, after a settle period of 30 s from the 
 1. **idle** — no input for 120 s. Gives the timer-driven wake cadence and per-tick run (D9). For the playback runs this is the whole measurement: playback proceeds with no input.
 2. **driven** — the stimulus stream replayed for its length (§3). Gives the per-input run (D9). Not run for the playback runs.
 
+3. **op** (2026-09-16; applications with an operation, §3) — the operation triggered repeatedly by `ops_driver.py` with 10 s pauses for 600 s; each trigger and completion is logged to `ops.jsonl` on the monotonic clock. Gives the operation's duration table and the components inside its window (spec decisions 8–9).
+
 Between phases a 10 s gap; the phase boundaries are logged with `phase.sh`.
 
 ## 3. Stimulus
@@ -35,6 +37,12 @@ Between phases a 10 s gap; the phase boundaries are logged with `phase.sh`.
 - **Pointer streams.** The same files' `Mouse` events (`clicked`, `dragged`, `wheel turned`) with their timing per application. Recorded positions (a 1600×1200 screen) are scaled into the application's content area — the window minus per-application insets for tab strips, toolbars and side bars (`appdefs.sh` AREA; design, so that replayed clicks land in the document, page or editor as the recorded ones did in theirs). Motion between recorded events is design: one straight move to the next event's position, issued at the event's time; no intermediate motion cadence is added (the record has no motion; `replay_stream.py --motion-ms` exists but is off).
 - **Scripted interactions** for `gimp` and `kdenlive`: a fixed script of drags, clicks and wheel turns at fixed times, committed with the workflow, labelled design.
 - **Replay driver.** Per-event xdotool through `replay.py`, timing on the monotonic clock. Fidelity (probe `timing` job, 120 events): absolute gap error p50 0.30 ms, p90 0.75 ms, p99 1.24 ms, max 1.41 ms.
+
+**Operations** (2026-09-16; spec decisions 7–10; inputs per `search/S7-benchmark-inputs.md`). Trigger and input are design, cited where a benchmark states the input; cost and duration are the observation.
+
+- `gimp` **unsharp-mask**: `plug-in-unsharp-mask` on the open 4952 × 3288 image through GIMP's Script-Fu server (started with the GUI by `-b`), std-dev 4.0, amount 0.32, threshold 8 — PCMark 10's batch unsharp "radius 8, sigma 4, amount 32, threshold 3" (p. 74) mapped onto the PDB (std-dev ← sigma; amount ← 32 % on the percent-scaled slider; threshold ← 3 % of 255); undo disabled so memory does not grow across repeats. Completion: the server's reply.
+- `kdenlive` **preview-render**: Remove All Preview Zones, Add Preview Zone (the timeline zone is the whole clip; shortcuts seeded in `kdenliverc`), Start Preview Render (Shift+Return). Kdenlive renders the 25-frame chunks in an external `kdenlive_render preview-chunks` process, part of the tree. Completion: that process has appeared and exited.
+- `chrome` **page-load**: navigate to `feed.html?i=<n>` on a local server (harness CPUs): the script builds a 300-post feed with thirty 1600 × 1200 pictures and runs a 200 000-record sort-and-aggregate pass (PCMark 10's social-feed and shop pages, pp. 52–53; CpsMark+'s pages "contain text, pictures, JS scripts", §4.3.3; sizes design). Completion: the page sets its title after the first paint of the built feed.
 
 ## 4. Instruments
 
@@ -70,6 +78,8 @@ Five repeats per run in one batch (D10; as `meas-cli` and `meas-gui` did), matri
 Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no display refresh, so paint cadence is the toolkit's fallback timer; software rasterisation on CPU threads; mpv's null audio output simulates a perfect device against the system clock; no human; replayed timing from recordings made on Windows in 2012 (D6).
 
 ## 9. Amendments
+
+- 2026-09-16, appdefs (spec decisions 6–10): §1 setup states for `code` (project + language server) and `soffice` (large document), inputs for `gimp` and `kdenlive`; §2 the `op` phase; §3 the three operations with their triggers, completion signals and cited inputs (`search/S7-benchmark-inputs.md`). Pending the runner probe.
 
 - 2026-09-16, follow-ups (spec `_dev/docs/spec/jioh/task-9.5-interactive-typing-follow-ups.md`): §4 single-core pin from the next campaign on; §5 the wake definition (wakeup-defined, resumes merged), checked on the D3 data (`wake-check.md`).
 

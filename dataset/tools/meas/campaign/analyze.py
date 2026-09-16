@@ -45,7 +45,8 @@ Row = namedtuple("Row", "t_in t_wake t_end run comm tid pid")  # compact: one tu
 
 # comms of the measurement harness itself: the snapshot roots the tree at run.sh, whose children include these
 HARNESS_COMMS = {"bash", "sh", "sleep", "setsid", "Xvfb", "perf", "python3", "xdotool", "gzip", "sudo", "tee", "sed",
-                 "grep", "import", "convert", "date", "xwd", "wc", "cat", "kill", "sort", "awk", "run.sh", "phase.sh"}
+                 "grep", "import", "convert", "date", "xwd", "wc", "cat", "kill", "sort", "awk", "run.sh", "phase.sh", "curl", "pgrep",
+                 "taskset"}
 
 ROW = re.compile(r"^\s*(\d+\.\d+)\s+\[(\d+)\]\s+(.*?)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s*$")
 TASK = re.compile(r"^(.*)\[(\d+)(?:/(\d+))?\]$")

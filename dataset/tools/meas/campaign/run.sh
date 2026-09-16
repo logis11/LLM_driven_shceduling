@@ -2,8 +2,10 @@
 # run.sh <app> <repeat> <dry|full> — one campaign run (9.5 method §1–§4).
 # Installs the application (appdefs.sh), starts Xvfb, launches, waits for the
 # window, then runs the phases with `perf sched record -a` over each whole
-# phase: interactive apps — settle, idle, driven (stream or scripted pointer);
-# playback and webrtc — settle, play. Everything lands in $MEAS_OUT.
+# phase: interactive apps — settle, idle, driven (stream or scripted pointer),
+# and for an application with a heavy operation (appdefs OP) an `op` phase in
+# which ops_driver.py triggers it repeatedly and logs ops.jsonl (spec decisions
+# 7–10); playback and webrtc — settle, play. Everything lands in $MEAS_OUT.
 # Single-core (pin.sh; 9.5 follow-ups spec decisions 2 and 5): this script and
 # everything it starts — Xvfb, perf, the replay driver, snapshots — run on the
 # harness CPUs; only the application tree is launched on the measured CPU.
@@ -16,9 +18,9 @@ pin_self_harness
 source "$TOOLS/appdefs.sh"
 APP="$1"; REPEAT="$2"; MODE="${3:-full}"
 STREAMS="$(cd "$TOOLS/../../.." && pwd)/meas/streams"
-if [ "$MODE" = dry ]; then SETTLE=10; IDLE=30; DRIVEN=60; PLAY=60; else SETTLE=30; IDLE=120; DRIVEN=600; PLAY=300; fi
+if [ "$MODE" = dry ]; then SETTLE=10; IDLE=30; DRIVEN=60; PLAY=60; OPS=90; else SETTLE=30; IDLE=120; DRIVEN=600; PLAY=300; OPS=600; fi
 rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE"; rec started_utc "$(date -u +%FT%TZ)"
-rec settle_s "$SETTLE"; rec idle_s "$IDLE"; rec driven_s "$DRIVEN"; rec play_s "$PLAY"
+rec settle_s "$SETTLE"; rec idle_s "$IDLE"; rec driven_s "$DRIVEN"; rec play_s "$PLAY"; rec op_s "$OPS"
 pin_record | tee -a "$KV" | sed 's/^/  /' >&2
 python3 "$TOOLS/../runner_spec.py" > "$OUT/spec.json"
 sudo apt-get update > /dev/null 2>&1
@@ -27,7 +29,7 @@ sudo apt-get install -y --no-install-recommends linux-tools-common "linux-tools-
 rec perf.version "$(perf --version 2>&1 | head -1)"
 start_xvfb
 appdef "$APP" || exit 0
-rec launch "$LAUNCH"; rec driver "$DRIVER"; rec stream "${STREAM:-}"
+rec launch "$LAUNCH"; rec driver "$DRIVER"; rec stream "${STREAM:-}"; rec op "${OP:-}"
 PH="$TOOLS/../phase.sh $OUT/phases.jsonl"
 export MEAS_PIN=harness   # phase.sh here wraps drivers, which stimulate the pinned application from the harness CPUs
 pin_load setsid bash -c "$LAUNCH" > "$OUT/app.log" 2>&1 &
@@ -90,7 +92,14 @@ case "$DRIVER" in
   none)
     phase play "$PLAY" "" ;;
 esac
+if [ -n "$OP" ]; then
+  # op: the operation triggered repeatedly with 10 s pauses; window and duration per operation in ops.jsonl
+  sleep 10
+  $PH op -- bash -c "true"; phase op "$((OPS + 5))" "$(op_driver "$WID" "$OPS")"
+  rec ops.count "$(wc -l < "$OUT/ops.jsonl" 2>/dev/null || echo 0)"
+  rec ops.rc0 "$(grep -c '"rc": 0' "$OUT/ops.jsonl" 2>/dev/null || echo 0)"
+fi
 rec window.name_after "$(xdotool getwindowname "$WID" 2>/dev/null | tr -d '\n' | head -c 120)"
-kill -- "-$APP_PID" 2>/dev/null; sleep 2; kill -9 -- "-$APP_PID" 2>/dev/null; kill "$(cat "$OUT/xvfb.pid")" 2>/dev/null
+kill -- "-$APP_PID" 2>/dev/null; sleep 2; kill -9 -- "-$APP_PID" 2>/dev/null; appdef_cleanup; kill "$(cat "$OUT/xvfb.pid")" 2>/dev/null
 rec finished_utc "$(date -u +%FT%TZ)"
 finish_report

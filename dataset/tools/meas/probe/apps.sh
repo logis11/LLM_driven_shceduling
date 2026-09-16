@@ -31,10 +31,20 @@ if [ -n "$WID" ]; then
     none) probe_phase driven "$PAT" "$RX" 20 "" ;;
   esac
   screenshot after-driven
+  if [ -n "$OP" ]; then
+    # operation probe: two operations, perf inside; ops.jsonl carries rc and duration per operation
+    sleep 5
+    probe_phase op "$PAT" "$RX" 120 "$(op_driver "$WID" 110 --count 2 --pause 5)"
+    screenshot after-op
+    rec ops.count "$(wc -l < "$OUT/ops.jsonl" 2>/dev/null || echo 0)"
+    rec ops.rc "$(python3 -c "import json,sys; print(' '.join(str(json.loads(l)['rc']) for l in open('$OUT/ops.jsonl')))" 2>/dev/null)"
+    rec ops.ms "$(python3 -c "import json,sys; print(' '.join(str(round((json.loads(l)['done_us']-json.loads(l)['trigger_us'])/1000)) for l in open('$OUT/ops.jsonl')))" 2>/dev/null)"
+    rec ops.notes "$(python3 -c "import json,sys; print(' | '.join(json.loads(l)['note'] for l in open('$OUT/ops.jsonl')))" 2>/dev/null | head -c 300)"
+  fi
   rec window.name_after "$(xdotool getwindowname "$WID" 2>/dev/null | tr -d '\n' | head -c 120)"
   [ -f "$OUT/replay.jsonl" ] && rec replay.sent "$(wc -l < "$OUT/replay.jsonl")"
 fi
 # never pkill -f: the script's own argv carries the app name (Phase 2 note)
-kill -- "-$APP_PID" 2>/dev/null; sleep 2; kill -9 -- "-$APP_PID" 2>/dev/null; kill "$(cat "$OUT/xvfb.pid")" 2>/dev/null
+kill -- "-$APP_PID" 2>/dev/null; sleep 2; kill -9 -- "-$APP_PID" 2>/dev/null; appdef_cleanup; kill "$(cat "$OUT/xvfb.pid")" 2>/dev/null
 rec finished_utc "$(date -u +%FT%TZ)"
 finish_report
