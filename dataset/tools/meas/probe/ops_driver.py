@@ -30,6 +30,7 @@ Operations (the trigger is design; the cost and duration are the observation):
 
 import argparse
 import json
+import os
 import socket
 import subprocess
 import sys
@@ -104,28 +105,42 @@ def wait_proc(comm, appear_s, gone_s):
     return t_seen, False
 
 
+def shot(args, label):
+    out_dir = os.path.dirname(os.path.abspath(args.out))
+    subprocess.run(["import", "-window", "root", os.path.join(out_dir, f"op-{label}.png")], capture_output=True)
+
+
 def op_kdenlive(i, wid, args):
     """First render: Start Preview Render (Shift+Return) adds the timeline zone itself when no preview zone is defined
-    (TimelineController::startPreviewRender, 23.08). Later renders: Select All (Ctrl+A), Delete, Undo (Ctrl+Z) — a change
-    to the video under the zone marks its chunks dirty (manual, "Timeline Preview Rendering") — then Shift+Return again.
-    All four are Kdenlive's default shortcuts; the render runs in an external kdenlive_render process."""
+    (TimelineController::startPreviewRender, 23.08). Later renders, two attempts with a screenshot after each step:
+    (A) Remove All Preview Zones through the shortcut seeded in the per-user ui file (Ctrl+Shift+F10), then Shift+Return;
+    (B) click the clip on V1, Delete, Undo (a change under the zone dirties its chunks; manual "Timeline Preview
+    Rendering"), then Shift+Return. The render runs in an external kdenlive_render process."""
     xdo("windowactivate", "--sync", wid)
     time.sleep(0.5)
-    how = "shift+Return"
-    if i > 0:
-        # select the clip by clicking it on track V1 (window-relative; the 1280×800 layout puts the first clip at
-        # x 170–455, y 595–690, probe 35088785783's screenshot), so Delete and Undo act on the timeline, not the bin
-        xdo("mousemove", "--window", wid, str(args.clip_x), str(args.clip_y)); time.sleep(0.2)
-        xdo("click", "1"); time.sleep(0.5)
-        for key in ("Delete", "ctrl+z"):
-            xdo("key", "--clearmodifiers", key)
-            time.sleep(1.0)
-        how = f"click clip ({args.clip_x},{args.clip_y}), Delete, ctrl+z, shift+Return"
-    t0 = now_us()
-    xdo("key", "--clearmodifiers", "shift+Return")
-    seen, gone = wait_proc("kdenlive_render", appear_s=30, gone_s=args.op_timeout)
+    if i == 0:
+        t0 = now_us()
+        xdo("key", "--clearmodifiers", "shift+Return")
+        seen, gone = wait_proc("kdenlive_render", appear_s=30, gone_s=args.op_timeout)
+        how = "shift+Return"
+    else:
+        xdo("key", "--clearmodifiers", "ctrl+shift+F10"); time.sleep(1.0); shot(args, f"{i}-a-clear")
+        t0 = now_us()
+        xdo("key", "--clearmodifiers", "shift+Return")
+        seen, gone = wait_proc("kdenlive_render", appear_s=15, gone_s=args.op_timeout)
+        how = "A: ctrl+shift+F10, shift+Return"
+        if seen is None:
+            xdo("mousemove", str(args.clip_x), str(args.clip_y)); time.sleep(0.2)
+            xdo("click", "1"); time.sleep(0.6); shot(args, f"{i}-b-click")
+            xdo("key", "--clearmodifiers", "Delete"); time.sleep(1.0); shot(args, f"{i}-b-delete")
+            xdo("key", "--clearmodifiers", "ctrl+z"); time.sleep(1.0); shot(args, f"{i}-b-undo")
+            t0 = now_us()
+            xdo("key", "--clearmodifiers", "shift+Return")
+            seen, gone = wait_proc("kdenlive_render", appear_s=15, gone_s=args.op_timeout)
+            how = f"A failed; B: click ({args.clip_x},{args.clip_y}), Delete, ctrl+z, shift+Return"
     t1 = now_us()
     if seen is None:
+        shot(args, f"{i}-end")
         return t0, t1, 2, f"kdenlive_render never appeared; {how}"
     return t0, t1, (0 if gone else 4), f"renderer seen at +{(seen - t0) / 1000:.0f} ms; {how}" + ("" if gone else "; timeout")
 
