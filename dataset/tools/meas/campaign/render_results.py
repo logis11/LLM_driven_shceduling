@@ -37,6 +37,11 @@ def main():
         lines.append("")
         for phase, ph in d["phases"].items():
             lines.append(f"### {phase}: CPU share {spread(ph['cpu_share'], 4)}, wakes/s {spread(ph['wakes_per_s'], 1)}")
+            if "operation" in ph:
+                o = ph["operation"]
+                lines.append(f"- operation `{o['name']}`: {sum(o['n_ok'])} succeeded, {sum(o['n_failed'])} failed over the repeats; "
+                             f"duration p50 {f(o['duration_ms']['p50'], 0)} ms, p90 {f(o['duration_ms']['p90'], 0)}, p99 {f(o['duration_ms']['p99'], 0)} "
+                             f"(per-repeat p50 {o['duration_ms']['repeat_p50']}); the thread table below is inside the operation windows only")
             roles = ph["roles"][str(d["repeats"][0])] if str(d["repeats"][0]) in ph["roles"] else ph["roles"].get(d["repeats"][0], {})
             if roles:
                 lines.append("- processes by role (repeat 1): " + "; ".join(f"{r}: {v['pids']} pid(s), {v['wakes_per_s']} wakes/s, CPU {v['cpu_share']}" for r, v in roles.items()))
@@ -58,6 +63,15 @@ def main():
                 lines.append(f"| (b) window run minus idle rate | {f(w['run_ms_minus_idle']['p50'], 3)} | {f(w['run_ms_minus_idle']['p90'], 3)} | {f(w['run_ms_minus_idle']['p99'], 3)} | {w['run_ms_minus_idle']['repeat_p50']} |")
                 lines.append(f"| (c) waker run (X wakes per input p50 {f(wk['x_wakes_per_input']['p50'], 1)}; first X wake latency p50 {f(wk['first_x_wake_latency_ms']['p50'])} ms) | {f(wk['run_ms']['p50'], 3)} | {f(wk['run_ms']['p90'], 3)} | {f(wk['run_ms']['p99'], 3)} | {wk['run_ms']['repeat_p50']} |")
                 lines.append("")
+        if "driven" in d["phases"] and "driven-alt" in d["phases"] and "per_input" in d["phases"]["driven"] and "per_input" in d["phases"]["driven-alt"]:
+            a, b = d["phases"]["driven"]["per_input"]["window"]["run_ms_minus_idle"], d["phases"]["driven-alt"]["per_input"]["window"]["run_ms_minus_idle"]
+            lines.append("Stimulus sensitivity (method §3, pre-registered): per-input run, rule (b), SWELL-KW (`driven`) against 136M Keystrokes (`driven-alt`):")
+            lines.append("")
+            lines.append("| stream | p50 ms | p90 | p99 | per-repeat p50 | driven wakes/s |")
+            lines.append("|---|---|---|---|---|---|")
+            lines.append(f"| SWELL-KW | {f(a['p50'], 3)} | {f(a['p90'], 3)} | {f(a['p99'], 3)} | {a['repeat_p50']} | {spread(d['phases']['driven']['wakes_per_s'], 1)} |")
+            lines.append(f"| 136M Keystrokes | {f(b['p50'], 3)} | {f(b['p90'], 3)} | {f(b['p99'], 3)} | {b['repeat_p50']} | {spread(d['phases']['driven-alt']['wakes_per_s'], 1)} |")
+            lines.append("")
     open(out, "w").write("\n".join(lines) + "\n")
     print(f"wrote {out}: {len(lines)} lines")
 

@@ -95,7 +95,12 @@ def main():
             for phase, pd in raw["phases"].items():
                 comms = {}
                 by_tid = {}
-                for row in pd["rows"]:
+                # the op phase pools the operation's components, i.e. the rows inside the [trigger, done) windows,
+                # over the summed window span; its duration samples travel beside them (spec decisions 8–9)
+                op = pd.get("operation")
+                phase_rows = op["inside"] if op else pd["rows"]
+                phase_span = (sum(op["durations_ms"]) / 1000 or 1e-6) if op else pd["span"]
+                for row in phase_rows:
                     by_tid.setdefault((row.comm, row.tid), []).append((row.t_in, row.run))
                 for (comm, tid), rs in by_tid.items():
                     c = comms.setdefault(comm, {"gaps": array("d"), "runs": array("d"), "t_in": array("d"), "wakes": 0, "threads": 0})
@@ -103,12 +108,14 @@ def main():
                     c["runs"].extend(x[1] for x in rs)
                     c["t_in"].extend(x[0] for x in rs)
                     c["wakes"] += len(rs); c["threads"] += 1
-                slim["phases"][phase] = {"span": pd["span"], "comms": comms, "per_input": pd.get("per_input")}
+                slim["phases"][phase] = {"span": phase_span, "comms": comms, "per_input": pd.get("per_input"),
+                                         "operation": {"name": op["name"], "durations_ms": op["durations_ms"],
+                                                       "n_ok": op["n_ok"], "n_failed": op["n_failed"]} if op else None}
             raws[r] = slim
             del raw
         entry = {"family": info["family"], "mode": info["mode"], "repeats": reps,
                  "version": results[reps[0]].get("version"), "phases": {}}
-        for phase in ("idle", "driven", "play"):
+        for phase in ("idle", "driven", "driven-alt", "play", "op"):
             if not all(phase in raws[r]["phases"] for r in reps):
                 continue
             ph = {"roles": {r: results[r]["phases"][phase]["roles"] for r in reps},
@@ -133,7 +140,12 @@ def main():
                     "cpu_share": [round(sum(c["runs"].get(r, [])) / 1000 / spans[r], 4) for r in reps],
                     "gap_ms": summary([c["gaps"].get(r, []) for r in reps]),
                     "run_ms": summary([c["runs"].get(r, []) for r in reps])}
-            if phase == "driven" and all(raws[r]["phases"][phase].get("per_input") for r in reps):
+            if phase == "op" and all(raws[r]["phases"][phase].get("operation") for r in reps):
+                ops = {r: raws[r]["phases"][phase]["operation"] for r in reps}
+                ph["operation"] = {"name": ops[reps[0]]["name"],
+                                   "n_ok": [ops[r]["n_ok"] for r in reps], "n_failed": [ops[r]["n_failed"] for r in reps],
+                                   "duration_ms": summary([ops[r]["durations_ms"] for r in reps])}
+            if phase in ("driven", "driven-alt") and all(raws[r]["phases"][phase].get("per_input") for r in reps):
                 pi = {r: raws[r]["phases"][phase]["per_input"] for r in reps}
                 ph["per_input"] = {
                     "events": [len(pi[r]["win_run"]) for r in reps],
@@ -151,6 +163,9 @@ def main():
         print(f"== {app} ({info['family']}, {info['mode']}, repeats {reps}, {entry['version']})")
         for phase, ph in entry["phases"].items():
             print(f"   {phase}: span {ph['span_s']} cpu {ph['cpu_share']} wakes/s {ph['wakes_per_s']}")
+            if "operation" in ph:
+                o = ph["operation"]
+                print(f"     operation {o['name']}: ok {o['n_ok']} failed {o['n_failed']}; duration p50/p90/p99 {o['duration_ms']['p50']}/{o['duration_ms']['p90']}/{o['duration_ms']['p99']} ms ({o['duration_ms']['repeat_p50']})")
             print(f"     roles r{reps[0]}: {ph['roles'][reps[0]]}")
             for comm, c in list(ph["threads"].items())[:5]:
                 print(f"     {comm:16s} thr {c['threads']} wakes/s {c['wakes_per_s']} gap p50 {c['gap_ms']['p50']} ({c['gap_ms']['repeat_p50']}) run p50/p90/p99 {c['run_ms']['p50']}/{c['run_ms']['p90']}/{c['run_ms']['p99']}")

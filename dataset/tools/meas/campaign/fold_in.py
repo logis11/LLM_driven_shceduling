@@ -109,6 +109,13 @@ def entry(aid, spec, d):
     out += components_block(ph_idle, tag, "components")
     if kind == "cadence":
         out += components_block(d["phases"]["driven"], tag, "focus_components")
+    if "op" in d["phases"] and d["phases"]["op"].get("operation"):
+        # spec decision 8: a named operation with its own components and a measured duration (trigger to completion)
+        o = d["phases"]["op"]["operation"]
+        out.append("      operations:")
+        out.append(f"        {o['name']}:")
+        out.append(f"          duration: {dist(o['duration_ms']['q'], tag)}")
+        out += components_block(d["phases"]["op"], tag, "components", indent="          ")
     out += ["    lifetime: segment-bound", "    binding_params: []", "    scalable: []", "    validation_stats:",
             "      referee: meas-ci"]
     reps = d["repeats"]
@@ -135,6 +142,12 @@ def entry(aid, spec, d):
                   f"keys and pointer events together, pointer positions scaled into the content area (D5, D12); "
                   f"the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the "
                   f"process tree until the next input minus the idle rate. ")
+        alt = d["phases"].get("driven-alt", {}).get("per_input")
+        if alt:  # spec decision 11: the pre-registered sensitivity result, one sentence, no value changed
+            a = pi["window"]["run_ms_minus_idle"]["p50"]; b = alt["window"]["run_ms_minus_idle"]["p50"]
+            scope += (f"Stimulus sensitivity (pre-registered, method §3): under a 136M Keystrokes transcription stream (dhakal-chi18) "
+                      f"the per-input run p50 is {b:.2f} ms against {a:.2f} ms under SWELL-KW ({(b - a) / a * 100:+.0f} %); "
+                      f"the archetype carries SWELL-KW. ")
     elif kind == "cadence":
         scope += "Stimulus: a scripted pointer loop (design); no per-input run exists, the driven cadence is carried as focus_components. "
     else:
@@ -155,6 +168,11 @@ def entry(aid, spec, d):
                   "the slice preserves the recording's burst-and-pause structure.")
     if kind == "cadence":
         notes += " Inside focus windows the driven-phase components replace the idle ones; no input wake is emitted (the stimulus was scripted)."
+    if "op" in d["phases"] and d["phases"]["op"].get("operation"):
+        o = d["phases"]["op"]["operation"]
+        notes += (f" Operation `{o['name']}` (spec decisions 8–10): the timeline names it and a start time; the compiler draws its length "
+                  f"from the measured duration table (trigger to completion) and swaps in the operation's components for that span, "
+                  f"emitting no input wake; it runs to completion past the focus window.")
     if run == "code":
         notes += " Word streams drive this editor as the nearest recording: no code-editing keystroke dataset with timestamps exists (D4)."
     if run == "thunderbird":

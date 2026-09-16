@@ -106,23 +106,21 @@ PREFS
       ffmpeg -loglevel error -y -f lavfi -i testsrc=size=1920x1080:rate=30 -t 20 -an -c:v libx264 -preset veryfast -pix_fmt yuv420p /tmp/clip.mp4; rec ffmpeg.rc "$?"
       python3 "$TOOLS/kdenlive_project.py" /tmp/clip.mp4 600 30 /tmp/project.kdenlive; rec project.rc "$?"
       rec melt.unsharp "$(melt -query filter=avfilter.unsharp 2>/dev/null | grep -c identifier)"
-      # shortcuts for the zone actions (shipped without defaults): KXMLGUI applies the ActionProperties of the per-user
-      # copy of the app's ui file (kxmlguiclient.cpp: <GenericDataLocation>/kxmlgui5/<app>/<file>; kxmlguifactory.cpp
-      # refreshActionProperties) — the shipped file with one element added, same version, so nothing else changes
-      RC=$(ls /usr/share/kxmlgui5/kdenlive/kdenliveui.rc /usr/share/kdenlive/kdenliveui.rc 2>/dev/null | head -1); rec kdenlive.rc "$RC"
+      # shortcuts for the zone actions (shipped without defaults): KXMLGUI merges the ActionProperties of a per-user
+      # copy of the app's ui file — <GenericDataLocation>/kxmlgui5/kdenlive/kdenliveui.rc (kxmlguiclient.cpp) — into the
+      # shipped file when the user's copy carries a LOWER version (kxmlguiversionhandler.cpp: the best version wins,
+      # the local ActionProperties are stored into it). Kdenlive's own file is a compiled-in resource (version 227), so the
+      # per-user file is this stub at version 1; an equal version would replace the whole GUI (probe 35090333141: crash).
       mkdir -p "$HOME/.local/share/kxmlgui5/kdenlive" "$HOME/.config"
-      python3 - "$RC" "$HOME/.local/share/kxmlgui5/kdenlive/kdenliveui.rc" <<'PY'
-import sys
-src, dst = sys.argv[1], sys.argv[2]
-xml = open(src, encoding="utf-8").read() if src else '<!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">\n<kpartgui name="kdenlive" version="227">\n</kpartgui>\n'
-props = ('<ActionProperties scheme="Default">\n'
-         '  <Action name="clear_render_timeline_zone" shortcut="Ctrl+Shift+F10"/>\n'
-         '  <Action name="set_render_timeline_zone" shortcut="Ctrl+Shift+F9"/>\n'
-         '</ActionProperties>\n')
-i = xml.rfind("</kpartgui>")
-open(dst, "w", encoding="utf-8").write(xml[:i] + props + xml[i:] if i >= 0 else xml + props)
-PY
-      rec kdenlive.rc_user "$(grep -c ActionProperties "$HOME/.local/share/kxmlgui5/kdenlive/kdenliveui.rc")"
+      cat > "$HOME/.local/share/kxmlgui5/kdenlive/kdenliveui.rc" <<'RC'
+<!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
+<kpartgui name="kdenlive" version="1">
+<ActionProperties scheme="Default">
+  <Action name="clear_render_timeline_zone" shortcut="Ctrl+Shift+F10"/>
+  <Action name="set_render_timeline_zone" shortcut="Ctrl+Shift+F9"/>
+</ActionProperties>
+</kpartgui>
+RC
       printf '[timeline]\nautopreview=false\n' > "$HOME/.config/kdenliverc"
       LAUNCH="kdenlive /tmp/project.kdenlive"
       CLASS="kdenlive"; PAT="kdenlive"; RX="kdenlive|melt"; DRIVER=pointer; OP=preview-render ;;

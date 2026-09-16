@@ -29,6 +29,7 @@ class Timeline:
         self._load_segments(raw)
         self._load_tasks(raw, library)
         self._load_focus(raw, library)
+        self._load_operations(raw, library)
 
     def _err(self, msg):
         raise TimelineError(f"{self.path.name}: {msg}")
@@ -162,6 +163,27 @@ class Timeline:
             if a["to"] > b["from"]:
                 self._err(f"focus windows overlap at {b['from']} µs "
                           "(one user, one attention track)")
+
+    def _load_operations(self, raw, library):
+        """operations: [{at, task, name}] — a measured archetype's heavy operation placed at a point in time
+        (9.5 follow-ups spec, decisions 8–9); its length is drawn from the operation's measured duration at
+        compile time, so only the start is authored. Whether it may start only inside a focus window is 9.10's."""
+        self.operations = []
+        for op in raw.get("operations") or []:
+            for field in ("at", "task", "name"):
+                if field not in op:
+                    self._err(f"operation missing {field!r}")
+            entry = {"at": parse_us(op["at"]), "task": op["task"], "name": op["name"]}
+            task = self.task_by_id.get(entry["task"]) or self._err(
+                f"operation targets unknown task {op['task']!r}")
+            available = library.operations(task["archetype"])
+            if entry["name"] not in available:
+                self._err(f"operation {op['name']!r} is not one of {task['archetype']!r}'s operations "
+                          f"{sorted(available)}")
+            if entry["at"] < task["arrive"] or (task["depart"] is not None and entry["at"] >= task["depart"]):
+                self._err(f"operation starts outside task {task['id']!r} lifetime")
+            self.operations.append(entry)
+        self.operations.sort(key=lambda o: o["at"])
 
     @property
     def duration_us(self):

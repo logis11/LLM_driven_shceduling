@@ -114,3 +114,65 @@ def test_linter_checks_components_and_stimulus(tmp_path, repo_root):
     errors = lint_repo(path, repo_root / "dataset" / "sources.yaml", repo_root / "docs" / "references.md")
     joined = "\n".join(errors)
     assert "stream 'nonesuch'" in joined and "non-decreasing" in joined and "missing 'run'" in joined
+
+
+# ---- operations (9.5 follow-ups spec, decisions 8–10) ----
+
+OP_LIB_PATCH = {"unsharp-mask": {
+    "duration": {"dist": "quantiles", "p": [900000, 950000, 1000000, 1050000, 1100000, 1150000, 1200000, 1250000, 1300000, 1400000],
+                 "sampling": "per-iteration", "source": "meas-ci:interactive:3"},
+    "components": [{"comm": "worker", "threads": 3, "wakes_per_s": 3000.0,
+                    "gap": {"dist": "quantiles", "p": [100, 150, 200, 250, 300, 350, 400, 500, 800, 2000],
+                            "sampling": "per-iteration", "source": "meas-ci:interactive:3"},
+                    "run": {"dist": "quantiles", "p": [50, 60, 70, 80, 90, 100, 120, 150, 300, 4000],
+                            "sampling": "per-iteration", "source": "meas-ci:interactive:3"}}]}}
+
+
+def _library_with_operation(tmp_path, repo_root):
+    from wlc import Library
+    data = yaml.safe_load((repo_root / "dataset" / "archetypes.yaml").read_text())
+    data["archetypes"]["image-editor"]["params"]["operations"] = OP_LIB_PATCH
+    path = tmp_path / "archetypes.yaml"
+    path.write_text(yaml.safe_dump(data))
+    return Library(path)
+
+
+def test_operation_replaces_components_for_its_measured_duration(tmp_path, repo_root):
+    lib = _library_with_operation(tmp_path, repo_root)
+    data = {"meta": {"id": "x-op", "seed": 5, "demand": "calibration"},
+            "segments": [{"from": "0s", "to": "20s", "mode": "photo", "attributes": {"background_wanted": True}}],
+            "tasks": [{"id": "g", "name": "gimp", "archetype": "image-editor", "arrive": "0s", "depart": "20s"}],
+            "focus": [{"from": "1s", "to": "19s", "task": "g"}],
+            "operations": [{"at": "5s", "task": "g", "name": "unsharp-mask"}]}
+    path = tmp_path / "x-op.timeline.yaml"
+    path.write_text(yaml.safe_dump(data))
+    tl = Timeline(path, lib)
+    assert tl.operations == [{"at": 5_000_000, "task": "g", "name": "unsharp-mask"}]
+    canonical, report = compile_timeline(tl, lib, "single", rel_path="fx")
+    arrive = next(e for e in canonical["events"] if e["op"] == "arrive")
+    # walk the program: timer deadlines chain; count wakes inside the operation's window vs. an equal window before it
+    t, inside, before = 0, 0, 0
+    for step in arrive["program"]:
+        if step["op"] == "TIMER":
+            t += step["period_us"]
+            if 5_000_000 <= t < 5_900_000:
+                inside += 1
+            elif 3_000_000 <= t < 3_900_000:
+                before += 1
+    # the operation's worker component wakes every ~0.3 ms; the focus components of image-editor wake far less often
+    assert inside > 5 * max(before, 1)
+    ops_report = report["operations"]["g"]
+    assert ops_report[0]["name"] == "unsharp-mask" and 900_000 <= ops_report[0]["duration_us"] <= 1_400_000
+
+
+def test_operation_must_exist_on_the_archetype(tmp_path, repo_root):
+    lib = _library_with_operation(tmp_path, repo_root)
+    data = {"meta": {"id": "x-op2", "seed": 5, "demand": "calibration"},
+            "segments": [{"from": "0s", "to": "20s", "mode": "photo", "attributes": {"background_wanted": True}}],
+            "tasks": [{"id": "g", "name": "gimp", "archetype": "image-editor", "arrive": "0s", "depart": "20s"}],
+            "operations": [{"at": "5s", "task": "g", "name": "render"}]}
+    path = tmp_path / "x-op2.timeline.yaml"
+    path.write_text(yaml.safe_dump(data))
+    from wlc.timeline import TimelineError
+    with pytest.raises(TimelineError):
+        Timeline(path, lib)

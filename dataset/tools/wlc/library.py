@@ -35,7 +35,11 @@ class Library:
         """True iff the entry is a measured archetype (9.5 fold-in): its params
         carry timer `components` (D16) and/or a replayed `stimulus` (D18)."""
         params = self.entries[archetype_id].get("params") or {}
-        return "components" in params or "stimulus" in params or "focus_components" in params
+        return "components" in params or "stimulus" in params or "focus_components" in params or "operations" in params
+
+    def operations(self, archetype_id):
+        """The measured operations of an archetype (9.5 follow-ups spec, decision 8): name -> {duration, components}."""
+        return (self.entries[archetype_id].get("params") or {}).get("operations") or {}
 
     def has_input_channel(self, archetype_id):
         """True iff the archetype's program waits on exogenous input."""

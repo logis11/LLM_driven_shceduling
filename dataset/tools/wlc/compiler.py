@@ -75,6 +75,7 @@ def compile_timeline(timeline, library, mode, rel_path=None):
         "demand_us": sum(per_task.values()),
         "utilization": sum(per_task.values()) / duration,
         "per_task": per_task,
+        "operations": {b.id: b.operations for b in builds if getattr(b, "operations", None)},
         "demand_class": timeline.demand_class,
     }
     return canonical, report
@@ -244,16 +245,32 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
     t0 = task["arrive"]
     t1 = task["depart"] or timeline.duration_us
     windows = [w for w in timeline.focus if w["task"] == task["id"]]
+    # operations (spec decisions 8–9): a window from the authored start for a duration drawn from the measured
+    # table; inside it the operation's components replace whatever is active and no input wake is emitted
+    op_windows = []
+    for j, op in enumerate(o for o in timeline.operations if o["task"] == task["id"]):
+        spec = params["operations"][op["name"]]
+        dur = sampling.sample(spec["duration"], seed, iid, "operation", j)
+        op_windows.append({"from": op["at"], "to": min(op["at"] + dur, t1), "name": op["name"], "spec": spec})
+    build.operations = [{"name": w["name"], "at_us": w["from"], "duration_us": w["to"] - w["from"]} for w in op_windows]
+
+    def in_operation(t):
+        return any(w["from"] <= t < w["to"] for w in op_windows)
     events = []
     # timer components over the lifetime; cadence archetypes swap inside focus windows
     focus_components = params.get("focus_components")
     for ev in _component_events(params.get("components") or [], seed, iid, t0, t1, "idle"):
         if focus_components and any(w["from"] <= ev[0] < w["to"] for w in windows):
             continue
+        if in_operation(ev[0]):
+            continue
         events.append(ev)
     if focus_components:
         for j, w in enumerate(windows):
-            events.extend(_component_events(focus_components, seed, iid, w["from"], w["to"], ("focus", j)))
+            events.extend(ev for ev in _component_events(focus_components, seed, iid, w["from"], w["to"], ("focus", j))
+                          if not in_operation(ev[0]))
+    for j, w in enumerate(op_windows):
+        events.extend(_component_events(w["spec"]["components"], seed, iid, w["from"], w["to"], ("operation", j)))
     # replayed stimulus inside focus windows
     stimulus = params.get("stimulus")
     if stimulus:
@@ -268,6 +285,8 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
                 if t_rel >= offset + length:
                     break
                 t = w["from"] + (t_rel - offset)
+                if in_operation(t):
+                    continue
                 run = sampling.sample(params["input_run"], seed, iid, "input", k)
                 events.append((t, run, "input"))
                 k += 1

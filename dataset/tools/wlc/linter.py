@@ -65,6 +65,28 @@ def lint_repo(archetypes_path, sources_path, references_md, freeze=False):
                         if field in comp:
                             errors.extend(_check_param(f"{where}[{i}].{field}", comp[field], registry, freeze))
                 continue
+            if pname == "operations":
+                # 9.5 follow-ups (spec decision 8): named operations, each with a measured duration table and components
+                if not isinstance(param, dict) or not param:
+                    errors.append(f"{where}: must be a non-empty map of operations")
+                    continue
+                for oname, op in param.items():
+                    if "duration" not in op:
+                        errors.append(f"{where}.{oname}: missing 'duration'")
+                    else:
+                        errors.extend(_check_param(f"{where}.{oname}.duration", op["duration"], registry, freeze))
+                    comps = op.get("components")
+                    if not isinstance(comps, list) or not comps:
+                        errors.append(f"{where}.{oname}: must carry a non-empty list of components")
+                        continue
+                    for i, comp in enumerate(comps):
+                        for field in ("comm", "gap", "run"):
+                            if field not in comp:
+                                errors.append(f"{where}.{oname}.components[{i}]: missing {field!r}")
+                        for field in ("gap", "run"):
+                            if field in comp:
+                                errors.extend(_check_param(f"{where}.{oname}.components[{i}].{field}", comp[field], registry, freeze))
+                continue
             if pname == "stimulus":
                 # 9.5 fold-in (D18): a replayed stream; the file must exist beside the library
                 stream = param.get("stream")
