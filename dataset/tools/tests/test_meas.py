@@ -194,3 +194,17 @@ def test_all_wakeups_indexed_by_wakee_tid(tmp_path):
                  "   1.000600 [0002]  app[8/100]  awakened: app[7/100]\n"
                  "   1.000700 [0002]  other[9/200]  awakened: other[9/200]\n")
     assert campaign.load_all_wakeups(str(p), {100}) == {7: [1.0005, 1.0006]}
+
+
+# ---- campaign analyzer: operation windows (9.5 follow-ups spec, decisions 8–9) ----
+
+def test_operation_windows_cut_rows_and_measure_duration():
+    ops = [{"op": "x", "i": 0, "trigger_us": 1_000_000, "done_us": 1_200_000, "rc": 0},
+           {"op": "x", "i": 1, "trigger_us": 2_000_000, "done_us": 2_050_000, "rc": 2},   # failed: excluded
+           {"op": "x", "i": 2, "trigger_us": 3_000_000, "done_us": 3_400_000, "rc": 0}]
+    rows = [_row(0.5, 1.0), _row(1.05, 2.0), _row(1.10, 3.0), _row(2.01, 1.0), _row(3.1, 5.0), _row(3.5, 1.0)]
+    res = campaign.operation_windows(rows, ops)
+    assert res["durations_ms"] == [200.0, 400.0]
+    assert res["n_ok"] == 2 and res["n_failed"] == 1
+    assert [r.t_in for r in res["inside"]] == [1.05, 1.10, 3.1]
+    assert [r.t_in for r in res["outside"]] == [0.5, 2.01, 3.5]

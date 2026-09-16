@@ -14,7 +14,7 @@ start_xvfb
 appdef "$APP" || exit 0
 [ "$DRIVER" = stream ] && DRIVER=type
 
-rec launch "$LAUNCH"
+rec launch "$LAUNCH"; rec rx "$RX"; rec pat "$PAT"; rec op "${OP:-}"
 T_LAUNCH=$(now_us)
 setsid bash -c "$LAUNCH" > "$OUT/app.log" 2>&1 &
 APP_PID=$!

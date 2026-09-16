@@ -29,7 +29,7 @@ sudo apt-get install -y --no-install-recommends linux-tools-common "linux-tools-
 rec perf.version "$(perf --version 2>&1 | head -1)"
 start_xvfb
 appdef "$APP" || exit 0
-rec launch "$LAUNCH"; rec driver "$DRIVER"; rec stream "${STREAM:-}"; rec op "${OP:-}"
+rec launch "$LAUNCH"; rec driver "$DRIVER"; rec stream "${STREAM:-}"; rec op "${OP:-}"; rec rx "$RX"; rec pat "$PAT"
 PH="$TOOLS/../phase.sh $OUT/phases.jsonl"
 export MEAS_PIN=harness   # phase.sh here wraps drivers, which stimulate the pinned application from the harness CPUs
 pin_load setsid bash -c "$LAUNCH" > "$OUT/app.log" 2>&1 &

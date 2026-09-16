@@ -70,9 +70,15 @@ def open_text(path):
     return gzip.open(path, "rt") if path.endswith(".gz") else open(path)
 
 
-def load_rows(path, pids):
-    """Rows of the application's threads, plus the capture window (first, last) over all tasks."""
+def load_rows(path, pids, comm_rx=None):
+    """Rows of the application's threads, plus the capture window (first, last) over all tasks.
+
+    comm_rx (the appdef's RX, recorded as `rx` in report.json) admits rows of pids the snapshots never saw —
+    transient children of the tree such as Kdenlive's kdenlive_render, which lives only during a preview
+    render (spec decisions 8–9); their pids are returned as the third element for the caller to record."""
     rows = []
+    extra = set()
+    rx = re.compile(comm_rx) if comm_rx else None
     t_min, t_max = None, None
     with open_text(path) as handle:
         for line in handle:
@@ -88,12 +94,17 @@ def load_rows(path, pids):
                 continue
             comm, a, b = tm.group(1), int(tm.group(2)), tm.group(3)
             tid, pid = (a, int(b)) if b else (a, a)
-            if pid not in pids or comm in HARNESS_COMMS or comm.startswith("llvmpipe-"):
+            if comm in HARNESS_COMMS or comm.startswith("llvmpipe-"):
                 continue  # harness processes share the tree; llvmpipe-* is the runner's software rasteriser (D15)
+            if pid not in pids:
+                if rx and rx.search(comm):
+                    extra.add(pid)
+                else:
+                    continue
             t, delay, run = float(t), float(delay), float(run)
             rows.append(Row(t - run / 1000.0, t - run / 1000.0 - delay / 1000.0, t, run, comm, tid, pid))
     rows.sort(key=lambda r: r.t_in)
-    return rows, (t_min or 0.0, t_max or 0.0)
+    return rows, (t_min or 0.0, t_max or 0.0), sorted(extra)
 
 
 WAKE = re.compile(r"^\s*(\d+\.\d+)\s+\[(\d+)\]\s+(.*?)\s+awakened:\s+(.*?)\s*$")
@@ -173,6 +184,26 @@ def merge_resumes(rows, wakeups_by_tid):
     return out, merged
 
 
+def operation_windows(rows, ops):
+    """Cut the op phase (spec decisions 8–9): rows whose schedule-in falls in a successful operation's
+    [trigger, done) window are `inside` (the operation's components), the rest `outside`; durations in ms
+    of the successful operations (rc 0), which the archetype carries as the operation's duration table."""
+    import bisect
+    ok = [(o["trigger_us"] / 1e6, o["done_us"] / 1e6) for o in ops if o.get("rc") == 0 and o.get("trigger_us") and o.get("done_us")]
+    ok.sort()
+    starts = [a for a, _ in ok]
+    inside, outside = [], []
+    for r in rows:
+        k = bisect.bisect_right(starts, r.t_in) - 1
+        if k >= 0 and r.t_in < ok[k][1]:
+            inside.append(r)
+        else:
+            outside.append(r)
+    return {"durations_ms": [round((b - a) * 1000, 3) for a, b in ok], "n_ok": len(ok),
+            "n_failed": sum(1 for o in ops if o.get("rc") != 0), "inside": inside, "outside": outside,
+            "name": ops[0]["op"] if ops else None}
+
+
 def pid_roles(D, phase):
     """pid -> role from the snapshots' command lines: main | renderer | gpu | utility | zygote | other."""
     roles = {}
@@ -245,7 +276,7 @@ def _analyze(args):
     result = {"app": report.get("app"), "repeat": report.get("repeat"), "mode": report.get("mode"),
               "version": report.get("version"), "phases": {}}
     idle_rate = None
-    for phase in ("idle", "driven", "play"):
+    for phase in ("idle", "driven", "driven-alt", "play", "op"):
         th = next((p for p in (f"perf.{phase}.timehist.txt.gz", f"perf.{phase}.timehist.txt") if os.path.exists(os.path.join(D, p))), None)
         if not th:
             continue
@@ -254,7 +285,7 @@ def _analyze(args):
             p = os.path.join(D, snap)
             if os.path.exists(p):
                 pids |= {pr["pid"] for pr in json.load(open(p))["procs"]}
-        segments, (t0, t1) = load_rows(os.path.join(D, th), pids)
+        segments, (t0, t1), extra_pids = load_rows(os.path.join(D, th), pids, report.get("rx") if phase == "op" else None)
         span = max(t1 - t0, 1e-6)
         total_run_s = sum(r.run for r in segments) / 1000
         roles = pid_roles(D, phase)
@@ -264,7 +295,8 @@ def _analyze(args):
             rows, merged = merge_resumes(segments, load_all_wakeups(os.path.join(D, wk_path), pids))
         else:
             rows, merged, wake_def = segments, 0, "row"
-        ph = {"pids": sorted(pids), "rows": len(rows), "segments": len(segments), "resumes_merged": merged,
+        ph = {"pids": sorted(pids), "transient_pids": {p: sorted({r.comm for r in segments if r.pid == p}) for p in extra_pids},
+              "rows": len(rows), "segments": len(segments), "resumes_merged": merged,
               "wake_definition": wake_def, "span_s": round(span, 2),
               "cpu_share": round(total_run_s / span, 4), "wakes_per_s": round(len(rows) / span, 2),
               "roles": per_role(rows, roles, span), "threads": per_thread(rows, span)}
@@ -274,8 +306,24 @@ def _analyze(args):
         if xwakes:
             ph["x_wakes_per_s"] = round(len(xwakes) / span, 2)
             ph["x_wakes_by_comm"] = {c: n for c, n in sorted(((c, sum(1 for w in xwakes if w[1] == c)) for c in {w[1] for w in xwakes}), key=lambda kv: -kv[1])[:8]}
-        if phase == "driven" and os.path.exists(os.path.join(D, "replay.jsonl")):
-            sent = [json.loads(l) for l in open(os.path.join(D, "replay.jsonl")) if l.strip()]
+        replay = {"driven": "replay.jsonl", "driven-alt": "replay-alt.jsonl"}.get(phase)
+        if phase == "op" and os.path.exists(os.path.join(D, "ops.jsonl")):
+            ops = [json.loads(l) for l in open(os.path.join(D, "ops.jsonl")) if l.strip()]
+            ow = operation_windows(rows, ops)
+            in_span = sum(d for d in ow["durations_ms"]) / 1000 or 1e-6
+            ph["operation"] = {"name": ow["name"], "n_ok": ow["n_ok"], "n_failed": ow["n_failed"],
+                               "duration_ms": dist(ow["durations_ms"]),
+                               "inside": {"wakes": len(ow["inside"]), "span_s": round(in_span, 2),
+                                          "wakes_per_s": round(len(ow["inside"]) / in_span, 2),
+                                          "cpu_share": round(sum(r.run for r in ow["inside"]) / 1000 / in_span, 4),
+                                          "threads": per_thread(ow["inside"], in_span)},
+                               "outside_wakes_per_s": round(len(ow["outside"]) / (span - in_span), 2) if span > in_span else None}
+            raw["phases"][phase] = {"rows": rows, "segments": segments, "span": span, "idle_rate": idle_rate, "roles": roles,
+                                    "operation": ow}
+            result["phases"][phase] = ph
+            continue
+        if replay and os.path.exists(os.path.join(D, replay)):
+            sent = [json.loads(l) for l in open(os.path.join(D, replay)) if l.strip()]
             s_times = [e["sent_us"] / 1e6 for e in sent]
             s_kinds = [e.get("kind", "key") for e in sent]
             wakes = [r.t_wake for r in rows]
