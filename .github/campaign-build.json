@@ -1,6 +1,8 @@
 {
   "note": "Trigger for meas-build.yml (9.6 campaign). Dispatch is unavailable off the default branch, so a push that changes this file starts the runs it names. Set repeats to [] to skip.",
   "mode": "dry",
-  "attempt": 1,
-  "repeats": [1]
+  "attempt": 2,
+  "repeats": [
+    1
+  ]
 }

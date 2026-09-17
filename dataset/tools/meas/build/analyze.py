@@ -44,6 +44,7 @@ EXIT = re.compile(r"^\s*(\d+\.\d+):\s+sched:sched_process_exit:\s+comm=(.*?)\s+p
 # comms on the measured CPU that are never part of a phase's tree: kernel threads and the runner's own agent
 OUTSIDE_PREFIX = ("kworker/", "ksoftirqd/", "migration/", "rcu_", "cpuhp/", "idle_inject/", "kcompactd", "kswapd",
                   "jbd2/", "xfsaild", "swapper", "watchdog", "irq/", "khugepaged", "ext4-", "blkcg", "kthreadd")
+OUTSIDE_PREFIX = OUTSIDE_PREFIX + (".NET", "provjobd", "Hosted Compute")
 OUTSIDE_COMMS = {"Runner.Listener", "Runner.Worker", "dotnet", "containerd", "dockerd", "containerd-shim", "provjobd",
                  "perf", "taskstats_liste", "sudo", "taskset", "systemd", "systemd-journal", "systemd-udevd",
                  "snapd", "cron", "rsyslogd", "walinuxagent", "python3-walinux", "hv_kvp_daemon", "chronyd",
@@ -52,6 +53,10 @@ OUTSIDE_COMMS = {"Runner.Listener", "Runner.Worker", "dotnet", "containerd", "do
 PHASE_ROOT = {"build-j8-warm": "make", "build-j8-cold": "make", "build-j1-warm": "make", "dkms": "dkms",
               "clamscan": "clamscan", "ffmpeg": "ffmpeg", "handbrake": "HandBrakeCLI", "train": "python3",
               "tracker": "dbus-run-sessio"}
+# the batch program inside each batch phase's tree (D7): its processes carry the saturation and wait figures; the
+# rest of the tree (a session bus, the poll loop) is reported beside them
+BATCH_PROGRAM = {"clamscan": "clamscan", "ffmpeg": "ffmpeg", "handbrake": "HandBrakeCLI", "train": "python3",
+                 "tracker": "tracker-miner-f"}
 QUANTILE_PROBS = (0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999)
 EPS = 1e-6
 
@@ -158,14 +163,48 @@ def load_taskstats(path):
     return rows, trailer
 
 
+def process_records(ts_rows):
+    """Per process (tgid) from the listener rows. The kernel sends a per-thread row for every exiting thread and,
+    for a thread group that ever had more than one thread, a per-tgid row of sums at the last exit (comm and pid
+    empty in it). A process's identity, parent, lifetime and exit time come from its main thread's row (id == tgid),
+    its CPU from the tgid sums when present. CPU is `cpu_run_virtual_total` (the scheduler's sum_exec_runtime, ns);
+    `utime + stime` (tick-sampled, ms resolution) is kept beside it. A thread's block-I/O delay larger than its
+    lifetime is a wait whose start was never stamped (dry run 1: a HandBrake thread at the machine's uptime) and is
+    rejected and counted."""
+    by_tgid = defaultdict(list)
+    tgid_rows = {}
+    for r in ts_rows:
+        if r["type"] == "tgid":
+            tgid_rows[r["id"]] = r
+        else:
+            by_tgid[r["tgid"] or r["id"]].append(r)
+    recs = {}
+    for tgid, rows in by_tgid.items():
+        main = next((r for r in rows if r["id"] == tgid), None) or rows[0]
+        agg = tgid_rows.get(tgid)
+        valid = [r for r in rows if r["blkio_delay_ns"] <= r["etime_us"] * 1000]
+        invalid = len(rows) - len(valid)
+        cpu_ns = agg["run_virtual_ns"] if agg else sum(r["run_virtual_ns"] for r in rows)
+        rec = {"pid": tgid, "comm": main["comm"], "ppid": main["ppid"], "etime_us": main["etime_us"],
+               "t_exit": max(r["recv_mono_ns"] for r in rows) / 1e9,
+               "threads": len(rows), "cpu_ns": cpu_ns, "utime_stime_us": (agg["utime_us"] + agg["stime_us"]) if agg else sum(r["utime_us"] + r["stime_us"] for r in rows),
+               "cpu_delay_ns": agg["cpu_delay_ns"] if agg else sum(r["cpu_delay_ns"] for r in rows),
+               "blkio_ns": sum(r["blkio_delay_ns"] for r in valid), "blkio_count": sum(r["blkio_count"] for r in valid),
+               "blkio_invalid_threads": invalid, "nvcsw": sum(r["nvcsw"] for r in rows), "nivcsw": sum(r["nivcsw"] for r in rows),
+               "thread_cpu_ns": {r["id"]: r["run_virtual_ns"] for r in rows}, "exitcode": main["exitcode"]}
+        recs[tgid] = rec
+    return recs
+
+
 # ---- the tree --------------------------------------------------------------
 
-def build_tree(phase, segs, forks, ts_rows, meas_cpu):
+def build_tree(phase, segs, forks, recs, meas_cpu):
     """Return (root_tid, tree_tids, tid2pid, role_of_pid, parent_of_pid, outside_by_comm).
 
-    The root is the earliest thread on the measured CPU whose comm (at any row) is the phase's program and whose
-    parent, per the fork rows, never ran on the measured CPU; the tree is every descendant by the fork rows plus
-    the root. Roles: comm at exit (taskstats tgid row, else the last comm seen in perf's exit row or a segment)."""
+    The root is the earliest thread on the measured CPU whose comm is the phase's program (`taskset` execs it, so it
+    is the first of its name there; sudo and dbus-run-session wrappers run pinned too and are its parents); the tree
+    is every descendant by the fork rows plus the root. Roles: comm at exit (the process record), else the last comm
+    seen in a segment."""
     on_cpu = [s for s in segs if s.cpu == meas_cpu]
     children = defaultdict(list)
     parent = {}
@@ -176,11 +215,10 @@ def build_tree(phase, segs, forks, ts_rows, meas_cpu):
     for s in segs:
         tid2pid[s.tid] = s.pid
         last_comm[s.tid] = s.comm
-    cpu_tids = {s.tid for s in on_cpu}
     root_comm = PHASE_ROOT.get(phase, phase.split("-")[0])
     root = None
     for s in on_cpu:
-        if s.comm == root_comm and parent.get(s.tid) not in cpu_tids:
+        if s.comm == root_comm:
             root = s.tid; break
     if root is None:   # fall back: the earliest non-outside thread on the measured CPU
         for s in on_cpu:
@@ -194,10 +232,7 @@ def build_tree(phase, segs, forks, ts_rows, meas_cpu):
             continue
         tree.add(t); stack.extend(children.get(t, ()))
     # exit comm per pid from taskstats (tgid rows), else perf's exit row, else last segment comm
-    role = {}
-    for r in ts_rows:
-        if r["type"] == "tgid":
-            role[r["id"]] = r["comm"]
+    role = {pid: r["comm"] for pid, r in recs.items()}
     for t in tree:
         pid = tid2pid.get(t, t)
         role.setdefault(pid, last_comm.get(t, "?"))
@@ -207,9 +242,9 @@ def build_tree(phase, segs, forks, ts_rows, meas_cpu):
         p = parent.get(t)
         if p is not None and pid == t:   # a process (its main thread): parent process = the forking thread's pid
             parent_pid[pid] = tid2pid.get(p, p)
-    for r in ts_rows:
-        if r["type"] == "tgid" and r["id"] in tree and r["id"] not in parent_pid:
-            parent_pid[r["id"]] = r["ppid"]
+    for pid, r in recs.items():
+        if pid in tree and pid not in parent_pid:
+            parent_pid[pid] = r["ppid"]
     out_by_comm = defaultdict(lambda: [0, 0.0])
     for s in on_cpu:
         if s.tid not in tree:
@@ -217,7 +252,7 @@ def build_tree(phase, segs, forks, ts_rows, meas_cpu):
     return root, tree, tid2pid, role, parent_pid, {k: {"rows": v[0], "run_ms": round(v[1], 3)} for k, v in out_by_comm.items()}
 
 
-def jobs_of(tree, tid2pid, role, parent_pid, forks, exits, ts_by_pid):
+def jobs_of(tree, tid2pid, role, parent_pid, forks, exits, recs):
     """make jobs (D2): a non-make child process of a make process, with its subtree; fork and last-exit times."""
     children = defaultdict(list)
     for pid, pp in parent_pid.items():
@@ -226,8 +261,8 @@ def jobs_of(tree, tid2pid, role, parent_pid, forks, exits, ts_by_pid):
     def exit_t(pid):
         if pid in exits:
             return exits[pid][0]
-        r = ts_by_pid.get(pid)
-        return None if r is None else r["_t_exit"]
+        r = recs.get(pid)
+        return None if r is None else r["t_exit"]
     makes = {pid for pid in set(tid2pid.get(t, t) for t in tree) if role.get(pid) == "make"}
     jobs = []
     for m in makes:
@@ -286,7 +321,7 @@ def merge_resumes(rows, wakeups_by_tid):
 
 # ---- per role -------------------------------------------------------------
 
-def role_shapes(tree, tid2pid, role, segs, wakeups, meas_cpu, ts_by_pid):
+def role_shapes(tree, tid2pid, role, segs, wakeups, meas_cpu, recs):
     """Per role: wakes (run per wake), off-CPU intervals after each wake by kind, per-process CPU and delays."""
     rows = [s for s in segs if s.tid in tree and s.cpu == meas_cpu]
     wakes, merged = merge_resumes(rows, wakeups)
@@ -294,12 +329,13 @@ def role_shapes(tree, tid2pid, role, segs, wakeups, meas_cpu, ts_by_pid):
     for w in wakes:
         by_tid[w.tid].append(w)
     per_role = defaultdict(lambda: {"run_ms": [], "off_D_ms": [], "off_S_ms": [], "off_R_ms": [], "wakes": 0, "threads": set(),
-                                    "procs": set(), "cpu_us": [], "blkio_ns": [], "blkio_count": [], "cpu_delay_ns": [],
-                                    "etime_us": [], "nvcsw": [], "nivcsw": [], "perf_run_ms_by_pid": defaultdict(float)})
+                                    "procs": set(), "cpu_us": [], "tick_cpu_us": [], "blkio_ns": [], "blkio_count": [], "cpu_delay_ns": [],
+                                    "etime_us": [], "nvcsw": [], "nivcsw": [], "perf_run_ms_by_pid": defaultdict(float),
+                                    "wakes_by_pid": defaultdict(int), "blkio_invalid": 0})
     for tid, ws in by_tid.items():
         pid = tid2pid.get(tid, tid)
         r = per_role[role.get(pid, "?")]
-        r["threads"].add(tid); r["procs"].add(pid); r["wakes"] += len(ws)
+        r["threads"].add(tid); r["procs"].add(pid); r["wakes"] += len(ws); r["wakes_by_pid"][pid] += len(ws)
         for a, b in zip(ws, ws[1:]):
             r["run_ms"].append(a.run)
             off = (b.t_wake - a.t_end) * 1000.0   # from the previous wake's last sched-out to the wakeup
@@ -308,32 +344,36 @@ def role_shapes(tree, tid2pid, role, segs, wakeups, meas_cpu, ts_by_pid):
         r["run_ms"].append(ws[-1].run)
         r["perf_run_ms_by_pid"][pid] += sum(w.run for w in ws)
     for pid in set(tid2pid.get(t, t) for t in tree):
-        t = ts_by_pid.get(pid)
+        t = recs.get(pid)
         if t is None:
             continue
         r = per_role[role.get(pid, "?")]
         r["procs"].add(pid)
-        r["cpu_us"].append(t["utime_us"] + t["stime_us"]); r["blkio_ns"].append(t["blkio_delay_ns"]); r["blkio_count"].append(t["blkio_count"])
+        r["cpu_us"].append(t["cpu_ns"] / 1000.0); r["tick_cpu_us"].append(t["utime_stime_us"])
+        r["blkio_ns"].append(t["blkio_ns"]); r["blkio_count"].append(t["blkio_count"]); r["blkio_invalid"] += t["blkio_invalid_threads"]
         r["cpu_delay_ns"].append(t["cpu_delay_ns"]); r["etime_us"].append(t["etime_us"]); r["nvcsw"].append(t["nvcsw"]); r["nivcsw"].append(t["nivcsw"])
     out = {}
     for name, r in per_role.items():
         cross = []
         for pid, ms in r["perf_run_ms_by_pid"].items():
-            t = ts_by_pid.get(pid)
-            if t is not None and (t["utime_us"] + t["stime_us"]) > 0:
-                cross.append(ms * 1000.0 / (t["utime_us"] + t["stime_us"]))
+            t = recs.get(pid)
+            if t is not None and t["cpu_ns"] > 0:
+                cross.append(ms * 1e6 / t["cpu_ns"])
         out[name] = {"processes": len(r["procs"]), "threads": len(r["threads"]), "wakes": r["wakes"],
+                     "wakes_per_process": dist(list(r["wakes_by_pid"].values())),
                      "run_per_wake_ms": dist(r["run_ms"]),
                      "off_after_D_ms": dist(r["off_D_ms"]), "off_after_S_ms": dist(r["off_S_ms"]), "off_after_R_ms": dist(r["off_R_ms"]),
-                     "cpu_per_process_us": dist(r["cpu_us"]), "etime_per_process_us": dist(r["etime_us"]),
+                     "cpu_per_process_us": dist(r["cpu_us"]), "tick_cpu_per_process_us": dist(r["tick_cpu_us"]),
+                     "etime_per_process_us": dist(r["etime_us"]),
                      "blkio_delay_per_process_ns": dist(r["blkio_ns"]), "blkio_count_per_process": dist(r["blkio_count"]),
+                     "blkio_invalid_threads": r["blkio_invalid"],
                      "cpu_delay_per_process_ns": dist(r["cpu_delay_ns"]),
                      "nvcsw_per_process": dist(r["nvcsw"]), "nivcsw_per_process": dist(r["nivcsw"]),
                      "perf_over_taskstats_cpu": dist(cross)}
     return out, merged, len(rows), len(wakes)
 
 
-def dispatch(tree, tid2pid, role, segs, forks, meas_cpu, ts_by_pid):
+def dispatch(tree, tid2pid, role, segs, forks, meas_cpu, recs):
     """make's per-dispatch run: for each make thread, the run of its segments between consecutive forks it issued."""
     make_tids = [t for t in tree if role.get(tid2pid.get(t, t)) == "make"]
     forks_by = defaultdict(list)
@@ -352,28 +392,51 @@ def dispatch(tree, tid2pid, role, segs, forks, meas_cpu, ts_by_pid):
         for a, b in zip(fts, fts[1:]):
             i, j = bisect.bisect_right(ends, a), bisect.bisect_right(ends, b)
             per_dispatch.append(sum(s.run for s in ss[i:j]))
-        t = ts_by_pid.get(tid2pid.get(tid, tid))
+        t = recs.get(tid2pid.get(tid, tid))
         if t is not None and fts:
-            cross.append((t["utime_us"] + t["stime_us"]) / len(fts) / 1000.0)
+            cross.append(t["cpu_ns"] / len(fts) / 1e6)
     return {"per_dispatch_ms": dist(per_dispatch), "makes": len(forks_by), "forks": sum(len(v) for v in forks_by.values()),
             "cpu_per_fork_ms_by_make": dist(cross)}
 
 
-def batch(tree, tid2pid, role, segs, wakeups, meas_cpu, ts_by_pid, span_s):
-    """The batch programs: saturation, thread share, wait shares over the tree."""
-    rows = [s for s in segs if s.tid in tree and s.cpu == meas_cpu]
+def batch(phase, tree, tid2pid, role, segs, wakeups, meas_cpu, recs, cmd_wall_s):
+    """The batch program's processes (BATCH_PROGRAM): saturation = CPU over the program's own lifetime, the dominant
+    thread's share, disk and sleep shares; the rest of the tree is reported beside it."""
+    prog = BATCH_PROGRAM.get(phase)
+    pids = set(tid2pid.get(x, x) for x in tree)
+    prog_pids = {p for p in pids if role.get(p) == prog} if prog else pids
+    prog_tids = {t for t in tree if tid2pid.get(t, t) in prog_pids}
+    rows = [s for s in segs if s.tid in prog_tids and s.cpu == meas_cpu]
     run_by_tid = defaultdict(float)
     for s in rows:
         run_by_tid[s.tid] += s.run
     total_run_ms = sum(run_by_tid.values())
     dominant = max(run_by_tid.values()) if run_by_tid else 0.0
-    cpu_us = sum(t["utime_us"] + t["stime_us"] for pid, t in ts_by_pid.items() if pid in set(tid2pid.get(x, x) for x in tree))
-    blkio = sum(t["blkio_delay_ns"] for pid, t in ts_by_pid.items() if pid in set(tid2pid.get(x, x) for x in tree))
-    return {"perf_run_ms": round(total_run_ms, 1), "phase_span_s": round(span_s, 2),
-            "saturation_perf": round(total_run_ms / 1000.0 / span_s, 4) if span_s else None,
-            "taskstats_cpu_s": round(cpu_us / 1e6, 3), "saturation_taskstats": round(cpu_us / 1e6 / span_s, 4) if span_s else None,
-            "threads_with_runs": len(run_by_tid), "dominant_thread_share": round(dominant / total_run_ms, 4) if total_run_ms else None,
-            "blkio_delay_s": round(blkio / 1e9, 4)}
+    prog_recs = [recs[p] for p in prog_pids if p in recs]
+    cpu_ns = sum(r["cpu_ns"] for r in prog_recs)
+    life_s = max((r["etime_us"] for r in prog_recs), default=0) / 1e6
+    blkio = sum(r["blkio_ns"] for r in prog_recs)
+    off = defaultdict(float)
+    wakes, _ = merge_resumes(rows, wakeups)
+    by_tid = defaultdict(list)
+    for w in wakes:
+        by_tid[w.tid].append(w)
+    for ws in by_tid.values():
+        for a, b in zip(ws, ws[1:]):
+            kind = "D" if a.state.startswith("D") else "S" if a.state.startswith("S") else "R"
+            off[kind] += max((b.t_wake - a.t_end) * 1000.0, 0.0)
+    other = sorted({role.get(p, "?") for p in pids - prog_pids})
+    return {"program": prog, "processes": len(prog_pids), "threads_with_runs": len(run_by_tid),
+            "lifetime_s": round(life_s, 3), "cmd_wall_s": round(cmd_wall_s, 2) if cmd_wall_s else None,
+            "perf_run_s": round(total_run_ms / 1000.0, 3), "taskstats_cpu_s": round(cpu_ns / 1e9, 3),
+            "saturation": round(cpu_ns / 1e9 / life_s, 4) if life_s else None,
+            "saturation_perf": round(total_run_ms / 1000.0 / life_s, 4) if life_s else None,
+            "dominant_thread_share": round(dominant / total_run_ms, 4) if total_run_ms else None,
+            "thread_cpu_share_top5": sorted((round(v / total_run_ms, 4) for v in run_by_tid.values()), reverse=True)[:5] if total_run_ms else [],
+            "blkio_delay_s": round(blkio / 1e9, 4), "blkio_share_of_lifetime": round(blkio / 1e9 / life_s, 4) if life_s else None,
+            "off_cpu_after_D_s": round(off["D"] / 1000.0, 3), "off_cpu_after_S_s": round(off["S"] / 1000.0, 3), "off_cpu_after_R_s": round(off["R"] / 1000.0, 3),
+            "blkio_invalid_threads": sum(r["blkio_invalid_threads"] for r in prog_recs),
+            "other_roles_in_tree": other}
 
 
 # ---- driver ----------------------------------------------------------------
@@ -384,21 +447,19 @@ def analyze_phase(D, phase, meas_cpu, edges):
     if not all(os.path.exists(p) for p in (th, wk, fk, ts)):
         return {"missing": [p for p in (th, wk, fk, ts) if not os.path.exists(p)]}
     segs = load_segments(th); wakeups = load_wakeups(wk); forks, exits = load_forks(fk); ts_rows, trailer = load_taskstats(ts)
-    # taskstats exit time on the perf clock: recv_mono_ns is CLOCK_MONOTONIC, as is perf's -k CLOCK_MONOTONIC
-    ts_by_pid = {}
-    for r in ts_rows:
-        if r["type"] == "tgid":
-            r["_t_exit"] = r["recv_mono_ns"] / 1e9
-            ts_by_pid[r["id"]] = r
-    root, tree, tid2pid, role, parent_pid, out_by_comm = build_tree(phase, segs, forks, ts_rows, meas_cpu)
+    # taskstats receive time is CLOCK_MONOTONIC, as is perf's -k CLOCK_MONOTONIC
+    recs = process_records(ts_rows)
+    root, tree, tid2pid, role, parent_pid, out_by_comm = build_tree(phase, segs, forks, recs, meas_cpu)
     e = edges.get(phase, {})
     span_s = (e["end"] - e["start"]) / 1e9 if "start" in e and "end" in e else (segs[-1].t_end - segs[0].t_in if segs else 0.0)
+    cmd_wall_s = e.get("cmd_wall_s")
     res = {"root_tid": root, "root_comm": role.get(tid2pid.get(root, root)) if root is not None else None,
            "tree_threads": len(tree), "tree_processes": len(set(tid2pid.get(t, t) for t in tree)),
-           "taskstats_rows": len(ts_rows), "taskstats_trailer": trailer, "fork_rows": len(forks), "exit_rows": len(exits),
-           "phase_span_s": round(span_s, 2),
+           "taskstats_rows": len(ts_rows), "taskstats_processes": len(recs), "taskstats_trailer": trailer,
+           "fork_rows": len(forks), "exit_rows": len(exits),
+           "phase_span_s": round(span_s, 2), "cmd_wall_s": round(cmd_wall_s, 2) if cmd_wall_s else None,
            "outside_on_measured_cpu": dict(sorted(out_by_comm.items(), key=lambda kv: -kv[1]["run_ms"])[:25])}
-    roles, merged, n_rows, n_wakes = role_shapes(tree, tid2pid, role, segs, wakeups, meas_cpu, ts_by_pid)
+    roles, merged, n_rows, n_wakes = role_shapes(tree, tid2pid, role, segs, wakeups, meas_cpu, recs)
     res["segments_in_tree"] = n_rows; res["wakes_in_tree"] = n_wakes; res["resumes_merged"] = merged
     res["roles"] = dict(sorted(roles.items(), key=lambda kv: -(kv[1]["cpu_per_process_us"].get("sum") or 0)))
     role_counts = defaultdict(int)
@@ -406,21 +467,25 @@ def analyze_phase(D, phase, meas_cpu, edges):
         role_counts[role.get(pid, "?")] += 1
     res["processes_by_role"] = dict(sorted(role_counts.items(), key=lambda kv: -kv[1]))
     if PHASE_ROOT.get(phase) in ("make", "dkms"):
-        jobs, makes = jobs_of(tree, tid2pid, role, parent_pid, forks, exits, ts_by_pid)
+        jobs, makes = jobs_of(tree, tid2pid, role, parent_pid, forks, exits, recs)
         shapes = defaultdict(int)
         for j in jobs:
             shapes[" ".join(j["roles"])] += 1
+        compile_jobs = [j for j in jobs if any(r in ("cc1", "cc1plus") for r in j["roles"])]
         res["jobs"] = {"count": len(jobs), "makes": len(makes), "concurrency": concurrency(jobs),
+                       "compile_jobs": len(compile_jobs), "compile_concurrency": concurrency(compile_jobs),
+                       "compile_job_lifetime_ms": dist([(j["end"] - j["start"]) * 1000.0 for j in compile_jobs if j["start"] is not None and j["end"] is not None]),
                        "members_per_job": dist([len(j["members"]) for j in jobs]),
                        "job_lifetime_ms": dist([(j["end"] - j["start"]) * 1000.0 for j in jobs if j["start"] is not None and j["end"] is not None]),
                        "shapes": dict(sorted(shapes.items(), key=lambda kv: -kv[1])[:20])}
-        res["dispatch"] = dispatch(tree, tid2pid, role, segs, forks, meas_cpu, ts_by_pid)
+        res["dispatch"] = dispatch(tree, tid2pid, role, segs, forks, meas_cpu, recs)
     else:
-        res["batch"] = batch(tree, tid2pid, role, segs, wakeups, meas_cpu, ts_by_pid, span_s)
+        res["batch"] = batch(phase, tree, tid2pid, role, segs, wakeups, meas_cpu, recs, cmd_wall_s)
     return res
 
 
 def load_edges(D):
+    """Phase edges on the monotonic clock (edges.jsonl) plus the command's own wall time (phases.jsonl)."""
     edges = defaultdict(dict)
     p = os.path.join(D, "edges.jsonl")
     if os.path.exists(p):
@@ -430,6 +495,15 @@ def load_edges(D):
             except ValueError:
                 continue
             edges[e["phase"]][e["edge"]] = e["mono_ns"]
+    p = os.path.join(D, "phases.jsonl")
+    if os.path.exists(p):
+        for line in open(p):
+            try:
+                e = json.loads(line)
+            except ValueError:
+                continue
+            edges[e["phase"]]["cmd_wall_s"] = (e["end_us"] - e["start_us"]) / 1e6
+            edges[e["phase"]]["rc"] = e["rc"]
     return edges
 
 
@@ -457,15 +531,15 @@ def main():
         if "missing" in r:
             print(f"{ph}: missing {r['missing']}"); continue
         print(f"{ph}: root {r['root_comm']}[{r['root_tid']}] tree {r['tree_processes']} procs / {r['tree_threads']} threads, "
-              f"span {r['phase_span_s']} s, segments {r['segments_in_tree']} wakes {r['wakes_in_tree']} merged {r['resumes_merged']}, "
+              f"cmd {r['cmd_wall_s']} s (edges {r['phase_span_s']} s), segments {r['segments_in_tree']} wakes {r['wakes_in_tree']} merged {r['resumes_merged']}, "
               f"taskstats rows {r['taskstats_rows']} enobufs {r['taskstats_trailer'].get('enobufs')}")
         for name, rr in list(r["roles"].items())[:12]:
             c = rr["cpu_per_process_us"]
-            print(f"  {name:16s} procs {rr['processes']:5d} wakes {rr['wakes']:7d} run/wake p50 {rr['run_per_wake_ms'].get('p50')} ms "
-                  f"cpu/proc p50 {c.get('p50')} us  blkio/proc p50 {rr['blkio_delay_per_process_ns'].get('p50')} ns  perf/ts {rr['perf_over_taskstats_cpu'].get('p50')}")
+            print(f"  {name:16s} procs {rr['processes']:5d} wakes {rr['wakes']:7d} (per proc p50 {rr['wakes_per_process'].get('p50')}) run/wake p50 {rr['run_per_wake_ms'].get('p50')} ms "
+                  f"cpu/proc p50 {c.get('p50')} us  blkio/proc p50 {rr['blkio_delay_per_process_ns'].get('p50')} ns  perf/ts p50 {rr['perf_over_taskstats_cpu'].get('p50')}")
         if "jobs" in r:
             j = r["jobs"]
-            print(f"  jobs {j['count']} makes {j['makes']} concurrency max {j['concurrency']['max']} mean {j['concurrency']['mean_busy']} "
+            print(f"  jobs {j['count']} (compile {j['compile_jobs']}, live max {j['compile_concurrency']['max']} mean {j['compile_concurrency']['mean_busy']}) makes {j['makes']} concurrency max {j['concurrency']['max']} mean {j['concurrency']['mean_busy']} "
                   f"members/job p50 {j['members_per_job'].get('p50')}; dispatch p50 {r['dispatch']['per_dispatch_ms'].get('p50')} ms over {r['dispatch']['forks']} forks")
             for shape, n in list(j["shapes"].items())[:6]:
                 print(f"    {n:6d} × {shape}")

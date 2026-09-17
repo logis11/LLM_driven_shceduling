@@ -78,8 +78,8 @@ listener_start() { # listener_start <phase>
 }
 listener_stop() { # listener_stop <phase>
   sudo kill -INT "$LISTENER_PID" 2>/dev/null; wait "$LISTENER_PID" 2>/dev/null
-  rec "taskstats.$1.rows" "$(grep -vc '^#\|^recv_mono' "$OUT/taskstats.$1.tsv" 2>/dev/null || echo 0)"
-  rec "taskstats.$1.enobufs" "$(grep -c ENOBUFS "$OUT/taskstats.$1.err" 2>/dev/null || echo 0)"
+  rec "taskstats.$1.rows" "$(grep -vc '^#\|^recv_mono' "$OUT/taskstats.$1.tsv" 2>/dev/null; true)"
+  rec "taskstats.$1.enobufs" "$(grep -c ENOBUFS "$OUT/taskstats.$1.err" 2>/dev/null; true)"
 }
 # smoke: one pinned process must produce one exit record
 listener_start smoke; taskset -c "$MEAS_CPU" sh -c 'true'; sleep 1; listener_stop smoke
@@ -104,8 +104,8 @@ phase() {
   sudo perf script -i "$OUT/perf.$name.data" -F time,event,trace 2>> "$OUT/perf.$name.log" | grep -E "sched_process_fork|sched_wakeup_new|sched_process_exit" | gzip > "$OUT/perf.$name.forks.txt.gz"
   rec "perf.$name.forks.rows" "$(gzip -dc "$OUT/perf.$name.forks.txt.gz" | wc -l)"
   rec "perf.$name.data_bytes" "$(stat -c %s "$OUT/perf.$name.data" 2>/dev/null || echo 0)"
-  if [ "$MODE" = dry ]; then gzip -f "$OUT/perf.$name.data"; else rm -f "$OUT/perf.$name.data"; fi
   sudo chown -R "$(id -u):$(id -g)" "$OUT" 2>/dev/null
+  if [ "$MODE" = dry ]; then gzip -f "$OUT/perf.$name.data"; else rm -f "$OUT/perf.$name.data"; fi
 }
 unmeasured() { pin_harness "$@"; }   # setup steps on the harness CPUs, no instruments
 
@@ -119,9 +119,14 @@ rec corpus.sha256 "$(sha256sum /tmp/linux-6.6.tar.xz | cut -d' ' -f1)"
 unmeasured tar -xf /tmp/linux-6.6.tar.xz -C /tmp; rec corpus.untar.rc "$?"
 unmeasured make -C "$CORPUS" defconfig > "$OUT/defconfig.log" 2>&1; rec corpus.defconfig.rc "$?"
 rec gcc.version "$(gcc --version | head -1)"; rec make.version "$(make --version | head -1)"
-grep -n -- '-pipe' "$CORPUS/Makefile" | head -3 > "$OUT/kbuild-pipe.txt"   # whether cc1 and as overlap (D2: read from the run)
+rec kbuild.pipe_lines "$(grep -c -- '-pipe' "$CORPUS/Makefile"; true)"   # -pipe would make cc1 and as overlap (D2: read from the run)
 
 # ---- builds (D4, D5) ----------------------------------------------------
+# an unmeasured warm-up build on the harness CPUs, then clean: the host tools (scripts/, objtool) stay built, so the
+# three measured builds compile the same object set (dry run 1: the first build carried 37 extra host-tool jobs)
+# shellcheck disable=SC2086
+unmeasured make -C "$CORPUS" -j3 $BUILD_TARGETS > "$OUT/warmup.log" 2>&1; rec build.warmup.rc "$?"
+unmeasured make -C "$CORPUS" clean > /dev/null 2>&1
 # shellcheck disable=SC2086
 phase build-j8-warm -- make -C "$CORPUS" -j8 $BUILD_TARGETS
 unmeasured make -C "$CORPUS" clean > /dev/null 2>&1
@@ -136,7 +141,7 @@ phase build-j1-warm -- make -C "$CORPUS" -j1 $BUILD_TARGETS
 if [ -n "$V4L2_VER" ]; then
   unmeasured sudo dkms remove "v4l2loopback/$V4L2_VER" --all > "$OUT/dkms.remove.log" 2>&1; rec dkms.remove.rc "$?"
   phase dkms -- sudo dkms build "v4l2loopback/$V4L2_VER" -k "$(uname -r)"
-  cp "/var/lib/dkms/v4l2loopback/$V4L2_VER/build/make.log" "$OUT/dkms.make.log" 2>/dev/null
+  sudo find /var/lib/dkms/v4l2loopback -name make.log -exec cp {} "$OUT/dkms.make.log" \; 2>/dev/null; sudo chown "$(id -u)" "$OUT/dkms.make.log" 2>/dev/null
 fi
 
 # ---- batch programs (D7) ------------------------------------------------
@@ -154,17 +159,21 @@ fi
 phase train -- python3 "$HERE/train.py" "$TRAIN_STEPS" --record "$OUT/train.json"
 
 # tracker full rescan: a fresh XDG data home over a corpus copy; the miner runs until tracker3 reports it idle or the cap
-TH=/tmp/tracker-home; rm -rf "$TH"; mkdir -p "$TH/Documents"; cp -r "$CORPUS/Documentation" "$TH/Documents/corpus" 2>/dev/null
+TH=/tmp/tracker-home; rm -rf "$TH"; mkdir -p "$TH/Documents" "$TH/.config"; cp -r "$CORPUS/Documentation" "$TH/Documents/corpus" 2>/dev/null
+printf 'XDG_DOCUMENTS_DIR="$HOME/Documents"\nXDG_DESKTOP_DIR="$HOME/Documents"\nXDG_DOWNLOAD_DIR="$HOME/Documents"\nXDG_MUSIC_DIR="$HOME/Documents"\nXDG_PICTURES_DIR="$HOME/Documents"\nXDG_VIDEOS_DIR="$HOME/Documents"\n' > "$TH/.config/user-dirs.dirs"
+rec tracker.corpus_files "$(find "$TH/Documents/corpus" -type f | wc -l)"
 MINER="$(ls /usr/libexec/tracker-miner-fs-3 /usr/libexec/tracker-miner-fs 2>/dev/null | head -1)"; rec tracker.miner "${MINER:-none}"
 if [ -n "$MINER" ]; then
   cat > "$WORK/tracker-run.sh" <<EOF
 export HOME=$TH XDG_DATA_HOME=$TH/.local/share XDG_CONFIG_HOME=$TH/.config XDG_CACHE_HOME=$TH/.cache
 "$MINER" > "$OUT/tracker.miner.log" 2>&1 &
 M=\$!
+taskset -cp $MEAS_HARNESS_CPUS \$\$ > /dev/null 2>&1   # the poll loop leaves the measured CPU; the miner keeps it
 end=\$((\$(date +%s) + $TRACKER_S)); idle=0
 while [ \$(date +%s) -lt \$end ]; do
   sleep 5
-  if tracker3 status 2>/dev/null | grep -qi "idle"; then idle=\$((idle + 1)); else idle=0; fi
+  st=\$(tracker3 status 2>/dev/null)
+  if echo "\$st" | grep -qi "idle" && ! echo "\$st" | grep -q "indexed: 0 files"; then idle=\$((idle + 1)); else idle=0; fi
   [ \$idle -ge 3 ] && break
 done
 tracker3 status > "$OUT/tracker.status.txt" 2>&1
