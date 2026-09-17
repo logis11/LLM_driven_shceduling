@@ -1,0 +1,56 @@
+name: meas-build
+
+# 9.6 campaign: the build archetypes and the batch programs, pinned single-core
+# (research-slice changelog D3–D8; method
+# _dev/research/jioh/task-9.6-compile/campaign/method.md). Started by a push
+# changing .github/campaign-build.json, which names the repeats and the mode
+# (dry | full). Registry tag meas-ci:build:<run_number>. One artifact per repeat.
+
+on:
+  push:
+    branches: [jioh/dataset-rebuild]
+    paths: [.github/campaign-build.json]
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      mode: ${{ steps.plan.outputs.mode }}
+      count: ${{ steps.plan.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        run: |
+          python3 - >> "$GITHUB_OUTPUT" <<'PY'
+          import json
+          c = json.load(open(".github/campaign-build.json"))
+          inc = [{"repeat": r} for r in c.get("repeats", [])]
+          print("matrix=" + json.dumps({"include": inc}))
+          print("mode=" + c.get("mode", "full"))
+          print("count=" + str(len(inc)))
+          PY
+  run:
+    needs: plan
+    if: needs.plan.outputs.count != '0'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: MEAS_OUT=/tmp/meas bash dataset/tools/meas/build/run.sh ${{ matrix.repeat }} ${{ needs.plan.outputs.mode }}
+      - name: own the output
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" /tmp/meas && sudo chmod -R a+rX /tmp/meas
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meas-build-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}
+          path: /tmp/meas
+          if-no-files-found: error

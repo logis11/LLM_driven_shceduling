@@ -1,0 +1,63 @@
+# Task 9.6 — measurement campaign method (2026-09-17)
+
+The observation behind `build-orchestrator`, `compiler-child` (changelog D2–D5) and `cpu-batch` (D7), run on GitHub-hosted runners (phase decision 5), pinned to one CPU (9.5 follow-ups decision 3). Written before any measurement, with the analysis rules of D8 fixed here; amended only by a dated entry in §8. Tooling: `dataset/tools/meas/build/` (`run.sh`, `taskstats_listen.c`, `train.py`), workflow `.github/workflows/meas-build.yml`, trigger `.github/campaign-build.json`.
+
+## 1. Runs
+
+One run, five repeats in one batch (D5), tagged `meas-ci:build:<run_number>`; one artifact per repeat. Each repeat is one runner (`ubuntu-24.04`, 4 vCPU): the measured load on the last vCPU, everything else — the run script, perf, the taskstats listener, package installs, corpus setup — on the other three (`pin.sh`). The runner's CPU model, kernel, disk type (`/sys/block/*/queue/rotational`, `lsblk`) and the kernel-config lines for taskstats, delay accounting and I/O accounting are recorded per repeat (`spec.json`, `report.kv`, `kconfig.txt`).
+
+## 2. Phases
+
+In this order, each one command under `phase.sh` on the measured CPU, both instruments (§3) over the whole phase, phase edges on both clocks in `edges.jsonl`:
+
+| Phase | Command (full mode) | For | Reads |
+|---|---|---|---|
+| `build-j8-warm` | `make -C linux-6.6 -j8` after `make defconfig`, sources in the page cache from the untar | `build-orchestrator`, `compiler-child`: the primary phase, every parameter (D4, D5) | per-role runs, waits, CPU totals; dispatch (§5) |
+| `build-j8-cold` | `make clean`, `sync`, `vm.drop_caches=3`, then `make -j8` | the block-I/O delay per role under a cold cache, reported beside the warm figures (D5, D8 iii) | same |
+| `build-j1-warm` | `make clean`, then `make -j1` (cache warm from the cold build's reads) | the `-j` invariance check (D4): per-role CPU at `-j1` against `-j8` | per-role CPU totals |
+| `dkms` | `dkms build v4l2loopback/<ver> -k <kernel>` after `dkms remove … --all` (the package's own postinst build is unpinned and unmeasured) | the DKMS structural check (D6): the chain per object and the per-role CPU shape against the kernel build; `dkms` runs `make -j$(nproc)`, which is `-j1` under the pin | roles, chain, CPU per role |
+| `clamscan` | `clamscan -r -i linux-6.6/Documentation` after `freshclam` (the signature database's version recorded from `clamscan --version`) | `cpu-batch` binding `clamscan` (D7) | saturation, threads, waits |
+| `ffmpeg` | `ffmpeg -i clip.mp4 -c:v libx264 -preset medium -crf 23 -c:a aac out.mp4`; the clip is a generated 60 s 1280×720 30 fps test pattern with a sine tone (design) | `cpu-batch` binding `ffmpeg` | same |
+| `handbrake` | `HandBrakeCLI -i clip.mp4 -o out.mp4 --preset "Fast 720p30"` (if the package installs) | `cpu-batch` binding `HandBrakeCLI` | same |
+| `train` | `python3 train.py 300` — a small convolutional network on synthetic 32×32 images for 300 steps, batch 64, PyTorch CPU build (design; `torch.get_num_threads()` recorded) | `cpu-batch` binding `python3` | same |
+| `tracker` | `tracker-miner-fs-3` under `dbus-run-session` with a fresh XDG data home over a copy of `linux-6.6/Documentation`, until `tracker3 status` reports the miners idle three polls in a row or 600 s | `cpu-batch` binding `tracker-miner-fs-3` in full-rescan state (the everyday daemon is 9.7's) | same |
+
+Dry mode (one repeat, before the campaign): the builds on `init/ mm/` only, `Documentation/admin-guide` for the scan, a 10 s clip, 30 training steps, a 120 s cap on the miner; `perf.data` kept gzipped. The `chrome` spoof is design by construction and is not measured (D7). Which of the batch programs share `cpu-batch` is decided on the results by the criterion of D7: a program is `cpu-batch` when it is runnable for the whole of its lifetime on one dominant thread; sustained I/O waits or several equal threads give it its own entry.
+
+## 3. Instruments
+
+- **`perf sched record -k CLOCK_MONOTONIC -a`** as root over the whole phase, on the harness CPUs, stopped with SIGINT when the phase's command exits. Read with `perf sched timehist --state` (per schedule: wait time, scheduling delay, run time, the state the task switched out in), `perf sched timehist -w` (wakeup rows with the waker), and `perf script` for the `sched_process_fork`, `sched_wakeup_new` and `sched_process_exit` rows (parent and child pids, times). The three text outputs, gzipped, are the released raw record; `perf.data` is kept in dry runs only. All CPUs are recorded so that a wakeup issued from another CPU (an I/O completion) is seen; rows on the harness CPUs are outside every process tree of interest and are not counted.
+- **taskstats** (`taskstats_listen.c`, compiled on the runner; Documentation/accounting/taskstats.rst): a listener registered on the measured CPU's cpumask, on the harness CPUs, under sudo, one row per exiting thread (`pid`) and per thread group at its last exit (`tgid`): comm, pid, parent pid, exit code, elapsed µs, user and system CPU µs, `cpu_run_real_total`, runnable delay, block-I/O delay and count, swap-in, free-pages and thrashing delays, voluntary and involuntary switches, faults, I/O bytes, high-water memory, stamped with the receive time on CLOCK_MONOTONIC and CLOCK_REALTIME. `kernel.task_delayacct=1` is set before the first phase so every task of the phases carries delay fields. Receive buffer 64 MB; ENOBUFS occurrences are counted in the file's trailer and `report.kv`. A smoke check before the phases confirms one pinned process yields one record.
+- **`phase.sh`** for the phase edges and the pin record; `edges.jsonl` for the same edges on the monotonic clock; `clock.json` for the clock pair at run start.
+- Versions recorded: kernel, gcc, make, perf, dkms and the module version, clamav and its database, ffmpeg, HandBrakeCLI, PyTorch, tracker; whether `linux-6.6/Makefile` passes `-pipe` (`kbuild-pipe.txt`), which decides whether `cc1` and `as` overlap (D2).
+
+## 4. Roles and the chain (D2)
+
+A process's role is its comm at exit (taskstats) and at each schedule (perf); the tree is the fork rows' parent-child pairs plus taskstats' parent pid. A make job is the subtree rooted at a shell forked by a `make`; its members are the roles the run exhibits — expected from kbuild's source: `sh`, `gcc`, `cc1`, `as`, optionally `objtool`, `fixdep`, `rm`; a sub-make per directory; `modpost`/`modfinal` sub-makes — and a role the run does not exhibit is not in the chain. The concurrency at the cap is the count of live jobs (shells with a live subtree) over time.
+
+## 5. Analysis rules (D8, fixed before the run)
+
+- **Distribution form.** Every parameter is a pooled quantile table (p1, p5, p10, p25, p50, p75, p90, p95, p99, p99.9; µs) over the five repeats, tagged with the run id (9.5 D17); the per-repeat p50 is the spread.
+- **Wake.** A timehist row is a segment; it is a wake when a wakeup row for that thread lies between its previous schedule-out and this schedule-in; otherwise a resume after preemption, merged into the preceding wake (9.5 follow-ups decision 4).
+- **Role shape.** Per role, the sequence of wakes (run) and off-CPU intervals between them, from the measured CPU's rows; an off-CPU interval is a *disk wait* when the preceding schedule-out state is uninterruptible (`D`) and the process's taskstats block-I/O delay accounts for it, a *sleep* when the state is interruptible, and neither when it is a runnable wait. Encoded as the wake-defined event form of the measured interactive archetypes (9.5 D9): per role, the quantiles of run per wake and of each off-CPU kind, with the per-process CPU total (taskstats `utime + stime`) as the finite quantity.
+- **`disk_wait`.** Per role, the quantiles of per-process `blkio_delay_total` (and its count) from the warm `-j8` phase; a role whose delay is below the instrument's resolution carries no WAIT and says so; the cold phase's figures are reported beside it.
+- **`dispatch_overhead`.** For each `make` process, the run segments between consecutive `sched_process_fork` rows whose parent is that make, pooled over all makes of the build; the cross-check is each make's `utime + stime` divided by the number of its forks; both reported.
+- **`spawn_count` default.** The number of jobs (shells forked by makes) in the warm `-j8` phase, per repeat and pooled.
+- **Invariance check (`build-j1-warm`).** Per role, the CPU total per process at `-j1` against `-j8`, warm; reported as the ratio of pooled medians with the per-repeat spread. A large difference is a stated limitation of the `-j8` values, not a re-decision (D4).
+- **DKMS check.** The roles and chain per object in the `dkms` phase against the kernel build's; the per-role CPU shape (median, p90). Reported; values come from the kernel build (D6).
+- **Batch programs.** Per program: CPU total over elapsed (saturation), thread count and the share of CPU on the dominant thread, disk-wait and sleep share of lifetime, from both instruments; the D7 criterion applied on the pooled figures.
+- **Instrument cross-check.** Per process, the sum of perf run segments on the measured CPU against taskstats `utime + stime`; the discrepancy bounds the tracing overhead and any lost rows.
+
+Any departure the data forces is a dated deviation in §8, not a re-fit.
+
+## 6. Scope, written into every archetype
+
+Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel, CPU model and disk type as recorded per repeat); one CPU, the rest of the machine idealised; linux-6.6 `defconfig` with the runner's gcc and make; the runner's own agent processes share the measured CPU and are outside every tree; no human, no interactive session, parallelism itself unobserved (the pin serialises the build). The `-j8` level is the `nproc` rule on an 8-thread desktop (D4).
+
+## 7. Release
+
+Raw records per repeat (the three perf text dumps, the taskstats files, `phases.jsonl`, `edges.jsonl`, `report.kv`, `spec.json`, logs) are released as a GitHub release named in the registry entry at fold-in, as 9.5 did.
+
+## 8. Amendments
+
+(none)
