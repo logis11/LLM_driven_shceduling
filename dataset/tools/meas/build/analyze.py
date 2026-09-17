@@ -254,17 +254,19 @@ def build_tree(phase, segs, forks, recs, meas_cpu):
     return root, tree, tid2pid, role, parent_pid, {k: {"rows": v[0], "run_ms": round(v[1], 3)} for k, v in out_by_comm.items()}
 
 
-JOB_KINDS = (("object", ("fixdep",)), ("link", ("ld", "collect2")))
+JOB_KINDS = (("object", ("fixdep",)), ("link", ("ld", "collect2", "ld.bfd", "ld.lld")), ("archive", ("ar",)),
+             ("probe", ("cc1", "cc1plus", "gcc", "gcc-13", "as", "cpp")))
 
 
 def job_kind(roles):
     """kbuild's object recipes run `fixdep` after the compiler (Kbuild.include cmd_and_fixdep); its compiler probes
-    (`try-run`, `cc-option`, `as-instr`) never do. A job with fixdep is an object compile; one with a linker and no
-    fixdep a link; any other non-make child of a make is a probe or helper."""
+    (`try-run`, `cc-option`, `as-instr`) never do. A job with fixdep is an object compile; with a linker and no fixdep
+    a link; with `ar` a per-directory archive (cmd_ar_builtin); with a compiler and none of those a compiler probe;
+    anything else (mkdir, a bare shell, pahole-flags.sh) a helper. Only probe members carry the "(probe)" role suffix."""
     for kind, marks in JOB_KINDS:
         if any(m in roles for m in marks):
             return kind
-    return "probe"
+    return "helper"
 
 
 def jobs_of(tree, tid2pid, role, parent_pid, forks, exits, recs):
