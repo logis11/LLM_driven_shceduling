@@ -21,6 +21,8 @@ source "$MEAS/probe/common.sh"        # OUT, KV, rec, run_rec, finish_report
 source "$MEAS/pin.sh"
 pin_self_harness
 REPEAT="$1"; MODE="${2:-full}"
+PHASES="${MEAS_PHASES:-all}"   # comma-separated phase names to run, or all (a dry run of one phase)
+want() { [ "$PHASES" = all ] || case ",$PHASES," in *",$1,"*) return 0;; *) return 1;; esac; }
 CORPUS=/tmp/linux-6.6
 WORK=/tmp/work; mkdir -p "$WORK"
 PH="$MEAS/phase.sh $OUT/phases.jsonl"
@@ -32,7 +34,7 @@ else
   BUILD_TARGETS=""; CLAM_DIR="Documentation"; CLIP_S=60; TRAIN_STEPS=300; TRACKER_S=600
 fi
 
-rec family build; rec repeat "$REPEAT"; rec mode "$MODE"; rec started_utc "$(date -u +%FT%TZ)"
+rec family build; rec repeat "$REPEAT"; rec mode "$MODE"; rec phases "$PHASES"; rec started_utc "$(date -u +%FT%TZ)"
 rec build.targets "${BUILD_TARGETS:-all}"; rec clam.dir "$CLAM_DIR"; rec clip_s "$CLIP_S"; rec train.steps "$TRAIN_STEPS"; rec tracker.max_s "$TRACKER_S"
 pin_record | tee -a "$KV" | sed 's/^/  /' >&2
 python3 "$MEAS/runner_spec.py" > "$OUT/spec.json"
@@ -124,39 +126,51 @@ rec kbuild.pipe_lines "$(grep -c -- '-pipe' "$CORPUS/Makefile"; true)"   # -pipe
 # ---- builds (D4, D5) ----------------------------------------------------
 # an unmeasured warm-up build on the harness CPUs, then clean: the host tools (scripts/, objtool) stay built, so the
 # three measured builds compile the same object set (dry run 1: the first build carried 37 extra host-tool jobs)
-# shellcheck disable=SC2086
-unmeasured make -C "$CORPUS" -j3 $BUILD_TARGETS > "$OUT/warmup.log" 2>&1; rec build.warmup.rc "$?"
-unmeasured make -C "$CORPUS" clean > /dev/null 2>&1
-# shellcheck disable=SC2086
-phase build-j8-warm -- make -C "$CORPUS" -j8 $BUILD_TARGETS
-unmeasured make -C "$CORPUS" clean > /dev/null 2>&1
-sync; sudo sysctl -q vm.drop_caches=3
-# shellcheck disable=SC2086
-phase build-j8-cold -- make -C "$CORPUS" -j8 $BUILD_TARGETS
-unmeasured make -C "$CORPUS" clean > /dev/null 2>&1
-# shellcheck disable=SC2086
-phase build-j1-warm -- make -C "$CORPUS" -j1 $BUILD_TARGETS
+if want build-j8-warm || want build-j8-cold || want build-j1-warm; then
+  # shellcheck disable=SC2086
+  unmeasured make -C "$CORPUS" -j3 $BUILD_TARGETS > "$OUT/warmup.log" 2>&1; rec build.warmup.rc "$?"
+  unmeasured make -C "$CORPUS" clean > /dev/null 2>&1
+fi
+if want build-j8-warm; then
+  # shellcheck disable=SC2086
+  phase build-j8-warm -- make -C "$CORPUS" -j8 $BUILD_TARGETS
+  unmeasured make -C "$CORPUS" clean > /dev/null 2>&1
+fi
+if want build-j8-cold; then
+  sync; sudo sysctl -q vm.drop_caches=3
+  # shellcheck disable=SC2086
+  phase build-j8-cold -- make -C "$CORPUS" -j8 $BUILD_TARGETS
+  unmeasured make -C "$CORPUS" clean > /dev/null 2>&1
+fi
+if want build-j1-warm; then
+  # shellcheck disable=SC2086
+  phase build-j1-warm -- make -C "$CORPUS" -j1 $BUILD_TARGETS
+fi
 
 # ---- dkms structural check (D6): the module rebuilt under the pin, dkms's own -j$(nproc) = -j1 ----
-if [ -n "$V4L2_VER" ]; then
+if [ -n "$V4L2_VER" ] && want dkms; then
   unmeasured sudo dkms remove "v4l2loopback/$V4L2_VER" --all > "$OUT/dkms.remove.log" 2>&1; rec dkms.remove.rc "$?"
   phase dkms -- sudo dkms build "v4l2loopback/$V4L2_VER" -k "$(uname -r)"
   sudo find /var/lib/dkms/v4l2loopback -name make.log -exec cp {} "$OUT/dkms.make.log" \; 2>/dev/null; sudo chown "$(id -u)" "$OUT/dkms.make.log" 2>/dev/null
 fi
 
 # ---- batch programs (D7) ------------------------------------------------
-sudo freshclam > "$OUT/freshclam.log" 2>&1; rec freshclam.rc "$?"
-rec clamav.db "$(clamscan --version 2>/dev/null)"; ls -la /var/lib/clamav > "$OUT/clamav.db.txt" 2>&1
-phase clamscan -- clamscan -r -i "$CORPUS/$CLAM_DIR"
+if want clamscan; then
+  sudo freshclam > "$OUT/freshclam.log" 2>&1; rec freshclam.rc "$?"
+  rec clamav.db "$(clamscan --version 2>/dev/null)"; ls -la /var/lib/clamav > "$OUT/clamav.db.txt" 2>&1
+  phase clamscan -- clamscan -r -i "$CORPUS/$CLAM_DIR"
+fi
 
-unmeasured ffmpeg -y -loglevel error -f lavfi -i "testsrc2=size=1280x720:rate=30" -f lavfi -i "sine=frequency=440" \
-  -t "$CLIP_S" -c:v libx264 -preset ultrafast -c:a aac "$WORK/clip.mp4" > "$OUT/clip.log" 2>&1; rec clip.rc "$?"
-phase ffmpeg -- ffmpeg -y -i "$WORK/clip.mp4" -c:v libx264 -preset medium -crf 23 -c:a aac "$WORK/ffmpeg-out.mp4"
-grep -m3 -E "using cpu capabilities|threads|frame=" "$OUT/cmd.ffmpeg.log" > "$OUT/ffmpeg.threads.txt" 2>/dev/null
-if command -v HandBrakeCLI > /dev/null 2>&1; then
+if want ffmpeg || want handbrake; then unmeasured ffmpeg -y -loglevel error -f lavfi -i "testsrc2=size=1280x720:rate=30" -f lavfi -i "sine=frequency=440" \
+  -t "$CLIP_S" -c:v libx264 -preset ultrafast -c:a aac "$WORK/clip.mp4" > "$OUT/clip.log" 2>&1; rec clip.rc "$?"; fi
+if want ffmpeg; then
+  phase ffmpeg -- ffmpeg -y -i "$WORK/clip.mp4" -c:v libx264 -preset medium -crf 23 -c:a aac "$WORK/ffmpeg-out.mp4"
+  grep -m3 -E "using cpu capabilities|threads|frame=" "$OUT/cmd.ffmpeg.log" > "$OUT/ffmpeg.threads.txt" 2>/dev/null
+fi
+if want handbrake && command -v HandBrakeCLI > /dev/null 2>&1; then
   phase handbrake -- HandBrakeCLI -i "$WORK/clip.mp4" -o "$WORK/hb-out.mp4" --preset "Fast 720p30"
 fi
-phase train -- python3 "$HERE/train.py" "$TRAIN_STEPS" --record "$OUT/train.json"
+if want train; then phase train -- python3 "$HERE/train.py" "$TRAIN_STEPS" --record "$OUT/train.json"; fi
 
 # tracker full rescan: a fresh XDG data home over a corpus copy; the miner runs until tracker3 reports it idle or the cap
 # each XDG special directory gets its own path: a path in both the miner's recursive and single lists is dropped
@@ -166,9 +180,17 @@ cp -r "$CORPUS/Documentation" "$TH/Documents/corpus" 2>/dev/null
 printf 'XDG_DOCUMENTS_DIR="$HOME/Documents"\nXDG_DESKTOP_DIR="$HOME/Desktop"\nXDG_DOWNLOAD_DIR="$HOME/Downloads"\nXDG_MUSIC_DIR="$HOME/Music"\nXDG_PICTURES_DIR="$HOME/Pictures"\nXDG_VIDEOS_DIR="$HOME/Videos"\n' > "$TH/.config/user-dirs.dirs"
 rec tracker.corpus_files "$(find "$TH/Documents/corpus" -type f | wc -l)"
 MINER="$(ls /usr/libexec/tracker-miner-fs-3 /usr/libexec/tracker-miner-fs 2>/dev/null | head -1)"; rec tracker.miner "${MINER:-none}"
-if [ -n "$MINER" ]; then
+if [ -n "$MINER" ] && want tracker; then
+  # the miner's settings through GLib's keyfile backend (dconf is not on the session bus of a fresh home): the
+  # corpus directory as the one recursive index root, no initial sleep, the miner's own decisions logged
   cat > "$WORK/tracker-run.sh" <<EOF
 export HOME=$TH XDG_DATA_HOME=$TH/.local/share XDG_CONFIG_HOME=$TH/.config XDG_CACHE_HOME=$TH/.cache
+export GSETTINGS_BACKEND=keyfile TRACKER_DEBUG=config,miner-fs-events,status,monitors
+gsettings set org.freedesktop.Tracker3.Miner.Files index-recursive-directories "['$TH/Documents']"
+gsettings set org.freedesktop.Tracker3.Miner.Files index-single-directories "[]"
+gsettings set org.freedesktop.Tracker3.Miner.Files initial-sleep 0
+gsettings set org.freedesktop.Tracker3.Miner.Files index-on-battery true
+gsettings list-recursively org.freedesktop.Tracker3.Miner.Files > "$OUT/tracker.settings.txt" 2>&1
 "$MINER" > "$OUT/tracker.miner.log" 2>&1 &
 M=\$!
 taskset -cp $MEAS_HARNESS_CPUS \$\$ > /dev/null 2>&1   # the poll loop leaves the measured CPU; the miner keeps it
@@ -180,6 +202,7 @@ while [ \$(date +%s) -lt \$end ]; do
   [ \$idle -ge 3 ] && break
 done
 tracker3 status > "$OUT/tracker.status.txt" 2>&1
+tracker3 status --stat >> "$OUT/tracker.status.txt" 2>&1
 kill -INT \$M 2>/dev/null; sleep 2; kill -9 \$M 2>/dev/null; wait \$M 2>/dev/null
 echo "idle_polls=\$idle elapsed=\$((\$(date +%s) - end + $TRACKER_S))"
 EOF
