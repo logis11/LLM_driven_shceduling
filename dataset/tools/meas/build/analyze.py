@@ -30,8 +30,10 @@ import statistics
 import sys
 from collections import defaultdict, namedtuple
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "campaign"))
-from analyze import pct, TASK  # noqa: E402
+import importlib.util as _ilu
+_spec = _ilu.spec_from_file_location("campaign_analyze", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "campaign", "analyze.py"))
+_campaign_analyze = _ilu.module_from_spec(_spec); _spec.loader.exec_module(_campaign_analyze)
+pct, TASK = _campaign_analyze.pct, _campaign_analyze.TASK   # the 9.5 analyzer's percentile and `comm[tid/pid]` parser
 
 Seg = namedtuple("Seg", "t_in t_wake t_end run comm tid pid state cpu")
 
@@ -252,6 +254,19 @@ def build_tree(phase, segs, forks, recs, meas_cpu):
     return root, tree, tid2pid, role, parent_pid, {k: {"rows": v[0], "run_ms": round(v[1], 3)} for k, v in out_by_comm.items()}
 
 
+JOB_KINDS = (("object", ("fixdep",)), ("link", ("ld", "collect2")))
+
+
+def job_kind(roles):
+    """kbuild's object recipes run `fixdep` after the compiler (Kbuild.include cmd_and_fixdep); its compiler probes
+    (`try-run`, `cc-option`, `as-instr`) never do. A job with fixdep is an object compile; one with a linker and no
+    fixdep a link; any other non-make child of a make is a probe or helper."""
+    for kind, marks in JOB_KINDS:
+        if any(m in roles for m in marks):
+            return kind
+    return "probe"
+
+
 def jobs_of(tree, tid2pid, role, parent_pid, forks, exits, recs):
     """make jobs (D2): a non-make child process of a make process, with its subtree; fork and last-exit times."""
     children = defaultdict(list)
@@ -274,7 +289,8 @@ def jobs_of(tree, tid2pid, role, parent_pid, forks, exits, recs):
                 x = stack.pop(); members.append(x); stack.extend(children.get(x, ()))
             starts = [fork_t[x] for x in members if x in fork_t]
             ends = [e for e in (exit_t(x) for x in members) if e is not None]
-            jobs.append({"root": c, "make": m, "members": members, "roles": sorted(role.get(x, "?") for x in members),
+            rs = sorted(role.get(x, "?") for x in members)
+            jobs.append({"root": c, "make": m, "members": members, "roles": rs, "kind": job_kind(rs),
                          "start": min(starts) if starts else None, "end": max(ends) if ends else None})
     jobs.sort(key=lambda j: (j["start"] is None, j["start"]))
     return jobs, makes
@@ -329,7 +345,7 @@ def role_shapes(tree, tid2pid, role, segs, wakeups, meas_cpu, recs):
     for w in wakes:
         by_tid[w.tid].append(w)
     per_role = defaultdict(lambda: {"run_ms": [], "off_D_ms": [], "off_S_ms": [], "off_R_ms": [], "wakes": 0, "threads": set(),
-                                    "procs": set(), "cpu_us": [], "tick_cpu_us": [], "blkio_ns": [], "blkio_count": [], "cpu_delay_ns": [],
+                                    "procs": set(), "cpu_us": [], "ts_cpu_us": [], "tick_cpu_us": [], "blkio_ns": [], "blkio_count": [], "cpu_delay_ns": [],
                                     "etime_us": [], "nvcsw": [], "nivcsw": [], "perf_run_ms_by_pid": defaultdict(float),
                                     "wakes_by_pid": defaultdict(int), "blkio_invalid": 0})
     for tid, ws in by_tid.items():
@@ -349,12 +365,15 @@ def role_shapes(tree, tid2pid, role, segs, wakeups, meas_cpu, recs):
             continue
         r = per_role[role.get(pid, "?")]
         r["procs"].add(pid)
-        r["cpu_us"].append(t["cpu_ns"] / 1000.0); r["tick_cpu_us"].append(t["utime_stime_us"])
+        r["ts_cpu_us"].append(t["cpu_ns"] / 1000.0); r["tick_cpu_us"].append(t["utime_stime_us"])
         r["blkio_ns"].append(t["blkio_ns"]); r["blkio_count"].append(t["blkio_count"]); r["blkio_invalid"] += t["blkio_invalid_threads"]
         r["cpu_delay_ns"].append(t["cpu_delay_ns"]); r["etime_us"].append(t["etime_us"]); r["nvcsw"].append(t["nvcsw"]); r["nivcsw"].append(t["nivcsw"])
     out = {}
     samples = {}
     for name, r in per_role.items():
+        # the process's CPU is the sum of its perf segments on the measured CPU: taskstats stamps its record early in
+        # the exit path, before the teardown (~0.5 ms), which is most of a sub-millisecond process (dry run 2)
+        r["cpu_us"] = [ms * 1000.0 for ms in r["perf_run_ms_by_pid"].values()]
         samples[name] = {"run_ms": r["run_ms"], "off_D_ms": r["off_D_ms"], "off_S_ms": r["off_S_ms"], "off_R_ms": r["off_R_ms"],
                          "cpu_us": r["cpu_us"], "blkio_ns": r["blkio_ns"], "etime_us": r["etime_us"], "wakes_by_pid": list(r["wakes_by_pid"].values())}
         cross = []
@@ -366,7 +385,8 @@ def role_shapes(tree, tid2pid, role, segs, wakeups, meas_cpu, recs):
                      "wakes_per_process": dist(list(r["wakes_by_pid"].values())),
                      "run_per_wake_ms": dist(r["run_ms"]),
                      "off_after_D_ms": dist(r["off_D_ms"]), "off_after_S_ms": dist(r["off_S_ms"]), "off_after_R_ms": dist(r["off_R_ms"]),
-                     "cpu_per_process_us": dist(r["cpu_us"]), "tick_cpu_per_process_us": dist(r["tick_cpu_us"]),
+                     "cpu_per_process_us": dist(r["cpu_us"]), "taskstats_cpu_per_process_us": dist(r["ts_cpu_us"]),
+                     "tick_cpu_per_process_us": dist(r["tick_cpu_us"]),
                      "etime_per_process_us": dist(r["etime_us"]),
                      "blkio_delay_per_process_ns": dist(r["blkio_ns"]), "blkio_count_per_process": dist(r["blkio_count"]),
                      "blkio_invalid_threads": r["blkio_invalid"],
@@ -462,24 +482,30 @@ def analyze_phase(D, phase, meas_cpu, edges):
            "fork_rows": len(forks), "exit_rows": len(exits),
            "phase_span_s": round(span_s, 2), "cmd_wall_s": round(cmd_wall_s, 2) if cmd_wall_s else None,
            "outside_on_measured_cpu": dict(sorted(out_by_comm.items(), key=lambda kv: -kv[1]["run_ms"])[:25])}
-    roles, merged, n_rows, n_wakes, samples = role_shapes(tree, tid2pid, role, segs, wakeups, meas_cpu, recs)
+    jobs, makes = (jobs_of(tree, tid2pid, role, parent_pid, forks, exits, recs) if PHASE_ROOT.get(phase) in ("make", "dkms") else ([], set()))
+    role_key = dict(role)   # roles keyed by comm and job kind: members of probe jobs carry " (probe)"
+    for j in jobs:
+        if j["kind"] == "probe":
+            for x in j["members"]:
+                role_key[x] = role.get(x, "?") + " (probe)"
+    roles, merged, n_rows, n_wakes, samples = role_shapes(tree, tid2pid, role_key, segs, wakeups, meas_cpu, recs)
     res["_samples"] = {"roles": samples}
     res["segments_in_tree"] = n_rows; res["wakes_in_tree"] = n_wakes; res["resumes_merged"] = merged
     res["roles"] = dict(sorted(roles.items(), key=lambda kv: -(kv[1]["cpu_per_process_us"].get("sum") or 0)))
     role_counts = defaultdict(int)
     for pid in set(tid2pid.get(t, t) for t in tree):
-        role_counts[role.get(pid, "?")] += 1
+        role_counts[role_key.get(pid, "?")] += 1
     res["processes_by_role"] = dict(sorted(role_counts.items(), key=lambda kv: -kv[1]))
     if PHASE_ROOT.get(phase) in ("make", "dkms"):
-        jobs, makes = jobs_of(tree, tid2pid, role, parent_pid, forks, exits, recs)
         shapes = defaultdict(int)
+        kinds = defaultdict(int)
         for j in jobs:
-            shapes[" ".join(j["roles"])] += 1
-        compile_jobs = [j for j in jobs if any(r in ("cc1", "cc1plus") for r in j["roles"])]
+            shapes[j["kind"] + ": " + " ".join(j["roles"])] += 1; kinds[j["kind"]] += 1
+        compile_jobs = [j for j in jobs if j["kind"] == "object" and any(r in ("cc1", "cc1plus") for r in j["roles"])]
         fork_t = {c: t for t, _p, _pc, c, _cc in forks}
         cc1_live = [{"start": fork_t.get(pid), "end": recs[pid]["t_exit"]} for pid in recs
                     if recs[pid]["comm"] in ("cc1", "cc1plus") and pid in tree and fork_t.get(pid) is not None]
-        res["jobs"] = {"count": len(jobs), "makes": len(makes), "concurrency": concurrency(jobs),
+        res["jobs"] = {"count": len(jobs), "kinds": dict(kinds), "makes": len(makes), "concurrency": concurrency(jobs),
                        "compile_jobs": len(compile_jobs), "compile_concurrency": concurrency(compile_jobs),
                        "cc1_processes": len(cc1_live), "cc1_concurrency": concurrency(cc1_live),
                        "compile_job_lifetime_ms": dist([(j["end"] - j["start"]) * 1000.0 for j in compile_jobs if j["start"] is not None and j["end"] is not None]),
@@ -553,7 +579,7 @@ def main():
                   f"cpu/proc p50 {c.get('p50')} us  blkio/proc p50 {rr['blkio_delay_per_process_ns'].get('p50')} ns  perf/ts p50 {rr['perf_over_taskstats_cpu'].get('p50')}")
         if "jobs" in r:
             j = r["jobs"]
-            print(f"  jobs {j['count']} (compile {j['compile_jobs']}, live max {j['compile_concurrency']['max']} mean {j['compile_concurrency']['mean_busy']}; cc1 {j['cc1_processes']} live max {j['cc1_concurrency']['max']} mean {j['cc1_concurrency']['mean_busy']}) makes {j['makes']} concurrency max {j['concurrency']['max']} mean {j['concurrency']['mean_busy']} "
+            print(f"  jobs {j['count']} {j['kinds']} (compile {j['compile_jobs']}, live max {j['compile_concurrency']['max']} mean {j['compile_concurrency']['mean_busy']}; cc1 {j['cc1_processes']} live max {j['cc1_concurrency']['max']} mean {j['cc1_concurrency']['mean_busy']}) makes {j['makes']} concurrency max {j['concurrency']['max']} mean {j['concurrency']['mean_busy']} "
                   f"members/job p50 {j['members_per_job'].get('p50')}; dispatch p50 {r['dispatch']['per_dispatch_ms'].get('p50')} ms over {r['dispatch']['forks']} forks")
             for shape, n in list(j["shapes"].items())[:6]:
                 print(f"    {n:6d} × {shape}")
