@@ -353,7 +353,10 @@ def role_shapes(tree, tid2pid, role, segs, wakeups, meas_cpu, recs):
         r["blkio_ns"].append(t["blkio_ns"]); r["blkio_count"].append(t["blkio_count"]); r["blkio_invalid"] += t["blkio_invalid_threads"]
         r["cpu_delay_ns"].append(t["cpu_delay_ns"]); r["etime_us"].append(t["etime_us"]); r["nvcsw"].append(t["nvcsw"]); r["nivcsw"].append(t["nivcsw"])
     out = {}
+    samples = {}
     for name, r in per_role.items():
+        samples[name] = {"run_ms": r["run_ms"], "off_D_ms": r["off_D_ms"], "off_S_ms": r["off_S_ms"], "off_R_ms": r["off_R_ms"],
+                         "cpu_us": r["cpu_us"], "blkio_ns": r["blkio_ns"], "etime_us": r["etime_us"], "wakes_by_pid": list(r["wakes_by_pid"].values())}
         cross = []
         for pid, ms in r["perf_run_ms_by_pid"].items():
             t = recs.get(pid)
@@ -370,7 +373,7 @@ def role_shapes(tree, tid2pid, role, segs, wakeups, meas_cpu, recs):
                      "cpu_delay_per_process_ns": dist(r["cpu_delay_ns"]),
                      "nvcsw_per_process": dist(r["nvcsw"]), "nivcsw_per_process": dist(r["nivcsw"]),
                      "perf_over_taskstats_cpu": dist(cross)}
-    return out, merged, len(rows), len(wakes)
+    return out, merged, len(rows), len(wakes), samples
 
 
 def dispatch(tree, tid2pid, role, segs, forks, meas_cpu, recs):
@@ -396,7 +399,7 @@ def dispatch(tree, tid2pid, role, segs, forks, meas_cpu, recs):
         if t is not None and fts:
             cross.append(t["cpu_ns"] / len(fts) / 1e6)
     return {"per_dispatch_ms": dist(per_dispatch), "makes": len(forks_by), "forks": sum(len(v) for v in forks_by.values()),
-            "cpu_per_fork_ms_by_make": dist(cross)}
+            "cpu_per_fork_ms_by_make": dist(cross), "_samples": {"per_dispatch_ms": per_dispatch, "cpu_per_fork_ms_by_make": cross}}
 
 
 def batch(phase, tree, tid2pid, role, segs, wakeups, meas_cpu, recs, cmd_wall_s):
@@ -459,7 +462,8 @@ def analyze_phase(D, phase, meas_cpu, edges):
            "fork_rows": len(forks), "exit_rows": len(exits),
            "phase_span_s": round(span_s, 2), "cmd_wall_s": round(cmd_wall_s, 2) if cmd_wall_s else None,
            "outside_on_measured_cpu": dict(sorted(out_by_comm.items(), key=lambda kv: -kv[1]["run_ms"])[:25])}
-    roles, merged, n_rows, n_wakes = role_shapes(tree, tid2pid, role, segs, wakeups, meas_cpu, recs)
+    roles, merged, n_rows, n_wakes, samples = role_shapes(tree, tid2pid, role, segs, wakeups, meas_cpu, recs)
+    res["_samples"] = {"roles": samples}
     res["segments_in_tree"] = n_rows; res["wakes_in_tree"] = n_wakes; res["resumes_merged"] = merged
     res["roles"] = dict(sorted(roles.items(), key=lambda kv: -(kv[1]["cpu_per_process_us"].get("sum") or 0)))
     role_counts = defaultdict(int)
@@ -472,8 +476,12 @@ def analyze_phase(D, phase, meas_cpu, edges):
         for j in jobs:
             shapes[" ".join(j["roles"])] += 1
         compile_jobs = [j for j in jobs if any(r in ("cc1", "cc1plus") for r in j["roles"])]
+        fork_t = {c: t for t, _p, _pc, c, _cc in forks}
+        cc1_live = [{"start": fork_t.get(pid), "end": recs[pid]["t_exit"]} for pid in recs
+                    if recs[pid]["comm"] in ("cc1", "cc1plus") and pid in tree and fork_t.get(pid) is not None]
         res["jobs"] = {"count": len(jobs), "makes": len(makes), "concurrency": concurrency(jobs),
                        "compile_jobs": len(compile_jobs), "compile_concurrency": concurrency(compile_jobs),
+                       "cc1_processes": len(cc1_live), "cc1_concurrency": concurrency(cc1_live),
                        "compile_job_lifetime_ms": dist([(j["end"] - j["start"]) * 1000.0 for j in compile_jobs if j["start"] is not None and j["end"] is not None]),
                        "members_per_job": dist([len(j["members"]) for j in jobs]),
                        "job_lifetime_ms": dist([(j["end"] - j["start"]) * 1000.0 for j in jobs if j["start"] is not None and j["end"] is not None]),
@@ -511,6 +519,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("run_dir"); ap.add_argument("--phase", action="append")
     ap.add_argument("--json"); ap.add_argument("--meas-cpu", type=int)
+    ap.add_argument("--samples", action="store_true", help="keep the raw per-role sample arrays in the JSON (for pooling)")
     args = ap.parse_args()
     D = args.run_dir
     report = json.load(open(os.path.join(D, "report.json"))) if os.path.exists(os.path.join(D, "report.json")) else {}
@@ -526,6 +535,11 @@ def main():
     for ph in phases:
         out["phases"][ph] = analyze_phase(D, ph, meas_cpu, edges)
     if args.json:
+        if not args.samples:
+            for r in out["phases"].values():
+                r.pop("_samples", None)
+                if "dispatch" in r:
+                    r["dispatch"].pop("_samples", None)
         json.dump(out, open(args.json, "w"), indent=1)
     for ph, r in out["phases"].items():
         if "missing" in r:
@@ -539,7 +553,7 @@ def main():
                   f"cpu/proc p50 {c.get('p50')} us  blkio/proc p50 {rr['blkio_delay_per_process_ns'].get('p50')} ns  perf/ts p50 {rr['perf_over_taskstats_cpu'].get('p50')}")
         if "jobs" in r:
             j = r["jobs"]
-            print(f"  jobs {j['count']} (compile {j['compile_jobs']}, live max {j['compile_concurrency']['max']} mean {j['compile_concurrency']['mean_busy']}) makes {j['makes']} concurrency max {j['concurrency']['max']} mean {j['concurrency']['mean_busy']} "
+            print(f"  jobs {j['count']} (compile {j['compile_jobs']}, live max {j['compile_concurrency']['max']} mean {j['compile_concurrency']['mean_busy']}; cc1 {j['cc1_processes']} live max {j['cc1_concurrency']['max']} mean {j['cc1_concurrency']['mean_busy']}) makes {j['makes']} concurrency max {j['concurrency']['max']} mean {j['concurrency']['mean_busy']} "
                   f"members/job p50 {j['members_per_job'].get('p50')}; dispatch p50 {r['dispatch']['per_dispatch_ms'].get('p50')} ms over {r['dispatch']['forks']} forks")
             for shape, n in list(j["shapes"].items())[:6]:
                 print(f"    {n:6d} × {shape}")
