@@ -116,7 +116,7 @@ Execution order: 9.1 ∥ 9.2 ∥ 9.3 first → 9.4–9.12 in parallel, after 9.1
   - [x] appdefs: setup states (VS Code project + language server, Writer large document), three operations (GIMP filter, Kdenlive preview render, Chrome scripted local page), inputs from PCMark 10 / SYSmark 30 / CpsMark+ where stated (D22; verified by probes 35087191213–35091079517)
   - [x] 136M Keystrokes extraction tool, registry re-entry, pre-registration written (D23; `driven-alt` phase in run.sh)
   - [x] display/GPU literature search — scope bounds only; compositor findings to 9.9 (D24, S8)
-  - [x] one pinned campaign → pool → fold-in (operation kind + duration) → rebuild → hand-offs (D25; runs interactive:6/8, playback:6; release `meas-ci-2026-09-16`)
+  - [x] one pinned campaign → pool → fold-in (operation kind + duration) → rebuild → hand-offs (D25; runs interactive:6/8/9, playback:6; release `meas-ci-2026-09-16`)
 - [WIP] **9.6** Compile — research and decisions — from 9.5 (spec decision 3): `build-orchestrator`, `compiler-child` carry four-vCPU Phase 2 measurements; every runner measurement is single-core from now on, re-run is this slice's decision
 - [ ] **9.7** Background and IO — research and decisions — from 9.5 (spec decision 3): `background-crawler`, `io-stream`, `network-bulk` carry four-vCPU Phase 2 measurements; single-core from now on, re-run is this slice's decision
 - [ ] **9.8** Browser and comms — research and decisions — from 9.5 (spec decision 3): `electron-comms` carries a four-vCPU Phase 2 measurement; single-core from now on, re-run is this slice's decision

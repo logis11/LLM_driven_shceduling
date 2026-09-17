@@ -277,85 +277,90 @@ archetypes:
             - RUN: event
     params:
       input_run:
-        {dist: quantiles, p: [0, 0, 0, 0, 0, 395, 1206, 1555, 8507, 431577], sampling: per-iteration, source: "meas-ci:interactive:6"}
+        {dist: quantiles, p: [0, 0, 0, 0, 0, 686, 1329, 1729, 10801, 784886], sampling: per-iteration, source: "meas-ci:interactive:9"}
       stimulus:
         {stream: swell-ie-c1, sampling: per-task, source: "swell-icmi14:ie-c1"}
       components:
         - comm: "ThreadPoolForeg"
-          threads: [17, 21]
-          wakes_per_s: 17.576
-          gap: {dist: quantiles, p: [3, 5, 9, 10, 110, 559, 6675, 55421, 1764968, 15000845], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [1, 2, 4, 4, 14, 42, 86, 154, 1139, 67531], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          threads: [16, 20]
+          wakes_per_s: 16.192
+          gap: {dist: quantiles, p: [9, 9, 9, 11, 120, 464, 6822, 75037, 1835242, 15002013], sampling: per-iteration, source: "meas-ci:interactive:9"}
+          run: {dist: quantiles, p: [4, 4, 4, 5, 16, 45, 92, 175, 1190, 63902], sampling: per-iteration, source: "meas-ci:interactive:9"}
         - comm: "Chrome_ChildIOT"
           threads: 3
-          wakes_per_s: 15.548
-          gap: {dist: quantiles, p: [34, 63, 77, 216, 806, 16219, 566425, 574451, 1418556, 10077400], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [5, 9, 12, 16, 29, 49, 127, 289, 1255, 1831], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          wakes_per_s: 13.860
+          gap: {dist: quantiles, p: [45, 69, 97, 337, 1481, 16275, 569633, 575652, 1910201, 12030762], sampling: per-iteration, source: "meas-ci:interactive:9"}
+          run: {dist: quantiles, p: [10, 12, 13, 20, 31, 54, 147, 316, 1318, 1940], sampling: per-iteration, source: "meas-ci:interactive:9"}
         - comm: "VizCompositorTh"
           threads: 1
-          wakes_per_s: 12.130
-          gap: {dist: quantiles, p: [53, 65, 77, 298, 8121, 17099, 550450, 557529, 564800, 565788], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [15, 21, 24, 32, 50, 79, 209, 238, 269, 304], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          wakes_per_s: 12.542
+          gap: {dist: quantiles, p: [55, 71, 88, 287, 5136, 16337, 553155, 558152, 563550, 565645], sampling: per-iteration, source: "meas-ci:interactive:9"}
+          run: {dist: quantiles, p: [18, 23, 26, 33, 53, 84, 196, 220, 266, 300], sampling: per-iteration, source: "meas-ci:interactive:9"}
         - comm: "chrome"
           threads: 5
-          wakes_per_s: 11.762
-          gap: {dist: quantiles, p: [9, 28, 69, 156, 674, 4610, 642754, 2999624, 4004199, 6267360], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [4, 12, 16, 25, 39, 103, 249, 420, 2167, 3106], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          wakes_per_s: 10.874
+          gap: {dist: quantiles, p: [9, 28, 74, 159, 587, 5469, 735469, 3384514, 4004241, 24343456], sampling: per-iteration, source: "meas-ci:interactive:9"}
+          run: {dist: quantiles, p: [4, 14, 21, 26, 43, 106, 253, 423, 1851, 3081], sampling: per-iteration, source: "meas-ci:interactive:9"}
         - comm: "Chrome_IOThread"
           threads: 1
-          wakes_per_s: 11.638
-          gap: {dist: quantiles, p: [18, 31, 52, 93, 191, 771, 2873, 9738, 482681, 19652643], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [5, 7, 9, 12, 16, 22, 44, 83, 146, 349], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          wakes_per_s: 10.514
+          gap: {dist: quantiles, p: [19, 33, 59, 101, 189, 694, 2971, 14084, 467496, 17182732], sampling: per-iteration, source: "meas-ci:interactive:9"}
+          run: {dist: quantiles, p: [9, 10, 11, 14, 17, 24, 48, 94, 158, 361], sampling: per-iteration, source: "meas-ci:interactive:9"}
         - comm: "residual"
           comms: ["ThreadPoolSingl", "MemoryInfra", "HangWatcher", "ThreadPoolServi", "CacheThread_Blo", "PerfettoTrace"]
           threads: [11, 17]
-          wakes_per_s: 2.978
-          gap: {dist: quantiles, p: [4, 8, 10, 21, 1124, 61052, 668353, 2122929, 5506266, 7992367], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [2, 4, 4, 7, 25, 85, 204, 436, 588, 7706], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        # 5 comms cover 95.8 % of 71.6 wakes/s (D16, target 95 %); the rest pooled as `residual`
+          wakes_per_s: 2.967
+          gap: {dist: quantiles, p: [9, 10, 11, 43, 1090, 28746, 590637, 2483108, 6171365, 8093092], sampling: per-iteration, source: "meas-ci:interactive:9"}
+          run: {dist: quantiles, p: [3, 4, 5, 7, 24, 87, 205, 438, 582, 7723], sampling: per-iteration, source: "meas-ci:interactive:9"}
+        # 5 comms cover 95.6 % of 66.9 wakes/s (D16, target 95 %); the rest pooled as `residual`
       operations:
         page-load:
-          duration: {dist: quantiles, p: [486554, 508966, 511619, 533100, 556168, 580748, 679603, 727088, 840178, 921535], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          duration: {dist: quantiles, p: [429173, 430425, 435129, 457057, 464092, 505666, 556842, 604534, 738815, 774131], sampling: per-iteration, source: "meas-ci:interactive:9"}
           components:
             - comm: "Chrome_IOThread"
               threads: 1
-              wakes_per_s: 698.572
-              gap: {dist: quantiles, p: [8, 14, 20, 40, 141, 744, 3594, 11725, 16620, 10654850], sampling: per-iteration, source: "meas-ci:interactive:6"}
-              run: {dist: quantiles, p: [3, 5, 6, 9, 14, 22, 34, 46, 115, 2570], sampling: per-iteration, source: "meas-ci:interactive:6"}
-            - comm: "ThreadPoolForeg"
-              threads: [7, 17]
-              wakes_per_s: 444.250
-              gap: {dist: quantiles, p: [3, 5, 9, 10, 47, 529, 4360, 12156, 10912105, 33570077], sampling: per-iteration, source: "meas-ci:interactive:6"}
-              run: {dist: quantiles, p: [1, 2, 3, 4, 6, 27, 92, 216, 350, 919], sampling: per-iteration, source: "meas-ci:interactive:6"}
+              wakes_per_s: 572.040
+              gap: {dist: quantiles, p: [13, 15, 21, 48, 134, 633, 5193, 15133, 17151, 10321733], sampling: per-iteration, source: "meas-ci:interactive:9"}
+              run: {dist: quantiles, p: [6, 7, 7, 10, 16, 24, 37, 52, 122, 2300], sampling: per-iteration, source: "meas-ci:interactive:9"}
             - comm: "chrome"
-              threads: [5, 6]
-              wakes_per_s: 246.352
-              gap: {dist: quantiles, p: [10, 34, 96, 231, 1116, 7395, 16237, 38266, 10846703, 11315445], sampling: per-iteration, source: "meas-ci:interactive:6"}
-              run: {dist: quantiles, p: [5, 18, 25, 38, 64, 209, 433, 610, 1693, 15844], sampling: per-iteration, source: "meas-ci:interactive:6"}
+              threads: 6
+              wakes_per_s: 286.340
+              gap: {dist: quantiles, p: [10, 45, 90, 197, 770, 7019, 16414, 31066, 10491002, 76003195], sampling: per-iteration, source: "meas-ci:interactive:9"}
+              run: {dist: quantiles, p: [4, 19, 26, 36, 59, 196, 417, 617, 4752, 15947], sampling: per-iteration, source: "meas-ci:interactive:9"}
             - comm: "Chrome_ChildIOT"
               threads: 3
-              wakes_per_s: 210.126
-              gap: {dist: quantiles, p: [27, 49, 69, 228, 2258, 11576, 17093, 23515, 11099141, 11254525], sampling: per-iteration, source: "meas-ci:interactive:6"}
-              run: {dist: quantiles, p: [7, 11, 14, 19, 27, 42, 93, 182, 1092, 12178], sampling: per-iteration, source: "meas-ci:interactive:6"}
+              wakes_per_s: 224.794
+              gap: {dist: quantiles, p: [27, 48, 69, 250, 2153, 11532, 17032, 25925, 10558138, 10855360], sampling: per-iteration, source: "meas-ci:interactive:9"}
+              run: {dist: quantiles, p: [9, 12, 14, 18, 25, 40, 91, 193, 1143, 7794], sampling: per-iteration, source: "meas-ci:interactive:9"}
+            - comm: "ThreadPoolForeg"
+              threads: [6, 9]
+              wakes_per_s: 189.154
+              gap: {dist: quantiles, p: [9, 9, 10, 11, 67, 1395, 13494, 193843, 10761652, 150964998], sampling: per-iteration, source: "meas-ci:interactive:9"}
+              run: {dist: quantiles, p: [4, 4, 4, 5, 7, 34, 86, 116, 291, 677], sampling: per-iteration, source: "meas-ci:interactive:9"}
             - comm: "VizCompositorTh"
               threads: 1
-              wakes_per_s: 151.270
-              gap: {dist: quantiles, p: [48, 108, 219, 926, 4867, 12091, 16145, 16993, 10647478, 10666225], sampling: per-iteration, source: "meas-ci:interactive:6"}
-              run: {dist: quantiles, p: [14, 20, 25, 39, 68, 205, 1872, 2027, 2316, 3373], sampling: per-iteration, source: "meas-ci:interactive:6"}
+              wakes_per_s: 146.026
+              gap: {dist: quantiles, p: [56, 136, 256, 1025, 4943, 12338, 16224, 16927, 10314939, 10325819], sampling: per-iteration, source: "meas-ci:interactive:9"}
+              run: {dist: quantiles, p: [18, 22, 27, 42, 69, 214, 1815, 1935, 2174, 2630], sampling: per-iteration, source: "meas-ci:interactive:9"}
+            - comm: "CompositorTileW"
+              threads: 1
+              wakes_per_s: 65.134
+              gap: {dist: quantiles, p: [11, 13, 16, 11089, 16436, 17286, 26055, 61696, 10340653, 10357550], sampling: per-iteration, source: "meas-ci:interactive:9"}
+              run: {dist: quantiles, p: [5, 6, 6, 37, 57, 76, 239, 380, 787, 1036], sampling: per-iteration, source: "meas-ci:interactive:9"}
             - comm: "residual"
-              comms: ["CompositorTileW", "ThreadPoolSingl", "HangWatcher", "MemoryInfra", "ThreadPoolServi", "CacheThread_Blo", "PerfettoTrace"]
-              threads: [8, 12]
-              wakes_per_s: 75.069
-              gap: {dist: quantiles, p: [4, 9, 11, 127, 15137, 17055, 26465, 47439, 10684636, 10735031], sampling: per-iteration, source: "meas-ci:interactive:6"}
-              run: {dist: quantiles, p: [2, 4, 6, 8, 58, 81, 218, 323, 992, 1831], sampling: per-iteration, source: "meas-ci:interactive:6"}
-            # 5 comms cover 95.9 % of 1825.6 wakes/s (D16, target 95 %); the rest pooled as `residual`
+              comms: ["ThreadPoolSingl", "ThreadPoolServi", "HangWatcher", "MemoryInfra", "CacheThread_Blo", "PerfettoTrace", "chrome_crashpad"]
+              threads: [12, 15]
+              wakes_per_s: 24.988
+              gap: {dist: quantiles, p: [9, 9, 10, 11, 111, 15397, 234463, 10512032, 10537330, 10783130], sampling: per-iteration, source: "meas-ci:interactive:9"}
+              run: {dist: quantiles, p: [4, 4, 4, 5, 8, 21, 34, 37, 67, 956], sampling: per-iteration, source: "meas-ci:interactive:9"}
+            # 6 comms cover 98.3 % of 1508.5 wakes/s (D16, target 95 %); the rest pooled as `residual`
     lifetime: segment-bound
     binding_params: []
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "interactive:6, repeats [1, 2, 3, 4, 5]"
-      stats: ["idle wakes/s 61.6\u201380.8", "idle cpu-share 0.0065\u20130.0155", "driven wakes/s 27.6\u201343.9", "driven cpu-share 0.0024\u20130.0039", "driven-alt wakes/s 51.0\u2013150.5", "driven-alt cpu-share 0.0039\u20130.0093", "op wakes/s 40.1\u201341.3", "op cpu-share 0.0053\u20130.0061", "input_run p50 ms per repeat [0.0, 0.0, 0.0, 0.0, 0.678]"]
+      run: "interactive:9, repeats [1, 2, 3, 4, 5]"
+      stats: ["idle wakes/s 60.8\u201385.7", "idle cpu-share 0.0059\u20130.0154", "driven wakes/s 26.6\u201345.1", "driven cpu-share 0.0023\u20130.0048", "driven-alt wakes/s 47.7\u2013149.9", "driven-alt cpu-share 0.0027\u20130.0091", "op wakes/s 85.6\u201388.2", "op cpu-share 0.0090\u20130.0113", "input_run p50 ms per repeat [0.0, 0.0, 0.0, 0.121, 0.68]"]
       scope: >-
         One observation (phase decision 2; D3, D10): Google Chrome 152.0.7977.82 (preinstalled), a local page with a text area and 400 paragraphs; the browser process, GPU and utility processes — renderer processes excluded (electron-comms); operation page-load: the scripted feed page feed.html (300 posts, thirty 1600×1200 pictures, a 200 000-record sort; design after PCMark 10 pp. 52–53 and CpsMark+ §4.3.3) from a local server, completion by the page's title after first paint, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. Stimulus: SWELL-KW stream swell-ie-c1 replayed per event by xdotool at recorded gaps (error p99 1.24 ms), keys and pointer events together, pointer positions scaled into the content area (D5, D12); the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the process tree until the next input minus the idle rate. Stimulus sensitivity (pre-registered, method §3): under a 136M Keystrokes transcription stream (dhakal-chi18) the per-input run p50 is 0.00 ms against 0.00 ms under SWELL-KW (the SWELL-KW median is at the zero bound, D13); the archetype carries SWELL-KW. Values are this software on this machine, not desktop truth (D10). Venue bound (D24, S8): without display vsync Chromium drives its compositor from a default 60 Hz timer (Chromium docs, life of a frame; BeginFrameArgs::DefaultInterval), so the compositor cadence has a 60 Hz display's period but not its phase; rasterisation and compositing run on CPU threads under --disable-gpu, so those threads' run lengths overcount what a GPU desktop would show, by an amount no source states.
     modeling_notes: >-
