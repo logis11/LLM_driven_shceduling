@@ -175,7 +175,8 @@ if want train; then phase train -- python3 "$HERE/train.py" "$TRAIN_STEPS" --rec
 # tracker full rescan: a fresh XDG data home over a corpus copy; the miner runs until tracker3 reports it idle or the cap
 # each XDG special directory gets its own path: a path in both the miner's recursive and single lists is dropped
 # from the recursive one (dry run 2: Documents mapped for every special dir was indexed one level deep, 0 files)
-TH=/tmp/tracker-home; rm -rf "$TH"; mkdir -p "$TH/Documents" "$TH/Desktop" "$TH/Downloads" "$TH/Music" "$TH/Pictures" "$TH/Videos" "$TH/.config"
+# the tracker home lives under the user's home, not /tmp: the miner ignores the system temporary directory
+TH="$HOME/tracker-home"; rm -rf "$TH"; mkdir -p "$TH/Documents" "$TH/Desktop" "$TH/Downloads" "$TH/Music" "$TH/Pictures" "$TH/Videos" "$TH/.config"
 cp -r "$CORPUS/Documentation" "$TH/Documents/corpus" 2>/dev/null
 printf 'XDG_DOCUMENTS_DIR="$HOME/Documents"\nXDG_DESKTOP_DIR="$HOME/Desktop"\nXDG_DOWNLOAD_DIR="$HOME/Downloads"\nXDG_MUSIC_DIR="$HOME/Music"\nXDG_PICTURES_DIR="$HOME/Pictures"\nXDG_VIDEOS_DIR="$HOME/Videos"\n' > "$TH/.config/user-dirs.dirs"
 rec tracker.corpus_files "$(find "$TH/Documents/corpus" -type f | wc -l)"
