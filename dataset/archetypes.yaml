@@ -912,7 +912,16 @@ archetypes:
       (OQ-5 convention; the compiler derives median/sigma from the span) and
       the one draw per member are ours; the per-member draw rests on the
       source's "Task execution time is very stable and is predictable using
-      its average" (s13). Sampled scheduler logs of four other games under
+      its average" (s13). The source's per-schedule runtime is taken as the
+      per-wake RUN: a schedule that ends by preemption is one wake cut in
+      pieces, so the RUN under-states one wake's demand; the deck's own
+      s14 bounds the size (preemption 25-30 % of scheduling events,
+      sched_preempt 28.78 % on the pie), about 1.4 schedules per wake on
+      average, larger for the long-running work tasks whose runs approach
+      the scheduler's slice (s13: 1.65 ms worker; the deck's slice example
+      1.5 ms) and near 1 for short coordination tasks. Direction downward,
+      no value changed; 9.14 sweeps chain-member RUNs over that factor.
+      Sampled scheduler logs of four other games under
       scx_lavd show game threads at tens of us per schedule (different
       accounting; not a source here). chain_length 16 is a point chosen inside the
       source's "15-20 game-specific tasks" (s12) — design within a source
