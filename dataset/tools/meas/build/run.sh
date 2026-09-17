@@ -190,6 +190,10 @@ gsettings set org.freedesktop.Tracker3.Miner.Files index-recursive-directories "
 gsettings set org.freedesktop.Tracker3.Miner.Files index-single-directories "[]"
 gsettings set org.freedesktop.Tracker3.Miner.Files initial-sleep 0
 gsettings set org.freedesktop.Tracker3.Miner.Files index-on-battery true
+# GLib cannot read /proc/self/mountinfo on the runner (GIO warning in every miner log), so the corpus root's volume
+# is unknown to the miner; a directory on an unrecognised volume is skipped unless removable/optical indexing is on
+gsettings set org.freedesktop.Tracker3.Miner.Files index-removable-devices true
+gsettings set org.freedesktop.Tracker3.Miner.Files index-optical-discs true
 gsettings list-recursively org.freedesktop.Tracker3.Miner.Files > "$OUT/tracker.settings.txt" 2>&1
 "$MINER" > "$OUT/tracker.miner.log" 2>&1 &
 M=\$!
