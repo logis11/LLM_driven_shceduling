@@ -57,8 +57,8 @@ PHASE_ROOT = {"build-j8-warm": "make", "build-j8-cold": "make", "build-j1-warm":
               "tracker": "dbus-run-sessio"}
 # the batch program inside each batch phase's tree (D7): its processes carry the saturation and wait figures; the
 # rest of the tree (a session bus, the poll loop) is reported beside them
-BATCH_PROGRAM = {"clamscan": "clamscan", "ffmpeg": "ffmpeg", "handbrake": "HandBrakeCLI", "train": "python3",
-                 "tracker": "tracker-miner-f"}
+BATCH_PROGRAM = {"clamscan": ("clamscan",), "ffmpeg": ("ffmpeg",), "handbrake": ("HandBrakeCLI",), "train": ("python3",),
+                 "tracker": ("tracker-miner-f", "tracker-extract")}   # the miner and the extractor it activates are one indexing job
 QUANTILE_PROBS = (0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999)
 EPS = 1e-6
 
@@ -427,7 +427,7 @@ def batch(phase, tree, tid2pid, role, segs, wakeups, meas_cpu, recs, cmd_wall_s)
     thread's share, disk and sleep shares; the rest of the tree is reported beside it."""
     prog = BATCH_PROGRAM.get(phase)
     pids = set(tid2pid.get(x, x) for x in tree)
-    prog_pids = {p for p in pids if role.get(p) == prog} if prog else pids
+    prog_pids = {p for p in pids if role.get(p) in prog} if prog else pids
     prog_tids = {t for t in tree if tid2pid.get(t, t) in prog_pids}
     rows = [s for s in segs if s.tid in prog_tids and s.cpu == meas_cpu]
     run_by_tid = defaultdict(float)
@@ -449,7 +449,7 @@ def batch(phase, tree, tid2pid, role, segs, wakeups, meas_cpu, recs, cmd_wall_s)
             kind = "D" if a.state.startswith("D") else "S" if a.state.startswith("S") else "R"
             off[kind] += max((b.t_wake - a.t_end) * 1000.0, 0.0)
     other = sorted({role.get(p, "?") for p in pids - prog_pids})
-    return {"program": prog, "processes": len(prog_pids), "threads_with_runs": len(run_by_tid),
+    return {"program": " + ".join(prog) if prog else None, "processes": len(prog_pids), "threads_with_runs": len(run_by_tid),
             "lifetime_s": round(life_s, 3), "cmd_wall_s": round(cmd_wall_s, 2) if cmd_wall_s else None,
             "perf_run_s": round(total_run_ms / 1000.0, 3), "taskstats_cpu_s": round(cpu_ns / 1e9, 3),
             "saturation": round(cpu_ns / 1e9 / life_s, 4) if life_s else None,
