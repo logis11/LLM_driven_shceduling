@@ -28,6 +28,7 @@ def main():
              "Numbers are pooled over the run's repeats (five 600 s driven / 120 s idle / 300 s play phases unless stated); "
              "`spread` is the range of the per-repeat p50. Threads are the top five by CPU. Per-input rules are method §5's (a) first-wake, (b) window minus idle rate, (c) waker (X-server-woken schedule-ins). "
              "Runner: `ubuntu-24.04`, 4 vCPU, kernel per `reports/*.spec.json`.", ""]
+    crit = []  # D26: the headline median of each app against the shared stability criterion
     for app in ORDER:
         p = os.path.join(R, f"pool-{app}.json")
         if not os.path.exists(p):
@@ -35,6 +36,11 @@ def main():
         d = json.load(open(p))["runs"][app]
         lines.append(f"## `{app}` — {d['version'].strip()[:60]}, repeats {d['repeats']}")
         lines.append("")
+        if d.get("cpu_model"):
+            lines.append(f"CPU model per repeat {d['cpu_model']}; kernel per repeat {d.get('kernel')}.")
+            lines.append("")
+        if d.get("stability"):
+            crit.append((app, d["stability"]))
         for phase, ph in d["phases"].items():
             lines.append(f"### {phase}: CPU share {spread(ph['cpu_share'], 4)}, wakes/s {spread(ph['wakes_per_s'], 1)}")
             if "operation" in ph:
@@ -72,6 +78,18 @@ def main():
             lines.append(f"| SWELL-KW | {f(a['p50'], 3)} | {f(a['p90'], 3)} | {f(a['p99'], 3)} | {a['repeat_p50']} | {spread(d['phases']['driven']['wakes_per_s'], 1)} |")
             lines.append(f"| 136M Keystrokes | {f(b['p50'], 3)} | {f(b['p90'], 3)} | {f(b['p99'], 3)} | {b['repeat_p50']} | {spread(d['phases']['driven-alt']['wakes_per_s'], 1)} |")
             lines.append("")
+    if crit:
+        lines += ["## Same-machine repeats and the stability criterion (D26)", "",
+                  f"Criterion: the 95 % confidence half-width of the across-repeat mean of each application's headline median is at most "
+                  f"{crit[0][1]['tolerance']:.0%}; repeats are added one at a time per application until it holds (`thunderbird` at most 8, "
+                  "the SWELL-KW Outlook windows).", "",
+                  "| application | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | holds |", "|---|---|---|---|---|---|---|---|"]
+        for app, c in crit:
+            hw = "—" if c["half_width"] is None else f"±{c['half_width']:.1%}"
+            cv = "—" if c["cv"] is None else f"{c['cv']:.1%}"
+            loo = "—" if c["leave_one_out"] is None else f"{c['leave_one_out']:.1%}"
+            lines.append(f"| `{app}` | {c['quantity']} | {c['k']} | {c['mean']} | {cv} | {hw} | {loo} | {'yes' if c['passes'] else 'no'} |")
+        lines.append("")
     open(out, "w").write("\n".join(lines) + "\n")
     print(f"wrote {out}: {len(lines)} lines")
 

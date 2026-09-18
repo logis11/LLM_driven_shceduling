@@ -3,7 +3,9 @@ name: meas-interactive
 # 9.5 campaign, interactive family (research-slice changelog D3, D9–D12; method
 # _dev/research/jioh/task-9.5-interactive-typing/campaign/method.md).
 # Started by a push changing .github/campaign.json; that file names the
-# applications, repeats and mode (dry | full). Registry tag
+# applications, repeats, CPU model and mode (dry | full). A family's repeats is
+# one list for every app or a map app -> list, for per-application additions
+# (9.5 changelog D26). Registry tag
 # meas-ci:interactive:<run_number>. One artifact per (app, repeat).
 
 on:
@@ -20,6 +22,7 @@ jobs:
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
       mode: ${{ steps.plan.outputs.mode }}
+      cpu_model: ${{ steps.plan.outputs.cpu_model }}
       count: ${{ steps.plan.outputs.count }}
     steps:
       - uses: actions/checkout@v4
@@ -29,9 +32,11 @@ jobs:
           import json
           c = json.load(open(".github/campaign.json"))
           fam = c.get("interactive", {})
-          inc = [{"app": a, "repeat": r} for a in fam.get("apps", []) for r in fam.get("repeats", [])]
+          reps = fam.get("repeats", [])
+          inc = [{"app": a, "repeat": r} for a in fam.get("apps", []) for r in (reps.get(a, []) if isinstance(reps, dict) else reps)]
           print("matrix=" + json.dumps({"include": inc}))
           print("mode=" + c.get("mode", "full"))
+          print("cpu_model=" + c.get("cpu_model", ""))
           print("count=" + str(len(inc)))
           PY
   run:
@@ -46,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get update > /dev/null && sudo apt-get install -y --no-install-recommends xvfb > /dev/null
-      - run: MEAS_OUT=/tmp/meas bash dataset/tools/meas/campaign/run.sh ${{ matrix.app }} ${{ matrix.repeat }} ${{ needs.plan.outputs.mode }}
+      - run: MEAS_OUT=/tmp/meas MEAS_CPU_MODEL="${{ needs.plan.outputs.cpu_model }}" bash dataset/tools/meas/campaign/run.sh ${{ matrix.app }} ${{ matrix.repeat }} ${{ needs.plan.outputs.mode }}
       - name: own the output
         if: always()
         run: sudo chown -R "$(id -u):$(id -g)" /tmp/meas && sudo chmod -R a+rX /tmp/meas

@@ -2,13 +2,18 @@
 """Pool a campaign's downloaded artifacts into per-run distributions with
 across-repeat spread (9.5 method §6–§7).
 
-pool.py <artifacts-dir> <out.json> [--w-ms 5] [--cap-ms 0]
+pool.py <artifacts-dir> <out.json> [--w-ms 5] [--cap-ms 0] [--cpu-model TEXT]
 
 <artifacts-dir> holds one folder per (app, repeat) named
-meas-<family>-<app>-r<k>-<mode> (as uploaded). For each app: every repeat is
-analysed (analyze.analyze_run); per phase and per thread comm the gap and run
-samples of all repeats are pooled (p50, p90, p99, n) and the per-repeat p50
-is listed as the spread; per-input samples likewise for the three rules.
+meas-<family>-<app>-r<k>-<mode> (as uploaded), at any depth, so the runs of one
+campaign can be downloaded side by side into one folder each. A job the machine
+gate stopped (report.json gate=wrong-machine) and, with --cpu-model, a repeat
+measured on another CPU model are listed, not pooled (changelog D26). For each
+app: every repeat is analysed (analyze.analyze_run); per phase and per thread
+comm the gap and run samples of all repeats are pooled (p50, p90, p99, n) and
+the per-repeat p50 is listed as the spread; per-input samples likewise for the
+three rules; the app's headline median is checked against the shared
+stability criterion (dataset/tools/meas/stability.py).
 """
 
 import argparse
@@ -21,12 +26,32 @@ from array import array
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from analyze import analyze_run, pct  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from stability import stability, TOLERANCE  # noqa: E402
 
 NAME = re.compile(r"^meas-(interactive|playback)-(.+)-r(\d+)-(dry|full)$")
 
 
 QUANTILE_PROBS = (0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999)
 COVERAGE = 0.95  # D16: components in descending wake rate until this share of idle wakes; the rest pooled as one residual
+# D26: the one median per application the stability criterion is evaluated on — the value its archetype carries
+HEADLINE = {"soffice": "input_run", "code": "input_run", "thunderbird": "input_run",
+            "chrome": "op_duration", "gimp": "op_duration", "kdenlive": "op_duration",
+            "mpv-video": "play_cpu_share", "mpv-audio": "play_cpu_share", "webrtc": "play_cpu_share"}
+# D26: SWELL-KW's Outlook conditions (c2, c3) hold 4 761 s of recorded time — eight windows, the eighth 561 s
+WINDOW_LIMIT = {"thunderbird": 8}
+
+
+def headline(app, entry):
+    kind = HEADLINE.get(app)
+    ph = entry["phases"]
+    if kind == "input_run" and "per_input" in ph.get("driven", {}):
+        return "input_run p50 (ms)", ph["driven"]["per_input"]["window"]["run_ms_minus_idle"]["repeat_p50"]
+    if kind == "op_duration" and "operation" in ph.get("op", {}):
+        return "operation duration p50 (ms)", ph["op"]["operation"]["duration_ms"]["repeat_p50"]
+    if kind == "play_cpu_share" and "play" in ph:
+        return "play CPU share", ph["play"]["cpu_share"]
+    return None, None
 
 
 def qtable(values):
@@ -77,16 +102,31 @@ def main():
     ap.add_argument("artifacts"); ap.add_argument("out")
     ap.add_argument("--w-ms", type=float, default=5.0); ap.add_argument("--cap-ms", type=float, default=0.0)
     ap.add_argument("--exclude-roles", default="", help="comma-separated process roles left out of the tree (D14: renderer for chrome)")
+    ap.add_argument("--cpu-model", default="", help="pool only repeats whose CPU model contains this text (D26)")
     args = ap.parse_args()
     exclude_roles = tuple(x for x in args.exclude_roles.split(",") if x)
-    runs = {}
-    for d in sorted(glob.glob(os.path.join(args.artifacts, "meas-*"))):
+    runs, gated, other = {}, [], []
+    for d in sorted(glob.glob(os.path.join(args.artifacts, "**", "meas-*"), recursive=True)):
         m = NAME.match(os.path.basename(d))
         if not m or not os.path.exists(os.path.join(d, "report.json")):
             continue
         fam, app, rep, mode = m.group(1), m.group(2), int(m.group(3)), m.group(4)
-        runs.setdefault(app, {"family": fam, "mode": mode, "repeats": {}})["repeats"][rep] = d
-    out = {"w_ms": args.w_ms, "cap_ms": args.cap_ms, "exclude_roles": list(exclude_roles), "runs": {}}
+        spec = json.load(open(os.path.join(d, "spec.json"))) if os.path.exists(os.path.join(d, "spec.json")) else {}
+        model = spec.get("cpu_model") or ""
+        if json.load(open(os.path.join(d, "report.json"))).get("gate") == "wrong-machine":
+            gated.append({"app": app, "repeat": rep, "cpu_model": model, "path": os.path.relpath(d, args.artifacts)})
+            continue
+        if args.cpu_model and args.cpu_model not in model:
+            other.append({"app": app, "repeat": rep, "cpu_model": model, "path": os.path.relpath(d, args.artifacts)})
+            continue
+        info = runs.setdefault(app, {"family": fam, "mode": mode, "repeats": {}, "cpu_model": {}, "kernel": {}})
+        if rep in info["repeats"]:
+            raise SystemExit(f"{app} repeat {rep}: two measured artifacts ({info['repeats'][rep]}, {d})")
+        info["repeats"][rep] = d
+        info["cpu_model"][rep] = model
+        info["kernel"][rep] = (spec.get("uname") or "").split()[2] if len((spec.get("uname") or "").split()) > 2 else None
+    out = {"w_ms": args.w_ms, "cap_ms": args.cap_ms, "exclude_roles": list(exclude_roles), "machine": args.cpu_model or None,
+           "gated_out": gated, "other_machine": other, "runs": {}}
     for app, info in runs.items():
         reps = sorted(info["repeats"])
         results, raws = {}, {}
@@ -116,6 +156,7 @@ def main():
             raws[r] = slim
             del raw
         entry = {"family": info["family"], "mode": info["mode"], "repeats": reps,
+                 "cpu_model": {r: info["cpu_model"][r] for r in reps}, "kernel": {r: info["kernel"][r] for r in reps},
                  "version": results[reps[0]].get("version"), "phases": {}}
         for phase in ("idle", "driven", "driven-alt", "play", "op"):
             if not all(phase in raws[r]["phases"] for r in reps):
@@ -161,8 +202,17 @@ def main():
                               "first_x_wake_latency_ms": summary([pi[r]["xw_lat"] for r in reps]),
                               "run_ms": summary([pi[r]["xw_run"] for r in reps])}}
             entry["phases"][phase] = ph
+        name, values = headline(app, entry)
+        if name:
+            entry["stability"] = {"quantity": name, "values": values, "tolerance": TOLERANCE,
+                                  "window_limit": WINDOW_LIMIT.get(app), **stability(values)}
         out["runs"][app] = entry
-        print(f"== {app} ({info['family']}, {info['mode']}, repeats {reps}, {entry['version']})")
+        print(f"== {app} ({info['family']}, {info['mode']}, repeats {reps}, {entry['version']}; CPU {sorted(set(entry['cpu_model'].values()))})")
+        if "stability" in entry:
+            st = entry["stability"]
+            hw = "—" if st["half_width"] is None else f"±{st['half_width']:.1%}"
+            print(f"   stability: {st['quantity']} over {st['k']} repeats, 95 % half-width {hw} "
+                  f"(tolerance ±{TOLERANCE:.0%}) — {'holds' if st['passes'] else 'does not hold yet'}")
         for phase, ph in entry["phases"].items():
             print(f"   {phase}: span {ph['span_s']} cpu {ph['cpu_share']} wakes/s {ph['wakes_per_s']}")
             if "operation" in ph:
@@ -174,6 +224,10 @@ def main():
             if "per_input" in ph:
                 p = ph["per_input"]
                 print(f"     per input: events {p['events']}; first-wake share {p['first_wake']['attributed_share']} run p50 {p['first_wake']['run_ms']['p50']}; window run p50/p90 {p['window']['run_ms']['p50']}/{p['window']['run_ms']['p90']} net {p['window']['run_ms_minus_idle']['p50']}; waker run p50/p90/p99 {p['waker']['run_ms']['p50']}/{p['waker']['run_ms']['p90']}/{p['waker']['run_ms']['p99']} ({p['waker']['run_ms']['repeat_p50']})")
+    for g in gated:
+        print(f"   gated out: {g['app']} r{g['repeat']} ({g['cpu_model']}) {g['path']}")
+    for o in other:
+        print(f"   other machine, not pooled: {o['app']} r{o['repeat']} ({o['cpu_model']}) {o['path']}")
     json.dump(out, open(args.out, "w"), indent=1)
 
 

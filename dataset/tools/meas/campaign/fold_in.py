@@ -137,8 +137,11 @@ def entry(aid, spec, d):
         stats.append(f"input_run p50 ms per repeat {pi['window']['run_ms_minus_idle']['repeat_p50']}")
     out.append("      stats: [" + ", ".join(json.dumps(x) for x in stats) + "]")
     out.append("      scope: >-")
-    scope = (f"One observation (phase decision 2; D3, D10): {observed}, on a GitHub-hosted ubuntu-24.04 runner "
-             f"(4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, "
+    # D26: the machine and kernel are the pooled repeats' own records (spec.json), one CPU model per observation
+    models = sorted(set((d.get("cpu_model") or {}).values())) or ["CPU model not recorded"]
+    kernels = sorted(set(k for k in (d.get("kernel") or {}).values() if k)) or ["kernel not recorded"]
+    scope = (f"One observation (phase decision 2; D3, D10, D26): {observed}, on a GitHub-hosted ubuntu-24.04 runner "
+             f"(4 vCPU {' / '.join(models)}, kernel {' / '.join(kernels)}) under Xvfb 1280×800 — no display refresh, no GPU, "
              f"no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. ")
     if kind == "input":
         scope += (f"Stimulus: SWELL-KW stream {stream} replayed per event by xdotool at recorded gaps (error p99 1.24 ms), "

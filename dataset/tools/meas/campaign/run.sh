@@ -23,6 +23,15 @@ rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE"; rec started_utc "$(date 
 rec settle_s "$SETTLE"; rec idle_s "$IDLE"; rec driven_s "$DRIVEN"; rec play_s "$PLAY"; rec op_s "$OPS"
 pin_record | tee -a "$KV" | sed 's/^/  /' >&2
 python3 "$TOOLS/../runner_spec.py" > "$OUT/spec.json"
+# same-machine repeats (9.6 D10; 9.5 D26): a job that drew another CPU model stops here, recorded, before any install or measurement
+source "$TOOLS/../machine_gate.sh"
+rec machine.model "$(machine_model)"; rec machine.wanted "${MEAS_CPU_MODEL:-}"
+if ! machine_gate "${MEAS_CPU_MODEL:-}"; then
+  rec gate wrong-machine; rec finished_utc "$(date -u +%FT%TZ)"; finish_report
+  echo "machine gate: wanted '${MEAS_CPU_MODEL}', drew '$(machine_model)' — stopping before any measurement" >&2
+  exit 0
+fi
+rec gate open
 sudo apt-get update > /dev/null 2>&1
 apt_install xdotool imagemagick x11-apps python3-xlib dbus-x11
 sudo apt-get install -y --no-install-recommends linux-tools-common "linux-tools-$(uname -r)" > "$OUT/apt.perf.log" 2>&1; rec apt.perf.rc "$?"

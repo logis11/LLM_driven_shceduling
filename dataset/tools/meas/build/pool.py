@@ -21,6 +21,8 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from analyze import analyze_phase, load_edges, pct, QUANTILE_PROBS  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from stability import stability, TOLERANCE  # noqa: E402
 
 NAME = re.compile(r"^meas-build-r(\d+)-(dry|full)$")
 BUILD_PHASES = ("build-j8-warm", "build-j8-cold", "build-j1-warm", "dkms")
@@ -45,26 +47,8 @@ def pooled(samples_by_repeat, scale=1.0):
             "repeat_n": {r: len(vs) for r, vs in sorted(vals.items())}}
 
 
-# ---- same-machine repeats and the stability criterion (changelog D10, D11; method §8, 2026-09-18) -----------
-T975 = {2: 12.706, 3: 4.303, 4: 3.182, 5: 2.776, 6: 2.571, 7: 2.447, 8: 2.365, 9: 2.306, 10: 2.262,
-        11: 2.228, 12: 2.201, 13: 2.179, 14: 2.160, 15: 2.145, 16: 2.131, 17: 2.120, 18: 2.110, 19: 2.101, 20: 2.093}
-TOLERANCE = 0.05
+# ---- same-machine repeats and the stability criterion (changelog D10, D11; method §8, 2026-09-18): shared rule ----
 CRITERION_ROLES = ("cc1", "as", "gcc", "sh", "fixdep", "rm")   # the object job's roles; plus the dispatch median
-
-
-def stability(values_by_repeat):
-    """The 95 % confidence half-width of the across-repeat mean of one carried median, relative to the mean
-    (t multiplier, k − 1 degrees of freedom), and the largest shift of the mean when any one repeat is dropped."""
-    import statistics
-    v = [x for x in values_by_repeat.values() if x]
-    k = len(v)
-    if k < 2:
-        return {"k": k, "mean": v[0] if v else None, "cv": None, "half_width": None, "leave_one_out": None, "passes": False}
-    m, sd = statistics.fmean(v), statistics.stdev(v)
-    hw = T975.get(k, T975[20]) * sd / (k ** 0.5) / m
-    loo = max(abs(statistics.fmean(v[:i] + v[i + 1:]) - m) / m for i in range(k))
-    return {"k": k, "mean": round(m, 1), "cv": round(sd / m, 4), "half_width": round(hw, 4), "leave_one_out": round(loo, 4),
-            "passes": hw <= TOLERANCE}
 
 
 def main():
