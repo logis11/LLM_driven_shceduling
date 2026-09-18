@@ -45,9 +45,10 @@ def pooled(samples_by_repeat, scale=1.0):
             "repeat_n": {r: len(vs) for r, vs in sorted(vals.items())}}
 
 
-# ---- same-machine repeats and the stability criterion (changelog D10; method §8, 2026-09-18) ----------------
-T975 = {2: 12.706, 3: 4.303, 4: 3.182, 5: 2.776, 6: 2.571, 7: 2.447, 8: 2.365, 9: 2.306, 10: 2.262}
-TOLERANCE, REPEAT_CAP = 0.05, 8
+# ---- same-machine repeats and the stability criterion (changelog D10, D11; method §8, 2026-09-18) -----------
+T975 = {2: 12.706, 3: 4.303, 4: 3.182, 5: 2.776, 6: 2.571, 7: 2.447, 8: 2.365, 9: 2.306, 10: 2.262,
+        11: 2.228, 12: 2.201, 13: 2.179, 14: 2.160, 15: 2.145, 16: 2.131, 17: 2.120, 18: 2.110, 19: 2.101, 20: 2.093}
+TOLERANCE = 0.05
 CRITERION_ROLES = ("cc1", "as", "gcc", "sh", "fixdep", "rm")   # the object job's roles; plus the dispatch median
 
 
@@ -60,7 +61,7 @@ def stability(values_by_repeat):
     if k < 2:
         return {"k": k, "mean": v[0] if v else None, "cv": None, "half_width": None, "leave_one_out": None, "passes": False}
     m, sd = statistics.fmean(v), statistics.stdev(v)
-    hw = T975.get(k, 2.2) * sd / (k ** 0.5) / m
+    hw = T975.get(k, T975[20]) * sd / (k ** 0.5) / m
     loo = max(abs(statistics.fmean(v[:i] + v[i + 1:]) - m) / m for i in range(k))
     return {"k": k, "mean": round(m, 1), "cv": round(sd / m, 4), "half_width": round(hw, 4), "leave_one_out": round(loo, 4),
             "passes": hw <= TOLERANCE}
@@ -159,7 +160,7 @@ def main():
             row["make dispatch"] = round(a["dispatch"]["per_dispatch_ms"]["p50"] * 1000.0 / ref, 3)
         row["build wall s"] = a.get("cmd_wall_s")
         cross[r] = {"cpu_model": per[r]["cpu_model"], "ratio_to_same_machine_mean": row}
-    out["stability"] = {"tolerance": TOLERANCE, "repeat_cap": REPEAT_CAP, "quantities": crit,
+    out["stability"] = {"tolerance": TOLERANCE, "quantities": crit,
                         "passes": bool(crit) and all(c["passes"] for c in crit.values())}
     out["cross_machine"] = cross
     json.dump(out, open(args.out, "w"), indent=1)
@@ -207,9 +208,9 @@ def render(out):
             L.append("")
     st = out.get("stability")
     if st:
-        L += ["## Same-machine repeats and the stability criterion (D10)", "",
+        L += ["## Same-machine repeats and the stability criterion (D10, D11)", "",
               f"Pooled machine: {out.get('machine') or 'any'}; pooled repeats {reps}; other-machine repeats {out.get('other_machine_repeats')}; stopped by the machine gate {out.get('gated_out')}. "
-              f"Criterion: the 95 % confidence half-width of the across-repeat mean of each carried median is at most {st['tolerance']:.0%} (cap {st['repeat_cap']} repeats). "
+              f"Criterion: the 95 % confidence half-width of the across-repeat mean of each carried median is at most {st['tolerance']:.0%}; repeats are added one at a time until it holds (D11). "
               f"**{'Holds' if st['passes'] else 'Does not hold yet'}.**", "",
               "| quantity | repeats | mean (µs) | spread (cv) | 95 % half-width | leave-one-out | passes |", "|---|---|---|---|---|---|---|"]
         for q, c in st["quantities"].items():
