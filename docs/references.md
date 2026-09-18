@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-09-15
+> Status: normative · Created 2026-08-26 · Updated 2026-09-18
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -11,7 +11,7 @@ Id derivation by `type`:
 
 - **scholarly** → `<label>-<venue><yy>` — label is the first-author surname, or the system name when the work is universally known by it (`cpsmark-tbench23`, `lavd-ossna24`). arXiv-only works use `arxiv` in the venue slot (`focal-arxiv26`). Raw arXiv numbers are banned as ids — they live in the citation.
 - **deployed-system** → project name, no year; `pinned_version` carries freshness (`interbench`, `rt-app`, `steam-downloads`).
-- **measurement** → `meas-ci`, with run identification in the locator (`meas-ci:<workflow>:<run>`).
+- **measurement** → `meas-ci`, with campaign identification in the locator (`meas-ci:<workflow>:<campaign>`): the campaign is the launch date of its first batch (`YYYY-MM-DD`); its runs may be several, each repeat's run id recorded in the pooled record, and its raw records are one release. A single run number (`meas-ci:<workflow>:<run>`) identifies a campaign of one run from before this form.
 
 **Contributor recipe:** (1) read this rule and mint the id; (2) add the entry here; (3) add a `dataset/sources.yaml` entry *only if the dataset derives values or structure from it*.
 
@@ -285,7 +285,7 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 ## Grounding — measurement
 
 ### `meas-ci`
-- cite: this work — CI measurement campaign; workflow files and raw outputs released in the artifact. Locator: `meas-ci:<workflow>:<run>`.
+- cite: this work — CI measurement campaign; workflow files and raw outputs released in the artifact. Locator: `meas-ci:<workflow>:<campaign>`, the campaign's launch date (`YYYY-MM-DD`), or a run number for a one-run campaign from before that form.
 - role: structural/shape claims about software behavior only (fork structure, counts, lifetime shapes, periods, heartbeats, comm strings); machine-relative absolutes carry the runner spec and rank as convention-informed-by-measurement. Never desktop-performance claims. N-run spread reported.
 - status: reserved (no runs yet; `meas-pending` placeholders in archetypes until freeze)
 

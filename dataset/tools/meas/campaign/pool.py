@@ -119,11 +119,12 @@ def main():
         if args.cpu_model and args.cpu_model not in model:
             other.append({"app": app, "repeat": rep, "cpu_model": model, "path": os.path.relpath(d, args.artifacts)})
             continue
-        info = runs.setdefault(app, {"family": fam, "mode": mode, "repeats": {}, "cpu_model": {}, "kernel": {}})
+        info = runs.setdefault(app, {"family": fam, "mode": mode, "repeats": {}, "cpu_model": {}, "kernel": {}, "run_id": {}})
         if rep in info["repeats"]:
             raise SystemExit(f"{app} repeat {rep}: two measured artifacts ({info['repeats'][rep]}, {d})")
         info["repeats"][rep] = d
         info["cpu_model"][rep] = model
+        info["run_id"][rep] = (spec.get("github_run") or {}).get("GITHUB_RUN_ID")  # D27: a campaign spans runs
         info["kernel"][rep] = (spec.get("uname") or "").split()[2] if len((spec.get("uname") or "").split()) > 2 else None
     out = {"w_ms": args.w_ms, "cap_ms": args.cap_ms, "exclude_roles": list(exclude_roles), "machine": args.cpu_model or None,
            "gated_out": gated, "other_machine": other, "runs": {}}
@@ -157,6 +158,7 @@ def main():
             del raw
         entry = {"family": info["family"], "mode": info["mode"], "repeats": reps,
                  "cpu_model": {r: info["cpu_model"][r] for r in reps}, "kernel": {r: info["kernel"][r] for r in reps},
+                 "run_id": {r: info["run_id"][r] for r in reps},
                  "version": results[reps[0]].get("version"), "phases": {}}
         for phase in ("idle", "driven", "driven-alt", "play", "op"):
             if not all(phase in raws[r]["phases"] for r in reps):

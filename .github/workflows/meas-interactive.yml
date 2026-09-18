@@ -6,7 +6,7 @@ name: meas-interactive
 # applications, repeats, CPU model and mode (dry | full). A family's repeats is
 # one list for every app or a map app -> list, for per-application additions
 # (9.5 changelog D26). Registry tag
-# meas-ci:interactive:<run_number>. One artifact per (app, repeat).
+# meas-ci:interactive:<campaign launch date> (D27). One artifact per (app, repeat).
 
 on:
   push:

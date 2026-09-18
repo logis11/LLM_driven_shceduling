@@ -4,7 +4,7 @@ name: meas-build
 # (research-slice changelog D3–D8; method
 # _dev/research/jioh/task-9.6-compile/campaign/method.md). Started by a push
 # changing .github/campaign-build.json, which names the repeats and the mode
-# (dry | full). Registry tag meas-ci:build:<run_number>. One artifact per repeat.
+# (dry | full). Registry tag meas-ci:build:<campaign launch date> (9.5 D27). One artifact per repeat.
 
 on:
   push:

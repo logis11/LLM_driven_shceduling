@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Generate the measured archetype entries (9.5 fold-in) from pool.py output.
 
-fold_in.py <results-dir> <out.yaml> [--tag interactive=meas-ci:interactive:N --tag playback=meas-ci:playback:M --tag <app>=meas-ci:interactive:K]
+fold_in.py <results-dir> <out.yaml> [--tag interactive=meas-ci:interactive:<campaign> --tag playback=meas-ci:playback:<campaign> --tag <app>=meas-ci:interactive:<campaign>]
+(<campaign>: the launch date, D27; a run number for a one-run campaign from before it)
 
 One entry per campaign run, per the 9.5 changelog: D2/D11 ids, D9 shape,
 D13 per-input run (window rule), D16 timer components with a pooled
@@ -124,6 +125,9 @@ def entry(aid, spec, d):
     reps = d["repeats"]
     phase_names = list(d["phases"])
     run_line = f"{tag.split(':', 1)[1]}, repeats {reps}"
+    runs = sorted(set(x for x in (d.get("run_id") or {}).values() if x))
+    if runs:  # D27: a campaign spans runs; each repeat's run is in the pooled record
+        run_line += f", runs {', '.join(runs)}"
     if run == "thunderbird" and tag == "meas-ci:interactive:3":
         run_line += " (repeats 2 and 3 from interactive:4 after a replay-driver fix)"
     out.append(f"      run: \"{run_line}\"")

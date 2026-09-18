@@ -276,9 +276,10 @@ sources:
 
   meas-ci:
     type: measurement
-    locator_pattern: "^[a-z0-9_-]+:\\d+$"
+    locator_pattern: "^[a-z0-9_-]+:(\\d+|\\d{4}-\\d{2}-\\d{2})$"
     notes: >-
-      Our CI measurement campaign (workflow:run locator). Supports structural
+      Our CI measurement campaign (workflow:campaign locator — the launch
+      date, or a run number for a one-run campaign). Supports structural
       and shape claims about software behavior only — fork structure, counts,
       lifetime shapes, periods, heartbeat rates, comm strings. Machine-
       relative absolutes (CPU %, IO throughput, io-wait fractions) carry the

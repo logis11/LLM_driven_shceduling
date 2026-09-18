@@ -74,13 +74,15 @@ def main():
         report = json.load(open(os.path.join(d, "report.json")))
         meas_cpu = int(report.get("pin.load_cpu", 3))
         edges = load_edges(d)
-        per[r] = {"mode": mode, "cpu_model": (json.load(open(os.path.join(d, "spec.json"))).get("cpu_model") if os.path.exists(os.path.join(d, "spec.json")) else None),
+        spec = json.load(open(os.path.join(d, "spec.json"))) if os.path.exists(os.path.join(d, "spec.json")) else {}
+        per[r] = {"mode": mode, "cpu_model": spec.get("cpu_model"), "run_id": (spec.get("github_run") or {}).get("GITHUB_RUN_ID"),  # D11; 9.5 D27
                   "phases": {ph: analyze_phase(d, ph, meas_cpu, edges) for ph in BUILD_PHASES + BATCH_PHASES}}
     all_reps = reps
     other = [r for r in all_reps if args.cpu_model and args.cpu_model not in (per[r]["cpu_model"] or "")]
     reps = [r for r in all_reps if r not in other]
     out = {"repeats": reps, "machine": args.cpu_model or None, "other_machine_repeats": other, "gated_out": gated,
-           "mode": {r: per[r]["mode"] for r in all_reps}, "cpu_model": {r: per[r]["cpu_model"] for r in all_reps}, "phases": {}}
+           "mode": {r: per[r]["mode"] for r in all_reps}, "cpu_model": {r: per[r]["cpu_model"] for r in all_reps},
+           "run_id": {r: per[r]["run_id"] for r in all_reps}, "phases": {}}
     for ph in BUILD_PHASES + BATCH_PHASES:
         have = [r for r in reps if "missing" not in per[r]["phases"][ph]]
         if not have:
@@ -161,7 +163,7 @@ def fmt_q(q):
 def render(out):
     reps = out["repeats"]
     L = [f"# 9.6 build campaign — pooled results", "",
-         f"Repeats {reps}; mode {out['mode']}; CPU model per repeat {out['cpu_model']}. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9; "
+         f"Repeats {reps}; mode {out['mode']}; CPU model per repeat {out['cpu_model']}; run per repeat {out['run_id']}. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9; "
          f"times in µs unless stated; the spread is the per-repeat p50. Rules: method §5.", ""]
     for ph, P in out["phases"].items():
         if P.get("missing"):
