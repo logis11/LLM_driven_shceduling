@@ -38,6 +38,15 @@ rec family build; rec repeat "$REPEAT"; rec mode "$MODE"; rec phases "$PHASES"; 
 rec build.targets "${BUILD_TARGETS:-all}"; rec clam.dir "$CLAM_DIR"; rec clip_s "$CLIP_S"; rec train.steps "$TRAIN_STEPS"; rec tracker.max_s "$TRACKER_S"
 pin_record | tee -a "$KV" | sed 's/^/  /' >&2
 python3 "$MEAS/runner_spec.py" > "$OUT/spec.json"
+# same-machine repeats (D10): a job that drew another CPU model stops here, recorded, before any measurement
+source "$MEAS/machine_gate.sh"
+rec machine.model "$(machine_model)"; rec machine.wanted "${MEAS_CPU_MODEL:-}"
+if ! machine_gate "${MEAS_CPU_MODEL:-}"; then
+  rec gate wrong-machine; rec finished_utc "$(date -u +%FT%TZ)"; finish_report
+  echo "machine gate: wanted '${MEAS_CPU_MODEL}', drew '$(machine_model)' — stopping before any measurement" >&2
+  exit 0
+fi
+rec gate open
 python3 -c 'import time,json; print(json.dumps({"mono_ns": time.monotonic_ns(), "real_ns": time.time_ns()}))' > "$OUT/clock.json"
 rec kernel "$(uname -r)"
 rec disk.root "$(df --output=source /tmp | tail -1)"

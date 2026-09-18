@@ -21,6 +21,7 @@ jobs:
       matrix: ${{ steps.plan.outputs.matrix }}
       mode: ${{ steps.plan.outputs.mode }}
       phases: ${{ steps.plan.outputs.phases }}
+      cpu_model: ${{ steps.plan.outputs.cpu_model }}
       count: ${{ steps.plan.outputs.count }}
     steps:
       - uses: actions/checkout@v4
@@ -33,6 +34,7 @@ jobs:
           print("matrix=" + json.dumps({"include": inc}))
           print("mode=" + c.get("mode", "full"))
           print("phases=" + c.get("phases", "all"))
+          print("cpu_model=" + c.get("cpu_model", ""))
           print("count=" + str(len(inc)))
           PY
   run:
@@ -46,7 +48,7 @@ jobs:
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
-      - run: MEAS_OUT=/tmp/meas MEAS_PHASES=${{ needs.plan.outputs.phases }} bash dataset/tools/meas/build/run.sh ${{ matrix.repeat }} ${{ needs.plan.outputs.mode }}
+      - run: MEAS_OUT=/tmp/meas MEAS_PHASES=${{ needs.plan.outputs.phases }} MEAS_CPU_MODEL="${{ needs.plan.outputs.cpu_model }}" bash dataset/tools/meas/build/run.sh ${{ matrix.repeat }} ${{ needs.plan.outputs.mode }}
       - name: own the output
         if: always()
         run: sudo chown -R "$(id -u):$(id -g)" /tmp/meas && sudo chmod -R a+rX /tmp/meas

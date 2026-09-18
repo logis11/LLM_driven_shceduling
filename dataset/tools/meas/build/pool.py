@@ -45,14 +45,40 @@ def pooled(samples_by_repeat, scale=1.0):
             "repeat_n": {r: len(vs) for r, vs in sorted(vals.items())}}
 
 
+# ---- same-machine repeats and the stability criterion (changelog D10; method §8, 2026-09-18) ----------------
+T975 = {2: 12.706, 3: 4.303, 4: 3.182, 5: 2.776, 6: 2.571, 7: 2.447, 8: 2.365, 9: 2.306, 10: 2.262}
+TOLERANCE, REPEAT_CAP = 0.05, 8
+CRITERION_ROLES = ("cc1", "as", "gcc", "sh", "fixdep", "rm")   # the object job's roles; plus the dispatch median
+
+
+def stability(values_by_repeat):
+    """The 95 % confidence half-width of the across-repeat mean of one carried median, relative to the mean
+    (t multiplier, k − 1 degrees of freedom), and the largest shift of the mean when any one repeat is dropped."""
+    import statistics
+    v = [x for x in values_by_repeat.values() if x]
+    k = len(v)
+    if k < 2:
+        return {"k": k, "mean": v[0] if v else None, "cv": None, "half_width": None, "leave_one_out": None, "passes": False}
+    m, sd = statistics.fmean(v), statistics.stdev(v)
+    hw = T975.get(k, 2.2) * sd / (k ** 0.5) / m
+    loo = max(abs(statistics.fmean(v[:i] + v[i + 1:]) - m) / m for i in range(k))
+    return {"k": k, "mean": round(m, 1), "cv": round(sd / m, 4), "half_width": round(hw, 4), "leave_one_out": round(loo, 4),
+            "passes": hw <= TOLERANCE}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("artifacts"); ap.add_argument("out"); ap.add_argument("--md")
+    ap.add_argument("--cpu-model", default="", help="pool only repeats whose CPU model contains this text (D10); others are the cross-machine check")
     args = ap.parse_args()
-    runs = {}
+    runs, gated = {}, {}
     for d in sorted(glob.glob(os.path.join(args.artifacts, "meas-build-*"))):
         m = NAME.match(os.path.basename(d))
         if m and os.path.exists(os.path.join(d, "report.json")):
+            rpt = json.load(open(os.path.join(d, "report.json")))
+            if rpt.get("gate") == "wrong-machine":   # stopped by the machine gate before any measurement
+                gated[int(m.group(1))] = rpt.get("machine.model")
+                continue
             runs[int(m.group(1))] = (d, m.group(2))
     if not runs:
         print("no repeats found", file=sys.stderr); return 1
@@ -65,7 +91,11 @@ def main():
         edges = load_edges(d)
         per[r] = {"mode": mode, "cpu_model": (json.load(open(os.path.join(d, "spec.json"))).get("cpu_model") if os.path.exists(os.path.join(d, "spec.json")) else None),
                   "phases": {ph: analyze_phase(d, ph, meas_cpu, edges) for ph in BUILD_PHASES + BATCH_PHASES}}
-    out = {"repeats": reps, "mode": {r: per[r]["mode"] for r in reps}, "cpu_model": {r: per[r]["cpu_model"] for r in reps}, "phases": {}}
+    all_reps = reps
+    other = [r for r in all_reps if args.cpu_model and args.cpu_model not in (per[r]["cpu_model"] or "")]
+    reps = [r for r in all_reps if r not in other]
+    out = {"repeats": reps, "machine": args.cpu_model or None, "other_machine_repeats": other, "gated_out": gated,
+           "mode": {r: per[r]["mode"] for r in all_reps}, "cpu_model": {r: per[r]["cpu_model"] for r in all_reps}, "phases": {}}
     for ph in BUILD_PHASES + BATCH_PHASES:
         have = [r for r in reps if "missing" not in per[r]["phases"][ph]]
         if not have:
@@ -106,6 +136,32 @@ def main():
                                         if a["cpu_per_process_us"]["repeat_p50"].get(r) and b["cpu_per_process_us"]["repeat_p50"].get(r) else None)
                                      for r in reps}}
     out["j1_check"] = chk
+    # the stability criterion on the warm -j8 phase's carried medians, and the other machine's repeats as a ratio
+    crit, cross = {}, {}
+    w = out["phases"].get("build-j8-warm", {})
+    for n in CRITERION_ROLES:
+        if n in w.get("roles", {}):
+            crit[n + " CPU per process"] = stability(w["roles"][n]["cpu_per_process_us"]["repeat_p50"])
+    if "dispatch" in w:
+        crit["make dispatch"] = stability(w["dispatch"]["per_dispatch_us"]["repeat_p50"])
+    for r in other:
+        a = per[r]["phases"].get("build-j8-warm", {})
+        if "missing" in a:
+            continue
+        row = {}
+        for n in CRITERION_ROLES:
+            p50 = a["roles"].get(n, {}).get("cpu_per_process_us", {}).get("p50")
+            ref = crit.get(n + " CPU per process", {}).get("mean")
+            if p50 and ref:
+                row[n] = round(p50 / ref, 3)
+        ref = crit.get("make dispatch", {}).get("mean")
+        if ref and a.get("dispatch", {}).get("per_dispatch_ms", {}).get("p50"):
+            row["make dispatch"] = round(a["dispatch"]["per_dispatch_ms"]["p50"] * 1000.0 / ref, 3)
+        row["build wall s"] = a.get("cmd_wall_s")
+        cross[r] = {"cpu_model": per[r]["cpu_model"], "ratio_to_same_machine_mean": row}
+    out["stability"] = {"tolerance": TOLERANCE, "repeat_cap": REPEAT_CAP, "quantities": crit,
+                        "passes": bool(crit) and all(c["passes"] for c in crit.values())}
+    out["cross_machine"] = cross
     json.dump(out, open(args.out, "w"), indent=1)
     if args.md:
         open(args.md, "w").write(render(out))
@@ -149,6 +205,19 @@ def render(out):
                 L.append(f"| {r} | `{b['program']}` | {b['processes']} | {b['threads_with_runs']} | {b['lifetime_s']} | {b['saturation']} / {b['saturation_perf']} | {b['dominant_thread_share']} | {b['thread_cpu_share_top5']} | "
                          f"{b['blkio_delay_s']} ({b['blkio_share_of_lifetime']}) | {b['off_cpu_after_S_s']} | {b['off_cpu_after_D_s']} | {b['blkio_invalid_threads']} |")
             L.append("")
+    st = out.get("stability")
+    if st:
+        L += ["## Same-machine repeats and the stability criterion (D10)", "",
+              f"Pooled machine: {out.get('machine') or 'any'}; pooled repeats {reps}; other-machine repeats {out.get('other_machine_repeats')}; stopped by the machine gate {out.get('gated_out')}. "
+              f"Criterion: the 95 % confidence half-width of the across-repeat mean of each carried median is at most {st['tolerance']:.0%} (cap {st['repeat_cap']} repeats). "
+              f"**{'Holds' if st['passes'] else 'Does not hold yet'}.**", "",
+              "| quantity | repeats | mean (µs) | spread (cv) | 95 % half-width | leave-one-out | passes |", "|---|---|---|---|---|---|---|"]
+        for q, c in st["quantities"].items():
+            L.append(f"| {q} | {c['k']} | {c['mean']} | {c['cv']:.1%} | ±{c['half_width']:.1%} | {c['leave_one_out']:.1%} | {'yes' if c['passes'] else 'no'} |")
+        L.append("")
+        for r, x in out.get("cross_machine", {}).items():
+            L.append(f"- cross-machine check, repeat {r} ({x['cpu_model']}): ratio to the same-machine mean {x['ratio_to_same_machine_mean']} — written into scope as a ratio, applied to no value (9.5 follow-ups decision 13)")
+        L.append("")
     L += ["## -j1 against -j8 (D4 invariance check): CPU per process, pooled p50 ratio", ""]
     for n, c in out["j1_check"].items():
         L.append(f"- `{n}`: {c['j1_over_j8_pooled_p50']} (per repeat {c['per_repeat']})")
