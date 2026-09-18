@@ -22,7 +22,7 @@
 appdef() {
   local app="$1"
   export DEBIAN_FRONTEND=noninteractive
-  STREAM=""; AREA="0,0,0,0"; POSTLAUNCH=""; POSTCLASS=""; OP=""; ALTPRELUDE=""
+  STREAM=""; AREA="0,0,0,0"; POSTLAUNCH=""; POSTCLASS=""; OP=""; ALTPRELUDE=""; KINDS="key,click,drag,wheel"
   case "$app" in
     code)
       wget -qO /tmp/code.deb "https://update.code.visualstudio.com/latest/linux-deb-x64/stable"; rec download.rc "$?"
@@ -66,6 +66,8 @@ PY
       rec doc.bytes "$(stat -c %s /tmp/doc/large.odt 2>/dev/null || echo 0)"
       LAUNCH="soffice --norestore --nologo --nofirststartwizard /tmp/doc/large.odt"
       CLASS="libreoffice|soffice"; PAT="soffice"; RX="soffice"; DRIVER=stream; STREAM=word; AREA="0.30,0.15,0.08,0.20"
+      # 9.5 D28: keys only, at their recorded times — the stream's clicks, scrolls and drags moved the typing up the document
+      KINDS="key"
       POSTLAUNCH="sleep 10; xdotool key ctrl+End" ;;
     thunderbird)
       apt_install_full thunderbird; ver thunderbird --version

@@ -91,8 +91,8 @@ case "$DRIVER" in
   stream)
     $PH idle -- bash -c "true"; phase idle "$IDLE" ""
     sleep 10
-    SFILE="$STREAMS/$STREAM-r$REPEAT.jsonl"; rec stream_file "$(basename "$SFILE")"
-    DRV="python3 $TOOLS/replay_stream.py $SFILE $WID $OUT/replay.jsonl --seconds $DRIVEN --area $AREA"
+    SFILE="$STREAMS/$STREAM-r$REPEAT.jsonl"; rec stream_file "$(basename "$SFILE")"; rec stream_kinds "$KINDS"
+    DRV="python3 $TOOLS/replay_stream.py $SFILE $WID $OUT/replay.jsonl --seconds $DRIVEN --area $AREA --kinds $KINDS"
     $PH driven -- bash -c "true"; phase driven "$((DRIVEN + 5))" "$DRV"
     rec replay.sent "$(wc -l < "$OUT/replay.jsonl" 2>/dev/null || echo 0)"
     # driven-alt (spec decision 11): the same phase under the 136M Keystrokes stream, for the stimulus-sensitivity check

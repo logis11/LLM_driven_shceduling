@@ -91,6 +91,9 @@ def components_block(ph, tag, key, indent="      "):
     return lines
 
 
+KEYS_ONLY = {"office-writer"}  # D28: the stream's keys only (appdefs KINDS=key)
+
+
 def entry(aid, spec, d):
     run, observed, kind, stream, stim_tag, approx = spec
     tag = RUN_TAG.get(run) or RUN_TAG[d["family"]]  # --tag <app>=… overrides the family tag for one run (re-run batch)
@@ -148,9 +151,14 @@ def entry(aid, spec, d):
              f"(4 vCPU {' / '.join(models)}, kernel {' / '.join(kernels)}) under Xvfb 1280×800 — no display refresh, no GPU, "
              f"no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. ")
     if kind == "input":
-        scope += (f"Stimulus: SWELL-KW stream {stream} replayed per event by xdotool at recorded gaps (error p99 1.24 ms), "
-                  f"keys and pointer events together, pointer positions scaled into the content area (D5, D12); "
-                  f"the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the "
+        if aid in KEYS_ONLY:
+            scope += (f"Stimulus: SWELL-KW stream {stream}, its keystrokes replayed by xdotool at their recorded times (error p99 1.24 ms) "
+                      f"and its clicks, scrolls and drags left out, so the typing stays at the document's end (D28; the archetype carries "
+                      f"typing, not document navigation); ")
+        else:
+            scope += (f"Stimulus: SWELL-KW stream {stream} replayed per event by xdotool at recorded gaps (error p99 1.24 ms), "
+                      f"keys and pointer events together, pointer positions scaled into the content area (D5, D12); ")
+        scope += (f"the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the "
                   f"process tree until the next input minus the idle rate. ")
         alt = d["phases"].get("driven-alt", {}).get("per_input")
         if alt:  # spec decision 11: the pre-registered sensitivity result, one sentence, no value changed
