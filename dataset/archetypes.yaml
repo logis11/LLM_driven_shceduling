@@ -808,49 +808,6 @@ archetypes:
       = block_cpu x (1/0.231 - 1) ~ 10 ms; warm-cache rsync runs 0.276 and
       compressing streams ~0.73, noted as the class's upper range.
 
-  background-crawler:
-    category_source: ananicy-rules
-    pattern:
-      program:
-        - loop:
-            - RUN: scan_burst
-            - WAIT: io
-            - SLEEP: throttle
-    params:
-      scan_burst:
-        {dist: lognormal, median_us: 1608, sigma_log: 0.639,
-         sampling: per-iteration, source: "meas-ci:cli:3"}
-      io_wait:
-        {dist: lognormal, median_us: 5870, sigma_log: 0.6,
-         sampling: per-iteration, source: "meas-ci:cli:3"}
-      throttle:
-        {dist: lognormal, median_us: 3800000, sigma_log: 0.428,
-         sampling: per-iteration, source: "meas-ci:cli:3"}
-    lifetime: segment-bound
-    binding_params: []
-    scalable: []
-    validation_stats:
-      referee: meas-ci
-      stats: [burst/idle duty cycle of updatedb + clamscan runs]
-    modeling_notes: >-
-      ananicy-rules establishes the class (BG_CPUIO/indexer, ioclass idle —
-      deployed practice) but carries no rates. Params from meas-ci:cli:3's
-      daemon-mode referee: tracker-miner-fs-3 under dbus-run-session
-      indexing a corpus copy for 300 s per repeat (5 repeats, one miner
-      process each) — cpu-per-wake median ~1.6 ms sigma_log ~0.64
-      (scan_burst), inter-wake gap median ~3.8 s sigma_log ~0.43 (throttle:
-      the daemon's observed self-paced wake structure across index + idle).
-      io_wait derives from the cold-cache updatedb duty 0.215 (spread
-      0.147-0.244): scan_burst x (1/0.215 - 1) ~ 5.9 ms; its sigma is our
-      convention. Foreground finding retained: foreground scans never
-      throttle (clamscan per-proc duty ~1.0 warm AND ~0.98 cold) — the
-      daemon-mode run is the only valid pacing referee. The
-      burst/wait/throttle loop shape is ours; the ioclass-idle character is
-      expressed through low scheduling priority at binding, not encoded here.
-      The daemon-mode (low-intensity, segment-bound) crawler lives here; a
-      full-rescan CPU-saturating indexer is deliberately bound to cpu-batch
-      in P1 (see cpu-batch modeling_notes).
-
   # ---- structural-special family — harvested from LAVD --------------------
 
   game-task-chain:
