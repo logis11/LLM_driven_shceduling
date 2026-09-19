@@ -1,0 +1,83 @@
+# Task 9.7 — measurement campaign method (draft, 2026-09-19)
+
+The observation behind `file-backup`, `file-archiver` and `game-download` (changelog D1, D2, D4, D16), run on GitHub-hosted runners (phase decision 5) under `../../measurement-campaign-workflow.md`, pinned to one CPU (9.5 follow-ups decision 3). Written before any measurement, with the analysis rules of D13 fixed here; amended only by a dated entry in §9. Tooling: `dataset/tools/meas/background/` (`run.sh`, `analyze.py`, `pool.py`; the taskstats listener is `build/taskstats_listen.c`), workflow `.github/workflows/meas-background.yml`, trigger `.github/campaign-background.json`, loop family `background` with apps `borg`, `7z`, `steamcmd` (`dataset/tools/meas/loop/common.py`).
+
+## 1. Runs
+
+- **Machine.** The AMD EPYC 7763 only; `machine_gate.sh` stops a job that drew another model before any install or measurement, and a gated job is not a repeat (campaign workflow).
+- **Tag.** `meas-ci:background:<YYYY-MM-DD>`, the launch date of the first batch (9.5 D27); each repeat's run id in the pooled record.
+- **Repeat.** One job per program per repeat index, the program's phases in the order of §3 (D14 (4)); identical work, so an added repeat is the next index. Artifact `meas-background-<app>-r<k>-<mode>`.
+- **Stability (D14).** Headline medians per archetype: `file-backup` — per-wake run and per-wake wait of `borg-first-warm`; `file-archiver` — per-wake run and per-wake wait of `7z-mmt8-warm`; `game-download` — per-wake run, network wait and bytes per wake of `steam-fresh-shaped`; each pooled over all the process's threads. Tolerance 5 %, fixed (`stability.py`). Repeats are added one at a time until every headline median of the program passes.
+- **Modes.** `dry` — one repeat per program on reduced inputs (§2), to verify the tooling; `probe` — three full repeats per program, whose per-program spread of the headline medians sets the first batch (the smallest count at which every headline median passes at that spread) and whose data is not pooled (D14 (3)); `full` — the campaign.
+- **Recorded per job.** `spec.json` (runner spec), `report.kv`, CPU model and kernel, `df` of `/` and `/mnt`, `lsblk` with `rotational`, the network interface and its counters, the kernel-config lines for taskstats, delay and I/O accounting, `NET_SCH_TBF`, `IFB`, `HZ` (`kconfig.txt`).
+
+## 2. Inputs
+
+- **The file set (D7).** Mahoney's `10gb.zpaq` (3,701,584,921 B per its page), fetched from the page's download link, its SHA-256 fixed at the dry run and checked in every job; extracted with `zpaq x` (zpaq 7.15, noble universe) on the harness CPUs; the archive deleted after extraction. The extracted tree's manifest (path, size, SHA-256) is written at the dry run and every job's tree is verified against it before the first phase.
+- **The set check (D7), from the manifest once.** The median file size and the share of bytes in files over 30 MB, reported against the GNU/Linux users' median file size (T9-S3-06) and the Windows populations' 30 MB share (T9-S1-02).
+- **The change set of `borg`'s repeat backup (D6).** Its size follows the one personal-machine trace of daily change in the records, Cumulus (T9-S1-05: 10.3 MB new and 29.9 MB changed per day over a 2.37 GB home directory), scaled to the set: new files totalling 0.43 % of its bytes (43.5 MB) and changed files totalling 1.26 % (126.2 MB). Which files change, how, and the new files' content are design: a seeded choice of files; in each, a seeded contiguous range rewritten with seeded random bytes; new files of seeded random bytes in seeded directories. Before the cold phases the set is restored to its manifest (originals kept aside, new files removed) and verified.
+- **Disk.** The set and one output at a time: each repository or archive is deleted after its phase. The work directory sits on whichever of `/` and `/mnt` holds the set plus the largest output, decided at the dry run and recorded.
+- **The depot (D4, D12).** Team Fortress 2 Dedicated Server, app 232250, anonymous on Valve's list (S4-16) — the listed anonymous Linux dedicated server with the most game content (maps, models, sounds), a choice of design; its size is read at the dry run (`app_info_print`) and must fit the disk beside one install; failing that, the next largest listed app, recorded. Its branches are read at the same time for the D12 staging probe.
+- **SteamCMD.** The noble `steamcmd` package (multiverse, i386 multiarch, licence preseeded for debconf), run as the runner user (S4-16); its self-update runs once with `+quit` on the harness CPUs before any phase, and the version it reports is recorded.
+- **The shaped link (D10, D11).** On the runner's interface, ingress redirected to an `ifb` device with a `tbf` root at 121.0 Mbps (the D11 rate; snapshot and `rate.py` from `../sources/D11/` go into the release); burst and latency are design, recorded, with burst at least the rate over `HZ` (tc-tbf, S4-14). The achieved rate is recorded from SteamCMD's content log and the interface counters. The unshaped phases run with no qdisc.
+- **Builds (D9).** borgbackup 1.2.8 (`--encryption=repokey`, passphrase from the environment, compression at its default lz4); 7-Zip 23.01 from `7zip` (`7z i` recorded; format and level at their defaults); `util-linux-extra` for `fincore`; `linux-tools` for perf; `iproute2` for tc.
+
+## 3. Phases
+
+In this order within each job, each one command under `phase.sh` on the measured CPU, the instruments of §4 over the whole phase, the phase edges on both clocks in `edges.jsonl`. *Warm*: the set read once on the harness CPUs, then `fincore` over it, the cached fraction recorded. *Cold*: `sync; sysctl vm.drop_caches=3` (S4-24).
+
+| Job | Phase | Command | For | Read |
+|---|---|---|---|---|
+| `borg` | `borg-first-warm` | `borg create <repo>::first <set>` into a repository just made by `borg init` on the harness CPUs; warm | `file-backup`, every value (D6, D8) | per-wake runs and waits, disk waits, CPU total |
+| | `borg-repeat-warm` | the change set applied on the harness CPUs, the set read again, then `borg create <repo>::repeat <set>` | the repeat backup, results only (D6) | same |
+| | `borg-first-cold` | the set restored, a new repository, cold, `borg create` | the cold first backup, results only (D8) | same |
+| | `borg-repeat-cold` | the change set applied, cold, `borg create` | the cold repeat, results only (D6, D8) | same |
+| `7z` | `7z-mmt8-warm` | `7z a -mmt8 <out>.7z <set>`; warm | `file-archiver`, every value (D8, D9) | per-thread runs and waits, CPU total |
+| | `7z-mmt1-warm` | `7z a -mmt1 …`; warm | the thread check (D15 (a)) | CPU per byte, per-wake run and wait |
+| | `7z-mmt8-cold` | as the first, cold | results only (D8) | same as the first |
+| `steamcmd` | `steam-fresh-shaped` | `steamcmd +force_install_dir <dir> +login anonymous +app_update <app> +quit` into an empty directory; shaped; `perf trace` on | `game-download`, every value (D10, D12) | per-wake runs, network waits, bytes per wake, CPU total |
+| | `steam-fresh-untraced` | as the first, without `perf trace` | the tracing check (D15 (b)) | CPU total, duration |
+| | `steam-fresh-unshaped` | as the first, no qdisc | the high-rate case, results only (D10) | as the first |
+| | `steam-update-shaped` | an older public build staged on the harness CPUs, then `app_update` to the public build; shaped; `perf trace` on — only if the dry run's staging probe succeeds | the update, results only (D12) | as the first |
+
+**Dry mode.** Mahoney's published 100 MB subset for `borg` and `7z`; the smallest listed anonymous app for `steamcmd`; the D12 staging probe (the app's branches; whether an older public build installs anonymously and then updates); one timed pass of `borg-first-warm` and `7z-mmt8-warm` on the full set, for disk and time. If the three 7-Zip passes over the full set cannot finish inside the job limit (330 min, as `meas-build.yml`), the 7-Zip phases read Mahoney's published 1 GB subset (D7) and §9 records it.
+
+## 4. Instruments
+
+- **`perf sched record -k CLOCK_MONOTONIC -a`** as root over the whole phase on the harness CPUs, stopped with SIGINT when the phase's command exits; read with `perf sched timehist --state`, `perf sched timehist -w` and `perf script` for the fork, wakeup-new and exit rows — as 9.6's method §3. All CPUs are recorded so a wakeup issued from another CPU (an I/O or network completion) is seen.
+- **taskstats**, `build/taskstats_listen.c` as in 9.6's method §3 and its dry-run amendments: registered on the measured CPU, `kernel.task_delayacct=1` before the first phase, one row per exiting thread and per thread group, ENOBUFS counted.
+- **`perf trace`** in the `steamcmd` phases marked on (§3), as root on the harness CPUs, `--cpu <measured>`, over the whole phase, recording the receive and send calls (`recvfrom`, `recvmsg`, `recvmmsg`, `read`, `readv`, `sendto`, `sendmsg`, `write`, `writev`), the poll-family waits (`epoll_wait`, `epoll_pwait`, `poll`, `ppoll`, `select`, `pselect6`) and `socket`, `connect`, `close` — the last three keeping the table of which descriptors are sockets. Output with timestamps on CLOCK_MONOTONIC where perf offers it, otherwise with the offset recorded against `edges.jsonl`.
+- **SteamCMD's own logs**, `logs/content_log.txt` among them, kept per phase (D4's comparison with the desktop client's log, S3-29).
+- **Network.** Interface counters before and after each `steamcmd` phase; `tc -s qdisc` after each shaped phase (sent, dropped, overlimits).
+- **`phase.sh`, `edges.jsonl`, `clock.json`** as in 9.6. Versions recorded: kernel, perf, borg, 7-Zip, zpaq, SteamCMD and the app's build id, util-linux.
+
+## 5. Analysis rules (D13, fixed before the run)
+
+- **Phases read.** `file-backup` from `borg-first-warm`; `file-archiver` from `7z-mmt8-warm`; `game-download` from `steam-fresh-shaped` (D6, D8, D10, D12).
+- **Distribution form.** Every parameter is a quantile table (p1, p5, p10, p25, p50, p75, p90, p95, p99, p99.9; µs, bytes for bytes per wake) pooled over the same-machine repeats, tagged with the campaign (9.5 D17); the per-repeat p50 is the spread.
+- **Wake.** A timehist row is a segment; it is a wake when a wakeup row for that thread lies between its previous schedule-out and this schedule-in; otherwise a resume after preemption, merged into the preceding wake (9.5 D21).
+- **Shape.** Per thread, the sequence of wakes (run) and the off-CPU intervals between them, from the measured CPU's rows. An interval is a *disk wait* when the schedule-out state is uninterruptible (`D`) and the process's taskstats block-I/O delay accounts for it; a *network wait* by the next rule; a *sleep* otherwise when the state is interruptible; neither when it is a runnable wait.
+- **Network wait (`steamcmd`).** An interval of a `steamcmd` thread is a network wait when, in the `perf trace` rows of that thread, the first receive call after the interval's end that returns data is on a socket descriptor, with no file read or write between the interval's end and that call; when the thread slept inside a poll-family call spanning the interval, that call's return with a ready descriptor is followed by such a receive. The matching is applied to the dry run and any correction is a dated entry in §9 before the probe batch.
+- **Bytes per wake.** Per wake of a receiving thread, the sum of the bytes its socket receive calls return from that wake's schedule-in to its next schedule-out that ends a network wait.
+- **CPU total.** Per process, the sum of its perf run segments on the measured CPU, with taskstats' CPU beside it as the cross-check (9.6 method, dry-run-2 amendment (a)); the discrepancy reported per process.
+- **Job size.** `total_work` stays timeline design (D13 (v)); the phases' CPU totals and durations are reported, not carried.
+- **Thread encoding.** Every thread's quantiles are kept separately; the encoding — one task merging the process (9.5 D14) or one task per busy thread — is decided on the results (D13).
+- **Checks (D15), each a ratio of pooled medians with the per-repeat spread.** (a) `7z-mmt1-warm` against `7z-mmt8-warm`: CPU per byte, per-wake run and wait. (b) `steam-fresh-untraced` against `steam-fresh-shaped`: the process's CPU total from exit accounting and the download's duration. A difference inside ± 5 % is reported as not resolved (D14); a larger one is written into the archetype's `modeling_notes` as a limitation of its values.
+- **Comparisons, results only.** Warm against cold (D8), first against repeat backup (D6), shaped against unshaped (D10), fresh against update (D12): the headline medians side by side, a difference inside ± 5 % reported as not resolved (D14).
+- **Also reported.** The set check (§2, D7); the D11 robustness line (the network table's byte-weighted median, 128.9 Mbps, against the 121.0 applied); the achieved download rate; SteamCMD's content log against the desktop client's (D4); the cached fraction of every warm phase.
+
+Any departure the data forces is a dated deviation in §9, not a re-fit.
+
+## 6. Scope, written into every archetype
+
+Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel and CPU model as recorded, the AMD EPYC 7763); one CPU, the rest of the machine idealised; the runner's agent processes share the measured CPU and are outside every tree; no human and no desktop session. `file-backup` and `file-archiver`: Mahoney's 10 GB set — one Windows laptop's files, 2009–2013, its set check stated (D7); the set cached (D8); the runner's disk for every write. `file-backup`: a first backup into a new repository with borg 1.2.8 at its defaults (D6, D9). `file-archiver`: 7-Zip 23.01 at its defaults with eight threads on one CPU, the `nproc` rule on an 8-thread desktop (D9), the thread check stated (D15). `game-download`: SteamCMD, not the desktop client, and the binding note of D4; a fresh install of the named app; the runner's path to Valve's servers shaped at 121.0 Mbps by a token-bucket shaper, its millisecond burstiness a stated limitation (D10, D11); the tracing check stated (D15).
+
+## 7. Release
+
+Raw records per job (the perf text dumps, the `perf trace` output, the taskstats files, `phases.jsonl`, `edges.jsonl`, `report.kv`, `spec.json`, SteamCMD's logs, `tc` statistics, logs) are released as a GitHub release named in the registry entry at fold-in, as 9.5 and 9.6 did, with the D11 snapshot and `rate.py` and the set's manifest. The set itself is not redistributed: its licence grants download "for your own use" (T9-S3-11). The release is outward-facing and is published on 인지오's go-ahead.
+
+## 8. Retirement of `meas-cli.yml`
+
+With this workflow in place no phase of `.github/workflows/meas-cli.yml` serves an archetype: its build phases are 9.6's `meas-build.yml`, its `clamscan` and indexer rescan are 9.6's `cpu-batch` phases, its tracker daemon phase measured the retired `background-crawler` (D5), and its `wget`, `tar`, `rsync` and `updatedb` phases measured the loads D1 and D5 replace. The workflow is removed when this campaign's tooling lands; its release `meas-ci-2026-08-28` stays for reference, and `meas-ci:cli:3` leaves the archetypes at fold-in.
+
+## 9. Amendments
