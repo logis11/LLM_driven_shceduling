@@ -106,10 +106,15 @@ def main():
     out = a[a.index("--out") + 1] if "--out" in a else os.path.join(base, "pooled.json")
     dirs = {}
     for r in common.runs(family, since):
+        names = None
         for j in common.jobs(family, r["databaseId"]):
             if j["state"] != "landed" or (app and j["app"] != app):
                 continue
             name = common.artifact(family, j["app"], j["k"])
+            names = common.artifact_names(r["databaseId"]) if names is None else names
+            if name not in names:   # a dry check or another mode: not a repeat of this campaign
+                print(f"   run #{r['number']} ({r['databaseId']}): no {name} (has {', '.join(names) or 'none'}); not pooled")
+                continue
             dest = os.path.join(base, name) if family == "build" else os.path.join(base, str(r["databaseId"]), name)
             dirs[j["k"]] = common.download(r["databaseId"], name, dest)
     if not dirs:

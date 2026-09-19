@@ -80,6 +80,11 @@ def artifact(family, app, k):
     return f"meas-build-r{k}-{m}" if family == "build" else f"meas-{family}-{app}-r{k}-{m}"
 
 
+def artifact_names(run_id):
+    """The names of a run's artifacts (a dry check's are meas-build-r<k>-dry, never a repeat of a full campaign)."""
+    return [a["name"] for a in (gh("api", f"repos/{{owner}}/{{repo}}/actions/runs/{run_id}/artifacts") or {}).get("artifacts", [])]
+
+
 def download(run_id, name, dest):
     """One artifact into its own folder (gh extracts an -n download flat)."""
     if os.path.exists(os.path.join(dest, "report.json")):

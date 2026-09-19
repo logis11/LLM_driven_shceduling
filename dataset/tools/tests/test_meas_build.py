@@ -154,11 +154,12 @@ def test_criterion_lists_every_carried_value():
                              "share_past_boot_slice": dict(zip((4, 5, 7, 8, 9), (0.702, 0.698, 0.696, 0.704, 0.700)))}}}}
     crit = pool.criterion(out)
     assert set(crit) == {f"{n} CPU per process" for n in pool.CRITERION_ROLES} | {
-        "make dispatch", "object-job sh 1/4", "ffmpeg run between blocks", "ffmpeg mean block per run",
-        "ffmpeg share past the boot slice"}
+        "make dispatch", "object-job sh 1/4"} | {f"{ph} {q}" for ph in pool.BATCH_PHASES for q in (
+        "run between blocks", "mean block per run", "share past the boot slice")}
+    assert crit["train mean block per run"]["k"] == 0 and crit["train mean block per run"]["passes"] is False   # no pooled repeat yet
     assert crit["ffmpeg run between blocks"]["passes"] is True        # within the 1 µs floor
     assert crit["ffmpeg mean block per run"]["passes"] is True        # sub-µs mean, within the floor
-    assert all(c["k"] == 5 for c in crit.values())
+    assert all(c["k"] == 5 for q, c in crit.items() if not q.startswith(("clamscan", "handbrake", "train", "tracker")))
     four = {"phases": {"ffmpeg": {"shape": {"runs_between_blocks_us": rp(7, 7, 7, 7), "mean_block_us": {4: 0.3, 5: 0.3, 7: 0.3, 8: 0.3},
                                             "share_past_boot_slice": {4: 0.7, 5: 0.7, 7: 0.7, 8: 0.7}}}}}
     assert not any(c["passes"] for c in pool.criterion(four).values())    # four repeats: below the minimum

@@ -118,12 +118,12 @@ def criterion(out):
         add("make dispatch", w["dispatch"]["per_dispatch_us"]["repeat_mean"], ABS_FLOOR_US)
     for k, t in w.get("object_members", {}).get("step_cpu_us", {}).items():
         add(f"object-job {k}", t["repeat_mean"], ABS_FLOOR_US)
-    for ph in BATCH_PHASES:
-        s = out["phases"].get(ph, {}).get("shape")
-        if s:
-            add(f"{ph} run between blocks", s["runs_between_blocks_us"]["repeat_mean"], ABS_FLOOR_US)
-            add(f"{ph} mean block per run", s["mean_block_us"], ABS_FLOOR_US)
-            add(f"{ph} share past the boot slice", s["share_past_boot_slice"], None)
+    for ph in BATCH_PHASES:   # a phase with no pooled repeat yet (D27, D28) stays on the list with none
+        s = out["phases"].get(ph, {}).get("shape") or {"runs_between_blocks_us": {"repeat_mean": {}}, "mean_block_us": {},
+                                                       "share_past_boot_slice": {}}
+        add(f"{ph} run between blocks", s["runs_between_blocks_us"]["repeat_mean"], ABS_FLOOR_US)
+        add(f"{ph} mean block per run", s["mean_block_us"], ABS_FLOOR_US)
+        add(f"{ph} share past the boot slice", s["share_past_boot_slice"], None)
     return crit
 
 
