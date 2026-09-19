@@ -27,11 +27,30 @@ from stability import stability, T975, TOLERANCE  # noqa: E402
 import shapes  # noqa: E402  (this directory is on sys.path)
 
 NAME = re.compile(r"^meas-build-r(\d+)-(dry|full)$")
+CLAMAV_DAILY = "28128"   # the fixed signature database clamscan reads from repeat 9 on (changelog D27)
 BUILD_PHASES = ("build-j8-warm", "build-j8-cold", "build-j1-warm", "dkms")
 BATCH_PHASES = ("clamscan", "ffmpeg", "handbrake", "train", "tracker")
 ROLE_SAMPLES = (("run_ms", 1000.0, "run_per_wake_us"), ("off_D_ms", 1000.0, "off_after_D_us"), ("off_S_ms", 1000.0, "off_after_S_us"),
                 ("off_R_ms", 1000.0, "off_after_R_us"), ("cpu_us", 1.0, "cpu_per_process_us"), ("blkio_ns", 1.0, "blkio_per_process_ns"),
                 ("etime_us", 1.0, "etime_per_process_us"), ("wakes_by_pid", 1.0, "wakes_per_process"))
+
+
+def clamav_daily(report):
+    """The daily signature database a repeat's clamscan read (D27): recorded from the fixed copy (`clamav.db.daily`),
+    or, before it, read from clamscan's version line ("ClamAV 1.5.3/28127/…")."""
+    if report.get("clamav.db.daily"):
+        return str(report["clamav.db.daily"])
+    m = re.search(r"/(\d+)/", report.get("clamav.db") or "")
+    return m.group(1) if m else None
+
+
+def other_database_row(b):
+    """A repeat whose clamscan read another signature database, reported beside the pool (D27)."""
+    runs = b["_samples"]["runs_between_blocks_ms"]
+    return {"lifetime_s": b["lifetime_s"], "saturation": b["saturation"],
+            "run_between_blocks_mean_us": round(statistics.fmean(runs) * 1000.0, 4) if runs else None,
+            "mean_block_us": round(b["mean_block_ms"] * 1000.0, 4) if b["mean_block_ms"] is not None else None,
+            "share_past_boot_slice": b["share_past_boot_slice"]}
 
 
 def qtable(values):
@@ -124,18 +143,26 @@ def main():
         edges = load_edges(d)
         spec = json.load(open(os.path.join(d, "spec.json"))) if os.path.exists(os.path.join(d, "spec.json")) else {}
         per[r] = {"mode": mode, "cpu_model": spec.get("cpu_model"), "run_id": (spec.get("github_run") or {}).get("GITHUB_RUN_ID"),  # D11; 9.5 D27
+                  "clamav_daily": clamav_daily(report),  # D27
                   "phases": {ph: analyze_phase(d, ph, meas_cpu, edges) for ph in BUILD_PHASES + BATCH_PHASES}}
     all_reps = reps
     other = [r for r in all_reps if args.cpu_model and args.cpu_model not in (per[r]["cpu_model"] or "")]
     reps = [r for r in all_reps if r not in other]
     out = {"repeats": reps, "machine": args.cpu_model or None, "other_machine_repeats": other, "gated_out": gated,
            "mode": {r: per[r]["mode"] for r in all_reps}, "cpu_model": {r: per[r]["cpu_model"] for r in all_reps},
-           "run_id": {r: per[r]["run_id"] for r in all_reps}, "phases": {}}
+           "run_id": {r: per[r]["run_id"] for r in all_reps}, "clamav_daily": {r: per[r]["clamav_daily"] for r in all_reps},
+           "phases": {}}
     for ph in BUILD_PHASES + BATCH_PHASES:
         have = [r for r in reps if "missing" not in per[r]["phases"][ph]]
+        other_db = {}
+        if ph == "clamscan":   # D27: only the repeats that read the fixed signature database; the others reported
+            other_db = {r: {"daily": per[r]["clamav_daily"], **other_database_row(per[r]["phases"][ph]["batch"])}
+                        for r in have if per[r]["clamav_daily"] != CLAMAV_DAILY}
+            have = [r for r in have if r not in other_db]
         if not have:
-            out["phases"][ph] = {"missing": True}; continue
-        P = {"repeats": have, "cmd_wall_s": {r: per[r]["phases"][ph]["cmd_wall_s"] for r in have},
+            out["phases"][ph] = {"missing": True, **({"other_database": other_db} if other_db else {})}; continue
+        P = {"repeats": have, **({"other_database": other_db} if other_db else {}),
+             "cmd_wall_s": {r: per[r]["phases"][ph]["cmd_wall_s"] for r in have},
              "tree_processes": {r: per[r]["phases"][ph]["tree_processes"] for r in have},
              "wakes_in_tree": {r: per[r]["phases"][ph]["wakes_in_tree"] for r in have},
              "resumes_merged": {r: per[r]["phases"][ph]["resumes_merged"] for r in have},
@@ -202,10 +229,11 @@ def main():
             row["make dispatch"] = round(statistics.fmean(disp) * 1000.0 / ref, 3)
         row["build wall s"] = a.get("cmd_wall_s")
         cross[r] = {"cpu_model": per[r]["cpu_model"], "ratio_to_same_machine_mean": row}
-    needed = [c["needed"] for c in crit.values()]
+    needed = [c["needed"] for c in crit.values() if c["k"] >= 2]
     out["stability"] = {"tolerance": TOLERANCE, "abs_floor_us": ABS_FLOOR_US, "min_repeats": MIN_REPEATS, "quantities": crit,
                         "passes": bool(crit) and all(c["passes"] for c in crit.values()),
-                        "needed": None if not needed or None in needed else max(needed)}
+                        "needed": None if not needed or None in needed else max(needed),
+                        "not_estimable": [q for q, c in crit.items() if c["k"] < 2]}
     out["cross_machine"] = cross
     json.dump(out, open(args.out, "w"), indent=1)
     if args.md:
@@ -224,9 +252,15 @@ def render(out, title=None):
          f"Repeats {reps}; mode {out['mode']}; CPU model per repeat {out['cpu_model']}; run per repeat {out['run_id']}. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9; "
          f"times in µs unless stated; the spread is the per-repeat mean, the stability rule's value (D26). Rules: method §5.", ""]
     for ph, P in out["phases"].items():
+        db = (f"Pooled repeats {P.get('repeats', [])}, those that read signature database daily {CLAMAV_DAILY}; not pooled, "
+              f"another database (D27): " + "; ".join(f"repeat {r} daily {x['daily']}: lifetime {x['lifetime_s']} s, saturation {x['saturation']}, "
+                                                      f"run between blocks mean {x['run_between_blocks_mean_us']} µs, block per run mean {x['mean_block_us']} µs, "
+                                                      f"share past the boot slice {x['share_past_boot_slice']}" for r, x in P["other_database"].items()) + "."
+              ) if P.get("other_database") else None
         if P.get("missing"):
-            L += [f"## {ph}", "", "missing", ""]; continue
-        L += [f"## {ph}", "", f"command wall s {P['cmd_wall_s']}; tree processes {P['tree_processes']}; wakes {P['wakes_in_tree']}; resumes merged {P['resumes_merged']}; ENOBUFS {P['taskstats_enobufs']}", ""]
+            L += [f"## {ph}", "", *([db, ""] if db else []), "missing", ""]; continue
+        L += [f"## {ph}", "", *([db, ""] if db else []),
+              f"command wall s {P['cmd_wall_s']}; tree processes {P['tree_processes']}; wakes {P['wakes_in_tree']}; resumes merged {P['resumes_merged']}; ENOBUFS {P['taskstats_enobufs']}", ""]
         if "jobs" in P:
             for r, j in P["jobs"].items():
                 L.append(f"- repeat {r}: jobs {j['count']} {j['kinds']} (compile {j['compile_jobs']}; cc1 {j['cc1_processes']}), makes {j['makes']}; live jobs max {j['concurrency']['max']} mean {j['concurrency']['mean_busy']}; "
@@ -267,13 +301,14 @@ def render(out, title=None):
         L += ["## Same-machine repeats and the stability rule (D10, D11, D23–D26)", "",
               f"Pooled machine: {out.get('machine') or 'any'}; pooled repeats {reps}; other-machine repeats {out.get('other_machine_repeats')}; stopped by the machine gate {out.get('gated_out')}. "
               f"Rule (`measurement-campaign-workflow.md`, \"The stability rule\"; D26): each carried table is tested by its per-repeat mean, the share by its value; the 95 % confidence half-width of the across-repeat mean is at most the larger of {st['tolerance']:.0%} of the mean and {st['abs_floor_us']} µs for times, {st['tolerance']:.0%} for the share, over at least {st['min_repeats']} repeats; repeats are added one at a time until every value holds. "
-              f"**{'Holds' if st['passes'] else 'Does not hold yet'}**; repeats needed at the present spread: {st.get('needed') or 'over 200'}.", "",
+              f"**{'Holds' if st['passes'] else 'Does not hold yet'}**; repeats needed at the present spread: {st.get('needed') or 'over 200'}"
+              + (f"; not estimable yet, fewer than two repeats: {', '.join(st['not_estimable'])}" if st.get("not_estimable") else "") + ".", "",
               "| quantity | repeats | mean | spread (cv) | 95 % half-width | half-width (abs) | leave-one-out | needed at this spread | passes |", "|---|---|---|---|---|---|---|---|---|"]
         for q, c in st["quantities"].items():
             cv = "–" if c["cv"] is None else f"{c['cv']:.1%}"
             hw = "–" if c["half_width"] is None else f"±{c['half_width']:.1%}"
             loo = "–" if c["leave_one_out"] is None else f"{c['leave_one_out']:.1%}"
-            L.append(f"| {q} | {c['k']} | {c['mean']} | {cv} | {hw} | {c['half_width_abs']} | {loo} | {c.get('needed') or 'over 200'} | {'yes' if c['passes'] else 'no'} |")
+            L.append(f"| {q} | {c['k']} | {c['mean']} | {cv} | {hw} | {c['half_width_abs']} | {loo} | {'–' if c['k'] < 2 else (c.get('needed') or 'over 200')} | {'yes' if c['passes'] else 'no'} |")
         L.append("")
         for r, x in out.get("cross_machine", {}).items():
             L.append(f"- cross-machine check, repeat {r} ({x['cpu_model']}): ratio of its mean to the same-machine mean {x['ratio_to_same_machine_mean']} — written into scope as a ratio, applied to no value (9.5 follow-ups decision 13)")

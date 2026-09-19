@@ -11,7 +11,7 @@ and pooled with the family's pool.py and --cpu-model common.MACHINE. Options aft
 --exclude-roles renderer, 9.5 D14). Validity per repeat (_dev/research/jioh/measurement-campaign-workflow.md, the loop,
 step 4): gate open on the machine; the replay sent every event of its window; operations completed; non-zero return
 codes other than perf record's 130 (its SIGINT stop) and freshclam's 2 with a recorded database; for build, one
-ClamAV signature database across repeats; for background, the set's archive and manifest matching their pins and the
+ClamAV signature database across the repeats whose clamscan is pooled (9.6 D27); for background, the set's archive and manifest matching their pins and the
 tree verified after each change set, every SteamCMD phase reporting its install complete, one app build across repeats.
 """
 
@@ -69,7 +69,10 @@ def validity(family, dirs, entry):
                 notes.append(f"driven-alt sent {sent} of {want}")
         if op and k in reps and op["n_failed"][reps.index(k)]:
             notes.append(f"operations failed {op['n_failed'][reps.index(k)]} of {op['n_ok'][reps.index(k)] + op['n_failed'][reps.index(k)]}")
-        if r.get("clamav.db"):
+        if family == "build":   # 9.6 D27: the repeats whose clamscan is pooled read one signature database
+            if k in (entry or {}).get("phases", {}).get("clamscan", {}).get("repeats", []):
+                dbs.add((entry or {}).get("clamav_daily", {}).get(str(k)) or (entry or {}).get("clamav_daily", {}).get(k))
+        elif r.get("clamav.db"):
             dbs.add(r["clamav.db"])
         if family == "background":
             pins = {x: v for x, v in r.items() if x.startswith("set.") and x.endswith("_pin") and v != "ok"}
@@ -123,7 +126,11 @@ def main():
     if family == "build":
         crit = st["quantities"]
         print(f"build: repeats {pooled['repeats']}; stability rule {'holds' if st['passes'] else 'does not hold yet'}; "
-              f"repeats needed at this spread {st.get('needed') or 'over 200'}")
+              f"repeats needed at this spread {st.get('needed') or 'over 200'}"
+              + (f"; not estimable yet: {', '.join(st['not_estimable'])}" if st.get("not_estimable") else ""))
+        if pooled["phases"].get("clamscan", {}).get("other_database"):
+            print(f"   clamscan pooled over {pooled['phases']['clamscan'].get('repeats', [])}; another signature database, not pooled: "
+                  f"{ {r: x['daily'] for r, x in pooled['phases']['clamscan']['other_database'].items()} } (9.6 D27)")
         for q, c in crit.items():
             print(f"   {q}: k {c['k']}, mean {c['mean']}, half-width {c['half_width']} (abs {c['half_width_abs']}), "
                   f"needed {c.get('needed')}, {'passes' if c['passes'] else 'fails'}")

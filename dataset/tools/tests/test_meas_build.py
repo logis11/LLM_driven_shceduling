@@ -170,3 +170,11 @@ def test_repeats_needed_is_at_least_five_and_follows_the_spread():
     wide = pool.repeats_needed({4: 196.0, 5: 233.0, 7: 205.0, 8: 220.0}, abs_floor=1.0)
     assert wide > 5 and pool.repeats_needed({4: 196.0, 5: 233.0, 7: 205.0, 8: 220.0}) == wide
     assert pool.repeats_needed({4: 100.0}) is None
+
+
+def test_clamav_daily_reads_the_fixed_copy_or_the_version_line():
+    # D27: repeats 4-8 read daily 28127, repeat 9 on the fixed 28128
+    assert pool.clamav_daily({"clamav.db": "ClamAV 1.5.3/28127/Fri Sep 18 06:25:28 2026"}) == "28127"
+    assert pool.clamav_daily({"clamav.db": "ClamAV 1.5.3/28128/Sat Sep 19 06:24:24 2026", "clamav.db.daily": "28128"}) == "28128"
+    assert pool.clamav_daily({"clamav.db": "none: MEAS_CLAMAV_DB unset, clamscan not run (D27)"}) is None
+    assert pool.clamav_daily({}) is None
