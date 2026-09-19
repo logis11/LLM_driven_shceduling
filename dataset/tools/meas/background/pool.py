@@ -271,6 +271,12 @@ def comparisons(app, entry):
     return out
 
 
+def achieved(net):
+    t = (net or {}).get("transfer") or {}
+    return {"per_second_byte_weighted_median": t.get("per_second_mbps_byte_weighted_median"),
+            "wire_over_payload": t.get("wire_over_payload"), "over_command": (net or {}).get("achieved_mbps_counters")}
+
+
 def also(app, entry, per):
     out = {}
     ks = entry["repeats"]
@@ -279,7 +285,9 @@ def also(app, entry, per):
     if app == "steamcmd":
         out["d11_robustness"] = {"applied_mbps": APPLIED_MBPS, "network_table_byte_weighted_median_mbps": NETWORK_TABLE_MBPS,
                                  "difference": round(NETWORK_TABLE_MBPS / APPLIED_MBPS - 1, 4)}
-        out["achieved_mbps"] = {ph: {k: (P.get("network", {}).get(k) or {}).get("achieved_mbps_counters") for k in P["repeats"]}
+        # the rate while data flows (the payload's per-second rates, their byte-weighted median; traced phases), and over the
+        # whole command from the interface counters (every phase; login and commit included)
+        out["achieved_mbps"] = {ph: {k: achieved((P.get("network") or {}).get(k)) for k in P["repeats"]}
                                 for ph, P in entry["phases"].items() if not P.get("missing")}
         out["shaping"] = {k: {x: per[k]["kv"].get(x) for x in per[k]["kv"] if x.startswith(("tc.", "shape."))} for k in ks}
     cached = {ph: P["cached_fraction"] for ph, P in entry["phases"].items() if not P.get("missing") and "cached_fraction" in P}

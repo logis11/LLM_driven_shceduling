@@ -116,6 +116,11 @@ rec python.version "$(python3 --version 2>&1)"
 gcc -O2 -Wall -o "$WORK/taskstats_listen" "$MEAS/build/taskstats_listen.c" > "$OUT/gcc.listener.log" 2>&1; rec listener.build.rc "$?"
 sudo sysctl -w kernel.task_delayacct=1 > /dev/null 2>&1; rec sysctl.task_delayacct "$(cat /proc/sys/kernel/task_delayacct 2>/dev/null || echo missing)"
 sudo sysctl -w kernel.perf_event_paranoid=-1 > /dev/null 2>&1; rec sysctl.perf_event_paranoid "$(cat /proc/sys/kernel/perf_event_paranoid)"
+# schedstats: the kernel's sched_stat_iowait row marks each uninterruptible sleep spent waiting on I/O (the disk rule,
+# method §9, the dry-run entry; kernel/sched/stats.c __update_stats_enqueue_sleeper); perf sched record already
+# asks for sched_stat_{wait,sleep,iowait} where CONFIG_SCHEDSTATS exposes them (tools/perf/builtin-sched.c), and the
+# kernel fires them only with this switch on
+sudo sysctl -w kernel.sched_schedstats=1 > /dev/null 2>&1; rec sysctl.sched_schedstats "$(cat /proc/sys/kernel/sched_schedstats 2>/dev/null || echo missing)"
 SYSCALL_FILTER="$(python3 "$HERE/nettrace.py" filter)"; rec trace.filter "$SYSCALL_FILTER"
 
 listener_start() { # listener_start <phase>
@@ -171,8 +176,9 @@ phase() {
   sudo perf sched timehist -w -i "$OUT/perf.$name.data" 2>> "$OUT/perf.$name.log" | grep -E "awakened|wakeup|\bwaker\b" | gzip > "$OUT/perf.$name.wakeups.txt.gz"
   rec "perf.$name.wakeups.rows" "$(gzip -dc "$OUT/perf.$name.wakeups.txt.gz" | wc -l)"
   sudo perf script -i "$OUT/perf.$name.data" -F time,event,trace 2>> "$OUT/perf.$name.log" \
-    | grep -E "sched_process_fork|sched_wakeup_new|sched_process_exit|sched_process_exec" | gzip > "$OUT/perf.$name.forks.txt.gz"
+    | grep -E "sched_process_fork|sched_wakeup_new|sched_process_exit|sched_process_exec|sched_stat_iowait" | gzip > "$OUT/perf.$name.forks.txt.gz"
   rec "perf.$name.forks.rows" "$(gzip -dc "$OUT/perf.$name.forks.txt.gz" | wc -l)"
+  rec "perf.$name.iowait.rows" "$(gzip -dc "$OUT/perf.$name.forks.txt.gz" | grep -c sched_stat_iowait)"
   gzip -dc "$OUT/perf.$name.forks.txt.gz" | sed -n 's/.*sched_process_exec: filename=\(.*\) pid=[0-9]* old_pid=[0-9]*.*/\1/p' | sort -u \
     | while read -r f; do printf '%s\t%s\n' "$f" "$(elf_class "$f")"; done > "$OUT/execs.$name.tsv"
   rec "perf.$name.data_bytes" "$(stat -c %s "$OUT/perf.$name.data" 2>/dev/null || echo 0)"

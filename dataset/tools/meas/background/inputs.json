@@ -4,8 +4,8 @@
     "10gb": {
       "urls": ["http://mattmahoney.net/dc/10gb.zpaq", "https://s3.amazonaws.com/10gb-benchmark/10gb.zpaq"],
       "archive_bytes": 3701584921,
-      "archive_sha256": null,
-      "manifest_sha256": null
+      "archive_sha256": "d76858dbb0426b1975be326820be548a1312642086b51cdb095ede27835c672b",
+      "manifest_sha256": "869f5fc1f4adf5aacbac2bc729be94e4b0e17de23a1f7770e3c8dca33127b37a"
     },
     "1gb": {
       "urls": ["https://s3.amazonaws.com/10gb-benchmark/1gb.zpaq", "http://mattmahoney.net/dc/1gb.zpaq"],
@@ -15,9 +15,9 @@
     },
     "100mb": {
       "urls": ["https://s3.amazonaws.com/10gb-benchmark/100mb.zpaq", "http://mattmahoney.net/dc/100mb.zpaq"],
-      "archive_bytes": null,
-      "archive_sha256": null,
-      "manifest_sha256": null
+      "archive_bytes": 44304455,
+      "archive_sha256": "93079e9b2c8281fbcdb08671e54a112bbb9598b81b5e932a81a65715e0e58c5f",
+      "manifest_sha256": "fcfea82e1a006611824bb8055581cfcf3b41a276b610b0d50da2cfe17b775df6"
     }
   }
 }

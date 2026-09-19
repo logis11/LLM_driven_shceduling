@@ -157,6 +157,38 @@ def test_classes_follow_the_method_order():
     assert [x["class"] for x in iv[201]] == ["uninterruptible", "sleep", "sleep", "runnable"]
 
 
+def test_an_iowait_row_of_the_thread_makes_its_uninterruptible_wait_a_disk_wait():
+    # method §9, the dry-run entry: each wait from its own sched_stat_iowait row, not the process's block-I/O total
+    iv = {201: [{"t0": 1.000, "t1": 1.010, "us": 10000.0, "state": "D", "next_in": 1.0102, "next_end": 1.011},
+                {"t0": 2.000, "t1": 2.010, "us": 10000.0, "state": "D", "next_in": 2.0102, "next_end": 2.011},
+                {"t0": 3.000, "t1": 3.010, "us": 10000.0, "state": "S", "next_in": 3.0102, "next_end": 3.011}]}
+    rows = {201: [1.0099, 3.0099], 202: [2.0099]}   # another thread's row does not count
+    analyze.classify(iv, {201: 200}, {200: {"accounted": True}}, None, rows)
+    assert [x["class"] for x in iv[201]] == ["disk", "uninterruptible", "sleep"]
+
+
+def test_iowait_rows_parse_from_perf_script():
+    text = ("  1234.567890: sched:sched_stat_iowait: comm=CJobMgr::m_Work pid=5108 delay=123456 [ns]\n"
+            "  1234.600000: sched:sched_process_exit: comm=borg pid=4571 prio=120\n"
+            "  1235.000001: sched:sched_stat_iowait: comm=BgIOThr~Pool #1 pid=77 delay=9 [ns]\n")
+    rows = analyze.parse_iowait(text.splitlines())
+    assert rows == {5108: [1234.56789], 77: [1235.000001]}
+
+
+def test_the_transfer_rate_is_the_byte_weighted_median_of_the_per_second_payload():
+    C = nettrace.Call
+    calls = [C(9.5, 9.5, 200, 201, "recvmsg", 5, 0, "recv", None)]                   # no data: not the start
+    calls += [C(float(i), float(i), 200, 201, "recvmsg", 4, 100, "recv", 100) for i in range(10)]   # the login trickle
+    calls += [C(10.0 + i * 0.5, 10.0 + i * 0.5, 200, 201, "recvmsg", 5, 1_000_000, "recv", 1_000_000) for i in range(7)]
+    calls += [C(11.2, 11.2, 200, 201, "read", 6, 4096, "fread", None)]               # a file read is not payload
+    r = analyze.transfer_rate(calls, wire_bytes=7_351_050)
+    assert r["payload_bytes"] == 7_001_000
+    assert r["per_second_mbps"] == [0.0] * 10 + [16.0, 16.0, 16.0, 8.0]
+    assert r["per_second_mbps_byte_weighted_median"] == 16.0   # the trickle's seconds carry almost no bytes
+    assert r["wire_over_payload"] == 1.05
+    assert analyze.transfer_rate(calls[:2]) is None            # one receive with data: no span
+
+
 def test_bytes_per_wake_run_from_one_network_wait_to_the_next():
     tc = _thread((1.0101, 1.0102, "recv", 1000), (1.0150, 1.0151, "recv", 500), (1.0301, 1.0302, "recv", 64))
     iv = {201: [{"t0": 1.000, "t1": 1.010, "next_in": 1.0100, "class": "network"},

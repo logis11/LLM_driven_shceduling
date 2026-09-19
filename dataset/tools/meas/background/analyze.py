@@ -13,17 +13,22 @@ segment; a segment is a wake when a wakeup row for the thread lies between its
 previous schedule-out and this schedule-in, else a resume merged into the
 preceding wake — 9.5 D21), the run of each wake, and the off-CPU interval after
 each wake, classified (§5 "Shape"):
-  disk — the schedule-out state is uninterruptible and the process's block-I/O
-    delay (taskstats) accounts for its uninterruptible time: the two equal
-    within the campaign's precision, TOLERANCE (D14);
-  uninterruptible — uninterruptible, not so accounted;
+  disk — the schedule-out state is uninterruptible and the kernel's
+    sched_stat_iowait row for the thread lies between its schedule-out and its
+    next schedule-in: the sleep was spent waiting on I/O (method §9, the
+    dry-run entry); in records without schedstats, the earlier reading — the
+    process's block-I/O delay (taskstats) equal to its uninterruptible time
+    within TOLERANCE — with the process's coverage kept as the cross-check;
+  uninterruptible — uninterruptible, not so marked;
   network — by the matching rule on the `perf trace` rows (nettrace.py), in the
     traced SteamCMD phases;
   sleep — otherwise, interruptible;
   runnable — a runnable wait (neither).
 Bytes per wake: after each network wait, the bytes the thread's socket
 receives return from the next schedule-in until it next leaves the CPU into a
-network wait. Per process: the CPU total as the sum of its perf run segments on
+network wait. The transfer rate: the socket receives' payload from the first
+receive that returns data to the last, per second of that span, beside the wire
+bytes through the shaper. Per process: the CPU total as the sum of its perf run segments on
 the measured CPU, with taskstats' CPU beside it (9.6 method, dry-run-2
 amendment (a)). Every thread's quantiles are kept separately (D13), keyed
 `comm#rank` (rank by CPU among the program's threads of that comm), and pooled
@@ -32,10 +37,13 @@ counted by comm, never folded in.
 """
 
 import argparse
+import gzip
 import json
 import os
 import re
+import statistics
 import sys
+from bisect import bisect_left
 from collections import defaultdict
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))   # dataset/tools
@@ -48,6 +56,7 @@ load_segments, load_wakeups, load_forks = _build.load_segments, _build.load_wake
 load_taskstats, process_records, merge_resumes = _build.load_taskstats, _build.process_records, _build.merge_resumes
 load_edges, outside, pct, dist, QUANTILE_PROBS = _build.load_edges, _build.outside, _build.pct, _build.dist, _build.QUANTILE_PROBS
 
+IOWAIT = re.compile(r"^\s*(\d+\.\d+):\s+sched:sched_stat_iowait:\s+comm=.*?\s+pid=(\d+)\s+delay=(\d+)")
 EXEC = re.compile(r"^\s*(\d+\.\d+):\s+sched:sched_process_exec:\s+filename=(.*?)\s+pid=(\d+)\s+old_pid=(\d+)")
 ROOT_COMMS = {"borg": ("borg",), "7z": ("7z", "7zz"), "steamcmd": ("steamcmd",)}
 CLASSES = ("disk", "uninterruptible", "network", "sleep", "runnable")
@@ -189,15 +198,36 @@ def disk_accounting(intervals, tid2pid, recs):
     return out
 
 
-def classify(intervals, tid2pid, disk, calls_by_tid=None):
-    """Label every interval (in place) with its class and, for network waits, how the rule matched."""
+def parse_iowait(lines):
+    """tid -> sorted times of its sched_stat_iowait rows (perf script -F time,event,trace)."""
+    out = defaultdict(list)
+    for line in lines:
+        m = IOWAIT.match(line)
+        if m:
+            out[int(m.group(2))].append(float(m.group(1)))
+    for v in out.values():
+        v.sort()
+    return dict(out)
+
+
+def iowait_marked(times, t0, t_in):
+    """Whether a row lies between the schedule-out and the next schedule-in."""
+    i = bisect_left(times, t0)
+    return i < len(times) and times[i] <= t_in
+
+
+def classify(intervals, tid2pid, disk, calls_by_tid=None, iowait=None):
+    """Label every interval (in place) with its class and, for network waits, how the rule matched. iowait (tid ->
+    sched_stat_iowait times): an uninterruptible wait is disk when its own row marks it; None: the process-level
+    reading (records without schedstats)."""
     how = defaultdict(int)
     for tid, iv in intervals.items():
         tc = calls_by_tid.get(tid) if calls_by_tid else None
         pid = tid2pid.get(tid, tid)
         for x in iv:
             st = x["state"]
-            if st.startswith("D") and disk.get(pid, {}).get("accounted"):
+            if st.startswith("D") and (iowait_marked(iowait.get(tid, ()), x["t0"], x["next_in"]) if iowait is not None
+                                       else disk.get(pid, {}).get("accounted")):
                 x["class"] = "disk"
                 continue
             if st.startswith("R"):
@@ -211,6 +241,30 @@ def classify(intervals, tid2pid, disk, calls_by_tid=None):
                     continue
             x["class"] = "uninterruptible" if st.startswith("D") else "sleep"
     return dict(how)
+
+
+def transfer_rate(calls, wire_bytes=None):
+    """The download's rate while data flows (method §9, the dry-run entry): the bytes the socket receives return, per
+    second from the first receive that returns data, and the median of those per-second rates weighted by their bytes
+    (D11's statistic), so the seconds of the login connection's trickle weigh by what they carry; beside it the wire
+    bytes through the shaper over the payload."""
+    rx = sorted((c.t_exit, c.nbytes) for c in calls if c.kind == "recv" and c.nbytes and c.nbytes > 0)
+    if len(rx) < 2 or rx[-1][0] <= rx[0][0]:
+        return None
+    t0 = rx[0][0]
+    bins = [0] * (int(rx[-1][0] - t0) + 1)
+    for t, n in rx:
+        bins[int(t - t0)] += n
+    total, acc = sum(bins), 0
+    for b in sorted(bins):
+        acc += b
+        if acc * 2 >= total:
+            break
+    out = {"payload_bytes": total, "per_second_mbps": [round(x * 8 / 1e6, 1) for x in bins],
+           "per_second_mbps_byte_weighted_median": round(b * 8 / 1e6, 1)}
+    if wire_bytes:
+        out["wire_over_payload"] = round(wire_bytes / total, 4)
+    return out
 
 
 def bytes_per_wake(intervals, calls_by_tid):
@@ -254,6 +308,10 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
     rows = [s for s in segs if s.cpu == meas_cpu and s.tid in tree]
     per_wakes, intervals, merged = thread_wakes(rows, wakeups)
     disk = disk_accounting(intervals, tid2pid, recs)
+    iowait = None
+    if str(kv.get("sysctl.sched_schedstats")) == "1":   # the sched_stat_iowait rows sit in the forks file (run.sh)
+        with gzip.open(fk, "rt") as handle:
+            iowait = parse_iowait(handle)
 
     # the socket rows of a traced SteamCMD phase
     calls_by_tid, net = None, None
@@ -273,9 +331,11 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
         for c in calls:
             kinds[c.name + ":" + c.kind] += 1
         net = {"trace_rows": len(raw), "calls_in_tree": len(calls), "unpaired": unpaired, "unknown_numbers": unknown,
-               "compat_pids": compat, "compat_assumed": assumed, "calls_by_name_kind": dict(sorted(kinds.items()))}
+               "compat_pids": compat, "compat_assumed": assumed, "calls_by_name_kind": dict(sorted(kinds.items())),
+               "transfer": transfer_rate([c for c in calls if tid2pid.get(c.tid, c.tid) in prog_set],
+                                         int(kv.get(f"shape.{phase}.through_ifb_bytes") or 0) or None)}
     prog_intervals = {t: iv for t, iv in intervals.items() if tid2pid.get(t, t) in prog_set}
-    how = classify(prog_intervals, tid2pid, disk, calls_by_tid)
+    how = classify(prog_intervals, tid2pid, disk, calls_by_tid, iowait)
     bpw, bpw_unknown = bytes_per_wake(prog_intervals, calls_by_tid) if calls_by_tid else ({}, 0)
     if net is not None:
         net["network_rule"] = how
@@ -324,6 +384,8 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
            "cmd_wall_s": round(e["cmd_wall_s"], 3) if e.get("cmd_wall_s") is not None else None, "rc": e.get("rc"),
            "phase_span_s": round(span_s, 3) if span_s else None,
            "segments_in_tree": len(rows), "resumes_merged": merged,
+           "disk_rule": "per-wait (sched_stat_iowait)" if iowait is not None else "process total (taskstats)",
+           "iowait_rows_in_tree": sum(len(v) for t, v in (iowait or {}).items() if t in tree),
            "taskstats_rows": len(ts_rows), "taskstats_trailer": trailer,
            "program_cpu_us": round(prog_cpu, 1), "program_taskstats_cpu_us": round(prog_ts, 1),
            "all": {k: dist(v) for k, v in samples["all"].items()}, "threads": threads, "processes": procs,
