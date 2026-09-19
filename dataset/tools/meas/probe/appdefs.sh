@@ -105,7 +105,10 @@ PREFS
       # on the harness CPUs), a copy of every sent message kept in Local Folders/Sent (the completion signal), and the
       # attachment: the Writer setup state's document (D22) with its ten pictures embedded, as .docx (CpsMark+'s
       # Outlook workload attaches Word files); pictures seeded so every repeat attaches the same bytes. Files live under
-      # $HOME: Thunderbird is a snap on noble and its /tmp is private.
+      # $HOME: Thunderbird is a snap on noble and its /tmp is private. The large-message confirmation is off: above
+      # mailnews.message_warning_size (default 20 MiB) MessageSend.sys.mjs asks before delivery, and the send waits on it.
+      # Attach File opens GTK's own chooser, whatever the automatic setting picks under the snap: through the desktop
+      # portal with no portal service running it opens nothing (container check, Thunderbird 140, the pref at 1).
       appdef thunderbird || return 1
       cat >> "$HOME/tbprofile/user.js" <<'PREFS'
 user_pref("mail.smtpserver.smtp1.hostname", "127.0.0.1");
@@ -117,6 +120,8 @@ user_pref("mail.identity.id1.fcc", true);
 user_pref("mail.identity.id1.fcc_folder", "mailbox://nobody@Local%20Folders/Sent");
 user_pref("mail.warn_on_send_accel_key", false);
 user_pref("mail.compose.attachment_reminder", false);
+user_pref("mailnews.message_warning_size", 0);
+user_pref("widget.use-xdg-desktop-portal.file-picker", 0);
 PREFS
       sudo apt-get install -y --no-install-recommends python3-aiosmtpd libreoffice-writer unzip > "$OUT/apt.send.log" 2>&1; rec apt.send.rc "$?"
       mkdir -p "$HOME/tbdoc" && for k in 0 1 2 3 4 5 6 7 8 9; do convert -seed "$((k + 1))" -size 1024x768 plasma:fractal "$HOME/tbdoc/pic-$k.png"; done

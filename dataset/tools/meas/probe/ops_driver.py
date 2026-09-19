@@ -28,8 +28,9 @@ Operations (the trigger is design; the cost and duration are the observation):
             "loaded …" after building the feed.
   thunderbird-send
             send a reply with the Writer document attached (9.5 changelog
-            D31): before the trigger, the running Thunderbird opens a compose
-            window pre-filled through -compose; the trigger is Ctrl+Enter (Send
+            D31): before the trigger, a compose window through New Message in
+            the running Thunderbird, its fields typed and the document attached
+            through Attach File; the trigger is Ctrl+Enter (Send
             Now); done when the copy into Local Folders/Sent has landed — the
             first poll at which the Sent mailbox reached the size it then keeps
             for SENT_SETTLE_S (Thunderbird copies to Sent after the server
@@ -223,20 +224,80 @@ def peer_rows(path):
         return []
 
 
-def op_thunderbird_send(i, wid, args):
-    tag = f"send-{i:03d}"
-    fields = f"to='reply@example.invalid',subject='Re: {tag}',body='{TB_BODY}',attachment='{TB_DOC}'"
-    subprocess.Popen(["thunderbird", "--profile", TB_PROFILE, "-compose", fields],
-                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    w, t = "", time.monotonic()
-    while not w and time.monotonic() - t < 60:
-        w = (xdo("search", "--onlyvisible", "--name", tag).stdout.split() or [""])[0]
+def windows_named(pattern):
+    return set(xdo("search", "--onlyvisible", "--name", pattern).stdout.split())
+
+
+def focus(w):
+    """Keyboard focus to a window: Xvfb runs no window manager (windowactivate is refused there), so the input focus is
+    set directly as well."""
+    xdo("windowactivate", "--sync", w)
+    xdo("windowfocus", "--sync", w)
+    time.sleep(0.3)
+
+
+def wait_new(pattern, before, seconds):
+    t = time.monotonic()
+    while time.monotonic() - t < seconds:
+        new = windows_named(pattern) - before
+        if new:
+            return sorted(new)[0]
         time.sleep(0.2)
+    return ""
+
+
+def op_thunderbird_send(i, wid, args):
+    """Compose through the running Thunderbird's own window — `-compose` opens nothing for a profile whose one account
+    is Local Folders, the handler returning when there is no default account (MessengerContentHandler.sys.mjs, 9.7
+    search record S4-17; container check with Thunderbird 140) — all before the trigger: New Message (Ctrl+N) in the
+    main window; the recipient typed and entered (Tab from To does not reach Subject), the subject through its access
+    key (Alt+S), Enter into the body; the document attached through Attach File (Ctrl+Shift+A) and the file chooser's
+    location entry (Ctrl+L, the path, Enter). Trigger: Ctrl+Enter (Send Now)."""
+    tag = f"send-{i:03d}"
+    main = next(iter(windows_named("Mozilla Thunderbird") - windows_named("Write:")), "")
+    if not main:
+        return now_us(), now_us(), 2, "no main window", {}
+    before = windows_named("Write:")
+    focus(main)
+    xdo("key", "--clearmodifiers", "ctrl+n")
+    w = wait_new("Write:", before, 30)
     if not w:
         shot(args, f"{i}-no-compose")
-        return now_us(), now_us(), 2, f"compose window {tag} never appeared", {}
-    xdo("windowactivate", "--sync", w)
+        return now_us(), now_us(), 2, "ctrl+n opened no compose window", {}
+    time.sleep(1.5)
+    focus(w)
+    xdo("type", "--clearmodifiers", "--delay", "20", "reply@example.invalid")
+    time.sleep(0.5)
+    xdo("key", "--clearmodifiers", "Return")            # the address becomes a recipient
+    time.sleep(0.5)
+    xdo("key", "--clearmodifiers", "alt+s")             # the Subject field's access key
+    xdo("type", "--clearmodifiers", "--delay", "20", f"Re: {tag}")
+    xdo("key", "--clearmodifiers", "Return")            # Enter in the subject moves to the body
+    time.sleep(0.3)
+    xdo("type", "--clearmodifiers", "--delay", "5", TB_BODY)
+    time.sleep(0.5)
+    if not windows_named(tag):
+        shot(args, f"{i}-no-subject")
+        return now_us(), now_us(), 5, f"the subject {tag} did not reach the compose window", {}
+    dialogs = windows_named(".")
+    xdo("key", "--clearmodifiers", "ctrl+shift+a")
+    d = wait_new(".", dialogs, 15)
+    if not d:
+        shot(args, f"{i}-no-picker")
+        return now_us(), now_us(), 6, "Attach File opened no file chooser", {}
+    time.sleep(1.0)
+    focus(d)
+    xdo("key", "--clearmodifiers", "ctrl+l")
+    time.sleep(0.3)
+    xdo("type", "--clearmodifiers", "--delay", "10", TB_DOC)
+    time.sleep(0.3)
+    xdo("key", "--clearmodifiers", "Return")
+    t = time.monotonic()
+    while d in windows_named(".") and time.monotonic() - t < 15:
+        time.sleep(0.2)
     time.sleep(2.0)   # the attachment is listed before the send
+    shot(args, f"{i}-ready")
+    focus(w)
     n_peer = len(peer_rows(args.peer))
     t0 = now_us()
     xdo("key", "--clearmodifiers", "ctrl+Return")
