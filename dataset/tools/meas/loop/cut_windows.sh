@@ -48,7 +48,8 @@ for app in word ie outlook; do
 done
 if [ ! -f "$ST/aalto-r$N.jsonl" ]; then cp "$W/aalto/out$N/aalto-r$N.jsonl" "$ST/"; new+=("$ST/aalto-r$N.jsonl"); fi
 cp "$W/swell/win$N/windows.json" "$W/aalto/out$N/aalto-windows.json" "$ST/"
-git add ${new[@]+"${new[@]}"} "$ST/windows.json" "$ST/aalto-windows.json"
-git diff --cached --quiet && { echo "window $N already committed"; exit 0; }
-git commit -q -m "feat($SCOPE): stimulus window $N — SWELL-KW and 136M cut by the committed rules; earlier windows byte-identical (9.5 D26)"
+paths=(${new[@]+"${new[@]}"} "$ST/windows.json" "$ST/aalto-windows.json")   # only these: the index is shared
+git add "${paths[@]}"
+git diff --cached --quiet -- "${paths[@]}" && { echo "window $N already committed"; exit 0; }
+git commit -q -m "feat($SCOPE): stimulus window $N — SWELL-KW and 136M cut by the committed rules; earlier windows byte-identical (9.5 D26)" -- "${paths[@]}"
 git pull -q --rebase --autostash && git push -q && git log --oneline -1
