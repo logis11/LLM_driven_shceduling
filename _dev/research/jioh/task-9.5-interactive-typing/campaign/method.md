@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-19, the `thunderbird-send` probe's phase length (changelog D42) — 2,000 s of idle phase after the 30 s settle, design: the span a `send` repeat observes Thunderbird after the idle phase starts, about 1,986 s — measured on the eight `thunderbird` repeats of the current campaign (`phases.jsonl`: driven at 132.5 s, `driven-alt` at 755.5–756.7 s) and, for the op phase, estimated at the same 624 s from one phase start to the next (op from about 1,380 s to about 1,986 s) — rounded up. Anything Thunderbird does at a fixed time after launch within that span falls in some phase of every repeat; nothing later does. An episode the probe shows past the current idle phase is read with its threads named and against the same second in the existing repeats' driven phases, since the probe stays idle where a repeat already has input.
+
 - 2026-09-19, `thunderbird-send`'s settle (changelog D42) — set by D35's rule after one long-phase probe of `thunderbird-send`'s setup under the machine gate (`run.sh … probe`: the 30 s settle, one idle phase of the stated length, nothing after it); the probe's phase length is stated here as design before its launch.
 
 - 2026-09-19, the wakeup rows of the op phase's transient processes (changelog D41) — §5 what one wake is: the wakeup rows are read for the application's tree with the processes the op phase admits by the appdef's pattern (Kdenlive's `kdenlive_render`), not only for the pids the snapshots saw.
