@@ -66,3 +66,54 @@ def program_gaps(rows, start, end):
     if end > edge:
         gaps.append((end - edge) * 1000.0)
     return gaps
+
+
+def tracker_job_end(lines, start_mono_ns, start_real_ns):
+    """The end of the rescan (D16) on CLOCK_MONOTONIC, in s: the miner's first `Idle` status after its last status
+    that is not `Idle`. The log stamps the time of day in UTC; the phase's start edge (edges.jsonl: mono_ns, real_ns)
+    gives the date and the offset between the clocks. None when the miner never left `Idle`."""
+    st = []
+    for line in lines:
+        m = STATUS.match(line.rstrip("\n"))
+        if m:
+            h, mi, sec, ms, status = m.groups()
+            st.append((int(h) * 3600 + int(mi) * 60 + int(sec) + int(ms) / 1000.0, status))
+    busy = [i for i, (_, status) in enumerate(st) if status != "Idle"]
+    if not busy:
+        return None
+    end = next((tod for tod, status in st[busy[-1] + 1:] if status == "Idle"), None)
+    if end is None:
+        return None
+    t0 = datetime.datetime.fromtimestamp(start_real_ns / 1e9, tz=datetime.timezone.utc)
+    real = t0.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(seconds=end)
+    if real < t0 - datetime.timedelta(hours=12):
+        real += datetime.timedelta(days=1)
+    return start_mono_ns / 1e9 + (real - t0).total_seconds()
+
+
+def member_steps(jobs, role, parent_pid, segs_by_pid, fork_time, exit_time):
+    """For the object jobs with exactly D19's six members: each member's CPU per structural step, in ms, keyed
+    "<role> <k>/<n>" — the member's segments on the measured CPU grouped by the exits of its own children (D20: `sh`
+    four steps around `gcc`, `fixdep`, `rm`; `gcc` three around `cc1`, `as`; a childless member one) — and the
+    parents' child orders by fork time, counted. jobs: analyze.jobs_of's list; segs_by_pid: pid -> that process's
+    segments on the measured CPU; fork_time, exit_time: pid -> s."""
+    kids = defaultdict(list)
+    for c, p in parent_pid.items():
+        kids[p].append(c)
+    steps, order, n = defaultdict(list), defaultdict(int), 0
+    for j in jobs:
+        if j["kind"] != "object" or tuple(j["roles"]) != OBJECT_MEMBERS:
+            continue
+        n += 1
+        members = set(j["members"])
+        for x in j["members"]:
+            ch = sorted((c for c in kids.get(x, ()) if c in members), key=lambda c: fork_time.get(c, 0.0))
+            bounds = sorted(exit_time[c] for c in ch if c in exit_time)
+            acc = [0.0] * (len(bounds) + 1)
+            for sg in segs_by_pid.get(x, ()):
+                acc[bisect.bisect_right(bounds, sg.t_in)] += sg.run
+            for k, v in enumerate(acc):
+                steps[f"{role[x]} {k + 1}/{len(acc)}"].append(v)
+            if ch:
+                order[f"{role[x]}: " + " ".join(role[c] for c in ch)] += 1
+    return {"jobs": n, "steps": dict(steps), "child_order": dict(order)}

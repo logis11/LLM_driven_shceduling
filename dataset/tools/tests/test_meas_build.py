@@ -52,3 +52,49 @@ def test_program_gaps_count_runnable_time_as_busy():
             build.Seg(1.015, 1.015, 1.016, 1.0, "p", 7, 1, "Z", 3)]
     assert shapes.program_gaps(rows, 1.000, 1.016) == pytest.approx([5.0])
     assert shapes.program_gaps(rows, 1.000, 1.020) == pytest.approx([5.0, 4.0])
+
+
+MINER_LOG = [
+    "Tracker-Message: 10:39:05.135: (Miner:'TrackerMinerFiles') set property:'status' to 'Idle'\n",
+    "Tracker-Message: 10:39:05.281: (Miner:'TrackerMinerFiles') set property:'status' to 'Crawling recursively directory 'file:///x''\n",
+    "Tracker-Message: 10:39:07.948: (Miner:'TrackerMinerFiles') set property:'status' to 'Idle'\n",
+    "Tracker-Message: 10:39:08.033: (Miner:'TrackerMinerFiles') set property:'status' to 'Extracting metadata'\n",
+    "Tracker-Message: 10:39:10.069: (Miner:'TrackerExtractDecorator') set property:'status' to 'Idle'\n",
+    "Tracker-Message: 10:39:10.070: (Miner:'TrackerMinerFiles') set property:'status' to 'Idle'\n",
+    "Tracker-Message: 10:39:20.177: (Miner:'TrackerMinerFiles') set property:'status' to 'Idle'\n",
+]
+
+
+def test_tracker_job_end_is_the_idle_after_the_last_busy_status():
+    # repeat 4's tracker phase start edge: 2026-09-18 10:39:01.876931750 UTC
+    t = shapes.tracker_job_end(MINER_LOG, 5383795831633, 1789727941876931750)
+    assert t == pytest.approx(5383.795831633 + 8.19306825, abs=1e-5)
+
+
+def test_tracker_job_end_none_without_a_job():
+    assert shapes.tracker_job_end(MINER_LOG[:1], 5383795831633, 1789727941876931750) is None
+
+
+def test_member_steps_split_each_member_at_its_childrens_exits():
+    role = {10: "sh", 11: "gcc", 12: "cc1", 13: "as", 14: "fixdep", 15: "rm", 16: "mkdir",
+            20: "sh", 21: "gcc", 22: "cc1", 23: "as", 24: "fixdep", 25: "rm"}
+    parent = {11: 10, 12: 11, 13: 11, 14: 10, 15: 10, 16: 10, 21: 20, 22: 21, 23: 21, 24: 20, 25: 20}
+    fork = {11: 1.00, 12: 1.01, 13: 1.50, 14: 2.00, 15: 2.10, 16: 0.995, 21: 5.0, 22: 5.01, 23: 5.5, 24: 6.0, 25: 6.1}
+    exit_ = {12: 1.40, 13: 1.60, 11: 1.70, 14: 2.05, 15: 2.20, 10: 2.30, 16: 0.999}
+
+    def s(t, run, pid):
+        return build.Seg(t, t, t + run / 1000, run, role[pid], pid, pid, "S", 3)
+    segs = {10: [s(0.99, 0.7, 10), s(1.71, 0.1, 10), s(2.06, 0.1, 10), s(2.21, 0.13, 10)],
+            11: [s(1.00, 1.7, 11), s(1.41, 0.15, 11), s(1.61, 0.34, 11)],
+            12: [s(1.02, 300.0, 12)], 13: [s(1.51, 3.0, 13)], 14: [s(2.01, 5.6, 14)], 15: [s(2.11, 1.0, 15)]}
+    six = ["as", "cc1", "fixdep", "gcc", "rm", "sh"]
+    jobs = [{"kind": "object", "roles": six, "members": [10, 11, 12, 13, 14, 15]},
+            {"kind": "object", "roles": sorted(six + ["mkdir"]), "members": [20, 21, 22, 23, 24, 25, 16]},
+            {"kind": "helper", "roles": ["sh"], "members": [30]}]
+    got = shapes.member_steps(jobs, role, parent, segs, fork, exit_)
+    assert got["jobs"] == 1
+    assert got["steps"]["sh 1/4"] == pytest.approx([0.7]) and got["steps"]["sh 2/4"] == pytest.approx([0.1])
+    assert got["steps"]["sh 3/4"] == pytest.approx([0.1]) and got["steps"]["sh 4/4"] == pytest.approx([0.13])
+    assert got["steps"]["gcc 1/3"] == pytest.approx([1.7]) and got["steps"]["gcc 2/3"] == pytest.approx([0.15])
+    assert got["steps"]["gcc 3/3"] == pytest.approx([0.34]) and got["steps"]["cc1 1/1"] == pytest.approx([300.0])
+    assert got["child_order"] == {"sh: gcc fixdep rm": 1, "gcc: cc1 as": 1}
