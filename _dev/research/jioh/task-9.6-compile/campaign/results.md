@@ -221,7 +221,7 @@ command wall s {4: 93.77, 5: 93.87, 7: 91.59, 8: 97.42}; tree processes {4: 1, 5
 | 7 | `clamscan` | 1 | 1 | 91.589 | 91.589811 | 0.9734 | 0.9733 / 0.9734 | 1.0 | [1.0] | 2.3953 (0.0262) | 0.0 | 2.276 | 0 |
 | 8 | `clamscan` | 1 | 1 | 97.412 | 97.413048 | 0.978 | 0.978 / 0.9781 | 1.0 | [1.0] | 2.0988 (0.0215) | 0.0 | 1.978 | 0 |
 
-shape (D21, D22): runs between voluntary blocks (µs) 232 / 1030 / 7641 / 7918 / 8294 / 8967 / 10034 / 10924 / 14841 / 33169 (n 40389; spread {4: 8233.0, 5: 8275.0, 7: 8079.0, 8: 8642.0}); program-level gaps (µs) 108 / 121 / 128 / 143 / 161 / 195 / 258 / 333 / 1788 / 4503 (n 40385; spread {4: 169.0, 5: 173.0, 7: 157.0, 8: 149.0}); share of CPU past the boot slice {4: 0.1088, 5: 0.1101, 7: 0.1072, 8: 0.1151} (pooled 0.1104)
+shape (D21, D22): runs between voluntary blocks (µs) 232 / 1030 / 7641 / 7918 / 8294 / 8967 / 10034 / 10924 / 14841 / 33169 (n 40389; spread {4: 8233.0, 5: 8275.0, 7: 8079.0, 8: 8642.0}); block after each run (µs, D25) 108 / 121 / 128 / 143 / 161 / 195 / 258 / 333 / 1788 / 4503 (n 40385; mean per repeat {4: 233.192, 5: 212.231, 7: 225.682, 8: 196.054}; share followed by a gap {4: 1.0, 5: 1.0, 7: 1.0, 8: 1.0}); program-level gaps (µs, reported) 108 / 121 / 128 / 143 / 161 / 195 / 258 / 333 / 1788 / 4503 (n 40385; spread {4: 169.0, 5: 173.0, 7: 157.0, 8: 149.0}); share of CPU past the boot slice {4: 0.1088, 5: 0.1101, 7: 0.1072, 8: 0.1151} (pooled 0.1104)
 
 ## ffmpeg
 
@@ -238,7 +238,7 @@ command wall s {4: 40.46, 5: 40.75, 7: 40.06, 8: 40.58}; tree processes {4: 1, 5
 | 7 | `ffmpeg` | 1 | 5 | 40.056 | 40.058949 | 0.9991 | 0.9996 / 0.9992 | 0.9429 | [0.9429, 0.0514, 0.002, 0.0019, 0.0018] | 0.0071 (0.0002) | 154.979 | 0.007 | 0 |
 | 8 | `ffmpeg` | 1 | 5 | 40.569 | 40.572512 | 0.9991 | 0.9997 / 0.9992 | 0.9429 | [0.9429, 0.0514, 0.002, 0.0019, 0.0018] | 0.0073 (0.0002) | 156.9 | 0.007 | 0 |
 
-shape (D21, D22): runs between voluntary blocks (µs) 3.0 / 4.0 / 4.0 / 5.0 / 7.0 / 20.0 / 1077 / 1195 / 50971 / 78895 (n 106732; spread {4: 7.0, 5: 7.0, 7: 6.0, 8: 6.0}); program-level gaps (µs) 66.8 / 108 / 121 / 150 / 179 / 220 / 293 / 400 / 516 / 608 (n 165; spread {4: 263.0, 5: 155.0, 7: 174.0, 8: 171.5}); share of CPU past the boot slice {4: 0.7023, 5: 0.698, 7: 0.6957, 8: 0.7043} (pooled 0.7001)
+shape (D21, D22): runs between voluntary blocks (µs) 3.0 / 4.0 / 4.0 / 5.0 / 7.0 / 20.0 / 1077 / 1195 / 50971 / 78895 (n 106732; spread {4: 7.0, 5: 7.0, 7: 6.0, 8: 6.0}); block after each run (µs, D25) 0.0 / 0.0 / 0.0 / 0.0 / 0.0 / 0.0 / 0.0 / 0.0 / 0.0 / 166 (n 106725; mean per repeat {4: 0.43, 5: 0.292, 7: 0.258, 8: 0.261}; share followed by a gap {4: 0.00153, 5: 0.00161, 7: 0.00154, 8: 0.0015}); program-level gaps (µs, reported) 66.8 / 108 / 121 / 150 / 179 / 220 / 293 / 400 / 516 / 608 (n 165; spread {4: 263.0, 5: 155.0, 7: 174.0, 8: 171.5}); share of CPU past the boot slice {4: 0.7023, 5: 0.698, 7: 0.6957, 8: 0.7043} (pooled 0.7001)
 
 ## handbrake
 
@@ -255,7 +255,7 @@ command wall s {4: 60.8, 5: 60.19, 7: 59.81, 8: 60.8}; tree processes {4: 1, 5: 
 | 7 | `HandBrakeCLI` | 1 | 22 | 59.795 | 59.802406 | 0.9902 | 0.9912 / 0.9904 | 0.6063 | [0.6063, 0.09, 0.0703, 0.0504, 0.0384] | 0.0046 (0.0001) | 1107.278 | 0.004 | 0 |
 | 8 | `HandBrakeCLI` | 1 | 22 | 60.789 | 60.799386 | 0.9917 | 0.9928 / 0.9919 | 0.6099 | [0.6099, 0.0892, 0.0694, 0.0494, 0.038] | 0.0044 (0.0001) | 1128.284 | 0.005 | 1 |
 
-shape (D21, D22): runs between voluntary blocks (µs) 4.0 / 4.0 / 4.0 / 6.0 / 8.0 / 370 / 1135 / 1839 / 5155 / 18037 (n 219813; spread {4: 9.0, 5: 8.0, 7: 8.0, 8: 9.0}); program-level gaps (µs) 6.0 / 68.5 / 108 / 175 / 270 / 21320 / 50055 / 50058 / 50076 / 50084 (n 175; spread {4: 390.0, 5: 246.0, 7: 204.0, 8: 225.0}); share of CPU past the boot slice {4: 0.6258, 5: 0.6267, 7: 0.6237, 8: 0.6271} (pooled 0.6258)
+shape (D21, D22): runs between voluntary blocks (µs) 4.0 / 4.0 / 4.0 / 6.0 / 8.0 / 370 / 1135 / 1839 / 5155 / 18037 (n 219813; spread {4: 9.0, 5: 8.0, 7: 8.0, 8: 9.0}); block after each run (µs, D25) 0.0 / 0.0 / 0.0 / 0.0 / 0.0 / 0.0 / 0.0 / 0.0 / 0.0 / 0.0 (n 219768; mean per repeat {4: 9.264, 5: 9.105, 7: 9.145, 8: 8.224}; share followed by a gap {4: 0.00084, 5: 0.00075, 7: 0.00078, 8: 0.00078}); program-level gaps (µs, reported) 6.0 / 68.5 / 108 / 175 / 270 / 21320 / 50055 / 50058 / 50076 / 50084 (n 175; spread {4: 390.0, 5: 246.0, 7: 204.0, 8: 225.0}); share of CPU past the boot slice {4: 0.6258, 5: 0.6267, 7: 0.6237, 8: 0.6271} (pooled 0.6258)
 
 ## train
 
@@ -272,7 +272,7 @@ command wall s {4: 22.34, 5: 22.17, 7: 21.44, 8: 22.43}; tree processes {4: 1, 5
 | 7 | `python3` | 1 | 1 | 21.417 | 21.435063 | 0.9583 | 0.9589 / 0.9591 | 1.0 | [1.0] | 0.8663 (0.0404) | 0.0 | 0.833 | 0 |
 | 8 | `python3` | 1 | 1 | 22.414 | 22.432139 | 0.9627 | 0.9632 / 0.9635 | 1.0 | [1.0] | 0.8097 (0.0361) | 0.0 | 0.777 | 0 |
 
-shape (D21, D22): runs between voluntary blocks (µs) 17.0 / 23.0 / 31.0 / 51.0 / 158 / 337 / 852 / 1639 / 7820 / 78343 (n 15604; spread {4: 160.0, 5: 151.0, 7: 156.0, 8: 165.0}); program-level gaps (µs) 93.0 / 99.0 / 105 / 120 / 168 / 222 / 288 / 337 / 729 / 6956 (n 15600; spread {4: 216.0, 5: 172.0, 7: 152.0, 8: 156.0}); share of CPU past the boot slice {4: 0.9183, 5: 0.9199, 7: 0.9184, 8: 0.9171} (pooled 0.9184)
+shape (D21, D22): runs between voluntary blocks (µs) 17.0 / 23.0 / 31.0 / 51.0 / 158 / 337 / 852 / 1639 / 7820 / 78343 (n 15604; spread {4: 160.0, 5: 151.0, 7: 156.0, 8: 165.0}); block after each run (µs, D25) 93.0 / 99.0 / 105 / 120 / 168 / 222 / 288 / 337 / 729 / 6956 (n 15600; mean per repeat {4: 252.127, 5: 214.388, 7: 213.559, 8: 199.329}; share followed by a gap {4: 1.0, 5: 1.0, 7: 1.0, 8: 1.0}); program-level gaps (µs, reported) 93.0 / 99.0 / 105 / 120 / 168 / 222 / 288 / 337 / 729 / 6956 (n 15600; spread {4: 216.0, 5: 172.0, 7: 152.0, 8: 156.0}); share of CPU past the boot slice {4: 0.9183, 5: 0.9199, 7: 0.9184, 8: 0.9171} (pooled 0.9184)
 
 ## tracker
 
@@ -296,9 +296,9 @@ command wall s {4: 22.29, 5: 17.25, 7: 17.26, 8: 22.28}; tree processes {4: 49, 
 | 7 | `tracker-miner-f + tracker-extract + gst-plugin-scan` | 3 | 25 | 15.24 | 4.966792 | 0.9618 | 0.3404 / 0.3405 | 0.5945 | [0.5945, 0.1745, 0.0721, 0.0347, 0.0294] | 0.8234 (0.054) | 172.52 | 0.19 | 1 |
 | 8 | `tracker-miner-f + tracker-extract + gst-plugin-scan` | 3 | 26 | 20.259 | 5.182749 | 0.9538 | 0.2612 / 0.2614 | 0.5902 | [0.5902, 0.1753, 0.075, 0.035, 0.029] | 12.8365 (0.6336) | 213.897 | 0.241 | 0 |
 
-shape (D21, D22): runs between voluntary blocks (µs) 3.0 / 4.0 / 6.0 / 23.0 / 63.0 / 90.0 / 221 / 515 / 2984 / 92991 (n 47534; spread {4: 64.0, 5: 61.0, 7: 65.0, 8: 66.0}); program-level gaps (µs) 3.0 / 3.0 / 3.0 / 4.0 / 5.0 / 104 / 231 / 298 / 649 / 6902 (n 7709; spread {4: 5.0, 5: 5.0, 7: 5.0, 8: 5.0}); share of CPU past the boot slice {4: 0.5362, 5: 0.5331, 7: 0.5332, 8: 0.53} (pooled 0.5331)
+shape (D21, D22): runs between voluntary blocks (µs) 3.0 / 4.0 / 6.0 / 23.0 / 63.0 / 90.0 / 221 / 515 / 2984 / 92991 (n 47534; spread {4: 64.0, 5: 61.0, 7: 65.0, 8: 66.0}); block after each run (µs, D25) 0.0 / 0.0 / 0.0 / 0.0 / 0.0 / 0.0 / 5.0 / 14.0 / 280 / 1313 (n 47526; mean per repeat {4: 17.44, 5: 14.988, 7: 13.549, 8: 17.7}; share followed by a gap {4: 0.16224, 5: 0.17031, 7: 0.15547, 8: 0.16065}); program-level gaps (µs, reported) 3.0 / 3.0 / 3.0 / 4.0 / 5.0 / 104 / 231 / 298 / 649 / 6902 (n 7709; spread {4: 5.0, 5: 5.0, 7: 5.0, 8: 5.0}); share of CPU past the boot slice {4: 0.5362, 5: 0.5331, 7: 0.5332, 8: 0.53} (pooled 0.5331)
 
-## Same-machine repeats and the stability criterion (D10, D11, D23, D24)
+## Same-machine repeats and the stability criterion (D10, D11, D23, D24, D25)
 
 Pooled machine: EPYC 7763; pooled repeats [4, 5, 7, 8]; other-machine repeats []; stopped by the machine gate {1: 'AMD EPYC 9V45 96-Core Processor', 2: 'AMD EPYC 9V74 80-Core Processor', 3: 'Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz', 6: 'Intel(R) Xeon(R) 6973P-C'}. Criterion: the 95 % confidence half-width of the across-repeat mean of each carried value is at most the larger of 5% of the mean and 1.0 µs, over at least 5 repeats; repeats are added one at a time until it holds (D11, D23, D24). **Does not hold yet.**
 
@@ -323,19 +323,19 @@ Pooled machine: EPYC 7763; pooled repeats [4, 5, 7, 8]; other-machine repeats []
 | object-job sh 3/4 | 4 | 97.25 | 2.4% | ±3.9% | 3.7594 | 1.1% | no |
 | object-job sh 4/4 | 4 | 136.75 | 2.6% | ±4.1% | 5.5685 | 1.0% | no |
 | clamscan run between blocks | 4 | 8307.25 | 2.9% | ±4.6% | 379.5224 | 1.3% | no |
-| clamscan program-level gap | 4 | 162.0 | 6.8% | ±10.8% | 17.5251 | 2.7% | no |
+| clamscan mean block per run | 4 | 216.7897 | 7.5% | ±12.0% | 25.9624 | 3.2% | no |
 | clamscan share past the boot slice | 4 | 0.1103 | 3.1% | ±4.9% | 0.0054 | 1.5% | no |
 | ffmpeg run between blocks | 4 | 6.5 | 8.9% | ±14.1% | 0.9186 | 2.6% | no |
-| ffmpeg program-level gap | 4 | 190.875 | 25.6% | ±40.7% | 77.6672 | 12.6% | no |
+| ffmpeg mean block per run | 4 | 0.3103 | 26.2% | ±41.7% | 0.1293 | 12.9% | no |
 | ffmpeg share past the boot slice | 4 | 0.7001 | 0.6% | ±0.9% | 0.0062 | 0.2% | no |
 | handbrake run between blocks | 4 | 8.5 | 6.8% | ±10.8% | 0.9186 | 2.0% | no |
-| handbrake program-level gap | 4 | 266.25 | 31.6% | ±50.3% | 134.0624 | 15.5% | no |
+| handbrake mean block per run | 4 | 8.9345 | 5.4% | ±8.5% | 0.7612 | 2.6% | no |
 | handbrake share past the boot slice | 4 | 0.6258 | 0.2% | ±0.4% | 0.0024 | 0.1% | no |
 | train run between blocks | 4 | 158.0 | 3.8% | ±6.0% | 9.4572 | 1.5% | no |
-| train program-level gap | 4 | 174.0 | 16.8% | ±26.8% | 46.6211 | 8.1% | no |
+| train mean block per run | 4 | 219.8508 | 10.3% | ±16.4% | 35.9571 | 4.9% | no |
 | train share past the boot slice | 4 | 0.9184 | 0.1% | ±0.2% | 0.0018 | 0.1% | no |
 | tracker run between blocks | 4 | 64.0 | 3.4% | ±5.4% | 3.437 | 1.6% | no |
-| tracker program-level gap | 4 | 5.0 | 0.0% | ±0.0% | 0.0 | 0.0% | no |
+| tracker mean block per run | 4 | 15.9192 | 12.6% | ±20.0% | 3.1779 | 5.0% | no |
 | tracker share past the boot slice | 4 | 0.5331 | 0.5% | ±0.8% | 0.004 | 0.2% | no |
 
 
