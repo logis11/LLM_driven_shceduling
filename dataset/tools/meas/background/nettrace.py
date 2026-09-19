@@ -182,8 +182,8 @@ class ThreadCalls:
             start, how = span.t_exit + EPS, "poll"
         else:
             start, how = t1 - EPS, ("recv" if span is not None and span.kind == "recv" else "after")
-        j = bisect.bisect_left(self.exits, start)
-        for c in self.by_exit[j:]:
+        for k in range(bisect.bisect_left(self.exits, start), len(self.by_exit)):   # by index: a slice copies the tail
+            c = self.by_exit[k]
             if c.t_exit > t_bound + EPS:
                 break
             if c is span and how == "poll":
