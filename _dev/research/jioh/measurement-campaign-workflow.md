@@ -1,0 +1,37 @@
+# Measured values — campaign workflow
+
+How a domain slice obtains the values its archetypes carry from a measurement on a GitHub-hosted runner: one CPU model, repeats added until the stability rule holds. Fixed on 2026-09-19 from the 9.6 and 9.5 campaigns (9.6 changelog D10–D11; 9.5 changelog D26–D28). Parent: `research-slice-workflow.md`. Applies to every archetype whose values carry a `meas-ci` tag — after 9.5 and 9.6: 9.7 (`background-crawler`, `io-stream`, `network-bulk`), 9.8 (`electron-comms`), 9.9 (`system-daemon`).
+
+## What a measured value is
+
+- **This software on this machine** (9.5 D10): one observation, pinned to one CPU of a 4-vCPU `ubuntu-24.04` runner (9.5 D21), its runner spec written into the archetype's scope.
+- **One CPU model: the AMD EPYC 7763.** A hosted runner guarantees a shape, not a processor; each job is an independent draw from several models, and one core of another model differs by a different factor per program (9.6: a Xeon Platinum 8573C ran `cc1` at 0.72× and `fixdep` at 0.50× the EPYC's time). The EPYC 7763 is the most frequent model in the recorded draws (9.6 D11: 26 of 56 jobs; the released 9.5 campaign: 22 of 45, `task-9.5-interactive-typing/campaign/machine-draws.md`). A job on any other model measures nothing.
+- **A fresh campaign.** Nothing from an earlier run is pooled into a new campaign, and a campaign has no cross-machine check (9.6 D11).
+- **Tag** `meas-ci:<workflow>:<YYYY-MM-DD>`, the launch date of the campaign's first batch (9.5 D27). A campaign spans several runs; each repeat's run id is in the pooled record and in the archetype's `validation_stats.run`. The raw records of a campaign are one release. A run-number tag (`meas-ci:cli:3`) names a one-run campaign from before this form.
+
+## Before the first run
+
+Written into the slice's method (a dated amendment) and changelog before the launch:
+
+1. **Headline medians** — the values the archetype carries, one per quantity the rule is checked on. 9.6: CPU per process of the six object-job roles and make's dispatch run, warm `-j8` build. 9.5: one per application — `input_run` p50 (typing), the operation's duration p50, the play phase's CPU share.
+2. **Tolerance, with its ground.** The rule: the 95 % confidence half-width of the across-repeat mean of each headline median (t multiplier, k − 1 degrees of freedom), relative to the mean, at most the tolerance. Both slices ground it as half the smallest effect the slice reports — 9.6: half of the 10 % `-j8` against `-j1` difference; 9.5: half of the +10 % stimulus-sensitivity effect — and both land on 5 % (`dataset/tools/meas/stability.py`, `TOLERANCE`).
+3. **First batch, with its ground.** 9.6: six repeats, the first count at which every median passes at the spread of an earlier run's same-model repeats. 9.5: windows 1–5, the stimulus windows already cut and committed. A job the gate stops is not a repeat; the first batch may land fewer.
+4. **What a repeat is.** Identical work (a build, a scripted interaction, a playback): the next repeat index. Work driven by recorded input: the next input window, cut by the committed rule (9.5: SWELL-KW continued in participant order, the 136M stream in its seeded order), so every repeat runs the same phases. The input's limit is stated in advance, with what happens at it (9.5: SWELL-KW's Outlook conditions hold eight windows; `thunderbird` stops at eight and states its half-width).
+
+## Tooling
+
+- **Machine gate** — `dataset/tools/meas/machine_gate.sh`, sourced by the run script right after `runner_spec.py > spec.json`: on another model it records `gate=wrong-machine` and `machine.model`, writes the report and exits 0, before any install or measurement (`dataset/tools/meas/build/run.sh`, `dataset/tools/meas/campaign/run.sh`).
+- **Workflow** — the plan step emits `cpu_model` from the trigger file and the run step passes `MEAS_CPU_MODEL` (`meas-build.yml`, `meas-interactive.yml`, `meas-playback.yml`). A push that changes the trigger file (`.github/campaign-build.json`, `.github/campaign.json`) starts the runs; nothing else does. A family's `repeats` is one list for every app or a map app → list; a family with `apps: []` runs nothing. The workflows have no concurrency group: a new push never cancels a run in flight.
+- **Pool** — `dataset/tools/meas/build/pool.py` and `dataset/tools/meas/campaign/pool.py`, each with `--cpu-model "EPYC 7763"`: pools only that model, lists gated jobs and other-model repeats without pooling them, carries `cpu_model`, `kernel` and `run_id` per repeat, and evaluates the rule (`stability.py`). The campaign pool finds artifacts at any depth, so each run downloads into its own folder.
+- **Fold-in** — `dataset/tools/meas/campaign/fold_in.py` takes the scope's CPU model and kernel from the pooled record.
+- **Windows** — `dataset/tools/meas/campaign/build_windows.py --repeats N` (SWELL-KW) and `dataset/tools/meas/probe/aalto_streams.py --repeats N` (136M; needs `SSL_CERT_FILE=/etc/ssl/cert.pem` on the development Mac) cut windows 1…N; windows 1…N−1 come out byte-identical and are verified so before the new ones are committed. An empty window is not committed.
+
+## The loop
+
+1. **Launch.** Write the trigger file with `json.dumps(…, indent=2) + "\n"`, commit (`chore(<slug>/phase-9): … campaign — …`), push, note the run id.
+2. **Gate.** A job that drew another model ends within about 20 s. Read its `report.json` (`gate`, `machine.model`) before calling it gated, then relaunch the same window (recorded input) or the next index (identical work). At most one relaunch or added repeat of an application is in flight at a time.
+3. **Landing.** Download each landed artifact into its own folder under a folder per run (`gh run download <run> -n <artifact> -D <dir>/<run>/<artifact>`; `-n` extracts flat), then pool the application.
+4. **Validity**, before a repeat counts: gate open on the EPYC 7763; every phase present (the pool drops a phase missing from any repeat); the replay sent every event of its window (`replay.jsonl` against `windows.json`) and every operation completed (`n_ok`, `n_failed`); every non-zero return code explained (`perf record` 130 is the SIGINT stop; `freshclam` 2 is the system service holding its lock, with the same signature database in every repeat); screenshots where the stimulus decides where input lands.
+5. **Check.** The rule holds → the application is done; a repeat already in flight is pooled and reported when it lands. It does not → add one repeat: cut the next window first when the input is recorded, commit the window, then push the trigger.
+6. **A spread the design makes.** When the spread follows the harness rather than the application, the fix is a design decision for 인지오, not more repeats (9.5 D28: the replayed clicks and scrolls moved `soffice`'s typing up a 76-page document, a 36 % spread; the typing is now keys only and the earlier repeats are superseded). A spread that follows the input itself (9.5 `code`: denser typing by later participants, fewer language-server re-checks per key) is what added windows average over.
+7. **Done.** The pooled `results.md` and `pooled.json` go into the slice's `campaign/` folder, titled with the campaign tag and its runs; the raw records are released (outward-facing: ask first); then the fold-in.
