@@ -56,7 +56,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [code, soffice, thunderbird, gimp, kdenlive, chrome, webrtc, mpv-video, mpv-audio]
+        app: [code, soffice, thunderbird, thunderbird-send, gimp, kdenlive, chrome, webrtc, mpv-video, mpv-audio]
     steps:
       - uses: actions/checkout@v4
       - name: perf and Xvfb
