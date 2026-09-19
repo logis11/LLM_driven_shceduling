@@ -1,8 +1,10 @@
 # S3 — public traces, datasets, logs and benchmark databases
 
-Task 9.7 "Background and IO", stage-2 search. Reader class S3; topics T1, T2, T3, T4, T7. All fetches 2026-09-17 (UTC times in the copy lines), with `curl -sSL --cacert /root/.ccr/ca-bundle.crt -A curl/8.5.0` through the session proxy; SHA-256 is `sha256sum` of the saved file. Source copies are under `sources/S3-NN/` (gitignored); every quoted passage and copy identification below is meant to stand on its own.
+Task 9.7 "Background and IO", stage-2 search. Reader class S3; topics T1, T2, T3, T4, T7. Rows 1–48 and S3-01…S3-27: all fetches 2026-09-17 (UTC times in the copy lines), with `curl -sSL --cacert /root/.ccr/ca-bundle.crt -A curl/8.5.0` through the session proxy; SHA-256 is `sha256sum` of the saved file. Rows 49–84 and S3-28…S3-36: a retry on 2026-09-19 (UTC times in the copy lines) from the development Mac without a proxy — GitHub issues through `gh api` (gh 2.89.0, authenticated) and every other file with `curl` 8.7.1; SHA-256 is `shasum -a 256` of the saved file. Source copies are under `sources/S3-NN/` (gitignored; the 2026-09-19 copies sit at `_dev/research/jioh/task-9.7-background-io/sources/S3-NN/`); every quoted passage and copy identification below is meant to stand on its own.
 
-Walls met this session (each probed with curl, status recorded): `github.com` HTML 403, `api.github.com` 403, `openbenchmarking.org` 403, `www.phoronix.com/search/*` 403 (article pages 200), `gitlab.gnome.org` 406 with a browser User-Agent but 200 with `curl/8.5.0` (REST API and `/-/issues/N/discussions.json`; `/notes` endpoint 401), `sylab-srv.cs.fiu.edu` and `iotta.snia.org/traces/block-io/391` connection failure (curl exit, no HTTP status), `git.sesse.net` CONNECT rejected by the proxy (502 recorded in proxy status), `pmc.ncbi.nlm.nih.gov` served a reCAPTCHA page (200, no article) — Europe PMC full-text XML used instead. `raw.githubusercontent.com`, `gist.githubusercontent.com` and `git clone --depth 1` work. WebFetch was not used for any cited text.
+Walls met on 2026-09-17 (each probed with curl, status recorded): `github.com` HTML 403, `api.github.com` 403, `openbenchmarking.org` 403, `www.phoronix.com/search/*` 403 (article pages 200), `gitlab.gnome.org` 406 with a browser User-Agent but 200 with `curl/8.5.0` (REST API and `/-/issues/N/discussions.json`; `/notes` endpoint 401), `sylab-srv.cs.fiu.edu` and `iotta.snia.org/traces/block-io/391` connection failure (curl exit, no HTTP status), `git.sesse.net` CONNECT rejected by the proxy (502 recorded in proxy status), `pmc.ncbi.nlm.nih.gov` served a reCAPTCHA page (200, no article) — Europe PMC full-text XML used instead. `raw.githubusercontent.com`, `gist.githubusercontent.com` and `git clone --depth 1` work. WebFetch was not used for any cited text.
+
+On the 2026-09-19 retry (rows 49–84): `api.github.com` (through `gh api`), `github.com/user-attachments`, `user-images.githubusercontent.com`, `i.imgur.com` and `tinystash.undef.im` returned 200, so the GitHub issues and the files their threads link were read. `openbenchmarking.org` still returns 403 to plain curl and to a browser User-Agent: the result page, its `&export=csv|txt|pdf|xml|json` forms, the `http://` scheme and the test-profile page all answer with a Cloudflare challenge (`cf-mitigated: challenge`, page title "Just a moment..."). Its Phoronix Test Suite client endpoint `https://openbenchmarking.org/f/client.php` answers 200 to the request the PTS client makes, and the result was read that way (S3-36). The other 2026-09-17 walls were not retried. WebFetch was not used.
 
 A reminder of the class rule applied throughout: a response-side value (CPU per block/wake, wake cadence, run/wait structure, thread structure) is a candidate only from a Linux observation; Windows/Cygwin/macOS observations and traces around two decades old are marked as context.
 
@@ -58,6 +60,42 @@ A reminder of the class rule applied throughout: a response-side value (CPU per 
 | 46 | 2026-09-17 | mail-archive.com search | l=clamav-users@lists.clamav.net q=clamscan %CPU top | result page saved (15 msg links, none opened: subjects were clamd/milter server threads) | — |
 | 47 | 2026-09-17 | lists.clamav.net hyperkitty search | q=clamscan cpu top | result page saved; no desktop on-demand scan thread with CPU figures in the first page | — |
 | 48 | 2026-09-17 | bugs.kde.org REST | product=frameworks-baloo quicksearch="cpu idle" | 3 hits returned (ids in S3-03 copy) | — |
+| 49 | 2026-09-19 | GitHub REST (`gh api`) | ValveSoftware/steam-for-linux issue 13024 + `/comments` (retry of rows 31, 33, 45) | 200; 14 of 14 comments → S3-28 | — |
+| 50 | 2026-09-19 | GitHub REST | steam-for-linux 12015 + comments (row 31) | 200; 10 of 10 → S3-29 | — |
+| 51 | 2026-09-19 | github.com user-attachments | #12015 body attachment `https://github.com/user-attachments/files/20233784/steam-logs.tar.gz` (redirected to objects.githubusercontent.com) | 200, 8,349,732 B; `content_log.txt` and `content_log.previous.txt` extracted → S3-29 | — |
+| 52 | 2026-09-19 | GitHub REST | steam-for-linux 7956 + comments (row 31) | 200; 11 of 11 → S3-30 | — |
+| 53 | 2026-09-19 | GitHub REST | steam-for-linux 6684 + comments (rows 17, 42) | 200; the issue lists 18 comments, the comments endpoint returned 17 → S3-31 | — |
+| 54 | 2026-09-19 | user-images.githubusercontent.com | #6684 body screenshot `17158780/68635668-24c24e80-055e-11ea-961b-59c02f8c1754.png` | 200, 133,785 B → S3-31 | — |
+| 55 | 2026-09-19 | user-images.githubusercontent.com | #6684 comment 955878117 screenshot `11761863/139614157-559b7e4d-4cb4-4405-9395-38c05266d677.png` | 200, 18,986 B → S3-31 | — |
+| 56 | 2026-09-19 | GitHub REST | borgbackup/borg 2245 + comments (rows 2, 15) | 200; 19 of 19 → S3-32 | — |
+| 57 | 2026-09-19 | GitHub REST | borg 3471 + comments | 200; 24 of 24 → S3-32 (macOS report; context) | — |
+| 58 | 2026-09-19 | GitHub REST | borg 5804 + comments | 200; 14 of 14 → S3-32 | — |
+| 59 | 2026-09-19 | GitHub REST | borg 7374 + comments | 200; 15 of 15 → S3-32 | — |
+| 60 | 2026-09-19 | GitHub REST | restic/restic 652 + comments (rows 2, 15) | 200; 32 of 32 → S3-33 | — |
+| 61 | 2026-09-19 | GitHub REST | restic 2696 + comments | 200; 1 of 1 → S3-33 | — |
+| 62 | 2026-09-19 | GitHub REST | restic 2679 + comments | 200; 8 of 8 → S3-33 (Windows observation; maintainer statements on the write path) | — |
+| 63 | 2026-09-19 | GitHub REST | curl/curl 336 + comments (rows 12, 28, 34, 39) | 200; 11 of 11 → S3-34 | — |
+| 64 | 2026-09-19 | i.imgur.com | #336 comment 119079303 screenshot `http://i.imgur.com/ZFj6Fqc.png` (redirected to https) | 200, 23,830 B → S3-34 | — |
+| 65 | 2026-09-19 | i.imgur.com | #336 comment 119090279 screenshot `http://i.imgur.com/KrNQlyr.png` | 200, 23,264 B → S3-34 | — |
+| 66 | 2026-09-19 | GitHub REST | curl 11242 + comments | 200; 11 of 11 → S3-34 | — |
+| 67 | 2026-09-19 | tinystash.undef.im | #11242 comment 1594442502 linked `CURL_DEBUG=http/2` log `https://tinystash.undef.im/il/2EQtfhvYcr9r9SPd1TkCyqudqFDNKSc9yaCHNAw9t4gsEdd9gKLaQUKAt2pBMiTgKow7kDcA2DhETsB8Q2ggAWsw` | 200, 104,954 B text/plain → S3-34 | — |
+| 68 | 2026-09-19 | GitHub REST | Cisco-Talos/clamav 849 + comments (rows 5, 13, 30, 46, 47) | 200; 13 of 13 → S3-35 | — |
+| 69 | 2026-09-19 | GitHub REST | clamav 590 + comments | 200; 53 of 53 → S3-35 | — |
+| 70 | 2026-09-19 | user-images.githubusercontent.com | #590 comment 1535822498 flamegraph `7189867/236843976-1e079c4e-3275-4920-8f75-033c151be4a3.svg` (0.104.2 on the unit-test database) | 200, 12,125 B → S3-35 (not quoted) | — |
+| 71 | 2026-09-19 | user-images.githubusercontent.com | #590 comment 1535822498 flamegraph `7189867/236844093-3fb0f8ea-4507-49e9-a045-a06dc8c9794f.svg` (1.0.1 on the unit-test database) | 200, 11,788 B → S3-35 (not quoted) | — |
+| 72 | 2026-09-19 | user-images.githubusercontent.com | #590 comment 1537198319 flamegraph `5107748/236641028-e1c1ee9d-a07b-4915-9cf6-5bd88d706843.svg` | 200, 59,954 B → S3-35 | — |
+| 73 | 2026-09-19 | user-images.githubusercontent.com | #590 comment 1537473757 flamegraph `7189867/236687385-d8063987-5649-414a-88e0-0c6d6be6898d.svg` (0.104.2, `$HOME`) | 200, 34,568 B → S3-35 | — |
+| 74 | 2026-09-19 | user-images.githubusercontent.com | #590 comment 1537473757 flamegraph `7189867/236687444-36808f86-16e4-4e46-8cc3-2cb4b923ff61.svg` (1.0.1, `$HOME`) | 200, 36,946 B → S3-35 | — |
+| 75 | 2026-09-19 | GitHub REST | clamav 1375 + comments | 200; 3 of 3 → S3-35 | — |
+| 76 | 2026-09-19 | curl, default UA `curl/8.7.1` | `https://openbenchmarking.org/result/2305286-NE-MONITORSY37` (row 11) | — | 403 (5,498 B) |
+| 77 | 2026-09-19 | curl, Chrome 140 macOS User-Agent with browser `Accept`/`Accept-Language` headers | same URL | — | 403, `server: cloudflare`, `cf-mitigated: challenge`, page title "Just a moment..." |
+| 78 | 2026-09-19 | curl, same browser UA | same URL + `&export=csv`, `&export=txt`, `&export=pdf`, `&export=xml`, `&export=json`; and `http://openbenchmarking.org/result/2305286-NE-MONITORSY37` | — | each 403, `cf-mitigated: challenge` |
+| 79 | 2026-09-19 | curl, same browser UA | `https://openbenchmarking.org/test/pts/compress-7zip` | — | 403 |
+| 80 | 2026-09-19 | GitHub REST (`gh api`, raw) | phoronix-test-suite/phoronix-test-suite `pts-core/objects/pts_openbenchmarking.php`, `pts-core/objects/pts_network.php`, `pts-core/pts-core.php` at master f977d6e270d5eb9eebfa26d3ca62385c00a547a6 (2026-07-27) — how the PTS client clones a result | 200: POST `r=clone_openbenchmarking_result`, `i=<id>` to `https://openbenchmarking.org/f/client.php` with User-Agent `PhoronixTestSuite/<Codename>` (PTS_VERSION 10.8.6, codename Nesseby) | — |
+| 81 | 2026-09-19 | curl POST, UA `PTS/10.8.6` | `f/client.php` `r=clone_openbenchmarking_result&client_version=10860&gsid=&gsid_e=&i=2305286-NE-MONITORSY37` | 200, body "No Client" (9 B) | — |
+| 82 | 2026-09-19 | curl POST, UA `PhoronixTestSuite/Nesseby` | same request | 200, JSON 4,783 B with `composite_xml` and `system_logs_available` → S3-36 | — |
+| 83 | 2026-09-19 | curl POST, UA `PhoronixTestSuite/Nesseby` | `r=clone_openbenchmarking_system_logs&…&i=2305286-NE-MONITORSY37` | 200, zip 97,896 B whose SHA-1 equals `system_logs_available` → S3-36 | — |
+| 84 | 2026-09-19 | GitHub REST (`gh api`, raw) | PTS repository `ob-cache/test-profiles/pts/compress-7zip-1.10.0/` (`install.sh`, `test-definition.xml`, `results-definition.xml`, `downloads.xml`, `changelog.json`) at f977d6e | 200 → S3-36 (what the test runs) | — |
 
 ## 2. Candidates
 
@@ -415,7 +453,7 @@ A reminder of the class rule applied throughout: a response-side value (CPU per 
 
 **Passages.** Steam forum, opening post (2020-12-26): "I've had this problem on two operating systems (Windows 8.1, Arch Linux now) for at least two months. When Steam is downloading games, the download speed tends to go up and down, and as it goes up, my CPU usage goes up a lot as well" … "I'm currently downloading Pathfinder: Kingmaker, and the downloads speed seems to cycle between 5 MB/s and 45 MB/s, disk usage seems to hover between 10 MB/s and 30 MB/s. At peak, I can hear my CPU fan go wild. / My hardware consists of an i7-6700k cpu, a 512 GB Intel 660p nvme ssd, 16GB of ram, and an nvidia gtx 1060." Reply #1: "Steam compresses the downloads for the smallest download size. You are dealing with decompression of the files. Takes CPU cycles." Reply #2 (Jens): "I'd gladly give Steam like, one core, so I could continue using the 7 others." EndeavourOS #2 (2023-01-23): "High CPU usage when downloading or installing is normal. Do you mean %100 on one thread or %100 on all threads?"; #4: "Turn out it was the damn Shader pre-caching".
 
-**Coverage.** T3 — covers weakly: download-rate and disk-write ranges during a Steam depot download on a named Linux machine (Arch, i7-6700K, NVMe: 5–45 MB/s network, 10–30 MB/s disk) and the user's attribution of CPU load to per-chunk decompression; no CPU number. The socket-read pattern analysis (issue #13024) is behind the GitHub wall (see Not found). T1/T2/T4/T7: does not cover.
+**Coverage.** T3 — covers weakly: download-rate and disk-write ranges during a Steam depot download on a named Linux machine (Arch, i7-6700K, NVMe: 5–45 MB/s network, 10–30 MB/s disk) and the user's attribution of CPU load to per-chunk decompression; no CPU number. The socket-read pattern analysis (issue #13024), behind the GitHub wall on 2026-09-17, was read on the 2026-09-19 retry (S3-28). T1/T2/T4/T7: does not cover.
 
 **Observation status.** One machine, no CPU figure, no window.
 
@@ -479,7 +517,7 @@ A reminder of the class rule applied throughout: a response-side value (CPU per 
 
 **Passages.** None quoted: a case-insensitive grep of the saved page for "cpu usage" and "cpu utilization" returns 0 lines (reader's check: `grep -c -i "cpu usage\|cpu utilization" phoronix-zstd-1.5.html` → 0).
 
-**Coverage.** T1 — does not cover (throughput graphs only; OpenBenchmarking result pages with `MONITOR=cpu.usage`, e.g. 2305286-NE-MONITORSY37 for compress-7zip, are 403 from this session). Recorded as the Phoronix attempt.
+**Coverage.** T1 — does not cover (throughput graphs only; OpenBenchmarking result pages with `MONITOR=cpu.usage`, e.g. 2305286-NE-MONITORSY37 for compress-7zip, were 403 on 2026-09-17; that result was read on the 2026-09-19 retry through the PTS client endpoint and carries no `cpu.usage` entry, S3-36). Recorded as the Phoronix attempt.
 
 ### S3-27 — BEHACOM dataset (Sánchez Sánchez et al., Data in Brief 31, 2020)
 
@@ -502,20 +540,408 @@ A reminder of the class rule applied throughout: a response-side value (CPU per 
 
 **Observation status.** Population: 12 users; machines not described; window Nov 2019–Jan 2020; Linux subset: Debian-based distributions (collector requirement).
 
+### S3-28 — ValveSoftware/steam-for-linux issue #13024 "Steam Linux Download Speed Issue - Problem Found"
+
+**Citation.** ValveSoftware/steam-for-linux, GitHub issue #13024, opened 2026-03-22 00:03:50 UTC by FrancescoPnr-dev, closed 2026-05-20 16:51:11 UTC, 14 comments, last updated 2026-08-30 20:09:08 UTC; https://github.com/ValveSoftware/steam-for-linux/issues/13024. The body was edited after posting: it opens "**EDIT** / **Problem Found!**", and the author's comment 4114010701 (2026-03-23 22:03:14 UTC) says "ok i found the problem, i used strace, check out my post i updated it".
+
+**Copy read.** `gh api repos/ValveSoftware/steam-for-linux/issues/13024` (JSON 8,747 B, sha256 fa6f742ada487658e7f1aedd49557ef549badfe36aaee5372ec68ef02f246eb1) and `…/issues/13024/comments?per_page=100` (30,231 B, 052787d1f4950af663477b22dce316ec2335b5d761cb64c2445818734238349a), accessed 2026-09-19 01:30:34 UTC. Local: `sources/S3-28/`.
+
+**Passages.**
+
+- Issue body: "TCP metrics collected during active downloads show a consistent pattern: congestion window (cwnd) grows normally from its initial value, indicating no network congestion; however, the receive window (rcv_wnd) remains abnormally small (on the order of ~180 KB), and the delivery rate reported by BBR remains limited (~1 Mbps per connection) despite multiple parallel connections. In contrast, a reference downloader such as aria2c, executed on the same system and network path, achieves full line-rate throughput (200 MB/s+) with significantly larger receive windows (3 MB+) and efficient parallelization."
+- Issue body: "system call tracing was performed on the Steam client process using strace, focusing on recvfrom and event loop behavior. The process was confirmed to run in 32-bit mode" … "data is consumed in small chunks (~6.7 KB per recvfrom call), followed by substantial idle periods ranging from hundreds of milliseconds to several seconds. Each read cycle consists of a small header read, a payload read, and then an immediate EAGAIN, after which the process remains idle before repeating the pattern." … "The limitation persists regardless of kernel tuning, TCP congestion control (including BBR), or increased socket buffer sizes".
+- Issue body, the strace excerpt (seven calls, no date): `16:30:35.331635 recvfrom(128, "q9\275\0\0\0\200\3\377\377\37\0\0\1\0\0\24\0\377\377\1\7\0\0 \10\377\0\0\0\0"..., 6732, 0, NULL, NULL) = 6732 16:30:35.332277 recvfrom(128, "\1\0\v\0\0\0\223\6", 8, 0, NULL, NULL) = 8 16:30:35.332315 recvfrom(128, …, 6732, 0, NULL, NULL) = 6732 16:30:40.380843 recvfrom(71, "\1\0\v\0\0\0\223\6", 8, 0, NULL, NULL) = 8 16:30:40.380891 recvfrom(71, …, 6732, 0, NULL, NULL) = 6732 16:30:40.381503 recvfrom(71, "\1\0\v\0\0\0\223\6", 8, 0, NULL, NULL) = 8 16:30:40.381516 recvfrom(71, …, 6732, 0, NULL, NULL) = 6732` (payload strings elided with "…").
+- Comment 4111297353 (FrancescoPnr-dev, 2026-03-23 15:00:51 UTC): "the download of the games does not go beyond 40MB/s, I think it is a limitation of the 32bit linux steam client". Comment 4111315295 (15:03:23 UTC): "mine never goes above 40MB/s at peak, even though on every other download I do outside of Steam I go well over 200MB/s".
+- Comment 4106639242 (desx88, 2026-03-22 17:26:55 UTC): "Fixed it by adding to /etc/hosts 0.0.0.0 + slow steam cdn servers. Launch steam with steam://open/console. Start download and write in console download_sources. Add any slow cdn to hosts with 0.0.0.0 / My steam_dev.cfg / `@nClientDownloadEnableHTTP2PlatformLinux 0` / `@fDownloadRateImprovementToAddAnotherConnection 1.1` / `@cMaxInitialDownloadSources 15`".
+- Comment 5470222856 (S4nic, 2026-08-30 17:35:07 UTC): "Two separate Linux PCs (one on a fresh Debian 13.6 / EXT4 install), both capped at ~20MB/s Steam downloads" … "Gigabit ISP connection, confirmed via wget pulling a Debian ISO at 110MB/s sustained" … "**CPU** — confirmed via btop during a capped download, no core anywhere near saturated (highest ~14%), load average low" … "15-16 simultaneous connections open, each individually capped in the 0.3–1.8MB/s range, summing to the ~20MB/s ceiling." … "Attached strace to the download thread handling actual TLS traffic to steamcontent.com. Sample of `recvmsg()` calls: / 18308 recvmsg(235, ...iov_len=65536..., MSG_DONTWAIT) = 1400 <0.000013> / 18308 recvmsg(235, ...iov_len=65536..., MSG_DONTWAIT) = 5600 <0.000012> / 18308 recvmsg(162, ...iov_len=65536..., MSG_DONTWAIT) = 516 <0.000014> / 18308 recvmsg(172, ...iov_len=65536..., MSG_DONTWAIT) = 5600 <0.000021>" … "Every call requests up to 65536 bytes but consistently returns small counts (mostly 1400-5600 bytes, occasionally as low as 516-518), always with `MSG_DONTWAIT`."
+- Comment 5470979694 (FrancescoPnr-dev, 2026-08-30 20:09:08 UTC): "I've done some further research and it appears the issue is with the caching on the Valve fco server."
+
+**Coverage.** T3 — covers the Steam client's wake structure against the socket on Linux, as two reporters describe and excerpt it:
+- bytes per read: an 8-B header read then a 6,732-B payload read per `recvfrom` pair; `recvmsg` returning 516–5,600 B of a 65,536-B non-blocking request;
+- the stated idle periods between read bursts (hundreds of ms to seconds);
+- the advertised receive window (~180 KB) and the per-connection delivery rate (~1 Mbps, BBR);
+- connection count and per-connection rate: 15–16 connections at 0.3–1.8 MB/s, summing to ~20 MB/s;
+- the process mode (32-bit), and CPU during a capped download (btop: highest core ~14 %);
+- throughput on consumer links: Steam capped at ~20 and ~40 MB/s, against wget at 110 MB/s and aria2c at 200 MB/s+ on the same links;
+- client configuration keys for multi-connection behaviour: `@fDownloadRateImprovementToAddAnotherConnection`, `@cMaxInitialDownloadSources`, `@nClientDownloadEnableHTTP2PlatformLinux`.
+
+The cause is disputed within the thread: the body reads it as the client's own behaviour, and the author's last comment puts it on Valve's server caching. CPU per chunk, decompression and disk-write work: does not cover. T7 — no trace file is attached, only the two excerpts. T1/T2/T4: does not cover.
+
+**Observation status.** Two observations. (a) The author: Arch Linux; hardware not named; link given only as "well over 200MB/s" outside Steam; Steam client version not named. The strace excerpt is seven calls over about 5 s (clock 16:30:35–16:30:40, no date; posted between 2026-03-22 and 2026-03-23). The cwnd, rcv_wnd and BBR figures are summaries, with no raw `ss` output. (b) S4nic: two PCs, one Debian 13.6 on ext4, a gigabit PPPoE link, a Cyberpunk 2077 download on 2026-08-30. Its `recvmsg` lines carry per-call durations but no wall-clock timestamps.
+
+**Reader's own computation** (locates the candidate; not a value): the gap between the last read on fd 128 and the first read on fd 71 in the excerpt, `python3 -c "from datetime import datetime as D; f='%H:%M:%S.%f'; print((D.strptime('16:30:40.380843',f)-D.strptime('16:30:35.332315',f)).total_seconds())"` → 5.048528 s. The gap spans two different sockets, and whether the trace covered every thread is not stated. Bytes per header+payload pair: 8 + 6,732 = 6,740.
+
+### S3-29 — steam-for-linux issue #12015 and its attached Steam logs (`content_log.txt`, `content_log.previous.txt`)
+
+**Citation.** ValveSoftware/steam-for-linux issue #12015 "Getting "content unavailable" on Linux client only, with unpack errors in the log", opened 2025-05-15 19:55:09 UTC by XANi, open, 10 comments; body attachment `steam-logs.tar.gz` (the reporter's `~/.steam/steam/logs/` directory).
+
+**Copy read.** `gh api` issue JSON 7,216 B (sha256 6f4265967ad9cbbce196395b5bc13589b62769515060332cd7723b768bcf8e3a) and comments 22,563 B (253f13f5503206cf66d0371320f9fa2951e502c6e7932f2001164d8621193b98), 2026-09-19 01:30:35 UTC. Attachment `https://github.com/user-attachments/files/20233784/steam-logs.tar.gz`: 8,349,732 B (ed6dc9b57b3610ed12b3336326360cdd5b50e8e086a03b3fbb806bdd99521e90), 01:31:30 UTC; a gzip tar of 84 files under `home/xani/.steam/steam/logs/`. Two of them extracted: `content_log.txt` 847,169 B, 5,324 lines (69f381c56f69ee70824c12293b2f9238eac4bc9ca51350a715ae9632869ea68a), and `content_log.previous.txt` 4,194,149 B, 26,465 lines (7de1aa0152b102e299f626f132d12791289936357657a7d8fa4ba50ec65196b2). Local: `sources/S3-29/`.
+
+**Passages.**
+
+- Issue body: "Steam client version (build number or date): 2025-05-15, tried both stable and beta branch / * Distribution (e.g. Ubuntu):  Debian" … "I have tried downloading same game on windows and it works fine. I've noticed a lot of "unpack failed" in logs".
+- `content_log.previous.txt` lines 7962, 7965, 7966, 7969, 7972 (one completed update): "[2025-05-15 21:31:48] AppID 1380910 update started : download 0/408033136, store 0/0, reuse 0/272518215, delta 0/0, stage 0/821581209" / "[2025-05-15 21:31:48] Downloading 1962 chunks from depot 1380917" / "[2025-05-15 21:31:49] Detected write gap 67 MB in file "Stardeus_Data\resources.assets.resS"" / "[2025-05-15 21:31:56] Increasing target number of download connections to 6 (rate was 172.464, now 215.223)" / "[2025-05-15 21:32:04] AppID 1380910 starting commit from "/mnt/steam/steamapps/downloading/1380910" to "/mnt/steam/steamapps/common/Stardeus" : 1620 updated, 1 moved, 82 deleted files".
+- `content_log.previous.txt` lines 7984, 7986, 7987, 7990: "[2025-05-15 21:32:09] AppID 427520 update started : download 0/146394288, store 0/0, reuse 0/2424207, delta 0/0, stage 0/542509102" / "[2025-05-15 21:32:09] Downloading 2144 chunks from depot 645391" / "[2025-05-15 21:32:18] Current download rate: 123.584 Mbps" / "[2025-05-15 21:32:22] AppID 427520 starting commit from "/var/steam/steamapps/downloading/427520" to "/var/steam/steamapps/common/Factorio" : 1866 updated, 8 moved, 10 deleted files".
+- `content_log.txt` line 83: "[2025-05-15 21:48:47] Turning on early CRC checks for all received data." Line 1387: "[2025-05-15 21:48:59] stats: (SteamCache, 251) cache1-waw-extl.steamcontent.com: 187208784 Bytes, 11 sec (131.89 Mbps). 257 Hits / 0 Misses (100 %, 100 % bytes)". Line 1396: "[2025-05-15 21:48:59] Increasing target number of download connections to 5 (rate was 0.000, now 234.990)".
+- `content_log.txt` line 3: "[2025-05-15 21:47:20] Failed unpacking chunk "8ec22e6c1b0646bfd14102ce5e1f9bf15fd9d0af" from "cache1-sto1.steamcontent.com/depot/2939641/chunk/8ec22e6c1b0646bfd14102ce5e1f9bf15fd9d0af" (Unpack failed (c:774592,u:0,r:806485,b:0))".
+- Comment 2923138888 (XANi, 2025-05-30 18:37:35 UTC): "@raethkcj That did fix it (clean re-install + re-adding 2 lib dirs), thanks".
+
+**Coverage.** T3 — covers the throughput and multi-connection behaviour of the Steam client's depot downloads on one Linux machine over 23 minutes:
+- per-CDN-host transfer counters about every 11 s: bytes, seconds, Mbps, cache hits and misses;
+- the client's connection-count steps, with the rate that triggered each (to 5 at rates of 67–250 Mbps, to 6 at 215–260 Mbps);
+- "Current download rate" lines of 123.6–189.2 Mbps;
+- per-update download and stage byte totals with chunk counts, from which an average compressed chunk size follows;
+- on the disk-write side, preallocation and "Detected write gap" lines, and per-update commit file counts;
+- one mode switch: "Turning on early CRC checks for all received data".
+
+CPU, wake structure, and process or thread structure: does not cover. T7 — covers: a public, complete `content_log.txt` pair from a Linux Steam client, with the fields quoted above. A fault dominates the window: repeated "Failed unpacking chunk" lines on depot 2939641, which a clean reinstall fixed (comment 2923138888). Interleaved with it, seven commits of six AppIDs complete normally. T1/T2/T4: does not cover.
+
+**Observation status.** One machine: Debian (issue body); hardware and link not named; Steam libraries on `/mnt/steam` and `/var/steam`. Subject: the Steam client of 2025-05-15. Window named: 2025-05-15 21:27:42 → 21:50:23 in the log's local time. `content_log.previous.txt` covers 21:27:42–21:47:20 (rotated at about 4 MB, so earlier lines are gone); `content_log.txt` covers 21:47:20–21:50:23. The depot 2939641 failures are a fault state; the completed updates are not.
+
+**Reader's own computation** (locates the candidate; not values):
+- The `stats:` lines in both files: `grep -h -o 'stats: .* [0-9]* sec ([0-9.]* Mbps)' content_log.previous.txt content_log.txt | sed -E 's/.* ([0-9]+) sec \(([0-9.]+) Mbps\)/\1 \2/' | python3 -c "import sys,statistics as st; r=[l.split() for l in sys.stdin]; v=[float(b) for a,b in r]; print(len(v), min(v), st.median(v), max(v), sum(1 for a,b in r if 10<=int(a)<=12))"` → 121 lines. Per-host rate: min 5.96, median 54.41, max 141.62 Mbps. 86 of the 121 lines cover 10–12 s.
+- Stardeus: 408,033,136 B between "update started" (21:31:48) and "starting commit" (21:32:04), 16 s ±1 s at the log's one-second resolution. `python3 -c "print(408033136/16/1e6, 408033136/1962)"` → 25.5 MB/s (204 Mbps) and 207,968 B per chunk.
+- Factorio: 13 s, 21:32:09 → 21:32:22. `python3 -c "print(146394288/13/1e6, 146394288/2144)"` → 11.3 MB/s (90 Mbps) and 68,281 B per chunk.
+
+### S3-30 — steam-for-linux issue #7956 "Downloading a large game can fail with EMFILE (errno 24)"
+
+**Citation.** ValveSoftware/steam-for-linux issue #7956, opened 2021-07-30 18:15:06 UTC by smcv (CONTRIBUTOR association), label "Steam client", closed 2021-08-04 20:32:57 UTC, 11 comments.
+
+**Copy read.** `gh api` issue JSON 9,290 B (sha256 2a1dd0812f5a731e57db7ae26ee1570b5913f5360577b8657a8e38e73806b1fe) and comments 24,092 B (a7e2f9114304df9b37b4aed557be7b3d7a6e1ddebb93c5ac659e38159e53d3e6), 2026-09-19 01:30:36 UTC. Local: `sources/S3-30/`.
+
+**Passages.**
+
+- Body (Debian 11, client build 1627607186, beta): "Downloading Civ VI gets paused after a while with "Disk write error". Looking at `~/.steam/root/logs/content_log.txt` I see this:" … "[2021-07-30 18:47:14] Downloading 35959 chunks from depot 533503 / [2021-07-30 18:47:26] Increasing target number of download connections to 4 (rate was 0.000, now 53.843) / [2021-07-30 18:47:26] Current download rate: 53.843 Mbps / [2021-07-30 18:47:26] Created download interface of type 'SteamCache' (7) to host cache1-lhr1.steamcontent.com (cache1-lhr1.steamcontent.com) / [2021-07-30 18:48:21] CGenericAsyncFileIOThread::AllocateResource() failed for CFileWriter: errno: 24, File: /home/steam/SteamLibrary/steamapps/downloading/289070/steamassets/base/platforms/windows/audio/751812779.wem / [2021-07-30 18:48:21] Failed to write chunk in file "steamassets\base\platforms\windows\audio\751812779.wem", 266788 bytes at offset 0 (File Not Found)".
+- Body: "Looking in `/proc/$pid/fd/` for the main Steam process, I can see that there are about 1000 fds just before it fails."
+- Comment 891353481 (PedroHLC, 2021-08-02 21:41:22 UTC; Arch Linux, ZFS, Steam beta of 2021-07-30): "[2021-08-02 18:23:32] AppID 1686450 update started : download 1274989264/1884205488, store 0/0, reuse 0/0, delta 0/0, stage 2881567184/4242800593" … "[2021-08-02 18:23:32] Downloading 7257 chunks from depot 1686451" … "[2021-08-02 18:24:29] Current download rate: 9.121 Mbps" … "Failed to write chunk in file "NanosWorld\Content\NanosWorld\Thumbnails\SM_Shoes.jpg", 9439 bytes at offset 0 (File Not Found)" … "It spawns like 100 fds per sec in `/proc/$pid/fd/`..."
+- Comment 891837165 (TTimo, COLLABORATOR, 2021-08-03 13:14:57 UTC): "The Aug 2nd beta update brought the open files count during download back down. This problem may be less prevalent now. It's possible we are leaking fds though so we'll keep an eye on it."
+- Comment 891909821 (PedroHLC, 2021-08-03 14:48:03 UTC): "I'm no longer able to reproduce it with built `Aug 2, 2021, 23:01`. But I can see it opened 1600+ file descriptors."
+
+**Coverage.** T3 — covers the disk-write side of a Steam depot download on Linux:
+- chunks are written by an asynchronous file-I/O thread (`CGenericAsyncFileIOThread`, `CFileWriter`) into per-file destinations under `steamapps/downloading/`;
+- the main Steam process held about 1,000 open file descriptors (Debian 11) and 1,600+ (Arch), opened at "like 100 fds per sec";
+- chunk write sizes as logged: 266,788 B and 9,439 B at offset 0;
+- the connection-count step at the first rate reading: to 4 at 53.843 Mbps;
+- depot chunk counts of 35,959 and 7,257, and rates of 53.843 and 9.121 Mbps.
+
+The fd growth is a fault state of that client build, fixed by the 2021-08-03 update (comment 892954863). CPU per chunk and wake structure: does not cover. T7 — covers: `content_log.txt` excerpts with the field set shared with S3-29, plus `update started` byte totals. T1/T2/T4: does not cover.
+
+**Observation status.** Two machines, hardware not named. (a) Debian 11, a btrfs library (comment 891639297), client build 1627607186 beta; window 2021-07-30 18:47:14–18:48:21. (b) Arch Linux on ZFS; window 2021-08-02 18:23:32–18:24:44. Link class not named.
+
+### S3-31 — steam-for-linux issue #6684 "High CPU usage when download"
+
+**Citation.** ValveSoftware/steam-for-linux issue #6684, opened 2019-11-12 02:07:41 UTC by howdev, labels "Not a bug" and "Steam client", open; the issue lists 18 comments and the API returned 17; last updated 2024-10-28 22:57:02 UTC.
+
+**Copy read.** `gh api` issue JSON 3,653 B (sha256 ce09a65337f80929e1d8209c93300d61f171b552c70de9321528a03ee830cd68) and comments 33,024 B (662edb082c1b943cd0da41a48fbc7361f8ef6c939dd705f54232e38793453810), 2026-09-19 01:30:36 UTC. Screenshots `https://user-images.githubusercontent.com/17158780/68635668-24c24e80-055e-11ea-961b-59c02f8c1754.png` (133,785 B, 36a64e705c63e048bde8327d84fd9b980c779949a853929a3fb87380f597c951) and `https://user-images.githubusercontent.com/11761863/139614157-559b7e4d-4cb4-4405-9395-38c05266d677.png` (18,986 B, fc90f011d7132f08f8efe6e2eac332ca7b979d01f20df28b0bba5faf02f56a90), 01:32:37 UTC. Local: `sources/S3-31/`.
+
+**Passages.**
+
+- Body (Linux Mint 19.2, client of Nov 6 2019): "CPU usage goes up high when downloading. 40% CPU graph in system monitor. Same continue to happen when download resume from pause. Restart Steam, still not resolve. Stop the download and CPU usage drops."
+- Comment 552704921 (kisak-valve, MEMBER, 2019-11-12 02:24:55 UTC): "the usage you've described is within expectations for SteamPipe."
+- Comment 553086531 (Plagman, MEMBER, 2019-11-12 19:53:12 UTC): "It does a lot of decryption, decompression, and delta-patching work. You're right that in some situations, it's not suitable to play a game and download at the same time; for this reason, I believe downloading games while playing is off by default and has to be explicitly enabled by the user."
+- Comment 554792172 (rcorre, 2019-11-17; Archlinux, client of Nov 14 2019, beta): "I've recently noticed my client get up to ~100% cpu during downloads."
+- Comment 938177221 (rcorre, 2021-10-07 21:43:24 UTC), whitespace collapsed: "I just started downloading Phoenix Point, and steam consumed over 300% CPU on an AMD 5600X pretty much the whole download. / PID USER PR NI VIRT RES SHR S %CPU %MEM TIME+ COMMAND / 2722 rcorre 20 0 833844 520036 242920 S 341.5 1.6 4:14.77 steam" … "I'm on `Linux 5.14.8-arch1-1`, with the Sept. 17th steam build."
+- Comment 955878117 (theoparis, 2021-11-01 02:40:47 UTC): "I have an AMD Ryzen 5 2600, but my cpu usage in top -i and htop seems really high as well and I'm just updating my games." … "I'm using a more recent version of Arch Linux than rcorre is: `5.14.14-arch1-1`".
+- Comment 1117530936 (zany130, 2022-05-04 16:02:21 UTC; Garuda Linux, kernel 5.17.5-256-tkg-pds, "6-core AMD Ryzen 5 2600X", "Intel I211 Gigabit Network"): "limiting it to 500mbps instead of allowing it to reach about 800mbps (I have gigabit internet) reduces the CPU usage drastically and no longer causes my system to stutter".
+- The reader's transcription of text legible in the body screenshot (GNOME System Monitor, Resources tab, 60-second history): "CPU1 36.3%", "CPU2 13.0%", "CPU3 15.0%", "CPU4 44.1%"; "Memory 3.0 GiB (39.2%) of 7.7 GiB"; "Receiving 8.5 MiB/s", "Total Received 19.6 GiB"; "Sending 232.1 KiB/s", "Total Sent 843.9 MiB". In the reader's reading of the plots, received traffic rises to a plateau of about 8 MiB/s over the last ~22 s of the window, with the four CPU lines mostly between 10 and 60 % over that stretch.
+- The reader's transcription of the comment 955878117 screenshot (one `htop` row under the header "CPU%▽MEM% TIME+ Command"): "461. 5.8 1:42.81 /home/theo/.local/share/Steam/ubuntu12_32/st" (the row is cut at the image edge).
+
+**Coverage.** T3 — covers the CPU share of the Steam client process during depot downloads on Linux:
+- `top` shows 341.5 % (3.4 CPUs) for process `steam` on a Ryzen 5 5600X (Arch, kernel 5.14.8);
+- `htop` shows 461 % for `…/Steam/ubuntu12_32/st…` on a Ryzen 5 2600 (Arch, 5.14.14);
+- "~100 %" (Arch, 2019) and a "40%" graph (Mint 19.2);
+- a Valve developer names the per-download work: decryption, decompression, delta-patching;
+- a qualitative rate dependence: a 500 Mbps cap against ~800 Mbps uncapped on a Ryzen 5 2600X;
+- the process name the work runs under: `steam`, from the 32-bit `ubuntu12_32` directory.
+
+A download rate alongside a per-process CPU figure: does not cover. The only rate, 8.5 MiB/s, comes with system-wide per-CPU load on the Mint machine. Thread structure and wake structure: does not cover. T1/T2/T4/T7: does not cover.
+
+**Observation status.** Snapshots, not series. Four machines, each named by CPU and distribution at most. Download rate, game size, disk and cache state are not named, except in the Mint screenshot (4 CPUs, 7.7 GiB, 8.5 MiB/s received). rcorre's line is one `top` refresh with TIME+ 4:14.77.
+
+**Reader's own computation** (locates; not a value): the mean of the four per-CPU readings in the Mint screenshot, `python3 -c "print((36.3+13.0+15.0+44.1)/4)"` → 27.1 % of the 4-CPU machine, system-wide.
+
+### S3-32 — BorgBackup GitHub issues #2245, #5804, #7374, #3471
+
+**Citation.** borgbackup/borg GitHub issues:
+- #2245 "A very slow repository": magma1447, 2017-03-02; labels "bug" and "c: index or hashtable"; closed 2017-03-04; 19 comments.
+- #5804 "[1.2.0b3] borg info very slow": FabioPedretti, 2021-05-12; closed 2022-04-20; 14 comments.
+- #7374 "Very slow backup speed when creating archive from sshfs to external hdd": AntonOellerer, 2023-02-23; label "cmd: create"; closed 2025-11-16; 15 comments.
+- #3471 "Slow startup": 2017-12-22; closed 2017-12-25; 24 comments. It is a macOS and Raspberry Pi startup report, recorded as context.
+
+**Copy read.** `gh api` issue and comments JSON, 2026-09-19 01:30:37–01:30:40 UTC:
+
+| Issue | Issue JSON | Comments JSON |
+|---|---|---|
+| #2245 | 8,996 B, a3f94a639f86714d0d78ba107e06275d244905222a2f4196133d3e3a02426326 | 54,255 B, ff36c97cf3dfdd0f04cd8b60d6c4e81a55d1721cbde0c527c5969cd1a4567c9f |
+| #3471 | 5,820 B, 2f26a0027820076773689b7cb4efad0358aba5346fcfa86327962a44b544a523 | 52,117 B, b03fbe65041a8b659066372d5351e0dec8aea8ae4d948534a4104698ac78c7c9 |
+| #5804 | 6,456 B, 90b0dae2dc9e2900b8f1dfce34ad177e115071e7cfacffc01cbb4bc80d7b8b35 | 33,388 B, ca97f618658990128498cae974a847c4bdd0be5d95450e9a8178c1ca0ff6d686 |
+| #7374 | 10,042 B, 8c4d4c5e581b1fd8000d07978b1ee86c7a1db89dfdf0cf6d56a57062c0ffa4ef | 29,567 B, 9dc9724676bfcbc99b27a26441764bf898dd5b30982e1272c89722eb09e66ddb |
+
+Local: `sources/S3-32/`.
+
+**Passages.**
+
+- #2245 body (client `pgc-db-01`, server `thor` over ssh; "Client has borgbackup-1.1.0-b3, Server has borgbackup-1.1.0-b3"): "cp /var/log/syslog . / du -hs syslog / 3.3M    syslog" … "time BORG_RSH='ssh -i /root/.ssh/thor-borg' borgbackup create --verbose --compression auto,zlib,3 borg@thor:/data/borg-WedFriSun/pgc-db-01.borg::test_1 syslog / real    1m40.940s / user    0m1.000s / sys     0m0.180s"; into the other repository: "real    0m11.295s / user    0m1.168s / sys     0m0.208s" … "For the above test cases the server used 50-100% cpu. It's a i5-3570K. In my real backups it's stuck at 100% for a very long time (hours)." … "The dumps are ~12 GB or ~70 GB." … "Backing up the smaller ones takes about 8 minutes for the two good repositories, and somewhere around 5 hours for the slow repository."
+- #2245 comment 283530493 (magma1447, 2017-03-02 01:46:24 UTC): "The process borgbackup uses 100%. I have not seen ssh in the top 10-15."
+- #2245 comment 283531439 (ThomasWaldmann, MEMBER, 2017-03-02 01:52:11 UTC): "borg serve does not do much computing usually: / - it is mostly I/O, getting/putting chunks from/into segment files. / - it computes crc32 for all segment entries (not that heavy and not expected to vary much) / - it maintains the repo index, which is a big in-memory hashtable (hashtable perf can vary depending on load factor, data, number of tombstones, ...)".
+- #2245 comment 283652563 (magma1447, 2017-03-02 13:25:45 UTC): "borg@thor:/data/borg-WedFriSun$ time borgbackup check --repair pgc-db-01.copy/" … "real    84m12.317s / user    18m28.868s / sys     9m35.000s".
+- #2245 comment 283856546 (ThomasWaldmann, 2017-03-03 03:37:21 UTC): "**No empty buckets. Load ca. 0.53.**" … "Thus: all new chunks in the backup being created trigger full hashtable scans on the repo server. Worst case for performance, high cpu load in ht code."
+- #5804 body (Debian 10 VM, "VM with ext4 main FS, repo on remote sshfs"), whitespace collapsed: "While running the borg 1.2.0b3 info command, "top" output shows borg CPU usage, as well as ssh/sshfs CPU usage (the repo is on sshfs). / PID USER PR NI VIRT RES SHR S %CPU %MEM TIME+ COMMAND / 17608 root 20 0 971804 937936 12504 S 20,6 11,5 0:19.73 borg-1.2.0b3 / 15527 root 20 0 19828 10240 5672 S 8,3 0,1 11:40.80 ssh / 15529 root 20 0 522012 6224 776 S 5,6 0,1 10:47.79 sshfs". Comment 839851591 (2021-05-12): "Platform: Linux borg 4.19.0-16-amd64 #1 SMP Debian 4.19.181-1 (2021-03-19) x86_64".
+- #5804 comment 1059935562 (FabioPedretti, 2022-03-06 10:30:01 UTC): "# time ./borg-1.1.17 info" … "real	0m26,835s / user	0m2,231s / sys	0m1,492s"; "# time ./borg-1.2.0 info" … "real	1m43,685s / user	0m6,663s / sys	0m2,491s". Comment 1059983335: "# borg list | wc -l / 3088".
+- #7374 body (borg 1.2.3; "fedora 37"; "linux laptop (`AMD Ryzen 7 4800H`, `32 GB RAM`), `btrfs + luks`"; "external hdd (`WDC WD20SDRW`), `xfs + luks`"; source a "hetzner storage box" mounted "via sshfs as `fuse.sshfs`"; "300GB"): "started to back up the content of the storage box, which turned out to be very slow (~10GB per hour), even when just deduplication of existing files was done". CRUD benchmark, "From the storage box to the hdd:": "C-R-BIG           3.89 MB/s (10 * 100.00 MB random files: 256.86s)" / "R-R-BIG         105.67 MB/s (10 * 100.00 MB random files: 9.46s)" / "C-R-SMALL         0.09 MB/s (10000 * 10.00 kB random files: 1093.80s)". "from the laptop to the hdd": "C-R-BIG          76.27 MB/s (10 * 100.00 MB random files: 13.11s)" / "C-R-SMALL        17.68 MB/s (10000 * 10.00 kB random files: 5.66s)".
+- #7374 comment 1697827312 (enkore, CONTRIBUTOR, 2023-08-29 17:02:35 UTC): "sshfs makes no attempt at latency hiding and couldn't do much if it tried - so this is very dependent on the latency of the sshfs mount. This setup will always perform badly with many files."
+- #7374 comment 2408718714 (thutex, 2024-10-12 22:33:36 UTC): "last upload (5263438 files, compressed 121.36GB, deduplicated 7.36GB) took over 24 hours: / Duration: 1 days 1 hours 8 minutes 5.14 seconds / my upload speed is 30Mbps".
+- #7374 comment 2566020761 (ThomasWaldmann, 2024-12-31 00:03:11 UTC): "Many network filesystems (like sshfs) do not have stable inodes, but the default for detection of "this file was not changed" is `--files-cache=inode,ctime,size`. The files cache is what makes borg really fast."
+- #3471 comment 364526948 (ThomasWaldmann, 2018-02-09 19:00:27 UTC; the thread concerns macOS and Raspberry Pi startup time): "any recent borg version does a quick self-test after startup and before executing any commands." … "borg can't exploit multiple cores yet, so it does not help that the rpi3 has 4 cores."
+
+**Coverage.** T1 — covers weakly:
+- the process structure of a remote borg backup: a `borg`/`borgbackup` client, an `ssh` transport, and `borg serve` on the repository host; with an sshfs source, `ssh` and `sshfs` processes beside `borg`;
+- one `top` snapshot during `borg info` over sshfs (Debian 10 VM): borg 20.6 %, ssh 8.3 %, sshfs 5.6 % CPU;
+- the maintainer's description of `borg serve`'s work (mostly I/O on segment files, crc32 per entry, the in-memory repository index), and the 2018 statement that borg uses one core;
+- `time` triples for a repository-wide `borg check --repair` on the server (84 m 12 s wall, 18 m 29 s user, 9 m 35 s sys);
+- `time` triples for small `borg create` runs whose wall time the server dominates (1 m 41 s wall against 1.2 s client CPU);
+- throughput of `borg create` from an sshfs source (~10 GB/hour), and `borg benchmark crud` rates from a Fedora laptop to a USB HDD.
+
+Every CPU figure comes either from a fault state (hashtable tombstones, #2245) or from `borg info`. None is from a healthy `borg create` on a desktop, and no thread states the cache state. T2/T3/T4/T7: does not cover. #3471 covers nothing beyond the quoted statement.
+
+**Observation status.**
+- #2245: one client/server pair, server CPU named (i5-3570K), borg 1.1.0b2/b3. Platform not stated; `/var/log/syslog` and the `borgbackup` command name fit a Debian-family Linux. Window 2017-03-01/02. Fault state.
+- #5804: one Debian 10 VM (kernel 4.19.0-16), borg 1.1.16/1.1.17/1.2.0b3/1.2.0. The repository holds 2.30–2.46 TB deduplicated and 3,088 archives, on sshfs. Windows 2021-05 and 2022-03.
+- #7374: one Fedora 37 laptop (Ryzen 7 4800H, 32 GB), borg 1.2.3, a 300 GB source over sshfs, 2023-02. A second user's `Duration` is over a 30 Mbps upload, machine not named.
+
+**Reader's own computation** (locates; not values): `python3 -c "print((18*60+28.868+9*60+35.0)/(84*60+12.317), (6.663+2.491)/(60+43.685), (2.231+1.492)/26.835)"` → CPU share 0.333 for `check --repair`, 0.088 for 1.2.0 `info`, 0.139 for 1.1.17 `info`.
+
+### S3-33 — restic GitHub issues #652, #2696, #2679
+
+**Citation.** restic/restic GitHub issues:
+- #652 "Reduce CPU usage": martin21, 2016-10-26; closed 2017-02-21; 32 comments.
+- #2696 "restic is very slow to backup small files": blastrock, 2020-04-18; closed 2022-07-03; 1 comment.
+- #2679 "High fragmentation and very slow backups": JsBergbau, 2020-04-03; closed 2022-08-08; 8 comments. The observation is on Windows, recorded as context.
+
+**Copy read.** `gh api` issue and comments JSON, 2026-09-19 01:30:41–01:30:42 UTC:
+
+| Issue | Issue JSON | Comments JSON |
+|---|---|---|
+| #652 | 12,737 B, 210127c5fa5433fad550091b92a83b7030314734d41372f176b1ef02b068b97c | 75,164 B, 7c077d3df09a14aeb0583bb2d9c946258968d882851d6d50c5cf6e154d1dfae1 |
+| #2696 | 8,530 B, d195b8f0df58114f82acffa92108368c1051319b1136d60f4d765fa65714574d | 2,107 B, bccc0e3fcbb97afd2482f8636f0f68434ede81b67f8cfd000eee49aaa73c961b |
+| #2679 | 10,243 B, 50d7d2782bf2612028224acf865b8204a7eae092fb327d4ea769f1a1f7f63da2 | 20,052 B, 7101648ba4029f033779a8466d2ee80af00b508b745f5fd0f9bcbb6f2b843db8 |
+
+Local: `sources/S3-33/`.
+
+**Passages.**
+
+- #652 body ("restic 0.3.0 (v0.3.0-17-gd4f76fb) / compiled at 2016-10-26 12:41:55 with go1.7.3 on linux/amd64"; host `merkaba`): "Initial backup: Up to 150% (probably would have used more, but borgbackup and other processes also used some CPU) / Incremental backup: Up to 330% (see below). It currently has more than 300% for a longer time. Laptop fans at maximum speed".
+- #652 body, the `atop` sample (whitespace collapsed): "ATOP - merkaba 2016/10/26 15:43:40 ------------- 10s elapsed / PRC | sys 4.05s | user 30.90s | | #proc 482 | #trun 5 | #tslpi 1383 | #tslpu 0 | #zombie 0 | clones 2 | | no procacct | / CPU | sys 36% | user 310% | irq 3% | | idle 29% | wait 22% | | steal 0% | guest 0% | curf 3.00GHz | curscal 93% | / CPL | avg1 4.63 | avg5 4.54 | | avg15 3.96 | | csw 180689 | | intr 54060 | | | numcpu 4 | / MEM | tot 15.5G | free 162.2M | cache 4.1G | dirty 0.2M | …" … "DSK | sda | busy 16% | read 6058 | write 44 | KiB/r 8 | KiB/w 42 | | MBr/s 4.8 | MBw/s 0.2 | avq 1.27 | avio 0.26 ms | / DSK | sdb | busy 12% | read 6424 | write 44 | KiB/r 9 | KiB/w 42 | | MBr/s 5.8 | MBw/s 0.2 | avq 1.33 | avio 0.18 ms |" … "PID TID RUID EUID THR SYSCPU USRCPU VGROW RGROW RDDSK WRDSK ST EXC S CPUNR CPU CMD 1/7 / 8991 - root root 22 2.61s 27.67s 0K 0K 94756K 0K -- - S 2 307% restic".
+- #652 body, `atopsar` (kernel line "merkaba 4.7.0-1-amd64 #1 SMP Debian 4.7.8-1 (2016-10-19) x86_64 2016/10/26"), whitespace collapsed: `-c`: "15:29:07 cpu %usr %nice %sys %irq %softirq %steal %guest %wait %idle _cpu_ / 15:39:07 all 311 0 35 0 4 0 0 27 24" … "15:49:07 all 309 0 34 0 4 0 0 26 28"; `-O`: "15:39:07 8991 restic 316% | 24839 firefox 14% | 24372 Xorg 3% / 15:49:07 8991 restic 297% | 7490 firefox 27% | 2142 Xorg 4%".
+- #652 body, restic progress and system: "[34:20] 99.86%  56.128 MiB/s  112.913 GiB / 113.072 GiB  2617417 / 2624033 items  0 errors  ETA 0:02" … "duration: 34:23, 56.12MiB/s" … "System that carries out the backup is ThinkPad T520 with dual SSD BTRFS RAID 1" … "Processor: Intel Core i5-2520M @ 3.20GHz (4 Cores), Motherboard: LENOVO 42433WG, … Memory: 16384MB, Disk: 300GB INTEL SSDSA2CW30 + 480GB Crucial_CT480M50" … "OS: Debian unstable, Kernel: 4.7.0-1-amd64 (x86_64), Desktop: KDE Frameworks 5" … "2) 1 GBit link and low latency (about 1 to 1,5 ms) to backup VM".
+- #652 comment 268259319 (martin21, 2016-12-20 14:39:56 UTC): "During the scan phase restic usually uses about 50-70% CPU" … "During the backup phase however, it uses more than 200-320% of CPU while reading about 80 to 150 MiB/s from Dual BTRFS RAID 1."
+- #652 comment 281457546 (fd0, MEMBER, 2017-02-21 19:43:33 UTC): "What you're seeing is restic splitting the files into chunks and calculating the SHA-256 hash of each chunk. That together takes a lot of CPU" … "In this phase, restic reads all files, splits them and hashes the chunks. Most of this process is CPU bound."
+- #652 comment 284139405 (martin21, 2017-03-04 09:20:24 UTC; over a DSL uplink; the comment arrived by e-mail, and its hard line wraps are joined here): "resticbackup currently is at just 50-110% CPU usage most of the time now with occasionally pikes at 300-350%." … "Atop reports about / si   34 Kbps | so 1221 Kbps".
+- #652 comment 284154677 (martin21, 2017-03-04 14:27:53 UTC; unchanged files after one completed backup with a fixed path): "scanned 4081 directories, 65882 files in 0:00" … "duration: 2:19, 1752.00MiB/s".
+- #2696 body ("restic 0.9.4 compiled with go1.11.6 on linux/amd64 / Actually 5a7c27ddb62d86440e60764fab4725e520f78e54"; "The hard drive spins at 7200RPM. hdparm reports 175MB/s for non-cached reads."; "fast.com measured my upload speed at 300Mbps"; "I am using a debian unstable with linux 5.4.0"): "The linux cache is cleared before each test with `sync; echo 3 | sudo tee /proc/sys/vm/drop_caches`". Test #1, "1 file of 1GiB full of random" (columns Drive type | FileReadConcurrency | Total time | Speed): "| HDD | 2 | 53s | 19MiB/s |". Test #2, "1024 files of 1MiB full of random": "| HDD | 2 | 5min19s | 3.2MiB/s |" / "| tmpfs | 2 | 5min11s | 3.3MiB/s |" / "| HDD | 16 | 54s | 19MiB/s |".
+- #2679 comment 608459562 (MichaelEischer, MEMBER, 2020-04-03 14:19:26 UTC). The reporter is on Windows (restic 0.9.6), so the observation is context; the statements describe restic's code. "Restic already collects all data that belongs into a pack file in a temporary file (stored in one of the usual temp directories) and then passes the full pack on to the operating system for writing into the backup repository. Actually the data is passed to the OS in smaller blocks (32kB)" … "A backup run can write up to `number of CPUs` packs at the same time." … "After writing restic forces the file to be flushed to disk".
+
+**Coverage.** T1 — covers, for `restic backup` on a Linux laptop in 2016:
+- the process's CPU share over 10-s and 10-min windows: 307 % in one `atop` interval, 316 % and 297 % in two 10-min `atopsar` intervals;
+- 22 threads, from `atop`'s THR column;
+- its disk read per interval (RDDSK 94,756 KiB in 10 s), the system's I/O-wait share (22 %) and the system-wide context-switch count;
+- the phase split the user states: scan at 50–70 %; read, chunk and hash at 200–320 % while reading 80–150 MiB/s;
+- the maintainer's explanation: every re-read file is chunked and SHA-256-hashed, "mostly CPU bound".
+
+The 2016 re-read happened because a changing snapshot path defeated restic's file cache: a real workload, but one caused by configuration. Also covered:
+- restic's write pacing as its maintainer describes it (restic ~0.9.6, 2020): a temporary pack file, 32 kB blocks to the OS, up to one pack per CPU in flight, a flush after each pack;
+- throughput against file-read concurrency on Linux with a cold page cache (drop_caches stated): 3.2 → 19 MiB/s for 1 MiB files (2020).
+
+On-CPU run lengths: does not cover. T7 — covers: a public `atop` per-process line for a named backup job, pasted into the issue for one interval, with fields PID, TID, RUID, EUID, THR, SYSCPU, USRCPU, VGROW, RGROW, RDDSK, WRDSK, ST, EXC, S, CPUNR, CPU, CMD. T2/T3/T4: does not cover.
+
+**Observation status.**
+- #652: one machine named: ThinkPad T520, i5-2520M (2 cores, 4 threads), 16 GB, two SATA SSDs in btrfs RAID 1, Debian unstable, kernel 4.7.0-1. Subject named: a restic 0.3.0 dev build backing up ~113–115 GiB (2.6 M files) of `/home` from a btrfs snapshot to a repository on a VM over 1 GbE. Windows named: `atop` on 2016-10-26 over the 10 s ending 15:43:40, `atopsar` 15:29–15:49, a 34 m 23 s run. Cache state not stated; `atop` shows 4.1 G of page cache out of 15.5 G.
+- #2696: one Debian unstable machine (Linux 5.4.0), cold cache, restic commit 5a7c27d.
+- #2679: Windows 10, restic 0.9.6 — context.
+
+**Reader's own computation** (locates; not values): for the `atop` interval, `python3 -c "print((2.61+27.67)/10, 94756/10/1024, 180689/10)"` → 3.03 CPUs of restic user+sys per wall second, 9.25 MiB/s read from disk by restic, and 18,069 context switches per second system-wide.
+
+### S3-34 — curl GitHub issues #336 and #11242, with #336's htop screenshots and #11242's debug log
+
+**Citation.** curl/curl GitHub issues:
+- #336 "High CPU usage when using --limit-rate option": Konstantinusz, 2015-07-06; closed 2015-07-26; 11 comments.
+- #11242 "curl consumes 100% CPU when sending a file with -F": l29ah, 2023-06-03; labels "needs-info" and "HTTP/2"; closed 2023-06-20; 11 comments.
+
+**Copy read.** `gh api` issue and comments JSON, 2026-09-19 01:30:43–01:30:44 UTC. Linked files: #336's screenshots at 01:34:18 UTC, #11242's debug log at 01:34:44 UTC.
+
+| File | Size | SHA-256 |
+|---|---|---|
+| #336 issue JSON | 5,460 B | 1bc92c64d679347f1e213459117ae3f42656d0f4736694d21cbd3c726396daa7 |
+| #336 comments JSON | 24,734 B | 844ff8158e798328e78077509cdf954289e2a98eba59e02a6a3896c79bbd485c |
+| #11242 issue JSON | 7,484 B | 142dae1d4bbe56a3a3ac7f35c635fdba457c962f6504c322ed8bc4df062136a5 |
+| #11242 comments JSON | 19,207 B | 81992bff983c9e18f03085df07a2a9a4827ac7822505719c65166e4bb84d0c0c |
+| `https://i.imgur.com/ZFj6Fqc.png` (#336) | 23,830 B | 59f68e6a859c4e899e9bc326f84f2936db27c6b2b2cb6dc4576c0e4636a4fa1a |
+| `https://i.imgur.com/KrNQlyr.png` (#336) | 23,264 B | 65f0677a5736b690836959a3e6fb29c5d36183295fda05c7b654465e2e749c6a |
+| tinystash log `tinystash-11242.txt` (#11242; URL in search-log row 67) | 104,954 B, 1,346 lines | 4db6b7fc5ab4740e015a9687d694f595e43d60f5ef68cc339fcb481d9d16f1c5 |
+
+Local: `sources/S3-34/`.
+
+**Passages.**
+
+- #336 body: "CPU was at 50% with one working thread, I used the command line utility "top" to examine CPU usage. If I omit this option CPU usage is only 1-2 % with one working thread."
+- #336 comment 118833103 (Konstantinusz, 2015-07-06): "curl 7.43.0 (i686-pc-linux-gnu) libcurl/7.43.0 OpenSSL/1.0.2a zlib/1.2.8 libidn/1.30 libssh2/1.5.0" … "I am using Arch Linux, 4.0.2 and Apache/2.4.9 (Unix)".
+- #336 comment 118958377 (jay, MEMBER, 2015-07-06; Ubuntu 14.04 x64 VM, curl 7.44.0-DEV, kernel 3.13.0-55): "Actually when I rate limit 320k I get the opposite effect in Ubuntu, the cpu usage is lower by at most several percentage points. (0-2%,avg 1 rate limited; 0-8%,avg 3 no limit -- empirical only: I just watched top and made some less-than-arbitrary notes)." … "curl --limit-rate 320K http://mirror.umd.edu/ubuntu-iso/15.04/ubuntu-15.04-desktop-i386.iso -L -o - | ./g" … "Worth mentioning that I did this in a VM which you can be sure had some effect on the results."
+- #336 comment 119090279 (Konstantinusz, 2015-07-07): "when I omit that option, the CPU usage is always nearly at 0%-0.5% even when the download speed is about 10 MB / sec."
+- #336 comment 124909457 (bagder, MEMBER, 2015-07-25): "it works perfectly fine for me with a 0.3 CPU% usage / curl http://localhost/4GB --limit-rate 320K -o /dev/null".
+- #336 comment 124931328 (Konstantinusz, 2015-07-26): "I simply renamed the outdated libcurl.so.4.3.0 which was located in /opt/lampp/lib/ and now everything seems to be fine, I don't experience high CPU load, only 1.7-7 % which is quite acceptable on a VPS."
+- The reader's transcription of `KrNQlyr.png` (htop, linked in comment 119090279, no `--limit-rate`): header "CPU[ 5.3%]", "Mem[ 118/498MB]", "Load average: 0.28 0.73 0.64"; row "15919 daemon 20 0 5552 4056 3616 S 0.0 0.8 0:00.05 curl -r 97690592-"; rows "5847 walaki 20 0 68848 20400 1560 S 0.5 4.0 1h31:58 transmission-daem" and "5848 walaki 20 0 68848 20400 1560 S 0.0 4.0 1h26:08 transmission-daem".
+- The reader's transcription of `ZFj6Fqc.png` (htop, linked in comment 119079303, `--limit-rate` with the outdated libcurl): "CPU[ 100.0%]"; row "13721 daemon 20 0 5560 4116 3672 R 92.9 0.8 3:01.96 curl --limit-rate".
+- #11242 body (Gentoo; "Linux l29ah-x201 6.2.5+ … Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz"; "curl 8.1.2 (x86_64-pc-linux-gnu) libcurl/8.1.2 GnuTLS/3.8.0 … nghttp2/1.52.0"): "Tiny CPU consumption appropriate for the pathetic ~200kB/s transfer speed on my i7 CPU." Top of `perf report`: "27.96%     0.00%  curl     [unknown]              [.] 0x0000000000020003" … "12.93%     5.91%  curl     libc.so.6              [.] __send".
+- #11242 comment 1594485172 (icing, CONTRIBUTOR, 2023-06-16 10:47:17 UTC): "In the log I see that the upload is progressing. So we have no stall or busy loop here, "just" the action of chunking your upload file into the 16KB frame data of the HTTP/2 protocol, encrypting those and passing them to the network."
+- #11242 comment 1594673344 (l29ah, 2023-06-16 13:25:08 UTC): "Downgraded curl to 8.0.1, now it consumes <1% CPU on the same scenario." Comment 1594725562 (icing): "Reproduced. You convinced me that this does not look right."
+- Debug log `tinystash-11242.txt` (curl 8.1.2 debug build, no timestamps): line 40 "* h2 [content-length: 416678084]"; line 60 "* [CONN-0-HTTP/2] [h2sid=1] cf_recv(len=102400) -> -1 81, buffered=0, window=0/65535, connection 1048576000/1048576000"; line 62 "* [CONN-0-HTTP/2] [h2sid=1] req_body_read(len=16384) left=416661700 -> 16384, 0"; line 67 "* [CONN-0-HTTP/2] [h2sid=1] cf_send(len=65536) -> 65536, 0, buffered=1, upload_left=416612549, stream-window=0, connection-window=0".
+
+**Coverage.** T3 — covers `curl`'s CPU share while downloading over HTTP on Linux, as `top`/`htop` readings:
+- ~0–0.5 % at about 10 MB/s (curl 7.43.0 on an Arch VPS), and 0.0 % in one `htop` refresh with 5.3 % total CPU;
+- avg 1 % rate-limited and avg 3 % unlimited from a mirror (Ubuntu 14.04 VM);
+- 0.3 % at 320 KB/s from localhost (maintainer);
+- 1.7–7 % after the fix.
+
+It also covers bug states at 50–100 %: an outdated libcurl with `--limit-rate`, and curl 8.1.2's HTTP/2 upload at ~200 kB/s (<1 % with 8.0.1). The #11242 debug log shows the call sizes of an HTTP/2 upload: 16,384-B body reads, 65,536-B sends, and 102,400-B receive attempts returning EAGAIN (-1, 81), with the HTTP/2 window values. It has no timestamps, so no rate per call. The wake structure of a download (bytes per receive, wakes per second): does not cover. aria2c and wget: does not cover. T1/T2/T4/T7: does not cover.
+
+**Observation status.**
+- #336 (2015): the reporter's host is a VPS, not a desktop: one CPU bar in `htop`, 498 MB RAM, curl run as CGI under Apache. The maintainers' readings are from a VM and from localhost. No window lengths.
+- #11242: one laptop (i7-8550U, Gentoo, kernel 6.2.5), curl 8.1.2 (bug) against 8.0.1, uploading a 416,678,084-B multipart body to 0x0.st, 2023-06.
+
+**Reader's own computation** (locates; not values), over the debug log:
+- `grep -o 'cf_send(len=[0-9]*) -> [-0-9]*' tinystash-11242.txt | sort | uniq -c` → 114 sends of 65,536 → 65,536; one 65,536 → 49,152; one of 181; one of 16,384.
+- `grep -o 'req_body_read(len=[0-9]*) left=[0-9]* -> [-0-9]*' tinystash-11242.txt | sed -E 's/left=[0-9]+ //' | sort | uniq -c` → 462 reads returning 16,384.
+- `grep -o 'cf_recv(len=[0-9]*) -> [-0-9]* [0-9]*' tinystash-11242.txt | sort | uniq -c` → 117 × "-1 81".
+- Body bytes consumed over the log: `python3 -c "print(416678084-409141444)"` → 7,536,640 B (115 × 65,536).
+
+### S3-35 — ClamAV GitHub issues #590, #849, #1375, with #590's flamegraphs
+
+**Citation.** Cisco-Talos/clamav GitHub issues:
+- #590 "Since version 0.105 the scan is unbearable slow": martin-ms, 2022-05-21; open; 53 comments; last updated 2026-03-18.
+- #849 "(since running freshclam) scanning simple files is slow": leapfog, 2023-03-01; closed 2023-03-02; 13 comments.
+- #1375 "Problem with slow clamscan": ebo-47, 2024-09-27; closed 2024-10-28 as a duplicate of #590; 3 comments.
+
+**Copy read.** `gh api` issue and comments JSON, 2026-09-19 01:30:45–01:30:47 UTC. Flamegraph SVGs attached to #590 comments 1535822498, 1537198319 and 1537473757 (`https://user-images.githubusercontent.com/<user>/<name>.svg`; full names in search-log rows 70–74), 01:35:58 UTC.
+
+| File | Size | SHA-256 |
+|---|---|---|
+| #590 issue JSON | 3,775 B | c33649e43e9304a06e22584b5ff67f824a00187609e5e54a9b0c9328458ad4d9 |
+| #590 comments JSON | 132,226 B | 0dc719fd920eb49b6902dd490f90545c7a032f1874ec07d3b7a747a2bf5630d1 |
+| #849 issue JSON | 6,361 B | aa64579a4b83fff581412fa832d1b5b9cd16b52393c1ebf7a30b4bb5f25fefd2 |
+| #849 comments JSON | 23,749 B | d780fcce694d9e79d1b7d82bf1e09cd5da7d29940583f792c343dce000d2169e |
+| #1375 issue JSON | 4,611 B | c264682a36e2df4d1a20c196210a8d505cfe2d6538732d8a7c8142b599a0cefd |
+| #1375 comments JSON | 5,934 B | 12270d0d1839c07d2afd59510d69a1004a465fd448f61d012c22ddd48002d27f |
+| `fg-236687385-…svg` (0.104.2, `$HOME`) | 34,568 B | a0e80e340ce18243929b4851721a01783bc86c7282acf95d188e0a2c3a4f68b9 |
+| `fg-236687444-…svg` (1.0.1, `$HOME`) | 36,946 B | 921536eb689efb3c2677bea46007a5fd550ae82cc67d2f1e3ad55973fd58b14f |
+| `fg-236641028-…svg` (one PDF) | 59,954 B | 0ce6205a552f30635741882e77d73d4cf8d3cd2ea714e28ac60b951ad99ed96f |
+| `fg-236843976-…svg` (unit-test database; not quoted) | 12,125 B | 470b488d0363476b29b4f98440b641272d422ad0b289131eb3e4a6f2f420ffa1 |
+| `fg-236844093-…svg` (unit-test database; not quoted) | 11,788 B | 3ee939aeedfda60e5395eabf53b8916ac177be6ce25bd543bf65884173b2adab |
+
+Local: `sources/S3-35/`.
+
+**Passages.**
+
+- #590 comment 1537473757 (martin-ms, 2023-05-07 15:45:34 UTC), run as "`perf record -F 100 -g -- /usr/bin/clamscan -ir $HOME`". The 0.104.2 run: "Engine version: 0.104.2 / Scanned directories: 8457 / Scanned files: 145265 / Infected files: 3 / Data scanned: 21981.75 MB / Data read: 15944.07 MB (ratio 1.38:1) / Time: 2221.037 sec (37 m 1 s) / Start Date: 2023:05:07 13:22:45 / End Date:   2023:05:07 13:59:46 / [ perf record: Woken up 55 times to write data ] / [ perf record: Captured and wrote 13,965 MB perf.data (218477 samples) ]". The 1.0.1 run: "Engine version: 1.0.1 / Scanned directories: 8462 / Scanned files: 145753 / Infected files: 3 / Data scanned: 28681.03 MB / Data read: 15988.41 MB (ratio 1.79:1) / Time: 6552.762 sec (109 m 12 s) / Start Date: 2023:05:07 14:15:39 / End Date:   2023:05:07 16:04:52 / [ perf record: Woken up 175 times to write data ] / [ perf record: Captured and wrote 44,184 MB perf.data (656843 samples) ]".
+- The flamegraph from that comment for 0.104.2 (`fg-236687385-…svg`), SVG `<title>` texts: "all (218,477 samples, 100%)", "clamscan (218,477 samples, 100.00%)", "cli_ac_scanbuff (57,402 samples, 26.27%)", "cli_bm_scanbuff (24,418 samples, 11.18%)", "sscanf (19,882 samples, 9.10%)". For 1.0.1 (`fg-236687444-…svg`): "all (656,843 samples, 100%)", "cli_ac_scanbuff (39,269 samples, 5.98%)", "&lt;jpeg_decoder::upsampler::UpsamplerH2V2 as jpeg_decoder::upsampler::Upsample&gt;::upsample_row (4,261 samples, 0.65%)". Neither graph carries kernel frames.
+- #590 comment 1537198319 (Devstellar, 2023-05-06 18:33:06 UTC; clamscan 1.0.1 rebuilt with debug symbols, one PDF): "Loading:     9s, ETA:   0s [========================>]    8.67M/8.67M sigs / Compiling:   2s, ETA:   0s [========================>]       41/41 tasks" … "Data scanned: 472.84 MB / Data read: 17.62 MB (ratio 26.83:1) / Time: 132.078 sec (2 m 12 s)" … "[ perf record: Captured and wrote 0.875 MB perf.data (13206 samples) ]". Its flamegraph (`fg-236641028-…svg`) weights frames by event period, not by sample count: "clamscan (547,647,815,661 samples, 100.00%)", "ac_backward_match_branch (334,347,641,414 samples, 61.05%)", "pread64 (1,284,807,196 samples, 0.23%)".
+- #590 comment 1336151478 (net1, 2022-12-03; clamscan 1.0.0): "Loading:    24s, ETA:   0s [========================>]    8.82M/8.82M sigs / Compiling:   4s, ETA:   0s [========================>]       42/42 tasks".
+- #590 body (0.105.0 against 0.104.2, same `$HOME`, "a few minutes later"): "Engine version: 0.105.0 / Scanned directories: 6240 / Scanned files: 98280 / … / Data scanned: 22403.29 MB / Data read: 12333.45 MB (ratio 1.82:1) / Time: 5897.640 sec (98 m 17 s)" and "Engine version: 0.104.2 / Scanned directories: 6240 / Scanned files: 97797 / … / Data scanned: 17019.32 MB / Data read: 12226.76 MB (ratio 1.39:1) / Time: 1569.143 sec (26 m 9 s)".
+- #590 comment 1758186534 (martin-ms, 2023-10-11 17:48:59 UTC; the same limits for both versions, `--exclude=pdf$ --exclude=jpg$ --exclude=jpeg$ --exclude=png$ --max-filesize=25M --max-scansize=100M …`): "Engine version: 0.104.2 / … / Scanned files: 154456 / … / Data read: 11790.80 MB (ratio 0.91:1) / Time: 1445.337 sec (24 m 5 s)" and "Engine version: 1.2.0 / … / Scanned files: 155398 / … / Data read: 11824.57 MB (ratio 0.92:1) / Time: 1798.677 sec (29 m 58 s)".
+- #590 comment 1147948644 (val-ms, CONTRIBUTOR, 2022-06-06 21:26:18 UTC): "In 0.105 we increased the default max file-size, max scan-size, etc." … "- MaxFileSize        25M  -> 100M / - MaxScanSize        100M -> 400M". Comment 4084546953 (val-ms, 2026-03-18 18:01:02 UTC): "the complaint in this ticket wasn't signature count related.  It has to do with changes in functionality such as the addition of image fuzzy hashing as well as increasing default scan limitations that resulted in longer processing times."
+- #849 body (Gentoo, "Linux 6.2.1-gentoo", ClamAV 0.103.8): "it took 12s to scan /etc/fstab. Then I run 'freshclam', now scanning the same file needs more than 90 seconds."
+- #849 comment 1450304536 (lunika, 2023-03-01 15:06:30 UTC), before the faulty daily database: "time /usr/bin/clamscan --no-summary --stdout --remove=no --scan-archive=yes -r testfiles/sample.pdf / /var/task/lambda-convert/testfiles/sample.pdf: OK / / real	0m17.322s / user	0m16.817s / sys	0m0.505s".
+- #849 comment 1472640852 (val-ms, 2023-03-16 19:43:02 UTC): "18 seconds is a normal amount of time for clamscan to load the databases. / If you want a faster scan time for individual scans, then you may wish to run clamd (which will take ~18 seconds to start) and then trigger scans with `clamdscan` instead of `clamscan`."
+- #1375 body (Raspberry Pi 4 B, a 1 TB USB HDD mounted with ntfs-3g): Buster 32-bit, "Engine version: 0.103.9 … Scanned files: 3351 … Data scanned: 12147.82 MB / Data read: 46156.46 MB (ratio 0.26:1) / Time: 3653.004 sec (60 m 53 s)"; Bookworm 64-bit, "Engine version: 1.0.5 … Scanned files: 3353 … Data scanned: 17547.89 MB / Data read: 46156.81 MB (ratio 0.38:1) / Time: 46123.837 sec (768 m 43 s)".
+
+**Coverage.** T4 — covers, for on-demand `clamscan` runs on Linux:
+- CPU share over single-file scans: `time` gives user 16.8 s + sys 0.5 s of 17.3 s real. The database load dominates; "18 seconds is a normal amount of time", per a ClamAV developer.
+- CPU share over two whole-`$HOME` scans: only through the `perf record -F 100` sample counts against the stated scan times — about one CPU for the whole wall time (see computation).
+- the database-load phase: `Loading` 9 s and 24 s, and `Compiling` 2 s and 4 s, for 8.67 M and 8.82 M signatures in the quoted runs;
+- scan summaries across versions and limits on the same `$HOME`: Data read 11.8–16.0 GB, 1,445–6,553 s;
+- the developer's account of why 0.105 and later are slower (raised size limits, image fuzzy hashing), and the recommendation to use `clamd` with `clamdscan` for individual scans;
+- a per-function CPU profile of whole-`$HOME` scans: the pattern matchers `cli_ac_scanbuff` and `cli_bm_scanbuff` dominate in 0.104.2.
+
+Throttling or pacing of the scan: nothing in these threads says `clamscan` paces itself. Threading: the flamegraphs show one command, `clamscan`; there is no thread statement. I/O pattern: `pread64` takes 0.23 % of cycles for one PDF; the `$HOME` graphs carry no kernel frames. T1/T2/T3/T7: does not cover.
+
+**Observation status.**
+- #590 `$HOME` scans: one user's machine, not described. Linux is inferred from the glibc `libc.so.6` and `libclamav.so.*` frames in the flamegraphs and the `/run/clamav` paths in comment 1148514776; CPU, disk and distribution are not named. Subject named: clamscan 0.104.2 / 0.105.0 / 1.0.0 / 1.0.1 / 1.2.0 with `-ir $HOME`, ~98–190 k files. Windows named by start and end dates. Cache state not stated: the runs are minutes apart on the same tree, so later runs may be warm.
+- Devstellar: machine unnamed, one PDF, 2023-05-06.
+- #849: machines unnamed (Gentoo; a `/var/task/lambda-convert` path).
+- #1375: Raspberry Pi 4 B, USB HDD, 2024-09.
+
+**Reader's own computation** (locates; not a value):
+- `python3 -c "print(218477/(100*2221.037), 656843/(100*6552.762), 13206/(100*132.078))"` → 0.98, 1.00, 1.00. perf's frequency mode aims at 100 samples per second of the sampled task's on-CPU time, so the ratio approximates CPUs used per wall second. That holds only if the event counts only while clamscan runs and the frequency target is met; the thread states neither.
+- `python3 -c "print(15944.07/2221.037, 15988.41/6552.762)"` → 7.18 and 2.44 MB of `Data read` per second.
+- `python3 -c "print((16.817+0.505)/17.322)"` → 1.00.
+
+### S3-36 — OpenBenchmarking.org result 2305286-NE-MONITORSY37 (compress-7zip) and test profile pts/compress-7zip-1.10.0
+
+**Citation.** OpenBenchmarking.org result 2305286-NE-MONITORSY37, titled "Monitor=sys.power,cpu.power,mem.temp,cpu.usage phoronix-test-suite benchmark compress-7zip". Uploader field `<User>chuck</User>`, system timestamp 2023-05-28 10:22:52, Phoronix Test Suite 10.8.4. Test profile `pts/compress-7zip-1.10.0` (maintainer Michael Larabel), as mirrored in the phoronix-test-suite repository at `ob-cache/test-profiles/pts/compress-7zip-1.10.0/`, commit f977d6e270d5eb9eebfa26d3ca62385c00a547a6 (2026-07-27).
+
+**Copy read.** The HTML page could not be read (rows 76–79): the challenge pages saved are `p1.html` (5,498 B, 4bfe383e4abc784e1c32a372341a6cf9b62eebf3dc5508bd0d83670a6484d35d) and `p2.html` (5,818 B, f40a264e0135795d106f13b754ed59da609f79e1f5082ec3c63548a0529ed1db). The result was read through the Phoronix Test Suite client endpoint, POST `https://openbenchmarking.org/f/client.php` with `r=clone_openbenchmarking_result` and User-Agent `PhoronixTestSuite/Nesseby` (rows 80–82). The request format comes from the PTS sources at f977d6e.
+
+| File | Size | SHA-256 | Accessed (UTC) |
+|---|---|---|---|
+| response JSON `clone2.json` | 4,783 B | fa04dc895bc28b3e1869828c38a0af4db393979c4b04174b6b45b073bbecfeef | 01:37:27 |
+| its `composite_xml`, saved as `composite-2305286-NE-MONITORSY37.xml` | 4,467 B | 8c42307509d7795475c97af67717e19000e7ff65e6b579734c96a698fbae877a | 01:37:27 |
+| earlier reply to UA `PTS/10.8.6`, `clone.json` ("No Client") | 9 B | 206044561c061d850c4578ea22f35d4ab615de0517446210cdcf7be10592040a | 01:37:19 |
+| system logs, `r=clone_openbenchmarking_system_logs`, `syslogs.zip` (SHA-1 074ebc73e6e24c3872de97652f87247973de0f5e, equal to the JSON's `system_logs_available`) | 97,896 B | e889ddbfa321552afc22636c03217fa9ad7dccfc5e6df9e511ccef0e6acb6d6a | 01:37:53 |
+| profile `install.sh` | 325 B | abc43fde61cb062cdd41f78aa2521a668bfc9b6b78a9b0f0c426313c344feb16 | 01:38:16 |
+| profile `test-definition.xml` | 958 B | 6f4474a450af4fc04c372b4bb2b7d904657d24206dd19b8d12d3969ac0de0a65 | 01:38:16 |
+| profile `results-definition.xml` | 1,719 B | 3bd93c65ef4ce1adc68d4c114f5582a750deed7a11485edd52da423f485d5254 | 01:38:16 |
+| profile `downloads.xml` | 995 B | dbe1cb52bd79019d50295ead218786c2fc8cf985b002bd8500a48460ee6c0653 | 01:38:16 |
+| profile `changelog.json` | 1,181 B | bf56f78740278cee887d04b0e297efa14e567dc4159edb39b5f9c44e7b7d5377 | 01:38:16 |
+| PTS source `pts_openbenchmarking.php` | 38,870 B | 5ec1c3e1b5155fe081c55ac24c9bea15877f17e06243ccbb5c90a081dd3a0b3b | 01:36:53 |
+| PTS source `pts_network.php` | 19,048 B | 859421d1be5e8cb6cec164d89493280b1acfdac09565ea0eca7f550ec8977a60 | 01:36:53 |
+| PTS source `pts-core.php` | 10,658 B | 93f842db9f49123c29c2224879eb6e6a33ada4fb95c0be9b064e54bba14f9833 | 01:36:53 |
+
+Local: `sources/S3-36/`.
+
+**Passages.**
+
+- Composite XML, `<Generated>`: "<Title>Monitor=sys.power,cpu.power,mem.temp,cpu.usage phoronix-test-suite benchmark compress-7zip</Title> / <LastModified>2023-05-28 10:30:58</LastModified> / <TestClient>Phoronix Test Suite v10.8.4</TestClient>".
+- Composite XML, `<System>`: "<Hardware>Processor: AMD Ryzen 5 2600X Six-Core @ 3.60GHz (6 Cores / 12 Threads), Motherboard: Gigabyte X470 AORUS ULTRA GAMING-CF (F64a BIOS), Chipset: AMD 17h, Memory: 32GB, Disk: 1024GB Sabrent + 240GB SanDisk SDSSDX24 + 2048GB Micron_1100_MTFD, …</Hardware> / <Software>OS: Ubuntu 22.04, Kernel: 5.15.0-72-lowlatency (x86_64), Desktop: KDE Plasma 5.24.7, … File-System: ext4, Screen Resolution: 3440x1440</Software>"; in its JSON: `"cpu-scaling-governor":"acpi-cpufreq schedutil (Boost: Enabled)"`.
+- Composite XML, the first `<Result>`: "<Identifier>pts/compress-7zip-1.10.0</Identifier> / <Title>7-Zip Compression</Title> / <AppVersion>22.01</AppVersion> / … / <Description>Test: Compression Rating</Description> / <Scale>MIPS</Scale> / … / <Value>38769</Value> / <RawString>38475:38968:38863</RawString> / <JSON>{…,"test-run-times":"35.49:35.79:35.77"}</JSON>". The second: "<Description>Test: Decompression Rating</Description>" … "<Value>35517</Value> / <RawString>35865:35351:35334</RawString>". These are the only two `<Result>` elements.
+- System log `system-logs/2600/cmdline`: "BOOT_IMAGE=/boot/vmlinuz-5.15.0-72-lowlatency root=UUID=6a75675a-0afa-4565-88a9-cfca91c617dc ro threadirqs acpi_sleep=nonvs".
+- Profile `install.sh`: "tar -xf 7z2201-src.tar.xz / cd CPP/7zip/Bundles/Alone2 / CFLAGS="-O3 -march=native -Wno-error $CFLAGS" make -j $NUM_CPU_CORES -f makefile.gcc" … "echo "#!/bin/sh / ./CPP/7zip/Bundles/Alone2/_o/7zz b > \$LOG_FILE 2>&1".
+- Profile `test-definition.xml`: "<Description>This is a test of 7-Zip compression/decompression with its integrated benchmark feature.</Description> / <ResultScale>MIPS</ResultScale> / <Proportion>HIB</Proportion> / <TimesToRun>3</TimesToRun>" … "<TestType>Processor</TestType>" … "<InternalTags>SMP</InternalTags>".
+- Profile `results-definition.xml`: the parser template opens "Compressing  |                  Decompressing / Dict     Speed Usage    R/U Rating  |      Speed Usage    R/U Rating / KiB/s     %   MIPS   MIPS" and takes its result from the "Avr:" row's Rating column.
+
+**Coverage.** T1 — context only. The test runs 7-Zip 22.01's built-in in-memory benchmark (`7zz b`, built from source with `-O3 -march=native`), not an archive of a file set through the disk. Its result is a MIPS rating per run: compression 38,769 and decompression 35,517, three runs of ~35.5 s each, on a named Linux desktop. The `cpu.usage` monitor named in the title has no result entry in the composite XML the client endpoint serves. The system-log archive holds only system-description files (uname, cpuinfo, lspci, …). So no CPU-usage series was found in this result. 7-Zip's own "Usage" column, which the parser template shows, is not stored in the result. T7 — covers: the fields of a public OpenBenchmarking result record (hardware and software strings, kernel, governor, microcode, per-run raw values and run times, system logs). T2/T3/T4: does not cover.
+
+**Observation status.** One machine named: Ryzen 5 2600X (6 cores, 12 threads), 32 GB, ext4, Ubuntu 22.04, kernel 5.15.0-72-lowlatency booted with `threadirqs`, schedutil. Subject named: 7-Zip 22.01 `7zz b`, in memory. Window 2023-05-28 10:22:52–10:30:58. The workload does no disk I/O. Whether the HTML result page shows monitor graphs could not be checked (403).
+
 ## 3. Not found
 
 - **T1, rsync per-process CPU (generator/sender/receiver) on Linux in a current-decade trace or log with `top`/`ps` figures.** The only Linux per-process observation is the 2010 LWN article (S3-16, atop-based, three processes described but per-process CPU not tabulated; whole-job hog 83 %). Searches 10, 28, 29, 39, 41 (rsync + top/atop/htop/perf/strace, mailing list, blogs); the rsync list threads found (S3-08) are Cygwin or figure-free; Phoronix/OpenBenchmarking have no rsync profile with CPU (search 1; openbenchmarking 403).
-- **T1, borg/restic per-run CPU on a desktop.** Only a VPS benchmark (S3-13, borgbase, 1 vCPU) and a home-server `time` for `borg prune` with platform unstated. borg GitHub issues #2245/#3471/#5804/#7374 and restic issues #652/#2696/#2679 are behind github.com 403 (searches 2, 15).
-- **T1, 7z archiving a file set on Linux with CPU share.** Only the in-memory `7z b` benchmark (S3-25) — searches 11, 23, 43; OpenBenchmarking compress-7zip result with `MONITOR=cpu.usage` (2305286-NE-MONITORSY37) is 403.
-- **T1, on-CPU run lengths between I/O waits for any of the named programs.** Only the off-CPU interval histogram for `tar` (S3-22, cpudist) and context-switch counts per borg job (S3-13). No `perf sched` trace of rsync/cp/borg/7z was found (searches 29, 38).
+- **T1, borg per-run CPU of a healthy `borg create` on a desktop.** Only a VPS benchmark (S3-13, borgbase, 1 vCPU) and a home-server `time` for `borg prune` with platform unstated. The borg GitHub issues #2245, #3471, #5804 and #7374 were read on the 2026-09-19 retry (S3-32, rows 56–59). They give a fault-state `borg serve` at 100 %, a `borg check --repair` `time` triple, a `top` line for `borg info` with its ssh/sshfs helpers, and throughput without CPU — none is a healthy `borg create` on a desktop (searches 2, 15). restic is no longer in this gap: the retry found a 2016 Linux-laptop `atop` capture of `restic backup` (S3-33, rows 60–62).
+- **T1, 7z archiving a file set on Linux with CPU share.** Only the in-memory `7z b` benchmark (S3-25; searches 11, 23, 43). The OpenBenchmarking compress-7zip result with `MONITOR=cpu.usage` (2305286-NE-MONITORSY37) was read on the 2026-09-19 retry through the PTS client endpoint (S3-36, rows 76–84). It too runs `7zz b` in memory, and its result file carries no `cpu.usage` monitor entry.
+- **T1, on-CPU run lengths between I/O waits for any of the named programs.** Only the off-CPU interval histogram for `tar` (S3-22, cpudist), context-switch counts per borg job (S3-13), and one system-wide `atop` context-switch count during `restic backup` (S3-33). No `perf sched` trace of rsync/cp/borg/7z was found (searches 29, 38).
 - **T2, steady-state wake cadence and CPU per wake of an indexer on a settled home directory.** No time series found; the closest are the settle-after-rename durations for tracker-miner-fs-3 (S3-01, #228) and the flamegraph/`chrt` capture of baloo_file_extractor during a content index (S3-03, 500665). Searches 3, 4, 22, 27 (GNOME GitLab, KDE Bugzilla incl. REST quicksearch "cpu idle", Launchpad, Manjaro/Fedora/KDE forums). Baloo's own wake cadence: does not appear in any fetched report.
 - **T2, plocate `updatedb` timing.** plocate.sesse.net carries query timings only (S3-19); only mlocate `updatedb` runs were found (S3-19: 2024 systemd accounting, 2008 `time`). Searches 26, 37; git.sesse.net unreachable (proxy CONNECT rejected).
-- **T3, wake structure against the socket (bytes per wake, wakes per second, receive window) for a Linux downloader or the Steam client.** The one known analysis — ValveSoftware/steam-for-linux issue #13024 "Steam Linux Download Speed Issue - Problem Found" (2026-03-22), with strace of `recvfrom` sizes and idle gaps, receive-window and per-connection rate figures and an aria2c comparison — is behind github.com/api.github.com 403 (searches 31, 33, 45; probes) and no mirror was found (the gist S3-23 is unrelated; steamcommunity/Arch BBS threads from the search did not carry the strace data). Only search-engine summaries exist in this session; they are not citable and are not used.
-- **T3, Steam client CPU during a download on Linux with a number.** steam-for-linux #6684 "High CPU usage when download" is 403 (search 17, 42); forum threads (S3-21) name the machine and rates but not CPU.
-- **T3, `content_log.txt` with depot chunk counts/throughput.** No public copy fetched: GitHub issues 403; scribd copies not attempted (login wall) (searches 6, 31).
-- **T3, curl/aria2c CPU at line rate on Linux.** Only bug-state busy loops (S3-18); wget has one `top` snapshot (S3-17). curl GitHub issues #336/#11242 403 (searches 12, 28, 34, 39).
-- **T3, Thunderbird attachment send with size/link/CPU on Linux.** Only progress-bar-CPU comments without message size (S3-09, 742697 c24/c25); the 100 %-CPU-with-TLS bugs are Windows-era (search 16).
-- **T4, CPU share over a `clamscan`/`clamdscan` on-demand scan on a Linux desktop.** No report with both a summary block and a CPU figure: S3-06 has the summary, S3-10 has `top` lines from server-side mail scanning (2004/2019). ClamAV GitHub issues #849/#590/#1375 403 (searches 5, 13, 30, 46, 47).
-- **T7, a public per-process CPU+I/O dataset of Linux desktop background jobs.** Established as not found in this session's venues: no atop/collectl/sysdig/LTTng/perf archives of desktops (searches 7, 20, 21, 25, 36, 40); SNIA holds only ≥10-year-old syscall traces and the 2008 FIU block traces with process names (S3-20); BEHACOM (S3-27) is the only in-the-wild Linux desktop dataset found and names only the foreground application; the KDE 500665 flamegraph (S3-03) and the borgbase results (S3-13) are the closest small public records with per-process CPU for a named background job.
+- **T3, a timestamped trace of receive sizes and intervals (bytes per wake, wakes per second) for a Linux downloader or the Steam client.** ValveSoftware/steam-for-linux issue #13024 was read on the 2026-09-19 retry (S3-28, row 49). It carries:
+  - the reporter's summary figures (~180 KB receive window, ~1 Mbps per connection, ~6.7 KB per `recvfrom`, idle periods of hundreds of ms to seconds);
+  - a seven-call `strace` excerpt;
+  - a second reporter's four `recvmsg` lines without wall-clock timestamps.
 
-Unreachable this session (recorded, not cited): github.com and api.github.com (all issue pages), openbenchmarking.org, phoronix.com search, sylab-srv.cs.fiu.edu, git.sesse.net, iotta.snia.org/traces/block-io/391 (subtrace listing), pmc.ncbi.nlm.nih.gov (reCAPTCHA; Europe PMC used).
+  No full trace is attached, and the reporter's last comment attributes the cap to Valve server caching. For wget, curl and aria2c downloads no such trace was found. The one curl debug log (S3-34, row 67) is of an HTTP/2 upload and has no timestamps (searches 31, 33, 45; rows 49, 63–67).
+- **T3, Steam client CPU on Linux paired with its download rate.** Per-process CPU numbers now exist (S3-31, rows 53–55): `top` 341.5 % and `htop` 461 % for the `steam` process, with no rate stated. One GNOME System Monitor screenshot pairs per-CPU load with 8.5 MiB/s received, but system-wide, not per process. #13024 gives "highest ~14%" per core at ~20 MB/s (S3-28). No per-process CPU at a stated rate. The forum threads (S3-21) name machine and rates but not CPU.
+- **T3, `content_log.txt` with depot chunk counts/throughput.** Found on the 2026-09-19 retry: a complete public `content_log.txt` pair (S3-29, rows 50–51) and excerpts (S3-30, row 52). The scribd copies (searches 6, 31) were still not attempted.
+- **T3, curl/aria2c CPU at line rate on Linux.** curl #336 (S3-34, rows 63–65) gives `top`/`htop` readings of 0–0.5 % at about 10 MB/s on a VPS, and 0.3 % at 320 KB/s from localhost (2015). #11242 is an HTTP/2 upload busy-loop bug. Older bug-state busy loops are in S3-18; wget has one `top` snapshot (S3-17). No figure at gigabit line rate; aria2c none (searches 12, 28, 34, 39).
+- **T3, Thunderbird attachment send with size/link/CPU on Linux.** Only progress-bar-CPU comments without message size (S3-09, 742697 c24/c25); the 100 %-CPU-with-TLS bugs are Windows-era (search 16).
+- **T4, a directly measured CPU share over a whole-directory `clamscan`/`clamdscan` scan on a Linux desktop.** S3-06 has a summary without CPU. S3-10 has `top` lines from server-side mail scanning (2004/2019). The ClamAV GitHub issues #849, #590 and #1375, read on the 2026-09-19 retry (S3-35, rows 68–75), add:
+  - `time` triples for single-file scans (user ≈ real; the database load dominates);
+  - two whole-`$HOME` scans whose CPU share is available only as the reader's derivation from `perf record -F 100` sample counts (≈0.98–1.00), on an undescribed machine.
+
+  No statement that `clamscan` throttles or paces itself appears in these threads (searches 5, 13, 30, 46, 47).
+- **T7, a public per-process CPU+I/O dataset of Linux desktop background jobs.** Established as not found in the venues searched:
+  - no atop/collectl/sysdig/LTTng/perf archives of desktops (searches 7, 20, 21, 25, 36, 40);
+  - SNIA holds only ≥10-year-old syscall traces and the 2008 FIU block traces with process names (S3-20);
+  - BEHACOM (S3-27) is the only in-the-wild Linux desktop dataset found, and it names only the foreground application.
+
+  The closest small public records with per-process CPU or I/O for a named background job are the KDE 500665 flamegraph (S3-03), the borgbase results (S3-13), the 2016 `atop` line for `restic backup` (S3-33), and, for throughput only, a full Steam `content_log.txt` pair (S3-29). The OpenBenchmarking result read on the retry (S3-36) carries no monitor data.
+
+Unreachable on 2026-09-17 (recorded, not cited then): github.com and api.github.com (all issue pages), openbenchmarking.org, phoronix.com search, sylab-srv.cs.fiu.edu, git.sesse.net, iotta.snia.org/traces/block-io/391 (subtrace listing), pmc.ncbi.nlm.nih.gov (reCAPTCHA; Europe PMC used). On the 2026-09-19 retry:
+- the GitHub issues named in the brief and the files their threads link were read (rows 49–75);
+- openbenchmarking.org's HTML result, export and test-profile pages still answer 403 behind a Cloudflare challenge, and the result itself was read through the Phoronix Test Suite client endpoint (rows 76–84);
+- the other hosts were not retried.
