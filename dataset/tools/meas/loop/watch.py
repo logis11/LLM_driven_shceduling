@@ -57,6 +57,7 @@ def main():
         open(seen_path, "w").write("\n".join(sorted(seen)) + "\n")
     watched = lambda f, app: (f, None) in targets or (f, app) in targets
     first = lambda app: app_since.get(app, since)
+    latest, landed = {}, set()   # per (family, app, k), kept across passes: the newest run holding it, and landed ones
     while True:
         events, gated, busy = [], [], set()
         for fam in sorted({f for f, _ in targets}):
@@ -66,6 +67,10 @@ def main():
                 js = [j for j in common.jobs(fam, r["databaseId"]) if watched(fam, j["app"]) and r["number"] >= first(j["app"])]
                 for j in js:
                     key = f"{r['databaseId']}:{j['name']}"
+                    w = (fam, j["app"], j["k"])
+                    latest[w] = max(latest.get(w, 0), r["number"])
+                    if j["state"] == "landed":
+                        landed.add(w)
                     if j["state"] in ("queued", "measuring"):
                         if r["number"] != first(j["app"]):
                             busy.add((fam, j["app"]))
@@ -79,14 +84,19 @@ def main():
                     else:
                         gate, model = common.gate_of(fam, j)
                         if gate == "wrong-machine":   # handled once relaunched: one left for later is read again
-                            gated.append((fam, j["app"], j["k"], model, key))
+                            gated.append((fam, j["app"], j["k"], model, key, r["number"]))
                             continue
                         events.append(f"SHORT without the gate {fam} {j['name']} run {r['databaseId']}: gate {gate}")
                     seen.add(key); open(seen_path, "a").write(key + "\n")
                 if r["status"] == "completed" and all(f"{r['databaseId']}:{j['name']}" in seen for j in js):
                     closed.add(r["databaseId"])
         go = []
-        for fam, app, k, model, key in gated:
+        for fam, app, k, model, key, number in gated:
+            # superseded: its window landed, or a later run holds it (a relaunch in flight, landed or gated in turn) —
+            # 2026-09-19, a gate stop left for later relaunched a window that had landed in the meantime
+            if (fam, app, k) in landed or latest.get((fam, app, k), 0) > number:
+                seen.add(key); open(seen_path, "a").write(key + "\n")
+                continue
             if app in done:
                 seen.add(key); open(seen_path, "a").write(key + "\n")
                 print(f"{time.strftime('%H:%M')} {app} r{k} gated ({model}); not relaunched ({app} done)", flush=True)
