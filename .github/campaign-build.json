@@ -1,7 +1,7 @@
 {
   "note": "Trigger for meas-build.yml (9.6 campaign). Dispatch is unavailable off the default branch, so a push that changes this file starts the runs it names. Set repeats to [] to skip; phases is a comma-separated phase list or all.",
   "mode": "full",
-  "attempt": 36,
+  "attempt": 37,
   "phases": "all",
   "cpu_model": "EPYC 7763",
   "repeats": [
