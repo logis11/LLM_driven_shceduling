@@ -184,7 +184,11 @@ fi
 if want handbrake && command -v HandBrakeCLI > /dev/null 2>&1; then
   phase handbrake -- HandBrakeCLI -i "$WORK/clip.mp4" -o "$WORK/hb-out.mp4" --preset "Fast 720p30"
 fi
-if want train; then phase train -- python3 "$HERE/train.py" "$TRAIN_STEPS" --record "$OUT/train.json"; fi
+# an unmeasured start first, so the measured run starts with torch's files in the page cache (changelog D28)
+if want train; then
+  unmeasured python3 "$HERE/train.py" 1 --record "$OUT/train.warm.json" > "$OUT/train.warm.log" 2>&1; rec train.warm.rc "$?"
+  phase train -- python3 "$HERE/train.py" "$TRAIN_STEPS" --record "$OUT/train.json"
+fi
 
 # tracker full rescan: a fresh XDG data home over a corpus copy; the miner runs until tracker3 reports it idle or the cap
 # each XDG special directory gets its own path: a path in both the miner's recursive and single lists is dropped

@@ -178,3 +178,13 @@ def test_clamav_daily_reads_the_fixed_copy_or_the_version_line():
     assert pool.clamav_daily({"clamav.db": "ClamAV 1.5.3/28128/Sat Sep 19 06:24:24 2026", "clamav.db.daily": "28128"}) == "28128"
     assert pool.clamav_daily({"clamav.db": "none: MEAS_CLAMAV_DB unset, clamscan not run (D27)"}) is None
     assert pool.clamav_daily({}) is None
+
+
+def test_not_pooled_names_the_database_and_the_warm_start():
+    # D27: clamscan on another signature database; D28: python3 without its warm-up run, or after a failed one
+    assert pool.not_pooled("clamscan", "28127", None) == "signature database daily 28127"
+    assert pool.not_pooled("clamscan", pool.CLAMAV_DAILY, None) is None
+    assert pool.not_pooled("train", "28127", None) == "no warm-up run"
+    assert pool.not_pooled("train", "28127", "1") == "warm-up run rc 1"
+    assert pool.not_pooled("train", None, "0") is None
+    assert pool.not_pooled("ffmpeg", "28127", None) is None

@@ -44,8 +44,18 @@ def clamav_daily(report):
     return m.group(1) if m else None
 
 
-def other_database_row(b):
-    """A repeat whose clamscan read another signature database, reported beside the pool (D27)."""
+def not_pooled(ph, clamav_daily_read, train_warm_rc):
+    """Why a repeat's batch phase is not pooled, or None: clamscan on another signature database (D27), python3 started
+    without the warm-up run or after a failed one (D28)."""
+    if ph == "clamscan" and clamav_daily_read != CLAMAV_DAILY:
+        return f"signature database daily {clamav_daily_read}"
+    if ph == "train" and train_warm_rc != "0":
+        return "no warm-up run" if train_warm_rc is None else f"warm-up run rc {train_warm_rc}"
+    return None
+
+
+def not_pooled_row(b):
+    """A repeat's batch phase reported beside the pool (D27, D28)."""
     runs = b["_samples"]["runs_between_blocks_ms"]
     return {"lifetime_s": b["lifetime_s"], "saturation": b["saturation"],
             "run_between_blocks_mean_us": round(statistics.fmean(runs) * 1000.0, 4) if runs else None,
@@ -143,7 +153,7 @@ def main():
         edges = load_edges(d)
         spec = json.load(open(os.path.join(d, "spec.json"))) if os.path.exists(os.path.join(d, "spec.json")) else {}
         per[r] = {"mode": mode, "cpu_model": spec.get("cpu_model"), "run_id": (spec.get("github_run") or {}).get("GITHUB_RUN_ID"),  # D11; 9.5 D27
-                  "clamav_daily": clamav_daily(report),  # D27
+                  "clamav_daily": clamav_daily(report), "train_warm_rc": report.get("train.warm.rc"),  # D27, D28
                   "phases": {ph: analyze_phase(d, ph, meas_cpu, edges) for ph in BUILD_PHASES + BATCH_PHASES}}
     all_reps = reps
     other = [r for r in all_reps if args.cpu_model and args.cpu_model not in (per[r]["cpu_model"] or "")]
@@ -154,14 +164,14 @@ def main():
            "phases": {}}
     for ph in BUILD_PHASES + BATCH_PHASES:
         have = [r for r in reps if "missing" not in per[r]["phases"][ph]]
-        other_db = {}
-        if ph == "clamscan":   # D27: only the repeats that read the fixed signature database; the others reported
-            other_db = {r: {"daily": per[r]["clamav_daily"], **other_database_row(per[r]["phases"][ph]["batch"])}
-                        for r in have if per[r]["clamav_daily"] != CLAMAV_DAILY}
-            have = [r for r in have if r not in other_db]
+        aside = {}   # D27, D28: repeats of a batch phase reported beside the pool
+        if ph in BATCH_PHASES:
+            why = {r: not_pooled(ph, per[r]["clamav_daily"], per[r]["train_warm_rc"]) for r in have}
+            aside = {r: {"why": w, **not_pooled_row(per[r]["phases"][ph]["batch"])} for r, w in why.items() if w}
+            have = [r for r in have if r not in aside]
         if not have:
-            out["phases"][ph] = {"missing": True, **({"other_database": other_db} if other_db else {})}; continue
-        P = {"repeats": have, **({"other_database": other_db} if other_db else {}),
+            out["phases"][ph] = {"missing": True, **({"not_pooled": aside} if aside else {})}; continue
+        P = {"repeats": have, **({"not_pooled": aside} if aside else {}),
              "cmd_wall_s": {r: per[r]["phases"][ph]["cmd_wall_s"] for r in have},
              "tree_processes": {r: per[r]["phases"][ph]["tree_processes"] for r in have},
              "wakes_in_tree": {r: per[r]["phases"][ph]["wakes_in_tree"] for r in have},
@@ -252,11 +262,11 @@ def render(out, title=None):
          f"Repeats {reps}; mode {out['mode']}; CPU model per repeat {out['cpu_model']}; run per repeat {out['run_id']}. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9; "
          f"times in µs unless stated; the spread is the per-repeat mean, the stability rule's value (D26). Rules: method §5.", ""]
     for ph, P in out["phases"].items():
-        db = (f"Pooled repeats {P.get('repeats', [])}, those that read signature database daily {CLAMAV_DAILY}; not pooled, "
-              f"another database (D27): " + "; ".join(f"repeat {r} daily {x['daily']}: lifetime {x['lifetime_s']} s, saturation {x['saturation']}, "
-                                                      f"run between blocks mean {x['run_between_blocks_mean_us']} µs, block per run mean {x['mean_block_us']} µs, "
-                                                      f"share past the boot slice {x['share_past_boot_slice']}" for r, x in P["other_database"].items()) + "."
-              ) if P.get("other_database") else None
+        db = (f"Pooled repeats {P.get('repeats', [])}; reported beside the pool, not pooled (D27, D28): "
+              + "; ".join(f"repeat {r} ({x['why']}): lifetime {x['lifetime_s']} s, saturation {x['saturation']}, "
+                          f"run between blocks mean {x['run_between_blocks_mean_us']} µs, block per run mean {x['mean_block_us']} µs, "
+                          f"share past the boot slice {x['share_past_boot_slice']}" for r, x in P["not_pooled"].items()) + "."
+              ) if P.get("not_pooled") else None
         if P.get("missing"):
             L += [f"## {ph}", "", *([db, ""] if db else []), "missing", ""]; continue
         L += [f"## {ph}", "", *([db, ""] if db else []),

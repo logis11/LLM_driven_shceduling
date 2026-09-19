@@ -128,9 +128,9 @@ def main():
         print(f"build: repeats {pooled['repeats']}; stability rule {'holds' if st['passes'] else 'does not hold yet'}; "
               f"repeats needed at this spread {st.get('needed') or 'over 200'}"
               + (f"; not estimable yet: {', '.join(st['not_estimable'])}" if st.get("not_estimable") else ""))
-        if pooled["phases"].get("clamscan", {}).get("other_database"):
-            print(f"   clamscan pooled over {pooled['phases']['clamscan'].get('repeats', [])}; another signature database, not pooled: "
-                  f"{ {r: x['daily'] for r, x in pooled['phases']['clamscan']['other_database'].items()} } (9.6 D27)")
+        for ph, P in pooled["phases"].items():
+            if P.get("not_pooled"):
+                print(f"   {ph} pooled over {P.get('repeats', [])}; not pooled: {({r: x['why'] for r, x in P['not_pooled'].items()})} (9.6 D27, D28)")
         for q, c in crit.items():
             print(f"   {q}: k {c['k']}, mean {c['mean']}, half-width {c['half_width']} (abs {c['half_width_abs']}), "
                   f"needed {c.get('needed')}, {'passes' if c['passes'] else 'fails'}")
