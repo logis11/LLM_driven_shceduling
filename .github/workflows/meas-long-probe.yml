@@ -36,6 +36,8 @@ jobs:
           print("count=" + str(len(inc)))
           PY
   run:
+    # named as the loop tools parse a job, "run (<app>, <k>)": the matrix's phase_s stays out of the name
+    name: run (${{ matrix.app }}, ${{ matrix.repeat }})
     needs: plan
     if: needs.plan.outputs.count != '0'
     runs-on: ubuntu-24.04
