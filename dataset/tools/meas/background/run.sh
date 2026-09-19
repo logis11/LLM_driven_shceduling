@@ -278,27 +278,33 @@ z_phases() {
 INSTALL="$WORK/steam-install"; SHAPED=0
 BURST=$(( (121000000 / 8 + HZ - 1) / HZ ))   # bytes: the rate over HZ, the least tc-tbf(8) allows at this rate (§2 "The shaped link")
 rec shape.burst_bytes "$BURST"
-# the runner's interface already carries a clsact qdisc (dry run 35425404685: adding an ingress qdisc fails with
-# "Exclusivity flag on"); the redirect filter then goes on clsact's ingress hook, ahead of what is there, and is the one
-# thing shape_off removes. The interface's qdiscs and filters are recorded before and after.
-shape_on() {   # ingress on the runner's interface redirected to ifb0, a tbf root at the D11 rate
-  { echo "== before"; tc -s qdisc show dev "$IFACE"; tc filter show dev "$IFACE" ingress; } >> "$OUT/tc.iface.txt" 2>&1
+# where the shaper sits (dry runs 35425404685, 35426597604): the runner's eth0 carries a clsact qdisc whose ingress hook
+# holds the runner's own BPF program (`tc_ingress_traffic`, direct-action, pref 1) — an ingress qdisc is refused and a
+# filter beside it at pref 1 is refused. Traffic arrives on the accelerated-networking VF enslaved to eth0, so the
+# redirect goes on the VF's own ingress when there is one: packets pass the shaper, then reach eth0 and its program as
+# before. Without a VF, eth0's clsact hook after the runner's filter. The interfaces, qdiscs and filters are recorded,
+# and after every shaped phase the bytes that went through ifb0.
+SHAPE_DEV="$(ip -o link show 2>/dev/null | awk -F': ' -v m="$IFACE" 'index($0, " master " m " ") {print $2}' | head -1)"
+SHAPE_DEV="${SHAPE_DEV:-$IFACE}"; rec shape.dev "$SHAPE_DEV"
+ip -o link show > "$OUT/ip.link.oneline.txt" 2>&1
+shape_on() {   # ingress on the interface that carries the traffic redirected to ifb0, a tbf root at the D11 rate
+  { echo "== before"; tc -s qdisc show dev "$SHAPE_DEV"; tc filter show dev "$SHAPE_DEV" ingress; } >> "$OUT/tc.iface.txt" 2>&1
   sudo modprobe ifb numifbs=1 > /dev/null 2>&1; sudo ip link add ifb0 type ifb > /dev/null 2>&1; sudo ip link set ifb0 up
-  if tc qdisc show dev "$IFACE" | grep -q clsact; then HOOK="ingress"; SHAPE_OWN_QDISC=0
-  else sudo tc qdisc add dev "$IFACE" handle ffff: ingress 2>> "$OUT/tc.log"; HOOK="parent ffff:"; SHAPE_OWN_QDISC=1; fi
-  rec shape.hook "$HOOK"
+  if tc qdisc show dev "$SHAPE_DEV" | grep -q clsact; then HOOK="ingress"; PREF=49152; SHAPE_OWN_QDISC=0
+  else sudo tc qdisc add dev "$SHAPE_DEV" handle ffff: ingress 2>> "$OUT/tc.log"; HOOK="parent ffff:"; PREF=1; SHAPE_OWN_QDISC=1; fi
+  rec shape.hook "$HOOK pref $PREF"
   # shellcheck disable=SC2086
-  sudo tc filter add dev "$IFACE" $HOOK protocol all pref 1 handle 1 u32 match u32 0 0 action mirred egress redirect dev ifb0 2>> "$OUT/tc.log"
+  sudo tc filter add dev "$SHAPE_DEV" $HOOK protocol all pref "$PREF" u32 match u32 0 0 action mirred egress redirect dev ifb0 2>> "$OUT/tc.log"
   local frc=$?
   sudo tc qdisc add dev ifb0 root tbf rate "${RATE_MBIT}mbit" burst "$BURST" latency "$TBF_LATENCY" 2>> "$OUT/tc.log"
   local qrc=$?
   if [ "$frc" = 0 ] && [ "$qrc" = 0 ]; then SHAPED=1; else SHAPED=0; fi
-  { echo "== shaped ($SHAPED)"; tc filter show dev "$IFACE" ingress; tc qdisc show dev ifb0; } >> "$OUT/tc.iface.txt" 2>&1
+  { echo "== shaped ($SHAPED)"; tc filter show dev "$SHAPE_DEV" ingress; tc qdisc show dev ifb0; } >> "$OUT/tc.iface.txt" 2>&1
 }
 shape_off() {
   # shellcheck disable=SC2086
-  if [ "${SHAPE_OWN_QDISC:-1}" = 1 ]; then sudo tc qdisc del dev "$IFACE" ingress 2>/dev/null
-  else sudo tc filter del dev "$IFACE" ${HOOK:-ingress} pref 1 2>/dev/null; fi
+  if [ "${SHAPE_OWN_QDISC:-1}" = 1 ]; then sudo tc qdisc del dev "$SHAPE_DEV" ingress 2>/dev/null
+  else sudo tc filter del dev "$SHAPE_DEV" ${HOOK:-ingress} pref "${PREF:-49152}" 2>/dev/null; fi
   sudo tc qdisc del dev ifb0 root 2>/dev/null; SHAPED=0
 }
 steam_logs_dir() {
@@ -334,6 +340,7 @@ steam_phase() {   # steam_phase <name> <trace 0|1> <fresh|staged> <app> [app_upd
   if [ "$SHAPED" = 1 ]; then
     tc -s qdisc show dev ifb0 > "$OUT/tc.$name.txt" 2>&1
     rec "tc.$name.stats" "$(grep -m1 -oE 'Sent [0-9]+ bytes [0-9]+ pkt \(dropped [0-9]+, overlimits [0-9]+' "$OUT/tc.$name.txt")"
+    rec "shape.$name.through_ifb_bytes" "$(grep -m1 -oE 'Sent [0-9]+ bytes' "$OUT/tc.$name.txt" | grep -oE '[0-9]+')"
   fi
   logs_take "$name"
   rec "steam.$name.success" "$(grep -c "Success! App '$app' fully installed" "$OUT/cmd.$name.log")"
