@@ -212,7 +212,7 @@ def render(out, title=None):
             for shape, n in list(P["job_shapes"][reps[0]].items())[:8]:
                 L.append(f"- {n} × `{shape}`")
             L.append("")
-        if "object_members" in P:
+        if P.get("object_members", {}).get("step_cpu_us"):
             om = P["object_members"]
             L += [f"object jobs with D19's six members {om['jobs']}; child order per repeat {om['child_order']}", "",
                   "| member step (D20) | n | CPU (µs) | spread (per-repeat p50) |", "|---|---|---|---|"]
