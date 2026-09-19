@@ -98,3 +98,20 @@ def test_member_steps_split_each_member_at_its_childrens_exits():
     assert got["steps"]["gcc 1/3"] == pytest.approx([1.7]) and got["steps"]["gcc 2/3"] == pytest.approx([0.15])
     assert got["steps"]["gcc 3/3"] == pytest.approx([0.34]) and got["steps"]["cc1 1/1"] == pytest.approx([300.0])
     assert got["child_order"] == {"sh: gcc fixdep rm": 1, "gcc: cc1 as": 1}
+
+
+def test_batch_reads_the_job_window_and_shape():
+    tree = {7, 8}
+    tid2pid = {7: 7, 8: 7}
+    role = {7: "clamscan"}
+    segs = [build.Seg(1.000, 1.000, 1.012, 12.0, "clamscan", 7, 7, "D", 3),
+            build.Seg(1.0122, 1.0122, 1.0202, 8.0, "clamscan", 7, 7, "D", 3),
+            build.Seg(1.0205, 1.0205, 1.0215, 1.0, "clamscan", 7, 7, "Z", 3)]
+    recs = {7: {"cpu_ns": 21_000_000, "etime_us": 21500, "blkio_ns": 0, "blkio_invalid_threads": 0}}
+    b = build.batch("clamscan", tree, tid2pid, role, segs, {7: [1.0, 1.0122, 1.0205]}, 3, recs, 0.03)
+    assert b["share_past_boot_slice"] == pytest.approx(2.0 / 21.0, abs=1e-4)
+    assert b["_samples"]["runs_between_blocks_ms"] == pytest.approx([12.0, 8.0, 1.0])
+    assert b["_samples"]["gaps_ms"] == pytest.approx([0.2, 0.3])
+    assert b["job_s"] == pytest.approx(0.0215, abs=1e-6)
+    cut = build.batch("clamscan", tree, tid2pid, role, segs, {}, 3, recs, 0.03, job_end=1.0203)
+    assert cut["job_s"] == pytest.approx(0.0203, abs=1e-6) and cut["_samples"]["runs_between_blocks_ms"] == pytest.approx([12.0, 8.0])

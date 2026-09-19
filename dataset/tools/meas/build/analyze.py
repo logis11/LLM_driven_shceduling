@@ -34,6 +34,10 @@ import importlib.util as _ilu
 _spec = _ilu.spec_from_file_location("campaign_analyze", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "campaign", "analyze.py"))
 _campaign_analyze = _ilu.module_from_spec(_spec); _spec.loader.exec_module(_campaign_analyze)
 pct, TASK = _campaign_analyze.pct, _campaign_analyze.TASK   # the 9.5 analyzer's percentile and `comm[tid/pid]` parser
+try:
+    from . import shapes          # imported as meas.build.analyze
+except ImportError:
+    import shapes                 # run as a script, or imported by pool.py with this directory on sys.path
 
 Seg = namedtuple("Seg", "t_in t_wake t_end run comm tid pid state cpu")
 
@@ -58,7 +62,7 @@ PHASE_ROOT = {"build-j8-warm": "make", "build-j8-cold": "make", "build-j1-warm":
 # the batch program inside each batch phase's tree (D7): its processes carry the saturation and wait figures; the
 # rest of the tree (a session bus, the poll loop) is reported beside them
 BATCH_PROGRAM = {"clamscan": ("clamscan",), "ffmpeg": ("ffmpeg",), "handbrake": ("HandBrakeCLI",), "train": ("python3",),
-                 "tracker": ("tracker-miner-f", "tracker-extract")}   # the miner and the extractor it activates are one indexing job
+                 "tracker": ("tracker-miner-f", "tracker-extract", "gst-plugin-scan")}   # the miner, the extractor and the miner's gst-plugin-scan child are one indexing job (method §8, 2026-09-19 first entry)
 QUANTILE_PROBS = (0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999)
 EPS = 1e-6
 
@@ -424,9 +428,11 @@ def dispatch(tree, tid2pid, role, segs, forks, meas_cpu, recs):
             "cpu_per_fork_ms_by_make": dist(cross), "_samples": {"per_dispatch_ms": per_dispatch, "cpu_per_fork_ms_by_make": cross}}
 
 
-def batch(phase, tree, tid2pid, role, segs, wakeups, meas_cpu, recs, cmd_wall_s):
+def batch(phase, tree, tid2pid, role, segs, wakeups, meas_cpu, recs, cmd_wall_s, job_end=None):
     """The batch program's processes (BATCH_PROGRAM): saturation = CPU over the program's own lifetime, the dominant
-    thread's share, disk and sleep shares; the rest of the tree is reported beside it."""
+    thread's share, disk and sleep shares; the rest of the tree is reported beside it. job_end (s): the end of the
+    program's job when it outlives it (D16; tracker); runs, gaps and the saturation over the job are read from the
+    job's segments (D21, D22)."""
     prog = BATCH_PROGRAM.get(phase)
     pids = set(tid2pid.get(x, x) for x in tree)
     prog_pids = {p for p in pids if role.get(p) in prog} if prog else pids
@@ -450,6 +456,13 @@ def batch(phase, tree, tid2pid, role, segs, wakeups, meas_cpu, recs, cmd_wall_s)
         for a, b in zip(ws, ws[1:]):
             kind = "D" if a.state.startswith("D") else "S" if a.state.startswith("S") else "R"
             off[kind] += max((b.t_wake - a.t_end) * 1000.0, 0.0)
+    start = min((s.t_in for s in rows), default=None)
+    end = job_end if job_end is not None else max((s.t_end for s in rows), default=None)
+    job_rows = [s for s in rows if s.t_in < end] if end is not None else []
+    runs = shapes.runs_between_blocks(job_rows)
+    gaps = shapes.program_gaps(job_rows, start, end) if job_rows else []
+    job_s = (end - start) if job_rows else None
+    share = shapes.share_past_slice(runs)
     other = sorted({role.get(p, "?") for p in pids - prog_pids})
     return {"program": " + ".join(prog) if prog else None, "processes": len(prog_pids), "threads_with_runs": len(run_by_tid),
             "lifetime_s": round(life_s, 3), "cmd_wall_s": round(cmd_wall_s, 2) if cmd_wall_s else None,
@@ -461,7 +474,12 @@ def batch(phase, tree, tid2pid, role, segs, wakeups, meas_cpu, recs, cmd_wall_s)
             "blkio_delay_s": round(blkio / 1e9, 4), "blkio_share_of_lifetime": round(blkio / 1e9 / life_s, 4) if life_s else None,
             "off_cpu_after_D_s": round(off["D"] / 1000.0, 3), "off_cpu_after_S_s": round(off["S"] / 1000.0, 3), "off_cpu_after_R_s": round(off["R"] / 1000.0, 3),
             "blkio_invalid_threads": sum(r["blkio_invalid_threads"] for r in prog_recs),
-            "other_roles_in_tree": other}
+            "other_roles_in_tree": other,
+            "job_s": round(job_s, 6) if job_s else None,
+            "saturation_job": round(sum(s.run for s in job_rows) / 1000.0 / job_s, 4) if job_s else None,
+            "share_past_boot_slice": round(share, 4) if share is not None else None,
+            "runs_between_blocks_n": len(runs), "gaps_n": len(gaps),
+            "_samples": {"runs_between_blocks_ms": runs, "gaps_ms": gaps}}
 
 
 # ---- driver ----------------------------------------------------------------
@@ -499,10 +517,10 @@ def analyze_phase(D, phase, meas_cpu, edges):
         role_counts[role_key.get(pid, "?")] += 1
     res["processes_by_role"] = dict(sorted(role_counts.items(), key=lambda kv: -kv[1]))
     if PHASE_ROOT.get(phase) in ("make", "dkms"):
-        shapes = defaultdict(int)
+        job_shapes = defaultdict(int)
         kinds = defaultdict(int)
         for j in jobs:
-            shapes[j["kind"] + ": " + " ".join(j["roles"])] += 1; kinds[j["kind"]] += 1
+            job_shapes[j["kind"] + ": " + " ".join(j["roles"])] += 1; kinds[j["kind"]] += 1
         compile_jobs = [j for j in jobs if j["kind"] == "object" and any(r in ("cc1", "cc1plus") for r in j["roles"])]
         fork_t = {c: t for t, _p, _pc, c, _cc in forks}
         cc1_live = [{"start": fork_t.get(pid), "end": recs[pid]["t_exit"]} for pid in recs
@@ -513,10 +531,26 @@ def analyze_phase(D, phase, meas_cpu, edges):
                        "compile_job_lifetime_ms": dist([(j["end"] - j["start"]) * 1000.0 for j in compile_jobs if j["start"] is not None and j["end"] is not None]),
                        "members_per_job": dist([len(j["members"]) for j in jobs]),
                        "job_lifetime_ms": dist([(j["end"] - j["start"]) * 1000.0 for j in jobs if j["start"] is not None and j["end"] is not None]),
-                       "shapes": dict(sorted(shapes.items(), key=lambda kv: -kv[1])[:20])}
+                       "shapes": dict(sorted(job_shapes.items(), key=lambda kv: -kv[1])[:20])}
         res["dispatch"] = dispatch(tree, tid2pid, role, segs, forks, meas_cpu, recs)
+        exit_t = {pid: t for pid, (t, _c) in exits.items()}
+        for pid, rec in recs.items():
+            exit_t.setdefault(pid, rec["t_exit"])
+        segs_by_pid = defaultdict(list)
+        for s in segs:
+            if s.cpu == meas_cpu and s.tid in tree:
+                segs_by_pid[tid2pid.get(s.tid, s.tid)].append(s)
+        om = shapes.member_steps(jobs, role, parent_pid, segs_by_pid, fork_t, exit_t)
+        res["object_members"] = {"jobs": om["jobs"], "child_order": om["child_order"],
+                                 "step_cpu_ms": {k: dist(v) for k, v in sorted(om["steps"].items())},
+                                 "_samples": {"steps": om["steps"]}}
     else:
-        res["batch"] = batch(phase, tree, tid2pid, role, segs, wakeups, meas_cpu, recs, cmd_wall_s)
+        job_end = None
+        log = os.path.join(D, "tracker.miner.log")
+        if phase == "tracker" and os.path.exists(log) and e.get("start") and e.get("start_real"):
+            with open(log, errors="replace") as handle:
+                job_end = shapes.tracker_job_end(handle, e["start"], e["start_real"])
+        res["batch"] = batch(phase, tree, tid2pid, role, segs, wakeups, meas_cpu, recs, cmd_wall_s, job_end)
     return res
 
 
@@ -531,6 +565,7 @@ def load_edges(D):
             except ValueError:
                 continue
             edges[e["phase"]][e["edge"]] = e["mono_ns"]
+            edges[e["phase"]][e["edge"] + "_real"] = e.get("real_ns")
     p = os.path.join(D, "phases.jsonl")
     if os.path.exists(p):
         for line in open(p):
@@ -566,8 +601,9 @@ def main():
         if not args.samples:
             for r in out["phases"].values():
                 r.pop("_samples", None)
-                if "dispatch" in r:
-                    r["dispatch"].pop("_samples", None)
+                for k in ("dispatch", "batch", "object_members"):
+                    if k in r:
+                        r[k].pop("_samples", None)
         json.dump(out, open(args.json, "w"), indent=1)
     for ph, r in out["phases"].items():
         if "missing" in r:
@@ -585,8 +621,13 @@ def main():
                   f"members/job p50 {j['members_per_job'].get('p50')}; dispatch p50 {r['dispatch']['per_dispatch_ms'].get('p50')} ms over {r['dispatch']['forks']} forks")
             for shape, n in list(j["shapes"].items())[:6]:
                 print(f"    {n:6d} × {shape}")
+        if "object_members" in r:
+            om = r["object_members"]
+            print(f"  object jobs with the six members {om['jobs']}; step CPU p50 ms "
+                  + ", ".join(f"{k} {v.get('p50')}" for k, v in om["step_cpu_ms"].items()))
+            print(f"  child orders {om['child_order']}")
         if "batch" in r:
-            print(f"  batch {r['batch']}")
+            print(f"  batch {({k: v for k, v in r['batch'].items() if k != '_samples'})}")
         top = list(r["outside_on_measured_cpu"].items())[:5]
         print(f"  outside the tree on the measured CPU: {top}")
     return 0
