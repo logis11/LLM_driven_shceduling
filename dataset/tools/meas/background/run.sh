@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# run.sh <app> <repeat> <dry|probe|full> — one job of the 9.7 background campaign
+# run.sh <app> <repeat> <dry|probe|full|diag> — one job of the 9.7 background campaign
 # (research-slice changelog D2–D15; method
 # _dev/research/jioh/task-9.7-background-io/campaign/method.md §1–§4).
 #
@@ -18,15 +18,22 @@
 # verified, warmed, changed and restored, the older build staged — runs on the
 # harness CPUs. Dry mode: the 100 MB subset for borg and 7z plus one timed pass
 # of the archetype's phase on the full set; for SteamCMD the smallest candidate
-# app and the staging probe on the campaign's app (D12). Nothing here fails the
-# job: every step records its rc and the next phase runs.
+# app and the staging probe on the campaign's app (D12). Diag mode, SteamCMD
+# only, not a repeat: the shaped traced download three times on one runner —
+# as the campaign runs it, with @cMaxContentServersToRequest at
+# MEAS_STEAM_DIAG_SERVERS (on the command line and in steam_dev.cfg), and as the
+# campaign runs it again — to test whether the number of content servers, one
+# connection each, sets the shaper's drops (probe repeats 1–3: 10, 8 and 4
+# servers). Nothing here fails the job: every step records its rc and the next
+# phase runs.
 #
 # Settings (the trigger file, through the workflow): MEAS_CPU_MODEL (the machine
 # gate), MEAS_WORK_ROOT (auto | / | /mnt), MEAS_STEAM_APP, MEAS_STEAM_UPDATE_FROM
 # (the branch staged before the update phase; empty: no update phase),
 # MEAS_STEAM_UPDATE_TO (app_update's -beta argument back to the public build),
 # MEAS_STEAM_DRY_APP (smallest | an app id), MEAS_ARCHIVER_SET (10gb | 1gb: the
-# 7-Zip phases' input, method §3 "Dry mode").
+# 7-Zip phases' input, method §3 "Dry mode"), MEAS_STEAM_DIAG_SERVERS (diag
+# mode's content-server count, default 2).
 set -u
 export PROBE_OUT="${MEAS_OUT:-/tmp/meas}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -340,7 +347,8 @@ steam_phase() {   # steam_phase <name> <trace 0|1> <fresh|staged> <app> [app_upd
   find "$HOME/.steam" "$HOME/Steam" -maxdepth 5 -type d -name depotcache -prune -exec rm -rf {} + 2>/dev/null   # every phase fetches its manifests
   local rx0 tx0; rx0="$(netc rx_bytes)"; tx0="$(netc tx_bytes)"
   logs_mark
-  TRACE="$tr" phase "$name" -- "$STEAMCMD" +force_install_dir "$INSTALL" +login anonymous +app_update "$app" "$@" +quit
+  # shellcheck disable=SC2086   # STEAM_PRE, STEAM_POST: diag mode's settings before login and commands after the update
+  TRACE="$tr" phase "$name" -- "$STEAMCMD" ${STEAM_PRE:-} +force_install_dir "$INSTALL" +login anonymous +app_update "$app" "$@" ${STEAM_POST:-} +quit
   rec "net.$name.rx_bytes" "$(( $(netc rx_bytes) - rx0 ))"; rec "net.$name.tx_bytes" "$(( $(netc tx_bytes) - tx0 ))"
   rec "shape.$name" "$SHAPED"
   if [ "$SHAPED" = 1 ]; then
@@ -367,6 +375,28 @@ steam_phases() {   # steam_phases <app> <branch to stage or empty> <-beta argume
   else
     rec steam.update_phase none
   fi
+}
+DEV_CFG_DIRS="$HOME/.local/share/Steam $HOME/.local/share/Steam/steamcmd $HOME/.steam/steam $HOME/.steam/steamcmd $HOME/Steam"
+steam_find() {   # steam_find <label>: what SteamCMD's own console reports for the download settings
+  # shellcheck disable=SC2086
+  unmeasured "$STEAMCMD" ${STEAM_PRE:-} +find ContentServer +find DownloadSource +find Connection +find CellID +quit > "$OUT/steamcmd.find.$1.log" 2>&1
+  rec "steamcmd.find.$1.rc" "$?"
+  rec "steamcmd.find.$1.cMaxContentServersToRequest" "$(grep -m1 -oE '@cMaxContentServersToRequest[^:]*' "$OUT/steamcmd.find.$1.log" | tr -s ' ')"
+}
+steam_diag() {   # steam_diag <app>: diag mode — default, fewer content servers, default again, each shaped and traced
+  local app="$1" n="${MEAS_STEAM_DIAG_SERVERS:-2}" d
+  rec steam.diag.servers "$n"
+  steam_find default
+  shape_on; STEAM_POST=+download_sources steam_phase steam-diag-default 1 fresh "$app"; shape_off
+  local written=""
+  for d in $DEV_CFG_DIRS; do [ -d "$d" ] && echo "@cMaxContentServersToRequest $n" > "$d/steam_dev.cfg" && written="$written $d"; done
+  rec steam.diag.dev_cfg_written "${written# }"
+  steam_find devcfg
+  STEAM_PRE="+@cMaxContentServersToRequest $n" steam_find cmdline
+  shape_on; STEAM_PRE="+@cMaxContentServersToRequest $n" STEAM_POST=+download_sources steam_phase "steam-diag-servers$n" 1 fresh "$app"; shape_off
+  for d in $DEV_CFG_DIRS; do rm -f "$d/steam_dev.cfg"; done
+  steam_find after
+  shape_on; STEAM_POST=+download_sources steam_phase steam-diag-default2 1 fresh "$app"; shape_off
 }
 stage_probe() {   # stage_probe <app>: D12 — does the nearest older public build install anonymously, and then update?
   local app="$1" dir="$WORK/steam-probe" from want pub got to
@@ -420,6 +450,9 @@ case "$APP" in
       FROM="$(python3 "$HERE/appinfo.py" older "$RUN_APP" "$OUT/appinfo.$RUN_APP.txt")"
       rec steam.app "$RUN_APP"; steam_phases "$RUN_APP" "$FROM" public
       stage_probe "$STEAM_APP"
+    elif [ "$MODE" = diag ]; then
+      appinfo "$STEAM_APP"; RUN_APP="$STEAM_APP"; rec steam.app "$RUN_APP"
+      steam_diag "$RUN_APP"
     else
       appinfo "$STEAM_APP"; RUN_APP="$STEAM_APP"; rec steam.app "$RUN_APP"
       steam_phases "$RUN_APP" "$UPDATE_FROM" "$UPDATE_TO"
