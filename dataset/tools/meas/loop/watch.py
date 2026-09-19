@@ -47,7 +47,7 @@ def main():
     os.makedirs(common.WORK, exist_ok=True)
     seen_path = os.path.join(common.WORK, "watch-seen.txt")
     seen = set(open(seen_path).read().split("\n")) if os.path.exists(seen_path) else set()
-    closed = set()
+    closed, deferred = set(), set()
     if from_now:
         for fam in sorted({f for f, _ in targets}):
             for r in common.runs(fam, since):
@@ -72,28 +72,36 @@ def main():
                         continue
                     if key in seen:
                         continue
-                    seen.add(key); open(seen_path, "a").write(key + "\n")
                     if j["state"] == "landed":
                         events.append(f"LANDED {fam} {j['name']} run {r['databaseId']} ({j['seconds']:.0f} s)")
                     elif j["state"] == "failed":
                         events.append(f"FAILED {fam} {j['name']} run {r['databaseId']}")
                     else:
                         gate, model = common.gate_of(fam, j)
-                        if gate == "wrong-machine":
-                            gated.append((fam, j["app"], j["k"], model))
-                        else:
-                            events.append(f"SHORT without the gate {fam} {j['name']} run {r['databaseId']}: gate {gate}")
+                        if gate == "wrong-machine":   # handled once relaunched: one left for later is read again
+                            gated.append((fam, j["app"], j["k"], model, key))
+                            continue
+                        events.append(f"SHORT without the gate {fam} {j['name']} run {r['databaseId']}: gate {gate}")
+                    seen.add(key); open(seen_path, "a").write(key + "\n")
                 if r["status"] == "completed" and all(f"{r['databaseId']}:{j['name']}" in seen for j in js):
                     closed.add(r["databaseId"])
         go = []
-        for fam, app, k, model in gated:
-            if app in done or (fam, app) in busy or any(x[:2] == (fam, app) for x in go):
-                print(f"{time.strftime('%H:%M')} {app or 'build'} r{k} gated ({model}); left for the next check", flush=True)
+        for fam, app, k, model, key in gated:
+            if app in done:
+                seen.add(key); open(seen_path, "a").write(key + "\n")
+                print(f"{time.strftime('%H:%M')} {app} r{k} gated ({model}); not relaunched ({app} done)", flush=True)
                 continue
-            go.append((fam, app, k))
+            if (fam, app) in busy or any(x[:2] == (fam, app) for x in go):
+                if key not in deferred:
+                    deferred.add(key)
+                    print(f"{time.strftime('%H:%M')} {app or 'build'} r{k} gated ({model}); left for the next check", flush=True)
+                continue
+            go.append((fam, app, k, key))
             print(f"{time.strftime('%H:%M')} {app or 'build'} r{k} gated ({model}); relaunched", flush=True)
         if go:
-            print("   " + common.push_trigger(go, "retried"), flush=True)
+            print("   " + common.push_trigger([x[:3] for x in go], "retried"), flush=True)
+            for x in go:   # handled only once the relaunch is pushed
+                seen.add(x[3]); open(seen_path, "a").write(x[3] + "\n")
         if events:
             print("\n".join(events)); return
         time.sleep(poll)
