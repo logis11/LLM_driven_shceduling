@@ -1,20 +1,12 @@
 {
   "note": "Trigger for meas-background.yml (9.7 campaign). Dispatch is unavailable off the default branch, so a push that changes this file starts the runs it names. Set apps to [] to skip; repeats is one list for every program or a map program -> list. mode: dry | probe | full. work_root: auto | / | /mnt. steam_update_from: the branch staged before steam-update-shaped (empty: no update phase); steam_update_to: app_update's -beta argument back to the public build. steam_dry_app: smallest | an app id. archiver_set: 10gb | 1gb.",
   "mode": "probe",
-  "attempt": 11,
+  "attempt": 12,
   "cpu_model": "EPYC 7763",
   "apps": [
-    "7z",
-    "borg",
     "steamcmd"
   ],
   "repeats": {
-    "7z": [
-      2
-    ],
-    "borg": [
-      3
-    ],
     "steamcmd": [
       3
     ]
