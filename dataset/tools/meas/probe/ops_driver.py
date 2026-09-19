@@ -26,6 +26,15 @@ Operations (the trigger is design; the cost and duration are the observation):
   chrome    load the scripted feed page from the local server (a fresh query
             string per load); done when the page sets its title to
             "loaded …" after building the feed.
+  thunderbird-send
+            send a reply with the Writer document attached (9.5 changelog
+            D31): before the trigger, the running Thunderbird opens a compose
+            window pre-filled through -compose; the trigger is Ctrl+Enter (Send
+            Now); done when the copy into Local Folders/Sent has landed — the
+            first poll at which the Sent mailbox reached the size it then keeps
+            for SENT_SETTLE_S (Thunderbird copies to Sent after the server
+            accepts the message, MessageSend.sys.mjs). The peer's arrival stamp
+            (smtp_peer.py) is recorded beside it.
 """
 
 import argparse
@@ -175,7 +184,75 @@ def op_chrome(i, wid, args):
     return t0, now_us(), 4, f"timeout; title {window_title(wid)[:60]!r}"
 
 
-OPS = {"gimp": ("unsharp-mask", op_gimp), "kdenlive": ("preview-render", op_kdenlive), "chrome": ("page-load", op_chrome)}
+# ---- Thunderbird: send (9.5 changelog D31)
+TB_PROFILE = os.path.expanduser("~/tbprofile")
+TB_SENT = os.path.join(TB_PROFILE, "Mail", "Local Folders", "Sent")
+TB_DOC = os.path.expanduser("~/tbdoc/large.docx")
+TB_BODY = "Thanks for the draft. The revised document is attached, with my comments inline."   # design
+SENT_SETTLE_S = 1.0   # design: the Sent mailbox unchanged this long after it grew ends the wait
+POLL_S = 0.02
+
+
+def file_size(path):
+    try:
+        return os.path.getsize(path)
+    except OSError:
+        return 0
+
+
+def wait_settled(size_fn, timeout_s, settle_s=SENT_SETTLE_S, poll_s=POLL_S, clock=now_us, sleep=time.sleep):
+    """Poll size_fn until it has grown and then held one value for settle_s. Returns (the time of the first poll that
+    saw the final size, or None if it never grew; the growth in bytes)."""
+    start = last = size_fn()
+    t_last = None
+    t_end = clock() + timeout_s * 1e6
+    while clock() < t_end:
+        s, t = size_fn(), clock()
+        if s != last:
+            last, t_last = s, t
+        elif t_last is not None and t - t_last >= settle_s * 1e6:
+            break
+        sleep(poll_s)
+    return t_last, last - start
+
+
+def peer_rows(path):
+    try:
+        return [json.loads(line) for line in open(path)]
+    except (OSError, ValueError):
+        return []
+
+
+def op_thunderbird_send(i, wid, args):
+    tag = f"send-{i:03d}"
+    fields = f"to='reply@example.invalid',subject='Re: {tag}',body='{TB_BODY}',attachment='{TB_DOC}'"
+    subprocess.Popen(["thunderbird", "--profile", TB_PROFILE, "-compose", fields],
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    w, t = "", time.monotonic()
+    while not w and time.monotonic() - t < 60:
+        w = (xdo("search", "--onlyvisible", "--name", tag).stdout.split() or [""])[0]
+        time.sleep(0.2)
+    if not w:
+        shot(args, f"{i}-no-compose")
+        return now_us(), now_us(), 2, f"compose window {tag} never appeared", {}
+    xdo("windowactivate", "--sync", w)
+    time.sleep(2.0)   # the attachment is listed before the send
+    n_peer = len(peer_rows(args.peer))
+    t0 = now_us()
+    xdo("key", "--clearmodifiers", "ctrl+Return")
+    t1, grew = wait_settled(lambda: file_size(TB_SENT), args.op_timeout)
+    rows = peer_rows(args.peer)[n_peer:]
+    extra = {"sent_growth_bytes": grew, "peer_us": rows[0]["t_us"] if rows else None,
+             "peer_bytes": rows[0]["bytes"] if rows else None}
+    if t1 is None:
+        shot(args, f"{i}-no-sent-copy")
+        return t0, now_us(), 4, f"Sent copy never landed; peer rows {len(rows)}", extra
+    note = f"sent copy +{grew} B" + (f"; peer at +{(rows[0]['t_us'] - t0) / 1000:.0f} ms" if rows else "; no peer row")
+    return t0, t1, 0, note, extra
+
+
+OPS = {"gimp": ("unsharp-mask", op_gimp), "kdenlive": ("preview-render", op_kdenlive), "chrome": ("page-load", op_chrome),
+       "thunderbird-send": ("send", op_thunderbird_send)}
 
 
 def tree_procs(pattern):
@@ -209,19 +286,26 @@ def main():
     ap.add_argument("--url", default="http://127.0.0.1:8088/feed.html")
     ap.add_argument("--clip-x", type=int, default=300); ap.add_argument("--clip-y", type=int, default=640)
     ap.add_argument("--pat", default="", help="the appdef's PAT: command-line pattern of the application's tree")
+    ap.add_argument("--peer", default=None, help="the SMTP peer's arrival stamps (default: smtp.jsonl beside the output)")
     args = ap.parse_args()
     name, fn = OPS[args.app]
     if args.op_timeout is None:
-        args.op_timeout = 60.0 if args.app == "chrome" else 600.0
+        args.op_timeout = {"chrome": 60.0, "thunderbird-send": 180.0}.get(args.app, 600.0)
+    if args.peer is None:
+        args.peer = os.path.join(os.path.dirname(os.path.abspath(args.out)), "smtp.jsonl")
     t_end = time.monotonic() + args.seconds
     i = 0
     with open(args.out, "a") as out:
         while (args.count and i < args.count) or (not args.count and time.monotonic() < t_end):
+            extra = {}
             try:
-                t0, t1, rc, note = fn(i, args.wid, args)
+                res = fn(i, args.wid, args)
+                t0, t1, rc, note = res[:4]
+                if len(res) > 4:   # an operation's own fields (thunderbird-send: the peer's stamp)
+                    extra = res[4]
             except Exception as exc:  # a failed trigger is recorded, never fatal
                 t0, t1, rc, note = now_us(), now_us(), 9, f"{type(exc).__name__}: {exc}"[:160]
-            rec = {"op": name, "i": i, "trigger_us": t0, "done_us": t1, "rc": rc, "note": note}
+            rec = {"op": name, "i": i, "trigger_us": t0, "done_us": t1, "rc": rc, "note": note, **extra}
             try:
                 rec["procs"] = tree_procs(args.pat)
             except Exception:  # never touches the operation's own record

@@ -35,11 +35,11 @@ NAME = re.compile(r"^meas-(interactive|playback)-(.+)-r(\d+)-(dry|full)$")
 QUANTILE_PROBS = (0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999)
 COVERAGE = 0.95  # D16: components in descending wake rate until this share of idle wakes; the rest pooled as one residual
 # D26: the one median per application the stability criterion is evaluated on — the value its archetype carries
-HEADLINE = {"soffice": "input_run", "code": "input_run", "thunderbird": "input_run",
+HEADLINE = {"soffice": "input_run", "code": "input_run", "thunderbird": "input_run", "thunderbird-send": "input_run",
             "chrome": "op_duration", "gimp": "op_duration", "kdenlive": "op_duration",
             "mpv-video": "play_cpu_share", "mpv-audio": "play_cpu_share", "webrtc": "play_cpu_share"}
 # D26: SWELL-KW's Outlook conditions (c2, c3) hold 4 761 s of recorded time — eight windows, the eighth 561 s
-WINDOW_LIMIT = {"thunderbird": 8}
+WINDOW_LIMIT = {"thunderbird": 8, "thunderbird-send": 8}   # D31: the re-observation reads the same Outlook windows
 
 
 def headline(app, entry):

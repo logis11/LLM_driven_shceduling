@@ -99,6 +99,36 @@ PREFS
       LAUNCH="thunderbird --profile $HOME/tbprofile -compose to=someone@example.invalid,subject=measure,body=measure"
       CLASS="thunderbird"; PAT="thunderbird"; RX="thunderbird|Isolated|Web Content"; DRIVER=stream; STREAM=outlook; AREA="0.30,0.02,0.05,0.02"
       POSTLAUNCH="sleep 8; xdotool key Escape; sleep 2; xdotool key ctrl+n; sleep 6"; POSTCLASS="Write" ;;
+    thunderbird-send)
+      # 9.5 changelog D31 (from 9.7 D3): Thunderbird re-observed whole with operation `send` — the `thunderbird` setup
+      # above, its SMTP server pointed at a local peer (smtp_peer.py: aiosmtpd on loopback, no authentication, no TLS,
+      # on the harness CPUs), a copy of every sent message kept in Local Folders/Sent (the completion signal), and the
+      # attachment: the Writer setup state's document (D22) with its ten pictures embedded, as .docx (CpsMark+'s
+      # Outlook workload attaches Word files); pictures seeded so every repeat attaches the same bytes. Files live under
+      # $HOME: Thunderbird is a snap on noble and its /tmp is private.
+      appdef thunderbird || return 1
+      cat >> "$HOME/tbprofile/user.js" <<'PREFS'
+user_pref("mail.smtpserver.smtp1.hostname", "127.0.0.1");
+user_pref("mail.smtpserver.smtp1.port", 2525);
+user_pref("mail.smtpserver.smtp1.authMethod", 1);
+user_pref("mail.smtpserver.smtp1.try_ssl", 0);
+user_pref("mail.smtpserver.smtp1.username", "");
+user_pref("mail.identity.id1.fcc", true);
+user_pref("mail.identity.id1.fcc_folder", "mailbox://nobody@Local%20Folders/Sent");
+user_pref("mail.warn_on_send_accel_key", false);
+user_pref("mail.compose.attachment_reminder", false);
+PREFS
+      sudo apt-get install -y --no-install-recommends python3-aiosmtpd libreoffice-writer unzip > "$OUT/apt.send.log" 2>&1; rec apt.send.rc "$?"
+      mkdir -p "$HOME/tbdoc" && for k in 0 1 2 3 4 5 6 7 8 9; do convert -seed "$((k + 1))" -size 1024x768 plasma:fractal "$HOME/tbdoc/pic-$k.png"; done
+      python3 "$TOOLS/writer_doc.py" "$HOME/tbdoc" > "$HOME/tbdoc/large.html"
+      (cd "$HOME/tbdoc" && soffice --headless --infilter="HTML (StarWriter)" --convert-to "docx:MS Word 2007 XML" large.html > "$OUT/doc.convert.log" 2>&1); rec doc.convert.rc "$?"
+      rec doc.bytes "$(stat -c %s "$HOME/tbdoc/large.docx" 2>/dev/null || echo 0)"
+      rec doc.pictures "$(unzip -l "$HOME/tbdoc/large.docx" 2>/dev/null | grep -c 'word/media/')"
+      rec doc.sha256 "$(sha256sum "$HOME/tbdoc/large.docx" 2>/dev/null | cut -d' ' -f1)"
+      setsid python3 "$TOOLS/smtp_peer.py" 2525 "$OUT/smtp.jsonl" > "$OUT/smtp.log" 2>&1 &
+      echo $! > "$OUT/smtp.pid"; sleep 2
+      rec smtp.peer "$(python3 -c 'import socket; s = socket.create_connection(("127.0.0.1", 2525), 5); print(s.recv(200).decode().strip())' 2>&1 | head -c 120)"
+      OP=send ;;
     gimp)
       apt_install gimp; ver gimp --version
       # image: 4952 × 3288 (PCMark 10 Photo Editing interactive image, Technical Guide p. 71); content synthetic (design)
@@ -166,4 +196,8 @@ op_driver() { # op_driver <window-id> <seconds> [extra ops_driver args] — the 
   local wid="$1" secs="$2"; shift 2
   echo "python3 $TOOLS/ops_driver.py $APP $wid $secs $OUT/ops.jsonl --pat '$PAT' $*"
 }
-appdef_cleanup() { [ -f "$OUT/httpd.pid" ] && kill "$(cat "$OUT/httpd.pid")" 2>/dev/null; return 0; }
+appdef_cleanup() {
+  [ -f "$OUT/httpd.pid" ] && kill "$(cat "$OUT/httpd.pid")" 2>/dev/null
+  [ -f "$OUT/smtp.pid" ] && kill "$(cat "$OUT/smtp.pid")" 2>/dev/null
+  return 0
+}
