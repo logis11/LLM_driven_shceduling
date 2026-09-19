@@ -71,7 +71,8 @@ phase() {
   wait "$perf_pid"; rec "perf.$name.record.rc" "$?"
   snap "$PAT" "" "$name.after"
   screenshot "after-$name"
-  sudo perf sched timehist -i "$OUT/perf.$name.data" 2>> "$OUT/perf.$name.log" | gzip > "$OUT/perf.$name.timehist.txt.gz"
+  # --state: each row's switch-out state, the cross-check of the wakeup-row wake (9.5 D39)
+  sudo perf sched timehist --state -i "$OUT/perf.$name.data" 2>> "$OUT/perf.$name.log" | gzip > "$OUT/perf.$name.timehist.txt.gz"
   rec "perf.$name.timehist.rc" "${PIPESTATUS[0]}"
   rec "perf.$name.rows_matching" "$(gzip -dc "$OUT/perf.$name.timehist.txt.gz" | grep -cE "$RX" || echo 0)"
   sudo perf sched timehist -w -i "$OUT/perf.$name.data" 2>> "$OUT/perf.$name.log" | grep -E "awakened|wakeup|\bwaker\b|^\s*[0-9]+\.[0-9]+ +\[[0-9]+\] +\S.*\[[0-9/]+\] +awakened" | gzip > "$OUT/perf.$name.wakeups.txt.gz"

@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-19, the wake rule and the switch-out state (changelog D39) — §5 what one wake is: the wakeup row is searched from the schedule-in of the wake it would continue to this schedule-in (9.7 D21, from commit `9d86aaf`), for every repeat of the campaign; §4: `perf sched timehist` is read with `--state` from this entry on, and the pool reports per component where the row disagrees with the recorded switch-out state (`wake_check`); the state decides no wake in this campaign.
+
 - 2026-09-19, `thunderbird-send`'s components (changelog D38) — a component is keyed by the thread's name with a trailing ` #<n>` removed (Gecko's pool threads, `nsThreadPoolNaming`), so each thread pool is one component; names without the suffix unchanged.
 
 - 2026-09-19, the `send` campaign's timing and its operation as built (changelog D37) — amending the D31 entry below: `thunderbird-send` launches once its method is settled (the D32 run mode, D33's component identity, the D34 settle), not after the current campaign ends. §3 the operation: the compose window opened in the running Thunderbird's interface — Ctrl+N in the main window, the recipient typed and Return, Alt+S and the subject, Return to the body and the body typed, Ctrl+Shift+A and the attachment's path through GTK's own file chooser, Ctrl+Enter — in place of `-compose`; the profile carries `mailnews.message_warning_size` 0 and `widget.use-xdg-desktop-portal.file-picker` 0 (`appdefs.sh`, `ops_driver.py`). The message is 56,946,735 B at the peer. Runner probe 35430077821 (Thunderbird 156.0 snap): both sends rc 0, completion about 3.0 s after the trigger.

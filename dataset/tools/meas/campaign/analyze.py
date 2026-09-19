@@ -13,9 +13,11 @@ belongs to the application's process tree.
 
 Wake definition (9.5 follow-ups spec, decision 4): a segment is a *wake* only
 when a wakeup event for that thread (the wakeups file, `perf sched timehist
--w`) lies between the thread's previous schedule-out and this schedule-in.
-A segment with no such event is a resume after preemption: its run is added
-to the preceding wake's run and the preempted time is neither run nor gap.
+-w`) lies after the schedule-in of the wake it would continue and at or before
+this schedule-in (9.7 D21). A segment with no such event is a resume after
+preemption: its run is added to the preceding wake's run and the preempted
+time is neither run nor gap. Where timehist carries the switch-out state
+(`--state`, 9.5 D39), the row is checked against it per comm (`wake_check`).
 Wake rates, gap and run distributions are computed over wakes; the per-input
 window rule (b) sums segments, so it is unaffected. Without a wakeups file
 every segment counts as a wake (`wake_definition: row`).
@@ -41,14 +43,15 @@ import re
 import statistics
 
 from collections import namedtuple
-Row = namedtuple("Row", "t_in t_wake t_end run comm tid pid")  # compact: one tuple per schedule row
+Row = namedtuple("Row", "t_in t_wake t_end run comm tid pid state", defaults=("",))  # compact: one tuple per schedule row
 
 # comms of the measurement harness itself: the snapshot roots the tree at run.sh, whose children include these
 HARNESS_COMMS = {"bash", "sh", "sleep", "setsid", "Xvfb", "perf", "python3", "xdotool", "gzip", "sudo", "tee", "sed",
                  "grep", "import", "convert", "date", "xwd", "wc", "cat", "kill", "sort", "awk", "run.sh", "phase.sh", "curl", "pgrep",
                  "taskset"}
 
-ROW = re.compile(r"^\s*(\d+\.\d+)\s+\[(\d+)\]\s+(.*?)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s*$")
+# timehist [--state]: time [cpu] comm[tid/pid] wait sch_delay run [state] — the state column from 9.5 D39 on
+ROW = re.compile(r"^\s*(\d+\.\d+)\s+\[(\d+)\]\s+(.*?)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)(?:\s+(\S+))?\s*$")
 TASK = re.compile(r"^(.*)\[(\d+)(?:/(\d+))?\]$")
 
 
@@ -85,7 +88,7 @@ def load_rows(path, pids, comm_rx=None):
             m = ROW.match(line)
             if not m:
                 continue
-            t, cpu, task, wait, delay, run = m.groups()
+            t, cpu, task, wait, delay, run, state = m.groups()
             tf = float(t)
             t_min = tf if t_min is None or tf < t_min else t_min
             t_max = tf if t_max is None or tf > t_max else t_max
@@ -102,7 +105,7 @@ def load_rows(path, pids, comm_rx=None):
                 else:
                     continue
             t, delay, run = float(t), float(delay), float(run)
-            rows.append(Row(t - run / 1000.0, t - run / 1000.0 - delay / 1000.0, t, run, comm, tid, pid))
+            rows.append(Row(t - run / 1000.0, t - run / 1000.0 - delay / 1000.0, t, run, comm, tid, pid, state or ""))
     rows.sort(key=lambda r: r.t_in)
     return rows, (t_min or 0.0, t_max or 0.0), sorted(extra)
 
@@ -155,7 +158,7 @@ def load_all_wakeups(path, pids):
 EPS = 1e-6  # timehist prints microseconds
 
 
-def merge_resumes(rows, wakeups_by_tid):
+def merge_resumes(rows, wakeups_by_tid, check=None):
     """Fold resume-after-preemption segments into the wake they continue.
 
     rows: segments sorted by t_in. A segment is a wake when a wakeup event for its
@@ -165,7 +168,12 @@ def merge_resumes(rows, wakeups_by_tid):
     own switch-out by microseconds, so a row inside the thread's last run wakes
     the sleep that follows (9.7 changelog D21: the window from the switch-out
     missed those); the first segment of a thread in the capture is always a wake.
-    Returns (wakes sorted by t_in, number of segments merged)."""
+    The row decides for the whole 9.5 campaign, whose early repeats carry no
+    switch-out state (9.5 D39). check (a dict), if given, collects per comm the
+    gaps whose preceding segment carries a state (`gaps`) and those where the row
+    disagrees with it: a sleep state but no row (`slept_without_row`), R with a
+    row (`preempted_with_row`). Returns (wakes sorted by t_in, number of segments
+    merged)."""
     import bisect
     last = {}      # tid -> index into out of that thread's current wake
     out = []
@@ -179,10 +187,16 @@ def merge_resumes(rows, wakeups_by_tid):
         wk = wakeups_by_tid.get(r.tid, [])
         k = bisect.bisect_right(wk, prev.t_in)
         woken = k < len(wk) and wk[k] <= r.t_in + EPS
+        if check is not None and prev.state:
+            c = check.setdefault(prev.comm, {"gaps": 0, "slept_without_row": 0, "preempted_with_row": 0})
+            c["gaps"] += 1
+            slept = prev.state[:1] != "R"
+            if slept != woken:
+                c["slept_without_row" if slept else "preempted_with_row"] += 1
         if woken:
             out.append(r); last[r.tid] = len(out) - 1
         else:
-            out[i] = prev._replace(run=prev.run + r.run, t_end=r.t_end)
+            out[i] = prev._replace(run=prev.run + r.run, t_end=r.t_end, state=r.state)
             merged += 1
     out.sort(key=lambda r: r.t_in)
     return out, merged
@@ -308,13 +322,15 @@ def _analyze(args):
         total_run_s = sum(r.run for r in segments) / 1000
         wk_path = next((p for p in (f"perf.{phase}.wakeups.txt.gz", f"perf.{phase}.wakeups.txt") if os.path.exists(os.path.join(D, p))), None)
         wake_def = getattr(args, "wake_def", "wakeup")
+        check = {}
         if wk_path and wake_def == "wakeup":
-            rows, merged = merge_resumes(segments, load_all_wakeups(os.path.join(D, wk_path), pids))
+            rows, merged = merge_resumes(segments, load_all_wakeups(os.path.join(D, wk_path), pids), check)
         else:
             rows, merged, wake_def = segments, 0, "row"
         ph = {"pids": sorted(pids), "transient_pids": {p: sorted({r.comm for r in segments if r.pid == p}) for p in extra_pids},
               "rows": len(rows), "segments": len(segments), "resumes_merged": merged,
               "wake_definition": wake_def, "span_s": round(span, 2),
+              "wake_check": check or None,   # the row against the switch-out state, where recorded (D39)
               "cpu_share": round(total_run_s / span, 4), "wakes_per_s": round(len(rows) / span, 2),
               "roles": per_role(rows, roles, span), "threads": per_thread(rows, span)}
         if phase == "idle":

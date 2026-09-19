@@ -258,6 +258,9 @@ def main():
                     "waker": {"x_wakes_per_input": summary([pi[r]["xw_count"] for r in reps]),
                               "first_x_wake_latency_ms": summary([pi[r]["xw_lat"] for r in reps]),
                               "run_ms": summary([pi[r]["xw_run"] for r in reps])}}
+            checks = {r: results[r]["phases"][phase].get("wake_check") for r in reps}
+            if any(checks.values()):   # D39: the wakeup row against the switch-out state, repeats that record it
+                ph["wake_check"] = {r: v for r, v in checks.items() if v}
             entry["phases"][phase] = ph
         crit = criterion(app, entry)
         needed = [c["needed"] for c in crit.values()]
@@ -277,6 +280,11 @@ def main():
             print(f"     {q}: mean {c['mean']}, half-width {hw}, needed {c['needed']}")
         for phase, ph in entry["phases"].items():
             print(f"   {phase}: span {ph['span_s']} cpu {ph['cpu_share']} wakes/s {ph['wakes_per_s']}")
+            if "wake_check" in ph:
+                tot = {k: sum(c[k] for v in ph["wake_check"].values() for c in v.values())
+                       for k in ("gaps", "slept_without_row", "preempted_with_row")}
+                print(f"     wake check (repeats {sorted(ph['wake_check'])}): {tot['gaps']} gaps with a state; row disagrees: "
+                      f"{tot['slept_without_row']} slept without a row, {tot['preempted_with_row']} preempted with a row")
             if "operation" in ph:
                 o = ph["operation"]
                 print(f"     operation {o['name']}: ok {o['n_ok']} failed {o['n_failed']}; duration p50/p90/p99 {o['duration_ms']['p50']}/{o['duration_ms']['p90']}/{o['duration_ms']['p99']} ms ({o['duration_ms']['repeat_p50']})")

@@ -222,6 +222,31 @@ def test_threads_are_merged_independently():
     assert sorted((w.tid, w.run) for w in wakes) == [(7, 3.0), (8, 1.0)]
 
 
+def test_the_row_decides_and_the_state_checks_it():
+    # 9.5 D39: the campaign keeps the row window for every repeat; a recorded switch-out state only counts where the
+    # row disagrees with it, per comm, and a folded resume carries its own switch-out state into the wake
+    check = {}
+    rows = [_row(1.000, 0.003)._replace(state="S"), _row(1.000010, 0.003)._replace(state="R"),
+            _row(1.000020, 0.003)._replace(state="D"), _row(1.000030, 0.003)._replace(state="S")]
+    wakes, merged = campaign.merge_resumes(rows, {7: [1.000015, 1.000026]}, check)
+    # gap 1 (after S, no row): folded by the row; gap 2 (after R, a row): a wake by the row; gap 3 (after D, a row): a wake
+    assert [w.t_in for w in wakes] == [1.000, 1.000020, 1.000030] and merged == 1
+    assert wakes[0].state == "R"
+    assert check == {"app": {"gaps": 3, "slept_without_row": 1, "preempted_with_row": 1}}
+    check = {}
+    campaign.merge_resumes([r._replace(state="") for r in rows], {7: [1.000015, 1.000026]}, check)
+    assert check == {}   # no state recorded (the campaign's earlier repeats): nothing to check
+
+
+def test_timehist_rows_with_and_without_the_state_column(tmp_path):
+    p = tmp_path / "perf.idle.timehist.txt"
+    p.write_text("           time    cpu  task name                       wait time  sch delay   run time  state\n"
+                 "   1.000300 [0003]  vo[7/100]    0.000      0.004      0.300      S\n"
+                 "   1.000900 [0003]  vo[7/100]    0.100      0.002      0.200\n")
+    rows, _, _ = campaign.load_rows(str(p), {100})
+    assert [(r.comm, r.tid, r.run, r.state) for r in rows] == [("vo", 7, 0.3, "S"), ("vo", 7, 0.2, "")]
+
+
 def test_all_wakeups_indexed_by_wakee_tid(tmp_path):
     p = tmp_path / "perf.idle.wakeups.txt"
     p.write_text("   1.000500 [0001]  Xvfb[500]  awakened: app[7/100]\n"
