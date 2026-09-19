@@ -86,7 +86,8 @@ rec work.root "$R"; rec work.dir "$WORK"; rec work.device "$(df --output=source 
 
 # ---- packages ------------------------------------------------------------------
 sudo apt-get update > "$OUT/apt.update.log" 2>&1; rec apt.update.rc "$?"
-sudo apt-get install -y --no-install-recommends linux-tools-common "linux-tools-$(uname -r)" gcc linux-libc-dev > "$OUT/apt.perf.log" 2>&1; rec apt.perf.rc "$?"
+sudo apt-get install -y --no-install-recommends linux-tools-common "linux-tools-$(uname -r)" > "$OUT/apt.perf.log" 2>&1; rec apt.perf.rc "$?"
+sudo apt-get install -y --no-install-recommends gcc libc6-dev linux-libc-dev > "$OUT/apt.gcc.log" 2>&1; rec apt.gcc.rc "$?"
 rec perf.version "$(perf --version 2>&1 | head -1)"
 case "$APP" in
   borg) sudo apt-get install -y --no-install-recommends borgbackup zpaq util-linux-extra > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
@@ -193,7 +194,8 @@ set_field() { python3 -c 'import json,sys; v=json.load(open(sys.argv[1]))["sets"
 pin_state() { [ -z "$1" ] && echo unpinned || { [ "$1" = "$2" ] && echo ok || echo mismatch; }; }
 
 fetch_set() {   # fetch_set <name> <record prefix>: fetched, checked, extracted on the harness CPUs, manifest verified; sets SET
-  local name="$1" p="$2" url ok=0 dest="$WORK/sets/$name" arc="$WORK/$name.zpaq" t0
+  local name="$1" p="$2" url ok=0 t0
+  local dest="$WORK/sets/$name" arc="$WORK/$name.zpaq"   # a separate statement: `local` expands every word before assigning any
   for url in $(set_field "$name" urls); do
     t0=$(date +%s)
     if unmeasured wget -q --tries=5 --waitretry=15 --retry-connrefused -O "$arc" "$url"; then ok=1; rec "$p.url" "$url"; rec "$p.fetch_s" "$(( $(date +%s) - t0 ))"; break; fi
@@ -220,7 +222,11 @@ verify_set() {   # verify_set <label>: the tree against this job's manifest
   unmeasured python3 "$HERE/fileset.py" verify "$SET" "$SET_MANIFEST" > "$OUT/verify.$1.kv" 2>&1
   local rc=$?; rec "set.verify.$1" "$( [ "$rc" = 0 ] && echo ok || echo mismatch)"
 }
-cached() { rec "cache.$1.fraction" "$(find "$SET" -type f -print0 | xargs -0 fincore -b -n -r -o RES,SIZE 2>/dev/null | awk '{r += $1; s += $2} END {if (s > 0) printf "%.4f", r / s}')"; }
+PAGE="$(getconf PAGESIZE)"
+cached() {   # resident pages over the pages the files span (fincore counts residency in whole pages)
+  rec "cache.$1.fraction" "$(find "$SET" -type f -print0 | xargs -0 fincore -b -n -r -o PAGES,SIZE 2>/dev/null \
+    | awk -v pg="$PAGE" '{r += $1; s += int(($2 + pg - 1) / pg)} END {if (s > 0) printf "%.4f", r / s}')"
+}
 warm() { unmeasured sh -c 'find "$1" -type f -exec cat {} + > /dev/null' _ "$SET"; cached "$1"; }   # warm <phase> (§3)
 cold() { sync; sudo sysctl -q vm.drop_caches=3; cached "$1"; sync; sudo sysctl -q vm.drop_caches=3; }   # the second drop undoes fincore's metadata reads
 change_apply() {   # change_apply <label>: the repeat backup's change set (D6), originals kept aside
