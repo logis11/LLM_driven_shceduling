@@ -84,6 +84,10 @@ def pooled(samples_by_repeat, scale=1.0):
 CRITERION_ROLES = ("cc1", "as", "gcc", "sh", "fixdep", "rm")   # the object job's roles; plus the dispatch median
 ABS_FLOOR_US = 1.0   # the trace's resolution: perf sched timehist times in whole microseconds (D23)
 MIN_REPEATS = 5      # kalibera-ismm13 §11 (D24)
+# D29: the rule's exception — their spread follows the runner's disk, not the program; carried with their half-widths
+# over at least MIN_REPEATS repeats, the tolerance not applied
+EXCEPTED = ("clamscan mean block per run", "train mean block per run", "train run between blocks",
+            "tracker mean block per run")
 
 
 def repeats_needed(values_by_repeat, abs_floor=None):
@@ -105,11 +109,15 @@ def criterion(out):
     each carried table by its per-repeat mean — CPU per process of D11's six roles, make's dispatch run, the object-job
     members' step CPU, each bound program's runs between blocks and block after each run — and each bound program's
     share of CPU past the boot slice by its value; tolerance the larger of 5 % of the mean and 1 µs for times, 5 % for
-    the share, at least five repeats; per value the repeat count at which its present spread would hold."""
+    the share, at least five repeats; per value the repeat count at which its present spread would hold. EXCEPTED
+    values are carried over at least five repeats with their half-widths instead (D29)."""
     crit = {}
 
     def add(name, values, floor):
-        crit[name] = {**stability(values, floor, MIN_REPEATS), "needed": repeats_needed(values, floor)}
+        c = {**stability(values, floor, MIN_REPEATS), "needed": repeats_needed(values, floor)}
+        c["excepted"] = name in EXCEPTED                      # D29
+        c["carried"] = c["passes"] or (c["excepted"] and c["k"] >= MIN_REPEATS)
+        crit[name] = c
     w = out["phases"].get("build-j8-warm", {})
     for n in CRITERION_ROLES:
         if n in w.get("roles", {}):
@@ -239,9 +247,9 @@ def main():
             row["make dispatch"] = round(statistics.fmean(disp) * 1000.0 / ref, 3)
         row["build wall s"] = a.get("cmd_wall_s")
         cross[r] = {"cpu_model": per[r]["cpu_model"], "ratio_to_same_machine_mean": row}
-    needed = [c["needed"] for c in crit.values() if c["k"] >= 2]
+    needed = [c["needed"] for c in crit.values() if c["k"] >= 2 and not c["excepted"]]   # D29: not the excepted values
     out["stability"] = {"tolerance": TOLERANCE, "abs_floor_us": ABS_FLOOR_US, "min_repeats": MIN_REPEATS, "quantities": crit,
-                        "passes": bool(crit) and all(c["passes"] for c in crit.values()),
+                        "passes": bool(crit) and all(c["carried"] for c in crit.values()),
                         "needed": None if not needed or None in needed else max(needed),
                         "not_estimable": [q for q, c in crit.items() if c["k"] < 2]}
     out["cross_machine"] = cross
@@ -311,14 +319,15 @@ def render(out, title=None):
         L += ["## Same-machine repeats and the stability rule (D10, D11, D23–D26)", "",
               f"Pooled machine: {out.get('machine') or 'any'}; pooled repeats {reps}; other-machine repeats {out.get('other_machine_repeats')}; stopped by the machine gate {out.get('gated_out')}. "
               f"Rule (`measurement-campaign-workflow.md`, \"The stability rule\"; D26): each carried table is tested by its per-repeat mean, the share by its value; the 95 % confidence half-width of the across-repeat mean is at most the larger of {st['tolerance']:.0%} of the mean and {st['abs_floor_us']} µs for times, {st['tolerance']:.0%} for the share, over at least {st['min_repeats']} repeats; repeats are added one at a time until every value holds. "
+              f"The rule's exception (D29), marked *carried* below: a value whose spread follows the runner's disk is carried over at least {st['min_repeats']} repeats with its half-width and range, the tolerance not applied — `clamscan` and `python3` mean block per run, `python3` runs between blocks, `tracker` mean block per run. "
               f"**{'Holds' if st['passes'] else 'Does not hold yet'}**; repeats needed at the present spread: {st.get('needed') or 'over 200'}"
               + (f"; not estimable yet, fewer than two repeats: {', '.join(st['not_estimable'])}" if st.get("not_estimable") else "") + ".", "",
-              "| quantity | repeats | mean | spread (cv) | 95 % half-width | half-width (abs) | leave-one-out | needed at this spread | passes |", "|---|---|---|---|---|---|---|---|---|"]
+              "| quantity | repeats | mean | spread (cv) | 95 % half-width | half-width (abs) | leave-one-out | needed at this spread | verdict |", "|---|---|---|---|---|---|---|---|---|"]
         for q, c in st["quantities"].items():
             cv = "–" if c["cv"] is None else f"{c['cv']:.1%}"
             hw = "–" if c["half_width"] is None else f"±{c['half_width']:.1%}"
             loo = "–" if c["leave_one_out"] is None else f"{c['leave_one_out']:.1%}"
-            L.append(f"| {q} | {c['k']} | {c['mean']} | {cv} | {hw} | {c['half_width_abs']} | {loo} | {'–' if c['k'] < 2 else (c.get('needed') or 'over 200')} | {'yes' if c['passes'] else 'no'} |")
+            L.append(f"| {q} | {c['k']} | {c['mean']} | {cv} | {hw} | {c['half_width_abs']} | {loo} | {'–' if c['k'] < 2 else (c.get('needed') or 'over 200')} | {'carried (D29)' if c.get('excepted') and c.get('carried') else ('yes' if c['passes'] else 'no')} |")
         L.append("")
         for r, x in out.get("cross_machine", {}).items():
             L.append(f"- cross-machine check, repeat {r} ({x['cpu_model']}): ratio of its mean to the same-machine mean {x['ratio_to_same_machine_mean']} — written into scope as a ratio, applied to no value (9.5 follow-ups decision 13)")

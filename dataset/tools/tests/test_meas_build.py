@@ -201,3 +201,19 @@ def test_not_pooled_names_the_database_and_the_warm_start():
     assert pool.not_pooled("train", "28127", "1") == "warm-up run rc 1"
     assert pool.not_pooled("train", None, "0") is None
     assert pool.not_pooled("ffmpeg", "28127", None) is None
+
+
+def test_excepted_values_are_carried_over_five_repeats_not_held_to_the_tolerance():
+    # D29: the four values whose spread follows the runner's disk
+    def rp(*v):
+        return {"repeat_mean": dict(zip(range(1, len(v) + 1), v))}
+    wide = dict(zip(range(1, 6), (13.3, 30.4, 17.4, 15.0, 19.1)))          # tracker's block means, ±40 %
+    out = {"phases": {"tracker": {"shape": {"runs_between_blocks_us": rp(400, 400, 400, 400, 400),
+                                            "mean_block_us": wide, "share_past_boot_slice": dict(zip(range(1, 6), [0.53] * 5))}}}}
+    c = pool.criterion(out)["tracker mean block per run"]
+    assert c["excepted"] is True and c["passes"] is False and c["carried"] is True     # outside 5 %, carried anyway
+    four = {"phases": {"tracker": {"shape": {"runs_between_blocks_us": rp(400, 400, 400, 400),
+                                             "mean_block_us": dict(zip(range(1, 5), (13.3, 30.4, 17.4, 15.0))),
+                                             "share_past_boot_slice": dict(zip(range(1, 5), [0.53] * 4))}}}}
+    assert pool.criterion(four)["tracker mean block per run"]["carried"] is False      # below the five-repeat minimum
+    assert pool.criterion(out)["tracker run between blocks"]["excepted"] is False
