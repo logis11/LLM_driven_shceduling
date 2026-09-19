@@ -1,8 +1,9 @@
 """The readings of the 9.6 build campaign that the fold-in carries beyond method §5's per-role tables (changelog
 D16, D19–D23; campaign/method.md §8, the 2026-09-19 entries).
 
-- runs_between_blocks, share_past_slice, program_gaps: a bound program's runs between voluntary blocks, the share of
-  its CPU past a scheduler slice, and its program-level gaps (D21, D22);
+- runs_between_blocks, share_past_slice, blocks_after_runs, program_gaps: a bound program's runs between voluntary
+  blocks, the share of its CPU past a scheduler slice, the block after each run and its program-level gaps (D21,
+  D22, D25);
 - tracker_job_end: the end of `tracker`'s rescan, the miner's own `Idle` status (D16);
 - member_steps: the CPU of each structural step of an object job's members (D19, D20).
 
@@ -41,9 +42,9 @@ def share_past_slice(runs_ms, slice_ms=BOOT_SLICE_MS):
     return sum(max(0.0, r - slice_ms) for r in runs_ms) / total if total else None
 
 
-def program_gaps(rows, start, end):
-    """The intervals within [start, end] (s) in which no thread of the program is on the CPU or runnable, in ms. A
-    thread is busy from t_wake (runnable: t_in less its scheduling delay) to t_end, and after a preemption (sched-out
+def _gap_spans(rows, start, end):
+    """The program-level gaps within [start, end] as (from, to) in s: no thread of the program on the CPU or runnable.
+    A thread is busy from t_wake (runnable: t_in less its scheduling delay) to t_end, and after a preemption (sched-out
     in R) until its next t_in."""
     by_tid = defaultdict(list)
     for s in rows:
@@ -61,11 +62,24 @@ def program_gaps(rows, start, end):
         if b <= a:
             continue
         if a > edge:
-            gaps.append((a - edge) * 1000.0)
+            gaps.append((edge, a))
         edge = max(edge, b)
     if end > edge:
-        gaps.append((end - edge) * 1000.0)
+        gaps.append((edge, end))
     return gaps
+
+
+def program_gaps(rows, start, end):
+    """The program-level gaps within [start, end] (s), in ms (reported beside the block table, D25)."""
+    return [(b - a) * 1000.0 for a, b in _gap_spans(rows, start, end)]
+
+
+def blocks_after_runs(rows, start, end):
+    """The block that follows each run between voluntary blocks (D25), in ms, in time order: the program-level gap
+    starting where the run's thread went to sleep, zero when another thread of the program runs on or is runnable."""
+    starts = {round(a, 7): (b - a) * 1000.0 for a, b in _gap_spans(rows, start, end)}
+    return [starts.get(round(min(s.t_end, end), 7), 0.0)
+            for s in sorted(rows, key=lambda s: s.t_in) if s.state[:1] in VOLUNTARY]
 
 
 def tracker_job_end(lines, start_mono_ns, start_real_ns):

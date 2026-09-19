@@ -56,8 +56,8 @@ MIN_REPEATS = 5      # kalibera-ismm13 §11 (D24)
 
 def criterion(out):
     """The stability criterion's quantities and verdicts (method §8, the 2026-09-19 third and fourth entries; changelog
-    D23, D24): D11's seven medians, the object-job members' step CPU, and per bound program its run-between-blocks
-    and program-level gap medians and its share of CPU past the boot slice; tolerance the larger of 5 % of the mean
+    D23, D24, D25): D11's seven medians, the object-job members' step CPU, and per bound program its run-between-blocks
+    median, its mean block per run and its share of CPU past the boot slice; tolerance the larger of 5 % of the mean
     and 1 µs, at least five repeats."""
     crit = {}
     w = out["phases"].get("build-j8-warm", {})
@@ -72,7 +72,7 @@ def criterion(out):
         s = out["phases"].get(ph, {}).get("shape")
         if s:
             crit[f"{ph} run between blocks"] = stability(s["runs_between_blocks_us"]["repeat_p50"], ABS_FLOOR_US, MIN_REPEATS)
-            crit[f"{ph} program-level gap"] = stability(s["gaps_us"]["repeat_p50"], ABS_FLOOR_US, MIN_REPEATS)
+            crit[f"{ph} mean block per run"] = stability(s["mean_block_us"], ABS_FLOOR_US, MIN_REPEATS)
             crit[f"{ph} share past the boot slice"] = stability(s["share_past_boot_slice"], None, MIN_REPEATS)
     return crit
 
@@ -146,6 +146,10 @@ def main():
             smp = {r: per[r]["phases"][ph]["batch"]["_samples"] for r in have}
             P["shape"] = {"runs_between_blocks_us": pooled({r: smp[r]["runs_between_blocks_ms"] for r in have}, 1000.0),
                           "gaps_us": pooled({r: smp[r]["gaps_ms"] for r in have}, 1000.0),
+                          "blocks_after_runs_us": pooled({r: smp[r]["blocks_after_runs_ms"] for r in have}, 1000.0),
+                          "mean_block_us": {r: (round(per[r]["phases"][ph]["batch"]["mean_block_ms"] * 1000.0, 4)
+                                                if per[r]["phases"][ph]["batch"]["mean_block_ms"] is not None else None) for r in have},
+                          "share_blocks_with_gap": {r: per[r]["phases"][ph]["batch"]["share_blocks_with_gap"] for r in have},
                           "share_past_boot_slice": {r: per[r]["phases"][ph]["batch"]["share_past_boot_slice"] for r in have},
                           "share_pooled": round(shapes.share_past_slice([x for r in have for x in smp[r]["runs_between_blocks_ms"]]) or 0.0, 4)}
         out["phases"][ph] = P
@@ -232,11 +236,12 @@ def render(out, title=None):
             L.append("")
             s = P["shape"]
             L += [f"shape (D21, D22): runs between voluntary blocks (µs) {fmt_q(s['runs_between_blocks_us']['q'])} (n {s['runs_between_blocks_us']['n']}; spread {s['runs_between_blocks_us']['repeat_p50']}); "
-                  f"program-level gaps (µs) {fmt_q(s['gaps_us']['q'])} (n {s['gaps_us']['n']}; spread {s['gaps_us']['repeat_p50']}); "
+                  f"block after each run (µs, D25) {fmt_q(s['blocks_after_runs_us']['q'])} (n {s['blocks_after_runs_us']['n']}; mean per repeat {s['mean_block_us']}; share followed by a gap {s['share_blocks_with_gap']}); "
+                  f"program-level gaps (µs, reported) {fmt_q(s['gaps_us']['q'])} (n {s['gaps_us']['n']}; spread {s['gaps_us']['repeat_p50']}); "
                   f"share of CPU past the boot slice {s['share_past_boot_slice']} (pooled {s['share_pooled']})", ""]
     st = out.get("stability")
     if st:
-        L += ["## Same-machine repeats and the stability criterion (D10, D11, D23, D24)", "",
+        L += ["## Same-machine repeats and the stability criterion (D10, D11, D23, D24, D25)", "",
               f"Pooled machine: {out.get('machine') or 'any'}; pooled repeats {reps}; other-machine repeats {out.get('other_machine_repeats')}; stopped by the machine gate {out.get('gated_out')}. "
               f"Criterion: the 95 % confidence half-width of the across-repeat mean of each carried value is at most the larger of {st['tolerance']:.0%} of the mean and {st['abs_floor_us']} µs, over at least {st['min_repeats']} repeats; repeats are added one at a time until it holds (D11, D23, D24). "
               f"**{'Holds' if st['passes'] else 'Does not hold yet'}.**", "",

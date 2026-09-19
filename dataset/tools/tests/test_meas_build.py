@@ -54,6 +54,14 @@ def test_program_gaps_count_runnable_time_as_busy():
     assert shapes.program_gaps(rows, 1.000, 1.020) == pytest.approx([5.0, 4.0])
 
 
+def test_blocks_after_runs_are_zero_when_another_thread_runs_on():
+    rows = [build.Seg(1.000, 1.000, 1.004, 4.0, "p", 7, 1, "S", 3),    # 7 sleeps; 8 is runnable: block 0
+            build.Seg(1.004, 1.003, 1.006, 2.0, "p", 8, 1, "R", 3),
+            build.Seg(1.009, 1.009, 1.010, 1.0, "p", 8, 1, "S", 3),    # 8 sleeps; nothing until 1.015: block 5 ms
+            build.Seg(1.015, 1.015, 1.016, 1.0, "p", 7, 1, "Z", 3)]
+    assert shapes.blocks_after_runs(rows, 1.000, 1.016) == pytest.approx([0.0, 5.0])
+
+
 MINER_LOG = [
     "Tracker-Message: 10:39:05.135: (Miner:'TrackerMinerFiles') set property:'status' to 'Idle'\n",
     "Tracker-Message: 10:39:05.281: (Miner:'TrackerMinerFiles') set property:'status' to 'Crawling recursively directory 'file:///x''\n",
@@ -112,6 +120,8 @@ def test_batch_reads_the_job_window_and_shape():
     assert b["share_past_boot_slice"] == pytest.approx(2.0 / 21.0, abs=1e-4)
     assert b["_samples"]["runs_between_blocks_ms"] == pytest.approx([12.0, 8.0, 1.0])
     assert b["_samples"]["gaps_ms"] == pytest.approx([0.2, 0.3])
+    assert b["_samples"]["blocks_after_runs_ms"] == pytest.approx([0.2, 0.3])
+    assert b["mean_block_ms"] == pytest.approx(0.25)
     assert b["job_s"] == pytest.approx(0.0215, abs=1e-6)
     cut = build.batch("clamscan", tree, tid2pid, role, segs, {}, 3, recs, 0.03, job_end=1.0203)
     assert cut["job_s"] == pytest.approx(0.0203, abs=1e-6) and cut["_samples"]["runs_between_blocks_ms"] == pytest.approx([12.0, 8.0])
@@ -127,14 +137,16 @@ def test_criterion_lists_every_carried_value():
         "build-j8-warm": {"roles": {n: {"cpu_per_process_us": rp(100, 101, 100, 102, 101)} for n in pool.CRITERION_ROLES},
                           "dispatch": {"per_dispatch_us": rp(670, 675, 673, 681, 676)},
                           "object_members": {"step_cpu_us": {"sh 1/4": rp(726, 785, 752, 785, 760)}}},
-        "ffmpeg": {"shape": {"runs_between_blocks_us": rp(7, 7, 6, 6, 7), "gaps_us": rp(1, 1, 1, 1, 1),
+        "ffmpeg": {"shape": {"runs_between_blocks_us": rp(7, 7, 6, 6, 7),
+                             "mean_block_us": dict(zip((4, 5, 7, 8, 9), (0.43, 0.29, 0.26, 0.26, 0.3))),
                              "share_past_boot_slice": dict(zip((4, 5, 7, 8, 9), (0.702, 0.698, 0.696, 0.704, 0.700)))}}}}
     crit = pool.criterion(out)
     assert set(crit) == {f"{n} CPU per process" for n in pool.CRITERION_ROLES} | {
-        "make dispatch", "object-job sh 1/4", "ffmpeg run between blocks", "ffmpeg program-level gap",
+        "make dispatch", "object-job sh 1/4", "ffmpeg run between blocks", "ffmpeg mean block per run",
         "ffmpeg share past the boot slice"}
     assert crit["ffmpeg run between blocks"]["passes"] is True        # within the 1 µs floor
+    assert crit["ffmpeg mean block per run"]["passes"] is True        # sub-µs mean, within the floor
     assert all(c["k"] == 5 for c in crit.values())
-    four = {"phases": {"ffmpeg": {"shape": {"runs_between_blocks_us": rp(7, 7, 7, 7), "gaps_us": rp(1, 1, 1, 1),
+    four = {"phases": {"ffmpeg": {"shape": {"runs_between_blocks_us": rp(7, 7, 7, 7), "mean_block_us": {4: 0.3, 5: 0.3, 7: 0.3, 8: 0.3},
                                             "share_past_boot_slice": {4: 0.7, 5: 0.7, 7: 0.7, 8: 0.7}}}}}
     assert not any(c["passes"] for c in pool.criterion(four).values())    # four repeats: below the minimum

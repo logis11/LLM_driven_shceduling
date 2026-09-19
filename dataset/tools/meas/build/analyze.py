@@ -461,6 +461,7 @@ def batch(phase, tree, tid2pid, role, segs, wakeups, meas_cpu, recs, cmd_wall_s,
     job_rows = [s for s in rows if s.t_in < end] if end is not None else []
     runs = shapes.runs_between_blocks(job_rows)
     gaps = shapes.program_gaps(job_rows, start, end) if job_rows else []
+    blocks = shapes.blocks_after_runs(job_rows, start, end) if job_rows else []
     job_s = (end - start) if job_rows else None
     share = shapes.share_past_slice(runs)
     other = sorted({role.get(p, "?") for p in pids - prog_pids})
@@ -479,7 +480,9 @@ def batch(phase, tree, tid2pid, role, segs, wakeups, meas_cpu, recs, cmd_wall_s,
             "saturation_job": round(sum(s.run for s in job_rows) / 1000.0 / job_s, 4) if job_s else None,
             "share_past_boot_slice": round(share, 4) if share is not None else None,
             "runs_between_blocks_n": len(runs), "gaps_n": len(gaps),
-            "_samples": {"runs_between_blocks_ms": runs, "gaps_ms": gaps}}
+            "mean_block_ms": round(statistics.fmean(blocks), 6) if blocks else None,
+            "share_blocks_with_gap": round(sum(1 for b in blocks if b > 0) / len(blocks), 5) if blocks else None,
+            "_samples": {"runs_between_blocks_ms": runs, "gaps_ms": gaps, "blocks_after_runs_ms": blocks}}
 
 
 # ---- driver ----------------------------------------------------------------
