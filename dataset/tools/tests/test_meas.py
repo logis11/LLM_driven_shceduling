@@ -191,6 +191,18 @@ def test_a_waking_row_before_the_switch_out_still_makes_a_wake():
     assert merged == 0 and len(wakes) == 2
 
 
+def test_the_switch_out_state_decides_where_it_was_recorded():
+    # 9.7 D21: S or D before the gap is a wake, R a resume, whatever the rows say; the disagreements are counted
+    check = {}
+    segs = [_bseg(1.000, 0.003, "S"), _bseg(1.000010, 0.003, "R"), _bseg(1.000020, 0.003, "D"), _bseg(1.000030, 0.003, "S")]
+    wakes, merged = build.merge_resumes(segs, {7: [1.000015, 1.000026]}, check)
+    # gap 1 (after S, no row): a wake; gap 2 (after R, a row at 1.000015): a resume; gap 3 (after D, a row): a wake
+    assert [w.t_in for w in wakes] == [1.000, 1.000010, 1.000030] and merged == 1
+    assert check == {"slept_without_row": 1, "preempted_with_row": 1}
+    wakes, merged = build.merge_resumes([s._replace(state="") for s in segs], {7: [1.000015, 1.000026]})
+    assert [w.t_in for w in wakes] == [1.000, 1.000020, 1.000030]   # no state recorded: the rows decide
+
+
 def test_a_row_before_the_last_schedule_in_belongs_to_the_earlier_sleep():
     rows = [_row(1.000, 0.003), _row(1.000010, 0.003)]
     wakes, merged = campaign.merge_resumes(rows, {7: [0.999999]})   # woke the first segment, not the second

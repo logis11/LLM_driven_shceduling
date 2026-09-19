@@ -164,10 +164,11 @@ def phase_tree(job, segs, forks, meas_cpu, root=None):
 
 # ---- wakes and intervals ---------------------------------------------------------
 
-def thread_wakes(rows, wakeups):
+def thread_wakes(rows, wakeups, check=None):
     """Per thread: wakes (sorted) and the intervals between consecutive wakes as dicts
-    {tid, t0 (schedule-out), t1 (wakeup), us, state, next_in, next_end}."""
-    wakes, merged = merge_resumes(sorted(rows, key=lambda r: r.t_in), wakeups)
+    {tid, t0 (schedule-out), t1 (wakeup), us, state, next_in, next_end}. check: the wake rule's disagreements of row
+    and state (merge_resumes)."""
+    wakes, merged = merge_resumes(sorted(rows, key=lambda r: r.t_in), wakeups, check)
     per = defaultdict(list)
     for w in wakes:
         per[w.tid].append(w)
@@ -306,7 +307,8 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
     prog = [p for p in pids if is_program(job, execs.get(p), role.get(p))]
     prog_set = set(prog)
     rows = [s for s in segs if s.cpu == meas_cpu and s.tid in tree]
-    per_wakes, intervals, merged = thread_wakes(rows, wakeups)
+    wake_check = {}
+    per_wakes, intervals, merged = thread_wakes(rows, wakeups, wake_check)
     disk = disk_accounting(intervals, tid2pid, recs)
     iowait = None
     if str(kv.get("sysctl.sched_schedstats")) == "1":   # the sched_stat_iowait rows sit in the forks file (run.sh)
@@ -383,7 +385,7 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
            "program_exec": sorted({execs.get(p) for p in prog if execs.get(p)}),
            "cmd_wall_s": round(e["cmd_wall_s"], 3) if e.get("cmd_wall_s") is not None else None, "rc": e.get("rc"),
            "phase_span_s": round(span_s, 3) if span_s else None,
-           "segments_in_tree": len(rows), "resumes_merged": merged,
+           "segments_in_tree": len(rows), "resumes_merged": merged, "wake_rule_row_disagrees": wake_check,
            "disk_rule": "per-wait (sched_stat_iowait)" if iowait is not None else "process total (taskstats)",
            "iowait_rows_in_tree": sum(len(v) for t, v in (iowait or {}).items() if t in tree),
            "taskstats_rows": len(ts_rows), "taskstats_trailer": trailer,

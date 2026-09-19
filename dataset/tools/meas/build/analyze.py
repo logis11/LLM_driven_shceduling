@@ -319,13 +319,16 @@ def concurrency(jobs):
     return {"max": mx, "mean_busy": round(mean, 2), "time_share": {str(k): round(v / total, 3) for k, v in sorted(share.items())}}
 
 
-def merge_resumes(rows, wakeups_by_tid):
+def merge_resumes(rows, wakeups_by_tid, check=None):
     """Fold resume-after-preemption segments into the wake they continue (9.5 follow-ups decision 4), carrying the
     last segment's sched-out state so the off-CPU interval after the wake is classified by how the wake ended.
-    A segment is a wake when a wakeup row for its thread falls after the schedule-in of the wake it would continue and
-    at or before its own schedule-in: sched_waking fires only for a thread already in a sleep state (kernel
-    try_to_wake_up: after ttwu_state_match) and can precede the sleeper's own switch-out by microseconds (9.7
-    changelog D21). rows: segments sorted by t_in. Returns (wakes sorted by t_in, number of segments merged)."""
+    A segment is a wake when the thread slept: the switch-out state of the segment before it is a sleep state (S, D,
+    or another but R); R — preempted or yielding — is a resume (9.7 changelog D21). Where no state was recorded, a
+    wakeup row for the thread after the schedule-in of the wake it would continue and at or before this schedule-in
+    decides: sched_waking fires only for a thread already in a sleep state (kernel try_to_wake_up: after
+    ttwu_state_match) and can precede its own switch-out by microseconds. check (a dict), if given, counts the gaps
+    where the row disagrees with the state. rows: segments sorted by t_in. Returns (wakes sorted by t_in, number of
+    segments merged)."""
     last, out, merged = {}, [], 0
     for r in rows:
         i = last.get(r.tid)
@@ -335,7 +338,13 @@ def merge_resumes(rows, wakeups_by_tid):
         prev = out[i]
         wk = wakeups_by_tid.get(r.tid, [])
         k = bisect.bisect_right(wk, prev.t_in)
-        if k < len(wk) and wk[k] <= r.t_in + EPS:
+        row = k < len(wk) and wk[k] <= r.t_in + EPS
+        st = (prev.state or "")[:1]
+        woken = (st != "R") if st else row
+        if st and check is not None and row != woken:
+            key = "slept_without_row" if woken else "preempted_with_row"
+            check[key] = check.get(key, 0) + 1
+        if woken:
             out.append(r); last[r.tid] = len(out) - 1
         else:
             out[i] = prev._replace(run=prev.run + r.run, t_end=r.t_end, state=r.state)
