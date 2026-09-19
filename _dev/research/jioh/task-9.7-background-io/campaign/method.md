@@ -81,3 +81,5 @@ Raw records per job (the perf text dumps, the `perf trace` output, the taskstats
 With this workflow in place no phase of `.github/workflows/meas-cli.yml` serves an archetype: its build phases are 9.6's `meas-build.yml`, its `clamscan` and indexer rescan are 9.6's `cpu-batch` phases, its tracker daemon phase measured the retired `background-crawler` (D5), and its `wget`, `tar`, `rsync` and `updatedb` phases measured the loads D1 and D5 replace. The workflow is removed when this campaign's tooling lands; its release `meas-ci-2026-08-28` stays for reference, and `meas-ci:cli:3` leaves the archetypes at fold-in.
 
 ## 9. Amendments
+
+- 2026-09-19, the stability rule (changelog D18) — amending §1 "Stability" before any run: the tolerance is the larger of 5 % of the mean and 1 µs, the trace's resolution, for the time medians (per-wake run, per-wake wait, network wait), and 5 % for bytes per wake; the rule holds only over at least five same-machine repeats (`kalibera-ismm13` §11), as 9.6 D23 and D24 state the shared criterion; the probe batch's first batch is at least five repeats.

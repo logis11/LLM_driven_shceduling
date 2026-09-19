@@ -346,10 +346,25 @@ def test_appinfo_takes_the_last_printed_block():
 # ---- pool: the first batch, the checks, the comparisons ----------------------------------
 
 def test_first_batch_is_the_smallest_count_that_passes_at_the_probe_spread():
-    # mean 100, sd 4: t(k-1) * 4 / sqrt(k) / 100 <= 0.05 first at k = 5 (2.776 * 4 / 2.236 = 4.97)
-    assert pool.first_batch([96.0, 100.0, 104.0]) == 5
-    assert pool.first_batch([100.0, 100.0, 100.0]) == 2
-    assert pool.first_batch([100.0]) is None
+    # mean 100, sd 6: t(k-1) * 6 / sqrt(k) / 100 <= 0.05 first at k = 9 (2.306 * 6 / 3 = 4.61; k = 8: 5.02)
+    assert pool.first_batch([94.0, 100.0, 106.0], None, 5) == 9
+    assert pool.first_batch([100.0, 100.0, 100.0], None, 5) == 5    # at least five repeats (D18, from 9.6 D24)
+    assert pool.first_batch([100.0], None, 5) is None
+
+
+def test_first_batch_takes_the_absolute_floor_for_small_medians():
+    # mean 10 µs, sd 1: 5 % is 0.5 µs, the floor 1 µs; t(k-1) / sqrt(k) <= 1 first at k = 7 (2.447 / 2.646 = 0.925)
+    assert pool.first_batch([9.0, 10.0, 11.0], 1.0, 5) == 7
+    assert pool.first_batch([9.0, 10.0, 11.0], None, 5) == 18
+
+
+def test_the_headline_rule_needs_five_repeats_and_floors_time_medians():
+    four = {1: 10.0, 2: 10.0, 3: 10.0, 4: 10.0}
+    assert not pool.headline_stability("run_us", four)["passes"]
+    assert pool.headline_stability("run_us", {**four, 5: 10.0})["passes"]
+    near = {1: 9.0, 2: 10.0, 3: 11.0, 4: 9.0, 5: 11.0, 6: 10.0, 7: 10.0}   # ±9 % of the mean, within 1 µs
+    assert pool.headline_stability("run_us", near)["passes"]
+    assert not pool.headline_stability("bytes_per_wake", near)["passes"]   # bytes carry no time floor
 
 
 def test_a_difference_inside_the_precision_is_not_resolved():

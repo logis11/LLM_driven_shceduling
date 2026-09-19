@@ -13,9 +13,11 @@ phase: every repeat is analysed (analyze.analyze_phase); the samples of all
 repeats are pooled into the quantile table (p1 … p99.9; µs, bytes for bytes per
 wake), over all the program's threads and per thread (comm#rank), with the
 per-repeat p50 as the spread (§5 "Distribution form"). Then: the stability
-rule on the program's headline medians (D14 (1), stability.py); in probe mode
-the first batch those repeats set — the smallest count at which every headline
-median passes at their spread (D14 (3)); the two checks (D15) and the
+rule on the program's headline medians (D14 (1), stability.py; with D18 the
+tolerance is the larger of 5 % and 1 µs for the time medians, over at least
+five repeats); in probe mode the first batch those repeats set — the smallest
+count, at least five, at which every headline median passes at their spread
+(D14 (3)); the two checks (D15) and the
 comparisons (D8, D6, D10, D12) as ratios of pooled medians with the per-repeat
 spread, a difference within ± TOLERANCE reported as not resolved (D14 (2)); and
 what §5 "Also reported" lists — the set check (D7), the D11 robustness line,
@@ -53,6 +55,10 @@ COMPARISONS = {"borg": [("borg-first-warm", "borg-first-cold", "warm against col
                "7z": [("7z-mmt8-warm", "7z-mmt8-cold", "warm against cold (D8)")],
                "steamcmd": [("steam-fresh-shaped", "steam-fresh-unshaped", "shaped against unshaped (D10)"),
                             ("steam-fresh-shaped", "steam-update-shaped", "fresh install against update (D12)")]}
+# D18 (9.6 D23, D24): the tolerance is the larger of TOLERANCE × mean and the trace's 1 µs for the time medians — bytes
+# per wake, a count of whole bytes, has no floor — and the rule holds only over at least five same-machine repeats
+ABS_FLOOR_US = 1.0
+MIN_REPEATS = 5
 SAMPLE_KEYS = ("run_us", "wait_us", "disk_us", "uninterruptible_us", "network_us", "sleep_us", "runnable_us", "bytes_per_wake")
 APPLIED_MBPS, NETWORK_TABLE_MBPS = 121.0, 128.9   # D11: the applied rate; the network table's byte-weighted median
 
@@ -76,16 +82,26 @@ def median_of(d):
     return statistics.median(v) if v else None
 
 
-def first_batch(values):
-    """D14 (3): the smallest repeat count at which the 95 % half-width of the across-repeat mean, at the spread of the
-    given repeats, is within TOLERANCE of the mean (t multiplier; normal beyond the table)."""
+def floor_of(key):
+    return None if key == "bytes_per_wake" else ABS_FLOOR_US
+
+
+def headline_stability(key, values_by_repeat):
+    return stability(values_by_repeat, floor_of(key), MIN_REPEATS)
+
+
+def first_batch(values, abs_floor=None, min_k=None):
+    """D14 (3) with D18: the smallest repeat count, at least min_k, at which the 95 % half-width of the across-repeat
+    mean, at the spread of the given repeats, is within the tolerance — the larger of TOLERANCE × mean and abs_floor
+    (t multiplier; normal beyond the table)."""
     v = [x for x in values if x]
     if len(v) < 2:
         return None
     m, sd = statistics.fmean(v), statistics.stdev(v)
-    for k in range(2, 201):
+    bound = max(TOLERANCE * m, abs_floor or 0.0)
+    for k in range(max(2, min_k or 2), 201):
         t = T975.get(k, 1.96 if k > max(T975) else None)
-        if t is not None and t * sd / k ** 0.5 / m <= TOLERANCE:
+        if t is not None and t * sd / k ** 0.5 <= bound:
             return k
     return None
 
@@ -184,9 +200,10 @@ def pool_app(app, reps):
         if P.get("missing") or key not in P.get("all", {}):
             continue
         vals = P["all"][key]["repeat_p50"]
-        crit[f"{ph} {label}"] = stability(vals)
-        fb[f"{ph} {label}"] = first_batch(list(vals.values()))
-    entry["stability"] = {"tolerance": TOLERANCE, "quantities": crit, "passes": bool(crit) and all(c["passes"] for c in crit.values())}
+        crit[f"{ph} {label}"] = headline_stability(key, vals)
+        fb[f"{ph} {label}"] = first_batch(list(vals.values()), floor_of(key), MIN_REPEATS)
+    entry["stability"] = {"tolerance": TOLERANCE, "abs_floor_us": ABS_FLOOR_US, "min_repeats": MIN_REPEATS, "quantities": crit,
+                          "passes": bool(crit) and all(c["passes"] for c in crit.values())}
     entry["first_batch"] = {"by_quantity": fb, "count": max(fb.values()) if fb and all(fb.values()) else None}
     entry["checks"] = checks(app, entry, per)
     entry["comparisons"] = comparisons(app, entry)
@@ -299,7 +316,8 @@ def render(out):
                         L.append(f"- repeat {k} network: " + json.dumps({x: n[x] for x in n if x not in ("calls_by_name_kind",)}))
             L.append("")
         st = E["stability"]
-        L += ["### Stability rule (D14)", "", f"**{'Holds' if st['passes'] else 'Does not hold yet'}** (tolerance {st['tolerance']:.0%}). "
+        L += ["### Stability rule (D14, D18)", "", f"**{'Holds' if st['passes'] else 'Does not hold yet'}** (tolerance the larger of "
+              f"{st['tolerance']:.0%} and {st['abs_floor_us']:g} µs for the time medians, at least {st['min_repeats']} repeats). "
               f"First batch at the spread of these repeats: {E['first_batch']['count']} {E['first_batch']['by_quantity']}.", "",
               "| quantity | repeats | mean | cv | 95 % half-width | leave-one-out | passes |", "|---|---|---|---|---|---|---|"]
         for q, c in st["quantities"].items():
