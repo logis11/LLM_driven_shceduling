@@ -305,6 +305,35 @@ def test_slice_profile_of_the_steady_phase(tmp_path):
     assert phase == "idle" and cpu == [0.1, 0.3, 0.0] and wakes == [0.1, 0.1, 0.0]
 
 
+def test_a_component_absent_from_a_repeat_is_sporadic_not_carried():
+    # 9.5 D43: carried only if its gap and run means exist in every repeat (two wakes in each repeat's phase); the
+    # residual is judged as a whole
+    import importlib
+    import sys
+    from array import array
+    saved = sys.modules.pop("analyze", None)
+    try:
+        pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+
+    def comm(wakes):   # per repeat: wake count, evenly spread gaps of 100 ms, runs of 0.1 ms
+        return {"wakes": dict(wakes), "threads": {r: 1 for r in wakes},
+                "gaps": {r: array("d", [100.0] * (n - 1)) for r, n in wakes.items() if n > 1},
+                "runs": {r: array("d", [0.1] * n) for r, n in wakes.items() if n},
+                "t_in": {r: array("d", [i * 0.1 for i in range(n)]) for r, n in wakes.items() if n}}
+    reps, spans = [1, 2, 3], {1: 100.0, 2: 100.0, 3: 100.0}
+    comms = {"main": comm({1: 150, 2: 150, 3: 150}), "tick": comm({1: 10, 2: 10, 3: 10}),
+             "dbus": comm({1: 0, 2: 6, 3: 0})}
+    chosen, residual, cov = pool.select_components(comms, spans, reps)
+    assert chosen == ["main", "tick"] and residual is None
+    assert cov["sporadic"] == [{"comm": "residual", "comms": ["dbus"], "repeats": [2], "wakes_per_s": 0.02}]
+    comms["dbus"] = comm({1: 3, 2: 6, 3: 2})   # present in every repeat: the residual is carried
+    chosen, residual, cov = pool.select_components(comms, spans, reps)
+    assert residual["comms"] == ["dbus"] and cov["sporadic"] == []
+
+
 def test_timehist_rows_with_and_without_the_state_column(tmp_path):
     p = tmp_path / "perf.idle.timehist.txt"
     p.write_text("           time    cpu  task name                       wait time  sch delay   run time  state\n"

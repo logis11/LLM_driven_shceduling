@@ -198,6 +198,12 @@ def entry(aid, spec, d):
         notes += " Outlook streams exist only in SWELL-KW's interruption conditions c2 and c3 (D12)."
     if approx:
         notes += " Bound by stated approximation, carrying these numbers unchanged (D11, D12): " + "; ".join(approx) + "."
+    sporadic = [(pn, ph.get("repeats", d["repeats"]), sp) for pn, ph in d["phases"].items()
+                for sp in (ph.get("components") or {}).get("sporadic", [])]
+    if sporadic:  # D43: a thread whose gap and run means do not exist in every repeat is reported, not carried
+        notes += " Sporadic wakes, not carried as components (D43): " + "; ".join(
+            f"`{sp['comm']}`" + (f" ({', '.join(sp['comms'])})" if "comms" in sp else "")
+            + f" in the {pn} phase, repeats {sp['repeats']} of {reps}, {sp['wakes_per_s']} wakes/s" for pn, reps, sp in sporadic) + "."
     out += ["      " + notes]
     return "\n".join(out)
 

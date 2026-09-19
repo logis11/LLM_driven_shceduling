@@ -134,7 +134,8 @@ def summary(samples_by_repeat):
 
 def select_components(comms, spans, reps):
     """D16: comms in descending mean wake rate until COVERAGE of the wakes; the remaining comms merged
-    into one residual component whose gaps are those of their merged wake times."""
+    into one residual component whose gaps are those of their merged wake times. D43: a component, the residual
+    included, whose gap and run means are missing in any repeat is listed under `sporadic`, not carried."""
     rate = {c: sum(cc["wakes"].get(r, 0) / spans[r] for r in reps) / len(reps) for c, cc in comms.items()}
     total = sum(rate.values())
     order = sorted(comms, key=lambda c: -rate[c])
@@ -156,8 +157,20 @@ def select_components(comms, spans, reps):
                     "wakes_per_s": [round(wakes_by_rep[i] / spans[r], 3) for i, r in enumerate(reps)],
                     "cpu_share": [round(sum(runs_by_rep[i]) / 1000 / spans[r], 5) for i, r in enumerate(reps)],
                     "gap_ms": summary(gaps_by_rep), "run_ms": summary(runs_by_rep)}
+    # D43: a component — the residual as a whole included — is carried only if its gap and run means exist in every
+    # repeat (it wakes at least twice in each repeat's phase): the rule tests each value by its per-repeat mean
+    # (kalibera-ismm13 §9.3), and D16's components are periodic; the rest is reported as sporadic, not carried
+    sporadic = []
+    for c in [c for c in chosen if not all(len(comms[c]["gaps"].get(r, [])) for r in reps)]:
+        chosen.remove(c)
+        sporadic.append({"comm": c, "repeats": [r for r in reps if comms[c]["wakes"].get(r, 0)], "wakes_per_s": round(rate[c], 4)})
+    if residual and not all(residual["gap_ms"]["repeat_n"]):
+        sporadic.append({"comm": "residual", "comms": rest, "repeats": [r for r, w in zip(reps, residual["wakes_per_s"]) if w],
+                         "wakes_per_s": round(sum(rate[c] for c in rest), 4)})
+        residual = None
+    cum = sum(rate[c] for c in chosen)
     return chosen, residual, {"coverage": COVERAGE, "covered_share": round(cum / total, 4) if total else None,
-                              "total_wakes_per_s": round(total, 3)}
+                              "total_wakes_per_s": round(total, 3), "sporadic": sporadic}
 
 
 def main():
@@ -302,6 +315,9 @@ def main():
                 o = ph["operation"]
                 print(f"     operation {o['name']}: ok {o['n_ok']} failed {o['n_failed']}; duration p50/p90/p99 {o['duration_ms']['p50']}/{o['duration_ms']['p90']}/{o['duration_ms']['p99']} ms ({o['duration_ms']['repeat_p50']})")
             print(f"     roles r{preps[0]}: {ph['roles'][preps[0]]}")
+            for sp in ph["components"].get("sporadic", []):
+                print(f"     sporadic, not carried (D43): {sp['comm']}{' ' + str(sp['comms']) if 'comms' in sp else ''}, "
+                      f"wakes in repeats {sp['repeats']}, {sp['wakes_per_s']} wakes/s")
             for comm, c in list(ph["threads"].items())[:5]:
                 print(f"     {comm:16s} thr {c['threads']} wakes/s {c['wakes_per_s']} gap p50 {c['gap_ms']['p50']} ({c['gap_ms']['repeat_p50']}) run p50/p90/p99 {c['run_ms']['p50']}/{c['run_ms']['p90']}/{c['run_ms']['p99']}")
             if "per_input" in ph:
