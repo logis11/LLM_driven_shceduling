@@ -58,10 +58,24 @@ def _t(s):
     return datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%SZ")
 
 
+def run_jobs(run_id):
+    """The run's jobs as gh reports them; a completed run's list never changes, so it is kept under the work directory
+    and not asked for again (each pool and each watcher pass reads every run since N: 2026-09-19, the account's API
+    rate limit was reached with ~150 runs read a pool)."""
+    cache = os.path.join(WORK, "jobs", f"{run_id}.json")
+    if os.path.exists(cache):
+        return json.load(open(cache))
+    data = gh("run", "view", str(run_id), "--json", "jobs,status") or {}
+    if data.get("status") == "completed":
+        os.makedirs(os.path.dirname(cache), exist_ok=True)
+        json.dump(data, open(cache, "w"))
+    return data
+
+
 def jobs(family, run_id):
     """The run's measurement jobs as dicts: app (None for build), k, state, seconds."""
     out = []
-    for j in (gh("run", "view", str(run_id), "--json", "jobs") or {}).get("jobs", []):
+    for j in run_jobs(run_id).get("jobs", []):
         m = re.fullmatch(r"run \((?:(.+), )?(\d+)\)", j["name"])
         if not m or j.get("conclusion") == "skipped":
             continue
