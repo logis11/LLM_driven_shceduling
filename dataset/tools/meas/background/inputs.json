@@ -1,0 +1,23 @@
+{
+  "note": "Mahoney's 10 GB benchmark set and its published subsets (method §2; changelog D7), in the page's link order (http://mattmahoney.net/dc/10gb.html, last update July 25, 2019). archive_sha256 and manifest_sha256 are fixed from the dry run's records; null means unpinned, and a job then records what it fetched. manifest_sha256 is the SHA-256 of the extracted tree's manifest text (fileset.py manifest).",
+  "sets": {
+    "10gb": {
+      "urls": ["http://mattmahoney.net/dc/10gb.zpaq", "https://s3.amazonaws.com/10gb-benchmark/10gb.zpaq"],
+      "archive_bytes": 3701584921,
+      "archive_sha256": null,
+      "manifest_sha256": null
+    },
+    "1gb": {
+      "urls": ["https://s3.amazonaws.com/10gb-benchmark/1gb.zpaq", "http://mattmahoney.net/dc/1gb.zpaq"],
+      "archive_bytes": null,
+      "archive_sha256": null,
+      "manifest_sha256": null
+    },
+    "100mb": {
+      "urls": ["https://s3.amazonaws.com/10gb-benchmark/100mb.zpaq", "http://mattmahoney.net/dc/100mb.zpaq"],
+      "archive_bytes": null,
+      "archive_sha256": null,
+      "manifest_sha256": null
+    }
+  }
+}

@@ -1,0 +1,354 @@
+#!/usr/bin/env python3
+"""Pool the 9.7 background campaign's repeats into the tables the archetypes take
+(method §5; changelog D13–D15) and render them as results.md.
+
+pool.py <artifacts-dir> <out.json> [--md results.md] [--cpu-model TEXT] [--tag TAG]
+
+<artifacts-dir> holds one folder per (program, repeat) named
+meas-background-<app>-r<k>-<mode> (as uploaded), at any depth, so the runs of
+one campaign can be downloaded side by side into one folder each. A job the
+machine gate stopped (report.json gate=wrong-machine) and, with --cpu-model, a
+repeat measured on another CPU model are listed, not pooled. Per program and
+phase: every repeat is analysed (analyze.analyze_phase); the samples of all
+repeats are pooled into the quantile table (p1 … p99.9; µs, bytes for bytes per
+wake), over all the program's threads and per thread (comm#rank), with the
+per-repeat p50 as the spread (§5 "Distribution form"). Then: the stability
+rule on the program's headline medians (D14 (1), stability.py); in probe mode
+the first batch those repeats set — the smallest count at which every headline
+median passes at their spread (D14 (3)); the two checks (D15) and the
+comparisons (D8, D6, D10, D12) as ratios of pooled medians with the per-repeat
+spread, a difference within ± TOLERANCE reported as not resolved (D14 (2)); and
+what §5 "Also reported" lists — the set check (D7), the D11 robustness line,
+the achieved download rate, the cached fraction of every warm phase.
+"""
+
+import argparse
+import glob
+import json
+import os
+import re
+import statistics
+import sys
+
+TOOLS = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))   # dataset/tools
+if TOOLS not in sys.path:
+    sys.path.insert(0, TOOLS)
+from meas.background import analyze  # noqa: E402
+from meas.stability import stability, TOLERANCE, T975  # noqa: E402
+pct, QUANTILE_PROBS = analyze.pct, analyze.QUANTILE_PROBS
+
+NAME = re.compile(r"^meas-background-(borg|7z|steamcmd)-r(\d+)-(dry|probe|full)$")
+PHASES = {"borg": ("borg-first-warm", "borg-repeat-warm", "borg-first-cold", "borg-repeat-cold"),
+          "7z": ("7z-mmt8-warm", "7z-mmt1-warm", "7z-mmt8-cold"),
+          "steamcmd": ("steam-fresh-shaped", "steam-fresh-untraced", "steam-fresh-unshaped", "steam-update-shaped")}
+# D14 (1): the medians each archetype carries, pooled over all the program's threads
+HEADLINE = {"borg": [("borg-first-warm", "run_us", "run per wake (µs)"), ("borg-first-warm", "wait_us", "wait per wake (µs)")],
+            "7z": [("7z-mmt8-warm", "run_us", "run per wake (µs)"), ("7z-mmt8-warm", "wait_us", "wait per wake (µs)")],
+            "steamcmd": [("steam-fresh-shaped", "run_us", "run per wake (µs)"), ("steam-fresh-shaped", "network_us", "network wait (µs)"),
+                         ("steam-fresh-shaped", "bytes_per_wake", "bytes per wake")]}
+# results only: (a, b, what) — the headline medians side by side
+COMPARISONS = {"borg": [("borg-first-warm", "borg-first-cold", "warm against cold, first backup (D8)"),
+                        ("borg-repeat-warm", "borg-repeat-cold", "warm against cold, repeat backup (D8)"),
+                        ("borg-first-warm", "borg-repeat-warm", "first against repeat backup (D6)")],
+               "7z": [("7z-mmt8-warm", "7z-mmt8-cold", "warm against cold (D8)")],
+               "steamcmd": [("steam-fresh-shaped", "steam-fresh-unshaped", "shaped against unshaped (D10)"),
+                            ("steam-fresh-shaped", "steam-update-shaped", "fresh install against update (D12)")]}
+SAMPLE_KEYS = ("run_us", "wait_us", "disk_us", "uninterruptible_us", "network_us", "sleep_us", "runnable_us", "bytes_per_wake")
+APPLIED_MBPS, NETWORK_TABLE_MBPS = 121.0, 128.9   # D11: the applied rate; the network table's byte-weighted median
+
+
+def qtable(values):
+    if not values:
+        return None
+    v = sorted(values)
+    return [round(pct(v, q), 1) for q in QUANTILE_PROBS]
+
+
+def pooled(by_repeat):
+    allv = [x for vs in by_repeat.values() for x in vs]
+    return {"n": len(allv), "q": qtable(allv), "p50": round(pct(sorted(allv), .5), 1) if allv else None,
+            "repeat_p50": {r: (round(pct(sorted(vs), .5), 1) if vs else None) for r, vs in sorted(by_repeat.items())},
+            "repeat_n": {r: len(vs) for r, vs in sorted(by_repeat.items())}}
+
+
+def median_of(d):
+    v = [x for x in d.values() if x is not None]
+    return statistics.median(v) if v else None
+
+
+def first_batch(values):
+    """D14 (3): the smallest repeat count at which the 95 % half-width of the across-repeat mean, at the spread of the
+    given repeats, is within TOLERANCE of the mean (t multiplier; normal beyond the table)."""
+    v = [x for x in values if x]
+    if len(v) < 2:
+        return None
+    m, sd = statistics.fmean(v), statistics.stdev(v)
+    for k in range(2, 201):
+        t = T975.get(k, 1.96 if k > max(T975) else None)
+        if t is not None and t * sd / k ** 0.5 / m <= TOLERANCE:
+            return k
+    return None
+
+
+def compare(a, b):
+    """b against a: the ratio, and the reading under D14 (2)."""
+    if a in (None, 0) or b is None:
+        return {"a": a, "b": b, "ratio": None, "reading": None}
+    r = b / a
+    return {"a": a, "b": b, "ratio": round(r, 4), "reading": "not resolved" if abs(r - 1) <= TOLERANCE else "difference"}
+
+
+def ratio_by_repeat(num, den):
+    return {r: (round(num[r] / den[r], 4) if num.get(r) and den.get(r) else None) for r in sorted(set(num) & set(den))}
+
+
+def kvfile(path):
+    try:
+        return dict(line.rstrip("\n").split("=", 1) for line in open(path) if "=" in line)
+    except OSError:
+        return {}
+
+
+def find_runs(root, cpu_model):
+    runs, gated, other = {}, [], []
+    for d in sorted(glob.glob(os.path.join(root, "**", "meas-background-*"), recursive=True)):
+        m = NAME.match(os.path.basename(d))
+        if not m or not os.path.exists(os.path.join(d, "report.json")):
+            continue
+        app, k, mode = m.group(1), int(m.group(2)), m.group(3)
+        rpt = json.load(open(os.path.join(d, "report.json")))
+        if rpt.get("gate") == "wrong-machine":
+            gated.append({"app": app, "repeat": k, "cpu_model": rpt.get("machine.model"), "path": os.path.relpath(d, root)})
+            continue
+        spec = json.load(open(os.path.join(d, "spec.json"))) if os.path.exists(os.path.join(d, "spec.json")) else {}
+        model = spec.get("cpu_model") or ""
+        if cpu_model and cpu_model not in model:
+            other.append({"app": app, "repeat": k, "cpu_model": model, "path": os.path.relpath(d, root)})
+            continue
+        runs.setdefault(app, {})[k] = {"dir": d, "mode": mode, "report": rpt, "spec": spec}
+    return runs, gated, other
+
+
+def pool_app(app, reps):
+    ks = sorted(reps)
+    per = {}
+    for k in ks:
+        d = reps[k]["dir"]
+        kv = kvfile(os.path.join(d, "report.kv"))
+        meas_cpu = int(reps[k]["report"].get("pin.load_cpu", 3))
+        edges = analyze.load_edges(d)
+        phases = [p for p in analyze.phases_in(d)]
+        per[k] = {"kv": kv, "phases": {ph: analyze.analyze_phase(d, ph, meas_cpu, edges, kv) for ph in phases}}
+    spec = {k: reps[k]["spec"] for k in ks}
+    entry = {"repeats": ks, "mode": {k: reps[k]["mode"] for k in ks},
+             "cpu_model": {k: spec[k].get("cpu_model") for k in ks},
+             "kernel": {k: ((spec[k].get("uname") or "").split() + [None, None, None])[2] for k in ks},
+             "run_id": {k: (spec[k].get("github_run") or {}).get("GITHUB_RUN_ID") for k in ks},
+             "versions": {k: {x: per[k]["kv"].get(x) for x in ("borg.version", "7z.version", "zpaq.version", "steamcmd.version",
+                                                              "steam.app", "steam.buildid", "perf.version", "kernel")
+                             if per[k]["kv"].get(x)} for k in ks},
+             "phases": {}}
+    all_phases = [p for p in PHASES[app] if any(p in per[k]["phases"] for k in ks)]
+    all_phases += sorted({p for k in ks for p in per[k]["phases"]} - set(all_phases))
+    for ph in all_phases:
+        have = [k for k in ks if ph in per[k]["phases"] and "missing" not in per[k]["phases"][ph]]
+        if not have:
+            entry["phases"][ph] = {"missing": True}
+            continue
+        A = {k: per[k]["phases"][ph] for k in have}
+        P = {"repeats": have, "cmd_wall_s": {k: A[k]["cmd_wall_s"] for k in have}, "rc": {k: A[k]["rc"] for k in have},
+             "program_cpu_us": {k: A[k]["program_cpu_us"] for k in have},
+             "program_taskstats_cpu_us": {k: A[k]["program_taskstats_cpu_us"] for k in have},
+             "resumes_merged": {k: A[k]["resumes_merged"] for k in have},
+             "taskstats_enobufs": {k: A[k]["taskstats_trailer"].get("enobufs") for k in have},
+             "all": {s: pooled({k: A[k]["_samples"]["all"][s] for k in have}) for s in SAMPLE_KEYS},
+             "threads": {},
+             "processes": {k: [{x: p[x] for x in ("pid", "role", "exec", "threads", "perf_cpu_us", "taskstats_cpu_us",
+                                                  "perf_over_taskstats", "disk")} for p in A[k]["processes"] if p["program"] or p["disk"]]
+                           for k in have},
+             "outside_on_measured_cpu": {k: dict(list(A[k]["outside_on_measured_cpu"].items())[:5]) for k in have}}
+        if any("cached_fraction" in A[k] for k in have):
+            P["cached_fraction"] = {k: A[k].get("cached_fraction") for k in have}
+        if any("network" in A[k] for k in have):
+            P["network"] = {k: A[k].get("network") for k in have}
+        keys = sorted({t for k in have for t in A[k]["_samples"]["threads"]},
+                      key=lambda t: -sum(A[k]["threads"].get(t, {}).get("cpu_us", 0) for k in have))
+        for t in keys:
+            P["threads"][t] = {"cpu_us": {k: A[k]["threads"].get(t, {}).get("cpu_us") for k in have},
+                               **{s: pooled({k: A[k]["_samples"]["threads"].get(t, {}).get(s, []) for k in have}) for s in SAMPLE_KEYS}}
+        entry["phases"][ph] = P
+    # D14: the stability rule on the headline medians; in probe mode the first batch they set
+    crit, fb = {}, {}
+    for ph, key, label in HEADLINE[app]:
+        P = entry["phases"].get(ph, {})
+        if P.get("missing") or key not in P.get("all", {}):
+            continue
+        vals = P["all"][key]["repeat_p50"]
+        crit[f"{ph} {label}"] = stability(vals)
+        fb[f"{ph} {label}"] = first_batch(list(vals.values()))
+    entry["stability"] = {"tolerance": TOLERANCE, "quantities": crit, "passes": bool(crit) and all(c["passes"] for c in crit.values())}
+    entry["first_batch"] = {"by_quantity": fb, "count": max(fb.values()) if fb and all(fb.values()) else None}
+    entry["checks"] = checks(app, entry, per)
+    entry["comparisons"] = comparisons(app, entry)
+    entry["also"] = also(app, entry, per)
+    return entry
+
+
+def checks(app, entry, per):
+    """D15: (a) 7z at one thread against eight — CPU per byte, per-wake run and wait; (b) SteamCMD untraced against
+    traced — the program's CPU total from exit accounting and the download's duration."""
+    ph = entry["phases"]
+    out = {}
+    if app == "7z":
+        a, b = ph.get("7z-mmt8-warm", {}), ph.get("7z-mmt1-warm", {})
+        if a and b and not a.get("missing") and not b.get("missing"):
+            nb = {k: int(per[k]["kv"].get("set.bytes") or 0) or None for k in entry["repeats"]}
+            cpb_a = {k: (v / nb[k] if v and nb.get(k) else None) for k, v in a["program_cpu_us"].items()}
+            cpb_b = {k: (v / nb[k] if v and nb.get(k) else None) for k, v in b["program_cpu_us"].items()}
+            out["mmt1 against mmt8: CPU per byte"] = {**compare(median_of(cpb_a), median_of(cpb_b)), "per_repeat": ratio_by_repeat(cpb_b, cpb_a)}
+            for key, label in (("run_us", "run per wake"), ("wait_us", "wait per wake")):
+                out[f"mmt1 against mmt8: {label}"] = {**compare(a["all"][key]["p50"], b["all"][key]["p50"]),
+                                                      "per_repeat": ratio_by_repeat(b["all"][key]["repeat_p50"], a["all"][key]["repeat_p50"])}
+    if app == "steamcmd":
+        a, b = ph.get("steam-fresh-shaped", {}), ph.get("steam-fresh-untraced", {})
+        if a and b and not a.get("missing") and not b.get("missing"):
+            for key, label in (("program_taskstats_cpu_us", "CPU total (exit accounting)"), ("cmd_wall_s", "download duration")):
+                out[f"untraced against traced: {label}"] = {**compare(median_of(a[key]), median_of(b[key])),
+                                                           "per_repeat": ratio_by_repeat(b[key], a[key])}
+    return out
+
+
+def comparisons(app, entry):
+    ph = entry["phases"]
+    out = {}
+    for pa, pb, what in COMPARISONS[app]:
+        a, b = ph.get(pa, {}), ph.get(pb, {})
+        if not a or not b or a.get("missing") or b.get("missing"):
+            continue
+        rows = {}
+        for _h, key, label in HEADLINE[app]:
+            if a["all"][key]["n"] and b["all"][key]["n"]:
+                rows[label] = {**compare(a["all"][key]["p50"], b["all"][key]["p50"]),
+                               "per_repeat": ratio_by_repeat(b["all"][key]["repeat_p50"], a["all"][key]["repeat_p50"])}
+        rows["CPU total (perf)"] = {**compare(median_of(a["program_cpu_us"]), median_of(b["program_cpu_us"])),
+                                    "per_repeat": ratio_by_repeat(b["program_cpu_us"], a["program_cpu_us"])}
+        rows["duration"] = {**compare(median_of(a["cmd_wall_s"]), median_of(b["cmd_wall_s"])),
+                            "per_repeat": ratio_by_repeat(b["cmd_wall_s"], a["cmd_wall_s"])}
+        out[f"{what}: {pb} against {pa}"] = rows
+    return out
+
+
+def also(app, entry, per):
+    out = {}
+    ks = entry["repeats"]
+    if app in ("borg", "7z"):
+        out["set_check"] = {k: {x[len("set."):]: per[k]["kv"].get(x) for x in per[k]["kv"] if x.startswith("set.")} for k in ks}
+    if app == "steamcmd":
+        out["d11_robustness"] = {"applied_mbps": APPLIED_MBPS, "network_table_byte_weighted_median_mbps": NETWORK_TABLE_MBPS,
+                                 "difference": round(NETWORK_TABLE_MBPS / APPLIED_MBPS - 1, 4)}
+        out["achieved_mbps"] = {ph: {k: (P.get("network", {}).get(k) or {}).get("achieved_mbps_counters") for k in P["repeats"]}
+                                for ph, P in entry["phases"].items() if not P.get("missing")}
+        out["shaping"] = {k: {x: per[k]["kv"].get(x) for x in per[k]["kv"] if x.startswith(("tc.", "shape."))} for k in ks}
+    cached = {ph: P["cached_fraction"] for ph, P in entry["phases"].items() if not P.get("missing") and "cached_fraction" in P}
+    if cached:
+        out["cached_fraction"] = cached
+    return out
+
+
+# ---- results.md ---------------------------------------------------------------------
+
+def fmt_q(q):
+    return " / ".join("–" if x is None else (f"{x:.0f}" if abs(x) >= 100 else f"{x:.1f}") for x in q) if q else "–"
+
+
+def render(out):
+    L = [f"# 9.7 background campaign — pooled results{' (' + out['tag'] + ')' if out.get('tag') else ''}", "",
+         f"Machine {out.get('machine') or 'any'}; stopped by the machine gate {len(out['gated_out'])}; other-model repeats "
+         f"{len(out['other_machine'])}. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9, times in µs, "
+         f"bytes per wake in bytes; the spread is the per-repeat p50. Rules: method §5.", ""]
+    for app, E in out["runs"].items():
+        L += [f"## {app}", "", f"Repeats {E['repeats']}; mode {E['mode']}; CPU {E['cpu_model']}; kernel {E['kernel']}; runs {E['run_id']}.", ""]
+        for k, v in E["versions"].items():
+            L.append(f"- repeat {k}: {v}")
+        L.append("")
+        for ph, P in E["phases"].items():
+            if P.get("missing"):
+                L += [f"### {ph}", "", "missing", ""]
+                continue
+            L += [f"### {ph}", "",
+                  f"command s {P['cmd_wall_s']}; rc {P['rc']}; program CPU µs (perf) {P['program_cpu_us']}; (taskstats) {P['program_taskstats_cpu_us']}; "
+                  f"resumes merged {P['resumes_merged']}; ENOBUFS {P['taskstats_enobufs']}"
+                  + (f"; cached fraction {P['cached_fraction']}" if "cached_fraction" in P else ""), "",
+                  "| threads | quantity | n | quantiles | spread (per-repeat p50) |", "|---|---|---|---|---|"]
+            for s in SAMPLE_KEYS:
+                x = P["all"][s]
+                if x["n"]:
+                    L.append(f"| all | {s} | {x['n']} | {fmt_q(x['q'])} | {x['repeat_p50']} |")
+            for t, T in list(P["threads"].items())[:12]:
+                for s in ("run_us", "wait_us", "disk_us", "network_us", "bytes_per_wake"):
+                    x = T[s]
+                    if x["n"]:
+                        L.append(f"| `{t}` | {s} | {x['n']} | {fmt_q(x['q'])} | {x['repeat_p50']} |")
+            L.append("")
+            for k, procs in P["processes"].items():
+                for p in procs:
+                    L.append(f"- repeat {k}: `{p['role']}` [{p['pid']}] {p['exec']} threads {p['threads']}; perf/taskstats CPU {p['perf_over_taskstats']}; disk {p['disk']}")
+            if "network" in P:
+                for k, n in P["network"].items():
+                    if n:
+                        L.append(f"- repeat {k} network: " + json.dumps({x: n[x] for x in n if x not in ("calls_by_name_kind",)}))
+            L.append("")
+        st = E["stability"]
+        L += ["### Stability rule (D14)", "", f"**{'Holds' if st['passes'] else 'Does not hold yet'}** (tolerance {st['tolerance']:.0%}). "
+              f"First batch at the spread of these repeats: {E['first_batch']['count']} {E['first_batch']['by_quantity']}.", "",
+              "| quantity | repeats | mean | cv | 95 % half-width | leave-one-out | passes |", "|---|---|---|---|---|---|---|"]
+        for q, c in st["quantities"].items():
+            hw = "–" if c["half_width"] is None else f"±{c['half_width']:.1%}"
+            cv = "–" if c["cv"] is None else f"{c['cv']:.1%}"
+            lo = "–" if c["leave_one_out"] is None else f"{c['leave_one_out']:.1%}"
+            L.append(f"| {q} | {c['k']} | {c['mean']} | {cv} | {hw} | {lo} | {'yes' if c['passes'] else 'no'} |")
+        L.append("")
+        if E["checks"]:
+            L += ["### Checks (D15)", ""]
+            for q, c in E["checks"].items():
+                L.append(f"- {q}: {c['ratio']} — {c['reading']} (per repeat {c['per_repeat']})")
+            L.append("")
+        if E["comparisons"]:
+            L += ["### Comparisons (results only)", ""]
+            for what, rows in E["comparisons"].items():
+                L.append(f"- {what}: " + "; ".join(f"{q} {c['ratio']} ({c['reading']})" for q, c in rows.items()))
+            L.append("")
+        if E["also"]:
+            L += ["### Also reported", ""]
+            for q, v in E["also"].items():
+                L.append(f"- {q}: {v}")
+            L.append("")
+    return "\n".join(L)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("artifacts"); ap.add_argument("out"); ap.add_argument("--md")
+    ap.add_argument("--cpu-model", default="", help="pool only repeats whose CPU model contains this text")
+    ap.add_argument("--tag", default="", help="the campaign tag, meas-ci:background:<launch date of the first batch>")
+    args = ap.parse_args()
+    runs, gated, other = find_runs(args.artifacts, args.cpu_model)
+    if not runs:
+        print("no repeats found", file=sys.stderr)
+        return 1
+    out = {"tag": args.tag or None, "machine": args.cpu_model or None, "gated_out": gated, "other_machine": other, "runs": {}}
+    for app in ("borg", "7z", "steamcmd"):
+        if app in runs:
+            out["runs"][app] = E = pool_app(app, runs[app])
+            st = E["stability"]
+            print(f"== {app}: repeats {E['repeats']}; stability {'holds' if st['passes'] else 'does not hold yet'}; first batch {E['first_batch']['count']}")
+            for q, c in st["quantities"].items():
+                print(f"   {q}: k {c['k']} mean {c['mean']} half-width {c['half_width']}")
+    json.dump(out, open(args.out, "w"), indent=1)
+    if args.md:
+        open(args.md, "w").write(render(out))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -1,0 +1,80 @@
+name: meas-background
+
+# 9.7 campaign: file-backup (borg), file-archiver (7z) and game-download
+# (SteamCMD), pinned single-core (research-slice changelog D1–D17; method
+# _dev/research/jioh/task-9.7-background-io/campaign/method.md). Started by a
+# push changing .github/campaign-background.json, which names the programs, the
+# repeats (one list for every program or a map program -> list), the CPU model,
+# the mode (dry | probe | full) and the run settings. Registry tag
+# meas-ci:background:<launch date of the first batch> (9.5 D27). One artifact
+# per (program, repeat).
+
+on:
+  push:
+    branches: [jioh/dataset-rebuild]
+    paths: [.github/campaign-background.json]
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      mode: ${{ steps.plan.outputs.mode }}
+      cpu_model: ${{ steps.plan.outputs.cpu_model }}
+      count: ${{ steps.plan.outputs.count }}
+      work_root: ${{ steps.plan.outputs.work_root }}
+      steam_app: ${{ steps.plan.outputs.steam_app }}
+      steam_update_from: ${{ steps.plan.outputs.steam_update_from }}
+      steam_update_to: ${{ steps.plan.outputs.steam_update_to }}
+      steam_dry_app: ${{ steps.plan.outputs.steam_dry_app }}
+      archiver_set: ${{ steps.plan.outputs.archiver_set }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        run: |
+          python3 - >> "$GITHUB_OUTPUT" <<'PY'
+          import json
+          c = json.load(open(".github/campaign-background.json"))
+          reps = c.get("repeats", [])
+          inc = [{"app": a, "repeat": r} for a in c.get("apps", []) for r in (reps.get(a, []) if isinstance(reps, dict) else reps)]
+          print("matrix=" + json.dumps({"include": inc}))
+          print("mode=" + c.get("mode", "full"))
+          print("cpu_model=" + c.get("cpu_model", ""))
+          print("count=" + str(len(inc)))
+          for k, d in (("work_root", "auto"), ("steam_app", "232250"), ("steam_update_from", ""), ("steam_update_to", "public"),
+                       ("steam_dry_app", "smallest"), ("archiver_set", "10gb")):
+              print(f"{k}={c.get(k, d)}")
+          PY
+  run:
+    needs: plan
+    if: needs.plan.outputs.count != '0'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash dataset/tools/meas/background/run.sh ${{ matrix.app }} ${{ matrix.repeat }} ${{ needs.plan.outputs.mode }}
+        env:
+          MEAS_OUT: /tmp/meas
+          MEAS_CPU_MODEL: ${{ needs.plan.outputs.cpu_model }}
+          MEAS_WORK_ROOT: ${{ needs.plan.outputs.work_root }}
+          MEAS_STEAM_APP: ${{ needs.plan.outputs.steam_app }}
+          MEAS_STEAM_UPDATE_FROM: ${{ needs.plan.outputs.steam_update_from }}
+          MEAS_STEAM_UPDATE_TO: ${{ needs.plan.outputs.steam_update_to }}
+          MEAS_STEAM_DRY_APP: ${{ needs.plan.outputs.steam_dry_app }}
+          MEAS_ARCHIVER_SET: ${{ needs.plan.outputs.archiver_set }}
+      - name: own the output
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" /tmp/meas && sudo chmod -R a+rX /tmp/meas
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meas-background-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}
+          path: /tmp/meas
+          if-no-files-found: error
