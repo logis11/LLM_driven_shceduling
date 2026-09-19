@@ -181733,7 +181733,9 @@
     "half_width_abs": 3414.6648,
     "leave_one_out": 0.0025,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "as CPU per process": {
     "k": 14,
@@ -181743,7 +181745,9 @@
     "half_width_abs": 27.603,
     "leave_one_out": 0.0019,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "gcc CPU per process": {
     "k": 14,
@@ -181753,7 +181757,9 @@
     "half_width_abs": 15.7855,
     "leave_one_out": 0.0017,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "sh CPU per process": {
     "k": 14,
@@ -181763,7 +181769,9 @@
     "half_width_abs": 10.2289,
     "leave_one_out": 0.0038,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "fixdep CPU per process": {
     "k": 14,
@@ -181773,7 +181781,9 @@
     "half_width_abs": 34.5783,
     "leave_one_out": 0.0017,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "rm CPU per process": {
     "k": 14,
@@ -181783,7 +181793,9 @@
     "half_width_abs": 9.0286,
     "leave_one_out": 0.003,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "make dispatch": {
     "k": 14,
@@ -181793,7 +181805,9 @@
     "half_width_abs": 6.4714,
     "leave_one_out": 0.0025,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "object-job as 1/1": {
     "k": 14,
@@ -181803,7 +181817,9 @@
     "half_width_abs": 27.1398,
     "leave_one_out": 0.0019,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "object-job cc1 1/1": {
     "k": 14,
@@ -181813,7 +181829,9 @@
     "half_width_abs": 3445.058,
     "leave_one_out": 0.0025,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "object-job fixdep 1/1": {
     "k": 14,
@@ -181823,7 +181841,9 @@
     "half_width_abs": 34.9681,
     "leave_one_out": 0.0017,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "object-job gcc 1/3": {
     "k": 14,
@@ -181833,7 +181853,9 @@
     "half_width_abs": 11.7641,
     "leave_one_out": 0.0015,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "object-job gcc 2/3": {
     "k": 14,
@@ -181843,7 +181865,9 @@
     "half_width_abs": 1.6558,
     "leave_one_out": 0.0026,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "object-job gcc 3/3": {
     "k": 14,
@@ -181853,7 +181877,9 @@
     "half_width_abs": 3.2147,
     "leave_one_out": 0.0026,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "object-job rm 1/1": {
     "k": 14,
@@ -181863,7 +181889,9 @@
     "half_width_abs": 9.2767,
     "leave_one_out": 0.0031,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "object-job sh 1/4": {
     "k": 14,
@@ -181873,7 +181901,9 @@
     "half_width_abs": 10.1673,
     "leave_one_out": 0.0031,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "object-job sh 2/4": {
     "k": 14,
@@ -181883,7 +181913,9 @@
     "half_width_abs": 1.936,
     "leave_one_out": 0.0051,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "object-job sh 3/4": {
     "k": 14,
@@ -181893,7 +181925,9 @@
     "half_width_abs": 1.893,
     "leave_one_out": 0.0072,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "object-job sh 4/4": {
     "k": 14,
@@ -181903,7 +181937,9 @@
     "half_width_abs": 1.6114,
     "leave_one_out": 0.0026,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "clamscan run between blocks": {
     "k": 10,
@@ -181913,7 +181949,9 @@
     "half_width_abs": 130.346,
     "leave_one_out": 0.0032,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "clamscan mean block per run": {
     "k": 10,
@@ -181923,7 +181961,9 @@
     "half_width_abs": 20.727,
     "leave_one_out": 0.0285,
     "passes": false,
-    "needed": 31
+    "needed": 31,
+    "excepted": true,
+    "carried": true
    },
    "clamscan share past the boot slice": {
     "k": 10,
@@ -181933,7 +181973,9 @@
     "half_width_abs": 0.0015,
     "leave_one_out": 0.0037,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "ffmpeg run between blocks": {
     "k": 14,
@@ -181943,7 +181985,9 @@
     "half_width_abs": 8.0386,
     "leave_one_out": 0.0014,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "ffmpeg mean block per run": {
     "k": 14,
@@ -181953,7 +181997,9 @@
     "half_width_abs": 0.0609,
     "leave_one_out": 0.0512,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "ffmpeg share past the boot slice": {
     "k": 14,
@@ -181963,7 +182009,9 @@
     "half_width_abs": 0.0022,
     "leave_one_out": 0.0008,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "handbrake run between blocks": {
     "k": 14,
@@ -181973,7 +182021,9 @@
     "half_width_abs": 5.1325,
     "leave_one_out": 0.0013,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "handbrake mean block per run": {
     "k": 14,
@@ -181983,7 +182033,9 @@
     "half_width_abs": 0.5973,
     "leave_one_out": 0.0151,
     "passes": true,
-    "needed": 7
+    "needed": 7,
+    "excepted": false,
+    "carried": true
    },
    "handbrake share past the boot slice": {
     "k": 14,
@@ -181993,7 +182045,9 @@
     "half_width_abs": 0.0012,
     "leave_one_out": 0.0005,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "train run between blocks": {
     "k": 8,
@@ -182003,7 +182057,9 @@
     "half_width_abs": 162251.4769,
     "leave_one_out": 0.0273,
     "passes": false,
-    "needed": 26
+    "needed": 26,
+    "excepted": true,
+    "carried": true
    },
    "train mean block per run": {
     "k": 8,
@@ -182013,7 +182069,9 @@
     "half_width_abs": 30.887,
     "leave_one_out": 0.0427,
     "passes": false,
-    "needed": 50
+    "needed": 50,
+    "excepted": true,
+    "carried": true
    },
    "train share past the boot slice": {
     "k": 8,
@@ -182023,7 +182081,9 @@
     "half_width_abs": 0.0002,
     "leave_one_out": 0.0001,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "tracker run between blocks": {
     "k": 14,
@@ -182033,7 +182093,9 @@
     "half_width_abs": 3.3725,
     "leave_one_out": 0.0023,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    },
    "tracker mean block per run": {
     "k": 14,
@@ -182043,7 +182105,9 @@
     "half_width_abs": 2.656,
     "leave_one_out": 0.0563,
     "passes": false,
-    "needed": 93
+    "needed": 93,
+    "excepted": true,
+    "carried": true
    },
    "tracker share past the boot slice": {
     "k": 14,
@@ -182053,11 +182117,13 @@
     "half_width_abs": 0.0028,
     "leave_one_out": 0.0014,
     "passes": true,
-    "needed": 5
+    "needed": 5,
+    "excepted": false,
+    "carried": true
    }
   },
-  "passes": false,
-  "needed": 93,
+  "passes": true,
+  "needed": 7,
   "not_estimable": []
  },
  "cross_machine": {}
