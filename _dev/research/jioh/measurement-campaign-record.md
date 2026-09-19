@@ -8,7 +8,7 @@ All on GitHub-hosted `ubuntu-24.04` runners, 4 vCPU, pinned to one CPU, AMD EPYC
 
 | tag | slice | workflow | runs | first launch |
 |---|---|---|---|---|
-| `meas-ci:build:2026-09-18` | 9.6 | `meas-build.yml` | #10–#12 (35328071379, 35328873409, 35337322204) | 2026-09-18 09:09 UTC |
+| `meas-ci:build:2026-09-18` | 9.6 | `meas-build.yml` | #10–#37; the 13 holding a landed repeat are #10, #11, #12, #15, #16, #22, #25, #26, #27, #29, #30, #32, #34 | 2026-09-18 09:09 UTC |
 | `meas-ci:interactive:2026-09-18` | 9.5 | `meas-interactive.yml` | #10–#100 | 2026-09-18 09:56 UTC |
 | `meas-ci:playback:2026-09-18` | 9.5 | `meas-playback.yml` | #10–#84 | 2026-09-18 09:56 UTC |
 
@@ -34,22 +34,28 @@ The four typing-driven applications also replay the 136M Keystrokes windows 1…
 - `audio-player`: the CPU share is 0.58–0.86 % of one CPU while the wake rate stays at 206–211 per second.
 - `video-player`, `image-editor`, `video-editor`: the windows the gate stopped (3 and 5; 4; 4) were not retried once the rule held.
 
-## 9.6 — seven headline medians, one campaign
+## 9.6 — three archetypes, one campaign
 
-Repeats 4, 5, 7, 8 (repeats 1, 2, 3, 6 gated); 8 jobs. Warm `-j8` build, CPU per process of the object job's roles and make's dispatch run (µs). Archetypes: `build-orchestrator`, `compiler-child`, `cpu-batch`.
+Repeats 4, 5, 7, 8 and 9–18 on the AMD EPYC 7763 (14 repeats; repeats 1, 2, 3, 6 gated). 28 jobs: 14 landed, 12 stopped by the machine gate, 2 cancelled (repeat 19, launched before the campaign ended, measured nothing). Every value is an across-repeat mean, each table by its per-repeat mean (D26). Two conditions changed mid-campaign: `clamscan` reads a fixed signature database from repeat 9 (D27) and `python3` starts warm from repeat 11 (D28), so those two pool fewer repeats.
 
-| median | mean | spread (cv) | 95 % half-width |
-|---|---|---|---|
-| `cc1` CPU per process | 364 750 | 1.5 % | ±2.36 % |
-| `as` CPU per process | 3 054.5 | 1.2 % | ±1.96 % |
-| `gcc` CPU per process | 2 238.8 | 1.6 % | ±2.49 % |
-| `sh` CPU per process | 825.0 | 1.9 % | ±3.09 % |
-| `fixdep` CPU per process | 5 626.3 | 0.8 % | ±1.27 % |
-| `rm` CPU per process | 1 025.0 | 0.9 % | ±1.46 % |
-| make dispatch run | 673.3 | 1.1 % | ±1.66 % |
+| archetype | program | headline | repeats | mean | spread (cv) | 95 % half-width | stopped by |
+|---|---|---|---|---|---|---|---|
+| `build-orchestrator` | `make` | dispatch run, warm `-j8` | 14 | 690.8 µs | 1.6 % | ±0.94 % | the rule |
+| `compiler-child` | `cc1` | CPU per process, warm `-j8` | 14 | 435.0 ms | 1.4 % | ±0.78 % | the rule |
+| `cpu-batch` | `clamscan` | runs between voluntary blocks | 10 | 8.893 ms | 2.1 % | ±1.47 % | the rule |
+| `cpu-batch` | `ffmpeg` | runs between voluntary blocks | 14 | 1.520 ms | 0.9 % | ±0.53 % | the rule |
+| `cpu-batch` | `HandBrakeCLI` | runs between voluntary blocks | 14 | 1.087 ms | 0.8 % | ±0.47 % | the rule |
+| `cpu-batch` | `python3` | runs between voluntary blocks | 8 | 1.616 s | 12.0 % | ±10.04 % | carried (D29) |
+| `cpu-batch` | `tracker-miner-fs-3` | runs between voluntary blocks | 14 | 406.5 µs | 1.4 % | ±0.83 % | the rule |
+
+The rule holds over 29 of the 33 values. Four are carried with their half-widths under the rule's exception for a value whose spread follows the machine (D29), all of them `cpu-batch` blocks on the runner's disk: `clamscan` block per run 218.1 µs ±9.5 % over 10 repeats (182–274), `python3` block per run 220.0 µs ±14.0 % over 8 (170–286) and its runs between blocks above, `tracker-miner-fs-3` block per run 17.6 µs ±15.1 % over 14 (13.3–30.4).
+
+Also within the rule: the object job's 11 per-step CPU tables (±0.7–1.4 %), CPU per process of the other five roles (±0.8–1.4 %), each bound program's share of CPU past the boot slice (±0.02–1.4 %), and the encoders' block means, which sit inside the trace's 1 µs floor (`ffmpeg` 0.35 µs, `HandBrakeCLI` 8.90 µs).
 
 Full tables: `task-9.6-compile/campaign/results.md`, `campaign/results/pooled.json`.
 
 ## Machine draws
 
-166 jobs across the three campaigns: 94 on the AMD EPYC 7763 (56.6 %), 72 stopped by the machine gate — AMD EPYC 9V74 32, Intel Xeon 6973P-C 12, Intel Xeon Platinum 8573C 12, AMD EPYC 9V45 8, Intel Xeon Platinum 8370C 8.
+The build campaign, complete: 28 jobs, 14 on the AMD EPYC 7763 (50.0 %), 12 stopped by the machine gate — Intel Xeon Platinum 8573C 4, AMD EPYC 9V74 4, AMD EPYC 9V45 2, Intel Xeon Platinum 8370C 1, Intel Xeon 6973P-C 1 — and 2 cancelled.
+
+The two 9.5 campaigns, as recorded on 2026-09-19 while they were still running: 158 jobs, 90 on the AMD EPYC 7763, 68 stopped by the gate. The model breakdown recorded then, over all three campaigns: AMD EPYC 9V74 32, Intel Xeon 6973P-C 12, Intel Xeon Platinum 8573C 12, AMD EPYC 9V45 8, Intel Xeon Platinum 8370C 8.
