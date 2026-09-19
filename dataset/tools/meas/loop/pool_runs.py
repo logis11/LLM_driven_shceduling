@@ -3,6 +3,7 @@
 
 pool_runs.py <family>/<app> [--since N] [--out FILE] [-- <pool.py options>]
 pool_runs.py build [--since N] [--out FILE] [-- <pool.py options>]
+pool_runs.py background/<app> [--since N] [--out FILE] [-- <pool.py options>]
 
 Every landed artifact (common.GATE_S or longer, success) of runs numbered N or later is downloaded under the work
 directory — one folder per run for families with apps, one flat folder for build (its repeat indices never repeat) —
@@ -10,7 +11,8 @@ and pooled with the family's pool.py and --cpu-model common.MACHINE. Options aft
 --exclude-roles renderer, 9.5 D14). Validity per repeat (_dev/research/jioh/measurement-campaign-workflow.md, the loop,
 step 4): gate open on the machine; the replay sent every event of its window; operations completed; non-zero return
 codes other than perf record's 130 (its SIGINT stop) and freshclam's 2 with a recorded database; for build, one
-ClamAV signature database across repeats.
+ClamAV signature database across repeats; for background, the set's archive and manifest matching their pins and the
+tree verified after each change set, every SteamCMD phase reporting its install complete, one app build across repeats.
 """
 
 import json
@@ -69,10 +71,23 @@ def validity(family, dirs, entry):
             notes.append(f"operations failed {op['n_failed'][reps.index(k)]} of {op['n_ok'][reps.index(k)] + op['n_failed'][reps.index(k)]}")
         if r.get("clamav.db"):
             dbs.add(r["clamav.db"])
+        if family == "background":
+            pins = {x: v for x, v in r.items() if x.startswith("set.") and x.endswith("_pin") and v != "ok"}
+            if pins:
+                notes.append(f"set pins {pins}")
+            bad_verify = {x: v for x, v in r.items() if x.startswith("set.verify.") and v != "ok"}
+            if bad_verify:
+                notes.append(f"set not restored {bad_verify}")
+            incomplete = [x for x, v in r.items() if x.startswith("steam.") and x.endswith(".success") and v != "1"]
+            if incomplete:
+                notes.append(f"SteamCMD install not reported complete {incomplete}")
+            if r.get("steam.buildid"):
+                dbs.add(r["steam.buildid"])
         bad += bool(notes)
         print(f"   r{k}: {'ok' if not notes else '; '.join(notes)}")
     if len(dbs) > 1:
-        print(f"   ClamAV signature databases differ across repeats: {sorted(dbs)}"); bad += 1
+        what = "SteamCMD app builds" if family == "background" else "ClamAV signature databases"
+        print(f"   {what} differ across repeats: {sorted(dbs)}"); bad += 1
     return bad
 
 
@@ -97,7 +112,7 @@ def main():
     if not dirs:
         raise SystemExit("no landed repeat")
     cmd = ["python3", common.FAMILIES[family]["pool"], base, out, "--cpu-model", common.MACHINE, *passthrough]
-    if family == "build" and "--md" not in passthrough:
+    if family in ("build", "background") and "--md" not in passthrough:
         cmd += ["--md", os.path.join(os.path.dirname(out), "results.md")]
     p = subprocess.run(cmd, cwd=common.REPO, capture_output=True, text=True)
     if p.returncode:
@@ -109,6 +124,11 @@ def main():
         crit = st["quantities"]
         print(f"build: repeats {pooled['repeats']}; stability rule {'holds' if st['passes'] else 'does not hold yet'}")
         for q, c in crit.items():
+            print(f"   {q}: k {c['k']}, half-width {c['half_width']}, {'passes' if c['passes'] else 'fails'}")
+    elif st and "quantities" in st:
+        print(f"{app}: repeats {entry['repeats']}; stability rule {'holds' if st['passes'] else 'does not hold yet'}"
+              + (f"; first batch at this spread {entry['first_batch']['count']}" if entry.get("first_batch") else ""))
+        for q, c in st["quantities"].items():
             print(f"   {q}: k {c['k']}, half-width {c['half_width']}, {'passes' if c['passes'] else 'fails'}")
     elif st:
         print(f"{app}: repeats {entry['repeats']}; {st['quantity']} over {st['k']}: half-width {st['half_width']} "

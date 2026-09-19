@@ -26,6 +26,8 @@ FAMILIES = {
                  "pool": "dataset/tools/meas/campaign/pool.py"},
     "build": {"workflow": "meas-build.yml", "trigger": ".github/campaign-build.json", "apps": False,
               "pool": "dataset/tools/meas/build/pool.py"},
+    "background": {"workflow": "meas-background.yml", "trigger": ".github/campaign-background.json", "apps": True,
+                   "pool": "dataset/tools/meas/background/pool.py"},
 }
 
 
@@ -110,6 +112,11 @@ def push_trigger(targets, kind, dry=False):
         d["attempt"] = d.get("attempt", 0) + 1
         if trig.endswith("campaign-build.json"):
             d["repeats"] = sorted(k for _, _, k in ts)
+        elif trig.endswith("campaign-background.json"):
+            m = {}
+            for _, app, k in ts:
+                m.setdefault(app, []).append(k)
+            d["apps"], d["repeats"] = sorted(m), {a: sorted(w) for a, w in sorted(m.items())}
         else:
             for fam in ("interactive", "playback"):
                 m = {}
