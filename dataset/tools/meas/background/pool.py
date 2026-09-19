@@ -12,12 +12,12 @@ repeat measured on another CPU model are listed, not pooled. Per program and
 phase: every repeat is analysed (analyze.analyze_phase); the samples of all
 repeats are pooled into the quantile table (p1 … p99.9; µs, bytes for bytes per
 wake), over all the program's threads and per thread (comm#rank), with the
-per-repeat p50 as the spread (§5 "Distribution form"). Then: the stability
-rule on the program's headline medians (D14 (1), stability.py; with D18 the
-tolerance is the larger of 5 % and 1 µs for the time medians, over at least
-five repeats); in probe mode the first batch those repeats set — the smallest
-count, at least five, at which every headline median passes at their spread
-(D14 (3)); the two checks (D15) and the
+per-repeat mean as the spread (§5 "Distribution form", §9 D19). Then: the
+shared stability rule (stability.py) on the list — every table the fold-in
+carries, each by its per-repeat mean (D19): the tolerance the larger of 5 % and
+1 µs for times, 5 % for bytes per wake, over at least five repeats (D18); per
+value the repeat count at which the present spread would hold, whose largest is,
+in probe mode, the first batch (D14 (3)); the two checks (D15) and the
 comparisons (D8, D6, D10, D12) as ratios of pooled medians with the per-repeat
 spread, a difference within ± TOLERANCE reported as not resolved (D14 (2)); and
 what §5 "Also reported" lists — the set check (D7), the D11 robustness line,
@@ -43,7 +43,15 @@ NAME = re.compile(r"^meas-background-(borg|7z|steamcmd)-r(\d+)-(dry|probe|full)$
 PHASES = {"borg": ("borg-first-warm", "borg-repeat-warm", "borg-first-cold", "borg-repeat-cold"),
           "7z": ("7z-mmt8-warm", "7z-mmt1-warm", "7z-mmt8-cold"),
           "steamcmd": ("steam-fresh-shaped", "steam-fresh-untraced", "steam-fresh-unshaped", "steam-update-shaped")}
-# D14 (1): the medians each archetype carries, pooled over all the program's threads
+# D19 (the shared stability rule): the list — every table the fold-in carries, each tested by its per-repeat mean; the
+# process-level tables of each archetype's phase, pooled over all the program's threads (each busy thread's tables join
+# if the probe batch sets one task per busy thread)
+LIST = {"borg": [("borg-first-warm", "run_us", "run per wake (µs)"), ("borg-first-warm", "wait_us", "wait per wake (µs)"),
+                 ("borg-first-warm", "disk_us", "disk wait (µs)")],
+        "7z": [("7z-mmt8-warm", "run_us", "run per wake (µs)"), ("7z-mmt8-warm", "wait_us", "wait per wake (µs)")],
+        "steamcmd": [("steam-fresh-shaped", "run_us", "run per wake (µs)"), ("steam-fresh-shaped", "network_us", "network wait (µs)"),
+                     ("steam-fresh-shaped", "bytes_per_wake", "bytes per wake")]}
+# D14 (1): the headline medians, pooled over all the program's threads — read by the comparisons (results only)
 HEADLINE = {"borg": [("borg-first-warm", "run_us", "run per wake (µs)"), ("borg-first-warm", "wait_us", "wait per wake (µs)")],
             "7z": [("7z-mmt8-warm", "run_us", "run per wake (µs)"), ("7z-mmt8-warm", "wait_us", "wait per wake (µs)")],
             "steamcmd": [("steam-fresh-shaped", "run_us", "run per wake (µs)"), ("steam-fresh-shaped", "network_us", "network wait (µs)"),
@@ -55,8 +63,8 @@ COMPARISONS = {"borg": [("borg-first-warm", "borg-first-cold", "warm against col
                "7z": [("7z-mmt8-warm", "7z-mmt8-cold", "warm against cold (D8)")],
                "steamcmd": [("steam-fresh-shaped", "steam-fresh-unshaped", "shaped against unshaped (D10)"),
                             ("steam-fresh-shaped", "steam-update-shaped", "fresh install against update (D12)")]}
-# D18 (9.6 D23, D24): the tolerance is the larger of TOLERANCE × mean and the trace's 1 µs for the time medians — bytes
-# per wake, a count of whole bytes, has no floor — and the rule holds only over at least five same-machine repeats
+# D18 (9.6 D23, D24): the tolerance is the larger of TOLERANCE × mean and the trace's 1 µs for times — bytes per wake,
+# a count of whole bytes, has no floor — and the rule holds only over at least five same-machine repeats
 ABS_FLOOR_US = 1.0
 MIN_REPEATS = 5
 SAMPLE_KEYS = ("run_us", "wait_us", "disk_us", "uninterruptible_us", "network_us", "sleep_us", "runnable_us", "bytes_per_wake")
@@ -74,6 +82,7 @@ def pooled(by_repeat):
     allv = [x for vs in by_repeat.values() for x in vs]
     return {"n": len(allv), "q": qtable(allv), "p50": round(pct(sorted(allv), .5), 1) if allv else None,
             "repeat_p50": {r: (round(pct(sorted(vs), .5), 1) if vs else None) for r, vs in sorted(by_repeat.items())},
+            "repeat_mean": {r: (round(statistics.fmean(vs), 4) if vs else None) for r, vs in sorted(by_repeat.items())},
             "repeat_n": {r: len(vs) for r, vs in sorted(by_repeat.items())}}
 
 
@@ -86,14 +95,14 @@ def floor_of(key):
     return None if key == "bytes_per_wake" else ABS_FLOOR_US
 
 
-def headline_stability(key, values_by_repeat):
+def value_stability(key, values_by_repeat):
     return stability(values_by_repeat, floor_of(key), MIN_REPEATS)
 
 
 def first_batch(values, abs_floor=None, min_k=None):
-    """D14 (3) with D18: the smallest repeat count, at least min_k, at which the 95 % half-width of the across-repeat
-    mean, at the spread of the given repeats, is within the tolerance — the larger of TOLERANCE × mean and abs_floor
-    (t multiplier; normal beyond the table)."""
+    """The repeats one value needs (D14 (3) with D18, D19): the smallest repeat count, at least min_k, at which the
+    95 % half-width of the across-repeat mean, at the spread of the given repeats, is within the tolerance — the larger
+    of TOLERANCE × mean and abs_floor (t multiplier; normal beyond the table)."""
     v = [x for x in values if x]
     if len(v) < 2:
         return None
@@ -104,6 +113,19 @@ def first_batch(values, abs_floor=None, min_k=None):
         if t is not None and t * sd / k ** 0.5 <= bound:
             return k
     return None
+
+
+def criterion(app, entry):
+    """D19: the shared stability rule on every table of the list, each by its per-repeat mean, with the repeat count at
+    which its present spread would hold."""
+    crit = {}
+    for ph, key, label in LIST[app]:
+        P = entry["phases"].get(ph, {})
+        if P.get("missing") or key not in P.get("all", {}):
+            continue
+        vals = P["all"][key]["repeat_mean"]
+        crit[f"{ph} {label}"] = {**value_stability(key, vals), "needed": first_batch(list(vals.values()), floor_of(key), MIN_REPEATS)}
+    return crit
 
 
 def compare(a, b):
@@ -193,15 +215,9 @@ def pool_app(app, reps):
             P["threads"][t] = {"cpu_us": {k: A[k]["threads"].get(t, {}).get("cpu_us") for k in have},
                                **{s: pooled({k: A[k]["_samples"]["threads"].get(t, {}).get(s, []) for k in have}) for s in SAMPLE_KEYS}}
         entry["phases"][ph] = P
-    # D14: the stability rule on the headline medians; in probe mode the first batch they set
-    crit, fb = {}, {}
-    for ph, key, label in HEADLINE[app]:
-        P = entry["phases"].get(ph, {})
-        if P.get("missing") or key not in P.get("all", {}):
-            continue
-        vals = P["all"][key]["repeat_p50"]
-        crit[f"{ph} {label}"] = headline_stability(key, vals)
-        fb[f"{ph} {label}"] = first_batch(list(vals.values()), floor_of(key), MIN_REPEATS)
+    # D19: the shared stability rule on the list; in probe mode the first batch it sets (D14 (3))
+    crit = criterion(app, entry)
+    fb = {q: c["needed"] for q, c in crit.items()}
     entry["stability"] = {"tolerance": TOLERANCE, "abs_floor_us": ABS_FLOOR_US, "min_repeats": MIN_REPEATS, "quantities": crit,
                           "passes": bool(crit) and all(c["passes"] for c in crit.values())}
     entry["first_batch"] = {"by_quantity": fb, "count": max(fb.values()) if fb and all(fb.values()) else None}
@@ -282,7 +298,7 @@ def render(out):
     L = [f"# 9.7 background campaign — pooled results{' (' + out['tag'] + ')' if out.get('tag') else ''}", "",
          f"Machine {out.get('machine') or 'any'}; stopped by the machine gate {len(out['gated_out'])}; other-model repeats "
          f"{len(out['other_machine'])}. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9, times in µs, "
-         f"bytes per wake in bytes; the spread is the per-repeat p50. Rules: method §5.", ""]
+         f"bytes per wake in bytes; the spread is the per-repeat mean. Rules: method §5 and §9.", ""]
     for app, E in out["runs"].items():
         L += [f"## {app}", "", f"Repeats {E['repeats']}; mode {E['mode']}; CPU {E['cpu_model']}; kernel {E['kernel']}; runs {E['run_id']}.", ""]
         for k, v in E["versions"].items():
@@ -296,16 +312,16 @@ def render(out):
                   f"command s {P['cmd_wall_s']}; rc {P['rc']}; program CPU µs (perf) {P['program_cpu_us']}; (taskstats) {P['program_taskstats_cpu_us']}; "
                   f"resumes merged {P['resumes_merged']}; ENOBUFS {P['taskstats_enobufs']}"
                   + (f"; cached fraction {P['cached_fraction']}" if "cached_fraction" in P else ""), "",
-                  "| threads | quantity | n | quantiles | spread (per-repeat p50) |", "|---|---|---|---|---|"]
+                  "| threads | quantity | n | quantiles | spread (per-repeat mean) |", "|---|---|---|---|---|"]
             for s in SAMPLE_KEYS:
                 x = P["all"][s]
                 if x["n"]:
-                    L.append(f"| all | {s} | {x['n']} | {fmt_q(x['q'])} | {x['repeat_p50']} |")
+                    L.append(f"| all | {s} | {x['n']} | {fmt_q(x['q'])} | {x['repeat_mean']} |")
             for t, T in list(P["threads"].items())[:12]:
                 for s in ("run_us", "wait_us", "disk_us", "network_us", "bytes_per_wake"):
                     x = T[s]
                     if x["n"]:
-                        L.append(f"| `{t}` | {s} | {x['n']} | {fmt_q(x['q'])} | {x['repeat_p50']} |")
+                        L.append(f"| `{t}` | {s} | {x['n']} | {fmt_q(x['q'])} | {x['repeat_mean']} |")
             L.append("")
             for k, procs in P["processes"].items():
                 for p in procs:
@@ -316,15 +332,16 @@ def render(out):
                         L.append(f"- repeat {k} network: " + json.dumps({x: n[x] for x in n if x not in ("calls_by_name_kind",)}))
             L.append("")
         st = E["stability"]
-        L += ["### Stability rule (D14, D18)", "", f"**{'Holds' if st['passes'] else 'Does not hold yet'}** (tolerance the larger of "
-              f"{st['tolerance']:.0%} and {st['abs_floor_us']:g} µs for the time medians, at least {st['min_repeats']} repeats). "
-              f"First batch at the spread of these repeats: {E['first_batch']['count']} {E['first_batch']['by_quantity']}.", "",
-              "| quantity | repeats | mean | cv | 95 % half-width | leave-one-out | passes |", "|---|---|---|---|---|---|---|"]
+        L += ["### Stability rule (D18, D19)", "", f"**{'Holds' if st['passes'] else 'Does not hold yet'}** (each table on the list by "
+              f"its per-repeat mean; tolerance the larger of {st['tolerance']:.0%} and {st['abs_floor_us']:g} µs for times, at least "
+              f"{st['min_repeats']} repeats). Repeats needed at the spread of these repeats: {E['first_batch']['count'] or 'over 200'}.", "",
+              "| quantity | repeats | mean | cv | 95 % half-width | leave-one-out | needed at this spread | passes |",
+              "|---|---|---|---|---|---|---|---|"]
         for q, c in st["quantities"].items():
             hw = "–" if c["half_width"] is None else f"±{c['half_width']:.1%}"
             cv = "–" if c["cv"] is None else f"{c['cv']:.1%}"
             lo = "–" if c["leave_one_out"] is None else f"{c['leave_one_out']:.1%}"
-            L.append(f"| {q} | {c['k']} | {c['mean']} | {cv} | {hw} | {lo} | {'yes' if c['passes'] else 'no'} |")
+            L.append(f"| {q} | {c['k']} | {c['mean']} | {cv} | {hw} | {lo} | {c['needed'] or 'over 200'} | {'yes' if c['passes'] else 'no'} |")
         L.append("")
         if E["checks"]:
             L += ["### Checks (D15)", ""]
@@ -361,7 +378,7 @@ def main():
             st = E["stability"]
             print(f"== {app}: repeats {E['repeats']}; stability {'holds' if st['passes'] else 'does not hold yet'}; first batch {E['first_batch']['count']}")
             for q, c in st["quantities"].items():
-                print(f"   {q}: k {c['k']} mean {c['mean']} half-width {c['half_width']}")
+                print(f"   {q}: k {c['k']} mean {c['mean']} half-width {c['half_width']} needed {c['needed']}")
     json.dump(out, open(args.out, "w"), indent=1)
     if args.md:
         open(args.md, "w").write(render(out))

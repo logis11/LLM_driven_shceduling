@@ -388,13 +388,41 @@ def test_first_batch_takes_the_absolute_floor_for_small_medians():
     assert pool.first_batch([9.0, 10.0, 11.0], None, 5) == 18
 
 
-def test_the_headline_rule_needs_five_repeats_and_floors_time_medians():
+def test_the_rule_needs_five_repeats_and_floors_times():
     four = {1: 10.0, 2: 10.0, 3: 10.0, 4: 10.0}
-    assert not pool.headline_stability("run_us", four)["passes"]
-    assert pool.headline_stability("run_us", {**four, 5: 10.0})["passes"]
+    assert not pool.value_stability("run_us", four)["passes"]
+    assert pool.value_stability("run_us", {**four, 5: 10.0})["passes"]
     near = {1: 9.0, 2: 10.0, 3: 11.0, 4: 9.0, 5: 11.0, 6: 10.0, 7: 10.0}   # ±9 % of the mean, within 1 µs
-    assert pool.headline_stability("run_us", near)["passes"]
-    assert not pool.headline_stability("bytes_per_wake", near)["passes"]   # bytes carry no time floor
+    assert pool.value_stability("run_us", near)["passes"]
+    assert not pool.value_stability("bytes_per_wake", near)["passes"]   # bytes carry no time floor
+
+
+def test_a_pooled_table_carries_each_repeats_mean():
+    p = pool.pooled({1: [1.0, 2.0, 9.0], 2: [4.0], 3: []})
+    assert p["repeat_mean"] == {1: 4.0, 2: 4.0, 3: None}
+    assert p["repeat_p50"] == {1: 2.0, 2: 4.0, 3: None}
+
+
+def _entry(phase, tables):
+    return {"phases": {phase: {"all": {k: pool.pooled(v) for k, v in tables.items()}}}}
+
+
+def test_the_rule_tests_every_table_on_the_list_by_its_per_repeat_mean():
+    # medians identical in every repeat, means apart by the long tail: the rule reads the means (D19)
+    steady_p50_wild_mean = {k: [10.0, 10.0, 10.0 + 40.0 * (k % 2)] for k in range(1, 6)}
+    flat = {k: [10.0, 10.0, 10.0] for k in range(1, 6)}
+    crit = pool.criterion("borg", _entry("borg-first-warm", {"run_us": flat, "wait_us": flat, "disk_us": steady_p50_wild_mean}))
+    assert set(crit) == {"borg-first-warm run per wake (µs)", "borg-first-warm wait per wake (µs)", "borg-first-warm disk wait (µs)"}
+    assert crit["borg-first-warm run per wake (µs)"]["passes"]
+    assert not crit["borg-first-warm disk wait (µs)"]["passes"]
+    assert crit["borg-first-warm run per wake (µs)"]["needed"] == 5
+
+
+def test_the_list_is_each_archetypes_process_level_tables():
+    assert [k for _p, k, _l in pool.LIST["borg"]] == ["run_us", "wait_us", "disk_us"]
+    assert [k for _p, k, _l in pool.LIST["7z"]] == ["run_us", "wait_us"]
+    assert [k for _p, k, _l in pool.LIST["steamcmd"]] == ["run_us", "network_us", "bytes_per_wake"]
+    assert {p for _p in pool.LIST.values() for p, _k, _l in _p} == {"borg-first-warm", "7z-mmt8-warm", "steam-fresh-shaped"}
 
 
 def test_a_difference_inside_the_precision_is_not_resolved():
