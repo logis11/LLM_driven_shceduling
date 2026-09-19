@@ -57,3 +57,7 @@ By 인지오's decision, the form of D12's entry: the full rescan is two tasks �
 ## D14 — the rescan's size binds in the timeline (2026-09-19)
 
 By 인지오's decision: the rescan's total CPU is a binding parameter of D12's entry, scenario design bound per timeline (9.10), as `total_work` is for `cpu-batch` (D7). The entry carries what the run shows of the program — each task's run-per-wake and wait tables (D13) and the split of the total between the two tasks, the miner's share 0.831–0.838 per repeat — and states the measured rescan as the reference: 5.12–5.29 s of CPU for the 9 462 files of the `linux-6.6/Documentation` copy (0.54–0.56 ms per file), Tracker 3.7.1. Stated in `modeling_notes` as a limitation: one corpus size and one mostly-text composition were observed, and the per-wake shape and the split are assumed independent of both; the extractor, which extracts per file type, is the likelier to differ on a media-heavy home. Applied at fold-in with the run; no value changed by this entry.
+
+## D15 — the rescan entry's id is `indexer-rescan` (2026-09-19)
+
+By 인지오's decision: D12's entry is `indexer-rescan` — the program kind and the measured state, in the library's program-kind form (`office-writer`, `mail-client`, `audio-player`); an everyday indexer re-created under 9.7 D5's hand-off to 9.10 takes its own id. No value changed by this entry.
