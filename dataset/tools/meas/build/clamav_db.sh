@@ -8,16 +8,16 @@ DIR="$1"; WANT_DAILY="$2"; WANT_MAIN="$3"; WANT_BYTECODE="$4"
 sudo apt-get update -qq
 sudo apt-get install -y -qq --no-install-recommends clamav clamav-freshclam > /dev/null
 sudo systemctl stop clamav-freshclam || true   # the service holds freshclam's lock
-sudo freshclam || echo "freshclam rc $? (NotifyClamd fails without clamd; the versions below decide)"
+sudo freshclam || echo "freshclam rc $? (the versions below decide)"
 mkdir -p "$DIR"
+pick() { local ext; for ext in cvd cld; do [ -f "$1/$2.$ext" ] && { echo "$1/$2.$ext"; return 0; }; done; return 1; }
 for db in daily main bytecode; do
-  f="$(ls /var/lib/clamav/$db.cvd /var/lib/clamav/$db.cld 2>/dev/null | head -1)"
-  [ -n "$f" ] || { echo "no $db database in /var/lib/clamav" >&2; exit 1; }
+  f="$(pick /var/lib/clamav "$db")" || { echo "no $db database in /var/lib/clamav" >&2; exit 1; }
   cp "$f" "$DIR/"
 done
 chmod -R a+rX "$DIR"
 
-version() { sigtool --info "$(ls "$DIR/$1".c?d | head -1)" | sed -n 's/^Version: *//p'; }
+version() { sigtool --info "$(pick "$DIR" "$1")" | sed -n 's/^Version: *//p'; }
 have="daily $(version daily), main $(version main), bytecode $(version bytecode)"
 want="daily $WANT_DAILY, main $WANT_MAIN, bytecode $WANT_BYTECODE"
 echo "fetched: $have"
