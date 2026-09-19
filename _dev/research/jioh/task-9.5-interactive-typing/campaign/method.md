@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-19, `thunderbird-send` past the recording's end (changelog D46) — §2: a repeat past the eighth Outlook window runs the settle and the idle phase alone, without the operation phase; the operation's values pool the eight full repeats and state their half-widths, as the per-input values do (D32).
+
 - 2026-09-19, `thunderbird-send`'s idle phase (changelog D45) — §2: 600 s, design, holding its recurring ~60 s `StreamTrans` episode and the slower variation on it (long-phase probe 35436084336, `launch-work.md`); every other application keeps 120 s.
 
 - 2026-09-19, `thunderbird-send`'s settle (changelog D44) — §2: 390 s, design: its launch work ends about 340 s into a 30 s-settled idle phase and the tree's CPU is steady from 360 s (long-phase probe 35436084336, `launch-work.md`); the recurring ~60 s `StreamTrans` episode stays in the idle phase.

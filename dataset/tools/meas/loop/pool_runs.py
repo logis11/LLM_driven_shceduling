@@ -153,7 +153,8 @@ def main():
         print(f"{app}: repeats {entry['repeats']}; stability rule {'holds' if st['passes'] else 'does not hold yet'}"
               + (f"; first batch at this spread {entry['first_batch']['count']}" if entry.get("first_batch") else ""))
         for q, c in st["quantities"].items():
-            print(f"   {q}: k {c['k']}, half-width {c['half_width']}, {'passes' if c['passes'] else 'fails'}")
+            print(f"   {q}: k {c['k']}, half-width {c['half_width']}, "
+                  f"{'passes' if c['passes'] else 'at the window limit, reported (D46)' if c.get('limited') else 'fails'}")
     elif st:
         print(f"{app}: repeats {entry['repeats']}; {st['quantity']} over {st['k']}: half-width {st['half_width']} "
               f"(tolerance {st['tolerance']}) — {'holds' if st['passes'] else 'does not hold yet'}")

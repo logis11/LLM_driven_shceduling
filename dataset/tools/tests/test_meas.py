@@ -334,6 +334,34 @@ def test_a_component_absent_from_a_repeat_is_sporadic_not_carried():
     assert residual["comms"] == ["dbus"] and cov["sporadic"] == []
 
 
+def test_values_at_the_window_limit_are_reported_not_held_open():
+    # 9.5 D32, D46: thunderbird-send's input and operation values stop at its eight Outlook windows; the idle values
+    # keep adding repeats
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)
+    try:
+        pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    crit = {n: {"passes": False} for n in ("idle Timer wakes/s", "op Timer wakes/s", "operation duration mean (ms)",
+                                           "input_run mean, SWELL-KW (ms)", "input_run mean, 136M (ms)")}
+    entry = {"repeats": list(range(1, 11)),
+             "phases": {"idle": {}, "driven": {"repeats": list(range(1, 9))}, "driven-alt": {"repeats": list(range(1, 9))},
+                        "op": {"repeats": list(range(1, 9))}}}
+    pool.mark_limited("thunderbird-send", entry, crit)
+    assert [n for n, c in crit.items() if c.get("limited")] == ["op Timer wakes/s", "operation duration mean (ms)",
+                                                                 "input_run mean, SWELL-KW (ms)", "input_run mean, 136M (ms)"]
+    entry["phases"]["op"]["repeats"] = list(range(1, 8))   # seven of eight windows landed: the op values still count
+    crit = {"op Timer wakes/s": {"passes": False}}
+    pool.mark_limited("thunderbird-send", entry, crit)
+    assert not crit["op Timer wakes/s"].get("limited")
+    crit = {"op gimp wakes/s": {"passes": False}}
+    pool.mark_limited("gimp", entry, crit)   # no recorded input limit
+    assert not crit["op gimp wakes/s"].get("limited")
+
+
 def test_timehist_rows_with_and_without_the_state_column(tmp_path):
     p = tmp_path / "perf.idle.timehist.txt"
     p.write_text("           time    cpu  task name                       wait time  sch delay   run time  state\n"

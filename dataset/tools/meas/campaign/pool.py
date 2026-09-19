@@ -104,6 +104,27 @@ def criterion(app, entry):
     return crit
 
 
+def mark_limited(app, entry, crit):
+    """D32, D46: a value of a phase only full repeats run — the replayed input's (driven, driven-alt) and the operation's
+    (op) — stops at the recording's window limit: once that phase holds the limit's repeats, the value is reported with
+    its half-width (`limited`) and no longer holds the rule open; the idle values keep adding repeats."""
+    limit = WINDOW_LIMIT.get(app)
+    if not limit:
+        return
+    def phase_of(name):
+        if name.startswith("op ") or name.startswith("operation"):
+            return "op"
+        if "SWELL-KW" in name or name.startswith("driven "):
+            return "driven"
+        if "136M" in name:
+            return "driven-alt"
+        return None
+    for name, c in crit.items():
+        p = phase_of(name)
+        if p in entry["phases"] and len(entry["phases"][p].get("repeats", entry["repeats"])) >= limit:
+            c["limited"] = True
+
+
 def headline(app, entry):
     kind = HEADLINE.get(app)
     ph = entry["phases"]
@@ -288,15 +309,17 @@ def main():
                 ph["repeats"] = preps   # the phase's lists run over these repeats, not the entry's
             entry["phases"][phase] = ph
         crit = criterion(app, entry)
-        needed = [c["needed"] for c in crit.values()]
+        mark_limited(app, entry, crit)
+        live = [c for c in crit.values() if not c.get("limited")]
+        needed = [c["needed"] for c in live]
         entry["stability"] = {"tolerance": TOLERANCE, "abs_floor_ms": ABS_FLOOR_MS, "min_repeats": MIN_REPEATS,
                               "window_limit": WINDOW_LIMIT.get(app), "quantities": crit,
-                              "passes": bool(crit) and all(c["passes"] for c in crit.values()),
+                              "passes": bool(crit) and all(c["passes"] for c in live),
                               "needed": None if not needed or None in needed else max(needed)}
         out["runs"][app] = entry
         print(f"== {app} ({info['family']}, {info['mode']}, repeats {reps}, {entry['version']}; CPU {sorted(set(entry['cpu_model'].values()))})")
         st = entry["stability"]
-        fails = [q for q, c in crit.items() if not c["passes"]]
+        fails = [q for q, c in crit.items() if not c["passes"] and not c.get("limited")]
         print(f"   stability: {len(crit)} quantities over {len(reps)} repeats, {len(fails)} out of tolerance; repeats needed at "
               f"this spread {st['needed'] or 'over 200'} — {'holds' if st['passes'] else 'does not hold yet'}")
         for q in fails:
