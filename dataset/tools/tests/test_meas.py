@@ -158,10 +158,15 @@ def test_package_binaries_include_sbin(monkeypatch):
 
 import pytest  # noqa: E402
 from meas.campaign import analyze as campaign  # noqa: E402
+from meas.build import analyze as build  # noqa: E402
 
 
 def _row(t_in, run_ms, tid=7, comm="app"):
     return campaign.Row(t_in, t_in, t_in + run_ms / 1000, run_ms, comm, tid, 100)
+
+
+def _bseg(t_in, run_ms, state, tid=7, comm="app"):
+    return build.Seg(t_in, t_in, t_in + run_ms / 1000, run_ms, comm, tid, 100, state, 3)
 
 
 def test_resume_after_preemption_extends_the_preceding_wake():
@@ -173,6 +178,23 @@ def test_resume_after_preemption_extends_the_preceding_wake():
     assert merged == 1
     got = [x for w in wakes for x in (w.t_in, w.run, w.t_end)]
     assert got == pytest.approx([1.000, 3.0, 1.0035, 1.010, 0.5, 1.0105])
+
+
+def test_a_waking_row_before_the_switch_out_still_makes_a_wake():
+    # a 3 µs run that blocks on a ~7 µs I/O wait: the waker's sched_waking fires at 1.000002, while the thread is
+    # still switching out (recorded at 1.000003); it fires only for a thread already in a sleep state (kernel
+    # try_to_wake_up: trace_sched_waking after ttwu_state_match), so it wakes the sleep that follows
+    rows = [_row(1.000, 0.003), _row(1.000010, 0.003)]
+    wakes, merged = campaign.merge_resumes(rows, {7: [0.9999, 1.000002]})
+    assert merged == 0 and len(wakes) == 2
+    wakes, merged = build.merge_resumes([_bseg(1.000, 0.003, "D"), _bseg(1.000010, 0.003, "S")], {7: [0.9999, 1.000002]})
+    assert merged == 0 and len(wakes) == 2
+
+
+def test_a_row_before_the_last_schedule_in_belongs_to_the_earlier_sleep():
+    rows = [_row(1.000, 0.003), _row(1.000010, 0.003)]
+    wakes, merged = campaign.merge_resumes(rows, {7: [0.999999]})   # woke the first segment, not the second
+    assert merged == 1
 
 
 def test_first_row_without_a_wakeup_in_the_capture_is_a_wake():

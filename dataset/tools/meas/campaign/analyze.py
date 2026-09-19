@@ -159,9 +159,13 @@ def merge_resumes(rows, wakeups_by_tid):
     """Fold resume-after-preemption segments into the wake they continue.
 
     rows: segments sorted by t_in. A segment is a wake when a wakeup event for its
-    tid falls in (previous segment's t_end, this t_in]; the first segment of a
-    thread in the capture is always a wake. Returns (wakes sorted by t_in,
-    number of segments merged)."""
+    tid falls after the schedule-in of the wake it would continue and at or before
+    this t_in: sched_waking fires only for a thread already in a sleep state
+    (kernel try_to_wake_up: after ttwu_state_match) and can precede the sleeper's
+    own switch-out by microseconds, so a row inside the thread's last run wakes
+    the sleep that follows (9.7 changelog D21: the window from the switch-out
+    missed those); the first segment of a thread in the capture is always a wake.
+    Returns (wakes sorted by t_in, number of segments merged)."""
     import bisect
     last = {}      # tid -> index into out of that thread's current wake
     out = []
@@ -173,7 +177,7 @@ def merge_resumes(rows, wakeups_by_tid):
             continue
         prev = out[i]
         wk = wakeups_by_tid.get(r.tid, [])
-        k = bisect.bisect_right(wk, prev.t_end - EPS)
+        k = bisect.bisect_right(wk, prev.t_in)
         woken = k < len(wk) and wk[k] <= r.t_in + EPS
         if woken:
             out.append(r); last[r.tid] = len(out) - 1

@@ -322,7 +322,10 @@ def concurrency(jobs):
 def merge_resumes(rows, wakeups_by_tid):
     """Fold resume-after-preemption segments into the wake they continue (9.5 follow-ups decision 4), carrying the
     last segment's sched-out state so the off-CPU interval after the wake is classified by how the wake ended.
-    rows: segments sorted by t_in. Returns (wakes sorted by t_in, number of segments merged)."""
+    A segment is a wake when a wakeup row for its thread falls after the schedule-in of the wake it would continue and
+    at or before its own schedule-in: sched_waking fires only for a thread already in a sleep state (kernel
+    try_to_wake_up: after ttwu_state_match) and can precede the sleeper's own switch-out by microseconds (9.7
+    changelog D21). rows: segments sorted by t_in. Returns (wakes sorted by t_in, number of segments merged)."""
     last, out, merged = {}, [], 0
     for r in rows:
         i = last.get(r.tid)
@@ -331,7 +334,7 @@ def merge_resumes(rows, wakeups_by_tid):
             continue
         prev = out[i]
         wk = wakeups_by_tid.get(r.tid, [])
-        k = bisect.bisect_right(wk, prev.t_end - EPS)
+        k = bisect.bisect_right(wk, prev.t_in)
         if k < len(wk) and wk[k] <= r.t_in + EPS:
             out.append(r); last[r.tid] = len(out) - 1
         else:
