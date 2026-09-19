@@ -8,7 +8,7 @@ DIR="$1"; WANT_DAILY="$2"; WANT_MAIN="$3"; WANT_BYTECODE="$4"
 sudo apt-get update -qq
 sudo apt-get install -y -qq --no-install-recommends clamav clamav-freshclam > /dev/null
 sudo systemctl stop clamav-freshclam || true   # the service holds freshclam's lock
-sudo freshclam
+sudo freshclam || echo "freshclam rc $? (NotifyClamd fails without clamd; the versions below decide)"
 mkdir -p "$DIR"
 for db in daily main bytecode; do
   f="$(ls /var/lib/clamav/$db.cvd /var/lib/clamav/$db.cld 2>/dev/null | head -1)"
