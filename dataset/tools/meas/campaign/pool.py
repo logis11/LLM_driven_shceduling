@@ -12,8 +12,9 @@ measured on another CPU model are listed, not pooled (changelog D26). For each
 app: every repeat is analysed (analyze.analyze_run); per phase and per thread
 comm the gap and run samples of all repeats are pooled (p50, p90, p99, n) and
 the per-repeat p50 is listed as the spread; per-input samples likewise for the
-three rules; the app's headline median is checked against the shared
-stability criterion (dataset/tools/meas/stability.py).
+three rules; every value the fold-in carries, each table by its per-repeat
+mean, is checked against the shared stability criterion
+(dataset/tools/meas/stability.py; changelog D29, D30).
 """
 
 import argparse
@@ -21,25 +22,78 @@ import glob
 import json
 import os
 import re
+import statistics
 import sys
 from array import array
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from analyze import analyze_run, pct  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from stability import stability, TOLERANCE  # noqa: E402
+from stability import stability, TOLERANCE, T975  # noqa: E402
 
 NAME = re.compile(r"^meas-(interactive|playback)-(.+)-r(\d+)-(dry|full)$")
 
 
 QUANTILE_PROBS = (0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999)
 COVERAGE = 0.95  # D16: components in descending wake rate until this share of idle wakes; the rest pooled as one residual
-# D26: the one median per application the stability criterion is evaluated on — the value its archetype carries
+# D26: the headline per application; under D30 the playback CPU share stays on the list beside every carried table
 HEADLINE = {"soffice": "input_run", "code": "input_run", "thunderbird": "input_run", "thunderbird-send": "input_run",
             "chrome": "op_duration", "gimp": "op_duration", "kdenlive": "op_duration",
             "mpv-video": "play_cpu_share", "mpv-audio": "play_cpu_share", "webrtc": "play_cpu_share"}
 # D26: SWELL-KW's Outlook conditions (c2, c3) hold 4 761 s of recorded time — eight windows, the eighth 561 s
 WINDOW_LIMIT = {"thunderbird": 8, "thunderbird-send": 8}   # D31: the re-observation reads the same Outlook windows
+ABS_FLOOR_MS = 0.001  # the trace's resolution: perf sched timehist times in whole microseconds (D30; 9.6 D23)
+MIN_REPEATS = 5       # kalibera-ismm13 §11 (D29; 9.6 D24)
+FOCUS_COMPONENTS = {"gimp", "kdenlive"}  # fold_in.py's pointer-loop archetypes carry the driven phase as focus_components
+
+
+def repeats_needed(values, abs_floor=None):
+    """The smallest repeat count, at least MIN_REPEATS, at which the 95 % half-width at the spread of the given
+    repeats is within the tolerance (stability()'s t multipliers); None past 200."""
+    v = [x for x in values if x is not None]
+    if len(v) < 2:
+        return None
+    m, sd = statistics.fmean(v), statistics.stdev(v)
+    bound = max(TOLERANCE * m, abs_floor or 0.0)
+    for k in range(MIN_REPEATS, 201):
+        if T975.get(k, T975[20]) * sd / k ** 0.5 <= bound:
+            return k
+    return None
+
+
+def criterion(app, entry):
+    """D30: every value the fold-in carries against the shared rule, each carried table by its per-repeat mean
+    (georges-oopsla07 §4.2, kalibera-ismm13 §9.3) — tolerance the larger of 5 % of the mean and 1 µs for times, 5 % for
+    rates and shares, at least five repeats (D29). Per carried component (the idle or play phase; the driven phase of
+    the pointer-loop runs; the operation's), its wake rate, gap mean and run mean; the input-run mean under SWELL-KW and
+    under the 136M check; the operation duration mean; the play-phase CPU share (D26's headline for playback)."""
+    ph, crit = entry["phases"], {}
+
+    def add(name, values, floor):
+        crit[name] = {**stability(values, floor, MIN_REPEATS, keep_zero=True), "needed": repeats_needed(values, floor)}
+
+    name, values = headline(app, entry)
+    if name == "play CPU share":
+        add("play CPU share", values, None)
+    carried = ["idle" if "idle" in ph else "play"] + (["driven"] if app in FOCUS_COMPONENTS else []) \
+        + (["op"] if ph.get("op", {}).get("operation") else [])
+    for p in carried:
+        if p not in ph:
+            continue
+        sel = ph[p]["components"]
+        comps = [(c, ph[p]["threads"][c]) for c in sel["selected"] if ph[p]["threads"][c]["gap_ms"]["q"] is not None]
+        if sel["residual"] and sel["residual"]["gap_ms"]["q"]:
+            comps.append(("residual", sel["residual"]))
+        for comm, c in comps:
+            add(f"{p} {comm} wakes/s", c["wakes_per_s"], None)
+            add(f"{p} {comm} gap mean (ms)", c["gap_ms"]["repeat_mean"], ABS_FLOOR_MS)
+            add(f"{p} {comm} run mean (ms)", c["run_ms"]["repeat_mean"], ABS_FLOOR_MS)
+    for p, label in (("driven", "SWELL-KW"), ("driven-alt", "136M")):
+        if "per_input" in ph.get(p, {}):
+            add(f"input_run mean, {label} (ms)", ph[p]["per_input"]["window"]["run_ms_minus_idle"]["repeat_mean"], ABS_FLOOR_MS)
+    if ph.get("op", {}).get("operation"):
+        add("operation duration mean (ms)", ph["op"]["operation"]["duration_ms"]["repeat_mean"], ABS_FLOOR_MS)
+    return crit
 
 
 def headline(app, entry):
@@ -66,7 +120,8 @@ def summary(samples_by_repeat):
     pooled = [v for vs in samples_by_repeat for v in vs]
     return {"n": len(pooled), "p50": pct(pooled, .5), "p90": pct(pooled, .9), "p99": pct(pooled, .99),
             "q": qtable(pooled),
-            "repeat_p50": [pct(vs, .5) for vs in samples_by_repeat], "repeat_n": [len(vs) for vs in samples_by_repeat]}
+            "repeat_p50": [pct(vs, .5) for vs in samples_by_repeat], "repeat_n": [len(vs) for vs in samples_by_repeat],
+            "repeat_mean": [round(statistics.fmean(vs), 4) if vs else None for vs in samples_by_repeat]}
 
 
 def select_components(comms, spans, reps):
@@ -204,17 +259,22 @@ def main():
                               "first_x_wake_latency_ms": summary([pi[r]["xw_lat"] for r in reps]),
                               "run_ms": summary([pi[r]["xw_run"] for r in reps])}}
             entry["phases"][phase] = ph
-        name, values = headline(app, entry)
-        if name:
-            entry["stability"] = {"quantity": name, "values": values, "tolerance": TOLERANCE,
-                                  "window_limit": WINDOW_LIMIT.get(app), **stability(values)}
+        crit = criterion(app, entry)
+        needed = [c["needed"] for c in crit.values()]
+        entry["stability"] = {"tolerance": TOLERANCE, "abs_floor_ms": ABS_FLOOR_MS, "min_repeats": MIN_REPEATS,
+                              "window_limit": WINDOW_LIMIT.get(app), "quantities": crit,
+                              "passes": bool(crit) and all(c["passes"] for c in crit.values()),
+                              "needed": None if not needed or None in needed else max(needed)}
         out["runs"][app] = entry
         print(f"== {app} ({info['family']}, {info['mode']}, repeats {reps}, {entry['version']}; CPU {sorted(set(entry['cpu_model'].values()))})")
-        if "stability" in entry:
-            st = entry["stability"]
-            hw = "—" if st["half_width"] is None else f"±{st['half_width']:.1%}"
-            print(f"   stability: {st['quantity']} over {st['k']} repeats, 95 % half-width {hw} "
-                  f"(tolerance ±{TOLERANCE:.0%}) — {'holds' if st['passes'] else 'does not hold yet'}")
+        st = entry["stability"]
+        fails = [q for q, c in crit.items() if not c["passes"]]
+        print(f"   stability: {len(crit)} quantities over {len(reps)} repeats, {len(fails)} out of tolerance; repeats needed at "
+              f"this spread {st['needed'] or 'over 200'} — {'holds' if st['passes'] else 'does not hold yet'}")
+        for q in fails:
+            c = crit[q]
+            hw = "—" if c["half_width"] is None else f"±{c['half_width']:.1%}"
+            print(f"     {q}: mean {c['mean']}, half-width {hw}, needed {c['needed']}")
         for phase, ph in entry["phases"].items():
             print(f"   {phase}: span {ph['span_s']} cpu {ph['cpu_share']} wakes/s {ph['wakes_per_s']}")
             if "operation" in ph:

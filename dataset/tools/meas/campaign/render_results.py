@@ -28,7 +28,7 @@ def main():
              "Numbers are pooled over the run's repeats (five 600 s driven / 120 s idle / 300 s play phases unless stated); "
              "`spread` is the range of the per-repeat p50. Threads are the top five by CPU. Per-input rules are method §5's (a) first-wake, (b) window minus idle rate, (c) waker (X-server-woken schedule-ins). "
              "Runner: `ubuntu-24.04`, 4 vCPU, kernel per `reports/*.spec.json`.", ""]
-    crit = []  # D26: the headline median of each app against the shared stability criterion
+    crit = []  # D30: every carried value of each app (tables by their per-repeat mean) against the shared stability criterion
     for app in ORDER:
         p = os.path.join(R, f"pool-{app}.json")
         if not os.path.exists(p):
@@ -79,17 +79,30 @@ def main():
             lines.append(f"| 136M Keystrokes | {f(b['p50'], 3)} | {f(b['p90'], 3)} | {f(b['p99'], 3)} | {b['repeat_p50']} | {spread(d['phases']['driven-alt']['wakes_per_s'], 1)} |")
             lines.append("")
     if crit:
-        lines += ["## Same-machine repeats and the stability criterion (D26)", "",
-                  f"Criterion: the 95 % confidence half-width of the across-repeat mean of each application's headline median is at most "
-                  f"{crit[0][1]['tolerance']:.0%}; repeats are added one at a time per application until it holds (`thunderbird` at most 8, "
-                  "the SWELL-KW Outlook windows).", "",
-                  "| application | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | holds |", "|---|---|---|---|---|---|---|---|"]
-        for app, c in crit:
-            hw = "—" if c["half_width"] is None else f"±{c['half_width']:.1%}"
-            cv = "—" if c["cv"] is None else f"{c['cv']:.1%}"
-            loo = "—" if c["leave_one_out"] is None else f"{c['leave_one_out']:.1%}"
-            lines.append(f"| `{app}` | {c['quantity']} | {c['k']} | {c['mean']} | {cv} | {hw} | {loo} | {'yes' if c['passes'] else 'no'} |")
+        st0 = crit[0][1]
+        lines += ["## Same-machine repeats and the stability criterion (D26, D29, D30)", "",
+                  f"Criterion: for every value the fold-in carries, each table by its per-repeat mean, the 95 % confidence "
+                  f"half-width of the across-repeat mean is at most the larger of {st0['tolerance']:.0%} of the mean and "
+                  f"{st0['abs_floor_ms'] * 1000:.0f} µs (the trace's resolution; times only), over at least {st0['min_repeats']} repeats; "
+                  "repeats are added one at a time per application until every quantity holds (`thunderbird` at most 8, the SWELL-KW "
+                  "Outlook windows). `needed`: the repeat count at which the half-width at the present spread would hold.", "",
+                  "| application | repeats | quantities | out of tolerance | repeats needed at this spread | holds |", "|---|---|---|---|---|---|"]
+        for app, st in crit:
+            q = st["quantities"]
+            k = max((c["k"] for c in q.values()), default=0)
+            lines.append(f"| `{app}` | {k} | {len(q)} | {sum(not c['passes'] for c in q.values())} | "
+                         f"{st['needed'] or 'over 200'} | {'yes' if st['passes'] else 'no'} |")
         lines.append("")
+        for app, st in crit:
+            lines += [f"### `{app}`", "", "| quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |",
+                      "|---|---|---|---|---|---|---|---|"]
+            for name, c in st["quantities"].items():
+                hw = f"±{c['half_width']:.1%}" if c["half_width"] is not None else \
+                    ("—" if c["half_width_abs"] is None else f"±{c['half_width_abs']} (mean 0)")
+                cv = "—" if c["cv"] is None else f"{c['cv']:.1%}"
+                loo = "—" if c["leave_one_out"] is None else f"{c['leave_one_out']:.1%}"
+                lines.append(f"| {name} | {c['k']} | {c['mean']} | {cv} | {hw} | {loo} | {c['needed'] or 'over 200'} | {'yes' if c['passes'] else 'no'} |")
+            lines.append("")
     open(out, "w").write("\n".join(lines) + "\n")
     print(f"wrote {out}: {len(lines)} lines")
 
