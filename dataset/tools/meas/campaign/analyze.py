@@ -17,7 +17,9 @@ when a wakeup event for that thread (the wakeups file, `perf sched timehist
 this schedule-in (9.7 D21). A segment with no such event is a resume after
 preemption: its run is added to the preceding wake's run and the preempted
 time is neither run nor gap. Where timehist carries the switch-out state
-(`--state`, 9.5 D39), the row is checked against it per comm (`wake_check`).
+(`--state`, 9.5 D39), the row is checked against it per comm (`wake_check`);
+for `thunderbird-send` the state decides and the row is the check (9.5 D40,
+`wake_definition: state`).
 Wake rates, gap and run distributions are computed over wakes; the per-input
 window rule (b) sums segments, so it is unaffected. Without a wakeups file
 every segment counts as a wake (`wake_definition: row`).
@@ -156,9 +158,12 @@ def load_all_wakeups(path, pids):
 
 
 EPS = 1e-6  # timehist prints microseconds
+# 9.5 D40: the send campaign starts with the switch-out state recorded, so the state decides its wakes (9.7 D21), the
+# row its check; the current campaign's repeats keep the row (D39)
+STATE_WAKE_APPS = {"thunderbird-send"}
 
 
-def merge_resumes(rows, wakeups_by_tid, check=None):
+def merge_resumes(rows, wakeups_by_tid, check=None, by_state=False):
     """Fold resume-after-preemption segments into the wake they continue.
 
     rows: segments sorted by t_in. A segment is a wake when a wakeup event for its
@@ -169,11 +174,13 @@ def merge_resumes(rows, wakeups_by_tid, check=None):
     the sleep that follows (9.7 changelog D21: the window from the switch-out
     missed those); the first segment of a thread in the capture is always a wake.
     The row decides for the whole 9.5 campaign, whose early repeats carry no
-    switch-out state (9.5 D39). check (a dict), if given, collects per comm the
-    gaps whose preceding segment carries a state (`gaps`) and those where the row
-    disagrees with it: a sleep state but no row (`slept_without_row`), R with a
-    row (`preempted_with_row`). Returns (wakes sorted by t_in, number of segments
-    merged)."""
+    switch-out state (9.5 D39); with by_state (9.5 D40), a recorded switch-out
+    state decides instead — a sleep state (any but R) a wake, R a resume — and
+    the row decides only where no state was recorded. check (a dict), if given,
+    collects per comm the gaps whose preceding segment carries a state (`gaps`)
+    and those where the row disagrees with it: a sleep state but no row
+    (`slept_without_row`), R with a row (`preempted_with_row`). Returns (wakes
+    sorted by t_in, number of segments merged)."""
     import bisect
     last = {}      # tid -> index into out of that thread's current wake
     out = []
@@ -186,12 +193,13 @@ def merge_resumes(rows, wakeups_by_tid, check=None):
         prev = out[i]
         wk = wakeups_by_tid.get(r.tid, [])
         k = bisect.bisect_right(wk, prev.t_in)
-        woken = k < len(wk) and wk[k] <= r.t_in + EPS
-        if check is not None and prev.state:
+        row = k < len(wk) and wk[k] <= r.t_in + EPS
+        slept = prev.state[:1] != "R" if prev.state else None
+        woken = slept if by_state and slept is not None else row
+        if check is not None and slept is not None:
             c = check.setdefault(prev.comm, {"gaps": 0, "slept_without_row": 0, "preempted_with_row": 0})
             c["gaps"] += 1
-            slept = prev.state[:1] != "R"
-            if slept != woken:
+            if slept != row:
                 c["slept_without_row" if slept else "preempted_with_row"] += 1
         if woken:
             out.append(r); last[r.tid] = len(out) - 1
@@ -324,7 +332,9 @@ def _analyze(args):
         wake_def = getattr(args, "wake_def", "wakeup")
         check = {}
         if wk_path and wake_def == "wakeup":
-            rows, merged = merge_resumes(segments, load_all_wakeups(os.path.join(D, wk_path), pids), check)
+            by_state = report.get("app") in STATE_WAKE_APPS and any(r.state for r in segments)
+            rows, merged = merge_resumes(segments, load_all_wakeups(os.path.join(D, wk_path), pids), check, by_state)
+            wake_def = "state" if by_state else wake_def
         else:
             rows, merged, wake_def = segments, 0, "row"
         ph = {"pids": sorted(pids), "transient_pids": {p: sorted({r.comm for r in segments if r.pid == p}) for p in extra_pids},

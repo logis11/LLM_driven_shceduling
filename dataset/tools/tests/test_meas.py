@@ -238,6 +238,35 @@ def test_the_row_decides_and_the_state_checks_it():
     assert check == {}   # no state recorded (the campaign's earlier repeats): nothing to check
 
 
+def test_the_state_decides_for_the_send_campaign():
+    # 9.5 D40: by_state — the recorded switch-out state decides, the row is counted against it; no state, the row decides
+    check = {}
+    rows = [_row(1.000, 0.003)._replace(state="S"), _row(1.000010, 0.003)._replace(state="R"),
+            _row(1.000020, 0.003)._replace(state="D"), _row(1.000030, 0.003)._replace(state="S")]
+    wakes, merged = campaign.merge_resumes(rows, {7: [1.000015, 1.000026]}, check, by_state=True)
+    # gap 1 (after S): a wake; gap 2 (after R): a resume, whatever the row says; gap 3 (after D): a wake
+    assert [w.t_in for w in wakes] == [1.000, 1.000010, 1.000030] and merged == 1
+    assert check == {"app": {"gaps": 3, "slept_without_row": 1, "preempted_with_row": 1}}
+    wakes, merged = campaign.merge_resumes([r._replace(state="") for r in rows], {7: [1.000015, 1.000026]}, by_state=True)
+    assert [w.t_in for w in wakes] == [1.000, 1.000020, 1.000030]   # no state recorded: the rows decide
+
+
+def test_a_gecko_pool_is_one_component_in_the_send_campaign():
+    # 9.5 D38: thunderbird-send keys a component by the thread's name without its trailing " #<n>"
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)   # pool.py imports its sibling as `analyze`; another test may hold build's
+    try:
+        campaign_pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    assert campaign_pool.component_key("thunderbird-send", "BgIOThr~Pool #3") == "BgIOThr~Pool"
+    assert campaign_pool.component_key("thunderbird-send", "StreamTrans #64") == "StreamTrans"
+    assert campaign_pool.component_key("thunderbird-send", "DOM Worker") == "DOM Worker"
+    assert campaign_pool.component_key("thunderbird", "BgIOThr~Pool #3") == "BgIOThr~Pool #3"   # the current campaign
+
+
 def test_timehist_rows_with_and_without_the_state_column(tmp_path):
     p = tmp_path / "perf.idle.timehist.txt"
     p.write_text("           time    cpu  task name                       wait time  sch delay   run time  state\n"

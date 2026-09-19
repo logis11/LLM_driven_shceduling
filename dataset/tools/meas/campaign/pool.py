@@ -45,6 +45,14 @@ WINDOW_LIMIT = {"thunderbird": 8, "thunderbird-send": 8}   # D31: the re-observa
 ABS_FLOOR_MS = 0.001  # the trace's resolution: perf sched timehist times in whole microseconds (D30; 9.6 D23)
 MIN_REPEATS = 5       # kalibera-ismm13 §11 (D29; 9.6 D24)
 FOCUS_COMPONENTS = {"gimp", "kdenlive"}  # fold_in.py's pointer-loop archetypes carry the driven phase as focus_components
+# D38: a component keyed by the thread's name with a trailing " #<n>" removed — Gecko names a pool's threads
+# "<pool> #<n>", n counting up per spawn (nsThreadPoolNaming::GetNextThreadName), so each pool is one component
+POOL_SUFFIX_APPS = {"thunderbird-send"}
+POOL_SUFFIX = re.compile(r" #\d+$")
+
+
+def component_key(app, comm):
+    return POOL_SUFFIX.sub("", comm) if app in POOL_SUFFIX_APPS else comm
 
 
 def repeats_needed(values, abs_floor=None):
@@ -199,7 +207,7 @@ def main():
                 phase_rows = op["inside"] if op else pd["rows"]
                 phase_span = (sum(op["durations_ms"]) / 1000 or 1e-6) if op else pd["span"]
                 for row in phase_rows:
-                    by_tid.setdefault((row.comm, row.tid), []).append((row.t_in, row.run))
+                    by_tid.setdefault((component_key(app, row.comm), row.tid), []).append((row.t_in, row.run))
                 for (comm, tid), rs in by_tid.items():
                     c = comms.setdefault(comm, {"gaps": array("d"), "runs": array("d"), "t_in": array("d"), "wakes": 0, "threads": 0})
                     c["gaps"].extend((b[0] - a[0]) * 1000 for a, b in zip(rs, rs[1:]))
@@ -216,51 +224,55 @@ def main():
                  "run_id": {r: info["run_id"][r] for r in reps},
                  "version": results[reps[0]].get("version"), "phases": {}}
         for phase in ("idle", "driven", "driven-alt", "play", "op"):
-            if not all(phase in raws[r]["phases"] for r in reps):
+            # D32: each phase over the repeats that have it — a repeat past the recording's end runs the idle phase alone
+            preps = [r for r in reps if phase in raws[r]["phases"]]
+            if not preps:
                 continue
-            ph = {"roles": {r: results[r]["phases"][phase]["roles"] for r in reps},
-                  "span_s": [round(raws[r]["phases"][phase]["span"], 1) for r in reps],
-                  "cpu_share": [results[r]["phases"][phase]["cpu_share"] for r in reps],
-                  "wakes_per_s": [results[r]["phases"][phase]["wakes_per_s"] for r in reps],
+            ph = {"roles": {r: results[r]["phases"][phase]["roles"] for r in preps},
+                  "span_s": [round(raws[r]["phases"][phase]["span"], 1) for r in preps],
+                  "cpu_share": [results[r]["phases"][phase]["cpu_share"] for r in preps],
+                  "wakes_per_s": [results[r]["phases"][phase]["wakes_per_s"] for r in preps],
                   "threads": {}}
             comms = {}
-            for r in reps:
+            for r in preps:
                 for comm, cc in raws[r]["phases"][phase]["comms"].items():
                     c = comms.setdefault(comm, {"gaps": {}, "runs": {}, "t_in": {}, "wakes": {}, "threads": {}})
                     c["gaps"][r] = cc["gaps"]; c["runs"][r] = cc["runs"]; c["t_in"][r] = cc["t_in"]
                     c["wakes"][r] = cc["wakes"]; c["threads"][r] = cc["threads"]
-            spans = {r: raws[r]["phases"][phase]["span"] for r in reps}
-            chosen, residual, cov = select_components(comms, spans, reps)
+            spans = {r: raws[r]["phases"][phase]["span"] for r in preps}
+            chosen, residual, cov = select_components(comms, spans, preps)
             ph["components"] = {"selected": chosen, "residual": residual, **cov}
             for comm, c in sorted(comms.items(), key=lambda kv: -sum(sum(v) for v in kv[1]["runs"].values())):
-                spans = {r: raws[r]["phases"][phase]["span"] for r in reps}
+                spans = {r: raws[r]["phases"][phase]["span"] for r in preps}
                 ph["threads"][comm] = {
-                    "threads": [c["threads"].get(r, 0) for r in reps],
-                    "wakes_per_s": [round(c["wakes"].get(r, 0) / spans[r], 2) for r in reps],
-                    "cpu_share": [round(sum(c["runs"].get(r, [])) / 1000 / spans[r], 4) for r in reps],
-                    "gap_ms": summary([c["gaps"].get(r, []) for r in reps]),
-                    "run_ms": summary([c["runs"].get(r, []) for r in reps])}
-            if phase == "op" and all(raws[r]["phases"][phase].get("operation") for r in reps):
-                ops = {r: raws[r]["phases"][phase]["operation"] for r in reps}
-                ph["operation"] = {"name": ops[reps[0]]["name"],
-                                   "n_ok": [ops[r]["n_ok"] for r in reps], "n_failed": [ops[r]["n_failed"] for r in reps],
-                                   "duration_ms": summary([ops[r]["durations_ms"] for r in reps])}
-            if phase in ("driven", "driven-alt") and all(raws[r]["phases"][phase].get("per_input") for r in reps):
-                pi = {r: raws[r]["phases"][phase]["per_input"] for r in reps}
+                    "threads": [c["threads"].get(r, 0) for r in preps],
+                    "wakes_per_s": [round(c["wakes"].get(r, 0) / spans[r], 2) for r in preps],
+                    "cpu_share": [round(sum(c["runs"].get(r, [])) / 1000 / spans[r], 4) for r in preps],
+                    "gap_ms": summary([c["gaps"].get(r, []) for r in preps]),
+                    "run_ms": summary([c["runs"].get(r, []) for r in preps])}
+            if phase == "op" and all(raws[r]["phases"][phase].get("operation") for r in preps):
+                ops = {r: raws[r]["phases"][phase]["operation"] for r in preps}
+                ph["operation"] = {"name": ops[preps[0]]["name"],
+                                   "n_ok": [ops[r]["n_ok"] for r in preps], "n_failed": [ops[r]["n_failed"] for r in preps],
+                                   "duration_ms": summary([ops[r]["durations_ms"] for r in preps])}
+            if phase in ("driven", "driven-alt") and all(raws[r]["phases"][phase].get("per_input") for r in preps):
+                pi = {r: raws[r]["phases"][phase]["per_input"] for r in preps}
                 ph["per_input"] = {
-                    "events": [len(pi[r]["win_run"]) for r in reps],
-                    "first_wake": {"attributed_share": [round(len(pi[r]["first_lat"]) / max(len(pi[r]["win_run"]), 1), 3) for r in reps],
-                                   "latency_ms": summary([pi[r]["first_lat"] for r in reps]),
-                                   "run_ms": summary([pi[r]["first_run"] for r in reps])},
-                    "window": {"len_ms": summary([pi[r]["win_len"] for r in reps]),
-                               "run_ms": summary([pi[r]["win_run"] for r in reps]),
-                               "run_ms_minus_idle": summary([pi[r]["win_run_corr"] for r in reps])},
-                    "waker": {"x_wakes_per_input": summary([pi[r]["xw_count"] for r in reps]),
-                              "first_x_wake_latency_ms": summary([pi[r]["xw_lat"] for r in reps]),
-                              "run_ms": summary([pi[r]["xw_run"] for r in reps])}}
-            checks = {r: results[r]["phases"][phase].get("wake_check") for r in reps}
+                    "events": [len(pi[r]["win_run"]) for r in preps],
+                    "first_wake": {"attributed_share": [round(len(pi[r]["first_lat"]) / max(len(pi[r]["win_run"]), 1), 3) for r in preps],
+                                   "latency_ms": summary([pi[r]["first_lat"] for r in preps]),
+                                   "run_ms": summary([pi[r]["first_run"] for r in preps])},
+                    "window": {"len_ms": summary([pi[r]["win_len"] for r in preps]),
+                               "run_ms": summary([pi[r]["win_run"] for r in preps]),
+                               "run_ms_minus_idle": summary([pi[r]["win_run_corr"] for r in preps])},
+                    "waker": {"x_wakes_per_input": summary([pi[r]["xw_count"] for r in preps]),
+                              "first_x_wake_latency_ms": summary([pi[r]["xw_lat"] for r in preps]),
+                              "run_ms": summary([pi[r]["xw_run"] for r in preps])}}
+            checks = {r: results[r]["phases"][phase].get("wake_check") for r in preps}
             if any(checks.values()):   # D39: the wakeup row against the switch-out state, repeats that record it
                 ph["wake_check"] = {r: v for r, v in checks.items() if v}
+            if preps != reps:
+                ph["repeats"] = preps   # the phase's lists run over these repeats, not the entry's
             entry["phases"][phase] = ph
         crit = criterion(app, entry)
         needed = [c["needed"] for c in crit.values()]
@@ -279,7 +291,8 @@ def main():
             hw = "—" if c["half_width"] is None else f"±{c['half_width']:.1%}"
             print(f"     {q}: mean {c['mean']}, half-width {hw}, needed {c['needed']}")
         for phase, ph in entry["phases"].items():
-            print(f"   {phase}: span {ph['span_s']} cpu {ph['cpu_share']} wakes/s {ph['wakes_per_s']}")
+            preps = ph.get("repeats", reps)
+            print(f"   {phase}{f' (repeats {preps})' if preps != reps else ''}: span {ph['span_s']} cpu {ph['cpu_share']} wakes/s {ph['wakes_per_s']}")
             if "wake_check" in ph:
                 tot = {k: sum(c[k] for v in ph["wake_check"].values() for c in v.values())
                        for k in ("gaps", "slept_without_row", "preempted_with_row")}
@@ -288,7 +301,7 @@ def main():
             if "operation" in ph:
                 o = ph["operation"]
                 print(f"     operation {o['name']}: ok {o['n_ok']} failed {o['n_failed']}; duration p50/p90/p99 {o['duration_ms']['p50']}/{o['duration_ms']['p90']}/{o['duration_ms']['p99']} ms ({o['duration_ms']['repeat_p50']})")
-            print(f"     roles r{reps[0]}: {ph['roles'][reps[0]]}")
+            print(f"     roles r{preps[0]}: {ph['roles'][preps[0]]}")
             for comm, c in list(ph["threads"].items())[:5]:
                 print(f"     {comm:16s} thr {c['threads']} wakes/s {c['wakes_per_s']} gap p50 {c['gap_ms']['p50']} ({c['gap_ms']['repeat_p50']}) run p50/p90/p99 {c['run_ms']['p50']}/{c['run_ms']['p90']}/{c['run_ms']['p99']}")
             if "per_input" in ph:

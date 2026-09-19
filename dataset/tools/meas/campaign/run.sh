@@ -18,9 +18,24 @@ pin_self_harness
 source "$TOOLS/appdefs.sh"
 APP="$1"; REPEAT="$2"; MODE="${3:-full}"
 STREAMS="$(cd "$TOOLS/../../.." && pwd)/meas/streams"
-if [ "$MODE" = dry ]; then SETTLE=10; IDLE=30; DRIVEN=60; PLAY=60; OPS=90; else SETTLE=30; IDLE=120; DRIVEN=600; PLAY=300; OPS=600; fi
+# D34, D35: the idle or play phase starts after the application's launch work — a settle per application, set from its
+# traces and stated in method §9 before its repeats; 30 s (method §2) where the traces show none. An application whose
+# launch work reaches past 30 s (chrome, code, webrtc, thunderbird, thunderbird-send) has no entry until its settle is
+# stated, and stops before any measurement.
+settle_for() {
+  case "$1" in
+    soffice|gimp|kdenlive|mpv-video|mpv-audio) echo 30 ;;
+    *) echo "" ;;
+  esac
+}
+if [ "$MODE" = dry ]; then SETTLE=10; IDLE=30; DRIVEN=60; PLAY=60; OPS=90; else SETTLE="$(settle_for "$APP")"; IDLE=120; DRIVEN=600; PLAY=300; OPS=600; fi
 rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE"; rec started_utc "$(date -u +%FT%TZ)"
-rec settle_s "$SETTLE"; rec idle_s "$IDLE"; rec driven_s "$DRIVEN"; rec play_s "$PLAY"; rec op_s "$OPS"
+rec settle_s "${SETTLE:-unset}"; rec idle_s "$IDLE"; rec driven_s "$DRIVEN"; rec play_s "$PLAY"; rec op_s "$OPS"
+if [ -z "$SETTLE" ]; then
+  rec finished_utc "$(date -u +%FT%TZ)"; finish_report
+  echo "settle: no settle stated for $APP (D34, D35) — stopping before any measurement" >&2
+  exit 0
+fi
 pin_record | tee -a "$KV" | sed 's/^/  /' >&2
 python3 "$TOOLS/../runner_spec.py" > "$OUT/spec.json"
 # same-machine repeats (9.6 D10; 9.5 D26): a job that drew another CPU model stops here, recorded, before any install or measurement
@@ -90,7 +105,13 @@ PY
 
 case "$DRIVER" in
   stream)
+    # D32: a repeat past the recording's end — its window recorded empty in windows.json (an empty window is not
+    # committed) — runs the idle phase alone and is pooled into the idle values only; no operation phase either,
+    # since without the driven phases it would start from another application state
+    WINDOW="$(python3 -c 'import json, sys; w = json.load(open(sys.argv[1]))["windows"].get(sys.argv[2]); print("uncut" if w is None else "ok" if w.get("events") else "empty")' "$STREAMS/windows.json" "$STREAM-r$REPEAT")"
+    rec recording.window "$WINDOW"
     $PH idle -- bash -c "true"; phase idle "$IDLE" ""
+    if [ "$WINDOW" = empty ]; then rec recording.past_end 1; OP=""; else
     sleep 10
     SFILE="$STREAMS/$STREAM-r$REPEAT.jsonl"; rec stream_file "$(basename "$SFILE")"; rec stream_kinds "$KINDS"
     DRV="python3 $TOOLS/replay_stream.py $SFILE $WID $OUT/replay.jsonl --seconds $DRIVEN --area $AREA --kinds $KINDS"
@@ -104,6 +125,7 @@ case "$DRIVER" in
       DRVA="python3 $TOOLS/replay_stream.py $AFILE $WID $OUT/replay-alt.jsonl --seconds $DRIVEN --area $AREA"
       $PH driven-alt -- bash -c "true"; phase driven-alt "$((DRIVEN + 5))" "$DRVA"
       rec replay_alt.sent "$(wc -l < "$OUT/replay-alt.jsonl" 2>/dev/null || echo 0)"
+    fi
     fi ;;
   pointer)
     $PH idle -- bash -c "true"; phase idle "$IDLE" ""

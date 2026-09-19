@@ -44,10 +44,20 @@ def validity(family, dirs, entry):
     alt = json.load(open(os.path.join(streams, "aalto-windows.json")))["windows"] if os.path.exists(os.path.join(streams, "aalto-windows.json")) else {}
     bad, dbs = 0, set()
     op = (entry or {}).get("phases", {}).get("op", {}).get("operation")
-    reps = (entry or {}).get("repeats", [])
+    reps = (entry or {}).get("phases", {}).get("op", {}).get("repeats") or (entry or {}).get("repeats", [])
+    # every phase present (the loop, step 4): a repeat past the recording's end runs the idle phase alone (9.5 D32);
+    # any other repeat has every phase some repeat of the application has
+    has = {k: {f.split(".")[1] for f in os.listdir(d) if f.startswith("perf.") and ".timehist.txt" in f} for k, d in dirs.items()}
+    full = set().union(*has.values()) if has else set()
     for k, d in sorted(dirs.items()):
         rep, r = json.load(open(os.path.join(d, "report.json"))), kv(os.path.join(d, "report.kv"))
-        notes = []
+        notes, info = [], []
+        if r.get("recording.past_end") == "1":
+            info.append("idle phase only, past the recording's end (9.5 D32)")
+        elif family in ("interactive", "playback") and has[k] != full:
+            notes.append(f"phases missing {sorted(full - has[k])}")
+        if r.get("recording.window") == "uncut":
+            notes.append("input window not cut")
         if rep.get("gate") != "open" or common.MACHINE not in (rep.get("machine.model") or ""):
             notes.append(f"gate {rep.get('gate')} on {rep.get('machine.model')}")
         # explained: perf record's 130 is its SIGINT stop; freshclam's 2 is the system service holding the update lock,
@@ -87,7 +97,7 @@ def validity(family, dirs, entry):
             if r.get("steam.buildid"):
                 dbs.add(r["steam.buildid"])
         bad += bool(notes)
-        print(f"   r{k}: {'ok' if not notes else '; '.join(notes)}")
+        print(f"   r{k}: {'ok' if not notes else '; '.join(notes)}{''.join(f' ({x})' for x in info)}")
     if len(dbs) > 1:
         what = "SteamCMD app builds" if family == "background" else "ClamAV signature databases"
         print(f"   {what} differ across repeats: {sorted(dbs)}"); bad += 1
