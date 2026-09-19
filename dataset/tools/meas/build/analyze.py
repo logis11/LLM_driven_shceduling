@@ -207,10 +207,12 @@ def process_records(ts_rows):
 def build_tree(phase, segs, forks, recs, meas_cpu):
     """Return (root_tid, tree_tids, tid2pid, role_of_pid, parent_of_pid, outside_by_comm).
 
-    The root is the earliest thread on the measured CPU whose comm is the phase's program (`taskset` execs it, so it
-    is the first of its name there; sudo and dbus-run-session wrappers run pinned too and are its parents); the tree
-    is every descendant by the fork rows plus the root. Roles: comm at exit (the process record), else the last comm
-    seen in a segment."""
+    The root is the earliest thread on the measured CPU whose comm is the phase's program and that was forked inside
+    the record (`taskset` execs it, so it is the first of its name there; sudo and dbus-run-session wrappers run
+    pinned too and are its parents) — a process of that name already running on the runner (a system `python3`
+    daemon, scheduled on the measured CPU before the program) is not the root; failing that, the earliest of the
+    name. The tree is every descendant by the fork rows plus the root. Roles: comm at exit (the process record),
+    else the last comm seen in a segment."""
     on_cpu = [s for s in segs if s.cpu == meas_cpu]
     children = defaultdict(list)
     parent = {}
@@ -222,10 +224,9 @@ def build_tree(phase, segs, forks, recs, meas_cpu):
         tid2pid[s.tid] = s.pid
         last_comm[s.tid] = s.comm
     root_comm = PHASE_ROOT.get(phase, phase.split("-")[0])
-    root = None
-    for s in on_cpu:
-        if s.comm == root_comm:
-            root = s.tid; break
+    root = next((s.tid for s in on_cpu if s.comm == root_comm and s.tid in parent), None)
+    if root is None:
+        root = next((s.tid for s in on_cpu if s.comm == root_comm), None)
     if root is None:   # fall back: the earliest non-outside thread on the measured CPU
         for s in on_cpu:
             if not outside(s.comm):

@@ -127,6 +127,18 @@ def test_batch_reads_the_job_window_and_shape():
     assert cut["job_s"] == pytest.approx(0.0203, abs=1e-6) and cut["_samples"]["runs_between_blocks_ms"] == pytest.approx([12.0, 8.0])
 
 
+def test_build_tree_roots_at_the_program_forked_in_the_record():
+    # a system python3 already running (no fork row) is scheduled on the measured CPU before the trainer
+    segs = [build.Seg(1.0, 1.0, 1.001, 1.0, "python3", 803, 803, "S", 3),
+            build.Seg(2.0, 2.0, 2.100, 100.0, "python3", 6525, 6525, "R", 3),
+            build.Seg(2.1, 2.1, 2.200, 100.0, "python3", 6525, 6525, "Z", 3)]
+    forks = [(1.9, 6521, "bash", 6525, "bash")]
+    root, tree, *_ = build.build_tree("train", segs, forks, {}, 3)
+    assert root == 6525 and tree == {6525}
+    root, *_ = build.build_tree("train", segs[:1], [], {}, 3)       # no forked candidate: the earliest of the name
+    assert root == 803
+
+
 from meas.build import pool  # noqa: E402
 
 
