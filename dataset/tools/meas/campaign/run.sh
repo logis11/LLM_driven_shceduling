@@ -30,9 +30,18 @@ settle_for() {
     *) echo "" ;;
   esac
 }
+# D45: the idle phase holds the application's recurring episodes (D35) — 600 s for thunderbird-send, whose ~60 s
+# StreamTrans episode and slower variation a 120 s window reproduces to within 31 % of the long-run level, a 600 s one
+# to within 7.4 % (long-phase probe); 120 s (method §2) elsewhere
+idle_for() {
+  case "$1" in
+    thunderbird-send) echo 600 ;;
+    *) echo 120 ;;
+  esac
+}
 if [ "$MODE" = dry ]; then SETTLE=10; IDLE=30; DRIVEN=60; PLAY=60; OPS=90
 elif [ "$MODE" = probe ]; then SETTLE=30; IDLE="${MEAS_PHASE_S:?probe needs MEAS_PHASE_S}"; DRIVEN=0; PLAY="$IDLE"; OPS=0
-else SETTLE="$(settle_for "$APP")"; IDLE=120; DRIVEN=600; PLAY=300; OPS=600; fi
+else SETTLE="$(settle_for "$APP")"; IDLE="$(idle_for "$APP")"; DRIVEN=600; PLAY=300; OPS=600; fi
 rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE"; rec started_utc "$(date -u +%FT%TZ)"
 rec settle_s "${SETTLE:-unset}"; rec idle_s "$IDLE"; rec driven_s "$DRIVEN"; rec play_s "$PLAY"; rec op_s "$OPS"
 if [ -z "$SETTLE" ]; then

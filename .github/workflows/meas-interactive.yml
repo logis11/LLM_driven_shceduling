@@ -43,7 +43,9 @@ jobs:
     needs: plan
     if: needs.plan.outputs.count != '0'
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    # 90: a full thunderbird-send repeat (the 390 s settle, a 600 s idle phase, three 600 s phases; 9.5 D44, D45) runs
+    # about an hour
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       max-parallel: 5

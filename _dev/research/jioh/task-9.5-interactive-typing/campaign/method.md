@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-19, `thunderbird-send`'s idle phase (changelog D45) — §2: 600 s, design, holding its recurring ~60 s `StreamTrans` episode and the slower variation on it (long-phase probe 35436084336, `launch-work.md`); every other application keeps 120 s.
+
 - 2026-09-19, `thunderbird-send`'s settle (changelog D44) — §2: 390 s, design: its launch work ends about 340 s into a 30 s-settled idle phase and the tree's CPU is steady from 360 s (long-phase probe 35436084336, `launch-work.md`); the recurring ~60 s `StreamTrans` episode stays in the idle phase.
 
 - 2026-09-19, sporadic components (changelog D43) — §6: a timer component, the residual as a whole included, is carried only if its gap and run means exist in every repeat (at least two wakes in each repeat's phase); otherwise its wakes are reported in the archetype's notes as sporadic, with their repeats and rate.
