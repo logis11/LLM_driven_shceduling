@@ -132,7 +132,7 @@ from meas.build import pool  # noqa: E402
 
 def test_criterion_lists_every_carried_value():
     def rp(*v):
-        return {"repeat_p50": dict(zip((4, 5, 7, 8, 9), v))}
+        return {"repeat_mean": dict(zip((4, 5, 7, 8, 9), v))}
     out = {"phases": {
         "build-j8-warm": {"roles": {n: {"cpu_per_process_us": rp(100, 101, 100, 102, 101)} for n in pool.CRITERION_ROLES},
                           "dispatch": {"per_dispatch_us": rp(670, 675, 673, 681, 676)},
@@ -150,3 +150,23 @@ def test_criterion_lists_every_carried_value():
     four = {"phases": {"ffmpeg": {"shape": {"runs_between_blocks_us": rp(7, 7, 7, 7), "mean_block_us": {4: 0.3, 5: 0.3, 7: 0.3, 8: 0.3},
                                             "share_past_boot_slice": {4: 0.7, 5: 0.7, 7: 0.7, 8: 0.7}}}}}
     assert not any(c["passes"] for c in pool.criterion(four).values())    # four repeats: below the minimum
+    assert all(c["needed"] is None or c["needed"] >= 5 for c in crit.values())
+
+
+def test_pooled_carries_the_per_repeat_mean_and_the_rule_reads_it():
+    # D26: a carried table is tested by its per-repeat mean — the medians agree, the means do not
+    t = pool.pooled({4: [1.0, 2.0, 3.0], 5: [1.0, 2.0, 3.6], 7: [1.0, 2.0, 3.0], 8: [1.0, 2.0, 3.6], 9: [1.0, 2.0, 3.0]}, 1000.0)
+    assert t["repeat_p50"] == {4: 2000.0, 5: 2000.0, 7: 2000.0, 8: 2000.0, 9: 2000.0}
+    assert t["repeat_mean"] == pytest.approx({4: 2000.0, 5: 2200.0, 7: 2000.0, 8: 2200.0, 9: 2000.0})
+    out = {"phases": {"build-j8-warm": {"roles": {}, "object_members": {"step_cpu_us": {"sh 1/4": t}}}}}
+    c = pool.criterion(out)["object-job sh 1/4"]
+    assert c["mean"] == pytest.approx(2080.0) and c["passes"] is False    # ±6.5 %: the medians alone would pass
+    assert c["needed"] == 7
+
+
+def test_repeats_needed_is_at_least_five_and_follows_the_spread():
+    assert pool.repeats_needed({4: 100.0, 5: 100.0, 7: 100.0, 8: 100.0}) == 5
+    assert pool.repeats_needed({4: 0.3, 5: 0.5, 7: 0.2, 8: 0.4}, abs_floor=1.0) == 5     # within the 1 µs floor
+    wide = pool.repeats_needed({4: 196.0, 5: 233.0, 7: 205.0, 8: 220.0}, abs_floor=1.0)
+    assert wide > 5 and pool.repeats_needed({4: 196.0, 5: 233.0, 7: 205.0, 8: 220.0}) == wide
+    assert pool.repeats_needed({4: 100.0}) is None

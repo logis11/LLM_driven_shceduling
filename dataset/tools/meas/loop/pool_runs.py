@@ -122,9 +122,11 @@ def main():
     st = (entry or {}).get("stability")
     if family == "build":
         crit = st["quantities"]
-        print(f"build: repeats {pooled['repeats']}; stability rule {'holds' if st['passes'] else 'does not hold yet'}")
+        print(f"build: repeats {pooled['repeats']}; stability rule {'holds' if st['passes'] else 'does not hold yet'}; "
+              f"repeats needed at this spread {st.get('needed') or 'over 200'}")
         for q, c in crit.items():
-            print(f"   {q}: k {c['k']}, half-width {c['half_width']}, {'passes' if c['passes'] else 'fails'}")
+            print(f"   {q}: k {c['k']}, mean {c['mean']}, half-width {c['half_width']} (abs {c['half_width_abs']}), "
+                  f"needed {c.get('needed')}, {'passes' if c['passes'] else 'fails'}")
     elif st and "quantities" in st:
         print(f"{app}: repeats {entry['repeats']}; stability rule {'holds' if st['passes'] else 'does not hold yet'}"
               + (f"; first batch at this spread {entry['first_batch']['count']}" if entry.get("first_batch") else ""))
