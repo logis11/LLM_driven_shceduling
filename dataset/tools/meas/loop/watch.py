@@ -1,0 +1,98 @@
+#!/usr/bin/env python3
+"""Watch a campaign: relaunch windows the machine gate stopped, stop on the first event that needs a decision.
+
+watch.py <family>[/<app>]... [--since N] [--app APP:N]... [--done APP,...] [--poll S] [--from-now]
+
+Every S seconds (default 30) the family's runs numbered N or later are read; N is the campaign's first batch, and
+--app APP:N gives one application its own first run (an application restarted under a new design, 9.5 D28). A job that
+finished in under common.GATE_S is read from its report: stopped by the machine gate, it is relaunched with the same
+window or repeat index (9.5 D26) — only while its application has no other job in flight outside its first run (one
+relaunch or added repeat at a time), and never for an application in --done. The watcher exits, printing the event, when
+a watched job lands, fails, or ends short without the gate. Handled jobs are kept in <work>/watch-seen.txt, so a restart
+does not repeat them; a completed run whose jobs are all handled is not read again. --from-now counts every job already
+finished at the start as handled.
+"""
+
+import os
+import sys
+import time
+
+import common
+
+
+def main():
+    a = sys.argv[1:]
+    if not a:
+        raise SystemExit(__doc__)
+    targets, since, app_since, done, poll, from_now = [], 1, {}, set(), 30, False
+    i = 0
+    while i < len(a):
+        if a[i] == "--since":
+            since = int(a[i + 1]); i += 2
+        elif a[i] == "--app":
+            n, _, s = a[i + 1].partition(":"); app_since[n] = int(s); i += 2
+        elif a[i] == "--done":
+            done |= set(a[i + 1].split(",")); i += 2
+        elif a[i] == "--poll":
+            poll = int(a[i + 1]); i += 2
+        elif a[i] == "--from-now":
+            from_now = True; i += 1
+        else:
+            targets.append(common.parse_target(a[i])[:2]); i += 1
+    os.makedirs(common.WORK, exist_ok=True)
+    seen_path = os.path.join(common.WORK, "watch-seen.txt")
+    seen = set(open(seen_path).read().split("\n")) if os.path.exists(seen_path) else set()
+    closed = set()
+    if from_now:
+        for fam in sorted({f for f, _ in targets}):
+            for r in common.runs(fam, since):
+                for j in common.jobs(fam, r["databaseId"]):
+                    if j["state"] not in ("queued", "measuring"):
+                        seen.add(f"{r['databaseId']}:{j['name']}")
+        open(seen_path, "w").write("\n".join(sorted(seen)) + "\n")
+    watched = lambda f, app: (f, None) in targets or (f, app) in targets
+    first = lambda app: app_since.get(app, since)
+    while True:
+        events, gated, busy = [], [], set()
+        for fam in sorted({f for f, _ in targets}):
+            for r in common.runs(fam, since):
+                if r["databaseId"] in closed:
+                    continue
+                js = [j for j in common.jobs(fam, r["databaseId"]) if watched(fam, j["app"]) and r["number"] >= first(j["app"])]
+                for j in js:
+                    key = f"{r['databaseId']}:{j['name']}"
+                    if j["state"] in ("queued", "measuring"):
+                        if r["number"] != first(j["app"]):
+                            busy.add((fam, j["app"]))
+                        continue
+                    if key in seen:
+                        continue
+                    seen.add(key); open(seen_path, "a").write(key + "\n")
+                    if j["state"] == "landed":
+                        events.append(f"LANDED {fam} {j['name']} run {r['databaseId']} ({j['seconds']:.0f} s)")
+                    elif j["state"] == "failed":
+                        events.append(f"FAILED {fam} {j['name']} run {r['databaseId']}")
+                    else:
+                        gate, model = common.gate_of(fam, j)
+                        if gate == "wrong-machine":
+                            gated.append((fam, j["app"], j["k"], model))
+                        else:
+                            events.append(f"SHORT without the gate {fam} {j['name']} run {r['databaseId']}: gate {gate}")
+                if r["status"] == "completed" and all(f"{r['databaseId']}:{j['name']}" in seen for j in js):
+                    closed.add(r["databaseId"])
+        go = []
+        for fam, app, k, model in gated:
+            if app in done or (fam, app) in busy or any(x[:2] == (fam, app) for x in go):
+                print(f"{time.strftime('%H:%M')} {app or 'build'} r{k} gated ({model}); left for the next check", flush=True)
+                continue
+            go.append((fam, app, k))
+            print(f"{time.strftime('%H:%M')} {app or 'build'} r{k} gated ({model}); relaunched", flush=True)
+        if go:
+            print("   " + common.push_trigger(go, "retried"), flush=True)
+        if events:
+            print("\n".join(events)); return
+        time.sleep(poll)
+
+
+if __name__ == "__main__":
+    main()
