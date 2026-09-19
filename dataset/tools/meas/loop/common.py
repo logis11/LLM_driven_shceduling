@@ -157,7 +157,7 @@ def push_trigger(targets, kind, dry=False):
         return msg
     git = lambda *a: subprocess.run(["git", *a], cwd=REPO, check=True, capture_output=True, text=True)
     git("add", *by_trigger)
-    git("commit", "-q", "-m", msg)
+    git("commit", "-q", "-m", msg, "--", *by_trigger)   # the trigger files only, never another session's staged work
     git("pull", "-q", "--rebase", "--autostash")
     git("push", "-q")
     return msg
