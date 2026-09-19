@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-19, the wakeup rows of the op phase's transient processes (changelog D41) — §5 what one wake is: the wakeup rows are read for the application's tree with the processes the op phase admits by the appdef's pattern (Kdenlive's `kdenlive_render`), not only for the pids the snapshots saw.
+
 - 2026-09-19, `thunderbird-send`'s wake rule (changelog D40) — a schedule-in is a wake when the thread's previous switch-out state is any but R, a resume when it is R (9.7 D21); the wakeup row is the check (D39's `wake_check`).
 
 - 2026-09-19, the wake rule and the switch-out state (changelog D39) — §5 what one wake is: the wakeup row is searched from the schedule-in of the wake it would continue to this schedule-in (9.7 D21, from commit `9d86aaf`), for every repeat of the campaign; §4: `perf sched timehist` is read with `--state` from this entry on, and the pool reports per component where the row disagrees with the recorded switch-out state (`wake_check`); the state decides no wake in this campaign.

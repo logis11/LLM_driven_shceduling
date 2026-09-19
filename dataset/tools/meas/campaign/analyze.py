@@ -322,6 +322,9 @@ def _analyze(args):
             if os.path.exists(p):
                 pids |= {pr["pid"] for pr in json.load(open(p))["procs"]}
         segments, (t0, t1), extra_pids = load_rows(os.path.join(D, th), pids, report.get("rx") if phase == "op" else None)
+        # the tree's wakeup rows include the transient children load_rows admitted (Kdenlive's kdenlive_render): without
+        # them every sleep of those threads found no row and was folded as a resume (9.5 D41)
+        tree = pids | set(extra_pids)
         span = max(t1 - t0, 1e-6)
         roles = pid_roles(D, phase)
         excluded = getattr(args, "exclude_roles", set())
@@ -333,7 +336,7 @@ def _analyze(args):
         check = {}
         if wk_path and wake_def == "wakeup":
             by_state = report.get("app") in STATE_WAKE_APPS and any(r.state for r in segments)
-            rows, merged = merge_resumes(segments, load_all_wakeups(os.path.join(D, wk_path), pids), check, by_state)
+            rows, merged = merge_resumes(segments, load_all_wakeups(os.path.join(D, wk_path), tree), check, by_state)
             wake_def = "state" if by_state else wake_def
         else:
             rows, merged, wake_def = segments, 0, "row"
@@ -345,7 +348,7 @@ def _analyze(args):
               "roles": per_role(rows, roles, span), "threads": per_thread(rows, span)}
         if phase == "idle":
             idle_rate = total_run_s / span
-        xwakes = load_wakeups(os.path.join(D, wk_path), pids, args.waker) if wk_path else []
+        xwakes = load_wakeups(os.path.join(D, wk_path), tree, args.waker) if wk_path else []
         if xwakes:
             ph["x_wakes_per_s"] = round(len(xwakes) / span, 2)
             ph["x_wakes_by_comm"] = {c: n for c, n in sorted(((c, sum(1 for w in xwakes if w[1] == c)) for c in {w[1] for w in xwakes}), key=lambda kv: -kv[1])[:8]}

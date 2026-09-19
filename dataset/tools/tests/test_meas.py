@@ -267,6 +267,24 @@ def test_a_gecko_pool_is_one_component_in_the_send_campaign():
     assert campaign_pool.component_key("thunderbird", "BgIOThr~Pool #3") == "BgIOThr~Pool #3"   # the current campaign
 
 
+def test_a_transient_child_is_woken_by_its_own_wakeup_rows(tmp_path):
+    # 9.5 D41: a process the op phase admits by the appdef's RX (kdenlive_render, pid 200, not in the snapshots) has its
+    # wakeup rows read like the tree's; before, every sleep of it found no row and was folded as a resume
+    import json as _json
+    (tmp_path / "report.json").write_text(_json.dumps({"app": "kdenlive", "repeat": 1, "mode": "full", "rx": "kdenlive_render"}))
+    for s in ("before", "after"):
+        (tmp_path / f"snap.op.{s}.json").write_text(_json.dumps({"procs": [{"pid": 100, "comm": "kdenlive"}]}))
+    (tmp_path / "perf.op.timehist.txt").write_text(
+        "   1.000100 [0003]  kdenlive_render[201/200]    0.000      0.002      0.100      S\n"
+        "   1.010100 [0003]  kdenlive_render[201/200]    9.900      0.002      0.100      S\n")
+    (tmp_path / "perf.op.wakeups.txt").write_text("   1.009990 [0001]  melt[300]  awakened: kdenlive_render[201/200]\n")
+    res, _ = campaign.analyze_run(str(tmp_path))
+    op = res["phases"]["op"]
+    assert op["transient_pids"] == {200: ["kdenlive_render"]}
+    assert op["segments"] == 2 and op["resumes_merged"] == 0 and op["rows"] == 2
+    assert op["wake_check"] == {"kdenlive_render": {"gaps": 1, "slept_without_row": 0, "preempted_with_row": 0}}
+
+
 def test_timehist_rows_with_and_without_the_state_column(tmp_path):
     p = tmp_path / "perf.idle.timehist.txt"
     p.write_text("           time    cpu  task name                       wait time  sch delay   run time  state\n"
