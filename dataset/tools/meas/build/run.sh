@@ -63,6 +63,9 @@ sudo apt-get install -y --no-install-recommends linux-tools-common "linux-tools-
 rec perf.version "$(perf --version 2>&1 | head -1)"
 sudo apt-get install -y --no-install-recommends clamav ffmpeg tracker tracker-miner-fs dbus-daemon dbus-user-session \
   python3-pip > "$OUT/apt.batch.log" 2>&1; rec apt.batch.rc "$?"
+# the runner's own freshclam service would replace the signature database during the job; clamscan reads the
+# campaign's fixed copy instead (changelog D27)
+sudo systemctl stop clamav-freshclam > /dev/null 2>&1; rec freshclam.service "$(systemctl is-active clamav-freshclam 2>&1)"
 sudo apt-get install -y --no-install-recommends handbrake-cli > "$OUT/apt.handbrake.log" 2>&1; rec apt.handbrake.rc "$?"
 sudo apt-get install -y --no-install-recommends dkms "linux-headers-$(uname -r)" > "$OUT/apt.dkms.log" 2>&1; rec apt.dkms.rc "$?"
 # the package's postinst builds the module once, unpinned; the measured build is a rebuild under the pin (dkms phase)
@@ -164,10 +167,12 @@ if [ -n "$V4L2_VER" ] && want dkms; then
 fi
 
 # ---- batch programs (D7) ------------------------------------------------
-if want clamscan; then
-  sudo freshclam > "$OUT/freshclam.log" 2>&1; rec freshclam.rc "$?"
-  rec clamav.db "$(clamscan --version 2>/dev/null)"; ls -la /var/lib/clamav > "$OUT/clamav.db.txt" 2>&1
-  phase clamscan -- clamscan -r -i "$CORPUS/$CLAM_DIR"
+DB="${MEAS_CLAMAV_DB:-}"
+if want clamscan && [ -z "$DB" ]; then rec clamav.db "none: MEAS_CLAMAV_DB unset, clamscan not run (D27)"
+elif want clamscan; then
+  rec clamav.db "$(clamscan --database="$DB" --version 2>/dev/null)"; ls -la "$DB" > "$OUT/clamav.db.txt" 2>&1
+  rec clamav.db.daily "$(sigtool --info "$(ls "$DB"/daily.c?d 2>/dev/null | head -1)" 2>/dev/null | sed -n 's/^Version: *//p')"
+  phase clamscan -- clamscan --database="$DB" -r -i "$CORPUS/$CLAM_DIR"
 fi
 
 if want ffmpeg || want handbrake; then unmeasured ffmpeg -y -loglevel error -f lavfi -i "testsrc2=size=1280x720:rate=30" -f lavfi -i "sine=frequency=440" \

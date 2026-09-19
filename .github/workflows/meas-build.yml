@@ -14,6 +14,12 @@ on:
 permissions:
   contents: read
 
+env:
+  # the signature database every repeat's clamscan reads from repeat 9 on (changelog D27): daily, main, bytecode
+  CLAMAV_DAILY: "28128"
+  CLAMAV_MAIN: "63"
+  CLAMAV_BYTECODE: "339"
+
 jobs:
   plan:
     runs-on: ubuntu-24.04
@@ -37,8 +43,20 @@ jobs:
           print("cpu_model=" + c.get("cpu_model", ""))
           print("count=" + str(len(inc)))
           PY
+  clamav-db:
+    # fetched once while it is the current database, then read from the cache by every repeat (D27)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/clamav-db
+          key: clamav-db-daily-${{ env.CLAMAV_DAILY }}-main-${{ env.CLAMAV_MAIN }}-bytecode-${{ env.CLAMAV_BYTECODE }}
+      - if: steps.cache.outputs.cache-hit != 'true'
+        run: bash dataset/tools/meas/build/clamav_db.sh "$HOME/clamav-db" "$CLAMAV_DAILY" "$CLAMAV_MAIN" "$CLAMAV_BYTECODE"
   run:
-    needs: plan
+    needs: [plan, clamav-db]
     if: needs.plan.outputs.count != '0'
     runs-on: ubuntu-24.04
     timeout-minutes: 330
@@ -48,7 +66,12 @@ jobs:
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
-      - run: MEAS_OUT=/tmp/meas MEAS_PHASES=${{ needs.plan.outputs.phases }} MEAS_CPU_MODEL="${{ needs.plan.outputs.cpu_model }}" bash dataset/tools/meas/build/run.sh ${{ matrix.repeat }} ${{ needs.plan.outputs.mode }}
+      - uses: actions/cache/restore@v4
+        with:
+          path: ~/clamav-db
+          key: clamav-db-daily-${{ env.CLAMAV_DAILY }}-main-${{ env.CLAMAV_MAIN }}-bytecode-${{ env.CLAMAV_BYTECODE }}
+          fail-on-cache-miss: true
+      - run: MEAS_OUT=/tmp/meas MEAS_PHASES=${{ needs.plan.outputs.phases }} MEAS_CPU_MODEL="${{ needs.plan.outputs.cpu_model }}" MEAS_CLAMAV_DB="$HOME/clamav-db" bash dataset/tools/meas/build/run.sh ${{ matrix.repeat }} ${{ needs.plan.outputs.mode }}
       - name: own the output
         if: always()
         run: sudo chown -R "$(id -u):$(id -g)" /tmp/meas && sudo chmod -R a+rX /tmp/meas
