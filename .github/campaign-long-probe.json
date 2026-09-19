@@ -1,9 +1,17 @@
 {
   "note": "Trigger for meas-long-probe.yml (9.5 D35, D42): a long-phase probe of an application's idle or play phase, never a campaign repeat. A push that changes this file starts the runs it names. apps and repeats (a map app -> probe indices) as in the other triggers; phase_s: each application's phase length in seconds, design, stated in the method before its launch.",
   "mode": "probe",
-  "attempt": 0,
+  "attempt": 1,
   "cpu_model": "EPYC 7763",
-  "apps": [],
-  "repeats": {},
-  "phase_s": {}
+  "apps": [
+    "thunderbird-send"
+  ],
+  "repeats": {
+    "thunderbird-send": [
+      1
+    ]
+  },
+  "phase_s": {
+    "thunderbird-send": 2000
+  }
 }
