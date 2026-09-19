@@ -23,6 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from analyze import analyze_phase, load_edges, pct, QUANTILE_PROBS  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from stability import stability, TOLERANCE  # noqa: E402
+import shapes  # noqa: E402  (this directory is on sys.path)
 
 NAME = re.compile(r"^meas-build-r(\d+)-(dry|full)$")
 BUILD_PHASES = ("build-j8-warm", "build-j8-cold", "build-j1-warm", "dkms")
@@ -49,11 +50,37 @@ def pooled(samples_by_repeat, scale=1.0):
 
 # ---- same-machine repeats and the stability criterion (changelog D10, D11; method §8, 2026-09-18): shared rule ----
 CRITERION_ROLES = ("cc1", "as", "gcc", "sh", "fixdep", "rm")   # the object job's roles; plus the dispatch median
+ABS_FLOOR_US = 1.0   # the trace's resolution: perf sched timehist times in whole microseconds (D23)
+MIN_REPEATS = 5      # kalibera-ismm13 §11 (D24)
+
+
+def criterion(out):
+    """The stability criterion's quantities and verdicts (method §8, the 2026-09-19 third and fourth entries; changelog
+    D23, D24): D11's seven medians, the object-job members' step CPU, and per bound program its run-between-blocks
+    and program-level gap medians and its share of CPU past the boot slice; tolerance the larger of 5 % of the mean
+    and 1 µs, at least five repeats."""
+    crit = {}
+    w = out["phases"].get("build-j8-warm", {})
+    for n in CRITERION_ROLES:
+        if n in w.get("roles", {}):
+            crit[n + " CPU per process"] = stability(w["roles"][n]["cpu_per_process_us"]["repeat_p50"], ABS_FLOOR_US, MIN_REPEATS)
+    if "dispatch" in w:
+        crit["make dispatch"] = stability(w["dispatch"]["per_dispatch_us"]["repeat_p50"], ABS_FLOOR_US, MIN_REPEATS)
+    for k, t in w.get("object_members", {}).get("step_cpu_us", {}).items():
+        crit[f"object-job {k}"] = stability(t["repeat_p50"], ABS_FLOOR_US, MIN_REPEATS)
+    for ph in BATCH_PHASES:
+        s = out["phases"].get(ph, {}).get("shape")
+        if s:
+            crit[f"{ph} run between blocks"] = stability(s["runs_between_blocks_us"]["repeat_p50"], ABS_FLOOR_US, MIN_REPEATS)
+            crit[f"{ph} program-level gap"] = stability(s["gaps_us"]["repeat_p50"], ABS_FLOOR_US, MIN_REPEATS)
+            crit[f"{ph} share past the boot slice"] = stability(s["share_past_boot_slice"], None, MIN_REPEATS)
+    return crit
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("artifacts"); ap.add_argument("out"); ap.add_argument("--md")
+    ap.add_argument("--title", help="the H1 of results.md (tag, runs, repeats, machine)")
     ap.add_argument("--cpu-model", default="", help="pool only repeats whose CPU model contains this text (D10); others are the cross-machine check")
     args = ap.parse_args()
     runs, gated = {}, {}
@@ -109,8 +136,18 @@ def main():
                              "cpu_per_fork_us_by_make": pooled({r: per[r]["phases"][ph]["dispatch"]["_samples"]["cpu_per_fork_ms_by_make"] for r in have}, 1000.0),
                              "forks": {r: per[r]["phases"][ph]["dispatch"]["forks"] for r in have},
                              "makes": {r: per[r]["phases"][ph]["dispatch"]["makes"] for r in have}}
+            om = {r: per[r]["phases"][ph]["object_members"] for r in have}
+            keys = sorted({k for r in have for k in om[r]["_samples"]["steps"]})
+            P["object_members"] = {"jobs": {r: om[r]["jobs"] for r in have},
+                                   "child_order": {r: om[r]["child_order"] for r in have},
+                                   "step_cpu_us": {k: pooled({r: om[r]["_samples"]["steps"].get(k, []) for r in have}, 1000.0) for k in keys}}
         else:
-            P["batch"] = {r: per[r]["phases"][ph]["batch"] for r in have}
+            P["batch"] = {r: {k: v for k, v in per[r]["phases"][ph]["batch"].items() if k != "_samples"} for r in have}
+            smp = {r: per[r]["phases"][ph]["batch"]["_samples"] for r in have}
+            P["shape"] = {"runs_between_blocks_us": pooled({r: smp[r]["runs_between_blocks_ms"] for r in have}, 1000.0),
+                          "gaps_us": pooled({r: smp[r]["gaps_ms"] for r in have}, 1000.0),
+                          "share_past_boot_slice": {r: per[r]["phases"][ph]["batch"]["share_past_boot_slice"] for r in have},
+                          "share_pooled": round(shapes.share_past_slice([x for r in have for x in smp[r]["runs_between_blocks_ms"]]) or 0.0, 4)}
         out["phases"][ph] = P
     # D4 invariance check: per role, cpu-per-process pooled median at -j1 over -j8 warm, per repeat and pooled
     chk = {}
@@ -124,13 +161,7 @@ def main():
                                      for r in reps}}
     out["j1_check"] = chk
     # the stability criterion on the warm -j8 phase's carried medians, and the other machine's repeats as a ratio
-    crit, cross = {}, {}
-    w = out["phases"].get("build-j8-warm", {})
-    for n in CRITERION_ROLES:
-        if n in w.get("roles", {}):
-            crit[n + " CPU per process"] = stability(w["roles"][n]["cpu_per_process_us"]["repeat_p50"])
-    if "dispatch" in w:
-        crit["make dispatch"] = stability(w["dispatch"]["per_dispatch_us"]["repeat_p50"])
+    crit, cross = criterion(out), {}
     for r in other:
         a = per[r]["phases"].get("build-j8-warm", {})
         if "missing" in a:
@@ -146,12 +177,12 @@ def main():
             row["make dispatch"] = round(a["dispatch"]["per_dispatch_ms"]["p50"] * 1000.0 / ref, 3)
         row["build wall s"] = a.get("cmd_wall_s")
         cross[r] = {"cpu_model": per[r]["cpu_model"], "ratio_to_same_machine_mean": row}
-    out["stability"] = {"tolerance": TOLERANCE, "quantities": crit,
+    out["stability"] = {"tolerance": TOLERANCE, "abs_floor_us": ABS_FLOOR_US, "min_repeats": MIN_REPEATS, "quantities": crit,
                         "passes": bool(crit) and all(c["passes"] for c in crit.values())}
     out["cross_machine"] = cross
     json.dump(out, open(args.out, "w"), indent=1)
     if args.md:
-        open(args.md, "w").write(render(out))
+        open(args.md, "w").write(render(out, args.title))
     print(f"pooled {len(reps)} repeat(s) -> {args.out}")
     return 0
 
@@ -160,9 +191,9 @@ def fmt_q(q):
     return " / ".join("–" if x is None else (f"{x:.0f}" if x >= 100 else f"{x:.1f}") for x in q) if q else "–"
 
 
-def render(out):
+def render(out, title=None):
     reps = out["repeats"]
-    L = [f"# 9.6 build campaign — pooled results", "",
+    L = [f"# {title or '9.6 build campaign — pooled results'}", "",
          f"Repeats {reps}; mode {out['mode']}; CPU model per repeat {out['cpu_model']}; run per repeat {out['run_id']}. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9; "
          f"times in µs unless stated; the spread is the per-repeat p50. Rules: method §5.", ""]
     for ph, P in out["phases"].items():
@@ -181,26 +212,40 @@ def render(out):
             for shape, n in list(P["job_shapes"][reps[0]].items())[:8]:
                 L.append(f"- {n} × `{shape}`")
             L.append("")
+        if "object_members" in P:
+            om = P["object_members"]
+            L += [f"object jobs with D19's six members {om['jobs']}; child order per repeat {om['child_order']}", "",
+                  "| member step (D20) | n | CPU (µs) | spread (per-repeat p50) |", "|---|---|---|---|"]
+            for k, t in om["step_cpu_us"].items():
+                L.append(f"| `{k}` | {t['n']} | {fmt_q(t['q'])} | {t['repeat_p50']} |")
+            L.append("")
         L += ["| role | procs | wakes/proc p50 | run per wake | off after D (disk) | off after S (sleep) | CPU per process | blkio per process (ns) | perf/ts p50 |", "|---|---|---|---|---|---|---|---|---|"]
         for n, R in list(P["roles"].items())[:14]:
             L.append(f"| `{n}` | {sum(R['processes'].values())} | {R['wakes_per_process']['p50']} | {fmt_q(R['run_per_wake_us']['q'])} | {fmt_q(R['off_after_D_us']['q'])} (n {R['off_after_D_us']['n']}) | "
                      f"{fmt_q(R['off_after_S_us']['q'])} (n {R['off_after_S_us']['n']}) | {fmt_q(R['cpu_per_process_us']['q'])} | {fmt_q(R['blkio_per_process_ns']['q'])} | {R['perf_over_taskstats_cpu_p50']} |")
         L.append("")
         if "batch" in P:
-            L += ["| repeat | program | procs | threads | lifetime s | saturation (taskstats / perf) | dominant thread | top-5 thread shares | blkio s (share) | off after S s | off after D s | invalid blkio threads |", "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+            L += ["| repeat | program | procs | threads | lifetime s | job s | saturation over the job | saturation (taskstats / perf) | dominant thread | top-5 thread shares | blkio s (share) | off after S s | off after D s | invalid blkio threads |", "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
             for r, b in P["batch"].items():
-                L.append(f"| {r} | `{b['program']}` | {b['processes']} | {b['threads_with_runs']} | {b['lifetime_s']} | {b['saturation']} / {b['saturation_perf']} | {b['dominant_thread_share']} | {b['thread_cpu_share_top5']} | "
+                L.append(f"| {r} | `{b['program']}` | {b['processes']} | {b['threads_with_runs']} | {b['lifetime_s']} | {b.get('job_s')} | {b.get('saturation_job')} | {b['saturation']} / {b['saturation_perf']} | {b['dominant_thread_share']} | {b['thread_cpu_share_top5']} | "
                          f"{b['blkio_delay_s']} ({b['blkio_share_of_lifetime']}) | {b['off_cpu_after_S_s']} | {b['off_cpu_after_D_s']} | {b['blkio_invalid_threads']} |")
             L.append("")
+            s = P["shape"]
+            L += [f"shape (D21, D22): runs between voluntary blocks (µs) {fmt_q(s['runs_between_blocks_us']['q'])} (n {s['runs_between_blocks_us']['n']}; spread {s['runs_between_blocks_us']['repeat_p50']}); "
+                  f"program-level gaps (µs) {fmt_q(s['gaps_us']['q'])} (n {s['gaps_us']['n']}; spread {s['gaps_us']['repeat_p50']}); "
+                  f"share of CPU past the boot slice {s['share_past_boot_slice']} (pooled {s['share_pooled']})", ""]
     st = out.get("stability")
     if st:
-        L += ["## Same-machine repeats and the stability criterion (D10, D11)", "",
+        L += ["## Same-machine repeats and the stability criterion (D10, D11, D23, D24)", "",
               f"Pooled machine: {out.get('machine') or 'any'}; pooled repeats {reps}; other-machine repeats {out.get('other_machine_repeats')}; stopped by the machine gate {out.get('gated_out')}. "
-              f"Criterion: the 95 % confidence half-width of the across-repeat mean of each carried median is at most {st['tolerance']:.0%}; repeats are added one at a time until it holds (D11). "
+              f"Criterion: the 95 % confidence half-width of the across-repeat mean of each carried value is at most the larger of {st['tolerance']:.0%} of the mean and {st['abs_floor_us']} µs, over at least {st['min_repeats']} repeats; repeats are added one at a time until it holds (D11, D23, D24). "
               f"**{'Holds' if st['passes'] else 'Does not hold yet'}.**", "",
-              "| quantity | repeats | mean (µs) | spread (cv) | 95 % half-width | leave-one-out | passes |", "|---|---|---|---|---|---|---|"]
+              "| quantity | repeats | mean | spread (cv) | 95 % half-width | half-width (abs) | leave-one-out | passes |", "|---|---|---|---|---|---|---|---|"]
         for q, c in st["quantities"].items():
-            L.append(f"| {q} | {c['k']} | {c['mean']} | {c['cv']:.1%} | ±{c['half_width']:.1%} | {c['leave_one_out']:.1%} | {'yes' if c['passes'] else 'no'} |")
+            cv = "–" if c["cv"] is None else f"{c['cv']:.1%}"
+            hw = "–" if c["half_width"] is None else f"±{c['half_width']:.1%}"
+            loo = "–" if c["leave_one_out"] is None else f"{c['leave_one_out']:.1%}"
+            L.append(f"| {q} | {c['k']} | {c['mean']} | {cv} | {hw} | {c['half_width_abs']} | {loo} | {'yes' if c['passes'] else 'no'} |")
         L.append("")
         for r, x in out.get("cross_machine", {}).items():
             L.append(f"- cross-machine check, repeat {r} ({x['cpu_model']}): ratio to the same-machine mean {x['ratio_to_same_machine_mean']} — written into scope as a ratio, applied to no value (9.5 follow-ups decision 13)")

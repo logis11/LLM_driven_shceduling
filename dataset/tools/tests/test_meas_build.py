@@ -115,3 +115,26 @@ def test_batch_reads_the_job_window_and_shape():
     assert b["job_s"] == pytest.approx(0.0215, abs=1e-6)
     cut = build.batch("clamscan", tree, tid2pid, role, segs, {}, 3, recs, 0.03, job_end=1.0203)
     assert cut["job_s"] == pytest.approx(0.0203, abs=1e-6) and cut["_samples"]["runs_between_blocks_ms"] == pytest.approx([12.0, 8.0])
+
+
+from meas.build import pool  # noqa: E402
+
+
+def test_criterion_lists_every_carried_value():
+    def rp(*v):
+        return {"repeat_p50": dict(zip((4, 5, 7, 8, 9), v))}
+    out = {"phases": {
+        "build-j8-warm": {"roles": {n: {"cpu_per_process_us": rp(100, 101, 100, 102, 101)} for n in pool.CRITERION_ROLES},
+                          "dispatch": {"per_dispatch_us": rp(670, 675, 673, 681, 676)},
+                          "object_members": {"step_cpu_us": {"sh 1/4": rp(726, 785, 752, 785, 760)}}},
+        "ffmpeg": {"shape": {"runs_between_blocks_us": rp(7, 7, 6, 6, 7), "gaps_us": rp(1, 1, 1, 1, 1),
+                             "share_past_boot_slice": dict(zip((4, 5, 7, 8, 9), (0.702, 0.698, 0.696, 0.704, 0.700)))}}}}
+    crit = pool.criterion(out)
+    assert set(crit) == {f"{n} CPU per process" for n in pool.CRITERION_ROLES} | {
+        "make dispatch", "object-job sh 1/4", "ffmpeg run between blocks", "ffmpeg program-level gap",
+        "ffmpeg share past the boot slice"}
+    assert crit["ffmpeg run between blocks"]["passes"] is True        # within the 1 µs floor
+    assert all(c["k"] == 5 for c in crit.values())
+    four = {"phases": {"ffmpeg": {"shape": {"runs_between_blocks_us": rp(7, 7, 7, 7), "gaps_us": rp(1, 1, 1, 1),
+                                            "share_past_boot_slice": {4: 0.7, 5: 0.7, 7: 0.7, 8: 0.7}}}}}
+    assert not any(c["passes"] for c in pool.criterion(four).values())    # four repeats: below the minimum
