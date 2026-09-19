@@ -75,15 +75,32 @@ def is_program(job, filename, comm):
     return comm in ROOT_COMMS.get(job, ())
 
 
-def load_execs(path):
-    """pid -> the last file it executed (exec rows in the forks file)."""
-    out = {}
+def load_exec_rows(path):
+    """Exec rows in the forks file, in time order: (t, pid, filename)."""
+    out = []
     with _build.open_text(path) as handle:
         for line in handle:
             m = EXEC.match(line)
             if m:
-                out[int(m.group(3))] = m.group(2)
+                out.append((float(m.group(1)), int(m.group(3)), m.group(2)))
+    out.sort()
     return out
+
+
+def load_execs(path):
+    """pid -> the last file it executed."""
+    return {pid: f for _t, pid, f in load_exec_rows(path)}
+
+
+def launched_root(job, exec_rows):
+    """The process phase.sh launched: the earliest one that executed taskset and then the job's command (borg, 7z, or
+    /usr/games/steamcmd, which becomes a bash running steamcmd.sh before it starts SteamCMD's binary)."""
+    last = {}
+    for _t, pid, f in exec_rows:
+        if last.get(pid, "").rsplit("/", 1)[-1] == "taskset" and f.rsplit("/", 1)[-1] in ROOT_COMMS.get(job, ()):
+            return pid
+        last[pid] = f
+    return None
 
 
 def load_exec_classes(path):
@@ -106,10 +123,10 @@ def read_kv(path):
 
 # ---- the tree -----------------------------------------------------------------
 
-def phase_tree(job, segs, forks, meas_cpu):
-    """(root tid, tree tids, tid -> pid, last comm per tid, outside rows by comm). The root is the earliest thread on
-    the measured CPU whose comm is the job's program (taskset execs it); the tree is it and every descendant by the
-    fork rows (which carry threads as well as processes)."""
+def phase_tree(job, segs, forks, meas_cpu, root=None):
+    """(root tid, tree tids, tid -> pid, last comm per tid, outside rows by comm). The root is the process phase.sh
+    launched (launched_root) when the exec rows name it, else the earliest thread on the measured CPU whose comm is the
+    job's program; the tree is it and every descendant by the fork rows (which carry threads as well as processes)."""
     on_cpu = [s for s in segs if s.cpu == meas_cpu]
     children = defaultdict(list)
     for _t, p, _pc, c, _cc in forks:
@@ -118,7 +135,8 @@ def phase_tree(job, segs, forks, meas_cpu):
     for s in segs:
         tid2pid[s.tid] = s.pid
         last_comm[s.tid] = s.comm
-    root = next((s.tid for s in on_cpu if s.comm in ROOT_COMMS.get(job, ())), None)
+    if root is None:
+        root = next((s.tid for s in on_cpu if s.comm in ROOT_COMMS.get(job, ())), None)
     if root is None:
         root = next((s.tid for s in on_cpu if not outside(s.comm)), None)
     tree, stack = set(), ([root] if root is not None else [])
@@ -224,10 +242,11 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
     job = job_of(phase)
     segs, wakeups = load_segments(th), load_wakeups(wk)
     forks, _exits = load_forks(fk)
-    execs = load_execs(fk)
+    exec_rows = load_exec_rows(fk)
+    execs = {pid: f for _t, pid, f in exec_rows}
     ts_rows, trailer = load_taskstats(ts)
     recs = process_records(ts_rows)
-    root, tree, tid2pid, last_comm, out_by_comm = phase_tree(job, segs, forks, meas_cpu)
+    root, tree, tid2pid, last_comm, out_by_comm = phase_tree(job, segs, forks, meas_cpu, launched_root(job, exec_rows))
     pids = sorted({tid2pid.get(t, t) for t in tree})
     role = {pid: (recs[pid]["comm"] if pid in recs else last_comm.get(pid, "?")) for pid in pids}
     prog = [p for p in pids if is_program(job, execs.get(p), role.get(p))]

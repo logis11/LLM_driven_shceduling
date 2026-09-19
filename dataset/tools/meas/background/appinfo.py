@@ -3,6 +3,7 @@
 
 appinfo.py summary <app-id> <steamcmd-output>...   key=value: the app's Linux install size and its branches
 appinfo.py smallest <steamcmd-output>...           the app id whose Linux install size is smallest among the outputs
+                                                   (apps with a depot of unknown size are passed over)
 appinfo.py older <app-id> <steamcmd-output>        the branch to stage for the update phase, or nothing
 appinfo.py buildid <app-id> <steamcmd-output> <branch>   that branch's build id
 
@@ -49,7 +50,7 @@ def parse_kv(text):
 def app_block(text, app):
     """The appinfo block of one app in a steamcmd output (the last one printed: steamcmd may print a stale copy first)."""
     found = None
-    for m in re.finditer(r'^\s*"%s"\s*$' % re.escape(str(app)), text, re.M):
+    for m in re.finditer(r'^"%s"\s*$' % re.escape(str(app)), text, re.M):   # top level only: a depot may carry the app's id
         body = parse_kv(text[m.start():])
         if str(app) in body and isinstance(body[str(app)], dict):
             found = body[str(app)]
@@ -118,6 +119,8 @@ def main():
             if not app:
                 continue
             s = summary(app_block(open(p, errors="replace").read(), app.group(1)))
+            if any(r["size"] is None for r in s["depots"]):   # a depot of unknown size: the total is not the app's size
+                continue
             if s["size"] and (best is None or s["size"] < best[0]):
                 best = (s["size"], app.group(1))
         print(best[1] if best else "")

@@ -166,6 +166,15 @@ def test_bytes_per_wake_run_from_one_network_wait_to_the_next():
     assert got == {201: [1500, 64]} and unknown == 0
 
 
+def test_the_root_is_the_process_taskset_handed_the_command_to():
+    rows = [(1.0, 90, "/usr/bin/taskset"), (1.1, 90, "/usr/bin/perf"),                    # a harness perf launch
+            (2.0, 100, "/usr/bin/taskset"), (2.1, 100, "/usr/games/steamcmd"),
+            (2.2, 100, "/home/runner/.local/share/Steam/steamcmd/steamcmd.sh"), (2.3, 100, "/usr/bin/bash"),
+            (3.0, 200, "/home/runner/.local/share/Steam/steamcmd/linux32/steamcmd")]
+    assert analyze.launched_root("steamcmd", rows) == 100
+    assert analyze.launched_root("borg", rows) is None
+
+
 # ---- analyze: one synthetic phase end to end ------------------------------------------
 
 TS_HEADER = ("recv_mono_ns\trecv_real_ns\ttype\tid\tversion\tpid\tppid\ttgid\tcomm\texitcode\tflag\tnice\tsched"
@@ -335,6 +344,27 @@ def test_appinfo_linux_size_and_the_nearest_older_public_branch():
     assert s["name"] == "Team Fortress 2 Dedicated Server"
     assert s["size"] == 1300 and s["download"] == 500
     assert appinfo.older_branch(s["branches"]) == "previous"
+
+
+def test_appinfo_block_is_the_app_not_a_depot_with_its_id(tmp_path):
+    same = APPINFO.replace('"232252"', '"232250"')      # the app's own id as a depot id (Team Fortress 2's server)
+    s = appinfo.summary(appinfo.app_block(same, 232250))
+    assert s["name"] == "Team Fortress 2 Dedicated Server" and s["size"] == 1300
+
+
+def test_smallest_passes_over_apps_with_depots_of_unknown_size(tmp_path, capsys):
+    unknown = APPINFO.replace('"232253"\n\t\t{\n\t\t\t"config" { "oslist" "linux" }\n\t\t\t"maxsize" "300"',
+                              '"232253"\n\t\t{\n\t\t\t"config" { "oslist" "linux" }')
+    small = APPINFO.replace("232250", "244310").replace('"size" "1000"', '"size" "5000"')
+    (tmp_path / "appinfo.232250.txt").write_text(unknown)
+    (tmp_path / "appinfo.244310.txt").write_text(small)
+    import sys
+    argv, sys.argv = sys.argv, ["appinfo.py", "smallest", str(tmp_path / "appinfo.232250.txt"), str(tmp_path / "appinfo.244310.txt")]
+    try:
+        appinfo.main()
+    finally:
+        sys.argv = argv
+    assert capsys.readouterr().out.strip() == "244310"
 
 
 def test_appinfo_takes_the_last_printed_block():

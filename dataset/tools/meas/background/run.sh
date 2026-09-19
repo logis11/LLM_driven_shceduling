@@ -278,13 +278,29 @@ z_phases() {
 INSTALL="$WORK/steam-install"; SHAPED=0
 BURST=$(( (121000000 / 8 + HZ - 1) / HZ ))   # bytes: the rate over HZ, the least tc-tbf(8) allows at this rate (§2 "The shaped link")
 rec shape.burst_bytes "$BURST"
+# the runner's interface already carries a clsact qdisc (dry run 35425404685: adding an ingress qdisc fails with
+# "Exclusivity flag on"); the redirect filter then goes on clsact's ingress hook, ahead of what is there, and is the one
+# thing shape_off removes. The interface's qdiscs and filters are recorded before and after.
 shape_on() {   # ingress on the runner's interface redirected to ifb0, a tbf root at the D11 rate
+  { echo "== before"; tc -s qdisc show dev "$IFACE"; tc filter show dev "$IFACE" ingress; } >> "$OUT/tc.iface.txt" 2>&1
   sudo modprobe ifb numifbs=1 > /dev/null 2>&1; sudo ip link add ifb0 type ifb > /dev/null 2>&1; sudo ip link set ifb0 up
-  sudo tc qdisc add dev "$IFACE" handle ffff: ingress 2>> "$OUT/tc.log"
-  sudo tc filter add dev "$IFACE" parent ffff: protocol all u32 match u32 0 0 action mirred egress redirect dev ifb0 2>> "$OUT/tc.log"
-  if sudo tc qdisc add dev ifb0 root tbf rate "${RATE_MBIT}mbit" burst "$BURST" latency "$TBF_LATENCY" 2>> "$OUT/tc.log"; then SHAPED=1; else SHAPED=0; fi
+  if tc qdisc show dev "$IFACE" | grep -q clsact; then HOOK="ingress"; SHAPE_OWN_QDISC=0
+  else sudo tc qdisc add dev "$IFACE" handle ffff: ingress 2>> "$OUT/tc.log"; HOOK="parent ffff:"; SHAPE_OWN_QDISC=1; fi
+  rec shape.hook "$HOOK"
+  # shellcheck disable=SC2086
+  sudo tc filter add dev "$IFACE" $HOOK protocol all pref 1 handle 1 u32 match u32 0 0 action mirred egress redirect dev ifb0 2>> "$OUT/tc.log"
+  local frc=$?
+  sudo tc qdisc add dev ifb0 root tbf rate "${RATE_MBIT}mbit" burst "$BURST" latency "$TBF_LATENCY" 2>> "$OUT/tc.log"
+  local qrc=$?
+  if [ "$frc" = 0 ] && [ "$qrc" = 0 ]; then SHAPED=1; else SHAPED=0; fi
+  { echo "== shaped ($SHAPED)"; tc filter show dev "$IFACE" ingress; tc qdisc show dev ifb0; } >> "$OUT/tc.iface.txt" 2>&1
 }
-shape_off() { sudo tc qdisc del dev "$IFACE" ingress 2>/dev/null; sudo tc qdisc del dev ifb0 root 2>/dev/null; SHAPED=0; }
+shape_off() {
+  # shellcheck disable=SC2086
+  if [ "${SHAPE_OWN_QDISC:-1}" = 1 ]; then sudo tc qdisc del dev "$IFACE" ingress 2>/dev/null
+  else sudo tc filter del dev "$IFACE" ${HOOK:-ingress} pref 1 2>/dev/null; fi
+  sudo tc qdisc del dev ifb0 root 2>/dev/null; SHAPED=0
+}
 steam_logs_dir() {
   local f; f="$(find "$HOME/.steam" "$HOME/Steam" "$HOME/.local/share/Steam" -maxdepth 5 -name content_log.txt 2>/dev/null | head -1)"
   if [ -n "$f" ]; then dirname "$f"; else find "$HOME/.steam" "$HOME/Steam" -maxdepth 4 -type d -name logs 2>/dev/null | head -1; fi
