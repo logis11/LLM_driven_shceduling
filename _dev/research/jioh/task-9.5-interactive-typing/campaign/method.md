@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-19, `thunderbird-send`'s settle (changelog D44) — §2: 390 s, design: its launch work ends about 340 s into a 30 s-settled idle phase and the tree's CPU is steady from 360 s (long-phase probe 35436084336, `launch-work.md`); the recurring ~60 s `StreamTrans` episode stays in the idle phase.
+
 - 2026-09-19, sporadic components (changelog D43) — §6: a timer component, the residual as a whole included, is carried only if its gap and run means exist in every repeat (at least two wakes in each repeat's phase); otherwise its wakes are reported in the archetype's notes as sporadic, with their repeats and rate.
 
 - 2026-09-19, the `thunderbird-send` probe's phase length (changelog D42) — 2,000 s of idle phase after the 30 s settle, design: the span a `send` repeat observes Thunderbird after the idle phase starts, about 1,986 s — measured on the eight `thunderbird` repeats of the current campaign (`phases.jsonl`: driven at 132.5 s, `driven-alt` at 755.5–756.7 s) and, for the op phase, estimated at the same 624 s from one phase start to the next (op from about 1,380 s to about 1,986 s) — rounded up. Anything Thunderbird does at a fixed time after launch within that span falls in some phase of every repeat; nothing later does. An episode the probe shows past the current idle phase is read with its threads named and against the same second in the existing repeats' driven phases, since the probe stays idle where a repeat already has input.

@@ -60,3 +60,13 @@ The pooled repeats of `meas-ci:interactive:2026-09-18` and `meas-ci:playback:202
 
 - `chrome`: the browser process's `ThreadPoolForeground` runs about 880 ms once per session (877, 879, 883, 886, 876 ms) at 152, 166, 180 s from the idle phase's start in repeats 1–3 (inside the driven phase) and at 65 and 85 s in repeats 4–5 (inside the idle phase); no run of that size recurs in the remaining phases of any repeat. The burst 29–39 s into the idle phase (runs of about 23, 80 and 67 ms) recurs in none either. In repeats 1–3 the window rule (D13) charges the 880 ms run to one input: per-repeat `input_run` means 2.42, 3.43, 2.85 ms against 0.31, 0.14 ms in repeats 4–5.
 - `thunderbird`: a pool thread runs 142–145 ms at 70–74 s in every repeat, named `BgIOThr~Pool #1`, `#2` or `#3` by repeat (D33).
+
+## `thunderbird-send` long-phase probe (D42, D44)
+
+Run 35436084336 (`meas-long-probe.yml`, EPYC 7763, gate open): `thunderbird-send`'s setup, the 30 s settle, then one idle phase of 2,000 s (method §9, D42); `campaign/slices.py` over it, times from the idle phase's start. Its first 120 s repeat the eight `thunderbird` repeats: 11.5, 9.2 ms/s at 10–30 s and 19.9, 4.5 at 70–90 s (their mean 11.7, 9.6 and 20.2, 3.4, above).
+
+One-off episodes, none recurring in the remaining ~1,650 s — the main thread (`thunderbird-bin`) with its `TaskController` threads: 85 ms at 10–30 s (with `DOM Worker`), 27 ms at 80 s, 30 ms at 140 s (with `sqldb:…` rows), 38 ms at 250–270 s, 25 ms at 330 s; `BgIOThr~Pool #2` one 142 ms run at 70 s (never above 1 ms a slice afterwards).
+
+A recurring episode every ~60 s to the phase's end: two newly spawned `StreamTrans` threads (`#47`/`#48` at 130 s … `#103`/`#104` at 1,890 s) about 38 ms, a long-lived `StreamTrans` thread about 10 ms.
+
+The process tree's CPU per 60 s from the phase's start, ms: 215, 249, 102, 65, 138, 108, then from 360 s: 49, 50, 66, 63, 63, 66, 60, 60, 66, 61, 18, 66, 61, 62, 67, 61, 61, 66, 62, 63, 54, 49, 59, 66, 65, 64, 19 (median 62; the two near 18 ms are minutes an instance of the 60 s episode straddles).

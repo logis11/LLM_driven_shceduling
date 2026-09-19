@@ -21,11 +21,12 @@ APP="$1"; REPEAT="$2"; MODE="${3:-full}"
 STREAMS="$(cd "$TOOLS/../../.." && pwd)/meas/streams"
 # D34, D35: the idle or play phase starts after the application's launch work — a settle per application, set from its
 # traces and stated in method §9 before its repeats; 30 s (method §2) where the traces show none. An application whose
-# launch work reaches past 30 s (chrome, code, webrtc, thunderbird, thunderbird-send) has no entry until its settle is
-# stated, and stops before any measurement.
+# launch work reaches past 30 s (chrome, code, webrtc, thunderbird) has no entry until its settle is stated, and stops
+# before any measurement.
 settle_for() {
   case "$1" in
     soffice|gimp|kdenlive|mpv-video|mpv-audio) echo 30 ;;
+    thunderbird-send) echo 390 ;;   # D44: its launch work ends ~340 s into a 30 s-settled idle phase (long-phase probe)
     *) echo "" ;;
   esac
 }
