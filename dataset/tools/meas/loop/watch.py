@@ -3,8 +3,10 @@
 
 watch.py <family>[/<app>]... [--since N] [--app APP:N]... [--done APP,...] [--poll S] [--from-now]
 
-Every S seconds (default 30) the family's runs numbered N or later are read; N is the campaign's first batch, and
---app APP:N gives one application its own first run (an application restarted under a new design, 9.5 D28). A job that
+Every S seconds (default 30) the family's runs numbered N or later are read. N is the run of the latest launch — the
+default, the family's newest run when the watcher starts — never the campaign's first run: reading every run of a long
+campaign takes minutes a pass and leaves a gated window unrelaunched that long. --app APP:N gives one application its
+own first run. A job that
 finished in under common.GATE_S is read from its report: stopped by the machine gate, it is relaunched with the same
 window or repeat index (9.5 D26) — only while its application has no other job in flight outside its first run (one
 relaunch or added repeat at a time), and never for an application in --done. The watcher exits, printing the event, when
@@ -24,7 +26,7 @@ def main():
     a = sys.argv[1:]
     if not a:
         raise SystemExit(__doc__)
-    targets, since, app_since, done, poll, from_now = [], 1, {}, set(), 30, False
+    targets, since, app_since, done, poll, from_now = [], None, {}, set(), 30, False
     i = 0
     while i < len(a):
         if a[i] == "--since":
@@ -39,6 +41,9 @@ def main():
             from_now = True; i += 1
         else:
             targets.append(common.parse_target(a[i])[:2]); i += 1
+    if since is None:   # the newest run of the watched families: the latest launch
+        since = min(common.runs(fam)[-1]["number"] for fam in {f for f, _ in targets})
+    print(f"watching runs from #{since}", flush=True)
     os.makedirs(common.WORK, exist_ok=True)
     seen_path = os.path.join(common.WORK, "watch-seen.txt")
     seen = set(open(seen_path).read().split("\n")) if os.path.exists(seen_path) else set()
