@@ -285,6 +285,26 @@ def test_a_transient_child_is_woken_by_its_own_wakeup_rows(tmp_path):
     assert op["wake_check"] == {"kdenlive_render": {"gaps": 1, "slept_without_row": 0, "preempted_with_row": 0}}
 
 
+def test_slice_profile_of_the_steady_phase(tmp_path):
+    # 9.5 D35, D42: CPU ms/s and wakes/s per slice from the phase's first row; a run counts in its schedule-in's slice
+    import json as _json
+    from meas.campaign import slices
+    (tmp_path / "report.json").write_text(_json.dumps({"app": "thunderbird-send", "repeat": 1, "mode": "probe"}))
+    for s in ("before", "after"):
+        (tmp_path / f"snap.idle.{s}.json").write_text(_json.dumps({"procs": [{"pid": 100, "comm": "thunderbird"}]}))
+    (tmp_path / "perf.idle.timehist.txt").write_text(
+        "   0.000010 [0000]  perf[50]    0.000      0.000      0.010      R\n"      # the capture's first row
+        "   5.001000 [0003]  thunderbird[101/100]    0.000      0.001      1.000      S\n"
+        "  15.002000 [0003]  thunderbird[101/100]    9.000      0.001      2.000      R\n"      # preempted
+        "  15.003000 [0003]  thunderbird[101/100]    0.000      0.001      1.000      S\n"
+        "  30.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n")     # the capture's last row: 30 s
+    (tmp_path / "perf.idle.wakeups.txt").write_text(
+        "   5.000000 [0001]  x[9]  awakened: thunderbird[101/100]\n"
+        "  14.999500 [0001]  x[9]  awakened: thunderbird[101/100]\n")   # the third follows an R: a resume
+    phase, cpu, wakes = slices.profile(str(tmp_path))
+    assert phase == "idle" and cpu == [0.1, 0.3, 0.0] and wakes == [0.1, 0.1, 0.0]
+
+
 def test_timehist_rows_with_and_without_the_state_column(tmp_path):
     p = tmp_path / "perf.idle.timehist.txt"
     p.write_text("           time    cpu  task name                       wait time  sch delay   run time  state\n"

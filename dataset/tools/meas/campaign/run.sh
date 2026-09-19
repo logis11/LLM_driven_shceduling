@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# run.sh <app> <repeat> <dry|full> — one campaign run (9.5 method §1–§4).
+# run.sh <app> <repeat> <dry|full|probe> — one campaign run (9.5 method §1–§4), or a long-phase probe (probe: the
+# 30 s settle, then one idle or play phase of $MEAS_PHASE_S seconds and nothing after it; 9.5 D35, D42).
 # Installs the application (appdefs.sh), starts Xvfb, launches, waits for the
 # window, then runs the phases with `perf sched record -a` over each whole
 # phase: interactive apps — settle, idle, driven (stream or scripted pointer),
@@ -28,7 +29,9 @@ settle_for() {
     *) echo "" ;;
   esac
 }
-if [ "$MODE" = dry ]; then SETTLE=10; IDLE=30; DRIVEN=60; PLAY=60; OPS=90; else SETTLE="$(settle_for "$APP")"; IDLE=120; DRIVEN=600; PLAY=300; OPS=600; fi
+if [ "$MODE" = dry ]; then SETTLE=10; IDLE=30; DRIVEN=60; PLAY=60; OPS=90
+elif [ "$MODE" = probe ]; then SETTLE=30; IDLE="${MEAS_PHASE_S:?probe needs MEAS_PHASE_S}"; DRIVEN=0; PLAY="$IDLE"; OPS=0
+else SETTLE="$(settle_for "$APP")"; IDLE=120; DRIVEN=600; PLAY=300; OPS=600; fi
 rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE"; rec started_utc "$(date -u +%FT%TZ)"
 rec settle_s "${SETTLE:-unset}"; rec idle_s "$IDLE"; rec driven_s "$DRIVEN"; rec play_s "$PLAY"; rec op_s "$OPS"
 if [ -z "$SETTLE" ]; then
@@ -111,7 +114,8 @@ case "$DRIVER" in
     WINDOW="$(python3 -c 'import json, sys; w = json.load(open(sys.argv[1]))["windows"].get(sys.argv[2]); print("uncut" if w is None else "ok" if w.get("events") else "empty")' "$STREAMS/windows.json" "$STREAM-r$REPEAT")"
     rec recording.window "$WINDOW"
     $PH idle -- bash -c "true"; phase idle "$IDLE" ""
-    if [ "$WINDOW" = empty ]; then rec recording.past_end 1; OP=""; else
+    if [ "$MODE" = probe ]; then OP=""
+    elif [ "$WINDOW" = empty ]; then rec recording.past_end 1; OP=""; else
     sleep 10
     SFILE="$STREAMS/$STREAM-r$REPEAT.jsonl"; rec stream_file "$(basename "$SFILE")"; rec stream_kinds "$KINDS"
     DRV="python3 $TOOLS/replay_stream.py $SFILE $WID $OUT/replay.jsonl --seconds $DRIVEN --area $AREA --kinds $KINDS"
@@ -129,9 +133,11 @@ case "$DRIVER" in
     fi ;;
   pointer)
     $PH idle -- bash -c "true"; phase idle "$IDLE" ""
+    if [ "$MODE" = probe ]; then OP=""; else
     sleep 10
     DRV="xdotool windowactivate --sync $WID; end=\$((\$(date +%s)+$DRIVEN)); while [ \$(date +%s) -lt \$end ]; do xdotool mousemove 300 300 mousedown 1 mousemove --sync 500 400 mousemove --sync 700 350 mouseup 1; sleep 0.8; xdotool mousemove 640 400 click 1; sleep 1.2; xdotool mousemove 400 500 click --repeat 3 --delay 100 4; sleep 1.0; xdotool mousemove 520 380 click --repeat 2 --delay 100 5; sleep 1.5; done"
-    $PH driven -- bash -c "true"; phase driven "$((DRIVEN + 5))" "$DRV" ;;
+    $PH driven -- bash -c "true"; phase driven "$((DRIVEN + 5))" "$DRV"
+    fi ;;
   none)
     phase play "$PLAY" "" ;;
 esac

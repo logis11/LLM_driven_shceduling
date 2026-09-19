@@ -364,7 +364,7 @@ def _analyze(args):
                                           "cpu_share": round(sum(r.run for r in ow["inside"]) / 1000 / in_span, 4),
                                           "threads": per_thread(ow["inside"], in_span)},
                                "outside_wakes_per_s": round(len(ow["outside"]) / (span - in_span), 2) if span > in_span else None}
-            raw["phases"][phase] = {"rows": rows, "segments": segments, "span": span, "idle_rate": idle_rate, "roles": roles,
+            raw["phases"][phase] = {"rows": rows, "segments": segments, "span": span, "t0": t0, "idle_rate": idle_rate, "roles": roles,
                                     "operation": ow}
             result["phases"][phase] = ph
             continue
@@ -419,7 +419,7 @@ def _analyze(args):
                                "waker": {"x_wakes_per_input": dist(xw_count), "first_x_wake_latency_ms": dist(xw_lat),
                                          "run_ms": dist(xw_run)} if xwakes else None}
         result["phases"][phase] = ph
-        raw["phases"][phase] = {"rows": rows, "segments": segments, "span": span, "idle_rate": idle_rate, "roles": roles}
+        raw["phases"][phase] = {"rows": rows, "segments": segments, "span": span, "t0": t0, "idle_rate": idle_rate, "roles": roles}
         if "per_input" in ph:
             raw["phases"][phase]["per_input"] = {"first_lat": first_lat, "first_run": first_run, "win_run": win_run,
                                                  "win_len": win_len, "win_wakes": win_wakes, "win_run_corr": win_run_corr,

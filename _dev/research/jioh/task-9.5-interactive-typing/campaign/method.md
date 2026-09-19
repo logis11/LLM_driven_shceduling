@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-19, `thunderbird-send`'s settle (changelog D42) — set by D35's rule after one long-phase probe of `thunderbird-send`'s setup under the machine gate (`run.sh … probe`: the 30 s settle, one idle phase of the stated length, nothing after it); the probe's phase length is stated here as design before its launch.
+
 - 2026-09-19, the wakeup rows of the op phase's transient processes (changelog D41) — §5 what one wake is: the wakeup rows are read for the application's tree with the processes the op phase admits by the appdef's pattern (Kdenlive's `kdenlive_render`), not only for the pids the snapshots saw.
 
 - 2026-09-19, `thunderbird-send`'s wake rule (changelog D40) — a schedule-in is a wake when the thread's previous switch-out state is any but R, a resume when it is R (9.7 D21); the wakeup row is the check (D39's `wake_check`).

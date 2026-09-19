@@ -1,0 +1,59 @@
+name: meas-long-probe
+
+# 9.5 long-phase probe (research-slice changelog D35, D42): one run of campaign/run.sh in probe mode — the 30 s
+# settle, then one idle or play phase of the stated length and nothing after it — under the machine gate, to see
+# whether an application's launch-time episodes stop or recur. Never a repeat of a campaign. Started by a push
+# changing .github/campaign-long-probe.json, which names the applications, their probe indices, the CPU model and
+# each application's phase length in seconds (`phase_s`, design, stated in the method before the launch; an
+# application without one fails the plan). One artifact per (app, index).
+
+on:
+  push:
+    branches: [jioh/dataset-rebuild]
+    paths: [.github/campaign-long-probe.json]
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      cpu_model: ${{ steps.plan.outputs.cpu_model }}
+      count: ${{ steps.plan.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        run: |
+          python3 - >> "$GITHUB_OUTPUT" <<'PY'
+          import json
+          c = json.load(open(".github/campaign-long-probe.json"))
+          reps, phase_s = c.get("repeats", {}), c.get("phase_s", {})
+          inc = [{"app": a, "repeat": r, "phase_s": int(phase_s[a])} for a in c.get("apps", []) for r in reps.get(a, [])]
+          print("matrix=" + json.dumps({"include": inc}))
+          print("cpu_model=" + c.get("cpu_model", ""))
+          print("count=" + str(len(inc)))
+          PY
+  run:
+    needs: plan
+    if: needs.plan.outputs.count != '0'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update > /dev/null && sudo apt-get install -y --no-install-recommends xvfb > /dev/null
+      - run: MEAS_OUT=/tmp/meas MEAS_CPU_MODEL="${{ needs.plan.outputs.cpu_model }}" MEAS_PHASE_S="${{ matrix.phase_s }}" bash dataset/tools/meas/campaign/run.sh ${{ matrix.app }} ${{ matrix.repeat }} probe
+      - name: own the output
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" /tmp/meas && sudo chmod -R a+rX /tmp/meas
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meas-long-probe-${{ matrix.app }}-r${{ matrix.repeat }}-probe
+          path: /tmp/meas
+          if-no-files-found: error
