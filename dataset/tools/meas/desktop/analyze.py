@@ -50,7 +50,7 @@ def renderer_components(rows, span_s):
     for r in rows:
         by_pid.setdefault(r.pid, []).append(r)
     per = {pid: per_thread(rs, span_s) for pid, rs in by_pid.items()}
-    out = {}
+    out, samples = {}, {}
     for comm in sorted({c for p in per.values() for c in p}):
         inst = [p[comm] for p in per.values() if comm in p]
         gaps, runs = [], []
@@ -63,13 +63,15 @@ def renderer_components(rows, span_s):
                 gaps += [(b.t_in - a.t_in) * 1000 for a, b in zip(trs, trs[1:])]
                 runs += [r.run for r in trs]
         rates = [i["wakes_per_s"] for i in inst]
+        samples[comm] = {"gaps": gaps, "runs": runs,
+                         "t_in": sorted(r.t_in for rs in by_pid.values() for r in rs if r.comm == comm)}
         out[comm] = {"renderers": len(inst),
                      "threads": [i["threads"] for i in inst],
                      "wakes_per_s": round(statistics.fmean(rates), 3),
                      "wakes_per_s_per_renderer": rates,
                      "cpu_share": round(statistics.fmean([i["cpu_share"] for i in inst]), 5),
                      "gap_ms": dist(gaps), "run_ms": dist(runs)}
-    return out
+    return out, samples
 
 
 def drop_control_tab(rows, span_s):
@@ -163,7 +165,19 @@ def analyze_phase(D, phase, app):
         out["wakes_per_s_per_renderer"] = round(out["wakes_per_s"] / n_rend, 4) if n_rend else None
         out["cpu_share_per_renderer"] = round(out["cpu_share"] / n_rend, 6) if n_rend else None
     # one renderer's components, the renderers present pooled as its samples
-    out["threads"] = renderer_components(kept, span) if app in RENDERER_APPS else per_thread(kept, span)
+    if app in RENDERER_APPS:
+        out["threads"], out["_samples"] = renderer_components(kept, span)
+    else:
+        out["threads"] = per_thread(kept, span)
+        out["_samples"] = {}
+        for comm in out["threads"]:
+            rs = [r for r in kept if r.comm == comm]
+            by_tid = {}
+            for r in rs:
+                by_tid.setdefault(r.tid, []).append(r)
+            out["_samples"][comm] = {
+                "gaps": [(b.t_in - a.t_in) * 1000 for trs in by_tid.values() for a, b in zip(trs, trs[1:])],
+                "runs": [r.run for r in rs], "t_in": sorted(r.t_in for r in rs)}
     return out
 
 
@@ -188,6 +202,8 @@ def main():
     ap.add_argument("--json")
     a = ap.parse_args()
     res = analyze_run_dir(a.run_dir, tuple(a.phase))
+    for ph in res["phases"].values():        # the sample lists are for the pool, not for the printed record
+        ph.pop("_samples", None)
     if a.json:
         json.dump(res, open(a.json, "w"), indent=1)
     for name, ph in res["phases"].items():

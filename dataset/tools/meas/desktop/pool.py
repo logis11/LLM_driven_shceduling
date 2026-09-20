@@ -160,9 +160,10 @@ def pool_app(app, reps):
                 # per-renderer components carry a thread count per renderer; the selector wants one number
                 t = c["threads"]
                 slot["threads"][k] = (max(t) if isinstance(t, list) and t else 0) if isinstance(t, list) else t
-                slot["gaps"][k] = []      # the per-sample lists are not carried out of analyze; the
-                slot["runs"][k] = []      # quantile tables below come from the per-repeat summaries
-                slot["t_in"][k] = []
+                sm = (ph.get("_samples") or {}).get(comm) or {}
+                slot["gaps"][k] = sm.get("gaps", [])
+                slot["runs"][k] = sm.get("runs", [])
+                slot["t_in"][k] = sm.get("t_in", [])
         chosen, residual, cov = select_components(comms, spans, sorted(by_rep))
         entry["phases"][name] = {
             "repeats": sorted(by_rep),
@@ -224,8 +225,12 @@ def comparisons(app, entry):
         pa, pb = entry["phases"].get(a), entry["phases"].get(b)
         if not pa or not pb:
             continue
-        ma = statistics.fmean(pa["wakes_per_s"]) if pa["wakes_per_s"] else None
-        mb = statistics.fmean(pb["wakes_per_s"]) if pb["wakes_per_s"] else None
+        # for the renderer entries the comparison is between one renderer's rates, not between the sums over N
+        key = "wakes_per_s_per_renderer" if app in ("chrome-hidden", "chrome-visible") else "wakes_per_s"
+        va = [x for x in pa.get(key) or [] if x is not None]
+        vb = [x for x in pb.get(key) or [] if x is not None]
+        ma = statistics.fmean(va) if va else None
+        mb = statistics.fmean(vb) if vb else None
         ratio = (ma / mb) if (ma and mb) else None
         # method §6 item 2: a difference under 10 % is reported as not resolved at this tolerance, not as an effect
         reading = "not resolved" if (ratio and 0.9 < ratio < 1.1) else "difference"
