@@ -108,4 +108,16 @@ measuring: a harness process inside it stops the job at `gate=harness-in-tree` r
 `chrome-hidden` and `chrome-visible` were never affected — their pattern is `chrome-data` and the argument is
 `chrome-hidden`, so the roots were Chrome's processes alone, and their values above stand.
 
+**Re-measured on clean trees, both jobs reporting no harness process in the tree.** The chat client was the more
+contaminated: its wake rate halved and its CPU share fell by about two thirds, from 27.154 to 13.466 wakes/s idle
+and 217.035 to 109.707 under traffic, CPU share 0.0034 to 0.00106 and 0.03442 to 0.00979. D11's comparison, which
+feeds no archetype, reads idle against traffic at 8.1× in the rate and 9.2× in the share.
+
+The Steam client's rates barely moved — its own tree is large, 29 components at about 300 wakes/s, so Xvfb and
+the window manager were a small share of its wakes — but its CPU share was inflated, and the correction makes
+D5's effect **larger** rather than smaller: minimising the client moves CPU share 3.338× (0.02884 → 0.00864)
+against 1.277× in the wake rate (317.9 → 249.0), where the contaminated reading gave 2.647×. Both are above
+method §6's 10 % resolution. D5's inference — that Steam controls its helper's throttling itself — now rests on
+an observation of a clean tree.
+
 No value changed by this entry.
