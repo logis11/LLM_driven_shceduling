@@ -510,3 +510,17 @@ Not settled by source: what Steam actually does with those controls while a game
 ### 4.5 Effect on §3
 
 The T3 bullet is amended in place: what the client's shipped binaries state about its visibility and throttling controls is now on record, while the runtime question stays open.
+
+## 5. Amendment — Discord's game overlay does not exist on Linux (2026-09-20)
+
+Added by 인지오 on 2026-09-20, while deciding the `discord` binding of scope-card item 12. The reader could not reach `support.discord.com` (§1 row 1, 403 through the proxy) and the class therefore recorded nothing about the overlay; the live site still answers 403 to scripted access with a browser user agent, but the page is retrievable from the Internet Archive.
+
+- **Citation.** Discord, "Game Overlay 101", support article 217659737, `https://support.discord.com/hc/en-us/articles/217659737-Game-Overlay-101`.
+- **Copy read.** Wayback memento `2026-01-02T16:50:30Z`, fetched 2026-09-20 as a raw `id_` capture, gzip-compressed on the wire as the S3 reader found for developer.valvesoftware.com; `sources/A-2026-09-20/discord-game-overlay-101-wayback.html.gz`, SHA-256 `0787c8ed879f85da9cb873ee42e97b382e425ab5eef4f0b6d1ad92418baeb62b`, decompressed copy `discord-game-overlay-101.html`, SHA-256 `a3dce07a94e4e997d0413d19124c440ae8274b27d1aaa2e8dcfbe4fbc45e85d5`. Page title "Game Overlay 101 – Discord".
+- **Passages.**
+  > "NOTE: The overlay is compatible with Windows OS only; it does not function on Mac OS or Linux."
+
+  > "A: The overlay is compatible with Windows 10 & 11 only; it does not function on Mac OS or Linux."
+- **Coverage.** T2: states the platform support of Discord's game overlay. Object: the overlay feature; scope: operating systems. It gives no CPU, wake or process figure and does not otherwise cover T2. T1, T3, T4: does not cover.
+- **One observation?** No — a vendor statement of feature availability.
+- **Effect on §3.** The T2 bullet stands: this adds no Linux measurement of Discord. What it settles is a timeline premise rather than a value — an injected Discord overlay cannot occur on the platform this dataset models.
