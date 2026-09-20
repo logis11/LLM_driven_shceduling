@@ -1,0 +1,23 @@
+soffice: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]; stability rule holds
+   idle soffice.bin wakes/s: k 14, half-width 0.0011, passes
+   idle soffice.bin gap mean (ms): k 14, half-width 0.0006, passes
+   idle soffice.bin run mean (ms): k 14, half-width 0.0493, passes
+   input_run mean, SWELL-KW (ms): k 14, half-width 0.0353, passes
+   input_run mean, 136M (ms): k 14, half-width 0.0474, passes
+   phases ['idle', 'driven', 'driven-alt']; pooled record _dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine/pool-soffice.json
+validity:
+   r1: ok
+   r2: ok
+   r3: ok
+   r4: ok
+   r5: ok
+   r6: ok
+   r7: ok
+   r8: ok
+   r9: ok
+   r10: ok
+   r11: ok
+   r12: ok
+   r13: ok
+   r14: ok
+   every repeat valid

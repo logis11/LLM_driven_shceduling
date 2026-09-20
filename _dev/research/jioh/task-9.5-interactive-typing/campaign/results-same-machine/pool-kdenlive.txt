@@ -1,0 +1,46 @@
+kdenlive: repeats [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]; stability rule holds
+   idle kdenlive wakes/s: k 20, half-width 0.0095, passes
+   idle kdenlive gap mean (ms): k 20, half-width 0.0101, passes
+   idle kdenlive run mean (ms): k 20, half-width 0.0466, passes
+   idle Qt bearer threa wakes/s: k 20, half-width 0.0, passes
+   idle Qt bearer threa gap mean (ms): k 20, half-width 0.0, passes
+   idle Qt bearer threa run mean (ms): k 20, half-width 0.0203, passes
+   driven kdenlive wakes/s: k 20, half-width 0.0347, passes
+   driven kdenlive gap mean (ms): k 20, half-width 0.0349, passes
+   driven kdenlive run mean (ms): k 20, half-width 0.0494, passes
+   driven QXcbEventQueue wakes/s: k 20, half-width 0.0119, passes
+   driven QXcbEventQueue gap mean (ms): k 20, half-width 0.0123, passes
+   driven QXcbEventQueue run mean (ms): k 20, half-width 0.0263, passes
+   driven residual wakes/s: k 20, half-width 0.0139, passes
+   driven residual gap mean (ms): k 20, half-width 0.0131, passes
+   driven residual run mean (ms): k 20, half-width 0.0132, passes
+   op kdenlive_render wakes/s: k 20, half-width 0.0068, passes
+   op kdenlive_render gap mean (ms): k 20, half-width 0.0101, passes
+   op kdenlive_render run mean (ms): k 20, half-width 0.007, passes
+   op residual wakes/s: k 20, half-width 0.0066, passes
+   op residual gap mean (ms): k 20, half-width 0.0031, passes
+   op residual run mean (ms): k 20, half-width 0.0064, passes
+   operation duration mean (ms): k 20, half-width 0.0073, passes
+   phases ['idle', 'driven', 'op']; pooled record _dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine/pool-kdenlive.json
+validity:
+   r1: ok
+   r2: ok
+   r3: ok
+   r5: ok
+   r6: ok
+   r7: ok
+   r8: ok
+   r9: ok
+   r10: ok
+   r11: ok
+   r12: ok
+   r13: ok
+   r14: ok
+   r15: ok
+   r16: ok
+   r17: ok
+   r18: ok
+   r19: ok
+   r20: ok
+   r21: ok
+   every repeat valid

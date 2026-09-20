@@ -1,39 +1,50 @@
 # Measured values — campaign record
 
-Every campaign behind a measured archetype value: per archetype the headline median, the repeats, the margin the stability rule reached, why it stopped, and the machine draws it took. Method: `measurement-campaign-workflow.md`. Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10` (`soffice`: `--since 38`); job counts are the campaign runs' jobs (`status.py`). Recorded 2026-09-19.
+Every campaign behind a measured archetype value: per archetype the repeats, the values the rule covers, the widest margin among them, why it stopped, and the machine draws it took. Method: `measurement-campaign-workflow.md`. Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10` (`soffice`: `--since 38`; `thunderbird-send`: `--since 150 --exclude 29`); job counts are the campaign runs' jobs, read from their job lists. Recorded 2026-09-20; the 9.5 rows were first recorded a day earlier against one headline median per archetype, which D29 and D30 replaced.
 
 ## Campaigns
 
-All on GitHub-hosted `ubuntu-24.04` runners, 4 vCPU, pinned to one CPU, AMD EPYC 7763 only (machine gate); kernel `6.17.0-1022-azure` in every repeat of the build campaign, `code`, `soffice`, `mpv-audio` and `webrtc` (the pools read for this record; the others' kernels are in their pooled records). Stability rule: 95 % confidence half-width of the across-repeat mean of each headline median at most 5 % (`dataset/tools/meas/stability.py`).
+All on GitHub-hosted `ubuntu-24.04` runners, 4 vCPU, pinned to one CPU, AMD EPYC 7763 only (machine gate); kernel `6.17.0-1022-azure` in every repeat of the build campaign and of all six 9.5 applications whose rule holds (their pooled records carry it per repeat). Stability rule (D29, D30): for every value the fold-in carries, each table by its per-repeat mean, the 95 % confidence half-width of the across-repeat mean is at most 5 % of it or 1 µs, whichever is larger, over at least five same-machine repeats (`dataset/tools/meas/stability.py`). A value whose phase holds the recorded input's last window is reported with its half-width instead, and left out of the rule (D32, D46).
 
 | tag | slice | workflow | runs | first launch |
 |---|---|---|---|---|
 | `meas-ci:build:2026-09-18` | 9.6 | `meas-build.yml` | #10–#37; the 13 holding a landed repeat are #10, #11, #12, #15, #16, #22, #25, #26, #27, #29, #30, #32, #34 | 2026-09-18 09:09 UTC |
 | `meas-ci:interactive:2026-09-18` | 9.5 | `meas-interactive.yml` | #10–#100 | 2026-09-18 09:56 UTC |
 | `meas-ci:playback:2026-09-18` | 9.5 | `meas-playback.yml` | #10–#84 | 2026-09-18 09:56 UTC |
+| `meas-ci:interactive:2026-09-19` | 9.5 | `meas-interactive.yml` | #150–#244, `thunderbird-send` alone (the `send` re-observation) | 2026-09-19 11:18 UTC |
 | `meas-ci:background:2026-09-19` | 9.7 | `meas-background.yml` | #19–; `borg`'s repeats are in #24–#40 | 2026-09-19 23:16 UTC |
+| `meas-ci:interactive:2026-09-20` | 9.5 | `meas-interactive.yml` | #245–, `chrome` and `code` re-measured under D51 and D53 | 2026-09-20 08:04 UTC |
+| `meas-ci:playback:2026-09-20` | 9.5 | `meas-playback.yml` | #245–, `webrtc` re-measured under D54 | 2026-09-20 08:04 UTC |
 
-## 9.5 — one headline median per archetype
+## 9.5 — six archetypes measured, three being re-measured
 
-| archetype | application | headline median | repeats (windows) | mean | spread (cv) | 95 % half-width | stopped by | jobs (gated) | recorded input covered |
-|---|---|---|---|---|---|---|---|---|---|
-| `office-writer` | `soffice` | `input_run` p50, keys only (D28) | 5 (1–5) | 3.327 ms | 3.13 % | ±3.89 % | the rule | 6 (1) | SWELL-KW Word, participants 1–2 |
-| `code-editor` | `code` | `input_run` p50 | 22 (1–22) | 74.69 ms | 10.82 % | ±4.83 % | the rule | 35 (13) | SWELL-KW Word, participants 1–11 of 25 |
-| `mail-client` | `thunderbird` | `input_run` p50 | 8 (1–8) | 4.325 ms | 10.13 % | ±8.47 % | the input's end (D26) | 11 (3) | SWELL-KW Outlook, all 25 participants |
-| `web-browser` | `chrome` | page-load duration p50 | 5 (1–5) | 472.7 ms | 3.35 % | ±4.16 % | the rule | 11 (6) | SWELL-KW Internet Explorer, participants 1–5 |
-| `image-editor` | `gimp` | unsharp-mask duration p50 | 4 (1, 2, 3, 5) | 2 365.0 ms | 1.14 % | ±1.81 % | the rule | 6 (2) | scripted pointer loop |
-| `video-editor` | `kdenlive` | preview-render duration p50 | 4 (1, 2, 3, 5) | 11 486.4 ms | 1.02 % | ±1.62 % | the rule | 10 (6) | scripted pointer loop |
-| `video-player` | `mpv-video` | play-phase CPU share | 3 (1, 2, 4) | 0.1235 | 1.59 % | ±3.96 % | the rule | 8 (5) | none |
-| `audio-player` | `mpv-audio` | play-phase CPU share | 29 (1–29) | 0.0072 | 12.72 % | ±4.95 % | the rule | 53 (24) | none |
-| `video-call` | `webrtc` | play-phase CPU share | 5 (1–5) | 0.4084 | 2.34 % | ±2.91 % | the rule | 7 (2) | none |
+The six whose rule holds, pooled in `task-9.5-interactive-typing/campaign/results-same-machine/` and rendered in `campaign/results-same-machine.md`. Every repeat on one AMD EPYC 7763, kernel `6.17.0-1022-azure` in all of them. `values` counts what the rule covers; `widest` is the largest half-width among them.
 
-The four typing-driven applications also replay the 136M Keystrokes windows 1…k of their own repeats in the `driven-alt` phase (the pre-registered stimulus check).
+| archetype | application | repeats | values | widest | stopped by | jobs (gated) | recorded input covered |
+|---|---|---|---|---|---|---|---|
+| `office-writer` | `soffice` | 14 (windows 1–14) | 5 | idle `soffice.bin` run mean ±4.93 % | the rule | 19 (5) | SWELL-KW Word, participants 1–6 |
+| `mail-client` | `thunderbird-send` | 43 (windows 1–28, 30–44) | 36 + 39 reported at the window limit | idle `StreamTrans` gap mean ±5.00 % | the rule | 77 (32) | SWELL-KW Outlook, all 25 participants; windows 9 on are past the recording |
+| `image-editor` | `gimp` | 5 (1, 2, 3, 5, 6) | 10 | op `gimp` wakes/s ±4.59 % | the rule | 8 (3) | scripted pointer loop |
+| `video-editor` | `kdenlive` | 20 (1–3, 5–21) | 22 | driven `kdenlive` run mean ±4.94 % | the rule | 30 (10) | scripted pointer loop |
+| `video-player` | `mpv-video` | 24 (1, 2, 4, 6–26) | 16 | play `vo` wakes/s ±4.98 % | the rule | 51 (27) | none |
+| `audio-player` | `mpv-audio` | 31 (1–31) | 16 | play `ao` run mean ±4.93 % | the rule | 55 (24) | none |
 
-- `office-writer`: five repeats of the first design (runs #10–#28, the stream's clicks, scrolls and drags replayed with the keys; `input_run` p50 8.67, 3.99, 5.91, 4.53, 4.21 ms, ±44 %) are superseded by D28 and not pooled; 11 jobs, 6 gated.
-- `mail-client`: SWELL-KW's Outlook conditions hold 4 761 s of recorded time — eight windows, the eighth 561 s; the half-width is stated as it is.
-- `code-editor`: windows 1–10 average 79.8 ms, windows 11–20 69.6 ms; the later participants type more keys per window.
-- `audio-player`: the CPU share is 0.58–0.86 % of one CPU while the wake rate stays at 206–211 per second.
-- `video-player`, `image-editor`, `video-editor`: the windows the gate stopped (3 and 5; 4; 4) were not retried once the rule held.
+The typing-driven applications also replay the 136M Keystrokes windows 1…k of their own repeats in the `driven-alt` phase (the pre-registered stimulus check).
+
+- `office-writer`: the first design's five repeats (the stream's clicks, scrolls and drags replayed with the keys; `input_run` p50 8.67, 3.99, 5.91, 4.53, 4.21 ms, ±44 %) are superseded by D28 and not pooled; their 11 jobs, 6 of them gated, are not in the count above.
+- `mail-client`: it took 43 repeats against the 29 first projected, because its idle phase holds a ~60 s `StreamTrans` episode that comes out big 6 to 9 times per 600 s window against 10 cycles, which kept the idle `StreamTrans` gap mean at the top of the tolerance. Window 29 is left out of the pool (D47), its Outlook window having been launched uncut; 77 jobs counted here exclude that repeat's job, one cancelled duplicate and one dry check. The operation's 39 values are reported with their half-widths over the eight full repeats, the recording's last window (D46).
+- `video-player`: its `vo` thread's projection swung between 24 and 31 repeats over ten repeats before settling; the rule held at 24.
+- `image-editor`, `video-editor`, `video-player`: the windows the gate stopped (4; 4; 3 and 5) were not retried once the rule held.
+
+Three applications are re-measured under the campaign launched 2026-09-20, their present values superseded (D55):
+
+| archetype | application | why | replaces |
+|---|---|---|---|
+| `web-browser` | `chrome` | its 30 s settle left the launch burst in the idle phase, about 35 times the steady level; settle now 270 s (D51) | 5 repeats, page-load duration p50 472.7 ms |
+| `code-editor` | `code` | a launch-anchored episode every ~320 s put its idle CPU 15.5 % above the long-run level at the placement every repeat takes; idle phase now 900 s (D53) | 22 repeats, `input_run` p50 74.69 ms |
+| `video-call` | `webrtc` | the call's saturation recurs every 240 s, so a 300 s play phase measured the ramp-up and read CPU 78 % above the steady call; settle 210 s, play phase 480 s (D54) | 5 repeats, play-phase CPU share 0.4084 |
+
+`mail-client` was `thunderbird` (8 windows, `input_run` p50 4.325 ms, ±8.47 %, stopped by the input's end) until the `send` re-observation replaced it whole (9.7 D3, D36).
 
 ## 9.6 — three archetypes, one campaign
 
@@ -77,4 +88,4 @@ Full tables: `task-9.7-background-io/campaign/results-borg.md` and `campaign/res
 
 The build campaign, complete: 28 jobs, 14 on the AMD EPYC 7763 (50.0 %), 12 stopped by the machine gate — Intel Xeon Platinum 8573C 4, AMD EPYC 9V74 4, AMD EPYC 9V45 2, Intel Xeon Platinum 8370C 1, Intel Xeon 6973P-C 1 — and 2 cancelled.
 
-The two 9.5 campaigns, as recorded on 2026-09-19 while they were still running: 158 jobs, 90 on the AMD EPYC 7763, 68 stopped by the gate. The model breakdown recorded then, over all three campaigns: AMD EPYC 9V74 32, Intel Xeon 6973P-C 12, Intel Xeon Platinum 8573C 12, AMD EPYC 9V45 8, Intel Xeon Platinum 8370C 8.
+The 9.5 campaigns of 2026-09-18 and 2026-09-19, over the six applications whose rule holds and complete for them: 252 jobs — 144 landed on the AMD EPYC 7763 (57.1 %, one of them `thunderbird-send`'s dry check), 107 stopped by the gate, 1 cancelled. The model is recorded for 104 of those stops, the reports the loop read: AMD EPYC 9V74 47, Intel Xeon Platinum 8573C 19, AMD EPYC 9V45 18, Intel Xeon 6973P-C 12, Intel Xeon Platinum 8370C 8. Per application, gate stops: `thunderbird-send` 32, `mpv-video` 27, `mpv-audio` 24, `soffice` 11 (5 of them in the pooled campaign, 6 in the superseded first design), `kdenlive` 10, `gimp` 3. The 2026-09-20 campaign re-measuring `chrome`, `code` and `webrtc` is still running.
