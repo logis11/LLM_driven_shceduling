@@ -1,42 +1,82 @@
-# Handoff — task 9.8 Browser and comms (2026-09-20)
+# Handoff — task 9.8 Browser and comms (2026-09-20, the first batch in flight)
 
-Stage 3 of `_dev/research/jioh/research-slice-workflow.md` is under way on `jioh/dataset-rebuild`: **D1–D12 landed, campaign method written, tooling not started.** Next session: build the tooling, then run the campaign.
+Stage 3 on `jioh/dataset-rebuild`. **D1–D16 landed, the tooling is written and proven, the long-phase probe is
+done, and the first batch is running.** Nothing is pooled yet and no archetype value has changed.
 
-## What is decided
+Next session: land whatever repeats are still outstanding, pool five per subject, and read the stability rule
+for the first time. That verdict is what decides whether 9.8 goes to the fold-in or starts adding repeats.
 
-`electron-comms` — one entry carrying **125 coreset tasks** on two values the measurement audit classed X, the geometric centre between an unauthenticated Element's main process and its helpers, matching no process that was observed — is replaced by four measured entries. Every binding has a destination.
+## Read these first
 
-| Entry | Measured on | Takes |
-|---|---|---|
-| idle **hidden** renderer | Google Chrome, N site-locked origins backgrounded past the intensive-throttling grace | background-tab renderer tasks |
-| idle **visible** renderer | the same page set, page still visible to Blink | `steamwebhelper` ×9, renderer tasks a timeline says are in front |
-| Electron **chat client** | Element against Synapse on the harness, idle phase carried | `discord` ×3 |
-| **Steam** desktop client | the client under Xvfb, logged out | `steam` ×6 |
+| What | Where |
+|---|---|
+| The campaign method, §10 carrying the phase lengths and the settles | `_dev/research/jioh/task-9.8-browser-comms/campaign/method.md` |
+| **D15** the probe, **D16** the visible entry's phase; D13 the tooling, D14 the dry run | `_dev/research/jioh/task-9.8-browser-comms/changelog.md` |
+| The loop, the machine gate, the stability rule | `_dev/research/jioh/measurement-campaign-workflow.md` |
 
-`thunderbird` ×3 rebinds to `mail-client` (identity binding, closing its three-way split with 9.7 D3); the `zoom` helper ×2 is retired; the Discord `injected-overlay` role is withdrawn.
+## Where the batch stands
 
-Four decisions rest on checks made this session rather than on the stage-2 record: cross-application window occlusion is Windows-only, so a covered renderer is never throttled and the visible state is terminal (D4); Steam ships its own `CMsgWasHidden` and a `background_throttling_disabled` field, so it controls throttling itself (D5); Discord's overlay is Windows-only by Discord's own support article (D7); and the Steam Subscriber Agreement forecloses any account use (D6).
+Campaign tag `meas-ci:desktop:2026-09-20`, `mode: full`, held to the AMD EPYC 7763.
 
-## Next, in order
+- **Repeat 1 — landed and checked for all four subjects.** Runs 35506753479 (`chrome-visible`), 35506838639
+  (`element`), 35506882547 (`chrome-hidden`, `steam`). Every one: `gate=open`, no harness process in its tree,
+  no non-zero return code, every phase present at 600 s, no part-phase renderer. All four pool.
+- **Repeats 2–5 — pushed as sixteen jobs**, run 24 (35508871434) and the retry runs after it.
 
-1. **Tooling** — `dataset/tools/meas/desktop/` (`run.sh`, `analyze.py`, `pool.py`), `.github/workflows/meas-desktop.yml`, trigger `.github/campaign-desktop.json`, loop family `desktop` in `loop/common.py`. `meas-gui.yml` retires with the entry, as 9.7 retired `meas-cli.yml`.
-2. **Long-phase probe** (`long-probe` family) — sets each subject's phase length and N together, and shows whether throttled wakes coincide across renderers. Written into `campaign/method.md` §10 before the first batch.
-3. **Dry run** — also settles whether the Steam client holds a stable state logged out; if it does not, D6's fallback retires that binding instead.
-4. **First batch** — five repeats per subject, then one at a time under the stability rule.
-5. **Pool → fold-in → hand-offs**, then scope-card items 6–10 and 15–16.
+To see what is still outstanding and restart the retrying:
+
+```
+tail ~/.cache/meas-loop/batch-9.8/retry.log
+bash ~/.cache/meas-loop/retry-batch-9.8.sh 24 chrome-hidden:2 … steam:5      # <since-run> <app:k>…
+```
+
+The driver relaunches only `wrong-machine` draws, reads each short job's report before calling it gated, and
+stops rather than retrying on a failure or any other gate. It was started detached; it may or may not have
+survived the session.
+
+## What this session settled
+
+- **The throttling gate was rejecting every valid hidden repeat** (fixed, `2c5225b`). `throttling_check` took
+  the highest rate in `per_pid_wakes_per_s`, which is computed before the control tab is dropped — and the
+  control tab is never throttled by design. It read 10.193 against a 0.5 limit while the worst measured
+  renderer was 0.184. A five-repeat batch would have pooled nothing, with every job reporting `gate=open`.
+  Repeat 1 confirms the fix in production: `(True, 0.155)`.
+- **The phase lengths and settles** (D15): steady 600 s everywhere, N = 12, launch-settle 20 s for the two
+  renderer subjects and the chat client and 900 s for the Steam client, hidden grace-settle 630 s. Two subjects
+  were still settling inside what the method treated as steady.
+- **The visible entry reads the no-timer phase** (D16), so its wake rate is an observation, 0.130 wakes/s per
+  renderer, not our timer period.
 
 ## Open threads
 
-- **Phase lengths and N** trade against each other for sample count and both come from the probe. At one wake per minute a short phase gives too few wakes for a quantile table or for the half-width to converge (D10).
-- **D5's probe question** — which CEF mode Steam uses, which switches it passes, and whether the helper's wakes change when the window is minimised. Read from `/proc/<pid>/cmdline` in the Steam job; its result replaces D5's inference if it lands before the fold-in.
-- **The visible renderer's values depend on the stated page** and nothing throttles them; the hidden entry is protected by the cap, the visible one is not. Stated in its scope, not solved.
+- **The twelve throttled renderers wake together** — 243 bins of 1 s and 32 of 10 ms hold all twelve, against
+  none under independence. Recorded in method §10 and D15. What it does to D14's decision to pool the N
+  renderers of a job as N samples of one renderer is undecided, and it belongs to the fold-in.
+- **D5's comparison has moved.** D14 recorded minimising the Steam client at 3.338× in CPU share from 45 s
+  phases taken soon after launch; repeat 1, with the 900 s settle, reads 1.382× (0.01755 → 0.01270). The wake
+  rate agrees — 1.225 now against 1.277. It still resolves above method §6's 10 % floor, so D5's direction
+  stands, but the magnitude looks like an unsettled measurement. The five repeats will say.
+- **The chat client's traffic phase** reads 4.0× idle at 600 s where the 45 s dry phase read 8.1×. It feeds no
+  archetype (D11) but should not be carried into the results as the same measurement.
+- **The pooled record says `renderers {1: '13'}`** where the analysis measured 12 — it takes
+  `renderers.observed` rather than the count after the browser's own renderer is dropped. No carried value
+  depends on it, but D14 hands to 9.13 that each entry's scope states the renderer population it was pooled
+  from.
+- **Automating the add-repeat loop** (인지오's proposal): mechanical by the workflow's step 5, which adds
+  repeats one at a time with no ceiling until every value holds — but its step 6 is not, since a spread that
+  follows the harness is a design decision, not more repeats. Guards to build in: stop on a failure or a gate
+  that is not `wrong-machine`, stop on a repeat failing the validity checks, and stop when the widest
+  half-width stops closing at roughly the 1/√n the rule implies.
 
-## Hands to other tasks
+## Operational notes
 
-- **9.7** — D4's escape clause ("it runs only if 인지오 provides an account") is foreclosed and should be withdrawn; its "terms unchecked" parenthetical is now checked. No 9.7 value changes: its campaign uses `+login anonymous` throughout. This slice's Steam job also supplies the desktop client's process tree, which D4's binding note currently asserts without an observation.
-- **9.10** — every `electron-comms` binding rebinds; the `injected-overlay` role goes; the meeting files lose the helper task; renderer counts are counts of *sites*, not tabs; a timeline binding a renderer states which of the two states it depicts; a just-switched-away tab is not covered by either entry.
-- **9.13** — the four entries' fields follow the component form at the rebuild.
-
-## Where things are
-
-Changelog `_dev/research/jioh/task-9.8-browser-comms/changelog.md`; method `…/campaign/method.md`; search-log amendments in `…/search/S1-literature.md` §4, `S2-project-docs.md` §4–§5, `S3-traces-datasets.md` §4. Source copies under `…/sources/A-2026-09-20/` (gitignored, local to this clone).
+- Artifacts and helpers live under `~/.cache/meas-loop/batch-9.8/` and `~/.cache/meas-loop/probe-9.8/`
+  (`size.py` sizes a phase from window spread; `align.py` tests wake coincidence across renderers).
+- **The trigger carries five keys only** — `mode`, `attempt`, `cpu_model`, `apps`, `repeats`. Every design
+  value is a constant in `run.sh` (D13); to change one, edit `run.sh` and bump `attempt` in the same push.
+- **The branch is shared with other live sessions.** Push immediately after each commit.
+- CI does not run on this branch. `make -C dataset test PY=python3.12`, about 8 minutes, currently 180 passed,
+  1 skipped, 1 xfailed.
+- Job lengths in `full`: about 23 minutes for the two renderer subjects and the chat client, about 42 for the
+  Steam client. The EPYC 7763 draw rate has run near 40–50 %, so budget about two draws per landing.
+- **Archives are written only when 인지오 explicitly asks.** Decisions go to the slice changelog.
