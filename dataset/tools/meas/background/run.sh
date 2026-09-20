@@ -20,14 +20,16 @@
 # of the archetype's phase on the full set; for SteamCMD the smallest candidate
 # app and the staging probe on the campaign's app (D12). Diag mode, SteamCMD
 # only, not a repeat: the shaped traced download three times on one runner — as
-# the campaign runs it, with one content server of its own site forced
-# (@ForceContentServer, on the command line and in steam_dev.cfg; the server is
-# MEAS_STEAM_DIAG_FORCE or the first the default download used), and as the
-# campaign runs it again — to test whether the number of content servers, one
-# connection each, sets the shaper's drops (probe repeats 1–3: 10, 8 and 4
-# servers, 10.7 %, 9.0 % and 2.1 % of packets dropped). Each download records
-# SteamCMD's own find output, the servers its content log names, and
-# download_sources after the update. Nothing here fails the job: every step
+# the campaign runs it, with the setting under test on the command line and in
+# steam_dev.cfg (MEAS_STEAM_DIAG_SETTING, e.g. "@cMaxInitialDownloadSources 4";
+# empty: @ForceContentServer with MEAS_STEAM_DIAG_FORCE or the first server the
+# default download used), and as the campaign runs it again — the number of
+# content servers, one connection each, sets the shaper's drops and with them
+# every value on `game-download`'s list (run 35475239657, one runner, the atl3
+# site: 6 servers 4.73 % of packets dropped and 4,070 B a wake, one server
+# forced 0.0005 % and 2,131 B, 6 servers again 4.97 % and 4,137 B). Each
+# download records SteamCMD's own find output, the servers its content log
+# names, and download_sources after the update. Nothing here fails the job: every step
 # records its rc and the next phase runs.
 #
 # Settings (the trigger file, through the workflow): MEAS_CPU_MODEL (the machine
@@ -35,8 +37,9 @@
 # (the branch staged before the update phase; empty: no update phase),
 # MEAS_STEAM_UPDATE_TO (app_update's -beta argument back to the public build),
 # MEAS_STEAM_DRY_APP (smallest | an app id), MEAS_ARCHIVER_SET (10gb | 1gb: the
-# 7-Zip phases' input, method §3 "Dry mode"), MEAS_STEAM_DIAG_FORCE (diag
-# mode's forced content server; default: the first the run itself used).
+# 7-Zip phases' input, method §3 "Dry mode"), MEAS_STEAM_DIAG_SETTING (diag
+# mode's setting under test) and MEAS_STEAM_DIAG_FORCE (the server it forces
+# when no setting is named; default: the first the run itself used).
 set -u
 export PROBE_OUT="${MEAS_OUT:-/tmp/meas}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -385,7 +388,7 @@ steam_find() {   # steam_find <label>: what SteamCMD's own console reports for t
   unmeasured "$STEAMCMD" ${STEAM_PRE:-} +find ContentServer +find DownloadSource +find Connection +find CellID +quit > "$OUT/steamcmd.find.$1.log" 2>&1
   rec "steamcmd.find.$1.rc" "$?"
   local v
-  for v in cMaxContentServersToRequest ForceContentServer ForceContentServerType; do
+  for v in cMaxContentServersToRequest cMaxInitialDownloadSources cDefaultInitialDownloadSources ForceContentServer ForceContentServerType; do
     rec "steamcmd.find.$1.$v" "$(grep -m1 -oE "@$v[^:]*" "$OUT/steamcmd.find.$1.log" | tr -s ' ')"
   done
 }
@@ -410,19 +413,24 @@ diag_download() {   # diag_download <phase> <app> [setting]: one shaped, traced 
 diag_first_host() {   # the first content server the named phase's download used
   sed -n "s/.*to host \([a-z0-9.-]*\) (.*/\1/p" "$OUT/steamlogs/$1/content_log.txt" 2>/dev/null | head -1
 }
-steam_diag() {   # steam_diag <app>: diag mode — default, one content server of the same site forced, default again
-  local app="$1" host
+steam_diag() {   # steam_diag <app>: diag mode — default, the setting under test, default again
+  local app="$1" setting host
   steam_find default
   diag_download steam-diag-default "$app"
-  host="${MEAS_STEAM_DIAG_FORCE:-$(diag_first_host steam-diag-default)}"
-  rec steam.diag.force_host "$host"
-  if [ -n "$host" ]; then
-    diag_dev_cfg "@ForceContentServer $host"; steam_find devcfg; diag_dev_cfg ""
-    STEAM_PRE="+@ForceContentServer $host" steam_find cmdline
-    diag_download steam-diag-forced "$app" "@ForceContentServer $host"
+  setting="${MEAS_STEAM_DIAG_SETTING:-}"   # a setting line, e.g. "@cMaxInitialDownloadSources 4"; empty: force one server
+  if [ -z "$setting" ]; then
+    host="${MEAS_STEAM_DIAG_FORCE:-$(diag_first_host steam-diag-default)}"
+    rec steam.diag.force_host "$host"
+    [ -n "$host" ] && setting="@ForceContentServer $host"
+  fi
+  rec steam.diag.setting "$setting"
+  if [ -n "$setting" ]; then
+    diag_dev_cfg "$setting"; steam_find devcfg; diag_dev_cfg ""
+    STEAM_PRE="+$setting" steam_find cmdline
+    diag_download steam-diag-setting "$app" "$setting"
     steam_find after
   else
-    rec steam.diag.forced skipped-no-host
+    rec steam.diag.setting skipped-none
   fi
   diag_download steam-diag-default2 "$app"
 }
