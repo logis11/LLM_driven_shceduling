@@ -199,19 +199,19 @@ synapse_start() {
     --server-name meas.local --config-path "$SYNAPSE_DIR/homeserver.yaml" --generate-config \
     --report-stats=no --data-directory "$SYNAPSE_DIR" > "$OUT/synapse.generate.log" 2>&1
   rec synapse.generate.rc "$?"
-  {
-    echo "registration_shared_secret: \"$MATRIX_SECRET\""
-    echo "enable_registration: false"
-    echo "listeners:"
-    echo "  - port: $SYNAPSE_PORT"
-    echo "    tls: false"
-    echo "    type: http"
-    echo "    x_forwarded: false"
-    echo "    bind_addresses: ['127.0.0.1']"
-    echo "    resources: [{names: [client], compress: false}]"
-  } >> "$SYNAPSE_DIR/homeserver.yaml"
-  pin_harness /opt/venvs/matrix-synapse/bin/python -m synapse.app.homeserver \
-    --config-path "$SYNAPSE_DIR/homeserver.yaml" > "$OUT/synapse.log" 2>&1 &
+  # the generated config already listens on 8008 for the client API and carries a random
+  # registration_shared_secret; it is read back rather than overridden, so there is no second `listeners:` key
+  MATRIX_SECRET="$(sed -n 's/^registration_shared_secret: *"\{0,1\}\([^"]*\)"\{0,1\} *$/\1/p' "$SYNAPSE_DIR/homeserver.yaml" | head -1)"
+  rec synapse.secret_read "$([ -n "$MATRIX_SECRET" ] && echo yes || echo no)"
+  # longhand taskset, not pin_harness: a function backgrounded forks a subshell, so $! would be the subshell and
+  # element_cleanup would kill that instead of the homeserver
+  if [ "$MEAS_PIN_AVAILABLE" = 1 ]; then
+    taskset -c "$MEAS_HARNESS_CPUS" setsid /opt/venvs/matrix-synapse/bin/python -m synapse.app.homeserver \
+      --config-path "$SYNAPSE_DIR/homeserver.yaml" > "$OUT/synapse.log" 2>&1 &
+  else
+    setsid /opt/venvs/matrix-synapse/bin/python -m synapse.app.homeserver \
+      --config-path "$SYNAPSE_DIR/homeserver.yaml" > "$OUT/synapse.log" 2>&1 &
+  fi
   echo $! > "$OUT/synapse.pid"
   local i
   for i in $(seq 1 60); do
@@ -229,6 +229,11 @@ element_setup() {
     -u "$MATRIX_USER" -p "$MATRIX_PASS" -a -k "$MATRIX_SECRET" "http://127.0.0.1:$SYNAPSE_PORT" \
     > "$OUT/register.log" 2>&1
   rec matrix.register.rc "$?"
+  wget -qO /tmp/element-io-archive-keyring.gpg https://packages.element.io/debian/element-io-archive-keyring.gpg
+  sudo cp /tmp/element-io-archive-keyring.gpg /usr/share/keyrings/
+  echo "deb [signed-by=/usr/share/keyrings/element-io-archive-keyring.gpg] https://packages.element.io/debian/ default main" \
+    | sudo tee /etc/apt/sources.list.d/element-io.list > /dev/null
+  sudo apt-get update > /dev/null 2>&1
   sudo apt-get install -y --no-install-recommends element-desktop > "$OUT/apt.element.log" 2>&1
   rec apt.element.rc "$?"
   rec element.version "$(element-desktop --version 2>&1 | head -1)"
@@ -269,7 +274,8 @@ steam_setup() {
   # this job alone runs a window manager: minimising is a window-manager operation, and the shown-against-
   # minimised comparison is what turns D5's inference into an observation (method §2 subject 5)
   apt_install openbox
-  pin_harness openbox > "$OUT/openbox.log" 2>&1 &
+  if [ "$MEAS_PIN_AVAILABLE" = 1 ]; then taskset -c "$MEAS_HARNESS_CPUS" setsid openbox > "$OUT/openbox.log" 2>&1 &
+  else setsid openbox > "$OUT/openbox.log" 2>&1 & fi
   echo $! > "$OUT/openbox.pid"; sleep 3
   rec wm "openbox $(openbox --version 2>&1 | head -1)"
   sudo dpkg --add-architecture i386 > /dev/null 2>&1; sudo apt-get update > /dev/null 2>&1
@@ -277,7 +283,7 @@ steam_setup() {
   rec apt.steam.rc "$?"
   # no account is used and none may be: Steam Subscriber Agreement §4.C and §1.C (D6). The job signs into
   # nothing, drives no store and performs no account action.
-  LAUNCH="steam -silent"
+  LAUNCH="steam"
   CLASS="Steam|steam"; PAT="steam"; RX="steam|Steam"
   rec launch "$LAUNCH"; rec rx "$RX"; rec pat "$PAT"
   launch_app
