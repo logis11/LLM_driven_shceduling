@@ -27,6 +27,7 @@ settle_for() {
   case "$1" in
     soffice|gimp|kdenlive|mpv-video|mpv-audio) echo 30 ;;
     thunderbird-send) echo 390 ;;   # D44: its launch work ends ~340 s into a 30 s-settled idle phase (long-phase probe)
+    chrome) echo 270 ;;             # D51: its ~880 ms ThreadPoolForeground run lands at 180–190 s into one (long-phase probe)
     *) echo "" ;;
   esac
 }
