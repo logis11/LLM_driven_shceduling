@@ -165,3 +165,15 @@ def test_an_element_repeat_without_a_session_is_flagged(tmp_path, repo_root):
         2: {"app": "element", "mode": "full", "matrix.sync_rows": "412"},
     })
     assert pool_runs.validity("desktop", dirs, {"repeats": [1, 2], "phases": {}}) == 1
+
+
+def test_renavigation_keeps_each_window_on_its_own_origin(repo_root):
+    # the origins are what make the renderers separate site-locked processes, so re-pointing every window at one
+    # address between phases would collapse N renderers into one and measure something else. navigate_all takes a
+    # query string and reads each window's origin back from its title; it must never build an address itself.
+    src = (repo_root / "dataset" / "tools" / "meas" / "desktop" / "run.sh").read_text()
+    body = re.search(r"^navigate_all\(\) \{(.*?)^\}", src, re.S | re.M).group(1)
+    assert "getwindowname" in body, "the origin must be read back from the window title"
+    assert "127.0.0." not in body, "navigate_all must not name an address of its own"
+    for call in re.findall(r"^\s*navigate_all (.+)$", src, re.M):
+        assert "127.0.0." not in call and "http" not in call, f"navigate_all takes a query string, got {call}"

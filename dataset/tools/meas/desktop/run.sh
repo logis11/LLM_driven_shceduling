@@ -129,9 +129,19 @@ navigate() {
   pin_harness xdotool key --clearmodifiers Return
 }
 
-navigate_all() {   # <url> — every window of the browser, so both phases observe one process tree
-  local w
-  for w in $(pin_harness xdotool search --onlyvisible --class "$CLASS" 2>/dev/null); do navigate "$w" "$1"; done
+# navigate_all <query-string> — re-point every window at ITS OWN origin with new parameters. Each window must
+# stay on the origin it was opened at: the origins are what make the renderers separate site-locked processes,
+# so sending them all to one address would collapse N renderers into one and measure something else entirely.
+# The origin is read back from the window title, which the page sets once at load.
+navigate_all() {
+  local w title origin n=0
+  for w in $(pin_harness xdotool search --onlyvisible --class "$CLASS" 2>/dev/null); do
+    title="$(pin_harness xdotool getwindowname "$w" 2>/dev/null)"
+    origin="$(printf '%s' "$title" | grep -oE 'http://127\.0\.0\.[0-9]+:[0-9]+' | head -1)"
+    [ -n "$origin" ] || continue
+    navigate "$w" "$origin/idle-page.html?$1"; n=$((n + 1))
+  done
+  rec "navigated.$1" "$n"
   sleep 15
 }
 
@@ -156,13 +166,13 @@ chrome_subject() {
     renderer_gate "$ORIGINS"
     if [ "$MODE" = probe ]; then
       for ms in $PROBE_PERIODS; do
-        navigate_all "http://127.0.0.2:$PAGE_PORT/idle-page.html?ms=$ms"
+        navigate_all "ms=$ms"
         phase "steady-timer-$ms" "$STEADY" ""
       done
     else
       phase steady-timer "$STEADY" ""
     fi
-    navigate_all "http://127.0.0.2:$PAGE_PORT/idle-page.html?timer=0"
+    navigate_all "timer=0"
     screenshot after-notimer-nav
     phase steady-notimer "$STEADY" ""
   fi
@@ -213,7 +223,7 @@ synapse_start() {
 
 element_setup() {
   synapse_start
-  [ "$(cat "$OUT/report.kv" | grep -c '^synapse.health=200$')" -ge 1 ] || stop_recorded no-homeserver "Synapse did not answer /health — stopping before any measurement"
+  grep -q '^synapse.health=200$' "$KV" || stop_recorded no-homeserver "Synapse did not answer /health — stopping before any measurement"
   # the account: register_new_matrix_user against the shared secret, so open registration is never left running
   pin_harness /opt/venvs/matrix-synapse/bin/register_new_matrix_user \
     -u "$MATRIX_USER" -p "$MATRIX_PASS" -a -k "$MATRIX_SECRET" "http://127.0.0.1:$SYNAPSE_PORT" \
@@ -273,7 +283,9 @@ steam_setup() {
   launch_app
   WID=$(wait_window "$CLASS" 300)
   [ -n "$WID" ] || { screenshot no-window; stop_recorded no-window "no Steam window after 300 s — the client may not hold a stable state logged out (D6's fallback)"; }
-  rec steam.buildid "$(grep -ho '[0-9]\{6,\}' /tmp/dumps/*.txt 2>/dev/null | head -1)"
+  # the client's own build id is a dry-run finding (method §9); what is recorded here is the package the runner
+  # installed, which is observable now
+  rec steam.package "$(dpkg-query -W -f='${Package} ${Version}' steam-installer 2>/dev/null)"
   edge launch-settle start; sleep "$LAUNCH_SETTLE"; edge launch-settle end
 }
 
