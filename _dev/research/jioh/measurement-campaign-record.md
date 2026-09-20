@@ -55,7 +55,7 @@ Also within the rule: the object job's 11 per-step CPU tables (±0.7–1.4 %), C
 
 Full tables: `task-9.6-compile/campaign/results.md`, `campaign/results/pooled.json`.
 
-## 9.7 — `file-backup`, the campaign's first archetype
+## 9.7 — `file-backup` and `file-archiver`
 
 Repeats 1–31 on the AMD EPYC 7763, repeat 3 left out of the pool: it landed, but its 10 GB set fetched as a 12,108 B file in place of the 3.70 GB archive (`set.archive_pin` mismatch, extract rc 2, 0 files), so its phases ran on an empty tree and the validity step fails it (the loop, step 4). 55 jobs: 31 landed, 24 stopped by the machine gate, none on another model. The rule is read over the other 30 repeats, and holds on all three of `file-backup`'s values.
 
@@ -64,10 +64,14 @@ Repeats 1–31 on the AMD EPYC 7763, repeat 3 left out of the pool: it landed, b
 | `file-backup` | `borg` | run per wake, warm first backup | 30 | 15.182 ms | 10.2 % | ±3.91 % | the rule |
 | `file-backup` | `borg` | wait per wake, warm first backup | 30 | 3.128 ms | 12.8 % | ±4.87 % | the rule |
 | `file-backup` | `borg` | disk wait per wake, warm first backup | 30 | 3.157 ms | 12.7 % | ±4.84 % | the rule |
+| `file-archiver` | `7z` | run per wake, warm eight-thread run | 6 | 4.187 ms | 2.1 % | ±2.17 % | the rule |
+| `file-archiver` | `7z` | wait per wake, warm eight-thread run | 6 | 32.232 ms | 2.3 % | ±2.40 % | the rule |
 
-`file-archiver` (7-Zip) and `game-download` (SteamCMD) have no values yet: 7-Zip's first batch of six repeats is measuring, and `game-download`'s operating point is open — the number of content servers its runner draws sets every value on its list (run 35475239657: 6 servers 4.73 % of packets dropped and 4,070 B a wake, one server forced 0.0005 % and 2,131 B, 6 servers again 4.97 % and 4,137 B).
+`file-archiver`'s first batch of six repeats holds the rule, every repeat valid: 14 jobs, 8 gated draws, none on another model. Its D15 check, the single-thread run against the eight-thread run, is reported by its CPU per byte (0.91–0.96 of the eight-thread run in every repeat); the check's per-wake parts split into two modes of the same thread, 940 wakes at a 0.36–0.38 s median gap in repeats 1, 2 and 6 against 1,246–1,575 wakes at 0.4–0.7 ms in repeats 3, 4 and 5, and both are stated in the archetype's notes.
 
-Full tables: `task-9.7-background-io/campaign/results-borg.md`, `campaign/results/borg-pooled.json`.
+`game-download` (SteamCMD) has no values yet: its operating point is open — the number of content servers its runner draws sets every value on its list (run 35475239657: 6 servers 4.73 % of packets dropped and 4,070 B a wake, one server forced 0.0005 % and 2,131 B, 6 servers again 4.97 % and 4,137 B).
+
+Full tables: `task-9.7-background-io/campaign/results-borg.md` and `campaign/results-7z.md`, `campaign/results/borg-pooled.json` and `results/7z-pooled.json`.
 
 ## Machine draws
 
