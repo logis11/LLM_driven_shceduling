@@ -321,18 +321,14 @@ element_setup() {
   eval "$(pin_harness xdotool getwindowgeometry --shell "$WID" 2>/dev/null)"
   pin_harness xdotool mousemove $((X + WIDTH / 2)) $((Y + HEIGHT * 35 / 100)) click 1
   sleep 8; screenshot after-signin
-  # Before anything else is clicked: did the client talk to OUR homeserver? Element queries the server named in
-  # its config as soon as the sign-in step opens, so a request in Synapse's log is the proof the config took. If
-  # it did not, the step is showing matrix.org and the next click would reach a third party's service, so the
-  # job stops here instead.
-  rec matrix.client_requests "$(grep -c '/_matrix/client/' "$OUT/synapse.log" 2>/dev/null || echo 0)"
-  [ "$(grep -c '/_matrix/client/' "$OUT/synapse.log" 2>/dev/null || echo 0)" -gt 0 ] \
-    || stop_recorded wrong-homeserver "no client request reached the local homeserver — the sign-in step is not pointed at it, and the next click would reach a public server"
-  # the homeserver step offers Continue before the credentials form
-  eval "$(pin_harness xdotool getwindowgeometry --shell "$WID" 2>/dev/null)"
-  pin_harness xdotool mousemove $((X + WIDTH * 60 / 100)) $((Y + HEIGHT * 36 / 100)) click 1
-  sleep 6; screenshot after-continue
-  # the form: the username field takes focus, then Tab to the password, then submit
+  # Recorded, not gated on: Element does not contact the homeserver until the credentials are submitted, so a
+  # count of zero here is normal and an earlier run stopped on it wrongly. That the config took is evidenced at
+  # submit time instead, by the /sync check below — and by the sign-in step naming the server, which the
+  # after-signin screenshot carries.
+  rec matrix.client_requests_before_submit "$(grep -c '/_matrix/client/' "$OUT/synapse.log" 2>/dev/null || echo 0)"
+  # With the homeserver preconfigured there is no intermediate step: the form is on the sign-in screen with the
+  # username field already focused. An earlier run clicked where a Continue button would have been and landed on
+  # the "Sign in with" dropdown.
   pin_harness xdotool windowactivate --sync "$WID"
   pin_harness xdotool type --delay 40 "$MATRIX_USER"
   pin_harness xdotool key --clearmodifiers Tab; sleep 0.5
