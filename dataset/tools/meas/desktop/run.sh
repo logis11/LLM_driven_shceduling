@@ -334,7 +334,11 @@ element_setup() {
   pin_harness xdotool key --clearmodifiers Tab; sleep 0.5
   pin_harness xdotool type --delay 40 "$MATRIX_PASS"
   sleep 1; screenshot after-credentials
-  pin_harness xdotool key --clearmodifiers Return
+  # The Sign in button is clicked, not Return: the dry run of 2026-09-20 filled the form correctly — the
+  # screenshot shows meas.local, the username and a password of the right length — and Return did not submit
+  # it. It sits below the password field, about three fifths of the way down the window.
+  eval "$(pin_harness xdotool getwindowgeometry --shell "$WID" 2>/dev/null)"
+  pin_harness xdotool mousemove $((X + WIDTH * 60 / 100)) $((Y + HEIGHT * 59 / 100)) click 1
   sleep 30; screenshot after-login
   # verified from the server's side: a signed-in client holds a /sync long poll, and a signed-out one cannot
   rec matrix.sync_rows "$(grep -c '/_matrix/client/.*/sync' "$OUT/synapse.log" 2>/dev/null || echo 0)"
