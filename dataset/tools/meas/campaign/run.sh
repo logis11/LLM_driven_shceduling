@@ -40,7 +40,8 @@ idle_for() {
   case "$1" in
     thunderbird-send) echo 600 ;;
     code) echo 900 ;;   # D53: its ~320 s episode is launch-anchored — a 120 s phase reads CPU +15.5 % at the placement
-    *) echo 120 ;;      # every repeat takes, a 900 s one +1.6 % (long-phase probe)
+    chrome) echo 600 ;; # every repeat takes, a 900 s one +1.6 % (long-phase probe). D56: past D51's settle chrome's idle
+    *) echo 120 ;;      # phase is quiet, and a 120 s window reads CPU +13.6 % there, a 600 s one +0.0 %
   esac
 }
 # D54: the play phase holds whole cycles of a recurring episode — 480 s for webrtc, two of its 240 s saturation

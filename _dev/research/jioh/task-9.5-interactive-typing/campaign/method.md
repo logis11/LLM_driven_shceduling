@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-20, `chrome`'s idle phase (changelog D56) — §2: 600 s, design, the second half of D51. Past its 270 s settle the phase observes Chrome quiet, and over the D50 probe a 120 s window reads CPU +13.6 % above the long-run level at the placement every repeat takes (worst 33.4 %), a 600 s window +0.0 % (worst 4.6 %), both metrics then inside the 5 % tolerance. The 2026-09-20 first batch's five repeats are superseded; `idle_for` in `campaign/run.sh`.
+
 - 2026-09-20, superseded repeats and the fold-in's timing (changelog D55) — §1: `chrome`'s five repeats are superseded whole, repeats 4–5's driven values included, a new repeat's driven phase opening from another application state under D51's settle; §8: one fold-in after `chrome`, `code` and `webrtc` are re-measured, the six applications whose rule holds having their pools, `results.md` and record rows committed meanwhile.
 
 - 2026-09-20, `webrtc`'s settle and play phase (changelog D54) — §2, from the D52 probe (run 35496212906): the settle is 210 s, past the call's dense ramp-up episodes (0–40, 60–90, 140–170 s); the play phase is 480 s, design, two whole cycles of the 240 s saturation cadence that holds to the call's end. The present 300 s phase sits inside the ramp-up and reads the play CPU 78 % above the steady call, so `webrtc`'s five repeats and `video-call`'s 0.4084 CPU share are superseded. `settle_for` and `play_for` in `campaign/run.sh`.
