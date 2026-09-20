@@ -157,6 +157,10 @@ def main():
     if excluded:
         (entry if entry is not None else pooled)["excluded_repeats"] = {str(k): why for k in sorted(excluded)}
         json.dump(pooled, open(out, "w"), indent=1)
+        md = next((cmd[i + 1] for i, a in enumerate(cmd) if a == "--md"), None)   # the pool rendered before this key existed
+        if md and os.path.exists(md):
+            with open(md, "a") as handle:
+                handle.write(f"\n## Left out of this pool\n\nRepeat(s) {', '.join(str(k) for k in sorted(excluded))}: {why}\n")
     if family == "build":
         crit = st["quantities"]
         print(f"build: repeats {pooled['repeats']}; stability rule {'holds' if st['passes'] else 'does not hold yet'}; "
