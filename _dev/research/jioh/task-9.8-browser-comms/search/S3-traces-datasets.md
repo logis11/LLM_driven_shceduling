@@ -625,13 +625,55 @@ L472: | 455 | 1603 | IPC:CSteamEngin |  3 |  3 |  73005000 |  510 | 1000000 | 18
 
 **What it does not establish, as it stands.**
 
-- **One sample each.** `steamwebhelper`, `steam` and `SteamNetworking` appear once apiece; `IPC:CSteamEngin` four times. Seven rows of 484 over about two minutes, one machine, one session.
-- **The columns' semantics are unverified.** `run_freq`, `run_tm_ns`, `wait_freq` and `wake_freq` are `scx_lavd`'s own per-task quantities and the log defines none of them. What each counts, over what window, and whether `run_tm_ns` is an average or a last value must be read out of `scx_lavd`'s source at a pinned commit before any number here is used.
-- **Which rows the scheduler prints, and when, is unverified** — whether a row appears per scheduling decision, per interval, or on some other rule decides whether "one row" means the process was scheduled once or merely sampled once. This also decides whether seven rows of 484 says anything about how often the Steam processes run.
+- **One sample each.** `steamwebhelper`, `steam` and `SteamNetworking` appear once apiece; `IPC:CSteamEngin` four times. Seven rows of 484 over about two minutes, one machine, one session. Each row is one *thread*, not a process (§4.4).
+- ~~The columns' semantics are unverified.~~ **Answered in §4.4** from `scx_lavd`'s source at a pinned commit: all four are exponentially weighted moving averages; `run_tm_ns` is average CPU per runnable-to-sleep episode, `run_freq` the reciprocal of a run-plus-wait cycle, `wait_freq` the reciprocal of the interval between sleeps, and `wake_freq` the rate at which the thread wakes *other* threads.
+- ~~Which rows the scheduler prints, and when, is unverified.~~ **Answered in §4.4**: the rows of each refill are the first N schedule-ins anywhere in the system after it, refilled about once a second. Seven rows of 484 is seven won draws, not a census, and carries nothing by itself about how often those threads ran.
 - **Not the stock scheduler.** The numbers are what these processes did under `scx_lavd`, not under the kernel's own scheduler.
 
-The record is preserved here as a candidate. Whether it grounds anything for the Steam client binding is a stage-3 decision, and it cannot be taken further without the two verifications above.
+The record is preserved here as a candidate. Whether it grounds anything for the Steam client binding is a stage-3 decision; the two verifications it waited on are done in §4.4, and the two limits that remain are the single sample per thread and the non-stock scheduler.
 
 ### 4.3 Effect on §3
 
 The T3 bullet is amended in place. The other three bullets stand: nothing retrieved on 2026-09-20 bears on T1, T2 or T5, and the venues that block those (the Chromium tracker's attachments and comment endpoints, openbenchmarking.org, phoronix.com) were not retried.
+
+### 4.4 The columns of §4.2's table, read from `scx_lavd`'s source
+
+**Copy read.** `sched-ext/scx` at commit `fa1c146cad9bea33acfb2e1c2d65fda50382586e` (2024-05-12T07:30:44Z), the last commit dated on the day of the log in §4.2. The build the poster ran is not stated anywhere in the thread, so this is a pin to the log's day, not to the poster's binary. Files fetched 2026-09-20 from `raw.githubusercontent.com/sched-ext/scx/fa1c146cad9bea33acfb2e1c2d65fda50382586e/scheds/rust/scx_lavd/src/…`, under `sources/A-2026-09-20/scx-fa1c146/`:
+
+| File | SHA-256 |
+|---|---|
+| `bpf/intf.h` | `666a345512e8ba1d1365ade8e2f6064b7140810afdacf18f84d3a07be98cdc29` |
+| `bpf/main.bpf.c` | `c7a892953f243fbd53fa451743a739bc11b1dfe481aea0e62d5afd4aeff3a91f` |
+| `main.rs` | `c78aca5537273b5e249a37dc9e546608c75fab4f8fcdb46bab42cd23bd39d8b8` |
+
+**Which rows get printed.** The userspace option (`main.rs:52–54`) is
+
+> `/// The number of scheduling samples to be reported every second (default: 1)` / `#[clap(short = 's', long, default_value = "1")]` / `nr_sched_samples: u64,`
+
+It is carried to the BPF side as a command and a remaining count (`main.rs:86–88`: `intrspc.cmd = LAVD_CMD_SCHED_N; intrspc.arg = opts.nr_sched_samples`), refilled by the userspace loop once per `interval_ms` — 1000 ms unless the count exceeds the online CPU count (`main.rs:246–250, 278–282`). On the BPF side the sampling point is a task's schedule-in: `try_proc_introspec_cmd(p, taskc, LAVD_CPU_ID_HERE)` is the last statement of the `running` hook (`main.bpf.c:2062`), and `proc_introspec_sched_n` (`main.bpf.c:529–556`) decrements the shared remaining count by compare-and-swap and, on success, submits a message for that task — the comment at `:535` reads `/* introspec_arg is the number of schedules remaining */`.
+
+So **the rows of one refill are the first N schedule-ins anywhere in the system after that refill**, not a per-task census and not a uniform sample over the interval. A comm appearing k times in a log won k of those draws. The header reprints every 32 messages and `mseq` counts messages printed, not schedules (`main.rs:168–170`). The §4.2 log holds 484 rows over about 121 s — roughly four a second, which on the four-CPU machine its rows show is consistent with `-s 4`; the poster states no options, so that is an inference from the row rate, not a fact of the record.
+
+**One row is one thread.** `main.bpf.c:513` sets `m->taskc_x.pid = p->pid`, the kernel thread id, and copies `p->comm`. `IPC:CSteamEngin` and `SteamNetworking` are therefore thread names inside Steam processes, not separate programs, and `steam` and `steamwebhelper` are single threads of those processes rather than the processes whole.
+
+**The four columns.** All four are exponentially weighted moving averages — `main.bpf.c:627–634`:
+
+> `/* Calculate the exponential weighted moving average (EWMA). * - EWMA = (0.75 * old) + (0.25 * new) */` / `return (old_val - (old_val >> 2)) + (new_val >> 2);`
+
+and the three frequencies take their new sample through `calc_avg_freq` (`main.bpf.c:636–646`), which is `new_freq = LAVD_TIME_ONE_SEC / interval` before the EWMA. Each is updated only when its own event occurs, so a rarely-running thread carries values from whenever it last ran.
+
+| Column | Updated | New sample fed to the EWMA |
+|---|---|---|
+| `run_freq` | at schedule-in, if the task has run before (`main.bpf.c:1303–1305`) | `1 s ÷ (run_time_ns + (now − last_quiescent_clk))` — the reciprocal of one run-plus-wait cycle, the wait measured from the task's last going to sleep |
+| `run_tm_ns` (`run_time_ns`) | at schedule-out (`main.bpf.c:1364–1367`) | `acc_run_time_ns`, the CPU time accumulated since the task last became runnable — `acc_run_time_ns` is zeroed in the `runnable` path (`main.bpf.c:1283`). Because the EWMA is taken at *every* schedule-out, a thread preempted several times inside one wake episode contributes several samples, each larger than the last |
+| `wait_freq` | at `quiescent` when the dequeue carries `SCX_DEQ_SLEEP` (`main.bpf.c:2143–2150`) | `1 s ÷ (now − last_quiescent_clk)` — the reciprocal of the interval between consecutive goings-to-sleep |
+| `wake_freq` | at another task's `runnable`, on the **waker** (`main.bpf.c:2000–2008`) | `1 s ÷ (now − last_runnable_clk)` of the waker. The column is how often this thread **wakes other threads up**, not how often it is woken — `intf.h:159` names the clock `/* last time when a task wakes up others */` |
+
+**What this settles for the Steam rows of §4.2.**
+
+- `run_tm_ns` is the quantity this project calls CPU per wake — average CPU time per runnable-to-sleep episode — carrying the upward bias above where a thread is preempted inside an episode.
+- `run_freq` is a cycle-rate proxy, not a count of schedules in the preceding second: one short wait moves it by a quarter of the difference.
+- `wake_freq` must not be read as the thread's own wake rate; it is its rate of waking others.
+- Seven rows of 484 is seven won draws of "first schedule-in after a refill", not a census, and says nothing by itself about how large a share of the machine those threads held.
+
+Two of §4.2's four stated limits — the columns' semantics and the rule deciding which rows are printed — are answered here. The other two stand: one sampled row each for `steamwebhelper`, `steam` and `SteamNetworking`, on one machine over about two minutes, and under `scx_lavd` rather than the stock scheduler.
