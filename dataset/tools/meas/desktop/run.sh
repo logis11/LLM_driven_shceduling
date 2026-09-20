@@ -119,6 +119,20 @@ click_right_button() {
   done
 }
 
+# check_tree <label> — the measured tree must not contain this script, Xvfb, the window manager or the
+# homeserver. A process pattern that matches run.sh's own command line roots the tree at the job itself and the
+# harness is then measured as if it were the application.
+check_tree() {
+  local n
+  snap "$PAT" "" "$1"
+  n="$(python3 -c 'import json,sys,re
+d=json.load(open(sys.argv[1]))
+bad=[p["cmd"][:60] for p in d["procs"] if re.search(r"desktop/run\.sh|Xvfb|openbox|synapse\.app|traffic\.py", p.get("cmd",""))]
+print(len(bad)); print("\n".join(bad), file=sys.stderr)' "$OUT/snap.$1.json" 2>>"$OUT/tree.$1.txt" || echo 0)"
+  rec "tree.$1.harness_procs" "$n"
+  [ "$n" = 0 ] || stop_recorded harness-in-tree "the measured tree contains $n harness process(es) — see tree.$1.txt; the process pattern is matching something of ours"
+}
+
 launch_app() {
   # launched directly under taskset, not through pin_load: a function run in the background forks a subshell, so
   # $! would be the subshell and not the session leader the kill and the affinity record need (campaign/run.sh)
@@ -299,7 +313,11 @@ element_setup() {
   # names this argument as the fix. The client therefore stores its session with Electron's basic backend, which
   # the entry's scope states.
   LAUNCH="element-desktop --no-sandbox --disable-gpu --disable-gpu-sandbox --disable-software-rasterizer --disable-dev-shm-usage --password-store=basic"
-  CLASS="element|Element"; PAT="element-desktop|element"; RX="element|Element"
+  # PAT must not match this script's own command line, `run.sh element 1 dry`: snapshot.py roots on any process
+  # whose command line or comm matches and then walks descendants, so the old `element-desktop|element` made
+  # run.sh the root and pulled in Xvfb, Synapse and the snapshot helper. The dry run of 2026-09-20 then read
+  # `python` — the homeserver — as the entry's largest component, the very process the method pins away.
+  CLASS="element|Element"; PAT="element-desktop"; RX="element|Element"
   rec launch "$LAUNCH"; rec rx "$RX"; rec pat "$PAT"
   launch_app
   WID=$(wait_window "$CLASS" 180)
@@ -353,6 +371,7 @@ element_setup() {
   [ "$(grep -c '/_matrix/client/.*/sync' "$OUT/homeserver.log" 2>/dev/null || echo 0)" -gt 0 ] \
     || stop_recorded not-logged-in "no /sync request reached the homeserver — the client is not signed in, so the idle phase is a login screen (D7)"
   edge launch-settle start; sleep "$LAUNCH_SETTLE"; edge launch-settle end
+  check_tree element-tree
 }
 
 element_traffic_driver() {   # <seconds> — a client-server API script on the harness CPUs, not an Element window
@@ -380,7 +399,9 @@ steam_setup() {
   # no account is used and none may be: Steam Subscriber Agreement §4.C and §1.C (D6). The job signs into
   # nothing, drives no store and performs no account action.
   LAUNCH="steam"
-  CLASS="Steam|steam"; PAT="steam"; RX="steam|Steam"
+  # as above: `steam` matched `run.sh steam 1 dry` and rooted the tree at this script, taking in Xvfb and the
+  # window manager. The install path appears in every Steam process's command line and in none of ours.
+  CLASS="Steam|steam"; PAT="debian-installation"; RX="steam|Steam"
   rec launch "$LAUNCH"; rec rx "$RX"; rec pat "$PAT"
   launch_app
   # `steam-installer` is a bootstrap: the first `steam` opens a window named "Steam installer" which downloads
@@ -424,6 +445,7 @@ steam_setup() {
   rec steam.buildid "$(tr '\0' ' ' < /proc/$(pgrep -f steamwebhelper | head -1)/cmdline 2>/dev/null | grep -o 'buildid=[0-9]*' | head -1 | cut -d= -f2)"
   rec steam.steamid "$(tr '\0' ' ' < /proc/$(pgrep -f steamwebhelper | head -1)/cmdline 2>/dev/null | grep -o 'steamid=[0-9]*' | head -1 | cut -d= -f2)"
   edge launch-settle start; sleep "$LAUNCH_SETTLE"; edge launch-settle end
+  check_tree steam-tree
 }
 
 steam_record_helpers() {   # <label> — D5's open question: each helper's --type= role and full command line

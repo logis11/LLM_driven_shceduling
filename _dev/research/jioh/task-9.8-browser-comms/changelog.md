@@ -92,4 +92,20 @@ The tooling of D13 run for the first time, `mode: dry`, thirteen attempts. A dry
 
 **Hands to 9.16:** a `dry` repeat of the hidden subject can never enter a pool — its 75 s grace does not clear the five-minute default and the throttling gate rejects it — so that entry's pooling path is exercised only in `probe` or `full` mode.
 
+**Correction, later the same day: the numbers above for the Steam client are withdrawn.** `snapshot.py` roots the
+measured tree on any process whose command line or comm matches the subject's pattern and then walks its
+descendants, and two patterns matched this script's own command line, which carries the subject name as an
+argument: `steam` matched `run.sh steam 1 dry`, and `element-desktop|element` matched `run.sh element 1 dry`. The
+tree was therefore rooted at the job itself and took in Xvfb, the window manager and — for the chat client — the
+homeserver, which the method pins away precisely so that it is not measured. The chat client's largest component
+read `python`, at 14.62 wakes/s idle and 110.77 under traffic: that is Synapse.
+
+So the Steam figures — 315.0 against 252.5 wakes/s and 0.03807 against 0.01438 CPU share — are the application
+and the harness together, and D5's comparison must be read again from a clean tree before anything rests on it.
+The direction of the effect is not in doubt; the magnitudes are withdrawn. The patterns are now `debian-installation`
+and `element-desktop`, neither of which appears in anything of ours, and every job checks its own tree before
+measuring: a harness process inside it stops the job at `gate=harness-in-tree` rather than producing a number.
+`chrome-hidden` and `chrome-visible` were never affected — their pattern is `chrome-data` and the argument is
+`chrome-hidden`, so the roots were Chrome's processes alone, and their values above stand.
+
 No value changed by this entry.
