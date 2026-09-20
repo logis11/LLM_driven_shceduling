@@ -30,6 +30,7 @@ jobs:
       steam_update_from: ${{ steps.plan.outputs.steam_update_from }}
       steam_update_to: ${{ steps.plan.outputs.steam_update_to }}
       steam_dry_app: ${{ steps.plan.outputs.steam_dry_app }}
+      steam_diag_setting: ${{ steps.plan.outputs.steam_diag_setting }}
       archiver_set: ${{ steps.plan.outputs.archiver_set }}
     steps:
       - uses: actions/checkout@v4
@@ -45,7 +46,7 @@ jobs:
           print("cpu_model=" + c.get("cpu_model", ""))
           print("count=" + str(len(inc)))
           for k, d in (("work_root", "auto"), ("steam_app", "232250"), ("steam_update_from", ""), ("steam_update_to", "public"),
-                       ("steam_dry_app", "smallest"), ("archiver_set", "10gb")):
+                       ("steam_dry_app", "smallest"), ("archiver_set", "10gb"), ("steam_diag_setting", "")):
               print(f"{k}={c.get(k, d)}")
           PY
   run:
@@ -69,6 +70,7 @@ jobs:
           MEAS_STEAM_UPDATE_TO: ${{ needs.plan.outputs.steam_update_to }}
           MEAS_STEAM_DRY_APP: ${{ needs.plan.outputs.steam_dry_app }}
           MEAS_ARCHIVER_SET: ${{ needs.plan.outputs.archiver_set }}
+          MEAS_STEAM_DIAG_SETTING: ${{ needs.plan.outputs.steam_diag_setting }}
       - name: own the output
         if: always()
         run: sudo chown -R "$(id -u):$(id -g)" /tmp/meas && sudo chmod -R a+rX /tmp/meas

@@ -404,7 +404,7 @@ diag_download() {   # diag_download <phase> <app> [setting]: one shaped, traced 
   local ph="$1" app="$2" setting="${3:-}"
   [ -n "$setting" ] && diag_dev_cfg "$setting"
   shape_on
-  STEAM_PRE="${setting:++$setting}" STEAM_POST=+download_sources steam_phase "$ph" 1 fresh "$app"
+  STEAM_PRE="$(printf '%s' "$setting" | sed 's/@/+@/g')" STEAM_POST=+download_sources steam_phase "$ph" 1 fresh "$app"
   shape_off
   [ -n "$setting" ] && diag_dev_cfg ""
   rec "steam.diag.$ph.servers" "$(grep -oE "to host [a-z0-9.-]+" "$OUT/steamlogs/$ph/content_log.txt" 2>/dev/null | sort -u | wc -l | tr -d ' ')"
