@@ -83,7 +83,10 @@ def test_only_renderer_processes_reach_the_components_of_a_renderer_subject(tmp_
     # two wakes of the renderer only: the browser's 5 ms and the GPU's 9 ms are out
     assert ph["threads"]["chrome"]["wakes_per_s"] == round(2 / ph["span_s"], 2)
     assert ph["threads"]["chrome"]["run_ms"]["sum"] == 4.0
-    assert set(ph["threads"]["chrome"]) == {"threads", "wakes_per_s", "cpu_share", "gap_ms", "run_ms"}
+    # method §5's shape, plus what tells the reader how many renderers the one archetype was pooled from
+    assert {"threads", "wakes_per_s", "cpu_share", "gap_ms", "run_ms"} <= set(ph["threads"]["chrome"])
+    assert ph["threads"]["chrome"]["renderers"] == 1
+    assert ph["renderers_measured"] == 1 and ph["wakes_per_s_per_renderer"] == ph["wakes_per_s"]
 
 
 def test_every_process_reaches_the_components_of_a_non_renderer_subject(tmp_path):
@@ -186,3 +189,39 @@ def test_the_renderer_subjects_drive_no_input(repo_root):
 
 def window_steps_body(src):
     return re.search(r"^window_steps\(\) \{(.*?)^\}", src, re.S | re.M).group(1)
+
+
+def test_the_archetype_carries_one_renderer_not_the_sum_of_n(tmp_path):
+    # the job measures N renderers only so a throttled entry yields enough wakes to read (method §9). Every
+    # renderer's main thread is named `chrome`, so per_thread over the whole tree returns the SUM over N, which
+    # is not what the archetype describes. Two renderers, one wake each, must read as one renderer's rate.
+    procs = [{"pid": p, "comm": "chrome", "cmd": "/opt/google/chrome/chrome --type=renderer"} for p in (200, 300)]
+    rows = ("   0.000010 [0000]  perf[50]    0.000      0.000      0.010      R\n"
+            "   1.000000 [0003]  chrome[201/200]    0.000      0.001      2.000      S\n"
+            "   2.000000 [0003]  chrome[301/300]    0.000      0.001      2.000      S\n"
+            "  10.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n")
+    d = _run_dir(tmp_path, "chrome-visible", "steady-timer", procs, rows)
+    ph = analyze.analyze_run_dir(str(d))["phases"]["steady-timer"]
+    assert ph["renderers_measured"] == 2
+    assert ph["wakes_per_s"] == round(2 / ph["span_s"], 3)                      # the set
+    assert ph["wakes_per_s_per_renderer"] == round(ph["wakes_per_s"] / 2, 4)    # what the entry carries
+    assert ph["threads"]["chrome"]["renderers"] == 2
+    assert ph["threads"]["chrome"]["wakes_per_s"] == round(1 / ph["span_s"], 3)
+
+
+def test_the_hidden_subject_drops_its_control_tab(tmp_path):
+    # the control tab is the selected tab, so it stays visible to Blink and is never throttled: it is the single
+    # fastest renderer, and the ratio to the next is recorded so the pool can see the identification was clean
+    procs = [{"pid": p, "comm": "chrome", "cmd": "/opt/google/chrome/chrome --type=renderer"} for p in (200, 300)]
+    rows = ["   0.000010 [0000]  perf[50]    0.000      0.000      0.010      R\n"]
+    for i in range(6):     # the control tab, unthrottled
+        rows.append(f"   {1.0 + i:.6f} [0003]  chrome[201/200]    0.000      0.001      1.000      S\n")
+    rows.append("   9.000000 [0003]  chrome[301/300]    0.000      0.001      1.000      S\n")
+    rows.append("  10.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n")
+    # a wakeup at or before each schedule-in, else the wake rule folds the run of rows into one (method §5)
+    wakeups = "".join(f"   {0.99 + i:.6f} [0001]  x[9]  awakened: chrome[201/200]\n" for i in range(6))
+    d = _run_dir(tmp_path, "chrome-hidden", "steady", procs, "".join(rows), wakeups)
+    ph = analyze.analyze_run_dir(str(d))["phases"]["steady"]
+    assert ph["control_tab"]["dropped"] == 200
+    assert ph["control_tab"]["ratio_to_next"] == 6.0
+    assert ph["renderers_measured"] == 1 and list(ph["threads"]["chrome"]["wakes_per_s_per_renderer"]) == [0.1]

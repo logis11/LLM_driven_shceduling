@@ -218,8 +218,12 @@ PY
       CHROME="google-chrome --no-sandbox --disable-gpu --no-first-run --user-data-dir=/tmp/chrome-data"
       if [ "$app" = chrome-hidden ]; then
         # one window: the first tab stays selected and is the control tab, the N measured tabs are background
-        # pages. Its page carries no timer, so its renderer falls below the components' coverage cut.
-        LAUNCH="$CHROME http://127.0.0.1:$PORT/idle-page.html?ms=0$URLS"
+        # pages. The control tab carries the SAME timer as the measured pages: being the selected tab it stays
+        # visible to Blink and is never throttled, so it wakes at the timer rate while the measured renderers
+        # fall to the documented budget — a gap of some 600x that identifies it for exclusion. (It cannot be
+        # identified by role or command line, and the components' coverage cut does not separate it: every
+        # renderer shares the same thread comms.)
+        LAUNCH="$CHROME http://127.0.0.1:$PORT/idle-page.html?ms=$MS$URLS"
       else
         # N windows, one tab each: every mapped window's selected tab is visible to Blink, the occlusion tracker
         # that would hide a covered window being Windows-only (D4). The first window comes from the launch; the

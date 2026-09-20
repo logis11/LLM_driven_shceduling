@@ -17,6 +17,7 @@ What is NOT reused is `analyze_run`, whose phase loop is fixed to 9.5's names �
 import argparse
 import json
 import os
+import statistics
 import sys
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))   # dataset/tools
@@ -24,7 +25,7 @@ if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 
 from meas.campaign.analyze import (   # noqa: E402  — the component layer, one definition for both halves
-    load_all_wakeups, load_rows, merge_resumes, per_role, per_thread, pid_roles,
+    dist, load_all_wakeups, load_rows, merge_resumes, per_role, per_thread, pid_roles,
 )
 
 # the renderer-only view: the inverse of the filter that pools `web-browser`. pid_roles returns exactly these
@@ -32,6 +33,63 @@ from meas.campaign.analyze import (   # noqa: E402  — the component layer, one
 # future Chromium adds a role — an unrecognised role arrives as "other" and is dropped.
 KEEP_ROLE = "renderer"
 RENDERER_APPS = ("chrome-hidden", "chrome-visible")
+
+
+def renderer_components(rows, span_s):
+    """The components of ONE renderer, with the renderer processes present pooled as samples of it.
+
+    A job measures N renderers so that a throttled entry yields enough wakes to read (method §9: at one wake per
+    minute per renderer, twelve renderers yield about twelve wakes a minute). `per_thread` keys by thread comm,
+    and every renderer's main thread is `chrome`, its hang watcher `HangWatcher`, and so on — so applied to the
+    whole tree it returns the SUM over N renderers, which is not what the archetype describes. It is therefore
+    applied per renderer process, exactly as `web-browser` has it applied to its tree, and the results pooled:
+    `wakes_per_s` is the mean over renderers with the per-renderer values kept beside it for the spread the
+    stability rule reads, and the gap and run tables are `dist` over every renderer's samples together.
+    """
+    by_pid = {}
+    for r in rows:
+        by_pid.setdefault(r.pid, []).append(r)
+    per = {pid: per_thread(rs, span_s) for pid, rs in by_pid.items()}
+    out = {}
+    for comm in sorted({c for p in per.values() for c in p}):
+        inst = [p[comm] for p in per.values() if comm in p]
+        gaps, runs = [], []
+        for rs in by_pid.values():
+            by_tid = {}
+            for r in rs:
+                if r.comm == comm:
+                    by_tid.setdefault(r.tid, []).append(r)
+            for trs in by_tid.values():
+                gaps += [(b.t_in - a.t_in) * 1000 for a, b in zip(trs, trs[1:])]
+                runs += [r.run for r in trs]
+        rates = [i["wakes_per_s"] for i in inst]
+        out[comm] = {"renderers": len(inst),
+                     "threads": [i["threads"] for i in inst],
+                     "wakes_per_s": round(statistics.fmean(rates), 3),
+                     "wakes_per_s_per_renderer": rates,
+                     "cpu_share": round(statistics.fmean([i["cpu_share"] for i in inst]), 5),
+                     "gap_ms": dist(gaps), "run_ms": dist(runs)}
+    return out
+
+
+def drop_control_tab(rows, span_s):
+    """The hidden subject's control tab is the selected tab, so it stays visible to Blink and is never
+    throttled, while the measured renderers fall to one wake a minute. It is the single fastest renderer, by
+    construction exactly one, and the ratio to the next fastest is recorded so the pool can see whether the
+    identification was clean rather than assume it. Returns (rows without it, a record of what was dropped)."""
+    rates = {}
+    for r in rows:
+        rates[r.pid] = rates.get(r.pid, 0) + 1
+    if len(rates) < 2:
+        return rows, {"dropped": None, "reason": "fewer than two renderers"}
+    ordered = sorted(rates, key=lambda p: -rates[p])
+    control, nxt = ordered[0], ordered[1]
+    ratio = (rates[control] / rates[nxt]) if rates[nxt] else None
+    return ([r for r in rows if r.pid != control],
+            {"dropped": control,
+             "wakes_per_s": round(rates[control] / span_s, 3),
+             "next_wakes_per_s": round(rates[nxt] / span_s, 3),
+             "ratio_to_next": round(ratio, 2) if ratio else None})
 
 
 def phases_in(D):
@@ -81,11 +139,21 @@ def analyze_phase(D, phase, app):
     else:
         kept = segments
         out["role_filter"] = "none"
-    out["wakes_per_s"] = round(len(kept) / span, 3)
-    out["cpu_share"] = round(sum(r.run for r in kept) / 1000 / span, 5)
-    out["threads"] = per_thread(kept, span)
     out["per_pid_wakes_per_s"] = {str(p): round(sum(1 for r in kept if r.pid == p) / span, 3)
                                   for p in sorted({r.pid for r in kept})}
+    if app == "chrome-hidden":
+        kept, out["control_tab"] = drop_control_tab(kept, span)
+    out["wakes_per_s"] = round(len(kept) / span, 3)          # the whole measured set, a diagnostic
+    out["cpu_share"] = round(sum(r.run for r in kept) / 1000 / span, 5)
+    if app in RENDERER_APPS:
+        # what the archetype carries: ONE renderer. The job measures N of them for sample count, so the headline
+        # rate is per renderer, not the sum the phase total gives.
+        n_rend = len({r.pid for r in kept})
+        out["renderers_measured"] = n_rend
+        out["wakes_per_s_per_renderer"] = round(out["wakes_per_s"] / n_rend, 4) if n_rend else None
+        out["cpu_share_per_renderer"] = round(out["cpu_share"] / n_rend, 6) if n_rend else None
+    # one renderer's components, the renderers present pooled as its samples
+    out["threads"] = renderer_components(kept, span) if app in RENDERER_APPS else per_thread(kept, span)
     return out
 
 

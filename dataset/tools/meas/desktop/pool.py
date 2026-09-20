@@ -157,7 +157,9 @@ def pool_app(app, reps):
             for comm, c in ph["threads"].items():
                 slot = comms.setdefault(comm, {"gaps": {}, "runs": {}, "t_in": {}, "wakes": {}, "threads": {}})
                 slot["wakes"][k] = int(round(c["wakes_per_s"] * ph["span_s"]))
-                slot["threads"][k] = c["threads"]
+                # per-renderer components carry a thread count per renderer; the selector wants one number
+                t = c["threads"]
+                slot["threads"][k] = (max(t) if isinstance(t, list) and t else 0) if isinstance(t, list) else t
                 slot["gaps"][k] = []      # the per-sample lists are not carried out of analyze; the
                 slot["runs"][k] = []      # quantile tables below come from the per-repeat summaries
                 slot["t_in"][k] = []
@@ -166,13 +168,19 @@ def pool_app(app, reps):
             "repeats": sorted(by_rep),
             "span_s": [by_rep[k]["span_s"] for k in sorted(by_rep)],
             "wakes_per_s": [wps[k] for k in sorted(by_rep)],
+            "wakes_per_s_per_renderer": [by_rep[k].get("wakes_per_s_per_renderer") for k in sorted(by_rep)],
+            "renderers_measured": [by_rep[k].get("renderers_measured") for k in sorted(by_rep)],
             "cpu_share": [by_rep[k]["cpu_share"] for k in sorted(by_rep)],
             "threads": {comm: {
                 "threads": [by_rep[k]["threads"][comm]["threads"] for k in sorted(by_rep) if comm in by_rep[k]["threads"]],
+                "renderers": [by_rep[k]["threads"][comm].get("renderers") for k in sorted(by_rep) if comm in by_rep[k]["threads"]],
                 "wakes_per_s": [by_rep[k]["threads"][comm]["wakes_per_s"] for k in sorted(by_rep) if comm in by_rep[k]["threads"]],
+                "wakes_per_s_per_renderer": [by_rep[k]["threads"][comm].get("wakes_per_s_per_renderer")
+                                             for k in sorted(by_rep) if comm in by_rep[k]["threads"]],
                 "gap_ms": [by_rep[k]["threads"][comm]["gap_ms"] for k in sorted(by_rep) if comm in by_rep[k]["threads"]],
                 "run_ms": [by_rep[k]["threads"][comm]["run_ms"] for k in sorted(by_rep) if comm in by_rep[k]["threads"]],
             } for comm in sorted({c for k in by_rep for c in by_rep[k]["threads"]})},
+            "control_tab": {k: by_rep[k].get("control_tab") for k in sorted(by_rep)},
             "components": {"selected": chosen, "residual": residual, **cov},
             "renderer_pids": {k: by_rep[k].get("renderer_pids") for k in sorted(by_rep)},
         }
@@ -189,7 +197,10 @@ def criterion(app, entry):
             continue
         reps = ph["repeats"]
         if key == "wakes_per_s":
-            vals = dict(zip(reps, ph["wakes_per_s"]))
+            # for the renderer entries this is the per-renderer rate: the archetype is one renderer, and the
+            # job measures N only so a throttled entry yields enough wakes to read
+            src = "wakes_per_s_per_renderer" if app in ("chrome-hidden", "chrome-visible") else "wakes_per_s"
+            vals = dict(zip(reps, ph[src]))
             floor = None
         else:
             which, field = ("gap_ms", "mean") if key == "gap_mean_ms" else ("run_ms", "mean")
