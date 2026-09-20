@@ -274,7 +274,14 @@ element_setup() {
   # printing and exiting, and the dry runs of 2026-09-20 hung here twice — the last key recorded was
   # apt.element.rc, and the next statement is this one.
   rec element.version "$(dpkg-query -W -f='${Version}' element-desktop 2>/dev/null || timeout 20 element-desktop --version 2>&1 | head -1)"
-  export ELEMENT_DESKTOP_CONFIG_JSON="$(printf '{"default_server_config":{"m.homeserver":{"base_url":"http://127.0.0.1:%s","server_name":"meas.local"}},"disable_custom_urls":true,"show_labs_settings":false}' "$SYNAPSE_PORT")"
+  # Element Desktop reads config.json from its user-data directory. The environment variable alone did not take:
+  # the dry run of 2026-09-20 reached the sign-in step showing matrix.org, the public server, which this job must
+  # never contact — no account of ours exists there and it is a third party's service.
+  mkdir -p "$HOME/.config/Element"
+  printf '{"default_server_config":{"m.homeserver":{"base_url":"http://127.0.0.1:%s","server_name":"meas.local"}},"disable_custom_urls":true,"show_labs_settings":false,"disable_guests":true}' \
+    "$SYNAPSE_PORT" > "$HOME/.config/Element/config.json"
+  rec element.config "$(cat "$HOME/.config/Element/config.json")"
+  export ELEMENT_DESKTOP_CONFIG_JSON="$HOME/.config/Element/config.json"
   # --disable-gpu alone is what meas-gui.yml used, but Element 1.12.28 died with "GPU process launch failed:
   # error_code=1002 … GPU process isn't usable. Goodbye." and showed its "System unsupported" page: Electron
   # treats an unusable GPU process as fatal where Chrome tolerates it. The GPU sandbox is disabled with the
@@ -314,6 +321,17 @@ element_setup() {
   eval "$(pin_harness xdotool getwindowgeometry --shell "$WID" 2>/dev/null)"
   pin_harness xdotool mousemove $((X + WIDTH / 2)) $((Y + HEIGHT * 35 / 100)) click 1
   sleep 8; screenshot after-signin
+  # Before anything else is clicked: did the client talk to OUR homeserver? Element queries the server named in
+  # its config as soon as the sign-in step opens, so a request in Synapse's log is the proof the config took. If
+  # it did not, the step is showing matrix.org and the next click would reach a third party's service, so the
+  # job stops here instead.
+  rec matrix.client_requests "$(grep -c '/_matrix/client/' "$OUT/synapse.log" 2>/dev/null || echo 0)"
+  [ "$(grep -c '/_matrix/client/' "$OUT/synapse.log" 2>/dev/null || echo 0)" -gt 0 ] \
+    || stop_recorded wrong-homeserver "no client request reached the local homeserver — the sign-in step is not pointed at it, and the next click would reach a public server"
+  # the homeserver step offers Continue before the credentials form
+  eval "$(pin_harness xdotool getwindowgeometry --shell "$WID" 2>/dev/null)"
+  pin_harness xdotool mousemove $((X + WIDTH * 60 / 100)) $((Y + HEIGHT * 36 / 100)) click 1
+  sleep 6; screenshot after-continue
   # the form: the username field takes focus, then Tab to the password, then submit
   pin_harness xdotool windowactivate --sync "$WID"
   pin_harness xdotool type --delay 40 "$MATRIX_USER"
