@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<!--
+  Task 9.8, the stated page of the two renderer subjects (campaign/method.md §2 subject 3). Design, not an
+  observation: no source states what a background tab contains, so this page is written down rather than chosen
+  to look representative, and it is released with the raw records.
+
+  It serves identical content at every origin. The only activity is one setInterval whose callback increments a
+  counter and returns:
+
+    - setInterval, not a single setTimeout, because intensive throttling applies to timers with a high nesting
+      level and a one-shot timer never reaches it. The nesting level climbs as the interval repeats.
+    - faster than the throttling cap, so a hidden page's wake RATE is Chromium's documented budget (one wake per
+      second backgrounded, one per minute past the grace) rather than our choice of period.
+    - trivial work per wake, so the measured CPU per wake is a floor: what a renderer costs when its page does
+      nothing but stay alive. A callback sized to spend the 3 ms allowance would report a ceiling instead, and
+      that ceiling would be multiplied by every renderer task in every timeline on the strength of no
+      observation. Both renderer entries state the floor in their scope.
+
+  Query parameters, both supplied by desktop/run.sh:
+    ms=<int>   the interval in milliseconds
+    timer=0    no timer at all — the hidden subject's control tab, and the visible subject's second steady
+               phase, which is reached by navigating here rather than relaunching the browser so that both
+               phases observe one process tree.
+
+  The title is set once at load and never again: updating it per tick would be work per wake, and would drive
+  the browser process as well as the renderer.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>idle-page</title>
+</head>
+<body>
+<p id="s">idle-page</p>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  var on = q.get("timer") !== "0";
+  var ms = parseInt(q.get("ms") || "100", 10);
+  var n = 0;
+  if (on) { setInterval(function () { n++; }, ms); }
+  var state = on ? ("timer " + ms + " ms") : "no timer";
+  document.title = "idle-page " + location.origin + " " + state;
+  document.getElementById("s").textContent = document.title;
+})();
+</script>
+</body>
+</html>

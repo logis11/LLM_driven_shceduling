@@ -1,0 +1,257 @@
+#!/usr/bin/env python3
+"""Pool the repeats of the 9.8 desktop campaign and evaluate the stability rule (changelog D13; method §5, §6).
+
+  pool.py <artifacts-dir> <out.json> [--md results.md] [--cpu-model TEXT] [--tag TAG]
+
+Structured on `background/pool.py`, whose `find_runs`, module-level list and `render` are the shape a new family
+needs; `campaign/pool.py`'s discovery and per-app pooling live inside its `main()` with nothing to reuse. The
+component selection is imported from `campaign/pool.py` all the same, so the coverage cut and the residual are
+computed exactly as they were for `web-browser`, the other half of the same application.
+
+Three reasons a repeat does not enter the pool:
+  - the machine gate stopped it (another CPU model), as in every campaign of this phase;
+  - its mode is `probe`: the long-phase probe is never a repeat (method §1);
+  - for `chrome-hidden`, intensive throttling did not engage. That is knowable only from the trace, which is why
+    it is gated here and not in `run.sh` (decision 9): a renderer past the grace wakes about once a minute, so a
+    steady phase whose renderers wake far faster measured an unthrottled page and describes nothing the entry
+    claims.
+"""
+
+import argparse
+import glob
+import json
+import os
+import re
+import statistics
+import sys
+
+TOOLS = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))   # dataset/tools
+if TOOLS not in sys.path:
+    sys.path.insert(0, TOOLS)
+from meas.desktop import analyze  # noqa: E402
+from meas.campaign.analyze import pct  # noqa: E402
+from meas.campaign.pool import QUANTILE_PROBS, select_components  # noqa: E402  — the coverage cut of `web-browser`
+from meas.stability import stability, TOLERANCE  # noqa: E402
+
+APPS = ("chrome-hidden", "chrome-visible", "element", "steam")
+NAME = re.compile(r"^meas-desktop-(chrome-hidden|chrome-visible|element|steam)-r(\d+)-(dry|probe|full)$")
+POOLED_MODES = ("dry", "full")          # `probe` is parsed so it can be reported, never pooled
+
+# the phase each entry reads. The visible entry reads the no-timer phase where that phase yields enough and the
+# timer phase otherwise (method §2 subject 3, §9); until the probe settles it, both are pooled and the entry's
+# choice is recorded at the fold-in.
+CARRIED = {"chrome-hidden": ("steady",),
+           "chrome-visible": ("steady-notimer", "steady-timer"),
+           "element": ("idle",),
+           "steam": ("shown",)}
+
+# the list: every value the fold-in carries, each tested by its per-repeat mean (method §6 item 1). Thread counts
+# are carried as their observed range and are deliberately absent.
+LIST = {app: [(ph, "wakes_per_s", "wakes/s"), (ph, "gap_mean_ms", "gap mean (ms)"),
+              (ph, "run_mean_ms", "run mean (ms)")]
+        for app, phs in CARRIED.items() for ph in phs[:1]}
+
+# results only: (a, b, what) — the two comparisons the slice reports (method §6 item 2)
+COMPARISONS = {"chrome-hidden": [], "chrome-visible": [("steady-timer", "steady-notimer", "timer against no timer")],
+               "element": [("idle", "traffic", "idle against scripted traffic (D11; feeds no archetype)")],
+               "steam": [("shown", "minimised", "shown against minimised (D5)")]}
+
+ABS_FLOOR_MS = 0.001        # the trace's resolution, as campaign/pool.py uses
+MIN_REPEATS = 5             # method §6 item 3
+THROTTLED_WAKES_PER_S_MAX = 0.5   # a renderer past the grace wakes ~1/min; 0.5/s is thirty times that
+
+
+def qtable(values):
+    if not values:
+        return None
+    v = sorted(values)
+    return [round(pct(v, q), 4) for q in QUANTILE_PROBS]
+
+
+def find_runs(root, cpu_model):
+    runs, gated, other, probes = {}, [], [], []
+    for d in sorted(glob.glob(os.path.join(root, "**", "meas-desktop-*"), recursive=True)):
+        m = NAME.match(os.path.basename(d))
+        if not m or not os.path.exists(os.path.join(d, "report.json")):
+            continue
+        app, k, mode = m.group(1), int(m.group(2)), m.group(3)
+        rpt = json.load(open(os.path.join(d, "report.json")))
+        rel = os.path.relpath(d, root)
+        if mode not in POOLED_MODES:
+            probes.append({"app": app, "repeat": k, "mode": mode, "path": rel})
+            continue
+        if rpt.get("gate") != "open":
+            gated.append({"app": app, "repeat": k, "gate": rpt.get("gate"),
+                          "cpu_model": rpt.get("machine.model"), "path": rel})
+            continue
+        spec_p = os.path.join(d, "spec.json")
+        spec = json.load(open(spec_p)) if os.path.exists(spec_p) else {}
+        model = spec.get("cpu_model") or ""
+        if cpu_model and cpu_model not in model:
+            other.append({"app": app, "repeat": k, "cpu_model": model, "path": rel})
+            continue
+        runs.setdefault(app, {})[k] = {"dir": d, "mode": mode, "report": rpt, "spec": spec}
+    return runs, gated, other, probes
+
+
+def throttling_check(app, res):
+    """chrome-hidden only: did intensive throttling engage in the carried phase? Returns (ok, wakes_per_s)."""
+    if app != "chrome-hidden":
+        return True, None
+    ph = res["phases"].get(CARRIED[app][0]) or {}
+    per_pid = ph.get("per_pid_wakes_per_s") or {}
+    if not per_pid:
+        return False, None
+    worst = max(per_pid.values())
+    return worst <= THROTTLED_WAKES_PER_S_MAX, worst
+
+
+def pool_app(app, reps):
+    """reps: {k -> info}. Returns the entry, plus the repeats left out for not throttling."""
+    entry = {"family": "desktop", "repeats": [], "mode": None, "cpu_model": {}, "kernel": {}, "run_id": {},
+             "version": {}, "origins": {}, "renderers": {}, "phases": {}, "not_throttled": []}
+    per_phase = {}
+    for k in sorted(reps):
+        info = reps[k]
+        res = analyze.analyze_run_dir(info["dir"])
+        ok, worst = throttling_check(app, res)
+        if not ok:
+            entry["not_throttled"].append({"repeat": k, "worst_renderer_wakes_per_s": worst,
+                                           "limit": THROTTLED_WAKES_PER_S_MAX})
+            continue
+        entry["repeats"].append(k)
+        entry["mode"] = info["mode"]
+        entry["cpu_model"][k] = info["spec"].get("cpu_model")
+        entry["kernel"][k] = info["report"].get("kernel")
+        entry["run_id"][k] = (info["spec"].get("github_run") or {}).get("GITHUB_RUN_ID")
+        entry["version"][k] = info["report"].get("version")
+        entry["origins"][k] = info["report"].get("settings.origins")
+        entry["renderers"][k] = info["report"].get("renderers.observed")
+        for name, ph in res["phases"].items():
+            if ph.get("missing"):
+                continue
+            per_phase.setdefault(name, {})[k] = ph
+
+    for name, by_rep in per_phase.items():
+        comms, spans, wps = {}, {}, {}
+        for k, ph in by_rep.items():
+            spans[k] = ph["span_s"]
+            wps[k] = ph["wakes_per_s"]
+            for comm, c in ph["threads"].items():
+                slot = comms.setdefault(comm, {"gaps": {}, "runs": {}, "t_in": {}, "wakes": {}, "threads": {}})
+                slot["wakes"][k] = int(round(c["wakes_per_s"] * ph["span_s"]))
+                slot["threads"][k] = c["threads"]
+                slot["gaps"][k] = []      # the per-sample lists are not carried out of analyze; the
+                slot["runs"][k] = []      # quantile tables below come from the per-repeat summaries
+                slot["t_in"][k] = []
+        chosen, residual, cov = select_components(comms, spans, sorted(by_rep))
+        entry["phases"][name] = {
+            "repeats": sorted(by_rep),
+            "span_s": [by_rep[k]["span_s"] for k in sorted(by_rep)],
+            "wakes_per_s": [wps[k] for k in sorted(by_rep)],
+            "cpu_share": [by_rep[k]["cpu_share"] for k in sorted(by_rep)],
+            "threads": {comm: {
+                "threads": [by_rep[k]["threads"][comm]["threads"] for k in sorted(by_rep) if comm in by_rep[k]["threads"]],
+                "wakes_per_s": [by_rep[k]["threads"][comm]["wakes_per_s"] for k in sorted(by_rep) if comm in by_rep[k]["threads"]],
+                "gap_ms": [by_rep[k]["threads"][comm]["gap_ms"] for k in sorted(by_rep) if comm in by_rep[k]["threads"]],
+                "run_ms": [by_rep[k]["threads"][comm]["run_ms"] for k in sorted(by_rep) if comm in by_rep[k]["threads"]],
+            } for comm in sorted({c for k in by_rep for c in by_rep[k]["threads"]})},
+            "components": {"selected": chosen, "residual": residual, **cov},
+            "renderer_pids": {k: by_rep[k].get("renderer_pids") for k in sorted(by_rep)},
+        }
+    entry["stability"] = criterion(app, entry)
+    return entry
+
+
+def criterion(app, entry):
+    """The list of method §6 item 1, each quantity tested by its per-repeat mean over the carried phase."""
+    out = {}
+    for phase, key, label in LIST.get(app, []):
+        ph = entry["phases"].get(phase)
+        if not ph:
+            continue
+        reps = ph["repeats"]
+        if key == "wakes_per_s":
+            vals = dict(zip(reps, ph["wakes_per_s"]))
+            floor = None
+        else:
+            which, field = ("gap_ms", "mean") if key == "gap_mean_ms" else ("run_ms", "mean")
+            comms = ph["components"]["selected"] or sorted(ph["threads"])
+            vals = {}
+            for i, k in enumerate(reps):
+                per = [ph["threads"][c][which][i][field] for c in comms
+                       if c in ph["threads"] and i < len(ph["threads"][c][which])
+                       and ph["threads"][c][which][i] and ph["threads"][c][which][i].get(field) is not None]
+                vals[k] = statistics.fmean(per) if per else None
+            floor = ABS_FLOOR_MS
+        out[f"{phase} {label}"] = {**stability(vals, floor, MIN_REPEATS)}
+    passes = bool(out) and all(c["passes"] for c in out.values())
+    return {"tolerance": TOLERANCE, "abs_floor_ms": ABS_FLOOR_MS, "min_repeats": MIN_REPEATS,
+            "quantities": out, "passes": passes}
+
+
+def comparisons(app, entry):
+    out = []
+    for a, b, what in COMPARISONS.get(app, []):
+        pa, pb = entry["phases"].get(a), entry["phases"].get(b)
+        if not pa or not pb:
+            continue
+        ma = statistics.fmean(pa["wakes_per_s"]) if pa["wakes_per_s"] else None
+        mb = statistics.fmean(pb["wakes_per_s"]) if pb["wakes_per_s"] else None
+        ratio = (ma / mb) if (ma and mb) else None
+        # method §6 item 2: a difference under 10 % is reported as not resolved at this tolerance, not as an effect
+        reading = "not resolved" if (ratio and 0.9 < ratio < 1.1) else "difference"
+        out.append({"a": a, "b": b, "what": what, "a_wakes_per_s": ma, "b_wakes_per_s": mb,
+                    "ratio": round(ratio, 3) if ratio else None, "reading": reading})
+    return out
+
+
+def render(out):
+    L = [f"# 9.8 desktop campaign — pooled results ({out.get('tag') or 'untagged'})", "",
+         f"Machine: {out.get('machine')}. Repeats pooled per subject; `probe` jobs are never repeats.", ""]
+    for app, e in sorted(out["runs"].items()):
+        L += [f"## {app}", "", f"Repeats: {e['repeats']}  ·  mode {e['mode']}  ·  renderers {e['renderers']}", ""]
+        if e["not_throttled"]:
+            L += [f"Left out, intensive throttling did not engage: {e['not_throttled']}", ""]
+        L += ["| quantity | k | mean | half-width | passes |", "|---|---|---|---|---|"]
+        for name, c in e["stability"]["quantities"].items():
+            hw = f"{c['half_width']:.1%}" if c.get("half_width") is not None else "—"
+            L.append(f"| {name} | {c['k']} | {c['mean']} | ±{hw} | {'yes' if c['passes'] else 'no'} |")
+        L.append("")
+        if e.get("comparisons"):
+            L += ["| comparison | a | b | ratio | reading |", "|---|---|---|---|---|"]
+            for c in e["comparisons"]:
+                L.append(f"| {c['what']} | {c['a_wakes_per_s']} | {c['b_wakes_per_s']} | {c['ratio']} | {c['reading']} |")
+            L.append("")
+    return "\n".join(L) + "\n"
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("artifacts")
+    ap.add_argument("out")
+    ap.add_argument("--md")
+    ap.add_argument("--cpu-model", default="")
+    ap.add_argument("--tag", default="")
+    a = ap.parse_args()
+
+    runs, gated, other, probes = find_runs(a.artifacts, a.cpu_model)
+    if not runs:
+        print("no repeats found", file=sys.stderr)
+        raise SystemExit(1)
+    out = {"tag": a.tag, "machine": a.cpu_model or None, "gated_out": gated, "other_machine": other,
+           "probe_jobs": probes, "runs": {}}
+    for app, reps in sorted(runs.items()):
+        entry = pool_app(app, reps)
+        entry["comparisons"] = comparisons(app, entry)
+        out["runs"][app] = entry
+        st = entry["stability"]
+        print(f"== {app}: repeats {entry['repeats']}  stability {'passes' if st['passes'] else 'does not hold'}"
+              f"  left out (not throttled) {len(entry['not_throttled'])}")
+    json.dump(out, open(a.out, "w"), indent=1)
+    if a.md:
+        open(a.md, "w").write(render(out))
+
+
+if __name__ == "__main__":
+    main()

@@ -186,6 +186,49 @@ PY
       rec feed.server "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8088/feed.html)"
       LAUNCH="google-chrome --no-sandbox --disable-gpu --no-first-run --user-data-dir=/tmp/chrome-data file:///tmp/page.html"
       CLASS="google-chrome|Google-chrome"; PAT="chrome-data"; RX="chrome"; DRIVER=stream; STREAM=ie; AREA="0.13,0,0.02,0.02"; OP=page-load ;;
+    chrome-hidden|chrome-visible)
+      # 9.8 D13: the two renderer subjects. The flags match the `chrome` arm above — web-browser carries Chrome's
+      # tree minus its renderers (9.5 D14) and these entries carry the renderers, so the two halves of one
+      # application must be the same program launched the same way; tests/test_meas_desktop.py asserts the three
+      # arms' flag portions are identical. The `chrome` arm is not called: its feed page costs thirty ImageMagick
+      # renders and a server these subjects never use, each an unguarded way for an expensive job to die.
+      ver google-chrome --version
+      # N origins are N loopback addresses, not N ports: a site is scheme plus eTLD+1 (S2-01), which excludes the
+      # port, so N ports on one address would share one site-locked renderer. 127.0.0.0/8 is routed to lo with no
+      # interface configuration, and an address literal needs no name resolution — a resolver that failed to pick
+      # up a hosts entry would leave the tabs unloaded, which is how the Phase 2 run was lost.
+      N="${MEAS_ORIGINS:?chrome-hidden/chrome-visible need MEAS_ORIGINS}"
+      PORT="${MEAS_PAGE_PORT:-8099}"; MS="${MEAS_TIMER_MS:?need MEAS_TIMER_MS}"
+      mkdir -p /tmp/idle-page && cp "$TOOLS/idle-page.html" /tmp/idle-page/
+      # one server answers every loopback address; --bind takes a single address, so it binds 0.0.0.0
+      setsid python3 -m http.server "$PORT" --bind 0.0.0.0 --directory /tmp/idle-page > /tmp/idle-page/httpd.log 2>&1 &
+      echo $! > "$OUT/httpd.pid"; sleep 1
+      rec page.origins "$N"; rec page.port "$PORT"; rec page.timer_ms "$MS"
+      rec page.server "$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.2:$PORT/idle-page.html")"
+      URLS=""; FIRST=""; REST=""
+      for i in $(seq 2 $((N + 1))); do
+        u="http://127.0.0.$i:$PORT/idle-page.html?ms=$MS"
+        URLS="$URLS $u"
+        if [ -z "$FIRST" ]; then FIRST="$u"; else REST="$REST $u"; fi
+      done
+      rec page.urls "$URLS"
+      CHROME="google-chrome --no-sandbox --disable-gpu --no-first-run --user-data-dir=/tmp/chrome-data"
+      if [ "$app" = chrome-hidden ]; then
+        # one window: the first tab stays selected and is the control tab, the N measured tabs are background
+        # pages. Its page carries no timer, so its renderer falls below the components' coverage cut.
+        LAUNCH="$CHROME http://127.0.0.1:$PORT/idle-page.html?timer=0$URLS"
+      else
+        # N windows, one tab each: every mapped window's selected tab is visible to Blink, the occlusion tracker
+        # that would hide a covered window being Windows-only (D4). The first window comes from the launch; the
+        # rest are asked for by a second invocation against the same profile, which the running browser serves
+        # and which then exits — the windows are created by the already-pinned process.
+        LAUNCH="$CHROME $FIRST"
+        POSTLAUNCH=""
+        for u in $REST; do
+          POSTLAUNCH="$POSTLAUNCH google-chrome --user-data-dir=/tmp/chrome-data --new-window '$u' > /dev/null 2>&1; sleep 2;"
+        done
+      fi
+      CLASS="google-chrome|Google-chrome"; PAT="chrome-data"; RX="chrome"; DRIVER=none ;;
     webrtc)
       ver google-chrome --version
       LAUNCH="google-chrome --no-sandbox --disable-gpu --no-first-run --user-data-dir=/tmp/chrome-data --use-fake-device-for-media-stream --use-fake-ui-for-media-stream --allow-file-access-from-files file://$TOOLS/webrtc-loopback.html"
