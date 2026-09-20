@@ -310,6 +310,27 @@ steam_setup() {
   WID=$(wait_window "$CLASS" 300)
   [ -n "$WID" ] || { screenshot no-window; stop_recorded no-window "no Steam window after 300 s — the client may not hold a stable state logged out (D6's fallback)"; }
   rec steam.first_window "$(pin_harness xdotool getwindowname "$WID" 2>/dev/null)"
+  # `steam-installer` ships a bootstrap, and its first run puts up a zenity consent dialog — "Steam is
+  # proprietary (binary-only) software … Steam will be installed into ~/.steam/debian-installation", Cancel or
+  # Install — and waits. The dry run of 2026-09-20 sat on it for 900 s. This accepts the package's own
+  # installation prompt, which is what D6 already decided when it said the probe installs and launches the
+  # client; it is not an account action, and none is taken anywhere.
+  if pin_harness xdotool getwindowname "$WID" 2>/dev/null | grep -qi "steam installer"; then
+    rec steam.installer_dialog 1
+    pin_harness xdotool windowactivate --sync "$WID" 2>/dev/null
+    pin_harness xdotool key --clearmodifiers Return; sleep 5
+    if pin_harness xdotool getwindowname "$WID" 2>/dev/null | grep -qi "steam installer"; then
+      pin_harness xdotool key --clearmodifiers Tab; sleep 1
+      pin_harness xdotool key --clearmodifiers Return; sleep 5
+    fi
+    if pin_harness xdotool getwindowname "$WID" 2>/dev/null | grep -qi "steam installer"; then
+      # the Install button sits in the right half of the dialog's bottom row
+      eval "$(pin_harness xdotool getwindowgeometry --shell "$WID" 2>/dev/null)"
+      pin_harness xdotool mousemove $((X + WIDTH * 3 / 4)) $((Y + HEIGHT - 25)) click 1; sleep 5
+    fi
+    rec steam.installer_dismissed "$(pin_harness xdotool getwindowname "$WID" 2>/dev/null | grep -qi "steam installer" && echo no || echo yes)"
+    screenshot after-installer-consent
+  fi
   for i in $(seq 1 "$STEAM_CLIENT_WAIT"); do
     [ "$(pgrep -cf steamwebhelper 2>/dev/null | head -1)" -gt 0 ] && break
     sleep 1
