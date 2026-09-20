@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# run.sh <app> <repeat> <dry|probe|full|diag> — one job of the 9.7 background campaign
+# run.sh <app> <repeat> <dry|probe|full|diag|shapediag> — one job of the 9.7 background campaign
 # (research-slice changelog D2–D15; method
 # _dev/research/jioh/task-9.7-background-io/campaign/method.md §1–§4).
 #
@@ -306,7 +306,9 @@ rec shape.burst_bytes "$BURST"
 SHAPE_DEV="$(ip -o link show 2>/dev/null | awk -F': ' -v m="$IFACE" 'index($0, " master " m " ") {print $2}' | head -1)"
 SHAPE_DEV="${SHAPE_DEV:-$IFACE}"; rec shape.dev "$SHAPE_DEV"
 ip -o link show > "$OUT/ip.link.oneline.txt" 2>&1
-shape_on() {   # ingress on the interface that carries the traffic redirected to ifb0, a tbf root at the D11 rate
+shape_on() {   # shape_on [tbf|aqm]: ingress on the interface that carries the traffic redirected to ifb0,
+               # the root at the D11 rate — the committed drop-tail bucket, or D24's AQM leaf under test
+  local variant="${1:-tbf}"
   { echo "== before"; tc -s qdisc show dev "$SHAPE_DEV"; tc filter show dev "$SHAPE_DEV" ingress; } >> "$OUT/tc.iface.txt" 2>&1
   sudo modprobe ifb numifbs=1 > /dev/null 2>&1; sudo ip link add ifb0 type ifb > /dev/null 2>&1; sudo ip link set ifb0 up
   if tc qdisc show dev "$SHAPE_DEV" | grep -q clsact; then HOOK="ingress"; PREF=49152; SHAPE_OWN_QDISC=0
@@ -315,10 +317,22 @@ shape_on() {   # ingress on the interface that carries the traffic redirected to
   # shellcheck disable=SC2086
   sudo tc filter add dev "$SHAPE_DEV" $HOOK protocol all pref "$PREF" u32 match u32 0 0 action mirred egress redirect dev ifb0 2>> "$OUT/tc.log"
   local frc=$?
-  sudo tc qdisc add dev ifb0 root tbf rate "${RATE_MBIT}mbit" burst "$BURST" latency "$TBF_LATENCY" 2>> "$OUT/tc.log"
-  local qrc=$?
+  local qrc
+  if [ "$variant" = aqm ]; then
+    # D24: a rate cap with an active-queue-management leaf (`fqcodel-rfc18`), against the committed bucket.
+    # The rate is D11's, untouched; only the queue changes.
+    sudo modprobe sch_htb > /dev/null 2>&1; sudo modprobe sch_fq_codel > /dev/null 2>&1
+    sudo tc qdisc add dev ifb0 root handle 1: htb default 10 2>> "$OUT/tc.log" \
+      && sudo tc class add dev ifb0 parent 1: classid 1:10 htb rate "${RATE_MBIT}mbit" ceil "${RATE_MBIT}mbit" 2>> "$OUT/tc.log" \
+      && sudo tc qdisc add dev ifb0 parent 1:10 handle 10: fq_codel 2>> "$OUT/tc.log"
+    qrc=$?
+  else
+    sudo tc qdisc add dev ifb0 root tbf rate "${RATE_MBIT}mbit" burst "$BURST" latency "$TBF_LATENCY" 2>> "$OUT/tc.log"
+    qrc=$?
+  fi
+  rec shape.variant "$variant"
   if [ "$frc" = 0 ] && [ "$qrc" = 0 ]; then SHAPED=1; else SHAPED=0; fi
-  { echo "== shaped ($SHAPED)"; tc filter show dev "$SHAPE_DEV" ingress; tc qdisc show dev ifb0; } >> "$OUT/tc.iface.txt" 2>&1
+  { echo "== shaped ($SHAPED, $variant)"; tc filter show dev "$SHAPE_DEV" ingress; tc qdisc show dev ifb0; } >> "$OUT/tc.iface.txt" 2>&1
 }
 shape_off() {
   # shellcheck disable=SC2086
@@ -434,6 +448,21 @@ steam_diag() {   # steam_diag <app>: diag mode — default, the setting under te
   fi
   diag_download steam-diag-default2 "$app"
 }
+shape_download() {   # shape_download <phase> <app> <variant>: one shaped, traced download under the named discipline
+  local ph="$1" app="$2" variant="$3"
+  shape_on "$variant"
+  rec "shape.$ph.discipline" "$variant"
+  STEAM_POST=+download_sources steam_phase "$ph" 1 fresh "$app"
+  shape_off
+  rec "steam.diag.$ph.servers" "$(grep -oE "to host [a-z0-9.-]+" "$OUT/steamlogs/$ph/content_log.txt" 2>/dev/null | sort -u | wc -l | tr -d ' ')"
+  rec "steam.diag.$ph.sources" "$(grep -m1 -oE 'Got [0-9]+ download sources' "$OUT/steamlogs/$ph/content_log.txt" 2>/dev/null)"
+}
+steam_shape_diag() {   # D24: the committed tbf root, the AQM leaf under test, the committed root again
+  local app="$1"
+  shape_download steam-shape-tbf "$app" tbf
+  shape_download steam-shape-aqm "$app" aqm
+  shape_download steam-shape-tbf2 "$app" tbf
+}
 stage_probe() {   # stage_probe <app>: D12 — does the nearest older public build install anonymously, and then update?
   local app="$1" dir="$WORK/steam-probe" from want pub got to
   appinfo "$app"
@@ -486,6 +515,9 @@ case "$APP" in
       FROM="$(python3 "$HERE/appinfo.py" older "$RUN_APP" "$OUT/appinfo.$RUN_APP.txt")"
       rec steam.app "$RUN_APP"; steam_phases "$RUN_APP" "$FROM" public
       stage_probe "$STEAM_APP"
+    elif [ "$MODE" = shapediag ]; then
+      appinfo "$STEAM_APP"; RUN_APP="$STEAM_APP"; rec steam.app "$RUN_APP"
+      steam_shape_diag "$RUN_APP"
     elif [ "$MODE" = diag ]; then
       appinfo "$STEAM_APP"; RUN_APP="$STEAM_APP"; rec steam.app "$RUN_APP"
       steam_diag "$RUN_APP"
