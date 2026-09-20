@@ -44,6 +44,10 @@ HEADLINE = {"soffice": "input_run", "code": "input_run", "thunderbird": "input_r
 WINDOW_LIMIT = {"thunderbird": 8, "thunderbird-send": 8}   # D31: the re-observation reads the same Outlook windows
 ABS_FLOOR_MS = 0.001  # the trace's resolution: perf sched timehist times in whole microseconds (D30; 9.6 D23)
 MIN_REPEATS = 5       # kalibera-ismm13 §11 (D29; 9.6 D24)
+# D57: the rule's exception — a component whose rate varies between sessions rather than within a run, so repeats
+# tighten the estimate without narrowing the spread; carried with its half-widths over at least MIN_REPEATS repeats,
+# the tolerance not applied. (app, the value name's prefix).
+SESSION_SPREAD = {("code", "idle libuv-worker")}
 FOCUS_COMPONENTS = {"gimp", "kdenlive"}  # fold_in.py's pointer-loop archetypes carry the driven phase as focus_components
 # D38: a component keyed by the thread's name with a trailing " #<n>" removed — Gecko names a pool's threads
 # "<pool> #<n>", n counting up per spawn (nsThreadPoolNaming::GetNextThreadName), so each pool is one component
@@ -310,7 +314,11 @@ def main():
             entry["phases"][phase] = ph
         crit = criterion(app, entry)
         mark_limited(app, entry, crit)
-        live = [c for c in crit.values() if not c.get("limited")]
+        for q, c in crit.items():   # D57: carried with its half-width once it has the minimum repeats
+            if any(a == app and q.startswith(pre) for a, pre in SESSION_SPREAD):
+                c["session_spread"] = True
+                c["carried"] = c["k"] >= MIN_REPEATS
+        live = [c for c in crit.values() if not c.get("limited") and not c.get("session_spread")]
         needed = [c["needed"] for c in live]
         entry["stability"] = {"tolerance": TOLERANCE, "abs_floor_ms": ABS_FLOOR_MS, "min_repeats": MIN_REPEATS,
                               "window_limit": WINDOW_LIMIT.get(app), "quantities": crit,
@@ -319,7 +327,7 @@ def main():
         out["runs"][app] = entry
         print(f"== {app} ({info['family']}, {info['mode']}, repeats {reps}, {entry['version']}; CPU {sorted(set(entry['cpu_model'].values()))})")
         st = entry["stability"]
-        fails = [q for q, c in crit.items() if not c["passes"] and not c.get("limited")]
+        fails = [q for q, c in crit.items() if not c["passes"] and not c.get("limited") and not c.get("session_spread")]
         print(f"   stability: {len(crit)} quantities over {len(reps)} repeats, {len(fails)} out of tolerance; repeats needed at "
               f"this spread {st['needed'] or 'over 200'} — {'holds' if st['passes'] else 'does not hold yet'}")
         for q in fails:

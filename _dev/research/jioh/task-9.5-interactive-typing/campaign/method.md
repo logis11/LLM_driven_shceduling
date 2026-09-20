@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-20, a component whose rate varies between sessions (changelog D57) — §7: carried with its half-widths over at least five repeats, the tolerance not applied, the rule and its projection read over the rest; a second exception beside 9.6 D29's, which covers a spread following the runner's disk. `code`'s `libuv-worker` takes it — ten threads in every repeat, ±8.7 % within the D52 probe's run against 5.09–9.24 a second across repeats, 6.5 % of the idle phase's wakes and 0.01 % of one CPU — and `code`'s projection falls from 107 repeats to 29. The sensitivity question goes to 9.14. `SESSION_SPREAD` in `campaign/pool.py`.
+
 - 2026-09-20, `chrome`'s idle phase (changelog D56) — §2: 600 s, design, the second half of D51. Past its 270 s settle the phase observes Chrome quiet, and over the D50 probe a 120 s window reads CPU +13.6 % above the long-run level at the placement every repeat takes (worst 33.4 %), a 600 s window +0.0 % (worst 4.6 %), both metrics then inside the 5 % tolerance. The 2026-09-20 first batch's five repeats are superseded; `idle_for` in `campaign/run.sh`.
 
 - 2026-09-20, superseded repeats and the fold-in's timing (changelog D55) — §1: `chrome`'s five repeats are superseded whole, repeats 4–5's driven values included, a new repeat's driven phase opening from another application state under D51's settle; §8: one fold-in after `chrome`, `code` and `webrtc` are re-measured, the six applications whose rule holds having their pools, `results.md` and record rows committed meanwhile.
