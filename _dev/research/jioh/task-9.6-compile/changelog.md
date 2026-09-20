@@ -139,3 +139,15 @@ The decisions of this slice are applied to `dataset/archetypes.yaml` and the com
 **Build**: 100 artifacts and the manifest rewritten; the coverage grid is byte-identical (the familiarity tier reads the bound names, which did not change). Tests 167 passed, 1 skipped, 1 xfailed. Lint and check report the five `-single` demand-window files and nothing else — the branch's known state until 9.14 — but `c3-workday` now fails high rather than low: a spawn-table entry was one process of about 89 ms and is now a job of six processes and about 471 ms, so its demand estimate moves 0.86 → 4.84, `c6-dual` 1.14 → 1.26 (inside the window), and the calibration-exempt compile files 0.15 → 0.93. **Hands to 9.10**: `spawn_count` was sized against the old per-entry cost and is 9.10's to resize (인지오, 2026-09-20; D30). **Hands to 9.14**: the demand-window rule, with `c3-workday` in this state.
 
 **Cost**: the compiler now materialises every draw — `c3-workday` holds 25 200 member programs, `tracker`'s 30 s job unrolls about 74 000 runs — so a full compile takes about 7 minutes.
+
+## D32 — two claims narrowed to what was observed; the venue's sensitivity handed on (2026-09-20)
+
+By 인지오's decision, reviewing the fold-in's stated limitations:
+
+**The DKMS binding is not unobserved.** `build-orchestrator`'s notes said its per-object CPU "is assumed to follow the kernel's" and that no observation of a DKMS run exists. True of the literature, not of this campaign: a DKMS module build ran in every repeat as a structural check and runs the same six-member chain, its driver named `gcc-13`, three object jobs at `-j1`, `cc1` 288 ms per process against the kernel build's 349 ms (D6, D9). The notes now state that check and confine the gap to what it covers — a real module's object count and a real run's duration, both bound in the timeline (9.10).
+
+**The `python3` binding is a stand-in and says so.** No source states what a desktop training job does (D7), so the measured loop trains on synthetic images, reads no data and writes no checkpoint. `cpu-batch`'s scope and notes now say it stands for a CPU-saturating batch task and not for ML training as observed. Hands to 9.10 (the timeline id `c1-ml-train` claims more than the stand-in supports), 9.12 and 9.15 (the same wording rule in prose).
+
+**The venue's effect is untested, and the test belongs to the consumer.** Every measured value is a pinned core of a GitHub-hosted runner, stated in each scope, and nothing yet shows whether a conclusion survives the absolutes being off. Hands to 9.14: the RQ0 gate spec carries a sensitivity check — the judging set rerun with every measured CPU value scaled by a stated factor either way, and whether the verdict changes stated with the result. It is simulation-only and needs no new measurement.
+
+No value changed by this entry.

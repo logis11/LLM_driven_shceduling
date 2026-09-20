@@ -705,8 +705,10 @@ archetypes:
         archetypes, each pinned to one CPU of a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel
         6.17.0-1022-azure) — ClamAV 1.5.3 scanning the kernel's `Documentation` (9 462 files) with signature
         database daily 28128 held fixed from repeat 9 (D27); ffmpeg and HandBrakeCLI encoding a generated 60 s
-        clip; a PyTorch 2.14 CPU training loop of 300 steps, started warm so its runs and blocks are the training
-        job's and not the interpreter's first page-ins (D28); Tracker 3.7.1 indexing a copy of the same corpus,
+        clip; a PyTorch 2.14 CPU training loop of 300 steps over synthetic images — a stand-in, since no source
+        states what a desktop training job does (D7): it reads no data and writes no checkpoint, so it stands for
+        a CPU-saturating batch task, not for ML training as observed — started warm so its runs and blocks are the
+        loop's and not the interpreter's first page-ins (D28); Tracker 3.7.1 indexing a copy of the same corpus,
         read over its job window from the miner's first schedule-in to its own Idle status (D16). A run is the CPU
         from one voluntary block to the next, pooled over the program's threads; the block after a run is the
         program's off-CPU time that followed it, zero when another thread ran on (D22, D25). Four values' spread
@@ -723,7 +725,9 @@ archetypes:
       one task: runs pooled over its threads, blocks the program's own off-CPU time, so the task alternates the
       threads' long and short runs in one sequence and cannot show a main thread demoted while its workers keep
       their level (D22). `total_work` is scenario design and binds in the timeline (D7). The `chrome` spoof is one
-      uninterrupted RUN by construction (D7). The `tracker-miner-fs-3` binding's real processes declare themselves
+      uninterrupted RUN by construction (D7). The `python3` binding's job is design, a CPU-saturating training
+      loop; text naming it says so rather than calling it an observed ML training workload (D32; 9.10 for the
+      timeline `c1-ml-train`, 9.12 and 9.15 for prose). The `tracker-miner-fs-3` binding's real processes declare themselves
       background work — every thread exits with policy SCHED_IDLE at nice 19, while clamscan, ffmpeg, HandBrakeCLI
       and python3 run at the default policy, nice 0 — and the task model carries no declared class, so a simulated
       baseline cannot honour it (D17; handed to 9.11). The rescan's tail after its job, 0.34-0.41 s of CPU over
@@ -839,9 +843,11 @@ archetypes:
       `spawn_count` counts object jobs and `parallelism_cap` counts jobs, as make's jobserver counts them; the
       compiler multiplies the cap by the six members for `fork_cap` (D19). `parallelism_cap` defaults to 8 by the
       `nproc` rule applied to an eight-thread desktop, overridable at binding time (D4); on one lane it shapes
-      fork-storm width and queue depth, not throughput. The `dkms` binding describes an out-of-tree kbuild run
-      whose per-object CPU is assumed to follow the kernel's; no observation of a DKMS run's duration, CPU or
-      process count exists (D6). Unmodelled per build: 681 archive, 1 537 helper, 90 probe and 38 link jobs under
+      fork-storm width and queue depth, not throughput. The `dkms` binding describes an out-of-tree kbuild run,
+      checked structurally in every repeat: a DKMS module build runs the same six-member chain with its driver
+      named `gcc-13`, three object jobs at `-j1`, `cc1` 288 ms per process against the kernel build's 349 ms
+      (D6, D9). What no observation covers is a real module's object count and a real run's duration; both bind
+      in the timeline (9.10). Unmodelled per build: 681 archive, 1 537 helper, 90 probe and 38 link jobs under
       716 make processes, together under 3 % of the build's CPU, their proportions kbuild's for this tree (D9).
       `spawn_count` was bound when a spawn-table entry was one process of about 89 ms; a job is now six processes
       of about 471 ms, and the counts are 9.10's to resize (D30, 2026-09-20).

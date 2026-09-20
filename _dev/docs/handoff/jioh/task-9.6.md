@@ -1,6 +1,6 @@
 # Handoff — task 9.6 Compile: done (2026-09-20)
 
-Branch `jioh/dataset-rebuild` (Phase 9 works here). 9.6 is ticked in `_dev/TODO.md`. Decisions D1–D31 in `_dev/research/jioh/task-9.6-compile/changelog.md`; method and its dated amendments in `campaign/method.md`; final pool in `campaign/results.md` and `campaign/results/pooled.json`.
+Branch `jioh/dataset-rebuild` (Phase 9 works here). 9.6 is ticked in `_dev/TODO.md`. Decisions D1–D32 in `_dev/research/jioh/task-9.6-compile/changelog.md`; method and its dated amendments in `campaign/method.md`; final pool in `campaign/results.md` and `campaign/results/pooled.json`.
 
 ## What the slice produced
 
@@ -18,12 +18,12 @@ Branch `jioh/dataset-rebuild` (Phase 9 works here). 9.6 is ticked in `_dev/TODO.
 ## Hands to other slices
 
 - **9.5** — the five-repeat minimum applies to its campaigns (D24).
-- **9.10** — `spawn_count` is sized against the old per-entry cost and is 9.10's to resize (인지오, 2026-09-20); whether `c2-p1b` takes the rescan's own tables rather than inheriting `python3`'s (D21); the compile timelines' member names now that a job is six processes (D2); the `file-backup` / `file-archiver` / `game-download` rebindings are 9.7's.
+- **9.10** — `spawn_count` is sized against the old per-entry cost and is 9.10's to resize (인지오, 2026-09-20); whether `c2-p1b` takes the rescan's own tables rather than inheriting `python3`'s (D21); the timeline id `c1-ml-train`, which claims more than its stand-in supports, and a real DKMS module's object count and run duration, unobserved and bound here (D32, D6); the compile timelines' member names now that a job is six processes (D2); the `file-backup` / `file-archiver` / `game-download` rebindings are 9.7's.
 - **9.11** — whether a simulated baseline honours a task's declared scheduling class; `tracker`'s processes declare `SCHED_IDLE` nice 19 while the other four run at the default (D17).
-- **9.12** — `docs/research-proposal.md` §2.2's `updatedb` sentence against the measured declarations (D17).
+- **9.12** — `docs/research-proposal.md` §2.2's `updatedb` sentence against the measured declarations (D17); the `python3` binding named as a CPU-saturating training-loop stand-in, never an observed ML training workload (D32).
 - **9.13** — whether the task model gains a field for a declared class (D17).
-- **9.14** — the demand-window rule with `c3-workday` in its new state; the batch-class memo's "never blocks" worked example, which the measured shares contradict; the prior-table rows arguing on "compiler children" (D21, D2).
-- **9.15** — the docs naming `cpu-batch`, `compiler-child` and `build-orchestrator`: `docs/data-contracts.md` quotes the old `cpu-batch` YAML, `docs/workload/coreset-guide.md` carries per-file event tables whose numbers moved, `docs/daemon/prior-table-pair-review.md` carries a stale demand column.
+- **9.14** — a venue sensitivity check in the RQ0 gate spec: the judging set rerun with every measured CPU value scaled by a stated factor either way, and whether the verdict changes stated (D32); the demand-window rule with `c3-workday` in its new state; the batch-class memo's "never blocks" worked example, which the measured shares contradict; the prior-table rows arguing on "compiler children" (D21, D2).
+- **9.15** — the `python3` stand-in's wording (D32); the docs naming `cpu-batch`, `compiler-child` and `build-orchestrator`: `docs/data-contracts.md` quotes the old `cpu-batch` YAML, `docs/workload/coreset-guide.md` carries per-file event tables whose numbers moved, `docs/daemon/prior-table-pair-review.md` carries a stale demand column.
 
 ## Shared tooling this slice changed
 
