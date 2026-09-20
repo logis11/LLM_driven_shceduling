@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Pool one application's landed repeats across a campaign's runs, check each repeat's validity, report the stability rule.
 
-pool_runs.py <family>/<app> [--since N] [--out FILE] [-- <pool.py options>]
-pool_runs.py build [--since N] [--out FILE] [-- <pool.py options>]
-pool_runs.py background/<app> [--since N] [--out FILE] [-- <pool.py options>]
+pool_runs.py <family>/<app> [--since N] [--out FILE] [--exclude K[,K]... --exclude-why TEXT] [-- <pool.py options>]
+pool_runs.py build [--since N] [--out FILE] [--exclude K[,K]... --exclude-why TEXT] [-- <pool.py options>]
+pool_runs.py background/<app> [--since N] [--out FILE] [--exclude K[,K]... --exclude-why TEXT] [-- <pool.py options>]
 
 Every landed artifact (common.GATE_S or longer, success) of runs numbered N or later is downloaded under the work
 directory — one folder per run for families with apps, one flat folder for build (its repeat indices never repeat) —
@@ -13,6 +13,11 @@ step 4): gate open on the machine; the replay sent every event of its window; op
 codes other than perf record's 130 (its SIGINT stop) and freshclam's 2 with a recorded database; for build, one
 ClamAV signature database across the repeats whose clamscan is pooled (9.6 D27); for background, the set's archive and manifest matching their pins and the
 tree verified after each change set, every SteamCMD phase reporting its install complete, one app build across repeats.
+
+--exclude leaves a repeat out of the pool, --exclude-why states why in the printed lines and in the pooled record
+(`excluded_repeats`); a repeat the validity step fails counts for nothing (workflow guide, the loop, step 4), and the
+rule, the projection and every value are then read over the rest. The artifact is moved to <pool folder>-excluded, out
+of the folder pool.py reads, and is not downloaded again.
 """
 
 import json
@@ -114,6 +119,10 @@ def main():
     since = int(a[a.index("--since") + 1]) if "--since" in a else 1
     base = os.path.join(common.WORK, "pool", f"{family}-{app or 'build'}-from{since}")
     out = a[a.index("--out") + 1] if "--out" in a else os.path.join(base, "pooled.json")
+    excluded = {int(k) for k in a[a.index("--exclude") + 1].split(",")} if "--exclude" in a else set()
+    why = a[a.index("--exclude-why") + 1] if "--exclude-why" in a else ""
+    if excluded and not why:
+        raise SystemExit('--exclude needs --exclude-why "<reason>": the pooled record states why a repeat is left out')
     dirs = {}
     for r in common.runs(family, since):
         names = None
@@ -126,6 +135,13 @@ def main():
                 print(f"   run #{r['number']} ({r['databaseId']}): no {name} (has {', '.join(names) or 'none'}); not pooled")
                 continue
             dest = os.path.join(base, name) if family == "build" else os.path.join(base, str(r["databaseId"]), name)
+            if j["k"] in excluded:   # out of the folder pool.py reads, kept beside it, never downloaded again
+                aside = os.path.join(base + "-excluded", str(r["databaseId"]), name)
+                if os.path.exists(dest) and not os.path.exists(aside):
+                    os.makedirs(os.path.dirname(aside), exist_ok=True)
+                    os.replace(dest, aside)
+                print(f"   r{j['k']}: left out of the pool — {why}; its artifact under {base}-excluded")
+                continue
             dirs[j["k"]] = common.download(r["databaseId"], name, dest)
     if not dirs:
         raise SystemExit("no landed repeat")
@@ -138,6 +154,9 @@ def main():
     pooled = json.load(open(out))
     entry = pooled if family == "build" else pooled["runs"].get(app)
     st = (entry or {}).get("stability")
+    if excluded:
+        (entry if entry is not None else pooled)["excluded_repeats"] = {str(k): why for k in sorted(excluded)}
+        json.dump(pooled, open(out, "w"), indent=1)
     if family == "build":
         crit = st["quantities"]
         print(f"build: repeats {pooled['repeats']}; stability rule {'holds' if st['passes'] else 'does not hold yet'}; "
@@ -164,6 +183,8 @@ def main():
     print(f"   phases {list((entry or {}).get('phases', {}))}; pooled record {out}")
     print("validity:")
     bad = validity(family, dirs, entry)
+    if excluded:
+        print(f"   left out of this pool: {sorted(excluded)} — {why}")
     print(f"   {'every repeat valid' if not bad else f'{bad} repeat(s) with a problem'}")
 
 
