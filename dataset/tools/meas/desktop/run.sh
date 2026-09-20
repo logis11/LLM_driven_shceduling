@@ -234,6 +234,13 @@ synapse_start() {
   # registration_shared_secret; it is read back rather than overridden, so there is no second `listeners:` key
   MATRIX_SECRET="$(sed -n 's/^registration_shared_secret: *"\{0,1\}\([^"]*\)"\{0,1\} *$/\1/p' "$SYNAPSE_DIR/homeserver.yaml" | head -1)"
   rec synapse.secret_read "$([ -n "$MATRIX_SECRET" ] && echo yes || echo no)"
+  # --generate-config routes the server's own log to a file of its choosing, not to stdout: the dry run of
+  # 2026-09-20 grepped the stdout redirect for /sync, found nothing, and gated a job that was signed in.
+  SYNAPSE_LOG="$(grep -o 'will log to [^ ]*' "$OUT/synapse.generate.log" | head -1 | awk '{print $4}')"
+  rec synapse.logfile "${SYNAPSE_LOG:-unset}"
+  # keys the generated config does not set, so appending them makes no duplicate: no federation at all, which
+  # keeps the observation local and stops the server reaching the trusted key server it warns about
+  { echo "federation_domain_whitelist: []"; echo "suppress_key_server_warning: true"; } >> "$SYNAPSE_DIR/homeserver.yaml"
   # longhand taskset, not pin_harness: a function backgrounded forks a subshell, so $! would be the subshell and
   # element_cleanup would kill that instead of the homeserver
   if [ "$MEAS_PIN_AVAILABLE" = 1 ]; then
@@ -325,7 +332,7 @@ element_setup() {
   # count of zero here is normal and an earlier run stopped on it wrongly. That the config took is evidenced at
   # submit time instead, by the /sync check below — and by the sign-in step naming the server, which the
   # after-signin screenshot carries.
-  rec matrix.client_requests_before_submit "$(grep -c '/_matrix/client/' "$OUT/synapse.log" 2>/dev/null || echo 0)"
+  rec matrix.client_requests_before_submit "$(grep -c '/_matrix/client/' "${SYNAPSE_LOG:-/dev/null}" 2>/dev/null || echo 0)"
   # With the homeserver preconfigured there is no intermediate step: the form is on the sign-in screen with the
   # username field already focused. An earlier run clicked where a Continue button would have been and landed on
   # the "Sign in with" dropdown.
@@ -341,8 +348,9 @@ element_setup() {
   pin_harness xdotool mousemove $((X + WIDTH * 60 / 100)) $((Y + HEIGHT * 59 / 100)) click 1
   sleep 30; screenshot after-login
   # verified from the server's side: a signed-in client holds a /sync long poll, and a signed-out one cannot
-  rec matrix.sync_rows "$(grep -c '/_matrix/client/.*/sync' "$OUT/synapse.log" 2>/dev/null || echo 0)"
-  [ "$(grep -c '/_matrix/client/.*/sync' "$OUT/synapse.log" 2>/dev/null || echo 0)" -gt 0 ] \
+  cp -f "${SYNAPSE_LOG:-/dev/null}" "$OUT/homeserver.log" 2>/dev/null
+  rec matrix.sync_rows "$(grep -c '/_matrix/client/.*/sync' "$OUT/homeserver.log" 2>/dev/null || echo 0)"
+  [ "$(grep -c '/_matrix/client/.*/sync' "$OUT/homeserver.log" 2>/dev/null || echo 0)" -gt 0 ] \
     || stop_recorded not-logged-in "no /sync request reached the homeserver — the client is not signed in, so the idle phase is a login screen (D7)"
   edge launch-settle start; sleep "$LAUNCH_SETTLE"; edge launch-settle end
 }
@@ -352,6 +360,7 @@ element_traffic_driver() {   # <seconds> — a client-server API script on the h
 }
 
 element_cleanup() {
+  cp -f "${SYNAPSE_LOG:-/dev/null}" "$OUT/homeserver.log" 2>/dev/null   # the server's own log, into the artifact
   kill "$(cat "$OUT/synapse.pid" 2>/dev/null)" 2>/dev/null
 }
 
