@@ -28,6 +28,7 @@ settle_for() {
     soffice|gimp|kdenlive|mpv-video|mpv-audio) echo 30 ;;
     thunderbird-send) echo 390 ;;   # D44: its launch work ends ~340 s into a 30 s-settled idle phase (long-phase probe)
     chrome) echo 270 ;;             # D51: its ~880 ms ThreadPoolForeground run lands at 180–190 s into one (long-phase probe)
+    code) echo 30 ;;                # D53: at its baseline within 10 s of the phase's start — no launch work to settle past
     *) echo "" ;;
   esac
 }
@@ -37,7 +38,8 @@ settle_for() {
 idle_for() {
   case "$1" in
     thunderbird-send) echo 600 ;;
-    *) echo 120 ;;
+    code) echo 900 ;;   # D53: its ~320 s episode is launch-anchored — a 120 s phase reads CPU +15.5 % at the placement
+    *) echo 120 ;;      # every repeat takes, a 900 s one +1.6 % (long-phase probe)
   esac
 }
 if [ "$MODE" = dry ]; then SETTLE=10; IDLE=30; DRIVEN=60; PLAY=60; OPS=90

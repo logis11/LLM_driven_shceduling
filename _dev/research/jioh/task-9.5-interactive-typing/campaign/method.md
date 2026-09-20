@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-20, `code`'s settle and idle phase (changelog D53) — §2, from the D52 probe (run 35496163876): the settle stays 30 s, the phase is at its baseline within 10 s and holds no launch work; the idle phase is 900 s, design, since `code`'s 25–40 ms/s episode recurs every ~320 s and is anchored to launch — a 120 s phase reads CPU +15.5 % above the long-run level at the placement every repeat takes, a 900 s phase +1.6 %, both the CPU share and the wake rate then inside the 5 % tolerance. `settle_for` and `idle_for` in `campaign/run.sh`; `code`'s 22 pooled repeats are superseded.
+
 - 2026-09-20, the `code` and `webrtc` probes' phase lengths (changelog D52) — §2, both design: `code` 1,400 s, the 1,374.4–1,378.3 s a repeat observes it (D42's ground), resolving whether its 50–70 s idle bump recurs; `webrtc` 2,000 s, not D42's ground (300 s, its only phase) but D35's question — whether the call's CPU saturation, seen over 0–40, 60–90 and 140–170 s, recurs past the 300 s phase. `phase_s` in `.github/campaign-long-probe.json`.
 
 - 2026-09-20, `chrome`'s settle (changelog D51) — §2: 270 s, design, from the D50 probe (run 35494199119): its launch burst at 20–60 s and the ~880 ms `ThreadPoolForeground` run at 180–190 s end by 190 s into a 30 s-settled idle phase, steady at 1.2–1.4 ms/s after; the idle phase stays 120 s, with one 75 ms episode seen once at 1,300 s. `settle_for` in `campaign/run.sh`.
