@@ -1,0 +1,72 @@
+name: meas-desktop
+
+# 9.8 campaign: the four entries that replace electron-comms — an idle hidden renderer, an idle visible
+# renderer, an Electron chat client and the Steam desktop client — pinned single-core (research-slice changelog
+# D1-D13; method _dev/research/jioh/task-9.8-browser-comms/campaign/method.md). Started by a push changing
+# .github/campaign-desktop.json, which names the subjects, the repeats (one list for every subject or a map
+# subject -> list), the CPU model and the mode (dry | probe | full). Nothing else: every value the design fixes
+# is a constant in dataset/tools/meas/desktop/run.sh, because a pool whose repeats ran at different N or
+# different phase lengths is not a pool (D13). Registry tag meas-ci:desktop:<launch date of the first batch>
+# (9.5 D27). One artifact per (subject, repeat).
+#
+# The long-phase probe is mode `probe` of this family rather than a run of meas-long-probe.yml, so that this
+# slice's parameters do not enter a trigger file 9.5 is launching thunderbird-send probes from (D13). A probe is
+# never a repeat, and desktop/pool.py refuses to pool its artifacts.
+
+on:
+  push:
+    branches: [jioh/dataset-rebuild]
+    paths: [.github/campaign-desktop.json]
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      mode: ${{ steps.plan.outputs.mode }}
+      cpu_model: ${{ steps.plan.outputs.cpu_model }}
+      count: ${{ steps.plan.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        run: |
+          python3 - >> "$GITHUB_OUTPUT" <<'PY'
+          import json
+          c = json.load(open(".github/campaign-desktop.json"))
+          reps = c.get("repeats", [])
+          inc = [{"app": a, "repeat": r} for a in c.get("apps", []) for r in (reps.get(a, []) if isinstance(reps, dict) else reps)]
+          print("matrix=" + json.dumps({"include": inc}))
+          print("mode=" + c.get("mode", "full"))
+          print("cpu_model=" + c.get("cpu_model", ""))
+          print("count=" + str(len(inc)))
+          PY
+  run:
+    # named as the loop tools parse a job, "run (<app>, <k>)"
+    name: run (${{ matrix.app }}, ${{ matrix.repeat }})
+    needs: plan
+    if: needs.plan.outputs.count != '0'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update > /dev/null && sudo apt-get install -y --no-install-recommends xvfb > /dev/null
+      - run: bash dataset/tools/meas/desktop/run.sh ${{ matrix.app }} ${{ matrix.repeat }} ${{ needs.plan.outputs.mode }}
+        env:
+          MEAS_OUT: /tmp/meas
+          MEAS_CPU_MODEL: ${{ needs.plan.outputs.cpu_model }}
+      - name: own the output
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" /tmp/meas && sudo chmod -R a+rX /tmp/meas
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meas-desktop-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}
+          path: /tmp/meas
+          if-no-files-found: error

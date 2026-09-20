@@ -28,6 +28,10 @@ FAMILIES = {
               "pool": "dataset/tools/meas/build/pool.py"},
     "background": {"workflow": "meas-background.yml", "trigger": ".github/campaign-background.json", "apps": True,
                    "pool": "dataset/tools/meas/background/pool.py"},
+    # 9.8 D13: the desktop family carries its own long-phase probe as mode `probe`, rather than borrowing the
+    # long-probe family, so its parameters stay out of a trigger file 9.5 is launching from
+    "desktop": {"workflow": "meas-desktop.yml", "trigger": ".github/campaign-desktop.json", "apps": True,
+                "pool": "dataset/tools/meas/desktop/pool.py"},
     # 9.5 D35, D42: a long-phase probe of one application's steady phase — never a campaign repeat, so no pool
     "long-probe": {"workflow": "meas-long-probe.yml", "trigger": ".github/campaign-long-probe.json", "apps": True,
                    "pool": None},
@@ -134,7 +138,7 @@ def push_trigger(targets, kind, dry=False):
         d["attempt"] = d.get("attempt", 0) + 1
         if trig.endswith("campaign-build.json"):
             d["repeats"] = sorted(k for _, _, k in ts)
-        elif trig.endswith(("campaign-background.json", "campaign-long-probe.json")):
+        elif trig.endswith(("campaign-background.json", "campaign-long-probe.json", "campaign-desktop.json")):
             m = {}
             for _, app, k in ts:
                 m.setdefault(app, []).append(k)

@@ -12,7 +12,9 @@ and pooled with the family's pool.py and --cpu-model common.MACHINE. Options aft
 step 4): gate open on the machine; the replay sent every event of its window; operations completed; non-zero return
 codes other than perf record's 130 (its SIGINT stop) and freshclam's 2 with a recorded database; for build, one
 ClamAV signature database across the repeats whose clamscan is pooled (9.6 D27); for background, the set's archive and manifest matching their pins and the
-tree verified after each change set, every SteamCMD phase reporting its install complete, one app build across repeats.
+tree verified after each change set, every SteamCMD phase reporting its install complete, one app build across repeats;
+for desktop, the renderer count meeting the minimum the job wanted, the page server answering, Element's session having
+reached the homeserver, and one origin count across repeats (9.8 D13).
 
 --exclude leaves a repeat out of the pool, --exclude-why states why in the printed lines and in the pooled record
 (`excluded_repeats`); a repeat the validity step fails counts for nothing (workflow guide, the loop, step 4), and the
@@ -47,7 +49,7 @@ def validity(family, dirs, entry):
     streams = os.path.join(common.REPO, "dataset/meas/streams")
     win = json.load(open(os.path.join(streams, "windows.json")))["windows"] if os.path.exists(os.path.join(streams, "windows.json")) else {}
     alt = json.load(open(os.path.join(streams, "aalto-windows.json")))["windows"] if os.path.exists(os.path.join(streams, "aalto-windows.json")) else {}
-    bad, dbs = 0, set()
+    bad, dbs, origins = 0, set(), set()
     op = (entry or {}).get("phases", {}).get("op", {}).get("operation")
     reps = (entry or {}).get("phases", {}).get("op", {}).get("repeats") or (entry or {}).get("repeats", [])
     # every phase present (the loop, step 4): a repeat past the recording's end runs the idle phase alone (9.5 D32);
@@ -101,11 +103,26 @@ def validity(family, dirs, entry):
                 notes.append(f"SteamCMD install not reported complete {incomplete}")
             if r.get("steam.buildid"):
                 dbs.add(r["steam.buildid"])
+        if family == "desktop":   # 9.8 D13 (the gate itself is checked for every family above)
+            want, got = r.get("renderers.wanted_min"), r.get("renderers.observed")
+            if want and got and int(got) < int(want):
+                notes.append(f"renderers {got} < {want}")
+            if r.get("mode") == "probe":
+                info.append("long-phase probe, never a repeat")
+            if r.get("page.server") not in (None, "200"):
+                notes.append(f"page server answered {r.get('page.server')}")
+            if r.get("app") == "element" and r.get("matrix.sync_rows") in (None, "0"):
+                notes.append("no /sync reached the homeserver — the client was not signed in")
+            # every repeat of one subject must have run at one N, or the pool is not a pool
+            if r.get("settings.origins"):
+                origins.add(r["settings.origins"])
         bad += bool(notes)
         print(f"   r{k}: {'ok' if not notes else '; '.join(notes)}{''.join(f' ({x})' for x in info)}")
     if len(dbs) > 1:
         what = "SteamCMD app builds" if family == "background" else "ClamAV signature databases"
         print(f"   {what} differ across repeats: {sorted(dbs)}"); bad += 1
+    if len(origins) > 1:
+        print(f"   origin counts differ across repeats: {sorted(origins)}"); bad += 1
     return bad
 
 
@@ -146,7 +163,7 @@ def main():
     if not dirs:
         raise SystemExit("no landed repeat")
     cmd = ["python3", common.FAMILIES[family]["pool"], base, out, "--cpu-model", common.MACHINE, *passthrough]
-    if family in ("build", "background") and "--md" not in passthrough:
+    if family in ("build", "background", "desktop") and "--md" not in passthrough:
         cmd += ["--md", os.path.join(os.path.dirname(out), "results.md")]
     p = subprocess.run(cmd, cwd=common.REPO, capture_output=True, text=True)
     if p.returncode:

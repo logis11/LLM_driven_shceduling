@@ -30,8 +30,25 @@ if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 from meas.desktop import analyze  # noqa: E402
 from meas.campaign.analyze import pct  # noqa: E402
-from meas.campaign.pool import QUANTILE_PROBS, select_components  # noqa: E402  — the coverage cut of `web-browser`
 from meas.stability import stability, TOLERANCE  # noqa: E402
+
+
+def _campaign_pool():
+    """`campaign/pool.py` imports its sibling with a flat `from analyze import ...`, so it picks up whatever is
+    bound to `analyze` — `meas/build/analyze.py` or `meas/analyze.py` in a process that imported one first. The
+    repo's idiom for reaching it is to unbind the name across the import (tests/test_meas.py)."""
+    import importlib
+    saved = sys.modules.pop("analyze", None)
+    try:
+        return importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+
+
+_cp = _campaign_pool()
+# the coverage cut and the residual exactly as `web-browser` — the other half of the same application — was pooled
+QUANTILE_PROBS, select_components = _cp.QUANTILE_PROBS, _cp.select_components
 
 APPS = ("chrome-hidden", "chrome-visible", "element", "steam")
 NAME = re.compile(r"^meas-desktop-(chrome-hidden|chrome-visible|element|steam)-r(\d+)-(dry|probe|full)$")
