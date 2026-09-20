@@ -56,6 +56,7 @@ DRY_APP="${MEAS_STEAM_DRY_APP:-smallest}"; ARCH_SET="${MEAS_ARCHIVER_SET:-10gb}"
 CANDIDATES="90 232330 4020 244310 232250"   # the anonymous Linux dedicated servers the S4-16 record quotes from Valve's list
 RATE_MBIT=121.0                             # D11
 TBF_LATENCY=70ms                            # design: the queue bound of tc-tbf(8)'s example (S4-14)
+SHAPE_DISCIPLINE="${MEAS_SHAPE_DISCIPLINE:-aqm}"   # D25: the campaign shapes with the fq_codel leaf; `tbf` is the superseded bucket
 export BORG_PASSPHRASE="meas-9.7"           # design: repokey's passphrase, from the environment (§2 "Builds")
 
 rec family background; rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE"; rec started_utc "$(date -u +%FT%TZ)"
@@ -308,7 +309,7 @@ SHAPE_DEV="${SHAPE_DEV:-$IFACE}"; rec shape.dev "$SHAPE_DEV"
 ip -o link show > "$OUT/ip.link.oneline.txt" 2>&1
 shape_on() {   # shape_on [tbf|aqm]: ingress on the interface that carries the traffic redirected to ifb0,
                # the root at the D11 rate — the committed drop-tail bucket, or D24's AQM leaf under test
-  local variant="${1:-tbf}"
+  local variant="${1:-$SHAPE_DISCIPLINE}"
   { echo "== before"; tc -s qdisc show dev "$SHAPE_DEV"; tc filter show dev "$SHAPE_DEV" ingress; } >> "$OUT/tc.iface.txt" 2>&1
   sudo modprobe ifb numifbs=1 > /dev/null 2>&1; sudo ip link add ifb0 type ifb > /dev/null 2>&1; sudo ip link set ifb0 up
   if tc qdisc show dev "$SHAPE_DEV" | grep -q clsact; then HOOK="ingress"; PREF=49152; SHAPE_OWN_QDISC=0
