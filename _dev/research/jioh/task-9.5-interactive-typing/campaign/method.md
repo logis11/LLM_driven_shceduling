@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-20, `chrome`'s settle (changelog D58) — §2, amending D51: 420 s, design. Its ~880 ms `ThreadPoolForeground` run lands 95–300 s after the window over seven sessions — 290–300 s in repeat 4 of the 2026-09-20 batch, which caught it inside a 270 s-settled idle phase — so the settle covers the latest occurrence with about two minutes of margin, and the 10 s slice profile (D35) guards every repeat, one that holds the run being left out under D47. The batch's five repeats are superseded. `settle_for` in `campaign/run.sh`.
+
 - 2026-09-20, a component whose rate varies between sessions (changelog D57) — §7: carried with its half-widths over at least five repeats, the tolerance not applied, the rule and its projection read over the rest; a second exception beside 9.6 D29's, which covers a spread following the runner's disk. `code`'s `libuv-worker` takes it — ten threads in every repeat, ±8.7 % within the D52 probe's run against 5.09–9.24 a second across repeats, 6.5 % of the idle phase's wakes and 0.01 % of one CPU — and `code`'s projection falls from 107 repeats to 29. The sensitivity question goes to 9.14. `SESSION_SPREAD` in `campaign/pool.py`.
 
 - 2026-09-20, `chrome`'s idle phase (changelog D56) — §2: 600 s, design, the second half of D51. Past its 270 s settle the phase observes Chrome quiet, and over the D50 probe a 120 s window reads CPU +13.6 % above the long-run level at the placement every repeat takes (worst 33.4 %), a 600 s window +0.0 % (worst 4.6 %), both metrics then inside the 5 % tolerance. The 2026-09-20 first batch's five repeats are superseded; `idle_for` in `campaign/run.sh`.

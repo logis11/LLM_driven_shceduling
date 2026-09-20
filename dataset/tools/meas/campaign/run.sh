@@ -27,7 +27,8 @@ settle_for() {
   case "$1" in
     soffice|gimp|kdenlive|mpv-video|mpv-audio) echo 30 ;;
     thunderbird-send) echo 390 ;;   # D44: its launch work ends ~340 s into a 30 s-settled idle phase (long-phase probe)
-    chrome) echo 270 ;;             # D51: its ~880 ms ThreadPoolForeground run lands at 180–190 s into one (long-phase probe)
+    chrome) echo 420 ;;             # D58: that run lands 95–300 s after the window over seven sessions (D51's 270 s
+                                    # caught it in one repeat of five); the slice profile guards the rest
     code) echo 30 ;;                # D53: at its baseline within 10 s of the phase's start — no launch work to settle past
     webrtc) echo 210 ;;             # D54: its call's dense ramp-up episodes end by 170 s, the 240 s cadence holds after
     *) echo "" ;;
