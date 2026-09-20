@@ -125,6 +125,12 @@ renderer_gate() {
   snap "$PAT" "" gate
   n="$(python3 -c 'import json,sys; print(sum(1 for p in json.load(open(sys.argv[1]))["procs"] if "--type=renderer" in p.get("cmd","")))' "$OUT/snap.gate.json" 2>/dev/null || echo 0)"
   rec renderers.observed "$n"; rec renderers.wanted_min "$want"
+  # every renderer's whole command line, which the snapshot truncates at 120 characters. The dry run of
+  # 2026-09-20 saw four renderers ticking at the timer rate against three windows and three origins, and a
+  # renderer's command line does not name the site it is locked to — these are the flags that might.
+  for r in $(pgrep -f -- "--type=renderer" 2>/dev/null); do
+    printf '%s\t%s\n' "$r" "$(tr '\0' ' ' < "/proc/$r/cmdline" 2>/dev/null)" >> "$OUT/renderers.tsv"
+  done
   [ "$n" -ge "$want" ] || stop_recorded wrong-renderer-count "renderer gate: wanted at least $want renderers, observed $n — stopping before the steady phase"
 }
 
