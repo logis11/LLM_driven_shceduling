@@ -29,7 +29,11 @@ def test_the_three_chrome_arms_launch_with_identical_flags(repo_root):
     var = [flags_of(m) for m in CHROME_VAR.findall(src)]
     assert len(arm) == 1, "expected exactly one `chrome` arm LAUNCH naming /tmp/page.html"
     assert len(var) == 1, "expected exactly one CHROME= shared by chrome-hidden and chrome-visible"
-    assert arm[0] == var[0], f"chrome arm {arm[0]} != chrome-hidden/chrome-visible {var[0]}"
+    # identical but for one stated flag: the spare renderer is not created, because it hosts no page and cannot
+    # be told from a real one afterwards. The difference is asserted exactly, not merely allowed.
+    assert var[0][:len(arm[0])] == arm[0], f"chrome arm {arm[0]} is not a prefix of {var[0]}"
+    assert var[0][len(arm[0]):] == ["--disable-features=SpareRendererForSitePerProcess"], \
+        f"the renderer arms may differ by that one flag only, found {var[0][len(arm[0]):]}"
     assert "--no-sandbox" in arm[0], "the flag is kept and stated (D13 corrects D12's claim that it is avoided)"
 
 

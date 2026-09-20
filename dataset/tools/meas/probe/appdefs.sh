@@ -215,7 +215,14 @@ PY
         if [ -z "$FIRST" ]; then FIRST="$u"; else REST="$REST $u"; fi
       done
       rec page.urls "$URLS"
-      CHROME="google-chrome --no-sandbox --disable-gpu --no-first-run --user-data-dir=/tmp/chrome-data"
+      # The flags are the `chrome` arm's, plus exactly one: Chrome keeps a spare renderer warm for the next
+      # navigation, and it hosts no page but is a --type=renderer process indistinguishable from a real one by
+      # command line. The dry run of 2026-09-20 measured it at 0.356 wakes/s beside three page renderers at
+      # ~10.6, taking the entry's per-renderer value from 10.64 to 8.07. It cannot be separated afterwards — in
+      # the hidden subject it reads 5 wakes against the measured tabs' 8 — so it is not created. The flag
+      # changes only the renderer population, which is the half `web-browser` excludes (9.5 D14) and these
+      # entries own; the browser, GPU and utility processes launch as they do for `chrome`.
+      CHROME="google-chrome --no-sandbox --disable-gpu --no-first-run --user-data-dir=/tmp/chrome-data --disable-features=SpareRendererForSitePerProcess"
       if [ "$app" = chrome-hidden ]; then
         # one window: the first tab stays selected and is the control tab, the N measured tabs are background
         # pages. The control tab carries the SAME timer as the measured pages: being the selected tab it stays
