@@ -130,6 +130,10 @@ PREFS
       rec doc.bytes "$(stat -c %s "$HOME/tbdoc/large.docx" 2>/dev/null || echo 0)"
       rec doc.pictures "$(unzip -l "$HOME/tbdoc/large.docx" 2>/dev/null | grep -c 'word/media/')"
       rec doc.sha256 "$(sha256sum "$HOME/tbdoc/large.docx" 2>/dev/null | cut -d' ' -f1)"
+      # D49: the .docx is the same size in every repeat and not the same bytes; its member listing — per-member
+      # CRCs and stored dates — records which members move. Setup, before the peer, the launch and the settle.
+      unzip -v "$HOME/tbdoc/large.docx" > "$OUT/doc.zip.txt" 2>&1; rec doc.zip.rc "$?"
+      rec doc.crc_sha256 "$(sha256sum "$OUT/doc.zip.txt" 2>/dev/null | cut -d' ' -f1)"
       setsid python3 "$TOOLS/smtp_peer.py" 2525 "$OUT/smtp.jsonl" > "$OUT/smtp.log" 2>&1 &
       echo $! > "$OUT/smtp.pid"; sleep 2
       rec smtp.peer "$(python3 -c 'import socket; s = socket.create_connection(("127.0.0.1", 2525), 5); print(s.recv(200).decode().strip())' 2>&1 | head -c 120)"
