@@ -33,9 +33,17 @@ The six that hold are pooled into `campaign/results-same-machine/` with `campaig
 
 Per landing: pool (`loop/pool_runs.py <family>/<app> --since N` with the arguments in the table), read the D35 slice profile where a settle applies, then `loop/launch.py added <family>/<app>:<k>` once and check the commit reached origin. One added repeat per application at a time; a **first batch's** gated indices go back in one push (`launch.py retried …`, 인지오's 2026-09-20 amendment, workflow step 2, commit `a95a9a9`). Before every launch check `.github/campaign.json` has `"mode": "full"`. Watch with `loop/watch.py <targets> --since <run of the latest launch> --poll 60`; it exits at the first landing, so restart it after each.
 
-## In flight at 11:25 UTC
+## The detached loop, running since 2026-09-20 11:58 UTC
 
-`chrome` 6 (interactive run #278), `code` 8 not yet launched (its repeat 7 pool was running at the cutoff), `webrtc` 13 (playback run #282).
+`~/.cache/meas-loop/overnight-9.5/`: `loop.py` with `state-2026-09-20.json`, logging to `loop-2026-09-20.log`. Started with `nohup caffeinate -i python3 loop.py state-2026-09-20.json >> loop-2026-09-20.log 2>&1 & disown`, so it sits under launchd and outlives the session — but not a reboot, which is what ended the 2026-09-19 run. It carries no cap: an application stops when its rule holds, a repeat fails validity, a job fails or ends short, or a `STOP` file appears beside the script.
+
+Its state at the start — `chrome` next 7 watching from run #278, `code` next 9 from #283, `webrtc` next 16 from #287 — with each application's pool arguments in the state file, `chrome`'s including `--exclude-roles renderer`. It rewrites that file after every step, so **read it first when resuming**: `next` is the index it would launch, and a `stopped` field says why an application ended. No session watcher may run beside it; two would relaunch the same gated attempt.
+
+**Resuming after it stops or the Mac restarts:** read `loop-2026-09-20.log` (each step is timestamped in UTC) and `state-2026-09-20.json`, check `status.py` per family for what is landed or in flight, pool anything that landed after its last entry, and either restart the loop with a refreshed state or carry on in the session.
+
+## In flight at 11:58 UTC
+
+`chrome` 6 (interactive run #278), `code` 8 (interactive run #283), `webrtc` 15 (playback run #287). Pooled and valid at that moment: `chrome` 5, `code` 7, `webrtc` 14.
 
 ## What is open
 
@@ -49,7 +57,8 @@ Per landing: pool (`loop/pool_runs.py <family>/<app> --since N` with the argumen
 - **Superseded repeats share indices with new ones.** Pool from the new campaign's first run (`chrome`: `--since 269`), never by excluding indices.
 - **The shared working tree** holds 9.6, 9.7 and 9.8 sessions. `push_trigger` and `cut_windows.sh` now commit only their own paths (`903a76b`, `75d873c`), but a session's unpushed commits are replayed by whoever pulls next — one such rebase conflict in `_dev/TODO.md` landed here and was resolved by taking 9.8's rewrite whole.
 - **`launch.py` is never retried in a loop**: its push can succeed while the run listing after it fails.
-- **The detached loop** (`~/.cache/meas-loop/overnight-9.5/loop.py`, its state in `state.json`, log `loop.log`) survives the session but not a reboot — the Mac restarted at 22:59 UTC on 2026-09-19 and killed it. Before reusing it for `chrome` it needs pool passthrough arguments, since `chrome` pools with `--exclude-roles renderer`.
+- **The detached loop survives the session but not a reboot** — the Mac restarted at 22:59 UTC on 2026-09-19 and killed the first run after 21 repeats. `caffeinate -i` blocks idle sleep only. Its pooling arguments come from the state file, added 2026-09-20 so `chrome` pools with `--exclude-roles renderer`.
+- **`watch.py` records handled jobs** in `~/.cache/meas-loop/watch-seen.txt`, so a landing already seen raises no event. An application whose last landing was seen and which has nothing in flight will sit idle — launch a repeat for it before handing it to the loop.
 
 ## 인지오's working rules
 
