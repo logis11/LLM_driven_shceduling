@@ -572,5 +572,66 @@ Reader's own computations are labelled **[own computation]** with the command; t
 
 - **T1 — a Linux trace or profile of an idle or background renderer giving CPU per wake or wake cadence per tab state.** Not found. The Chromium tracker yields Linux reports with a single per-tab CPU % or a wake-ups-per-second reading in prose (S3-01, S3-02, S3-04, S3-06, S3-07 — the last without an OS), and reports whose evidence is an attachment (traces in S3-04, S3-05; powertop output in S3-03; screenshots in S3-02) that the tracker serves only to signed-in users (`/action/issues/<id>/attachments` 401; comment endpoints 404/405 — log rows 16, 23). The only PowerTOP table quoted in text is the 2009 chromium-dev mail (S3-08, context). Searches that established it: log rows 9, 15–24, 35, 41–43, 50–52.
 - **T2 — Slack on Linux.** No Linux observation with a figure found: GitHub semantic search over all repositories and the flathub com.slack.Slack tracker returned nothing (rows 34, 36); the web result (HN 16436815, row 48) names no platform. **Discord, Zoom, Element, Teams**: only CPU-% readings and one powertop watt comparison (S3-10 – S3-20); nothing gives wake cadence, CPU per wake or an under-traffic (message-rate) measurement; Discord's own tracker (support.discord.com) is 403 through the proxy (row 1, 10). Element's Electron client on Linux has only S3-16 (nightly, pathological) and S3-17 (rank without a number); S3-15 is the web client in Firefox.
-- **T3 — an scx_lavd sample table under a running game listing `steamwebhelper`, `gameoverlayui` or `CQueuedPacketSe`.** Not found: the scx repository at commit 0b6f009f holds none of the three strings (row 3); GitHub semantic search of sched-ext/scx and of all repositories for those names returned nothing (rows 2, 4, 13, 38, 39); the one `scx_lavd` log reachable (S3-30 gist) samples 408 tasks and names only `steam` and `IPC:CSteamEngin` from the client; Wayback captures of scx #296/#376/#2491 hold no comment bodies or are absent (row 28); the `dump.txt` attachments in #234 are on github.com (403). GitHub code search finds `CQueuedPacketSe` only as Source-engine source (row 37). Steam-client CPU during play exists only as prose readings (S3-23, S3-25 comment 6, S3-28 `ps` snapshot, S3-35), none with wake counts.
+- **T3 — an scx_lavd sample table under a running game listing `steamwebhelper`, `gameoverlayui` or `CQueuedPacketSe`.** ***Superseded in part on 2026-09-20 — §4.2: the attachments of #234 were fetched once github.com answered, and one of them, `scx_lavd-12-05-2024.log` in comment 60, is such a table — it names `steamwebhelper`, `steam`, `SteamNetworking` and `IPC:CSteamEngin` with the scheduler's per-task columns, one sampled row each for the first three. `gameoverlayui` and `CQueuedPacketSe` still appear in no file. Everything else in this bullet stands as written.*** Not found as of 2026-09-19: the scx repository at commit 0b6f009f holds none of the three strings (row 3); GitHub semantic search of sched-ext/scx and of all repositories for those names returned nothing (rows 2, 4, 13, 38, 39); the one `scx_lavd` log reachable (S3-30 gist) samples 408 tasks and names only `steam` and `IPC:CSteamEngin` from the client; Wayback captures of scx #296/#376/#2491 hold no comment bodies or are absent (row 28); the `dump.txt` attachments in #234 are on github.com (403). GitHub code search finds `CQueuedPacketSe` only as Source-engine source (row 37). Steam-client CPU during play exists only as prose readings (S3-23, S3-25 comment 6, S3-28 `ps` snapshot, S3-35), none with wake counts.
 - **T5 — a public per-process CPU or scheduling trace of a Linux desktop browsing session with several renderers, of an Electron/CEF client at idle, or of a conferencing client.** Not found. Perfetto's public Chrome traces are Android-device traces without `sched_slice` rows (S3-34); catapult's Chrome traces are pre-2019 trace-event JSON without OS, version or scheduler data (S3-32, S3-33); Zenodo, Discourse forums, StackExchange and Launchpad searches returned nothing (rows 41–45, 52); openbenchmarking.org and phoronix.com are 403 through the proxy (row 1), so browser-benchmark databases could not be checked for per-process CPU fields. The nearest items are the scx_lavd sampled-task log (S3-30) and a `perf sched latency` excerpt of a desktop with browser threads (S3-31), neither a browsing-session trace.
+
+## 4. Amendment — GitHub retrieval retry, 2026-09-20
+
+Added by 인지오 on 2026-09-20 from the development machine. Sections 1–3 are the S3 reader's record of 2026-09-19 and stand as written, apart from the clause marked in §3. The reader's box answered 403 on github.com issue pages, api.github.com and github.com/user-attachments, so issue comments were reachable only through Internet Archive captures and file attachments not at all (header note; §1 row 1). From the development machine all three answer normally. Threads read with `gh issue view <n> --repo <repo> --json title,body,comments` (GitHub CLI, account `retz8`); attachments with `curl -sS -L`, HTTP 200 each. Copies under `sources/A-2026-09-20/` (gitignored).
+
+### 4.1 The four threads read in full
+
+| Thread | What the reader had | Now | Change |
+|---|---|---|---|
+| `element-hq/element-web` #32107 (S3-16) | issue body through the GitHub MCP search endpoint; no comment bodies | body + 14 comments, SHA-256 `b2837e5bc660a00316dacfaf67991b259a6e8b364242102fb0aed98888550dd1` | None. The 60–70 % idle CPU reading is in the issue body, which the reader had; the comments carry cause discussion (a Rust crypto library migration, clearing the cache) and no figure |
+| `element-hq/element-web` #32167 (S3-17) | as above | body + 9 comments, SHA-256 `6f5a19cccb077058e96d96df0c5debf63f364487f2b361b8e7314a208b9197f9` | None. The rank without a number — element-desktop "the 3rd CPU-cycle hungriest app" after gnome-shell — is in the body; the comments add no figure |
+| `ValveSoftware/steam-for-linux` #8258 (S3-25) | Wayback capture 20260419042556, bodies decoded from the page's React payload | body + 63 comments, SHA-256 `25bd79bbe4a914235c405e641615514ab0e7e91e89f071ef2b6e7beb6590ed15` | None. Every figure S3-25 records is present and unchanged: ≈ 25 % of one core minimised, "130–150 % in total, one process 70–80 %", "37.5 % of my 4 threads" while playing, 10–40 % on a 12-core Ryzen, ≈ 0–1 % with `-no-browser`. The reader's decode was complete |
+| `sched-ext/scx` #234 (S3-30) | Wayback capture 20250221083909: body + 16 of 63 comment bodies; the attachments 403 | body + 63 comments, SHA-256 `add3368e427b7921e3f11e6a049b14cf502eaae1079aa36d8dcd92f4996e399d`, + 6 attachments | **Changed — §4.2.** The 63 comment bodies confirm the reader's grep over 16: `steamwebhelper`, `gameoverlayui`, `CQueuedPacketSe` and the bare string `steam` occur in none of them. The attachments are a different matter |
+
+### 4.2 S3-30 amended — the attachments of `sched-ext/scx` issue #234
+
+Six attachments linked from the thread were fetched on 2026-09-20, all HTTP 200, all under `sources/A-2026-09-20/`:
+
+| Comment | URL | Bytes | SHA-256 | What it is |
+|---|---|---|---|---|
+| 3 | `github.com/sched-ext/scx/files/15046314/scx_lavd_dump-2024-04-20-1.txt` | 5 616 | `2f0167c7ad1ca64e2e5adce4bf3b55fd4e7d1ef18ef3767cedb7b0b846593a34` | Watchdog exit dump (runnable task stall), no sampled-task table |
+| 5 | `…/files/15098588/dump.txt` | 2 760 | `35cd5c91a75b0f970762dc64b78f043e2fe2178c095caca110bf16336f958f3b` | Watchdog exit dump, no sampled-task table |
+| 6 | `…/files/15098674/dump.txt` | 342 390 | `4c6523bd596df3144e3c666e47644bf911d41221f61e32be111d45d1e982800d` | 1 092 sampled rows, 52 distinct comms, a different game (`LikeADragon8.ex`); no Steam-side comm |
+| 19 | `…/files/15123361/dump.txt` | 2 794 | `80908a82f6e2afbf459777e6845d2a2921ee336b2e59e27e039fae0744fb4bb2` | Watchdog exit dump, no sampled-task table |
+| 50 | `…/files/15180709/scx_lavd-01-05-2024.log` | 40 268 | `ae8cac443583f86da9b87bd662db9a4fb33887d7bb437ddce5c432ac218aa14a` | 132 sampled rows, 22 distinct comms, `r5apex.exe` running; no Steam-side comm |
+| 60 | `…/files/15287842/scx_lavd-12-05-2024.log` | 142 628 | `caa86ecbd8137e1601adf153657d7b72f9f19b00a964d1984f53280e9220ee41` | **484 sampled rows, 46 distinct comms, `r5apex.exe` running, and four Steam-side comms** |
+
+**The one that carries Steam-side rows.** `scx_lavd-12-05-2024.log`, posted by GitHub user DasLeo in comment 60 of `sched-ext/scx` issue #234 ("[scx_lavd] Getting large pauses and stutters in-game"), fetched 2026-09-20 from `https://github.com/sched-ext/scx/files/15287842/scx_lavd-12-05-2024.log`. 502 lines, timestamps 12:28:26 to 12:30:27 — about two minutes. The scheduler is `scx_lavd`, an out-of-tree sched_ext scheduler, not the stock kernel scheduler. The session shows Apex Legends (`r5apex.exe`, 97 of 484 sampled rows) running through Wine/Proton (`wineserver` 32 rows) on an X11 KDE desktop (`Xorg`, `plasmashell`), with the Steam client present.
+
+**Passages.** Column header, line 3:
+
+```
+| mseq      | pid      | comm              | cpu  | vtmc | vddln_ns  | elglty_ns | slice_ns   | grdy_rt   | lat_prio | avg_lc  | static_prio  | lat_bst | slice_bst | run_freq  | run_tm_ns | wait_freq | wake_freq | perf_cri | avg_pc   | cpu_util | sys_ld |
+```
+
+Every Steam-side row in the file — seven of 484 sampled rows (ANSI colour codes and the `[INFO]` prefix stripped; line numbers of the file as fetched):
+
+```
+L31:  |  28 | 1603 | IPC:CSteamEngin |  2 |  2 |  60925830 |  472 | 1000000 | 1289 | 21 | 44 | 20 |  1 | 0 |  6361 | 28642 |  11420 |  11267 | 37 | 45 | 88 | 130 |
+L170: | 162 | 1453 | steam           |  2 |  3 |  68292300 |    0 | 1458176 |  886 | 22 | 47 | 20 |  2 | 0 |  2908 | 79570 |    999 | 114319 | 49 | 47 | 89 | 116 |
+L203: | 194 | 1603 | IPC:CSteamEngin |  2 | -1 |  47766600 | 1086 | 1000000 | 1941 | 21 | 47 | 20 |  1 | 0 |  4215 | 34390 |   6831 |  16565 | 37 | 47 | 87 | 102 |
+L213: | 204 | 1603 | IPC:CSteamEngin |  0 | -1 |  58620000 |  534 | 1000000 | 1074 | 22 | 47 | 20 |  2 | 0 |  4261 | 32043 |   8498 |  33629 | 39 | 47 | 94 |  67 |
+L254: | 244 | 1737 | steamwebhelper  |  2 | -1 | 1324140000 | 3906 | 1000000 | 1234 | 36 | 47 | 36 |  0 | 0 |    56 | 73460 |     58 |  88254 | 41 | 47 | 84 |  53 |
+L289: | 278 | 39611 | SteamNetworking |  1 | -1 |   4020000 |    0 | 9023360 |  517 | 10 | 48 | 13 | -3 | 0 | 93783 |  3566 | 104624 |  87632 | 46 | 47 | 86 |  55 |
+L472: | 455 | 1603 | IPC:CSteamEngin |  3 |  3 |  73005000 |  510 | 1000000 | 1821 | 23 | 47 | 20 |  3 | 0 |  8820 | 27651 |  17167 |  14046 | 38 | 47 | 92 |  73 |
+```
+
+**Coverage.** T3: this is the artifact §3's T3 bullet declared not found — an `scx_lavd` sampled-task table taken while a Steam-launched game runs, naming `steamwebhelper`. It names `steamwebhelper` (pid 1737), the client process `steam` (pid 1453), `SteamNetworking` (pid 39611) and `IPC:CSteamEngin` (pid 1603), each with the scheduler's per-task columns including `run_freq`, `run_tm_ns`, `wait_freq` and `wake_freq`. `gameoverlayui` and `CQueuedPacketSe` still appear in no file. T1, T2, T5: does not cover.
+
+**What it does not establish, as it stands.**
+
+- **One sample each.** `steamwebhelper`, `steam` and `SteamNetworking` appear once apiece; `IPC:CSteamEngin` four times. Seven rows of 484 over about two minutes, one machine, one session.
+- **The columns' semantics are unverified.** `run_freq`, `run_tm_ns`, `wait_freq` and `wake_freq` are `scx_lavd`'s own per-task quantities and the log defines none of them. What each counts, over what window, and whether `run_tm_ns` is an average or a last value must be read out of `scx_lavd`'s source at a pinned commit before any number here is used.
+- **Which rows the scheduler prints, and when, is unverified** — whether a row appears per scheduling decision, per interval, or on some other rule decides whether "one row" means the process was scheduled once or merely sampled once. This also decides whether seven rows of 484 says anything about how often the Steam processes run.
+- **Not the stock scheduler.** The numbers are what these processes did under `scx_lavd`, not under the kernel's own scheduler.
+
+The record is preserved here as a candidate. Whether it grounds anything for the Steam client binding is a stage-3 decision, and it cannot be taken further without the two verifications above.
+
+### 4.3 Effect on §3
+
+The T3 bullet is amended in place. The other three bullets stand: nothing retrieved on 2026-09-20 bears on T1, T2 or T5, and the venues that block those (the Chromium tracker's attachments and comment endpoints, openbenchmarking.org, phoronix.com) were not retried.
