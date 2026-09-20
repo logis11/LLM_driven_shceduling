@@ -1,4 +1,4 @@
-# Handoff — task 9.7 Background and IO (2026-09-20, ~20:30 KST)
+# Handoff — task 9.7 Background and IO (2026-09-20, ~21:00 KST)
 
 Branch `jioh/dataset-rebuild` (Phase 9 works on this branch only, `_dev/` included). Supersedes the 2026-09-19 handoff and `/tmp/handoff-9.7-steamcmd-operating-point-2026-09-20.md`, both stale. Campaign tag `meas-ci:background:2026-09-19`.
 
@@ -8,15 +8,34 @@ Branch `jioh/dataset-rebuild` (Phase 9 works on this branch only, `_dev/` includ
 |---|---|---|
 | `file-backup` | `borg` | **done** — rule holds over 30 valid repeats |
 | `file-archiver` | `7z` | **done** — rule holds over 6 repeats |
-| `game-download` | SteamCMD | **method settled (D24, D25); first batch of 5 landed; pooling in flight** |
+| `game-download` | SteamCMD | **method settled (D24, D25); 5 pooled, rule fails, 7 more added — 12 projected** |
 
 Read the committed results rather than re-deriving: `…/task-9.7-background-io/campaign/results-borg.md`, `results-7z.md`, `campaign/results/{borg,7z}-pooled.json`, and the 9.7 section of `_dev/research/jioh/measurement-campaign-record.md`.
 
-## In flight
+## Where the campaign is
 
-`pool_runs.py background/steamcmd --since 47 -- --tag meas-ci:background:2026-09-19`, started 19:42 KST. Artifacts are already downloaded to `~/.cache/meas-loop/pool/background-steamcmd-from47` (2.4 GB), so a re-run skips the download and goes straight to pooling. All five repeats landed (2,716–2,944 s): repeats 1, 2, 5 on run #47 `35502824537`, repeat 3 on #48 `35502868640`, repeat 4 on #49 `35503071794`.
+**First batch pooled, rule does not hold.** `pool_runs.py background/steamcmd --since 47` over repeats 1–5 (all five valid, none excluded):
 
-**When it finishes:** read the validity lines first (gate on the EPYC 7763, every phase present, every SteamCMD phase reporting its install complete, one app build across repeats, every non-zero rc explained); then the rule on the three carried values of `steam-fresh-shaped` — run per wake, network wait, bytes per wake. D25 projects that five repeats suffice, but that projection came from three runner draws of the diagnostic, not from campaign repeats. Rule holds → fold-in. Does not hold → add repeats one at a time (no ceiling), relaunching gated indices.
+```
+stability rule does not hold yet; first batch at this spread 12
+  steam-fresh-shaped run per wake (µs): k 5, half-width 6.77 %, fails
+  steam-fresh-shaped network wait (µs): k 5, half-width 9.49 %, fails
+  steam-fresh-shaped bytes per wake:    k 5, half-width 7.97 %, fails
+```
+
+**D25's five-repeat projection was optimistic and is superseded by this.** It came from the diagnostic's three runner draws (`fq_codel` cv 1.9 % network wait, 1.6 % bytes per wake); five campaign repeats imply roughly 5.5 %, 7.6 % and 6.4 %. Three draws understated the spread about fourfold. **This does not overturn D25** — the discipline decision rested on `fq_codel` against `tbf` on the same three runners, and that gap is unchanged: the bucket projects 65 repeats where the leaf projects 12.
+
+**Seven repeats added** (6–12), run #50 `35509003684`; index 10 gated once and was relaunched as run #51 `35509045982`. All seven were in flight at 21:00 KST.
+
+**An overnight loop was dispatched** — `~/.cache/meas-loop/overnight-9.7/campaign_loop.sh 50 "6 7 8 9 10 11 12"` under `nohup caffeinate -i`, logging to `~/.cache/meas-loop/overnight-9.7/campaign-loop.log`. Uncapped on machine gating; stops on a genuine job failure; pools once when all seven land (local only, nothing pushed). **It does not survive the Mac sleeping or powering off** — `caffeinate -i` blocks idle sleep only.
+
+## What to do on pickup
+
+1. `git pull` first — 9.5, 9.6 and 9.8 all push to this branch.
+2. Read `campaign-loop.log`. `DONE` → the pool already ran; read its output and `~/.cache/meas-loop/pool/background-steamcmd-from47/results.md`. `STOP: repeat N FAILED` → a job failed for a non-gate reason and needs reading. Nothing since the last state line → the Mac died; the loop is gone.
+3. Whatever the log says, check the jobs themselves: a gated job exits in seconds and still reports **success**, so read `report.json`'s `gate` and `machine.model`, never a status alone. Relaunch any gated index of 6–12 (`launch.py retried background/steamcmd:<k>…`, batched in one push).
+4. When all twelve have landed: `pool_runs.py background/steamcmd --since 47 -- --tag meas-ci:background:2026-09-19`. Budget ~105 min — `pool.py` re-runs `analyze_phase` for every phase of every repeat, nothing is cached, and twelve repeats is 36 phases.
+5. Rule holds → fold-in. Does not hold → add repeats again (no ceiling); 인지오 chose to add a batch rather than one at a time, because re-pooling is too expensive for one-at-a-time cycles.
 
 ## Decisions taken this session
 
