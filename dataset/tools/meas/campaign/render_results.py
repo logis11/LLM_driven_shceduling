@@ -10,7 +10,7 @@ import json
 import os
 import sys
 
-ORDER = ["soffice", "code", "thunderbird", "chrome", "gimp", "kdenlive", "mpv-video", "mpv-audio", "webrtc"]
+ORDER = ["soffice", "code", "thunderbird", "thunderbird-send", "chrome", "gimp", "kdenlive", "mpv-video", "mpv-audio", "webrtc"]
 
 
 def f(v, nd=2):
@@ -38,6 +38,10 @@ def main():
         lines.append("")
         if d.get("cpu_model"):
             lines.append(f"CPU model per repeat {d['cpu_model']}; kernel per repeat {d.get('kernel')}.")
+            lines.append("")
+        if d.get("excluded_repeats"):   # a repeat the validity step failed, with its reason (D47)
+            lines.append("Left out of this pool: " + "; ".join(
+                f"repeat {k} — {why}" for k, why in sorted(d["excluded_repeats"].items(), key=lambda kv: int(kv[0]))) + ".")
             lines.append("")
         if d.get("stability"):
             crit.append((app, d["stability"]))
