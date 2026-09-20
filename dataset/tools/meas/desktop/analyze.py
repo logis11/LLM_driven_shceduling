@@ -94,6 +94,25 @@ def drop_control_tab(rows, span_s):
              "ratio_to_next": round(ratio, 2) if ratio else None})
 
 
+def slice_profile(rows, t0, span_s, slice_s=10.0):
+    """CPU ms per second and wakes per second per slice, as `campaign/slices.py` reports them for the long-phase
+    probe (9.5 D35, D42) — the shape that tells launch work from behaviour that recurs.
+
+    It is computed here rather than by that module because `slices.profile` goes through `campaign.analyze_run`,
+    whose phase loop is fixed to 9.5's names, so it raises KeyError on every phase this slice records.
+    """
+    n = max(1, int(span_s // slice_s))
+    cpu, wakes = [0.0] * n, [0] * n
+    for r in rows:
+        i = int((r.t_in - t0) // slice_s)
+        if 0 <= i < n:
+            cpu[i] += r.run
+            wakes[i] += 1
+    return {"slice_s": slice_s,
+            "cpu_ms_per_s": [round(c / slice_s, 2) for c in cpu],
+            "wakes_per_s": [round(w / slice_s, 2) for w in wakes]}
+
+
 def phases_in(D):
     """Every phase with a timehist, in the order the run recorded them (edges.jsonl), else alphabetical."""
     have = set()
@@ -164,6 +183,7 @@ def analyze_phase(D, phase, app):
         out["renderers_measured"] = n_rend
         out["wakes_per_s_per_renderer"] = round(out["wakes_per_s"] / n_rend, 4) if n_rend else None
         out["cpu_share_per_renderer"] = round(out["cpu_share"] / n_rend, 6) if n_rend else None
+    out["slices"] = slice_profile(kept, t0, span)
     # one renderer's components, the renderers present pooled as its samples
     if app in RENDERER_APPS:
         out["threads"], out["_samples"] = renderer_components(kept, span)

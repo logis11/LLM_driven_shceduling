@@ -225,3 +225,23 @@ def test_the_hidden_subject_drops_its_control_tab(tmp_path):
     assert ph["control_tab"]["dropped"] == 200
     assert ph["control_tab"]["ratio_to_next"] == 6.0
     assert ph["renderers_measured"] == 1 and list(ph["threads"]["chrome"]["wakes_per_s_per_renderer"]) == [0.1]
+
+
+def test_the_slice_profile_reads_a_phase_in_ten_second_slices(tmp_path):
+    # method §3: the long-phase probe's steady phase is read per 10 s slice, which is what tells launch work
+    # from behaviour that recurs (9.5 D35, D42). campaign/slices.py cannot do it for this family — it goes
+    # through campaign.analyze_run, whose phase loop is fixed to 9.5's names and raises KeyError on ours.
+    procs = [{"pid": 200, "comm": "element", "cmd": "/usr/bin/element-desktop"}]
+    rows = ["   0.000010 [0000]  perf[50]    0.000      0.000      0.010      R\n"]
+    for t in (1.0, 2.0, 3.0):            # three wakes in the first slice
+        rows.append(f"   {t:.6f} [0003]  element[201/200]    0.000      0.001      2.000      S\n")
+    rows.append("  25.000000 [0003]  element[201/200]    0.000      0.001      4.000      S\n")   # third slice
+    rows.append("  30.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n")
+    wakeups = "".join(f"   {t - 0.01:.6f} [0001]  x[9]  awakened: element[201/200]\n"
+                      for t in (1.0, 2.0, 3.0, 25.0))
+    d = _run_dir(tmp_path, "element", "idle", procs, "".join(rows), wakeups)
+    sl = analyze.analyze_run_dir(str(d))["phases"]["idle"]["slices"]
+    assert sl["slice_s"] == 10.0
+    assert len(sl["wakes_per_s"]) == 3
+    assert sl["wakes_per_s"][0] == 0.3 and sl["wakes_per_s"][1] == 0.0 and sl["wakes_per_s"][2] == 0.1
+    assert sl["cpu_ms_per_s"][0] == 0.6 and sl["cpu_ms_per_s"][2] == 0.4
