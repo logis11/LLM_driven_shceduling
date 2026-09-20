@@ -29,6 +29,7 @@ settle_for() {
     thunderbird-send) echo 390 ;;   # D44: its launch work ends ~340 s into a 30 s-settled idle phase (long-phase probe)
     chrome) echo 270 ;;             # D51: its ~880 ms ThreadPoolForeground run lands at 180–190 s into one (long-phase probe)
     code) echo 30 ;;                # D53: at its baseline within 10 s of the phase's start — no launch work to settle past
+    webrtc) echo 210 ;;             # D54: its call's dense ramp-up episodes end by 170 s, the 240 s cadence holds after
     *) echo "" ;;
   esac
 }
@@ -42,9 +43,18 @@ idle_for() {
     *) echo 120 ;;      # every repeat takes, a 900 s one +1.6 % (long-phase probe)
   esac
 }
+# D54: the play phase holds whole cycles of a recurring episode — 480 s for webrtc, two of its 240 s saturation
+# cycles (a 300 s phase reads CPU +78 % of the long-run level, a 600 s one strays 9.7 % by placement, being two and a
+# half cycles); 300 s (method §2) elsewhere
+play_for() {
+  case "$1" in
+    webrtc) echo 480 ;;
+    *) echo 300 ;;
+  esac
+}
 if [ "$MODE" = dry ]; then SETTLE=10; IDLE=30; DRIVEN=60; PLAY=60; OPS=90
 elif [ "$MODE" = probe ]; then SETTLE=30; IDLE="${MEAS_PHASE_S:?probe needs MEAS_PHASE_S}"; DRIVEN=0; PLAY="$IDLE"; OPS=0
-else SETTLE="$(settle_for "$APP")"; IDLE="$(idle_for "$APP")"; DRIVEN=600; PLAY=300; OPS=600; fi
+else SETTLE="$(settle_for "$APP")"; IDLE="$(idle_for "$APP")"; DRIVEN=600; PLAY="$(play_for "$APP")"; OPS=600; fi
 rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE"; rec started_utc "$(date -u +%FT%TZ)"
 rec settle_s "${SETTLE:-unset}"; rec idle_s "$IDLE"; rec driven_s "$DRIVEN"; rec play_s "$PLAY"; rec op_s "$OPS"
 if [ -z "$SETTLE" ]; then

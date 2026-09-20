@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-20, `webrtc`'s settle and play phase (changelog D54) — §2, from the D52 probe (run 35496212906): the settle is 210 s, past the call's dense ramp-up episodes (0–40, 60–90, 140–170 s); the play phase is 480 s, design, two whole cycles of the 240 s saturation cadence that holds to the call's end. The present 300 s phase sits inside the ramp-up and reads the play CPU 78 % above the steady call, so `webrtc`'s five repeats and `video-call`'s 0.4084 CPU share are superseded. `settle_for` and `play_for` in `campaign/run.sh`.
+
 - 2026-09-20, `code`'s settle and idle phase (changelog D53) — §2, from the D52 probe (run 35496163876): the settle stays 30 s, the phase is at its baseline within 10 s and holds no launch work; the idle phase is 900 s, design, since `code`'s 25–40 ms/s episode recurs every ~320 s and is anchored to launch — a 120 s phase reads CPU +15.5 % above the long-run level at the placement every repeat takes, a 900 s phase +1.6 %, both the CPU share and the wake rate then inside the 5 % tolerance. `settle_for` and `idle_for` in `campaign/run.sh`; `code`'s 22 pooled repeats are superseded.
 
 - 2026-09-20, the `code` and `webrtc` probes' phase lengths (changelog D52) — §2, both design: `code` 1,400 s, the 1,374.4–1,378.3 s a repeat observes it (D42's ground), resolving whether its 50–70 s idle bump recurs; `webrtc` 2,000 s, not D42's ground (300 s, its only phase) but D35's question — whether the call's CPU saturation, seen over 0–40, 60–90 and 140–170 s, recurs past the 300 s phase. `phase_s` in `.github/campaign-long-probe.json`.
