@@ -40,8 +40,11 @@ TIMER_MS=100                # the page's setInterval period; above both throttli
 PAGE_PORT=8099
 # The grace before intensive throttling is sixty seconds for a page that has finished loading and five minutes
 # by default. Per-tab load completion is not observable from outside the browser, so the grace-settle covers the
-# default: the steady phase then begins throttled whichever class Chromium put the pages in.
-GRACE_S=330
+# default: the steady phase then begins throttled whichever class Chromium put the pages in. 330 s of this is
+# that documented default; the remaining 300 s is design, set from the 2026-09-20 probe, whose steady phase was
+# still settling for its first 300 s — dropping them took the spread of 500 s windows from 11.3% to 3.7%
+# (method section 10, changelog D15).
+GRACE_S=630
 # The visible subject's two steady phases come from a page plan, not from driving the browser: the page holds
 # the timer for STEP1 seconds from its load and then none. STEP1 is generous because the run waits on what the
 # pages report rather than on this number; it only has to be long enough that the switch cannot fall inside the
@@ -57,8 +60,25 @@ SYNAPSE_PORT=8008; SYNAPSE_DIR=/tmp/synapse
 
 # Steady-phase lengths come from the long-phase probe and are written into method §10 before the first batch
 # (method §3, 9.5 D35). A subject without one stops before measuring, as campaign/run.sh's settle_for() does.
-launch_settle_for() { case "$1" in *) echo "" ;; esac; }
-steady_for()        { case "$1" in *) echo "" ;; esac; }
+# Set from the 2026-09-20 probe (changelog D15). The launch-settle is per subject; the hidden subject's own
+# settling past its launch sits in GRACE_S above. The Steam client steps from about 325 to about 298 wakes/s at
+# 900 s and is flat after it, so that step is settled through rather than measured.
+launch_settle_for() {
+  case "$1" in
+    chrome-hidden|chrome-visible|element) echo 20 ;;
+    steam) echo 900 ;;
+    *) echo "" ;;
+  esac
+}
+# 600 s everywhere: the length at which every subject's spread of non-overlapping windows holds inside the 5%
+# tolerance across five repeats — element 2.7%, the visible subject 0.5% with its timer and 3.1% without it,
+# the hidden subject 3.7% past its settle, the Steam client 0.3% past its own.
+steady_for() {
+  case "$1" in
+    chrome-hidden|chrome-visible|element|steam) echo 600 ;;
+    *) echo "" ;;
+  esac
+}
 
 if [ "$MODE" = dry ]; then
   LAUNCH_SETTLE=20; STEADY=45; GRACE_S=75; ORIGINS=3; STEP_GAP=40; STEP_WAIT=180; STEAM_CLIENT_WAIT=900

@@ -121,3 +121,56 @@ method §6's 10 % resolution. D5's inference — that Steam controls its helper'
 an observation of a clean tree.
 
 No value changed by this entry.
+
+## D15 — the long-phase probe, the gate it exposed, and the phase lengths it set (2026-09-20)
+
+The probe of method §3 run for the first time, `mode: probe`, one job per subject on a single long steady
+phase of 1800 s. Four subjects landed on the AMD EPYC 7763 in eight draws — `chrome-visible` first, then
+`chrome-hidden` and `steam`, then `element` on its third — each reporting `gate=open` and no harness process
+in its tree. A probe is never a repeat and no archetype value comes from it.
+
+**A defect that would have emptied the hidden entry's pool.** `desktop/pool.py`'s `throttling_check` decided
+whether intensive throttling engaged by taking the highest rate in `per_pid_wakes_per_s`, which
+`desktop/analyze.py` computes before the control tab is dropped. The control tab carries the same timer and,
+being the selected tab, stays visible to Blink and is never throttled — that is what it is for (§2 subject 1),
+and the run identifies it at 55× the next renderer. The gate therefore tested the one renderer that cannot
+pass it: on this probe it read the control's 10.193 wakes/s against a 0.5 limit while the worst measured
+renderer was 0.184. Every repeat of a five-repeat batch would have gone into `not_throttled` and the entry
+would have carried nothing, with each job reporting `gate=open` and each artifact the right shape. The check
+now excludes the control tab and returns `(True, 0.184)` on this artifact; a measured renderer that never
+throttled is still caught, and a phase holding only a control tab is rejected rather than passed.
+
+This also corrects D14. A `dry` repeat of the hidden subject was rejected by this gate at any grace, not
+because its 75 s grace left throttling unengaged. The probe reads 0.1817 wakes/s per renderer with the real
+330 s grace against 0.178 in the dry run, and the page's own thread at 0.040 wakes/s where the unthrottled
+control sits at 10.193 — throttling was engaged in both.
+
+**What each subject showed.** The chat client is flat from its first slice, its first minute the lowest of the
+thirty; its launch work is over before the phase begins. The visible subject reproduces the page's 100 ms
+period exactly, 10.032 wakes/s on the thread the callback runs on, and falls to 0.130 per renderer with the
+timer removed. The hidden subject sits at 0.1817 per renderer, of which 0.100 is `HangWatcher` — Chromium's
+hang-detection thread, which polls whatever the page does — and 0.040 the page's own thread. The Steam client
+holds 311.8 wakes/s over the phase with `steamwebhelper` at 72.9 and `steam` at 71.0, against 317.9 in the dry
+run.
+
+**Two subjects were still settling inside what the method treated as steady.** The Steam client steps from
+about 325 to about 298 wakes/s at 900 s; dropping that step takes the spread of its 120 s windows from 4.8 %
+to 0.2 %. The hidden subject settles for about 300 s past its 330 s grace; dropping it takes the spread of its
+500 s windows from 11.3 % to 3.7 %.
+
+**By 인지오's decision**, the steady phase is 600 s for every subject, N stays at 12, the launch-settle is 20 s
+for the two renderer subjects and the chat client and 900 s for the Steam client, and the hidden subject's
+grace-settle is 630 s — 330 s of Chromium's documented default and 300 s of design read from the probe.
+`launch_settle_for()` and `steady_for()` in `desktop/run.sh` carry them, so a `full` job no longer stops at
+`gate=no-phase-lengths`. Method §10 carries the amendment, which §9 requires before the first batch.
+
+**The throttled renderers do not wake independently.** Counting the bins in which every one of the twelve woke
+gives 243 bins of 1 s and 32 bins of 10 ms, against none at either width in draws that keep each renderer's own
+wake count and place its wakes uniformly over the phase. §9's second item is read and answered. What it implies
+for D14's decision to pool the N renderers of a job as N samples of one renderer is open.
+
+**Open after this entry:** whether the visible entry reads the no-timer phase — the probe answers the yield
+half, the no-timer phase holding a 3.1 % spread at 600 s against the 5 % tolerance — and what the alignment
+above does to the pooling of N renderers as N samples.
+
+No value changed by this entry.
