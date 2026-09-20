@@ -33,6 +33,28 @@ from meas.campaign.analyze import (   # noqa: E402  — the component layer, one
 # future Chromium adds a role — an unrecognised role arrives as "other" and is dropped.
 KEEP_ROLE = "renderer"
 RENDERER_APPS = ("chrome-hidden", "chrome-visible")
+# Chrome's own renderers, which are not a page's. They carry --type=renderer and pid_roles therefore calls them
+# renderers, but they belong to the browser — to `web-browser`, the other half of this application — and not to
+# the entry that describes a page's renderer. The dry run of 2026-09-20 found two extension processes and one
+# top-chrome WebUI renderer among eight, diluting the archetype. They are read from renderers.tsv, the whole
+# command lines: --extension-process sits about 129 characters in, past the 120 the snapshot keeps.
+NOT_PAGE_RENDERER = ("--extension-process", "--top-chrome-webui")
+
+
+def page_renderers(D):
+    """pids of the renderers that are a page's, from renderers.tsv; None when the run recorded no such file."""
+    p = os.path.join(D, "renderers.tsv")
+    if not os.path.exists(p):
+        return None
+    out, seen = set(), False
+    for line in open(p):
+        parts = line.rstrip("\n").split("\t", 1)
+        if len(parts) != 2:
+            continue
+        seen = True
+        if not any(f in parts[1] for f in NOT_PAGE_RENDERER):
+            out.add(int(parts[0]))
+    return out if seen else None
 
 
 def renderer_components(rows, span_s):
@@ -160,6 +182,12 @@ def analyze_phase(D, phase, app):
     if app in RENDERER_APPS:
         kept = [r for r in segments if roles.get(r.pid, "main") == KEEP_ROLE]
         out["role_filter"] = f"kept {KEEP_ROLE} only"
+        pages = page_renderers(D)
+        if pages is not None:
+            dropped = sorted({r.pid for r in kept} - pages)
+            out["renderers_not_page"] = dropped
+            kept = [r for r in kept if r.pid in pages]
+            out["role_filter"] += ", browser's own renderers dropped"
     else:
         kept = segments
         out["role_filter"] = "none"
