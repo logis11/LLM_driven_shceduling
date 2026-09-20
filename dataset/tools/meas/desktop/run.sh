@@ -328,16 +328,16 @@ steam_setup() {
   if pin_harness xdotool getwindowname "$WID" 2>/dev/null | grep -qi "steam installer"; then
     rec steam.installer_dialog 1
     pin_harness xdotool windowactivate --sync "$WID" 2>/dev/null
-    pin_harness xdotool key --clearmodifiers Return; sleep 5
-    if pin_harness xdotool getwindowname "$WID" 2>/dev/null | grep -qi "steam installer"; then
-      pin_harness xdotool key --clearmodifiers Tab; sleep 1
-      pin_harness xdotool key --clearmodifiers Return; sleep 5
-    fi
-    if pin_harness xdotool getwindowname "$WID" 2>/dev/null | grep -qi "steam installer"; then
-      # the Install button sits in the right half of the dialog's bottom row
-      eval "$(pin_harness xdotool getwindowgeometry --shell "$WID" 2>/dev/null)"
-      pin_harness xdotool mousemove $((X + WIDTH * 3 / 4)) $((Y + HEIGHT - 25)) click 1; sleep 5
-    fi
+    # The Install button is clicked by position, never by Return: the dry run of 2026-09-20 pressed Return and
+    # the log read "steam: Installation cancelled" — zenity's default button here is Cancel, on the left, with
+    # Install on the right of the bottom row.
+    eval "$(pin_harness xdotool getwindowgeometry --shell "$WID" 2>/dev/null)"
+    for dy in 26 40 14; do
+      pin_harness xdotool getwindowname "$WID" 2>/dev/null | grep -qi "steam installer" || break
+      pin_harness xdotool mousemove $((X + WIDTH * 3 / 4)) $((Y + HEIGHT - dy)) click 1
+      rec "steam.installer_click_dy" "$dy"
+      sleep 5
+    done
     rec steam.installer_dismissed "$(pin_harness xdotool getwindowname "$WID" 2>/dev/null | grep -qi "steam installer" && echo no || echo yes)"
     screenshot after-installer-consent
   fi
