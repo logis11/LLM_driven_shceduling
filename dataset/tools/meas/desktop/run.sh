@@ -359,9 +359,11 @@ steam_setup() {
   W2=$(wait_window "$CLASS" 120); [ -n "$W2" ] && WID="$W2"
   rec steam.client_window "$(pin_harness xdotool getwindowname "$WID" 2>/dev/null)"
   screenshot after-client
-  # the client's own build id is a dry-run finding (method §9); what is recorded here is the package the runner
-  # installed, which is observable now
+  # the client's own build id: the dry run of 2026-09-20 found it in the web helper's command line, as
+  # -buildid=, beside -steamid=0 which is the logged-out state D6 requires
   rec steam.package "$(dpkg-query -W -f='${Package} ${Version}' steam-installer 2>/dev/null)"
+  rec steam.buildid "$(tr '\0' ' ' < /proc/$(pgrep -f steamwebhelper | head -1)/cmdline 2>/dev/null | grep -o 'buildid=[0-9]*' | head -1 | cut -d= -f2)"
+  rec steam.steamid "$(tr '\0' ' ' < /proc/$(pgrep -f steamwebhelper | head -1)/cmdline 2>/dev/null | grep -o 'steamid=[0-9]*' | head -1 | cut -d= -f2)"
   edge launch-settle start; sleep "$LAUNCH_SETTLE"; edge launch-settle end
 }
 
