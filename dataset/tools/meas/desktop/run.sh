@@ -203,6 +203,9 @@ chrome_subject() {
   if [ -n "$POSTLAUNCH" ]; then bash -c "$POSTLAUNCH" > "$OUT/postlaunch.log" 2>&1; screenshot after-postlaunch; fi
   edge launch-settle start; sleep "$LAUNCH_SETTLE"; edge launch-settle end
   screenshot after-launch-settle
+  # `chrome-data` does not appear in this script's command line, whose argument is chrome-hidden — but that is a
+  # fact to check rather than to rely on, and it is the same check the other two subjects need
+  check_tree chrome-tree
   if [ "$APP" = chrome-hidden ]; then
     renderer_gate "$((ORIGINS + 1))"
     # the measured tabs are background pages from the launch — the control tab is first and stays selected — so
