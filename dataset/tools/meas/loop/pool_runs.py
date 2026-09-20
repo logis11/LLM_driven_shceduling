@@ -113,8 +113,9 @@ def validity(family, dirs, entry):
                 notes.append(f"page server answered {r.get('page.server')}")
             if r.get("app") == "element" and r.get("matrix.sync_rows") in (None, "0"):
                 notes.append("no /sync reached the homeserver — the client was not signed in")
-            # every repeat of one subject must have run at one N, or the pool is not a pool
-            if r.get("settings.origins"):
+            # every repeat of one subject must have run at one N, or the pool is not a pool. A probe is never a
+            # repeat and its N may differ by design, so it stays out of the comparison.
+            if r.get("settings.origins") and r.get("mode") != "probe":
                 origins.add(r["settings.origins"])
         bad += bool(notes)
         print(f"   r{k}: {'ok' if not notes else '; '.join(notes)}{''.join(f' ({x})' for x in info)}")

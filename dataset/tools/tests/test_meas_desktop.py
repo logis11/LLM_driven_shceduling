@@ -116,3 +116,52 @@ def test_a_hidden_repeat_whose_renderers_never_throttled_is_left_out():
     assert ok is False and worst == 9.8
     # the visible subject is not throttled by design, so the check does not apply to it
     assert pool.throttling_check("chrome-visible", unthrottled)[0] is True
+
+
+def _loop_dirs(tmp_path, rows):
+    """rows: {repeat -> report.kv dict}; every repeat gates open on the campaign's machine."""
+    dirs = {}
+    for k, kvs in rows.items():
+        p = tmp_path / f"r{k}"
+        p.mkdir(parents=True)
+        (p / "report.json").write_text(json.dumps(
+            {"gate": "open", "machine.model": "AMD EPYC 7763 64-Core Processor"}))
+        (p / "report.kv").write_text("".join(f"{a}={b}\n" for a, b in kvs.items()))
+        dirs[k] = str(p)
+    return dirs
+
+
+def _pool_runs(repo_root):
+    """loop/pool_runs.py imports its sibling registry as a flat `common`, so its directory goes on the path."""
+    import importlib
+    import sys
+    d = str(repo_root / "dataset" / "tools" / "meas" / "loop")
+    if d not in sys.path:
+        sys.path.insert(0, d)
+    return importlib.import_module("pool_runs")
+
+
+def test_the_desktop_validity_arm_reads_the_loop_s_checks(tmp_path, repo_root):
+    # D13: the loop's per-repeat line for this family — the renderer count against the minimum the job wanted,
+    # the page server, Element's session, and one origin count across the repeats that are repeats
+    pool_runs = _pool_runs(repo_root)
+    base = {"app": "chrome-hidden", "mode": "full", "renderers.wanted_min": "13",
+            "renderers.observed": "13", "page.server": "200", "settings.origins": "12"}
+    dirs = _loop_dirs(tmp_path / "chrome", {
+        1: dict(base),
+        2: dict(base, **{"renderers.observed": "9"}),
+        3: dict(base, **{"mode": "probe", "settings.origins": "8"}),
+    })
+    # repeat 2 alone: the probe is never a repeat, so its smaller N stays out of the cross-repeat comparison
+    assert pool_runs.validity("desktop", dirs, {"repeats": [1, 2, 3], "phases": {}}) == 1
+
+
+def test_an_element_repeat_without_a_session_is_flagged(tmp_path, repo_root):
+    # D7/D13: the idle phase the archetype reads is the /sync long poll, which no signed-out client holds, so a
+    # repeat whose session never reached the homeserver measured a login screen
+    pool_runs = _pool_runs(repo_root)
+    dirs = _loop_dirs(tmp_path / "element", {
+        1: {"app": "element", "mode": "full", "matrix.sync_rows": "0"},
+        2: {"app": "element", "mode": "full", "matrix.sync_rows": "412"},
+    })
+    assert pool_runs.validity("desktop", dirs, {"repeats": [1, 2], "phases": {}}) == 1
