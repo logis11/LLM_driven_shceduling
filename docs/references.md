@@ -302,7 +302,7 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 ### `meas-ci`
 - cite: this work — CI measurement campaign; workflow files and raw outputs released in the artifact. Locator: `meas-ci:<workflow>:<campaign>`, the campaign's launch date (`YYYY-MM-DD`), or a run number for a one-run campaign from before that form.
 - role: structural/shape claims about software behavior only (fork structure, counts, lifetime shapes, periods, heartbeats, comm strings); machine-relative absolutes carry the runner spec and rank as convention-informed-by-measurement. Never desktop-performance claims. N-run spread reported.
-- status: reserved (no runs yet; `meas-pending` placeholders in archetypes until freeze)
+- status: in use — a campaign's repeats are same-machine (one CPU model under the machine gate), its raw records are one release, and each repeat's run id is in the pooled record and in the archetype's `validation_stats.run`; how a campaign is run and when it stops is `_dev/research/jioh/measurement-campaign-workflow.md`
 
 ### `meas-pending`
 - cite: none — not a source; the placeholder sentinel for parameters awaiting the CI campaign.
