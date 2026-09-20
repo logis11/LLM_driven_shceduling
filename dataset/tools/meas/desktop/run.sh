@@ -241,9 +241,12 @@ element_setup() {
   synapse_start
   grep -q '^synapse.health=200$' "$KV" || stop_recorded no-homeserver "Synapse did not answer /health — stopping before any measurement"
   # the account: register_new_matrix_user against the shared secret, so open registration is never left running
+  # -c, not -k: register_new_matrix_user reads the shared secret from the config itself, so the secret never
+  # makes a round trip through the shell. The dry run of 2026-09-20 failed here with "-k/--shared-secret:
+  # expected one argument" although the read-back had reported a value.
   pin_harness /opt/venvs/matrix-synapse/bin/register_new_matrix_user \
-    -u "$MATRIX_USER" -p "$MATRIX_PASS" -a -k "$MATRIX_SECRET" "http://127.0.0.1:$SYNAPSE_PORT" \
-    > "$OUT/register.log" 2>&1
+    -u "$MATRIX_USER" -p "$MATRIX_PASS" -a --exists-ok -c "$SYNAPSE_DIR/homeserver.yaml" \
+    "http://127.0.0.1:$SYNAPSE_PORT" > "$OUT/register.log" 2>&1
   rec matrix.register.rc "$?"
   wget -qO /tmp/element-io-archive-keyring.gpg https://packages.element.io/debian/element-io-archive-keyring.gpg
   sudo cp /tmp/element-io-archive-keyring.gpg /usr/share/keyrings/
@@ -257,7 +260,11 @@ element_setup() {
   # apt.element.rc, and the next statement is this one.
   rec element.version "$(dpkg-query -W -f='${Version}' element-desktop 2>/dev/null || timeout 20 element-desktop --version 2>&1 | head -1)"
   export ELEMENT_DESKTOP_CONFIG_JSON="$(printf '{"default_server_config":{"m.homeserver":{"base_url":"http://127.0.0.1:%s","server_name":"meas.local"}},"disable_custom_urls":true,"show_labs_settings":false}' "$SYNAPSE_PORT")"
-  LAUNCH="element-desktop --no-sandbox --disable-gpu"
+  # --disable-gpu alone is what meas-gui.yml used, but Element 1.12.28 died with "GPU process launch failed:
+  # error_code=1002 … GPU process isn't usable. Goodbye." and showed its "System unsupported" page: Electron
+  # treats an unusable GPU process as fatal where Chrome tolerates it. The GPU sandbox is disabled with the
+  # rest, and /dev/shm is not used, which is the shape a hosted runner needs.
+  LAUNCH="element-desktop --no-sandbox --disable-gpu --disable-gpu-sandbox --disable-software-rasterizer --disable-dev-shm-usage"
   CLASS="element|Element"; PAT="element-desktop|element"; RX="element|Element"
   rec launch "$LAUNCH"; rec rx "$RX"; rec pat "$PAT"
   launch_app
