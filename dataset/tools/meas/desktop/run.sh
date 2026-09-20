@@ -252,7 +252,10 @@ element_setup() {
   sudo apt-get update > /dev/null 2>&1
   sudo apt-get install -y --no-install-recommends element-desktop > "$OUT/apt.element.log" 2>&1
   rec apt.element.rc "$?"
-  rec element.version "$(element-desktop --version 2>&1 | head -1)"
+  # under `timeout`, and from the package first: an Electron binary given --version may start its GUI instead of
+  # printing and exiting, and the dry runs of 2026-09-20 hung here twice — the last key recorded was
+  # apt.element.rc, and the next statement is this one.
+  rec element.version "$(dpkg-query -W -f='${Version}' element-desktop 2>/dev/null || timeout 20 element-desktop --version 2>&1 | head -1)"
   export ELEMENT_DESKTOP_CONFIG_JSON="$(printf '{"default_server_config":{"m.homeserver":{"base_url":"http://127.0.0.1:%s","server_name":"meas.local"}},"disable_custom_urls":true,"show_labs_settings":false}' "$SYNAPSE_PORT")"
   LAUNCH="element-desktop --no-sandbox --disable-gpu"
   CLASS="element|Element"; PAT="element-desktop|element"; RX="element|Element"
