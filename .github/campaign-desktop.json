@@ -1,21 +1,13 @@
 {
   "note": "Trigger for meas-desktop.yml (9.8 campaign). Dispatch is unavailable off the default branch, so a push that changes this file starts the runs it names. Set apps to [] to skip; repeats is one list for every subject or a map subject -> list. Subjects: chrome-hidden | chrome-visible | element | steam. mode: dry | probe | full — probe is the long-phase probe and is never a repeat. These five keys are the whole trigger by D13: N, the timer period, the grace, the phase lengths, the homeserver and the traffic rate are constants in dataset/tools/meas/desktop/run.sh, because a pool whose repeats ran at different settings is not a pool. A dry run sets cpu_model to \"\" so machine_gate opens on any model: it verifies the tooling, is never pooled and is not a repeat, so it has no reason to hold the campaign's machine.",
   "mode": "dry",
-  "attempt": 3,
+  "attempt": 4,
   "cpu_model": "",
   "apps": [
-    "chrome-hidden",
-    "chrome-visible",
     "element",
     "steam"
   ],
   "repeats": {
-    "chrome-hidden": [
-      1
-    ],
-    "chrome-visible": [
-      1
-    ],
     "element": [
       1
     ],
