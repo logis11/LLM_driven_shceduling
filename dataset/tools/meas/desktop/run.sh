@@ -305,12 +305,21 @@ element_setup() {
     sleep 15
   fi
   screenshot before-login
-  # The sign-in form: the exact field order is a dry-run finding (method §9). Tab order from the focused
-  # username field is username, password, submit.
+  # Element opens on a welcome screen — "Be in your element", with Sign in and Create account — and the
+  # username and password fields exist only after Sign in is clicked. The dry run of 2026-09-20 typed the
+  # credentials into that screen, which has no fields, and the job stopped at gate=not-logged-in. Sign in sits
+  # centred, about a third of the way down the window. A screenshot follows each step so that a failure says
+  # which one.
+  pin_harness xdotool windowactivate --sync "$WID"
+  eval "$(pin_harness xdotool getwindowgeometry --shell "$WID" 2>/dev/null)"
+  pin_harness xdotool mousemove $((X + WIDTH / 2)) $((Y + HEIGHT * 35 / 100)) click 1
+  sleep 8; screenshot after-signin
+  # the form: the username field takes focus, then Tab to the password, then submit
   pin_harness xdotool windowactivate --sync "$WID"
   pin_harness xdotool type --delay 40 "$MATRIX_USER"
   pin_harness xdotool key --clearmodifiers Tab; sleep 0.5
   pin_harness xdotool type --delay 40 "$MATRIX_PASS"
+  sleep 1; screenshot after-credentials
   pin_harness xdotool key --clearmodifiers Return
   sleep 30; screenshot after-login
   # verified from the server's side: a signed-in client holds a /sync long poll, and a signed-out one cannot
