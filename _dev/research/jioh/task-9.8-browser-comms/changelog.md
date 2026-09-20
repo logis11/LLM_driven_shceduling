@@ -174,3 +174,32 @@ half, the no-timer phase holding a 3.1 % spread at 600 s against the 5 % toleran
 above does to the pooling of N renderers as N samples.
 
 No value changed by this entry.
+
+## D16 — the visible entry reads the no-timer phase (2026-09-20)
+
+By 인지오's decision, closing the third of method §9's items open before the first batch.
+
+The visible entry takes the steady phase the page runs with its timer removed. §9 set the condition — that
+phase if the probe shows it yields enough wakes for the quantile tables and for the half-width to converge,
+otherwise the timer phase with `wakes_per_s` labelled design — and the probe meets it: at 600 s the no-timer
+phase holds a 3.1 % spread of non-overlapping windows, a 3.9 % half-width across five repeats, against the 5 %
+tolerance. The entry therefore carries an observation, 0.130 wakes/s per renderer, where the alternative was
+our own timer period. The value is multiplied by every renderer task in every timeline, which is the ground
+for preferring the observed one. `CARRIED` in `desktop/pool.py` already lists `steady-notimer` first and `LIST`
+takes the first phase, so no tooling changes.
+
+**What it does to the effect the slice reports.** Method §6 item 2 grounds the tolerance on the smallest effect
+the slice reports and names the hidden-against-visible comparison as about sixtyfold in wake rate. That holds
+for the two *states* with a timer running, and the probe measures it at 56× — 10.179 wakes/s per visible
+renderer against 0.182 per hidden one, the same separation the control tab shows at 55.26 inside the hidden
+job. But the two *entries* the slice carries are now the hidden renderer against a visible renderer with no
+timer at all, and those differ by 39 %, 0.182 against 0.130. It stays above the 10 % below which §6 reports a
+difference as not resolved rather than as an effect, so the tolerance is unchanged; §10 carries the corrected
+statement.
+
+**Hands to 9.13:** both renderer entries are majority `HangWatcher` — Chromium's hang-detection thread, which
+polls whatever the page does — at 0.100 wakes/s of the hidden entry's 0.182 and of the visible entry's 0.130.
+The page's own thread is 0.040 hidden and 0.020 visible. An entry's scope states this: what separates the two
+is a fraction of each one's wakes, and most of what either carries is the browser's own housekeeping.
+
+No value changed by this entry.
