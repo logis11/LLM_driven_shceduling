@@ -201,7 +201,7 @@ synapse_start() {
   sudo apt-get update > /dev/null 2>&1
   sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends matrix-synapse-py3 > "$OUT/apt.synapse.log" 2>&1
   rec apt.synapse.rc "$?"
-  rec synapse.version "$(/opt/venvs/matrix-synapse/bin/python -m synapse.app.homeserver --version 2>&1 | head -1)"
+  rec synapse.version "$(dpkg-query -W -f='${Version}' matrix-synapse-py3 2>/dev/null)"
   sudo systemctl mask matrix-synapse.service > /dev/null 2>&1
   sudo systemctl stop matrix-synapse.service > /dev/null 2>&1
   mkdir -p "$SYNAPSE_DIR"
