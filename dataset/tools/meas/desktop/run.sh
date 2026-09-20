@@ -42,7 +42,14 @@ PAGE_PORT=8099
 # by default. Per-tab load completion is not observable from outside the browser, so the grace-settle covers the
 # default: the steady phase then begins throttled whichever class Chromium put the pages in.
 GRACE_S=330
-PROBE_PERIODS="50 100 500"  # the visible subject's period sweep, run as successive phases of one probe job (D13)
+# The visible subject's two steady phases come from a page plan, not from driving the browser: the page holds
+# the timer for STEP1 seconds from its load and then none. STEP1 is generous because the run waits on what the
+# pages report rather than on this number; it only has to be long enough that the switch cannot fall inside the
+# first phase. The probe's period sweep is three probe pushes with TIMER_MS edited between them (D13: the way to
+# change a design value is to edit this file and bump the trigger's attempt), not three phases of one job.
+STEP_GAP=120                # margin over a phase, absorbing perf post-processing
+STEP_WAIT=600               # how long the run waits for every window to report the no-timer step
+STEAM_CLIENT_WAIT=900       # the bootstrap downloads the client on first run; the helpers are the signal
 HOMESERVER=synapse
 TRAFFIC_PER_MIN=60          # instrument setting, not a claim about users (method §2 subject 4)
 MATRIX_USER=meas; MATRIX_PASS=meas-9.8-local; MATRIX_SECRET=meas-9-8-registration-secret
@@ -54,7 +61,7 @@ launch_settle_for() { case "$1" in *) echo "" ;; esac; }
 steady_for()        { case "$1" in *) echo "" ;; esac; }
 
 if [ "$MODE" = dry ]; then
-  LAUNCH_SETTLE=20; STEADY=45; GRACE_S=75; ORIGINS=3; PROBE_PERIODS="100"
+  LAUNCH_SETTLE=20; STEADY=45; GRACE_S=75; ORIGINS=3; STEP_GAP=40; STEP_WAIT=180; STEAM_CLIENT_WAIT=900
 elif [ "$MODE" = probe ]; then
   LAUNCH_SETTLE=20; STEADY=1800          # one long phase, read per 10 s slice by campaign/slices.py
 else
@@ -121,32 +128,38 @@ renderer_gate() {
   [ "$n" -ge "$want" ] || stop_recorded wrong-renderer-count "renderer gate: wanted at least $want renderers, observed $n — stopping before the steady phase"
 }
 
-# navigate <window-id> <url> — through the omnibox, as ops_driver.py's chrome operation drives it
-navigate() {
-  pin_harness xdotool windowactivate --sync "$1"
-  pin_harness xdotool key --clearmodifiers ctrl+l; sleep 0.3
-  pin_harness xdotool type --delay 5 "$2"
-  pin_harness xdotool key --clearmodifiers Return
+# window_steps — one line per browser window: the step its page reports in its title. xdotool getwindowname
+# reads a window without focusing it, which is what makes this work where typing did not.
+window_steps() {
+  local w
+  for w in $(pin_harness xdotool search --onlyvisible --class "$CLASS" 2>/dev/null); do
+    pin_harness xdotool getwindowname "$w" 2>/dev/null | grep -oE 'idle-page .*' || true
+  done
 }
 
-# navigate_all <query-string> — re-point every window at ITS OWN origin with new parameters. Each window must
-# stay on the origin it was opened at: the origins are what make the renderers separate site-locked processes,
-# so sending them all to one address would collapse N renderers into one and measure something else entirely.
-# The origin is read back from the window title, which the page sets once at load.
-navigate_all() {
-  local w title origin n=0
-  for w in $(pin_harness xdotool search --onlyvisible --class "$CLASS" 2>/dev/null); do
-    title="$(pin_harness xdotool getwindowname "$w" 2>/dev/null)"
-    origin="$(printf '%s' "$title" | grep -oE 'http://127\.0\.0\.[0-9]+:[0-9]+' | head -1)"
-    [ -n "$origin" ] || continue
-    navigate "$w" "$origin/idle-page.html?$1"; n=$((n + 1))
+# wait_for_step <label> <seconds> — block until every window's page reports <label> ("timer <n> ms" or "no
+# timer"), then record what was seen. The page walks its own schedule from its load (idle-page.html), so the run
+# SYNCHRONISES on what the pages report rather than assuming the phase boundary landed where it was planned —
+# the gap between phases is dominated by perf post-processing, whose length is not knowable in advance.
+wait_for_step() {
+  local want="$1" secs="$2" i n_all n_want
+  for i in $(seq 1 "$secs"); do
+    n_all="$(window_steps | wc -l | tr -d ' ')"
+    n_want="$(window_steps | grep -cF "$want" || true)"
+    [ "$n_all" -gt 0 ] && [ "$n_all" = "$n_want" ] && break
+    sleep 1
   done
-  rec "navigated.$1" "$n"
-  sleep 15
+  rec "step.$want.windows" "$n_all"; rec "step.$want.reporting" "$n_want"
+  window_steps > "$OUT/steps.$want.txt"
+  [ "$n_all" = "$n_want" ]
 }
 
 chrome_subject() {
   export MEAS_ORIGINS="$ORIGINS" MEAS_TIMER_MS="$TIMER_MS" MEAS_PAGE_PORT="$PAGE_PORT"
+  if [ "$APP" = chrome-visible ]; then
+    export MEAS_PAGE_PLAN="$TIMER_MS:$((LAUNCH_SETTLE + STEADY + STEP_GAP)),0:$((STEADY + STEP_GAP + STEP_WAIT))"
+    rec page.plan "$MEAS_PAGE_PLAN"
+  fi
   appdef "$APP" || exit 0
   rec launch "$LAUNCH"; rec rx "$RX"; rec pat "$PAT"
   launch_app
@@ -164,16 +177,13 @@ chrome_subject() {
     phase steady "$STEADY" ""
   else
     renderer_gate "$ORIGINS"
-    if [ "$MODE" = probe ]; then
-      for ms in $PROBE_PERIODS; do
-        navigate_all "ms=$ms"
-        phase "steady-timer-$ms" "$STEADY" ""
-      done
-    else
-      phase steady-timer "$STEADY" ""
-    fi
-    navigate_all "timer=0"
-    screenshot after-notimer-nav
+    # every window must still be on the timer step, or the phase is not the phase it claims
+    wait_for_step "timer $TIMER_MS ms" 30 || rec step.timer.incomplete 1
+    phase steady-timer "$STEADY" ""
+    # the pages switch themselves off on their own schedule; the run waits for every window to report it
+    wait_for_step "no timer" "$STEP_WAIT" || stop_recorded timer-not-stopped \
+      "not every window reported the no-timer step within ${STEP_WAIT}s — the second phase would carry timers the first already had"
+    screenshot after-notimer
     phase steady-notimer "$STEADY" ""
   fi
 }
@@ -287,8 +297,26 @@ steam_setup() {
   CLASS="Steam|steam"; PAT="steam"; RX="steam|Steam"
   rec launch "$LAUNCH"; rec rx "$RX"; rec pat "$PAT"
   launch_app
+  # `steam-installer` is a bootstrap: the first `steam` opens a window named "Steam installer" which downloads
+  # the real client. The dry run of 2026-09-20 measured that dialog — `steam.helpers` 0 in both phases and no
+  # row matching the process regex — so the window alone is not the signal. The client is up when its CEF
+  # helpers exist, which is also what D5's open question is about, so that is what the run waits for.
   WID=$(wait_window "$CLASS" 300)
   [ -n "$WID" ] || { screenshot no-window; stop_recorded no-window "no Steam window after 300 s — the client may not hold a stable state logged out (D6's fallback)"; }
+  rec steam.first_window "$(pin_harness xdotool getwindowname "$WID" 2>/dev/null)"
+  for i in $(seq 1 "$STEAM_CLIENT_WAIT"); do
+    [ "$(pgrep -cf steamwebhelper 2>/dev/null | head -1)" -gt 0 ] && break
+    sleep 1
+  done
+  rec steam.helpers.at_launch "$(pgrep -cf steamwebhelper 2>/dev/null | head -1)"
+  [ "$(pgrep -cf steamwebhelper 2>/dev/null | head -1)" -gt 0 ] || {
+    screenshot no-client
+    stop_recorded no-steam-client "the bootstrap did not reach a running client within ${STEAM_CLIENT_WAIT}s — no steamwebhelper (D6's fallback: the binding retires to 9.10 instead of being measured)"
+  }
+  # the client's own window, once the bootstrap's dialog has gone
+  W2=$(wait_window "$CLASS" 120); [ -n "$W2" ] && WID="$W2"
+  rec steam.client_window "$(pin_harness xdotool getwindowname "$WID" 2>/dev/null)"
+  screenshot after-client
   # the client's own build id is a dry-run finding (method §9); what is recorded here is the package the runner
   # installed, which is observable now
   rec steam.package "$(dpkg-query -W -f='${Package} ${Version}' steam-installer 2>/dev/null)"
@@ -300,7 +328,9 @@ steam_record_helpers() {   # <label> — D5's open question: each helper's --typ
   for p in $(pgrep -f steamwebhelper 2>/dev/null); do
     printf '%s\t%s\t%s\n' "$label" "$p" "$(tr '\0' ' ' < "/proc/$p/cmdline" 2>/dev/null)" >> "$OUT/steam-helpers.tsv"
   done
-  rec "steam.helpers.$label" "$(pgrep -cf steamwebhelper 2>/dev/null || echo 0)"
+  # pgrep -c prints its count and exits 1 when there are none, so `|| echo 0` printed a second line and `rec`
+  # wrote a bare `0` into report.kv
+  rec "steam.helpers.$label" "$(pgrep -cf steamwebhelper 2>/dev/null | head -1)"
 }
 
 # ---- the job ---------------------------------------------------------------------------------------------------

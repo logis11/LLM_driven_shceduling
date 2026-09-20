@@ -33,13 +33,16 @@ def test_the_three_chrome_arms_launch_with_identical_flags(repo_root):
     assert "--no-sandbox" in arm[0], "the flag is kept and stated (D13 corrects D12's claim that it is avoided)"
 
 
-def test_the_page_times_out_of_a_nesting_level_and_does_no_work_per_wake(repo_root):
-    # D13 / decision 7: setInterval, not a one-shot setTimeout — intensive throttling applies only to timers with
-    # a high nesting level — and a callback that increments a counter and returns, so the entries are floors.
+def test_the_measured_timer_is_an_interval_that_does_no_work_per_wake(repo_root):
+    # D13 / decision 7: setInterval, not a one-shot setTimeout — intensive throttling applies only to timers
+    # with a high nesting level — and a callback that increments a counter and returns, so the entries are
+    # floors. The only other timer is the one-shot that walks the page's step plan.
     page = (repo_root / "dataset" / "tools" / "meas" / "probe" / "idle-page.html").read_text()
-    assert "setInterval(" in page and "setTimeout(" not in page
+    assert page.count("setInterval(") == 1
     body = re.search(r"setInterval\(function \(\) \{(.*?)\}", page, re.S).group(1)
     assert body.strip() == "n++;", f"the callback must do nothing but count, found {body.strip()!r}"
+    for call in re.findall(r"setTimeout\(([^,]+),", page):
+        assert call.strip() == "step", f"the only one-shot timer walks the plan, found setTimeout({call})"
 
 
 def _run_dir(tmp_path, app, phase, procs, rows, wakeups=""):
@@ -167,13 +170,19 @@ def test_an_element_repeat_without_a_session_is_flagged(tmp_path, repo_root):
     assert pool_runs.validity("desktop", dirs, {"repeats": [1, 2], "phases": {}}) == 1
 
 
-def test_renavigation_keeps_each_window_on_its_own_origin(repo_root):
-    # the origins are what make the renderers separate site-locked processes, so re-pointing every window at one
-    # address between phases would collapse N renderers into one and measure something else. navigate_all takes a
-    # query string and reads each window's origin back from its title; it must never build an address itself.
+def test_the_renderer_subjects_drive_no_input(repo_root):
+    # the dry run of 2026-09-20 showed why: run.sh retyped a URL into each window through the omnibox, and
+    # without a window manager xdotool windowactivate does not move X input focus, so all three navigations
+    # landed on one window and two renderers kept their timers through the phase that was meant to have none.
+    # The page now walks its own plan and the run synchronises on what each window reports.
     src = (repo_root / "dataset" / "tools" / "meas" / "desktop" / "run.sh").read_text()
-    body = re.search(r"^navigate_all\(\) \{(.*?)^\}", src, re.S | re.M).group(1)
-    assert "getwindowname" in body, "the origin must be read back from the window title"
-    assert "127.0.0." not in body, "navigate_all must not name an address of its own"
-    for call in re.findall(r"^\s*navigate_all (.+)$", src, re.M):
-        assert "127.0.0." not in call and "http" not in call, f"navigate_all takes a query string, got {call}"
+    body = re.search(r"^chrome_subject\(\) \{(.*?)^\}", src, re.S | re.M).group(1)
+    for forbidden in ("xdotool type", "xdotool key", "windowactivate", "navigate"):
+        assert forbidden not in body, f"the renderer subjects must drive no input, found {forbidden!r}"
+    wait = re.search(r"^wait_for_step\(\) \{(.*?)^\}", src, re.S | re.M).group(1)
+    assert "getwindowname" in window_steps_body(src), "the step is read back per window, without focus"
+    assert "rec " in wait and "seq 1" in wait, "the wait polls and records what it saw"
+
+
+def window_steps_body(src):
+    return re.search(r"^window_steps\(\) \{(.*?)^\}", src, re.S | re.M).group(1)

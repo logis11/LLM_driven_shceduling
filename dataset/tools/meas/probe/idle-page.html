@@ -16,14 +16,23 @@
       that ceiling would be multiplied by every renderer task in every timeline on the strength of no
       observation. Both renderer entries state the floor in their scope.
 
-  Query parameters, both supplied by desktop/run.sh:
-    ms=<int>   the interval in milliseconds
-    timer=0    no timer at all — the hidden subject's control tab, and the visible subject's second steady
-               phase, which is reached by navigating here rather than relaunching the browser so that both
-               phases observe one process tree.
+  Query parameters, all supplied by desktop/run.sh:
 
-  The title is set once at load and never again: updating it per tick would be work per wake, and would drive
-  the browser process as well as the renderer.
+    ms=<int>            one period for the page's whole life; 0 means no timer at all (the hidden subject's
+                        control tab, whose renderer must fall below the components' coverage cut).
+    plan=<p:s,p:s,...>  a schedule the page walks from its own load: period p milliseconds for s seconds, 0
+                        meaning no timer. The visible subject uses two steps — the timer, then none — so that
+                        its second steady phase observes the same process tree as its first.
+
+  THE PAGE DRIVES ITSELF. An earlier version had run.sh retype a URL into each window through the omnibox; the
+  dry run of 2026-09-20 showed all three windows receiving the same keystrokes, because without a window
+  manager xdotool windowactivate does not move X input focus, and two renderers kept their timers through the
+  phase that was supposed to have none. Nothing here depends on input, focus or a window manager.
+
+  The title is the instrument run.sh reads back, through xdotool getwindowname, which works per window without
+  focus. It states the origin and the current step, so the run can VERIFY which step every window is on before
+  it starts a phase, rather than assume. It is written once per step, never per tick: a per-tick title update
+  would be work per wake and would drive the browser process as well as the renderer.
 -->
 <html lang="en">
 <head>
@@ -35,13 +44,36 @@
 <script>
 (function () {
   var q = new URLSearchParams(location.search);
-  var on = q.get("timer") !== "0";
-  var ms = parseInt(q.get("ms") || "100", 10);
-  var n = 0;
-  if (on) { setInterval(function () { n++; }, ms); }
-  var state = on ? ("timer " + ms + " ms") : "no timer";
-  document.title = "idle-page " + location.origin + " " + state;
-  document.getElementById("s").textContent = document.title;
+  var n = 0, id = null;
+
+  function say(label) {
+    document.title = "idle-page " + location.origin + " " + label;
+    document.getElementById("s").textContent = document.title;
+  }
+
+  function run(ms) {
+    if (id !== null) { clearInterval(id); id = null; }
+    if (ms > 0) { id = setInterval(function () { n++; }, ms); }
+    say(ms > 0 ? ("timer " + ms + " ms") : "no timer");
+  }
+
+  var plan = (q.get("plan") || "").split(",").filter(Boolean).map(function (step) {
+    var kv = step.split(":");
+    return {ms: parseInt(kv[0], 10) || 0, s: parseFloat(kv[1]) || 0};
+  });
+
+  if (plan.length) {
+    // one one-shot timer per step boundary, and nothing else: the steps are long, so this is a handful of wakes
+    // over the page's life and none of them falls inside a measured phase
+    var i = 0;
+    (function step() {
+      run(plan[i].ms);
+      var secs = plan[i].s;
+      if (++i < plan.length) { setTimeout(step, secs * 1000); }
+    })();
+  } else {
+    run(parseInt(q.get("ms") || "100", 10));
+  }
 })();
 </script>
 </body>

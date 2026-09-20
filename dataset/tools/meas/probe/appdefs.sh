@@ -199,15 +199,18 @@ PY
       # up a hosts entry would leave the tabs unloaded, which is how the Phase 2 run was lost.
       N="${MEAS_ORIGINS:?chrome-hidden/chrome-visible need MEAS_ORIGINS}"
       PORT="${MEAS_PAGE_PORT:-8099}"; MS="${MEAS_TIMER_MS:?need MEAS_TIMER_MS}"
+      # the page drives itself from its own load (idle-page.html): the hidden subject holds one period, the
+      # visible subject walks a two-step plan, the timer and then none. Nothing is typed into a window.
+      PAGEQ="${MEAS_PAGE_PLAN:+plan=$MEAS_PAGE_PLAN}"; PAGEQ="${PAGEQ:-ms=$MS}"
       mkdir -p /tmp/idle-page && cp "$TOOLS/idle-page.html" /tmp/idle-page/
       # one server answers every loopback address; --bind takes a single address, so it binds 0.0.0.0
       setsid python3 -m http.server "$PORT" --bind 0.0.0.0 --directory /tmp/idle-page > /tmp/idle-page/httpd.log 2>&1 &
       echo $! > "$OUT/httpd.pid"; sleep 1
-      rec page.origins "$N"; rec page.port "$PORT"; rec page.timer_ms "$MS"
+      rec page.origins "$N"; rec page.port "$PORT"; rec page.timer_ms "$MS"; rec page.query "$PAGEQ"
       rec page.server "$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.2:$PORT/idle-page.html")"
       URLS=""; FIRST=""; REST=""
       for i in $(seq 2 $((N + 1))); do
-        u="http://127.0.0.$i:$PORT/idle-page.html?ms=$MS"
+        u="http://127.0.0.$i:$PORT/idle-page.html?$PAGEQ"
         URLS="$URLS $u"
         if [ -z "$FIRST" ]; then FIRST="$u"; else REST="$REST $u"; fi
       done
@@ -216,7 +219,7 @@ PY
       if [ "$app" = chrome-hidden ]; then
         # one window: the first tab stays selected and is the control tab, the N measured tabs are background
         # pages. Its page carries no timer, so its renderer falls below the components' coverage cut.
-        LAUNCH="$CHROME http://127.0.0.1:$PORT/idle-page.html?timer=0$URLS"
+        LAUNCH="$CHROME http://127.0.0.1:$PORT/idle-page.html?ms=0$URLS"
       else
         # N windows, one tab each: every mapped window's selected tab is visible to Blink, the occlusion tracker
         # that would hide a covered window being Windows-only (D4). The first window comes from the launch; the
