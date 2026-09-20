@@ -11,6 +11,7 @@ All on GitHub-hosted `ubuntu-24.04` runners, 4 vCPU, pinned to one CPU, AMD EPYC
 | `meas-ci:build:2026-09-18` | 9.6 | `meas-build.yml` | #10–#37; the 13 holding a landed repeat are #10, #11, #12, #15, #16, #22, #25, #26, #27, #29, #30, #32, #34 | 2026-09-18 09:09 UTC |
 | `meas-ci:interactive:2026-09-18` | 9.5 | `meas-interactive.yml` | #10–#100 | 2026-09-18 09:56 UTC |
 | `meas-ci:playback:2026-09-18` | 9.5 | `meas-playback.yml` | #10–#84 | 2026-09-18 09:56 UTC |
+| `meas-ci:background:2026-09-19` | 9.7 | `meas-background.yml` | #19–; `borg`'s repeats are in #24–#40 | 2026-09-19 23:16 UTC |
 
 ## 9.5 — one headline median per archetype
 
@@ -53,6 +54,20 @@ The rule holds over 29 of the 33 values. Four are carried with their half-widths
 Also within the rule: the object job's 11 per-step CPU tables (±0.7–1.4 %), CPU per process of the other five roles (±0.8–1.4 %), each bound program's share of CPU past the boot slice (±0.02–1.4 %), and the encoders' block means, which sit inside the trace's 1 µs floor (`ffmpeg` 0.35 µs, `HandBrakeCLI` 8.90 µs).
 
 Full tables: `task-9.6-compile/campaign/results.md`, `campaign/results/pooled.json`.
+
+## 9.7 — `file-backup`, the campaign's first archetype
+
+Repeats 1–31 on the AMD EPYC 7763, repeat 3 left out of the pool: it landed, but its 10 GB set fetched as a 12,108 B file in place of the 3.70 GB archive (`set.archive_pin` mismatch, extract rc 2, 0 files), so its phases ran on an empty tree and the validity step fails it (the loop, step 4). 55 jobs: 31 landed, 24 stopped by the machine gate, none on another model. The rule is read over the other 30 repeats, and holds on all three of `file-backup`'s values.
+
+| archetype | program | value | repeats | mean | spread (cv) | 95 % half-width | stopped by |
+|---|---|---|---|---|---|---|---|
+| `file-backup` | `borg` | run per wake, warm first backup | 30 | 15.182 ms | 10.2 % | ±3.91 % | the rule |
+| `file-backup` | `borg` | wait per wake, warm first backup | 30 | 3.128 ms | 12.8 % | ±4.87 % | the rule |
+| `file-backup` | `borg` | disk wait per wake, warm first backup | 30 | 3.157 ms | 12.7 % | ±4.84 % | the rule |
+
+`file-archiver` (7-Zip) and `game-download` (SteamCMD) have no values yet: 7-Zip's first batch of six repeats is measuring, and `game-download`'s operating point is open — the number of content servers its runner draws sets every value on its list (run 35475239657: 6 servers 4.73 % of packets dropped and 4,070 B a wake, one server forced 0.0005 % and 2,131 B, 6 servers again 4.97 % and 4,137 B).
+
+Full tables: `task-9.7-background-io/campaign/results-borg.md`, `campaign/results/borg-pooled.json`.
 
 ## Machine draws
 
