@@ -232,10 +232,21 @@ def comparisons(app, entry):
         ma = statistics.fmean(va) if va else None
         mb = statistics.fmean(vb) if vb else None
         ratio = (ma / mb) if (ma and mb) else None
+        # CPU share beside the rate: D5 asks whether the helper's behaviour changes when the window is hidden,
+        # and the dry run moved share 2.6x while the rate moved 1.25x — the rate alone understates it
+        ca = [x for x in pa.get("cpu_share") or [] if x is not None]
+        cb = [x for x in pb.get("cpu_share") or [] if x is not None]
+        sa = statistics.fmean(ca) if ca else None
+        sb = statistics.fmean(cb) if cb else None
+        cpu_ratio = (sa / sb) if (sa and sb) else None
         # method §6 item 2: a difference under 10 % is reported as not resolved at this tolerance, not as an effect
-        reading = "not resolved" if (ratio and 0.9 < ratio < 1.1) else "difference"
+        def read(r):
+            return None if not r else ("not resolved" if 0.9 < r < 1.1 else "difference")
         out.append({"a": a, "b": b, "what": what, "a_wakes_per_s": ma, "b_wakes_per_s": mb,
-                    "ratio": round(ratio, 3) if ratio else None, "reading": reading})
+                    "ratio": round(ratio, 3) if ratio else None, "reading": read(ratio),
+                    "a_cpu_share": sa, "b_cpu_share": sb,
+                    "cpu_share_ratio": round(cpu_ratio, 3) if cpu_ratio else None,
+                    "cpu_share_reading": read(cpu_ratio)})
     return out
 
 
@@ -252,9 +263,11 @@ def render(out):
             L.append(f"| {name} | {c['k']} | {c['mean']} | ±{hw} | {'yes' if c['passes'] else 'no'} |")
         L.append("")
         if e.get("comparisons"):
-            L += ["| comparison | a | b | ratio | reading |", "|---|---|---|---|---|"]
+            L += ["| comparison | wakes/s a | wakes/s b | ratio | reading | cpu share a | cpu share b | ratio | reading |",
+                  "|---|---|---|---|---|---|---|---|---|"]
             for c in e["comparisons"]:
-                L.append(f"| {c['what']} | {c['a_wakes_per_s']} | {c['b_wakes_per_s']} | {c['ratio']} | {c['reading']} |")
+                L.append(f"| {c['what']} | {c['a_wakes_per_s']} | {c['b_wakes_per_s']} | {c['ratio']} | {c['reading']} "
+                         f"| {c['a_cpu_share']} | {c['b_cpu_share']} | {c['cpu_share_ratio']} | {c['cpu_share_reading']} |")
             L.append("")
     return "\n".join(L) + "\n"
 
