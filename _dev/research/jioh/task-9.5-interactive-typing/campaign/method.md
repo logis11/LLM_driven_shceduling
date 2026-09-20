@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-20, `chrome`'s settle (changelog D50) — amending the D35 entry below: set after one long-phase probe of `chrome`'s setup, as `webrtc` and `code` take, not from the current campaign's five repeats, whose 880 ms launch run scatters over 152–180 s (repeats 1–3) and 65–85 s (repeats 4–5). §2: the probe's phase length is 2,000 s, design — a `chrome` repeat observes the application 1,974.5–1,976.8 s after its idle phase starts (`phases.jsonl` over the five repeats), rounded up as D42 rounds `thunderbird-send`'s.
+
 - 2026-09-20, the `send` attachment's bytes and the `.docx`'s members (changelog D49) — amending the D37 and D31 entries below. §3: the attachment is the same size in every repeat and not the same bytes — over the 43 repeats of the closed pool `interactive-thunderbird-send-from150` every `doc.bytes` is 41,555,063 and every `doc.sha256` distinct, and the peer receives 56,946,735 B in every message; D31's 41,555,035 B is a container build, the runner's is 41,555,063 B. §1: `appdefs.sh` writes the `.docx`'s member listing — per-member CRCs and stored dates — to `$OUT/doc.zip.txt` and records that file's hash as `doc.crc_sha256`, from the repeats taken after `thunderbird-send`'s present pool closes.
 
 - 2026-09-19, `thunderbird-send` past the recording's end (changelog D46) — §2: a repeat past the eighth Outlook window runs the settle and the idle phase alone, without the operation phase; the operation's values pool the eight full repeats and state their half-widths, as the per-input values do (D32).
