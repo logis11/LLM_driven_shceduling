@@ -264,7 +264,12 @@ element_setup() {
   # error_code=1002 … GPU process isn't usable. Goodbye." and showed its "System unsupported" page: Electron
   # treats an unusable GPU process as fatal where Chrome tolerates it. The GPU sandbox is disabled with the
   # rest, and /dev/shm is not used, which is the shape a hosted runner needs.
-  LAUNCH="element-desktop --no-sandbox --disable-gpu --disable-gpu-sandbox --disable-software-rasterizer --disable-dev-shm-usage"
+  # --password-store=basic: a hosted runner has no gnome-keyring or kwallet, and Electron's safeStorage then
+  # puts up "Your system has an unsupported keyring meaning the database cannot be opened" — a modal the dry run
+  # of 2026-09-20 found sitting where the login form should have been, titled "System unsupported". The dialog
+  # names this argument as the fix. The client therefore stores its session with Electron's basic backend, which
+  # the entry's scope states.
+  LAUNCH="element-desktop --no-sandbox --disable-gpu --disable-gpu-sandbox --disable-software-rasterizer --disable-dev-shm-usage --password-store=basic"
   CLASS="element|Element"; PAT="element-desktop|element"; RX="element|Element"
   rec launch "$LAUNCH"; rec rx "$RX"; rec pat "$PAT"
   launch_app
