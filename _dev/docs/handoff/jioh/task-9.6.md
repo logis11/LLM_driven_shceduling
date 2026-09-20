@@ -1,36 +1,32 @@
-# Handoff — task 9.6 Compile: the top-up campaign in progress (2026-09-19)
+# Handoff — task 9.6 Compile: done (2026-09-20)
 
-Branch `jioh/dataset-rebuild` (Phase 9 works here). 9.6 stays `[WIP]`. Supersedes `/private/tmp/handoff-9.6-topup-and-fold-in-2026-09-19.md`.
+Branch `jioh/dataset-rebuild` (Phase 9 works here). 9.6 is ticked in `_dev/TODO.md`. Decisions D1–D31 in `_dev/research/jioh/task-9.6-compile/changelog.md`; method and its dated amendments in `campaign/method.md`; final pool in `campaign/results.md` and `campaign/results/pooled.json`.
 
-## Where it stands
+## What the slice produced
 
-- Decisions D12–D28 in `_dev/research/jioh/task-9.6-compile/changelog.md`; method deviations in `campaign/method.md` §8 (nine 2026-09-19 entries). Today's:
-  - D26 — the criterion is the shared stability rule (`_dev/research/jioh/measurement-campaign-workflow.md`, "The stability rule"): each carried table tested by its per-repeat mean; 33 values.
-  - D27 — `clamscan` reads a fixed signature database, daily 28128 / main 63 / bytecode 339, from the Actions cache (`clamav-db-daily-28128-main-63-bytecode-339`; `dataset/tools/meas/build/clamav_db.sh`, job `clamav-db` in `meas-build.yml`); `clamscan` pools repeats 9 on, 4–8 reported beside the pool.
-  - D28 — `python3` starts warm (one unmeasured `train.py 1` before the measured run, `train.warm.rc`); pools repeats 11 on, 4–10 reported beside the pool.
-- Pool at the checkpoint (commit `96717bd`, `campaign/results.md`, `results/pooled.json`): repeats 4, 5, 7, 8, 9, 10, 11, 12 on the AMD EPYC 7763, all valid; 26 of 33 values within tolerance. Open: `clamscan` (4 repeats on 28128) block mean ±22.4 %; `python3` (2 warm repeats) runs ±16.5 %, block mean ±152 %; `tracker` block mean ±15.5 % (repeat 12 at 23.3 µs). Projected 35–51 repeats; the `python3` projection rests on two repeats.
-- 인지오's decision at the checkpoint: keep adding repeats until every value holds (the disk-bound block means average over the runner's disk).
+- **One campaign**, `meas-ci:build:2026-09-18`: 14 same-machine repeats (4, 5, 7, 8, 9–18) on the AMD EPYC 7763 under the machine gate, 28 jobs over runs #10–#37, 12 stopped by the gate, 2 cancelled. Raw records: release `meas-ci-build-2026-09-18`, created at the fold-in commit `6f1ad39` (Actions artifacts expire 2026-12-17).
+- **Two conditions fixed mid-campaign**: `clamscan`'s signature database from repeat 9 (D27), `python3`'s warm start from repeat 11 (D28). Their values pool repeats 9–18 and 11–18.
+- **The stability rule holds** over 29 of 33 carried values; four are carried with their half-widths under the rule's exception for a value whose spread follows the machine (D29) — the block after each run of `clamscan`, `python3` and `tracker-miner-fs-3`, and `python3`'s runs between blocks. The exception is in `_dev/research/jioh/measurement-campaign-workflow.md`, "The stability rule".
+- **Folded in** (D31, plan `_dev/docs/plan/jioh/task-9.6-fold-in.md`): `compiler-child` is the six-member object job with 11 per-(role, step) tables; `build-orchestrator` carries the measured dispatch table and `fork_cap` = cap × 6; `cpu-batch` is a run-and-block loop over the bound program's tables, chosen by a new `program` binding. Three archetypes carry `validation_stats.scope` and rewritten `modeling_notes`; `docs/references.md`'s `meas-ci` status line is the campaign form.
 
-## Overnight loop (running detached)
+## State of the checks
 
-- `~/.cache/meas-loop/overnight/loop.sh 14 26 12`, started 13:08 UTC under `nohup caffeinate -i`; log `~/.cache/meas-loop/overnight/loop.log`. Repeat 13 was in flight as run #26 (35443899531).
-- Per repeat: `watch.py` (relaunches gated attempts) → `pool_runs.py` → launches the next index only when the job landed and the pool prints "every repeat valid". Stops on no landing, an invalid repeat, a failed launch, the rule holding, or 12 launches. Commits nothing but the trigger pushes.
-- Check: `tail -40 ~/.cache/meas-loop/overnight/loop.log`; `pgrep -fl "loop.sh"`. While it runs, start no other build watcher (two would both relaunch a gated attempt).
+- Tests 167 passed, 1 skipped, 1 xfailed.
+- `make -C dataset lint` and `check` fail on five `-single` demand-window files — the branch's known state until 9.14 — but `c3-workday` now fails **high** (4.84, was 0.86): a spawn-table entry was one process of about 89 ms and is now a job of six processes and about 471 ms. `c6-dual` 1.14 → 1.26 (inside the window); the calibration-exempt compile files 0.15 → 0.93.
+- A full `tools/compile.py` now takes about 7 minutes: every draw is materialised (`c3-workday` holds 25 200 member programs; `tracker`'s 30 s job unrolls about 74 000 runs).
 
-## Next
+## Hands to other slices
 
-1. Read the log. If the loop stopped, act on its STOP line; restart with `nohup caffeinate -i bash loop.sh <next index> <run number of the launch in flight> <cap> >> loop.log 2>&1 < /dev/null & disown` from `~/.cache/meas-loop/overnight/`.
-2. Commit the latest pool: `pool_runs.py build --since 10 -- --title "<tag; every run id; repeats; D11, D26–D28>"`, copy `results.md` and `pooled.json` from `~/.cache/meas-loop/pool/build-build-from10/` into `campaign/`.
-3. When `python3` has five warm repeats (repeat 15): bring 인지오 the values and each open value's projected count.
-4. Two questions held for 인지오, one at a time: the list carries CPU per process of `sh` and `gcc` while the fold-in carries their per-step tables (D20); whether 9.6 uses `stability.py`'s `keep_zero` (a zero counted as a repeat's value) for the block means and shares.
-5. When the rule holds: final pool into `campaign/`, a changelog entry, the 9.6 rows of `_dev/research/jioh/measurement-campaign-record.md`.
-6. Fold-in (plan, then execute): the D19 object-job chain in `dataset/tools/wlc/compiler.py`, D20 member tables, D21/D22/D25 `cpu-batch` per-program tables with the explicit binding, D16's window for `tracker`, `build-orchestrator`'s dispatch table, the D27/D28 conditions in scope, `modeling_notes` / scope / `validation_stats` / `category_source`, timeline bindings, `make -C dataset dataset lint test check PY=python3.12` (the demand-window lint fails on five `-single` files until 9.14).
-7. Release `meas-ci-build-2026-09-18` at the fold-in commit (D18; ask first): every run of the campaign; the gated attempts per run are in `~/.cache/meas-loop/gate/<run>/`; the D28 dry check (run 35431343598, `meas-build-r0-dry`) is not a repeat.
-8. Wrap-up hand-offs recorded in D16–D25 (9.5, 9.10, 9.11, 9.12, 9.13, 9.14, 9.15).
+- **9.5** — the five-repeat minimum applies to its campaigns (D24).
+- **9.10** — `spawn_count` is sized against the old per-entry cost and is 9.10's to resize (인지오, 2026-09-20); whether `c2-p1b` takes the rescan's own tables rather than inheriting `python3`'s (D21); the compile timelines' member names now that a job is six processes (D2); the `file-backup` / `file-archiver` / `game-download` rebindings are 9.7's.
+- **9.11** — whether a simulated baseline honours a task's declared scheduling class; `tracker`'s processes declare `SCHED_IDLE` nice 19 while the other four run at the default (D17).
+- **9.12** — `docs/research-proposal.md` §2.2's `updatedb` sentence against the measured declarations (D17).
+- **9.13** — whether the task model gains a field for a declared class (D17).
+- **9.14** — the demand-window rule with `c3-workday` in its new state; the batch-class memo's "never blocks" worked example, which the measured shares contradict; the prior-table rows arguing on "compiler children" (D21, D2).
+- **9.15** — the docs naming `cpu-batch`, `compiler-child` and `build-orchestrator`: `docs/data-contracts.md` quotes the old `cpu-batch` YAML, `docs/workload/coreset-guide.md` carries per-file event tables whose numbers moved, `docs/daemon/prior-table-pair-review.md` carries a stale demand column.
 
-## Pitfalls
+## Shared tooling this slice changed
 
-- The working tree is shared with the 9.5 and 9.7 sessions: stage by path; shared files by hunk.
-- The GitHub API limit (5 000 requests an hour) is shared by every session's loop tools; poll at 120 s or more. `common.py` caches completed runs' job lists.
-- Read the 1 µs-floor values (`ffmpeg`, `HandBrakeCLI`, `tracker` block means) from the absolute half-width, which the loop printout now shows.
-- `SSL_CERT_FILE=/etc/ssl/cert.pem` for Python HTTPS on this Mac.
+- `dataset/tools/meas/build/` — `run.sh` (fixed signature database, warm `python3` start), `clamav_db.sh`, `analyze.py` (`build_tree` roots at the program forked inside the record), `shapes.py`, `pool.py` (per-repeat means, the D29 exception, per-value projected counts).
+- `dataset/tools/meas/loop/` — `common.py` (`artifact_names`, path-limited trigger commits), `pool_runs.py` (skips a landed job whose run has no artifact of the campaign's mode; database check over the pooled `clamscan` repeats).
+- `dataset/tools/wlc/sampling.py` — `allow_zero` on `sample()` / `_quantile_sample()`, so a zero-inclusive table may draw zero; every existing call keeps the 1 µs floor.
