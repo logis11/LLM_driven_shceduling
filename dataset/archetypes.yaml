@@ -688,7 +688,7 @@ archetypes:
       are intentional, not an inconsistency.
 
   compiler-child:
-    category_source: ocallahan-atc17
+    category_source: meas
     pattern:
       program:                 # D19: one object job, six members forked together, woken in D2's order; the
         # compiler builds the members (a spawned child has no spawn table of its own), so this states their shape
@@ -727,65 +727,79 @@ archetypes:
     scalable: []
     validation_stats:
       referee: meas-ci
-      stats: [child lifetime CDF, concurrent-children time series]
-      note: headless real-build workflow (make -jN with /proc sidecar);
-        lifetime absolutes are machine-relative — recorded with the runner
-        spec, convention-informed-by-measurement.
+      run: "build:2026-09-18, repeats [4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]"
+      stats: ["2 857 six-member object jobs per build in every repeat",
+              "child order sh: gcc fixdep rm; gcc: cc1 as, 2 857 each",
+              "cc1 CPU per process mean 435.0 ms (+-0.78 %)",
+              "step CPU half-widths +-0.7 to 1.4 %",
+              "cc1 wakes once in 99.3 % of jobs; sh 5-7 times, gcc 4-7"]
+      scope: >-
+        One observation (phase decision 2; D3, D30): the object jobs of the same warm `-j8` linux-6.6 defconfig
+        build as `build-orchestrator`, gcc 13.2.0 on Ubuntu 24.04, no `-pipe` in the kernel's Makefile so `cc1`
+        and `as` run in sequence. Per-process CPU is the sum of the process's perf segments on the measured CPU,
+        with taskstats exit accounting as the cross-check (perf over taskstats 1.005 for `cc1`); a step's CPU is
+        the sum of a member's runs between its children's forks and exits (D20). Warm: no block-I/O delay per
+        process. Under the cold cache `cc1` wakes twice at the median with a 183 us disk wait per wake, reported
+        beside the pool and not carried (D8 iii, D9). Values are this software on this machine, not desktop truth
+        (9.5 D10).
     modeling_notes: >-
-      The kernel-build literature grounds the class's existence and
-      short-lived character only (ocallahan-atc17 sec-4.3: "make forks and
-      execs 2430 processes, mostly short-lived"; coetzee-arxiv12 sec-9
-      corroborates, kernel-build-specific). meas-ci:cli:3 (linux-6.6
-      defconfig, make -j8, 5 repeats): ~11.9k compiler-family children per
-      build, lifetime median ~100 ms sigma_log ~2.37 (forkstat exit
-      durations). cpu params are moment-matched: the 500 ms sampler measures
-      mean cpu/child ~90 ms directly (still a lower bound — sub-500 ms
-      children are partially censored; the 4-core utilization bound is
-      ~165 ms); median cpu = (cpu_mean/life_mean) x life_median ~ 14.4 ms;
-      sigma_log 1.91 from mean/median = 6.25 — matching the measured mean
-      rather than carrying the lifetime log-std (which overshot the mean
-      2.4x). The 90/10 burst/tail split is ours. disk_wait: the cold-cache
-      rebuild (vm.drop_caches=3) is statistically identical to the warm
-      build (cpu and lifetime means within repeat spread) — per-child disk
-      waits are noise-bounded at ~4 ms on runner NVMe; median 3.6 ms is that
-      measured bound (machine-relative, runner spec recorded). The
-      RUN/WAIT/RUN/EXIT shape and the lognormal family (OQ-5 convention)
-      are ours. Spawn-table entries sample per-instance
+      One make job is the chain of processes it runs, one task per process (D2). In the frozen format only a
+      top-level task creates tasks, so the job is six consecutive spawn-table entries of `build-orchestrator`
+      rather than a child with its own spawn table (D19). Each member runs once per structural step, the steps
+      bounded by its children's forks and exits (D20): `sh` four, `gcc` three, the others one. Against the records
+      `sh` wakes 5-7 times and `gcc` 4-7, so the model's four and three are the structure, not the wake count;
+      steps and members draw independently. A member that has finished waits without CPU until `sh` ends the job,
+      so a member's trace arrival and end are its job's, not its process lifetime: its `turnaround` row is reported
+      unweighted, no scored term reads it, and a waiting member accrues no `ready_wait` (D19). The recognizer's
+      view is unchanged — the visible projection carries spawn-table names and counts attributed to the parent's
+      lifetime (D19). The kernel-build literature grounds the class's existence and short-lived character only
+      (ocallahan-atc17 sec-4.3, "make forks and execs 2430 processes, mostly short-lived"; coetzee-arxiv12 sec-9
+      corroborates); Gregg's one-second perf sched capture of a build corroborates that the same roles carry the
+      same relative weight on Linux, no number transcribed (D2). Spawn-table entries sample per-instance
       (interpretation-contract §5).
 
   build-orchestrator:
-    category_source: ocallahan-atc17
+    category_source: meas
     pattern:
       program:
-        - loop:                    # consumes the pre-sampled spawn table
+        - loop:                    # consumes the pre-sampled spawn table, six entries per object job (D19)
             - RUN: dispatch_overhead
-            - FORK: {}             # blocks on wait-for-slot at the parallelism cap
+            - FORK: {}             # x6, the job's members; blocks on wait-for-slot at the parallelism cap
         - WAIT: children
         - EXIT: {}
     params:
       dispatch_overhead:
-        {dist: lognormal, median_us: 234, sigma_log: 0.5,
-         sampling: per-iteration, source: "meas-ci:cli:3"}
+        {dist: quantiles, p: [118, 227, 246, 387, 676, 889, 1129, 1329, 1679, 2704], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
     lifetime: finite
     spawns: compiler-child
     binding_params: [spawn_count, parallelism_cap, child_name]
     scalable: []
     validation_stats:
       referee: meas-ci
-      stats: [fork rate, concurrent-children time series vs make -jN run]
+      run: "build:2026-09-18, repeats [4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]"
+      stats: ["dispatch run per job p50 676 us, mean 691 us (+-0.94 %)",
+              "5 957 forks under 716 make processes per build",
+              "5 254 jobs per build: 2 908 object, 681 archive, 1 537 helper, 90 probe, 38 link",
+              "live jobs at cap 8: mean 7.87, peak 11"]
+      scope: >-
+        One observation (phase decision 2; D3, D5, D30): GNU make building linux-6.6 defconfig with `make -j8`,
+        warm, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure) pinned to
+        one CPU, instrumented by `perf sched record` on the measured CPU and a taskstats listener on its cpumask.
+        14 same-machine repeats under the machine gate; the stability rule holds (D26, D30). The dispatch run is
+        make's own CPU between consecutive fork events, pooled over every make of the build (D8 iv). `-j8` on one
+        CPU costs about 10 % more CPU per compile than `-j1` (D4, D9), a stated limitation of these values. Values
+        are this software on this machine, not desktop truth (9.5 D10).
     modeling_notes: >-
-      FORK consumes a pre-sampled ordered spawn table (one fully resolved
-      compiler-child program per entry); spawn timing emerges from the
-      fork/wait-for-slot loop at run time (interpretation-contract §5).
-      spawn_count binds per timeline — the kernel-build default is 2,430
-      (ocallahan-atc17 sec-4.3). parallelism_cap defaults to -j8 by stated
-      convention (archetype-plan OQ-4: between interbench's documented -j4
-      and desktop nproc conventions), overridable at binding time; on one
-      lane it shapes fork-storm width and queue depth, not throughput. The
-      loop shape and dispatch_overhead field are ours. dispatch_overhead is
-      make's own cpu time per spawned child, meas-ci:cli:3 (5-repeat medians
-      183-262 us; observed fork rate ~24 children/s at -j8); sigma_log is
-      our convention.
+      FORK consumes a pre-sampled ordered spawn table; one dispatch run precedes each job's six FORKs (D19).
+      `spawn_count` counts object jobs and `parallelism_cap` counts jobs, as make's jobserver counts them; the
+      compiler multiplies the cap by the six members for `fork_cap` (D19). `parallelism_cap` defaults to 8 by the
+      `nproc` rule applied to an eight-thread desktop, overridable at binding time (D4); on one lane it shapes
+      fork-storm width and queue depth, not throughput. The `dkms` binding describes an out-of-tree kbuild run
+      whose per-object CPU is assumed to follow the kernel's; no observation of a DKMS run's duration, CPU or
+      process count exists (D6). Unmodelled per build: 681 archive, 1 537 helper, 90 probe and 38 link jobs under
+      716 make processes, together under 3 % of the build's CPU, their proportions kbuild's for this tree (D9).
+      `spawn_count` was bound when a spawn-table entry was one process of about 89 ms; a job is now six processes
+      of about 471 ms, and the counts are 9.10's to resize (D30, 2026-09-20).
 
   # ---- IO family — interbench loads + ananicy types -----------------------
 
