@@ -28,15 +28,33 @@ def test_events_sorted_and_ids_unique(fixture_path, library):
     assert len(ids) == len(set(ids))
 
 
-def test_orchestrator_spawn_table(fixture_path, library):
+def test_orchestrator_spawn_table_is_six_member_object_jobs(fixture_path, library):
+    # D19: one object job = six spawn-table entries, forked together, woken in D2's parent-child order
     _, canonical, _ = compiled(fixture_path, library, "fx-mixed.timeline.yaml")
     build = next(e for e in canonical["events"]
                  if e["op"] == "arrive" and e["id"] == "build")
-    assert build["fork_cap"] == 2
-    assert len(build["spawn_table"]) == 6
-    assert sum(1 for i in build["program"] if i["op"] == "FORK") == 6
-    assert all(s["name"] == "cc1" for s in build["spawn_table"])
-    assert all(s["program"][-1] == {"op": "EXIT"} for s in build["spawn_table"])
+    assert build["fork_cap"] == 12                 # parallelism_cap 2 x the job's six members
+    table = build["spawn_table"]
+    assert len(table) == 36                        # 6 object jobs x 6 members
+    assert len({s["id"] for s in table}) == 36
+    assert sum(1 for i in build["program"] if i["op"] == "FORK") == 36
+    assert [s["name"] for s in table[:6]] == ["sh", "gcc", "cc1", "as", "fixdep", "rm"]
+    job = {s["name"]: s for s in table[:6]}
+    assert [op["op"] for op in job["sh"]["program"]] == [
+        "RUN", "WAKE", "WAIT", "RUN", "WAKE", "WAIT", "RUN", "WAKE", "WAIT", "RUN",
+        "WAKE", "WAKE", "WAKE", "WAKE", "WAKE", "EXIT"]      # four steps, then it releases the five it held
+    assert [op["op"] for op in job["gcc"]["program"]] == [
+        "WAIT", "RUN", "WAKE", "WAIT", "RUN", "WAKE", "WAIT", "RUN", "WAKE", "WAIT", "EXIT"]
+    assert [op["op"] for op in job["cc1"]["program"]] == ["WAIT", "RUN", "WAKE", "WAIT", "EXIT"]
+    assert job["sh"]["program"][1]["target"] == job["gcc"]["id"]    # sh wakes gcc first (D2's order)
+    assert job["gcc"]["program"][2]["target"] == job["cc1"]["id"]   # gcc wakes cc1, then as, then sh
+    assert job["cc1"]["program"][0]["channel"] == f"job:{job['cc1']['id']}"
+    cc1_us = job["cc1"]["program"][1]["us"]
+    assert 6_414 <= cc1_us <= 4_005_164                            # inside its table's support, p1 to p99.9
+    others = sum(op["us"] for name, s in job.items() if name != "cc1"
+                 for op in s["program"] if op["op"] == "RUN")
+    assert cc1_us > 10 * others                                    # cc1 carries the job's CPU (D2, D20)
+    assert all(s["program"][-1] == {"op": "EXIT"} for s in table)
     assert "depart" not in build  # finite: ends via EXIT at an emergent time
 
 

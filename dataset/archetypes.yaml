@@ -690,21 +690,37 @@ archetypes:
   compiler-child:
     category_source: ocallahan-atc17
     pattern:
-      program:
-        - RUN: cpu_burst
-        - WAIT: disk
-        - RUN: cpu_tail
-        - EXIT: {}
-    params:
-      cpu_burst:
-        {dist: lognormal, median_us: 12900, sigma_log: 1.91,
-         sampling: per-instance, source: "meas-ci:cli:3"}
-      cpu_tail:
-        {dist: lognormal, median_us: 1440, sigma_log: 1.91,
-         sampling: per-instance, source: "meas-ci:cli:3"}
-      disk_wait:
-        {dist: lognormal, median_us: 3600, sigma_log: 0.8,
-         sampling: per-instance, source: "meas-ci:cli:3"}
+      program:                 # D19: one object job, six members forked together, woken in D2's order; the
+        # compiler builds the members (a spawned child has no spawn table of its own), so this states their shape
+        - sh: [RUN, WAKE gcc, WAIT, RUN, WAKE fixdep, WAIT, RUN, WAKE rm, WAIT, RUN, WAKE each member, EXIT]
+        - gcc: [WAIT, RUN, WAKE cc1, WAIT, RUN, WAKE as, WAIT, RUN, WAKE sh, WAIT, EXIT]
+        - cc1: [WAIT, RUN, WAKE gcc, WAIT, EXIT]
+        - as: [WAIT, RUN, WAKE gcc, WAIT, EXIT]
+        - fixdep: [WAIT, RUN, WAKE sh, WAIT, EXIT]
+        - rm: [WAIT, RUN, WAKE sh, WAIT, EXIT]
+    params:                    # D20: one table per (role, structural step), warm -j8
+      sh_step_1:
+        {dist: quantiles, p: [663, 688, 700, 725, 766, 803, 832, 853, 902, 1051], sampling: per-instance, source: "meas-ci:build:2026-09-18"}
+      sh_step_2:
+        {dist: quantiles, p: [87, 95, 100, 108, 117, 126, 136, 142, 156, 176], sampling: per-instance, source: "meas-ci:build:2026-09-18"}
+      sh_step_3:
+        {dist: quantiles, p: [63, 70, 75, 86, 97, 103, 109, 116, 132, 151], sampling: per-instance, source: "meas-ci:build:2026-09-18"}
+      sh_step_4:
+        {dist: quantiles, p: [119, 123, 125, 129, 140, 152, 163, 168, 178, 196], sampling: per-instance, source: "meas-ci:build:2026-09-18"}
+      gcc_step_1:
+        {dist: quantiles, p: [1173, 1628, 1670, 1701, 1741, 1788, 1833, 1862, 1928, 2227], sampling: per-instance, source: "meas-ci:build:2026-09-18"}
+      gcc_step_2:
+        {dist: quantiles, p: [109, 121, 128, 143, 152, 159, 169, 178, 195, 216], sampling: per-instance, source: "meas-ci:build:2026-09-18"}
+      gcc_step_3:
+        {dist: quantiles, p: [293, 308, 314, 326, 341, 360, 381, 397, 437, 597], sampling: per-instance, source: "meas-ci:build:2026-09-18"}
+      cc1_step_1:
+        {dist: quantiles, p: [6414, 73857, 165905, 259292, 367630, 510704, 778278, 1034898, 1797882, 4005164], sampling: per-instance, source: "meas-ci:build:2026-09-18"}
+      as_step_1:
+        {dist: quantiles, p: [2054, 2238, 2342, 2560, 3053, 4283, 7088, 9814, 18491, 56254], sampling: per-instance, source: "meas-ci:build:2026-09-18"}
+      fixdep_step_1:
+        {dist: quantiles, p: [868, 1585, 4034, 4769, 5652, 6727, 7551, 7888, 8623, 9114], sampling: per-instance, source: "meas-ci:build:2026-09-18"}
+      rm_step_1:
+        {dist: quantiles, p: [847, 881, 916, 994, 1039, 1065, 1088, 1102, 1137, 1413], sampling: per-instance, source: "meas-ci:build:2026-09-18"}
     lifetime: spawned
     spawned_by: build-orchestrator
     binding_params: []

@@ -368,25 +368,65 @@ def _finite_unroll(build, task, iid, seed, params, program):
 
 # ---- orchestrators (build-orchestrator) -------------------------------------
 
+# D19, D20: one make job as six member processes — the roles in fork order, each with its structural step count
+OBJECT_JOB = (("sh", 4), ("gcc", 3), ("cc1", 1), ("as", 1), ("fixdep", 1), ("rm", 1))
+
+
+def _object_job(parent_iid, job_index, child_entry, seed, child_name):
+    """One object job as six spawn-table entries (D19): `sh` runs first, every other member waits on its own
+    channel and is woken in the job's parent-child order (D2) — sh, gcc, cc1, gcc, as, gcc, sh, fixdep, sh, rm, sh
+    — each member's step CPU drawn from its own (role, step) table (D20). A member that has finished waits,
+    without CPU, until `sh` ends the job, so `fork_cap` bounds the jobs in flight, as make's jobserver counts them.
+    Returns (spawn-table entries in fork order, their CPU)."""
+    params = child_entry["params"]
+    ids = {role: f"{parent_iid}.j{job_index + 1}.{role}" for role, _ in OBJECT_JOB}
+    names = {role: role for role, _ in OBJECT_JOB} | {"cc1": child_name}
+    demand = 0
+
+    def run(role, step):
+        nonlocal demand
+        us = int(sampling.sample(params[f"{role}_step_{step}"], seed, parent_iid,
+                                 "job", str(job_index), role, str(step)))
+        demand += us
+        return {"op": "RUN", "us": us}
+
+    def wait(role):
+        return {"op": "WAIT", "channel": f"job:{ids[role]}"}
+
+    def wake(role):
+        return {"op": "WAKE", "target": ids[role]}
+
+    bodies = {
+        "sh": [run("sh", 1), wake("gcc"), wait("sh"), run("sh", 2), wake("fixdep"), wait("sh"),
+               run("sh", 3), wake("rm"), wait("sh"), run("sh", 4)]
+              + [wake(r) for r, _ in OBJECT_JOB if r != "sh"] + [{"op": "EXIT"}],
+        "gcc": [wait("gcc"), run("gcc", 1), wake("cc1"), wait("gcc"), run("gcc", 2), wake("as"),
+                wait("gcc"), run("gcc", 3), wake("sh"), wait("gcc"), {"op": "EXIT"}],
+        "cc1": [wait("cc1"), run("cc1", 1), wake("gcc"), wait("cc1"), {"op": "EXIT"}],
+        "as": [wait("as"), run("as", 1), wake("gcc"), wait("as"), {"op": "EXIT"}],
+        "fixdep": [wait("fixdep"), run("fixdep", 1), wake("sh"), wait("fixdep"), {"op": "EXIT"}],
+        "rm": [wait("rm"), run("rm", 1), wake("sh"), wait("rm"), {"op": "EXIT"}],
+    }
+    return [{"id": ids[role], "name": names[role], "program": bodies[role]}
+            for role, _ in OBJECT_JOB], demand
+
+
 def _orchestrator_unroll(build, library, task, iid, seed, params, program):
     spawn_count = int(task["bind"]["spawn_count"])
-    build.fork_cap = int(task["bind"]["parallelism_cap"])
-    child_archetype = library.entry(task["archetype"])["spawns"]
-    child_entry = library.entry(child_archetype)
-    child_name = task["bind"].get("child_name", child_archetype)
+    build.fork_cap = int(task["bind"]["parallelism_cap"]) * len(OBJECT_JOB)   # D19: jobs in flight, six members each
+    child_entry = library.entry(library.entry(task["archetype"])["spawns"])
+    child_name = task["bind"].get("child_name", "cc1")
 
     build.spawn_table = []
     for i in range(spawn_count):
-        child = _TaskBuild(f"{iid}.c{i + 1}", child_name)
-        _spawned_program(child, child_entry, seed, iid, i)
-        build.spawn_table.append(
-            {"id": child.id, "name": child.name, "program": child.program})
-        build.demand_us += child.demand_us
+        entries, demand = _object_job(iid, i, child_entry, seed, child_name)
+        build.spawn_table.extend(entries)
+        build.demand_us += demand
 
-    for i in range(spawn_count):
+    for i in range(spawn_count):   # one dispatch run per job, then its six members are forked together (D19)
         us = _draw(params, "dispatch_overhead", seed, iid, i)
         build.program.append({"op": "RUN", "us": us})
-        build.program.append({"op": "FORK"})
+        build.program.extend({"op": "FORK"} for _ in OBJECT_JOB)
         build.demand_us += us
     build.program.append({"op": "WAIT", "channel": f"children:{iid}"})
     build.program.append({"op": "EXIT"})
