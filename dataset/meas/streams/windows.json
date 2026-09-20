@@ -359,6 +359,16 @@
    "pointer": 92,
    "span_s": 598.3
   },
+  "word-r39": {
+   "sources": [
+    "a_pp16_c1_uLog_20121015_132554.xml",
+    "a_pp17_c1_uLog_20121017_132247.xml"
+   ],
+   "events": 1329,
+   "keys": 1271,
+   "pointer": 58,
+   "span_s": 595.1
+  },
   "ie-r1": {
    "sources": [
     "a_pp1_c1_uLog_20120918_131425.xml"
@@ -725,6 +735,13 @@
    "pointer": 196,
    "span_s": 338.6
   },
+  "ie-r39": {
+   "sources": [],
+   "events": 0,
+   "keys": 0,
+   "pointer": 0,
+   "span_s": 0.0
+  },
   "outlook-r1": {
    "sources": [
     "a_pp1_c2_uLog_20120918_142524.xml",
@@ -1048,6 +1065,13 @@
    "span_s": 0.0
   },
   "outlook-r38": {
+   "sources": [],
+   "events": 0,
+   "keys": 0,
+   "pointer": 0,
+   "span_s": 0.0
+  },
+  "outlook-r39": {
    "sources": [],
    "events": 0,
    "keys": 0,
