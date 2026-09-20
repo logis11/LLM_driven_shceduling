@@ -104,6 +104,21 @@ stop_recorded() {   # <gate-value> <message> — the machine gate's shape, for a
   exit 0
 }
 
+# click_right_button <window-id> <key> — the right-hand button of a two-button modal, by position. Return is
+# never used: in steam-installer's dialog it selected Cancel and the log then read "steam: Installation
+# cancelled", and these dialogs put the affirmative button on the right.
+click_right_button() {
+  local wid="$1" key="$2" dy
+  pin_harness xdotool windowactivate --sync "$wid" 2>/dev/null
+  eval "$(pin_harness xdotool getwindowgeometry --shell "$wid" 2>/dev/null)"
+  for dy in 20 26 40 14; do
+    pin_harness xdotool mousemove $((X + WIDTH * 3 / 4)) $((Y + HEIGHT - dy)) click 1
+    rec "$key.click_dy" "$dy"
+    sleep 4
+    pin_harness xdotool getwindowname "$wid" > /dev/null 2>&1 || break
+  done
+}
+
 launch_app() {
   # launched directly under taskset, not through pin_load: a function run in the background forks a subshell, so
   # $! would be the subshell and not the session leader the kill and the affinity record need (campaign/run.sh)
@@ -275,7 +290,21 @@ element_setup() {
   launch_app
   WID=$(wait_window "$CLASS" 180)
   [ -n "$WID" ] || { screenshot no-window; stop_recorded no-window "no Element window after 180 s"; }
-  sleep 20; screenshot before-login
+  sleep 20; screenshot before-modal
+  # Electron's safeStorage finds no keyring on a hosted runner and Element puts up "Your system has an
+  # unsupported keyring meaning the database cannot be opened", titled "System unsupported", where the login
+  # form should be. --password-store=basic does not suppress it — isEncryptionAvailable() is false for that
+  # backend — so the dialog's own offer is taken: "Use weaker encryption", its right-hand button. The client
+  # therefore stores its session with Electron's basic backend, which the entry's scope states.
+  if pin_harness xdotool getwindowname "$WID" 2>/dev/null | grep -qi "system unsupported"; then
+    rec element.keyring_modal 1
+    click_right_button "$WID" element.keyring
+    screenshot after-keyring-modal
+    W2=$(wait_window "$CLASS" 120); [ -n "$W2" ] && WID="$W2"
+    rec element.window_after_modal "$(pin_harness xdotool getwindowname "$WID" 2>/dev/null)"
+    sleep 15
+  fi
+  screenshot before-login
   # The sign-in form: the exact field order is a dry-run finding (method §9). Tab order from the focused
   # username field is username, password, submit.
   pin_harness xdotool windowactivate --sync "$WID"
@@ -336,13 +365,7 @@ steam_setup() {
     # The Install button is clicked by position, never by Return: the dry run of 2026-09-20 pressed Return and
     # the log read "steam: Installation cancelled" — zenity's default button here is Cancel, on the left, with
     # Install on the right of the bottom row.
-    eval "$(pin_harness xdotool getwindowgeometry --shell "$WID" 2>/dev/null)"
-    for dy in 26 40 14; do
-      pin_harness xdotool getwindowname "$WID" 2>/dev/null | grep -qi "steam installer" || break
-      pin_harness xdotool mousemove $((X + WIDTH * 3 / 4)) $((Y + HEIGHT - dy)) click 1
-      rec "steam.installer_click_dy" "$dy"
-      sleep 5
-    done
+    click_right_button "$WID" steam.installer
     rec steam.installer_dismissed "$(pin_harness xdotool getwindowname "$WID" 2>/dev/null | grep -qi "steam installer" && echo no || echo yes)"
     screenshot after-installer-consent
   fi
