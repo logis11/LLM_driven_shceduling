@@ -32,6 +32,7 @@ tasks:
 - archetype: cpu-batch
   arrive: 20s
   bind:
+    program: spoof
     total_work: 30s
   id: spoof
   name: chrome

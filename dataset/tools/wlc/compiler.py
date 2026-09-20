@@ -130,6 +130,8 @@ def _compile_instance(timeline, library, task, iid, mode, wakes):
         _interactive_unroll(build, timeline, task, iid, params, wakes)
     elif _is_fork_loop(program):
         _orchestrator_unroll(build, library, task, iid, seed, params, program)
+    elif entry["pattern"].get("constructor") == "batch-loop":
+        _batch_loop(build, params, task, seed, iid)
     elif entry["lifetime"] == "finite":
         _finite_unroll(build, task, iid, seed, params, program)
     else:
@@ -287,7 +289,7 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
                 t = w["from"] + (t_rel - offset)
                 if in_operation(t):
                     continue
-                run = sampling.sample(params["input_run"], seed, iid, "input", k)
+                run = sampling.sample(params["input_run"], seed, iid, "input", k, allow_zero=True)
                 events.append((t, run, "input"))
                 k += 1
     events.sort(key=lambda e: (e[0], e[2] != "timer"))
@@ -300,8 +302,9 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
         else:
             wakes.append((t, iid, channel))
             build.program.append({"op": "WAIT", "channel": channel})
-        build.program.append({"op": "RUN", "us": run})
-        build.demand_us += run
+        if run:   # a zero input_run is measured, not missing: the input woke the task and cost no CPU (D48)
+            build.program.append({"op": "RUN", "us": run})
+            build.demand_us += run
     if not build.program:  # alive but silent: block forever
         build.program = [{"op": "WAIT", "channel": channel}]
 
@@ -333,6 +336,35 @@ def _interactive_unroll(build, timeline, task, iid, params, wakes):
 
 
 # ---- finite jobs (cpu-batch, io-stream, network-bulk) -----------------------
+
+def _batch_loop(build, params, task, seed, iid):
+    """cpu-batch (D21, D22, D25): a RUN drawn from the bound program's measured runs between voluntary blocks,
+    then the program's off-CPU time that followed such a run — the block table is zero-inclusive, a zero meaning
+    another thread of the program ran on — until `total_work` of CPU is spent. The table set is chosen by the
+    `program` binding, never by the task's display name."""
+    program = task["bind"]["program"]
+    total = parse_us(task["bind"]["total_work"])
+    if program == "spoof":   # the chrome spoof is one uninterrupted RUN by construction (D7)
+        build.program = [{"op": "RUN", "us": total}, {"op": "EXIT"}]
+        build.demand_us = total
+        return
+    runs, blocks = params[f"{program}_run"], params[f"{program}_block"]
+    spent, k, ops, pending = 0, 0, [], 0
+    while spent < total:
+        us = min(max(1, int(sampling.sample(runs, seed, iid, "batch_run", str(k)))), total - spent)
+        pending += us
+        spent += us
+        block = int(sampling.sample(blocks, seed, iid, "batch_block", str(k), allow_zero=True))
+        if block >= 1 and spent < total:
+            ops.append({"op": "RUN", "us": pending})   # a zero block means the program ran on (D25): the runs it
+            ops.append({"op": "SLEEP", "us": block})   # separates join one RUN, the same CPU between two blocks
+            pending = 0
+        k += 1
+    if pending:
+        ops.append({"op": "RUN", "us": pending})
+    ops.append({"op": "EXIT"})
+    build.program, build.demand_us = ops, total
+
 
 def _finite_unroll(build, task, iid, seed, params, program):
     total_work = parse_us(task["bind"]["total_work"])

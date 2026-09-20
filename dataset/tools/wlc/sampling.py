@@ -35,8 +35,9 @@ def anchored_lognormal_params(anchor_min_us, anchor_max_us):
     return median, sigma
 
 
-def sample(param, seed, *key):
-    """Draw one concrete value from an archetype param object."""
+def sample(param, seed, *key, allow_zero=False):
+    """Draw one concrete value from an archetype param object. allow_zero applies to a quantile table whose zeros
+    are measured values (9.6 D25); every other dist is unchanged."""
     dist = param["dist"]
     if dist == "constant":
         return param["value_us"] if "value_us" in param else param["value"]
@@ -59,7 +60,7 @@ def sample(param, seed, *key):
         median = mean / math.exp(sigma**2 / 2)  # mean -> median for lognormal
         return _lognormal_us(median, sigma, uniform(seed, *key, "value"))
     if dist == "quantiles":
-        return _quantile_sample(param, uniform(seed, *key))
+        return _quantile_sample(param, uniform(seed, *key), allow_zero)
     raise ValueError(f"unknown dist {dist!r}")
 
 
@@ -70,20 +71,23 @@ def sample(param, seed, *key):
 QUANTILE_PROBS = (0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999)
 
 
-def _quantile_sample(param, u):
+def _quantile_sample(param, u, allow_zero=False):
+    """allow_zero: keep a drawn zero instead of the 1 us floor — for a zero-inclusive table, where a zero is the
+    measured value and not a too-short duration (9.6 D25: the block after a run is zero when the program ran on)."""
+    floor = (lambda v: max(0, round(v))) if allow_zero else (lambda v: max(1, round(v)))
     q = param["p"]
     if len(q) != len(QUANTILE_PROBS):
         raise ValueError("quantiles param needs %d values" % len(QUANTILE_PROBS))
     if u <= QUANTILE_PROBS[0]:
-        return max(1, round(q[0]))
+        return floor(q[0])
     if u >= QUANTILE_PROBS[-1]:
-        return max(1, round(q[-1]))
+        return floor(q[-1])
     for i in range(1, len(QUANTILE_PROBS)):
         if u <= QUANTILE_PROBS[i]:
             p0, p1 = QUANTILE_PROBS[i - 1], QUANTILE_PROBS[i]
             v0, v1 = q[i - 1], q[i]
-            return max(1, round(v0 + (v1 - v0) * (u - p0) / (p1 - p0)))
-    return max(1, round(q[-1]))
+            return floor(v0 + (v1 - v0) * (u - p0) / (p1 - p0))
+    return floor(q[-1])
 
 
 def quantile_mean_us(param):

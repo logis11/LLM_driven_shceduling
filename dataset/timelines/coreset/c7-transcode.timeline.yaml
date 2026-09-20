@@ -27,6 +27,7 @@ tasks:
 - archetype: cpu-batch
   arrive: 2s
   bind:
+    program: handbrakecli
     total_work: 30s
   id: batch
   name: HandBrakeCLI

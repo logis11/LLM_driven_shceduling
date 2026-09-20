@@ -28,6 +28,7 @@ tasks:
 - archetype: cpu-batch
   arrive: 2s
   bind:
+    program: python3
     total_work: 30s
   id: hog
   name: python3

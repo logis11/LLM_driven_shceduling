@@ -88,7 +88,8 @@ def load_bad(tmp_path, mutate):
     ("depart present but archetype lifetime is 'finite'",
      lambda d: d["tasks"].append({"id": "job", "name": "python3",
                                   "archetype": "cpu-batch", "arrive": "0s",
-                                  "depart": "5s", "bind": {"total_work": "1s"}})),
+                                  "depart": "5s",
+                                  "bind": {"total_work": "1s", "program": "python3"}})),
     ("spawned-only",
      lambda d: d["tasks"].append({"id": "kid", "name": "cc1",
                                   "archetype": "compiler-child", "arrive": "0s"})),
@@ -132,7 +133,8 @@ def test_demand_window_enforced(tmp_path, library, schema):
             "segments": [{"from": "0s", "to": "60s", "mode": "office",
                           "attributes": {"background_wanted": True}}],
             "tasks": [{"id": "job", "name": "python3", "archetype": "cpu-batch",
-                       "arrive": "0s", "bind": {"total_work": "20s"}}]}
+                       "arrive": "0s",
+                       "bind": {"total_work": "20s", "program": "python3"}}]}
     path = tmp_path / "under.timeline.yaml"
     path.write_text(yaml.safe_dump(data))
     timeline = Timeline(path, library)

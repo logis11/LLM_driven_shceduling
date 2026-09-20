@@ -103,3 +103,30 @@ def test_familiarity_annotation_carried_into_ground_truth(fixture_path, library,
     # not authored -> the key is absent, never null or derived
     _, canonical, _ = compiled(fixture_path, library, "fx-game.timeline.yaml")
     assert all("familiarity" not in s for s in canonical["ground_truth"])
+
+
+def test_cpu_batch_runs_and_blocks_until_total_work(fixture_path, library):
+    # D21, D22, D25: RUN from the bound program's runs between voluntary blocks, then the block that followed it
+    _, canonical, _ = compiled(fixture_path, library, "fx-oversub.timeline.yaml")
+    task = next(e for e in canonical["events"]
+                if e["op"] == "arrive" and e["id"] == "train")
+    ops = [op["op"] for op in task["program"]]
+    assert ops[-1] == "EXIT" and ops.count("RUN") > 1      # a loop, not one uninterrupted RUN
+    assert set(ops) == {"RUN", "SLEEP", "EXIT"}
+    assert sum(op["us"] for op in task["program"] if op["op"] == "RUN") == 66_000_000
+    assert all(op["us"] >= 1 for op in task["program"] if op["op"] in ("RUN", "SLEEP"))
+
+
+def test_zero_inclusive_block_table_leaves_the_program_running(library):
+    # D25: HandBrakeCLI's block table is zero at every quantile — 0.08 % of its runs end in a block, so the task
+    # runs on and the runs join one RUN; the CPU still sums to total_work
+    from wlc import compiler
+    build = compiler._TaskBuild("batch", "HandBrakeCLI")
+    params = library.entry("cpu-batch")["params"]
+    compiler._batch_loop(build, params, {"bind": {"program": "handbrakecli", "total_work": "2s"}}, "seed", "batch")
+    assert [op["op"] for op in build.program] == ["RUN", "EXIT"]
+    assert build.program[0]["us"] == 2_000_000 == build.demand_us
+    build = compiler._TaskBuild("hog", "python3")
+    compiler._batch_loop(build, params, {"bind": {"program": "python3", "total_work": "2s"}}, "seed", "hog")
+    assert "SLEEP" in {op["op"] for op in build.program}          # python3 blocks after every run
+    assert sum(op["us"] for op in build.program if op["op"] == "RUN") == 2_000_000

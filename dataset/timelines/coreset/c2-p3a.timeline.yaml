@@ -14,7 +14,7 @@ tasks:
   - {id: editor, name: kdenlive, archetype: video-editor,
      arrive: 0s, depart: 120s}
   - {id: bulk, name: ffmpeg, archetype: cpu-batch, arrive: 60s,
-     bind: {total_work: 75s}}
+     bind: {total_work: 75s, program: ffmpeg}}
 
 focus:
   - {from: 2s, to: 118s, task: editor}

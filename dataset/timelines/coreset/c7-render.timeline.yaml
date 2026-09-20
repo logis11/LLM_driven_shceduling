@@ -28,6 +28,7 @@ tasks:
 - archetype: cpu-batch
   arrive: 2s
   bind:
+    program: ffmpeg
     total_work: 30s
   id: bulk
   name: ffmpeg

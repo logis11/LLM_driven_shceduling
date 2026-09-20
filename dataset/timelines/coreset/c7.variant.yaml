@@ -28,7 +28,7 @@ variants:
     from: c1-browsing.timeline.yaml
     ops:
       - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
+                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
       - patch-segment: {index: 0,
                         attributes: {background_wanted: false, background: av-scan},
                         scenario: [S2, S17]}
@@ -38,7 +38,7 @@ variants:
     from: c1-office.timeline.yaml
     ops:
       - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
+                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
       - patch-segment: {index: 0,
                         attributes: {background_wanted: false, background: av-scan},
                         scenario: [S1, S2, S4, S17]}
@@ -48,7 +48,7 @@ variants:
     from: c1-mail.timeline.yaml
     ops:
       - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
+                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
       - patch-segment: {index: 0,
                         attributes: {background_wanted: false, background: av-scan},
                         scenario: [S4, S17]}
@@ -58,7 +58,7 @@ variants:
     from: c1-dev.timeline.yaml
     ops:
       - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
+                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
       - patch-segment: {index: 0,
                         attributes: {background_wanted: false, background: av-scan},
                         scenario: [S11, S17]}
@@ -68,7 +68,7 @@ variants:
     from: c1-photo.timeline.yaml
     ops:
       - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
+                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
       - patch-segment: {index: 0,
                         attributes: {background_wanted: false, background: av-scan},
                         scenario: [S6, S17]}
@@ -78,7 +78,7 @@ variants:
     from: c1-meeting.timeline.yaml
     ops:
       - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
+                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
       - patch-segment: {index: 0,
                         attributes: {background_wanted: false, background: av-scan},
                         scenario: [S3, S17]}
@@ -88,7 +88,7 @@ variants:
     from: c1-gaming.timeline.yaml
     ops:
       - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
+                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
       - patch-segment: {index: 0,
                         attributes: {background_wanted: false, background: av-scan},
                         scenario: [S9, S17]}
@@ -98,7 +98,7 @@ variants:
     from: c1-media.timeline.yaml
     ops:
       - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
+                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
       - patch-segment: {index: 0,
                         attributes: {background_wanted: false, background: av-scan},
                         scenario: [S13, S17]}
@@ -108,7 +108,7 @@ variants:
     from: c1-video-edit.timeline.yaml
     ops:
       - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
+                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
       - patch-segment: {index: 0,
                         attributes: {background_wanted: false, background: av-scan},
                         scenario: [S7, S17]}
@@ -118,7 +118,7 @@ variants:
     from: c1-idle.timeline.yaml
     ops:
       - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s}}
+                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
       - patch-segment: {index: 0,
                         attributes: {background_wanted: false, background: av-scan},
                         scenario: [S18, S17]}

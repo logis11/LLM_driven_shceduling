@@ -19,7 +19,7 @@ variants:
     from: c2-p2a.timeline.yaml
     ops:
       - patch-task: {id: download, name: clamscan, archetype: cpu-batch,
-                     arrive: 60s, bind: {total_work: 25s}}
+                     arrive: 60s, bind: {total_work: 25s, program: clamscan}}
       - patch-segment: {index: 1,
                         attributes: {background_wanted: false, background: av-scan},
                         scenario: [S9, S17]}

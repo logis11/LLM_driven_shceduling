@@ -9,7 +9,7 @@ variants:
     from: c1-browsing.timeline.yaml
     ops:
       - add-task: {id: spoof, name: chrome, archetype: cpu-batch,
-                   arrive: 20s, bind: {total_work: 30s}}
+                   arrive: 20s, bind: {total_work: 30s, program: spoof}}
       - patch-segment: {index: 0, attributes: {background_wanted: true, spoof: true}}
 
   # Fold-internal change: browsing becomes a video call with the task set

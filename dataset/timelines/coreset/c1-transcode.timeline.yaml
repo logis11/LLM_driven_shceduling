@@ -15,7 +15,7 @@ tasks:
   - {id: video-editor, name: kdenlive, archetype: video-editor,
      arrive: 0s, depart: 60s}
   - {id: batch, name: HandBrakeCLI, archetype: cpu-batch, arrive: 2s,
-     bind: {total_work: 30s}}
+     bind: {total_work: 30s, program: handbrakecli}}
 
 focus:
   - {from: 2s, to: 58s, task: video-editor}

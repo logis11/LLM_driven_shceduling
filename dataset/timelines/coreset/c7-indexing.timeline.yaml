@@ -27,6 +27,7 @@ tasks:
 - archetype: cpu-batch
   arrive: 2s
   bind:
+    program: tracker
     total_work: 30s
   id: hog
   name: tracker-miner-fs-3

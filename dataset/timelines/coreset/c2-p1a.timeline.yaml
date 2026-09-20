@@ -16,7 +16,7 @@ tasks:
   - {id: editor, name: code, archetype: code-editor,
      arrive: 0s, depart: 180s}
   - {id: hog, name: python3, archetype: cpu-batch, arrive: 60s,
-     bind: {total_work: 130s}}
+     bind: {total_work: 130s, program: python3}}
 
 focus:
   - {from: 2s, to: 178s, task: editor}

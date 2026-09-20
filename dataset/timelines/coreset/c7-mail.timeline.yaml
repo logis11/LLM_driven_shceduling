@@ -33,6 +33,7 @@ tasks:
 - archetype: cpu-batch
   arrive: 0s
   bind:
+    program: clamscan
     total_work: 60s
   id: scan
   name: clamscan

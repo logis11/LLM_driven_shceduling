@@ -662,12 +662,35 @@ archetypes:
   cpu-batch:
     category_source: interbench
     pattern:
+      constructor: batch-loop      # D21: a run between voluntary blocks, then the block that followed it
       program:
-        - RUN: total_work          # run-to-completion, sustained
+        - loop:                    # until total_work of CPU is spent; tables chosen by the `program` binding
+            - RUN: <program>_run
+            - SLEEP: <program>_block
         - EXIT: {}
-    params: {}
+    params:                        # D21, D22, D25: per bound program, pooled over its threads
+      clamscan_run:
+        {dist: quantiles, p: [81, 979, 7598, 7848, 8148, 8682, 9666, 10541, 14246, 31278], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
+      clamscan_block:
+        {dist: quantiles, p: [100, 115, 123, 137, 156, 192, 253, 324, 1932, 5076], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
+      ffmpeg_run:
+        {dist: quantiles, p: [3, 4, 4, 5, 7, 20, 1076, 1207, 51116, 77879], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
+      ffmpeg_block:
+        {dist: quantiles, p: [0, 0, 0, 0, 0, 0, 0, 0, 0, 173], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
+      handbrakecli_run:
+        {dist: quantiles, p: [4, 4, 4, 6, 8, 371, 1137, 1847, 5067, 18453], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
+      handbrakecli_block:
+        {dist: quantiles, p: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
+      python3_run:
+        {dist: quantiles, p: [14, 15, 26, 36, 49, 125809, 1750612, 18493185, 18986255, 19110868], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
+      python3_block:
+        {dist: quantiles, p: [100, 101, 102, 142, 218, 277, 348, 390, 441, 475], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
+      tracker_run:
+        {dist: quantiles, p: [3, 4, 6, 23, 64, 92, 220, 515, 2972, 92960], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
+      tracker_block:
+        {dist: quantiles, p: [0, 0, 0, 0, 0, 0, 5, 15, 294, 1271], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
     lifetime: finite
-    binding_params: [total_work]
+    binding_params: [total_work, program]
     scalable: []
     validation_stats:
       referee: self-consistency
