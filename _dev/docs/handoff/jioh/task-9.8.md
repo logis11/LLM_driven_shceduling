@@ -31,8 +31,10 @@ bash ~/.cache/meas-loop/retry-batch-9.8.sh 24 chrome-hidden:2 … steam:5      #
 ```
 
 The driver relaunches only `wrong-machine` draws, reads each short job's report before calling it gated, and
-stops rather than retrying on a failure or any other gate. It was started detached; it may or may not have
-survived the session.
+stops rather than retrying on a failure or any other gate. It was started detached and lives in
+`~/.cache/meas-loop/`, outside the repository — **if that is gone, the repository's own relauncher does the
+same job**: `python3 dataset/tools/meas/loop/watch.py desktop/<app>… --since <run>`, which relaunches gated
+windows one at a time per application and exits on a landing or a failure.
 
 ## What this session settled
 
@@ -70,8 +72,11 @@ survived the session.
 
 ## Operational notes
 
-- Artifacts and helpers live under `~/.cache/meas-loop/batch-9.8/` and `~/.cache/meas-loop/probe-9.8/`
-  (`size.py` sizes a phase from window spread; `align.py` tests wake coincidence across renderers).
+- The two analyses behind method §10's figures are in the repository:
+  `dataset/tools/meas/desktop/window_spread.py` (sizes a steady phase from a probe's window spread — the 3.7 %
+  at 500 s that set the hidden renderer's settle) and `dataset/tools/meas/desktop/wake_alignment.py` (the 32
+  bins of 10 ms holding all twelve renderers). Downloaded artifacts sit under `~/.cache/meas-loop/batch-9.8/`
+  and `~/.cache/meas-loop/probe-9.8/`, and are re-downloadable from the run ids above.
 - **The trigger carries five keys only** — `mode`, `attempt`, `cpu_model`, `apps`, `repeats`. Every design
   value is a constant in `run.sh` (D13); to change one, edit `run.sh` and bump `attempt` in the same push.
 - **The branch is shared with other live sessions.** Push immediately after each commit.
