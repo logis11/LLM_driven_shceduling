@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-20, the `code` and `webrtc` probes' phase lengths (changelog D52) — §2, both design: `code` 1,400 s, the 1,374.4–1,378.3 s a repeat observes it (D42's ground), resolving whether its 50–70 s idle bump recurs; `webrtc` 2,000 s, not D42's ground (300 s, its only phase) but D35's question — whether the call's CPU saturation, seen over 0–40, 60–90 and 140–170 s, recurs past the 300 s phase. `phase_s` in `.github/campaign-long-probe.json`.
+
 - 2026-09-20, `chrome`'s settle (changelog D51) — §2: 270 s, design, from the D50 probe (run 35494199119): its launch burst at 20–60 s and the ~880 ms `ThreadPoolForeground` run at 180–190 s end by 190 s into a 30 s-settled idle phase, steady at 1.2–1.4 ms/s after; the idle phase stays 120 s, with one 75 ms episode seen once at 1,300 s. `settle_for` in `campaign/run.sh`.
 
 - 2026-09-20, `chrome`'s settle (changelog D50) — amending the D35 entry below: set after one long-phase probe of `chrome`'s setup, as `webrtc` and `code` take, not from the current campaign's five repeats, whose 880 ms launch run scatters over 152–180 s (repeats 1–3) and 65–85 s (repeats 4–5). §2: the probe's phase length is 2,000 s, design — a `chrome` repeat observes the application 1,974.5–1,976.8 s after its idle phase starts (`phases.jsonl` over the five repeats), rounded up as D42 rounds `thunderbird-send`'s.
