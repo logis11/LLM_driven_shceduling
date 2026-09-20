@@ -115,11 +115,14 @@ def analyze_phase(D, phase, app):
                if os.path.exists(os.path.join(D, f"perf.{phase}.timehist.txt{s}"))), None)
     if not th:
         return {"missing": True}
-    pids = set()
+    pids, ends = set(), []
     for snap in (f"snap.{phase}.before.json", f"snap.{phase}.after.json"):
         p = os.path.join(D, snap)
         if os.path.exists(p):
-            pids |= {pr["pid"] for pr in json.load(open(p))["procs"]}
+            here = {pr["pid"] for pr in json.load(open(p))["procs"]}
+            pids |= here
+            ends.append(here)
+    whole_phase = set.intersection(*ends) if len(ends) == 2 else pids
     segments, (t0, t1), extra = load_rows(os.path.join(D, th), pids)
     span = max(t1 - t0, 1e-6)
     roles = pid_roles(D, phase)
@@ -141,6 +144,13 @@ def analyze_phase(D, phase, app):
         out["role_filter"] = "none"
     out["per_pid_wakes_per_s"] = {str(p): round(sum(1 for r in kept if r.pid == p) / span, 3)
                                   for p in sorted({r.pid for r in kept})}
+    if app in RENDERER_APPS:
+        # A renderer is a sample of the phase only if it existed for the phase. One that died partway has its
+        # wakes divided by the whole span, so its rate is understated and it drags the pooled mean down — in the
+        # 2026-09-20 dry run two such renderers took the visible subject's mean from about 10.9 to 6.66.
+        short = sorted({r.pid for r in kept} - whole_phase)
+        out["renderers_part_phase"] = [{"pid": p, "wakes_per_s": out["per_pid_wakes_per_s"][str(p)]} for p in short]
+        kept = [r for r in kept if r.pid in whole_phase]
     if app == "chrome-hidden":
         kept, out["control_tab"] = drop_control_tab(kept, span)
     out["wakes_per_s"] = round(len(kept) / span, 3)          # the whole measured set, a diagnostic
