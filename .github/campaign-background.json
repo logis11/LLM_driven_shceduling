@@ -1,7 +1,7 @@
 {
-  "note": "Trigger for meas-background.yml (9.7 campaign). Dispatch is unavailable off the default branch, so a push that changes this file starts the runs it names. Set apps to [] to skip; repeats is one list for every program or a map program -> list. mode: dry | probe | full | diag (SteamCMD only, not a repeat). work_root: auto | / | /mnt. steam_update_from: the branch staged before steam-update-shaped (empty: no update phase); steam_update_to: app_update's -beta argument back to the public build. steam_dry_app: smallest | an app id. archiver_set: 10gb | 1gb. steam_diag_setting: diag mode's setting under test (empty: one content server forced).",
-  "mode": "diag",
-  "attempt": 43,
+  "note": "Trigger for meas-background.yml (9.7 campaign). Dispatch is unavailable off the default branch, so a push that changes this file starts the runs it names. Set apps to [] to skip; repeats is one list for every program or a map program -> list. mode: dry | probe | full | diag | shapediag (SteamCMD only, neither is a repeat; shapediag is D24's queue-discipline test). work_root: auto | / | /mnt. steam_update_from: the branch staged before steam-update-shaped (empty: no update phase); steam_update_to: app_update's -beta argument back to the public build. steam_dry_app: smallest | an app id. archiver_set: 10gb | 1gb. steam_diag_setting: diag mode's setting under test (empty: one content server forced).",
+  "mode": "shapediag",
+  "attempt": 44,
   "cpu_model": "EPYC 7763",
   "apps": [
     "steamcmd"
@@ -19,5 +19,5 @@
   "steam_update_to": "public",
   "steam_dry_app": "smallest",
   "archiver_set": "10gb",
-  "steam_diag_setting": "@cMaxInitialDownloadSources 5 @cDefaultInitialDownloadSources 5 @fDownloadRateImprovementToAddAnotherConnection 99"
+  "steam_diag_setting": ""
 }
