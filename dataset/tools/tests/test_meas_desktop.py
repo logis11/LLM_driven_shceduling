@@ -128,6 +128,27 @@ def test_a_hidden_repeat_whose_renderers_never_throttled_is_left_out():
     assert pool.throttling_check("chrome-visible", unthrottled)[0] is True
 
 
+def test_the_control_tab_does_not_decide_the_throttling_check():
+    # The control tab is never throttled — that is what it is for (method §2 subject 1), and
+    # `per_pid_wakes_per_s` is computed before it is dropped. Reading it here rejected every repeat whose
+    # renderers had throttled: the 2026-09-20 probe gated at the control's 10.193 wakes/s while the worst
+    # measured renderer was 0.184.
+    probe = {"phases": {"steady": {"per_pid_wakes_per_s": {"3494": 10.193, "3501": 0.182, "3508": 0.184},
+                                   "control_tab": {"dropped": 3494, "wakes_per_s": 10.193,
+                                                   "ratio_to_next": 55.26}}}}
+    ok, worst = pool.throttling_check("chrome-hidden", probe)
+    assert ok is True and worst == 0.184
+    # a measured renderer that never throttled is still caught, with the control tab out of the way
+    hot = {"phases": {"steady": {"per_pid_wakes_per_s": {"3494": 10.193, "3501": 0.182, "3508": 9.8},
+                                 "control_tab": {"dropped": 3494}}}}
+    ok, worst = pool.throttling_check("chrome-hidden", hot)
+    assert ok is False and worst == 9.8
+    # no control tab identified — nothing to exclude, and a phase holding only one is not a measurement
+    only = {"phases": {"steady": {"per_pid_wakes_per_s": {"3494": 10.193},
+                                  "control_tab": {"dropped": 3494}}}}
+    assert pool.throttling_check("chrome-hidden", only) == (False, None)
+
+
 def _loop_dirs(tmp_path, rows):
     """rows: {repeat -> report.kv dict}; every repeat gates open on the campaign's machine."""
     dirs = {}

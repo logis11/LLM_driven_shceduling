@@ -112,11 +112,21 @@ def find_runs(root, cpu_model):
 
 
 def throttling_check(app, res):
-    """chrome-hidden only: did intensive throttling engage in the carried phase? Returns (ok, wakes_per_s)."""
+    """chrome-hidden only: did intensive throttling engage in the carried phase? Returns (ok, wakes_per_s).
+
+    The control tab is excluded. It carries the same timer and, being the selected tab, stays visible to Blink
+    and is never throttled (method §2 subject 1) — it is the reference the run identifies the throttled
+    renderers against, at 55x the next. `per_pid_wakes_per_s` is computed before it is dropped, so reading the
+    raw map here tested the one renderer that cannot pass, and rejected every repeat whose renderers did
+    throttle.
+    """
     if app != "chrome-hidden":
         return True, None
     ph = res["phases"].get(CARRIED[app][0]) or {}
-    per_pid = ph.get("per_pid_wakes_per_s") or {}
+    per_pid = dict(ph.get("per_pid_wakes_per_s") or {})
+    control = (ph.get("control_tab") or {}).get("dropped")
+    if control is not None:
+        per_pid.pop(str(control), None)
     if not per_pid:
         return False, None
     worst = max(per_pid.values())
