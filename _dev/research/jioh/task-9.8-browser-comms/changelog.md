@@ -276,3 +276,30 @@ spread of the application between sessions, which is 9.5 D57's case. They carry 
 and 14 % of the visible renderer's. Open.
 
 No value changed by this entry.
+
+## D20 — where the Chrome quiet threads' spread lies, measured; the decision open (2026-09-21)
+
+D19 left the renderer entries failing only on quiet threads: the hidden renderer's residual (`Chrome_ChildIOT`,
+`MemoryInfra`), the visible renderer's `Chrome_ChildIOT`, `ThreadPoolForeg` and residual — 7 % of the hidden
+renderer's wakes and 14 % of the visible one's. 9.5 D57 carries a component whose rate varies between sessions
+with its half-widths, and places the spread by sliding a window along one long run. The same test on the
+2026-09-20 probes (`desktop/within_run.py`, 600 s windows every 60 s, per renderer), the hidden probe's first 300 s
+dropped because D15 found it still settling there:
+
+| thread group | within one run | across the eleven repeats |
+|---|---|---|
+| visible `Chrome_ChildIOT` | ±18.6 % | ±105.8 % |
+| visible residual | ±28.9 % | ±45.3 % |
+| hidden residual | ±34.0 % | ±46.2 % |
+| visible `ThreadPoolForeg` | barely present in the probe (mean 0.0001/s) | 0.0030–0.0070/s |
+
+`Chrome_ChildIOT` in the visible renderer is D57's case: its rate barely moves within a run and moves a lot
+between runs. The residuals are not cleanly so — about two thirds of their spread is already present within one
+run, since they wake about six times per renderer per 600 s phase, so a 600 s phase is itself too short to average
+them. Lengthening the phase would change the campaign and supersede all eleven repeats of both subjects.
+
+**Open for 인지오:** carry the renderer entries' quiet threads with their half-widths — D57 as written for
+`Chrome_ChildIOT`, extended to the residuals and `ThreadPoolForeg` with both spreads and the few-wakes-per-phase
+limitation stated in the scope — or supersede both renderer subjects and rerun them on a longer phase.
+
+No value changed by this entry.
