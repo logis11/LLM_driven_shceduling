@@ -355,3 +355,18 @@ these tables at their quantiles rather than their means, which would change how 
 reaches beyond this slice.
 
 No value changed by this entry.
+
+## D23 — the Steam client's two components carried between sessions; every entry holds (2026-09-22)
+
+By 인지오's decision on D22: 9.5 D57's exception applies as written to the Steam client's `steamwebhelper` and
+`ThreadPoolForeg` — a component whose rate varies between sessions carried with its half-widths over the repeats
+obtained, its three values together. D22 holds the evidence: within one run their gap means move ±0.1 % and ±1.7 %,
+across the twelve repeats ±21.0 % and ±19.6 %; `steamwebhelper`'s wake rate holds within ±0.5 % and its gap table
+is identical through its 99th percentile, the mean moved by a handful of gaps past it. Each entry's scope states
+this, and that `steamwebhelper` carries 23.6 % of the client's wakes, well above 9.5 D57's 6.5 %. Tooling:
+`SESSION_SPREAD` in `desktop/pool.py`.
+
+**Every entry holds the rule:** the chat client at 17 repeats, the two renderers at 11, the Steam client at 12, all
+on the AMD EPYC 7763 under campaign `meas-ci:desktop:2026-09-20`, no repeat excluded or superseded.
+
+No value changed by this entry.

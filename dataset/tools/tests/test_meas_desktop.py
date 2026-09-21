@@ -383,3 +383,11 @@ def test_an_interrupted_artifact_download_leaves_nothing_behind_and_does_not_blo
     monkeypatch.setattr(common.subprocess, "run", gh_ok)
     assert common.download(1, "meas-desktop-element-r15-full", str(dest)) == str(dest)
     assert (dest / "report.json").exists()
+
+
+def test_the_steam_client_components_carried_between_sessions():
+    # changelog D23: steamwebhelper's and ThreadPoolForeg's gap means carried with their half-widths under 9.5 D57
+    wild = _comp([70.0] * 5, [29.0, 29.0, 42.0, 29.0, 41.0], [0.05] * 5)
+    q = pool.criterion("steam", _entry({"steamwebhelper": wild}, phase="shown"))
+    assert q["quantities"]["shown steamwebhelper gap mean (ms)"]["carried"] is True and q["passes"] is True
+    assert pool.criterion("steam", _entry({"steam": wild}, phase="shown"))["passes"] is False

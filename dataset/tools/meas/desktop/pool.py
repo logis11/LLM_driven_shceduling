@@ -80,7 +80,10 @@ EXCEPTED_RUN_MEANS = ("chrome-hidden", "chrome-visible", "element", "steam")
 # renderer's ThreadPoolForeg, whose spread is in part within a run (about six wakes per renderer per phase) — both
 # spreads and that limitation are stated in the entry's scope (D20 holds the measurement).
 SESSION_SPREAD = {"chrome-hidden": ("residual",),
-                  "chrome-visible": ("Chrome_ChildIOT", "ThreadPoolForeg", "residual")}
+                  "chrome-visible": ("Chrome_ChildIOT", "ThreadPoolForeg", "residual"),
+                  # changelog D23: 9.5 D57 as written — the gap means move ±0.1 % and ±1.7 % within a run and ±21 %
+                  # and ±20 % between runs, the tables stable through p99 and the wake rates holding
+                  "steam": ("steamwebhelper", "ThreadPoolForeg")}
 
 # results only: (a, b, what) — the two comparisons the slice reports (method §6 item 2)
 COMPARISONS = {"chrome-hidden": [], "chrome-visible": [("steady-timer", "steady-notimer", "timer against no timer")],
