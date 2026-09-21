@@ -59,11 +59,11 @@ Chrome launch, diff those arms against `332f627` — any change supersedes the C
   `dataset/tools/meas/desktop/window_spread.py` (sizes a steady phase from a probe's window spread — the 3.7 %
   at 500 s that set the hidden renderer's settle) and `dataset/tools/meas/desktop/wake_alignment.py` (the 32
   bins of 10 ms holding all twelve renderers). Downloaded artifacts sit under `~/.cache/meas-loop/batch-9.8/`
-  and `~/.cache/meas-loop/probe-9.8/`, and are re-downloadable from the run ids above.
+  and `~/.cache/meas-loop/probe-9.8/`, and are re-downloadable: `pool_runs.py` fetches every landed repeat from run 21 on.
 - **The trigger carries five keys only** — `mode`, `attempt`, `cpu_model`, `apps`, `repeats`. Every design
   value is a constant in `run.sh` (D13); to change one, edit `run.sh` and bump `attempt` in the same push.
 - **The branch is shared with other live sessions.** Push immediately after each commit.
-- CI does not run on this branch. `make -C dataset test PY=python3.12`, about 8 minutes, currently 180 passed,
+- CI does not run on this branch. `make -C dataset test PY=python3.12`, about 8 minutes, currently 184 passed,
   1 skipped, 1 xfailed.
 - Job lengths in `full`: about 23 minutes for the two renderer subjects and the chat client, about 42 for the
   Steam client. The EPYC 7763 draw rate has run near 40–50 %, so budget about two draws per landing.
