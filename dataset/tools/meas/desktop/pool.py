@@ -62,11 +62,10 @@ CARRIED = {"chrome-hidden": ("steady",),
            "element": ("idle",),
            "steam": ("shown",)}
 
-# the list: every value the fold-in carries, each tested by its per-repeat mean (method §6 item 1). Thread counts
-# are carried as their observed range and are deliberately absent.
-LIST = {app: [(ph, "wakes_per_s", "wakes/s"), (ph, "gap_mean_ms", "gap mean (ms)"),
-              (ph, "run_mean_ms", "run mean (ms)")]
-        for app, phs in CARRIED.items() for ph in phs[:1]}
+# the list: every value the fold-in carries, each tested by its per-repeat mean (method §6 item 1) — per carried
+# component of the carried phase and for the residual, its wake rate, gap mean and run mean, as campaign/pool.py
+# tests 9.5's entries. Thread counts are carried as their observed range and are deliberately absent.
+LIST_FIELDS = (("wakes_per_s", "wakes/s"), ("gap_ms", "gap mean (ms)"), ("run_ms", "run mean (ms)"))
 
 # results only: (a, b, what) — the two comparisons the slice reports (method §6 item 2)
 COMPARISONS = {"chrome-hidden": [], "chrome-visible": [("steady-timer", "steady-notimer", "timer against no timer")],
@@ -200,30 +199,36 @@ def pool_app(app, reps):
 
 
 def criterion(app, entry):
-    """The list of method §6 item 1, each quantity tested by its per-repeat mean over the carried phase."""
+    """The list of method §6 item 1, each value tested by its per-repeat mean over the carried phase: for every
+    selected component and for the residual, its wake rate, gap mean and run mean — the list `campaign/pool.py`
+    tests for 9.5's entries.
+
+    An earlier version tested three numbers per phase — the per-renderer wake rate and the unweighted means of the
+    components' gap and run means. That average gave a component waking a handful of times a phase the weight of
+    one waking every ten seconds, let a failing component sit behind stable ones, and left the residual untested:
+    on the first batch it passed `element`, where 6 of its 15 per-component values fail.
+
+    For the renderer entries every rate here is already per renderer — components are computed per renderer
+    process and pooled as its samples (changelog D14) — so nothing is divided by N.
+    """
     out = {}
-    for phase, key, label in LIST.get(app, []):
-        ph = entry["phases"].get(phase)
-        if not ph:
-            continue
-        reps = ph["repeats"]
-        if key == "wakes_per_s":
-            # for the renderer entries this is the per-renderer rate: the archetype is one renderer, and the
-            # job measures N only so a throttled entry yields enough wakes to read
-            src = "wakes_per_s_per_renderer" if app in ("chrome-hidden", "chrome-visible") else "wakes_per_s"
-            vals = dict(zip(reps, ph[src]))
-            floor = None
-        else:
-            which, field = ("gap_ms", "mean") if key == "gap_mean_ms" else ("run_ms", "mean")
-            comms = ph["components"]["selected"] or sorted(ph["threads"])
-            vals = {}
-            for i, k in enumerate(reps):
-                per = [ph["threads"][c][which][i][field] for c in comms
-                       if c in ph["threads"] and i < len(ph["threads"][c][which])
-                       and ph["threads"][c][which][i] and ph["threads"][c][which][i].get(field) is not None]
-                vals[k] = statistics.fmean(per) if per else None
-            floor = ABS_FLOOR_MS
-        out[f"{phase} {label}"] = {**stability(vals, floor, MIN_REPEATS)}
+    phase = CARRIED[app][0]
+    ph = entry["phases"].get(phase)
+    if ph:
+        comps = [(c, ph["threads"][c]) for c in ph["components"]["selected"] if c in ph["threads"]]
+        residual = ph["components"].get("residual")
+        for comm, c in comps + ([("residual", residual)] if residual else []):
+            for field, label in LIST_FIELDS:
+                if field == "wakes_per_s":
+                    vals, floor = c.get("wakes_per_s") or [], None
+                elif comm == "residual":
+                    vals, floor = (c.get(field) or {}).get("repeat_mean") or [], ABS_FLOOR_MS
+                else:
+                    vals, floor = [x.get("mean") if x else None for x in c.get(field) or []], ABS_FLOOR_MS
+                if not vals:
+                    continue
+                out[f"{phase} {comm} {label}"] = {**stability(vals, floor, MIN_REPEATS, keep_zero=True),
+                                                  "needed": _cp.repeats_needed(vals, floor)}
     passes = bool(out) and all(c["passes"] for c in out.values())
     return {"tolerance": TOLERANCE, "abs_floor_ms": ABS_FLOOR_MS, "min_repeats": MIN_REPEATS,
             "quantities": out, "passes": passes}

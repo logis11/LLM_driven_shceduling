@@ -270,3 +270,33 @@ def test_the_slice_profile_reads_a_phase_in_ten_second_slices(tmp_path):
     assert len(sl["wakes_per_s"]) == 3
     assert sl["wakes_per_s"][0] == 0.3 and sl["wakes_per_s"][1] == 0.0 and sl["wakes_per_s"][2] == 0.1
     assert sl["cpu_ms_per_s"][0] == 0.6 and sl["cpu_ms_per_s"][2] == 0.4
+
+
+def _entry(threads, residual=None, phase="idle"):
+    return {"phases": {phase: {"threads": threads,
+                               "components": {"selected": sorted(threads), "residual": residual}}}}
+
+
+def _comp(rate, gap, run):
+    return {"wakes_per_s": list(rate), "gap_ms": [{"mean": g} for g in gap], "run_ms": [{"mean": r} for r in run]}
+
+
+def test_the_stability_rule_tests_each_carried_component_and_the_residual():
+    # method §6 item 1 lists every value per component, and the residual's. The earlier criterion averaged the
+    # components' gap means into one number: a steady component and a wild one could pass together, and the
+    # residual was never tested. On the 2026-09-20 first batch it passed `element` with 6 of 15 values failing.
+    steady = _comp([4.0] * 5, [250.0] * 5, [0.05] * 5)
+    wild = _comp([4.0] * 5, [100.0, 400.0, 100.0, 400.0, 250.0], [0.05] * 5)
+    res = {"wakes_per_s": [0.4] * 5, "gap_ms": {"repeat_mean": [2000.0] * 5},
+           "run_ms": {"repeat_mean": [0.02, 0.02, 0.09, 0.02, 0.02]}}
+    crit = pool.criterion("element", _entry({"a": steady, "b": wild}, res))
+    q = crit["quantities"]
+    assert q["idle a gap mean (ms)"]["passes"] is True
+    assert q["idle b gap mean (ms)"]["passes"] is False
+    assert q["idle residual run mean (ms)"]["passes"] is False
+    assert "idle residual wakes/s" in q and crit["passes"] is False
+    # every value carries the repeat count its present spread would need
+    assert all("needed" in v for v in q.values())
+    # all steady -> the entry holds
+    ok = pool.criterion("element", _entry({"a": steady}, {**res, "run_ms": {"repeat_mean": [0.02] * 5}}))
+    assert ok["passes"] is True
