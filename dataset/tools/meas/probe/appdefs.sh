@@ -185,7 +185,11 @@ PY
       echo $! > "$OUT/httpd.pid"; sleep 1
       rec feed.server "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8088/feed.html)"
       LAUNCH="google-chrome --no-sandbox --disable-gpu --no-first-run --user-data-dir=/tmp/chrome-data file:///tmp/page.html"
-      CLASS="google-chrome|Google-chrome"; PAT="chrome-data"; RX="chrome"; DRIVER=stream; STREAM=ie; AREA="0.13,0,0.02,0.02"; OP=page-load ;;
+      CLASS="google-chrome|Google-chrome"; PAT="chrome-data"; RX="chrome"; DRIVER=stream; STREAM=ie; AREA="0.13,0,0.02,0.02"; OP=page-load
+      # 9.5 D60: the 136M phase types into the text box whatever the SWELL-KW window left — a click on blank body right
+      # of the box (x 18–842 at the page's top) takes focus off any field, Ctrl+Home scrolls to the top, a click in the
+      # box and Ctrl+End put the caret after its text
+      ALTPRELUDE="xdotool mousemove 950 600 click 1; sleep 1; xdotool key ctrl+Home; sleep 2; xdotool mousemove 430 255 click 1; sleep 1; xdotool key ctrl+End" ;;
     chrome-hidden|chrome-visible)
       # 9.8 D13: the two renderer subjects. The flags match the `chrome` arm above — web-browser carries Chrome's
       # tree minus its renderers (9.5 D14) and these entries carry the renderers, so the two halves of one

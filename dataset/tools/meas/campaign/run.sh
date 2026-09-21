@@ -150,7 +150,7 @@ case "$DRIVER" in
     AFILE="$STREAMS/aalto-r$REPEAT.jsonl"
     if [ -f "$AFILE" ]; then
       sleep 10; rec stream_alt_file "$(basename "$AFILE")"
-      if [ -n "$ALTPRELUDE" ]; then xdotool windowactivate --sync "$WID"; bash -c "$ALTPRELUDE" > "$OUT/altprelude.log" 2>&1; screenshot after-altprelude; sleep 5; fi
+      if [ -n "$ALTPRELUDE" ]; then xdotool windowactivate --sync "$WID"; bash -c "$ALTPRELUDE" > "$OUT/altprelude.log" 2>&1; rec altprelude.rc "$?"; screenshot after-altprelude; sleep 5; fi
       DRVA="python3 $TOOLS/replay_stream.py $AFILE $WID $OUT/replay-alt.jsonl --seconds $DRIVEN --area $AREA"
       $PH driven-alt -- bash -c "true"; phase driven-alt "$((DRIVEN + 5))" "$DRVA"
       rec replay_alt.sent "$(wc -l < "$OUT/replay-alt.jsonl" 2>/dev/null || echo 0)"
