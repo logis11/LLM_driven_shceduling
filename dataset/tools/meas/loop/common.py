@@ -9,6 +9,7 @@ import datetime
 import json
 import os
 import re
+import shutil
 import subprocess
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
@@ -107,11 +108,27 @@ def artifact_names(run_id):
 
 
 def download(run_id, name, dest):
-    """One artifact into its own folder (gh extracts an -n download flat)."""
+    """One artifact into its own folder (gh extracts an -n download flat).
+
+    Extracted into a sibling temporary folder and moved into place only once gh has finished: an extraction cut off
+    partway (2026-09-21, 41 of 43 files and no report.json) otherwise left a folder that every later attempt refused
+    with "file exists", and that a reader could have taken for a repeat. A leftover partial folder is cleared."""
     if os.path.exists(os.path.join(dest, "report.json")):
         return dest
-    os.makedirs(dest, exist_ok=True)
-    subprocess.run(["gh", "run", "download", str(run_id), "-n", name, "-D", dest], cwd=REPO, capture_output=True, check=True)
+    if os.path.isdir(dest):
+        shutil.rmtree(dest)
+    tmp = dest + ".partial"
+    if os.path.isdir(tmp):
+        shutil.rmtree(tmp)
+    os.makedirs(tmp)
+    try:
+        subprocess.run(["gh", "run", "download", str(run_id), "-n", name, "-D", tmp], cwd=REPO, capture_output=True,
+                       check=True)
+    except BaseException:
+        shutil.rmtree(tmp, ignore_errors=True)
+        raise
+    os.makedirs(os.path.dirname(dest) or ".", exist_ok=True)
+    os.rename(tmp, dest)
     return dest
 
 

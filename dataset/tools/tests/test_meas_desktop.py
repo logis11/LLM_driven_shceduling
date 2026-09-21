@@ -1,7 +1,10 @@
 """Constructed cases for the 9.8 desktop campaign tools (changelog D13)."""
 
 import json
+import os
 import re
+
+import pytest
 
 from meas.desktop import analyze, pool
 
@@ -348,3 +351,35 @@ def test_the_renderer_quiet_threads_carry_with_their_half_widths():
     assert q["passes"] is False                        # the main thread is not excepted
     q = pool.criterion("element", _entry({"Chrome_ChildIOT": wild}))
     assert q["passes"] is False                        # nor is any other subject's thread of the same name
+
+
+def test_an_interrupted_artifact_download_leaves_nothing_behind_and_does_not_block_the_next(tmp_path, repo_root,
+                                                                                          monkeypatch):
+    # 2026-09-21: an extraction cut off at 41 of 43 files left a folder without report.json, and every later
+    # download refused it with "file exists", so the pool could never be read again
+    import subprocess
+    _pool_runs(repo_root)
+    import common
+    dest = tmp_path / "run" / "meas-desktop-element-r15-full"
+    dest.mkdir(parents=True)
+    (dest / "after-credentials.png").write_text("partial")          # the leftover of the interrupted attempt
+
+    def gh_fails(cmd, **kw):
+        out = cmd[cmd.index("-D") + 1]
+        with open(os.path.join(out, "half.png"), "w") as f:
+            f.write("x")
+        raise subprocess.CalledProcessError(1, cmd)
+
+    monkeypatch.setattr(common.subprocess, "run", gh_fails)
+    with pytest.raises(subprocess.CalledProcessError):
+        common.download(1, "meas-desktop-element-r15-full", str(dest))
+    assert not dest.exists() and not (tmp_path / "run" / "meas-desktop-element-r15-full.partial").exists()
+
+    def gh_ok(cmd, **kw):
+        out = cmd[cmd.index("-D") + 1]
+        for f in ("report.json", "after-credentials.png"):
+            with open(os.path.join(out, f), "w") as fh:
+                fh.write("{}")
+    monkeypatch.setattr(common.subprocess, "run", gh_ok)
+    assert common.download(1, "meas-desktop-element-r15-full", str(dest)) == str(dest)
+    assert (dest / "report.json").exists()
