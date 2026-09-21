@@ -1,15 +1,19 @@
 {
   "note": "Trigger for meas-interactive.yml and meas-playback.yml (9.5 campaign). Dispatch is unavailable off the default branch, so a push that changes this file starts the runs it names. Set a family's apps to [] to skip it.",
   "mode": "full",
-  "attempt": 378,
+  "attempt": 379,
   "cpu_model": "EPYC 7763",
   "interactive": {
     "apps": [
-      "code"
+      "chrome"
     ],
     "repeats": {
-      "code": [
-        2
+      "chrome": [
+        1,
+        2,
+        3,
+        4,
+        5
       ]
     }
   },
