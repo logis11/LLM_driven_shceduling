@@ -1,10 +1,44 @@
-# Handoff — task 9.8 Browser and comms (2026-09-20, the first batch in flight)
+# Handoff — task 9.8 Browser and comms (2026-09-21 night)
 
-Stage 3 on `jioh/dataset-rebuild`. **D1–D16 landed, the tooling is written and proven, the long-phase probe is
-done, and the first batch is running.** Nothing is pooled yet and no archetype value has changed.
+Stage 3 on `jioh/dataset-rebuild`. **Three of the four entries hold the stability rule; the Steam client's waits on
+one decision (D22).** Nothing is folded into the dataset yet and no archetype value has changed.
 
-Next session: land whatever repeats are still outstanding, pool five per subject, and read the stability rule
-for the first time. That verdict is what decides whether 9.8 goes to the fold-in or starts adding repeats.
+## Morning summary (2026-09-21 → 22)
+
+| Entry | Repeats (all valid, EPYC 7763) | Rule |
+|---|---|---|
+| chat client (`element`) | 17 | **holds** |
+| hidden renderer (`chrome-hidden`) | 11 | **holds** — run means under D17, the residual under D21 |
+| visible renderer (`chrome-visible`) | 11 | **holds** — run means under D17, `Chrome_ChildIOT`, `ThreadPoolForeg`, residual under D21 |
+| Steam client (`steam`) | 12 | two gap means fail — **D22, open** |
+
+**Your decision — D22:** the Steam client's `steamwebhelper` and `ThreadPoolForeg` gap means. Within one run they
+move ±0.1 % and ±1.7 %; across the twelve repeats ±21.0 % and ±19.6 % — same threads, same wake rate, the wakes
+spread differently from one launch to the next. That is 9.5 D57's case by all three of its tests, but
+`steamwebhelper` carries 23.6 % of the client's wakes against D57's 6.5 %. Carry both with their half-widths under
+D57, or add about 46 repeats (42 min each). Evidence in the changelog, D22.
+
+**Fixed without asking (all in pooling/analysis — the measurement is unchanged since D15, every repeat recorded
+the same settings, so nothing was superseded):**
+- the rule tested one phase-average instead of each component and the residual (`c7b8a72`)
+- the renderer residual merged all twelve renderers instead of describing one (`1f44041`, D19)
+- the pooled record stated the observed renderer count instead of the measured one (`52e4d5b`)
+
+**Decided today by you:** D17 (run means carried under the machine-spread exception), D18 (D5 stated on the
+wake-rate ratio — now 1.225 ±0.5 % over twelve repeats — and the Steam client's run means excepted too), D21 (the
+renderer quiet threads carried with their half-widths).
+
+**Checked, not a defect:** the chat client's traffic phase reading 4.0× idle against the dry run's 8.1× — every
+repeat's driver sent exactly 600 messages over the 600 s; the dry figure was a 45 s phase dominated by the first
+messages.
+
+**Next, once D22 is decided:** the final pooled set into `campaign/results/` with the campaign tag, each entry's row
+in `measurement-campaign-record.md`, the raw-record release (outward — ask first), then the fold-in with scope-card
+items 6–10 and 15–16. Still open for the fold-in: what the renderer wake alignment (D15) does to pooling N
+renderers as N samples.
+
+**Watch:** `probe/appdefs.sh` is shared with 9.5's live campaign and holds our two Chrome arms. Before any further
+Chrome launch, diff those arms against `332f627` — any change supersedes the Chrome repeats.
 
 ## Read these first
 
