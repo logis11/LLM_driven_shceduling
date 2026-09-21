@@ -1,4 +1,4 @@
-# Handoff — task 9.5 Interactive and typing (2026-09-21, 13:25 UTC)
+# Handoff — task 9.5 Interactive and typing (2026-09-21, 22:20 UTC)
 
 Same-machine repeats sub-item. Branch `jioh/dataset-rebuild`; everything below is committed and pushed. Decision record `_dev/research/jioh/task-9.5-interactive-typing/changelog.md` (now D1–D63), method `campaign/method.md` (§9 carries every amendment), workflow `_dev/research/jioh/measurement-campaign-workflow.md`.
 
@@ -8,8 +8,8 @@ Same-machine repeats sub-item. Branch `jioh/dataset-rebuild`; everything below i
 |---|---|---|---|---|
 | `soffice`, `gimp`, `kdenlive`, `mpv-video`, `mpv-audio`, `thunderbird-send` | six archetypes | — | **hold** | filed in `campaign/results-same-machine/` |
 | `webrtc` | `video-call` | 35 | **holds** (D59) | `playback/webrtc --since 245` |
-| `code` | `code-editor` | 6 valid (window 5 left out, D63) | not yet, projection 21 | `interactive/code --since 376 --exclude 5 --exclude-why "D63: …"` |
-| `chrome` | `web-browser` | 6 | not yet, projection over 200 | `interactive/chrome --since 379 -- --exclude-roles renderer` |
+| `code` | `code-editor` | 17 valid (windows 1–4, 6–18; window 5 left out, D63) | not yet, projection 22 | `interactive/code --since 376 --exclude 5 --exclude-why "D63: …"` |
+| `chrome` | `web-browser` | 15 | not yet, projection over 200 (the `MemoryInfra` residual) | `interactive/chrome --since 379 -- --exclude-roles renderer` |
 
 ## What changed on 2026-09-21
 
@@ -30,6 +30,8 @@ Same-machine repeats sub-item. Branch `jioh/dataset-rebuild`; everything below i
 **`code`'s idle compositor rate in window 10 (watch, not yet a question).** Window 10's `VizCompositorThread` wakes 16.2 a second over its idle phase against 22.3–24.4 in the other eight pooled repeats, `Chrome_ChildIOT` 15.7 against 20.2–22.7; lower from launch through the whole phase (about 18 a second per minute against 24 in window 9, dipping to 13 on the ~320 s cadence of D53's episode). Same VS Code 1.138.0, Node, machine; screenshots before and after idle identical to the other repeats. It moved the projection from 21 to 40. The D57 shape (a rate varying between sessions) on one repeat of nine; the loop keeps adding repeats — if more sessions show it, it is a D57 question for 인지오.
 
 **`chrome`'s SWELL-KW per-input value and the page state the replayed browsing leaves (a D12 design question).** D12 keeps Internet Explorer's clicks, drags and wheel turns with the keys for `web-browser`; on this page (a text box over 400 paragraphs) they can move focus off the box or select page text, and the keys then cost differently. Window 12 (run 35634845510) ended its SWELL-KW phase with paragraphs 24–28 selected (3,055 highlighted pixels in `after-driven.png`, against 0–146 in windows 1–11) and gave 3.02 ms per input against 1.49–2.38 — moving the value's projection from 43 to 89. Across windows 1–11 the value does not split by whether the box is in view (1.77–2.38 with it, 1.49–2.30 without), so until window 12 it read as a spread the input makes. Kept pooled — valid under the present design; whether `web-browser`'s typing phase should replay keys only (as D28 did for `office-writer`) or keep browsing's pointer events is 인지오's.
+
+**`chrome`'s idle `Chrome_ChildIOT` gap mean (an analysis question, D33's kind).** Over 15 repeats its wake rate holds at 7.45–7.96 a second while its gap mean spans 247–455 ms (projection 35 at 15). The component is four threads and the gap mean pools each thread's own gaps, so the same wakes split differently across the four move the mean without any change in the component's work. Whether the component's gap should be read over its merged wake times (as the residual's is) is 인지오's.
 
 ## Still to do at the end (unchanged)
 
