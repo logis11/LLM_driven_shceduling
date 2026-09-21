@@ -25,7 +25,7 @@ Same-machine repeats sub-item. Branch `jioh/dataset-rebuild`; everything below i
 
 ## Decided 2026-09-21
 
-1. **D64 (applied)** — `MemoryInfra`'s heavy pass carried as its own stated event: its runs of 30 ms or more in `chrome`'s idle phase leave the component rows (`HEAVY_EVENTS`, `split_events` in `campaign/pool.py`; the pooled record's `heavy_event`: count per repeat, runs, times into the phase, rate). **Still to write: the event's place in `fold_in.py`** (with the fold-in).
+1. **D64 (applied)** — `MemoryInfra`'s heavy pass carried as its own stated event: its runs of 30 ms or more in `chrome`'s idle phase leave the component rows (`HEAVY_EVENTS`, `split_events` in `campaign/pool.py`; the pooled record's `heavy_event`: count per repeat, runs, times into the phase, rate). Verified on the D62 campaign's 16 downloaded repeats: the idle residual run mean goes from ±28.8 % (projection over 200) to ±3.4 %, passing, its rate and gap too; the event reads 5 passes in 16 repeats (9,600 s), 53.8–60.1 ms, rate 0.00052 a second. **Still to write: the event's place in `fold_in.py`** (with the fold-in).
 2. **D65 (applied, to confirm)** — `chrome`'s SWELL-KW phase replays keys only (`KINDS="key"` in `probe/appdefs.sh`; `KEYS_ONLY` and the stimulus sentence in `fold_in.py`). 인지오 answered "B I think": **confirm before relaunching `chrome`**. The D62 campaign is superseded whole; `chrome` restarts from window 1 with a first batch of five. New validity check: `after-driven.png` shows the box holding the stream's text.
 3. `Chrome_ChildIOT`'s gap mean stays per-thread (option (a)). Nothing to apply.
 4. `code`'s window-10 compositor rate stays a watch item (option (a)); raise as a D57 question if more sessions show it.
