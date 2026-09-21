@@ -1,6 +1,6 @@
-# Handoff — task 9.7 Background and IO (2026-09-20, ~21:00 KST)
+# Handoff — task 9.7 Background and IO (2026-09-22, ~08:00 KST)
 
-Branch `jioh/dataset-rebuild` (Phase 9 works on this branch only, `_dev/` included). Supersedes the 2026-09-19 handoff and `/tmp/handoff-9.7-steamcmd-operating-point-2026-09-20.md`, both stale. Campaign tag `meas-ci:background:2026-09-19`.
+Branch `jioh/dataset-rebuild` (Phase 9 works on this branch only, `_dev/` included). Campaign tag `meas-ci:background:2026-09-19`.
 
 ## Where 9.7 stands
 
@@ -8,62 +8,53 @@ Branch `jioh/dataset-rebuild` (Phase 9 works on this branch only, `_dev/` includ
 |---|---|---|
 | `file-backup` | `borg` | **done** — rule holds over 30 valid repeats |
 | `file-archiver` | `7z` | **done** — rule holds over 6 repeats |
-| `game-download` | SteamCMD | **method settled (D24, D25); 5 pooled, rule fails, 7 more added — 12 projected** |
+| `game-download` | SteamCMD | **22 repeats landed, all downloaded; the pool at 22 has not run to completion** |
 
-Read the committed results rather than re-deriving: `…/task-9.7-background-io/campaign/results-borg.md`, `results-7z.md`, `campaign/results/{borg,7z}-pooled.json`, and the 9.7 section of `_dev/research/jioh/measurement-campaign-record.md`.
+## SteamCMD campaign — status
 
-## Where the campaign is
+- Repeats 1–22 all landed on the EPYC 7763 (runs #47–#54). At 12 repeats (runs 47–52, all valid) the rule did not hold: run per wake ±3.79 % holds; network wait ±7.48 % and bytes per wake ±6.44 % do not; the pool projected 22. Repeat 13 was added alone, 14–22 as one batch (D26). All artifacts are in `~/.cache/meas-loop/pool/background-steamcmd-from47`.
+- **The pool at 22 never finished.** It ran 12 hours (2026-09-21 19:38 → 09-22 07:45 KST) swapping, and was stopped along with the two loops (`campaign_loop.sh`, `rule_loop.sh` in `~/.cache/meas-loop/overnight-9.7/`). Cause: `dataset/tools/meas/background/pool.py` analyses every phase of every repeat first and keeps every raw sample (Python lists) in memory until it pools; at 22 repeats that exceeds the Mac's 16 GB (swap 12.3 of 13.3 GB). The 12-repeat pool already swapped (3 h instead of ~2).
+- **A fix is written but NOT verified and NOT committed** — `dataset/tools/meas/background/pool.py` is modified in the working tree (backup: `~/.cache/meas-loop/overnight-9.7/pool-fix/pool.py.fixed`, diff `pool-memory-fix.patch`). It must give byte-identical output to the committed version before it is used. What it does: each repeat's phase is analysed once and cached beside the repeat in `pool-cache/` (results as JSON, samples as float64 arrays per thread; "all" is rebuilt as the concatenation of the threads', as `analyze.py` builds it), keyed by a hash of the analysis code (`analyze.py`, `nettrace.py`, `build/analyze.py`, `stability.py`) and `CACHE_VERSION`; pooling loads one table at a time, sorts it once, releases it; `--jobs N` fills the cache in parallel. No number is meant to change.
 
-**First batch pooled, rule does not hold.** `pool_runs.py background/steamcmd --since 47` over repeats 1–5 (all five valid, none excluded):
+## Next actions, in order
 
-```
-stability rule does not hold yet; first batch at this spread 12
-  steam-fresh-shaped run per wake (µs): k 5, half-width 6.77 %, fails
-  steam-fresh-shaped network wait (µs): k 5, half-width 9.49 %, fails
-  steam-fresh-shaped bytes per wake:    k 5, half-width 7.97 %, fails
-```
+1. `git pull` first — 9.5, 9.6 and 9.8 all push to this branch (9.8 had uncommitted changes in the shared tree on 09-22).
+2. **Verify the fix.** `~/.cache/meas-loop/overnight-9.7/pool-fix/make_inputs.sh` rebuilds the inputs (the six 7-Zip repeats and SteamCMD repeats 1–2, as symlinks); `regress.sh` runs the committed `pool.py` (`pool_old.py`, the HEAD copy) and the fixed one twice (cache cold, then warm) and `cmp`s the JSON, `results.md` and printed rule. Budget about an hour — the old version on two SteamCMD repeats is the slow part. All three must be IDENTICAL for both apps; if anything differs, find why before using it. A partial run was stopped on 09-22; some `pool-cache/` folders may already exist under the 7-Zip and SteamCMD pools — they are valid only for the same code hash, and the fix rebuilds them otherwise.
+3. **Commit the fix** (`feat(jioh/phase-9): …`) once identical.
+4. **Pool the 22 repeats:** `pool_runs.py background/steamcmd --since 47 -- --tag meas-ci:background:2026-09-19 --jobs 2`. The first run builds every repeat's cache (a few hours); later pools only analyse new repeats.
+5. **Rule holds** → SteamCMD is done → fold-in. **Does not** → one repeat at a time from 23 (D26): `launch.py added background/steamcmd:23`, watch it (`watch.py background/steamcmd --since <run>`, relaunches if gated), pool, evaluate, repeat — no ceiling (인지오, 2026-09-20). With the cache, each cycle is about an hour. `rule_loop.sh` in `~/.cache/meas-loop/overnight-9.7/` automates this; before reusing it, change its pool call to pass `--jobs`.
 
-**D25's five-repeat projection was optimistic and is superseded by this.** It came from the diagnostic's three runner draws (`fq_codel` cv 1.9 % network wait, 1.6 % bytes per wake); five campaign repeats imply roughly 5.5 %, 7.6 % and 6.4 %. Three draws understated the spread about fourfold. **This does not overturn D25** — the discipline decision rested on `fq_codel` against `tbf` on the same three runners, and that gap is unchanged: the bucket projects 65 repeats where the leaf projects 12.
+## Decisions taken (9.7 changelog unless marked)
 
-**Seven repeats added** (6–12), run #50 `35509003684`; index 10 gated once and was relaunched as run #51 `35509045982`. All seven were in flight at 21:00 KST.
+- **D24** — the shaped link's queue discipline tested before the campaign, bar fixed at a cross-runner cv of 8 %. The connection count can be pinned (six hosts on 4 of 4 runners) but pinning does not make the values repeatable.
+- **D25** — the campaign shapes with an `htb` root at D11's 121.0 Mbps and an `fq_codel` leaf (kernel defaults); the connection count is not pinned; `game-download`'s scope carries the sensitivity sentence on 9.5 D23's pattern: against the committed token bucket, network wait +43 %, bytes per wake +35 %, run per wake +17 %. Its five-repeat projection (from three diagnostic draws) proved about fourfold too optimistic; the discipline decision itself stands (the bucket projected 65 repeats where the leaf projects about 22).
+- **D26** — SteamCMD's added repeats: 6–12 and 14–22 as batches, 22 being the pool's projection at 12; past 22, one at a time.
+- **9.5 D49** — the `send` attachment is the same size every repeat, not the same bytes; `appdefs.sh` records the `.docx` member listing.
+- Citation `fqcodel-rfc18` (RFC 8290, Experimental) in `docs/references.md`, for the discipline's stated purpose only.
 
-**An overnight loop was dispatched** — `~/.cache/meas-loop/overnight-9.7/campaign_loop.sh 50 "6 7 8 9 10 11 12"` under `nohup caffeinate -i`, logging to `~/.cache/meas-loop/overnight-9.7/campaign-loop.log`. Uncapped on machine gating; stops on a genuine job failure; pools once when all seven land (local only, nothing pushed). **It does not survive the Mac sleeping or powering off** — `caffeinate -i` blocks idle sleep only.
+## Findings to carry into the fold-in (not yet written anywhere)
 
-## What to do on pickup
-
-1. `git pull` first — 9.5, 9.6 and 9.8 all push to this branch.
-2. Read `campaign-loop.log`. `DONE` → the pool already ran; read its output and `~/.cache/meas-loop/pool/background-steamcmd-from47/results.md`. `STOP: repeat N FAILED` → a job failed for a non-gate reason and needs reading. Nothing since the last state line → the Mac died; the loop is gone.
-3. Whatever the log says, check the jobs themselves: a gated job exits in seconds and still reports **success**, so read `report.json`'s `gate` and `machine.model`, never a status alone. Relaunch any gated index of 6–12 (`launch.py retried background/steamcmd:<k>…`, batched in one push).
-4. When all twelve have landed: `pool_runs.py background/steamcmd --since 47 -- --tag meas-ci:background:2026-09-19`. Budget ~105 min — `pool.py` re-runs `analyze_phase` for every phase of every repeat, nothing is cached, and twelve repeats is 36 phases.
-5. Rule holds → fold-in. Does not hold → add repeats again (no ceiling); 인지오 chose to add a batch rather than one at a time, because re-pooling is too expensive for one-at-a-time cycles.
-
-## Decisions taken this session
-
-- **D24** (`…/task-9.7-background-io/changelog.md`) — the shaped link's queue discipline tested before the campaign, the bar fixed beforehand at a cross-runner cv of 8 % on network wait and bytes per wake. Records what the connection-count diagnostic established: the count **can** be pinned (`@cMaxInitialDownloadSources 5 @cDefaultInitialDownloadSources 5 @fDownloadRateImprovementToAddAnotherConnection 99`, read back on 4 of 4 runners, six content hosts on each against 9/6/6/8 unpinned) and pinning does **not** make the values repeatable (pinned cv 22.5 % network wait, 19.1 % bytes per wake; 78 and 57 repeats projected).
-- **D25** — the campaign shapes with an `htb` root at D11's unchanged 121.0 Mbps and an `fq_codel` leaf (kernel defaults, recorded per phase as `shape.<phase>.discipline`); the connection count is **not** pinned; `game-download`'s scope carries a link-model sensitivity sentence on 9.5 D23's pattern. Result over three runner draws: `fq_codel` network wait cv **1.9 %**, bytes per wake cv **1.6 %**, run per wake cv 4.4 % (5, 5 and 6 repeats) against the bucket's 20.5 %/18.1 %/8.9 % (65, 51, 15). The leaf is nearly insensitive to the connection count (+3.6 % from 6 to 9 servers, against +51 % from 6 to 10 under the bucket) and gives up no throughput (payload 115.4–115.9 Mbps, wall 760.8–783.1 s over all nine downloads).
-- **Sensitivity to carry in `game-download`'s scope**: against the committed token bucket, network wait is 43 % higher (329.3 µs), bytes per wake 35 % higher (5,509 B), run per wake 17 % higher (185.5 µs).
-- **9.5 D49** (`…/task-9.5-interactive-typing/changelog.md`) — the `send` attachment is the same size in every repeat and not the same bytes (43 repeats, `doc.bytes` 41,555,063 and `doc.pictures` 10 in all, 43 distinct `doc.sha256`); D31's 41,555,035 B is a container build, the runner's is 41,555,063 B; `appdefs.sh` now records the `.docx`'s member listing to `$OUT/doc.zip.txt` with `doc.crc_sha256`. 9.5's `thunderbird-send` pool is closed at 43 valid repeats.
-- New citation `fqcodel-rfc18` in `docs/references.md` (RFC 8290, Experimental), cited for the discipline's stated purpose only — never for any consumer link's loss rate.
+- **The spread left under `fq_codel` follows the runner's region.** Over repeats 1–12, network wait by the Steam site the runner was sent to: west (sea1, lax1, lax2) 199 µs, central (ord1) 221 µs, east (iad1, atl3) 249 µs — 81 % of network wait's variance and 82 % of bytes per wake's lies between these groups (run per wake 31 %). The connection count no longer matters (6 → 221, 8 → 235, 9 → 197, 10 → 229 µs). The runner's region is not recorded — the Steam site is a proxy. 인지오 decided **not** to filter on region (no other campaign measures across the internet; more repeats converge); `game-download`'s scope should state the region split of its repeats.
+- All 12 pooled repeats ran the `fq_codel` leaf (`shape.variant=aqm`, `htb` + `fq_codel` in every shaped phase). Full mode does not write `shape.<phase>.discipline` — only `shapediag` does; cosmetic.
 
 ## Stated with the values, do not drop
 
-`fq_codel` removes the spread **by construction**: CoDel holds queue delay at its target (5 ms as installed), so the per-wake pattern follows that setpoint rather than the runner's path. No source here establishes that consumer equipment manages its queue this way, so the emulated link is design, not population-representative. Its **delay is still the runner's own path to Valve's servers**, neither controlled nor recorded (D10's stated limitation).
+`fq_codel` removes the connection-count spread by construction — CoDel holds queue delay at its 5 ms target. No source here establishes that consumer equipment manages its queue this way, so the emulated link is design, not population-representative. Its delay is the runner's own path to Valve's servers, neither controlled nor recorded (D10's stated limitation).
 
 ## Traps
 
-- **The trigger is in `full` mode** with `steam_diag_setting` empty (`.github/campaign-background.json`, attempt 47). A push changing that file starts the runs it names; nothing else does.
-- **Machine gating ran hot today** — EPYC 9V74, 9V45 and Xeon 6973P-C draws; at one point six of seven draws were gated. A gated job exits in seconds and still reports **success**, so never read a status alone: check `report.json`'s `gate` and `machine.model`. Relaunch loop script (session-scoped, rewrite if needed): `campaign-relaunch.sh <since> "<indices>" <cycles>` in the session scratchpad; it relaunches a first batch's gated indices together in one push.
-- **Shared tree.** 9.5, 9.6, 9.8 all push to this branch; one left an interactive rebase mid-conflict in `_dev/TODO.md` this morning. Pull first; stage only your own paths; `launch.py` pulls with `--autostash`.
-- SteamCMD pools take ~45 min for five repeats (download plus per-phase analysis).
+- A gated job exits in seconds and still reports **success** — read `report.json`'s `gate` and `machine.model`, never the status alone.
+- The trigger `.github/campaign-background.json` is in `full` mode, `steam_diag_setting` empty. A push changing it starts the runs it names.
+- Loops under `nohup caffeinate -i` do not survive the Mac sleeping or powering off.
+- `launch.py` pulls with `--autostash`; the shared tree has been caught mid-rebase by a peer before — `rule_loop.sh` waits if `.git/rebase-merge` exists.
 
 ## Open items
 
-- **RTT recording — held by 인지오.** D24's residual at a fixed connection count (drops 2.98–5.60 %, network wait ordering identically across four sites) is unattributed; round-trip time is a hypothesis and nothing measures it. Recorded in D25's "not taken". The cheap step, when wanted: measure TCP connect time to each content host after `shape_off`, outside the traced window.
-- After the pool: fold-in (remove `io-stream`, `network-bulk`; add `file-backup`, `file-archiver`, `game-download`; rebind timelines; D17 registry changes) → hand-offs. `file-archiver`'s `modeling_notes` carry D23's two modes and the CPU-per-byte check; `file-backup`'s carry nothing new; `game-download`'s carry D25's sensitivity sentence.
+- **RTT recording — held by 인지오** (D25 "not taken"). The region finding above now points at the path; the cheap step, when wanted, is TCP connect time to each content host after `shape_off`, outside the traced window.
+- After the pool: fold-in (remove `io-stream`, `network-bulk`; add `file-backup`, `file-archiver`, `game-download`; rebind timelines; D17 registry changes) → hand-offs. `file-archiver`'s `modeling_notes` carry D23's two modes and the CPU-per-byte check; `game-download`'s carry D25's sensitivity sentence and the region split.
 - borg's repeat 3 stays excluded in every borg pool (`--exclude 3 --exclude-why "the 10 GB set's fetch returned a 12,108 B file in place of the 3.70 GB archive (set.archive_pin mismatch, extract rc 2, 0 files), so the phases ran on an empty tree"`).
-- Belongs to 9.5, flagged to them, not written here: the episode-count spread (6–9 episodes per 600 s window against 10 cycles) that took `thunderbird-send`'s rule to 43 repeats rather than the projected 29.
-- Belongs to 9.10 (D4, D12): whether the desktop client downloads while a game runs — c2-p2a's premise — rests on Valve pages not read.
+- Not 9.7's: 9.5's episode-count spread (flagged to 9.5); 9.10's question whether the desktop client downloads while a game runs (D4, D12). To check: whether 9.8's Steam client entry (9.8 D6, logged out) has measured values that include internet traffic, which would make them region-dependent too.
 
 ## Working with 인지오
 
-One question per message, plain chat, no question popups. Say what every label, decision number and source id means in the same sentence. Recommendations rest on a verified reference or the records — say so when a number has none. Never paraphrase their terms in docs; no chat-derived justification in docs; archives only on explicit request.
+One question per message, plain chat, no question popups. Say what every label, decision number and source id means in the same sentence. Recommendations rest on a verified reference or the records; don't substitute estimates for the method (the rule is on-line, one repeat at a time, unless 인지오 decides otherwise). Plain, literal English — say "filter", never "hold", for a gate. Never paraphrase their terms in docs; no chat-derived justification in docs; archives only on explicit request.
