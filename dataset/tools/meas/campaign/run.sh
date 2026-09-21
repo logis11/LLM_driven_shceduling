@@ -88,9 +88,12 @@ export MEAS_PIN=harness   # phase.sh here wraps drivers, which stimulate the pin
 # subshell, so $! would be the subshell, not the session leader the kill and the affinity record need)
 if [ "$MEAS_PIN_AVAILABLE" = 1 ]; then taskset -c "$MEAS_CPU" setsid bash -c "$LAUNCH" > "$OUT/app.log" 2>&1 & else setsid bash -c "$LAUNCH" > "$OUT/app.log" 2>&1 & fi
 APP_PID=$!
-rec app.affinity "$(taskset -p "$APP_PID" 2>/dev/null | sed 's/.*: //' || echo unknown)"
 WID=$(wait_window "$CLASS" 120)
 if [ -z "$WID" ]; then screenshot no-window; rec finished_utc "$(date -u +%FT%TZ)"; finish_report; exit 0; fi
+# the mask of the process owning the window, read once it exists: read at launch, $APP_PID could still be taskset before
+# it applied the mask, and five webrtc repeats recorded the harness CPUs while their trace ran every thread on the load CPU
+WIN_PID=$(xdotool getwindowpid "$WID" 2>/dev/null || echo "$APP_PID")
+rec app.affinity "$(taskset -p "$WIN_PID" 2>/dev/null | sed 's/.*: //' || echo unknown)"; rec app.affinity_pid "$WIN_PID"
 if [ -n "$POSTLAUNCH" ]; then
   xdotool windowactivate --sync "$WID"; bash -c "$POSTLAUNCH" > "$OUT/postlaunch.log" 2>&1
   W2=$(wait_window "$POSTCLASS" 30); rec postlaunch.window "$W2"
