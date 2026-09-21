@@ -241,6 +241,11 @@ def pool_app(app, reps):
             "components": {"selected": chosen, "residual": residual, **cov},
             "renderer_pids": {k: by_rep[k].get("renderer_pids") for k in sorted(by_rep)},
         }
+    # the population the entry is pooled from (D14 hands to 9.13 that each entry's scope states it): the renderers
+    # measured in the carried phase, after the browser's own renderers, part-phase renderers and the control tab are
+    # dropped — `renderers` above is the raw `--type=renderer` count the job observed, which includes all of those
+    carried = entry["phases"].get(CARRIED[app][0]) or {}
+    entry["renderers_measured"] = dict(zip(carried.get("repeats", []), carried.get("renderers_measured", [])))
     entry["stability"] = criterion(app, entry)
     return entry
 
@@ -318,7 +323,9 @@ def render(out):
     L = [f"# 9.8 desktop campaign — pooled results ({out.get('tag') or 'untagged'})", "",
          f"Machine: {out.get('machine')}. Repeats pooled per subject; `probe` jobs are never repeats.", ""]
     for app, e in sorted(out["runs"].items()):
-        L += [f"## {app}", "", f"Repeats: {e['repeats']}  ·  mode {e['mode']}  ·  renderers {e['renderers']}", ""]
+        pop = (f"renderers measured {e['renderers_measured']} (observed {e['renderers']})"
+               if any(e.get("renderers_measured", {}).values()) else "")
+        L += [f"## {app}", "", f"Repeats: {e['repeats']}  ·  mode {e['mode']}" + (f"  ·  {pop}" if pop else ""), ""]
         if e["not_throttled"]:
             L += [f"Left out, intensive throttling did not engage: {e['not_throttled']}", ""]
         L += ["| quantity | k | mean | half-width | passes |", "|---|---|---|---|---|"]
