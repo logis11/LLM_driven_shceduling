@@ -257,3 +257,22 @@ to 1.493.
 and gap mean (12, 31). Open.
 
 No value changed by this entry.
+
+## D19 — the renderer residual describes one renderer (2026-09-21)
+
+For the two renderer entries the selected components are one renderer's with the renderers pooled as its samples
+(D14), but the residual was built by `select_components`, which merges the residual comms' wake times over
+everything it is given — every measured renderer at once. Its rate came out N times a renderer's and its gaps
+interleaved N processes: on the hidden subject's repeat 2, 0.16 wakes/s and a 5.6 s gap mean for a residual whose
+thread wakes 0.01 times a second with a 105 s gap in each renderer. `desktop/pool.py` now rebuilds the renderer
+residual per renderer — the residual comms merged within each renderer, gaps within each renderer, the renderers
+pooled as samples — and reports it sporadic, not carried, where it wakes fewer than twice in a repeat (D43). The
+per-renderer residual reads 0.005–0.014 wakes/s.
+
+It still does not hold at eleven repeats (hidden: wake rate and gap mean need about 161 and 143; visible: 125 and
+72), and neither do the visible renderer's `Chrome_ChildIOT` and `ThreadPoolForeg`: these quiet threads' wake
+counts per phase vary between runs — the hidden renderer's `Compositor` reads 0 to 48 gaps across the eleven — a
+spread of the application between sessions, which is 9.5 D57's case. They carry 7 % of the hidden renderer's wakes
+and 14 % of the visible renderer's. Open.
+
+No value changed by this entry.

@@ -118,6 +118,41 @@ def find_runs(root, cpu_model):
     return runs, gated, other, probes
 
 
+def renderer_residual(rest, comms, spans, by_rep, cov):
+    """The residual of ONE renderer (changelog D19). `select_components` merges the residual comms' wake times over
+    everything it is given, which for a renderer entry is every measured renderer at once: its rate came out N times
+    a renderer's and its gaps interleaved N processes, where the selected components are one renderer's with the
+    renderers pooled as samples (D14). Here the residual comms are merged within each renderer, gaps are taken
+    within each renderer, and the renderers pooled as samples: the rate is the mean over the renderers measured,
+    and the gap and run tables are over every renderer's samples together. A residual without two wakes in some
+    repeat is reported as sporadic and not carried, as D43 has it."""
+    reps = sorted(by_rep)
+    gaps_by_rep, runs_by_rep, rate_by_rep, share_by_rep, threads_by_rep = [], [], [], [], []
+    for k in reps:
+        n = by_rep[k].get("renderers_measured") or 1
+        by_pid = {}
+        for c in rest:
+            for pid, ts in (comms[c]["t_in_by_pid"].get(k) or {}).items():
+                by_pid.setdefault(pid, []).extend(ts)
+        gaps = []
+        for ts in by_pid.values():
+            ts = sorted(ts)
+            gaps += [(b - a) * 1000 for a, b in zip(ts, ts[1:])]
+        runs = [x for c in rest for x in comms[c]["runs"].get(k, [])]
+        wakes = sum(len(ts) for ts in by_pid.values())
+        gaps_by_rep.append(gaps); runs_by_rep.append(runs)
+        rate_by_rep.append(round(wakes / spans[k] / n, 4))
+        share_by_rep.append(round(sum(runs) / 1000 / spans[k] / n, 6))
+        threads_by_rep.append(sum(comms[c]["threads"].get(k, 0) for c in rest))
+    residual = {"comms": rest, "threads": threads_by_rep, "wakes_per_s": rate_by_rep, "cpu_share": share_by_rep,
+                "gap_ms": _cp.summary(gaps_by_rep), "run_ms": _cp.summary(runs_by_rep), "per_renderer": True}
+    if not all(residual["gap_ms"]["repeat_n"]):
+        cov.setdefault("sporadic", []).append({"comm": "residual", "comms": rest,
+                                               "repeats": [k for k, w in zip(reps, rate_by_rep) if w]})
+        return None
+    return residual
+
+
 def throttling_check(app, res):
     """chrome-hidden only: did intensive throttling engage in the carried phase? Returns (ok, wakes_per_s).
 
@@ -172,7 +207,8 @@ def pool_app(app, reps):
             spans[k] = ph["span_s"]
             wps[k] = ph["wakes_per_s"]
             for comm, c in ph["threads"].items():
-                slot = comms.setdefault(comm, {"gaps": {}, "runs": {}, "t_in": {}, "wakes": {}, "threads": {}})
+                slot = comms.setdefault(comm, {"gaps": {}, "runs": {}, "t_in": {}, "t_in_by_pid": {}, "wakes": {},
+                                               "threads": {}})
                 slot["wakes"][k] = int(round(c["wakes_per_s"] * ph["span_s"]))
                 # per-renderer components carry a thread count per renderer; the selector wants one number
                 t = c["threads"]
@@ -181,7 +217,10 @@ def pool_app(app, reps):
                 slot["gaps"][k] = sm.get("gaps", [])
                 slot["runs"][k] = sm.get("runs", [])
                 slot["t_in"][k] = sm.get("t_in", [])
+                slot["t_in_by_pid"][k] = sm.get("t_in_by_pid", {})
         chosen, residual, cov = select_components(comms, spans, sorted(by_rep))
+        if app in analyze.RENDERER_APPS and residual:
+            residual = renderer_residual(residual["comms"], comms, spans, by_rep, cov)
         entry["phases"][name] = {
             "repeats": sorted(by_rep),
             "span_s": [by_rep[k]["span_s"] for k in sorted(by_rep)],

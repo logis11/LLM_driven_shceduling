@@ -317,3 +317,22 @@ def test_run_means_carry_under_the_machine_spread_exception():
     wide_gap = _comp([4.0] * 5, [100.0, 400.0, 100.0, 400.0, 250.0], [0.05] * 5)
     q = pool.criterion("element", _entry({"a": wide_gap}))
     assert q["quantities"]["idle a gap mean (ms)"]["carried"] is False and q["passes"] is False
+
+
+def test_a_renderer_residual_describes_one_renderer_not_n_merged():
+    # changelog D19: the residual merged every measured renderer's wakes, so its rate was N times a renderer's and
+    # its gaps interleaved N processes. Two renderers, each waking every 100 s on one residual thread, offset by
+    # 50 s: one renderer's residual wakes at 0.01/s with 100 s gaps, not 0.02/s with 50 s gaps.
+    ts = {1: [0.0, 100.0, 200.0, 300.0], 2: [50.0, 150.0, 250.0, 350.0]}
+    comms = {"Quiet": {"t_in_by_pid": {1: ts, 2: ts}, "runs": {1: [0.02] * 8, 2: [0.02] * 8},
+                       "threads": {1: 2, 2: 2}}}
+    by_rep = {1: {"renderers_measured": 2}, 2: {"renderers_measured": 2}}
+    res = pool.renderer_residual(["Quiet"], comms, {1: 400.0, 2: 400.0}, by_rep, {})
+    assert res["wakes_per_s"] == [0.01, 0.01]
+    assert res["gap_ms"]["repeat_mean"] == [100000.0, 100000.0]
+    # a repeat where the residual wakes fewer than twice in every renderer is sporadic, not carried (D43)
+    thin = {"Quiet": {"t_in_by_pid": {1: ts, 2: {1: [5.0]}}, "runs": {1: [0.02] * 8, 2: [0.02]},
+                      "threads": {1: 2, 2: 1}}}
+    cov = {}
+    assert pool.renderer_residual(["Quiet"], thin, {1: 400.0, 2: 400.0}, by_rep, cov) is None
+    assert cov["sporadic"][0]["comm"] == "residual"

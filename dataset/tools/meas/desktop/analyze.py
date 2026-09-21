@@ -86,7 +86,10 @@ def renderer_components(rows, span_s):
                 runs += [r.run for r in trs]
         rates = [i["wakes_per_s"] for i in inst]
         samples[comm] = {"gaps": gaps, "runs": runs,
-                         "t_in": sorted(r.t_in for rs in by_pid.values() for r in rs if r.comm == comm)}
+                         "t_in": sorted(r.t_in for rs in by_pid.values() for r in rs if r.comm == comm),
+                         # per renderer, so the pool can build the residual of ONE renderer (changelog D19)
+                         "t_in_by_pid": {pid: sorted(r.t_in for r in rs if r.comm == comm)
+                                         for pid, rs in by_pid.items() if any(r.comm == comm for r in rs)}}
         out[comm] = {"renderers": len(inst),
                      "threads": [i["threads"] for i in inst],
                      "wakes_per_s": round(statistics.fmean(rates), 3),
