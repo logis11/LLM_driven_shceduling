@@ -38,7 +38,10 @@ messages.
 **Next, once D22 is decided:** the final pooled set into `campaign/results/` with the campaign tag, each entry's row
 in `measurement-campaign-record.md`, the raw-record release (outward — ask first), then the fold-in with scope-card
 items 6–10 and 15–16. Still open for the fold-in: what the renderer wake alignment (D15) does to pooling N
-renderers as N samples.
+renderers as N samples. It does not reach the stability rule — the rule reads per-repeat means, the repeat is
+its unit, and each renderer's gaps are its own — so the open parts are the scope's statement of sample count
+(twelve aligned renderers are not twelve independent samples) and, for 9.10, that a timeline placing N hidden
+renderers should wake them together.
 
 **Watch:** `probe/appdefs.sh` is shared with 9.5's live campaign and holds our two Chrome arms. Before any further
 Chrome launch, diff those arms against `332f627` — any change supersedes the Chrome repeats.
