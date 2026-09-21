@@ -23,6 +23,10 @@ Same-machine repeats sub-item. Branch `jioh/dataset-rebuild`; everything below i
 - `chrome`: `after-altprelude.png` — box at the page top, focused, empty; idle slice profile (D58 guard) — no ~95 ms/s launch run.
 - `code`: `after-altprelude.png` status bar — Ln 28, Col 1, 0 errors; idle profile starts 17–19 ms/s, peaks ~40 (D53's episode, expected).
 
+## Decided 2026-09-21, not yet applied
+
+1. **`MemoryInfra`'s heavy pass is carried as its own stated event** (인지오, option (b)): the archetype states the pass's rate and size with their counts (so far 9 passes in 20 sessions × 600 s, 54–61 ms), and `chrome`'s idle residual is read without it so it can converge. To apply: a changelog entry (D64), the pass's extraction in `campaign/pool.py`, its place in `fold_in.py`, method §9.
+
 ## Open for 인지오
 
 **`chrome`'s idle residual run mean (±69 % at 6 repeats, projection over 200).** It is one thread, `MemoryInfra`. In every one of 20 sessions (both superseded and current campaigns) it runs ~7.7 ms at 180–183 s and 480–483 s into the idle phase, a fixed 300 s cadence. In 7 of 20 sessions it also runs a heavy pass of 54–61 ms at no fixed time (43, 57, 165, 217, 473, 474, 503, 572, 593 s) — 9 passes in 20 × 600 s, about one per 22 minutes. A rare random event within the run, not a harness defect nor a between-session spread; at that rarity the mean needs over 200 repeats. Options to decide: a longer idle phase; carry the heavy pass as its own stated event (rate and size); or an exception. Repeats continue meanwhile. (Script: the session scratchpad's `memoryinfra.py`; analysis reproducible with `analyze_run` on the idle phase, `comm == "MemoryInfra"`, run > 5 ms.)
