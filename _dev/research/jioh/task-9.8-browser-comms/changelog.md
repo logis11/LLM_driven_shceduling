@@ -341,3 +341,27 @@ by ±0.1 % and ±1.7 %. (c) Their weight: `steamwebhelper` carries 23.6 % of the
 projects (about 46).
 
 No value changed by this entry.
+
+## D22 — the Steam client at twelve repeats: two gap means set by their far tails; the decision open (2026-09-21)
+
+Repeats 6–12 landed; all twelve are valid. Every value holds except two gap means, projecting 46 and 35 repeats:
+
+| component | gap p50 | gap p90 | gap p99 | gap mean | wake rate | share of wakes |
+|---|---|---|---|---|---|---|
+| `steamwebhelper` | 16.2 ms in all twelve | 16.2 ms in all twelve | 588.4–592.9 ms | 28.5–42.2 ms | 70.5–71.2/s | 23.6 % |
+| `ThreadPoolForeg` | 1.1–22.8 ms | 576.1–579.3 ms | 583.0–599.6 ms | 415.9–616.1 ms | 5.6–6.7/s | 2.1 % |
+
+`steamwebhelper`'s gap distribution is identical across repeats through its 99th percentile — its median is a
+16.2 ms frame tick — and its wake rate holds within 1 %. Its mean moves because of a handful of gaps beyond the
+99th percentile out of about 42 000 a repeat (the high means fall in repeats 4, 6, 10, 11). The rule tests a
+carried table by its per-repeat mean (campaign workflow, from kalibera-ismm13 §9.3), which for a heavy-tailed
+component is a summary of its rarest events rather than of the table. `ThreadPoolForeg` holds at its 90th and 99th
+percentiles, and its pool runs 5 to 8 threads across repeats, which is 9.5 D57's shape — a component whose make-up
+varies between sessions.
+
+**Open for 인지오 (campaign workflow step 6 — a spread the analysis or the observation makes):** carry the two gap
+means with their half-widths and state the quantile stability in the scope — 9.5 D57 for `ThreadPoolForeg`, the
+tail-dominated mean for `steamwebhelper` — or add repeats toward 46; or test these tables at their quantiles rather
+than their means, which would change how the shared rule reads a table and reaches beyond this slice.
+
+No value changed by this entry.
