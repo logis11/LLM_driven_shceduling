@@ -75,6 +75,13 @@ LIST_FIELDS = (("wakes_per_s", "wakes/s"), ("gap_ms", "gap mean (ms)"), ("run_ms
 # reported effect rests on its run times either.
 EXCEPTED_RUN_MEANS = ("chrome-hidden", "chrome-visible", "element", "steam")
 
+# changelog D21, 9.5 D57's exception: a component whose rate varies between sessions is carried with its half-widths
+# over at least five repeats, its three values together. Extended by D21 to the renderer residuals and the visible
+# renderer's ThreadPoolForeg, whose spread is in part within a run (about six wakes per renderer per phase) — both
+# spreads and that limitation are stated in the entry's scope (D20 holds the measurement).
+SESSION_SPREAD = {"chrome-hidden": ("residual",),
+                  "chrome-visible": ("Chrome_ChildIOT", "ThreadPoolForeg", "residual")}
+
 # results only: (a, b, what) — the two comparisons the slice reports (method §6 item 2)
 COMPARISONS = {"chrome-hidden": [], "chrome-visible": [("steady-timer", "steady-notimer", "timer against no timer")],
                "element": [("idle", "traffic", "idle against scripted traffic (D11; feeds no archetype)")],
@@ -281,7 +288,8 @@ def criterion(app, entry):
                     continue
                 c_ = {**stability(vals, floor, MIN_REPEATS, keep_zero=True), "needed": _cp.repeats_needed(vals, floor)}
                 c_["excepted"] = field == "run_ms" and app in EXCEPTED_RUN_MEANS          # D17
-                c_["carried"] = c_["passes"] or (c_["excepted"] and c_["k"] >= MIN_REPEATS)
+                c_["session_spread"] = comm in SESSION_SPREAD.get(app, ())                 # D21
+                c_["carried"] = c_["passes"] or ((c_["excepted"] or c_["session_spread"]) and c_["k"] >= MIN_REPEATS)
                 out[f"{phase} {comm} {label}"] = c_
     passes = bool(out) and all(c["carried"] for c in out.values())
     return {"tolerance": TOLERANCE, "abs_floor_ms": ABS_FLOOR_MS, "min_repeats": MIN_REPEATS,

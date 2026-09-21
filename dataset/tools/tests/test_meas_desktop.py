@@ -336,3 +336,15 @@ def test_a_renderer_residual_describes_one_renderer_not_n_merged():
     cov = {}
     assert pool.renderer_residual(["Quiet"], thin, {1: 400.0, 2: 400.0}, by_rep, cov) is None
     assert cov["sporadic"][0]["comm"] == "residual"
+
+
+def test_the_renderer_quiet_threads_carry_with_their_half_widths():
+    # changelog D21: 9.5 D57's between-sessions exception, for the named quiet threads of the renderer entries — all
+    # three of their values together, over at least five repeats — and for nothing else
+    wild = _comp([0.0, 0.01, 0.005, 0.01, 0.002], [300000.0, 100000.0, 150000.0, 100000.0, 250000.0], [0.03] * 5)
+    q = pool.criterion("chrome-visible", _entry({"Chrome_ChildIOT": wild}, phase="steady-notimer"))
+    assert all(c["session_spread"] and c["carried"] for c in q["quantities"].values()) and q["passes"] is True
+    q = pool.criterion("chrome-visible", _entry({"chrome": wild}, phase="steady-notimer"))
+    assert q["passes"] is False                        # the main thread is not excepted
+    q = pool.criterion("element", _entry({"Chrome_ChildIOT": wild}))
+    assert q["passes"] is False                        # nor is any other subject's thread of the same name

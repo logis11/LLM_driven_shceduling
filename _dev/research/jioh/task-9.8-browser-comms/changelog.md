@@ -303,3 +303,18 @@ them. Lengthening the phase would change the campaign and supersede all eleven r
 limitation stated in the scope — or supersede both renderer subjects and rerun them on a longer phase.
 
 No value changed by this entry.
+
+## D21 — the renderer quiet threads carried with their half-widths; both renderer entries hold (2026-09-21)
+
+By 인지오's decision on D20's open question: the quiet threads are carried with their half-widths over the eleven
+repeats obtained, not rerun on a longer phase — which would change the campaign and supersede all twenty-two
+renderer repeats for 7 % and 14 % of the two entries' wakes. 9.5 D57 applies as written to the visible renderer's
+`Chrome_ChildIOT` (±18.6 % within a run, ±105.8 % across repeats). It is extended to the visible renderer's
+`ThreadPoolForeg` and to both renderer residuals, whose spread is in part within a run: each entry's scope states
+both spreads from D20, the three values of each such component carried together, and that these threads wake about
+six times per renderer per 600 s phase. Tooling: `SESSION_SPREAD` in `desktop/pool.py`.
+
+With D17's run-mean exception and this, **both renderer entries hold at eleven repeats** — `HangWatcher` and the
+main thread pass on their own, and every other value is carried with its half-width under a stated exception.
+
+No value changed by this entry.
