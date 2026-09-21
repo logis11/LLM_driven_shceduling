@@ -46,8 +46,12 @@ ABS_FLOOR_MS = 0.001  # the trace's resolution: perf sched timehist times in who
 MIN_REPEATS = 5       # kalibera-ismm13 §11 (D29; 9.6 D24)
 # D57: the rule's exception — a component whose rate varies between sessions rather than within a run, so repeats
 # tighten the estimate without narrowing the spread; carried with its half-widths over at least MIN_REPEATS repeats,
-# the tolerance not applied. (app, the value name's prefix).
-SESSION_SPREAD = {("code", "idle libuv-worker")}
+# the tolerance not applied. (app, the value name's prefix). D59: webrtc's audio path — AudioProcessing whole, the
+# others' run means only, their wake rates being fixed or passing.
+SESSION_SPREAD = {("code", "idle libuv-worker"),
+                  ("webrtc", "play AudioProcessing "), ("webrtc", "play AudioOutputDevi run mean"),
+                  ("webrtc", "play AudioInputDevic run mean"), ("webrtc", "play FakeAudioInput run mean"),
+                  ("webrtc", "play residual run mean")}
 FOCUS_COMPONENTS = {"gimp", "kdenlive"}  # fold_in.py's pointer-loop archetypes carry the driven phase as focus_components
 # D38: a component keyed by the thread's name with a trailing " #<n>" removed — Gecko names a pool's threads
 # "<pool> #<n>", n counting up per spawn (nsThreadPoolNaming::GetNextThreadName), so each pool is one component
