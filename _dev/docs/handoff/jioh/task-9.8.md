@@ -15,14 +15,17 @@ one decision (D22).** Nothing is folded into the dataset yet and no archetype va
 **Your decision — D22:** the Steam client's `steamwebhelper` and `ThreadPoolForeg` gap means. Within one run they
 move ±0.1 % and ±1.7 %; across the twelve repeats ±21.0 % and ±19.6 % — same threads, same wake rate, the wakes
 spread differently from one launch to the next. That is 9.5 D57's case by all three of its tests, but
-`steamwebhelper` carries 23.6 % of the client's wakes against D57's 6.5 %. Carry both with their half-widths under
-D57, or add about 46 repeats (42 min each). Evidence in the changelog, D22.
+`steamwebhelper` carries 23.6 % of the client's wakes against D57's 6.5 %. The tables themselves hold — `steamwebhelper`'s gap median and 90th percentile are
+16.2 ms in all twelve repeats; the mean moves on a handful of gaps past the 99th percentile. Carry both with their
+half-widths under D57, or add about 46 repeats (42 min each), or test these tables at their quantiles (a change to
+the shared rule). Evidence in the changelog, D22.
 
 **Fixed without asking (all in pooling/analysis — the measurement is unchanged since D15, every repeat recorded
 the same settings, so nothing was superseded):**
 - the rule tested one phase-average instead of each component and the residual (`c7b8a72`)
 - the renderer residual merged all twelve renderers instead of describing one (`1f44041`, D19)
 - the pooled record stated the observed renderer count instead of the measured one (`52e4d5b`)
+- an interrupted artifact download blocked every later pool of that app (`91b127d`, loop tooling)
 
 **Decided today by you:** D17 (run means carried under the machine-spread exception), D18 (D5 stated on the
 wake-rate ratio — now 1.225 ±0.5 % over twelve repeats — and the Steam client's run means excepted too), D21 (the
@@ -63,7 +66,7 @@ Chrome launch, diff those arms against `332f627` — any change supersedes the C
 - **The trigger carries five keys only** — `mode`, `attempt`, `cpu_model`, `apps`, `repeats`. Every design
   value is a constant in `run.sh` (D13); to change one, edit `run.sh` and bump `attempt` in the same push.
 - **The branch is shared with other live sessions.** Push immediately after each commit.
-- CI does not run on this branch. `make -C dataset test PY=python3.12`, about 8 minutes, currently 184 passed,
+- CI does not run on this branch. `make -C dataset test PY=python3.12`, about 8 minutes, currently 185 passed,
   1 skipped, 1 xfailed.
 - Job lengths in `full`: about 23 minutes for the two renderer subjects and the chat client, about 42 for the
   Steam client. The EPYC 7763 draw rate has run near 40–50 %, so budget about two draws per landing.
