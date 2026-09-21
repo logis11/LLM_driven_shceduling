@@ -237,3 +237,23 @@ carried set only because the 0.95 coverage cut needs three equally small threads
 analysis makes (campaign workflow, step 6), open.
 
 No value changed by this entry.
+
+## D18 — D5 stated on the wake rate; the Steam client's run means excepted (2026-09-21)
+
+D17 left the Steam client's run means under the tolerance, because D5's comparison was in part a CPU-share ratio
+built from run times. Whether the per-runner speed cancels inside that ratio — both phases of a repeat running on
+one runner — was checked against the five repeats, and it does not: the per-repeat CPU-share ratio of shown to
+minimised is 1.382, 1.326, 1.274, 1.075, 1.493, a 12 % spread, about the spread of the shown share itself (11 %).
+The wake-rate ratio is 1.226, 1.224, 1.217, 1.230, 1.241, a 0.7 % spread.
+
+**By 인지오's decision**, D5's comparison is stated on the wake-rate ratio — throttling is a change in how often a
+thread wakes, so the wake rate is the direct observable of D5's claim, and it is the precise one. The CPU-share
+ratio is reported with its spread and no effect rests on it. With nothing reported resting on the Steam client's
+run times, its run means join the rule's exception on the terms of D17. This also supersedes D14's 3.338× CPU-share
+figure as D5's magnitude: that came from 45 s phases taken soon after launch, and the settled repeats read 1.075
+to 1.493.
+
+**Still failing at five repeats:** `steamwebhelper`'s gap mean (needs about 59) and `ThreadPoolForeg`'s wake rate
+and gap mean (12, 31). Open.
+
+No value changed by this entry.

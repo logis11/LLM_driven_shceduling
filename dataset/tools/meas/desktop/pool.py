@@ -70,9 +70,10 @@ LIST_FIELDS = (("wakes_per_s", "wakes/s"), ("gap_ms", "gap mean (ms)"), ("run_ms
 # changelog D17, the rule's exception (measurement-campaign workflow; 9.6 D29): run times move together across every
 # thread of a repeat — a per-runner speed on one CPU model — while wake rates hold within about 1 %. For these
 # subjects every run mean, the residual's included, is carried over at least five repeats with its half-width and
-# range instead of the tolerance. Steam is not excepted: its shown-against-minimised comparison (D5) is in part a
-# CPU-share ratio, built from run times, and the exception applies only to a value no reported effect rests on.
-EXCEPTED_RUN_MEANS = ("chrome-hidden", "chrome-visible", "element")
+# range instead of the tolerance. Steam joins them by D18: its shown-against-minimised comparison (D5) is stated on
+# the wake-rate ratio, and the CPU-share ratio is reported with its spread with no effect resting on it, so no
+# reported effect rests on its run times either.
+EXCEPTED_RUN_MEANS = ("chrome-hidden", "chrome-visible", "element", "steam")
 
 # results only: (a, b, what) — the two comparisons the slice reports (method §6 item 2)
 COMPARISONS = {"chrome-hidden": [], "chrome-visible": [("steady-timer", "steady-notimer", "timer against no timer")],
