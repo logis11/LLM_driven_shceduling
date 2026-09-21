@@ -67,6 +67,13 @@ CARRIED = {"chrome-hidden": ("steady",),
 # tests 9.5's entries. Thread counts are carried as their observed range and are deliberately absent.
 LIST_FIELDS = (("wakes_per_s", "wakes/s"), ("gap_ms", "gap mean (ms)"), ("run_ms", "run mean (ms)"))
 
+# changelog D17, the rule's exception (measurement-campaign workflow; 9.6 D29): run times move together across every
+# thread of a repeat — a per-runner speed on one CPU model — while wake rates hold within about 1 %. For these
+# subjects every run mean, the residual's included, is carried over at least five repeats with its half-width and
+# range instead of the tolerance. Steam is not excepted: its shown-against-minimised comparison (D5) is in part a
+# CPU-share ratio, built from run times, and the exception applies only to a value no reported effect rests on.
+EXCEPTED_RUN_MEANS = ("chrome-hidden", "chrome-visible", "element")
+
 # results only: (a, b, what) — the two comparisons the slice reports (method §6 item 2)
 COMPARISONS = {"chrome-hidden": [], "chrome-visible": [("steady-timer", "steady-notimer", "timer against no timer")],
                "element": [("idle", "traffic", "idle against scripted traffic (D11; feeds no archetype)")],
@@ -227,9 +234,11 @@ def criterion(app, entry):
                     vals, floor = [x.get("mean") if x else None for x in c.get(field) or []], ABS_FLOOR_MS
                 if not vals:
                     continue
-                out[f"{phase} {comm} {label}"] = {**stability(vals, floor, MIN_REPEATS, keep_zero=True),
-                                                  "needed": _cp.repeats_needed(vals, floor)}
-    passes = bool(out) and all(c["passes"] for c in out.values())
+                c_ = {**stability(vals, floor, MIN_REPEATS, keep_zero=True), "needed": _cp.repeats_needed(vals, floor)}
+                c_["excepted"] = field == "run_ms" and app in EXCEPTED_RUN_MEANS          # D17
+                c_["carried"] = c_["passes"] or (c_["excepted"] and c_["k"] >= MIN_REPEATS)
+                out[f"{phase} {comm} {label}"] = c_
+    passes = bool(out) and all(c["carried"] for c in out.values())
     return {"tolerance": TOLERANCE, "abs_floor_ms": ABS_FLOOR_MS, "min_repeats": MIN_REPEATS,
             "quantities": out, "passes": passes}
 

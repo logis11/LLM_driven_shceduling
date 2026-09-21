@@ -300,3 +300,20 @@ def test_the_stability_rule_tests_each_carried_component_and_the_residual():
     # all steady -> the entry holds
     ok = pool.criterion("element", _entry({"a": steady}, {**res, "run_ms": {"repeat_mean": [0.02] * 5}}))
     assert ok["passes"] is True
+
+
+def test_run_means_carry_under_the_machine_spread_exception_except_for_steam():
+    # changelog D17: run times move together across a repeat's threads, a per-runner speed. For the renderers and
+    # the chat client a run mean is carried over five repeats with its half-width; Steam's is not, because D5's
+    # comparison is in part a CPU-share ratio built from run times.
+    wide_run = _comp([4.0] * 5, [250.0] * 5, [0.068, 0.047, 0.049, 0.065, 0.062])
+    q = pool.criterion("element", _entry({"a": wide_run}))
+    c = q["quantities"]["idle a run mean (ms)"]
+    assert c["passes"] is False and c["excepted"] is True and c["carried"] is True and q["passes"] is True
+    q = pool.criterion("steam", _entry({"a": wide_run}, phase="shown"))
+    c = q["quantities"]["shown a run mean (ms)"]
+    assert c["excepted"] is False and c["carried"] is False and q["passes"] is False
+    # the exception never reaches a wake rate or a gap
+    wide_gap = _comp([4.0] * 5, [100.0, 400.0, 100.0, 400.0, 250.0], [0.05] * 5)
+    q = pool.criterion("element", _entry({"a": wide_gap}))
+    assert q["quantities"]["idle a gap mean (ms)"]["carried"] is False and q["passes"] is False

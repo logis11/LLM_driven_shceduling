@@ -197,7 +197,8 @@ def main():
               + (f"; first batch at this spread {entry['first_batch']['count']}" if entry.get("first_batch") else ""))
         for q, c in st["quantities"].items():
             print(f"   {q}: k {c['k']}, half-width {c['half_width']}, "
-                  f"{'passes' if c['passes'] else 'at the window limit, reported (D46)' if c.get('limited') else 'carried with its half-width, its spread between sessions (D57)' if c.get('session_spread') else 'fails'}")
+                  f"{'passes' if c['passes'] else 'at the window limit, reported (D46)' if c.get('limited') else 'carried with its half-width, its spread between sessions (D57)' if c.get('session_spread') else 'carried with its half-width, its spread the machine (9.8 D17)' if c.get('excepted') and c.get('carried') else 'fails'}"
+                  + (f", needed {c.get('needed') or 'over 200'}" if not c["passes"] and not c.get("carried") and "needed" in c else ""))
     elif st:
         print(f"{app}: repeats {entry['repeats']}; {st['quantity']} over {st['k']}: half-width {st['half_width']} "
               f"(tolerance {st['tolerance']}) — {'holds' if st['passes'] else 'does not hold yet'}")

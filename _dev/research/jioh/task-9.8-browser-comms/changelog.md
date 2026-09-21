@@ -203,3 +203,37 @@ The page's own thread is 0.040 hidden and 0.020 visible. An entry's scope states
 is a fraction of each one's wakes, and most of what either carries is the browser's own housekeeping.
 
 No value changed by this entry.
+
+## D17 — the first batch read against the rule; the list per component, and run means excepted (2026-09-21)
+
+All twenty jobs of the first batch landed on the AMD EPYC 7763 — five repeats per subject, every one valid.
+
+**The rule was being tested on the wrong list.** `desktop/pool.py`'s criterion tested three numbers per phase: the
+per-renderer wake rate and the unweighted means of the components' gap and run means. Method §6 item 1 lists every
+value per component and the residual's, and `campaign/pool.py` tests 9.5's entries that way. The average weighted a
+thread waking a handful of times a phase like one waking every ten seconds, let a failing component sit behind
+stable ones, and never tested the residual: it reported the chat client done where 7 of its 18 per-component values
+failed. The criterion now tests each carried component and the residual (`c7b8a72`).
+
+**Run times follow the runner.** Within a repeat every thread's run mean moves together — the Steam client's
+`steam`, `IPC:CSteamEngin` and `CJobMgr` threads all run about 30 % slower in repeats 1, 4 and 5 than in 2 and 3 —
+while the same threads' wake rates hold within about 1 %. That is a per-runner speed on one CPU model, which added
+repeats average over rather than remove.
+
+**By 인지오's decision**, the rule's exception (measurement-campaign workflow; 9.6 D29) applies to every carried run
+mean of the hidden renderer, the visible renderer and the chat client, the residual's included: carried over at
+least five repeats with its half-width and range in place of the tolerance. The Steam client is not excepted —
+its shown-against-minimised comparison (D5) is in part a CPU-share ratio built from run times, and the exception
+applies only to a value no reported effect rests on — so its run means keep adding repeats. Each excepted value's
+half-width, range, repeat count, what its spread follows and the share of the job's time it holds go into the
+entry's scope at the fold-in.
+
+**What still fails at five repeats**, with the count its present spread would need: the chat client's
+`ThreadPoolForeg`, `Chrome_ChildIOT` and `ThreadPoolServi` gap means (9, 7, 7); the visible renderer's main thread
+wake rate and gap mean (10, 11), its `Chrome_ChildIOT` (over 200) and residual (55); the hidden renderer's main
+thread gap mean (6), its `Chrome_ChildIOT`, `Compositor` and `PerfettoTrace` (over 200 each) and residual (84); the
+Steam client's run means and `ThreadPoolForeg`. The components past 200 wake about six times a phase and are in the
+carried set only because the 0.95 coverage cut needs three equally small threads to reach it — a spread the
+analysis makes (campaign workflow, step 6), open.
+
+No value changed by this entry.
