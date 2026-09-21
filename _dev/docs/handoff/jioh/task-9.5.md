@@ -26,7 +26,7 @@ Same-machine repeats sub-item. Branch `jioh/dataset-rebuild`; everything below i
 ## Decided 2026-09-21
 
 1. **D64 (applied)** — `MemoryInfra`'s heavy pass carried as its own stated event: its runs of 30 ms or more in `chrome`'s idle phase leave the component rows (`HEAVY_EVENTS`, `split_events` in `campaign/pool.py`; the pooled record's `heavy_event`: count per repeat, runs, times into the phase, rate). Verified on the D62 campaign's 16 downloaded repeats: the idle residual run mean goes from ±28.8 % (projection over 200) to ±3.4 %, passing, its rate and gap too; the event reads 5 passes in 16 repeats (9,600 s), 53.8–60.1 ms, rate 0.00052 a second. **Still to write: the event's place in `fold_in.py`** (with the fold-in).
-2. **D65 (applied, to confirm)** — `chrome`'s SWELL-KW phase replays keys only (`KINDS="key"` in `probe/appdefs.sh`; `KEYS_ONLY` and the stimulus sentence in `fold_in.py`). 인지오 answered "B I think": **confirm before relaunching `chrome`**. The D62 campaign is superseded whole; `chrome` restarts from window 1 with a first batch of five. New validity check: `after-driven.png` shows the box holding the stream's text.
+2. **D65 (applied, confirmed)** — `chrome`'s SWELL-KW phase replays keys only (`KINDS="key"` in `probe/appdefs.sh`; `KEYS_ONLY` and the stimulus sentence in `fold_in.py`). The D62 campaign is superseded whole; `chrome` restarted from window 1: first batch launched 2026-09-21 23:20 UTC as run #438 (pool `interactive/chrome --since 438 -- --exclude-roles renderer`); `chrome` 17 (run #437, superseded) cancelled. New validity check: `after-driven.png` shows the box holding the stream's text.
 3. `Chrome_ChildIOT`'s gap mean stays per-thread (option (a)). Nothing to apply.
 4. `code`'s window-10 compositor rate stays a watch item (option (a)); raise as a D57 question if more sessions show it.
 
@@ -46,7 +46,7 @@ The releases (2026-09-18/-19 for the six, 2026-09-20 for the three) and one fold
 
 ## Resume point (the Mac may go down)
 
-In flight at 23:10 UTC: `code` window 19 (run #436, 35662756973) and `chrome` window 17 (run #437, superseded by D65 — let it land, do not pool it). On resume: confirm D65 with 인지오; `status.py interactive --since 436 --app code:436`; pool and check `code` 19 (`pool_runs.py` with the pool arguments in the table, `report.json`'s `altprelude.rc`, the status bar in `after-altprelude.png`, `campaign/slices.py <run dir> --phase idle`), launch `code` 20; launch `chrome`'s D65 first batch (`launch.py first interactive/chrome:1 … :5`, gated windows back in one push) and pool it from that run.
+In flight at 23:20 UTC: `code` window 19 (run #436) and `chrome`'s D65 first batch, windows 1–5 (run #438). Its gated windows are relaunched in one push per round while the Mac is up; on resume, check `status.py interactive --since 436 --app chrome:438 --app code:436`, send any `gated only` windows of the batch back together (`launch.py retried interactive/chrome:K …`), pool and check every landing (`pool_runs.py` with the table's arguments; `chrome`: `after-driven.png` shows the box holding the stream's text, `after-altprelude.png` the box empty at the top, the idle slice profile under ~10 ms/s; `code`: the status bar in `after-altprelude.png` at Ln 28 with 0 errors), then add repeats one at a time per application (`code` 20 next).
 
 ## Running the loop
 
