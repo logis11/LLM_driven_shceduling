@@ -1,4 +1,4 @@
-# Handoff — task 9.5 Interactive and typing (2026-09-21, 22:20 UTC)
+# Handoff — task 9.5 Interactive and typing (2026-09-21, 22:45 UTC)
 
 Same-machine repeats sub-item. Branch `jioh/dataset-rebuild`; everything below is committed and pushed. Decision record `_dev/research/jioh/task-9.5-interactive-typing/changelog.md` (now D1–D63), method `campaign/method.md` (§9 carries every amendment), workflow `_dev/research/jioh/measurement-campaign-workflow.md`.
 
@@ -9,7 +9,7 @@ Same-machine repeats sub-item. Branch `jioh/dataset-rebuild`; everything below i
 | `soffice`, `gimp`, `kdenlive`, `mpv-video`, `mpv-audio`, `thunderbird-send` | six archetypes | — | **hold** | filed in `campaign/results-same-machine/` |
 | `webrtc` | `video-call` | 35 | **holds** (D59) | `playback/webrtc --since 245` |
 | `code` | `code-editor` | 17 valid (windows 1–4, 6–18; window 5 left out, D63) | not yet, projection 22 | `interactive/code --since 376 --exclude 5 --exclude-why "D63: …"` |
-| `chrome` | `web-browser` | 15 | not yet, projection over 200 (the `MemoryInfra` residual) | `interactive/chrome --since 379 -- --exclude-roles renderer` |
+| `chrome` | `web-browser` | 16 | not yet, projection over 200 (the `MemoryInfra` residual) | `interactive/chrome --since 379 -- --exclude-roles renderer` |
 
 ## What changed on 2026-09-21
 
@@ -36,6 +36,10 @@ Same-machine repeats sub-item. Branch `jioh/dataset-rebuild`; everything below i
 ## Still to do at the end (unchanged)
 
 The releases (2026-09-18/-19 for the six, 2026-09-20 for the three) and one fold-in wait for all three (D55); both releases are outward-facing — ask first. `mail-client`'s notes carry the runner's attachment figures (41,555,063 B and 56,946,735 B at the peer). `dataset/tools/meas/desktop/run.sh` line 162 still reads `app.affinity` at launch — 9.8's file.
+
+## Resume point (the Mac may go down)
+
+In flight at 22:45 UTC: `chrome` window 17 (run #437, 35663725760) and `code` window 19 (run #436, 35662756973; its first attempt, run #435, was gated and then failed a 403 on the artifact upload — nothing measured). Both land on GitHub whatever the Mac does. On resume: `status.py interactive --since 436 --app chrome:437 --app code:436`, pool and check each landing (the per-landing checks above; the session scratchpad's `check.sh` does not survive a restart — its steps are `pool_runs.py` with the pool arguments in the table, `report.json`'s `altprelude.rc`, the `after-altprelude.png` test, and `campaign/slices.py <run dir> --phase idle`), then launch `chrome` 18 and `code` 20.
 
 ## Running the loop
 
