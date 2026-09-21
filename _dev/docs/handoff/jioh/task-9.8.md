@@ -1,49 +1,38 @@
-# Handoff — task 9.8 Browser and comms (2026-09-21 night)
+# Handoff — task 9.8 Browser and comms (2026-09-22)
 
-Stage 3 on `jioh/dataset-rebuild`. **Three of the four entries hold the stability rule; the Steam client's waits on
-one decision (D22).** Nothing is folded into the dataset yet and no archetype value has changed.
+Stage 3 on `jioh/dataset-rebuild`. **Every entry holds the stability rule** under campaign
+`meas-ci:desktop:2026-09-20`, all repeats on the AMD EPYC 7763, none excluded or superseded. Nothing is folded into
+the dataset yet and no archetype value has changed.
 
-## Morning summary (2026-09-21 → 22)
-
-| Entry | Repeats (all valid, EPYC 7763) | Rule |
+| Entry | Repeats | Rule |
 |---|---|---|
-| chat client (`element`) | 17 | **holds** |
-| hidden renderer (`chrome-hidden`) | 11 | **holds** — run means under D17, the residual under D21 |
-| visible renderer (`chrome-visible`) | 11 | **holds** — run means under D17, `Chrome_ChildIOT`, `ThreadPoolForeg`, residual under D21 |
-| Steam client (`steam`) | 12 | two gap means fail — **D22, open** |
+| chat client (`element`) | 17 | holds — run means under D17 |
+| hidden renderer (`chrome-hidden`) | 11 | holds — run means under D17, residual under D21 |
+| visible renderer (`chrome-visible`) | 11 | holds — run means under D17; `Chrome_ChildIOT`, `ThreadPoolForeg`, residual under D21 |
+| Steam client (`steam`) | 12 | holds — run means under D18; `steamwebhelper`, `ThreadPoolForeg` under D23 |
 
-**Your decision — D22:** the Steam client's `steamwebhelper` and `ThreadPoolForeg` gap means. Within one run they
-move ±0.1 % and ±1.7 %; across the twelve repeats ±21.0 % and ±19.6 % — same threads, same wake rate, the wakes
-spread differently from one launch to the next. That is 9.5 D57's case by all three of its tests, but
-`steamwebhelper` carries 23.6 % of the client's wakes against D57's 6.5 %. The tables themselves hold — `steamwebhelper`'s gap median and 90th percentile are
-16.2 ms in all twelve repeats; the mean moves on a handful of gaps past the 99th percentile. Carry both with their
-half-widths under D57, or add about 46 repeats (42 min each), or test these tables at their quantiles (a change to
-the shared rule). Evidence in the changelog, D22.
+Decisions this campaign: D15 phase lengths and settles, D16 the visible entry reads its no-timer phase, D17 run
+means carried under the machine-spread exception, D18 D5 stated on the wake-rate ratio, D21 and D23 quiet or
+between-session components carried under 9.5 D57. Fixes in pooling, analysis and download tooling only (D17, D19,
+`52e4d5b`, `91b127d`); the measurement is unchanged since D15.
 
-**Fixed without asking (all in pooling/analysis — the measurement is unchanged since D15, every repeat recorded
-the same settings, so nothing was superseded):**
-- the rule tested one phase-average instead of each component and the residual (`c7b8a72`)
-- the renderer residual merged all twelve renderers instead of describing one (`1f44041`, D19)
-- the pooled record stated the observed renderer count instead of the measured one (`52e4d5b`)
-- an interrupted artifact download blocked every later pool of that app (`91b127d`, loop tooling)
+## Next, in order
 
-**Decided today by you:** D17 (run means carried under the machine-spread exception), D18 (D5 stated on the
-wake-rate ratio — now 1.225 ±0.5 % over twelve repeats — and the Steam client's run means excepted too), D21 (the
-renderer quiet threads carried with their half-widths).
+1. **The final pooled set, tagged, once.** Pool all four subjects together with the campaign tag into
+   `campaign/results/` (as 9.5 keeps `campaign/results/pool-<app>.json`). `pool_runs.py` does not pass `--tag`;
+   run `desktop/pool.py <artifacts> <out.json> --md <out.md> --cpu-model "EPYC 7763" --tag meas-ci:desktop:2026-09-20`
+   over the artifacts `pool_runs.py desktop/<app> --since 21` downloads under `~/.cache/meas-loop/pool/`.
+2. **Each entry's row in `_dev/research/jioh/measurement-campaign-record.md`** — repeats, the values on the list and
+   the widest half-width, what stopped it, jobs and gated draws; the excepted values with their half-widths.
+3. **The raw-record release** — outward-facing: ask 인지오 first.
+4. **The fold-in**, with scope-card items 6–10 and 15–16. Each entry's scope states: the exceptions and their
+   half-widths and ranges (D17, D18, D21, D23), the within/between-run spreads (D20, D22), the renderer population
+   (12 measured of 16 observed), the floor clause and `--no-sandbox` (§7), and that the renderer entries are
+   majority `HangWatcher` (D16). Still open for the fold-in: the renderer wake alignment (D15) does not reach the
+   rule — its unit is the repeat — but the scope's sample-count statement and, for 9.10, waking N placed hidden
+   renderers together remain.
 
-**Checked, not a defect:** the chat client's traffic phase reading 4.0× idle against the dry run's 8.1× — every
-repeat's driver sent exactly 600 messages over the 600 s; the dry figure was a 45 s phase dominated by the first
-messages.
-
-**Next, once D22 is decided:** the final pooled set into `campaign/results/` with the campaign tag, each entry's row
-in `measurement-campaign-record.md`, the raw-record release (outward — ask first), then the fold-in with scope-card
-items 6–10 and 15–16. Still open for the fold-in: what the renderer wake alignment (D15) does to pooling N
-renderers as N samples. It does not reach the stability rule — the rule reads per-repeat means, the repeat is
-its unit, and each renderer's gaps are its own — so the open parts are the scope's statement of sample count
-(twelve aligned renderers are not twelve independent samples) and, for 9.10, that a timeline placing N hidden
-renderers should wake them together.
-
-**Watch:** `probe/appdefs.sh` is shared with 9.5's live campaign and holds our two Chrome arms. Before any further
+**Watch:** `probe/appdefs.sh` is shared with 9.5's live campaign and holds the two Chrome arms. Before any further
 Chrome launch, diff those arms against `332f627` — any change supersedes the Chrome repeats.
 
 ## Read these first
@@ -69,7 +58,7 @@ Chrome launch, diff those arms against `332f627` — any change supersedes the C
 - **The trigger carries five keys only** — `mode`, `attempt`, `cpu_model`, `apps`, `repeats`. Every design
   value is a constant in `run.sh` (D13); to change one, edit `run.sh` and bump `attempt` in the same push.
 - **The branch is shared with other live sessions.** Push immediately after each commit.
-- CI does not run on this branch. `make -C dataset test PY=python3.12`, about 8 minutes, currently 185 passed,
+- CI does not run on this branch. `make -C dataset test PY=python3.12`, about 8 minutes, currently 186 passed,
   1 skipped, 1 xfailed.
 - Job lengths in `full`: about 23 minutes for the two renderer subjects and the chat client, about 42 for the
   Steam client. The EPYC 7763 draw rate has run near 40–50 %, so budget about two draws per landing.
