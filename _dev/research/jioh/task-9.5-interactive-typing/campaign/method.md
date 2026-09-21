@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-21, `chrome`'s 136M phase in the empty text box (changelog D62), amending D60 on D61's principle: the prelude also empties the box (Ctrl+A, Delete), since D60's first repeat showed the box holding what the SWELL-KW window typed, different in every repeat. The D60 campaign is superseded whole and `chrome` restarts from window 1. `chrome`'s `ALTPRELUDE` in `probe/appdefs.sh`.
+
 - 2026-09-21, `code`'s 136M phase from the committed file (changelog D61) — §4 and the stimulus-sensitivity check: the prelude now returns `source/index.ts` to its committed text — a pristine copy back to disk, the unsaved buffer reverted, the caret at the end — since the SWELL-KW window before it left a different file in every repeat (36–142 errors after the prelude over 18 repeats). The 18 repeats are superseded whole and `code` restarts from window 1. `code`'s `ALTPRELUDE` in `probe/appdefs.sh`.
 
 - 2026-09-21, `chrome`'s 136M phase from a fixed state (changelog D60) — §4 and the stimulus-sensitivity check: the phase starts with the text box focused at the page's top, design (a click on blank body, Ctrl+Home, a click in the box, Ctrl+End), since the SWELL-KW window before it left the box in view in 5 of 15 repeats and scrolled away in 10, where the 136M keys reached no field; the two groups' per-input medians were 1.88–2.35 and 0.87–0.95 ms. The 15 repeats are superseded whole and `chrome` restarts from window 1. `ALTPRELUDE` in `probe/appdefs.sh`, `altprelude.rc` in `campaign/run.sh`.
