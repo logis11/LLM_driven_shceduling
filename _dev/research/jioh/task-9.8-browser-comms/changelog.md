@@ -318,3 +318,26 @@ With D17's run-mean exception and this, **both renderer entries hold at eleven r
 main thread pass on their own, and every other value is carried with its half-width under a stated exception.
 
 No value changed by this entry.
+
+## D22 — the Steam client's two failing gap means, placed; the decision open (2026-09-21)
+
+The Steam client at twelve repeats, every one valid: the rule holds for every value but two gap means —
+`steamwebhelper` (±10.2 %, needs about 46 repeats) and `ThreadPoolForeg` (±9.0 %, about 35). Both components' wake
+rates pass. Placed by 9.5 D57's three tests (`desktop/within_run.py --tree`, the probe's shown phase past its 900 s
+settle, 600 s windows every 60 s):
+
+| component | gap mean within one run | across the twelve repeats | share of wakes | threads per repeat |
+|---|---|---|---|---|
+| `steamwebhelper` | ±0.1 % | ±21.0 % (28.5–42.2 ms) | 23.6 % | 4, or 6 in two repeats |
+| `ThreadPoolForeg` | ±1.7 % | ±19.6 % (415.9–616.1 ms) | 2.1 % | 5 to 8 |
+
+(a) It is not the analysis: `steamwebhelper`'s repeats 4 and 6 hold the same four threads and the same wake rate
+(70.8, 71.1 /s) as the repeats reading 29 ms, and read 42.2 and 41.2 ms — the same threads spread their wakes
+differently from one launch to the next. (b) It is not the phase's placement: within one run each gap mean moves
+by ±0.1 % and ±1.7 %. (c) Their weight: `steamwebhelper` carries 23.6 % of the client's wakes, well above 9.5 D57's
+6.5 %, though only its gap mean varies — its wake rate holds within ±0.5 % across the twelve.
+
+**Open for 인지오:** carry both gap means with their half-widths under 9.5 D57, or add the repeats the rule
+projects (about 46).
+
+No value changed by this entry.
