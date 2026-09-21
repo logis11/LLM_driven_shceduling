@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-21, `code`'s window 5 left out and the prelude made robust (changelog D63) — §6 validity: window 5 of D61's first batch reached the committed file with the caret on line 16, not the end, and is left out under D47; windows 1–4 reached the designed state. The prelude's keys now carry `--clearmodifiers`, with Escape again and Ctrl+End twice. `code`'s `ALTPRELUDE` in `probe/appdefs.sh`.
+
 - 2026-09-21, `chrome`'s 136M phase in the empty text box (changelog D62), amending D60 on D61's principle: the prelude also empties the box (Ctrl+A, Delete), since D60's first repeat showed the box holding what the SWELL-KW window typed, different in every repeat. The D60 campaign is superseded whole and `chrome` restarts from window 1. `chrome`'s `ALTPRELUDE` in `probe/appdefs.sh`.
 
 - 2026-09-21, `code`'s 136M phase from the committed file (changelog D61) — §4 and the stimulus-sensitivity check: the prelude now returns `source/index.ts` to its committed text — a pristine copy back to disk, the unsaved buffer reverted, the caret at the end — since the SWELL-KW window before it left a different file in every repeat (36–142 errors after the prelude over 18 repeats). The 18 repeats are superseded whole and `code` restarts from window 1. `code`'s `ALTPRELUDE` in `probe/appdefs.sh`.

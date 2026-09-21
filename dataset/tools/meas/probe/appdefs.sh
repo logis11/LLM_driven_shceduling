@@ -50,7 +50,8 @@ appdef() {
       # reverted to it, the caret goes to the end
       CLASS="code"; PAT="vscode-data"; RX="code|Code"; DRIVER=stream; STREAM=word; AREA="0.12,0.03,0.05,0.03"
       POSTLAUNCH="sleep 20; xdotool key ctrl+b; sleep 1; xdotool key ctrl+alt+b; sleep 1; xdotool key ctrl+End"
-      ALTPRELUDE="xdotool key Escape; sleep 1; cp /tmp/index.ts.orig /tmp/project/source/index.ts; code --user-data-dir=/tmp/vscode-data --reuse-window /tmp/project/source/index.ts; sleep 4; xdotool key ctrl+alt+shift+r; sleep 8; xdotool key ctrl+End" ;;
+      # (D63) every key with --clearmodifiers, Escape again and Ctrl+End twice: in D61's window 5 the caret stayed on line 16
+      ALTPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; cp /tmp/index.ts.orig /tmp/project/source/index.ts; code --user-data-dir=/tmp/vscode-data --reuse-window /tmp/project/source/index.ts; sleep 4; xdotool key --clearmodifiers ctrl+alt+shift+r; sleep 8; xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+End; sleep 1; xdotool key --clearmodifiers ctrl+End; sleep 1" ;;
     soffice)
       apt_install libreoffice-writer libreoffice-gtk3; ver soffice --version
       # setup state (design): a large document — 100 pages of running text (≈ 50 000 words) with ten
