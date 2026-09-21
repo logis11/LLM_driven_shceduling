@@ -194,6 +194,9 @@ PY
       rec feed.server "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8088/feed.html)"
       LAUNCH="google-chrome --no-sandbox --disable-gpu --no-first-run --user-data-dir=/tmp/chrome-data file:///tmp/page.html"
       CLASS="google-chrome|Google-chrome"; PAT="chrome-data"; RX="chrome"; DRIVER=stream; STREAM=ie; AREA="0.13,0,0.02,0.02"; OP=page-load
+      # 9.5 D65: the SWELL-KW phase replays the stream's keys only — its clicks, drags and wheel turns moved focus off the
+      # box or selected page text, and the keys then cost differently; the box is focused and empty from launch (autofocus)
+      KINDS="key"
       # 9.5 D60, D62: the 136M phase types into the empty text box, the page as generated, whatever the SWELL-KW window
       # left — a click on blank body right of the box (x 18–842 at the page's top) takes focus off any field, Ctrl+Home
       # scrolls to the top, a click in the box focuses it, Ctrl+A and Delete empty it

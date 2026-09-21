@@ -91,7 +91,7 @@ def components_block(ph, tag, key, indent="      "):
     return lines
 
 
-KEYS_ONLY = {"office-writer"}  # D28: the stream's keys only (appdefs KINDS=key)
+KEYS_ONLY = {"office-writer", "web-browser"}  # D28, D65: the stream's keys only (appdefs KINDS=key)
 
 
 def entry(aid, spec, d):
@@ -153,8 +153,10 @@ def entry(aid, spec, d):
     if kind == "input":
         if aid in KEYS_ONLY:
             scope += (f"Stimulus: SWELL-KW stream {stream}, its keystrokes replayed by xdotool at their recorded times (error p99 1.24 ms) "
-                      f"and its clicks, scrolls and drags left out, so the typing stays at the document's end (D28; the archetype carries "
-                      f"typing, not document navigation); ")
+                      + ("and its clicks, scrolls and drags left out, so the typing stays at the document's end (D28; the archetype carries "
+                         "typing, not document navigation); " if aid == "office-writer" else
+                         "and its clicks, scrolls and drags left out, so every key lands in the page's text box (D65; the archetype carries "
+                         "typing into a page field, not browsing's scrolling and clicking — the page-load operation carries browsing's heavy work); "))
         else:
             scope += (f"Stimulus: SWELL-KW stream {stream} replayed per event by xdotool at recorded gaps (error p99 1.24 ms), "
                       f"keys and pointer events together, pointer positions scaled into the content area (D5, D12); ")

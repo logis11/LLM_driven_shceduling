@@ -52,11 +52,25 @@ SESSION_SPREAD = {("code", "idle libuv-worker"),
                   ("webrtc", "play AudioProcessing "), ("webrtc", "play AudioOutputDevi run mean"),
                   ("webrtc", "play AudioInputDevic run mean"), ("webrtc", "play FakeAudioInput run mean"),
                   ("webrtc", "play residual run mean")}
+# D64: a rare heavy run carried as its own stated event, not as a component's wake — chrome's MemoryInfra pass of 54–61 ms
+# at no fixed time (9 in 20 sessions × 600 s) against its regular runs of at most 11.5 ms; (app, phase) -> (comm, run floor
+# in ms, the floor being design between the two). The event's runs leave the component rows, so the residual converges.
+HEAVY_EVENTS = {("chrome", "idle"): ("MemoryInfra", 30.0)}
 FOCUS_COMPONENTS = {"gimp", "kdenlive"}  # fold_in.py's pointer-loop archetypes carry the driven phase as focus_components
 # D38: a component keyed by the thread's name with a trailing " #<n>" removed — Gecko names a pool's threads
 # "<pool> #<n>", n counting up per spawn (nsThreadPoolNaming::GetNextThreadName), so each pool is one component
 POOL_SUFFIX_APPS = {"thunderbird-send"}
 POOL_SUFFIX = re.compile(r" #\d+$")
+
+
+def split_events(app, phase, rows):
+    """D64: (rows without the phase's heavy-event runs, [(t_in, run_ms)] of those runs, or None where none is declared)."""
+    spec = HEAVY_EVENTS.get((app, phase))
+    if not spec:
+        return rows, None
+    comm, floor = spec
+    heavy = lambda r: r.comm == comm and r.run >= floor
+    return [r for r in rows if not heavy(r)], [(r.t_in, r.run) for r in rows if heavy(r)]
 
 
 def component_key(app, comm):
@@ -247,6 +261,7 @@ def main():
                 # over the summed window span; its duration samples travel beside them (spec decisions 8–9)
                 op = pd.get("operation")
                 phase_rows = op["inside"] if op else pd["rows"]
+                phase_rows, events = split_events(app, phase, phase_rows)
                 phase_span = (sum(op["durations_ms"]) / 1000 or 1e-6) if op else pd["span"]
                 for row in phase_rows:
                     by_tid.setdefault((component_key(app, row.comm), row.tid), []).append((row.t_in, row.run))
@@ -257,6 +272,7 @@ def main():
                     c["t_in"].extend(x[0] for x in rs)
                     c["wakes"] += len(rs); c["threads"] += 1
                 slim["phases"][phase] = {"span": phase_span, "comms": comms, "per_input": pd.get("per_input"),
+                                         "events": None if events is None else [(t - pd["t0"], x) for t, x in events],
                                          "operation": {"name": op["name"], "durations_ms": op["durations_ms"],
                                                        "n_ok": op["n_ok"], "n_failed": op["n_failed"]} if op else None}
             raws[r] = slim
@@ -292,6 +308,16 @@ def main():
                     "cpu_share": [round(sum(c["runs"].get(r, [])) / 1000 / spans[r], 4) for r in preps],
                     "gap_ms": summary([c["gaps"].get(r, []) for r in preps]),
                     "run_ms": summary([c["runs"].get(r, []) for r in preps])}
+            if HEAVY_EVENTS.get((app, phase)):   # D64: the heavy event, stated with its counts
+                comm, floor = HEAVY_EVENTS[(app, phase)]
+                ev = {r: raws[r]["phases"][phase]["events"] or [] for r in preps}
+                total_s = sum(raws[r]["phases"][phase]["span"] for r in preps)
+                ph["heavy_event"] = {"comm": comm, "run_floor_ms": floor,
+                                     "count": [len(ev[r]) for r in preps],
+                                     "runs_ms": [round(x, 3) for r in preps for _, x in ev[r]],
+                                     "at_s": [[round(t, 1) for t, _ in ev[r]] for r in preps],   # seconds into the phase
+                                     "rate_per_s": round(sum(len(ev[r]) for r in preps) / total_s, 6) if total_s else None,
+                                     "span_s_total": round(total_s, 1)}
             if phase == "op" and all(raws[r]["phases"][phase].get("operation") for r in preps):
                 ops = {r: raws[r]["phases"][phase]["operation"] for r in preps}
                 ph["operation"] = {"name": ops[preps[0]]["name"],

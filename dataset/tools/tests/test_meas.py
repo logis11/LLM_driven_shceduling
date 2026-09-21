@@ -334,6 +334,25 @@ def test_a_component_absent_from_a_repeat_is_sporadic_not_carried():
     assert residual["comms"] == ["dbus"] and cov["sporadic"] == []
 
 
+def test_a_heavy_event_leaves_the_component_rows():
+    # 9.5 D64: chrome's MemoryInfra pass of 54-61 ms is carried as its own event, its regular runs stay component wakes
+    import importlib
+    import sys
+    from types import SimpleNamespace as R
+    saved = sys.modules.pop("analyze", None)
+    try:
+        pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    rows = [R(comm="MemoryInfra", t_in=1.0, run=7.7), R(comm="MemoryInfra", t_in=2.0, run=57.3),
+            R(comm="HangWatcher", t_in=3.0, run=40.0)]
+    kept, events = pool.split_events("chrome", "idle", rows)
+    assert [r.run for r in kept] == [7.7, 40.0] and events == [(2.0, 57.3)]
+    assert pool.split_events("chrome", "driven", rows) == (rows, None)
+    assert pool.split_events("code", "idle", rows) == (rows, None)
+
+
 def test_values_at_the_window_limit_are_reported_not_held_open():
     # 9.5 D32, D46: thunderbird-send's input and operation values stop at its eight Outlook windows; the idle values
     # keep adding repeats

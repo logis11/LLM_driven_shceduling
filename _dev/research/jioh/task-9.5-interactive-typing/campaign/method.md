@@ -82,6 +82,10 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-21, `chrome`'s SWELL-KW phase keys only (changelog D65): the stream's clicks, drags and wheel turns moved focus off the text box or selected page text (window 12 of the D62 campaign: paragraphs selected, 3.02 ms per input against 1.49–2.38), so `chrome` replays the keys alone into the box, focused and empty from launch; browsing's scrolling and clicking are a stated limitation. The D62 campaign is superseded whole and `chrome` restarts from window 1. `KINDS` in `probe/appdefs.sh`.
+
+- 2026-09-21, `chrome`'s `MemoryInfra` heavy pass as its own event (changelog D64) — §6: `MemoryInfra`'s runs of 30 ms or more in `chrome`'s idle phase (54–61 ms, 9 in 20 sessions × 600 s, at no fixed time; the regular runs at most 11.5 ms) leave the component rows and are stated as an event with its count, runs and rate; the residual is read without them. `HEAVY_EVENTS` in `campaign/pool.py`.
+
 - 2026-09-21, `code`'s window 5 left out and the prelude made robust (changelog D63) — §6 validity: window 5 of D61's first batch reached the committed file with the caret on line 16, not the end, and is left out under D47; windows 1–4 reached the designed state. The prelude's keys now carry `--clearmodifiers`, with Escape again and Ctrl+End twice. `code`'s `ALTPRELUDE` in `probe/appdefs.sh`.
 
 - 2026-09-21, `chrome`'s 136M phase in the empty text box (changelog D62), amending D60 on D61's principle: the prelude also empties the box (Ctrl+A, Delete), since D60's first repeat showed the box holding what the SWELL-KW window typed, different in every repeat. The D60 campaign is superseded whole and `chrome` restarts from window 1. `chrome`'s `ALTPRELUDE` in `probe/appdefs.sh`.
