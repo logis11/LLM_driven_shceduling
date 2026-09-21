@@ -1,65 +1,36 @@
-# Handoff — task 9.5 Interactive and typing (2026-09-20, 11:25 UTC)
+# Handoff — task 9.5 Interactive and typing (2026-09-21, 13:25 UTC)
 
-Reopened by 9.6 D10 and 9.7 D3 (`_dev/TODO.md` 9.5's two `[WIP]` sub-items: same-machine repeats, and Thunderbird re-observed with a `send` operation). Branch `jioh/dataset-rebuild`; everything below is committed and pushed. Decision record `_dev/research/jioh/task-9.5-interactive-typing/changelog.md` (now D1–D58), method `campaign/method.md` (§9 carries every amendment), workflow `_dev/research/jioh/measurement-campaign-workflow.md`, record `_dev/research/jioh/measurement-campaign-record.md`.
+Same-machine repeats sub-item. Branch `jioh/dataset-rebuild`; everything below is committed and pushed. Decision record `_dev/research/jioh/task-9.5-interactive-typing/changelog.md` (now D1–D63), method `campaign/method.md` (§9 carries every amendment), workflow `_dev/research/jioh/measurement-campaign-workflow.md`.
 
 ## Where the nine archetypes stand
 
 | application | archetype | repeats | rule | pool |
 |---|---|---|---|---|
-| `soffice` | `office-writer` | 14 | **holds** | `--since 38` |
-| `gimp` | `image-editor` | 5 | **holds** | `--since 10` |
-| `kdenlive` | `video-editor` | 20 | **holds** | `--since 10` |
-| `mpv-video` | `video-player` | 24 | **holds** | `--since 10` |
-| `mpv-audio` | `audio-player` | 31 | **holds** | `--since 10` |
-| `thunderbird-send` | `mail-client` | 43 | **holds** | `--since 150 --exclude 29 --exclude-why "…"` |
-| `chrome` | `web-browser` | 5 | not yet | `--since 269 -- --exclude-roles renderer` |
-| `code` | `code-editor` | 7 | not yet | `--since 245` |
-| `webrtc` | `video-call` | 12 | not yet | `--since 245` |
+| `soffice`, `gimp`, `kdenlive`, `mpv-video`, `mpv-audio`, `thunderbird-send` | six archetypes | — | **hold** | filed in `campaign/results-same-machine/` |
+| `webrtc` | `video-call` | 35 | **holds** (D59) | `playback/webrtc --since 245` |
+| `code` | `code-editor` | 6 valid (window 5 left out, D63) | not yet, projection 21 | `interactive/code --since 376 --exclude 5 --exclude-why "D63: …"` |
+| `chrome` | `web-browser` | 6 | not yet, projection over 200 | `interactive/chrome --since 379 -- --exclude-roles renderer` |
 
-The six that hold are pooled into `campaign/results-same-machine/` with `campaign/results-same-machine.md` rendered over them, and their rows are in `measurement-campaign-record.md`. The three that do not are the 2026-09-20 campaign, launched after three long-phase probes changed their protocol.
+## What changed on 2026-09-21
 
-## What the probes changed (D50–D58)
+- **D59** — `webrtc`'s audio path (`AudioProcessing` whole; run means of `AudioOutputDevi`, `AudioInputDevic`, `FakeAudioInput`, residual) carried with half-widths under D57: within one call ±0.7–3.0 %, across repeats ±26–41 %. Rule holds at 35. All 35 repeats reviewed: one protocol (210/480), gate open, every Chrome row on CPU 3, two saturation episodes at 130–150 and 370–390 s in every play phase. Sensitivity question on 9.14's TODO line.
+- **D60 → D62** — `chrome`'s 136M phase starts from a fixed state: page at the top, text box focused and emptied (the page as generated). The SWELL-KW window before it had left the box scrolled away in 10 of 15 repeats (keys to a page that takes no text) and, under D60, holding the stream's text. Both earlier campaigns superseded whole; `chrome` restarted from window 1 at run #379.
+- **D61, D63** — `code`'s 136M phase starts from the committed `index.ts` (pristine copy restored, buffer reverted with a bound File: Revert File key, caret at the end); the SWELL-KW window had left 36–142 errors in the file. 18 repeats superseded, restarted from window 1 at run #376. Window 5 left out under D47 (caret on line 16 after the prelude); the prelude's keys now carry `--clearmodifiers`, Escape again, Ctrl+End twice.
+- `run.sh` records `app.affinity` from the window owner's process (`app.affinity_pid`) — read at launch it could catch `taskset` before the mask applied.
 
-- `chrome` (D51, D56, D58): settle 30 → 270 → **420 s**, idle phase 120 → **600 s**. Its ~880 ms `ThreadPoolForeground` launch run lands 95–300 s after the window over seven sessions; at 270 s one repeat of five still caught it (95.4 ms/s in one slice). Its earlier repeats are superseded whole, driven values included (D55).
-- `code` (D53): settle stays 30 s, idle phase 120 → **900 s**. A 25–40 ms/s episode recurs every ~320 s, anchored to launch, so a 120 s phase read idle CPU 15.5 % high in every repeat.
-- `webrtc` (D54): settle 30 → **210 s**, play phase 300 → **480 s**. Its call saturates one CPU for ~30 s every 240 s to the call's end; the old 300 s phase sat in the ramp-up and read play CPU **78 %** above the steady call. Its CPU share is now 0.226–0.255 against the superseded 0.4084.
+## Per-landing checks (beyond `pool_runs.py`'s validity lines)
 
-## Two exceptions to the stability rule, beside 9.6 D29's
+- `chrome`: `after-altprelude.png` — box at the page top, focused, empty; idle slice profile (D58 guard) — no ~95 ms/s launch run.
+- `code`: `after-altprelude.png` status bar — Ln 28, Col 1, 0 errors; idle profile starts 17–19 ms/s, peaks ~40 (D53's episode, expected).
 
-- **D46** — `thunderbird-send`'s operation and per-input values pool its eight full repeats and state their half-widths, past the recording's window limit.
-- **D57** — a component whose rate varies between sessions rather than within a run is carried with its half-widths: `code`'s `libuv-worker` (`SESSION_SPREAD` in `campaign/pool.py`). The test that placed it: the rate moves ±8.7 % within the probe's run against 5.09–9.24 a second across repeats. Its projection fell from 107 repeats to 29. The sensitivity question is on 9.14's TODO line.
+## Open for 인지오
 
-## The loop, as run
+**`chrome`'s idle residual run mean (±69 % at 6 repeats, projection over 200).** It is one thread, `MemoryInfra`. In every one of 20 sessions (both superseded and current campaigns) it runs ~7.7 ms at 180–183 s and 480–483 s into the idle phase, a fixed 300 s cadence. In 7 of 20 sessions it also runs a heavy pass of 54–61 ms at no fixed time (43, 57, 165, 217, 473, 474, 503, 572, 593 s) — 9 passes in 20 × 600 s, about one per 22 minutes. A rare random event within the run, not a harness defect nor a between-session spread; at that rarity the mean needs over 200 repeats. Options to decide: a longer idle phase; carry the heavy pass as its own stated event (rate and size); or an exception. Repeats continue meanwhile. (Script: the session scratchpad's `memoryinfra.py`; analysis reproducible with `analyze_run` on the idle phase, `comm == "MemoryInfra"`, run > 5 ms.)
 
-Per landing: pool (`loop/pool_runs.py <family>/<app> --since N` with the arguments in the table), read the D35 slice profile where a settle applies, then `loop/launch.py added <family>/<app>:<k>` once and check the commit reached origin. One added repeat per application at a time; a **first batch's** gated indices go back in one push (`launch.py retried …`, 인지오's 2026-09-20 amendment, workflow step 2, commit `a95a9a9`). Before every launch check `.github/campaign.json` has `"mode": "full"`. Watch with `loop/watch.py <targets> --since <run of the latest launch> --poll 60`; it exits at the first landing, so restart it after each.
+## Still to do at the end (unchanged)
 
-## The detached loop, running since 2026-09-20 11:58 UTC
+The releases (2026-09-18/-19 for the six, 2026-09-20 for the three) and one fold-in wait for all three (D55); both releases are outward-facing — ask first. `mail-client`'s notes carry the runner's attachment figures (41,555,063 B and 56,946,735 B at the peer). `dataset/tools/meas/desktop/run.sh` line 162 still reads `app.affinity` at launch — 9.8's file.
 
-`~/.cache/meas-loop/overnight-9.5/`: `loop.py` with `state-2026-09-20.json`, logging to `loop-2026-09-20.log`. Started with `nohup caffeinate -i python3 loop.py state-2026-09-20.json >> loop-2026-09-20.log 2>&1 & disown`, so it sits under launchd and outlives the session — but not a reboot, which is what ended the 2026-09-19 run. It carries no cap: an application stops when its rule holds, a repeat fails validity, a job fails or ends short, or a `STOP` file appears beside the script.
+## Running the loop
 
-Its state at the start — `chrome` next 7 watching from run #278, `code` next 9 from #283, `webrtc` next 16 from #287 — with each application's pool arguments in the state file, `chrome`'s including `--exclude-roles renderer`. It rewrites that file after every step, so **read it first when resuming**: `next` is the index it would launch, and a `stopped` field says why an application ended. No session watcher may run beside it; two would relaunch the same gated attempt.
-
-**Resuming after it stops or the Mac restarts:** read `loop-2026-09-20.log` (each step is timestamped in UTC) and `state-2026-09-20.json`, check `status.py` per family for what is landed or in flight, pool anything that landed after its last entry, and either restart the loop with a refreshed state or carry on in the session.
-
-## In flight at 11:58 UTC
-
-`chrome` 6 (interactive run #278), `code` 8 (interactive run #283), `webrtc` 15 (playback run #287). Pooled and valid at that moment: `chrome` 5, `code` 7, `webrtc` 14.
-
-## What is open
-
-1. **`webrtc` may not converge.** Its projection has gone 24 → 39 → 53 → 55 over four repeats. The driver is the audio path: `AudioOutputDevi` wakes 105–120 a second in nine repeats and 156 in two, `AudioProcessing` 106–178. Within the D52 probe's single call those rates move ±4.6 % and ±2.8 %, so the spread is between sessions — the D57 shape. It is **not** exempted: those two threads are ~12 % of the phase's wakes and they are what a video call does, where `libuv-worker` was peripheral. Decision taken: keep running, and bring the exception to 인지오 with this evidence if the projection is still climbing at about 30 repeats. A longer play phase is not an option — the within-call variation is already small.
-2. **The releases and the fold-in wait for all three** (D55). Two releases, one per campaign: 2026-09-18/-09-19 for the six, 2026-09-20 for the three. Both are outward-facing — ask 인지오 first. Then one fold-in (`campaign/fold_in.py`), then `make -C dataset dataset lint test check PY=python3.12` (five `-single` files fail the demand-window lint until 9.14 — state it).
-3. **At the fold-in**, `mail-client`'s notes must carry the runner's attachment figures — 41,555,063 B and 56,946,735 B at the peer — not D31's container build (9.7's D49).
-
-## Pitfalls met
-
-- **A repeat launched without its window cut** runs the driven branch against a missing file, skips `driven-alt` and runs the operation from another application state: that is `thunderbird-send` repeat 29, excluded under **D47** (`pool_runs.py --exclude K --exclude-why TEXT`, artifact moved to `<pool folder>-excluded`). Cut windows first (`loop/cut_windows.sh N`) for any recorded-input application.
-- **Superseded repeats share indices with new ones.** Pool from the new campaign's first run (`chrome`: `--since 269`), never by excluding indices.
-- **The shared working tree** holds 9.6, 9.7 and 9.8 sessions. `push_trigger` and `cut_windows.sh` now commit only their own paths (`903a76b`, `75d873c`), but a session's unpushed commits are replayed by whoever pulls next — one such rebase conflict in `_dev/TODO.md` landed here and was resolved by taking 9.8's rewrite whole.
-- **`launch.py` is never retried in a loop**: its push can succeed while the run listing after it fails.
-- **The detached loop survives the session but not a reboot** — the Mac restarted at 22:59 UTC on 2026-09-19 and killed the first run after 21 repeats. `caffeinate -i` blocks idle sleep only. Its pooling arguments come from the state file, added 2026-09-20 so `chrome` pools with `--exclude-roles renderer`.
-- **`watch.py` records handled jobs** in `~/.cache/meas-loop/watch-seen.txt`, so a landing already seen raises no event. An application whose last landing was seen and which has nothing in flight will sit idle — launch a repeat for it before handing it to the loop.
-
-## 인지오's working rules
-
-Questions one at a time in plain chat, each with a recommendation and its reference; every label explained where it appears; no number without a reference; decisions framed on research reliability, not effort. Report applications as name, repeats, whether the rule holds — numbers only when they are the basis of a decision. The loop's added repeats and relaunches are approved standing; a new campaign or a release is asked first.
+In-session, no detached loop. Watch with `loop/watch.py interactive/chrome interactive/code --since <latest launch run> --app chrome:<run> --app code:<run> --poll 60`; it exits at the first landing. One added repeat per application at a time; a first batch's gated windows go back in one push (`launch.py retried …`). Check `.github/campaign.json` is `"mode": "full"` before each launch; push with `git pull --rebase --autostash` (other sessions keep unstaged edits in the shared tree). Only one session may run this loop — on 2026-09-21 the original session survived a lost terminal and two copies ran at once until one stood down.
