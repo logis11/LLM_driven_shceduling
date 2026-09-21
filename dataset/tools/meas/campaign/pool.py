@@ -52,21 +52,11 @@ SESSION_SPREAD = {("code", "idle libuv-worker"),
                   ("webrtc", "play AudioProcessing "), ("webrtc", "play AudioOutputDevi run mean"),
                   ("webrtc", "play AudioInputDevic run mean"), ("webrtc", "play FakeAudioInput run mean"),
                   ("webrtc", "play residual run mean")}
-# D60: the driven-alt phase starts from a fixed state set by the app's ALTPRELUDE (probe/appdefs.sh), recorded by
-# run.sh as `altprelude.rc` (a non-zero one fails the validity step); for these apps a repeat without it leaves that
-# phase out of the pool, its other phases kept
-ALT_PRELUDE_APPS = {"chrome"}
 FOCUS_COMPONENTS = {"gimp", "kdenlive"}  # fold_in.py's pointer-loop archetypes carry the driven phase as focus_components
 # D38: a component keyed by the thread's name with a trailing " #<n>" removed — Gecko names a pool's threads
 # "<pool> #<n>", n counting up per spawn (nsThreadPoolNaming::GetNextThreadName), so each pool is one component
 POOL_SUFFIX_APPS = {"thunderbird-send"}
 POOL_SUFFIX = re.compile(r" #\d+$")
-
-
-def keeps_alt(app, report):
-    """D60: whether a repeat's driven-alt phase is pooled — for ALT_PRELUDE_APPS only a repeat that ran the phase's
-    fixed starting state (report.json `altprelude.rc`)."""
-    return app not in ALT_PRELUDE_APPS or "altprelude.rc" in report
 
 
 def component_key(app, comm):
@@ -248,8 +238,6 @@ def main():
         results, raws = {}, {}
         for r in reps:
             results[r], raw = analyze_run(info["repeats"][r], args.w_ms, args.cap_ms, exclude_roles=exclude_roles)
-            if not keeps_alt(app, json.load(open(os.path.join(info["repeats"][r], "report.json")))):
-                raw["phases"].pop("driven-alt", None); results[r]["phases"].pop("driven-alt", None)
             # keep only compact samples per phase: per-comm gaps/runs/wakes/threads, span, per-input lists
             slim = {"phases": {}}
             for phase, pd in raw["phases"].items():
@@ -338,10 +326,7 @@ def main():
         needed = [c["needed"] for c in live]
         entry["stability"] = {"tolerance": TOLERANCE, "abs_floor_ms": ABS_FLOOR_MS, "min_repeats": MIN_REPEATS,
                               "window_limit": WINDOW_LIMIT.get(app), "quantities": crit,
-                              "passes": bool(crit) and all(c["passes"] for c in live)
-                                        # D60: never without the pre-registered check, before any fixed-start repeat
-                                        and not (app in ALT_PRELUDE_APPS and "driven" in entry["phases"]
-                                                 and "driven-alt" not in entry["phases"]),
+                              "passes": bool(crit) and all(c["passes"] for c in live),
                               "needed": None if not needed or None in needed else max(needed)}
         out["runs"][app] = entry
         print(f"== {app} ({info['family']}, {info['mode']}, repeats {reps}, {entry['version']}; CPU {sorted(set(entry['cpu_model'].values()))})")

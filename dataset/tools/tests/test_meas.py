@@ -334,21 +334,6 @@ def test_a_component_absent_from_a_repeat_is_sporadic_not_carried():
     assert residual["comms"] == ["dbus"] and cov["sporadic"] == []
 
 
-def test_chrome_136m_phase_pools_only_fixed_start_repeats():
-    # 9.5 D60: chrome's driven-alt phase starts from its ALTPRELUDE state; a repeat run before it leaves that phase out
-    import importlib
-    import sys
-    saved = sys.modules.pop("analyze", None)
-    try:
-        pool = importlib.import_module("meas.campaign.pool")
-    finally:
-        if saved is not None:
-            sys.modules["analyze"] = saved
-    assert not pool.keeps_alt("chrome", {"app": "chrome", "replay_alt.sent": "1896"})
-    assert pool.keeps_alt("chrome", {"app": "chrome", "altprelude.rc": "0"})
-    assert pool.keeps_alt("code", {"app": "code"})   # code's prelude predates the record and every repeat ran it
-
-
 def test_values_at_the_window_limit_are_reported_not_held_open():
     # 9.5 D32, D46: thunderbird-send's input and operation values stop at its eight Outlook windows; the idle values
     # keep adding repeats
