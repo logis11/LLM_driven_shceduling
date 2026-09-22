@@ -151,3 +151,17 @@ By 인지오's decision, reviewing the fold-in's stated limitations:
 **The venue's effect is untested, and the test belongs to the consumer.** Every measured value is a pinned core of a GitHub-hosted runner, stated in each scope, and nothing yet shows whether a conclusion survives the absolutes being off. Hands to 9.14: the RQ0 gate spec carries a sensitivity check — the judging set rerun with every measured CPU value scaled by a stated factor either way, and whether the verdict changes stated with the result. It is simulation-only and needs no new measurement.
 
 No value changed by this entry.
+
+## D33 — the fold-in's run ids and D29's statement completed (2026-09-22)
+
+Two omissions of D31's fold-in, found checking 9.6 against the rule decisions made after it (the 9.8 session of
+2026-09-22). `validation_stats.run` of `build-orchestrator`, `compiler-child` and `cpu-batch` now names the campaign's
+thirteen run ids, as the campaign workflow's tag rule requires (9.5 D27), from the pooled record's `run_id`.
+`cpu-batch`'s `validation_stats.stats` now carries what D29 said the fold-in would state and did not: each excepted
+value's repeat count and observed range — `clamscan`'s block mean over 10 repeats (182–274 µs), `python3`'s over 8
+(170–286 µs), `tracker`'s over 14 (13.3–30.4 µs), `python3`'s runs between blocks over 8 (1.31–1.77 s) — and the share
+of its job's time `python3`'s runs hold, 99.97–99.98 % (`saturation_job`). The same check found nothing else to
+redo: no index of the build campaign landed twice, every carried table is on the tested list, and D29's disk reading
+holds — `clamscan`'s and `python3`'s off-CPU time after a block is all disk wait, and `tracker`'s two highest block
+means fall in the two repeats with the most disk wait (0.384 s and 0.301 s). No value changed by this entry; demand is
+unchanged and the compiled files differ only in the archetype file's provenance hash.

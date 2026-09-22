@@ -918,12 +918,12 @@ archetypes:
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "build:2026-09-18; repeats [4, 5, 7, 8, 9-18]; clamscan [9-18], python3 [11-18]"
+      run: "build:2026-09-18; repeats [4, 5, 7, 8, 9-18]; clamscan [9-18], python3 [11-18]; runs 35328071379, 35328873409, 35337322204, 35426065936, 35430430817, 35434872927, 35439345618, 35443899531, 35448942696, 35453727742, 35459121647, 35464371497, 35469642365"
       stats: ["saturation over the job: clamscan 0.971-0.979, ffmpeg 0.9996, HandBrakeCLI 0.990-0.993, python3 0.9997, tracker 0.941-0.962",
               "share of CPU past the 10 ms boot slice: clamscan 0.109, ffmpeg 0.698, HandBrakeCLI 0.626, python3 0.998, tracker 0.532",
               "share of runs followed by a block: 1.0, 0.0015, 0.0008, 1.0, 0.16",
-              "block per run carried with its half-width (D29): clamscan 218.1 us +-9.5 %, python3 220.0 us +-14.0 %, tracker 17.6 us +-15.1 %",
-              "python3 runs between blocks 1.616 s +-10.0 % (D29)"]
+              "block per run carried with its half-width (D29): clamscan 218.1 us +-9.5 % over 10 repeats (182-274 us), python3 220.0 us +-14.0 % over 8 (170-286 us), tracker 17.6 us +-15.1 % over 14 (13.3-30.4 us)",
+              "python3 runs between blocks 1.616 s +-10.0 % over 8 repeats (1.31-1.77 s), 99.97-99.98 % of its job's time (D29)"]
       scope: >-
         One observation (phase decision 2; D3, D7, D30): five programs measured in the same campaign as the build
         archetypes, each pinned to one CPU of a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel
@@ -1000,7 +1000,7 @@ archetypes:
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "build:2026-09-18, repeats [4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]"
+      run: "build:2026-09-18, repeats [4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], runs 35328071379, 35328873409, 35337322204, 35426065936, 35430430817, 35434872927, 35439345618, 35443899531, 35448942696, 35453727742, 35459121647, 35464371497, 35469642365"
       stats: ["2 857 six-member object jobs per build in every repeat",
               "child order sh: gcc fixdep rm; gcc: cc1 as, 2 857 each",
               "cc1 CPU per process mean 435.0 ms (+-0.78 %)",
@@ -1049,7 +1049,7 @@ archetypes:
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "build:2026-09-18, repeats [4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]"
+      run: "build:2026-09-18, repeats [4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], runs 35328071379, 35328873409, 35337322204, 35426065936, 35430430817, 35434872927, 35439345618, 35443899531, 35448942696, 35453727742, 35459121647, 35464371497, 35469642365"
       stats: ["dispatch run per job p50 676 us, mean 691 us (+-0.94 %)",
               "5 957 forks under 716 make processes per build",
               "5 254 jobs per build: 2 908 object, 681 archive, 1 537 helper, 90 probe, 38 link",
@@ -1076,42 +1076,107 @@ archetypes:
       `spawn_count` was bound when a spawn-table entry was one process of about 89 ms; a job is now six processes
       of about 471 ms, and the counts are 9.10's to resize (D30, 2026-09-20).
 
-  # ---- IO family — interbench loads + ananicy types -----------------------
+  # ---- file and download jobs — 9.7 background campaign -----------------------
 
-  io-stream:
-    category_source: interbench
+  file-backup:
+    category_source: meas
     pattern:
+      constructor: batch-loop      # 9.7 D29: a run between voluntary blocks, then the block that followed it
       program:
-        - loop:                    # per-block streaming until total_work consumed
-            - RUN: block_cpu
-            - WAIT: io
+        - loop:                    # until total_work of CPU is spent
+            - RUN: borg_run
+            - SLEEP: borg_block
         - EXIT: {}
-    params:
-      block_cpu:
-        {dist: lognormal, median_us: 3000, sigma_log: 0.6,
-         sampling: per-iteration, source: "meas-ci:cli:3"}
-      io_wait:
-        {dist: lognormal, median_us: 10000, sigma_log: 0.6,
-         sampling: per-iteration, source: "meas-ci:cli:3"}
+    params:                        # D29: the program's runs, pooled over its threads, and the block after each
+      borg_run:
+        {dist: quantiles, p: [3, 3, 3, 4, 5, 7, 11, 18, 6720, 4860305], sampling: per-iteration, source: "meas-ci:background:2026-09-19"}
+      borg_block:
+        {dist: quantiles, p: [1, 2, 3, 6, 7, 14, 201, 5521, 93852, 109511], sampling: per-iteration, source: "meas-ci:background:2026-09-19"}
     lifetime: finite
     binding_params: [total_work]
     scalable: []
     validation_stats:
       referee: meas-ci
-      stats: [cpu/io duty pattern of tar/xz/rsync runs]
-      note: throughput absolutes are machine-relative — runner spec recorded,
-        convention-informed-by-measurement, never desktop truth.
+      run: "background:2026-09-19; repeats [1, 2, 4-31]"
+      stats: ["run between voluntary blocks mean 15.18 ms (+-3.91 %), block per run mean 3.128 ms (+-4.87 %)",
+              "share of runs followed by a block 0.9955-0.9997",
+              "CPU over the job 0.812-0.835: 46.6-48.1 s of CPU in 56.1-59.2 s",
+              "disk wait per wake 3.157 ms (+-4.84 %), reported"]
+      scope: >-
+        One observation (phase decision 2; 9.7 D2, D6–D9): borg 1.2.8 (Ubuntu 24.04's `borgbackup`), its repository
+        initialised with `--encryption=repokey` and compressing at its default lz4, making a first backup into a new
+        repository of Matt Mahoney's 10 GB benchmark set — 79 431 files from one Windows laptop, 2009–2013 (D7); set
+        check: median file 2 891 B against the GNU/Linux users' 4.60 KB, share of bytes in files over 30 MB 0.606
+        against the Windows populations' half — the set cached (cached fraction 1.0 in every repeat, D8), the
+        repository written to the runner's disk. Pinned to one CPU of a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD
+        EPYC 7763, kernel 6.17.0-1022-azure), the rest of the machine idealised; the runner's agent processes share
+        the measured CPU outside the process tree; no human and no desktop session. `perf sched record` on the
+        measured CPU and a taskstats listener on its cpumask. 30 same-machine repeats under the machine gate; the
+        stability rule holds (D19, D29). Repeat 3 is left out: its set fetched as a 12 108 B file in place of the
+        3.70 GB archive, so its phases ran on an empty tree. Values are this software on this machine, not desktop
+        truth (9.5 D10).
     modeling_notes: >-
-      interbench man-write/man-read establish the class (RAM-scale
-      sequential, cache-defeating streaming) but publish no per-block timing;
-      the RUN/WAIT block loop, the lognormal family (OQ-5), and total_work as
-      a binding param are ours. The meas-ci:cli:3 tag covers the block pair
-      jointly: the 3 ms block granularity and sigmas are our convention; the
-      measured quantity is the per-process cpu:wall duty of a stream. The
-      cold-cache rsync copy (vm.drop_caches=3 — matching interbench's
-      cache-defeating intent) measures 0.231 (spread 0.155-0.267) -> io_wait
-      = block_cpu x (1/0.231 - 1) ~ 10 ms; warm-cache rsync runs 0.276 and
-      compressing streams ~0.73, noted as the class's upper range.
+      The class is what the measurement shows (D1): borg is one process on one thread, reading every file, cutting
+      content-defined chunks, hashing, compressing and encrypting them and writing its repository. The task is
+      `cpu-batch`'s batch loop (D29) — a run drawn from borg's runs between voluntary blocks, then the block that
+      followed such a run — until `total_work` of CPU is spent; `total_work` is scenario design and binds in the
+      timeline (D13 (v)). The archetype describes a first backup into a new repository (D6): a timeline that is to
+      show a routine periodic backup gets an incremental archetype made from the campaign's repeat phase, its change
+      set stated as design (9.10). It describes a cached file set (D8); the cold figures are in the campaign results.
+      The blocks are mostly borg's own disk waits — it writes through `sync_file_range` windows and drops what it
+      read from the page cache — on the runner's disk, which is not a desktop drive (D8).
+
+  file-archiver:
+    category_source: meas
+    pattern:
+      constructor: batch-loop      # 9.7 D29
+      program:
+        - loop:                    # until total_work of CPU is spent
+            - RUN: 7z_run
+            - SLEEP: 7z_block
+        - EXIT: {}
+    params:                        # D29: the program's runs, pooled over its 34 threads, and the block after each
+      7z_run:
+        {dist: quantiles, p: [5, 5, 5, 67, 1206, 1335, 1548, 2129, 4379, 21988], sampling: per-iteration, source: "meas-ci:background:2026-09-19"}
+      7z_block:
+        {dist: quantiles, p: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], sampling: per-iteration, source: "meas-ci:background:2026-09-19"}
+    lifetime: finite
+    binding_params: [total_work]
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      run: "background:2026-09-19; repeats [1-6]"
+      stats: ["run between voluntary blocks mean 4.187 ms (+-2.17 %), block per run mean 0.16 us (inside the 1 us floor)",
+              "share of runs followed by a block 0-0.0002",
+              "CPU over the job 1.000: 4 882-5 283 s of CPU",
+              "34 threads, one comm `7z` (D22)",
+              "one thread against eight, CPU per byte 0.910-0.961 (D15, D23)"]
+      scope: >-
+        One observation (phase decision 2; 9.7 D2, D7–D9): 7-Zip 23.01 (Ubuntu 24.04's `7zip`) at its default format
+        and level with eight threads (`-mmt8`, the `nproc` rule on an eight-thread desktop, D9) archiving Matt
+        Mahoney's 10 GB benchmark set — 79 431 files from one Windows laptop, 2009–2013 (D7); set check: median file
+        2 891 B against the GNU/Linux users' 4.60 KB, share of bytes in files over 30 MB 0.606 against the Windows
+        populations' half — the set cached (cached fraction 1.0 in every repeat, D8), the archive written to the
+        runner's disk. Pinned to one CPU of a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel
+        6.17.0-1022-azure), so the eight threads time-share one core; the rest of the machine idealised; the runner's
+        agent processes share the measured CPU outside the process tree; no human and no desktop session. `perf sched
+        record` on the measured CPU and a taskstats listener on its cpumask. 6 same-machine repeats under the machine
+        gate; the stability rule holds (D19, D29). Values are this software on this machine, not desktop truth (9.5
+        D10).
+    modeling_notes: >-
+      The class is what the measurement shows (D1): 7-Zip multithreads, and at eight threads on one CPU it keeps that
+      CPU busy for the whole job. The task is `cpu-batch`'s batch loop (D29) — a run drawn from 7-Zip's runs between
+      voluntary blocks, pooled over its threads, then the block that followed such a run — until `total_work` of CPU
+      is spent; `total_work` binds in the timeline (D13 (v)). The block is zero at every quantile: another thread of
+      the program nearly always runs on, so the loop emits the runs as one RUN. One task, one component `7z` (D22):
+      its two kinds of thread — four carrying about 70 % of the CPU in runs of 0.15–0.45 s and four steady at about
+      1 ms a wake — are flattened into one pooled table, their shape kept only in the quantiles, and the task
+      alternates the threads' long and short runs in one sequence (9.6 D22). The eight threads time-share the one
+      measured CPU, where on a desktop they would largely run side by side: in every repeat eight threads cost
+      1.04–1.10 times the CPU per byte of one thread (one thread against eight 0.910–0.961, D15, D23). In the one-thread
+      check one thread takes one of two modes — 906–941 wakes at a median gap of 0.36–0.39 s in repeats 1, 2 and 6,
+      1 246–1 575 wakes at 0.40–0.74 ms in repeats 3, 4 and 5 — for a cause not identified (D23). It describes a
+      cached file set (D8); the cold figures are in the campaign results.
 
   # ---- structural-special family — harvested from LAVD --------------------
 
@@ -1255,7 +1320,10 @@ archetypes:
       sample — stated) -> net_wait = chunk_cpu x (1/0.057 - 1) ~ 16.7 ms.
       Structural claim only — the runner link is datacenter-class; the duty
       ratio, not the throughput, is the grounded quantity. The chunk loop
-      shape is ours.
+      shape is ours. Bound only by the three `thunderbird` send tasks (c1-mail, c7-mail,
+      c3-workday) until 9.5's `send` re-observation folds into `mail-client` and
+      9.10 places the send as an operation of the `mail-client` task; it leaves
+      before 9.13's rebuild (9.7 D30).
 
   system-daemon:
     category_source: meas
