@@ -102,7 +102,16 @@ def qtable(values):
     return [round(pct(v, q), 4) for q in QUANTILE_PROBS]
 
 
+def repeat_order(k):
+    """Sort key for a repeat: its index, then the run of one landing of an index that landed more than once."""
+    i, _, run = str(k).partition("@")
+    return int(i), run
+
+
 def find_runs(root, cpu_model):
+    """Every repeat obtained is pooled (campaign workflow: "Every same-machine repeat obtained is pooled and
+    reported"). A repeat is keyed by its index; when an index landed more than once — a retry relaunched while an
+    earlier launch of it was still queued — every landing of it is keyed `<index>@<run id>`, never the latest alone."""
     runs, gated, other, probes = {}, [], [], []
     for d in sorted(glob.glob(os.path.join(root, "**", "meas-desktop-*"), recursive=True)):
         m = NAME.match(os.path.basename(d))
@@ -124,8 +133,14 @@ def find_runs(root, cpu_model):
         if cpu_model and cpu_model not in model:
             other.append({"app": app, "repeat": k, "cpu_model": model, "path": rel})
             continue
-        runs.setdefault(app, {})[k] = {"dir": d, "mode": mode, "report": rpt, "spec": spec}
-    return runs, gated, other, probes
+        run_id = str((spec.get("github_run") or {}).get("GITHUB_RUN_ID") or os.path.basename(os.path.dirname(d)))
+        runs.setdefault(app, {}).setdefault(k, []).append((run_id, {"dir": d, "mode": mode, "report": rpt, "spec": spec}))
+    keyed = {}
+    for app, by_k in runs.items():
+        for k, landings in by_k.items():
+            for run_id, info in landings:
+                keyed.setdefault(app, {})[k if len(landings) == 1 else f"{k}@{run_id}"] = info
+    return keyed, gated, other, probes
 
 
 def renderer_residual(rest, comms, spans, by_rep, cov):
@@ -136,7 +151,7 @@ def renderer_residual(rest, comms, spans, by_rep, cov):
     within each renderer, and the renderers pooled as samples: the rate is the mean over the renderers measured,
     and the gap and run tables are over every renderer's samples together. A residual without two wakes in some
     repeat is reported as sporadic and not carried, as D43 has it."""
-    reps = sorted(by_rep)
+    reps = sorted(by_rep, key=repeat_order)
     gaps_by_rep, runs_by_rep, rate_by_rep, share_by_rep, threads_by_rep = [], [], [], [], []
     for k in reps:
         n = by_rep[k].get("renderers_measured") or 1
@@ -190,7 +205,7 @@ def pool_app(app, reps):
     entry = {"family": "desktop", "repeats": [], "mode": None, "cpu_model": {}, "kernel": {}, "run_id": {},
              "version": {}, "origins": {}, "renderers": {}, "phases": {}, "not_throttled": []}
     per_phase = {}
-    for k in sorted(reps):
+    for k in sorted(reps, key=repeat_order):
         info = reps[k]
         res = analyze.analyze_run_dir(info["dir"])
         ok, worst = throttling_check(app, res)
@@ -228,28 +243,28 @@ def pool_app(app, reps):
                 slot["runs"][k] = sm.get("runs", [])
                 slot["t_in"][k] = sm.get("t_in", [])
                 slot["t_in_by_pid"][k] = sm.get("t_in_by_pid", {})
-        chosen, residual, cov = select_components(comms, spans, sorted(by_rep))
+        chosen, residual, cov = select_components(comms, spans, sorted(by_rep, key=repeat_order))
         if app in analyze.RENDERER_APPS and residual:
             residual = renderer_residual(residual["comms"], comms, spans, by_rep, cov)
         entry["phases"][name] = {
-            "repeats": sorted(by_rep),
-            "span_s": [by_rep[k]["span_s"] for k in sorted(by_rep)],
-            "wakes_per_s": [wps[k] for k in sorted(by_rep)],
-            "wakes_per_s_per_renderer": [by_rep[k].get("wakes_per_s_per_renderer") for k in sorted(by_rep)],
-            "renderers_measured": [by_rep[k].get("renderers_measured") for k in sorted(by_rep)],
-            "cpu_share": [by_rep[k]["cpu_share"] for k in sorted(by_rep)],
+            "repeats": sorted(by_rep, key=repeat_order),
+            "span_s": [by_rep[k]["span_s"] for k in sorted(by_rep, key=repeat_order)],
+            "wakes_per_s": [wps[k] for k in sorted(by_rep, key=repeat_order)],
+            "wakes_per_s_per_renderer": [by_rep[k].get("wakes_per_s_per_renderer") for k in sorted(by_rep, key=repeat_order)],
+            "renderers_measured": [by_rep[k].get("renderers_measured") for k in sorted(by_rep, key=repeat_order)],
+            "cpu_share": [by_rep[k]["cpu_share"] for k in sorted(by_rep, key=repeat_order)],
             "threads": {comm: {
-                "threads": [by_rep[k]["threads"][comm]["threads"] for k in sorted(by_rep) if comm in by_rep[k]["threads"]],
-                "renderers": [by_rep[k]["threads"][comm].get("renderers") for k in sorted(by_rep) if comm in by_rep[k]["threads"]],
-                "wakes_per_s": [by_rep[k]["threads"][comm]["wakes_per_s"] for k in sorted(by_rep) if comm in by_rep[k]["threads"]],
+                "threads": [by_rep[k]["threads"][comm]["threads"] for k in sorted(by_rep, key=repeat_order) if comm in by_rep[k]["threads"]],
+                "renderers": [by_rep[k]["threads"][comm].get("renderers") for k in sorted(by_rep, key=repeat_order) if comm in by_rep[k]["threads"]],
+                "wakes_per_s": [by_rep[k]["threads"][comm]["wakes_per_s"] for k in sorted(by_rep, key=repeat_order) if comm in by_rep[k]["threads"]],
                 "wakes_per_s_per_renderer": [by_rep[k]["threads"][comm].get("wakes_per_s_per_renderer")
-                                             for k in sorted(by_rep) if comm in by_rep[k]["threads"]],
-                "gap_ms": [by_rep[k]["threads"][comm]["gap_ms"] for k in sorted(by_rep) if comm in by_rep[k]["threads"]],
-                "run_ms": [by_rep[k]["threads"][comm]["run_ms"] for k in sorted(by_rep) if comm in by_rep[k]["threads"]],
+                                             for k in sorted(by_rep, key=repeat_order) if comm in by_rep[k]["threads"]],
+                "gap_ms": [by_rep[k]["threads"][comm]["gap_ms"] for k in sorted(by_rep, key=repeat_order) if comm in by_rep[k]["threads"]],
+                "run_ms": [by_rep[k]["threads"][comm]["run_ms"] for k in sorted(by_rep, key=repeat_order) if comm in by_rep[k]["threads"]],
             } for comm in sorted({c for k in by_rep for c in by_rep[k]["threads"]})},
-            "control_tab": {k: by_rep[k].get("control_tab") for k in sorted(by_rep)},
+            "control_tab": {k: by_rep[k].get("control_tab") for k in sorted(by_rep, key=repeat_order)},
             "components": {"selected": chosen, "residual": residual, **cov},
-            "renderer_pids": {k: by_rep[k].get("renderer_pids") for k in sorted(by_rep)},
+            "renderer_pids": {k: by_rep[k].get("renderer_pids") for k in sorted(by_rep, key=repeat_order)},
         }
     # the population the entry is pooled from (D14 hands to 9.13 that each entry's scope states it): the renderers
     # measured in the carried phase, after the browser's own renderers, part-phase renderers and the control tab are

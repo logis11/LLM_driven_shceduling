@@ -391,3 +391,16 @@ def test_the_steam_client_components_carried_between_sessions():
     q = pool.criterion("steam", _entry({"steamwebhelper": wild}, phase="shown"))
     assert q["quantities"]["shown steamwebhelper gap mean (ms)"]["carried"] is True and q["passes"] is True
     assert pool.criterion("steam", _entry({"steam": wild}, phase="shown"))["passes"] is False
+
+
+def test_every_landing_of_an_index_that_landed_twice_is_pooled(tmp_path):
+    # campaign workflow: every same-machine repeat obtained is pooled. A retry relaunched while an earlier launch of
+    # the same index was queued lands twice (9.8: chrome-hidden repeat 10 four times); keying by index alone kept
+    # the latest landing and dropped the rest without a word
+    for run, k in (("111", 1), ("222", 2), ("333", 2)):
+        d = tmp_path / run / f"meas-desktop-element-r{k}-full"
+        d.mkdir(parents=True)
+        (d / "report.json").write_text(json.dumps({"gate": "open"}))
+        (d / "spec.json").write_text(json.dumps({"cpu_model": "AMD EPYC 7763", "github_run": {"GITHUB_RUN_ID": run}}))
+    runs, _, _, _ = pool.find_runs(str(tmp_path), "EPYC 7763")
+    assert sorted(runs["element"], key=pool.repeat_order) == [1, "2@222", "2@333"]

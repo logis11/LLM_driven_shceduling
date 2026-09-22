@@ -56,7 +56,7 @@ def validity(family, dirs, entry):
     # any other repeat has every phase some repeat of the application has
     has = {k: {f.split(".")[1] for f in os.listdir(d) if f.startswith("perf.") and ".timehist.txt" in f} for k, d in dirs.items()}
     full = set().union(*has.values()) if has else set()
-    for k, d in sorted(dirs.items()):
+    for k, d in sorted(dirs.items(), key=lambda kv: (int(str(kv[0]).partition("@")[0]), str(kv[0]))):
         rep, r = json.load(open(os.path.join(d, "report.json"))), kv(os.path.join(d, "report.kv"))
         notes, info = [], []
         if r.get("recording.past_end") == "1":
@@ -141,7 +141,7 @@ def main():
     why = a[a.index("--exclude-why") + 1] if "--exclude-why" in a else ""
     if excluded and not why:
         raise SystemExit('--exclude needs --exclude-why "<reason>": the pooled record states why a repeat is left out')
-    dirs = {}
+    landed = {}
     for r in common.runs(family, since):
         names = None
         for j in common.jobs(family, r["databaseId"]):
@@ -160,7 +160,12 @@ def main():
                     os.replace(dest, aside)
                 print(f"   r{j['k']}: left out of the pool — {why}; its artifact under {base}-excluded")
                 continue
-            dirs[j["k"]] = common.download(r["databaseId"], name, dest)
+            got = common.download(r["databaseId"], name, dest)
+            if got not in (d for _, d in landed.get(j["k"], [])):   # build's flat folder: one path per index
+                landed.setdefault(j["k"], []).append((r["databaseId"], got))
+    # every landing is checked: an index that landed more than once (a retry relaunched while an earlier launch was
+    # still queued) is keyed <index>@<run id> per landing, as the desktop pool keys it
+    dirs = {(k if len(ls) == 1 else f"{k}@{rid}"): d for k, ls in landed.items() for rid, d in ls}
     if not dirs:
         raise SystemExit("no landed repeat")
     cmd = ["python3", common.FAMILIES[family]["pool"], base, out, "--cpu-model", common.MACHINE, *passthrough]
