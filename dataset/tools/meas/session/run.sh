@@ -82,6 +82,26 @@ phase() {
   if [ "$MODE" = dry ]; then sudo gzip -f "$OUT/perf.$name.data"; else sudo rm -f "$OUT/perf.$name.data"; fi
 }
 
+# checkpoint <stage> — the machine's state after a stage (network, memory, failed units, the journal), and, in dry
+# mode only, a clean stop there when MEAS_STOP_AFTER names it: a diagnostic, never a design value. The first dry run
+# (2026-09-22) lost its runner with no log; parallel dry jobs stopping after successive stages locate what does.
+checkpoint() {
+  local st="$1" d="$OUT/diag.$1"
+  mkdir -p "$d"
+  ip -brief addr > "$d/ip.txt" 2>&1; ip route >> "$d/ip.txt" 2>&1
+  networkctl list --no-pager > "$d/networkctl.txt" 2>&1
+  nmcli -t dev > "$d/nmcli.txt" 2>&1; systemctl is-active NetworkManager >> "$d/nmcli.txt" 2>&1
+  free -m > "$d/free.txt" 2>&1; uptime >> "$d/free.txt" 2>&1
+  systemctl --failed --no-pager > "$d/failed.txt" 2>&1
+  sudo journalctl -b --no-pager -n 600 > "$d/journal.txt" 2>&1
+  sudo dmesg | tail -200 > "$d/dmesg.txt" 2>&1
+  rec "diag.$st.github" "$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 https://api.github.com)"
+  rec "diag.$st.utc" "$(date -u +%FT%TZ)"
+  if [ "$MODE" = dry ] && [ "${MEAS_STOP_AFTER:-}" = "$st" ]; then
+    rec stopped_after "$st"; stop_recorded open "dry run stopped after $st (MEAS_STOP_AFTER)"
+  fi
+}
+
 stop_recorded() {   # <gate-value> <message> — the machine gate's shape, for a state that makes the job worthless
   poll_stop
   rec gate "$1"; rec finished_utc "$(date -u +%FT%TZ)"
@@ -271,6 +291,7 @@ rec kernel.hz "$(grep -E '^CONFIG_HZ=' "/boot/config-$(uname -r)" 2>/dev/null | 
 
 install_session
 [ -n "$SESSION_EXEC" ] || stop_recorded no-session-file "no Ubuntu Wayland session file after the install (method §2.1)"
+checkpoint install
 
 # priming login (D11): the account's first-login work, then a logout. The probe records it (D13).
 login priming
@@ -279,6 +300,7 @@ if [ "$MODE" = probe ]; then phase priming "$PRIMING"
 else edge priming start; sleep "$PRIMING"; edge priming end; census priming.end; fi
 rec wizard.seen_priming "$(python3 -c "import json,sys; print(sum('initial-setup' in p['cmd'] for f in sys.argv[1:] for p in json.load(open(f))['procs']))" "$OUT/census.priming.up.json" "$OUT/census.priming.end.json" 2>/dev/null)"
 logout priming
+checkpoint priming
 # the first-run wizard dismissed as a user would, by its done stamp (D11), if the install ships it
 if [ -e /usr/libexec/gnome-initial-setup ]; then
   echo yes | sudo -u "$SESSION_USER" tee "/home/$SESSION_USER/.config/gnome-initial-setup-done" > /dev/null
@@ -294,6 +316,7 @@ census login
 pin_four
 sweep 1
 census pinned
+checkpoint pinned
 
 if [ "$MODE" = probe ]; then
   phase idle "$STEADY"                         # one long phase from the pin: settles, shield, blank, and after
@@ -303,6 +326,7 @@ else
   sweep 2
   sudo $CENSUS state "$MEAS_UID" > "$OUT/state.edge.json" 2>> "$OUT/census.log"
   if sudo $CENSUS check "$OUT/state.edge.json"; then rec edge.idle 1; else rec edge.idle 0; fi
+  checkpoint edge
   if [ "$MODE" = full ] && [ "$(sed -n 's/^edge.idle=//p' "$KV" | tail -1)" != 1 ]; then
     census steady.start
     stop_recorded not-idle "steady edge: the session is not in the terminal idle state (method §3, D13)"
@@ -311,6 +335,7 @@ else
 fi
 
 logout measured
+checkpoint end
 rec finished_utc "$(date -u +%FT%TZ)"
 sudo chown -R "$(id -u):$(id -g)" "$OUT" 2>/dev/null
 finish_report

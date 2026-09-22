@@ -33,7 +33,10 @@ jobs:
           import json
           c = json.load(open(".github/campaign-session.json"))
           reps = c.get("repeats", [])
-          inc = [{"app": a, "repeat": r} for a in c.get("apps", []) for r in (reps.get(a, []) if isinstance(reps, dict) else reps)]
+          # stop_after (repeat -> stage): a dry-run diagnostic only; run.sh ignores it outside mode dry
+          stop = c.get("stop_after", {})
+          inc = [{"app": a, "repeat": r, "stop": stop.get(str(r), "")}
+                 for a in c.get("apps", []) for r in (reps.get(a, []) if isinstance(reps, dict) else reps)]
           print("matrix=" + json.dumps({"include": inc}))
           print("mode=" + c.get("mode", "full"))
           print("cpu_model=" + c.get("cpu_model", ""))
@@ -56,6 +59,7 @@ jobs:
         env:
           MEAS_OUT: /tmp/meas
           MEAS_CPU_MODEL: ${{ needs.plan.outputs.cpu_model }}
+          MEAS_STOP_AFTER: ${{ matrix.stop }}
       - name: own the output
         if: always()
         run: sudo chown -R "$(id -u):$(id -g)" /tmp/meas && sudo chmod -R a+rX /tmp/meas
