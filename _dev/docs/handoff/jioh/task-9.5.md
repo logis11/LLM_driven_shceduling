@@ -1,53 +1,51 @@
-# Handoff — task 9.5 Interactive and typing (2026-09-21, 23:10 UTC)
+# Handoff — task 9.5 Interactive and typing (2026-09-22, 12:45 UTC)
 
-Same-machine repeats sub-item. Branch `jioh/dataset-rebuild`; everything below is committed and pushed. Decision record `_dev/research/jioh/task-9.5-interactive-typing/changelog.md` (now D1–D65), method `campaign/method.md` (§9 carries every amendment), workflow `_dev/research/jioh/measurement-campaign-workflow.md`.
+Same-machine repeats sub-item. Branch `jioh/dataset-rebuild`; everything below is committed and pushed. Decision record `_dev/research/jioh/task-9.5-interactive-typing/changelog.md` (now D1–D66), method `campaign/method.md` (§9 carries every amendment), workflow `_dev/research/jioh/measurement-campaign-workflow.md`.
 
 ## Where the nine archetypes stand
 
-| application | archetype | repeats | rule | pool |
+| application | archetype | repeats | rule | pool arguments (`loop/pool_runs.py`) |
 |---|---|---|---|---|
 | `soffice`, `gimp`, `kdenlive`, `mpv-video`, `mpv-audio`, `thunderbird-send` | six archetypes | — | **hold** | filed in `campaign/results-same-machine/` |
 | `webrtc` | `video-call` | 35 | **holds** (D59) | `playback/webrtc --since 245` |
-| `code` | `code-editor` | 21 valid (windows 1–4, 6–22; window 5 left out, D63) | not yet, projection 22 (the 136M input_run only, ±5.1 %) | `interactive/code --since 376 --exclude 5 --exclude-why "D63: …"` |
-| `chrome` | `web-browser` | 7 under D65 | not yet, projection 26 (the two input_run values only) | `interactive/chrome --since 438 -- --exclude-roles renderer` |
+| `code` | `code-editor` | 25 (windows 1–4, 6–26; window 5 left out, D63) | **holds** (2026-09-22) | `interactive/code --since 376 --exclude 5 --exclude-why "D63: after the D61 prelude the caret stood on line 16, not at the file's end (screenshot after-altprelude), so the 136M phase typed mid-file"` |
+| `chrome` | `web-browser` | 18 under D65 (windows 1–18) | not yet, projection 42 | `interactive/chrome --since 438 --exclude 16@35712250969 --exclude-why "D66: window 16 measured twice — one push started runs #474 and #475, #475's copy was gated and the watcher relaunched it as #476 while #474's copy measured; the original launch's copy (#474) is kept" -- --exclude-roles renderer` |
 
-## What changed on 2026-09-21
+`chrome`'s three failing values at 18: idle `Chrome_ChildIOT` gap mean ±7.7 % (42 needed; its gap sits at 397–459 ms in 14 repeats, ~250 in windows 14–15 and 334 in window 8 — the per-thread pooling of a four-thread component, kept by 인지오's decision), SWELL-KW `input_run` ±6.9 % (34), 136M `input_run` ±5.7 % (24). Every other value passes, the `MemoryInfra` residual included (D64).
 
-- **D59** — `webrtc`'s audio path (`AudioProcessing` whole; run means of `AudioOutputDevi`, `AudioInputDevic`, `FakeAudioInput`, residual) carried with half-widths under D57: within one call ±0.7–3.0 %, across repeats ±26–41 %. Rule holds at 35. All 35 repeats reviewed: one protocol (210/480), gate open, every Chrome row on CPU 3, two saturation episodes at 130–150 and 370–390 s in every play phase. Sensitivity question on 9.14's TODO line.
-- **D60 → D62** — `chrome`'s 136M phase starts from a fixed state: page at the top, text box focused and emptied (the page as generated). The SWELL-KW window before it had left the box scrolled away in 10 of 15 repeats (keys to a page that takes no text) and, under D60, holding the stream's text. Both earlier campaigns superseded whole; `chrome` restarted from window 1 at run #379.
-- **D61, D63** — `code`'s 136M phase starts from the committed `index.ts` (pristine copy restored, buffer reverted with a bound File: Revert File key, caret at the end); the SWELL-KW window had left 36–142 errors in the file. 18 repeats superseded, restarted from window 1 at run #376. Window 5 left out under D47 (caret on line 16 after the prelude); the prelude's keys now carry `--clearmodifiers`, Escape again, Ctrl+End twice.
-- `run.sh` records `app.affinity` from the window owner's process (`app.affinity_pid`) — read at launch it could catch `taskset` before the mask applied.
+## Resume point
 
-## Per-landing checks (beyond `pool_runs.py`'s validity lines)
+**In flight: `chrome` window 19, run #481 (35728483709).** Nothing else. `code` and `webrtc` add no repeats.
 
-- `chrome`: `after-altprelude.png` — box at the page top, focused, empty; idle slice profile (D58 guard) — no ~95 ms/s launch run.
-- `code`: `after-altprelude.png` status bar — Ln 28, Col 1, 0 errors; idle profile starts 17–19 ms/s, peaks ~40 (D53's episode, expected).
+1. `python3 dataset/tools/meas/loop/status.py interactive --since 480 --app chrome:481` — landed / in flight / gated.
+2. On its landing: pool with the arguments above and run the per-landing checks below; if valid and the rule does not hold, `launch.py added interactive/chrome:20` (check `.github/campaign.json` is `"mode": "full"` first), then watch with `watch.py interactive/chrome --since <that run> --app chrome:<that run> --poll 60`.
+3. When `chrome`'s rule holds: stop launching; then the D55 end work below.
 
-## Decided 2026-09-21
+## Per-landing checks (`chrome`, beyond `pool_runs.py`'s validity lines)
 
-1. **D64 (applied)** — `MemoryInfra`'s heavy pass carried as its own stated event: its runs of 30 ms or more in `chrome`'s idle phase leave the component rows (`HEAVY_EVENTS`, `split_events` in `campaign/pool.py`; the pooled record's `heavy_event`: count per repeat, runs, times into the phase, rate). Verified on the D62 campaign's 16 downloaded repeats: the idle residual run mean goes from ±28.8 % (projection over 200) to ±3.4 %, passing, its rate and gap too; the event reads 5 passes in 16 repeats (9,600 s), 53.8–60.1 ms, rate 0.00052 a second. **Still to write: the event's place in `fold_in.py`** (with the fold-in).
-2. **D65 (applied, confirmed)** — `chrome`'s SWELL-KW phase replays keys only (`KINDS="key"` in `probe/appdefs.sh`; `KEYS_ONLY` and the stimulus sentence in `fold_in.py`). The D62 campaign is superseded whole; `chrome` restarted from window 1: first batch launched 2026-09-21 23:20 UTC as run #438 (pool `interactive/chrome --since 438 -- --exclude-roles renderer`); `chrome` 17 (run #437, superseded) cancelled. New validity check: `after-driven.png` shows the box holding the stream's text.
-3. `Chrome_ChildIOT`'s gap mean stays per-thread (option (a)). Nothing to apply.
-4. `code`'s window-10 compositor rate stays a watch item (option (a)); raise as a D57 question if more sessions show it.
+Each repeat's artifact is `~/.cache/meas-loop/pool/interactive-chrome-from438/<run id>/meas-interactive-chrome-r<k>-full/`.
 
-## The evidence behind the decisions
+- `report.json`: `stream_kinds` is `key` (D65); `altprelude.rc` is `0`; `app.affinity` is `8` with `app.affinity_pid` set.
+- `after-driven.png`: the text box (dark left border at x 19, y 170–340) holds the stream's text — dark pixels inside x 25–835, y 168–340.
+- `after-altprelude.png`: the box at the page's top (border present) and empty (no dark pixels inside) — D60, D62.
+- Idle guard (D58): `python3 dataset/tools/meas/campaign/slices.py <artifact> --phase idle --exclude-roles renderer` — every 10 s slice under ~10 ms/s (clean repeats peak 2.2–8.7; the launch run shows ~95).
+- Only one copy of the window landed (`ls -d …/*/meas-interactive-chrome-r<k>-full | wc -l` is 1); a second copy is D66's case — keep the original launch's, `--exclude K@<run id>` the other.
 
-**(decided — D64) `chrome`'s idle residual run mean.** It is one thread, `MemoryInfra`. In every one of 20 sessions (both superseded and current campaigns) it runs ~7.7 ms at 180–183 s and 480–483 s into the idle phase, a fixed 300 s cadence. In 7 of 20 sessions it also runs a heavy pass of 54–61 ms at no fixed time (43, 57, 165, 217, 473, 474, 503, 572, 593 s) — 9 passes in 20 × 600 s, about one per 22 minutes. A rare random event within the run, not a harness defect nor a between-session spread; at that rarity the mean needs over 200 repeats. Options to decide: a longer idle phase; carry the heavy pass as its own stated event (rate and size); or an exception. Repeats continue meanwhile. (Script: the session scratchpad's `memoryinfra.py`; analysis reproducible with `analyze_run` on the idle phase, `comm == "MemoryInfra"`, run > 5 ms.)
+## Decisions of 2026-09-21/22 (all applied)
 
-**(decided — watch) `code`'s idle compositor rate in window 10.** Window 10's `VizCompositorThread` wakes 16.2 a second over its idle phase against 22.3–24.4 in the other eight pooled repeats, `Chrome_ChildIOT` 15.7 against 20.2–22.7; lower from launch through the whole phase (about 18 a second per minute against 24 in window 9, dipping to 13 on the ~320 s cadence of D53's episode). Same VS Code 1.138.0, Node, machine; screenshots before and after idle identical to the other repeats. It moved the projection from 21 to 40. The D57 shape (a rate varying between sessions) on one repeat of nine; the loop keeps adding repeats — if more sessions show it, it is a D57 question for 인지오.
+- **D59** — `webrtc`'s audio path carried with its half-widths under D57 (within one call ±0.7–3.0 %, across repeats ±26–41 %); rule holds at 35; all 35 repeats reviewed.
+- **D60 → D62** — `chrome`'s 136M phase starts with the page at the top and the text box focused and empty.
+- **D61, D63** — `code`'s 136M phase starts from the committed `index.ts`; window 5 left out (caret mid-file); the prelude's keys hardened.
+- **D64** — `MemoryInfra`'s heavy pass (runs ≥ 30 ms in `chrome`'s idle phase; 54–61 ms, about one per 30 minutes) carried as its own stated event (`HEAVY_EVENTS`, `split_events` in `campaign/pool.py`; the pooled record's `heavy_event`), so the residual converges. **Still to write: its place in `fold_in.py`.**
+- **D65** — `chrome`'s SWELL-KW phase replays keys only (`KINDS="key"`), the stream's clicks and drags having moved focus or selected page text; browsing's scrolling and clicking a stated limitation. `chrome` restarted from window 1 at run #438.
+- **D66** — window 16 measured twice by a duplicated run (one push started #474 and #475); the original launch's copy kept. `watch.py` no longer relaunches a gated window another run from five before holds (`holder`); `pool_runs.py --exclude K@RUNID`.
+- `Chrome_ChildIOT`'s gap stays per-thread (option (a)); `code`'s window-10 compositor rate stays a watch item (one session of 25; not repeated since).
+- `run.sh` records `app.affinity` from the window owner's process.
 
-**(decided — D65) `chrome`'s SWELL-KW per-input value and the page state the replayed browsing leaves.** D12 keeps Internet Explorer's clicks, drags and wheel turns with the keys for `web-browser`; on this page (a text box over 400 paragraphs) they can move focus off the box or select page text, and the keys then cost differently. Window 12 (run 35634845510) ended its SWELL-KW phase with paragraphs 24–28 selected (3,055 highlighted pixels in `after-driven.png`, against 0–146 in windows 1–11) and gave 3.02 ms per input against 1.49–2.38 — moving the value's projection from 43 to 89. Across windows 1–11 the value does not split by whether the box is in view (1.77–2.38 with it, 1.49–2.30 without), so until window 12 it read as a spread the input makes. Kept pooled — valid under the present design; whether `web-browser`'s typing phase should replay keys only (as D28 did for `office-writer`) or keep browsing's pointer events is 인지오's.
+## At the end (D55)
 
-**(decided — per-thread) `chrome`'s idle `Chrome_ChildIOT` gap mean.** Over 15 repeats its wake rate holds at 7.45–7.96 a second while its gap mean spans 247–455 ms (projection 35 at 15). The component is four threads and the gap mean pools each thread's own gaps, so the same wakes split differently across the four move the mean without any change in the component's work. Whether the component's gap should be read over its merged wake times (as the residual's is) is 인지오's.
-
-## Still to do at the end (unchanged)
-
-The releases (2026-09-18/-19 for the six, 2026-09-20 for the three) and one fold-in wait for all three (D55); both releases are outward-facing — ask first. `mail-client`'s notes carry the runner's attachment figures (41,555,063 B and 56,946,735 B at the peer). `dataset/tools/meas/desktop/run.sh` line 162 still reads `app.affinity` at launch — 9.8's file.
-
-## Resume point (the Mac may go down)
-
-In flight at 02:25 UTC on 2026-09-22: `chrome` window 8 and `code` window 23 (run #455). On resume: `status.py interactive --since 455 --app chrome:455 --app code:455`; relaunch any gated window; pool and check each landing (the per-landing checks above, plus for `chrome` `after-driven.png` holding the stream's text); add the next repeat per application.
+The three re-measured applications are filed together: each pool's `pooled.json` and `results.md` into the slice's `campaign/` folder, rows into `measurement-campaign-record.md`; then the releases (2026-09-18/-19 for the six, 2026-09-20 for the three — outward-facing, ask 인지오 first); then one fold-in (`campaign/fold_in.py`, with D64's event written in first) and `make -C dataset dataset lint test check PY=python3.12` (five `-single` files fail the demand-window lint until 9.14 — state it). `mail-client`'s notes carry the runner's attachment figures (41,555,063 B and 56,946,735 B at the peer). `dataset/tools/meas/desktop/run.sh` line 162 still reads `app.affinity` at launch — 9.8's file.
 
 ## Running the loop
 
-In-session, no detached loop. Watch with `loop/watch.py interactive/chrome interactive/code --since <latest launch run> --app chrome:<run> --app code:<run> --poll 60`; it exits at the first landing. One added repeat per application at a time; a first batch's gated windows go back in one push (`launch.py retried …`). Check `.github/campaign.json` is `"mode": "full"` before each launch; push with `git pull --rebase --autostash` (other sessions keep unstaged edits in the shared tree). Only one session may run this loop — on 2026-09-21 the original session survived a lost terminal and two copies ran at once until one stood down.
+In-session only, one session at a time (on 2026-09-21 a lost terminal left the original session running beside its restore until one stood down). Relaunches: `watch.py` handles gated jobs itself; a first batch's gated windows go back in one push (`launch.py retried …`); a job that FAILED is relaunched by hand. Push doc edits only while no watcher runs (a watcher's relaunch push and a doc push raced once). Push with `git pull --rebase --autostash` — other sessions keep unstaged edits in the shared tree. Each `chrome` repeat is ~49 min on the runner, ~55 min per cycle with launch and gated draws.
