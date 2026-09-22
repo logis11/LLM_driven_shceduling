@@ -487,3 +487,31 @@ Every sentence cites a candidate or is marked **[inference]**.
 **T7.5 — what an all-CPU trace beside a measured, pinned application says about the daemons.** The trace carries every switch and wakeup on every CPU, so the daemons' rows are identifiable by comm/pid and can be filtered per CPU (S4-07 `perf-sched.txt:424-426`; `events-sched.h:250-266`) — which rows are daemons' is a matter of naming them from `/proc` snapshots **[inference]**. On the measured CPU, a daemon thread that lands there shares it with the pinned application under the same scheduler, so its `sch delay` is inflated by the application's run time and the application's rows show the daemon's run time as `wait time` **[inference from the column definitions, S4-07 `perf-sched.txt:71-74`]**; whether a daemon lands there depends on its affinity mask and the load balancer, which the trace shows only after the fact through `target_cpu` and the `cpu` column **[inference]**. Undecidable from such a trace: what the daemon would have done on an idle desktop with a seat, a real display and a sound card (the runner has none of these: S4-15 `CONFIG_SND` `-`; S4-05 seat definition; §3) **[inference]**; the wake *cause* (timer, socket, inotify) — `sched_waking` records the waker context but not the object **[inference from the fields in S4-07 `events-sched.h:141-163`]**; and whether a switch-out in state `R+` (preempted, S4-07 `events-sched.h:263-265`) was preemption by the measured application or by another daemon, without joining on the `next_pid` of the same row **[inference]**.
 
 **T7.6 — what the runner cannot observe.** A real display and vblank: Xvfb "emulates a dumb framebuffer using virtual memory" (S4-12 `Xvfb.man:37-39`), the dummy driver is "virtual/offscreen" (S4-12 `dummy-README.md:1`), and the wlroots headless output paces frames from a software timer (S4-11 `output.c:31,76`) — so any per-frame CPU cost measured is that of a timer-paced compositor on llvmpipe, not of a vblank-paced GPU desktop **[inference]**. A sound card: the azure kernel is built without `CONFIG_SND` (S4-15 `annotations-azure.txt:245`), so only a null sink exists. A seat and a logged-in session: a seat needs hardware devices (S4-05 `sd-login.xml:94-96`); the runner's session is a linger session without a seat (S4-01 `systemd-linger.sh:3-5`; S4-05 `sd-login.xml:111`) **[inference]**. Laptop power management: no battery, lid, or DPMS-driven behaviour exists on an Azure VM **[inference; no passage states it, and the runner docs describe only the VM shape, S4-03]**. The CPU model: the runner documentation names only "4" processors (S4-03 `:307-318`); the model is visible only through `/proc/cpuinfo` at run time, which is what the repository's gate reads (input.md) **[inference]**. Everything in this section is documentation or inference; nothing here is a measurement.
+
+## 5. Retry from the development machine (2026-09-22)
+
+Fetched with the authenticated `gh` CLI and plain `curl` on the development Mac, outside the routine's proxy. Copies in `sources/retry-2026-09-22/` (local, gitignored).
+
+| # | date | engine | URL | status | copy (SHA-256) |
+|---|---|---|---|---|---|
+| R1 | 2026-09-22 | `gh api` | `repos/actions/runner-images/issues/11789` | 200 | `ri-11789.json` `79304080f390c6918190484f4672896b8f7ebfcd26834d856a77873ab01f5a59` |
+| R2 | 2026-09-22 | `gh api --paginate` | `repos/actions/runner-images/issues/11789/comments` | 200 (3 comments) | `ri-11789-comments.json` `247d83c0730f2c5e255b7b3466333241a2b5d00794426671d7afc264ecda4345` |
+| R3 | 2026-09-22 | `gh api` | `repos/actions/runner-images/issues/11689/comments` | 200 (7 comments) | `ri-11689-comments.json` `cccf1467f9890b1deeb7128cfdcdf8312c668974b88402cce25bcfd1951fd50c` |
+| R4 | 2026-09-22 | `curl`, no credentials | `https://api.github.com/repos/logis11/LLM_driven_shceduling/releases` | 200 | `rel-anon.json` `3106298b501d3ff007e05cab9ff1b9af51ba02ff2f67f8f74a9ec0890cecc43a`; headers `rel-anon.headers` `819c325efcc39a2fe9821a5e6d113a202bbe5c8f4c6b0427645a0a6c64535f3a` |
+
+### S4-17 — actions/runner-images issue #11789 (`perf stat` on Ubuntu 24.04 runners, 2025)
+
+**Citation.** actions/runner-images issue #11789, "`perf stat` does not work on Linux runners (even ARM ones)", opened by Luni-4, 2025-03-13, closed, https://github.com/actions/runner-images/issues/11789.
+
+**Passages.**
+- Body, image block: > "Image: ubuntu-24.04" / "Version: 20250309.1.0"
+- Body, actual behaviour: > "Run sudo perf stat --timeout 10000 -ae power/energy-cores/,power/energy-pkg/,power/energy-psys/" … "Cannot find PMU `power'. Missing kernel support?"
+- Comment 2736869987 (RaviAkshintala, 2025-03-19): > "Currently, our runner images are using kernel version `6.8.0-1021-azure`. We kindly request that you try using alternative power management tools such as `cpupower`,` s-tui,` or `powertop`."
+
+**Coverage.** T7 — an instrument fact: the `power` PMU (RAPL energy counters) is absent on the Ubuntu 24.04 x64 runner of March 2025; it says nothing of `perf_event_paranoid`, of software or tracepoint events, or of `perf sched`. The comments of #11689 (R3) add to the archive capture of S4-16 only a GitHub staff reply redirecting ARM issues to `partner-runner-images` and apangin's statement that on the ARM runner `PERF_TYPE_HARDWARE` events record no samples while `cpu-clock` "works well"; ARM, not the x64 runner the campaigns use.
+
+### S4-00 amendment — anonymous reachability of the releases, tested
+
+**Passages.** `rel-anon.headers`: > `HTTP/2 200` / `x-ratelimit-limit: 60` / `x-ratelimit-used: 1`. `rel-anon.json` tag names (reader's extraction): `meas-ci-desktop-2026-09-20`, `meas-ci-build-2026-09-18`, `meas-ci-2026-09-16`, `meas-ci-2026-09-14`, `meas-ci-2026-08-28`.
+
+**Coverage.** The caveat under S4-00 is resolved: a request with no credentials (limit 60, GitHub's unauthenticated limit) returns the release list with 200. An asset downloads without credentials too: `curl -sL https://github.com/logis11/LLM_driven_shceduling/releases/download/meas-ci-build-2026-09-18/gated-reports.zip` → 200, 5 898 bytes, the size the release lists (2026-09-22).
