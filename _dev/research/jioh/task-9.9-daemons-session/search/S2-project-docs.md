@@ -572,6 +572,12 @@ Read during stage 3 to settle whether an idle GNOME 46 session runs an X server.
 | R5 | 2026-09-22 | `curl` | `…/gdm3/plain/debian/custom.conf?h=ubuntu/noble-updates` (and `debian/default.conf`, `data/custom.conf`) | 404 | — ; the shipped `custom.conf` was not read |
 | R6 | 2026-09-22 | `curl` | `https://raw.githubusercontent.com/systemd/systemd/v255/units/user%40.service.in` | 200 | `systemd-v255-user@.service.in` `0b0147ccd524ae37b8dd37979f0007997574dd6ed690bf772c49ab901f19f616` (S2-29) |
 | R7 | 2026-09-22 | `api.launchpad.net` | `getPublishedBinaries` for `systemd`, noble amd64, Published | 200 | not saved; versions `255.4-1ubuntu8` (Release), `255.4-1ubuntu8.17` (Security, Updates) |
+| R8 | 2026-09-22 | `curl` | `https://gitlab.gnome.org/GNOME/gnome-settings-daemon/-/raw/46.0/plugins/power/gsd-power-manager.c` | 200 | `gnome-settings-daemon-46.0-gsd-power-manager.c` `faea818b77b616add64d8bf778c2ee9ebcb6bded4aa16bdf91cfc0744abc41e3` (S2-30) |
+| R9 | 2026-09-22 | `curl` | `https://gitlab.gnome.org/GNOME/gnome-settings-daemon/-/raw/46.0/data/org.gnome.settings-daemon.plugins.power.gschema.xml.in` | 200 | `…plugins.power.gschema.xml.in` `345c280d1fcb0b401f7f9e09490227c8ef927333e93b1c41ed0a307ec6bd5506` (S2-30) |
+| R10 | 2026-09-22 | `curl` | `https://git.launchpad.net/ubuntu/+source/ubuntu-settings/plain/debian/ubuntu-settings.gsettings-override?h=ubuntu/noble-updates` | 200 | `ubuntu-settings-noble-updates-gsettings-override` `fa63fa302dd98cab86551705a60ac980dd88196b1460d164963e4d7cfb76c27a` (S2-30) |
+| R11 | 2026-09-22 | `curl` | `https://gitlab.gnome.org/GNOME/gsettings-desktop-schemas/-/raw/46.0/schemas/org.gnome.desktop.screensaver.gschema.xml.in` | 200 | `…screensaver.gschema.xml.in` `738eda39f4a825f87d29b8ecb79f098871616325bc5b5bc4ad4dc425067f1289` (S2-31) |
+| R12 | 2026-09-22 | `curl` | `https://raw.githubusercontent.com/systemd/systemd/v255/src/login/logind-session.c` | 200 | `systemd-v255-logind-session.c` `9c43ffa0183f5302b4e409994368d4b8f38f07c5423ae943c0f315c6dc71ad28` (S2-31) |
+| R13 | 2026-09-22 | `curl` | Mutter 46.2 `src/backends/native/meta-monitor-manager-native.c`, `src/backends/native/meta-renderer-native.c`, `src/backends/meta-renderer.c`, `src/backends/meta-stage.c` at `https://gitlab.gnome.org/GNOME/mutter/-/raw/46.2/` | 200 | `b887d947…d8581b4`, `8947ed26…c6fc74`, `85d84bd0…4d7b3a8`, `cf849b2e…c95cb0` (S2-32) |
 
 ### S2-28 — Mutter 46.2's X11 display policy and GNOME Shell 46.0's Wayland unit: Xwayland on demand
 
@@ -592,3 +598,37 @@ Read during stage 3 to settle whether an idle GNOME 46 session runs an X server.
 **Passages.** `units/user@.service.in`: `Description=User Manager for UID %i` / `After=user-runtime-dir@%i.service dbus.service systemd-oomd.service` / `[Service]` / `User=%i` / `PAMName=systemd-user` / `Type=notify-reload` / `ExecStart={{LIBEXECDIR}}/systemd --user` / `Slice=user-%i.slice` / `KillMode=mixed` / `Delegate=pids memory cpu`.
 
 **Coverage.** T1 — covers as structure: for each logged-in user, pid 1 starts a second `systemd` process, the user manager (`systemd --user`), in the user's slice with the CPU controller delegated to it; the session's user units — GNOME Shell's `org.gnome.Shell@wayland.service` (S2-28), the session bus's user unit (S2-04, S2-05), the PipeWire services (S2-18, S2-19) — run under it. No idle cadence is stated. T2, T4 — do not cover.
+
+### S2-30 — gnome-settings-daemon 46.0's power plugin, its schema, and Ubuntu 24.04's override: blank on idle, no automatic suspend on AC
+
+**Citation.** GNOME gnome-settings-daemon 46.0, `plugins/power/gsd-power-manager.c` and `data/org.gnome.settings-daemon.plugins.power.gschema.xml.in`, tag `46.0`, https://gitlab.gnome.org/GNOME/gnome-settings-daemon; Ubuntu `ubuntu-settings` source package, `debian/ubuntu-settings.gsettings-override`, branch `ubuntu/noble-updates`, https://git.launchpad.net/ubuntu/+source/ubuntu-settings.
+
+**Passages.**
+- Blanking — `gsd-power-manager.c:1286-1301`: `backlight_disable (GsdPowerManager *manager)` … `ret = gnome_rr_screen_set_dpms_mode (manager->rr_screen,` / `GNOME_RR_DPMS_OFF,` / `&error);` … `g_warning ("failed to turn the panel off: %s",`; `:1792-1794`: `} else if (mode == GSD_POWER_IDLE_MODE_BLANK) {` / (blank) / `backlight_disable (manager);`
+- Blank follows the screensaver — `:1926-1938`: `/* set up blank callback only when the screensaver is on,` / `* as it's what will drive the blank */` … `if (manager->screensaver_active) {` … `guint timeout_blank = SCREENSAVER_TIMEOUT_BLANK;`
+- No idle mode without an active session — `:1946-1949`: `if (!manager->session_is_active ||` / `(is_idle_inhibited && !manager->screensaver_active)) {` … `idle_set_mode (manager, GSD_POWER_IDLE_MODE_NORMAL);`; `session_is_active` is gnome-session's `SessionIsActive` (`:2591`).
+- No suspend in a VM — `:1979-1984`: `/* don't do any power saving if we're a VM */` / `if (manager->is_virtual_machine &&` / `(action_type == GSD_POWER_ACTION_SUSPEND ||` / `action_type == GSD_POWER_ACTION_HIBERNATE)) {` / `g_debug ("Ignoring sleep timeout with suspend action inside VM");` / `timeout_sleep = 0;`
+- Schema defaults: `idle-dim` `<default>true</default>`; `sleep-inactive-ac-timeout` `<default>900</default>`; `sleep-inactive-ac-type` `<default>'suspend'</default>`; `sleep-inactive-battery-timeout` `<default>900</default>`; `sleep-inactive-battery-type` `<default>'suspend'</default>`.
+- Ubuntu override: `[org.gnome.settings-daemon.plugins.power]` / `power-button-action = 'interactive'` / `sleep-inactive-ac-timeout = 0`.
+
+**Coverage.** T2 — covers as mechanism: GNOME's power daemon blanks by setting DPMS off through the display configuration once the screensaver (the shield) is active, and does nothing while the session is inactive; upstream GNOME 46 suspends after 900 s of inactivity on AC and on battery, Ubuntu 24.04 overrides the AC timeout to 0 (never) and leaves the battery default, and the daemon ignores a suspend timeout inside a VM. So on Ubuntu on AC the blanked idle state is terminal; on a laptop on battery it ends in suspend after 900 s. T1, T4 — do not cover.
+
+### S2-31 — the lock default and logind's rule for a session without a seat
+
+**Citation.** GNOME gsettings-desktop-schemas 46.0, `schemas/org.gnome.desktop.screensaver.gschema.xml.in`, tag `46.0`; systemd v255, `src/login/logind-session.c`, tag `v255`.
+
+**Passages.** Schema: `<key name="lock-enabled" type="b">` / `<default>true</default>` / `<summary>Lock on activation</summary>`; `<key name="lock-delay" type="u">` / `<default>0</default>`. The Ubuntu override (S2-30) sets neither. `logind-session.c:985-991`: `bool session_is_active(Session *s) {` … `if (!s->seat)` / `return true;` / (blank) / `return s->seat->active == s;`
+
+**Coverage.** T2 — covers as mechanism: GNOME locks the screen when the shield activates, with no delay, and Ubuntu 24.04 keeps that default; logind counts a session without a seat as active, so a seatless login on the runner is an active session for the power daemon's check (S2-30), on the assumption, to be verified in the dry run, that gnome-session's `SessionIsActive` follows logind's `Active`. T1, T4 — do not cover.
+
+### S2-32 — Mutter 46.2's power-save path: what "blank" does to the compositor
+
+**Citation.** GNOME Mutter 46.2, `src/backends/native/meta-monitor-manager-native.c`, `src/backends/native/meta-renderer-native.c`, `src/backends/meta-renderer.c`, `src/backends/meta-stage.c`, tag `46.2`.
+
+**Passages.**
+- `meta-monitor-manager-native.c:129-151`: `meta_monitor_manager_native_set_power_save_mode (MetaMonitorManager *manager,` … `for (l = meta_backend_get_gpus (backend); l; l = l->next)` … `case META_POWER_SAVE_STANDBY:` / `case META_POWER_SAVE_SUSPEND:` / `case META_POWER_SAVE_OFF:` / `{` / `meta_kms_device_disable (meta_gpu_kms_get_kms_device (gpu_kms));`
+- `meta-renderer-native.c:746-755`: `meta_renderer_native_queue_power_save_page_flip (MetaRendererNative *renderer_native,` … `const unsigned int timeout_ms = 100;` … `g_timeout_add (timeout_ms,` / `dummy_power_save_page_flip_cb,`
+- `meta-renderer.c:268-283`: `meta_renderer_pause (MetaRenderer *renderer)` … `clutter_frame_clock_inhibit (frame_clock);` — the inhibit S2-12 describes is reached through the renderer's pause, not through power save.
+- `meta-stage.c:297-303`: `on_power_save_changed` … `if (meta_monitor_manager_get_power_save_mode (monitor_manager) ==` / `META_POWER_SAVE_ON)` / `clutter_actor_queue_redraw (CLUTTER_ACTOR (stage));`
+
+**Coverage.** T2 — covers as mechanism, and corrects this record's earlier reading of S2-12: blanking disables the KMS devices of the GPUs the backend has, and a frame drawn while powered off completes by a 100 ms dummy page flip instead of a vblank; the frame clock is inhibited by the renderer's pause (a session switched away), not by blanking. So a blanked Mutter with nothing drawing is idle because nothing is scheduled, and whatever still draws — for instance a lock-screen clock — draws with dummy flips. With a headless virtual monitor there is no GPU in the loop, so the power-save call disables nothing, and frames are paced by the virtual monitor's own timer. T1, T4 — do not cover.
