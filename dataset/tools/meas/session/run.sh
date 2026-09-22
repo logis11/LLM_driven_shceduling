@@ -41,7 +41,7 @@ POLL_S=10                            # the probe's state polls (D13)
 # js/misc/loginManager.js:38-53), so with `unit` alone the session never locks and never blanks: `gdm` logs in
 # through GDM's automatic login instead, `stub` keeps D11's login and adds dm_stub.py on the system bus. The two
 # are compared in a dry run before either is decided (Q14).
-LOGIN_MODE="${MEAS_LOGIN_MODE:-unit}"
+LOGIN_MODE="${MEAS_LOGIN_MODE:-gdm}"   # D16: GDM's automatic login; `unit` and `stub` are the compared alternatives
 
 # Lengths from the long-phase probe, written into method §10 before the first batch (method §9). Empty until then:
 # a full job without them stops before measuring, as the desktop family's does.
