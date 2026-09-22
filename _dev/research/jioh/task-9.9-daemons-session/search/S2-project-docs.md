@@ -558,3 +558,27 @@ Topics or sub-questions for which this class produced no candidate, with the sea
 - **T4, Debian rtkit packaging.** salsa raw URL returned a sign-in page (row 33); not recorded.
 - **T4, the GLib mechanism that places launched applications into `app-*.scope` under `app.slice`.** `gio/gdesktopappinfo.c` at GLib main (row 39) contains no `app.slice`/`StartTransientUnit` text; the code has evidently moved and was not located in this session.
 - **Unreachable or not served:** `https://src.fedoraproject.org/rpms/rtkit/raw/rawhide/f/rtkit-daemon.service` (404, row 32); `https://salsa.debian.org/utopia-team/rtkit/-/raw/debian/master/debian/patches/series` (200 but GitLab sign-in HTML, row 33). All git remotes and the two blog hosts were reachable.
+
+## 5. Retry from the development machine (2026-09-22)
+
+Read during stage 3 to settle whether an idle GNOME 46 session runs an X server. Copies in `sources/retry-2026-09-22/` (local, gitignored).
+
+| # | date | engine | URL | status | copy (SHA-256) |
+|---|---|---|---|---|---|
+| R1 | 2026-09-22 | `curl` | `https://gitlab.gnome.org/GNOME/mutter/-/raw/46.2/src/core/meta-context-main.c` | 200 | `mutter-46.2-src_core_meta-context-main.c` `a559e0b970c23f9f04fce303d1077f2ec9d20196d685b61c2aae0830a6b4d2d7` (the same file S4-08 read) |
+| R2 | 2026-09-22 | `curl` | `https://gitlab.gnome.org/GNOME/mutter/-/raw/46.2/data/org.gnome.mutter.gschema.xml.in` | 200 | `mutter-46.2-data_org.gnome.mutter.gschema.xml.in` `e950c02788bd6bd9886ad46ce6c9ccd45fa245d4b676e1f1b0433109ad449006` |
+| R3 | 2026-09-22 | `curl` | `https://gitlab.gnome.org/GNOME/gnome-shell/-/raw/46.0/data/org.gnome.Shell@wayland.service.in` | 200 | `gnome-shell-46.0-org.gnome.Shell@wayland.service.in` `0b3ce9179c6ab60dd1e12b4d4223899bb056cdce995da8d2de29859888d1f40e` |
+| R4 | 2026-09-22 | `curl` | `https://git.launchpad.net/ubuntu/+source/gdm3/plain/data/61-gdm.rules.in?h=ubuntu/noble-updates` | 200 | `gdm3-noble-updates-61-gdm.rules.in` `b1db35a79d951fc21210c1850154500cea9f7d244335fd130df54040f9907f00` |
+| R5 | 2026-09-22 | `curl` | `…/gdm3/plain/debian/custom.conf?h=ubuntu/noble-updates` (and `debian/default.conf`, `data/custom.conf`) | 404 | — ; the shipped `custom.conf` was not read |
+
+### S2-28 — Mutter 46.2's X11 display policy and GNOME Shell 46.0's Wayland unit: Xwayland on demand
+
+**Citation.** GNOME Mutter 46.2, `src/core/meta-context-main.c` and `data/org.gnome.mutter.gschema.xml.in`, tag `46.2`, https://gitlab.gnome.org/GNOME/mutter; GNOME Shell 46.0, `data/org.gnome.Shell@wayland.service.in`, tag `46.0`, https://gitlab.gnome.org/GNOME/gnome-shell; Ubuntu `gdm3` source package, `data/61-gdm.rules.in`, branch `ubuntu/noble-updates`, https://git.launchpad.net/ubuntu/+source/gdm3.
+
+**Passages.**
+- `meta-context-main.c:333-353`: `meta_context_main_get_x11_display_policy (MetaContext *context)` … `case META_COMPOSITOR_TYPE_X11:` / `return META_X11_DISPLAY_POLICY_MANDATORY;` / `case META_COMPOSITOR_TYPE_WAYLAND:` … `if (context_main->options.no_x11)` / `return META_X11_DISPLAY_POLICY_DISABLED;` / `else if (sd_pid_get_user_unit (0, &unit) < 0)` / `return META_X11_DISPLAY_POLICY_MANDATORY;` / `else` / `return META_X11_DISPLAY_POLICY_ON_DEMAND;`
+- `org.gnome.mutter.gschema.xml.in:104-106, :129-131`: `<key name="experimental-features"` … `<default>[]</default>` … `• “autoclose-xwayland” — automatically terminates Xwayland if all relevant X11 clients are gone. Requires a restart.`
+- `org.gnome.Shell@wayland.service.in`: `Description=GNOME Shell on Wayland` … `ConditionEnvironment=XDG_SESSION_TYPE=%I` … `[Service]` / `Slice=session.slice` / `Type=notify` / `ExecStart=@bindir@/gnome-shell`
+- `61-gdm.rules.in` (Ubuntu noble-updates): `# disable Wayland on Hi1710 chipsets` … `# disable Wayland if modesetting is disabled` … `IMPORT{cmdline}="nomodeset", GOTO="gdm_disable_wayland"` … and the NVIDIA vendor-driver checks `TEST{0711}!="/usr/bin/nvidia-sleep.sh", GOTO="gdm_disable_wayland"` / `ENV{NVIDIA_PRESERVE_VIDEO_MEMORY_ALLOCATIONS}!="1", GOTO="gdm_disable_wayland"`.
+
+**Coverage.** T2 — covers as mechanism: GNOME Shell 46 on Wayland runs as the systemd user unit `org.gnome.Shell@wayland.service`, so `sd_pid_get_user_unit` succeeds and Mutter's X11 display policy is ON_DEMAND — Xwayland starts only when an X11 client connects — and since `autoclose-xwayland` is not in the default experimental features, a started Xwayland stays for the session. Run outside a user unit, Mutter's Wayland compositor takes the MANDATORY policy and starts Xwayland at once; `--no-x11` disables it. GDM on Ubuntu 24.04 disables Wayland only under the listed conditions (the Hi1710 chipset, `nomodeset`, the NVIDIA vendor driver without its suspend services), so the GNOME session is Wayland otherwise; the shipped `custom.conf`, which can set `WaylandEnable=false`, was not read (R5). T1, T4 — do not cover.
