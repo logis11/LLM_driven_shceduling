@@ -97,6 +97,7 @@ checkpoint() {
   sudo dmesg | tail -200 > "$d/dmesg.txt" 2>&1
   rec "diag.$st.github" "$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 https://api.github.com)"
   rec "diag.$st.utc" "$(date -u +%FT%TZ)"
+  : > "$d/done"                       # the workflow's partial upload waits on this marker
   if [ "$MODE" = dry ] && [ "${MEAS_STOP_AFTER:-}" = "$st" ]; then
     rec stopped_after "$st"; stop_recorded open "dry run stopped after $st (MEAS_STOP_AFTER)"
   fi
@@ -281,6 +282,9 @@ if [ -z "$PRIMING" ] || [ -z "$STEADY_OFFSET" ] || [ -z "$STEADY" ]; then
   exit 0
 fi
 rec gate open
+# the journal followed from here on, so a partial upload carries what happened up to it
+sudo journalctl -f -o short-monotonic --no-pager > "$OUT/journal.follow.txt" 2>&1 &
+JOURNAL_PID=$!
 
 sudo apt-get update > /dev/null 2>&1
 sudo apt-get install -y --no-install-recommends linux-tools-common "linux-tools-$(uname -r)" > "$OUT/apt.perf.log" 2>&1; rec apt.perf.rc "$?"
@@ -337,5 +341,6 @@ fi
 logout measured
 checkpoint end
 rec finished_utc "$(date -u +%FT%TZ)"
+sudo kill "$JOURNAL_PID" 2>/dev/null
 sudo chown -R "$(id -u):$(id -g)" "$OUT" 2>/dev/null
 finish_report

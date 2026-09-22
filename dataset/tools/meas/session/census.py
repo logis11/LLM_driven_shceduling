@@ -143,9 +143,12 @@ def state(uid):
         "presence": u + ["busctl", "--user", "get-property", "org.gnome.SessionManager",
                          "/org/gnome/SessionManager/Presence", "org.gnome.SessionManager.Presence", "status"],
     }
-    out = {"mono_ns": time.monotonic_ns()}
+    out = {"mono_ns": time.monotonic_ns(), "raw": {}}
     for k, cmd in q.items():
-        out[k] = busctl_value(sh(cmd, timeout=10))
+        res = sh(cmd, timeout=10)
+        out[k] = busctl_value(res)
+        if out[k] is None:            # what the query answered instead, so a failed check can be read
+            out["raw"][k] = {"rc": res["rc"], "out": res["out"][-200:], "err": res["err"][-300:]}
     sess = user_session(uid)
     out["session"] = sess
     out["locked_hint"] = (sh(["loginctl", "show-session", sess, "-p", "LockedHint", "--value"])["out"] == "yes") if sess else None

@@ -55,11 +55,61 @@ jobs:
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
-      - run: bash dataset/tools/meas/session/run.sh ${{ matrix.app }} ${{ matrix.repeat }} ${{ needs.plan.outputs.mode }}
+      # run.sh starts in the background and a partial copy of its output is uploaded as each stage completes: an
+      # uploaded artifact survives a runner that is lost later, which the first dry run's was, with no log
+      - name: start
+        run: |
+          mkdir -p /tmp/meas
+          setsid nohup bash dataset/tools/meas/session/run.sh ${{ matrix.app }} ${{ matrix.repeat }} ${{ needs.plan.outputs.mode }} > /tmp/run.out 2>&1 &
+          echo $! > /tmp/run.pid
         env:
           MEAS_OUT: /tmp/meas
           MEAS_CPU_MODEL: ${{ needs.plan.outputs.cpu_model }}
           MEAS_STOP_AFTER: ${{ matrix.stop }}
+      - name: stage install
+        run: |
+          while [ ! -e /tmp/meas/diag.install/done ] && kill -0 "$(cat /tmp/run.pid)" 2>/dev/null; do sleep 5; done
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo rm -f /tmp/part/meas/perf.*.data; sudo chown -R "$(id -u):$(id -g)" /tmp/part; echo "reached: $(ls -d /tmp/meas/diag.* 2>/dev/null | xargs -n1 basename | tr '\n' ' ')"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-install
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: stage priming
+        run: |
+          while [ ! -e /tmp/meas/diag.priming/done ] && kill -0 "$(cat /tmp/run.pid)" 2>/dev/null; do sleep 5; done
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo rm -f /tmp/part/meas/perf.*.data; sudo chown -R "$(id -u):$(id -g)" /tmp/part; echo "reached: $(ls -d /tmp/meas/diag.* 2>/dev/null | xargs -n1 basename | tr '\n' ' ')"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-priming
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: stage pinned
+        run: |
+          while [ ! -e /tmp/meas/diag.pinned/done ] && kill -0 "$(cat /tmp/run.pid)" 2>/dev/null; do sleep 5; done
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo rm -f /tmp/part/meas/perf.*.data; sudo chown -R "$(id -u):$(id -g)" /tmp/part; echo "reached: $(ls -d /tmp/meas/diag.* 2>/dev/null | xargs -n1 basename | tr '\n' ' ')"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-pinned
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: stage edge
+        run: |
+          while [ ! -e /tmp/meas/diag.edge/done ] && kill -0 "$(cat /tmp/run.pid)" 2>/dev/null; do sleep 5; done
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo rm -f /tmp/part/meas/perf.*.data; sudo chown -R "$(id -u):$(id -g)" /tmp/part; echo "reached: $(ls -d /tmp/meas/diag.* 2>/dev/null | xargs -n1 basename | tr '\n' ' ')"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-edge
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: wait for the run
+        run: |
+          while kill -0 "$(cat /tmp/run.pid)" 2>/dev/null; do sleep 10; done
+          cat /tmp/run.out; cp /tmp/run.out /tmp/meas/ 2>/dev/null || true
       - name: own the output
         if: always()
         run: sudo chown -R "$(id -u):$(id -g)" /tmp/meas && sudo chmod -R a+rX /tmp/meas
