@@ -9,8 +9,9 @@ meas-background-<app>-r<k>-<mode> (as uploaded), at any depth, so the runs of
 one campaign can be downloaded side by side into one folder each. A job the
 machine gate stopped (report.json gate=wrong-machine) and, with --cpu-model, a
 repeat measured on another CPU model are listed, not pooled. Per program and
-phase: every repeat is analysed (analyze.analyze_phase); the samples of all
-repeats are pooled into the quantile table (p1 … p99.9; µs, bytes for bytes per
+phase: every repeat is analysed (analyze.analyze_phase) once, the result and its samples cached beside the
+repeat (pool-cache/, keyed by the analysis code), and the samples of all
+repeats are pooled — one table at a time — into the quantile table (p1 … p99.9; µs, bytes for bytes per
 wake), over all the program's threads and per thread (comm#rank), with the
 per-repeat mean as the spread (§5 "Distribution form", §9 D19). Then: the
 shared stability rule (stability.py) on the list — every table the fold-in
@@ -26,11 +27,14 @@ the achieved download rate, the cached fraction of every warm phase.
 
 import argparse
 import glob
+import hashlib
 import json
 import os
 import re
 import statistics
 import sys
+
+import numpy as np
 
 TOOLS = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))   # dataset/tools
 if TOOLS not in sys.path:
@@ -71,19 +75,89 @@ SAMPLE_KEYS = ("run_us", "wait_us", "disk_us", "uninterruptible_us", "network_us
 APPLIED_MBPS, NETWORK_TABLE_MBPS = 121.0, 128.9   # D11: the applied rate; the network table's byte-weighted median
 
 
-def qtable(values):
-    if not values:
+def pct_sorted(v, q):
+    """analyze.pct on an already sorted array, the same arithmetic on the same doubles."""
+    n = len(v)
+    if not n:
         return None
-    v = sorted(values)
-    return [round(pct(v, q), 1) for q in QUANTILE_PROBS]
+    k = (n - 1) * q
+    lo, hi = int(k), min(int(k) + 1, n - 1)
+    a, b = float(v[lo]), float(v[hi])
+    return round(a + (b - a) * (k - lo), 3)
 
 
 def pooled(by_repeat):
-    allv = [x for vs in by_repeat.values() for x in vs]
-    return {"n": len(allv), "q": qtable(allv), "p50": round(pct(sorted(allv), .5), 1) if allv else None,
-            "repeat_p50": {r: (round(pct(sorted(vs), .5), 1) if vs else None) for r, vs in sorted(by_repeat.items())},
-            "repeat_mean": {r: (round(statistics.fmean(vs), 4) if vs else None) for r, vs in sorted(by_repeat.items())},
-            "repeat_n": {r: len(vs) for r, vs in sorted(by_repeat.items())}}
+    """by_repeat: repeat -> float64 array of one table's samples. Each array is sorted once, the pooled one once."""
+    reps = sorted(by_repeat.items())
+    allv = np.sort(np.concatenate([vs for _r, vs in reps])) if reps else np.empty(0)
+    out = {"n": int(len(allv)), "q": [round(pct_sorted(allv, q), 1) for q in QUANTILE_PROBS] if len(allv) else None,
+           "p50": round(pct_sorted(allv, .5), 1) if len(allv) else None}
+    del allv
+    out["repeat_p50"] = {r: (round(pct_sorted(np.sort(vs), .5), 1) if len(vs) else None) for r, vs in reps}
+    out["repeat_mean"] = {r: (round(statistics.fmean(vs.tolist()), 4) if len(vs) else None) for r, vs in reps}
+    out["repeat_n"] = {r: int(len(vs)) for r, vs in reps}
+    return out
+
+
+# ---- per-repeat analysis, cached --------------------------------------------------
+CACHE_VERSION = 1
+
+
+def code_hash():
+    """The analysis code a cached result was made by: a change to it makes every cache stale."""
+    h = hashlib.sha256(str(CACHE_VERSION).encode())
+    for m in (analyze, analyze.nettrace, analyze._build, sys.modules["meas.stability"]):
+        h.update(open(m.__file__, "rb").read())
+    return h.hexdigest()[:16]
+
+
+def cached_phase(d, ph, meas_cpu, edges, kv, code):
+    """analyze_phase for one repeat's phase, from pool-cache/ when the same code made it. The samples leave the
+    result: they are kept per thread as float64 arrays in <phase>.npz — the program's "all" samples are the
+    concatenation of its threads', so only the threads' are stored."""
+    cdir = os.path.join(d, "pool-cache")
+    meta_p, npz_p = os.path.join(cdir, f"{ph}.json"), os.path.join(cdir, f"{ph}.npz")
+    if os.path.exists(meta_p):
+        m = json.load(open(meta_p))
+        if m.get("code") == code and m.get("meas_cpu") == meas_cpu and ("missing" in m["result"] or os.path.exists(npz_p)):
+            r = m["result"]
+            if "missing" not in r:
+                r["_npz"] = npz_p
+            return r
+    r = analyze.analyze_phase(d, ph, meas_cpu, edges, kv)
+    os.makedirs(cdir, exist_ok=True)
+    if "missing" not in r:
+        smp = r.pop("_samples")
+        r["_threads"] = list(smp["threads"])
+        arrays = {f"t{i}__{s}": np.asarray(smp["threads"][t][s], dtype=np.float64)
+                  for i, t in enumerate(r["_threads"]) for s in SAMPLE_KEYS}
+        del smp
+        np.savez(npz_p + ".tmp.npz", **arrays)
+        os.replace(npz_p + ".tmp.npz", npz_p)
+        del arrays
+    json.dump({"code": code, "meas_cpu": meas_cpu, "result": r}, open(meta_p + ".tmp", "w"))
+    os.replace(meta_p + ".tmp", meta_p)
+    r = json.load(open(meta_p))["result"]   # the same JSON form a cached read gives
+    if "missing" not in r:
+        r["_npz"] = npz_p
+    return r
+
+
+def samples_of(A, t, s):
+    """One repeat's samples of table s: of thread t, or of all the program's threads when t is None."""
+    with np.load(A["_npz"]) as z:
+        if t is None:
+            parts = [z[f"t{i}__{s}"] for i in range(len(A["_threads"]))]
+            return np.concatenate(parts) if parts else np.empty(0)
+        if t not in A["_threads"]:
+            return np.empty(0)
+        return z[f"t{A['_threads'].index(t)}__{s}"]
+
+
+def _analyse_one(job):
+    d, ph, meas_cpu, code = job
+    cached_phase(d, ph, meas_cpu, analyze.load_edges(d), kvfile(os.path.join(d, "report.kv")), code)
+    return d, ph
 
 
 def median_of(d):
@@ -167,8 +241,16 @@ def find_runs(root, cpu_model):
     return runs, gated, other
 
 
-def pool_app(app, reps):
+def pool_app(app, reps, jobs=1):
     ks = sorted(reps)
+    code = code_hash()
+    if jobs > 1:   # fill the cache first, several phases at a time; the pooling below then reads it
+        import multiprocessing
+        todo = [(reps[k]["dir"], ph, int(reps[k]["report"].get("pin.load_cpu", 3)), code)
+                for k in ks for ph in analyze.phases_in(reps[k]["dir"])]
+        with multiprocessing.get_context("spawn").Pool(jobs, maxtasksperchild=1) as mp:
+            for d, ph in mp.imap_unordered(_analyse_one, todo):
+                print(f"   analysed {os.path.basename(d)} {ph}", file=sys.stderr, flush=True)
     per = {}
     for k in ks:
         d = reps[k]["dir"]
@@ -176,7 +258,7 @@ def pool_app(app, reps):
         meas_cpu = int(reps[k]["report"].get("pin.load_cpu", 3))
         edges = analyze.load_edges(d)
         phases = [p for p in analyze.phases_in(d)]
-        per[k] = {"kv": kv, "phases": {ph: analyze.analyze_phase(d, ph, meas_cpu, edges, kv) for ph in phases}}
+        per[k] = {"kv": kv, "phases": {ph: cached_phase(d, ph, meas_cpu, edges, kv, code) for ph in phases}}
     spec = {k: reps[k]["spec"] for k in ks}
     entry = {"repeats": ks, "mode": {k: reps[k]["mode"] for k in ks},
              "cpu_model": {k: spec[k].get("cpu_model") for k in ks},
@@ -199,7 +281,7 @@ def pool_app(app, reps):
              "program_taskstats_cpu_us": {k: A[k]["program_taskstats_cpu_us"] for k in have},
              "resumes_merged": {k: A[k]["resumes_merged"] for k in have},
              "taskstats_enobufs": {k: A[k]["taskstats_trailer"].get("enobufs") for k in have},
-             "all": {s: pooled({k: A[k]["_samples"]["all"][s] for k in have}) for s in SAMPLE_KEYS},
+             "all": {s: pooled({k: samples_of(A[k], None, s) for k in have}) for s in SAMPLE_KEYS},
              "threads": {},
              "processes": {k: [{x: p[x] for x in ("pid", "role", "exec", "threads", "perf_cpu_us", "taskstats_cpu_us",
                                                   "perf_over_taskstats", "disk")} for p in A[k]["processes"] if p["program"] or p["disk"]]
@@ -209,11 +291,11 @@ def pool_app(app, reps):
             P["cached_fraction"] = {k: A[k].get("cached_fraction") for k in have}
         if any("network" in A[k] for k in have):
             P["network"] = {k: A[k].get("network") for k in have}
-        keys = sorted({t for k in have for t in A[k]["_samples"]["threads"]},
+        keys = sorted({t for k in have for t in A[k]["_threads"]},
                       key=lambda t: -sum(A[k]["threads"].get(t, {}).get("cpu_us", 0) for k in have))
         for t in keys:
             P["threads"][t] = {"cpu_us": {k: A[k]["threads"].get(t, {}).get("cpu_us") for k in have},
-                               **{s: pooled({k: A[k]["_samples"]["threads"].get(t, {}).get(s, []) for k in have}) for s in SAMPLE_KEYS}}
+                               **{s: pooled({k: samples_of(A[k], t, s) for k in have}) for s in SAMPLE_KEYS}}
         entry["phases"][ph] = P
     # D19: the shared stability rule on the list; in probe mode the first batch it sets (D14 (3))
     crit = criterion(app, entry)
@@ -374,6 +456,7 @@ def main():
     ap.add_argument("artifacts"); ap.add_argument("out"); ap.add_argument("--md")
     ap.add_argument("--cpu-model", default="", help="pool only repeats whose CPU model contains this text")
     ap.add_argument("--tag", default="", help="the campaign tag, meas-ci:background:<launch date of the first batch>")
+    ap.add_argument("--jobs", type=int, default=1, help="phases analysed at a time when the cache is filled")
     args = ap.parse_args()
     runs, gated, other = find_runs(args.artifacts, args.cpu_model)
     if not runs:
@@ -382,7 +465,7 @@ def main():
     out = {"tag": args.tag or None, "machine": args.cpu_model or None, "gated_out": gated, "other_machine": other, "runs": {}}
     for app in ("borg", "7z", "steamcmd"):
         if app in runs:
-            out["runs"][app] = E = pool_app(app, runs[app])
+            out["runs"][app] = E = pool_app(app, runs[app], args.jobs)
             st = E["stability"]
             print(f"== {app}: repeats {E['repeats']}; stability {'holds' if st['passes'] else 'does not hold yet'}; first batch {E['first_batch']['count']}")
             for q, c in st["quantities"].items():
