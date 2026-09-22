@@ -1,6 +1,6 @@
 # Measured values — campaign record
 
-Every campaign behind a measured archetype value: per archetype the repeats, the values the rule covers, the widest margin among them, why it stopped, and the machine draws it took. Method: `measurement-campaign-workflow.md`. Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10` (`soffice`: `--since 38`; `thunderbird-send`: `--since 150 --exclude 29`); job counts are the campaign runs' jobs, read from their job lists. Recorded 2026-09-20; the 9.5 rows were first recorded a day earlier against one headline median per archetype, which D29 and D30 replaced.
+Every campaign behind a measured archetype value: per archetype the repeats, the values the rule covers, the widest margin among them, why it stopped, and the machine draws it took. Method: `measurement-campaign-workflow.md`. Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10` (`soffice`: `--since 38`; `thunderbird-send`: `--since 150 --exclude 29`; the `desktop` family: `--since 21`); job counts are the campaign runs' jobs, read from their job lists. Recorded 2026-09-20, the 9.8 rows 2026-09-22; the 9.5 rows were first recorded a day earlier against one headline median per archetype, which D29 and D30 replaced.
 
 ## Campaigns
 
@@ -15,6 +15,7 @@ All on GitHub-hosted `ubuntu-24.04` runners, 4 vCPU, pinned to one CPU, AMD EPYC
 | `meas-ci:background:2026-09-19` | 9.7 | `meas-background.yml` | #19–; `borg`'s repeats are in #24–#40 | 2026-09-19 23:16 UTC |
 | `meas-ci:interactive:2026-09-20` | 9.5 | `meas-interactive.yml` | #245–, `chrome` and `code` re-measured under D51 and D53 | 2026-09-20 08:04 UTC |
 | `meas-ci:playback:2026-09-20` | 9.5 | `meas-playback.yml` | #245–, `webrtc` re-measured under D54 | 2026-09-20 08:04 UTC |
+| `meas-ci:desktop:2026-09-20` | 9.8 | `meas-desktop.yml` | #21–#50 | 2026-09-20 11:03 UTC |
 
 ## 9.5 — six archetypes measured, three being re-measured
 
@@ -84,8 +85,41 @@ Repeats 1–31 on the AMD EPYC 7763, repeat 3 left out of the pool: it landed, b
 
 Full tables: `task-9.7-background-io/campaign/results-borg.md` and `campaign/results-7z.md`, `campaign/results/borg-pooled.json` and `results/7z-pooled.json`.
 
+## 9.8 — four desktop entries, one campaign
+
+Every repeat on the AMD EPYC 7763, kernel `6.17.0-1022-azure` in all of them, none excluded or superseded; the renderer entries on Google Chrome 152.0.7977.82 in every repeat, 12 renderers measured of 16 observed (hidden) and of 13–14 (visible). Each entry reads one phase (method §10): the hidden renderer `steady`, the visible renderer `steady-notimer` (D16), the chat client `idle`, the Steam client `shown`. The renderer entries' values are per renderer, the renderers pooled as samples (D14). `values` counts what the rule covers; `widest` is the largest half-width among the values that pass it.
+
+| entry | subject | repeats | values | pass | widest | stopped by | jobs (gated) | recorded input covered |
+|---|---|---|---|---|---|---|---|---|
+| hidden renderer | `chrome-hidden` | 11 (1–11) | 9 | 5 | `chrome` run mean ±4.99 % | the rule | 25 (11) | none |
+| visible renderer | `chrome-visible` | 11 (1–11) | 15 | 4 | `chrome` gap mean ±3.68 % | the rule | 18 (7) | none |
+| chat client | `element` | 17 (1–17) | 18 | 18 | `ThreadPoolForeg` gap mean ±4.84 % | the rule | 32 (14) | none |
+| Steam client | `steam` | 12 (1–12) | 33 | 25 | `ThreadPoolForeg` run mean ±4.99 % | the rule | 21 (9) | none |
+
+The values outside the tolerance, each carried over its repeats with its half-width and range. Run means whose spread is the machine (D17; the Steam client's by D18):
+
+- hidden renderer: `HangWatcher` run mean 0.0275 ms ±6.4 % (0.024–0.033).
+- visible renderer: `HangWatcher` run mean 0.0318 ms ±6.0 % (0.029–0.037); `chrome` run mean 0.1489 ms ±5.8 % (0.133–0.181).
+- Steam client: `steam` run mean 0.0555 ms ±10.2 % (0.044–0.068); `IPC:CSteamEngin` 0.0573 ms ±8.8 % (0.047–0.068); `CJobMgr::m_Work` 0.0176 ms ±6.2 % (0.015–0.020); `VizCompositorTh` 0.0819 ms ±5.5 % (0.066–0.089); `CHTTPClientThre` 0.0312 ms ±46.0 % (0.014–0.064).
+
+Components whose spread lies between sessions, their three values together (D21; the Steam client's by D23, both under 9.5 D57):
+
+- hidden renderer, residual: 0.0104 wakes/s ±20.3 % (0.0046–0.0142); gap mean 70.3 s ±19.1 % (28.3–109.1 s); run mean 0.0923 ms ±19.9 % (0.058–0.149).
+- visible renderer, `Chrome_ChildIOT`: 0.0047 wakes/s ±62.0 % (0–0.010); gap mean 163.5 s ±19.5 % (97.1–254.5 s); run mean 0.0408 ms ±10.7 % (0.030–0.053).
+- visible renderer, `ThreadPoolForeg`: 0.0043 wakes/s ±29.1 % (0.003–0.007); gap mean 1051 ms ±27.8 % (472–1653 ms); run mean 0.0254 ms ±10.3 % (0.019–0.034).
+- visible renderer, residual: 0.0108 wakes/s ±17.9 % (0.0060–0.0158); gap mean 76.0 s ±13.6 % (46.3–94.3 s); run mean 0.1026 ms ±14.5 % (0.070–0.141).
+- Steam client, `steamwebhelper`: gap mean 32.44 ms ±10.2 % (28.51–42.16); run mean 0.0696 ms ±5.3 % (0.063–0.082); its wake rate passes.
+- Steam client, `ThreadPoolForeg`: gap mean 511.6 ms ±9.0 % (415.9–616.1); its wake rate and run mean pass.
+
+- Repeat indices that landed more than once: the retry driver relaunched the hidden renderer's repeat 10 in runs #33, #34, #36 and #37 and the chat client's repeat 17 in #49 and #50, and every launch landed on the AMD EPYC 7763 with the gate open. The pool keys repeats by index and reads the latest landing (#37, #50); the three earlier landings of hidden repeat 10 and the one of chat repeat 17 are not pooled, and are counted in the jobs above.
+- No gated window was left once the rule held: every index 1…k of each entry landed.
+
+Full tables: `task-9.8-browser-comms/campaign/results/results.md`, `campaign/results/pooled.json`.
+
 ## Machine draws
 
 The build campaign, complete: 28 jobs, 14 on the AMD EPYC 7763 (50.0 %), 12 stopped by the machine gate — Intel Xeon Platinum 8573C 4, AMD EPYC 9V74 4, AMD EPYC 9V45 2, Intel Xeon Platinum 8370C 1, Intel Xeon 6973P-C 1 — and 2 cancelled.
 
 The 9.5 campaigns of 2026-09-18 and 2026-09-19, over the six applications whose rule holds and complete for them: 252 jobs — 144 landed on the AMD EPYC 7763 (57.1 %, one of them `thunderbird-send`'s dry check), 107 stopped by the gate, 1 cancelled. The model is recorded for 104 of those stops, the reports the loop read: AMD EPYC 9V74 47, Intel Xeon Platinum 8573C 19, AMD EPYC 9V45 18, Intel Xeon 6973P-C 12, Intel Xeon Platinum 8370C 8. Per application, gate stops: `thunderbird-send` 32, `mpv-video` 27, `mpv-audio` 24, `soffice` 11 (5 of them in the pooled campaign, 6 in the superseded first design), `kdenlive` 10, `gimp` 3. The 2026-09-20 campaign re-measuring `chrome`, `code` and `webrtc` is still running.
+
+The 9.8 desktop campaign, complete: 96 jobs — 55 landed on the AMD EPYC 7763 (57.3 %; 51 pooled, 4 the unpooled duplicate landings above), 41 stopped by the machine gate: AMD EPYC 9V74 19, Intel Xeon Platinum 8573C 9, AMD EPYC 9V45 7, Intel Xeon 6973P-C 4, Intel Xeon Platinum 8370C 2. Per entry, gate stops: `element` 14, `chrome-hidden` 11, `steam` 9, `chrome-visible` 7.
