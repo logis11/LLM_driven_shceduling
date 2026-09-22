@@ -8,8 +8,8 @@ Same-machine repeats sub-item. Branch `jioh/dataset-rebuild`; everything below i
 |---|---|---|---|---|
 | `soffice`, `gimp`, `kdenlive`, `mpv-video`, `mpv-audio`, `thunderbird-send` | six archetypes | — | **hold** | filed in `campaign/results-same-machine/` |
 | `webrtc` | `video-call` | 35 | **holds** (D59) | `playback/webrtc --since 245` |
-| `code` | `code-editor` | 18 valid (windows 1–4, 6–19; window 5 left out, D63) | not yet, projection 21 | `interactive/code --since 376 --exclude 5 --exclude-why "D63: …"` |
-| `chrome` | `web-browser` | 0 — the D62 campaign (16 repeats) superseded by D65; restarts from window 1 | — | pool from the first run under D65, `-- --exclude-roles renderer` |
+| `code` | `code-editor` | 19 valid (windows 1–4, 6–20; window 5 left out, D63) | not yet, projection 24 (136M input_run, VizCompositorTh gap) | `interactive/code --since 376 --exclude 5 --exclude-why "D63: …"` |
+| `chrome` | `web-browser` | 5 under D65 (first batch valid) | not yet, projection 32 (the two input_run values only) | `interactive/chrome --since 438 -- --exclude-roles renderer` |
 
 ## What changed on 2026-09-21
 
@@ -46,7 +46,7 @@ The releases (2026-09-18/-19 for the six, 2026-09-20 for the three) and one fold
 
 ## Resume point (the Mac may go down)
 
-In flight at 23:40 UTC: `chrome`'s D65 first batch, all five windows measuring (runs #438–#441, pool `--since 438`), and `code` window 20 (run #448). On resume: `status.py interactive --since 438 --app chrome:438 --app code:448`; relaunch any gated window (`launch.py retried …`); pool and check every landing (`pool_runs.py` with the table's arguments; `chrome`: `after-driven.png` shows the box holding the stream's text, `after-altprelude.png` the box empty at the top, the idle slice profile under ~10 ms/s, the pooled record's `heavy_event`; `code`: the status bar in `after-altprelude.png` at Ln 28 with 0 errors); then add repeats one at a time per application (`chrome` 6 and `code` 21 next).
+In flight at 00:40 UTC on 2026-09-22: `chrome` window 6 and `code` window 21 (run #449). The D65 first batch (windows 1–5) is valid on every check: keys only, the box holding the stream's text after SWELL-KW and empty after the prelude, idle peaks 2.2–8.0 ms/s, the heavy pass recorded apart (once in 3,000 s). On resume: `status.py interactive --since 449 --app chrome:449 --app code:449`; relaunch any gated window; pool and check each landing (the per-landing checks above, plus for `chrome` `after-driven.png` holding text); add the next repeat per application.
 
 ## Running the loop
 
