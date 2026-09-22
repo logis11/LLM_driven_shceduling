@@ -253,6 +253,34 @@ sweep() {
     else failed=$((failed + 1)); echo "user failed $u" >> "$OUT/sweep.$n.txt"; fi
   done < <(ucmd systemctl --user list-units --type=service,scope --state=active,activating,reloading --no-legend --plain --no-pager)
   rec "sweep.$n.moved" "$moved"; rec "sweep.$n.failed" "$failed"
+  adopt "$n"
+}
+
+# adopt <n>: the processes in the pinned units that are none of the entries' — services the session bus starts on
+# demand, a helper GNOME Shell forks, (sd-pam) beside the user manager — moved into a scope of their own on the
+# harness CPUs, created by the manager owning their unit with StartTransientUnit's PIDs (changelog D15)
+adopt() {
+  local n="$1" m pids_user="" pids_sys="" rc
+  m="$($CENSUS mask "$MEAS_HARNESS_CPUS")"
+  while read -r mgr pid; do
+    case "$mgr" in user) pids_user="$pids_user $pid" ;; system) pids_sys="$pids_sys $pid" ;; esac
+  done < <(sudo $CENSUS others "$MEAS_UID")
+  echo "adopt $n user:$pids_user system:$pids_sys" >> "$OUT/sweep.$n.txt"
+  set -- $pids_user
+  if [ "$#" -gt 0 ]; then
+    ucmd busctl --user call org.freedesktop.systemd1 /org/freedesktop/systemd1 org.freedesktop.systemd1.Manager \
+      StartTransientUnit 'ssa(sv)a(sa(sv))' "meas-offcpu-$n.scope" fail 2 PIDs au "$#" "$@" AllowedCPUs $m 0 \
+      >> "$OUT/sweep.$n.txt" 2>&1; rc=$?
+    rec "sweep.$n.adopted_user" "$#"; rec "sweep.$n.adopt_user.rc" "$rc"
+  fi
+  set -- $pids_sys
+  if [ "$#" -gt 0 ]; then
+    sudo busctl call org.freedesktop.systemd1 /org/freedesktop/systemd1 org.freedesktop.systemd1.Manager \
+      StartTransientUnit 'ssa(sv)a(sa(sv))' "meas-offcpu-$n.scope" fail 2 PIDs au "$#" "$@" AllowedCPUs $m 0 \
+      >> "$OUT/sweep.$n.txt" 2>&1; rc=$?
+    rec "sweep.$n.adopted_system" "$#"; rec "sweep.$n.adopt_system.rc" "$rc"
+  fi
+  rec "sweep.$n.left_in_units" "$(sudo $CENSUS others "$MEAS_UID" | wc -l)"
 }
 
 # ---- the job ---------------------------------------------------------------------------------------------------

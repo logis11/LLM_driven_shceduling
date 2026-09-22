@@ -12,8 +12,8 @@ Two counts sit beside the entries, from every row of the trace on the measured C
   - `foreign.user`: schedule-ins by user-space processes that are none of the four entries' — the gate; a repeat
     with any is not pooled;
   - `foreign.kernel`: schedule-ins and CPU time of kernel threads, which cannot be moved at run time — reported;
-  - `in_unit_other`: processes in a pinned unit that are not its program (an Xwayland, a helper) — on the measured
-    CPU by the pin, in no entry, reported apart.
+  - `in_unit_other`: processes in a pinned unit that are not its program (an Xwayland, a helper) — moved off by the
+    sweeps (D15), so any left on the measured CPU gate the repeat as `foreign.user` does.
 
 `llvmpipe-*` threads are left out of GNOME Shell's components, as `load_rows` leaves them out of every campaign
 (9.5 D15: the runner's software rasteriser, a venue artefact); their rows are counted and reported.

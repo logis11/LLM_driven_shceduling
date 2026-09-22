@@ -11,7 +11,8 @@ across entries or instances).
 Reasons a repeat does not enter the pool:
   - the machine gate stopped it, or the run stopped it at the steady edge (`not-idle`) or earlier;
   - its mode is `probe`: the long-phase probe is never a repeat (method §1);
-  - a user-space process other than the four entries' was scheduled on the measured CPU during `steady` (D12, D14).
+  - a user-space process other than the four entries' — a pinned unit's other process included — was scheduled
+    on the measured CPU during `steady` (D12, D14, D15).
 """
 
 import argparse
@@ -143,9 +144,11 @@ def pool_app(app, reps):
             continue
         f = ph["foreign"]
         entry["foreign"][k] = {x: {"schedule_ins": f[x]["schedule_ins"], "cpu_ms": f[x]["cpu_ms"]} for x in f}
-        if f["user"]["schedule_ins"]:
-            entry["foreign_user"].append({"repeat": k, "schedule_ins": f["user"]["schedule_ins"],
-                                          "by_comm": f["user"]["by_comm"]})
+        # D12, D15: user space outside the entries, including the pinned units' other processes, gates a repeat
+        gated = f["user"]["schedule_ins"] + f["in_unit_other"]["schedule_ins"]
+        if gated:
+            entry["foreign_user"].append({"repeat": k, "schedule_ins": gated,
+                                          "by_comm": {**f["user"]["by_comm"], **f["in_unit_other"]["by_comm"]}})
             continue
         entry["repeats"].append(k)
         entry["mode"] = info["mode"]

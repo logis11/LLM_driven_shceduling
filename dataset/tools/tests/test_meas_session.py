@@ -53,6 +53,12 @@ def test_the_idle_state_needs_the_shield_the_blank_and_an_active_session():
     assert not census.is_idle({**ok, "session_active": None})    # the query failed
 
 
+def test_the_cpu_mask_is_the_bytes_start_transient_unit_takes():
+    assert census.mask("0-2") == "ay 1 7"
+    assert census.mask("3") == "ay 1 8"
+    assert census.mask("0-2,9") == "ay 2 7 2"
+
+
 def test_busctl_values_parse():
     assert census.busctl_value({"rc": 0, "out": "b true"}) is True
     assert census.busctl_value({"rc": 0, "out": "i 3"}) == 3
@@ -63,7 +69,7 @@ def _row(t, cpu, comm, tid, pid, run, state="S"):
     return f"{t:12.6f} [{cpu:04d}]  {comm}[{tid}/{pid}]    0.000      0.001      {run:.3f}      {state}\n"
 
 
-def _run_dir(d, k=1, mode="full", foreign_user=False, scale=1.0):
+def _run_dir(d, k=1, mode="full", foreign_user=False, scale=1.0, in_unit=False):
     inst, other = census.instances(PROCS, UID)
     c = {"instances": inst, "in_unit_other": other, "kthreads": [2, 30],
          "display_servers": [{"pid": 521, "comm": "Xwayland", "cmd": "Xwayland"}]}
@@ -85,7 +91,8 @@ def _run_dir(d, k=1, mode="full", foreign_user=False, scale=1.0):
         rows.append(_row(t, 3, "gnome-shell", 520, 520, 0.5 * scale))
         rows.append(_row(t + 0.1, 3, "llvmpipe-0", 522, 520, 1.0))
     rows.append(_row(50.2, 3, "kworker/3:1", 30, 30, 0.05))       # a per-CPU kernel thread: reported, not gated
-    rows.append(_row(50.4, 3, "Xwayland", 521, 521, 0.3))         # in the shell's unit: reported apart
+    if in_unit:
+        rows.append(_row(50.4, 3, "Xwayland", 521, 521, 0.3))     # in the shell's unit, left on the measured CPU
     rows.append(_row(50.6, 0, "snapd", 410, 410, 0.3))            # user space on a harness CPU: nothing
     if foreign_user:
         rows.append(_row(60.0, 3, "snapd", 410, 410, 0.3))        # user space on the measured CPU: the gate
@@ -98,7 +105,7 @@ def _run_dir(d, k=1, mode="full", foreign_user=False, scale=1.0):
 
 
 def test_components_are_per_instance_and_foreign_work_is_split(tmp_path):
-    ph = analyze.analyze_run_dir(str(_run_dir(tmp_path / "r1", foreign_user=True)))["phases"]["steady"]
+    ph = analyze.analyze_run_dir(str(_run_dir(tmp_path / "r1", foreign_user=True, in_unit=True)))["phases"]["steady"]
     sysd = ph["entries"]["systemd"]
     assert set(sysd["threads"]) == {"pid1/systemd"}              # the user manager did not run in this trace
     assert sysd["missing_instances"] == []
@@ -120,12 +127,14 @@ def test_the_pool_names_probe_and_foreign_repeats_and_pools_the_rest(tmp_path):
     for k in range(1, 6):
         _run_dir(root / f"run{k}" / f"meas-session-session-r{k}-full", k=k)
     _run_dir(root / "run6" / "meas-session-session-r6-full", k=6, foreign_user=True)
+    _run_dir(root / "run8" / "meas-session-session-r8-full", k=8, in_unit=True)
     _run_dir(root / "run7" / "meas-session-session-r7-probe", k=7, mode="probe")
     runs, gated, other, probes = pool.find_runs(str(root), "EPYC 7763")
     assert [p["repeat"] for p in probes] == [7]
     entry = pool.pool_app("session", runs["session"])
     assert entry["repeats"] == [1, 2, 3, 4, 5]
-    assert [x["repeat"] for x in entry["foreign_user"]] == [6]
+    # D15: a pinned unit's other process on the measured CPU gates the repeat as user space outside the entries does
+    assert [x["repeat"] for x in entry["foreign_user"]] == [6, 8]
     ents = entry["phases"]["steady"]["entries"]
     assert set(ents) == {"gnome-shell", "pipewire", "systemd", "dbus-daemon"}
     # five identical repeats: every value carried holds, each entry on its own components

@@ -4,6 +4,9 @@
   census.py snapshot <uid> <label> <out.json>    as root: every process, the units, the session, the state
   census.py state <uid>                          one JSON line: SessionIsActive, shield, PowerSaveMode, presence
   census.py check <state.json>                   exit 0 when the state is the terminal idle state (method §3)
+  census.py others <uid>                         the pinned units' processes that are none of the entries', one
+                                                 "<manager> <pid>" per line, for the sweep to adopt (changelog D15)
+  census.py mask <cpu-list>                      a CPU list as the `ay` bitmask StartTransientUnit takes
 
 Every query here reaches a measured process — `systemctl` pid 1 and the user manager, `loginctl` logind over the
 system bus, the state queries the session bus, gnome-session and GNOME Shell — so the run calls this outside the
@@ -212,6 +215,26 @@ def snapshot(uid, label):
     }
 
 
+def others(uid):
+    """The processes in a pinned unit that are not its program (changelog D15), by the manager that owns their unit:
+    `user` under the measured user's manager, `system` otherwise."""
+    _, other = instances(processes(), uid)
+    for o in sorted(other, key=lambda o: o["pid"]):
+        cg = proc(o["pid"]) and proc(o["pid"])["cgroup"] or ""
+        yield ("user" if f"/user@{uid}.service/" in cg else "system"), o["pid"]
+
+
+def mask(cpus):
+    """'0-2' -> 'ay 1 7': the bytes of the CPU bitmask, least significant first, as busctl writes an `ay`."""
+    bits = set()
+    for part in cpus.split(","):
+        a, _, b = part.partition("-")
+        bits.update(range(int(a), int(b or a) + 1))
+    n = max(bits) // 8 + 1
+    by = [sum(1 << (c % 8) for c in bits if c // 8 == i) for i in range(n)]
+    return "ay " + " ".join(str(x) for x in [n] + by)
+
+
 def main():
     a = sys.argv[1:]
     if a[:1] == ["snapshot"] and len(a) == 4:
@@ -220,6 +243,11 @@ def main():
         print(json.dumps(state(int(a[1]))))
     elif a[:1] == ["check"] and len(a) == 2:
         raise SystemExit(0 if is_idle(json.load(open(a[1]))) else 1)
+    elif a[:1] == ["others"] and len(a) == 2:
+        for mgr, pid in others(int(a[1])):
+            print(mgr, pid)
+    elif a[:1] == ["mask"] and len(a) == 2:
+        print(mask(a[1]))
     else:
         raise SystemExit(__doc__)
 
