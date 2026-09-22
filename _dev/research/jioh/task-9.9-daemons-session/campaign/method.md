@@ -20,7 +20,7 @@ One subject, since the four entries are observed in one session (D8).
 2. **Log in.** A dedicated user, logged in through PAM so that logind creates a session for it and pid 1 starts its user manager (`user@.service`, S2-29). The session has no seat; logind counts a seatless session as active (S2-31). The Ubuntu session (`gnome-session --session=ubuntu`) is started under the user manager with `XDG_SESSION_TYPE=wayland`, so GNOME Shell runs inside `org.gnome.Shell@wayland.service` and Mutter keeps Xwayland on demand (S2-28).
 3. **Headless.** The runner has no display device, so GNOME Shell runs with `--headless --virtual-monitor 1920x1080@60`, added by a user drop-in on `org.gnome.Shell@wayland.service` that changes `ExecStart=` and nothing else. This is the one departure from the shipped unit, and it is stated in every entry's scope. The audio stack runs with no sound device (the Azure kernel has no `CONFIG_SND`, S4-15); WirePlumber creates its null sink as it does on a machine without one.
 4. **Census, recorded before the steady phase.** The process tree with each process's cgroup and command line; `systemctl list-units` for the system and the user manager; `loginctl show-session`; whether any `Xwayland` or `Xorg` process exists (the held display-server question); whether the buses are `dbus-daemon` or `dbus-broker` (D6); gnome-session's `SessionIsActive`, the power daemon's idle mode and the shield's state at the start and the end of the steady phase (S2-30, S2-31). The census is released with the raw records.
-5. **Pinning.** The four entries' processes are confined to the measured CPU at run time; everything the harness runs — `perf`, the driver, the runner's agents — stays on the other CPUs. Which processes beyond the four entries share the measured CPU is open (§9).
+5. **Pinning.** Only the four entries' processes are confined to the measured CPU, at run time (D10): pid 1 by `systemctl set-property --runtime init.scope AllowedCPUs=`, the system bus by the same on `dbus.service`, and in the user manager the session bus, GNOME Shell and the three PipeWire services by `systemctl --user set-property --runtime … AllowedCPUs=` on their units, with the user manager itself by `taskset -a -pc` (S4-05, S4-06, S4-07). Every other process — the other session processes (settings daemons, portals, the indexer), the other system services, and everything the harness runs (`perf`, the driver, the runner's agents) — stays on the other CPUs. The census records each process's allowed CPUs at the start and the end of the steady phase.
 
 ## 3. Phases
 
@@ -53,7 +53,7 @@ One subject, since the four entries are observed in one session (D8).
 
 ## 7. Scope, written into every archetype
 
-Each entry states: the runner spec, CPU model and kernel; the package versions observed; the state — the Ubuntu 24.04 desktop session idle past `idle-delay`, shield up and locked, blanked by the power daemon, nobody present, no application running — and what it is not; and the limits: a headless virtual monitor at 60 Hz with no display and no vblank, GNOME Shell started with `--headless --virtual-monitor` by a unit drop-in; no seat; a null sink and no sound device; a server VM with its own agents present off the measured CPU; the pinning of §2.5.
+Each entry states: the runner spec, CPU model and kernel; the package versions observed; the state — the Ubuntu 24.04 desktop session idle past `idle-delay`, shield up and locked, blanked by the power daemon, nobody present, no application running — and what it is not; and the limits: a headless virtual monitor at 60 Hz with no display and no vblank, GNOME Shell started with `--headless --virtual-monitor` by a unit drop-in; no seat; a null sink and no sound device; a server VM with its own agents present off the measured CPU; only the four entries' processes on the measured CPU, the rest of the session on the others (§2.5).
 
 ## 8. Release
 
@@ -61,11 +61,10 @@ The raw records, including every job's census, are one release, as 9.5–9.8 rel
 
 ## 9. Open before the first batch
 
-- **Which processes share the measured CPU.** Either only the four entries' processes (pid 1 by `init.scope`, the system bus by `dbus.service`, the user manager, the session bus, GNOME Shell and the three PipeWire services by their user units), or the whole session — the user's slice, holding every session process — together with pid 1 and the system bus. 인지오's decision.
 - **Whether the session comes up as §2 states** — the seatless PAM login, `SessionIsActive`, the shell under its unit with the drop-in, the null sink. The dry run verifies it; a departure is a method amendment, not a silent change.
 - **Whether the shield and the blank are reached headless**, and what the compositor does once they are. The probe shows it; if the session never blanks, whether the entries are measured shield-up without the blank is a design question for 인지오.
 - **`session-settle` and `steady` lengths**, from the probe, written into §10 before the first batch.
 
 ## 10. Amendments
 
-(none)
+- 2026-09-22, which processes share the measured CPU (changelog D10) — §2.5: only the four entries' processes; §9's item removed.
