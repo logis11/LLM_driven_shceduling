@@ -7,7 +7,7 @@ pool.py <artifacts-dir> <out.json> [--md results.md] [--cpu-model TEXT] [--tag T
 <artifacts-dir> holds one folder per (program, repeat) named
 meas-background-<app>-r<k>-<mode> (as uploaded), at any depth, so the runs of
 one campaign can be downloaded side by side into one folder each. A job the
-machine gate stopped (report.json gate=wrong-machine) and, with --cpu-model, a
+machine gate stopped (report.json gate=wrong-machine), one the network gate stopped (gate=no-vf) and, with --cpu-model, a
 repeat measured on another CPU model are listed, not pooled. Per program and
 phase: every repeat is analysed (analyze.analyze_phase) once, the result and its samples cached beside the
 repeat (pool-cache/, keyed by the analysis code), and the samples of all
@@ -88,7 +88,7 @@ def pct_sorted(v, q):
 
 def pooled(by_repeat):
     """by_repeat: repeat -> float64 array of one table's samples. Each array is sorted once, the pooled one once."""
-    reps = sorted(by_repeat.items())
+    reps = sorted((r, np.asarray(vs, dtype=np.float64)) for r, vs in by_repeat.items())
     allv = np.sort(np.concatenate([vs for _r, vs in reps])) if reps else np.empty(0)
     out = {"n": int(len(allv)), "q": [round(pct_sorted(allv, q), 1) for q in QUANTILE_PROBS] if len(allv) else None,
            "p50": round(pct_sorted(allv, .5), 1) if len(allv) else None}
@@ -229,7 +229,7 @@ def find_runs(root, cpu_model):
             continue
         app, k, mode = m.group(1), int(m.group(2)), m.group(3)
         rpt = json.load(open(os.path.join(d, "report.json")))
-        if rpt.get("gate") == "wrong-machine":
+        if rpt.get("gate") in ("wrong-machine", "no-vf"):
             gated.append({"app": app, "repeat": k, "cpu_model": rpt.get("machine.model"), "path": os.path.relpath(d, root)})
             continue
         spec = json.load(open(os.path.join(d, "spec.json"))) if os.path.exists(os.path.join(d, "spec.json")) else {}
