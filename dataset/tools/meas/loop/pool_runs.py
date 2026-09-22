@@ -144,9 +144,12 @@ def main():
     since = int(a[a.index("--since") + 1]) if "--since" in a else 1
     base = os.path.join(common.WORK, "pool", f"{family}-{app or 'build'}-from{since}")
     out = a[a.index("--out") + 1] if "--out" in a else os.path.join(base, "pooled.json")
-    excluded = {int(k) for k in a[a.index("--exclude") + 1].split(",")} if "--exclude" in a else set()
+    # K leaves every copy of window K out; K@RUNID only the copy measured in that run (a window measured twice)
+    items = a[a.index("--exclude") + 1].split(",") if "--exclude" in a else []
+    excluded = {int(x) for x in items if "@" not in x}
+    excluded_runs = {(int(x.split("@")[0]), int(x.split("@")[1])) for x in items if "@" in x}
     why = a[a.index("--exclude-why") + 1] if "--exclude-why" in a else ""
-    if excluded and not why:
+    if (excluded or excluded_runs) and not why:
         raise SystemExit('--exclude needs --exclude-why "<reason>": the pooled record states why a repeat is left out')
     landed = {}
     for r in common.runs(family, since):
@@ -160,7 +163,7 @@ def main():
                 print(f"   run #{r['number']} ({r['databaseId']}): no {name} (has {', '.join(names) or 'none'}); not pooled")
                 continue
             dest = os.path.join(base, name) if family == "build" else os.path.join(base, str(r["databaseId"]), name)
-            if j["k"] in excluded:   # out of the folder pool.py reads, kept beside it, never downloaded again
+            if j["k"] in excluded or (j["k"], r["databaseId"]) in excluded_runs:   # out of the folder pool.py reads, kept beside it, never downloaded again
                 aside = os.path.join(base + "-excluded", str(r["databaseId"]), name)
                 if os.path.exists(dest) and not os.path.exists(aside):
                     os.makedirs(os.path.dirname(aside), exist_ok=True)
@@ -184,13 +187,14 @@ def main():
     pooled = json.load(open(out))
     entry = pooled if family == "build" else pooled["runs"].get(app)
     st = (entry or {}).get("stability")
-    if excluded:
-        (entry if entry is not None else pooled)["excluded_repeats"] = {str(k): why for k in sorted(excluded)}
+    if excluded or excluded_runs:
+        (entry if entry is not None else pooled)["excluded_repeats"] = {
+            **{str(k): why for k in sorted(excluded)}, **{f"{k}@{rid}": why for k, rid in sorted(excluded_runs)}}
         json.dump(pooled, open(out, "w"), indent=1)
         md = next((cmd[i + 1] for i, a in enumerate(cmd) if a == "--md"), None)   # the pool rendered before this key existed
         if md and os.path.exists(md):
             with open(md, "a") as handle:
-                handle.write(f"\n## Left out of this pool\n\nRepeat(s) {', '.join(str(k) for k in sorted(excluded))}: {why}\n")
+                handle.write(f"\n## Left out of this pool\n\nRepeat(s) {', '.join([str(k) for k in sorted(excluded)] + [f"{k}@{rid}" for k, rid in sorted(excluded_runs)])}: {why}\n")
     if family == "build":
         crit = st["quantities"]
         print(f"build: repeats {pooled['repeats']}; stability rule {'holds' if st['passes'] else 'does not hold yet'}; "
@@ -218,8 +222,8 @@ def main():
     print(f"   phases {list((entry or {}).get('phases', {}))}; pooled record {out}")
     print("validity:")
     bad = validity(family, dirs, entry)
-    if excluded:
-        print(f"   left out of this pool: {sorted(excluded)} — {why}")
+    if excluded or excluded_runs:
+        print(f"   left out of this pool: {sorted(excluded) + [f'{k}@{rid}' for k, rid in sorted(excluded_runs)]} — {why}")
     print(f"   {'every repeat valid' if not bad else f'{bad} repeat(s) with a problem'}")
 
 

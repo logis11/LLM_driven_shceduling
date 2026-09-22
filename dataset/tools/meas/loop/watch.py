@@ -22,6 +22,19 @@ import time
 import common
 
 
+def holder(fam, app, k, number, back=5):
+    """The number of another run from `number - back` on whose job for the same window is queued, measuring or landed,
+    or None: a push can start two runs of one workflow in the same second, and a watcher started from the later one's
+    number would otherwise relaunch a window the earlier one is measuring."""
+    for r in common.runs(fam, max(1, number - back)):
+        if r["number"] == number:
+            continue
+        if any(j["app"] == app and j["k"] == k and j["state"] in ("queued", "measuring", "landed")
+               for j in common.jobs(fam, r["databaseId"])):
+            return r["number"]
+    return None
+
+
 def main():
     a = sys.argv[1:]
     if not a:
@@ -105,6 +118,11 @@ def main():
                 if key not in deferred:
                     deferred.add(key)
                     print(f"{time.strftime('%H:%M')} {app or 'build'} r{k} gated ({model}); left for the next check", flush=True)
+                continue
+            other = holder(fam, app, k, number)
+            if other:   # 2026-09-22: one push started two runs (#474, #475); the watcher saw only #475's gated copy
+                seen.add(key); open(seen_path, "a").write(key + "\n")
+                print(f"{time.strftime('%H:%M')} {app or 'build'} r{k} gated ({model}); not relaunched — run #{other} holds it", flush=True)
                 continue
             go.append((fam, app, k, key))
             print(f"{time.strftime('%H:%M')} {app or 'build'} r{k} gated ({model}); relaunched", flush=True)
