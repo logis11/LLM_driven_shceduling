@@ -298,7 +298,7 @@ def phase_span(rows):
 def analyze_run(D, w_ms=5.0, cap_ms=0.0, waker="^Xvfb$|^Xorg$", wake_def="wakeup", exclude_roles=()):
     """Return (result, raw): result as printed/dumped by the CLI; raw = per-phase wakes, segments and per-input lists for pooling.
     exclude_roles: process roles (pid_roles) whose rows leave the tree — D14: Chrome's renderer processes belong to
-    electron-comms, so the web-browser archetype is pooled with exclude_roles=("renderer",)."""
+    renderer-hidden and renderer-visible (9.8 D2), so the web-browser archetype is pooled with exclude_roles=("renderer",)."""
     class A: pass
     args = A(); args.run_dir = D; args.w_ms = w_ms; args.cap_ms = cap_ms; args.waker = waker; args.json = None
     args.wake_def = wake_def; args.exclude_roles = set(exclude_roles)

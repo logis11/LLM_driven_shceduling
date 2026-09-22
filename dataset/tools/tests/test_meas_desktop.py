@@ -406,3 +406,23 @@ def test_every_landing_of_an_index_that_landed_twice_is_pooled(tmp_path):
         (d / "spec.json").write_text(json.dumps({"cpu_model": "AMD EPYC 7763", "github_run": {"GITHUB_RUN_ID": run}}))
     runs, _, _, _ = pool.find_runs(str(tmp_path), "EPYC 7763")
     assert sorted(runs["element"], key=pool.repeat_order) == [1, "2@222", "2@333"]
+
+
+def test_each_selected_component_carries_its_pooled_tables(tmp_path):
+    # D10: the entries carry a gap and a run quantile table per component; the pool builds them from every
+    # repeat's samples together
+    procs = [{"pid": 100, "comm": "element", "cmd": "/usr/bin/element-desktop"}]
+    rows = ("   0.000010 [0000]  perf[50]    0.000      0.000      0.010      R\n"
+            + "".join(f"   {t:.6f} [0003]  element[100/100]    0.000      0.001      1.000      S\n" for t in (1, 2, 3, 4, 5))
+            + "  10.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n")
+    wakeups = "".join(f"   {t - 0.01:.6f} [0001]  x[9]  awakened: element[100/100]\n" for t in (1, 2, 3, 4, 5))
+    reps = {}
+    for k in (1, 2):
+        d = tmp_path / f"r{k}"
+        d.mkdir()
+        _run_dir(d, "element", "idle", procs, rows, wakeups)
+        reps[k] = {"dir": str(d), "mode": "full", "report": {}, "spec": {}}
+    e = pool.pool_app("element", reps)
+    t = e["phases"]["idle"]["tables"]
+    assert set(t) == set(e["phases"]["idle"]["components"]["selected"]) and t
+    assert all(v["gap_ms"]["q"] and v["run_ms"]["q"] for v in t.values())

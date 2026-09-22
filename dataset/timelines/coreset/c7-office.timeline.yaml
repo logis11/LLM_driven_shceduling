@@ -31,13 +31,18 @@ tasks:
   depart: 60s
   id: browser
   name: chrome
-- archetype: electron-comms
+- archetype: renderer-visible
   arrive: 0s
-  count: 8
+  depart: 60s
+  id: renderer-shown
+  name: chrome
+- archetype: renderer-hidden
+  arrive: 0s
+  count: 7
   depart: 60s
   id: renderers
   name: chrome
-- archetype: electron-comms
+- archetype: mail-client
   arrive: 0s
   depart: 60s
   id: mail

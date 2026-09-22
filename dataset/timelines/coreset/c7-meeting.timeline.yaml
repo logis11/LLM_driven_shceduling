@@ -26,11 +26,6 @@ tasks:
   depart: 60s
   id: voice
   name: zoom
-- archetype: electron-comms
-  arrive: 0s
-  depart: 60s
-  id: helper
-  name: zoom
 - archetype: cpu-batch
   arrive: 0s
   bind:

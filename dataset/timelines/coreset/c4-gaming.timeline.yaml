@@ -21,23 +21,17 @@ tasks:
   depart: 60s
   id: game
   name: game.exe
-- archetype: electron-comms
+- archetype: game-client
   arrive: 0s
   depart: 60s
   id: steam
   name: steam
-- archetype: electron-comms
-  arrive: 0s
-  count: 3
-  depart: 60s
-  id: webhelper
-  name: steamwebhelper
 - archetype: video-player
   arrive: 0s
   depart: 60s
   id: compositor
   name: gamescope
-- archetype: electron-comms
+- archetype: chat-client
   arrive: 30s
   depart: 60s
   id: injected-overlay

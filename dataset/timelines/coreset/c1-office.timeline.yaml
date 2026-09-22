@@ -13,9 +13,11 @@ tasks:
      arrive: 0s, depart: 60s}
   - {id: browser, name: chrome, archetype: web-browser,
      arrive: 0s, depart: 60s}
-  - {id: renderers, name: chrome, archetype: electron-comms,
-     arrive: 0s, depart: 60s, count: 8}
-  - {id: mail, name: thunderbird, archetype: electron-comms,
+  - {id: renderer-shown, name: chrome, archetype: renderer-visible,
+     arrive: 0s, depart: 60s}
+  - {id: renderers, name: chrome, archetype: renderer-hidden,
+     arrive: 0s, depart: 60s, count: 7}
+  - {id: mail, name: thunderbird, archetype: mail-client,
      arrive: 0s, depart: 60s}
 
 focus:

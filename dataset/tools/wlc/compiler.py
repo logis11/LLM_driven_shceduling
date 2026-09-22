@@ -166,7 +166,7 @@ def _draw(params, name, seed, iid, k):
     return sampling.sample(param, seed, iid, name, index)
 
 
-# ---- segment-bound unbounded loops (audio, video, electron, daemons) --------
+# ---- segment-bound unbounded loops (entries without measured components) --
 
 def _unbounded_loop(build, iid, seed, params, program, lifespan):
     body, cycle_run, cycle_wall, period = [], 0, 0, None

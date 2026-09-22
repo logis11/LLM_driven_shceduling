@@ -27,7 +27,7 @@ ARCHETYPES = {
                     "swell-word-c1", "swell-icmi14:word-c1", []),
     "mail-client": ("thunderbird", "{version} (snap via apt), a compose window over a pre-seeded local account", "input",
                     "swell-outlook-c23", "swell-icmi14:outlook-c23", []),
-    "web-browser": ("chrome", "{version} (preinstalled), a local page with a text area and 400 paragraphs; the browser process, GPU and utility processes — renderer processes excluded (electron-comms); operation page-load: the scripted feed page feed.html (300 posts, thirty 1600×1200 pictures, a 200 000-record sort; design after PCMark 10 pp. 52–53 and CpsMark+ §4.3.3) from a local server, completion by the page's title after first paint", "input",
+    "web-browser": ("chrome", "{version} (preinstalled), a local page with a text area and 400 paragraphs; the browser process, GPU and utility processes — renderer processes excluded (renderer-hidden, renderer-visible); operation page-load: the scripted feed page feed.html (300 posts, thirty 1600×1200 pictures, a 200 000-record sort; design after PCMark 10 pp. 52–53 and CpsMark+ §4.3.3) from a local server, completion by the page's title after first paint", "input",
                     "swell-ie-c1", "swell-icmi14:ie-c1", []),
     "image-editor": ("gimp", "{version} (apt), a 4952×3288 image open (PCMark 10 Photo Editing's interactive image size, Technical Guide p. 71; synthetic content, imported as 16-bit; design); driven by a scripted pointer loop (drag, click, wheel; design); operation unsharp-mask: plug-in-unsharp-mask std-dev 4.0, amount 0.32, threshold 8 (PCMark 10's batch unsharp parameters mapped onto GIMP's PDB, p. 74; design) through the Script-Fu server, completion by its reply", "cadence", None, None, []),
     "video-editor": ("kdenlive", "Kdenlive 23.08.5 (Ubuntu 24.04 apt), a project with one 20 s 1920×1080 30 fps H.264 clip (PCMark 10 Video Editing's 1080p H.264, p. 76; synthetic content, design) on V1 with an avfilter.unsharp effect at PCMark 10's sharpening parameters (p. 76); driven by a scripted pointer loop that scrubs the clip monitor (design); llvmpipe software-rasteriser threads excluded (D15); operation preview-render: the whole-clip timeline preview rendered by Kdenlive's external kdenlive_render process (part of the tree), completion when it exits", "cadence", None, None, []),
@@ -180,7 +180,7 @@ def entry(aid, spec, d):
     out.append("    modeling_notes: >-")
     notes = (f"Per-application archetype (D2): one task carries the whole process tree merged (D14)")
     if run == "chrome":
-        notes += ", renderer processes excluded as electron-comms' (bound separately)"
+        notes += ", renderer processes excluded as renderer-hidden's and renderer-visible's (bound separately)"
     notes += (". Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the "
               "task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled "
               "residual stands for the comms below the coverage cut.")

@@ -266,6 +266,11 @@ def pool_app(app, reps):
             } for comm in sorted({c for k in by_rep for c in by_rep[k]["threads"]})},
             "control_tab": {k: by_rep[k].get("control_tab") for k in sorted(by_rep, key=repeat_order)},
             "components": {"selected": chosen, "residual": residual, **cov},
+            # each selected component's pooled gap and run tables, every repeat's samples together — what the fold-in
+            # carries (D10), built with the summary `campaign/pool.py` builds 9.5's tables with
+            "tables": {c: {"gap_ms": _cp.summary([comms[c]["gaps"].get(k, []) for k in sorted(by_rep, key=repeat_order)]),
+                           "run_ms": _cp.summary([comms[c]["runs"].get(k, []) for k in sorted(by_rep, key=repeat_order)])}
+                       for c in chosen},
             "renderer_pids": {k: by_rep[k].get("renderer_pids") for k in sorted(by_rep, key=repeat_order)},
         }
     # the population the entry is pooled from (D14 hands to 9.13 that each entry's scope states it): the renderers

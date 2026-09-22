@@ -64,11 +64,9 @@ def test_count_expansion(fixture_path, library):
                  and e["id"].startswith("renderers.")]
     assert len(renderers) == 3
     assert all(e["name"] == "chrome" for e in renderers)
-    periods = set()
-    for event in renderers:
-        body = event["program"][0]["body"]
-        periods.add(next(i["period_us"] for i in body if i["op"] == "TIMER"))
-    assert len(periods) == 3  # per-instance draws differ across the expansion
+    # a measured archetype compiles to an explicit event stream per instance (9.5 D9): each instance draws its own
+    streams = {tuple(i.get("period_us") or i.get("us") for i in event["program"]) for event in renderers}
+    assert len(streams) == 3  # per-instance draws differ across the expansion
 
 
 def test_focus_wakes_inside_windows(fixture_path, library):

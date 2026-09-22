@@ -7,7 +7,7 @@ variants:
     from: c1-gaming.timeline.yaml
     ops:
       - add-task: {id: injected-overlay, name: discord,
-                   archetype: electron-comms, arrive: 30s, depart: 60s}
+                   archetype: chat-client, arrive: 30s, depart: 60s}
       - patch-meta: {demand: calibration}
 
   - id: c4-office
@@ -22,7 +22,9 @@ variants:
     ops:
       - add-task: {id: injected-browser, name: chrome,
                    archetype: web-browser, arrive: 30s, depart: 60s}
+      - add-task: {id: injected-renderer-shown, name: chrome,
+                   archetype: renderer-visible, arrive: 30s, depart: 60s}
       - add-task: {id: injected-renderers, name: chrome,
-                   archetype: electron-comms, arrive: 30s, depart: 60s,
-                   count: 6}
+                   archetype: renderer-hidden, arrive: 30s, depart: 60s,
+                   count: 5}
       - patch-meta: {demand: calibration}

@@ -36,7 +36,7 @@
 #   - `quantiles` params are `{p: [p1, p5, p10, p25, p50, p75, p90, p95, p99,
 #     p99.9]}` in integer microseconds, sampled by interpolation — measured
 #     distributions carried as observed (9.5 changelog D17)
-#   - measured per-application archetypes (category_source `meas`, 9.5) carry
+#   - measured per-application archetypes (category_source `meas`, 9.5, 9.8) carry
 #     `components` (timer wakes per thread comm, D16), `focus_components`
 #     (the driven cadence inside focus windows) and `stimulus` (a replayed
 #     input stream under dataset/stimulus/, D18); the compiler merges them into
@@ -362,9 +362,9 @@ archetypes:
       run: "interactive:9, repeats [1, 2, 3, 4, 5]"
       stats: ["idle wakes/s 60.8\u201385.7", "idle cpu-share 0.0059\u20130.0154", "driven wakes/s 26.6\u201345.1", "driven cpu-share 0.0023\u20130.0048", "driven-alt wakes/s 47.7\u2013149.9", "driven-alt cpu-share 0.0027\u20130.0091", "op wakes/s 85.6\u201388.2", "op cpu-share 0.0090\u20130.0113", "input_run p50 ms per repeat [0.0, 0.0, 0.0, 0.121, 0.68]"]
       scope: >-
-        One observation (phase decision 2; D3, D10): Google Chrome 152.0.7977.82 (preinstalled), a local page with a text area and 400 paragraphs; the browser process, GPU and utility processes — renderer processes excluded (electron-comms); operation page-load: the scripted feed page feed.html (300 posts, thirty 1600×1200 pictures, a 200 000-record sort; design after PCMark 10 pp. 52–53 and CpsMark+ §4.3.3) from a local server, completion by the page's title after first paint, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. Stimulus: SWELL-KW stream swell-ie-c1 replayed per event by xdotool at recorded gaps (error p99 1.24 ms), keys and pointer events together, pointer positions scaled into the content area (D5, D12); the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the process tree until the next input minus the idle rate. Stimulus sensitivity (pre-registered, method §3): under a 136M Keystrokes transcription stream (dhakal-chi18) the per-input run p50 is 0.00 ms against 0.00 ms under SWELL-KW (the SWELL-KW median is at the zero bound, D13); the archetype carries SWELL-KW. Values are this software on this machine, not desktop truth (D10). Venue bound (D24, S8): without display vsync Chromium drives its compositor from a default 60 Hz timer (Chromium docs, life of a frame; BeginFrameArgs::DefaultInterval), so the compositor cadence has a 60 Hz display's period but not its phase; rasterisation and compositing run on CPU threads under --disable-gpu, so those threads' run lengths overcount what a GPU desktop would show, by an amount no source states.
+        One observation (phase decision 2; D3, D10): Google Chrome 152.0.7977.82 (preinstalled), a local page with a text area and 400 paragraphs; the browser process, GPU and utility processes — renderer processes excluded (renderer-hidden, renderer-visible); operation page-load: the scripted feed page feed.html (300 posts, thirty 1600×1200 pictures, a 200 000-record sort; design after PCMark 10 pp. 52–53 and CpsMark+ §4.3.3) from a local server, completion by the page's title after first paint, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. Stimulus: SWELL-KW stream swell-ie-c1 replayed per event by xdotool at recorded gaps (error p99 1.24 ms), keys and pointer events together, pointer positions scaled into the content area (D5, D12); the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the process tree until the next input minus the idle rate. Stimulus sensitivity (pre-registered, method §3): under a 136M Keystrokes transcription stream (dhakal-chi18) the per-input run p50 is 0.00 ms against 0.00 ms under SWELL-KW (the SWELL-KW median is at the zero bound, D13); the archetype carries SWELL-KW. Values are this software on this machine, not desktop truth (D10). Venue bound (D24, S8): without display vsync Chromium drives its compositor from a default 60 Hz timer (Chromium docs, life of a frame; BeginFrameArgs::DefaultInterval), so the compositor cadence has a 60 Hz display's period but not its phase; rasterisation and compositing run on CPU threads under --disable-gpu, so those threads' run lengths overcount what a GPU desktop would show, by an amount no source states.
     modeling_notes: >-
-      Per-application archetype (D2): one task carries the whole process tree merged (D14), renderer processes excluded as electron-comms' (bound separately). Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled residual stands for the comms below the coverage cut. Input wakes: a contiguous slice of swell-ie-c1 equal to each focus window, at a seed-drawn offset (D18); the slice preserves the recording's burst-and-pause structure. Operation `page-load` (spec decisions 8–10): the timeline names it and a start time; the compiler draws its length from the measured duration table (trigger to completion) and swaps in the operation's components for that span, emitting no input wake; it runs to completion past the focus window.
+      Per-application archetype (D2): one task carries the whole process tree merged (D14), renderer processes excluded as renderer-hidden's and renderer-visible's (bound separately). Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled residual stands for the comms below the coverage cut. Input wakes: a contiguous slice of swell-ie-c1 equal to each focus window, at a seed-drawn offset (D18); the slice preserves the recording's burst-and-pause structure. Operation `page-load` (spec decisions 8–10): the timeline names it and a start time; the compiler draws its length from the measured duration table (trigger to completion) and swaps in the operation's components for that span, emitting no input wake; it runs to completion past the focus window.
 
   image-editor:
     category_source: meas
@@ -658,6 +658,230 @@ archetypes:
         One observation (phase decision 2; D3, D10): Google Chrome 152.0.7977.82, a loopback WebRTC call in one page with a synthetic 1280×720 30 fps camera and microphone (--use-fake-device-for-media-stream); encode and decode at ~20 fps, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. No stimulus; the play phase's thread cadence is the whole behaviour. Values are this software on this machine, not desktop truth (D10). Venue bound (D24, S8): without display vsync Chromium drives its compositor from a default 60 Hz timer (Chromium docs, life of a frame; BeginFrameArgs::DefaultInterval), so the compositor cadence has a 60 Hz display's period but not its phase; rasterisation and compositing run on CPU threads under --disable-gpu, so those threads' run lengths overcount what a GPU desktop would show, by an amount no source states.
     modeling_notes: >-
       Per-application archetype (D2): one task carries the whole process tree merged (D14). Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled residual stands for the comms below the coverage cut. Bound by stated approximation, carrying these numbers unchanged (D11, D12): zoom voice and video: a proprietary client with capture, encode, network and playback threads (S2-17; S6: whole-client CPU only).
+
+  # ---- measured per-application archetypes — 9.8 campaign (meas-ci:desktop:2026-09-20) ----
+
+  renderer-hidden:
+    category_source: meas
+    pattern:
+      program:
+        - loop:                    # measured timer components merged at compile time (9.5 D9, D16)
+            - TIMER: tick
+            - RUN: event
+    params:
+      components:
+        - comm: "HangWatcher"
+          threads: 1
+          wakes_per_s: 0.1000
+          gap: {dist: quantiles, p: [10000089, 10000108, 10000114, 10000120, 10000125, 10000133, 10000152, 10000161, 10000172, 10000227], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [19, 21, 22, 24, 26, 30, 36, 39, 43, 49], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "chrome"
+          threads: 1
+          wakes_per_s: 0.0400
+          gap: {dist: quantiles, p: [12, 5537, 354819, 1696524, 9976713, 54258458, 58439895, 59138979, 59836063, 59992820], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [5, 40, 48, 58, 79, 110, 149, 300, 418, 481], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "Chrome_ChildIOT"
+          threads: 1
+          wakes_per_s: 0.0065
+          gap: {dist: quantiles, p: [2811957, 6921560, 60050938, 80902427, 117159093, 121351897, 178496758, 242746978, 309082323, 309219476], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [12, 13, 13, 18, 23, 40, 49, 62, 95, 121], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "residual"
+          comms: ["ThreadPoolServi", "MemoryInfra"]
+          threads: 2
+          wakes_per_s: 0.0100
+          gap: {dist: quantiles, p: [10, 11, 14, 23470025, 94322893, 119766726, 176126559, 218986199, 309008254, 309165734], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [4, 6, 7, 15, 20, 29, 320, 337, 371, 393], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        # 3 comms cover 87.9 % of 0.167 wakes/s per renderer (9.5 D16, target 95 %); the rest pooled as `residual`
+    lifetime: segment-bound
+    binding_params: []
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      run: "desktop:2026-09-20, repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10@35585759158, 10@35585978825, 10@35586404781, 10@35586632429, 11], runs 35506882547, 35508871434, 35508896087, 35509010925, 35585311256, 35585545176, 35585759158, 35585978825, 35586404781, 35586632429"
+      stats: ["steady wakes/s per renderer 0.1479\u20130.1825", "steady cpu-share 0.00009\u20130.00011"]
+      scope: >-
+        One observation (phase decision 2; D10): Google Chrome 152.0.7977.82, launched as web-browser was (--no-sandbox --disable-gpu, plus --disable-features=SpareRendererForSitePerProcess), one window holding a foreground control tab and 12 background tabs at 12 loopback origins of one local page whose setInterval callback only increments a counter; observed past Chromium's intensive-wake-up-throttling grace (launch-settle 20 s, grace-settle 630 s: 330 s of the documented five-minute default and 300 s read from the probe, D15), a 600 s steady phase, under Xvfb with no window manager; on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure), the subject pinned to one CPU and the harness, page server and homeserver pinned away from it, perf sched record on that CPU; 14 same-machine repeats, every landing pooled (D24). Values describe one renderer, the 12 page renderers a job measures pooled as its samples (D14), of 16 --type=renderer processes observed — the control tab, Chrome's own extension and WebUI renderers and any renderer present for part of the phase dropped. The entry is majority `HangWatcher`, Chromium's hang-detection thread, 0.100 of 0.169 wakes/s per renderer; the page's own thread is 0.040 (D16). Values are floors: a page that does nothing but stay alive, on a runner without a GPU or display vsync (method §7); a renderer showing live content does more. Not covered: a tab just switched away from, before the grace (D3). Stability rule: every value on the list holds within 5 % or 1 µs except these, carried over the repeats obtained with their half-widths and ranges. Run means whose spread is the runner's speed, every thread of a repeat moving together while wake rates hold (D17): `HangWatcher` run mean 0.0274 ms ±5.3 % (0.024–0.033 ms). Components whose rate varies between sessions, their values carried together (9.5 D57; D21, D24): `Chrome_ChildIOT` wake rate 0.0065 wakes/s ±38.1 % (0–0.01 wakes/s), gap mean 137.4 s ±25.7 % (96.8–309.1 s), run mean 0.0321 ms ±14.1 % (0.025–0.056 ms); within one run ±17.7 % (D24), its wake rate across the repeats ±76.9 %; `residual` wake rate 0.01 wakes/s ±15.6 % (0.0042–0.014 wakes/s), gap mean 88.3 s ±15.9 % (38.0–132.3 s), run mean 0.0842 ms ±19.0 % (0.0574–0.1434 ms); within one run ±29.7 % (D24), its wake rate across the repeats ±48.8 %. These threads wake about six times per renderer per 600 s phase. Values are this software on this machine, not desktop truth (9.5 D10).
+    modeling_notes: >-
+      Per-application archetype (9.5 D2): one task carries the one renderer process, the renderers of a browsing session bound as separate tasks (D2) — under Chromium's site-per-process model one renderer is one site, not one tab (S2-01); web-browser carries the rest of the browser's tree. Timer components are per thread comm (9.5 D16), each sampled from its measured gap and run quantiles (9.5 D17) over the task's lifetime and merged into one explicit event stream at compile time (9.5 D9); the pooled residual stands for the comms below the coverage cut. No focus_components and no stimulus: the state is unattended by construction (D10). Sporadic wakes, not carried as components (9.5 D43): `Compositor` in 9 of 14 repeats, 0.0064 wakes/s; `PerfettoTrace` in 9 of 14 repeats, 0.0064 wakes/s.
+
+  renderer-visible:
+    category_source: meas
+    pattern:
+      program:
+        - loop:                    # measured timer components merged at compile time (9.5 D9, D16)
+            - TIMER: tick
+            - RUN: event
+    params:
+      components:
+        - comm: "HangWatcher"
+          threads: 1
+          wakes_per_s: 0.1000
+          gap: {dist: quantiles, p: [10000092, 10000105, 10000116, 10000125, 10000132, 10000149, 10000167, 10000172, 10000183, 10000290], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [23, 25, 26, 28, 31, 36, 39, 41, 44, 56], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "chrome"
+          threads: 1
+          wakes_per_s: 0.0204
+          gap: {dist: quantiles, p: [12, 2151, 12661, 2007851, 60000140, 60000177, 60000224, 60000254, 60000294, 60000418], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [5, 80, 85, 93, 114, 164, 231, 399, 514, 608], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "Chrome_ChildIOT"
+          threads: 1
+          wakes_per_s: 0.0047
+          gap: {dist: quantiles, p: [7067969, 26851329, 46612469, 111881939, 131446128, 192440035, 219338817, 256218993, 303838850, 310278975], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [19, 21, 22, 24, 30, 54, 61, 66, 100, 132], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "ThreadPoolForeg"
+          threads: 1
+          wakes_per_s: 0.0043
+          gap: {dist: quantiles, p: [10, 10, 11, 13, 1065079, 1531748, 1990152, 4298620, 4693833, 4729882], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [5, 5, 5, 8, 29, 34, 40, 47, 56, 60], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "residual"
+          comms: ["PerfettoTrace", "MemoryInfra", "Compositor", "ThreadPoolServi"]
+          threads: 4
+          wakes_per_s: 0.0108
+          gap: {dist: quantiles, p: [10, 13, 61, 112, 58306499, 125353774, 190301546, 214178243, 282133231, 309550943], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [4, 8, 20, 22, 30, 93, 359, 382, 434, 507], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        # 4 comms cover 97.4 % of 0.133 wakes/s per renderer (9.5 D16, target 95 %); the rest pooled as `residual`
+    lifetime: segment-bound
+    binding_params: []
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      run: "desktop:2026-09-20, repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], runs 35506753479, 35508871434, 35509122608, 35585311256, 35585545176, 35587521689, 35587769187"
+      stats: ["steady-notimer wakes/s per renderer 0.1319\u20130.1504", "steady-notimer cpu-share 0.00009\u20130.00012"]
+      scope: >-
+        One observation (phase decision 2; D10): Google Chrome 152.0.7977.82, launched as the hidden entry, the same page at the same 12 origins opened as 12 windows of one tab each, nothing interacting with them; the steady phase with the page's timer removed (D16), 600 s, under Xvfb with no window manager, where Chromium tracks no cross-application occlusion (D4); on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure), the subject pinned to one CPU and the harness, page server and homeserver pinned away from it, perf sched record on that CPU; 11 same-machine repeats, every landing pooled (D24). Values describe one renderer, the 12 page renderers a job measures pooled as its samples (D14), of 13–14 --type=renderer processes observed — the control tab, Chrome's own extension and WebUI renderers and any renderer present for part of the phase dropped. The entry is majority `HangWatcher`, Chromium's hang-detection thread, 0.100 of 0.141 wakes/s per renderer; the page's own thread is 0.020 (D16). Values are floors, as the hidden entry's (method §7), and unlike its wake rate they depend on the stated page, which nothing throttles (D12). Not covered: a page being interacted with. Stability rule: every value on the list holds within 5 % or 1 µs except these, carried over the repeats obtained with their half-widths and ranges. Run means whose spread is the runner's speed, every thread of a repeat moving together while wake rates hold (D17): `HangWatcher` run mean 0.0318 ms ±6.0 % (0.029–0.037 ms); `chrome` run mean 0.1489 ms ±5.8 % (0.133–0.181 ms). Components whose rate varies between sessions, their values carried together (9.5 D57; D21): `Chrome_ChildIOT` wake rate 0.0047 wakes/s ±62.0 % (0–0.01 wakes/s), gap mean 163.5 s ±19.5 % (97.1–254.5 s), run mean 0.0408 ms ±10.7 % (0.03–0.053 ms); within one run ±18.6 % (D20), its wake rate across the repeats ±105.8 %; `ThreadPoolForeg` wake rate 0.0043 wakes/s ±29.1 % (0.003–0.007 wakes/s), gap mean 1051 ms ±27.8 % (472.3–1653 ms), run mean 0.0254 ms ±10.3 % (0.019–0.034 ms); within one run barely present in the probe (D20), its wake rate across the repeats ±46.8 %; `residual` wake rate 0.0108 wakes/s ±17.9 % (0.006–0.0158 wakes/s), gap mean 76.0 s ±13.6 % (46.3–94.3 s), run mean 0.1026 ms ±14.5 % (0.0697–0.1408 ms); within one run ±28.9 % (D20), its wake rate across the repeats ±45.3 %. These threads wake about six times per renderer per 600 s phase. Measured beside it, timer against no timer: wake rate 10.235 against 0.141 (72.652×), CPU share 82.076×. Values are this software on this machine, not desktop truth (9.5 D10).
+    modeling_notes: >-
+      Per-application archetype (9.5 D2): one task carries the one renderer process, the renderers of a browsing session bound as separate tasks (D2) — under Chromium's site-per-process model one renderer is one site, not one tab (S2-01); web-browser carries the rest of the browser's tree. Timer components are per thread comm (9.5 D16), each sampled from its measured gap and run quantiles (9.5 D17) over the task's lifetime and merged into one explicit event stream at compile time (9.5 D9); the pooled residual stands for the comms below the coverage cut. No focus_components and no stimulus: the state is unattended by construction (D10).
+
+  chat-client:
+    category_source: meas
+    pattern:
+      program:
+        - loop:                    # measured timer components merged at compile time (9.5 D9, D16)
+            - TIMER: tick
+            - RUN: event
+    params:
+      components:
+        - comm: "ThreadPoolForeg"
+          threads: [11, 13]
+          wakes_per_s: 4.2283
+          gap: {dist: quantiles, p: [9, 10, 10, 12, 168, 10366, 1850242, 6634250, 28624102, 119336643], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [4, 4, 4, 5, 16, 42, 85, 135, 357, 999], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "element-desktop"
+          threads: 37
+          wakes_per_s: 3.8989
+          gap: {dist: quantiles, p: [12, 115, 210, 901, 864534, 3194851, 4004137, 4004300, 30013493, 30015724], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [5, 12, 30, 63, 105, 139, 264, 382, 3233, 4531], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "Chrome_IOThread"
+          threads: 1
+          wakes_per_s: 1.8500
+          gap: {dist: quantiles, p: [28, 45, 61, 108, 235, 448, 1583, 767696, 21639335, 28160997], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [7, 8, 8, 15, 18, 25, 49, 65, 123, 188], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "Chrome_ChildIOT"
+          threads: 4
+          wakes_per_s: 1.4833
+          gap: {dist: quantiles, p: [25, 47, 77, 187, 417, 1577, 1906903, 11716120, 27807797, 200358523], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [8, 10, 11, 14, 18, 45, 190, 404, 605, 723], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "ThreadPoolServi"
+          threads: 5
+          wakes_per_s: 0.3833
+          gap: {dist: quantiles, p: [49, 55, 75, 6156, 4995103, 5005109, 53312570, 59996604, 142302308, 206471702], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [11, 12, 13, 21, 45, 57, 80, 111, 343, 530], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "residual"
+          comms: ["DedicatedWorker", "ThreadPoolSingl", "CacheThread_Blo", "r2d2-worker-1", "r2d2-worker-2", "r2d2-worker-0", "PerfettoTrace", "V8Worker", "Compositor", "DelayedTaskSche", "meta-file-watch"]
+          threads: [18, 19]
+          wakes_per_s: 0.4696
+          gap: {dist: quantiles, p: [7, 10, 11, 14, 1249, 999808, 2815876, 20528621, 26885437, 26995829], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [4, 5, 6, 10, 20, 36, 64, 83, 394, 1253], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        # 5 comms cover 96.3 % of 12.302 wakes/s (9.5 D16, target 95 %); the rest pooled as `residual`
+    lifetime: segment-bound
+    binding_params: []
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      run: "desktop:2026-09-20, repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17@35597073549, 17@35597185904], runs 35506838639, 35508871434, 35509230804, 35509947990, 35585311256, 35587769187, 35588428093, 35594376695, 35594606756, 35594819539, 35597073549, 35597185904"
+      stats: ["idle wakes/s 11.9830\u201312.5600", "idle cpu-share 0.00088\u20130.00114"]
+      scope: >-
+        One observation (phase decision 2; D10): Element Desktop 1.12.28 (unauthenticated apt repository; --no-sandbox --disable-gpu --disable-gpu-sandbox --disable-software-rasterizer --disable-dev-shm-usage --password-store=basic), signed in to one room on a Synapse 1.161.0 homeserver installed on the runner, idle with no message sent (D11); launch-settle 20 s, a 600 s idle phase, under Xvfb; on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure), the subject pinned to one CPU and the harness, page server and homeserver pinned away from it, perf sched record on that CPU; 18 same-machine repeats, every landing pooled (D24). It carries no message-traffic wakes: the traffic phase each repeat also ran (a stated scripted rate, design) stays in the campaign results and feeds no archetype (D11). Stability rule: every value on the list holds within 5 % or 1 µs over the repeats obtained. Measured beside it, idle against scripted traffic (D11; feeds no archetype): wake rate 12.319 against 49.150 (0.251×), CPU share 0.24×. Values are this software on this machine, not desktop truth (9.5 D10).
+    modeling_notes: >-
+      Per-application archetype (9.5 D2): one task carries the whole process tree merged (9.5 D14). Timer components are per thread comm (9.5 D16), each sampled from its measured gap and run quantiles (9.5 D17) over the task's lifetime and merged into one explicit event stream at compile time (9.5 D9); the pooled residual stands for the comms below the coverage cut. No focus_components and no stimulus: the state is unattended by construction (D10). Bound by stated approximation (D7): discord, whose Linux client cannot be observed without an account and has no self-hosted server. Discord keeps its connection with a gateway heartbeat at a server-assigned interval (documented example 45 s) where Matrix clients hold a 30 s /sync long poll; no Linux observation of Discord's wake cadence or CPU per wake exists, so the direction of the error is not known. The injected-overlay role is withdrawn: Discord's overlay is Windows-only (D7).
+
+  game-client:
+    category_source: meas
+    pattern:
+      program:
+        - loop:                    # measured timer components merged at compile time (9.5 D9, D16)
+            - TIMER: tick
+            - RUN: event
+    params:
+      components:
+        - comm: "steamwebhelper"
+          threads: [4, 6]
+          wakes_per_s: 70.7500
+          gap: {dist: quantiles, p: [343, 731, 10577, 16145, 16156, 16165, 16188, 16219, 591390, 597470], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [15, 37, 48, 58, 62, 69, 97, 114, 221, 314], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "steam"
+          threads: 3
+          wakes_per_s: 69.4667
+          gap: {dist: quantiles, p: [137, 162, 175, 193, 240, 50143, 200105, 200114, 200131, 200187], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [11, 15, 17, 38, 49, 70, 99, 115, 144, 248], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "IPC:CSteamEngin"
+          threads: 2
+          wakes_per_s: 44.4942
+          gap: {dist: quantiles, p: [44, 51, 59, 91, 49114, 49213, 200090, 200113, 200121, 200172], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [12, 15, 17, 19, 36, 91, 121, 136, 163, 208], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "CJobMgr::m_Work"
+          threads: 3
+          wakes_per_s: 35.6283
+          gap: {dist: quantiles, p: [12, 14, 16, 19, 98412, 98527, 250086, 250112, 250133, 250183], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [6, 8, 8, 10, 15, 24, 29, 32, 52, 134], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "Compositor"
+          threads: 1
+          wakes_per_s: 18.6008
+          gap: {dist: quantiles, p: [10, 11, 13, 93, 231, 15890, 198913, 374908, 382167, 383581], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [4, 5, 6, 20, 48, 79, 126, 153, 203, 285], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "Chrome_ChildIOT"
+          threads: [3, 4]
+          wakes_per_s: 13.4275
+          gap: {dist: quantiles, p: [69, 98, 221, 843, 9256, 486625, 583842, 591870, 597727, 29960627], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [15, 17, 20, 23, 29, 34, 49, 53, 74, 93], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "VizCompositorTh"
+          threads: 1
+          wakes_per_s: 10.5400
+          gap: {dist: quantiles, p: [135, 240, 265, 722, 14141, 17147, 554699, 560372, 564205, 564960], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [25, 28, 32, 37, 63, 93, 203, 220, 245, 282], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "CHTTPClientThre"
+          threads: 2
+          wakes_per_s: 8.0458
+          gap: {dist: quantiles, p: [250054, 250077, 250084, 250102, 250111, 250116, 250125, 250136, 250176, 250473], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [8, 10, 11, 14, 16, 17, 19, 21, 29, 2692], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "CNet Encrypt:0"
+          threads: 2
+          wakes_per_s: 8.0383
+          gap: {dist: quantiles, p: [250060, 250078, 250085, 250103, 250112, 250116, 250123, 250135, 250172, 250526], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [8, 10, 11, 14, 16, 18, 20, 22, 28, 36], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "ThreadPoolForeg"
+          threads: [5, 8]
+          wakes_per_s: 6.1717
+          gap: {dist: quantiles, p: [10, 11, 13, 15, 19147, 568206, 578140, 580996, 599418, 120039724], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [4, 5, 6, 7, 16, 22, 28, 39, 70, 452], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        - comm: "residual"
+          comms: ["CSystemManager:", "CHTTPCacheFileT", "CSteamControlle", "IPC:CServiceEng", "CGamepadAPITask", "HangWatcher", "SteamUIWatchdog", "SteamEngineWatc", "Chrome_IOThread", "IOCP Thread 0", "CFileWriterThre", "MemoryInfra", "ThreadPoolServi", "GpuWatchdog", "CacheThread_Blo", "libusb", "ThreadPoolSingl", "HTMLController ", "srt-logger", "steam:disk$0", "Controller Work", "WebCrypto", "gmain", "threaded-ml", "libusb_event", "gdbus", "SteamUpdater", "SteamUdevContex", "pool-spawner"]
+          threads: [24, 37]
+          wakes_per_s: 14.1526
+          gap: {dist: quantiles, p: [83, 292, 1528, 19319, 54089, 109807, 164653, 194685, 235229, 248367], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+          run: {dist: quantiles, p: [9, 12, 13, 16, 19, 33, 58, 71, 163, 483], sampling: per-iteration, source: "meas-ci:desktop:2026-09-20"}
+        # 10 comms cover 95.3 % of 299.302 wakes/s (9.5 D16, target 95 %); the rest pooled as `residual`
+    lifetime: segment-bound
+    binding_params: []
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      run: "desktop:2026-09-20, repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], runs 35506882547, 35508871434, 35510066832, 35592897185, 35593348663"
+      stats: ["shown wakes/s 298.0720\u2013301.9720", "shown cpu-share 0.01301\u20130.01755"]
+      scope: >-
+        One observation (phase decision 2; D10): the Steam desktop client, build 1788652215 (steam-installer), logged out — no account is used, and none may be (D6) — its window shown; launch-settle 900 s (D15), a 600 s shown phase, under Xvfb with openbox so the window can be minimised; on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure), the subject pinned to one CPU and the harness, page server and homeserver pinned away from it, perf sched record on that CPU; 12 same-machine repeats, every landing pooled (D24). Not covered: a client that is logged in, holds a library, downloads, or runs behind a game — the state the gaming timelines depict (D6). Stability rule: every value on the list holds within 5 % or 1 µs except these, carried over the repeats obtained with their half-widths and ranges. Run means whose spread is the runner's speed, every thread of a repeat moving together while wake rates hold (D17, D18): `steam` run mean 0.0555 ms ±10.2 % (0.044–0.068 ms); `IPC:CSteamEngin` run mean 0.0573 ms ±8.8 % (0.047–0.068 ms); `CJobMgr::m_Work` run mean 0.0176 ms ±6.2 % (0.015–0.02 ms); `VizCompositorTh` run mean 0.0819 ms ±5.5 % (0.066–0.089 ms); `CHTTPClientThre` run mean 0.0312 ms ±46.0 % (0.014–0.064 ms). Components whose rate varies between sessions, their values carried together (9.5 D57; D23): `steamwebhelper` gap mean 32.44 ms ±10.2 % (28.51–42.16 ms), run mean 0.0696 ms ±5.3 % (0.063–0.082 ms); within one run gap mean ±0.1 % (D22), its wake rate across the repeats ±0.4 %; `ThreadPoolForeg` gap mean 511.6 ms ±9.0 % (415.9–616.1 ms); within one run gap mean ±1.7 % (D22), its wake rate across the repeats ±9.0 %. `steamwebhelper` carries 23.6 % of the client's wakes and its gap table is identical through its 99th percentile in every repeat, the mean moved by a handful of gaps past it (D22). Measured beside it, shown against minimised (D5): wake rate 299.325 against 244.398 (1.225×), the comparison D5 rests on; the CPU share ratio, 1.259×, is reported with its spread and no effect rests on it (D18). Values are this software on this machine, not desktop truth (9.5 D10).
+    modeling_notes: >-
+      Per-application archetype (9.5 D2): one task carries the whole process tree merged (9.5 D14). Timer components are per thread comm (9.5 D16), each sampled from its measured gap and run quantiles (9.5 D17) over the task's lifetime and merged into one explicit event stream at compile time (9.5 D9); the pooled residual stands for the comms below the coverage cut. No focus_components and no stimulus: the state is unattended by construction (D10).
 
   cpu-batch:
     category_source: meas
@@ -1032,48 +1256,6 @@ archetypes:
       Structural claim only — the runner link is datacenter-class; the duty
       ratio, not the throughput, is the grounded quantity. The chunk loop
       shape is ours.
-
-  electron-comms:
-    category_source: meas
-    pattern:
-      program:
-        - loop:
-            - TIMER: heartbeat
-            - RUN: heartbeat_work
-    params:
-      heartbeat:
-        {dist: lognormal, median_us: 1850000, sigma_log: 1.09,
-         sampling: per-task, source: "meas-ci:gui:2"}
-      heartbeat_work:
-        {dist: lognormal, median_us: 289, sigma_log: 0.713,
-         sampling: per-iteration, source: "meas-ci:gui:2"}
-    lifetime: segment-bound
-    binding_params: []
-    scalable: []
-    validation_stats:
-      referee: meas-ci
-      stats: [heartbeat period CDF, renderer-children count under Xvfb]
-      note: the same Xvfb workflow referees OQ-3 — chromium-renderer vs
-        Electron-app CDF comparison decides whether this entry splits.
-    modeling_notes: >-
-      Mostly idle plus periodic short wakes; the TIMER/RUN encoding and all
-      field names are ours. Params from meas-ci:gui:2: Element Desktop
-      idling unauthenticated under Xvfb (stated substitute for account-gated
-      comms apps; idle lacks message-traffic wakes — stated limitation), 15
-      processes across 5 repeats — voluntary-wakeup gap median ~1.85 s
-      sigma_log ~1.09, cpu-per-wake median ~289 us. The TIMER encoding
-      approximates the observed aperiodic-ish wake stream as periodic —
-      stated simplification. OQ-3 referee result (same run): idle chromium
-      renderers wake at median ~1.61 s sigma_log ~1.72 — close in median,
-      heavier-tailed; no archetype split warranted, chromium renderers keep
-      binding to this entry. Chromium at 10 file tabs peaked at 21-22
-      processes (binding guidance for renderer counts). Renderer-children
-      multiplicity is a static binding-time count (archetype-plan §3),
-      expressed through the timeline task entry's count field: values bind
-      against the Chromium process model from the tab-count literature
-      (dubroy-chi10, mozilla-testpilot10, chang-chi21) plus meas-ci Xvfb
-      counts — order-of-magnitude fidelity suffices for recognition;
-      precision matters only for executor load.
 
   system-daemon:
     category_source: meas

@@ -35,9 +35,14 @@ tasks:
   depart: 60s
   id: injected-browser
   name: chrome
-- archetype: electron-comms
+- archetype: renderer-visible
   arrive: 30s
-  count: 6
+  depart: 60s
+  id: injected-renderer-shown
+  name: chrome
+- archetype: renderer-hidden
+  arrive: 30s
+  count: 5
   depart: 60s
   id: injected-renderers
   name: chrome

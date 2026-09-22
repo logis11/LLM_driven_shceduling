@@ -15,13 +15,15 @@ segments:
 tasks:
   - {id: browser, name: chrome, archetype: web-browser,
      arrive: 0s, depart: 60s}
-  - {id: renderers, name: chrome, archetype: electron-comms,
-     arrive: 0s, depart: 60s, count: 10}
+  - {id: renderer-shown, name: chrome, archetype: renderer-visible,
+     arrive: 0s, depart: 60s}
+  - {id: renderers, name: chrome, archetype: renderer-hidden,
+     arrive: 0s, depart: 60s, count: 9}
   - {id: game, name: game.exe, archetype: game-task-chain,
      arrive: 60s, depart: 300s, bind: {lane_share: 1.45}}
-  - {id: overlay, name: discord, archetype: electron-comms,
+  - {id: overlay, name: discord, archetype: chat-client,
      arrive: 60s, depart: 300s}
-  - {id: steam, name: steam, archetype: electron-comms,
+  - {id: steam, name: steam, archetype: game-client,
      arrive: 60s, depart: 300s}
   - {id: video, name: mpv, archetype: video-player,
      arrive: 300s, depart: 420s}

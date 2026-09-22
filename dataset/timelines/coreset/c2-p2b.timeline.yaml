@@ -29,7 +29,7 @@ tasks:
   depart: 120s
   id: game
   name: game.exe
-- archetype: electron-comms
+- archetype: game-client
   arrive: 0s
   depart: 120s
   id: steam
