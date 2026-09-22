@@ -127,8 +127,13 @@ session_file() {
 }
 
 install_session() {
-  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y ubuntu-desktop-minimal > "$OUT/apt.desktop.log" 2>&1
+  # services are not started by the packages' scripts (policy-rc.d 101) nor restarted by needrestart: every dry job of
+  # 2026-09-22 that lost its runner lost it in the install's last service starts. The units are started afterwards,
+  # one at a time and logged, as a boot would start them (start_boot_units).
+  printf '#!/bin/sh\nexit 101\n' | sudo tee /usr/sbin/policy-rc.d > /dev/null; sudo chmod +x /usr/sbin/policy-rc.d
+  sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_SUSPEND=1 apt-get install -y ubuntu-desktop-minimal > "$OUT/apt.desktop.log" 2>&1
   rec apt.desktop.rc "$?"
+  sudo rm -f /usr/sbin/policy-rc.d
   local p
   for p in ubuntu-desktop-minimal gnome-shell mutter gnome-session pipewire wireplumber pipewire-pulse systemd dbus \
            dbus-daemon dbus-broker gdm3 gnome-initial-setup ubuntu-settings; do
@@ -164,6 +169,23 @@ install_session() {
   SESSION_EXEC="$(sed -n 's/^Exec=//p' "$SESSION_FILE" 2>/dev/null | head -1)"
   SESSION_DESKTOPS="$(sed -n 's/^DesktopNames=//p' "$SESSION_FILE" 2>/dev/null | head -1 | tr ';' ':' | sed 's/:$//')"
   rec session.exec "$SESSION_EXEC"; rec session.desktop_names "$SESSION_DESKTOPS"
+}
+
+# the units graphical.target wants that the install left inactive, started one at a time, each logged before it
+# starts so the last line names the unit that was starting if the runner is lost (gdm is masked by then)
+start_boot_units() {
+  local u n=0 rc
+  : > "$OUT/units.start.log"
+  while read -r u; do
+    case "$u" in *.service|*.socket|*.path|*.timer) ;; *) continue ;; esac
+    systemctl is-active --quiet "$u" && continue
+    [ "$(systemctl is-enabled "$u" 2>/dev/null)" = masked ] && continue
+    echo "$(date -u +%T) start $u" >> "$OUT/units.start.log"; sync
+    timeout 90 sudo systemctl start "$u" > /dev/null 2>&1; rc=$?
+    echo "$(date -u +%T) rc=$rc $u" >> "$OUT/units.start.log"; sync
+    n=$((n + 1)); sleep 2
+  done < <(systemctl list-dependencies --plain --no-pager graphical.target 2>/dev/null | sed 's/^[^a-zA-Z0-9@._-]*//' | sort -u)
+  rec units.started "$n"
 }
 
 # login <label> — the seatless PAM login of D11: a transient system unit is the session leader
@@ -324,6 +346,8 @@ rec kernel.hz "$(grep -E '^CONFIG_HZ=' "/boot/config-$(uname -r)" 2>/dev/null | 
 install_session
 [ -n "$SESSION_EXEC" ] || stop_recorded no-session-file "no Ubuntu Wayland session file after the install (method §2.1)"
 checkpoint install
+start_boot_units
+checkpoint units
 
 # priming login (D11): the account's first-login work, then a logout. The probe records it (D13).
 login priming

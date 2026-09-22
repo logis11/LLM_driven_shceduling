@@ -127,6 +127,166 @@ jobs:
           name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-install
           path: /tmp/part
           if-no-files-found: warn
+      - name: u+20s
+        run: |
+          sleep 20
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo chown -R "$(id -u):$(id -g)" /tmp/part; tail -2 /tmp/meas/units.start.log 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-u20
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: u+40s
+        run: |
+          sleep 20
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo chown -R "$(id -u):$(id -g)" /tmp/part; tail -2 /tmp/meas/units.start.log 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-u40
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: u+60s
+        run: |
+          sleep 20
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo chown -R "$(id -u):$(id -g)" /tmp/part; tail -2 /tmp/meas/units.start.log 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-u60
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: u+80s
+        run: |
+          sleep 20
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo chown -R "$(id -u):$(id -g)" /tmp/part; tail -2 /tmp/meas/units.start.log 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-u80
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: u+100s
+        run: |
+          sleep 20
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo chown -R "$(id -u):$(id -g)" /tmp/part; tail -2 /tmp/meas/units.start.log 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-u100
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: u+120s
+        run: |
+          sleep 20
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo chown -R "$(id -u):$(id -g)" /tmp/part; tail -2 /tmp/meas/units.start.log 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-u120
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: u+140s
+        run: |
+          sleep 20
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo chown -R "$(id -u):$(id -g)" /tmp/part; tail -2 /tmp/meas/units.start.log 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-u140
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: u+160s
+        run: |
+          sleep 20
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo chown -R "$(id -u):$(id -g)" /tmp/part; tail -2 /tmp/meas/units.start.log 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-u160
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: u+180s
+        run: |
+          sleep 20
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo chown -R "$(id -u):$(id -g)" /tmp/part; tail -2 /tmp/meas/units.start.log 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-u180
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: u+200s
+        run: |
+          sleep 20
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo chown -R "$(id -u):$(id -g)" /tmp/part; tail -2 /tmp/meas/units.start.log 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-u200
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: u+220s
+        run: |
+          sleep 20
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo chown -R "$(id -u):$(id -g)" /tmp/part; tail -2 /tmp/meas/units.start.log 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-u220
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: u+240s
+        run: |
+          sleep 20
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo chown -R "$(id -u):$(id -g)" /tmp/part; tail -2 /tmp/meas/units.start.log 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-u240
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: u+260s
+        run: |
+          sleep 20
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo chown -R "$(id -u):$(id -g)" /tmp/part; tail -2 /tmp/meas/units.start.log 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-u260
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: u+280s
+        run: |
+          sleep 20
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo chown -R "$(id -u):$(id -g)" /tmp/part; tail -2 /tmp/meas/units.start.log 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-u280
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: u+300s
+        run: |
+          sleep 20
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo chown -R "$(id -u):$(id -g)" /tmp/part; tail -2 /tmp/meas/units.start.log 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-u300
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: stage units
+        run: |
+          while [ ! -e /tmp/meas/diag.units/done ] && kill -0 "$(cat /tmp/run.pid)" 2>/dev/null; do sleep 5; done
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo rm -f /tmp/part/meas/perf.*.data; sudo chown -R "$(id -u):$(id -g)" /tmp/part
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-units
+          path: /tmp/part
+          if-no-files-found: warn
       - name: stage priming
         run: |
           while [ ! -e /tmp/meas/diag.priming/done ] && kill -0 "$(cat /tmp/run.pid)" 2>/dev/null; do sleep 5; done
