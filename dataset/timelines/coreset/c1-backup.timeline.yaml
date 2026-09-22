@@ -14,7 +14,7 @@ segments:
 tasks:
   - {id: editor, name: kdenlive, archetype: video-editor,
      arrive: 0s, depart: 60s}
-  - {id: bulk, name: borg, archetype: io-stream, arrive: 2s,
+  - {id: bulk, name: borg, archetype: file-backup, arrive: 2s,
      bind: {total_work: 30s}}
 
 focus:

@@ -128,3 +128,20 @@ def test_zero_inclusive_block_table_leaves_the_program_running(library):
     compiler._batch_loop(build, params, {"bind": {"program": "python3", "total_work": "2s"}}, "seed", "hog")
     assert "SLEEP" in {op["op"] for op in build.program}          # python3 blocks after every run
     assert sum(op["us"] for op in build.program if op["op"] == "RUN") == 2_000_000
+
+
+def test_a_single_table_set_batch_loop_needs_no_program_binding(library):
+    # 9.7 D29: file-backup, file-archiver and game-download each carry one table set, taken without a `program` binding;
+    # cpu-batch, with five, still needs one
+    import pytest
+    from wlc import compiler
+    build = compiler._TaskBuild("backup", "borg")
+    compiler._batch_loop(build, library.entry("file-backup")["params"], {"bind": {"total_work": "2s"}}, "seed", "backup")
+    assert "SLEEP" in {op["op"] for op in build.program}          # borg blocks after almost every run
+    assert sum(op["us"] for op in build.program if op["op"] == "RUN") == 2_000_000 == build.demand_us
+    build = compiler._TaskBuild("archive", "7z")
+    compiler._batch_loop(build, library.entry("file-archiver")["params"], {"bind": {"total_work": "2s"}}, "seed", "archive")
+    assert [op["op"] for op in build.program] == ["RUN", "EXIT"]  # 7-Zip's block is zero at every quantile
+    with pytest.raises(ValueError):
+        compiler._batch_loop(compiler._TaskBuild("x", "x"), library.entry("cpu-batch")["params"],
+                             {"bind": {"total_work": "2s"}}, "seed", "x")

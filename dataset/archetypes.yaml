@@ -1320,8 +1320,9 @@ archetypes:
       sample — stated) -> net_wait = chunk_cpu x (1/0.057 - 1) ~ 16.7 ms.
       Structural claim only — the runner link is datacenter-class; the duty
       ratio, not the throughput, is the grounded quantity. The chunk loop
-      shape is ours. Bound only by the three `thunderbird` send tasks (c1-mail, c7-mail,
-      c3-workday) until 9.5's `send` re-observation folds into `mail-client` and
+      shape is ours. Bound by the three `thunderbird` send tasks (c1-mail, c7-mail,
+      c3-workday), and by the c2-p2a `steam` download until `game-download` folds
+      in, until 9.5's `send` re-observation folds into `mail-client` and
       9.10 places the send as an operation of the `mail-client` task; it leaves
       before 9.13's rebuild (9.7 D30).
 

@@ -45,7 +45,7 @@ tasks:
   depart: 60s
   id: mail
   name: thunderbird
-- archetype: io-stream
+- archetype: file-archiver
   arrive: 30s
   bind:
     total_work: 6s

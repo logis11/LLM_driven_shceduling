@@ -30,7 +30,7 @@ tasks:
   depart: 120s
   id: editor
   name: kdenlive
-- archetype: io-stream
+- archetype: file-backup
   arrive: 60s
   bind:
     total_work: 75s

@@ -44,17 +44,6 @@ sources:
 
   # ---- behavior parameters (Role B) --------------------------------------
 
-  interbench:
-    type: deployed-system
-    locator_pattern: "^(man|src)-[a-z]+$"
-    notes: >-
-      Establishes interbench's own load emulations: Burn (4 CPU-bound threads),
-      Write/Read (RAM-scale streaming, cache-defeating), Compile
-      (Burn+Write+Read, "heavy make -j4"); gaming unbounded. Its Audio, Video
-      and X interactive emulations are no longer cited by the dataset (Phase 9
-      research slice 9.5: measured per-application archetypes replace them).
-      Scope: "interbench models it this way" — never "desktops behave this way".
-
   rt-app:
     type: deployed-system
     notes: >-
@@ -161,22 +150,6 @@ sources:
       held. The conceptual portal page carrying those claims has not been
       read; do not derive them from this source.
 
-  ananicy-rules:
-    type: deployed-system
-    notes: >-
-      Community-maintained process-name -> behavior-class taxonomy: rule
-      `type` classes (Game, Heavy_CPU, BG_CPUIO, Doc-View, LowLatency_RT,
-      Player-Audio, Player-Video, ...) with nice / ioclass / sched values;
-      background CPU/IO runs ioclass idle at nice 16, Player-Audio and
-      Player-Video at nice -4, LowLatency_RT at nice -12, Game at nice -5;
-      Proton/wine vs native game classes. Establishes the classes' existence,
-      deployed name->class mappings, and the wanted/unwanted-background
-      distinction as deployed practice (category_source for harvested
-      archetypes). Values and entry counts measured at the commit named in
-      docs/references.md (2026-09-12); the capitalized type vocabulary
-      belongs to this catalogue, not to upstream Ananicy, whose current
-      types file marks those types deprecated.
-
   steam-downloads:
     type: deployed-system
     notes: >-
@@ -278,13 +251,20 @@ sources:
     type: measurement
     locator_pattern: "^[a-z0-9_-]+:(\\d+|\\d{4}-\\d{2}-\\d{2})$"
     notes: >-
-      Our CI measurement campaign (workflow:campaign locator — the launch
-      date, or a run number for a one-run campaign). Supports structural
-      and shape claims about software behavior only — fork structure, counts,
-      lifetime shapes, periods, heartbeat rates, comm strings. Machine-
-      relative absolutes (CPU %, IO throughput, io-wait fractions) carry the
-      recorded runner spec and rank as convention-informed-by-measurement,
-      never desktop truth. Workflows run N times; spread reported.
+      Our CI measurement campaigns (workflow:campaign locator — the launch
+      date of the campaign's first batch; a run number names a one-run
+      campaign from before that form). A measured value is this software on
+      this machine: a GitHub-hosted ubuntu-24.04 runner, pinned to one CPU of
+      the AMD EPYC 7763 only (machine gate), its runner spec written into the
+      archetype's scope — never desktop truth. The campaigns observe per-wake
+      runs and waits from the scheduler trace, per-process CPU and block-I/O
+      delay at exit, and network waits and bytes per wake from socket rows.
+      Repeats are added until the stability rule holds for every carried
+      value: the 95 % confidence half-width of the across-repeat mean within
+      5 % of it or 1 us, over at least five same-machine repeats
+      (dataset/tools/meas/stability.py); a value whose spread follows the
+      machine is carried with its half-width. One-run campaigns predate the
+      rule and the machine gate.
 
   meas-pending:
     type: measurement

@@ -69,22 +69,24 @@ Full tables: `task-9.6-compile/campaign/results.md`, `campaign/results/pooled.js
 
 ## 9.7 — `file-backup`, `file-archiver` and `game-download`
 
-Repeats 1–31 on the AMD EPYC 7763, repeat 3 left out of the pool: it landed, but its 10 GB set fetched as a 12,108 B file in place of the 3.70 GB archive (`set.archive_pin` mismatch, extract rc 2, 0 files), so its phases ran on an empty tree and the validity step fails it (the loop, step 4). 55 jobs: 31 landed, 24 stopped by the machine gate, none on another model. The rule is read over the other 30 repeats, and holds on all three of `file-backup`'s values.
+Repeats 1–31 on the AMD EPYC 7763, repeat 3 left out of the pool: it landed, but its 10 GB set fetched as a 12,108 B file in place of the 3.70 GB archive (`set.archive_pin` mismatch, extract rc 2, 0 files), so its phases ran on an empty tree and the validity step fails it (the loop, step 4). 55 jobs: 31 landed, 24 stopped by the machine gate, none on another model. The rule is read over the other 30 repeats, and holds on both of `file-backup`'s values.
+
+Each archetype carries two tables (D29): the program's runs between voluntary blocks, pooled over its threads, and the block after each run — the program's off-CPU time, zero when another of its threads runs on — each tested by its per-repeat mean.
 
 | archetype | program | value | repeats | mean | spread (cv) | 95 % half-width | stopped by |
 |---|---|---|---|---|---|---|---|
-| `file-backup` | `borg` | run per wake, warm first backup | 30 | 15.182 ms | 10.2 % | ±3.91 % | the rule |
-| `file-backup` | `borg` | wait per wake, warm first backup | 30 | 3.128 ms | 12.8 % | ±4.87 % | the rule |
-| `file-backup` | `borg` | disk wait per wake, warm first backup | 30 | 3.157 ms | 12.7 % | ±4.84 % | the rule |
-| `file-archiver` | `7z` | run per wake, warm eight-thread run | 6 | 4.187 ms | 2.1 % | ±2.17 % | the rule |
-| `file-archiver` | `7z` | wait per wake, warm eight-thread run | 6 | 32.232 ms | 2.3 % | ±2.40 % | the rule |
-| `game-download` | `steamcmd` | run per wake, shaped fresh install | 21 | 161.8 µs | 4.9 % | ±2.26 % | the rule |
-| `game-download` | `steamcmd` | network wait, shaped fresh install | 21 | 217.7 µs | 9.8 % | ±4.47 % | the rule |
-| `game-download` | `steamcmd` | bytes per wake, shaped fresh install | 21 | 3,894 B | 8.4 % | ±3.82 % | the rule |
+| `file-backup` | `borg` | run between voluntary blocks, warm first backup | 30 | 15.182 ms | 10.2 % | ±3.91 % | the rule |
+| `file-backup` | `borg` | block per run, warm first backup | 30 | 3.128 ms | 12.8 % | ±4.87 % | the rule |
+| `file-archiver` | `7z` | run between voluntary blocks, warm eight-thread run | 6 | 4.187 ms | 2.1 % | ±2.17 % | the rule |
+| `file-archiver` | `7z` | block per run, warm eight-thread run | 6 | 0.16 µs | 38.5 % | ±0.06 µs | the rule (1 µs floor) |
+| `game-download` | `steamcmd` | run between voluntary blocks, shaped fresh install | 21 | 161.8 µs | 4.9 % | ±2.26 % | the rule |
+| `game-download` | `steamcmd` | block per run, shaped fresh install | 21 | 9.02 µs | 27.3 % | ±1.12 µs (±12.46 %) | not yet: repeats added from 24 |
+
+The per-wake tables of the first list are reported beside them: `borg` wait per wake 3.128 ms ±4.87 %, disk wait 3.157 ms ±4.84 %; `7z` wait per wake 32.232 ms ±2.40 %; `steamcmd` network wait 217.7 µs ±4.47 %, bytes per wake 3,894 B ±3.82 %.
 
 `file-archiver`'s first batch of six repeats holds the rule, every repeat valid: 14 jobs, 8 gated draws, none on another model. Its D15 check, the single-thread run against the eight-thread run, is reported by its CPU per byte (0.91–0.96 of the eight-thread run in every repeat); the check's per-wake parts split into two modes of the same thread, 940 wakes at a 0.36–0.38 s median gap in repeats 1, 2 and 6 against 1,246–1,575 wakes at 0.4–0.7 ms in repeats 3, 4 and 5, and both are stated in the archetype's notes.
 
-`game-download`'s repeats 1–22 ran in runs #47–#57 under the `fq_codel` leaf (D25), repeats 6–12 and 14–22 added as batches (D26). Repeat 21 is left out of the pool: its runner had no accelerated-networking VF and 490 B of its 10.5 GB download went through the shaper, so its shaped phases ran unshaped (D27). Repeat 23 (run #58), added before the rule was read without repeat 21, landed and is not pooled (D27). 36 jobs: 23 landed, 13 stopped by the machine gate, none on another model. The rule is read over the other 21 repeats (1–20 and 22) and holds on all three values.
+`game-download`'s repeats 1–22 ran in runs #47–#57 under the `fq_codel` leaf (D25), repeats 6–12 and 14–22 added as batches (D26). Repeat 21 is left out of the pool: its runner had no accelerated-networking VF and 490 B of its 10.5 GB download went through the shaper, so its shaped phases ran unshaped (D27). Repeat 23 (run #58) was wrongly launched on the pool that held repeat 21 and is not pooled (D27). 36 jobs: 23 landed, 13 stopped by the machine gate, none on another model. The rule is read over the other 21 repeats (1–20 and 22): the run table holds, the block per run misses its 1 µs floor by 0.12 µs (projected 24 repeats), and repeats are added one at a time from repeat 24 (run #59).
 
 Full tables: `task-9.7-background-io/campaign/results-borg.md`, `campaign/results-7z.md` and `campaign/results-steamcmd.md`, `campaign/results/borg-pooled.json`, `results/7z-pooled.json` and `results/steamcmd-pooled.json`.
 

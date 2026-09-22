@@ -13,7 +13,7 @@ variants:
   - id: c4-office
     from: c1-office.timeline.yaml
     ops:
-      - add-task: {id: injected-burst, name: 7z, archetype: io-stream,
+      - add-task: {id: injected-burst, name: 7z, archetype: file-archiver,
                    arrive: 30s, bind: {total_work: 6s}}
       - patch-meta: {demand: calibration}
 

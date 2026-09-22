@@ -335,14 +335,20 @@ def _interactive_unroll(build, timeline, task, iid, params, wakes):
         build.program = [{"op": "WAIT", "channel": channel}]
 
 
-# ---- finite jobs (cpu-batch, io-stream, network-bulk) -----------------------
+# ---- finite jobs (cpu-batch, file-backup, file-archiver, game-download; network-bulk) ----
 
 def _batch_loop(build, params, task, seed, iid):
     """cpu-batch (D21, D22, D25): a RUN drawn from the bound program's measured runs between voluntary blocks,
     then the program's off-CPU time that followed such a run — the block table is zero-inclusive, a zero meaning
     another thread of the program ran on — until `total_work` of CPU is spent. The table set is chosen by the
-    `program` binding, never by the task's display name."""
-    program = task["bind"]["program"]
+    `program` binding, never by the task's display name. An archetype with one table set (9.7 D29: `file-backup`,
+    `file-archiver`, `game-download`) needs no `program` binding: its one set is taken."""
+    program = task["bind"].get("program")
+    if program is None:
+        sets = sorted(name[:-len("_run")] for name in params if name.endswith("_run"))
+        if len(sets) != 1:
+            raise ValueError(f"{iid}: a batch loop with {len(sets)} table sets needs a `program` binding")
+        program = sets[0]
     total = parse_us(task["bind"]["total_work"])
     if program == "spoof":   # the chrome spoof is one uninterrupted RUN by construction (D7)
         build.program = [{"op": "RUN", "us": total}, {"op": "EXIT"}]

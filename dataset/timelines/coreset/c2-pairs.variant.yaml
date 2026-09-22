@@ -28,7 +28,7 @@ variants:
   - id: c2-p3b
     from: c2-p3a.timeline.yaml
     ops:
-      - patch-task: {id: bulk, name: borg, archetype: io-stream,
+      - patch-task: {id: bulk, name: borg, archetype: file-backup,
                      arrive: 60s, bind: {total_work: 75s}}
       - patch-segment: {index: 1, mode: backup,
                         attributes: {background_wanted: true, initiated: scheduled},
