@@ -14,7 +14,8 @@ codes other than perf record's 130 (its SIGINT stop) and freshclam's 2 with a re
 ClamAV signature database across the repeats whose clamscan is pooled (9.6 D27); for background, the set's archive and manifest matching their pins and the
 tree verified after each change set, every SteamCMD phase reporting its install complete, one app build across repeats;
 for desktop, the renderer count meeting the minimum the job wanted, the page server answering, Element's session having
-reached the homeserver, and one origin count across repeats (9.8 D13).
+reached the homeserver, and one origin count across repeats (9.8 D13); for session, the steady edge found the terminal idle state, the pin
+applied without failure and no user-space work outside the four entries on the measured CPU (9.9 D12–D14).
 
 --exclude leaves a repeat out of the pool, --exclude-why states why in the printed lines and in the pooled record
 (`excluded_repeats`); a repeat the validity step fails counts for nothing (workflow guide, the loop, step 4), and the
@@ -124,6 +125,16 @@ def validity(family, dirs, entry):
             # repeat and its N may differ by design, so it stays out of the comparison.
             if r.get("settings.origins") and r.get("mode") != "probe":
                 origins.add(r["settings.origins"])
+        if family == "session":   # 9.9 D12–D14 (the gate itself is checked for every family above)
+            if r.get("mode") == "probe":
+                info.append("long-phase probe, never a repeat")
+            if r.get("edge.idle") not in (None, "1"):
+                notes.append("steady edge not in the terminal idle state")
+            if r.get("pin.fails") not in (None, "0"):
+                notes.append(f"pin failed {r.get('pin.fails')} time(s)")
+            fu = [x for x in ((entry or {}).get("foreign_user") or []) if str(x.get("repeat")) == str(k)]
+            if fu:
+                notes.append(f"user-space work on the measured CPU: {fu[0]['schedule_ins']} schedule-ins")
         bad += bool(notes)
         print(f"   r{k}: {'ok' if not notes else '; '.join(notes)}{''.join(f' ({x})' for x in info)}")
     if len(dbs) > 1:
@@ -179,7 +190,7 @@ def main():
     if not dirs:
         raise SystemExit("no landed repeat")
     cmd = ["python3", common.FAMILIES[family]["pool"], base, out, "--cpu-model", common.MACHINE, *passthrough]
-    if family in ("build", "background", "desktop") and "--md" not in passthrough:
+    if family in ("build", "background", "desktop", "session") and "--md" not in passthrough:
         cmd += ["--md", os.path.join(os.path.dirname(out), "results.md")]
     p = subprocess.run(cmd, cwd=common.REPO, capture_output=True, text=True)
     if p.returncode:

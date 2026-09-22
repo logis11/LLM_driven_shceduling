@@ -33,6 +33,10 @@ FAMILIES = {
     # long-probe family, so its parameters stay out of a trigger file 9.5 is launching from
     "desktop": {"workflow": "meas-desktop.yml", "trigger": ".github/campaign-desktop.json", "apps": True,
                 "pool": "dataset/tools/meas/desktop/pool.py"},
+    # 9.9 D8, D13: one subject, `session` — the Ubuntu desktop session carrying the four entries; its long-phase
+    # probe is mode `probe`, as the desktop family's is
+    "session": {"workflow": "meas-session.yml", "trigger": ".github/campaign-session.json", "apps": True,
+                "pool": "dataset/tools/meas/session/pool.py"},
     # 9.5 D35, D42: a long-phase probe of one application's steady phase — never a campaign repeat, so no pool
     "long-probe": {"workflow": "meas-long-probe.yml", "trigger": ".github/campaign-long-probe.json", "apps": True,
                    "pool": None},
@@ -156,7 +160,8 @@ def push_trigger(targets, kind, dry=False):
         d["attempt"] = d.get("attempt", 0) + 1
         if trig.endswith("campaign-build.json"):
             d["repeats"] = sorted(k for _, _, k in ts)
-        elif trig.endswith(("campaign-background.json", "campaign-long-probe.json", "campaign-desktop.json")):
+        elif trig.endswith(("campaign-background.json", "campaign-long-probe.json", "campaign-desktop.json",
+                                "campaign-session.json")):
             m = {}
             for _, app, k in ts:
                 m.setdefault(app, []).append(k)

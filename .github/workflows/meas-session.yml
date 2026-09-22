@@ -1,0 +1,67 @@
+name: meas-session
+
+# 9.9 campaign: the four entries that replace system-daemon — GNOME Shell, the PipeWire stack, systemd (pid 1 and the
+# user manager), dbus-daemon (system and session bus) — observed in one Ubuntu 24.04 desktop session in its terminal
+# idle state, only the four entries' processes on the measured CPU (research-slice changelog D8–D14; method
+# _dev/research/jioh/task-9.9-daemons-session/campaign/method.md). Started by a push changing
+# .github/campaign-session.json, which names the subject (`session`), the repeats, the CPU model and the mode
+# (dry | probe | full). Every value the design fixes is a constant in dataset/tools/meas/session/run.sh. Registry
+# tag meas-ci:session:<launch date of the first batch> (9.5 D27). One artifact per repeat. The long-phase probe is
+# mode `probe`, never a repeat; session/pool.py refuses to pool it.
+
+on:
+  push:
+    branches: [jioh/dataset-rebuild]
+    paths: [.github/campaign-session.json]
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      mode: ${{ steps.plan.outputs.mode }}
+      cpu_model: ${{ steps.plan.outputs.cpu_model }}
+      count: ${{ steps.plan.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        run: |
+          python3 - >> "$GITHUB_OUTPUT" <<'PY'
+          import json
+          c = json.load(open(".github/campaign-session.json"))
+          reps = c.get("repeats", [])
+          inc = [{"app": a, "repeat": r} for a in c.get("apps", []) for r in (reps.get(a, []) if isinstance(reps, dict) else reps)]
+          print("matrix=" + json.dumps({"include": inc}))
+          print("mode=" + c.get("mode", "full"))
+          print("cpu_model=" + c.get("cpu_model", ""))
+          print("count=" + str(len(inc)))
+          PY
+  run:
+    # named as the loop tools parse a job, "run (<app>, <k>)"
+    name: run (${{ matrix.app }}, ${{ matrix.repeat }})
+    needs: plan
+    if: needs.plan.outputs.count != '0'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash dataset/tools/meas/session/run.sh ${{ matrix.app }} ${{ matrix.repeat }} ${{ needs.plan.outputs.mode }}
+        env:
+          MEAS_OUT: /tmp/meas
+          MEAS_CPU_MODEL: ${{ needs.plan.outputs.cpu_model }}
+      - name: own the output
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" /tmp/meas && sudo chmod -R a+rX /tmp/meas
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}
+          path: /tmp/meas
+          if-no-files-found: error
