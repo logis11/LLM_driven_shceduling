@@ -88,16 +88,16 @@ Repeats 1–31 on the AMD EPYC 7763, repeat 3 left out of the pool: it landed, b
 
 Full tables: `task-9.7-background-io/campaign/results-borg.md`, `campaign/results-7z.md` and `campaign/results-steamcmd.md`, `campaign/results/borg-pooled.json`, `results/7z-pooled.json` and `results/steamcmd-pooled.json`.
 
-## 9.8 — four desktop entries, one campaign
+## 9.8 — four archetypes, one campaign
 
 Every repeat on the AMD EPYC 7763, kernel `6.17.0-1022-azure` in all of them, none excluded or superseded; the renderer entries on Google Chrome 152.0.7977.82 in every repeat, 12 renderers measured of 16 observed (hidden) and of 13–14 (visible). Each entry reads one phase (method §10): the hidden renderer `steady`, the visible renderer `steady-notimer` (D16), the chat client `idle`, the Steam client `shown`. The renderer entries' values are per renderer, the renderers pooled as samples (D14). `values` counts what the rule covers; `widest` is the largest half-width among the values that pass it.
 
-| entry | subject | repeats | values | pass | widest | stopped by | jobs (gated) | recorded input covered |
+| archetype | subject | repeats | values | pass | widest | stopped by | jobs (gated) | recorded input covered |
 |---|---|---|---|---|---|---|---|---|
-| hidden renderer | `chrome-hidden` | 14 (1–9, 11, and 10 four times) | 12 | 5 | `chrome` run mean ±4.44 % | the rule | 25 (11) | none |
-| visible renderer | `chrome-visible` | 11 (1–11) | 15 | 4 | `chrome` gap mean ±3.68 % | the rule | 18 (7) | none |
-| chat client | `element` | 18 (1–16, and 17 twice) | 18 | 18 | `ThreadPoolForeg` gap mean ±4.56 % | the rule | 32 (14) | none |
-| Steam client | `steam` | 12 (1–12) | 33 | 25 | `ThreadPoolForeg` run mean ±4.99 % | the rule | 21 (9) | none |
+| `renderer-hidden` | `chrome-hidden` | 14 (1–9, 11, and 10 four times) | 12 | 5 | `chrome` run mean ±4.44 % | the rule | 25 (11) | none |
+| `renderer-visible` | `chrome-visible` | 11 (1–11) | 15 | 4 | `chrome` gap mean ±3.68 % | the rule | 18 (7) | none |
+| `chat-client` | `element` | 18 (1–16, and 17 twice) | 18 | 18 | `ThreadPoolForeg` gap mean ±4.56 % | the rule | 32 (14) | none |
+| `game-client` | `steam` | 12 (1–12) | 33 | 25 | `ThreadPoolForeg` run mean ±4.99 % | the rule | 21 (9) | none |
 
 The values outside the tolerance, each carried over its repeats with its half-width and range. Run means whose spread is the machine (D17; the Steam client's by D18):
 
