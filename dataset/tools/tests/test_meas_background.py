@@ -443,17 +443,17 @@ def test_the_rule_tests_every_table_on_the_list_by_its_per_repeat_mean():
     # medians identical in every repeat, means apart by the long tail: the rule reads the means (D19)
     steady_p50_wild_mean = {k: [10.0, 10.0, 10.0 + 40.0 * (k % 2)] for k in range(1, 6)}
     flat = {k: [10.0, 10.0, 10.0] for k in range(1, 6)}
-    crit = pool.criterion("borg", _entry("borg-first-warm", {"run_us": flat, "wait_us": flat, "disk_us": steady_p50_wild_mean}))
-    assert set(crit) == {"borg-first-warm run per wake (µs)", "borg-first-warm wait per wake (µs)", "borg-first-warm disk wait (µs)"}
-    assert crit["borg-first-warm run per wake (µs)"]["passes"]
-    assert not crit["borg-first-warm disk wait (µs)"]["passes"]
-    assert crit["borg-first-warm run per wake (µs)"]["needed"] == 5
+    crit = pool.criterion("borg", _entry("borg-first-warm", {"batch_run_us": flat, "batch_block_us": steady_p50_wild_mean}))
+    assert set(crit) == {"borg-first-warm run between voluntary blocks (µs)", "borg-first-warm block per run (µs)"}
+    assert crit["borg-first-warm run between voluntary blocks (µs)"]["passes"]
+    assert not crit["borg-first-warm block per run (µs)"]["passes"]
+    assert crit["borg-first-warm run between voluntary blocks (µs)"]["needed"] == 5
 
 
-def test_the_list_is_each_archetypes_process_level_tables():
-    assert [k for _p, k, _l in pool.LIST["borg"]] == ["run_us", "wait_us", "disk_us"]
-    assert [k for _p, k, _l in pool.LIST["7z"]] == ["run_us", "wait_us"]
-    assert [k for _p, k, _l in pool.LIST["steamcmd"]] == ["run_us", "network_us", "bytes_per_wake"]
+def test_the_list_is_each_archetypes_batch_loop_tables():
+    # D29: every archetype compiles as cpu-batch's batch loop and carries its two tables
+    for app in ("borg", "7z", "steamcmd"):
+        assert [k for _p, k, _l in pool.LIST[app]] == ["batch_run_us", "batch_block_us"]
     assert {p for _p in pool.LIST.values() for p, _k, _l in _p} == {"borg-first-warm", "7z-mmt8-warm", "steam-fresh-shaped"}
 
 

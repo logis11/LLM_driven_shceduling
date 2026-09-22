@@ -47,14 +47,12 @@ NAME = re.compile(r"^meas-background-(borg|7z|steamcmd)-r(\d+)-(dry|probe|full)$
 PHASES = {"borg": ("borg-first-warm", "borg-repeat-warm", "borg-first-cold", "borg-repeat-cold"),
           "7z": ("7z-mmt8-warm", "7z-mmt1-warm", "7z-mmt8-cold"),
           "steamcmd": ("steam-fresh-shaped", "steam-fresh-untraced", "steam-fresh-unshaped", "steam-update-shaped")}
-# D19 (the shared stability rule): the list — every table the fold-in carries, each tested by its per-repeat mean; the
-# process-level tables of each archetype's phase, pooled over all the program's threads (each busy thread's tables join
-# if the probe batch sets one task per busy thread)
-LIST = {"borg": [("borg-first-warm", "run_us", "run per wake (µs)"), ("borg-first-warm", "wait_us", "wait per wake (µs)"),
-                 ("borg-first-warm", "disk_us", "disk wait (µs)")],
-        "7z": [("7z-mmt8-warm", "run_us", "run per wake (µs)"), ("7z-mmt8-warm", "wait_us", "wait per wake (µs)")],
-        "steamcmd": [("steam-fresh-shaped", "run_us", "run per wake (µs)"), ("steam-fresh-shaped", "network_us", "network wait (µs)"),
-                     ("steam-fresh-shaped", "bytes_per_wake", "bytes per wake")]}
+# D19 (the shared stability rule): the list — every table the fold-in carries, each tested by its per-repeat mean. D29
+# (9.6 D21, D22, D25): each archetype compiles as cpu-batch's batch loop, so it carries the program's runs between
+# voluntary blocks, pooled over its threads, and the block after each run — the program-level off-CPU time, zero when
+# another thread runs on; the per-wake tables of D19's first list are reported, not carried
+LIST = {app: [(ph, "batch_run_us", "run between voluntary blocks (µs)"), (ph, "batch_block_us", "block per run (µs)")]
+        for app, ph in (("borg", "borg-first-warm"), ("7z", "7z-mmt8-warm"), ("steamcmd", "steam-fresh-shaped"))}
 # D14 (1): the headline medians, pooled over all the program's threads — read by the comparisons (results only)
 HEADLINE = {"borg": [("borg-first-warm", "run_us", "run per wake (µs)"), ("borg-first-warm", "wait_us", "wait per wake (µs)")],
             "7z": [("7z-mmt8-warm", "run_us", "run per wake (µs)"), ("7z-mmt8-warm", "wait_us", "wait per wake (µs)")],
@@ -71,7 +69,7 @@ COMPARISONS = {"borg": [("borg-first-warm", "borg-first-cold", "warm against col
 # a count of whole bytes, has no floor — and the rule holds only over at least five same-machine repeats
 ABS_FLOOR_US = 1.0
 MIN_REPEATS = 5
-SAMPLE_KEYS = ("run_us", "wait_us", "disk_us", "uninterruptible_us", "network_us", "sleep_us", "runnable_us", "bytes_per_wake")
+SAMPLE_KEYS = ("run_us", "wait_us", "disk_us", "uninterruptible_us", "network_us", "sleep_us", "runnable_us", "bytes_per_wake", "batch_run_us", "batch_block_us")
 APPLIED_MBPS, NETWORK_TABLE_MBPS = 121.0, 128.9   # D11: the applied rate; the network table's byte-weighted median
 
 
@@ -106,7 +104,7 @@ CACHE_VERSION = 1
 def code_hash():
     """The analysis code a cached result was made by: a change to it makes every cache stale."""
     h = hashlib.sha256(str(CACHE_VERSION).encode())
-    for m in (analyze, analyze.nettrace, analyze._build, sys.modules["meas.stability"]):
+    for m in (analyze, analyze.nettrace, analyze._build, analyze.shapes, sys.modules["meas.stability"]):
         h.update(open(m.__file__, "rb").read())
     return h.hexdigest()[:16]
 

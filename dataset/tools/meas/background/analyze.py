@@ -51,6 +51,7 @@ if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 from meas.build import analyze as _build   # noqa: E402  9.6's loaders and wake rule
 from meas.background import nettrace  # noqa: E402
+from meas.build import shapes  # noqa: E402  9.6's runs between voluntary blocks and the block after each (D29)
 from meas.stability import TOLERANCE  # noqa: E402
 load_segments, load_wakeups, load_forks = _build.load_segments, _build.load_wakeups, _build.load_forks
 load_taskstats, process_records, merge_resumes = _build.load_taskstats, _build.process_records, _build.merge_resumes
@@ -349,11 +350,30 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
     for tid in sorted(run_by_tid, key=lambda t: -run_by_tid[t]):
         ranked[last_comm.get(tid, "?")].append(tid)
     key_of = {tid: f"{comm}#{i + 1}" for comm, tids in ranked.items() for i, tid in enumerate(tids)}
-    samples = {"all": {k: [] for k in ("run_us", "wait_us", "bytes_per_wake") + tuple(c + "_us" for c in CLASSES)}, "threads": {}}
+    # D29 (9.6 D21, D22, D25): the program's runs between voluntary blocks, per thread, and the block after each —
+    # the program-level off-CPU time from that run's voluntary block, zero when another thread of the program runs on
+    # or is runnable — each block kept with the thread whose run it follows, so "all" is the threads' concatenation
+    prog_rows = sorted((s for s in rows if tid2pid.get(s.tid, s.tid) in prog_set), key=lambda s: s.t_in)
+    batch_run, batch_block = defaultdict(list), defaultdict(list)
+    for s_ in prog_rows:
+        batch_run[s_.tid]   # every program thread with a row has a (possibly empty) list
+    by_tid_rows = defaultdict(list)
+    for s_ in prog_rows:
+        by_tid_rows[s_.tid].append(s_)
+    for tid, rs in by_tid_rows.items():
+        batch_run[tid] = [x * 1000.0 for x in shapes.runs_between_blocks(rs)]
+    if prog_rows:
+        b_start, b_end = prog_rows[0].t_in, max(s_.t_end for s_ in prog_rows)
+        vol_tids = [s_.tid for s_ in prog_rows if s_.state[:1] in shapes.VOLUNTARY]
+        for tid, ms in zip(vol_tids, shapes.blocks_after_runs(prog_rows, b_start, b_end)):
+            batch_block[tid].append(ms * 1000.0)
+    samples = {"all": {k: [] for k in ("run_us", "wait_us", "bytes_per_wake") + tuple(c + "_us" for c in CLASSES)
+                       + ("batch_run_us", "batch_block_us")}, "threads": {}}
     threads = {}
     for tid in sorted(run_by_tid, key=lambda t: -run_by_tid[t]):
         s = {"run_us": [w.run * 1000.0 for w in per_wakes[tid]], "wait_us": [x["us"] for x in prog_intervals.get(tid, [])],
-             "bytes_per_wake": list(bpw.get(tid, []))}
+             "bytes_per_wake": list(bpw.get(tid, [])),
+             "batch_run_us": batch_run.get(tid, []), "batch_block_us": batch_block.get(tid, [])}
         for c in CLASSES:
             s[c + "_us"] = [x["us"] for x in prog_intervals.get(tid, []) if x.get("class") == c]
         samples["threads"][key_of[tid]] = s
