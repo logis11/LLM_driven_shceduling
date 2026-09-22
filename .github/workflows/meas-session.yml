@@ -66,6 +66,57 @@ jobs:
           MEAS_OUT: /tmp/meas
           MEAS_CPU_MODEL: ${{ needs.plan.outputs.cpu_model }}
           MEAS_STOP_AFTER: ${{ matrix.stop }}
+      # timed copies through the install, where four of five dry jobs lost their runner on 2026-09-22
+      - name: t+60s
+        run: |
+          sleep 60
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo cp /var/log/apt/term.log /tmp/part/ 2>/dev/null; sudo chown -R "$(id -u):$(id -g)" /tmp/part; free -m; uptime
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-t60
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: t+120s
+        run: |
+          sleep 60
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo cp /var/log/apt/term.log /tmp/part/ 2>/dev/null; sudo chown -R "$(id -u):$(id -g)" /tmp/part; free -m; uptime
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-t120
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: t+180s
+        run: |
+          sleep 60
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo cp /var/log/apt/term.log /tmp/part/ 2>/dev/null; sudo chown -R "$(id -u):$(id -g)" /tmp/part; free -m; uptime
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-t180
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: t+240s
+        run: |
+          sleep 60
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo cp /var/log/apt/term.log /tmp/part/ 2>/dev/null; sudo chown -R "$(id -u):$(id -g)" /tmp/part; free -m; uptime
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-t240
+          path: /tmp/part
+          if-no-files-found: warn
+      - name: t+300s
+        run: |
+          sleep 60
+          rm -rf /tmp/part && mkdir -p /tmp/part && sudo cp -r /tmp/meas /tmp/part/ 2>/dev/null; cp /tmp/run.out /tmp/part/ 2>/dev/null
+          sudo cp /var/log/apt/term.log /tmp/part/ 2>/dev/null; sudo chown -R "$(id -u):$(id -g)" /tmp/part; free -m; uptime
+      - uses: actions/upload-artifact@v4
+        with:
+          name: meas-session-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}-at-t300
+          path: /tmp/part
+          if-no-files-found: warn
       - name: stage install
         run: |
           while [ ! -e /tmp/meas/diag.install/done ] && kill -0 "$(cat /tmp/run.pid)" 2>/dev/null; do sleep 5; done
