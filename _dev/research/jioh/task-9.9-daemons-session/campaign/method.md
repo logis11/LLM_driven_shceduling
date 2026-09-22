@@ -67,7 +67,6 @@ The raw records, including every job's census, are one release, as 9.5–9.8 rel
 - **Whether the session comes up as §2 states** — the seatless PAM login, `SessionIsActive`, the shell under its unit with the drop-in, the null sink. The dry run verifies it; a departure is a method amendment, not a silent change.
 - **Whether the shield and the blank are reached headless**, and what the compositor does once they are. The dry run shows whether they are reached, the probe what follows; if the session never blanks, whether the entries are measured shield-up without the blank is a design question for 인지오.
 - **`priming`, `session-settle` and `steady` lengths**, from the probe, written into §10 before the first batch.
-- **Whether GDM 46's greeter keeps running after the user logs in** on a stock install, read from its source; if it does, a stated limit of §7.
 
 ## 10. Amendments
 
@@ -76,3 +75,4 @@ The raw records, including every job's census, are one release, as 9.5–9.8 rel
 - 2026-09-22, the rest kept off the measured CPU (changelog D12) — §2.5: the per-unit sweep, run twice; §5: foreign schedule-ins gate a repeat.
 - 2026-09-22, the phases and the checks (changelog D13) — §2.4: census outside the recording; §3: `priming`, the fixed steady edge and its check, the dry run through the blank, the probe's lengths and polling; §9: the dry run's share and the GDM greeter question.
 - 2026-09-22, the user side's pin and the kernel threads (changelog D14) — §2.5: cpuset delegated to the user manager, the user manager by its `init.scope` cgroup; §5: kernel threads counted, not gated; §7: both limits stated.
+- 2026-09-22, the GDM greeter (changelog D11, S2-33) — §9: the item removed; GDM 46.2 stops the login screen once a user session has taken over, so no limit is added to §7.
