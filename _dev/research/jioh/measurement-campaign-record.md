@@ -12,7 +12,7 @@ All on GitHub-hosted `ubuntu-24.04` runners, 4 vCPU, pinned to one CPU, AMD EPYC
 | `meas-ci:interactive:2026-09-18` | 9.5 | `meas-interactive.yml` | #10–#100 | 2026-09-18 09:56 UTC |
 | `meas-ci:playback:2026-09-18` | 9.5 | `meas-playback.yml` | #10–#84 | 2026-09-18 09:56 UTC |
 | `meas-ci:interactive:2026-09-19` | 9.5 | `meas-interactive.yml` | #150–#244, `thunderbird-send` alone (the `send` re-observation) | 2026-09-19 11:18 UTC |
-| `meas-ci:background:2026-09-19` | 9.7 | `meas-background.yml` | #19–; `borg`'s repeats are in #24–#40 | 2026-09-19 23:16 UTC |
+| `meas-ci:background:2026-09-19` | 9.7 | `meas-background.yml` | #19–#58; `borg`'s repeats are in #24–#40, `steamcmd`'s pooled repeats in #47–#57 | 2026-09-19 23:16 UTC |
 | `meas-ci:interactive:2026-09-20` | 9.5 | `meas-interactive.yml` | #245–, `chrome` and `code` re-measured under D51 and D53 | 2026-09-20 08:04 UTC |
 | `meas-ci:playback:2026-09-20` | 9.5 | `meas-playback.yml` | #245–, `webrtc` re-measured under D54 | 2026-09-20 08:04 UTC |
 | `meas-ci:desktop:2026-09-20` | 9.8 | `meas-desktop.yml` | #21–#50 | 2026-09-20 11:03 UTC |
@@ -67,7 +67,7 @@ Also within the rule: the object job's 11 per-step CPU tables (±0.7–1.4 %), C
 
 Full tables: `task-9.6-compile/campaign/results.md`, `campaign/results/pooled.json`.
 
-## 9.7 — `file-backup` and `file-archiver`
+## 9.7 — `file-backup`, `file-archiver` and `game-download`
 
 Repeats 1–31 on the AMD EPYC 7763, repeat 3 left out of the pool: it landed, but its 10 GB set fetched as a 12,108 B file in place of the 3.70 GB archive (`set.archive_pin` mismatch, extract rc 2, 0 files), so its phases ran on an empty tree and the validity step fails it (the loop, step 4). 55 jobs: 31 landed, 24 stopped by the machine gate, none on another model. The rule is read over the other 30 repeats, and holds on all three of `file-backup`'s values.
 
@@ -78,12 +78,15 @@ Repeats 1–31 on the AMD EPYC 7763, repeat 3 left out of the pool: it landed, b
 | `file-backup` | `borg` | disk wait per wake, warm first backup | 30 | 3.157 ms | 12.7 % | ±4.84 % | the rule |
 | `file-archiver` | `7z` | run per wake, warm eight-thread run | 6 | 4.187 ms | 2.1 % | ±2.17 % | the rule |
 | `file-archiver` | `7z` | wait per wake, warm eight-thread run | 6 | 32.232 ms | 2.3 % | ±2.40 % | the rule |
+| `game-download` | `steamcmd` | run per wake, shaped fresh install | 21 | 161.8 µs | 4.9 % | ±2.26 % | the rule |
+| `game-download` | `steamcmd` | network wait, shaped fresh install | 21 | 217.7 µs | 9.8 % | ±4.47 % | the rule |
+| `game-download` | `steamcmd` | bytes per wake, shaped fresh install | 21 | 3,894 B | 8.4 % | ±3.82 % | the rule |
 
 `file-archiver`'s first batch of six repeats holds the rule, every repeat valid: 14 jobs, 8 gated draws, none on another model. Its D15 check, the single-thread run against the eight-thread run, is reported by its CPU per byte (0.91–0.96 of the eight-thread run in every repeat); the check's per-wake parts split into two modes of the same thread, 940 wakes at a 0.36–0.38 s median gap in repeats 1, 2 and 6 against 1,246–1,575 wakes at 0.4–0.7 ms in repeats 3, 4 and 5, and both are stated in the archetype's notes.
 
-`game-download` (SteamCMD) has no values yet: its operating point is open — the number of content servers its runner draws sets every value on its list (run 35475239657: 6 servers 4.73 % of packets dropped and 4,070 B a wake, one server forced 0.0005 % and 2,131 B, 6 servers again 4.97 % and 4,137 B).
+`game-download`'s repeats 1–22 ran in runs #47–#57 under the `fq_codel` leaf (D25), repeats 6–12 and 14–22 added as batches (D26). Repeat 21 is left out of the pool: its runner had no accelerated-networking VF and 490 B of its 10.5 GB download went through the shaper, so its shaped phases ran unshaped (D27). Repeat 23 (run #58), added before the rule was read without repeat 21, landed and is not pooled (D27). 36 jobs: 23 landed, 13 stopped by the machine gate, none on another model. The rule is read over the other 21 repeats (1–20 and 22) and holds on all three values.
 
-Full tables: `task-9.7-background-io/campaign/results-borg.md` and `campaign/results-7z.md`, `campaign/results/borg-pooled.json` and `results/7z-pooled.json`.
+Full tables: `task-9.7-background-io/campaign/results-borg.md`, `campaign/results-7z.md` and `campaign/results-steamcmd.md`, `campaign/results/borg-pooled.json`, `results/7z-pooled.json` and `results/steamcmd-pooled.json`.
 
 ## 9.8 — four desktop entries, one campaign
 
