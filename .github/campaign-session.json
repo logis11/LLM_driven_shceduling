@@ -1,19 +1,24 @@
 {
-  "note": "Trigger for meas-session.yml (9.9 campaign). A push that changes this file starts the runs it names. One subject, session. repeats is one list or a map subject -> list. mode: dry | probe | full \u2014 probe is the long-phase probe and is never a repeat. Every other value is a constant in dataset/tools/meas/session/run.sh. A dry run sets cpu_model to \"\" so machine_gate opens on any model: it verifies the tooling, is never pooled and is not a repeat. stop_after (repeat -> stage: install | priming | pinned | edge | end) stops a dry job cleanly after that stage; a diagnostic, ignored outside mode dry.",
+  "note": "Trigger for meas-session.yml (9.9 campaign). A push that changes this file starts the runs it names. One subject, session. repeats is one list or a map subject -> list. mode: dry | probe | full \u2014 probe is the long-phase probe and is never a repeat. Every other value is a constant in dataset/tools/meas/session/run.sh. A dry run sets cpu_model to \"\" so machine_gate opens on any model: it verifies the tooling, is never pooled and is not a repeat. stop_after (repeat -> stage: install | priming | pinned | edge | end) stops a dry job cleanly after that stage; a diagnostic, ignored outside mode dry. login_mode (repeat -> unit | gdm | stub) picks the login path for the Q14 comparison.",
   "mode": "dry",
-  "attempt": 5,
+  "attempt": 6,
   "cpu_model": "",
   "apps": [
     "session"
   ],
   "repeats": {
     "session": [
-      17,
-      18,
-      19,
-      20,
-      21
+      22,
+      23,
+      24,
+      25
     ]
   },
-  "stop_after": {}
+  "stop_after": {},
+  "login_mode": {
+    "22": "gdm",
+    "23": "stub",
+    "24": "gdm",
+    "25": "stub"
+  }
 }

@@ -210,6 +210,14 @@ def snapshot(uid, label):
         "greeter": [{"pid": p["pid"], "comm": p["comm"], "cmd": p["cmd"]} for p in procs
                     if p["comm"].startswith("gdm") or "gdm-" in p["cmd"]],
         "buses": sorted({p["comm"] for p in procs if re.match(r"^dbus-(daemon|broker)", p["comm"])}),
+        "environment": read("/etc/environment"),
+        # what the shell's environment really is: the runner image's XDG paths reached earlier sessions
+        "shell_env": {k: v for pr in procs if pr["comm"] == "gnome-shell"
+                      for k, _, v in (ln.partition("=") for ln in read(f"/proc/{pr['pid']}/environ").split("\0"))
+                      if k in ("HOME", "XDG_CONFIG_HOME", "XDG_RUNTIME_DIR", "XDG_SESSION_TYPE", "XDG_SESSION_CLASS",
+                               "XDG_CURRENT_DESKTOP", "DCONF_PROFILE", "GDMSESSION")},
+        "display_manager": sh(["busctl", "--system", "get-property", "org.gnome.DisplayManager",
+                               "/org/gnome/DisplayManager/Manager", "org.gnome.DisplayManager.Manager", "Version"]),
         "commands": {k: sh(c) for k, c in cmds.items()},
         "state": state(uid),
     }

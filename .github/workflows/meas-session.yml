@@ -35,7 +35,9 @@ jobs:
           reps = c.get("repeats", [])
           # stop_after (repeat -> stage): a dry-run diagnostic only; run.sh ignores it outside mode dry
           stop = c.get("stop_after", {})
-          inc = [{"app": a, "repeat": r, "stop": stop.get(str(r), "")}
+          # login_mode (repeat -> unit | gdm | stub): the Q14 comparison; `unit` is the default
+          lm = c.get("login_mode", {})
+          inc = [{"app": a, "repeat": r, "stop": stop.get(str(r), ""), "login": lm.get(str(r), "")}
                  for a in c.get("apps", []) for r in (reps.get(a, []) if isinstance(reps, dict) else reps)]
           print("matrix=" + json.dumps({"include": inc}))
           print("mode=" + c.get("mode", "full"))
@@ -66,6 +68,7 @@ jobs:
           MEAS_OUT: /tmp/meas
           MEAS_CPU_MODEL: ${{ needs.plan.outputs.cpu_model }}
           MEAS_STOP_AFTER: ${{ matrix.stop }}
+          MEAS_LOGIN_MODE: ${{ matrix.login }}
       # timed copies through the install, where four of five dry jobs lost their runner on 2026-09-22
       - name: t+60s
         run: |

@@ -36,6 +36,12 @@ LEADER_UNIT=meas-session             # the transient unit that is the session le
 LOGIN_WAIT=240                       # how long a login may take to bring GNOME Shell up before the job stops
 LOGOUT_WAIT=90                       # how long the user manager may take to stop after the logout
 POLL_S=10                            # the probe's state polls (D13)
+# How the session is logged in. `unit` is D11's transient PAM unit with GDM masked. GNOME Shell creates its screen
+# shield only when a display manager answers on the system bus (gnome-shell 46.0 js/ui/main.js:230,
+# js/misc/loginManager.js:38-53), so with `unit` alone the session never locks and never blanks: `gdm` logs in
+# through GDM's automatic login instead, `stub` keeps D11's login and adds dm_stub.py on the system bus. The two
+# are compared in a dry run before either is decided (Q14).
+LOGIN_MODE="${MEAS_LOGIN_MODE:-unit}"
 
 # Lengths from the long-phase probe, written into method §10 before the first batch (method §9). Empty until then:
 # a full job without them stops before measuring, as the desktop family's does.
@@ -139,12 +145,21 @@ install_session() {
            dbus-daemon dbus-broker gdm3 gnome-initial-setup ubuntu-settings; do
     rec "version.$p" "$(dpkg-query -W -f='${Version}' "$p" 2>/dev/null)"
   done
-  # D11: no display manager — the transient PAM unit below is the only login path
-  sudo systemctl disable --now gdm.service > "$OUT/gdm.log" 2>&1; sudo systemctl mask gdm.service >> "$OUT/gdm.log" 2>&1
+  # D11: no display manager — the transient PAM unit is the login path — except in login mode `gdm`, where GDM's
+  # own automatic login is the path and GDM stays as installed
+  if [ "$LOGIN_MODE" != gdm ]; then
+    sudo systemctl disable --now gdm.service > "$OUT/gdm.log" 2>&1; sudo systemctl mask gdm.service >> "$OUT/gdm.log" 2>&1
+    sudo loginctl terminate-user gdm >> "$OUT/gdm.log" 2>&1
+    sleep 5
+  fi
   rec gdm.masked "$(systemctl is-enabled gdm.service 2>/dev/null)"
-  sudo loginctl terminate-user gdm >> "$OUT/gdm.log" 2>&1
-  sleep 5
   rec gdm.procs_left "$(pgrep -u gdm 2>/dev/null | wc -l)"
+
+  # the runner image exports its own XDG paths to every login through /etc/environment, which sends the session's
+  # settings, its dconf database and the wizard's stamp to /home/runner; the file is restored to the stock lines
+  cp /etc/environment "$OUT/environment.before" 2>/dev/null
+  sudo sed -i '/^XDG_/d;/^HOME=/d;/^XDG/d' /etc/environment
+  cp /etc/environment "$OUT/environment.after" 2>/dev/null
 
   # D14: the cpuset controller delegated to the user manager, so the user side's AllowedCPUs= apply
   sudo mkdir -p /etc/systemd/system/user@.service.d
@@ -165,6 +180,11 @@ install_session() {
     | sudo -u "$SESSION_USER" tee "$d/headless.conf" > /dev/null
   rec shell.exec "$shipped --headless --virtual-monitor $VIRTUAL_MONITOR"
 
+  if [ "$LOGIN_MODE" = gdm ]; then     # GDM's automatic login of the measured user, Wayland (Q14 test)
+    printf '[daemon]\nWaylandEnable=true\nAutomaticLoginEnable=true\nAutomaticLogin=%s\n' "$SESSION_USER" \
+      | sudo tee /etc/gdm3/custom.conf > /dev/null
+    rec gdm.autologin "$SESSION_USER"
+  fi
   SESSION_FILE="$(session_file)"; rec session.file "${SESSION_FILE:-none}"
   SESSION_EXEC="$(sed -n 's/^Exec=//p' "$SESSION_FILE" 2>/dev/null | head -1)"
   SESSION_DESKTOPS="$(sed -n 's/^DesktopNames=//p' "$SESSION_FILE" 2>/dev/null | head -1 | tr ';' ':' | sed 's/:$//')"
@@ -188,9 +208,28 @@ start_boot_units() {
   rec units.started "$n"
 }
 
-# login <label> — the seatless PAM login of D11: a transient system unit is the session leader
+# dm_stub — the stand-in display manager of login mode `stub`: the one property gnome-shell's canLock() asks for
+start_dm_stub() {
+  printf '<!DOCTYPE busconfig PUBLIC "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">\n<busconfig><policy user="root"><allow own="org.gnome.DisplayManager"/></policy><policy context="default"><allow send_destination="org.gnome.DisplayManager"/></policy></busconfig>\n' \
+    | sudo tee /etc/dbus-1/system.d/meas-dm-stub.conf > /dev/null
+  sudo systemctl reload dbus.service 2>/dev/null
+  sudo setsid python3 "$HERE/dm_stub.py" "$(dpkg-query -W -f='${Version}' gdm3 2>/dev/null | sed 's/-.*//;s/[^0-9.].*//')" \
+    > "$OUT/dm_stub.log" 2>&1 &
+  sleep 3
+  rec dm_stub.owner "$(sudo busctl --system call org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus GetNameOwner s org.gnome.DisplayManager 2>&1 | tail -c 60)"
+  rec dm_stub.version "$(sudo busctl --system get-property org.gnome.DisplayManager /org/gnome/DisplayManager/Manager org.gnome.DisplayManager.Manager Version 2>&1 | tail -c 40)"
+}
+
+# login <label> — the seatless PAM login of D11: a transient system unit is the session leader; in login mode `gdm`
+# the login is GDM's automatic one instead, started (and restarted, for the measured login) with the service
 login() {
   local label="$1"
+  if [ "$LOGIN_MODE" = gdm ]; then
+    edge "login-$label" start
+    sudo systemctl restart gdm.service > "$OUT/login.$label.log" 2>&1; rec "login.$label.rc" "$?"
+    wait_for_shell "$label"
+    return
+  fi
   edge "login-$label" start
   sudo systemd-run --unit="$LEADER_UNIT" --service-type=simple -p PAMName=login -p User="$SESSION_USER" \
     -p WorkingDirectory="/home/$SESSION_USER" \
@@ -198,6 +237,16 @@ login() {
     --setenv=DESKTOP_SESSION=ubuntu --setenv=XDG_CURRENT_DESKTOP="$SESSION_DESKTOPS" \
     /bin/sh -c "exec $SESSION_EXEC" > "$OUT/login.$label.log" 2>&1
   rec "login.$label.rc" "$?"
+  wait_for_shell "$label"
+}
+
+wait_for_shell() {
+  local label="$1"
+  if [ "$LOGIN_MODE" = gdm ]; then     # the user's uid exists before the session does; wait for its manager first
+    local w=0
+    while [ "$w" -lt "$LOGIN_WAIT" ] && ! systemctl is-active --quiet "user@$MEAS_UID.service"; do sleep 2; w=$((w + 2)); done
+    rec "login.$label.user_manager_s" "$w"
+  fi
   local t=0
   while [ "$t" -lt "$LOGIN_WAIT" ]; do
     [ "$(ucmd systemctl --user is-active org.gnome.Shell@wayland.service 2>/dev/null)" = active ] && break
@@ -219,7 +268,11 @@ login() {
 logout() {
   local label="$1" t=0
   edge "logout-$label" start
-  sudo systemctl stop "$LEADER_UNIT.service"; rec "logout.$label.rc" "$?"
+  if [ "$LOGIN_MODE" = gdm ]; then
+    sudo loginctl terminate-user "$SESSION_USER" > /dev/null 2>&1; rec "logout.$label.rc" "$?"
+  else
+    sudo systemctl stop "$LEADER_UNIT.service"; rec "logout.$label.rc" "$?"
+  fi
   while [ "$t" -lt "$LOGOUT_WAIT" ]; do
     systemctl is-active --quiet "user@$MEAS_UID.service" || break
     sleep 2; t=$((t + 2))
@@ -343,7 +396,9 @@ rec kernel "$(uname -r)"
 grep -E "CONFIG_(PERF_EVENTS|SCHED_TRACER|TASKSTATS|TASK_DELAY_ACCT|HZ)" "/boot/config-$(uname -r)" > "$OUT/kconfig.txt" 2>/dev/null
 rec kernel.hz "$(grep -E '^CONFIG_HZ=' "/boot/config-$(uname -r)" 2>/dev/null | head -1)"
 
+rec settings.login_mode "$LOGIN_MODE"
 install_session
+[ "$LOGIN_MODE" = stub ] && start_dm_stub
 [ -n "$SESSION_EXEC" ] || stop_recorded no-session-file "no Ubuntu Wayland session file after the install (method §2.1)"
 checkpoint install
 start_boot_units
