@@ -83,7 +83,7 @@ def main():
                         events.append(f"FAILED {fam} {j['name']} run {r['databaseId']}")
                     else:
                         gate, model = common.gate_of(fam, j)
-                        if gate == "wrong-machine":   # handled once relaunched: one left for later is read again
+                        if gate in ("wrong-machine", "no-vf"):   # handled once relaunched: one left for later is read again
                             gated.append((fam, j["app"], j["k"], model, key, r["number"]))
                             continue
                         events.append(f"SHORT without the gate {fam} {j['name']} run {r['databaseId']}: gate {gate}")

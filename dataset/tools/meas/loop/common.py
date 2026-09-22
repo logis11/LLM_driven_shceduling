@@ -133,7 +133,8 @@ def download(run_id, name, dest):
 
 
 def gate_of(family, job):
-    """(gate, machine.model) from the job's report.json — 'wrong-machine' when the machine gate stopped it."""
+    """(gate, machine.model) from the job's report.json — 'wrong-machine' when the machine gate stopped it,
+    'no-vf' when the background network gate did (no accelerated-networking VF for the shaper)."""
     d = download(job["run"], artifact(family, job["app"], job["k"]),
                  os.path.join(WORK, "gate", str(job["run"]), f"{job['app'] or 'build'}-r{job['k']}"))
     try:

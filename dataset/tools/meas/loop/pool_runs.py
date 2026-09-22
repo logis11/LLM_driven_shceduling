@@ -101,6 +101,13 @@ def validity(family, dirs, entry):
             incomplete = [x for x, v in r.items() if x.startswith("steam.") and x.endswith(".success") and v != "1"]
             if incomplete:
                 notes.append(f"SteamCMD install not reported complete {incomplete}")
+            # the shaper carried the download: bytes through ifb0 against bytes received in every shaped phase
+            for x, v in r.items():
+                if x.startswith("shape.") and x.endswith(".through_ifb_bytes"):
+                    ph = x[len("shape."):-len(".through_ifb_bytes")]
+                    rx = r.get(f"net.{ph}.rx_bytes")
+                    if rx and int(rx) > 0 and int(v or 0) < 0.9 * int(rx):
+                        notes.append(f"{ph} not shaped: {v} B through ifb0 of {rx} B received")
             if r.get("steam.buildid"):
                 dbs.add(r["steam.buildid"])
         if family == "desktop":   # 9.8 D13 (the gate itself is checked for every family above)

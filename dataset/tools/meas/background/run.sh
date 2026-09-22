@@ -72,6 +72,19 @@ if ! machine_gate "${MEAS_CPU_MODEL:-}"; then
   echo "machine gate: wanted '${MEAS_CPU_MODEL}', drew '$(machine_model)' — stopping before any measurement" >&2
   exit 0
 fi
+# the shaped link needs the accelerated-networking VF: without one the redirect sits on eth0's clsact hook behind the
+# runner's own direct-action BPF program, which ends classification, so nothing reaches ifb0 (repeat 21, run
+# 35584871283: shape.dev=eth0, 490 B through ifb0 of 10.5 GB received). Such a job stops here, recorded, and is relaunched.
+if [ "$APP" = steamcmd ]; then
+  GATE_IFACE="$(ip -o route get 1.1.1.1 2>/dev/null | sed -n 's/.* dev \([^ ]*\).*/\1/p')"
+  GATE_VF="$(ip -o link show 2>/dev/null | awk -F': ' -v m="$GATE_IFACE" 'index($0, " master " m " ") {print $2}' | head -1)"
+  if [ -z "$GATE_VF" ]; then
+    ip -o link show > "$OUT/ip.link.oneline.txt" 2>&1
+    rec gate no-vf; rec finished_utc "$(date -u +%FT%TZ)"; finish_report
+    echo "network gate: no accelerated-networking VF under '${GATE_IFACE}' — the shaper cannot sit on this runner; stopping" >&2
+    exit 0
+  fi
+fi
 rec gate open
 python3 -c 'import time,json; print(json.dumps({"mono_ns": time.monotonic_ns(), "real_ns": time.time_ns()}))' > "$OUT/clock.json"
 rec kernel "$(uname -r)"
