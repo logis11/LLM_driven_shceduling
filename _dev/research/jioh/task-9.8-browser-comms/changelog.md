@@ -370,3 +370,32 @@ this, and that `steamwebhelper` carries 23.6 % of the client's wakes, well above
 on the AMD EPYC 7763 under campaign `meas-ci:desktop:2026-09-20`, no repeat excluded or superseded.
 
 No value changed by this entry.
+
+## D24 — every landing pooled; the hidden renderer's `Chrome_ChildIOT` carried between sessions (2026-09-22)
+
+**Four landings were not pooled.** The retry driver relaunched the hidden renderer's repeat 10 in runs #33, #34, #36
+and #37 and the chat client's repeat 17 in #49 and #50, and every launch landed on the AMD EPYC 7763 with the gate
+open and passed the validity step. `desktop/pool.py` and `pool_runs.py` keyed repeats by index, so each read the
+latest landing and dropped the others without a word, against the campaign workflow's "Every same-machine repeat
+obtained is pooled and reported". By 인지오's decision all of them are pooled: an index that landed more than once is
+keyed `<index>@<run id>` per landing (`ecd3244`). The hidden renderer pools 14 repeats and the chat client 18.
+
+The chat client holds at 18, every value passing. The hidden renderer's coverage cut moved: `Chrome_ChildIOT`, in the
+residual at eleven repeats (D20), is a carried component of its own at fourteen, and its wake rate (±38.1 %) and gap
+mean (±25.7 %) fail. D20's test, the hidden probe's steady phase past its first 300 s in 600 s windows every 60 s per
+renderer (`desktop/within_run.py`, which reproduces D20's ±34.0 % for the old residual), places the spread:
+
+| hidden `Chrome_ChildIOT` | within one run | across the fourteen repeats | share of wakes |
+|---|---|---|---|
+| wake rate per renderer | ±17.7 % | ±76.9 % (0–0.010 wakes/s) | 3.8 % |
+
+**By 인지오's decision**, 9.5 D57 applies to it as written, as D21 applied it to the visible renderer's
+`Chrome_ChildIOT` (±18.6 % within, ±105.8 % across): its three values carried together with their half-widths over
+the fourteen repeats. It wakes about six times per renderer per 600 s phase; the entry's scope states both spreads.
+The residual is now `ThreadPoolServi` and `MemoryInfra` (±29.7 % within a run), still carried under D21. Tooling:
+`SESSION_SPREAD` in `desktop/pool.py`.
+
+**Every entry holds the rule over every landing:** the chat client at 18 repeats, the hidden renderer at 14, the
+visible renderer at 11, the Steam client at 12.
+
+No value changed by this entry.

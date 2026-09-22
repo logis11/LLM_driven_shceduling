@@ -347,6 +347,8 @@ def test_the_renderer_quiet_threads_carry_with_their_half_widths():
     wild = _comp([0.0, 0.01, 0.005, 0.01, 0.002], [300000.0, 100000.0, 150000.0, 100000.0, 250000.0], [0.03] * 5)
     q = pool.criterion("chrome-visible", _entry({"Chrome_ChildIOT": wild}, phase="steady-notimer"))
     assert all(c["session_spread"] and c["carried"] for c in q["quantities"].values()) and q["passes"] is True
+    q = pool.criterion("chrome-hidden", _entry({"Chrome_ChildIOT": wild}, phase="steady"))   # D24
+    assert all(c["session_spread"] and c["carried"] for c in q["quantities"].values()) and q["passes"] is True
     q = pool.criterion("chrome-visible", _entry({"chrome": wild}, phase="steady-notimer"))
     assert q["passes"] is False                        # the main thread is not excepted
     q = pool.criterion("element", _entry({"Chrome_ChildIOT": wild}))

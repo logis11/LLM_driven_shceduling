@@ -79,7 +79,9 @@ EXCEPTED_RUN_MEANS = ("chrome-hidden", "chrome-visible", "element", "steam")
 # over at least five repeats, its three values together. Extended by D21 to the renderer residuals and the visible
 # renderer's ThreadPoolForeg, whose spread is in part within a run (about six wakes per renderer per phase) — both
 # spreads and that limitation are stated in the entry's scope (D20 holds the measurement).
-SESSION_SPREAD = {"chrome-hidden": ("residual",),
+# changelog D24: the hidden renderer's Chrome_ChildIOT, a separate component once all 14 landings are pooled — ±17.7 %
+# within a run against ±76.9 % between runs, 9.5 D57 as written, as D21 found for the visible renderer's
+SESSION_SPREAD = {"chrome-hidden": ("Chrome_ChildIOT", "residual"),
                   "chrome-visible": ("Chrome_ChildIOT", "ThreadPoolForeg", "residual"),
                   # changelog D23: 9.5 D57 as written — the gap means move ±0.1 % and ±1.7 % within a run and ±21 %
                   # and ±20 % between runs, the tables stable through p99 and the wake rates holding
