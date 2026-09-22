@@ -8,8 +8,8 @@ Same-machine repeats sub-item. Branch `jioh/dataset-rebuild`; everything below i
 |---|---|---|---|---|
 | `soffice`, `gimp`, `kdenlive`, `mpv-video`, `mpv-audio`, `thunderbird-send` | six archetypes | — | **hold** | filed in `campaign/results-same-machine/` |
 | `webrtc` | `video-call` | 35 | **holds** (D59) | `playback/webrtc --since 245` |
-| `code` | `code-editor` | 19 valid (windows 1–4, 6–20; window 5 left out, D63) | not yet, projection 24 (136M input_run, VizCompositorTh gap) | `interactive/code --since 376 --exclude 5 --exclude-why "D63: …"` |
-| `chrome` | `web-browser` | 5 under D65 (first batch valid) | not yet, projection 32 (the two input_run values only) | `interactive/chrome --since 438 -- --exclude-roles renderer` |
+| `code` | `code-editor` | 20 valid (windows 1–4, 6–21; window 5 left out, D63) | not yet, projection 23 (the 136M input_run only) | `interactive/code --since 376 --exclude 5 --exclude-why "D63: …"` |
+| `chrome` | `web-browser` | 6 under D65 | not yet, projection 26 (the two input_run values only) | `interactive/chrome --since 438 -- --exclude-roles renderer` |
 
 ## What changed on 2026-09-21
 
@@ -46,7 +46,7 @@ The releases (2026-09-18/-19 for the six, 2026-09-20 for the three) and one fold
 
 ## Resume point (the Mac may go down)
 
-In flight at 00:40 UTC on 2026-09-22: `chrome` window 6 and `code` window 21 (run #449). The D65 first batch (windows 1–5) is valid on every check: keys only, the box holding the stream's text after SWELL-KW and empty after the prelude, idle peaks 2.2–8.0 ms/s, the heavy pass recorded apart (once in 3,000 s). On resume: `status.py interactive --since 449 --app chrome:449 --app code:449`; relaunch any gated window; pool and check each landing (the per-landing checks above, plus for `chrome` `after-driven.png` holding text); add the next repeat per application.
+In flight at 01:30 UTC on 2026-09-22: `chrome` window 7 and `code` window 22 (run #453). On resume: `status.py interactive --since 453 --app chrome:453 --app code:453`; relaunch any gated window; pool and check each landing (the per-landing checks above, plus for `chrome` `after-driven.png` holding the stream's text); add the next repeat per application.
 
 ## Running the loop
 
