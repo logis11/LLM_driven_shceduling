@@ -570,6 +570,8 @@ Read during stage 3 to settle whether an idle GNOME 46 session runs an X server.
 | R3 | 2026-09-22 | `curl` | `https://gitlab.gnome.org/GNOME/gnome-shell/-/raw/46.0/data/org.gnome.Shell@wayland.service.in` | 200 | `gnome-shell-46.0-org.gnome.Shell@wayland.service.in` `0b3ce9179c6ab60dd1e12b4d4223899bb056cdce995da8d2de29859888d1f40e` |
 | R4 | 2026-09-22 | `curl` | `https://git.launchpad.net/ubuntu/+source/gdm3/plain/data/61-gdm.rules.in?h=ubuntu/noble-updates` | 200 | `gdm3-noble-updates-61-gdm.rules.in` `b1db35a79d951fc21210c1850154500cea9f7d244335fd130df54040f9907f00` |
 | R5 | 2026-09-22 | `curl` | `…/gdm3/plain/debian/custom.conf?h=ubuntu/noble-updates` (and `debian/default.conf`, `data/custom.conf`) | 404 | — ; the shipped `custom.conf` was not read |
+| R6 | 2026-09-22 | `curl` | `https://raw.githubusercontent.com/systemd/systemd/v255/units/user%40.service.in` | 200 | `systemd-v255-user@.service.in` `0b0147ccd524ae37b8dd37979f0007997574dd6ed690bf772c49ab901f19f616` (S2-29) |
+| R7 | 2026-09-22 | `api.launchpad.net` | `getPublishedBinaries` for `systemd`, noble amd64, Published | 200 | not saved; versions `255.4-1ubuntu8` (Release), `255.4-1ubuntu8.17` (Security, Updates) |
 
 ### S2-28 — Mutter 46.2's X11 display policy and GNOME Shell 46.0's Wayland unit: Xwayland on demand
 
@@ -582,3 +584,11 @@ Read during stage 3 to settle whether an idle GNOME 46 session runs an X server.
 - `61-gdm.rules.in` (Ubuntu noble-updates): `# disable Wayland on Hi1710 chipsets` … `# disable Wayland if modesetting is disabled` … `IMPORT{cmdline}="nomodeset", GOTO="gdm_disable_wayland"` … and the NVIDIA vendor-driver checks `TEST{0711}!="/usr/bin/nvidia-sleep.sh", GOTO="gdm_disable_wayland"` / `ENV{NVIDIA_PRESERVE_VIDEO_MEMORY_ALLOCATIONS}!="1", GOTO="gdm_disable_wayland"`.
 
 **Coverage.** T2 — covers as mechanism: GNOME Shell 46 on Wayland runs as the systemd user unit `org.gnome.Shell@wayland.service`, so `sd_pid_get_user_unit` succeeds and Mutter's X11 display policy is ON_DEMAND — Xwayland starts only when an X11 client connects — and since `autoclose-xwayland` is not in the default experimental features, a started Xwayland stays for the session. Run outside a user unit, Mutter's Wayland compositor takes the MANDATORY policy and starts Xwayland at once; `--no-x11` disables it. GDM on Ubuntu 24.04 disables Wayland only under the listed conditions (the Hi1710 chipset, `nomodeset`, the NVIDIA vendor driver without its suspend services), so the GNOME session is Wayland otherwise; the shipped `custom.conf`, which can set `WaylandEnable=false`, was not read (R5). T1, T4 — do not cover.
+
+### S2-29 — systemd v255's `user@.service`: the per-user manager
+
+**Citation.** systemd project, `units/user@.service.in`, tag `v255`, https://github.com/systemd/systemd — the upstream release Ubuntu 24.04 packages (`255.4-1ubuntu8`, R7).
+
+**Passages.** `units/user@.service.in`: `Description=User Manager for UID %i` / `After=user-runtime-dir@%i.service dbus.service systemd-oomd.service` / `[Service]` / `User=%i` / `PAMName=systemd-user` / `Type=notify-reload` / `ExecStart={{LIBEXECDIR}}/systemd --user` / `Slice=user-%i.slice` / `KillMode=mixed` / `Delegate=pids memory cpu`.
+
+**Coverage.** T1 — covers as structure: for each logged-in user, pid 1 starts a second `systemd` process, the user manager (`systemd --user`), in the user's slice with the CPU controller delegated to it; the session's user units — GNOME Shell's `org.gnome.Shell@wayland.service` (S2-28), the session bus's user unit (S2-04, S2-05), the PipeWire services (S2-18, S2-19) — run under it. No idle cadence is stated. T2, T4 — do not cover.
