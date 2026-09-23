@@ -1,16 +1,18 @@
 {
   "note": "Trigger for meas-session.yml (9.9 campaign). A push that changes this file starts the runs it names. One subject, session. repeats is one list or a map subject -> list. mode: dry | probe | full — probe is the long-phase probe and is never a repeat. Every other value is a constant in dataset/tools/meas/session/run.sh. A dry run sets cpu_model to \"\" so machine_gate opens on any model: it verifies the tooling, is never pooled and is not a repeat. stop_after (repeat -> stage: install | priming | pinned | edge | end) stops a dry job cleanly after that stage; a diagnostic, ignored outside mode dry. login_mode (repeat -> unit | gdm | stub) picks the login path for the Q14 comparison.",
-  "mode": "probe",
-  "attempt": 15,
+  "mode": "full",
+  "attempt": 16,
   "cpu_model": "EPYC 7763",
   "apps": [
     "session"
   ],
   "repeats": {
     "session": [
-      44,
-      45,
-      46
+      47,
+      48,
+      49,
+      50,
+      51
     ]
   },
   "stop_after": {},
