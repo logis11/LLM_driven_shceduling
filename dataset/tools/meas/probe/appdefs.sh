@@ -23,9 +23,14 @@ appdef() {
   local app="$1"
   export DEBIAN_FRONTEND=noninteractive
   STREAM=""; AREA="0,0,0,0"; POSTLAUNCH=""; POSTCLASS=""; OP=""; ALTPRELUDE=""; KINDS="key,click,drag,wheel"
+  BUILD_WANT=""; APP_VERSION=""
   case "$app" in
     code)
-      wget -qO /tmp/code.deb "https://update.code.visualstudio.com/latest/linux-deb-x64/stable"; rec download.rc "$?"
+      # D69: the build is pinned and gated. `latest` served 1.138.0 through repeat 28 and 1.139.0 from 2026-09-23,
+      # whose copilot-runtime process wakes ~50 times a second in the idle phase — a different workload, pooled with
+      # the rest unnoticed. update.code.visualstudio.com serves any released version at its own path.
+      BUILD_WANT=1.138.0
+      wget -qO /tmp/code.deb "https://update.code.visualstudio.com/$BUILD_WANT/linux-deb-x64/stable"; rec download.rc "$?"
       apt_install_full /tmp/code.deb; ver code --version
       # setup state (design): a TypeScript project open with its dependencies installed, so VS Code's built-in
       # TypeScript language server (tsserver) runs and re-checks the file the stream types into.
@@ -272,7 +277,18 @@ PY
 }
 apt_install() { sudo apt-get install -y --no-install-recommends "$@" > "$OUT/apt.log" 2>&1; rec apt.rc "$?"; }
 apt_install_full() { sudo apt-get install -y "$@" > "$OUT/apt.log" 2>&1; rec apt.rc "$?"; }
-ver() { rec version "$("$@" 2>&1 | head -1 | tr -d '\n' | head -c 200)"; }
+ver() { APP_VERSION="$("$@" 2>&1 | head -1 | tr -d '\n' | head -c 200)"; rec version "$APP_VERSION"; }
+# D69: a build gate for an application whose build can be pinned (BUILD_WANT set by its appdef) — the campaign pools
+# repeats of one build, as it pools repeats of one CPU model (D26). An application the vendor serves only at its
+# current version (chrome) sets none: its build is recorded per repeat and the pool states the census.
+build_gate() {
+  [ -z "${BUILD_WANT:-}" ] && return 0
+  rec build.wanted "$BUILD_WANT"
+  case "${APP_VERSION:-}" in
+    *"$BUILD_WANT"*) return 0 ;;
+    *) rec gate wrong-build; return 1 ;;
+  esac
+}
 op_driver() { # op_driver <window-id> <seconds> [extra ops_driver args] — the operation loop for the `op` phase
   local wid="$1" secs="$2"; shift 2
   echo "python3 $TOOLS/ops_driver.py $APP $wid $secs $OUT/ops.jsonl --pat '$PAT' $*"

@@ -11,6 +11,9 @@ import json
 import os
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from pool import build_census  # noqa: E402  — D69: one definition of the build census
+
 ORDER = ["soffice", "code", "thunderbird", "thunderbird-send", "chrome", "gimp", "kdenlive", "mpv-video", "mpv-audio", "webrtc"]
 
 
@@ -39,7 +42,7 @@ def main():
         if not os.path.exists(p):
             continue
         d = json.load(open(p))["runs"][app]
-        lines.append(f"## `{app}` — {d['version'].strip()[:60]}, repeats {d['repeats']}")
+        lines.append(f"## `{app}` — {build_census(d['version'])}, repeats {d['repeats']}")
         lines.append("")
         if d.get("cpu_model"):
             lines.append(f"CPU model per repeat {d['cpu_model']}; kernel per repeat {d.get('kernel')}.")

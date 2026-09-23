@@ -81,6 +81,13 @@ sudo apt-get install -y --no-install-recommends linux-tools-common "linux-tools-
 rec perf.version "$(perf --version 2>&1 | head -1)"
 start_xvfb
 appdef "$APP" || exit 0
+# D69: the build gate — a job whose appdef pins a build and drew another stops here, recorded, before any measurement,
+# as the machine gate stops one that drew another CPU model
+if ! build_gate; then
+  rec finished_utc "$(date -u +%FT%TZ)"; finish_report
+  echo "build gate: wanted '${BUILD_WANT}', installed '${APP_VERSION}' — stopping before any measurement" >&2
+  exit 0
+fi
 rec launch "$LAUNCH"; rec driver "$DRIVER"; rec stream "${STREAM:-}"; rec op "${OP:-}"; rec rx "$RX"; rec pat "$PAT"
 PH="$TOOLS/../phase.sh $OUT/phases.jsonl"
 export MEAS_PIN=harness   # phase.sh here wraps drivers, which stimulate the pinned application from the harness CPUs

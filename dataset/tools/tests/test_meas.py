@@ -449,3 +449,21 @@ def test_chromes_input_values_stop_at_its_recordings_last_window():
     at37 = {"input_run mean, SWELL-KW (ms)": {}}
     pool.mark_limited("chrome", {"repeats": list(range(1, 38)), "phases": {"driven": {}}}, at37)
     assert not at37["input_run mean, SWELL-KW (ms)"].get("limited")
+
+
+def test_the_pool_states_every_build_it_holds():
+    # 9.5 D69: a pool that kept only the first repeat's build could not show a build change — code's 1.139.0 in
+    # repeat 29, chrome's 153 in four repeats of thirty — so the record keeps one per repeat and states the census
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)
+    try:
+        pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    assert pool.build_census({1: "1.138.0", 2: "1.138.0", 3: "1.138.0"}) == "1.138.0 (3 repeats)"
+    mixed = pool.build_census({17: "Chrome 152 ", 18: "Chrome 153", 19: "Chrome 152", 20: "Chrome 153", 21: "Chrome 152"})
+    assert mixed == "Chrome 152 (3 repeats), Chrome 153 (2: 18, 20)"
+    assert pool.build_census(None) == "?"          # a pool written before the field was per repeat
+    assert pool.build_census("Chrome 152 ") == "Chrome 152"

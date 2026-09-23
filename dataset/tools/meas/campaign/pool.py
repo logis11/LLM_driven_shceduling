@@ -78,6 +78,22 @@ def split_events(app, phase, rows):
     return [r for r in rows if not heavy(r)], [(r.t_in, r.run) for r in rows if heavy(r)]
 
 
+def build_census(version):
+    """D69: the builds a pool holds, most repeats first — "1.138.0 (28 repeats)", or with a mix
+    "152.0.7977.82 (26 repeats), 153.0.8010.52 (4: 18, 20, 22, 27)". `version` is {repeat: the build it measured}."""
+    if not isinstance(version, dict):
+        return (version or "?").strip()[:60]
+    by = {}
+    for r, v in sorted(version.items(), key=lambda kv: int(kv[0])):
+        by.setdefault((v or "?").strip()[:60], []).append(int(r))
+    if len(by) == 1:
+        v, reps = next(iter(by.items()))
+        return f"{v} ({len(reps)} repeats)"
+    parts = [f"{v} ({len(reps)} repeats)" if i == 0 else f"{v} ({len(reps)}: {', '.join(str(x) for x in reps)})"
+             for i, (v, reps) in enumerate(sorted(by.items(), key=lambda kv: -len(kv[1])))]
+    return ", ".join(parts)
+
+
 def component_key(app, comm):
     return POOL_SUFFIX.sub("", comm) if app in POOL_SUFFIX_APPS else comm
 
@@ -287,7 +303,9 @@ def main():
         entry = {"family": info["family"], "mode": info["mode"], "repeats": reps,
                  "cpu_model": {r: info["cpu_model"][r] for r in reps}, "kernel": {r: info["kernel"][r] for r in reps},
                  "run_id": {r: info["run_id"][r] for r in reps},
-                 "version": results[reps[0]].get("version"), "phases": {}}
+                 # D69: every repeat's build, as the CPU model is kept per repeat — a pool that carried only the first
+                 # repeat's could not show a build change (code's 1.139.0 in repeat 29, chrome's 153 in four of thirty)
+                 "version": {r: results[r].get("version") for r in reps}, "phases": {}}
         for phase in ("idle", "driven", "driven-alt", "play", "op"):
             # D32: each phase over the repeats that have it — a repeat past the recording's end runs the idle phase alone
             preps = [r for r in reps if phase in raws[r]["phases"]]
@@ -362,7 +380,7 @@ def main():
                               "passes": bool(crit) and all(c["passes"] for c in live),
                               "needed": None if not needed or None in needed else max(needed)}
         out["runs"][app] = entry
-        print(f"== {app} ({info['family']}, {info['mode']}, repeats {reps}, {entry['version']}; CPU {sorted(set(entry['cpu_model'].values()))})")
+        print(f"== {app} ({info['family']}, {info['mode']}, repeats {reps}, {build_census(entry['version'])}; CPU {sorted(set(entry['cpu_model'].values()))})")
         st = entry["stability"]
         fails = [q for q, c in crit.items() if not c["passes"] and not c.get("limited") and not c.get("session_spread")]
         print(f"   stability: {len(crit)} quantities over {len(reps)} repeats, {len(fails)} out of tolerance; repeats needed at "

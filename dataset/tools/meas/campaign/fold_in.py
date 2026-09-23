@@ -15,6 +15,9 @@ import json
 import os
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from pool import build_census  # noqa: E402  — D69: one definition of the build census
+
 RUN_TAG = {"interactive": "meas-ci:interactive:3", "playback": "meas-ci:playback:3"}  # the D3 campaign; --tag overrides
 
 # the observed setup per run — `{version}` is filled from the run's recorded application version (report.json)
@@ -97,7 +100,7 @@ KEYS_ONLY = {"office-writer", "web-browser"}  # D28, D65: the stream's keys only
 def entry(aid, spec, d):
     run, observed, kind, stream, stim_tag, approx = spec
     tag = RUN_TAG.get(run) or RUN_TAG[d["family"]]  # --tag <app>=… overrides the family tag for one run (re-run batch)
-    observed = observed.replace("{version}", (d.get("version") or "?").strip()[:60])
+    observed = observed.replace("{version}", build_census(d.get("version")))   # D69: the census, a mix stated
     out = [f"  {aid}:", "    category_source: meas", "    pattern:", "      program:"]
     if kind == "play":
         out += ["        - loop:                    # measured timer components merged at compile time (D9, D16)",
