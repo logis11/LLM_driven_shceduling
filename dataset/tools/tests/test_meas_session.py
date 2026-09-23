@@ -164,8 +164,10 @@ def test_the_pool_names_probe_and_foreign_repeats_and_pools_the_rest(tmp_path):
     _run_dir(root / "run6" / "meas-session-session-r6-full", k=6, foreign_user=True)
     _run_dir(root / "run8" / "meas-session-session-r8-full", k=8, in_unit=True)
     _run_dir(root / "run7" / "meas-session-session-r7-probe", k=7, mode="probe")
-    runs, gated, other, probes = pool.find_runs(str(root), "EPYC 7763")
-    assert [p["repeat"] for p in probes] == [7]
+    _run_dir(root / "run9" / "meas-session-session-r9-dry", k=9, mode="dry")
+    runs, gated, other, not_repeats = pool.find_runs(str(root), "EPYC 7763")
+    # a dry job runs shortened phases; with the gate open on any model it must not pool as a repeat either
+    assert sorted((p["repeat"], p["mode"]) for p in not_repeats) == [(7, "probe"), (9, "dry")]
     # D20: no bound stated, nothing pooled — the pool refuses rather than pooling on an unstated gate
     assert pool.FOREIGN_CPU_SHARE_BOUND is None
     assert pool.pool_app("session", runs["session"])["repeats"] == []

@@ -10,7 +10,7 @@ across entries or instances).
 
 Reasons a repeat does not enter the pool:
   - the machine gate stopped it, or the run stopped it at the steady edge (`not-idle`) or earlier;
-  - its mode is `probe`: the long-phase probe is never a repeat (method §1);
+  - its mode is `probe` or `dry`: neither is a repeat (method §1);
   - user-space work other than the four entries' — a pinned unit's other process included — took more than
     `FOREIGN_CPU_SHARE_BOUND` of the measured CPU during `steady` (D12, D15, amended by D20).
 """
@@ -34,7 +34,10 @@ select_components = _cp.select_components
 
 APPS = ("session",)
 NAME = re.compile(r"^meas-session-(session)-r(\d+)-(dry|probe|full)$")
-POOLED_MODES = ("dry", "full")          # `probe` is parsed so it can be reported, never pooled
+# Only a `full` job is a repeat. `probe` and `dry` are parsed so they can be reported and never pooled: a dry job
+# runs shortened phases and is not a repeat (method §1), and with the gate open on any model one that drew the
+# campaign's model would otherwise have been pooled as a repeat of it.
+POOLED_MODES = ("full",)
 CARRIED = "steady"
 LIST_FIELDS = (("wakes_per_s", "wakes/s"), ("gap_ms", "gap mean (ms)"), ("run_ms", "run mean (ms)"))
 ABS_FLOOR_MS = 0.001        # the trace's resolution, as campaign/pool.py uses
@@ -216,7 +219,7 @@ def main():
         print("no repeats found", file=sys.stderr)
         raise SystemExit(1)
     out = {"tag": a.tag, "machine": a.cpu_model or None, "gated_out": gated, "other_machine": other,
-           "probe_jobs": probes, "runs": {}}
+           "not_repeats": probes, "runs": {}}
     for app, reps in sorted(runs.items()):
         entry = pool_app(app, reps)
         out["runs"][app] = entry
