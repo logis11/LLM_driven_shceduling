@@ -1,4 +1,4 @@
-# Handoff — task 9.7 Background and IO (2026-09-23, ~13:10 KST)
+# Handoff — task 9.7 Background and IO (2026-09-23, ~13:40 KST) — complete
 
 Branch `jioh/dataset-rebuild` (Phase 9 works on this branch only, `_dev/` included). Campaign tag `meas-ci:background:2026-09-19`.
 
@@ -16,14 +16,9 @@ The campaign is closed and folded in. Only the raw-record release is unfinished.
 - `interbench` and `ananicy-rules` left `dataset/sources.yaml`; `meas-ci`'s notes rewritten (D17).
 - Rebuild verified: 100 artifacts, every file's demand estimate and class unchanged, lint reporting only the branch's five known `-single` demand-window files, derived files and grid checked, tests passing over every area this touched.
 
-## In flight
+## The release
 
-**The release upload**, tmux session `meas97upload`, log `~/.cache/meas-loop/overnight-9.7/upload_release.log`. The release exists (`meas-ci-background-2026-09-19`); the script zips each landed repeat without the local `pool-cache/`, uploads it, deletes the zip, and skips assets already on the release — re-run `~/.cache/meas-loop/overnight-9.7/upload_release.sh` to resume after any interruption. Expect 71 repeat archives plus `gated-reports.zip`, about 11.3 GB, SteamCMD's 34 at ~490 MB each being the bulk. When it ends, check `UPLOAD DONE` in the log and the asset count, then tick 9.7's release sub-item in `_dev/TODO.md`.
-
-## Next actions, in order
-
-1. Confirm the upload finished and the release holds every archive.
-2. Tick the release sub-item; 9.7 is then complete. Phase 9 stays `[WIP]` — 9.5, 9.8, 9.9 and 9.10–9.16 remain.
+`meas-ci-background-2026-09-19` holds 72 assets, 17.0 GB: every landed repeat (borg 31, 7z 6, steamcmd 34) without the local `pool-cache/`, and `gated-reports.zip`. Re-run `~/.cache/meas-loop/overnight-9.7/upload_release.sh` to restore any asset — it skips what is already there. 9.7 is complete.
 
 ## Decisions taken since the last handoff (9.7 changelog)
 
