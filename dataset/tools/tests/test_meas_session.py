@@ -60,6 +60,34 @@ def test_the_idle_state_needs_the_shield_the_blank_and_an_active_session():
     assert not census.is_idle({**ok, "session_active": None})    # the query failed
 
 
+def test_the_placement_is_read_from_the_processes_not_the_units(tmp_path):
+    # D21: `Slice=` applies when a unit starts, so the check reads each process's own allowed CPUs. The system bus
+    # running since boot is the case that went unseen in the 2026-09-23 probes.
+    procs = [dict(p) for p in PROCS]
+    for p in procs:
+        p["cpus_allowed"] = "0-2"
+    by_pid = {p["pid"]: p for p in procs}
+    for pid in (1, 500, 510, 520, 530, 531, 532):        # the entries, on the measured CPU
+        by_pid[pid]["cpus_allowed"] = "3"
+    by_pid[400]["cpus_allowed"] = "0-2"                  # the system bus, left in system.slice — the defect
+    inst, _ = census.instances(procs, UID)
+    c = {"procs": procs, "instances": inst}
+    path = tmp_path / "census.json"
+    path.write_text(json.dumps(c))
+    bad = census.placed(str(path), "3")
+    assert any("dbus-daemon/system-bus" in b and "cpus_allowed=0-2" in b for b in bad)
+    assert not any("gnome-shell" in b for b in bad)
+
+    by_pid[400]["cpus_allowed"] = "3"                    # restarted into meas.slice: the placement holds
+    path.write_text(json.dumps(c))
+    assert census.placed(str(path), "3") == []
+
+    by_pid[410]["cpus_allowed"] = "3"                    # snapd, no entry of ours, allowed the measured CPU
+    path.write_text(json.dumps(c))
+    assert [b for b in census.placed(str(path), "3")] == [
+        "not an entry: pid 410 snapd cpus_allowed=3 cgroup=/system.slice/snapd.service"]
+
+
 def test_the_cpu_mask_is_the_bytes_start_transient_unit_takes():
     assert census.mask("0-2") == "ay 1 7"
     assert census.mask("3") == "ay 1 8"
@@ -138,10 +166,18 @@ def test_the_pool_names_probe_and_foreign_repeats_and_pools_the_rest(tmp_path):
     _run_dir(root / "run7" / "meas-session-session-r7-probe", k=7, mode="probe")
     runs, gated, other, probes = pool.find_runs(str(root), "EPYC 7763")
     assert [p["repeat"] for p in probes] == [7]
-    entry = pool.pool_app("session", runs["session"])
+    # D20: no bound stated, nothing pooled — the pool refuses rather than pooling on an unstated gate
+    assert pool.FOREIGN_CPU_SHARE_BOUND is None
+    assert pool.pool_app("session", runs["session"])["repeats"] == []
+    pool.FOREIGN_CPU_SHARE_BOUND = 1e-6          # the fixture's foreign repeats take 0.3 ms of a 100 s phase
+    try:
+        entry = pool.pool_app("session", runs["session"])
+    finally:
+        pool.FOREIGN_CPU_SHARE_BOUND = None
     assert entry["repeats"] == [1, 2, 3, 4, 5]
     # D15: a pinned unit's other process on the measured CPU gates the repeat as user space outside the entries does
     assert [x["repeat"] for x in entry["foreign_user"]] == [6, 8]
+    assert all(x["share_of_phase"] > 1e-6 for x in entry["foreign_user"])
     ents = entry["phases"]["steady"]["entries"]
     assert set(ents) == {"gnome-shell", "pipewire", "systemd", "dbus-daemon"}
     # five identical repeats: every value carried holds, each entry on its own components
@@ -244,6 +280,13 @@ def test_run_sh_carries_the_decisions(repo_root):
     # job stops at the no-phase-lengths gate until the unpolled probe sets it
     assert re.search(r"steady_for\(\)\s*{ echo; }", src)
     assert re.search(r'if \[ -z "\$PRIMING" \] \|\| \[ -z "\$STEADY_OFFSET" \] \|\| \[ -z "\$STEADY" \]', src)
+    # D21: the system bus restarted into meas.slice before any login, and the placement read from the processes
+    # the restart is written inside install_session, so it runs before the call that starts the desktop units
+    assert 'sudo systemctl restart "$sysbus"' in src
+    assert src.index("dbus.restart.rc") < src.rindex("\nstart_boot_units")
+    assert 'CENSUS placed "$OUT/census.pinned.json"' in src and 'CENSUS placed "$OUT/census.edge.json"' in src
+    assert src.count("stop_recorded misplaced-entry") == 2
+    assert "pin.entry_cgroups" in src and "pin.entry_slices" not in src
     # D19: the probe's polls stop at the steady edge, so the region a full job carries is recorded unpolled
     assert 'poll_start "$name" "${POLL_UNTIL:-}"' in src
     assert 'POLL_UNTIL=$(( LOGIN_T0 + $(steady_offset_for "$APP") ))' in src

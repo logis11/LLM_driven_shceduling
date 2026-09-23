@@ -223,6 +223,15 @@ install_session() {
   done
   sudo systemctl daemon-reload
   rec slices.written 1
+  # D21: `Slice=` applies when a unit starts. The system bus has been running since boot, so the drop-in above
+  # leaves it in `system.slice`, where D17's default then holds it on the harness CPUs — an entry measured off the
+  # measured CPU, which is what the 2026-09-23 probes did. It is restarted here, before the desktop units start
+  # and before any login, while its clients are the base system services; the placement is then read from the
+  # process, never from the unit's configured slice.
+  local sysbus; sysbus="$(systemctl show -p Id --value dbus.service 2>/dev/null)"
+  sudo systemctl restart "$sysbus" > "$OUT/dbus.restart.log" 2>&1; rec dbus.restart.rc "$?"
+  rec dbus.restart.unit "$sysbus"
+  rec dbus.restart.cgroup "$(systemctl show -p ControlGroup --value "$sysbus" 2>/dev/null)"
 
   SESSION_FILE="$(session_file)"; rec session.file "${SESSION_FILE:-none}"
   SESSION_EXEC="$(sed -n 's/^Exec=//p' "$SESSION_FILE" 2>/dev/null | head -1)"
@@ -348,7 +357,9 @@ pin_four() {
   local cg="/sys/fs/cgroup/user.slice/user-$MEAS_UID.slice/user@$MEAS_UID.service/init.scope"
   echo "$MEAS_CPU" | sudo tee "$cg/cpuset.cpus" > /dev/null || fails=$((fails + 1))
   rec pin.user_manager_cpuset "$(cat "$cg/cpuset.cpus.effective" 2>/dev/null)"
-  rec pin.entry_slices "$(systemctl show -p Slice --value dbus.service 2>/dev/null) $(ucmd systemctl --user show -p Slice --value org.gnome.Shell@wayland.service 2>/dev/null)"
+  # D21: the control group each entry's unit is actually in — `Slice=` reports the configuration, which a unit
+  # running since boot has not taken
+  rec pin.entry_cgroups "$(systemctl show -p ControlGroup --value dbus.service 2>/dev/null) $(ucmd systemctl --user show -p ControlGroup --value org.gnome.Shell@wayland.service 2>/dev/null)"
   rec pin.fails "$fails"
 }
 
@@ -473,6 +484,15 @@ census login
 pin_four
 sweep 1
 census pinned
+# D21: the placement of method §2.5 read from the processes, before anything is measured
+if sudo $CENSUS placed "$OUT/census.pinned.json" "$MEAS_CPU" > "$OUT/placement.pinned.txt" 2>&1; then
+  rec placement.pinned 1
+else
+  rec placement.pinned 0; echo "placement (pinned census):" >&2; cat "$OUT/placement.pinned.txt" >&2
+fi
+if [ "$MODE" != dry ] && [ "$(sed -n 's/^placement.pinned=//p' "$KV" | tail -1)" != 1 ]; then
+  stop_recorded misplaced-entry "the entries are not alone on the measured CPU (method §2.5, D21); see placement.pinned.txt"
+fi
 checkpoint pinned
 
 if [ "$MODE" = probe ]; then
@@ -484,6 +504,15 @@ else
   left=$(( LOGIN_T0 + STEADY_OFFSET - $(date +%s) )); rec steady.wait_s "$left"
   [ "$left" -gt 0 ] && sleep "$left"
   sweep 2
+  census edge
+  if sudo $CENSUS placed "$OUT/census.edge.json" "$MEAS_CPU" > "$OUT/placement.edge.txt" 2>&1; then
+    rec placement.edge 1
+  else
+    rec placement.edge 0; echo "placement (edge census):" >&2; cat "$OUT/placement.edge.txt" >&2
+  fi
+  if [ "$MODE" = full ] && [ "$(sed -n 's/^placement.edge=//p' "$KV" | tail -1)" != 1 ]; then
+    stop_recorded misplaced-entry "the entries are not alone on the measured CPU at the steady edge (method §2.5, D21)"
+  fi
   sudo $CENSUS state "$MEAS_UID" > "$OUT/state.edge.json" 2>> "$OUT/census.log"
   if sudo $CENSUS check "$OUT/state.edge.json"; then rec edge.idle 1; else rec edge.idle 0; fi
   checkpoint edge

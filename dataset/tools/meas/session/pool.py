@@ -11,8 +11,8 @@ across entries or instances).
 Reasons a repeat does not enter the pool:
   - the machine gate stopped it, or the run stopped it at the steady edge (`not-idle`) or earlier;
   - its mode is `probe`: the long-phase probe is never a repeat (method §1);
-  - a user-space process other than the four entries' — a pinned unit's other process included — was scheduled
-    on the measured CPU during `steady` (D12, D14, D15).
+  - user-space work other than the four entries' — a pinned unit's other process included — took more than
+    `FOREIGN_CPU_SHARE_BOUND` of the measured CPU during `steady` (D12, D15, amended by D20).
 """
 
 import argparse
@@ -38,6 +38,13 @@ POOLED_MODES = ("dry", "full")          # `probe` is parsed so it can be reporte
 CARRIED = "steady"
 LIST_FIELDS = (("wakes_per_s", "wakes/s"), ("gap_ms", "gap mean (ms)"), ("run_ms", "run mean (ms)"))
 ABS_FLOOR_MS = 0.001        # the trace's resolution, as campaign/pool.py uses
+
+# D20: the gate is a bound on how much of the measured CPU foreign user-space work took, not an absolute. Both
+# managers' `init.scope` are on the measured CPU because both managers are entries, so every process the system
+# starts is forked there and no placement can move it: the 2026-09-23 probes found no window of 600 s or more
+# without some. The bound is a share of the steady phase's wall time, set from the unpolled probes and written
+# into method §5 before the first batch. `None` until then: no repeat is pooled without it.
+FOREIGN_CPU_SHARE_BOUND = None
 MIN_REPEATS = 5             # method §6 item 3
 
 
@@ -144,11 +151,17 @@ def pool_app(app, reps):
             continue
         f = ph["foreign"]
         entry["foreign"][k] = {x: {"schedule_ins": f[x]["schedule_ins"], "cpu_ms": f[x]["cpu_ms"]} for x in f}
-        # D12, D15: user space outside the entries, including the pinned units' other processes, gates a repeat
-        gated = f["user"]["schedule_ins"] + f["in_unit_other"]["schedule_ins"]
-        if gated:
-            entry["foreign_user"].append({"repeat": k, "schedule_ins": gated,
-                                          "by_comm": {**f["user"]["by_comm"], **f["in_unit_other"]["by_comm"]}})
+        # D12, D15, D20: user space outside the entries, the pinned units' other processes included, gates a
+        # repeat when it took more than the bound of the measured CPU over the phase
+        ins = f["user"]["schedule_ins"] + f["in_unit_other"]["schedule_ins"]
+        share = (f["user"]["cpu_ms"] + f["in_unit_other"]["cpu_ms"]) / 1000.0 / max(ph["span_s"], 1e-9)
+        entry["foreign"][k]["share_of_phase"] = share
+        if FOREIGN_CPU_SHARE_BOUND is None or share > FOREIGN_CPU_SHARE_BOUND:
+            entry["foreign_user"].append({
+                "repeat": k, "schedule_ins": ins, "share_of_phase": share, "bound": FOREIGN_CPU_SHARE_BOUND,
+                "why": "no bound set (D20): none is pooled until method §5 states one"
+                       if FOREIGN_CPU_SHARE_BOUND is None else "over the bound",
+                "by_comm": {**f["user"]["by_comm"], **f["in_unit_other"]["by_comm"]}})
             continue
         entry["repeats"].append(k)
         entry["mode"] = info["mode"]
@@ -172,7 +185,10 @@ def render(out):
     for app, e in sorted(out["runs"].items()):
         L += [f"Repeats: {e['repeats']}  ·  mode {e['mode']}", ""]
         if e["foreign_user"]:
-            L += [f"Left out, user-space work on the measured CPU (D12): {[x['repeat'] for x in e['foreign_user']]}", ""]
+            L += [f"Left out, user-space work on the measured CPU over the bound "
+                  f"{FOREIGN_CPU_SHARE_BOUND} (D12, D20): "
+                  + ", ".join(f"r{x['repeat']} {x['share_of_phase'] * 100:.4f}% ({x['why']})"
+                              for x in e["foreign_user"]), ""]
         kern = {k: v["kernel"]["schedule_ins"] for k, v in e["foreign"].items()}
         L += [f"Kernel-thread schedule-ins on the measured CPU per repeat (D14, reported): {kern}", ""]
         for name, ph in e["phases"][CARRIED]["entries"].items():

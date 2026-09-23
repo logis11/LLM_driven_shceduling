@@ -4,6 +4,7 @@
   census.py snapshot <uid> <label> <out.json>    as root: every process, the units, the session, the state
   census.py state <uid>                          one JSON line: SessionIsActive, shield, PowerSaveMode, presence
   census.py check <state.json>                   exit 0 when the state is the terminal idle state (method §3)
+  census.py placed <census.json> <cpu>           exit 0 when the placement of method §2.5 holds (D21)
   census.py others <uid>                         the pinned units' processes that are none of the entries', one
                                                  "<manager> <pid>" per line, for the sweep to adopt (changelog D15)
   census.py mask <cpu-list>                      a CPU list as the `ay` bitmask StartTransientUnit takes
@@ -164,6 +165,39 @@ def is_idle(st):
     return bool(st.get("session_active")) and bool(st.get("shield_active")) and st.get("power_save_mode") in (1, 2, 3)
 
 
+def placed(path, cpu):
+    """The placement of method §2.5, read from the processes (D21): every entry instance's processes allowed the
+    measured CPU and only, and no other user-space process allowed it.
+
+    It reads what each process is allowed, not what its unit is configured with. `Slice=` applies when a unit
+    starts, so a unit running since boot stays in its old slice — and under D17's default on `system.slice`, on
+    the harness CPUs — while `systemctl show -p Slice` already answers with the new one. The 2026-09-23 probes
+    measured the system bus off the measured CPU for that reason, with `pin.fails` 0.
+    """
+    c = json.load(open(path))
+    by_pid = {p["pid"]: p for p in c.get("procs", [])}
+    want = str(cpu)
+    entry_pids, bad = set(), []
+    for entry, insts in (c.get("instances") or {}).items():
+        for inst, pids in sorted(insts.items()):
+            if not pids:
+                bad.append(f"{entry}/{inst}: no process in the census")
+                continue
+            for pid in pids:
+                entry_pids.add(pid)
+                p = by_pid.get(pid) or {}
+                if str(p.get("cpus_allowed")) != want:
+                    bad.append(f"{entry}/{inst} pid {pid}: cpus_allowed={p.get('cpus_allowed')} "
+                               f"cgroup={p.get('cgroup')}")
+    for p in c.get("procs", []):
+        if p.get("kthread") or p["pid"] in entry_pids:
+            continue
+        if want in str(p.get("cpus_allowed", "")).split(","):
+            bad.append(f"not an entry: pid {p['pid']} {p['comm']} cpus_allowed={p.get('cpus_allowed')} "
+                       f"cgroup={p.get('cgroup')}")
+    return bad
+
+
 def user_session(uid):
     for line in sh(["loginctl", "list-sessions", "--no-legend"])["out"].splitlines():
         f = line.split()
@@ -249,6 +283,11 @@ def main():
         json.dump(snapshot(int(a[1]), a[2]), open(a[3], "w"), indent=1)
     elif a[:1] == ["state"] and len(a) == 2:
         print(json.dumps(state(int(a[1]))))
+    elif a[:1] == ["placed"] and len(a) == 3:
+        bad = placed(a[1], a[2])
+        for line in bad:
+            print(line)
+        sys.exit(1 if bad else 0)
     elif a[:1] == ["check"] and len(a) == 2:
         raise SystemExit(0 if is_idle(json.load(open(a[1]))) else 1)
     elif a[:1] == ["others"] and len(a) == 2:
