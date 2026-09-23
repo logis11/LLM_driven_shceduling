@@ -132,9 +132,18 @@ def validity(family, dirs, entry):
                 notes.append("steady edge not in the terminal idle state")
             if r.get("pin.fails") not in (None, "0"):
                 notes.append(f"pin failed {r.get('pin.fails')} time(s)")
+            # D21: the placement read from the processes, and the bus answering after it was restarted into
+            # meas.slice. A full job stops on either, so this states what the record was judged on.
+            for field, what in (("placement.pinned", "at the pin"), ("placement.edge", "at the steady edge")):
+                if r.get(field) not in (None, "1"):
+                    notes.append(f"the entries were not alone on the measured CPU {what}")
+            if r.get("bus.login1.rc") not in (None, "0"):
+                notes.append("org.freedesktop.login1 did not answer after the bus was restarted")
             fu = [x for x in ((entry or {}).get("foreign_user") or []) if str(x.get("repeat")) == str(k)]
             if fu:
-                notes.append(f"user-space work on the measured CPU: {fu[0]['schedule_ins']} schedule-ins")
+                notes.append(f"user-space work on the measured CPU over the bound (D20, D22): "
+                             f"{fu[0]['schedule_ins']} schedule-ins, {fu[0]['share_of_phase'] * 100:.4f}% of the "
+                             f"phase against {(fu[0]['bound'] or 0) * 100:.2f}%")
         bad += bool(notes)
         print(f"   r{k}: {'ok' if not notes else '; '.join(notes)}{''.join(f' ({x})' for x in info)}")
     if len(dbs) > 1:
