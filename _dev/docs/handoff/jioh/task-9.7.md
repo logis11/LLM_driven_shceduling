@@ -4,7 +4,7 @@ Branch `jioh/dataset-rebuild` (Phase 9 works on this branch only, `_dev/` includ
 
 ## Where 9.7 stands
 
-The campaign is closed and folded in. Only the raw-record release is unfinished.
+The campaign is closed, folded in and released. 9.7 is complete.
 
 | archetype | program | repeats | state |
 |---|---|---|---|
@@ -46,7 +46,7 @@ The campaign is closed and folded in. Only the raw-record release is unfinished.
 
 - A gated job exits in seconds and still reports **success** — read `report.json`'s `gate` and `machine.model`, never the status alone.
 - The trigger `.github/campaign-background.json` is in `full` mode. A push changing it starts the runs it names.
-- **Loops must run under tmux**, not `nohup … & disown`: the harness kills the session's process tree, which killed the rule loop mid-pool on 2026-09-23.
+- **A long-running loop must be a true daemon** — `~/.cache/meas-loop/overnight-9.7/daemonize.py '<command>' <log>` (double fork, own session). Neither `nohup … & disown` nor tmux survives: the harness kills the session's process tree, and a tmux server started from a tool call dies with it. Both happened on 2026-09-23, killing the rule loop mid-pool and the release upload after 31 assets.
 - `launch.py` pulls with `--autostash`; the shared tree has been caught mid-rebase by a peer.
 
 ## Working with 인지오
