@@ -36,7 +36,7 @@ ENTRIES = {
                  "pipewire-pulse": (r"/user@{uid}\.service/(.*/)?pipewire-pulse\.service$", r"^pipewire-pulse$")},
     "systemd": {"pid1": (r"^/init\.scope$", r"^systemd$"),
                 "user-manager": (r"/user@{uid}\.service/init\.scope$", r"^systemd$")},
-    "dbus-daemon": {"system-bus": (r"^/system\.slice/dbus(-broker)?\.service$", r"^dbus-(daemon|broker)"),
+    "dbus-daemon": {"system-bus": (r"^/(system|meas)\.slice/dbus(-broker)?\.service$", r"^dbus-(daemon|broker)"),
                     "session-bus": (r"/user@{uid}\.service/(.*/)?dbus(-broker)?\.service$", r"^dbus-(daemon|broker)")},
 }
 

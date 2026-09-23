@@ -134,14 +134,18 @@ def components(rows, inst_pids, span):
     return threads, samples
 
 
-def poll_summary(D, phase, t_start_ns):
-    """The probe's polls: when the shield, the blank and SessionIsActive were first seen, seconds from the phase start."""
+def poll_summary(D, phase, _unused=None):
+    """The probe's polls: when the shield, the blank and SessionIsActive were first seen, seconds from the first
+    poll. The polls carry a monotonic clock and `edges.jsonl` the wall clock, so the first poll is the origin."""
     p = os.path.join(D, f"poll.{phase}.jsonl")
     if not os.path.exists(p):
         return None
     polls = [json.loads(ln) for ln in open(p) if ln.strip()]
-    first = lambda f: next(((x["mono_ns"] - t_start_ns) / 1e9 for x in polls if f(x)), None)
-    return {"polls": len(polls),
+    if not polls:
+        return None
+    t0 = polls[0]["mono_ns"]
+    first = lambda f: next(((x["mono_ns"] - t0) / 1e9 for x in polls if f(x)), None)
+    return {"polls": len(polls), "span_s": round((polls[-1]["mono_ns"] - t0) / 1e9, 1),
             "first_shield_s": first(lambda x: x.get("shield_active")),
             "first_blank_s": first(lambda x: x.get("power_save_mode") in (1, 2, 3)),
             "session_active_all": all(x.get("session_active") for x in polls) if polls else None,

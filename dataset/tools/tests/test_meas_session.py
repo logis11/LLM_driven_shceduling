@@ -18,7 +18,8 @@ PROCS = [
     _proc(1, "systemd", "/init.scope"),
     _proc(2, "kthreadd", "/", ppid=0, kthread=True),
     _proc(30, "kworker/3:1", "/", ppid=2, kthread=True),
-    _proc(400, "dbus-daemon", "/system.slice/dbus.service", cmd="@dbus-daemon --system --address=systemd:"),
+    # D17: the system bus moves into the measured slice; the census matches it in either
+    _proc(400, "dbus-daemon", "/meas.slice/dbus.service", cmd="@dbus-daemon --system --address=systemd:"),
     _proc(410, "snapd", "/system.slice/snapd.service"),
     _proc(500, "systemd", f"{U}/init.scope", cmd="/usr/lib/systemd/systemd --user"),
     # another user's manager, the runner's lingering one — not the measured user's
@@ -42,6 +43,12 @@ def test_the_census_names_each_instance_by_its_unit():
     assert inst["gnome-shell"] == {"gnome-shell": [520]}
     # an Xwayland in the shell's unit is the unit's other process, reported, never the shell (the held question)
     assert [o["comm"] for o in other] == ["Xwayland"]
+
+
+def test_the_system_bus_is_found_in_either_slice():
+    for cg in ("/system.slice/dbus.service", "/meas.slice/dbus.service", "/system.slice/dbus-broker.service"):
+        inst, _ = census.instances([_proc(400, "dbus-daemon", cg)], UID)
+        assert inst["dbus-daemon"]["system-bus"] == [400], cg
 
 
 def test_the_idle_state_needs_the_shield_the_blank_and_an_active_session():
@@ -151,15 +158,19 @@ def _src(repo_root, *p):
 
 def test_run_sh_carries_the_decisions(repo_root):
     src = _src(repo_root, "session", "run.sh")
-    assert "PAMName=login" in src and "XDG_SESSION_TYPE=wayland" in src                 # D11
-    assert "systemctl mask gdm.service" in src                                           # D11
+    assert "PAMName=login" in src and "XDG_SESSION_TYPE=wayland" in src                 # D11, login mode `unit`
+    assert 'LOGIN_MODE="${MEAS_LOGIN_MODE:-gdm}"' in src                                 # D16: GDM's automatic login
+    assert "AutomaticLogin=%s" in src and "systemctl restart gdm.service" in src         # D16
+    assert "Slice=meas.slice" in src and 'set-property --runtime system.slice AllowedCPUs="$MEAS_HARNESS_CPUS"' in src  # D17
     assert "Delegate=pids memory cpu cpuset" in src                                      # D14
     assert "--headless --virtual-monitor" in src and "VIRTUAL_MONITOR=1920x1080@60" in src
     assert re.search(r"probe \]; then\n\s*PRIMING=1800; STEADY_OFFSET=0; STEADY=10800", src)   # D13
     m = re.search(r"dry \]; then\n\s*PRIMING=(\d+); STEADY_OFFSET=(\d+); STEADY=(\d+)", src)
     assert m and int(m.group(2)) > 310                                                   # D13: past idle-delay + fade
-    # full-mode lengths are empty until the probe sets them, so a full job stops before measuring
-    assert re.search(r'priming_for\(\)\s*\{ echo ""; \}', src)
+    # D18: the lengths the long-phase probe set — the blank at 304 s, the edge past it, a window the spread holds in
+    lens = {k: int(re.search(rf"{k}\(\)\s*{{ echo (\d+); }}", src).group(1))
+            for k in ("priming_for", "steady_offset_for", "steady_for")}
+    assert lens["steady_offset_for"] > 310 and lens["steady_for"] >= 600 and lens["priming_for"] >= 120, lens
     # D13: the census runs before perf starts and after it stops, never inside the recording
     body = re.search(r"^phase\(\) \{(.*?)^\}", src, re.S | re.M).group(1)
     assert body.index('census "$name.start"') < body.index("perf sched record") < body.index('census "$name.end"')

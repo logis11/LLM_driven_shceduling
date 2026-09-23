@@ -45,9 +45,15 @@ LOGIN_MODE="${MEAS_LOGIN_MODE:-gdm}"   # D16: GDM's automatic login; `unit` and 
 
 # Lengths from the long-phase probe, written into method §10 before the first batch (method §9). Empty until then:
 # a full job without them stops before measuring, as the desktop family's does.
-priming_for()      { echo ""; }      # the priming login's length (D13)
-steady_offset_for(){ echo ""; }      # measured login → steady edge: past both settles and the blank (D13)
-steady_for()       { echo ""; }
+# Set from the long-phase probe of 2026-09-22 (run 35798819217; D18). The first-login work is over inside the
+# first minute — the indexer crawls the empty home in under 60 s and gnome-initial-setup runs only in minute 0.
+priming_for()      { echo 300; }
+# The shield rises and the monitor blanks 304 s after the login (idle-delay 300 s and the 10 s fade, polls 10 s
+# apart), and GNOME Shell's wake rate settles at the same moment; 420 s leaves a margin past it.
+steady_offset_for(){ echo 420; }
+# Past that edge the probe's non-overlapping windows spread 2.3-4.1 % at 600 s and at most 1.6 % at 900 s,
+# against the 5 % tolerance.
+steady_for()       { echo 900; }
 
 if [ "$MODE" = dry ]; then
   PRIMING=60; STEADY_OFFSET=420; STEADY=60        # 420 s: idle-delay 300 s, the 10 s fade, the blank, a margin
@@ -185,6 +191,27 @@ install_session() {
       | sudo tee /etc/gdm3/custom.conf > /dev/null
     rec gdm.autologin "$SESSION_USER"
   fi
+  # D17: the placement is a slice default, so a unit a timer starts during the measured window inherits the other
+  # CPUs. The four entries move into a slice of their own; pid 1's init.scope and the user manager's are outside
+  # these slices already.
+  printf '[Unit]\nDescription=Measured slice (9.9 campaign)\n[Slice]\nAllowedCPUs=%s\n' "$MEAS_CPU" \
+    | sudo tee /etc/systemd/system/meas.slice > /dev/null
+  local u
+  for u in dbus dbus-broker; do
+    sudo mkdir -p "/etc/systemd/system/$u.service.d"
+    printf '[Service]\nSlice=meas.slice\n' | sudo tee "/etc/systemd/system/$u.service.d/meas-slice.conf" > /dev/null
+  done
+  local ud="/home/$SESSION_USER/.config/systemd/user"
+  sudo -u "$SESSION_USER" mkdir -p "$ud"
+  printf '[Unit]\nDescription=Measured slice (9.9 campaign)\n[Slice]\nAllowedCPUs=%s\n' "$MEAS_CPU" \
+    | sudo -u "$SESSION_USER" tee "$ud/meas.slice" > /dev/null
+  for u in dbus org.gnome.Shell@wayland pipewire wireplumber pipewire-pulse; do
+    sudo -u "$SESSION_USER" mkdir -p "$ud/$u.service.d"
+    printf '[Service]\nSlice=meas.slice\n' | sudo -u "$SESSION_USER" tee "$ud/$u.service.d/meas-slice.conf" > /dev/null
+  done
+  sudo systemctl daemon-reload
+  rec slices.written 1
+
   SESSION_FILE="$(session_file)"; rec session.file "${SESSION_FILE:-none}"
   SESSION_EXEC="$(sed -n 's/^Exec=//p' "$SESSION_FILE" 2>/dev/null | head -1)"
   SESSION_DESKTOPS="$(sed -n 's/^DesktopNames=//p' "$SESSION_FILE" 2>/dev/null | head -1 | tr ';' ':' | sed 's/:$//')"
@@ -287,7 +314,13 @@ logout() {
 unit_id() { "$@" show -p Id --value 2>/dev/null | head -1; }   # resolves an alias: dbus.service -> dbus-broker.service
 
 pin_four() {
-  local bus u id fails=0
+  local bus u id fails=0 sl
+  # D17: the slices everything else lands in, including what a timer starts later
+  sudo systemctl set-property --runtime system.slice AllowedCPUs="$MEAS_HARNESS_CPUS" || fails=$((fails + 1))
+  for sl in app.slice session.slice background.slice; do
+    ucmd systemctl --user set-property --runtime "$sl" AllowedCPUs="$MEAS_HARNESS_CPUS" || fails=$((fails + 1))
+  done
+  rec pin.slice_defaults "$MEAS_HARNESS_CPUS"
   sudo systemctl set-property --runtime init.scope AllowedCPUs="$MEAS_CPU" || fails=$((fails + 1))
   bus="$(systemctl show -p Id --value dbus.service 2>/dev/null)"; rec pin.system_bus_unit "$bus"
   sudo systemctl set-property --runtime "$bus" AllowedCPUs="$MEAS_CPU" || fails=$((fails + 1))
@@ -303,6 +336,7 @@ pin_four() {
   local cg="/sys/fs/cgroup/user.slice/user-$MEAS_UID.slice/user@$MEAS_UID.service/init.scope"
   echo "$MEAS_CPU" | sudo tee "$cg/cpuset.cpus" > /dev/null || fails=$((fails + 1))
   rec pin.user_manager_cpuset "$(cat "$cg/cpuset.cpus.effective" 2>/dev/null)"
+  rec pin.entry_slices "$(systemctl show -p Slice --value dbus.service 2>/dev/null) $(ucmd systemctl --user show -p Slice --value org.gnome.Shell@wayland.service 2>/dev/null)"
   rec pin.fails "$fails"
 }
 
