@@ -45,7 +45,10 @@ WINDOW_LIMIT = {"thunderbird": 8, "thunderbird-send": 8,   # D31: the re-observa
                 # D32 names chrome too: SWELL-KW's Internet Explorer condition (c1) holds 38 windows, the 38th 338.6 s,
                 # and windows.json records every later one empty. Past it run.sh replays neither driven phase (the
                 # window's index decides both), so the 136M check stops with SWELL-KW at the same repeat.
-                "chrome": 38}
+                "chrome": 38,
+                # code replays SWELL-KW's Word condition (c1): 44 windows, of which word-r43 records no event, so that
+                # repeat runs the idle phase alone (D32) and window 44 is the last the recording gives
+                "code": 44}
 ABS_FLOOR_MS = 0.001  # the trace's resolution: perf sched timehist times in whole microseconds (D30; 9.6 D23)
 MIN_REPEATS = 5       # kalibera-ismm13 §11 (D29; 9.6 D24)
 # D57: the rule's exception — a component whose rate varies between sessions rather than within a run, so repeats
@@ -164,7 +167,11 @@ def mark_limited(app, entry, crit):
         return None
     for name, c in crit.items():
         p = phase_of(name)
-        if p in entry["phases"] and len(entry["phases"][p].get("repeats", entry["repeats"])) >= limit:
+        # the highest window the phase reached, not how many repeats it holds: a window left out by the validity step
+        # (D47) or replayed by none (code's word-r43 records no event, so that repeat runs the idle phase alone) leaves
+        # the count short of the limit while the recording is just as exhausted — there is no further window to add
+        reps = entry["phases"][p].get("repeats", entry["repeats"]) if p in entry["phases"] else None
+        if reps and max(reps) >= limit:
             c["limited"] = True
 
 

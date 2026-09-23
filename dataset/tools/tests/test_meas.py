@@ -467,3 +467,26 @@ def test_the_pool_states_every_build_it_holds():
     assert mixed == "Chrome 152 (3 repeats), Chrome 153 (2: 18, 20)"
     assert pool.build_census(None) == "?"          # a pool written before the field was per repeat
     assert pool.build_census("Chrome 152 ") == "Chrome 152"
+
+
+def test_the_window_limit_reads_the_highest_window_not_the_repeat_count():
+    # 9.5 D32: the limit binds when the recording has no further window to give. A window left out under D47, or one
+    # whose recording holds no event (code's word-r43), leaves the phase's repeat count short of the limit while the
+    # recording is just as exhausted.
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)
+    try:
+        pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    assert pool.WINDOW_LIMIT["code"] == 44
+    reached = [r for r in range(1, 45) if r not in (5, 43)]       # 5 left out under D47, 43 replayed by none
+    crit = {"input_run mean, SWELL-KW (ms)": {}}
+    pool.mark_limited("code", {"repeats": reached, "phases": {"driven": {"repeats": reached}}}, crit)
+    assert crit["input_run mean, SWELL-KW (ms)"].get("limited")   # 42 repeats, and every window the recording has
+    crit2 = {"input_run mean, SWELL-KW (ms)": {}}
+    short = [r for r in range(1, 44) if r not in (5, 43)]
+    pool.mark_limited("code", {"repeats": short, "phases": {"driven": {"repeats": short}}}, crit2)
+    assert not crit2["input_run mean, SWELL-KW (ms)"].get("limited")   # window 44 is still to come

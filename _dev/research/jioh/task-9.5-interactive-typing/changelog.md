@@ -331,6 +331,8 @@ The limit is 38: `ie-r38` holds 223 events over 338.6 s and `windows.json` recor
 
 Tooling: `WINDOW_LIMIT["chrome"] = 38` in `campaign/pool.py`; test `test_chromes_input_values_stop_at_its_recordings_last_window`. No value changes today — `chrome` stands at 29 repeats; the entry decides where its loop ends. Method §9, 2026-09-23.
 
+Two corrections the same day, as `code` met the same limit — its 136M `input_run` mean projects 48 repeats from window 30's sparse Aalto window (884 events against 2,000–2,600, its mean 177.2 ms against 104.7 ± 11.6), past the 44 windows its recording holds. `WINDOW_LIMIT` gains `code` at 44, SWELL-KW's Word condition holding 44 windows of which `word-r43` records no event, so that repeat runs the idle phase alone (D32) and window 44 is the last the recording gives. And `mark_limited` reads the highest window the phase reached rather than how many repeats it holds: a window left out under D47, or one replayed by none, leaves the count short of the limit while the recording is just as exhausted — `code` would have stood at 42 driven repeats with every one of its windows spent, and the value would have gone on holding the rule open with nothing left to add.
+
 ## D69 — the application build is pinned where it can be, recorded and stated where it cannot (2026-09-23)
 
 By 인지오's decision. The appdefs install what the vendor's repository serves at the moment a job runs, so the campaign's pools have been holding more than one build of the application they describe, and nothing showed it: `campaign/pool.py` kept `version` from the first repeat alone.
