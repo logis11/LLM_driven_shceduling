@@ -18,8 +18,10 @@ Per entry and candidate length L:
   - `total`   — the two in quadrature, and `hw@5rep`, the 95 % half-width a five-repeat batch would show
                 (t = 2.776 at 4 degrees of freedom), against the 5 % tolerance of the stability rule. The length
                 is chosen on this column: where it stops falling, a longer phase buys nothing and repeats do.
-  - `clean`   — the share of candidate windows with no foreign user-space schedule-in on the measured CPU. A
-                repeat with any is not pooled (D12), so this is the share of launched jobs a length would keep.
+  - `clean`   — the share of candidate windows with no foreign user-space schedule-in on the measured CPU. Under
+                D12's absolute gate that was the share of launched jobs a length would keep; D20 replaced it with
+                a bound on the share of the CPU that work took, which this tool prints per run so method §5 can
+                state the bound beside what was observed.
 
 And per component, the samples a window of L would hold for the gap and run tables it carries — method §6 puts
 every one of them on the stability list, so a length that leaves a component a handful of samples per repeat
@@ -69,9 +71,18 @@ def read_run(D, margin, phase, components=True):
     else:
         cut, polls = t0, None                    # an unpolled phase is clean whole
     clean = analyze_phase(D, phase, meas_cpu, from_mono=cut) if components else None
+    src = clean or full                      # the clean region's own foreign counts where they were computed
+    fu, fo = src["foreign"]["user"], src["foreign"]["in_unit_other"]
+    span = src["span_s"]
+    foreign = {"schedule_ins": fu["schedule_ins"] + fo["schedule_ins"],
+               "cpu_ms": round(fu["cpu_ms"] + fo["cpu_ms"], 1),
+               "share_of_phase": (fu["cpu_ms"] + fo["cpu_ms"]) / 1000.0 / max(span, 1e-9),
+               "by_comm": dict(sorted({**fu["by_comm"], **fo["by_comm"]}.items(),
+                                      key=lambda kv: -kv[1]["cpu_ms"])[:8]),
+               "over": span, "kernel_schedule_ins": src["foreign"]["kernel"]["schedule_ins"]}
     return {"dir": D, "repeat": report.get("repeat"), "mode": report.get("mode"), "gate": report.get("gate"),
             "cut_s": round(cut - t0, 1), "span_s": full["span_s"], "clean_span_s": round(t1 - cut, 1),
-            "polls": polls, "full": full, "clean": clean}
+            "polls": polls, "foreign": foreign, "full": full, "clean": clean}
 
 
 def _after_cut(series, slice_s, cut_s):
@@ -176,8 +187,13 @@ def report(dirs, margin=60.0, lengths=LENGTHS, phase="idle", components=True):
               f"{r['span_s']:.0f}s"
               + (f", {p['n']} polls ({p['first_s']:.0f}-{p['last_s']:.0f}s)" if p else ", unpolled")
               + f", cut at {r['cut_s']:.0f}s, clean {r['clean_span_s']:.0f}s")
-    res = {"runs": [{k: r[k] for k in ("dir", "repeat", "mode", "gate", "cut_s", "span_s", "clean_span_s", "polls")}
-                    for r in runs], "margin_s": margin, "entries": {}}
+        g = r["foreign"]
+        top = ", ".join(f"{c} {v['cpu_ms']:.0f}ms" for c, v in list(g["by_comm"].items())[:5])
+        print(f"    foreign user work on the measured CPU (D20): {g['schedule_ins']} schedule-ins, "
+              f"{g['cpu_ms']:.0f} ms over {g['over']:.0f}s = {g['share_of_phase'] * 100:.4f}% of the CPU"
+              + (f"   [{top}]" if top else ""))
+    res = {"runs": [{k: r[k] for k in ("dir", "repeat", "mode", "gate", "cut_s", "span_s", "clean_span_s",
+                                       "polls", "foreign")} for r in runs], "margin_s": margin, "entries": {}}
     for e in ENTRIES:
         ent = entry_report(runs, e, lengths)
         ent["poll_tail"] = poll_tail(runs, e)
