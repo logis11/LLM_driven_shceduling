@@ -167,10 +167,19 @@ def test_run_sh_carries_the_decisions(repo_root):
     assert re.search(r"probe \]; then\n\s*PRIMING=1800; STEADY_OFFSET=0; STEADY=10800", src)   # D13
     m = re.search(r"dry \]; then\n\s*PRIMING=(\d+); STEADY_OFFSET=(\d+); STEADY=(\d+)", src)
     assert m and int(m.group(2)) > 310                                                   # D13: past idle-delay + fade
-    # D18: the lengths the long-phase probe set — the blank at 304 s, the edge past it, a window the spread holds in
+    # D18: the lengths the long-phase probe set — the blank at 304 s, the edge past it
     lens = {k: int(re.search(rf"{k}\(\)\s*{{ echo (\d+); }}", src).group(1))
-            for k in ("priming_for", "steady_offset_for", "steady_for")}
-    assert lens["steady_offset_for"] > 310 and lens["steady_for"] >= 600 and lens["priming_for"] >= 120, lens
+            for k in ("priming_for", "steady_offset_for")}
+    assert lens["steady_offset_for"] > 310 and lens["priming_for"] >= 120, lens
+    # D19: the steady length is withdrawn — the polls dominated the signal its spreads were read from — so a full
+    # job stops at the no-phase-lengths gate until the unpolled probe sets it
+    assert re.search(r"steady_for\(\)\s*{ echo; }", src)
+    assert re.search(r'if \[ -z "\$PRIMING" \] \|\| \[ -z "\$STEADY_OFFSET" \] \|\| \[ -z "\$STEADY" \]', src)
+    # D19: the probe's polls stop at the steady edge, so the region a full job carries is recorded unpolled
+    assert 'poll_start "$name" "${POLL_UNTIL:-}"' in src
+    assert 'POLL_UNTIL=$(( LOGIN_T0 + $(steady_offset_for "$APP") ))' in src
+    probe_block = src[src.index('if [ "$MODE" = probe ]; then\n  # D19'):]
+    assert probe_block.index("POLL_UNTIL=$((") < probe_block.index('phase idle "$STEADY"')
     # D13: the census runs before perf starts and after it stops, never inside the recording
     body = re.search(r"^phase\(\) \{(.*?)^\}", src, re.S | re.M).group(1)
     assert body.index('census "$name.start"') < body.index("perf sched record") < body.index('census "$name.end"')

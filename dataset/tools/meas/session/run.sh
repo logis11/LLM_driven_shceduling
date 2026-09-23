@@ -10,7 +10,7 @@
 #   dry    shortened priming, the measured login idled past `idle-delay` and the blank, the edge check recorded
 #          (not stopping the job), a short steady; the raw perf file kept (D13)
 #   probe  a 30 min priming login and a 3 h phase on the measured login, both recorded and read per 10 s slice,
-#          the idle state polled every 10 s during the recording (D13); never a repeat
+#          the idle state polled every 10 s up to the steady edge and not past it (D13, D19); never a repeat
 #   full   the campaign; the priming, steady-offset and steady lengths come from the probe (method §9) and a job
 #          without them stops before measuring
 #
@@ -36,6 +36,7 @@ LEADER_UNIT=meas-session             # the transient unit that is the session le
 LOGIN_WAIT=240                       # how long a login may take to bring GNOME Shell up before the job stops
 LOGOUT_WAIT=90                       # how long the user manager may take to stop after the logout
 POLL_S=10                            # the probe's state polls (D13)
+POLL_UNTIL=""                        # epoch second the polls stop at; set for the probe's measured phase (D19)
 # How the session is logged in. `unit` is D11's transient PAM unit with GDM masked. GNOME Shell creates its screen
 # shield only when a display manager answers on the system bus (gnome-shell 46.0 js/ui/main.js:230,
 # js/misc/loginManager.js:38-53), so with `unit` alone the session never locks and never blanks: `gdm` logs in
@@ -51,9 +52,11 @@ priming_for()      { echo 300; }
 # The shield rises and the monitor blanks 304 s after the login (idle-delay 300 s and the 10 s fade, polls 10 s
 # apart), and GNOME Shell's wake rate settles at the same moment; 420 s leaves a margin past it.
 steady_offset_for(){ echo 420; }
-# Past that edge the probe's non-overlapping windows spread 2.3-4.1 % at 600 s and at most 1.6 % at 900 s,
-# against the 5 % tolerance.
-steady_for()       { echo 900; }
+# Withdrawn (D19): the 900 s of D18 rested on window spreads of a signal the probe's own 10 s polls dominated —
+# at idle the entries wake 0.1-0.9 /s in an unpolled dry run against 15.06, 4.25, 3.67 and 2.17 /s in the probe —
+# and a periodic instrument makes a spread read smaller than the subject's. Empty until the unpolled probe sets it,
+# so a full job stops at the no-phase-lengths gate.
+steady_for()       { echo; }
 
 if [ "$MODE" = dry ]; then
   PRIMING=60; STEADY_OFFSET=420; STEADY=60        # 420 s: idle-delay 300 s, the 10 s fade, the blank, a margin
@@ -68,9 +71,18 @@ fi
 edge() { printf '{"phase":"%s","edge":"%s","mono_ns":%s}\n' "$1" "$2" "$(date +%s%9N)" >> "$OUT/edges.jsonl"; }
 census() { sudo $CENSUS snapshot "$MEAS_UID" "$1" "$OUT/census.$1.json" 2>> "$OUT/census.log"; rec "census.$1.rc" "$?"; }
 
-# poller: the probe's state polls during a recording, one JSON line per POLL_S (D13), stated in its record
-poll_start() { ( while :; do sudo $CENSUS state "$MEAS_UID" >> "$OUT/poll.$1.jsonl" 2>/dev/null; sleep "$POLL_S"; done ) &
-               POLL_PID=$!; rec "poll.$1.interval_s" "$POLL_S"; }
+# poller: the probe's state polls during a recording, one JSON line per POLL_S (D13), stated in its record.
+# A poll is five `sudo` commands — four `busctl --user` calls and `loginctl` — and every `sudo -u` registers a
+# logind session, so the poll itself wakes the four entries it reads. D19 stops it at the steady edge: the settles
+# stay polled, the region a full job carries is not. poll_start <phase> [stop-epoch]; no epoch, no bound.
+poll_start() { local name="$1" until_epoch="${2:-}"
+               ( while :; do
+                   sudo $CENSUS state "$MEAS_UID" >> "$OUT/poll.$name.jsonl" 2>/dev/null
+                   if [ -n "$until_epoch" ] && [ "$(date +%s)" -ge "$until_epoch" ]; then break; fi
+                   sleep "$POLL_S"
+                 done ) &
+               POLL_PID=$!; rec "poll.$name.interval_s" "$POLL_S"
+               [ -n "$until_epoch" ] && rec "poll.$name.until_epoch" "$until_epoch"; }
 poll_stop()  { [ -n "${POLL_PID:-}" ] && kill "$POLL_PID" 2>/dev/null; POLL_PID=""; }
 
 # phase <name> <seconds> — perf over the whole phase, as the desktop family's phase(), with the census in place of
@@ -79,7 +91,7 @@ phase() {
   local name="$1" secs="$2"
   census "$name.start"
   edge "$name" start
-  [ "$MODE" = probe ] && poll_start "$name"
+  [ "$MODE" = probe ] && poll_start "$name" "${POLL_UNTIL:-}"
   pin_harness sudo perf sched record -k CLOCK_MONOTONIC -a -o "$OUT/perf.$name.data" -- sleep "$secs" > "$OUT/perf.$name.log" 2>&1
   rec "perf.$name.record.rc" "$?"
   poll_stop
@@ -464,6 +476,9 @@ census pinned
 checkpoint pinned
 
 if [ "$MODE" = probe ]; then
+  # D19: the polls stop at the edge a full job measures from, so the settles are read and the carried region is not
+  # polled. The offset is the login's, as in a full job; the phase starts at the pin, a little after it.
+  POLL_UNTIL=$(( LOGIN_T0 + $(steady_offset_for "$APP") ))
   phase idle "$STEADY"                         # one long phase from the pin: settles, shield, blank, and after
 else
   left=$(( LOGIN_T0 + STEADY_OFFSET - $(date +%s) )); rec steady.wait_s "$left"
