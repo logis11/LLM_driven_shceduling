@@ -322,3 +322,11 @@ Scope: the roles come from Chromium's `--type=` flag, so the identity moves only
 Tooling: `component_name(role, comm)` in `campaign/analyze.py`, `per_thread`'s optional `roles`, and the pooled component key in `campaign/pool.py`; test `test_one_comm_in_two_processes_is_two_components`. `SESSION_SPREAD`'s keys carry the role with the same edit — D57's `code` entry and D59's four `webrtc` entries name components the rename moved, and an exception keyed by the old name silently stops applying to the value it was decided for (`idle libuv-worker` read as a plain failure at ±6.3 % and ±6.9 % until the key was corrected). Method §9, 2026-09-23.
 
 Values changed: `chrome`'s idle components are re-identified and every idle value now passes — `gpu/Chrome_ChildIOT` gap mean 131.9 ms (±0.9 %), against 402.9 ms (±6.1 %) pooled by comm alone. The rule is held open only by the SWELL-KW `input_run` mean, whose spread follows the input.
+
+## D68 — `chrome`'s window limit entered in the tooling, as D32 named it (2026-09-23)
+
+No new decision: D32 states that a recording's limit binds the values of the phases that replay it, that such a value pools every window the recording holds and is then carried with its half-width, and it names the two applications the limit binds — `thunderbird` at its eight Outlook windows and **`chrome` at 38 Internet Explorer windows**. `campaign/pool.py`'s `WINDOW_LIMIT` carried only the two Thunderbird entries, so `chrome`'s `input_run` mean under SWELL-KW would have gone on holding the rule open past the last window the recording has — at window 29 it projects 45, seven more than exist.
+
+The limit is 38: `ie-r38` holds 223 events over 338.6 s and `windows.json` records `ie-r39` through `ie-r44` empty (an empty window is not committed). It covers the 136M check as well, because `run.sh` reads the SWELL-KW window's index to decide both driven phases — past the recording's end a repeat replays neither (D32), so the 136M value stops at the same repeat, its own 44 Aalto windows notwithstanding.
+
+Tooling: `WINDOW_LIMIT["chrome"] = 38` in `campaign/pool.py`; test `test_chromes_input_values_stop_at_its_recordings_last_window`. No value changes today — `chrome` stands at 29 repeats; the entry decides where its loop ends. Method §9, 2026-09-23.

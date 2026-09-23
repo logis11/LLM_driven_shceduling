@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-23, `chrome`'s window limit in the tooling (changelog D68) — §6: `WINDOW_LIMIT` carries `chrome` at its 38 Internet Explorer windows, as D32 named it; its two per-input values are carried with their half-widths once the driven phases hold 38 repeats.
+
 - 2026-09-23, component identity (changelog D67) — §5: a component is the role of the process its thread runs in together with its comm (`gpu/Chrome_ChildIOT`), one comm naming a thread of several processes in a multi-process tree; a single-process tree's components keep plain comm names. `chrome`, `webrtc` and `code` re-pooled under it.
 
 - 2026-09-22, `chrome`'s window 16 measured twice (changelog D66) — §6: one push started two runs (#474, #475); #475's copy was gated and relaunched as #476 while #474's measured, so window 16 landed twice; the original launch's copy (#474) is pooled and #476's left out (`pool_runs.py --exclude 16@35712250969`). The watcher no longer relaunches a gated window another recent run holds.

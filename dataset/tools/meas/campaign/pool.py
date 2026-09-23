@@ -41,7 +41,11 @@ HEADLINE = {"soffice": "input_run", "code": "input_run", "thunderbird": "input_r
             "chrome": "op_duration", "gimp": "op_duration", "kdenlive": "op_duration",
             "mpv-video": "play_cpu_share", "mpv-audio": "play_cpu_share", "webrtc": "play_cpu_share"}
 # D26: SWELL-KW's Outlook conditions (c2, c3) hold 4 761 s of recorded time — eight windows, the eighth 561 s
-WINDOW_LIMIT = {"thunderbird": 8, "thunderbird-send": 8}   # D31: the re-observation reads the same Outlook windows
+WINDOW_LIMIT = {"thunderbird": 8, "thunderbird-send": 8,   # D31: the re-observation reads the same Outlook windows
+                # D32 names chrome too: SWELL-KW's Internet Explorer condition (c1) holds 38 windows, the 38th 338.6 s,
+                # and windows.json records every later one empty. Past it run.sh replays neither driven phase (the
+                # window's index decides both), so the 136M check stops with SWELL-KW at the same repeat.
+                "chrome": 38}
 ABS_FLOOR_MS = 0.001  # the trace's resolution: perf sched timehist times in whole microseconds (D30; 9.6 D23)
 MIN_REPEATS = 5       # kalibera-ismm13 §11 (D29; 9.6 D24)
 # D57: the rule's exception — a component whose rate varies between sessions rather than within a run, so repeats

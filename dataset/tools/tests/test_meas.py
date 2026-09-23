@@ -426,3 +426,26 @@ def test_one_comm_in_two_processes_is_two_components():
     assert campaign.per_thread(rows, 600.0)["Chrome_ChildIOT"]["gap_ms"]["mean"] == pytest.approx(75_075.0)
     # a single-process tree keeps plain comm names: every thread's role is `main`
     assert sorted(campaign.per_thread(rows, 600.0, {100: "main", 200: "main"})) == ["Chrome_ChildIOT"]
+
+
+def test_chromes_input_values_stop_at_its_recordings_last_window():
+    # 9.5 D32: a value of a phase only full repeats run stops at the recording's limit — chrome's 38 Internet Explorer
+    # windows — and is then carried with its half-width instead of holding the rule open
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)
+    try:
+        pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    assert pool.WINDOW_LIMIT["chrome"] == 38
+    crit = {"input_run mean, SWELL-KW (ms)": {}, "input_run mean, 136M (ms)": {}, "idle gpu/Chrome_ChildIOT gap mean (ms)": {}}
+    entry = {"repeats": list(range(1, 39)), "phases": {"driven": {}, "driven-alt": {}, "idle": {}}}
+    pool.mark_limited("chrome", entry, crit)
+    assert crit["input_run mean, SWELL-KW (ms)"].get("limited")
+    assert crit["input_run mean, 136M (ms)"].get("limited")      # run.sh replays neither past the window's end
+    assert not crit["idle gpu/Chrome_ChildIOT gap mean (ms)"].get("limited")   # the idle phase keeps adding repeats
+    at37 = {"input_run mean, SWELL-KW (ms)": {}}
+    pool.mark_limited("chrome", {"repeats": list(range(1, 38)), "phases": {"driven": {}}}, at37)
+    assert not at37["input_run mean, SWELL-KW (ms)"].get("limited")
