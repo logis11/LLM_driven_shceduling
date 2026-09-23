@@ -281,9 +281,13 @@ def test_run_sh_carries_the_decisions(repo_root):
     assert re.search(r"steady_for\(\)\s*{ echo; }", src)
     assert re.search(r'if \[ -z "\$PRIMING" \] \|\| \[ -z "\$STEADY_OFFSET" \] \|\| \[ -z "\$STEADY" \]', src)
     # D21: the system bus restarted into meas.slice before any login, and the placement read from the processes
-    # the restart is written inside install_session, so it runs before the call that starts the desktop units
-    assert 'sudo systemctl restart "$sysbus"' in src
-    assert src.index("dbus.restart.rc") < src.rindex("\nstart_boot_units")
+    # the bus is restarted into meas.slice before the desktop is installed, and every service holding a name on
+    # the old bus is restarted with it — without that, logind keeps running nameless and GDM never gets a session
+    assert 'sudo systemctl restart "$bus"' in src and "bus_into_meas_slice" in src
+    assert src.index("bus_into_meas_slice()") < src.index("install_session() {")
+    assert src.index("bus_into_meas_slice\n") < src.index("apt-get install -y ubuntu-desktop-minimal")
+    assert 'systemctl show -p BusName --value "$u"' in src and "try-restart" in src
+    assert "stop_recorded bus-no-login1" in src
     assert 'CENSUS placed "$OUT/census.pinned.json"' in src and 'CENSUS placed "$OUT/census.edge.json"' in src
     assert src.count("stop_recorded misplaced-entry") == 2
     assert "pin.entry_cgroups" in src and "pin.entry_slices" not in src

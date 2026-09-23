@@ -150,7 +150,47 @@ session_file() {
   done
 }
 
+# D21: `meas.slice` and the system bus's place in it, taken before the desktop is installed.
+#
+# A unit takes its slice when it starts, and this bus has run since boot, so a `Slice=` drop-in alone leaves it in
+# `system.slice` — which D17's default then holds on the harness CPUs. That is how the 2026-09-23 probes measured
+# an entry off the measured CPU with `pin.fails` 0. The bus is therefore restarted; it is done here, while its
+# clients are still the base system services and no session exists.
+#
+# A bus restart leaves every service that had claimed a well-known name on the old bus connected to nothing: in
+# the dry jobs of 2026-09-23 (32, 33) `systemd-logind` kept running without `org.freedesktop.login1`, GDM timed
+# out activating it after 25 s, and no session was ever created. Every running service that declares a `BusName=`
+# is restarted with the bus so that it claims its name again, and logind is then asked a question before the job
+# goes on.
+bus_into_meas_slice() {
+  local u bus named=""
+  printf '[Unit]\nDescription=Measured slice (9.9 campaign)\n[Slice]\nAllowedCPUs=%s\n' "$MEAS_CPU" \
+    | sudo tee /etc/systemd/system/meas.slice > /dev/null
+  for u in dbus dbus-broker; do
+    sudo mkdir -p "/etc/systemd/system/$u.service.d"
+    printf '[Service]\nSlice=meas.slice\n' | sudo tee "/etc/systemd/system/$u.service.d/meas-slice.conf" > /dev/null
+  done
+  sudo systemctl daemon-reload
+  bus="$(systemctl show -p Id --value dbus.service 2>/dev/null)"; rec dbus.restart.unit "$bus"
+  sudo systemctl restart "$bus" > "$OUT/dbus.restart.log" 2>&1; rec dbus.restart.rc "$?"
+  for u in $(systemctl list-units --type=service --state=running --no-legend --plain 2>/dev/null | awk '{print $1}'); do
+    [ "$u" = "$bus" ] && continue
+    [ -n "$(systemctl show -p BusName --value "$u" 2>/dev/null)" ] || continue
+    echo "== try-restart $u" >> "$OUT/dbus.restart.log"
+    sudo systemctl try-restart "$u" >> "$OUT/dbus.restart.log" 2>&1 && named="$named $u"
+  done
+  rec dbus.restart.renamed "${named# }"
+  rec dbus.restart.cgroup "$(systemctl show -p ControlGroup --value "$bus" 2>/dev/null)"
+  # logind answering on the new bus is what GDM needs; a job whose bus restart broke it measures nothing
+  sudo busctl --system get-property org.freedesktop.login1 /org/freedesktop/login1 \
+    org.freedesktop.login1.Manager NAutoVTs > "$OUT/bus.login1.txt" 2>&1; rec bus.login1.rc "$?"
+  if [ "$(sed -n 's/^bus.login1.rc=//p' "$KV" | tail -1)" != 0 ]; then
+    stop_recorded bus-no-login1 "the system bus restarted into meas.slice but org.freedesktop.login1 does not answer (D21)"
+  fi
+}
+
 install_session() {
+  bus_into_meas_slice
   # services are not started by the packages' scripts (policy-rc.d 101) nor restarted by needrestart: every dry job of
   # 2026-09-22 that lost its runner lost it in the install's last service starts. The units are started afterwards,
   # one at a time and logged, as a boot would start them (start_boot_units).
@@ -205,14 +245,9 @@ install_session() {
   fi
   # D17: the placement is a slice default, so a unit a timer starts during the measured window inherits the other
   # CPUs. The four entries move into a slice of their own; pid 1's init.scope and the user manager's are outside
-  # these slices already.
-  printf '[Unit]\nDescription=Measured slice (9.9 campaign)\n[Slice]\nAllowedCPUs=%s\n' "$MEAS_CPU" \
-    | sudo tee /etc/systemd/system/meas.slice > /dev/null
+  # these slices already. The system side of this — `meas.slice` and the system bus's place in it — is written and
+  # taken before the install, by bus_into_meas_slice (D21).
   local u
-  for u in dbus dbus-broker; do
-    sudo mkdir -p "/etc/systemd/system/$u.service.d"
-    printf '[Service]\nSlice=meas.slice\n' | sudo tee "/etc/systemd/system/$u.service.d/meas-slice.conf" > /dev/null
-  done
   local ud="/home/$SESSION_USER/.config/systemd/user"
   sudo -u "$SESSION_USER" mkdir -p "$ud"
   printf '[Unit]\nDescription=Measured slice (9.9 campaign)\n[Slice]\nAllowedCPUs=%s\n' "$MEAS_CPU" \
@@ -223,15 +258,6 @@ install_session() {
   done
   sudo systemctl daemon-reload
   rec slices.written 1
-  # D21: `Slice=` applies when a unit starts. The system bus has been running since boot, so the drop-in above
-  # leaves it in `system.slice`, where D17's default then holds it on the harness CPUs — an entry measured off the
-  # measured CPU, which is what the 2026-09-23 probes did. It is restarted here, before the desktop units start
-  # and before any login, while its clients are the base system services; the placement is then read from the
-  # process, never from the unit's configured slice.
-  local sysbus; sysbus="$(systemctl show -p Id --value dbus.service 2>/dev/null)"
-  sudo systemctl restart "$sysbus" > "$OUT/dbus.restart.log" 2>&1; rec dbus.restart.rc "$?"
-  rec dbus.restart.unit "$sysbus"
-  rec dbus.restart.cgroup "$(systemctl show -p ControlGroup --value "$sysbus" 2>/dev/null)"
 
   SESSION_FILE="$(session_file)"; rec session.file "${SESSION_FILE:-none}"
   SESSION_EXEC="$(sed -n 's/^Exec=//p' "$SESSION_FILE" 2>/dev/null | head -1)"
