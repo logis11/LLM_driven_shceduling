@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-23, the application build (changelog D69) — §1: `code` is pinned to 1.138.0 and gated like the CPU model, a job that installed another build stopping before any measurement; §6: every repeat's build is kept in the pooled record and the census stated with the values, `chrome` being served only at its current version and its campaign holding 152.0.7977.82 and 153.0.8010.52.
+
 - 2026-09-23, `chrome`'s window limit in the tooling (changelog D68) — §6: `WINDOW_LIMIT` carries `chrome` at its 38 Internet Explorer windows, as D32 named it; its two per-input values are carried with their half-widths once the driven phases hold 38 repeats.
 
 - 2026-09-23, component identity (changelog D67) — §5: a component is the role of the process its thread runs in together with its comm (`gpu/Chrome_ChildIOT`), one comm naming a thread of several processes in a multi-process tree; a single-process tree's components keep plain comm names. `chrome`, `webrtc` and `code` re-pooled under it.
