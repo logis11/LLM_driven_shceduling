@@ -3,7 +3,7 @@
 import json
 import re
 
-from meas.session import analyze, census, pool
+from meas.session import analyze, census, pool, size_steady
 
 UID = 1002
 
@@ -150,6 +150,75 @@ def test_the_pool_names_probe_and_foreign_repeats_and_pools_the_rest(tmp_path):
     assert all(c["passes"] for n, c in q.items() if n.startswith(("systemd ", "gnome-shell ")))
     # an entry with nothing observed has nothing to carry, and the rule does not hold for it
     assert q["pipewire (no components)"]["passes"] is False and not entry["stability"]["passes"]
+
+
+def _probe_dir(d, k, tail_rate, polled_rate=5.0, t0=1000.0, head_s=300.0, tail_s=1200.0, foreign_at=None):
+    """A probe job's output: a polled head, then the clean region D19 has the polls stop before.
+
+    The polls' `mono_ns` and the trace share `CLOCK_MONOTONIC`, so the origin is arbitrary and the cut is placed
+    from the last poll. gnome-shell's tail rate steps between windows, so a window spread exists to read.
+    """
+    inst, other = census.instances(PROCS, UID)
+    c = {"instances": inst, "in_unit_other": other, "kthreads": [2, 30], "display_servers": []}
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "report.json").write_text(json.dumps({"app": "session", "repeat": k, "mode": "probe", "gate": "open",
+                                               "pin.load_cpu": "3", "edge.idle": "1"}))
+    for e in ("start", "end"):
+        (d / f"census.idle.{e}.json").write_text(json.dumps(c))
+    (d / "edges.jsonl").write_text(json.dumps({"phase": "idle", "edge": "start", "mono_ns": 0}) + "\n")
+    (d / "poll.idle.jsonl").write_text("".join(
+        json.dumps({"mono_ns": int((t0 + i * 10.0) * 1e9), "session_active": True, "shield_active": True,
+                    "power_save_mode": 3}) + "\n" for i in range(int(head_s // 10) + 1)))
+
+    rows, wakes = [_row(t0, 0, "perf", 50, 50, 0.01, "R")], []
+    def emit(t, comm, tid, pid):
+        rows.append(_row(t, 3, comm, tid, pid, 0.2))
+        wakes.append((t - 0.001, comm, tid, pid))
+    n = 0
+    while n / polled_rate < head_s:                      # the head, as the polls made it
+        t = t0 + n / polled_rate
+        emit(t, "systemd", 1, 1); emit(t + 0.01, "gnome-shell", 520, 520)
+        n += 1
+    m, tail0 = 0, t0 + head_s
+    while m / tail_rate < tail_s:                        # the clean region; the shell steps every 300 s
+        t = tail0 + m / tail_rate
+        emit(t, "systemd", 1, 1)
+        if int((t - tail0) // 300) % 2 == 0 or m % 2 == 0:
+            emit(t + 0.01, "gnome-shell", 520, 520)
+        m += 1
+    if foreign_at is not None:
+        rows.append(_row(tail0 + foreign_at, 3, "snapd", 410, 410, 0.3))
+    rows.append(_row(tail0 + tail_s, 0, "perf", 50, 50, 0.01, "R"))
+    (d / "perf.idle.timehist.txt").write_text("".join(rows))
+    (d / "perf.idle.wakeups.txt").write_text("".join(
+        f"{t:12.6f} [0001]  x[9]  awakened: {comm}[{tid}/{pid}]\n" for t, comm, tid, pid in wakes))
+    return d
+
+
+def test_size_steady_reads_only_past_the_last_poll(tmp_path):
+    # D19: the polls stop at the steady edge, so the sizing reads the clean region and the polled head is dropped
+    a = _probe_dir(tmp_path / "r28", 28, tail_rate=0.5)
+    b = _probe_dir(tmp_path / "r29", 29, tail_rate=0.6, foreign_at=700.0)
+    res = size_steady.report([str(a), str(b)], margin=60.0, lengths=(300, 600), phase="idle")
+
+    assert [r["cut_s"] for r in res["runs"]] == [360.0, 360.0]        # the last poll at 300 s, a 60 s margin
+    assert [r["polls"]["n"] for r in res["runs"]] == [31, 31]
+    sysd = res["entries"]["systemd"]
+    assert [round(r["mean_wakes_per_s"], 2) for r in sysd["runs"]] == [0.5, 0.6]   # the tail, not the 5.0 head
+    assert 12 < sysd["between_sd_pct"] < 14                          # 0.499 against 0.599
+    tail = {(b["from_s"], b["to_s"]): b["wakes_per_s"] for b in sysd["poll_tail"]}
+    assert tail[(-120, 0)] > 4 and tail[(60, 120)] < 1               # the polled head, then the clean region
+
+    by_len = {r["length_s"]: r for r in sysd["lengths"]}
+    assert by_len[300]["windows"] == 6                               # three per run, of the 1140 s left
+    assert by_len[300]["total_sd_pct"] >= by_len[300]["between_sd_pct"]
+    # one 600 s window per run spreads over nothing, so the length is unread rather than perfect
+    assert by_len[600]["windows"] == 0 and by_len[600]["within_sd_pct"] is None and by_len[600]["total_sd_pct"] is None
+    # D12: one foreign schedule-in in one 300 s window of one run — five of the six would be pooled
+    assert by_len[300]["clean_share"] == 5 / 6
+    # the samples a window would hold scale with the length, and the pool reads them per component
+    comp = {c["component"]: c for c in sysd["components"]}["pid1/systemd"]
+    assert 150 < comp["per_window"][300]["gaps"] < 180 and 300 < comp["per_window"][600]["gaps"] < 360
 
 
 def _src(repo_root, *p):

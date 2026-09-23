@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Per-phase analysis of a 9.9 session run (changelog D4–D14; method §4, §5).
 
-  analyze.py <run-dir> [--json out.json] [--phase NAME ...]
+  analyze.py <run-dir> [--json out.json] [--phase NAME ...] [--from-s SECONDS]
+
+`--from-s` reads the phase from that many seconds past its first row and nothing before, which is how the
+unpolled part of a probe is read (D19): `size_steady.py` passes the cut it takes from the last poll.
 
 The four entries are read from one trace. Each entry's processes are the instances the census names by cgroup
 (`census.py`): GNOME Shell; `pipewire`, `wireplumber` and `pipewire-pulse`; pid 1 and the user manager; the system
@@ -136,7 +139,8 @@ def components(rows, inst_pids, span):
 
 def poll_summary(D, phase, _unused=None):
     """The probe's polls: when the shield, the blank and SessionIsActive were first seen, seconds from the first
-    poll. The polls carry a monotonic clock and `edges.jsonl` the wall clock, so the first poll is the origin."""
+    poll. The polls carry a monotonic clock and `edges.jsonl` the wall clock, so the first poll is the origin.
+    `first_mono_s` and `last_mono_s` are on the polls' own clock, which is the trace's (D19)."""
     p = os.path.join(D, f"poll.{phase}.jsonl")
     if not os.path.exists(p):
         return None
@@ -146,13 +150,18 @@ def poll_summary(D, phase, _unused=None):
     t0 = polls[0]["mono_ns"]
     first = lambda f: next(((x["mono_ns"] - t0) / 1e9 for x in polls if f(x)), None)
     return {"polls": len(polls), "span_s": round((polls[-1]["mono_ns"] - t0) / 1e9, 1),
+            "first_mono_s": round(t0 / 1e9, 6), "last_mono_s": round(polls[-1]["mono_ns"] / 1e9, 6),
             "first_shield_s": first(lambda x: x.get("shield_active")),
             "first_blank_s": first(lambda x: x.get("power_save_mode") in (1, 2, 3)),
             "session_active_all": all(x.get("session_active") for x in polls) if polls else None,
             "power_save_modes": sorted({x.get("power_save_mode") for x in polls if x.get("power_save_mode") is not None})}
 
 
-def analyze_phase(D, phase, meas_cpu):
+def analyze_phase(D, phase, meas_cpu, from_s=0.0, from_mono=None):
+    """`from_s` starts the phase that many seconds past its first row; `from_mono` at that monotonic second of
+    the trace itself (the clock `perf sched record -k CLOCK_MONOTONIC` and the polls' `mono_ns` share), which is
+    how the region past the probe's last poll is read (D19). Everything — rates, components, the foreign counts
+    and the slice profile — is computed over what is left."""
     th = next((f"perf.{phase}.timehist.txt{s}" for s in (".gz", "")
                if os.path.exists(os.path.join(D, f"perf.{phase}.timehist.txt{s}"))), None)
     if not th:
@@ -162,6 +171,12 @@ def analyze_phase(D, phase, meas_cpu):
         return {"missing": True, "why": "no census"}
     inst, other, kthreads = instances_of(censuses)
     rows_cpu, (t0, t1) = load_trace(os.path.join(D, th))
+    cut = from_mono if from_mono is not None else (t0 + from_s if from_s else None)
+    if cut is not None:
+        if not t0 <= cut < t1:
+            return {"missing": True, "why": f"the cut {cut} is outside the trace [{t0}, {t1}]"}
+        rows_cpu = [(r, cpu) for r, cpu in rows_cpu if r.t_in >= cut]
+        t0 = cut
     span = max(t1 - t0, 1e-6)
     entry_pids = {p for by_i in inst.values() for pids in by_i.values() for p in pids}
 
@@ -173,7 +188,8 @@ def analyze_phase(D, phase, meas_cpu):
     mine, merged = merge_resumes(mine, wakeups, by_state=True)
     on_cpu = {cpu for r, cpu in rows_cpu if r.pid in entry_pids}
 
-    out = {"span_s": round(span, 3), "resumes_merged": merged, "meas_cpu": meas_cpu,
+    out = {"span_s": round(span, 3), "t0": round(t0, 6), "from_mono": round(cut, 6) if cut is not None else None,
+           "resumes_merged": merged, "meas_cpu": meas_cpu,
            "entry_cpus_seen": sorted(on_cpu),
            "llvmpipe_rows": len(llvm),
            "foreign": foreign(rows_cpu, meas_cpu, entry_pids, set(other), kthreads, t0, span),
@@ -201,7 +217,7 @@ def analyze_phase(D, phase, meas_cpu):
     return out
 
 
-def analyze_run_dir(D, only=()):
+def analyze_run_dir(D, only=(), from_s=0.0):
     report = json.load(open(os.path.join(D, "report.json")))
     meas_cpu = int(report.get("pin.load_cpu") or 0)
     res = {"run_dir": D, "app": report.get("app"), "repeat": report.get("repeat"), "mode": report.get("mode"),
@@ -209,7 +225,7 @@ def analyze_run_dir(D, only=()):
     for phase in phases_in(D):
         if only and phase not in only:
             continue
-        res["phases"][phase] = analyze_phase(D, phase, meas_cpu)
+        res["phases"][phase] = analyze_phase(D, phase, meas_cpu, from_s=from_s)
     return res
 
 
@@ -218,8 +234,9 @@ def main():
     ap.add_argument("run_dir")
     ap.add_argument("--phase", action="append", default=[])
     ap.add_argument("--json")
+    ap.add_argument("--from-s", type=float, default=0.0)
     a = ap.parse_args()
-    res = analyze_run_dir(a.run_dir, tuple(a.phase))
+    res = analyze_run_dir(a.run_dir, tuple(a.phase), from_s=a.from_s)
     for ph in res["phases"].values():        # the sample lists are for the pool, not for the printed record
         for e in (ph.get("entries") or {}).values():
             e.pop("_samples", None)
