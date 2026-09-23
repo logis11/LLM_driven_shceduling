@@ -410,3 +410,19 @@ def test_operation_windows_cut_rows_and_measure_duration():
     assert res["n_ok"] == 2 and res["n_failed"] == 1
     assert [r.t_in for r in res["inside"]] == [1.05, 1.10, 3.1]
     assert [r.t_in for r in res["outside"]] == [0.5, 2.01, 3.5]
+
+
+def test_one_comm_in_two_processes_is_two_components():
+    # 9.5 D67: chrome's Chrome_ChildIOT names a thread of the GPU process (thousands of wakes) and one of each utility
+    # process (one to six); pooled by comm alone, the utility threads' gaps of minutes move the component's gap mean
+    rows = [campaign.Row(t, t, t + 0.0001, 0.1, "Chrome_ChildIOT", 11, 100) for t in (1.0, 1.1, 1.2, 1.3)]
+    rows += [campaign.Row(t, t, t + 0.0001, 0.1, "Chrome_ChildIOT", 22, 200) for t in (1.0, 301.0)]
+    roles = {100: "gpu", 200: "utility"}
+    per = campaign.per_thread(rows, 600.0, roles)
+    assert sorted(per) == ["gpu/Chrome_ChildIOT", "utility/Chrome_ChildIOT"]
+    assert per["gpu/Chrome_ChildIOT"]["gap_ms"]["mean"] == pytest.approx(100.0)
+    assert per["utility/Chrome_ChildIOT"]["gap_ms"]["mean"] == pytest.approx(300_000.0)
+    # pooled by comm alone the two are one bucket, and the utility thread's single gap carries the mean away
+    assert campaign.per_thread(rows, 600.0)["Chrome_ChildIOT"]["gap_ms"]["mean"] == pytest.approx(75_075.0)
+    # a single-process tree keeps plain comm names: every thread's role is `main`
+    assert sorted(campaign.per_thread(rows, 600.0, {100: "main", 200: "main"})) == ["Chrome_ChildIOT"]

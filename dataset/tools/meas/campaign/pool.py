@@ -27,7 +27,7 @@ import sys
 from array import array
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from analyze import analyze_run, pct  # noqa: E402
+from analyze import analyze_run, component_name, pct  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from stability import stability, TOLERANCE, T975  # noqa: E402
 
@@ -263,8 +263,10 @@ def main():
                 phase_rows = op["inside"] if op else pd["rows"]
                 phase_rows, events = split_events(app, phase, phase_rows)
                 phase_span = (sum(op["durations_ms"]) / 1000 or 1e-6) if op else pd["span"]
+                roles = pd.get("roles") or {}
                 for row in phase_rows:
-                    by_tid.setdefault((component_key(app, row.comm), row.tid), []).append((row.t_in, row.run))
+                    key = component_name(roles.get(row.pid, "main"), component_key(app, row.comm))   # D67
+                    by_tid.setdefault((key, row.tid), []).append((row.t_in, row.run))
                 for (comm, tid), rs in by_tid.items():
                     c = comms.setdefault(comm, {"gaps": array("d"), "runs": array("d"), "t_in": array("d"), "wakes": 0, "threads": 0})
                     c["gaps"].extend((b[0] - a[0]) * 1000 for a, b in zip(rs, rs[1:]))

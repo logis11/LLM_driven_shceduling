@@ -273,11 +273,23 @@ def per_role(rows, roles, span_s):
             for role, c in sorted(out.items(), key=lambda kv: -kv[1]["run"])}
 
 
-def per_thread(rows, span_s):
+def component_name(role, comm):
+    """D67: a component is identified by its process role and comm together — one comm can name a thread of several
+    processes (chrome's Chrome_ChildIOT runs in the GPU process and in each utility process), and pooling their gaps
+    into one bucket mixes a thread waking thousands of times with threads waking once or twice. The role is dropped
+    from the name of a single-process tree's components, whose every thread carries role `main`."""
+    return comm if role == "main" else f"{role}/{comm}"
+
+
+def per_thread(rows, span_s, roles=None):
+    """roles (pid -> role) qualifies each component by the role of the process its thread runs in (D67). The callers
+    that already separate their rows per process — the desktop and session slices' entries — pass none and keep
+    plain comm names."""
     out = {}
     by_tid = {}
     for r in rows:
-        by_tid.setdefault((r.comm, r.tid), []).append(r)
+        key = component_name(roles.get(r.pid, "main"), r.comm) if roles else r.comm
+        by_tid.setdefault((key, r.tid), []).append(r)
     by_comm = {}
     for (comm, tid), rs in by_tid.items():
         gaps = [(b.t_in - a.t_in) * 1000 for a, b in zip(rs, rs[1:])]
@@ -345,7 +357,7 @@ def _analyze(args):
               "wake_definition": wake_def, "span_s": round(span, 2),
               "wake_check": check or None,   # the row against the switch-out state, where recorded (D39)
               "cpu_share": round(total_run_s / span, 4), "wakes_per_s": round(len(rows) / span, 2),
-              "roles": per_role(rows, roles, span), "threads": per_thread(rows, span)}
+              "roles": per_role(rows, roles, span), "threads": per_thread(rows, span, roles)}
         if phase == "idle":
             idle_rate = total_run_s / span
         xwakes = load_wakeups(os.path.join(D, wk_path), tree, args.waker) if wk_path else []
@@ -362,7 +374,7 @@ def _analyze(args):
                                "inside": {"wakes": len(ow["inside"]), "span_s": round(in_span, 2),
                                           "wakes_per_s": round(len(ow["inside"]) / in_span, 2),
                                           "cpu_share": round(sum(r.run for r in ow["inside"]) / 1000 / in_span, 4),
-                                          "threads": per_thread(ow["inside"], in_span)},
+                                          "threads": per_thread(ow["inside"], in_span, roles)},
                                "outside_wakes_per_s": round(len(ow["outside"]) / (span - in_span), 2) if span > in_span else None}
             raw["phases"][phase] = {"rows": rows, "segments": segments, "span": span, "t0": t0, "idle_rate": idle_rate, "roles": roles,
                                     "operation": ow}
