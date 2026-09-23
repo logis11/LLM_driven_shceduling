@@ -319,6 +319,6 @@ The rule: a component is identified by the role of the process its thread runs i
 
 Scope: the roles come from Chromium's `--type=` flag, so the identity moves only the multi-process trees — `chrome`, `webrtc` and `code`. The six single-process applications are unaffected, their pools included. The desktop (9.8) and session (9.9) slices separate their rows per process already and pass no roles, so their component names are unchanged.
 
-Tooling: `component_name(role, comm)` in `campaign/analyze.py`, `per_thread`'s optional `roles`, and the pooled component key in `campaign/pool.py`; test `test_one_comm_in_two_processes_is_two_components`. Method §9, 2026-09-23.
+Tooling: `component_name(role, comm)` in `campaign/analyze.py`, `per_thread`'s optional `roles`, and the pooled component key in `campaign/pool.py`; test `test_one_comm_in_two_processes_is_two_components`. `SESSION_SPREAD`'s keys carry the role with the same edit — D57's `code` entry and D59's four `webrtc` entries name components the rename moved, and an exception keyed by the old name silently stops applying to the value it was decided for (`idle libuv-worker` read as a plain failure at ±6.3 % and ±6.9 % until the key was corrected). Method §9, 2026-09-23.
 
 Values changed: `chrome`'s idle components are re-identified and every idle value now passes — `gpu/Chrome_ChildIOT` gap mean 131.9 ms (±0.9 %), against 402.9 ms (±6.1 %) pooled by comm alone. The rule is held open only by the SWELL-KW `input_run` mean, whose spread follows the input.

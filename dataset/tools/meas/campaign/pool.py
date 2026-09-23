@@ -48,9 +48,10 @@ MIN_REPEATS = 5       # kalibera-ismm13 §11 (D29; 9.6 D24)
 # tighten the estimate without narrowing the spread; carried with its half-widths over at least MIN_REPEATS repeats,
 # the tolerance not applied. (app, the value name's prefix). D59: webrtc's audio path — AudioProcessing whole, the
 # others' run means only, their wake rates being fixed or passing.
-SESSION_SPREAD = {("code", "idle libuv-worker"),
-                  ("webrtc", "play AudioProcessing "), ("webrtc", "play AudioOutputDevi run mean"),
-                  ("webrtc", "play AudioInputDevic run mean"), ("webrtc", "play FakeAudioInput run mean"),
+# D67 renamed the components these name, so the keys carry the role: the exception follows its component's identity.
+SESSION_SPREAD = {("code", "idle utility/libuv-worker"),
+                  ("webrtc", "play utility/AudioProcessing "), ("webrtc", "play renderer/AudioOutputDevi run mean"),
+                  ("webrtc", "play renderer/AudioInputDevic run mean"), ("webrtc", "play utility/FakeAudioInput run mean"),
                   ("webrtc", "play residual run mean")}
 # D64: a rare heavy run carried as its own stated event, not as a component's wake — chrome's MemoryInfra pass of 54–61 ms
 # at no fixed time (9 in 20 sessions × 600 s) against its regular runs of at most 11.5 ms; (app, phase) -> (comm, run floor
