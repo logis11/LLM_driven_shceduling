@@ -109,3 +109,19 @@ Grounds — the defect, read from the probes' own census. `census.idle.end.json`
 What this reaches. `gnome-shell`, the PipeWire stack and `systemd` were placed as the method states in all three probes, so what was read of them stands as an observation; `dbus-daemon`'s does not, its own entry having been measured off the measured CPU. Both are superseded by the rule above, the second for cause and the first because the corrected protocol puts a fifth process on the measured CPU.
 
 No value in `dataset/archetypes.yaml` changed by this entry.
+
+## D22 — the steady length and the gate's bound, from the corrected probes (2026-09-24)
+
+By 인지오's decision of 2026-09-23 on the gate's form (D20) and the placement fix (D21), applied to the three unpolled probes taken under the corrected placement — run 35839696453 repeat 36 and run 35861267312 repeat 41 and run 35863364163 repeat 44, all `gate` open on the AMD EPYC 7763, the bus in `meas.slice`, the placement check passing, 41 polls each and the carried region unpolled: `steady` is **1800 s**, and the bound of method §5 is **2 × 10⁻⁴ of the steady phase**. `priming` stays 300 s and the steady edge 420 s (D18).
+
+The length, by the rule the tolerance already fixes — the first candidate length at which every entry's predicted half-width for a five-repeat batch clears 5 %. Over the three runs' clean 10336 s each, cut 60 s past the last poll: at 600 s the half-widths are 1.5 %, 1.7 %, 4.7 % and 14.8 % for GNOME Shell, the PipeWire stack, `systemd` and `dbus-daemon`; at 900 s, 1.4 %, 0.8 %, 2.7 % and 7.5 %; at 1200 s, 0.9 %, 1.0 %, 3.5 % and 8.9 %; at 1800 s, 0.7 %, 0.3 %, 2.4 % and 4.3 %. `dbus-daemon` binds. The 1200 s row reading worse than the 900 s one is the estimator, not the subject: 24 and 33 windows over three runs determine a standard deviation loosely.
+
+Why not longer. `dbus-daemon`'s spread between runs is 2.3 % and no phase length reduces it — the other three are 0.1–0.7 % — so 2700 s buys only 4.3 % → 3.4 % for a quarter more job time. The margin at 1800 s is thin, and if the batch's own spread is wider the stability rule adds repeats, which is what it is for.
+
+The bound, at 2 × 10⁻⁴. The six probes taken so far put foreign user-space work on the measured CPU at 0.0013–0.0057 % of the phase — under the corrected placement 0.0027 %, 0.0057 % and 0.0015 % — so the bound is about three and a half times the largest observed and never rejects a repeat for the structural forks D20 describes. Read as contamination rather than as headroom: the four entries together take 0.031 % of the measured CPU (repeat 44: GNOME Shell 0.0214 %, `systemd` 0.0044 %, `dbus-daemon` 0.0034 %, the PipeWire stack 0.0017 %), so the CPU is idle for all but a thousandth of the phase and what matters is whether an entry's wake meets foreign work on it. At the bound, over the entries' 1.3 wakes/s together, the expected number of such meetings in an 1800 s phase is about 0.3 — under one. Every repeat records its own share and its comms, so the bound can be re-read over the pool without re-measuring.
+
+What the corrected placement changed, against the superseded probes: the three entries placed correctly all along are unmoved — GNOME Shell 0.580 wakes/s against 0.580, the PipeWire stack 0.411 against 0.411, `systemd` 0.177 against 0.181 — while `dbus-daemon` reads 0.135 against 0.115, its system bus 0.130 against 0.113. That entry, and only that entry, had been measured off the measured CPU.
+
+Read for the fold-in: the session bus wakes about once in 1800 s and GNOME Shell's `gnome-s:disk$0` less, so under method §5's 95 % coverage cut both fall into their entry's residual rather than carrying tables of their own.
+
+No value in `dataset/archetypes.yaml` changed by this entry.
