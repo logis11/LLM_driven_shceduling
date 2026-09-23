@@ -1178,6 +1178,70 @@ archetypes:
       1 246–1 575 wakes at 0.40–0.74 ms in repeats 3, 4 and 5 — for a cause not identified (D23). It describes a
       cached file set (D8); the cold figures are in the campaign results.
 
+  game-download:
+    category_source: meas
+    pattern:
+      constructor: batch-loop      # 9.7 D29
+      program:
+        - loop:                    # until total_work of CPU is spent
+            - RUN: steamcmd_run
+            - SLEEP: steamcmd_block
+        - EXIT: {}
+    params:                        # D29: the program's runs, pooled over its threads, and the block after each
+      steamcmd_run:
+        {dist: quantiles, p: [6, 6, 6, 12, 23, 29, 39, 59, 424, 4061], sampling: per-iteration, source: "meas-ci:background:2026-09-19"}
+      steamcmd_block:
+        {dist: quantiles, p: [0, 0, 0, 0, 0, 0, 0, 0, 246, 834], sampling: per-iteration, source: "meas-ci:background:2026-09-19"}
+    lifetime: finite
+    binding_params: [total_work]
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      run: "background:2026-09-19; repeats [1-20, 22, 24-31, 34]"
+      stats: ["run between voluntary blocks mean 163.4 us (+-2.42 %), block per run mean 9.43 us (+-0.98 us, inside the 1 us floor)",
+              "share of runs followed by a block 0.019-0.051",
+              "CPU over the job 0.907-0.958: 697-761 s of CPU in 760-822 s",
+              "83-84 threads, one component (D28)",
+              "reported, not carried: network wait 223.1 us (+-4.51 %), bytes per wake 3 973 B (+-3.84 %), run per wake 163.4 us",
+              "10.59-10.68 GB received at a byte-weighted median of 115.3-115.8 Mbps payload",
+              "tracing check (D15 b): untraced against traced, CPU total 0.973 and duration 0.992 — not resolved"]
+      scope: >-
+        One observation (phase decision 2; 9.7 D2, D4, D10–D12): SteamCMD (build 1788292693) logged in anonymously,
+        installing the Team Fortress 2 Dedicated Server depot (app 232250, build 24245063) fresh — 10.4 GB
+        downloaded, 14.9 GB installed — over a link shaped at 121.0 Mbps, the byte-weighted median of Valve's
+        per-country download rates (D11), with an `htb` root and an `fq_codel` leaf at the kernel's defaults (D25).
+        Pinned to one CPU of a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure),
+        the rest of the machine idealised; the runner's agent processes share the measured CPU outside the process
+        tree; no human and no desktop session. `perf sched record` and a taskstats listener on the measured CPU,
+        with `perf trace` on its socket calls. 30 same-machine repeats under the machine gate; the stability rule
+        holds (D19, D29). Four repeats are left out: 21 ran unshaped (D27), 23 was wrongly launched (D27), 32's and
+        33's check phases failed (D32, D33). The link is design, not a population-representative link: `fq_codel`
+        holds queue delay at its 5 ms target, so the per-wake pattern follows that setpoint, and no source here
+        establishes that consumer equipment manages its queue this way; the link's delay is the runner's own path
+        to Valve's servers, neither controlled nor recorded (D10, D25). Those paths differ: the repeats split by
+        the Steam site the runner drew — 14 west (`sea1`, `lax1`, `lax2`), 13 east (`iad1`, `atl3`), 3 central
+        (`ord1`) — and the region holds 64 % of the variance of network wait (west 202.2 us, central 220.8, east
+        246.0) and 45 % of the block per run (7.73, 9.36, 11.28 us). Values are this software on this machine, not
+        desktop truth (9.5 D10).
+    modeling_notes: >-
+      The class is what the measurement shows (D1, D4): a chunked download that keeps its CPU 91-96 % busy at a
+      consumer rate, fetching ~1 MB chunks, decrypting, decompressing and writing them. The task is `cpu-batch`'s
+      batch loop (D29) — a run drawn from SteamCMD's runs between voluntary blocks, pooled over its threads, then
+      the block that followed such a run — until `total_work` of CPU is spent; `total_work` is scenario design and
+      binds in the timeline (D13 (v)). The block is zero after 95-98 % of runs: another thread of the program runs
+      on, and the loop emits those runs as one RUN. One task, one component (D28): the two content-update threads'
+      long runs (about 71 % of the CPU in runs of ~14 ms) and the five HTTP threads' short ones (36 % of the wakes,
+      6 % of the CPU) are flattened into one pooled table, their shape kept only in the quantiles, and the task
+      alternates them in one sequence (9.6 D22). The `steam` binding carries SteamCMD's numbers by stated
+      approximation (D4): the desktop client was not observed — it needs a logged-in account, and no Steam account
+      is used — so what it does that SteamCMD does not (its Chromium-based interface process, a game's depot rather
+      than a server's) is outside these values; SteamCMD's own connection limit is undocumented. The archetype
+      describes a fresh install (D12); a timeline that is to show a background update needs its own measurement,
+      since no earlier public build of the app could be staged anonymously (D20). Link-model sensitivity (D25):
+      against the committed token bucket the same download's network wait is 43 % higher, its bytes per wake 35 %
+      higher and its run per wake 17 % higher, a far larger effect than 9.5 D23's stimulus sensitivity (+1 % to
+      +12 %), so the queue discipline moves this archetype more than the choice of recording moved those.
+
   # ---- structural-special family — harvested from LAVD --------------------
 
   game-task-chain:
@@ -1320,9 +1384,8 @@ archetypes:
       sample — stated) -> net_wait = chunk_cpu x (1/0.057 - 1) ~ 16.7 ms.
       Structural claim only — the runner link is datacenter-class; the duty
       ratio, not the throughput, is the grounded quantity. The chunk loop
-      shape is ours. Bound by the three `thunderbird` send tasks (c1-mail, c7-mail,
-      c3-workday), and by the c2-p2a `steam` download until `game-download` folds
-      in, until 9.5's `send` re-observation folds into `mail-client` and
+      shape is ours. Bound only by the three `thunderbird` send tasks (c1-mail,
+      c7-mail, c3-workday) until 9.5's `send` re-observation folds into `mail-client` and
       9.10 places the send as an operation of the `mail-client` task; it leaves
       before 9.13's rebuild (9.7 D30).
 
