@@ -52,11 +52,10 @@ priming_for()      { echo 300; }
 # The shield rises and the monitor blanks 304 s after the login (idle-delay 300 s and the 10 s fade, polls 10 s
 # apart), and GNOME Shell's wake rate settles at the same moment; 420 s leaves a margin past it.
 steady_offset_for(){ echo 420; }
-# Withdrawn (D19): the 900 s of D18 rested on window spreads of a signal the probe's own 10 s polls dominated —
-# at idle the entries wake 0.1-0.9 /s in an unpolled dry run against 15.06, 4.25, 3.67 and 2.17 /s in the probe —
-# and a periodic instrument makes a spread read smaller than the subject's. Empty until the unpolled probe sets it,
-# so a full job stops at the no-phase-lengths gate.
-steady_for()       { echo; }
+# 1800 s (D22), from the three unpolled probes of 2026-09-24 under the corrected placement (repeats 36, 41, 44):
+# the first candidate length at which every entry's predicted half-width for a five-repeat batch clears the 5 %
+# tolerance — gnome-shell 0.7 %, the PipeWire stack 0.3 %, systemd 2.4 %, dbus-daemon 4.3 %, the binding entry.
+steady_for()       { echo 1800; }
 
 if [ "$MODE" = dry ]; then
   PRIMING=60; STEADY_OFFSET=420; STEADY=60        # 420 s: idle-delay 300 s, the 10 s fade, the blank, a margin

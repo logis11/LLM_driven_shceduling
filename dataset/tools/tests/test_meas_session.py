@@ -168,14 +168,15 @@ def test_the_pool_names_probe_and_foreign_repeats_and_pools_the_rest(tmp_path):
     runs, gated, other, not_repeats = pool.find_runs(str(root), "EPYC 7763")
     # a dry job runs shortened phases; with the gate open on any model it must not pool as a repeat either
     assert sorted((p["repeat"], p["mode"]) for p in not_repeats) == [(7, "probe"), (9, "dry")]
-    # D20: no bound stated, nothing pooled — the pool refuses rather than pooling on an unstated gate
-    assert pool.FOREIGN_CPU_SHARE_BOUND is None
-    assert pool.pool_app("session", runs["session"])["repeats"] == []
-    pool.FOREIGN_CPU_SHARE_BOUND = 1e-6          # the fixture's foreign repeats take 0.3 ms of a 100 s phase
+    # D22: the bound method §5 states. The fixture's foreign repeats take 0.3 ms of a 100 s phase, three hundredths
+    # of it, so the bound admits them — a repeat is left out for work that ran, not for the structural forks
+    assert pool.FOREIGN_CPU_SHARE_BOUND == 2e-4
+    assert pool.pool_app("session", runs["session"])["repeats"] == [1, 2, 3, 4, 5, 6, 8]
+    pool.FOREIGN_CPU_SHARE_BOUND = 1e-6          # below the fixture's share: now the two are left out
     try:
         entry = pool.pool_app("session", runs["session"])
     finally:
-        pool.FOREIGN_CPU_SHARE_BOUND = None
+        pool.FOREIGN_CPU_SHARE_BOUND = 2e-4
     assert entry["repeats"] == [1, 2, 3, 4, 5]
     # D15: a pinned unit's other process on the measured CPU gates the repeat as user space outside the entries does
     assert [x["repeat"] for x in entry["foreign_user"]] == [6, 8]
@@ -278,9 +279,9 @@ def test_run_sh_carries_the_decisions(repo_root):
     lens = {k: int(re.search(rf"{k}\(\)\s*{{ echo (\d+); }}", src).group(1))
             for k in ("priming_for", "steady_offset_for")}
     assert lens["steady_offset_for"] > 310 and lens["priming_for"] >= 120, lens
-    # D19: the steady length is withdrawn — the polls dominated the signal its spreads were read from — so a full
-    # job stops at the no-phase-lengths gate until the unpolled probe sets it
-    assert re.search(r"steady_for\(\)\s*{ echo; }", src)
+    # D22: the steady length the unpolled probes under the corrected placement set, and the gate that still holds
+    # a job with no length at all
+    assert int(re.search(r"steady_for\(\)\s*{ echo (\d+); }", src).group(1)) == 1800
     assert re.search(r'if \[ -z "\$PRIMING" \] \|\| \[ -z "\$STEADY_OFFSET" \] \|\| \[ -z "\$STEADY" \]', src)
     # D21: the system bus restarted into meas.slice before any login, and the placement read from the processes
     # the bus is restarted into meas.slice before the desktop is installed, and every service holding a name on

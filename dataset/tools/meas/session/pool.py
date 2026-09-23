@@ -44,10 +44,12 @@ ABS_FLOOR_MS = 0.001        # the trace's resolution, as campaign/pool.py uses
 
 # D20: the gate is a bound on how much of the measured CPU foreign user-space work took, not an absolute. Both
 # managers' `init.scope` are on the measured CPU because both managers are entries, so every process the system
-# starts is forked there and no placement can move it: the 2026-09-23 probes found no window of 600 s or more
-# without some. The bound is a share of the steady phase's wall time, set from the unpolled probes and written
-# into method §5 before the first batch. `None` until then: no repeat is pooled without it.
-FOREIGN_CPU_SHARE_BOUND = None
+# starts is forked there and no placement can move it: no window of 600 s or more in any probe is free of it.
+# Set at 2e-4 of the steady phase by D22: about three and a half times the largest of the six shares observed
+# (0.0013-0.0057 %), so the structural forks never reject a repeat, and low enough that in an 1800 s phase, over
+# the entries' ~1.3 wakes/s together, the expected number of their wakes that could meet foreign work on the CPU
+# is about 0.3 — under one. Every repeat records its own share, so the bound can be re-read over the pool.
+FOREIGN_CPU_SHARE_BOUND = 2e-4
 MIN_REPEATS = 5             # method §6 item 3
 
 
