@@ -1,51 +1,45 @@
-# Handoff — task 9.5 Interactive and typing (2026-09-22, 12:45 UTC)
+# Handoff — task 9.5 Interactive and typing (2026-09-24, 11:20 UTC) — done
 
-Same-machine repeats sub-item. Branch `jioh/dataset-rebuild`; everything below is committed and pushed. Decision record `_dev/research/jioh/task-9.5-interactive-typing/changelog.md` (now D1–D66), method `campaign/method.md` (§9 carries every amendment), workflow `_dev/research/jioh/measurement-campaign-workflow.md`.
+9.5 is closed. Nine measured per-application archetypes, every value from a same-machine campaign on one AMD EPYC 7763 under the machine gate. Decision record `_dev/research/jioh/task-9.5-interactive-typing/changelog.md` (D1–D69), method `campaign/method.md` (§9 carries every amendment), workflow `_dev/research/jioh/measurement-campaign-workflow.md`. Branch `jioh/dataset-rebuild`; everything below is committed and pushed.
 
-## Where the nine archetypes stand
+## Where the nine archetypes ended
 
-| application | archetype | repeats | rule | pool arguments (`loop/pool_runs.py`) |
-|---|---|---|---|---|
-| `soffice`, `gimp`, `kdenlive`, `mpv-video`, `mpv-audio`, `thunderbird-send` | six archetypes | — | **hold** | filed in `campaign/results-same-machine/` |
-| `webrtc` | `video-call` | 35 | **holds** (D59) | `playback/webrtc --since 245` |
-| `code` | `code-editor` | 25 (windows 1–4, 6–26; window 5 left out, D63) | **holds** (2026-09-22) | `interactive/code --since 376 --exclude 5 --exclude-why "D63: after the D61 prelude the caret stood on line 16, not at the file's end (screenshot after-altprelude), so the 136M phase typed mid-file"` |
-| `chrome` | `web-browser` | 18 under D65 (windows 1–18) | not yet, projection 42 | `interactive/chrome --since 438 --exclude 16@35712250969 --exclude-why "D66: window 16 measured twice — one push started runs #474 and #475, #475's copy was gated and the watcher relaunched it as #476 while #474's copy measured; the original launch's copy (#474) is kept" -- --exclude-roles renderer` |
+| archetype | application | repeats | rule |
+|---|---|---|---|
+| `office-writer` | `soffice` | 14 | holds |
+| `mail-client` | `thunderbird-send` | 43 | holds; the operation's 39 values reported at the recording's window limit (D46) |
+| `image-editor` | `gimp` | 5 | holds |
+| `video-editor` | `kdenlive` | 20 | holds |
+| `video-player` | `mpv-video` | 24 | holds |
+| `audio-player` | `mpv-audio` | 31 | holds |
+| `web-browser` | `chrome` | 38 | holds; 30 values reported at the window limit, the widest being the SWELL-KW `input_run` mean, 1.701 ms ±8.33 % (D32, D68) |
+| `code-editor` | `code` | 41 | holds; three values carried under D57 (its `utility/libuv-worker` component) |
+| `video-call` | `webrtc` | 45 | holds; seven carried under D57 (the audio path, D59) |
 
-`chrome`'s three failing values at 18: idle `Chrome_ChildIOT` gap mean ±7.7 % (42 needed; its gap sits at 397–459 ms in 14 repeats, ~250 in windows 14–15 and 334 in window 8 — the per-thread pooling of a four-thread component, kept by 인지오's decision), SWELL-KW `input_run` ±6.9 % (34), 136M `input_run` ±5.7 % (24). Every other value passes, the `MemoryInfra` residual included (D64).
+Pools and rendered results: `campaign/results-same-machine/` + `results-same-machine.md` (the six), `campaign/results-re-measured/` + `results-re-measured.md` (the three). Rows in `_dev/research/jioh/measurement-campaign-record.md`.
 
-## Resume point
+## The last four decisions
 
-**In flight: `chrome` window 19, run #481 (35728483709).** Nothing else. `code` and `webrtc` add no repeats.
+- **D66** — a window measured twice by a duplicated run; the original launch's copy is kept (`pool_runs.py --exclude K@RUNID`).
+- **D67** — a component is identified by its process role and comm together. `chrome`'s `Chrome_ChildIOT` names one thread in the GPU process (4,400–4,700 wakes per 600 s idle phase) and one in each of three utility processes (0–75); pooled by comm alone, the rare threads' gaps of minutes moved the component's gap mean 40 % and the rule would not close. Split by role it is 131.9 ms ±0.9 %. A single-process tree keeps plain comm names. `SESSION_SPREAD`'s keys carry the role with it — an exception keyed by the old name stops applying silently.
+- **D68** — the recording's window limit entered for `chrome` (38) and `code` (44), and `mark_limited` reads the highest window the phase reached rather than how many repeats it holds: a window left out under D47, or one whose recording holds no event (`word-r43`), leaves the count short while the recording is just as exhausted.
+- **D69** — the application build is pinned where the vendor serves a version of its own (`code` at 1.138.0, gated like the CPU model), recorded per repeat and stated where it is not (`chrome`, `webrtc`). VS Code 1.139.0 landed mid-campaign and runs a `copilot-runtime` process at 49.7 wakes/s in the idle phase; `chrome` holds 152.0.7977.82 in 29 repeats and 153.0.8010.52 in 9, the two builds agreeing within 0.18–1.09 standard deviations on every carried value.
 
-1. `python3 dataset/tools/meas/loop/status.py interactive --since 480 --app chrome:481` — landed / in flight / gated.
-2. On its landing: pool with the arguments above and run the per-landing checks below; if valid and the rule does not hold, `launch.py added interactive/chrome:20` (check `.github/campaign.json` is `"mode": "full"` first), then watch with `watch.py interactive/chrome --since <that run> --app chrome:<that run> --poll 60`.
-3. When `chrome`'s rule holds: stop launching; then the D55 end work below.
+## Released
 
-## Per-landing checks (`chrome`, beyond `pool_runs.py`'s validity lines)
+Both outward-facing, on 인지오's 2026-09-24 approval, screenshots omitted:
 
-Each repeat's artifact is `~/.cache/meas-loop/pool/interactive-chrome-from438/<run id>/meas-interactive-chrome-r<k>-full/`.
+- `meas-ci-2026-09-18` — the six (`meas-interactive-six.zip` 1.37 GB, `meas-playback-six.zip` 314 MB).
+- `meas-ci-2026-09-20` — the three (`meas-interactive-chrome.zip` 1.47 GB, `meas-interactive-code-windows-1-22.zip` 1.39 GB, `…-23-42.zip` 1.26 GB, `meas-playback-webrtc.zip` 1.31 GB). `code` is split because a release asset is capped at 2 GiB.
 
-- `report.json`: `stream_kinds` is `key` (D65); `altprelude.rc` is `0`; `app.affinity` is `8` with `app.affinity_pid` set.
-- `after-driven.png`: the text box (dark left border at x 19, y 170–340) holds the stream's text — dark pixels inside x 25–835, y 168–340.
-- `after-altprelude.png`: the box at the page's top (border present) and empty (no dark pixels inside) — D60, D62.
-- Idle guard (D58): `python3 dataset/tools/meas/campaign/slices.py <artifact> --phase idle --exclude-roles renderer` — every 10 s slice under ~10 ms/s (clean repeats peak 2.2–8.7; the launch run shows ~95).
-- Only one copy of the window landed (`ls -d …/*/meas-interactive-chrome-r<k>-full | wc -l` is 1); a second copy is D66's case — keep the original launch's, `--exclude K@<run id>` the other.
+## Folded in
 
-## Decisions of 2026-09-21/22 (all applied)
+All nine entries in `dataset/archetypes.yaml` regenerated from the pooled records (`fold_in.py` + `splice.py`), replacing the five-repeat values of the 2026-09-16 campaign. `mail-client` folds from `thunderbird-send`, the send re-observation that replaced it whole (9.7 D3; D31, D36, D49). `web-browser` carries D64's heavy event as a `heavy_events` block — `MemoryInfra`'s pass, its run quantiles over 8 observations, the count and the 22,800 s counted over, and no interval, none having been measured; the linter takes the block and rejects one that states a gap.
 
-- **D59** — `webrtc`'s audio path carried with its half-widths under D57 (within one call ±0.7–3.0 %, across repeats ±26–41 %); rule holds at 35; all 35 repeats reviewed.
-- **D60 → D62** — `chrome`'s 136M phase starts with the page at the top and the text box focused and empty.
-- **D61, D63** — `code`'s 136M phase starts from the committed `index.ts`; window 5 left out (caret mid-file); the prelude's keys hardened.
-- **D64** — `MemoryInfra`'s heavy pass (runs ≥ 30 ms in `chrome`'s idle phase; 54–61 ms, about one per 30 minutes) carried as its own stated event (`HEAVY_EVENTS`, `split_events` in `campaign/pool.py`; the pooled record's `heavy_event`), so the residual converges. **Still to write: its place in `fold_in.py`.**
-- **D65** — `chrome`'s SWELL-KW phase replays keys only (`KINDS="key"`), the stream's clicks and drags having moved focus or selected page text; browsing's scrolling and clicking a stated limitation. `chrome` restarted from window 1 at run #438.
-- **D66** — window 16 measured twice by a duplicated run (one push started #474 and #475); the original launch's copy kept. `watch.py` no longer relaunches a gated window another run from five before holds (`holder`); `pool_runs.py --exclude K@RUNID`.
-- `Chrome_ChildIOT`'s gap stays per-thread (option (a)); `code`'s window-10 compositor rate stays a watch item (one session of 25; not repeated since).
-- `run.sh` records `app.affinity` from the window owner's process.
+State of the gates at close: `make -C dataset dataset lint check PY=python3.12` stops on five errors, all of them the `-single` demand window (`c2-p3a`, `c2-p3b`, `c3-creation`, `c3-evening`, `c3-workday`), which is 9.14's. `make -C dataset test` passes 213; its one intermittent failure is the 9.9 session slice's fold-in test, which asserts that slice's entries match its pooled record byte for byte while another session has that record open.
 
-## At the end (D55)
+## What 9.5 hands on
 
-The three re-measured applications are filed together: each pool's `pooled.json` and `results.md` into the slice's `campaign/` folder, rows into `measurement-campaign-record.md`; then the releases (2026-09-18/-19 for the six, 2026-09-20 for the three — outward-facing, ask 인지오 first); then one fold-in (`campaign/fold_in.py`, with D64's event written in first) and `make -C dataset dataset lint test check PY=python3.12` (five `-single` files fail the demand-window lint until 9.14 — state it). `mail-client`'s notes carry the runner's attachment figures (41,555,063 B and 56,946,735 B at the peer). `dataset/tools/meas/desktop/run.sh` line 162 still reads `app.affinity` at launch — 9.8's file.
+Already written into the TODO items that own them: 9.10 (the timeline questions, SWELL-KW's window-activation data as a source for task sets and focus windows, whether a timeline models an application's launch work), 9.14 (the demand-window and prior-table sensitivity checks; whether a scheduling outcome moves with the values carried under D57), 9.15 (the docs naming the retired entries, the library-level scale limitation), 9.16 (the venue mix per timeline; reproduction from the two releases).
 
-## Running the loop
-
-In-session only, one session at a time (on 2026-09-21 a lost terminal left the original session running beside its restore until one stood down). Relaunches: `watch.py` handles gated jobs itself; a first batch's gated windows go back in one push (`launch.py retried …`); a job that FAILED is relaunched by hand. Push doc edits only while no watcher runs (a watcher's relaunch push and a doc push raced once). Push with `git pull --rebase --autostash` — other sessions keep unstaged edits in the shared tree. Each `chrome` repeat is ~49 min on the runner, ~55 min per cycle with launch and gated draws.
+Two loose ends belonging to other slices: `dataset/tools/meas/desktop/run.sh` line 162 still reads `app.affinity` at launch (9.8's file), and `.github/workflows/meas-gui.yml` retires when `system-daemon`'s own measurement replaces its values (9.9's).

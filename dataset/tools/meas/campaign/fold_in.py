@@ -52,6 +52,17 @@ VENUE_BOUND = {
     'video-player': "Venue bound (D24, S8): mpv's default --video-sync=audio paces frames on the audio clock, not the display (mpv 0.37 manual), so the missing refresh does not change its cadence; the x11 output copies frames on the CPU, work a GPU output would move.",
 }
 
+# D69: the build is pinned where the vendor serves a version of its own, so an archetype describes that build and not
+# whatever the repository serves later; where the build moved under the campaign, what it leaves out is stated.
+BUILD_BOUND = {
+    'code-editor': "Build bound (D69): the campaign is pinned to the build named above, which ships no assistant runtime. "
+                   "VS Code 1.139.0, released during the campaign, runs a copilot-runtime process that woke 49.7 times a "
+                   "second in the idle phase against the 115 a second of this build's whole tree — a different workload, "
+                   "and whether a code editor should describe an assistant-bearing one is the archetype's own question, "
+                   "not this campaign's.",
+}
+
+
 APPROX_BY = {"video-player": ["gamescope"], "audio-player": ["spotify"], "video-call": ["zoom"]}
 
 
@@ -202,6 +213,8 @@ def entry(aid, spec, d):
     else:
         scope += "No stimulus; the play phase's thread cadence is the whole behaviour. "
     scope += "Values are this software on this machine, not desktop truth (D10)."
+    if aid in BUILD_BOUND:   # D69: what the pinned or recorded build leaves out of the archetype
+        scope += " " + BUILD_BOUND[aid]
     if aid in VENUE_BOUND:  # D24: the direction of the venue's error, from the toolkits' own sources (search log S8)
         scope += " " + VENUE_BOUND[aid]
     out += ["        " + scope]
@@ -209,6 +222,9 @@ def entry(aid, spec, d):
     notes = (f"Per-application archetype (D2): one task carries the whole process tree merged (D14)")
     if run == "chrome":
         notes += ", renderer processes excluded as renderer-hidden's and renderer-visible's (bound separately)"
+    notes += (". A component is its process's role and the thread comm together (D67), so one comm naming a thread of "
+              "several processes — chrome's Chrome_ChildIOT runs in the GPU process and in each utility process — is "
+              "several components; a single-process tree's components carry the comm alone")
     notes += (". Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the "
               "task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled "
               "residual stands for the comms below the coverage cut.")
