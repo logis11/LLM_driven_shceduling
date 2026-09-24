@@ -125,14 +125,14 @@ Full tables: `task-9.8-browser-comms/campaign/results/results.md`, `campaign/res
 
 ## 9.9 — four entries, one campaign
 
-One subject, the Ubuntu 24.04 desktop session, carries the four entries that replace `system-daemon`, so every job observes all four and the repeats and jobs are shared. 24 repeats — 47–49, 51, 58, 60–63, 68, 69, 71–77, 79, 83, 85–88 — every one on the AMD EPYC 7763, kernel `6.17.0-1022-azure` in all of them, none excluded, one set of package versions in every repeat (`gnome-shell` 46.0-0ubuntu6~24.04.14, `pipewire` and `pipewire-pulse` 1.0.5-1ubuntu3.3, `wireplumber` 0.4.17-1ubuntu4.1, `systemd` 255.4-1ubuntu8.17, `dbus-daemon` 1.14.10-4ubuntu4.1). Each entry reads the `steady` phase, 1800 s (D22): the session idle past `idle-delay`, the shield up and locked, the monitor blanked (method §3). No display server in any repeat's census. `values` counts what the rule covers; `widest` is the largest half-width among them.
+One subject, the Ubuntu 24.04 desktop session, carries the four entries that replace `system-daemon` — `compositor-shell` (GNOME Shell), `audio-server` (the PipeWire stack), `service-manager` (`systemd`) and `message-bus` (`dbus-daemon`), folded in at D26 — so every job observes all four and the repeats and jobs are shared. 24 repeats — 47–49, 51, 58, 60–63, 68, 69, 71–77, 79, 83, 85–88 — every one on the AMD EPYC 7763, kernel `6.17.0-1022-azure` in all of them, none excluded, one set of package versions in every repeat (`gnome-shell` 46.0-0ubuntu6~24.04.14, `pipewire` and `pipewire-pulse` 1.0.5-1ubuntu3.3, `wireplumber` 0.4.17-1ubuntu4.1, `systemd` 255.4-1ubuntu8.17, `dbus-daemon` 1.14.10-4ubuntu4.1). Each entry reads the `steady` phase, 1800 s (D22): the session idle past `idle-delay`, the shield up and locked, the monitor blanked (method §3). No display server in any repeat's census. `values` counts what the rule covers; `widest` is the largest half-width among them.
 
 | entry | components | repeats | values | pass | widest | stopped by | jobs (gated) | recorded input covered |
 |---|---|---|---|---|---|---|---|---|
-| GNOME Shell | `JS Helper`, `gmain`, `gnome-shell` | 24 | 9 | 9 | `gnome-shell` run mean ±2.81 % | the rule | 42 (18), shared | none |
-| PipeWire stack | `wireplumber/gmain` | 24 | 3 | 3 | run mean ±3.71 % | the rule | shared | none |
-| `systemd` | `pid1/systemd` | 24 | 3 | 3 | run mean ±3.55 % | the rule | shared | none |
-| `dbus-daemon` | `system-bus/dbus-daemon` | 24 | 3 | 3 | wakes/s ±3.02 % | the rule | shared | none |
+| `compositor-shell` | `JS Helper`, `gmain`, `gnome-shell` | 24 | 9 | 9 | `gnome-shell` run mean ±2.81 % | the rule | 42 (18), shared | none |
+| `audio-server` | `wireplumber/gmain` | 24 | 3 | 3 | run mean ±3.71 % | the rule | shared | none |
+| `service-manager` | `pid1/systemd` | 24 | 3 | 3 | run mean ±3.55 % | the rule | shared | none |
+| `message-bus` | `system-bus/dbus-daemon` | 24 | 3 | 3 | wakes/s ±3.02 % | the rule | shared | none |
 
 | component | wakes/s | gap mean | run mean | widest of the three |
 |---|---|---|---|---|

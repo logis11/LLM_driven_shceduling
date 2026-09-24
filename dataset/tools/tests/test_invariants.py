@@ -40,7 +40,7 @@ def test_keyed_isolation_unrelated_task(fixture_path, library, tmp_path):
     base_path = fixture_path("fx-mixed.timeline.yaml")
     base, _ = compile_fixture(base_path, library, "single")
     extended_path = rewrite(tmp_path, base_path, lambda d: d["tasks"].append(
-        {"id": "extra", "name": "sleepd", "archetype": "system-daemon",
+        {"id": "extra", "name": "sleepd", "archetype": "service-manager",
          "arrive": "0s", "depart": "60s"}))
     extended, _ = compile_fixture(extended_path, library, "single")
 

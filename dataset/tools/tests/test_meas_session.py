@@ -2,8 +2,9 @@
 
 import json
 import re
+import sys
 
-from meas.session import analyze, census, pool, size_steady
+from meas.session import analyze, census, fold_in, pool, size_steady
 
 UID = 1002
 
@@ -360,3 +361,20 @@ def test_the_loop_knows_the_session_family(repo_root):
     assert "campaign-session.json" in _src(repo_root, "loop", "common.py")
     wf = (repo_root / ".github" / "workflows" / "meas-session.yml").read_text()
     assert "dataset/tools/meas/session/run.sh" in wf and "meas-session-${{ matrix.app }}" in wf
+
+
+def test_the_fold_in_regenerates_the_four_entries_from_the_pooled_record(repo_root, tmp_path):
+    # D26: the entries in archetypes.yaml are fold_in.py's output on the committed pooled record, byte for byte
+    pooled = repo_root / "_dev" / "research" / "jioh" / "task-9.9-daemons-session" / "campaign" / "results" / "pooled.json"
+    out = tmp_path / "fold.yaml"
+    argv, sys.argv = sys.argv, ["fold_in.py", str(pooled), str(out)]
+    try:
+        fold_in.main()
+    finally:
+        sys.argv = argv
+    fragment = out.read_text().rstrip("\n")
+    library = (repo_root / "dataset" / "archetypes.yaml").read_text()
+    assert fragment in library
+    for entry in fold_in.IDS.values():
+        assert f"\n  {entry}:\n" in fragment
+    assert "system-daemon" not in library

@@ -8,14 +8,13 @@ segments:
   - {from: 0s, to: 60s, mode: idle, attributes: {background_wanted: true}, scenario: [S18]}
 
 tasks:
-  - {id: shell, name: gnome-shell, archetype: system-daemon,
+  - {id: shell, name: gnome-shell, archetype: compositor-shell,
      arrive: 0s, depart: 60s}
-  - {id: xorg, name: Xorg, archetype: system-daemon, arrive: 0s, depart: 60s}
-  - {id: audio-srv, name: pipewire, archetype: system-daemon,
+  - {id: audio-srv, name: pipewire, archetype: audio-server,
      arrive: 0s, depart: 60s}
-  - {id: init, name: systemd, archetype: system-daemon,
+  - {id: init, name: systemd, archetype: service-manager,
      arrive: 0s, depart: 60s}
-  - {id: bus, name: dbus-daemon, archetype: system-daemon,
+  - {id: bus, name: dbus-daemon, archetype: message-bus,
      arrive: 0s, depart: 60s}
 
 focus: []

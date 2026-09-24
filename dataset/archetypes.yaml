@@ -40,7 +40,10 @@
 #     `components` (timer wakes per thread comm, D16), `focus_components`
 #     (the driven cadence inside focus windows) and `stimulus` (a replayed
 #     input stream under dataset/stimulus/, D18); the compiler merges them into
-#     one explicit event stream per task (D9)
+#     one explicit event stream per task (D9). The measured session and system
+#     processes (9.9) carry `components` alone, one per process instance and
+#     thread comm (`<instance>/<comm>`) where one task holds several processes
+#     of a program
 #   - all source ids resolve against dataset/sources.yaml; locators validate
 #     against each entry's locator_pattern
 
@@ -1346,8 +1349,7 @@ archetypes:
       call is a request write and a blocking reply read); a linear relay
       cannot return to a node, so the relay passes the wake on to the next
       member instead — the same linearization applied to the whole graph,
-      ours. Its RUN scales with the chain in -single mode (design). The
-      earlier wineserver -> system-daemon timeline binding is withdrawn.
+      ours. Its RUN scales with the chain in -single mode (design).
 
   # ---- meas family — no literature taxonomy exists ------------------------
 
@@ -1389,34 +1391,122 @@ archetypes:
       9.10 places the send as an operation of the `mail-client` task; it leaves
       before 9.13's rebuild (9.7 D30).
 
-  system-daemon:
+  # ---- session and system processes — 9.9 campaign (meas-ci:session:2026-09-24) ----
+
+  compositor-shell:
     category_source: meas
     pattern:
       program:
-        - loop:
-            - SLEEP: idle_gap
-            - RUN: wake_burst
+        - loop:                    # measured timer components merged at compile time (9.5 D9, D16)
+            - TIMER: tick
+            - RUN: event
     params:
-      idle_gap:
-        {dist: lognormal, median_us: 11240000, sigma_log: 1.9,
-         sampling: per-iteration, source: "meas-ci:gui:2"}
-      wake_burst:
-        {dist: lognormal, median_us: 155, sigma_log: 0.809,
-         sampling: per-iteration, source: "meas-ci:gui:2"}
+      components:
+        - comm: "gnome-shell/JS Helper"
+          threads: 4
+          wakes_per_s: 0.3025
+          gap: {dist: quantiles, p: [11, 13, 17, 50, 253, 8132, 59998569, 59999547, 60000938, 63998159], sampling: per-iteration, source: "meas-ci:session:2026-09-24"}
+          run: {dist: quantiles, p: [4, 4, 5, 6, 7, 10, 32, 77, 93, 112], sampling: per-iteration, source: "meas-ci:session:2026-09-24"}
+        - comm: "gnome-shell/gmain"
+          threads: 1
+          wakes_per_s: 0.2499
+          gap: {dist: quantiles, p: [3998078, 3999098, 3999122, 4000092, 4000106, 4000120, 4000139, 4000153, 4002121, 4004116], sampling: per-iteration, source: "meas-ci:session:2026-09-24"}
+          run: {dist: quantiles, p: [36, 39, 41, 44, 48, 55, 60, 64, 69, 76], sampling: per-iteration, source: "meas-ci:session:2026-09-24"}
+        - comm: "gnome-shell/gnome-shell"
+          threads: 1
+          wakes_per_s: 0.0348
+          gap: {dist: quantiles, p: [440, 9760765, 9918215, 10164201, 10712248, 49778721, 50069191, 50137115, 50239326, 59999996], sampling: per-iteration, source: "meas-ci:session:2026-09-24"}
+          run: {dist: quantiles, p: [423, 1860, 1902, 1977, 2380, 9052, 9424, 9733, 10917, 48028], sampling: per-iteration, source: "meas-ci:session:2026-09-24"}
+        # 3 components cover 99.97 % of 0.587 wakes/s (9.5 D16, target 95 %); no residual — every other wake sporadic (modeling_notes)
     lifetime: segment-bound
     binding_params: []
     scalable: []
     validation_stats:
       referee: meas-ci
-      stats: [wakeup rate and burst-length CDF of stock daemons via /proc sidecar]
+      run: "session:2026-09-24, repeats [47, 48, 49, 51, 58, 60, 61, 62, 63, 68, 69, 71, 72, 73, 74, 75, 76, 77, 79, 83, 85, 86, 87, 88], runs 35934388525, 35941513123, 35945605366, 35948704522"
+      stats: ["steady wakes/s 0.5770\u20130.5960", "steady cpu-share 0.000196\u20130.000249"]
+      scope: >-
+        One observation (phase decision 2; D8): GNOME Shell 46.0-0ubuntu6~24.04.14 — Mutter and the shell in one process (D3), in an Ubuntu 24.04 desktop session — ubuntu-desktop-minimal from the runner's own archive, a dedicated user logged in by GDM's automatic login after a 300 s priming login and a logout (D16) — in its terminal idle state: nobody present past idle-delay, the shield up and locked, the monitor blanked by the power daemon, each checked at the steady edge 420 s after the measured login (D9, D13, D18); a 1800 s steady phase (D22); on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure), the four entries' processes confined to one CPU and every other process of the session, the system and the harness kept on the others, the placement read from the processes after the pin and at the steady edge (D10, D21), perf sched record on every CPU; 24 same-machine repeats, every landing pooled. Not covered: drawing. The monitor is off, and Mutter's frame clock is inhibited while the output is off (S2-12); no source states a compositor's per-frame CPU cost on a GPU desktop (9.5 D24). Nor a session in use — an application open, the screen on, a notification — nor the session's start-up (D9). Limits of the observation (method §7): GNOME Shell started with --headless --virtual-monitor 1920x1080@60 by a unit drop-in, on a seat with no display device and no vblank; no sound device, WirePlumber's null sink; the cpuset controller delegated to the user manager by a drop-in on user@.service (D14); the four entries' units in a slice of their own and the other slices defaulted to the other CPUs (D17), the system bus restarted into that slice before any login (D21); the pinned units' other processes moved into a scope of their own (D15); per-CPU kernel threads sharing the measured CPU; a server VM with its own agents, off the measured CPU. Stability rule: all 9 values on the list hold within 5 % or 1 µs over the 24 repeats, the widest `gnome-shell/gnome-shell` run mean ±2.81 %. A cron job's session is stated, not carried (D23, D26): the session of the sphinxsearch indexer's cron job at 00:00 UTC — a package of the runner image, not of the desktop install — met the phase in 4 of 24 repeats (47, 48, 49, 51), 318–365 s into it; the 12 rows it held inside two seconds of each cron wakeup (3, 3, 3, 3 per repeat) left the components, which are read without them. Foreign user-space work on the measured CPU 0.00097–0.0022 % of the phase per repeat, under the 2 × 10⁻⁴ bound (D20, D22); per-CPU kernel threads 11,608–15,472 schedule-ins on it per repeat, reported, not gated (D14). Values are this software on this machine, not desktop truth (9.5 D10).
     modeling_notes: >-
-      Near-idle with intermittent sub-millisecond wakes; SLEEP (not TIMER)
-      because stock daemons are not drift-free periodic — aperiodicity is the
-      class's character; the encoding is ours. Params from meas-ci:gui:2
-      (stock runner daemons — systemd family, dbus, cron, etc. — sampled at
-      200 ms with ctxt counters during the quiet element-idle phase, 51
-      processes across 5 repeats): voluntary-wakeup gap median ~11.2 s
-      sigma_log ~1.9, cpu-per-wake median ~155 us. The cli:1 idle-baseline
-      phase corroborates near-zero daemon cpu at 1 s sampling.
-      wineserver is not bound here: it is a member of the constructed
-      game-task-chain (see that entry's modeling_notes).
+      Per-program archetype (D2, D5), bound by identity to the timelines' `gnome-shell` task: one task carries the program's processes, each instance's threads its own components (D4, D6, D7; 9.5 D16), each sampled from its measured gap and run quantiles (9.5 D17) over the task's lifetime and merged into one explicit event stream at compile time (9.5 D9). No focus_components and no stimulus: nobody is present (D9). Sporadic wakes, not carried as components (9.5 D43): `gnome-shell/gnome-s:disk$0` in 4 of 24 repeats (47, 48, 49, 51, the repeats that met the cron session), 0.0002 wakes/s over the pool.
+
+  audio-server:
+    category_source: meas
+    pattern:
+      program:
+        - loop:                    # measured timer components merged at compile time (9.5 D9, D16)
+            - TIMER: tick
+            - RUN: event
+    params:
+      components:
+        - comm: "wireplumber/gmain"
+          threads: 1
+          wakes_per_s: 0.2132
+          gap: {dist: quantiles, p: [85497, 100181, 100189, 100199, 100237, 9902699, 9902814, 9902875, 9902998, 9903431], sampling: per-iteration, source: "meas-ci:session:2026-09-24"}
+          run: {dist: quantiles, p: [20, 24, 27, 35, 39, 43, 47, 49, 54, 64], sampling: per-iteration, source: "meas-ci:session:2026-09-24"}
+        # 1 component covers 100.00 % of 0.213 wakes/s (9.5 D16, target 95 %); no residual — every other wake sporadic (modeling_notes)
+    lifetime: segment-bound
+    binding_params: []
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      run: "session:2026-09-24, repeats [47, 48, 49, 51, 58, 60, 61, 62, 63, 68, 69, 71, 72, 73, 74, 75, 76, 77, 79, 83, 85, 86, 87, 88], runs 35934388525, 35941513123, 35945605366, 35948704522"
+      stats: ["steady wakes/s 0.2110\u20130.2180", "steady cpu-share 0.000006\u20130.000009"]
+      scope: >-
+        One observation (phase decision 2; D8): the PipeWire stack — pipewire 1.0.5-1ubuntu3.3, wireplumber 0.4.17-1ubuntu4.1, pipewire-pulse 1.0.5-1ubuntu3.3 — its three user services in one task (D4), in an Ubuntu 24.04 desktop session — ubuntu-desktop-minimal from the runner's own archive, a dedicated user logged in by GDM's automatic login after a 300 s priming login and a logout (D16) — in its terminal idle state: nobody present past idle-delay, the shield up and locked, the monitor blanked by the power daemon, each checked at the steady edge 420 s after the measured login (D9, D13, D18); a 1800 s steady phase (D22); on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure), the four entries' processes confined to one CPU and every other process of the session, the system and the harness kept on the others, the placement read from the processes after the pin and at the steady edge (D10, D21), perf sched record on every CPU; 24 same-machine repeats, every landing pooled. Not covered: playback or capture, nor the session's start-up (D9). Limits of the observation (method §7): GNOME Shell started with --headless --virtual-monitor 1920x1080@60 by a unit drop-in, on a seat with no display device and no vblank; no sound device, WirePlumber's null sink; the cpuset controller delegated to the user manager by a drop-in on user@.service (D14); the four entries' units in a slice of their own and the other slices defaulted to the other CPUs (D17), the system bus restarted into that slice before any login (D21); the pinned units' other processes moved into a scope of their own (D15); per-CPU kernel threads sharing the measured CPU; a server VM with its own agents, off the measured CPU. Stability rule: all 3 values on the list hold within 5 % or 1 µs over the 24 repeats, the widest `wireplumber/gmain` run mean ±3.71 %. A cron job's session is stated, not carried (D23, D26): the session of the sphinxsearch indexer's cron job at 00:00 UTC — a package of the runner image, not of the desktop install — met the phase in 4 of 24 repeats (47, 48, 49, 51), 318–364 s into it; the 37 rows it held inside two seconds of each cron wakeup (8, 10, 9, 10 per repeat) left the components, which are read without them. Foreign user-space work on the measured CPU 0.00097–0.0022 % of the phase per repeat, under the 2 × 10⁻⁴ bound (D20, D22); per-CPU kernel threads 11,608–15,472 schedule-ins on it per repeat, reported, not gated (D14). Values are this software on this machine, not desktop truth (9.5 D10).
+    modeling_notes: >-
+      Per-program archetype (D2, D5), bound by identity to the timelines' `pipewire` task, which stands for the three services (D4): one task carries the program's processes, each instance's threads its own components (D4, D6, D7; 9.5 D16), each sampled from its measured gap and run quantiles (9.5 D17) over the task's lifetime and merged into one explicit event stream at compile time (9.5 D9). No focus_components and no stimulus: nobody is present (D9). Present in every repeat and never woken in the phase: `pipewire`, `pipewire-pulse`; the entry carries no wake of them.
+
+  service-manager:
+    category_source: meas
+    pattern:
+      program:
+        - loop:                    # measured timer components merged at compile time (9.5 D9, D16)
+            - TIMER: tick
+            - RUN: event
+    params:
+      components:
+        - comm: "pid1/systemd"
+          threads: 1
+          wakes_per_s: 0.1792
+          gap: {dist: quantiles, p: [530, 587, 648, 1735144, 5624552, 10000537, 10001055, 10001276, 10001897, 10002037], sampling: per-iteration, source: "meas-ci:session:2026-09-24"}
+          run: {dist: quantiles, p: [41, 49, 62, 111, 207, 229, 262, 315, 2330, 3525], sampling: per-iteration, source: "meas-ci:session:2026-09-24"}
+        # 1 component covers 99.90 % of 0.179 wakes/s (9.5 D16, target 95 %); no residual — every other wake sporadic (modeling_notes)
+    lifetime: segment-bound
+    binding_params: []
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      run: "session:2026-09-24, repeats [47, 48, 49, 51, 58, 60, 61, 62, 63, 68, 69, 71, 72, 73, 74, 75, 76, 77, 79, 83, 85, 86, 87, 88], runs 35934388525, 35941513123, 35945605366, 35948704522"
+      stats: ["steady wakes/s 0.1740\u20130.1880", "steady cpu-share 0.000040\u20130.000059"]
+      scope: >-
+        One observation (phase decision 2; D8): systemd 255.4-1ubuntu8.17 — pid 1 and the user manager in one task (D7), in an Ubuntu 24.04 desktop session — ubuntu-desktop-minimal from the runner's own archive, a dedicated user logged in by GDM's automatic login after a 300 s priming login and a logout (D16) — in its terminal idle state: nobody present past idle-delay, the shield up and locked, the monitor blanked by the power daemon, each checked at the steady edge 420 s after the measured login (D9, D13, D18); a 1800 s steady phase (D22); on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure), the four entries' processes confined to one CPU and every other process of the session, the system and the harness kept on the others, the placement read from the processes after the pin and at the steady edge (D10, D21), perf sched record on every CPU; 24 same-machine repeats, every landing pooled. Not covered: unit starts and stops of a session in use, nor boot and login (D9). Limits of the observation (method §7): GNOME Shell started with --headless --virtual-monitor 1920x1080@60 by a unit drop-in, on a seat with no display device and no vblank; no sound device, WirePlumber's null sink; the cpuset controller delegated to the user manager by a drop-in on user@.service (D14); the four entries' units in a slice of their own and the other slices defaulted to the other CPUs (D17), the system bus restarted into that slice before any login (D21); the pinned units' other processes moved into a scope of their own (D15); per-CPU kernel threads sharing the measured CPU; a server VM with its own agents, off the measured CPU. Stability rule: all 3 values on the list hold within 5 % or 1 µs over the 24 repeats, the widest `pid1/systemd` run mean ±3.55 %. A cron job's session is stated, not carried (D23, D26): the session of the sphinxsearch indexer's cron job at 00:00 UTC — a package of the runner image, not of the desktop install — met the phase in 4 of 24 repeats (47, 48, 49, 51), 318–365 s into it; the 201 rows it held inside two seconds of each cron wakeup (50, 50, 49, 52 per repeat) left the components, which are read without them. Foreign user-space work on the measured CPU 0.00097–0.0022 % of the phase per repeat, under the 2 × 10⁻⁴ bound (D20, D22); per-CPU kernel threads 11,608–15,472 schedule-ins on it per repeat, reported, not gated (D14). Values are this software on this machine, not desktop truth (9.5 D10).
+    modeling_notes: >-
+      Per-program archetype (D2, D5), bound by identity to the timelines' `systemd` task, which stands for both managers (D7): one task carries the program's processes, each instance's threads its own components (D4, D6, D7; 9.5 D16), each sampled from its measured gap and run quantiles (9.5 D17) over the task's lifetime and merged into one explicit event stream at compile time (9.5 D9). No focus_components and no stimulus: nobody is present (D9). Sporadic wakes, not carried as components (9.5 D43): `user-manager/systemd` in 4 of 24 repeats (47, 48, 49, 51, the repeats that met the cron session), 0.0002 wakes/s over the pool.
+
+  message-bus:
+    category_source: meas
+    pattern:
+      program:
+        - loop:                    # measured timer components merged at compile time (9.5 D9, D16)
+            - TIMER: tick
+            - RUN: event
+    params:
+      components:
+        - comm: "system-bus/dbus-daemon"
+          threads: 1
+          wakes_per_s: 0.1368
+          gap: {dist: quantiles, p: [97, 124, 158, 14757, 10000885, 10001073, 10001544, 10001867, 10002785, 10004051], sampling: per-iteration, source: "meas-ci:session:2026-09-24"}
+          run: {dist: quantiles, p: [57, 71, 78, 214, 319, 352, 387, 408, 496, 676], sampling: per-iteration, source: "meas-ci:session:2026-09-24"}
+        # 1 component covers 100.00 % of 0.137 wakes/s (9.5 D16, target 95 %); no residual — every other wake sporadic (modeling_notes)
+    lifetime: segment-bound
+    binding_params: []
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      run: "session:2026-09-24, repeats [47, 48, 49, 51, 58, 60, 61, 62, 63, 68, 69, 71, 72, 73, 74, 75, 76, 77, 79, 83, 85, 86, 87, 88], runs 35934388525, 35941513123, 35945605366, 35948704522"
+      stats: ["steady wakes/s 0.1270\u20130.1640", "steady cpu-share 0.000033\u20130.000040"]
+      scope: >-
+        One observation (phase decision 2; D8): dbus-daemon 1.14.10-4ubuntu4.1 — the system bus and the session bus in one task (D6), in an Ubuntu 24.04 desktop session — ubuntu-desktop-minimal from the runner's own archive, a dedicated user logged in by GDM's automatic login after a 300 s priming login and a logout (D16) — in its terminal idle state: nobody present past idle-delay, the shield up and locked, the monitor blanked by the power daemon, each checked at the steady edge 420 s after the measured login (D9, D13, D18); a 1800 s steady phase (D22); on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure), the four entries' processes confined to one CPU and every other process of the session, the system and the harness kept on the others, the placement read from the processes after the pin and at the steady edge (D10, D21), perf sched record on every CPU; 24 same-machine repeats, every landing pooled. Not covered: the bus traffic of a session in use, nor the session's start-up (D9). Limits of the observation (method §7): GNOME Shell started with --headless --virtual-monitor 1920x1080@60 by a unit drop-in, on a seat with no display device and no vblank; no sound device, WirePlumber's null sink; the cpuset controller delegated to the user manager by a drop-in on user@.service (D14); the four entries' units in a slice of their own and the other slices defaulted to the other CPUs (D17), the system bus restarted into that slice before any login (D21); the pinned units' other processes moved into a scope of their own (D15); per-CPU kernel threads sharing the measured CPU; a server VM with its own agents, off the measured CPU. Stability rule: all 3 values on the list hold within 5 % or 1 µs over the 24 repeats, the widest `system-bus/dbus-daemon` wake rate ±3.02 %. A cron job's session is stated, not carried (D23, D26): the session of the sphinxsearch indexer's cron job at 00:00 UTC — a package of the runner image, not of the desktop install — met the phase in 4 of 24 repeats (47, 48, 49, 51), 318–364 s into it; the 245 rows it held inside two seconds of each cron wakeup (56, 65, 55, 69 per repeat) left the components, which are read without them. Foreign user-space work on the measured CPU 0.00097–0.0022 % of the phase per repeat, under the 2 × 10⁻⁴ bound (D20, D22); per-CPU kernel threads 11,608–15,472 schedule-ins on it per repeat, reported, not gated (D14). Values are this software on this machine, not desktop truth (9.5 D10).
+    modeling_notes: >-
+      Per-program archetype (D2, D5), bound by identity to the timelines' `dbus-daemon` task, which stands for both buses (D6): one task carries the program's processes, each instance's threads its own components (D4, D6, D7; 9.5 D16), each sampled from its measured gap and run quantiles (9.5 D17) over the task's lifetime and merged into one explicit event stream at compile time (9.5 D9). No focus_components and no stimulus: nobody is present (D9). Present in every repeat and never woken in the phase: `session-bus`; the entry carries no wake of it.
