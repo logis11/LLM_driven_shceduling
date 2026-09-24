@@ -112,6 +112,16 @@ def pool_entry(name, by_rep):
         "threads": {comm: {f: at(comm, f) for f in ("threads", "wakes_per_s", "gap_ms", "run_ms")}
                     for comm in sorted({c for k in reps for c in by_rep[k]["threads"]})},
         "components": {"selected": chosen, "residual": residual, **cov},
+        # D23, in 9.5 D64's form: the wakes a cron job's session caused are stated, not carried — the component
+        # tables above are read without them
+        "cron_event": {
+            "waker": "cron",
+            "count": [(by_rep[k].get("cron_event") or {}).get("count", 0) for k in reps],
+            "runs_ms": [x for k in reps for x in ((by_rep[k].get("cron_event") or {}).get("runs_ms") or [])],
+            "at_s": [(by_rep[k].get("cron_event") or {}).get("at_s", []) for k in reps],
+            "rate_per_s": round(sum((by_rep[k].get("cron_event") or {}).get("count", 0) for k in reps)
+                                / sum(spans[k] for k in reps), 6) if sum(spans[k] for k in reps) else None,
+            "span_s_total": round(sum(spans[k] for k in reps), 1)},
         "tables": {c: {"gap_ms": _cp.summary([comms[c]["gaps"].get(k, []) for k in reps]),
                        "run_ms": _cp.summary([comms[c]["runs"].get(k, []) for k in reps])} for c in chosen},
     }

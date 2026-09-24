@@ -155,6 +155,29 @@ def test_components_are_per_instance_and_foreign_work_is_split(tmp_path):
     assert ph["display_servers"] == ["Xwayland"]
 
 
+def test_a_cron_sessions_wakes_leave_the_component_and_are_stated(tmp_path):
+    # D23, in 9.5 D64's form: whether an 1800 s window meets the hourly run-parts or the 23:59 sysstat job is
+    # decided by the clock, so those wakes are an event of the phase, not a component's wake
+    d = _run_dir(tmp_path / "r1")
+    rows = (d / "perf.steady.timehist.txt").read_text()
+    wakes = (d / "perf.steady.wakeups.txt").read_text()
+    # three more pid-1 rows, each preceded by a wakeup from cron
+    for i, t in enumerate((71.0, 73.0, 75.0)):
+        rows += _row(t, 3, "systemd", 1, 1, 0.9)
+        wakes += f"{t - 0.002:12.6f} [0001]  cron[900/900]  awakened: systemd[1/1]\n"
+    (d / "perf.steady.timehist.txt").write_text("".join(sorted(rows.splitlines(True), key=lambda l: float(l.split()[0]))))
+    (d / "perf.steady.wakeups.txt").write_text(wakes)
+
+    ph = analyze.analyze_run_dir(str(d))["phases"]["steady"]
+    sysd = ph["entries"]["systemd"]
+    ev = sysd["cron_event"]
+    assert ev["count"] == 3 and ev["waker"] == "cron"
+    assert ev["runs_ms"] == [0.9, 0.9, 0.9] and ev["at_s"] == [71.0, 73.0, 75.0]
+    # the component is read without them: the fixture's ten pid-1 wakes over the 100 s phase, unchanged
+    assert sysd["threads"]["pid1/systemd"]["wakes_per_s"] == 0.1
+    assert ph["entries"]["gnome-shell"]["cron_event"]["count"] == 0
+
+
 def test_the_pool_names_probe_and_foreign_repeats_and_pools_the_rest(tmp_path):
     assert pool.NAME.match("meas-session-session-r3-full")
     assert pool.NAME.match("meas-session-session-r1-probe")

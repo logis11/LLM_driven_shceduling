@@ -23,6 +23,7 @@ Two counts sit beside the entries, from every row of the trace on the measured C
 """
 
 import argparse
+import bisect
 import json
 import os
 import re
@@ -33,11 +34,20 @@ if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 
 from meas.campaign.analyze import (   # noqa: E402  — one wake rule and one component layer for every campaign
-    ROW, TASK, Row, load_all_wakeups, merge_resumes, open_text, per_thread,
+    ROW, TASK, Row, load_all_wakeups, load_wakeups, merge_resumes, open_text, per_thread,
 )
 from meas.desktop.analyze import phases_in, slice_profile  # noqa: E402
 
 ENTRIES = ("gnome-shell", "pipewire", "systemd", "dbus-daemon")
+
+# D23, in the form of 9.5 D64: a wake a cron job's session caused is a rare event within the phase, not a
+# component's wake. Whether an 1800 s window meets one is decided by the clock — the hourly `run-parts` at 17
+# past, the sysstat job at 23:59, the daily jobs — so the population a repeat draws from is not stationary: in
+# the first batch cron woke pid 1 36-38 times a phase, in the pair that followed 0. D64's event is picked out by
+# a run floor; this one by its waker, `cron` being the process whose session opens wake the managers. The rows it
+# caused leave the component, which is read without them, and the event is stated per repeat with its count, its
+# runs, its times into the phase and its rate over the phase time pooled.
+CRON_WAKER = r"^cron$"
 # a pid the census never saw (a process born and gone inside the phase) is told kernel from user by its name
 KTHREAD_NAME = re.compile(r"^(kworker/|ksoftirqd/|migration/|rcu_|rcuc/|rcuog/|rcuop/|cpuhp/|idle_inject/|irq/|"
                           r"kthreadd$|khugepaged$|kcompactd|kswapd|watchdog/|jbd2/|writeback|scsi_|hv_|kauditd$)")
@@ -157,6 +167,25 @@ def poll_summary(D, phase, _unused=None):
             "power_save_modes": sorted({x.get("power_save_mode") for x in polls if x.get("power_save_mode") is not None})}
 
 
+def split_cron(rows, by_tid):
+    """(rows the component keeps, [(t_in, run_ms)] of the wakes a cron session caused) — D23.
+
+    A row is the event's when a wakeup by `cron` for that thread falls after the schedule-in of the wake this row
+    would continue and at or before it: the wake rule's own matching (campaign workflow), applied to one waker.
+    """
+    keep, events, prev = [], [], {}
+    for r in rows:
+        ts = by_tid.get(r.tid)
+        lo = prev.get(r.tid)
+        hit = False
+        if ts:
+            i = bisect.bisect_right(ts, r.t_in)
+            hit = i > 0 and (lo is None or ts[i - 1] > lo)
+        (events.append((r.t_in, r.run)) if hit else keep.append(r))
+        prev[r.tid] = r.t_in
+    return keep, events
+
+
 def analyze_phase(D, phase, meas_cpu, from_s=0.0, from_mono=None):
     """`from_s` starts the phase that many seconds past its first row; `from_mono` at that monotonic second of
     the trace itself (the clock `perf sched record -k CLOCK_MONOTONIC` and the polls' `mono_ns` share), which is
@@ -183,6 +212,11 @@ def analyze_phase(D, phase, meas_cpu, from_s=0.0, from_mono=None):
     wk = next((os.path.join(D, f"perf.{phase}.wakeups.txt{s}") for s in (".gz", "")
                if os.path.exists(os.path.join(D, f"perf.{phase}.wakeups.txt{s}"))), None)
     wakeups = load_all_wakeups(wk, entry_pids) if wk else {}
+    cron_by_tid = {}                              # D23: the wakes a cron job's session caused, per thread
+    for t, _comm, tid in (load_wakeups(wk, entry_pids, CRON_WAKER) if wk else []):
+        cron_by_tid.setdefault(tid, []).append(t)
+    for v in cron_by_tid.values():
+        v.sort()
     llvm = [r for r, _ in rows_cpu if r.pid in entry_pids and r.comm.startswith("llvmpipe-")]
     mine = [r for r, _ in rows_cpu if r.pid in entry_pids and not r.comm.startswith("llvmpipe-")]
     mine, merged = merge_resumes(mine, wakeups, by_state=True)
@@ -200,6 +234,7 @@ def analyze_phase(D, phase, meas_cpu, from_s=0.0, from_mono=None):
     for e in ENTRIES:
         ipids = {i: pids for i, pids in inst.get(e, {}).items()}
         rows = [r for r in mine if any(r.pid in pids for pids in ipids.values())]
+        rows, cron_events = split_cron(rows, cron_by_tid)      # D23: read without them, stated beside them
         threads, samples = components(rows, ipids, span)
         out["entries"][e] = {
             "instances": {i: sorted(p) for i, p in ipids.items()},
@@ -208,6 +243,9 @@ def analyze_phase(D, phase, meas_cpu, from_s=0.0, from_mono=None):
             "wakes_per_s": round(len(rows) / span, 3),
             "cpu_share": round(sum(r.run for r in rows) / 1000 / span, 6),
             "slices": slice_profile(rows, t0, span),
+            "cron_event": {"waker": "cron", "count": len(cron_events),
+                           "runs_ms": [round(x, 3) for _, x in cron_events],
+                           "at_s": [round(t - t0, 1) for t, _ in cron_events]},
             "threads": threads, "_samples": samples}
     t_start = next((json.loads(ln)["mono_ns"] for ln in open(os.path.join(D, "edges.jsonl"))
                     if ln.strip() and json.loads(ln).get("phase") == phase and json.loads(ln).get("edge") == "start"), None) \
