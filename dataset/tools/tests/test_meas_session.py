@@ -363,6 +363,21 @@ def test_the_loop_knows_the_session_family(repo_root):
     assert "dataset/tools/meas/session/run.sh" in wf and "meas-session-${{ matrix.app }}" in wf
 
 
+def test_a_runs_artifacts_are_listed_from_every_page(monkeypatch):
+    # a session job uploads about 30 artifacts, so a run's first page of 30 left most of its repeats unpooled
+    from meas.loop import common
+    calls = []
+
+    def gh(*args):
+        calls.append(args)
+        return [{"artifacts": [{"name": f"a{i}"} for i in range(100)]}, {"artifacts": [{"name": "meas-session-session-r88-full"}]}]
+
+    monkeypatch.setattr(common, "gh", gh)
+    names = common.artifact_names(1)
+    assert len(names) == 101 and names[-1] == "meas-session-session-r88-full"
+    assert "--paginate" in calls[0] and "--slurp" in calls[0]
+
+
 def test_the_fold_in_regenerates_the_four_entries_from_the_pooled_record(repo_root, tmp_path):
     # D26: the entries in archetypes.yaml are fold_in.py's output on the committed pooled record, byte for byte
     pooled = repo_root / "_dev" / "research" / "jioh" / "task-9.9-daemons-session" / "campaign" / "results" / "pooled.json"

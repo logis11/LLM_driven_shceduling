@@ -107,8 +107,12 @@ def artifact(family, app, k):
 
 
 def artifact_names(run_id):
-    """The names of a run's artifacts (a dry check's are meas-build-r<k>-dry, never a repeat of a full campaign)."""
-    return [a["name"] for a in (gh("api", f"repos/{{owner}}/{{repo}}/actions/runs/{run_id}/artifacts") or {}).get("artifacts", [])]
+    """The names of a run's artifacts (a dry check's are meas-build-r<k>-dry, never a repeat of a full campaign).
+
+    Every page of them: the API returns 30 a page unless asked for more, and a session job alone uploads about 30 (a
+    partial copy per stage), so a run of several jobs listed from its first page left most of its repeats unpooled."""
+    pages = gh("api", "--paginate", "--slurp", f"repos/{{owner}}/{{repo}}/actions/runs/{run_id}/artifacts?per_page=100")
+    return [a["name"] for page in pages or [] for a in page.get("artifacts", [])]
 
 
 def download(run_id, name, dest):
