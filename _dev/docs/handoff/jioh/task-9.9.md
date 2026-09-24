@@ -1,31 +1,44 @@
-# Handoff — task 9.9 Daemons and session processes (2026-09-23)
+# Handoff — task 9.9 Daemons and session processes (2026-09-24)
 
-Stage 3's decisions D1–D10 were the 2026-09-22 session's. This one built the session tooling, took D11–D18 on what the runner forced, ran the dry runs and the long-phase probe. Work is on `jioh/dataset-rebuild` (worktree `../LLM_driven_shceduling-9.9`, branch `jioh/phase-9/9-session-tooling`, merged up to date); the main checkout still holds someone else's uncommitted `dataset/` edits — never stage, test against or push them.
+The measurement campaign is **closed**: the stability rule holds over 24 repeats, every one of the 18 carried values inside the 5 % tolerance, the widest half-width 3.7 %. Tag `meas-ci:session:2026-09-24`. Work is on `jioh/dataset-rebuild` (worktree `../LLM_driven_shceduling-9.9`, branch `jioh/phase-9/9-session-tooling`, merged up to date). Pooled `results.md` and `pooled.json` are in `_dev/research/jioh/task-9.9-daemons-session/campaign/results/`; every job's model is in `campaign/machine-draws.md`.
 
-## Next session: launch the first batch
+## Next session: the raw-record release, then the fold-in
 
-Trigger `.github/campaign-session.json`: `mode` `full`, `cpu_model` `EPYC 7763`, `repeats` `{"session": [1..5]}` — the method's first batch of five, ~30 min a job. Then the campaign loop as 9.5–9.8 ran it: `dataset/tools/meas/loop/` (family `session`), gated indices relaunched together, repeats added one at a time until every value on the method §6 list holds, `pool_runs.py session/session` to pool.
+- **The release is unasked.** Method §8 and the campaign workflow's loop step 7 put the raw records of a campaign in one release and say publishing outward is asked before it is done. 인지오 has not been asked yet — ask first.
+- **The fold-in** then carries the open items the campaign did not settle: the entry ids and whether `system-daemon` survives, the `meas-ci` registry relabel (scope-card item 17), `category_source`, `validation_stats`, the header form (item 18), and `meas-gui.yml` retiring once these four entries carry their own values.
+- Each entry's row still has to go into `../../measurement-campaign-record.md` — repeats, the values, the widest half-width, what stopped it, jobs and gated draws (loop step 7). Not yet written.
 
-**Decide first (from the dry runs of 2026-09-23, run 35814510341):** the probe's own 10 s state polls ran inside its recording, and they dominate what it measured — at idle the entries wake 0.1–0.9 /s in a dry run's steady phase against 15.06, 4.25, 3.67 and 2.17 /s in the probe. D18's steady edge (420 s) rests on the shield and blank timings, which the polls read directly and which hold; its 900 s steady length rests on window spreads of the poll-dominated signal and does not. Either re-run the probe with the polls off during the recording (~4 h), or keep 900 s and let the stability rule add repeats.
+## The measured values (24 repeats, AMD EPYC 7763, kernel 6.17.0-1022-azure)
+
+| entry | component | wakes/s | gap mean | run mean | widest |
+|---|---|---|---|---|---|
+| GNOME Shell | `JS Helper` | 0.3025 | 13.05 s | 0.0137 ms | ±1.5 % |
+| | `gmain` | 0.2499 | 4.00 s | 0.0497 ms | ±2.2 % |
+| | `gnome-shell` | 0.0348 | 28.75 s | 5.7007 ms | ±2.8 % |
+| PipeWire stack | `wireplumber/gmain` | 0.2132 | 4.68 s | 0.0383 ms | ±3.7 % |
+| `systemd` | `pid1/systemd` | 0.1792 | 5.57 s | 0.2460 ms | ±3.5 % |
+| `dbus-daemon` | `system-bus/dbus-daemon` | 0.1368 | 7.33 s | 0.2784 ms | ±3.0 % |
+
+Coverage 99.9–100 % per entry. Beside them the cron event (D23), present in 4 of the 24 repeats: `systemd` 201 rows, `dbus-daemon` 245, PipeWire 37, GNOME Shell 12.
+
+**For the fold-in's scope text.** `pipewire` and `pipewire-pulse` never woke in an 1800 s phase — the entry carries `wireplumber` alone. The user manager and GNOME Shell's `gnome-s:disk$0` woke only in the four repeats that met a cron session, so both are reported sporadic and neither is carried. The session bus is under the coverage cut.
 
 ## Decisions this session (changelog `_dev/research/jioh/task-9.9-daemons-session/changelog.md`)
 
-- D11 the login, D12 the sweep and the zero gate, D13 the phases and checks, D14 the cpuset delegation and kernel threads, D15 the pinned units' other processes, D16 GDM's automatic login (correcting D11), D17 the placement as a slice default, D18 the phase lengths.
-- Sources added: S2-33 (GDM 46.2 stops its login screen once a user session takes over), S2-34 (GNOME Shell 46.0 locks only when a display manager answers on the system bus).
+- **D19** the probe's polls stop at the steady edge — the 2026-09-22 probe's own 10 s polls dominated its signal (`systemd` 15.06 /s polled against 0.17 unpolled), so D18's 900 s steady length was withdrawn.
+- **D20** the foreign-work gate is a stated bound, not an absolute: both managers' `init.scope` are on the measured CPU because both managers are entries, so every process the system starts is forked there and no window of 600 s or more is free of it.
+- **D21** the system bus was never on the measured CPU — `Slice=` applies when a unit starts and that bus had run since boot. It is restarted into `meas.slice` during the install, the placement is read from the processes at the pin and at the steady edge, and the 2026-09-23 dry jobs and probes were superseded by the campaign workflow's loop step 6.
+- **D22** `steady` 1800 s and the bound 2 × 10⁻⁴, from the three probes taken under the corrected placement.
+- **D23** a cron job's session is an event of the phase in 9.5 D64's form, taken by cause with a ±2 s window, not by a run floor.
+- **D24** the pool reads each component's exact wake count; `per_thread`'s two-decimal rounding was a ±15 % step at this slice's rates.
+- **D25** 인지오 took the repeats as a batch to the pool's projection (9.7 D26's form).
 
-## What the runner forced, and what verified it
+## What the tooling gained
 
-- **Runner losses.** The first five dry jobs lost their runner with no log, in the install's last service starts and `needrestart` pass. The install now blocks both, and the units `graphical.target` wants start one at a time afterwards (D16). Every job since completed.
-- **No shield without a display manager.** With GDM masked the session never locked or blanked (S2-34). GDM's automatic login reaches the state; a stand-in on the bus does not (run 35795764108). The session now holds seat0 and a virtual terminal, so D9's seatless ground is no longer needed.
-- **The runner image's `XDG_*` lines** went to every login and sent the session's settings to `/home/runner`; they are removed from `/etc/environment` (D16).
-- **Verified clean** (run 35814510341, both jobs): entries in `meas.slice`, other slices on the harness CPUs, no pin failures, nothing left in the pinned units, the edge check passing, and zero foreign user-space work on the measured CPU.
+`session/size_steady.py` (the steady length from the probes, within-run and between-run, with the foreign share per run), `census.py placed` (the placement read from the processes), `analyze.py --from-s`/`from_mono` (a phase read from a cut), the cron event in `analyze.py` and `pool.py`, the exact wake count in `pool.py`, the placement and bound records in the loop's validity arm, and `dry` no longer poolable. 13 tests in `dataset/tools/tests/test_meas_session.py`; the full tool suite passed at 200 tests when last run whole.
 
-## Held and open
+## Held
 
-- **Held: a display-server entry for the idle desktop.** The probe and every census found no display server at idle; Xwayland ran only during login and start-up. The share of X11 sessions is still unverified.
-- At fold-in: entry ids (whether `system-daemon` survives), `meas-ci` registry relabel (scope card item 17), `category_source`, `validation_stats`, the header form (item 18); `meas-gui.yml` retires.
-- `docs/references.md` carries no entry for the 9.9 source-code readings; S2-33 and S2-34 live in the slice's search log, and whether either becomes a citation is a fold-in question.
-
-## Tooling (all on `jioh/dataset-rebuild`)
-
-`dataset/tools/meas/session/` — `run.sh` (modes `dry`, `probe`, `full`; stage checkpoints with a dry-only stop point), `census.py`, `analyze.py`, `pool.py`, `dm_stub.py` (the rejected stand-in, kept as the `stub` login mode); `.github/workflows/meas-session.yml` (partial upload per stage, so a lost runner still leaves a trace), trigger `.github/campaign-session.json`, loop family `session`, validity arm in `loop/pool_runs.py`, 9 tests in `dataset/tools/tests/test_meas_session.py`.
+- The display-server entry for the idle desktop: no display server at idle in any probe or census; the share of X11 sessions is unverified.
+- `docs/references.md` carries no entry for the 9.9 source readings; S2-33 and S2-34 live in the slice's search log, and whether either becomes a citation is a fold-in question.
+- That systemd names a pre-exec child `(name)` is read from the observed comms and their timing, not from systemd's source — the citation to add if that ground is carried further (D20).
