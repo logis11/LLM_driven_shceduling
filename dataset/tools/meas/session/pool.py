@@ -97,12 +97,20 @@ def pool_entry(name, by_rep):
         spans[k] = e["span_s"]
         for comm, c in e["threads"].items():
             slot = comms.setdefault(comm, {"gaps": {}, "runs": {}, "t_in": {}, "wakes": {}, "threads": {}})
-            slot["wakes"][k] = int(round(c["wakes_per_s"] * e["span_s"]))
-            slot["threads"][k] = c["threads"]
             sm = (e.get("_samples") or {}).get(comm) or {}
+            # D24: the exact count from the samples, never the rounded rate × span. `per_thread` rounds
+            # `wakes_per_s` to two places, which for this slice's components is coarse — `gnome-shell`'s main
+            # thread wakes 0.033 /s and reads 0.03 or 0.04, a ±15 % step the rule would read as the subject's
+            # spread. The shared rounding is left as it is: the slices already folded in were read through it.
+            slot["wakes"][k] = len(sm.get("runs") or []) or int(round(c["wakes_per_s"] * e["span_s"]))
+            slot["threads"][k] = c["threads"]
             slot["gaps"][k], slot["runs"][k], slot["t_in"][k] = sm.get("gaps", []), sm.get("runs", []), sm.get("t_in", [])
     chosen, residual, cov = select_components(comms, spans, reps)
-    at = lambda comm, f: [by_rep[k]["threads"][comm][f] for k in reps if comm in by_rep[k]["threads"]]
+    def at(comm, f):
+        ks = [k for k in reps if comm in by_rep[k]["threads"]]
+        if f == "wakes_per_s":      # D24: from the exact counts, at the resolution the rule needs
+            return [round(comms[comm]["wakes"].get(k, 0) / spans[k], 6) for k in ks]
+        return [by_rep[k]["threads"][comm][f] for k in ks]
     return {
         "repeats": reps,
         "span_s": [spans[k] for k in reps],

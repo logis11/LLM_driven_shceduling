@@ -297,6 +297,21 @@ def _src(repo_root, *p):
     return (repo_root.joinpath("dataset", "tools", "meas", *p)).read_text()
 
 
+def test_the_rule_reads_the_exact_wake_count_not_the_rounded_rate(tmp_path):
+    # D24: per_thread rounds wakes_per_s to two places; a component at 0.033 /s reads 0.03 or 0.04, a ±15 % step.
+    # The pool takes the count from the samples instead, so the rule reads the subject.
+    root = tmp_path / "art"
+    for k in range(1, 6):
+        _run_dir(root / f"run{k}" / f"meas-session-session-r{k}-full", k=k)
+    runs, _gated, _other, _nr = pool.find_runs(str(root), "EPYC 7763")
+    entry = pool.pool_app("session", runs["session"])
+    sysd = entry["phases"]["steady"]["entries"]["systemd"]
+    # the fixture wakes pid 1 ten times in a 100 s phase: 0.1 /s exactly, from the ten samples
+    assert sysd["threads"]["pid1/systemd"]["wakes_per_s"] == [0.1] * 5
+    shell = entry["phases"]["steady"]["entries"]["gnome-shell"]["threads"]["gnome-shell/gnome-shell"]
+    assert shell["wakes_per_s"] == [0.2] * 5     # twenty wakes in the same phase
+
+
 def test_run_sh_carries_the_decisions(repo_root):
     src = _src(repo_root, "session", "run.sh")
     assert "PAMName=login" in src and "XDG_SESSION_TYPE=wayland" in src                 # D11, login mode `unit`
