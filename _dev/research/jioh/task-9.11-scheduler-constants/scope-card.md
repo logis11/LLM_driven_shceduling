@@ -110,7 +110,7 @@ The threshold points (900, 1 200, 3 000, 5 000 µs) and the second reasons on 75
 | — | 9.6 card, "To 9.11" | "nothing identified" | — |
 | — | 9.7, 9.8, 9.9 changelogs and cards | no `9.11` hand-off (grep at `b29d1ec`) | — |
 
-Slices that may still add hand-offs after this card's commit: 9.5 (`[WIP]`, decision session open), 9.10 (unstarted), 9.12 (unstarted). 9.4, 9.6, 9.7, 9.8, 9.9 are ticked in `_dev/TODO.md` at `b29d1ec`.
+Slices that may still add hand-offs after this card's commit: 9.5 (`[WIP]`, decision session open), 9.9 (reopened to `[WIP]` at `63a0f02`, after this card was drafted), 9.10 (unstarted), 9.12 (unstarted). 9.4, 9.6, 9.7, 9.8 are ticked in `_dev/TODO.md` at `63a0f02`.
 
 ## What the sources are, as one observation
 
