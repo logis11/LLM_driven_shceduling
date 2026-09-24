@@ -565,10 +565,10 @@ Read during stage 3 to settle whether an idle GNOME 46 session runs an X server.
 
 | # | date | engine | URL | status | copy (SHA-256) |
 |---|---|---|---|---|---|
-| R1 | 2026-09-22 | `curl` | `https://gitlab.gnome.org/GNOME/mutter/-/raw/46.2/src/core/meta-context-main.c` | 200 | `mutter-46.2-src_core_meta-context-main.c` `a559e0b970c23f9f04fce303d1077f2ec9d20196d685b61c2aae0830a6b4d2d7` (the same file S4-08 read) |
-| R2 | 2026-09-22 | `curl` | `https://gitlab.gnome.org/GNOME/mutter/-/raw/46.2/data/org.gnome.mutter.gschema.xml.in` | 200 | `mutter-46.2-data_org.gnome.mutter.gschema.xml.in` `e950c02788bd6bd9886ad46ce6c9ccd45fa245d4b676e1f1b0433109ad449006` |
-| R3 | 2026-09-22 | `curl` | `https://gitlab.gnome.org/GNOME/gnome-shell/-/raw/46.0/data/org.gnome.Shell@wayland.service.in` | 200 | `gnome-shell-46.0-org.gnome.Shell@wayland.service.in` `0b3ce9179c6ab60dd1e12b4d4223899bb056cdce995da8d2de29859888d1f40e` |
-| R4 | 2026-09-22 | `curl` | `https://git.launchpad.net/ubuntu/+source/gdm3/plain/data/61-gdm.rules.in?h=ubuntu/noble-updates` | 200 | `gdm3-noble-updates-61-gdm.rules.in` `b1db35a79d951fc21210c1850154500cea9f7d244335fd130df54040f9907f00` |
+| R1 | 2026-09-22 | `curl` | `https://gitlab.gnome.org/GNOME/mutter/-/raw/46.2/src/core/meta-context-main.c` | 200 | `mutter-46.2-src_core_meta-context-main.c` `a559e0b970c23f9f04fce303d1077f2ec9d20196d685b61c2aae0830a6b4d2d7` (the same file S4-08 read; S2-35) |
+| R2 | 2026-09-22 | `curl` | `https://gitlab.gnome.org/GNOME/mutter/-/raw/46.2/data/org.gnome.mutter.gschema.xml.in` | 200 | `mutter-46.2-data_org.gnome.mutter.gschema.xml.in` `e950c02788bd6bd9886ad46ce6c9ccd45fa245d4b676e1f1b0433109ad449006` (S2-35) |
+| R3 | 2026-09-22 | `curl` | `https://gitlab.gnome.org/GNOME/gnome-shell/-/raw/46.0/data/org.gnome.Shell@wayland.service.in` | 200 | `gnome-shell-46.0-org.gnome.Shell@wayland.service.in` `0b3ce9179c6ab60dd1e12b4d4223899bb056cdce995da8d2de29859888d1f40e` (S2-35) |
+| R4 | 2026-09-22 | `curl` | `https://git.launchpad.net/ubuntu/+source/gdm3/plain/data/61-gdm.rules.in?h=ubuntu/noble-updates` | 200 | `gdm3-noble-updates-61-gdm.rules.in` `b1db35a79d951fc21210c1850154500cea9f7d244335fd130df54040f9907f00` (S2-35) |
 | R5 | 2026-09-22 | `curl` | `…/gdm3/plain/debian/custom.conf?h=ubuntu/noble-updates` (and `debian/default.conf`, `data/custom.conf`) | 404 | — ; the shipped `custom.conf` was not read |
 | R6 | 2026-09-22 | `curl` | `https://raw.githubusercontent.com/systemd/systemd/v255/units/user%40.service.in` | 200 | `systemd-v255-user@.service.in` `0b0147ccd524ae37b8dd37979f0007997574dd6ed690bf772c49ab901f19f616` (S2-29) |
 | R7 | 2026-09-22 | `api.launchpad.net` | `getPublishedBinaries` for `systemd`, noble amd64, Published | 200 | not saved; versions `255.4-1ubuntu8` (Release), `255.4-1ubuntu8.17` (Security, Updates) |
@@ -588,7 +588,7 @@ Read during stage 3 to settle whether an idle GNOME 46 session runs an X server.
 | R21 | 2026-09-23 | `curl` | `https://gitlab.gnome.org/GNOME/gnome-shell/-/raw/46.0/js/ui/screenShield.js` | 200 | `gnome-shell-46.0-js_ui_screenShield.js` `98c02ced1560569c589b47b971d8c9313eb7e8e2505ca50ee2d4806fff1cd11e` (S2-34) |
 | R22 | 2026-09-23 | `curl` | `https://gitlab.gnome.org/GNOME/gnome-shell/-/raw/46.0/js/ui/shellDBus.js` | 200 | `gnome-shell-46.0-js_ui_shellDBus.js` `d67b9cf07a511a7e921b65ab34721b16d384cf7c47dc1144df7c7e100c5086ce` (S2-34) |
 
-### S2-28 — Mutter 46.2's X11 display policy and GNOME Shell 46.0's Wayland unit: Xwayland on demand
+### S2-35 — Mutter 46.2's X11 display policy and GNOME Shell 46.0's Wayland unit: Xwayland on demand
 
 **Citation.** GNOME Mutter 46.2, `src/core/meta-context-main.c` and `data/org.gnome.mutter.gschema.xml.in`, tag `46.2`, https://gitlab.gnome.org/GNOME/mutter; GNOME Shell 46.0, `data/org.gnome.Shell@wayland.service.in`, tag `46.0`, https://gitlab.gnome.org/GNOME/gnome-shell; Ubuntu `gdm3` source package, `data/61-gdm.rules.in`, branch `ubuntu/noble-updates`, https://git.launchpad.net/ubuntu/+source/gdm3.
 
@@ -606,7 +606,7 @@ Read during stage 3 to settle whether an idle GNOME 46 session runs an X server.
 
 **Passages.** `units/user@.service.in`: `Description=User Manager for UID %i` / `After=user-runtime-dir@%i.service dbus.service systemd-oomd.service` / `[Service]` / `User=%i` / `PAMName=systemd-user` / `Type=notify-reload` / `ExecStart={{LIBEXECDIR}}/systemd --user` / `Slice=user-%i.slice` / `KillMode=mixed` / `Delegate=pids memory cpu`.
 
-**Coverage.** T1 — covers as structure: for each logged-in user, pid 1 starts a second `systemd` process, the user manager (`systemd --user`), in the user's slice with the CPU controller delegated to it; the session's user units — GNOME Shell's `org.gnome.Shell@wayland.service` (S2-28), the session bus's user unit (S2-04, S2-05), the PipeWire services (S2-18, S2-19) — run under it. No idle cadence is stated. T2, T4 — do not cover.
+**Coverage.** T1 — covers as structure: for each logged-in user, pid 1 starts a second `systemd` process, the user manager (`systemd --user`), in the user's slice with the CPU controller delegated to it; the session's user units — GNOME Shell's `org.gnome.Shell@wayland.service` (S2-35), the session bus's user unit (S2-04, S2-05), the PipeWire services (S2-18, S2-19) — run under it. No idle cadence is stated. T2, T4 — do not cover.
 
 ### S2-30 — gnome-settings-daemon 46.0's power plugin, its schema, and Ubuntu 24.04's override: blank on idle, no automatic suspend on AC
 
