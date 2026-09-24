@@ -87,6 +87,15 @@ def find_runs(root, cpu_model):
     return keyed, gated, other, probes
 
 
+def _causes(by_rep, reps):
+    out = {}
+    for i, k in enumerate(reps):
+        for cls, labs in ((by_rep[k].get("causes") or {}).items()):
+            for lab, n in labs.items():
+                out.setdefault(cls, {}).setdefault(lab, [0] * len(reps))[i] = n
+    return {cls: dict(sorted(labs.items(), key=lambda kv: -sum(kv[1]))) for cls, labs in sorted(out.items())}
+
+
 def pool_entry(name, by_rep):
     """by_rep: {k -> the entry's phase record}. The components, the residual and the tables, as desktop/pool.py
     builds them for a non-renderer subject."""
@@ -130,20 +139,36 @@ def pool_entry(name, by_rep):
             "rate_per_s": round(sum((by_rep[k].get("cron_event") or {}).get("count", 0) for k in reps)
                                 / sum(spans[k] for k in reps), 6) if sum(spans[k] for k in reps) else None,
             "span_s_total": round(sum(spans[k] for k in reps), 1)},
+        # D27: every wake by its cause, per repeat — `own`, `kernel`, `desktop` and `unknown` are the component's,
+        # `outside` (a package the desktop manifest does not hold, or the harness) and `event` (a desktop job bound
+        # to a clock time) left it and are stated here
+        "causes": _causes(by_rep, reps),
+        # every wake per instance before D23 and D27, per repeat: which instances never woke at all
+        "instance_wakes_all": {i: [(by_rep[k].get("instance_wakes_all") or {}).get(i, 0) for k in reps]
+                               for i in sorted({i for k in reps for i in (by_rep[k].get("instance_wakes_all") or {})})},
         "tables": {c: {"gap_ms": _cp.summary([comms[c]["gaps"].get(k, []) for k in reps]),
                        "run_ms": _cp.summary([comms[c]["runs"].get(k, []) for k in reps])} for c in chosen},
     }
 
 
+# D29: 9.5 D57 as 9.8 D21 extended it — components whose spread lies in part within one run (the probes: half to
+# all of the across-repeat spread), each its entry's whole activity once D27's causes are out, carried with their
+# half-widths over at least five repeats, their three values together; both spreads, the wakes per phase and the
+# weight are stated in each entry's scope (`within_run.py`)
+SESSION_SPREAD = {"pipewire": ("wireplumber/gmain",), "systemd": ("pid1/systemd",),
+                  "dbus-daemon": ("system-bus/dbus-daemon",)}
+
+
 def criterion(pooled):
     """Method §6 item 1: per entry, per carried component and the residual, the wake rate, gap mean and run mean,
-    each by its per-repeat mean; the standing tolerance, no exception invoked in advance."""
+    each by its per-repeat mean; the standing tolerance, or D29's exception for the components it names."""
     out = {}
     for name, ph in pooled.items():
         comps = [(c, ph["threads"][c]) for c in ph["components"]["selected"] if c in ph["threads"]]
         residual = ph["components"].get("residual")
         if not comps and not residual:     # an entry with nothing to carry cannot pass the rule
-            out[f"{name} (no components)"] = {"k": len(ph["repeats"]), "mean": None, "half_width": None, "passes": False}
+            out[f"{name} (no components)"] = {"k": len(ph["repeats"]), "mean": None, "half_width": None, "passes": False,
+                                               "carried": False}
             continue
         for comm, c in comps + ([("residual", residual)] if residual else []):
             for field, label in LIST_FIELDS:
@@ -155,10 +180,12 @@ def criterion(pooled):
                     vals, floor = [x.get("mean") if x else None for x in c.get(field) or []], ABS_FLOOR_MS
                 if not vals:
                     continue
-                out[f"{name} {comm} {label}"] = {**stability(vals, floor, MIN_REPEATS, keep_zero=True),
-                                                 "needed": _cp.repeats_needed(vals, floor)}
+                c_ = {**stability(vals, floor, MIN_REPEATS, keep_zero=True), "needed": _cp.repeats_needed(vals, floor)}
+                c_["session_spread"] = comm in SESSION_SPREAD.get(name, ())          # D29
+                c_["carried"] = c_["passes"] or (c_["session_spread"] and c_["k"] >= MIN_REPEATS)
+                out[f"{name} {comm} {label}"] = c_
     return {"tolerance": TOLERANCE, "abs_floor_ms": ABS_FLOOR_MS, "min_repeats": MIN_REPEATS, "quantities": out,
-            "passes": bool(out) and all(c["passes"] for c in out.values())}
+            "passes": bool(out) and all(c["carried"] for c in out.values())}
 
 
 def pool_app(app, reps):
@@ -218,10 +245,15 @@ def render(out):
             c = ph["components"]
             L += [f"## {name}", "", f"Components {c['selected']} cover {c['covered_share']} of "
                   f"{c['total_wakes_per_s']} wakes/s; residual {bool(c['residual'])}; sporadic {c['sporadic']}", ""]
+            left = [(cls, lab, sum(ns)) for cls in ("outside", "event") for lab, ns in (ph.get("causes") or {}).get(cls, {}).items()]
+            if left:
+                L += ["Left the components by cause (D27), wakes over the pooled repeats: "
+                      + "; ".join(f"{cls} — {lab} {n}" for cls, lab, n in left), ""]
         L += ["| quantity | k | mean | half-width | passes |", "|---|---|---|---|---|"]
         for name, c in e["stability"]["quantities"].items():
             hw = f"{c['half_width']:.1%}" if c.get("half_width") is not None else "—"
-            L.append(f"| {name} | {c['k']} | {c['mean']} | ±{hw} | {'yes' if c['passes'] else 'no'} |")
+            ok = "yes" if c["passes"] else ("carried (D29)" if c.get("carried") else "no")
+            L.append(f"| {name} | {c['k']} | {c['mean']} | ±{hw} | {ok} |")
         L.append("")
     return "\n".join(L) + "\n"
 

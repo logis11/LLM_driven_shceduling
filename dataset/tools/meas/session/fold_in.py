@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the four 9.9 archetype entries from the session campaign's pooled record (changelog D2–D7, D26).
+"""Generate the four 9.9 archetype entries from the session campaign's pooled record (changelog D2–D7, D26–D30).
 
   fold_in.py <pooled.json> <out.yaml>
 
@@ -7,8 +7,10 @@ One entry per program of the Ubuntu desktop session, in 9.5's measured form: `co
 and thread comm of the `steady` phase (D4, D6, D7), each with its `wakes_per_s` and its pooled `gap` and `run`
 quantile tables; no residual, no `focus_components`, no `stimulus`. The scope states what method §7 and the changelog
 require of each entry: the machine, the package versions, the state and what it is not, the limits of the
-observation, the instances that never woke or woke only sporadically, the cron session stated and not carried (D23,
-D26), and the foreign work on the measured CPU (D20, D22). The output is a YAML fragment for `dataset/archetypes.yaml`.
+observation, the instances that never woke or woke only sporadically, the wakes that left the components by cause
+(D27) and the cron session (D23, D26), each stated and not carried, the components carried with their half-widths
+under D29 with both spreads (D28), and the foreign work on the measured CPU (D20, D22). The output is a YAML fragment
+for `dataset/archetypes.yaml`.
 """
 
 import json
@@ -95,12 +97,86 @@ def component(comm, t, tab, indent="        "):
             f"{indent}  run: {dist(tab['run_ms']['q'], TAG)}"]
 
 
-def widest(prog, stab):
-    rows = [(c["half_width"], key) for key, c in stab["quantities"].items() if key.startswith(prog + " ")]
-    hw, key = max(rows)
-    rest = key[len(prog) + 1:]
-    label = next(lb for lb in LABEL if rest.endswith(" " + lb))
-    return f"`{rest[:-len(label) - 1]}` {LABEL[label]} ±{hw * 100:.2f} %", len(rows)
+# D28: where the carried components' spread lies — within one run, the unpolled region of the long-phase probes 36,
+# 41 and 44 read under D27's causes, a window of the phase's 1800 s every 60 s, against across the 24 repeats; half
+# the range over the mean (`within_run.py`)
+WITHIN = {
+    "wireplumber/gmain": ("±17.2–17.6 %", "±18.8–28.8 %", "±3.2–8.4 %", "±20.9 %", "±22.3 %", "±14.2 %"),
+    "pid1/systemd": ("±4.3–9.6 %", "±4.6–9.5 %", "±10.4–18.2 %", "±8.2 %", "±8.0 %", "±31.0 %"),
+    "system-bus/dbus-daemon": ("±23.4–28.4 %", "±25.3–47.0 %", "±13.6–16.7 %", "±51.2 %", "±41.3 %", "±41.8 %"),
+}
+
+
+def split_list(prog, stab):
+    """The entry's values: (passing [(half-width, component, label)], the components carried under D29). A carried
+    component's three values are carried together (9.5 D57), those that pass on their own with them."""
+    rows = []
+    for key, c in stab["quantities"].items():
+        if key.startswith(prog + " "):
+            rest = key[len(prog) + 1:]
+            label = next(lb for lb in LABEL if rest.endswith(" " + lb))
+            rows.append((rest[:-len(label) - 1], label, c))
+    carried = [comp for comp, _l, c in rows if not c["passes"] and c.get("carried")]
+    carried = list(dict.fromkeys(carried))
+    ok = [(c["half_width"], comp, label) for comp, label, c in rows if comp not in carried]
+    return ok, carried
+
+
+def fmt_value(v, label, unit=True):
+    if label == "wakes/s":
+        return f"{v:.4f}" + (" wakes/s" if unit else "")
+    if label.startswith("gap") and v >= 10000:
+        return f"{v / 1000:.1f}" + (" s" if unit else "")
+    return (f"{v:.1f}" if label.startswith("gap") else f"{v:.3f}") + (" ms" if unit else "")
+
+
+def stability_text(prog, e, stab, k):
+    ok, carried = split_list(prog, stab)
+    text = ""
+    if ok:
+        hw, comp, label = max(ok)
+        text = (f"Stability rule: {'all ' if not carried else ''}{len(ok)} value{'s' if len(ok) > 1 else ''} on the "
+                f"list hold{'s' if len(ok) == 1 else ''} within 5 % or 1 µs over the {k} repeats, the widest `{comp}` "
+                f"{LABEL[label]} ±{hw * 100:.2f} %. ")
+    for comp in carried:
+        th, parts = e["threads"][comp], []
+        for i, label in enumerate(LABEL):
+            q = stab["quantities"][f"{prog} {comp} {label}"]
+            vals = th["wakes_per_s"] if label == "wakes/s" else [x["mean"] for x in th[
+                "gap_ms" if label.startswith("gap") else "run_ms"] if x]
+            parts.append(f"{LABEL[label]} {fmt_value(q['mean'], label)} ±{q['half_width'] * 100:.1f} % "
+                         f"({fmt_value(min(vals), label, False)}–{fmt_value(max(vals), label)})")
+        w = WITHIN[comp]
+        n = [round(r * statistics.fmean(e["span_s"])) for r in th["wakes_per_s"]]
+        text += (f"`{comp}`'s three values are carried together with their half-widths under 9.5 D57 as 9.8 D21 "
+                 f"extended it (D28, D29): {'; '.join(parts)}. Within one run (the long-phase probes 36, 41 and 44, "
+                 f"a window of the phase every 60 s) they move by {w[0]}, {w[1]} and {w[2]} of their mean, against "
+                 f"{w[3]}, {w[4]} and {w[5]} across the repeats (half the range over the mean): the spread lies in "
+                 f"part within a run. It wakes {min(n)}–{max(n)} times a phase and is the entry's whole activity once "
+                 f"the wakes owed to outside causes are out (D27). ")
+    return text
+
+
+def causes_text(e, k):
+    c = e.get("causes") or {}
+    rng = lambda ns: f"{min(ns)}–{max(ns)}" if min(ns) != max(ns) else f"{min(ns)}"
+    text = ""
+    if c.get("outside"):
+        text += ("Wakes traced to a cause outside the observed desktop — a package Ubuntu 24.04's desktop manifest "
+                 "does not hold, or the harness — left the components and are stated (D27): "
+                 + "; ".join(f"{lab} {rng(ns)} a phase" for lab, ns in c["outside"].items()) + ". ")
+    if c.get("event"):
+        text += ("Desktop jobs bound to a clock time are events of the phase, stated and not carried (D27, in D23's "
+                 f"form): " + "; ".join(f"{lab} {sum(ns)} over the {k} repeats" for lab, ns in c["event"].items())
+                 + ". ")
+    if c.get("unknown"):
+        text += ("Kept, their cause not resolved by the trace: "
+                 + "; ".join(f"{lab} {sum(ns)} over the {k} repeats" for lab, ns in c["unknown"].items()) + ". ")
+    desk = c.get("desktop") or {}
+    if any("systemd-networkd" in lab for lab in desk):
+        text += ("The wakes systemd-networkd causes are kept by the package rule; whether a stock desktop, which runs "
+                 "NetworkManager, also runs networkd is unverified (D27). ")
+    return text
 
 
 def cron_text(e):
@@ -143,13 +219,13 @@ def entry(prog, e, run):
     if any(v != versions for v in run["versions"].values()):
         raise SystemExit("package versions differ across repeats")
     what, instances = PROGRAM[prog]
-    wide, n = widest(prog, run["stability"])
     foreign = run["foreign"].values()
     share = [f["share_of_phase"] for f in foreign]
     kth = [f["kernel"]["schedule_ins"] for f in foreign]
     scope = (f"One observation (phase decision 2; D8): {what.format(**versions)}, in {OBSERVED}; on {MACHINE}; {k} "
-             f"same-machine repeats, every landing pooled. {STATE_NOT[prog]} {LIMITS} Stability rule: all {n} values "
-             f"on the list hold within 5 % or 1 µs over the {k} repeats, the widest {wide}. ")
+             f"same-machine repeats, every landing pooled. {STATE_NOT[prog]} {LIMITS} ")
+    scope += stability_text(prog, e, run["stability"], k)
+    scope += causes_text(e, k)
     scope += cron_text(e)
     scope += (f"Foreign user-space work on the measured CPU {min(share) * 100:.5f}–{max(share) * 100:.4f} % of the "
               f"phase per repeat, under the 2 × 10⁻⁴ bound (D20, D22); per-CPU kernel threads "
@@ -158,7 +234,9 @@ def entry(prog, e, run):
     out += ["      scope: >-", "        " + scope]
 
     woke = {c.split("/", 1)[0] for c in e["threads"]}
-    silent = [i for i in instances if i not in woke]
+    every = e.get("instance_wakes_all") or {}
+    silent = [i for i in instances if i not in woke and not sum(every.get(i, [0]))]
+    left_only = [i for i in instances if i not in woke and sum(every.get(i, [0]))]
     notes = (f"Per-program archetype (D2, D5), bound by identity to {BINDING[prog]}: one task carries the program's "
              f"processes, each instance's threads its own components (D4, D6, D7; 9.5 D16), each sampled from its "
              f"measured gap and run quantiles (9.5 D17) over the task's lifetime and merged into one explicit event "
@@ -167,6 +245,11 @@ def entry(prog, e, run):
         notes += (" Present in every repeat and never woken in the phase: "
                   + ", ".join(f"`{i}`" for i in silent) + "; the entry carries no wake of "
                   + ("them." if len(silent) > 1 else "it."))
+    for i in left_only:
+        reps_with = [k for k, n in zip(e["repeats"], every[i]) if n]
+        notes += (f" `{i}` woke only in repeats {', '.join(str(k) for k in reps_with)} ({sum(every[i])} wakes), every "
+                  f"one of them taken out of the component by the cron session's window (D23) or by its cause (D27); "
+                  f"the entry carries none.")
     spor = comp.get("sporadic") or []
     cron = {r for r, n in zip(e["repeats"], e["cron_event"]["count"]) if n}
     if spor:

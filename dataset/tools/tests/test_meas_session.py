@@ -393,3 +393,65 @@ def test_the_fold_in_regenerates_the_four_entries_from_the_pooled_record(repo_ro
     for entry in fold_in.IDS.values():
         assert f"\n  {entry}:\n" in fragment
     assert "system-daemon" not in library
+
+
+def _causes_case():
+    """pid 1, the system bus (pid 400) and WirePlumber's worker (pid 531) as entries; php-fpm (pid 900) a runner
+    service; the workflow's bash (pid 950) in the runner agent's unit; cron (pid 960)."""
+    from meas.campaign.analyze import Row
+    from meas.session import causes as C
+    procs = {1: {"pid": 1, "comm": "systemd", "cgroup": "/init.scope"},
+             400: {"pid": 400, "comm": "dbus-daemon", "cgroup": "/meas.slice/dbus.service"},
+             531: {"pid": 531, "comm": "wireplumber", "cgroup": f"{U}/meas.slice/wireplumber.service"},
+             900: {"pid": 900, "comm": "php-fpm8.3", "cgroup": "/system.slice/php8.3-fpm.service"},
+             950: {"pid": 950, "comm": "bash", "cgroup": "/system.slice/hosted-compute-agent.service"},
+             960: {"pid": 960, "comm": "cron", "cgroup": "/system.slice/cron.service"},
+             970: {"pid": 970, "comm": "systemd-logind", "cgroup": "/system.slice/systemd-logind.service"}}
+    inst = {"systemd": {"pid1": {1}}, "dbus-daemon": {"system-bus": {400}}, "pipewire": {"wireplumber": {531}}}
+    R = lambda t, run, comm, tid, pid, st="S": Row(t, t, t + run / 1000, run, comm, tid, pid, st)
+    wakes = [R(10.0, 0.2, "systemd", 1, 1),            # php-fpm's notice
+             R(10.0003, 0.1, "dbus-daemon", 400, 400),  # pid 1 relays it on the bus
+             R(20.0, 0.2, "systemd", 1, 1, "D"),        # logind; pid 1 then blocks in the kernel
+             R(20.01, 0.1, "systemd", 1, 1),            # continued after the block
+             R(30.0, 0.05, "gmain", 532, 531),          # the workflow loop
+             R(30.1002, 0.05, "gmain", 532, 531),       # its timer, 100.2 ms on
+             R(40.0, 0.05, "gmain", 532, 531),          # a job cron ran: debian-sa1 1 1
+             R(50.0, 0.05, "gmain", 532, 531),          # a job cron ran: debian-sa1 60 2
+             R(60.0, 0.05, "gmain", 532, 531),          # a cat the loop forked
+             R(70.0, 0.05, "gmain", 532, 531)]          # its own timer
+    rows = [(9.9999, "php-fpm8.3", 900, 900, "systemd", 1, 1),
+            (10.0002, "systemd", 1, 1, "dbus-daemon", 400, 400),
+            (19.9999, "systemd-logind", 970, 970, "systemd", 1, 1),
+            (20.0099, "rcu_sched", 15, 15, "systemd", 1, 1),
+            (29.9999, "bash", 950, 950, "gmain", 532, 531),
+            (30.1001, "swapper", None, None, "gmain", 532, 531),
+            (39.0, "cron", 960, 960, "cron", 1001, 1001), (39.001, "cron", 1001, 1001, "sh", 1002, 1002),
+            (39.9999, "sh", 1002, 1002, "gmain", 532, 531),
+            (49.0, "cron", 960, 960, "cron", 1011, 1011), (49.001, "cron", 1011, 1011, "sh", 1012, 1012),
+            (49.9999, "sh", 1012, 1012, "gmain", 532, 531),
+            (59.0, "bash", 950, 950, "bash", 1021, 1021), (59.9999, "cat", 1021, 1021, "gmain", 532, 531),
+            (69.9999, "swapper", None, None, "gmain", 532, 531)]
+    cmds = {1002: "command -v debian-sa1 > /dev/null && debian-sa1 1 1",
+            1012: "command -v debian-sa1 > /dev/null && debian-sa1 60 2"}
+    c = C.Causes(sorted(wakes, key=lambda w: w.t_in), rows, [], procs, inst, {15}, re.compile(r"^rcu_"), cmds)
+    return c, wakes
+
+
+def test_a_wake_is_classed_by_its_cause_traced_through_the_trace():
+    # D27: a runner service and the chain it sets off through pid 1 leave; a wake after a kernel block keeps the cause
+    # of the wake it continues; the loop's wake and its 100.2 ms timer leave together; cron's jobs by their command
+    c, wakes = _causes_case()
+    keep, tally, gone = c.split(wakes)
+    by_t = {round(t, 4): (cls, lab) for t, cls, lab in gone}
+    assert by_t[10.0][0] == "outside" and "php8.3-fpm" in by_t[10.0][1]
+    assert by_t[10.0003][0] == "outside" and "php8.3-fpm" in by_t[10.0003][1]
+    assert by_t[30.0][0] == "outside" and "harness" in by_t[30.0][1]
+    assert by_t[30.1002][0] == "outside"                       # the follow-up goes with the wake that armed it
+    assert by_t[50.0] == ("event", "job sysstat-daily-sample (sysstat)")
+    assert by_t[60.0][0] == "outside" and "harness" in by_t[60.0][1]   # the cat's lineage reaches the loop's bash
+    kept = {round(r.t_in, 4) for r in keep}
+    assert kept == {20.0, 20.01, 40.0, 70.0}
+    assert "systemd-logind.service (systemd)" in tally["desktop"]
+    assert tally["desktop"]["systemd-logind.service (systemd)"] == 2   # the D-continuation carries logind's cause
+    assert tally["desktop"]["job sysstat-collect (sysstat)"] == 1
+    assert tally["own"]["idle CPU (timer or interrupt)"] == 1

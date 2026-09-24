@@ -1,0 +1,137 @@
+{
+ "pipewire wireplumber/gmain": {
+  "analysis": {
+   "repeats_with_it": 24,
+   "of": 24,
+   "threads": [
+    1
+   ]
+  },
+  "weight": {
+   "share_of_entry_wakes": 1.0,
+   "wakes_per_phase": [
+    14,
+    21
+   ],
+   "wakes_per_phase_mean": 16.8
+  },
+  "across": {
+   "wakes/s": 0.20896337722931432,
+   "gap mean (ms)": 0.22270385514663177,
+   "run mean (ms)": 0.14234875444839862
+  },
+  "within": {
+   "36": {
+    "positions": 143,
+    "clean_span_s": 10335.946,
+    "wakes/s": 0.17215088282504018,
+    "gap mean (ms)": 0.18776637042095407,
+    "run mean (ms)": 0.08350125016196544
+   },
+   "41": {
+    "positions": 143,
+    "clean_span_s": 10335.809,
+    "wakes/s": 0.17396593673965938,
+    "gap mean (ms)": 0.2880461458295319,
+    "run mean (ms)": 0.07779171083674623
+   },
+   "44": {
+    "positions": 143,
+    "clean_span_s": 10335.732,
+    "wakes/s": 0.17567567567567569,
+    "gap mean (ms)": 0.18990032394194473,
+    "run mean (ms)": 0.032199424285524546
+   }
+  }
+ },
+ "systemd pid1/systemd": {
+  "analysis": {
+   "repeats_with_it": 24,
+   "of": 24,
+   "threads": [
+    1
+   ]
+  },
+  "weight": {
+   "share_of_entry_wakes": 1.0,
+   "wakes_per_phase": [
+    126,
+    148
+   ],
+   "wakes_per_phase_mean": 134.9
+  },
+  "across": {
+   "wakes/s": 0.0815304582947446,
+   "gap mean (ms)": 0.07991114311179902,
+   "run mean (ms)": 0.3102933863749378
+  },
+  "within": {
+   "36": {
+    "positions": 143,
+    "clean_span_s": 10335.946,
+    "wakes/s": 0.042671706370915614,
+    "gap mean (ms)": 0.046421399313886155,
+    "run mean (ms)": 0.10433557282565502
+   },
+   "41": {
+    "positions": 143,
+    "clean_span_s": 10335.809,
+    "wakes/s": 0.09644117036729609,
+    "gap mean (ms)": 0.09520256470748482,
+    "run mean (ms)": 0.16216994428749695
+   },
+   "44": {
+    "positions": 143,
+    "clean_span_s": 10335.732,
+    "wakes/s": 0.06298253795533443,
+    "gap mean (ms)": 0.07080615999279972,
+    "run mean (ms)": 0.18249453058688928
+   }
+  }
+ },
+ "dbus-daemon system-bus/dbus-daemon": {
+  "analysis": {
+   "repeats_with_it": 24,
+   "of": 24,
+   "threads": [
+    1
+   ]
+  },
+  "weight": {
+   "share_of_entry_wakes": 1.0,
+   "wakes_per_phase": [
+    16,
+    42
+   ],
+   "wakes_per_phase_mean": 25.4
+  },
+  "across": {
+   "wakes/s": 0.5123000121182385,
+   "gap mean (ms)": 0.4133004089498766,
+   "run mean (ms)": 0.4176136363636364
+  },
+  "within": {
+   "36": {
+    "positions": 143,
+    "clean_span_s": 10335.946,
+    "wakes/s": 0.23388943408570487,
+    "gap mean (ms)": 0.35397716802840373,
+    "run mean (ms)": 0.15948543029105228
+   },
+   "41": {
+    "positions": 143,
+    "clean_span_s": 10335.809,
+    "wakes/s": 0.2584472732987585,
+    "gap mean (ms)": 0.470260843522707,
+    "run mean (ms)": 0.1363813563665731
+   },
+   "44": {
+    "positions": 143,
+    "clean_span_s": 10335.732,
+    "wakes/s": 0.2842942345924453,
+    "gap mean (ms)": 0.25254962766332867,
+    "run mean (ms)": 0.16674459641209408
+   }
+  }
+ }
+}

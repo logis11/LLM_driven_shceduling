@@ -142,30 +142,32 @@ Full tables: `task-9.8-browser-comms/campaign/results/results.md`, `campaign/res
 
 ## 9.9 — four entries, one campaign
 
-One subject, the Ubuntu 24.04 desktop session, carries the four entries that replace `system-daemon` — `compositor-shell` (GNOME Shell), `audio-server` (the PipeWire stack), `service-manager` (`systemd`) and `message-bus` (`dbus-daemon`), folded in at D26 — so every job observes all four and the repeats and jobs are shared. 24 repeats — 47–49, 51, 58, 60–63, 68, 69, 71–77, 79, 83, 85–88 — every one on the AMD EPYC 7763, kernel `6.17.0-1022-azure` in all of them, none excluded, one set of package versions in every repeat (`gnome-shell` 46.0-0ubuntu6~24.04.14, `pipewire` and `pipewire-pulse` 1.0.5-1ubuntu3.3, `wireplumber` 0.4.17-1ubuntu4.1, `systemd` 255.4-1ubuntu8.17, `dbus-daemon` 1.14.10-4ubuntu4.1). Each entry reads the `steady` phase, 1800 s (D22): the session idle past `idle-delay`, the shield up and locked, the monitor blanked (method §3). No display server in any repeat's census. `values` counts what the rule covers; `widest` is the largest half-width among them.
+One subject, the Ubuntu 24.04 desktop session, carries the four entries that replace `system-daemon` — `compositor-shell` (GNOME Shell), `audio-server` (the PipeWire stack), `service-manager` (`systemd`) and `message-bus` (`dbus-daemon`), folded in at D26 and again, re-analysed, at D30 — so every job observes all four and the repeats and jobs are shared. 24 repeats — 47–49, 51, 58, 60–63, 68, 69, 71–77, 79, 83, 85–88 — every one on the AMD EPYC 7763, kernel `6.17.0-1022-azure` in all of them, none excluded, one set of package versions in every repeat (`gnome-shell` 46.0-0ubuntu6~24.04.14, `pipewire` and `pipewire-pulse` 1.0.5-1ubuntu3.3, `wireplumber` 0.4.17-1ubuntu4.1, `systemd` 255.4-1ubuntu8.17, `dbus-daemon` 1.14.10-4ubuntu4.1). Each entry reads the `steady` phase, 1800 s (D22): the session idle past `idle-delay`, the shield up and locked, the monitor blanked (method §3). No display server in any repeat's census. Every wake is read by its cause (D27): wakes owed to a package Ubuntu 24.04's desktop manifest does not hold, or to the harness, and desktop jobs bound to a clock time leave the components and are stated. `values` counts what the rule covers; `widest` is the largest half-width among those that pass.
 
 | entry | components | repeats | values | pass | widest | stopped by | jobs (gated) | recorded input covered |
 |---|---|---|---|---|---|---|---|---|
-| `compositor-shell` | `JS Helper`, `gmain`, `gnome-shell` | 24 | 9 | 9 | `gnome-shell` run mean ±2.81 % | the rule | 42 (18), shared | none |
-| `audio-server` | `wireplumber/gmain` | 24 | 3 | 3 | run mean ±3.71 % | the rule | shared | none |
-| `service-manager` | `pid1/systemd` | 24 | 3 | 3 | run mean ±3.55 % | the rule | shared | none |
-| `message-bus` | `system-bus/dbus-daemon` | 24 | 3 | 3 | wakes/s ±3.02 % | the rule | shared | none |
+| `compositor-shell` | `JS Helper`, `gmain`, `gnome-shell` | 24 | 9 | 9 | `gnome-shell` run mean ±2.8 % | the rule | 42 (18), shared | none |
+| `audio-server` | `wireplumber/gmain` | 24 | 3 | 2 | carried (D29) | the rule, with D29 | shared | none |
+| `service-manager` | `pid1/systemd` | 24 | 3 | 2 | carried (D29) | the rule, with D29 | shared | none |
+| `message-bus` | `system-bus/dbus-daemon` | 24 | 3 | 0 | carried (D29) | the rule, with D29 | shared | none |
 
-| component | wakes/s | gap mean | run mean | widest of the three |
+| component | wakes/s | gap mean | run mean | half-widths (rate · gap · run) |
 |---|---|---|---|---|
-| `gnome-shell/JS Helper` | 0.3025 | 13.05 s | 0.0137 ms | ±1.51 % |
-| `gnome-shell/gmain` | 0.2499 | 4.00 s | 0.0497 ms | ±2.20 % |
-| `gnome-shell/gnome-shell` | 0.0348 | 28.75 s | 5.7007 ms | ±2.81 % |
-| `wireplumber/gmain` | 0.2132 | 4.68 s | 0.0383 ms | ±3.71 % |
-| `pid1/systemd` | 0.1792 | 5.57 s | 0.2460 ms | ±3.55 % |
-| `system-bus/dbus-daemon` | 0.1368 | 7.33 s | 0.2784 ms | ±3.02 % |
+| `gnome-shell/JS Helper` | 0.3025 | 13.05 s | 0.0137 ms | ±0.7 · ±0.7 · ±1.5 % |
+| `gnome-shell/gmain` | 0.2498 | 4.00 s | 0.0497 ms | ±0.1 · ±0.1 · ±2.2 % |
+| `gnome-shell/gnome-shell` | 0.0347 | 28.77 s | 5.7035 ms | ±1.5 · ±1.7 · ±2.8 % |
+| `wireplumber/gmain` | 0.0093 | 104.67 s | 0.0351 ms | ±4.5 · ±5.3 · ±3.0 %, carried |
+| `pid1/systemd` | 0.0750 | 13.26 s | 0.1676 ms | ±2.0 · ±1.9 · ±7.8 %, carried |
+| `system-bus/dbus-daemon` | 0.0141 | 49.41 s | 0.1173 ms | ±11.9 · ±10.0 · ±11.0 %, carried |
 
-- Coverage (method §5, the 95 % cut): GNOME Shell 99.97 % of 0.587 wakes/s, the PipeWire stack 100 % of 0.213, `systemd` 99.9 % of 0.179, `dbus-daemon` 100 % of 0.137; no entry carries a residual. `pipewire` and `pipewire-pulse` recorded no wake in the phase of any repeat, nor did the session bus. The user manager and GNOME Shell's `gnome-s:disk$0` woke only in repeats 47, 48, 49 and 51, 0.0002 wakes/s each over the pool, and are reported as sporadic, not carried.
-- A cron job's session (D23): repeats 47, 48, 49 and 51, the first batch, met one 317–365 s into the phase; the rows inside its window left each component — `systemd` 201, `dbus-daemon` 245, the PipeWire stack 37, GNOME Shell 12 — and are stated per repeat in `pooled.json` (`cron_event`). No other repeat met one.
+- Causes that left (D27), per phase: `php-fpm` (PHP 8.3's FastCGI service, which the runner image ships) 180–188 wakes of pid 1 and 185–225 of the system bus through pid 1; the workflow's "wait for the run" loop 355–362 of WirePlumber's worker, each with the worker's own timer 100.2 ms later; PHP's session cleanup and `podman` a few each. Desktop jobs bound to a clock time (sysstat's daily summary and 23:59 sample, `logrotate`, `man-db`, `fstrim`, `motd-news`, `anacron`) are stated as events. Before D27 the three entries read 0.179, 0.137 and 0.213 wakes/s.
+- Carried with their half-widths (D28, D29): the three components whose spread lies in part within one run — within a long-phase probe each value moves by half to all of its across-repeat spread — each its entry's whole activity, 14–21, 126–148 and 16–42 wakes a phase; their three values together, under 9.5 D57 as 9.8 D21 extended it.
+- Coverage (method §5, the 95 % cut): GNOME Shell 99.97 % of 0.587 wakes/s, every other entry 100 % of its one component; no residual. `pipewire` and `pipewire-pulse` recorded no wake in the phase of any repeat. The session bus woke 26–29 times in each of repeats 47, 48, 49 and 51 and in no other — all at 00:00 UTC, from Evolution's calendar and alarm daemons, inside the cron session's window — and the user manager 8 times in the same four; D23 and D27 took every one out, so the entries carry none. GNOME Shell's `gnome-s:disk$0` woke only in those four repeats, 0.0002 wakes/s over the pool, reported as sporadic, not carried.
+- A cron job's session (D23): repeats 47, 48, 49 and 51, the first batch, met the `sphinxsearch` indexer's at 00:00 UTC, 317–365 s into the phase; the rows inside its window left each component — `service-manager` 201, `message-bus` 245, `audio-server` 37, `compositor-shell` 12 — and are stated per repeat in `pooled.json` (`cron_event`). No other repeat met one.
 - Foreign work on the measured CPU: 18–43 user-space schedule-ins per repeat outside the four entries, 0.00097–0.0022 % of the phase against the 2 × 10⁻⁴ bound (D22); none by a pinned unit's other process. Kernel threads 11,608–15,472 schedule-ins per repeat, reported and not gated (D14).
 - Batches: the first batch of five in run #16 (repeat 50 gated); relaunches and added repeats in #17–#21; then 24 jobs to the pool's projection in #22 (D25), 15 of them landing. Every landing is pooled.
 
-Full tables: `task-9.9-daemons-session/campaign/results/results.md`, `campaign/results/pooled.json`; every job's model: `campaign/machine-draws.md`.
+Full tables: `task-9.9-daemons-session/campaign/results/results.md`, `campaign/results/pooled.json`; the placement of D28, `campaign/results/within-run.json`; every job's model: `campaign/machine-draws.md`.
 
 ## Machine draws
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Per-phase analysis of a 9.9 session run (changelog D4–D14; method §4, §5).
+"""Per-phase analysis of a 9.9 session run (changelog D4–D14, D23, D27; method §4, §5).
 
   analyze.py <run-dir> [--json out.json] [--phase NAME ...] [--from-s SECONDS]
 
@@ -17,6 +17,11 @@ Two counts sit beside the entries, from every row of the trace on the measured C
   - `foreign.kernel`: schedule-ins and CPU time of kernel threads, which cannot be moved at run time — reported;
   - `in_unit_other`: processes in a pinned unit that are not its program (an Xwayland, a helper) — moved off by the
     sweeps (D15), so any left on the measured CPU gate the repeat as `foreign.user` does.
+
+Every entry wake is traced to its cause (D27, `causes.py`): wakes owed to a package Ubuntu 24.04's desktop manifest
+does not hold, or to the harness, and desktop jobs bound to a clock time leave the components after D23's cron window
+and are stated per entry (`causes`), with every instance's wakes counted before either takes any out
+(`instance_wakes_all`).
 
 `llvmpipe-*` threads are left out of GNOME Shell's components, as `load_rows` leaves them out of every campaign
 (9.5 D15: the runner's software rasteriser, a venue artefact); their rows are counted and reported.
@@ -37,6 +42,7 @@ from meas.campaign.analyze import (   # noqa: E402  — one wake rule and one co
     ROW, TASK, Row, load_all_wakeups, load_wakeups, merge_resumes, open_text, per_thread,
 )
 from meas.desktop.analyze import phases_in, slice_profile  # noqa: E402
+from meas.session.causes import Causes, cron_commands, load_wakeup_rows  # noqa: E402
 
 ENTRIES = ("gnome-shell", "pipewire", "systemd", "dbus-daemon")
 
@@ -235,6 +241,14 @@ def analyze_phase(D, phase, meas_cpu, from_s=0.0, from_mono=None):
     mine = [r for r, _ in rows_cpu if r.pid in entry_pids and not r.comm.startswith("llvmpipe-")]
     mine, merged = merge_resumes(mine, wakeups, by_state=True)
     on_cpu = {cpu for r, cpu in rows_cpu if r.pid in entry_pids}
+    # D27: every wake traced to its cause; wakes caused from outside the observed desktop, and desktop jobs bound to
+    # a clock time, leave the component and are stated beside it
+    procs = {}
+    for c in censuses:
+        for p in c.get("procs") or []:
+            procs.setdefault(p["pid"], p)
+    causes = Causes(mine, load_wakeup_rows(wk) if wk else [], rows_cpu, procs, inst, kthreads, KTHREAD_NAME,
+                    cron_commands(os.path.join(D, "journal.follow.txt")))
 
     out = {"span_s": round(span, 3), "t0": round(t0, 6), "from_mono": round(cut, 6) if cut is not None else None,
            "resumes_merged": merged, "meas_cpu": meas_cpu,
@@ -248,7 +262,10 @@ def analyze_phase(D, phase, meas_cpu, from_s=0.0, from_mono=None):
     for e in ENTRIES:
         ipids = {i: pids for i, pids in inst.get(e, {}).items()}
         rows = [r for r in mine if any(r.pid in pids for pids in ipids.values())]
+        # every wake per instance before D23 and D27 take any out: an instance with none never woke in the phase
+        all_wakes = {i: sum(1 for r in rows if r.pid in pids) for i, pids in ipids.items()}
         rows, cron_events = split_cron(rows, cron_wins)        # D23: read without them, stated beside them
+        rows, tally, gone = causes.split(rows)                 # D27: likewise, by cause
         threads, samples = components(rows, ipids, span)
         out["entries"][e] = {
             "instances": {i: sorted(p) for i, p in ipids.items()},
@@ -261,6 +278,9 @@ def analyze_phase(D, phase, meas_cpu, from_s=0.0, from_mono=None):
                            "count": len(cron_events),
                            "runs_ms": [round(x, 3) for _, x in cron_events],
                            "at_s": [round(t - t0, 1) for t, _ in cron_events]},
+            "causes": tally,
+            "instance_wakes_all": all_wakes,
+            "left": [[round(t - t0, 1), cls, lab] for t, cls, lab in gone],
             "threads": threads, "_samples": samples}
     t_start = next((json.loads(ln)["mono_ns"] for ln in open(os.path.join(D, "edges.jsonl"))
                     if ln.strip() and json.loads(ln).get("phase") == phase and json.loads(ln).get("edge") == "start"), None) \
