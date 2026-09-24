@@ -490,3 +490,36 @@ def test_the_window_limit_reads_the_highest_window_not_the_repeat_count():
     short = [r for r in range(1, 44) if r not in (5, 43)]
     pool.mark_limited("code", {"repeats": short, "phases": {"driven": {"repeats": short}}}, crit2)
     assert not crit2["input_run mean, SWELL-KW (ms)"].get("limited")   # window 44 is still to come
+
+
+def test_the_results_render_sorts_an_exclusion_that_names_its_run():
+    # 9.5 D66: pool_runs keys a window that landed twice as "<window>@<run id>"; the renderer sorted the keys as
+    # integers and stopped on the first such pool (chrome's window 16, code's window 29)
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)
+    try:
+        rr = importlib.import_module("meas.campaign.render_results")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    keys = {"29@35838600778": "a", "5": "b", "16": "c"}
+    assert [k for k, _ in sorted(keys.items(), key=rr.EXCLUDED_ORDER)] == ["5", "16", "29@35838600778"]
+
+
+def test_repeats_that_share_an_exclusion_reason_are_named_once():
+    # pool_runs states one --exclude-why per pool, so the rendered record named every excluded repeat with the whole
+    # text repeated; code's two exclusions printed the same paragraph twice
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)
+    try:
+        rr = importlib.import_module("meas.campaign.render_results")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    by_why = {}
+    for k, why in sorted({"29@358": "D63 and D69", "5": "D63 and D69"}.items(), key=rr.EXCLUDED_ORDER):
+        by_why.setdefault(why, []).append(str(k))
+    line = "; ".join(f"repeat{'s' if len(ks) > 1 else ''} {', '.join(ks)} — {why}" for why, ks in by_why.items())
+    assert line == "repeats 5, 29@358 — D63 and D69"

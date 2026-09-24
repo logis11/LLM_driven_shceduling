@@ -14,6 +14,11 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pool import build_census  # noqa: E402  — D69: one definition of the build census
 
+# D66 keys a window that landed twice as "<window>@<run id>", so the window is what orders the list
+def EXCLUDED_ORDER(kv):
+    return int(str(kv[0]).split("@")[0])
+
+
 ORDER = ["soffice", "code", "thunderbird", "thunderbird-send", "chrome", "gimp", "kdenlive", "mpv-video", "mpv-audio", "webrtc"]
 
 
@@ -48,8 +53,11 @@ def main():
             lines.append(f"CPU model per repeat {d['cpu_model']}; kernel per repeat {d.get('kernel')}.")
             lines.append("")
         if d.get("excluded_repeats"):   # a repeat the validity step failed, with its reason (D47)
+            by_why = {}   # pool_runs states one reason per pool, so the repeats that share it are named together
+            for k, why in sorted(d["excluded_repeats"].items(), key=EXCLUDED_ORDER):
+                by_why.setdefault(why, []).append(str(k))
             lines.append("Left out of this pool: " + "; ".join(
-                f"repeat {k} — {why}" for k, why in sorted(d["excluded_repeats"].items(), key=lambda kv: int(kv[0]))) + ".")
+                f"repeat{'s' if len(ks) > 1 else ''} {', '.join(ks)} — {why}" for why, ks in by_why.items()) + ".")
             lines.append("")
         if d.get("stability"):
             crit.append((app, d["stability"]))

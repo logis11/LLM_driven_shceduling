@@ -1,6 +1,6 @@
 # Measured values — campaign record
 
-Every campaign behind a measured archetype value: per archetype the repeats, the values the rule covers, the widest margin among them, why it stopped, and the machine draws it took. Method: `measurement-campaign-workflow.md`. Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10` (`soffice`: `--since 38`; `thunderbird-send`: `--since 150 --exclude 29`; the `desktop` family: `--since 21`); the `session` family's rows with `dataset/tools/meas/session/pool.py` over the 24 repeats of release `meas-ci-session-2026-09-24`, since `pool_runs.py` lists only the first 30 artifacts of a run and each session job uploads about 30; job counts are the campaign runs' jobs, read from their job lists. Recorded 2026-09-20, the 9.8 rows 2026-09-22, the 9.9 rows 2026-09-24; the 9.5 rows were first recorded a day earlier against one headline median per archetype, which D29 and D30 replaced.
+Every campaign behind a measured archetype value: per archetype the repeats, the values the rule covers, the widest margin among them, why it stopped, and the machine draws it took. Method: `measurement-campaign-workflow.md`. Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10` (`soffice`: `--since 38`; `thunderbird-send`: `--since 150 --exclude 29`; the `desktop` family: `--since 21`; the `session` family: `--since 16 -- --tag meas-ci:session:2026-09-24`); job counts are the campaign runs' jobs, read from their job lists. Recorded 2026-09-20, the 9.8 rows 2026-09-22, the 9.9 rows 2026-09-24, the three re-measured 9.5 rows 2026-09-24; the 9.5 rows were first recorded a day earlier against one headline median per archetype, which D29 and D30 replaced.
 
 ## Campaigns
 
@@ -13,14 +13,16 @@ All on GitHub-hosted `ubuntu-24.04` runners, 4 vCPU, pinned to one CPU, AMD EPYC
 | `meas-ci:playback:2026-09-18` | 9.5 | `meas-playback.yml` | #10–#84 | 2026-09-18 09:56 UTC |
 | `meas-ci:interactive:2026-09-19` | 9.5 | `meas-interactive.yml` | #150–#244, `thunderbird-send` alone (the `send` re-observation) | 2026-09-19 11:18 UTC |
 | `meas-ci:background:2026-09-19` | 9.7 | `meas-background.yml` | #19–#58; `borg`'s repeats are in #24–#40, `steamcmd`'s pooled repeats in #47–#57 | 2026-09-19 23:16 UTC |
-| `meas-ci:interactive:2026-09-20` | 9.5 | `meas-interactive.yml` | #245–, `chrome` and `code` re-measured under D51 and D53 | 2026-09-20 08:04 UTC |
-| `meas-ci:playback:2026-09-20` | 9.5 | `meas-playback.yml` | #245–, `webrtc` re-measured under D54 | 2026-09-20 08:04 UTC |
+| `meas-ci:interactive:2026-09-20` | 9.5 | `meas-interactive.yml` | #245–#565, `chrome` and `code` re-measured under D51 and D53; `code` restarted at #376 under D61 and `chrome` at #438 under D65 | 2026-09-20 08:04 UTC |
+| `meas-ci:playback:2026-09-20` | 9.5 | `meas-playback.yml` | #245–#565, `webrtc` re-measured under D54 | 2026-09-20 08:04 UTC |
 | `meas-ci:desktop:2026-09-20` | 9.8 | `meas-desktop.yml` | #21–#50 | 2026-09-20 11:03 UTC |
 | `meas-ci:session:2026-09-24` | 9.9 | `meas-session.yml` | #16–#22; the four holding a landed repeat are #16, #20, #21, #22 | 2026-09-23 23:35 UTC (2026-09-24 KST) |
 
-## 9.5 — six archetypes measured, three being re-measured
+## 9.5 — nine archetypes measured
 
-The six whose rule holds, pooled in `task-9.5-interactive-typing/campaign/results-same-machine/` and rendered in `campaign/results-same-machine.md`. Every repeat on one AMD EPYC 7763, kernel `6.17.0-1022-azure` in all of them. `values` counts what the rule covers; `widest` is the largest half-width among them.
+### The six measured first (D26, D29, D30)
+
+Pooled in `task-9.5-interactive-typing/campaign/results-same-machine/` and rendered in `campaign/results-same-machine.md`. Every repeat on one AMD EPYC 7763, kernel `6.17.0-1022-azure` in all of them. `values` counts what the rule covers; `widest` is the largest half-width among them.
 
 | archetype | application | repeats | values | widest | stopped by | jobs (gated) | recorded input covered |
 |---|---|---|---|---|---|---|---|
@@ -38,7 +40,22 @@ The typing-driven applications also replay the 136M Keystrokes windows 1…k of 
 - `video-player`: its `vo` thread's projection swung between 24 and 31 repeats over ten repeats before settling; the rule held at 24.
 - `image-editor`, `video-editor`, `video-player`: the windows the gate stopped (4; 4; 3 and 5) were not retried once the rule held.
 
-Three applications are re-measured under the campaign launched 2026-09-20, their present values superseded (D55):
+### The three re-measured (D51, D53, D54), finished 2026-09-24
+
+Pooled in `task-9.5-interactive-typing/campaign/results-re-measured/` and rendered in `campaign/results-re-measured.md`. Every repeat on one AMD EPYC 7763, kernel `6.17.0-1022-azure`. Components are identified by process role and comm (D67), so a comm naming a thread of several processes is several components.
+
+| archetype | application | repeats | values | widest | stopped by | jobs (gated) | recorded input covered |
+|---|---|---|---|---|---|---|---|
+| `web-browser` | `chrome` | 38 (windows 1–38) | 18 + 30 reported at the window limit | idle `utility/HangWatcher` run mean ±2.99 % | the recording's last window (D32, D68) | 71 (31) | SWELL-KW Internet Explorer c1, every window the recording holds |
+| `code-editor` | `code` | 41 (windows 1–4, 6–42) | 26 + 3 carried (D57) | `input_run` mean under SWELL-KW ±4.93 % | the rule | 94 (49) | SWELL-KW Word c1, windows 1–42 of the 44 it holds |
+| `video-call` | `webrtc` | 45 | 39 + 7 carried (D57) | play `gpu/Chrome_ChildIOT` gap mean ±4.95 % | the rule | 102 (57) | none |
+
+- `web-browser`: its 30 values at the window limit are the operation phase's 27 (D46), the operation's duration mean and the two per-input means; the widest is the `input_run` mean under SWELL-KW, 1.701 ms ±8.33 %, whose spread follows how densely each participant typed — the recording's tail is sparse, windows 29, 35, 36, 37 and 38 replaying 47, 53, 80, 61 and 27 events against 200–1,300 earlier (D32). The 136M check's mean is ±4.09 % over the same repeats. One job was cancelled mid-measurement (window 31, cancelled with the `code` job that shared its run) and is not counted.
+- `code-editor`: window 5 is left out under D63 and the copy of window 29 that installed VS Code 1.139.0 under D69; both were re-measured or superseded, and the pool holds 1.138.0 in all 41 repeats. The three values carried under D57 are its `utility/libuv-worker` component (VS Code's Node worker pool), widest ±5.58 %. Two jobs were cancelled (window 30, launched before the build pin landed; and one duplicate) and are not counted.
+- `video-call`: the seven values carried under D57 are the audio path (D59), widest ±5.82 %; `play gpu/Chrome_ChildIOT`'s gap mean took 45 repeats, its wake rate taking discrete levels between sessions — 64.3–65.2 a second in 34 repeats, ~54 in four, ~46.6 in five, 36.5 in one.
+- The builds are stated per repeat (D69): `code` 1.138.0 in all 41; `chrome` 152.0.7977.82 in 29 and 153.0.8010.52 in 9 (windows 18, 20, 22, 27, 31, 33, 34, 37, 38); `webrtc` 152.0.7977.82 in 42 and 153.0.8010.52 in 3 (windows 37, 40, 45). Google's repository serves only its current version, so the mix is carried and stated: over `chrome`'s 38 repeats every carried value agrees between the two builds within 0.18–1.09 standard deviations of the 152 repeats' own spread, the operation duration within 0.38 and the 136M mean within 0.13.
+
+They replaced these values (D55):
 
 | archetype | application | why | replaces |
 |---|---|---|---|
