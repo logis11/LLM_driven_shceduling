@@ -1,6 +1,6 @@
 # Measured values — campaign record
 
-Every campaign behind a measured archetype value: per archetype the repeats, the values the rule covers, the widest margin among them, why it stopped, and the machine draws it took. Method: `measurement-campaign-workflow.md`. Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10` (`soffice`: `--since 38`; `thunderbird-send`: `--since 150 --exclude 29`; the `desktop` family: `--since 21`); job counts are the campaign runs' jobs, read from their job lists. Recorded 2026-09-20, the 9.8 rows 2026-09-22; the 9.5 rows were first recorded a day earlier against one headline median per archetype, which D29 and D30 replaced.
+Every campaign behind a measured archetype value: per archetype the repeats, the values the rule covers, the widest margin among them, why it stopped, and the machine draws it took. Method: `measurement-campaign-workflow.md`. Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10` (`soffice`: `--since 38`; `thunderbird-send`: `--since 150 --exclude 29`; the `desktop` family: `--since 21`); the `session` family's rows with `dataset/tools/meas/session/pool.py` over the 24 repeats of release `meas-ci-session-2026-09-24`, since `pool_runs.py` lists only the first 30 artifacts of a run and each session job uploads about 30; job counts are the campaign runs' jobs, read from their job lists. Recorded 2026-09-20, the 9.8 rows 2026-09-22, the 9.9 rows 2026-09-24; the 9.5 rows were first recorded a day earlier against one headline median per archetype, which D29 and D30 replaced.
 
 ## Campaigns
 
@@ -16,6 +16,7 @@ All on GitHub-hosted `ubuntu-24.04` runners, 4 vCPU, pinned to one CPU, AMD EPYC
 | `meas-ci:interactive:2026-09-20` | 9.5 | `meas-interactive.yml` | #245–, `chrome` and `code` re-measured under D51 and D53 | 2026-09-20 08:04 UTC |
 | `meas-ci:playback:2026-09-20` | 9.5 | `meas-playback.yml` | #245–, `webrtc` re-measured under D54 | 2026-09-20 08:04 UTC |
 | `meas-ci:desktop:2026-09-20` | 9.8 | `meas-desktop.yml` | #21–#50 | 2026-09-20 11:03 UTC |
+| `meas-ci:session:2026-09-24` | 9.9 | `meas-session.yml` | #16–#22; the four holding a landed repeat are #16, #20, #21, #22 | 2026-09-23 23:35 UTC (2026-09-24 KST) |
 
 ## 9.5 — six archetypes measured, three being re-measured
 
@@ -122,6 +123,33 @@ Components whose spread lies between sessions, their three values together (D21;
 
 Full tables: `task-9.8-browser-comms/campaign/results/results.md`, `campaign/results/pooled.json`.
 
+## 9.9 — four entries, one campaign
+
+One subject, the Ubuntu 24.04 desktop session, carries the four entries that replace `system-daemon`, so every job observes all four and the repeats and jobs are shared. 24 repeats — 47–49, 51, 58, 60–63, 68, 69, 71–77, 79, 83, 85–88 — every one on the AMD EPYC 7763, kernel `6.17.0-1022-azure` in all of them, none excluded, one set of package versions in every repeat (`gnome-shell` 46.0-0ubuntu6~24.04.14, `pipewire` and `pipewire-pulse` 1.0.5-1ubuntu3.3, `wireplumber` 0.4.17-1ubuntu4.1, `systemd` 255.4-1ubuntu8.17, `dbus-daemon` 1.14.10-4ubuntu4.1). Each entry reads the `steady` phase, 1800 s (D22): the session idle past `idle-delay`, the shield up and locked, the monitor blanked (method §3). No display server in any repeat's census. `values` counts what the rule covers; `widest` is the largest half-width among them.
+
+| entry | components | repeats | values | pass | widest | stopped by | jobs (gated) | recorded input covered |
+|---|---|---|---|---|---|---|---|---|
+| GNOME Shell | `JS Helper`, `gmain`, `gnome-shell` | 24 | 9 | 9 | `gnome-shell` run mean ±2.81 % | the rule | 42 (18), shared | none |
+| PipeWire stack | `wireplumber/gmain` | 24 | 3 | 3 | run mean ±3.71 % | the rule | shared | none |
+| `systemd` | `pid1/systemd` | 24 | 3 | 3 | run mean ±3.55 % | the rule | shared | none |
+| `dbus-daemon` | `system-bus/dbus-daemon` | 24 | 3 | 3 | wakes/s ±3.02 % | the rule | shared | none |
+
+| component | wakes/s | gap mean | run mean | widest of the three |
+|---|---|---|---|---|
+| `gnome-shell/JS Helper` | 0.3025 | 13.05 s | 0.0137 ms | ±1.51 % |
+| `gnome-shell/gmain` | 0.2499 | 4.00 s | 0.0497 ms | ±2.20 % |
+| `gnome-shell/gnome-shell` | 0.0348 | 28.75 s | 5.7007 ms | ±2.81 % |
+| `wireplumber/gmain` | 0.2132 | 4.68 s | 0.0383 ms | ±3.71 % |
+| `pid1/systemd` | 0.1792 | 5.57 s | 0.2460 ms | ±3.55 % |
+| `system-bus/dbus-daemon` | 0.1368 | 7.33 s | 0.2784 ms | ±3.02 % |
+
+- Coverage (method §5, the 95 % cut): GNOME Shell 99.97 % of 0.587 wakes/s, the PipeWire stack 100 % of 0.213, `systemd` 99.9 % of 0.179, `dbus-daemon` 100 % of 0.137; no entry carries a residual. `pipewire` and `pipewire-pulse` recorded no wake in the phase of any repeat, nor did the session bus. The user manager and GNOME Shell's `gnome-s:disk$0` woke only in repeats 47, 48, 49 and 51, 0.0002 wakes/s each over the pool, and are reported as sporadic, not carried.
+- A cron job's session (D23): repeats 47, 48, 49 and 51, the first batch, met one 317–365 s into the phase; the rows inside its window left each component — `systemd` 201, `dbus-daemon` 245, the PipeWire stack 37, GNOME Shell 12 — and are stated per repeat in `pooled.json` (`cron_event`). No other repeat met one.
+- Foreign work on the measured CPU: 18–43 user-space schedule-ins per repeat outside the four entries, 0.00097–0.0022 % of the phase against the 2 × 10⁻⁴ bound (D22); none by a pinned unit's other process. Kernel threads 11,608–15,472 schedule-ins per repeat, reported and not gated (D14).
+- Batches: the first batch of five in run #16 (repeat 50 gated); relaunches and added repeats in #17–#21; then 24 jobs to the pool's projection in #22 (D25), 15 of them landing. Every landing is pooled.
+
+Full tables: `task-9.9-daemons-session/campaign/results/results.md`, `campaign/results/pooled.json`; every job's model: `campaign/machine-draws.md`.
+
 ## Machine draws
 
 The build campaign, complete: 28 jobs, 14 on the AMD EPYC 7763 (50.0 %), 12 stopped by the machine gate — Intel Xeon Platinum 8573C 4, AMD EPYC 9V74 4, AMD EPYC 9V45 2, Intel Xeon Platinum 8370C 1, Intel Xeon 6973P-C 1 — and 2 cancelled.
@@ -129,3 +157,5 @@ The build campaign, complete: 28 jobs, 14 on the AMD EPYC 7763 (50.0 %), 12 stop
 The 9.5 campaigns of 2026-09-18 and 2026-09-19, over the six applications whose rule holds and complete for them: 252 jobs — 144 landed on the AMD EPYC 7763 (57.1 %, one of them `thunderbird-send`'s dry check), 107 stopped by the gate, 1 cancelled. The model is recorded for 104 of those stops, the reports the loop read: AMD EPYC 9V74 47, Intel Xeon Platinum 8573C 19, AMD EPYC 9V45 18, Intel Xeon 6973P-C 12, Intel Xeon Platinum 8370C 8. Per application, gate stops: `thunderbird-send` 32, `mpv-video` 27, `mpv-audio` 24, `soffice` 11 (5 of them in the pooled campaign, 6 in the superseded first design), `kdenlive` 10, `gimp` 3. The 2026-09-20 campaign re-measuring `chrome`, `code` and `webrtc` is still running.
 
 The 9.8 desktop campaign, complete: 96 jobs — 55 landed on the AMD EPYC 7763 (57.3 %, all pooled), 41 stopped by the machine gate: AMD EPYC 9V74 19, Intel Xeon Platinum 8573C 9, AMD EPYC 9V45 7, Intel Xeon 6973P-C 4, Intel Xeon Platinum 8370C 2. Per entry, gate stops: `element` 14, `chrome-hidden` 11, `steam` 9, `chrome-visible` 7.
+
+The 9.9 session campaign, complete: 42 jobs — 24 landed on the AMD EPYC 7763 (57.1 %, all pooled), 18 stopped by the machine gate: AMD EPYC 9V74 6, Intel Xeon Platinum 8573C 5, AMD EPYC 9V45 3, Intel Xeon 6973P-C 3, Intel Xeon Platinum 8370C 1. With the tooling's dry runs and the long-phase probes, neither of them a repeat, 38 of 77 jobs drew the EPYC 7763 (`task-9.9-daemons-session/campaign/machine-draws.md`).
