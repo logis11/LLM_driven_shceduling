@@ -151,3 +151,26 @@ def test_demand_window_enforced(tmp_path, library, schema):
     timeline = Timeline(path, library)
     canonical, report = compile_timeline(timeline, library, "single")
     assert lint_canonical(canonical, schema, report=report, mode="single") == []
+
+
+def test_a_heavy_event_states_its_runs_and_no_gap(tmp_path):
+    # 9.5 D64: chrome's MemoryInfra pass is carried as its own stated event — its runs, their count and the span they
+    # were counted over. It states no interval, because no repeat held two of them to measure one.
+    import yaml
+    from wlc import linter
+    ev = {"comm": "MemoryInfra", "run_floor_ms": 30, "count": 8, "span_s": 22800.1, "rate_per_s": 0.000351,
+          "run": {"dist": "quantiles", "p": [50939, 50939, 52001, 53255, 54695, 55068, 59377, 59997, 59997, 59997],
+                  "sampling": "per-iteration", "source": "meas-ci"}}
+    lib = {"archetypes": {"web-browser": {"category_source": "meas", "lifetime": "segment-bound",
+                                          "pattern": {"program": []}, "params": {"heavy_events": [ev]}}}}
+    a = tmp_path / "archetypes.yaml"; a.write_text(yaml.safe_dump(lib))
+    src = tmp_path / "sources.yaml"; src.write_text(yaml.safe_dump({"sources": {"meas-ci": {"type": "measurement"}}}))
+    refs = tmp_path / "references.md"; refs.write_text("- `meas-ci` — the campaign's own runs\n")
+    errs = linter.lint_repo(str(a), str(src), str(refs))
+    assert not [e for e in errs if "heavy_events" in e], errs
+
+    ev_gap = dict(ev, gap=ev["run"])
+    lib["archetypes"]["web-browser"]["params"]["heavy_events"] = [ev_gap]
+    a.write_text(yaml.safe_dump(lib))
+    errs = linter.lint_repo(str(a), str(src), str(refs))
+    assert any("states no gap" in e for e in errs), errs

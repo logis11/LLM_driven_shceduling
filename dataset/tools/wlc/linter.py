@@ -87,6 +87,21 @@ def lint_repo(archetypes_path, sources_path, references_md, freeze=False):
                             if field in comp:
                                 errors.extend(_check_param(f"{where}.{oname}.components[{i}].{field}", comp[field], registry, freeze))
                 continue
+            if pname == "heavy_events":
+                # 9.5 D64: a rare run carried as its own stated event, not as a component's wake — what was measured
+                # (the runs, their count and the span counted over) and no interval, none having been measured
+                if not isinstance(param, list) or not param:
+                    errors.append(f"{where}: must be a non-empty list of events")
+                    continue
+                for i, ev in enumerate(param):
+                    for field in ("comm", "count", "span_s", "rate_per_s", "run"):
+                        if field not in ev:
+                            errors.append(f"{where}[{i}]: missing {field!r}")
+                    if "run" in ev:
+                        errors.extend(_check_param(f"{where}[{i}].run", ev["run"], registry, freeze))
+                    if "gap" in ev:
+                        errors.append(f"{where}[{i}]: a heavy event states no gap — none is measured (D64)")
+                continue
             if pname == "stimulus":
                 # 9.5 fold-in (D18): a replayed stream; the file must exist beside the library
                 stream = param.get("stream")

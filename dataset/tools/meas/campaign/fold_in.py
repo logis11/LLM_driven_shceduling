@@ -16,7 +16,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from pool import build_census  # noqa: E402  — D69: one definition of the build census
+from pool import QUANTILE_PROBS, build_census  # noqa: E402  — D69: one definition of the build census
 
 RUN_TAG = {"interactive": "meas-ci:interactive:3", "playback": "meas-ci:playback:3"}  # the D3 campaign; --tag overrides
 
@@ -28,7 +28,9 @@ ARCHETYPES = {
                       "swell-word-c1", "swell-icmi14:word-c1", []),
     "code-editor": ("code", "Visual Studio Code {version} (vendor .deb), the TypeScript project sindresorhus/got at commit 64f21e2a (tag v16.0.0, dependencies installed; design) open on source/index.ts with the built-in TypeScript language server running", "input",
                     "swell-word-c1", "swell-icmi14:word-c1", []),
-    "mail-client": ("thunderbird", "{version} (snap via apt), a compose window over a pre-seeded local account", "input",
+    # 9.7 D3 and D31, D36: mail-client is re-observed whole as thunderbird-send — the same application with a send
+    # operation, its values replacing the compose-only entry's
+    "mail-client": ("thunderbird-send", "{version} (vendor .deb), a compose window over a local account whose SMTP server is a loopback peer (aiosmtpd, no authentication or TLS, on the harness CPUs); operation send: a reply with a short body and one Word document attached — the Writer setup state's document (100 sections of five 100-word paragraphs, ten 1024×768 pictures; design after CpsMark+ §CA's attachment kinds, no source stating a size) saved as .docx, 41,555,063 B on the runner and 56,946,735 B as the peer receives it, the same size in every repeat and not the same bytes (D49); completion when the copy into the Sent folder lands, the peer's own stamp recorded beside it", "input",
                     "swell-outlook-c23", "swell-icmi14:outlook-c23", []),
     "web-browser": ("chrome", "{version} (preinstalled), a local page with a text area and 400 paragraphs; the browser process, GPU and utility processes — renderer processes excluded (renderer-hidden, renderer-visible); operation page-load: the scripted feed page feed.html (300 posts, thirty 1600×1200 pictures, a 200 000-record sort; design after PCMark 10 pp. 52–53 and CpsMark+ §4.3.3) from a local server, completion by the page's title after first paint", "input",
                     "swell-ie-c1", "swell-icmi14:ie-c1", []),
@@ -94,6 +96,28 @@ def components_block(ph, tag, key, indent="      "):
     return lines
 
 
+def heavy_events_block(ph, tag, indent="      "):
+    """D64: a rare run the component's wakes leave out — chrome's MemoryInfra pass, 50.9–60.0 ms against its regular
+    runs of at most 11.5 ms — carried as its own stated event. Only what was measured: the run quantiles, the count and
+    the span they were counted over, and the rate that follows. No gap distribution, because none was measured — most
+    repeats saw the event once or not at all, so no repeat holds an interval between two of them."""
+    h = ph.get("heavy_event")
+    if not h or not h.get("runs_ms"):
+        return []
+    runs = sorted(h["runs_ms"])
+    q = [runs[min(int(round(f * (len(runs) - 1))), len(runs) - 1)] for f in QUANTILE_PROBS]
+    return [f"{indent}heavy_events:",
+            f"{indent}  - comm: {json.dumps(h['comm'])}",
+            f"{indent}    run_floor_ms: {h['run_floor_ms']:g}",
+            f"{indent}    count: {sum(h['count'])}",
+            f"{indent}    span_s: {h['span_s_total']:.1f}",
+            f"{indent}    rate_per_s: {h['rate_per_s']:g}",
+            f"{indent}    run: {dist(q, tag)}",
+            f"{indent}  # D64: {sum(h['count'])} runs of at least {h['run_floor_ms']:g} ms over {h['span_s_total']:.0f} s of idle phase, "
+            f"{min(runs):.1f}–{max(runs):.1f} ms; their runs leave the components' wakes, so the residual converges. "
+            f"No interval is stated: no repeat holds two of them."]
+
+
 KEYS_ONLY = {"office-writer", "web-browser"}  # D28, D65: the stream's keys only (appdefs KINDS=key)
 
 
@@ -117,6 +141,7 @@ def entry(aid, spec, d):
         out.append("      stimulus:")
         out.append(f"        {{stream: {stream}, sampling: per-task, source: \"{stim_tag}\"}}")
     out += components_block(ph_idle, tag, "components")
+    out += heavy_events_block(ph_idle, tag)
     if kind == "cadence":
         out += components_block(d["phases"]["driven"], tag, "focus_components")
     if "op" in d["phases"] and d["phases"]["op"].get("operation"):

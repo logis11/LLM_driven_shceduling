@@ -60,27 +60,27 @@ archetypes:
             - RUN: event
     params:
       input_run:
-        {dist: quantiles, p: [1393, 1735, 2258, 2900, 4561, 7420, 10944, 12340, 21092, 109265], sampling: per-iteration, source: "meas-ci:interactive:6"}
+        {dist: quantiles, p: [2049, 2364, 2532, 2850, 3230, 6328, 9551, 10167, 11367, 62153], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
       stimulus:
         {stream: swell-word-c1, sampling: per-task, source: "swell-icmi14:word-c1"}
       components:
         - comm: "soffice.bin"
           threads: 1
-          wakes_per_s: 3.448
-          gap: {dist: quantiles, p: [222, 318, 346, 401, 98195, 600663, 600684, 600696, 600712, 600757], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [12, 13, 15, 23, 76, 325, 353, 368, 394, 697], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        # 1 comms cover 100.0 % of 3.4 wakes/s (D16, target 95 %); the rest pooled as `residual`
+          wakes_per_s: 3.459
+          gap: {dist: quantiles, p: [245, 314, 356, 386, 94198, 600682, 600693, 600706, 600718, 600749], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
+          run: {dist: quantiles, p: [21, 25, 25, 27, 70, 311, 339, 355, 389, 429], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
+        # 1 comms cover 100.0 % of 3.5 wakes/s (D16, target 95 %); the rest pooled as `residual`
     lifetime: segment-bound
     binding_params: []
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "interactive:6, repeats [1, 2, 3, 4, 5]"
-      stats: ["idle wakes/s 3.4\u20133.5", "idle cpu-share 0.0005\u20130.0006", "driven wakes/s 31.6\u201343.0", "driven cpu-share 0.0122\u20130.0166", "driven-alt wakes/s 43.7\u201352.6", "driven-alt cpu-share 0.0155\u20130.0320", "input_run p50 ms per repeat [5.082, 4.084, 4.299, 4.89, 4.654]"]
+      run: "interactive:2026-09-18, repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], runs 35341238784, 35341485208, 35430758081, 35432930785, 35434332697, 35435880078, 35437191456, 35438537682, 35440351728, 35441577685, 35443052230"
+      stats: ["idle wakes/s 3.4\u20133.5", "idle cpu-share 0.0005\u20130.0007", "driven wakes/s 19.9\u201340.0", "driven cpu-share 0.0059\u20130.0140", "driven-alt wakes/s 39.6\u201356.5", "driven-alt cpu-share 0.0134\u20130.0229", "input_run p50 ms per repeat [3.325, 3.487, 3.22, 3.351, 3.251, 3.14, 3.14, 3.175, 3.129, 3.039, 2.717, 2.937, 3.355, 3.265]"]
       scope: >-
-        One observation (phase decision 2; D3, D10): LibreOffice 24.2.7.2 420(Build:2) (Ubuntu 24.04 apt), a generated document of about 76 pages (100 sections of five 100-word paragraphs, ten 1024×768 pictures; design — no source states a length, S7) with the stream typing at its end, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. Stimulus: SWELL-KW stream swell-word-c1 replayed per event by xdotool at recorded gaps (error p99 1.24 ms), keys and pointer events together, pointer positions scaled into the content area (D5, D12); the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the process tree until the next input minus the idle rate. Stimulus sensitivity (pre-registered, method §3): under a 136M Keystrokes transcription stream (dhakal-chi18) the per-input run p50 is 5.09 ms against 4.56 ms under SWELL-KW (+12 %); the archetype carries SWELL-KW. Values are this software on this machine, not desktop truth (D10).
+        One observation (phase decision 2; D3, D10, D26): LibreOffice 24.2.7.2 420(Build:2) (Ubuntu 24.04 apt), a generated document of about 76 pages (100 sections of five 100-word paragraphs, ten 1024×768 pictures; design — no source states a length, S7) with the stream typing at its end, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763 64-Core Processor, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. Stimulus: SWELL-KW stream swell-word-c1, its keystrokes replayed by xdotool at their recorded times (error p99 1.24 ms) and its clicks, scrolls and drags left out, so the typing stays at the document's end (D28; the archetype carries typing, not document navigation); the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the process tree until the next input minus the idle rate. Stimulus sensitivity (pre-registered, method §3): under a 136M Keystrokes transcription stream (dhakal-chi18) the per-input run p50 is 4.05 ms against 3.23 ms under SWELL-KW (+25 %); the archetype carries SWELL-KW. Values are this software on this machine, not desktop truth (D10).
     modeling_notes: >-
-      Per-application archetype (D2): one task carries the whole process tree merged (D14). Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled residual stands for the comms below the coverage cut. Input wakes: a contiguous slice of swell-word-c1 equal to each focus window, at a seed-drawn offset (D18); the slice preserves the recording's burst-and-pause structure.
+      Per-application archetype (D2): one task carries the whole process tree merged (D14). Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled residual stands for the comms below the coverage cut. Input wakes: a contiguous slice of swell-word-c1 equal to each focus window, at a seed-drawn offset (D18); the slice preserves the recording's burst-and-pause structure. Sporadic wakes, not carried as components (D43): `residual` (oosplash) in the driven-alt phase, repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], 0.0017 wakes/s.
 
   code-editor:
     category_source: meas
@@ -91,51 +91,66 @@ archetypes:
             - RUN: event
     params:
       input_run:
-        {dist: quantiles, p: [5987, 12963, 14265, 51647, 77059, 110764, 170561, 224791, 461893, 849284], sampling: per-iteration, source: "meas-ci:interactive:8"}
+        {dist: quantiles, p: [0, 12183, 13631, 39690, 70873, 101170, 166568, 227193, 495354, 861909], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
       stimulus:
         {stream: swell-word-c1, sampling: per-task, source: "swell-icmi14:word-c1"}
       components:
-        - comm: "code"
-          threads: 19
-          wakes_per_s: 40.722
-          gap: {dist: quantiles, p: [4, 8, 12, 90, 2244, 208108, 959022, 2942484, 8108123, 8108383], sampling: per-iteration, source: "meas-ci:interactive:8"}
-          run: {dist: quantiles, p: [2, 3, 4, 8, 26, 106, 478, 1030, 1610, 6589], sampling: per-iteration, source: "meas-ci:interactive:8"}
-        - comm: "VizCompositorTh"
+        - comm: "gpu/VizCompositorTh"
           threads: 1
-          wakes_per_s: 24.324
-          gap: {dist: quantiles, p: [44, 80, 120, 705, 7070, 17095, 132686, 306921, 409259, 411772], sampling: per-iteration, source: "meas-ci:interactive:8"}
-          run: {dist: quantiles, p: [9, 12, 15, 23, 38, 64, 84, 2146, 2494, 2635], sampling: per-iteration, source: "meas-ci:interactive:8"}
-        - comm: "Compositor"
+          wakes_per_s: 22.868
+          gap: {dist: quantiles, p: [73, 111, 138, 807, 8079, 17123, 175237, 323251, 435548, 459793], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+          run: {dist: quantiles, p: [19, 22, 23, 29, 42, 62, 94, 2305, 2409, 2548], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+        - comm: "renderer/Compositor"
           threads: 1
-          wakes_per_s: 23.166
-          gap: {dist: quantiles, p: [25, 48, 64, 742, 2716, 16323, 196984, 326073, 413357, 416131], sampling: per-iteration, source: "meas-ci:interactive:8"}
-          run: {dist: quantiles, p: [5, 7, 9, 25, 54, 100, 189, 259, 404, 512], sampling: per-iteration, source: "meas-ci:interactive:8"}
-        - comm: "Chrome_ChildIOT"
-          threads: 6
-          wakes_per_s: 21.962
-          gap: {dist: quantiles, p: [13, 23, 36, 615, 6335, 17173, 254681, 409679, 5000849, 12622639], sampling: per-iteration, source: "meas-ci:interactive:8"}
-          run: {dist: quantiles, p: [4, 6, 8, 12, 19, 29, 46, 49, 76, 249], sampling: per-iteration, source: "meas-ci:interactive:8"}
-        - comm: "libuv-worker"
+          wakes_per_s: 22.806
+          gap: {dist: quantiles, p: [36, 48, 57, 805, 2811, 16252, 176956, 339934, 441162, 461981], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+          run: {dist: quantiles, p: [7, 8, 11, 27, 52, 101, 198, 253, 397, 482], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+        - comm: "gpu/Chrome_ChildIOT"
+          threads: 1
+          wakes_per_s: 19.677
+          gap: {dist: quantiles, p: [21, 30, 39, 762, 8205, 17144, 228076, 351749, 449043, 462194], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+          run: {dist: quantiles, p: [9, 10, 11, 16, 20, 28, 42, 45, 70, 89], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+        - comm: "renderer/code"
+          threads: 1
+          wakes_per_s: 19.298
+          gap: {dist: quantiles, p: [10, 11, 13, 162, 3634, 44395, 204296, 293801, 412277, 473911], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+          run: {dist: quantiles, p: [4, 5, 6, 12, 46, 144, 1214, 1368, 1602, 2401], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+        - comm: "utility/code"
           threads: 10
-          wakes_per_s: 10.142
-          gap: {dist: quantiles, p: [3, 4, 8, 13, 73, 324962, 3799184, 5007707, 5010402, 5011445], sampling: per-iteration, source: "meas-ci:interactive:8"}
-          run: {dist: quantiles, p: [1, 1, 2, 4, 6, 9, 19, 24, 56, 146], sampling: per-iteration, source: "meas-ci:interactive:8"}
+          wakes_per_s: 12.529
+          gap: {dist: quantiles, p: [10, 12, 26, 85, 23197, 500578, 2115178, 4000183, 4000427, 60006391], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+          run: {dist: quantiles, p: [4, 5, 6, 11, 21, 44, 117, 175, 319, 1082], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+        - comm: "utility/libuv-worker"
+          threads: 4
+          wakes_per_s: 5.665
+          gap: {dist: quantiles, p: [9, 11, 12, 19, 95, 597165, 3581542, 4262909, 4693389, 4938115], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+          run: {dist: quantiles, p: [3, 4, 5, 5, 7, 11, 20, 24, 43, 60], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+        - comm: "code"
+          threads: 7
+          wakes_per_s: 3.594
+          gap: {dist: quantiles, p: [21, 30, 33, 140, 45904, 2194342, 3003135, 8101739, 8108213, 8108254], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+          run: {dist: quantiles, p: [5, 6, 7, 12, 38, 83, 151, 233, 553, 10793], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+        - comm: "renderer/ThreadPoolForeg"
+          threads: [3, 4]
+          wakes_per_s: 3.226
+          gap: {dist: quantiles, p: [9, 10, 11, 14, 499864, 500025, 500145, 500254, 516378, 157779840], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+          run: {dist: quantiles, p: [4, 4, 5, 7, 43, 52, 59, 70, 305, 32158], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
         - comm: "residual"
-          comms: ["ThreadPoolForeg", "V8Worker", "Chrome_IOThread", "DelayedTaskSche", "CacheThread_Blo", "ThreadPoolSingl", "ThreadPoolServi", "PerfettoTrace", "DedicatedWorker"]
-          threads: [63, 83]
-          wakes_per_s: 5.218
-          gap: {dist: quantiles, p: [3, 7, 9, 16, 2722, 499912, 500046, 500126, 500408, 502155], sampling: per-iteration, source: "meas-ci:interactive:8"}
-          run: {dist: quantiles, p: [1, 3, 4, 7, 33, 57, 116, 2252, 11745, 32236], sampling: per-iteration, source: "meas-ci:interactive:8"}
-        # 5 comms cover 95.8 % of 125.5 wakes/s (D16, target 95 %); the rest pooled as `residual`
+          comms: ["libuv-worker", "renderer/Chrome_ChildIOT", "utility/Chrome_ChildIOT", "gpu/code", "V8Worker", "Chrome_IOThread", "utility/V8Worker", "utility/ThreadPoolForeg", "CacheThread_Blo", "ThreadPoolForeg", "ThreadPoolServi", "utility/ThreadPoolServi", "utility/PerfettoTrace", "DelayedTaskSche", "renderer/ThreadPoolServi", "ThreadPoolSingl", "utility/DelayedTaskSche", "PerfettoTrace", "gpu/PerfettoTrace", "gpu/ThreadPoolServi", "renderer/PerfettoTrace", "renderer/DedicatedWorker", "renderer/ThreadPoolSingl", "gpu/ThreadPoolForeg", "gpu/ThreadPoolSingl"]
+          threads: [100, 111]
+          wakes_per_s: 3.577
+          gap: {dist: quantiles, p: [7, 10, 12, 20, 182, 214517, 1126273, 1648120, 2515720, 3349044], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+          run: {dist: quantiles, p: [4, 5, 6, 9, 21, 47, 134, 195, 5402, 31875], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+        # 8 comms cover 96.8 % of 113.2 wakes/s (D16, target 95 %); the rest pooled as `residual`
     lifetime: segment-bound
     binding_params: []
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "interactive:8, repeats [1, 2, 3, 4, 5]"
-      stats: ["idle wakes/s 122.2\u2013130.2", "idle cpu-share 0.0141\u20130.0196", "driven wakes/s 548.2\u2013846.1", "driven cpu-share 0.1307\u20130.2860", "driven-alt wakes/s 901.6\u20131045.0", "driven-alt cpu-share 0.2601\u20130.3880", "input_run p50 ms per repeat [87.862, 72.478, 79.63, 78.926, 55.711]"]
+      run: "interactive:2026-09-20, repeats [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42], runs 35590664184, 35591072901, 35595138586, 35600686371, 35605353728, 35610164663, 35615224019, 35620704803, 35626843798, 35631970026, 35636910143, 35642424547, 35647632301, 35653126436, 35658041070, 35662756973, 35669674370, 35673406451, 35676628439, 35679891403, 35683010456, 35686499444, 35689769266, 35825181263, 35829411664, 35846103509, 35851482610, 35856632808, 35861384035, 35865843118, 35871224358, 35876063664, 35881199996, 35886164781, 35934919263, 35958189728, 35961103478, 35964227532, 35967625968"
+      stats: ["idle wakes/s 90.5\u2013119.2", "idle cpu-share 0.0128\u20130.0165", "driven wakes/s 449.2\u20131100.8", "driven cpu-share 0.1416\u20130.4615", "driven-alt wakes/s 694.2\u20131152.9", "driven-alt cpu-share 0.2752\u20130.4437", "input_run p50 ms per repeat [80.825, 78.612, 80.032, 75.1, 66.368, 78.65, 80.432, 79.081, 84.893, 70.517, 82.171, 71.43, 63.87, 72.482, 64.925, 72.245, 82.279, 63.355, 70.479, 73.696, 73.925, 72.437, 76.657, 72.352, 77.371, 75.584, 69.105, 70.916, 69.599, 12.73, 61.067, 45.726, 66.504, 54.223, 81.139, 78.093, 78.013, 65.345, 77.857, 70.198, 80.642]"]
       scope: >-
-        One observation (phase decision 2; D3, D10): Visual Studio Code 1.138.0 (vendor .deb), the TypeScript project sindresorhus/got at commit 64f21e2a (tag v16.0.0, dependencies installed; design) open on source/index.ts with the built-in TypeScript language server running, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. Stimulus: SWELL-KW stream swell-word-c1 replayed per event by xdotool at recorded gaps (error p99 1.24 ms), keys and pointer events together, pointer positions scaled into the content area (D5, D12); the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the process tree until the next input minus the idle rate. Stimulus sensitivity (pre-registered, method §3): under a 136M Keystrokes transcription stream (dhakal-chi18) the per-input run p50 is 77.73 ms against 77.06 ms under SWELL-KW (+1 %); the archetype carries SWELL-KW. Values are this software on this machine, not desktop truth (D10). Venue bound (D24, S8): without display vsync Chromium drives its compositor from a default 60 Hz timer (Chromium docs, life of a frame; BeginFrameArgs::DefaultInterval), so the compositor cadence has a 60 Hz display's period but not its phase; rasterisation and compositing run on CPU threads under --disable-gpu, so those threads' run lengths overcount what a GPU desktop would show, by an amount no source states.
+        One observation (phase decision 2; D3, D10, D26): Visual Studio Code 1.138.0 (41 repeats) (vendor .deb), the TypeScript project sindresorhus/got at commit 64f21e2a (tag v16.0.0, dependencies installed; design) open on source/index.ts with the built-in TypeScript language server running, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763 64-Core Processor, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. Stimulus: SWELL-KW stream swell-word-c1 replayed per event by xdotool at recorded gaps (error p99 1.24 ms), keys and pointer events together, pointer positions scaled into the content area (D5, D12); the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the process tree until the next input minus the idle rate. Stimulus sensitivity (pre-registered, method §3): under a 136M Keystrokes transcription stream (dhakal-chi18) the per-input run p50 is 81.83 ms against 70.87 ms under SWELL-KW (+15 %); the archetype carries SWELL-KW. Values are this software on this machine, not desktop truth (D10). Venue bound (D24, S8): without display vsync Chromium drives its compositor from a default 60 Hz timer (Chromium docs, life of a frame; BeginFrameArgs::DefaultInterval), so the compositor cadence has a 60 Hz display's period but not its phase; rasterisation and compositing run on CPU threads under --disable-gpu, so those threads' run lengths overcount what a GPU desktop would show, by an amount no source states.
     modeling_notes: >-
       Per-application archetype (D2): one task carries the whole process tree merged (D14). Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled residual stands for the comms below the coverage cut. Input wakes: a contiguous slice of swell-word-c1 equal to each focus window, at a seed-drawn offset (D18); the slice preserves the recording's burst-and-pause structure. Word streams drive this editor as the nearest recording: no code-editing keystroke dataset with timestamps exists (D4).
 
@@ -148,128 +163,149 @@ archetypes:
             - RUN: event
     params:
       input_run:
-        {dist: quantiles, p: [1257, 2941, 3381, 3931, 4670, 5741, 7128, 8785, 37881, 77599], sampling: per-iteration, source: "meas-ci:interactive:6"}
+        {dist: quantiles, p: [2592, 3150, 3538, 4162, 5158, 6353, 9629, 13466, 50499, 122412], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
       stimulus:
         {stream: swell-outlook-c23, sampling: per-task, source: "swell-icmi14:outlook-c23"}
       components:
-        - comm: "TaskCon~ller #0"
-          threads: 2
-          wakes_per_s: 3.484
-          gap: {dist: quantiles, p: [4, 5, 6, 10, 12, 35, 380, 2658, 6569369, 45983264], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [2, 2, 3, 5, 6, 10, 50, 117, 814, 6252], sampling: per-iteration, source: "meas-ci:interactive:6"}
         - comm: "thunderbird-bin"
-          threads: [1, 6]
-          wakes_per_s: 2.456
-          gap: {dist: quantiles, p: [7, 12, 15, 26, 90, 2427, 19778, 1005992, 10316979, 19544827], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [3, 4, 5, 8, 22, 105, 572, 2344, 9817, 14365], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          threads: 1
+          wakes_per_s: 0.405
+          gap: {dist: quantiles, p: [14, 18, 24, 39, 157, 26206, 10042781, 15632690, 24012625, 31001098], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+          run: {dist: quantiles, p: [7, 8, 9, 11, 32, 147, 919, 1509, 3461, 3963], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
         - comm: "Timer"
           threads: 2
-          wakes_per_s: 0.936
-          gap: {dist: quantiles, p: [8, 12, 17, 296, 16059, 354927, 3983395, 9292079, 27695000, 46153662], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [3, 5, 6, 7, 24, 47, 61, 76, 98, 151], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        - comm: "TaskCon~ller #1"
-          threads: 2
-          wakes_per_s: 0.738
-          gap: {dist: quantiles, p: [8, 12, 14, 34, 242, 1208, 14999, 486593, 43095059, 65739166], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [3, 4, 5, 7, 10, 34, 412, 2195, 6714, 8477], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        - comm: "IPDL Background"
-          threads: 1
-          wakes_per_s: 0.650
-          gap: {dist: quantiles, p: [5, 6, 9, 13, 26, 733, 846295, 4716077, 39606241, 43431516], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [3, 3, 4, 7, 9, 16, 26, 38, 74, 86], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        - comm: "WebExtensions"
-          threads: 1
-          wakes_per_s: 0.408
-          gap: {dist: quantiles, p: [11, 15, 17, 32, 146, 16074, 1000638, 16160632, 30006460, 30008602], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [3, 5, 7, 11, 28, 84, 236, 803, 4790, 5248], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        - comm: "BgIOThr~Pool #2"
-          threads: 1
-          wakes_per_s: 0.402
-          gap: {dist: quantiles, p: [6, 11, 14, 25, 128, 870, 6168, 76470, 60283416, 60853744], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [2, 3, 5, 7, 12, 44, 119, 165, 139887, 141604], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        - comm: "DOM Worker"
-          threads: 2
-          wakes_per_s: 0.334
-          gap: {dist: quantiles, p: [10, 11, 16, 31, 126, 1318, 16999, 3526113, 5003336, 5003712], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [2, 3, 4, 5, 45, 421, 1272, 2892, 8237, 8928], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          wakes_per_s: 0.283
+          gap: {dist: quantiles, p: [12, 15, 20, 1526, 250099, 8348469, 22307631, 49982046, 59998352, 60000248], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+          run: {dist: quantiles, p: [5, 6, 7, 9, 39, 57, 67, 74, 97, 125], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
         - comm: "gmain"
           threads: 1
           wakes_per_s: 0.250
-          gap: {dist: quantiles, p: [3997013, 3999965, 3999972, 3999987, 4000001, 4000013, 4000024, 4000039, 4003001, 4003582], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [40, 44, 45, 47, 49, 53, 56, 62, 70, 73], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        - comm: "glean.dispatche"
+          gap: {dist: quantiles, p: [3996206, 3998773, 3999966, 3999990, 4000000, 4000009, 4000035, 4001239, 4003692, 4004018], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+          run: {dist: quantiles, p: [29, 35, 40, 44, 47, 50, 55, 57, 61, 87], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+        - comm: "IPDL Background"
           threads: 1
-          wakes_per_s: 0.218
-          gap: {dist: quantiles, p: [3049, 14977, 16188, 18335, 27170, 4003205, 12786696, 15100051, 30970294, 31458092], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [15, 19, 21, 28, 32, 46, 73, 95, 180, 202], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        - comm: "TaskCon~ller #2"
-          threads: [1, 2]
-          wakes_per_s: 0.190
-          gap: {dist: quantiles, p: [11, 20, 32, 136, 1165, 19079, 5001736, 7004689, 66167941, 67000512], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [3, 4, 4, 6, 8, 12, 35, 519, 6827, 9428], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          wakes_per_s: 0.239
+          gap: {dist: quantiles, p: [11, 12, 13, 17, 68, 739, 10000162, 47997862, 47998487, 47998653], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+          run: {dist: quantiles, p: [6, 6, 7, 8, 12, 26, 32, 86, 105, 140], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+        - comm: "WebExtensions"
+          threads: 1
+          wakes_per_s: 0.206
+          gap: {dist: quantiles, p: [17, 21, 24, 34, 141, 15066, 19971472, 30010343, 59997897, 59998145], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+          run: {dist: quantiles, p: [6, 8, 9, 14, 27, 93, 225, 588, 967, 1098], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
         - comm: "JS Watchdog"
           threads: 2
-          wakes_per_s: 0.190
-          gap: {dist: quantiles, p: [1000069, 1000083, 1000090, 1000105, 1000126, 1000152, 21567205, 54870714, 57001556, 57003075], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [9, 10, 10, 14, 24, 28, 33, 36, 40, 45], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        - comm: "IPC I/O Child"
-          threads: 2
-          wakes_per_s: 0.106
-          gap: {dist: quantiles, p: [20, 33, 176, 293, 1809, 682089, 10669901, 48181228, 48213514, 48215657], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [9, 12, 15, 20, 29, 48, 56, 76, 100, 100], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        - comm: "TaskCon~ller #3"
+          wakes_per_s: 0.169
+          gap: {dist: quantiles, p: [1000081, 1000102, 1000111, 1000118, 1000128, 8001301, 56999173, 56999939, 58000315, 59811576], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+          run: {dist: quantiles, p: [8, 10, 11, 14, 23, 26, 30, 33, 37, 52], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+        - comm: "StreamTrans"
+          threads: [21, 27]
+          wakes_per_s: 0.130
+          gap: {dist: quantiles, p: [10, 12, 14, 75, 2312, 30018086, 30034469, 30035732, 30037308, 30041667], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+          run: {dist: quantiles, p: [4, 6, 7, 48, 85, 9930, 10988, 27860, 28739, 30040], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+        - comm: "Indexed~ IO"
+          threads: [7, 8]
+          wakes_per_s: 0.071
+          gap: {dist: quantiles, p: [13, 14, 17, 592, 2000536, 10000572, 30000283, 30000307, 30000387, 30002787], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+          run: {dist: quantiles, p: [6, 7, 10, 54, 81, 162, 632, 682, 739, 804], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+        - comm: "glean.dispatche"
           threads: 1
-          wakes_per_s: 0.104
-          gap: {dist: quantiles, p: [13, 13, 20, 176, 1464, 3043710, 6665171, 60723318, 68432290, 70890350], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [5, 5, 5, 7, 9, 14, 22, 485, 4485, 7671], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        - comm: "Socket Thread"
-          threads: 1
-          wakes_per_s: 0.102
-          gap: {dist: quantiles, p: [47, 144, 180, 657, 1679, 982256, 998040, 63141828, 63454345, 63654041], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [13, 16, 17, 31, 48, 58, 192, 228, 261, 282], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          wakes_per_s: 0.056
+          gap: {dist: quantiles, p: [15092, 15844, 16237, 18147, 42807, 25759942, 50442346, 73014613, 111945254, 114619490], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+          run: {dist: quantiles, p: [19, 21, 23, 25, 27, 37, 75, 78, 87, 108], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
         - comm: "IPC I/O Parent"
           threads: 1
-          wakes_per_s: 0.084
-          gap: {dist: quantiles, p: [46, 147, 182, 982, 37851, 2016534, 25438980, 46138330, 46155230, 46157095], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [7, 12, 13, 20, 36, 58, 70, 74, 85, 89], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        - comm: "IndexedDB IO #2"
-          threads: 1
-          wakes_per_s: 0.066
-          gap: {dist: quantiles, p: [8, 12, 14, 94, 3881, 10000212, 30000258, 30000268, 30000273, 30000275], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [4, 5, 6, 42, 61, 134, 568, 597, 607, 610], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        - comm: "RDD Process"
-          threads: 1
-          wakes_per_s: 0.058
-          gap: {dist: quantiles, p: [13, 14, 15, 17, 59, 277, 500941, 536426, 1236226, 1473098], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [7, 8, 8, 10, 18, 25, 49, 56, 59, 60], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        - comm: "StreamTrans #2"
-          threads: 1
           wakes_per_s: 0.042
-          gap: {dist: quantiles, p: [7, 9, 11, 81, 128, 283, 30011940, 30012240, 30012622, 30012707], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [3, 4, 5, 56, 83, 162, 8569, 10082, 10299, 10340], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        - comm: "StreamTrans #33"
-          threads: [0, 1]
+          gap: {dist: quantiles, p: [119, 302, 327, 847, 1107, 59998860, 59999098, 59999177, 59999262, 59999355], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+          run: {dist: quantiles, p: [12, 16, 17, 18, 22, 53, 59, 64, 94, 106], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+        - comm: "IPC I/O Child"
+          threads: 2
           wakes_per_s: 0.040
-          gap: {dist: quantiles, p: [4, 4, 5, 6, 9, 32, 4574, 18894, 23713235, 29381708], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [2, 2, 2, 3, 4, 8, 38, 108, 4718, 5955], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          gap: {dist: quantiles, p: [215, 248, 255, 286, 359, 59999810, 59999985, 60000046, 60000146, 60000333], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+          run: {dist: quantiles, p: [17, 19, 19, 19, 26, 29, 45, 55, 66, 105], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
         - comm: "residual"
-          comms: ["IndexedDB IO #1", "StreamTrans #3", "Backgro~Pool #1", "Cache2 I/O", "StreamTrans #41", "StreamTrans #39", "StreamTrans #38", "StreamTrans #42", "StreamTrans #40", "Compositor", "StreamTrans #46", "DNS Resolver #4", "DNS Resolver #1", "StreamTrans #35", "StreamTrans #45", "DNS Resolver #3", "DNS Resolver #7", "StreamTrans #37", "DNS Resolver #6", "QuotaManager IO", "StreamTrans #1", "StreamTrans #15", "IndexedDB IO #3", "StreamTrans #43", "StreamTrans #44", "DNS Resolver #2", "DNS Resolver #5", "StreamTrans #36", "StreamTrans #22", "FSBroker5453", "FSBroker4907", "SSL Cert #2", "DNS Resolver #8", "FSBroker5298", "FSBroker5230", "Backgro~Pool #2", "FSBroker5370", "StreamTrans #21", "StreamTrans #32", "StreamTrans #27", "StreamTrans #16", "StreamTrans #17", "StreamTrans #18", "StreamTrans #19", "StreamTrans #20", "StreamTrans #30", "SSL Cert #1"]
-          threads: [19, 25]
-          wakes_per_s: 0.533
-          gap: {dist: quantiles, p: [7, 13, 18, 90, 1159, 18549, 2019618, 12076515, 27996302, 29194614], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [4, 5, 7, 18, 49, 102, 633, 10146, 21346, 27841], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        # 20 comms cover 95.3 % of 11.4 wakes/s (D16, target 95 %); the rest pooled as `residual`
+          comms: ["IndexedDB IO", "QuotaManager IO", "BgIOThr~Pool", "RDD Process", "FSBroker7155", "FSBroker7149", "FSBroker7177", "FSBroker7264", "FSBroker7175", "FSBroker7274", "FSBroker7173", "FSBroker7103", "FSBroker7253", "FSBroker7226", "FSBroker7137", "FSBroker7216", "FSBroker7164", "FSBroker7161", "FSBroker7183", "FSBroker7165", "FSBroker7270", "FSBroker7174", "FSBroker7071", "FSBroker7201", "FSBroker7217", "FSBroker7169", "FSBroker7190", "FSBroker7134", "FSBroker7160", "FSBroker7133", "FSBroker7139", "FSBroker7196", "FSBroker7093", "FSBroker7156", "FSBroker7147", "FSBroker7170", "FSBroker7123", "FSBroker7135", "FSBroker7152", "FSBroker7157", "FSBroker7129", "FSBroker7144", "FSBroker7052", "glean.mps"]
+          threads: [7, 9]
+          wakes_per_s: 0.094
+          gap: {dist: quantiles, p: [13, 15, 16, 129, 1087, 11545673, 46961889, 50782778, 60000095, 60000538], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+          run: {dist: quantiles, p: [6, 7, 9, 20, 49, 78, 160, 568, 694, 784], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+        # 11 comms cover 95.3 % of 2.0 wakes/s (D16, target 95 %); the rest pooled as `residual`
+      operations:
+        send:
+          duration: {dist: quantiles, p: [2844038, 2887502, 2905388, 2927417, 2967424, 3072431, 3471455, 3526439, 3552623, 3569668], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+          components:
+            - comm: "Socket Thread"
+              threads: 1
+              wakes_per_s: 717.565
+              gap: {dist: quantiles, p: [12, 13, 13, 20, 61, 333, 752, 1310, 18954, 37940], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+              run: {dist: quantiles, p: [6, 7, 7, 8, 12, 29, 40, 48, 105, 479], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+            - comm: "Compositor"
+              threads: 1
+              wakes_per_s: 580.989
+              gap: {dist: quantiles, p: [11, 11, 12, 14, 52, 463, 2180, 8881, 15580, 1095226], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+              run: {dist: quantiles, p: [5, 5, 6, 7, 9, 16, 29, 39, 61, 101], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+            - comm: "thunderbird-bin"
+              threads: 1
+              wakes_per_s: 450.234
+              gap: {dist: quantiles, p: [15, 18, 22, 51, 260, 806, 2784, 6650, 15857, 1191092], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+              run: {dist: quantiles, p: [9, 11, 13, 28, 135, 641, 1254, 1994, 5179, 113346], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+            - comm: "Renderer"
+              threads: 1
+              wakes_per_s: 119.904
+              gap: {dist: quantiles, p: [29, 135, 165, 217, 467, 9538, 15660, 17847, 35574, 21365552], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+              run: {dist: quantiles, p: [9, 15, 32, 42, 76, 200, 268, 337, 1367, 2121], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+            - comm: "SwComposite"
+              threads: 50
+              wakes_per_s: 72.969
+              gap: {dist: quantiles, p: [22, 34, 46, 13666, 16618, 18090, 21092, 33922, 102072, 1327751], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+              run: {dist: quantiles, p: [7, 8, 8, 9, 10, 12, 14, 34, 83, 138], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+            - comm: "Softwar~cThread"
+              threads: 1
+              wakes_per_s: 59.722
+              gap: {dist: quantiles, p: [894, 15648, 16079, 16652, 17067, 17170, 17616, 18074, 19583, 21263000], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+              run: {dist: quantiles, p: [8, 8, 9, 13, 29, 67, 89, 111, 136, 166], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+            - comm: "StreamT~ns"
+              threads: [8, 13]
+              wakes_per_s: 46.099
+              gap: {dist: quantiles, p: [10, 11, 11, 12, 22, 606, 1043, 3493, 2769577, 24677340], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+              run: {dist: quantiles, p: [5, 5, 6, 6, 10, 388, 440, 459, 521, 786], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+            - comm: "TaskCon~ller"
+              threads: 4
+              wakes_per_s: 41.155
+              gap: {dist: quantiles, p: [11, 12, 12, 13, 523, 1464, 18181, 473642, 24169085, 24763691], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+              run: {dist: quantiles, p: [5, 6, 6, 7, 14, 31, 289, 1262, 3011, 3689], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+            - comm: "Timer"
+              threads: 2
+              wakes_per_s: 28.094
+              gap: {dist: quantiles, p: [14, 19, 37, 715, 13854, 42745, 100119, 173102, 21269162, 48631109], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+              run: {dist: quantiles, p: [5, 6, 7, 9, 13, 19, 31, 38, 59, 96], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+            - comm: "glean.dispatche"
+              threads: 1
+              wakes_per_s: 27.405
+              gap: {dist: quantiles, p: [4869, 7973, 11034, 16317, 17173, 22999, 38937, 91497, 21230943, 21332398], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+              run: {dist: quantiles, p: [24, 36, 41, 48, 58, 80, 141, 178, 285, 739], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+            - comm: "WRRende~ckend#0"
+              threads: 1
+              wakes_per_s: 27.220
+              gap: {dist: quantiles, p: [6400, 9644, 12322, 16096, 17064, 21810, 34213, 47565, 21262570, 21389751], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+              run: {dist: quantiles, p: [41, 61, 221, 253, 300, 382, 624, 844, 1338, 3686], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+            - comm: "residual"
+              comms: ["WRRende~ckend#1", "WRScene~ilder#0", "WRScene~ilder#1", "IPDL Background", "StreamTrans", "WrGlyph~terizer", "BgIOThr~Pool", "sqldb:g~lite", "JS Watchdog", "WebExtensions", "IPC I/O Child", "dconf worker", "gmain", "RDD Process", "WRScene~derLP#1", "IPC I/O Parent", "Indexed~ IO", "QuotaManager IO", "FSBroker7160", "FSBroker7139", "FSBroker7217", "FSBroker7196", "FSBroker7161", "FSBroker7155"]
+              threads: [26, 35]
+              wakes_per_s: 105.015
+              gap: {dist: quantiles, p: [11, 15, 33, 127, 1210, 12219, 16009, 21728, 228830, 21251369], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+              run: {dist: quantiles, p: [6, 8, 10, 67, 136, 238, 397, 490, 1121, 15634], sampling: per-iteration, source: "meas-ci:interactive:2026-09-19"}
+            # 11 comms cover 95.4 % of 2276.4 wakes/s (D16, target 95 %); the rest pooled as `residual`
     lifetime: segment-bound
     binding_params: []
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "interactive:6, repeats [1, 2, 3, 4, 5]"
-      stats: ["idle wakes/s 10.4\u201312.1", "idle cpu-share 0.0033\u20130.0041", "driven wakes/s 119.3\u2013235.2", "driven cpu-share 0.0061\u20130.0166", "driven-alt wakes/s 317.3\u2013389.2", "driven-alt cpu-share 0.0191\u20130.0257", "input_run p50 ms per repeat [5.192, 4.371, 4.864, 3.842, 4.659]"]
+      run: "interactive:2026-09-19, repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44], runs 35439754133, 35439957879, 35440191916, 35442944585, 35445710972, 35448812203, 35451594065, 35452970606, 35454193433, 35455407756, 35456609084, 35457798981, 35458951843, 35460233076, 35461409718, 35462633106, 35463796132, 35464964672, 35466093426, 35467262885, 35468458977, 35469688606, 35470844610, 35471955893, 35473113054, 35474279792, 35477787920, 35479016867, 35480007141, 35481149550, 35482217850, 35483234664, 35484289975, 35485420183, 35486427711, 35487486347, 35488471378, 35489472727, 35490452186, 35491508744, 35492617691"
+      stats: ["idle wakes/s 1.8\u20132.2", "idle cpu-share 0.0007\u20130.0009", "driven wakes/s 116.9\u2013231.3", "driven cpu-share 0.0072\u20130.0152", "driven-alt wakes/s 295.5\u2013384.1", "driven-alt cpu-share 0.0181\u20130.0282", "op wakes/s 740.5\u2013765.9", "op cpu-share 0.1855\u20130.1994", "input_run p50 ms per repeat [5.827, 5.197, 5.108, 6.016, 4.328, 5.247, 5.213, 4.679]"]
       scope: >-
-        One observation (phase decision 2; D3, D10): Mozilla Thunderbird 155.0.1 (snap via apt), a compose window over a pre-seeded local account, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. Stimulus: SWELL-KW stream swell-outlook-c23 replayed per event by xdotool at recorded gaps (error p99 1.24 ms), keys and pointer events together, pointer positions scaled into the content area (D5, D12); the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the process tree until the next input minus the idle rate. Stimulus sensitivity (pre-registered, method §3): under a 136M Keystrokes transcription stream (dhakal-chi18) the per-input run p50 is 5.15 ms against 4.67 ms under SWELL-KW (+10 %); the archetype carries SWELL-KW. Values are this software on this machine, not desktop truth (D10).
+        One observation (phase decision 2; D3, D10, D26): Mozilla Thunderbird 156.0 (vendor .deb), a compose window over a local account whose SMTP server is a loopback peer (aiosmtpd, no authentication or TLS, on the harness CPUs); operation send: a reply with a short body and one Word document attached — the Writer setup state's document (100 sections of five 100-word paragraphs, ten 1024×768 pictures; design after CpsMark+ §CA's attachment kinds, no source stating a size) saved as .docx, 41,555,063 B on the runner and 56,946,735 B as the peer receives it, the same size in every repeat and not the same bytes (D49); completion when the copy into the Sent folder lands, the peer's own stamp recorded beside it, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763 64-Core Processor, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. Stimulus: SWELL-KW stream swell-outlook-c23 replayed per event by xdotool at recorded gaps (error p99 1.24 ms), keys and pointer events together, pointer positions scaled into the content area (D5, D12); the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the process tree until the next input minus the idle rate. Stimulus sensitivity (pre-registered, method §3): under a 136M Keystrokes transcription stream (dhakal-chi18) the per-input run p50 is 5.61 ms against 5.16 ms under SWELL-KW (+9 %); the archetype carries SWELL-KW. Values are this software on this machine, not desktop truth (D10).
     modeling_notes: >-
-      Per-application archetype (D2): one task carries the whole process tree merged (D14). Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled residual stands for the comms below the coverage cut. Input wakes: a contiguous slice of swell-outlook-c23 equal to each focus window, at a seed-drawn offset (D18); the slice preserves the recording's burst-and-pause structure. Outlook streams exist only in SWELL-KW's interruption conditions c2 and c3 (D12).
+      Per-application archetype (D2): one task carries the whole process tree merged (D14). Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled residual stands for the comms below the coverage cut. Input wakes: a contiguous slice of swell-outlook-c23 equal to each focus window, at a seed-drawn offset (D18); the slice preserves the recording's burst-and-pause structure. Operation `send` (spec decisions 8–10): the timeline names it and a start time; the compiler draws its length from the measured duration table (trigger to completion) and swaps in the operation's components for that span, emitting no input wake; it runs to completion past the focus window.
 
   web-browser:
     category_source: meas
@@ -280,92 +316,110 @@ archetypes:
             - RUN: event
     params:
       input_run:
-        {dist: quantiles, p: [0, 0, 0, 0, 0, 686, 1329, 1729, 10801, 784886], sampling: per-iteration, source: "meas-ci:interactive:9"}
+        {dist: quantiles, p: [0, 1008, 1139, 1340, 1603, 1843, 2088, 2283, 3415, 10870], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
       stimulus:
         {stream: swell-ie-c1, sampling: per-task, source: "swell-icmi14:ie-c1"}
       components:
-        - comm: "ThreadPoolForeg"
-          threads: [16, 20]
-          wakes_per_s: 16.192
-          gap: {dist: quantiles, p: [9, 9, 9, 11, 120, 464, 6822, 75037, 1835242, 15002013], sampling: per-iteration, source: "meas-ci:interactive:9"}
-          run: {dist: quantiles, p: [4, 4, 4, 5, 16, 45, 92, 175, 1190, 63902], sampling: per-iteration, source: "meas-ci:interactive:9"}
-        - comm: "Chrome_ChildIOT"
-          threads: 3
-          wakes_per_s: 13.860
-          gap: {dist: quantiles, p: [45, 69, 97, 337, 1481, 16275, 569633, 575652, 1910201, 12030762], sampling: per-iteration, source: "meas-ci:interactive:9"}
-          run: {dist: quantiles, p: [10, 12, 13, 20, 31, 54, 147, 316, 1318, 1940], sampling: per-iteration, source: "meas-ci:interactive:9"}
-        - comm: "VizCompositorTh"
+        - comm: "gpu/VizCompositorTh"
           threads: 1
-          wakes_per_s: 12.542
-          gap: {dist: quantiles, p: [55, 71, 88, 287, 5136, 16337, 553155, 558152, 563550, 565645], sampling: per-iteration, source: "meas-ci:interactive:9"}
-          run: {dist: quantiles, p: [18, 23, 26, 33, 53, 84, 196, 220, 266, 300], sampling: per-iteration, source: "meas-ci:interactive:9"}
+          wakes_per_s: 12.098
+          gap: {dist: quantiles, p: [60, 68, 78, 294, 6134, 17108, 553439, 559607, 564486, 565701], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+          run: {dist: quantiles, p: [21, 23, 26, 34, 51, 80, 198, 222, 261, 301], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+        - comm: "gpu/Chrome_ChildIOT"
+          threads: 1
+          wakes_per_s: 7.592
+          gap: {dist: quantiles, p: [53, 69, 92, 584, 12619, 17216, 574670, 578579, 581582, 581894], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+          run: {dist: quantiles, p: [11, 14, 15, 17, 26, 39, 48, 55, 76, 107], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+        - comm: "utility/chrome"
+          threads: [3, 4]
+          wakes_per_s: 0.802
+          gap: {dist: quantiles, p: [1013170, 1032310, 2976786, 4000151, 4000165, 4000188, 4000208, 4000230, 4000331, 4000400], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+          run: {dist: quantiles, p: [34, 44, 51, 58, 71, 90, 106, 129, 236, 283], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
         - comm: "chrome"
-          threads: 5
-          wakes_per_s: 10.874
-          gap: {dist: quantiles, p: [9, 28, 74, 159, 587, 5469, 735469, 3384514, 4004241, 24343456], sampling: per-iteration, source: "meas-ci:interactive:9"}
-          run: {dist: quantiles, p: [4, 14, 21, 26, 43, 106, 253, 423, 1851, 3081], sampling: per-iteration, source: "meas-ci:interactive:9"}
-        - comm: "Chrome_IOThread"
           threads: 1
-          wakes_per_s: 10.514
-          gap: {dist: quantiles, p: [19, 33, 59, 101, 189, 694, 2971, 14084, 467496, 17182732], sampling: per-iteration, source: "meas-ci:interactive:9"}
-          run: {dist: quantiles, p: [9, 10, 11, 14, 17, 24, 48, 94, 158, 361], sampling: per-iteration, source: "meas-ci:interactive:9"}
+          wakes_per_s: 0.800
+          gap: {dist: quantiles, p: [58, 129, 164, 810, 350498, 2443107, 4004263, 4004304, 4004572, 4004857], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+          run: {dist: quantiles, p: [17, 24, 31, 55, 107, 217, 283, 421, 742, 1056], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+        - comm: "utility/HangWatcher"
+          threads: 3
+          wakes_per_s: 0.300
+          gap: {dist: quantiles, p: [10000090, 10000106, 10000115, 10000121, 10000126, 10000132, 10000145, 10000157, 10000172, 10000233], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+          run: {dist: quantiles, p: [19, 21, 22, 24, 26, 29, 34, 37, 41, 53], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
         - comm: "residual"
-          comms: ["ThreadPoolSingl", "MemoryInfra", "HangWatcher", "ThreadPoolServi", "CacheThread_Blo", "PerfettoTrace"]
-          threads: [11, 17]
-          wakes_per_s: 2.967
-          gap: {dist: quantiles, p: [9, 10, 11, 43, 1090, 28746, 590637, 2483108, 6171365, 8093092], sampling: per-iteration, source: "meas-ci:interactive:9"}
-          run: {dist: quantiles, p: [3, 4, 5, 7, 24, 87, 205, 438, 582, 7723], sampling: per-iteration, source: "meas-ci:interactive:9"}
-        # 5 comms cover 95.6 % of 66.9 wakes/s (D16, target 95 %); the rest pooled as `residual`
+          comms: ["gpu/chrome", "ThreadPoolForeg", "HangWatcher", "gpu/HangWatcher", "utility/Chrome_ChildIOT", "MemoryInfra", "Chrome_IOThread", "CacheThread_Blo", "ThreadPoolServi", "utility/ThreadPoolForeg", "utility/ThreadPoolServi", "utility/PerfettoTrace", "gpu/ThreadPoolServi", "gpu/PerfettoTrace", "PerfettoTrace", "utility/MemoryInfra", "ThreadPoolSingl", "gpu/MemoryInfra", "sandbox_ipc_thr"]
+          threads: [11, 29]
+          wakes_per_s: 1.101
+          gap: {dist: quantiles, p: [13, 35, 132, 50305, 458276, 1268639, 2857803, 3445459, 4004212, 4004291], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+          run: {dist: quantiles, p: [7, 15, 19, 28, 51, 128, 173, 293, 742, 7795], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+        # 5 comms cover 95.2 % of 22.7 wakes/s (D16, target 95 %); the rest pooled as `residual`
+      heavy_events:
+        - comm: "MemoryInfra"
+          run_floor_ms: 30
+          count: 8
+          span_s: 22800.1
+          rate_per_s: 0.000351
+          run: {dist: quantiles, p: [50939, 50939, 52001, 53255, 54695, 55068, 59377, 59997, 59997, 59997], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+        # D64: 8 runs of at least 30 ms over 22800 s of idle phase, 50.9–60.0 ms; their runs leave the components' wakes, so the residual converges. No interval is stated: no repeat holds two of them.
       operations:
         page-load:
-          duration: {dist: quantiles, p: [429173, 430425, 435129, 457057, 464092, 505666, 556842, 604534, 738815, 774131], sampling: per-iteration, source: "meas-ci:interactive:9"}
+          duration: {dist: quantiles, p: [433085, 435244, 438229, 458841, 465374, 505752, 559854, 622435, 715527, 881230], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
           components:
             - comm: "Chrome_IOThread"
               threads: 1
-              wakes_per_s: 572.040
-              gap: {dist: quantiles, p: [13, 15, 21, 48, 134, 633, 5193, 15133, 17151, 10321733], sampling: per-iteration, source: "meas-ci:interactive:9"}
-              run: {dist: quantiles, p: [6, 7, 7, 10, 16, 24, 37, 52, 122, 2300], sampling: per-iteration, source: "meas-ci:interactive:9"}
+              wakes_per_s: 564.578
+              gap: {dist: quantiles, p: [13, 15, 21, 50, 138, 671, 5365, 15154, 17167, 10321686], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+              run: {dist: quantiles, p: [6, 7, 7, 10, 16, 24, 38, 54, 123, 2454], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
             - comm: "chrome"
-              threads: 6
-              wakes_per_s: 286.340
-              gap: {dist: quantiles, p: [10, 45, 90, 197, 770, 7019, 16414, 31066, 10491002, 76003195], sampling: per-iteration, source: "meas-ci:interactive:9"}
-              run: {dist: quantiles, p: [4, 19, 26, 36, 59, 196, 417, 617, 4752, 15947], sampling: per-iteration, source: "meas-ci:interactive:9"}
-            - comm: "Chrome_ChildIOT"
-              threads: 3
-              wakes_per_s: 224.794
-              gap: {dist: quantiles, p: [27, 48, 69, 250, 2153, 11532, 17032, 25925, 10558138, 10855360], sampling: per-iteration, source: "meas-ci:interactive:9"}
-              run: {dist: quantiles, p: [9, 12, 14, 18, 25, 40, 91, 193, 1143, 7794], sampling: per-iteration, source: "meas-ci:interactive:9"}
-            - comm: "ThreadPoolForeg"
-              threads: [6, 9]
-              wakes_per_s: 189.154
-              gap: {dist: quantiles, p: [9, 9, 10, 11, 67, 1395, 13494, 193843, 10761652, 150964998], sampling: per-iteration, source: "meas-ci:interactive:9"}
-              run: {dist: quantiles, p: [4, 4, 4, 5, 7, 34, 86, 116, 291, 677], sampling: per-iteration, source: "meas-ci:interactive:9"}
-            - comm: "VizCompositorTh"
               threads: 1
-              wakes_per_s: 146.026
-              gap: {dist: quantiles, p: [56, 136, 256, 1025, 4943, 12338, 16224, 16927, 10314939, 10325819], sampling: per-iteration, source: "meas-ci:interactive:9"}
-              run: {dist: quantiles, p: [18, 22, 27, 42, 69, 214, 1815, 1935, 2174, 2630], sampling: per-iteration, source: "meas-ci:interactive:9"}
+              wakes_per_s: 250.648
+              gap: {dist: quantiles, p: [10, 57, 94, 197, 661, 5227, 15086, 16538, 48634, 10320453], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+              run: {dist: quantiles, p: [4, 23, 29, 38, 71, 218, 435, 617, 7089, 16272], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+            - comm: "gpu/VizCompositorTh"
+              threads: 1
+              wakes_per_s: 146.970
+              gap: {dist: quantiles, p: [60, 145, 260, 1043, 4875, 12171, 16202, 16924, 10314760, 10325896], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+              run: {dist: quantiles, p: [18, 23, 28, 42, 69, 218, 1796, 1930, 2190, 2647], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+            - comm: "gpu/Chrome_ChildIOT"
+              threads: 1
+              wakes_per_s: 143.156
+              gap: {dist: quantiles, p: [35, 72, 129, 476, 3950, 14971, 16947, 18536, 10316110, 10326783], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+              run: {dist: quantiles, p: [9, 13, 15, 19, 24, 31, 46, 59, 186, 241], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+            - comm: "ThreadPoolForeg"
+              threads: [3, 8]
+              wakes_per_s: 142.727
+              gap: {dist: quantiles, p: [9, 9, 10, 11, 57, 1515, 17248, 194492, 10547141, 53964020], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+              run: {dist: quantiles, p: [4, 4, 4, 5, 7, 28, 87, 118, 303, 552], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+            - comm: "utility/Chrome_ChildIOT"
+              threads: 2
+              wakes_per_s: 78.962
+              gap: {dist: quantiles, p: [25, 35, 51, 106, 616, 3816, 28261, 10447727, 10786499, 10931367], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+              run: {dist: quantiles, p: [11, 12, 15, 18, 35, 88, 227, 395, 1505, 14678], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
             - comm: "CompositorTileW"
               threads: 1
-              wakes_per_s: 65.134
-              gap: {dist: quantiles, p: [11, 13, 16, 11089, 16436, 17286, 26055, 61696, 10340653, 10357550], sampling: per-iteration, source: "meas-ci:interactive:9"}
-              run: {dist: quantiles, p: [5, 6, 6, 37, 57, 76, 239, 380, 787, 1036], sampling: per-iteration, source: "meas-ci:interactive:9"}
+              wakes_per_s: 64.453
+              gap: {dist: quantiles, p: [11, 13, 17, 11758, 16396, 17318, 26602, 61497, 10341549, 10360405], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+              run: {dist: quantiles, p: [5, 6, 7, 38, 58, 78, 249, 383, 807, 1046], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+            - comm: "utility/ThreadPoolForeg"
+              threads: 3
+              wakes_per_s: 42.235
+              gap: {dist: quantiles, p: [9, 9, 10, 11, 105, 1114, 5805, 10680781, 10826217, 258814457], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+              run: {dist: quantiles, p: [4, 4, 4, 5, 7, 51, 91, 110, 226, 403], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
             - comm: "residual"
-              comms: ["ThreadPoolSingl", "ThreadPoolServi", "HangWatcher", "MemoryInfra", "CacheThread_Blo", "PerfettoTrace", "chrome_crashpad"]
-              threads: [12, 15]
-              wakes_per_s: 24.988
-              gap: {dist: quantiles, p: [9, 9, 10, 11, 111, 15397, 234463, 10512032, 10537330, 10783130], sampling: per-iteration, source: "meas-ci:interactive:9"}
-              run: {dist: quantiles, p: [4, 4, 4, 5, 8, 21, 34, 37, 67, 956], sampling: per-iteration, source: "meas-ci:interactive:9"}
-            # 6 comms cover 98.3 % of 1508.5 wakes/s (D16, target 95 %); the rest pooled as `residual`
+              comms: ["gpu/chrome", "ThreadPoolSingl", "utility/chrome", "ThreadPoolServi", "utility/HangWatcher", "MemoryInfra", "zygote/chrome", "gpu/ThreadPoolSingl", "utility/ThreadPoolServi", "gpu/HangWatcher", "HangWatcher", "CacheThread_Blo", "gpu/ThreadPoolServi", "utility/PerfettoTrace", "gpu/PerfettoTrace", "PerfettoTrace", "chrome_crashpad"]
+              threads: [16, 21]
+              wakes_per_s: 59.561
+              gap: {dist: quantiles, p: [9, 10, 11, 44, 1118, 10520, 62043, 121178, 10483166, 10504398], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+              run: {dist: quantiles, p: [4, 4, 5, 10, 27, 44, 68, 116, 1220, 1574], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
+            # 8 comms cover 96.0 % of 1493.3 wakes/s (D16, target 95 %); the rest pooled as `residual`
     lifetime: segment-bound
     binding_params: []
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "interactive:9, repeats [1, 2, 3, 4, 5]"
-      stats: ["idle wakes/s 60.8\u201385.7", "idle cpu-share 0.0059\u20130.0154", "driven wakes/s 26.6\u201345.1", "driven cpu-share 0.0023\u20130.0048", "driven-alt wakes/s 47.7\u2013149.9", "driven-alt cpu-share 0.0027\u20130.0091", "op wakes/s 85.6\u201388.2", "op cpu-share 0.0090\u20130.0113", "input_run p50 ms per repeat [0.0, 0.0, 0.0, 0.121, 0.68]"]
+      run: "interactive:2026-09-20, repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38], runs 35667380500, 35667467067, 35667642001, 35668860761, 35673181389, 35676568762, 35680029596, 35683291619, 35686570487, 35689933419, 35693508381, 35697615773, 35702180029, 35707078134, 35712180366, 35717718371, 35723051563, 35728483709, 35734264599, 35740604481, 35796001095, 35800434571, 35804505368, 35808462146, 35813092251, 35816792491, 35820600415, 35825181263, 35837903108, 35846103509, 35851371612, 35856244621, 35861695953, 35867241977, 35873326163, 35879539388, 35886111298"
+      stats: ["idle wakes/s 21.7\u201324.3", "idle cpu-share 0.0012\u20130.0017", "driven wakes/s 24.4\u201386.8", "driven cpu-share 0.0013\u20130.0055", "driven-alt wakes/s 71.6\u2013187.1", "driven-alt cpu-share 0.0039\u20130.0111", "op wakes/s 84.8\u201388.8", "op cpu-share 0.0092\u20130.0126", "input_run p50 ms per repeat [1.528, 1.801, 1.423, 1.626, 1.677, 1.539, 1.844, 1.549, 1.55, 1.522, 1.22, 1.625, 1.465, 1.57, 1.738, 1.559, 1.312, 1.366, 1.805, 1.68, 1.876, 1.588, 1.888, 1.144, 1.546, 1.624, 1.45, 1.668, 1.029, 1.263, 1.655, 1.547, 1.2, 1.257, 1.366, 1.462, 1.749, 1.405]"]
       scope: >-
-        One observation (phase decision 2; D3, D10): Google Chrome 152.0.7977.82 (preinstalled), a local page with a text area and 400 paragraphs; the browser process, GPU and utility processes — renderer processes excluded (renderer-hidden, renderer-visible); operation page-load: the scripted feed page feed.html (300 posts, thirty 1600×1200 pictures, a 200 000-record sort; design after PCMark 10 pp. 52–53 and CpsMark+ §4.3.3) from a local server, completion by the page's title after first paint, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. Stimulus: SWELL-KW stream swell-ie-c1 replayed per event by xdotool at recorded gaps (error p99 1.24 ms), keys and pointer events together, pointer positions scaled into the content area (D5, D12); the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the process tree until the next input minus the idle rate. Stimulus sensitivity (pre-registered, method §3): under a 136M Keystrokes transcription stream (dhakal-chi18) the per-input run p50 is 0.00 ms against 0.00 ms under SWELL-KW (the SWELL-KW median is at the zero bound, D13); the archetype carries SWELL-KW. Values are this software on this machine, not desktop truth (D10). Venue bound (D24, S8): without display vsync Chromium drives its compositor from a default 60 Hz timer (Chromium docs, life of a frame; BeginFrameArgs::DefaultInterval), so the compositor cadence has a 60 Hz display's period but not its phase; rasterisation and compositing run on CPU threads under --disable-gpu, so those threads' run lengths overcount what a GPU desktop would show, by an amount no source states.
+        One observation (phase decision 2; D3, D10, D26): Google Chrome 152.0.7977.82 (29 repeats), Google Chrome 153.0.8010.52 (9: 18, 20, 22, 27, 31, 33, 34, 37, 38) (preinstalled), a local page with a text area and 400 paragraphs; the browser process, GPU and utility processes — renderer processes excluded (renderer-hidden, renderer-visible); operation page-load: the scripted feed page feed.html (300 posts, thirty 1600×1200 pictures, a 200 000-record sort; design after PCMark 10 pp. 52–53 and CpsMark+ §4.3.3) from a local server, completion by the page's title after first paint, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763 64-Core Processor, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. Stimulus: SWELL-KW stream swell-ie-c1, its keystrokes replayed by xdotool at their recorded times (error p99 1.24 ms) and its clicks, scrolls and drags left out, so every key lands in the page's text box (D65; the archetype carries typing into a page field, not browsing's scrolling and clicking — the page-load operation carries browsing's heavy work); the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the process tree until the next input minus the idle rate. Stimulus sensitivity (pre-registered, method §3): under a 136M Keystrokes transcription stream (dhakal-chi18) the per-input run p50 is 1.84 ms against 1.60 ms under SWELL-KW (+15 %); the archetype carries SWELL-KW. Values are this software on this machine, not desktop truth (D10). Venue bound (D24, S8): without display vsync Chromium drives its compositor from a default 60 Hz timer (Chromium docs, life of a frame; BeginFrameArgs::DefaultInterval), so the compositor cadence has a 60 Hz display's period but not its phase; rasterisation and compositing run on CPU threads under --disable-gpu, so those threads' run lengths overcount what a GPU desktop would show, by an amount no source states.
     modeling_notes: >-
       Per-application archetype (D2): one task carries the whole process tree merged (D14), renderer processes excluded as renderer-hidden's and renderer-visible's (bound separately). Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled residual stands for the comms below the coverage cut. Input wakes: a contiguous slice of swell-ie-c1 equal to each focus window, at a seed-drawn offset (D18); the slice preserves the recording's burst-and-pause structure. Operation `page-load` (spec decisions 8–10): the timeline names it and a start time; the compiler draws its length from the measured duration table (trigger to completion) and swaps in the operation's components for that span, emitting no input wake; it runs to completion past the focus window.
 
@@ -381,34 +435,34 @@ archetypes:
       focus_components:
         - comm: "gimp"
           threads: 1
-          wakes_per_s: 8.590
-          gap: {dist: quantiles, p: [28, 37, 41, 58, 207, 2936, 500596, 604270, 1105383, 1105839], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [12, 16, 17, 24, 71, 402, 1040, 1432, 2062, 2156], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          wakes_per_s: 8.644
+          gap: {dist: quantiles, p: [36, 40, 43, 62, 182, 2917, 500589, 604349, 1105494, 1105895], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
+          run: {dist: quantiles, p: [16, 17, 18, 25, 71, 402, 1054, 1456, 2075, 2177], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
         # 1 comms cover 100.0 % of 8.6 wakes/s (D16, target 95 %); the rest pooled as `residual`
       operations:
         unsharp-mask:
-          duration: {dist: quantiles, p: [1853349, 1935167, 1941709, 2238359, 2343433, 2365846, 2413302, 2426033, 2451461, 2465838], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          duration: {dist: quantiles, p: [2200446, 2230730, 2275691, 2335242, 2357587, 2396587, 2434569, 2451040, 2485369, 2516939], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
           components:
             - comm: "script-fu"
               threads: 1
-              wakes_per_s: 12.026
-              gap: {dist: quantiles, p: [18, 24, 27, 32, 100, 1854, 882579, 1343639, 10003071, 10003305], sampling: per-iteration, source: "meas-ci:interactive:6"}
-              run: {dist: quantiles, p: [9, 10, 11, 12, 18, 29, 48, 125, 235, 1587], sampling: per-iteration, source: "meas-ci:interactive:6"}
+              wakes_per_s: 11.580
+              gap: {dist: quantiles, p: [20, 28, 29, 35, 129, 1998, 987694, 1343451, 10002992, 10003159], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
+              run: {dist: quantiles, p: [10, 11, 11, 13, 19, 29, 48, 126, 235, 1595], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
             - comm: "gimp"
               threads: 1
-              wakes_per_s: 2.296
-              gap: {dist: quantiles, p: [25, 30, 34, 55, 277, 2157, 12340070, 12363538, 12425329, 12462611], sampling: per-iteration, source: "meas-ci:interactive:6"}
-              run: {dist: quantiles, p: [13, 15, 17, 27, 100, 2194, 2425250, 2445132, 2500408, 2535621], sampling: per-iteration, source: "meas-ci:interactive:6"}
-            # 2 comms cover 100.0 % of 14.3 wakes/s (D16, target 95 %); the rest pooled as `residual`
+              wakes_per_s: 2.066
+              gap: {dist: quantiles, p: [31, 37, 44, 59, 325, 2397, 12352413, 12397437, 12447938, 12489572], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
+              run: {dist: quantiles, p: [15, 20, 23, 33, 111, 2303, 2438067, 2478448, 2524369, 2564816], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
+            # 2 comms cover 100.0 % of 13.6 wakes/s (D16, target 95 %); the rest pooled as `residual`
     lifetime: segment-bound
     binding_params: []
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "interactive:6, repeats [1, 2, 3, 4, 5]"
-      stats: ["idle wakes/s 0.0\u20130.0", "idle cpu-share 0.0000\u20130.0000", "driven wakes/s 8.4\u20138.7", "driven cpu-share 0.0025\u20130.0029", "op wakes/s 4.5\u20134.7", "op cpu-share 0.2002\u20130.2332"]
+      run: "interactive:2026-09-18, repeats [1, 2, 3, 5, 6], runs 35332161302, 35336583064, 35430758081"
+      stats: ["idle wakes/s 0.0\u20130.0", "idle cpu-share 0.0000\u20130.0000", "driven wakes/s 8.6\u20138.7", "driven cpu-share 0.0028\u20130.0030", "op wakes/s 4.5\u20134.5", "op cpu-share 0.2318\u20130.2359"]
       scope: >-
-        One observation (phase decision 2; D3, D10): GNU Image Manipulation Program version 2.10.36 (apt), a 4952×3288 image open (PCMark 10 Photo Editing's interactive image size, Technical Guide p. 71; synthetic content, imported as 16-bit; design); driven by a scripted pointer loop (drag, click, wheel; design); operation unsharp-mask: plug-in-unsharp-mask std-dev 4.0, amount 0.32, threshold 8 (PCMark 10's batch unsharp parameters mapped onto GIMP's PDB, p. 74; design) through the Script-Fu server, completion by its reply, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. Stimulus: a scripted pointer loop (design); no per-input run exists, the driven cadence is carried as focus_components. Values are this software on this machine, not desktop truth (D10).
+        One observation (phase decision 2; D3, D10, D26): GNU Image Manipulation Program version 2.10.36 (apt), a 4952×3288 image open (PCMark 10 Photo Editing's interactive image size, Technical Guide p. 71; synthetic content, imported as 16-bit; design); driven by a scripted pointer loop (drag, click, wheel; design); operation unsharp-mask: plug-in-unsharp-mask std-dev 4.0, amount 0.32, threshold 8 (PCMark 10's batch unsharp parameters mapped onto GIMP's PDB, p. 74; design) through the Script-Fu server, completion by its reply, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763 64-Core Processor, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. Stimulus: a scripted pointer loop (design); no per-input run exists, the driven cadence is carried as focus_components. Values are this software on this machine, not desktop truth (D10).
     modeling_notes: >-
       Per-application archetype (D2): one task carries the whole process tree merged (D14). Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled residual stands for the comms below the coverage cut. Inside focus windows the driven-phase components replace the idle ones; no input wake is emitted (the stimulus was scripted). Operation `unsharp-mask` (spec decisions 8–10): the timeline names it and a start time; the compiler draws its length from the measured duration table (trigger to completion) and swaps in the operation's components for that span, emitting no input wake; it runs to completion past the focus window.
 
@@ -423,65 +477,60 @@ archetypes:
       components:
         - comm: "kdenlive"
           threads: 2
-          wakes_per_s: 1.276
-          gap: {dist: quantiles, p: [16, 40, 1000744, 1001058, 1001070, 1001093, 1002030, 8994885, 9007062, 10007768], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [9, 12, 15, 17, 20, 26, 57, 84, 124, 153], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          wakes_per_s: 1.260
+          gap: {dist: quantiles, p: [18, 75, 1000289, 1001063, 1001070, 1001084, 1001392, 8998100, 9007084, 10002476], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
+          run: {dist: quantiles, p: [10, 14, 16, 18, 20, 25, 58, 82, 133, 179], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
         - comm: "Qt bearer threa"
           threads: 1
           wakes_per_s: 0.100
-          gap: {dist: quantiles, p: [9991001, 9991709, 9993522, 9999457, 10000257, 10000442, 10008158, 10008562, 10008903, 10009252], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [233, 242, 259, 337, 399, 439, 460, 486, 497, 498], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        # 2 comms cover 100.0 % of 1.4 wakes/s (D16, target 95 %); the rest pooled as `residual`
+          gap: {dist: quantiles, p: [9990683, 9991730, 9993887, 9999110, 10000226, 10000529, 10005519, 10008545, 10009518, 10010261], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
+          run: {dist: quantiles, p: [324, 335, 355, 385, 405, 435, 457, 474, 500, 504], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
+        # 2 comms cover 99.8 % of 1.4 wakes/s (D16, target 95 %); the rest pooled as `residual`
       focus_components:
         - comm: "kdenlive"
-          threads: 8
-          wakes_per_s: 134.654
-          gap: {dist: quantiles, p: [49, 1085, 2010, 2823, 5114, 8768, 16103, 16136, 1001411, 2621175], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [6, 14, 16, 28, 989, 6356, 8381, 8935, 9596, 31233], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          threads: [6, 9]
+          wakes_per_s: 136.590
+          gap: {dist: quantiles, p: [69, 1083, 1339, 2651, 5107, 8357, 16111, 16130, 1001195, 2621021], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
+          run: {dist: quantiles, p: [7, 15, 18, 27, 953, 6783, 8030, 8615, 9343, 31017], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
         - comm: "QXcbEventQueue"
           threads: 1
-          wakes_per_s: 71.720
-          gap: {dist: quantiles, p: [67, 987, 6672, 7475, 8136, 9029, 9613, 10128, 21194, 1165868], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [7, 7, 8, 13, 14, 17, 19, 21, 31, 52], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          wakes_per_s: 72.799
+          gap: {dist: quantiles, p: [74, 882, 7006, 7459, 7987, 8632, 9296, 9708, 19956, 1166238], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
+          run: {dist: quantiles, p: [10, 13, 13, 13, 14, 16, 18, 20, 29, 42], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
         - comm: "residual"
-          comms: ["Thread (pooled)", "FrameRenderer", "Qt bearer threa", "SDLHotplugALSA", "kdenliv:disk$0", "KIO::WorkerThre", "QDBusConnection"]
-          threads: [5, 6]
-          wakes_per_s: 1.864
-          gap: {dist: quantiles, p: [4, 9, 10, 498, 5669, 261321, 2494636, 2605644, 2615914, 2619762], sampling: per-iteration, source: "meas-ci:interactive:6"}
-          run: {dist: quantiles, p: [2, 4, 5, 8, 26, 313, 869, 1016, 1453, 2294], sampling: per-iteration, source: "meas-ci:interactive:6"}
-        # 2 comms cover 99.1 % of 208.2 wakes/s (D16, target 95 %); the rest pooled as `residual`
+          comms: ["Thread (pooled)", "FrameRenderer", "Qt bearer threa", "SDLHotplugALSA", "kdenliv:disk$0", "QDBusConnection", "PulseMainloop", "KIO::WorkerThre"]
+          threads: [5, 8]
+          wakes_per_s: 1.822
+          gap: {dist: quantiles, p: [9, 10, 11, 15, 4201, 381071, 2494207, 2609121, 2616407, 2619795], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
+          run: {dist: quantiles, p: [4, 4, 5, 8, 23, 328, 829, 874, 1394, 2528], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
+        # 2 comms cover 99.1 % of 211.2 wakes/s (D16, target 95 %); the rest pooled as `residual`
       operations:
         preview-render:
-          duration: {dist: quantiles, p: [9922893, 9980180, 10051711, 11243462, 11383771, 11618959, 11767523, 11891527, 11950055, 12072426], sampling: per-iteration, source: "meas-ci:interactive:6"}
+          duration: {dist: quantiles, p: [11050660, 11080351, 11122871, 11204230, 11375067, 11526479, 11689306, 11769659, 12027843, 12246661], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
           components:
-            - comm: "kdenlive"
-              threads: [28, 30]
-              wakes_per_s: 10.858
-              gap: {dist: quantiles, p: [59, 5266, 6245, 10895, 25006, 388167, 1000067, 1001005, 11666383, 13017000], sampling: per-iteration, source: "meas-ci:interactive:6"}
-              run: {dist: quantiles, p: [11, 15, 22, 66, 3817, 9291, 9601, 9810, 11858, 159853], sampling: per-iteration, source: "meas-ci:interactive:6"}
-            - comm: "QXcbEventQueue"
-              threads: 1
-              wakes_per_s: 5.350
-              gap: {dist: quantiles, p: [56, 2921, 7828, 25001, 31811, 431300, 446490, 456611, 11650690, 11685282], sampling: per-iteration, source: "meas-ci:interactive:6"}
-              run: {dist: quantiles, p: [7, 11, 13, 16, 18, 20, 23, 30, 46, 65], sampling: per-iteration, source: "meas-ci:interactive:6"}
+            - comm: "kdenlive_render"
+              threads: [1412, 1480]
+              wakes_per_s: 635.462
+              gap: {dist: quantiles, p: [10, 13, 26, 2838, 6488, 11127, 14696, 20870, 128181, 466082], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
+              run: {dist: quantiles, p: [4, 4, 4, 5, 7, 17, 3008, 4990, 14747, 215478], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
             - comm: "residual"
-              comms: ["Qt bearer threa", "Thread (pooled)"]
-              threads: [1, 2]
-              wakes_per_s: 0.100
-              gap: {dist: quantiles, p: [9995413, 9997924, 10000392, 19997998, 20000002, 20002070, 29999077, 30000925, 30001758, 30002864], sampling: per-iteration, source: "meas-ci:interactive:6"}
-              run: {dist: quantiles, p: [235, 245, 252, 330, 360, 375, 393, 411, 439, 457], sampling: per-iteration, source: "meas-ci:interactive:6"}
-            # 3 comms cover 99.5 % of 21.1 wakes/s (D16, target 95 %); the rest pooled as `residual`
+              comms: ["kdenlive", "QXcbEventQueue", "Qt bearer threa"]
+              threads: [29, 31]
+              wakes_per_s: 16.066
+              gap: {dist: quantiles, p: [15, 18, 20, 2007, 9292, 27397, 328994, 401019, 431010, 11674907], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
+              run: {dist: quantiles, p: [9, 15, 16, 19, 67, 8799, 9402, 9618, 10409, 13919], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
+            # 1 comms cover 97.5 % of 651.5 wakes/s (D16, target 95 %); the rest pooled as `residual`
     lifetime: segment-bound
     binding_params: []
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "interactive:6, repeats [1, 2, 3, 4, 5]"
-      stats: ["idle wakes/s 1.3\u20131.4", "idle cpu-share 0.0001\u20130.0001", "driven wakes/s 190.2\u2013236.1", "driven cpu-share 0.3193\u20130.3926", "op wakes/s 11.6\u201312.3", "op cpu-share 0.4652\u20130.5038"]
+      run: "interactive:2026-09-18, repeats [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21], runs 35332161302, 35337753822, 35430724508, 35432804310, 35434359943, 35435880078, 35437536150, 35439063729, 35440486578, 35442641193, 35443962910, 35445325169, 35446754640, 35448143331, 35449591333, 35451045847, 35452546894, 35454009002"
+      stats: ["idle wakes/s 1.3\u20131.4", "idle cpu-share 0.0001\u20130.0001", "driven wakes/s 191.2\u2013230.1", "driven cpu-share 0.3501\u20130.3898", "op wakes/s 321.9\u2013334.6", "op cpu-share 0.4929\u20130.5049"]
       scope: >-
-        One observation (phase decision 2; D3, D10): Kdenlive 23.08.5 (Ubuntu 24.04 apt), a project with one 20 s 1920×1080 30 fps H.264 clip (PCMark 10 Video Editing's 1080p H.264, p. 76; synthetic content, design) on V1 with an avfilter.unsharp effect at PCMark 10's sharpening parameters (p. 76); driven by a scripted pointer loop that scrubs the clip monitor (design); llvmpipe software-rasteriser threads excluded (D15); operation preview-render: the whole-clip timeline preview rendered by Kdenlive's external kdenlive_render process (part of the tree), completion when it exits, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. Stimulus: a scripted pointer loop (design); no per-input run exists, the driven cadence is carried as focus_components. Values are this software on this machine, not desktop truth (D10). Venue bound (D24, S8): Qt Quick's render loop paces on a blocking buffer swap; the runner's software rasteriser does not block, so the rendering path's wake rate overcounts a vsync-throttled display (Qt 5.15 qsgthreadedrenderloop.cpp); the excluded llvmpipe threads carried 93 % of the driven phase's CPU (D15).
+        One observation (phase decision 2; D3, D10, D26): Kdenlive 23.08.5 (Ubuntu 24.04 apt), a project with one 20 s 1920×1080 30 fps H.264 clip (PCMark 10 Video Editing's 1080p H.264, p. 76; synthetic content, design) on V1 with an avfilter.unsharp effect at PCMark 10's sharpening parameters (p. 76); driven by a scripted pointer loop that scrubs the clip monitor (design); llvmpipe software-rasteriser threads excluded (D15); operation preview-render: the whole-clip timeline preview rendered by Kdenlive's external kdenlive_render process (part of the tree), completion when it exits, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763 64-Core Processor, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. Stimulus: a scripted pointer loop (design); no per-input run exists, the driven cadence is carried as focus_components. Values are this software on this machine, not desktop truth (D10). Venue bound (D24, S8): Qt Quick's render loop paces on a blocking buffer swap; the runner's software rasteriser does not block, so the rendering path's wake rate overcounts a vsync-throttled display (Qt 5.15 qsgthreadedrenderloop.cpp); the excluded llvmpipe threads carried 93 % of the driven phase's CPU (D15).
     modeling_notes: >-
-      Per-application archetype (D2): one task carries the whole process tree merged (D14). Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled residual stands for the comms below the coverage cut. Inside focus windows the driven-phase components replace the idle ones; no input wake is emitted (the stimulus was scripted). Operation `preview-render` (spec decisions 8–10): the timeline names it and a start time; the compiler draws its length from the measured duration table (trigger to completion) and swaps in the operation's components for that span, emitting no input wake; it runs to completion past the focus window.
+      Per-application archetype (D2): one task carries the whole process tree merged (D14). Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled residual stands for the comms below the coverage cut. Inside focus windows the driven-phase components replace the idle ones; no input wake is emitted (the stimulus was scripted). Operation `preview-render` (spec decisions 8–10): the timeline names it and a start time; the compiler draws its length from the measured duration table (trigger to completion) and swaps in the operation's components for that span, emitting no input wake; it runs to completion past the focus window. Sporadic wakes, not carried as components (D43): `residual` (QDBusConnection, Thread (pooled)) in the idle phase, repeats [7, 21] of [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21], 0.0029 wakes/s.
 
   video-player:
     category_source: meas
@@ -494,40 +543,40 @@ archetypes:
       components:
         - comm: "vo"
           threads: 1
-          wakes_per_s: 274.440
-          gap: {dist: quantiles, p: [10, 51, 60, 72, 99, 807, 16656, 29852, 32844, 33223], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [4, 5, 6, 43, 56, 86, 1375, 1912, 2418, 2800], sampling: per-iteration, source: "meas-ci:playback:6"}
+          wakes_per_s: 310.157
+          gap: {dist: quantiles, p: [12, 67, 75, 83, 99, 322, 12759, 28826, 32539, 33246], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
+          run: {dist: quantiles, p: [5, 6, 6, 51, 60, 86, 831, 1963, 2450, 2892], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
         - comm: "mpv"
           threads: 1
-          wakes_per_s: 230.486
-          gap: {dist: quantiles, p: [7, 8, 9, 11, 18, 1962, 18766, 30847, 33290, 33499], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [3, 3, 4, 5, 7, 14, 861, 1049, 1200, 1383], sampling: per-iteration, source: "meas-ci:playback:6"}
+          wakes_per_s: 234.993
+          gap: {dist: quantiles, p: [9, 9, 10, 11, 17, 1951, 19056, 30261, 33294, 33601], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
+          run: {dist: quantiles, p: [3, 4, 4, 5, 6, 12, 873, 1021, 1206, 1582], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
         - comm: "demux"
           threads: 1
-          wakes_per_s: 145.052
-          gap: {dist: quantiles, p: [8, 9, 10, 13, 39, 970, 30915, 46735, 50074, 50442], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [3, 3, 3, 4, 6, 10, 22, 29, 38, 54], sampling: per-iteration, source: "meas-ci:playback:6"}
+          wakes_per_s: 146.707
+          gap: {dist: quantiles, p: [10, 11, 12, 14, 42, 1013, 30332, 46798, 49777, 50428], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
+          run: {dist: quantiles, p: [4, 4, 4, 5, 6, 10, 20, 26, 36, 55], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
         - comm: "lua/osc"
           threads: 1
-          wakes_per_s: 114.682
-          gap: {dist: quantiles, p: [7, 8, 10, 18, 155, 16580, 33035, 36184, 38412, 39626], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [3, 3, 4, 6, 24, 49, 73, 85, 116, 213], sampling: per-iteration, source: "meas-ci:playback:6"}
+          wakes_per_s: 106.636
+          gap: {dist: quantiles, p: [9, 10, 12, 63, 764, 17557, 33123, 36263, 38627, 39540], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
+          run: {dist: quantiles, p: [4, 4, 5, 10, 25, 48, 66, 77, 104, 196], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
         - comm: "residual"
-          comms: ["ao", "terminal/input", "lua/ytdl_hook", "lua/stats", "lua/console"]
+          comms: ["ao", "terminal/input", "lua/stats", "lua/ytdl_hook", "lua/console"]
           threads: 5
-          wakes_per_s: 37.115
-          gap: {dist: quantiles, p: [7, 8, 10, 144, 49397, 49623, 50556, 50745, 50911, 51311], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [3, 3, 4, 4, 18, 35, 46, 51, 65, 83], sampling: per-iteration, source: "meas-ci:playback:6"}
-        # 4 comms cover 95.4 % of 801.8 wakes/s (D16, target 95 %); the rest pooled as `residual`
+          wakes_per_s: 33.661
+          gap: {dist: quantiles, p: [9, 12, 24, 163, 49408, 49630, 50662, 50757, 50922, 51410], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
+          run: {dist: quantiles, p: [4, 4, 5, 6, 21, 35, 40, 43, 52, 65], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
+        # 4 comms cover 96.0 % of 832.2 wakes/s (D16, target 95 %); the rest pooled as `residual`
     lifetime: segment-bound
     binding_params: []
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "playback:6, repeats [1, 2, 3, 4, 5]"
-      stats: ["play wakes/s 766.6\u2013831.6", "play cpu-share 0.0933\u20130.1292"]
+      run: "playback:2026-09-18, repeats [1, 2, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26], runs 35332161264, 35332527751, 35430789097, 35431295158, 35431761759, 35432755181, 35434466048, 35435117227, 35435913749, 35436442350, 35437246052, 35437782918, 35438269919, 35438784042, 35439715255, 35440351748, 35440928077, 35442356450, 35443042117, 35443488409, 35443962997, 35444519830, 35444977609"
+      stats: ["play wakes/s 769.1\u2013908.0", "play cpu-share 0.1072\u20130.1529"]
       scope: >-
-        One observation (phase decision 2; D3, D10): mpv 0.37.0 Copyright © 2000-2023 mpv/MPlayer/mplayer2 projec, --vo=x11 --ao=null, a 1280×720 30 fps H.264 file with AAC audio, looped, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. No stimulus; the play phase's thread cadence is the whole behaviour. Values are this software on this machine, not desktop truth (D10). Venue bound (D24, S8): mpv's default --video-sync=audio paces frames on the audio clock, not the display (mpv 0.37 manual), so the missing refresh does not change its cadence; the x11 output copies frames on the CPU, work a GPU output would move.
+        One observation (phase decision 2; D3, D10, D26): mpv 0.37.0 Copyright © 2000-2023 mpv/MPlayer/mplayer2 projec, --vo=x11 --ao=null, a 1280×720 30 fps H.264 file with AAC audio, looped, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763 64-Core Processor, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. No stimulus; the play phase's thread cadence is the whole behaviour. Values are this software on this machine, not desktop truth (D10). Venue bound (D24, S8): mpv's default --video-sync=audio paces frames on the audio clock, not the display (mpv 0.37 manual), so the missing refresh does not change its cadence; the x11 output copies frames on the CPU, work a GPU output would move.
     modeling_notes: >-
       Per-application archetype (D2): one task carries the whole process tree merged (D14). Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled residual stands for the comms below the coverage cut. Bound by stated approximation, carrying these numbers unchanged (D11, D12): zoom (video) → video-call instead (D12); gamescope: compositor, not a decoder (9.4's record).
 
@@ -542,40 +591,40 @@ archetypes:
       components:
         - comm: "mpv"
           threads: 1
-          wakes_per_s: 69.566
-          gap: {dist: quantiles, p: [6, 8, 10, 16, 344, 29657, 49487, 49562, 49630, 49707], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [2, 3, 4, 6, 9, 81, 120, 141, 185, 252], sampling: per-iteration, source: "meas-ci:playback:6"}
+          wakes_per_s: 70.380
+          gap: {dist: quantiles, p: [13, 14, 15, 19, 415, 28889, 49280, 49588, 49659, 49712], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
+          run: {dist: quantiles, p: [6, 7, 7, 9, 11, 92, 136, 157, 201, 269], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
         - comm: "demux"
           threads: 1
-          wakes_per_s: 57.566
-          gap: {dist: quantiles, p: [4, 5, 6, 13, 57, 49501, 49567, 49606, 49682, 49778], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [1, 1, 2, 3, 5, 15, 21, 25, 38, 97], sampling: per-iteration, source: "meas-ci:playback:6"}
+          wakes_per_s: 53.996
+          gap: {dist: quantiles, p: [12, 13, 14, 22, 77, 49528, 49588, 49626, 49705, 49814], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
+          run: {dist: quantiles, p: [4, 5, 5, 6, 9, 16, 24, 28, 44, 109], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
         - comm: "ao"
           threads: 1
-          wakes_per_s: 45.486
-          gap: {dist: quantiles, p: [3, 4, 7, 128, 213, 49429, 49455, 49545, 49636, 49720], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [1, 2, 2, 2, 6, 34, 44, 50, 62, 81], sampling: per-iteration, source: "meas-ci:playback:6"}
+          wakes_per_s: 44.370
+          gap: {dist: quantiles, p: [11, 12, 13, 143, 235, 49446, 49471, 49585, 49677, 49742], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
+          run: {dist: quantiles, p: [4, 5, 5, 6, 7, 41, 52, 59, 66, 80], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
         - comm: "lua/osc"
           threads: 1
-          wakes_per_s: 36.374
-          gap: {dist: quantiles, p: [63, 74, 80, 98, 2273, 49924, 98724, 99069, 99212, 99336], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [5, 7, 10, 30, 46, 62, 74, 86, 129, 217], sampling: per-iteration, source: "meas-ci:playback:6"}
+          wakes_per_s: 37.335
+          gap: {dist: quantiles, p: [71, 148, 159, 177, 2152, 51059, 97524, 99057, 99217, 99350], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
+          run: {dist: quantiles, p: [13, 20, 24, 33, 53, 71, 85, 93, 143, 232], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
         - comm: "residual"
           comms: ["terminal/input", "vo", "lua/ytdl_hook", "lua/stats", "lua/console"]
           threads: 5
-          wakes_per_s: 2.023
-          gap: {dist: quantiles, p: [4, 14, 15225, 185392, 491062, 796092, 974677, 1001042, 1001075, 1001106], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [2, 7, 14, 19, 25, 32, 36, 41, 74, 133], sampling: per-iteration, source: "meas-ci:playback:6"}
-        # 4 comms cover 99.0 % of 211.0 wakes/s (D16, target 95 %); the rest pooled as `residual`
+          wakes_per_s: 2.026
+          gap: {dist: quantiles, p: [9, 21, 9523, 186951, 490266, 797565, 977912, 1001067, 1001081, 1001111], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
+          run: {dist: quantiles, p: [4, 9, 16, 20, 26, 36, 39, 44, 92, 156], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
+        # 4 comms cover 99.0 % of 208.1 wakes/s (D16, target 95 %); the rest pooled as `residual`
     lifetime: segment-bound
     binding_params: []
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "playback:6, repeats [1, 2, 3, 4, 5]"
-      stats: ["play wakes/s 207.9\u2013214.9", "play cpu-share 0.0044\u20130.0071"]
+      run: "playback:2026-09-18, repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31], runs 35332161264, 35332322376, 35333878507, 35334899089, 35335626383, 35336583038, 35338567828, 35339374435, 35340330342, 35341704626, 35343199854, 35344612046, 35345768082, 35347103719, 35348355970, 35350316655, 35351278279, 35352183264, 35353644742, 35354634250, 35355643628, 35357635317, 35358686848, 35360229226, 35361972658, 35362948869, 35430724434, 35431295158"
+      stats: ["play wakes/s 206.1\u2013211.0", "play cpu-share 0.0058\u20130.0086"]
       scope: >-
-        One observation (phase decision 2; D3, D10): mpv 0.37.0 Copyright © 2000-2023 mpv/MPlayer/mplayer2 projec, --no-video --ao=null, the same file's AAC audio, looped, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. No stimulus; the play phase's thread cadence is the whole behaviour. Values are this software on this machine, not desktop truth (D10).
+        One observation (phase decision 2; D3, D10, D26): mpv 0.37.0 Copyright © 2000-2023 mpv/MPlayer/mplayer2 projec, --no-video --ao=null, the same file's AAC audio, looped, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763 64-Core Processor, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. No stimulus; the play phase's thread cadence is the whole behaviour. Values are this software on this machine, not desktop truth (D10).
     modeling_notes: >-
       Per-application archetype (D2): one task carries the whole process tree merged (D14). Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled residual stands for the comms below the coverage cut. Bound by stated approximation, carrying these numbers unchanged (D11, D12): spotify: streaming client with network fetch, decode and a Chromium-based interface (S2-18: no documentation).
 
@@ -588,81 +637,94 @@ archetypes:
             - RUN: event
     params:
       components:
-        - comm: "WebRTC_W_and_N"
+        - comm: "renderer/WebRTC_W_and_N"
           threads: 1
-          wakes_per_s: 481.156
-          gap: {dist: quantiles, p: [3, 4, 5, 11, 162, 2847, 7403, 10276, 14167, 15628], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [1, 2, 2, 5, 14, 45, 72, 91, 136, 198], sampling: per-iteration, source: "meas-ci:playback:6"}
-        - comm: "Chrome_ChildIOT"
-          threads: [10, 11]
-          wakes_per_s: 436.576
-          gap: {dist: quantiles, p: [36, 64, 107, 750, 5458, 15686, 18581, 21064, 83969, 1000113], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [4, 7, 9, 13, 19, 36, 80, 99, 146, 256], sampling: per-iteration, source: "meas-ci:playback:6"}
-        - comm: "ThreadPoolForeg"
-          threads: [39, 44]
-          wakes_per_s: 191.840
-          gap: {dist: quantiles, p: [4, 9, 11, 1965, 6985, 9987, 11554, 83552, 358743, 6647321], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [1, 4, 5, 9, 40, 158, 1105, 1526, 42349, 139305], sampling: per-iteration, source: "meas-ci:playback:6"}
-        - comm: "AudioProcessing"
+          wakes_per_s: 501.693
+          gap: {dist: quantiles, p: [9, 9, 10, 12, 160, 2504, 7321, 9904, 13715, 15632], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+          run: {dist: quantiles, p: [4, 4, 4, 6, 14, 49, 79, 99, 146, 214], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+        - comm: "renderer/Chrome_ChildIOT"
+          threads: [2, 4]
+          wakes_per_s: 273.570
+          gap: {dist: quantiles, p: [40, 62, 82, 263, 1576, 6051, 11025, 13554, 16574, 999358], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+          run: {dist: quantiles, p: [8, 9, 13, 16, 19, 23, 36, 44, 62, 91], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+        - comm: "renderer/ThreadPoolForeg"
+          threads: [10, 12]
+          wakes_per_s: 191.527
+          gap: {dist: quantiles, p: [9, 10, 12, 1553, 5827, 9971, 10047, 10899, 249405, 1689113], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+          run: {dist: quantiles, p: [4, 4, 5, 10, 23, 162, 1162, 1447, 2035, 78942], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+        - comm: "utility/AudioProcessing"
           threads: 1
-          wakes_per_s: 127.256
-          gap: {dist: quantiles, p: [4, 5, 10, 7860, 9994, 10004, 10602, 11669, 12729, 15034], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [2, 2, 4, 107, 136, 156, 172, 184, 213, 264], sampling: per-iteration, source: "meas-ci:playback:6"}
-        - comm: "chrome"
-          threads: [13, 15]
-          wakes_per_s: 124.624
-          gap: {dist: quantiles, p: [4, 8, 11, 1306, 22010, 49426, 66740, 66812, 979291, 4003998], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [2, 4, 5, 15, 26, 92, 357, 418, 718, 1706], sampling: per-iteration, source: "meas-ci:playback:6"}
-        - comm: "AudioOutputDevi"
+          wakes_per_s: 124.806
+          gap: {dist: quantiles, p: [9, 10, 10, 9678, 9994, 10004, 10022, 10401, 12178, 13848], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+          run: {dist: quantiles, p: [4, 4, 5, 124, 144, 166, 186, 200, 231, 282], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+        - comm: "renderer/AudioOutputDevi"
           threads: 1
-          wakes_per_s: 120.210
-          gap: {dist: quantiles, p: [6, 8, 10, 9133, 9994, 10020, 10555, 11714, 13185, 15101], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [1, 1, 2, 36, 51, 79, 96, 105, 124, 153], sampling: per-iteration, source: "meas-ci:playback:6"}
-        - comm: "VizCompositorTh"
-          threads: 1
-          wakes_per_s: 103.364
-          gap: {dist: quantiles, p: [80, 108, 144, 604, 15102, 16210, 17178, 17241, 18452, 19856], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [14, 18, 24, 33, 50, 79, 356, 416, 553, 689], sampling: per-iteration, source: "meas-ci:playback:6"}
-        - comm: "AudioWorkerThre"
-          threads: 1
-          wakes_per_s: 100.002
-          gap: {dist: quantiles, p: [6765, 7949, 9439, 9994, 10000, 10008, 10780, 11842, 13078, 14659], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [40, 47, 51, 58, 64, 73, 83, 89, 103, 128], sampling: per-iteration, source: "meas-ci:playback:6"}
-        - comm: "AudioInputDevic"
+          wakes_per_s: 115.148
+          gap: {dist: quantiles, p: [13, 15, 17, 9942, 9996, 10012, 10126, 10758, 12278, 14278], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+          run: {dist: quantiles, p: [3, 4, 4, 41, 60, 88, 104, 116, 142, 178], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+        - comm: "utility/Chrome_ChildIOT"
+          threads: [3, 5]
+          wakes_per_s: 107.785
+          gap: {dist: quantiles, p: [182, 1120, 2506, 6203, 14646, 20084, 50061, 50488, 98432, 1000140], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+          run: {dist: quantiles, p: [18, 24, 26, 60, 80, 105, 137, 152, 186, 256], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+        - comm: "utility/AudioWorkerThre"
           threads: 1
           wakes_per_s: 100.000
-          gap: {dist: quantiles, p: [6447, 7797, 8747, 9964, 10000, 10041, 11202, 11990, 13580, 15683], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [10, 12, 13, 17, 21, 24, 31, 38, 51, 69], sampling: per-iteration, source: "meas-ci:playback:6"}
-        - comm: "FakeAudioInput"
+          gap: {dist: quantiles, p: [7611, 9310, 9907, 9993, 10000, 10008, 10116, 10762, 12253, 13939], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+          run: {dist: quantiles, p: [56, 58, 60, 62, 68, 77, 88, 96, 115, 156], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+        - comm: "renderer/AudioInputDevic"
           threads: 1
           wakes_per_s: 100.000
-          gap: {dist: quantiles, p: [7273, 8286, 9218, 9996, 10000, 10005, 10812, 11702, 12725, 14336], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [8, 10, 11, 16, 21, 25, 33, 37, 44, 59], sampling: per-iteration, source: "meas-ci:playback:6"}
-        - comm: "VideoFrameCompo"
+          gap: {dist: quantiles, p: [7440, 9104, 9896, 9968, 10000, 10033, 10117, 10946, 12458, 14921], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+          run: {dist: quantiles, p: [17, 18, 19, 20, 22, 28, 36, 43, 61, 80], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+        - comm: "utility/FakeAudioInput"
           threads: 1
-          wakes_per_s: 84.572
-          gap: {dist: quantiles, p: [4, 10, 12, 650, 16199, 16870, 17228, 17458, 19300, 65255], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [2, 4, 5, 16, 34, 59, 180, 222, 341, 552], sampling: per-iteration, source: "meas-ci:playback:6"}
+          wakes_per_s: 100.000
+          gap: {dist: quantiles, p: [7727, 9594, 9971, 9994, 10000, 10007, 10035, 10458, 12171, 13483], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+          run: {dist: quantiles, p: [16, 17, 18, 19, 22, 28, 35, 39, 47, 69], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+        - comm: "gpu/VizCompositorTh"
+          threads: 1
+          wakes_per_s: 96.923
+          gap: {dist: quantiles, p: [105, 154, 285, 709, 16088, 16245, 17195, 17250, 17870, 19405], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+          run: {dist: quantiles, p: [22, 26, 30, 39, 59, 99, 340, 382, 477, 627], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+        - comm: "renderer/VideoFrameCompo"
+          threads: 1
+          wakes_per_s: 89.314
+          gap: {dist: quantiles, p: [10, 11, 11, 352, 16199, 16635, 17236, 17492, 33311, 49510], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+          run: {dist: quantiles, p: [4, 5, 5, 13, 35, 69, 178, 203, 252, 308], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+        - comm: "gpu/Chrome_ChildIOT"
+          threads: 1
+          wakes_per_s: 60.819
+          gap: {dist: quantiles, p: [105, 1799, 14246, 16199, 16534, 17197, 17405, 18336, 50216, 50716], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+          run: {dist: quantiles, p: [11, 12, 12, 14, 17, 20, 25, 30, 46, 65], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+        - comm: "utility/chrome"
+          threads: [5, 8]
+          wakes_per_s: 59.479
+          gap: {dist: quantiles, p: [33, 1659, 1965, 2451, 47094, 52923, 66748, 66759, 4000103, 4000250], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+          run: {dist: quantiles, p: [12, 15, 17, 21, 29, 308, 393, 415, 454, 525], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+        - comm: "renderer/chrome"
+          threads: [3, 4]
+          wakes_per_s: 56.710
+          gap: {dist: quantiles, p: [9, 10, 10, 12, 5336, 47998, 50275, 51253, 810161, 999464], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+          run: {dist: quantiles, p: [4, 4, 5, 6, 20, 30, 86, 169, 340, 618], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
         - comm: "residual"
-          comms: ["Chrome_IOThread", "WebRTC_Signalin", "CompositorTileW", "ThreadPoolServi", "HangWatcher", "ThreadPoolSingl", "MemoryInfra", "Compositor", "CacheThread_Blo", "sandbox_ipc_thr", "PerfettoTrace", "ServiceWorker t"]
-          threads: [35, 62]
-          wakes_per_s: 66.043
-          gap: {dist: quantiles, p: [5, 20, 56, 316, 1887, 35214, 48493, 48732, 50996, 53714], sampling: per-iteration, source: "meas-ci:playback:6"}
-          run: {dist: quantiles, p: [2, 5, 10, 19, 44, 71, 87, 95, 331, 482], sampling: per-iteration, source: "meas-ci:playback:6"}
-        # 11 comms cover 96.8 % of 2035.6 wakes/s (D16, target 95 %); the rest pooled as `residual`
+          comms: ["Chrome_IOThread", "renderer/WebRTC_Signalin", "chrome", "CompositorTileW", "renderer/ThreadPoolServi", "utility/HangWatcher", "ThreadPoolForeg", "renderer/HangWatcher", "gpu/chrome", "renderer/Compositor", "MemoryInfra", "HangWatcher", "gpu/HangWatcher", "utility/ThreadPoolForeg", "utility/ThreadPoolServi", "CacheThread_Blo", "ThreadPoolServi", "sandbox_ipc_thr", "utility/PerfettoTrace", "renderer/PerfettoTrace", "PerfettoTrace", "gpu/ThreadPoolServi", "gpu/PerfettoTrace", "renderer/ServiceWorker t", "renderer/MemoryInfra", "ThreadPoolSingl", "utility/MemoryInfra", "gpu/MemoryInfra"]
+          threads: [31, 59]
+          wakes_per_s: 74.610
+          gap: {dist: quantiles, p: [9, 11, 24, 224, 1760, 26132, 48418, 48572, 49367, 52432], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+          run: {dist: quantiles, p: [4, 5, 12, 25, 51, 75, 98, 236, 1327, 1638], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
+        # 14 comms cover 96.4 % of 2052.4 wakes/s (D16, target 95 %); the rest pooled as `residual`
     lifetime: segment-bound
     binding_params: []
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "playback:6, repeats [1, 2, 3, 4, 5]"
-      stats: ["play wakes/s 2021.1\u20132049.8", "play cpu-share 0.4066\u20130.4232"]
+      run: "playback:2026-09-20, repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45], runs 35498551463, 35498599240, 35498811122, 35499419096, 35500035897, 35501685936, 35502408295, 35503154734, 35504126607, 35505001410, 35505912707, 35506764800, 35507534835, 35508447512, 35509559108, 35510800348, 35511721936, 35512737329, 35513862651, 35514933297, 35515982996, 35517338875, 35518362240, 35519505521, 35520844556, 35522016056, 35523095460, 35524164417, 35525331338, 35526531236, 35528743816, 35529951828, 35531287100, 35582380376, 35584737555, 35826474736, 35828785649, 35838753559, 35841314413, 35843827354, 35847294439, 35849765098, 35852699176, 35855225049, 35858966584"
+      stats: ["play wakes/s 1986.8\u20132114.5", "play cpu-share 0.2164\u20130.2686"]
       scope: >-
-        One observation (phase decision 2; D3, D10): Google Chrome 152.0.7977.82, a loopback WebRTC call in one page with a synthetic 1280×720 30 fps camera and microphone (--use-fake-device-for-media-stream); encode and decode at ~20 fps, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. No stimulus; the play phase's thread cadence is the whole behaviour. Values are this software on this machine, not desktop truth (D10). Venue bound (D24, S8): without display vsync Chromium drives its compositor from a default 60 Hz timer (Chromium docs, life of a frame; BeginFrameArgs::DefaultInterval), so the compositor cadence has a 60 Hz display's period but not its phase; rasterisation and compositing run on CPU threads under --disable-gpu, so those threads' run lengths overcount what a GPU desktop would show, by an amount no source states.
+        One observation (phase decision 2; D3, D10, D26): Google Chrome 152.0.7977.82 (42 repeats), Google Chrome 153.0.8010.52 (3: 37, 40, 45), a loopback WebRTC call in one page with a synthetic 1280×720 30 fps camera and microphone (--use-fake-device-for-media-stream); encode and decode at ~20 fps, on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763 64-Core Processor, kernel 6.17.0-1022-azure) under Xvfb 1280×800 — no display refresh, no GPU, no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. No stimulus; the play phase's thread cadence is the whole behaviour. Values are this software on this machine, not desktop truth (D10). Venue bound (D24, S8): without display vsync Chromium drives its compositor from a default 60 Hz timer (Chromium docs, life of a frame; BeginFrameArgs::DefaultInterval), so the compositor cadence has a 60 Hz display's period but not its phase; rasterisation and compositing run on CPU threads under --disable-gpu, so those threads' run lengths overcount what a GPU desktop would show, by an amount no source states.
     modeling_notes: >-
       Per-application archetype (D2): one task carries the whole process tree merged (D14). Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled residual stands for the comms below the coverage cut. Bound by stated approximation, carrying these numbers unchanged (D11, D12): zoom voice and video: a proprietary client with capture, encode, network and playback threads (S2-17; S6: whole-client CPU only).
-
-  # ---- measured per-application archetypes — 9.8 campaign (meas-ci:desktop:2026-09-20) ----
 
   renderer-hidden:
     category_source: meas
