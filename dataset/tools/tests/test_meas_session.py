@@ -178,11 +178,14 @@ def test_a_cron_sessions_wakes_leave_the_component_and_are_stated(tmp_path):
     ph = analyze.analyze_run_dir(str(d))["phases"]["steady"]
     sysd = ph["entries"]["systemd"]
     ev = sysd["cron_event"]
-    assert ev["count"] == 4 and ev["waker"] == "cron" and ev["window_s"] == 1.0 and ev["windows"] == 3
-    assert ev["runs_ms"] == [0.9, 2.6, 0.9, 0.9] and ev["at_s"] == [71.0, 71.4, 73.0, 75.0]
-    # the component is read without them: the fixture's ten pid-1 wakes over the 100 s phase, unchanged
-    assert sysd["threads"]["pid1/systemd"]["wakes_per_s"] == 0.1
-    assert ph["entries"]["gnome-shell"]["cron_event"]["count"] == 0
+    # ±2 s each side, the three wakeups merging into one window [69, 77] — which also takes the routine pid-1
+    # wake at 70 s, the over-attribution a window of this width states rather than avoids
+    assert ev["count"] == 5 and ev["waker"] == "cron" and ev["window_s"] == 2.0 and ev["windows"] == 1
+    assert ev["runs_ms"] == [0.2, 0.9, 2.6, 0.9, 0.9] and ev["at_s"] == [70.0, 71.0, 71.4, 73.0, 75.0]
+    # the component is read without them: nine of the fixture's ten pid-1 wakes over the 100 s phase
+    assert sysd["threads"]["pid1/systemd"]["wakes_per_s"] == 0.09
+    # the window takes every entry's rows, not just the woken one's: the shell's wakes at 69.5 and 74.5 s
+    assert ph["entries"]["gnome-shell"]["cron_event"]["at_s"] == [69.5, 74.5]
 
 
 def test_the_pool_names_probe_and_foreign_repeats_and_pools_the_rest(tmp_path):

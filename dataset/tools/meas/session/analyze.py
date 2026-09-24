@@ -52,11 +52,15 @@ ENTRIES = ("gnome-shell", "pipewire", "systemd", "dbus-daemon")
 # logind's own comm and which a waker-only rule leaves behind. A floor would instead cut by size, removing the
 # heavy runs of a repeat whose window met no cron session at all and biasing every quantile above it.
 #
-# The window is a second; the journal puts a session's whole open-to-close at milliseconds (repeat 47, the sysstat
-# job: opened 2484.518, closed 2484.521). The rows leave the component, which is read without them, and the event
-# is stated per repeat with its count, its runs, its times into the phase and its rate over the phase time pooled.
+# The window is symmetric, two seconds each way from a wakeup. It straddles its marker because pid 1 does the
+# scope work before cron's own wakeups: in repeat 47 seven runs of 1 ms or more fall at +318 s and the cron burst
+# at +319 s. Two seconds is where the value stops moving — pid 1's mean run over the rows left is 0.207, 0.208,
+# 0.211 and 0.219 ms in the four repeats that met a session at ±2 s and the same at ±5 s, against 0.220-0.228 with
+# no window at all — so the footprint is inside ±2 s and the window is not cutting into unrelated work. The rows
+# leave the component, which is read without them, and the event is stated per repeat with its count, its runs,
+# its times into the phase and its rate over the phase time pooled.
 CRON_WAKER = r"^cron$"
-CRON_EVENT_S = 1.0
+CRON_EVENT_S = 2.0
 # a pid the census never saw (a process born and gone inside the phase) is told kernel from user by its name
 KTHREAD_NAME = re.compile(r"^(kworker/|ksoftirqd/|migration/|rcu_|rcuc/|rcuog/|rcuop/|cpuhp/|idle_inject/|irq/|"
                           r"kthreadd$|khugepaged$|kcompactd|kswapd|watchdog/|jbd2/|writeback|scsi_|hv_|kauditd$)")
@@ -177,13 +181,13 @@ def poll_summary(D, phase, _unused=None):
 
 
 def cron_windows(times, w=CRON_EVENT_S):
-    """The windows a cron session occupies: each wakeup by `cron` opens one of `w` seconds, overlaps merged."""
+    """The windows a cron session occupies: `w` seconds each side of every wakeup by `cron`, overlaps merged."""
     out = []
     for t in sorted(times):
-        if out and t <= out[-1][1]:
+        if out and t - w <= out[-1][1]:
             out[-1][1] = max(out[-1][1], t + w)
         else:
-            out.append([t, t + w])
+            out.append([t - w, t + w])
     return out
 
 
