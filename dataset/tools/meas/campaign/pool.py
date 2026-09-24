@@ -30,6 +30,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from analyze import analyze_run, component_name, pct  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from stability import stability, TOLERANCE, T975  # noqa: E402
+from distribution import circular_gaps, quantile_table  # noqa: E402
 
 NAME = re.compile(r"^meas-(interactive|playback)-(.+)-r(\d+)-(dry|full)$")
 
@@ -198,15 +199,50 @@ def qtable(values):
 def summary(samples_by_repeat):
     pooled = [v for vs in samples_by_repeat for v in vs]
     return {"n": len(pooled), "p50": pct(pooled, .5), "p90": pct(pooled, .9), "p99": pct(pooled, .99),
-            "q": qtable(pooled),
+            "q": qtable(pooled), "table": quantile_table(pooled),
             "repeat_p50": [pct(vs, .5) for vs in samples_by_repeat], "repeat_n": [len(vs) for vs in samples_by_repeat],
             "repeat_mean": [round(statistics.fmean(vs), 4) if vs else None for vs in samples_by_repeat]}
 
 
-def select_components(comms, spans, reps):
+def segment_gaps(times, segments):
+    """A component's gaps in ms over its merged wake times (seconds), laid out on its segments [(start, end)] and
+    wrapped round (distribution.circular_gaps): each time belongs to the segment whose start it follows."""
+    import bisect
+    starts = [a for a, _ in segments]
+    split = [[] for _ in segments]
+    for t in times:
+        split[max(bisect.bisect_right(starts, t) - 1, 0)].append(t)
+    return [g * 1000 for g in circular_gaps([(ts, a, b) for ts, (a, b) in zip(split, segments)])]
+
+
+def phase_comms(app, rows, roles, segments):
+    """The phase's components (D16, D38, D67) with the samples the pool keeps: per component its merged wake times,
+    its gaps over them (`segment_gaps`), its runs, wakes and threads."""
+    by_comm = {}
+    for row in rows:
+        key = component_name(roles.get(row.pid, "main"), component_key(app, row.comm))   # D67
+        by_comm.setdefault(key, []).append(row)
+    comms = {}
+    for comm, rs in by_comm.items():
+        times = [r.t_in for r in rs]
+        comms[comm] = {"gaps": array("d", segment_gaps(times, segments)), "runs": array("d", [r.run for r in rs]),
+                       "t_in": array("d", times), "wakes": len(rs), "threads": len({r.tid for r in rs})}
+    return comms
+
+
+def per_repeat_rates(c, reps, spans):
+    """A component's wake rate per repeat from its exact wake count — never rounded to a resolution the rule can
+    read as spread (a component waking 0.04 times a second rounded to two places moves in 25 % steps)."""
+    return [c["wakes"].get(r, 0) / spans[r] for r in reps]
+
+
+def select_components(comms, spans, reps, segments=None):
     """D16: comms in descending mean wake rate until COVERAGE of the wakes; the remaining comms merged
-    into one residual component whose gaps are those of their merged wake times. D43: a component, the residual
-    included, whose gap and run means are missing in any repeat is listed under `sporadic`, not carried."""
+    into one residual component whose gaps are those of their merged wake times, wrapped round each repeat's
+    segments (`segments`: {repeat: [(start, end)]}, the phase or the operation's windows; default the span from 0).
+    D43: a component, the residual included, that does not wake at least twice in every repeat is listed under
+    `sporadic`, not carried."""
+    segments = segments or {r: [(0.0, spans[r])] for r in reps}
     rate = {c: sum(cc["wakes"].get(r, 0) / spans[r] for r in reps) / len(reps) for c, cc in comms.items()}
     total = sum(rate.values())
     order = sorted(comms, key=lambda c: -rate[c])
@@ -220,22 +256,24 @@ def select_components(comms, spans, reps):
     if rest:
         gaps_by_rep, runs_by_rep, wakes_by_rep, threads_by_rep = [], [], [], []
         for r in reps:
-            times = sorted(t for c in rest for t in comms[c]["t_in"].get(r, []))
-            gaps_by_rep.append([(b - a) * 1000 for a, b in zip(times, times[1:])])
+            times = [t for c in rest for t in comms[c]["t_in"].get(r, [])]
+            gaps_by_rep.append(segment_gaps(times, segments[r]))
             runs_by_rep.append([x for c in rest for x in comms[c]["runs"].get(r, [])])
             wakes_by_rep.append(len(times)); threads_by_rep.append(sum(comms[c]["threads"].get(r, 0) for c in rest))
-        residual = {"comms": rest, "threads": threads_by_rep,
-                    "wakes_per_s": [round(wakes_by_rep[i] / spans[r], 3) for i, r in enumerate(reps)],
+        residual = {"comms": rest, "threads": threads_by_rep, "wakes": wakes_by_rep,
+                    "wakes_per_s": [wakes_by_rep[i] / spans[r] for i, r in enumerate(reps)],
                     "cpu_share": [round(sum(runs_by_rep[i]) / 1000 / spans[r], 5) for i, r in enumerate(reps)],
                     "gap_ms": summary(gaps_by_rep), "run_ms": summary(runs_by_rep)}
-    # D43: a component — the residual as a whole included — is carried only if its gap and run means exist in every
-    # repeat (it wakes at least twice in each repeat's phase): the rule tests each value by its per-repeat mean
-    # (kalibera-ismm13 §9.3), and D16's components are periodic; the rest is reported as sporadic, not carried
+    # D43: a component — the residual as a whole included — is carried only if it wakes at least twice in each
+    # repeat's phase: the rule tests each value by its per-repeat mean (kalibera-ismm13 §9.3), and D16's components
+    # are periodic; the rest is reported as sporadic, not carried
     sporadic = []
-    for c in [c for c in chosen if not all(len(comms[c]["gaps"].get(r, [])) for r in reps)]:
+    # (`count`, where a slot carries one, is the wake count the rule reads when `wakes` is one renderer's mean: a
+    # renderer entry carries a thread that wakes at least twice across the renderers measured in every repeat)
+    for c in [c for c in chosen if not all(comms[c].get("count", comms[c]["wakes"]).get(r, 0) >= 2 for r in reps)]:
         chosen.remove(c)
         sporadic.append({"comm": c, "repeats": [r for r in reps if comms[c]["wakes"].get(r, 0)], "wakes_per_s": round(rate[c], 4)})
-    if residual and not all(residual["gap_ms"]["repeat_n"]):
+    if residual and not all(w >= 2 for w in residual["wakes"]):
         sporadic.append({"comm": "residual", "comms": rest, "repeats": [r for r, w in zip(reps, residual["wakes_per_s"]) if w],
                          "wakes_per_s": round(sum(rate[c] for c in rest), 4)})
         residual = None
@@ -283,25 +321,17 @@ def main():
             # keep only compact samples per phase: per-comm gaps/runs/wakes/threads, span, per-input lists
             slim = {"phases": {}}
             for phase, pd in raw["phases"].items():
-                comms = {}
-                by_tid = {}
                 # the op phase pools the operation's components, i.e. the rows inside the [trigger, done) windows,
                 # over the summed window span; its duration samples travel beside them (spec decisions 8–9)
                 op = pd.get("operation")
                 phase_rows = op["inside"] if op else pd["rows"]
                 phase_rows, events = split_events(app, phase, phase_rows)
                 phase_span = (sum(op["durations_ms"]) / 1000 or 1e-6) if op else pd["span"]
-                roles = pd.get("roles") or {}
-                for row in phase_rows:
-                    key = component_name(roles.get(row.pid, "main"), component_key(app, row.comm))   # D67
-                    by_tid.setdefault((key, row.tid), []).append((row.t_in, row.run))
-                for (comm, tid), rs in by_tid.items():
-                    c = comms.setdefault(comm, {"gaps": array("d"), "runs": array("d"), "t_in": array("d"), "wakes": 0, "threads": 0})
-                    c["gaps"].extend((b[0] - a[0]) * 1000 for a, b in zip(rs, rs[1:]))
-                    c["runs"].extend(x[1] for x in rs)
-                    c["t_in"].extend(x[0] for x in rs)
-                    c["wakes"] += len(rs); c["threads"] += 1
-                slim["phases"][phase] = {"span": phase_span, "comms": comms, "per_input": pd.get("per_input"),
+                # the gaps' segments: the phase, or the operation's windows joined end to end (the pause between
+                # two operations is no gap of the operation's)
+                segments = [tuple(w) for w in op["windows"]] if op else [(pd["t0"], pd["t0"] + pd["span"])]
+                comms = phase_comms(app, phase_rows, pd.get("roles") or {}, segments)
+                slim["phases"][phase] = {"span": phase_span, "segments": segments, "comms": comms, "per_input": pd.get("per_input"),
                                          "events": None if events is None else [(t - pd["t0"], x) for t, x in events],
                                          "operation": {"name": op["name"], "durations_ms": op["durations_ms"],
                                                        "n_ok": op["n_ok"], "n_failed": op["n_failed"]} if op else None}
@@ -330,13 +360,13 @@ def main():
                     c["gaps"][r] = cc["gaps"]; c["runs"][r] = cc["runs"]; c["t_in"][r] = cc["t_in"]
                     c["wakes"][r] = cc["wakes"]; c["threads"][r] = cc["threads"]
             spans = {r: raws[r]["phases"][phase]["span"] for r in preps}
-            chosen, residual, cov = select_components(comms, spans, preps)
+            chosen, residual, cov = select_components(comms, spans, preps,
+                                                      {r: raws[r]["phases"][phase]["segments"] for r in preps})
             ph["components"] = {"selected": chosen, "residual": residual, **cov}
             for comm, c in sorted(comms.items(), key=lambda kv: -sum(sum(v) for v in kv[1]["runs"].values())):
-                spans = {r: raws[r]["phases"][phase]["span"] for r in preps}
                 ph["threads"][comm] = {
                     "threads": [c["threads"].get(r, 0) for r in preps],
-                    "wakes_per_s": [round(c["wakes"].get(r, 0) / spans[r], 2) for r in preps],
+                    "wakes_per_s": per_repeat_rates(c, preps, spans),
                     "cpu_share": [round(sum(c["runs"].get(r, [])) / 1000 / spans[r], 4) for r in preps],
                     "gap_ms": summary([c["gaps"].get(r, []) for r in preps]),
                     "run_ms": summary([c["runs"].get(r, []) for r in preps])}

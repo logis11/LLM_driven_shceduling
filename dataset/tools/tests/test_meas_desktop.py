@@ -88,7 +88,7 @@ def test_only_renderer_processes_reach_the_components_of_a_renderer_subject(tmp_
     assert ph["renderer_pids"] == [200]
     assert ph["resumes_merged"] == 0
     # two wakes of the renderer only: the browser's 5 ms and the GPU's 9 ms are out
-    assert ph["threads"]["chrome"]["wakes_per_s"] == round(2 / ph["span_s"], 2)
+    assert ph["threads"]["chrome"]["wakes_per_s"] == pytest.approx(2 / ph["span_s"], rel=1e-4)
     assert ph["threads"]["chrome"]["run_ms"]["sum"] == 4.0
     # method §5's shape, plus what tells the reader how many renderers the one archetype was pooled from
     assert {"threads", "wakes_per_s", "cpu_share", "gap_ms", "run_ms"} <= set(ph["threads"]["chrome"])
@@ -234,7 +234,7 @@ def test_the_archetype_carries_one_renderer_not_the_sum_of_n(tmp_path):
     assert ph["wakes_per_s"] == round(2 / ph["span_s"], 3)                      # the set
     assert ph["wakes_per_s_per_renderer"] == round(ph["wakes_per_s"] / 2, 4)    # what the entry carries
     assert ph["threads"]["chrome"]["renderers"] == 2
-    assert ph["threads"]["chrome"]["wakes_per_s"] == round(1 / ph["span_s"], 3)
+    assert ph["threads"]["chrome"]["wakes_per_s"] == pytest.approx(1 / ph["span_s"], rel=1e-4)
 
 
 def test_the_hidden_subject_drops_its_control_tab(tmp_path):
@@ -252,7 +252,8 @@ def test_the_hidden_subject_drops_its_control_tab(tmp_path):
     ph = analyze.analyze_run_dir(str(d))["phases"]["steady"]
     assert ph["control_tab"]["dropped"] == 200
     assert ph["control_tab"]["ratio_to_next"] == 6.0
-    assert ph["renderers_measured"] == 1 and list(ph["threads"]["chrome"]["wakes_per_s_per_renderer"]) == [0.1]
+    assert ph["renderers_measured"] == 1
+    assert list(ph["threads"]["chrome"]["wakes_per_s_per_renderer"]) == [pytest.approx(1 / ph["span_s"], rel=1e-4)]
 
 
 def test_the_slice_profile_reads_a_phase_in_ten_second_slices(tmp_path):
@@ -329,9 +330,9 @@ def test_a_renderer_residual_describes_one_renderer_not_n_merged():
     ts = {1: [0.0, 100.0, 200.0, 300.0], 2: [50.0, 150.0, 250.0, 350.0]}
     comms = {"Quiet": {"t_in_by_pid": {1: ts, 2: ts}, "runs": {1: [0.02] * 8, 2: [0.02] * 8},
                        "threads": {1: 2, 2: 2}}}
-    by_rep = {1: {"renderers_measured": 2}, 2: {"renderers_measured": 2}}
+    by_rep = {k: {"renderers_measured": 2, "measured_renderer_pids": [1, 2], "t0": 0.0} for k in (1, 2)}
     res = pool.renderer_residual(["Quiet"], comms, {1: 400.0, 2: 400.0}, by_rep, {})
-    assert res["wakes_per_s"] == [0.01, 0.01]
+    assert res["wakes_per_s"] == [pytest.approx(0.01), pytest.approx(0.01)]
     assert res["gap_ms"]["repeat_mean"] == [100000.0, 100000.0]
     # a repeat where the residual wakes fewer than twice in every renderer is sporadic, not carried (D43)
     thin = {"Quiet": {"t_in_by_pid": {1: ts, 2: {1: [5.0]}}, "runs": {1: [0.02] * 8, 2: [0.02]},
@@ -426,3 +427,47 @@ def test_each_selected_component_carries_its_pooled_tables(tmp_path):
     t = e["phases"]["idle"]["tables"]
     assert set(t) == set(e["phases"]["idle"]["components"]["selected"]) and t
     assert all(v["gap_ms"]["q"] and v["run_ms"]["q"] for v in t.values())
+
+
+def test_a_renderer_entry_counts_its_coverage_per_renderer(tmp_path):
+    # the fidelity fix: a renderer entry's rates and coverage are ONE renderer's (the mean over those measured), not
+    # the total over the N renderers
+    procs = [{"pid": p, "comm": "chrome", "cmd": "/opt/google/chrome/chrome --type=renderer"} for p in (200, 300)]
+    times = {(201, 200, "chrome"): (1.0, 2.0, 3.0), (202, 200, "Quiet"): (5.0,),
+             (301, 300, "chrome"): (1.5, 2.5, 3.5), (302, 300, "Quiet"): (6.0,)}
+    rows = "   0.000010 [0000]  perf[50]    0.000      0.000      0.010      R\n"
+    rows += "".join(f"   {t + 0.001:.6f} [0003]  {c}[{tid}/{pid}]    0.000      0.001      1.000      S\n"
+                    for (tid, pid, c), ts in times.items() for t in ts)
+    rows += "  10.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n"
+    wakeups = "".join(f"   {t - 0.01:.6f} [0001]  x[9]  awakened: {c}[{tid}/{pid}]\n"
+                      for (tid, pid, c), ts in times.items() for t in ts)
+    reps = {}
+    for k in range(1, 3):
+        d = tmp_path / f"r{k}"
+        d.mkdir()
+        _run_dir(d, "chrome-visible", "steady-notimer", procs, rows, wakeups)
+        reps[k] = {"dir": str(d), "mode": "full", "report": {}, "spec": {}}
+    comps = pool.pool_app("chrome-visible", reps)["phases"]["steady-notimer"]["components"]
+    assert comps["total_wakes_per_s"] == pytest.approx(4 / 10.0, rel=1e-3)   # one renderer: 3 + 1 wakes in 10 s
+
+
+def test_a_renderer_thread_that_wakes_twice_across_the_renderers_is_carried(tmp_path):
+    # the fidelity fix, 인지오's decision: a renderer entry carries a thread that wakes at least twice across the
+    # renderers measured in every repeat — once in each of two renderers — though one renderer wakes it once
+    procs = [{"pid": p, "comm": "chrome", "cmd": "/opt/google/chrome/chrome --type=renderer"} for p in (200, 300)]
+    times = {(201, 200, "chrome"): (1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8), (202, 200, "Quiet"): (5.0,),
+             (301, 300, "chrome"): (1.1, 1.3, 1.5, 1.7, 1.9, 2.1, 2.3, 2.5, 2.7, 2.9), (302, 300, "Quiet"): (6.0,)}
+    rows = "   0.000010 [0000]  perf[50]    0.000      0.000      0.010      R\n"
+    rows += "".join(f"   {t + 0.001:.6f} [0003]  {c}[{tid}/{pid}]    0.000      0.001      1.000      S\n"
+                    for (tid, pid, c), ts in times.items() for t in ts)
+    rows += "  10.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n"
+    wakeups = "".join(f"   {t - 0.01:.6f} [0001]  x[9]  awakened: {c}[{tid}/{pid}]\n"
+                      for (tid, pid, c), ts in times.items() for t in ts)
+    reps = {}
+    for k in range(1, 3):
+        d = tmp_path / f"r{k}"
+        d.mkdir()
+        _run_dir(d, "chrome-visible", "steady-notimer", procs, rows, wakeups)
+        reps[k] = {"dir": str(d), "mode": "full", "report": {}, "spec": {}}
+    comps = pool.pool_app("chrome-visible", reps)["phases"]["steady-notimer"]["components"]
+    assert comps["selected"] == ["chrome", "Quiet"]

@@ -16,7 +16,9 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from pool import QUANTILE_PROBS, build_census  # noqa: E402  — D69: one definition of the build census
+from pool import build_census  # noqa: E402  — D69: one definition of the build census
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from distribution import quantile_table, yaml_table  # noqa: E402
 
 RUN_TAG = {"interactive": "meas-ci:interactive:3", "playback": "meas-ci:playback:3"}  # the D3 campaign; --tag overrides
 
@@ -66,16 +68,13 @@ BUILD_BOUND = {
 APPROX_BY = {"video-player": ["gamescope"], "audio-player": ["spotify"], "video-call": ["zoom"]}
 
 
-def us(ms_list):
-    return [int(round(v * 1000)) for v in ms_list]
-
-
 def rng(vals, nd=4):
     return f"{min(vals):.{nd}f}–{max(vals):.{nd}f}"
 
 
-def dist(q_ms, tag, sampling="per-iteration"):
-    return "{dist: quantiles, p: [" + ", ".join(str(v) for v in us(q_ms)) + f"], sampling: {sampling}, source: \"{tag}\"}}"
+def dist(summary, tag, sampling="per-iteration"):
+    """A pooled summary's table (ms) as the library's `quantiles` param: ten quantiles, extremes, interval means."""
+    return yaml_table(summary["table"], tag, sampling=sampling)
 
 
 def component_lines(comp_name, comp, tag, indent, extra=None):
@@ -83,9 +82,9 @@ def component_lines(comp_name, comp, tag, indent, extra=None):
     if extra:
         lines += [f"{indent}  {k}: {v}" for k, v in extra]
     lines.append(f"{indent}  threads: {min(comp['threads'])}" if min(comp["threads"]) == max(comp["threads"]) else f"{indent}  threads: [{min(comp['threads'])}, {max(comp['threads'])}]")
-    lines.append(f"{indent}  wakes_per_s: {sum(comp['wakes_per_s']) / len(comp['wakes_per_s']):.3f}")
-    lines.append(f"{indent}  gap: {dist(comp['gap_ms']['q'], tag)}")
-    lines.append(f"{indent}  run: {dist(comp['run_ms']['q'], tag)}")
+    lines.append(f"{indent}  wakes_per_s: {sum(comp['wakes_per_s']) / len(comp['wakes_per_s']):.5g}")
+    lines.append(f"{indent}  gap: {dist(comp['gap_ms'], tag)}")
+    lines.append(f"{indent}  run: {dist(comp['run_ms'], tag)}")
     return lines
 
 
@@ -96,10 +95,10 @@ def components_block(ph, tag, key, indent="      "):
     lines = [f"{indent}{key}:"]
     for comm in sel["selected"]:
         c = ph["threads"][comm]
-        if c["gap_ms"]["q"] is None:
+        if c["gap_ms"]["table"] is None:
             continue
         lines += component_lines(comm, c, tag, indent + "  ")
-    if sel["residual"] and sel["residual"]["gap_ms"]["q"]:
+    if sel["residual"] and sel["residual"]["gap_ms"]["table"]:
         r = sel["residual"]
         lines += component_lines("residual", r, tag, indent + "  ",
                                  extra=[("comms", "[" + ", ".join(json.dumps(x) for x in r["comms"]) + "]")])
@@ -116,14 +115,13 @@ def heavy_events_block(ph, tag, indent="      "):
     if not h or not h.get("runs_ms"):
         return []
     runs = sorted(h["runs_ms"])
-    q = [runs[min(int(round(f * (len(runs) - 1))), len(runs) - 1)] for f in QUANTILE_PROBS]
     return [f"{indent}heavy_events:",
             f"{indent}  - comm: {json.dumps(h['comm'])}",
             f"{indent}    run_floor_ms: {h['run_floor_ms']:g}",
             f"{indent}    count: {sum(h['count'])}",
             f"{indent}    span_s: {h['span_s_total']:.1f}",
             f"{indent}    rate_per_s: {h['rate_per_s']:g}",
-            f"{indent}    run: {dist(q, tag)}",
+            f"{indent}    run: {yaml_table(quantile_table(runs), tag)}",
             f"{indent}  # D64: {sum(h['count'])} runs of at least {h['run_floor_ms']:g} ms over {h['span_s_total']:.0f} s of idle phase, "
             f"{min(runs):.1f}–{max(runs):.1f} ms; their runs leave the components' wakes, so the residual converges. "
             f"No interval is stated: no repeat holds two of them."]
@@ -148,9 +146,10 @@ def entry(aid, spec, d):
     if kind == "input":
         pi = d["phases"]["driven"]["per_input"]
         out.append("      input_run:")
-        out.append(f"        {dist(pi['window']['run_ms_minus_idle']['q'], tag)}")
+        out.append(f"        {dist(pi['window']['run_ms_minus_idle'], tag)}")
         out.append("      stimulus:")
-        out.append(f"        {{stream: {stream}, sampling: per-task, source: \"{stim_tag}\"}}")
+        kinds = ", kinds: [key]" if aid in KEYS_ONLY else ""   # D28, D65: the events the measurement replayed
+        out.append(f"        {{stream: {stream}{kinds}, sampling: per-task, source: \"{stim_tag}\"}}")
     out += components_block(ph_idle, tag, "components")
     out += heavy_events_block(ph_idle, tag)
     if kind == "cadence":
@@ -160,7 +159,7 @@ def entry(aid, spec, d):
         o = d["phases"]["op"]["operation"]
         out.append("      operations:")
         out.append(f"        {o['name']}:")
-        out.append(f"          duration: {dist(o['duration_ms']['q'], tag)}")
+        out.append(f"          duration: {dist(o['duration_ms'], tag)}")
         out += components_block(d["phases"]["op"], tag, "components", indent="          ")
     out += ["    lifetime: segment-bound", "    binding_params: []", "    scalable: []", "    validation_stats:",
             "      referee: meas-ci"]

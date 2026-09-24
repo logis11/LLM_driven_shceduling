@@ -42,6 +42,7 @@ from meas.campaign.analyze import (   # noqa: E402  — one wake rule and one co
     ROW, TASK, Row, load_all_wakeups, load_wakeups, merge_resumes, open_text, per_thread,
 )
 from meas.desktop.analyze import phases_in, slice_profile  # noqa: E402
+from meas.distribution import circular_gaps  # noqa: E402
 from meas.session.causes import Causes, cron_commands, load_wakeup_rows  # noqa: E402
 
 ENTRIES = ("gnome-shell", "pipewire", "systemd", "dbus-daemon")
@@ -149,19 +150,17 @@ def foreign(rows_cpu, meas_cpu, entry_pids, other_pids, kthreads, t0, span_s, sl
     return out
 
 
-def components(rows, inst_pids, span):
-    """Per instance and thread comm (method §5), keyed `<instance>/<comm>`, with the samples the pool reads."""
+def components(rows, inst_pids, span, t0):
+    """Per instance and thread comm (method §5), keyed `<instance>/<comm>`, with the samples the pool reads: the
+    gaps over the component's merged wake times, wrapped round the phase [t0, t0 + span] (distribution.circular_gaps)."""
     threads, samples = {}, {}
     for i, pids in sorted(inst_pids.items()):
         mine = [r for r in rows if r.pid in pids]
-        for comm, c in per_thread(mine, span).items():
+        for comm, c in per_thread(mine, span, None, t0).items():   # the rule's gap mean is the carried gaps'
             key = f"{i}/{comm}"
             threads[key] = c
             rs = [r for r in mine if r.comm == comm]
-            by_tid = {}
-            for r in rs:
-                by_tid.setdefault(r.tid, []).append(r)
-            samples[key] = {"gaps": [(b.t_in - a.t_in) * 1000 for trs in by_tid.values() for a, b in zip(trs, trs[1:])],
+            samples[key] = {"gaps": [g * 1000 for g in circular_gaps([([r.t_in for r in rs], t0, t0 + span)])],
                             "runs": [r.run for r in rs], "t_in": sorted(r.t_in for r in rs)}
     return threads, samples
 
@@ -266,11 +265,11 @@ def analyze_phase(D, phase, meas_cpu, from_s=0.0, from_mono=None):
         all_wakes = {i: sum(1 for r in rows if r.pid in pids) for i, pids in ipids.items()}
         rows, cron_events = split_cron(rows, cron_wins)        # D23: read without them, stated beside them
         rows, tally, gone = causes.split(rows)                 # D27: likewise, by cause
-        threads, samples = components(rows, ipids, span)
+        threads, samples = components(rows, ipids, span, t0)
         out["entries"][e] = {
             "instances": {i: sorted(p) for i, p in ipids.items()},
             "missing_instances": sorted(i for i, p in ipids.items() if not p),
-            "span_s": round(span, 3),
+            "span_s": round(span, 3), "t0": t0,
             "wakes_per_s": round(len(rows) / span, 3),
             "cpu_share": round(sum(r.run for r in rows) / 1000 / span, 6),
             "slices": slice_profile(rows, t0, span),

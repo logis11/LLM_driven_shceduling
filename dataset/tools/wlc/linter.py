@@ -108,6 +108,9 @@ def lint_repo(archetypes_path, sources_path, references_md, freeze=False):
                 path = pathlib.Path(archetypes_path).resolve().parent / "stimulus" / f"{stream}.jsonl"
                 if not stream or not path.exists():
                     errors.append(f"{where}: stream {stream!r} has no file at dataset/stimulus/")
+                for kind in param.get("kinds") or []:
+                    if kind not in STIMULUS_KINDS:
+                        errors.append(f"{where}: kind {kind!r} is not an event kind of the streams")
             errors.extend(_check_param(where, param, registry, freeze))
     return errors
 
@@ -128,7 +131,35 @@ def _check_param(where, param, registry, freeze):
         if not isinstance(q, list) or len(q) != 10 or any((not isinstance(v, (int, float))) or v < 0 for v in q) \
                 or any(b < a for a, b in zip(q, q[1:])):
             errors.append(f"{where}: quantiles need 10 non-decreasing non-negative values (p1 … p99.9, µs)")
+        else:
+            errors.extend(_check_table_extremes(where, param, q))
     return errors
+
+
+def _check_table_extremes(where, param, q):
+    """A measured table's `min`, `max` and eleven interval `means` (the fidelity fix): all three or none; the
+    extremes bound the quantiles; each mean inside its interval, to the microsecond the knots are rounded to."""
+    have = {k for k in ("min", "max", "means") if k in param}
+    if not have:
+        return []
+    if have != {"min", "max", "means"}:
+        return [f"{where}: a table carries min, max and means together"]
+    errors = []
+    lo, hi, means = param["min"], param["max"], param["means"]
+    if lo > q[0]:
+        errors.append(f"{where}: min above p1")
+    if hi < q[-1]:
+        errors.append(f"{where}: max below p99.9")
+    if not isinstance(means, list) or len(means) != 11:
+        return errors + [f"{where}: eleven interval means (min … p1 … p99.9 … max)"]
+    bounds = [lo, *q, hi]
+    for i, m in enumerate(means):
+        if not bounds[i] - 1 <= m <= bounds[i + 1] + 1:
+            errors.append(f"{where}: interval mean {i} ({m}) outside [{bounds[i]}, {bounds[i + 1]}]")
+    return errors
+
+
+STIMULUS_KINDS = {"key", "click", "wheel", "drag"}   # the event kinds of dataset/stimulus/ streams
 
 
 def _check_tag(where, tag, registry):

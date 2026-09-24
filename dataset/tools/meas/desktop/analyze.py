@@ -27,6 +27,7 @@ if TOOLS not in sys.path:
 from meas.campaign.analyze import (   # noqa: E402  — the component layer, one definition for both halves
     dist, load_all_wakeups, load_rows, merge_resumes, per_role, per_thread, pid_roles,
 )
+from meas.distribution import circular_gaps   # noqa: E402
 
 # the renderer-only view: the inverse of the filter that pools `web-browser`. pid_roles returns exactly these
 # six values, so naming the five that go is equivalent to keeping the one that stays, and it stays honest if a
@@ -57,7 +58,7 @@ def page_renderers(D):
     return out if seen else None
 
 
-def renderer_components(rows, span_s):
+def renderer_components(rows, span_s, t0):
     """The components of ONE renderer, with the renderer processes present pooled as samples of it.
 
     A job measures N renderers so that a throttled entry yields enough wakes to read (method §9: at one wake per
@@ -65,36 +66,32 @@ def renderer_components(rows, span_s):
     and every renderer's main thread is `chrome`, its hang watcher `HangWatcher`, and so on — so applied to the
     whole tree it returns the SUM over N renderers, which is not what the archetype describes. It is therefore
     applied per renderer process, exactly as `web-browser` has it applied to its tree, and the results pooled:
-    `wakes_per_s` is the mean over renderers with the per-renderer values kept beside it for the spread the
-    stability rule reads, and the gap and run tables are `dist` over every renderer's samples together.
+    `wakes_per_s` is the mean over every renderer measured — one in which the thread never woke counts at zero —
+    with the per-renderer values kept beside it for the spread the stability rule reads. The gaps are taken over
+    the thread's merged wake times within each renderer, the renderers laid end to end and wrapped round
+    (`distribution.circular_gaps`), so they sum to the renderers' time and imply the per-renderer rate.
     """
     by_pid = {}
     for r in rows:
         by_pid.setdefault(r.pid, []).append(r)
+    pids = sorted(by_pid)
     per = {pid: per_thread(rs, span_s) for pid, rs in by_pid.items()}
     out, samples = {}, {}
     for comm in sorted({c for p in per.values() for c in p}):
         inst = [p[comm] for p in per.values() if comm in p]
-        gaps, runs = [], []
-        for rs in by_pid.values():
-            by_tid = {}
-            for r in rs:
-                if r.comm == comm:
-                    by_tid.setdefault(r.tid, []).append(r)
-            for trs in by_tid.values():
-                gaps += [(b.t_in - a.t_in) * 1000 for a, b in zip(trs, trs[1:])]
-                runs += [r.run for r in trs]
-        rates = [i["wakes_per_s"] for i in inst]
+        mine = {pid: [r for r in by_pid[pid] if r.comm == comm] for pid in pids}
+        gaps = [g * 1000 for g in circular_gaps([([r.t_in for r in mine[pid]], t0, t0 + span_s) for pid in pids])]
+        runs = [r.run for pid in pids for r in mine[pid]]
+        rates = [len(mine[pid]) / span_s for pid in pids]
         samples[comm] = {"gaps": gaps, "runs": runs,
-                         "t_in": sorted(r.t_in for rs in by_pid.values() for r in rs if r.comm == comm),
+                         "t_in": sorted(r.t_in for pid in pids for r in mine[pid]),
                          # per renderer, so the pool can build the residual of ONE renderer (changelog D19)
-                         "t_in_by_pid": {pid: sorted(r.t_in for r in rs if r.comm == comm)
-                                         for pid, rs in by_pid.items() if any(r.comm == comm for r in rs)}}
+                         "t_in_by_pid": {pid: sorted(r.t_in for r in mine[pid]) for pid in pids if mine[pid]}}
         out[comm] = {"renderers": len(inst),
                      "threads": [i["threads"] for i in inst],
-                     "wakes_per_s": round(statistics.fmean(rates), 3),
+                     "wakes_per_s": statistics.fmean(rates),
                      "wakes_per_s_per_renderer": rates,
-                     "cpu_share": round(statistics.fmean([i["cpu_share"] for i in inst]), 5),
+                     "cpu_share": round(sum(runs) / 1000 / span_s / len(pids), 7),
                      "gap_ms": dist(gaps), "run_ms": dist(runs)}
     return out, samples
 
@@ -216,18 +213,17 @@ def analyze_phase(D, phase, app):
         out["cpu_share_per_renderer"] = round(out["cpu_share"] / n_rend, 6) if n_rend else None
     out["slices"] = slice_profile(kept, t0, span)
     # one renderer's components, the renderers present pooled as its samples
+    out["t0"] = t0   # the phase's start: the gaps wrap round [t0, t0 + span]
     if app in RENDERER_APPS:
-        out["threads"], out["_samples"] = renderer_components(kept, span)
+        out["measured_renderer_pids"] = sorted({r.pid for r in kept})
+        out["threads"], out["_samples"] = renderer_components(kept, span, t0)
     else:
-        out["threads"] = per_thread(kept, span)
+        out["threads"] = per_thread(kept, span, None, t0)   # the rule's gap mean is the carried gaps'
         out["_samples"] = {}
         for comm in out["threads"]:
             rs = [r for r in kept if r.comm == comm]
-            by_tid = {}
-            for r in rs:
-                by_tid.setdefault(r.tid, []).append(r)
             out["_samples"][comm] = {
-                "gaps": [(b.t_in - a.t_in) * 1000 for trs in by_tid.values() for a, b in zip(trs, trs[1:])],
+                "gaps": [g * 1000 for g in circular_gaps([([r.t_in for r in rs], t0, t0 + span)])],
                 "runs": [r.run for r in rs], "t_in": sorted(r.t_in for r in rs)}
     return out
 

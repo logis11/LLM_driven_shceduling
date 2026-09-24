@@ -1,6 +1,6 @@
 # Measured values — campaign record
 
-Every campaign behind a measured archetype value: per archetype the repeats, the values the rule covers, the widest margin among them, why it stopped, and the machine draws it took. Method: `measurement-campaign-workflow.md`. Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10` (`soffice`: `--since 38`; `thunderbird-send`: `--since 150 --exclude 29`; the `desktop` family: `--since 21`; the `session` family: `--since 16 -- --tag meas-ci:session:2026-09-24`); job counts are the campaign runs' jobs, read from their job lists. Recorded 2026-09-20, the 9.8 rows 2026-09-22, the 9.9 rows 2026-09-24, the three re-measured 9.5 rows 2026-09-24; the 9.5 rows were first recorded a day earlier against one headline median per archetype, which D29 and D30 replaced.
+Every campaign behind a measured archetype value: per archetype the repeats, the values the rule covers, the widest margin among them, why it stopped, and the machine draws it took. Method: `measurement-campaign-workflow.md`. Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10` (`soffice`: `--since 38`; `thunderbird-send`: `--since 150 --exclude 29`; the `desktop` family: `--since 21`; the `session` family: `--since 16 -- --tag meas-ci:session:2026-09-24`); job counts are the campaign runs' jobs, read from their job lists. Recorded 2026-09-20, the 9.8 rows 2026-09-22, the 9.9 rows 2026-09-24, the three re-measured 9.5 rows 2026-09-24; the 9.5 rows were first recorded a day earlier against one headline median per archetype, which D29 and D30 replaced. Every gap mean and wake rate re-read on 2026-09-24 under 9.5 D71 (gaps over merged wake times, wrapped round the span; rates from exact counts).
 
 ## Campaigns
 
@@ -27,15 +27,15 @@ Pooled in `task-9.5-interactive-typing/campaign/results-same-machine/` and rende
 | archetype | application | repeats | values | widest | stopped by | jobs (gated) | recorded input covered |
 |---|---|---|---|---|---|---|---|
 | `office-writer` | `soffice` | 14 (windows 1–14) | 5 | idle `soffice.bin` run mean ±4.93 % | the rule | 19 (5) | SWELL-KW Word, participants 1–6 |
-| `mail-client` | `thunderbird-send` | 43 (windows 1–28, 30–44) | 36 + 39 reported at the window limit | idle `StreamTrans` gap mean ±5.00 % | the rule | 77 (32) | SWELL-KW Outlook, all 25 participants; windows 9 on are past the recording |
-| `image-editor` | `gimp` | 5 (1, 2, 3, 5, 6) | 10 | op `gimp` wakes/s ±4.59 % | the rule | 8 (3) | scripted pointer loop |
+| `mail-client` | `thunderbird-send` | 43 (windows 1–28, 30–44) | 36 + 39 reported at the window limit | idle `JS Watchdog` gap mean ±4.52 % | the rule | 77 (32) | SWELL-KW Outlook, all 25 participants; windows 9 on are past the recording |
+| `image-editor` | `gimp` | 5 (1, 2, 3, 5, 6) | 10 | op `gimp` wakes/s ±4.38 % | the rule | 8 (3) | scripted pointer loop |
 | `video-editor` | `kdenlive` | 20 (1–3, 5–21) | 22 | driven `kdenlive` run mean ±4.94 % | the rule | 30 (10) | scripted pointer loop |
 | `video-player` | `mpv-video` | 24 (1, 2, 4, 6–26) | 16 | play `vo` wakes/s ±4.98 % | the rule | 51 (27) | none |
 | `audio-player` | `mpv-audio` | 31 (1–31) | 16 | play `ao` run mean ±4.93 % | the rule | 55 (24) | none |
 
 The typing-driven applications also replay the 136M Keystrokes windows 1…k of their own repeats in the `driven-alt` phase (the pre-registered stimulus check).
 
-**What the half-widths do and do not claim** (noted 2026-09-24, in self-review; no decision taken, and it is 9.14's and 9.16's to resolve). The loop adds one repeat at a time and stops when every value the rule covers is inside the tolerance, so the value that stopped an application is at the boundary by construction: `soffice` 4.93 %, `code` 4.93 %, `mpv-audio` 4.93 %, `kdenlive` 4.94 %, `webrtc` 4.95 %, `mpv-video` 4.98 %, `thunderbird-send` 5.00 %, `gimp` 4.59 % — eight of the nine within half a point of the line, and dropping any single repeat moves that half-width by 0.79–1.50 points (`leave_one_out` in each pooled record). Stopping at the first crossing cannot bias a mean, so the values themselves stand; it does make the stated precision of that one value per application optimistic, because the count was chosen by the estimate it produced. Across the library it touches 18 of the 188 values the rule covers; the rest cleared it with room. `chrome` is the exception — it stopped at its recording's last window, not at the rule, and its widest value inside the rule is 2.99 %. `gimp` rests on the five-repeat minimum and has the most sensitive binding value of the nine.
+**What the half-widths do and do not claim** (noted 2026-09-24, in self-review; no decision taken, and it is 9.14's and 9.16's to resolve). The loop adds one repeat at a time and stops when every value the rule covers is inside the tolerance, so the value that stopped an application sat at the boundary by construction: `soffice` 4.93 %, `code` 4.93 %, `mpv-audio` 4.93 %, `kdenlive` 4.94 %, `webrtc` 4.95 %, `mpv-video` 4.98 %, `thunderbird-send` 5.00 %, `gimp` 4.59 %. Read as 9.5 D71 reads them — gap means over merged wake times, rates from exact counts — two widest values move: `thunderbird-send`'s is the idle `JS Watchdog` gap mean at 4.52 %, `gimp`'s its op wake rate at 4.38 %; seven of the nine sit within half a point of the line. Dropping any single repeat moves the mean of each application's widest value by up to 0.67–1.44 % (`leave_one_out` in each pooled record). Stopping at the first crossing cannot bias a mean, so the values themselves stand; it does make the stated precision of that one value per application optimistic, because the count was chosen by the estimate it produced. Across the library 17 of the 188 values the rule covers have half-widths of 4.5 % or more; the rest cleared it with room. `chrome` is the exception — it stopped at its recording's last window, not at the rule, and its widest value inside the rule is 2.99 %. `gimp` rests on the five-repeat minimum.
 
 Reported precision would be clean rather than caveated if the binding values were re-measured at a count fixed in advance and their half-widths read once, without re-testing: about three hours for `webrtc`, `mpv-video` and `mpv-audio` at some twelve minutes a repeat, about a day for `chrome` and `code`.
 
@@ -118,10 +118,12 @@ Every repeat on the AMD EPYC 7763, kernel `6.17.0-1022-azure` in all of them, no
 
 | archetype | subject | repeats | values | pass | widest | stopped by | jobs (gated) | recorded input covered |
 |---|---|---|---|---|---|---|---|---|
-| `renderer-hidden` | `chrome-hidden` | 14 (1–9, 11, and 10 four times) | 12 | 5 | `chrome` run mean ±4.44 % | the rule | 25 (11) | none |
-| `renderer-visible` | `chrome-visible` | 11 (1–11) | 15 | 4 | `chrome` gap mean ±3.68 % | the rule | 18 (7) | none |
-| `chat-client` | `element` | 18 (1–16, and 17 twice) | 18 | 18 | `ThreadPoolForeg` gap mean ±4.56 % | the rule | 32 (14) | none |
-| `game-client` | `steam` | 12 (1–12) | 33 | 25 | `ThreadPoolForeg` run mean ±4.99 % | the rule | 21 (9) | none |
+| `renderer-hidden` | `chrome-hidden` | 14 (1–9, 11, and 10 four times) | 21 | 6 | `ThreadPoolServi` run mean ±4.82 % | the rule | 25 (11) | none |
+| `renderer-visible` | `chrome-visible` | 11 (1–11) | 15 | 4 | `chrome` wake rate ±3.76 % | the rule | 18 (7) | none |
+| `chat-client` | `element` | 18 (1–16, and 17 twice) | 18 | 18 | residual run mean ±4.32 % | the rule | 32 (14) | none |
+| `game-client` | `steam` | 12 (1–12) | 33 | 27 | `ThreadPoolForeg` run mean ±4.99 % | the rule | 21 (9) | none |
+
+Rates are one renderer's, the mean over every renderer measured from exact counts; gaps are over each component's merged wake times, wrapped round the phase — the renderers laid end to end for a renderer entry — so a gap mean is the span over the wakes (9.5 D71; this slice's D26).
 
 The values outside the tolerance, each carried over its repeats with its half-width and range. Run means whose spread is the machine (D17; the Steam client's by D18):
 
@@ -129,15 +131,15 @@ The values outside the tolerance, each carried over its repeats with its half-wi
 - visible renderer: `HangWatcher` run mean 0.0318 ms ±6.0 % (0.029–0.037); `chrome` run mean 0.1489 ms ±5.8 % (0.133–0.181).
 - Steam client: `steam` run mean 0.0555 ms ±10.2 % (0.044–0.068); `IPC:CSteamEngin` 0.0573 ms ±8.8 % (0.047–0.068); `CJobMgr::m_Work` 0.0176 ms ±6.2 % (0.015–0.020); `VizCompositorTh` 0.0819 ms ±5.5 % (0.066–0.089); `CHTTPClientThre` 0.0312 ms ±46.0 % (0.014–0.064).
 
-Components whose spread lies between sessions, their three values together (D21; the hidden renderer's `Chrome_ChildIOT` by D24, the Steam client's by D23, all under 9.5 D57):
+Components whose spread lies between sessions, their three values together (D21; the hidden renderer's `Chrome_ChildIOT` by D24, the four quiet threads by D26, the Steam client's by D23, all under 9.5 D57):
 
-- hidden renderer, `Chrome_ChildIOT`: 0.0065 wakes/s ±38.1 % (0–0.010); gap mean 137.4 s ±25.7 % (96.9–309.1 s); run mean 0.0321 ms ±14.1 % (0.025–0.056).
-- hidden renderer, residual (`ThreadPoolServi`, `MemoryInfra`): 0.0100 wakes/s ±15.6 % (0.0042–0.0140); gap mean 88.3 s ±15.9 % (38.0–132.3 s); run mean 0.0842 ms ±19.0 % (0.057–0.143).
-- visible renderer, `Chrome_ChildIOT`: 0.0047 wakes/s ±62.0 % (0–0.010); gap mean 163.5 s ±19.5 % (97.1–254.5 s); run mean 0.0408 ms ±10.7 % (0.030–0.053).
-- visible renderer, `ThreadPoolForeg`: 0.0043 wakes/s ±29.1 % (0.003–0.007); gap mean 1051 ms ±27.8 % (472–1653 ms); run mean 0.0254 ms ±10.3 % (0.019–0.034).
-- visible renderer, residual: 0.0108 wakes/s ±17.9 % (0.0060–0.0158); gap mean 76.0 s ±13.6 % (46.3–94.3 s); run mean 0.1026 ms ±14.5 % (0.070–0.141).
-- Steam client, `steamwebhelper`: gap mean 32.44 ms ±10.2 % (28.51–42.16); run mean 0.0696 ms ±5.3 % (0.063–0.082); its wake rate passes.
-- Steam client, `ThreadPoolForeg`: gap mean 511.6 ms ±9.0 % (415.9–616.1); its wake rate and run mean pass.
+- hidden renderer, `Chrome_ChildIOT`: 0.0071 wakes/s ±20.9 % (0.0021–0.0106); gap mean 172.5 s ±35.0 % (94.7–480.0 s); run mean 0.0321 ms ±14.1 % (0.025–0.056).
+- hidden renderer, `Compositor`, `PerfettoTrace` and `ThreadPoolServi`, which wake together: 0.0065 wakes/s ±21.9 % (0.0017–0.0100); gap mean 194.3 s ±39.8 % (100.0–600.0 s); run means 0.0207 ms ±6.3 % and 0.0202 ms ±5.8 %, `ThreadPoolServi`'s 0.0199 ms within the tolerance (±4.8 %); within one run ±10.8 % against ±63.6 % across the repeats.
+- hidden renderer, residual (`MemoryInfra`): 0.0035 wakes/s ±18.3 % (0.0021–0.0057); gap mean 308.9 s ±15.6 % (175.6–480.0 s); run mean 0.1924 ms ±8.8 % (0.152–0.265); within one run ±134.2 % against ±51.6 % across, which does not place its spread between sessions (open, D26).
+- visible renderer, `Chrome_ChildIOT`: 0.0060 wakes/s ±26.4 % (0.0022–0.0094); gap mean 196.5 s ±33.8 % (105.9–450.0 s); run mean 0.0408 ms ±10.7 % (0.030–0.053).
+- visible renderer, `PerfettoTrace`: 0.0054 wakes/s ±26.2 % (0.0017–0.0085); gap mean 227.2 s ±40.0 % (118.0–600.0 s); run mean 0.0241 ms ±5.1 % (0.022–0.028); within one run ±4.0 % against ±63.4 % across.
+- visible renderer, residual (`MemoryInfra`, `Compositor`, `ThreadPoolForeg`, `ThreadPoolServi`): 0.0068 wakes/s ±10.9 % (0.0060–0.0092); gap mean 149.9 s ±9.0 % (109.1–167.4 s); run mean 0.1434 ms ±11.0 % (0.116–0.200); within one run ±181.3 % against ±23.5 % across, its comms barely waking in the probe (open, D26).
+- Steam client, `steamwebhelper`: run mean 0.0696 ms ±5.3 % (0.063–0.082); its wake rate and gap mean pass. Its and `ThreadPoolForeg`'s gap means, carried until D26 at ±10.2 % and ±9.0 %, read ±0.18 % and ±4.15 % over merged wake times.
 
 - Repeat indices that landed more than once: the retry driver relaunched the hidden renderer's repeat 10 in runs #33, #34, #36 and #37 and the chat client's repeat 17 in #49 and #50, and every launch landed on the AMD EPYC 7763 with the gate open. Every landing is pooled, keyed `<index>@<run id>` (D24).
 - No gated window was left once the rule held: every index 1…k of each entry landed.
@@ -151,21 +153,23 @@ One subject, the Ubuntu 24.04 desktop session, carries the four entries that rep
 | entry | components | repeats | values | pass | widest | stopped by | jobs (gated) | recorded input covered |
 |---|---|---|---|---|---|---|---|---|
 | `compositor-shell` | `JS Helper`, `gmain`, `gnome-shell` | 24 | 9 | 9 | `gnome-shell` run mean ±2.8 % | the rule | 42 (18), shared | none |
-| `audio-server` | `wireplumber/gmain` | 24 | 3 | 2 | carried (D29) | the rule, with D29 | shared | none |
+| `audio-server` | `wireplumber/gmain` | 24 | 3 | 3 | `wireplumber/gmain` wake rate ±4.5 % | the rule | shared | none |
 | `service-manager` | `pid1/systemd` | 24 | 3 | 2 | carried (D29) | the rule, with D29 | shared | none |
 | `message-bus` | `system-bus/dbus-daemon` | 24 | 3 | 0 | carried (D29) | the rule, with D29 | shared | none |
 
 | component | wakes/s | gap mean | run mean | half-widths (rate · gap · run) |
 |---|---|---|---|---|
-| `gnome-shell/JS Helper` | 0.3025 | 13.05 s | 0.0137 ms | ±0.7 · ±0.7 · ±1.5 % |
+| `gnome-shell/JS Helper` | 0.3025 | 3.31 s | 0.0137 ms | ±0.7 · ±0.7 · ±1.5 % |
 | `gnome-shell/gmain` | 0.2498 | 4.00 s | 0.0497 ms | ±0.1 · ±0.1 · ±2.2 % |
-| `gnome-shell/gnome-shell` | 0.0347 | 28.77 s | 5.7035 ms | ±1.5 · ±1.7 · ±2.8 % |
-| `wireplumber/gmain` | 0.0093 | 104.67 s | 0.0351 ms | ±4.5 · ±5.3 · ±3.0 %, carried |
-| `pid1/systemd` | 0.0750 | 13.26 s | 0.1676 ms | ±2.0 · ±1.9 · ±7.8 %, carried |
-| `system-bus/dbus-daemon` | 0.0141 | 49.41 s | 0.1173 ms | ±11.9 · ±10.0 · ±11.0 %, carried |
+| `gnome-shell/gnome-shell` | 0.0347 | 28.81 s | 5.7035 ms | ±1.5 · ±1.5 · ±2.8 % |
+| `wireplumber/gmain` | 0.0093 | 108.58 s | 0.0351 ms | ±4.5 · ±4.4 · ±3.0 % |
+| `pid1/systemd` | 0.0750 | 13.37 s | 0.1676 ms | ±2.0 · ±1.9 · ±7.8 %, carried |
+| `system-bus/dbus-daemon` | 0.0141 | 76.14 s | 0.1173 ms | ±11.9 · ±11.3 · ±11.0 %, carried |
+
+Gap means are over each component's merged wake times, wrapped round the phase (9.5 D71; this slice's D31), so a gap mean is the phase over the wakes.
 
 - Causes that left (D27), per phase: `php-fpm` (PHP 8.3's FastCGI service, which the runner image ships) 180–188 wakes of pid 1 and 185–225 of the system bus through pid 1; the workflow's "wait for the run" loop 355–362 of WirePlumber's worker, each with the worker's own timer 100.2 ms later; PHP's session cleanup and `podman` a few each. Desktop jobs bound to a clock time (sysstat's daily summary and 23:59 sample, `logrotate`, `man-db`, `fstrim`, `motd-news`, `anacron`) are stated as events. Before D27 the three entries read 0.179, 0.137 and 0.213 wakes/s.
-- Carried with their half-widths (D28, D29): the three components whose spread lies in part within one run — within a long-phase probe each value moves by half to all of its across-repeat spread — each its entry's whole activity, 14–21, 126–148 and 16–42 wakes a phase; their three values together, under 9.5 D57 as 9.8 D21 extended it.
+- Carried with their half-widths (D28, D29): `pid1/systemd` and `system-bus/dbus-daemon`, whose spread lies in part within one run — within a long-phase probe each value moves by half to all of its across-repeat spread — each its entry's whole activity, 126–148 and 16–42 wakes a phase; their three values together, under 9.5 D57 as 9.8 D21 extended it. `wireplumber/gmain`, carried so until D31, holds its three values within the tolerance.
 - Coverage (method §5, the 95 % cut): GNOME Shell 99.97 % of 0.587 wakes/s, every other entry 100 % of its one component; no residual. `pipewire` and `pipewire-pulse` recorded no wake in the phase of any repeat. The session bus woke 26–29 times in each of repeats 47, 48, 49 and 51 and in no other — all at 00:00 UTC, from Evolution's calendar and alarm daemons, inside the cron session's window — and the user manager 8 times in the same four; D23 and D27 took every one out, so the entries carry none. GNOME Shell's `gnome-s:disk$0` woke only in those four repeats, 0.0002 wakes/s over the pool, reported as sporadic, not carried.
 - A cron job's session (D23): repeats 47, 48, 49 and 51, the first batch, met the `sphinxsearch` indexer's at 00:00 UTC, 317–365 s into the phase; the rows inside its window left each component — `service-manager` 201, `message-bus` 245, `audio-server` 37, `compositor-shell` 12 — and are stated per repeat in `pooled.json` (`cron_event`). No other repeat met one.
 - Foreign work on the measured CPU: 18–43 user-space schedule-ins per repeat outside the four entries, 0.00097–0.0022 % of the phase against the 2 × 10⁻⁴ bound (D22); none by a pinned unit's other process. Kernel threads 11,608–15,472 schedule-ins per repeat, reported and not gated (D14).

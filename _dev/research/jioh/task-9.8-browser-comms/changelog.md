@@ -486,3 +486,26 @@ and "one per tab group" (scope card, Out of 9.8). **Hands to 9.16:** the reprodu
 release at the tooling commit.
 
 Commit: this entry.
+
+## D26 — one renderer's rates and merged gaps; the quiet threads carried (2026-09-24)
+
+By 인지오's decision (9.5 D71: gaps over a component's merged wake times, wrapped round the span observed; tables that keep their mean; rates from exact counts). For the renderer entries a thread's gaps are merged within each renderer and the renderers measured laid end to end, one in which the thread never woke adding its time; its wake rate is the mean over every renderer measured, a renderer without it counting zero, from exact counts — where the per-renderer rates had been rounded to 0.01 wakes/s before averaging and averaged over only the renderers in which the thread woke. The residual of one renderer (D19) is built the same way.
+
+By 인지오's decision, for a renderer entry 9.5 D43 reads over the renderers measured: a thread is carried if it wakes at least twice across them in every repeat; coverage (9.5 D16) is counted per renderer. With the rates exact:
+
+| entry | carried components, before → after | into the residual |
+|---|---|---|
+| `renderer-hidden` | `HangWatcher`, `chrome`, `Chrome_ChildIOT` → and `Compositor`, `PerfettoTrace`, `ThreadPoolServi` (sporadic, not carried, before) | — |
+| `renderer-visible` | `HangWatcher`, `chrome`, `Chrome_ChildIOT`, `ThreadPoolForeg` → `HangWatcher`, `chrome`, `Chrome_ChildIOT`, `PerfettoTrace` | `ThreadPoolForeg` (0.0014 wakes/s per renderer, not 0.0043) |
+
+The four threads newly carried are carried with their three values together under 9.5 D57, by 인지오's decision, as `Chrome_ChildIOT` is (D21, D24). Placed by the long-phase probes (`desktop/within_run.py`, 600 s windows every 60 s per renderer, the hidden probe from 300 s as in D24): hidden `Compositor`, `PerfettoTrace` and `ThreadPoolServi`, which wake together, ±10.8 % within one run against ±63.6 % across the fourteen repeats, 3.9 wakes per renderer per phase, each 3.9 % of a renderer's wakes; visible `PerfettoTrace` ±4.0 % within against ±63.4 % across, 3.2 wakes per phase, 3.8 %.
+
+`Chrome_ChildIOT`'s values on the exact rates: hidden 0.0071 wakes/s ±20.9 % (was 0.0065 ±38.1 %), visible 0.0060 ±26.4 % (was 0.0047 ±62.0 %); the "0–0.01 wakes/s" ranges the scopes stated were the rounding's. The residuals changed their comms — hidden `MemoryInfra` alone, visible `MemoryInfra`, `Compositor`, `ThreadPoolForeg`, `ThreadPoolServi` — and D20's and D24's within-run figures described the residuals as they were. Re-read on the probes: hidden ±134.2 % within against ±51.6 % across, visible ±181.3 % within against ±23.5 % across (its comms barely wake in the probe, 0.0009 against 0.0068 wakes/s in the campaign). Neither places the residual's spread between sessions as 9.5 D57 requires; the residuals stay carried under D21 and D24 with these figures stated, and whether they should is open, for 인지오.
+
+Both renderer entries hold: hidden 21 values, 6 within the tolerance, the widest `ThreadPoolServi` run mean ±4.82 %; visible 15 values, 4 within, the widest `chrome` wake rate ±3.76 %. `chat-client` and `game-client` keep their components and repeats; the rule now reads their gap means over the carried gaps (`per_thread` given the phase's start), where it had read gaps within each thread beside a table built otherwise. `chat-client` holds 18 of 18, the widest its residual run mean ±4.32 %. `game-client` holds 27 of 33: `steamwebhelper`'s gap mean ±10.2 % → ±0.18 % and `ThreadPoolForeg`'s ±9.0 % → ±4.15 % are within the tolerance, their wake rates having passed all along, so of D23's two components only `steamwebhelper`'s run mean stays carried, under D18.
+
+Tooling: `desktop/analyze.py` (`renderer_components` over every renderer measured, the phase's `t0` and `measured_renderer_pids` recorded); `desktop/pool.py` (exact per-renderer counts for coverage, the count across renderers for D43, the residual wrapped round every renderer, `SESSION_SPREAD`); `desktop/fold_in.py` (the table form, the within-run figures, the wakes per phase computed). Tests: `test_a_renderer_entry_counts_its_coverage_per_renderer`, `test_a_renderer_thread_that_wakes_twice_across_the_renderers_is_carried`, and four whose expectations had been the rounded rates.
+
+Values changed: every table of the four entries (form; the gaps' values); the renderer entries' components and their values. **Hands to 9.14:** the demand moves (9.5 D71).
+
+Commit: this entry.

@@ -4,10 +4,10 @@ webrtc: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 
    play renderer/WebRTC_W_and_N gap mean (ms): k 45, half-width 0.0167, passes
    play renderer/WebRTC_W_and_N run mean (ms): k 45, half-width 0.0396, passes
    play renderer/Chrome_ChildIOT wakes/s: k 45, half-width 0.0062, passes
-   play renderer/Chrome_ChildIOT gap mean (ms): k 45, half-width 0.0402, passes
+   play renderer/Chrome_ChildIOT gap mean (ms): k 45, half-width 0.0062, passes
    play renderer/Chrome_ChildIOT run mean (ms): k 45, half-width 0.0227, passes
    play renderer/ThreadPoolForeg wakes/s: k 45, half-width 0.0133, passes
-   play renderer/ThreadPoolForeg gap mean (ms): k 45, half-width 0.0147, passes
+   play renderer/ThreadPoolForeg gap mean (ms): k 45, half-width 0.0126, passes
    play renderer/ThreadPoolForeg run mean (ms): k 45, half-width 0.013, passes
    play utility/AudioProcessing wakes/s: k 45, half-width 0.053, carried with its half-width, its spread between sessions (D57)
    play utility/AudioProcessing gap mean (ms): k 45, half-width 0.0443, passes
@@ -16,7 +16,7 @@ webrtc: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 
    play renderer/AudioOutputDevi gap mean (ms): k 45, half-width 0.0363, passes
    play renderer/AudioOutputDevi run mean (ms): k 45, half-width 0.052, carried with its half-width, its spread between sessions (D57)
    play utility/Chrome_ChildIOT wakes/s: k 45, half-width 0.003, passes
-   play utility/Chrome_ChildIOT gap mean (ms): k 45, half-width 0.0305, passes
+   play utility/Chrome_ChildIOT gap mean (ms): k 45, half-width 0.003, passes
    play utility/Chrome_ChildIOT run mean (ms): k 45, half-width 0.0467, passes
    play utility/AudioWorkerThre wakes/s: k 45, half-width 0.0, passes
    play utility/AudioWorkerThre gap mean (ms): k 45, half-width 0.0, passes
@@ -40,7 +40,7 @@ webrtc: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 
    play utility/chrome gap mean (ms): k 45, half-width 0.0047, passes
    play utility/chrome run mean (ms): k 45, half-width 0.041, passes
    play renderer/chrome wakes/s: k 45, half-width 0.0116, passes
-   play renderer/chrome gap mean (ms): k 45, half-width 0.024, passes
+   play renderer/chrome gap mean (ms): k 45, half-width 0.0119, passes
    play renderer/chrome run mean (ms): k 45, half-width 0.0235, passes
    play residual wakes/s: k 45, half-width 0.0111, passes
    play residual gap mean (ms): k 45, half-width 0.0114, passes

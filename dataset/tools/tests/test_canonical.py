@@ -116,14 +116,16 @@ def test_cpu_batch_runs_and_blocks_until_total_work(fixture_path, library):
 
 
 def test_zero_inclusive_block_table_leaves_the_program_running(library):
-    # D25: HandBrakeCLI's block table is zero at every quantile — 0.08 % of its runs end in a block, so the task
-    # runs on and the runs join one RUN; the CPU still sums to total_work
+    # D25: HandBrakeCLI's block table is zero up to p99.9 — 0.08 % of its runs end in a block, so the task runs on
+    # through almost every run and those runs join one RUN; the table's top interval carries the rare blocks it
+    # measured (9.5 D71: about two in the ~1,840 runs of 2 s), and the CPU still sums to total_work
     from wlc import compiler
     build = compiler._TaskBuild("batch", "HandBrakeCLI")
     params = library.entry("cpu-batch")["params"]
     compiler._batch_loop(build, params, {"bind": {"program": "handbrakecli", "total_work": "2s"}}, "seed", "batch")
-    assert [op["op"] for op in build.program] == ["RUN", "EXIT"]
-    assert build.program[0]["us"] == 2_000_000 == build.demand_us
+    ops = [op["op"] for op in build.program]
+    assert ops[-1] == "EXIT" and ops.count("RUN") == ops.count("SLEEP") + 1 and ops.count("SLEEP") <= 10
+    assert sum(op["us"] for op in build.program if op["op"] == "RUN") == 2_000_000 == build.demand_us
     build = compiler._TaskBuild("hog", "python3")
     compiler._batch_loop(build, params, {"bind": {"program": "python3", "total_work": "2s"}}, "seed", "hog")
     assert "SLEEP" in {op["op"] for op in build.program}          # python3 blocks after every run

@@ -20,7 +20,7 @@ import sys
 TOOLS = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
-from meas.campaign.fold_in import dist  # noqa: E402
+from meas.distribution import yaml_table  # noqa: E402
 
 TAG = "meas-ci:desktop:2026-09-20"
 CARRIED = {"chrome-hidden": "steady", "chrome-visible": "steady-notimer", "element": "idle", "steam": "shown"}
@@ -74,9 +74,14 @@ APPROX = {
 # D20, D22, D24: where a between-sessions component's spread lies — within one run (the probe, 600 s windows every
 # 60 s) against across the repeats. Across-repeat figures for the renderer entries are recomputed from the pooled
 # record; the within-run figures are the changelog's, measured on the probes.
-WITHIN = {("chrome-hidden", "Chrome_ChildIOT"): "±17.7 % (D24)", ("chrome-hidden", "residual"): "±29.7 % (D24)",
-          ("chrome-visible", "Chrome_ChildIOT"): "±18.6 % (D20)", ("chrome-visible", "residual"): "±28.9 % (D20)",
+WITHIN = {("chrome-hidden", "Chrome_ChildIOT"): "±17.7 % (D24)",
+          # D26: the residuals' comms changed once the rates were one renderer's and exact — re-read on the probes
+          ("chrome-hidden", "residual"): "±134.2 % (D26; `MemoryInfra` alone, 0–2 wakes per renderer a window)",
+          ("chrome-visible", "Chrome_ChildIOT"): "±18.6 % (D20)",
+          ("chrome-visible", "residual"): "±181.3 % (D26; its comms barely wake in the probe, 0.0009 against 0.0068 wakes/s)",
           ("chrome-visible", "ThreadPoolForeg"): "barely present in the probe (D20)",
+          ("chrome-hidden", "Compositor"): "±10.8 % (D26)", ("chrome-hidden", "PerfettoTrace"): "±10.8 % (D26)",
+          ("chrome-hidden", "ThreadPoolServi"): "±10.8 % (D26)", ("chrome-visible", "PerfettoTrace"): "±4.0 % (D26)",
           ("steam", "steamwebhelper"): "gap mean ±0.1 % (D22)", ("steam", "ThreadPoolForeg"): "gap mean ±1.7 % (D22)"}
 
 
@@ -107,14 +112,14 @@ def values_of(ph, comm, label):
     return [v for v in vals if v is not None]
 
 
-def component(comm, threads, wps, gap_q, run_q, extra=None, indent="        "):
+def component(comm, threads, wps, gap, run, extra=None, indent="        "):
     lines = [f"{indent}- comm: {json.dumps(comm)}"]
     if extra:
         lines.append(f"{indent}  comms: [" + ", ".join(json.dumps(x) for x in extra) + "]")
     lines.append(f"{indent}  threads: {threads}")
-    lines.append(f"{indent}  wakes_per_s: {wps:.4f}")
-    lines.append(f"{indent}  gap: {dist(gap_q, TAG)}")
-    lines.append(f"{indent}  run: {dist(run_q, TAG)}")
+    lines.append(f"{indent}  wakes_per_s: {wps:.5g}")
+    lines.append(f"{indent}  gap: {yaml_table(gap['table'], TAG)}")
+    lines.append(f"{indent}  run: {yaml_table(run['table'], TAG)}")
     return lines
 
 
@@ -154,11 +159,11 @@ def entry(app, e):
         t = ph["threads"][comm]
         tab = ph["tables"][comm]
         out += component(comm, thread_count(t["threads"]), statistics.fmean(t["wakes_per_s"]),
-                         tab["gap_ms"]["q"], tab["run_ms"]["q"])
+                         tab["gap_ms"], tab["run_ms"])
     r = comp["residual"]
-    if r and r["gap_ms"]["q"]:
+    if r and r["gap_ms"]["table"]:
         out += component("residual", thread_count(r["threads"]), statistics.fmean(r["wakes_per_s"]),
-                         r["gap_ms"]["q"], r["run_ms"]["q"], extra=r["comms"])
+                         r["gap_ms"], r["run_ms"], extra=r["comms"])
     unit = " per renderer" if renderer else ""
     out.append(f"        # {len(comp['selected'])} comms cover {comp['covered_share'] * 100:.1f} % of "
                f"{comp['total_wakes_per_s']:.3f} wakes/s{unit} (9.5 D16, target 95 %); the rest pooled as `residual`")
@@ -203,11 +208,12 @@ def entry(app, e):
             across = f"±{(max(wr) - min(wr)) / 2 / statistics.fmean(wr) * 100:.1f} %" if statistics.fmean(wr) else "—"
             where = f"; within one run {w}, its wake rate across the repeats {across}" if w else ""
             parts.append(f"`{comm}` " + ", ".join(texts) + where)
-        law = {"chrome-hidden": "D21, D24", "chrome-visible": "D21", "steam": "D23"}[app]
+        law = {"chrome-hidden": "D21, D24, D26", "chrome-visible": "D21, D26", "steam": "D23"}[app]
         scope += (f"Components whose rate varies between sessions, their values carried together (9.5 D57; {law}): "
                   + "; ".join(parts) + ". ")
         if renderer:
-            scope += "These threads wake about six times per renderer per 600 s phase. "
+            per = [statistics.fmean(values_of(ph, comm, "wakes/s")) * statistics.fmean(ph["span_s"]) for comm in session]
+            scope += f"These threads wake {min(per):.1f}–{max(per):.1f} times per renderer per 600 s phase. "
         if app == "steam":
             scope += ("`steamwebhelper` carries 23.6 % of the client's wakes and its gap table is identical through "
                       "its 99th percentile in every repeat, the mean moved by a handful of gaps past it (D22). ")

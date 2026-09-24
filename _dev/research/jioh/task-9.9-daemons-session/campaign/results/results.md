@@ -33,21 +33,21 @@ Left the components by cause (D27), wakes over the pooled repeats: outside — p
 | quantity | k | mean | half-width | passes |
 |---|---|---|---|---|
 | gnome-shell gnome-shell/JS Helper wakes/s | 24 | 0.3025 | ±0.7% | yes |
-| gnome-shell gnome-shell/JS Helper gap mean (ms) | 24 | 13049.3382 | ±0.7% | yes |
+| gnome-shell gnome-shell/JS Helper gap mean (ms) | 24 | 3306.7344 | ±0.7% | yes |
 | gnome-shell gnome-shell/JS Helper run mean (ms) | 24 | 0.0137 | ±1.5% | yes |
 | gnome-shell gnome-shell/gmain wakes/s | 24 | 0.2498 | ±0.1% | yes |
-| gnome-shell gnome-shell/gmain gap mean (ms) | 24 | 4002.6055 | ±0.1% | yes |
+| gnome-shell gnome-shell/gmain gap mean (ms) | 24 | 4002.606 | ±0.1% | yes |
 | gnome-shell gnome-shell/gmain run mean (ms) | 24 | 0.0497 | ±2.2% | yes |
 | gnome-shell gnome-shell/gnome-shell wakes/s | 24 | 0.0347 | ±1.5% | yes |
-| gnome-shell gnome-shell/gnome-shell gap mean (ms) | 24 | 28767.3606 | ±1.7% | yes |
+| gnome-shell gnome-shell/gnome-shell gap mean (ms) | 24 | 28813.9483 | ±1.5% | yes |
 | gnome-shell gnome-shell/gnome-shell run mean (ms) | 24 | 5.7035 | ±2.8% | yes |
 | pipewire wireplumber/gmain wakes/s | 24 | 0.0093 | ±4.5% | yes |
-| pipewire wireplumber/gmain gap mean (ms) | 24 | 104665.3098 | ±5.3% | carried (D29) |
+| pipewire wireplumber/gmain gap mean (ms) | 24 | 108583.7999 | ±4.4% | yes |
 | pipewire wireplumber/gmain run mean (ms) | 24 | 0.0351 | ±3.0% | yes |
 | systemd pid1/systemd wakes/s | 24 | 0.075 | ±2.0% | yes |
-| systemd pid1/systemd gap mean (ms) | 24 | 13262.5621 | ±1.9% | yes |
+| systemd pid1/systemd gap mean (ms) | 24 | 13368.8769 | ±1.9% | yes |
 | systemd pid1/systemd run mean (ms) | 24 | 0.1676 | ±7.8% | carried (D29) |
 | dbus-daemon system-bus/dbus-daemon wakes/s | 24 | 0.0141 | ±11.9% | carried (D29) |
-| dbus-daemon system-bus/dbus-daemon gap mean (ms) | 24 | 49408.7038 | ±10.0% | carried (D29) |
+| dbus-daemon system-bus/dbus-daemon gap mean (ms) | 24 | 76135.7654 | ±11.3% | carried (D29) |
 | dbus-daemon system-bus/dbus-daemon run mean (ms) | 24 | 0.1173 | ±11.0% | carried (D29) |
 

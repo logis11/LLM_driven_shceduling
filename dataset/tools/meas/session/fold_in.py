@@ -14,8 +14,14 @@ for `dataset/archetypes.yaml`.
 """
 
 import json
+import os
 import statistics
 import sys
+
+TOOLS = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))   # dataset/tools
+if TOOLS not in sys.path:
+    sys.path.insert(0, TOOLS)
+from meas.distribution import yaml_table  # noqa: E402
 
 TAG = "meas-ci:session:2026-09-24"
 PHASE = "steady"
@@ -76,14 +82,6 @@ CRON_CAUSE = ("the session of the sphinxsearch indexer's cron job at 00:00 UTC �
               "the desktop install —")
 
 
-def dist(q_ms, tag, sampling="per-iteration"):
-    """A quantile table in integer microseconds, the form `campaign/fold_in.py`'s `dist` writes. Not imported from it:
-    that module puts its own folder on sys.path and imports `pool` and `analyze` by bare name, which collide with the
-    other families' modules of the same names in one test run."""
-    return ("{dist: quantiles, p: [" + ", ".join(str(int(round(v * 1000))) for v in q_ms)
-            + f"], sampling: {sampling}, source: \"{tag}\"}}")
-
-
 def thread_count(t):
     lo, hi = min(t), max(t)
     return str(lo) if lo == hi else f"[{lo}, {hi}]"
@@ -92,9 +90,9 @@ def thread_count(t):
 def component(comm, t, tab, indent="        "):
     return [f"{indent}- comm: {json.dumps(comm)}",
             f"{indent}  threads: {thread_count(t['threads'])}",
-            f"{indent}  wakes_per_s: {statistics.fmean(t['wakes_per_s']):.4f}",
-            f"{indent}  gap: {dist(tab['gap_ms']['q'], TAG)}",
-            f"{indent}  run: {dist(tab['run_ms']['q'], TAG)}"]
+            f"{indent}  wakes_per_s: {statistics.fmean(t['wakes_per_s']):.5g}",
+            f"{indent}  gap: {yaml_table(tab['gap_ms']['table'], TAG)}",
+            f"{indent}  run: {yaml_table(tab['run_ms']['table'], TAG)}"]
 
 
 # D28: where the carried components' spread lies — within one run, the unpolled region of the long-phase probes 36,

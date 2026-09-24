@@ -41,6 +41,7 @@ if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 from meas.background import analyze  # noqa: E402
 from meas.stability import stability, TOLERANCE, T975  # noqa: E402
+from meas.distribution import quantile_table  # noqa: E402
 pct, QUANTILE_PROBS = analyze.pct, analyze.QUANTILE_PROBS
 
 NAME = re.compile(r"^meas-background-(borg|7z|steamcmd)-r(\d+)-(dry|probe|full)$")
@@ -89,7 +90,8 @@ def pooled(by_repeat):
     reps = sorted((r, np.asarray(vs, dtype=np.float64)) for r, vs in by_repeat.items())
     allv = np.sort(np.concatenate([vs for _r, vs in reps])) if reps else np.empty(0)
     out = {"n": int(len(allv)), "q": [round(pct_sorted(allv, q), 1) for q in QUANTILE_PROBS] if len(allv) else None,
-           "p50": round(pct_sorted(allv, .5), 1) if len(allv) else None}
+           "p50": round(pct_sorted(allv, .5), 1) if len(allv) else None,
+           "table": quantile_table(allv) if len(allv) else None}
     del allv
     out["repeat_p50"] = {r: (round(pct_sorted(np.sort(vs), .5), 1) if len(vs) else None) for r, vs in reps}
     out["repeat_mean"] = {r: (round(statistics.fmean(vs.tolist()), 4) if len(vs) else None) for r, vs in reps}

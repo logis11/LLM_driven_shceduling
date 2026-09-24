@@ -4,7 +4,7 @@ Campaigns `meas-ci:interactive:2026-09-18` and `meas-ci:playback:2026-09-18` (`s
 
 Numbers are pooled over the repeats listed with each application; its phase lengths are the method's, §2 and the settles and phases §9's amendments name. `spread` is the range of the per-repeat p50. Threads are the top five by CPU. Per-input rules are method §5's (a) first-wake, (b) window minus idle rate, (c) waker (X-server-woken schedule-ins). Runner: `ubuntu-24.04`, 4 vCPU, kernel per `reports/*.spec.json`.
 
-## `soffice` — LibreOffice 24.2.7.2 420(Build:2), repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+## `soffice` — LibreOffice 24.2.7.2 420(Build:2) (14 repeats), repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
 
 CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 7763 64-Core Processor', '3': 'AMD EPYC 7763 64-Core Processor', '4': 'AMD EPYC 7763 64-Core Processor', '5': 'AMD EPYC 7763 64-Core Processor', '6': 'AMD EPYC 7763 64-Core Processor', '7': 'AMD EPYC 7763 64-Core Processor', '8': 'AMD EPYC 7763 64-Core Processor', '9': 'AMD EPYC 7763 64-Core Processor', '10': 'AMD EPYC 7763 64-Core Processor', '11': 'AMD EPYC 7763 64-Core Processor', '12': 'AMD EPYC 7763 64-Core Processor', '13': 'AMD EPYC 7763 64-Core Processor', '14': 'AMD EPYC 7763 64-Core Processor'}; kernel per repeat {'1': '6.17.0-1022-azure', '2': '6.17.0-1022-azure', '3': '6.17.0-1022-azure', '4': '6.17.0-1022-azure', '5': '6.17.0-1022-azure', '6': '6.17.0-1022-azure', '7': '6.17.0-1022-azure', '8': '6.17.0-1022-azure', '9': '6.17.0-1022-azure', '10': '6.17.0-1022-azure', '11': '6.17.0-1022-azure', '12': '6.17.0-1022-azure', '13': '6.17.0-1022-azure', '14': '6.17.0-1022-azure'}.
 
@@ -13,16 +13,16 @@ CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 776
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `soffice.bin` | 1–1 | 3.4–3.5 | 94.20 (82.2–112.2) | 600.69 | 0.070 | 0.339 | 0.389 | 5808 |
+| `soffice.bin` | 1–1 | 3.4–3.5 | 110.22 (83.7–131.2) | 600.69 | 0.070 | 0.339 | 0.389 | 5808 |
 
 ### driven: CPU share 0.0059–0.0140, wakes/s 19.9–40.0
 - processes by role (repeat 1): main: 1 pid(s), 39.84 wakes/s, CPU 0.0136
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `soffice.bin` | 3–3 | 19.9–40.0 | 5.04 (4.5–9.7) | 51.10 | 0.046 | 1.131 | 2.977 | 238329 |
-| `Parser` | 1–1 | 0.0–0.0 | 2.74 (1.5–3.0) | 2.84 | 0.693 | 1.362 | 1.465 | 29 |
-| `Unzipping` | 0–1 | 0.0–0.0 | — (—) | — | 0.005 | 0.005 | 0.005 | 1 |
+| `soffice.bin` | 3–3 | 19.9–40.0 | 5.04 (4.5–9.7) | 51.12 | 0.046 | 1.131 | 2.977 | 238329 |
+| `Parser` | 1–1 | 0.0–0.0 | 2.99 (2.5–302501.1) | 604999.45 | 0.693 | 1.362 | 1.465 | 29 |
+| `Unzipping` | 0–1 | 0.0–0.0 | 605002.17 (605002.2–605002.2) | 605002.17 | 0.005 | 0.005 | 0.005 | 1 |
 
 Per input ([1569, 1619, 1500, 996, 886, 626, 858, 692, 746, 738, 1395, 787, 720, 1456] events per repeat):
 
@@ -39,7 +39,7 @@ Per input ([1569, 1619, 1500, 996, 886, 626, 858, 692, 746, 738, 1395, 787, 720,
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
 | `soffice.bin` | 1–1 | 39.6–56.5 | 8.13 (5.1–17.1) | 20.19 | 0.048 | 1.483 | 3.077 | 404831 |
-| `oosplash` | 1–1 | 0.0–0.0 | — (—) | — | 0.021 | 0.026 | 0.028 | 14 |
+| `oosplash` | 1–1 | 0.0–0.0 | 605002.10 (605002.0–605002.3) | 605002.19 | 0.021 | 0.026 | 0.028 | 14 |
 
 Per input ([2054, 1896, 1976, 2374, 1891, 2275, 1677, 2366, 2515, 1961, 1692, 1260, 1997, 1703] events per repeat):
 
@@ -57,7 +57,7 @@ Stimulus sensitivity (method §3, pre-registered): per-input run, rule (b), SWEL
 | SWELL-KW | 3.230 | 9.551 | 11.367 | [3.325, 3.487, 3.22, 3.351, 3.251, 3.14, 3.14, 3.175, 3.129, 3.039, 2.717, 2.937, 3.355, 3.265] | 19.9–40.0 |
 | 136M Keystrokes | 4.047 | 10.281 | 12.253 | [4.33, 4.361, 4.328, 4.289, 3.879, 3.621, 3.697, 3.907, 3.751, 3.991, 4.053, 5.557, 4.052, 4.217] | 39.6–56.5 |
 
-## `thunderbird-send` — Mozilla Thunderbird 156.0, repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44]
+## `thunderbird-send` — Mozilla Thunderbird 156.0 (43 repeats), repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44]
 
 CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 7763 64-Core Processor', '3': 'AMD EPYC 7763 64-Core Processor', '4': 'AMD EPYC 7763 64-Core Processor', '5': 'AMD EPYC 7763 64-Core Processor', '6': 'AMD EPYC 7763 64-Core Processor', '7': 'AMD EPYC 7763 64-Core Processor', '8': 'AMD EPYC 7763 64-Core Processor', '9': 'AMD EPYC 7763 64-Core Processor', '10': 'AMD EPYC 7763 64-Core Processor', '11': 'AMD EPYC 7763 64-Core Processor', '12': 'AMD EPYC 7763 64-Core Processor', '13': 'AMD EPYC 7763 64-Core Processor', '14': 'AMD EPYC 7763 64-Core Processor', '15': 'AMD EPYC 7763 64-Core Processor', '16': 'AMD EPYC 7763 64-Core Processor', '17': 'AMD EPYC 7763 64-Core Processor', '18': 'AMD EPYC 7763 64-Core Processor', '19': 'AMD EPYC 7763 64-Core Processor', '20': 'AMD EPYC 7763 64-Core Processor', '21': 'AMD EPYC 7763 64-Core Processor', '22': 'AMD EPYC 7763 64-Core Processor', '23': 'AMD EPYC 7763 64-Core Processor', '24': 'AMD EPYC 7763 64-Core Processor', '25': 'AMD EPYC 7763 64-Core Processor', '26': 'AMD EPYC 7763 64-Core Processor', '27': 'AMD EPYC 7763 64-Core Processor', '28': 'AMD EPYC 7763 64-Core Processor', '30': 'AMD EPYC 7763 64-Core Processor', '31': 'AMD EPYC 7763 64-Core Processor', '32': 'AMD EPYC 7763 64-Core Processor', '33': 'AMD EPYC 7763 64-Core Processor', '34': 'AMD EPYC 7763 64-Core Processor', '35': 'AMD EPYC 7763 64-Core Processor', '36': 'AMD EPYC 7763 64-Core Processor', '37': 'AMD EPYC 7763 64-Core Processor', '38': 'AMD EPYC 7763 64-Core Processor', '39': 'AMD EPYC 7763 64-Core Processor', '40': 'AMD EPYC 7763 64-Core Processor', '41': 'AMD EPYC 7763 64-Core Processor', '42': 'AMD EPYC 7763 64-Core Processor', '43': 'AMD EPYC 7763 64-Core Processor', '44': 'AMD EPYC 7763 64-Core Processor'}; kernel per repeat {'1': '6.17.0-1022-azure', '2': '6.17.0-1022-azure', '3': '6.17.0-1022-azure', '4': '6.17.0-1022-azure', '5': '6.17.0-1022-azure', '6': '6.17.0-1022-azure', '7': '6.17.0-1022-azure', '8': '6.17.0-1022-azure', '9': '6.17.0-1022-azure', '10': '6.17.0-1022-azure', '11': '6.17.0-1022-azure', '12': '6.17.0-1022-azure', '13': '6.17.0-1022-azure', '14': '6.17.0-1022-azure', '15': '6.17.0-1022-azure', '16': '6.17.0-1022-azure', '17': '6.17.0-1022-azure', '18': '6.17.0-1022-azure', '19': '6.17.0-1022-azure', '20': '6.17.0-1022-azure', '21': '6.17.0-1022-azure', '22': '6.17.0-1022-azure', '23': '6.17.0-1022-azure', '24': '6.17.0-1022-azure', '25': '6.17.0-1022-azure', '26': '6.17.0-1022-azure', '27': '6.17.0-1022-azure', '28': '6.17.0-1022-azure', '30': '6.17.0-1022-azure', '31': '6.17.0-1022-azure', '32': '6.17.0-1022-azure', '33': '6.17.0-1022-azure', '34': '6.17.0-1022-azure', '35': '6.17.0-1022-azure', '36': '6.17.0-1022-azure', '37': '6.17.0-1022-azure', '38': '6.17.0-1022-azure', '39': '6.17.0-1022-azure', '40': '6.17.0-1022-azure', '41': '6.17.0-1022-azure', '42': '6.17.0-1022-azure', '43': '6.17.0-1022-azure', '44': '6.17.0-1022-azure'}.
 
@@ -68,11 +68,11 @@ Left out of this pool: repeat 29 — the Outlook window was not cut, so the repe
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `StreamTrans` | 21–27 | 0.1–0.2 | 2.31 (0.1–30011.2) | 30034.47 | 0.085 | 10.988 | 28.739 | 3362 |
-| `thunderbird-bin` | 1–1 | 0.3–0.5 | 0.16 (0.1–16.1) | 10042.78 | 0.032 | 0.919 | 3.461 | 10459 |
-| `WebExtensions` | 1–1 | 0.2–0.2 | 0.14 (0.1–0.3) | 19971.47 | 0.027 | 0.225 | 0.967 | 5345 |
-| `Indexed~ IO` | 7–8 | 0.1–0.1 | 2000.54 (0.8–10000.4) | 30000.28 | 0.081 | 0.632 | 0.739 | 1878 |
-| `gmain` | 1–1 | 0.2–0.2 | 4000.00 (4000.0–4000.0) | 4000.03 | 0.047 | 0.055 | 0.061 | 6450 |
+| `StreamTrans` | 21–27 | 0.1–0.2 | 9.51 (1.2–983.9) | 28192.04 | 0.085 | 10.988 | 28.739 | 3362 |
+| `thunderbird-bin` | 1–1 | 0.3–0.5 | 0.16 (0.1–16.1) | 10036.96 | 0.032 | 0.919 | 3.461 | 10459 |
+| `WebExtensions` | 1–1 | 0.2–0.2 | 0.17 (0.1–0.3) | 19971.47 | 0.027 | 0.225 | 0.967 | 5345 |
+| `Indexed~ IO` | 7–8 | 0.1–0.1 | 2004.77 (2000.5–10008.7) | 30000.29 | 0.081 | 0.632 | 0.739 | 1878 |
+| `gmain` | 1–1 | 0.2–0.2 | 4000.00 (4000.0–4000.0) | 4000.04 | 0.047 | 0.055 | 0.061 | 6450 |
 
 ### driven: CPU share 0.0072–0.0152, wakes/s 116.9–231.3
 - processes by role (repeat 1): main: 3 pid(s), 172.1 wakes/s, CPU 0.0105
@@ -80,10 +80,10 @@ Left out of this pool: repeat 29 — the Outlook window was not cut, so the repe
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
 | `thunderbird-bin` | 1–2 | 11.1–20.4 | 1.21 (0.8–1.5) | 144.35 | 0.077 | 1.204 | 2.227 | 81286 |
-| `Renderer` | 1–1 | 3.6–6.7 | 32.86 (18.5–67.3) | 600.45 | 0.043 | 0.628 | 1.065 | 27009 |
+| `Renderer` | 1–1 | 3.6–6.7 | 32.88 (18.5–67.4) | 600.49 | 0.043 | 0.628 | 1.065 | 27009 |
 | `Compositor` | 1–1 | 73.0–148.3 | 0.02 (0.0–0.0) | 16.14 | 0.008 | 0.012 | 0.056 | 559969 |
 | `Softwar~cThread` | 1–1 | 15.3–27.9 | 17.16 (17.2–17.2) | 17.25 | 0.051 | 0.074 | 0.098 | 109505 |
-| `StreamTrans` | 30–32 | 0.1–0.2 | 261.11 (2.8–30010.2) | 30035.92 | 0.106 | 27.501 | 30.697 | 762 |
+| `StreamTrans` | 30–32 | 0.1–0.2 | 21.01 (5.3–22.6) | 27206.43 | 0.106 | 27.501 | 30.697 | 762 |
 
 Per input ([741, 1155, 1325, 392, 724, 887, 1167, 1193] events per repeat):
 
@@ -99,11 +99,11 @@ Per input ([741, 1155, 1325, 392, 724, 887, 1167, 1193] events per repeat):
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `thunderbird-bin` | 1–1 | 22.7–34.6 | 2.46 (1.9–2.6) | 126.25 | 0.082 | 1.943 | 2.676 | 136355 |
-| `Renderer` | 1–1 | 8.5–11.6 | 37.63 (17.1–68.5) | 199.22 | 0.047 | 0.777 | 1.761 | 47427 |
+| `thunderbird-bin` | 1–1 | 22.7–34.6 | 2.46 (1.9–2.6) | 126.41 | 0.082 | 1.943 | 2.676 | 136355 |
+| `Renderer` | 1–1 | 8.5–11.6 | 37.75 (17.1–68.5) | 199.22 | 0.047 | 0.777 | 1.761 | 47427 |
 | `Compositor` | 1–1 | 194.0–247.7 | 0.02 (0.0–0.0) | 16.13 | 0.008 | 0.012 | 0.054 | 1054985 |
 | `Softwar~cThread` | 1–1 | 37.6–46.2 | 17.16 (17.2–17.2) | 17.24 | 0.052 | 0.073 | 0.097 | 196606 |
-| `WRRende~ckend#1` | 1–1 | 4.3–7.8 | 97.20 (54.7–144.2) | 416.17 | 0.273 | 0.345 | 0.432 | 27853 |
+| `WRRende~ckend#1` | 1–1 | 4.3–7.8 | 97.22 (55.0–144.2) | 416.84 | 0.273 | 0.345 | 0.432 | 27853 |
 
 Per input ([2054, 1896, 1976, 2374, 1891, 2275, 1677, 2366] events per repeat):
 
@@ -120,11 +120,11 @@ Per input ([2054, 1896, 1976, 2374, 1891, 2275, 1677, 2366] events per repeat):
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `thunderbird-bin` | 1–1 | 408.8–471.4 | 0.26 (0.2–0.3) | 2.78 | 0.135 | 1.254 | 5.179 | 276461 |
+| `thunderbird-bin` | 1–1 | 408.8–471.4 | 0.26 (0.2–0.3) | 2.79 | 0.135 | 1.254 | 5.179 | 276461 |
 | `Renderer` | 1–1 | 118.6–121.9 | 0.47 (0.4–0.5) | 15.66 | 0.076 | 0.268 | 1.367 | 73733 |
 | `Socket Thread` | 1–1 | 695.0–731.5 | 0.06 (0.1–0.1) | 0.75 | 0.012 | 0.040 | 0.105 | 441053 |
 | `WRRende~ckend#0` | 1–1 | 26.1–28.7 | 17.06 (17.0–17.2) | 34.21 | 0.300 | 0.624 | 1.338 | 16728 |
-| `WRScene~ilder#0` | 1–1 | 24.3–25.4 | 18.77 (18.2–19.4) | 36.19 | 0.282 | 0.541 | 1.073 | 15291 |
+| `WRScene~ilder#0` | 1–1 | 24.3–25.4 | 18.78 (18.2–19.4) | 36.10 | 0.282 | 0.541 | 1.073 | 15291 |
 
 Stimulus sensitivity (method §3, pre-registered): per-input run, rule (b), SWELL-KW (`driven`) against 136M Keystrokes (`driven-alt`):
 
@@ -133,7 +133,7 @@ Stimulus sensitivity (method §3, pre-registered): per-input run, rule (b), SWEL
 | SWELL-KW | 5.158 | 9.629 | 50.499 | [5.827, 5.197, 5.108, 6.016, 4.328, 5.247, 5.213, 4.679] | 116.9–231.3 |
 | 136M Keystrokes | 5.612 | 7.641 | 24.789 | [5.296, 5.461, 6.228, 5.587, 5.178, 5.614, 5.685, 5.999] | 295.5–384.1 |
 
-## `gimp` — GNU Image Manipulation Program version 2.10.36, repeats [1, 2, 3, 5, 6]
+## `gimp` — GNU Image Manipulation Program version 2.10.36 (5 repeats), repeats [1, 2, 3, 5, 6]
 
 CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 7763 64-Core Processor', '3': 'AMD EPYC 7763 64-Core Processor', '5': 'AMD EPYC 7763 64-Core Processor', '6': 'AMD EPYC 7763 64-Core Processor'}; kernel per repeat {'1': '6.17.0-1022-azure', '2': '6.17.0-1022-azure', '3': '6.17.0-1022-azure', '5': '6.17.0-1022-azure', '6': '6.17.0-1022-azure'}.
 
@@ -155,10 +155,10 @@ CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 776
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `gimp` | 1–1 | 2.0–2.2 | 0.33 (0.3–0.3) | 12352.41 | 0.111 | 2438.067 | 2524.369 | 1195 |
-| `script-fu` | 1–1 | 11.5–11.7 | 0.13 (0.1–0.1) | 987.69 | 0.019 | 0.048 | 0.235 | 6696 |
+| `gimp` | 1–1 | 2.0–2.2 | 0.33 (0.3–0.3) | 2353.21 | 0.111 | 2438.067 | 2524.369 | 1195 |
+| `script-fu` | 1–1 | 11.5–11.7 | 0.13 (0.1–0.1) | 4.87 | 0.019 | 0.048 | 0.235 | 6696 |
 
-## `kdenlive` — Could not detect package type, probably default? App dir is , repeats [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+## `kdenlive` — Could not detect package type, probably default? App dir is  (20 repeats), repeats [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
 
 CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 7763 64-Core Processor', '3': 'AMD EPYC 7763 64-Core Processor', '5': 'AMD EPYC 7763 64-Core Processor', '6': 'AMD EPYC 7763 64-Core Processor', '7': 'AMD EPYC 7763 64-Core Processor', '8': 'AMD EPYC 7763 64-Core Processor', '9': 'AMD EPYC 7763 64-Core Processor', '10': 'AMD EPYC 7763 64-Core Processor', '11': 'AMD EPYC 7763 64-Core Processor', '12': 'AMD EPYC 7763 64-Core Processor', '13': 'AMD EPYC 7763 64-Core Processor', '14': 'AMD EPYC 7763 64-Core Processor', '15': 'AMD EPYC 7763 64-Core Processor', '16': 'AMD EPYC 7763 64-Core Processor', '17': 'AMD EPYC 7763 64-Core Processor', '18': 'AMD EPYC 7763 64-Core Processor', '19': 'AMD EPYC 7763 64-Core Processor', '20': 'AMD EPYC 7763 64-Core Processor', '21': 'AMD EPYC 7763 64-Core Processor'}; kernel per repeat {'1': '6.17.0-1022-azure', '2': '6.17.0-1022-azure', '3': '6.17.0-1022-azure', '5': '6.17.0-1022-azure', '6': '6.17.0-1022-azure', '7': '6.17.0-1022-azure', '8': '6.17.0-1022-azure', '9': '6.17.0-1022-azure', '10': '6.17.0-1022-azure', '11': '6.17.0-1022-azure', '12': '6.17.0-1022-azure', '13': '6.17.0-1022-azure', '14': '6.17.0-1022-azure', '15': '6.17.0-1022-azure', '16': '6.17.0-1022-azure', '17': '6.17.0-1022-azure', '18': '6.17.0-1022-azure', '19': '6.17.0-1022-azure', '20': '6.17.0-1022-azure', '21': '6.17.0-1022-azure'}.
 
@@ -167,21 +167,21 @@ CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 776
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `Qt bearer threa` | 1–1 | 0.1–0.1 | 10000.23 (9999.5–10000.4) | 10005.52 | 0.405 | 0.457 | 0.500 | 240 |
-| `kdenlive` | 2–2 | 1.2–1.3 | 1001.07 (1000.3–1001.1) | 1001.39 | 0.020 | 0.058 | 0.133 | 3025 |
-| `QDBusConnection` | 0–1 | 0.0–0.1 | 1.03 (1.0–1.0) | 17.06 | 0.062 | 0.146 | 0.158 | 6 |
-| `Thread (pooled)` | 0–1 | 0.0–0.0 | — (—) | — | 0.116 | 0.116 | 0.116 | 1 |
+| `Qt bearer threa` | 1–1 | 0.1–0.1 | 10000.37 (9999.3–10000.4) | 10006.47 | 0.405 | 0.457 | 0.500 | 240 |
+| `kdenlive` | 2–2 | 1.2–1.3 | 1001.06 (1000.3–1001.1) | 1001.08 | 0.020 | 0.058 | 0.133 | 3025 |
+| `QDBusConnection` | 0–1 | 0.0–0.0 | 1.33 (1.3–1.3) | 59999.48 | 0.062 | 0.146 | 0.158 | 6 |
+| `Thread (pooled)` | 0–1 | 0.0–0.0 | 120002.10 (120002.1–120002.1) | 120002.10 | 0.116 | 0.116 | 0.116 | 1 |
 
 ### driven: CPU share 0.3501–0.3898, wakes/s 191.2–230.1
 - processes by role (repeat 1): main: 1 pid(s), 223.13 wakes/s, CPU 0.3598
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `kdenlive` | 6–9 | 121.1–153.5 | 5.11 (5.1–5.2) | 16.11 | 0.953 | 8.030 | 9.343 | 1652745 |
+| `kdenlive` | 6–9 | 121.1–153.5 | 5.10 (5.1–5.1) | 16.08 | 0.953 | 8.030 | 9.343 | 1652745 |
 | `QXcbEventQueue` | 1–1 | 68.2–74.9 | 7.99 (7.5–8.3) | 9.30 | 0.014 | 0.018 | 0.029 | 880859 |
-| `FrameRenderer` | 1–1 | 0.6–0.8 | 2497.05 (2492.5–2501.4) | 2617.14 | 0.767 | 0.894 | 1.728 | 8035 |
-| `Qt bearer threa` | 1–1 | 0.1–0.1 | 10000.34 (10000.0–10000.4) | 10005.54 | 0.357 | 0.422 | 0.472 | 1200 |
-| `Thread (pooled)` | 1–1 | 1.0–1.1 | 2.22 (0.0–2.8) | 2620.71 | 0.008 | 0.024 | 0.035 | 12714 |
+| `FrameRenderer` | 1–1 | 0.6–0.8 | 2497.06 (2492.8–2501.5) | 2617.20 | 0.767 | 0.894 | 1.728 | 8035 |
+| `Qt bearer threa` | 1–1 | 0.1–0.1 | 10000.35 (10000.0–10000.5) | 10006.20 | 0.357 | 0.422 | 0.472 | 1200 |
+| `Thread (pooled)` | 1–1 | 1.0–1.1 | 2.22 (0.0–2.8) | 2620.81 | 0.008 | 0.024 | 0.035 | 12714 |
 
 ### op: CPU share 0.4929–0.5049, wakes/s 321.9–334.6
 - operation `preview-render`: 531 succeeded, 0 failed over the repeats; duration p50 11375 ms, p90 11689, p99 12028 (per-repeat p50 [11311.277, 11558.301, 11545.977, 11529.901, 11482.691, 11757.497, 11314.796, 11069.45, 11343.745, 11223.434, 11118.997, 11504.613, 11368.888, 11521.957, 11488.27, 11184.263, 11545.945, 11346.835, 11183.47, 11379.397]); the thread table below is inside the operation windows only
@@ -189,12 +189,12 @@ CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 776
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `kdenlive_render` | 1412–1480 | 619.9–655.3 | 6.49 (5.9–7.6) | 14.70 | 0.007 | 3.008 | 14.747 | 3844521 |
-| `kdenlive` | 27–29 | 10.5–11.0 | 24.93 (24.0–25.7) | 1000.12 | 3.815 | 9.532 | 11.931 | 64760 |
-| `QXcbEventQueue` | 1–1 | 5.1–5.4 | 32.02 (30.9–33.1) | 443.88 | 0.019 | 0.023 | 0.044 | 31849 |
-| `Qt bearer threa` | 1–1 | 0.1–0.1 | 20000.09 (19999.5–20002.1) | 29999.01 | 0.366 | 0.394 | 0.441 | 589 |
+| `kdenlive_render` | 1412–1480 | 619.9–655.3 | 0.01 (0.0–0.0) | 4.68 | 0.007 | 3.008 | 14.747 | 3844521 |
+| `kdenlive` | 27–29 | 10.5–11.0 | 24.01 (22.6–24.8) | 392.96 | 3.815 | 9.532 | 11.931 | 64760 |
+| `QXcbEventQueue` | 1–1 | 5.1–5.4 | 31.42 (30.5–32.6) | 441.95 | 0.019 | 0.023 | 0.044 | 31849 |
+| `Qt bearer threa` | 1–1 | 0.1–0.1 | 8362.17 (8358.7–8365.5) | 18357.05 | 0.366 | 0.394 | 0.441 | 589 |
 
-## `mpv-video` — mpv 0.37.0 Copyright © 2000-2023 mpv/MPlayer/mplayer2 projec, repeats [1, 2, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+## `mpv-video` — mpv 0.37.0 Copyright © 2000-2023 mpv/MPlayer/mplayer2 projec (24 repeats), repeats [1, 2, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
 
 CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 7763 64-Core Processor', '4': 'AMD EPYC 7763 64-Core Processor', '6': 'AMD EPYC 7763 64-Core Processor', '7': 'AMD EPYC 7763 64-Core Processor', '8': 'AMD EPYC 7763 64-Core Processor', '9': 'AMD EPYC 7763 64-Core Processor', '10': 'AMD EPYC 7763 64-Core Processor', '11': 'AMD EPYC 7763 64-Core Processor', '12': 'AMD EPYC 7763 64-Core Processor', '13': 'AMD EPYC 7763 64-Core Processor', '14': 'AMD EPYC 7763 64-Core Processor', '15': 'AMD EPYC 7763 64-Core Processor', '16': 'AMD EPYC 7763 64-Core Processor', '17': 'AMD EPYC 7763 64-Core Processor', '18': 'AMD EPYC 7763 64-Core Processor', '19': 'AMD EPYC 7763 64-Core Processor', '20': 'AMD EPYC 7763 64-Core Processor', '21': 'AMD EPYC 7763 64-Core Processor', '22': 'AMD EPYC 7763 64-Core Processor', '23': 'AMD EPYC 7763 64-Core Processor', '24': 'AMD EPYC 7763 64-Core Processor', '25': 'AMD EPYC 7763 64-Core Processor', '26': 'AMD EPYC 7763 64-Core Processor'}; kernel per repeat {'1': '6.17.0-1022-azure', '2': '6.17.0-1022-azure', '4': '6.17.0-1022-azure', '6': '6.17.0-1022-azure', '7': '6.17.0-1022-azure', '8': '6.17.0-1022-azure', '9': '6.17.0-1022-azure', '10': '6.17.0-1022-azure', '11': '6.17.0-1022-azure', '12': '6.17.0-1022-azure', '13': '6.17.0-1022-azure', '14': '6.17.0-1022-azure', '15': '6.17.0-1022-azure', '16': '6.17.0-1022-azure', '17': '6.17.0-1022-azure', '18': '6.17.0-1022-azure', '19': '6.17.0-1022-azure', '20': '6.17.0-1022-azure', '21': '6.17.0-1022-azure', '22': '6.17.0-1022-azure', '23': '6.17.0-1022-azure', '24': '6.17.0-1022-azure', '25': '6.17.0-1022-azure', '26': '6.17.0-1022-azure'}.
 
@@ -203,13 +203,13 @@ CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 776
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `vo` | 1–1 | 239.3–390.3 | 0.10 (0.1–0.1) | 12.76 | 0.060 | 0.831 | 2.450 | 2233154 |
+| `vo` | 1–1 | 239.4–390.3 | 0.10 (0.1–0.1) | 12.76 | 0.060 | 0.831 | 2.450 | 2233154 |
 | `mpv` | 1–1 | 215.3–243.5 | 0.02 (0.0–0.0) | 19.06 | 0.006 | 0.873 | 1.206 | 1691962 |
 | `lua/osc` | 1–1 | 101.7–116.8 | 0.76 (0.3–0.8) | 33.12 | 0.025 | 0.066 | 0.104 | 767782 |
 | `demux` | 1–1 | 142.2–147.5 | 0.04 (0.0–0.1) | 30.33 | 0.006 | 0.020 | 0.036 | 1056289 |
 | `ao` | 1–1 | 30.4–33.4 | 49.41 (49.4–49.4) | 50.68 | 0.023 | 0.040 | 0.052 | 234123 |
 
-## `mpv-audio` — mpv 0.37.0 Copyright © 2000-2023 mpv/MPlayer/mplayer2 projec, repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+## `mpv-audio` — mpv 0.37.0 Copyright © 2000-2023 mpv/MPlayer/mplayer2 projec (31 repeats), repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
 
 CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 7763 64-Core Processor', '3': 'AMD EPYC 7763 64-Core Processor', '4': 'AMD EPYC 7763 64-Core Processor', '5': 'AMD EPYC 7763 64-Core Processor', '6': 'AMD EPYC 7763 64-Core Processor', '7': 'AMD EPYC 7763 64-Core Processor', '8': 'AMD EPYC 7763 64-Core Processor', '9': 'AMD EPYC 7763 64-Core Processor', '10': 'AMD EPYC 7763 64-Core Processor', '11': 'AMD EPYC 7763 64-Core Processor', '12': 'AMD EPYC 7763 64-Core Processor', '13': 'AMD EPYC 7763 64-Core Processor', '14': 'AMD EPYC 7763 64-Core Processor', '15': 'AMD EPYC 7763 64-Core Processor', '16': 'AMD EPYC 7763 64-Core Processor', '17': 'AMD EPYC 7763 64-Core Processor', '18': 'AMD EPYC 7763 64-Core Processor', '19': 'AMD EPYC 7763 64-Core Processor', '20': 'AMD EPYC 7763 64-Core Processor', '21': 'AMD EPYC 7763 64-Core Processor', '22': 'AMD EPYC 7763 64-Core Processor', '23': 'AMD EPYC 7763 64-Core Processor', '24': 'AMD EPYC 7763 64-Core Processor', '25': 'AMD EPYC 7763 64-Core Processor', '26': 'AMD EPYC 7763 64-Core Processor', '27': 'AMD EPYC 7763 64-Core Processor', '28': 'AMD EPYC 7763 64-Core Processor', '29': 'AMD EPYC 7763 64-Core Processor', '30': 'AMD EPYC 7763 64-Core Processor', '31': 'AMD EPYC 7763 64-Core Processor'}; kernel per repeat {'1': '6.17.0-1022-azure', '2': '6.17.0-1022-azure', '3': '6.17.0-1022-azure', '4': '6.17.0-1022-azure', '5': '6.17.0-1022-azure', '6': '6.17.0-1022-azure', '7': '6.17.0-1022-azure', '8': '6.17.0-1022-azure', '9': '6.17.0-1022-azure', '10': '6.17.0-1022-azure', '11': '6.17.0-1022-azure', '12': '6.17.0-1022-azure', '13': '6.17.0-1022-azure', '14': '6.17.0-1022-azure', '15': '6.17.0-1022-azure', '16': '6.17.0-1022-azure', '17': '6.17.0-1022-azure', '18': '6.17.0-1022-azure', '19': '6.17.0-1022-azure', '20': '6.17.0-1022-azure', '21': '6.17.0-1022-azure', '22': '6.17.0-1022-azure', '23': '6.17.0-1022-azure', '24': '6.17.0-1022-azure', '25': '6.17.0-1022-azure', '26': '6.17.0-1022-azure', '27': '6.17.0-1022-azure', '28': '6.17.0-1022-azure', '29': '6.17.0-1022-azure', '30': '6.17.0-1022-azure', '31': '6.17.0-1022-azure'}.
 
@@ -219,10 +219,10 @@ CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 776
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
 | `mpv` | 1–1 | 70.0–70.9 | 0.41 (0.4–0.5) | 49.28 | 0.011 | 0.136 | 0.201 | 654535 |
-| `lua/osc` | 1–1 | 36.5–39.1 | 2.15 (1.5–2.5) | 97.52 | 0.053 | 0.085 | 0.143 | 347219 |
+| `lua/osc` | 1–1 | 36.5–39.1 | 2.15 (1.5–2.5) | 97.53 | 0.053 | 0.085 | 0.143 | 347219 |
 | `ao` | 1–1 | 43.5–45.3 | 0.23 (0.2–0.3) | 49.47 | 0.007 | 0.052 | 0.066 | 412637 |
 | `demux` | 1–1 | 53.2–55.2 | 0.08 (0.1–0.1) | 49.59 | 0.009 | 0.024 | 0.044 | 502158 |
-| `vo` | 1–1 | 0.9–0.9 | 1191.09 (1190.2–1192.8) | 1241.80 | 0.036 | 0.045 | 0.115 | 8076 |
+| `vo` | 1–1 | 0.9–0.9 | 1191.09 (1190.2–1192.7) | 1241.80 | 0.036 | 0.045 | 0.115 | 8076 |
 
 ## Same-machine repeats and the stability criterion (D26, D29, D30)
 
@@ -231,7 +231,7 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 | application | repeats | quantities | out of tolerance | repeats needed at this spread | holds |
 |---|---|---|---|---|---|
 | `soffice` | 14 | 5 | 0 | 14 | yes |
-| `thunderbird-send` | 43 | 75 | 9 | 43 | yes |
+| `thunderbird-send` | 43 | 75 | 9 | 36 | yes |
 | `gimp` | 5 | 10 | 0 | 5 | yes |
 | `kdenlive` | 20 | 22 | 0 | 20 | yes |
 | `mpv-video` | 24 | 16 | 0 | 24 | yes |
@@ -241,8 +241,8 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
-| idle soffice.bin wakes/s | 14 | 3.4586 | 0.2% | ±0.1% | 0.0% | 5 | yes |
-| idle soffice.bin gap mean (ms) | 14 | 288.9007 | 0.1% | ±0.1% | 0.0% | 5 | yes |
+| idle soffice.bin wakes/s | 14 | 3.4571 | 0.2% | ±0.1% | 0.0% | 5 | yes |
+| idle soffice.bin gap mean (ms) | 14 | 289.262 | 0.2% | ±0.1% | 0.0% | 5 | yes |
 | idle soffice.bin run mean (ms) | 14 | 0.1657 | 8.5% | ±4.9% | 1.4% | 14 | yes |
 | input_run mean, SWELL-KW (ms) | 14 | 4.9587 | 6.1% | ±3.5% | 1.2% | 9 | yes |
 | input_run mean, 136M (ms) | 14 | 5.5387 | 8.2% | ±4.7% | 1.0% | 13 | yes |
@@ -251,77 +251,77 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
-| idle thunderbird-bin wakes/s | 43 | 0.4049 | 12.0% | ±3.8% | 0.7% | 26 | yes |
-| idle thunderbird-bin gap mean (ms) | 43 | 2497.6802 | 12.0% | ±3.8% | 0.6% | 26 | yes |
+| idle thunderbird-bin wakes/s | 43 | 0.4054 | 11.8% | ±3.8% | 0.7% | 25 | yes |
+| idle thunderbird-bin gap mean (ms) | 43 | 2500.9935 | 12.0% | ±3.8% | 0.6% | 26 | yes |
 | idle thunderbird-bin run mean (ms) | 43 | 0.2981 | 10.9% | ±3.5% | 0.7% | 21 | yes |
-| idle Timer wakes/s | 43 | 0.2826 | 7.0% | ±2.2% | 0.5% | 11 | yes |
-| idle Timer gap mean (ms) | 43 | 6809.6385 | 6.3% | ±2.0% | 0.4% | 9 | yes |
+| idle Timer wakes/s | 43 | 0.2831 | 6.9% | ±2.2% | 0.4% | 10 | yes |
+| idle Timer gap mean (ms) | 43 | 3548.7175 | 6.7% | ±2.1% | 0.4% | 10 | yes |
 | idle Timer run mean (ms) | 43 | 0.0363 | 5.8% | ±1.9% | 0.5% | 8 | yes |
 | idle gmain wakes/s | 43 | 0.25 | 0.0% | ±0.0% | 0.0% | 5 | yes |
-| idle gmain gap mean (ms) | 43 | 4000.0005 | 0.0% | ±0.0% | 0.0% | 5 | yes |
+| idle gmain gap mean (ms) | 43 | 4000.0139 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle gmain run mean (ms) | 43 | 0.047 | 8.8% | ±2.8% | 0.8% | 15 | yes |
-| idle IPDL Background wakes/s | 43 | 0.2391 | 3.9% | ±1.2% | 0.3% | 5 | yes |
-| idle IPDL Background gap mean (ms) | 43 | 3857.6997 | 3.9% | ±1.2% | 0.3% | 5 | yes |
+| idle IPDL Background wakes/s | 43 | 0.2405 | 3.8% | ±1.2% | 0.3% | 5 | yes |
+| idle IPDL Background gap mean (ms) | 43 | 4163.7771 | 3.8% | ±1.2% | 0.3% | 5 | yes |
 | idle IPDL Background run mean (ms) | 43 | 0.0207 | 5.0% | ±1.6% | 0.3% | 7 | yes |
-| idle WebExtensions wakes/s | 43 | 0.206 | 8.8% | ±2.8% | 0.4% | 15 | yes |
-| idle WebExtensions gap mean (ms) | 43 | 4853.0923 | 9.4% | ±3.0% | 0.5% | 17 | yes |
+| idle WebExtensions wakes/s | 43 | 0.2072 | 9.2% | ±2.9% | 0.4% | 16 | yes |
+| idle WebExtensions gap mean (ms) | 43 | 4867.4275 | 9.3% | ±3.0% | 0.5% | 16 | yes |
 | idle WebExtensions run mean (ms) | 43 | 0.1076 | 9.1% | ±2.9% | 0.6% | 16 | yes |
-| idle JS Watchdog wakes/s | 43 | 0.1688 | 12.5% | ±4.0% | 0.5% | 28 | yes |
-| idle JS Watchdog gap mean (ms) | 43 | 11256.4583 | 13.3% | ±4.2% | 0.6% | 32 | yes |
+| idle JS Watchdog wakes/s | 43 | 0.1698 | 12.6% | ±4.0% | 0.6% | 28 | yes |
+| idle JS Watchdog gap mean (ms) | 43 | 5994.469 | 14.2% | ±4.5% | 0.7% | 36 | yes |
 | idle JS Watchdog run mean (ms) | 43 | 0.0215 | 8.9% | ±2.8% | 0.8% | 15 | yes |
-| idle StreamTrans wakes/s | 43 | 0.1295 | 10.5% | ±3.4% | 0.6% | 20 | yes |
-| idle StreamTrans gap mean (ms) | 43 | 12910.1566 | 15.7% | ±5.0% | 1.1% | 43 | yes |
+| idle StreamTrans wakes/s | 43 | 0.1303 | 9.9% | ±3.1% | 0.6% | 18 | yes |
+| idle StreamTrans gap mean (ms) | 43 | 7747.1788 | 9.9% | ±3.1% | 0.5% | 18 | yes |
 | idle StreamTrans run mean (ms) | 43 | 4.77 | 11.8% | ±3.8% | 0.7% | 25 | yes |
-| idle Indexed~ IO wakes/s | 43 | 0.0714 | 12.1% | ±3.9% | 0.9% | 26 | yes |
-| idle Indexed~ IO gap mean (ms) | 43 | 8329.7378 | 12.1% | ±3.9% | 1.0% | 26 | yes |
+| idle Indexed~ IO wakes/s | 43 | 0.0728 | 10.7% | ±3.4% | 0.8% | 21 | yes |
+| idle Indexed~ IO gap mean (ms) | 43 | 13893.8297 | 11.0% | ±3.5% | 0.8% | 22 | yes |
 | idle Indexed~ IO run mean (ms) | 43 | 0.1793 | 9.4% | ±3.0% | 0.7% | 16 | yes |
-| idle glean.dispatche wakes/s | 43 | 0.0556 | 9.9% | ±3.1% | 0.7% | 18 | yes |
-| idle glean.dispatche gap mean (ms) | 43 | 16589.681 | 9.0% | ±2.9% | 0.4% | 15 | yes |
+| idle glean.dispatche wakes/s | 43 | 0.0568 | 8.4% | ±2.7% | 0.6% | 14 | yes |
+| idle glean.dispatche gap mean (ms) | 43 | 17741.1417 | 9.0% | ±2.9% | 0.7% | 16 | yes |
 | idle glean.dispatche run mean (ms) | 43 | 0.0371 | 5.3% | ±1.7% | 0.4% | 7 | yes |
-| idle IPC I/O Parent wakes/s | 43 | 0.0416 | 9.0% | ±2.9% | 0.5% | 15 | yes |
-| idle IPC I/O Parent gap mean (ms) | 43 | 22257.9989 | 8.1% | ±2.6% | 0.4% | 13 | yes |
+| idle IPC I/O Parent wakes/s | 43 | 0.0424 | 7.8% | ±2.5% | 0.4% | 12 | yes |
+| idle IPC I/O Parent gap mean (ms) | 43 | 23746.2086 | 7.8% | ±2.5% | 0.4% | 12 | yes |
 | idle IPC I/O Parent run mean (ms) | 43 | 0.0348 | 7.2% | ±2.3% | 0.4% | 11 | yes |
 | idle IPC I/O Child wakes/s | 43 | 0.04 | 0.0% | ±0.0% | 0.0% | 5 | yes |
-| idle IPC I/O Child gap mean (ms) | 43 | 24545.5543 | 0.0% | ±0.0% | 0.0% | 5 | yes |
+| idle IPC I/O Child gap mean (ms) | 43 | 25000.0866 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle IPC I/O Child run mean (ms) | 43 | 0.0277 | 4.6% | ±1.5% | 0.3% | 6 | yes |
-| idle residual wakes/s | 43 | 0.0943 | 6.0% | ±1.9% | 0.4% | 9 | yes |
-| idle residual gap mean (ms) | 43 | 9928.9374 | 6.4% | ±2.0% | 0.5% | 9 | yes |
+| idle residual wakes/s | 43 | 0.0943 | 5.9% | ±1.9% | 0.4% | 8 | yes |
+| idle residual gap mean (ms) | 43 | 10638.4311 | 6.3% | ±2.0% | 0.5% | 9 | yes |
 | idle residual run mean (ms) | 43 | 0.0869 | 9.9% | ±3.1% | 0.8% | 18 | yes |
-| op Socket Thread wakes/s | 8 | 717.565 | 1.9% | ±1.6% | 0.4% | 5 | yes |
-| op Socket Thread gap mean (ms) | 8 | 10.612 | 2.3% | ±1.9% | 0.6% | 5 | yes |
+| op Socket Thread wakes/s | 8 | 717.5645 | 1.9% | ±1.6% | 0.4% | 5 | yes |
+| op Socket Thread gap mean (ms) | 8 | 1.394 | 1.9% | ±1.6% | 0.5% | 5 | yes |
 | op Socket Thread run mean (ms) | 8 | 0.0217 | 4.8% | ±4.0% | 1.3% | 7 | yes |
-| op Compositor wakes/s | 8 | 580.9887 | 1.2% | ±1.0% | 0.3% | 5 | yes |
-| op Compositor gap mean (ms) | 8 | 13.146 | 3.8% | ±3.2% | 0.9% | 5 | yes |
+| op Compositor wakes/s | 8 | 580.9912 | 1.2% | ±1.0% | 0.3% | 5 | yes |
+| op Compositor gap mean (ms) | 8 | 1.7214 | 1.2% | ±1.0% | 0.3% | 5 | yes |
 | op Compositor run mean (ms) | 8 | 0.0143 | 3.0% | ±2.5% | 0.8% | 5 | yes |
-| op thunderbird-bin wakes/s | 8 | 450.2337 | 4.8% | ±4.0% | 1.3% | 6 | yes |
-| op thunderbird-bin gap mean (ms) | 8 | 16.9711 | 2.3% | ±1.9% | 0.7% | 5 | yes |
+| op thunderbird-bin wakes/s | 8 | 450.2345 | 4.8% | ±4.0% | 1.3% | 6 | yes |
+| op thunderbird-bin gap mean (ms) | 8 | 2.2256 | 5.0% | ±4.1% | 1.4% | 7 | yes |
 | op thunderbird-bin run mean (ms) | 8 | 1.5039 | 4.8% | ±4.0% | 1.4% | 7 | yes |
-| op Renderer wakes/s | 8 | 119.9038 | 1.0% | ±0.8% | 0.2% | 5 | yes |
-| op Renderer gap mean (ms) | 8 | 63.6883 | 3.4% | ±2.8% | 0.9% | 5 | yes |
+| op Renderer wakes/s | 8 | 119.9042 | 1.0% | ±0.8% | 0.2% | 5 | yes |
+| op Renderer gap mean (ms) | 8 | 8.3407 | 1.0% | ±0.8% | 0.2% | 5 | yes |
 | op Renderer run mean (ms) | 8 | 0.1626 | 3.1% | ±2.6% | 0.6% | 5 | yes |
-| op SwComposite wakes/s | 8 | 72.9688 | 2.0% | ±1.7% | 0.5% | 5 | yes |
-| op SwComposite gap mean (ms) | 8 | 26.4306 | 1.9% | ±1.6% | 0.4% | 5 | yes |
+| op SwComposite wakes/s | 8 | 72.9689 | 2.0% | ±1.7% | 0.5% | 5 | yes |
+| op SwComposite gap mean (ms) | 8 | 13.7094 | 2.0% | ±1.7% | 0.5% | 5 | yes |
 | op SwComposite run mean (ms) | 8 | 0.0137 | 4.1% | ±3.5% | 1.0% | 5 | yes |
-| op Softwar~cThread wakes/s | 8 | 59.7225 | 0.2% | ±0.1% | 0.0% | 5 | yes |
-| op Softwar~cThread gap mean (ms) | 8 | 127.8709 | 2.8% | ±2.3% | 0.7% | 5 | yes |
+| op Softwar~cThread wakes/s | 8 | 59.7211 | 0.2% | ±0.1% | 0.0% | 5 | yes |
+| op Softwar~cThread gap mean (ms) | 8 | 16.7445 | 0.2% | ±0.1% | 0.0% | 5 | yes |
 | op Softwar~cThread run mean (ms) | 8 | 0.0423 | 4.4% | ±3.6% | 1.1% | 6 | yes |
-| op StreamT~ns wakes/s | 8 | 46.0988 | 14.5% | ±12.1% | 2.7% | 37 | no |
-| op StreamT~ns gap mean (ms) | 8 | 254.3859 | 7.4% | ±6.2% | 2.0% | 11 | no |
+| op StreamT~ns wakes/s | 8 | 46.0977 | 14.5% | ±12.1% | 2.7% | 37 | no |
+| op StreamT~ns gap mean (ms) | 8 | 22.0922 | 14.3% | ±12.0% | 2.5% | 36 | no |
 | op StreamT~ns run mean (ms) | 8 | 0.1508 | 13.6% | ±11.3% | 3.0% | 33 | no |
-| op TaskCon~ller wakes/s | 8 | 41.155 | 3.4% | ±2.8% | 0.9% | 5 | yes |
-| op TaskCon~ller gap mean (ms) | 8 | 736.7389 | 1.5% | ±1.2% | 0.3% | 5 | yes |
+| op TaskCon~ller wakes/s | 8 | 41.1563 | 3.4% | ±2.8% | 0.9% | 5 | yes |
+| op TaskCon~ller gap mean (ms) | 8 | 24.322 | 3.4% | ±2.9% | 0.9% | 5 | yes |
 | op TaskCon~ller run mean (ms) | 8 | 0.1812 | 1.8% | ±1.6% | 0.4% | 5 | yes |
-| op Timer wakes/s | 8 | 28.0938 | 3.8% | ±3.2% | 0.8% | 5 | yes |
-| op Timer gap mean (ms) | 8 | 540.3128 | 3.0% | ±2.5% | 0.8% | 5 | yes |
+| op Timer wakes/s | 8 | 28.0923 | 3.8% | ±3.2% | 0.8% | 5 | yes |
+| op Timer gap mean (ms) | 8 | 35.6418 | 3.8% | ±3.2% | 0.8% | 5 | yes |
 | op Timer run mean (ms) | 8 | 0.0162 | 2.9% | ±2.4% | 0.6% | 5 | yes |
-| op glean.dispatche wakes/s | 8 | 27.405 | 3.1% | ±2.6% | 0.9% | 5 | yes |
-| op glean.dispatche gap mean (ms) | 8 | 278.8104 | 2.5% | ±2.1% | 0.6% | 5 | yes |
+| op glean.dispatche wakes/s | 8 | 27.4056 | 3.1% | ±2.6% | 0.9% | 5 | yes |
+| op glean.dispatche gap mean (ms) | 8 | 36.5182 | 3.0% | ±2.5% | 0.9% | 5 | yes |
 | op glean.dispatche run mean (ms) | 8 | 0.0764 | 6.7% | ±5.6% | 1.9% | 10 | no |
-| op WRRende~ckend#0 wakes/s | 8 | 27.22 | 2.8% | ±2.3% | 0.8% | 5 | yes |
-| op WRRende~ckend#0 gap mean (ms) | 8 | 280.6655 | 2.4% | ±2.0% | 0.5% | 5 | yes |
+| op WRRende~ckend#0 wakes/s | 8 | 27.2205 | 2.8% | ±2.3% | 0.8% | 5 | yes |
+| op WRRende~ckend#0 gap mean (ms) | 8 | 36.7617 | 2.8% | ±2.3% | 0.7% | 5 | yes |
 | op WRRende~ckend#0 run mean (ms) | 8 | 0.368 | 8.0% | ±6.7% | 2.4% | 13 | no |
-| op residual wakes/s | 8 | 105.0153 | 6.6% | ±5.5% | 1.7% | 10 | no |
-| op residual gap mean (ms) | 8 | 72.9707 | 6.9% | ±5.8% | 1.3% | 10 | no |
+| op residual wakes/s | 8 | 105.0151 | 6.6% | ±5.5% | 1.7% | 10 | no |
+| op residual gap mean (ms) | 8 | 9.5572 | 6.3% | ±5.3% | 1.6% | 9 | no |
 | op residual run mean (ms) | 8 | 0.256 | 4.4% | ±3.7% | 1.0% | 6 | yes |
 | input_run mean, SWELL-KW (ms) | 8 | 7.1569 | 17.1% | ±14.3% | 5.4% | 52 | no |
 | input_run mean, 136M (ms) | 8 | 6.2843 | 8.1% | ±6.8% | 1.9% | 13 | no |
@@ -331,14 +331,14 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
-| driven gimp wakes/s | 5 | 8.644 | 0.5% | ±0.6% | 0.1% | 5 | yes |
-| driven gimp gap mean (ms) | 5 | 115.2237 | 0.4% | ±0.5% | 0.2% | 5 | yes |
+| driven gimp wakes/s | 5 | 8.6429 | 0.4% | ±0.5% | 0.1% | 5 | yes |
+| driven gimp gap mean (ms) | 5 | 115.7031 | 0.4% | ±0.5% | 0.1% | 5 | yes |
 | driven gimp run mean (ms) | 5 | 0.3301 | 3.4% | ±4.2% | 1.4% | 5 | yes |
-| op script-fu wakes/s | 5 | 11.58 | 0.8% | ±1.1% | 0.2% | 5 | yes |
-| op script-fu gap mean (ms) | 5 | 445.2317 | 0.8% | ±1.0% | 0.4% | 5 | yes |
+| op script-fu wakes/s | 5 | 11.5803 | 0.8% | ±1.0% | 0.2% | 5 | yes |
+| op script-fu gap mean (ms) | 5 | 86.3581 | 0.8% | ±1.0% | 0.2% | 5 | yes |
 | op script-fu run mean (ms) | 5 | 0.0346 | 3.5% | ±4.4% | 1.5% | 5 | yes |
-| op gimp wakes/s | 5 | 2.066 | 3.7% | ±4.6% | 1.5% | 5 | yes |
-| op gimp gap mean (ms) | 5 | 2495.5521 | 3.3% | ±4.1% | 1.2% | 5 | yes |
+| op gimp wakes/s | 5 | 2.0668 | 3.5% | ±4.4% | 1.4% | 5 | yes |
+| op gimp gap mean (ms) | 5 | 484.306 | 3.4% | ±4.3% | 1.4% | 5 | yes |
 | op gimp run mean (ms) | 5 | 500.9874 | 3.4% | ±4.3% | 1.4% | 5 | yes |
 | operation duration mean (ms) | 5 | 2360.1735 | 1.0% | ±1.2% | 0.4% | 5 | yes |
 
@@ -346,26 +346,26 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
-| idle kdenlive wakes/s | 20 | 1.2595 | 2.0% | ±0.9% | 0.2% | 5 | yes |
-| idle kdenlive gap mean (ms) | 20 | 1544.3286 | 2.2% | ±1.0% | 0.3% | 5 | yes |
+| idle kdenlive wakes/s | 20 | 1.2604 | 1.9% | ±0.9% | 0.2% | 5 | yes |
+| idle kdenlive gap mean (ms) | 20 | 793.6713 | 1.9% | ±0.9% | 0.2% | 5 | yes |
 | idle kdenlive run mean (ms) | 20 | 0.0284 | 10.0% | ±4.7% | 1.6% | 18 | yes |
 | idle Qt bearer threa wakes/s | 20 | 0.1 | 0.0% | ±0.0% | 0.0% | 5 | yes |
-| idle Qt bearer threa gap mean (ms) | 20 | 9999.921 | 0.0% | ±0.0% | 0.0% | 5 | yes |
+| idle Qt bearer threa gap mean (ms) | 20 | 10000.1692 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle Qt bearer threa run mean (ms) | 20 | 0.4077 | 4.3% | ±2.0% | 0.5% | 6 | yes |
-| driven kdenlive wakes/s | 20 | 136.5905 | 7.4% | ±3.5% | 0.7% | 11 | yes |
-| driven kdenlive gap mean (ms) | 20 | 36.5412 | 7.5% | ±3.5% | 0.6% | 12 | yes |
+| driven kdenlive wakes/s | 20 | 136.59 | 7.4% | ±3.5% | 0.7% | 11 | yes |
+| driven kdenlive gap mean (ms) | 20 | 7.3593 | 7.4% | ±3.5% | 0.6% | 11 | yes |
 | driven kdenlive run mean (ms) | 20 | 2.732 | 10.6% | ±4.9% | 0.9% | 20 | yes |
-| driven QXcbEventQueue wakes/s | 20 | 72.799 | 2.5% | ±1.2% | 0.3% | 5 | yes |
-| driven QXcbEventQueue gap mean (ms) | 20 | 13.6846 | 2.6% | ±1.2% | 0.3% | 5 | yes |
+| driven QXcbEventQueue wakes/s | 20 | 72.798 | 2.5% | ±1.2% | 0.3% | 5 | yes |
+| driven QXcbEventQueue gap mean (ms) | 20 | 13.7452 | 2.6% | ±1.2% | 0.4% | 5 | yes |
 | driven QXcbEventQueue run mean (ms) | 20 | 0.0152 | 5.6% | ±2.6% | 0.9% | 6 | yes |
 | driven residual wakes/s | 20 | 1.8221 | 3.0% | ±1.4% | 0.3% | 5 | yes |
-| driven residual gap mean (ms) | 20 | 544.2032 | 2.8% | ±1.3% | 0.3% | 5 | yes |
+| driven residual gap mean (ms) | 20 | 549.2708 | 3.0% | ±1.4% | 0.4% | 5 | yes |
 | driven residual run mean (ms) | 20 | 0.2207 | 2.8% | ±1.3% | 0.3% | 5 | yes |
-| op kdenlive_render wakes/s | 20 | 635.462 | 1.5% | ±0.7% | 0.2% | 5 | yes |
-| op kdenlive_render gap mean (ms) | 20 | 11.2231 | 2.2% | ±1.0% | 0.2% | 5 | yes |
+| op kdenlive_render wakes/s | 20 | 635.463 | 1.5% | ±0.7% | 0.2% | 5 | yes |
+| op kdenlive_render gap mean (ms) | 20 | 1.574 | 1.4% | ±0.7% | 0.2% | 5 | yes |
 | op kdenlive_render run mean (ms) | 20 | 1.4761 | 1.5% | ±0.7% | 0.2% | 5 | yes |
 | op residual wakes/s | 20 | 16.0658 | 1.4% | ±0.7% | 0.2% | 5 | yes |
-| op residual gap mean (ms) | 20 | 123.1161 | 0.7% | ±0.3% | 0.1% | 5 | yes |
+| op residual gap mean (ms) | 20 | 62.2558 | 1.4% | ±0.7% | 0.2% | 5 | yes |
 | op residual run mean (ms) | 20 | 3.244 | 1.4% | ±0.6% | 0.1% | 5 | yes |
 | operation duration mean (ms) | 20 | 11396.8687 | 1.6% | ±0.7% | 0.2% | 5 | yes |
 
@@ -374,20 +374,20 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
 | play CPU share | 24 | 0.1218 | 6.8% | ±2.9% | 1.1% | 10 | yes |
-| play vo wakes/s | 24 | 310.1567 | 11.7% | ±5.0% | 1.1% | 24 | yes |
-| play vo gap mean (ms) | 24 | 3.2648 | 11.4% | ±4.9% | 1.2% | 23 | yes |
+| play vo wakes/s | 24 | 310.158 | 11.7% | ±5.0% | 1.1% | 24 | yes |
+| play vo gap mean (ms) | 24 | 3.2651 | 11.4% | ±4.9% | 1.2% | 23 | yes |
 | play vo run mean (ms) | 24 | 0.2728 | 11.4% | ±4.9% | 1.1% | 23 | yes |
-| play mpv wakes/s | 24 | 234.9933 | 2.6% | ±1.1% | 0.4% | 5 | yes |
-| play mpv gap mean (ms) | 24 | 4.2581 | 2.7% | ±1.2% | 0.4% | 5 | yes |
+| play mpv wakes/s | 24 | 234.993 | 2.6% | ±1.1% | 0.4% | 5 | yes |
+| play mpv gap mean (ms) | 24 | 4.2584 | 2.7% | ±1.2% | 0.4% | 5 | yes |
 | play mpv run mean (ms) | 24 | 0.1395 | 10.3% | ±4.4% | 1.7% | 19 | yes |
-| play demux wakes/s | 24 | 146.7067 | 0.7% | ±0.3% | 0.1% | 5 | yes |
-| play demux gap mean (ms) | 24 | 6.8161 | 0.8% | ±0.3% | 0.1% | 5 | yes |
+| play demux wakes/s | 24 | 146.7057 | 0.7% | ±0.3% | 0.1% | 5 | yes |
+| play demux gap mean (ms) | 24 | 6.8167 | 0.8% | ±0.3% | 0.1% | 5 | yes |
 | play demux run mean (ms) | 24 | 0.0092 | 8.2% | ±3.5% | 1.1% | 5 | yes |
-| play lua/osc wakes/s | 24 | 106.6363 | 2.9% | ±1.2% | 0.4% | 5 | yes |
-| play lua/osc gap mean (ms) | 24 | 9.3844 | 2.8% | ±1.2% | 0.4% | 5 | yes |
+| play lua/osc wakes/s | 24 | 106.6356 | 2.9% | ±1.2% | 0.4% | 5 | yes |
+| play lua/osc gap mean (ms) | 24 | 9.385 | 2.8% | ±1.2% | 0.4% | 5 | yes |
 | play lua/osc run mean (ms) | 24 | 0.0314 | 10.8% | ±4.6% | 1.0% | 21 | yes |
-| play residual wakes/s | 24 | 33.6609 | 2.0% | ±0.8% | 0.3% | 5 | yes |
-| play residual gap mean (ms) | 24 | 29.7169 | 2.0% | ±0.9% | 0.3% | 5 | yes |
+| play residual wakes/s | 24 | 33.661 | 2.0% | ±0.8% | 0.3% | 5 | yes |
+| play residual gap mean (ms) | 24 | 29.7192 | 2.0% | ±0.9% | 0.3% | 5 | yes |
 | play residual run mean (ms) | 24 | 0.0219 | 8.9% | ±3.8% | 1.4% | 15 | yes |
 
 ### `mpv-audio`
@@ -395,19 +395,19 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
 | play CPU share | 31 | 0.0071 | 12.8% | ±4.8% | 0.7% | 29 | yes |
-| play mpv wakes/s | 31 | 70.38 | 0.4% | ±0.1% | 0.0% | 5 | yes |
-| play mpv gap mean (ms) | 31 | 14.2074 | 0.4% | ±0.1% | 0.0% | 5 | yes |
+| play mpv wakes/s | 31 | 70.3796 | 0.4% | ±0.1% | 0.0% | 5 | yes |
+| play mpv gap mean (ms) | 31 | 14.2088 | 0.4% | ±0.1% | 0.0% | 5 | yes |
 | play mpv run mean (ms) | 31 | 0.0467 | 12.0% | ±4.5% | 0.7% | 26 | yes |
-| play demux wakes/s | 31 | 53.9958 | 0.8% | ±0.3% | 0.1% | 5 | yes |
-| play demux gap mean (ms) | 31 | 18.5195 | 0.8% | ±0.3% | 0.1% | 5 | yes |
+| play demux wakes/s | 31 | 53.9951 | 0.8% | ±0.3% | 0.1% | 5 | yes |
+| play demux gap mean (ms) | 31 | 18.5214 | 0.8% | ±0.3% | 0.1% | 5 | yes |
 | play demux run mean (ms) | 31 | 0.0126 | 11.3% | ±4.3% | 0.7% | 11 | yes |
-| play ao wakes/s | 31 | 44.3697 | 1.1% | ±0.4% | 0.1% | 5 | yes |
-| play ao gap mean (ms) | 31 | 22.5389 | 1.1% | ±0.4% | 0.1% | 5 | yes |
+| play ao wakes/s | 31 | 44.3692 | 1.1% | ±0.4% | 0.1% | 5 | yes |
+| play ao gap mean (ms) | 31 | 22.541 | 1.1% | ±0.4% | 0.1% | 5 | yes |
 | play ao run mean (ms) | 31 | 0.0229 | 13.1% | ±4.9% | 0.8% | 31 | yes |
-| play lua/osc wakes/s | 31 | 37.3352 | 2.1% | ±0.8% | 0.2% | 5 | yes |
-| play lua/osc gap mean (ms) | 31 | 26.7914 | 2.1% | ±0.8% | 0.2% | 5 | yes |
+| play lua/osc wakes/s | 31 | 37.3351 | 2.1% | ±0.8% | 0.2% | 5 | yes |
+| play lua/osc gap mean (ms) | 31 | 26.7957 | 2.1% | ±0.8% | 0.2% | 5 | yes |
 | play lua/osc run mean (ms) | 31 | 0.0549 | 11.2% | ±4.2% | 0.6% | 22 | yes |
-| play residual wakes/s | 31 | 2.0265 | 0.2% | ±0.1% | 0.0% | 5 | yes |
-| play residual gap mean (ms) | 31 | 493.2373 | 0.2% | ±0.1% | 0.0% | 5 | yes |
+| play residual wakes/s | 31 | 2.0264 | 0.2% | ±0.1% | 0.0% | 5 | yes |
+| play residual gap mean (ms) | 31 | 493.4792 | 0.2% | ±0.1% | 0.0% | 5 | yes |
 | play residual run mean (ms) | 31 | 0.0287 | 7.1% | ±2.7% | 0.7% | 11 | yes |
 

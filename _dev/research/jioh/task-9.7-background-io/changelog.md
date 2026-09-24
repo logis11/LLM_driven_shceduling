@@ -155,3 +155,13 @@ D31 completed for `game-download`, on the campaign's close: the rule holds over 
 **Build.** 100 artifacts and the manifest rewritten; every file's demand estimate and class unchanged; lint reports the five `-single` demand-window files of the branch's known state; derived files and the coverage grid check out. Campaign record and pooled results (`campaign/results-steamcmd.md`, `results/steamcmd-pooled.json`) re-read at 30 repeats.
 
 **Hands to 9.10** (with D1, D3, D4, D6, D8, D12's hand-offs): the `game-download` binding describes a fresh depot install observed on SteamCMD, and whether the desktop client downloads while a game runs — c2-p2a's premise — rests on Valve pages the search could not read. **Hands to 9.14**: the consumer lines on `borg`, `7z` and the c2-p2a download now rest on per-program numbers (D1).
+
+## D35 — the batch tables keep their mean (2026-09-24)
+
+By 인지오's decision (9.5 D71: a measured table carries its extremes and the measured mean of each interval between its quantiles, and a draw keeps that mean). The six batch-loop tables of `file-backup`, `file-archiver` and `game-download` are written by `meas/batch_fold_in.py` (9.6 D34) from `campaign/results/{borg,7z,steamcmd}-pooled.json`, re-pooled from the campaign's cached artifacts; the rule's values and every repeat are as before, and the records keep their left-out repeats (borg 3; steamcmd 21, 23, 32, 33).
+
+Each table's mean, before → after (the pooled sample's; the rule's mean of per-repeat means in brackets): `borg` run 26.9 → 15.03 ms (15.18), block 3.18 → 3.09 ms (3.13); `7z` run 1.06 → 4.19 ms (4.19), block 0 → 0.16 µs (0.16: the table was zero at every quantile, so `file-archiver` compiled to one run of its whole work); `steamcmd` run 54.3 → 162.7 µs (163.4), block 10.6 → 9.3 µs (9.4).
+
+Values changed: the six tables. **Hands to 9.14:** the demand moves (9.5 D71).
+
+Commit: this entry.

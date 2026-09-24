@@ -114,7 +114,8 @@ def pool_entry(name, by_rep):
             slot["wakes"][k] = len(sm.get("runs") or []) or int(round(c["wakes_per_s"] * e["span_s"]))
             slot["threads"][k] = c["threads"]
             slot["gaps"][k], slot["runs"][k], slot["t_in"][k] = sm.get("gaps", []), sm.get("runs", []), sm.get("t_in", [])
-    chosen, residual, cov = select_components(comms, spans, reps)
+    chosen, residual, cov = select_components(comms, spans, reps,
+                                              {k: [(by_rep[k]["t0"], by_rep[k]["t0"] + spans[k])] for k in reps})
     def at(comm, f):
         ks = [k for k in reps if comm in by_rep[k]["threads"]]
         if f == "wakes_per_s":      # D24: from the exact counts, at the resolution the rule needs

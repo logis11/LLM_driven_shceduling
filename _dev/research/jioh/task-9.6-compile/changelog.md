@@ -165,3 +165,15 @@ redo: no index of the build campaign landed twice, every carried table is on the
 holds — `clamscan`'s and `python3`'s off-CPU time after a block is all disk wait, and `tracker`'s two highest block
 means fall in the two repeats with the most disk wait (0.384 s and 0.301 s). No value changed by this entry; demand is
 unchanged and the compiled files differ only in the archetype file's provenance hash.
+
+## D34 — the batch tables keep their mean (2026-09-24)
+
+By 인지오's decision (9.5 D71: a measured table carries its extremes and the measured mean of each interval between its quantiles, and a draw keeps that mean). The ten tables of `cpu-batch`, the eleven step tables of `compiler-child` and `build-orchestrator`'s dispatch table are written by `meas/batch_fold_in.py` from `campaign/results/pooled.json`, re-pooled from the build campaign's cached artifacts; each keeps its sampling and source tag. The rule's 33 values and every repeat are as before.
+
+Each table's mean, before → after (the pooled sample's; the rule's mean of per-repeat means beside it where they differ): `clamscan` run 8.11 → 8.89 ms, block 240.4 → 218.1 µs; `ffmpeg` run 1.85 → 1.52 ms, block 0.95 → 0.35 µs; `HandBrakeCLI` run 0.50 → 1.087 ms, block 0 → 8.9 µs (the table was zero at every quantile); `python3` run 1.603 → 1.595 s (rule 1.616 s), block 221.8 → 223.1 µs (rule 220.0); `tracker-miner-fs-3` run 669 → 406 µs, block 15.4 → 17.6 µs; `cc1` step 456.5 → 439.1 ms, `as` 4.44 → 4.26 ms; the other step tables and the dispatch within 0.4 %.
+
+Tooling: `meas/batch_fold_in.py` (the 28 batch tables of 9.6 and 9.7, `--check`); `build/pool.py` writes each pooled table's `table`. Test: `test_the_batch_tables_regenerate_from_the_pooled_records`.
+
+Values changed: the 22 tables above (form and mean). **Hands to 9.14:** the demand moves (9.5 D71).
+
+Commit: this entry.

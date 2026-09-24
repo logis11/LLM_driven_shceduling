@@ -9,17 +9,26 @@ Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, '10@35585759158', '10@35585978825', '10@355
 | quantity | k | mean | half-width | passes |
 |---|---|---|---|---|
 | steady HangWatcher wakes/s | 14 | 0.1 | ±0.0% | yes |
-| steady HangWatcher gap mean (ms) | 14 | 10000.1285 | ±0.0% | yes |
+| steady HangWatcher gap mean (ms) | 14 | 10000.035 | ±0.0% | yes |
 | steady HangWatcher run mean (ms) | 14 | 0.0274 | ±5.3% | no |
-| steady chrome wakes/s | 14 | 0.04 | ±0.0% | yes |
-| steady chrome gap mean (ms) | 14 | 24547.4306 | ±2.5% | yes |
+| steady chrome wakes/s | 14 | 0.039 | ±2.0% | yes |
+| steady chrome gap mean (ms) | 14 | 25664.3246 | ±2.0% | yes |
 | steady chrome run mean (ms) | 14 | 0.0977 | ±4.4% | yes |
-| steady Chrome_ChildIOT wakes/s | 14 | 0.0065 | ±38.1% | no |
-| steady Chrome_ChildIOT gap mean (ms) | 14 | 137354.3797 | ±25.7% | no |
+| steady Chrome_ChildIOT wakes/s | 14 | 0.0071 | ±20.9% | no |
+| steady Chrome_ChildIOT gap mean (ms) | 14 | 172501.6939 | ±35.0% | no |
 | steady Chrome_ChildIOT run mean (ms) | 14 | 0.0321 | ±14.1% | no |
-| steady residual wakes/s | 14 | 0.01 | ±15.6% | no |
-| steady residual gap mean (ms) | 14 | 88319.7886 | ±15.9% | no |
-| steady residual run mean (ms) | 14 | 0.0842 | ±19.0% | no |
+| steady Compositor wakes/s | 14 | 0.0065 | ±21.9% | no |
+| steady Compositor gap mean (ms) | 14 | 194286.3971 | ±39.8% | no |
+| steady Compositor run mean (ms) | 14 | 0.0207 | ±6.3% | no |
+| steady PerfettoTrace wakes/s | 14 | 0.0065 | ±21.9% | no |
+| steady PerfettoTrace gap mean (ms) | 14 | 194286.3971 | ±39.8% | no |
+| steady PerfettoTrace run mean (ms) | 14 | 0.0202 | ±5.8% | no |
+| steady ThreadPoolServi wakes/s | 14 | 0.0065 | ±21.9% | no |
+| steady ThreadPoolServi gap mean (ms) | 14 | 194286.3971 | ±39.8% | no |
+| steady ThreadPoolServi run mean (ms) | 14 | 0.0199 | ±4.8% | yes |
+| steady residual wakes/s | 14 | 0.0035 | ±18.3% | no |
+| steady residual gap mean (ms) | 14 | 308923.3851 | ±15.6% | no |
+| steady residual run mean (ms) | 14 | 0.1924 | ±8.8% | no |
 
 ## chrome-visible
 
@@ -28,20 +37,20 @@ Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]  ·  mode full  ·  renderers measu
 | quantity | k | mean | half-width | passes |
 |---|---|---|---|---|
 | steady-notimer HangWatcher wakes/s | 11 | 0.1 | ±0.0% | yes |
-| steady-notimer HangWatcher gap mean (ms) | 11 | 10000.1372 | ±0.0% | yes |
+| steady-notimer HangWatcher gap mean (ms) | 11 | 10001.3003 | ±0.0% | yes |
 | steady-notimer HangWatcher run mean (ms) | 11 | 0.0318 | ±6.0% | no |
-| steady-notimer chrome wakes/s | 11 | 0.0204 | ±3.0% | yes |
-| steady-notimer chrome gap mean (ms) | 11 | 42965.8358 | ±3.7% | yes |
+| steady-notimer chrome wakes/s | 11 | 0.0227 | ±3.8% | yes |
+| steady-notimer chrome gap mean (ms) | 11 | 44213.0045 | ±3.4% | yes |
 | steady-notimer chrome run mean (ms) | 11 | 0.1489 | ±5.8% | no |
-| steady-notimer Chrome_ChildIOT wakes/s | 11 | 0.0047 | ±62.0% | no |
-| steady-notimer Chrome_ChildIOT gap mean (ms) | 11 | 163506.0193 | ±19.5% | no |
+| steady-notimer Chrome_ChildIOT wakes/s | 11 | 0.006 | ±26.4% | no |
+| steady-notimer Chrome_ChildIOT gap mean (ms) | 11 | 196533.0305 | ±33.8% | no |
 | steady-notimer Chrome_ChildIOT run mean (ms) | 11 | 0.0408 | ±10.7% | no |
-| steady-notimer ThreadPoolForeg wakes/s | 11 | 0.0043 | ±29.1% | no |
-| steady-notimer ThreadPoolForeg gap mean (ms) | 11 | 1050.9345 | ±27.8% | no |
-| steady-notimer ThreadPoolForeg run mean (ms) | 11 | 0.0254 | ±10.3% | no |
-| steady-notimer residual wakes/s | 11 | 0.0108 | ±17.9% | no |
-| steady-notimer residual gap mean (ms) | 11 | 76035.483 | ±13.6% | no |
-| steady-notimer residual run mean (ms) | 11 | 0.1026 | ±14.5% | no |
+| steady-notimer PerfettoTrace wakes/s | 11 | 0.0054 | ±26.2% | no |
+| steady-notimer PerfettoTrace gap mean (ms) | 11 | 227163.6253 | ±40.0% | no |
+| steady-notimer PerfettoTrace run mean (ms) | 11 | 0.0241 | ±5.1% | no |
+| steady-notimer residual wakes/s | 11 | 0.0068 | ±10.9% | no |
+| steady-notimer residual gap mean (ms) | 11 | 149880.0265 | ±9.0% | no |
+| steady-notimer residual run mean (ms) | 11 | 0.1434 | ±11.0% | no |
 
 | comparison | wakes/s a | wakes/s b | ratio | reading | cpu share a | cpu share b | ratio | reading |
 |---|---|---|---|---|---|---|---|---|
@@ -53,23 +62,23 @@ Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, '17@35597073549
 
 | quantity | k | mean | half-width | passes |
 |---|---|---|---|---|
-| idle ThreadPoolForeg wakes/s | 18 | 4.2283 | ±1.8% | yes |
-| idle ThreadPoolForeg gap mean (ms) | 18 | 1926.9967 | ±4.6% | yes |
+| idle ThreadPoolForeg wakes/s | 18 | 4.2288 | ±1.8% | yes |
+| idle ThreadPoolForeg gap mean (ms) | 18 | 236.7663 | ±1.8% | yes |
 | idle ThreadPoolForeg run mean (ms) | 18 | 0.04 | ±2.7% | yes |
-| idle element-desktop wakes/s | 18 | 3.8989 | ±0.5% | yes |
-| idle element-desktop gap mean (ms) | 18 | 1787.3261 | ±0.5% | yes |
+| idle element-desktop wakes/s | 18 | 3.8999 | ±0.5% | yes |
+| idle element-desktop gap mean (ms) | 18 | 256.4426 | ±0.5% | yes |
 | idle element-desktop run mean (ms) | 18 | 0.176 | ±2.9% | yes |
-| idle Chrome_IOThread wakes/s | 18 | 1.85 | ±0.6% | yes |
-| idle Chrome_IOThread gap mean (ms) | 18 | 521.2064 | ±0.6% | yes |
+| idle Chrome_IOThread wakes/s | 18 | 1.8527 | ±0.6% | yes |
+| idle Chrome_IOThread gap mean (ms) | 18 | 539.8377 | ±0.6% | yes |
 | idle Chrome_IOThread run mean (ms) | 18 | 0.0252 | ±2.3% | yes |
-| idle Chrome_ChildIOT wakes/s | 18 | 1.4833 | ±1.0% | yes |
-| idle Chrome_ChildIOT gap mean (ms) | 18 | 2265.7752 | ±2.4% | yes |
+| idle Chrome_ChildIOT wakes/s | 18 | 1.4841 | ±0.9% | yes |
+| idle Chrome_ChildIOT gap mean (ms) | 18 | 674.0543 | ±0.9% | yes |
 | idle Chrome_ChildIOT run mean (ms) | 18 | 0.0706 | ±3.2% | yes |
-| idle ThreadPoolServi wakes/s | 18 | 0.3833 | ±1.0% | yes |
-| idle ThreadPoolServi gap mean (ms) | 18 | 11564.3512 | ±2.6% | yes |
+| idle ThreadPoolServi wakes/s | 18 | 0.3844 | ±0.9% | yes |
+| idle ThreadPoolServi gap mean (ms) | 18 | 2601.9065 | ±0.9% | yes |
 | idle ThreadPoolServi run mean (ms) | 18 | 0.0509 | ±3.7% | yes |
-| idle residual wakes/s | 18 | 0.4696 | ±1.9% | yes |
-| idle residual gap mean (ms) | 18 | 2067.52 | ±1.9% | yes |
+| idle residual wakes/s | 18 | 0.4695 | ±1.9% | yes |
+| idle residual gap mean (ms) | 18 | 2132.6326 | ±1.9% | yes |
 | idle residual run mean (ms) | 18 | 0.0353 | ±4.3% | yes |
 
 | comparison | wakes/s a | wakes/s b | ratio | reading | cpu share a | cpu share b | ratio | reading |
@@ -82,38 +91,38 @@ Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]  ·  mode full
 
 | quantity | k | mean | half-width | passes |
 |---|---|---|---|---|
-| shown steamwebhelper wakes/s | 12 | 70.75 | ±0.2% | yes |
-| shown steamwebhelper gap mean (ms) | 12 | 32.4431 | ±10.2% | no |
+| shown steamwebhelper wakes/s | 12 | 70.7489 | ±0.2% | yes |
+| shown steamwebhelper gap mean (ms) | 12 | 14.1346 | ±0.2% | yes |
 | shown steamwebhelper run mean (ms) | 12 | 0.0696 | ±5.3% | no |
-| shown steam wakes/s | 12 | 69.4667 | ±0.1% | yes |
-| shown steam gap mean (ms) | 12 | 43.1793 | ±0.1% | yes |
+| shown steam wakes/s | 12 | 69.4671 | ±0.1% | yes |
+| shown steam gap mean (ms) | 12 | 14.3953 | ±0.1% | yes |
 | shown steam run mean (ms) | 12 | 0.0555 | ±10.2% | no |
-| shown IPC:CSteamEngin wakes/s | 12 | 44.4942 | ±0.8% | yes |
-| shown IPC:CSteamEngin gap mean (ms) | 12 | 44.9481 | ±0.8% | yes |
+| shown IPC:CSteamEngin wakes/s | 12 | 44.496 | ±0.8% | yes |
+| shown IPC:CSteamEngin gap mean (ms) | 12 | 22.4773 | ±0.8% | yes |
 | shown IPC:CSteamEngin run mean (ms) | 12 | 0.0573 | ±8.8% | no |
-| shown CJobMgr::m_Work wakes/s | 12 | 35.6283 | ±0.6% | yes |
-| shown CJobMgr::m_Work gap mean (ms) | 12 | 84.1995 | ±0.6% | yes |
+| shown CJobMgr::m_Work wakes/s | 12 | 35.6288 | ±0.6% | yes |
+| shown CJobMgr::m_Work gap mean (ms) | 12 | 28.0693 | ±0.6% | yes |
 | shown CJobMgr::m_Work run mean (ms) | 12 | 0.0176 | ±6.2% | no |
-| shown Compositor wakes/s | 12 | 18.6008 | ±0.9% | yes |
-| shown Compositor gap mean (ms) | 12 | 53.7532 | ±0.9% | yes |
+| shown Compositor wakes/s | 12 | 18.601 | ±0.9% | yes |
+| shown Compositor gap mean (ms) | 12 | 53.7701 | ±0.9% | yes |
 | shown Compositor run mean (ms) | 12 | 0.0562 | ±4.3% | yes |
-| shown Chrome_ChildIOT wakes/s | 12 | 13.4275 | ±0.6% | yes |
-| shown Chrome_ChildIOT gap mean (ms) | 12 | 219.692 | ±0.6% | yes |
+| shown Chrome_ChildIOT wakes/s | 12 | 13.4293 | ±0.6% | yes |
+| shown Chrome_ChildIOT gap mean (ms) | 12 | 74.471 | ±0.6% | yes |
 | shown Chrome_ChildIOT run mean (ms) | 12 | 0.0312 | ±2.8% | yes |
-| shown VizCompositorTh wakes/s | 12 | 10.54 | ±2.0% | yes |
-| shown VizCompositorTh gap mean (ms) | 12 | 94.8866 | ±1.9% | yes |
+| shown VizCompositorTh wakes/s | 12 | 10.5416 | ±2.0% | yes |
+| shown VizCompositorTh gap mean (ms) | 12 | 94.9431 | ±1.9% | yes |
 | shown VizCompositorTh run mean (ms) | 12 | 0.0819 | ±5.5% | no |
-| shown CHTTPClientThre wakes/s | 12 | 8.0458 | ±0.4% | yes |
-| shown CHTTPClientThre gap mean (ms) | 12 | 248.5793 | ±0.4% | yes |
+| shown CHTTPClientThre wakes/s | 12 | 8.0464 | ±0.4% | yes |
+| shown CHTTPClientThre gap mean (ms) | 12 | 124.2842 | ±0.4% | yes |
 | shown CHTTPClientThre run mean (ms) | 12 | 0.0312 | ±46.0% | no |
-| shown CNet Encrypt:0 wakes/s | 12 | 8.0383 | ±0.2% | yes |
-| shown CNet Encrypt:0 gap mean (ms) | 12 | 248.7527 | ±0.2% | yes |
+| shown CNet Encrypt:0 wakes/s | 12 | 8.0401 | ±0.2% | yes |
+| shown CNet Encrypt:0 gap mean (ms) | 12 | 124.3779 | ±0.2% | yes |
 | shown CNet Encrypt:0 run mean (ms) | 12 | 0.0159 | ±4.0% | yes |
-| shown ThreadPoolForeg wakes/s | 12 | 6.1717 | ±4.2% | yes |
-| shown ThreadPoolForeg gap mean (ms) | 12 | 511.5989 | ±9.0% | no |
+| shown ThreadPoolForeg wakes/s | 12 | 6.1732 | ±4.2% | yes |
+| shown ThreadPoolForeg gap mean (ms) | 12 | 162.6334 | ±4.2% | yes |
 | shown ThreadPoolForeg run mean (ms) | 12 | 0.018 | ±5.0% | yes |
 | shown residual wakes/s | 12 | 14.1526 | ±0.9% | yes |
-| shown residual gap mean (ms) | 12 | 70.6633 | ±0.9% | yes |
+| shown residual gap mean (ms) | 12 | 70.6709 | ±0.9% | yes |
 | shown residual run mean (ms) | 12 | 0.0296 | ±4.5% | yes |
 
 | comparison | wakes/s a | wakes/s b | ratio | reading | cpu share a | cpu share b | ratio | reading |

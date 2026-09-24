@@ -1,12 +1,12 @@
 gimp: repeats [1, 2, 3, 5, 6]; stability rule holds
-   driven gimp wakes/s: k 5, half-width 0.0058, passes
-   driven gimp gap mean (ms): k 5, half-width 0.0046, passes
+   driven gimp wakes/s: k 5, half-width 0.0055, passes
+   driven gimp gap mean (ms): k 5, half-width 0.0055, passes
    driven gimp run mean (ms): k 5, half-width 0.0417, passes
-   op script-fu wakes/s: k 5, half-width 0.0105, passes
-   op script-fu gap mean (ms): k 5, half-width 0.0097, passes
+   op script-fu wakes/s: k 5, half-width 0.0103, passes
+   op script-fu gap mean (ms): k 5, half-width 0.0103, passes
    op script-fu run mean (ms): k 5, half-width 0.0437, passes
-   op gimp wakes/s: k 5, half-width 0.0459, passes
-   op gimp gap mean (ms): k 5, half-width 0.0406, passes
+   op gimp wakes/s: k 5, half-width 0.0438, passes
+   op gimp gap mean (ms): k 5, half-width 0.0426, passes
    op gimp run mean (ms): k 5, half-width 0.0426, passes
    operation duration mean (ms): k 5, half-width 0.0123, passes
    phases ['idle', 'driven', 'op']; pooled record _dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine/pool-gimp.json

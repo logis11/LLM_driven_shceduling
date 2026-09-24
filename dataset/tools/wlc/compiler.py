@@ -20,6 +20,7 @@ scheduling can influence. Concretely:
 
 import bisect
 import json
+import math
 import pathlib
 
 from . import sampling
@@ -218,12 +219,35 @@ def _unbounded_loop(build, iid, seed, params, program, lifespan):
 _STREAMS = {}
 
 
-def _load_stream(name):
-    if name not in _STREAMS:
+def _load_stream(name, kinds=None):
+    """The stream's event times, or only those of the named kinds — the events the measurement replayed (9.5 D28,
+    D65: `office-writer` and `web-browser` were measured with the keys alone)."""
+    key = (name, tuple(kinds) if kinds else None)
+    if key not in _STREAMS:
         path = pathlib.Path(__file__).resolve().parents[2] / "stimulus" / f"{name}.jsonl"
-        times = [json.loads(line)["t_us"] for line in path.read_text().splitlines() if line.strip()]
-        _STREAMS[name] = times
-    return _STREAMS[name]
+        events = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+        _STREAMS[key] = [e["t_us"] for e in events if not kinds or e.get("kind") in kinds]
+    return _STREAMS[key]
+
+
+def _heavy_events(heavy, seed, iid, t0, t1):
+    """9.5 D64's heavy events, each at its carried rate at no fixed time: intervals drawn exponential (the
+    measurement saw at most one per session, so no interval was measured and none is carried), each run from the
+    event's measured run table."""
+    events = []
+    for index, ev in enumerate(heavy or []):
+        rate = ev["rate_per_s"]
+        if not rate:
+            continue
+        t, k = t0, 0
+        while True:
+            u = sampling.uniform(seed, iid, "heavy", index, k, "gap")
+            t += max(1, round(-math.log(u) / rate * 1e6))
+            if t >= t1:
+                break
+            events.append((t, sampling.sample(ev["run"], seed, iid, "heavy", index, k, "run"), "timer"))
+            k += 1
+    return events
 
 
 def _component_events(components, seed, iid, t0, t1, tag):
@@ -267,6 +291,7 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
         if in_operation(ev[0]):
             continue
         events.append(ev)
+    events.extend(ev for ev in _heavy_events(params.get("heavy_events"), seed, iid, t0, t1) if not in_operation(ev[0]))
     if focus_components:
         for j, w in enumerate(windows):
             events.extend(ev for ev in _component_events(focus_components, seed, iid, w["from"], w["to"], ("focus", j))
@@ -276,7 +301,7 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
     # replayed stimulus inside focus windows
     stimulus = params.get("stimulus")
     if stimulus:
-        stream = _load_stream(stimulus["stream"])
+        stream = _load_stream(stimulus["stream"], stimulus.get("kinds"))
         span = stream[-1] if stream else 0
         k = 0
         for j, w in enumerate(windows):

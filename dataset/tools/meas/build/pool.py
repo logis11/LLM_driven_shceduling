@@ -24,6 +24,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from analyze import analyze_phase, load_edges, pct, QUANTILE_PROBS  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from stability import stability, T975, TOLERANCE  # noqa: E402
+from distribution import quantile_table  # noqa: E402
 import shapes  # noqa: E402  (this directory is on sys.path)
 
 NAME = re.compile(r"^meas-build-r(\d+)-(dry|full)$")
@@ -73,7 +74,8 @@ def qtable(values):
 def pooled(samples_by_repeat, scale=1.0):
     vals = {r: [x * scale for x in vs] for r, vs in samples_by_repeat.items()}
     allv = [x for vs in vals.values() for x in vs]
-    return {"n": len(allv), "q": qtable(allv), "p50": round(pct(sorted(allv), .5), 1) if allv else None,
+    return {"n": len(allv), "q": qtable(allv), "table": quantile_table(allv),
+            "p50": round(pct(sorted(allv), .5), 1) if allv else None,
             "repeat_p50": {r: (round(pct(sorted(vs), .5), 1) if vs else None) for r, vs in sorted(vals.items())},
             "repeat_mean": {r: (round(statistics.fmean(vs), 4) if vs else None) for r, vs in sorted(vals.items())},
             "repeat_n": {r: len(vs) for r, vs in sorted(vals.items())}}

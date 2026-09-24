@@ -1,3 +1,4 @@
+import pytest
 """Constructed cases for the 9.9 session campaign tools (changelog D8–D14)."""
 
 import json
@@ -184,7 +185,7 @@ def test_a_cron_sessions_wakes_leave_the_component_and_are_stated(tmp_path):
     assert ev["count"] == 5 and ev["waker"] == "cron" and ev["window_s"] == 2.0 and ev["windows"] == 1
     assert ev["runs_ms"] == [0.2, 0.9, 2.6, 0.9, 0.9] and ev["at_s"] == [70.0, 71.0, 71.4, 73.0, 75.0]
     # the component is read without them: nine of the fixture's ten pid-1 wakes over the 100 s phase
-    assert sysd["threads"]["pid1/systemd"]["wakes_per_s"] == 0.09
+    assert sysd["threads"]["pid1/systemd"]["wakes_per_s"] == pytest.approx(0.09, rel=1e-3)
     # the window takes every entry's rows, not just the woken one's: the shell's wakes at 69.5 and 74.5 s
     assert ph["entries"]["gnome-shell"]["cron_event"]["at_s"] == [69.5, 74.5]
 

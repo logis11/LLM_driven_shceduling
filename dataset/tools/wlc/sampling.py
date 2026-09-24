@@ -65,10 +65,31 @@ def sample(param, seed, *key, allow_zero=False):
 
 
 # Quantile tables (9.5 changelog D17): measured distributions carried as the
-# pooled percentiles QUANTILE_PROBS, in integer microseconds, sampled by
-# linear interpolation on u; below p1 and above p99.9 the tail is held at
-# the end value (no extrapolation beyond the observation).
+# pooled percentiles QUANTILE_PROBS, in integer microseconds. A measured table
+# also carries the sample's `min` and `max` and `means`, the measured mean of
+# each of the eleven intervals they and the percentiles bound: a draw picks its
+# interval by u and falls inside it on the curve lo + (hi - lo) * v**a, v the
+# position in the interval, a set so the interval's mean is the measured one —
+# the percentiles are kept and so is the table's mean. A table without them is
+# sampled by linear interpolation on u with the tails held at the end values.
 QUANTILE_PROBS = (0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999)
+_EDGES = (0.0, *QUANTILE_PROBS, 1.0)
+
+
+def _interval(param):
+    """(bounds, means) of a table carrying its extremes and interval means, the means held inside their
+    intervals (a knot rounded to the microsecond can leave a mean a fraction outside)."""
+    bounds = [param["min"], *param["p"], param["max"]]
+    means = [min(max(m, lo), hi) for m, lo, hi in zip(param["means"], bounds, bounds[1:])]
+    return bounds, means
+
+
+def _power_draw(lo, hi, mean, v):
+    if hi <= lo or mean <= lo:
+        return lo
+    if mean >= hi:
+        return hi
+    return lo + (hi - lo) * v ** ((hi - lo) / (mean - lo) - 1)
 
 
 def _quantile_sample(param, u, allow_zero=False):
@@ -78,6 +99,12 @@ def _quantile_sample(param, u, allow_zero=False):
     q = param["p"]
     if len(q) != len(QUANTILE_PROBS):
         raise ValueError("quantiles param needs %d values" % len(QUANTILE_PROBS))
+    if "means" in param:
+        bounds, means = _interval(param)
+        for i in range(len(_EDGES) - 1):
+            if u <= _EDGES[i + 1] or i == len(_EDGES) - 2:
+                v = (u - _EDGES[i]) / (_EDGES[i + 1] - _EDGES[i])
+                return floor(_power_draw(bounds[i], bounds[i + 1], means[i], min(max(v, 0.0), 1.0)))
     if u <= QUANTILE_PROBS[0]:
         return floor(q[0])
     if u >= QUANTILE_PROBS[-1]:
@@ -91,8 +118,11 @@ def _quantile_sample(param, u, allow_zero=False):
 
 
 def quantile_mean_us(param):
-    """Mean of the piecewise-linear quantile function (trapezoids between
-    the tabulated probabilities; the tails held flat)."""
+    """A table's mean: its interval means weighted by their mass, or, for a table without them, the mean of the
+    piecewise-linear quantile function (trapezoids between the tabulated probabilities; the tails held flat)."""
+    if "means" in param:
+        _, means = _interval(param)
+        return sum(m * (b - a) for m, a, b in zip(means, _EDGES, _EDGES[1:]))
     q = param["p"]
     total = q[0] * QUANTILE_PROBS[0]
     for i in range(1, len(QUANTILE_PROBS)):

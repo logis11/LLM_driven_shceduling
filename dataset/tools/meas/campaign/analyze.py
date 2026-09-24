@@ -227,7 +227,7 @@ def operation_windows(rows, ops):
             outside.append(r)
     return {"durations_ms": [round((b - a) * 1000, 3) for a, b in ok], "n_ok": len(ok),
             "n_failed": sum(1 for o in ops if o.get("rc") != 0), "inside": inside, "outside": outside,
-            "name": ops[0]["op"] if ops else None}
+            "windows": ok, "name": ops[0]["op"] if ops else None}
 
 
 def pid_roles(D, phase):
@@ -281,10 +281,11 @@ def component_name(role, comm):
     return comm if role == "main" else f"{role}/{comm}"
 
 
-def per_thread(rows, span_s, roles=None):
+def per_thread(rows, span_s, roles=None, t0=None):
     """roles (pid -> role) qualifies each component by the role of the process its thread runs in (D67). The callers
     that already separate their rows per process — the desktop and session slices' entries — pass none and keep
-    plain comm names."""
+    plain comm names. t0, the phase's start: the gaps are the carried table's (9.5 D71) — over the component's
+    merged wake times, wrapped round [t0, t0 + span_s]; without it, within each thread, as reported before."""
     out = {}
     by_tid = {}
     for r in rows:
@@ -293,11 +294,16 @@ def per_thread(rows, span_s, roles=None):
     by_comm = {}
     for (comm, tid), rs in by_tid.items():
         gaps = [(b.t_in - a.t_in) * 1000 for a, b in zip(rs, rs[1:])]
-        by_comm.setdefault(comm, {"threads": 0, "wakes": 0, "gaps": [], "runs": []})
+        by_comm.setdefault(comm, {"threads": 0, "wakes": 0, "gaps": [], "runs": [], "t_in": []})
         c = by_comm[comm]
         c["threads"] += 1; c["wakes"] += len(rs); c["gaps"] += gaps; c["runs"] += [r.run for r in rs]
+        c["t_in"] += [r.t_in for r in rs]
+    if t0 is not None:   # the desktop and session slices, which import this module as meas.campaign.analyze
+        from meas.distribution import circular_gaps
+        for c in by_comm.values():
+            c["gaps"] = [g * 1000 for g in circular_gaps([(c["t_in"], t0, t0 + span_s)])]
     for comm, c in sorted(by_comm.items(), key=lambda kv: -sum(kv[1]["runs"])):
-        out[comm] = {"threads": c["threads"], "wakes_per_s": round(c["wakes"] / span_s, 2),
+        out[comm] = {"threads": c["threads"], "wakes": c["wakes"], "wakes_per_s": c["wakes"] / span_s,
                      "cpu_share": round(sum(c["runs"]) / 1000 / span_s, 4),
                      "gap_ms": dist(c["gaps"]), "run_ms": dist(c["runs"])}
     return out
