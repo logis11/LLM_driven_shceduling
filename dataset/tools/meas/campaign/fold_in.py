@@ -262,7 +262,8 @@ def main():
             fam, tag = rest[1].split("=", 1); RUN_TAG[fam] = tag; rest = rest[2:]
         else:
             raise SystemExit(f"unknown argument {rest[0]!r}")
-    blocks = [f"  # ---- measured per-application archetypes — 9.5 campaign ({RUN_TAG['interactive']}, {RUN_TAG['playback']}) ----", ""]
+    tags = ", ".join(sorted(set(RUN_TAG.values())))
+    blocks = [f"  # ---- measured per-application archetypes — 9.5 same-machine campaigns ({tags}) ----", ""]
     for aid, spec in ARCHETYPES.items():
         d = json.load(open(os.path.join(R, f"pool-{spec[0]}.json")))["runs"][spec[0]]
         blocks.append(entry(aid, spec, d))

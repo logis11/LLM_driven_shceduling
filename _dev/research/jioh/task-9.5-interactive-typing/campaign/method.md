@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-24, the fold-in and the releases (changelog D70) — §7: the nine archetypes are regenerated from the same-machine pools, `mail-client` from `thunderbird-send`; `web-browser` carries D64's heavy event as its own stated block with no interval; raw records released as `meas-ci-2026-09-18` (the six) and `meas-ci-2026-09-20` (the three).
+
 - 2026-09-23, the application build (changelog D69) — §1: `code` is pinned to 1.138.0 and gated like the CPU model, a job that installed another build stopping before any measurement; §6: every repeat's build is kept in the pooled record and the census stated with the values, `chrome` being served only at its current version and its campaign holding 152.0.7977.82 and 153.0.8010.52.
 
 - 2026-09-23, `chrome`'s window limit in the tooling (changelog D68) — §6: `WINDOW_LIMIT` carries `chrome` at its 38 Internet Explorer windows, as D32 named it; its two per-input values are carried with their half-widths once the driven phases hold 38 repeats.

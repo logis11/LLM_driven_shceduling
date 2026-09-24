@@ -348,3 +348,21 @@ The decision. A campaign pools repeats of one build, as it pools repeats of one 
 Tooling: `BUILD_WANT` and `build_gate` in `probe/appdefs.sh` with `code` pinned, the gate called from `campaign/run.sh` before any measurement; `version` kept per repeat in the pooled record and `build_census()` in `campaign/pool.py`, used by `render_results.py` and `fold_in.py`; test `test_the_pool_states_every_build_it_holds`. Method §9, 2026-09-23.
 
 Values changed: none directly — `chrome`'s and `webrtc`'s pools keep every repeat. `code`'s pool loses repeat 29 and regains it re-measured.
+
+## D70 — the fold-in of the nine same-machine archetypes, and the releases (2026-09-24)
+
+By 인지오's decision to release and fold in. The nine measured entries in `dataset/archetypes.yaml` are regenerated from the pooled records of the same-machine campaigns and replace the five-repeat values of `meas-ci-2026-09-16` (D25) whole: `meas-ci:interactive:2026-09-18` and `meas-ci:playback:2026-09-18` for `office-writer`, `image-editor`, `video-editor`, `video-player` and `audio-player`; `meas-ci:interactive:2026-09-19` for `mail-client`, which folds from `thunderbird-send` — the send re-observation that replaced the compose-only entry whole (9.7 D3; D31, D36, D49); `meas-ci:interactive:2026-09-20` and `meas-ci:playback:2026-09-20` for `web-browser`, `code-editor` and `video-call`.
+
+Repeats and what stopped each: `soffice` 14, `gimp` 5, `kdenlive` 20, `mpv-video` 24, `mpv-audio` 31 and `thunderbird-send` 43 by the rule (its operation's 39 values reported at the recording's window limit, D46); `chrome` 38 at the recording's last window, 30 of its values reported there and the widest of them the SWELL-KW `input_run` mean, 1.701 ms ±8.33 % (D32, D68); `code` 41 by the rule, three values carried under D57; `webrtc` 45 by the rule, seven carried under D57 (D59). Pools and rendered results in `campaign/results-same-machine/` and `campaign/results-re-measured/`; rows in `_dev/research/jioh/measurement-campaign-record.md`.
+
+D64's event gets the place that entry left open: `web-browser` carries `MemoryInfra`'s pass as a `heavy_events` block — the run quantiles over its 8 observations, their count, the 22,800 s of idle phase counted over, and the rate that follows. It states no interval, because none was measured: most repeats saw the event once or not at all, so no repeat holds two of them, and fitting one would write a model into the library beside measured values. Nothing compiles it today; whether the simulator models a rare heavy run is 9.13's, the phase that owns the schema.
+
+Each entry states what its build leaves out (D69) and how its components are identified (D67), and the scope carries the build census in place of one version string.
+
+Raw records released, outward-facing on 인지오's approval, screenshots omitted (their per-landing checks are recorded here and in the campaign record): **`meas-ci-2026-09-18`** — `meas-interactive-six.zip`, `meas-playback-six.zip` — and **`meas-ci-2026-09-20`** — `meas-interactive-chrome.zip`, `meas-interactive-code-windows-1-22.zip`, `meas-interactive-code-windows-23-42.zip` (split because a release asset is capped at 2 GiB), `meas-playback-webrtc.zip`. Both tags point at the commit that carries the filed pools and the tooling that produced them.
+
+Tooling: `heavy_events_block` and `BUILD_BOUND` in `campaign/fold_in.py`, its `mail-client` entry folding from `thunderbird-send`, and its section header naming the campaigns it was run with; `heavy_events` in `wlc/linter.py`, which rejects an event that states a gap; `render_results.py` sorting and grouping D66's `<window>@<run id>` exclusion keys. Tests: `test_a_heavy_event_states_its_runs_and_no_gap`, `test_repeats_that_share_an_exclusion_reason_are_named_once`. Method §9, 2026-09-24.
+
+State of the gates at the fold-in: `make -C dataset dataset lint check PY=python3.12` stops on five errors, all the `-single` demand window (`c2-p3a`, `c2-p3b`, `c3-creation`, `c3-evening`, `c3-workday`), which 9.14 owns; `make -C dataset test` passes 213.
+
+Values changed: every value of the nine measured archetypes.

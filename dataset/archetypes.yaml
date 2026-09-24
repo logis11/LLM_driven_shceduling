@@ -49,7 +49,9 @@
 
 archetypes:
 
-  # ---- measured per-application archetypes — 9.5 campaign (meas-ci:interactive:3, meas-ci:playback:3) ----
+  # ---- measured per-application archetypes — 9.5 same-machine campaigns (meas-ci:interactive:2026-09-18 and
+  # meas-ci:playback:2026-09-18 for the six; meas-ci:interactive:2026-09-19 for mail-client's send re-observation;
+  # meas-ci:interactive:2026-09-20 and meas-ci:playback:2026-09-20 for chrome, code and webrtc) ----
 
   office-writer:
     category_source: meas
