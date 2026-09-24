@@ -168,11 +168,18 @@ def test_a_cron_sessions_wakes_leave_the_component_and_are_stated(tmp_path):
     (d / "perf.steady.timehist.txt").write_text("".join(sorted(rows.splitlines(True), key=lambda l: float(l.split()[0]))))
     (d / "perf.steady.wakeups.txt").write_text(wakes)
 
+    # a pid-1 row inside the same window but woken by logind — the scope work a waker-only rule leaves behind
+    rows = (d / "perf.steady.timehist.txt").read_text() + _row(71.4, 3, "systemd", 1, 1, 2.6)
+    wakes = (d / "perf.steady.wakeups.txt").read_text() + \
+        f"{71.398:12.6f} [0001]  systemd-logind[800/800]  awakened: systemd[1/1]\n"
+    (d / "perf.steady.timehist.txt").write_text("".join(sorted(rows.splitlines(True), key=lambda l: float(l.split()[0]))))
+    (d / "perf.steady.wakeups.txt").write_text(wakes)
+
     ph = analyze.analyze_run_dir(str(d))["phases"]["steady"]
     sysd = ph["entries"]["systemd"]
     ev = sysd["cron_event"]
-    assert ev["count"] == 3 and ev["waker"] == "cron"
-    assert ev["runs_ms"] == [0.9, 0.9, 0.9] and ev["at_s"] == [71.0, 73.0, 75.0]
+    assert ev["count"] == 4 and ev["waker"] == "cron" and ev["window_s"] == 1.0 and ev["windows"] == 3
+    assert ev["runs_ms"] == [0.9, 2.6, 0.9, 0.9] and ev["at_s"] == [71.0, 71.4, 73.0, 75.0]
     # the component is read without them: the fixture's ten pid-1 wakes over the 100 s phase, unchanged
     assert sysd["threads"]["pid1/systemd"]["wakes_per_s"] == 0.1
     assert ph["entries"]["gnome-shell"]["cron_event"]["count"] == 0
