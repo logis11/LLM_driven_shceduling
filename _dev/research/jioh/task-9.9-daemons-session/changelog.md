@@ -125,3 +125,27 @@ What the corrected placement changed, against the superseded probes: the three e
 Read for the fold-in: the session bus wakes about once in 1800 s and GNOME Shell's `gnome-s:disk$0` less, so under method §5's 95 % coverage cut both fall into their entry's residual rather than carrying tables of their own.
 
 No value in `dataset/archetypes.yaml` changed by this entry.
+
+## D23 — a cron job's session is an event of the phase, not a component's wake (2026-09-24)
+
+By 인지오's decision, in the form of 9.5 D64 (method §5): the rows an entry runs inside the window a cron job's session occupies leave the component, which is read without them, and the event is stated per repeat with its count, its runs, its times into the phase and its rate over the phase time pooled. The window is two seconds each side of every wakeup by a process with comm `cron`, overlapping windows merged (`CRON_WAKER`, `CRON_EVENT_S` in `session/analyze.py`).
+
+Grounds — the population a repeat draws from is not stationary, and the clock decides it. The first batch's six repeats split in two: 47, 48, 49 and 51 recorded 370–375 wakes of pid 1 in the phase and 58 and 60 recorded 325 and 329, on the same kernel and with all fourteen recorded package versions identical. The whole difference was one waker: `cron` woke pid 1 36–38 times in the first four and not once in the other two, every other waker matching across all six. Cron ran in both — the journals show 111 cron lines in a probe and both groups' sessions — but the job set differs with the time of day: the first batch's steady phases fell across 23:59–00:25 UTC and met the sysstat daily job and a sphinxsearch job, the later pair's sat at 01:27–01:57 and met neither. The three probes, all taken in daytime windows, recorded no cron wake of pid 1 at all over 3 h each, which is why the length of D22 was read without this in view.
+
+By cause, not by size. D64 picks its event out by a run floor because chrome's heavy pass has no other marker; this one has a cause, and a floor would cut the wrong population — pid 1 carried 20–23 runs of 1 ms or more in the first four repeats against 11–12 in the other two, so a floor of 1 ms would also delete the heavy runs of a repeat whose window met no session at all, and would bias every quantile above it for the life of the dataset.
+
+The window straddles its marker because pid 1 does the session's scope work before cron's own wakeups: in repeat 47 seven runs of 1 ms or more fall at +318 s and the cron burst at +319 s. Two seconds each side is where the value stops moving — pid 1's mean run over the rows left is 0.207, 0.208, 0.211 and 0.219 ms at ±2 s and the same at ±5 s, against 0.220–0.228 ms with no window — so the footprint is inside ±2 s and the window is not cutting into unrelated work. The event's footprint reaches every entry, which a waker-only rule missed: per affected repeat `systemd` 49–52 rows, `dbus-daemon` 55–69, the PipeWire stack 8–10, GNOME Shell 3.
+
+What it reached: `pid1/systemd`'s wake rate is now identical across all six repeats (0.18 /s) and its run mean's half-width fell from ±18.8 % to ±10.8 %; the system bus's gap mean from ±16.0 % to ±10.2 %.
+
+No value in `dataset/archetypes.yaml` changed by this entry.
+
+## D24 — the rule reads each component's exact wake count (2026-09-24)
+
+By 인지오's decision (method §5): the pool takes each component's wake count per repeat from its own samples, never from the rounded rate multiplied by the span. `per_thread` in `campaign/analyze.py` rounds `wakes_per_s` to two places, which this slice's components are too sparse for — GNOME Shell's main thread wakes 0.033 /s and reads 0.03 or 0.04, a ±15 % step, and the stability rule was reading the step as the subject's spread: that value showed a ±16.4 % half-width and a projection of 43 repeats, and reads ±5.4 % and 7 once the count is exact. The shared rounding is left as it is, the slices already folded in having been read through it; the change is `session/pool.py`'s alone.
+
+No value in `dataset/archetypes.yaml` changed by this entry.
+
+## D25 — the repeats added as a batch to the pool's projection (2026-09-24)
+
+By 인지오's decision, in the form of 9.7 D26 (campaign workflow, the loop step 5): the campaign adds a batch up to the pool's own projection rather than one repeat at a time, then continues one at a time. At six repeats the projection is 19, every carried value needing at most that; with three repeats in flight, 24 jobs were launched for the ten landings still wanted, the EPYC 7763 having come up in 18 of the campaign's first 44 draws (`campaign/machine-draws.md`).
