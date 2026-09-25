@@ -18,7 +18,7 @@
 
 using i64 = std::int64_t;
 
-enum class Op { RUN, WAIT, EXIT };  //operations
+enum class Op { RUN, SLEEP, WAIT, EXIT };  //operations
 struct Instr { Op op; i64 us; };
 
 enum class State { Ready, Running, Blocked, Done };
@@ -31,6 +31,7 @@ struct Task {
 
   i64 run_left = 0;       // demand left on the current RUN instruction
   std::uint64_t gen = 0;  // stale check for an already-scheduled Lane event
+  char blocked_by = 'w';  // why the task last blocked: 'w'=WAIT (external wake), 's'=SLEEP (self-timer)
 };
 
 // ─────────────────────────── the scheduler seat ───────────────────────────
@@ -198,7 +199,9 @@ struct Mlfq : Policy {
 };
 
 // ─────────────────────────────────── core ─────────────────────────────────
-enum class Kind { Arrive, Lane, Wake, Depart, PolicyTimer };  //event state
+enum class Kind { Arrive, Lane, Wake, Unblock, Depart, PolicyTimer };  //event state
+                                     // Wake = external (a channel/id, may find no waiter)
+                                     // Unblock = a SLEEP/TIMER expiry the task scheduled for itself
 
 struct Event {
   i64 t;
@@ -247,17 +250,14 @@ struct Sim : Trace, Clock {
           else note_settled(e.task);
           break;
         }
-        case Kind::Wake: {
-          Task& t = tasks[e.task];
-          if (t.state == State::Blocked) {
-            note("ready", e.task, "cause=wake");  // WAIT is over — blocked or not, it lands here
-            ++t.pc;
-            step(e.task);
-            if (t.state == State::Ready) { enqueue(e.task); maybe_preempt(e.task); }
-            else note_settled(e.task);
-          }
+        case Kind::Wake:
+          // External wake only lifts a WAIT — it must not cut a SLEEP short
+          if (tasks[e.task].blocked_by == 'w') unblock(e.task, "cause=wake");
           break;
-        }
+        case Kind::Unblock:
+          // A SLEEP timer only wakes its own sleeper (a stale one after a re-block is ignored)
+          if (tasks[e.task].blocked_by == 's') unblock(e.task, "cause=sleep_end");
+          break;
         case Kind::Lane: {
           if (e.task != running || e.gen != tasks[e.task].gen) break;  // voided reservation
           int id = e.task;
@@ -336,15 +336,19 @@ struct Sim : Trace, Clock {
   }
 
   // Advances the program only. The ready set, the lane and the queueing are all
-  // the policy's or the caller's job (memo 2026-09-07-trace-clarifications-for-the-simulator §4)
+  // the policy's or the caller's job (memo 2026-09-07-trace-clarifications-for-the-simulator §4).
+  // Exception: SLEEP schedules its own timed Unblock here — a relative-time block is
+  // part of executing that instruction, not a scheduling decision
   void step(int id) {
     Task& t = tasks[id];
     for (;;) {
       if (t.pc >= t.prog.size()) { t.state = State::Done; return; }  // ran out without EXIT — defensive
       const Instr& in = t.prog[t.pc];
-      if (in.op == Op::RUN)  { t.state = State::Ready; t.run_left = in.us; return; }
-      if (in.op == Op::WAIT) { t.state = State::Blocked; return; }
-      if (in.op == Op::EXIT) { t.state = State::Done;    return; }
+      if (in.op == Op::RUN)   { t.state = State::Ready; t.run_left = in.us; return; }
+      if (in.op == Op::SLEEP) { t.state = State::Blocked; t.blocked_by = 's';
+                                schedule(now_ + in.us, Kind::Unblock, id); return; }  // relative wake at now+N
+      if (in.op == Op::WAIT)  { t.state = State::Blocked; t.blocked_by = 'w'; return; }
+      if (in.op == Op::EXIT)  { t.state = State::Done;    return; }
       ++t.pc;
     }
   }
@@ -353,6 +357,18 @@ struct Sim : Trace, Clock {
   void note_settled(int id) {
     if (tasks[id].state == State::Blocked)   note("x_block", id);
     else if (tasks[id].state == State::Done) note("task_end", id);
+  }
+
+  // A blocked task becomes runnable again — the WAIT/SLEEP is over, advance past it.
+  // Shared by external wake and SLEEP expiry; the caller supplies the trace cause
+  void unblock(int id, const char* cause) {
+    Task& t = tasks[id];
+    if (t.state != State::Blocked) return;
+    note("ready", id, cause);
+    ++t.pc;
+    step(id);
+    if (t.state == State::Ready) { enqueue(id); maybe_preempt(id); }
+    else note_settled(id);
   }
 
   void enqueue(int id) {
