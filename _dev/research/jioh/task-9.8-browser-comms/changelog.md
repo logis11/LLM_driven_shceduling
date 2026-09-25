@@ -509,3 +509,15 @@ Tooling: `desktop/analyze.py` (`renderer_components` over every renderer measure
 Values changed: every table of the four entries (form; the gaps' values); the renderer entries' components and their values. **Hands to 9.14:** the demand moves (9.5 D71).
 
 Commit: this entry.
+
+## D27 — the renderer residuals carried as sparse components (2026-09-25)
+
+By 인지오's decision, on D26's open question: both renderer entries' residuals leave 9.5 D57's between-sessions class (D21, extended to them by D21 and D24) and are carried as sparse components — a component that wakes a few times per renderer per phase, carried with its half-widths over at least five repeats, its three values together, and its count stated. Hidden: `MemoryInfra` alone, 0.0035 wakes/s ±18.3 %, gap mean 308.9 s ±15.6 %, run mean 0.1924 ms ±8.8 %, 1.2–3.4 wakes per renderer per 600 s phase across the fourteen repeats. Visible: `MemoryInfra`, `Compositor`, `ThreadPoolForeg`, `ThreadPoolServi`, 0.0068 wakes/s ±10.9 %, gap mean 149.9 s ±9.0 %, run mean 0.1434 ms ±11.0 %, 3.6–5.5 wakes per renderer per phase across the eleven.
+
+Grounds: 9.5 D57 places a spread between sessions by asking that the value move far less within one run than across repeats. D26 re-read the residuals on the long-phase probes and found hidden ±134.2 % within against ±51.6 % across, visible ±181.3 % within against ±23.5 % across. A 600 s window of the hidden probe catches 0–2 of the residual's wakes, so its within-run figure is the spread of a count of one or two — evidence neither for nor against a between-sessions state. The visible probe's residual comms wake at 0.0009 wakes/s against 0.0068 in the campaign, so the probe does not observe the campaign's residual at all. The within-run test cannot place a component this sparse, and a class whose placement it cannot meet does not carry it. The workflow already asks for the count of a component that wakes only a few times a phase (9.5 D59). Weight: about 2 % (hidden) and 4 % (visible) of a renderer's wakes; the hidden residual's run mean is seven times `HangWatcher`'s.
+
+Not taken: the rare-event rule (9.5 D64), under which the hidden residual — `MemoryInfra` being the whole component — would leave the compiled entry and stand only in the pooled record, dropping the entry's heaviest periodic runs; adding repeats, the pool projecting 177 for the hidden residual's wake rate, for 2–4 % of a floor entry.
+
+Stated in each entry's scope: the count per renderer per phase, and why the within-run test does not place the spread. Tooling: `desktop/pool.py` (`SPARSE`; the `sparse` flag beside `session_spread`, `carried` reading it); `desktop/fold_in.py` (the sparse sentence, `SPARSE_WHY`). Test: `test_the_renderer_residuals_carry_as_sparse_components`. Re-pooled from the cached artifacts: every value as before, the flag the only change in the pooled record. **Hands to 9.14:** whether a spread of this size on 2–4 % of a renderer's wakes changes a scheduling outcome (the workflow's sensitivity question). No value changed by this entry.
+
+Commit: this entry.

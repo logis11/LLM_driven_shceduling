@@ -77,18 +77,26 @@ LIST_FIELDS = (("wakes_per_s", "wakes/s"), ("gap_ms", "gap mean (ms)"), ("run_ms
 EXCEPTED_RUN_MEANS = ("chrome-hidden", "chrome-visible", "element", "steam")
 
 # changelog D21, 9.5 D57's exception: a component whose rate varies between sessions is carried with its half-widths
-# over at least five repeats, its three values together. Extended by D21 to the renderer residuals and the visible
-# renderer's ThreadPoolForeg, whose spread is in part within a run (about six wakes per renderer per phase) — both
-# spreads and that limitation are stated in the entry's scope (D20 holds the measurement).
+# over at least five repeats, its three values together. Extended by D21 to the visible renderer's ThreadPoolForeg,
+# whose spread is in part within a run (about six wakes per renderer per phase) — both spreads and that limitation
+# are stated in the entry's scope (D20 holds the measurement).
 # changelog D24: the hidden renderer's Chrome_ChildIOT, a separate component once all 14 landings are pooled — ±17.7 %
 # within a run against ±76.9 % between runs, 9.5 D57 as written, as D21 found for the visible renderer's
-SESSION_SPREAD = {"chrome-hidden": ("Chrome_ChildIOT", "residual",
+SESSION_SPREAD = {"chrome-hidden": ("Chrome_ChildIOT",
                                     # changelog D26: carried once the rates are one renderer's and exact
                                     "Compositor", "PerfettoTrace", "ThreadPoolServi"),
-                  "chrome-visible": ("Chrome_ChildIOT", "ThreadPoolForeg", "residual", "PerfettoTrace"),
+                  "chrome-visible": ("Chrome_ChildIOT", "ThreadPoolForeg", "PerfettoTrace"),
                   # changelog D23: 9.5 D57 as written — the gap means move ±0.1 % and ±1.7 % within a run and ±21 %
                   # and ±20 % between runs, the tables stable through p99 and the wake rates holding
                   "steam": ("steamwebhelper", "ThreadPoolForeg")}
+
+# changelog D27: a sparse component — one that wakes a few times per renderer per phase (hidden residual, MemoryInfra
+# alone, 1.2–3.4 wakes; visible residual, four comms, 3.6–5.5) — is carried with its half-widths over at least five
+# repeats, its three values together, and its count stated. Its spread is the count's own: a 600 s window of the
+# long-phase probe catches 0–2 of its wakes, so the within-run test cannot place the spread and 9.5 D57 does not
+# apply (D26 re-read the residuals under D21 and D24 and found neither placed). The residuals were carried between
+# sessions from D21 to D26.
+SPARSE = {"chrome-hidden": ("residual",), "chrome-visible": ("residual",)}
 
 # results only: (a, b, what) — the two comparisons the slice reports (method §6 item 2)
 COMPARISONS = {"chrome-hidden": [], "chrome-visible": [("steady-timer", "steady-notimer", "timer against no timer")],
@@ -323,7 +331,9 @@ def criterion(app, entry):
                 c_ = {**stability(vals, floor, MIN_REPEATS, keep_zero=True), "needed": _cp.repeats_needed(vals, floor)}
                 c_["excepted"] = field == "run_ms" and app in EXCEPTED_RUN_MEANS          # D17
                 c_["session_spread"] = comm in SESSION_SPREAD.get(app, ())                 # D21
-                c_["carried"] = c_["passes"] or ((c_["excepted"] or c_["session_spread"]) and c_["k"] >= MIN_REPEATS)
+                c_["sparse"] = comm in SPARSE.get(app, ())                                 # D27
+                c_["carried"] = c_["passes"] or ((c_["excepted"] or c_["session_spread"] or c_["sparse"])
+                                                 and c_["k"] >= MIN_REPEATS)
                 out[f"{phase} {comm} {label}"] = c_
     passes = bool(out) and all(c["carried"] for c in out.values())
     return {"tolerance": TOLERANCE, "abs_floor_ms": ABS_FLOOR_MS, "min_repeats": MIN_REPEATS,

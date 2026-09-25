@@ -6586,6 +6586,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "steady HangWatcher gap mean (ms)": {
@@ -6599,6 +6600,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "steady HangWatcher run mean (ms)": {
@@ -6612,6 +6614,7 @@
       "needed": 16,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "steady chrome wakes/s": {
@@ -6625,6 +6628,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "steady chrome gap mean (ms)": {
@@ -6638,6 +6642,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "steady chrome run mean (ms)": {
@@ -6651,6 +6656,7 @@
       "needed": 12,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "steady Chrome_ChildIOT wakes/s": {
@@ -6664,6 +6670,7 @@
       "needed": null,
       "excepted": false,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady Chrome_ChildIOT gap mean (ms)": {
@@ -6677,6 +6684,7 @@
       "needed": null,
       "excepted": false,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady Chrome_ChildIOT run mean (ms)": {
@@ -6690,6 +6698,7 @@
       "needed": 105,
       "excepted": true,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady Compositor wakes/s": {
@@ -6703,6 +6712,7 @@
       "needed": null,
       "excepted": false,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady Compositor gap mean (ms)": {
@@ -6716,6 +6726,7 @@
       "needed": null,
       "excepted": false,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady Compositor run mean (ms)": {
@@ -6729,6 +6740,7 @@
       "needed": 22,
       "excepted": true,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady PerfettoTrace wakes/s": {
@@ -6742,6 +6754,7 @@
       "needed": null,
       "excepted": false,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady PerfettoTrace gap mean (ms)": {
@@ -6755,6 +6768,7 @@
       "needed": null,
       "excepted": false,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady PerfettoTrace run mean (ms)": {
@@ -6768,6 +6782,7 @@
       "needed": 19,
       "excepted": true,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady ThreadPoolServi wakes/s": {
@@ -6781,6 +6796,7 @@
       "needed": null,
       "excepted": false,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady ThreadPoolServi gap mean (ms)": {
@@ -6794,6 +6810,7 @@
       "needed": null,
       "excepted": false,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady ThreadPoolServi run mean (ms)": {
@@ -6807,6 +6824,7 @@
       "needed": 14,
       "excepted": true,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady residual wakes/s": {
@@ -6819,7 +6837,8 @@
       "passes": false,
       "needed": 177,
       "excepted": false,
-      "session_spread": true,
+      "session_spread": false,
+      "sparse": true,
       "carried": true
      },
      "steady residual gap mean (ms)": {
@@ -6832,7 +6851,8 @@
       "passes": false,
       "needed": 128,
       "excepted": false,
-      "session_spread": true,
+      "session_spread": false,
+      "sparse": true,
       "carried": true
      },
      "steady residual run mean (ms)": {
@@ -6845,7 +6865,8 @@
       "passes": false,
       "needed": 41,
       "excepted": true,
-      "session_spread": true,
+      "session_spread": false,
+      "sparse": true,
       "carried": true
      }
     },
@@ -17488,6 +17509,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "steady-notimer HangWatcher gap mean (ms)": {
@@ -17501,6 +17523,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "steady-notimer HangWatcher run mean (ms)": {
@@ -17514,6 +17537,7 @@
       "needed": 15,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "steady-notimer chrome wakes/s": {
@@ -17527,6 +17551,7 @@
       "needed": 8,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "steady-notimer chrome gap mean (ms)": {
@@ -17540,6 +17565,7 @@
       "needed": 7,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "steady-notimer chrome run mean (ms)": {
@@ -17553,6 +17579,7 @@
       "needed": 14,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "steady-notimer Chrome_ChildIOT wakes/s": {
@@ -17566,6 +17593,7 @@
       "needed": null,
       "excepted": false,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady-notimer Chrome_ChildIOT gap mean (ms)": {
@@ -17579,6 +17607,7 @@
       "needed": null,
       "excepted": false,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady-notimer Chrome_ChildIOT run mean (ms)": {
@@ -17592,6 +17621,7 @@
       "needed": 45,
       "excepted": true,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady-notimer PerfettoTrace wakes/s": {
@@ -17605,6 +17635,7 @@
       "needed": null,
       "excepted": false,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady-notimer PerfettoTrace gap mean (ms)": {
@@ -17618,6 +17649,7 @@
       "needed": null,
       "excepted": false,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady-notimer PerfettoTrace run mean (ms)": {
@@ -17631,6 +17663,7 @@
       "needed": 12,
       "excepted": true,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "steady-notimer residual wakes/s": {
@@ -17643,7 +17676,8 @@
       "passes": false,
       "needed": 47,
       "excepted": false,
-      "session_spread": true,
+      "session_spread": false,
+      "sparse": true,
       "carried": true
      },
      "steady-notimer residual gap mean (ms)": {
@@ -17656,7 +17690,8 @@
       "passes": false,
       "needed": 32,
       "excepted": false,
-      "session_spread": true,
+      "session_spread": false,
+      "sparse": true,
       "carried": true
      },
      "steady-notimer residual run mean (ms)": {
@@ -17669,7 +17704,8 @@
       "passes": false,
       "needed": 48,
       "excepted": true,
-      "session_spread": true,
+      "session_spread": false,
+      "sparse": true,
       "carried": true
      }
     },
@@ -33265,6 +33301,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle ThreadPoolForeg gap mean (ms)": {
@@ -33278,6 +33315,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle ThreadPoolForeg run mean (ms)": {
@@ -33291,6 +33329,7 @@
       "needed": 7,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle element-desktop wakes/s": {
@@ -33304,6 +33343,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle element-desktop gap mean (ms)": {
@@ -33317,6 +33357,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle element-desktop run mean (ms)": {
@@ -33330,6 +33371,7 @@
       "needed": 8,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle Chrome_IOThread wakes/s": {
@@ -33343,6 +33385,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle Chrome_IOThread gap mean (ms)": {
@@ -33356,6 +33399,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle Chrome_IOThread run mean (ms)": {
@@ -33369,6 +33413,7 @@
       "needed": 6,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle Chrome_ChildIOT wakes/s": {
@@ -33382,6 +33427,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle Chrome_ChildIOT gap mean (ms)": {
@@ -33395,6 +33441,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle Chrome_ChildIOT run mean (ms)": {
@@ -33408,6 +33455,7 @@
       "needed": 9,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle ThreadPoolServi wakes/s": {
@@ -33421,6 +33469,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle ThreadPoolServi gap mean (ms)": {
@@ -33434,6 +33483,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle ThreadPoolServi run mean (ms)": {
@@ -33447,6 +33497,7 @@
       "needed": 11,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle residual wakes/s": {
@@ -33460,6 +33511,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle residual gap mean (ms)": {
@@ -33473,6 +33525,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "idle residual run mean (ms)": {
@@ -33486,6 +33539,7 @@
       "needed": 15,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      }
     },
@@ -52054,6 +52108,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "shown steamwebhelper gap mean (ms)": {
@@ -52067,6 +52122,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "shown steamwebhelper run mean (ms)": {
@@ -52080,6 +52136,7 @@
       "needed": 14,
       "excepted": true,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "shown steam wakes/s": {
@@ -52093,6 +52150,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown steam gap mean (ms)": {
@@ -52106,6 +52164,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown steam run mean (ms)": {
@@ -52119,6 +52178,7 @@
       "needed": 46,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown IPC:CSteamEngin wakes/s": {
@@ -52132,6 +52192,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown IPC:CSteamEngin gap mean (ms)": {
@@ -52145,6 +52206,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown IPC:CSteamEngin run mean (ms)": {
@@ -52158,6 +52220,7 @@
       "needed": 34,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown CJobMgr::m_Work wakes/s": {
@@ -52171,6 +52234,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown CJobMgr::m_Work gap mean (ms)": {
@@ -52184,6 +52248,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown CJobMgr::m_Work run mean (ms)": {
@@ -52197,6 +52262,7 @@
       "needed": 14,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown Compositor wakes/s": {
@@ -52210,6 +52276,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown Compositor gap mean (ms)": {
@@ -52223,6 +52290,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown Compositor run mean (ms)": {
@@ -52236,6 +52304,7 @@
       "needed": 10,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown Chrome_ChildIOT wakes/s": {
@@ -52249,6 +52318,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown Chrome_ChildIOT gap mean (ms)": {
@@ -52262,6 +52332,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown Chrome_ChildIOT run mean (ms)": {
@@ -52275,6 +52346,7 @@
       "needed": 6,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown VizCompositorTh wakes/s": {
@@ -52288,6 +52360,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown VizCompositorTh gap mean (ms)": {
@@ -52301,6 +52374,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown VizCompositorTh run mean (ms)": {
@@ -52314,6 +52388,7 @@
       "needed": 14,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown CHTTPClientThre wakes/s": {
@@ -52327,6 +52402,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown CHTTPClientThre gap mean (ms)": {
@@ -52340,6 +52416,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown CHTTPClientThre run mean (ms)": {
@@ -52353,6 +52430,7 @@
       "needed": null,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown CNet Encrypt:0 wakes/s": {
@@ -52366,6 +52444,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown CNet Encrypt:0 gap mean (ms)": {
@@ -52379,6 +52458,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown CNet Encrypt:0 run mean (ms)": {
@@ -52392,6 +52472,7 @@
       "needed": 7,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown ThreadPoolForeg wakes/s": {
@@ -52405,6 +52486,7 @@
       "needed": 10,
       "excepted": false,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "shown ThreadPoolForeg gap mean (ms)": {
@@ -52418,6 +52500,7 @@
       "needed": 10,
       "excepted": false,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "shown ThreadPoolForeg run mean (ms)": {
@@ -52431,6 +52514,7 @@
       "needed": 11,
       "excepted": true,
       "session_spread": true,
+      "sparse": false,
       "carried": true
      },
      "shown residual wakes/s": {
@@ -52444,6 +52528,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown residual gap mean (ms)": {
@@ -52457,6 +52542,7 @@
       "needed": 5,
       "excepted": false,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      },
      "shown residual run mean (ms)": {
@@ -52470,6 +52556,7 @@
       "needed": 11,
       "excepted": true,
       "session_spread": false,
+      "sparse": false,
       "carried": true
      }
     },

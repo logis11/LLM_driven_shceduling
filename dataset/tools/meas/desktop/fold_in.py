@@ -7,9 +7,9 @@ One entry per subject, in 9.5's measured per-application form (D10): `components
 carried phase, each with its `wakes_per_s` and its pooled `gap` and `run` quantile tables, and the residual; no
 `focus_components`, no `stimulus`. The scope states what method §7 and the changelog require of each entry: the
 machine, the program's version, the state and what it is not, the values carried under an exception with their
-half-widths and ranges (D17, D18, D21, D23, D24), the spreads within and between runs (D20, D22, D24), the renderer
-population (D14) and the share `HangWatcher` holds (D16). The output is a YAML fragment for
-`dataset/archetypes.yaml`.
+half-widths and ranges (D17, D18, D21, D23, D24), the spreads within and between runs (D20, D22, D24), the sparse
+residuals with their counts (D27), the renderer population (D14) and the share `HangWatcher` holds (D16). The output
+is a YAML fragment for `dataset/archetypes.yaml`.
 """
 
 import json
@@ -75,14 +75,18 @@ APPROX = {
 # 60 s) against across the repeats. Across-repeat figures for the renderer entries are recomputed from the pooled
 # record; the within-run figures are the changelog's, measured on the probes.
 WITHIN = {("chrome-hidden", "Chrome_ChildIOT"): "±17.7 % (D24)",
-          # D26: the residuals' comms changed once the rates were one renderer's and exact — re-read on the probes
-          ("chrome-hidden", "residual"): "±134.2 % (D26; `MemoryInfra` alone, 0–2 wakes per renderer a window)",
           ("chrome-visible", "Chrome_ChildIOT"): "±18.6 % (D20)",
-          ("chrome-visible", "residual"): "±181.3 % (D26; its comms barely wake in the probe, 0.0009 against 0.0068 wakes/s)",
           ("chrome-visible", "ThreadPoolForeg"): "barely present in the probe (D20)",
           ("chrome-hidden", "Compositor"): "±10.8 % (D26)", ("chrome-hidden", "PerfettoTrace"): "±10.8 % (D26)",
           ("chrome-hidden", "ThreadPoolServi"): "±10.8 % (D26)", ("chrome-visible", "PerfettoTrace"): "±4.0 % (D26)",
           ("steam", "steamwebhelper"): "gap mean ±0.1 % (D22)", ("steam", "ThreadPoolForeg"): "gap mean ±1.7 % (D22)"}
+
+# D27: the renderer residuals are sparse — a few wakes per renderer per phase — so the within-run test (D26 re-read
+# them on the probes) cannot place their spread; why, per entry, from D26's re-read.
+SPARSE_WHY = {("chrome-hidden", "residual"): ("a 600 s window of the probe catches 0–2 of its wakes (±134.2 % within "
+                                              "one run, D26)"),
+              ("chrome-visible", "residual"): ("the probe does not reproduce its comms, 0.0009 against 0.0068 wakes/s "
+                                               "(±181.3 % within one run, D26)")}
 
 
 def fmt(v, label, unit=True):
@@ -130,7 +134,7 @@ def thread_count(t):
 
 
 def exceptions(app, e, ph):
-    machine, session = [], {}
+    machine, session, sparse = [], {}, {}
     for key, c in e["stability"]["quantities"].items():
         if c["passes"]:
             continue
@@ -140,11 +144,13 @@ def exceptions(app, e, ph):
         vals = values_of(ph, comm, label)
         text = (f"{LABEL[label]} {fmt(c['mean'], label)} ±{c['half_width'] * 100:.1f} % "
                 f"({span(vals, label, c['mean'])})")
-        if c.get("session_spread"):
+        if c.get("sparse"):
+            sparse.setdefault(comm, []).append(text)
+        elif c.get("session_spread"):
             session.setdefault(comm, []).append(text)
         else:
             machine.append(f"`{comm}` {text}")
-    return machine, session
+    return machine, session, sparse
 
 
 def entry(app, e):
@@ -177,7 +183,7 @@ def entry(app, e):
              f"{CARRIED[app]} cpu-share {min(ph['cpu_share']):.5f}–{max(ph['cpu_share']):.5f}"]
     out.append("      stats: [" + ", ".join(json.dumps(s) for s in stats) + "]")
 
-    machine, session = exceptions(app, e, ph)
+    machine, session, sparse = exceptions(app, e, ph)
     scope = (f"One observation (phase decision 2; D10): {OBSERVED[app]}; on {MACHINE}; {k} same-machine repeats, "
              f"every landing pooled (D24). ")
     if renderer:
@@ -193,7 +199,7 @@ def entry(app, e):
                   f"{statistics.fmean(per):.3f} wakes/s per renderer; the page's own thread is {pg:.3f} (D16). ")
     scope += STATE_NOT[app] + " "
     scope += "Stability rule: every value on the list holds within 5 % or 1 µs"
-    if machine or session:
+    if machine or session or sparse:
         scope += " except these, carried over the repeats obtained with their half-widths and ranges. "
     else:
         scope += " over the repeats obtained. "
@@ -217,6 +223,17 @@ def entry(app, e):
         if app == "steam":
             scope += ("`steamwebhelper` carries 23.6 % of the client's wakes and its gap table is identical through "
                       "its 99th percentile in every repeat, the mean moved by a handful of gaps past it (D22). ")
+    if sparse:
+        parts = []
+        for comm, texts in sparse.items():
+            comms = ph["components"]["residual"]["comms"] if comm == "residual" else [comm]
+            per = [w * s for w, s in zip(values_of(ph, comm, "wakes/s"), ph["span_s"])]
+            parts.append(f"`{comm}` (" + ", ".join(f"`{c}`" for c in comms) + ") " + ", ".join(texts)
+                         + f", {min(per):.1f}–{max(per):.1f} wakes per renderer per 600 s phase; "
+                         + SPARSE_WHY[(app, comm)])
+        scope += ("Sparse components, waking a few times per renderer per phase, their values carried together with "
+                  "their half-widths and their count, a spread that is the count's own and which the within-run test "
+                  "cannot place (D27): " + "; ".join(parts) + ". ")
     for c in e.get("comparisons") or []:
         if c.get("ratio"):
             scope += (f"Measured beside it, {c['what']}: wake rate {c['a_wakes_per_s']:.3f} against "

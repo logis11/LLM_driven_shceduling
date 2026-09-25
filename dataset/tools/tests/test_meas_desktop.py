@@ -356,6 +356,35 @@ def test_the_renderer_quiet_threads_carry_with_their_half_widths():
     assert q["passes"] is False                        # nor is any other subject's thread of the same name
 
 
+def test_the_renderer_residuals_carry_as_sparse_components():
+    # changelog D27: a renderer's residual wakes a few times per renderer per phase (hidden: `MemoryInfra` alone,
+    # 1.2–3.4 wakes; visible: four comms, 3.6–5.5), a count whose spread is the count's own — the within-run test
+    # cannot place it, so 9.5 D57 does not apply. It is carried with its half-widths and its count, its three
+    # values together, over at least five repeats, and is no longer a between-sessions component.
+    res = {"wakes_per_s": [0.0031, 0.0057, 0.0021, 0.0050, 0.0029],
+           "gap_ms": {"repeat_mean": [320000.0, 175000.0, 480000.0, 200000.0, 345000.0]},
+           "run_ms": {"repeat_mean": [0.15, 0.26, 0.17, 0.19, 0.20]}}
+    steady = _comp([4.0] * 5, [250.0] * 5, [0.05] * 5)
+    for app, phase in (("chrome-hidden", "steady"), ("chrome-visible", "steady-notimer")):
+        q = pool.criterion(app, _entry({"HangWatcher": steady}, res, phase=phase))
+        for label in ("wakes/s", "gap mean (ms)", "run mean (ms)"):
+            c = q["quantities"][f"{phase} residual {label}"]
+            assert c["passes"] is False and c["sparse"] is True and c["session_spread"] is False
+            assert c["carried"] is True
+        assert q["passes"] is True
+    # not with fewer than five repeats behind it
+    short = {k: (v[:4] if k == "wakes_per_s" else {"repeat_mean": v["repeat_mean"][:4]}) for k, v in res.items()}
+    steady4 = _comp([4.0] * 4, [250.0] * 4, [0.05] * 4)
+    assert pool.criterion("chrome-hidden", _entry({"HangWatcher": steady4}, short, phase="steady"))["passes"] is False
+    # no other subject's residual is sparse, and no named renderer thread is
+    q = pool.criterion("element", _entry({"HangWatcher": steady}, res))
+    assert q["quantities"]["idle residual wakes/s"]["sparse"] is False and q["passes"] is False
+    q = pool.criterion("chrome-hidden", _entry({"Chrome_ChildIOT": _comp(res["wakes_per_s"], [250.0] * 5,
+                                                                          [0.03] * 5)}, phase="steady"))
+    c = q["quantities"]["steady Chrome_ChildIOT wakes/s"]
+    assert c["sparse"] is False and c["session_spread"] is True
+
+
 def test_an_interrupted_artifact_download_leaves_nothing_behind_and_does_not_block_the_next(tmp_path, repo_root,
                                                                                           monkeypatch):
     # 2026-09-21: an extraction cut off at 41 of 43 files left a folder without report.json, and every later
