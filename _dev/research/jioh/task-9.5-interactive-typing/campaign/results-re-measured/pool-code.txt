@@ -1,39 +1,40 @@
-code: repeats [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42]; stability rule holds
-   idle gpu/VizCompositorTh wakes/s: k 41, half-width 0.0299, passes
-   idle gpu/VizCompositorTh gap mean (ms): k 41, half-width 0.0373, passes
-   idle gpu/VizCompositorTh run mean (ms): k 41, half-width 0.0355, passes
-   idle renderer/Compositor wakes/s: k 41, half-width 0.0153, passes
-   idle renderer/Compositor gap mean (ms): k 41, half-width 0.017, passes
-   idle renderer/Compositor run mean (ms): k 41, half-width 0.0259, passes
-   idle gpu/Chrome_ChildIOT wakes/s: k 41, half-width 0.0347, passes
-   idle gpu/Chrome_ChildIOT gap mean (ms): k 41, half-width 0.0452, passes
-   idle gpu/Chrome_ChildIOT run mean (ms): k 41, half-width 0.0284, passes
-   idle renderer/code wakes/s: k 41, half-width 0.0234, passes
-   idle renderer/code gap mean (ms): k 41, half-width 0.0249, passes
-   idle renderer/code run mean (ms): k 41, half-width 0.0255, passes
-   idle utility/code wakes/s: k 41, half-width 0.0279, passes
-   idle utility/code gap mean (ms): k 41, half-width 0.0276, passes
-   idle utility/code run mean (ms): k 41, half-width 0.0224, passes
-   idle utility/libuv-worker wakes/s: k 41, half-width 0.049, passes
-   idle utility/libuv-worker gap mean (ms): k 41, half-width 0.0557, carried with its half-width, its spread between sessions (D57)
-   idle utility/libuv-worker run mean (ms): k 41, half-width 0.02, passes
-   idle code wakes/s: k 41, half-width 0.0025, passes
-   idle code gap mean (ms): k 41, half-width 0.0025, passes
-   idle code run mean (ms): k 41, half-width 0.0111, passes
-   idle renderer/ThreadPoolForeg wakes/s: k 41, half-width 0.0418, passes
-   idle renderer/ThreadPoolForeg gap mean (ms): k 41, half-width 0.0423, passes
-   idle renderer/ThreadPoolForeg run mean (ms): k 41, half-width 0.0422, passes
-   idle residual wakes/s: k 41, half-width 0.008, passes
-   idle residual gap mean (ms): k 41, half-width 0.0079, passes
-   idle residual run mean (ms): k 41, half-width 0.012, passes
-   input_run mean, SWELL-KW (ms): k 41, half-width 0.0493, passes
-   input_run mean, 136M (ms): k 41, half-width 0.049, passes
+code: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44]; stability rule holds
+   idle gpu/VizCompositorTh wakes/s: k 44, half-width 0.0237, passes
+   idle gpu/VizCompositorTh gap mean (ms): k 44, half-width 0.0299, passes
+   idle gpu/VizCompositorTh run mean (ms): k 44, half-width 0.0244, passes
+   idle renderer/Compositor wakes/s: k 44, half-width 0.0139, passes
+   idle renderer/Compositor gap mean (ms): k 44, half-width 0.0156, passes
+   idle renderer/Compositor run mean (ms): k 44, half-width 0.0247, passes
+   idle gpu/Chrome_ChildIOT wakes/s: k 44, half-width 0.023, passes
+   idle gpu/Chrome_ChildIOT gap mean (ms): k 44, half-width 0.029, passes
+   idle gpu/Chrome_ChildIOT run mean (ms): k 44, half-width 0.0277, passes
+   idle renderer/code wakes/s: k 44, half-width 0.0174, passes
+   idle renderer/code gap mean (ms): k 44, half-width 0.0182, passes
+   idle renderer/code run mean (ms): k 44, half-width 0.0231, passes
+   idle utility/code wakes/s: k 44, half-width 0.032, passes
+   idle utility/code gap mean (ms): k 44, half-width 0.0324, passes
+   idle utility/code run mean (ms): k 44, half-width 0.0218, passes
+   idle utility/libuv-worker wakes/s: k 44, half-width 0.0463, passes
+   idle utility/libuv-worker gap mean (ms): k 44, half-width 0.0513, carried with its half-width, its spread between sessions (D57)
+   idle utility/libuv-worker run mean (ms): k 44, half-width 0.0202, passes
+   idle code wakes/s: k 44, half-width 0.0023, passes
+   idle code gap mean (ms): k 44, half-width 0.0023, passes
+   idle code run mean (ms): k 44, half-width 0.0108, passes
+   idle renderer/ThreadPoolForeg wakes/s: k 44, half-width 0.0341, passes
+   idle renderer/ThreadPoolForeg gap mean (ms): k 44, half-width 0.036, passes
+   idle renderer/ThreadPoolForeg run mean (ms): k 44, half-width 0.0402, passes
+   idle residual wakes/s: k 44, half-width 0.0081, passes
+   idle residual gap mean (ms): k 44, half-width 0.0077, passes
+   idle residual run mean (ms): k 44, half-width 0.01, passes
+   input_run mean, SWELL-KW (ms): k 43, half-width 0.0517, at the window limit, reported (D46), needed 46
+   input_run mean, 136M (ms): k 43, half-width 0.0392, passes
    phases ['idle', 'driven', 'driven-alt']; pooled record _dev/research/jioh/task-9.5-interactive-typing/campaign/results-re-measured/pool-code.json
 validity:
    r1: ok
    r2: ok
    r3: ok
    r4: ok
+   r5: ok
    r6: ok
    r7: ok
    r8: ok
@@ -71,5 +72,7 @@ validity:
    r40: ok
    r41: ok
    r42: ok
-   left out of this pool: [5, '29@35838600778'] — 5 — D63: after the D61 prelude the caret stood on line 16, not at the file's end (screenshot after-altprelude), so the 136M phase typed mid-file; 29@35838600778 — D69: that copy installed VS Code 1.139.0, whose copilot-runtime process wakes ~50 times a second in the idle phase, where every other repeat measured 1.138.0; the window was re-measured on the pinned build (run 35846103509)
+   r43: ok (idle phase only, past the recording's end (9.5 D32))
+   r44: ok
+   left out of this pool: ['42@36126168885'] — D66: two pushes ten seconds apart started runs #598 and #599 (2026-09-25 10:50 UTC), both measuring window 42; the original launch's copy (#598, 36126154552) is pooled and #599's left out
    every repeat valid
