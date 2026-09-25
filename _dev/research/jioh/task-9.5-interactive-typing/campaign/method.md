@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-25, `code`'s keys-only campaign closed and folded in (changelog D73) — §7: `code-editor` is regenerated from the keys-only pool (`meas-ci:interactive:2026-09-25`, 44 repeats, every window the Word recording holds, window 43 idle only), its two per-input means reported at the recording's window limit as `chrome`'s are (D32, D68) and `libuv-worker`'s gap mean carried between sessions (D57); the other eight entries regenerate byte for byte. A window that landed twice is pooled once, the original launch's copy (D66).
+
 - 2026-09-25, `code`'s SWELL-KW phase keys only (changelog D72): the stream's pointer events landed on the activity bar's Search icon and opened the Search view in four repeats (windows 11, 30, 31, 33), the letters then split between its box and the editor, and selected and replaced text in others, so `code` replays the keys alone into the committed file at its end, as `office-writer` (D28) and `chrome` (D65) do; the editor's navigation is a stated limitation. D61's 41-repeat campaign is superseded whole and `code` restarts from window 1. `KINDS` in `probe/appdefs.sh`.
 
 - 2026-09-24, the fold-in and the releases (changelog D70) — §7: the nine archetypes are regenerated from the same-machine pools, `mail-client` from `thunderbird-send`; `web-browser` carries D64's heavy event as its own stated block with no interval; raw records released as `meas-ci-2026-09-18` (the six) and `meas-ci-2026-09-20` (the three).
