@@ -143,9 +143,21 @@ def stability_text(prog, e, stab, k):
             vals = th["wakes_per_s"] if label == "wakes/s" else [x["mean"] for x in th[
                 "gap_ms" if label.startswith("gap") else "run_ms"] if x]
             parts.append(f"{LABEL[label]} {fmt_value(q['mean'], label)} ±{q['half_width'] * 100:.1f} % "
-                         f"({fmt_value(min(vals), label, False)}–{fmt_value(max(vals), label)})")
-        w = WITHIN[comp]
+                         f"({fmt_value(min(vals), label, False)}–{fmt_value(max(vals), label)})"
+                         + (f" over the {q['k']} repeats it woke in" if q["k"] != k else ""))
         n = [round(r * statistics.fmean(e["span_s"])) for r in th["wakes_per_s"]]
+        if stab["quantities"][f"{prog} {comp} wakes/s"].get("sparse"):
+            without = next((x["repeats_without"] for x in e["components"].get("sparse", []) if x["comm"] == comp), [])
+            text += (f"`{comp}` is carried as a sparse component, its three values together with their half-widths "
+                     f"and its count (9.8 D27; D33): {'; '.join(parts)}. It wakes {min(n)}–{max(n)} times a phase"
+                     + (f", none at all in {len(without)} of the {k} repeats — its gap table is over the {k} repeats "
+                        f"laid end to end and wrapped round, the silent ones adding their time (9.5 D71), so the entry "
+                        f"compiles at the rate it carries" if without else "")
+                     + ", and is the entry's whole activity once the wakes owed to outside causes are out (D27, D32); "
+                       "its spread is the count's own, which the within-run test cannot place (D28's figures were read "
+                       "with the collector's wakes present). ")
+            continue
+        w = WITHIN[comp]
         text += (f"`{comp}`'s three values are carried together with their half-widths under 9.5 D57 as 9.8 D21 "
                  f"extended it (D28, D29): {'; '.join(parts)}. Within one run (the long-phase probes 36, 41 and 44, "
                  f"a window of the phase every 60 s) they move by {w[0]}, {w[1]} and {w[2]} of their mean, against "
@@ -161,7 +173,8 @@ def causes_text(e, k):
     text = ""
     if c.get("outside"):
         text += ("Wakes traced to a cause outside the observed desktop — a package Ubuntu 24.04's desktop manifest "
-                 "does not hold, or the harness — left the components and are stated (D27): "
+                 "does not hold, a desktop package's unit that a stock install leaves disabled and the runner image "
+                 "enabled, or the harness — left the components and are stated (D27, D32): "
                  + "; ".join(f"{lab} {rng(ns)} a phase" for lab, ns in c["outside"].items()) + ". ")
     if c.get("event"):
         text += ("Desktop jobs bound to a clock time are events of the phase, stated and not carried (D27, in D23's "

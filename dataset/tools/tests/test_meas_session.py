@@ -314,6 +314,39 @@ def test_the_rule_reads_the_exact_wake_count_not_the_rounded_rate(tmp_path):
     assert shell["wakes_per_s"] == [0.2] * 5     # twenty wakes in the same phase
 
 
+def test_a_sparse_component_is_carried_although_it_never_woke_in_some_repeats():
+    # D33: the system bus, once the runner's collector is out (D32), wakes in bursts — none at all in some phases —
+    # so 9.5 D43 lists it as sporadic; it is its entry's whole activity and is carried as a sparse component (9.8 D27):
+    # its wake rate over every repeat, zero where it never woke, its gap and run means over the repeats it woke in
+    comm = "system-bus/dbus-daemon"
+    def rec(k, times):
+        th = {} if not times else {comm: {"threads": 1, "wakes_per_s": len(times) / 100.0, "gap_ms": {"mean": 100000.0 / len(times)},
+                                          "run_ms": {"mean": 0.1}}}
+        return {"span_s": 100.0, "t0": 0.0, "wakes_per_s": len(times) / 100.0, "cpu_share": 0.0, "instances": {},
+                "threads": th, "_samples": {comm: {"runs": [0.1] * len(times), "gaps": [100000.0 / len(times)] * len(times),
+                                                   "t_in": times}} if times else {}}
+    by_rep = {1: rec(1, [10.0, 40.0, 70.0]), 2: rec(2, [20.0, 60.0]), 3: rec(3, []), 4: rec(4, [5.0, 50.0, 95.0]),
+              5: rec(5, [30.0, 80.0]), 6: rec(6, [15.0, 45.0, 75.0])}
+    e = pool.pool_entry("dbus-daemon", by_rep)
+    assert e["components"]["selected"] == [comm] and e["components"]["sporadic"] == []
+    assert e["components"]["sparse"] == [{"comm": comm, "repeats_without": [3]}]
+    assert e["threads"][comm]["wakes_per_s"] == [0.03, 0.02, 0.0, 0.03, 0.02, 0.03]  # every repeat, zero where silent
+    assert len(e["threads"][comm]["gap_ms"]) == 5                                     # the repeats it woke in
+    # its gap table is over the six repeats laid end to end, the silent one adding its time (9.5 D71): 600 s over
+    # 13 wakes, so the entry compiles at the rate it carries
+    assert e["tables"][comm]["gap_ms"]["repeat_mean"] == [round(600000 / 13, 4)]
+    q = pool.criterion({"dbus-daemon": e})
+    c = q["quantities"][f"dbus-daemon {comm} wakes/s"]
+    assert abs(c["mean"] - 0.02167) < 1e-4 and c["passes"] is False and c["sparse"] is True and c["carried"] is True
+    assert q["passes"] is True
+    # an entry not named keeps D43 as written
+    e2 = pool.pool_entry("gnome-shell", {k: {**v, "threads": {k2.replace("system-bus/dbus-daemon", "gnome-shell/gmain"): x
+                                                                for k2, x in v["threads"].items()},
+                                             "_samples": {"gnome-shell/gmain": x for x in v["_samples"].values()}}
+                                         for k, v in by_rep.items()})
+    assert e2["components"]["selected"] == [] and e2["components"]["sporadic"][0]["comm"] == "gnome-shell/gmain"
+
+
 def test_run_sh_carries_the_decisions(repo_root):
     src = _src(repo_root, "session", "run.sh")
     assert "PAMName=login" in src and "XDG_SESSION_TYPE=wayland" in src                 # D11, login mode `unit`
@@ -448,11 +481,14 @@ def test_a_wake_is_classed_by_its_cause_traced_through_the_trace():
     assert by_t[10.0003][0] == "outside" and "php8.3-fpm" in by_t[10.0003][1]
     assert by_t[30.0][0] == "outside" and "harness" in by_t[30.0][1]
     assert by_t[30.1002][0] == "outside"                       # the follow-up goes with the wake that armed it
-    assert by_t[50.0] == ("event", "job sysstat-daily-sample (sysstat)")
+    assert by_t[50.0] == ("outside", "job sysstat-daily-sample (sysstat)")   # D32: every sysstat job is outside
     assert by_t[60.0][0] == "outside" and "harness" in by_t[60.0][1]   # the cat's lineage reaches the loop's bash
     kept = {round(r.t_in, 4) for r in keep}
-    assert kept == {20.0, 20.01, 40.0, 70.0}
+    assert kept == {20.0, 20.01, 70.0}
     assert "systemd-logind.service (systemd)" in tally["desktop"]
     assert tally["desktop"]["systemd-logind.service (systemd)"] == 2   # the D-continuation carries logind's cause
-    assert tally["desktop"]["job sysstat-collect (sysstat)"] == 1
+    # D32: sysstat's collector is outside — the package is a desktop one, but a stock install leaves its timers
+    # disabled (Debian's sysstat/enable defaults to false); the runner image enabled them
+    assert by_t[40.0] == ("outside", "job sysstat-collect (sysstat)")
+    assert "job sysstat-collect (sysstat)" not in tally.get("desktop", {})
     assert tally["own"]["idle CPU (timer or interrupt)"] == 1

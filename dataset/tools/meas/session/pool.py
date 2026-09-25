@@ -27,6 +27,7 @@ if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 from meas.session import analyze  # noqa: E402
 from meas.stability import stability, TOLERANCE  # noqa: E402
+from meas.distribution import circular_gaps  # noqa: E402
 from meas.desktop.pool import _campaign_pool, repeat_order  # noqa: E402
 
 _cp = _campaign_pool()
@@ -116,10 +117,20 @@ def pool_entry(name, by_rep):
             slot["gaps"][k], slot["runs"][k], slot["t_in"][k] = sm.get("gaps", []), sm.get("runs", []), sm.get("t_in", [])
     chosen, residual, cov = select_components(comms, spans, reps,
                                               {k: [(by_rep[k]["t0"], by_rep[k]["t0"] + spans[k])] for k in reps})
+    # D33: a sparse component named for this entry is carried although D43 lists it as sporadic
+    sparse = SPARSE.get(name, ())
+    cov["sparse"] = []
+    for sp in [x for x in cov["sporadic"] if x["comm"] in sparse]:
+        cov["sporadic"].remove(sp); chosen.append(sp["comm"])
+        cov["sparse"].append({"comm": sp["comm"], "repeats_without": [k for k in reps if not comms[sp["comm"]]["wakes"].get(k, 0)]})
+    if cov["sparse"]:
+        rate = {c: sum(cc["wakes"].get(r, 0) / spans[r] for r in reps) / len(reps) for c, cc in comms.items()}
+        total = sum(rate.values())
+        cov["covered_share"] = round(sum(rate[c] for c in chosen) / total, 4) if total else None
     def at(comm, f):
         ks = [k for k in reps if comm in by_rep[k]["threads"]]
         if f == "wakes_per_s":      # D24: from the exact counts, at the resolution the rule needs
-            return [round(comms[comm]["wakes"].get(k, 0) / spans[k], 6) for k in ks]
+            return [round(comms[comm]["wakes"].get(k, 0) / spans[k], 6) for k in (reps if comm in sparse else ks)]
         return [by_rep[k]["threads"][comm][f] for k in ks]
     return {
         "repeats": reps,
@@ -147,7 +158,13 @@ def pool_entry(name, by_rep):
         # every wake per instance before D23 and D27, per repeat: which instances never woke at all
         "instance_wakes_all": {i: [(by_rep[k].get("instance_wakes_all") or {}).get(i, 0) for k in reps]
                                for i in sorted({i for k in reps for i in (by_rep[k].get("instance_wakes_all") or {})})},
-        "tables": {c: {"gap_ms": _cp.summary([comms[c]["gaps"].get(k, []) for k in reps]),
+        # D33 (9.5 D71's renderer rule, for repeats): a sparse component's gap table is over the repeats laid end to
+        # end and wrapped round, a repeat in which it never woke adding its time, so the table implies the rate the
+        # entry carries; every other component's gaps are its per-repeat gaps, wrapped round each phase
+        "tables": {c: {"gap_ms": _cp.summary([[g * 1000 for g in circular_gaps(
+                                     [(comms[c]["t_in"].get(k, []), by_rep[k]["t0"], by_rep[k]["t0"] + spans[k]) for k in reps])]]
+                                 if c in sparse and any(not comms[c]["wakes"].get(k, 0) for k in reps) else
+                                 [comms[c]["gaps"].get(k, []) for k in reps]),
                        "run_ms": _cp.summary([comms[c]["runs"].get(k, []) for k in reps])} for c in chosen},
     }
 
@@ -156,8 +173,15 @@ def pool_entry(name, by_rep):
 # all of the across-repeat spread), each its entry's whole activity once D27's causes are out, carried with their
 # half-widths over at least five repeats, their three values together; both spreads, the wakes per phase and the
 # weight are stated in each entry's scope (`within_run.py`)
-SESSION_SPREAD = {"pipewire": ("wireplumber/gmain",), "systemd": ("pid1/systemd",),
-                  "dbus-daemon": ("system-bus/dbus-daemon",)}
+SESSION_SPREAD = {"systemd": ("pid1/systemd",)}
+
+# D33: sparse components (the class 9.8 D27 set), each its entry's whole activity once D27's and D32's causes are out:
+# WirePlumber's worker, 2–12 wakes a phase; the system bus, 0–36 a phase and none in 6 of the 24 repeats, which
+# 9.5 D43 would list as sporadic. Carried with their half-widths over at least five repeats, their three values
+# together, and their count stated: the wake rate over every repeat, zero where the component never woke; the gap
+# and run means over the repeats it woke in. D29 carried both between sessions on figures D28 read with the
+# collector's wakes present.
+SPARSE = {"pipewire": ("wireplumber/gmain",), "dbus-daemon": ("system-bus/dbus-daemon",)}
 
 
 def criterion(pooled):
@@ -183,7 +207,8 @@ def criterion(pooled):
                     continue
                 c_ = {**stability(vals, floor, MIN_REPEATS, keep_zero=True), "needed": _cp.repeats_needed(vals, floor)}
                 c_["session_spread"] = comm in SESSION_SPREAD.get(name, ())          # D29
-                c_["carried"] = c_["passes"] or (c_["session_spread"] and c_["k"] >= MIN_REPEATS)
+                c_["sparse"] = comm in SPARSE.get(name, ())                          # D33
+                c_["carried"] = c_["passes"] or ((c_["session_spread"] or c_["sparse"]) and c_["k"] >= MIN_REPEATS)
                 out[f"{name} {comm} {label}"] = c_
     return {"tolerance": TOLERANCE, "abs_floor_ms": ABS_FLOOR_MS, "min_repeats": MIN_REPEATS, "quantities": out,
             "passes": bool(out) and all(c["carried"] for c in out.values())}

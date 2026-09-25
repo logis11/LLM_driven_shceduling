@@ -19,7 +19,8 @@ releases.ubuntu.com, read 2026-09-24, SHA-256 6c200933618b2e382e7732b69b247aa5f6
   own      the entry's own threads and timers              kept
   kernel   kernel threads                                  kept
   desktop  a desktop package's unit, or its job whose schedule recurs within the phase   kept
-  outside  a package the manifest does not hold, or the harness                          leaves, stated
+  outside  a package the manifest does not hold, a desktop package's unit or job that a   leaves, stated
+           stock install leaves disabled and the runner image enabled (D32), or the harness
   event    a desktop job bound to a clock time (D23's form)                               leaves, stated
   unknown  a cause the trace does not resolve                                             kept, stated
 """
@@ -56,14 +57,18 @@ UNIT_PREFIXES = (("app-gnome-org.gnome.Evolution\\x2dalarm\\x2dnotify-", ("evolu
 
 # Scheduled jobs, named by any program their process tree ran (systemd names a unit's process `(<unit>)` before its
 # exec, truncated to 15 characters) or by a fragment of cron's CMD line. A desktop job is kept only when its
-# schedule recurs within the 1800 s phase — sysstat's collector, every 10 minutes (met 3 times in each of the 24
-# repeats); every other desktop job is bound to a clock time (daily, weekly, twice a day, once a boot) and is an
-# event. Checked in order: the summary before the collector.
+# schedule recurs within the 1800 s phase; every other desktop job is bound to a clock time (daily, weekly, twice a
+# day, once a boot) and is an event. Checked in order: the summary before the collector.
+# D32: sysstat's jobs are outside. The package is in the desktop manifest, but a stock install runs none of them:
+# Debian's sysstat 12.6.1-2 (the version Ubuntu 24.04 ships) asks `sysstat/enable` with `Default: false`
+# (debian/sysstat.templates) and its postinst disables sysstat-collect.timer, sysstat-summary.timer and
+# sysstat.service on that default; the runner image enabled them. The collector, every 10 minutes (3 times in each
+# of the 24 repeats), had been kept as a desktop job under D27; the summary and the 23:59 sample had been events.
 JOBS = (
-    ("sysstat-summary", ("(sa2)", "sa2", "sar.sysstat"), "sysstat", "event"),
+    ("sysstat-summary", ("(sa2)", "sa2", "sar.sysstat"), "sysstat", "outside"),
     # sysstat's cron file: `debian-sa1 60 2` once a day at 23:59, `debian-sa1 1 1` every 10 minutes
-    ("sysstat-daily-sample", ("debian-sa1 60 2",), "sysstat", "event"),
-    ("sysstat-collect", ("(sa1)", "sa1", "sadc", "debian-sa1"), "sysstat", "desktop"),
+    ("sysstat-daily-sample", ("debian-sa1 60 2",), "sysstat", "outside"),
+    ("sysstat-collect", ("(sa1)", "sa1", "sadc", "debian-sa1"), "sysstat", "outside"),
     ("phpsessionclean", ("(ionclean)", "sessionclean", "phpquery", "/usr/lib/php/sessionclean"), "php-common",
      "outside"),
     ("podman", ("(podman)", "podman"), "podman", "outside"),

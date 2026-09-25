@@ -89,3 +89,5 @@ The raw records, including every job's census, are one release, as 9.5–9.8 rel
 - 2026-09-24, a cron session as an event of the phase and the exact wake count (changelog D23, D24) — §5: both rules added.
 - 2026-09-24, a wake's cause and the components carried with their half-widths (changelog D27–D29) — §5: both rules added.
 - 2026-09-24, the fold-in (changelog D26) — §7: the login limit reads GDM's automatic login (D16) in place of the transient PAM unit.
+- 2026-09-25, sysstat's jobs are outside (changelog D32) — §5: a desktop package's unit or job that a stock install leaves disabled and the runner image enabled is outside, with the packaging as the ground; sysstat's collector, summary and 23:59 sample leave the components and are stated. `JOBS` in `session/causes.py`.
+- 2026-09-25, the audio server's worker and the system bus as sparse components (changelog D33) — §5: 9.8 D27's class; each its entry's whole activity, the bus waking in none of six phases, its wake rate over every repeat and its gap and run means over the repeats it woke in; D29 keeps pid 1's run mean alone. `SPARSE` in `session/pool.py`.
