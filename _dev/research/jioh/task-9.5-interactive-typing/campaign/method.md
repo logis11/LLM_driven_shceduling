@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-25, `code`'s SWELL-KW phase keys only (changelog D72): the stream's pointer events landed on the activity bar's Search icon and opened the Search view in four repeats (windows 11, 30, 31, 33), the letters then split between its box and the editor, and selected and replaced text in others, so `code` replays the keys alone into the committed file at its end, as `office-writer` (D28) and `chrome` (D65) do; the editor's navigation is a stated limitation. D61's 41-repeat campaign is superseded whole and `code` restarts from window 1. `KINDS` in `probe/appdefs.sh`.
+
 - 2026-09-24, the fold-in and the releases (changelog D70) — §7: the nine archetypes are regenerated from the same-machine pools, `mail-client` from `thunderbird-send`; `web-browser` carries D64's heavy event as its own stated block with no interval; raw records released as `meas-ci-2026-09-18` (the six) and `meas-ci-2026-09-20` (the three).
 
 - 2026-09-23, the application build (changelog D69) — §1: `code` is pinned to 1.138.0 and gated like the CPU model, a job that installed another build stopping before any measurement; §6: every repeat's build is kept in the pooled record and the census stated with the values, `chrome` being served only at its current version and its campaign holding 152.0.7977.82 and 153.0.8010.52.

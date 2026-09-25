@@ -54,6 +54,13 @@ appdef() {
       # widget the stream left open, the pristine copy goes back to disk (the stream may have saved), the buffer is
       # reverted to it, the caret goes to the end
       CLASS="code"; PAT="vscode-data"; RX="code|Code"; DRIVER=stream; STREAM=word; AREA="0.12,0.03,0.05,0.03"
+      # 9.5 D72: the keys only, as soffice (D28) and chrome (D65). With the insets above the recording's origin lands
+      # 38 px from the window's left edge and 96 px from its top — on the activity bar's Search icon — and the Word
+      # recordings hold pointer events at exactly that origin: a press and release there opened the Search view in
+      # windows 11, 30, 31 and 33 of D61's campaign, the letters then split between its box and the editor, and the
+      # clicks and drags selected and replaced text in others. The keys land at the file's end, where the postlaunch
+      # leaves the caret (D61's state); the insets and the hidden Explorer stay as they were.
+      KINDS="key"
       POSTLAUNCH="sleep 20; xdotool key ctrl+b; sleep 1; xdotool key ctrl+alt+b; sleep 1; xdotool key ctrl+End"
       # (D63) every key with --clearmodifiers, Escape again and Ctrl+End twice: in D61's window 5 the caret stayed on line 16
       ALTPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; cp /tmp/index.ts.orig /tmp/project/source/index.ts; code --user-data-dir=/tmp/vscode-data --reuse-window /tmp/project/source/index.ts; sleep 4; xdotool key --clearmodifiers ctrl+alt+shift+r; sleep 8; xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+End; sleep 1; xdotool key --clearmodifiers ctrl+End; sleep 1" ;;

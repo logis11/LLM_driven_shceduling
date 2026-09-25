@@ -127,7 +127,18 @@ def heavy_events_block(ph, tag, indent="      "):
             f"No interval is stated: no repeat holds two of them."]
 
 
-KEYS_ONLY = {"office-writer", "web-browser"}  # D28, D65: the stream's keys only (appdefs KINDS=key)
+# D28, D65, D72: the stream's keys only (appdefs KINDS=key), and what each entry's scope says about it
+KEYS_ONLY = {
+    "office-writer": ("and its clicks, scrolls and drags left out, so the typing stays at the document's end (D28; the archetype "
+                      "carries typing, not document navigation); "),
+    "web-browser": ("and its clicks, scrolls and drags left out, so every key lands in the page's text box (D65; the archetype "
+                    "carries typing into a page field, not browsing's scrolling and clicking — the page-load operation carries "
+                    "browsing's heavy work); "),
+    "code-editor": ("and its clicks, scrolls and drags left out, so the typing stays at the file's end, the file otherwise as "
+                    "committed (D72; the archetype carries typing, not the editor's navigation); the keys are a fixed letter "
+                    "cycle (D4: timing only), so the per-key cost is the language server re-checking a file being filled with "
+                    "letter runs; "),
+}
 
 
 def entry(aid, spec, d):
@@ -191,10 +202,7 @@ def entry(aid, spec, d):
     if kind == "input":
         if aid in KEYS_ONLY:
             scope += (f"Stimulus: SWELL-KW stream {stream}, its keystrokes replayed by xdotool at their recorded times (error p99 1.24 ms) "
-                      + ("and its clicks, scrolls and drags left out, so the typing stays at the document's end (D28; the archetype carries "
-                         "typing, not document navigation); " if aid == "office-writer" else
-                         "and its clicks, scrolls and drags left out, so every key lands in the page's text box (D65; the archetype carries "
-                         "typing into a page field, not browsing's scrolling and clicking — the page-load operation carries browsing's heavy work); "))
+                      + KEYS_ONLY[aid])
         else:
             scope += (f"Stimulus: SWELL-KW stream {stream} replayed per event by xdotool at recorded gaps (error p99 1.24 ms), "
                       f"keys and pointer events together, pointer positions scaled into the content area (D5, D12); ")
