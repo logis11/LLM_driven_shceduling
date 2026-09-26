@@ -231,11 +231,11 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 | application | repeats | quantities | out of tolerance | repeats needed at this spread | holds |
 |---|---|---|---|---|---|
 | `soffice` | 14 | 5 | 0 | 14 | yes |
-| `thunderbird-send` | 43 | 75 | 9 | 36 | yes |
+| `thunderbird-send` | 43 | 75 | 9 | 34 | yes |
 | `gimp` | 5 | 10 | 0 | 5 | yes |
 | `kdenlive` | 20 | 22 | 0 | 20 | yes |
 | `mpv-video` | 24 | 3 | 0 | 10 | yes |
-| `mpv-audio` | 31 | 3 | 0 | 29 | yes |
+| `mpv-audio` | 31 | 3 | 0 | 28 | yes |
 
 ### `soffice`
 
@@ -251,42 +251,42 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
-| idle thunderbird-bin wakes/s | 43 | 0.4054 | 11.8% | ±3.8% | 0.7% | 25 | yes |
-| idle thunderbird-bin gap mean (ms) | 43 | 2500.9935 | 12.0% | ±3.8% | 0.6% | 26 | yes |
-| idle thunderbird-bin run mean (ms) | 43 | 0.2981 | 10.9% | ±3.5% | 0.7% | 21 | yes |
-| idle Timer wakes/s | 43 | 0.2831 | 6.9% | ±2.2% | 0.4% | 10 | yes |
+| idle thunderbird-bin wakes/s | 43 | 0.4054 | 11.8% | ±3.6% | 0.7% | 24 | yes |
+| idle thunderbird-bin gap mean (ms) | 43 | 2500.9935 | 12.0% | ±3.7% | 0.6% | 25 | yes |
+| idle thunderbird-bin run mean (ms) | 43 | 0.2981 | 10.9% | ±3.4% | 0.7% | 21 | yes |
+| idle Timer wakes/s | 43 | 0.2831 | 6.9% | ±2.1% | 0.4% | 10 | yes |
 | idle Timer gap mean (ms) | 43 | 3548.7175 | 6.7% | ±2.1% | 0.4% | 10 | yes |
-| idle Timer run mean (ms) | 43 | 0.0363 | 5.8% | ±1.9% | 0.5% | 8 | yes |
+| idle Timer run mean (ms) | 43 | 0.0363 | 5.8% | ±1.8% | 0.5% | 8 | yes |
 | idle gmain wakes/s | 43 | 0.25 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle gmain gap mean (ms) | 43 | 4000.0139 | 0.0% | ±0.0% | 0.0% | 5 | yes |
-| idle gmain run mean (ms) | 43 | 0.047 | 8.8% | ±2.8% | 0.8% | 15 | yes |
-| idle IPDL Background wakes/s | 43 | 0.2405 | 3.8% | ±1.2% | 0.3% | 5 | yes |
+| idle gmain run mean (ms) | 43 | 0.047 | 8.8% | ±2.7% | 0.8% | 15 | yes |
+| idle IPDL Background wakes/s | 43 | 0.2405 | 3.8% | ±1.1% | 0.3% | 5 | yes |
 | idle IPDL Background gap mean (ms) | 43 | 4163.7771 | 3.8% | ±1.2% | 0.3% | 5 | yes |
-| idle IPDL Background run mean (ms) | 43 | 0.0207 | 5.0% | ±1.6% | 0.3% | 7 | yes |
-| idle WebExtensions wakes/s | 43 | 0.2072 | 9.2% | ±2.9% | 0.4% | 16 | yes |
-| idle WebExtensions gap mean (ms) | 43 | 4867.4275 | 9.3% | ±3.0% | 0.5% | 16 | yes |
-| idle WebExtensions run mean (ms) | 43 | 0.1076 | 9.1% | ±2.9% | 0.6% | 16 | yes |
-| idle JS Watchdog wakes/s | 43 | 0.1698 | 12.6% | ±4.0% | 0.6% | 28 | yes |
-| idle JS Watchdog gap mean (ms) | 43 | 5994.469 | 14.2% | ±4.5% | 0.7% | 36 | yes |
-| idle JS Watchdog run mean (ms) | 43 | 0.0215 | 8.9% | ±2.8% | 0.8% | 15 | yes |
-| idle StreamTrans wakes/s | 43 | 0.1303 | 9.9% | ±3.1% | 0.6% | 18 | yes |
-| idle StreamTrans gap mean (ms) | 43 | 7747.1788 | 9.9% | ±3.1% | 0.5% | 18 | yes |
-| idle StreamTrans run mean (ms) | 43 | 4.77 | 11.8% | ±3.8% | 0.7% | 25 | yes |
-| idle Indexed~ IO wakes/s | 43 | 0.0728 | 10.7% | ±3.4% | 0.8% | 21 | yes |
-| idle Indexed~ IO gap mean (ms) | 43 | 13893.8297 | 11.0% | ±3.5% | 0.8% | 22 | yes |
-| idle Indexed~ IO run mean (ms) | 43 | 0.1793 | 9.4% | ±3.0% | 0.7% | 16 | yes |
-| idle glean.dispatche wakes/s | 43 | 0.0568 | 8.4% | ±2.7% | 0.6% | 14 | yes |
-| idle glean.dispatche gap mean (ms) | 43 | 17741.1417 | 9.0% | ±2.9% | 0.7% | 16 | yes |
-| idle glean.dispatche run mean (ms) | 43 | 0.0371 | 5.3% | ±1.7% | 0.4% | 7 | yes |
-| idle IPC I/O Parent wakes/s | 43 | 0.0424 | 7.8% | ±2.5% | 0.4% | 12 | yes |
-| idle IPC I/O Parent gap mean (ms) | 43 | 23746.2086 | 7.8% | ±2.5% | 0.4% | 12 | yes |
-| idle IPC I/O Parent run mean (ms) | 43 | 0.0348 | 7.2% | ±2.3% | 0.4% | 11 | yes |
+| idle IPDL Background run mean (ms) | 43 | 0.0207 | 5.0% | ±1.5% | 0.3% | 7 | yes |
+| idle WebExtensions wakes/s | 43 | 0.2072 | 9.2% | ±2.8% | 0.4% | 16 | yes |
+| idle WebExtensions gap mean (ms) | 43 | 4867.4275 | 9.3% | ±2.9% | 0.5% | 16 | yes |
+| idle WebExtensions run mean (ms) | 43 | 0.1076 | 9.1% | ±2.8% | 0.6% | 16 | yes |
+| idle JS Watchdog wakes/s | 43 | 0.1698 | 12.6% | ±3.9% | 0.6% | 27 | yes |
+| idle JS Watchdog gap mean (ms) | 43 | 5994.469 | 14.2% | ±4.4% | 0.7% | 34 | yes |
+| idle JS Watchdog run mean (ms) | 43 | 0.0215 | 8.9% | ±2.7% | 0.8% | 15 | yes |
+| idle StreamTrans wakes/s | 43 | 0.1303 | 9.9% | ±3.0% | 0.6% | 18 | yes |
+| idle StreamTrans gap mean (ms) | 43 | 7747.1788 | 9.9% | ±3.0% | 0.5% | 18 | yes |
+| idle StreamTrans run mean (ms) | 43 | 4.77 | 11.8% | ±3.6% | 0.7% | 25 | yes |
+| idle Indexed~ IO wakes/s | 43 | 0.0728 | 10.7% | ±3.3% | 0.8% | 21 | yes |
+| idle Indexed~ IO gap mean (ms) | 43 | 13893.8297 | 11.0% | ±3.4% | 0.8% | 21 | yes |
+| idle Indexed~ IO run mean (ms) | 43 | 0.1793 | 9.4% | ±2.9% | 0.7% | 16 | yes |
+| idle glean.dispatche wakes/s | 43 | 0.0568 | 8.4% | ±2.6% | 0.6% | 14 | yes |
+| idle glean.dispatche gap mean (ms) | 43 | 17741.1417 | 9.0% | ±2.8% | 0.7% | 16 | yes |
+| idle glean.dispatche run mean (ms) | 43 | 0.0371 | 5.3% | ±1.6% | 0.4% | 7 | yes |
+| idle IPC I/O Parent wakes/s | 43 | 0.0424 | 7.8% | ±2.4% | 0.4% | 12 | yes |
+| idle IPC I/O Parent gap mean (ms) | 43 | 23746.2086 | 7.8% | ±2.4% | 0.4% | 12 | yes |
+| idle IPC I/O Parent run mean (ms) | 43 | 0.0348 | 7.2% | ±2.2% | 0.4% | 11 | yes |
 | idle IPC I/O Child wakes/s | 43 | 0.04 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle IPC I/O Child gap mean (ms) | 43 | 25000.0866 | 0.0% | ±0.0% | 0.0% | 5 | yes |
-| idle IPC I/O Child run mean (ms) | 43 | 0.0277 | 4.6% | ±1.5% | 0.3% | 6 | yes |
-| idle residual wakes/s | 43 | 0.0943 | 5.9% | ±1.9% | 0.4% | 8 | yes |
-| idle residual gap mean (ms) | 43 | 10638.4311 | 6.3% | ±2.0% | 0.5% | 9 | yes |
-| idle residual run mean (ms) | 43 | 0.0869 | 9.9% | ±3.1% | 0.8% | 18 | yes |
+| idle IPC I/O Child run mean (ms) | 43 | 0.0277 | 4.6% | ±1.4% | 0.3% | 6 | yes |
+| idle residual wakes/s | 43 | 0.0943 | 5.9% | ±1.8% | 0.4% | 8 | yes |
+| idle residual gap mean (ms) | 43 | 10638.4311 | 6.3% | ±1.9% | 0.5% | 9 | yes |
+| idle residual run mean (ms) | 43 | 0.0869 | 9.9% | ±3.0% | 0.8% | 18 | yes |
 | op Socket Thread wakes/s | 8 | 717.5645 | 1.9% | ±1.6% | 0.4% | 5 | yes |
 | op Socket Thread gap mean (ms) | 8 | 1.394 | 1.9% | ±1.6% | 0.5% | 5 | yes |
 | op Socket Thread run mean (ms) | 8 | 0.0217 | 4.8% | ±4.0% | 1.3% | 7 | yes |
@@ -305,9 +305,9 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 | op Softwar~cThread wakes/s | 8 | 59.7211 | 0.2% | ±0.1% | 0.0% | 5 | yes |
 | op Softwar~cThread gap mean (ms) | 8 | 16.7445 | 0.2% | ±0.1% | 0.0% | 5 | yes |
 | op Softwar~cThread run mean (ms) | 8 | 0.0423 | 4.4% | ±3.6% | 1.1% | 6 | yes |
-| op StreamT~ns wakes/s | 8 | 46.0977 | 14.5% | ±12.1% | 2.7% | 37 | no |
-| op StreamT~ns gap mean (ms) | 8 | 22.0922 | 14.3% | ±12.0% | 2.5% | 36 | no |
-| op StreamT~ns run mean (ms) | 8 | 0.1508 | 13.6% | ±11.3% | 3.0% | 33 | no |
+| op StreamT~ns wakes/s | 8 | 46.0977 | 14.5% | ±12.1% | 2.7% | 35 | no |
+| op StreamT~ns gap mean (ms) | 8 | 22.0922 | 14.3% | ±12.0% | 2.5% | 34 | no |
+| op StreamT~ns run mean (ms) | 8 | 0.1508 | 13.6% | ±11.3% | 3.0% | 31 | no |
 | op TaskCon~ller wakes/s | 8 | 41.1563 | 3.4% | ±2.8% | 0.9% | 5 | yes |
 | op TaskCon~ller gap mean (ms) | 8 | 24.322 | 3.4% | ±2.9% | 0.9% | 5 | yes |
 | op TaskCon~ller run mean (ms) | 8 | 0.1812 | 1.8% | ±1.6% | 0.4% | 5 | yes |
@@ -323,7 +323,7 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 | op residual wakes/s | 8 | 105.0151 | 6.6% | ±5.5% | 1.7% | 10 | no |
 | op residual gap mean (ms) | 8 | 9.5572 | 6.3% | ±5.3% | 1.6% | 9 | no |
 | op residual run mean (ms) | 8 | 0.256 | 4.4% | ±3.7% | 1.0% | 6 | yes |
-| input_run mean, SWELL-KW (ms) | 8 | 7.1569 | 17.1% | ±14.3% | 5.4% | 52 | no |
+| input_run mean, SWELL-KW (ms) | 8 | 7.1569 | 17.1% | ±14.3% | 5.4% | 48 | no |
 | input_run mean, 136M (ms) | 8 | 6.2843 | 8.1% | ±6.8% | 1.9% | 13 | no |
 | operation duration mean (ms) | 8 | 3074.2678 | 3.3% | ±2.8% | 0.9% | 5 | yes |
 
@@ -381,7 +381,7 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
-| play CPU share | 31 | 0.0071 | 12.8% | ±4.8% | 0.7% | 29 | yes |
+| play CPU share | 31 | 0.0071 | 12.8% | ±4.7% | 0.7% | 28 | yes |
 | play cycle length mean (ms) | 31 | 49.6354 | 0.1% | ±0.0% | 0.0% | 5 | yes |
-| play cycle work mean (ms) | 31 | 0.3524 | 12.8% | ±4.8% | 0.7% | 29 | yes |
+| play cycle work mean (ms) | 31 | 0.3524 | 12.8% | ±4.7% | 0.7% | 28 | yes |
 

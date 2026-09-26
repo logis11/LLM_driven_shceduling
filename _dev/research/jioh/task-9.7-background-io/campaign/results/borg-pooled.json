@@ -17482,8 +17482,8 @@
       "k": 30,
       "mean": 15181.5683,
       "cv": 0.1024,
-      "half_width": 0.0391,
-      "half_width_abs": 594.3035,
+      "half_width": 0.0382,
+      "half_width_abs": 580.674,
       "leave_one_out": 0.0082,
       "passes": true,
       "needed": 19
@@ -17492,11 +17492,11 @@
       "k": 30,
       "mean": 3128.4014,
       "cv": 0.1276,
-      "half_width": 0.0487,
-      "half_width_abs": 152.4927,
+      "half_width": 0.0476,
+      "half_width_abs": 148.9955,
       "leave_one_out": 0.0099,
       "passes": true,
-      "needed": 26
+      "needed": 28
      }
     },
     "passes": true
@@ -17504,9 +17504,9 @@
    "first_batch": {
     "by_quantity": {
      "borg-first-warm run between voluntary blocks (\u00b5s)": 19,
-     "borg-first-warm block per run (\u00b5s)": 26
+     "borg-first-warm block per run (\u00b5s)": 28
     },
-    "count": 26
+    "count": 28
    },
    "checks": {},
    "comparisons": {

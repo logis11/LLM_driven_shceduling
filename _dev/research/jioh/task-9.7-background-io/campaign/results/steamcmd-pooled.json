@@ -387698,8 +387698,8 @@
       "k": 30,
       "mean": 163.3826,
       "cv": 0.0633,
-      "half_width": 0.0242,
-      "half_width_abs": 3.9535,
+      "half_width": 0.0236,
+      "half_width_abs": 3.8628,
       "leave_one_out": 0.006,
       "passes": true,
       "needed": 9
@@ -387708,11 +387708,11 @@
       "k": 30,
       "mean": 9.4307,
       "cv": 0.2717,
-      "half_width": 0.1038,
-      "half_width_abs": 0.9792,
+      "half_width": 0.1014,
+      "half_width_abs": 0.9567,
       "leave_one_out": 0.0261,
       "passes": true,
-      "needed": 26
+      "needed": 28
      }
     },
     "passes": true
@@ -387720,9 +387720,9 @@
    "first_batch": {
     "by_quantity": {
      "steam-fresh-shaped run between voluntary blocks (\u00b5s)": 9,
-     "steam-fresh-shaped block per run (\u00b5s)": 26
+     "steam-fresh-shaped block per run (\u00b5s)": 28
     },
-    "count": 26
+    "count": 28
    },
    "checks": {
     "untraced against traced: CPU total (exit accounting)": {

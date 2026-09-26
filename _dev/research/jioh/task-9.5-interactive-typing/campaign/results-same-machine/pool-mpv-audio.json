@@ -4822,18 +4822,18 @@
       "k": 31,
       "mean": 0.0071,
       "cv": 0.1275,
-      "half_width": 0.0479,
+      "half_width": 0.0468,
       "half_width_abs": 0.0003,
       "leave_one_out": 0.007,
       "passes": true,
-      "needed": 29
+      "needed": 28
      },
      "play cycle length mean (ms)": {
       "k": 31,
       "mean": 49.6354,
       "cv": 0.0006,
       "half_width": 0.0002,
-      "half_width_abs": 0.0118,
+      "half_width_abs": 0.0116,
       "leave_one_out": 0.0,
       "passes": true,
       "needed": 5
@@ -4842,15 +4842,15 @@
       "k": 31,
       "mean": 0.3524,
       "cv": 0.1275,
-      "half_width": 0.0479,
-      "half_width_abs": 0.0169,
+      "half_width": 0.0468,
+      "half_width_abs": 0.0165,
       "leave_one_out": 0.007,
       "passes": true,
-      "needed": 29
+      "needed": 28
      }
     },
     "passes": true,
-    "needed": 29
+    "needed": 28
    }
   }
  }

@@ -1,7 +1,7 @@
 mpv-audio: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]; stability rule holds
-   play CPU share: k 31, half-width 0.0479, passes
+   play CPU share: k 31, half-width 0.0468, passes
    play cycle length mean (ms): k 31, half-width 0.0002, passes
-   play cycle work mean (ms): k 31, half-width 0.0479, passes
+   play cycle work mean (ms): k 31, half-width 0.0468, passes
    phases ['play']; pooled record _dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine/pool-mpv-audio.json
 validity:
    r1: ok

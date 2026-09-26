@@ -236473,7 +236473,7 @@
     "half_width_abs": 20.727,
     "leave_one_out": 0.0285,
     "passes": false,
-    "needed": 31,
+    "needed": 30,
     "excepted": true,
     "carried": true
    },
@@ -236569,7 +236569,7 @@
     "half_width_abs": 162251.4769,
     "leave_one_out": 0.0273,
     "passes": false,
-    "needed": 26,
+    "needed": 25,
     "excepted": true,
     "carried": true
    },
@@ -236581,7 +236581,7 @@
     "half_width_abs": 30.887,
     "leave_one_out": 0.0427,
     "passes": false,
-    "needed": 50,
+    "needed": 46,
     "excepted": true,
     "carried": true
    },
@@ -236617,7 +236617,7 @@
     "half_width_abs": 2.656,
     "leave_one_out": 0.0563,
     "passes": false,
-    "needed": 93,
+    "needed": 84,
     "excepted": true,
     "carried": true
    },

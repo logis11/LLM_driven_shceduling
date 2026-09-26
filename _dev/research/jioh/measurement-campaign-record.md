@@ -28,11 +28,11 @@ Pooled in `task-9.5-interactive-typing/campaign/results-same-machine/` and rende
 | archetype | application | repeats | values | widest | stopped by | jobs (gated) | recorded input covered |
 |---|---|---|---|---|---|---|---|
 | `office-writer` | `soffice` | 14 (windows 1–14) | 5 | idle `soffice.bin` run mean ±4.93 % | the rule | 19 (5) | SWELL-KW Word, participants 1–6 |
-| `mail-client` | `thunderbird-send` | 43 (windows 1–28, 30–44) | 36 + 39 reported at the window limit | idle `JS Watchdog` gap mean ±4.52 % | the rule | 77 (32) | SWELL-KW Outlook, all 25 participants; windows 9 on are past the recording |
+| `mail-client` | `thunderbird-send` | 43 (windows 1–28, 30–44) | 36 + 39 reported at the window limit | idle `JS Watchdog` gap mean ±4.36 % | the rule | 77 (32) | SWELL-KW Outlook, all 25 participants; windows 9 on are past the recording |
 | `image-editor` | `gimp` | 5 (1, 2, 3, 5, 6) | 10 | op `gimp` wakes/s ±4.38 % | the rule | 8 (3) | scripted pointer loop |
 | `video-editor` | `kdenlive` | 20 (1–3, 5–21) | 22 | driven `kdenlive` run mean ±4.94 % | the rule | 30 (10) | scripted pointer loop |
-| `video-player` | `mpv-video` | 24 (1, 2, 4, 6–26) | 3 since D75 (16 before) | play cycle run mean ±2.89 % (before D75: play `vo` wakes/s ±4.98 %) | the rule | 51 (27) | none |
-| `audio-player` | `mpv-audio` | 31 (1–31) | 3 since D75 (16 before) | play cycle run mean ±4.79 % (before D75: play `ao` run mean ±4.93 %) | the rule | 55 (24) | none |
+| `video-player` | `mpv-video` | 24 (1, 2, 4, 6–26) | 3 since D75 (16 before) | play cycle run mean ±2.86 % (before D75: play `vo` wakes/s ±4.98 %) | the rule | 51 (27) | none |
+| `audio-player` | `mpv-audio` | 31 (1–31) | 3 since D75 (16 before) | play cycle run mean ±4.68 % (before D75: play `ao` run mean ±4.93 %) | the rule | 55 (24) | none |
 
 The typing-driven applications also replay the 136M Keystrokes windows 1…k of their own repeats in the `driven-alt` phase (the pre-registered stimulus check).
 
@@ -52,12 +52,12 @@ Pooled in `task-9.5-interactive-typing/campaign/results-re-measured/` and render
 
 | archetype | application | repeats | values | widest | stopped by | jobs (gated) | recorded input covered |
 |---|---|---|---|---|---|---|---|
-| `web-browser` | `chrome` | 38 (windows 1–38) | 18 + 30 reported at the window limit | idle `utility/HangWatcher` run mean ±2.99 % | the recording's last window (D32, D68) | 71 (31) | SWELL-KW Internet Explorer c1, every window the recording holds |
-| `code-editor` | `code` | 44 (windows 1–44; 43 idle only, no event recorded) | 26 + 1 carried (D57) + 2 at the window limit | `input_run` mean under SWELL-KW ±5.17 % at the limit | the recording's last window (D32, D68) | 102 (57) | SWELL-KW Word c1, every window the recording holds |
-| `video-call` | `webrtc` | 45 | 3 since D75 (39 + 7 carried (D57) before) | play cycle run mean ±1.58 % (before D75: play `gpu/Chrome_ChildIOT` gap mean ±4.95 %) | the rule | 102 (57) | none |
+| `web-browser` | `chrome` | 38 (windows 1–38) | 18 + 30 reported at the window limit | idle `utility/HangWatcher` run mean ±2.89 % | the recording's last window (D32, D68) | 71 (31) | SWELL-KW Internet Explorer c1, every window the recording holds |
+| `code-editor` | `code` | 44 (windows 1–44; 43 idle only, no event recorded) | 26 + 1 carried (D57) + 2 at the window limit | `input_run` mean under SWELL-KW ±4.98 % at the limit | the recording's last window (D32, D68) | 102 (57) | SWELL-KW Word c1, every window the recording holds |
+| `video-call` | `webrtc` | 45 | 3 since D75 (39 + 7 carried (D57) before) | play cycle run mean ±1.52 % (before D75: play `gpu/Chrome_ChildIOT` gap mean ±4.95 %) | the rule | 102 (57) | none |
 
-- `web-browser`: its 30 values at the window limit are the operation phase's 27 (D46), the operation's duration mean and the two per-input means; the widest is the `input_run` mean under SWELL-KW, 1.701 ms ±8.33 %, whose spread follows how densely each participant typed — the recording's tail is sparse, windows 29, 35, 36, 37 and 38 replaying 47, 53, 80, 61 and 27 events against 200–1,300 earlier (D32). The 136M check's mean is ±4.09 % over the same repeats. One job was cancelled mid-measurement (window 31, cancelled with the `code` job that shared its run) and is not counted.
-- `code-editor`: the keys-only campaign (D72, D73): 44 repeats, VS Code 1.138.0 in every one; window 43 records no event and ran the idle phase alone; window 42's later copy (#599) left out under D66. Its two per-input values are reported at the recording's limit — SWELL-KW 105.4 ms ±5.17 %, 136M 106.1 ms ±3.92 % — the SWELL-KW mean having projected 47 repeats at 41 against 44 windows; `utility/libuv-worker`'s gap mean ±5.13 % is carried under D57, its wake rate ±4.63 % the widest value inside the rule. Every repeat's screenshot after the SWELL-KW phase was read: the letters at the file's end, no view opened. The superseded D61 campaign (41 repeats, pointer events replayed) read 92.31 ms under SWELL-KW and +15 % under 136M; keys only, the two streams agree within 3 %.
+- `web-browser`: its 30 values at the window limit are the operation phase's 27 (D46), the operation's duration mean and the two per-input means; the widest is the `input_run` mean under SWELL-KW, 1.701 ms ±8.06 %, whose spread follows how densely each participant typed — the recording's tail is sparse, windows 29, 35, 36, 37 and 38 replaying 47, 53, 80, 61 and 27 events against 200–1,300 earlier (D32). The 136M check's mean is ±3.96 % over the same repeats. One job was cancelled mid-measurement (window 31, cancelled with the `code` job that shared its run) and is not counted.
+- `code-editor`: the keys-only campaign (D72, D73): 44 repeats, VS Code 1.138.0 in every one; window 43 records no event and ran the idle phase alone; window 42's later copy (#599) left out under D66. Its two per-input values are reported at the recording's limit — SWELL-KW 105.4 ms ±4.98 %, 136M 106.1 ms ±3.78 %, both within the rule under the exact t multiplier (9.6 D35) — the SWELL-KW mean having projected 47 repeats at 41 against 44 windows; `utility/libuv-worker`'s three values are carried under D57, its gap mean ±4.95 % and wake rate ±4.46 %. Every repeat's screenshot after the SWELL-KW phase was read: the letters at the file's end, no view opened. The superseded D61 campaign (41 repeats, pointer events replayed) read 92.31 ms under SWELL-KW and +15 % under 136M; keys only, the two streams agree within 3 %.
 - `video-call`: the seven values carried under D57 are the audio path (D59), widest ±5.82 %; `play gpu/Chrome_ChildIOT`'s gap mean took 45 repeats, its wake rate taking discrete levels between sessions — 64.3–65.2 a second in 34 repeats, ~54 in four, ~46.6 in five, 36.5 in one. Since D75 the entry carries the call's 10 ms audio-frame cycle, not its components, so these seven values leave it; they stay in the pooled record.
 - The builds are stated per repeat (D69): `code` 1.138.0 in all 44; `chrome` 152.0.7977.82 in 29 and 153.0.8010.52 in 9 (windows 18, 20, 22, 27, 31, 33, 34, 37, 38); `webrtc` 152.0.7977.82 in 42 and 153.0.8010.52 in 3 (windows 37, 40, 45). Google's repository serves only its current version, so the mix is carried and stated: over `chrome`'s 38 repeats every carried value agrees between the two builds within 0.18–1.09 standard deviations of the 152 repeats' own spread, the operation duration within 0.38 and the 136M mean within 0.13.
 
@@ -99,14 +99,14 @@ Each archetype carries two tables (D29): the program's runs between voluntary bl
 
 | archetype | program | value | repeats | mean | spread (cv) | 95 % half-width | stopped by |
 |---|---|---|---|---|---|---|---|
-| `file-backup` | `borg` | run between voluntary blocks, warm first backup | 30 | 15.182 ms | 10.2 % | ±3.91 % | the rule |
-| `file-backup` | `borg` | block per run, warm first backup | 30 | 3.128 ms | 12.8 % | ±4.87 % | the rule |
+| `file-backup` | `borg` | run between voluntary blocks, warm first backup | 30 | 15.182 ms | 10.2 % | ±3.82 % | the rule |
+| `file-backup` | `borg` | block per run, warm first backup | 30 | 3.128 ms | 12.8 % | ±4.76 % | the rule |
 | `file-archiver` | `7z` | run between voluntary blocks, warm eight-thread run | 6 | 4.187 ms | 2.1 % | ±2.17 % | the rule |
 | `file-archiver` | `7z` | block per run, warm eight-thread run | 6 | 0.16 µs | 38.5 % | ±0.06 µs | the rule (1 µs floor) |
-| `game-download` | `steamcmd` | run between voluntary blocks, shaped fresh install | 30 | 163.4 µs | 6.3 % | ±2.42 % | the rule |
-| `game-download` | `steamcmd` | block per run, shaped fresh install | 30 | 9.43 µs | 27.2 % | ±0.98 µs (±10.38 %) | the rule (1 µs floor) |
+| `game-download` | `steamcmd` | run between voluntary blocks, shaped fresh install | 30 | 163.4 µs | 6.3 % | ±2.36 % | the rule |
+| `game-download` | `steamcmd` | block per run, shaped fresh install | 30 | 9.43 µs | 27.2 % | ±0.96 µs (±10.14 %) | the rule (1 µs floor) |
 
-The per-wake tables of the first list are reported beside them: `borg` wait per wake 3.128 ms ±4.87 %, disk wait 3.157 ms ±4.84 %; `7z` wait per wake 32.232 ms ±2.40 %; `steamcmd` network wait 223.1 µs ±4.51 %, bytes per wake 3,973 B ±3.84 %, run per wake 163.4 µs.
+The per-wake tables of the first list are reported beside them: `borg` wait per wake 3.128 ms ±4.76 %, disk wait 3.157 ms ±4.73 %; `7z` wait per wake 32.232 ms ±2.40 %; `steamcmd` network wait 223.1 µs ±4.40 %, bytes per wake 3,973 B ±3.75 %, run per wake 163.4 µs.
 
 `file-archiver`'s first batch of six repeats holds the rule, every repeat valid: 14 jobs, 8 gated draws, none on another model. Its D15 check, the single-thread run against the eight-thread run, is reported by its CPU per byte (0.91–0.96 of the eight-thread run in every repeat); the check's per-wake parts split into two modes of the same thread, 940 wakes at a 0.36–0.38 s median gap in repeats 1, 2 and 6 against 1,246–1,575 wakes at 0.4–0.7 ms in repeats 3, 4 and 5, and both are stated in the archetype's notes.
 
@@ -168,10 +168,10 @@ One subject, the Ubuntu 24.04 desktop session, carries the four entries that rep
 |---|---|---|---|---|
 | `gnome-shell/JS Helper` | 0.3025 | 3.31 s | 0.0137 ms | ±0.7 · ±0.7 · ±1.5 % |
 | `gnome-shell/gmain` | 0.2498 | 4.00 s | 0.0497 ms | ±0.1 · ±0.1 · ±2.2 % |
-| `gnome-shell/gnome-shell` | 0.0347 | 28.81 s | 5.7035 ms | ±1.5 · ±1.5 · ±2.8 % |
-| `wireplumber/gmain` | 0.0029 | 426.70 s | 0.0360 ms | ±21.6 · ±19.8 · ±4.0 %, carried (D33) |
-| `pid1/systemd` | 0.0734 | 13.66 s | 0.1274 ms | ±2.0 · ±1.9 · ±10.1 %, run mean carried (D29) |
-| `system-bus/dbus-daemon` | 0.0057 | 238.56 s | 0.1882 ms | ±43.8 · ±45.7 · ±25.0 %, carried (D33); 0–36 wakes a phase, none in 6 of 24 |
+| `gnome-shell/gnome-shell` | 0.0347 | 28.81 s | 5.7035 ms | ±1.5 · ±1.4 · ±2.8 % |
+| `wireplumber/gmain` | 0.0029 | 426.70 s | 0.0360 ms | ±21.4 · ±19.5 · ±3.9 %, carried (D33) |
+| `pid1/systemd` | 0.0734 | 13.66 s | 0.1274 ms | ±2.0 · ±1.9 · ±10.0 %, run mean carried (D29) |
+| `system-bus/dbus-daemon` | 0.0057 | 238.56 s | 0.1882 ms | ±43.3 · ±45.7 · ±25.0 %, carried (D33); 0–36 wakes a phase, none in 6 of 24 |
 
 Gap means are over each component's merged wake times, wrapped round the phase (9.5 D71; this slice's D31), so a gap mean is the phase over the wakes.
 

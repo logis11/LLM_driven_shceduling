@@ -5,11 +5,39 @@ carried median (t multiplier, k − 1 degrees of freedom), relative to the mean,
 added one at a time until it holds; every same-machine repeat obtained is pooled and reported.
 """
 
+import functools
+import math
 import statistics
 
-T975 = {2: 12.706, 3: 4.303, 4: 3.182, 5: 2.776, 6: 2.571, 7: 2.447, 8: 2.365, 9: 2.306, 10: 2.262,
-        11: 2.228, 12: 2.201, 13: 2.179, 14: 2.160, 15: 2.145, 16: 2.131, 17: 2.120, 18: 2.110, 19: 2.101, 20: 2.093}
 TOLERANCE = 0.05
+
+
+def _within(t, nu):
+    """P(|T| <= t) for Student's t with nu (a positive integer) degrees of freedom: the closed form of its
+    distribution function as a finite sum in theta = atan(t / sqrt(nu))."""
+    th = math.atan(t / math.sqrt(nu))
+    c2 = math.cos(th) ** 2
+    term, total = 1.0, 1.0
+    if nu % 2:
+        for j in range(1, (nu - 1) // 2):
+            term *= c2 * (2 * j) / (2 * j + 1)
+            total += term
+        return 2 / math.pi * (th + (math.sin(th) * math.cos(th) * total if nu > 1 else 0.0))
+    for j in range(1, nu // 2):
+        term *= c2 * (2 * j - 1) / (2 * j)
+        total += term
+    return math.sin(th) * total
+
+
+@functools.lru_cache(maxsize=None)
+def t975(k):
+    """The 97.5 % point of Student's t with k - 1 degrees of freedom, to three decimals as printed tables give it:
+    the multiplier of a 95 % two-sided interval over k repeats."""
+    lo, hi = 0.0, 100.0
+    for _ in range(200):
+        mid = (lo + hi) / 2
+        lo, hi = (mid, hi) if _within(mid, k - 1) < 0.95 else (lo, mid)
+    return round((lo + hi) / 2, 3)
 
 
 def stability(values_by_repeat, abs_floor=None, min_k=None, keep_zero=False):
@@ -27,7 +55,7 @@ def stability(values_by_repeat, abs_floor=None, min_k=None, keep_zero=False):
         return {"k": k, "mean": v[0] if v else None, "cv": None, "half_width": None, "half_width_abs": None,
                 "leave_one_out": None, "passes": False}
     m, sd = statistics.fmean(v), statistics.stdev(v)
-    hw_abs = T975.get(k, T975[20]) * sd / (k ** 0.5)
+    hw_abs = t975(k) * sd / (k ** 0.5)
     if m == 0:  # only under keep_zero: every repeat at zero
         ok = abs_floor is not None and hw_abs <= abs_floor
         if min_k is not None and k < min_k:

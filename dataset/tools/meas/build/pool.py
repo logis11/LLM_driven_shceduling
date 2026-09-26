@@ -23,7 +23,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from analyze import analyze_phase, load_edges, pct, QUANTILE_PROBS  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from stability import stability, T975, TOLERANCE  # noqa: E402
+from stability import stability, t975, TOLERANCE  # noqa: E402
 from distribution import quantile_table  # noqa: E402
 import shapes  # noqa: E402  (this directory is on sys.path)
 
@@ -101,7 +101,7 @@ def repeats_needed(values_by_repeat, abs_floor=None):
     m, sd = statistics.fmean(v), statistics.stdev(v)
     bound = max(TOLERANCE * m, abs_floor or 0.0)
     for k in range(MIN_REPEATS, 201):
-        if T975.get(k, T975[20]) * sd / k ** 0.5 <= bound:
+        if t975(k) * sd / k ** 0.5 <= bound:
             return k
     return None
 

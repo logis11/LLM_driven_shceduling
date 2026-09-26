@@ -29,7 +29,7 @@ from array import array
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from analyze import analyze_run, component_name, pct  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from stability import stability, TOLERANCE, T975  # noqa: E402
+from stability import stability, TOLERANCE, t975  # noqa: E402
 from distribution import circular_gaps, quantile_table  # noqa: E402
 
 NAME = re.compile(r"^meas-(interactive|playback)-(.+)-r(\d+)-(dry|full)$")
@@ -147,7 +147,7 @@ def repeats_needed(values, abs_floor=None):
     m, sd = statistics.fmean(v), statistics.stdev(v)
     bound = max(TOLERANCE * m, abs_floor or 0.0)
     for k in range(MIN_REPEATS, 201):
-        if T975.get(k, T975[20]) * sd / k ** 0.5 <= bound:
+        if t975(k) * sd / k ** 0.5 <= bound:
             return k
     return None
 

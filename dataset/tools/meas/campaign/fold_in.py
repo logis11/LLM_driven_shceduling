@@ -142,9 +142,10 @@ def stability_scope(aid, d):
         if out:
             text += "; outside the rule: " + "; ".join(
                 f"{value_name(k)[0]} {held(c, value_name(k)[1])} (the rule needs {c['needed']} repeats)" for k, c in out)
-        if len(ins) == 1:
-            k = next(k for k, c in limited.items() if c["passes"])
-            text += f"; {value_name(k)[0]} {held(limited[k], value_name(k)[1])} holds within it"
+        if 1 <= len(ins) <= 2:
+            text += "; " + " and ".join(f"{value_name(k)[0]} {held(c, value_name(k)[1])}"
+                                        for k, c in limited.items() if c["passes"])
+            text += f" hold{'s' if len(ins) == 1 else ''} within it"
         elif ins:
             text += (f"; {'the other' if out else 'all'} {len(ins)} hold within it, the widest "
                      f"±{max(c['half_width'] for c in ins) * 100:.2f} %")

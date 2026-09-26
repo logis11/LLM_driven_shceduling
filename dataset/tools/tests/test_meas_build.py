@@ -26,6 +26,22 @@ def test_min_k_holds_the_criterion_back_below_five_repeats():
     assert stab.stability(vals + [100.4], min_k=5)["passes"] is True
 
 
+def test_the_t_multiplier_is_students_at_k_minus_one_degrees_of_freedom():
+    # the interval the workflow states, a t interval with k - 1 degrees of freedom, to three decimals as printed tables
+    # give it: the table this module carried for k = 2..20, then ν = 20, 29, 30, 36, 37, 40, 44, 60, 120
+    printed = {2: 12.706, 3: 4.303, 4: 3.182, 5: 2.776, 6: 2.571, 7: 2.447, 8: 2.365, 9: 2.306, 10: 2.262, 11: 2.228,
+               12: 2.201, 13: 2.179, 14: 2.160, 15: 2.145, 16: 2.131, 17: 2.120, 18: 2.110, 19: 2.101, 20: 2.093,
+               21: 2.086, 30: 2.045, 31: 2.042, 37: 2.028, 38: 2.026, 41: 2.021, 45: 2.015, 61: 2.000, 121: 1.980}
+    assert {k: stab.t975(k) for k in printed} == printed
+
+
+def test_the_half_width_past_twenty_repeats_takes_its_own_multiplier():
+    # 30 repeats alternating 95 and 105: mean 100, sd 5.0855; t(29) = 2.045 gives 2.045 * 5.0855 / sqrt(30) = 1.8987,
+    # ±1.90 % (the k = 20 multiplier, 2.093, gave ±1.94 %)
+    r = stab.stability([95.0, 105.0] * 15)
+    assert r["k"] == 30 and r["half_width"] == 0.019 and r["half_width_abs"] == pytest.approx(1.8987, abs=1e-4)
+
+
 from meas.build import analyze as build  # noqa: E402
 from meas.build import shapes  # noqa: E402
 
@@ -183,6 +199,8 @@ def test_repeats_needed_is_at_least_five_and_follows_the_spread():
     wide = pool.repeats_needed({4: 196.0, 5: 233.0, 7: 205.0, 8: 220.0}, abs_floor=1.0)
     assert wide > 5 and pool.repeats_needed({4: 196.0, 5: 233.0, 7: 205.0, 8: 220.0}) == wide
     assert pool.repeats_needed({4: 100.0}) is None
+    # sd 15 about 100: t(k-1) / sqrt(k) <= 1/3 first at k = 38 (2.026 / 6.164 = 0.3287; k = 37: 2.028 / 6.083 = 0.3334)
+    assert pool.repeats_needed({1: 85.0, 2: 100.0, 3: 115.0}) == 38
 
 
 def test_clamav_daily_reads_the_fixed_copy_or_the_version_line():

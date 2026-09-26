@@ -229,12 +229,7 @@ def main():
                   + ("carried with its half-width (9.6 D29)" if c.get("excepted") and c.get("carried")
                      else ("passes" if c["passes"] else "fails")))
     elif st and "quantities" in st:
-        print(f"{app}: repeats {entry['repeats']}; stability rule {'holds' if st['passes'] else 'does not hold yet'}"
-              + (f"; first batch at this spread {entry['first_batch']['count']}" if entry.get("first_batch") else ""))
-        for q, c in st["quantities"].items():
-            print(f"   {q}: k {c['k']}, half-width {c['half_width']}, "
-                  f"{'passes' if c['passes'] else 'at the window limit, reported (D46)' if c.get('limited') else 'carried with its half-width, its spread between sessions (D57)' if c.get('session_spread') and c.get('carried', True) else 'carried with its half-width, its spread the machine (9.8 D17)' if c.get('excepted') and c.get('carried') else 'fails'}"
-                  + (f", needed {c.get('needed') or 'over 200'}" if not c["passes"] and not c.get("carried") and "needed" in c else ""))
+        print("\n".join(stability_lines(app, entry)))
     elif st:
         print(f"{app}: repeats {entry['repeats']}; {st['quantity']} over {st['k']}: half-width {st['half_width']} "
               f"(tolerance {st['tolerance']}) — {'holds' if st['passes'] else 'does not hold yet'}")
@@ -245,6 +240,18 @@ def main():
     if excluded or excluded_runs:
         print(f"   left out of this pool: {sorted(excluded) + [f'{k}@{rid}' for k, rid in sorted(excluded_runs)]} — {why}")
     print(f"   {'every repeat valid' if not bad else f'{bad} repeat(s) with a problem'}")
+
+
+def stability_lines(app, entry):
+    """The rule's reading of one application's pooled entry, a line per value, as the pool report prints it."""
+    st = entry["stability"]
+    lines = [f"{app}: repeats {entry['repeats']}; stability rule {'holds' if st['passes'] else 'does not hold yet'}"
+             + (f"; first batch at this spread {entry['first_batch']['count']}" if entry.get("first_batch") else "")]
+    for q, c in st["quantities"].items():
+        lines.append(f"   {q}: k {c['k']}, half-width {c['half_width']}, "
+                     f"{'passes' if c['passes'] else 'at the window limit, reported (D46)' if c.get('limited') else 'carried with its half-width, its spread between sessions (D57)' if c.get('session_spread') and c.get('carried', True) else 'carried with its half-width, its spread the machine (9.8 D17)' if c.get('excepted') and c.get('carried') else 'fails'}"
+                     + (f", needed {c.get('needed') or 'over 200'}" if not c["passes"] and not c.get("carried") and "needed" in c else ""))
+    return lines
 
 
 if __name__ == "__main__":

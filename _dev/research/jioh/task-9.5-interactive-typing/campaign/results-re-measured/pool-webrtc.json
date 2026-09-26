@@ -29086,8 +29086,8 @@
       "k": 45,
       "mean": 0.2371,
       "cv": 0.0507,
-      "half_width": 0.0158,
-      "half_width_abs": 0.0037,
+      "half_width": 0.0152,
+      "half_width_abs": 0.0036,
       "leave_one_out": 0.003,
       "passes": true,
       "needed": 7
@@ -29106,8 +29106,8 @@
       "k": 45,
       "mean": 2.3713,
       "cv": 0.0507,
-      "half_width": 0.0158,
-      "half_width_abs": 0.0375,
+      "half_width": 0.0152,
+      "half_width_abs": 0.0361,
       "leave_one_out": 0.003,
       "passes": true,
       "needed": 7

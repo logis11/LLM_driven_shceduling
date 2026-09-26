@@ -420,6 +420,11 @@ def test_first_batch_takes_the_absolute_floor_for_small_medians():
     assert pool.first_batch([9.0, 10.0, 11.0], None, 5) == 18
 
 
+def test_first_batch_past_twenty_repeats_takes_students_t_not_the_normal():
+    # sd 15 about 100: t(k-1) / sqrt(k) <= 1/3 first at k = 38; the normal's 1.96 would stop at 35
+    assert pool.first_batch([85.0, 100.0, 115.0], None, 5) == 38
+
+
 def test_the_rule_needs_five_repeats_and_floors_times():
     four = {1: 10.0, 2: 10.0, 3: 10.0, 4: 10.0}
     assert not pool.value_stability("run_us", four)["passes"]

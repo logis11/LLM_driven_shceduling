@@ -40,7 +40,7 @@ TOOLS = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__
 if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 from meas.background import analyze  # noqa: E402
-from meas.stability import stability, TOLERANCE, T975  # noqa: E402
+from meas.stability import stability, TOLERANCE, t975  # noqa: E402
 from meas.distribution import quantile_table  # noqa: E402
 pct, QUANTILE_PROBS = analyze.pct, analyze.QUANTILE_PROBS
 
@@ -176,15 +176,14 @@ def value_stability(key, values_by_repeat):
 def first_batch(values, abs_floor=None, min_k=None):
     """The repeats one value needs (D14 (3) with D18, D19): the smallest repeat count, at least min_k, at which the
     95 % half-width of the across-repeat mean, at the spread of the given repeats, is within the tolerance — the larger
-    of TOLERANCE × mean and abs_floor (t multiplier; normal beyond the table)."""
+    of TOLERANCE × mean and abs_floor (Student's t multiplier, k - 1 degrees of freedom)."""
     v = [x for x in values if x]
     if len(v) < 2:
         return None
     m, sd = statistics.fmean(v), statistics.stdev(v)
     bound = max(TOLERANCE * m, abs_floor or 0.0)
     for k in range(max(2, min_k or 2), 201):
-        t = T975.get(k, 1.96 if k > max(T975) else None)
-        if t is not None and t * sd / k ** 0.5 <= bound:
+        if t975(k) * sd / k ** 0.5 <= bound:
             return k
     return None
 
