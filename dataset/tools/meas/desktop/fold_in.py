@@ -21,6 +21,7 @@ TOOLS = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__
 if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 from meas.distribution import yaml_table  # noqa: E402
+from meas.desktop.pool import _cp  # noqa: E402  — campaign/pool.py, for its build census (9.5 D69)
 
 TAG = "meas-ci:desktop:2026-09-20"
 CARRIED = {"chrome-hidden": "steady", "chrome-visible": "steady-notimer", "element": "idle", "steam": "shown"}
@@ -32,13 +33,13 @@ MACHINE = ("a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.
            "to one CPU and the harness, page server and homeserver pinned away from it, perf sched record on that CPU")
 
 OBSERVED = {
-    "chrome-hidden": ("Google Chrome 152.0.7977.82, launched as web-browser was (--no-sandbox --disable-gpu, plus "
+    "chrome-hidden": ("{build}, launched as web-browser was (--no-sandbox --disable-gpu, plus "
                       "--disable-features=SpareRendererForSitePerProcess), one window holding a foreground control tab "
                       "and 12 background tabs at 12 loopback origins of one local page whose setInterval callback only "
                       "increments a counter; observed past Chromium's intensive-wake-up-throttling grace (launch-settle "
                       "20 s, grace-settle 630 s: 330 s of the documented five-minute default and 300 s read from the "
                       "probe, D15), a 600 s steady phase, under Xvfb with no window manager"),
-    "chrome-visible": ("Google Chrome 152.0.7977.82, launched as the hidden entry, the same page at the same 12 origins "
+    "chrome-visible": ("{build}, launched as the hidden entry, the same page at the same 12 origins "
                        "opened as 12 windows of one tab each, nothing interacting with them; the steady phase with the "
                        "page's timer removed (D16), 600 s, under Xvfb with no window manager, where Chromium tracks no "
                        "cross-application occlusion (D4)"),
@@ -210,7 +211,9 @@ def entry(app, e):
     out.append("      stats: [" + ", ".join(json.dumps(s) for s in stats) + "]")
 
     machine, session, sparse = exceptions(app, e, ph)
-    scope = (f"One observation (phase decision 2; D10): {OBSERVED[app]}; on {MACHINE}; {k} same-machine repeats, "
+    # 9.5 D69: Chrome's build recorded per repeat and its census stated, Google's repository serving only its current
+    observed = OBSERVED[app].replace("{build}", _cp.build_census(e["version"]))
+    scope = (f"One observation (phase decision 2; D10): {observed}; on {MACHINE}; {k} same-machine repeats, "
              f"every landing pooled (D24). ")
     if renderer:
         meas = sorted(set(e["renderers_measured"].values()))

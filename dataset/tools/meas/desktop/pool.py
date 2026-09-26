@@ -384,7 +384,8 @@ def render(out):
     for app, e in sorted(out["runs"].items()):
         pop = (f"renderers measured {e['renderers_measured']} (observed {e['renderers']})"
                if any(e.get("renderers_measured", {}).values()) else "")
-        L += [f"## {app}", "", f"Repeats: {e['repeats']}  ·  mode {e['mode']}" + (f"  ·  {pop}" if pop else ""), ""]
+        L += [f"## {app}", "", f"Repeats: {e['repeats']}  ·  mode {e['mode']}" + (f"  ·  {pop}" if pop else "")
+              + f"  ·  builds {_cp.build_census(e.get('version') or {})}", ""]   # 9.5 D69
         if e["not_throttled"]:
             L += [f"Left out, intensive throttling did not engage: {e['not_throttled']}", ""]
         L += ["| quantity | k | mean | half-width | passes |", "|---|---|---|---|---|"]

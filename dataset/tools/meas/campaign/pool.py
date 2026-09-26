@@ -121,12 +121,15 @@ def cycle_windows(app, phase, rows, segments, roles):
 
 def build_census(version):
     """D69: the builds a pool holds, most repeats first — "1.138.0 (28 repeats)", or with a mix
-    "152.0.7977.82 (26 repeats), 153.0.8010.52 (4: 18, 20, 22, 27)". `version` is {repeat: the build it measured}."""
+    "152.0.7977.82 (26 repeats), 153.0.8010.52 (4: 18, 20, 22, 27)". `version` is {repeat: the build it measured}; a
+    repeat keyed "<index>@<run id>" (9.8 D24, an index that landed more than once) counts once per landing, listed by
+    its index."""
     if not isinstance(version, dict):
         return (version or "?").strip()[:60]
+    index = lambda r: int(str(r).split("@")[0])
     by = {}
-    for r, v in sorted(version.items(), key=lambda kv: int(kv[0])):
-        by.setdefault((v or "?").strip()[:60], []).append(int(r))
+    for r, v in sorted(version.items(), key=lambda kv: index(kv[0])):
+        by.setdefault((v or "?").strip()[:60], []).append(index(r))
     if len(by) == 1:
         v, reps = next(iter(by.items()))
         return f"{v} ({len(reps)} repeats)"

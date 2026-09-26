@@ -4,35 +4,35 @@ Machine: EPYC 7763. Repeats pooled per subject; `probe` jobs are never repeats.
 
 ## chrome-hidden
 
-Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, '10@35585759158', '10@35585978825', '10@35586404781', '10@35586632429', 11]  ·  mode full  ·  renderers measured {1: 12, 2: 12, 3: 12, 4: 12, 5: 12, 6: 12, 7: 12, 8: 12, 9: 12, '10@35585759158': 12, '10@35585978825': 12, '10@35586404781': 12, '10@35586632429': 12, 11: 12} (observed {1: '16', 2: '16', 3: '16', 4: '16', 5: '16', 6: '16', 7: '16', 8: '16', 9: '16', '10@35585759158': '16', '10@35585978825': '16', '10@35586404781': '16', '10@35586632429': '16', 11: '16'})
+Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, '10@35585759158', '10@35585978825', '10@35586404781', '10@35586632429', 11, 12, 13, 14, 15, 16]  ·  mode full  ·  renderers measured {1: 12, 2: 12, 3: 12, 4: 12, 5: 12, 6: 12, 7: 12, 8: 12, 9: 12, '10@35585759158': 12, '10@35585978825': 12, '10@35586404781': 12, '10@35586632429': 12, 11: 12, 12: 12, 13: 12, 14: 12, 15: 12, 16: 12} (observed {1: '16', 2: '16', 3: '16', 4: '16', 5: '16', 6: '16', 7: '16', 8: '16', 9: '16', '10@35585759158': '16', '10@35585978825': '16', '10@35586404781': '16', '10@35586632429': '16', 11: '16', 12: '16', 13: '16', 14: '16', 15: '16', 16: '16'})  ·  builds Google Chrome 152.0.7977.82 (14 repeats), Google Chrome 153.0.8010.52 (5: 12, 13, 14, 15, 16)
 
 | quantity | k | mean | half-width | passes |
 |---|---|---|---|---|
-| steady HangWatcher wakes/s | 14 | 0.1 | ±0.0% | yes |
-| steady HangWatcher gap mean (ms) | 14 | 10000.0349 | ±0.0% | yes |
-| steady HangWatcher run mean (ms) | 14 | 0.0274 | ±5.3% | no |
-| steady chrome wakes/s | 14 | 0.039 | ±2.0% | yes |
-| steady chrome gap mean (ms) | 14 | 25635.8982 | ±2.0% | yes |
-| steady chrome run mean (ms) | 14 | 0.0977 | ±4.5% | yes |
-| steady Chrome_ChildIOT wakes/s | 14 | 0.0071 | ±20.9% | no |
-| steady Chrome_ChildIOT gap mean (ms) | 14 | 141176.9633 | ±20.9% | no |
-| steady Chrome_ChildIOT run mean (ms) | 14 | 0.0298 | ±7.9% | no |
-| steady Compositor wakes/s | 14 | 0.0065 | ±21.9% | no |
-| steady Compositor gap mean (ms) | 14 | 152727.8057 | ±21.9% | no |
-| steady Compositor run mean (ms) | 14 | 0.0207 | ±5.7% | no |
-| steady PerfettoTrace wakes/s | 14 | 0.0065 | ±21.9% | no |
-| steady PerfettoTrace gap mean (ms) | 14 | 152727.8057 | ±21.9% | no |
-| steady PerfettoTrace run mean (ms) | 14 | 0.02 | ±6.0% | no |
-| steady ThreadPoolServi wakes/s | 14 | 0.0065 | ±21.9% | no |
-| steady ThreadPoolServi gap mean (ms) | 14 | 152727.8057 | ±21.9% | no |
-| steady ThreadPoolServi run mean (ms) | 14 | 0.0203 | ±4.9% | yes |
-| steady residual wakes/s | 14 | 0.0035 | ±18.3% | no |
-| steady residual gap mean (ms) | 14 | 285553.3598 | ±18.3% | no |
-| steady residual run mean (ms) | 14 | 0.1903 | ±7.4% | no |
+| steady HangWatcher wakes/s | 19 | 0.1 | ±0.0% | yes |
+| steady HangWatcher gap mean (ms) | 19 | 10000.0346 | ±0.0% | yes |
+| steady HangWatcher run mean (ms) | 19 | 0.0267 | ±4.8% | yes |
+| steady chrome wakes/s | 19 | 0.0389 | ±1.5% | yes |
+| steady chrome gap mean (ms) | 19 | 25714.3747 | ±1.5% | yes |
+| steady chrome run mean (ms) | 19 | 0.0955 | ±4.0% | yes |
+| steady Chrome_ChildIOT wakes/s | 19 | 0.007 | ±18.5% | no |
+| steady Chrome_ChildIOT gap mean (ms) | 19 | 142352.2096 | ±18.5% | no |
+| steady Chrome_ChildIOT run mean (ms) | 19 | 0.029 | ±6.9% | no |
+| steady Compositor wakes/s | 19 | 0.0065 | ±18.9% | no |
+| steady Compositor gap mean (ms) | 19 | 154054.5871 | ±18.9% | no |
+| steady Compositor run mean (ms) | 19 | 0.0202 | ±5.1% | no |
+| steady PerfettoTrace wakes/s | 19 | 0.0065 | ±18.9% | no |
+| steady PerfettoTrace gap mean (ms) | 19 | 154054.5871 | ±18.9% | no |
+| steady PerfettoTrace run mean (ms) | 19 | 0.0192 | ±6.3% | no |
+| steady ThreadPoolServi wakes/s | 19 | 0.0065 | ±18.9% | no |
+| steady ThreadPoolServi gap mean (ms) | 19 | 154054.5871 | ±18.9% | no |
+| steady ThreadPoolServi run mean (ms) | 19 | 0.0198 | ±4.3% | yes |
+| steady residual wakes/s | 19 | 0.0033 | ±14.8% | no |
+| steady residual gap mean (ms) | 19 | 302655.8761 | ±14.8% | no |
+| steady residual run mean (ms) | 19 | 0.1883 | ±6.0% | no |
 
 ## chrome-visible
 
-Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]  ·  mode full  ·  renderers measured {1: 12, 2: 12, 3: 12, 4: 12, 5: 12, 6: 12, 7: 12, 8: 12, 9: 12, 10: 12, 11: 12} (observed {1: '13', 2: '13', 3: '13', 4: '13', 5: '13', 6: '13', 7: '13', 8: '13', 9: '14', 10: '13', 11: '13'})
+Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]  ·  mode full  ·  renderers measured {1: 12, 2: 12, 3: 12, 4: 12, 5: 12, 6: 12, 7: 12, 8: 12, 9: 12, 10: 12, 11: 12} (observed {1: '13', 2: '13', 3: '13', 4: '13', 5: '13', 6: '13', 7: '13', 8: '13', 9: '14', 10: '13', 11: '13'})  ·  builds Google Chrome 152.0.7977.82 (11 repeats)
 
 | quantity | k | mean | half-width | passes |
 |---|---|---|---|---|
@@ -58,7 +58,7 @@ Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]  ·  mode full  ·  renderers measu
 
 ## element
 
-Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, '17@35597073549', '17@35597185904']  ·  mode full
+Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, '17@35597073549', '17@35597185904']  ·  mode full  ·  builds ? (18 repeats)
 
 | quantity | k | mean | half-width | passes |
 |---|---|---|---|---|
@@ -87,7 +87,7 @@ Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, '17@35597073549
 
 ## steam
 
-Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]  ·  mode full
+Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]  ·  mode full  ·  builds ? (12 repeats)
 
 | quantity | k | mean | half-width | passes |
 |---|---|---|---|---|

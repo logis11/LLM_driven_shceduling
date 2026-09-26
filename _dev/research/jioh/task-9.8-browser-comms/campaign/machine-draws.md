@@ -2,21 +2,21 @@
 
 Every `meas-desktop.yml` job of the 9.8 desktop campaign and the model it drew, from each job's own `report.kv` (`machine.model`, `gate`, `mode`, `repeat`). A hosted runner guarantees a shape, not a processor, and the campaign holds one model — the AMD EPYC 7763 — so a job on any other stops before measuring and is not a repeat (campaign workflow, 9.6 D11).
 
-**71 of 132 jobs drew the EPYC 7763** (53.8 %). Of the 96 jobs in `full` mode (runs #21–#50), 55 landed on the model and were pooled and 41 were stopped by the gate: AMD EPYC 9V74 19, Intel Xeon Platinum 8573C 9, AMD EPYC 9V45 7, Intel Xeon 6973P-C 4, Intel Xeon Platinum 8370C 2. The rest of the jobs are the tooling's dry runs (runs #2–#15) and the long-phase probes (#17–#19), neither of them a repeat. Runs #1, #16 and #20 launched no measurement job.
+**76 of 141 jobs drew the EPYC 7763** (53.9 %). Of the 105 jobs in `full` mode (runs #21–#50 and, for the hidden renderer's added repeats (D31), #51–#57), 60 landed on the model and were pooled and 45 were stopped by the gate: AMD EPYC 9V74 20, Intel Xeon Platinum 8573C 11, AMD EPYC 9V45 8, Intel Xeon 6973P-C 4, Intel Xeon Platinum 8370C 2. The rest of the jobs are the tooling's dry runs (runs #2–#15) and the long-phase probes (#17–#19), neither of them a repeat. Runs #1, #16 and #20 launched no measurement job.
 
 | subject | archetype | runs | `full` jobs | landed and pooled | stopped by the gate |
 |---|---|---|---|---|---|
-| `chrome-hidden` | `renderer-hidden` | #21–#26, #31–#38 | 25 | 14 | 11 (EPYC 9V74 6, EPYC 9V45 2, Xeon 6973P-C 2, Xeon Platinum 8573C 1) |
+| `chrome-hidden` | `renderer-hidden` | #21–#26, #31–#38, #51–#57 | 34 | 19 | 15 (EPYC 9V74 7, EPYC 9V45 3, Xeon Platinum 8573C 3, Xeon 6973P-C 2) |
 | `chrome-visible` | `renderer-visible` | #21, #24, #26, #27, #31, #32, #39, #40 | 18 | 11 | 7 (EPYC 9V45 3, EPYC 9V74 3, Xeon Platinum 8573C 1) |
 | `element` | `chat-client` | #21, #22, #24, #26–#29, #31, #40–#42, #46–#50 | 32 | 18 | 14 (Xeon Platinum 8573C 7, EPYC 9V74 4, Xeon 6973P-C 2, EPYC 9V45 1) |
 | `steam` | `game-client` | #21–#24, #30, #43–#45 | 21 | 12 | 9 (EPYC 9V74 6, Xeon Platinum 8370C 2, EPYC 9V45 1) |
 
 | model | jobs |
 |---|---|
-| AMD EPYC 7763 64-Core Processor | 71 |
-| AMD EPYC 9V74 80-Core Processor | 25 |
-| INTEL(R) XEON(R) PLATINUM 8573C | 17 |
-| AMD EPYC 9V45 96-Core Processor | 10 |
+| AMD EPYC 7763 64-Core Processor | 76 |
+| AMD EPYC 9V74 80-Core Processor | 26 |
+| INTEL(R) XEON(R) PLATINUM 8573C | 19 |
+| AMD EPYC 9V45 96-Core Processor | 11 |
 | Intel(R) Xeon(R) 6973P-C | 6 |
 | Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz | 3 |
 
@@ -156,3 +156,12 @@ Every `meas-desktop.yml` job of the 9.8 desktop campaign and the model it drew, 
 | 35594819539 | #48 | `element` | 12 | full | open | AMD EPYC 7763 64-Core Processor |
 | 35597073549 | #49 | `element` | 17 | full | open | AMD EPYC 7763 64-Core Processor |
 | 35597185904 | #50 | `element` | 17 | full | open | AMD EPYC 7763 64-Core Processor |
+| 36243810542 | #51 | `chrome-hidden` | 12 | full | wrong-machine | AMD EPYC 9V45 96-Core Processor |
+| 36243810542 | #51 | `chrome-hidden` | 13 | full | wrong-machine | INTEL(R) XEON(R) PLATINUM 8573C |
+| 36243940153 | #52 | `chrome-hidden` | 13 | full | open | AMD EPYC 7763 64-Core Processor |
+| 36245179684 | #53 | `chrome-hidden` | 12 | full | open | AMD EPYC 7763 64-Core Processor |
+| 36246478061 | #54 | `chrome-hidden` | 14 | full | open | AMD EPYC 7763 64-Core Processor |
+| 36246478061 | #54 | `chrome-hidden` | 15 | full | wrong-machine | AMD EPYC 9V74 80-Core Processor |
+| 36246540057 | #55 | `chrome-hidden` | 15 | full | wrong-machine | INTEL(R) XEON(R) PLATINUM 8573C |
+| 36246577937 | #56 | `chrome-hidden` | 15 | full | open | AMD EPYC 7763 64-Core Processor |
+| 36247838683 | #57 | `chrome-hidden` | 16 | full | open | AMD EPYC 7763 64-Core Processor |

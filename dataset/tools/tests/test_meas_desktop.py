@@ -469,6 +469,35 @@ def test_the_game_client_scope_states_the_http_threads_two_modes(repo_root, tmp_
     assert "the pooled table mixes the two modes wake by wake" in scope
 
 
+def test_the_build_census_orders_repeats_keyed_by_landing():
+    # 9.5 D69 in 9.8: an index that landed more than once is keyed "<index>@<run id>" (D24); the census counts every
+    # landing and orders by the index
+    census = pool._cp.build_census({"1": "Chrome 152", "10@35585759158": "Chrome 152", "10@35586632429": "Chrome 152",
+                                    "12": "Chrome 153", "2": "Chrome 152"})
+    assert census == "Chrome 152 (4 repeats), Chrome 153 (1: 12)"
+
+
+def test_the_renderer_scopes_state_the_chrome_builds_they_pool(repo_root, tmp_path):
+    # 9.5 D69: Google's repository serves only its current Chrome, so the build is recorded per repeat and the census
+    # stated in the observed line; the hidden renderer's added repeats (D31) ran 153
+    import sys
+    from meas.desktop import fold_in
+    out = tmp_path / "fold.yaml"
+    pooled = repo_root / "_dev" / "research" / "jioh" / "task-9.8-browser-comms" / "campaign" / "results" / "pooled.json"
+    argv, sys.argv = sys.argv, ["fold_in.py", str(pooled), str(out)]
+    try:
+        fold_in.main()
+    finally:
+        sys.argv = argv
+    import yaml
+    doc = yaml.safe_load("archetypes:\n" + out.read_text())["archetypes"]
+    hidden = doc["renderer-hidden"]["validation_stats"]["scope"]
+    assert ("Google Chrome 152.0.7977.82 (14 repeats), Google Chrome 153.0.8010.52 (5: 12, 13, 14, 15, 16), "
+            "launched as web-browser was") in hidden
+    assert "Google Chrome 152.0.7977.82 (11 repeats), launched as the hidden entry" in doc["renderer-visible"][
+        "validation_stats"]["scope"]
+
+
 def test_the_steam_client_carries_no_other_component_between_sessions():
     # changelog D26: over merged wake times steamwebhelper's and ThreadPoolForeg's gap means hold the rule, so of D23's
     # two components carried between sessions only steamwebhelper's run mean stays carried, under D18
