@@ -437,7 +437,39 @@ def test_an_interrupted_artifact_download_leaves_nothing_behind_and_does_not_blo
     assert (dest / "report.json").exists()
 
 
-def test_the_steam_client_carries_no_component_between_sessions():
+def test_the_steam_client_carries_its_http_threads_run_mean_between_sessions():
+    # changelog D30: CHTTPClientThre's run mean sits in two modes across the repeats and within ±0.2 % inside one run,
+    # so it is carried between sessions under 9.5 D57, not as the runner's speed (D18); its rate and gap hold the rule
+    two_modes = _comp([8.05] * 5, [124.3] * 5, [0.0157, 0.0161, 0.063, 0.0639, 0.0165])
+    q = pool.criterion("steam", _entry({"CHTTPClientThre": two_modes}, phase="shown"))["quantities"]
+    run = q["shown CHTTPClientThre run mean (ms)"]
+    assert run["passes"] is False and run["session_spread"] is True and run["carried"] is True
+    assert q["shown CHTTPClientThre wakes/s"]["passes"] and q["shown CHTTPClientThre gap mean (ms)"]["passes"]
+
+
+def test_the_game_client_scope_states_the_http_threads_two_modes(repo_root, tmp_path):
+    # changelog D30: the scope states both modes, the within-run figure and that the pooled table mixes the modes per
+    # wake, and no longer lists the run mean among those whose spread is the runner's speed
+    import sys
+    from meas.desktop import fold_in
+    out = tmp_path / "fold.yaml"
+    pooled = repo_root / "_dev" / "research" / "jioh" / "task-9.8-browser-comms" / "campaign" / "results" / "pooled.json"
+    argv, sys.argv = sys.argv, ["fold_in.py", str(pooled), str(out)]
+    try:
+        fold_in.main()
+    finally:
+        sys.argv = argv
+    import yaml
+    scope = yaml.safe_load("archetypes:\n" + out.read_text())["archetypes"]["game-client"]["validation_stats"]["scope"]
+    machine = scope[scope.index("Run means whose spread is the runner's speed"):]
+    machine = machine[:machine.index(". ")]
+    assert "CHTTPClientThre" not in machine
+    assert "8 of the 12 repeats at 0.0137–0.0170 ms and 4 at 0.0572–0.0639 ms" in scope
+    assert "within one run ±0.2 % (0.01454–0.01459 ms" in scope
+    assert "the pooled table mixes the two modes wake by wake" in scope
+
+
+def test_the_steam_client_carries_no_other_component_between_sessions():
     # changelog D26: over merged wake times steamwebhelper's and ThreadPoolForeg's gap means hold the rule, so of D23's
     # two components carried between sessions only steamwebhelper's run mean stays carried, under D18
     wild_gap = _comp([70.0] * 5, [29.0, 29.0, 42.0, 29.0, 41.0], [0.05] * 5)

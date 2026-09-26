@@ -7,7 +7,7 @@ One entry per subject, in 9.5's measured per-application form (D10): `components
 carried phase, each with its `wakes_per_s` and its pooled `gap` and `run` quantile tables, and the residual; no
 `focus_components`, no `stimulus`. The scope states what method §7 and the changelog require of each entry: the
 machine, the program's version, the state and what it is not, the values carried under an exception with their
-half-widths and ranges (D17, D18, D21, D23, D24), the spreads within and between runs (D20, D22, D24), the sparse
+half-widths and ranges (D17, D18, D21, D23, D24, D30), the spreads within and between runs (D20, D22, D24, D30), the sparse
 residuals with their counts (D27), the renderer population (D14) and the share `HangWatcher` holds (D16). The output
 is a YAML fragment for `dataset/archetypes.yaml`.
 """
@@ -78,7 +78,8 @@ WITHIN = {("chrome-hidden", "Chrome_ChildIOT"): "±17.7 % (D24)",
           ("chrome-visible", "Chrome_ChildIOT"): "±18.6 % (D20)",
           ("chrome-visible", "ThreadPoolForeg"): "barely present in the probe (D20)",
           ("chrome-hidden", "Compositor"): "±10.8 % (D26)", ("chrome-hidden", "PerfettoTrace"): "±10.8 % (D26)",
-          ("chrome-hidden", "ThreadPoolServi"): "±10.8 % (D26)", ("chrome-visible", "PerfettoTrace"): "±4.0 % (D26)"}
+          ("chrome-hidden", "ThreadPoolServi"): "±10.8 % (D26)", ("chrome-visible", "PerfettoTrace"): "±4.0 % (D26)",
+          ("steam", "CHTTPClientThre"): "±0.2 % (0.01454–0.01459 ms, the probe's 600 s windows every 60 s, D30)"}
 
 # D27: the renderer residuals are sparse — a few wakes per renderer per phase — so the within-run test (D26 re-read
 # them on the probes) cannot place their spread; why, per entry, from D26's re-read.
@@ -113,6 +114,32 @@ def values_of(ph, comm, label):
     else:
         vals = [x.get("mean") for x in src[field] if x]
     return [v for v in vals if v is not None]
+
+
+def two_modes(vals):
+    """Per-repeat values split at their largest step: (the lower mode, the upper mode)."""
+    v = sorted(vals)
+    i = max(range(1, len(v)), key=lambda j: v[j] - v[j - 1])
+    return v[:i], v[i:]
+
+
+def run_mean_between_sessions(app, ph, session):
+    """D30: 9.5 D57 applied to a run mean — the Steam client's HTTP thread, its rate and gap within the rule, its run
+    mean in two modes across the repeats and steady within one run."""
+    parts = []
+    for comm, texts in session.items():
+        run = ph["tables"][comm]["run_ms"]
+        lo, hi = two_modes([m for m in run["repeat_mean"] if m is not None])
+        wakes = statistics.fmean(ph["threads"][comm]["wakes_per_s"]) / statistics.fmean(ph["wakes_per_s"])
+        cpu = (sum(m * n for m, n in zip(run["repeat_mean"], run["repeat_n"]) if m is not None) / 1000
+               / sum(ph["span_s"]) / statistics.fmean(ph["cpu_share"]))
+        parts.append(f"`{comm}` " + ", ".join(texts) + f", in two modes — {len(lo)} of the {len(lo) + len(hi)} "
+                     f"repeats at {min(lo):.4f}–{max(lo):.4f} ms and {len(hi)} at {min(hi):.4f}–{max(hi):.4f} ms — "
+                     f"against within one run {WITHIN[(app, comm)]}; the pooled table mixes the two modes wake by "
+                     f"wake, where a measured session holds one. Its wake rate and gap mean hold the rule; it holds "
+                     f"{wakes * 100:.1f} % of the {CARRIED[app]} phase's wakes and {cpu * 100:.1f} % of its CPU")
+    return "A run mean that varies between sessions, carried under 9.5 D57 applied to a run mean (D30): " \
+        + "; ".join(parts) + ". "
 
 
 def component(comm, threads, wps, gap, run, extra=None, indent="        "):
@@ -206,7 +233,9 @@ def entry(app, e):
     if machine:
         scope += ("Run means whose spread is the runner's speed, every thread of a repeat moving together while wake "
                   f"rates hold (D17{', D18' if app == 'steam' else ''}): " + "; ".join(machine) + ". ")
-    if session:
+    if session and app == "steam":
+        scope += run_mean_between_sessions(app, ph, session)
+    elif session:
         parts = []
         for comm, texts in session.items():
             w = WITHIN.get((app, comm))

@@ -86,7 +86,10 @@ EXCEPTED_RUN_MEANS = ("chrome-hidden", "chrome-visible", "element", "steam")
 SESSION_SPREAD = {"chrome-hidden": ("Chrome_ChildIOT",
                                     # changelog D26: carried once the rates are one renderer's and exact
                                     "Compositor", "PerfettoTrace", "ThreadPoolServi"),
-                  "chrome-visible": ("Chrome_ChildIOT", "ThreadPoolForeg", "PerfettoTrace")}
+                  "chrome-visible": ("Chrome_ChildIOT", "ThreadPoolForeg", "PerfettoTrace"),
+                  # changelog D30: the Steam client's HTTP thread, its run mean in two modes across the repeats and
+                  # within ±0.2 % inside one run, its rate and gap within the rule — 9.5 D57 on a run mean, not D18
+                  "steam": ("CHTTPClientThre",)}
 # changelog D26: the Steam client's steamwebhelper and ThreadPoolForeg, carried between sessions under D23, hold the
 # rule over merged wake times; steamwebhelper's run mean stays carried, under D18
 
