@@ -287,3 +287,11 @@ D29 stands for pid 1: within one run its run mean moves by a third to two-thirds
 Tooling: `session/fold_in.py` reads `within-run.json` beside the pooled record in place of D28's figures written into it; the sparse components' scope no longer says D28's figures were read with the collector's wakes present. Test: `test_the_within_run_figures_are_read_from_the_record_beside_the_pool`. Values changed: none; `service-manager`'s scope states the re-read, `audio-server`'s and `message-bus`'s drop the parenthesis.
 
 Commit: this entry.
+
+## D36 — the machine draws count every job (2026-09-26)
+
+No new decision: `campaign/machine-draws.md` listed 77 jobs and named itself every `meas-session.yml` job, while the workflow's job lists hold 90 — 13 dry jobs of the tooling's first runs were missing. Run 35741515206's five (repeats 12–16) ended before their final upload; the `report.kv` of each one's last timed partial upload names its model, all `gate=open` — two on the AMD EPYC 7763, one each on the EPYC 9V74, the EPYC 9V45 and the Xeon Platinum 8573C. The other eight — repeat 1 in run 35725004617, 3–5 in 35729918486, 7, 8, 10 and 11 in 35735629925, each `mode: dry` in its run's trigger — died inside the measurement step after about 47 minutes, uploaded nothing, and their logs are not retrievable, so the model each drew is not recorded. Found on the 2026-09-26 review of 9.5–9.9.
+
+Counted figures: 41 of the 82 jobs whose model is recorded drew the EPYC 7763 (was 39 of 77); `full` mode unchanged, 24 landed and 18 gated of 42. Record: `measurement-campaign-record.md`, machine draws. Values changed: none.
+
+Commit: this entry.

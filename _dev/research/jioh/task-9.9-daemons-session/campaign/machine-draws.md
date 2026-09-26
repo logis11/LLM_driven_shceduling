@@ -1,25 +1,39 @@
 # Task 9.9 — the campaign's machine draws
 
-Every `meas-session.yml` job of the 9.9 session campaign and the model it drew, from each job's own `report.json` (`machine.model`, `gate`). A hosted runner guarantees a shape, not a processor, and the campaign holds one model — the AMD EPYC 7763 — so a job on any other stops before measuring and is not a repeat (campaign workflow, 9.6 D11).
+Every `meas-session.yml` job of the 9.9 session campaign and the model it drew, from each job's own `report.json` (`machine.model`, `gate`) — for the five jobs of run 35741515206, which ended before their final upload, the `report.kv` of their last timed partial upload. A hosted runner guarantees a shape, not a processor, and the campaign holds one model — the AMD EPYC 7763 — so a job on any other stops before measuring and is not a repeat (campaign workflow, 9.6 D11).
 
-**39 of 77 jobs drew the EPYC 7763** (50.6 %), beside the 26 of 56 the 9.6 campaign recorded, the 22 of 45 of the released 9.5 campaign and the 55 of 96 of 9.8's. Of the 42 jobs in `full` mode, 24 landed on the model and were pooled and 18 were stopped by the gate; the rest of the jobs are the tooling's dry runs and the long-phase probes, neither of them a repeat.
+**41 of the 82 jobs whose model is recorded drew the EPYC 7763** (50.0 %), beside the 26 of 56 the 9.6 campaign recorded, the 22 of 45 of the released 9.5 campaign and the 55 of 96 of 9.8's. Of the 42 jobs in `full` mode, 24 landed on the model and were pooled and 18 were stopped by the gate; the rest of the jobs are the tooling's dry runs and the long-phase probes, neither of them a repeat. Eight more, dry runs of the tooling in runs 35725004617, 35729918486 and 35735629925, ended without uploading anything and their logs are not retrievable, so the model each drew is not recorded: 90 jobs in all.
 
 | model | jobs |
 |---|---|
-| AMD EPYC 7763 64-Core Processor | 39 |
-| AMD EPYC 9V74 80-Core Processor | 16 |
-| INTEL(R) XEON(R) PLATINUM 8573C | 8 |
+| AMD EPYC 7763 64-Core Processor | 41 |
+| AMD EPYC 9V74 80-Core Processor | 17 |
+| INTEL(R) XEON(R) PLATINUM 8573C | 9 |
 | Intel(R) Xeon(R) 6973P-C | 7 |
-| AMD EPYC 9V45 96-Core Processor | 5 |
+| AMD EPYC 9V45 96-Core Processor | 6 |
 | Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz | 2 |
+| not recorded | 8 |
 
 ## Every job
 
 | run | repeat | mode | gate | model |
 |---|---|---|---|---|
+| 35725004617 | 1 | dry | — | not recorded |
 | 35729918486 | 2 | dry | open | AMD EPYC 7763 64-Core Processor |
+| 35729918486 | 3 | dry | — | not recorded |
+| 35729918486 | 4 | dry | — | not recorded |
+| 35729918486 | 5 | dry | — | not recorded |
 | 35729918486 | 6 | dry | open | INTEL(R) XEON(R) PLATINUM 8573C |
+| 35735629925 | 7 | dry | — | not recorded |
+| 35735629925 | 8 | dry | — | not recorded |
 | 35735629925 | 9 | dry | open | AMD EPYC 7763 64-Core Processor |
+| 35735629925 | 10 | dry | — | not recorded |
+| 35735629925 | 11 | dry | — | not recorded |
+| 35741515206 | 12 | dry | open | AMD EPYC 9V74 80-Core Processor |
+| 35741515206 | 13 | dry | open | AMD EPYC 7763 64-Core Processor |
+| 35741515206 | 14 | dry | open | AMD EPYC 9V45 96-Core Processor |
+| 35741515206 | 15 | dry | open | INTEL(R) XEON(R) PLATINUM 8573C |
+| 35741515206 | 16 | dry | open | AMD EPYC 7763 64-Core Processor |
 | 35742612282 | 17 | dry | open | AMD EPYC 9V74 80-Core Processor |
 | 35742612282 | 18 | dry | open | AMD EPYC 7763 64-Core Processor |
 | 35742612282 | 19 | dry | open | AMD EPYC 9V74 80-Core Processor |
