@@ -162,9 +162,10 @@ PREFS
       # there from the first one
       KINDS="key"
       POSTLAUNCH="$POSTLAUNCH; xdotool mousemove 430 495 click 1; sleep 1"
-      # the 136M phase types into the empty body, whatever the SWELL-KW window left — a click in the body, Ctrl+A (the
-      # body's text only) and Delete, as chrome's box (D62)
-      ALTPRELUDE="xdotool mousemove 430 495 click 1; sleep 1; xdotool key ctrl+a; sleep 1; xdotool key Delete; sleep 2"
+      # the 136M phase types into the empty body in the Paragraph format the compose window opens with, whatever the
+      # SWELL-KW window left — a click in the body, Ctrl+Home and Ctrl+Shift+End (the text, not the paragraph holding it)
+      # and Delete. Ctrl+A and Delete took the paragraph too and left the body in Body Text (dry run 36279665873)
+      ALTPRELUDE="xdotool mousemove 430 495 click 1; sleep 1; xdotool key ctrl+Home; sleep 1; xdotool key ctrl+shift+End; sleep 1; xdotool key Delete; sleep 2"
       OP=send ;;
     gimp)
       apt_install gimp; ver gimp --version
