@@ -395,12 +395,12 @@ command s {1: 638.753, 2: 588.282, 3: 632.962, 4: 696.0, 5: 617.045, 6: 638.915,
 
 ### Stability rule (D18, D19)
 
-**Holds** (each table on the list by its per-repeat mean; tolerance the larger of 5% and 1 µs for times, at least 5 repeats). Repeats needed at the spread of these repeats: 28.
+**Holds** (each table on the list by its mean as the table carries it, count-weighted over the repeats — 9.5 D78; tolerance the larger of 5% and 1 µs for times, at least 5 repeats). Repeats needed at the spread of these repeats: 25.
 
 | quantity | repeats | mean | cv | 95 % half-width | leave-one-out | needed at this spread | passes |
 |---|---|---|---|---|---|---|---|
-| steam-fresh-shaped run between voluntary blocks (µs) | 30 | 163.3826 | 6.3% | ±2.4% | 0.6% | 9 | yes |
-| steam-fresh-shaped block per run (µs) | 30 | 9.4307 | 27.2% | ±10.1% | 2.6% | 28 | yes |
+| steam-fresh-shaped run between voluntary blocks (µs) | 30 | 162.7448 | 5.9% | ±2.2% | 0.5% | 8 | yes |
+| steam-fresh-shaped block per run (µs) | 30 | 9.3064 | 25.9% | ±9.7% | 2.3% | 25 | yes |
 
 ### Checks (D15)
 

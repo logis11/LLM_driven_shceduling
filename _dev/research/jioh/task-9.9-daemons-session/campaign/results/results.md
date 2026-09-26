@@ -33,21 +33,21 @@ Left the components by cause (D27), wakes over the pooled repeats: outside — p
 | quantity | k | mean | half-width | passes |
 |---|---|---|---|---|
 | gnome-shell gnome-shell/JS Helper wakes/s | 24 | 0.3025 | ±0.7% | yes |
-| gnome-shell gnome-shell/JS Helper gap mean (ms) | 24 | 3306.7344 | ±0.7% | yes |
-| gnome-shell gnome-shell/JS Helper run mean (ms) | 24 | 0.0137 | ±1.5% | yes |
+| gnome-shell gnome-shell/JS Helper gap mean (ms) | 24 | 3305.79 | ±0.7% | yes |
+| gnome-shell gnome-shell/JS Helper run mean (ms) | 24 | 0.0137 | ±1.0% | yes |
 | gnome-shell gnome-shell/gmain wakes/s | 24 | 0.2498 | ±0.1% | yes |
-| gnome-shell gnome-shell/gmain gap mean (ms) | 24 | 4002.606 | ±0.1% | yes |
-| gnome-shell gnome-shell/gmain run mean (ms) | 24 | 0.0497 | ±2.2% | yes |
+| gnome-shell gnome-shell/gmain gap mean (ms) | 24 | 4002.6002 | ±0.1% | yes |
+| gnome-shell gnome-shell/gmain run mean (ms) | 24 | 0.0497 | ±2.1% | yes |
 | gnome-shell gnome-shell/gnome-shell wakes/s | 24 | 0.0347 | ±1.5% | yes |
-| gnome-shell gnome-shell/gnome-shell gap mean (ms) | 24 | 28813.9483 | ±1.4% | yes |
-| gnome-shell gnome-shell/gnome-shell run mean (ms) | 24 | 5.7035 | ±2.8% | yes |
+| gnome-shell gnome-shell/gnome-shell gap mean (ms) | 24 | 28780.8556 | ±1.5% | yes |
+| gnome-shell gnome-shell/gnome-shell run mean (ms) | 24 | 5.6996 | ±2.8% | yes |
 | pipewire wireplumber/gmain wakes/s | 24 | 0.0029 | ±21.4% | carried (D33) |
-| pipewire wireplumber/gmain gap mean (ms) | 24 | 426699.7815 | ±19.5% | carried (D33) |
-| pipewire wireplumber/gmain run mean (ms) | 24 | 0.036 | ±3.9% | yes |
+| pipewire wireplumber/gmain gap mean (ms) | 24 | 345600.5142 | ±21.4% | carried (D33) |
+| pipewire wireplumber/gmain run mean (ms) | 24 | 0.0359 | ±3.5% | yes |
 | systemd pid1/systemd wakes/s | 24 | 0.0734 | ±2.0% | yes |
-| systemd pid1/systemd gap mean (ms) | 24 | 13655.2751 | ±1.9% | yes |
-| systemd pid1/systemd run mean (ms) | 24 | 0.1274 | ±10.0% | carried (D29) |
+| systemd pid1/systemd gap mean (ms) | 24 | 13627.7805 | ±2.0% | yes |
+| systemd pid1/systemd run mean (ms) | 24 | 0.1284 | ±10.2% | carried (D29) |
 | dbus-daemon system-bus/dbus-daemon wakes/s | 24 | 0.0057 | ±43.3% | carried (D33) |
-| dbus-daemon system-bus/dbus-daemon gap mean (ms) | 18 | 238555.0312 | ±45.7% | carried (D33) |
-| dbus-daemon system-bus/dbus-daemon run mean (ms) | 18 | 0.1882 | ±25.0% | carried (D33) |
+| dbus-daemon system-bus/dbus-daemon gap mean (ms) | 24 | 174193.7863 | ±43.3% | carried (D33) |
+| dbus-daemon system-bus/dbus-daemon run mean (ms) | 24 | 0.1545 | ±9.1% | carried (D33) |
 

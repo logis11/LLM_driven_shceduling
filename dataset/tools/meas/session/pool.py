@@ -26,7 +26,7 @@ TOOLS = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__
 if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 from meas.session import analyze  # noqa: E402
-from meas.stability import stability, TOLERANCE  # noqa: E402
+from meas.stability import stability, ratio_stability, ratio_repeats_needed, TOLERANCE  # noqa: E402
 from meas.distribution import circular_gaps  # noqa: E402
 from meas.desktop.pool import _campaign_pool, repeat_order  # noqa: E402
 
@@ -184,9 +184,21 @@ SESSION_SPREAD = {"systemd": ("pid1/systemd",)}
 SPARSE = {"pipewire": ("wireplumber/gmain",), "dbus-daemon": ("system-bus/dbus-daemon",)}
 
 
+def gap_pairs(ph, comm, table):
+    """A gap table's per-repeat sums and counts: the span over the wakes. A sparse component's table laid over the
+    repeats end to end (D33) holds one sample list, so its pairs are each repeat's span and wake count, read from the
+    phase; every other table's are its own (`campaign/pool.py`'s `table_pairs`), each repeat's gaps summing to its
+    span."""
+    if len(table["repeat_n"]) == len(ph["repeats"]):
+        return _cp.table_pairs(table)
+    return ([s * 1000 for s in ph["span_s"]],
+            [int(round(r * s)) for r, s in zip(ph["threads"][comm]["wakes_per_s"], ph["span_s"])])
+
+
 def criterion(pooled):
-    """Method §6 item 1: per entry, per carried component and the residual, the wake rate, gap mean and run mean,
-    each by its per-repeat mean; the standing tolerance, or D29's exception for the components it names."""
+    """Method §6 item 1: per entry, per carried component and the residual, the wake rate by its per-repeat values,
+    the gap mean and run mean as the pooled tables carry them — count-weighted over the repeats, the half-width the
+    ratio estimator's; the standing tolerance, or D29's exception for the components it names."""
     out = {}
     for name, ph in pooled.items():
         comps = [(c, ph["threads"][c]) for c in ph["components"]["selected"] if c in ph["threads"]]
@@ -198,14 +210,18 @@ def criterion(pooled):
         for comm, c in comps + ([("residual", residual)] if residual else []):
             for field, label in LIST_FIELDS:
                 if field == "wakes_per_s":
-                    vals, floor = c.get("wakes_per_s") or [], None
-                elif comm == "residual":
-                    vals, floor = (c.get(field) or {}).get("repeat_mean") or [], ABS_FLOOR_MS
+                    vals = c.get("wakes_per_s") or []
+                    if not vals:
+                        continue
+                    c_ = {**stability(vals, None, MIN_REPEATS, keep_zero=True), "needed": _cp.repeats_needed(vals)}
                 else:
-                    vals, floor = [x.get("mean") if x else None for x in c.get(field) or []], ABS_FLOOR_MS
-                if not vals:
-                    continue
-                c_ = {**stability(vals, floor, MIN_REPEATS, keep_zero=True), "needed": _cp.repeats_needed(vals, floor)}
+                    table = (c if comm == "residual" else (ph.get("tables") or {}).get(comm) or {}).get(field)
+                    if not table:
+                        continue
+                    sums, counts = (gap_pairs(ph, comm, table) if field == "gap_ms" and comm != "residual"
+                                    else _cp.table_pairs(table))
+                    c_ = {**ratio_stability(sums, counts, ABS_FLOOR_MS, MIN_REPEATS),
+                          "needed": ratio_repeats_needed(sums, counts, ABS_FLOOR_MS, MIN_REPEATS)}
                 c_["session_spread"] = comm in SESSION_SPREAD.get(name, ())          # D29
                 c_["sparse"] = comm in SPARSE.get(name, ())                          # D33
                 c_["carried"] = c_["passes"] or ((c_["session_spread"] or c_["sparse"]) and c_["k"] >= MIN_REPEATS)

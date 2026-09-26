@@ -23,7 +23,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from analyze import analyze_phase, load_edges, pct, QUANTILE_PROBS  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from stability import stability, t975, TOLERANCE  # noqa: E402
+from stability import stability, ratio_stability, ratio_repeats_needed, t975, TOLERANCE  # noqa: E402
 from distribution import quantile_table  # noqa: E402
 import shapes  # noqa: E402  (this directory is on sys.path)
 
@@ -106,33 +106,49 @@ def repeats_needed(values_by_repeat, abs_floor=None):
     return None
 
 
+def table_pairs(table):
+    """A pooled table's per-repeat sums and counts (dicts keyed by repeat), from its per-repeat means and counts: the
+    pairs whose ratio is the table's own mean."""
+    return ({r: (m * table["repeat_n"][r] if m is not None else 0.0) for r, m in table["repeat_mean"].items()},
+            dict(table["repeat_n"]))
+
+
 def criterion(out):
     """The stability rule over every value the fold-in carries (method §8, the 2026-09-19 entries; changelog D23–D26):
-    each carried table by its per-repeat mean — CPU per process of D11's six roles, make's dispatch run, the object-job
-    members' step CPU, each bound program's runs between blocks and block after each run — and each bound program's
-    share of CPU past the boot slice by its value; tolerance the larger of 5 % of the mean and 1 µs for times, 5 % for
+    each carried table by its mean as the table carries it, count-weighted over the repeats, the half-width the ratio
+    estimator's (cochran-st77) — CPU per process of D11's six roles, make's dispatch run, the object-job members' step
+    CPU, each bound program's runs between blocks and block after each run — and each bound program's share of CPU
+    past the boot slice by its per-repeat values; tolerance the larger of 5 % of the mean and 1 µs for times, 5 % for
     the share, at least five repeats; per value the repeat count at which its present spread would hold. EXCEPTED
     values are carried over at least five repeats with their half-widths instead (D29)."""
     crit = {}
 
-    def add(name, values, floor):
-        c = {**stability(values, floor, MIN_REPEATS), "needed": repeats_needed(values, floor)}
+    def mark(name, c):
         c["excepted"] = name in EXCEPTED                      # D29
         c["carried"] = c["passes"] or (c["excepted"] and c["k"] >= MIN_REPEATS)
         crit[name] = c
+
+    def add(name, values, floor):
+        mark(name, {**stability(values, floor, MIN_REPEATS), "needed": repeats_needed(values, floor)})
+
+    def add_table(name, table, floor):
+        sums, counts = table_pairs(table)
+        mark(name, {**ratio_stability(sums, counts, floor, MIN_REPEATS),
+                    "needed": ratio_repeats_needed(sums, counts, floor, MIN_REPEATS)})
     w = out["phases"].get("build-j8-warm", {})
     for n in CRITERION_ROLES:
         if n in w.get("roles", {}):
-            add(n + " CPU per process", w["roles"][n]["cpu_per_process_us"]["repeat_mean"], ABS_FLOOR_US)
+            add_table(n + " CPU per process", w["roles"][n]["cpu_per_process_us"], ABS_FLOOR_US)
     if "dispatch" in w:
-        add("make dispatch", w["dispatch"]["per_dispatch_us"]["repeat_mean"], ABS_FLOOR_US)
+        add_table("make dispatch", w["dispatch"]["per_dispatch_us"], ABS_FLOOR_US)
     for k, t in w.get("object_members", {}).get("step_cpu_us", {}).items():
-        add(f"object-job {k}", t["repeat_mean"], ABS_FLOOR_US)
+        add_table(f"object-job {k}", t, ABS_FLOOR_US)
+    none = {"repeat_mean": {}, "repeat_n": {}}
     for ph in BATCH_PHASES:   # a phase with no pooled repeat yet (D27, D28) stays on the list with none
-        s = out["phases"].get(ph, {}).get("shape") or {"runs_between_blocks_us": {"repeat_mean": {}}, "mean_block_us": {},
+        s = out["phases"].get(ph, {}).get("shape") or {"runs_between_blocks_us": none, "blocks_after_runs_us": none,
                                                        "share_past_boot_slice": {}}
-        add(f"{ph} run between blocks", s["runs_between_blocks_us"]["repeat_mean"], ABS_FLOOR_US)
-        add(f"{ph} mean block per run", s["mean_block_us"], ABS_FLOOR_US)
+        add_table(f"{ph} run between blocks", s["runs_between_blocks_us"], ABS_FLOOR_US)
+        add_table(f"{ph} mean block per run", s["blocks_after_runs_us"], ABS_FLOOR_US)
         add(f"{ph} share past the boot slice", s["share_past_boot_slice"], None)
     return crit
 
@@ -270,7 +286,7 @@ def render(out, title=None):
     reps = out["repeats"]
     L = [f"# {title or '9.6 build campaign — pooled results'}", "",
          f"Repeats {reps}; mode {out['mode']}; CPU model per repeat {out['cpu_model']}; run per repeat {out['run_id']}. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9; "
-         f"times in µs unless stated; the spread is the per-repeat mean, the stability rule's value (D26). Rules: method §5.", ""]
+         f"times in µs unless stated; the spread is the per-repeat mean. Rules: method §5.", ""]
     for ph, P in out["phases"].items():
         db = (f"Pooled repeats {P.get('repeats', [])}; reported beside the pool, not pooled (D27, D28): "
               + "; ".join(f"repeat {r} ({x['why']}): lifetime {x['lifetime_s']} s, saturation {x['saturation']}, "
@@ -320,7 +336,7 @@ def render(out, title=None):
     if st:
         L += ["## Same-machine repeats and the stability rule (D10, D11, D23–D26)", "",
               f"Pooled machine: {out.get('machine') or 'any'}; pooled repeats {reps}; other-machine repeats {out.get('other_machine_repeats')}; stopped by the machine gate {out.get('gated_out')}. "
-              f"Rule (`measurement-campaign-workflow.md`, \"The stability rule\"; D26): each carried table is tested by its per-repeat mean, the share by its value; the 95 % confidence half-width of the across-repeat mean is at most the larger of {st['tolerance']:.0%} of the mean and {st['abs_floor_us']} µs for times, {st['tolerance']:.0%} for the share, over at least {st['min_repeats']} repeats; repeats are added one at a time until every value holds. "
+              f"Rule (`measurement-campaign-workflow.md`, \"The stability rule\"; D26, 9.5 D78): each carried table is tested by its mean as the table carries it, count-weighted over the repeats, its half-width the ratio estimator's (`cochran-st77`), the share by its per-repeat values; the 95 % confidence half-width is at most the larger of {st['tolerance']:.0%} of the mean and {st['abs_floor_us']} µs for times, {st['tolerance']:.0%} for the share, over at least {st['min_repeats']} repeats; repeats are added one at a time until every value holds. "
               f"The rule's exception (D29), marked *carried* below: a value whose spread follows the runner's disk is carried over at least {st['min_repeats']} repeats with its half-width and range, the tolerance not applied — `clamscan` and `python3` mean block per run, `python3` runs between blocks, `tracker` mean block per run. "
               f"**{'Holds' if st['passes'] else 'Does not hold yet'}**; repeats needed at the present spread: {st.get('needed') or 'over 200'}"
               + (f"; not estimable yet, fewer than two repeats: {', '.join(st['not_estimable'])}" if st.get("not_estimable") else "") + ".", "",

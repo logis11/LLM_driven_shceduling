@@ -407,31 +407,44 @@ def test_appinfo_takes_the_last_printed_block():
 
 # ---- pool: the first batch, the checks, the comparisons ----------------------------------
 
+RUN = "borg-first-warm run between voluntary blocks (µs)"
+
+
+def _one_sample_each(values):
+    return _entry("borg-first-warm", {"batch_run_us": {k: [v] for k, v in enumerate(values, 1)}})
+
+
 def test_first_batch_is_the_smallest_count_that_passes_at_the_probe_spread():
     # mean 100, sd 6: t(k-1) * 6 / sqrt(k) / 100 <= 0.05 first at k = 9 (2.306 * 6 / 3 = 4.61; k = 8: 5.02)
-    assert pool.first_batch([94.0, 100.0, 106.0], None, 5) == 9
-    assert pool.first_batch([100.0, 100.0, 100.0], None, 5) == 5    # at least five repeats (D18, from 9.6 D24)
-    assert pool.first_batch([100.0], None, 5) is None
+    assert pool.criterion("borg", _one_sample_each([94.0, 100.0, 106.0]))[RUN]["needed"] == 9
+    assert pool.criterion("borg", _one_sample_each([100.0, 100.0, 100.0]))[RUN]["needed"] == 5   # five repeats (D18)
+    assert pool.criterion("borg", _one_sample_each([100.0]))[RUN]["needed"] is None
 
 
 def test_first_batch_takes_the_absolute_floor_for_small_medians():
     # mean 10 µs, sd 1: 5 % is 0.5 µs, the floor 1 µs; t(k-1) / sqrt(k) <= 1 first at k = 7 (2.447 / 2.646 = 0.925)
-    assert pool.first_batch([9.0, 10.0, 11.0], 1.0, 5) == 7
-    assert pool.first_batch([9.0, 10.0, 11.0], None, 5) == 18
+    assert pool.criterion("borg", _one_sample_each([9.0, 10.0, 11.0]))[RUN]["needed"] == 7
 
 
 def test_first_batch_past_twenty_repeats_takes_students_t_not_the_normal():
     # sd 15 about 100: t(k-1) / sqrt(k) <= 1/3 first at k = 38; the normal's 1.96 would stop at 35
-    assert pool.first_batch([85.0, 100.0, 115.0], None, 5) == 38
+    assert pool.criterion("borg", _one_sample_each([85.0, 100.0, 115.0]))[RUN]["needed"] == 38
 
 
 def test_the_rule_needs_five_repeats_and_floors_times():
-    four = {1: 10.0, 2: 10.0, 3: 10.0, 4: 10.0}
-    assert not pool.value_stability("run_us", four)["passes"]
-    assert pool.value_stability("run_us", {**four, 5: 10.0})["passes"]
-    near = {1: 9.0, 2: 10.0, 3: 11.0, 4: 9.0, 5: 11.0, 6: 10.0, 7: 10.0}   # ±9 % of the mean, within 1 µs
-    assert pool.value_stability("run_us", near)["passes"]
-    assert not pool.value_stability("bytes_per_wake", near)["passes"]   # bytes carry no time floor
+    assert not pool.criterion("borg", _one_sample_each([10.0] * 4))[RUN]["passes"]
+    assert pool.criterion("borg", _one_sample_each([10.0] * 5))[RUN]["passes"]
+    near = [9.0, 10.0, 11.0, 9.0, 11.0, 10.0, 10.0]   # ±9 % of the mean, within 1 µs
+    assert pool.criterion("borg", _one_sample_each(near))[RUN]["passes"]
+    assert pool.floor_of("bytes_per_wake") is None      # bytes carry no time floor
+
+
+def test_the_rule_weighs_each_repeat_by_its_samples():
+    # one repeat of a single 200 µs run beside four of 99 runs at 100 µs: the per-repeat means 200, 100, 100, 100, 100
+    # read ±46 %, the table the fold-in carries has mean 39 800 / 397 = 100.25 µs and holds within ±0.9 %
+    tables = {1: [200.0], **{k: [100.0] * 99 for k in range(2, 6)}}
+    c = pool.criterion("borg", _entry("borg-first-warm", {"batch_run_us": tables}))[RUN]
+    assert c["mean"] == pytest.approx(39800 / 397, abs=1e-4) and c["half_width"] < 0.01 and c["passes"]
 
 
 def test_a_pooled_table_carries_each_repeats_mean():
@@ -444,7 +457,7 @@ def _entry(phase, tables):
     return {"phases": {phase: {"all": {k: pool.pooled(v) for k, v in tables.items()}}}}
 
 
-def test_the_rule_tests_every_table_on_the_list_by_its_per_repeat_mean():
+def test_the_rule_tests_every_table_on_the_list_by_its_mean():
     # medians identical in every repeat, means apart by the long tail: the rule reads the means (D19)
     steady_p50_wild_mean = {k: [10.0, 10.0, 10.0 + 40.0 * (k % 2)] for k in range(1, 6)}
     flat = {k: [10.0, 10.0, 10.0] for k in range(1, 6)}

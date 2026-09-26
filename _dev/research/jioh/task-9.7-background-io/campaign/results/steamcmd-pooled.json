@@ -387991,33 +387991,33 @@
     "quantities": {
      "steam-fresh-shaped run between voluntary blocks (\u00b5s)": {
       "k": 30,
-      "mean": 163.3826,
-      "cv": 0.0633,
-      "half_width": 0.0236,
-      "half_width_abs": 3.8628,
-      "leave_one_out": 0.006,
+      "mean": 162.7448,
+      "cv": 0.0593,
+      "half_width": 0.0221,
+      "half_width_abs": 3.603,
+      "leave_one_out": 0.0051,
       "passes": true,
-      "needed": 9
+      "needed": 8
      },
      "steam-fresh-shaped block per run (\u00b5s)": {
       "k": 30,
-      "mean": 9.4307,
-      "cv": 0.2717,
-      "half_width": 0.1014,
-      "half_width_abs": 0.9567,
-      "leave_one_out": 0.0261,
+      "mean": 9.3064,
+      "cv": 0.2589,
+      "half_width": 0.0967,
+      "half_width_abs": 0.8995,
+      "leave_one_out": 0.0228,
       "passes": true,
-      "needed": 28
+      "needed": 25
      }
     },
     "passes": true
    },
    "first_batch": {
     "by_quantity": {
-     "steam-fresh-shaped run between voluntary blocks (\u00b5s)": 9,
-     "steam-fresh-shaped block per run (\u00b5s)": 28
+     "steam-fresh-shaped run between voluntary blocks (\u00b5s)": 8,
+     "steam-fresh-shaped block per run (\u00b5s)": 25
     },
-    "count": 28
+    "count": 25
    },
    "checks": {
     "untraced against traced: CPU total (exit accounting)": {

@@ -1,6 +1,6 @@
 # 9.6 build campaign — pooled results (meas-ci:build:2026-09-18; runs 35328071379, 35328873409, 35337322204, 35426065936, 35430430817, 35434872927, 35439345618, 35443899531, 35448942696, 35453727742, 35459121647, 35464371497, 35469642365; repeats 4, 5, 7, 8, 9–18 on the AMD EPYC 7763, full mode; clamscan repeats 9–18 on signature database daily 28128; python3 repeats 11–18, warm start; D11, D26–D29)
 
-Repeats [4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]; mode {4: 'full', 5: 'full', 7: 'full', 8: 'full', 9: 'full', 10: 'full', 11: 'full', 12: 'full', 13: 'full', 14: 'full', 15: 'full', 16: 'full', 17: 'full', 18: 'full'}; CPU model per repeat {4: 'AMD EPYC 7763 64-Core Processor', 5: 'AMD EPYC 7763 64-Core Processor', 7: 'AMD EPYC 7763 64-Core Processor', 8: 'AMD EPYC 7763 64-Core Processor', 9: 'AMD EPYC 7763 64-Core Processor', 10: 'AMD EPYC 7763 64-Core Processor', 11: 'AMD EPYC 7763 64-Core Processor', 12: 'AMD EPYC 7763 64-Core Processor', 13: 'AMD EPYC 7763 64-Core Processor', 14: 'AMD EPYC 7763 64-Core Processor', 15: 'AMD EPYC 7763 64-Core Processor', 16: 'AMD EPYC 7763 64-Core Processor', 17: 'AMD EPYC 7763 64-Core Processor', 18: 'AMD EPYC 7763 64-Core Processor'}; run per repeat {4: '35328071379', 5: '35328071379', 7: '35328873409', 8: '35337322204', 9: '35426065936', 10: '35430430817', 11: '35434872927', 12: '35439345618', 13: '35443899531', 14: '35448942696', 15: '35453727742', 16: '35459121647', 17: '35464371497', 18: '35469642365'}. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9; times in µs unless stated; the spread is the per-repeat mean, the stability rule's value (D26). Rules: method §5.
+Repeats [4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]; mode {4: 'full', 5: 'full', 7: 'full', 8: 'full', 9: 'full', 10: 'full', 11: 'full', 12: 'full', 13: 'full', 14: 'full', 15: 'full', 16: 'full', 17: 'full', 18: 'full'}; CPU model per repeat {4: 'AMD EPYC 7763 64-Core Processor', 5: 'AMD EPYC 7763 64-Core Processor', 7: 'AMD EPYC 7763 64-Core Processor', 8: 'AMD EPYC 7763 64-Core Processor', 9: 'AMD EPYC 7763 64-Core Processor', 10: 'AMD EPYC 7763 64-Core Processor', 11: 'AMD EPYC 7763 64-Core Processor', 12: 'AMD EPYC 7763 64-Core Processor', 13: 'AMD EPYC 7763 64-Core Processor', 14: 'AMD EPYC 7763 64-Core Processor', 15: 'AMD EPYC 7763 64-Core Processor', 16: 'AMD EPYC 7763 64-Core Processor', 17: 'AMD EPYC 7763 64-Core Processor', 18: 'AMD EPYC 7763 64-Core Processor'}; run per repeat {4: '35328071379', 5: '35328071379', 7: '35328873409', 8: '35337322204', 9: '35426065936', 10: '35430430817', 11: '35434872927', 12: '35439345618', 13: '35443899531', 14: '35448942696', 15: '35453727742', 16: '35459121647', 17: '35464371497', 18: '35469642365'}. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9; times in µs unless stated; the spread is the per-repeat mean. Rules: method §5.
 
 ## build-j8-warm
 
@@ -384,7 +384,7 @@ shape (D21, D22): runs between voluntary blocks (µs) 3.0 / 4.0 / 6.0 / 23.0 / 6
 
 ## Same-machine repeats and the stability rule (D10, D11, D23–D26)
 
-Pooled machine: EPYC 7763; pooled repeats [4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]; other-machine repeats []; stopped by the machine gate {1: 'AMD EPYC 9V45 96-Core Processor', 2: 'AMD EPYC 9V74 80-Core Processor', 3: 'Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz', 6: 'Intel(R) Xeon(R) 6973P-C'}. Rule (`measurement-campaign-workflow.md`, "The stability rule"; D26): each carried table is tested by its per-repeat mean, the share by its value; the 95 % confidence half-width of the across-repeat mean is at most the larger of 5% of the mean and 1.0 µs for times, 5% for the share, over at least 5 repeats; repeats are added one at a time until every value holds. The rule's exception (D29), marked *carried* below: a value whose spread follows the runner's disk is carried over at least 5 repeats with its half-width and range, the tolerance not applied — `clamscan` and `python3` mean block per run, `python3` runs between blocks, `tracker` mean block per run. **Holds**; repeats needed at the present spread: 7.
+Pooled machine: EPYC 7763; pooled repeats [4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]; other-machine repeats []; stopped by the machine gate {1: 'AMD EPYC 9V45 96-Core Processor', 2: 'AMD EPYC 9V74 80-Core Processor', 3: 'Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz', 6: 'Intel(R) Xeon(R) 6973P-C'}. Rule (`measurement-campaign-workflow.md`, "The stability rule"; D26, 9.5 D78): each carried table is tested by its mean as the table carries it, count-weighted over the repeats, its half-width the ratio estimator's (`cochran-st77`), the share by its per-repeat values; the 95 % confidence half-width is at most the larger of 5% of the mean and 1.0 µs for times, 5% for the share, over at least 5 repeats; repeats are added one at a time until every value holds. The rule's exception (D29), marked *carried* below: a value whose spread follows the runner's disk is carried over at least 5 repeats with its half-width and range, the tolerance not applied — `clamscan` and `python3` mean block per run, `python3` runs between blocks, `tracker` mean block per run. **Holds**; repeats needed at the present spread: 7.
 
 | quantity | repeats | mean | spread (cv) | 95 % half-width | half-width (abs) | leave-one-out | needed at this spread | verdict |
 |---|---|---|---|---|---|---|---|---|
@@ -406,20 +406,20 @@ Pooled machine: EPYC 7763; pooled repeats [4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15
 | object-job sh 2/4 | 14 | 117.635 | 2.9% | ±1.7% | 1.936 | 0.5% | 5 | yes |
 | object-job sh 3/4 | 14 | 94.8346 | 3.5% | ±2.0% | 1.893 | 0.7% | 5 | yes |
 | object-job sh 4/4 | 14 | 141.6259 | 2.0% | ±1.1% | 1.6114 | 0.3% | 5 | yes |
-| clamscan run between blocks | 10 | 8893.0553 | 2.1% | ±1.5% | 130.346 | 0.3% | 5 | yes |
-| clamscan mean block per run | 10 | 218.0973 | 13.3% | ±9.5% | 20.727 | 2.9% | 30 | carried (D29) |
+| clamscan run between blocks | 10 | 8892.9779 | 2.1% | ±1.5% | 130.3425 | 0.3% | 5 | yes |
+| clamscan mean block per run | 10 | 218.089 | 13.3% | ±9.5% | 20.7238 | 2.8% | 30 | carried (D29) |
 | clamscan share past the boot slice | 10 | 0.1089 | 1.9% | ±1.4% | 0.0015 | 0.4% | 5 | yes |
-| ffmpeg run between blocks | 14 | 1519.9704 | 0.9% | ±0.5% | 8.0386 | 0.1% | 5 | yes |
-| ffmpeg mean block per run | 14 | 0.353 | 29.9% | ±17.2% | 0.0609 | 5.1% | 5 | yes |
+| ffmpeg run between blocks | 14 | 1519.9754 | 0.9% | ±0.5% | 8.0288 | 0.1% | 5 | yes |
+| ffmpeg mean block per run | 14 | 0.3528 | 29.8% | ±17.2% | 0.0607 | 5.1% | 5 | yes |
 | ffmpeg share past the boot slice | 14 | 0.6981 | 0.5% | ±0.3% | 0.0022 | 0.1% | 5 | yes |
-| handbrake run between blocks | 14 | 1086.6556 | 0.8% | ±0.5% | 5.1325 | 0.1% | 5 | yes |
-| handbrake mean block per run | 14 | 8.8954 | 11.6% | ±6.7% | 0.5973 | 1.5% | 7 | yes |
+| handbrake run between blocks | 14 | 1086.6675 | 0.8% | ±0.5% | 5.1377 | 0.1% | 5 | yes |
+| handbrake mean block per run | 14 | 8.8952 | 11.6% | ±6.7% | 0.5967 | 1.5% | 7 | yes |
 | handbrake share past the boot slice | 14 | 0.6256 | 0.3% | ±0.2% | 0.0012 | 0.1% | 5 | yes |
-| train run between blocks | 8 | 1615861.6653 | 12.0% | ±10.0% | 162251.4769 | 2.7% | 25 | carried (D29) |
-| train mean block per run | 8 | 220.0024 | 16.8% | ±14.0% | 30.887 | 4.3% | 46 | carried (D29) |
+| train run between blocks | 8 | 1595282.9135 | 13.4% | ±11.2% | 179211.7971 | 3.3% | 31 | carried (D29) |
+| train mean block per run | 8 | 223.1667 | 17.3% | ±14.5% | 32.2762 | 4.8% | 49 | carried (D29) |
 | train share past the boot slice | 8 | 0.9979 | 0.0% | ±0.0% | 0.0002 | 0.0% | 5 | yes |
-| tracker run between blocks | 14 | 406.4632 | 1.4% | ±0.8% | 3.3725 | 0.2% | 5 | yes |
-| tracker mean block per run | 14 | 17.5568 | 26.2% | ±15.1% | 2.656 | 5.6% | 84 | carried (D29) |
+| tracker run between blocks | 14 | 406.4218 | 1.5% | ±0.8% | 3.4029 | 0.2% | 5 | yes |
+| tracker mean block per run | 14 | 17.5567 | 26.1% | ±15.1% | 2.6466 | 5.6% | 84 | carried (D29) |
 | tracker share past the boot slice | 14 | 0.5321 | 0.9% | ±0.5% | 0.0028 | 0.1% | 5 | yes |
 
 

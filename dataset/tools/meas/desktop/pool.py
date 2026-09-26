@@ -30,7 +30,7 @@ if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 from meas.desktop import analyze  # noqa: E402
 from meas.campaign.analyze import pct  # noqa: E402
-from meas.stability import stability, TOLERANCE  # noqa: E402
+from meas.stability import stability, ratio_stability, ratio_repeats_needed, TOLERANCE  # noqa: E402
 from meas.distribution import circular_gaps  # noqa: E402
 
 
@@ -63,9 +63,10 @@ CARRIED = {"chrome-hidden": ("steady",),
            "element": ("idle",),
            "steam": ("shown",)}
 
-# the list: every value the fold-in carries, each tested by its per-repeat mean (method §6 item 1) — per carried
-# component of the carried phase and for the residual, its wake rate, gap mean and run mean, as campaign/pool.py
-# tests 9.5's entries. Thread counts are carried as their observed range and are deliberately absent.
+# the list: every value the fold-in carries (method §6 item 1) — per carried component of the carried phase and for
+# the residual, its wake rate by its per-repeat values, its gap mean and run mean as the pooled tables carry them
+# (count-weighted over the repeats), as campaign/pool.py tests 9.5's entries. Thread counts are carried as their
+# observed range and are deliberately absent.
 LIST_FIELDS = (("wakes_per_s", "wakes/s"), ("gap_ms", "gap mean (ms)"), ("run_ms", "run mean (ms)"))
 
 # changelog D17, the rule's exception (measurement-campaign workflow; 9.6 D29): run times move together across every
@@ -299,9 +300,10 @@ def pool_app(app, reps):
 
 
 def criterion(app, entry):
-    """The list of method §6 item 1, each value tested by its per-repeat mean over the carried phase: for every
-    selected component and for the residual, its wake rate, gap mean and run mean — the list `campaign/pool.py`
-    tests for 9.5's entries.
+    """The list of method §6 item 1 over the carried phase: for every selected component and for the residual, its
+    wake rate by its per-repeat values, its gap mean and run mean as its pooled tables carry them — count-weighted
+    over the repeats, the half-width the ratio estimator's (`campaign/pool.py`'s `table_pairs`) — the list
+    `campaign/pool.py` tests for 9.5's entries.
 
     An earlier version tested three numbers per phase — the per-renderer wake rate and the unweighted means of the
     components' gap and run means. That average gave a component waking a handful of times a phase the weight of
@@ -320,14 +322,17 @@ def criterion(app, entry):
         for comm, c in comps + ([("residual", residual)] if residual else []):
             for field, label in LIST_FIELDS:
                 if field == "wakes_per_s":
-                    vals, floor = c.get("wakes_per_s") or [], None
-                elif comm == "residual":
-                    vals, floor = (c.get(field) or {}).get("repeat_mean") or [], ABS_FLOOR_MS
+                    vals = c.get("wakes_per_s") or []
+                    if not vals:
+                        continue
+                    c_ = {**stability(vals, None, MIN_REPEATS, keep_zero=True), "needed": _cp.repeats_needed(vals)}
                 else:
-                    vals, floor = [x.get("mean") if x else None for x in c.get(field) or []], ABS_FLOOR_MS
-                if not vals:
-                    continue
-                c_ = {**stability(vals, floor, MIN_REPEATS, keep_zero=True), "needed": _cp.repeats_needed(vals, floor)}
+                    table = (c if comm == "residual" else (ph.get("tables") or {}).get(comm) or {}).get(field)
+                    if not table:
+                        continue
+                    sums, counts = _cp.table_pairs(table)
+                    c_ = {**ratio_stability(sums, counts, ABS_FLOOR_MS, MIN_REPEATS),
+                          "needed": ratio_repeats_needed(sums, counts, ABS_FLOOR_MS, MIN_REPEATS)}
                 c_["excepted"] = field == "run_ms" and app in EXCEPTED_RUN_MEANS          # D17
                 c_["session_spread"] = comm in SESSION_SPREAD.get(app, ())                 # D21
                 c_["sparse"] = comm in SPARSE.get(app, ())                                 # D27

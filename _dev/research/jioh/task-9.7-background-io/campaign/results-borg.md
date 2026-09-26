@@ -291,12 +291,12 @@ command s {1: 12.159, 2: 11.991, 4: 12.19, 5: 12.016, 6: 11.909, 7: 11.778, 8: 1
 
 ### Stability rule (D18, D19)
 
-**Holds** (each table on the list by its per-repeat mean; tolerance the larger of 5% and 1 µs for times, at least 5 repeats). Repeats needed at the spread of these repeats: 28.
+**Holds** (each table on the list by its mean as the table carries it, count-weighted over the repeats — 9.5 D78; tolerance the larger of 5% and 1 µs for times, at least 5 repeats). Repeats needed at the spread of these repeats: 27.
 
 | quantity | repeats | mean | cv | 95 % half-width | leave-one-out | needed at this spread | passes |
 |---|---|---|---|---|---|---|---|
-| borg-first-warm run between voluntary blocks (µs) | 30 | 15181.5683 | 10.2% | ±3.8% | 0.8% | 19 | yes |
-| borg-first-warm block per run (µs) | 30 | 3128.4014 | 12.8% | ±4.8% | 1.0% | 28 | yes |
+| borg-first-warm run between voluntary blocks (µs) | 30 | 15028.3037 | 10.2% | ±3.8% | 0.7% | 19 | yes |
+| borg-first-warm block per run (µs) | 30 | 3091.3138 | 12.6% | ±4.7% | 0.9% | 27 | yes |
 
 ### Comparisons (results only)
 

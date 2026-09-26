@@ -41,7 +41,7 @@ def main():
               "and the settles and phases §9's amendments name. `spread` is the range of the per-repeat p50. Threads are the top five by CPU. "
               "Per-input rules are method §5's (a) first-wake, (b) window minus idle rate, (c) waker (X-server-woken schedule-ins). "
               "Runner: `ubuntu-24.04`, 4 vCPU, kernel per `reports/*.spec.json`.", ""]
-    crit = []  # D30: every carried value of each app (tables by their per-repeat mean) against the shared stability criterion
+    crit = []  # D30: every carried value of each app (tables by their mean as carried, D78) against the shared stability criterion
     for app in ORDER:
         p = os.path.join(R, f"pool-{app}.json")
         if not os.path.exists(p):
@@ -100,9 +100,10 @@ def main():
             lines.append("")
     if crit:
         st0 = crit[0][1]
-        lines += ["## Same-machine repeats and the stability criterion (D26, D29, D30)", "",
-                  f"Criterion: for every value the fold-in carries, each table by its per-repeat mean, the 95 % confidence "
-                  f"half-width of the across-repeat mean is at most the larger of {st0['tolerance']:.0%} of the mean and "
+        lines += ["## Same-machine repeats and the stability criterion (D26, D29, D30, D78)", "",
+                  f"Criterion: for every value the fold-in carries — a rate or share by its per-repeat values, a table by its mean "
+                  f"as the table carries it, count-weighted over the repeats (D78; the ratio estimator's half-width, "
+                  f"`cochran-st77`) — the 95 % confidence half-width is at most the larger of {st0['tolerance']:.0%} of the mean and "
                   f"{st0['abs_floor_ms'] * 1000:.0f} µs (the trace's resolution; times only), over at least {st0['min_repeats']} repeats; "
                   "repeats are added one at a time per application until every quantity holds (`thunderbird` at most 8, the SWELL-KW "
                   "Outlook windows). `needed`: the repeat count at which the half-width at the present spread would hold.", "",

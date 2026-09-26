@@ -17649,23 +17649,23 @@
     "quantities": {
      "borg-first-warm run between voluntary blocks (\u00b5s)": {
       "k": 30,
-      "mean": 15181.5683,
+      "mean": 15028.3037,
       "cv": 0.1024,
       "half_width": 0.0382,
-      "half_width_abs": 580.674,
-      "leave_one_out": 0.0082,
+      "half_width_abs": 574.7604,
+      "leave_one_out": 0.0073,
       "passes": true,
       "needed": 19
      },
      "borg-first-warm block per run (\u00b5s)": {
       "k": 30,
-      "mean": 3128.4014,
-      "cv": 0.1276,
-      "half_width": 0.0476,
-      "half_width_abs": 148.9955,
-      "leave_one_out": 0.0099,
+      "mean": 3091.3138,
+      "cv": 0.1262,
+      "half_width": 0.0471,
+      "half_width_abs": 145.6249,
+      "leave_one_out": 0.0089,
       "passes": true,
-      "needed": 28
+      "needed": 27
      }
     },
     "passes": true
@@ -17673,9 +17673,9 @@
    "first_batch": {
     "by_quantity": {
      "borg-first-warm run between voluntary blocks (\u00b5s)": 19,
-     "borg-first-warm block per run (\u00b5s)": 28
+     "borg-first-warm block per run (\u00b5s)": 27
     },
-    "count": 28
+    "count": 27
    },
    "checks": {},
    "comparisons": {

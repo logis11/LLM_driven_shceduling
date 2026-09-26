@@ -224,14 +224,14 @@ CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 776
 | `demux` | 1–1 | 53.2–55.2 | 0.08 (0.1–0.1) | 49.59 | 0.009 | 0.024 | 0.044 | 502158 |
 | `vo` | 1–1 | 0.9–0.9 | 1191.09 (1190.2–1192.7) | 1241.80 | 0.036 | 0.045 | 0.115 | 8076 |
 
-## Same-machine repeats and the stability criterion (D26, D29, D30)
+## Same-machine repeats and the stability criterion (D26, D29, D30, D78)
 
-Criterion: for every value the fold-in carries, each table by its per-repeat mean, the 95 % confidence half-width of the across-repeat mean is at most the larger of 5% of the mean and 1 µs (the trace's resolution; times only), over at least 5 repeats; repeats are added one at a time per application until every quantity holds (`thunderbird` at most 8, the SWELL-KW Outlook windows). `needed`: the repeat count at which the half-width at the present spread would hold.
+Criterion: for every value the fold-in carries — a rate or share by its per-repeat values, a table by its mean as the table carries it, count-weighted over the repeats (D78; the ratio estimator's half-width, `cochran-st77`) — the 95 % confidence half-width is at most the larger of 5% of the mean and 1 µs (the trace's resolution; times only), over at least 5 repeats; repeats are added one at a time per application until every quantity holds (`thunderbird` at most 8, the SWELL-KW Outlook windows). `needed`: the repeat count at which the half-width at the present spread would hold.
 
 | application | repeats | quantities | out of tolerance | repeats needed at this spread | holds |
 |---|---|---|---|---|---|
 | `soffice` | 14 | 5 | 0 | 14 | yes |
-| `thunderbird-send` | 43 | 75 | 9 | 34 | yes |
+| `thunderbird-send` | 43 | 75 | 9 | 27 | yes |
 | `gimp` | 5 | 10 | 0 | 5 | yes |
 | `kdenlive` | 20 | 22 | 0 | 20 | yes |
 | `mpv-video` | 24 | 3 | 0 | 10 | yes |
@@ -242,89 +242,89 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
 | idle soffice.bin wakes/s | 14 | 3.4571 | 0.2% | ±0.1% | 0.0% | 5 | yes |
-| idle soffice.bin gap mean (ms) | 14 | 289.262 | 0.2% | ±0.1% | 0.0% | 5 | yes |
+| idle soffice.bin gap mean (ms) | 14 | 289.2613 | 0.2% | ±0.1% | 0.0% | 5 | yes |
 | idle soffice.bin run mean (ms) | 14 | 0.1657 | 8.5% | ±4.9% | 1.4% | 14 | yes |
-| input_run mean, SWELL-KW (ms) | 14 | 4.9587 | 6.1% | ±3.5% | 1.2% | 9 | yes |
-| input_run mean, 136M (ms) | 14 | 5.5387 | 8.2% | ±4.7% | 1.0% | 13 | yes |
+| input_run mean, SWELL-KW (ms) | 14 | 4.9067 | 7.1% | ±4.1% | 1.6% | 11 | yes |
+| input_run mean, 136M (ms) | 14 | 5.4964 | 8.6% | ±5.0% | 1.2% | 14 | yes |
 
 ### `thunderbird-send`
 
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
 | idle thunderbird-bin wakes/s | 43 | 0.4054 | 11.8% | ±3.6% | 0.7% | 24 | yes |
-| idle thunderbird-bin gap mean (ms) | 43 | 2500.9935 | 12.0% | ±3.7% | 0.6% | 25 | yes |
-| idle thunderbird-bin run mean (ms) | 43 | 0.2981 | 10.9% | ±3.4% | 0.7% | 21 | yes |
+| idle thunderbird-bin gap mean (ms) | 43 | 2466.7836 | 11.8% | ±3.6% | 0.7% | 24 | yes |
+| idle thunderbird-bin run mean (ms) | 43 | 0.2947 | 10.5% | ±3.2% | 0.6% | 20 | yes |
 | idle Timer wakes/s | 43 | 0.2831 | 6.9% | ±2.1% | 0.4% | 10 | yes |
-| idle Timer gap mean (ms) | 43 | 3548.7175 | 6.7% | ±2.1% | 0.4% | 10 | yes |
-| idle Timer run mean (ms) | 43 | 0.0363 | 5.8% | ±1.8% | 0.5% | 8 | yes |
+| idle Timer gap mean (ms) | 43 | 3532.807 | 6.9% | ±2.1% | 0.4% | 10 | yes |
+| idle Timer run mean (ms) | 43 | 0.0362 | 6.1% | ±1.9% | 0.6% | 9 | yes |
 | idle gmain wakes/s | 43 | 0.25 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle gmain gap mean (ms) | 43 | 4000.0139 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle gmain run mean (ms) | 43 | 0.047 | 8.8% | ±2.7% | 0.8% | 15 | yes |
 | idle IPDL Background wakes/s | 43 | 0.2405 | 3.8% | ±1.1% | 0.3% | 5 | yes |
-| idle IPDL Background gap mean (ms) | 43 | 4163.7771 | 3.8% | ±1.2% | 0.3% | 5 | yes |
-| idle IPDL Background run mean (ms) | 43 | 0.0207 | 5.0% | ±1.5% | 0.3% | 7 | yes |
+| idle IPDL Background gap mean (ms) | 43 | 4157.9516 | 3.8% | ±1.1% | 0.3% | 5 | yes |
+| idle IPDL Background run mean (ms) | 43 | 0.0206 | 4.9% | ±1.5% | 0.3% | 7 | yes |
 | idle WebExtensions wakes/s | 43 | 0.2072 | 9.2% | ±2.8% | 0.4% | 16 | yes |
-| idle WebExtensions gap mean (ms) | 43 | 4867.4275 | 9.3% | ±2.9% | 0.5% | 16 | yes |
-| idle WebExtensions run mean (ms) | 43 | 0.1076 | 9.1% | ±2.8% | 0.6% | 16 | yes |
+| idle WebExtensions gap mean (ms) | 43 | 4826.9578 | 9.2% | ±2.8% | 0.4% | 16 | yes |
+| idle WebExtensions run mean (ms) | 43 | 0.1067 | 9.0% | ±2.8% | 0.5% | 15 | yes |
 | idle JS Watchdog wakes/s | 43 | 0.1698 | 12.6% | ±3.9% | 0.6% | 27 | yes |
-| idle JS Watchdog gap mean (ms) | 43 | 5994.469 | 14.2% | ±4.4% | 0.7% | 34 | yes |
-| idle JS Watchdog run mean (ms) | 43 | 0.0215 | 8.9% | ±2.7% | 0.8% | 15 | yes |
+| idle JS Watchdog gap mean (ms) | 43 | 5890.4314 | 12.6% | ±3.9% | 0.5% | 27 | yes |
+| idle JS Watchdog run mean (ms) | 43 | 0.0215 | 9.3% | ±2.9% | 0.8% | 16 | yes |
 | idle StreamTrans wakes/s | 43 | 0.1303 | 9.9% | ±3.0% | 0.6% | 18 | yes |
-| idle StreamTrans gap mean (ms) | 43 | 7747.1788 | 9.9% | ±3.0% | 0.5% | 18 | yes |
-| idle StreamTrans run mean (ms) | 43 | 4.77 | 11.8% | ±3.6% | 0.7% | 25 | yes |
+| idle StreamTrans gap mean (ms) | 43 | 7674.0302 | 9.9% | ±3.0% | 0.6% | 18 | yes |
+| idle StreamTrans run mean (ms) | 43 | 4.7323 | 11.9% | ±3.7% | 0.8% | 25 | yes |
 | idle Indexed~ IO wakes/s | 43 | 0.0728 | 10.7% | ±3.3% | 0.8% | 21 | yes |
-| idle Indexed~ IO gap mean (ms) | 43 | 13893.8297 | 11.0% | ±3.4% | 0.8% | 21 | yes |
-| idle Indexed~ IO run mean (ms) | 43 | 0.1793 | 9.4% | ±2.9% | 0.7% | 16 | yes |
+| idle Indexed~ IO gap mean (ms) | 43 | 13738.0668 | 10.7% | ±3.3% | 0.8% | 21 | yes |
+| idle Indexed~ IO run mean (ms) | 43 | 0.1779 | 9.2% | ±2.8% | 0.7% | 16 | yes |
 | idle glean.dispatche wakes/s | 43 | 0.0568 | 8.4% | ±2.6% | 0.6% | 14 | yes |
-| idle glean.dispatche gap mean (ms) | 43 | 17741.1417 | 9.0% | ±2.8% | 0.7% | 16 | yes |
-| idle glean.dispatche run mean (ms) | 43 | 0.0371 | 5.3% | ±1.6% | 0.4% | 7 | yes |
+| idle glean.dispatche gap mean (ms) | 43 | 17610.9825 | 8.4% | ±2.6% | 0.6% | 14 | yes |
+| idle glean.dispatche run mean (ms) | 43 | 0.0371 | 5.4% | ±1.7% | 0.3% | 7 | yes |
 | idle IPC I/O Parent wakes/s | 43 | 0.0424 | 7.8% | ±2.4% | 0.4% | 12 | yes |
-| idle IPC I/O Parent gap mean (ms) | 43 | 23746.2086 | 7.8% | ±2.4% | 0.4% | 12 | yes |
-| idle IPC I/O Parent run mean (ms) | 43 | 0.0348 | 7.2% | ±2.2% | 0.4% | 11 | yes |
+| idle IPC I/O Parent gap mean (ms) | 43 | 23604.8393 | 7.8% | ±2.4% | 0.4% | 12 | yes |
+| idle IPC I/O Parent run mean (ms) | 43 | 0.0346 | 7.2% | ±2.2% | 0.5% | 11 | yes |
 | idle IPC I/O Child wakes/s | 43 | 0.04 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle IPC I/O Child gap mean (ms) | 43 | 25000.0866 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle IPC I/O Child run mean (ms) | 43 | 0.0277 | 4.6% | ±1.4% | 0.3% | 6 | yes |
 | idle residual wakes/s | 43 | 0.0943 | 5.9% | ±1.8% | 0.4% | 8 | yes |
-| idle residual gap mean (ms) | 43 | 10638.4311 | 6.3% | ±1.9% | 0.5% | 9 | yes |
-| idle residual run mean (ms) | 43 | 0.0869 | 9.9% | ±3.0% | 0.8% | 18 | yes |
+| idle residual gap mean (ms) | 43 | 10599.8724 | 5.9% | ±1.8% | 0.4% | 8 | yes |
+| idle residual run mean (ms) | 43 | 0.0868 | 9.7% | ±3.0% | 0.9% | 17 | yes |
 | op Socket Thread wakes/s | 8 | 717.5645 | 1.9% | ±1.6% | 0.4% | 5 | yes |
 | op Socket Thread gap mean (ms) | 8 | 1.394 | 1.9% | ±1.6% | 0.5% | 5 | yes |
-| op Socket Thread run mean (ms) | 8 | 0.0217 | 4.8% | ±4.0% | 1.3% | 7 | yes |
+| op Socket Thread run mean (ms) | 8 | 0.0217 | 4.9% | ±4.1% | 1.3% | 7 | yes |
 | op Compositor wakes/s | 8 | 580.9912 | 1.2% | ±1.0% | 0.3% | 5 | yes |
-| op Compositor gap mean (ms) | 8 | 1.7214 | 1.2% | ±1.0% | 0.3% | 5 | yes |
-| op Compositor run mean (ms) | 8 | 0.0143 | 3.0% | ±2.5% | 0.8% | 5 | yes |
+| op Compositor gap mean (ms) | 8 | 1.7207 | 1.2% | ±1.0% | 0.3% | 5 | yes |
+| op Compositor run mean (ms) | 8 | 0.0143 | 3.1% | ±2.6% | 0.9% | 5 | yes |
 | op thunderbird-bin wakes/s | 8 | 450.2345 | 4.8% | ±4.0% | 1.3% | 6 | yes |
-| op thunderbird-bin gap mean (ms) | 8 | 2.2256 | 5.0% | ±4.1% | 1.4% | 7 | yes |
-| op thunderbird-bin run mean (ms) | 8 | 1.5039 | 4.8% | ±4.0% | 1.4% | 7 | yes |
+| op thunderbird-bin gap mean (ms) | 8 | 2.224 | 4.9% | ±4.1% | 1.4% | 7 | yes |
+| op thunderbird-bin run mean (ms) | 8 | 1.5028 | 4.7% | ±4.0% | 1.3% | 6 | yes |
 | op Renderer wakes/s | 8 | 119.9042 | 1.0% | ±0.8% | 0.2% | 5 | yes |
-| op Renderer gap mean (ms) | 8 | 8.3407 | 1.0% | ±0.8% | 0.2% | 5 | yes |
-| op Renderer run mean (ms) | 8 | 0.1626 | 3.1% | ±2.6% | 0.6% | 5 | yes |
+| op Renderer gap mean (ms) | 8 | 8.3389 | 1.0% | ±0.9% | 0.3% | 5 | yes |
+| op Renderer run mean (ms) | 8 | 0.1626 | 3.2% | ±2.7% | 0.6% | 5 | yes |
 | op SwComposite wakes/s | 8 | 72.9689 | 2.0% | ±1.7% | 0.5% | 5 | yes |
-| op SwComposite gap mean (ms) | 8 | 13.7094 | 2.0% | ±1.7% | 0.5% | 5 | yes |
-| op SwComposite run mean (ms) | 8 | 0.0137 | 4.1% | ±3.5% | 1.0% | 5 | yes |
+| op SwComposite gap mean (ms) | 8 | 13.6996 | 2.0% | ±1.7% | 0.5% | 5 | yes |
+| op SwComposite run mean (ms) | 8 | 0.0137 | 4.2% | ±3.5% | 1.1% | 5 | yes |
 | op Softwar~cThread wakes/s | 8 | 59.7211 | 0.2% | ±0.1% | 0.0% | 5 | yes |
-| op Softwar~cThread gap mean (ms) | 8 | 16.7445 | 0.2% | ±0.1% | 0.0% | 5 | yes |
-| op Softwar~cThread run mean (ms) | 8 | 0.0423 | 4.4% | ±3.6% | 1.1% | 6 | yes |
+| op Softwar~cThread gap mean (ms) | 8 | 16.7448 | 0.2% | ±0.1% | 0.0% | 5 | yes |
+| op Softwar~cThread run mean (ms) | 8 | 0.0423 | 4.4% | ±3.7% | 1.1% | 6 | yes |
 | op StreamT~ns wakes/s | 8 | 46.0977 | 14.5% | ±12.1% | 2.7% | 35 | no |
-| op StreamT~ns gap mean (ms) | 8 | 22.0922 | 14.3% | ±12.0% | 2.5% | 34 | no |
-| op StreamT~ns run mean (ms) | 8 | 0.1508 | 13.6% | ±11.3% | 3.0% | 31 | no |
+| op StreamT~ns gap mean (ms) | 8 | 21.7163 | 14.4% | ±12.0% | 2.7% | 35 | no |
+| op StreamT~ns run mean (ms) | 8 | 0.1498 | 13.4% | ±11.2% | 3.0% | 30 | no |
 | op TaskCon~ller wakes/s | 8 | 41.1563 | 3.4% | ±2.8% | 0.9% | 5 | yes |
-| op TaskCon~ller gap mean (ms) | 8 | 24.322 | 3.4% | ±2.9% | 0.9% | 5 | yes |
+| op TaskCon~ller gap mean (ms) | 8 | 24.3198 | 3.4% | ±2.9% | 0.9% | 5 | yes |
 | op TaskCon~ller run mean (ms) | 8 | 0.1812 | 1.8% | ±1.6% | 0.4% | 5 | yes |
 | op Timer wakes/s | 8 | 28.0923 | 3.8% | ±3.2% | 0.8% | 5 | yes |
-| op Timer gap mean (ms) | 8 | 35.6418 | 3.8% | ±3.2% | 0.8% | 5 | yes |
+| op Timer gap mean (ms) | 8 | 35.6189 | 3.8% | ±3.2% | 0.8% | 5 | yes |
 | op Timer run mean (ms) | 8 | 0.0162 | 2.9% | ±2.4% | 0.6% | 5 | yes |
 | op glean.dispatche wakes/s | 8 | 27.4056 | 3.1% | ±2.6% | 0.9% | 5 | yes |
-| op glean.dispatche gap mean (ms) | 8 | 36.5182 | 3.0% | ±2.5% | 0.9% | 5 | yes |
-| op glean.dispatche run mean (ms) | 8 | 0.0764 | 6.7% | ±5.6% | 1.9% | 10 | no |
+| op glean.dispatche gap mean (ms) | 8 | 36.5093 | 3.1% | ±2.6% | 0.9% | 5 | yes |
+| op glean.dispatche run mean (ms) | 8 | 0.0764 | 6.8% | ±5.7% | 2.0% | 10 | no |
 | op WRRende~ckend#0 wakes/s | 8 | 27.2205 | 2.8% | ±2.3% | 0.8% | 5 | yes |
-| op WRRende~ckend#0 gap mean (ms) | 8 | 36.7617 | 2.8% | ±2.3% | 0.7% | 5 | yes |
-| op WRRende~ckend#0 run mean (ms) | 8 | 0.368 | 8.0% | ±6.7% | 2.4% | 13 | no |
+| op WRRende~ckend#0 gap mean (ms) | 8 | 36.756 | 2.8% | ±2.4% | 0.8% | 5 | yes |
+| op WRRende~ckend#0 run mean (ms) | 8 | 0.3682 | 8.1% | ±6.8% | 2.4% | 13 | no |
 | op residual wakes/s | 8 | 105.0151 | 6.6% | ±5.5% | 1.7% | 10 | no |
-| op residual gap mean (ms) | 8 | 9.5572 | 6.3% | ±5.3% | 1.6% | 9 | no |
-| op residual run mean (ms) | 8 | 0.256 | 4.4% | ±3.7% | 1.0% | 6 | yes |
-| input_run mean, SWELL-KW (ms) | 8 | 7.1569 | 17.1% | ±14.3% | 5.4% | 48 | no |
-| input_run mean, 136M (ms) | 8 | 6.2843 | 8.1% | ±6.8% | 1.9% | 13 | no |
+| op residual gap mean (ms) | 8 | 9.5236 | 6.5% | ±5.4% | 1.7% | 9 | no |
+| op residual run mean (ms) | 8 | 0.2561 | 4.6% | ±3.8% | 1.1% | 6 | yes |
+| input_run mean, SWELL-KW (ms) | 8 | 6.8674 | 10.2% | ±8.6% | 2.4% | 19 | no |
+| input_run mean, 136M (ms) | 8 | 6.2957 | 8.2% | ±6.9% | 1.9% | 13 | no |
 | operation duration mean (ms) | 8 | 3074.2678 | 3.3% | ±2.8% | 0.9% | 5 | yes |
 
 ### `gimp`
@@ -332,14 +332,14 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
 | driven gimp wakes/s | 5 | 8.6429 | 0.4% | ±0.5% | 0.1% | 5 | yes |
-| driven gimp gap mean (ms) | 5 | 115.7031 | 0.4% | ±0.5% | 0.1% | 5 | yes |
+| driven gimp gap mean (ms) | 5 | 115.7013 | 0.4% | ±0.5% | 0.1% | 5 | yes |
 | driven gimp run mean (ms) | 5 | 0.3301 | 3.4% | ±4.2% | 1.4% | 5 | yes |
 | op script-fu wakes/s | 5 | 11.5803 | 0.8% | ±1.0% | 0.2% | 5 | yes |
-| op script-fu gap mean (ms) | 5 | 86.3581 | 0.8% | ±1.0% | 0.2% | 5 | yes |
+| op script-fu gap mean (ms) | 5 | 86.3564 | 0.8% | ±1.0% | 0.2% | 5 | yes |
 | op script-fu run mean (ms) | 5 | 0.0346 | 3.5% | ±4.4% | 1.5% | 5 | yes |
 | op gimp wakes/s | 5 | 2.0668 | 3.5% | ±4.4% | 1.4% | 5 | yes |
-| op gimp gap mean (ms) | 5 | 484.306 | 3.4% | ±4.3% | 1.4% | 5 | yes |
-| op gimp run mean (ms) | 5 | 500.9874 | 3.4% | ±4.3% | 1.4% | 5 | yes |
+| op gimp gap mean (ms) | 5 | 483.885 | 3.5% | ±4.4% | 1.4% | 5 | yes |
+| op gimp run mean (ms) | 5 | 500.5503 | 3.5% | ±4.4% | 1.4% | 5 | yes |
 | operation duration mean (ms) | 5 | 2360.1735 | 1.0% | ±1.2% | 0.4% | 5 | yes |
 
 ### `kdenlive`
@@ -347,27 +347,27 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
 | idle kdenlive wakes/s | 20 | 1.2604 | 1.9% | ±0.9% | 0.2% | 5 | yes |
-| idle kdenlive gap mean (ms) | 20 | 793.6713 | 1.9% | ±0.9% | 0.2% | 5 | yes |
+| idle kdenlive gap mean (ms) | 20 | 793.4019 | 1.9% | ±0.9% | 0.2% | 5 | yes |
 | idle kdenlive run mean (ms) | 20 | 0.0284 | 10.0% | ±4.7% | 1.6% | 18 | yes |
 | idle Qt bearer threa wakes/s | 20 | 0.1 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle Qt bearer threa gap mean (ms) | 20 | 10000.1692 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle Qt bearer threa run mean (ms) | 20 | 0.4077 | 4.3% | ±2.0% | 0.5% | 6 | yes |
 | driven kdenlive wakes/s | 20 | 136.59 | 7.4% | ±3.5% | 0.7% | 11 | yes |
-| driven kdenlive gap mean (ms) | 20 | 7.3593 | 7.4% | ±3.5% | 0.6% | 11 | yes |
-| driven kdenlive run mean (ms) | 20 | 2.732 | 10.6% | ±4.9% | 0.9% | 20 | yes |
+| driven kdenlive gap mean (ms) | 20 | 7.3212 | 7.4% | ±3.5% | 0.7% | 11 | yes |
+| driven kdenlive run mean (ms) | 20 | 2.7117 | 10.7% | ±5.0% | 1.0% | 20 | yes |
 | driven QXcbEventQueue wakes/s | 20 | 72.798 | 2.5% | ±1.2% | 0.3% | 5 | yes |
-| driven QXcbEventQueue gap mean (ms) | 20 | 13.7452 | 2.6% | ±1.2% | 0.4% | 5 | yes |
-| driven QXcbEventQueue run mean (ms) | 20 | 0.0152 | 5.6% | ±2.6% | 0.9% | 6 | yes |
+| driven QXcbEventQueue gap mean (ms) | 20 | 13.7366 | 2.5% | ±1.2% | 0.3% | 5 | yes |
+| driven QXcbEventQueue run mean (ms) | 20 | 0.0151 | 5.5% | ±2.6% | 0.8% | 6 | yes |
 | driven residual wakes/s | 20 | 1.8221 | 3.0% | ±1.4% | 0.3% | 5 | yes |
-| driven residual gap mean (ms) | 20 | 549.2708 | 3.0% | ±1.4% | 0.4% | 5 | yes |
+| driven residual gap mean (ms) | 20 | 548.8044 | 3.0% | ±1.4% | 0.3% | 5 | yes |
 | driven residual run mean (ms) | 20 | 0.2207 | 2.8% | ±1.3% | 0.3% | 5 | yes |
 | op kdenlive_render wakes/s | 20 | 635.463 | 1.5% | ±0.7% | 0.2% | 5 | yes |
-| op kdenlive_render gap mean (ms) | 20 | 1.574 | 1.4% | ±0.7% | 0.2% | 5 | yes |
-| op kdenlive_render run mean (ms) | 20 | 1.4761 | 1.5% | ±0.7% | 0.2% | 5 | yes |
+| op kdenlive_render gap mean (ms) | 20 | 1.5737 | 1.5% | ±0.7% | 0.2% | 5 | yes |
+| op kdenlive_render run mean (ms) | 20 | 1.4758 | 1.5% | ±0.7% | 0.2% | 5 | yes |
 | op residual wakes/s | 20 | 16.0658 | 1.4% | ±0.7% | 0.2% | 5 | yes |
-| op residual gap mean (ms) | 20 | 62.2558 | 1.4% | ±0.7% | 0.2% | 5 | yes |
-| op residual run mean (ms) | 20 | 3.244 | 1.4% | ±0.6% | 0.1% | 5 | yes |
-| operation duration mean (ms) | 20 | 11396.8687 | 1.6% | ±0.7% | 0.2% | 5 | yes |
+| op residual gap mean (ms) | 20 | 62.2466 | 1.4% | ±0.7% | 0.2% | 5 | yes |
+| op residual run mean (ms) | 20 | 3.2434 | 1.4% | ±0.6% | 0.1% | 5 | yes |
+| operation duration mean (ms) | 20 | 11394.0653 | 1.6% | ±0.7% | 0.2% | 5 | yes |
 
 ### `mpv-video`
 

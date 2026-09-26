@@ -40712,21 +40712,21 @@
     "quantities": {
      "7z-mmt8-warm run between voluntary blocks (\u00b5s)": {
       "k": 6,
-      "mean": 4187.0959,
-      "cv": 0.0206,
-      "half_width": 0.0217,
-      "half_width_abs": 90.6721,
-      "leave_one_out": 0.0069,
+      "mean": 4187.4668,
+      "cv": 0.0208,
+      "half_width": 0.0218,
+      "half_width_abs": 91.2294,
+      "leave_one_out": 0.007,
       "passes": true,
       "needed": 5
      },
      "7z-mmt8-warm block per run (\u00b5s)": {
       "k": 6,
-      "mean": 0.1593,
-      "cv": 0.3849,
-      "half_width": 0.404,
-      "half_width_abs": 0.0644,
-      "leave_one_out": 0.1248,
+      "mean": 0.1595,
+      "cv": 0.386,
+      "half_width": 0.4051,
+      "half_width_abs": 0.0646,
+      "leave_one_out": 0.126,
       "passes": true,
       "needed": 5
      }

@@ -134,8 +134,9 @@ def stability_text(prog, e, stab, k, within):
     text = ""
     if ok:
         hw, comp, label = max(ok)
-        text = (f"Stability rule: {'all ' if not carried else ''}{len(ok)} value{'s' if len(ok) > 1 else ''} on the "
-                f"list hold{'s' if len(ok) == 1 else ''} within 5 % or 1 µs over the {k} repeats, the widest `{comp}` "
+        text = (f"Stability rule (9.5 D78): {'all ' if not carried else ''}{len(ok)} value{'s' if len(ok) > 1 else ''} "
+                f"on the list — a table read by the mean it carries, over every repeat's samples — "
+                f"hold{'s' if len(ok) == 1 else ''} within 5 % or 1 µs over the {k} repeats, the widest `{comp}` "
                 f"{LABEL[label]} ±{hw * 100:.2f} %. ")
     for comp in carried:
         th, parts = e["threads"][comp], []
@@ -144,8 +145,8 @@ def stability_text(prog, e, stab, k, within):
             vals = th["wakes_per_s"] if label == "wakes/s" else [x["mean"] for x in th[
                 "gap_ms" if label.startswith("gap") else "run_ms"] if x]
             parts.append(f"{LABEL[label]} {fmt_value(q['mean'], label)} ±{q['half_width'] * 100:.1f} % "
-                         f"({fmt_value(min(vals), label, False)}–{fmt_value(max(vals), label)})"
-                         + (f" over the {q['k']} repeats it woke in" if q["k"] != k else ""))
+                         f"({fmt_value(min(vals), label, False)}–{fmt_value(max(vals), label)}"
+                         + (f" over the {len(vals)} repeats it woke in" if len(vals) != k else "") + ")")
         n = [round(r * statistics.fmean(e["span_s"])) for r in th["wakes_per_s"]]
         if stab["quantities"][f"{prog} {comp} wakes/s"].get("sparse"):
             without = next((x["repeats_without"] for x in e["components"].get("sparse", []) if x["comm"] == comp), [])

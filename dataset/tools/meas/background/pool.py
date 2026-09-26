@@ -15,7 +15,8 @@ repeats are pooled — one table at a time — into the quantile table (p1 … p
 wake), over all the program's threads and per thread (comm#rank), with the
 per-repeat mean as the spread (§5 "Distribution form", §9 D19). Then: the
 shared stability rule (stability.py) on the list — every table the fold-in
-carries, each by its per-repeat mean (D19): the tolerance the larger of 5 % and
+carries, each by its mean as it carries it, count-weighted over the repeats
+(D19; the ratio estimator's half-width): the tolerance the larger of 5 % and
 1 µs for times, 5 % for bytes per wake, over at least five repeats (D18); per
 value the repeat count at which the present spread would hold, whose largest is,
 in probe mode, the first batch (D14 (3)); the two checks (D15) and the
@@ -40,7 +41,7 @@ TOOLS = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__
 if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 from meas.background import analyze  # noqa: E402
-from meas.stability import stability, TOLERANCE, t975  # noqa: E402
+from meas.stability import ratio_stability, ratio_repeats_needed, TOLERANCE, t975  # noqa: E402
 from meas.distribution import quantile_table  # noqa: E402
 pct, QUANTILE_PROBS = analyze.pct, analyze.QUANTILE_PROBS
 
@@ -48,10 +49,10 @@ NAME = re.compile(r"^meas-background-(borg|7z|steamcmd)-r(\d+)-(dry|probe|full)$
 PHASES = {"borg": ("borg-first-warm", "borg-repeat-warm", "borg-first-cold", "borg-repeat-cold"),
           "7z": ("7z-mmt8-warm", "7z-mmt1-warm", "7z-mmt8-cold"),
           "steamcmd": ("steam-fresh-shaped", "steam-fresh-untraced", "steam-fresh-unshaped", "steam-update-shaped")}
-# D19 (the shared stability rule): the list — every table the fold-in carries, each tested by its per-repeat mean. D29
-# (9.6 D21, D22, D25): each archetype compiles as cpu-batch's batch loop, so it carries the program's runs between
-# voluntary blocks, pooled over its threads, and the block after each run — the program-level off-CPU time, zero when
-# another thread runs on; the per-wake tables of D19's first list are reported, not carried
+# D19 (the shared stability rule): the list — every table the fold-in carries, each tested by its mean as the table
+# carries it (9.5 D78). D29 (9.6 D21, D22, D25): each archetype compiles as cpu-batch's batch loop, so it carries the
+# program's runs between voluntary blocks, pooled over its threads, and the block after each run — the program-level
+# off-CPU time, zero when another thread runs on; the per-wake tables of D19's first list are reported, not carried
 LIST = {app: [(ph, "batch_run_us", "run between voluntary blocks (µs)"), (ph, "batch_block_us", "block per run (µs)")]
         for app, ph in (("borg", "borg-first-warm"), ("7z", "7z-mmt8-warm"), ("steamcmd", "steam-fresh-shaped"))}
 # D14 (1): the headline medians, pooled over all the program's threads — read by the comparisons (results only)
@@ -169,35 +170,25 @@ def floor_of(key):
     return None if key == "bytes_per_wake" else ABS_FLOOR_US
 
 
-def value_stability(key, values_by_repeat):
-    return stability(values_by_repeat, floor_of(key), MIN_REPEATS)
-
-
-def first_batch(values, abs_floor=None, min_k=None):
-    """The repeats one value needs (D14 (3) with D18, D19): the smallest repeat count, at least min_k, at which the
-    95 % half-width of the across-repeat mean, at the spread of the given repeats, is within the tolerance — the larger
-    of TOLERANCE × mean and abs_floor (Student's t multiplier, k - 1 degrees of freedom)."""
-    v = [x for x in values if x]
-    if len(v) < 2:
-        return None
-    m, sd = statistics.fmean(v), statistics.stdev(v)
-    bound = max(TOLERANCE * m, abs_floor or 0.0)
-    for k in range(max(2, min_k or 2), 201):
-        if t975(k) * sd / k ** 0.5 <= bound:
-            return k
-    return None
+def table_pairs(table):
+    """A pooled table's per-repeat sums and counts (dicts keyed by repeat), from its per-repeat means and counts: the
+    pairs whose ratio is the table's own mean."""
+    return ({r: (m * table["repeat_n"][r] if m is not None else 0.0) for r, m in table["repeat_mean"].items()},
+            dict(table["repeat_n"]))
 
 
 def criterion(app, entry):
-    """D19: the shared stability rule on every table of the list, each by its per-repeat mean, with the repeat count at
+    """D19: the shared stability rule on every table of the list, each by its mean as the table carries it —
+    count-weighted over the repeats, the half-width the ratio estimator's (cochran-st77) — with the repeat count at
     which its present spread would hold."""
     crit = {}
     for ph, key, label in LIST[app]:
         P = entry["phases"].get(ph, {})
         if P.get("missing") or key not in P.get("all", {}):
             continue
-        vals = P["all"][key]["repeat_mean"]
-        crit[f"{ph} {label}"] = {**value_stability(key, vals), "needed": first_batch(list(vals.values()), floor_of(key), MIN_REPEATS)}
+        sums, counts = table_pairs(P["all"][key])
+        crit[f"{ph} {label}"] = {**ratio_stability(sums, counts, floor_of(key), MIN_REPEATS),
+                                 "needed": ratio_repeats_needed(sums, counts, floor_of(key), MIN_REPEATS)}
     return crit
 
 
@@ -437,7 +428,7 @@ def render(out):
             L.append("")
         st = E["stability"]
         L += ["### Stability rule (D18, D19)", "", f"**{'Holds' if st['passes'] else 'Does not hold yet'}** (each table on the list by "
-              f"its per-repeat mean; tolerance the larger of {st['tolerance']:.0%} and {st['abs_floor_us']:g} µs for times, at least "
+              f"its mean as the table carries it, count-weighted over the repeats — 9.5 D78; tolerance the larger of {st['tolerance']:.0%} and {st['abs_floor_us']:g} µs for times, at least "
               f"{st['min_repeats']} repeats). Repeats needed at the spread of these repeats: {E['first_batch']['count'] or 'over 200'}.", "",
               "| quantity | repeats | mean | cv | 95 % half-width | leave-one-out | needed at this spread | passes |",
               "|---|---|---|---|---|---|---|---|"]

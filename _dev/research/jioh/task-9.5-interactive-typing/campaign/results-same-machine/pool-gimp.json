@@ -810,10 +810,10 @@
      },
      "driven gimp gap mean (ms)": {
       "k": 5,
-      "mean": 115.7031,
+      "mean": 115.7013,
       "cv": 0.0044,
       "half_width": 0.0055,
-      "half_width_abs": 0.6324,
+      "half_width_abs": 0.6315,
       "leave_one_out": 0.0012,
       "passes": true,
       "needed": 5
@@ -821,10 +821,10 @@
      "driven gimp run mean (ms)": {
       "k": 5,
       "mean": 0.3301,
-      "cv": 0.0336,
-      "half_width": 0.0417,
-      "half_width_abs": 0.0138,
-      "leave_one_out": 0.014,
+      "cv": 0.0335,
+      "half_width": 0.0415,
+      "half_width_abs": 0.0137,
+      "leave_one_out": 0.0139,
       "passes": true,
       "needed": 5
      },
@@ -840,10 +840,10 @@
      },
      "op script-fu gap mean (ms)": {
       "k": 5,
-      "mean": 86.3581,
+      "mean": 86.3564,
       "cv": 0.0083,
       "half_width": 0.0103,
-      "half_width_abs": 0.8928,
+      "half_width_abs": 0.8914,
       "leave_one_out": 0.0022,
       "passes": true,
       "needed": 5
@@ -851,10 +851,10 @@
      "op script-fu run mean (ms)": {
       "k": 5,
       "mean": 0.0346,
-      "cv": 0.0352,
-      "half_width": 0.0437,
+      "cv": 0.0354,
+      "half_width": 0.044,
       "half_width_abs": 0.0015,
-      "leave_one_out": 0.0148,
+      "leave_one_out": 0.0149,
       "passes": true,
       "needed": 5
      },
@@ -870,21 +870,21 @@
      },
      "op gimp gap mean (ms)": {
       "k": 5,
-      "mean": 484.306,
-      "cv": 0.0343,
-      "half_width": 0.0426,
-      "half_width_abs": 20.626,
-      "leave_one_out": 0.0138,
+      "mean": 483.885,
+      "cv": 0.0351,
+      "half_width": 0.0436,
+      "half_width_abs": 21.0834,
+      "leave_one_out": 0.0144,
       "passes": true,
       "needed": 5
      },
      "op gimp run mean (ms)": {
       "k": 5,
-      "mean": 500.9874,
-      "cv": 0.0343,
-      "half_width": 0.0426,
-      "half_width_abs": 21.3423,
-      "leave_one_out": 0.0137,
+      "mean": 500.5503,
+      "cv": 0.0351,
+      "half_width": 0.0436,
+      "half_width_abs": 21.8078,
+      "leave_one_out": 0.0144,
       "passes": true,
       "needed": 5
      },

@@ -276,8 +276,18 @@ def test_the_slice_profile_reads_a_phase_in_ten_second_slices(tmp_path):
     assert sl["cpu_ms_per_s"][0] == 0.6 and sl["cpu_ms_per_s"][2] == 0.4
 
 
+def _table(means, n=10):
+    """A pooled table's per-repeat fields, each repeat holding n samples."""
+    return {"repeat_mean": list(means), "repeat_n": [n] * len(means)}
+
+
 def _entry(threads, residual=None, phase="idle"):
-    return {"phases": {phase: {"threads": threads,
+    # the pooled tables the rule reads beside the per-repeat thread records, ten samples a repeat
+    tables = {c: {f: _table([x["mean"] for x in t[f]]) for f in ("gap_ms", "run_ms")} for c, t in threads.items()}
+    if residual:
+        residual = {k: ({**v, "repeat_n": [10] * len(v["repeat_mean"])} if isinstance(v, dict) and "repeat_n" not in v
+                        else v) for k, v in residual.items()}
+    return {"phases": {phase: {"threads": threads, "tables": tables,
                                "components": {"selected": sorted(threads), "residual": residual}}}}
 
 
@@ -304,6 +314,16 @@ def test_the_stability_rule_tests_each_carried_component_and_the_residual():
     # all steady -> the entry holds
     ok = pool.criterion("element", _entry({"a": steady}, {**res, "run_ms": {"repeat_mean": [0.02] * 5}}))
     assert ok["passes"] is True
+
+
+def test_the_rule_reads_a_components_mean_as_its_pooled_table_carries_it():
+    # the carried gap and run tables pool every repeat's samples, so their means are count-weighted: a repeat whose
+    # run mean is ten times the others' but which holds one wake of 4001 moves the carried mean to 0.0501 ms and
+    # holds within ±0.8 %, where its per-repeat means, 0.05 four times and 0.5, would read ±178 %
+    entry = _entry({"a": _comp([4.0] * 5, [250.0] * 5, [0.05, 0.05, 0.05, 0.05, 0.50])})
+    entry["phases"]["idle"]["tables"]["a"]["run_ms"]["repeat_n"] = [1000, 1000, 1000, 1000, 1]
+    c = pool.criterion("element", entry)["quantities"]["idle a run mean (ms)"]
+    assert c["mean"] == pytest.approx(200.5 / 4001, abs=1e-4) and c["half_width"] < 0.01 and c["passes"] is True
 
 
 def test_run_means_carry_under_the_machine_spread_exception():

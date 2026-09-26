@@ -317,7 +317,7 @@ def test_the_rule_reads_the_exact_wake_count_not_the_rounded_rate(tmp_path):
 def test_a_sparse_component_is_carried_although_it_never_woke_in_some_repeats():
     # D33: the system bus, once the runner's collector is out (D32), wakes in bursts — none at all in some phases —
     # so 9.5 D43 lists it as sporadic; it is its entry's whole activity and is carried as a sparse component (9.8 D27):
-    # its wake rate over every repeat, zero where it never woke, its gap and run means over the repeats it woke in
+    # its wake rate over every repeat, zero where it never woke, its gap and run means as its tables carry them
     comm = "system-bus/dbus-daemon"
     def rec(k, times):
         th = {} if not times else {comm: {"threads": 1, "wakes_per_s": len(times) / 100.0, "gap_ms": {"mean": 100000.0 / len(times)},
@@ -338,6 +338,12 @@ def test_a_sparse_component_is_carried_although_it_never_woke_in_some_repeats():
     q = pool.criterion({"dbus-daemon": e})
     c = q["quantities"][f"dbus-daemon {comm} wakes/s"]
     assert abs(c["mean"] - 0.02167) < 1e-4 and c["passes"] is False and c["sparse"] is True and c["carried"] is True
+    # its gap mean is tested as the table carries it, the span over the wakes of every repeat — the silent one adding
+    # its 100 s and no wake — and its run mean over every repeat's runs, the silent one holding none
+    gap = q["quantities"][f"dbus-daemon {comm} gap mean (ms)"]
+    assert gap["k"] == 6 and gap["mean"] == round(600000 / 13, 4)
+    run = q["quantities"][f"dbus-daemon {comm} run mean (ms)"]
+    assert run["k"] == 6 and run["mean"] == 0.1
     assert q["passes"] is True
     # an entry not named keeps D43 as written
     e2 = pool.pool_entry("gnome-shell", {k: {**v, "threads": {k2.replace("system-bus/dbus-daemon", "gnome-shell/gmain"): x

@@ -145,12 +145,12 @@ command s {1: 5253.633, 2: 4981.545, 3: 5413.129, 4: 4956.569, 5: 5173.491, 6: 4
 
 ### Stability rule (D18, D19)
 
-**Holds** (each table on the list by its per-repeat mean; tolerance the larger of 5% and 1 µs for times, at least 5 repeats). Repeats needed at the spread of these repeats: 5.
+**Holds** (each table on the list by its mean as the table carries it, count-weighted over the repeats — 9.5 D78; tolerance the larger of 5% and 1 µs for times, at least 5 repeats). Repeats needed at the spread of these repeats: 5.
 
 | quantity | repeats | mean | cv | 95 % half-width | leave-one-out | needed at this spread | passes |
 |---|---|---|---|---|---|---|---|
-| 7z-mmt8-warm run between voluntary blocks (µs) | 6 | 4187.0959 | 2.1% | ±2.2% | 0.7% | 5 | yes |
-| 7z-mmt8-warm block per run (µs) | 6 | 0.1593 | 38.5% | ±40.4% | 12.5% | 5 | yes |
+| 7z-mmt8-warm run between voluntary blocks (µs) | 6 | 4187.4668 | 2.1% | ±2.2% | 0.7% | 5 | yes |
+| 7z-mmt8-warm block per run (µs) | 6 | 0.1595 | 38.6% | ±40.5% | 12.6% | 5 | yes |
 
 ### Checks (D15)
 

@@ -12,9 +12,10 @@ measured on another CPU model are listed, not pooled (changelog D26). For each
 app: every repeat is analysed (analyze.analyze_run); per phase and per thread
 comm the gap and run samples of all repeats are pooled (p50, p90, p99, n) and
 the per-repeat p50 is listed as the spread; per-input samples likewise for the
-three rules; every value the fold-in carries, each table by its per-repeat
-mean, is checked against the shared stability criterion
-(dataset/tools/meas/stability.py; changelog D29, D30).
+three rules; every value the fold-in carries, each table by its mean as the
+table carries it (count-weighted over the repeats), is checked against the
+shared stability criterion (dataset/tools/meas/stability.py; changelog D29,
+D30).
 """
 
 import argparse
@@ -29,7 +30,7 @@ from array import array
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from analyze import analyze_run, component_name, pct  # noqa: E402
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from stability import stability, TOLERANCE, t975  # noqa: E402
+from stability import stability, ratio_stability, ratio_repeats_needed, TOLERANCE, t975  # noqa: E402
 from distribution import circular_gaps, quantile_table  # noqa: E402
 
 NAME = re.compile(r"^meas-(interactive|playback)-(.+)-r(\d+)-(dry|full)$")
@@ -57,8 +58,8 @@ MIN_REPEATS = 5       # kalibera-ismm13 §11 (D29; 9.6 D24)
 # the tolerance not applied. (app, the value name's prefix). D59: webrtc's audio path — AudioProcessing whole, the
 # others' run means only, their wake rates being fixed or passing.
 # D67 renamed the components these name, so the keys carry the role: the exception follows its component's identity.
-SESSION_SPREAD = {("code", "idle utility/libuv-worker"),
-                  ("webrtc", "play utility/AudioProcessing "), ("webrtc", "play renderer/AudioOutputDevi run mean"),
+# D78: code's utility/libuv-worker, carried here from D57, holds the rule once its values are read as carried.
+SESSION_SPREAD = {("webrtc", "play utility/AudioProcessing "), ("webrtc", "play renderer/AudioOutputDevi run mean"),
                   ("webrtc", "play renderer/AudioInputDevic run mean"), ("webrtc", "play utility/FakeAudioInput run mean"),
                   ("webrtc", "play residual run mean")}
 # D64: a rare heavy run carried as its own stated event, not as a component's wake — chrome's MemoryInfra pass of 54–61 ms
@@ -152,16 +153,30 @@ def repeats_needed(values, abs_floor=None):
     return None
 
 
+def table_pairs(table):
+    """A pooled table's per-repeat sums and counts, read from its per-repeat means and counts (`summary`): the pairs
+    whose ratio is the table's own mean. A repeat with no samples is a pair of zeros."""
+    return ([m * n if m is not None else 0.0 for m, n in zip(table["repeat_mean"], table["repeat_n"])],
+            list(table["repeat_n"]))
+
+
 def criterion(app, entry):
-    """D30: every value the fold-in carries against the shared rule, each carried table by its per-repeat mean
-    (georges-oopsla07 §4.2, kalibera-ismm13 §9.3) — tolerance the larger of 5 % of the mean and 1 µs for times, 5 % for
-    rates and shares, at least five repeats (D29). Per carried component (the idle or play phase; the driven phase of
-    the pointer-loop runs; the operation's), its wake rate, gap mean and run mean; the input-run mean under SWELL-KW and
-    under the 136M check; the operation duration mean; the play-phase CPU share (D26's headline for playback)."""
+    """D30: every value the fold-in carries against the shared rule (georges-oopsla07 §4.2, kalibera-ismm13 §9.3) —
+    tolerance the larger of 5 % of the mean and 1 µs for times, 5 % for rates and shares, at least five repeats (D29).
+    A rate or share by its per-repeat values; a carried table by its mean as the table carries it, every repeat's
+    samples together — count-weighted, its half-width the ratio estimator's over the repeats (cochran-st77), a gap
+    mean the span over the wakes. Per carried component (the idle or play phase; the driven phase of the pointer-loop
+    runs; the operation's), its wake rate, gap mean and run mean; the input-run mean under SWELL-KW and under the 136M
+    check; the operation duration mean; the play-phase CPU share (D26's headline for playback)."""
     ph, crit = entry["phases"], {}
 
     def add(name, values, floor):
         crit[name] = {**stability(values, floor, MIN_REPEATS, keep_zero=True), "needed": repeats_needed(values, floor)}
+
+    def add_table(name, table, floor):
+        sums, counts = table_pairs(table)
+        crit[name] = {**ratio_stability(sums, counts, floor, MIN_REPEATS),
+                      "needed": ratio_repeats_needed(sums, counts, floor, MIN_REPEATS)}
 
     name, values = headline(app, entry)
     if name == "play CPU share":
@@ -172,8 +187,8 @@ def criterion(app, entry):
         if p not in ph:
             continue
         if ph[p].get("cycle"):   # D75: a periodic job carries its cycle's length and work, not the phase's components
-            add(f"{p} cycle length mean (ms)", ph[p]["cycle"]["length_ms"]["repeat_mean"], ABS_FLOOR_MS)
-            add(f"{p} cycle work mean (ms)", ph[p]["cycle"]["work_ms"]["repeat_mean"], ABS_FLOOR_MS)
+            add_table(f"{p} cycle length mean (ms)", ph[p]["cycle"]["length_ms"], ABS_FLOOR_MS)
+            add_table(f"{p} cycle work mean (ms)", ph[p]["cycle"]["work_ms"], ABS_FLOOR_MS)
             continue
         sel = ph[p]["components"]
         comps = [(c, ph[p]["threads"][c]) for c in sel["selected"] if ph[p]["threads"][c]["gap_ms"]["q"] is not None]
@@ -181,13 +196,13 @@ def criterion(app, entry):
             comps.append(("residual", sel["residual"]))
         for comm, c in comps:
             add(f"{p} {comm} wakes/s", c["wakes_per_s"], None)
-            add(f"{p} {comm} gap mean (ms)", c["gap_ms"]["repeat_mean"], ABS_FLOOR_MS)
-            add(f"{p} {comm} run mean (ms)", c["run_ms"]["repeat_mean"], ABS_FLOOR_MS)
+            add_table(f"{p} {comm} gap mean (ms)", c["gap_ms"], ABS_FLOOR_MS)
+            add_table(f"{p} {comm} run mean (ms)", c["run_ms"], ABS_FLOOR_MS)
     for p, label in (("driven", "SWELL-KW"), ("driven-alt", "136M")):
         if "per_input" in ph.get(p, {}):
-            add(f"input_run mean, {label} (ms)", ph[p]["per_input"]["window"]["run_ms_minus_idle"]["repeat_mean"], ABS_FLOOR_MS)
+            add_table(f"input_run mean, {label} (ms)", ph[p]["per_input"]["window"]["run_ms_minus_idle"], ABS_FLOOR_MS)
     if ph.get("op", {}).get("operation"):
-        add("operation duration mean (ms)", ph["op"]["operation"]["duration_ms"]["repeat_mean"], ABS_FLOOR_MS)
+        add_table("operation duration mean (ms)", ph["op"]["operation"]["duration_ms"], ABS_FLOOR_MS)
     return crit
 
 
@@ -305,8 +320,8 @@ def select_components(comms, spans, reps, segments=None):
                     "cpu_share": [round(sum(runs_by_rep[i]) / 1000 / spans[r], 5) for i, r in enumerate(reps)],
                     "gap_ms": summary(gaps_by_rep), "run_ms": summary(runs_by_rep)}
     # D43: a component — the residual as a whole included — is carried only if it wakes at least twice in each
-    # repeat's phase: the rule tests each value by its per-repeat mean (kalibera-ismm13 §9.3), and D16's components
-    # are periodic; the rest is reported as sporadic, not carried
+    # repeat's phase: the rule then tested each value by its per-repeat mean (kalibera-ismm13 §9.3; since D78 a table by
+    # its mean as carried), and D16's components are periodic; the rest is reported as sporadic, not carried
     sporadic = []
     # (`count`, where a slot carries one, is the wake count the rule reads when `wakes` is one renderer's mean: a
     # renderer entry carries a thread that wakes at least twice across the renderers measured in every repeat)

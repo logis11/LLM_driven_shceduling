@@ -95,14 +95,14 @@ def share_above(table, x):
     return 1.0
 
 
-# The stability rule as the scope states it (the campaign workflow; D26, D30): the rule over the repeats obtained, and
+# The stability rule as the scope states it (the campaign workflow; D26, D30, D78): the rule over the repeats obtained, and
 # each value it was not held to — at the recording's window limit (D32) or carried under D57 — with its half-width.
 LABEL = {"wakes/s": "wake rate", "gap mean (ms)": "gap mean", "run mean (ms)": "run mean"}
 # where each entry's window limit is decided: D32 the rule, D46 the send's operation phase, D68 chrome's and code's limits
 WINDOW_LAW = {"code-editor": "D32, D68", "web-browser": "D32, D68", "mail-client": "D32, D46"}
-# D57's second finding: a between-sessions component's spread within one run, read on the D52 probe
-WITHIN = {("code-editor", "utility/libuv-worker"): "its schedule-in rate ±8.7 % (7.81–9.31 a second over 900 s "
-                                                   "windows slid along the D52 probe)"}
+# D57's second finding: a between-sessions component's spread within one run, read on the D52 probe — none carried
+# since D78 (code-editor's utility/libuv-worker, its schedule-in rate ±8.7 % within a run, holds the rule)
+WITHIN = {}
 
 
 def value_name(key):
@@ -124,7 +124,8 @@ def held(c, unit):
 def stability_scope(aid, d):
     st = d["stability"]
     q = st["quantities"]
-    text = (f"Stability rule (D26, D30): every value on the list holds within {st['tolerance'] * 100:g} % or "
+    text = (f"Stability rule (D26, D30, D78): every value on the list — a table read by the mean it carries, over "
+            f"every repeat's samples — holds within {st['tolerance'] * 100:g} % or "
             f"{st['abs_floor_ms'] * 1000:g} µs over the {len(d['repeats'])} repeats obtained")
     limited = {k: c for k, c in q.items() if c.get("limited")}
     session = {k: c for k, c in q.items() if c.get("session_spread") and c.get("carried")}

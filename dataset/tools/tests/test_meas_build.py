@@ -42,6 +42,63 @@ def test_the_half_width_past_twenty_repeats_takes_its_own_multiplier():
     assert r["k"] == 30 and r["half_width"] == 0.019 and r["half_width_abs"] == pytest.approx(1.8987, abs=1e-4)
 
 
+def test_a_count_weighted_mean_is_tested_as_the_pooled_tables_mean():
+    # per-repeat sums y and counts x: the carried table's mean is Σy / Σx = 154 / 15 = 10.2667 (cochran-st77 §9A.1),
+    # not the unweighted mean of the per-repeat means 10, 11, 10, 10.5, 10 = 10.3
+    r = stab.ratio_stability([10.0, 22.0, 30.0, 42.0, 50.0], [1, 2, 3, 4, 5])
+    assert r["k"] == 5 and r["mean"] == pytest.approx(154 / 15, abs=1e-4)
+
+
+def test_the_ratio_half_width_is_cochrans_estimate_with_a_t_multiplier():
+    # cochran-st77 (6.13) with f = 0: v(R) = Σ(y − R x)² / (k − 1) / (k x̄²); residuals −0.2667, 1.4667, −0.8, 0.9333,
+    # −1.3333, Σ² = 5.5111; v = 5.5111 / 4 / (5 × 9) = 0.030617, se 0.17498; t(4) = 2.776 → ±0.48574, ±4.73 %
+    r = stab.ratio_stability([10.0, 22.0, 30.0, 42.0, 50.0], [1, 2, 3, 4, 5])
+    assert r["half_width_abs"] == pytest.approx(0.4857, abs=1e-4) and r["half_width"] == pytest.approx(0.0473, abs=1e-4)
+    assert r["passes"] is True
+    # leaving out the last repeat moves the ratio to 104 / 10 = 10.4, the largest shift of the five (1.30 %)
+    assert r["leave_one_out"] == pytest.approx(abs(104 / 10 - 154 / 15) / (154 / 15), abs=1e-4)
+
+
+def test_the_ratio_weighs_a_repeat_by_its_count():
+    # the same per-repeat means, the wide one on the repeat holding most of the samples: the unweighted rule reads
+    # 10, 10, 10, 10, 14 as 10.8 ±20.6 %; the carried mean is 1240 / 100 = 12.4, residuals −24 (four) and 96,
+    # v = 11520 / 4 / (5 × 20²) = 1.44, se 1.2, t(4) = 2.776 → ±3.331, ±26.9 %
+    means, counts = [10.0, 10.0, 10.0, 10.0, 14.0], [10, 10, 10, 10, 60]
+    r = stab.ratio_stability([m * n for m, n in zip(means, counts)], counts)
+    assert r["mean"] == pytest.approx(12.4, abs=1e-4) and r["half_width"] == pytest.approx(0.2686, abs=1e-4)
+    assert stab.stability(means)["half_width"] == pytest.approx(0.2056, abs=1e-4)
+    even = stab.ratio_stability([m * 10 for m in means], [10] * 5)
+    assert even["half_width"] == pytest.approx(stab.stability(means)["half_width"], abs=1e-4)   # equal counts: the old rule
+
+
+def test_a_repeat_with_no_samples_is_a_repeat_of_the_ratio():
+    # a sparse component's gap mean as span over wakes: a repeat in which it never woke adds its span and no wake —
+    # the carried gap table's mean, 1800 × 3 / 4 = 1350 s — and counts toward k (a cluster of size zero)
+    r = stab.ratio_stability([1800.0, 1800.0, 1800.0], [2, 0, 2])
+    assert r["k"] == 3 and r["mean"] == pytest.approx(1350.0)
+    # a run mean over the same repeats: the silent repeat holds no run and moves nothing but k
+    r = stab.ratio_stability([4.0, 0.0, 6.0], [2, 0, 2])
+    assert r["k"] == 3 and r["mean"] == pytest.approx(2.5)
+
+
+def test_the_ratio_takes_the_floor_and_the_minimum_count():
+    sums, counts = [7.0, 7.0, 6.0, 6.0], [1, 1, 1, 1]              # µs: a one-step flip is 14 % of the mean
+    assert stab.ratio_stability(sums, counts)["passes"] is False
+    assert stab.ratio_stability(sums, counts, abs_floor=1.0)["passes"] is True
+    steady = ([100.0, 101.0, 100.5, 100.2], [1, 1, 1, 1])
+    assert stab.ratio_stability(*steady)["passes"] is True
+    assert stab.ratio_stability(*steady, min_k=5)["passes"] is False
+    assert stab.ratio_stability([100.0], [1])["passes"] is False and stab.ratio_stability([100.0], [1])["k"] == 1
+
+
+def test_the_ratio_projection_follows_the_linearised_spread():
+    # equal counts: the projection the unweighted rule gives (repeats_needed's 38 for 85, 100, 115)
+    assert stab.ratio_repeats_needed([85.0, 100.0, 115.0], [1, 1, 1], min_k=5) == 38
+    assert stab.ratio_repeats_needed([100.0, 100.0, 100.0], [1, 1, 1], min_k=5) == 5
+    assert stab.ratio_repeats_needed([9.0, 10.0, 11.0], [1, 1, 1], abs_floor=1.0, min_k=5) == 7
+    assert stab.ratio_repeats_needed([100.0], [1], min_k=5) is None
+
+
 from meas.build import analyze as build  # noqa: E402
 from meas.build import shapes  # noqa: E402
 
@@ -160,13 +217,13 @@ from meas.build import pool  # noqa: E402
 
 def test_criterion_lists_every_carried_value():
     def rp(*v):
-        return {"repeat_mean": dict(zip((4, 5, 7, 8, 9), v))}
+        return {"repeat_mean": dict(zip((4, 5, 7, 8, 9), v)), "repeat_n": dict(zip((4, 5, 7, 8, 9), [10] * len(v)))}
     out = {"phases": {
         "build-j8-warm": {"roles": {n: {"cpu_per_process_us": rp(100, 101, 100, 102, 101)} for n in pool.CRITERION_ROLES},
                           "dispatch": {"per_dispatch_us": rp(670, 675, 673, 681, 676)},
                           "object_members": {"step_cpu_us": {"sh 1/4": rp(726, 785, 752, 785, 760)}}},
         "ffmpeg": {"shape": {"runs_between_blocks_us": rp(7, 7, 6, 6, 7),
-                             "mean_block_us": dict(zip((4, 5, 7, 8, 9), (0.43, 0.29, 0.26, 0.26, 0.3))),
+                             "blocks_after_runs_us": rp(0.43, 0.29, 0.26, 0.26, 0.3),
                              "share_past_boot_slice": dict(zip((4, 5, 7, 8, 9), (0.702, 0.698, 0.696, 0.704, 0.700)))}}}}
     crit = pool.criterion(out)
     assert set(crit) == {f"{n} CPU per process" for n in pool.CRITERION_ROLES} | {
@@ -176,14 +233,14 @@ def test_criterion_lists_every_carried_value():
     assert crit["ffmpeg run between blocks"]["passes"] is True        # within the 1 µs floor
     assert crit["ffmpeg mean block per run"]["passes"] is True        # sub-µs mean, within the floor
     assert all(c["k"] == 5 for q, c in crit.items() if not q.startswith(("clamscan", "handbrake", "train", "tracker")))
-    four = {"phases": {"ffmpeg": {"shape": {"runs_between_blocks_us": rp(7, 7, 7, 7), "mean_block_us": {4: 0.3, 5: 0.3, 7: 0.3, 8: 0.3},
+    four = {"phases": {"ffmpeg": {"shape": {"runs_between_blocks_us": rp(7, 7, 7, 7), "blocks_after_runs_us": rp(0.3, 0.3, 0.3, 0.3),
                                             "share_past_boot_slice": {4: 0.7, 5: 0.7, 7: 0.7, 8: 0.7}}}}}
     assert not any(c["passes"] for c in pool.criterion(four).values())    # four repeats: below the minimum
     assert all(c["needed"] is None or c["needed"] >= 5 for c in crit.values())
 
 
 def test_pooled_carries_the_per_repeat_mean_and_the_rule_reads_it():
-    # D26: a carried table is tested by its per-repeat mean — the medians agree, the means do not
+    # D26: a carried table is tested by its mean — the medians agree, the means do not
     t = pool.pooled({4: [1.0, 2.0, 3.0], 5: [1.0, 2.0, 3.6], 7: [1.0, 2.0, 3.0], 8: [1.0, 2.0, 3.6], 9: [1.0, 2.0, 3.0]}, 1000.0)
     assert t["repeat_p50"] == {4: 2000.0, 5: 2000.0, 7: 2000.0, 8: 2000.0, 9: 2000.0}
     assert t["repeat_mean"] == pytest.approx({4: 2000.0, 5: 2200.0, 7: 2000.0, 8: 2200.0, 9: 2000.0})
@@ -224,14 +281,14 @@ def test_not_pooled_names_the_database_and_the_warm_start():
 def test_excepted_values_are_carried_over_five_repeats_not_held_to_the_tolerance():
     # D29: the four values whose spread follows the runner's disk
     def rp(*v):
-        return {"repeat_mean": dict(zip(range(1, len(v) + 1), v))}
-    wide = dict(zip(range(1, 6), (13.3, 30.4, 17.4, 15.0, 19.1)))          # tracker's block means, ±40 %
+        return {"repeat_mean": dict(zip(range(1, len(v) + 1), v)), "repeat_n": dict(zip(range(1, len(v) + 1), [10] * len(v)))}
+    wide = rp(13.3, 30.4, 17.4, 15.0, 19.1)                                  # tracker's block means, ±40 %
     out = {"phases": {"tracker": {"shape": {"runs_between_blocks_us": rp(400, 400, 400, 400, 400),
-                                            "mean_block_us": wide, "share_past_boot_slice": dict(zip(range(1, 6), [0.53] * 5))}}}}
+                                            "blocks_after_runs_us": wide, "share_past_boot_slice": dict(zip(range(1, 6), [0.53] * 5))}}}}
     c = pool.criterion(out)["tracker mean block per run"]
     assert c["excepted"] is True and c["passes"] is False and c["carried"] is True     # outside 5 %, carried anyway
     four = {"phases": {"tracker": {"shape": {"runs_between_blocks_us": rp(400, 400, 400, 400),
-                                             "mean_block_us": dict(zip(range(1, 5), (13.3, 30.4, 17.4, 15.0))),
+                                             "blocks_after_runs_us": rp(13.3, 30.4, 17.4, 15.0),
                                              "share_past_boot_slice": dict(zip(range(1, 5), [0.53] * 4))}}}}
     assert pool.criterion(four)["tracker mean block per run"]["carried"] is False      # below the five-repeat minimum
     assert pool.criterion(out)["tracker run between blocks"]["excepted"] is False

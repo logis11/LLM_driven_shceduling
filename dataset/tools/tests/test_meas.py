@@ -582,13 +582,15 @@ def test_the_fold_in_regenerates_the_nine_entries_from_the_pooled_records(repo_r
 
 
 def test_every_measured_scope_states_the_stability_rule_over_its_repeats(fold_95):
-    # the workflow's rule (D26, D30): every value within 5 % or 1 µs, read over the repeats the pool holds
+    # the workflow's rule (D26, D30, D78): every value within 5 % or 1 µs, a table read by the mean it carries, over the
+    # repeats the pool holds
     repeats = {"office-writer": 14, "code-editor": 44, "mail-client": 43, "web-browser": 38, "image-editor": 5,
                "video-editor": 20, "video-player": 24, "audio-player": 31, "video-call": 45}
     scopes = _scopes(fold_95)
     assert sorted(scopes) == sorted(repeats)
     for aid, scope in scopes.items():
         assert f"within 5 % or 1 µs over the {repeats[aid]} repeats obtained" in scope, aid
+        assert "a table read by the mean it carries, over every repeat's samples" in scope, aid
 
 
 def test_values_at_the_window_limit_are_stated_with_their_half_widths(fold_95):
@@ -597,30 +599,24 @@ def test_values_at_the_window_limit_are_stated_with_their_half_widths(fold_95):
     s = _scopes(fold_95)
     code = s["code-editor"]
     assert "43 repeats" in code and "outside the rule" not in code
-    assert ("the per-input run mean under SWELL-KW 105.4 ms ±4.98 % and the per-input run mean under 136M "
-            "106.1 ms ±3.78 % hold within it") in code
+    assert ("the per-input run mean under SWELL-KW 98.92 ms ±4.82 % and the per-input run mean under 136M "
+            "103.7 ms ±3.00 % hold within it") in code
     web = s["web-browser"]
     assert "38 repeats" in web and "the per-input means and the page-load operation's values" in web
-    assert "SWELL-KW 1.701 ms ±8.06 % (the rule needs 95 repeats)" in web
-    assert "the other 29 hold within it, the widest ±3.96 %" in web
+    assert "outside the rule" not in web and "all 30 hold within it, the widest ±4.72 %" in web   # D78
     mail = s["mail-client"]
     assert "8 repeats" in mail and "the per-input means and the send operation's values" in mail
-    assert "SWELL-KW 7.157 ms ±14.27 % (the rule needs 48 repeats)" in mail
-    assert "136M 6.284 ms ±6.77 % (the rule needs 13 repeats)" in mail
+    assert "SWELL-KW 6.867 ms ±8.57 % (the rule needs 19 repeats)" in mail
+    assert "136M 6.296 ms ±6.90 % (the rule needs 13 repeats)" in mail
     assert "the operation's `StreamT~ns` wake rate 46.1 wakes/s ±12.09 % (the rule needs 35 repeats)" in mail
-    assert "the other 30 hold within it, the widest ±4.14 %" in mail
+    assert "the other 30 hold within it, the widest ±4.09 %" in mail
     for aid in ("office-writer", "image-editor", "video-editor", "video-player", "audio-player", "video-call"):
         assert "window limit" not in s[aid].lower(), aid
 
 
-def test_the_between_sessions_component_states_both_spreads_and_its_share(fold_95):
-    # D57: libuv-worker's three values carried together with their half-widths and ranges; the spread within one run
-    # (the D52 probe) against across the 44 repeats (3.659–7.336 wakes/s about 5.764: ±31.9 %); 5.764 of the idle
-    # phase's 114.6 wakes/s is 5.0 %
-    code = _scopes(fold_95)["code-editor"]
-    assert "`utility/libuv-worker` wake rate 5.764 wakes/s ±4.46 % (3.659–7.336 wakes/s)" in code
-    assert "gap mean 177.5 ms ±4.95 % (136.3–273.3 ms)" in code
-    assert "run mean 0.01 ms ±1.95 % (0.009–0.0114 ms)" in code
-    assert "within one run its schedule-in rate ±8.7 % (7.81–9.31 a second" in code
-    assert "across the repeats its wake rate ±31.9 %" in code
-    assert "5.0 % of the idle phase's wakes" in code
+def test_a_component_the_rule_holds_carries_no_between_sessions_marking(fold_95):
+    # D78: read as carried, code's utility/libuv-worker holds the rule on all three values — wake rate and gap mean
+    # ±4.46 %, run mean ±1.94 % — so D57's marking is dropped and no 9.5 entry states a between-sessions component
+    scopes = _scopes(fold_95)
+    assert all("rate varies between sessions" not in scope for scope in scopes.values())
+    assert "libuv-worker" not in scopes["code-editor"]

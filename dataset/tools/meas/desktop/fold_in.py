@@ -197,7 +197,8 @@ def entry(app, e):
         scope += (f"The entry is majority `HangWatcher`, Chromium's hang-detection thread, {hw:.3f} of "
                   f"{statistics.fmean(per):.3f} wakes/s per renderer; the page's own thread is {pg:.3f} (D16). ")
     scope += STATE_NOT[app] + " "
-    scope += "Stability rule: every value on the list holds within 5 % or 1 µs"
+    scope += ("Stability rule (9.5 D78): every value on the list — a table read by the mean it carries, over every "
+              "repeat's samples — holds within 5 % or 1 µs")
     if machine or session or sparse:
         scope += " except these, carried over the repeats obtained with their half-widths and ranges. "
     else:
