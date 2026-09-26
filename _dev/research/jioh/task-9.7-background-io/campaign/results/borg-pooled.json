@@ -1,7 +1,176 @@
 {
  "tag": "meas-ci:background:2026-09-19",
  "machine": "EPYC 7763",
- "gated_out": [],
+ "gated_out": [
+  {
+   "app": "borg",
+   "repeat": 1,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35476401518/meas-background-borg-r1-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 11,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35476401518/meas-background-borg-r11-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 13,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35476401518/meas-background-borg-r13-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 15,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35476401518/meas-background-borg-r15-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 16,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35476401518/meas-background-borg-r16-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 17,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35476401518/meas-background-borg-r17-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 2,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35476401518/meas-background-borg-r2-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 20,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35476401518/meas-background-borg-r20-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 21,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35476401518/meas-background-borg-r21-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 22,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35476401518/meas-background-borg-r22-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 24,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35476401518/meas-background-borg-r24-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 3,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35476401518/meas-background-borg-r3-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 8,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+   "path": "35476401518/meas-background-borg-r8-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 9,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35476401518/meas-background-borg-r9-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 8,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35476432132/meas-background-borg-r8-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 15,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35476881396/meas-background-borg-r15-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 20,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35476881396/meas-background-borg-r20-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 22,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35476881396/meas-background-borg-r22-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 15,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35477031052/meas-background-borg-r15-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 20,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35477031052/meas-background-borg-r20-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 15,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+   "path": "35477182078/meas-background-borg-r15-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 26,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35479018795/meas-background-borg-r26-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 29,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35480602297/meas-background-borg-r29-full"
+  },
+  {
+   "app": "borg",
+   "repeat": 29,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35480706292/meas-background-borg-r29-full"
+  }
+ ],
  "other_machine": [],
  "runs": {
   "borg": {

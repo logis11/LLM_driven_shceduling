@@ -1,7 +1,302 @@
 {
  "tag": "meas-ci:background:2026-09-19",
  "machine": "EPYC 7763",
- "gated_out": [],
+ "gated_out": [
+  {
+   "app": "steamcmd",
+   "repeat": 3,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35502824537/meas-background-steamcmd-r3-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 4,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35502824537/meas-background-steamcmd-r4-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 4,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+   "path": "35502868640/meas-background-steamcmd-r4-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 10,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35509003684/meas-background-steamcmd-r10-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 10,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35509045982/meas-background-steamcmd-r10-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 14,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35584428409/meas-background-steamcmd-r14-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 17,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+   "path": "35584428409/meas-background-steamcmd-r17-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 19,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35584428409/meas-background-steamcmd-r19-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 21,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35584428409/meas-background-steamcmd-r21-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 22,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35584428409/meas-background-steamcmd-r22-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 17,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35584473283/meas-background-steamcmd-r17-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 19,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35584473283/meas-background-steamcmd-r19-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 19,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35584871283/meas-background-steamcmd-r19-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 25,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35736409534/meas-background-steamcmd-r25-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 25,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35736699472/meas-background-steamcmd-r25-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 25,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35736941629/meas-background-steamcmd-r25-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 25,
+   "gate": "no-vf",
+   "cpu_model": "AMD EPYC 7763 64-Core Processor",
+   "path": "35737184634/meas-background-steamcmd-r25-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 25,
+   "gate": "no-vf",
+   "cpu_model": "AMD EPYC 7763 64-Core Processor",
+   "path": "35737445169/meas-background-steamcmd-r25-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 25,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35737692964/meas-background-steamcmd-r25-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 25,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35737952780/meas-background-steamcmd-r25-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 26,
+   "gate": "no-vf",
+   "cpu_model": "AMD EPYC 7763 64-Core Processor",
+   "path": "35745702827/meas-background-steamcmd-r26-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 26,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35745760752/meas-background-steamcmd-r26-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 26,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35746016906/meas-background-steamcmd-r26-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 27,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35753782786/meas-background-steamcmd-r27-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 27,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35753836288/meas-background-steamcmd-r27-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 27,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35754079731/meas-background-steamcmd-r27-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 27,
+   "gate": "no-vf",
+   "cpu_model": "AMD EPYC 7763 64-Core Processor",
+   "path": "35754320041/meas-background-steamcmd-r27-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 27,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35754561085/meas-background-steamcmd-r27-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 27,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35754810326/meas-background-steamcmd-r27-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 28,
+   "gate": "no-vf",
+   "cpu_model": "AMD EPYC 7763 64-Core Processor",
+   "path": "35761988583/meas-background-steamcmd-r28-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 29,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35768937357/meas-background-steamcmd-r29-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 29,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35768995976/meas-background-steamcmd-r29-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 30,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35775857984/meas-background-steamcmd-r30-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 30,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35776133966/meas-background-steamcmd-r30-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 31,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+   "path": "35783098091/meas-background-steamcmd-r31-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 31,
+   "gate": "no-vf",
+   "cpu_model": "AMD EPYC 7763 64-Core Processor",
+   "path": "35783361577/meas-background-steamcmd-r31-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 32,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35790224174/meas-background-steamcmd-r32-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 32,
+   "gate": "no-vf",
+   "cpu_model": "AMD EPYC 7763 64-Core Processor",
+   "path": "35790273177/meas-background-steamcmd-r32-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 32,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+   "path": "35790487419/meas-background-steamcmd-r32-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 32,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35790695548/meas-background-steamcmd-r32-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 32,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35790902680/meas-background-steamcmd-r32-full"
+  },
+  {
+   "app": "steamcmd",
+   "repeat": 32,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35791107702/meas-background-steamcmd-r32-full"
+  }
+ ],
  "other_machine": [],
  "runs": {
   "steamcmd": {

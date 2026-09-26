@@ -241,7 +241,8 @@ def find_runs(root, cpu_model):
         app, k, mode = m.group(1), int(m.group(2)), m.group(3)
         rpt = json.load(open(os.path.join(d, "report.json")))
         if rpt.get("gate") in ("wrong-machine", "no-vf"):
-            gated.append({"app": app, "repeat": k, "cpu_model": rpt.get("machine.model"), "path": os.path.relpath(d, root)})
+            gated.append({"app": app, "repeat": k, "gate": rpt.get("gate"), "cpu_model": rpt.get("machine.model"),
+                          "path": os.path.relpath(d, root)})
             continue
         spec = json.load(open(os.path.join(d, "spec.json"))) if os.path.exists(os.path.join(d, "spec.json")) else {}
         model = spec.get("cpu_model") or ""
@@ -396,8 +397,10 @@ def fmt_q(q):
 
 
 def render(out):
+    network = sum(g.get("gate") == "no-vf" for g in out["gated_out"])
     L = [f"# 9.7 background campaign — pooled results{' (' + out['tag'] + ')' if out.get('tag') else ''}", "",
-         f"Machine {out.get('machine') or 'any'}; stopped by the machine gate {len(out['gated_out'])}; other-model repeats "
+         f"Machine {out.get('machine') or 'any'}; stopped by the machine gate {len(out['gated_out']) - network}"
+         f"{f', by the network gate {network}' if network else ''}; other-model repeats "
          f"{len(out['other_machine'])}. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9, times in µs, "
          f"bytes per wake in bytes; the spread is the per-repeat mean. Rules: method §5 and §9.", ""]
     for app, E in out["runs"].items():

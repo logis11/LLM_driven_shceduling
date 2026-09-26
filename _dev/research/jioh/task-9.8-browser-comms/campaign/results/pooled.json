@@ -1,7 +1,295 @@
 {
  "tag": "meas-ci:desktop:2026-09-20",
  "machine": "EPYC 7763",
- "gated_out": [],
+ "gated_out": [
+  {
+   "app": "chrome-hidden",
+   "repeat": 1,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+   "path": "35506753479/meas-desktop-chrome-hidden-r1-full"
+  },
+  {
+   "app": "element",
+   "repeat": 1,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35506753479/meas-desktop-element-r1-full"
+  },
+  {
+   "app": "steam",
+   "repeat": 1,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35506753479/meas-desktop-steam-r1-full"
+  },
+  {
+   "app": "chrome-hidden",
+   "repeat": 1,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35506838639/meas-desktop-chrome-hidden-r1-full"
+  },
+  {
+   "app": "steam",
+   "repeat": 1,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+   "path": "35506838639/meas-desktop-steam-r1-full"
+  },
+  {
+   "app": "chrome-hidden",
+   "repeat": 3,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35508871434/meas-desktop-chrome-hidden-r3-full"
+  },
+  {
+   "app": "chrome-hidden",
+   "repeat": 5,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35508871434/meas-desktop-chrome-hidden-r5-full"
+  },
+  {
+   "app": "chrome-visible",
+   "repeat": 3,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35508871434/meas-desktop-chrome-visible-r3-full"
+  },
+  {
+   "app": "chrome-visible",
+   "repeat": 5,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35508871434/meas-desktop-chrome-visible-r5-full"
+  },
+  {
+   "app": "element",
+   "repeat": 2,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35508871434/meas-desktop-element-r2-full"
+  },
+  {
+   "app": "element",
+   "repeat": 4,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35508871434/meas-desktop-element-r4-full"
+  },
+  {
+   "app": "steam",
+   "repeat": 3,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35508871434/meas-desktop-steam-r3-full"
+  },
+  {
+   "app": "chrome-hidden",
+   "repeat": 5,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35508896087/meas-desktop-chrome-hidden-r5-full"
+  },
+  {
+   "app": "chrome-visible",
+   "repeat": 3,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35509010925/meas-desktop-chrome-visible-r3-full"
+  },
+  {
+   "app": "chrome-visible",
+   "repeat": 5,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35509010925/meas-desktop-chrome-visible-r5-full"
+  },
+  {
+   "app": "element",
+   "repeat": 2,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35509010925/meas-desktop-element-r2-full"
+  },
+  {
+   "app": "element",
+   "repeat": 2,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35509122608/meas-desktop-element-r2-full"
+  },
+  {
+   "app": "chrome-hidden",
+   "repeat": 10,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35585311256/meas-desktop-chrome-hidden-r10-full"
+  },
+  {
+   "app": "chrome-hidden",
+   "repeat": 11,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+   "path": "35585311256/meas-desktop-chrome-hidden-r11-full"
+  },
+  {
+   "app": "chrome-hidden",
+   "repeat": 6,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35585311256/meas-desktop-chrome-hidden-r6-full"
+  },
+  {
+   "app": "chrome-visible",
+   "repeat": 10,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35585311256/meas-desktop-chrome-visible-r10-full"
+  },
+  {
+   "app": "chrome-visible",
+   "repeat": 7,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35585311256/meas-desktop-chrome-visible-r7-full"
+  },
+  {
+   "app": "chrome-visible",
+   "repeat": 9,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35585311256/meas-desktop-chrome-visible-r9-full"
+  },
+  {
+   "app": "element",
+   "repeat": 6,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35585311256/meas-desktop-element-r6-full"
+  },
+  {
+   "app": "element",
+   "repeat": 7,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35585311256/meas-desktop-element-r7-full"
+  },
+  {
+   "app": "element",
+   "repeat": 9,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+   "path": "35585311256/meas-desktop-element-r9-full"
+  },
+  {
+   "app": "chrome-hidden",
+   "repeat": 10,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35585545176/meas-desktop-chrome-hidden-r10-full"
+  },
+  {
+   "app": "chrome-hidden",
+   "repeat": 10,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35586186257/meas-desktop-chrome-hidden-r10-full"
+  },
+  {
+   "app": "chrome-hidden",
+   "repeat": 10,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35586865270/meas-desktop-chrome-hidden-r10-full"
+  },
+  {
+   "app": "element",
+   "repeat": 7,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35587769187/meas-desktop-element-r7-full"
+  },
+  {
+   "app": "element",
+   "repeat": 7,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35588195326/meas-desktop-element-r7-full"
+  },
+  {
+   "app": "steam",
+   "repeat": 11,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35592897185/meas-desktop-steam-r11-full"
+  },
+  {
+   "app": "steam",
+   "repeat": 12,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35592897185/meas-desktop-steam-r12-full"
+  },
+  {
+   "app": "steam",
+   "repeat": 9,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+   "path": "35592897185/meas-desktop-steam-r9-full"
+  },
+  {
+   "app": "steam",
+   "repeat": 11,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35593126399/meas-desktop-steam-r11-full"
+  },
+  {
+   "app": "steam",
+   "repeat": 12,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35593126399/meas-desktop-steam-r12-full"
+  },
+  {
+   "app": "steam",
+   "repeat": 9,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35593126399/meas-desktop-steam-r9-full"
+  },
+  {
+   "app": "element",
+   "repeat": 12,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35594376695/meas-desktop-element-r12-full"
+  },
+  {
+   "app": "element",
+   "repeat": 14,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35594376695/meas-desktop-element-r14-full"
+  },
+  {
+   "app": "element",
+   "repeat": 15,
+   "gate": "wrong-machine",
+   "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+   "path": "35594376695/meas-desktop-element-r15-full"
+  },
+  {
+   "app": "element",
+   "repeat": 12,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+   "path": "35594606756/meas-desktop-element-r12-full"
+  }
+ ],
  "other_machine": [],
  "probe_jobs": [],
  "runs": {

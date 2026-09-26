@@ -1,6 +1,6 @@
 # 9.7 background campaign — pooled results (meas-ci:background:2026-09-19)
 
-Machine EPYC 7763; stopped by the machine gate 0; other-model repeats 0. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9, times in µs, bytes per wake in bytes; the spread is the per-repeat mean. Rules: method §5 and §9.
+Machine EPYC 7763; stopped by the machine gate 24; other-model repeats 0. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9, times in µs, bytes per wake in bytes; the spread is the per-repeat mean. Rules: method §5 and §9.
 
 ## borg
 

@@ -176,3 +176,14 @@ By 인지오's decision, on the 2026-09-26 review of 9.5–9.9. D15's two checks
 The checks re-read from the per-repeat ratios the pooled records hold. `game-download`: without `perf trace` the program spends 0.9754 of the CPU (95 % interval 0.9702–0.9807) and 0.9912 of the time (0.9878–0.9946) — both differences, where both read not resolved; stated in its `modeling_notes` as the tracing's cost, about 2.5 % more CPU under the carried values, where in the runs it lands not measured. `file-archiver`: CPU per byte at one thread 0.9308 of the eight-thread run (0.9109–0.9507), a difference as before and as its notes state (D23); the per-wake run and wait, whose repeats fall into D23's two modes, not resolved (they read "difference" on the ratio of medians) — D23 already reports them by mode, not by one ratio. Tooling: `check` in `background/pool.py` (the D15 checks; `compare` stays the comparisons'), the results pages' check lines with the interval. Test: `test_a_check_is_read_against_the_interval_of_its_per_repeat_ratios`. Method §9, 2026-09-26. Values changed: none; `game-download`'s notes.
 
 Commit: this entry.
+
+## D37 — the pooled records carry the jobs the gates stopped (2026-09-26)
+
+By 인지오's decision, on the 2026-09-26 review of 9.5–9.9. The three pooled records' `gated_out` was empty, and each results page stated "stopped by the machine gate 0". Every job of the workflow's runs and the model it drew, from each job's own report, is in `campaign/machine-draws.md`.
+
+- **`gated_out`** lists each `full` job a gate stopped, from its artifact's `report.json`: application, repeat, gate, model and path (`<run id>/<artifact>`). `7z` 8, `borg` 24, `steamcmd` 42 — 35 by the machine gate, 7 by the network gate (D27).
+- **The results pages** count the two gates apart: `7z` 8 and `borg` 24 by the machine gate, `steamcmd` 35 by the machine gate and 7 by the network gate.
+
+Tooling: `find_runs` in `background/pool.py` keeps each stopped job's gate, and `render` counts the network gate apart. Tests: `test_a_stopped_job_keeps_its_gate`, `test_the_page_counts_the_machine_gate_and_the_network_gate_apart`. Campaign record: `file-backup`'s and `file-archiver`'s gate stops by model, and a 9.7 paragraph under its machine draws. Values changed: none.
+
+Commit: this entry.

@@ -481,3 +481,27 @@ def test_a_check_is_read_against_the_interval_of_its_per_repeat_ratios():
     wide = {1: 0.9, 2: 1.1, 3: 0.95, 4: 1.05, 5: 1.0}
     assert pool.check(100.0, 110.0, wide)["reading"] == "not resolved"
     assert pool.check(None, 1.0, steady)["reading"] is None
+
+
+def test_a_stopped_job_keeps_its_gate(tmp_path):
+    # the machine gate and the network gate (D27) each stop a job before it measures; the pooled record names which
+    for run, name, gate, model in (("11", "meas-background-steamcmd-r1-full", "wrong-machine", "AMD EPYC 9V74 80-Core Processor"),
+                                   ("12", "meas-background-steamcmd-r2-full", "no-vf", "AMD EPYC 7763 64-Core Processor")):
+        d = tmp_path / run / name
+        d.mkdir(parents=True)
+        (d / "report.json").write_text(json.dumps({"gate": gate, "machine.model": model}))
+    runs, gated, other = pool.find_runs(str(tmp_path), "EPYC 7763")
+    assert runs == {} and other == []
+    assert gated == [
+        {"app": "steamcmd", "repeat": 1, "gate": "wrong-machine", "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+         "path": "11/meas-background-steamcmd-r1-full"},
+        {"app": "steamcmd", "repeat": 2, "gate": "no-vf", "cpu_model": "AMD EPYC 7763 64-Core Processor",
+         "path": "12/meas-background-steamcmd-r2-full"}]
+
+
+def test_the_page_counts_the_machine_gate_and_the_network_gate_apart():
+    out = {"tag": None, "machine": "EPYC 7763", "other_machine": [], "runs": {},
+           "gated_out": [{"gate": "wrong-machine"}, {"gate": "wrong-machine"}, {"gate": "no-vf"}]}
+    assert "; stopped by the machine gate 2, by the network gate 1; other-model repeats 0." in pool.render(out)
+    out["gated_out"] = out["gated_out"][:2]
+    assert "; stopped by the machine gate 2; other-model repeats 0." in pool.render(out)

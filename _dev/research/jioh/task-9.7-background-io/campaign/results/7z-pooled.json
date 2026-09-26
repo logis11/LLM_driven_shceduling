@@ -1,7 +1,64 @@
 {
  "tag": "meas-ci:background:2026-09-19",
  "machine": "EPYC 7763",
- "gated_out": [],
+ "gated_out": [
+  {
+   "app": "7z",
+   "repeat": 1,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35475673566/meas-background-7z-r1-full"
+  },
+  {
+   "app": "7z",
+   "repeat": 2,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
+   "path": "35475673566/meas-background-7z-r2-full"
+  },
+  {
+   "app": "7z",
+   "repeat": 3,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+   "path": "35475673566/meas-background-7z-r3-full"
+  },
+  {
+   "app": "7z",
+   "repeat": 6,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V45 96-Core Processor",
+   "path": "35475673566/meas-background-7z-r6-full"
+  },
+  {
+   "app": "7z",
+   "repeat": 1,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35475892675/meas-background-7z-r1-full"
+  },
+  {
+   "app": "7z",
+   "repeat": 2,
+   "gate": "wrong-machine",
+   "cpu_model": "Intel(R) Xeon(R) 6973P-C",
+   "path": "35475892675/meas-background-7z-r2-full"
+  },
+  {
+   "app": "7z",
+   "repeat": 1,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35475946669/meas-background-7z-r1-full"
+  },
+  {
+   "app": "7z",
+   "repeat": 2,
+   "gate": "wrong-machine",
+   "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+   "path": "35475946669/meas-background-7z-r2-full"
+  }
+ ],
  "other_machine": [],
  "runs": {
   "7z": {
