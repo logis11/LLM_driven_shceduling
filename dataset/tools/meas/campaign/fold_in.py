@@ -13,6 +13,7 @@ YAML fragment to splice into dataset/archetypes.yaml under `archetypes:`.
 
 import json
 import os
+import statistics
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -92,6 +93,88 @@ def share_above(table, x):
         if a <= x < b:
             return 1.0 - (pa + (pb - pa) * (x - a) / (b - a))
     return 1.0
+
+
+# The stability rule as the scope states it (the campaign workflow; D26, D30): the rule over the repeats obtained, and
+# each value it was not held to — at the recording's window limit (D32) or carried under D57 — with its half-width.
+LABEL = {"wakes/s": "wake rate", "gap mean (ms)": "gap mean", "run mean (ms)": "run mean"}
+# where each entry's window limit is decided: D32 the rule, D46 the send's operation phase, D68 chrome's and code's limits
+WINDOW_LAW = {"code-editor": "D32, D68", "web-browser": "D32, D68", "mail-client": "D32, D46"}
+# D57's second finding: a between-sessions component's spread within one run, read on the D52 probe
+WITHIN = {("code-editor", "utility/libuv-worker"): "its schedule-in rate ±8.7 % (7.81–9.31 a second over 900 s "
+                                                   "windows slid along the D52 probe)"}
+
+
+def value_name(key):
+    """(name, unit) of a stability-block value as the scope writes it."""
+    if key.startswith("input_run mean, "):
+        return f"the per-input run mean under {key[len('input_run mean, '):-len(' (ms)')]}", "ms"
+    if key == "operation duration mean (ms)":
+        return "the operation's duration mean", "ms"
+    phase, rest = key.split(" ", 1)
+    label = next(lb for lb in LABEL if rest.endswith(" " + lb))
+    whose = "the operation's " if phase == "op" else ""
+    return f"{whose}`{rest[:-len(label) - 1]}` {LABEL[label]}", ("wakes/s" if label == "wakes/s" else "ms")
+
+
+def held(c, unit):
+    return f"{c['mean']:.4g} {unit} ±{c['half_width'] * 100:.2f} %"
+
+
+def stability_scope(aid, d):
+    st = d["stability"]
+    q = st["quantities"]
+    text = (f"Stability rule (D26, D30): every value on the list holds within {st['tolerance'] * 100:g} % or "
+            f"{st['abs_floor_ms'] * 1000:g} µs over the {len(d['repeats'])} repeats obtained")
+    limited = {k: c for k, c in q.items() if c.get("limited")}
+    session = {k: c for k, c in q.items() if c.get("session_spread") and c.get("carried")}
+    if not limited and not session:
+        return text + ". "
+    text += ", except these, stated with their half-widths. "
+    if limited:
+        op = (d["phases"].get("op") or {}).get("operation")
+        what = "the per-input means" + (f" and the {op['name']} operation's values"
+                                        if op and any(k.startswith(("op ", "operation ")) for k in limited) else "")
+        out = sorted((kc for kc in limited.items() if not kc[1]["passes"]), key=lambda kc: -kc[1]["half_width"])
+        ins = [c for c in limited.values() if c["passes"]]
+        text += (f"Window limit ({WINDOW_LAW[aid]}): {what} come from the repeats that replay a window of the "
+                 f"recording, {max(c['k'] for c in limited.values())} repeats, every window of it that holds input")
+        if out:
+            text += "; outside the rule: " + "; ".join(
+                f"{value_name(k)[0]} {held(c, value_name(k)[1])} (the rule needs {c['needed']} repeats)" for k, c in out)
+        if len(ins) == 1:
+            k = next(k for k, c in limited.items() if c["passes"])
+            text += f"; {value_name(k)[0]} {held(limited[k], value_name(k)[1])} holds within it"
+        elif ins:
+            text += (f"; {'the other' if out else 'all'} {len(ins)} hold within it, the widest "
+                     f"±{max(c['half_width'] for c in ins) * 100:.2f} %")
+        text += ". "
+    if session:
+        comps = {}
+        for k, c in session.items():
+            phase, rest = k.split(" ", 1)
+            label = next(lb for lb in LABEL if rest.endswith(" " + lb))
+            comps.setdefault((phase, rest[:-len(label) - 1]), {})[label] = c
+        parts = []
+        for (phase, comm), vals in comps.items():
+            t = d["phases"][phase]["threads"][comm]
+            per = {"wakes/s": t["wakes_per_s"], "gap mean (ms)": t["gap_ms"]["repeat_mean"],
+                   "run mean (ms)": t["run_ms"]["repeat_mean"]}
+            texts = []
+            for label in LABEL:
+                if label in vals:
+                    unit = "wakes/s" if label == "wakes/s" else "ms"
+                    texts.append(f"{LABEL[label]} {held(vals[label], unit)} "
+                                 f"({min(per[label]):.4g}–{max(per[label]):.4g} {unit})")
+            w = t["wakes_per_s"]
+            across = (max(w) - min(w)) / 2 / statistics.fmean(w) * 100
+            share = statistics.fmean(w) / statistics.fmean(d["phases"][phase]["wakes_per_s"]) * 100
+            parts.append(f"`{comm}` " + ", ".join(texts) + f"; within one run {WITHIN[(aid, comm)]}, across the "
+                         f"repeats its wake rate ±{across:.1f} %; it holds {share:.1f} % of the {phase} phase's wakes")
+        many = len(comps) > 1
+        text += (f"{'Components' if many else 'A component'} whose rate varies between sessions, "
+                 f"{'their' if many else 'its'} three values carried together (D57): " + "; ".join(parts) + ". ")
+    return text
 
 
 def rng(vals, nd=4):
@@ -271,6 +354,7 @@ def entry(aid, spec, d):
         if aid == "video-call":
             scope += ("The call's video path — compositing at about 16.7 ms and the 30 fps frames — has no job of its own; its "
                       "CPU runs inside the audio frames' cycles. ")
+    scope += stability_scope(aid, d)
     scope += "Values are this software on this machine, not desktop truth (D10)."
     if aid in BUILD_BOUND:   # D69: what the pinned or recorded build leaves out of the archetype
         scope += " " + BUILD_BOUND[aid]

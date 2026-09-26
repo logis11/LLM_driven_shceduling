@@ -523,3 +523,91 @@ def test_repeats_that_share_an_exclusion_reason_are_named_once():
         by_why.setdefault(why, []).append(str(k))
     line = "; ".join(f"repeat{'s' if len(ks) > 1 else ''} {', '.join(ks)} — {why}" for why, ks in by_why.items())
     assert line == "repeats 5, 29@358 — D63 and D69"
+
+
+# ------------------------------------------------------------------------------------------ 9.5 fold-in
+
+POOLS_95 = ([("results-same-machine", a) for a in ("gimp", "kdenlive", "mpv-audio", "mpv-video", "soffice",
+                                                   "thunderbird-send")]
+            + [("results-re-measured", a) for a in ("chrome", "code", "webrtc")])
+TAGS_95 = ["--tag", "interactive=meas-ci:interactive:2026-09-18", "--tag", "playback=meas-ci:playback:2026-09-18",
+           "--tag", "thunderbird-send=meas-ci:interactive:2026-09-19", "--tag", "chrome=meas-ci:interactive:2026-09-20",
+           "--tag", "webrtc=meas-ci:playback:2026-09-20", "--tag", "code=meas-ci:interactive:2026-09-25"]
+
+
+@pytest.fixture(scope="module")
+def fold_95(repo_root, tmp_path_factory):
+    """9.5's fold-in over its nine committed pools, as the campaign record's re-fold runs it."""
+    import shutil
+    import sys
+    d = tmp_path_factory.mktemp("fold95")
+    (d / "pools").mkdir()
+    campaign_dir = repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+    for sub, app in POOLS_95:
+        shutil.copy(campaign_dir / sub / f"pool-{app}.json", d / "pools")
+    frag = d / "frag.yaml"
+    subprocess.run([sys.executable, str(repo_root / "dataset" / "tools" / "meas" / "campaign" / "fold_in.py"),
+                    str(d / "pools"), str(frag), *TAGS_95], check=True, capture_output=True)
+    return frag
+
+
+def _scopes(frag):
+    import yaml
+    doc = yaml.safe_load("archetypes:\n" + frag.read_text())["archetypes"]
+    return {aid: e["validation_stats"]["scope"] for aid, e in doc.items()}
+
+
+def test_the_fold_in_regenerates_the_nine_entries_from_the_pooled_records(repo_root, fold_95, tmp_path):
+    # the nine entries in archetypes.yaml are fold_in.py's output on the committed pools, spliced, byte for byte
+    import shutil
+    import sys
+    lib = tmp_path / "archetypes.yaml"
+    shutil.copy(repo_root / "dataset" / "archetypes.yaml", lib)
+    subprocess.run([sys.executable, str(repo_root / "dataset" / "tools" / "meas" / "campaign" / "splice.py"),
+                    str(fold_95), str(lib)], check=True, capture_output=True)
+    assert lib.read_bytes() == (repo_root / "dataset" / "archetypes.yaml").read_bytes()
+
+
+def test_every_measured_scope_states_the_stability_rule_over_its_repeats(fold_95):
+    # the workflow's rule (D26, D30): every value within 5 % or 1 µs, read over the repeats the pool holds
+    repeats = {"office-writer": 14, "code-editor": 44, "mail-client": 43, "web-browser": 38, "image-editor": 5,
+               "video-editor": 20, "video-player": 24, "audio-player": 31, "video-call": 45}
+    scopes = _scopes(fold_95)
+    assert sorted(scopes) == sorted(repeats)
+    for aid, scope in scopes.items():
+        assert f"within 5 % or 1 µs over the {repeats[aid]} repeats obtained" in scope, aid
+
+
+def test_values_at_the_window_limit_are_stated_with_their_half_widths(fold_95):
+    # D32, D46: the phases that replay a recording's window stop at its last; their values state their half-widths,
+    # each one outside the rule by name with the repeats the rule would need
+    s = _scopes(fold_95)
+    code = s["code-editor"]
+    assert "43 repeats" in code
+    assert "SWELL-KW 105.4 ms ±5.17 % (the rule needs 46 repeats)" in code
+    assert "136M 106.1 ms ±3.92 %" in code
+    web = s["web-browser"]
+    assert "38 repeats" in web and "the per-input means and the page-load operation's values" in web
+    assert "SWELL-KW 1.701 ms ±8.33 % (the rule needs 106 repeats)" in web
+    assert "the other 29 hold within it, the widest ±4.09 %" in web
+    mail = s["mail-client"]
+    assert "8 repeats" in mail and "the per-input means and the send operation's values" in mail
+    assert "SWELL-KW 7.157 ms ±14.27 % (the rule needs 52 repeats)" in mail
+    assert "136M 6.284 ms ±6.77 % (the rule needs 13 repeats)" in mail
+    assert "the operation's `StreamT~ns` wake rate 46.1 wakes/s ±12.09 % (the rule needs 37 repeats)" in mail
+    assert "the other 30 hold within it, the widest ±4.14 %" in mail
+    for aid in ("office-writer", "image-editor", "video-editor", "video-player", "audio-player", "video-call"):
+        assert "window limit" not in s[aid].lower(), aid
+
+
+def test_the_between_sessions_component_states_both_spreads_and_its_share(fold_95):
+    # D57: libuv-worker's three values carried together with their half-widths and ranges; the spread within one run
+    # (the D52 probe) against across the 44 repeats (3.659–7.336 wakes/s about 5.764: ±31.9 %); 5.764 of the idle
+    # phase's 114.6 wakes/s is 5.0 %
+    code = _scopes(fold_95)["code-editor"]
+    assert "`utility/libuv-worker` wake rate 5.764 wakes/s ±4.63 % (3.659–7.336 wakes/s)" in code
+    assert "gap mean 177.5 ms ±5.13 % (136.3–273.3 ms)" in code
+    assert "run mean 0.01 ms ±2.02 % (0.009–0.0114 ms)" in code
+    assert "within one run its schedule-in rate ±8.7 % (7.81–9.31 a second" in code
+    assert "across the repeats its wake rate ±31.9 %" in code
+    assert "5.0 % of the idle phase's wakes" in code
