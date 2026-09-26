@@ -55,37 +55,37 @@
   "weight": {
    "share_of_entry_wakes": 1.0,
    "wakes_per_phase": [
-    123,
-    145
+    111,
+    136
    ],
-   "wakes_per_phase_mean": 132.1
+   "wakes_per_phase_mean": 123.6
   },
   "across": {
-   "wakes/s": 0.08327939002037352,
-   "gap mean (ms)": 0.08130055917767705,
-   "run mean (ms)": 0.3924133420536299
+   "wakes/s": 0.10113996077136696,
+   "gap mean (ms)": 0.1021390611020333,
+   "run mean (ms)": 0.40104849279161203
   },
   "within": {
    "36": {
     "positions": 143,
     "clean_span_s": 10335.946,
-    "wakes/s": 0.043601992072365085,
-    "gap mean (ms)": 0.047359984700679376,
-    "run mean (ms)": 0.12462816087642198
+    "wakes/s": 0.06135364153169572,
+    "gap mean (ms)": 0.06490139359759649,
+    "run mean (ms)": 0.12836412871552624
    },
    "41": {
     "positions": 143,
     "clean_span_s": 10335.809,
-    "wakes/s": 0.09863638775401917,
-    "gap mean (ms)": 0.09727198183727308,
-    "run mean (ms)": 0.19657970186619556
+    "wakes/s": 0.1016513560804899,
+    "gap mean (ms)": 0.10029804687761387,
+    "run mean (ms)": 0.19745034695310312
    },
    "44": {
     "positions": 143,
     "clean_span_s": 10335.732,
-    "wakes/s": 0.06441441441441446,
-    "gap mean (ms)": 0.0722980454846177,
-    "run mean (ms)": 0.25047282886189104
+    "wakes/s": 0.0509287162347268,
+    "gap mean (ms)": 0.05606740567462455,
+    "run mean (ms)": 0.253274919172386
    }
   }
  },
@@ -101,13 +101,13 @@
    "share_of_entry_wakes": 1.0,
    "wakes_per_phase": [
     0,
-    36
+    30
    ],
-   "wakes_per_phase_mean": 10.3
+   "wakes_per_phase_mean": 10.1
   },
   "across": {
-   "wakes/s": 1.7419579607478803,
-   "gap mean (ms)": 1.781561966735772,
+   "wakes/s": 1.4876490408574636,
+   "gap mean (ms)": 1.7565117939413704,
    "run mean (ms)": 0.9191263282172373
   },
   "within": {

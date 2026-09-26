@@ -129,6 +129,27 @@ def fmt_value(v, label, unit=True):
     return (f"{v:.1f}" if label.startswith("gap") else f"{v:.3f}") + (" ms" if unit else "")
 
 
+# D38: a sparse component that woke more in the repeats that crossed midnight UTC and met the cron session (D23), where
+# no rule of D23 or D27 moves the extra wakes — the split stated, with what the trace shows of them
+MIDNIGHT_SPLIT = {("pipewire", "wireplumber/gmain"): (
+    "the extra wakes are pairs of the worker's own timer 100 ms apart, 496–1205 s into the phase, 14 of the 15 pairs "
+    "starting within 0.2 s of one of the runner's `dockerd` bursts, three every 10 s; the trace names no waker for them "
+    "(a timer or interrupt on an idle CPU), so D27's rules keep them (D38)")}
+
+
+def midnight_split(prog, e, comp):
+    what = MIDNIGHT_SPLIT.get((prog, comp))
+    if not what:
+        return ""
+    reps, w = e["repeats"], e["threads"][comp]["wakes_per_s"]
+    met = [r for r, c in zip(reps, e["cron_event"]["count"]) if c]
+    a = [x for r, x in zip(reps, w) if r in met]
+    b = [x for r, x in zip(reps, w) if r not in met]
+    return (f"In the {len(met)} repeats that crossed midnight UTC and met the cron session "
+            f"({', '.join(str(r) for r in met[:-1])} and {met[-1]}) `{comp}` woke {statistics.fmean(a):.4f} times a "
+            f"second against {statistics.fmean(b):.4f} in the other {len(b)}: {what}. ")
+
+
 def stability_text(prog, e, stab, k, within):
     ok, carried = split_list(prog, stab)
     text = ""
@@ -157,6 +178,7 @@ def stability_text(prog, e, stab, k, within):
                         f"compiles at the rate it carries" if without else "")
                      + ", and is the entry's whole activity once the wakes owed to outside causes are out (D27, D32); "
                        "its spread is the count's own, which the within-run test cannot place. ")
+            text += midnight_split(prog, e, comp)
             continue
         w = within_figures(within[f"{prog} {comp}"])
         text += (f"`{comp}`'s three values are carried together with their half-widths under 9.5 D57 as 9.8 D21 "
@@ -175,7 +197,7 @@ def causes_text(e, k):
     if c.get("outside"):
         text += ("Wakes traced to a cause outside the observed desktop — a package Ubuntu 24.04's desktop manifest "
                  "does not hold, a desktop package's unit that a stock install leaves disabled and the runner image "
-                 "enabled, or the harness — left the components and are stated (D27, D32): "
+                 "enabled, or the harness — left the components and are stated (D27, D32, D37): "
                  + "; ".join(f"{lab} {rng(ns)} a phase" for lab, ns in c["outside"].items()) + ". ")
     if c.get("event"):
         text += ("Desktop jobs bound to a clock time are events of the phase, stated and not carried (D27, in D23's "
@@ -184,10 +206,6 @@ def causes_text(e, k):
     if c.get("unknown"):
         text += ("Kept, their cause not resolved by the trace: "
                  + "; ".join(f"{lab} {sum(ns)} over the {k} repeats" for lab, ns in c["unknown"].items()) + ". ")
-    desk = c.get("desktop") or {}
-    if any("systemd-networkd" in lab for lab in desk):
-        text += ("The wakes systemd-networkd causes are kept by the package rule; whether a stock desktop, which runs "
-                 "NetworkManager, also runs networkd is unverified (D27). ")
     return text
 
 

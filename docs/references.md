@@ -312,6 +312,21 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - role: existence claim only — a shipped MLFQ (Solaris/illumos Time-Sharing class) is table-driven with per-level quanta and a once-per-second aging pass. Bounded the boot default's `num_queues` and `boost_interval_us` from the other side (60 levels; ~1 s aging) until 2026-09-11, when the boot default became OSTEP's example whole; one point of the RQ0 gate spec's boot-default sensitivity sweep (`harness/boot-defaults/ostep-slice-2000us.json`, 8.8); does not name our values. At the default `hz` of 1000 the table's quanta are 2 ms (highest priority) to 20 ms (lowest); the 20-to-200 ms figures in OSTEP §8.5 and in Arpaci-Dusseau's Solaris 2.6 handout are the same tick table at 100 Hz. For the described millisecond ranges cite `ostep` §8.5, not this source.
 - status: verified (2026-09-07; source and man page read)
 
+### `systemd-ubuntu`
+- cite: Ubuntu source package `systemd` 255.4-1ubuntu8.17 (noble), its packaging: `debian/systemd.postinst`, `debian/rules` (`override_dh_installsystemd`), `debian/systemd.links`. git.launchpad.net/ubuntu/+source/systemd, branch `ubuntu/noble-updates` (accessed 2026-09-26).
+- role: what a new install of Ubuntu 24.04's `systemd` enables (`_dev/research/jioh/task-9.9-daemons-session/changelog.md` D37): its postinst enables `getty@tty1.service`, `remote-fs.target` and `systemd-pstore.service` "by default on new installs" and no other unit; `override_dh_installsystemd` installs units for `systemd-timesyncd`, `systemd-oomd`, `systemd-container`, `systemd-userdbd`, `systemd-homed`, `systemd-resolved` and `udev` only, none from the `systemd` package, which ships `systemd-networkd.service` and `.socket`; the links file enables only `getty-static.service`. So the package leaves `systemd-networkd` disabled; the postinst only try-restarts it on upgrade. Existence only.
+- status: verified (2026-09-26; the three files read at the branch head, whose changelog's top entry is 255.4-1ubuntu8.17, the version the 9.9 campaign ran)
+
+### `netplan`
+- cite: Ubuntu source package `netplan.io` 1.1.2-8ubuntu1~24.04.3 (noble), `src/generate.c`. git.launchpad.net/ubuntu/+source/netplan.io, branch `ubuntu/noble-updates` (accessed 2026-09-26).
+- role: when netplan starts `systemd-networkd` (9.9 D37): run as a systemd generator it creates the `multi-user.target.wants/systemd-networkd.service` enablement symlink only if it wrote networkd configuration — "Ensure networkd starts if we have any configuration for it" (`if (any_networkd) enable_networkd(...)`); a definition rendered by NetworkManager writes none. A definition without its own `renderer` takes the global one once every file has been read (`finish_iterator`, `src/parse.c`), so one file's `renderer: NetworkManager` covers the definitions of every other file that names none. Existence only.
+- status: verified (2026-09-26; `src/generate.c` and `src/parse.c` read at the branch head)
+
+### `livecd-rootfs`
+- cite: Ubuntu `livecd-rootfs` 24.04.101, the image build of Ubuntu 24.04's desktop, `live-build/functions` (`configure_network_manager`, called from `live-build/lb_chroot_layered` and `live-build/auto/build`). git.launchpad.net/livecd-rootfs, branch `ubuntu/noble` (accessed 2026-09-26).
+- role: the network configuration a stock Ubuntu 24.04 desktop install carries (9.9 D37): an image that pre-installs NetworkManager gets `/etc/netplan/01-network-manager-all.yaml`, "# Let NetworkManager manage all devices on this system", `renderer: NetworkManager` for every device (every subproject but `desktop-preinstalled`); nothing in the build applies systemd presets. With `netplan`, no networkd configuration is written, so `systemd-networkd` is not started. Existence only.
+- status: verified (2026-09-26; `live-build/functions` read at the branch head, commit f492363)
+
 ## Grounding — measurement
 
 ### `meas-ci`

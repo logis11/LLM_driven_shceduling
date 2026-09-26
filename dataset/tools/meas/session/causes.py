@@ -40,9 +40,10 @@ UNITS = {
     "systemd-logind.service": ("systemd", "desktop"),
     "systemd-resolved.service": ("systemd-resolved", "desktop"),
     "systemd-journald.service": ("systemd", "desktop"),
-    # kept by the package rule and stated: a stock desktop runs NetworkManager (network-manager is in the
-    # manifest), and whether systemd-networkd also runs there is unverified
-    "systemd-networkd.service": ("systemd", "desktop"),
+    # D37 (D32's ground): a stock desktop leaves systemd-networkd inactive — Ubuntu's systemd 255.4-1ubuntu8.17 enables
+    # it on no install, the desktop image writes `renderer: NetworkManager` for every device (livecd-rootfs) and
+    # netplan starts networkd only for networkd configuration; the runner image's own network runs it
+    "systemd-networkd.service": ("systemd", "outside"),
     "systemd-udevd.service": ("udev", "desktop"),
     "udisks2.service": ("udisks2", "desktop"),
     "cron.service": ("cron", "desktop"),

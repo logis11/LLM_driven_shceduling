@@ -435,6 +435,21 @@ def test_the_fold_in_regenerates_the_four_entries_from_the_pooled_record(repo_ro
     assert "system-daemon" not in library
 
 
+def test_the_audio_servers_scope_states_its_midnight_split(repo_root, tmp_path):
+    # D38: WirePlumber's worker woke more in the four repeats that crossed midnight UTC and met the cron session; no rule
+    # of D23 or D27 moves the extra wakes, so the scope states the split
+    pooled = repo_root / "_dev" / "research" / "jioh" / "task-9.9-daemons-session" / "campaign" / "results" / "pooled.json"
+    out = tmp_path / "fold.yaml"
+    argv, sys.argv = sys.argv, ["fold_in.py", str(pooled), str(out)]
+    try:
+        fold_in.main()
+    finally:
+        sys.argv = argv
+    text = out.read_text()
+    assert ("In the 4 repeats that crossed midnight UTC and met the cron session (47, 48, 49 and 51) "
+            "`wireplumber/gmain` woke 0.0057 times a second against 0.0023 in the other 20") in " ".join(text.split())
+
+
 def test_the_within_run_figures_are_read_from_the_record_beside_the_pool(repo_root, tmp_path):
     # D28, D35: a carried component's within-run spreads are `within-run.json`'s, beside the pooled record
     results = repo_root / "_dev" / "research" / "jioh" / "task-9.9-daemons-session" / "campaign" / "results"
@@ -466,7 +481,8 @@ def _causes_case():
              900: {"pid": 900, "comm": "php-fpm8.3", "cgroup": "/system.slice/php8.3-fpm.service"},
              950: {"pid": 950, "comm": "bash", "cgroup": "/system.slice/hosted-compute-agent.service"},
              960: {"pid": 960, "comm": "cron", "cgroup": "/system.slice/cron.service"},
-             970: {"pid": 970, "comm": "systemd-logind", "cgroup": "/system.slice/systemd-logind.service"}}
+             970: {"pid": 970, "comm": "systemd-logind", "cgroup": "/system.slice/systemd-logind.service"},
+             980: {"pid": 980, "comm": "systemd-network", "cgroup": "/system.slice/systemd-networkd.service"}}
     inst = {"systemd": {"pid1": {1}}, "dbus-daemon": {"system-bus": {400}}, "pipewire": {"wireplumber": {531}}}
     R = lambda t, run, comm, tid, pid, st="S": Row(t, t, t + run / 1000, run, comm, tid, pid, st)
     wakes = [R(10.0, 0.2, "systemd", 1, 1),            # php-fpm's notice
@@ -478,7 +494,8 @@ def _causes_case():
              R(40.0, 0.05, "gmain", 532, 531),          # a job cron ran: debian-sa1 1 1
              R(50.0, 0.05, "gmain", 532, 531),          # a job cron ran: debian-sa1 60 2
              R(60.0, 0.05, "gmain", 532, 531),          # a cat the loop forked
-             R(70.0, 0.05, "gmain", 532, 531)]          # its own timer
+             R(70.0, 0.05, "gmain", 532, 531),          # its own timer
+             R(80.0, 0.2, "systemd", 1, 1)]             # systemd-networkd's notice
     rows = [(9.9999, "php-fpm8.3", 900, 900, "systemd", 1, 1),
             (10.0002, "systemd", 1, 1, "dbus-daemon", 400, 400),
             (19.9999, "systemd-logind", 970, 970, "systemd", 1, 1),
@@ -490,7 +507,8 @@ def _causes_case():
             (49.0, "cron", 960, 960, "cron", 1011, 1011), (49.001, "cron", 1011, 1011, "sh", 1012, 1012),
             (49.9999, "sh", 1012, 1012, "gmain", 532, 531),
             (59.0, "bash", 950, 950, "bash", 1021, 1021), (59.9999, "cat", 1021, 1021, "gmain", 532, 531),
-            (69.9999, "swapper", None, None, "gmain", 532, 531)]
+            (69.9999, "swapper", None, None, "gmain", 532, 531),
+            (79.9999, "systemd-network", 980, 980, "systemd", 1, 1)]
     cmds = {1002: "command -v debian-sa1 > /dev/null && debian-sa1 1 1",
             1012: "command -v debian-sa1 > /dev/null && debian-sa1 60 2"}
     c = C.Causes(sorted(wakes, key=lambda w: w.t_in), rows, [], procs, inst, {15}, re.compile(r"^rcu_"), cmds)
@@ -518,6 +536,17 @@ def test_a_wake_is_classed_by_its_cause_traced_through_the_trace():
     assert by_t[40.0] == ("outside", "job sysstat-collect (sysstat)")
     assert "job sysstat-collect (sysstat)" not in tally.get("desktop", {})
     assert tally["own"]["idle CPU (timer or interrupt)"] == 1
+
+
+def test_systemd_networkds_wakes_are_outside():
+    # D37: a stock Ubuntu 24.04 desktop leaves systemd-networkd inactive — the systemd package enables it on no install,
+    # the desktop image hands every device to NetworkManager and netplan starts networkd only for networkd
+    # configuration — while the runner image runs it; its wakes leave the components, as sysstat's did (D32)
+    c, wakes = _causes_case()
+    keep, tally, gone = c.split(wakes)
+    by_t = {round(t, 4): (cls, lab) for t, cls, lab in gone}
+    assert by_t[80.0] == ("outside", "systemd-networkd.service (systemd)")
+    assert not any("systemd-networkd" in lab for lab in tally.get("desktop", {}))
 
 
 def test_the_results_page_names_the_exception_that_carries_each_value():

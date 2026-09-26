@@ -20,15 +20,15 @@ Left the components by cause (D27), wakes over the pooled repeats: outside — h
 
 ## systemd
 
-Components ['pid1/systemd'] cover 1.0 of 0.073 wakes/s; residual False; sporadic []
+Components ['pid1/systemd'] cover 1.0 of 0.069 wakes/s; residual False; sporadic []
 
-Left the components by cause (D27), wakes over the pooled repeats: outside — php8.3-fpm.service (php8.3-fpm) 4425; outside — job sysstat-collect (sysstat) 68; outside — job podman (podman) 26; outside — job phpsessionclean (php-common) 24; outside — job sysstat-summary (sysstat) 4; event — anacron.service (anacron) 14; event — job anacron (anacron) 12; event — job man-db (man-db) 4; event — job motd-news (base-files) 2; event — job fstrim (util-linux) 1
+Left the components by cause (D27), wakes over the pooled repeats: outside — php8.3-fpm.service (php8.3-fpm) 4425; outside — systemd-networkd.service (systemd) 204; outside — job sysstat-collect (sysstat) 68; outside — job podman (podman) 26; outside — job phpsessionclean (php-common) 24; outside — job sysstat-summary (sysstat) 4; event — anacron.service (anacron) 14; event — job anacron (anacron) 12; event — job man-db (man-db) 4; event — job motd-news (base-files) 2; event — job fstrim (util-linux) 1
 
 ## dbus-daemon
 
 Components ['system-bus/dbus-daemon'] cover 1.0 of 0.006 wakes/s; residual False; sporadic []
 
-Left the components by cause (D27), wakes over the pooled repeats: outside — php8.3-fpm.service (php8.3-fpm) 4989; outside — job sysstat-collect (sysstat) 361; outside — job phpsessionclean (php-common) 149; outside — job podman (podman) 92; outside — job sysstat-summary (sysstat) 22; event — anacron.service (anacron) 13; event — job anacron (anacron) 11; event — job motd-news (base-files) 10; event — job fstrim (util-linux) 7; event — job man-db (man-db) 7
+Left the components by cause (D27), wakes over the pooled repeats: outside — php8.3-fpm.service (php8.3-fpm) 4989; outside — job sysstat-collect (sysstat) 361; outside — job phpsessionclean (php-common) 149; outside — job podman (podman) 92; outside — job sysstat-summary (sysstat) 22; outside — systemd-networkd.service (systemd) 6; event — anacron.service (anacron) 13; event — job anacron (anacron) 11; event — job motd-news (base-files) 10; event — job fstrim (util-linux) 7; event — job man-db (man-db) 7
 
 | quantity | k | mean | half-width | passes |
 |---|---|---|---|---|
@@ -44,10 +44,10 @@ Left the components by cause (D27), wakes over the pooled repeats: outside — p
 | pipewire wireplumber/gmain wakes/s | 24 | 0.0029 | ±21.4% | carried (D33) |
 | pipewire wireplumber/gmain gap mean (ms) | 24 | 345600.5142 | ±21.4% | carried (D33) |
 | pipewire wireplumber/gmain run mean (ms) | 24 | 0.0359 | ±3.5% | yes |
-| systemd pid1/systemd wakes/s | 24 | 0.0734 | ±2.0% | yes |
-| systemd pid1/systemd gap mean (ms) | 24 | 13627.7805 | ±2.0% | yes |
-| systemd pid1/systemd run mean (ms) | 24 | 0.1284 | ±10.2% | carried (D29) |
-| dbus-daemon system-bus/dbus-daemon wakes/s | 24 | 0.0057 | ±43.3% | carried (D33) |
-| dbus-daemon system-bus/dbus-daemon gap mean (ms) | 24 | 174193.7863 | ±43.3% | carried (D33) |
-| dbus-daemon system-bus/dbus-daemon run mean (ms) | 24 | 0.1545 | ±9.1% | carried (D33) |
+| systemd pid1/systemd wakes/s | 24 | 0.0687 | ±1.9% | yes |
+| systemd pid1/systemd gap mean (ms) | 24 | 14565.0925 | ±1.9% | yes |
+| systemd pid1/systemd run mean (ms) | 24 | 0.1282 | ±10.3% | carried (D29) |
+| dbus-daemon system-bus/dbus-daemon wakes/s | 24 | 0.0056 | ±42.0% | carried (D33) |
+| dbus-daemon system-bus/dbus-daemon gap mean (ms) | 24 | 178512.6405 | ±42.0% | carried (D33) |
+| dbus-daemon system-bus/dbus-daemon run mean (ms) | 24 | 0.1548 | ±9.3% | carried (D33) |
 
