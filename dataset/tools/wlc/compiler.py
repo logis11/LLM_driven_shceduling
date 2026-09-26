@@ -207,7 +207,9 @@ def _unbounded_loop(build, iid, seed, params, program, lifespan):
 #   - timer components (`components`): each comm's wakes are sampled from its
 #     measured gap quantiles over the whole lifetime, each wake's RUN from its
 #     run quantiles; cadence archetypes (`focus_components`) swap to the
-#     driven-phase components inside focus windows;
+#     driven-phase components inside focus windows; every component starts as
+#     a stream already running — at arrival, and at each focus window's or
+#     operation's start (9.5 D77);
 #   - replayed stimulus (`stimulus`): inside each focus window a contiguous
 #     slice of the named stream (dataset/stimulus/<stream>.jsonl) of the
 #     window's length, at an offset drawn from the seed; each input is an
@@ -254,17 +256,17 @@ def _heavy_events(heavy, seed, iid, t0, t1):
 
 
 def _component_events(components, seed, iid, t0, t1, tag):
+    """9.5 D77: each component over [t0, t1) — a task's lifetime, a focus window, an operation — is a stream already
+    running at t0: its first wake falls one forward-recurrence gap after t0, then gap after gap from its table."""
     events = []
     for index, comp in enumerate(components):
         key = (tag, index, comp["comm"])
-        t, k = t0, 0
-        while True:
-            t += sampling.sample(comp["gap"], seed, iid, *key, k, "gap")
-            if t >= t1:
-                break
+        t, k = t0 + sampling.sample_first_gap(comp["gap"], seed, iid, *key), 0
+        while t < t1:
             run = sampling.sample(comp["run"], seed, iid, *key, k, "run")
             events.append((t, run, "timer"))
             k += 1
+            t += sampling.sample(comp["gap"], seed, iid, *key, k, "gap")
     return events
 
 

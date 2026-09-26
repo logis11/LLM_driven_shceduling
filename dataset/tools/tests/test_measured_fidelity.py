@@ -67,6 +67,18 @@ def test_a_draw_at_a_tabulated_probability_is_that_quantile():
         assert sampling._quantile_sample(T, u) == q
 
 
+def test_a_running_streams_first_gap_is_the_forward_recurrence_of_its_table():
+    # the time from an arbitrary instant to the next wake of a stream already running: mean E[X²] / 2E[X], longer than
+    # the gap mean, since an arbitrary instant falls in a long gap more often than in a short one
+    # — a measured table, and a bare one sampled between its quantiles
+    n = 100_000
+    for table in (T, {k: T[k] for k in ("dist", "p")}):
+        draws = [sampling.sample_first_gap(table, 3, "first", i) for i in range(n)]
+        mean = sampling.mean_us(table)
+        assert sum(draws) / n == pytest.approx(_second_moment(table, 200_000) / (2 * mean), rel=0.02)
+        assert all(0 <= d <= max(table.get("max", 0), table["p"][-1]) for d in draws)
+
+
 def test_a_draw_stays_between_its_intervals_quantiles():
     edges = [0.0, *sampling.QUANTILE_PROBS, 1.0]
     bounds = [T["min"], *T["p"], T["max"]]
@@ -242,6 +254,26 @@ def test_every_component_set_compiles_at_its_measured_rate_and_cpu(repo_root):
         if abs(got_rate / rate - 1) > 0.05 or abs(got_cpu - cpu) > 4 * se + 0.01 * cpu:
             off.append(f"{aid} {where}: {got_rate:.4g} /s, CPU {got_cpu:.4g} against {rate:.4g} /s, "
                        f"CPU {cpu:.4g} ± {4 * se:.2g}")
+    assert not off, "\n".join(off)
+
+
+def test_every_component_compiles_at_its_measured_rate_over_a_timelines_length(repo_root):
+    # a task, focus window or operation starts its components as streams already running, so a span as short as a C1
+    # timeline (60 s) or one operation (its mean measured duration) holds the measured rate: over many instances of
+    # the span, the mean wake count within four standard errors of rate × span, plus 2 %
+    lib, off = _library(repo_root), []
+    for aid, where, comps in _component_sets(lib):
+        span_s = 60.0
+        if where.startswith("operations."):
+            span_s = sampling.mean_us(lib[aid]["params"]["operations"][where.split(".", 1)[1]]["duration"]) / 1e6
+        for c in comps:
+            expected = c["wakes_per_s"] * span_s
+            n = max(20, -(-20_000 // max(expected, 1e-9)))
+            counts = [len(_component_events([c], 13, f"short{i}", 0, int(span_s * 1e6), "short")) for i in range(int(n))]
+            mean = sum(counts) / n
+            se = (sum((x - mean) ** 2 for x in counts) / (n - 1) / n) ** 0.5
+            if abs(mean - expected) > 4 * se + 0.02 * expected:
+                off.append(f"{aid} {where} {c['comm']}: {mean / expected:.2f}× over {span_s:g} s (± {4 * se / expected:.1%})")
     assert not off, "\n".join(off)
 
 

@@ -117,6 +117,42 @@ def _quantile_sample(param, u, allow_zero=False):
     return floor(q[-1])
 
 
+def sample_first_gap(param, seed, *key):
+    """The first gap of a stream already running: the time from an arbitrary instant to its next wake, the forward
+    recurrence of a measured gap table (9.5 D77). An arbitrary instant falls in a gap with probability in proportion
+    to its length, and anywhere in it: the gap is drawn length-biased — its interval by mass × interval mean, then
+    inside the interval with density in proportion to x on the draw's curve — and the instant a uniform fraction into
+    it. On the curve lo + (hi − lo)·v**a, v uniform, the length-biased v has density (lo + (hi − lo)·v**a) / mean: v
+    uniform with probability lo / mean, else v**(a + 1) uniform. A table without extremes and means is uniform between
+    its quantiles and held at the end ones: the same curve, each interval's mean its midpoint."""
+    if param.get("dist") != "quantiles":
+        raise ValueError("a running stream's first gap needs a quantile table")
+    if "means" in param:
+        bounds, means = _interval(param)
+    else:
+        q = param["p"]
+        bounds = [q[0], *q, q[-1]]
+        means = [(lo + hi) / 2 for lo, hi in zip(bounds, bounds[1:])]
+    weights = [m * (b - a) for m, a, b in zip(means, _EDGES, _EDGES[1:])]
+    pick = uniform(seed, *key, "first", "interval") * sum(weights)
+    i = 0
+    while i < len(weights) - 1 and pick > weights[i]:
+        pick -= weights[i]
+        i += 1
+    lo, hi, mean = bounds[i], bounds[i + 1], means[i]
+    if hi <= lo or mean <= lo:
+        length = lo
+    elif mean >= hi:
+        length = hi
+    else:
+        a = (hi - lo) / (mean - lo) - 1
+        v = uniform(seed, *key, "first", "v")
+        if uniform(seed, *key, "first", "part") >= lo / mean:
+            v = v ** (1 / (a + 1))
+        length = lo + (hi - lo) * v ** a
+    return max(1, round(uniform(seed, *key, "first", "at") * length))
+
+
 def quantile_mean_us(param):
     """A table's mean: its interval means weighted by their mass, or, for a table without them, the mean of the
     piecewise-linear quantile function (trapezoids between the tabulated probabilities; the tails held flat)."""
