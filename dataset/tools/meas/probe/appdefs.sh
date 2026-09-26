@@ -157,6 +157,14 @@ PREFS
       setsid python3 "$TOOLS/smtp_peer.py" 2525 "$OUT/smtp.jsonl" > "$OUT/smtp.log" 2>&1 &
       echo $! > "$OUT/smtp.pid"; sleep 2
       rec smtp.peer "$(python3 -c 'import socket; s = socket.create_connection(("127.0.0.1", 2525), 5); print(s.recv(200).decode().strip())' 2>&1 | head -c 120)"
+      # 9.5 D79: the keys only, as soffice (D28), chrome (D65) and code (D72). The postlaunch leaves the compose window
+      # (x 0–860 of the 1280×800 screen) with focus in the empty To field; a click in the body (y 211–776) puts the keys
+      # there from the first one
+      KINDS="key"
+      POSTLAUNCH="$POSTLAUNCH; xdotool mousemove 430 495 click 1; sleep 1"
+      # the 136M phase types into the empty body, whatever the SWELL-KW window left — a click in the body, Ctrl+A (the
+      # body's text only) and Delete, as chrome's box (D62)
+      ALTPRELUDE="xdotool mousemove 430 495 click 1; sleep 1; xdotool key ctrl+a; sleep 1; xdotool key Delete; sleep 2"
       OP=send ;;
     gimp)
       apt_install gimp; ver gimp --version
