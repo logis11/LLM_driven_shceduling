@@ -183,7 +183,7 @@ Gap means are over each component's merged wake times, wrapped round the phase (
 
 - **When the exception was decided and where the campaign stopped** (D34, 2026-09-25; UTC). The campaign's last run, #22, was launched 2026-09-24 02:47; it was closed at 24 repeats at 05:55 (`55944a5`, "the rule holds, widest 3.7 %") on the values it carried then; D27's re-analysis by cause (10:56, `60c50ba`) moved three components off the rule and D29 carried them, so the exception followed values seen failing after the campaign had stopped, and no repeat was added. The projections then: 58 for pid 1's run mean, 96–138 for the system bus; now pid 1's run mean 99, the bus a sparse component (D33). Whether pid 1's run mean is re-measured at a count fixed in advance is 9.14's, after its sensitivity check.
 
-Full tables: `task-9.9-daemons-session/campaign/results/results.md`, `campaign/results/pooled.json`; the placement of D28, `campaign/results/within-run.json`; every job's model: `campaign/machine-draws.md`.
+Full tables: `task-9.9-daemons-session/campaign/results/results.md`, `campaign/results/pooled.json`; the placement of D28, re-read under D32's causes at D35, `campaign/results/within-run.json`; every job's model: `campaign/machine-draws.md`.
 
 ## Machine draws
 

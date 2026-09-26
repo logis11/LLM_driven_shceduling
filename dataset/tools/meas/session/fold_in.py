@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the four 9.9 archetype entries from the session campaign's pooled record (changelog D2–D7, D26–D30).
 
-  fold_in.py <pooled.json> <out.yaml>
+  fold_in.py <pooled.json> <out.yaml>     (reads `within-run.json` beside the pooled record)
 
 One entry per program of the Ubuntu desktop session, in 9.5's measured form: `components`, one per process instance
 and thread comm of the `steady` phase (D4, D6, D7), each with its `wakes_per_s` and its pooled `gap` and `run`
@@ -95,14 +95,15 @@ def component(comm, t, tab, indent="        "):
             f"{indent}  run: {yaml_table(tab['run_ms']['table'], TAG)}"]
 
 
-# D28: where the carried components' spread lies — within one run, the unpolled region of the long-phase probes 36,
-# 41 and 44 read under D27's causes, a window of the phase's 1800 s every 60 s, against across the 24 repeats; half
-# the range over the mean (`within_run.py`)
-WITHIN = {
-    "wireplumber/gmain": ("±17.2–17.6 %", "±18.8–28.8 %", "±3.2–8.4 %", "±20.9 %", "±22.3 %", "±14.2 %"),
-    "pid1/systemd": ("±4.3–9.6 %", "±4.6–9.5 %", "±10.4–18.2 %", "±8.2 %", "±8.0 %", "±31.0 %"),
-    "system-bus/dbus-daemon": ("±23.4–28.4 %", "±25.3–47.0 %", "±13.6–16.7 %", "±51.2 %", "±41.3 %", "±41.8 %"),
-}
+def within_figures(w):
+    """D28, D35: where a carried component's spread lies — `within_run.py`'s record beside the pooled one: within one
+    run, the unpolled region of the long-phase probes 36, 41 and 44 read under the pool's causes, a window of the
+    phase's 1800 s every 60 s, against across the 24 repeats; half the range over the mean. Its three values' ranges
+    within, then their spreads across."""
+    pct = lambda x: f"{x * 100:.1f}"
+    within = [[probe[label] for probe in w["within"].values()] for label in LABEL]
+    return (tuple(f"±{pct(min(v))}–{pct(max(v))} %" for v in within)
+            + tuple(f"±{pct(w['across'][label])} %" for label in LABEL))
 
 
 def split_list(prog, stab):
@@ -128,7 +129,7 @@ def fmt_value(v, label, unit=True):
     return (f"{v:.1f}" if label.startswith("gap") else f"{v:.3f}") + (" ms" if unit else "")
 
 
-def stability_text(prog, e, stab, k):
+def stability_text(prog, e, stab, k, within):
     ok, carried = split_list(prog, stab)
     text = ""
     if ok:
@@ -154,10 +155,9 @@ def stability_text(prog, e, stab, k):
                         f"laid end to end and wrapped round, the silent ones adding their time (9.5 D71), so the entry "
                         f"compiles at the rate it carries" if without else "")
                      + ", and is the entry's whole activity once the wakes owed to outside causes are out (D27, D32); "
-                       "its spread is the count's own, which the within-run test cannot place (D28's figures were read "
-                       "with the collector's wakes present). ")
+                       "its spread is the count's own, which the within-run test cannot place. ")
             continue
-        w = WITHIN[comp]
+        w = within_figures(within[f"{prog} {comp}"])
         text += (f"`{comp}`'s three values are carried together with their half-widths under 9.5 D57 as 9.8 D21 "
                  f"extended it (D28, D29): {'; '.join(parts)}. Within one run (the long-phase probes 36, 41 and 44, "
                  f"a window of the phase every 60 s) they move by {w[0]}, {w[1]} and {w[2]} of their mean, against "
@@ -203,7 +203,7 @@ def cron_text(e):
             f"repeat) left the components, which are read without them. ")
 
 
-def entry(prog, e, run):
+def entry(prog, e, run, within):
     comp = e["components"]
     k = len(e["repeats"])
     out = [f"  {IDS[prog]}:", "    category_source: meas", "    pattern:", "      program:",
@@ -235,7 +235,7 @@ def entry(prog, e, run):
     kth = [f["kernel"]["schedule_ins"] for f in foreign]
     scope = (f"One observation (phase decision 2; D8): {what.format(**versions)}, in {OBSERVED}; on {MACHINE}; {k} "
              f"same-machine repeats, every landing pooled. {STATE_NOT[prog]} {LIMITS} ")
-    scope += stability_text(prog, e, run["stability"], k)
+    scope += stability_text(prog, e, run["stability"], k, within)
     scope += causes_text(e, k)
     scope += cron_text(e)
     scope += (f"Foreign user-space work on the measured CPU {min(share) * 100:.5f}–{max(share) * 100:.4f} % of the "
@@ -283,9 +283,10 @@ def main():
     if not run["stability"]["passes"]:
         raise SystemExit("the stability rule does not hold on this pooled record")
     entries = run["phases"][PHASE]["entries"]
+    within = json.load(open(os.path.join(os.path.dirname(sys.argv[1]), "within-run.json")))
     blocks = [f"  # ---- session and system processes — 9.9 campaign ({TAG}) ----", ""]
     for prog in IDS:
-        blocks += [entry(prog, entries[prog], run), ""]
+        blocks += [entry(prog, entries[prog], run, within), ""]
     open(sys.argv[2], "w").write("\n".join(blocks))
     print(f"wrote {sys.argv[2]}: {len(IDS)} entries")
 

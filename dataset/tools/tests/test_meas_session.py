@@ -429,6 +429,26 @@ def test_the_fold_in_regenerates_the_four_entries_from_the_pooled_record(repo_ro
     assert "system-daemon" not in library
 
 
+def test_the_within_run_figures_are_read_from_the_record_beside_the_pool(repo_root, tmp_path):
+    # D28, D35: a carried component's within-run spreads are `within-run.json`'s, beside the pooled record
+    results = repo_root / "_dev" / "research" / "jioh" / "task-9.9-daemons-session" / "campaign" / "results"
+    (tmp_path / "pooled.json").write_text((results / "pooled.json").read_text())
+    within = json.loads((results / "within-run.json").read_text())
+    pid1 = within["systemd pid1/systemd"]
+    pid1["across"] = {"wakes/s": 0.111, "gap mean (ms)": 0.222, "run mean (ms)": 0.333}
+    for i, probe in enumerate(pid1["within"].values()):
+        probe.update({"wakes/s": 0.01 * (i + 1), "gap mean (ms)": 0.02 * (i + 1), "run mean (ms)": 0.03 * (i + 1)})
+    (tmp_path / "within-run.json").write_text(json.dumps(within))
+    out = tmp_path / "fold.yaml"
+    argv, sys.argv = sys.argv, ["fold_in.py", str(tmp_path / "pooled.json"), str(out)]
+    try:
+        fold_in.main()
+    finally:
+        sys.argv = argv
+    assert ("they move by ±1.0–3.0 %, ±2.0–6.0 % and ±3.0–9.0 % of their mean, against ±11.1 %, ±22.2 % and "
+            "±33.3 % across the repeats") in out.read_text()
+
+
 def _causes_case():
     """pid 1, the system bus (pid 400) and WirePlumber's worker (pid 531) as entries; php-fpm (pid 900) a runner
     service; the workflow's bash (pid 950) in the runner agent's unit; cron (pid 960)."""

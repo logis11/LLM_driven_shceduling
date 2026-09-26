@@ -271,3 +271,19 @@ Commit: this entry.
 By 인지오's decision, with 9.8 D28. The campaign's last run, #22, was launched 2026-09-24 02:47 UTC; the campaign was closed at 24 repeats at 05:55 (`55944a5`) on the values it carried then, every one within the tolerance; D27's re-analysis by cause (10:56, `60c50ba`) moved three components off the rule, and D29 carried them with their half-widths after the campaign had stopped, no repeat added. The projections then: 58 for pid 1's run mean, 96–138 for the system bus. Now pid 1's run mean is the one value under D29, projected 99; the bus is a sparse component (D33). Decision: D29 stands for pid 1's run mean and the record states the order; whether it is re-measured at a count fixed in advance follows 9.14's sensitivity check, the workflow's "No ceiling on repeats" reading as a bound on the design, not a demand to add repeats to a value whose spread follows the runner. Record: `measurement-campaign-record.md`, 9.9. No value changed by this entry.
 
 Commit: this entry.
+
+## D35 — D28's placement re-read under D32's causes (2026-09-26)
+
+By 인지오's decision, on the 2026-09-26 review of 9.5–9.9: `campaign/results/within-run.json`, D28's placement of the carried components, was written before D32 took sysstat's jobs out, so D29's ground for `pid1/systemd`'s run mean rested on figures read with the collector's wakes present. Re-read with `session/within_run.py` on the long-phase probes 36, 41 and 44 (downloaded from their runs; the artifacts expire 2026-12-22) under the pool's causes, a window of the phase's 1800 s every 60 s, half the range over the mean:
+
+| component | wakes a phase | value | within one run | across the 24 repeats |
+|---|---|---|---|---|
+| `wireplumber/gmain` | 2–12 | wake rate · gap mean · run mean | ±53.2–59.1 % · ±155.3–229.2 % · ±12.4–15.0 % | ±96.0 % · ±87.9 % · ±16.7 % |
+| `pid1/systemd` | 123–145 | wake rate · gap mean · run mean | ±4.4–9.9 % · ±4.7–9.7 % · ±12.5–25.0 % | ±8.3 % · ±8.1 % · ±39.2 % |
+| `system-bus/dbus-daemon` | 0–36 | wake rate · gap mean · run mean | ±23.3–55.0 % · ±32.2–87.3 % · ±9.4–11.8 % | ±174.2 % · ±178.2 % · ±91.9 % |
+
+D29 stands for pid 1: within one run its run mean moves by a third to two-thirds of its spread across the repeats. The audio server's worker and the system bus stay sparse components under D33.
+
+Tooling: `session/fold_in.py` reads `within-run.json` beside the pooled record in place of D28's figures written into it; the sparse components' scope no longer says D28's figures were read with the collector's wakes present. Test: `test_the_within_run_figures_are_read_from_the_record_beside_the_pool`. Values changed: none; `service-manager`'s scope states the re-read, `audio-server`'s and `message-bus`'s drop the parenthesis.
+
+Commit: this entry.
