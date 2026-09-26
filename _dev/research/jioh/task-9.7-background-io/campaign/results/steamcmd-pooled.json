@@ -387729,7 +387729,7 @@
      "a": 733528657.55,
      "b": 713529933.8499999,
      "ratio": 0.9727,
-     "reading": "not resolved",
+     "reading": "difference",
      "per_repeat": {
       "1": 0.9646,
       "2": 0.982,
@@ -387761,13 +387761,18 @@
       "30": 0.9612,
       "31": 0.9828,
       "34": 0.9632
-     }
+     },
+     "per_repeat_mean": 0.9754,
+     "interval": [
+      0.9702,
+      0.9807
+     ]
     },
     "untraced against traced: download duration": {
      "a": 775.5985000000001,
      "b": 769.739,
      "ratio": 0.9924,
-     "reading": "not resolved",
+     "reading": "difference",
      "per_repeat": {
       "1": 0.9895,
       "2": 0.9864,
@@ -387799,7 +387804,12 @@
       "30": 0.9897,
       "31": 0.9943,
       "34": 0.9905
-     }
+     },
+     "per_repeat_mean": 0.9912,
+     "interval": [
+      0.9878,
+      0.9946
+     ]
     }
    },
    "comparisons": {

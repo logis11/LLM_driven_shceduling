@@ -466,3 +466,18 @@ def test_a_difference_inside_the_precision_is_not_resolved():
     assert pool.compare(100.0, 104.0)["reading"] == "not resolved"
     assert pool.compare(100.0, 106.0)["reading"] == "difference"
     assert pool.compare(None, 1.0)["reading"] is None
+
+
+def test_a_check_is_read_against_the_interval_of_its_per_repeat_ratios():
+    # D36: a D15 check is a difference when the 95 % interval of its per-repeat ratios excludes 1. Ratios 0.97, 0.98,
+    # 0.975, 0.97, 0.98: mean 0.975, sd 0.005, interval 0.975 ± 2.776 · 0.005 / sqrt(5) = 0.9688–0.9812 — a 2.5 % shift
+    # in every repeat, which the ±5 % reading of a comparison would call not resolved
+    steady = {1: 0.97, 2: 0.98, 3: 0.975, 4: 0.97, 5: 0.98}
+    c = pool.check(100.0, 97.5, steady)
+    assert c["ratio"] == 0.975 and c["reading"] == "difference"
+    assert c["per_repeat_mean"] == 0.975 and c["interval"] == [0.9688, 0.9812]
+    assert pool.compare(100.0, 97.5)["reading"] == "not resolved"
+    # ratios straddling 1 do not resolve, however far the pooled medians' ratio sits from it
+    wide = {1: 0.9, 2: 1.1, 3: 0.95, 4: 1.05, 5: 1.0}
+    assert pool.check(100.0, 110.0, wide)["reading"] == "not resolved"
+    assert pool.check(None, 1.0, steady)["reading"] is None

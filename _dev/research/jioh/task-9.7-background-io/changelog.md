@@ -165,3 +165,14 @@ Each table's mean, before → after (the pooled sample's; the rule's mean of per
 Values changed: the six tables. **Hands to 9.14:** the demand moves (9.5 D71).
 
 Commit: this entry.
+
+## D36 — a D15 check is read against its own interval (2026-09-26)
+
+By 인지오's decision, on the 2026-09-26 review of 9.5–9.9. D15's two checks look for distortions of the campaign's own making, and D14's reporting rule read them as it reads a comparison of results — a difference inside the ± 5 % precision not resolved. That precision is the random error of a carried value's mean; a distortion shifts every repeat the same way, and the checks' per-repeat ratios measure it far more finely. SteamCMD's tracing check read "not resolved" at 0.9727 while 29 of its 30 per-repeat ratios sat below 1.
+
+- **A D15 check** is read against the 95 % t interval of its per-repeat ratios (k − 1 degrees of freedom, the stability rule's multiplier): a difference when the interval excludes 1 — written into the archetype's `modeling_notes` as a limitation of its values, as D15 has a larger one — and not resolved otherwise. The ratio of pooled medians is kept beside it.
+- **The comparisons** (warm against cold, first against repeat, shaped against unshaped, fresh against update) keep D14's reading.
+
+The checks re-read from the per-repeat ratios the pooled records hold. `game-download`: without `perf trace` the program spends 0.9754 of the CPU (95 % interval 0.9702–0.9807) and 0.9912 of the time (0.9878–0.9946) — both differences, where both read not resolved; stated in its `modeling_notes` as the tracing's cost, about 2.5 % more CPU under the carried values, where in the runs it lands not measured. `file-archiver`: CPU per byte at one thread 0.9308 of the eight-thread run (0.9109–0.9507), a difference as before and as its notes state (D23); the per-wake run and wait, whose repeats fall into D23's two modes, not resolved (they read "difference" on the ratio of medians) — D23 already reports them by mode, not by one ratio. Tooling: `check` in `background/pool.py` (the D15 checks; `compare` stays the comparisons'), the results pages' check lines with the interval. Test: `test_a_check_is_read_against_the_interval_of_its_per_repeat_ratios`. Method §9, 2026-09-26. Values changed: none; `game-download`'s notes.
+
+Commit: this entry.

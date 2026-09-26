@@ -154,9 +154,9 @@ command s {1: 5253.633, 2: 4981.545, 3: 5413.129, 4: 4956.569, 5: 5173.491, 6: 4
 
 ### Checks (D15)
 
-- mmt1 against mmt8: CPU per byte: 0.9339 — difference (per repeat {1: 0.9098, 2: 0.9406, 3: 0.925, 4: 0.9612, 5: 0.9137, 6: 0.9346})
-- mmt1 against mmt8: run per wake: 1.3607 — difference (per repeat {1: 1.6496, 2: 1.7067, 3: 0.5004, 4: 0.5904, 5: 0.8362, 6: 1.6686})
-- mmt1 against mmt8: wait per wake: 6.8647 — difference (per repeat {1: 28.0595, 2: 27.549, 3: 0.0347, 4: 0.0352, 5: 0.0378, 6: 32.1475})
+- mmt1 against mmt8: CPU per byte: 0.9339 — difference (per-repeat mean 0.9308, 95 % interval 0.9109–0.9507; per repeat {1: 0.9098, 2: 0.9406, 3: 0.925, 4: 0.9612, 5: 0.9137, 6: 0.9346})
+- mmt1 against mmt8: run per wake: 1.3607 — not resolved (per-repeat mean 1.1586, 95 % interval 0.5536–1.7637; per repeat {1: 1.6496, 2: 1.7067, 3: 0.5004, 4: 0.5904, 5: 0.8362, 6: 1.6686})
+- mmt1 against mmt8: wait per wake: 6.8647 — not resolved (per-repeat mean 14.6439, 95 % interval -2.2353–31.5232; per repeat {1: 28.0595, 2: 27.549, 3: 0.0347, 4: 0.0352, 5: 0.0378, 6: 32.1475})
 
 ### Comparisons (results only)
 

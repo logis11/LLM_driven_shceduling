@@ -40696,13 +40696,18 @@
       "4": 0.9612,
       "5": 0.9137,
       "6": 0.9346
-     }
+     },
+     "per_repeat_mean": 0.9308,
+     "interval": [
+      0.9109,
+      0.9507
+     ]
     },
     "mmt1 against mmt8: run per wake": {
      "a": 1206.0,
      "b": 1641.0,
      "ratio": 1.3607,
-     "reading": "difference",
+     "reading": "not resolved",
      "per_repeat": {
       "1": 1.6496,
       "2": 1.7067,
@@ -40710,13 +40715,18 @@
       "4": 0.5904,
       "5": 0.8362,
       "6": 1.6686
-     }
+     },
+     "per_repeat_mean": 1.1586,
+     "interval": [
+      0.5536,
+      1.7637
+     ]
     },
     "mmt1 against mmt8: wait per wake": {
      "a": 11415.0,
      "b": 78360.0,
      "ratio": 6.8647,
-     "reading": "difference",
+     "reading": "not resolved",
      "per_repeat": {
       "1": 28.0595,
       "2": 27.549,
@@ -40724,7 +40734,12 @@
       "4": 0.0352,
       "5": 0.0378,
       "6": 32.1475
-     }
+     },
+     "per_repeat_mean": 14.6439,
+     "interval": [
+      -2.2353,
+      31.5232
+     ]
     }
    },
    "comparisons": {

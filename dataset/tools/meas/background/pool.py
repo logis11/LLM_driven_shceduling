@@ -209,6 +209,18 @@ def compare(a, b):
     return {"a": a, "b": b, "ratio": round(r, 4), "reading": "not resolved" if abs(r - 1) <= TOLERANCE else "difference"}
 
 
+def check(a, b, per_repeat):
+    """A D15 check, b against a: the pooled medians' ratio, and the reading by the check's own interval (D36) — a
+    difference when the 95 % t interval of the per-repeat ratios excludes 1, not resolved otherwise."""
+    out = {**compare(a, b), "per_repeat": per_repeat}
+    r = [v for v in per_repeat.values() if v is not None]
+    if out["ratio"] is None or len(r) < 2:
+        return {**out, "reading": None if out["ratio"] is None else "not resolved"}
+    m, hw = statistics.fmean(r), t975(len(r)) * statistics.stdev(r) / len(r) ** 0.5
+    return {**out, "per_repeat_mean": round(m, 4), "interval": [round(m - hw, 4), round(m + hw, 4)],
+            "reading": "difference" if not m - hw <= 1 <= m + hw else "not resolved"}
+
+
 def ratio_by_repeat(num, den):
     return {r: (round(num[r] / den[r], 4) if num.get(r) and den.get(r) else None) for r in sorted(set(num) & set(den))}
 
@@ -319,16 +331,16 @@ def checks(app, entry, per):
             nb = {k: int(per[k]["kv"].get("set.bytes") or 0) or None for k in entry["repeats"]}
             cpb_a = {k: (v / nb[k] if v and nb.get(k) else None) for k, v in a["program_cpu_us"].items()}
             cpb_b = {k: (v / nb[k] if v and nb.get(k) else None) for k, v in b["program_cpu_us"].items()}
-            out["mmt1 against mmt8: CPU per byte"] = {**compare(median_of(cpb_a), median_of(cpb_b)), "per_repeat": ratio_by_repeat(cpb_b, cpb_a)}
+            out["mmt1 against mmt8: CPU per byte"] = check(median_of(cpb_a), median_of(cpb_b), ratio_by_repeat(cpb_b, cpb_a))
             for key, label in (("run_us", "run per wake"), ("wait_us", "wait per wake")):
-                out[f"mmt1 against mmt8: {label}"] = {**compare(a["all"][key]["p50"], b["all"][key]["p50"]),
-                                                      "per_repeat": ratio_by_repeat(b["all"][key]["repeat_p50"], a["all"][key]["repeat_p50"])}
+                out[f"mmt1 against mmt8: {label}"] = check(a["all"][key]["p50"], b["all"][key]["p50"],
+                                                           ratio_by_repeat(b["all"][key]["repeat_p50"], a["all"][key]["repeat_p50"]))
     if app == "steamcmd":
         a, b = ph.get("steam-fresh-shaped", {}), ph.get("steam-fresh-untraced", {})
         if a and b and not a.get("missing") and not b.get("missing"):
             for key, label in (("program_taskstats_cpu_us", "CPU total (exit accounting)"), ("cmd_wall_s", "download duration")):
-                out[f"untraced against traced: {label}"] = {**compare(median_of(a[key]), median_of(b[key])),
-                                                           "per_repeat": ratio_by_repeat(b[key], a[key])}
+                out[f"untraced against traced: {label}"] = check(median_of(a[key]), median_of(b[key]),
+                                                                ratio_by_repeat(b[key], a[key]))
     return out
 
 
@@ -435,7 +447,9 @@ def render(out):
         if E["checks"]:
             L += ["### Checks (D15)", ""]
             for q, c in E["checks"].items():
-                L.append(f"- {q}: {c['ratio']} — {c['reading']} (per repeat {c['per_repeat']})")
+                own = (f"per-repeat mean {c['per_repeat_mean']}, 95 % interval {c['interval'][0]}–{c['interval'][1]}; "
+                       if c.get("interval") else "")
+                L.append(f"- {q}: {c['ratio']} — {c['reading']} ({own}per repeat {c['per_repeat']})")
             L.append("")
         if E["comparisons"]:
             L += ["### Comparisons (results only)", ""]

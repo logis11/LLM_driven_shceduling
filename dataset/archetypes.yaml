@@ -1200,6 +1200,11 @@ archetypes:
       against the committed token bucket the same download's network wait is 43 % higher, its bytes per wake 35 %
       higher and its run per wake 17 % higher, a far larger effect than 9.5 D23's stimulus sensitivity (+1 % to
       +12 %), so the queue discipline moves this archetype more than the choice of recording moved those.
+      Tracing cost (D15 (b), D36), a stated limitation of these values: they come from the phase run under `perf
+      trace`, which records every socket read and write; beside it the same install without it spends 0.975 of the
+      program's CPU (95 % interval 0.970-0.981 over 30 repeats, 29 of them below 1) and takes 0.991 of the time
+      (0.988-0.995), so the carried runs are read under about 2.5 % more CPU than the untraced program spends. Where
+      in the runs the added CPU lands is not measured.
 
   # ---- structural-special family — harvested from LAVD --------------------
 
