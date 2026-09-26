@@ -67,6 +67,32 @@ BUILD_BOUND = {
 
 APPROX_BY = {"video-player": ["gamescope"], "audio-player": ["spotify"], "video-call": ["zoom"]}
 
+# D75: where each playback archetype's medium cycle starts, as the scope states it (the rule itself: pool.py CYCLES)
+CYCLE_START = {
+    "video-player": ("frame", "each frame copy — a run of 1 ms or more by the video output thread `vo`, 30.0 a second"),
+    "audio-player": ("audio", "the first wake of the audio output thread `ao` after 5 ms of silence"),
+    "video-call": ("audio-frame", "each wake of the audio worker thread `utility/AudioWorkerThre`, once per 10 ms audio frame"),
+}
+MASSES = (0.01, 0.04, 0.05, 0.15, 0.25, 0.25, 0.15, 0.05, 0.04, 0.009, 0.001)   # the eleven intervals of a D17 table
+
+
+def table_mean(table):
+    """A pooled table's mean: the interval means weighted by their masses (9.5 D71), the sample's own mean."""
+    return sum(m * x for m, x in zip(MASSES, table["means"]))
+
+
+def share_above(table, x):
+    """The share of a pooled table's samples above x, read off its knots (minimum, ten quantiles, maximum) with straight
+    lines between them — how many of a periodic job's cycles carry more work than the period itself (D75)."""
+    knots = [table["min"], *table["p"], table["max"]]
+    probs = [0.0, 0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999, 1.0]
+    if x >= knots[-1]:
+        return 0.0
+    for (a, pa), (b, pb) in zip(zip(knots, probs), zip(knots[1:], probs[1:])):
+        if a <= x < b:
+            return 1.0 - (pa + (pb - pa) * (x - a) / (b - a))
+    return 1.0
+
 
 def rng(vals, nd=4):
     return f"{min(vals):.{nd}f}–{max(vals):.{nd}f}"
@@ -147,8 +173,8 @@ def entry(aid, spec, d):
     observed = observed.replace("{version}", build_census(d.get("version")))   # D69: the census, a mix stated
     out = [f"  {aid}:", "    category_source: meas", "    pattern:", "      program:"]
     if kind == "play":
-        out += ["        - loop:                    # measured timer components merged at compile time (D9, D16)",
-                "            - TIMER: tick", "            - RUN: event"]
+        out += ["        - loop:                    # one periodic job per medium cycle, its deadline the next cycle's start (D74, D75)",
+                "            - TIMER: period", "            - RUN: cycle_run"]
     else:
         out += ["        - loop:                    # merged event stream, explicit at compile time (D9): replayed stimulus in focus windows (D18) + timer components (D16)",
                 "            - WAIT: input", "            - RUN: event"]
@@ -161,7 +187,13 @@ def entry(aid, spec, d):
         out.append("      stimulus:")
         kinds = ", kinds: [key]" if aid in KEYS_ONLY else ""   # D28, D65: the events the measurement replayed
         out.append(f"        {{stream: {stream}{kinds}, sampling: per-task, source: \"{stim_tag}\"}}")
-    out += components_block(ph_idle, tag, "components")
+    if kind == "play":   # D75: the period is the cycles' mean length, the run each cycle's whole-tree CPU
+        cyc = ph_idle["cycle"]
+        out.append(f"      period: {{dist: constant, value_us: {round(table_mean(cyc['length_ms']['table']) * 1000)}, "
+                   f"sampling: per-task, source: \"{tag}\"}}")
+        out.append(f"      cycle_run: {dist(cyc['work_ms'], tag)}")
+    else:
+        out += components_block(ph_idle, tag, "components")
     out += heavy_events_block(ph_idle, tag)
     if kind == "cadence":
         out += components_block(d["phases"]["driven"], tag, "focus_components")
@@ -191,6 +223,10 @@ def entry(aid, spec, d):
     if kind == "input":
         pi = d["phases"]["driven"]["per_input"]
         stats.append(f"input_run p50 ms per repeat {pi['window']['run_ms_minus_idle']['repeat_p50']}")
+    if kind == "play":   # D75: the cycle's length and work, each repeat's mean
+        cyc = ph_idle["cycle"]
+        stats.append(f"cycle length ms per repeat {rng(cyc['length_ms']['repeat_mean'], 3)}")
+        stats.append(f"cycle run ms per repeat {rng(cyc['work_ms']['repeat_mean'], 4)}")
     out.append("      stats: [" + ", ".join(json.dumps(x) for x in stats) + "]")
     out.append("      scope: >-")
     # D26: the machine and kernel are the pooled repeats' own records (spec.json), one CPU model per observation
@@ -217,8 +253,24 @@ def entry(aid, spec, d):
                       f"the archetype carries SWELL-KW. ")
     elif kind == "cadence":
         scope += "Stimulus: a scripted pointer loop (design); no per-input run exists, the driven cadence is carried as focus_components. "
-    else:
-        scope += "No stimulus; the play phase's thread cadence is the whole behaviour. "
+    else:   # D74, D75: one periodic job per medium cycle, read off the trace
+        cyc = ph_idle["cycle"]
+        what, start = CYCLE_START[aid]
+        period_ms = table_mean(cyc['length_ms']['table'])
+        scope += (f"No stimulus. One periodic job per {what} cycle (D74, D75): a cycle starts at {start}; the period is the "
+                  f"mean interval between starts, {period_ms:.3f} ms over {sum(cyc['cycles']):,} cycles; "
+                  f"each job's run is the process tree's whole CPU from one start to the next, drawn per cycle from its "
+                  f"measured table, and its deadline is the next cycle's start (period-implicit, liu-jacm73 (A2)). The "
+                  f"deadline is the cycle's, not the output device's: an audio server buffers ahead of the device (PulseAudio "
+                  f"up to 2 s by default, 9.5 search record S2), so a late cycle is not by itself an audible gap or a dropped frame. ")
+        over = share_above(cyc["work_ms"]["table"], period_ms)
+        if over >= 0.001:   # measured load, not a compile effect: these jobs miss with the task alone on the CPU
+            scope += (f"In about {over * 100:.1f} % of cycles the tree's own work exceeds the period"
+                      + (" — the call's saturation episodes, one CPU busy for about 30 s every 240 s (D54) —" if aid == "video-call" else "")
+                      + " so those jobs miss even with the task alone on the CPU. ")
+        if aid == "video-call":
+            scope += ("The call's video path — compositing at about 16.7 ms and the 30 fps frames — has no job of its own; its "
+                      "CPU runs inside the audio frames' cycles. ")
     scope += "Values are this software on this machine, not desktop truth (D10)."
     if aid in BUILD_BOUND:   # D69: what the pinned or recorded build leaves out of the archetype
         scope += " " + BUILD_BOUND[aid]
@@ -232,9 +284,14 @@ def entry(aid, spec, d):
     notes += (". A component is its process's role and the thread comm together (D67), so one comm naming a thread of "
               "several processes — chrome's Chrome_ChildIOT runs in the GPU process and in each utility process — is "
               "several components; a single-process tree's components carry the comm alone")
-    notes += (". Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the "
-              "task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled "
-              "residual stands for the comms below the coverage cut.")
+    if kind == "play":
+        notes += (". The threads' own wakes are not carried one by one: the tree's CPU is summed per medium cycle into one run "
+                  "per job (D75), so the compiled task wakes once per cycle; the per-thread tables stay in the pooled record.")
+    else:
+        notes += (". Timer components are per thread comm (D16), each sampled from its measured gap and run quantiles (D17) over the "
+                  "task's lifetime and merged, with the input wakes, into one explicit event stream at compile time (D9); the pooled "
+                  "residual stands for the comms below the coverage cut. Each timer wake is a WAIT on the task's timer channel, "
+                  "woken at its sampled absolute time, with no deadline (D74).")
     if kind == "input":
         notes += (f" Input wakes: a contiguous slice of {stream} equal to each focus window, at a seed-drawn offset (D18); "
                   "the slice preserves the recording's burst-and-pause structure.")

@@ -212,9 +212,12 @@ def _unbounded_loop(build, iid, seed, params, program, lifespan):
 #     slice of the named stream (dataset/stimulus/<stream>.jsonl) of the
 #     window's length, at an offset drawn from the seed; each input is an
 #     exogenous wake on the task's input channel with a RUN from `input_run`.
-# Timer wakes compile to TIMER steps whose periods chain from the previous
-# timer deadline (drift-free absolute times, contract §3); input wakes to
-# WAIT steps plus `wake` events, as before.
+# Timer wakes compile to WAIT steps on the task's timer channel, each woken by a
+# `wake` event at its sampled absolute time, with no deadline (9.5 D74); input
+# wakes to WAIT steps on the input channel plus `wake` events, as before.
+# A periodic archetype (`period`, `cycle_run`: the playback and call entries,
+# 9.5 D75) compiles to one TIMER step per medium cycle over the lifetime, each
+# followed by its cycle's run — TIMER carries a period with a deadline only.
 
 _STREAMS = {}
 
@@ -265,11 +268,30 @@ def _component_events(components, seed, iid, t0, t1, tag):
     return events
 
 
+def _periodic_unroll(build, seed, iid, params, t0, t1):
+    """9.5 D75: one job per medium cycle — TIMER(period) at arrival + k·period over the lifetime (contract §3's absolute
+    grid, tick 0 consumed at arrival), each followed by its cycle's run drawn from the measured per-cycle table."""
+    period = sampling.sample(params["period"], seed, iid, "period", 0)
+    t, k = t0, 0
+    while t < t1:
+        build.program.append({"op": "TIMER", "period_us": period})
+        run = sampling.sample(params["cycle_run"], seed, iid, "cycle", k, allow_zero=True)
+        if run:
+            build.program.append({"op": "RUN", "us": run})
+            build.demand_us += run
+        t += period
+        k += 1
+
+
 def _measured_unroll(build, timeline, task, iid, params, wakes):
     seed = timeline.seed
     channel = f"input:{iid}"
+    timer_channel = f"timer:{iid}"
     t0 = task["arrive"]
     t1 = task["depart"] or timeline.duration_us
+    if "cycle_run" in params:
+        _periodic_unroll(build, seed, iid, params, t0, t1)
+        return
     windows = [w for w in timeline.focus if w["task"] == task["id"]]
     # operations (spec decisions 8–9): a window from the authored start for a duration drawn from the measured
     # table; inside it the operation's components replace whatever is active and no input wake is emitted
@@ -318,15 +340,10 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
                 events.append((t, run, "input"))
                 k += 1
     events.sort(key=lambda e: (e[0], e[2] != "timer"))
-    last_deadline = t0
     for t, run, kind in events:
-        if kind == "timer":
-            period = max(1, t - last_deadline)
-            last_deadline += period
-            build.program.append({"op": "TIMER", "period_us": period})
-        else:
-            wakes.append((t, iid, channel))
-            build.program.append({"op": "WAIT", "channel": channel})
+        wake_channel = timer_channel if kind == "timer" else channel   # D74: a timer wake carries no deadline
+        wakes.append((t, iid, wake_channel))
+        build.program.append({"op": "WAIT", "channel": wake_channel})
         if run:   # a zero input_run is measured, not missing: the input woke the task and cost no CPU (D48)
             build.program.append({"op": "RUN", "us": run})
             build.demand_us += run

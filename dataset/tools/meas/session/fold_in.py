@@ -207,8 +207,8 @@ def entry(prog, e, run):
     comp = e["components"]
     k = len(e["repeats"])
     out = [f"  {IDS[prog]}:", "    category_source: meas", "    pattern:", "      program:",
-           "        - loop:                    # measured timer components merged at compile time (9.5 D9, D16)",
-           "            - TIMER: tick", "            - RUN: event", "    params:", "      components:"]
+           "        - loop:                    # measured timer components merged at compile time, each wake on the task's timer channel (9.5 D9, D16, D74)",
+           "            - WAIT: timer", "            - RUN: event", "    params:", "      components:"]
     for comm in comp["selected"]:
         out += component(comm, e["threads"][comm], e["tables"][comm])
     if comp["residual"]:

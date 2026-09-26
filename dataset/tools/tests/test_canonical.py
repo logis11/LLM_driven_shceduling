@@ -64,25 +64,29 @@ def test_count_expansion(fixture_path, library):
                  and e["id"].startswith("renderers.")]
     assert len(renderers) == 3
     assert all(e["name"] == "chrome" for e in renderers)
-    # a measured archetype compiles to an explicit event stream per instance (9.5 D9): each instance draws its own
-    streams = {tuple(i.get("period_us") or i.get("us") for i in event["program"]) for event in renderers}
+    # a measured archetype compiles to an explicit event stream per instance (9.5 D9): each instance draws its own —
+    # its timer wakes are wake events on its own timer channel (D74), its runs in its program
+    streams = {(tuple(i.get("us") for i in event["program"]),
+                tuple(w["t"] for w in canonical["events"] if w["op"] == "wake" and w["target"] == event["id"]))
+               for event in renderers}
     assert len(streams) == 3  # per-instance draws differ across the expansion
 
 
 def test_focus_wakes_inside_windows(fixture_path, library):
     timeline, canonical, _ = compiled(fixture_path, library,
                                       "fx-mixed.timeline.yaml")
-    wake_events = [e for e in canonical["events"] if e["op"] == "wake"]
-    assert wake_events, "focused interactive task must receive input wakes"
+    wake_events = [e for e in canonical["events"] if e["op"] == "wake" and e["target"] == "editor"]
+    inputs = [e for e in wake_events if e["channel"] == "input:editor"]
+    assert inputs, "focused interactive task must receive input wakes"
     windows = [(w["from"], w["to"]) for w in timeline.focus]
-    for event in wake_events:
-        assert event["target"] == "editor"
-        assert event["channel"] == "input:editor"
+    for event in inputs:
         assert any(lo <= event["t"] < hi for lo, hi in windows)
+    # every other wake is a timer wake on the task's own timer channel (9.5 D74)
+    assert {e["channel"] for e in wake_events} <= {"input:editor", "timer:editor"}
     editor = next(e for e in canonical["events"]
                   if e["op"] == "arrive" and e["id"] == "editor")
     waits = [i for i in editor["program"] if i["op"] == "WAIT"]
-    assert len(waits) == len(wake_events)  # one WAIT per input wake (timer wakes are TIMER steps, 9.5 D9)
+    assert len(waits) == len(wake_events)  # one WAIT per wake, input or timer
 
 
 def test_demand_estimate(fixture_path, library):

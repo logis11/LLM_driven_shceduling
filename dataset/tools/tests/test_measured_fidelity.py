@@ -246,6 +246,22 @@ def test_every_component_set_compiles_at_its_measured_rate_and_cpu(repo_root):
 
 
 
+def test_every_periodic_archetype_carries_its_measured_cpu(repo_root):
+    # 9.5 D75: a periodic job's run is its cycle's whole-tree CPU, so the run table's mean over the period is the play
+    # phase's CPU share, inside the range its repeats measured
+    periodic = 0
+    for aid, a in _library(repo_root).items():
+        p = a.get("params") or {}
+        if "cycle_run" not in p:
+            continue
+        periodic += 1
+        share = sampling.mean_us(p["cycle_run"]) / p["period"]["value_us"]
+        stat = next(s for s in a["validation_stats"]["stats"] if s.startswith("play cpu-share"))
+        lo, hi = (float(x) for x in stat.split()[-1].split("\u2013"))
+        assert lo <= share <= hi, f"{aid}: {share:.5f} outside {lo}–{hi}"
+    assert periodic == 3   # audio-player, video-player, video-call
+
+
 def test_the_linter_checks_a_tables_extremes_means_and_the_replayed_kinds(tmp_path, repo_root):
     from wlc.linter import lint_repo
     lib = yaml.safe_load((repo_root / "dataset" / "archetypes.yaml").read_text())

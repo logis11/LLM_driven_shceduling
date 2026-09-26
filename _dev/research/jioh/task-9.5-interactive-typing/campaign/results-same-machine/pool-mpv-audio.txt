@@ -1,20 +1,7 @@
 mpv-audio: repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]; stability rule holds
    play CPU share: k 31, half-width 0.0479, passes
-   play mpv wakes/s: k 31, half-width 0.0014, passes
-   play mpv gap mean (ms): k 31, half-width 0.0014, passes
-   play mpv run mean (ms): k 31, half-width 0.0452, passes
-   play demux wakes/s: k 31, half-width 0.0031, passes
-   play demux gap mean (ms): k 31, half-width 0.0031, passes
-   play demux run mean (ms): k 31, half-width 0.0426, passes
-   play ao wakes/s: k 31, half-width 0.0043, passes
-   play ao gap mean (ms): k 31, half-width 0.0043, passes
-   play ao run mean (ms): k 31, half-width 0.0493, passes
-   play lua/osc wakes/s: k 31, half-width 0.0079, passes
-   play lua/osc gap mean (ms): k 31, half-width 0.0078, passes
-   play lua/osc run mean (ms): k 31, half-width 0.042, passes
-   play residual wakes/s: k 31, half-width 0.0008, passes
-   play residual gap mean (ms): k 31, half-width 0.0008, passes
-   play residual run mean (ms): k 31, half-width 0.0269, passes
+   play cycle length mean (ms): k 31, half-width 0.0002, passes
+   play cycle work mean (ms): k 31, half-width 0.0479, passes
    phases ['play']; pooled record _dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine/pool-mpv-audio.json
 validity:
    r1: ok

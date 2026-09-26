@@ -65,6 +65,14 @@ SESSION_SPREAD = {("code", "idle utility/libuv-worker"),
 # at no fixed time (9 in 20 sessions × 600 s) against its regular runs of at most 11.5 ms; (app, phase) -> (comm, run floor
 # in ms, the floor being design between the two). The event's runs leave the component rows, so the residual converges.
 HEAVY_EVENTS = {("chrome", "idle"): ("MemoryInfra", 30.0)}
+# D75: a periodic job per medium cycle — each cycle's start read off a reference thread of the trace, its work the process
+# tree's whole CPU from one start to the next (W2), its period the mean interval (P1); (app, phase) -> (component, rule,
+# value, spacing): `silence_ms` starts a cycle at the reference's first wake after that silence, `min_run_ms` at each of
+# its wakes with a run of at least that length; a start closer than `spacing` ms to the one before it is not a new cycle
+CYCLES = {("mpv-audio", "play"): ("ao", "silence_ms", 5.0, 0.0),                   # one ao cluster per ~49.6 ms audio cycle
+          # the frame copy: one run of 1 ms or more per frame, a second one inside half a frame (16.7 ms) the same frame's
+          ("mpv-video", "play"): ("vo", "min_run_ms", 1.0, 16.7),
+          ("webrtc", "play"): ("utility/AudioWorkerThre", "silence_ms", 5.0, 0.0)}  # one wake per 10 ms audio frame
 FOCUS_COMPONENTS = {"gimp", "kdenlive"}  # fold_in.py's pointer-loop archetypes carry the driven phase as focus_components
 # D38: a component keyed by the thread's name with a trailing " #<n>" removed — Gecko names a pool's threads
 # "<pool> #<n>", n counting up per spawn (nsThreadPoolNaming::GetNextThreadName), so each pool is one component
@@ -80,6 +88,34 @@ def split_events(app, phase, rows):
     comm, floor = spec
     heavy = lambda r: r.comm == comm and r.run >= floor
     return [r for r in rows if not heavy(r)], [(r.t_in, r.run) for r in rows if heavy(r)]
+
+
+def cycle_windows(app, phase, rows, segments, roles):
+    """D75: the phase's medium cycles — their starts from the reference component's wakes (`CYCLES`), each cycle's work
+    the sum of the tree's segment runs (ms) that start inside it, and its length (ms); None where no cycle is declared."""
+    import bisect
+    spec = CYCLES.get((app, phase))
+    if not spec:
+        return None
+    comm, rule, value, spacing = spec
+    ref = sorted((r.t_in, r.run) for r in rows
+                 if component_name(roles.get(r.pid, "main"), component_key(app, r.comm)) == comm)
+    if rule == "silence_ms":
+        found = [t for i, (t, _) in enumerate(ref) if i == 0 or t - ref[i - 1][0] > value / 1000]
+    else:
+        found = [t for t, run in ref if run >= value]
+    starts = []
+    for t in found:
+        if not starts or t - starts[-1] >= spacing / 1000:
+            starts.append(t)
+    seg = sorted((s.t_in, s.run) for s in segments)
+    times = [t for t, _ in seg]
+    work, length = [], []
+    for a, b in zip(starts, starts[1:]):
+        i, j = bisect.bisect_left(times, a), bisect.bisect_left(times, b)
+        work.append(sum(run for _, run in seg[i:j]))
+        length.append((b - a) * 1000)
+    return {"comm": comm, "rule": rule, "value": value, "spacing_ms": spacing, "work_ms": work, "length_ms": length}
 
 
 def build_census(version):
@@ -134,6 +170,10 @@ def criterion(app, entry):
         + (["op"] if ph.get("op", {}).get("operation") else [])
     for p in carried:
         if p not in ph:
+            continue
+        if ph[p].get("cycle"):   # D75: a periodic job carries its cycle's length and work, not the phase's components
+            add(f"{p} cycle length mean (ms)", ph[p]["cycle"]["length_ms"]["repeat_mean"], ABS_FLOOR_MS)
+            add(f"{p} cycle work mean (ms)", ph[p]["cycle"]["work_ms"]["repeat_mean"], ABS_FLOOR_MS)
             continue
         sel = ph[p]["components"]
         comps = [(c, ph[p]["threads"][c]) for c in sel["selected"] if ph[p]["threads"][c]["gap_ms"]["q"] is not None]
@@ -332,6 +372,7 @@ def main():
                 segments = [tuple(w) for w in op["windows"]] if op else [(pd["t0"], pd["t0"] + pd["span"])]
                 comms = phase_comms(app, phase_rows, pd.get("roles") or {}, segments)
                 slim["phases"][phase] = {"span": phase_span, "segments": segments, "comms": comms, "per_input": pd.get("per_input"),
+                                         "cycle": None if op else cycle_windows(app, phase, pd["rows"], pd["segments"], pd.get("roles") or {}),
                                          "events": None if events is None else [(t - pd["t0"], x) for t, x in events],
                                          "operation": {"name": op["name"], "durations_ms": op["durations_ms"],
                                                        "n_ok": op["n_ok"], "n_failed": op["n_failed"]} if op else None}
@@ -370,6 +411,13 @@ def main():
                     "cpu_share": [round(sum(c["runs"].get(r, [])) / 1000 / spans[r], 4) for r in preps],
                     "gap_ms": summary([c["gaps"].get(r, []) for r in preps]),
                     "run_ms": summary([c["runs"].get(r, []) for r in preps])}
+            cyc = {r: raws[r]["phases"][phase]["cycle"] for r in preps}
+            if all(cyc.values()):   # D75: the medium's cycles, their length and work pooled as tables
+                c0 = cyc[preps[0]]
+                ph["cycle"] = {"reference": {"comm": c0["comm"], c0["rule"]: c0["value"], "spacing_ms": c0["spacing_ms"]},
+                               "cycles": [len(cyc[r]["work_ms"]) for r in preps],
+                               "length_ms": summary([cyc[r]["length_ms"] for r in preps]),
+                               "work_ms": summary([cyc[r]["work_ms"] for r in preps])}
             if HEAVY_EVENTS.get((app, phase)):   # D64: the heavy event, stated with its counts
                 comm, floor = HEAVY_EVENTS[(app, phase)]
                 ev = {r: raws[r]["phases"][phase]["events"] or [] for r in preps}

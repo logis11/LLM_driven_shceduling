@@ -33,9 +33,11 @@ class Library:
 
     def is_measured(self, archetype_id):
         """True iff the entry is a measured archetype (9.5 fold-in): its params
-        carry timer `components` (D16) and/or a replayed `stimulus` (D18)."""
+        carry timer `components` (D16), a replayed `stimulus` (D18), or a
+        measured per-cycle run (`cycle_run`, D75)."""
         params = self.entries[archetype_id].get("params") or {}
-        return "components" in params or "stimulus" in params or "focus_components" in params or "operations" in params
+        return ("components" in params or "stimulus" in params or "focus_components" in params or "operations" in params
+                or "cycle_run" in params)
 
     def operations(self, archetype_id):
         """The measured operations of an archetype (9.5 follow-ups spec, decision 8): name -> {duration, components}."""

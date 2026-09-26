@@ -1,6 +1,7 @@
 """Measured archetypes (9.5 fold-in): the quantiles distribution (D17), the
-merged event stream (D9, D16), the replayed stimulus (D18) and the linter's
-checks on components and stimulus."""
+merged event stream (D9, D16) with its timer wakes on the task's timer channel
+(D74), the periodic playback jobs (D75), the replayed stimulus (D18) and the
+linter's checks on components and stimulus."""
 
 import json
 
@@ -44,18 +45,16 @@ def test_measured_task_is_one_explicit_stream(tmp_path, library):
     canonical, report = compile_timeline(Timeline(path, library), library, "single", rel_path="fx")
     arrive = next(e for e in canonical["events"] if e["op"] == "arrive")
     ops = [step["op"] for step in arrive["program"]]
-    assert set(ops) <= {"TIMER", "WAIT", "RUN"} and ops.count("RUN") == ops.count("TIMER") + ops.count("WAIT")
-    # timer periods chain to absolute deadlines inside the lifetime
-    deadline = 0
-    for step in arrive["program"]:
-        if step["op"] == "TIMER":
-            assert step["period_us"] >= 1
-            deadline += step["period_us"]
-    assert deadline < 20_000_000
-    # input wakes only inside the focus window, one per WAIT
+    # 9.5 D74: no TIMER — a timer wake is a WAIT on the task's timer channel, woken at its absolute time
+    assert set(ops) <= {"WAIT", "RUN"} and ops.count("RUN") <= ops.count("WAIT")
     wakes = [e for e in canonical["events"] if e["op"] == "wake"]
     assert len(wakes) == ops.count("WAIT") > 0
-    assert all(2_000_000 <= w["t"] < 12_000_000 for w in wakes)
+    waits = [s["channel"] for s in arrive["program"] if s["op"] == "WAIT"]
+    assert set(waits) == {"timer:ed", "input:ed"}
+    timer = [w["t"] for w in wakes if w["channel"] == "timer:ed"]
+    assert timer and all(0 <= t < 20_000_000 for t in timer)
+    # input wakes only inside the focus window
+    assert all(2_000_000 <= w["t"] < 12_000_000 for w in wakes if w["channel"] == "input:ed")
     assert report["per_task"]["ed"] == sum(s["us"] for s in arrive["program"] if s["op"] == "RUN")
 
 
@@ -66,7 +65,7 @@ def test_stimulus_slice_preserves_recorded_gaps(tmp_path, library):
                                  "arrive": "0s", "depart": "20s"}],
                      [{"from": "0s", "to": "20s", "task": "ed"}])
     canonical, _ = compile_timeline(Timeline(path, library), library, "single", rel_path="fx")
-    wakes = sorted(e["t"] for e in canonical["events"] if e["op"] == "wake")
+    wakes = sorted(e["t"] for e in canonical["events"] if e["op"] == "wake" and e["channel"] == "input:ed")
     gaps = {b - a for a, b in zip(wakes, wakes[1:])}
     stream = [json.loads(l)["t_us"] for l in open(library.path.parent / "stimulus" / "swell-outlook-c23.jsonl")]
     recorded = {b - a for a, b in zip(stream, stream[1:])}
@@ -87,13 +86,9 @@ def test_cadence_archetype_swaps_components_in_focus(tmp_path, library):
                                  "arrive": "0s", "depart": "20s"}],
                      [{"from": "5s", "to": "15s", "task": "px"}])
     canonical, _ = compile_timeline(Timeline(path, library), library, "single", rel_path="fx")
-    arrive = next(e for e in canonical["events"] if e["op"] == "arrive")
-    assert not [e for e in canonical["events"] if e["op"] == "wake"]  # scripted stimulus: no input wakes
-    deadlines, t = [], 0
-    for step in arrive["program"]:
-        if step["op"] == "TIMER":
-            t += step["period_us"]; deadlines.append(t)
-    assert deadlines and all(5_000_000 <= d < 15_000_000 for d in deadlines)  # GIMP idles silently outside focus
+    wakes = [e for e in canonical["events"] if e["op"] == "wake"]
+    assert not [w for w in wakes if w["channel"] != "timer:px"]  # scripted stimulus: no input wakes
+    assert wakes and all(5_000_000 <= w["t"] < 15_000_000 for w in wakes)  # GIMP idles silently outside focus
 
 
 def test_playback_archetype_runs_the_whole_lifetime(tmp_path, library):
@@ -101,8 +96,12 @@ def test_playback_archetype_runs_the_whole_lifetime(tmp_path, library):
                                  "arrive": "0s", "depart": "20s"}], [])
     canonical, report = compile_timeline(Timeline(path, library), library, "single", rel_path="fx")
     arrive = next(e for e in canonical["events"] if e["op"] == "arrive")
+    # 9.5 D75: one periodic job per frame — TIMER at the measured period over the lifetime, each with its cycle's run
+    period = library.entry("video-player")["params"]["period"]["value_us"]
     timers = [s for s in arrive["program"] if s["op"] == "TIMER"]
-    assert 20 * 600 < len(timers) < 20 * 1000  # ≈ 790 wakes/s measured
+    assert {s["period_us"] for s in timers} == {period} and len(timers) == -(-20_000_000 // period)
+    assert not [e for e in canonical["events"] if e["op"] == "wake"]
+    assert report["per_task"]["v"] == sum(s["us"] for s in arrive["program"] if s["op"] == "RUN")
 
 
 def test_linter_checks_components_and_stimulus(tmp_path, repo_root):
@@ -152,15 +151,10 @@ def test_operation_replaces_components_for_its_measured_duration(tmp_path, repo_
     assert tl.operations == [{"at": 5_000_000, "task": "g", "name": "unsharp-mask"}]
     canonical, report = compile_timeline(tl, lib, "single", rel_path="fx")
     arrive = next(e for e in canonical["events"] if e["op"] == "arrive")
-    # walk the program: timer deadlines chain; count wakes inside the operation's window vs. an equal window before it
-    t, inside, before = 0, 0, 0
-    for step in arrive["program"]:
-        if step["op"] == "TIMER":
-            t += step["period_us"]
-            if 5_000_000 <= t < 5_900_000:
-                inside += 1
-            elif 3_000_000 <= t < 3_900_000:
-                before += 1
+    # count timer wakes inside the operation's window vs. an equal window before it
+    timer = [e["t"] for e in canonical["events"] if e["op"] == "wake" and e["channel"] == "timer:g"]
+    inside = sum(1 for t in timer if 5_000_000 <= t < 5_900_000)
+    before = sum(1 for t in timer if 3_000_000 <= t < 3_900_000)
     # the operation's worker component wakes every ~0.3 ms; the focus components of image-editor wake far less often
     assert inside > 5 * max(before, 1)
     ops_report = report["operations"]["g"]

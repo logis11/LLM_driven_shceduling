@@ -234,8 +234,8 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 | `thunderbird-send` | 43 | 75 | 9 | 36 | yes |
 | `gimp` | 5 | 10 | 0 | 5 | yes |
 | `kdenlive` | 20 | 22 | 0 | 20 | yes |
-| `mpv-video` | 24 | 16 | 0 | 24 | yes |
-| `mpv-audio` | 31 | 16 | 0 | 31 | yes |
+| `mpv-video` | 24 | 3 | 0 | 10 | yes |
+| `mpv-audio` | 31 | 3 | 0 | 29 | yes |
 
 ### `soffice`
 
@@ -374,40 +374,14 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
 | play CPU share | 24 | 0.1218 | 6.8% | ±2.9% | 1.1% | 10 | yes |
-| play vo wakes/s | 24 | 310.158 | 11.7% | ±5.0% | 1.1% | 24 | yes |
-| play vo gap mean (ms) | 24 | 3.2651 | 11.4% | ±4.9% | 1.2% | 23 | yes |
-| play vo run mean (ms) | 24 | 0.2728 | 11.4% | ±4.9% | 1.1% | 23 | yes |
-| play mpv wakes/s | 24 | 234.993 | 2.6% | ±1.1% | 0.4% | 5 | yes |
-| play mpv gap mean (ms) | 24 | 4.2584 | 2.7% | ±1.2% | 0.4% | 5 | yes |
-| play mpv run mean (ms) | 24 | 0.1395 | 10.3% | ±4.4% | 1.7% | 19 | yes |
-| play demux wakes/s | 24 | 146.7057 | 0.7% | ±0.3% | 0.1% | 5 | yes |
-| play demux gap mean (ms) | 24 | 6.8167 | 0.8% | ±0.3% | 0.1% | 5 | yes |
-| play demux run mean (ms) | 24 | 0.0092 | 8.2% | ±3.5% | 1.1% | 5 | yes |
-| play lua/osc wakes/s | 24 | 106.6356 | 2.9% | ±1.2% | 0.4% | 5 | yes |
-| play lua/osc gap mean (ms) | 24 | 9.385 | 2.8% | ±1.2% | 0.4% | 5 | yes |
-| play lua/osc run mean (ms) | 24 | 0.0314 | 10.8% | ±4.6% | 1.0% | 21 | yes |
-| play residual wakes/s | 24 | 33.661 | 2.0% | ±0.8% | 0.3% | 5 | yes |
-| play residual gap mean (ms) | 24 | 29.7192 | 2.0% | ±0.9% | 0.3% | 5 | yes |
-| play residual run mean (ms) | 24 | 0.0219 | 8.9% | ±3.8% | 1.4% | 15 | yes |
+| play cycle length mean (ms) | 24 | 33.3479 | 0.0% | ±0.0% | 0.0% | 5 | yes |
+| play cycle work mean (ms) | 24 | 4.0624 | 6.8% | ±2.9% | 1.1% | 10 | yes |
 
 ### `mpv-audio`
 
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
 | play CPU share | 31 | 0.0071 | 12.8% | ±4.8% | 0.7% | 29 | yes |
-| play mpv wakes/s | 31 | 70.3796 | 0.4% | ±0.1% | 0.0% | 5 | yes |
-| play mpv gap mean (ms) | 31 | 14.2088 | 0.4% | ±0.1% | 0.0% | 5 | yes |
-| play mpv run mean (ms) | 31 | 0.0467 | 12.0% | ±4.5% | 0.7% | 26 | yes |
-| play demux wakes/s | 31 | 53.9951 | 0.8% | ±0.3% | 0.1% | 5 | yes |
-| play demux gap mean (ms) | 31 | 18.5214 | 0.8% | ±0.3% | 0.1% | 5 | yes |
-| play demux run mean (ms) | 31 | 0.0126 | 11.3% | ±4.3% | 0.7% | 11 | yes |
-| play ao wakes/s | 31 | 44.3692 | 1.1% | ±0.4% | 0.1% | 5 | yes |
-| play ao gap mean (ms) | 31 | 22.541 | 1.1% | ±0.4% | 0.1% | 5 | yes |
-| play ao run mean (ms) | 31 | 0.0229 | 13.1% | ±4.9% | 0.8% | 31 | yes |
-| play lua/osc wakes/s | 31 | 37.3351 | 2.1% | ±0.8% | 0.2% | 5 | yes |
-| play lua/osc gap mean (ms) | 31 | 26.7957 | 2.1% | ±0.8% | 0.2% | 5 | yes |
-| play lua/osc run mean (ms) | 31 | 0.0549 | 11.2% | ±4.2% | 0.6% | 22 | yes |
-| play residual wakes/s | 31 | 2.0264 | 0.2% | ±0.1% | 0.0% | 5 | yes |
-| play residual gap mean (ms) | 31 | 493.4792 | 0.2% | ±0.1% | 0.0% | 5 | yes |
-| play residual run mean (ms) | 31 | 0.0287 | 7.1% | ±2.7% | 0.7% | 11 | yes |
+| play cycle length mean (ms) | 31 | 49.6354 | 0.1% | ±0.0% | 0.0% | 5 | yes |
+| play cycle work mean (ms) | 31 | 0.3524 | 12.8% | ±4.8% | 0.7% | 29 | yes |
 

@@ -167,7 +167,7 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 |---|---|---|---|---|---|
 | `code` | 44 | 29 | 2 | 29 | yes |
 | `chrome` | 38 | 48 | 1 | 15 | yes |
-| `webrtc` | 45 | 46 | 5 | 45 | yes |
+| `webrtc` | 45 | 3 | 0 | 7 | yes |
 
 ### `code`
 
@@ -261,49 +261,6 @@ Criterion: for every value the fold-in carries, each table by its per-repeat mea
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
 | play CPU share | 45 | 0.2371 | 5.1% | ±1.6% | 0.3% | 7 | yes |
-| play renderer/WebRTC_W_and_N wakes/s | 45 | 501.6936 | 5.1% | ±1.6% | 0.4% | 7 | yes |
-| play renderer/WebRTC_W_and_N gap mean (ms) | 45 | 1.9985 | 5.3% | ±1.7% | 0.4% | 7 | yes |
-| play renderer/WebRTC_W_and_N run mean (ms) | 45 | 0.0316 | 12.7% | ±4.0% | 0.6% | 29 | yes |
-| play renderer/Chrome_ChildIOT wakes/s | 45 | 273.5702 | 2.0% | ±0.6% | 0.1% | 5 | yes |
-| play renderer/Chrome_ChildIOT gap mean (ms) | 45 | 3.6568 | 2.0% | ±0.6% | 0.1% | 5 | yes |
-| play renderer/Chrome_ChildIOT run mean (ms) | 45 | 0.0217 | 7.3% | ±2.3% | 0.4% | 11 | yes |
-| play renderer/ThreadPoolForeg wakes/s | 45 | 191.5266 | 4.2% | ±1.3% | 0.3% | 6 | yes |
-| play renderer/ThreadPoolForeg gap mean (ms) | 45 | 5.23 | 4.0% | ±1.3% | 0.3% | 6 | yes |
-| play renderer/ThreadPoolForeg run mean (ms) | 45 | 0.7156 | 4.2% | ±1.3% | 0.2% | 6 | yes |
-| play utility/AudioProcessing wakes/s | 45 | 124.8057 | 17.0% | ±5.3% | 1.1% | 51 | no |
-| play utility/AudioProcessing gap mean (ms) | 45 | 8.2034 | 14.2% | ±4.4% | 0.8% | 36 | yes |
-| play utility/AudioProcessing run mean (ms) | 45 | 0.129 | 16.7% | ±5.2% | 0.9% | 49 | no |
-| play renderer/AudioOutputDevi wakes/s | 45 | 115.1479 | 14.3% | ±4.5% | 0.9% | 37 | yes |
-| play renderer/AudioOutputDevi gap mean (ms) | 45 | 8.8279 | 11.6% | ±3.6% | 0.7% | 24 | yes |
-| play renderer/AudioOutputDevi run mean (ms) | 45 | 0.0636 | 16.7% | ±5.2% | 0.9% | 49 | no |
-| play utility/Chrome_ChildIOT wakes/s | 45 | 107.7851 | 0.9% | ±0.3% | 0.1% | 5 | yes |
-| play utility/Chrome_ChildIOT gap mean (ms) | 45 | 9.2785 | 0.9% | ±0.3% | 0.1% | 5 | yes |
-| play utility/Chrome_ChildIOT run mean (ms) | 45 | 0.0826 | 15.0% | ±4.7% | 0.8% | 40 | yes |
-| play utility/AudioWorkerThre wakes/s | 45 | 100.0005 | 0.0% | ±0.0% | 0.0% | 5 | yes |
-| play utility/AudioWorkerThre gap mean (ms) | 45 | 9.9999 | 0.0% | ±0.0% | 0.0% | 5 | yes |
-| play utility/AudioWorkerThre run mean (ms) | 45 | 0.0716 | 9.6% | ±3.0% | 0.8% | 17 | yes |
-| play renderer/AudioInputDevic wakes/s | 45 | 100.0004 | 0.0% | ±0.0% | 0.0% | 5 | yes |
-| play renderer/AudioInputDevic gap mean (ms) | 45 | 9.9999 | 0.0% | ±0.0% | 0.0% | 5 | yes |
-| play renderer/AudioInputDevic run mean (ms) | 45 | 0.0254 | 18.6% | ±5.8% | 1.9% | 61 | no |
-| play utility/FakeAudioInput wakes/s | 45 | 99.9997 | 0.0% | ±0.0% | 0.0% | 5 | yes |
-| play utility/FakeAudioInput gap mean (ms) | 45 | 10.0 | 0.0% | ±0.0% | 0.0% | 5 | yes |
-| play utility/FakeAudioInput run mean (ms) | 45 | 0.0244 | 15.4% | ±4.8% | 0.8% | 42 | yes |
-| play gpu/VizCompositorTh wakes/s | 45 | 96.923 | 2.1% | ±0.7% | 0.1% | 5 | yes |
-| play gpu/VizCompositorTh gap mean (ms) | 45 | 10.3221 | 2.1% | ±0.7% | 0.2% | 5 | yes |
-| play gpu/VizCompositorTh run mean (ms) | 45 | 0.1138 | 10.9% | ±3.4% | 0.6% | 21 | yes |
-| play renderer/VideoFrameCompo wakes/s | 45 | 89.3144 | 4.5% | ±1.4% | 0.3% | 6 | yes |
-| play renderer/VideoFrameCompo gap mean (ms) | 45 | 11.2205 | 4.9% | ±1.5% | 0.4% | 7 | yes |
-| play renderer/VideoFrameCompo run mean (ms) | 45 | 0.0617 | 12.6% | ±3.9% | 0.6% | 28 | yes |
-| play gpu/Chrome_ChildIOT wakes/s | 45 | 60.8193 | 12.3% | ±3.8% | 0.9% | 27 | yes |
-| play gpu/Chrome_ChildIOT gap mean (ms) | 45 | 16.7576 | 15.9% | ±5.0% | 1.4% | 45 | yes |
-| play gpu/Chrome_ChildIOT run mean (ms) | 45 | 0.0185 | 11.4% | ±3.6% | 0.5% | 20 | yes |
-| play utility/chrome wakes/s | 45 | 59.479 | 1.5% | ±0.5% | 0.1% | 5 | yes |
-| play utility/chrome gap mean (ms) | 45 | 16.8164 | 1.5% | ±0.5% | 0.1% | 5 | yes |
-| play utility/chrome run mean (ms) | 45 | 0.1355 | 13.2% | ±4.1% | 0.7% | 31 | yes |
-| play renderer/chrome wakes/s | 45 | 56.71 | 3.7% | ±1.2% | 0.2% | 5 | yes |
-| play renderer/chrome gap mean (ms) | 45 | 17.6581 | 3.8% | ±1.2% | 0.2% | 5 | yes |
-| play renderer/chrome run mean (ms) | 45 | 0.0394 | 7.5% | ±2.4% | 0.4% | 12 | yes |
-| play residual wakes/s | 45 | 74.61 | 3.5% | ±1.1% | 0.2% | 5 | yes |
-| play residual gap mean (ms) | 45 | 13.42 | 3.6% | ±1.1% | 0.2% | 5 | yes |
-| play residual run mean (ms) | 45 | 0.0878 | 16.1% | ±5.0% | 0.7% | 46 | no |
+| play cycle length mean (ms) | 45 | 10.0015 | 0.0% | ±0.0% | 0.0% | 5 | yes |
+| play cycle work mean (ms) | 45 | 2.3713 | 5.1% | ±1.6% | 0.3% | 7 | yes |
 
