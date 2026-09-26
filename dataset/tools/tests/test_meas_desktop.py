@@ -417,12 +417,16 @@ def test_an_interrupted_artifact_download_leaves_nothing_behind_and_does_not_blo
     assert (dest / "report.json").exists()
 
 
-def test_the_steam_client_components_carried_between_sessions():
-    # changelog D23: steamwebhelper's and ThreadPoolForeg's gap means carried with their half-widths under 9.5 D57
-    wild = _comp([70.0] * 5, [29.0, 29.0, 42.0, 29.0, 41.0], [0.05] * 5)
-    q = pool.criterion("steam", _entry({"steamwebhelper": wild}, phase="shown"))
-    assert q["quantities"]["shown steamwebhelper gap mean (ms)"]["carried"] is True and q["passes"] is True
-    assert pool.criterion("steam", _entry({"steam": wild}, phase="shown"))["passes"] is False
+def test_the_steam_client_carries_no_component_between_sessions():
+    # changelog D26: over merged wake times steamwebhelper's and ThreadPoolForeg's gap means hold the rule, so of D23's
+    # two components carried between sessions only steamwebhelper's run mean stays carried, under D18
+    wild_gap = _comp([70.0] * 5, [29.0, 29.0, 42.0, 29.0, 41.0], [0.05] * 5)
+    q = pool.criterion("steam", _entry({"steamwebhelper": wild_gap}, phase="shown"))
+    assert q["quantities"]["shown steamwebhelper gap mean (ms)"]["carried"] is False and q["passes"] is False
+    wide_run = _comp([70.0] * 5, [29.0] * 5, [0.068, 0.047, 0.049, 0.065, 0.062])
+    c = pool.criterion("steam", _entry({"steamwebhelper": wide_run}, phase="shown"))["quantities"]
+    run = c["shown steamwebhelper run mean (ms)"]
+    assert run["excepted"] is True and run["session_spread"] is False and run["carried"] is True
 
 
 def test_every_landing_of_an_index_that_landed_twice_is_pooled(tmp_path):

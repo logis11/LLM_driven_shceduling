@@ -78,8 +78,7 @@ WITHIN = {("chrome-hidden", "Chrome_ChildIOT"): "±17.7 % (D24)",
           ("chrome-visible", "Chrome_ChildIOT"): "±18.6 % (D20)",
           ("chrome-visible", "ThreadPoolForeg"): "barely present in the probe (D20)",
           ("chrome-hidden", "Compositor"): "±10.8 % (D26)", ("chrome-hidden", "PerfettoTrace"): "±10.8 % (D26)",
-          ("chrome-hidden", "ThreadPoolServi"): "±10.8 % (D26)", ("chrome-visible", "PerfettoTrace"): "±4.0 % (D26)",
-          ("steam", "steamwebhelper"): "gap mean ±0.1 % (D22)", ("steam", "ThreadPoolForeg"): "gap mean ±1.7 % (D22)"}
+          ("chrome-hidden", "ThreadPoolServi"): "±10.8 % (D26)", ("chrome-visible", "PerfettoTrace"): "±4.0 % (D26)"}
 
 # D27: the renderer residuals are sparse — a few wakes per renderer per phase — so the within-run test (D26 re-read
 # them on the probes) cannot place their spread; why, per entry, from D26's re-read.
@@ -214,15 +213,12 @@ def entry(app, e):
             across = f"±{(max(wr) - min(wr)) / 2 / statistics.fmean(wr) * 100:.1f} %" if statistics.fmean(wr) else "—"
             where = f"; within one run {w}, its wake rate across the repeats {across}" if w else ""
             parts.append(f"`{comm}` " + ", ".join(texts) + where)
-        law = {"chrome-hidden": "D21, D24, D26", "chrome-visible": "D21, D26", "steam": "D23"}[app]
+        law = {"chrome-hidden": "D21, D24, D26", "chrome-visible": "D21, D26"}[app]
         scope += (f"Components whose rate varies between sessions, their values carried together (9.5 D57; {law}): "
                   + "; ".join(parts) + ". ")
         if renderer:
             per = [statistics.fmean(values_of(ph, comm, "wakes/s")) * statistics.fmean(ph["span_s"]) for comm in session]
             scope += f"These threads wake {min(per):.1f}–{max(per):.1f} times per renderer per 600 s phase. "
-        if app == "steam":
-            scope += ("`steamwebhelper` carries 23.6 % of the client's wakes and its gap table is identical through "
-                      "its 99th percentile in every repeat, the mean moved by a handful of gaps past it (D22). ")
     if sparse:
         parts = []
         for comm, texts in sparse.items():

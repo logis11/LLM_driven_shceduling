@@ -838,7 +838,7 @@ archetypes:
       run: "desktop:2026-09-20, repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], runs 35506882547, 35508871434, 35510066832, 35592897185, 35593348663"
       stats: ["shown wakes/s 298.0720\u2013301.9720", "shown cpu-share 0.01301\u20130.01755"]
       scope: >-
-        One observation (phase decision 2; D10): the Steam desktop client, build 1788652215 (steam-installer), logged out — no account is used, and none may be (D6) — its window shown; launch-settle 900 s (D15), a 600 s shown phase, under Xvfb with openbox so the window can be minimised; on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure), the subject pinned to one CPU and the harness, page server and homeserver pinned away from it, perf sched record on that CPU; 12 same-machine repeats, every landing pooled (D24). Not covered: a client that is logged in, holds a library, downloads, or runs behind a game — the state the gaming timelines depict (D6). Stability rule: every value on the list holds within 5 % or 1 µs except these, carried over the repeats obtained with their half-widths and ranges. Run means whose spread is the runner's speed, every thread of a repeat moving together while wake rates hold (D17, D18): `steam` run mean 0.0555 ms ±10.2 % (0.044–0.068 ms); `IPC:CSteamEngin` run mean 0.0573 ms ±8.8 % (0.047–0.068 ms); `CJobMgr::m_Work` run mean 0.0176 ms ±6.2 % (0.015–0.02 ms); `VizCompositorTh` run mean 0.0819 ms ±5.5 % (0.066–0.089 ms); `CHTTPClientThre` run mean 0.0312 ms ±46.0 % (0.014–0.064 ms). Components whose rate varies between sessions, their values carried together (9.5 D57; D23): `steamwebhelper` run mean 0.0696 ms ±5.3 % (0.063–0.082 ms); within one run gap mean ±0.1 % (D22), its wake rate across the repeats ±0.4 %. `steamwebhelper` carries 23.6 % of the client's wakes and its gap table is identical through its 99th percentile in every repeat, the mean moved by a handful of gaps past it (D22). Measured beside it, shown against minimised (D5): wake rate 299.325 against 244.398 (1.225×), the comparison D5 rests on; the CPU share ratio, 1.259×, is reported with its spread and no effect rests on it (D18). Values are this software on this machine, not desktop truth (9.5 D10).
+        One observation (phase decision 2; D10): the Steam desktop client, build 1788652215 (steam-installer), logged out — no account is used, and none may be (D6) — its window shown; launch-settle 900 s (D15), a 600 s shown phase, under Xvfb with openbox so the window can be minimised; on a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure), the subject pinned to one CPU and the harness, page server and homeserver pinned away from it, perf sched record on that CPU; 12 same-machine repeats, every landing pooled (D24). Not covered: a client that is logged in, holds a library, downloads, or runs behind a game — the state the gaming timelines depict (D6). Stability rule: every value on the list holds within 5 % or 1 µs except these, carried over the repeats obtained with their half-widths and ranges. Run means whose spread is the runner's speed, every thread of a repeat moving together while wake rates hold (D17, D18): `steamwebhelper` run mean 0.0696 ms ±5.3 % (0.063–0.082 ms); `steam` run mean 0.0555 ms ±10.2 % (0.044–0.068 ms); `IPC:CSteamEngin` run mean 0.0573 ms ±8.8 % (0.047–0.068 ms); `CJobMgr::m_Work` run mean 0.0176 ms ±6.2 % (0.015–0.02 ms); `VizCompositorTh` run mean 0.0819 ms ±5.5 % (0.066–0.089 ms); `CHTTPClientThre` run mean 0.0312 ms ±46.0 % (0.014–0.064 ms). Measured beside it, shown against minimised (D5): wake rate 299.325 against 244.398 (1.225×), the comparison D5 rests on; the CPU share ratio, 1.259×, is reported with its spread and no effect rests on it (D18). Values are this software on this machine, not desktop truth (9.5 D10).
     modeling_notes: >-
       Per-application archetype (9.5 D2): one task carries the whole process tree merged (9.5 D14). Timer components are per thread comm (9.5 D16), each sampled from its measured gap and run quantiles (9.5 D17) over the task's lifetime and merged into one explicit event stream at compile time (9.5 D9); the pooled residual stands for the comms below the coverage cut. No focus_components and no stimulus: the state is unattended by construction (D10).
 
@@ -962,8 +962,8 @@ archetypes:
       run: "build:2026-09-18, repeats [4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], runs 35328071379, 35328873409, 35337322204, 35426065936, 35430430817, 35434872927, 35439345618, 35443899531, 35448942696, 35453727742, 35459121647, 35464371497, 35469642365"
       stats: ["2 857 six-member object jobs per build in every repeat",
               "child order sh: gcc fixdep rm; gcc: cc1 as, 2 857 each",
-              "cc1 CPU per process mean 435.0 ms (+-0.78 %)",
-              "step CPU half-widths +-0.7 to 1.4 %",
+              "cc1 step CPU mean 439.1 ms (+-0.78 %)",
+              "step CPU half-widths +-0.6 to 2.0 %",
               "cc1 wakes once in 99.3 % of jobs; sh 5-7 times, gcc 4-7"]
       scope: >-
         One observation (phase decision 2; D3, D30): the object jobs of the same warm `-j8` linux-6.6 defconfig
@@ -1010,7 +1010,7 @@ archetypes:
       referee: meas-ci
       run: "build:2026-09-18, repeats [4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18], runs 35328071379, 35328873409, 35337322204, 35426065936, 35430430817, 35434872927, 35439345618, 35443899531, 35448942696, 35453727742, 35459121647, 35464371497, 35469642365"
       stats: ["dispatch run per job p50 676 us, mean 691 us (+-0.94 %)",
-              "5 957 forks under 716 make processes per build",
+              "5 957 forks under 719 make processes per build",
               "5 254 jobs per build: 2 908 object, 681 archive, 1 537 helper, 90 probe, 38 link",
               "live jobs at cap 8: mean 7.87, peak 11"]
       scope: >-
@@ -1028,12 +1028,12 @@ archetypes:
       `nproc` rule applied to an eight-thread desktop, overridable at binding time (D4); on one lane it shapes
       fork-storm width and queue depth, not throughput. The `dkms` binding describes an out-of-tree kbuild run,
       checked structurally in every repeat: a DKMS module build runs the same six-member chain with its driver
-      named `gcc-13`, three object jobs at `-j1`, `cc1` 288 ms per process against the kernel build's 349 ms
+      named `gcc-13`, three object jobs at `-j1`, `cc1` 288 ms per process against the kernel build's 365 ms (medians)
       (D6, D9). What no observation covers is a real module's object count and a real run's duration; both bind
       in the timeline (9.10). Unmodelled per build: 681 archive, 1 537 helper, 90 probe and 38 link jobs under
-      716 make processes, together under 3 % of the build's CPU, their proportions kbuild's for this tree (D9).
+      719 make processes, together under 3 % of the build's CPU, their proportions kbuild's for this tree (D9).
       `spawn_count` was bound when a spawn-table entry was one process of about 89 ms; a job is now six processes
-      of about 471 ms, and the counts are 9.10's to resize (D30, 2026-09-20).
+      of about 453 ms, and the counts are 9.10's to resize (D30, 2026-09-20).
 
   # ---- file and download jobs — 9.7 background campaign -----------------------
 

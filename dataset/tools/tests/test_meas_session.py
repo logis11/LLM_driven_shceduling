@@ -492,3 +492,11 @@ def test_a_wake_is_classed_by_its_cause_traced_through_the_trace():
     assert by_t[40.0] == ("outside", "job sysstat-collect (sysstat)")
     assert "job sysstat-collect (sysstat)" not in tally.get("desktop", {})
     assert tally["own"]["idle CPU (timer or interrupt)"] == 1
+
+
+def test_the_results_page_names_the_exception_that_carries_each_value():
+    # D29 carries pid 1's run mean, its spread the machine's; D33 the sparse components' values
+    assert pool.verdict({"passes": True}) == "yes"
+    assert pool.verdict({"passes": False, "carried": True, "sparse": False}) == "carried (D29)"
+    assert pool.verdict({"passes": False, "carried": True, "sparse": True}) == "carried (D33)"
+    assert pool.verdict({"passes": False, "carried": False}) == "no"

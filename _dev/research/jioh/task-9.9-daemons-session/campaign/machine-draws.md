@@ -2,12 +2,12 @@
 
 Every `meas-session.yml` job of the 9.9 session campaign and the model it drew, from each job's own `report.json` (`machine.model`, `gate`). A hosted runner guarantees a shape, not a processor, and the campaign holds one model — the AMD EPYC 7763 — so a job on any other stops before measuring and is not a repeat (campaign workflow, 9.6 D11).
 
-**38 of 77 jobs drew the EPYC 7763** (49.4 %), beside the 26 of 56 the 9.6 campaign recorded, the 22 of 45 of the released 9.5 campaign and the 55 of 96 of 9.8's. Of the 42 jobs in `full` mode, 24 landed on the model and were pooled and 18 were stopped by the gate; the rest of the jobs are the tooling's dry runs and the long-phase probes, neither of them a repeat.
+**39 of 77 jobs drew the EPYC 7763** (50.6 %), beside the 26 of 56 the 9.6 campaign recorded, the 22 of 45 of the released 9.5 campaign and the 55 of 96 of 9.8's. Of the 42 jobs in `full` mode, 24 landed on the model and were pooled and 18 were stopped by the gate; the rest of the jobs are the tooling's dry runs and the long-phase probes, neither of them a repeat.
 
 | model | jobs |
 |---|---|
-| AMD EPYC 7763 64-Core Processor | 38 |
-| AMD EPYC 9V74 80-Core Processor | 17 |
+| AMD EPYC 7763 64-Core Processor | 39 |
+| AMD EPYC 9V74 80-Core Processor | 16 |
 | INTEL(R) XEON(R) PLATINUM 8573C | 8 |
 | Intel(R) Xeon(R) 6973P-C | 7 |
 | AMD EPYC 9V45 96-Core Processor | 5 |
@@ -30,7 +30,7 @@ Every `meas-session.yml` job of the 9.9 session campaign and the model it drew, 
 | 35795764108 | 24 | dry | open | AMD EPYC 9V74 80-Core Processor |
 | 35795764108 | 25 | dry | open | AMD EPYC 9V74 80-Core Processor |
 | 35797546428 | 1 | probe | wrong-machine | AMD EPYC 9V74 80-Core Processor |
-| 35798819217 | 1 | probe | wrong-machine | AMD EPYC 9V74 80-Core Processor |
+| 35798819217 | 1 | probe | open | AMD EPYC 7763 64-Core Processor |
 | 35814510341 | 26 | dry | open | AMD EPYC 7763 64-Core Processor |
 | 35814510341 | 27 | dry | open | AMD EPYC 7763 64-Core Processor |
 | 35816984839 | 28 | probe | open | AMD EPYC 7763 64-Core Processor |

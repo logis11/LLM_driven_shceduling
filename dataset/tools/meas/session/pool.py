@@ -255,6 +255,16 @@ def pool_app(app, reps):
     return entry
 
 
+def verdict(c):
+    """A value's reading on the results page: within the rule, or carried under D29 (its spread the machine's) or
+    D33 (a sparse component's)."""
+    if c["passes"]:
+        return "yes"
+    if not c.get("carried"):
+        return "no"
+    return "carried (D33)" if c.get("sparse") else "carried (D29)"
+
+
 def render(out):
     L = [f"# 9.9 session campaign — pooled results ({out.get('tag') or 'untagged'})", "",
          f"Machine: {out.get('machine')}. `probe` jobs are never repeats.", ""]
@@ -278,8 +288,7 @@ def render(out):
         L += ["| quantity | k | mean | half-width | passes |", "|---|---|---|---|---|"]
         for name, c in e["stability"]["quantities"].items():
             hw = f"{c['half_width']:.1%}" if c.get("half_width") is not None else "—"
-            ok = "yes" if c["passes"] else ("carried (D29)" if c.get("carried") else "no")
-            L.append(f"| {name} | {c['k']} | {c['mean']} | ±{hw} | {ok} |")
+            L.append(f"| {name} | {c['k']} | {c['mean']} | ±{hw} | {verdict(c)} |")
         L.append("")
     return "\n".join(L) + "\n"
 

@@ -85,10 +85,9 @@ EXCEPTED_RUN_MEANS = ("chrome-hidden", "chrome-visible", "element", "steam")
 SESSION_SPREAD = {"chrome-hidden": ("Chrome_ChildIOT",
                                     # changelog D26: carried once the rates are one renderer's and exact
                                     "Compositor", "PerfettoTrace", "ThreadPoolServi"),
-                  "chrome-visible": ("Chrome_ChildIOT", "ThreadPoolForeg", "PerfettoTrace"),
-                  # changelog D23: 9.5 D57 as written — the gap means move ±0.1 % and ±1.7 % within a run and ±21 %
-                  # and ±20 % between runs, the tables stable through p99 and the wake rates holding
-                  "steam": ("steamwebhelper", "ThreadPoolForeg")}
+                  "chrome-visible": ("Chrome_ChildIOT", "ThreadPoolForeg", "PerfettoTrace")}
+# changelog D26: the Steam client's steamwebhelper and ThreadPoolForeg, carried between sessions under D23, hold the
+# rule over merged wake times; steamwebhelper's run mean stays carried, under D18
 
 # changelog D27: a sparse component — one that wakes a few times per renderer per phase (hidden residual, MemoryInfra
 # alone, 1.2–3.4 wakes; visible residual, four comms, 3.6–5.5) — is carried with its half-widths over at least five
