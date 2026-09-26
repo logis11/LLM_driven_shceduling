@@ -35,7 +35,8 @@ Also not a trace pair. `experiment.yaml` is a per-experiment spec over the `mock
 
 ## Fixed here, documented in the metrics doc (5.2)
 
-- **Row order:** `entity`, then `metric`, then `t` (numeric), then `cause`. Byte comparison needs one order.
+- **Row order:** `entity`, then `metric`, then `t` (numeric), then `cause`, then `channel`. Byte comparison needs one order.
+- **`channel`** on a `cause=wake` row is the kind of the WAIT it completes, the WAITs taken in program order: `input` for the keystrokes of `mock-office`, `mock-p1a`, `mock-switch`, `mock-guards` and the `mock-scores` records, `chain` for `mock-chain`'s stages.
 - **Anchor `t`** for window-level rows (`cpu_delivered`, `demand`, `preempt_count`, `busy`, and `completed` when its value is 0) is `T_end`. `completed` with value 1 and `turnaround` are anchored at the `task_end` time.
 - **`T_end`** is the largest pinned time in the run file: arrivals, departs, and wake events.
 - **`demand`** rows exist only for programs whose RUN total is finite. A program with an unbounded LOOP has no `demand` row.

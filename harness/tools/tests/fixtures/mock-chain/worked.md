@@ -55,7 +55,7 @@ Chain: `input` → `engine` → `display` (head `input`, tail `display`). Frame 
 | `engine` 35500 `wake` | `run_start` 35500 | 0 |
 | `display` 38100 `wake` | `run_start` 38100 | 0 |
 
-Chain stages' WAIT completions are `cause=wake`, indistinguishable from keystrokes by cause alone; scoring tells them apart by entity.
+Chain stages' WAIT completions are `cause=wake`, like keystrokes; each completes the stage's next `WAIT chain:<stage>`, so the rows carry `channel=chain`.
 
 **`job`** — entity is the chain head; frame k completion = the end of the tail's k-th iteration; value = completion − tick k.
 

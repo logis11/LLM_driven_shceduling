@@ -209,6 +209,21 @@ def test_ready_wait_needs_a_cause_and_others_must_not_carry_one(tmp_path):
     assert any("cause" in e for e in errs)
 
 
+def test_channel_filters_a_wake_term_only(tmp_path):
+    """9.5 D74: a ready_wait term with cause wake may name the channel kind it reads
+    (`channel: input` for interaction latency); no other term may."""
+    errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [term(channel="input")]}}))
+    assert not any("channel" in e for e in errs)
+    errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [term(cause="arrive", channel="input")]}}))
+    assert any("channel" in e for e in errs)
+    t = term(entity="hog", metric="cpu_delivered", aggregate="progress", direction="higher",
+             channel="input")
+    errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [t]}}))
+    assert any("channel" in e for e in errs)
+    errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [term(channel="input:editor")]}}))
+    assert any("channel" in e or "input:editor" in e for e in errs)
+
+
 def test_declared_base_must_match_the_variant_recipe_and_terms_must_equal(tmp_path):
     base_terms = [term(entity="writer")]
     doc = minimal(**{"c1-office": {"terms": base_terms},

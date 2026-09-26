@@ -35,7 +35,7 @@ Keystrokes on `input:writer`: 10000, 15000, 16000. `T_end` = 60000 (the departs)
 | `writer` 18000 `wake` | inside occupancy [10000, 26000] | 0 |
 | `writer` 21000 `wake` | inside occupancy [10000, 26000] | 0 |
 
-Three `cause=wake` rows for three keystrokes: the queued ones are counted, at zero wait.
+Three `cause=wake` rows for three keystrokes: the queued ones are counted, at zero wait. Each completes the writer's next `WAIT input:writer`, so the rows carry `channel=input`.
 
 **Lifetime**
 

@@ -81,6 +81,11 @@
         "fork_slot"
       ]
     },
+    "channel": {
+      "description": "The term's channel filter, a wake term's channel kind (added 2026-09-26, from 9.5 D74); empty for none.",
+      "type": "string",
+      "pattern": "^[^:]+$"
+    },
     "window_start_us": {
       "type": "string",
       "pattern": "^[0-9]+$"

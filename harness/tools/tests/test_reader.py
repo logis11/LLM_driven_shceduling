@@ -3,6 +3,7 @@
 run-file view)."""
 
 import gzip
+import itertools
 import json
 
 import pytest
@@ -168,7 +169,53 @@ def test_demand_is_finite_run_total_or_absent(fixture_dir):
 
 def test_wake_events_are_counted_per_target(fixture_dir):
     run = read_run_file(fixture_dir("mock-p1a") / "run.json")
-    assert run.wakes == {"editor": 4}
+    assert run.input_wakes == {"editor": 4}
+
+
+def test_input_wakes_count_the_input_channel_only(tmp_path):
+    """9.5 D74: a measured timer wake is an exogenous wake event on the task's
+    timer channel; the stimuli are the input channel's events alone."""
+    p = tmp_path / "run.json"
+    p.write_text(json.dumps({"workload_id": "w", "events": [
+        {"op": "arrive", "t": 0, "id": "e", "name": "code", "depart": 100,
+         "program": [{"op": "WAIT", "channel": "input:e"}, {"op": "WAIT", "channel": "timer:e"},
+                     {"op": "WAIT", "channel": "timer:e"}, {"op": "WAIT", "channel": "input:e"}]},
+        {"op": "arrive", "t": 0, "id": "d", "name": "dbus-daemon", "depart": 100,
+         "program": [{"op": "WAIT", "channel": "timer:d"}]},
+        {"op": "wake", "t": 10, "channel": "input:e", "target": "e"},
+        {"op": "wake", "t": 20, "channel": "timer:e", "target": "e"},
+        {"op": "wake", "t": 30, "channel": "timer:e", "target": "e"},
+        {"op": "wake", "t": 40, "channel": "input:e", "target": "e"},
+        {"op": "wake", "t": 50, "channel": "timer:d", "target": "d"},
+    ]}))
+    assert read_run_file(p).input_wakes == {"e": 2}
+
+
+def test_wait_channels_follow_program_order_through_loops(tmp_path):
+    """A task's WAITs complete in program order (metrics doc §11, items 1–2), so
+    the reader gives each WAIT's channel kind — the name before its colon — in
+    that order, repeating a bounded LOOP's body and an unbounded one's forever."""
+    p = tmp_path / "run.json"
+    p.write_text(json.dumps({"workload_id": "w", "events": [
+        {"op": "arrive", "t": 0, "id": "e", "name": "code", "depart": 100,
+         "program": [{"op": "WAIT", "channel": "timer:e"}, {"op": "RUN", "us": 5},
+                     {"op": "LOOP", "count": 2, "body": [
+                         {"op": "WAIT", "channel": "input:e"}, {"op": "RUN", "us": 5},
+                         {"op": "WAIT", "channel": "timer:e"}]},
+                     {"op": "LOOP", "count": 3, "body": [{"op": "RUN", "us": 5}]},
+                     {"op": "SLEEP", "us": 10},
+                     {"op": "WAIT", "channel": "children:e"}]},
+        {"op": "arrive", "t": 0, "id": "stage", "name": "game.exe", "depart": 100,
+         "program": [{"op": "LOOP", "count": "unbounded", "body": [
+             {"op": "WAIT", "channel": "chain:stage"}, {"op": "RUN", "us": 5}]}]},
+        {"op": "arrive", "t": 0, "id": "hog", "name": "python3",
+         "program": [{"op": "RUN", "us": 50}, {"op": "EXIT"}]},
+    ]}))
+    run = read_run_file(p)
+    assert list(run.tasks["e"].wait_channels()) == [
+        "timer", "input", "timer", "input", "timer", "children"]
+    assert list(itertools.islice(run.tasks["stage"].wait_channels(), 4)) == ["chain"] * 4
+    assert list(run.tasks["hog"].wait_channels()) == []
 
 
 def test_spawn_table_children_are_tasks_with_demand(tmp_path):

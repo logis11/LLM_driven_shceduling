@@ -2,7 +2,8 @@
 
 `harness/scoring/scoring-spec.yaml` says, per coreset file, how its records are
 valued: a list of terms, each naming an entity, a primitive, a filter (`cause`,
-a time window), an aggregate, a direction, and a weight. A file's score is the
+for a wake term the `channel` kind, a time window), an aggregate, a direction,
+and a weight. A file's score is the
 weighted sum of its terms' normalised shares (metrics doc §9). The file carries
 terms only — which files judge, report, or are excluded is the RQ0 gate spec's.
 
@@ -123,6 +124,8 @@ def lint_spec(spec_path, schema_path, build_dir, recipes_dir):
                 errors.append(f"{where}a ready_wait term names its cause")
             if t["metric"] != "ready_wait" and "cause" in t:
                 errors.append(f"{where}cause is a ready_wait filter only")
+            if "channel" in t and (t["metric"] != "ready_wait" or t.get("cause") != "wake"):
+                errors.append(f"{where}channel is a filter of a ready_wait term with cause wake only")
             win = t.get("window")
             if isinstance(win, dict) and all(isinstance(win.get(k), int) for k in ("start_us", "end_us")):
                 if not (0 <= win["start_us"] < win["end_us"] <= run.t_end):

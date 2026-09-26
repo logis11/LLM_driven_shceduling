@@ -7,15 +7,16 @@ from harness.primitives import compute
 from harness.reader import ConfigSchedule, RunFile, ScheduleEntry, TaskInfo
 
 
-def task(id, name="x", arrive=0, depart=None, demand=None, period=None, targets=()):
+def task(id, name="x", arrive=0, depart=None, demand=None, period=None, targets=(), waits=()):
+    """`waits`: the channel kinds of the task's WAITs in program order."""
     return TaskInfo(id=id, name=name, arrive=arrive, depart=depart, demand=demand,
-                    period_us=period, wake_targets=list(targets))
+                    period_us=period, wake_targets=list(targets), waits=list(waits))
 
 
-def runfile(t_end, tasks, chains=(), wakes=None):
+def runfile(t_end, tasks, chains=(), input_wakes=None):
     return RunFile(workload_id="w", t_end=t_end,
                    tasks={t.id: t for t in tasks}, chains=[list(c) for c in chains],
-                   wakes=wakes or {})
+                   input_wakes=input_wakes or {})
 
 
 def schedule(*entries):
@@ -169,7 +170,7 @@ def test_config_interval_ignores_entries_at_or_after_t_end():
 
 
 def test_stimulus_count_guard_against_run_file_wakes():
-    run = runfile(100, [task("e")], wakes={"e": 2})
+    run = runfile(100, [task("e", waits=["input", "input"])], input_wakes={"e": 2})
     events = [
         {"event": "task_arrive", "t": 0, "task": "e", "source": "file"},
         {"event": "ready", "t": 0, "task": "e", "cause": "arrive"},
@@ -181,7 +182,74 @@ def test_stimulus_count_guard_against_run_file_wakes():
         # the second keystroke never produced a ready line
     ]
     r = compute(run, events)
-    assert any("e" in g and "wake" in g for g in r.guards)
+    assert any(g.startswith("task e:") and "input" in g for g in r.guards)
+
+
+def _wake_events(*wakes):
+    """Task `e` arrives at 0 and blocks; each (ready_t, run_start_t) is one
+    ready(wake) line, served by a 10 µs occupancy (run_start None: the line
+    falls inside the previous occupancy, which it extends by 10 µs)."""
+    events = [
+        {"event": "task_arrive", "t": 0, "task": "e", "source": "file"},
+        {"event": "ready", "t": 0, "task": "e", "cause": "arrive"},
+        {"event": "run_start", "t": 0, "task": "e"},
+    ]
+    end = 5
+    for ready_t, start in wakes:
+        if start is None:
+            events.append({"event": "ready", "t": ready_t, "task": "e", "cause": "wake"})
+            end = ready_t + 10
+            continue
+        events.append({"event": "run_end", "t": end, "task": "e", "reason": "block",
+                       "blocked_on": "wait"})
+        events.append({"event": "ready", "t": ready_t, "task": "e", "cause": "wake"})
+        events.append({"event": "run_start", "t": start, "task": "e"})
+        end = start + 10
+    events.append({"event": "run_end", "t": end, "task": "e", "reason": "block",
+                   "blocked_on": "wait"})
+    return events
+
+
+def test_wake_rows_carry_the_channel_of_the_wait_they_complete():
+    """9.5 D74: the k-th ready(wake) line of a task completes its k-th WAIT, so the
+    row carries that WAIT's channel kind — a keystroke `input`, a measured timer
+    wake `timer` — whether the line waited or fell inside an occupancy."""
+    run = runfile(1000, [task("e", waits=["input", "timer", "timer", "input"])],
+                  input_wakes={"e": 2})
+    events = _wake_events((100, 130), (135, None), (300, 320), (400, 450))
+    r = compute(run, events)
+    assert [(x["t"], x["value"], x["cause"], x.get("channel"))
+            for x in rows_of(r, "ready_wait", "e")] == [
+        (0, 0, "arrive", None),
+        (100, 30, "wake", "input"),
+        (135, 0, "wake", "timer"),
+        (300, 20, "wake", "timer"),
+        (400, 50, "wake", "input"),
+    ]
+    assert r.guards == []
+
+
+def test_stimulus_guard_counts_the_input_channel_only():
+    """Timer wakes are ready(wake) lines too since D74: three lines for one
+    keystroke among two timer wakes is no guard, and a keystroke lost among
+    timer wakes still is."""
+    events = _wake_events((100, 110), (200, 210), (300, 310))
+    run = runfile(1000, [task("e", waits=["timer", "input", "timer"])], input_wakes={"e": 1})
+    assert compute(run, events).guards == []
+    run = runfile(1000, [task("e", waits=["timer", "input", "timer", "input"])],
+                  input_wakes={"e": 2})
+    guards = compute(run, events).guards
+    assert len(guards) == 1 and guards[0].startswith("task e: 1 ") and "input" in guards[0]
+
+
+def test_wake_line_past_the_programs_last_wait_is_a_guard():
+    """A ready(wake) line with no WAIT left to complete has no channel: the trace
+    and the run file disagree, and the row is written without one."""
+    run = runfile(1000, [task("e", waits=["input"])], input_wakes={"e": 1})
+    r = compute(run, _wake_events((100, 110), (200, 210)))
+    assert [(x["t"], x.get("channel")) for x in rows_of(r, "ready_wait", "e")] == [
+        (0, None), (100, "input"), (200, None)]
+    assert len(r.guards) == 1 and r.guards[0].startswith("task e:") and "WAIT" in r.guards[0]
 
 
 # ------------------------------------------------------------ switch_window

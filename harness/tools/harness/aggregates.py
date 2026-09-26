@@ -2,7 +2,9 @@
 
 `compute_aggregates` takes the typed rows of one records file (what
 `records.read_csv` returns) and yields aggregate rows: one per
-(entity, metric, aggregate, cause, window, index) with a value. Every trace
+(entity, metric, aggregate, cause, channel, window, index) with a value. The
+`ready_wait` aggregates come per cause and, for cause `wake`, per channel kind
+as well (§8), so interaction latency can read the input channel alone. Every trace
 aggregate §8 lists is here whether a scoring term weights it or not, so the
 scorer, the guards, and the report read one file (`harness/aggregates/schema/`).
 The recognition aggregates are the grader's (sub-task 8.4), not this module's.
@@ -15,8 +17,9 @@ observations "at or before" `T_end`.
 The per-switch excess and its boost variant (§8) need the interactive task the
 scoring spec names for the file — the caller passes `interactive`, the entities
 of the file's `ready_wait` terms — and the `boost_window` rows the primitives
-emit (§6.10, sub-task 8.10). Inside a switch window (or the boost windows of that
-config interval) means the wake row's `t` lies in it; "the rest of that config
+emit (§6.10, sub-task 8.10). Its wake rows are the input channel's. Inside a
+switch window (or the boost windows of that config interval) means the wake
+row's `t` lies in it; "the rest of that config
 interval outside any window" is the interval's wake rows in neither. A variant
 is written only when both sides have rows.
 
@@ -40,7 +43,7 @@ PERCENTILE_METHOD = "linear"        # numpy's linear interpolation, R type 7 (me
 PLACES = 12                         # decimal places in the aggregates file
 
 IDENTITY = ("workload_id", "condition", "table", "seed", "boot_default")
-COLUMNS = IDENTITY + ("entity", "metric", "aggregate", "cause",
+COLUMNS = IDENTITY + ("entity", "metric", "aggregate", "cause", "channel",
                       "window_start_us", "window_end_us", "index", "value")
 PROVENANCES = ("unmodified", "clamped", "held", "fallback")
 
@@ -86,15 +89,15 @@ def compute_aggregates(rows, windows=None, interactive=()):
     windows = windows or {}
     identity = run_identity(rows)
     df = pd.DataFrame(rows)
-    for col in ("cause", "provenance", "algorithm", "index", "period_us"):
+    for col in ("cause", "channel", "provenance", "algorithm", "index", "period_us"):
         if col not in df.columns:
             df[col] = np.nan
     out = []
 
-    def emit(entity, metric, aggregate, value, cause="", window=(None, None), index=""):
+    def emit(entity, metric, aggregate, value, cause="", window=(None, None), index="", channel=""):
         start, end = window
         out.append({**identity, "entity": entity, "metric": metric, "aggregate": aggregate,
-                    "cause": cause,
+                    "cause": cause, "channel": channel,
                     "window_start_us": "" if start is None else str(start),
                     "window_end_us": "" if end is None else str(end),
                     "index": "" if index == "" else str(index),
@@ -106,24 +109,29 @@ def compute_aggregates(rows, windows=None, interactive=()):
     def windows_for(entity, metric):
         return [(None, None)] + list(windows.get((entity, metric), []))
 
-    # --- ready_wait: per entity, per cause (and any cause), per window
+    # --- ready_wait: per entity, per cause (and any cause), wake per channel too, per window
     rw = df[df["metric"] == "ready_wait"]
     for entity, g in rw.groupby("entity", sort=True):
-        causes = [""] + sorted(c for c in g["cause"].dropna().unique())
+        filters = [("", "")] + [(c, "") for c in sorted(g["cause"].dropna().unique())]
+        wake = g[g["cause"] == "wake"]
+        filters += [("wake", ch) for ch in sorted(wake["channel"].dropna().unique())]
         for window in windows_for(entity, "ready_wait"):
-            for cause in causes:
+            for cause, channel in filters:
                 sel = g if cause == "" else g[g["cause"] == cause]
+                if channel:
+                    sel = sel[sel["channel"] == channel]
                 sel = sel[[_in_window(int(t), window) for t in sel["t"]]]
                 if sel.empty:
                     continue
                 vals = sel["value"].astype(int).tolist()
-                emit(entity, "ready_wait", "count", len(vals), cause, window)
-                emit(entity, "ready_wait", "mean", Fraction(sum(vals), len(vals)), cause, window)
+                kw = dict(cause=cause, window=window, channel=channel)
+                emit(entity, "ready_wait", "count", len(vals), **kw)
+                emit(entity, "ready_wait", "mean", Fraction(sum(vals), len(vals)), **kw)
                 for p, name in ((50, "p50"), (95, "p95"), (99, "p99")):
-                    emit(entity, "ready_wait", name, percentile(vals, p), cause, window)
-                emit(entity, "ready_wait", "max", max(vals), cause, window)
+                    emit(entity, "ready_wait", name, percentile(vals, p), **kw)
+                emit(entity, "ready_wait", "max", max(vals), **kw)
                 over = sum(1 for v in vals if v > T_INTERACTION_US)
-                emit(entity, "ready_wait", "over_threshold", Fraction(over, len(vals)), cause, window)
+                emit(entity, "ready_wait", "over_threshold", Fraction(over, len(vals)), **kw)
 
     # --- job: per entity, per window
     jobs = df[df["metric"] == "job"]
@@ -190,7 +198,7 @@ def compute_aggregates(rows, windows=None, interactive=()):
         emit("schedule", "switch_window", "share_inside_switch_windows", Fraction(inside, t_end))
         bw = df[df["metric"] == "boost_window"]
         ci = df[df["metric"] == "config_interval"]
-        wakes = rw[rw["cause"] == "wake"]
+        wakes = rw[(rw["cause"] == "wake") & (rw["channel"] == "input")]
         for _, s_row in sw[sw["algorithm"] == "MLFQ"].iterrows():
             t_s, v_s, idx = int(s_row["t"]), int(s_row["value"]), int(s_row["index"])
             interval = ci[ci["index"].astype("Int64") == idx]
@@ -226,6 +234,6 @@ def compute_aggregates(rows, windows=None, interactive=()):
 
 
 def sort_key(row):
-    return (row["entity"], row["metric"], row["aggregate"], row["cause"],
+    return (row["entity"], row["metric"], row["aggregate"], row["cause"], row["channel"],
             int(row["window_start_us"] or -1), int(row["window_end_us"] or -1),
             int(row["index"] or -1))

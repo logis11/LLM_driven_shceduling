@@ -45,12 +45,30 @@ def test_fixture_csv_validates_against_schema(fixture_dir, mock):
     validate_rows(rows)            # raises on the first invalid row
 
 
-def test_columns_are_the_twenty_two_in_order(fixture_dir):
+def test_columns_are_the_twenty_three_in_order(fixture_dir):
     with open(fixture_dir("mock-office") / "expected.csv", newline="") as f:
         header = next(csv.reader(f))
     assert header == list(COLUMNS)
-    assert len(COLUMNS) == 22
+    assert len(COLUMNS) == 23
+    assert COLUMNS[COLUMNS.index("cause") + 1] == "channel"
     assert COLUMNS[-2:] == ("hogs", "pre_committed_miss")
+
+
+def test_channel_rides_on_wake_rows_only(fixture_dir):
+    """metrics doc §5: `channel` is filled on `ready_wait` rows with cause `wake`
+    and on no other row."""
+    rows = read_csv(fixture_dir("mock-chain") / "expected.csv")
+    wake = next(r for r in rows if r["metric"] == "ready_wait" and r["cause"] == "wake")
+    assert wake["channel"] == "chain"
+    validate_rows([dict(wake, channel="timer")])
+    arrive = next(r for r in rows if r["metric"] == "ready_wait" and r["cause"] == "arrive")
+    with pytest.raises(ValueError):
+        validate_rows([dict(arrive, channel="input")])
+    busy = next(r for r in rows if r["metric"] == "busy")
+    with pytest.raises(ValueError):
+        validate_rows([dict(busy, channel="input")])
+    with pytest.raises(ValueError, match="channel"):
+        validate_rows([dict(wake, channel="input:editor")])     # the kind, never the full name
 
 
 def test_pre_committed_miss_is_zero_or_one():

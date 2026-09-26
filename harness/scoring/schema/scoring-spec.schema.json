@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "scoring-spec.schema.json",
   "title": "Scoring spec",
-  "description": "Per-file terms over records (Phase 6 spec, decisions 5–15): each term names an entity, a primitive, a filter (cause, time window), an aggregate, a direction, and a weight; a file's score is the weighted sum of its terms' normalised shares. A derived file declares its base and carries the base's terms verbatim. Cross-checks the schema cannot express (entity exists in the compiled workload, scored metric/aggregate pairs and their direction, windows inside [0, T_end], base per the dataset's recipes) live in tools/harness/scoring.py.",
+  "description": "Per-file terms over records (Phase 6 spec, decisions 5–15): each term names an entity, a primitive, a filter (cause, for a wake term the channel kind, time window), an aggregate, a direction, and a weight; a file's score is the weighted sum of its terms' normalised shares. A derived file declares its base and carries the base's terms verbatim. Cross-checks the schema cannot express (entity exists in the compiled workload, scored metric/aggregate pairs and their direction, windows inside [0, T_end], base per the dataset's recipes) live in tools/harness/scoring.py.",
   "type": "object",
   "additionalProperties": false,
   "required": ["files"],
@@ -31,6 +31,7 @@
         "entity": {"type": "string", "minLength": 1},
         "metric": {"enum": ["ready_wait", "job", "cpu_delivered", "turnaround"]},
         "cause": {"enum": ["arrive", "wake", "sleep_end", "timer_tick", "fork_slot"]},
+        "channel": {"type": "string", "pattern": "^[^:]+$"},
         "window": {
           "type": "object",
           "additionalProperties": false,

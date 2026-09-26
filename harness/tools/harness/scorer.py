@@ -41,7 +41,7 @@ def floors_for(latency_floor_us=LATENCY_FLOOR_US, fraction_floor=FRACTION_FLOOR)
     return {"p99": lat, "turnaround": lat, "miss_rate": frac, "progress": frac}
 
 IDENTITY = ("workload_id", "condition", "table", "seed", "boot_default")
-COLUMNS = IDENTITY + ("level", "entity", "metric", "aggregate", "cause",
+COLUMNS = IDENTITY + ("level", "entity", "metric", "aggregate", "cause", "channel",
                       "window_start_us", "window_end_us", "direction", "weight",
                       "value_fixed", "value_oracle", "value_condition",
                       "improvement_oracle", "improvement_condition", "share",
@@ -64,7 +64,7 @@ def _runs(agg_rows):
     runs = {}
     for r in agg_rows:
         key = tuple(str(r.get(k, "")) for k in IDENTITY)
-        runs.setdefault(key, {})[(r["entity"], r["metric"], r["aggregate"], r["cause"],
+        runs.setdefault(key, {})[(r["entity"], r["metric"], r["aggregate"], r["cause"], r.get("channel", ""),
                                   str(r["window_start_us"]), str(r["window_end_us"]))] = Fraction(str(r["value"]))
     return runs
 
@@ -72,7 +72,7 @@ def _runs(agg_rows):
 def _term_key(term):
     w = term.get("window") or {}
     return (term["entity"], term["metric"], TERM_AGGREGATE[(term["metric"], term["aggregate"])],
-            term.get("cause", ""), str(w.get("start_us", "")), str(w.get("end_us", "")))
+            term.get("cause", ""), term.get("channel", ""), str(w.get("start_us", "")), str(w.get("end_us", "")))
 
 
 def _lookup(run, key, who):
@@ -138,8 +138,8 @@ def score(agg_rows, spec, floors=None):
                     total += weight * (Fraction(1) if no_headroom else share)
                     n_nh += int(no_headroom); n_c += int(censored)
                     term_rows.append({**identity, "level": "term", "entity": tk[0], "metric": tk[1],
-                                      "aggregate": tk[2], "cause": tk[3],
-                                      "window_start_us": tk[4], "window_end_us": tk[5],
+                                      "aggregate": tk[2], "cause": tk[3], "channel": tk[4],
+                                      "window_start_us": tk[5], "window_end_us": tk[6],
                                       "direction": direction, "weight": fmt(weight),
                                       "value_fixed": fmt(v_fixed), "value_oracle": fmt(v_oracle),
                                       "value_condition": fmt(v_cond),
@@ -148,12 +148,12 @@ def score(agg_rows, spec, floors=None):
                                       "no_headroom": int(no_headroom), "censored": int(censored),
                                       "score": "", "weight_sum": "", "n_terms": "", "n_no_headroom": "", "n_censored": ""})
                 file_rows.append({**identity, "level": "file", "entity": "", "metric": "", "aggregate": "",
-                                  "cause": "", "window_start_us": "", "window_end_us": "", "direction": "",
+                                  "cause": "", "channel": "", "window_start_us": "", "window_end_us": "", "direction": "",
                                   "weight": "", "value_fixed": "", "value_oracle": "", "value_condition": "",
                                   "improvement_oracle": "", "improvement_condition": "", "share": "",
                                   "no_headroom": "", "censored": "",
                                   "score": fmt(total), "weight_sum": fmt(wsum), "n_terms": len(terms),
                                   "n_no_headroom": n_nh, "n_censored": n_c})
     key = lambda r: (tuple(str(r[k]) for k in IDENTITY), r["level"] == "term", r["entity"], r["metric"],
-                     r["aggregate"], r["cause"], str(r["window_start_us"]))
+                     r["aggregate"], r["cause"], r["channel"], str(r["window_start_us"]))
     return sorted(term_rows, key=key), sorted(file_rows, key=key)

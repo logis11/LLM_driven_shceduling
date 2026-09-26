@@ -36,7 +36,8 @@ TINY = {
     "ground_truth": [],
     "events": [
         {"op": "arrive", "t": 0, "id": "editor", "name": "code", "depart": 1000,
-         "program": [{"op": "WAIT", "channel": "input:editor"}, {"op": "RUN", "us": 10}]},
+         "program": [{"op": "LOOP", "count": 3, "body": [
+             {"op": "WAIT", "channel": "input:editor"}, {"op": "RUN", "us": 10}]}]},
         {"op": "arrive", "t": 0, "id": "game.chain.1", "name": "game.exe", "depart": 1000,
          "program": [{"op": "LOOP", "count": "unbounded", "body": [
              {"op": "TIMER", "period_us": 300}, {"op": "RUN", "us": 5},

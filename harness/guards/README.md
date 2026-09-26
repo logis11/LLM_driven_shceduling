@@ -15,7 +15,7 @@ Two files live here. `guard-spec.yaml` is the list of guards with their threshol
 | `starvation_floor` | a ready task waiting longer than the executor's starvation window |
 | `determinism` | a rerun trace that is not byte-identical to the first |
 | `utilisation_sanity` | delivered CPU exceeding the lane's elapsed time, or a scored file that delivered none: an empty trace that parsed |
-| `tick_count` | any consistency message from the records build: a chain tail's iterations not matching its head's ticks, the deadline cross-check, stimulus counts against the run file, applied config lines against the schedule |
+| `tick_count` | any consistency message from the records build: a chain tail's iterations not matching its head's ticks, the deadline cross-check, stimulus counts against the run file, a wake line past the last WAIT of its task's program, applied config lines against the schedule |
 | `validation_matches_provenance` | the log's `validation` sequence not equal, entry by entry, to the schedule's `provenance` sequence after the boot entry |
 | `c2_pair` | the two files of a C2 pair producing identical trace bodies under a recognition-driven condition, or different ones under `fixed`; identical under `oracle` means the configuration never changed between wanted and unwanted |
 

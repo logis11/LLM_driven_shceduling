@@ -6,8 +6,8 @@ validates the closed event set, each type's required fields and enums, and
 time order, refusing the file with a line number on the first violation.
 
 `read_run_file` reads the run-file view of a workload (data-contracts §4) for
-the three facts a trace does not carry (metrics doc §3): `T_end`, chain
-topology, and per-task demand.
+the facts a trace does not carry (metrics doc §3): `T_end`, chain topology,
+per-task demand, and the channel of each task's WAITs in program order.
 
 `read_config_schedule` reads the daemon's config schedule (data-contracts §7)
 for the one fact neither of the other two carries: the params of each applied
@@ -22,6 +22,7 @@ computes a metric.
 
 import gzip
 import hashlib
+import itertools
 import json
 from dataclasses import dataclass, field
 from typing import Dict, Iterator, List, Optional
@@ -169,6 +170,11 @@ class TaskInfo:
     demand: Optional[int]          # total RUN work; None when unbounded
     period_us: Optional[int]       # the TIMER period, when the program has one
     wake_targets: List[str] = field(default_factory=list)
+    waits: list = field(default_factory=list, repr=False)   # channel kinds of its WAITs; a LOOP is (count, body)
+
+    def wait_channels(self) -> Iterator[str]:
+        """The channel kind of each WAIT the task completes, in program order."""
+        return _expand(self.waits)
 
 
 @dataclass
@@ -177,7 +183,12 @@ class RunFile:
     t_end: int
     tasks: Dict[str, TaskInfo]
     chains: List[List[str]]        # each from a TIMER head to its tail
-    wakes: Dict[str, int]          # exogenous wake events per target task
+    input_wakes: Dict[str, int]    # exogenous wake events on an input channel, per target task
+
+
+def channel_kind(channel) -> str:
+    """A channel's kind: its name before the colon (`input:editor` → `input`)."""
+    return str(channel).split(":", 1)[0]
 
 
 def _walk(program):
@@ -186,6 +197,31 @@ def _walk(program):
         yield op
         if op.get("op") == "LOOP":
             yield from _walk(op.get("body", []))
+
+
+def _wait_plan(program) -> list:
+    """The channel kinds of a program's WAITs in program order; a LOOP whose body
+    waits is kept as (count, body plan), so an unbounded one stays finite here."""
+    plan = []
+    for op in program:
+        kind = op.get("op")
+        if kind == "WAIT":
+            plan.append(channel_kind(op["channel"]))
+        elif kind == "LOOP":
+            body = _wait_plan(op.get("body", []))
+            if body:
+                plan.append((op["count"], body))
+    return plan
+
+
+def _expand(plan) -> Iterator[str]:
+    for item in plan:
+        if isinstance(item, tuple):
+            count, body = item
+            for _ in (itertools.count() if count == "unbounded" else range(int(count))):
+                yield from _expand(body)
+        else:
+            yield item
 
 
 def _run_total(program) -> Optional[int]:
@@ -213,7 +249,7 @@ def _task_info(tid, name, program, arrive=None, depart=None):
     targets = [op["target"] for op in _walk(program) if op.get("op") == "WAKE"]
     return TaskInfo(id=tid, name=name, arrive=arrive, depart=depart,
                     demand=_run_total(program), period_us=period,
-                    wake_targets=targets)
+                    wake_targets=targets, waits=_wait_plan(program))
 
 
 def read_run_file(path) -> RunFile:
@@ -222,7 +258,7 @@ def read_run_file(path) -> RunFile:
     if "events" not in doc:
         raise RunFileError("run file has no 'events'")
     tasks: Dict[str, TaskInfo] = {}
-    wakes: Dict[str, int] = {}
+    input_wakes: Dict[str, int] = {}
     pinned = [0]
     for ev in doc["events"]:
         op = ev.get("op")
@@ -242,7 +278,8 @@ def read_run_file(path) -> RunFile:
                 tasks[cid] = _task_info(cid, child["name"], child["program"])
         elif op == "wake":
             pinned.append(int(ev["t"]))
-            wakes[ev["target"]] = wakes.get(ev["target"], 0) + 1
+            if channel_kind(ev["channel"]) == "input":
+                input_wakes[ev["target"]] = input_wakes.get(ev["target"], 0) + 1
         else:
             raise RunFileError(f"unknown event op {op!r}")
     chains = []
@@ -259,7 +296,7 @@ def read_run_file(path) -> RunFile:
             cur = tasks[nxt]
         chains.append(chain)
     return RunFile(workload_id=doc.get("workload_id", ""), t_end=max(pinned),
-                   tasks=tasks, chains=chains, wakes=wakes)
+                   tasks=tasks, chains=chains, input_wakes=input_wakes)
 
 
 # ---------------------------------------------------------- config schedule

@@ -7,15 +7,21 @@ carries. It knows nothing about which file, task role, or condition it is
 looking at. The config schedule is the third input (§3): `switch_window` and `boost_window` read
 the incoming entry's params from it by `index`.
 
+A `ready(cause = wake)` line completes the task's next WAIT in program order,
+so its row carries that WAIT's channel kind from the run file (`input`, `timer`,
+`chain`, …; metrics doc §6.1).
+
 Alongside the rows it returns the guard messages the metrics doc names: tail
 iterations versus head ticks per chain, the `deadline` cross-check on
-single-stage chains, stimulus counts against the run file's wake events, and
-the schedule cross-check (an applied entry the schedule does not carry, or
-carries with another algorithm; a switch into MLFQ with no schedule given).
+single-stage chains, stimulus counts — `input`-channel wake lines against the
+run file's input wake events — a wake line past the last WAIT of its task's
+program, and the schedule cross-check (an applied entry the schedule does not
+carry, or carries with another algorithm; a switch into MLFQ with no schedule
+given).
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, Iterable, Iterator, List, Optional
 
 _BLOCKING_END = {"block", "exit", "depart"}
 
@@ -35,7 +41,7 @@ def w_single(params) -> int:
 class _TaskState:
     arrive_t: Optional[int] = None
     running_since: Optional[int] = None
-    pending_ready: List[tuple] = field(default_factory=list)   # (t, cause)
+    pending_ready: List[tuple] = field(default_factory=list)   # (t, cause, channel)
     cpu: int = 0
     preempts: int = 0
     end: Optional[tuple] = None                                 # (t, reason)
@@ -43,7 +49,9 @@ class _TaskState:
     occupancy: List[tuple] = field(default_factory=list)        # (start, end) clipped at T_end
     # chain bookkeeping
     ticks: List[int] = field(default_factory=list)              # ready(timer_tick) times
-    wake_ready: int = 0                                         # ready(wake) lines seen
+    waits: Optional[Iterator[str]] = None                       # channel kinds of the WAITs still to complete
+    input_ready: int = 0                                        # ready(wake) lines on an input channel
+    unmatched: List[int] = field(default_factory=list)         # ready(wake) times past the program's last WAIT
     iter_open: Optional[int] = None                             # start t of the open iteration
     iter_ends: List[int] = field(default_factory=list)          # completion t per iteration
     deadlines: List[dict] = field(default_factory=list)
@@ -82,7 +90,8 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
 
     def state(tid):
         if tid not in tasks:
-            tasks[tid] = _TaskState()
+            info = run.tasks.get(tid)
+            tasks[tid] = _TaskState(waits=info.wait_channels() if info is not None else iter(()))
             order.append(tid)
         return tasks[tid]
 
@@ -109,22 +118,27 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
         if kind == "task_arrive":
             st.arrive_t = t
         elif kind == "ready":
+            channel = None
+            if ev["cause"] == "wake":
+                channel = next(st.waits, None)
+                if channel is None:
+                    st.unmatched.append(t)
+                elif channel == "input":
+                    st.input_ready += 1
             if st.running_since is not None:              # inside own occupancy
                 if t <= t_end:
-                    rows.append(_row(ev["task"], "ready_wait", t, 0, cause=ev["cause"]))
+                    rows.append(_ready_row(ev["task"], t, 0, ev["cause"], channel))
             else:
-                st.pending_ready.append((t, ev["cause"]))
+                st.pending_ready.append((t, ev["cause"], channel))
             if ev["cause"] == "timer_tick":
                 st.ticks.append(t)
-            if ev["cause"] == "wake":
-                st.wake_ready += 1
             if iteration_start(ev["task"], ev):
                 close_iteration(st, t)                    # zero-wait boundary
                 st.iter_open = t
         elif kind == "run_start":
             if t <= t_end:
-                for (rt, cause) in st.pending_ready:
-                    rows.append(_row(ev["task"], "ready_wait", rt, t - rt, cause=cause))
+                for (rt, cause, channel) in st.pending_ready:
+                    rows.append(_ready_row(ev["task"], rt, t - rt, cause, channel))
             st.pending_ready = []
             st.running_since = t
         elif kind == "run_end":
@@ -284,12 +298,17 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
                                   f"slack={dl['slack_us']}) disagrees with the job row "
                                   f"(completion {ends[k]}, value {ends[k] - ticks[k]})")
 
-    # ---- stimulus guard
-    for tid, n in run.wakes.items():
-        seen = tasks[tid].wake_ready if tid in tasks else 0
+    # ---- stimulus guard, and wake lines the run file has no WAIT for
+    for tid, n in run.input_wakes.items():
+        seen = tasks[tid].input_ready if tid in tasks else 0
         if seen != n:
-            guards.append(f"task {tid}: {seen} ready(wake) line(s) for {n} wake event(s) "
-                          "in the run file")
+            guards.append(f"task {tid}: {seen} input ready(wake) line(s) for {n} input wake "
+                          "event(s) in the run file")
+    for tid in order:
+        extra = tasks[tid].unmatched
+        if extra:
+            guards.append(f"task {tid}: {len(extra)} ready(wake) line(s) past the last WAIT "
+                          f"of its program, the first at t={extra[0]}")
 
     return Result(rows=rows, guards=guards, switches=switches)
 
@@ -317,6 +336,12 @@ def _time_of_cpu_since(occupancy, t0, need) -> Optional[int]:
             return start + (need - got)
         got += end - start
     return None
+
+
+def _ready_row(entity, t, value, cause, channel):
+    if channel is None:
+        return _row(entity, "ready_wait", t, value, cause=cause)
+    return _row(entity, "ready_wait", t, value, cause=cause, channel=channel)
 
 
 def _row(entity, metric, t, value, **attrs):

@@ -148,6 +148,74 @@ def test_excess_aggregates_on_mock_switch(fixture_dir):
     assert out[("share_inside_switch_windows", "")] == "0.125000000000"
 
 
+def _wake_records(condition, wakes, t_end=100000, extra=()):
+    """Typed records rows of one run of workload `w`: the lane's busy row and one
+    editor ready_wait wake row per (t, value, channel)."""
+    ident = {"workload_id": "w", "condition": condition, "source_sha256": "0" * 64, "sim": "mock@0"}
+    rows = [dict(ident, entity="lane", metric="busy", t=t_end, value=0)]
+    rows += [dict(ident, entity="editor", metric="ready_wait", t=t, value=v, cause="wake", channel=ch)
+             for (t, v, ch) in wakes]
+    rows += [dict(ident, **r) for r in extra]
+    return rows
+
+
+def test_wake_aggregates_split_by_channel():
+    """Metrics doc §8: the ready_wait aggregates over cause wake come once over
+    every channel and once per channel kind, so interaction latency can read the
+    input channel alone (9.5 D74)."""
+    rows = _wake_records("fixed", [(10, 100, "input"), (20, 5000, "timer"), (30, 300, "input"),
+                                   (40, 7000, "timer"), (50, 9000, "timer")])
+    out = {(r["cause"], r["channel"], r["aggregate"]): r["value"]
+           for r in agg.compute_aggregates(rows) if r["entity"] == "editor"}
+    assert out[("wake", "input", "count")] == "2.000000000000"
+    assert out[("wake", "input", "max")] == "300.000000000000"
+    assert out[("wake", "input", "p99")] == "298.000000000000"         # 100 + 0.99 · 200
+    assert out[("wake", "timer", "count")] == "3.000000000000"
+    assert out[("wake", "timer", "mean")] == "7000.000000000000"
+    assert out[("wake", "", "count")] == "5.000000000000"
+    assert out[("", "", "count")] == "5.000000000000"
+    assert not any(k[1] and k[0] != "wake" for k in out)                  # the split is on wake only
+
+
+def test_excess_reads_the_input_channel_only():
+    """Metrics doc §8's per-switch excess is interaction latency: with the switch
+    window [10000, 15000] holding a keystroke (400) and a timer wake (9000), and the
+    rest of the interval a keystroke (100) and a timer wake (7000), the excess is
+    400 − 100 = 300; over every wake it would be 4700 − 3550 = 1150."""
+    extra = [dict(entity="schedule", metric="config_interval", t=0, value=10000,
+                  provenance="unmodified", algorithm="FIFO", index=0),
+             dict(entity="schedule", metric="config_interval", t=10000, value=90000,
+                  provenance="unmodified", algorithm="MLFQ", index=1),
+             dict(entity="schedule", metric="switch_window", t=10000, value=5000,
+                  algorithm="MLFQ", index=1, hogs=1)]
+    rows = _wake_records("llm_full", [(12000, 400, "input"), (13000, 9000, "timer"),
+                                      (50000, 100, "input"), (60000, 7000, "timer")], extra=extra)
+    out = {(r["aggregate"], r["index"]): r["value"]
+           for r in agg.compute_aggregates(rows, interactive=("editor",)) if r["metric"] == "switch_window"}
+    assert out[("excess_switch", "1")] == "300.000000000000"
+
+
+def test_a_channel_term_scores_the_channel_aggregate():
+    """A term naming `channel: input` scores the input channel's P99: fixed [1000, 3000]
+    → 2980, oracle [100, 100] → 100, llm_full [500, 1500] → 1490; share 1490/2880.
+    The timer wakes beside them would dominate a P99 over every wake."""
+    spec = {"files": {"w": {"terms": [
+        {"entity": "editor", "metric": "ready_wait", "cause": "wake", "channel": "input",
+         "aggregate": "p99", "direction": "lower", "weight": 1.0}]}}}
+    runs = {"fixed": [(10, 1000, "input"), (20, 3000, "input"), (30, 50000, "timer")],
+            "oracle": [(10, 100, "input"), (20, 100, "input"), (30, 50000, "timer")],
+            "llm_full": [(10, 500, "input"), (20, 1500, "input"), (30, 90000, "timer")]}
+    rows = []
+    for condition, wakes in runs.items():
+        rows.extend(agg.compute_aggregates(_wake_records(condition, wakes)))
+    term_rows, _ = scorer.score(rows, spec)
+    llm = next(r for r in term_rows if r["condition"] == "llm_full")
+    assert llm["channel"] == "input"
+    assert (llm["value_fixed"], llm["value_oracle"], llm["value_condition"]) == (
+        "2980.000000", "100.000000", "1490.000000")
+    assert llm["share"] == "0.517361"
+
+
 def test_scorer_floors_are_overridable_with_the_same_default():
     """8.7 spec, decision 11: an optional floors argument for the floor band."""
     from fractions import Fraction

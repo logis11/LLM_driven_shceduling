@@ -4,7 +4,7 @@ The aggregates file collapses a run's records into one value per (entity, metric
 
 ## What a row is
 
-Identity columns as in records (`workload_id`, `condition`, `table`, `seed`, `boot_default`), then what was aggregated (`entity`, `metric`, `aggregate`), the filter (`cause`, empty for no filter), the window (`window_start_us`, `window_end_us`, both empty for the whole file), `index` where the aggregate is per switch, and `value` as a twelve-place decimal string. `schema/aggregates.schema.json` is the machine form.
+Identity columns as in records (`workload_id`, `condition`, `table`, `seed`, `boot_default`), then what was aggregated (`entity`, `metric`, `aggregate`), the filter (`cause`, and for `cause = wake` the `channel` kind, each empty for no filter), the window (`window_start_us`, `window_end_us`, both empty for the whole file), `index` where the aggregate is per switch, and `value` as a twelve-place decimal string. `schema/aggregates.schema.json` is the machine form.
 
 Windows: the whole file always, plus any window a scoring term names for that entity and metric. A window keeps rows whose anchor time lies inside the closed interval.
 

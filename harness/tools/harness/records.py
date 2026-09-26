@@ -18,7 +18,7 @@ from .reader import read_config_schedule, read_run_file, read_trace
 
 COLUMNS = ("workload_id", "condition", "table", "seed", "boot_default", "sim", "source_sha256",
            "entity", "metric", "t", "value",
-           "cause", "provenance", "algorithm", "index", "period_us",
+           "cause", "channel", "provenance", "algorithm", "index", "period_us",
            "predicted", "truth", "validation", "familiarity", "hogs",
            "pre_committed_miss")
 _INT_COLUMNS = ("t", "value", "index", "period_us", "familiarity", "hogs",
@@ -34,7 +34,8 @@ def _schema():
 
 
 def sort_key(row):
-    return (row["entity"], row["metric"], int(row["t"]), str(row.get("cause", "")))
+    return (row["entity"], row["metric"], int(row["t"]), str(row.get("cause", "")),
+            str(row.get("channel", "")))
 
 
 def build(run_path, trace_path, table="", seed="", schedule_path=None, boot_default=""):

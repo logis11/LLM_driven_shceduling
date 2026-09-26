@@ -77,6 +77,11 @@
         "fork_slot"
       ]
     },
+    "channel": {
+      "description": "The kind of the channel the wake rows were filtered to (docs/harness/metrics.md §8; added 2026-09-26, from 9.5 D74); empty for no channel filter.",
+      "type": "string",
+      "pattern": "^[^:]+$"
+    },
     "window_start_us": {
       "type": "string",
       "pattern": "^[0-9]+$"

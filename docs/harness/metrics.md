@@ -1,6 +1,6 @@
 # Metrics — primitives, records, and the aggregates the research reads
 
-> Status: normative · Created 2026-09-08 · Updated 2026-09-12
+> Status: normative · Created 2026-09-08 · Updated 2026-09-26
 
 Every number the project reports is defined here. The document fixes three things: the **primitives** — the raw observations the harness computes from a trace or a recognition log; the **records** file they land in; and the **aggregates** — the statistics, the normalisation rule, and the constants that turn records into the figures the research questions ask for. Per-file weights are not here; they are data, in the scoring spec (`harness/scoring/scoring-spec.yaml`, §2). The code that implements the trace primitives lives in `harness/`; the grader that implements the recognition primitives is built in Phase 8 to the definitions below.
 
@@ -36,13 +36,14 @@ The first function is Phase 5's harness lower half. The second is Phase 8's grad
 
 **Trace** — the simulator's output, frozen in `../data-contracts.md` §9: JSONL, a `meta` header line, then seven event types. The reader streams plain or gzipped files, validates that every non-`x_` line is one of the seven types with the fields the contract names, ignores `x_`-prefixed lines wholesale, captures the header (`workload_id`, `condition`, `sim`), and refuses a trace whose task ids collide with a reserved entity name.
 
-**Run file** — the simulator's input, the run-file view of the workload (`../data-contracts.md` §4): `workload_id` and `events`. The reader takes it as a second input for three facts the trace does not carry:
+**Run file** — the simulator's input, the run-file view of the workload (`../data-contracts.md` §4): `workload_id` and `events`. The reader takes it as a second input for four facts the trace does not carry:
 
 | fact | how it is read |
 |---|---|
 | `T_end` | the largest pinned time in the file: arrival times, pinned departs, and wake events |
 | chain topology | a **chain** is the WAKE path starting at a task whose program contains a TIMER: the head, then each task the previous stage's WAKE targets, until a stage wakes no one (the tail). A TIMER task that wakes no one is a chain of length one. |
 | `demand` | a task's total RUN work, summed over its program; defined only when the program has no unbounded LOOP |
+| channels | each task's WAITs in program order, a LOOP's body repeated, with the **kind** of the channel each names: the channel's name before its colon (`input`, `timer`, `chain`, `job`, `children`); and, per task, the wake events on an `input` channel — its stimuli |
 
 **Config schedule** — the daemon's input to the simulator (`../data-contracts.md` §7). The reader takes it as a third input for the one fact neither of the others carries: the **params** of each applied entry, looked up by the `index` the trace's `config_applied` line names. Only `switch_window` (§6.9) reads it, for a switch into MLFQ. The schedule's `t_us` is the daemon's stamp (`t_return`); the trace's `config_applied` time is the applied instant (`t_apply`), which is what every schedule row anchors on. When the schedule is not given, a switch into MLFQ produces a guard and no row; an applied entry the schedule lacks, or carries with another algorithm, is a guard.
 
@@ -63,7 +64,7 @@ Every primitive is measured over `[0, T_end]`.
 
 ## 5. Records
 
-One CSV file per trace (or per recognition log), every row self-contained, twenty-two columns.
+One CSV file per trace (or per recognition log), every row self-contained, twenty-three columns.
 
 **Identity** — which run the row came from.
 
@@ -91,6 +92,7 @@ One CSV file per trace (or per recognition log), every row self-contained, twent
 | column | filled by | meaning |
 |---|---|---|
 | `cause` | `ready_wait` | why the task became runnable: `arrive`, `wake`, `sleep_end`, `timer_tick`, `fork_slot` |
+| `channel` | `ready_wait` with `cause = wake` | the kind of the channel the completed WAIT named (§6.1): `input`, `timer`, `chain`, `job`, `children` |
 | `provenance` | `config_interval` | `unmodified`, `clamped`, `held`, `fallback` |
 | `algorithm` | `config_interval`, `switch_window` | `MLFQ`, `EDF`, `LOTTERY`, `FIFO` |
 | `index` | `config_interval`, `switch_window` | the schedule entry's index |
@@ -104,7 +106,7 @@ One CSV file per trace (or per recognition log), every row self-contained, twent
 
 **Rules.**
 
-- **Row order**: by `entity`, then `metric`, then `t` (numeric), then `cause`. Files compare byte for byte.
+- **Row order**: by `entity`, then `metric`, then `t` (numeric), then `cause`, then `channel`. Files compare byte for byte.
 - **Anchors**: window-level rows (`cpu_delivered`, `demand`, `preempt_count`, `busy`, and `completed` with value 0) sit at `T_end`; `completed` with value 1 and `turnaround` sit at the `task_end` time; every other primitive names its anchor below.
 - **No aggregates, no derived flags.** `met` is not stored (it is `value ≤ period_us`); progress is not stored (it is `cpu_delivered / demand`).
 - **Machine schema**: lands beside the code that writes the file, in the harness tree (`harness/records/schema/`), enforced by its tests. Records are not a data contract: only the harness writes and reads them.
@@ -121,16 +123,17 @@ Each primitive states what it measures, which trace lines produce it, and what t
 
 One row per `ready` line inside the window. `t` = the `ready` time. `value` = the task's next `run_start` minus `t`; **zero when the `ready` falls inside the task's own occupancy** (at or after a `run_start` and before its `run_end`), which is how a blocking primitive that completed without blocking appears. `cause` carried on the row.
 
+A `ready` line with `cause = wake` completes the task's next WAIT in program order (§11, items 1–2), so its row also carries that WAIT's `channel` kind, read from the run file (§3). A keystroke is `input`; a measured timer wake, a chain stage's hand-off, a job member's hand-off, and an orchestrator's wait for its children are `timer`, `chain`, `job`, and `children`. A wake line past the last WAIT of its task's program is a guard, and its row carries no channel.
+
 The proposal's named metrics are filters and aggregates over it:
 
 | name | filter / aggregate |
 |---|---|
-| interaction latency (per stimulus) | rows with `cause = wake` on the task the scoring spec names |
+| interaction latency (per stimulus) | rows with `cause = wake` and `channel = input` on the task the scoring spec names |
 | response time (per task) | the row with `cause = arrive` |
 | timer dispatch delay | rows with `cause = timer_tick` |
 | starvation | a task's maximum `ready_wait` over the window, any cause — measured from `ready`, never from arrival: a task sleeping voluntarily is not starving |
 
-A chain stage's WAIT completing is also `cause = wake`; the trace does not name channels, so scoring tells keystrokes from stage hand-offs by entity.
 
 ### 6.2 `job`
 
@@ -236,13 +239,13 @@ A fixed list, computed from records at scoring time, always per workload, condit
 
 | over | aggregate |
 |---|---|
-| `ready_wait` rows (a filter by `cause` and entity applied first) | count; mean; P50; P95; P99; max; **`over_threshold`** — the fraction of rows with `value > T_interaction` (§10) |
+| `ready_wait` rows (a filter by `cause` — for `cause = wake` also by `channel` — and entity applied first) | count; mean; P50; P95; P99; max; **`over_threshold`** — the fraction of rows with `value > T_interaction` (§10) |
 | `job` rows | count; **miss rate** — the fraction with `value > period_us`; latency P50; latency P99 |
 | `cpu_delivered`, `demand` | **progress** — `cpu_delivered / demand` |
 | `completed`, `turnaround` | completion (0/1); turnaround as is |
 | `preempt_count` | as is; summed over tasks for the lane |
 | `config_interval` rows | time-weighted share per `provenance`; count share per `provenance`; **fallback share** (time-weighted `fallback` + `held`); config age — the distribution of `value` |
-| `switch_window` rows with `ready_wait` rows | **per-switch excess** — for each switch into MLFQ, the mean of the `ready_wait(cause = wake)` values of the scoring spec's interactive task inside the switch window `[t, t + value]`, minus the mean of the same task's rows in the rest of that config interval outside any window, in µs; the **boost variant** takes the same excess over the boost windows of that interval, one at each instant `t + k · boost_interval_us` (k ≥ 1), each sized by the §6.9 rule from that instant (H counted there, closing when the last hog has its `W_single`) and clipped at the next boost; switch excess ≈ boost excess means the switch cost one boost, the difference above it is backlog carried from the outgoing algorithm. **Share inside switch windows** — Σ `value`, each clipped at `T_end`, over `T_end`. Neither is weighted in any score; both are reported beside it |
+| `switch_window` rows with `ready_wait` rows | **per-switch excess** — for each switch into MLFQ, the mean of the `ready_wait(cause = wake, channel = input)` values of the scoring spec's interactive task inside the switch window `[t, t + value]`, minus the mean of the same task's rows in the rest of that config interval outside any window, in µs; the **boost variant** takes the same excess over the boost windows of that interval, one at each instant `t + k · boost_interval_us` (k ≥ 1), each sized by the §6.9 rule from that instant (H counted there, closing when the last hog has its `W_single`) and clipped at the next boost; switch excess ≈ boost excess means the switch cost one boost, the difference above it is backlog carried from the outgoing algorithm. **Share inside switch windows** — Σ `value`, each clipped at `T_end`, over `T_end`. Neither is weighted in any score; both are reported beside it |
 | `busy` | utilisation `busy / T_end`; idle `T_end − busy` |
 | recognition rows | the grader's, not the aggregates module's (§7; 8.4), and they land in the `grades` file (`harness/grades/schema/`) rather than here: raw accuracy beside its **measured** majority baseline on every axis; **balanced accuracy** and the **Matthews correlation coefficient** on the binary attribute only; the confusion matrix over (`truth`, `predicted`) and per-class recall on mode and on algorithm choice; the configuration-correct rate and the share of errors that changed the configuration; latency P50/P99 over rows with `mode_correct = 1`. The familiarity tier rides on the row as a split key and **no per-tier aggregate is defined**: at the current coreset each annotated tier carries one graded query point and tiers 1 and 2 have none, so what the tiers demonstrate belongs to its own experiment |
 
@@ -252,7 +255,7 @@ A fixed list, computed from records at scoring time, always per workload, condit
 
 **Intervals and comparisons.** Query points inside one workload file share its process names and its situation, so they are not independent observations. Every interval therefore comes from a **cluster bootstrap that resamples workload files**, not query points (`field-jrssb07`, whose consistency is in the number of clusters and which is anti-conservative at very few). Condition comparisons are computed **paired**, on the same drawn files, because every condition is graded on identical query points (`dietterich-neco98`, which names this case and rules out both a difference of two proportions and a resampled t test). Determinism here means reproducibility: the seed and the repetition count are constants (§10), so a rerun gives byte-identical bounds.
 
-Percentiles are computed on the raw values with linear interpolation: position `(n − 1) · p / 100` on the sorted values, interpolating between the two neighbours (numpy's `linear` method, R's type 7), computed exactly on the integer records. Mean is reported for sanity only, never as a headline. Counts (stimuli per task, ticks per chain) are guard inputs: stimulus count is checked against the workload's wake events, tick count against the window's tick grid. The guards themselves — the eight checks, their thresholds, and the grounding behind each — are the guard spec, `../../harness/guards/guard-spec.yaml` (8.3), read by `harness/tools/harness/guards.py` into a `guards` file beside `aggregates` and `scores`. The `config_age` aggregates above measure time in force and are reported; the config-age guard measures something else, whether an entry took effect before the ground-truth segment its query was observed in had ended.
+Percentiles are computed on the raw values with linear interpolation: position `(n − 1) · p / 100` on the sorted values, interpolating between the two neighbours (numpy's `linear` method, R's type 7), computed exactly on the integer records. Mean is reported for sanity only, never as a headline. Counts (stimuli per task, ticks per chain) are guard inputs: stimulus count — the `input`-channel wake rows — is checked against the workload's input wake events, tick count against the window's tick grid. The guards themselves — the eight checks, their thresholds, and the grounding behind each — are the guard spec, `../../harness/guards/guard-spec.yaml` (8.3), read by `harness/tools/harness/guards.py` into a `guards` file beside `aggregates` and `scores`. The `config_age` aggregates above measure time in force and are reported; the config-age guard measures something else, whether an entry took effect before the ground-truth segment its query was observed in had ended.
 
 ---
 
@@ -321,6 +324,7 @@ The definitions above, and the mock traces that test them, assume the following 
 
 Every change to a primitive, an aggregate, a constant, or a floor lands here, dated, with the sub-task that made it.
 
+- **2026-09-26 — wake rows carry their channel (jioh 9.5).** A measured timer wake now compiles as a WAIT on the task's `timer` channel, woken by a wake event at its measured time, so a `ready(cause = wake)` line is a keystroke or a timer wake alike. The run file's fourth fact is each task's WAIT channels in program order and its input wake events (§3). Records gain a twenty-third column, `channel` (§5): on a `ready_wait` row with `cause = wake`, the kind of the channel of the WAIT the line completed (§6.1). Interaction latency and the per-switch excess read `channel = input` (§6.1, §8); the `ready_wait` aggregates over `cause = wake` also come per channel; the stimulus count compares the input-channel rows with the run file's input wake events, and a wake line past the last WAIT of its task's program is a guard. A scoring-spec `ready_wait` term with `cause: wake` may name `channel`; the frozen spec's interaction-latency terms gain `channel: input` in 9.14's change to it, and until then read every channel. The fixtures' expected records, aggregates, and scores gain the column. No constant or floor changed.
 - **2026-09-12 — `W_single`'s worked value (jioh 8.9).** No rule changed. §6.9's parenthetical example of `W_single` still quoted the 2 ms boot slice's 6 000 µs; at the OSTEP boot default of 2026-09-11 the same formula gives 30 000 µs. The formula and the incoming-entry rule are unchanged.
 - **2026-09-11 — the Layer-1 grader (jioh 8.4).** Records gain a twenty-second column, `pre_committed_miss` (§5), and `sim` stops being required, since a recognition row comes from a log and not a trace. §7 gains a fifth recognition primitive, `config_correct`, the exclusion rule for pre-committed misses, and the off-menu rules. §8's recognition row is the grader's and lands in a `grades` file (`harness/grades/schema/`, `harness/tools/harness/grader.py`, CLI `tools/grade.py`): balanced accuracy and the Matthews coefficient on the binary attribute only, raw accuracy against a measured majority baseline with confusion matrix and per-class recall on mode and algorithm choice, no macro-average anywhere, the configuration-distance line, and clustered intervals with paired condition comparisons. The familiarity tier is carried and no longer aggregated: the earlier "each also per familiarity tier" required numbers the coreset cannot support, one graded query point per annotated tier. §10 gains the bootstrap seed, repetitions and interval level. Seeds are averaged over rather than pooled, mirroring §9's Layer-2 rule, with both readings kept (`over_seeds`, `n_seeds`). Fixture `mock-grades`. No trace primitive, constant, or floor changed.
 - **2026-09-11 — guard spec and guards (jioh 8.3).** No primitive, aggregate, constant, or floor changed. The guards' list, thresholds, and groundings now live in the guard spec, `harness/guards/guard-spec.yaml` (schema and lint beside it, in CI), read by `harness/tools/harness/guards.py` into a `guards` file (`harness/guards/schema/guards.schema.json`): provenance share below 0.5 and starvation at or below 1 000 000 µs as stated assumptions, utilisation as arithmetic, the rest structural; the config-age guard checks observation staleness against the ground-truth segments and is distinct from §8's `config_age_*` aggregates (time in force), which §8 now says. The reader gains `read_recognition_log` (data-contracts §8). Fixture `mock-guards`.
