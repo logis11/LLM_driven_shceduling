@@ -52,7 +52,7 @@ _cp = _campaign_pool()
 QUANTILE_PROBS, select_components = _cp.QUANTILE_PROBS, _cp.select_components
 
 APPS = ("chrome-hidden", "chrome-visible", "element", "steam")
-NAME = re.compile(r"^meas-desktop-(chrome-hidden|chrome-visible|element|steam)-r(\d+)-(dry|probe|full)$")
+NAME = re.compile(r"^meas-desktop-(chrome-hidden|chrome-visible|element|steam)-r(\d+)-(dry|probe|full|control)$")
 POOLED_MODES = ("dry", "full")          # `probe` is parsed so it can be reported, never pooled
 
 # the phase each entry reads. The visible entry reads the no-timer phase where that phase yields enough and the
@@ -124,7 +124,7 @@ def repeat_order(k):
     return int(i), run
 
 
-def find_runs(root, cpu_model):
+def find_runs(root, cpu_model, modes=POOLED_MODES):
     """Every repeat obtained is pooled (campaign workflow: "Every same-machine repeat obtained is pooled and
     reported"). A repeat is keyed by its index; when an index landed more than once — a retry relaunched while an
     earlier launch of it was still queued — every landing of it is keyed `<index>@<run id>`, never the latest alone."""
@@ -136,7 +136,7 @@ def find_runs(root, cpu_model):
         app, k, mode = m.group(1), int(m.group(2)), m.group(3)
         rpt = json.load(open(os.path.join(d, "report.json")))
         rel = os.path.relpath(d, root)
-        if mode not in POOLED_MODES:
+        if mode not in modes:
             probes.append({"app": app, "repeat": k, "mode": mode, "path": rel})
             continue
         if rpt.get("gate") != "open":
@@ -410,9 +410,11 @@ def main():
     ap.add_argument("--md")
     ap.add_argument("--cpu-model", default="")
     ap.add_argument("--tag", default="")
+    ap.add_argument("--control", action="store_true", help="pool the untraced control's traced runs, and only them")
     a = ap.parse_args()
 
-    runs, gated, other, probes = find_runs(a.artifacts, a.cpu_model)
+    # the untraced control's traced runs pool apart, under --control only (task-9.5-untraced-control spec, decision 15)
+    runs, gated, other, probes = find_runs(a.artifacts, a.cpu_model, ("control",) if a.control else POOLED_MODES)
     if not runs:
         print("no repeats found", file=sys.stderr)
         raise SystemExit(1)

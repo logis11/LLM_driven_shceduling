@@ -442,3 +442,48 @@ def test_the_shares_are_read_over_the_traced_run_s_wake_rows():
     assert out["MemoryInfra"]["left"] == (round(50 / 52, 4), 0.5)
     assert out["main"]["left"] == (0.0, 0.0)
     assert control.shares(rows, key, ["main"], alive)["main"]["left"] is None     # no rule for this value
+
+
+# ---- analysis: the workload check (analysis plan, task 5) --------------------------------------------------------
+
+def test_a_control_artifact_is_pooled_only_under_the_control_flag(tmp_path):
+    import json as _j
+    import sys as _s
+    from meas.desktop import pool as p98
+    from meas.session import pool as p99
+    saved = _s.modules.pop("analyze", None)
+    try:
+        import importlib
+        p95 = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            _s.modules["analyze"] = saved
+    # decision 15: a campaign pool never takes a control artifact; the control's traced runs pool apart
+    assert p95.pooled_mode("full", False) and not p95.pooled_mode("control", False)
+    assert p95.pooled_mode("control", True) and not p95.pooled_mode("full", True)
+    assert p95.NAME.match("meas-interactive-chrome-r3-control")
+    for fam, mod, app in (("desktop", p98, "steam"), ("session", p99, "session")):
+        for k, mode in ((1, "control"), (2, "full")):
+            d = tmp_path / fam / f"meas-{fam}-{app}-r{k}-{mode}"
+            d.mkdir(parents=True)
+            (d / "report.json").write_text(_j.dumps({"gate": "open"}))
+            (d / "spec.json").write_text(_j.dumps({"cpu_model": "AMD EPYC 7763 64-Core Processor"}))
+        runs, _, _, probes = mod.find_runs(str(tmp_path / fam), "EPYC 7763", modes=("control",))
+        assert list(runs[app]) == [1] and [p["mode"] for p in probes] == ["full"], fam
+        runs, _, _, probes = mod.find_runs(str(tmp_path / fam), "EPYC 7763")
+        assert list(runs[app]) == [2] and [p["mode"] for p in probes] == ["control"], fam
+
+
+def test_the_workload_check_places_each_control_value_in_the_carried_spread():
+    from meas import control
+    carried = {"stability": {"quantities": {"idle a wakes/s": {"k": 20, "mean": 10.0, "cv": 0.05},
+                                            "idle b run mean (ms)": {"k": 20, "mean": 2.0, "cv": 0.1},
+                                            "idle gone wakes/s": {"k": 20, "mean": 1.0, "cv": 0.2}}}}
+    ctl = {"stability": {"quantities": {"idle a wakes/s": {"k": 6, "mean": 10.25, "cv": 0.04},
+                                        "idle b run mean (ms)": {"k": 6, "mean": 1.7, "cv": 0.1},
+                                        "idle new wakes/s": {"k": 6, "mean": 3.0, "cv": 0.1}}}}
+    out = control.workload(carried, ctl)
+    # z: the control's mean less the carried mean, over the carried per-repeat spread (cv × mean) — 9.5 D69's form
+    assert out["z"] == {"idle a wakes/s": 0.5, "idle b run mean (ms)": -1.5}
+    assert out["only_carried"] == ["idle gone wakes/s"] and out["only_control"] == ["idle new wakes/s"]
+    assert out["max_abs_z"] == 1.5

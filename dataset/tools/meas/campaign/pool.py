@@ -33,7 +33,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from stability import stability, ratio_stability, ratio_repeats_needed, TOLERANCE, t975  # noqa: E402
 from distribution import circular_gaps, quantile_table  # noqa: E402
 
-NAME = re.compile(r"^meas-(interactive|playback)-(.+)-r(\d+)-(dry|full)$")
+NAME = re.compile(r"^meas-(interactive|playback)-(.+)-r(\d+)-(dry|full|control)$")
+
+
+def pooled_mode(mode, control):
+    """A control job (task-9.5-untraced-control spec) is pooled only under --control, and then alone (decision 15)."""
+    return (mode == "control") == bool(control)
 
 
 QUANTILE_PROBS = (0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999)
@@ -357,6 +362,7 @@ def main():
     ap.add_argument("--w-ms", type=float, default=5.0); ap.add_argument("--cap-ms", type=float, default=0.0)
     ap.add_argument("--exclude-roles", default="", help="comma-separated process roles left out of the tree (D14: renderer for chrome)")
     ap.add_argument("--cpu-model", default="", help="pool only repeats whose CPU model contains this text (D26)")
+    ap.add_argument("--control", action="store_true", help="pool the untraced control's traced runs, and only them")
     args = ap.parse_args()
     exclude_roles = tuple(x for x in args.exclude_roles.split(",") if x)
     runs, gated, other = {}, [], []
@@ -365,6 +371,8 @@ def main():
         if not m or not os.path.exists(os.path.join(d, "report.json")):
             continue
         fam, app, rep, mode = m.group(1), m.group(2), int(m.group(3)), m.group(4)
+        if not pooled_mode(mode, args.control):
+            continue
         spec = json.load(open(os.path.join(d, "spec.json"))) if os.path.exists(os.path.join(d, "spec.json")) else {}
         model = spec.get("cpu_model") or ""
         if json.load(open(os.path.join(d, "report.json"))).get("gate") == "wrong-machine":

@@ -34,7 +34,7 @@ _cp = _campaign_pool()
 select_components = _cp.select_components
 
 APPS = ("session",)
-NAME = re.compile(r"^meas-session-(session)-r(\d+)-(dry|probe|full)$")
+NAME = re.compile(r"^meas-session-(session)-r(\d+)-(dry|probe|full|control)$")
 # Only a `full` job is a repeat. `probe` and `dry` are parsed so they can be reported and never pooled: a dry job
 # runs shortened phases and is not a repeat (method §1), and with the gate open on any model one that drew the
 # campaign's model would otherwise have been pooled as a repeat of it.
@@ -54,7 +54,7 @@ FOREIGN_CPU_SHARE_BOUND = 2e-4
 MIN_REPEATS = 5             # method §6 item 3
 
 
-def find_runs(root, cpu_model):
+def find_runs(root, cpu_model, modes=POOLED_MODES):
     """As `desktop/pool.py`: every repeat obtained is pooled; an index that landed more than once is keyed
     `<index>@<run id>` per landing."""
     runs, gated, other, probes = {}, [], [], []
@@ -65,7 +65,7 @@ def find_runs(root, cpu_model):
         app, k, mode = m.group(1), int(m.group(2)), m.group(3)
         rpt = json.load(open(os.path.join(d, "report.json")))
         rel = os.path.relpath(d, root)
-        if mode not in POOLED_MODES:
+        if mode not in modes:
             probes.append({"app": app, "repeat": k, "mode": mode, "path": rel})
             continue
         if rpt.get("gate") != "open":
@@ -316,8 +316,10 @@ def main():
     ap.add_argument("--md")
     ap.add_argument("--cpu-model", default="")
     ap.add_argument("--tag", default="")
+    ap.add_argument("--control", action="store_true", help="pool the untraced control's traced runs, and only them")
     a = ap.parse_args()
-    runs, gated, other, probes = find_runs(a.artifacts, a.cpu_model)
+    # the untraced control's traced runs pool apart, under --control only (task-9.5-untraced-control spec, decision 15)
+    runs, gated, other, probes = find_runs(a.artifacts, a.cpu_model, ("control",) if a.control else POOLED_MODES)
     if not runs:
         print("no repeats found", file=sys.stderr)
         raise SystemExit(1)
