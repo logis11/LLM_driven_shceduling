@@ -230,3 +230,56 @@ def test_the_session_control_pairs_the_steady_phase_with_a_snapshot_at_each_edge
         # the snapshot sits between the census and the recorded edge, on both sides: /proc only, outside the run
         assert body.index('census "$name.start"') < body.index('sys_snap "$name.before"') < body.index('edge "$name" start'), fn
         assert body.index('edge "$name" end') < body.index('sys_snap "$name.after"') < body.index('census "$name.end"'), fn
+
+
+# ---- analysis: the shared core (analysis plan, task 1) ----------------------------------------------------------
+
+def _snap(t, procs):
+    """procs: {pid: [(tid, comm, start, run_ns, vol, invol)]}"""
+    return {"t_mono": t, "procs": [{"pid": pid, "cmd": f"app{pid}", "cgroup": "/", "tasks": [
+        {"tid": tid, "comm": comm, "start_ticks": st, "run_ns": run, "wait_ns": 0, "slices": 0, "vol": vol, "invol": inv}
+        for tid, comm, st, run, vol, inv in ts]} for pid, ts in procs.items()]}
+
+
+def test_the_deltas_count_only_threads_alive_at_both_edges():
+    from meas import control
+    before = _snap(100.0, {10: [(10, "main", 1, 1_000_000, 10, 1), (11, "worker", 2, 0, 0, 0), (12, "old", 3, 5, 5, 0)]})
+    after = _snap(160.0, {10: [(10, "main", 1, 4_000_000, 40, 3), (11, "worker", 2, 2_000_000, 20, 0),
+                               (12, "new", 99, 7, 2, 0), (13, "born", 50, 9, 9, 9)]})
+    deltas, span = control.thread_deltas(before, after)
+    assert span == 60.0
+    # 12 is a new thread under a reused tid (another start time), 13 was born within the run: neither counts (decision 10)
+    assert sorted(k[1] for k in deltas) == [10, 11]
+    assert deltas[(10, 10, 1)] == {"pid": 10, "comm": "main", "run_ns": 3_000_000, "vol": 30, "invol": 2}
+
+
+def test_threads_group_by_the_family_s_key_and_values_are_per_wake():
+    from meas import control
+    deltas = {(10, 10, 1): {"pid": 10, "comm": "main", "run_ns": 3_000_000, "vol": 30, "invol": 2},
+              (10, 11, 2): {"pid": 10, "comm": "worker", "run_ns": 2_000_000, "vol": 20, "invol": 0},
+              (10, 12, 3): {"pid": 10, "comm": "worker", "run_ns": 1_000_000, "vol": 30, "invol": 1},
+              (20, 20, 4): {"pid": 20, "comm": "harness", "run_ns": 9, "vol": 9, "invol": 9}}
+    g = control.group(deltas, lambda pid, comm: None if comm == "harness" else comm)
+    assert g == {"main": {"run_ns": 3_000_000, "vol": 30, "invol": 2, "threads": 1},
+                 "worker": {"run_ns": 3_000_000, "vol": 50, "invol": 1, "threads": 2}}
+    # decision 8: the run mean is CPU over voluntary switches, the wake rate voluntary switches over the span
+    assert control.rate_and_run(g["worker"], 50.0) == (1.0, 0.06)
+    assert control.rate_and_run({"run_ns": 5, "vol": 0, "invol": 0, "threads": 1}, 50.0) == (0.0, None)
+
+
+def test_the_reading_is_the_d36_check_with_the_two_orders_beside_it():
+    from meas import control
+    from meas.background.pool import check
+    pairs = {1: ("traced untraced", 10.0, 9.7), 2: ("untraced traced", 10.0, 9.8), 3: ("traced untraced", 12.0, 11.7),
+             4: ("untraced traced", 11.0, 10.8), 5: ("traced untraced", 10.0, 9.75), 6: ("untraced traced", 10.0, 0.0)}
+    out = control.read(pairs)
+    ratios = {1: 0.97, 2: 0.98, 3: 0.975, 4: 0.9818, 5: 0.975, 6: None}   # job 6's untraced side is zero: no ratio
+    assert {k: out["per_repeat"][k] for k in ratios} == ratios
+    # the pooled medians take every job's value, job 6's zero included
+    assert out["a"] == 10.0 and out["b"] == 9.775
+    ref = check(10.0, 9.775, ratios)
+    assert out["reading"] == ref["reading"] == "difference" and out["interval"] == ref["interval"]
+    assert out["ratio"] == ref["ratio"] == 0.9775
+    assert out["n"] == 5
+    assert out["order_means"] == {"traced untraced": round((0.97 + 0.975 + 0.975) / 3, 4),
+                                  "untraced traced": round((0.98 + 0.9818) / 2, 4)}
