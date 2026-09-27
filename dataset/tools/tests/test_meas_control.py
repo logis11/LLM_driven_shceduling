@@ -517,3 +517,12 @@ def test_the_report_names_the_archetypes_the_fold_ins_name(repo_root):
     body = src[src.index("ARCHETYPES = {"):src.index("\n}\n", src.index("ARCHETYPES = {"))]
     folded = {app: aid for aid, app in _re.findall(r'^    "([a-z-]+)": \("([a-z0-9-]+)",', body, _re.M)}
     assert control_report.ARCH_95 == folded
+
+
+def test_a_play_entry_is_read_over_the_tree_only():
+    # the play entries carry a period and the tree's whole CPU per cycle (fold_in, D74/D75), no components: the first
+    # landed control jobs (playback #620) listed the play phase's per-thread tables, which no archetype carries
+    from meas.campaign import control as c95
+    ph = {"components": {"selected": ["ao", "mpv"], "residual": {"gap_ms": {"table": [1]}}},
+          "threads": {"ao": {"gap_ms": {"table": [1]}}, "mpv": {"gap_ms": {"table": [1]}}}, "cycle": {}}
+    assert c95.carried_components("mpv-audio", "play", ph) == []

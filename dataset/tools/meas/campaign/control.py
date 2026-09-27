@@ -58,9 +58,9 @@ def keyer(D, app, name, exclude_roles):
 def carried_components(app, phase, ph):
     """The components the fold-in carries for a phase (fold_in.components_block): the selected ones with a gap table,
     and `residual` when it has one; the driven phase's only for the pointer-loop entries, whose focus components they
-    are — a typing entry carries its driven phase as the per-input run."""
-    if phase == "driven" and app not in _cp.FOCUS_COMPONENTS:
-        return []
+    are — a typing entry carries its driven phase as the per-input run; none of the play phase's."""
+    if phase == "play" or (phase == "driven" and app not in _cp.FOCUS_COMPONENTS):
+        return []   # a play entry carries its period and the tree's CPU per cycle (D74, D75), read here as its CPU share
     sel = ph.get("components") or {}
     out = [c for c in sel.get("selected", []) if ((ph.get("threads") or {}).get(c, {}).get("gap_ms") or {}).get("table")]
     if (sel.get("residual") or {}).get("gap_ms", {}).get("table"):
