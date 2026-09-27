@@ -321,3 +321,9 @@ No rule of D23 or D27 moves them: they fall outside the cron windows, and D27 fo
 Tooling: `session/fold_in.py` (`MIDNIGHT_SPLIT`, `midnight_split`). Test: `test_the_audio_servers_scope_states_its_midnight_split`. Values changed: none; `audio-server`'s scope. Compiled with D37.
 
 Commit: this entry.
+
+## D39 — a coincidence in time with a runner service is not ground to take wakes out (2026-09-27)
+
+By 인지오's decision, closing D38's open question: a wake leaves a component only when the trace's waker chain leads to a cause outside the observed desktop (D27, decision 2); a wake that falls near a runner service's activity, with no waker in the trace linking the two, stays. The 15 extra pairs of `wireplumber/gmain` in the four midnight repeats, 14 of them within 0.2 s of a `dockerd` burst, stay in `audio-server`, whose scope states the split and that D27's rules keep them (D38). Values changed: none.
+
+Commit: this entry.
