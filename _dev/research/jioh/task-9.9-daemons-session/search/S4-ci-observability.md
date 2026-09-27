@@ -515,3 +515,25 @@ Fetched with the authenticated `gh` CLI and plain `curl` on the development Mac,
 **Passages.** `rel-anon.headers`: > `HTTP/2 200` / `x-ratelimit-limit: 60` / `x-ratelimit-used: 1`. `rel-anon.json` tag names (reader's extraction): `meas-ci-desktop-2026-09-20`, `meas-ci-build-2026-09-18`, `meas-ci-2026-09-16`, `meas-ci-2026-09-14`, `meas-ci-2026-08-28`.
 
 **Coverage.** The caveat under S4-00 is resolved: a request with no credentials (limit 60, GitHub's unauthenticated limit) returns the release list with 200. An asset downloads without credentials too: `curl -sL https://github.com/logis11/LLM_driven_shceduling/releases/download/meas-ci-build-2026-09-18/gated-reports.zip` → 200, 5 898 bytes, the size the release lists (2026-09-22).
+
+## 6. Kernel sources at v6.17 (2026-09-27)
+
+Fetched with plain `curl` on the development Mac at the tag `v6.17`, which `git ls-remote https://github.com/torvalds/linux` resolves to commit `e5f0a698b34ed76002dc5cff3804a61c80233a7a` (2026-09-27). Copies in `sources/retry-2026-09-27/` (local, gitignored).
+
+| # | date | engine | URL | status | copy (SHA-256) |
+|---|---|---|---|---|---|
+| R5 | 2026-09-27 | `curl` | `https://raw.githubusercontent.com/torvalds/linux/v6.17/fs/proc/base.c` | 200 (98 834 bytes) | `base.c` `73d9700353f13f9873aa2f3c860b0a1d9a7b2c3939e33ac12c9b95474e7e5af7` |
+| R6 | 2026-09-27 | `curl` | `https://raw.githubusercontent.com/torvalds/linux/v6.17/include/linux/sched/stat.h` | 200 (887 bytes) | `sched-stat.h` `29f95604d2c3bb7bdaff659a9418044c0f7247805ef6769238db95dac439922c` |
+
+### S4-07 amendment — `/proc/<pid>/schedstat` at v6.17
+
+**Citation.** Linux kernel (torvalds/linux), tag `v6.17` → commit `e5f0a698b34ed76002dc5cff3804a61c80233a7a`: `fs/proc/base.c`, `include/linux/sched/stat.h`. The runner's kernel is 6.17 (S4-01).
+
+**Passages.**
+- `base.c:507-524`: `#ifdef CONFIG_SCHED_INFO` / `/*` / ` * Provides /proc/PID/schedstat` / ` */` / `static int proc_pid_schedstat(struct seq_file *m, struct pid_namespace *ns,` / `struct pid *pid, struct task_struct *task)` / `{` / `if (unlikely(!sched_info_on()))` / `seq_puts(m, "0 0 0\n");` / `else` / `seq_printf(m, "%llu %llu %lu\n",` / `(unsigned long long)task->se.sum_exec_runtime,` / `(unsigned long long)task->sched_info.run_delay,` / `task->sched_info.pcount);` / (blank) / `return 0;` / `}` / `#endif`
+- `base.c:3368-3369`, in `tgid_base_stuff` (`:3314`): `#ifdef CONFIG_SCHED_INFO` / `ONE("schedstat",  S_IRUGO, proc_pid_schedstat),`; `:3714-3715`, in `tid_base_stuff` (`:3664`): `#ifdef CONFIG_SCHED_INFO` / `ONE("schedstat", S_IRUGO, proc_pid_schedstat),`
+- `sched-stat.h:25-28`: `static inline int sched_info_on(void)` / `{` / `return IS_ENABLED(CONFIG_SCHED_INFO);` / `}`
+
+**Correction to §4 T7.4.** `/proc/<pid>/schedstat` is not governed by `kernel.sched_schedstats`. At v6.17 the file, per process and per thread (`/proc/<pid>/task/<tid>/schedstat`), exists when the kernel is built with `CONFIG_SCHED_INFO`, and prints its three fields when `sched_info_on()` holds, which is `CONFIG_SCHED_INFO` again; neither path reads the sysctl. The first field is the task's `se.sum_exec_runtime`. The azure kernel has `SCHED_INFO=y` (S4-15). `sysctl-kernel.rst:1269-1274` (S4-07) states only that the sysctl "Enables/disables scheduler statistics"; it names no file.
+
+**Coverage.** T7.4: on the runner's kernel, `/proc/<pid>/task/<tid>/schedstat` prints each thread's `se.sum_exec_runtime` whatever `kernel.sched_schedstats` is set to. Source; not an observation.
