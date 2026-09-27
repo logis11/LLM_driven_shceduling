@@ -95,7 +95,7 @@ The ratio tables go on the family's results pages and in the campaign record. Ea
 
 ### 21. The raw records are released
 
-The raw records of every landed control job and the gate-stop reports are released as the campaigns' were.
+The raw records of every landed control job and the gate-stop reports are released as the campaigns' were, in one release for the whole control.
 
 ### 22. Work a carried value leaves out by a rule read from the trace
 
@@ -108,7 +108,3 @@ Each ratio of an operation phase's component is taken over the whole phase: the 
 ## Invariants
 
 - Every dry run, control launch and release waits on 인지오's approval.
-
-## Open items
-
-- Whether the raw records go out as one release per family or one for the whole control, decided when they are released.
