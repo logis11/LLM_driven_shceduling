@@ -35,6 +35,8 @@ ARCH_95 = {"soffice": "office-writer", "code": "code-editor", "chrome": "web-bro
            "webrtc": "video-call"}
 POOL_98 = os.path.join(RESEARCH, "task-9.8-browser-comms", "campaign", "results", "pooled.json")
 POOL_99 = os.path.join(RESEARCH, "task-9.9-daemons-session", "campaign", "results", "pooled.json")
+# the 9.8 subjects whose job records the build under its own key (a renderer's is `version`), and the name it goes by
+VERSION_98 = {"chat-client": ("element.version", "Element ")}
 VERSIONS_99 = {"gnome-shell": ("gnome-shell",), "pipewire": ("pipewire", "wireplumber"), "systemd": ("systemd",),
                "dbus-daemon": ("dbus-daemon",)}
 NAME = {"campaign": re.compile(r"^meas-(?:interactive|playback)-(.+)-r(\d+)-control$"),
@@ -143,6 +145,9 @@ def _census(family, archetype, reports):
         from meas.session.fold_in import IDS
         entry = {v: k for k, v in IDS.items()}[archetype]
         ver = {k: ", ".join(f"{p} {r.get('version.' + p) or '?'}" for p in VERSIONS_99[entry]) for k, r in reports.items()}
+    elif family == "desktop" and archetype in VERSION_98:
+        key, name = VERSION_98[archetype]
+        ver = {k: (name + r[key]) if r.get(key) else None for k, r in reports.items()}
     else:
         ver = {k: r.get("version") for k, r in reports.items()}
     by = {}

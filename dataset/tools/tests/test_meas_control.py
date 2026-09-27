@@ -587,6 +587,15 @@ def test_the_report_reads_every_value_over_the_jobs_and_counts_the_intervals(tmp
     assert f"{rep['intervals']} intervals read" in md and "chance alone" in md
 
 
+def test_the_build_census_reads_each_subject_s_own_version_key():
+    from meas import control_report
+    # the chat client's job records Element's build under its own key, the renderers' under `version` (decision 16)
+    element = {1: {"element.version": "1.12.29", "synapse.version": "1.161.0+noble1"}, 2: {"element.version": "1.12.29"}}
+    assert control_report._census("desktop", "chat-client", element) == {"Element 1.12.29": [1, 2]}
+    chrome = {1: {"version": "Google Chrome 153.0.8010.52 "}}
+    assert control_report._census("desktop", "renderer-hidden", chrome) == {"Google Chrome 153.0.8010.52": [1]}
+
+
 def test_the_report_names_the_archetypes_the_fold_ins_name(repo_root):
     import re as _re
     from meas import control_report
