@@ -67,3 +67,9 @@
 
 - [x] `control.py <family> <artifacts> <carried pools> <out.json> --md <page>`: per archetype, each value's ratio, interval, reading, medians' ratio, order means, the shares, the interval count and the chance count, the build census, the workload check.
 - [ ] Run over the landed control jobs; commit the page to the slice's `campaign/` folder.
+
+### Task 7: the operation windows' share (decision 23)
+
+- [x] `control.shares` takes an `inside` rule beside `left`; the 9.5 adapter's op phase passes the rows `analyze.operation_windows` puts inside the [trigger, done) windows.
+- [x] The results page carries the share, CPU and wakes, in its own column for an archetype with an operation phase.
+- [x] Tests; commit.

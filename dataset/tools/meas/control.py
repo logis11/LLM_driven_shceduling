@@ -72,17 +72,19 @@ def alive(before, after):
             for pid, tid in [(p["pid"], t["tid"])] if (pid, tid, t["start_ticks"]) in first}
 
 
-def shares(rows, key, comps, alive_ids, left=None):
-    """{component: {"exited": (cpu share, wake share), "left": (cpu share, wake share) | None}} over a traced run's
+def shares(rows, key, comps, alive_ids, left=None, inside=None):
+    """{component: {"exited": (cpu share, wake share), "left": … | None, "inside": … | None}} over a traced run's
     wake rows: `exited` the rows of threads not alive at both edges (decision 10), `left` the rows a rule read from the
-    trace leaves out of the carried value (decision 22). key(row) names a row's component, None drops it; `residual`
-    takes every kept row outside the other components."""
+    trace leaves out of the carried value (decision 22), `inside` the rows inside an operation phase's windows
+    (decision 23). key(row) names a row's component, None drops it; `residual` takes every kept row outside the other
+    components."""
     named = [(key(r), r) for r in rows]
     out = {}
     for comp in comps:
         mine = [r for k, r in named if k is not None and (k == comp if comp != "residual" else k not in comps)]
         out[comp] = {"exited": _share(mine, lambda r: (r.pid, r.tid) not in alive_ids),
-                     "left": _share(mine, left) if left else None}
+                     "left": _share(mine, left) if left else None,
+                     "inside": _share(mine, inside) if inside else None}
     return out
 
 

@@ -129,10 +129,18 @@ def job_values(D, app, carried):
     return report.get("control.order"), vals
 
 
+def inside_rule(operation):
+    """row -> whether it is one of the rows analyze.operation_windows put inside a successful operation's [trigger,
+    done) window, the rows the pool reads the op phase's components from."""
+    ids = {id(r) for r in operation["inside"]}
+    return lambda row: id(row) in ids
+
+
 def shares(D, app, carried):
     """{"<phase> <component>": control.shares' record} over the traced runs' wake rows as the pool reads them
-    (analyze.analyze_run, the pool's roles excluded): the threads not alive at both edges (decision 10), and the heavy
-    event a component's value leaves out (HEAVY_EVENTS, 9.5 D64; decision 22)."""
+    (analyze.analyze_run, the pool's roles excluded): the threads not alive at both edges (decision 10), the heavy
+    event a component's value leaves out (HEAVY_EVENTS, 9.5 D64; decision 22), and an op phase's rows inside its
+    operation windows (decision 23)."""
     _, raw = analyze.analyze_run(D, exclude_roles=carried.get("exclude_roles") or ())
     out = {}
     for phase, r in raw["phases"].items():
@@ -145,6 +153,7 @@ def shares(D, app, carried):
         key = lambda row: analyze.component_name(roles.get(row.pid, "main"), _cp.component_key(app, row.comm))
         spec = _cp.HEAVY_EVENTS.get((app, phase))
         left = (lambda row: row.comm == spec[0] and row.run >= spec[1]) if spec else None
-        for comp, rec in control.shares(r["rows"], key, comps, control.alive(before, after), left).items():
+        inside = inside_rule(r["operation"]) if r.get("operation") else None
+        for comp, rec in control.shares(r["rows"], key, comps, control.alive(before, after), left, inside).items():
             out[f"{phase} {comp}"] = rec
     return out

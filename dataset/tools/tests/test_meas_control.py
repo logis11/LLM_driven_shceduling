@@ -444,6 +444,54 @@ def test_the_shares_are_read_over_the_traced_run_s_wake_rows():
     assert control.shares(rows, key, ["main"], alive)["main"]["left"] is None     # no rule for this value
 
 
+# ---- analysis: the operation windows' share of decision 23 (analysis plan, task 7) --------------------------------
+
+def test_the_share_inside_the_operation_windows_is_read_beside_the_others():
+    from collections import namedtuple
+    from meas import control
+    R = namedtuple("R", "pid tid comm run")
+    rows = [R(1, 1, "main", 4.0), R(1, 1, "main", 1.0), R(1, 2, "worker", 3.0)]
+    alive = {(1, 1), (1, 2)}
+    out = control.shares(rows, lambda r: r.comm, ["main", "residual"], alive, inside=lambda r: r.run >= 3.0)
+    assert out["main"]["inside"] == (0.8, 0.5)
+    assert out["residual"]["inside"] == (1.0, 1.0)
+    assert control.shares(rows, lambda r: r.comm, ["main"], alive)["main"]["inside"] is None   # a phase without an operation
+
+
+def test_the_op_phase_s_inside_rows_are_the_ones_the_pool_reads():
+    from collections import namedtuple
+    from meas.campaign import analyze
+    from meas.campaign import control as cc
+    R = namedtuple("R", "pid tid comm run t_in")
+    rows = [R(1, 1, "main", 1.0, 0.5), R(1, 1, "main", 2.0, 1.2), R(1, 1, "main", 4.0, 2.0), R(1, 1, "main", 8.0, 3.4)]
+    ops = [{"op": "page-load", "trigger_us": 1_000_000, "done_us": 2_000_000, "rc": 0},
+           {"op": "page-load", "trigger_us": 3_000_000, "done_us": 3_500_000, "rc": 1}]
+    rule = cc.inside_rule(analyze.operation_windows(rows, ops))
+    # a successful operation's [trigger, done) window only: the row at done and the failed operation's row are outside
+    assert [rule(r) for r in rows] == [False, True, False, False]
+
+
+def test_the_page_carries_the_operation_windows_share_only_for_an_archetype_with_an_operation():
+    from meas import control_report
+    recs = [{"exited": (0.0, 0.0), "left": None, "inside": (0.9, 0.8)},
+            {"exited": (0.0, 0.0), "left": None, "inside": (0.7, 0.6)}]
+    assert control_report._mean_shares(recs) == {"exited cpu": {"mean": 0.0, "max": 0.0}, "exited wakes": {"mean": 0.0, "max": 0.0},
+                                                 "inside cpu": {"mean": 0.8, "max": 0.9}, "inside wakes": {"mean": 0.7, "max": 0.8}}
+    value = {"a": 1.0, "b": 0.9, "ratio": 0.9, "per_repeat_mean": 0.9, "interval": [0.8, 1.0], "reading": "not resolved",
+             "order_means": {}, "n": 6}
+    rep = {"app": "chrome", "jobs": 6, "orders": {}, "builds": {}, "intervals": 2, "chance": 0.1, "differences": [],
+           "values": {"idle chrome wakes/s": value, "op chrome wakes/s": value},
+           "shares": {"idle chrome": control_report._mean_shares([{"exited": (0.0, 0.0), "left": None}]),
+                      "op chrome": control_report._mean_shares(recs)}}
+    lines = control_report.render({"family": "campaign", "archetypes": {"web-browser": rep}}).splitlines()
+    assert next(l for l in lines if l.startswith("| value |")).endswith("| in the operation windows (CPU, wakes) |")
+    assert next(l for l in lines if l.startswith("| op chrome wakes/s")).endswith("| 0.8, 0.7 |")
+    assert next(l for l in lines if l.startswith("| idle chrome wakes/s")).endswith("| — |")
+    rep["shares"] = {"idle chrome": rep["shares"]["idle chrome"]}
+    del rep["values"]["op chrome wakes/s"]
+    assert "operation windows" not in control_report.render({"family": "campaign", "archetypes": {"web-browser": rep}})
+
+
 # ---- analysis: the workload check (analysis plan, task 5) --------------------------------------------------------
 
 def test_a_control_artifact_is_pooled_only_under_the_control_flag(tmp_path):

@@ -2,7 +2,7 @@
 """The untraced control's report (_dev/docs/spec/jioh/task-9.5-untraced-control.md).
 
 Every landed control job of a family through its adapter: each value's per-job ratios, untraced over traced, read as
-9.7 D36 reads a check (decisions 11, 12), the shares of decisions 10 and 22 beside them, the build census (decision
+9.7 D36 reads a check (decisions 11, 12), the shares of decisions 10, 22 and 23 beside them, the build census (decision
 16) and, given the family's pool of the control's traced runs (pool.py --control), the workload check (decision 17).
 A JSON record and a results page, per archetype.
 
@@ -183,7 +183,7 @@ def app_reports(family, app, jobs, carried, with_shares=True, control_pool=None)
 def _mean_shares(recs):
     """Each share's mean and largest value over the jobs."""
     out = {}
-    for kind in ("exited", "left"):
+    for kind in ("exited", "left", "inside"):
         for i, what in ((0, "cpu"), (1, "wakes")):
             xs = [r[kind][i] for r in recs if r.get(kind) and r[kind][i] is not None]
             if xs:
@@ -200,12 +200,14 @@ def render(record):
     for arch, r in record["archetypes"].items():
         orders = ", ".join(f"{n} {o}" for o, n in r["orders"].items())
         builds = "; ".join(f"{v} ({', '.join(map(str, ks))})" for v, ks in r["builds"].items())
+        ops = any("inside cpu" in sh or "inside wakes" in sh for sh in r["shares"].values())   # decision 23
         lines += [f"## {arch} (`{r['app']}`)", "",
                   f"{r['jobs']} jobs ({orders}); builds: {builds}.",
                   f"{r['intervals']} intervals read; at 95 % chance alone gives about {r['chance']} differences; "
                   f"differences found: {len(r['differences'])}" + (f" ({', '.join(r['differences'])})." if r["differences"] else "."), "",
-                  "| value | traced median | untraced median | medians' ratio | per-job mean | 95 % interval | reading | by order | n | exited (CPU, wakes) | left out (CPU, wakes) |",
-                  "|---|---|---|---|---|---|---|---|---|---|---|"]
+                  "| value | traced median | untraced median | medians' ratio | per-job mean | 95 % interval | reading | by order | n | exited (CPU, wakes) | left out (CPU, wakes) |"
+                  + (" in the operation windows (CPU, wakes) |" if ops else ""),
+                  "|---|---|---|---|---|---|---|---|---|---|---|" + ("---|" if ops else "")]
         for name, v in r["values"].items():
             prefix = name.rsplit(" wakes/s", 1)[0].rsplit(" run mean (ms)", 1)[0]
             sh = r["shares"].get(prefix) or {}
@@ -215,7 +217,7 @@ def render(record):
             lines.append(f"| {name} | {_fmt(v.get('a'))} | {_fmt(v.get('b'))} | {_fmt(v.get('ratio'))} | {_fmt(v.get('per_repeat_mean'))} | "
                          f"{(_fmt(iv[0]) + '–' + _fmt(iv[1])) if iv else '—'} | {v.get('reading') or '—'} | "
                          f"{'; '.join(f'{o.split()[0]} first {m}' for o, m in v.get('order_means', {}).items()) or '—'} | {v.get('n', 0)} | "
-                         f"{pair('exited')} | {pair('left')} |")
+                         f"{pair('exited')} | {pair('left')} |" + (f" {pair('inside')} |" if ops else ""))
         for k, c in (r.get("validity") or {}).items():
             if c["problems"]:
                 lines.append(f"- job {k}: " + "; ".join(c["problems"]))
