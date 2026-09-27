@@ -63,3 +63,30 @@ def read(pairs):
     out["order_means"] = {o: round(statistics.fmean(v), 4) for o, v in sorted(by_order.items())}
     out["n"] = sum(1 for v in ratios.values() if v is not None)
     return out
+
+
+def alive(before, after):
+    """{(pid, tid)} of the threads present at both edges of a run — the same thread, by its start time."""
+    first = {(p["pid"], t["tid"], t["start_ticks"]) for p in before["procs"] for t in p.get("tasks", [])}
+    return {(pid, tid) for p in after["procs"] for t in p.get("tasks", [])
+            for pid, tid in [(p["pid"], t["tid"])] if (pid, tid, t["start_ticks"]) in first}
+
+
+def shares(rows, key, comps, alive_ids, left=None):
+    """{component: {"exited": (cpu share, wake share), "left": (cpu share, wake share) | None}} over a traced run's
+    wake rows: `exited` the rows of threads not alive at both edges (decision 10), `left` the rows a rule read from the
+    trace leaves out of the carried value (decision 22). key(row) names a row's component, None drops it; `residual`
+    takes every kept row outside the other components."""
+    named = [(key(r), r) for r in rows]
+    out = {}
+    for comp in comps:
+        mine = [r for k, r in named if k is not None and (k == comp if comp != "residual" else k not in comps)]
+        out[comp] = {"exited": _share(mine, lambda r: (r.pid, r.tid) not in alive_ids),
+                     "left": _share(mine, left) if left else None}
+    return out
+
+
+def _share(rows, pred):
+    cpu = sum(r.run for r in rows)
+    hit = [r for r in rows if pred(r)]
+    return (round(sum(r.run for r in hit) / cpu, 4) if cpu else None, round(len(hit) / len(rows), 4) if rows else None)

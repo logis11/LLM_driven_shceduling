@@ -208,7 +208,7 @@ def split_cron(rows, windows):
     return keep, events
 
 
-def analyze_phase(D, phase, meas_cpu, from_s=0.0, from_mono=None):
+def analyze_phase(D, phase, meas_cpu, from_s=0.0, from_mono=None, keep_rows=False):
     """`from_s` starts the phase that many seconds past its first row; `from_mono` at that monotonic second of
     the trace itself (the clock `perf sched record -k CLOCK_MONOTONIC` and the polls' `mono_ns` share), which is
     how the region past the probe's last poll is read (D19). Everything — rates, components, the foreign counts
@@ -263,6 +263,7 @@ def analyze_phase(D, phase, meas_cpu, from_s=0.0, from_mono=None):
         rows = [r for r in mine if any(r.pid in pids for pids in ipids.values())]
         # every wake per instance before D23 and D27 take any out: an instance with none never woke in the phase
         all_wakes = {i: sum(1 for r in rows if r.pid in pids) for i, pids in ipids.items()}
+        rows_all = rows
         rows, cron_events = split_cron(rows, cron_wins)        # D23: read without them, stated beside them
         rows, tally, gone = causes.split(rows)                 # D27: likewise, by cause
         threads, samples = components(rows, ipids, span, t0)
@@ -281,6 +282,8 @@ def analyze_phase(D, phase, meas_cpu, from_s=0.0, from_mono=None):
             "instance_wakes_all": all_wakes,
             "left": [[round(t - t0, 1), cls, lab] for t, cls, lab in gone],
             "threads": threads, "_samples": samples}
+        if keep_rows:   # the untraced control's shares (task-9.5-untraced-control spec, decisions 10, 22): every row
+            out["entries"][e]["_rows_all"], out["entries"][e]["_rows_kept"] = rows_all, rows   # before D23/D27, after
     t_start = next((json.loads(ln)["mono_ns"] for ln in open(os.path.join(D, "edges.jsonl"))
                     if ln.strip() and json.loads(ln).get("phase") == phase and json.loads(ln).get("edge") == "start"), None) \
         if os.path.exists(os.path.join(D, "edges.jsonl")) else None

@@ -421,3 +421,24 @@ def test_the_session_adapter_keys_threads_by_instance(tmp_path):
     assert vals["gnome-shell gnome-shell/gmain run mean (ms)"] == (0.05, 0.04)
     assert vals["dbus-daemon system-bus/dbus-daemon run mean (ms)"] == (0.1, 0.08)
     assert not any("cron" in k for k in vals)
+
+
+# ---- analysis: the shares of decisions 10 and 22 (analysis plan, task 4) ----------------------------------------
+
+def test_the_shares_are_read_over_the_traced_run_s_wake_rows():
+    from collections import namedtuple
+    from meas import control
+    R = namedtuple("R", "pid tid comm run")
+    rows = [R(1, 1, "main", 4.0), R(1, 1, "main", 4.0), R(1, 2, "worker", 1.0), R(1, 3, "worker", 3.0),
+            R(1, 9, "MemoryInfra", 50.0), R(1, 9, "MemoryInfra", 2.0), R(7, 7, "xdotool", 99.0)]
+    alive = {(1, 1), (1, 2), (1, 9)}                      # tid 3 started or exited within the run
+    key = lambda r: None if r.comm == "xdotool" else r.comm
+    out = control.shares(rows, key, ["main", "MemoryInfra", "residual"], alive,
+                         left=lambda r: r.comm == "MemoryInfra" and r.run >= 30.0)
+    # decision 10: the residual (both worker threads) holds 3 of its 4 ms and 1 of its 2 wakes in the thread that left
+    assert out["residual"]["exited"] == (0.75, 0.5)
+    assert out["main"]["exited"] == (0.0, 0.0)
+    # decision 22: MemoryInfra's heavy pass (50 of its 52 ms, 1 of 2 wakes) is what the carried value leaves out
+    assert out["MemoryInfra"]["left"] == (round(50 / 52, 4), 0.5)
+    assert out["main"]["left"] == (0.0, 0.0)
+    assert control.shares(rows, key, ["main"], alive)["main"]["left"] is None     # no rule for this value

@@ -72,3 +72,15 @@ def job_values(D, app, carried):
         vals[f"{phase} {comp} wakes/s"] = (pair["traced"][0], pair["untraced"][0])
         vals[f"{phase} {comp} run mean (ms)"] = (pair["traced"][1], pair["untraced"][1])
     return report.get("control.order"), vals
+
+
+def shares(D, app, carried):
+    """{"<phase> <component>": control.shares' record} over the traced run's kept rows (analyze.analyze_phase): the
+    threads not alive at both edges (decision 10); no rule read from the trace leaves a 9.8 value's work out."""
+    phase = CARRIED[app]
+    out_ph = a98.analyze_phase(D, phase, app, keep_rows=True)
+    comps = (carried["phases"][phase].get("components") or {})
+    names = list(comps.get("selected") or []) + (["residual"] if comps.get("residual") else [])
+    load = lambda edge: json.load(open(os.path.join(D, f"snap.{phase}.{edge}.json")))
+    rec = control.shares(out_ph.get("_rows") or [], lambda row: row.comm, names, control.alive(load("before"), load("after")))
+    return {f"{phase} {c}": v for c, v in rec.items()}

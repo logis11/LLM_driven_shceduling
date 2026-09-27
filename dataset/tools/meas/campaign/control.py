@@ -127,3 +127,24 @@ def job_values(D, app, carried):
         if phase == "op" and "operation" in ph:
             vals["op operation duration mean (ms)"] = (_ops_mean(D, "traced"), _ops_mean(D, "untraced"))
     return report.get("control.order"), vals
+
+
+def shares(D, app, carried):
+    """{"<phase> <component>": control.shares' record} over the traced runs' wake rows as the pool reads them
+    (analyze.analyze_run, the pool's roles excluded): the threads not alive at both edges (decision 10), and the heavy
+    event a component's value leaves out (HEAVY_EVENTS, 9.5 D64; decision 22)."""
+    _, raw = analyze.analyze_run(D, exclude_roles=carried.get("exclude_roles") or ())
+    out = {}
+    for phase, r in raw["phases"].items():
+        ph = carried["phases"].get(phase)
+        comps = carried_components(app, phase, ph) if ph else []
+        if not comps:
+            continue
+        before, after = _snaps(D, phase)
+        roles = r["roles"]
+        key = lambda row: analyze.component_name(roles.get(row.pid, "main"), _cp.component_key(app, row.comm))
+        spec = _cp.HEAVY_EVENTS.get((app, phase))
+        left = (lambda row: row.comm == spec[0] and row.run >= spec[1]) if spec else None
+        for comp, rec in control.shares(r["rows"], key, comps, control.alive(before, after), left).items():
+            out[f"{phase} {comp}"] = rec
+    return out

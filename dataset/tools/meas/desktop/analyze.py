@@ -153,7 +153,7 @@ def phases_in(D):
     return order + sorted(have - set(order))
 
 
-def analyze_phase(D, phase, app):
+def analyze_phase(D, phase, app, keep_rows=False):
     th = next((f"perf.{phase}.timehist.txt{s}" for s in (".gz", "")
                if os.path.exists(os.path.join(D, f"perf.{phase}.timehist.txt{s}"))), None)
     if not th:
@@ -225,6 +225,8 @@ def analyze_phase(D, phase, app):
             out["_samples"][comm] = {
                 "gaps": [g * 1000 for g in circular_gaps([([r.t_in for r in rs], t0, t0 + span)])],
                 "runs": [r.run for r in rs], "t_in": sorted(r.t_in for r in rs)}
+    if keep_rows:   # the untraced control's shares (task-9.5-untraced-control spec, decision 10): the rows kept
+        out["_rows"] = kept
     return out
 
 
