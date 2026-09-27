@@ -177,9 +177,16 @@ def test_a_prelude_answers_only_the_dialog_it_raised(repo_root):
                             ("kdenlive", "^Revert to last saved version", "Return")):
         pre = _arm(appdefs, app).split("CTRLPRELUDE=")[1]
         assert f"if xdotool search --onlyvisible --name '{title}' > /dev/null; then" in pre, app
-        assert f"xdotool key --clearmodifiers {key}; sleep 2; xdotool search --onlyvisible --name '{title}' > /dev/null && echo dialog-still-up" in pre, app
+        # run #615: a key sent the moment the dialog maps, the pointer still, did not reach it — the pointer is nudged
+        # across it and the dialog given a second first
+        assert (f"xdotool mousemove_relative 1 1; sleep 0.3; xdotool mousemove_relative -- -1 -1; sleep 1; "
+                f"xdotool key --clearmodifiers {key}; sleep 2; xdotool search --onlyvisible --name '{title}' > /dev/null && echo dialog-still-up") in pre, app
         assert "windowfocus" not in pre, app
     assert "alt+d" not in _arm(appdefs, "soffice")
+    # run #615: the document reopened after the dialog took no keys until clicked — a click at the pointer, on the
+    # first page's running text, before Ctrl+End puts the caret at the end in both preludes
+    sof = _arm(appdefs, "soffice").split("CTRLPRELUDE=")[1]
+    assert sof.index("sleep 30; xdotool click 1; sleep 1; xdotool key --clearmodifiers ctrl+End") > sof.index("soffice --norestore")
     pre = _body(_src("campaign", "run.sh"), "ctrl_prelude")
     assert pre.index("getwindowgeometry --shell") < pre.index("xdotool mousemove") < pre.index('bash -c "$CTRLPRELUDE"')
 
