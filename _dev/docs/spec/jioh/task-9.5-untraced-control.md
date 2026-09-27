@@ -101,6 +101,10 @@ The raw records of every landed control job and the gate-stop reports are releas
 
 Where a component's carried value leaves part of its thread's work out by a rule read from the trace — 9.5 D64's heavy events, 9.9 D23's cron sessions, the wakes 9.9 D27 and D32 trace to packages outside the desktop manifest or to the harness — the ratio is taken over the thread's whole work in both runs. The share the carried value leaves out, CPU and wakes, is read from the traced run's trace and stated beside the ratio.
 
+### 23. An operation phase's components over the whole phase
+
+Each ratio of an operation phase's component is taken over the whole phase: the operation windows and the pauses between them. The share of the component's CPU and wakes inside the operation windows, the [trigger, done) windows its carried value is pooled from (9.5 follow-ups D8), is read from the traced run's trace and stated beside the ratio.
+
 ## Invariants
 
 - Every dry run, control launch and release waits on 인지오's approval.
