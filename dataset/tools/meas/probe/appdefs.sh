@@ -96,7 +96,7 @@ PY
       # under the pointer, which ctrl_prelude puts at the window's centre, where the dialog opens; the pointer is nudged
       # across the dialog before its key, and the reopened document clicked at the pointer — the first page's running
       # text — before Ctrl+End, since after the dialog it took no keys until clicked (dry runs 2026-09-27, #612–#615)
-      CTRLPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+w; sleep 3; if xdotool search --onlyvisible --name '^Save Document' > /dev/null; then echo query-save; xdotool mousemove_relative 1 1; sleep 0.3; xdotool mousemove_relative -- -1 -1; sleep 1; xdotool key --clearmodifiers alt+n; sleep 2; xdotool search --onlyvisible --name '^Save Document' > /dev/null && echo dialog-still-up; fi; sleep 5; (soffice --norestore /tmp/doc/large.odt > /dev/null 2>&1 &); sleep 30; xdotool click 1; sleep 1; xdotool key --clearmodifiers ctrl+End; sleep 1" ;;
+      CTRLPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+w; sleep 3; if xdotool search --onlyvisible --name '^Save Document' > /dev/null; then echo query-save; xdotool mousemove_relative 1 1; sleep 0.3; xdotool mousemove_relative -- -1 -1; sleep 1; xdotool key --clearmodifiers alt+n; sleep 2; if xdotool search --onlyvisible --name '^Save Document' > /dev/null; then echo dialog-still-up; xdotool search --onlyvisible --name '^Save Document' windowfocus --sync key --clearmodifiers alt+n; sleep 2; xdotool search --onlyvisible --name '^Save Document' > /dev/null && echo dialog-still-up-after-focus; fi; fi; sleep 5; (soffice --norestore /tmp/doc/large.odt > /dev/null 2>&1 &); sleep 30; xdotool click 1; sleep 1; xdotool key --clearmodifiers ctrl+End; sleep 1" ;;
     thunderbird)
       apt_install_full thunderbird; ver thunderbird --version
       mkdir -p "$HOME/tbprofile"
@@ -188,8 +188,9 @@ PREFS
       mkdir -p "$HOME/.config/GIMP/2.10"
       echo '(gtk_accel_path "<Actions>/file/file-revert" "<Primary><Shift><Alt>r")' >> "$HOME/.config/GIMP/2.10/menurc"
       # GIMP asks "Revert Image" (app/actions/file-commands.c) of an imported image even unmodified; the dialog,
-      # when up, is answered with its default, _Revert
-      CTRLPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+shift+alt+r; sleep 3; if xdotool search --onlyvisible --name '^Revert Image' > /dev/null; then echo revert-query; xdotool mousemove_relative 1 1; sleep 0.3; xdotool mousemove_relative -- -1 -1; sleep 1; xdotool key --clearmodifiers Return; sleep 2; xdotool search --onlyvisible --name '^Revert Image' > /dev/null && echo dialog-still-up; fi; sleep 20; xdotool key --clearmodifiers Escape; sleep 1" ;;
+      # when up, is answered with its default, _Revert — through the pointer, then, while it is still up, focused
+      # explicitly (the first prelude of run #616 kept it through the pointer; the focus answered both in run #614)
+      CTRLPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+shift+alt+r; sleep 3; if xdotool search --onlyvisible --name '^Revert Image' > /dev/null; then echo revert-query; xdotool mousemove_relative 1 1; sleep 0.3; xdotool mousemove_relative -- -1 -1; sleep 1; xdotool key --clearmodifiers Return; sleep 2; if xdotool search --onlyvisible --name '^Revert Image' > /dev/null; then echo dialog-still-up; xdotool search --onlyvisible --name '^Revert Image' windowfocus --sync key --clearmodifiers Return; sleep 2; xdotool search --onlyvisible --name '^Revert Image' > /dev/null && echo dialog-still-up-after-focus; fi; fi; sleep 20; xdotool key --clearmodifiers Escape; sleep 1" ;;
     kdenlive)
       apt_install_full kdenlive ffmpeg; ver kdenlive --version
       export QT_QPA_PLATFORM=xcb KDE_FULL_SESSION=true
@@ -220,7 +221,7 @@ RC
       # /tmp/project.kdenlive as generated (File > Revert, bound to Ctrl+Shift+F8 in the stub above), then Escape.
       # ProjectManager::slotRevert reloads the file always and asks "Revert to last saved version" of a modified
       # project only (src/project/projectmanager.cpp, v23.08.5); that dialog, when up, is continued
-      CTRLPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+shift+F8; sleep 3; if xdotool search --onlyvisible --name '^Revert to last saved version' > /dev/null; then echo revert-query; xdotool mousemove_relative 1 1; sleep 0.3; xdotool mousemove_relative -- -1 -1; sleep 1; xdotool key --clearmodifiers Return; sleep 2; xdotool search --onlyvisible --name '^Revert to last saved version' > /dev/null && echo dialog-still-up; fi; sleep 20; xdotool key --clearmodifiers Escape; sleep 1" ;;
+      CTRLPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+shift+F8; sleep 3; if xdotool search --onlyvisible --name '^Revert to last saved version' > /dev/null; then echo revert-query; xdotool mousemove_relative 1 1; sleep 0.3; xdotool mousemove_relative -- -1 -1; sleep 1; xdotool key --clearmodifiers Return; sleep 2; if xdotool search --onlyvisible --name '^Revert to last saved version' > /dev/null; then echo dialog-still-up; xdotool search --onlyvisible --name '^Revert to last saved version' windowfocus --sync key --clearmodifiers Return; sleep 2; xdotool search --onlyvisible --name '^Revert to last saved version' > /dev/null && echo dialog-still-up-after-focus; fi; fi; sleep 20; xdotool key --clearmodifiers Escape; sleep 1" ;;
     chrome)
       ver google-chrome --version
       python3 - > /tmp/page.html <<'PY'

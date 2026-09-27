@@ -180,8 +180,13 @@ def test_a_prelude_answers_only_the_dialog_it_raised(repo_root):
         # run #615: a key sent the moment the dialog maps, the pointer still, did not reach it — the pointer is nudged
         # across it and the dialog given a second first
         assert (f"xdotool mousemove_relative 1 1; sleep 0.3; xdotool mousemove_relative -- -1 -1; sleep 1; "
-                f"xdotool key --clearmodifiers {key}; sleep 2; xdotool search --onlyvisible --name '{title}' > /dev/null && echo dialog-still-up") in pre, app
-        assert "windowfocus" not in pre, app
+                f"xdotool key --clearmodifiers {key}; sleep 2; if xdotool search --onlyvisible --name '{title}' > /dev/null; "
+                f"then echo dialog-still-up; ") in pre, app
+        # run #616: GIMP's first prelude kept its dialog through the pointer path, which an explicit focus answered in
+        # run #614 — the focus is the second stage, taken only while the dialog is still up (the focus's own run #614
+        # left the reopened Writer document without the keyboard, so it is never the first)
+        assert (f"xdotool search --onlyvisible --name '{title}' windowfocus --sync key --clearmodifiers {key}; sleep 2; "
+                f"xdotool search --onlyvisible --name '{title}' > /dev/null && echo dialog-still-up-after-focus; fi; fi") in pre, app
     assert "alt+d" not in _arm(appdefs, "soffice")
     # run #615: the document reopened after the dialog took no keys until clicked — a click at the pointer, on the
     # first page's running text, before Ctrl+End puts the caret at the end in both preludes
