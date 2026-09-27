@@ -283,3 +283,67 @@ def test_the_reading_is_the_d36_check_with_the_two_orders_beside_it():
     assert out["n"] == 5
     assert out["order_means"] == {"traced untraced": round((0.97 + 0.975 + 0.975) / 3, 4),
                                   "untraced traced": round((0.98 + 0.9818) / 2, 4)}
+
+
+# ---- analysis: 9.5's adapter (analysis plan, task 2) ------------------------------------------------------------
+
+def _write_job(d, order, sides):
+    """A control artifact in miniature: sides[run] = {phase: (t0, t1, {pid: (cmd, [(tid, comm, run0, run1, vol0, vol1)])})}"""
+    import json as _j
+    d.mkdir(parents=True)
+    rep = {"app": "chrome", "control.order": order, "replay.sent": "100", "replay_untraced.sent": "80"}
+    (d / "report.json").write_text(_j.dumps(rep))
+    for run, phases in sides.items():
+        for phase, (t0, t1, procs) in phases.items():
+            name = phase if run == "traced" else f"{phase}-untraced"
+            for edge, t, i in (("before", t0, 0), ("after", t1, 1)):
+                snap = {"t_mono": t, "procs": [{"pid": pid, "cmd": cmd, "cgroup": "/", "tasks": [
+                    {"tid": tid, "comm": comm, "start_ticks": tid, "run_ns": (r0, r1)[i], "wait_ns": 0, "slices": 0,
+                     "vol": (v0, v1)[i], "invol": 0} for tid, comm, r0, r1, v0, v1 in ts]} for pid, (cmd, ts) in procs.items()]}
+                (d / f"snap.{name}.{edge}.json").write_text(_j.dumps(snap))
+    for log, durs in (("ops.jsonl", (400, 500, 900)), ("ops-untraced.jsonl", (380, 470))):
+        rows = [{"op": "page-load", "i": i, "trigger_us": 1_000_000 * i, "done_us": 1_000_000 * i + 1000 * ms, "rc": 0}
+                for i, ms in enumerate(durs)]
+        rows.append({"op": "page-load", "i": 9, "trigger_us": 0, "done_us": 99_000_000, "rc": 3})    # a failed op is left out
+        (d / log).write_text("".join(_j.dumps(r) + "\n" for r in rows))
+
+
+MAIN, GPU = "/opt/google/chrome/chrome --user-data-dir=/tmp/chrome-data", "/opt/google/chrome/chrome --type=gpu-process"
+
+
+def _job_sides(scale):
+    procs = lambda k: {1: (MAIN, [(1, "chrome", 0, int(4e6 * k), 0, 40), (2, "Chrome_IOThread", 0, int(1e6 * k), 0, 20),
+                                  (3, "llvmpipe-0", 0, 10**9, 0, 999), (4, "xdotool", 0, 10**9, 0, 999)]),
+                       2: (GPU, [(5, "VizCompositorTh", 0, int(2e6 * k), 0, 10)]),
+                       3: ("/opt/google/chrome/chrome --type=renderer", [(6, "Compositor", 0, 10**9, 0, 999)])}
+    return {"idle": (0.0, 100.0, procs(scale)), "driven": (200.0, 300.0, procs(3 * scale)), "op": (400.0, 500.0, procs(2 * scale))}
+
+
+CARRIED_95 = {"exclude_roles": ["renderer"], "phases": {
+    "idle": {"components": {"selected": ["chrome", "gpu/VizCompositorTh"], "residual": {"gap_ms": {"table": [1]}}},
+             "threads": {"chrome": {"gap_ms": {"table": [1]}}, "gpu/VizCompositorTh": {"gap_ms": {"table": [1]}}}},
+    "driven": {"components": {"selected": ["chrome"], "residual": None}, "threads": {"chrome": {"gap_ms": {"table": [1]}}},
+               "per_input": {}},
+    "op": {"components": {"selected": ["chrome"], "residual": {"gap_ms": {"table": [1]}}},
+           "threads": {"chrome": {"gap_ms": {"table": [1]}}}, "operation": {}}}}
+
+
+def test_the_campaign_adapter_keys_threads_as_the_pool_keys_components(tmp_path):
+    from meas.campaign import control as c95
+    _write_job(tmp_path / "job", "traced untraced", {"traced": _job_sides(1.0), "untraced": _job_sides(0.9)})
+    order, vals = c95.job_values(str(tmp_path / "job"), "chrome", CARRIED_95)
+    assert order == "traced untraced"
+    # idle: the selected components and the residual (Chrome_IOThread); llvmpipe and the harness's xdotool dropped as the
+    # pool drops them, the renderer role excluded as chrome's pool excludes it
+    assert vals["idle chrome wakes/s"] == (0.4, 0.4) and vals["idle chrome run mean (ms)"] == (0.1, 0.09)
+    assert vals["idle gpu/VizCompositorTh run mean (ms)"] == (0.2, 0.18)
+    assert vals["idle residual run mean (ms)"] == (0.05, 0.045)
+    assert not any("renderer" in k or "llvmpipe" in k or "xdotool" in k for k in vals)
+    # the typing entries' driven phase carries the per-input run over the tree, not components (chrome is not a
+    # pointer-loop app): (tree CPU − the same side's idle CPU rate × span) / inputs that side sent
+    assert "driven chrome wakes/s" not in vals
+    t, u = vals["driven per-input run (ms)"]
+    assert round(t, 6) == round((21e6 - 7e6) / 1e6 / 100, 6) and round(u, 6) == round((18.9e6 - 6.3e6) / 1e6 / 80, 6)
+    # the operation: its duration over the rc-0 operations of each side's own log
+    assert vals["op operation duration mean (ms)"] == (600.0, 425.0)
+    assert vals["op chrome run mean (ms)"] == (0.2, 0.18) and "op residual wakes/s" in vals
