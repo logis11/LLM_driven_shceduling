@@ -2,9 +2,10 @@
 """Generate the measured archetype entries (9.5 fold-in) from pool.py output.
 
 fold_in.py <results-dir> <out.yaml> [--tag interactive=meas-ci:interactive:<campaign> --tag playback=meas-ci:playback:<campaign> --tag <app>=meas-ci:interactive:<campaign>]
-    [--idle-from <app>=<pool.json> --idle-tag <app>=meas-ci:interactive:<campaign>]
+    [--idle-from <app>=<pool.json> --idle-tag <app>=meas-ci:interactive:<campaign>] [--control <record>]
 (<campaign>: the launch date, D27; a run number for a one-run campaign from before it. --idle-from: the app's idle
-phase from another campaign's pool, D79)
+phase from another campaign's pool, D79. --control: the untraced control's record, each archetype's reading appended
+to its notes)
 
 One entry per campaign run, per the 9.5 changelog: D2/D11 ids, D9 shape,
 D13 per-input run (window rule), D16 timer components with a pooled
@@ -26,6 +27,7 @@ from distribution import quantile_table, yaml_table  # noqa: E402
 RUN_TAG = {"interactive": "meas-ci:interactive:3", "playback": "meas-ci:playback:3"}  # the D3 campaign; --tag overrides
 # D79: a run whose idle phase comes from another campaign — the pool it is read from and that campaign's tag
 IDLE_FROM, IDLE_TAG = {}, {}
+CONTROL = {}   # archetype id -> the untraced control's reading for its notes (control_report.py's `notes`)
 
 # the observed setup per run — `{version}` is filled from the run's recorded application version (report.json)
 
@@ -436,6 +438,8 @@ def entry(aid, spec, d):
         notes += " Sporadic wakes, not carried as components (D43): " + "; ".join(
             f"`{sp['comm']}`" + (f" ({', '.join(sp['comms'])})" if "comms" in sp else "")
             + f" in the {pn} phase, repeats {sp['repeats']} of {reps}, {sp['wakes_per_s']} wakes/s" for pn, reps, sp in sporadic) + "."
+    if aid in CONTROL:
+        notes += " " + CONTROL[aid]
     out += ["      " + notes]
     return "\n".join(out)
 
@@ -445,7 +449,9 @@ def main():
     rest = sys.argv[3:]
     flags = {"--tag": RUN_TAG, "--idle-from": IDLE_FROM, "--idle-tag": IDLE_TAG}
     while rest:  # --tag interactive=meas-ci:interactive:N, --idle-from <app>=<pool.json>, --idle-tag <app>=<tag> (repeatable)
-        if rest[0] in flags and len(rest) > 1 and "=" in rest[1]:
+        if rest[0] == "--control" and len(rest) > 1:
+            CONTROL.update({a: r["notes"] for a, r in json.load(open(rest[1]))["archetypes"].items()}); rest = rest[2:]
+        elif rest[0] in flags and len(rest) > 1 and "=" in rest[1]:
             key, val = rest[1].split("=", 1); flags[rest[0]][key] = val; rest = rest[2:]
         else:
             raise SystemExit(f"unknown argument {rest[0]!r}")

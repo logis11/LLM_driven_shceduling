@@ -637,6 +637,64 @@ def test_the_page_carries_the_lines_stated_for_an_archetype(monkeypatch):
     assert "Stated in the notes." in md and "Stated on the page only." in md
 
 
+# ---- the fold-ins carry the reading (fold-in plan, task 2) --------------------------------------------------------
+
+def _control_record(tmp_path, notes):
+    import json as _j
+    p = tmp_path / "control.json"
+    p.write_text(_j.dumps({"archetypes": {a: {"notes": n} for a, n in notes.items()}}))
+    return p
+
+
+def _only_notes_gain(plain, read, archetype, reading):
+    """`read` is `plain` with `reading` appended to `archetype`'s modeling_notes and nothing else changed."""
+    import yaml
+    a = yaml.safe_load("archetypes:\n" + plain)["archetypes"]
+    b = yaml.safe_load("archetypes:\n" + read)["archetypes"]
+    assert b[archetype]["modeling_notes"] == a[archetype]["modeling_notes"] + " " + reading
+    b[archetype]["modeling_notes"] = a[archetype]["modeling_notes"]
+    assert a == b
+
+
+def test_the_9_5_fold_in_appends_each_archetype_s_reading_to_its_notes(repo_root, tmp_path):
+    import shutil
+    import subprocess
+    import sys
+    from test_meas import IDLE_POOL_95, POOLS_95, TAGS_95
+    campaign = repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+    (tmp_path / "pools").mkdir()
+    for sub, app in POOLS_95:
+        shutil.copy(campaign / sub / f"pool-{app}.json", tmp_path / "pools")
+    idle = campaign / IDLE_POOL_95[0] / f"pool-{IDLE_POOL_95[1]}.json"
+    run = lambda out, *extra: subprocess.run(
+        [sys.executable, str(repo_root / "dataset" / "tools" / "meas" / "campaign" / "fold_in.py"), str(tmp_path / "pools"),
+         str(out), *TAGS_95, "--idle-from", f"{IDLE_POOL_95[1]}={idle}", *extra], check=True, capture_output=True)
+    run(tmp_path / "plain.yaml")
+    run(tmp_path / "read.yaml", "--control", str(_control_record(tmp_path, {"audio-player": "Untraced control: one."})))
+    _only_notes_gain((tmp_path / "plain.yaml").read_text(), (tmp_path / "read.yaml").read_text(), "audio-player",
+                     "Untraced control: one.")
+
+
+def test_the_9_8_and_9_9_fold_ins_append_each_archetype_s_reading_to_its_notes(repo_root, tmp_path):
+    import sys
+    from meas.desktop import fold_in as f98
+    from meas.session import fold_in as f99
+    results = repo_root / "_dev" / "research" / "jioh"
+    for mod, slice_, archetype in ((f98, "task-9.8-browser-comms", "renderer-hidden"),
+                                   (f99, "task-9.9-daemons-session", "compositor-shell")):
+        pooled = results / slice_ / "campaign" / "results" / "pooled.json"
+        ctl = _control_record(tmp_path, {archetype: "Untraced control: one."})
+        outs = {}
+        for name, extra in (("plain", []), ("read", ["--control", str(ctl)])):
+            outs[name] = tmp_path / f"{mod.__name__}-{name}.yaml"
+            argv, sys.argv = sys.argv, ["fold_in.py", str(pooled), str(outs[name]), *extra]
+            try:
+                mod.main()
+            finally:
+                sys.argv = argv
+        _only_notes_gain(outs["plain"].read_text(), outs["read"].read_text(), archetype, "Untraced control: one.")
+
+
 def test_the_build_census_reads_each_subject_s_own_version_key():
     from meas import control_report
     # the chat client's job records Element's build under its own key, the renderers' under `version` (decision 16)

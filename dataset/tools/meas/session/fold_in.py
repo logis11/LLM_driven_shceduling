@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the four 9.9 archetype entries from the session campaign's pooled record (changelog D2–D7, D26–D30).
 
-  fold_in.py <pooled.json> <out.yaml>     (reads `within-run.json` beside the pooled record)
+  fold_in.py <pooled.json> <out.yaml> [--control <record>]     (reads `within-run.json` beside the pooled record)
 
 One entry per program of the Ubuntu desktop session, in 9.5's measured form: `components`, one per process instance
 and thread comm of the `steady` phase (D4, D6, D7), each with its `wakes_per_s` and its pooled `gap` and `run`
@@ -25,6 +25,7 @@ from meas.distribution import yaml_table  # noqa: E402
 
 TAG = "meas-ci:session:2026-09-24"
 PHASE = "steady"
+CONTROL = {}   # archetype id -> the untraced control's reading for its notes
 IDS = {"gnome-shell": "compositor-shell", "pipewire": "audio-server", "systemd": "service-manager",
        "dbus-daemon": "message-bus"}
 LABEL = {"wakes/s": "wake rate", "gap mean (ms)": "gap mean", "run mean (ms)": "run mean"}
@@ -288,13 +289,22 @@ def entry(prog, e, run, within):
             + (", the repeats that met the cron session" if set(s["repeats"]) == cron else "")
             + f"), {s['wakes_per_s']} wakes/s over the pool"
             for s in spor for c in s["comms"]) + "."
+    if IDS[prog] in CONTROL:   # the untraced control's reading (its record's `notes`)
+        notes += " " + CONTROL[IDS[prog]]
     out += ["    modeling_notes: >-", "      " + notes]
     return "\n".join(out)
 
 
 def main():
-    if len(sys.argv) != 3:
+    CONTROL.clear()   # a run without --control carries no reading, whatever a run before it read
+    args = sys.argv[1:]
+    if "--control" in args and args.index("--control") + 1 < len(args):
+        i = args.index("--control")
+        CONTROL.update({a: r["notes"] for a, r in json.load(open(args[i + 1]))["archetypes"].items()})
+        del args[i:i + 2]
+    if len(args) != 2:
         raise SystemExit(__doc__)
+    sys.argv[1:] = args
     p = json.load(open(sys.argv[1]))
     if p.get("tag") != TAG:
         raise SystemExit(f"pooled record tagged {p.get('tag')!r}, expected {TAG!r}")

@@ -24,10 +24,10 @@
 
 ### Task 2: the fold-ins
 
-- [ ] `--control <record>` in `campaign/fold_in.py`, `desktop/fold_in.py`, `session/fold_in.py`; the reading appended to each entry's notes.
-- [ ] The fold-in tests read the committed records; commit.
+- [x] `--control <record>` in `campaign/fold_in.py`, `desktop/fold_in.py`, `session/fold_in.py`; the reading appended to each entry's notes.
+- [x] Tests: each fold-in appends its archetype's reading and changes nothing else; commit.
 
 ### Task 3: results and recompile
 
 - [ ] The report over every landed control job per family, the pages and records committed under each slice's `campaign/`.
-- [ ] The fold-ins run with `--control`, spliced; `tools/compile.py --allow-window`; the manifest hashes; full test suite; commit.
+- [ ] The fold-ins run with `--control`, spliced, their byte-for-byte tests reading the committed records; `tools/compile.py --allow-window`; the manifest hashes; full test suite; commit.

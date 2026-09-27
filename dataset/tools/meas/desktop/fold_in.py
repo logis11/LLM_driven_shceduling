@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the four 9.8 archetype entries from the desktop campaign's pooled record (changelog D10, D25).
 
-  fold_in.py <pooled.json> <out.yaml>
+  fold_in.py <pooled.json> <out.yaml> [--control <record>]
 
 One entry per subject, in 9.5's measured per-application form (D10): `components`, one per thread comm of the
 carried phase, each with its `wakes_per_s` and its pooled `gap` and `run` quantile tables, and the residual; no
@@ -25,6 +25,7 @@ from meas.desktop.pool import _cp  # noqa: E402  — campaign/pool.py, for its b
 
 TAG = "meas-ci:desktop:2026-09-20"
 CARRIED = {"chrome-hidden": "steady", "chrome-visible": "steady-notimer", "element": "idle", "steam": "shown"}
+CONTROL = {}   # archetype id -> the untraced control's reading for its notes
 IDS = {"chrome-hidden": "renderer-hidden", "chrome-visible": "renderer-visible", "element": "chat-client",
        "steam": "game-client"}
 LABEL = {"wakes/s": "wake rate", "gap mean (ms)": "gap mean", "run mean (ms)": "run mean"}
@@ -287,13 +288,22 @@ def entry(app, e):
             f"`{s['comm']}` in {len(s['repeats'])} of {k} repeats, {s['wakes_per_s']} wakes/s" for s in spor) + "."
     if app in APPROX:
         notes += " " + APPROX[app]
+    if IDS[app] in CONTROL:   # the untraced control's reading (its record's `notes`)
+        notes += " " + CONTROL[IDS[app]]
     out += ["    modeling_notes: >-", "      " + notes]
     return "\n".join(out)
 
 
 def main():
-    if len(sys.argv) != 3:
+    CONTROL.clear()   # a run without --control carries no reading, whatever a run before it read
+    args = sys.argv[1:]
+    if "--control" in args and args.index("--control") + 1 < len(args):
+        i = args.index("--control")
+        CONTROL.update({a: r["notes"] for a, r in json.load(open(args[i + 1]))["archetypes"].items()})
+        del args[i:i + 2]
+    if len(args) != 2:
         raise SystemExit(__doc__)
+    sys.argv[1:] = args
     p = json.load(open(sys.argv[1]))
     if p.get("tag") != TAG:
         raise SystemExit(f"pooled record tagged {p.get('tag')!r}, expected {TAG!r}")
