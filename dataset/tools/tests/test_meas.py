@@ -708,3 +708,57 @@ def test_an_entry_from_two_campaigns_names_each_campaign_its_repeats_and_its_bui
             "with or after the input from meas-ci:interactive:2026-09-27, 8 repeats; the idle phase runs before any input. "
             ) in e["scope"]
     assert "over the 43 repeats obtained" in e["scope"] and "8 repeats, every window of it that holds input" in e["scope"]
+
+
+# 9.5 D81: the stimulus-sensitivity check read per repeat, as 9.7 D36 reads a check
+
+def _campaign_pool():
+    import importlib
+    import sys
+    saved = sys.modules.pop("analyze", None)   # pool.py imports its sibling as `analyze`; another test may hold build's
+    try:
+        return importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+
+
+def test_the_stimulus_check_is_read_against_the_interval_of_its_per_repeat_ratios():
+    # the ratio of each repeat's per-input run mean, 136M against SWELL-KW; a difference when the 95 % t interval of the
+    # ratios (k − 1 degrees of freedom, the stability rule's multiplier) excludes 1; the pooled medians' ratio beside it
+    pool = _campaign_pool()
+    a = {"p50": 4.0, "repeat_mean": [10.0, 10.0, 10.0, 10.0, 10.0]}
+    shifted = pool.stimulus_check(a, {"p50": 5.0, "repeat_mean": [11.0, 11.2, 10.9, 11.1, 11.0]})
+    import pytest
+    assert shifted["per_repeat"] == pytest.approx([1.1, 1.12, 1.09, 1.11, 1.1])
+    assert shifted["reading"] == "difference" and shifted["p50_ratio"] == 1.25
+    m, s = 1.104, 0.0114017542509914
+    assert shifted["per_repeat_mean"] == pytest.approx(m)
+    assert shifted["interval"] == pytest.approx([m - 2.776 * s / 5 ** 0.5, m + 2.776 * s / 5 ** 0.5])
+    scattered = pool.stimulus_check(a, {"p50": 4.0, "repeat_mean": [9.0, 11.0, 10.0, 12.0, 8.0]})
+    assert scattered["reading"] == "not resolved"
+
+
+def test_every_typing_scope_states_its_stimulus_check_read_per_repeat(fold_95):
+    # D81: the pre-registered p50 sentence keeps its p50s and adds the per-repeat reading of the means
+    s = _scopes(fold_95)
+    want = {"office-writer": "is 1.123 of SWELL-KW's (95 % interval 1.045–1.200 over 14 repeats), a difference",
+            "web-browser": "is 1.160 of SWELL-KW's (95 % interval 1.095–1.225 over 38 repeats), a difference",
+            "code-editor": "is 1.030 of SWELL-KW's (95 % interval 0.969–1.091 over 43 repeats), not resolved",
+            "mail-client": "is 0.909 of SWELL-KW's (95 % interval 0.824–0.994 over 8 repeats), a difference"}
+    for aid, phrase in want.items():
+        assert "read per repeat (D81), the per-input run mean under 136M " + phrase in s[aid], aid
+    assert "the per-input run p50 is 5.03 ms against 4.65 ms under SWELL-KW (+8 %)" in s["mail-client"]
+
+
+def test_the_results_page_reads_the_stimulus_check_per_repeat(repo_root, tmp_path):
+    # D81: under each application's pre-registered table, the per-repeat reading
+    import shutil
+    import sys
+    campaign_dir = repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+    shutil.copytree(campaign_dir / "results-re-measured", tmp_path / "rr")
+    subprocess.run([sys.executable, str(repo_root / "dataset" / "tools" / "meas" / "campaign" / "render_results.py"),
+                    str(tmp_path / "rr"), str(tmp_path / "rr.md"), "note"], check=True, capture_output=True)
+    page = (tmp_path / "rr.md").read_text()
+    assert ("Read per repeat (D81, as 9.7 D36 reads a check): the per-input run mean under 136M is 0.909 of SWELL-KW's, "
+            "95 % interval 0.824–0.994 over 8 repeats — a difference; the pooled medians' ratio 1.082.") in page

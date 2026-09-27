@@ -12,7 +12,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from pool import build_census  # noqa: E402  — D69: one definition of the build census
+from pool import build_census, stimulus_check  # noqa: E402  — D69: one definition of the build census; D81 the check
 
 # D66 keys a window that landed twice as "<window>@<run id>", so the window is what orders the list
 def EXCLUDED_ORDER(kv):
@@ -97,6 +97,12 @@ def main():
             lines.append("|---|---|---|---|---|---|")
             lines.append(f"| SWELL-KW | {f(a['p50'], 3)} | {f(a['p90'], 3)} | {f(a['p99'], 3)} | {a['repeat_p50']} | {spread(d['phases']['driven']['wakes_per_s'], 1)} |")
             lines.append(f"| 136M Keystrokes | {f(b['p50'], 3)} | {f(b['p90'], 3)} | {f(b['p99'], 3)} | {b['repeat_p50']} | {spread(d['phases']['driven-alt']['wakes_per_s'], 1)} |")
+            lines.append("")
+            c = stimulus_check(a, b)
+            lines.append(f"Read per repeat (D81, as 9.7 D36 reads a check): the per-input run mean under 136M is "
+                         f"{c['per_repeat_mean']:.3f} of SWELL-KW's, 95 % interval {c['interval'][0]:.3f}–{c['interval'][1]:.3f} "
+                         f"over {len(c['per_repeat'])} repeats — {'a difference' if c['reading'] == 'difference' else 'not resolved'}; "
+                         f"the pooled medians' ratio {c['p50_ratio']:.3f}.")
             lines.append("")
     if crit:
         st0 = crit[0][1]

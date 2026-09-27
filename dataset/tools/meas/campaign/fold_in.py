@@ -19,7 +19,7 @@ import statistics
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from pool import build_census  # noqa: E402  — D69: one definition of the build census
+from pool import build_census, stimulus_check  # noqa: E402  — D69: one definition of the build census; D81 the check
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from distribution import quantile_table, yaml_table  # noqa: E402
 
@@ -362,9 +362,13 @@ def entry(aid, spec, d):
         if alt:  # spec decision 11: the pre-registered sensitivity result, one sentence, no value changed
             a = pi["window"]["run_ms_minus_idle"]["p50"]; b = alt["window"]["run_ms_minus_idle"]["p50"]
             change = f" ({(b - a) / a * 100:+.0f} %)" if a else " (the SWELL-KW median is at the zero bound, D13)"
+            c = stimulus_check(pi["window"]["run_ms_minus_idle"], alt["window"]["run_ms_minus_idle"])
+            lo, hi = c["interval"]
             scope += (f"Stimulus sensitivity (pre-registered, method §3): under a 136M Keystrokes transcription stream (dhakal-chi18) "
-                      f"the per-input run p50 is {b:.2f} ms against {a:.2f} ms under SWELL-KW{change}; "
-                      f"the archetype carries SWELL-KW. ")
+                      f"the per-input run p50 is {b:.2f} ms against {a:.2f} ms under SWELL-KW{change}; read per repeat (D81), "
+                      f"the per-input run mean under 136M is {c['per_repeat_mean']:.3f} of SWELL-KW's (95 % interval "
+                      f"{lo:.3f}–{hi:.3f} over {len(c['per_repeat'])} repeats), "
+                      f"{'a difference' if c['reading'] == 'difference' else 'not resolved'}; the archetype carries SWELL-KW. ")
     elif kind == "cadence":
         scope += "Stimulus: a scripted pointer loop (design); no per-input run exists, the driven cadence is carried as focus_components. "
     else:   # D74, D75: one periodic job per medium cycle, read off the trace

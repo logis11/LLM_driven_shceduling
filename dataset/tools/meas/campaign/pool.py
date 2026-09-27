@@ -119,6 +119,17 @@ def cycle_windows(app, phase, rows, segments, roles):
     return {"comm": comm, "rule": rule, "value": value, "spacing_ms": spacing, "work_ms": work, "length_ms": length}
 
 
+def stimulus_check(a, b):
+    """D81: the stimulus-sensitivity check read as 9.7 D36 reads a check — each repeat's per-input run mean under 136M
+    (`b`) against its mean under SWELL-KW (`a`), both a pooled record's `run_ms_minus_idle`; a difference when the 95 % t
+    interval of the per-repeat ratios excludes 1, not resolved otherwise; the pooled medians' ratio kept beside it."""
+    r = [y / x for x, y in zip(a["repeat_mean"], b["repeat_mean"]) if x]
+    m, hw = statistics.fmean(r), t975(len(r)) * statistics.stdev(r) / len(r) ** 0.5
+    return {"per_repeat": r, "per_repeat_mean": m, "interval": [m - hw, m + hw],
+            "reading": "difference" if not m - hw <= 1 <= m + hw else "not resolved",
+            "p50_ratio": b["p50"] / a["p50"] if a.get("p50") else None}
+
+
 def build_census(version):
     """D69: the builds a pool holds, most repeats first — "1.138.0 (28 repeats)", or with a mix
     "152.0.7977.82 (26 repeats), 153.0.8010.52 (4: 18, 20, 22, 27)". `version` is {repeat: the build it measured}; a
