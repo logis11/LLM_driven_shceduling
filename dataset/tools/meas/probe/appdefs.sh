@@ -22,7 +22,7 @@
 appdef() {
   local app="$1"
   export DEBIAN_FRONTEND=noninteractive
-  STREAM=""; AREA="0,0,0,0"; POSTLAUNCH=""; POSTCLASS=""; OP=""; ALTPRELUDE=""; KINDS="key,click,drag,wheel"
+  STREAM=""; AREA="0,0,0,0"; POSTLAUNCH=""; POSTCLASS=""; OP=""; ALTPRELUDE=""; CTRLPRELUDE=""; KINDS="key,click,drag,wheel"
   BUILD_WANT=""; APP_VERSION=""
   case "$app" in
     code)
@@ -88,7 +88,11 @@ PY
       CLASS="libreoffice|soffice"; PAT="soffice"; RX="soffice"; DRIVER=stream; STREAM=word; AREA="0.30,0.15,0.08,0.20"
       # 9.5 D28: keys only, at their recorded times — the stream's clicks, scrolls and drags moved the typing up the document
       KINDS="key"
-      POSTLAUNCH="sleep 10; xdotool key ctrl+End" ;;
+      POSTLAUNCH="sleep 10; xdotool key ctrl+End"
+      # the untraced control's prelude (task-9.5-untraced-control spec, decision 4): the document closed unsaved
+      # (Ctrl+W, Don't Save) and reopened from disk through the running instance, the caret at its end — the state
+      # the postlaunch leaves; 30 s for the reopened document's layout
+      CTRLPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+w; sleep 3; xdotool key --clearmodifiers alt+d; sleep 5; (soffice --norestore /tmp/doc/large.odt > /dev/null 2>&1 &); sleep 30; xdotool key --clearmodifiers ctrl+End; sleep 1" ;;
     thunderbird)
       apt_install_full thunderbird; ver thunderbird --version
       mkdir -p "$HOME/tbprofile"
@@ -173,7 +177,13 @@ PREFS
       convert -size 4952x3288 plasma:fractal /tmp/photo.png; rec photo.rc "$?"
       # operation `unsharp-mask` through the Script-Fu server started with the GUI (ops_driver.py)
       LAUNCH="gimp --no-splash --new-instance -b '(plug-in-script-fu-server RUN-NONINTERACTIVE \"127.0.0.1\" 10008 \"\")' /tmp/photo.png"
-      CLASS="gimp"; PAT="gimp"; RX="gimp|script-fu"; DRIVER=pointer; OP=unsharp-mask ;;
+      CLASS="gimp"; PAT="gimp"; RX="gimp|script-fu"; DRIVER=pointer; OP=unsharp-mask
+      # the untraced control's prelude (task-9.5-untraced-control spec, decision 4): the image reverted to
+      # /tmp/photo.png as loaded, any tool action cancelled. File > Revert has no default key; the job's menurc,
+      # GIMP's accelerator file, binds one before the first launch
+      mkdir -p "$HOME/.config/GIMP/2.10"
+      echo '(gtk_accel_path "<Actions>/file/file-revert" "<Primary><Shift><Alt>r")' >> "$HOME/.config/GIMP/2.10/menurc"
+      CTRLPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+shift+alt+r; sleep 3; xdotool key --clearmodifiers Return; sleep 20; xdotool key --clearmodifiers Escape; sleep 1" ;;
     kdenlive)
       apt_install_full kdenlive ffmpeg; ver kdenlive --version
       export QT_QPA_PLATFORM=xcb KDE_FULL_SESSION=true
@@ -193,12 +203,16 @@ PREFS
 <ActionProperties scheme="Default">
   <Action name="clear_render_timeline_zone" shortcut="Ctrl+Shift+F10"/>
   <Action name="set_render_timeline_zone" shortcut="Ctrl+Shift+F9"/>
+  <Action name="file_revert" shortcut="Ctrl+Shift+F8"/>
 </ActionProperties>
 </kpartgui>
 RC
       printf '[timeline]\nautopreview=false\n' > "$HOME/.config/kdenliverc"
       LAUNCH="kdenlive /tmp/project.kdenlive"
-      CLASS="kdenlive"; PAT="kdenlive"; RX="kdenlive|melt"; DRIVER=pointer; OP=preview-render ;;
+      CLASS="kdenlive"; PAT="kdenlive"; RX="kdenlive|melt"; DRIVER=pointer; OP=preview-render
+      # the untraced control's prelude (task-9.5-untraced-control spec, decision 4): the project reverted to
+      # /tmp/project.kdenlive as generated (File > Revert, bound to Ctrl+Shift+F8 in the stub above), then Escape
+      CTRLPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+shift+F8; sleep 3; xdotool key --clearmodifiers Return; sleep 20; xdotool key --clearmodifiers Escape; sleep 1" ;;
     chrome)
       ver google-chrome --version
       python3 - > /tmp/page.html <<'PY'
@@ -307,7 +321,7 @@ build_gate() {
 }
 op_driver() { # op_driver <window-id> <seconds> [extra ops_driver args] — the operation loop for the `op` phase
   local wid="$1" secs="$2"; shift 2
-  echo "python3 $TOOLS/ops_driver.py $APP $wid $secs $OUT/ops.jsonl --pat '$PAT' $*"
+  echo "python3 $TOOLS/ops_driver.py $APP $wid $secs ${OPS_OUT:-$OUT/ops.jsonl} --pat '$PAT' $*"
 }
 appdef_cleanup() {
   [ -f "$OUT/httpd.pid" ] && kill "$(cat "$OUT/httpd.pid")" 2>/dev/null

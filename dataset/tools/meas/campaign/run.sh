@@ -17,7 +17,13 @@ source "$PROBE_DIR/common.sh"
 source "$TOOLS/../pin.sh"
 pin_self_harness
 source "$TOOLS/appdefs.sh"
-APP="$1"; REPEAT="$2"; MODE="${3:-full}"
+APP="$1"; REPEAT="$2"; MODE_ARG="${3:-full}"
+# the untraced control (_dev/docs/spec/jioh/task-9.5-untraced-control.md): `control` runs full's lengths and
+# `control-dry` dry's, every carried phase as a traced and an untraced run
+CONTROL=0; MODE="$MODE_ARG"
+case "$MODE_ARG" in control) CONTROL=1; MODE=full ;; control-dry) CONTROL=1; MODE=dry ;; esac
+# its decision 5: the pair's order alternates across jobs — odd jobs run it traced first, even jobs untraced first
+if [ $((REPEAT % 2)) -eq 1 ]; then ORDER="traced untraced"; else ORDER="untraced traced"; fi
 STREAMS="$(cd "$TOOLS/../../.." && pwd)/meas/streams"
 # D34, D35: the idle or play phase starts after the application's launch work — a settle per application, set from its
 # traces and stated in method §9 before its repeats; 30 s (method §2) where the traces show none. An application whose
@@ -57,7 +63,8 @@ play_for() {
 if [ "$MODE" = dry ]; then SETTLE=10; IDLE=30; DRIVEN=60; PLAY=60; OPS=90
 elif [ "$MODE" = probe ]; then SETTLE=30; IDLE="${MEAS_PHASE_S:?probe needs MEAS_PHASE_S}"; DRIVEN=0; PLAY="$IDLE"; OPS=0
 else SETTLE="$(settle_for "$APP")"; IDLE="$(idle_for "$APP")"; DRIVEN=600; PLAY="$(play_for "$APP")"; OPS=600; fi
-rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE"; rec started_utc "$(date -u +%FT%TZ)"
+rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE_ARG"; rec control "$CONTROL"; rec started_utc "$(date -u +%FT%TZ)"
+[ "$CONTROL" = 1 ] && rec control.order "$ORDER"
 rec settle_s "${SETTLE:-unset}"; rec idle_s "$IDLE"; rec driven_s "$DRIVEN"; rec play_s "$PLAY"; rec op_s "$OPS"
 if [ -z "$SETTLE" ]; then
   rec finished_utc "$(date -u +%FT%TZ)"; finish_report
@@ -66,6 +73,8 @@ if [ -z "$SETTLE" ]; then
 fi
 pin_record | tee -a "$KV" | sed 's/^/  /' >&2
 python3 "$TOOLS/../runner_spec.py" > "$OUT/spec.json"
+# the untraced control's decision 9: the schedstats switch, which neither perf nor this job sets
+rec sysctl.sched_schedstats "$(cat /proc/sys/kernel/sched_schedstats 2>/dev/null || echo unknown)"
 # same-machine repeats (9.6 D10; 9.5 D26): a job that drew another CPU model stops here, recorded, before any install or measurement
 source "$TOOLS/../machine_gate.sh"
 rec machine.model "$(machine_model)"; rec machine.wanted "${MEAS_CPU_MODEL:-}"
@@ -89,6 +98,9 @@ if ! build_gate; then
   exit 0
 fi
 rec launch "$LAUNCH"; rec driver "$DRIVER"; rec stream "${STREAM:-}"; rec op "${OP:-}"; rec rx "$RX"; rec pat "$PAT"
+# the untraced control's decision 4: the prelude before each driven run — the 136M prelude where the appdef has one
+CTRLPRELUDE="${CTRLPRELUDE:-$ALTPRELUDE}"
+[ "$CONTROL" = 1 ] && rec ctrlprelude "$CTRLPRELUDE"
 PH="$TOOLS/../phase.sh $OUT/phases.jsonl"
 export MEAS_PIN=harness   # phase.sh here wraps drivers, which stimulate the pinned application from the harness CPUs
 # launched directly under taskset (not through the pin_load function: a function run in the background forks a
@@ -130,7 +142,13 @@ phase() {
   rec "perf.$name.rows_matching" "$(gzip -dc "$OUT/perf.$name.timehist.txt.gz" | grep -cE "$RX" || echo 0)"
   sudo perf sched timehist -w -i "$OUT/perf.$name.data" 2>> "$OUT/perf.$name.log" | grep -E "awakened|wakeup|\bwaker\b|^\s*[0-9]+\.[0-9]+ +\[[0-9]+\] +\S.*\[[0-9/]+\] +awakened" | gzip > "$OUT/perf.$name.wakeups.txt.gz"
   rec "perf.$name.wakeups.rows" "$(gzip -dc "$OUT/perf.$name.wakeups.txt.gz" | wc -l)"
-  python3 - "$OUT/snap.$name.before.json" "$OUT/snap.$name.after.json" "$name" <<'PY' | tee -a "$KV" | sed 's/^/  /' >&2
+  phase_summary "$name"
+  if [ "$MODE" = dry ]; then gzip -f "$OUT/perf.$name.data"; else rm -f "$OUT/perf.$name.data"; fi
+}
+
+# phase_summary <name>: the tree's CPU and switches over a phase, from its two snapshots, into report.kv
+phase_summary() {
+  python3 - "$OUT/snap.$1.before.json" "$OUT/snap.$1.after.json" "$1" <<'PY' | tee -a "$KV" | sed 's/^/  /' >&2
 import json, sys
 a, b, ph = json.load(open(sys.argv[1])), json.load(open(sys.argv[2])), sys.argv[3]
 dt = b["t_mono"] - a["t_mono"]
@@ -138,15 +156,110 @@ print(f"{ph}.wall_s={dt:.2f}"); print(f"{ph}.n_procs={b['n_procs']}"); print(f"{
 print(f"{ph}.cpu_s={b['cpu_s']-a['cpu_s']:.3f}"); print(f"{ph}.cpu_share={(b['cpu_s']-a['cpu_s'])/dt if dt else 0:.4f}")
 print(f"{ph}.switches_per_s={(b['vol_switches']-a['vol_switches']+b['nonvol_switches']-a['nonvol_switches'])/dt if dt else 0:.1f}")
 PY
-  if [ "$MODE" = dry ]; then gzip -f "$OUT/perf.$name.data"; else rm -f "$OUT/perf.$name.data"; fi
 }
 
+# quiet <name> <seconds> <driver-cmd or ''>: phase()'s untraced twin (the untraced control's decision 1) — the same
+# snapshots, driver and length, and no perf
+quiet() {
+  local name="$1" secs="$2" driver="$3"
+  snap "$PAT" "" "$name.before"
+  sleep "$secs" &
+  local sleep_pid=$!
+  sleep 1
+  if [ -n "$driver" ]; then
+    $PH "$name-driver" -- bash -c "$driver" > "$OUT/driver.$name.log" 2>&1
+  fi
+  wait "$sleep_pid"
+  snap "$PAT" "" "$name.after"
+  screenshot "after-$name"
+  phase_summary "$name"
+}
+
+# ctrl_prelude <label>: the untraced control's prelude (decision 4) — the application back in its designed state
+# before a driven run; the window is read again, since a prelude may reopen the document
+ctrl_prelude() {
+  xdotool windowactivate --sync "$WID" 2>/dev/null
+  bash -c "$CTRLPRELUDE" > "$OUT/ctrlprelude.$1.log" 2>&1; rec "ctrlprelude.$1.rc" "$?"
+  local w; w=$(wait_window "$CLASS" 60); [ -n "$w" ] && WID="$w"
+  rec "ctrlprelude.$1.window" "$WID"
+  screenshot "after-ctrlprelude-$1"; sleep 5
+}
+
+# pair <name> <seconds> <driver-builder> [prelude]: one carried phase as its traced run <name> and its untraced run
+# <name>-untraced, adjacent, in the job's ORDER (decisions 1, 5, 6); the builder echoes a run's driver command, given
+# the run, once any prelude has run
+pair() {
+  local name="$1" secs="$2" builder="$3" prelude="${4:-}" run first=1
+  for run in $ORDER; do
+    [ "$first" = 1 ] || sleep 10
+    first=0
+    [ -n "$prelude" ] && ctrl_prelude "$name.$run"
+    if [ "$run" = traced ]; then
+      $PH "$name" -- bash -c "true"; phase "$name" "$secs" "$($builder traced)"
+    else
+      $PH "$name-untraced" -- bash -c "true"; quiet "$name-untraced" "$secs" "$($builder untraced)"
+    fi
+  done
+}
+
+# the drivers a pair's runs take, one log per run
+no_driver() { echo ""; }
+stream_driver() {
+  local log="$OUT/replay.jsonl"; [ "$1" = untraced ] && log="$OUT/replay-untraced.jsonl"
+  echo "python3 $TOOLS/replay_stream.py $SFILE $WID $log --seconds $DRIVEN --area $AREA --kinds $KINDS"
+}
+pointer_loop() {
+  echo "xdotool windowactivate --sync $WID; end=\$((\$(date +%s)+$DRIVEN)); while [ \$(date +%s) -lt \$end ]; do xdotool mousemove 300 300 mousedown 1 mousemove --sync 500 400 mousemove --sync 700 350 mouseup 1; sleep 0.8; xdotool mousemove 640 400 click 1; sleep 1.2; xdotool mousemove 400 500 click --repeat 3 --delay 100 4; sleep 1.0; xdotool mousemove 520 380 click --repeat 2 --delay 100 5; sleep 1.5; done"
+}
+op_run_driver() {
+  local log="$OUT/ops.jsonl"; [ "$1" = untraced ] && log="$OUT/ops-untraced.jsonl"
+  OPS_OUT="$log" op_driver "$WID" "$OPS"
+}
+
+# window_state: whether this job's recorded-input window is cut and holds events — ok, empty or uncut
+window_state() {
+  python3 -c 'import json, sys; w = json.load(open(sys.argv[1]))["windows"].get(sys.argv[2]); print("uncut" if w is None else "ok" if w.get("events") else "empty")' "$STREAMS/windows.json" "$STREAM-r$REPEAT"
+}
+
+# control_phases: the untraced control's sequence (decisions 3, 6) — the campaign's phase order, each carried phase an
+# adjacent pair; the 136M phase, which no archetype carries, left out
+control_phases() {
+  case "$DRIVER" in
+    stream|pointer)
+      pair idle "$IDLE" no_driver
+      sleep 10
+      if [ "$DRIVER" = stream ]; then
+        local w; w="$(window_state)"; rec recording.window "$w"
+        if [ "$w" != ok ]; then rec control.stopped "window $w"; return; fi
+        SFILE="$STREAMS/$STREAM-r$REPEAT.jsonl"; rec stream_file "$(basename "$SFILE")"; rec stream_kinds "$KINDS"
+        pair driven "$((DRIVEN + 5))" stream_driver prelude
+        rec replay.sent "$(wc -l < "$OUT/replay.jsonl" 2>/dev/null || echo 0)"
+        rec replay_untraced.sent "$(wc -l < "$OUT/replay-untraced.jsonl" 2>/dev/null || echo 0)"
+      else
+        pair driven "$((DRIVEN + 5))" pointer_loop prelude
+      fi ;;
+    none)
+      pair play "$PLAY" no_driver ;;
+  esac
+  if [ -n "$OP" ]; then
+    sleep 10
+    pair op "$((OPS + 5))" op_run_driver
+    rec ops.count "$(wc -l < "$OUT/ops.jsonl" 2>/dev/null || echo 0)"
+    rec ops.rc0 "$(grep -c '"rc": 0' "$OUT/ops.jsonl" 2>/dev/null || echo 0)"
+    rec ops_untraced.count "$(wc -l < "$OUT/ops-untraced.jsonl" 2>/dev/null || echo 0)"
+    rec ops_untraced.rc0 "$(grep -c '"rc": 0' "$OUT/ops-untraced.jsonl" 2>/dev/null || echo 0)"
+  fi
+}
+
+if [ "$CONTROL" = 1 ]; then
+  control_phases
+else
 case "$DRIVER" in
   stream)
     # D32: a repeat past the recording's end — its window recorded empty in windows.json (an empty window is not
     # committed) — runs the idle phase alone and is pooled into the idle values only; no operation phase either,
     # since without the driven phases it would start from another application state
-    WINDOW="$(python3 -c 'import json, sys; w = json.load(open(sys.argv[1]))["windows"].get(sys.argv[2]); print("uncut" if w is None else "ok" if w.get("events") else "empty")' "$STREAMS/windows.json" "$STREAM-r$REPEAT")"
+    WINDOW="$(window_state)"
     rec recording.window "$WINDOW"
     $PH idle -- bash -c "true"; phase idle "$IDLE" ""
     if [ "$MODE" = probe ]; then OP=""
@@ -170,7 +283,7 @@ case "$DRIVER" in
     $PH idle -- bash -c "true"; phase idle "$IDLE" ""
     if [ "$MODE" = probe ]; then OP=""; else
     sleep 10
-    DRV="xdotool windowactivate --sync $WID; end=\$((\$(date +%s)+$DRIVEN)); while [ \$(date +%s) -lt \$end ]; do xdotool mousemove 300 300 mousedown 1 mousemove --sync 500 400 mousemove --sync 700 350 mouseup 1; sleep 0.8; xdotool mousemove 640 400 click 1; sleep 1.2; xdotool mousemove 400 500 click --repeat 3 --delay 100 4; sleep 1.0; xdotool mousemove 520 380 click --repeat 2 --delay 100 5; sleep 1.5; done"
+    DRV="$(pointer_loop)"
     $PH driven -- bash -c "true"; phase driven "$((DRIVEN + 5))" "$DRV"
     fi ;;
   none)
@@ -182,6 +295,7 @@ if [ -n "$OP" ]; then
   $PH op -- bash -c "true"; phase op "$((OPS + 5))" "$(op_driver "$WID" "$OPS")"
   rec ops.count "$(wc -l < "$OUT/ops.jsonl" 2>/dev/null || echo 0)"
   rec ops.rc0 "$(grep -c '"rc": 0' "$OUT/ops.jsonl" 2>/dev/null || echo 0)"
+fi
 fi
 rec window.name_after "$(xdotool getwindowname "$WID" 2>/dev/null | tr -d '\n' | head -c 120)"
 kill -- "-$APP_PID" 2>/dev/null; sleep 2; kill -9 -- "-$APP_PID" 2>/dev/null; appdef_cleanup; kill "$(cat "$OUT/xvfb.pid")" 2>/dev/null
