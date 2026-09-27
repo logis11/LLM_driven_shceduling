@@ -241,13 +241,13 @@ Full tables: `task-9.9-daemons-session/campaign/results/results.md`, `campaign/r
 
 ### The untraced control (D40), finished 2026-09-27
 
-Each carried phase run twice in every job, traced under `perf sched record` and untraced, each thread's CPU time and switches read from `/proc` at both edges of each run; each value's per-job ratios, untraced over traced, read by their 95 % interval (the 9.5 untraced-control spec). Six jobs per subject, three in each order, every one on the AMD EPYC 7763; the carried values unchanged, each entry's notes carrying its reading. Runs `meas-ci:session` #25–#28. The check against the carried pool reads the session's 18 values together.
+Each carried phase run twice in every job, traced under `perf sched record` and untraced, each thread's CPU time and switches read from `/proc` at both edges of each run; each value's per-job ratios, untraced over traced, read by their 95 % interval (the 9.5 untraced-control spec). Six jobs per subject, three in each order, every one on the AMD EPYC 7763; the carried values unchanged, each entry's notes carrying its reading. Runs `meas-ci:session` #25–#28. The check against the carried pool reads each entry's own values (9.9 D41).
 
 | archetype | subject | jobs | build | intervals | differences (chance) | traced against carried, largest \|z\| |
 |---|---|---|---|---|---|---|
-| `message-bus` | `session` | 6 | dbus-daemon 1.14.10-4ubuntu4.1 | 2 | 0 (0.1) | 1.19 — agrees |
-| `compositor-shell` | `session` | 6 | gnome-shell 46.0-0ubuntu6~24.04.15 | 6 | 1 (0.3) | 1.19 — agrees |
-| `audio-server` | `session` | 6 | pipewire 1.0.5-1ubuntu3.3, wireplumber 0.4.17-1ubuntu4.1 | 2 | 0 (0.1) | 1.19 — agrees |
+| `message-bus` | `session` | 6 | dbus-daemon 1.14.10-4ubuntu4.1 | 2 | 0 (0.1) | 0.68 — agrees |
+| `compositor-shell` | `session` | 6 | gnome-shell 46.0-0ubuntu6~24.04.15 | 6 | 1 (0.3) | 0.74 — agrees |
+| `audio-server` | `session` | 6 | pipewire 1.0.5-1ubuntu3.3, wireplumber 0.4.17-1ubuntu4.1 | 2 | 0 (0.1) | 0.6 — agrees |
 | `service-manager` | `session` | 6 | systemd 255.4-1ubuntu8.17 | 2 | 0 (0.1) | 1.19 — agrees |
 
 The differences, each value's per-job mean ratio, untraced over traced, and its 95 % interval:

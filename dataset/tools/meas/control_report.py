@@ -218,7 +218,11 @@ def app_reports(family, app, jobs, carried, with_shares=True, control_pool=None)
                "shares": {p: _mean_shares(recs) for p, recs in shares.items() if any(n.startswith(p + " ") for n in names)}}
         if control_pool is not None:
             ctl = control_pool["runs"].get(app)
-            rep["workload"] = control.workload(carried, ctl) if ctl else None
+            if ctl:   # decision 17 over the archetype's own values: 9.9's session pool carries four entries
+                q = {n for p in (carried, ctl) for n in ((p.get("stability") or {}).get("quantities") or {})}
+                rep["workload"] = control.workload(carried, ctl, _archetypes(family, app, sorted(q)).get(arch, []))
+            else:
+                rep["workload"] = None
             rep["left_out"] = (ctl or {}).get("excluded_repeats") or {}
         rep["notes"] = control_notes(rep)
         out[arch] = rep

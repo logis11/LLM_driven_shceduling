@@ -395,27 +395,34 @@ def test_the_desktop_adapter_reads_a_renderer_component_per_renderer(tmp_path):
     assert vals["steady residual wakes/s"] == (0.015, 0.015) and vals["steady residual run mean (ms)"] == (0.1, 0.05)
 
 
-def test_the_session_adapter_keys_threads_by_instance(tmp_path):
-    import json as _j
-    from meas.session import control as c99
+def _session_procs(k):
     U = "/user.slice/user-1002.slice/user@1002.service"
-    def procs(k):
-        return (0.0, 1800.0, {
-            1: ("/sbin/init", [(1, "systemd", 0, int(9e6 * k), 0, 90)], "/init.scope"),
-            400: ("@dbus-daemon --system", [(400, "dbus-daemon", 0, int(1e6 * k), 0, 10)], "/meas.slice/dbus.service"),
-            520: ("/usr/bin/gnome-shell", [(520, "gnome-shell", 0, int(5e7 * k), 0, 500), (521, "gmain", 0, int(2e6 * k), 0, 40)],
-                  f"{U}/session.slice/org.gnome.Shell@wayland.service"),
-            900: ("/usr/sbin/cron", [(900, "cron", 0, 10**9, 0, 999)], "/system.slice/cron.service"),
-        })
-    _write_desktop_job(tmp_path / "job", "session", "steady", "traced untraced",
-                       {"traced": procs(1.0), "untraced": procs(0.8)})
+    return (0.0, 1800.0, {
+        1: ("/sbin/init", [(1, "systemd", 0, int(9e6 * k), 0, 90)], "/init.scope"),
+        400: ("@dbus-daemon --system", [(400, "dbus-daemon", 0, int(1e6 * k), 0, 10)], "/meas.slice/dbus.service"),
+        520: ("/usr/bin/gnome-shell", [(520, "gnome-shell", 0, int(5e7 * k), 0, 500), (521, "gmain", 0, int(2e6 * k), 0, 40)],
+              f"{U}/session.slice/org.gnome.Shell@wayland.service"),
+        900: ("/usr/sbin/cron", [(900, "cron", 0, 10**9, 0, 999)], "/system.slice/cron.service"),
+    })
+
+
+def _write_session_job(d, order, untraced_scale):
+    import json as _j
+    _write_desktop_job(d, "session", "steady", order, {"traced": _session_procs(1.0), "untraced": _session_procs(untraced_scale)})
     for name in ("steady", "steady-untraced"):
-        (tmp_path / "job" / f"census.{name}.start.json").write_text(_j.dumps({"uid": 1002}))
-    carried = {"phases": {"steady": {"entries": {
-        "systemd": {"components": {"selected": ["pid1/systemd"]}},
-        "dbus-daemon": {"components": {"selected": ["system-bus/dbus-daemon"]}},
-        "gnome-shell": {"components": {"selected": ["gnome-shell/gnome-shell", "gnome-shell/gmain"]}}}}}}
-    order, vals = c99.job_values(str(tmp_path / "job"), carried)
+        (d / f"census.{name}.start.json").write_text(_j.dumps({"uid": 1002}))
+
+
+CARRIED_99 = {"phases": {"steady": {"entries": {
+    "systemd": {"components": {"selected": ["pid1/systemd"]}},
+    "dbus-daemon": {"components": {"selected": ["system-bus/dbus-daemon"]}},
+    "gnome-shell": {"components": {"selected": ["gnome-shell/gnome-shell", "gnome-shell/gmain"]}}}}}}
+
+
+def test_the_session_adapter_keys_threads_by_instance(tmp_path):
+    from meas.session import control as c99
+    _write_session_job(tmp_path / "job", "traced untraced", 0.8)
+    order, vals = c99.job_values(str(tmp_path / "job"), CARRIED_99)
     assert vals["systemd pid1/systemd wakes/s"] == (0.05, 0.05)
     assert vals["systemd pid1/systemd run mean (ms)"] == (0.1, 0.08)
     assert vals["gnome-shell gnome-shell/gmain run mean (ms)"] == (0.05, 0.04)
@@ -565,6 +572,30 @@ def test_the_workload_check_places_each_control_value_in_the_carried_spread():
     assert out["z"] == {"idle a wakes/s": 0.5, "idle b run mean (ms)": -1.5}
     assert out["only_carried"] == ["idle gone wakes/s"] and out["only_control"] == ["idle new wakes/s"]
     assert out["max_abs_z"] == 1.5
+
+
+def test_a_session_entry_s_workload_check_reads_only_its_own_values(tmp_path):
+    from meas import control_report
+    jobs = {}
+    for k in range(1, 3):
+        d = tmp_path / f"meas-session-session-r{k}-control"
+        _write_session_job(d, "traced untraced" if k % 2 else "untraced traced", 0.8)
+        jobs[k] = str(d)
+    carried = dict(CARRIED_99, stability={"quantities": {
+        "systemd pid1/systemd wakes/s": {"k": 20, "mean": 1.0, "cv": 0.1},
+        "gnome-shell gnome-shell/gnome-shell wakes/s": {"k": 20, "mean": 10.0, "cv": 0.1},
+        "dbus-daemon system-bus/dbus-daemon wakes/s": {"k": 20, "mean": 0.1, "cv": 0.1}}})
+    ctl = {"runs": {"session": {"stability": {"quantities": {
+        "systemd pid1/systemd wakes/s": {"k": 6, "mean": 1.2, "cv": 0.1},
+        "gnome-shell gnome-shell/gnome-shell wakes/s": {"k": 6, "mean": 10.5, "cv": 0.1}}}}}}
+    reps = control_report.app_reports("session", "session", jobs, carried, with_shares=False, control_pool=ctl)
+    # the session pool carries four entries: each is placed over its own program's values, not the session's together
+    assert reps["service-manager"]["workload"] == {"z": {"systemd pid1/systemd wakes/s": 2.0},
+                                                   "only_carried": [], "only_control": [], "max_abs_z": 2.0}
+    assert reps["compositor-shell"]["workload"] == {"z": {"gnome-shell gnome-shell/gnome-shell wakes/s": 0.5},
+                                                    "only_carried": [], "only_control": [], "max_abs_z": 0.5}
+    assert reps["message-bus"]["workload"] == {"z": {}, "only_carried": ["dbus-daemon system-bus/dbus-daemon wakes/s"],
+                                               "only_control": [], "max_abs_z": None}
 
 
 # ---- analysis: the report (analysis plan, task 6) ----------------------------------------------------------------

@@ -94,12 +94,14 @@ def _share(rows, pred):
     return (round(sum(r.run for r in hit) / cpu, 4) if cpu else None, round(len(hit) / len(rows), 4) if rows else None)
 
 
-def workload(carried, ctl):
+def workload(carried, ctl, names=None):
     """Decision 17, in the form of 9.5 D69 and D80: each carried value of the control's traced-run pool placed in the
     carried pool's per-repeat spread — z = (control mean − carried mean) / (carried cv × carried mean) — over the
-    stability blocks' quantities, with the values found in one pool only listed."""
+    stability blocks' quantities, or those of them in `names`, with the values found in one pool only listed."""
     a = (carried.get("stability") or {}).get("quantities") or {}
     b = (ctl.get("stability") or {}).get("quantities") or {}
+    if names is not None:
+        a, b = ({k: v for k, v in q.items() if k in names} for q in (a, b))
     z = {}
     for name in sorted(a.keys() & b.keys()):
         m, cv = a[name].get("mean"), a[name].get("cv")

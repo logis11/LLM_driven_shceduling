@@ -10,7 +10,7 @@
 | dbus-daemon system-bus/dbus-daemon run mean (ms) | 0.2619 | 0.2625 | 1.0024 | 0.9913 | 0.8897–1.0929 | not resolved | traced first 0.9565; untraced first 1.0261 | 6 | 0, 0 | 0.964, 0.931 |
 | dbus-daemon system-bus/dbus-daemon wakes/s | 0.1395 | 0.1352 | 0.9695 | 0.9938 | 0.8967–1.0908 | not resolved | traced first 1.0342; untraced first 0.9533 | 6 | 0, 0 | 0.964, 0.931 |
 
-The traced runs against the carried pool (decision 17): largest |z| 1.19 over 18 values.
+The traced runs against the carried pool (decision 17): largest |z| 0.68 over 3 values.
 
 ## compositor-shell (`session`)
 
@@ -26,7 +26,7 @@ The traced runs against the carried pool (decision 17): largest |z| 1.19 over 18
 | gnome-shell gnome-shell/gnome-shell run mean (ms) | 5.7492 | 5.5954 | 0.9732 | 0.977 | 0.9296–1.0245 | not resolved | traced first 0.9503; untraced first 1.0038 | 6 | 0, 0 | 0, 0 |
 | gnome-shell gnome-shell/gnome-shell wakes/s | 0.0349 | 0.0339 | 0.9713 | 0.9921 | 0.9594–1.0248 | not resolved | traced first 0.9819; untraced first 1.0023 | 6 | 0, 0 | 0, 0 |
 
-The traced runs against the carried pool (decision 17): largest |z| 1.19 over 18 values.
+The traced runs against the carried pool (decision 17): largest |z| 0.74 over 9 values.
 
 ## audio-server (`session`)
 
@@ -38,7 +38,7 @@ The traced runs against the carried pool (decision 17): largest |z| 1.19 over 18
 | pipewire wireplumber/gmain run mean (ms) | 0.0555 | 0.0571 | 1.0289 | 1.0175 | 0.966–1.069 | not resolved | traced first 1.0202; untraced first 1.0147 | 6 | 0, 0 | 0.984, 0.984 |
 | pipewire wireplumber/gmain wakes/s | 0.213 | 0.2133 | 1.0014 | 0.9971 | 0.9879–1.0064 | not resolved | traced first 0.9911; untraced first 1.0031 | 6 | 0, 0 | 0.984, 0.984 |
 
-The traced runs against the carried pool (decision 17): largest |z| 1.19 over 18 values.
+The traced runs against the carried pool (decision 17): largest |z| 0.6 over 3 values.
 
 ## service-manager (`session`)
 
@@ -50,4 +50,4 @@ The traced runs against the carried pool (decision 17): largest |z| 1.19 over 18
 | systemd pid1/systemd run mean (ms) | 0.2723 | 0.2553 | 0.9378 | 0.9671 | 0.9011–1.0331 | not resolved | traced first 0.9938; untraced first 0.9405 | 6 | 0, 0 | 0.748, 0.611 |
 | systemd pid1/systemd wakes/s | 0.178 | 0.1775 | 0.9969 | 0.9903 | 0.9763–1.0044 | not resolved | traced first 0.9973; untraced first 0.9833 | 6 | 0, 0 | 0.748, 0.611 |
 
-The traced runs against the carried pool (decision 17): largest |z| 1.19 over 18 values.
+The traced runs against the carried pool (decision 17): largest |z| 1.19 over 3 values.

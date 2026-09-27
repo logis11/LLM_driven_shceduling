@@ -97,26 +97,11 @@
     "z": {
      "dbus-daemon system-bus/dbus-daemon gap mean (ms)": -0.41,
      "dbus-daemon system-bus/dbus-daemon run mean (ms)": -0.4,
-     "dbus-daemon system-bus/dbus-daemon wakes/s": 0.68,
-     "gnome-shell gnome-shell/JS Helper gap mean (ms)": 0.74,
-     "gnome-shell gnome-shell/JS Helper run mean (ms)": 0.31,
-     "gnome-shell gnome-shell/JS Helper wakes/s": -0.73,
-     "gnome-shell gnome-shell/gmain gap mean (ms)": -0.54,
-     "gnome-shell gnome-shell/gmain run mean (ms)": 0.24,
-     "gnome-shell gnome-shell/gmain wakes/s": 0.67,
-     "gnome-shell gnome-shell/gnome-shell gap mean (ms)": 0.09,
-     "gnome-shell gnome-shell/gnome-shell run mean (ms)": -0.0,
-     "gnome-shell gnome-shell/gnome-shell wakes/s": -0.08,
-     "pipewire wireplumber/gmain gap mean (ms)": -0.35,
-     "pipewire wireplumber/gmain run mean (ms)": 0.6,
-     "pipewire wireplumber/gmain wakes/s": 0.41,
-     "systemd pid1/systemd gap mean (ms)": -0.28,
-     "systemd pid1/systemd run mean (ms)": 1.19,
-     "systemd pid1/systemd wakes/s": 0.26
+     "dbus-daemon system-bus/dbus-daemon wakes/s": 0.68
     },
     "only_carried": [],
     "only_control": [],
-    "max_abs_z": 1.19
+    "max_abs_z": 0.68
    },
    "left_out": {},
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 2 intervals read, about 0.1 differences by chance alone, none found."
@@ -349,9 +334,6 @@
    },
    "workload": {
     "z": {
-     "dbus-daemon system-bus/dbus-daemon gap mean (ms)": -0.41,
-     "dbus-daemon system-bus/dbus-daemon run mean (ms)": -0.4,
-     "dbus-daemon system-bus/dbus-daemon wakes/s": 0.68,
      "gnome-shell gnome-shell/JS Helper gap mean (ms)": 0.74,
      "gnome-shell gnome-shell/JS Helper run mean (ms)": 0.31,
      "gnome-shell gnome-shell/JS Helper wakes/s": -0.73,
@@ -360,17 +342,11 @@
      "gnome-shell gnome-shell/gmain wakes/s": 0.67,
      "gnome-shell gnome-shell/gnome-shell gap mean (ms)": 0.09,
      "gnome-shell gnome-shell/gnome-shell run mean (ms)": -0.0,
-     "gnome-shell gnome-shell/gnome-shell wakes/s": -0.08,
-     "pipewire wireplumber/gmain gap mean (ms)": -0.35,
-     "pipewire wireplumber/gmain run mean (ms)": 0.6,
-     "pipewire wireplumber/gmain wakes/s": 0.41,
-     "systemd pid1/systemd gap mean (ms)": -0.28,
-     "systemd pid1/systemd run mean (ms)": 1.19,
-     "systemd pid1/systemd wakes/s": 0.26
+     "gnome-shell gnome-shell/gnome-shell wakes/s": -0.08
     },
     "only_carried": [],
     "only_control": [],
-    "max_abs_z": 1.19
+    "max_abs_z": 0.74
    },
    "left_out": {},
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 6 intervals read, about 0.3 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 steady phase: `gnome-shell/JS Helper` run mean 0.864 (0.841\u20130.886)."
@@ -469,28 +445,13 @@
    },
    "workload": {
     "z": {
-     "dbus-daemon system-bus/dbus-daemon gap mean (ms)": -0.41,
-     "dbus-daemon system-bus/dbus-daemon run mean (ms)": -0.4,
-     "dbus-daemon system-bus/dbus-daemon wakes/s": 0.68,
-     "gnome-shell gnome-shell/JS Helper gap mean (ms)": 0.74,
-     "gnome-shell gnome-shell/JS Helper run mean (ms)": 0.31,
-     "gnome-shell gnome-shell/JS Helper wakes/s": -0.73,
-     "gnome-shell gnome-shell/gmain gap mean (ms)": -0.54,
-     "gnome-shell gnome-shell/gmain run mean (ms)": 0.24,
-     "gnome-shell gnome-shell/gmain wakes/s": 0.67,
-     "gnome-shell gnome-shell/gnome-shell gap mean (ms)": 0.09,
-     "gnome-shell gnome-shell/gnome-shell run mean (ms)": -0.0,
-     "gnome-shell gnome-shell/gnome-shell wakes/s": -0.08,
      "pipewire wireplumber/gmain gap mean (ms)": -0.35,
      "pipewire wireplumber/gmain run mean (ms)": 0.6,
-     "pipewire wireplumber/gmain wakes/s": 0.41,
-     "systemd pid1/systemd gap mean (ms)": -0.28,
-     "systemd pid1/systemd run mean (ms)": 1.19,
-     "systemd pid1/systemd wakes/s": 0.26
+     "pipewire wireplumber/gmain wakes/s": 0.41
     },
     "only_carried": [],
     "only_control": [],
-    "max_abs_z": 1.19
+    "max_abs_z": 0.6
    },
    "left_out": {},
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 2 intervals read, about 0.1 differences by chance alone, none found."
@@ -589,21 +550,6 @@
    },
    "workload": {
     "z": {
-     "dbus-daemon system-bus/dbus-daemon gap mean (ms)": -0.41,
-     "dbus-daemon system-bus/dbus-daemon run mean (ms)": -0.4,
-     "dbus-daemon system-bus/dbus-daemon wakes/s": 0.68,
-     "gnome-shell gnome-shell/JS Helper gap mean (ms)": 0.74,
-     "gnome-shell gnome-shell/JS Helper run mean (ms)": 0.31,
-     "gnome-shell gnome-shell/JS Helper wakes/s": -0.73,
-     "gnome-shell gnome-shell/gmain gap mean (ms)": -0.54,
-     "gnome-shell gnome-shell/gmain run mean (ms)": 0.24,
-     "gnome-shell gnome-shell/gmain wakes/s": 0.67,
-     "gnome-shell gnome-shell/gnome-shell gap mean (ms)": 0.09,
-     "gnome-shell gnome-shell/gnome-shell run mean (ms)": -0.0,
-     "gnome-shell gnome-shell/gnome-shell wakes/s": -0.08,
-     "pipewire wireplumber/gmain gap mean (ms)": -0.35,
-     "pipewire wireplumber/gmain run mean (ms)": 0.6,
-     "pipewire wireplumber/gmain wakes/s": 0.41,
      "systemd pid1/systemd gap mean (ms)": -0.28,
      "systemd pid1/systemd run mean (ms)": 1.19,
      "systemd pid1/systemd wakes/s": 0.26

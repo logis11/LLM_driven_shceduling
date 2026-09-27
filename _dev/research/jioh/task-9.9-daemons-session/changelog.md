@@ -339,3 +339,11 @@ The instrument. Each thread's CPU time is the first field of its `/proc/<pid>/ta
 Results: `campaign/results-control.md`, `campaign/results-control/` (the record and the control's pool). Record: `measurement-campaign-record.md`, 9.9. Tooling: `session/fold_in.py --control`. Tests: `test_the_9_8_and_9_9_fold_ins_append_each_archetype_s_reading_to_its_notes`; `test_the_fold_in_regenerates_the_four_entries_from_the_pooled_record` reads the committed record. Values changed: none; the four entries' notes. Compiled with 9.5 D82's. Raw records released with 9.5 D82's, in **`meas-ci-control-2026-09-27`**: `meas-control-session.zip`.
 
 Commit: this entry.
+
+## D41 — the untraced control's check against the carried pool read per entry (2026-09-27)
+
+No new decision; D40's check of the traced runs against the carried pool (the 9.5 untraced-control spec's decision 17: each carried value of the control's traced runs placed in the carried pool's per-repeat spread, in standard deviations) read over each entry's own values, where the report had read the session pool's 18 values together for each of the four entries. The largest |z|: `message-bus` 0.68 over 3 values (`system-bus/dbus-daemon`'s wake rate), `compositor-shell` 0.74 over 9 (`gnome-shell/JS Helper`'s gap mean), `audio-server` 0.6 over 3 (`wireplumber/gmain`'s run mean), `service-manager` 1.19 over 3 (`pid1/systemd`'s run mean); each was stated 1.19 over 18. All four agree, as D40 read them. The record's 9.9 control subsection follows.
+
+Results: `campaign/results-control.md`, `campaign/results-control/control.json`. Tooling: `control_report.py`, the check over the archetype's own values (`control.workload`'s `names`). Tests: `test_a_session_entry_s_workload_check_reads_only_its_own_values`. Values changed: none; the notes do not carry the check, and the raw records released with D40 are unchanged.
+
+Commit: this entry.
