@@ -165,17 +165,20 @@ def test_the_three_new_preludes_are_defined(repo_root):
 
 
 def test_a_prelude_answers_only_the_dialog_it_raised(repo_root):
-    # the dry run of 2026-09-27 (runs #612, #613): with no window manager, keys go to the window under the pointer, so
-    # Writer's Alt+D and GIMP's Return missed their dialogs and the next driven run played against them. Each prelude
-    # now answers a confirmation only when that dialog is up, by its title, focused first: Writer's "Save Document?"
-    # (querysavedialog.ui, whose discard button is "Do_n't Save"), GIMP's "Revert Image" (file-commands.c), Kdenlive's
-    # "Revert to last saved version" (projectmanager.cpp, asked only of a modified project)
+    # the dry runs of 2026-09-27: with no window manager, keys go to the window under the pointer, so Writer's Alt+D
+    # and GIMP's Return missed their dialogs (runs #612, #613); focusing the dialog explicitly then left the reopened
+    # Writer document without the keyboard (run #614). The pointer now sits at the window's centre, where the dialog
+    # opens, and each prelude answers a confirmation only when that dialog is up, by its title — Writer's "Save
+    # Document?" (querysavedialog.ui, discard button "Do_n't Save"), GIMP's "Revert Image" (file-commands.c),
+    # Kdenlive's "Revert to last saved version" (projectmanager.cpp, asked only of a modified project) — and says so
+    # if it is still up after
     appdefs = _src("probe", "appdefs.sh")
     for app, title, key in (("soffice", "^Save Document", "alt+n"), ("gimp", "^Revert Image", "Return"),
                             ("kdenlive", "^Revert to last saved version", "Return")):
         pre = _arm(appdefs, app).split("CTRLPRELUDE=")[1]
-        assert f"search --onlyvisible --name '{title}' windowfocus --sync key --clearmodifiers {key}" in pre, app
-        assert f"if xdotool search --onlyvisible --name '{title}'" in pre, app
+        assert f"if xdotool search --onlyvisible --name '{title}' > /dev/null; then" in pre, app
+        assert f"xdotool key --clearmodifiers {key}; sleep 2; xdotool search --onlyvisible --name '{title}' > /dev/null && echo dialog-still-up" in pre, app
+        assert "windowfocus" not in pre, app
     assert "alt+d" not in _arm(appdefs, "soffice")
     pre = _body(_src("campaign", "run.sh"), "ctrl_prelude")
     assert pre.index("getwindowgeometry --shell") < pre.index("xdotool mousemove") < pre.index('bash -c "$CTRLPRELUDE"')

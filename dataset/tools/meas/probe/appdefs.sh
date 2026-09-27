@@ -92,9 +92,9 @@ PY
       # the untraced control's prelude (task-9.5-untraced-control spec, decision 4): the document closed unsaved and
       # reopened from disk through the running instance, the caret at its end — the state the postlaunch leaves; 30 s
       # for the reopened document's layout. Ctrl+W asks "Save Document?" only of a modified document; that dialog,
-      # when up, is focused and answered Do_n't Save (sfx2 querysavedialog.ui) — with no window manager a key reaches
-      # the window under the pointer, and Alt+D reached none (dry run 2026-09-27)
-      CTRLPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+w; sleep 3; if xdotool search --onlyvisible --name '^Save Document' > /dev/null; then echo query-save; xdotool search --onlyvisible --name '^Save Document' windowfocus --sync key --clearmodifiers alt+n; fi; sleep 5; (soffice --norestore /tmp/doc/large.odt > /dev/null 2>&1 &); sleep 30; xdotool key --clearmodifiers ctrl+End; sleep 1" ;;
+      # when up, is answered Do_n't Save (sfx2 querysavedialog.ui). With no window manager a key reaches the window
+      # under the pointer, which ctrl_prelude puts at the window's centre, where the dialog opens (dry runs 2026-09-27)
+      CTRLPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+w; sleep 3; if xdotool search --onlyvisible --name '^Save Document' > /dev/null; then echo query-save; xdotool key --clearmodifiers alt+n; sleep 2; xdotool search --onlyvisible --name '^Save Document' > /dev/null && echo dialog-still-up; fi; sleep 5; (soffice --norestore /tmp/doc/large.odt > /dev/null 2>&1 &); sleep 30; xdotool key --clearmodifiers ctrl+End; sleep 1" ;;
     thunderbird)
       apt_install_full thunderbird; ver thunderbird --version
       mkdir -p "$HOME/tbprofile"
@@ -186,8 +186,8 @@ PREFS
       mkdir -p "$HOME/.config/GIMP/2.10"
       echo '(gtk_accel_path "<Actions>/file/file-revert" "<Primary><Shift><Alt>r")' >> "$HOME/.config/GIMP/2.10/menurc"
       # GIMP asks "Revert Image" (app/actions/file-commands.c) of an imported image even unmodified; the dialog,
-      # when up, is focused and answered with its default, _Revert
-      CTRLPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+shift+alt+r; sleep 3; if xdotool search --onlyvisible --name '^Revert Image' > /dev/null; then echo revert-query; xdotool search --onlyvisible --name '^Revert Image' windowfocus --sync key --clearmodifiers Return; fi; sleep 20; xdotool key --clearmodifiers Escape; sleep 1" ;;
+      # when up, is answered with its default, _Revert
+      CTRLPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+shift+alt+r; sleep 3; if xdotool search --onlyvisible --name '^Revert Image' > /dev/null; then echo revert-query; xdotool key --clearmodifiers Return; sleep 2; xdotool search --onlyvisible --name '^Revert Image' > /dev/null && echo dialog-still-up; fi; sleep 20; xdotool key --clearmodifiers Escape; sleep 1" ;;
     kdenlive)
       apt_install_full kdenlive ffmpeg; ver kdenlive --version
       export QT_QPA_PLATFORM=xcb KDE_FULL_SESSION=true
@@ -217,8 +217,8 @@ RC
       # the untraced control's prelude (task-9.5-untraced-control spec, decision 4): the project reverted to
       # /tmp/project.kdenlive as generated (File > Revert, bound to Ctrl+Shift+F8 in the stub above), then Escape.
       # ProjectManager::slotRevert reloads the file always and asks "Revert to last saved version" of a modified
-      # project only (src/project/projectmanager.cpp, v23.08.5); that dialog, when up, is focused and continued
-      CTRLPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+shift+F8; sleep 3; if xdotool search --onlyvisible --name '^Revert to last saved version' > /dev/null; then echo revert-query; xdotool search --onlyvisible --name '^Revert to last saved version' windowfocus --sync key --clearmodifiers Return; fi; sleep 20; xdotool key --clearmodifiers Escape; sleep 1" ;;
+      # project only (src/project/projectmanager.cpp, v23.08.5); that dialog, when up, is continued
+      CTRLPRELUDE="xdotool key --clearmodifiers Escape; sleep 1; xdotool key --clearmodifiers ctrl+shift+F8; sleep 3; if xdotool search --onlyvisible --name '^Revert to last saved version' > /dev/null; then echo revert-query; xdotool key --clearmodifiers Return; sleep 2; xdotool search --onlyvisible --name '^Revert to last saved version' > /dev/null && echo dialog-still-up; fi; sleep 20; xdotool key --clearmodifiers Escape; sleep 1" ;;
     chrome)
       ver google-chrome --version
       python3 - > /tmp/page.html <<'PY'
