@@ -1,0 +1,619 @@
+{
+ "family": "session",
+ "archetypes": {
+  "message-bus": {
+   "archetype": "message-bus",
+   "app": "session",
+   "jobs": 6,
+   "orders": {
+    "traced untraced": 3,
+    "untraced traced": 3
+   },
+   "builds": {
+    "dbus-daemon 1.14.10-4ubuntu4.1": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ]
+   },
+   "values": {
+    "dbus-daemon system-bus/dbus-daemon run mean (ms)": {
+     "a": 0.26188100000000003,
+     "b": 0.262519,
+     "ratio": 1.0024,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.8338,
+      "2": 0.9878,
+      "3": 1.05,
+      "4": 0.9654,
+      "5": 0.9858,
+      "6": 1.1251
+     },
+     "per_repeat_mean": 0.9913,
+     "interval": [
+      0.8897,
+      1.0929
+     ],
+     "order_means": {
+      "traced untraced": 0.9565,
+      "untraced traced": 1.0261
+     },
+     "n": 6
+    },
+    "dbus-daemon system-bus/dbus-daemon wakes/s": {
+     "a": 0.1395,
+     "b": 0.13524999999999998,
+     "ratio": 0.9695,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.1638,
+      "2": 1.0136,
+      "3": 0.9933,
+      "4": 0.9471,
+      "5": 0.9456,
+      "6": 0.8992
+     },
+     "per_repeat_mean": 0.9938,
+     "interval": [
+      0.8967,
+      1.0908
+     ],
+     "order_means": {
+      "traced untraced": 1.0342,
+      "untraced traced": 0.9533
+     },
+     "n": 6
+    }
+   },
+   "intervals": 2,
+   "chance": 0.1,
+   "differences": [],
+   "validity": {},
+   "shares": {
+    "dbus-daemon system-bus/dbus-daemon": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.9639,
+      "max": 1.0
+     },
+     "left wakes": {
+      "mean": 0.931,
+      "max": 1.0
+     }
+    }
+   },
+   "workload": {
+    "z": {
+     "dbus-daemon system-bus/dbus-daemon gap mean (ms)": -0.41,
+     "dbus-daemon system-bus/dbus-daemon run mean (ms)": -0.4,
+     "dbus-daemon system-bus/dbus-daemon wakes/s": 0.68,
+     "gnome-shell gnome-shell/JS Helper gap mean (ms)": 0.74,
+     "gnome-shell gnome-shell/JS Helper run mean (ms)": 0.31,
+     "gnome-shell gnome-shell/JS Helper wakes/s": -0.73,
+     "gnome-shell gnome-shell/gmain gap mean (ms)": -0.54,
+     "gnome-shell gnome-shell/gmain run mean (ms)": 0.24,
+     "gnome-shell gnome-shell/gmain wakes/s": 0.67,
+     "gnome-shell gnome-shell/gnome-shell gap mean (ms)": 0.09,
+     "gnome-shell gnome-shell/gnome-shell run mean (ms)": -0.0,
+     "gnome-shell gnome-shell/gnome-shell wakes/s": -0.08,
+     "pipewire wireplumber/gmain gap mean (ms)": -0.35,
+     "pipewire wireplumber/gmain run mean (ms)": 0.6,
+     "pipewire wireplumber/gmain wakes/s": 0.41,
+     "systemd pid1/systemd gap mean (ms)": -0.28,
+     "systemd pid1/systemd run mean (ms)": 1.19,
+     "systemd pid1/systemd wakes/s": 0.26
+    },
+    "only_carried": [],
+    "only_control": [],
+    "max_abs_z": 1.19
+   },
+   "left_out": {},
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 2 intervals read, about 0.1 differences by chance alone, none found."
+  },
+  "compositor-shell": {
+   "archetype": "compositor-shell",
+   "app": "session",
+   "jobs": 6,
+   "orders": {
+    "traced untraced": 3,
+    "untraced traced": 3
+   },
+   "builds": {
+    "gnome-shell 46.0-0ubuntu6~24.04.15": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ]
+   },
+   "values": {
+    "gnome-shell gnome-shell/JS Helper run mean (ms)": {
+     "a": 0.014889,
+     "b": 0.0130785,
+     "ratio": 0.8784,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.8345,
+      "2": 0.8811,
+      "3": 0.8384,
+      "4": 0.8789,
+      "5": 0.873,
+      "6": 0.8779
+     },
+     "per_repeat_mean": 0.864,
+     "interval": [
+      0.8414,
+      0.8865
+     ],
+     "order_means": {
+      "traced untraced": 0.8486,
+      "untraced traced": 0.8793
+     },
+     "n": 6
+    },
+    "gnome-shell gnome-shell/JS Helper wakes/s": {
+     "a": 0.3028,
+     "b": 0.3086,
+     "ratio": 1.0192,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0524,
+      "2": 1.0089,
+      "3": 1.0331,
+      "4": 1.0197,
+      "5": 0.9851,
+      "6": 1.0125
+     },
+     "per_repeat_mean": 1.0186,
+     "interval": [
+      0.9946,
+      1.0426
+     ],
+     "order_means": {
+      "traced untraced": 1.0235,
+      "untraced traced": 1.0137
+     },
+     "n": 6
+    },
+    "gnome-shell gnome-shell/gmain run mean (ms)": {
+     "a": 0.073367,
+     "b": 0.07326099999999999,
+     "ratio": 0.9986,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9875,
+      "2": 0.9363,
+      "3": 1.0242,
+      "4": 1.0004,
+      "5": 0.9814,
+      "6": 1.0791
+     },
+     "per_repeat_mean": 1.0015,
+     "interval": [
+      0.9514,
+      1.0516
+     ],
+     "order_means": {
+      "traced untraced": 0.9977,
+      "untraced traced": 1.0053
+     },
+     "n": 6
+    },
+    "gnome-shell gnome-shell/gmain wakes/s": {
+     "a": 0.2501,
+     "b": 0.25,
+     "ratio": 0.9996,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9992,
+      "2": 0.9996,
+      "3": 0.9992,
+      "4": 1.0016,
+      "5": 0.9996,
+      "6": 1.0016
+     },
+     "per_repeat_mean": 1.0001,
+     "interval": [
+      0.9989,
+      1.0013
+     ],
+     "order_means": {
+      "traced untraced": 0.9993,
+      "untraced traced": 1.0009
+     },
+     "n": 6
+    },
+    "gnome-shell gnome-shell/gnome-shell run mean (ms)": {
+     "a": 5.749228499999999,
+     "b": 5.5953870000000006,
+     "ratio": 0.9732,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9108,
+      "2": 1.0453,
+      "3": 0.9522,
+      "4": 0.9693,
+      "5": 0.9879,
+      "6": 0.9967
+     },
+     "per_repeat_mean": 0.977,
+     "interval": [
+      0.9296,
+      1.0245
+     ],
+     "order_means": {
+      "traced untraced": 0.9503,
+      "untraced traced": 1.0038
+     },
+     "n": 6
+    },
+    "gnome-shell gnome-shell/gnome-shell wakes/s": {
+     "a": 0.0349,
+     "b": 0.0339,
+     "ratio": 0.9713,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.003,
+      "2": 0.9549,
+      "3": 0.9713,
+      "4": 1.0355,
+      "5": 0.9713,
+      "6": 1.0166
+     },
+     "per_repeat_mean": 0.9921,
+     "interval": [
+      0.9594,
+      1.0248
+     ],
+     "order_means": {
+      "traced untraced": 0.9819,
+      "untraced traced": 1.0023
+     },
+     "n": 6
+    }
+   },
+   "intervals": 6,
+   "chance": 0.3,
+   "differences": [
+    "gnome-shell gnome-shell/JS Helper run mean (ms)"
+   ],
+   "validity": {},
+   "shares": {
+    "gnome-shell gnome-shell/JS Helper": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "gnome-shell gnome-shell/gmain": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "gnome-shell gnome-shell/gnome-shell": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    }
+   },
+   "workload": {
+    "z": {
+     "dbus-daemon system-bus/dbus-daemon gap mean (ms)": -0.41,
+     "dbus-daemon system-bus/dbus-daemon run mean (ms)": -0.4,
+     "dbus-daemon system-bus/dbus-daemon wakes/s": 0.68,
+     "gnome-shell gnome-shell/JS Helper gap mean (ms)": 0.74,
+     "gnome-shell gnome-shell/JS Helper run mean (ms)": 0.31,
+     "gnome-shell gnome-shell/JS Helper wakes/s": -0.73,
+     "gnome-shell gnome-shell/gmain gap mean (ms)": -0.54,
+     "gnome-shell gnome-shell/gmain run mean (ms)": 0.24,
+     "gnome-shell gnome-shell/gmain wakes/s": 0.67,
+     "gnome-shell gnome-shell/gnome-shell gap mean (ms)": 0.09,
+     "gnome-shell gnome-shell/gnome-shell run mean (ms)": -0.0,
+     "gnome-shell gnome-shell/gnome-shell wakes/s": -0.08,
+     "pipewire wireplumber/gmain gap mean (ms)": -0.35,
+     "pipewire wireplumber/gmain run mean (ms)": 0.6,
+     "pipewire wireplumber/gmain wakes/s": 0.41,
+     "systemd pid1/systemd gap mean (ms)": -0.28,
+     "systemd pid1/systemd run mean (ms)": 1.19,
+     "systemd pid1/systemd wakes/s": 0.26
+    },
+    "only_carried": [],
+    "only_control": [],
+    "max_abs_z": 1.19
+   },
+   "left_out": {},
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 6 intervals read, about 0.3 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 steady phase: `gnome-shell/JS Helper` run mean 0.864 (0.841\u20130.886)."
+  },
+  "audio-server": {
+   "archetype": "audio-server",
+   "app": "session",
+   "jobs": 6,
+   "orders": {
+    "traced untraced": 3,
+    "untraced traced": 3
+   },
+   "builds": {
+    "pipewire 1.0.5-1ubuntu3.3, wireplumber 0.4.17-1ubuntu4.1": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ]
+   },
+   "values": {
+    "pipewire wireplumber/gmain run mean (ms)": {
+     "a": 0.055477,
+     "b": 0.057079,
+     "ratio": 1.0289,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0217,
+      "2": 0.9506,
+      "3": 1.0598,
+      "4": 1.0109,
+      "5": 0.9792,
+      "6": 1.0827
+     },
+     "per_repeat_mean": 1.0175,
+     "interval": [
+      0.966,
+      1.069
+     ],
+     "order_means": {
+      "traced untraced": 1.0202,
+      "untraced traced": 1.0147
+     },
+     "n": 6
+    },
+    "pipewire wireplumber/gmain wakes/s": {
+     "a": 0.213,
+     "b": 0.2133,
+     "ratio": 1.0014,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9963,
+      "2": 1.0066,
+      "3": 0.9962,
+      "4": 1.0014,
+      "5": 0.9809,
+      "6": 1.0014
+     },
+     "per_repeat_mean": 0.9971,
+     "interval": [
+      0.9879,
+      1.0064
+     ],
+     "order_means": {
+      "traced untraced": 0.9911,
+      "untraced traced": 1.0031
+     },
+     "n": 6
+    }
+   },
+   "intervals": 2,
+   "chance": 0.1,
+   "differences": [],
+   "validity": {},
+   "shares": {
+    "pipewire wireplumber/gmain": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.9841,
+      "max": 0.989
+     },
+     "left wakes": {
+      "mean": 0.9835,
+      "max": 0.987
+     }
+    }
+   },
+   "workload": {
+    "z": {
+     "dbus-daemon system-bus/dbus-daemon gap mean (ms)": -0.41,
+     "dbus-daemon system-bus/dbus-daemon run mean (ms)": -0.4,
+     "dbus-daemon system-bus/dbus-daemon wakes/s": 0.68,
+     "gnome-shell gnome-shell/JS Helper gap mean (ms)": 0.74,
+     "gnome-shell gnome-shell/JS Helper run mean (ms)": 0.31,
+     "gnome-shell gnome-shell/JS Helper wakes/s": -0.73,
+     "gnome-shell gnome-shell/gmain gap mean (ms)": -0.54,
+     "gnome-shell gnome-shell/gmain run mean (ms)": 0.24,
+     "gnome-shell gnome-shell/gmain wakes/s": 0.67,
+     "gnome-shell gnome-shell/gnome-shell gap mean (ms)": 0.09,
+     "gnome-shell gnome-shell/gnome-shell run mean (ms)": -0.0,
+     "gnome-shell gnome-shell/gnome-shell wakes/s": -0.08,
+     "pipewire wireplumber/gmain gap mean (ms)": -0.35,
+     "pipewire wireplumber/gmain run mean (ms)": 0.6,
+     "pipewire wireplumber/gmain wakes/s": 0.41,
+     "systemd pid1/systemd gap mean (ms)": -0.28,
+     "systemd pid1/systemd run mean (ms)": 1.19,
+     "systemd pid1/systemd wakes/s": 0.26
+    },
+    "only_carried": [],
+    "only_control": [],
+    "max_abs_z": 1.19
+   },
+   "left_out": {},
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 2 intervals read, about 0.1 differences by chance alone, none found."
+  },
+  "service-manager": {
+   "archetype": "service-manager",
+   "app": "session",
+   "jobs": 6,
+   "orders": {
+    "traced untraced": 3,
+    "untraced traced": 3
+   },
+   "builds": {
+    "systemd 255.4-1ubuntu8.17": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ]
+   },
+   "values": {
+    "systemd pid1/systemd run mean (ms)": {
+     "a": 0.2722735,
+     "b": 0.2553435,
+     "ratio": 0.9378,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0671,
+      "2": 0.9797,
+      "3": 1.0027,
+      "4": 0.8986,
+      "5": 0.9115,
+      "6": 0.9431
+     },
+     "per_repeat_mean": 0.9671,
+     "interval": [
+      0.9011,
+      1.0331
+     ],
+     "order_means": {
+      "traced untraced": 0.9938,
+      "untraced traced": 0.9405
+     },
+     "n": 6
+    },
+    "systemd pid1/systemd wakes/s": {
+     "a": 0.17804999999999999,
+     "b": 0.1775,
+     "ratio": 0.9969,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9989,
+      "2": 0.9989,
+      "3": 1.0045,
+      "4": 0.9827,
+      "5": 0.9886,
+      "6": 0.9683
+     },
+     "per_repeat_mean": 0.9903,
+     "interval": [
+      0.9763,
+      1.0044
+     ],
+     "order_means": {
+      "traced untraced": 0.9973,
+      "untraced traced": 0.9833
+     },
+     "n": 6
+    }
+   },
+   "intervals": 2,
+   "chance": 0.1,
+   "differences": [],
+   "validity": {},
+   "shares": {
+    "systemd pid1/systemd": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.7484,
+      "max": 0.8441
+     },
+     "left wakes": {
+      "mean": 0.6106,
+      "max": 0.6297
+     }
+    }
+   },
+   "workload": {
+    "z": {
+     "dbus-daemon system-bus/dbus-daemon gap mean (ms)": -0.41,
+     "dbus-daemon system-bus/dbus-daemon run mean (ms)": -0.4,
+     "dbus-daemon system-bus/dbus-daemon wakes/s": 0.68,
+     "gnome-shell gnome-shell/JS Helper gap mean (ms)": 0.74,
+     "gnome-shell gnome-shell/JS Helper run mean (ms)": 0.31,
+     "gnome-shell gnome-shell/JS Helper wakes/s": -0.73,
+     "gnome-shell gnome-shell/gmain gap mean (ms)": -0.54,
+     "gnome-shell gnome-shell/gmain run mean (ms)": 0.24,
+     "gnome-shell gnome-shell/gmain wakes/s": 0.67,
+     "gnome-shell gnome-shell/gnome-shell gap mean (ms)": 0.09,
+     "gnome-shell gnome-shell/gnome-shell run mean (ms)": -0.0,
+     "gnome-shell gnome-shell/gnome-shell wakes/s": -0.08,
+     "pipewire wireplumber/gmain gap mean (ms)": -0.35,
+     "pipewire wireplumber/gmain run mean (ms)": 0.6,
+     "pipewire wireplumber/gmain wakes/s": 0.41,
+     "systemd pid1/systemd gap mean (ms)": -0.28,
+     "systemd pid1/systemd run mean (ms)": 1.19,
+     "systemd pid1/systemd wakes/s": 0.26
+    },
+    "only_carried": [],
+    "only_control": [],
+    "max_abs_z": 1.19
+   },
+   "left_out": {},
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 2 intervals read, about 0.1 differences by chance alone, none found."
+  }
+ }
+}
