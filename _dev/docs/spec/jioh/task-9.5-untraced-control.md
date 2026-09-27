@@ -97,6 +97,10 @@ The ratio tables go on the family's results pages and in the campaign record. Ea
 
 The raw records of every landed control job and the gate-stop reports are released as the campaigns' were.
 
+### 22. Work a carried value leaves out by a rule read from the trace
+
+Where a component's carried value leaves part of its thread's work out by a rule read from the trace — 9.5 D64's heavy events, 9.9 D23's cron sessions, the wakes 9.9 D27 and D32 trace to packages outside the desktop manifest or to the harness — the ratio is taken over the thread's whole work in both runs. The share the carried value leaves out, CPU and wakes, is read from the traced run's trace and stated beside the ratio.
+
 ## Invariants
 
 - Every dry run, control launch and release waits on 인지오's approval.
