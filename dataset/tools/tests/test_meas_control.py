@@ -164,6 +164,23 @@ def test_the_three_new_preludes_are_defined(repo_root):
     assert '<Action name="file_revert" shortcut="Ctrl+Shift+F8"/>' in _arm(appdefs, "kdenlive")
 
 
+def test_a_prelude_answers_only_the_dialog_it_raised(repo_root):
+    # the dry run of 2026-09-27 (runs #612, #613): with no window manager, keys go to the window under the pointer, so
+    # Writer's Alt+D and GIMP's Return missed their dialogs and the next driven run played against them. Each prelude
+    # now answers a confirmation only when that dialog is up, by its title, focused first: Writer's "Save Document?"
+    # (querysavedialog.ui, whose discard button is "Do_n't Save"), GIMP's "Revert Image" (file-commands.c), Kdenlive's
+    # "Revert to last saved version" (projectmanager.cpp, asked only of a modified project)
+    appdefs = _src("probe", "appdefs.sh")
+    for app, title, key in (("soffice", "^Save Document", "alt+n"), ("gimp", "^Revert Image", "Return"),
+                            ("kdenlive", "^Revert to last saved version", "Return")):
+        pre = _arm(appdefs, app).split("CTRLPRELUDE=")[1]
+        assert f"search --onlyvisible --name '{title}' windowfocus --sync key --clearmodifiers {key}" in pre, app
+        assert f"if xdotool search --onlyvisible --name '{title}'" in pre, app
+    assert "alt+d" not in _arm(appdefs, "soffice")
+    pre = _body(_src("campaign", "run.sh"), "ctrl_prelude")
+    assert pre.index("getwindowgeometry --shell") < pre.index("xdotool mousemove") < pre.index('bash -c "$CTRLPRELUDE"')
+
+
 def test_the_interactive_workflow_holds_the_longest_control_job(repo_root):
     # web-browser's control job: 420 s settle + 2 × 600 + 2 × 605 + 2 × 605 s of phases, about 68 minutes
     wf = (repo_root / ".github" / "workflows" / "meas-interactive.yml").read_text()

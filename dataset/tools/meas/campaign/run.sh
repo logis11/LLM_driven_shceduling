@@ -176,8 +176,14 @@ quiet() {
 }
 
 # ctrl_prelude <label>: the untraced control's prelude (decision 4) — the application back in its designed state
-# before a driven run; the window is read again, since a prelude may reopen the document
+# before a driven run; the window is read again, since a prelude may reopen the document. With no window manager a key
+# reaches the window under the pointer, so the pointer goes to the window's centre first, where a dialog the prelude
+# raises also opens (dry run 2026-09-27)
 ctrl_prelude() {
+  local x y w h
+  read -r x y w h < <(xdotool getwindowgeometry --shell "$WID" 2>/dev/null | awk -F= '/^X=/{x=$2} /^Y=/{y=$2} /^WIDTH=/{w=$2} /^HEIGHT=/{h=$2} END{print x, y, w, h}')
+  [ -n "$h" ] && xdotool mousemove "$((x + w / 2))" "$((y + h / 2))"
+  rec "ctrlprelude.$1.pointer" "$((x + w / 2)),$((y + h / 2))"
   xdotool windowactivate --sync "$WID" 2>/dev/null
   bash -c "$CTRLPRELUDE" > "$OUT/ctrlprelude.$1.log" 2>&1; rec "ctrlprelude.$1.rc" "$?"
   local w; w=$(wait_window "$CLASS" 60); [ -n "$w" ] && WID="$w"
