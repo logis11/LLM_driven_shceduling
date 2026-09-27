@@ -1,0 +1,325 @@
+{
+ "family": "session",
+ "archetypes": {
+  "compositor-shell": {
+   "archetype": "compositor-shell",
+   "app": "session",
+   "phase": "steady",
+   "repeats": 24,
+   "wakes_per_s": {
+    "measured": 0.588,
+    "compiled": 0.581
+   },
+   "bins": {
+    "1 ms": {
+     "measured": {
+      "median": 5.525,
+      "min": 4.6502,
+      "max": 6.0824
+     },
+     "compiled": {
+      "median": 5.3787,
+      "min": 3.584,
+      "max": 7.7424
+     },
+     "ratio": {
+      "median": 0.9724,
+      "min": 0.6999,
+      "max": 1.3535
+     }
+    },
+    "10 ms": {
+     "measured": {
+      "median": 7.0132,
+      "min": 6.4995,
+      "max": 11.5824
+     },
+     "compiled": {
+      "median": 8.5459,
+      "min": 4.7919,
+      "max": 13.9022
+     },
+     "ratio": {
+      "median": 0.8564,
+      "min": 0.6385,
+      "max": 2.0382
+     }
+    },
+    "100 ms": {
+     "measured": {
+      "median": 10.8094,
+      "min": 6.452,
+      "max": 12.0628
+     },
+     "compiled": {
+      "median": 12.1026,
+      "min": 5.9833,
+      "max": 18.1595
+     },
+     "ratio": {
+      "median": 0.9071,
+      "min": 0.5074,
+      "max": 1.7502
+     }
+    },
+    "1 s": {
+     "measured": {
+      "median": 10.2785,
+      "min": 9.9104,
+      "max": 11.5273
+     },
+     "compiled": {
+      "median": 12.6732,
+      "min": 6.4631,
+      "max": 28.4655
+     },
+     "ratio": {
+      "median": 0.8156,
+      "min": 0.361,
+      "max": 1.54
+     }
+    }
+   }
+  },
+  "audio-server": {
+   "archetype": "audio-server",
+   "app": "session",
+   "phase": "steady",
+   "repeats": 24,
+   "wakes_per_s": {
+    "measured": 0.003,
+    "compiled": 0.003
+   },
+   "bins": {
+    "1 ms": {
+     "measured": {
+      "median": 1.0,
+      "min": 1.0,
+      "max": 1.0
+     },
+     "compiled": {
+      "median": 1.0,
+      "min": 1.0,
+      "max": 1.0
+     },
+     "ratio": {
+      "median": 1.0,
+      "min": 1.0,
+      "max": 1.0
+     }
+    },
+    "10 ms": {
+     "measured": {
+      "median": 1.0,
+      "min": 0.9999,
+      "max": 1.0
+     },
+     "compiled": {
+      "median": 1.0,
+      "min": 0.9999,
+      "max": 1.0
+     },
+     "ratio": {
+      "median": 1.0,
+      "min": 0.9999,
+      "max": 1.0001
+     }
+    },
+    "100 ms": {
+     "measured": {
+      "median": 0.9997,
+      "min": 0.9993,
+      "max": 0.9999
+     },
+     "compiled": {
+      "median": 0.9997,
+      "min": 0.9991,
+      "max": 0.9999
+     },
+     "ratio": {
+      "median": 0.9999,
+      "min": 0.9995,
+      "max": 1.0007
+     }
+    },
+    "1 s": {
+     "measured": {
+      "median": 1.7972,
+      "min": 0.9972,
+      "max": 2.33
+     },
+     "compiled": {
+      "median": 1.5303,
+      "min": 0.9983,
+      "max": 2.6161
+     },
+     "ratio": {
+      "median": 1.1869,
+      "min": 0.4061,
+      "max": 2.0
+     }
+    }
+   }
+  },
+  "service-manager": {
+   "archetype": "service-manager",
+   "app": "session",
+   "phase": "steady",
+   "repeats": 24,
+   "wakes_per_s": {
+    "measured": 0.068,
+    "compiled": 0.067
+   },
+   "bins": {
+    "1 ms": {
+     "measured": {
+      "median": 0.9999,
+      "min": 0.9999,
+      "max": 1.2352
+     },
+     "compiled": {
+      "median": 0.9999,
+      "min": 0.9999,
+      "max": 1.0181
+     },
+     "ratio": {
+      "median": 1.0,
+      "min": 0.9821,
+      "max": 1.2353
+     }
+    },
+    "10 ms": {
+     "measured": {
+      "median": 0.9994,
+      "min": 0.9993,
+      "max": 1.5728
+     },
+     "compiled": {
+      "median": 1.014,
+      "min": 0.9993,
+      "max": 1.0841
+     },
+     "ratio": {
+      "median": 1.0,
+      "min": 0.932,
+      "max": 1.5738
+     }
+    },
+    "100 ms": {
+     "measured": {
+      "median": 1.0562,
+      "min": 0.9932,
+      "max": 2.0072
+     },
+     "compiled": {
+      "median": 1.0257,
+      "min": 0.9932,
+      "max": 1.0951
+     },
+     "ratio": {
+      "median": 1.0317,
+      "min": 0.9075,
+      "max": 2.021
+     }
+    },
+    "1 s": {
+     "measured": {
+      "median": 1.0217,
+      "min": 0.9317,
+      "max": 1.998
+     },
+     "compiled": {
+      "median": 1.0198,
+      "min": 0.9383,
+      "max": 1.1283
+     },
+     "ratio": {
+      "median": 1.0369,
+      "min": 0.8707,
+      "max": 2.1077
+     }
+    }
+   }
+  },
+  "message-bus": {
+   "archetype": "message-bus",
+   "app": "session",
+   "phase": "steady",
+   "repeats": 24,
+   "wakes_per_s": {
+    "measured": 0.004,
+    "compiled": 0.004
+   },
+   "bins": {
+    "1 ms": {
+     "measured": {
+      "median": 3.5417,
+      "min": 1.0,
+      "max": 5.0
+     },
+     "compiled": {
+      "median": 2.7143,
+      "min": 1.0,
+      "max": 4.875
+     },
+     "ratio": {
+      "median": 1.2353,
+      "min": 0.3684,
+      "max": 3.1667
+     }
+    },
+    "10 ms": {
+     "measured": {
+      "median": 5.3142,
+      "min": 1.0,
+      "max": 6.25
+     },
+     "compiled": {
+      "median": 3.8571,
+      "min": 1.0,
+      "max": 9.3123
+     },
+     "ratio": {
+      "median": 1.3587,
+      "min": 0.5091,
+      "max": 4.1667
+     }
+    },
+    "100 ms": {
+     "measured": {
+      "median": 7.1421,
+      "min": 1.9998,
+      "max": 8.9995
+     },
+     "compiled": {
+      "median": 5.1994,
+      "min": 0.9999,
+      "max": 23.5607
+     },
+     "ratio": {
+      "median": 1.6155,
+      "min": 0.3784,
+      "max": 5.3338
+     }
+    },
+    "1 s": {
+     "measured": {
+      "median": 7.3855,
+      "min": 1.9989,
+      "max": 8.995
+     },
+     "compiled": {
+      "median": 5.7944,
+      "min": 0.9994,
+      "max": 23.5447
+     },
+     "ratio": {
+      "median": 1.3799,
+      "min": 0.588,
+      "max": 5.3383
+     }
+    }
+   }
+  }
+ }
+}
