@@ -592,6 +592,8 @@ def test_the_build_census_reads_each_subject_s_own_version_key():
     # the chat client's job records Element's build under its own key, the renderers' under `version` (decision 16)
     element = {1: {"element.version": "1.12.29", "synapse.version": "1.161.0+noble1"}, 2: {"element.version": "1.12.29"}}
     assert control_report._census("desktop", "chat-client", element) == {"Element 1.12.29": [1, 2]}
+    steam = {k: {"steam.buildid": "1788652215", "steam.package": "steam-installer 1:1.0.0.79~ds-2"} for k in (1, 2)}
+    assert control_report._census("desktop", "game-client", steam) == {"Steam client build 1788652215": [1, 2]}
     chrome = {1: {"version": "Google Chrome 153.0.8010.52 "}}
     assert control_report._census("desktop", "renderer-hidden", chrome) == {"Google Chrome 153.0.8010.52": [1]}
 

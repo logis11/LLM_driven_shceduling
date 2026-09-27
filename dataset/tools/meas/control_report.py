@@ -36,7 +36,8 @@ ARCH_95 = {"soffice": "office-writer", "code": "code-editor", "chrome": "web-bro
 POOL_98 = os.path.join(RESEARCH, "task-9.8-browser-comms", "campaign", "results", "pooled.json")
 POOL_99 = os.path.join(RESEARCH, "task-9.9-daemons-session", "campaign", "results", "pooled.json")
 # the 9.8 subjects whose job records the build under its own key (a renderer's is `version`), and the name it goes by
-VERSION_98 = {"chat-client": ("element.version", "Element ")}
+VERSION_98 = {"chat-client": ("element.version", "Element "),
+              "game-client": ("steam.buildid", "Steam client build ")}
 VERSIONS_99 = {"gnome-shell": ("gnome-shell",), "pipewire": ("pipewire", "wireplumber"), "systemd": ("systemd",),
                "dbus-daemon": ("dbus-daemon",)}
 NAME = {"campaign": re.compile(r"^meas-(?:interactive|playback)-(.+)-r(\d+)-control$"),
