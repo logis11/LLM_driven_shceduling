@@ -243,7 +243,8 @@ def _second_moment(table, n=20_000):
 def _rate_se(comps, span_s):
     """The standard error of a component set's wake rate over span_s. Each component's gaps are drawn independently from
     its table, so its wake count is a renewal count, of variance span × σ²/μ³ for large spans (μ, σ² the gap table's
-    mean and variance; the renewal counting theorem — reference to verify: `feller-tams49`, provisional)."""
+    mean and variance; the count of a recurrent event's occurrences is asymptotically normal on that scale —
+    `feller-ipta50`, §12.4)."""
     var = 0.0
     for c in comps:
         mu = sampling.mean_us(c["gap"]) / 1e6
