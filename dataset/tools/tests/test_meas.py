@@ -548,6 +548,8 @@ TAGS_95 = ["--tag", "interactive=meas-ci:interactive:2026-09-18", "--tag", "play
            "--tag", "thunderbird-send=meas-ci:interactive:2026-09-27", "--tag", "chrome=meas-ci:interactive:2026-09-20",
            "--tag", "webrtc=meas-ci:playback:2026-09-20", "--tag", "code=meas-ci:interactive:2026-09-25",
            "--idle-tag", "thunderbird-send=meas-ci:interactive:2026-09-19"]
+# the untraced control's record, each archetype's reading in its notes (the 9.5 untraced-control spec, decision 20)
+CONTROL_95 = ("results-control", "control.json")
 
 
 @pytest.fixture(scope="module")
@@ -563,8 +565,8 @@ def fold_95(repo_root, tmp_path_factory):
     idle = campaign_dir / IDLE_POOL_95[0] / f"pool-{IDLE_POOL_95[1]}.json"
     frag = d / "frag.yaml"
     subprocess.run([sys.executable, str(repo_root / "dataset" / "tools" / "meas" / "campaign" / "fold_in.py"),
-                    str(d / "pools"), str(frag), *TAGS_95, "--idle-from", f"{IDLE_POOL_95[1]}={idle}"],
-                   check=True, capture_output=True)
+                    str(d / "pools"), str(frag), *TAGS_95, "--idle-from", f"{IDLE_POOL_95[1]}={idle}",
+                    "--control", str(campaign_dir.joinpath(*CONTROL_95))], check=True, capture_output=True)
     return frag
 
 

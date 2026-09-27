@@ -74,6 +74,36 @@ They replaced these values (D55):
 
 `mail-client` was `thunderbird` (8 windows, `input_run` p50 4.325 ms, ±8.47 %, stopped by the input's end) until the `send` re-observation replaced it whole (9.7 D3, D36).
 
+### The untraced control (D82), finished 2026-09-27
+
+Each carried phase run twice in every job, traced under `perf sched record` and untraced, each thread's CPU time and switches read from `/proc` at both edges of each run; each value's per-job ratios, untraced over traced, read by their 95 % interval (the 9.5 untraced-control spec). Six jobs per subject, three in each order, every one on the AMD EPYC 7763; the carried values unchanged, each entry's notes carrying its reading. Runs `meas-ci:interactive` and `meas-ci:playback` #620–#649; `video-player`'s window 2 landed twice and its later copy is left out (D66).
+
+| archetype | subject | jobs | build | intervals | differences (chance) | traced against carried, largest \|z\| |
+|---|---|---|---|---|---|---|
+| `web-browser` | `chrome` | 6 | Google Chrome 153.0.8010.52 | 32 | 9 (1.6) | 6.31 — disagrees: the second page-load pass (stated) |
+| `code-editor` | `code` | 6 | VS Code 1.138.0 | 19 | 3 (1.0) | 10.83 — disagrees: the second idle run (stated; open item) |
+| `image-editor` | `gimp` | 6 | GIMP 2.10.36 | 7 | 3 (0.4) | 51.72 — disagrees: the prelude's state (stated) |
+| `video-editor` | `kdenlive` | 6 | Kdenlive `4:23.08.5-0ubuntu4` | 13 | 2 (0.7) | 0.98 — agrees |
+| `audio-player` | `mpv-audio` | 6 | mpv 0.37.0 | 1 | 1 (0.1) | 0.11 — agrees |
+| `video-player` | `mpv-video` | 6 | mpv 0.37.0 | 1 | 1 (0.1) | 1.41 — agrees |
+| `office-writer` | `soffice` | 6 | LibreOffice 24.2.7.2 | 3 | 2 (0.2) | 0.8 — agrees |
+| `mail-client` | `thunderbird-send` | 6 | Thunderbird 156.0.1 | 44 | 14 (2.2) | 8.96 — disagrees: the second send pass (stated) |
+| `video-call` | `webrtc` | 6 | Google Chrome 153.0.8010.52 | 1 | 1 (0.1) | 0.37 — agrees |
+
+The differences, each value's per-job mean ratio, untraced over traced, and its 95 % interval:
+
+- `web-browser`: idle gpu/Chrome_ChildIOT run mean (ms) 0.863 (0.850–0.877); idle gpu/VizCompositorTh run mean (ms) 0.954 (0.929–0.978); idle gpu/VizCompositorTh wakes/s 0.977 (0.960–0.993); idle utility/HangWatcher run mean (ms) 0.936 (0.911–0.962); idle utility/HangWatcher wakes/s 1.003 (1.002–1.003); op Chrome_IOThread run mean (ms) 0.861 (0.818–0.903); op Chrome_IOThread wakes/s 1.037 (1.014–1.060); op chrome run mean (ms) 0.963 (0.933–0.993); op gpu/Chrome_ChildIOT run mean (ms) 0.889 (0.859–0.920).
+- `code-editor`: idle gpu/Chrome_ChildIOT run mean (ms) 0.884 (0.836–0.932); idle renderer/Compositor run mean (ms) 0.948 (0.925–0.970); idle utility/libuv-worker run mean (ms) 0.716 (0.639–0.792).
+- `image-editor`: op gimp run mean (ms) 0.981 (0.970–0.992); op gimp wakes/s 1.021 (1.007–1.034); op script-fu wakes/s 0.972 (0.964–0.979).
+- `video-editor`: driven QXcbEventQueue run mean (ms) 0.861 (0.815–0.907); op operation duration mean (ms) 0.988 (0.978–0.997).
+- `audio-player`: play CPU share 0.860 (0.834–0.886).
+- `video-player`: play CPU share 0.976 (0.964–0.988).
+- `office-writer`: driven per-input run (ms) 0.984 (0.969–0.998); idle soffice.bin wakes/s 1.003 (1.001–1.005).
+- `mail-client`: driven per-input run (ms) 0.895 (0.853–0.937); idle IPC I/O Child run mean (ms) 0.863 (0.803–0.923); idle IPC I/O Child wakes/s 1.002 (1.002–1.002); idle IPDL Background run mean (ms) 0.883 (0.824–0.941); idle Timer run mean (ms) 0.843 (0.765–0.920); idle glean.dispatche run mean (ms) 0.791 (0.721–0.861); idle residual run mean (ms) 0.943 (0.892–0.993); op Compositor run mean (ms) 0.817 (0.782–0.852); op Renderer run mean (ms) 0.970 (0.944–0.995); op Socket Thread run mean (ms) 0.825 (0.668–0.981); op Softwar~cThread run mean (ms) 0.745 (0.725–0.766); op Timer run mean (ms) 0.815 (0.759–0.870); op WRRende~ckend#0 run mean (ms) 0.911 (0.828–0.994); op glean.dispatche run mean (ms) 0.738 (0.689–0.786).
+- `video-call`: play CPU share 0.952 (0.934–0.971).
+
+Full tables: `task-9.5-interactive-typing/campaign/results-control.md`, `campaign/results-control/control.json`.
+
 ## 9.6 — three archetypes, one campaign
 
 Repeats 4, 5, 7, 8 and 9–18 on the AMD EPYC 7763 (14 repeats; repeats 1, 2, 3, 6 gated). 28 jobs: 14 landed, 12 stopped by the machine gate, 2 cancelled (repeat 19, launched before the campaign ended, measured nothing). Every value is an across-repeat mean, each table by its mean as it carries it, count-weighted over the repeats (D26; 9.5 D78). Two conditions changed mid-campaign: `clamscan` reads a fixed signature database from repeat 9 (D27) and `python3` starts warm from repeat 11 (D28), so those two pool fewer repeats.
@@ -156,6 +186,25 @@ Sparse components, waking a few times per renderer per phase, their three values
 
 Full tables: `task-9.8-browser-comms/campaign/results/results.md`, `campaign/results/pooled.json`; every job's model: `campaign/machine-draws.md`.
 
+### The untraced control (D32), finished 2026-09-27
+
+Each carried phase run twice in every job, traced under `perf sched record` and untraced, each thread's CPU time and switches read from `/proc` at both edges of each run; each value's per-job ratios, untraced over traced, read by their 95 % interval (the 9.5 untraced-control spec). Six jobs per subject, three in each order, every one on the AMD EPYC 7763; the carried values unchanged, each entry's notes carrying its reading. Runs `meas-ci:desktop` #60–#69; `chat-client`'s windows 1 and 2 landed twice and their later copies are left out (9.5 D66).
+
+| archetype | subject | jobs | build | intervals | differences (chance) | traced against carried, largest \|z\| |
+|---|---|---|---|---|---|---|
+| `renderer-hidden` | `chrome-hidden` | 6 | Google Chrome 153.0.8010.52 | 14 | 2 (0.7) | 5.12 — agrees under the carried selection, read by hand |
+| `renderer-visible` | `chrome-visible` | 6 | Google Chrome 153.0.8010.52 | 10 | 0 (0.5) | 1.98 — agrees |
+| `chat-client` | `element` | 6 | Element 1.12.29 | 12 | 4 (0.6) | 3.35 — disagrees: the second idle run (stated, with the build) |
+| `game-client` | `steam` | 6 | Steam client build 1788652215 | 22 | 10 (1.1) | 1.27 — agrees |
+
+The differences, each value's per-job mean ratio, untraced over traced, and its 95 % interval:
+
+- `renderer-hidden`: steady HangWatcher run mean (ms) 0.974 (0.950–0.998); steady HangWatcher wakes/s 1.003 (1.002–1.003).
+- `chat-client`: idle Chrome_ChildIOT run mean (ms) 0.931 (0.910–0.952); idle Chrome_IOThread run mean (ms) 0.843 (0.809–0.877); idle ThreadPoolForeg run mean (ms) 0.909 (0.861–0.958); idle ThreadPoolServi run mean (ms) 0.880 (0.807–0.952).
+- `game-client`: shown CJobMgr::m_Work run mean (ms) 0.857 (0.778–0.935); shown Chrome_ChildIOT run mean (ms) 0.871 (0.844–0.899); shown Chrome_ChildIOT wakes/s 0.996 (0.993–1.000); shown Compositor run mean (ms) 0.952 (0.915–0.988); shown Compositor wakes/s 0.979 (0.973–0.985); shown ThreadPoolForeg run mean (ms) 0.816 (0.746–0.886); shown ThreadPoolForeg wakes/s 1.076 (1.013–1.139); shown VizCompositorTh run mean (ms) 0.972 (0.947–0.998); shown VizCompositorTh wakes/s 0.988 (0.977–0.998); shown steamwebhelper wakes/s 0.996 (0.993–0.999).
+
+Full tables: `task-9.8-browser-comms/campaign/results-control.md`, `campaign/results-control/control.json`.
+
 ## 9.9 — four entries, one campaign
 
 One subject, the Ubuntu 24.04 desktop session, carries the four entries that replace `system-daemon` — `compositor-shell` (GNOME Shell), `audio-server` (the PipeWire stack), `service-manager` (`systemd`) and `message-bus` (`dbus-daemon`), folded in at D26 and again, re-analysed, at D30 — so every job observes all four and the repeats and jobs are shared. 24 repeats — 47–49, 51, 58, 60–63, 68, 69, 71–77, 79, 83, 85–88 — every one on the AMD EPYC 7763, kernel `6.17.0-1022-azure` in all of them, none excluded, one set of package versions in every repeat (`gnome-shell` 46.0-0ubuntu6~24.04.14, `pipewire` and `pipewire-pulse` 1.0.5-1ubuntu3.3, `wireplumber` 0.4.17-1ubuntu4.1, `systemd` 255.4-1ubuntu8.17, `dbus-daemon` 1.14.10-4ubuntu4.1). Each entry reads the `steady` phase, 1800 s (D22): the session idle past `idle-delay`, the shield up and locked, the monitor blanked (method §3). No display server in any repeat's census. Every wake is read by its cause (D27): wakes owed to a package Ubuntu 24.04's desktop manifest does not hold, or to the harness, and desktop jobs bound to a clock time leave the components and are stated. `values` counts what the rule covers; `widest` is the largest half-width among those that pass.
@@ -190,6 +239,23 @@ Gap means are over each component's merged wake times, wrapped round the phase (
 
 Full tables: `task-9.9-daemons-session/campaign/results/results.md`, `campaign/results/pooled.json`; the placement of D28, re-read under D32's causes at D35, `campaign/results/within-run.json`; every job's model: `campaign/machine-draws.md`.
 
+### The untraced control (D40), finished 2026-09-27
+
+Each carried phase run twice in every job, traced under `perf sched record` and untraced, each thread's CPU time and switches read from `/proc` at both edges of each run; each value's per-job ratios, untraced over traced, read by their 95 % interval (the 9.5 untraced-control spec). Six jobs per subject, three in each order, every one on the AMD EPYC 7763; the carried values unchanged, each entry's notes carrying its reading. Runs `meas-ci:session` #25–#28. The check against the carried pool reads the session's 18 values together.
+
+| archetype | subject | jobs | build | intervals | differences (chance) | traced against carried, largest \|z\| |
+|---|---|---|---|---|---|---|
+| `message-bus` | `session` | 6 | dbus-daemon 1.14.10-4ubuntu4.1 | 2 | 0 (0.1) | 1.19 — agrees |
+| `compositor-shell` | `session` | 6 | gnome-shell 46.0-0ubuntu6~24.04.15 | 6 | 1 (0.3) | 1.19 — agrees |
+| `audio-server` | `session` | 6 | pipewire 1.0.5-1ubuntu3.3, wireplumber 0.4.17-1ubuntu4.1 | 2 | 0 (0.1) | 1.19 — agrees |
+| `service-manager` | `session` | 6 | systemd 255.4-1ubuntu8.17 | 2 | 0 (0.1) | 1.19 — agrees |
+
+The differences, each value's per-job mean ratio, untraced over traced, and its 95 % interval:
+
+- `compositor-shell`: gnome-shell gnome-shell/JS Helper run mean (ms) 0.864 (0.841–0.886).
+
+Full tables: `task-9.9-daemons-session/campaign/results-control.md`, `campaign/results-control/control.json`.
+
 ## Machine draws
 
 The build campaign, complete: 28 jobs, 14 on the AMD EPYC 7763 (50.0 %), 12 stopped by the machine gate — Intel Xeon Platinum 8573C 4, AMD EPYC 9V74 4, AMD EPYC 9V45 2, Intel Xeon Platinum 8370C 1, Intel Xeon 6973P-C 1 — and 2 cancelled.
@@ -201,3 +267,5 @@ The 9.7 background campaign, complete: 145 jobs — 78 drew the AMD EPYC 7763 (5
 The 9.8 desktop campaign, complete: 105 jobs, the hidden renderer's added repeats (D31, runs #51–#57) included — 60 landed on the AMD EPYC 7763 (57.1 %, all pooled), 45 stopped by the machine gate: AMD EPYC 9V74 20, Intel Xeon Platinum 8573C 11, AMD EPYC 9V45 8, Intel Xeon 6973P-C 4, Intel Xeon Platinum 8370C 2. Per entry, gate stops: `chrome-hidden` 15, `element` 14, `steam` 9, `chrome-visible` 7. With the tooling's dry runs and the long-phase probes, neither of them a repeat, 76 of 141 jobs drew the EPYC 7763 (`task-9.8-browser-comms/campaign/machine-draws.md`).
 
 The 9.9 session campaign, complete: 42 jobs — 24 landed on the AMD EPYC 7763 (57.1 %, all pooled), 18 stopped by the machine gate: AMD EPYC 9V74 6, Intel Xeon Platinum 8573C 5, AMD EPYC 9V45 3, Intel Xeon 6973P-C 3, Intel Xeon Platinum 8370C 1. With the tooling's dry runs and the long-phase probes, neither of them a repeat, 41 of the 82 jobs whose model is recorded drew the EPYC 7763; 8 more dry jobs ended without a report, 90 in all (`task-9.9-daemons-session/campaign/machine-draws.md`).
+
+The untraced control of 9.5, 9.8 and 9.9, complete (9.5 D82, 9.8 D32, 9.9 D40): 148 jobs — 87 landed on the AMD EPYC 7763 (58.8 %; 84 pooled, three later copies of a window that landed twice left out under 9.5 D66), 61 stopped by the machine gate: AMD EPYC 9V74 25, AMD EPYC 9V45 13, Intel Xeon Platinum 8573C 12, Intel Xeon 6973P-C 7, Intel Xeon Platinum 8370C 4. By family: interactive 61 jobs, 36 landed; playback 31, 19; desktop 46, 26; session 10, 6.

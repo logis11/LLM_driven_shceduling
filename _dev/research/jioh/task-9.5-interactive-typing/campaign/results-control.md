@@ -250,7 +250,7 @@ The traced runs against the carried pool (decision 17): largest |z| 0.8 over 4 v
 | op thunderbird-bin run mean (ms) | 1.1553 | 1.1216 | 0.9708 | 0.985 | 0.765–1.2051 | not resolved | traced first 1.1715; untraced first 0.7986 | 6 | 0, 0 | — | 0.552, 0.375 |
 | op thunderbird-bin wakes/s | 133.7811 | 135.9434 | 1.0162 | 1.0216 | 0.877–1.1662 | not resolved | traced first 0.8962; untraced first 1.147 | 6 | 0, 0 | — | 0.552, 0.375 |
 
-The operation phase's second send pass wakes `Socket Thread` about 22 % more and `TaskCon~ller` about 35 % less inside the sends than the first, which keeps those ratios from resolving.
+The operation phase's second send pass wakes `Socket Thread` about 22 % more and `TaskCon~ller` about 35 % less inside the sends than the first, which keeps `Socket Thread`'s wake rate and both of `TaskCon~ller`'s ratios from resolving.
 
 The traced runs against the carried pool (decision 17): largest |z| 8.96 over 70 values; only in the carried pool: input_run mean, 136M (ms).
 

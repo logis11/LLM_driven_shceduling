@@ -419,10 +419,12 @@ def test_a_runs_artifacts_are_listed_from_every_page(monkeypatch):
 
 
 def test_the_fold_in_regenerates_the_four_entries_from_the_pooled_record(repo_root, tmp_path):
-    # D26: the entries in archetypes.yaml are fold_in.py's output on the committed pooled record, byte for byte
-    pooled = repo_root / "_dev" / "research" / "jioh" / "task-9.9-daemons-session" / "campaign" / "results" / "pooled.json"
+    # D26: the entries in archetypes.yaml are fold_in.py's output on the committed pooled record, byte for byte, with the
+    # untraced control's reading in their notes (the 9.5 untraced-control spec, decision 20)
+    campaign = repo_root / "_dev" / "research" / "jioh" / "task-9.9-daemons-session" / "campaign"
+    pooled, control = campaign / "results" / "pooled.json", campaign / "results-control" / "control.json"
     out = tmp_path / "fold.yaml"
-    argv, sys.argv = sys.argv, ["fold_in.py", str(pooled), str(out)]
+    argv, sys.argv = sys.argv, ["fold_in.py", str(pooled), str(out), "--control", str(control)]
     try:
         fold_in.main()
     finally:

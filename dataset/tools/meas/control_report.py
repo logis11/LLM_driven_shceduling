@@ -57,8 +57,9 @@ NOTES_STATED = {
     "image-editor": ("The driven runs start from the control's prelude (the image reverted, the pointer over the canvas), in "
                      "which the main thread wakes about 18 % less often with about 19 % longer runs than in the carried "
                      "pool at the same CPU share; the driven ratios are perf's effect in that state."),
-    "mail-client": ("The operation phase's second send pass wakes `Socket Thread` about 25 % more and `TaskCon~ller` about "
-                    "35 % less inside the sends than the first, which keeps those ratios from resolving."),
+    "mail-client": ("The operation phase's second send pass wakes `Socket Thread` about 22 % more and `TaskCon~ller` about "
+                    "35 % less inside the sends than the first, which keeps `Socket Thread`'s wake rate and both of "
+                    "`TaskCon~ller`'s ratios from resolving."),
     "video-editor": ("The first preview render of each job's second operation run did not start (`kdenlive_render` never "
                      "appeared within 30 s), so that run's operation values rest on 25 renders against the first run's "
                      "26–27."),

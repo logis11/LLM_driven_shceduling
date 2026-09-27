@@ -29,5 +29,5 @@
 
 ### Task 3: results and recompile
 
-- [ ] The report over every landed control job per family, the pages and records committed under each slice's `campaign/`.
-- [ ] The fold-ins run with `--control`, spliced, their byte-for-byte tests reading the committed records; `tools/compile.py --allow-window`; the manifest hashes; full test suite; commit.
+- [x] The report over every landed control job per family, the pages and records committed under each slice's `campaign/`.
+- [x] The fold-ins run with `--control`, spliced, their byte-for-byte tests reading the committed records; `tools/compile.py --allow-window`; the manifest hashes; full test suite; commit.

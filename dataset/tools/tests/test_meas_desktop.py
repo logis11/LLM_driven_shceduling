@@ -477,6 +477,26 @@ def test_the_build_census_orders_repeats_keyed_by_landing():
     assert census == "Chrome 152 (4 repeats), Chrome 153 (1: 12)"
 
 
+def test_the_fold_in_regenerates_the_four_entries_from_the_pooled_record(repo_root, tmp_path):
+    # the entries in archetypes.yaml are fold_in.py's output on the committed pooled record, byte for byte, with the
+    # untraced control's reading in their notes (the 9.5 untraced-control spec, decision 20)
+    import sys
+    from meas.desktop import fold_in
+    campaign = repo_root / "_dev" / "research" / "jioh" / "task-9.8-browser-comms" / "campaign"
+    pooled, control = campaign / "results" / "pooled.json", campaign / "results-control" / "control.json"
+    out = tmp_path / "fold.yaml"
+    argv, sys.argv = sys.argv, ["fold_in.py", str(pooled), str(out), "--control", str(control)]
+    try:
+        fold_in.main()
+    finally:
+        sys.argv = argv
+    fragment = out.read_text().rstrip("\n")
+    entries = fragment[fragment.index("\n  renderer-hidden:\n"):]   # the library holds the entries, not the fold's header
+    assert entries in (repo_root / "dataset" / "archetypes.yaml").read_text()
+    for entry in fold_in.IDS.values():
+        assert f"\n  {entry}:\n" in fragment
+
+
 def test_the_renderer_scopes_state_the_chrome_builds_they_pool(repo_root, tmp_path):
     # 9.5 D69: Google's repository serves only its current Chrome, so the build is recorded per repeat and the census
     # stated in the observed line; the hidden renderer's added repeats (D31) ran 153
