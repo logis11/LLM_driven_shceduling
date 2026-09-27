@@ -1,0 +1,4613 @@
+{
+ "family": "campaign",
+ "archetypes": {
+  "web-browser": {
+   "archetype": "web-browser",
+   "app": "chrome",
+   "jobs": 6,
+   "orders": {
+    "traced untraced": 3,
+    "untraced traced": 3
+   },
+   "builds": {
+    "Google Chrome 153.0.8010.52": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ]
+   },
+   "values": {
+    "driven per-input run (ms)": {
+     "a": 1.2751915,
+     "b": 1.879214,
+     "ratio": 1.4737,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 2.1732,
+      "2": 1.0481,
+      "3": 0.3925,
+      "4": 1.0535,
+      "5": 0.9587,
+      "6": 1.7425
+     },
+     "per_repeat_mean": 1.2281,
+     "interval": [
+      0.5657,
+      1.8905
+     ],
+     "order_means": {
+      "traced untraced": 1.1748,
+      "untraced traced": 1.2814
+     },
+     "n": 6
+    },
+    "idle chrome run mean (ms)": {
+     "a": 0.1710765,
+     "b": 0.1589035,
+     "ratio": 0.9288,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.8907,
+      "2": 0.9777,
+      "3": 1.0394,
+      "4": 1.0224,
+      "5": 0.9299,
+      "6": 0.9199
+     },
+     "per_repeat_mean": 0.9633,
+     "interval": [
+      0.9008,
+      1.0259
+     ],
+     "order_means": {
+      "traced untraced": 0.9533,
+      "untraced traced": 0.9733
+     },
+     "n": 6
+    },
+    "idle chrome wakes/s": {
+     "a": 0.7913,
+     "b": 0.7891,
+     "ratio": 0.9972,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9575,
+      "2": 1.0369,
+      "3": 0.9503,
+      "4": 1.0893,
+      "5": 0.9416,
+      "6": 1.009
+     },
+     "per_repeat_mean": 0.9974,
+     "interval": [
+      0.9361,
+      1.0588
+     ],
+     "order_means": {
+      "traced untraced": 0.9498,
+      "untraced traced": 1.0451
+     },
+     "n": 6
+    },
+    "idle gpu/Chrome_ChildIOT run mean (ms)": {
+     "a": 0.0315905,
+     "b": 0.0272745,
+     "ratio": 0.8634,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.8603,
+      "2": 0.8879,
+      "3": 0.8486,
+      "4": 0.8641,
+      "5": 0.8613,
+      "6": 0.8584
+     },
+     "per_repeat_mean": 0.8634,
+     "interval": [
+      0.8497,
+      0.8772
+     ],
+     "order_means": {
+      "traced untraced": 0.8567,
+      "untraced traced": 0.8701
+     },
+     "n": 6
+    },
+    "idle gpu/Chrome_ChildIOT wakes/s": {
+     "a": 7.5428999999999995,
+     "b": 7.44185,
+     "ratio": 0.9866,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0025,
+      "2": 0.9806,
+      "3": 1.0137,
+      "4": 0.9851,
+      "5": 0.9926,
+      "6": 0.9721
+     },
+     "per_repeat_mean": 0.9911,
+     "interval": [
+      0.9752,
+      1.007
+     ],
+     "order_means": {
+      "traced untraced": 1.0029,
+      "untraced traced": 0.9793
+     },
+     "n": 6
+    },
+    "idle gpu/VizCompositorTh run mean (ms)": {
+     "a": 0.0779195,
+     "b": 0.0749735,
+     "ratio": 0.9622,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.9503,
+      "2": 0.9668,
+      "3": 0.9084,
+      "4": 0.9729,
+      "5": 0.9611,
+      "6": 0.9628
+     },
+     "per_repeat_mean": 0.9537,
+     "interval": [
+      0.9291,
+      0.9783
+     ],
+     "order_means": {
+      "traced untraced": 0.9399,
+      "untraced traced": 0.9675
+     },
+     "n": 6
+    },
+    "idle gpu/VizCompositorTh wakes/s": {
+     "a": 11.78255,
+     "b": 11.5974,
+     "ratio": 0.9843,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.9889,
+      "2": 0.9761,
+      "3": 0.9618,
+      "4": 0.9803,
+      "5": 0.9974,
+      "6": 0.9556
+     },
+     "per_repeat_mean": 0.9767,
+     "interval": [
+      0.96,
+      0.9933
+     ],
+     "order_means": {
+      "traced untraced": 0.9827,
+      "untraced traced": 0.9707
+     },
+     "n": 6
+    },
+    "idle residual run mean (ms)": {
+     "a": 0.2038455,
+     "b": 0.12234249999999999,
+     "ratio": 0.6002,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.4812,
+      "2": 1.2347,
+      "3": 1.3529,
+      "4": 1.0836,
+      "5": 0.4812,
+      "6": 0.4697
+     },
+     "per_repeat_mean": 0.8506,
+     "interval": [
+      0.4122,
+      1.2889
+     ],
+     "order_means": {
+      "traced untraced": 0.7718,
+      "untraced traced": 0.9293
+     },
+     "n": 6
+    },
+    "idle residual wakes/s": {
+     "a": 1.0448,
+     "b": 1.0340500000000001,
+     "ratio": 0.9897,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.8312,
+      "2": 1.125,
+      "3": 0.9033,
+      "4": 1.1689,
+      "5": 0.8646,
+      "6": 1.0201
+     },
+     "per_repeat_mean": 0.9855,
+     "interval": [
+      0.8375,
+      1.1336
+     ],
+     "order_means": {
+      "traced untraced": 0.8664,
+      "untraced traced": 1.1047
+     },
+     "n": 6
+    },
+    "idle utility/HangWatcher run mean (ms)": {
+     "a": 0.04294,
+     "b": 0.040487,
+     "ratio": 0.9429,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.9114,
+      "2": 0.9189,
+      "3": 0.9252,
+      "4": 0.9789,
+      "5": 0.9447,
+      "6": 0.9392
+     },
+     "per_repeat_mean": 0.9364,
+     "interval": [
+      0.9109,
+      0.9618
+     ],
+     "order_means": {
+      "traced untraced": 0.9271,
+      "untraced traced": 0.9457
+     },
+     "n": 6
+    },
+    "idle utility/HangWatcher wakes/s": {
+     "a": 0.29925,
+     "b": 0.3,
+     "ratio": 1.0025,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 1.0023,
+      "2": 1.0023,
+      "3": 1.003,
+      "4": 1.0027,
+      "5": 1.0023,
+      "6": 1.0027
+     },
+     "per_repeat_mean": 1.0026,
+     "interval": [
+      1.0022,
+      1.0029
+     ],
+     "order_means": {
+      "traced untraced": 1.0025,
+      "untraced traced": 1.0026
+     },
+     "n": 6
+    },
+    "idle utility/chrome run mean (ms)": {
+     "a": 0.09371750000000001,
+     "b": 0.08962600000000001,
+     "ratio": 0.9563,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9389,
+      "2": 1.0075,
+      "3": 0.9758,
+      "4": 1.0146,
+      "5": 0.9323,
+      "6": 0.9726
+     },
+     "per_repeat_mean": 0.9736,
+     "interval": [
+      0.938,
+      1.0092
+     ],
+     "order_means": {
+      "traced untraced": 0.949,
+      "untraced traced": 0.9982
+     },
+     "n": 6
+    },
+    "idle utility/chrome wakes/s": {
+     "a": 0.81295,
+     "b": 0.7999,
+     "ratio": 0.9839,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9798,
+      "2": 1.0024,
+      "3": 1.0174,
+      "4": 1.0005,
+      "5": 0.9839,
+      "6": 0.9781
+     },
+     "per_repeat_mean": 0.9937,
+     "interval": [
+      0.9773,
+      1.0101
+     ],
+     "order_means": {
+      "traced untraced": 0.9937,
+      "untraced traced": 0.9937
+     },
+     "n": 6
+    },
+    "op Chrome_IOThread run mean (ms)": {
+     "a": 0.025232499999999998,
+     "b": 0.0221005,
+     "ratio": 0.8759,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.8035,
+      "2": 0.89,
+      "3": 0.8275,
+      "4": 0.906,
+      "5": 0.8496,
+      "6": 0.8873
+     },
+     "per_repeat_mean": 0.8607,
+     "interval": [
+      0.8184,
+      0.9029
+     ],
+     "order_means": {
+      "traced untraced": 0.8269,
+      "untraced traced": 0.8944
+     },
+     "n": 6
+    },
+    "op Chrome_IOThread wakes/s": {
+     "a": 27.889200000000002,
+     "b": 28.9893,
+     "ratio": 1.0394,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 1.0711,
+      "2": 1.0179,
+      "3": 1.0319,
+      "4": 1.0347,
+      "5": 1.0523,
+      "6": 1.013
+     },
+     "per_repeat_mean": 1.0368,
+     "interval": [
+      1.014,
+      1.0597
+     ],
+     "order_means": {
+      "traced untraced": 1.0518,
+      "untraced traced": 1.0219
+     },
+     "n": 6
+    },
+    "op CompositorTileW run mean (ms)": {
+     "a": 0.094256,
+     "b": 0.09351899999999999,
+     "ratio": 0.9922,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.925,
+      "2": 0.9755,
+      "3": 0.9617,
+      "4": 1.003,
+      "5": 1.0111,
+      "6": 0.9626
+     },
+     "per_repeat_mean": 0.9731,
+     "interval": [
+      0.9403,
+      1.006
+     ],
+     "order_means": {
+      "traced untraced": 0.9659,
+      "untraced traced": 0.9804
+     },
+     "n": 6
+    },
+    "op CompositorTileW wakes/s": {
+     "a": 3.2161,
+     "b": 3.2641999999999998,
+     "ratio": 1.015,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.035,
+      "2": 1.0124,
+      "3": 0.9685,
+      "4": 1.0178,
+      "5": 0.9976,
+      "6": 1.0032
+     },
+     "per_repeat_mean": 1.0058,
+     "interval": [
+      0.9823,
+      1.0292
+     ],
+     "order_means": {
+      "traced untraced": 1.0004,
+      "untraced traced": 1.0111
+     },
+     "n": 6
+    },
+    "op ThreadPoolForeg run mean (ms)": {
+     "a": 0.039137,
+     "b": 0.0351655,
+     "ratio": 0.8985,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9804,
+      "2": 0.8901,
+      "3": 0.9857,
+      "4": 0.8986,
+      "5": 1.0338,
+      "6": 0.8206
+     },
+     "per_repeat_mean": 0.9349,
+     "interval": [
+      0.8525,
+      1.0173
+     ],
+     "order_means": {
+      "traced untraced": 1.0,
+      "untraced traced": 0.8698
+     },
+     "n": 6
+    },
+    "op ThreadPoolForeg wakes/s": {
+     "a": 9.8894,
+     "b": 9.826450000000001,
+     "ratio": 0.9936,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9904,
+      "2": 0.9925,
+      "3": 1.0278,
+      "4": 0.9795,
+      "5": 1.0047,
+      "6": 1.0678
+     },
+     "per_repeat_mean": 1.0105,
+     "interval": [
+      0.9763,
+      1.0446
+     ],
+     "order_means": {
+      "traced untraced": 1.0076,
+      "untraced traced": 1.0133
+     },
+     "n": 6
+    },
+    "op chrome run mean (ms)": {
+     "a": 0.233847,
+     "b": 0.225099,
+     "ratio": 0.9626,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.9511,
+      "2": 0.944,
+      "3": 0.943,
+      "4": 1.014,
+      "5": 0.9813,
+      "6": 0.9469
+     },
+     "per_repeat_mean": 0.9634,
+     "interval": [
+      0.9333,
+      0.9934
+     ],
+     "order_means": {
+      "traced untraced": 0.9585,
+      "untraced traced": 0.9683
+     },
+     "n": 6
+    },
+    "op chrome wakes/s": {
+     "a": 18.946,
+     "b": 18.929850000000002,
+     "ratio": 0.9991,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0083,
+      "2": 1.0029,
+      "3": 1.0117,
+      "4": 0.971,
+      "5": 1.0593,
+      "6": 0.9829
+     },
+     "per_repeat_mean": 1.006,
+     "interval": [
+      0.974,
+      1.038
+     ],
+     "order_means": {
+      "traced untraced": 1.0264,
+      "untraced traced": 0.9856
+     },
+     "n": 6
+    },
+    "op gpu/Chrome_ChildIOT run mean (ms)": {
+     "a": 0.031297,
+     "b": 0.028519500000000003,
+     "ratio": 0.9113,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.8493,
+      "2": 0.8943,
+      "3": 0.8731,
+      "4": 0.9155,
+      "5": 0.9282,
+      "6": 0.8765
+     },
+     "per_repeat_mean": 0.8895,
+     "interval": [
+      0.8589,
+      0.9201
+     ],
+     "order_means": {
+      "traced untraced": 0.8835,
+      "untraced traced": 0.8954
+     },
+     "n": 6
+    },
+    "op gpu/Chrome_ChildIOT wakes/s": {
+     "a": 7.556150000000001,
+     "b": 7.6506,
+     "ratio": 1.0125,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0073,
+      "2": 1.0098,
+      "3": 0.9826,
+      "4": 1.0281,
+      "5": 1.0179,
+      "6": 1.0131
+     },
+     "per_repeat_mean": 1.0098,
+     "interval": [
+      0.9938,
+      1.0258
+     ],
+     "order_means": {
+      "traced untraced": 1.0026,
+      "untraced traced": 1.017
+     },
+     "n": 6
+    },
+    "op gpu/VizCompositorTh run mean (ms)": {
+     "a": 0.35858100000000004,
+     "b": 0.35139149999999997,
+     "ratio": 0.98,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9588,
+      "2": 0.9384,
+      "3": 0.9887,
+      "4": 1.0097,
+      "5": 1.0418,
+      "6": 0.947
+     },
+     "per_repeat_mean": 0.9807,
+     "interval": [
+      0.9386,
+      1.0228
+     ],
+     "order_means": {
+      "traced untraced": 0.9964,
+      "untraced traced": 0.965
+     },
+     "n": 6
+    },
+    "op gpu/VizCompositorTh wakes/s": {
+     "a": 8.0823,
+     "b": 8.138200000000001,
+     "ratio": 1.0069,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9991,
+      "2": 1.0123,
+      "3": 0.9542,
+      "4": 1.0152,
+      "5": 1.0028,
+      "6": 1.0039
+     },
+     "per_repeat_mean": 0.9979,
+     "interval": [
+      0.9746,
+      1.0213
+     ],
+     "order_means": {
+      "traced untraced": 0.9854,
+      "untraced traced": 1.0105
+     },
+     "n": 6
+    },
+    "op operation duration mean (ms)": {
+     "a": 481.86699999999996,
+     "b": 480.028,
+     "ratio": 0.9962,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9983,
+      "2": 0.9941,
+      "3": 0.9341,
+      "4": 1.0125,
+      "5": 1.0044,
+      "6": 0.9872
+     },
+     "per_repeat_mean": 0.9884,
+     "interval": [
+      0.9591,
+      1.0178
+     ],
+     "order_means": {
+      "traced untraced": 0.9789,
+      "untraced traced": 0.9979
+     },
+     "n": 6
+    },
+    "op residual run mean (ms)": {
+     "a": 0.1007075,
+     "b": 0.09823950000000001,
+     "ratio": 0.9755,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9711,
+      "2": 0.8114,
+      "3": 1.3427,
+      "4": 0.9938,
+      "5": 1.0129,
+      "6": 0.9823
+     },
+     "per_repeat_mean": 1.019,
+     "interval": [
+      0.8359,
+      1.2022
+     ],
+     "order_means": {
+      "traced untraced": 1.1089,
+      "untraced traced": 0.9292
+     },
+     "n": 6
+    },
+    "op residual wakes/s": {
+     "a": 5.19875,
+     "b": 5.1202000000000005,
+     "ratio": 0.9849,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.99,
+      "2": 0.9849,
+      "3": 1.0125,
+      "4": 0.9911,
+      "5": 1.0001,
+      "6": 0.9696
+     },
+     "per_repeat_mean": 0.9914,
+     "interval": [
+      0.9762,
+      1.0065
+     ],
+     "order_means": {
+      "traced untraced": 1.0009,
+      "untraced traced": 0.9819
+     },
+     "n": 6
+    },
+    "op utility/Chrome_ChildIOT run mean (ms)": {
+     "a": 0.13751200000000002,
+     "b": 0.132168,
+     "ratio": 0.9611,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.8467,
+      "2": 1.0441,
+      "3": 0.9035,
+      "4": 0.9724,
+      "5": 0.95,
+      "6": 0.9862
+     },
+     "per_repeat_mean": 0.9505,
+     "interval": [
+      0.8785,
+      1.0224
+     ],
+     "order_means": {
+      "traced untraced": 0.9001,
+      "untraced traced": 1.0009
+     },
+     "n": 6
+    },
+    "op utility/Chrome_ChildIOT wakes/s": {
+     "a": 3.82045,
+     "b": 3.8748500000000003,
+     "ratio": 1.0142,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.1148,
+      "2": 0.9306,
+      "3": 1.0359,
+      "4": 1.0049,
+      "5": 1.0177,
+      "6": 0.9631
+     },
+     "per_repeat_mean": 1.0112,
+     "interval": [
+      0.9444,
+      1.0779
+     ],
+     "order_means": {
+      "traced untraced": 1.0561,
+      "untraced traced": 0.9662
+     },
+     "n": 6
+    },
+    "op utility/ThreadPoolForeg run mean (ms)": {
+     "a": 0.0322215,
+     "b": 0.0317365,
+     "ratio": 0.9849,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.8132,
+      "2": 1.1507,
+      "3": 0.8538,
+      "4": 1.1062,
+      "5": 0.8348,
+      "6": 1.0121
+     },
+     "per_repeat_mean": 0.9618,
+     "interval": [
+      0.8069,
+      1.1167
+     ],
+     "order_means": {
+      "traced untraced": 0.8339,
+      "untraced traced": 1.0897
+     },
+     "n": 6
+    },
+    "op utility/ThreadPoolForeg wakes/s": {
+     "a": 1.4236,
+     "b": 1.4495,
+     "ratio": 1.0182,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.6105,
+      "2": 1.4555,
+      "3": 0.6241,
+      "4": 1.5473,
+      "5": 0.6197,
+      "6": 1.6433
+     },
+     "per_repeat_mean": 1.0834,
+     "interval": [
+      0.5448,
+      1.622
+     ],
+     "order_means": {
+      "traced untraced": 0.6181,
+      "untraced traced": 1.5487
+     },
+     "n": 6
+    }
+   },
+   "intervals": 32,
+   "chance": 1.6,
+   "differences": [
+    "idle gpu/Chrome_ChildIOT run mean (ms)",
+    "idle gpu/VizCompositorTh run mean (ms)",
+    "idle gpu/VizCompositorTh wakes/s",
+    "idle utility/HangWatcher run mean (ms)",
+    "idle utility/HangWatcher wakes/s",
+    "op Chrome_IOThread run mean (ms)",
+    "op Chrome_IOThread wakes/s",
+    "op chrome run mean (ms)",
+    "op gpu/Chrome_ChildIOT run mean (ms)"
+   ],
+   "validity": {
+    "1": {
+     "problems": [],
+     "prelude_screens": [
+      21,
+      164,
+      22,
+      179
+     ]
+    },
+    "2": {
+     "problems": [],
+     "prelude_screens": [
+      21,
+      164,
+      22,
+      179
+     ]
+    },
+    "3": {
+     "problems": [],
+     "prelude_screens": [
+      21,
+      164,
+      22,
+      179
+     ]
+    },
+    "4": {
+     "problems": [],
+     "prelude_screens": [
+      21,
+      164,
+      22,
+      179
+     ]
+    },
+    "5": {
+     "problems": [],
+     "prelude_screens": [
+      21,
+      164,
+      22,
+      179
+     ]
+    },
+    "6": {
+     "problems": [],
+     "prelude_screens": [
+      21,
+      164,
+      22,
+      179
+     ]
+    }
+   },
+   "shares": {
+    "idle gpu/VizCompositorTh": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle gpu/Chrome_ChildIOT": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle utility/chrome": {
+     "exited cpu": {
+      "mean": 0.0016,
+      "max": 0.0098
+     },
+     "exited wakes": {
+      "mean": 0.0003,
+      "max": 0.002
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle chrome": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle utility/HangWatcher": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle residual": {
+     "exited cpu": {
+      "mean": 0.0027,
+      "max": 0.0124
+     },
+     "exited wakes": {
+      "mean": 0.0019,
+      "max": 0.0079
+     },
+     "left cpu": {
+      "mean": 0.3125,
+      "max": 0.6394
+     },
+     "left wakes": {
+      "mean": 0.0013,
+      "max": 0.0032
+     }
+    },
+    "op Chrome_IOThread": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "inside cpu": {
+      "mean": 0.8863,
+      "max": 0.8963
+     },
+     "inside wakes": {
+      "mean": 0.9026,
+      "max": 0.9106
+     }
+    },
+    "op chrome": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "inside cpu": {
+      "mean": 0.7761,
+      "max": 0.7859
+     },
+     "inside wakes": {
+      "mean": 0.5963,
+      "max": 0.6036
+     }
+    },
+    "op gpu/VizCompositorTh": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "inside cpu": {
+      "mean": 0.8754,
+      "max": 0.8803
+     },
+     "inside wakes": {
+      "mean": 0.8175,
+      "max": 0.8235
+     }
+    },
+    "op gpu/Chrome_ChildIOT": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "inside cpu": {
+      "mean": 0.8221,
+      "max": 0.8282
+     },
+     "inside wakes": {
+      "mean": 0.8481,
+      "max": 0.857
+     }
+    },
+    "op ThreadPoolForeg": {
+     "exited cpu": {
+      "mean": 0.0003,
+      "max": 0.0019
+     },
+     "exited wakes": {
+      "mean": 0.0001,
+      "max": 0.0008
+     },
+     "inside cpu": {
+      "mean": 0.5431,
+      "max": 0.6312
+     },
+     "inside wakes": {
+      "mean": 0.6641,
+      "max": 0.7155
+     }
+    },
+    "op utility/Chrome_ChildIOT": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "inside cpu": {
+      "mean": 0.9632,
+      "max": 0.9829
+     },
+     "inside wakes": {
+      "mean": 0.9464,
+      "max": 0.9631
+     }
+    },
+    "op CompositorTileW": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "inside cpu": {
+      "mean": 0.9302,
+      "max": 0.9348
+     },
+     "inside wakes": {
+      "mean": 0.9007,
+      "max": 0.9057
+     }
+    },
+    "op utility/ThreadPoolForeg": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "inside cpu": {
+      "mean": 0.8687,
+      "max": 0.9313
+     },
+     "inside wakes": {
+      "mean": 0.9,
+      "max": 0.9368
+     }
+    },
+    "op residual": {
+     "exited cpu": {
+      "mean": 0.0013,
+      "max": 0.0071
+     },
+     "exited wakes": {
+      "mean": 0.0005,
+      "max": 0.0022
+     },
+     "inside cpu": {
+      "mean": 0.377,
+      "max": 0.3926
+     },
+     "inside wakes": {
+      "mean": 0.5175,
+      "max": 0.5315
+     }
+    }
+   },
+   "workload": {
+    "z": {
+     "idle chrome gap mean (ms)": 0.41,
+     "idle chrome run mean (ms)": 0.19,
+     "idle chrome wakes/s": -0.41,
+     "idle gpu/Chrome_ChildIOT gap mean (ms)": 0.34,
+     "idle gpu/Chrome_ChildIOT run mean (ms)": 0.62,
+     "idle gpu/Chrome_ChildIOT wakes/s": -0.33,
+     "idle gpu/VizCompositorTh gap mean (ms)": 0.22,
+     "idle gpu/VizCompositorTh run mean (ms)": 0.11,
+     "idle gpu/VizCompositorTh wakes/s": -0.22,
+     "idle residual gap mean (ms)": 0.98,
+     "idle residual run mean (ms)": -1.36,
+     "idle residual wakes/s": -0.93,
+     "idle utility/HangWatcher run mean (ms)": 0.29,
+     "idle utility/chrome gap mean (ms)": -1.33,
+     "idle utility/chrome run mean (ms)": -0.04,
+     "idle utility/chrome wakes/s": 1.34,
+     "input_run mean, SWELL-KW (ms)": 0.44,
+     "op Chrome_IOThread gap mean (ms)": 0.49,
+     "op Chrome_IOThread run mean (ms)": -0.29,
+     "op Chrome_IOThread wakes/s": -0.47,
+     "op CompositorTileW gap mean (ms)": -0.17,
+     "op CompositorTileW run mean (ms)": -0.29,
+     "op CompositorTileW wakes/s": 0.19,
+     "op ThreadPoolForeg gap mean (ms)": -0.21,
+     "op ThreadPoolForeg run mean (ms)": -0.41,
+     "op ThreadPoolForeg wakes/s": 0.21,
+     "op chrome gap mean (ms)": 0.12,
+     "op chrome run mean (ms)": 0.16,
+     "op chrome wakes/s": -0.07,
+     "op gpu/Chrome_ChildIOT gap mean (ms)": 0.2,
+     "op gpu/Chrome_ChildIOT run mean (ms)": 0.0,
+     "op gpu/Chrome_ChildIOT wakes/s": -0.19,
+     "op gpu/VizCompositorTh gap mean (ms)": -0.89,
+     "op gpu/VizCompositorTh run mean (ms)": -1.17,
+     "op gpu/VizCompositorTh wakes/s": 0.91,
+     "op residual gap mean (ms)": 0.02,
+     "op residual run mean (ms)": -0.49,
+     "op residual wakes/s": -0.02,
+     "op utility/Chrome_ChildIOT gap mean (ms)": -0.23,
+     "op utility/Chrome_ChildIOT run mean (ms)": -2.81,
+     "op utility/Chrome_ChildIOT wakes/s": 0.25,
+     "op utility/ThreadPoolForeg gap mean (ms)": 6.31,
+     "op utility/ThreadPoolForeg run mean (ms)": -0.51,
+     "op utility/ThreadPoolForeg wakes/s": -4.52,
+     "operation duration mean (ms)": -0.0
+    },
+    "only_carried": [
+     "input_run mean, 136M (ms)"
+    ],
+    "only_control": [],
+    "max_abs_z": 6.31
+   },
+   "left_out": {},
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 32 intervals read, about 1.6 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 idle phase: `gpu/Chrome_ChildIOT` run mean 0.863 (0.850\u20130.877), `gpu/VizCompositorTh` run mean 0.954 (0.929\u20130.978) and wake rate 0.977 (0.960\u20130.993), `utility/HangWatcher` run mean 0.936 (0.911\u20130.962) and wake rate 1.003 (1.002\u20131.003); operation phase, over the whole phase: `Chrome_IOThread` run mean 0.861 (0.818\u20130.903) and wake rate 1.037 (1.014\u20131.060), `chrome` run mean 0.963 (0.933\u20130.993), `gpu/Chrome_ChildIOT` run mean 0.889 (0.859\u20130.920). The operation phase's second page-load pass wakes the network service's foreground pool (`utility/ThreadPoolForeg`) about 40 % less than the first, which keeps that component's ratio from resolving."
+  },
+  "code-editor": {
+   "archetype": "code-editor",
+   "app": "code",
+   "jobs": 6,
+   "orders": {
+    "traced untraced": 3,
+    "untraced traced": 3
+   },
+   "builds": {
+    "1.138.0": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ]
+   },
+   "values": {
+    "driven per-input run (ms)": {
+     "a": 110.2845765,
+     "b": 108.13611399999999,
+     "ratio": 0.9805,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9536,
+      "2": 0.9475,
+      "3": 1.0097,
+      "4": 0.9896,
+      "5": 1.0218,
+      "6": 1.091
+     },
+     "per_repeat_mean": 1.0022,
+     "interval": [
+      0.947,
+      1.0574
+     ],
+     "order_means": {
+      "traced untraced": 0.995,
+      "untraced traced": 1.0094
+     },
+     "n": 6
+    },
+    "idle code run mean (ms)": {
+     "a": 0.09089649999999999,
+     "b": 0.0904355,
+     "ratio": 0.9949,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.5612,
+      "2": 1.6633,
+      "3": 0.5472,
+      "4": 1.6186,
+      "5": 0.5616,
+      "6": 1.6109
+     },
+     "per_repeat_mean": 1.0938,
+     "interval": [
+      0.4759,
+      1.7117
+     ],
+     "order_means": {
+      "traced untraced": 0.5567,
+      "untraced traced": 1.6309
+     },
+     "n": 6
+    },
+    "idle code wakes/s": {
+     "a": 3.4704,
+     "b": 3.4680999999999997,
+     "ratio": 0.9993,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9084,
+      "2": 1.0892,
+      "3": 0.9229,
+      "4": 1.0762,
+      "5": 0.9258,
+      "6": 1.0733
+     },
+     "per_repeat_mean": 0.9993,
+     "interval": [
+      0.9066,
+      1.092
+     ],
+     "order_means": {
+      "traced untraced": 0.919,
+      "untraced traced": 1.0796
+     },
+     "n": 6
+    },
+    "idle gpu/Chrome_ChildIOT run mean (ms)": {
+     "a": 0.025771000000000002,
+     "b": 0.022924,
+     "ratio": 0.8895,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.8652,
+      "2": 0.9097,
+      "3": 0.9157,
+      "4": 0.8652,
+      "5": 0.9374,
+      "6": 0.8105
+     },
+     "per_repeat_mean": 0.884,
+     "interval": [
+      0.8356,
+      0.9323
+     ],
+     "order_means": {
+      "traced untraced": 0.9061,
+      "untraced traced": 0.8618
+     },
+     "n": 6
+    },
+    "idle gpu/Chrome_ChildIOT wakes/s": {
+     "a": 20.244,
+     "b": 19.95195,
+     "ratio": 0.9856,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9989,
+      "2": 1.0132,
+      "3": 0.9845,
+      "4": 1.0126,
+      "5": 0.9866,
+      "6": 1.0104
+     },
+     "per_repeat_mean": 1.001,
+     "interval": [
+      0.9873,
+      1.0148
+     ],
+     "order_means": {
+      "traced untraced": 0.99,
+      "untraced traced": 1.0121
+     },
+     "n": 6
+    },
+    "idle gpu/VizCompositorTh run mean (ms)": {
+     "a": 0.243021,
+     "b": 0.2390875,
+     "ratio": 0.9838,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0041,
+      "2": 0.9967,
+      "3": 1.0169,
+      "4": 0.9808,
+      "5": 1.0,
+      "6": 0.929
+     },
+     "per_repeat_mean": 0.9879,
+     "interval": [
+      0.9552,
+      1.0206
+     ],
+     "order_means": {
+      "traced untraced": 1.007,
+      "untraced traced": 0.9688
+     },
+     "n": 6
+    },
+    "idle gpu/VizCompositorTh wakes/s": {
+     "a": 23.4436,
+     "b": 23.4195,
+     "ratio": 0.999,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9965,
+      "2": 1.0036,
+      "3": 0.9869,
+      "4": 0.9998,
+      "5": 0.9945,
+      "6": 1.0217
+     },
+     "per_repeat_mean": 1.0005,
+     "interval": [
+      0.9881,
+      1.0129
+     ],
+     "order_means": {
+      "traced untraced": 0.9926,
+      "untraced traced": 1.0084
+     },
+     "n": 6
+    },
+    "idle renderer/Compositor run mean (ms)": {
+     "a": 0.0832395,
+     "b": 0.0794245,
+     "ratio": 0.9542,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.9433,
+      "2": 0.9677,
+      "3": 0.9525,
+      "4": 0.9318,
+      "5": 0.9737,
+      "6": 0.9176
+     },
+     "per_repeat_mean": 0.9478,
+     "interval": [
+      0.9254,
+      0.9702
+     ],
+     "order_means": {
+      "traced untraced": 0.9565,
+      "untraced traced": 0.939
+     },
+     "n": 6
+    },
+    "idle renderer/Compositor wakes/s": {
+     "a": 23.189950000000003,
+     "b": 23.0301,
+     "ratio": 0.9931,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9688,
+      "2": 1.0019,
+      "3": 0.9837,
+      "4": 1.0007,
+      "5": 0.9978,
+      "6": 0.9438
+     },
+     "per_repeat_mean": 0.9828,
+     "interval": [
+      0.9587,
+      1.0068
+     ],
+     "order_means": {
+      "traced untraced": 0.9834,
+      "untraced traced": 0.9821
+     },
+     "n": 6
+    },
+    "idle renderer/ThreadPoolForeg run mean (ms)": {
+     "a": 0.1483735,
+     "b": 0.14528449999999998,
+     "ratio": 0.9792,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.288,
+      "2": 0.7376,
+      "3": 1.273,
+      "4": 0.6731,
+      "5": 1.3639,
+      "6": 0.7557
+     },
+     "per_repeat_mean": 1.0152,
+     "interval": [
+      0.6755,
+      1.355
+     ],
+     "order_means": {
+      "traced untraced": 1.3083,
+      "untraced traced": 0.7221
+     },
+     "n": 6
+    },
+    "idle renderer/ThreadPoolForeg wakes/s": {
+     "a": 2.952,
+     "b": 2.9998,
+     "ratio": 1.0162,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9777,
+      "2": 1.0604,
+      "3": 1.0402,
+      "4": 1.0968,
+      "5": 0.9376,
+      "6": 0.9932
+     },
+     "per_repeat_mean": 1.0176,
+     "interval": [
+      0.9561,
+      1.0792
+     ],
+     "order_means": {
+      "traced untraced": 0.9852,
+      "untraced traced": 1.0501
+     },
+     "n": 6
+    },
+    "idle renderer/code run mean (ms)": {
+     "a": 0.2709205,
+     "b": 0.26324349999999996,
+     "ratio": 0.9717,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9161,
+      "2": 1.0644,
+      "3": 0.9719,
+      "4": 1.058,
+      "5": 0.9496,
+      "6": 0.9835
+     },
+     "per_repeat_mean": 0.9906,
+     "interval": [
+      0.9283,
+      1.0529
+     ],
+     "order_means": {
+      "traced untraced": 0.9459,
+      "untraced traced": 1.0353
+     },
+     "n": 6
+    },
+    "idle renderer/code wakes/s": {
+     "a": 19.472,
+     "b": 19.62585,
+     "ratio": 1.0079,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0609,
+      "2": 0.9776,
+      "3": 1.0162,
+      "4": 0.9418,
+      "5": 1.0581,
+      "6": 0.9926
+     },
+     "per_repeat_mean": 1.0079,
+     "interval": [
+      0.9588,
+      1.0569
+     ],
+     "order_means": {
+      "traced untraced": 1.0451,
+      "untraced traced": 0.9707
+     },
+     "n": 6
+    },
+    "idle residual run mean (ms)": {
+     "a": 0.1345745,
+     "b": 0.12895299999999998,
+     "ratio": 0.9582,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.2766,
+      "2": 3.485,
+      "3": 0.2876,
+      "4": 3.2875,
+      "5": 0.2855,
+      "6": 3.2657
+     },
+     "per_repeat_mean": 1.8147,
+     "interval": [
+      0.052,
+      3.5773
+     ],
+     "order_means": {
+      "traced untraced": 0.2832,
+      "untraced traced": 3.3461
+     },
+     "n": 6
+    },
+    "idle residual wakes/s": {
+     "a": 3.34355,
+     "b": 3.3386500000000003,
+     "ratio": 0.9985,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.8492,
+      "2": 1.1966,
+      "3": 0.84,
+      "4": 1.2104,
+      "5": 0.8411,
+      "6": 1.1908
+     },
+     "per_repeat_mean": 1.0213,
+     "interval": [
+      0.8166,
+      1.2261
+     ],
+     "order_means": {
+      "traced untraced": 0.8434,
+      "untraced traced": 1.1993
+     },
+     "n": 6
+    },
+    "idle utility/code run mean (ms)": {
+     "a": 0.057745500000000005,
+     "b": 0.0527995,
+     "ratio": 0.9143,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.02,
+      "2": 0.8921,
+      "3": 0.9495,
+      "4": 0.8599,
+      "5": 1.0634,
+      "6": 0.8447
+     },
+     "per_repeat_mean": 0.9383,
+     "interval": [
+      0.845,
+      1.0315
+     ],
+     "order_means": {
+      "traced untraced": 1.011,
+      "untraced traced": 0.8656
+     },
+     "n": 6
+    },
+    "idle utility/code wakes/s": {
+     "a": 10.7072,
+     "b": 11.16255,
+     "ratio": 1.0425,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.8397,
+      "2": 1.171,
+      "3": 0.9043,
+      "4": 1.2274,
+      "5": 0.7718,
+      "6": 1.2132
+     },
+     "per_repeat_mean": 1.0212,
+     "interval": [
+      0.8058,
+      1.2367
+     ],
+     "order_means": {
+      "traced untraced": 0.8386,
+      "untraced traced": 1.2039
+     },
+     "n": 6
+    },
+    "idle utility/libuv-worker run mean (ms)": {
+     "a": 0.01071,
+     "b": 0.0074055,
+     "ratio": 0.6915,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.6435,
+      "2": 0.7776,
+      "3": 0.7043,
+      "4": 0.6644,
+      "5": 0.8306,
+      "6": 0.6732
+     },
+     "per_repeat_mean": 0.7156,
+     "interval": [
+      0.6387,
+      0.7925
+     ],
+     "order_means": {
+      "traced untraced": 0.7261,
+      "untraced traced": 0.7051
+     },
+     "n": 6
+    },
+    "idle utility/libuv-worker wakes/s": {
+     "a": 5.3681,
+     "b": 6.7429,
+     "ratio": 1.2561,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.3496,
+      "2": 1.0985,
+      "3": 1.172,
+      "4": 1.4063,
+      "5": 0.7858,
+      "6": 1.4274
+     },
+     "per_repeat_mean": 1.2066,
+     "interval": [
+      0.9499,
+      1.4633
+     ],
+     "order_means": {
+      "traced untraced": 1.1025,
+      "untraced traced": 1.3107
+     },
+     "n": 6
+    }
+   },
+   "intervals": 19,
+   "chance": 1.0,
+   "differences": [
+    "idle gpu/Chrome_ChildIOT run mean (ms)",
+    "idle renderer/Compositor run mean (ms)",
+    "idle utility/libuv-worker run mean (ms)"
+   ],
+   "validity": {
+    "1": {
+     "problems": [],
+     "prelude_screens": [
+      54,
+      761,
+      56,
+      764
+     ]
+    },
+    "2": {
+     "problems": [],
+     "prelude_screens": [
+      4,
+      40,
+      56,
+      764
+     ]
+    },
+    "3": {
+     "problems": [],
+     "prelude_screens": [
+      4,
+      40,
+      125,
+      764
+     ]
+    },
+    "4": {
+     "problems": [],
+     "prelude_screens": [
+      4,
+      40,
+      56,
+      764
+     ]
+    },
+    "5": {
+     "problems": [],
+     "prelude_screens": [
+      54,
+      761,
+      56,
+      764
+     ]
+    },
+    "6": {
+     "problems": [],
+     "prelude_screens": [
+      54,
+      761,
+      56,
+      764
+     ]
+    }
+   },
+   "shares": {
+    "idle gpu/VizCompositorTh": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle renderer/Compositor": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle gpu/Chrome_ChildIOT": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle renderer/code": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle utility/code": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle utility/libuv-worker": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle code": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle renderer/ThreadPoolForeg": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0001
+     },
+     "exited wakes": {
+      "mean": 0.0002,
+      "max": 0.0008
+     }
+    },
+    "idle residual": {
+     "exited cpu": {
+      "mean": 0.0014,
+      "max": 0.0029
+     },
+     "exited wakes": {
+      "mean": 0.0006,
+      "max": 0.0019
+     }
+    }
+   },
+   "workload": {
+    "z": {
+     "idle code gap mean (ms)": 4.88,
+     "idle code run mean (ms)": -6.26,
+     "idle code wakes/s": -4.71,
+     "idle gpu/Chrome_ChildIOT gap mean (ms)": 0.07,
+     "idle gpu/Chrome_ChildIOT run mean (ms)": 0.14,
+     "idle gpu/Chrome_ChildIOT wakes/s": -0.07,
+     "idle gpu/VizCompositorTh gap mean (ms)": -0.15,
+     "idle gpu/VizCompositorTh run mean (ms)": -0.23,
+     "idle gpu/VizCompositorTh wakes/s": 0.15,
+     "idle renderer/Compositor gap mean (ms)": -0.38,
+     "idle renderer/Compositor run mean (ms)": -0.11,
+     "idle renderer/Compositor wakes/s": 0.38,
+     "idle renderer/ThreadPoolForeg gap mean (ms)": 1.07,
+     "idle renderer/ThreadPoolForeg run mean (ms)": 2.48,
+     "idle renderer/ThreadPoolForeg wakes/s": -0.96,
+     "idle renderer/code gap mean (ms)": -0.01,
+     "idle renderer/code run mean (ms)": 0.09,
+     "idle renderer/code wakes/s": 0.01,
+     "idle residual gap mean (ms)": 2.71,
+     "idle residual run mean (ms)": -10.83,
+     "idle residual wakes/s": -2.54,
+     "idle utility/code gap mean (ms)": 1.42,
+     "idle utility/code run mean (ms)": 0.8,
+     "idle utility/code wakes/s": -1.24,
+     "idle utility/libuv-worker gap mean (ms)": 0.24,
+     "idle utility/libuv-worker run mean (ms)": 0.16,
+     "idle utility/libuv-worker wakes/s": -0.23,
+     "input_run mean, SWELL-KW (ms)": 0.62
+    },
+    "only_carried": [
+     "input_run mean, 136M (ms)"
+    ],
+    "only_control": [],
+    "max_abs_z": 10.83
+   },
+   "left_out": {},
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 19 intervals read, about 1.0 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 idle phase: `gpu/Chrome_ChildIOT` run mean 0.884 (0.836\u20130.932), `renderer/Compositor` run mean 0.948 (0.925\u20130.970), `utility/libuv-worker` run mean 0.716 (0.639\u20130.792). The second idle run, 915\u20131815 s after the first began, differs from the first whichever is traced \u2014 the main thread wakes about 7 % less and its runs are about 40 % shorter, the residual's about 70 % shorter \u2014 which keeps those ratios from resolving; the carried idle values match the first run."
+  },
+  "image-editor": {
+   "archetype": "image-editor",
+   "app": "gimp",
+   "jobs": 6,
+   "orders": {
+    "traced untraced": 3,
+    "untraced traced": 3
+   },
+   "builds": {
+    "GNU Image Manipulation Program version 2.10.36": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ]
+   },
+   "values": {
+    "driven gimp run mean (ms)": {
+     "a": 0.4010335,
+     "b": 0.39494700000000005,
+     "ratio": 0.9848,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0047,
+      "2": 0.9805,
+      "3": 1.0007,
+      "4": 0.9884,
+      "5": 0.9711,
+      "6": 0.9682
+     },
+     "per_repeat_mean": 0.9856,
+     "interval": [
+      0.9698,
+      1.0014
+     ],
+     "order_means": {
+      "traced untraced": 0.9922,
+      "untraced traced": 0.979
+     },
+     "n": 6
+    },
+    "driven gimp wakes/s": {
+     "a": 7.0457,
+     "b": 7.03365,
+     "ratio": 0.9983,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0,
+      "2": 1.0065,
+      "3": 1.0018,
+      "4": 1.0015,
+      "5": 0.996,
+      "6": 0.9987
+     },
+     "per_repeat_mean": 1.0008,
+     "interval": [
+      0.9971,
+      1.0044
+     ],
+     "order_means": {
+      "traced untraced": 0.9993,
+      "untraced traced": 1.0022
+     },
+     "n": 6
+    },
+    "op gimp run mean (ms)": {
+     "a": 97.7926835,
+     "b": 96.59418099999999,
+     "ratio": 0.9877,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.9629,
+      "2": 0.9902,
+      "3": 0.9881,
+      "4": 0.9767,
+      "5": 0.9853,
+      "6": 0.9826
+     },
+     "per_repeat_mean": 0.981,
+     "interval": [
+      0.9704,
+      0.9915
+     ],
+     "order_means": {
+      "traced untraced": 0.9788,
+      "untraced traced": 0.9832
+     },
+     "n": 6
+    },
+    "op gimp wakes/s": {
+     "a": 2.176,
+     "b": 2.2065,
+     "ratio": 1.014,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 1.0437,
+      "2": 1.0062,
+      "3": 1.0147,
+      "4": 1.0191,
+      "5": 1.0219,
+      "6": 1.0178
+     },
+     "per_repeat_mean": 1.0206,
+     "interval": [
+      1.0074,
+      1.0337
+     ],
+     "order_means": {
+      "traced untraced": 1.0268,
+      "untraced traced": 1.0144
+     },
+     "n": 6
+    },
+    "op operation duration mean (ms)": {
+     "a": 2350.0605,
+     "b": 2346.6580000000004,
+     "ratio": 0.9986,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9969,
+      "2": 0.999,
+      "3": 0.9947,
+      "4": 0.9994,
+      "5": 0.9981,
+      "6": 1.005
+     },
+     "per_repeat_mean": 0.9989,
+     "interval": [
+      0.9952,
+      1.0025
+     ],
+     "order_means": {
+      "traced untraced": 0.9966,
+      "untraced traced": 1.0011
+     },
+     "n": 6
+    },
+    "op script-fu run mean (ms)": {
+     "a": 0.037624000000000005,
+     "b": 0.0374965,
+     "ratio": 0.9966,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.945,
+      "2": 1.027,
+      "3": 0.941,
+      "4": 1.0205,
+      "5": 0.9566,
+      "6": 0.9971
+     },
+     "per_repeat_mean": 0.9812,
+     "interval": [
+      0.9407,
+      1.0217
+     ],
+     "order_means": {
+      "traced untraced": 0.9475,
+      "untraced traced": 1.0149
+     },
+     "n": 6
+    },
+    "op script-fu wakes/s": {
+     "a": 2.2466,
+     "b": 2.1799999999999997,
+     "ratio": 0.9704,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.9678,
+      "2": 0.9753,
+      "3": 0.9653,
+      "4": 0.9799,
+      "5": 0.9637,
+      "6": 0.9773
+     },
+     "per_repeat_mean": 0.9716,
+     "interval": [
+      0.9644,
+      0.9787
+     ],
+     "order_means": {
+      "traced untraced": 0.9656,
+      "untraced traced": 0.9775
+     },
+     "n": 6
+    }
+   },
+   "intervals": 7,
+   "chance": 0.4,
+   "differences": [
+    "op gimp run mean (ms)",
+    "op gimp wakes/s",
+    "op script-fu wakes/s"
+   ],
+   "validity": {
+    "1": {
+     "problems": [],
+     "prelude_screens": [
+      223,
+      445,
+      335,
+      454
+     ]
+    },
+    "2": {
+     "problems": [],
+     "prelude_screens": [
+      223,
+      445,
+      335,
+      454
+     ]
+    },
+    "3": {
+     "problems": [],
+     "prelude_screens": [
+      223,
+      445,
+      335,
+      454
+     ]
+    },
+    "4": {
+     "problems": [],
+     "prelude_screens": [
+      223,
+      445,
+      335,
+      454
+     ]
+    },
+    "5": {
+     "problems": [],
+     "prelude_screens": [
+      223,
+      445,
+      335,
+      454
+     ]
+    },
+    "6": {
+     "problems": [],
+     "prelude_screens": [
+      223,
+      445,
+      335,
+      454
+     ]
+    }
+   },
+   "shares": {
+    "driven gimp": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "op script-fu": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "inside cpu": {
+      "mean": 0.9875,
+      "max": 0.9904
+     },
+     "inside wakes": {
+      "mean": 0.991,
+      "max": 0.9934
+     }
+    },
+    "op gimp": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "inside cpu": {
+      "mean": 0.9239,
+      "max": 0.9266
+     },
+     "inside wakes": {
+      "mean": 0.1807,
+      "max": 0.1945
+     }
+    }
+   },
+   "workload": {
+    "z": {
+     "driven gimp gap mean (ms)": 51.72,
+     "driven gimp run mean (ms)": 5.77,
+     "driven gimp wakes/s": -42.13,
+     "op gimp gap mean (ms)": 0.08,
+     "op gimp run mean (ms)": 0.11,
+     "op gimp wakes/s": -0.09,
+     "op script-fu gap mean (ms)": -1.0,
+     "op script-fu run mean (ms)": -0.57,
+     "op script-fu wakes/s": 1.01,
+     "operation duration mean (ms)": -0.35
+    },
+    "only_carried": [],
+    "only_control": [],
+    "max_abs_z": 51.72
+   },
+   "left_out": {},
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 7 intervals read, about 0.4 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 operation phase, over the whole phase: `gimp` run mean 0.981 (0.970\u20130.992) and wake rate 1.021 (1.007\u20131.034), `script-fu` wake rate 0.972 (0.964\u20130.979). The driven runs start from the control's prelude (the image reverted, the pointer over the canvas), in which the main thread wakes about 18 % less often with about 19 % longer runs than in the carried pool at the same CPU share; the driven ratios are perf's effect in that state."
+  },
+  "video-editor": {
+   "archetype": "video-editor",
+   "app": "kdenlive",
+   "jobs": 6,
+   "orders": {
+    "traced untraced": 3,
+    "untraced traced": 3
+   },
+   "builds": {
+    "Could not detect package type, probably default? App dir is \"/usr/bin\"": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ]
+   },
+   "values": {
+    "driven QXcbEventQueue run mean (ms)": {
+     "a": 0.0217745,
+     "b": 0.0187605,
+     "ratio": 0.8616,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.8435,
+      "2": 0.8721,
+      "3": 0.8502,
+      "4": 0.8833,
+      "5": 0.7938,
+      "6": 0.9246
+     },
+     "per_repeat_mean": 0.8612,
+     "interval": [
+      0.8152,
+      0.9073
+     ],
+     "order_means": {
+      "traced untraced": 0.8292,
+      "untraced traced": 0.8933
+     },
+     "n": 6
+    },
+    "driven QXcbEventQueue wakes/s": {
+     "a": 74.2364,
+     "b": 73.845,
+     "ratio": 0.9947,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9977,
+      "2": 0.9832,
+      "3": 1.0011,
+      "4": 0.9746,
+      "5": 1.0458,
+      "6": 0.9815
+     },
+     "per_repeat_mean": 0.9973,
+     "interval": [
+      0.9702,
+      1.0244
+     ],
+     "order_means": {
+      "traced untraced": 1.0149,
+      "untraced traced": 0.9798
+     },
+     "n": 6
+    },
+    "driven kdenlive run mean (ms)": {
+     "a": 2.6837095,
+     "b": 2.7428084999999998,
+     "ratio": 1.022,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9889,
+      "2": 1.2096,
+      "3": 1.0391,
+      "4": 1.037,
+      "5": 0.8271,
+      "6": 1.1201
+     },
+     "per_repeat_mean": 1.037,
+     "interval": [
+      0.9017,
+      1.1723
+     ],
+     "order_means": {
+      "traced untraced": 0.9517,
+      "untraced traced": 1.1222
+     },
+     "n": 6
+    },
+    "driven kdenlive wakes/s": {
+     "a": 133.7114,
+     "b": 132.02715,
+     "ratio": 0.9874,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0059,
+      "2": 0.8791,
+      "3": 0.9821,
+      "4": 0.9767,
+      "5": 1.1485,
+      "6": 0.9293
+     },
+     "per_repeat_mean": 0.9869,
+     "interval": [
+      0.8913,
+      1.0826
+     ],
+     "order_means": {
+      "traced untraced": 1.0455,
+      "untraced traced": 0.9284
+     },
+     "n": 6
+    },
+    "driven residual run mean (ms)": {
+     "a": 0.48310200000000003,
+     "b": 0.48870199999999997,
+     "ratio": 1.0116,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0019,
+      "2": 1.0231,
+      "3": 0.9236,
+      "4": 1.0373,
+      "5": 0.998,
+      "6": 1.0065
+     },
+     "per_repeat_mean": 0.9984,
+     "interval": [
+      0.957,
+      1.0398
+     ],
+     "order_means": {
+      "traced untraced": 0.9745,
+      "untraced traced": 1.0223
+     },
+     "n": 6
+    },
+    "driven residual wakes/s": {
+     "a": 0.7444,
+     "b": 0.74665,
+     "ratio": 1.003,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9463,
+      "2": 1.0586,
+      "3": 1.0308,
+      "4": 1.0276,
+      "5": 0.8911,
+      "6": 1.0816
+     },
+     "per_repeat_mean": 1.006,
+     "interval": [
+      0.9298,
+      1.0822
+     ],
+     "order_means": {
+      "traced untraced": 0.9561,
+      "untraced traced": 1.0559
+     },
+     "n": 6
+    },
+    "idle Qt bearer threa run mean (ms)": {
+     "a": 0.428913,
+     "b": 0.42732000000000003,
+     "ratio": 0.9963,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0651,
+      "2": 0.9982,
+      "3": 0.9898,
+      "4": 0.9572,
+      "5": 1.0136,
+      "6": 0.9772
+     },
+     "per_repeat_mean": 1.0002,
+     "interval": [
+      0.9612,
+      1.0391
+     ],
+     "order_means": {
+      "traced untraced": 1.0228,
+      "untraced traced": 0.9775
+     },
+     "n": 6
+    },
+    "idle Qt bearer threa wakes/s": {
+     "a": 0.1066,
+     "b": 0.1,
+     "ratio": 0.9381,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9381,
+      "2": 0.9372,
+      "3": 0.9381,
+      "4": 1.0163,
+      "5": 0.9381,
+      "6": 1.1006
+     },
+     "per_repeat_mean": 0.9781,
+     "interval": [
+      0.907,
+      1.0492
+     ],
+     "order_means": {
+      "traced untraced": 0.9381,
+      "untraced traced": 1.018
+     },
+     "n": 6
+    },
+    "idle kdenlive run mean (ms)": {
+     "a": 0.0424115,
+     "b": 0.039435,
+     "ratio": 0.9298,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9346,
+      "2": 1.0274,
+      "3": 0.902,
+      "4": 1.0033,
+      "5": 1.0324,
+      "6": 0.925
+     },
+     "per_repeat_mean": 0.9708,
+     "interval": [
+      0.911,
+      1.0305
+     ],
+     "order_means": {
+      "traced untraced": 0.9563,
+      "untraced traced": 0.9852
+     },
+     "n": 6
+    },
+    "idle kdenlive wakes/s": {
+     "a": 1.2466499999999998,
+     "b": 1.2287,
+     "ratio": 0.9856,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9564,
+      "2": 1.0759,
+      "3": 0.904,
+      "4": 1.1285,
+      "5": 0.9165,
+      "6": 1.0094
+     },
+     "per_repeat_mean": 0.9985,
+     "interval": [
+      0.9041,
+      1.0928
+     ],
+     "order_means": {
+      "traced untraced": 0.9256,
+      "untraced traced": 1.0713
+     },
+     "n": 6
+    },
+    "op kdenlive_render run mean (ms)": {
+     "a": null,
+     "b": null,
+     "ratio": null,
+     "reading": null,
+     "per_repeat": {},
+     "order_means": {},
+     "n": 0
+    },
+    "op kdenlive_render wakes/s": {
+     "a": null,
+     "b": null,
+     "ratio": null,
+     "reading": null,
+     "per_repeat": {},
+     "order_means": {},
+     "n": 0
+    },
+    "op operation duration mean (ms)": {
+     "a": 11360.5875,
+     "b": 11279.4,
+     "ratio": 0.9929,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.9932,
+      "2": 0.9795,
+      "3": 0.9782,
+      "4": 1.0022,
+      "5": 0.9827,
+      "6": 0.9894
+     },
+     "per_repeat_mean": 0.9875,
+     "interval": [
+      0.9778,
+      0.9972
+     ],
+     "order_means": {
+      "traced untraced": 0.9847,
+      "untraced traced": 0.9904
+     },
+     "n": 6
+    },
+    "op residual run mean (ms)": {
+     "a": 2.8379285,
+     "b": 2.8123975,
+     "ratio": 0.991,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9886,
+      "2": 0.989,
+      "3": 0.9748,
+      "4": 1.0187,
+      "5": 0.977,
+      "6": 1.0109
+     },
+     "per_repeat_mean": 0.9932,
+     "interval": [
+      0.9744,
+      1.012
+     ],
+     "order_means": {
+      "traced untraced": 0.9801,
+      "untraced traced": 1.0062
+     },
+     "n": 6
+    },
+    "op residual wakes/s": {
+     "a": 9.1085,
+     "b": 9.2161,
+     "ratio": 1.0118,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9439,
+      "2": 1.0644,
+      "3": 0.9735,
+      "4": 1.0542,
+      "5": 0.9495,
+      "6": 1.0537
+     },
+     "per_repeat_mean": 1.0065,
+     "interval": [
+      0.947,
+      1.0661
+     ],
+     "order_means": {
+      "traced untraced": 0.9556,
+      "untraced traced": 1.0574
+     },
+     "n": 6
+    }
+   },
+   "intervals": 13,
+   "chance": 0.7,
+   "differences": [
+    "driven QXcbEventQueue run mean (ms)",
+    "op operation duration mean (ms)"
+   ],
+   "validity": {
+    "1": {
+     "problems": [
+      "op-untraced: 1 of 26 operations failed"
+     ],
+     "prelude_screens": [
+      0,
+      5,
+      1230,
+      792
+     ]
+    },
+    "2": {
+     "problems": [
+      "op: 1 of 26 operations failed"
+     ],
+     "prelude_screens": [
+      0,
+      5,
+      1230,
+      792
+     ]
+    },
+    "3": {
+     "problems": [
+      "op-untraced: 1 of 26 operations failed"
+     ],
+     "prelude_screens": [
+      0,
+      5,
+      1230,
+      792
+     ]
+    },
+    "4": {
+     "problems": [
+      "op: 1 of 26 operations failed"
+     ],
+     "prelude_screens": [
+      0,
+      5,
+      1230,
+      792
+     ]
+    },
+    "5": {
+     "problems": [
+      "op-untraced: 1 of 26 operations failed"
+     ],
+     "prelude_screens": [
+      0,
+      5,
+      1230,
+      792
+     ]
+    },
+    "6": {
+     "problems": [
+      "op: 1 of 26 operations failed"
+     ],
+     "prelude_screens": [
+      0,
+      5,
+      1230,
+      792
+     ]
+    }
+   },
+   "shares": {
+    "idle kdenlive": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle Qt bearer threa": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "driven kdenlive": {
+     "exited cpu": {
+      "mean": 0.0326,
+      "max": 0.0337
+     },
+     "exited wakes": {
+      "mean": 0.0229,
+      "max": 0.0248
+     }
+    },
+    "driven QXcbEventQueue": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "driven residual": {
+     "exited cpu": {
+      "mean": 0.044,
+      "max": 0.049
+     },
+     "exited wakes": {
+      "mean": 0.578,
+      "max": 0.5981
+     }
+    },
+    "op kdenlive_render": {
+     "exited cpu": {
+      "mean": 1.0,
+      "max": 1.0
+     },
+     "exited wakes": {
+      "mean": 1.0,
+      "max": 1.0
+     },
+     "inside cpu": {
+      "mean": 1.0,
+      "max": 1.0
+     },
+     "inside wakes": {
+      "mean": 1.0,
+      "max": 1.0
+     }
+    },
+    "op residual": {
+     "exited cpu": {
+      "mean": 0.0212,
+      "max": 0.0215
+     },
+     "exited wakes": {
+      "mean": 0.0046,
+      "max": 0.0047
+     },
+     "inside cpu": {
+      "mean": 0.9517,
+      "max": 0.954
+     },
+     "inside wakes": {
+      "mean": 0.8387,
+      "max": 0.8484
+     }
+    }
+   },
+   "workload": {
+    "z": {
+     "driven QXcbEventQueue gap mean (ms)": -0.32,
+     "driven QXcbEventQueue run mean (ms)": 0.36,
+     "driven QXcbEventQueue wakes/s": 0.33,
+     "driven kdenlive gap mean (ms)": -0.1,
+     "driven kdenlive run mean (ms)": -0.06,
+     "driven kdenlive wakes/s": 0.1,
+     "driven residual gap mean (ms)": 0.56,
+     "driven residual run mean (ms)": -0.88,
+     "driven residual wakes/s": -0.55,
+     "idle Qt bearer threa run mean (ms)": 0.09,
+     "idle kdenlive gap mean (ms)": 0.98,
+     "idle kdenlive run mean (ms)": -0.21,
+     "idle kdenlive wakes/s": -0.96,
+     "op kdenlive_render gap mean (ms)": 0.28,
+     "op kdenlive_render run mean (ms)": -0.01,
+     "op kdenlive_render wakes/s": -0.27,
+     "op residual gap mean (ms)": 0.86,
+     "op residual run mean (ms)": 0.6,
+     "op residual wakes/s": -0.84,
+     "operation duration mean (ms)": 0.1
+    },
+    "only_carried": [],
+    "only_control": [],
+    "max_abs_z": 0.98
+   },
+   "left_out": {},
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 13 intervals read, about 0.7 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 driven phase: `QXcbEventQueue` run mean 0.861 (0.815\u20130.907); operation phase, over the whole phase: the operation's duration mean 0.988 (0.978\u20130.997). The first preview render of each job's second operation run did not start (`kdenlive_render` never appeared within 30 s), so that run's operation values rest on 25 renders against the first run's 26\u201327."
+  },
+  "audio-player": {
+   "archetype": "audio-player",
+   "app": "mpv-audio",
+   "jobs": 6,
+   "orders": {
+    "traced untraced": 3,
+    "untraced traced": 3
+   },
+   "builds": {
+    "mpv 0.37.0 Copyright \u00a9 2000-2023 mpv/MPlayer/mplayer2 projects": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ]
+   },
+   "values": {
+    "play CPU share": {
+     "a": 0.0076075,
+     "b": 0.006672,
+     "ratio": 0.877,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.8817,
+      "2": 0.8763,
+      "3": 0.8694,
+      "4": 0.8194,
+      "5": 0.8723,
+      "6": 0.8396
+     },
+     "per_repeat_mean": 0.8598,
+     "interval": [
+      0.8339,
+      0.8857
+     ],
+     "order_means": {
+      "traced untraced": 0.8745,
+      "untraced traced": 0.8451
+     },
+     "n": 6
+    }
+   },
+   "intervals": 1,
+   "chance": 0.1,
+   "differences": [
+    "play CPU share"
+   ],
+   "validity": {},
+   "shares": {},
+   "workload": {
+    "z": {
+     "play CPU share": -0.11,
+     "play cycle length mean (ms)": -0.01,
+     "play cycle work mean (ms)": -0.05
+    },
+    "only_carried": [],
+    "only_control": [],
+    "max_abs_z": 0.11
+   },
+   "left_out": {},
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 1 interval read, about 0.1 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 play phase: the tree's CPU share 0.860 (0.834\u20130.886)."
+  },
+  "video-player": {
+   "archetype": "video-player",
+   "app": "mpv-video",
+   "jobs": 6,
+   "orders": {
+    "traced untraced": 3,
+    "untraced traced": 3
+   },
+   "builds": {
+    "mpv 0.37.0 Copyright \u00a9 2000-2023 mpv/MPlayer/mplayer2 projects": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ]
+   },
+   "values": {
+    "play CPU share": {
+     "a": 0.1212895,
+     "b": 0.11815049999999999,
+     "ratio": 0.9741,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.9652,
+      "2": 0.979,
+      "3": 0.9654,
+      "4": 0.9945,
+      "5": 0.9682,
+      "6": 0.9834
+     },
+     "per_repeat_mean": 0.9759,
+     "interval": [
+      0.9636,
+      0.9883
+     ],
+     "order_means": {
+      "traced untraced": 0.9663,
+      "untraced traced": 0.9856
+     },
+     "n": 6
+    }
+   },
+   "intervals": 1,
+   "chance": 0.1,
+   "differences": [
+    "play CPU share"
+   ],
+   "validity": {},
+   "shares": {},
+   "workload": {
+    "z": {
+     "play CPU share": -0.06,
+     "play cycle length mean (ms)": 1.41,
+     "play cycle work mean (ms)": -0.06
+    },
+    "only_carried": [],
+    "only_control": [],
+    "max_abs_z": 1.41
+   },
+   "left_out": {
+    "2@36300802358": "D66: window 2 measured twice \u2014 the restarted gate loop relaunched it (#627) before the previous loop's relaunch (#625) had started; the original launch's copy (#625, 36300400332) is kept"
+   },
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 1 interval read, about 0.1 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 play phase: the tree's CPU share 0.976 (0.964\u20130.988)."
+  },
+  "office-writer": {
+   "archetype": "office-writer",
+   "app": "soffice",
+   "jobs": 6,
+   "orders": {
+    "traced untraced": 3,
+    "untraced traced": 3
+   },
+   "builds": {
+    "LibreOffice 24.2.7.2 420(Build:2)": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ]
+   },
+   "values": {
+    "driven per-input run (ms)": {
+     "a": 5.1596185000000006,
+     "b": 5.0677544999999995,
+     "ratio": 0.9822,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.9799,
+      "2": 0.9809,
+      "3": 0.9597,
+      "4": 0.9953,
+      "5": 0.9958,
+      "6": 0.9903
+     },
+     "per_repeat_mean": 0.9836,
+     "interval": [
+      0.9694,
+      0.9979
+     ],
+     "order_means": {
+      "traced untraced": 0.9785,
+      "untraced traced": 0.9888
+     },
+     "n": 6
+    },
+    "idle soffice.bin run mean (ms)": {
+     "a": 0.178282,
+     "b": 0.174107,
+     "ratio": 0.9766,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9767,
+      "2": 0.9989,
+      "3": 0.9586,
+      "4": 1.0335,
+      "5": 0.9853,
+      "6": 0.9637
+     },
+     "per_repeat_mean": 0.9861,
+     "interval": [
+      0.9573,
+      1.0149
+     ],
+     "order_means": {
+      "traced untraced": 0.9735,
+      "untraced traced": 0.9987
+     },
+     "n": 6
+    },
+    "idle soffice.bin wakes/s": {
+     "a": 3.4468,
+     "b": 3.4572,
+     "ratio": 1.003,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 1.0021,
+      "2": 1.001,
+      "3": 1.0039,
+      "4": 1.0061,
+      "5": 1.0019,
+      "6": 1.0039
+     },
+     "per_repeat_mean": 1.0031,
+     "interval": [
+      1.0012,
+      1.0051
+     ],
+     "order_means": {
+      "traced untraced": 1.0026,
+      "untraced traced": 1.0037
+     },
+     "n": 6
+    }
+   },
+   "intervals": 3,
+   "chance": 0.2,
+   "differences": [
+    "driven per-input run (ms)",
+    "idle soffice.bin wakes/s"
+   ],
+   "validity": {},
+   "shares": {
+    "idle soffice.bin": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    }
+   },
+   "workload": {
+    "z": {
+     "idle soffice.bin gap mean (ms)": 0.79,
+     "idle soffice.bin run mean (ms)": -0.8,
+     "idle soffice.bin wakes/s": -0.8,
+     "input_run mean, SWELL-KW (ms)": -0.27
+    },
+    "only_carried": [
+     "input_run mean, 136M (ms)"
+    ],
+    "only_control": [],
+    "max_abs_z": 0.8
+   },
+   "left_out": {},
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 3 intervals read, about 0.2 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 idle phase: `soffice.bin` wake rate 1.003 (1.001\u20131.005); driven phase: the per-input run 0.984 (0.969\u20130.998)."
+  },
+  "mail-client": {
+   "archetype": "mail-client",
+   "app": "thunderbird-send",
+   "jobs": 6,
+   "orders": {
+    "traced untraced": 3,
+    "untraced traced": 3
+   },
+   "builds": {
+    "Mozilla Thunderbird 156.0.1": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ]
+   },
+   "values": {
+    "driven per-input run (ms)": {
+     "a": 6.290647,
+     "b": 5.4763025,
+     "ratio": 0.8705,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.8314,
+      "2": 0.8791,
+      "3": 0.9034,
+      "4": 0.954,
+      "5": 0.9096,
+      "6": 0.8931
+     },
+     "per_repeat_mean": 0.8951,
+     "interval": [
+      0.8529,
+      0.9373
+     ],
+     "order_means": {
+      "traced untraced": 0.8815,
+      "untraced traced": 0.9087
+     },
+     "n": 6
+    },
+    "idle IPC I/O Child run mean (ms)": {
+     "a": 0.027930999999999997,
+     "b": 0.0243045,
+     "ratio": 0.8702,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.8677,
+      "2": 0.8981,
+      "3": 0.849,
+      "4": 0.8878,
+      "5": 0.7574,
+      "6": 0.9174
+     },
+     "per_repeat_mean": 0.8629,
+     "interval": [
+      0.8032,
+      0.9226
+     ],
+     "order_means": {
+      "traced untraced": 0.8247,
+      "untraced traced": 0.9011
+     },
+     "n": 6
+    },
+    "idle IPC I/O Child wakes/s": {
+     "a": 0.0399,
+     "b": 0.04,
+     "ratio": 1.0025,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 1.0025,
+      "2": 1.0025,
+      "3": 1.0025,
+      "4": 1.0025,
+      "5": 1.0025,
+      "6": 1.0025
+     },
+     "per_repeat_mean": 1.0025,
+     "interval": [
+      1.0025,
+      1.0025
+     ],
+     "order_means": {
+      "traced untraced": 1.0025,
+      "untraced traced": 1.0025
+     },
+     "n": 6
+    },
+    "idle IPC I/O Parent run mean (ms)": {
+     "a": 0.036195,
+     "b": 0.032969,
+     "ratio": 0.9109,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.1674,
+      "2": 0.8039,
+      "3": 1.0158,
+      "4": 0.7986,
+      "5": 0.8375,
+      "6": 0.9306
+     },
+     "per_repeat_mean": 0.9256,
+     "interval": [
+      0.7733,
+      1.078
+     ],
+     "order_means": {
+      "traced untraced": 1.0069,
+      "untraced traced": 0.8444
+     },
+     "n": 6
+    },
+    "idle IPC I/O Parent wakes/s": {
+     "a": 0.0449,
+     "b": 0.04165,
+     "ratio": 0.9276,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.7416,
+      "2": 0.8299,
+      "3": 0.9657,
+      "4": 1.178,
+      "5": 1.0409,
+      "6": 0.8909
+     },
+     "per_repeat_mean": 0.9412,
+     "interval": [
+      0.7776,
+      1.1047
+     ],
+     "order_means": {
+      "traced untraced": 0.9161,
+      "untraced traced": 0.9663
+     },
+     "n": 6
+    },
+    "idle IPDL Background run mean (ms)": {
+     "a": 0.021203,
+     "b": 0.018042,
+     "ratio": 0.8509,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.8971,
+      "2": 0.8717,
+      "3": 0.8712,
+      "4": 0.8683,
+      "5": 0.8078,
+      "6": 0.9797
+     },
+     "per_repeat_mean": 0.8826,
+     "interval": [
+      0.8238,
+      0.9414
+     ],
+     "order_means": {
+      "traced untraced": 0.8587,
+      "untraced traced": 0.9066
+     },
+     "n": 6
+    },
+    "idle IPDL Background wakes/s": {
+     "a": 0.2444,
+     "b": 0.24664999999999998,
+     "ratio": 1.0092,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9054,
+      "2": 0.9379,
+      "3": 0.9893,
+      "4": 1.0585,
+      "5": 1.051,
+      "6": 0.9552
+     },
+     "per_repeat_mean": 0.9829,
+     "interval": [
+      0.9179,
+      1.0479
+     ],
+     "order_means": {
+      "traced untraced": 0.9819,
+      "untraced traced": 0.9839
+     },
+     "n": 6
+    },
+    "idle Indexed~ IO run mean (ms)": {
+     "a": null,
+     "b": null,
+     "ratio": null,
+     "reading": null,
+     "per_repeat": {},
+     "order_means": {},
+     "n": 0
+    },
+    "idle Indexed~ IO wakes/s": {
+     "a": null,
+     "b": null,
+     "ratio": null,
+     "reading": null,
+     "per_repeat": {},
+     "order_means": {},
+     "n": 0
+    },
+    "idle JS Watchdog run mean (ms)": {
+     "a": 0.034394999999999995,
+     "b": 0.032347,
+     "ratio": 0.9405,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.1003,
+      "2": 0.9698,
+      "3": 0.9205,
+      "4": 0.9464,
+      "5": 0.8299,
+      "6": 0.9999
+     },
+     "per_repeat_mean": 0.9611,
+     "interval": [
+      0.8672,
+      1.0551
+     ],
+     "order_means": {
+      "traced untraced": 0.9502,
+      "untraced traced": 0.972
+     },
+     "n": 6
+    },
+    "idle JS Watchdog wakes/s": {
+     "a": 0.1737,
+     "b": 0.18,
+     "ratio": 1.0363,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0798,
+      "2": 1.0024,
+      "3": 1.0022,
+      "4": 1.0304,
+      "5": 0.9923,
+      "6": 1.0315
+     },
+     "per_repeat_mean": 1.0231,
+     "interval": [
+      0.9894,
+      1.0568
+     ],
+     "order_means": {
+      "traced untraced": 1.0248,
+      "untraced traced": 1.0214
+     },
+     "n": 6
+    },
+    "idle StreamTrans run mean (ms)": {
+     "a": null,
+     "b": null,
+     "ratio": null,
+     "reading": null,
+     "per_repeat": {},
+     "order_means": {},
+     "n": 0
+    },
+    "idle StreamTrans wakes/s": {
+     "a": null,
+     "b": null,
+     "ratio": null,
+     "reading": null,
+     "per_repeat": {},
+     "order_means": {},
+     "n": 0
+    },
+    "idle Timer run mean (ms)": {
+     "a": 0.048625,
+     "b": 0.041737,
+     "ratio": 0.8583,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.8995,
+      "2": 0.738,
+      "3": 0.8584,
+      "4": 0.7709,
+      "5": 0.8626,
+      "6": 0.9277
+     },
+     "per_repeat_mean": 0.8428,
+     "interval": [
+      0.7654,
+      0.9203
+     ],
+     "order_means": {
+      "traced untraced": 0.8735,
+      "untraced traced": 0.8122
+     },
+     "n": 6
+    },
+    "idle Timer wakes/s": {
+     "a": 0.27595000000000003,
+     "b": 0.2883,
+     "ratio": 1.0448,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0358,
+      "2": 1.1949,
+      "3": 1.0078,
+      "4": 1.0981,
+      "5": 0.885,
+      "6": 1.0277
+     },
+     "per_repeat_mean": 1.0415,
+     "interval": [
+      0.9339,
+      1.1492
+     ],
+     "order_means": {
+      "traced untraced": 0.9762,
+      "untraced traced": 1.1069
+     },
+     "n": 6
+    },
+    "idle WebExtensions run mean (ms)": {
+     "a": 0.0891595,
+     "b": 0.09158250000000001,
+     "ratio": 1.0272,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9366,
+      "2": 1.129,
+      "3": 0.8729,
+      "4": 1.2112,
+      "5": 0.8258,
+      "6": 1.1582
+     },
+     "per_repeat_mean": 1.0223,
+     "interval": [
+      0.8506,
+      1.194
+     ],
+     "order_means": {
+      "traced untraced": 0.8784,
+      "untraced traced": 1.1661
+     },
+     "n": 6
+    },
+    "idle WebExtensions wakes/s": {
+     "a": 0.24355,
+     "b": 0.22494999999999998,
+     "ratio": 0.9236,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0194,
+      "2": 0.8816,
+      "3": 1.0506,
+      "4": 0.8177,
+      "5": 1.0648,
+      "6": 0.9077
+     },
+     "per_repeat_mean": 0.957,
+     "interval": [
+      0.8501,
+      1.0638
+     ],
+     "order_means": {
+      "traced untraced": 1.0449,
+      "untraced traced": 0.869
+     },
+     "n": 6
+    },
+    "idle glean.dispatche run mean (ms)": {
+     "a": 0.039473999999999995,
+     "b": 0.031372,
+     "ratio": 0.7948,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.8829,
+      "2": 0.7419,
+      "3": 0.8174,
+      "4": 0.7928,
+      "5": 0.8206,
+      "6": 0.6913
+     },
+     "per_repeat_mean": 0.7912,
+     "interval": [
+      0.7209,
+      0.8614
+     ],
+     "order_means": {
+      "traced untraced": 0.8403,
+      "untraced traced": 0.742
+     },
+     "n": 6
+    },
+    "idle glean.dispatche wakes/s": {
+     "a": 0.0582,
+     "b": 0.057499999999999996,
+     "ratio": 0.988,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.1239,
+      "2": 0.9466,
+      "3": 1.003,
+      "4": 0.8314,
+      "5": 1.0619,
+      "6": 1.0035
+     },
+     "per_repeat_mean": 0.995,
+     "interval": [
+      0.8897,
+      1.1004
+     ],
+     "order_means": {
+      "traced untraced": 1.0629,
+      "untraced traced": 0.9272
+     },
+     "n": 6
+    },
+    "idle gmain run mean (ms)": {
+     "a": 0.0679865,
+     "b": 0.06489,
+     "ratio": 0.9545,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.1901,
+      "2": 0.9654,
+      "3": 0.9671,
+      "4": 0.9365,
+      "5": 0.9348,
+      "6": 1.0067
+     },
+     "per_repeat_mean": 1.0001,
+     "interval": [
+      0.8986,
+      1.1016
+     ],
+     "order_means": {
+      "traced untraced": 1.0307,
+      "untraced traced": 0.9695
+     },
+     "n": 6
+    },
+    "idle gmain wakes/s": {
+     "a": 0.2502,
+     "b": 0.25,
+     "ratio": 0.9992,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0024,
+      "2": 0.996,
+      "3": 1.0024,
+      "4": 0.996,
+      "5": 1.0024,
+      "6": 0.996
+     },
+     "per_repeat_mean": 0.9992,
+     "interval": [
+      0.9955,
+      1.0029
+     ],
+     "order_means": {
+      "traced untraced": 1.0024,
+      "untraced traced": 0.996
+     },
+     "n": 6
+    },
+    "idle residual run mean (ms)": {
+     "a": 0.0365305,
+     "b": 0.034343,
+     "ratio": 0.9401,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.9691,
+      "2": 0.9404,
+      "3": 0.8784,
+      "4": 1.0196,
+      "5": 0.9322,
+      "6": 0.9152
+     },
+     "per_repeat_mean": 0.9425,
+     "interval": [
+      0.8919,
+      0.9931
+     ],
+     "order_means": {
+      "traced untraced": 0.9266,
+      "untraced traced": 0.9584
+     },
+     "n": 6
+    },
+    "idle residual wakes/s": {
+     "a": 0.056499999999999995,
+     "b": 0.0542,
+     "ratio": 0.9593,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0658,
+      "2": 0.8407,
+      "3": 1.2291,
+      "4": 0.8407,
+      "5": 1.1278,
+      "6": 0.8645
+     },
+     "per_repeat_mean": 0.9948,
+     "interval": [
+      0.8178,
+      1.1717
+     ],
+     "order_means": {
+      "traced untraced": 1.1409,
+      "untraced traced": 0.8486
+     },
+     "n": 6
+    },
+    "idle thunderbird-bin run mean (ms)": {
+     "a": 0.2754535,
+     "b": 0.26127500000000003,
+     "ratio": 0.9485,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.8018,
+      "2": 1.4365,
+      "3": 0.768,
+      "4": 1.185,
+      "5": 0.7114,
+      "6": 0.9703
+     },
+     "per_repeat_mean": 0.9788,
+     "interval": [
+      0.6822,
+      1.2755
+     ],
+     "order_means": {
+      "traced untraced": 0.7604,
+      "untraced traced": 1.1973
+     },
+     "n": 6
+    },
+    "idle thunderbird-bin wakes/s": {
+     "a": 0.46715,
+     "b": 0.4625,
+     "ratio": 0.99,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.2929,
+      "2": 0.6756,
+      "3": 1.2583,
+      "4": 0.8282,
+      "5": 1.3746,
+      "6": 0.985
+     },
+     "per_repeat_mean": 1.0691,
+     "interval": [
+      0.7725,
+      1.3657
+     ],
+     "order_means": {
+      "traced untraced": 1.3086,
+      "untraced traced": 0.8296
+     },
+     "n": 6
+    },
+    "op Compositor run mean (ms)": {
+     "a": 0.0135155,
+     "b": 0.011175500000000001,
+     "ratio": 0.8269,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.8034,
+      "2": 0.8498,
+      "3": 0.834,
+      "4": 0.8431,
+      "5": 0.7591,
+      "6": 0.8132
+     },
+     "per_repeat_mean": 0.8171,
+     "interval": [
+      0.782,
+      0.8522
+     ],
+     "order_means": {
+      "traced untraced": 0.7988,
+      "untraced traced": 0.8354
+     },
+     "n": 6
+    },
+    "op Compositor wakes/s": {
+     "a": 220.68415,
+     "b": 223.34455,
+     "ratio": 1.0121,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0498,
+      "2": 0.9909,
+      "3": 1.0773,
+      "4": 0.9666,
+      "5": 1.0212,
+      "6": 0.9419
+     },
+     "per_repeat_mean": 1.0079,
+     "interval": [
+      0.9542,
+      1.0617
+     ],
+     "order_means": {
+      "traced untraced": 1.0494,
+      "untraced traced": 0.9665
+     },
+     "n": 6
+    },
+    "op Renderer run mean (ms)": {
+     "a": 0.2804825,
+     "b": 0.2685145,
+     "ratio": 0.9573,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.9681,
+      "2": 0.9709,
+      "3": 0.9672,
+      "4": 1.0032,
+      "5": 0.9286,
+      "6": 0.9797
+     },
+     "per_repeat_mean": 0.9696,
+     "interval": [
+      0.9442,
+      0.995
+     ],
+     "order_means": {
+      "traced untraced": 0.9546,
+      "untraced traced": 0.9846
+     },
+     "n": 6
+    },
+    "op Renderer wakes/s": {
+     "a": 27.4722,
+     "b": 27.2961,
+     "ratio": 0.9936,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9951,
+      "2": 1.0321,
+      "3": 1.0408,
+      "4": 0.9731,
+      "5": 0.9295,
+      "6": 0.9222
+     },
+     "per_repeat_mean": 0.9821,
+     "interval": [
+      0.9295,
+      1.0347
+     ],
+     "order_means": {
+      "traced untraced": 0.9885,
+      "untraced traced": 0.9758
+     },
+     "n": 6
+    },
+    "op Socket Thread run mean (ms)": {
+     "a": 0.0220435,
+     "b": 0.0178485,
+     "ratio": 0.8097,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.7192,
+      "2": 1.0076,
+      "3": 0.7802,
+      "4": 0.9576,
+      "5": 0.6129,
+      "6": 0.8703
+     },
+     "per_repeat_mean": 0.8246,
+     "interval": [
+      0.6681,
+      0.9811
+     ],
+     "order_means": {
+      "traced untraced": 0.7041,
+      "untraced traced": 0.9452
+     },
+     "n": 6
+    },
+    "op Socket Thread wakes/s": {
+     "a": 101.81954999999999,
+     "b": 105.74025,
+     "ratio": 1.0385,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.2579,
+      "2": 0.8718,
+      "3": 1.3151,
+      "4": 0.7985,
+      "5": 1.2397,
+      "6": 0.7919
+     },
+     "per_repeat_mean": 1.0458,
+     "interval": [
+      0.784,
+      1.3076
+     ],
+     "order_means": {
+      "traced untraced": 1.2709,
+      "untraced traced": 0.8207
+     },
+     "n": 6
+    },
+    "op Softwar~cThread run mean (ms)": {
+     "a": 0.055237999999999995,
+     "b": 0.041503,
+     "ratio": 0.7513,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.7374,
+      "2": 0.7635,
+      "3": 0.7574,
+      "4": 0.7589,
+      "5": 0.7112,
+      "6": 0.7433
+     },
+     "per_repeat_mean": 0.7453,
+     "interval": [
+      0.7249,
+      0.7657
+     ],
+     "order_means": {
+      "traced untraced": 0.7353,
+      "untraced traced": 0.7552
+     },
+     "n": 6
+    },
+    "op Softwar~cThread wakes/s": {
+     "a": 26.1107,
+     "b": 26.03345,
+     "ratio": 0.997,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9955,
+      "2": 1.0079,
+      "3": 1.0063,
+      "4": 0.9925,
+      "5": 0.976,
+      "6": 0.9768
+     },
+     "per_repeat_mean": 0.9925,
+     "interval": [
+      0.978,
+      1.007
+     ],
+     "order_means": {
+      "traced untraced": 0.9926,
+      "untraced traced": 0.9924
+     },
+     "n": 6
+    },
+    "op StreamT~ns run mean (ms)": {
+     "a": null,
+     "b": null,
+     "ratio": null,
+     "reading": null,
+     "per_repeat": {},
+     "order_means": {},
+     "n": 0
+    },
+    "op StreamT~ns wakes/s": {
+     "a": null,
+     "b": null,
+     "ratio": null,
+     "reading": null,
+     "per_repeat": {},
+     "order_means": {},
+     "n": 0
+    },
+    "op SwComposite run mean (ms)": {
+     "a": 0.023920999999999998,
+     "b": 0.021998999999999998,
+     "ratio": 0.9197,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9673,
+      "2": 0.9322,
+      "3": 0.8735,
+      "4": 1.0605,
+      "5": 0.7386,
+      "6": 0.9872
+     },
+     "per_repeat_mean": 0.9266,
+     "interval": [
+      0.8102,
+      1.0429
+     ],
+     "order_means": {
+      "traced untraced": 0.8598,
+      "untraced traced": 0.9933
+     },
+     "n": 6
+    },
+    "op SwComposite wakes/s": {
+     "a": 5.74655,
+     "b": 5.8309,
+     "ratio": 1.0147,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0088,
+      "2": 0.9338,
+      "3": 0.9611,
+      "4": 1.0305,
+      "5": 1.0113,
+      "6": 1.0014
+     },
+     "per_repeat_mean": 0.9912,
+     "interval": [
+      0.9531,
+      1.0292
+     ],
+     "order_means": {
+      "traced untraced": 0.9937,
+      "untraced traced": 0.9886
+     },
+     "n": 6
+    },
+    "op TaskCon~ller run mean (ms)": {
+     "a": 0.2754585,
+     "b": 0.2729765,
+     "ratio": 0.991,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.2151,
+      "2": 0.7869,
+      "3": 1.2877,
+      "4": 0.7853,
+      "5": 1.2772,
+      "6": 0.7598
+     },
+     "per_repeat_mean": 1.0187,
+     "interval": [
+      0.7398,
+      1.2976
+     ],
+     "order_means": {
+      "traced untraced": 1.26,
+      "untraced traced": 0.7773
+     },
+     "n": 6
+    },
+    "op TaskCon~ller wakes/s": {
+     "a": 20.9863,
+     "b": 21.29005,
+     "ratio": 1.0145,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9548,
+      "2": 1.0879,
+      "3": 0.8971,
+      "4": 1.0878,
+      "5": 0.8965,
+      "6": 1.1388
+     },
+     "per_repeat_mean": 1.0105,
+     "interval": [
+      0.898,
+      1.1229
+     ],
+     "order_means": {
+      "traced untraced": 0.9161,
+      "untraced traced": 1.1048
+     },
+     "n": 6
+    },
+    "op Timer run mean (ms)": {
+     "a": 0.027521499999999997,
+     "b": 0.022017500000000002,
+     "ratio": 0.8,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.7558,
+      "2": 0.8382,
+      "3": 0.7972,
+      "4": 0.8723,
+      "5": 0.7556,
+      "6": 0.8678
+     },
+     "per_repeat_mean": 0.8145,
+     "interval": [
+      0.759,
+      0.8699
+     ],
+     "order_means": {
+      "traced untraced": 0.7695,
+      "untraced traced": 0.8594
+     },
+     "n": 6
+    },
+    "op Timer wakes/s": {
+     "a": 14.84455,
+     "b": 14.616150000000001,
+     "ratio": 0.9846,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.0686,
+      "2": 0.9243,
+      "3": 1.0472,
+      "4": 0.9232,
+      "5": 1.0533,
+      "6": 0.8794
+     },
+     "per_repeat_mean": 0.9827,
+     "interval": [
+      0.8959,
+      1.0694
+     ],
+     "order_means": {
+      "traced untraced": 1.0564,
+      "untraced traced": 0.909
+     },
+     "n": 6
+    },
+    "op WRRende~ckend#0 run mean (ms)": {
+     "a": 0.3182395,
+     "b": 0.29647049999999997,
+     "ratio": 0.9316,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.9434,
+      "2": 0.9452,
+      "3": 1.0264,
+      "4": 0.9073,
+      "5": 0.8287,
+      "6": 0.816
+     },
+     "per_repeat_mean": 0.9112,
+     "interval": [
+      0.8281,
+      0.9943
+     ],
+     "order_means": {
+      "traced untraced": 0.9328,
+      "untraced traced": 0.8895
+     },
+     "n": 6
+    },
+    "op WRRende~ckend#0 wakes/s": {
+     "a": 10.40325,
+     "b": 10.556149999999999,
+     "ratio": 1.0147,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9963,
+      "2": 1.0398,
+      "3": 1.0032,
+      "4": 1.0375,
+      "5": 0.9787,
+      "6": 1.0264
+     },
+     "per_repeat_mean": 1.0136,
+     "interval": [
+      0.9877,
+      1.0396
+     ],
+     "order_means": {
+      "traced untraced": 0.9927,
+      "untraced traced": 1.0346
+     },
+     "n": 6
+    },
+    "op glean.dispatche run mean (ms)": {
+     "a": 0.0504605,
+     "b": 0.0373535,
+     "ratio": 0.7403,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.7664,
+      "2": 0.7455,
+      "3": 0.8074,
+      "4": 0.7255,
+      "5": 0.7039,
+      "6": 0.6764
+     },
+     "per_repeat_mean": 0.7375,
+     "interval": [
+      0.6888,
+      0.7863
+     ],
+     "order_means": {
+      "traced untraced": 0.7592,
+      "untraced traced": 0.7158
+     },
+     "n": 6
+    },
+    "op glean.dispatche wakes/s": {
+     "a": 17.7028,
+     "b": 17.959699999999998,
+     "ratio": 1.0145,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9814,
+      "2": 1.0673,
+      "3": 0.9785,
+      "4": 1.0538,
+      "5": 0.9756,
+      "6": 1.068
+     },
+     "per_repeat_mean": 1.0208,
+     "interval": [
+      0.9718,
+      1.0697
+     ],
+     "order_means": {
+      "traced untraced": 0.9785,
+      "untraced traced": 1.063
+     },
+     "n": 6
+    },
+    "op operation duration mean (ms)": {
+     "a": 2973.304,
+     "b": 2942.335,
+     "ratio": 0.9896,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.996,
+      "2": 1.0278,
+      "3": 1.0555,
+      "4": 0.9647,
+      "5": 0.909,
+      "6": 0.9077
+     },
+     "per_repeat_mean": 0.9768,
+     "interval": [
+      0.9126,
+      1.0409
+     ],
+     "order_means": {
+      "traced untraced": 0.9868,
+      "untraced traced": 0.9667
+     },
+     "n": 6
+    },
+    "op residual run mean (ms)": {
+     "a": 0.140403,
+     "b": 0.13508350000000002,
+     "ratio": 0.9621,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.9122,
+      "2": 0.9689,
+      "3": 1.2379,
+      "4": 0.9166,
+      "5": 0.8229,
+      "6": 1.0408
+     },
+     "per_repeat_mean": 0.9832,
+     "interval": [
+      0.8322,
+      1.1343
+     ],
+     "order_means": {
+      "traced untraced": 0.991,
+      "untraced traced": 0.9754
+     },
+     "n": 6
+    },
+    "op residual wakes/s": {
+     "a": 38.9798,
+     "b": 39.410849999999996,
+     "ratio": 1.0111,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.03,
+      "2": 1.0128,
+      "3": 1.0503,
+      "4": 1.0115,
+      "5": 0.9867,
+      "6": 0.9859
+     },
+     "per_repeat_mean": 1.0129,
+     "interval": [
+      0.9867,
+      1.039
+     ],
+     "order_means": {
+      "traced untraced": 1.0223,
+      "untraced traced": 1.0034
+     },
+     "n": 6
+    },
+    "op thunderbird-bin run mean (ms)": {
+     "a": 1.1553095,
+     "b": 1.1216085,
+     "ratio": 0.9708,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.1878,
+      "2": 0.8231,
+      "3": 1.2325,
+      "4": 0.7991,
+      "5": 1.0942,
+      "6": 0.7735
+     },
+     "per_repeat_mean": 0.985,
+     "interval": [
+      0.765,
+      1.2051
+     ],
+     "order_means": {
+      "traced untraced": 1.1715,
+      "untraced traced": 0.7986
+     },
+     "n": 6
+    },
+    "op thunderbird-bin wakes/s": {
+     "a": 133.7811,
+     "b": 135.94344999999998,
+     "ratio": 1.0162,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 0.8915,
+      "2": 1.1437,
+      "3": 0.8836,
+      "4": 1.154,
+      "5": 0.9136,
+      "6": 1.1434
+     },
+     "per_repeat_mean": 1.0216,
+     "interval": [
+      0.877,
+      1.1662
+     ],
+     "order_means": {
+      "traced untraced": 0.8962,
+      "untraced traced": 1.147
+     },
+     "n": 6
+    }
+   },
+   "intervals": 44,
+   "chance": 2.2,
+   "differences": [
+    "driven per-input run (ms)",
+    "idle IPC I/O Child run mean (ms)",
+    "idle IPC I/O Child wakes/s",
+    "idle IPDL Background run mean (ms)",
+    "idle Timer run mean (ms)",
+    "idle glean.dispatche run mean (ms)",
+    "idle residual run mean (ms)",
+    "op Compositor run mean (ms)",
+    "op Renderer run mean (ms)",
+    "op Socket Thread run mean (ms)",
+    "op Softwar~cThread run mean (ms)",
+    "op Timer run mean (ms)",
+    "op WRRende~ckend#0 run mean (ms)",
+    "op glean.dispatche run mean (ms)"
+   ],
+   "validity": {},
+   "shares": {
+    "idle thunderbird-bin": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle Timer": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle gmain": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle IPDL Background": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle WebExtensions": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle JS Watchdog": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle StreamTrans": {
+     "exited cpu": {
+      "mean": 1.0,
+      "max": 1.0
+     },
+     "exited wakes": {
+      "mean": 1.0,
+      "max": 1.0
+     }
+    },
+    "idle Indexed~ IO": {
+     "exited cpu": {
+      "mean": 1.0,
+      "max": 1.0
+     },
+     "exited wakes": {
+      "mean": 1.0,
+      "max": 1.0
+     }
+    },
+    "idle glean.dispatche": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle IPC I/O Parent": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle IPC I/O Child": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle residual": {
+     "exited cpu": {
+      "mean": 0.5479,
+      "max": 0.7795
+     },
+     "exited wakes": {
+      "mean": 0.3227,
+      "max": 0.4667
+     }
+    },
+    "op Socket Thread": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "inside cpu": {
+      "mean": 0.995,
+      "max": 0.9955
+     },
+     "inside wakes": {
+      "mean": 0.9974,
+      "max": 0.9978
+     }
+    },
+    "op Compositor": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "inside cpu": {
+      "mean": 0.3737,
+      "max": 0.4176
+     },
+     "inside wakes": {
+      "mean": 0.3406,
+      "max": 0.3673
+     }
+    },
+    "op thunderbird-bin": {
+     "exited cpu": {
+      "mean": 0.0003,
+      "max": 0.0004
+     },
+     "exited wakes": {
+      "mean": 0.0002,
+      "max": 0.0003
+     },
+     "inside cpu": {
+      "mean": 0.5518,
+      "max": 0.5633
+     },
+     "inside wakes": {
+      "mean": 0.3753,
+      "max": 0.4079
+     }
+    },
+    "op Renderer": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0001
+     },
+     "inside cpu": {
+      "mean": 0.3066,
+      "max": 0.3441
+     },
+     "inside wakes": {
+      "mean": 0.5415,
+      "max": 0.5624
+     }
+    },
+    "op SwComposite": {
+     "exited cpu": {
+      "mean": 0.7975,
+      "max": 0.8234
+     },
+     "exited wakes": {
+      "mean": 0.7437,
+      "max": 0.7554
+     },
+     "inside cpu": {
+      "mean": 0.1955,
+      "max": 0.2315
+     },
+     "inside wakes": {
+      "mean": 0.4318,
+      "max": 0.4673
+     }
+    },
+    "op Softwar~cThread": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "inside cpu": {
+      "mean": 0.2503,
+      "max": 0.2874
+     },
+     "inside wakes": {
+      "mean": 0.2833,
+      "max": 0.3004
+     }
+    },
+    "op StreamT~ns": {
+     "exited cpu": {
+      "mean": 1.0,
+      "max": 1.0
+     },
+     "exited wakes": {
+      "mean": 1.0,
+      "max": 1.0
+     },
+     "inside cpu": {
+      "mean": 0.1771,
+      "max": 0.2108
+     },
+     "inside wakes": {
+      "mean": 0.0695,
+      "max": 0.0808
+     }
+    },
+    "op TaskCon~ller": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "inside cpu": {
+      "mean": 0.164,
+      "max": 0.1802
+     },
+     "inside wakes": {
+      "mean": 0.2109,
+      "max": 0.2462
+     }
+    },
+    "op Timer": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "inside cpu": {
+      "mean": 0.1789,
+      "max": 0.204
+     },
+     "inside wakes": {
+      "mean": 0.2497,
+      "max": 0.2723
+     }
+    },
+    "op glean.dispatche": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "inside cpu": {
+      "mean": 0.3168,
+      "max": 0.3645
+     },
+     "inside wakes": {
+      "mean": 0.1876,
+      "max": 0.1956
+     }
+    },
+    "op WRRende~ckend#0": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "inside cpu": {
+      "mean": 0.3671,
+      "max": 0.4145
+     },
+     "inside wakes": {
+      "mean": 0.3216,
+      "max": 0.3367
+     }
+    },
+    "op residual": {
+     "exited cpu": {
+      "mean": 0.1693,
+      "max": 0.3131
+     },
+     "exited wakes": {
+      "mean": 0.1647,
+      "max": 0.1752
+     },
+     "inside cpu": {
+      "mean": 0.4884,
+      "max": 0.5344
+     },
+     "inside wakes": {
+      "mean": 0.2679,
+      "max": 0.2843
+     }
+    }
+   },
+   "workload": {
+    "z": {
+     "idle IPC I/O Child run mean (ms)": -0.55,
+     "idle IPC I/O Parent gap mean (ms)": -0.61,
+     "idle IPC I/O Parent run mean (ms)": -0.57,
+     "idle IPC I/O Parent wakes/s": 0.64,
+     "idle IPDL Background gap mean (ms)": -0.73,
+     "idle IPDL Background run mean (ms)": -1.37,
+     "idle IPDL Background wakes/s": 0.76,
+     "idle Indexed~ IO gap mean (ms)": -0.05,
+     "idle Indexed~ IO run mean (ms)": 1.29,
+     "idle Indexed~ IO wakes/s": 0.04,
+     "idle JS Watchdog gap mean (ms)": 0.11,
+     "idle JS Watchdog run mean (ms)": -1.04,
+     "idle JS Watchdog wakes/s": -0.12,
+     "idle StreamTrans gap mean (ms)": -0.24,
+     "idle StreamTrans run mean (ms)": 0.62,
+     "idle StreamTrans wakes/s": 0.25,
+     "idle Timer gap mean (ms)": 0.65,
+     "idle Timer run mean (ms)": -0.35,
+     "idle Timer wakes/s": -0.62,
+     "idle WebExtensions gap mean (ms)": -1.21,
+     "idle WebExtensions run mean (ms)": -1.53,
+     "idle WebExtensions wakes/s": 1.35,
+     "idle glean.dispatche gap mean (ms)": -1.04,
+     "idle glean.dispatche run mean (ms)": -0.06,
+     "idle glean.dispatche wakes/s": 1.14,
+     "idle gmain run mean (ms)": -0.82,
+     "idle residual gap mean (ms)": 1.7,
+     "idle residual run mean (ms)": -3.18,
+     "idle residual wakes/s": -1.53,
+     "idle thunderbird-bin gap mean (ms)": -0.91,
+     "idle thunderbird-bin run mean (ms)": -1.17,
+     "idle thunderbird-bin wakes/s": 1.01,
+     "input_run mean, SWELL-KW (ms)": -0.29,
+     "op Compositor gap mean (ms)": -3.73,
+     "op Compositor run mean (ms)": -0.24,
+     "op Compositor wakes/s": 3.67,
+     "op Renderer gap mean (ms)": 0.28,
+     "op Renderer run mean (ms)": -0.06,
+     "op Renderer wakes/s": -0.32,
+     "op Socket Thread gap mean (ms)": -8.11,
+     "op Socket Thread run mean (ms)": -1.44,
+     "op Socket Thread wakes/s": 8.96,
+     "op Softwar~cThread gap mean (ms)": 0.28,
+     "op Softwar~cThread run mean (ms)": -0.11,
+     "op Softwar~cThread wakes/s": -0.26,
+     "op StreamT~ns gap mean (ms)": -1.45,
+     "op StreamT~ns run mean (ms)": -0.43,
+     "op StreamT~ns wakes/s": 1.65,
+     "op SwComposite gap mean (ms)": -2.31,
+     "op SwComposite run mean (ms)": -0.24,
+     "op SwComposite wakes/s": 2.36,
+     "op TaskCon~ller gap mean (ms)": 8.28,
+     "op TaskCon~ller run mean (ms)": 5.51,
+     "op TaskCon~ller wakes/s": -6.75,
+     "op Timer gap mean (ms)": -1.48,
+     "op Timer run mean (ms)": -0.89,
+     "op Timer wakes/s": 1.5,
+     "op WRRende~ckend#0 gap mean (ms)": 1.31,
+     "op WRRende~ckend#0 run mean (ms)": 0.36,
+     "op WRRende~ckend#0 wakes/s": -1.23,
+     "op glean.dispatche gap mean (ms)": 2.11,
+     "op glean.dispatche run mean (ms)": 0.7,
+     "op glean.dispatche wakes/s": -1.93,
+     "op residual gap mean (ms)": 0.42,
+     "op residual run mean (ms)": -0.06,
+     "op residual wakes/s": -0.41,
+     "op thunderbird-bin gap mean (ms)": 3.14,
+     "op thunderbird-bin run mean (ms)": 3.39,
+     "op thunderbird-bin wakes/s": -2.67,
+     "operation duration mean (ms)": 0.63
+    },
+    "only_carried": [
+     "input_run mean, 136M (ms)"
+    ],
+    "only_control": [],
+    "max_abs_z": 8.96
+   },
+   "left_out": {},
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 44 intervals read, about 2.2 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 idle phase: `IPC I/O Child` run mean 0.863 (0.803\u20130.923) and wake rate 1.002 (1.002\u20131.002), `IPDL Background` run mean 0.883 (0.824\u20130.941), `Timer` run mean 0.843 (0.765\u20130.920), `glean.dispatche` run mean 0.791 (0.721\u20130.861), `residual` run mean 0.943 (0.892\u20130.993); driven phase: the per-input run 0.895 (0.853\u20130.937); operation phase, over the whole phase: `Compositor` run mean 0.817 (0.782\u20130.852), `Renderer` run mean 0.970 (0.944\u20130.995), `Socket Thread` run mean 0.825 (0.668\u20130.981), `Softwar~cThread` run mean 0.745 (0.725\u20130.766), `Timer` run mean 0.815 (0.759\u20130.870), `WRRende~ckend#0` run mean 0.911 (0.828\u20130.994), `glean.dispatche` run mean 0.738 (0.689\u20130.786). The operation phase's second send pass wakes `Socket Thread` about 22 % more and `TaskCon~ller` about 35 % less inside the sends than the first, which keeps those ratios from resolving."
+  },
+  "video-call": {
+   "archetype": "video-call",
+   "app": "webrtc",
+   "jobs": 6,
+   "orders": {
+    "traced untraced": 3,
+    "untraced traced": 3
+   },
+   "builds": {
+    "Google Chrome 153.0.8010.52": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ]
+   },
+   "values": {
+    "play CPU share": {
+     "a": 0.1873475,
+     "b": 0.180782,
+     "ratio": 0.965,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.9297,
+      "2": 0.9617,
+      "3": 0.9719,
+      "4": 0.9321,
+      "5": 0.9612,
+      "6": 0.9581
+     },
+     "per_repeat_mean": 0.9524,
+     "interval": [
+      0.9342,
+      0.9707
+     ],
+     "order_means": {
+      "traced untraced": 0.9543,
+      "untraced traced": 0.9506
+     },
+     "n": 6
+    }
+   },
+   "intervals": 1,
+   "chance": 0.1,
+   "differences": [
+    "play CPU share"
+   ],
+   "validity": {},
+   "shares": {},
+   "workload": {
+    "z": {
+     "play CPU share": -0.37,
+     "play cycle length mean (ms)": -0.2,
+     "play cycle work mean (ms)": -0.37
+    },
+    "only_carried": [],
+    "only_control": [],
+    "max_abs_z": 0.37
+   },
+   "left_out": {},
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 1 interval read, about 0.1 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 play phase: the tree's CPU share 0.952 (0.934\u20130.971)."
+  }
+ }
+}
