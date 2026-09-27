@@ -492,6 +492,35 @@ def test_the_page_carries_the_operation_windows_share_only_for_an_archetype_with
     assert "operation windows" not in control_report.render({"family": "campaign", "archetypes": {"web-browser": rep}})
 
 
+# ---- analysis: a copy left out of the control's pool (9.5 D66) ---------------------------------------------------
+
+def test_the_report_reads_no_copy_the_pool_left_out(tmp_path):
+    import json as _j
+    from meas import control_report
+    rep = _j.dumps({"gate": "open", "machine.model": "AMD EPYC 7763 64-Core Processor"})
+    kept = tmp_path / "playback-mpv-video-from620" / "36300400332" / "meas-playback-mpv-video-r2-control"
+    left = tmp_path / "playback-mpv-video-from620-excluded" / "36300802358" / "meas-playback-mpv-video-r2-control"
+    for d in (kept, left):
+        d.mkdir(parents=True)
+        (d / "report.json").write_text(rep)
+    assert control_report.find_jobs("campaign", str(tmp_path)) == {"mpv-video": {2: str(kept)}}
+
+
+def test_the_page_names_each_copy_left_out_of_the_control_s_pool(tmp_path):
+    from meas import control_report
+    jobs = {}
+    for k in range(1, 7):
+        d = tmp_path / f"meas-interactive-chrome-r{k}-control"
+        _write_job(d, "traced untraced" if k % 2 else "untraced traced", {"traced": _job_sides(1.0), "untraced": _job_sides(0.95)})
+        jobs[k] = str(d)
+    why = "D66: window 2 measured twice; the original launch's copy is kept"
+    ctl = {"runs": {"chrome": {"excluded_repeats": {"2@36300802358": why}}}}
+    rep = control_report.app_reports("campaign", "chrome", jobs, CARRIED_95, with_shares=False, control_pool=ctl)["web-browser"]
+    assert rep["left_out"] == {"2@36300802358": why}
+    md = control_report.render({"family": "campaign", "archetypes": {"web-browser": rep}})
+    assert f"- left out of the control's pool: 2@36300802358 — {why}" in md.splitlines()
+
+
 # ---- analysis: the workload check (analysis plan, task 5) --------------------------------------------------------
 
 def test_a_control_artifact_is_pooled_only_under_the_control_flag(tmp_path):

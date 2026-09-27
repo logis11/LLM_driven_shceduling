@@ -52,9 +52,12 @@ def carried_95(app):
 
 
 def find_jobs(family, root):
-    """{app: {index or index@run: dir}} of the landed control jobs on the campaign's machine, gate open."""
+    """{app: {index or index@run: dir}} of the landed control jobs on the campaign's machine, gate open; a copy
+    pool_runs.py --exclude moved to its pool's `-excluded` folder is not read."""
     found = {}
     for d in sorted(glob.glob(os.path.join(root, "**", "meas-*-control"), recursive=True)):
+        if any(part.endswith("-excluded") for part in os.path.relpath(d, root).split(os.sep)):
+            continue
         m = NAME[family].match(os.path.basename(d))
         if not m or not os.path.exists(os.path.join(d, "report.json")):
             continue
@@ -176,6 +179,7 @@ def app_reports(family, app, jobs, carried, with_shares=True, control_pool=None)
         if control_pool is not None:
             ctl = control_pool["runs"].get(app)
             rep["workload"] = control.workload(carried, ctl) if ctl else None
+            rep["left_out"] = (ctl or {}).get("excluded_repeats") or {}
         out[arch] = rep
     return out
 
@@ -223,6 +227,8 @@ def render(record):
                 lines.append(f"- job {k}: " + "; ".join(c["problems"]))
             if c["prelude_screens"]:
                 lines.append(f"- job {k}: the screenshots after its two preludes differ in {c['prelude_screens']}")
+        for k, why in (r.get("left_out") or {}).items():
+            lines.append(f"- left out of the control's pool: {k} — {why}")
         w = r.get("workload")
         if w:
             lines += ["", f"The traced runs against the carried pool (decision 17): largest |z| {w['max_abs_z']} over {len(w['z'])} values"
