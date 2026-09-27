@@ -526,3 +526,24 @@ def test_a_play_entry_is_read_over_the_tree_only():
     ph = {"components": {"selected": ["ao", "mpv"], "residual": {"gap_ms": {"table": [1]}}},
           "threads": {"ao": {"gap_ms": {"table": [1]}}, "mpv": {"gap_ms": {"table": [1]}}}, "cycle": {}}
     assert c95.carried_components("mpv-audio", "play", ph) == []
+
+
+def test_a_control_job_s_validity_names_what_would_leave_it_out(tmp_path):
+    import json as _j
+    from meas import control_report
+    _write_job(tmp_path / "ok", "traced untraced", {"traced": _job_sides(1.0), "untraced": _job_sides(0.9)})
+    rep = _j.loads((tmp_path / "ok" / "report.json").read_text())
+    rep.update({"gate": "open", "replay.sent": "100", "replay_untraced.sent": "100", "ctrlprelude.driven.traced.rc": "0",
+                "ctrlprelude.driven.untraced.rc": "0", "ops.count": "3", "ops.rc0": "3", "ops_untraced.count": "3", "ops_untraced.rc0": "2"})
+    (tmp_path / "ok" / "report.json").write_text(_j.dumps(rep))
+    (tmp_path / "ok" / "ctrlprelude.driven.traced.log").write_text("revert-query\n")
+    (tmp_path / "ok" / "ctrlprelude.driven.untraced.log").write_text("revert-query\ndialog-still-up\n")
+    assert control_report.validity(str(tmp_path / "ok")) == ["op-untraced: 1 of 3 operations failed"]
+    rep.update({"replay_untraced.sent": "90", "ctrlprelude.driven.traced.rc": "1"})
+    (tmp_path / "ok" / "report.json").write_text(_j.dumps(rep))
+    (tmp_path / "ok" / "ctrlprelude.driven.traced.log").write_text("revert-query\ndialog-still-up\ndialog-still-up-after-focus\n")
+    (tmp_path / "ok" / "snap.op-untraced.after.json").unlink()
+    probs = control_report.validity(str(tmp_path / "ok"))
+    assert "driven: the two runs replayed 100 and 90 events" in probs
+    assert "prelude driven.traced: rc 1" in probs and "prelude driven.traced: its dialog stayed up" in probs
+    assert "op-untraced: a snapshot is missing" in probs

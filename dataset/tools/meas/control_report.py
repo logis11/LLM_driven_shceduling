@@ -66,6 +66,50 @@ def find_jobs(family, root):
     return {app: {k if len(ds) == 1 else f"{k}@{run}": d for k, ds in by.items() for run, d in ds} for app, by in found.items()}
 
 
+def validity(D):
+    """What would leave a control job out, one line each: the gate, a run's missing snapshot, two driven runs that
+    replayed different counts, failed operations, a prelude that returned non-zero or left its dialog up after the
+    focus (ctrlprelude logs, the 2026-09-27 dry runs). The screenshots are compared apart (prelude_screens)."""
+    r = json.load(open(os.path.join(D, "report.json")))
+    probs = []
+    if r.get("gate") not in (None, "open"):
+        probs.append(f"gate {r.get('gate')}")
+    names = sorted({os.path.basename(p)[len("snap."):].rsplit(".", 2)[0] for p in glob.glob(os.path.join(D, "snap.*.*.json"))} - {"launch"})
+    phases = sorted({n[:-len("-untraced")] if n.endswith("-untraced") else n for n in names})
+    for ph in phases:
+        for name in (ph, f"{ph}-untraced"):
+            if not all(os.path.exists(os.path.join(D, f"snap.{name}.{e}.json")) for e in ("before", "after")):
+                probs.append(f"{name}: a snapshot is missing")
+    a, b = r.get("replay.sent"), r.get("replay_untraced.sent")
+    if a is not None and b is not None and a != b:
+        probs.append(f"driven: the two runs replayed {a} and {b} events")
+    for count, ok, label in (("ops.count", "ops.rc0", "op"), ("ops_untraced.count", "ops_untraced.rc0", "op-untraced")):
+        if r.get(count) is not None and int(r.get(ok) or 0) < int(r[count]):
+            probs.append(f"{label}: {int(r[count]) - int(r.get(ok) or 0)} of {r[count]} operations failed")
+    for k, v in sorted(r.items()):
+        m = re.fullmatch(r"ctrlprelude\.(.+)\.rc", k)
+        if m and str(v) != "0":
+            probs.append(f"prelude {m.group(1)}: rc {v}")
+    for log in sorted(glob.glob(os.path.join(D, "ctrlprelude.*.log"))):
+        if "dialog-still-up-after-focus" in open(log).read():
+            probs.append(f"prelude {os.path.basename(log)[len('ctrlprelude.'):-len('.log')]}: its dialog stayed up")
+    return probs
+
+
+def prelude_screens(D):
+    """The box in which a job's two screenshots after its preludes differ, None when identical — for reading beside
+    the designed state; needs PIL, and returns None without it."""
+    shots = sorted(glob.glob(os.path.join(D, "after-ctrlprelude-*.png")))
+    if len(shots) != 2:
+        return None
+    try:
+        from PIL import Image, ImageChops
+    except ImportError:
+        return None
+    a, b = (Image.open(x).convert("RGB") for x in shots)
+    return ImageChops.difference(a, b).getbbox() if a.size == b.size else ("sizes", a.size, b.size)
+
+
 def _adapter(family):
     if family == "campaign":
         from meas.campaign import control as c
@@ -107,11 +151,12 @@ def _census(family, archetype, reports):
 def app_reports(family, app, jobs, carried, with_shares=True, control_pool=None):
     """{archetype: its report} for one app's landed control jobs `jobs` {index: dir}."""
     values_of, shares_of = _adapter(family)
-    per, orders, reports, shares = {}, {}, {}, {}
+    per, orders, reports, shares, checks = {}, {}, {}, {}, {}
     for k, D in sorted(jobs.items(), key=lambda kv: str(kv[0])):
         order, vals = values_of(D, app, carried)
         orders[k] = order
         reports[k] = json.load(open(os.path.join(D, "report.json")))
+        checks[k] = {"problems": validity(D), "prelude_screens": prelude_screens(D)}
         for name, (t, u) in vals.items():
             per.setdefault(name, {})[k] = (order, t, u)
         if with_shares:
@@ -126,6 +171,7 @@ def app_reports(family, app, jobs, carried, with_shares=True, control_pool=None)
                "builds": _census(family, arch, reports),
                "values": values, "intervals": n_int, "chance": round(0.05 * n_int, 1),
                "differences": sorted(n for n, v in values.items() if v.get("reading") == "difference"),
+               "validity": {str(k): c for k, c in checks.items() if c["problems"] or c["prelude_screens"]},
                "shares": {p: _mean_shares(recs) for p, recs in shares.items() if any(n.startswith(p + " ") for n in names)}}
         if control_pool is not None:
             ctl = control_pool["runs"].get(app)
@@ -170,6 +216,11 @@ def render(record):
                          f"{(_fmt(iv[0]) + '–' + _fmt(iv[1])) if iv else '—'} | {v.get('reading') or '—'} | "
                          f"{'; '.join(f'{o.split()[0]} first {m}' for o, m in v.get('order_means', {}).items()) or '—'} | {v.get('n', 0)} | "
                          f"{pair('exited')} | {pair('left')} |")
+        for k, c in (r.get("validity") or {}).items():
+            if c["problems"]:
+                lines.append(f"- job {k}: " + "; ".join(c["problems"]))
+            if c["prelude_screens"]:
+                lines.append(f"- job {k}: the screenshots after its two preludes differ in {c['prelude_screens']}")
         w = r.get("workload")
         if w:
             lines += ["", f"The traced runs against the carried pool (decision 17): largest |z| {w['max_abs_z']} over {len(w['z'])} values"
