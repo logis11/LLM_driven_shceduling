@@ -1,0 +1,88 @@
+thunderbird-send: repeats [1, 2, 3, 4, 5, 6, 7, 8]; stability rule does not hold yet
+   idle thunderbird-bin wakes/s: k 8, half-width 0.0932, fails, needed 22
+   idle thunderbird-bin gap mean (ms): k 8, half-width 0.0932, fails, needed 22
+   idle thunderbird-bin run mean (ms): k 8, half-width 0.083, fails, needed 18
+   idle Timer wakes/s: k 8, half-width 0.0448, passes
+   idle Timer gap mean (ms): k 8, half-width 0.0448, passes
+   idle Timer run mean (ms): k 8, half-width 0.0382, passes
+   idle gmain wakes/s: k 8, half-width 0.0, passes
+   idle gmain gap mean (ms): k 8, half-width 0.0, passes
+   idle gmain run mean (ms): k 8, half-width 0.0578, fails, needed 10
+   idle IPDL Background wakes/s: k 8, half-width 0.0416, passes
+   idle IPDL Background gap mean (ms): k 8, half-width 0.0416, passes
+   idle IPDL Background run mean (ms): k 8, half-width 0.0406, passes
+   idle WebExtensions wakes/s: k 8, half-width 0.0735, fails, needed 15
+   idle WebExtensions gap mean (ms): k 8, half-width 0.0735, fails, needed 15
+   idle WebExtensions run mean (ms): k 8, half-width 0.0814, fails, needed 18
+   idle JS Watchdog wakes/s: k 8, half-width 0.0413, passes
+   idle JS Watchdog gap mean (ms): k 8, half-width 0.0413, passes
+   idle JS Watchdog run mean (ms): k 8, half-width 0.0563, fails, needed 10
+   idle StreamTrans wakes/s: k 8, half-width 0.0913, fails, needed 21
+   idle StreamTrans gap mean (ms): k 8, half-width 0.0913, fails, needed 21
+   idle StreamTrans run mean (ms): k 8, half-width 0.0944, fails, needed 23
+   idle Indexed~ IO wakes/s: k 8, half-width 0.1468, fails, needed 50
+   idle Indexed~ IO gap mean (ms): k 8, half-width 0.1468, fails, needed 50
+   idle Indexed~ IO run mean (ms): k 8, half-width 0.0789, fails, needed 17
+   idle glean.dispatche wakes/s: k 8, half-width 0.0563, fails, needed 10
+   idle glean.dispatche gap mean (ms): k 8, half-width 0.0563, fails, needed 10
+   idle glean.dispatche run mean (ms): k 8, half-width 0.0377, passes
+   idle IPC I/O Parent wakes/s: k 8, half-width 0.0583, fails, needed 10
+   idle IPC I/O Parent gap mean (ms): k 8, half-width 0.0583, fails, needed 10
+   idle IPC I/O Parent run mean (ms): k 8, half-width 0.046, passes
+   idle IPC I/O Child wakes/s: k 8, half-width 0.0, passes
+   idle IPC I/O Child gap mean (ms): k 8, half-width 0.0, passes
+   idle IPC I/O Child run mean (ms): k 8, half-width 0.0386, passes
+   idle residual wakes/s: k 8, half-width 0.0531, fails, needed 9
+   idle residual gap mean (ms): k 8, half-width 0.0531, fails, needed 9
+   idle residual run mean (ms): k 8, half-width 0.0448, passes
+   op Socket Thread wakes/s: k 8, half-width 0.0106, passes
+   op Socket Thread gap mean (ms): k 8, half-width 0.0106, passes
+   op Socket Thread run mean (ms): k 8, half-width 0.0382, passes
+   op Compositor wakes/s: k 8, half-width 0.0077, passes
+   op Compositor gap mean (ms): k 8, half-width 0.0076, passes
+   op Compositor run mean (ms): k 8, half-width 0.0493, passes
+   op thunderbird-bin wakes/s: k 8, half-width 0.0405, passes
+   op thunderbird-bin gap mean (ms): k 8, half-width 0.0411, passes
+   op thunderbird-bin run mean (ms): k 8, half-width 0.0477, passes
+   op Renderer wakes/s: k 8, half-width 0.0115, passes
+   op Renderer gap mean (ms): k 8, half-width 0.0117, passes
+   op Renderer run mean (ms): k 8, half-width 0.0537, at the window limit, reported (D46), needed 9
+   op SwComposite wakes/s: k 8, half-width 0.0159, passes
+   op SwComposite gap mean (ms): k 8, half-width 0.0159, passes
+   op SwComposite run mean (ms): k 8, half-width 0.0538, passes
+   op Softwar~cThread wakes/s: k 8, half-width 0.0022, passes
+   op Softwar~cThread gap mean (ms): k 8, half-width 0.0022, passes
+   op Softwar~cThread run mean (ms): k 8, half-width 0.0545, at the window limit, reported (D46), needed 10
+   op StreamT~ns wakes/s: k 8, half-width 0.0811, at the window limit, reported (D46), needed 17
+   op StreamT~ns gap mean (ms): k 8, half-width 0.0805, at the window limit, reported (D46), needed 17
+   op StreamT~ns run mean (ms): k 8, half-width 0.1871, at the window limit, reported (D46), needed 80
+   op TaskCon~ller wakes/s: k 8, half-width 0.0194, passes
+   op TaskCon~ller gap mean (ms): k 8, half-width 0.0193, passes
+   op TaskCon~ller run mean (ms): k 8, half-width 0.0255, passes
+   op Timer wakes/s: k 8, half-width 0.0273, passes
+   op Timer gap mean (ms): k 8, half-width 0.0275, passes
+   op Timer run mean (ms): k 8, half-width 0.0353, passes
+   op glean.dispatche wakes/s: k 8, half-width 0.0247, passes
+   op glean.dispatche gap mean (ms): k 8, half-width 0.0249, passes
+   op glean.dispatche run mean (ms): k 8, half-width 0.0818, at the window limit, reported (D46), needed 18
+   op WRRende~ckend#0 wakes/s: k 8, half-width 0.025, passes
+   op WRRende~ckend#0 gap mean (ms): k 8, half-width 0.0253, passes
+   op WRRende~ckend#0 run mean (ms): k 8, half-width 0.1115, at the window limit, reported (D46), needed 30
+   op residual wakes/s: k 8, half-width 0.0356, passes
+   op residual gap mean (ms): k 8, half-width 0.0352, passes
+   op residual run mean (ms): k 8, half-width 0.0712, at the window limit, reported (D46), needed 14
+   input_run mean, SWELL-KW (ms): k 8, half-width 0.1041, at the window limit, reported (D46), needed 27
+   input_run mean, 136M (ms): k 8, half-width 0.0479, passes
+   operation duration mean (ms): k 8, half-width 0.0211, passes
+   phases ['idle', 'driven', 'driven-alt', 'op']; pooled record _dev/research/jioh/task-9.5-interactive-typing/campaign/results-re-measured/pool-thunderbird-send.json
+validity:
+   r1: ok
+   r2: ok
+   r3: ok
+   r4: ok
+   r5: ok
+   r6: ok
+   r7: ok
+   r8: ok
+   every repeat valid
+   not carried: the idle rows above — mail-client carries the idle phase of the 43-repeat pool, results-same-machine/pool-thunderbird-send.json (D79)

@@ -2,7 +2,9 @@
 """Generate the measured archetype entries (9.5 fold-in) from pool.py output.
 
 fold_in.py <results-dir> <out.yaml> [--tag interactive=meas-ci:interactive:<campaign> --tag playback=meas-ci:playback:<campaign> --tag <app>=meas-ci:interactive:<campaign>]
-(<campaign>: the launch date, D27; a run number for a one-run campaign from before it)
+    [--idle-from <app>=<pool.json> --idle-tag <app>=meas-ci:interactive:<campaign>]
+(<campaign>: the launch date, D27; a run number for a one-run campaign from before it. --idle-from: the app's idle
+phase from another campaign's pool, D79)
 
 One entry per campaign run, per the 9.5 changelog: D2/D11 ids, D9 shape,
 D13 per-input run (window rule), D16 timer components with a pooled
@@ -22,6 +24,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from distribution import quantile_table, yaml_table  # noqa: E402
 
 RUN_TAG = {"interactive": "meas-ci:interactive:3", "playback": "meas-ci:playback:3"}  # the D3 campaign; --tag overrides
+# D79: a run whose idle phase comes from another campaign — the pool it is read from and that campaign's tag
+IDLE_FROM, IDLE_TAG = {}, {}
 
 # the observed setup per run — `{version}` is filled from the run's recorded application version (report.json)
 
@@ -33,7 +37,7 @@ ARCHETYPES = {
                     "swell-word-c1", "swell-icmi14:word-c1", []),
     # 9.7 D3 and D31, D36: mail-client is re-observed whole as thunderbird-send — the same application with a send
     # operation, its values replacing the compose-only entry's
-    "mail-client": ("thunderbird-send", "{version} (vendor .deb), a compose window over a local account whose SMTP server is a loopback peer (aiosmtpd, no authentication or TLS, on the harness CPUs); operation send: a reply with a short body and one Word document attached — the Writer setup state's document (100 sections of five 100-word paragraphs, ten 1024×768 pictures; design after CpsMark+ §CA's attachment kinds, no source stating a size) saved as .docx, 41,555,063 B on the runner and 56,946,735 B as the peer receives it, the same size in every repeat and not the same bytes (D49); completion when the copy into the Sent folder lands, the peer's own stamp recorded beside it", "input",
+    "mail-client": ("thunderbird-send", "{version} (Ubuntu 24.04 snap), a compose window over a local account whose SMTP server is a loopback peer (aiosmtpd, no authentication or TLS, on the harness CPUs); operation send: a reply with a short body and one Word document attached — the Writer setup state's document (100 sections of five 100-word paragraphs, ten 1024×768 pictures; design after CpsMark+ §CA's attachment kinds, no source stating a size) saved as .docx, 41,555,063 B on the runner and 56,946,735 B as the peer receives it, the same size in every repeat and not the same bytes (D49); completion when the copy into the Sent folder lands, the peer's own stamp recorded beside it", "input",
                     "swell-outlook-c23", "swell-icmi14:outlook-c23", []),
     "web-browser": ("chrome", "{version} (preinstalled), a local page with a text area and 400 paragraphs; the browser process, GPU and utility processes — renderer processes excluded (renderer-hidden, renderer-visible); operation page-load: the scripted feed page feed.html (300 posts, thirty 1600×1200 pictures, a 200 000-record sort; design after PCMark 10 pp. 52–53 and CpsMark+ §4.3.3) from a local server, completion by the page's title after first paint", "input",
                     "swell-ie-c1", "swell-icmi14:ie-c1", []),
@@ -238,7 +242,7 @@ def heavy_events_block(ph, tag, indent="      "):
             f"No interval is stated: no repeat holds two of them."]
 
 
-# D28, D65, D72: the stream's keys only (appdefs KINDS=key), and what each entry's scope says about it
+# D28, D65, D72, D79: the stream's keys only (appdefs KINDS=key), and what each entry's scope says about it
 KEYS_ONLY = {
     "office-writer": ("and its clicks, scrolls and drags left out, so the typing stays at the document's end (D28; the archetype "
                       "carries typing, not document navigation); "),
@@ -249,13 +253,41 @@ KEYS_ONLY = {
                     "committed (D72; the archetype carries typing, not the editor's navigation); the keys are a fixed letter "
                     "cycle (D4: timing only), so the per-key cost is the language server re-checking a file being filled with "
                     "letter runs; "),
+    "mail-client": ("and its clicks, scrolls and drags left out, so every key lands in the message body (D79; the archetype "
+                    "carries typing a message, not moving between the compose window's fields); "),
 }
+
+
+def with_idle(later, idle):
+    """D79: one entry from two campaigns. The idle phase runs before any input: its values, its rows of the rule and the
+    repeats the rule is read over come from `idle`; every phase with or after the input, and its rows, from `later`,
+    which the record keeps as `later`."""
+    d = dict(idle)
+    d["phases"] = {"idle": idle["phases"]["idle"], **{k: v for k, v in later["phases"].items() if k != "idle"}}
+    q = {k: v for k, v in idle["stability"]["quantities"].items() if k.startswith("idle ")}
+    q.update({k: v for k, v in later["stability"]["quantities"].items() if not k.startswith("idle ")})
+    d["stability"] = dict(later["stability"], quantities=q)
+    d["later"] = later
+    return d
+
+
+def run_line(tag, d):
+    line = f"{tag.split(':', 1)[1]}, repeats {d['repeats']}"
+    runs = sorted(set(x for x in (d.get("run_id") or {}).values() if x))
+    if runs:  # D27: a campaign spans runs; each repeat's run is in the pooled record
+        line += f", runs {', '.join(runs)}"
+    return line
 
 
 def entry(aid, spec, d):
     run, observed, kind, stream, stim_tag, approx = spec
     tag = RUN_TAG.get(run) or RUN_TAG[d["family"]]  # --tag <app>=… overrides the family tag for one run (re-run batch)
-    observed = observed.replace("{version}", build_census(d.get("version")))   # D69: the census, a mix stated
+    idle_tag = IDLE_TAG.get(run, tag)
+    later = d.get("later")   # D79: the phases with or after the input from another campaign than the idle phase
+    census = build_census(d.get("version"))   # D69: the census, a mix stated
+    if later:
+        census = f"{build_census(later.get('version'))} in the phases with or after the input, {census} in the idle phase"
+    observed = observed.replace("{version}", census)
     out = [f"  {aid}:", "    category_source: meas", "    pattern:", "      program:"]
     if kind == "play":
         out += ["        - loop:                    # one periodic job per medium cycle, its deadline the next cycle's start (D74, D75)",
@@ -270,16 +302,16 @@ def entry(aid, spec, d):
         out.append("      input_run:")
         out.append(f"        {dist(pi['window']['run_ms_minus_idle'], tag)}")
         out.append("      stimulus:")
-        kinds = ", kinds: [key]" if aid in KEYS_ONLY else ""   # D28, D65: the events the measurement replayed
+        kinds = ", kinds: [key]" if aid in KEYS_ONLY else ""   # D28, D65, D72, D79: the events the measurement replayed
         out.append(f"        {{stream: {stream}{kinds}, sampling: per-task, source: \"{stim_tag}\"}}")
     if kind == "play":   # D75: the period is the cycles' mean length, the run each cycle's whole-tree CPU
         cyc = ph_idle["cycle"]
         out.append(f"      period: {{dist: constant, value_us: {round(table_mean(cyc['length_ms']['table']) * 1000)}, "
-                   f"sampling: per-task, source: \"{tag}\"}}")
-        out.append(f"      cycle_run: {dist(cyc['work_ms'], tag)}")
+                   f"sampling: per-task, source: \"{idle_tag}\"}}")
+        out.append(f"      cycle_run: {dist(cyc['work_ms'], idle_tag)}")
     else:
-        out += components_block(ph_idle, tag, "components")
-    out += heavy_events_block(ph_idle, tag)
+        out += components_block(ph_idle, idle_tag, "components")
+    out += heavy_events_block(ph_idle, idle_tag)
     if kind == "cadence":
         out += components_block(d["phases"]["driven"], tag, "focus_components")
     if "op" in d["phases"] and d["phases"]["op"].get("operation"):
@@ -291,15 +323,11 @@ def entry(aid, spec, d):
         out += components_block(d["phases"]["op"], tag, "components", indent="          ")
     out += ["    lifetime: segment-bound", "    binding_params: []", "    scalable: []", "    validation_stats:",
             "      referee: meas-ci"]
-    reps = d["repeats"]
     phase_names = list(d["phases"])
-    run_line = f"{tag.split(':', 1)[1]}, repeats {reps}"
-    runs = sorted(set(x for x in (d.get("run_id") or {}).values() if x))
-    if runs:  # D27: a campaign spans runs; each repeat's run is in the pooled record
-        run_line += f", runs {', '.join(runs)}"
+    line = f"{run_line(tag, later)}; the idle phase {run_line(idle_tag, d)}" if later else run_line(tag, d)
     if run == "thunderbird" and tag == "meas-ci:interactive:3":
-        run_line += " (repeats 2 and 3 from interactive:4 after a replay-driver fix)"
-    out.append(f"      run: \"{run_line}\"")
+        line += " (repeats 2 and 3 from interactive:4 after a replay-driver fix)"
+    out.append(f"      run: \"{line}\"")
     stats = []
     for pn in phase_names:
         ph = d["phases"][pn]
@@ -315,8 +343,9 @@ def entry(aid, spec, d):
     out.append("      stats: [" + ", ".join(json.dumps(x) for x in stats) + "]")
     out.append("      scope: >-")
     # D26: the machine and kernel are the pooled repeats' own records (spec.json), one CPU model per observation
-    models = sorted(set((d.get("cpu_model") or {}).values())) or ["CPU model not recorded"]
-    kernels = sorted(set(k for k in (d.get("kernel") or {}).values() if k)) or ["kernel not recorded"]
+    recs = [d] + ([later] if later else [])
+    models = sorted({m for r in recs for m in (r.get("cpu_model") or {}).values()}) or ["CPU model not recorded"]
+    kernels = sorted({k for r in recs for k in (r.get("kernel") or {}).values() if k}) or ["kernel not recorded"]
     scope = (f"One observation (phase decision 2; D3, D10, D26): {observed}, on a GitHub-hosted ubuntu-24.04 runner "
              f"(4 vCPU {' / '.join(models)}, kernel {' / '.join(kernels)}) under Xvfb 1280×800 — no display refresh, no GPU, "
              f"no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. ")
@@ -356,6 +385,9 @@ def entry(aid, spec, d):
         if aid == "video-call":
             scope += ("The call's video path — compositing at about 16.7 ms and the 30 fps frames — has no job of its own; its "
                       "CPU runs inside the audio frames' cycles. ")
+    if later:
+        scope += (f"Two campaigns (D79): the idle phase's values from {idle_tag}, {len(d['repeats'])} repeats; the phases "
+                  f"with or after the input from {tag}, {len(later['repeats'])} repeats; the idle phase runs before any input. ")
     scope += stability_scope(aid, d)
     scope += "Values are this software on this machine, not desktop truth (D10)."
     if aid in BUILD_BOUND:   # D69: what the pinned or recorded build leaves out of the archetype
@@ -407,15 +439,20 @@ def entry(aid, spec, d):
 def main():
     R, out = sys.argv[1], sys.argv[2]
     rest = sys.argv[3:]
-    while rest:  # --tag interactive=meas-ci:interactive:N (repeatable)
-        if rest[0] == "--tag" and len(rest) > 1 and "=" in rest[1]:
-            fam, tag = rest[1].split("=", 1); RUN_TAG[fam] = tag; rest = rest[2:]
+    flags = {"--tag": RUN_TAG, "--idle-from": IDLE_FROM, "--idle-tag": IDLE_TAG}
+    while rest:  # --tag interactive=meas-ci:interactive:N, --idle-from <app>=<pool.json>, --idle-tag <app>=<tag> (repeatable)
+        if rest[0] in flags and len(rest) > 1 and "=" in rest[1]:
+            key, val = rest[1].split("=", 1); flags[rest[0]][key] = val; rest = rest[2:]
         else:
             raise SystemExit(f"unknown argument {rest[0]!r}")
-    tags = ", ".join(sorted(set(RUN_TAG.values())))
+    if set(IDLE_FROM) != set(IDLE_TAG):
+        raise SystemExit("--idle-from and --idle-tag name the same applications")
+    tags = ", ".join(sorted(set(RUN_TAG.values()) | set(IDLE_TAG.values())))
     blocks = [f"  # ---- measured per-application archetypes — 9.5 same-machine campaigns ({tags}) ----", ""]
     for aid, spec in ARCHETYPES.items():
         d = json.load(open(os.path.join(R, f"pool-{spec[0]}.json")))["runs"][spec[0]]
+        if spec[0] in IDLE_FROM:
+            d = with_idle(d, json.load(open(IDLE_FROM[spec[0]]))["runs"][spec[0]])
         blocks.append(entry(aid, spec, d))
         blocks.append("")
     open(out, "w").write("\n".join(blocks))

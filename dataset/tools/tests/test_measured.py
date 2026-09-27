@@ -59,17 +59,18 @@ def test_measured_task_is_one_explicit_stream(tmp_path, library):
 
 
 def test_stimulus_slice_preserves_recorded_gaps(tmp_path, library):
-    # mail-client replays every event of its stream (office-writer, web-browser and code-editor their keys alone,
-    # 9.5 D71, D72)
+    # mail-client replays its stream's keys alone, as office-writer, web-browser and code-editor do (9.5 D71, D72, D79):
+    # every simulated gap is a gap between two consecutive keys of the recording (a contiguous slice of its keys)
     path = _timeline(tmp_path, [{"id": "ed", "name": "thunderbird", "archetype": "mail-client",
                                  "arrive": "0s", "depart": "20s"}],
                      [{"from": "0s", "to": "20s", "task": "ed"}])
     canonical, _ = compile_timeline(Timeline(path, library), library, "single", rel_path="fx")
     wakes = sorted(e["t"] for e in canonical["events"] if e["op"] == "wake" and e["channel"] == "input:ed")
     gaps = {b - a for a, b in zip(wakes, wakes[1:])}
-    stream = [json.loads(l)["t_us"] for l in open(library.path.parent / "stimulus" / "swell-outlook-c23.jsonl")]
-    recorded = {b - a for a, b in zip(stream, stream[1:])}
-    assert gaps and gaps <= recorded  # every simulated gap is a recorded gap (a contiguous slice)
+    events = [json.loads(l) for l in open(library.path.parent / "stimulus" / "swell-outlook-c23.jsonl") if l.strip()]
+    keys = [e["t_us"] for e in events if e["kind"] == "key"]
+    recorded = {b - a for a, b in zip(keys, keys[1:])}
+    assert gaps and gaps <= recorded
 
 
 def test_measured_stream_is_deterministic_and_seed_dependent(tmp_path, library):

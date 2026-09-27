@@ -240,19 +240,33 @@ def _second_moment(table, n=20_000):
     return sum(sampling._quantile_sample(table, (i + 0.5) / n) ** 2 for i in range(n)) / n
 
 
+def _rate_se(comps, span_s):
+    """The standard error of a component set's wake rate over span_s. Each component's gaps are drawn independently from
+    its table, so its wake count is a renewal count, of variance span × σ²/μ³ for large spans (μ, σ² the gap table's
+    mean and variance; the renewal counting theorem — reference to verify: `feller-tams49`, provisional)."""
+    var = 0.0
+    for c in comps:
+        mu = sampling.mean_us(c["gap"]) / 1e6
+        var += span_s * max(0.0, _second_moment(c["gap"]) / 1e12 - mu * mu) / mu ** 3
+    return var ** 0.5 / span_s
+
+
 def test_every_component_set_compiles_at_its_measured_rate_and_cpu(repo_root):
-    # the compile path over a finite span: the wake rate within 5 %, the CPU share within four standard errors of the
-    # run draws it sums (a send's CPU is 87 % `thunderbird-bin` runs of up to 1.2 s, so 50 000 events are noisy there)
+    # the compile path over a finite span: the wake rate within 5 % or four standard errors of its count, whichever is
+    # wider (a send's components wake in bursts round each send, its rate's standard error 6.7 % over 50 000 events,
+    # every other set's under 2 %); the CPU share within four standard errors of the run draws it sums (a send's CPU is
+    # 87 % `thunderbird-bin` runs of up to 1.2 s, so 50 000 events are noisy there)
     off = []
     for aid, where, comps in _component_sets(_library(repo_root)):
         rate = sum(c["wakes_per_s"] for c in comps)
         cpu = sum(c["wakes_per_s"] * sampling.mean_us(c["run"]) / 1e6 for c in comps)
         span = int(50_000 / rate * 1e6)
         se = sum(c["wakes_per_s"] * span / 1e6 * _second_moment(c["run"]) for c in comps) ** 0.5 / span
+        rate_tol = max(0.05, 4 * _rate_se(comps, span / 1e6) / rate)
         events = _component_events(comps, 11, "fidelity", 0, span, "fidelity")
         got_rate, got_cpu = len(events) / (span / 1e6), sum(e[1] for e in events) / span
-        if abs(got_rate / rate - 1) > 0.05 or abs(got_cpu - cpu) > 4 * se + 0.01 * cpu:
-            off.append(f"{aid} {where}: {got_rate:.4g} /s, CPU {got_cpu:.4g} against {rate:.4g} /s, "
+        if abs(got_rate / rate - 1) > rate_tol or abs(got_cpu - cpu) > 4 * se + 0.01 * cpu:
+            off.append(f"{aid} {where}: {got_rate:.4g} /s (± {rate_tol:.1%}), CPU {got_cpu:.4g} against {rate:.4g} /s, "
                        f"CPU {cpu:.4g} ± {4 * se:.2g}")
     assert not off, "\n".join(off)
 

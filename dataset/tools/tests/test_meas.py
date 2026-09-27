@@ -540,12 +540,14 @@ def test_repeats_that_share_an_exclusion_reason_are_named_once():
 
 # ------------------------------------------------------------------------------------------ 9.5 fold-in
 
-POOLS_95 = ([("results-same-machine", a) for a in ("gimp", "kdenlive", "mpv-audio", "mpv-video", "soffice",
-                                                   "thunderbird-send")]
-            + [("results-re-measured", a) for a in ("chrome", "code", "webrtc")])
+POOLS_95 = ([("results-same-machine", a) for a in ("gimp", "kdenlive", "mpv-audio", "mpv-video", "soffice")]
+            + [("results-re-measured", a) for a in ("chrome", "code", "webrtc", "thunderbird-send")])
+# D79: thunderbird-send's idle phase from the 43-repeat pool, every phase with or after the input from the keys-only one
+IDLE_POOL_95 = ("results-same-machine", "thunderbird-send")
 TAGS_95 = ["--tag", "interactive=meas-ci:interactive:2026-09-18", "--tag", "playback=meas-ci:playback:2026-09-18",
-           "--tag", "thunderbird-send=meas-ci:interactive:2026-09-19", "--tag", "chrome=meas-ci:interactive:2026-09-20",
-           "--tag", "webrtc=meas-ci:playback:2026-09-20", "--tag", "code=meas-ci:interactive:2026-09-25"]
+           "--tag", "thunderbird-send=meas-ci:interactive:2026-09-27", "--tag", "chrome=meas-ci:interactive:2026-09-20",
+           "--tag", "webrtc=meas-ci:playback:2026-09-20", "--tag", "code=meas-ci:interactive:2026-09-25",
+           "--idle-tag", "thunderbird-send=meas-ci:interactive:2026-09-19"]
 
 
 @pytest.fixture(scope="module")
@@ -558,9 +560,11 @@ def fold_95(repo_root, tmp_path_factory):
     campaign_dir = repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
     for sub, app in POOLS_95:
         shutil.copy(campaign_dir / sub / f"pool-{app}.json", d / "pools")
+    idle = campaign_dir / IDLE_POOL_95[0] / f"pool-{IDLE_POOL_95[1]}.json"
     frag = d / "frag.yaml"
     subprocess.run([sys.executable, str(repo_root / "dataset" / "tools" / "meas" / "campaign" / "fold_in.py"),
-                    str(d / "pools"), str(frag), *TAGS_95], check=True, capture_output=True)
+                    str(d / "pools"), str(frag), *TAGS_95, "--idle-from", f"{IDLE_POOL_95[1]}={idle}"],
+                   check=True, capture_output=True)
     return frag
 
 
@@ -606,10 +610,11 @@ def test_values_at_the_window_limit_are_stated_with_their_half_widths(fold_95):
     assert "outside the rule" not in web and "all 30 hold within it, the widest ±4.72 %" in web   # D78
     mail = s["mail-client"]
     assert "8 repeats" in mail and "the per-input means and the send operation's values" in mail
-    assert "SWELL-KW 6.867 ms ±8.57 % (the rule needs 19 repeats)" in mail
-    assert "136M 6.296 ms ±6.90 % (the rule needs 13 repeats)" in mail
-    assert "the operation's `StreamT~ns` wake rate 46.1 wakes/s ±12.09 % (the rule needs 35 repeats)" in mail
-    assert "the other 30 hold within it, the widest ±4.09 %" in mail
+    # D79: the keys-only re-measure's eight windows; its 136M mean now holds the rule
+    assert "SWELL-KW 6.052 ms ±10.41 % (the rule needs 27 repeats)" in mail
+    assert "136M" not in mail.split("outside the rule:")[1].split("hold within it")[0]
+    assert "the operation's `StreamT~ns` wake rate 54.54 wakes/s ±8.11 % (the rule needs 17 repeats)" in mail
+    assert "the other 30 hold within it, the widest ±5.38 %" in mail   # SwComposite's run mean, by the 1 µs floor
     for aid in ("office-writer", "image-editor", "video-editor", "video-player", "audio-player", "video-call"):
         assert "window limit" not in s[aid].lower(), aid
 
@@ -620,3 +625,86 @@ def test_a_component_the_rule_holds_carries_no_between_sessions_marking(fold_95)
     scopes = _scopes(fold_95)
     assert all("rate varies between sessions" not in scope for scope in scopes.values())
     assert "libuv-worker" not in scopes["code-editor"]
+
+
+# 9.5 D79: mail-client from two campaigns — the idle phase's values from the 43-repeat campaign, the phases with or after
+# the input from the keys-only re-measure
+
+IDLE_TAG_95 = "meas-ci:interactive:2026-09-19"
+KEYS_TAG_95 = "meas-ci:interactive:2026-09-27"
+
+
+def _pool_95(repo_root, sub, app):
+    path = repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign" / sub / f"pool-{app}.json"
+    return json.loads(path.read_text())["runs"][app]
+
+
+def _fold_two_campaigns(repo_root, d, later, idle=None):
+    """9.5's fold-in with `later` as thunderbird-send's pool and its idle phase from `idle` (D79); without `idle`, every
+    value from `later`, under the idle pool's tag."""
+    import shutil
+    import sys
+    (d / "pools").mkdir(parents=True)
+    campaign_dir = repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+    for sub, app in POOLS_95:
+        if app != "thunderbird-send":
+            shutil.copy(campaign_dir / sub / f"pool-{app}.json", d / "pools")
+    (d / "pools" / "pool-thunderbird-send.json").write_text(json.dumps({"runs": {"thunderbird-send": later}}))
+    tags = [x for pair in zip(TAGS_95[::2], TAGS_95[1::2]) if not pair[1].startswith("thunderbird-send=") for x in pair]
+    if idle is None:
+        tags += ["--tag", f"thunderbird-send={IDLE_TAG_95}"]
+    else:
+        (d / "idle.json").write_text(json.dumps({"runs": {"thunderbird-send": idle}}))
+        tags += ["--tag", f"thunderbird-send={KEYS_TAG_95}", "--idle-from", f"thunderbird-send={d / 'idle.json'}",
+                 "--idle-tag", f"thunderbird-send={IDLE_TAG_95}"]
+    frag = d / "frag.yaml"
+    subprocess.run([sys.executable, str(repo_root / "dataset" / "tools" / "meas" / "campaign" / "fold_in.py"),
+                    str(d / "pools"), str(frag), *tags], check=True, capture_output=True)
+    return frag
+
+
+def _entry(frag, aid):
+    import yaml
+    return yaml.safe_load("archetypes:\n" + frag.read_text())["archetypes"][aid]
+
+
+def test_an_entry_from_two_campaigns_takes_the_idle_phase_from_one_and_the_rest_from_the_other(repo_root, tmp_path):
+    # D79: the idle phase runs before any input, so mail-client keeps its idle values from the 43-repeat campaign and
+    # takes the per-input and send values from the keys-only re-measure, each value naming the campaign it came from.
+    # Each pool carries a phase from another application where the other pool's is the one to take.
+    import copy
+    old = _pool_95(repo_root, "results-same-machine", "thunderbird-send")
+    later = copy.deepcopy(old)
+    later["phases"]["idle"] = _pool_95(repo_root, "results-same-machine", "soffice")["phases"]["idle"]
+    idle = copy.deepcopy(old)
+    chrome = _pool_95(repo_root, "results-re-measured", "chrome")
+    idle["phases"]["driven"], idle["phases"]["op"] = chrome["phases"]["driven"], chrome["phases"]["op"]
+    got = _entry(_fold_two_campaigns(repo_root, tmp_path / "two", later, idle), "mail-client")["params"]
+    want = _entry(_fold_two_campaigns(repo_root, tmp_path / "one", old), "mail-client")["params"]   # one pool, one tag
+    retag = lambda x: json.loads(json.dumps(x).replace(IDLE_TAG_95, KEYS_TAG_95))
+    assert got["components"] == want["components"]
+    assert got["input_run"] == retag(want["input_run"])
+    assert got["operations"] == retag(want["operations"])
+
+
+def test_an_entry_from_two_campaigns_names_each_campaign_its_repeats_and_its_build(repo_root, tmp_path):
+    # D79, D69: the run line, the build census and the scope say which campaign each phase's values come from
+    import copy
+    old = _pool_95(repo_root, "results-same-machine", "thunderbird-send")
+    later = copy.deepcopy(old)
+    later["repeats"] = list(range(1, 9))
+    later["run_id"] = {str(k): str(40000000000 + k) for k in later["repeats"]}
+    later["version"] = {str(k): "Mozilla Thunderbird 156.0.1" for k in later["repeats"]}
+    for key in ("cpu_model", "kernel"):
+        later[key] = {str(k): old[key][str(k)] for k in later["repeats"]}
+    e = _entry(_fold_two_campaigns(repo_root, tmp_path, later, old), "mail-client")["validation_stats"]
+    old_runs = ", ".join(sorted(set(old["run_id"].values())))
+    assert e["run"] == (f"interactive:2026-09-27, repeats {later['repeats']}, runs "
+                        + ", ".join(str(40000000000 + k) for k in later["repeats"])
+                        + f"; the idle phase interactive:2026-09-19, repeats {old['repeats']}, runs {old_runs}")
+    assert ("Mozilla Thunderbird 156.0.1 (8 repeats) in the phases with or after the input, "
+            "Mozilla Thunderbird 156.0 (43 repeats) in the idle phase") in e["scope"]
+    assert ("Two campaigns (D79): the idle phase's values from meas-ci:interactive:2026-09-19, 43 repeats; the phases "
+            "with or after the input from meas-ci:interactive:2026-09-27, 8 repeats; the idle phase runs before any input. "
+            ) in e["scope"]
+    assert "over the 43 repeats obtained" in e["scope"] and "8 repeats, every window of it that holds input" in e["scope"]
