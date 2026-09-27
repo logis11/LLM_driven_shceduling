@@ -77,3 +77,124 @@ def test_the_tree_totals_are_kept(tmp_path, monkeypatch):
     snap = snapshot.snapshot("soffice", None)
     assert snap["n_procs"] == 2 and snap["n_threads"] == 4
     assert snap["vol_switches"] == 30 + 2 + 1 + 0 and snap["nonvol_switches"] == 12 + 1
+
+
+def _src(*p):
+    return MEAS.joinpath(*p).read_text()
+
+
+def _body(src, fn):
+    m = re.search(rf"^{fn}\(\) \{{(.*?)^\}}", src, re.S | re.M)
+    assert m, f"no function {fn}()"
+    return m.group(1)
+
+
+def _arm(src, app):
+    m = re.search(rf"^    {re.escape(app)}\)\n(.*?);;\n", src, re.S | re.M)
+    assert m, f"no appdef arm {app}"
+    return m.group(1)
+
+
+MODE_MAP = 'case "$MODE_ARG" in control) CONTROL=1; MODE=full ;; control-dry) CONTROL=1; MODE=dry ;; esac'
+ORDER = re.compile(r'if \[ \$\(\(REPEAT % 2\)\) -eq 1 \]; then ORDER="traced untraced"; else ORDER="untraced traced"; fi')
+
+
+def test_every_family_maps_the_control_modes_onto_its_own(repo_root):
+    # a control job runs full's lengths (`control`) or dry's (`control-dry`); its artifact keeps the mode it was
+    # launched with, which no campaign pool takes (decision 15)
+    for fam in ("campaign", "desktop", "session"):
+        src = _src(fam, "run.sh")
+        assert MODE_MAP in src, fam
+        assert 'rec mode "$MODE_ARG"' in src and 'rec control "$CONTROL"' in src, fam
+        assert ORDER.search(src), f"{fam}: decision 5, odd jobs traced first, even jobs untraced first"
+        assert "rec sysctl.sched_schedstats" in src, f"{fam}: decision 9, the switch recorded in each job"
+
+
+def test_the_untraced_run_is_the_traced_run_without_perf(repo_root):
+    # decision 1: the same snapshots, driver and length, and no perf
+    for fam in ("campaign", "desktop", "session"):
+        quiet = _body(_src(fam, "run.sh"), "quiet")
+        assert "perf" not in quiet, fam
+        pair = _body(_src(fam, "run.sh"), "pair")
+        assert "for run in $ORDER" in pair and 'phase "$name"' in pair and 'quiet "$name-untraced"' in pair, fam
+    q95 = _body(_src("campaign", "run.sh"), "quiet")
+    assert q95.index('snap "$PAT" "" "$name.before"') < q95.index('sleep "$secs" &') < q95.index('snap "$PAT" "" "$name.after"')
+    assert 'phase_summary "$name"' in q95 and 'phase_summary "$name"' in _body(_src("campaign", "run.sh"), "phase")
+
+
+def test_the_campaign_control_pairs_every_carried_phase(repo_root):
+    src = _src("campaign", "run.sh")
+    ctl = _body(src, "control_phases")
+    assert 'pair idle "$IDLE" no_driver' in ctl and 'pair play "$PLAY" no_driver' in ctl         # decision 3
+    assert 'pair driven "$((DRIVEN + 5))" stream_driver prelude' in ctl
+    assert 'pair driven "$((DRIVEN + 5))" pointer_loop prelude' in ctl
+    assert 'pair op "$((OPS + 5))" op_run_driver' in ctl
+    assert "driven-alt" not in ctl and "aalto" not in ctl       # the 136M phase is carried by no archetype
+    # decision 6: idle, then driven, then the operation — both idle runs before any input
+    assert ctl.index("pair idle") < ctl.index("pair driven") < ctl.index("pair op")
+    assert re.search(r'if \[ "\$CONTROL" = 1 \]; then\n\s*control_phases\nelse\n', src)
+
+
+def test_the_prelude_runs_before_each_driven_run(repo_root):
+    # decision 4: the same prelude before each of the two driven runs, the window re-read after it
+    src = _src("campaign", "run.sh")
+    loop = _body(src, "pair").split("for run in $ORDER")[1]
+    assert loop.index('ctrl_prelude "$name.$run"') < loop.index('phase "$name"')
+    assert loop.index('ctrl_prelude "$name.$run"') < loop.index('quiet "$name-untraced"')
+    pre = _body(src, "ctrl_prelude")
+    assert 'bash -c "$CTRLPRELUDE"' in pre and 'wait_window "$CLASS"' in pre and 'screenshot "after-ctrlprelude-$1"' in pre
+    assert 'CTRLPRELUDE="${CTRLPRELUDE:-$ALTPRELUDE}"' in src
+
+
+def test_each_run_writes_its_own_driver_log(repo_root):
+    src = _src("campaign", "run.sh")
+    assert "replay-untraced.jsonl" in _body(src, "stream_driver")
+    assert "ops-untraced.jsonl" in _body(src, "op_run_driver") and "OPS_OUT=" in _body(src, "op_run_driver")
+    assert "${OPS_OUT:-$OUT/ops.jsonl}" in _body(_src("probe", "appdefs.sh"), "op_driver")
+    assert 'DRV="$(pointer_loop)"' in src              # the campaign's pointer loop and the control's are one
+
+
+def test_the_three_new_preludes_are_defined(repo_root):
+    appdefs = _src("probe", "appdefs.sh")
+    assert 'OP=""; ALTPRELUDE=""; CTRLPRELUDE=""' in appdefs
+    for app in ("soffice", "gimp", "kdenlive"):
+        assert "CTRLPRELUDE=" in _arm(appdefs, app), app
+    assert "/tmp/doc/large.odt" in _arm(appdefs, "soffice").split("CTRLPRELUDE=")[1]
+    assert '<Actions>/file/file-revert' in _arm(appdefs, "gimp")
+    assert '<Action name="file_revert" shortcut="Ctrl+Shift+F8"/>' in _arm(appdefs, "kdenlive")
+
+
+def test_the_interactive_workflow_holds_the_longest_control_job(repo_root):
+    # web-browser's control job: 420 s settle + 2 × 600 + 2 × 605 + 2 × 605 s of phases, about 68 minutes
+    wf = (repo_root / ".github" / "workflows" / "meas-interactive.yml").read_text()
+    assert "timeout-minutes: 150" in wf
+
+
+def test_the_desktop_control_pairs_each_subject_s_carried_phase_alone(repo_root):
+    # decision 3: renderer-hidden `steady`, renderer-visible `steady-notimer`, chat-client `idle`, game-client `shown`
+    src = _src("desktop", "run.sh")
+    chrome = _body(src, "chrome_subject")
+    assert 'if [ "$CONTROL" = 1 ]; then pair steady "$STEADY"; else phase steady "$STEADY" ""; fi' in chrome
+    assert 'if [ "$CONTROL" = 1 ]; then pair steady-notimer "$STEADY"; else phase steady-notimer "$STEADY" ""; fi' in chrome
+    # the timer phase is carried by no archetype: its time kept, unmeasured, so the pages switch off on schedule
+    assert re.search(r'if \[ "\$CONTROL" = 1 \]; then edge timer-wait start; sleep "\$STEADY"; edge timer-wait end\n'
+                     r'\s*else phase steady-timer "\$STEADY" ""; fi', chrome)
+    element = src[src.index("  element)\n"):src.index("  steam)\n")]
+    assert 'pair idle "$STEADY"' in element and element.index("pair idle") < element.index("phase traffic")
+    assert re.search(r'if \[ "\$CONTROL" = 1 \]; then pair idle "\$STEADY".*?\n\s*else\n', element, re.S)
+    steam = src[src.index("  steam)\n"):src.index("  *) rec error")]
+    assert re.search(r'if \[ "\$CONTROL" = 1 \]; then pair shown "\$STEADY".*?\n\s*else\n', steam, re.S)
+    quiet = _body(src, "quiet")
+    assert quiet.index('edge "$name" start') < quiet.index('snap "$PAT" "" "$name.before"') < quiet.index('sleep "$secs" &')
+    assert quiet.index('snap "$PAT" "" "$name.after"') < quiet.index('edge "$name" end')
+
+
+def test_the_session_control_pairs_the_steady_phase_with_a_snapshot_at_each_edge(repo_root):
+    src = _src("session", "run.sh")
+    assert 'if [ "$CONTROL" = 1 ]; then pair steady "$STEADY"; else phase steady "$STEADY"; fi' in src
+    assert "sys_snap() { sudo python3 \"$MEAS/probe/snapshot.py\" '.'" in src
+    for fn in ("phase", "quiet"):
+        body = _body(src, fn)
+        # the snapshot sits between the census and the recorded edge, on both sides: /proc only, outside the run
+        assert body.index('census "$name.start"') < body.index('sys_snap "$name.before"') < body.index('edge "$name" start'), fn
+        assert body.index('edge "$name" end') < body.index('sys_snap "$name.after"') < body.index('census "$name.end"'), fn

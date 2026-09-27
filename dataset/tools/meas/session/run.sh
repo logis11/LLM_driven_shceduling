@@ -26,7 +26,13 @@ MEAS="$(cd "$HERE/.." && pwd)"
 source "$MEAS/probe/common.sh"          # OUT, KV, rec, finish_report
 source "$MEAS/pin.sh"
 pin_self_harness
-APP="$1"; REPEAT="$2"; MODE="${3:-full}"
+APP="$1"; REPEAT="$2"; MODE_ARG="${3:-full}"
+# the untraced control (_dev/docs/spec/jioh/task-9.5-untraced-control.md): `control` runs full's lengths and
+# `control-dry` dry's, the steady phase as a traced and an untraced run
+CONTROL=0; MODE="$MODE_ARG"
+case "$MODE_ARG" in control) CONTROL=1; MODE=full ;; control-dry) CONTROL=1; MODE=dry ;; esac
+# its decision 5: the pair's order alternates across jobs — odd jobs run it traced first, even jobs untraced first
+if [ $((REPEAT % 2)) -eq 1 ]; then ORDER="traced untraced"; else ORDER="untraced traced"; fi
 CENSUS="python3 $HERE/census.py"
 
 # ---- design constants (method §2, §3) ----------------------------------------------------------------------
@@ -89,12 +95,14 @@ poll_stop()  { [ -n "${POLL_PID:-}" ] && kill "$POLL_PID" 2>/dev/null; POLL_PID=
 phase() {
   local name="$1" secs="$2"
   census "$name.start"
+  sys_snap "$name.before"
   edge "$name" start
   [ "$MODE" = probe ] && poll_start "$name" "${POLL_UNTIL:-}"
   pin_harness sudo perf sched record -k CLOCK_MONOTONIC -a -o "$OUT/perf.$name.data" -- sleep "$secs" > "$OUT/perf.$name.log" 2>&1
   rec "perf.$name.record.rc" "$?"
   poll_stop
   edge "$name" end
+  sys_snap "$name.after"
   census "$name.end"
   rec "perf.$name.data_bytes" "$(stat -c %s "$OUT/perf.$name.data" 2>/dev/null || echo 0)"
   # --state: each row's switch-out state, the cross-check of the wakeup-row wake (9.5 D39)
@@ -103,6 +111,34 @@ phase() {
   sudo perf sched timehist -w -i "$OUT/perf.$name.data" 2>> "$OUT/perf.$name.log" | grep -E "awakened|wakeup|\bwaker\b" | gzip > "$OUT/perf.$name.wakeups.txt.gz"
   rec "perf.$name.wakeups.rows" "$(gzip -dc "$OUT/perf.$name.wakeups.txt.gz" | wc -l)"
   if [ "$MODE" = dry ]; then sudo gzip -f "$OUT/perf.$name.data"; else sudo rm -f "$OUT/perf.$name.data"; fi
+}
+
+# sys_snap <label>: every process with each thread's counters (the untraced control's decision 9) — a read of /proc
+# only, which reaches no measured process, taken beside the census at each edge
+sys_snap() { sudo python3 "$MEAS/probe/snapshot.py" '.' 'snapshot\.py' > "$OUT/snap.$1.json" 2>> "$OUT/snap.log"; }
+
+# quiet <name> <seconds>: phase()'s untraced twin (the untraced control's decision 1) — the same census, snapshots,
+# edges and length, and no perf
+quiet() {
+  local name="$1" secs="$2"
+  census "$name.start"
+  sys_snap "$name.before"
+  edge "$name" start
+  sleep "$secs"
+  edge "$name" end
+  sys_snap "$name.after"
+  census "$name.end"
+}
+
+# pair <name> <seconds>: the steady phase as its traced run <name> and its untraced run <name>-untraced, adjacent, in
+# the job's ORDER (decisions 1, 5, 6)
+pair() {
+  local name="$1" secs="$2" run first=1
+  for run in $ORDER; do
+    [ "$first" = 1 ] || sleep 10
+    first=0
+    if [ "$run" = traced ]; then phase "$name" "$secs"; else quiet "$name-untraced" "$secs"; fi
+  done
 }
 
 # checkpoint <stage> — the machine's state after a stage (network, memory, failed units, the journal), and, in dry
@@ -442,11 +478,14 @@ adopt() {
 
 # ---- the job ---------------------------------------------------------------------------------------------------
 
-rec family session; rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE"; rec started_utc "$(date -u +%FT%TZ)"
+rec family session; rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE_ARG"; rec control "$CONTROL"; rec started_utc "$(date -u +%FT%TZ)"
+[ "$CONTROL" = 1 ] && rec control.order "$ORDER"
 rec settings.virtual_monitor "$VIRTUAL_MONITOR"; rec settings.session_user "$SESSION_USER"
 rec priming_s "${PRIMING:-unset}"; rec steady_offset_s "${STEADY_OFFSET:-unset}"; rec steady_s "${STEADY:-unset}"
 pin_record | tee -a "$KV" | sed 's/^/  /' >&2
 python3 "$MEAS/runner_spec.py" > "$OUT/spec.json"
+# the untraced control's decision 9: the schedstats switch, which neither perf nor this job sets
+rec sysctl.sched_schedstats "$(cat /proc/sys/kernel/sched_schedstats 2>/dev/null || echo unknown)"
 
 # same-machine repeats (9.6 D10; 9.5 D26): a job that drew another CPU model stops here, recorded, before any
 # install or measurement
@@ -545,7 +584,7 @@ else
     census steady.start
     stop_recorded not-idle "steady edge: the session is not in the terminal idle state (method §3, D13)"
   fi
-  phase steady "$STEADY"
+  if [ "$CONTROL" = 1 ]; then pair steady "$STEADY"; else phase steady "$STEADY"; fi
 fi
 
 logout measured
