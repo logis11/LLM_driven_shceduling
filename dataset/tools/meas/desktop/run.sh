@@ -29,7 +29,13 @@ source "$MEAS/probe/common.sh"          # OUT, KV, TOOLS, rec, finish_report, st
 source "$MEAS/pin.sh"
 pin_self_harness
 source "$TOOLS/appdefs.sh"              # appdef, apt_install, ver, appdef_cleanup
-APP="$1"; REPEAT="$2"; MODE="${3:-full}"
+APP="$1"; REPEAT="$2"; MODE_ARG="${3:-full}"
+# the untraced control (_dev/docs/spec/jioh/task-9.5-untraced-control.md): `control` runs full's lengths and
+# `control-dry` dry's, the subject's carried phase as a traced and an untraced run
+CONTROL=0; MODE="$MODE_ARG"
+case "$MODE_ARG" in control) CONTROL=1; MODE=full ;; control-dry) CONTROL=1; MODE=dry ;; esac
+# its decision 5: the pair's order alternates across jobs — odd jobs run it traced first, even jobs untraced first
+if [ $((REPEAT % 2)) -eq 1 ]; then ORDER="traced untraced"; else ORDER="untraced traced"; fi
 PH="$MEAS/phase.sh $OUT/phases.jsonl"
 export MEAS_PIN=harness                 # phase.sh here wraps drivers, which act on the pinned application from the harness CPUs
 APP_PID=0; WID=""; PAT="?"; RX="?"
@@ -115,6 +121,35 @@ phase() {
   rec "perf.$name.wakeups.rows" "$(gzip -dc "$OUT/perf.$name.wakeups.txt.gz" | wc -l)"
   if [ "$MODE" = dry ]; then gzip -f "$OUT/perf.$name.data"; else rm -f "$OUT/perf.$name.data"; fi
   edge "$name" end
+}
+
+# quiet <name> <seconds> <driver-cmd or ''>: phase()'s untraced twin (the untraced control's decision 1) — the same
+# edges, snapshots, driver and length, and no perf
+quiet() {
+  local name="$1" secs="$2" driver="$3"
+  edge "$name" start
+  snap "$PAT" "" "$name.before"
+  sleep "$secs" &
+  local sleep_pid=$!
+  sleep 1
+  if [ -n "$driver" ]; then
+    $PH "$name-driver" -- bash -c "$driver" > "$OUT/driver.$name.log" 2>&1
+  fi
+  wait "$sleep_pid"
+  snap "$PAT" "" "$name.after"
+  screenshot "after-$name"
+  edge "$name" end
+}
+
+# pair <name> <seconds>: the subject's carried phase as its traced run <name> and its untraced run <name>-untraced,
+# adjacent, in the job's ORDER (decisions 1, 5, 6)
+pair() {
+  local name="$1" secs="$2" run first=1
+  for run in $ORDER; do
+    [ "$first" = 1 ] || sleep 10
+    first=0
+    if [ "$run" = traced ]; then phase "$name" "$secs" ""; else quiet "$name-untraced" "$secs" ""; fi
+  done
 }
 
 stop_recorded() {   # <gate-value> <message> — the machine gate's shape, for a state that makes the job worthless
@@ -232,17 +267,20 @@ chrome_subject() {
     # the grace runs from here, and the moment is recorded rather than folded into one settle figure
     edge backgrounded mark
     edge grace-settle start; sleep "$GRACE_S"; edge grace-settle end
-    phase steady "$STEADY" ""
+    if [ "$CONTROL" = 1 ]; then pair steady "$STEADY"; else phase steady "$STEADY" ""; fi
   else
     renderer_gate "$ORIGINS"
     # every window must still be on the timer step, or the phase is not the phase it claims
     wait_for_step "timer $TIMER_MS ms" 30 || rec step.timer.incomplete 1
-    phase steady-timer "$STEADY" ""
+    # the untraced control carries steady-notimer alone (decision 3): the timer phase's time is kept unmeasured, so
+    # the pages reach their no-timer step on the schedule the campaign's jobs had
+    if [ "$CONTROL" = 1 ]; then edge timer-wait start; sleep "$STEADY"; edge timer-wait end
+    else phase steady-timer "$STEADY" ""; fi
     # the pages switch themselves off on their own schedule; the run waits for every window to report it
     wait_for_step "no timer" "$STEP_WAIT" || stop_recorded timer-not-stopped \
       "not every window reported the no-timer step within ${STEP_WAIT}s — the second phase would carry timers the first already had"
     screenshot after-notimer
-    phase steady-notimer "$STEADY" ""
+    if [ "$CONTROL" = 1 ]; then pair steady-notimer "$STEADY"; else phase steady-notimer "$STEADY" ""; fi
   fi
 }
 
@@ -483,12 +521,15 @@ steam_record_helpers() {   # <label> — D5's open question: each helper's --typ
 
 # ---- the job ---------------------------------------------------------------------------------------------------
 
-rec family desktop; rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE"; rec started_utc "$(date -u +%FT%TZ)"
+rec family desktop; rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE_ARG"; rec control "$CONTROL"; rec started_utc "$(date -u +%FT%TZ)"
+[ "$CONTROL" = 1 ] && rec control.order "$ORDER"
 rec settings.origins "$ORIGINS"; rec settings.timer_ms "$TIMER_MS"; rec settings.grace_s "$GRACE_S"
 rec settings.homeserver "$HOMESERVER"; rec settings.traffic_per_min "$TRAFFIC_PER_MIN"
 rec launch_settle_s "${LAUNCH_SETTLE:-unset}"; rec steady_s "${STEADY:-unset}"
 pin_record | tee -a "$KV" | sed 's/^/  /' >&2
 python3 "$MEAS/runner_spec.py" > "$OUT/spec.json"
+# the untraced control's decision 9: the schedstats switch, which neither perf nor this job sets
+rec sysctl.sched_schedstats "$(cat /proc/sys/kernel/sched_schedstats 2>/dev/null || echo unknown)"
 
 # same-machine repeats (9.6 D10; 9.5 D26): a job that drew another CPU model stops here, recorded, before any
 # install or measurement
@@ -519,16 +560,22 @@ case "$APP" in
   chrome-hidden|chrome-visible) chrome_subject ;;
   element)
     element_setup
-    phase idle "$STEADY" ""
-    [ "$MODE" = probe ] || phase traffic "$STEADY" "$(element_traffic_driver "$STEADY")" ;;
+    if [ "$CONTROL" = 1 ]; then pair idle "$STEADY"     # decision 3: the traffic phase is carried by no archetype
+    else
+      phase idle "$STEADY" ""
+      [ "$MODE" = probe ] || phase traffic "$STEADY" "$(element_traffic_driver "$STEADY")"
+    fi ;;
   steam)
     steam_setup
     steam_record_helpers shown
+    if [ "$CONTROL" = 1 ]; then pair shown "$STEADY"    # decision 3: the minimised phase is carried by no archetype
+    else
     phase shown "$STEADY" ""
     if [ "$MODE" != probe ]; then
       pin_harness xdotool windowminimize "$WID"; sleep 10; screenshot after-minimize
       steam_record_helpers minimised
       phase minimised "$STEADY" ""
+    fi
     fi ;;
   *) rec error "unknown app $APP" ;;
 esac
