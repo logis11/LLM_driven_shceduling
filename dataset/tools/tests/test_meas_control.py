@@ -347,3 +347,77 @@ def test_the_campaign_adapter_keys_threads_as_the_pool_keys_components(tmp_path)
     # the operation: its duration over the rc-0 operations of each side's own log
     assert vals["op operation duration mean (ms)"] == (600.0, 425.0)
     assert vals["op chrome run mean (ms)"] == (0.2, 0.18) and "op residual wakes/s" in vals
+
+
+# ---- analysis: 9.8's and 9.9's adapters (analysis plan, task 3) -------------------------------------------------
+
+REND = "/opt/google/chrome/chrome --type=renderer --enable-features=x"
+
+
+def _write_desktop_job(d, app, phase, order, procs_by_run, renderers_tsv=None):
+    """procs_by_run[run] = (t0, t1, {pid: (cmd, [(tid, comm, run0, run1, vol0, vol1)])})"""
+    import json as _j
+    d.mkdir(parents=True)
+    (d / "report.json").write_text(_j.dumps({"app": app, "control.order": order}))
+    if renderers_tsv:
+        (d / "renderers.tsv").write_text(renderers_tsv)
+    for run, (t0, t1, procs) in procs_by_run.items():
+        name = phase if run == "traced" else f"{phase}-untraced"
+        for edge, t, i in (("before", t0, 0), ("after", t1, 1)):
+            snap = {"t_mono": t, "procs": [{"pid": pid, "cmd": v[0], "cgroup": v[2] if len(v) > 2 else "/", "tasks": [
+                {"tid": tid, "comm": comm, "start_ticks": tid, "run_ns": (r0, r1)[i], "wait_ns": 0, "slices": 0,
+                 "vol": (v0, v1)[i], "invol": 0} for tid, comm, r0, r1, v0, v1 in v[1]]} for pid, v in procs.items()]}
+            (d / f"snap.{name}.{edge}.json").write_text(_j.dumps(snap))
+
+
+def test_the_desktop_adapter_reads_a_renderer_component_per_renderer(tmp_path):
+    from meas.desktop import control as c98
+    def procs(k):
+        return (0.0, 100.0, {
+            1: ("/opt/google/chrome/chrome --user-data-dir=/tmp/chrome-data", [(1, "chrome", 0, 10**9, 0, 999)]),
+            # the control tab: the busiest renderer, dropped (desktop/analyze.drop_control_tab)
+            10: (REND, [(10, "chrome", 0, 10**8, 0, 5000), (11, "HangWatcher", 0, 10**6, 0, 100)]),
+            20: (REND, [(20, "chrome", 0, int(2e6 * k), 0, 20), (21, "HangWatcher", 0, int(1e6 * k), 0, 10),
+                        (22, "Compositor", 0, int(3e5 * k), 0, 3)]),
+            30: (REND, [(30, "chrome", 0, int(4e6 * k), 0, 40)]),           # no HangWatcher: counts at zero in the mean
+            40: (REND, [(40, "chrome", 0, 10**7, 0, 900)]),                  # an extension process: not a page's renderer
+        })
+    tsv = "10\tchrome --type=renderer\n20\tchrome --type=renderer\n30\tchrome --type=renderer\n40\tchrome --type=renderer --extension-process\n"
+    _write_desktop_job(tmp_path / "job", "chrome-hidden", "steady", "untraced traced",
+                       {"traced": procs(1.0), "untraced": procs(0.5)}, tsv)
+    carried = {"phases": {"steady": {"components": {"selected": ["chrome", "HangWatcher"], "residual": {"x": 1}}}}}
+    order, vals = c98.job_values(str(tmp_path / "job"), "chrome-hidden", carried)
+    assert order == "untraced traced"
+    # renderers 20 and 30 only: rate the mean over them, run mean their pooled CPU over their pooled wakes
+    assert vals["steady chrome wakes/s"] == (0.3, 0.3)
+    assert vals["steady chrome run mean (ms)"] == (0.1, 0.05)
+    assert vals["steady HangWatcher wakes/s"] == (0.05, 0.05) and vals["steady HangWatcher run mean (ms)"] == (0.1, 0.05)
+    assert vals["steady residual wakes/s"] == (0.015, 0.015) and vals["steady residual run mean (ms)"] == (0.1, 0.05)
+
+
+def test_the_session_adapter_keys_threads_by_instance(tmp_path):
+    import json as _j
+    from meas.session import control as c99
+    U = "/user.slice/user-1002.slice/user@1002.service"
+    def procs(k):
+        return (0.0, 1800.0, {
+            1: ("/sbin/init", [(1, "systemd", 0, int(9e6 * k), 0, 90)], "/init.scope"),
+            400: ("@dbus-daemon --system", [(400, "dbus-daemon", 0, int(1e6 * k), 0, 10)], "/meas.slice/dbus.service"),
+            520: ("/usr/bin/gnome-shell", [(520, "gnome-shell", 0, int(5e7 * k), 0, 500), (521, "gmain", 0, int(2e6 * k), 0, 40)],
+                  f"{U}/session.slice/org.gnome.Shell@wayland.service"),
+            900: ("/usr/sbin/cron", [(900, "cron", 0, 10**9, 0, 999)], "/system.slice/cron.service"),
+        })
+    _write_desktop_job(tmp_path / "job", "session", "steady", "traced untraced",
+                       {"traced": procs(1.0), "untraced": procs(0.8)})
+    for name in ("steady", "steady-untraced"):
+        (tmp_path / "job" / f"census.{name}.start.json").write_text(_j.dumps({"uid": 1002}))
+    carried = {"phases": {"steady": {"entries": {
+        "systemd": {"components": {"selected": ["pid1/systemd"]}},
+        "dbus-daemon": {"components": {"selected": ["system-bus/dbus-daemon"]}},
+        "gnome-shell": {"components": {"selected": ["gnome-shell/gnome-shell", "gnome-shell/gmain"]}}}}}}
+    order, vals = c99.job_values(str(tmp_path / "job"), carried)
+    assert vals["systemd pid1/systemd wakes/s"] == (0.05, 0.05)
+    assert vals["systemd pid1/systemd run mean (ms)"] == (0.1, 0.08)
+    assert vals["gnome-shell gnome-shell/gmain run mean (ms)"] == (0.05, 0.04)
+    assert vals["dbus-daemon system-bus/dbus-daemon run mean (ms)"] == (0.1, 0.08)
+    assert not any("cron" in k for k in vals)
