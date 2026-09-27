@@ -517,6 +517,7 @@ def test_the_page_names_each_copy_left_out_of_the_control_s_pool(tmp_path):
     ctl = {"runs": {"chrome": {"excluded_repeats": {"2@36300802358": why}}}}
     rep = control_report.app_reports("campaign", "chrome", jobs, CARRIED_95, with_shares=False, control_pool=ctl)["web-browser"]
     assert rep["left_out"] == {"2@36300802358": why}
+    assert rep["notes"] == control_report.control_notes(rep)   # the record carries the notes' reading for the fold-in
     md = control_report.render({"family": "campaign", "archetypes": {"web-browser": rep}})
     assert f"- left out of the control's pool: 2@36300802358 — {why}" in md.splitlines()
 
@@ -585,6 +586,55 @@ def test_the_report_reads_every_value_over_the_jobs_and_counts_the_intervals(tmp
     md = control_report.render({"family": "campaign", "archetypes": {"web-browser": rep}})
     assert "## web-browser (`chrome`)" in md and "idle chrome run mean (ms)" in md
     assert f"{rep['intervals']} intervals read" in md and "chance alone" in md
+
+
+# ---- the notes' reading (fold-in plan, task 1) --------------------------------------------------------------------
+
+def _diff(mean, lo, hi):
+    return {"per_repeat_mean": mean, "interval": [lo, hi], "reading": "difference"}
+
+
+def test_the_notes_read_the_counts_then_each_difference_by_phase_and_component(monkeypatch):
+    from meas import control_report
+    values = {"idle gpu/Chrome_ChildIOT run mean (ms)": _diff(0.8634, 0.8497, 0.8772),
+              "idle gpu/VizCompositorTh run mean (ms)": _diff(0.9537, 0.9291, 0.9783),
+              "idle gpu/VizCompositorTh wakes/s": _diff(0.9767, 0.96, 0.9933),
+              "op Chrome_IOThread wakes/s": _diff(1.0368, 1.014, 1.0597),
+              "op chrome run mean (ms)": _diff(0.9634, 0.9333, 0.9934),
+              "op operation duration mean (ms)": _diff(0.99, 0.98, 0.995),
+              "op residual wakes/s": {"per_repeat_mean": 0.99, "interval": [0.97, 1.01], "reading": "not resolved"}}
+    rep = {"archetype": "web-browser", "app": "chrome", "jobs": 6, "intervals": 32, "chance": 1.6, "values": values,
+           "differences": sorted(n for n, v in values.items() if v["reading"] == "difference")}
+    monkeypatch.setitem(control_report.NOTES_STATED, "web-browser", "A stated line.")
+    assert control_report.control_notes(rep) == (
+        "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under "
+        "`perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; "
+        "32 intervals read, about 1.6 differences by chance alone. Perf's effect on the carried values, which stay the "
+        "traced ones — idle phase: `gpu/Chrome_ChildIOT` run mean 0.863 (0.850–0.877), `gpu/VizCompositorTh` run mean "
+        "0.954 (0.929–0.978) and wake rate 0.977 (0.960–0.993); operation phase, over the whole phase: "
+        "`Chrome_IOThread` wake rate 1.037 (1.014–1.060), `chrome` run mean 0.963 (0.933–0.993), the operation's "
+        "duration mean 0.990 (0.980–0.995). A stated line.")
+
+
+def test_the_notes_state_when_no_difference_is_found_and_read_a_session_entry_s_components():
+    from meas import control_report
+    rep = {"archetype": "audio-server", "app": "session", "jobs": 6, "intervals": 2, "chance": 0.1, "differences": [],
+           "values": {"pipewire wireplumber/gmain wakes/s": {"per_repeat_mean": 1.0, "interval": [0.9, 1.1]}}}
+    assert control_report.control_notes(rep).endswith("; 2 intervals read, about 0.1 differences by chance alone, none found.")
+    rep["differences"] = ["gnome-shell gnome-shell/JS Helper run mean (ms)"]
+    rep["values"]["gnome-shell gnome-shell/JS Helper run mean (ms)"] = _diff(0.864, 0.8414, 0.8865)
+    assert control_report.control_notes(rep).endswith(
+        "— steady phase: `gnome-shell/JS Helper` run mean 0.864 (0.841–0.886).")
+
+
+def test_the_page_carries_the_lines_stated_for_an_archetype(monkeypatch):
+    from meas import control_report
+    monkeypatch.setitem(control_report.NOTES_STATED, "chat-client", "Stated in the notes.")
+    monkeypatch.setitem(control_report.PAGE_STATED, "chat-client", "Stated on the page only.")
+    rep = {"app": "element", "jobs": 6, "orders": {}, "builds": {}, "intervals": 0, "chance": 0.0, "differences": [],
+           "values": {}, "shares": {}}
+    md = control_report.render({"family": "desktop", "archetypes": {"chat-client": rep}}).splitlines()
+    assert "Stated in the notes." in md and "Stated on the page only." in md
 
 
 def test_the_build_census_reads_each_subject_s_own_version_key():

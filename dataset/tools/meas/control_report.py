@@ -38,6 +38,34 @@ POOL_99 = os.path.join(RESEARCH, "task-9.9-daemons-session", "campaign", "result
 # the 9.8 subjects whose job records the build under its own key (a renderer's is `version`), and the name it goes by
 VERSION_98 = {"chat-client": ("element.version", "Element "),
               "game-client": ("steam.buildid", "Steam client build ")}
+# the notes' reading (decisions 2, 12, 20): 9.5's phases in campaign order, the others as they come
+PHASES = ("idle", "driven", "op", "play")
+QUANTITY = {"run mean (ms)": "run mean", "wakes/s": "wake rate", "gap mean (ms)": "gap mean"}
+TREE = {"per-input run (ms)": "the per-input run", "CPU share": "the tree's CPU share",
+        "operation duration mean (ms)": "the operation's duration mean"}
+NUMBER = {3: "three", 4: "four", 5: "five", 6: "six"}
+# lines stated beside an archetype's reading by 인지오's decisions (decision 17) — in its notes and on its page
+NOTES_STATED = {
+    "web-browser": ("The operation phase's second page-load pass wakes the network service's foreground pool "
+                    "(`utility/ThreadPoolForeg`) about 40 % less than the first, which keeps that component's ratio from "
+                    "resolving."),
+    "chat-client": ("The second idle run wakes `Chrome_IOThread` and `Chrome_ChildIOT` about 3–4 % more than the first, "
+                    "traced or not; the control ran Element 1.12.29, the carried pool 1.12.28."),
+    "code-editor": ("The second idle run, 915–1815 s after the first began, differs from the first whichever is traced — the "
+                    "main thread wakes about 7 % less and its runs are about 40 % shorter, the residual's about 70 % "
+                    "shorter — which keeps those ratios from resolving; the carried idle values match the first run."),
+    "image-editor": ("The driven runs start from the control's prelude (the image reverted, the pointer over the canvas), in "
+                     "which the main thread wakes about 18 % less often with about 19 % longer runs than in the carried "
+                     "pool at the same CPU share; the driven ratios are perf's effect in that state."),
+}
+# on the page only
+PAGE_STATED = {
+    "renderer-hidden": ("The workload check under the carried pool's selection, read by hand: the control's six repeats put "
+                        "`ThreadPoolServi`, the slowest carried component, past the coverage cut (9.5 D16) into the "
+                        "residual; under the carried selection `ThreadPoolServi`'s wake rate is 0.0056 against 0.0065 /s "
+                        "(z −0.37) and its run mean 0.0197 against 0.0198 ms (z −0.07), the residual (`MemoryInfra`) "
+                        "0.0034 against 0.0033 /s (z +0.10) and 0.193 against 0.188 ms (z +0.19) — no disagreement."),
+}
 VERSIONS_99 = {"gnome-shell": ("gnome-shell",), "pipewire": ("pipewire", "wireplumber"), "systemd": ("systemd",),
                "dbus-daemon": ("dbus-daemon",)}
 NAME = {"campaign": re.compile(r"^meas-(?:interactive|playback)-(.+)-r(\d+)-control$"),
@@ -186,6 +214,7 @@ def app_reports(family, app, jobs, carried, with_shares=True, control_pool=None)
             ctl = control_pool["runs"].get(app)
             rep["workload"] = control.workload(carried, ctl) if ctl else None
             rep["left_out"] = (ctl or {}).get("excluded_repeats") or {}
+        rep["notes"] = control_notes(rep)
         out[arch] = rep
     return out
 
@@ -203,6 +232,38 @@ def _mean_shares(recs):
 
 def _fmt(x, nd=4):
     return "—" if x is None else f"{x:.{nd}f}".rstrip("0").rstrip(".") if isinstance(x, float) else str(x)
+
+
+def control_notes(rep):
+    """The archetype's control reading for its modeling_notes: the counts (decision 12), each difference by phase and
+    component (decision 20), the operation phase read over the whole phase (decision 23), then its stated line."""
+    n = rep["intervals"]
+    s = (f"Untraced control (the 9.5 untraced-control spec): {NUMBER.get(rep['jobs'], rep['jobs'])} jobs each ran every "
+         "carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job "
+         f"ratios, untraced over traced; {n} interval{'' if n == 1 else 's'} read, about {rep['chance']} differences by "
+         "chance alone")
+    if not rep["differences"]:
+        s += ", none found."
+    else:
+        groups = {}
+        for name in rep["differences"]:
+            v = rep["values"][name]
+            head, rest = name.split(" ", 1)
+            phase = "steady" if rep["app"] == "session" else head   # a 9.9 value is named by its program, not its phase
+            lo, hi = v["interval"]
+            num = f"{v['per_repeat_mean']:.3f} ({lo:.3f}–{hi:.3f})"
+            if rest in TREE:
+                groups.setdefault(phase, {})[TREE[rest]] = [num]
+            else:
+                q = next(q for q in QUANTITY if rest.endswith(" " + q))
+                groups.setdefault(phase, {}).setdefault(f"`{rest[:-len(q) - 1]}`", []).append(f"{QUANTITY[q]} {num}")
+        parts = [("operation phase, over the whole phase" if ph == "op" else f"{ph} phase") + ": "
+                 + ", ".join(f"{c} {' and '.join(qs)}" for c, qs in groups[ph].items())
+                 for ph in sorted(groups, key=lambda p: PHASES.index(p) if p in PHASES else len(PHASES))]
+        s += ". Perf's effect on the carried values, which stay the traced ones — " + "; ".join(parts) + "."
+    if NOTES_STATED.get(rep.get("archetype")):
+        s += " " + NOTES_STATED[rep["archetype"]]
+    return s
 
 
 def render(record):
@@ -235,6 +296,9 @@ def render(record):
                 lines.append(f"- job {k}: the screenshots after its two preludes differ in {c['prelude_screens']}")
         for k, why in (r.get("left_out") or {}).items():
             lines.append(f"- left out of the control's pool: {k} — {why}")
+        for text in (NOTES_STATED.get(arch), PAGE_STATED.get(arch)):
+            if text:
+                lines += ["", text]
         w = r.get("workload")
         if w:
             lines += ["", f"The traced runs against the carried pool (decision 17): largest |z| {w['max_abs_z']} over {len(w['z'])} values"
