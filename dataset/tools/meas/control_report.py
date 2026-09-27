@@ -292,6 +292,8 @@ def render(record):
                          f"{(_fmt(iv[0]) + '–' + _fmt(iv[1])) if iv else '—'} | {v.get('reading') or '—'} | "
                          f"{'; '.join(f'{o.split()[0]} first {m}' for o, m in v.get('order_means', {}).items()) or '—'} | {v.get('n', 0)} | "
                          f"{pair('exited')} | {pair('left')} |" + (f" {pair('inside')} |" if ops else ""))
+        if r.get("validity") or r.get("left_out"):
+            lines.append("")
         for k, c in (r.get("validity") or {}).items():
             if c["problems"]:
                 lines.append(f"- job {k}: " + "; ".join(c["problems"]))
