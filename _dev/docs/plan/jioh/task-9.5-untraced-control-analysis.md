@@ -32,38 +32,38 @@
 
 **Produces:** `thread_deltas(before, after) -> (deltas, span_s)`; `group(deltas, key) -> {component: {run_ns, vol, invol, threads}}`; `rate_and_run(g, span_s) -> (wakes_per_s, run_ms or None)`; `read(pairs) -> dict` where `pairs` is `{job: (order, traced, untraced)}` — `check`'s fields plus `order_means`, `n`.
 
-- [ ] Tests: deltas over threads at both edges only, a reused tid kept apart; grouping drops a thread whose key is None; a zero traced side gives no ratio; `read` equals `check` on the same ratios and adds the two order groups' means.
-- [ ] Implement; tests pass; commit.
+- [x] Tests: deltas over threads at both edges only, a reused tid kept apart; grouping drops a thread whose key is None; a zero traced side gives no ratio; `read` equals `check` on the same ratios and adds the two order groups' means.
+- [x] Implement; tests pass; commit.
 
 ### Task 2: 9.5 adapter
 
 **Files:** Create `dataset/tools/meas/campaign/control.py`; Test `test_meas_control.py`.
 
-- [ ] Key: the process role from the snapshots' command lines (`analyze.pid_roles`), `analyze.component_name(role, pool.component_key(app, comm))`; `HARNESS_COMMS` and `llvmpipe-*` dropped; the carried pool's `exclude_roles` dropped.
-- [ ] Carried components per phase from the carried pool (`components.selected`), the rest of the kept threads as `residual`.
-- [ ] Tree values: per-input run — (tree CPU over the driven run − the same side's idle CPU rate × the run's span) / inputs sent that side; play CPU share — tree CPU / span; operation duration — the mean of the rc-0 durations in `ops.jsonl` / `ops-untraced.jsonl`.
-- [ ] Tests over a fixture cut from a dry control artifact; commit.
+- [x] Key: the process role from the snapshots' command lines (`analyze.pid_roles`), `analyze.component_name(role, pool.component_key(app, comm))`; `HARNESS_COMMS` and `llvmpipe-*` dropped; the carried pool's `exclude_roles` dropped.
+- [x] Carried components per phase from the carried pool (`components.selected`), the rest of the kept threads as `residual`.
+- [x] Tree values: per-input run — (tree CPU over the driven run − the same side's idle CPU rate × the run's span) / inputs sent that side; play CPU share — tree CPU / span; operation duration — the mean of the rc-0 durations in `ops.jsonl` / `ops-untraced.jsonl`.
+- [x] Tests over a fixture cut from a dry control artifact; commit.
 
 ### Task 3: 9.8 and 9.9 adapters
 
 **Files:** Create `dataset/tools/meas/desktop/control.py`, `dataset/tools/meas/session/control.py`; Test `test_meas_control.py`.
 
-- [ ] 9.8: renderer subjects keyed per renderer (page renderers of `renderers.tsv`, the control tab dropped as `analyze.drop_control_tab` drops it), a component's wake rate the mean over renderers and its run mean the renderers' pooled CPU over their pooled wakes; the other subjects by role and comm.
-- [ ] 9.9: instances by `census.ENTRIES` on each process's cgroup and comm, components `<instance>/<comm>`.
-- [ ] Tests; commit.
+- [x] 9.8: renderer subjects keyed per renderer (page renderers of `renderers.tsv`, the control tab dropped as `analyze.drop_control_tab` drops it), a component's wake rate the mean over renderers and its run mean the renderers' pooled CPU over their pooled wakes; the other subjects by role and comm.
+- [x] 9.9: instances by `census.ENTRIES` on each process's cgroup and comm, components `<instance>/<comm>`.
+- [x] Tests; commit.
 
 ### Task 4: the shares of decisions 10 and 22
 
-- [ ] From each traced run's trace (the family's analysis rows): per carried component, the share of CPU and wakes held by threads not alive at both edges, and the share a trace-read rule leaves out (9.5 `HEAVY_EVENTS`; 9.9 cron sessions and the causes of D27/D32).
-- [ ] Tests; commit.
+- [x] From each traced run's trace (the family's analysis rows): per carried component, the share of CPU and wakes held by threads not alive at both edges, and the share a trace-read rule leaves out (9.5 `HEAVY_EVENTS`; 9.9 cron sessions and the causes of D27/D32).
+- [x] Tests; commit.
 
 ### Task 5: the workload check
 
-- [ ] `pool.py --mode control` in campaign, desktop and session: a control artifact accepted, pooled apart.
-- [ ] Each carried value of the control's pool placed in the carried pool's per-repeat spread in standard deviations; components present in one pool only listed.
-- [ ] Tests; commit.
+- [x] `pool.py --mode control` in campaign, desktop and session: a control artifact accepted, pooled apart.
+- [x] Each carried value of the control's pool placed in the carried pool's per-repeat spread in standard deviations; components present in one pool only listed.
+- [x] Tests; commit.
 
 ### Task 6: the results page
 
-- [ ] `control.py <family> <artifacts> <carried pools> <out.json> --md <page>`: per archetype, each value's ratio, interval, reading, medians' ratio, order means, the shares, the interval count and the chance count, the build census, the workload check.
+- [x] `control.py <family> <artifacts> <carried pools> <out.json> --md <page>`: per archetype, each value's ratio, interval, reading, medians' ratio, order means, the shares, the interval count and the chance count, the build census, the workload check.
 - [ ] Run over the landed control jobs; commit the page to the slice's `campaign/` folder.

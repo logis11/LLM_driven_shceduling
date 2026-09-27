@@ -487,3 +487,33 @@ def test_the_workload_check_places_each_control_value_in_the_carried_spread():
     assert out["z"] == {"idle a wakes/s": 0.5, "idle b run mean (ms)": -1.5}
     assert out["only_carried"] == ["idle gone wakes/s"] and out["only_control"] == ["idle new wakes/s"]
     assert out["max_abs_z"] == 1.5
+
+
+# ---- analysis: the report (analysis plan, task 6) ----------------------------------------------------------------
+
+def test_the_report_reads_every_value_over_the_jobs_and_counts_the_intervals(tmp_path):
+    from meas import control_report
+    jobs = {}
+    for k in range(1, 7):
+        order = "traced untraced" if k % 2 else "untraced traced"
+        d = tmp_path / f"meas-interactive-chrome-r{k}-control"
+        _write_job(d, order, {"traced": _job_sides(1.0), "untraced": _job_sides(0.9 + 0.01 * k)})
+        jobs[k] = str(d)
+    rep = control_report.app_reports("campaign", "chrome", jobs, CARRIED_95, with_shares=False)["web-browser"]
+    assert rep["archetype"] == "web-browser" and rep["jobs"] == 6 and rep["orders"] == {"traced untraced": 3, "untraced traced": 3}
+    v = rep["values"]["idle chrome run mean (ms)"]
+    assert v["n"] == 6 and v["reading"] == "difference" and v["interval"][1] < 1
+    # decision 12: how many intervals were read, and how many differences a 95 % level gives by chance alone
+    assert rep["intervals"] == sum(1 for x in rep["values"].values() if x.get("interval")) and rep["chance"] == round(0.05 * rep["intervals"], 1)
+    md = control_report.render({"family": "campaign", "archetypes": {"web-browser": rep}})
+    assert "## web-browser (`chrome`)" in md and "idle chrome run mean (ms)" in md
+    assert f"{rep['intervals']} intervals read" in md and "chance alone" in md
+
+
+def test_the_report_names_the_archetypes_the_fold_ins_name(repo_root):
+    import re as _re
+    from meas import control_report
+    src = (repo_root / "dataset" / "tools" / "meas" / "campaign" / "fold_in.py").read_text()
+    body = src[src.index("ARCHETYPES = {"):src.index("\n}\n", src.index("ARCHETYPES = {"))]
+    folded = {app: aid for aid, app in _re.findall(r'^    "([a-z-]+)": \("([a-z0-9-]+)",', body, _re.M)}
+    assert control_report.ARCH_95 == folded
