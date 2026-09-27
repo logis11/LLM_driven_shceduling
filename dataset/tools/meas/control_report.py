@@ -6,7 +6,7 @@ Every landed control job of a family through its adapter: each value's per-job r
 16) and, given the family's pool of the control's traced runs (pool.py --control), the workload check (decision 17).
 A JSON record and a results page, per archetype.
 
-control_report.py <campaign|desktop|session> <artifacts> <out.json> [--md PAGE] [--control-pool POOL.json]
+control_report.py <campaign|desktop|session> <artifacts> <out.json> [--md PAGE] [--control-pool POOL.json]...
 """
 
 import argparse
@@ -234,9 +234,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("family", choices=("campaign", "desktop", "session"))
     ap.add_argument("artifacts"); ap.add_argument("out")
-    ap.add_argument("--md"); ap.add_argument("--control-pool")
+    ap.add_argument("--md"); ap.add_argument("--control-pool", action="append", default=[],
+                                             help="a pool of the control's traced runs (pool.py --control); one per app, repeatable")
     a = ap.parse_args()
-    ctl = json.load(open(a.control_pool)) if a.control_pool else None
+    ctl = {"runs": {k: v for p in a.control_pool for k, v in json.load(open(p))["runs"].items()}} if a.control_pool else None
     record = {"family": a.family, "archetypes": {}}
     for app, jobs in sorted(find_jobs(a.family, a.artifacts).items()):
         if a.family == "campaign":
