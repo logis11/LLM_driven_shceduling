@@ -57,6 +57,9 @@ NOTES_STATED = {
     "image-editor": ("The driven runs start from the control's prelude (the image reverted, the pointer over the canvas), in "
                      "which the main thread wakes about 18 % less often with about 19 % longer runs than in the carried "
                      "pool at the same CPU share; the driven ratios are perf's effect in that state."),
+    "video-editor": ("The first preview render of each job's second operation run did not start (`kdenlive_render` never "
+                     "appeared within 30 s), so that run's operation values rest on 25 renders against the first run's "
+                     "26–27."),
 }
 # on the page only
 PAGE_STATED = {
