@@ -63,14 +63,19 @@ MIN_REPEATS = 5       # kalibera-ismm13 §11 (D29; 9.6 D24)
 # the tolerance not applied. (app, the value name's prefix). D59: webrtc's audio path — AudioProcessing whole, the
 # others' run means only, their wake rates being fixed or passing.
 # D67 renamed the components these name, so the keys carry the role: the exception follows its component's identity.
-# D78: code's utility/libuv-worker, carried here from D57, holds the rule once its values are read as carried.
-SESSION_SPREAD = {("webrtc", "play utility/AudioProcessing "), ("webrtc", "play renderer/AudioOutputDevi run mean"),
+# D78: code's utility/libuv-worker, carried here from D57, holds the rule once its values are read as carried; D83: read
+# from 200 s into the idle phase it does not (±5.6 % at the recording's 44 windows), and D57 carries it again.
+SESSION_SPREAD = {("code", "idle utility/libuv-worker"),
+                  ("webrtc", "play utility/AudioProcessing "), ("webrtc", "play renderer/AudioOutputDevi run mean"),
                   ("webrtc", "play renderer/AudioInputDevic run mean"), ("webrtc", "play utility/FakeAudioInput run mean"),
                   ("webrtc", "play residual run mean")}
 # D64: a rare heavy run carried as its own stated event, not as a component's wake — chrome's MemoryInfra pass of 54–61 ms
 # at no fixed time (9 in 20 sessions × 600 s) against its regular runs of at most 11.5 ms; (app, phase) -> (comm, run floor
 # in ms, the floor being design between the two). The event's runs leave the component rows, so the residual converges.
 HEAVY_EVENTS = {("chrome", "idle"): ("MemoryInfra", 30.0)}
+# D83: the idle phase read from this many seconds past its start — code's launch work, two episodes 50–75 s and
+# 150–175 s into the phase that never recur (the D52 probe's 1,400 s), left out; the start past the last is design.
+IDLE_FROM_S = {"code": 200.0}
 # D75: a periodic job per medium cycle — each cycle's start read off a reference thread of the trace, its work the process
 # tree's whole CPU from one start to the next (W2), its period the mean interval (P1); (app, phase) -> (component, rule,
 # value, spacing): `silence_ms` starts a cycle at the reference's first wake after that silence, `min_run_ms` at each of
@@ -394,7 +399,8 @@ def main():
         reps = sorted(info["repeats"])
         results, raws = {}, {}
         for r in reps:
-            results[r], raw = analyze_run(info["repeats"][r], args.w_ms, args.cap_ms, exclude_roles=exclude_roles)
+            results[r], raw = analyze_run(info["repeats"][r], args.w_ms, args.cap_ms, exclude_roles=exclude_roles,
+                                          idle_from_s=IDLE_FROM_S.get(app, 0.0))
             # keep only compact samples per phase: per-comm gaps/runs/wakes/threads, span, per-input lists
             slim = {"phases": {}}
             for phase, pd in raw["phases"].items():
@@ -421,6 +427,8 @@ def main():
                  # D69: every repeat's build, as the CPU model is kept per repeat — a pool that carried only the first
                  # repeat's could not show a build change (code's 1.139.0 in repeat 29, chrome's 153 in four of thirty)
                  "version": {r: results[r].get("version") for r in reps}, "phases": {}}
+        if app in IDLE_FROM_S:
+            entry["idle_from_s"] = IDLE_FROM_S[app]
         for phase in ("idle", "driven", "driven-alt", "play", "op"):
             # D32: each phase over the repeats that have it — a repeat past the recording's end runs the idle phase alone
             preps = [r for r in reps if phase in raws[r]["phases"]]

@@ -106,9 +106,10 @@ def share_above(table, x):
 LABEL = {"wakes/s": "wake rate", "gap mean (ms)": "gap mean", "run mean (ms)": "run mean"}
 # where each entry's window limit is decided: D32 the rule, D46 the send's operation phase, D68 chrome's and code's limits
 WINDOW_LAW = {"code-editor": "D32, D68", "web-browser": "D32, D68", "mail-client": "D32, D46"}
-# D57's second finding: a between-sessions component's spread within one run, read on the D52 probe — none carried
-# since D78 (code-editor's utility/libuv-worker, its schedule-in rate ±8.7 % within a run, holds the rule)
-WITHIN = {}
+# D57's second finding: a between-sessions component's spread within one run, read on the D52 probe
+# (_dev/research/jioh/task-9.5-interactive-typing/campaign/within_libuv.py, D83)
+WITHIN = {("code-editor", "utility/libuv-worker"): "its wake rate ±10.6 % (5.41–6.71 a second over 700 s windows slid "
+                                                   "along the D52 probe from 200 s)"}
 
 
 def value_name(key):
@@ -360,6 +361,9 @@ def entry(aid, spec, d):
                       f"keys and pointer events together, pointer positions scaled into the content area (D5, D12); ")
         scope += (f"the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the "
                   f"process tree until the next input minus the idle rate. ")
+        if d.get("idle_from_s"):   # D83
+            scope += (f"The idle phase is read from {d['idle_from_s']:g} s past its start, past the launch work in it (D83); "
+                      f"the idle rate is read over the same span. ")
         alt = d["phases"].get("driven-alt", {}).get("per_input")
         if alt:  # spec decision 11: the pre-registered sensitivity result, one sentence, no value changed
             a = pi["window"]["run_ms_minus_idle"]["p50"]; b = alt["window"]["run_ms_minus_idle"]["p50"]

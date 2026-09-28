@@ -1787,16 +1787,6 @@
       "max": 0.0
      }
     },
-    "idle code": {
-     "exited cpu": {
-      "mean": 0.0,
-      "max": 0.0
-     },
-     "exited wakes": {
-      "mean": 0.0,
-      "max": 0.0
-     }
-    },
     "idle renderer/ThreadPoolForeg": {
      "exited cpu": {
       "mean": 0.0,
@@ -1805,6 +1795,16 @@
      "exited wakes": {
       "mean": 0.0002,
       "max": 0.0008
+     }
+    },
+    "idle code": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
      }
     },
     "idle residual": {
@@ -1820,43 +1820,43 @@
    },
    "workload": {
     "z": {
-     "idle code gap mean (ms)": 4.88,
-     "idle code run mean (ms)": -6.26,
-     "idle code wakes/s": -4.71,
-     "idle gpu/Chrome_ChildIOT gap mean (ms)": 0.07,
-     "idle gpu/Chrome_ChildIOT run mean (ms)": 0.14,
-     "idle gpu/Chrome_ChildIOT wakes/s": -0.07,
-     "idle gpu/VizCompositorTh gap mean (ms)": -0.15,
+     "idle code gap mean (ms)": -0.89,
+     "idle code run mean (ms)": -0.27,
+     "idle code wakes/s": 0.9,
+     "idle gpu/Chrome_ChildIOT gap mean (ms)": 0.06,
+     "idle gpu/Chrome_ChildIOT run mean (ms)": 0.18,
+     "idle gpu/Chrome_ChildIOT wakes/s": -0.06,
+     "idle gpu/VizCompositorTh gap mean (ms)": -0.17,
      "idle gpu/VizCompositorTh run mean (ms)": -0.23,
-     "idle gpu/VizCompositorTh wakes/s": 0.15,
-     "idle renderer/Compositor gap mean (ms)": -0.38,
-     "idle renderer/Compositor run mean (ms)": -0.11,
-     "idle renderer/Compositor wakes/s": 0.38,
-     "idle renderer/ThreadPoolForeg gap mean (ms)": 1.07,
-     "idle renderer/ThreadPoolForeg run mean (ms)": 2.48,
-     "idle renderer/ThreadPoolForeg wakes/s": -0.96,
-     "idle renderer/code gap mean (ms)": -0.01,
-     "idle renderer/code run mean (ms)": 0.09,
-     "idle renderer/code wakes/s": 0.01,
-     "idle residual gap mean (ms)": 2.71,
-     "idle residual run mean (ms)": -10.83,
-     "idle residual wakes/s": -2.54,
-     "idle utility/code gap mean (ms)": 1.42,
-     "idle utility/code run mean (ms)": 0.8,
-     "idle utility/code wakes/s": -1.24,
-     "idle utility/libuv-worker gap mean (ms)": 0.24,
-     "idle utility/libuv-worker run mean (ms)": 0.16,
-     "idle utility/libuv-worker wakes/s": -0.23,
-     "input_run mean, SWELL-KW (ms)": 0.62
+     "idle gpu/VizCompositorTh wakes/s": 0.18,
+     "idle renderer/Compositor gap mean (ms)": -0.43,
+     "idle renderer/Compositor run mean (ms)": -0.09,
+     "idle renderer/Compositor wakes/s": 0.44,
+     "idle renderer/ThreadPoolForeg gap mean (ms)": 1.01,
+     "idle renderer/ThreadPoolForeg run mean (ms)": 0.9,
+     "idle renderer/ThreadPoolForeg wakes/s": -0.91,
+     "idle renderer/code gap mean (ms)": 0.04,
+     "idle renderer/code run mean (ms)": 0.12,
+     "idle renderer/code wakes/s": -0.04,
+     "idle residual gap mean (ms)": -0.61,
+     "idle residual run mean (ms)": 3.24,
+     "idle residual wakes/s": 0.62,
+     "idle utility/code gap mean (ms)": 0.79,
+     "idle utility/code run mean (ms)": 1.18,
+     "idle utility/code wakes/s": -0.72,
+     "idle utility/libuv-worker gap mean (ms)": 0.15,
+     "idle utility/libuv-worker run mean (ms)": 0.13,
+     "idle utility/libuv-worker wakes/s": -0.14,
+     "input_run mean, SWELL-KW (ms)": 0.61
     },
     "only_carried": [
      "input_run mean, 136M (ms)"
     ],
     "only_control": [],
-    "max_abs_z": 10.83
+    "max_abs_z": 3.24
    },
    "left_out": {},
-   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 19 intervals read, about 1.0 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 idle phase: `gpu/Chrome_ChildIOT` run mean 0.884 (0.836\u20130.932), `renderer/Compositor` run mean 0.948 (0.925\u20130.970), `utility/libuv-worker` run mean 0.716 (0.639\u20130.792). The second idle run, 915\u20131815 s after the first began, differs from the first whichever is traced \u2014 the main thread wakes about 7 % less and its runs are about 40 % shorter, the residual's about 70 % shorter \u2014 which keeps those ratios from resolving; the carried idle values match the first run."
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 19 intervals read, about 1.0 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 idle phase: `gpu/Chrome_ChildIOT` run mean 0.884 (0.836\u20130.932), `renderer/Compositor` run mean 0.948 (0.925\u20130.970), `utility/libuv-worker` run mean 0.716 (0.639\u20130.792). The second idle run, 915\u20131815 s after the first began, differs from the first whichever is traced \u2014 the main thread wakes about 7 % less and its runs are about 40 % shorter, the residual's about 70 % shorter \u2014 which keeps those ratios from resolving; the first run holds VS Code's launch work, which the carried idle values leave out (D83). Read from 200 s into each run as the carried values are, the first run agrees with the carried pool, every value within 2.1 standard deviations of its spread, and the second differs in the residual's run mean alone, about 35 % longer (0.060\u20130.066 against 0.046 ms)."
   },
   "image-editor": {
    "archetype": "image-editor",

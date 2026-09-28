@@ -92,7 +92,7 @@ def _campaign_pool_module():
 
 def campaign_streams(app, pooled, root, phase="idle"):
     """{rep: (span, times)} of a 9.5 app's carried repeats: the rows its pool reads (analyze_run with the pool's
-    settings), heavy events aside, in seconds from the phase's start."""
+    settings, the idle phase from where the pool read it, D83), heavy events aside, in seconds from the phase's start."""
     from meas.campaign.analyze import analyze_run
     split_events = _campaign_pool_module().split_events
     run = pooled["runs"][app]
@@ -100,7 +100,7 @@ def campaign_streams(app, pooled, root, phase="idle"):
     for rep in run["repeats"]:
         D = artifact_dir(root, app, rep, run["run_id"][str(rep)])
         _, raw = analyze_run(D, pooled.get("w_ms", 5.0), pooled.get("cap_ms", 0.0),
-                             exclude_roles=tuple(pooled.get("exclude_roles") or ()))
+                             exclude_roles=tuple(pooled.get("exclude_roles") or ()), idle_from_s=run.get("idle_from_s", 0.0))
         pd = raw["phases"][phase]
         rows, _ = split_events(app, phase, pd["rows"])
         out[rep] = (pd["span"], sorted(r.t_in - pd["t0"] for r in rows))

@@ -285,6 +285,28 @@ def test_a_transient_child_is_woken_by_its_own_wakeup_rows(tmp_path):
     assert op["wake_check"] == {"kdenlive_render": {"gaps": 1, "slept_without_row": 0, "preempted_with_row": 0}}
 
 
+def test_the_idle_phase_is_read_from_a_stated_second_past_its_first_row(tmp_path):
+    # 9.5 D83: the idle phase read from idle_from_s on — its span, its rows and its CPU (D13's idle rate) over the rest
+    import json as _json
+    (tmp_path / "report.json").write_text(_json.dumps({"app": "code", "repeat": 1, "mode": "full"}))
+    for s in ("before", "after"):
+        (tmp_path / f"snap.idle.{s}.json").write_text(_json.dumps({"procs": [{"pid": 100, "comm": "code"}]}))
+    (tmp_path / "perf.idle.timehist.txt").write_text(
+        "   0.000010 [0000]  perf[50]    0.000      0.000      0.010      R\n"      # the capture's first row
+        "   5.090000 [0003]  code[101/100]    0.000      0.001     90.000      S\n"   # in at 5.0 s: launch work
+        "  25.020000 [0003]  code[101/100]    0.000      0.001     20.000      S\n"   # in at 25.0 s
+        "  30.000010 [0000]  perf[50]    0.000      0.000      0.010      R\n")     # the capture's last row
+    (tmp_path / "perf.idle.wakeups.txt").write_text(
+        "   4.999000 [0001]  x[9]  awakened: code[101/100]\n"
+        "  24.999000 [0001]  x[9]  awakened: code[101/100]\n")
+    whole, _ = campaign.analyze_run(str(tmp_path))
+    assert (whole["phases"]["idle"]["span_s"], whole["phases"]["idle"]["rows"]) == (30.0, 2)
+    res, raw = campaign.analyze_run(str(tmp_path), idle_from_s=10.0)
+    idle = res["phases"]["idle"]
+    assert (idle["span_s"], idle["rows"], idle["cpu_share"]) == (20.0, 1, 0.001)   # 20 ms over 20 s
+    assert raw["phases"]["idle"]["t0"] == pytest.approx(10.00001)
+
+
 def test_slice_profile_of_the_steady_phase(tmp_path):
     # 9.5 D35, D42: CPU ms/s and wakes/s per slice from the phase's first row; a run counts in its schedule-in's slice
     import json as _json
@@ -605,8 +627,8 @@ def test_values_at_the_window_limit_are_stated_with_their_half_widths(fold_95):
     s = _scopes(fold_95)
     code = s["code-editor"]
     assert "43 repeats" in code and "outside the rule" not in code
-    assert ("the per-input run mean under SWELL-KW 98.92 ms ±4.82 % and the per-input run mean under 136M "
-            "103.7 ms ±3.00 % hold within it") in code
+    assert ("the per-input run mean under SWELL-KW 99.26 ms ±4.84 % and the per-input run mean under 136M "
+            "103.9 ms ±3.01 % hold within it") in code   # D83: the idle rate the window rule nets read from 200 s
     web = s["web-browser"]
     assert "38 repeats" in web and "the per-input means and the page-load operation's values" in web
     assert "outside the rule" not in web and "all 30 hold within it, the widest ±4.72 %" in web   # D78
@@ -621,12 +643,17 @@ def test_values_at_the_window_limit_are_stated_with_their_half_widths(fold_95):
         assert "window limit" not in s[aid].lower(), aid
 
 
-def test_a_component_the_rule_holds_carries_no_between_sessions_marking(fold_95):
-    # D78: read as carried, code's utility/libuv-worker holds the rule on all three values — wake rate and gap mean
-    # ±4.46 %, run mean ±1.94 % — so D57's marking is dropped and no 9.5 entry states a between-sessions component
+def test_code_s_idle_phase_from_200_s_carries_libuv_worker_under_d57_again(fold_95):
+    # D83: code's idle phase read from 200 s past its start; utility/libuv-worker's wake rate and gap mean then ±5.63 %,
+    # carried under D57 as before D78 with its spread within one run re-read from 200 s — the only 9.5 entry with either
     scopes = _scopes(fold_95)
-    assert all("rate varies between sessions" not in scope for scope in scopes.values())
-    assert "libuv-worker" not in scopes["code-editor"]
+    code = scopes["code-editor"]
+    assert "The idle phase is read from 200 s past its start, past the launch work in it (D83)" in code
+    assert ("A component whose rate varies between sessions, its three values carried together (D57): "
+            "`utility/libuv-worker` wake rate 5.382 wakes/s ±5.63 % (3.133–7.327 wakes/s)") in code
+    assert "within one run its wake rate ±10.6 % (5.41–6.71 a second over 700 s windows slid along the D52 probe" in code
+    others = [aid for aid, scope in scopes.items() if aid != "code-editor"]
+    assert all("rate varies between sessions" not in scopes[a] and "(D83)" not in scopes[a] for a in others)
 
 
 # 9.5 D79: mail-client from two campaigns — the idle phase's values from the 43-repeat campaign, the phases with or after
@@ -746,7 +773,7 @@ def test_every_typing_scope_states_its_stimulus_check_read_per_repeat(fold_95):
     s = _scopes(fold_95)
     want = {"office-writer": "is 1.123 of SWELL-KW's (95 % interval 1.045–1.200 over 14 repeats), a difference",
             "web-browser": "is 1.160 of SWELL-KW's (95 % interval 1.095–1.225 over 38 repeats), a difference",
-            "code-editor": "is 1.030 of SWELL-KW's (95 % interval 0.969–1.091 over 43 repeats), not resolved",
+            "code-editor": "is 1.029 of SWELL-KW's (95 % interval 0.968–1.090 over 43 repeats), not resolved",   # D83
             "mail-client": "is 0.909 of SWELL-KW's (95 % interval 0.824–0.994 over 8 repeats), a difference"}
     for aid, phrase in want.items():
         assert "read per repeat (D81), the per-input run mean under 136M " + phrase in s[aid], aid

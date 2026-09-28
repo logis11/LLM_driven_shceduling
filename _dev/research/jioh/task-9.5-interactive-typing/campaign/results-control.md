@@ -85,9 +85,9 @@ The traced runs against the carried pool (decision 17): largest |z| 6.31 over 45
 - job 5: the screenshots after its two preludes differ in (54, 761, 56, 764)
 - job 6: the screenshots after its two preludes differ in (54, 761, 56, 764)
 
-The second idle run, 915–1815 s after the first began, differs from the first whichever is traced — the main thread wakes about 7 % less and its runs are about 40 % shorter, the residual's about 70 % shorter — which keeps those ratios from resolving; the carried idle values match the first run.
+The second idle run, 915–1815 s after the first began, differs from the first whichever is traced — the main thread wakes about 7 % less and its runs are about 40 % shorter, the residual's about 70 % shorter — which keeps those ratios from resolving; the first run holds VS Code's launch work, which the carried idle values leave out (D83). Read from 200 s into each run as the carried values are, the first run agrees with the carried pool, every value within 2.1 standard deviations of its spread, and the second differs in the residual's run mean alone, about 35 % longer (0.060–0.066 against 0.046 ms).
 
-The traced runs against the carried pool (decision 17): largest |z| 10.83 over 28 values; only in the carried pool: input_run mean, 136M (ms).
+The traced runs against the carried pool (decision 17): largest |z| 3.24 over 28 values; only in the carried pool: input_run mean, 136M (ms).
 
 ## image-editor (`gimp`)
 

@@ -13,14 +13,14 @@
 
 ## code-editor (`code`, idle)
 
-44 repeats; wakes/s, median over the streams: measured 115.561, compiled 114.56. Dispersion (variance over mean of the wake counts per bin), median (least–largest) over the streams; the ratio measured over compiled, per stream.
+44 repeats; wakes/s, median over the streams: measured 113.096, compiled 112.234. Dispersion (variance over mean of the wake counts per bin), median (least–largest) over the streams; the ratio measured over compiled, per stream.
 
 | bin | measured | compiled | measured / compiled |
 |---|---|---|---|
-| 1 ms | 5.758 (5.121–6.321) | 2.229 (2.162–2.299) | 2.564 (2.314–2.876) |
-| 10 ms | 10.78 (8.484–13.22) | 3.071 (2.992–3.179) | 3.497 (2.721–4.267) |
-| 100 ms | 16.85 (8.106–33.98) | 5.062 (4.855–5.26) | 3.299 (1.595–6.636) |
-| 1 s | 7.548 (5.121–11.07) | 4.91 (4.166–5.495) | 1.566 (0.9413–2.312) |
+| 1 ms | 5.696 (5.048–6.28) | 2.156 (2.083–2.224) | 2.623 (2.349–2.94) |
+| 10 ms | 10.34 (8.023–12.9) | 2.966 (2.882–3.101) | 3.43 (2.643–4.38) |
+| 100 ms | 14.95 (6.969–32.37) | 4.937 (4.734–5.244) | 3.022 (1.368–6.631) |
+| 1 s | 4.628 (2.462–7.925) | 4.774 (4.141–5.399) | 0.9888 (0.475–1.71) |
 
 ## web-browser (`chrome`, idle)
 

@@ -53,7 +53,11 @@ NOTES_STATED = {
                     "traced or not; the control ran Element 1.12.29, the carried pool 1.12.28."),
     "code-editor": ("The second idle run, 915–1815 s after the first began, differs from the first whichever is traced — the "
                     "main thread wakes about 7 % less and its runs are about 40 % shorter, the residual's about 70 % "
-                    "shorter — which keeps those ratios from resolving; the carried idle values match the first run."),
+                    "shorter — which keeps those ratios from resolving; the first run holds VS Code's launch work, which "
+                    "the carried idle values leave out (D83). Read from 200 s into each run as the carried values are, the "
+                    "first run agrees with the carried pool, every value within 2.1 standard deviations of its spread, "
+                    "and the second differs in the residual's run mean alone, about 35 % longer (0.060–0.066 against "
+                    "0.046 ms)."),
     "image-editor": ("The driven runs start from the control's prelude (the image reverted, the pointer over the canvas), in "
                      "which the main thread wakes about 18 % less often with about 19 % longer runs than in the carried "
                      "pool at the same CPU share; the driven ratios are perf's effect in that state."),

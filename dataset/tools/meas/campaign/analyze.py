@@ -313,13 +313,15 @@ def phase_span(rows):
     return (rows[0].t_in, rows[-1].t_end) if rows else (0, 0)
 
 
-def analyze_run(D, w_ms=5.0, cap_ms=0.0, waker="^Xvfb$|^Xorg$", wake_def="wakeup", exclude_roles=()):
+def analyze_run(D, w_ms=5.0, cap_ms=0.0, waker="^Xvfb$|^Xorg$", wake_def="wakeup", exclude_roles=(), idle_from_s=0.0):
     """Return (result, raw): result as printed/dumped by the CLI; raw = per-phase wakes, segments and per-input lists for pooling.
     exclude_roles: process roles (pid_roles) whose rows leave the tree — D14: Chrome's renderer processes belong to
-    renderer-hidden and renderer-visible (9.8 D2), so the web-browser archetype is pooled with exclude_roles=("renderer",)."""
+    renderer-hidden and renderer-visible (9.8 D2), so the web-browser archetype is pooled with exclude_roles=("renderer",).
+    idle_from_s: the idle phase read from that many seconds past its first row (D83) — its span, rows and CPU, and so
+    D13's idle rate, over what is left."""
     class A: pass
     args = A(); args.run_dir = D; args.w_ms = w_ms; args.cap_ms = cap_ms; args.waker = waker; args.json = None
-    args.wake_def = wake_def; args.exclude_roles = set(exclude_roles)
+    args.wake_def = wake_def; args.exclude_roles = set(exclude_roles); args.idle_from_s = idle_from_s
     return _analyze(args)
 
 
@@ -340,6 +342,9 @@ def _analyze(args):
             if os.path.exists(p):
                 pids |= {pr["pid"] for pr in json.load(open(p))["procs"]}
         segments, (t0, t1), extra_pids = load_rows(os.path.join(D, th), pids, report.get("rx") if phase == "op" else None)
+        if phase == "idle" and getattr(args, "idle_from_s", 0.0):   # D83: the idle phase read past its launch work
+            t0 += args.idle_from_s
+            segments = [r for r in segments if r.t_in >= t0]
         # the tree's wakeup rows include the transient children load_rows admitted (Kdenlive's kdenlive_render): without
         # them every sleep of those threads found no row and was folded as a resume (9.5 D41)
         tree = pids | set(extra_pids)
