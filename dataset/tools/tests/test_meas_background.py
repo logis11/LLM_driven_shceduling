@@ -496,6 +496,27 @@ def test_a_check_is_read_against_the_interval_of_its_per_repeat_ratios():
     assert pool.check(None, 1.0, steady)["reading"] is None
 
 
+def test_every_d15_check_is_read_by_its_interval_and_every_comparison_by_the_tolerance(repo_root):
+    # D36 on the committed records: the five D15 checks — 7z's CPU per byte, run and wait per wake at one thread against
+    # eight; SteamCMD's CPU total and duration untraced against traced — each carry the interval of their per-repeat
+    # ratios; SteamCMD's two re-read from the pooled phases reproduce the record; the comparisons keep D14's reading
+    import json as _json
+    res = repo_root / "_dev" / "research" / "jioh" / "task-9.7-background-io" / "campaign" / "results"
+    z = _json.load(open(res / "7z-pooled.json"))["runs"]["7z"]
+    s = _json.load(open(res / "steamcmd-pooled.json"))["runs"]["steamcmd"]
+    assert sorted(z["checks"]) == ["mmt1 against mmt8: CPU per byte", "mmt1 against mmt8: run per wake",
+                                   "mmt1 against mmt8: wait per wake"]
+    assert sorted(s["checks"]) == ["untraced against traced: CPU total (exit accounting)",
+                                   "untraced against traced: download duration"]
+    for c in list(z["checks"].values()) + list(s["checks"].values()):
+        assert c["interval"] and c["reading"] in ("difference", "not resolved")
+    assert pool.checks("steamcmd", s, {}) == s["checks"]
+    for rec in (z, s):
+        for rows in rec["comparisons"].values():
+            for row in rows.values():
+                assert "interval" not in row and row["reading"] in ("difference", "not resolved", None)
+
+
 def test_a_stopped_job_keeps_its_gate(tmp_path):
     # the machine gate and the network gate (D27) each stop a job before it measures; the pooled record names which
     for run, name, gate, model in (("11", "meas-background-steamcmd-r1-full", "wrong-machine", "AMD EPYC 9V74 80-Core Processor"),

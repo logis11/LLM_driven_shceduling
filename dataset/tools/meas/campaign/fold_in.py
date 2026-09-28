@@ -44,7 +44,7 @@ ARCHETYPES = {
     "web-browser": ("chrome", "{version} (preinstalled), a local page with a text area and 400 paragraphs; the whole process tree, its renderers included — the typed-into page's, the spare renderer the page load takes over and Chrome's own WebUI renderer (D84); other tabs' and windows' renderers are renderer-hidden's and renderer-visible's; operation page-load: the scripted feed page feed.html (300 posts, thirty 1600×1200 pictures, a 200 000-record sort; design after PCMark 10 pp. 52–53 and CpsMark+ §4.3.3) from a local server, completion by the page's title after first paint", "input",
                     "swell-ie-c1", "swell-icmi14:ie-c1", []),
     "image-editor": ("gimp", "{version} (apt), a 4952×3288 image open (PCMark 10 Photo Editing's interactive image size, Technical Guide p. 71; synthetic content, imported as 16-bit; design); driven by a scripted pointer loop (drag, click, wheel; design); operation unsharp-mask: plug-in-unsharp-mask std-dev 4.0, amount 0.32, threshold 8 (PCMark 10's batch unsharp parameters mapped onto GIMP's PDB, p. 74; design) through the Script-Fu server, completion by its reply", "cadence", None, None, []),
-    "video-editor": ("kdenlive", "Kdenlive 23.08.5 (Ubuntu 24.04 apt), a project with one 20 s 1920×1080 30 fps H.264 clip (PCMark 10 Video Editing's 1080p H.264, p. 76; synthetic content, design) on V1 with an avfilter.unsharp effect at PCMark 10's sharpening parameters (p. 76); driven by a scripted pointer loop that scrubs the clip monitor (design); llvmpipe software-rasteriser threads excluded (D15); operation preview-render: the whole-clip timeline preview rendered by Kdenlive's external kdenlive_render process (part of the tree), completion when it exits", "cadence", None, None, []),
+    "video-editor": ("kdenlive", "Kdenlive 23.08.5 (Ubuntu 24.04 apt; 4:23.08.5-0ubuntu4 in every repeat's install log, `kdenlive --version` printing none), a project with one 20 s 1920×1080 30 fps H.264 clip (PCMark 10 Video Editing's 1080p H.264, p. 76; synthetic content, design) on V1 with an avfilter.unsharp effect at PCMark 10's sharpening parameters (p. 76); driven by a scripted pointer loop that scrubs the clip monitor (design); llvmpipe software-rasteriser threads excluded (D15); operation preview-render: the whole-clip timeline preview rendered by Kdenlive's external kdenlive_render process (part of the tree), completion when it exits", "cadence", None, None, []),
     "video-player": ("mpv-video", "{version}, --vo=x11 --ao=null, a 1280×720 30 fps H.264 file with AAC audio, looped", "play", None, None,
                      ["zoom (video) → video-call instead (D12)", "gamescope: compositor, not a decoder (9.4's record)"]),
     "audio-player": ("mpv-audio", "{version}, --no-video --ao=null, the same file's AAC audio, looped", "play", None, None,
@@ -133,7 +133,8 @@ WINDOWS_STATED = {
                     "while each send's mean duration stays within 2.88–3.19 s and its CPU within 2.19–2.44 s across the "
                     "25. The carried values are the means over the 25."),
     "web-browser": ("The page load read one by one over the 38 repeats (D87): the first page load of each repeat takes "
-                    "739 ms and 545 ms of CPU against 485 ms and 341 ms for each of the other 55, the network service's "
+                    "739 ms and 545 ms of CPU against a mean of 485 ms and 341 ms over the other 55 (446–570 ms and 292–413 ms "
+                    "by position in the pass), the network service's "
                     "foreground pool (`utility/ThreadPoolForeg`, in the residual) waking 606 times in it against 41 and "
                     "the renderer's main thread 101 times, its runs 2.45 ms, against 38 times at 5.03 ms — one page "
                     "load in 56, 2.8 % of the operation's CPU and 4.3 % of its wakes; past the first six, each block of "
@@ -386,7 +387,8 @@ def entry(aid, spec, d):
     models = sorted({m for r in recs for m in (r.get("cpu_model") or {}).values()}) or ["CPU model not recorded"]
     kernels = sorted({k for r in recs for k in (r.get("kernel") or {}).values() if k}) or ["kernel not recorded"]
     scope = (f"One observation (phase decision 2; D3, D10, D26): {observed}, on a GitHub-hosted ubuntu-24.04 runner "
-             f"(4 vCPU {' / '.join(models)}, kernel {' / '.join(kernels)}) under Xvfb 1280×800 — no display refresh, no GPU, "
+             f"(4 vCPU {' / '.join(models)}, kernel {' / '.join(kernels)}), the application's process tree pinned to one of its "
+             f"CPUs, which the runner's own agent processes share (D21; method §4), under Xvfb 1280×800 — no display refresh, no GPU, "
              f"no sound device; perf sched record on CLOCK_MONOTONIC over whole phases. ")
     if kind == "input":
         if aid in KEYS_ONLY:
@@ -396,7 +398,8 @@ def entry(aid, spec, d):
             scope += (f"Stimulus: SWELL-KW stream {stream} replayed per event by xdotool at recorded gaps (error p99 1.24 ms), "
                       f"keys and pointer events together, pointer positions scaled into the content area (D5, D12); ")
         scope += (f"the recordings' timestamps are quantised at 15.6 ms. Per-input run is the window rule (D13): all run time of the "
-                  f"process tree until the next input minus the idle rate. ")
+                  f"process tree until the next input minus the idle rate, so work that is not the idle rate inside a long gap "
+                  f"(an autosave after typing) is charged to the input before it. ")
         if d.get("idle_from_s"):   # D83
             scope += (f"The idle phase is read from {d['idle_from_s']:g} s past its start, past the launch work in it (D83); "
                       f"the idle rate is read over the same span. ")
@@ -435,6 +438,12 @@ def entry(aid, spec, d):
         scope += (f"Two campaigns (D79): the idle phase's values from {idle_tag}, {len(d['repeats'])} repeats; the phases "
                   f"with or after the input from {tag}, {len(later['repeats'])} repeats; the idle phase runs before any input. ")
     scope += stability_scope(aid, d)
+    heavy = (ph_idle or {}).get("heavy_event") if kind == "input" else None
+    if heavy and heavy.get("runs_ms"):   # D64: carried as its own event, beside the rule's list
+        scope += (f"The `{heavy['comm']}` heavy event (D64) is carried beside the rule, not on it: "
+                  f"{sum(heavy['count'])} runs over {heavy['span_s_total']:.0f} s of idle phase, "
+                  f"{sum(1 for c in heavy['count'] if not c)} of the {len(heavy['count'])} repeats holding none, so no "
+                  f"half-width is read for its rate. ")
     if aid in STOPPING_STATED:
         scope += STOPPING_STATED[aid] + " "
     if aid in WINDOWS_STATED:
@@ -472,10 +481,12 @@ def entry(aid, spec, d):
                   f"emitting no input wake; it runs to completion past the focus window.")
     if run == "code":
         notes += " Word streams drive this editor as the nearest recording: no code-editing keystroke dataset with timestamps exists (D4)."
-    if run == "thunderbird":
+    if run in ("thunderbird", "thunderbird-send"):
         notes += " Outlook streams exist only in SWELL-KW's interruption conditions c2 and c3 (D12)."
     if approx:
-        notes += " Bound by stated approximation, carrying these numbers unchanged (D11, D12): " + "; ".join(approx) + "."
+        notes += (" Bound by stated approximation, carrying these numbers unchanged (D11, D12): " + "; ".join(approx)
+                  + ". No run observes these programs, so the direction of each binding's error is not measured; each "
+                  "binding is design.")
     sporadic = [(pn, ph.get("repeats", d["repeats"]), sp) for pn, ph in d["phases"].items()
                 for sp in (ph.get("components") or {}).get("sporadic", [])]
     if sporadic:  # D43: a thread whose gap and run means do not exist in every repeat is reported, not carried

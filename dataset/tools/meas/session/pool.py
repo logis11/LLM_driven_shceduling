@@ -158,9 +158,10 @@ def pool_entry(name, by_rep):
         # every wake per instance before D23 and D27, per repeat: which instances never woke at all
         "instance_wakes_all": {i: [(by_rep[k].get("instance_wakes_all") or {}).get(i, 0) for k in reps]
                                for i in sorted({i for k in reps for i in (by_rep[k].get("instance_wakes_all") or {})})},
-        # D33 (9.5 D71's renderer rule, for repeats): a sparse component's gap table is over the repeats laid end to
-        # end and wrapped round, a repeat in which it never woke adding its time, so the table implies the rate the
-        # entry carries; every other component's gaps are its per-repeat gaps, wrapped round each phase
+        # D33 (9.5 D71's renderer rule, for repeats): a sparse component that never woke in some repeat has its gap
+        # table over the repeats laid end to end and wrapped round, that repeat adding its time, so the table implies
+        # the rate the entry carries; every other component's gaps, a sparse one that woke in every repeat included,
+        # are its per-repeat gaps, wrapped round each phase (9.9 D43)
         "tables": {c: {"gap_ms": _cp.summary([[g * 1000 for g in circular_gaps(
                                      [(comms[c]["t_in"].get(k, []), by_rep[k]["t0"], by_rep[k]["t0"] + spans[k]) for k in reps])]]
                                  if c in sparse and any(not comms[c]["wakes"].get(k, 0) for k in reps) else

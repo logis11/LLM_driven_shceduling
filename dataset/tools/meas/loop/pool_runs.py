@@ -30,6 +30,24 @@ import sys
 import common
 
 
+# the phases run.sh starts under shape_on (9.7 D11, D27): each must record its shaper installed
+SHAPED_PHASES = ("steam-fresh-shaped", "steam-fresh-untraced", "steam-update-shaped")
+
+
+def shaping_notes(r):
+    """9.7 D27: the shaper carried the download — in every phase run under shape_on the shaper installed (shape.<phase>
+    1), and the bytes through ifb0 are at least 90 % of the bytes received."""
+    notes = [f"{ph} not shaped: the shaper did not install" for ph in SHAPED_PHASES
+             if f"shape.{ph}" in r and r[f"shape.{ph}"] != "1"]
+    for x, v in r.items():
+        if x.startswith("shape.") and x.endswith(".through_ifb_bytes"):
+            ph = x[len("shape."):-len(".through_ifb_bytes")]
+            rx = r.get(f"net.{ph}.rx_bytes")
+            if rx and int(rx) > 0 and int(v or 0) < 0.9 * int(rx):
+                notes.append(f"{ph} not shaped: {v} B through ifb0 of {rx} B received")
+    return notes
+
+
 def kv(path):
     try:
         return dict(line.rstrip("\n").split("=", 1) for line in open(path) if "=" in line)
@@ -101,13 +119,7 @@ def validity(family, dirs, entry):
             incomplete = [x for x, v in r.items() if x.startswith("steam.") and x.endswith(".success") and v != "1"]
             if incomplete:
                 notes.append(f"SteamCMD install not reported complete {incomplete}")
-            # the shaper carried the download: bytes through ifb0 against bytes received in every shaped phase
-            for x, v in r.items():
-                if x.startswith("shape.") and x.endswith(".through_ifb_bytes"):
-                    ph = x[len("shape."):-len(".through_ifb_bytes")]
-                    rx = r.get(f"net.{ph}.rx_bytes")
-                    if rx and int(rx) > 0 and int(v or 0) < 0.9 * int(rx):
-                        notes.append(f"{ph} not shaped: {v} B through ifb0 of {rx} B received")
+            notes += shaping_notes(r)
             if r.get("steam.buildid"):
                 dbs.add(r["steam.buildid"])
         if family == "desktop":   # 9.8 D13 (the gate itself is checked for every family above)

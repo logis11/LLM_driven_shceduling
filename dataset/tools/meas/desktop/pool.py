@@ -194,6 +194,16 @@ def renderer_residual(rest, comms, spans, by_rep, cov):
     return residual
 
 
+# the key each subject's job records its build under (9.5 D69): Chrome's `version`, Element's and the Steam client's own
+BUILD_KEY = {"element": ("element.version", "Element "), "steam": ("steam.buildid", "Steam client build ")}
+
+
+def build_of(app, report):
+    key, name = BUILD_KEY.get(app, ("version", ""))
+    v = report.get(key)
+    return f"{name}{v}" if v else None
+
+
 def throttling_check(app, res):
     """chrome-hidden only: did intensive throttling engage in the carried phase? Returns (ok, wakes_per_s).
 
@@ -234,7 +244,7 @@ def pool_app(app, reps):
         entry["cpu_model"][k] = info["spec"].get("cpu_model")
         entry["kernel"][k] = info["report"].get("kernel")
         entry["run_id"][k] = (info["spec"].get("github_run") or {}).get("GITHUB_RUN_ID")
-        entry["version"][k] = info["report"].get("version")
+        entry["version"][k] = build_of(app, info["report"])
         entry["origins"][k] = info["report"].get("settings.origins")
         entry["renderers"][k] = info["report"].get("renderers.observed")
         for name, ph in res["phases"].items():

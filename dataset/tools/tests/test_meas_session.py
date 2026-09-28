@@ -540,6 +540,42 @@ def test_a_wake_is_classed_by_its_cause_traced_through_the_trace():
     assert tally["own"]["idle CPU (timer or interrupt)"] == 1
 
 
+def test_every_cause_class_is_reached_by_a_constructed_wake():
+    # D27, D32: the branches the first case does not reach — a job named by the process pid 1 starts for it
+    # (`(<unit>)`) or by the programs anacron's tree ran, both clock-bound events; pid 1's own helper, a desktop job
+    # kept; a kernel thread's wake, kept; a waker the trace does not resolve, kept as unknown; sysstat's daily summary,
+    # outside; another entry acting on its own, a desktop program's activity, kept
+    from meas.campaign.analyze import Row
+    from meas.session import causes as C
+    procs = {1: {"pid": 1, "comm": "systemd", "cgroup": "/init.scope"},
+             400: {"pid": 400, "comm": "dbus-daemon", "cgroup": "/meas.slice/dbus.service"},
+             531: {"pid": 531, "comm": "wireplumber", "cgroup": f"{U}/meas.slice/wireplumber.service"},
+             990: {"pid": 990, "comm": "anacron", "cgroup": "/system.slice/anacron.service"}}
+    inst = {"systemd": {"pid1": {1}}, "dbus-daemon": {"system-bus": {400}}, "pipewire": {"wireplumber": {531}}}
+    R = lambda t, comm, tid, pid: Row(t, t, t + 0.00005, 0.05, comm, tid, pid, "S")
+    wakes = [R(100.0, "gmain", 532, 531), R(110.0, "gmain", 532, 531), R(120.0, "gmain", 532, 531),
+             R(130.0, "gmain", 532, 531), R(140.0, "gmain", 532, 531), R(150.0, "gmain", 532, 531),
+             R(159.0, "dbus-daemon", 400, 400), R(159.0002, "gmain", 532, 531)]
+    rows = [(99.0, "systemd", 1, 1, "(fstrim)", 2001, 2001), (99.9999, "fstrim", 2001, 2001, "gmain", 532, 531),
+            (109.0, "anacron", 990, 990, "sh", 2011, 2011), (109.9999, "0anacron", 2011, 2011, "gmain", 532, 531),
+            (119.0, "systemd", 1, 1, "(sd-close)", 2021, 2021), (119.9999, "(sd-close)", 2021, 2021, "gmain", 532, 531),
+            (129.9999, "kworker/0:1", 16, 16, "gmain", 532, 531),
+            (139.9999, "mystery", 3001, 3001, "gmain", 532, 531),
+            (149.0, "systemd", 1, 1, "(sa2)", 2031, 2031), (149.9999, "sa2", 2031, 2031, "gmain", 532, 531),
+            (158.9999, "swapper", None, None, "dbus-daemon", 400, 400),
+            (159.0001, "dbus-daemon", 400, 400, "gmain", 532, 531)]
+    c = C.Causes(wakes, rows, [], procs, inst, {16}, re.compile(r"^rcu_"), {})
+    keep, tally, gone = c.split(wakes)
+    by_t = {round(t, 4): (cls, lab) for t, cls, lab in gone}
+    assert by_t == {100.0: ("event", "job fstrim (util-linux)"), 110.0: ("event", "job anacron (anacron)"),
+                    150.0: ("outside", "job sysstat-summary (sysstat)")}
+    assert {round(r.t_in, 4) for r in keep} == {120.0, 130.0, 140.0, 159.0, 159.0002}
+    assert tally["desktop"] == {"job systemd helper (systemd)": 1, "entry dbus-daemon (system-bus/dbus-daemon) on its own": 1}
+    assert tally["kernel"] == {"kernel thread kworker/0:1": 1}
+    assert tally["unknown"] == {"unresolved process mystery": 1}
+    assert tally["own"] == {"idle CPU (timer or interrupt)": 1}
+
+
 def test_systemd_networkds_wakes_are_outside():
     # D37: a stock Ubuntu 24.04 desktop leaves systemd-networkd inactive — the systemd package enables it on no install,
     # the desktop image hands every device to NetworkManager and netplan starts networkd only for networkd

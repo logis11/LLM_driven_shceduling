@@ -277,10 +277,12 @@ def test_a_transient_child_is_woken_by_its_own_wakeup_rows(tmp_path):
     (tmp_path / "perf.op.timehist.txt").write_text(
         "   1.000100 [0003]  kdenlive_render[201/200]    0.000      0.002      0.100      S\n"
         "   1.010100 [0003]  kdenlive_render[201/200]    9.900      0.002      0.100      S\n")
-    (tmp_path / "perf.op.wakeups.txt").write_text("   1.009990 [0001]  melt[300]  awakened: kdenlive_render[201/200]\n")
+    (tmp_path / "perf.op.wakeups.txt").write_text("   1.005000 [0001]  Xvfb[400]  awakened: kdenlive_render[201/200]\n"
+                                                  "   1.009990 [0001]  melt[300]  awakened: kdenlive_render[201/200]\n")
     res, _ = campaign.analyze_run(str(tmp_path))
     op = res["phases"]["op"]
     assert op["transient_pids"] == {200: ["kdenlive_render"]}
+    assert op["x_wakes_by_comm"] == {"kdenlive_render": 1}   # the X-server wake count reads the admitted child too
     assert op["segments"] == 2 and op["resumes_merged"] == 0 and op["rows"] == 2
     assert op["wake_check"] == {"kdenlive_render": {"gaps": 1, "slept_without_row": 0, "preempted_with_row": 0}}
 
@@ -354,6 +356,10 @@ def test_a_component_absent_from_a_repeat_is_sporadic_not_carried():
     comms["dbus"] = comm({1: 3, 2: 6, 3: 2})   # present in every repeat: the residual is carried
     chosen, residual, cov = pool.select_components(comms, spans, reps)
     assert residual["comms"] == ["dbus"] and cov["sporadic"] == []
+    # a selected component that wakes fewer than twice in one repeat is dropped too, not carried
+    comms = {"main": comm({1: 150, 2: 150, 3: 150}), "tick": comm({1: 30, 2: 1, 3: 30})}
+    chosen, residual, cov = pool.select_components(comms, spans, reps)
+    assert chosen == ["main"] and [c["comm"] for c in cov["sporadic"]] == ["tick"]
 
 
 def test_a_heavy_event_leaves_the_component_rows():

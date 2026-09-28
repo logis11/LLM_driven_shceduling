@@ -341,7 +341,11 @@ def test_the_batch_tables_regenerate_from_the_pooled_records(repo_root):
     # the compile and background entries' 28 tables are batch_fold_in.py's output on the committed pooled records
     from meas import batch_fold_in
     text = (repo_root / "dataset" / "archetypes.yaml").read_text()
+    assert len(batch_fold_in.TABLES) == 28
     assert batch_fold_in.rewrite(text, batch_fold_in.load_pools(repo_root)) == text
+    # every listed table is written: one the library no longer holds fails the rewrite
+    with pytest.raises(SystemExit, match="cpu-batch.tracker_block"):
+        batch_fold_in.rewrite(text.replace("    tracker_block:", "    tracker_blocks:"), batch_fold_in.load_pools(repo_root))
 
 
 def test_the_reported_gap_is_the_carried_gap_when_the_phase_start_is_given():

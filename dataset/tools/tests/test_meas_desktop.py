@@ -175,6 +175,26 @@ def _pool_runs(repo_root):
     return importlib.import_module("pool_runs")
 
 
+def test_each_subject_s_build_is_read_from_the_key_its_job_records():
+    # 9.5 D69 in 9.8 D31's census: Chrome records `version`, Element `element.version`, the Steam client `steam.buildid`
+    assert pool.build_of("chrome-hidden", {"version": "Google Chrome 153.0.8010.52"}) == "Google Chrome 153.0.8010.52"
+    assert pool.build_of("element", {"element.version": "1.12.28", "version": None}) == "Element 1.12.28"
+    assert pool.build_of("steam", {"steam.buildid": "1788652215"}) == "Steam client build 1788652215"
+    assert pool.build_of("steam", {}) is None
+
+
+def test_a_shaped_phase_is_invalid_when_its_shaper_did_not_install_or_carried_too_little(repo_root):
+    # 9.7 D27: every phase run under shape_on records its shaper installed, and its bytes through ifb0 are at least 90 %
+    # of the bytes received; before, a phase whose shaper failed recorded no bytes and no rule read it
+    pr = _pool_runs(repo_root)
+    ok = {"shape.steam-fresh-shaped": "1", "shape.steam-fresh-shaped.through_ifb_bytes": "950",
+          "net.steam-fresh-shaped.rx_bytes": "1000", "shape.steam-fresh-unshaped": "0"}
+    assert pr.shaping_notes(ok) == []
+    assert pr.shaping_notes({**ok, "shape.steam-fresh-untraced": "0"}) == ["steam-fresh-untraced not shaped: the shaper did not install"]
+    assert pr.shaping_notes({**ok, "shape.steam-fresh-shaped.through_ifb_bytes": "800"}) == [
+        "steam-fresh-shaped not shaped: 800 B through ifb0 of 1000 B received"]
+
+
 def test_the_desktop_validity_arm_reads_the_loop_s_checks(tmp_path, repo_root):
     # D13: the loop's per-repeat line for this family — the renderer count against the minimum the job wanted,
     # the page server, Element's session, and one origin count across the repeats that are repeats

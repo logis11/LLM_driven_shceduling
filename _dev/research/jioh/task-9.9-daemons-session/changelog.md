@@ -62,7 +62,7 @@ By 인지오's decision, D10's pinning (method §2.5, §5): every loaded service
 
 ## D13 — the phases and the checks: a fixed steady edge, the dry run through the blank, a 3 h probe (2026-09-22)
 
-> Amended by D19 (the probe's polls stop at the steady edge).
+> Amended by D19 (the probe's polls stop at the steady edge); corrected by D43 (the edge test accepts any DPMS state other than on, 1–3, not off alone).
 
 By 인지오's decision, method §2.4, §3 and §9: `steady` begins at a fixed offset from the measured login, set from the probe, and at that edge the job checks that the shield is active, Mutter's `PowerSaveMode` reports the monitor off and `SessionIsActive` holds, a job failing the check not being a repeat; the priming login lasts a fixed length set from the probe; the dry run runs a shortened priming login, then the measured login idle past `idle-delay` and the blank, the edge check and a short `steady`, keeping the raw `perf` file; the probe runs a 30 min priming login and a 3 h idle phase on the measured login, polling the shield and blank state every 10 s during its recording, the polls stated in its record; both censuses run outside the `perf` recording, at the steady edge before it starts and after it stops. Grounds: a fixed edge keeps every repeat's timeline the same, as 9.5–9.8's phases are; the census's queries go to pid 1, the user manager, the buses, gnome-session and GNOME Shell, so inside the recording they would be wakes of three of the four entries that the trace cannot tell from any other client's; the dry run answers the method's largest open risk, whether a headless session blanks, before the probe's hours are spent. The 3 h and 30 min lengths are design choices with no source: 3 h covers a timer firing hourly and a long first-login crawl within the 6 h job limit, and a probe that shows work still running at 30 min reopens the priming length before the first batch. Not taken: starting `steady` when the blank is seen, whose edge would vary between repeats; a census inside the recording with its wakes removed in analysis; a dry run that stops before the blank. No value changed by this entry.
 
@@ -82,7 +82,7 @@ By 인지오's decision on the dry comparison of 2026-09-22 (run 35795764108, tw
 
 ## D17 — the placement is a slice default, not only a sweep (2026-09-23)
 
-> Amended by D20 (D12's gate loosened to a stated share); corrected by D21 (the system bus stayed in `system.slice`).
+> Amended by D20 (D12's gate loosened to a stated share); corrected by D21 (the system bus stayed in `system.slice`) and D43 (six units carry the drop-in: the system bus and five user units).
 
 By 인지오's decision, method §2.5 and §7, extending D12: `system.slice` and, in the user manager, `app.slice`, `session.slice` and `background.slice` are set to the other CPUs, and the four entries' units are moved by drop-in into a `meas.slice` of their own on the measured CPU (pid 1's `init.scope` and the user manager's lie outside those slices and keep the pin of D10 and D14). Grounds: the sweeps reach what exists when they run, so a unit started by a timer inside the measured window still drew the measured CPU — the long-phase probe of 2026-09-22 (run 35798819217) recorded 1 660 schedule-ins and 762 ms there over its 3 h idle phase, `man-db` in one burst of 988, `sessionclean`, and `sadc`/`sa1`, the sysstat collection that runs every 10 minutes, which a 900 s steady window meets more often than not, so D12's gate would reject most repeats. A slice default is inherited by whatever is started later, so the timer jobs keep running, keep talking on the buses and keep waking the entries — what changes is the CPU they run on, which is what D10 asks. Stated limit for the scope: five units carry a `Slice=` drop-in. Not taken: masking the timers for the run, which removes work a real idle desktop does and the bus traffic the entries answer; loosening D12's gate to a share, which gives up the property the gate is for. No value changed by this entry.
 
@@ -119,6 +119,8 @@ Not taken: excluding the managers' own transient forks from the foreign class, e
 No value in `dataset/archetypes.yaml` changed by this entry.
 
 ## D21 — the system bus was never on the measured CPU; the placement is read from the processes (2026-09-23)
+
+> Corrected by D43 (`pin.entry_cgroups` records two of the six units; the census holds every process's cgroup).
 
 By 인지오's decision (method §2.1, §2.5, §5): the system bus is restarted into `meas.slice` during the install, before the desktop units start and before any login; the run records the control group each entry's unit is actually in; and `census.py placed` reads every entry instance's own `cpus_allowed`, and every other user-space process allowed the measured CPU, from the census taken after the pin and again at the steady edge. A `full` or `probe` job whose placement does not hold stops before measuring (`gate=misplaced-entry`). By the campaign workflow's loop step 6 — where a spread follows the harness rather than the application the fix is a design decision and the earlier repeats are superseded, as 9.5 D28 superseded `soffice`'s repeats when its typing changed — the dry jobs of 2026-09-23 (run 35814510341, repeats 26, 27) and the three unpolled probes (run 35816984839, repeats 28, 30, 31) are superseded as grounds for measured values, and the probe is re-run under the corrected placement.
 
@@ -172,7 +174,7 @@ By 인지오's decision, in the form of 9.7 D26 (campaign workflow, the loop ste
 
 ## D26 — the fold-in: four entries replace `system-daemon`; the idle files rebound, `xorg` retired, the cron session stated (2026-09-24)
 
-> Amended by D30 (the four entries regenerated under D27 and D29) and D31 (merged gaps, tables that keep their mean); corrected by D27 (the manifest holds `sysstat`) and D30 (the session bus woke in the cron session's window).
+> Amended by D30 (the four entries regenerated under D27 and D29) and D31 (merged gaps, tables that keep their mean); corrected by D27 (the manifest holds `sysstat`) and D30 (the session bus woke in the cron session's window) and D43 (sysstat's jobs and PHP's session cleanup did wake the entries in the four midnight repeats).
 
 **The entries.** By 인지오's decision the ids are `compositor-shell` (GNOME Shell, D3), `audio-server` (the PipeWire stack, D4), `service-manager` (`systemd`, pid 1 and the user manager, D7) and `message-bus` (`dbus-daemon`, the system and the session bus, D6): named for the kind of program, as 9.8 D25 named its entries "for the kind of application as `web-browser`, `mail-client` and `video-call` are", in the role words D2–D7 use — D7's task carries two managers, so not "init". `system-daemon` is removed, as 9.8 removed `electron-comms` and 9.7 `io-stream`. Not taken: the program names as ids, which repeat the process names the timelines' task `name:` fields carry; `system-daemon` kept as one entry's id, whose meaning — a class of stock daemons fitted across 51 processes — no entry now has (D5 left the id open).
 
@@ -205,7 +207,7 @@ Commit: this entry.
 
 ## D27 — a wake's cause is traced through the trace; wakes owed to causes outside the observed desktop leave the components (2026-09-24)
 
-> Amended by D32 (sysstat's jobs outside; decision 1 gains a ground) and D37 (`systemd-networkd` outside).
+> Amended by D32 (sysstat's jobs outside; decision 1 gains a ground) and D37 (`systemd-networkd` outside); corrected by D43 (sysstat's jobs left wakes in those four repeats; four GNOME Shell wakes over the 24 repeats are php-fpm's).
 
 By 인지오's decisions of 2026-09-24, after the fold-in (D26) was found to carry wakes the desktop does not make. What wakes each entry's threads, read from the released wakeup rows of all 24 repeats: pid 1's 7,943 rows are 54.4 % `php-fpm8.3`, 180 in every repeat, one every 10.001 s — PHP 8.3's FastCGI service, which the runner image ships, signalling pid 1; the system bus's 6,031 rows are 99.8 % pid 1, and 74.9 % of them fall inside pid-1 runs that `php-fpm` started; WirePlumber's worker thread (`gmain`) has 9,249 rows, 4,320 of them raised by the workflow's own "wait for the run" step (`while kill -0 …; do sleep 10; done` in `meas-session.yml`), 180 in every repeat at the same point of each iteration, and 4,316 of those followed by the thread's own timer 100.2 ms later (1st–99th percentile 100.17–100.25 ms). `compositor-shell`'s wakes are its own threads and timers. The foreign-work bound (D20, D22) did not see any of this: it counts work on the measured CPU, and these wakers run on the others.
 
@@ -292,7 +294,7 @@ Commit: this entry.
 
 ## D33 — the audio server's worker and the system bus carried as sparse components (2026-09-25)
 
-> Amended by 9.5 D78 (gap and run means over every repeat) and D37 (`message-bus` re-pooled without `systemd-networkd`); corrected by 9.6 D35 (half-widths past twenty repeats were too wide) and 9.5 D77 (over a short span not compiled at its rate).
+> Amended by 9.5 D78 (gap and run means over every repeat) and D37 (`message-bus` re-pooled without `systemd-networkd`); corrected by 9.6 D35 (half-widths past twenty repeats were too wide) and 9.5 D77 (over a short span not compiled at its rate) and D43 (the audio server's worker woke in every repeat, so its gap table is per repeat; only the bus's is laid end to end).
 
 By 인지오's decision, on D32's result. Both components are their entry's whole activity once D27's and D32's causes are out, and both are sparse: `wireplumber/gmain` wakes 2–12 times a phase on its own timer; `system-bus/dbus-daemon` 0–36 times, in bursts from journald, pid 1's own activity, resolved, oomd, udevd and udisks2, and not at all in 6 of the 24 phases. They are carried as sparse components, the class 9.8 D27 set: with their half-widths over at least five repeats, their three values together, and their count stated — the wake rate over every repeat, zero where the component never woke; the gap and run means over the repeats it woke in; its gap table over the repeats laid end to end and wrapped round, a repeat in which it never woke adding its time (9.5 D71's rule for a renderer the thread never woke in), so the entry compiles at the rate it carries. Values: `wireplumber/gmain` 0.0029 wakes/s ±21.6 %, gap mean 426.7 s ±19.8 %, run mean 0.036 ms ±4.0 %; `system-bus/dbus-daemon` 0.0057 wakes/s ±43.8 % over 24, gap mean 238.6 s ±45.7 % and run mean 0.188 ms ±25.0 % over the 18 it woke in. `pid1/systemd` keeps D29 for its run mean alone, its rate and gap mean passing.
 
@@ -350,6 +352,8 @@ Commit: this entry.
 
 ## D38 — the midnight repeats' WirePlumber wakes: the split stated (2026-09-26)
 
+> Corrected by D43 (repeat 61 holds two kept wakes a pid-1 job woke, and no pair in the first 4 s).
+
 By 인지오's decision, on the 2026-09-26 review of 9.5–9.9: `wireplumber/gmain` woke 0.0057 times a second in repeats 47, 48, 49 and 51 — the first batch, launched at 23:35 UTC, which crossed midnight and met the cron session (D23) — against 0.0023 in the other 20, after D23's windows. Traced to its cause, the rows leave by D23's and D27's rules if a clock-bound or outside cause is found, else the split is stated.
 
 Traced with the pool's causes, every kept wake of the worker with the waker its wakeup row names, in the four and in six others (58, 60, 61, 62, 63, 68). Every kept wake is the worker's own — an idle-CPU wake, a timer or interrupt — most in pairs 100 ms apart, the second D27's fixed-delay follow-up of the first. Every repeat read holds a pair in the phase's first 4 s, most a wake near 17–19 s and one or two pairs later; the four midnight repeats hold 3 to 5 more pairs, 496–1205 s into the phase, past the cron session's window at 317–365 s — 9–12 kept wakes a phase against 2–7. 14 of those 15 pairs start within 0.2 s of one of the runner's `dockerd` bursts, three every 10 s, each repeat on one burst of its own cycle (47 at x8.1 s, 48 at x1.0 s, 49 at x4.4 s, 51 at x5.0 s into the phase); repeat 60's later pair, 809.1 s, falls on none (its bursts x0.1, x3.5, x5.1 s). The trace names no waker for any of them: the wakeup row's waker is the idle task.
@@ -368,7 +372,7 @@ Commit: this entry.
 
 ## D40 — the untraced control: perf's own effect on the four entries' values, read and stated in their notes (2026-09-27)
 
-> Corrected by D41 (the check read per entry, not over the session's 18 values).
+> Corrected by D41 (the check read per entry, not over the session's 18 values) and D43 (the control jobs record 19–39 foreign user-space schedule-ins each, within the bound, not none).
 
 The control of the 2026-09-26 review of 9.5–9.9, under its own spec (`_dev/docs/spec/jioh/task-9.5-untraced-control.md`; 9.5 D82 for the method): the `steady` phase run twice per job, traced under `perf sched record` and untraced, a `/proc` snapshot at each edge of each run, the per-job ratios, untraced over traced, read by their 95 % interval. Runs `meas-ci:session` #25–#28 (mode `control`): 10 jobs, 6 landed on the AMD EPYC 7763 and 4 stopped by the machine gate — AMD EPYC 9V45 2, Intel Xeon Platinum 8573C 1, AMD EPYC 9V74 1. Six jobs, three in each order, every one valid: the steady edge found the terminal idle state, the pin applied, no user-space work outside the four entries on the measured CPU.
 
@@ -393,5 +397,20 @@ Commit: this entry.
 By 인지오's decision, from the 2026-09-28 review of 9.5–9.9: the steady phase is read in 100 s windows, per carried component and for each entry whole, pooled over the 24 repeats — `dataset/tools/meas/windows.py`, `campaign/results-windows.md` — and where an entry does part of its work only in part of the phase, its scope states it; no value changes, the carried values staying the phase's means. `compositor-shell`: the first 100 s past the steady edge is the phase's busiest — `JS Helper` wakes at 1.46 times its phase rate and `gnome-shell`'s run mean is 8.03 ms against 5.10–6.75 ms after — the phase's windows holding 5.7 % of its CPU above its median window. `audio-server`: `wireplumber/gmain` wakes at 7.2 times its phase rate in the first 100 s — 50 of its 125 kept wakes fall in the phase's first 22 s, in 22 of the 24 repeats a pair 0.1 s apart within the first 4 s, one wake 12–22 s in, or both — beside the midnight repeats' pairs (D38). Neither is launch work the traces show, the ground on which 9.5 D34 and D83 move a phase's start; `compositor-shell` uses about 0.02 % of a CPU and `audio-server` wakes about five times in 30 minutes. `service-manager` and `message-bus` rise and fall on a cycle of about 700–800 s through the phase rather than at its start (9.8 % and 31.6 % of their CPU above the median window), and are not stated.
 
 Tooling: `WINDOWS_STATED` in `session/fold_in.py`; the reading is 9.8 D34's `meas/windows.py`. Results: `campaign/results-windows.md`, `campaign/results-windows/windows.json`. Values changed: none; `compositor-shell`'s and `audio-server`'s scopes. The raw records are unchanged.
+
+Commit: this entry.
+
+## D43 — the coverage sweep's corrections: texts and guards brought to what the code and records show (2026-09-28)
+
+By 인지오's decision, on the 2026-09-28 sweep of the 9.5–9.9 changelogs' coverage claims against the tooling (9.5 D89): the claims below were read false or stale against the code, the library and the committed records, and each is corrected to what those show. No carried value changes. D23's cron window — written as every wakeup by `cron`, opened by the code only at cron's wakeups of an entry's thread — is decided on its own.
+
+- D26 and D27: sysstat's jobs and PHP's session cleanup did wake the entries in the four midnight repeats (47, 48, 49, 51) — `audio-server` the collector 9–10 times a repeat, the session cleanup 2–4, the 23:59 sample 2 and the daily summary 1–2; `message-bus` 14, 7 and 1–7; `service-manager` 2, 1 and 1 (`pooled.json`, the causes) — the footprint D32 later took out by cause. D27: GNOME Shell's kept wakes are its own; four over the 24 repeats, woken by `php8.3-fpm.service`, leave it.
+- D33: the audio server's worker (`wireplumber/gmain`) woke in every one of the 24 repeats, so its gap table is its per-repeat gaps wrapped round each phase, not laid end to end; only the system bus's is. Its gap mean is the same either way. `session/pool.py`'s comment restated.
+- D38: in repeat 61 two kept wakes of the worker are classed unknown — a job pid 1 launched (`install`) woke them — so not every kept wake is the worker's own; and repeat 61 holds one early wake, at 2.969 s, not a pair in the first 4 s nor a wake 12–22 s in.
+- D40: the six control jobs record 19, 25, 19, 39, 23 and 38 foreign user-space schedule-ins on the measured CPU, 1.0–1.6 × 10⁻⁵ of the phase: valid within D20's and D22's 2 × 10⁻⁴ bound, not free of user-space work.
+- D17: six units carry the `Slice=` drop-in, the system bus and five user units, as D21 corrected for the bus. D21: `pin.entry_cgroups` records the system bus's and GNOME Shell's control groups, two of the six; the census files hold every process's. D13: the steady edge's idle test accepts any DPMS state other than on (`census.is_idle`, PowerSaveMode 1–3), not off alone.
+- Guards: `test_every_cause_class_is_reached_by_a_constructed_wake` reaches the classes the first case no longer did — a job named by the process pid 1 starts, an anacron job, pid 1's own helper kept, a kernel thread's wake, an unresolved waker kept as unknown, another entry acting on its own — and asserts sysstat's daily summary outside, which D32's named test did not.
+
+Values changed: none. Compiled with `--allow-window`: the library hash only, 0 of 100 artifacts changing beyond it (`tools/beyond_hash.py`); no demand moves.
 
 Commit: this entry.

@@ -58,7 +58,7 @@ By 인지오's decision, after the five repeats of `meas-ci:build:35215328887` t
 
 ## D11 — the campaign re-run from the start; repeats added one at a time until the stability criterion holds (2026-09-18)
 
-> Amended by D23 (the quantity list covers every value the fold-in carries).
+> Amended by D23 (the quantity list covers every value the fold-in carries), D27 (`clamscan` pooled over repeats 9–18) and D28 (`python3` over repeats 11–18).
 
 By 인지오's decision: the observation behind the 9.6 archetypes is a new campaign under the machine gate, measured from the start; nothing of `meas-ci:build:35215328887` is used as data — its EPYC 7763 repeats are not pooled and its Xeon 8573C repeat is no longer D10's cross-machine check — and its four EPYC 7763 repeats set only the starting count. The new run launches six repeats — at the spread of those four repeats' carried medians (D10's list: CPU per process of `cc1`, `as`, `gcc`, `sh`, `fixdep`, `rm` and make's dispatch run, warm `-j8`), six is the first count at which every 95 % half-width is within 5 % (`rm` last: ±5.6 % at five, ±4.8 % at six); a job stopped by the machine gate is not a repeat. Once the six have landed, repeats are added one at a time and the criterion evaluated after each, until it holds; every same-machine repeat obtained is pooled and reported. Supersedes D10's top-up (batches of two added to the four repeats in hand) and its cap of eight; D10's tolerance, quantity list and machine stand, and the campaign has no cross-machine check (`campaign/method.md` §8, 2026-09-18, second entry). The machine stays the AMD EPYC 7763 by 인지오's decision, the most frequent model in the project's recorded draws: 26 of 56 jobs (the first 9.5 campaign 20 of 45, `task-9.5-interactive-typing/campaign/results-interactive3/reports/*.spec.json`; run 35215328887 4 of 5; run 35328071379 2 of 6, the other four — AMD EPYC 9V45, EPYC 9V74, Intel Xeon Platinum 8370C, Xeon 6973P-C — stopped by the gate). The top-up run 35326810453 (repeats 6, 7) was cancelled before either job measured. The campaign's tag is `meas-ci:build:2026-09-18` (9.5 D27), each repeat's run id in the pooled record. Tooling: `pool.py` drops the cap. No value changed by this entry.
 
@@ -122,7 +122,7 @@ By 인지오's decision, the collapse D21 left open: a `cpu-batch` task draws it
 
 ## D23 — the stability criterion covers every carried value; repeats added until it holds (2026-09-19)
 
-> Amended by D25 (the block table's mean in place of the gap table's median), D26 (each table tested by its per-repeat mean) and D29 (four values carried with their half-widths).
+> Amended by D25 (the block table's mean in place of the gap table's median), D26 (each table tested by its per-repeat mean), D27 (`clamscan` pooled over repeats 9–18), D28 (`python3` over repeats 11–18) and D29 (four values carried with their half-widths).
 
 By 인지오's decision: D10's tolerance applies to every value the fold-in carries, not only D11's seven medians — the per-step CPU of `sh` and `gcc` (D20) and each bound program's run-between-blocks and program-level gap tables and its share of CPU past the boot slice (D21, D22) join the list, with the tolerance the larger of 5 % and the trace's 1 µs resolution; full-protocol repeats on the EPYC 7763 are added one at a time under D11's procedure until every quantity holds, every same-machine repeat pooled, and the fold-in reads the final pool (`campaign/method.md` §8, 2026-09-19, third entry: list, tolerance, procedure and the status at four repeats, stated before any further repeat). Ground: one precision standard for every value the library carries from this campaign; a value outside it would carry an uncertainty its entry does not show. At four repeats five quantities are out of tolerance — `sh` step 1 ±6.0 %, `python3`'s run-between-blocks median ±6.0 %, `tracker`'s ±5.4 %, `clamscan`'s gap median ±9.0 %, `python3`'s ±24.8 % — about five repeats at the present spread for the first three, eight for `clamscan`'s gap, about forty for `python3`'s, whose spread comes mostly from repeat 4 (0.227 ms against 0.165–0.183). After the 8th repeat the values and projected counts go to 인지오 before the loop continues. Each repeat is one job of about 93 minutes. The pooling and stability tools compute the new quantities before the first new job. Supersedes D11's quantity list; D11's machine, gate and procedure stand. D18's release carries the top-up runs beside the three named there (9.5 D27, one release per campaign). No value changed by this entry.
 
@@ -138,11 +138,13 @@ By 인지오's decision, before any further repeat. D22's blocks, drawn from the
 
 ## D26 — the criterion is the shared stability rule: each carried table tested by its per-repeat mean (2026-09-19)
 
-> Amended by 9.5 D78 (a table's mean tested as the table carries it, count-weighted).
+> Amended by 9.5 D78 (a table's mean tested as the table carries it, count-weighted); corrected by D37 (the six per-process tables tested and reported, not carried; the warm build's block-I/O delay 0 at every quantile, at most 18 ms in one process).
 
 By 인지오's decision, before repeat 9 is read: 9.6's criterion is the stability rule every campaign shares, kept in `_dev/research/jioh/measurement-campaign-workflow.md`, "The stability rule" (9.5 D30). What changes for this campaign: the 23 carried tables D23 tested by each repeat's median — CPU per process of `cc1`, `as`, `gcc`, `sh`, `fixdep`, `rm` and make's dispatch run (D11), the eleven member-step CPU tables (D20), and each bound program's runs between voluntary blocks (D21, D22) — are tested by each repeat's mean; the mean block per run (D25) and each bound program's share of CPU past the boot slice already fit the rule. The list is unchanged: every table the fold-in carries is on it — make's dispatch table, the eleven step tables, each bound program's run and block tables; no wait table is carried, a member's waits being its children's runs (D20) and the warm build showing no block-I/O delay (D9). At repeats 4, 5, 7, 8 (`campaign/results.md`, regenerated): every table mean within tolerance — `sh` step 1 ±4.5 % (±6.0 % on medians), `python3`'s runs between blocks ±3.4 % (±6.0 %), `tracker`'s ±2.6 % (±5.4 %); out of tolerance only D25's three block means, `clamscan` ±12.0 %, `python3` ±16.4 %, `tracker` ±20.0 % (3.2 µs); no value holds below the five-repeat minimum (D24). At the present spread the rule holds at 19 repeats, `python3`'s block mean last (`clamscan` 12, `tracker` 18); D25's 28 for `tracker` took 5 % of its 15.9 µs mean as the bound, where the 1 µs floor is the larger. Tooling: `pool.py` carries each table's per-repeat mean and, per value, the repeat count at which its present spread would hold (`campaign/method.md` §8, 2026-09-19, seventh entry). No value changed by this entry.
 
 ## D27 — `clamscan`'s signature database fixed from repeat 9 on (2026-09-19)
+
+> Amended by D28 (`python3`'s train phase pooled over repeats 11–18).
 
 By 인지오's decision: every later repeat's `clamscan` reads one signature database — daily 28128, main 63, bytecode 339 — and `clamscan`'s values pool only the repeats that read it. Repeats 4, 5, 7 and 8 scanned with daily 28127 (built 2026-09-18 06:25); in repeat 9 the runner's own `clamav-freshclam` service replaced it with 28128 (built 2026-09-19 06:24) at 07:15 UTC, before the scan started at 07:34 UTC. The service checks hourly and the database is released daily, so a campaign of several days would read several databases, and the workflow's validity check — the same signature database in every repeat (`measurement-campaign-workflow.md`, the loop, step 4) — failed for repeat 9. A repeat of this campaign is identical work (the workflow's "What a repeat is"), and the signature database is part of what `clamscan` does with each file. Repeat 9's `clamscan` values sit inside repeats 4–8's range — run between blocks mean 9 090 µs against 8 838–9 441, block per run mean 209 µs against 196–233, share past the boot slice 0.109 against 0.107–0.115, scan 93.9 s against 91.6–97.4 s — which shows one day's increment, not the several a campaign spans; 28127 cannot be fetched again (the artifacts keep the file listing, not the database). So the database was fetched once while current and checked by its three versions into the workflow's Actions cache, readable only by the repository's workflows (key `clamav-db-daily-28128-main-63-bytecode-339`, run 35430732315); from repeat 11 on each job restores it (the job fails on a cache miss), stops the runner's freshclam service after install, and runs `clamscan --database` on it, recording the daily version read. Repeat 10, launched before the change, reads 28128 through the service, current until the next daily release. Repeats 4, 5, 7 and 8's `clamscan` values are reported beside the pool, not pooled; every other phase pools every repeat. `clamscan`'s count restarts at repeat 9: at least five repeats on 28128, about ten at the spread of repeats 4–9, within the 37 `python3`'s block mean needs at the present spread (`campaign/method.md` §8, 2026-09-19, eighth entry). No value changed by this entry.
 
@@ -164,7 +166,7 @@ By 인지오's decision: the top-up ends and the fold-in reads the pool of these
 
 ## D31 — the fold-in: the campaign's values and structure are in the dataset (2026-09-20)
 
-> Amended by D33 (the campaign's run ids and D29's counts and ranges added) and D34 (the 22 tables keep their mean).
+> Amended by D33 (the campaign's run ids and D29's counts and ranges added) and D34 (the 22 tables keep their mean); corrected by D37 (`cpu-batch`'s saturation line was the eight-repeat checkpoint's; the scope claims hold for `cpu-batch` alone, whose scope named no instrument).
 
 The decisions of this slice are applied to `dataset/archetypes.yaml` and the compiler, from the final pool of 14 repeats (D30). Plan: `_dev/docs/plan/jioh/task-9.6-fold-in.md`.
 
@@ -184,7 +186,7 @@ The decisions of this slice are applied to `dataset/archetypes.yaml` and the com
 
 ## D32 — two claims narrowed to what was observed; the venue's sensitivity handed on (2026-09-20)
 
-> Corrected by D36 (the kernel build's `cc1` 365 ms; the 349 ms was a superseded run's).
+> Corrected by D36 (the kernel build's `cc1` 365 ms; the 349 ms was a superseded run's) and D37 (the DKMS object job runs `objtool` too, seven members; its chain was never checked).
 
 By 인지오's decision, reviewing the fold-in's stated limitations:
 
@@ -224,6 +226,8 @@ Commit: this entry.
 
 ## D35 — the stability rule's t multiplier at k − 1 degrees of freedom past twenty repeats (2026-09-26)
 
+> Amended by 9.5 D78 (`python3`'s two projections re-read, 49 and 31).
+
 No new decision: D10's rule is a t interval with k − 1 degrees of freedom (the campaign workflow, after `kalibera-ismm13` §9.3), and `meas/stability.py` carried the multiplier as a table to k = 20 and used t(19) = 2.093 for every larger k, so the half-width of a value over 21–45 repeats was too wide by 0.3–3.8 % of itself; the repeat projections of `campaign/pool.py` and `build/pool.py` past 20 used the same table, and `background/pool.py`'s the normal's 1.96, which projects too few. Found on the 2026-09-26 review of 9.5–9.9. `stability.t975(k)` gives Student's t 97.5 % point at k − 1 degrees of freedom from the closed form of its distribution function for whole degrees of freedom, to three decimals as printed tables give it — the old table's values exactly up to k = 20 — and every reading of the rule and every projection uses it.
 
 The pooled records are re-read, not re-pooled: each stability block is its pool module's criterion on the record's stored per-repeat values, which reproduces every committed block at the previous commit; no other field of a record changes. What moved — half-widths over more than 20 repeats, projections past 20:
@@ -241,5 +245,20 @@ Commit: this entry.
 ## D36 — stale figures in two entries' stats and notes (2026-09-26)
 
 No new decision; the figures the pooled record gives, found on the 2026-09-26 review of 9.5–9.9. `compiler-child` carries the object job's per-(role, step) tables (D19, D20), so its stats state the carried `cc1` step, 439.1 ms ±0.78 % (`object-job cc1 1/1`), where they stated the per-process role table, 435.0 ms, which the entry does not carry; its step half-widths are ±0.6–2.0 % (were stated ±0.7–1.4 %). `build-orchestrator`: 719 make processes per build in every repeat (was 716, twice); the kernel build's `cc1` median per process 365 ms against the DKMS build's 288 ms (the 349 ms stated was a superseded run's); an object job's six processes about 453 ms, the sum of its step means (the 471 ms stated predates D34's table means). The record's 9.6 headline row and its "also within the rule" line follow. Values changed: none; stats and notes text.
+
+Commit: this entry.
+
+## D37 — the coverage sweep's corrections: texts and a guard brought to what the code and records show (2026-09-28)
+
+By 인지오's decision, on the 2026-09-28 sweep of the 9.5–9.9 changelogs' coverage claims against the tooling (9.5 D89): the claims below were read false or stale against the code, the library and the committed records, and each is corrected to what those show. No carried value changes.
+
+- `build-orchestrator`'s notes and D32: the DKMS module build's three object jobs run seven members in every repeat, `objtool` beside the six of the kernel build's chain, `as cc1 fixdep gcc-13 objtool rm sh`; the chain check (`build/shapes.py`) reads the six-member shape only, so their step CPU was never read. The notes state the seventh member and that the step CPU is not read.
+- `cpu-batch`'s stats line: the saturation over the job was the eight-repeat checkpoint's, `ffmpeg`'s and `HandBrakeCLI`'s the lifetime figures; restated from the 14-repeat pool — `clamscan` 0.969–0.979, `ffmpeg` 0.9990–0.9992, `HandBrakeCLI` 0.989–0.992, `python3` 0.9997–0.9998, `tracker` 0.925–0.964.
+- D31's scope claims hold for `cpu-batch` alone: the two mid-campaign conditions and the four half-widths are its values; `compiler-child`'s scope names its venue through `build-orchestrator`'s. `cpu-batch`'s scope named no instrument and now names it.
+- `compiler-child`'s scope and D26: the warm build's block-I/O delay per process is 0 at every quantile, at most 18 ms in one process, not none. D26's 23 tables are the ones tested; the six per-process tables among them are reported, not carried.
+- Status lines added where a later entry changed an entry and none said so: D11 and D23 (D27, D28), D27 (D28), D35 (9.5 D78).
+- Guard: `meas/batch_fold_in.py` fails when a table it lists is not in the library, and `test_the_batch_tables_regenerate_from_the_pooled_records` asserts the 28 and that failure; before, a missing param was skipped and the test passed.
+
+Values changed: none; the scopes of `cpu-batch` and `compiler-child`, `build-orchestrator`'s notes, `cpu-batch`'s stats line. Compiled with `--allow-window`: the library hash only, 0 of 100 artifacts changing beyond it (`tools/beyond_hash.py`); no demand moves.
 
 Commit: this entry.

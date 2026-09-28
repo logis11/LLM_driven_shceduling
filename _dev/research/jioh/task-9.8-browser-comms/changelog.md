@@ -48,6 +48,8 @@ By 인지오's decision, scope-card item 12, the `zoom` half: the two `zoom` hel
 
 ## D9 — the `thunderbird` tasks rebind to `mail-client` (2026-09-20)
 
+> Corrected by D36 (three `thunderbird` send tasks stay on `network-bulk` until the send is placed (9.7 D3, D30)).
+
 By 인지오's decision, scope-card item 14: the three `thunderbird` tasks bound to `electron-comms` in `c1-office`, `c4-office` and `c7-office` rebind to `mail-client`, 9.5's per-application archetype measured on Thunderbird. Grounds: this is an identity binding — the task names the program the archetype is measured on — so it needs neither an approximation nor a stated role, which is what D1 asks of every binding it can get. In each of the three files the `thunderbird` task is the only mail task, so the rebinding duplicates nothing. The depicted state fits the form: a measured per-application archetype carries `components` for the application's idle behaviour and `focus_components` with `stimulus` for its focus windows (9.5 D16–D18), so a mail task with no focus window draws the idle components, which is what a background mail client in an office file is. Together with 9.7 D3, which makes the send an operation of `mail-client` instead of a `network-bulk` task, this collapses all nine `thunderbird` bindings in the coreset — three on `mail-client`, three on `network-bulk`, three on `electron-comms` — onto one archetype, and closes the open item that `thunderbird` is bound three ways with each non-identity binding needing a stated role. Not taken: binding to D7's Electron chat-client entry because the ananicy catalogue files `thunderbird` under `Chat` beside `discord`, `element-desktop`, `slack` and `zoom` (S2-23) — that catalogue is a treatment profile and not a behaviour class, and the binding would put a Thunderbird-named task on an Element measurement while a Thunderbird measurement exists. Hands to 9.10: the office files' mail tasks carry `mail-client`; whether an office timeline holds a mail task at all, and whether a send operation is placed in one, stays 9.10's. No value changed by this entry.
 
 ## D10 — the four entries take the per-thread-comm component form with no focus side; the hidden renderer's phase length comes from a long-phase probe (2026-09-20)
@@ -438,7 +440,7 @@ No value changed by this entry.
 
 ## D25 — the fold-in: four entries replace `electron-comms`, every binding rebound or retired (2026-09-22)
 
-> Amended by D26 (every table's form and gaps; the renderer entries' components), D31 (`renderer-hidden`'s tables and rates over 19 repeats, two Chrome builds) and 9.5 D84 (the renderer of the page in use carried by `web-browser`).
+> Amended by D26 (every table's form and gaps; the renderer entries' components), D31 (`renderer-hidden`'s tables and rates over 19 repeats, two Chrome builds) and 9.5 D84 (the renderer of the page in use carried by `web-browser`); corrected by D36 (the library header's sentence named `focus_components` and `stimulus`, which these entries do not carry).
 
 **The entries.** By 인지오's decision the ids are `renderer-hidden`, `renderer-visible`, `chat-client` and
 `game-client`, named for the kind of application as `web-browser`, `mail-client` and `video-call` are. They are
@@ -597,6 +599,8 @@ Commit: this entry.
 
 ## D31 — the hidden renderer's repeats to the rule; `HangWatcher`'s run mean held (2026-09-26)
 
+> Corrected by D36 (the results page read no build for Element and the Steam client; each subject's key read now).
+
 By 인지오's decision, on the 2026-09-26 review of 9.5–9.9: the hidden renderer's repeats added to the pool's projection, `HangWatcher`'s run mean held by the rule and D17 no longer applied to it. Read as carried (9.5 D78) over the 14 landings the run mean was 0.0274 ms ±5.29 %, the projection 16. Repeats 12 and 13 were added (run #51); at 16 landings it read ±5.25 % and projected 18, so 14 and 15 were added; at 18, ±5.02 % projecting 19, so 16 — the rule read after each landing past the batch (the workflow; 9.7 D26). At 19 landings it holds, 0.0267 ms ±4.79 %, every repeat valid. Nine jobs, runs #51–#57: five landed on the AMD EPYC 7763 and four were stopped by the machine gate (EPYC 9V45, Xeon Platinum 8573C twice, EPYC 9V74), each in `gated_out` (41 → 45) and in `campaign/machine-draws.md`.
 
 The added repeats ran Google Chrome 153.0.8010.52 and the first fourteen 152.0.7977.82. Google's repository serves only its current build, so under 9.5 D69 the build is recorded per repeat and the census stated with the values — the entry's observed line, the results page, the record. Whether the builds differ: every value the entry carries agrees within 0.09–1.27 standard deviations of the 152 repeats' own spread, 12 of the 21 within 0.5, and no component appears or disappears; every run mean is lower under 153, by 0.22–1.27 of them (`HangWatcher` 0.0248 against 0.0274 ms, `chrome` 0.0895 against 0.0976), which five repeats cannot place between the build and the runner's speed (D17). The mix is carried and stated.
@@ -635,6 +639,8 @@ Commit: this entry.
 
 ## D34 — the carried phases read in time windows; the renderer entries' transients stated (2026-09-28)
 
+> Corrected by D36 (the phase whole leaves out `game-client`'s `heavy_events`, the burst D33 split off).
+
 By 인지오's decision, from the 2026-09-28 review of 9.5–9.9: every carried phase is read in 100 s windows, per carried component and for the phase whole, pooled over the carried repeats — `dataset/tools/meas/windows.py`, `campaign/results-windows.md` — and where a phase does part of its work only in part of it, the entry's scope states it; no value changes, the carried values staying the phase's means. The two renderer entries carry such work. `renderer-hidden` (19 repeats): the page's own thread `chrome` runs longer early in the phase than late, its run mean 0.107 ms in the first 100 s and 0.057 ms in the last, and the residual (`MemoryInfra`) wakes at 5.2 times its phase rate 200–300 s into the phase; the phase's windows hold 13.3 % of its CPU above its median window. `renderer-visible` (11 repeats): every residual wake falls in the phase's first 200 s, and `chrome`'s run mean is 0.179 and 0.231 ms there against 0.092–0.123 ms after; the residual holds 12.5 % of the entry's CPU and the phase's windows 29.4 % of it above its median window. Neither is launch work the traces show, the ground on which 9.5 D34 and D83 move a phase's start; each entry uses about a hundred-thousandth of a CPU. `chat-client` and `game-client` read level through their phases (under 7 % of their CPU above the median window; `game-client` 1.1 % since D33).
 
 Tooling: `meas/windows.py` (the reading and its page); `WINDOWS_STATED` in `desktop/fold_in.py`. Tests: `tests/test_meas_windows.py`. Results: `campaign/results-windows.md`, `campaign/results-windows/windows.json`. Values changed: none; the two renderer entries' scopes. The raw records are unchanged.
@@ -646,5 +652,19 @@ Commit: this entry.
 By 인지오's decision, on the drift past the carried window (9.5 D83, D87): the untraced control's second idle run wakes `Chrome_IOThread` and `Chrome_ChildIOT` about 3–4 % more than the first, traced or not, the control on Element 1.12.29 and the carried pool on 1.12.28 (D32). D15's long-phase probe — one job, Element 1.12.28, 1,800 s of the idle phase the entry carries for 600 s — is read per carried component in 100 s windows and in windows of the carried length (`desktop/probe_windows.py`). Over its three 600 s windows `Chrome_IOThread` sits at 0.99, 0.99 and 1.01 of its mean (1.849 wakes/s), `Chrome_ChildIOT` at 0.99, 1.02 and 0.99 (1.514), the phase whole at 1.03, 0.98 and 0.99: no drift past the carried 600 s. Its 100 s windows spread 0.74–1.23 and 0.81–1.22 of those means, so one job resolves no drift of 3–4 %: whether the control's difference is time past the carried phase or the build is not resolved. D32's stated line unchanged.
 
 Tooling: `desktop/probe_windows.py`. Tests: `tests/test_meas_probe_windows.py`. Results: `campaign/results-probe-windows.md`, `campaign/results-probe-windows/element.json`. Values changed: none. The raw records are unchanged.
+
+Commit: this entry.
+
+## D36 — the coverage sweep's corrections: texts and the build census brought to what the code and records show (2026-09-28)
+
+By 인지오's decision, on the 2026-09-28 sweep of the 9.5–9.9 changelogs' coverage claims against the tooling (9.5 D89): the claims below were read false or stale against the code, the library and the committed records, and each is corrected to what those show. No carried value changes. The share of the job's time each machine-speed exception holds (D17) and the within-run readings `desktop/within_run.py` cannot reproduce are decided on their own.
+
+- D31's build census: `desktop/pool.py` read every subject's build from the job's `version` key, which Element's and the Steam client's jobs do not write, so the results page carried "builds ?" for both. The pool reads each subject's own key (`build_of`: Chrome's `version`, Element's `element.version`, the Steam client's `steam.buildid`), as the untraced control's report does; re-pooled from the cache (`pooled.json`'s `gated_out` carried from the committed record, D31), the record changes in the 30 build fields alone and the page in its two census lines: Element 1.12.28 in all 18 repeats, Steam client build 1788652215 in all 12.
+- D25: the library header's sentence on measured per-application archetypes named `focus_components` and `stimulus`, which none of the four entries carries; it now names `components` and, where the observation holds them, `focus_components`, `stimulus`, `operations` and `heavy_events`, for 9.5, 9.8 and 9.9.
+- D9: six `thunderbird` tasks bind to `mail-client`; three `thunderbird` send tasks stay on `network-bulk` (c1-mail, c3-workday, c7-mail) until 9.10 places the send as `mail-client`'s operation (9.7 D3, D30), so the three-way binding closes there, not here.
+- D34: the phase whole leaves out `game-client`'s `heavy_events`, the `CHTTPClientThre` burst D33 split off — 62 runs over the 7,200 s; D33's scope sentence states when it falls.
+- Guard: `test_each_subject_s_build_is_read_from_the_key_its_job_records`.
+
+Values changed: none; the results page's build census. Compiled with `--allow-window`: the library hash only, 0 of 100 artifacts changing beyond it (`tools/beyond_hash.py`); no demand moves.
 
 Commit: this entry.

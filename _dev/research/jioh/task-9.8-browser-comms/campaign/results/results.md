@@ -58,7 +58,7 @@ Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]  ·  mode full  ·  renderers measu
 
 ## element
 
-Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, '17@35597073549', '17@35597185904']  ·  mode full  ·  builds ? (18 repeats)
+Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, '17@35597073549', '17@35597185904']  ·  mode full  ·  builds Element 1.12.28 (18 repeats)
 
 | quantity | k | mean | half-width | passes |
 |---|---|---|---|---|
@@ -87,7 +87,7 @@ Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, '17@35597073549
 
 ## steam
 
-Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]  ·  mode full  ·  builds ? (12 repeats)
+Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]  ·  mode full  ·  builds Steam client build 1788652215 (12 repeats)
 
 | quantity | k | mean | half-width | passes |
 |---|---|---|---|---|

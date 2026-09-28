@@ -53,7 +53,7 @@ def load_pools(repo_root):
 
 def rewrite(text, pools):
     lines = text.split("\n")
-    archetype = None
+    archetype, written = None, set()
     for i, line in enumerate(lines):
         m = re.match(r"^  ([a-z0-9-]+):\s*$", line)
         if m:
@@ -70,6 +70,10 @@ def rewrite(text, pools):
         if not pm:
             raise SystemExit(f"{archetype}.{m.group(1)}: the line after the param is not a one-line quantiles table")
         lines[i + 1] = pm.group(1) + yaml_table(node["table"], pm.group(3), scale=1.0, sampling=pm.group(2))
+        written.add((archetype, m.group(1)))
+    missing = sorted(set(TABLES) - written)
+    if missing:   # a table the library no longer holds is a failure, not a table skipped
+        raise SystemExit(f"not in the library: {', '.join(f'{a}.{p}' for a, p in missing)}")
     return "\n".join(lines)
 
 
