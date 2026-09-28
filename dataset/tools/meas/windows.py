@@ -5,7 +5,9 @@ repeats — a window's rows over the repeats' time in it. A phase's carried valu
 the phase does part of its work only in part of it — launch work (9.5 D34, D83), work after a harness step or past the
 steady edge — the windows show where. Rows are the ones the pool reads: a heavy event's runs apart (9.5 D64, 9.8 D33),
 a session entry's wakes owed to causes outside the desktop out (9.9 D23, D27). A component the library does not carry
-is read as the residual. A JSON record and a results page, per archetype.
+is read as the residual. An operation phase carries the rows inside its operations (9.5's operations, the pool's
+`inside`), so it is read over the operations' time: each operation in the window its trigger falls in, and the
+operations one by one in their order. A JSON record and a results page, per archetype.
 
 windows.py <campaign|desktop|session> <artifacts> <out.json> [--md PAGE] [--app APP]...
 """
@@ -25,6 +27,9 @@ SHORT_WIN_S = 20.0      # a phase under 300 s (9.5's 120 s idle phases, D45) rea
 # the 9.5 entries and the phase each carries: the idle entries' components, the periodic entries' play phase
 PHASES_95 = (("soffice", "idle"), ("code", "idle"), ("chrome", "idle"), ("thunderbird-send", "idle"),
              ("kdenlive", "idle"), ("mpv-video", "play"), ("mpv-audio", "play"), ("webrtc", "play"))
+# the 9.5 entries that carry an operation, read in the op phase
+OPS_95 = ("chrome", "thunderbird-send", "gimp", "kdenlive")
+BLOCKS = 10             # the page reads the operations in at most this many blocks of consecutive operations
 
 
 def window_of(span):
@@ -46,33 +51,79 @@ def read(rows, t0, span, win):
     return n, out
 
 
+def read_ops(rows, ops, t0, span, win):
+    """rows: (name, t_in, run_ms) inside the operations; ops: the successful operations' (trigger, done) windows. By
+    time: each operation, its rows and its length in the window its trigger falls in, whole windows only. By
+    operation: the k-th operation a window of its own. Each (n windows, {k: {name: [wakes, run ms]}}, {k: seconds of
+    operation})."""
+    import bisect
+    ops = sorted(ops)
+    starts = [a for a, _ in ops]
+    n = int(span // win)
+    by_time, by_op = (n, {}, {}), (len(ops), {}, {})
+    for j, (a, b) in enumerate(ops):
+        k = int((a - t0) // win)
+        if 0 <= k < n:
+            by_time[2][k] = by_time[2].get(k, 0.0) + (b - a)
+        by_op[2][j] = b - a
+    for name, t, run in rows:
+        j = bisect.bisect_right(starts, t) - 1
+        if j < 0 or t >= ops[j][1]:
+            continue
+        k = int((ops[j][0] - t0) // win)
+        for w, key in [(by_op[1], j)] + ([(by_time[1], k)] if 0 <= k < n else []):
+            for nm in (name, "ALL"):
+                c = w.setdefault(key, {}).setdefault(nm, [0, 0.0])
+                c[0] += 1
+                c[1] += run
+    return by_time, by_op
+
+
 def pool(readings, win):
-    """readings: [(n windows, {k: {name: [wakes, run]}})] one per repeat. Per name, per window over every repeat that
-    holds the window whole: wakes/s, run mean (ms), CPU (ms of run per s)."""
-    nwin = min(n for n, _ in readings)
-    names = sorted({name for _, w in readings for k in w for name in w[k]}, key=lambda x: (x != "ALL", x))
+    """readings: [(n windows, {k: {name: [wakes, run]}}[, {k: seconds}])] one per repeat. Per name, per window over
+    every repeat that holds the window whole: wakes/s, run mean (ms), CPU (ms of run per s) — over the repeats' time in
+    the window, or where a reading gives its seconds (an operation phase) over those; such an entry also keeps each
+    window's seconds and each name's wakes and run, which `blocks` joins."""
+    nwin = min(r[0] for r in readings)
+    timed = any(len(r) > 2 for r in readings)
+    secs = [sum((r[2].get(k, 0.0) if len(r) > 2 else win) for r in readings) for k in range(nwin)]
+    names = sorted({name for r in readings for k in r[1] for name in r[1][k]}, key=lambda x: (x != "ALL", x))
     out = {}
     for name in names:
-        rate, run_mean, cpu = [], [], []
-        for k in range(nwin):
-            wakes = sum(w.get(k, {}).get(name, [0, 0.0])[0] for _, w in readings)
-            run = sum(w.get(k, {}).get(name, [0, 0.0])[1] for _, w in readings)
-            t = win * len(readings)
-            rate.append(wakes / t)
-            run_mean.append(run / wakes if wakes else None)
-            cpu.append(run / t)
-        out[name] = {"wakes_per_s": rate, "run_mean_ms": run_mean, "cpu_ms_per_s": cpu}
-    return {"repeats": len(readings), "win_s": win, "windows": nwin, "components": out}
+        wakes = [sum(r[1].get(k, {}).get(name, [0, 0.0])[0] for r in readings) for k in range(nwin)]
+        run = [sum(r[1].get(k, {}).get(name, [0, 0.0])[1] for r in readings) for k in range(nwin)]
+        out[name] = _rates(wakes, run, secs)
+        if timed:
+            out[name].update({"wakes": wakes, "run_ms": run})
+    e = {"repeats": len(readings), "win_s": win, "windows": nwin, "components": out}
+    if timed:
+        e["time_s"] = secs
+    return e
+
+
+def _rates(wakes, run, secs):
+    return {"wakes_per_s": [w / t if t else None for w, t in zip(wakes, secs)],
+            "run_mean_ms": [r / w if w else None for r, w in zip(run, wakes)],
+            "cpu_ms_per_s": [r / t if t else None for r, t in zip(run, secs)]}
+
+
+def blocks(entry, size):
+    """An operation entry's windows joined in blocks of `size` consecutive windows, each read over its seconds."""
+    idx = [range(i, min(i + size, entry["windows"])) for i in range(0, entry["windows"], size)]
+    secs = [sum(entry["time_s"][k] for k in ks) for ks in idx]
+    comps = {name: _rates([sum(c["wakes"][k] for k in ks) for ks in idx], [sum(c["run_ms"][k] for k in ks) for ks in idx],
+                          secs) for name, c in entry["components"].items()}
+    return {"repeats": entry["repeats"], "windows": len(idx), "time_s": secs, "components": comps}
 
 
 def shares(entry):
     """Per component: its share of the phase's CPU, and the CPU its windows hold above its median window, as a share
     of the phase's CPU — the part of the phase's mean a window of the component's own typical level would not hold."""
     comps = entry["components"]
-    total = sum(comps["ALL"]["cpu_ms_per_s"]) or 0.0
+    total = sum(x for x in comps["ALL"]["cpu_ms_per_s"] if x is not None) or 0.0
     out = {}
     for name, c in comps.items():
-        cpu = c["cpu_ms_per_s"]
+        cpu = [x for x in c["cpu_ms_per_s"] if x is not None]
         med = statistics.median(cpu) if cpu else 0.0
         out[name] = {"share_of_cpu": sum(cpu) / total if total else None,
                      "above_median_window": sum(max(0.0, x - med) for x in cpu) / total if total else None}
@@ -125,6 +176,33 @@ def campaign_entries(root, apps=()):
             readings.append(read(named, pd["t0"], pd["span"], win))
             print(f"{app} r{rep}", file=sys.stderr)
         out[arch] = _entry(arch, app, phase, readings, win)
+    for app in OPS_95:
+        if apps and app not in apps:
+            continue
+        arch = cr.ARCH_95[app]
+        (op_name, op), = lib[arch]["params"]["operations"].items()
+        pooled = json.load(open(os.path.join(cr.POOL_95[app], f"pool-{app}.json")))
+        run = pooled["runs"][app]
+        carried = [c["comm"] for c in op["components"] if c["comm"] != "residual"]
+        by_time, by_op, win = [], [], None
+        for rep in run["repeats"]:
+            D = b.artifact_dir(root, app, rep, run["run_id"][str(rep)])
+            _, raw = analyze_run(D, pooled.get("w_ms", 5.0), pooled.get("cap_ms", 0.0),
+                                 exclude_roles=tuple(pooled.get("exclude_roles") or ()))
+            pd = raw["phases"]["op"]
+            rows, _ = cp.split_events(app, "op", pd["operation"]["inside"])
+            win = win or window_of(pd["span"])
+            named = []
+            for r in rows:
+                name = component_name(pd["roles"].get(r.pid, "main"), cp.component_key(app, r.comm))
+                named.append((name if name in carried else "residual", r.t_in, r.run))
+            t, o = read_ops(named, pd["operation"]["windows"], pd["t0"], pd["span"], win)
+            by_time.append(t)
+            by_op.append(o)
+            print(f"{app} op r{rep}", file=sys.stderr)
+        e = _entry(arch, app, "op", by_time, win)
+        e.update({"operation": op_name, "by_operation": pool(by_op, None)})
+        out[f"{arch}/{op_name}"] = e
     return out
 
 
@@ -182,24 +260,43 @@ def _pct(x):
     return "—" if x is None else f"{x * 100:.1f} %"
 
 
+def _table(r, per):
+    rows = [f"| component | wakes/s | wake rate per {per}, over its mean | run mean per {per} (ms) | share of CPU "
+            f"| above its median {per} |", "|---|---|---|---|---|---|"]
+    sh = shares(r)
+    for name, c in r["components"].items():
+        rate = c["wakes_per_s"]
+        known = [x for x in rate if x is not None]
+        m = statistics.fmean(known) if known else 0.0
+        s = sh[name]
+        rows.append(f"| `{name}` | {m:.4g} | " + " · ".join(_f(x / m if m and x is not None else None, 2) for x in rate)
+                    + " | " + " · ".join(_f(x) for x in c["run_mean_ms"]) + f" | {_pct(s['share_of_cpu'])} | "
+                    f"{_pct(s['above_median_window'])} |")
+    return rows
+
+
+def _remainder(n, size):
+    return f", the last block the remaining {n % size}" if n % size else ""
+
+
 def render(record):
     lines = [f"# Carried phases in time windows — {record['family']}", ""]
     for arch, r in record["archetypes"].items():
-        lines += [f"## {arch} (`{r['app']}`, {r['phase']})", "",
-                  f"{r['repeats']} repeats, {r['windows']} whole windows of {r['win_s']:g} s. Per component, pooled over "
-                  "the repeats: each window's wake rate over the component's mean over the windows, each window's run "
-                  "mean (ms), its share of the phase's CPU, and the CPU its windows hold above its median window as a "
-                  "share of the phase's CPU.", "",
-                  "| component | wakes/s | wake rate per window, over its mean | run mean per window (ms) | share of CPU "
-                  "| above its median window |", "|---|---|---|---|---|---|"]
-        for name, c in r["components"].items():
-            rate = c["wakes_per_s"]
-            m = statistics.fmean(rate) if rate else 0.0
-            s = r["shares"][name]
-            lines.append(f"| `{name}` | {m:.4g} | " + " · ".join(_f(x / m if m else None, 2) for x in rate) + " | "
-                         + " · ".join(_f(x) for x in c["run_mean_ms"]) + f" | {_pct(s['share_of_cpu'])} | "
-                         f"{_pct(s['above_median_window'])} |")
-        lines.append("")
+        per = ("Per component, pooled over the repeats: each {0}'s wake rate over the component's mean over the {0}s, "
+               "each {0}'s run mean (ms), its share of the phase's CPU, and the CPU its {0}s hold above its median {0} "
+               "as a share of the phase's CPU.")
+        if "operation" not in r:
+            lines += [f"## {arch} (`{r['app']}`, {r['phase']})", "",
+                      f"{r['repeats']} repeats, {r['windows']} whole windows of {r['win_s']:g} s. " + per.format("window"),
+                      ""] + _table(r, "window") + [""]
+            continue
+        n = r["by_operation"]["windows"]
+        size = -(-n // BLOCKS)
+        lines += [f"## {arch.split('/')[0]} (`{r['app']}`, the `{r['operation']}` operation)", "",
+                  f"{r['repeats']} repeats, {r['windows']} whole windows of {r['win_s']:g} s, each holding the operations "
+                  "triggered in it, read over their time. " + per.format("window"), ""] + _table(r, "window") + [
+                  "", f"By operation, in blocks of {size} ({n} operations a repeat{_remainder(n, size)}), each block read "
+                  "over its operations' time. " + per.format("block"), ""] + _table(blocks(r["by_operation"], size), "block") + [""]
     return "\n".join(lines)
 
 

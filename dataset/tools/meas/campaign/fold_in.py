@@ -112,7 +112,18 @@ WINDOWS_STATED = {
                     "idle phase's first 100 s to 0.040–0.045 ms in its last three, and `WebExtensions`' is 0.257 ms in "
                     "the first 100 s against 0.078–0.108 ms after, together 0.7 % of the entry's CPU above their median "
                     "windows; `StreamTrans`'s episodes recur through the phase. The carried values are the phase's "
-                    "means."),
+                    "means. The send read in 100 s windows over the 8 repeats (D87): from the first window to the last "
+                    "the main thread wakes 17 % less often with runs 27 % longer (1.29 against 1.63 ms), `Socket "
+                    "Thread` wakes 21 % more, `TaskCon~ller` 27 % less with runs 36 % longer and `StreamT~ns` 47 % more, "
+                    "while each send's mean duration stays within 2.88–3.19 s and its CPU within 2.19–2.44 s across the "
+                    "25. The carried values are the means over the 25."),
+    "web-browser": ("The page load read one by one over the 38 repeats (D87): the first page load of each repeat takes "
+                    "739 ms and 545 ms of CPU against 485 ms and 341 ms for each of the other 55, the network service's "
+                    "foreground pool (`utility/ThreadPoolForeg`, in the residual) waking 606 times in it against 41 and "
+                    "the renderer's main thread 101 times, its runs 2.45 ms, against 38 times at 5.03 ms — one page "
+                    "load in 56, 2.8 % of the operation's CPU and 4.3 % of its wakes; past the first six, each block of "
+                    "six page loads holds the operation's wake rate within 2 % and its CPU at 334–356 ms a page load. "
+                    "The carried values are the means over the 56."),
 }
 
 WINDOW_LAW = {"code-editor": "D32, D68", "web-browser": "D32, D68", "mail-client": "D32, D46"}

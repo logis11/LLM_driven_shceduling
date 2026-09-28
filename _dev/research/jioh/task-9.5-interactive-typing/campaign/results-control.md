@@ -55,7 +55,7 @@
 - job 5: the screenshots after its two preludes differ in (21, 164, 22, 179)
 - job 6: the screenshots after its two preludes differ in (21, 164, 22, 179)
 
-The operation phase's second page-load pass wakes the network service's foreground pool (`utility/ThreadPoolForeg`, in the residual since D84) about 40 % less than the first, which keeps the residual's ratios from resolving.
+The operation phase's second page-load pass wakes the network service's foreground pool (`utility/ThreadPoolForeg`, in the residual since D84) about 40 % less than the first, which keeps the residual's ratios from resolving. The difference sits in each pass's opening burst: the pool wakes 417–556 times in the first pass's first page load and 149–162 times in the second pass's second, and from the fourth page load on at 18.6 and 17.7 a second (D87).
 
 The traced runs against the carried pool (decision 17): largest |z| 3.11 over 59 values; only in the carried pool: input_run mean, 136M (ms).
 
@@ -258,7 +258,7 @@ The traced runs against the carried pool (decision 17): largest |z| 0.8 over 4 v
 | op thunderbird-bin run mean (ms) | 1.1553 | 1.1216 | 0.9708 | 0.985 | 0.765–1.2051 | not resolved | traced first 1.1715; untraced first 0.7986 | 6 | 0, 0 | — | 0.552, 0.375 |
 | op thunderbird-bin wakes/s | 133.7811 | 135.9434 | 1.0162 | 1.0216 | 0.877–1.1662 | not resolved | traced first 0.8962; untraced first 1.147 | 6 | 0, 0 | — | 0.552, 0.375 |
 
-The operation phase's second send pass wakes `Socket Thread` about 22 % more and `TaskCon~ller` about 35 % less inside the sends than the first, which keeps `Socket Thread`'s wake rate and both of `TaskCon~ller`'s ratios from resolving.
+The operation phase's second send pass wakes `Socket Thread` about 22 % more and `TaskCon~ller` about 35 % less inside the sends than the first, which keeps `Socket Thread`'s wake rate and both of `TaskCon~ller`'s ratios from resolving. The second pass continues a trend that runs through the first: over the first pass's six 100 s windows `Socket Thread` wakes 638 → 838 a second and `TaskCon~ller` 50.9 → 35.9, over the second's 842 → 963 and 34.5 → 23.1 (D87).
 
 The traced runs against the carried pool (decision 17): largest |z| 8.96 over 70 values; only in the carried pool: input_run mean, 136M (ms).
 

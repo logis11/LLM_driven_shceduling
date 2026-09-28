@@ -48,7 +48,9 @@ NUMBER = {3: "three", 4: "four", 5: "five", 6: "six"}
 NOTES_STATED = {
     "web-browser": ("The operation phase's second page-load pass wakes the network service's foreground pool "
                     "(`utility/ThreadPoolForeg`, in the residual since D84) about 40 % less than the first, which keeps "
-                    "the residual's ratios from resolving."),
+                    "the residual's ratios from resolving. The difference sits in each pass's opening burst: the pool "
+                    "wakes 417–556 times in the first pass's first page load and 149–162 times in the second pass's "
+                    "second, and from the fourth page load on at 18.6 and 17.7 a second (D87)."),
     "chat-client": ("The second idle run wakes `Chrome_IOThread` and `Chrome_ChildIOT` about 3–4 % more than the first, "
                     "traced or not; the control ran Element 1.12.29, the carried pool 1.12.28."),
     "code-editor": ("The second idle run, 915–1815 s after the first began, differs from the first whichever is traced — the "
@@ -63,7 +65,9 @@ NOTES_STATED = {
                      "pool at the same CPU share; the driven ratios are perf's effect in that state."),
     "mail-client": ("The operation phase's second send pass wakes `Socket Thread` about 22 % more and `TaskCon~ller` about "
                     "35 % less inside the sends than the first, which keeps `Socket Thread`'s wake rate and both of "
-                    "`TaskCon~ller`'s ratios from resolving."),
+                    "`TaskCon~ller`'s ratios from resolving. The second pass continues a trend that runs through the "
+                    "first: over the first pass's six 100 s windows `Socket Thread` wakes 638 → 838 a second and "
+                    "`TaskCon~ller` 50.9 → 35.9, over the second's 842 → 963 and 34.5 → 23.1 (D87)."),
     "video-editor": ("The first preview render of each job's second operation run did not start (`kdenlive_render` never "
                      "appeared within 30 s), so that run's operation values rest on 25 renders against the first run's "
                      "26–27."),
