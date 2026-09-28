@@ -640,3 +640,11 @@ By 인지오's decision, from the 2026-09-28 review of 9.5–9.9: every carried 
 Tooling: `meas/windows.py` (the reading and its page); `WINDOWS_STATED` in `desktop/fold_in.py`. Tests: `tests/test_meas_windows.py`. Results: `campaign/results-windows.md`, `campaign/results-windows/windows.json`. Values changed: none; the two renderer entries' scopes. The raw records are unchanged.
 
 Commit: this entry.
+
+## D35 — the chat client past its carried phase: the long-phase probe read in time windows, no drift resolved (2026-09-28)
+
+By 인지오's decision, on the drift past the carried window (9.5 D83, D87): the untraced control's second idle run wakes `Chrome_IOThread` and `Chrome_ChildIOT` about 3–4 % more than the first, traced or not, the control on Element 1.12.29 and the carried pool on 1.12.28 (D32). D15's long-phase probe — one job, Element 1.12.28, 1,800 s of the idle phase the entry carries for 600 s — is read per carried component in 100 s windows and in windows of the carried length (`desktop/probe_windows.py`). Over its three 600 s windows `Chrome_IOThread` sits at 0.99, 0.99 and 1.01 of its mean (1.849 wakes/s), `Chrome_ChildIOT` at 0.99, 1.02 and 0.99 (1.514), the phase whole at 1.03, 0.98 and 0.99: no drift past the carried 600 s. Its 100 s windows spread 0.74–1.23 and 0.81–1.22 of those means, so one job resolves no drift of 3–4 %: whether the control's difference is time past the carried phase or the build is not resolved. D32's stated line unchanged.
+
+Tooling: `desktop/probe_windows.py`. Tests: `tests/test_meas_probe_windows.py`. Results: `campaign/results-probe-windows.md`, `campaign/results-probe-windows/element.json`. Values changed: none. The raw records are unchanged.
+
+Commit: this entry.
