@@ -337,6 +337,11 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - role: when the Glean metrics-ping scheduler's thread wakes (`_dev/research/jioh/task-9.5-interactive-typing/changelog.md` D91): `const SCHEDULED_HOUR: u32 = 4;`, "Today's 04:00 in local time"; the thread is spawned as `"glean.mps"` (`crate::thread::spawn("glean.mps", …)`), waits until the next 04:00 local time, submits the "metrics" ping and reschedules for the next day's 04:00 (`When::Reschedule`); at startup it submits at once, reason "overdue", if that day's ping was not collected and 04:00 has passed. Existence only; the thread's run is the measurement's (`meas-ci`).
 - status: verified (2026-09-28; the file read at commit 25b0fb2). Which Glean release Thunderbird 156.0 vendors was not read.
 
+### `mahoney-10gb`
+- cite: Mahoney, M. "10 GB Compression Benchmark." mattmahoney.net/dc/10gb.html, "Benchmark created July 28, 2013. Last update July 25, 2019." (accessed 2026-09-28). The archive `10gb.zpaq`: "Size is exactly 3,701,584,921 bytes", SHA-1 224547185f873fe414d7d97ea812af5c8935a5d8 per the page; SHA-256 d76858dbb0426b1975be326820be548a1312642086b51cdb095ede27835c672b as fetched at 9.7's dry run (`dataset/tools/meas/background/inputs.json`). Licence: "10gb.zpaq is copyright (C) 2013, Matt Mahoney"; "Please do not use this data set for any purpose other than benchmarking data compression and archiving programs and related research."
+- role: the input `file-backup` (`borg`) and `file-archiver` (`7z`) were measured on (`_dev/research/jioh/task-9.7-background-io/changelog.md` D7): "exactly 10 GB (10^10) bytes in 79,431 files in 4006 directories from my Windows laptop collected from 2009 to 2013", "designed to test archivers in realistic backup scenarios with lots of already-compressed or hard to compress files and lots of duplicate or nearly identical files". Identifies the measurement's input; existence only, no claim about a population's files.
+- status: verified (2026-09-28; the page read and every figure D7 quotes checked against it)
+
 ## Grounding — measurement
 
 ### `meas-ci`

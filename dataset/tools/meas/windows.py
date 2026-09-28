@@ -29,6 +29,8 @@ PHASES_95 = (("soffice", "idle"), ("code", "idle"), ("chrome", "idle"), ("thunde
              ("kdenlive", "idle"), ("mpv-video", "play"), ("mpv-audio", "play"), ("webrtc", "play"))
 # the 9.5 entries that carry an operation, read in the op phase
 OPS_95 = ("chrome", "thunderbird-send", "gimp", "kdenlive")
+# 9.5 D95: the entries that carry their driven phase as focus_components (campaign/pool.py FOCUS_COMPONENTS)
+DRIVEN_95 = ("gimp", "kdenlive")
 BLOCKS = 10             # the page reads the operations in at most this many blocks of consecutive operations
 
 
@@ -176,6 +178,28 @@ def campaign_entries(root, apps=()):
             readings.append(read(named, pd["t0"], pd["span"], win))
             print(f"{app} r{rep}", file=sys.stderr)
         out[arch] = _entry(arch, app, phase, readings, win)
+    for app in DRIVEN_95:   # D95: the pointer loop's driven phase, its focus_components carried
+        if apps and app not in apps:
+            continue
+        arch = cr.ARCH_95[app]
+        pooled = json.load(open(os.path.join(cr.POOL_95[app], f"pool-{app}.json")))
+        run = pooled["runs"][app]
+        carried = [c["comm"] for c in lib[arch]["params"]["focus_components"] if c["comm"] != "residual"]
+        readings, win = [], None
+        for rep in run["repeats"]:
+            D = b.artifact_dir(root, app, rep, run["run_id"][str(rep)])
+            _, raw = analyze_run(D, pooled.get("w_ms", 5.0), pooled.get("cap_ms", 0.0),
+                                 exclude_roles=tuple(pooled.get("exclude_roles") or ()))
+            pd = raw["phases"]["driven"]
+            rows, _ = cp.split_events(app, "driven", pd["rows"])
+            win = win or window_of(pd["span"])
+            named = []
+            for r in rows:
+                name = component_name(pd["roles"].get(r.pid, "main"), cp.component_key(app, r.comm))
+                named.append((name if name in carried else "residual", r.t_in, r.run))
+            readings.append(read(named, pd["t0"], pd["span"], win))
+            print(f"{app} driven r{rep}", file=sys.stderr)
+        out[f"{arch}/driven"] = _entry(arch, app, "driven", readings, win)
     for app in OPS_95:
         if apps and app not in apps:
             continue
@@ -286,7 +310,7 @@ def render(record):
                "each {0}'s run mean (ms), its share of the phase's CPU, and the CPU its {0}s hold above its median {0} "
                "as a share of the phase's CPU.")
         if "operation" not in r:
-            lines += [f"## {arch} (`{r['app']}`, {r['phase']})", "",
+            lines += [f"## {r['archetype']} (`{r['app']}`, {r['phase']})", "",
                       f"{r['repeats']} repeats, {r['windows']} whole windows of {r['win_s']:g} s. " + per.format("window"),
                       ""] + _table(r, "window") + [""]
             continue

@@ -251,3 +251,9 @@ By 인지오's decision, on the 2026-09-28 sweep of the 9.5–9.9 changelogs' co
 Values changed: none; `game-download`'s stats line and notes. Compiled with `--allow-window`: the library hash only, 0 of 100 artifacts changing beyond it (`tools/beyond_hash.py`); no demand moves.
 
 Commit: this entry.
+
+## D39 — Mahoney's 10 GB set entered in the reference index (2026-09-28)
+
+By 인지오's decision, from the 2026-09-28 coverage sweep of 9.5–9.9: D7's input set, cited by D7, the method and the `file-backup` and `file-archiver` scopes, had no `docs/references.md` entry, which the citation rule asks of every citation. It is entered as `mahoney-10gb` (deployed-system), verified against the page on 2026-09-28: its last update (July 25, 2019), the archive's size and SHA-1, the file and directory counts, the description and the licence D7 quotes, all as D7 has them; the entry carries the SHA-256 the dry run pinned. No `dataset/sources.yaml` entry: the dataset derives no value from the set itself, only from the measurements run on it. Values changed: none.
+
+Commit: this entry.

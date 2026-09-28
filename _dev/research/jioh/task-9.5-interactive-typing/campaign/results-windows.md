@@ -72,6 +72,17 @@
 | `kdenlive` | 1.26 | 1.08 · 0.96 · 1.09 · 0.97 · 0.95 · 0.95 | 0.023 · 0.033 · 0.029 · 0.029 · 0.029 · 0.028 | 46.6 % | 2.1 % |
 | `residual` | 0.002917 | 6.00 · 0.00 · 0.00 · 0.00 · 0.00 · 0.00 | 0.091 · — · — · — · — · — | 0.3 % | 0.3 % |
 
+## video-editor (`kdenlive`, driven)
+
+20 repeats, 6 whole windows of 100 s. Per component, pooled over the repeats: each window's wake rate over the component's mean over the windows, each window's run mean (ms), its share of the phase's CPU, and the CPU its windows hold above its median window as a share of the phase's CPU.
+
+| component | wakes/s | wake rate per window, over its mean | run mean per window (ms) | share of CPU | above its median window |
+|---|---|---|---|---|---|
+| `ALL` | 211.9 | 0.99 · 0.99 · 1.02 · 1.00 · 1.02 · 0.98 | 1.756 · 1.767 · 1.742 · 1.747 · 1.764 · 1.791 | 100.0 % | 0.6 % |
+| `QXcbEventQueue` | 73.05 | 0.99 · 1.00 · 1.02 · 0.99 · 1.02 · 0.98 | 0.015 · 0.015 · 0.015 · 0.015 · 0.015 · 0.015 | 0.3 % | 0.0 % |
+| `kdenlive` | 137 | 0.99 · 0.99 · 1.02 · 1.00 · 1.02 · 0.98 | 2.704 · 2.724 · 2.680 · 2.685 · 2.719 · 2.765 | 99.6 % | 0.6 % |
+| `residual` | 1.832 | 0.97 · 1.00 · 1.00 · 1.00 · 1.00 · 1.02 | 0.285 · 0.219 · 0.211 · 0.206 · 0.204 · 0.202 | 0.1 % | 0.0 % |
+
 ## video-player (`mpv-video`, play)
 
 24 repeats, 3 whole windows of 100 s. Per component, pooled over the repeats: each window's wake rate over the component's mean over the windows, each window's run mean (ms), its share of the phase's CPU, and the CPU its windows hold above its median window as a share of the phase's CPU.
@@ -196,6 +207,15 @@ By operation, in blocks of 3 (25 operations a repeat, the last block the remaini
 | `glean.dispatche` | 28.22 | 1.05 · 1.03 · 1.02 · 1.02 · 1.00 · 0.98 · 0.97 · 0.96 · 0.96 | 0.077 · 0.073 · 0.068 · 0.074 · 0.073 · 0.073 · 0.073 · 0.077 · 0.080 | 0.3 % | 0.0 % |
 | `residual` | 100.8 | 0.99 · 0.99 · 0.99 · 1.02 · 1.00 · 1.01 · 1.00 · 1.00 · 0.99 | 0.268 · 0.256 · 0.247 · 0.250 · 0.248 · 0.248 · 0.248 · 0.250 · 0.260 | 3.3 % | 0.0 % |
 | `thunderbird-bin` | 468.5 | 1.08 · 1.10 · 1.10 · 1.01 · 1.01 · 0.99 · 0.93 · 0.90 · 0.88 | 1.288 · 1.273 · 1.277 · 1.405 · 1.421 · 1.459 · 1.550 · 1.615 · 1.671 | 86.8 % | 0.7 % |
+
+## image-editor (`gimp`, driven)
+
+5 repeats, 6 whole windows of 100 s. Per component, pooled over the repeats: each window's wake rate over the component's mean over the windows, each window's run mean (ms), its share of the phase's CPU, and the CPU its windows hold above its median window as a share of the phase's CPU.
+
+| component | wakes/s | wake rate per window, over its mean | run mean per window (ms) | share of CPU | above its median window |
+|---|---|---|---|---|---|
+| `ALL` | 8.664 | 1.01 · 0.99 · 1.01 · 0.99 · 1.02 · 0.99 | 0.334 · 0.328 · 0.330 · 0.329 · 0.331 · 0.328 | 100.0 % | 1.0 % |
+| `gimp` | 8.664 | 1.01 · 0.99 · 1.01 · 0.99 · 1.02 · 0.99 | 0.334 · 0.328 · 0.330 · 0.329 · 0.331 · 0.328 | 100.0 % | 1.0 % |
 
 ## image-editor (`gimp`, the `unsharp-mask` operation)
 

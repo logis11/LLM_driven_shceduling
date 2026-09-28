@@ -92,6 +92,21 @@ def test_every_9_5_operation_is_read():
     assert set(windows.OPS_95) == with_ops
 
 
+def test_every_9_5_driven_phase_is_read():
+    # 9.5 D95: an entry that carries its driven phase as focus_components has that phase read in time windows too
+    import yaml
+    from meas import control_report as cr
+    lib = yaml.safe_load(open(cr.REPO + "/dataset/archetypes.yaml"))["archetypes"]
+    with_focus = {app for app, arch in cr.ARCH_95.items() if lib[arch]["params"].get("focus_components")}
+    assert set(windows.DRIVEN_95) == with_focus
+
+
+def test_a_driven_phase_is_headed_by_its_archetype_and_phase():
+    e = windows._entry("video-editor", "kdenlive", "driven", [windows.read([("kdenlive", 0.5, 1.0)], 0.0, 100.0, 100.0)], 100.0)
+    page = windows.render({"family": "campaign", "archetypes": {"video-editor/driven": e}})
+    assert "## video-editor (`kdenlive`, driven)" in page
+
+
 def test_the_page_carries_an_operation_phase_in_time_windows_and_by_operation():
     ops = [(0.0, 1.0), (100.0, 101.0)]
     by_time, by_op = windows.read_ops([("a", 0.5, 1.0), ("a", 0.6, 1.0), ("a", 100.5, 3.0)], ops, 0.0, 200.0, 100.0)
