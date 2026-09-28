@@ -107,6 +107,21 @@ LABEL = {"wakes/s": "wake rate", "gap mean (ms)": "gap mean", "run mean (ms)": "
 # where each entry's window limit is decided: D32 the rule, D46 the send's operation phase, D68 chrome's and code's limits
 # D85: where a carried phase does part of its work only in part of it, read in time windows over the carried repeats
 # (meas/windows.py, `campaign/results-windows.md`) — stated beside the values, which stay the phase's means
+# D88: the repeat count is the rule's first pass, chosen by the estimate it produces; where an entry's widest value the
+# rule is read on sits within half a point of the tolerance, its stated interval is read against the rule's stopping
+# simulated at that value's spread (meas/stopping.py, campaign/results-stopping.md)
+STOPPING_STATED = {
+    "office-writer": ("The repeat count is the rule's first pass (D88): simulated at the spread of the widest value, the "
+                      "per-input run mean under 136M at ±4.96 % over 14 repeats, the rule's stated 95 % interval covers "
+                      "the true mean in about 91–93 % of campaigns and the stopped mean leans by at most 0.2 %."),
+    "video-editor": ("The repeat count is the rule's first pass (D88): simulated at the spread of the widest value, the "
+                     "driven phase's `kdenlive` run mean at ±5.00 % over 20 repeats, the rule's stated 95 % interval covers "
+                     "the true mean in about 91 % of campaigns and the stopped mean leans by at most 0.2 %."),
+    "audio-player": ("The repeat count is the rule's first pass (D88): simulated at the spread of the widest value, the "
+                     "play phase's CPU share at ±4.68 % over 31 repeats, the rule's stated 95 % interval covers the true "
+                     "mean in about 92 % of campaigns and the stopped mean leans by at most 0.2 %."),
+}
+
 WINDOWS_STATED = {
     "mail-client": ("Read in 100 s windows over the 43 repeats (D85): the residual's run mean falls from 0.175 ms in the "
                     "idle phase's first 100 s to 0.040–0.045 ms in its last three, and `WebExtensions`' is 0.257 ms in "
@@ -420,6 +435,8 @@ def entry(aid, spec, d):
         scope += (f"Two campaigns (D79): the idle phase's values from {idle_tag}, {len(d['repeats'])} repeats; the phases "
                   f"with or after the input from {tag}, {len(later['repeats'])} repeats; the idle phase runs before any input. ")
     scope += stability_scope(aid, d)
+    if aid in STOPPING_STATED:
+        scope += STOPPING_STATED[aid] + " "
     if aid in WINDOWS_STATED:
         scope += WINDOWS_STATED[aid] + " "
     scope += "Values are this software on this machine, not desktop truth (D10)."

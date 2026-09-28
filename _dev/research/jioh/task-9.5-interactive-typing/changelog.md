@@ -667,3 +667,17 @@ The untraced control (D82). Its traced passes are read the same way, per job the
 Tooling: `read_ops`, `blocks`, `OPS_95` and `pool` over a reading's seconds in `meas/windows.py`; `campaign/control_passes.py`; the scope sentences in `campaign/fold_in.py`'s `WINDOWS_STATED`; the stated lines in `control_report.NOTES_STATED`. Tests: `tests/test_meas_windows.py` (the operation phases), `tests/test_meas_control_passes.py`. Results: `campaign/results-windows.md` and `campaign/results-windows/windows.json`, the four operation sections added and the other eight unchanged; `campaign/results-control-passes.md`, `campaign/results-control/passes.json`; `campaign/results-control.md` and `campaign/results-control/control.json`, the two lines. Values changed: none; the scopes and notes of `web-browser` and `mail-client`. Compiled with `--allow-window`: the library hash only, every artifact HEAD's once the library's blob hash is swapped back; no demand moves. The raw records are unchanged.
 
 Commit: this entry.
+
+## D88 — the stated precision read against the rule's stopping; three entries' intervals caveated (2026-09-28)
+
+By 인지오's decision, taken before 9.13 on the question 9.5's self-review left to 9.14 and 9.16 (`measurement-campaign-record.md`, "What the half-widths do and do not claim"): the rule adds repeats one at a time and stops at the first count whose half-width is within 5 % of the mean, so the count is chosen by the estimate it produces; the stated precision is reported with a caveat, not re-measured at a count fixed in advance. The rule's stopping is simulated at each entry's widest value the rule is read on (`meas/stopping.py`): repeats drawn at the value's per-repeat spread, normal and lognormal, 4,000 campaigns each, the rule run on that value alone.
+
+- `office-writer` (the per-input run mean under 136M, ±4.96 % over 14 repeats), `video-editor` (the driven phase's `kdenlive` run mean, ±5.00 % over 20) and `audio-player` (the play phase's CPU share, ±4.68 % over 31): the stated 95 % interval covers the true mean in 91.3–92.7 %, 91.3–91.4 % and 92.1–92.4 % of campaigns, the stopped mean's bias −0.09 to +0.20 %, the count at the stop 12.8, 18.3–18.4 and 25.5 against the 14, 20 and 31 obtained. Stated in their scopes.
+- `image-editor` stops at the five-repeat minimum, its widest value ±4.40 %, covering 94.8 %. `mail-client`'s idle phase, `video-player` and `video-call`, widest ±3.87 %, ±2.86 % and ±1.52 %: that value alone would stop at 24.8, 9.1 and 6.7 repeats against the 43, 24 and 45 obtained, other values setting the count. No sentence.
+- `code-editor` and `web-browser` stopped at their recording's last window (D73, D84), their counts not chosen by the rule.
+
+The campaign record's "Stopping at the first crossing cannot bias a mean" holds to within 0.2 % at these spreads: the tolerance is relative to the mean, so the stop depends on it. The record's note carries the decision as a dated addendum.
+
+Tooling: `meas/stopping.py`; `STOPPING_STATED` in `campaign/fold_in.py`. Tests: `tests/test_meas_stopping.py`. Results: `campaign/results-stopping.md`, `campaign/results-stopping/stopping.json`. Record: `measurement-campaign-record.md`, 9.5. Values changed: none; the scopes of `office-writer`, `video-editor` and `audio-player`. Compiled with `--allow-window`: the library hash only, 0 of 100 artifacts changing beyond it (`tools/beyond_hash.py`); no demand moves. The raw records are unchanged.
+
+Commit: this entry.

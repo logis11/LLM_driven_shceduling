@@ -1,0 +1,206 @@
+{
+ "n": 4000,
+ "entries": [
+  {
+   "archetype": "office-writer",
+   "app": "soffice",
+   "pool": "_dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine",
+   "repeats": 14,
+   "stopped_at_window_limit": false,
+   "widest": {
+    "value": "input_run mean, 136M (ms)",
+    "k": 14,
+    "cv": 0.0859,
+    "half_width": 0.0496
+   },
+   "simulated": {
+    "normal": {
+     "mean_bias": 0.0012188996265769547,
+     "coverage": 0.9265,
+     "mean_k": 12.78475
+    },
+    "lognormal": {
+     "mean_bias": -0.00017501319925884902,
+     "coverage": 0.91275,
+     "mean_k": 12.813
+    }
+   }
+  },
+  {
+   "archetype": "code-editor",
+   "app": "code",
+   "pool": "_dev/research/jioh/task-9.5-interactive-typing/campaign/results-re-measured",
+   "repeats": 44,
+   "stopped_at_window_limit": true,
+   "widest": {
+    "value": "idle renderer/ThreadPoolForeg run mean (ms)",
+    "k": 44,
+    "cv": 0.1217,
+    "half_width": 0.037
+   }
+  },
+  {
+   "archetype": "web-browser",
+   "app": "chrome",
+   "pool": "_dev/research/jioh/task-9.5-interactive-typing/campaign/results-re-measured",
+   "repeats": 38,
+   "stopped_at_window_limit": true,
+   "widest": {
+    "value": "idle renderer/chrome run mean (ms)",
+    "k": 38,
+    "cv": 0.133,
+    "half_width": 0.0437
+   }
+  },
+  {
+   "archetype": "mail-client",
+   "app": "thunderbird-send",
+   "pool": "_dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine",
+   "repeats": 43,
+   "stopped_at_window_limit": false,
+   "widest": {
+    "value": "idle JS Watchdog wakes/s",
+    "k": 43,
+    "cv": 0.1256,
+    "half_width": 0.0387
+   },
+   "simulated": {
+    "normal": {
+     "mean_bias": 0.0019892927818701894,
+     "coverage": 0.924,
+     "mean_k": 24.80125
+    },
+    "lognormal": {
+     "mean_bias": -0.0007894545157952084,
+     "coverage": 0.91475,
+     "mean_k": 24.82825
+    }
+   }
+  },
+  {
+   "archetype": "image-editor",
+   "app": "gimp",
+   "pool": "_dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine",
+   "repeats": 5,
+   "stopped_at_window_limit": false,
+   "widest": {
+    "value": "op script-fu run mean (ms)",
+    "k": 5,
+    "cv": 0.0354,
+    "half_width": 0.044
+   },
+   "simulated": {
+    "normal": {
+     "mean_bias": -7.89738170738129e-05,
+     "coverage": 0.9475,
+     "mean_k": 5.39125
+    },
+    "lognormal": {
+     "mean_bias": -0.00016623281978702813,
+     "coverage": 0.94775,
+     "mean_k": 5.3945
+    }
+   }
+  },
+  {
+   "archetype": "video-editor",
+   "app": "kdenlive",
+   "pool": "_dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine",
+   "repeats": 20,
+   "stopped_at_window_limit": false,
+   "widest": {
+    "value": "driven kdenlive run mean (ms)",
+    "k": 20,
+    "cv": 0.1068,
+    "half_width": 0.05
+   },
+   "simulated": {
+    "normal": {
+     "mean_bias": 0.0013614543134995492,
+     "coverage": 0.9135,
+     "mean_k": 18.33575
+    },
+    "lognormal": {
+     "mean_bias": -0.0008484728973040176,
+     "coverage": 0.914,
+     "mean_k": 18.36375
+    }
+   }
+  },
+  {
+   "archetype": "audio-player",
+   "app": "mpv-audio",
+   "pool": "_dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine",
+   "repeats": 31,
+   "stopped_at_window_limit": false,
+   "widest": {
+    "value": "play CPU share",
+    "k": 31,
+    "cv": 0.1275,
+    "half_width": 0.0468
+   },
+   "simulated": {
+    "normal": {
+     "mean_bias": 0.001968546421457189,
+     "coverage": 0.924,
+     "mean_k": 25.54525
+    },
+    "lognormal": {
+     "mean_bias": -0.0009175519348191132,
+     "coverage": 0.92125,
+     "mean_k": 25.511
+    }
+   }
+  },
+  {
+   "archetype": "video-player",
+   "app": "mpv-video",
+   "pool": "_dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine",
+   "repeats": 24,
+   "stopped_at_window_limit": false,
+   "widest": {
+    "value": "play CPU share",
+    "k": 24,
+    "cv": 0.0677,
+    "half_width": 0.0286
+   },
+   "simulated": {
+    "normal": {
+     "mean_bias": 0.0008577721334143757,
+     "coverage": 0.93175,
+     "mean_k": 9.13275
+    },
+    "lognormal": {
+     "mean_bias": -0.0006155885977621607,
+     "coverage": 0.93525,
+     "mean_k": 9.1365
+    }
+   }
+  },
+  {
+   "archetype": "video-call",
+   "app": "webrtc",
+   "pool": "_dev/research/jioh/task-9.5-interactive-typing/campaign/results-re-measured",
+   "repeats": 45,
+   "stopped_at_window_limit": false,
+   "widest": {
+    "value": "play CPU share",
+    "k": 45,
+    "cv": 0.0507,
+    "half_width": 0.0152
+   },
+   "simulated": {
+    "normal": {
+     "mean_bias": 0.0003745942623669011,
+     "coverage": 0.94175,
+     "mean_k": 6.701
+    },
+    "lognormal": {
+     "mean_bias": -5.006355477141441e-05,
+     "coverage": 0.94325,
+     "mean_k": 6.71
+    }
+   }
+  }
+ ]
+}
