@@ -3442,7 +3442,7 @@
      },
      "n": 6
     },
-    "idle Indexed~ IO run mean (ms)": {
+    "idle IndexedDB IO run mean (ms)": {
      "a": null,
      "b": null,
      "ratio": null,
@@ -3451,7 +3451,7 @@
      "order_means": {},
      "n": 0
     },
-    "idle Indexed~ IO wakes/s": {
+    "idle IndexedDB IO wakes/s": {
      "a": null,
      "b": null,
      "ratio": null,
@@ -4006,7 +4006,7 @@
      },
      "n": 6
     },
-    "op StreamT~ns run mean (ms)": {
+    "op StreamTrans run mean (ms)": {
      "a": null,
      "b": null,
      "ratio": null,
@@ -4015,7 +4015,7 @@
      "order_means": {},
      "n": 0
     },
-    "op StreamT~ns wakes/s": {
+    "op StreamTrans wakes/s": {
      "a": null,
      "b": null,
      "ratio": null,
@@ -4413,6 +4413,14 @@
      "exited wakes": {
       "mean": 0.0,
       "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
      }
     },
     "idle Timer": {
@@ -4421,6 +4429,14 @@
       "max": 0.0
      },
      "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
       "mean": 0.0,
       "max": 0.0
      }
@@ -4433,6 +4449,14 @@
      "exited wakes": {
       "mean": 0.0,
       "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
      }
     },
     "idle IPDL Background": {
@@ -4441,6 +4465,14 @@
       "max": 0.0
      },
      "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
       "mean": 0.0,
       "max": 0.0
      }
@@ -4453,6 +4485,14 @@
      "exited wakes": {
       "mean": 0.0,
       "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
      }
     },
     "idle JS Watchdog": {
@@ -4461,6 +4501,14 @@
       "max": 0.0
      },
      "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
       "mean": 0.0,
       "max": 0.0
      }
@@ -4473,9 +4521,17 @@
      "exited wakes": {
       "mean": 1.0,
       "max": 1.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
      }
     },
-    "idle Indexed~ IO": {
+    "idle IndexedDB IO": {
      "exited cpu": {
       "mean": 1.0,
       "max": 1.0
@@ -4483,6 +4539,14 @@
      "exited wakes": {
       "mean": 1.0,
       "max": 1.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
      }
     },
     "idle glean.dispatche": {
@@ -4491,6 +4555,14 @@
       "max": 0.0
      },
      "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
       "mean": 0.0,
       "max": 0.0
      }
@@ -4503,6 +4575,14 @@
      "exited wakes": {
       "mean": 0.0,
       "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
      }
     },
     "idle IPC I/O Child": {
@@ -4513,16 +4593,32 @@
      "exited wakes": {
       "mean": 0.0,
       "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
      }
     },
     "idle residual": {
      "exited cpu": {
-      "mean": 0.5479,
-      "max": 0.7795
+      "mean": 0.3606,
+      "max": 0.4149
      },
      "exited wakes": {
-      "mean": 0.3227,
-      "max": 0.4667
+      "mean": 0.2123,
+      "max": 0.2558
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
      }
     },
     "op Socket Thread": {
@@ -4633,7 +4729,7 @@
       "max": 0.3004
      }
     },
-    "op StreamT~ns": {
+    "op StreamTrans": {
      "exited cpu": {
       "mean": 1.0,
       "max": 1.0
@@ -4643,8 +4739,8 @@
       "max": 1.0
      },
      "inside cpu": {
-      "mean": 0.1771,
-      "max": 0.2108
+      "mean": 0.175,
+      "max": 0.2051
      },
      "inside wakes": {
       "mean": 0.0695,
@@ -4725,20 +4821,20 @@
     },
     "op residual": {
      "exited cpu": {
-      "mean": 0.1693,
-      "max": 0.3131
+      "mean": 0.146,
+      "max": 0.2933
      },
      "exited wakes": {
-      "mean": 0.1647,
-      "max": 0.1752
+      "mean": 0.1639,
+      "max": 0.1744
      },
      "inside cpu": {
-      "mean": 0.4884,
-      "max": 0.5344
+      "mean": 0.4993,
+      "max": 0.5421
      },
      "inside wakes": {
-      "mean": 0.2679,
-      "max": 0.2843
+      "mean": 0.2681,
+      "max": 0.2844
      }
     }
    },
@@ -4751,9 +4847,9 @@
      "idle IPDL Background gap mean (ms)": -0.73,
      "idle IPDL Background run mean (ms)": -1.37,
      "idle IPDL Background wakes/s": 0.76,
-     "idle Indexed~ IO gap mean (ms)": -0.05,
-     "idle Indexed~ IO run mean (ms)": 1.29,
-     "idle Indexed~ IO wakes/s": 0.04,
+     "idle IndexedDB IO gap mean (ms)": 1.57,
+     "idle IndexedDB IO run mean (ms)": 1.76,
+     "idle IndexedDB IO wakes/s": -1.4,
      "idle JS Watchdog gap mean (ms)": 0.11,
      "idle JS Watchdog run mean (ms)": -1.04,
      "idle JS Watchdog wakes/s": -0.12,
@@ -4770,9 +4866,9 @@
      "idle glean.dispatche run mean (ms)": -0.06,
      "idle glean.dispatche wakes/s": 1.14,
      "idle gmain run mean (ms)": -0.82,
-     "idle residual gap mean (ms)": 1.7,
-     "idle residual run mean (ms)": -3.18,
-     "idle residual wakes/s": -1.53,
+     "idle residual gap mean (ms)": -2.51,
+     "idle residual run mean (ms)": -0.38,
+     "idle residual wakes/s": 2.58,
      "idle thunderbird-bin gap mean (ms)": -0.91,
      "idle thunderbird-bin run mean (ms)": -1.17,
      "idle thunderbird-bin wakes/s": 1.01,
@@ -4789,9 +4885,9 @@
      "op Softwar~cThread gap mean (ms)": 0.28,
      "op Softwar~cThread run mean (ms)": -0.11,
      "op Softwar~cThread wakes/s": -0.26,
-     "op StreamT~ns gap mean (ms)": -1.45,
-     "op StreamT~ns run mean (ms)": -0.43,
-     "op StreamT~ns wakes/s": 1.65,
+     "op StreamTrans gap mean (ms)": -1.6,
+     "op StreamTrans run mean (ms)": -0.54,
+     "op StreamTrans wakes/s": 1.8,
      "op SwComposite gap mean (ms)": -2.31,
      "op SwComposite run mean (ms)": -0.24,
      "op SwComposite wakes/s": 2.36,
@@ -4807,9 +4903,9 @@
      "op glean.dispatche gap mean (ms)": 2.11,
      "op glean.dispatche run mean (ms)": 0.7,
      "op glean.dispatche wakes/s": -1.93,
-     "op residual gap mean (ms)": 0.42,
-     "op residual run mean (ms)": -0.06,
-     "op residual wakes/s": -0.41,
+     "op residual gap mean (ms)": 0.46,
+     "op residual run mean (ms)": -0.02,
+     "op residual wakes/s": -0.46,
      "op thunderbird-bin gap mean (ms)": 3.14,
      "op thunderbird-bin run mean (ms)": 3.39,
      "op thunderbird-bin wakes/s": -2.67,

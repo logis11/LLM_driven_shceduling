@@ -20,9 +20,9 @@ thunderbird-send: repeats [1, 2, 3, 4, 5, 6, 7, 8]; stability rule does not hold
    idle StreamTrans wakes/s: k 8, half-width 0.0913, fails, needed 21
    idle StreamTrans gap mean (ms): k 8, half-width 0.0913, fails, needed 21
    idle StreamTrans run mean (ms): k 8, half-width 0.0944, fails, needed 23
-   idle Indexed~ IO wakes/s: k 8, half-width 0.1468, fails, needed 50
-   idle Indexed~ IO gap mean (ms): k 8, half-width 0.1468, fails, needed 50
-   idle Indexed~ IO run mean (ms): k 8, half-width 0.0789, fails, needed 17
+   idle IndexedDB IO wakes/s: k 8, half-width 0.0694, fails, needed 14
+   idle IndexedDB IO gap mean (ms): k 8, half-width 0.0694, fails, needed 14
+   idle IndexedDB IO run mean (ms): k 8, half-width 0.0541, fails, needed 9
    idle glean.dispatche wakes/s: k 8, half-width 0.0563, fails, needed 10
    idle glean.dispatche gap mean (ms): k 8, half-width 0.0563, fails, needed 10
    idle glean.dispatche run mean (ms): k 8, half-width 0.0377, passes
@@ -32,9 +32,9 @@ thunderbird-send: repeats [1, 2, 3, 4, 5, 6, 7, 8]; stability rule does not hold
    idle IPC I/O Child wakes/s: k 8, half-width 0.0, passes
    idle IPC I/O Child gap mean (ms): k 8, half-width 0.0, passes
    idle IPC I/O Child run mean (ms): k 8, half-width 0.0386, passes
-   idle residual wakes/s: k 8, half-width 0.0531, fails, needed 9
-   idle residual gap mean (ms): k 8, half-width 0.0531, fails, needed 9
-   idle residual run mean (ms): k 8, half-width 0.0448, passes
+   idle residual wakes/s: k 8, half-width 0.015, passes
+   idle residual gap mean (ms): k 8, half-width 0.015, passes
+   idle residual run mean (ms): k 8, half-width 0.0498, passes
    op Socket Thread wakes/s: k 8, half-width 0.0106, passes
    op Socket Thread gap mean (ms): k 8, half-width 0.0106, passes
    op Socket Thread run mean (ms): k 8, half-width 0.0382, passes
@@ -53,9 +53,9 @@ thunderbird-send: repeats [1, 2, 3, 4, 5, 6, 7, 8]; stability rule does not hold
    op Softwar~cThread wakes/s: k 8, half-width 0.0022, passes
    op Softwar~cThread gap mean (ms): k 8, half-width 0.0022, passes
    op Softwar~cThread run mean (ms): k 8, half-width 0.0545, at the window limit, reported (D46), needed 10
-   op StreamT~ns wakes/s: k 8, half-width 0.0811, at the window limit, reported (D46), needed 17
-   op StreamT~ns gap mean (ms): k 8, half-width 0.0805, at the window limit, reported (D46), needed 17
-   op StreamT~ns run mean (ms): k 8, half-width 0.1871, at the window limit, reported (D46), needed 80
+   op StreamTrans wakes/s: k 8, half-width 0.0648, at the window limit, reported (D46), needed 12
+   op StreamTrans gap mean (ms): k 8, half-width 0.0649, at the window limit, reported (D46), needed 12
+   op StreamTrans run mean (ms): k 8, half-width 0.1819, at the window limit, reported (D46), needed 76
    op TaskCon~ller wakes/s: k 8, half-width 0.0194, passes
    op TaskCon~ller gap mean (ms): k 8, half-width 0.0193, passes
    op TaskCon~ller run mean (ms): k 8, half-width 0.0255, passes
@@ -68,9 +68,9 @@ thunderbird-send: repeats [1, 2, 3, 4, 5, 6, 7, 8]; stability rule does not hold
    op WRRende~ckend#0 wakes/s: k 8, half-width 0.025, passes
    op WRRende~ckend#0 gap mean (ms): k 8, half-width 0.0253, passes
    op WRRende~ckend#0 run mean (ms): k 8, half-width 0.1115, at the window limit, reported (D46), needed 30
-   op residual wakes/s: k 8, half-width 0.0356, passes
-   op residual gap mean (ms): k 8, half-width 0.0352, passes
-   op residual run mean (ms): k 8, half-width 0.0712, at the window limit, reported (D46), needed 14
+   op residual wakes/s: k 8, half-width 0.0145, passes
+   op residual gap mean (ms): k 8, half-width 0.0145, passes
+   op residual run mean (ms): k 8, half-width 0.0668, at the window limit, reported (D46), needed 13
    input_run mean, SWELL-KW (ms): k 8, half-width 0.1041, at the window limit, reported (D46), needed 27
    input_run mean, 136M (ms): k 8, half-width 0.0479, passes
    operation duration mean (ms): k 8, half-width 0.0211, passes

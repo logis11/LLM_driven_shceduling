@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-09-27
+> Status: normative · Created 2026-08-26 · Updated 2026-09-28
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -331,6 +331,11 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - cite: Ubuntu `livecd-rootfs` 24.04.101, the image build of Ubuntu 24.04's desktop, `live-build/functions` (`configure_network_manager`, called from `live-build/lb_chroot_layered` and `live-build/auto/build`). git.launchpad.net/livecd-rootfs, branch `ubuntu/noble` (accessed 2026-09-26).
 - role: the network configuration a stock Ubuntu 24.04 desktop install carries (9.9 D37): an image that pre-installs NetworkManager gets `/etc/netplan/01-network-manager-all.yaml`, "# Let NetworkManager manage all devices on this system", `renderer: NetworkManager` for every device (every subproject but `desktop-preinstalled`); nothing in the build applies systemd presets. With `netplan`, no networkd configuration is written, so `systemd-networkd` is not started. Existence only.
 - status: verified (2026-09-26; `live-build/functions` read at the branch head, commit f492363)
+
+### `glean`
+- cite: Mozilla. Glean SDK, `glean-core/src/scheduler.rs`. github.com/mozilla/glean, branch `main` at commit 25b0fb2 (2026-09-25); the file last changed in commit 8fe5d82 (2025-08-08). MPL-2.0 per the file's header (accessed 2026-09-28).
+- role: when the Glean metrics-ping scheduler's thread wakes (`_dev/research/jioh/task-9.5-interactive-typing/changelog.md` D91): `const SCHEDULED_HOUR: u32 = 4;`, "Today's 04:00 in local time"; the thread is spawned as `"glean.mps"` (`crate::thread::spawn("glean.mps", …)`), waits until the next 04:00 local time, submits the "metrics" ping and reschedules for the next day's 04:00 (`When::Reschedule`); at startup it submits at once, reason "overdue", if that day's ping was not collected and 04:00 has passed. Existence only; the thread's run is the measurement's (`meas-ci`).
+- status: verified (2026-09-28; the file read at commit 25b0fb2). Which Glean release Thunderbird 156.0 vendors was not read.
 
 ## Grounding — measurement
 

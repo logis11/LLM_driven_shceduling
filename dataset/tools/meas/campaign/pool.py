@@ -72,7 +72,11 @@ SESSION_SPREAD = {("code", "idle utility/libuv-worker"),
 # D64: a rare heavy run carried as its own stated event, not as a component's wake — chrome's MemoryInfra pass of 54–61 ms
 # at no fixed time (9 in 20 sessions × 600 s) against its regular runs of at most 11.5 ms; (app, phase) -> (comm, run floor
 # in ms, the floor being design between the two). The event's runs leave the component rows, so the residual converges.
-HEAVY_EVENTS = {("chrome", "idle"): ("MemoryInfra", 30.0)}
+HEAVY_EVENTS = {("chrome", "idle"): ("MemoryInfra", 30.0), ("thunderbird-send", "idle"): ("glean.mps", 0.0)}
+# D91: an event on the clock — thunderbird-send's `glean.mps`, Glean's metrics-ping scheduler, wakes once a day at 04:00
+# local time (glean-core/src/scheduler.rs, SCHEDULED_HOUR) — leaves the component rows at any run, as D64's event does,
+# and is stated, not compiled: its pooled record says so
+CLOCK_EVENTS = {("thunderbird-send", "idle")}
 # D83: the idle phase read from this many seconds past its start — code's launch work, two episodes 50–75 s and
 # 150–175 s into the phase that never recur (the D52 probe's 1,400 s), left out; the start past the last is design.
 IDLE_FROM_S = {"code": 200.0}
@@ -89,6 +93,15 @@ FOCUS_COMPONENTS = {"gimp", "kdenlive"}  # fold_in.py's pointer-loop archetypes 
 # "<pool> #<n>", n counting up per spawn (nsThreadPoolNaming::GetNextThreadName), so each pool is one component
 POOL_SUFFIX_APPS = {"thunderbird-send"}
 POOL_SUFFIX = re.compile(r" #\d+$")
+# D90: Gecko shortens a thread name past 15 characters to its first 7, "~" and its last 7 (NSPR's
+# PR_SetCurrentThreadName, nsprpub/pr/src/pthreads/ptthread.c, on Linux), so a pool whose name runs
+# long takes another spelling once its thread numbers grow (the traces: `StreamTrans #99`, `StreamT~ns #114`;
+# `IndexedDB IO #9`, `Indexed~ IO #10`); these pools' later spellings fold back into the pool
+GECKO_POOLS = ("StreamTrans", "IndexedDB IO")
+
+
+def gecko_short(name):
+    return name if len(name) <= 15 else name[:7] + "~" + name[-7:]
 
 
 def split_events(app, phase, rows):
@@ -160,7 +173,15 @@ def build_census(version):
 
 
 def component_key(app, comm):
-    return POOL_SUFFIX.sub("", comm) if app in POOL_SUFFIX_APPS else comm
+    if app not in POOL_SUFFIX_APPS:
+        return comm
+    m = POOL_SUFFIX.search(comm)
+    if m:
+        n = m.group(0)[2:]
+        for pool_name in GECKO_POOLS:   # D90
+            if gecko_short(f"{pool_name} #{n}") == comm:
+                return pool_name
+    return POOL_SUFFIX.sub("", comm)
 
 
 def repeats_needed(values, abs_floor=None):
@@ -473,6 +494,8 @@ def main():
                                      "at_s": [[round(t, 1) for t, _ in ev[r]] for r in preps],   # seconds into the phase
                                      "rate_per_s": round(sum(len(ev[r]) for r in preps) / total_s, 6) if total_s else None,
                                      "span_s_total": round(total_s, 1)}
+                if (app, phase) in CLOCK_EVENTS:   # D91
+                    ph["heavy_event"]["compiled"] = False
             if phase == "op" and all(raws[r]["phases"][phase].get("operation") for r in preps):
                 ops = {r: raws[r]["phases"][phase]["operation"] for r in preps}
                 ph["operation"] = {"name": ops[preps[0]]["name"],

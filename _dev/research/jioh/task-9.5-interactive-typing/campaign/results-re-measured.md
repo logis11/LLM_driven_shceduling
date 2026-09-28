@@ -82,7 +82,7 @@ CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 776
 | `StreamTrans` | 23–27 | 0.1–0.1 | 7.54 (2.9–21.2) | 28003.62 | 0.084 | 10.512 | 28.205 | 640 |
 | `thunderbird-bin` | 1–1 | 0.3–0.5 | 0.19 (0.1–0.9) | 10000.25 | 0.032 | 0.915 | 3.577 | 1987 |
 | `WebExtensions` | 1–1 | 0.2–0.2 | 0.13 (0.1–0.3) | 19971.56 | 0.027 | 0.221 | 0.977 | 1025 |
-| `Indexed~ IO` | 7–8 | 0.1–0.1 | 2003.16 (2000.5–10015.7) | 30000.28 | 0.081 | 0.635 | 0.716 | 369 |
+| `IndexedDB IO` | 10–10 | 0.1–0.1 | 2003.03 (2000.6–10000.4) | 30000.26 | 0.080 | 0.638 | 0.719 | 499 |
 | `gmain` | 1–1 | 0.2–0.2 | 4000.00 (4000.0–4000.0) | 4000.62 | 0.047 | 0.055 | 0.061 | 1200 |
 
 ### driven: CPU share 0.0041–0.0132, wakes/s 54.0–204.5
@@ -135,7 +135,7 @@ Per input ([2054, 1896, 1976, 2374, 1891, 2275, 1677, 2366] events per repeat):
 | `Renderer` | 1–2 | 119.3–124.6 | 0.47 (0.4–0.5) | 15.70 | 0.079 | 0.263 | 1.280 | 72209 |
 | `Socket Thread` | 1–1 | 721.5–745.1 | 0.06 (0.1–0.1) | 0.73 | 0.011 | 0.038 | 0.110 | 434893 |
 | `WRRende~ckend#0` | 1–1 | 26.4–29.3 | 17.07 (17.0–17.2) | 33.61 | 0.287 | 0.566 | 1.341 | 16613 |
-| `WRScene~ilder#0` | 1–1 | 24.5–25.9 | 19.23 (18.4–20.2) | 35.82 | 0.268 | 0.545 | 1.022 | 14864 |
+| `StreamTrans` | 14–21 | 48.2–61.8 | 0.02 (0.0–0.0) | 0.80 | 0.010 | 0.439 | 0.525 | 33012 |
 
 Stimulus sensitivity (method §3, pre-registered): per-input run, rule (b), SWELL-KW (`driven`) against 136M Keystrokes (`driven-alt`):
 
@@ -246,7 +246,7 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | application | repeats | quantities | out of tolerance | repeats needed at this spread | holds |
 |---|---|---|---|---|---|
 | `code` | 44 | 29 | 2 | 26 | yes |
-| `thunderbird-send` | 8 | 75 | 29 | 50 | no |
+| `thunderbird-send` | 8 | 75 | 27 | 23 | no |
 | `chrome` | 38 | 60 | 1 | 30 | yes |
 | `webrtc` | 45 | 3 | 0 | 7 | yes |
 
@@ -309,9 +309,9 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | idle StreamTrans wakes/s | 8 | 0.1333 | 10.9% | ±9.1% | 2.9% | 21 | no |
 | idle StreamTrans gap mean (ms) | 8 | 7500.026 | 10.9% | ±9.1% | 2.8% | 21 | no |
 | idle StreamTrans run mean (ms) | 8 | 4.6799 | 11.3% | ±9.4% | 2.8% | 23 | no |
-| idle Indexed~ IO wakes/s | 8 | 0.0769 | 17.5% | ±14.7% | 3.4% | 50 | no |
-| idle Indexed~ IO gap mean (ms) | 8 | 13008.1751 | 17.5% | ±14.7% | 3.5% | 50 | no |
-| idle Indexed~ IO run mean (ms) | 8 | 0.173 | 9.4% | ±7.9% | 2.2% | 17 | no |
+| idle IndexedDB IO wakes/s | 8 | 0.104 | 8.3% | ±6.9% | 1.9% | 14 | no |
+| idle IndexedDB IO gap mean (ms) | 8 | 9619.2718 | 8.3% | ±6.9% | 1.9% | 14 | no |
+| idle IndexedDB IO run mean (ms) | 8 | 0.1723 | 6.5% | ±5.4% | 1.5% | 9 | no |
 | idle glean.dispatche wakes/s | 8 | 0.056 | 6.7% | ±5.6% | 1.4% | 10 | no |
 | idle glean.dispatche gap mean (ms) | 8 | 17843.928 | 6.7% | ±5.6% | 1.5% | 10 | no |
 | idle glean.dispatche run mean (ms) | 8 | 0.0372 | 4.5% | ±3.8% | 0.9% | 6 | yes |
@@ -321,9 +321,9 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | idle IPC I/O Child wakes/s | 8 | 0.04 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle IPC I/O Child gap mean (ms) | 8 | 25000.0866 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle IPC I/O Child run mean (ms) | 8 | 0.0275 | 4.6% | ±3.9% | 1.2% | 6 | yes |
-| idle residual wakes/s | 8 | 0.096 | 6.3% | ±5.3% | 1.1% | 9 | no |
-| idle residual gap mean (ms) | 8 | 10412.1835 | 6.4% | ±5.3% | 1.1% | 9 | no |
-| idle residual run mean (ms) | 8 | 0.0797 | 5.4% | ±4.5% | 1.2% | 7 | yes |
+| idle residual wakes/s | 8 | 0.069 | 1.8% | ±1.5% | 0.6% | 5 | yes |
+| idle residual gap mean (ms) | 8 | 14501.5608 | 1.8% | ±1.5% | 0.6% | 5 | yes |
+| idle residual run mean (ms) | 8 | 0.0441 | 6.0% | ±5.0% | 1.5% | 8 | yes |
 | op Socket Thread wakes/s | 8 | 732.0448 | 1.3% | ±1.1% | 0.2% | 5 | yes |
 | op Socket Thread gap mean (ms) | 8 | 1.3662 | 1.3% | ±1.1% | 0.2% | 5 | yes |
 | op Socket Thread run mean (ms) | 8 | 0.0213 | 4.6% | ±3.8% | 1.1% | 6 | yes |
@@ -342,9 +342,9 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | op Softwar~cThread wakes/s | 8 | 59.6819 | 0.3% | ±0.2% | 0.1% | 5 | yes |
 | op Softwar~cThread gap mean (ms) | 8 | 16.7553 | 0.3% | ±0.2% | 0.1% | 5 | yes |
 | op Softwar~cThread run mean (ms) | 8 | 0.0423 | 6.5% | ±5.5% | 1.8% | 10 | no |
-| op StreamT~ns wakes/s | 8 | 54.5403 | 9.7% | ±8.1% | 2.0% | 17 | no |
-| op StreamT~ns gap mean (ms) | 8 | 18.3382 | 9.6% | ±8.1% | 1.9% | 17 | no |
-| op StreamT~ns run mean (ms) | 8 | 0.153 | 22.4% | ±18.7% | 5.6% | 80 | no |
+| op StreamTrans wakes/s | 8 | 55.5877 | 7.7% | ±6.5% | 1.9% | 12 | no |
+| op StreamTrans gap mean (ms) | 8 | 17.9988 | 7.8% | ±6.5% | 1.9% | 12 | no |
+| op StreamTrans run mean (ms) | 8 | 0.1589 | 21.8% | ±18.2% | 5.4% | 76 | no |
 | op TaskCon~ller wakes/s | 8 | 42.5422 | 2.3% | ±1.9% | 0.5% | 5 | yes |
 | op TaskCon~ller gap mean (ms) | 8 | 23.5131 | 2.3% | ±1.9% | 0.5% | 5 | yes |
 | op TaskCon~ller run mean (ms) | 8 | 0.1809 | 3.0% | ±2.5% | 0.8% | 5 | yes |
@@ -357,9 +357,9 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | op WRRende~ckend#0 wakes/s | 8 | 27.9733 | 3.0% | ±2.5% | 0.8% | 5 | yes |
 | op WRRende~ckend#0 gap mean (ms) | 8 | 35.7658 | 3.0% | ±2.5% | 0.8% | 5 | yes |
 | op WRRende~ckend#0 run mean (ms) | 8 | 0.3555 | 13.3% | ±11.2% | 3.8% | 30 | no |
-| op residual wakes/s | 8 | 101.9351 | 4.3% | ±3.6% | 1.5% | 6 | yes |
-| op residual gap mean (ms) | 8 | 9.8143 | 4.2% | ±3.5% | 1.5% | 6 | yes |
-| op residual run mean (ms) | 8 | 0.2544 | 8.5% | ±7.1% | 2.2% | 14 | no |
+| op residual wakes/s | 8 | 100.8877 | 1.7% | ±1.5% | 0.5% | 5 | yes |
+| op residual gap mean (ms) | 8 | 9.9144 | 1.7% | ±1.5% | 0.5% | 5 | yes |
+| op residual run mean (ms) | 8 | 0.2522 | 8.0% | ±6.7% | 2.2% | 13 | no |
 | input_run mean, SWELL-KW (ms) | 8 | 6.0516 | 12.4% | ±10.4% | 3.3% | 27 | no |
 | input_run mean, 136M (ms) | 8 | 5.6439 | 5.7% | ±4.8% | 1.3% | 8 | yes |
 | operation duration mean (ms) | 8 | 2970.8859 | 2.5% | ±2.1% | 0.6% | 5 | yes |

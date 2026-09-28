@@ -122,14 +122,20 @@ STOPPING_STATED = {
                      "mean in about 92 % of campaigns and the stopped mean leans by at most 0.2 %."),
 }
 
+# D91: an event on the clock, by its thread — what it is, from its source, and which repeats caught it, from the phases'
+# start times (phases.jsonl), which the pooled record does not keep
+CLOCK_STATED = {
+    "glean.mps": ("Glean's metrics-ping scheduler, wakes once a day at 04:00 local time (glean)",
+                  "the only one of the {k} whose phase held 04:00 on the runner's clock (UTC)"),
+}
+
 WINDOWS_STATED = {
-    "mail-client": ("Read in 100 s windows over the 43 repeats (D85): the residual's run mean falls from 0.175 ms in the "
-                    "idle phase's first 100 s to 0.040–0.045 ms in its last three, and `WebExtensions`' is 0.257 ms in "
-                    "the first 100 s against 0.078–0.108 ms after, together 0.7 % of the entry's CPU above their median "
-                    "windows; `StreamTrans`'s episodes recur through the phase. The carried values are the phase's "
+    "mail-client": ("Read in 100 s windows over the 43 repeats (D85, D90): `WebExtensions`' run mean is 0.257 ms in the "
+                    "idle phase's first 100 s against 0.078–0.108 ms after, 0.2 % of the entry's CPU above its median "
+                    "window; `StreamTrans`'s episodes recur through the phase. The carried values are the phase's "
                     "means. The send read in 100 s windows over the 8 repeats (D87): from the first window to the last "
                     "the main thread wakes 17 % less often with runs 27 % longer (1.29 against 1.63 ms), `Socket "
-                    "Thread` wakes 21 % more, `TaskCon~ller` 27 % less with runs 36 % longer and `StreamT~ns` 47 % more, "
+                    "Thread` wakes 21 % more, `TaskCon~ller` 27 % less with runs 36 % longer and `StreamTrans` 29 % more, "
                     "while each send's mean duration stays within 2.88–3.19 s and its CPU within 2.19–2.44 s across the "
                     "25. The carried values are the means over the 25."),
     "web-browser": ("The page load read one by one over the 38 repeats (D87): the first page load of each repeat takes "
@@ -265,9 +271,10 @@ def heavy_events_block(ph, tag, indent="      "):
     """D64: a rare run the component's wakes leave out — chrome's MemoryInfra pass, 50.9–60.0 ms against its regular
     runs of at most 11.5 ms — carried as its own stated event. Only what was measured: the run quantiles, the count and
     the span they were counted over, and the rate that follows. No gap distribution, because none was measured — most
-    repeats saw the event once or not at all, so no repeat holds an interval between two of them."""
+    repeats saw the event once or not at all, so no repeat holds an interval between two of them. D91: an event on the
+    clock (`compiled` false) is stated in the scope, not written here."""
     h = ph.get("heavy_event")
-    if not h or not h.get("runs_ms"):
+    if not h or not h.get("runs_ms") or h.get("compiled") is False:
         return []
     runs = sorted(h["runs_ms"])
     return [f"{indent}heavy_events:",
@@ -439,7 +446,14 @@ def entry(aid, spec, d):
                   f"with or after the input from {tag}, {len(later['repeats'])} repeats; the idle phase runs before any input. ")
     scope += stability_scope(aid, d)
     heavy = (ph_idle or {}).get("heavy_event") if kind == "input" else None
-    if heavy and heavy.get("runs_ms"):   # D64: carried as its own event, beside the rule's list
+    if heavy and heavy.get("runs_ms") and heavy.get("compiled") is False:   # D91: an event on the clock, stated, not carried
+        what, caught = CLOCK_STATED[heavy["comm"]]
+        n = sum(heavy["count"])
+        at = "; ".join(f"{t:.1f} s into repeat {r}'s idle phase" for r, ts in zip(d["repeats"], heavy["at_s"]) for t in ts)
+        scope += (f"`{heavy['comm']}`, {what}; it is stated, not carried (D91): {n} run{'s' if n != 1 else ''} of "
+                  f"{', '.join(f'{x:g}' for x in heavy['runs_ms'])} ms, {at}, {caught.format(k=len(d['repeats']))}; "
+                  f"its run is out of the residual. ")
+    elif heavy and heavy.get("runs_ms"):   # D64: carried as its own event, beside the rule's list
         scope += (f"The `{heavy['comm']}` heavy event (D64) is carried beside the rule, not on it: "
                   f"{sum(heavy['count'])} runs over {heavy['span_s_total']:.0f} s of idle phase, "
                   f"{sum(1 for c in heavy['count'] if not c)} of the {len(heavy['count'])} repeats holding none, so no "

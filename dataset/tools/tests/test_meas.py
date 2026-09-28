@@ -265,6 +265,35 @@ def test_a_gecko_pool_is_one_component_in_the_send_campaign():
     assert campaign_pool.component_key("thunderbird-send", "StreamTrans #64") == "StreamTrans"
     assert campaign_pool.component_key("thunderbird-send", "DOM Worker") == "DOM Worker"
     assert campaign_pool.component_key("thunderbird", "BgIOThr~Pool #3") == "BgIOThr~Pool #3"   # the current campaign
+    # 9.5 D90: Gecko shortens a name past 15 characters to its first 7, "~" and its last 7, so a pool's later threads
+    # take another spelling (`StreamTrans #99`, `StreamT~ns #114`; `IndexedDB IO #9`, `Indexed~ IO #10`); each folds
+    # back into its pool
+    for comm, pool_name in (("StreamTrans #99", "StreamTrans"), ("StreamT~ns #114", "StreamTrans"),
+                            ("StreamT~s #1000", "StreamTrans"), ("IndexedDB IO #9", "IndexedDB IO"),
+                            ("Indexed~ IO #10", "IndexedDB IO"), ("Indexed~IO #100", "IndexedDB IO"),
+                            ("TaskCon~ller #0", "TaskCon~ller"), ("Softwar~cThread", "Softwar~cThread")):
+        assert campaign_pool.component_key("thunderbird-send", comm) == pool_name, comm
+
+
+def test_no_pooled_gecko_pool_is_split_across_two_spellings(repo_root):
+    # 9.5 D90 on the committed records: no shortened spelling of a listed pool is left as a name of its own
+    import importlib
+    import json as _json
+    import sys
+    saved = sys.modules.pop("analyze", None)
+    try:
+        campaign_pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    campaign = repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+    for sub in ("results-same-machine", "results-re-measured", "results-control"):
+        run = _json.load(open(campaign / sub / "pool-thunderbird-send.json"))["runs"]["thunderbird-send"]
+        for phase, ph in run["phases"].items():
+            names = set(ph.get("threads") or {})
+            for pool_name in campaign_pool.GECKO_POOLS:
+                short = {campaign_pool.gecko_short(f"{pool_name} #{n}")[:-len(f" #{n}")] for n in range(1, 1000)} - {pool_name}
+                assert not names & short, (sub, phase, names & short)
 
 
 def test_a_transient_child_is_woken_by_its_own_wakeup_rows(tmp_path):
@@ -379,6 +408,42 @@ def test_a_heavy_event_leaves_the_component_rows():
     assert [r.run for r in kept] == [7.7, 40.0] and events == [(2.0, 57.3)]
     assert pool.split_events("chrome", "driven", rows) == (rows, None)
     assert pool.split_events("code", "idle", rows) == (rows, None)
+
+
+def test_a_clock_event_leaves_the_component_rows_at_any_run():
+    # 9.5 D91: thunderbird-send's `glean.mps`, Glean's metrics-ping scheduler waking once a day at 04:00 local time,
+    # leaves the idle phase's component rows whatever its run, and is stated, not compiled
+    import importlib
+    import sys
+    from types import SimpleNamespace as R
+    saved = sys.modules.pop("analyze", None)
+    try:
+        pool = importlib.import_module("meas.campaign.pool")
+    finally:
+        if saved is not None:
+            sys.modules["analyze"] = saved
+    rows = [R(comm="glean.mps", t_in=239.5, run=2.299), R(comm="glean.mps", t_in=300.0, run=0.01),
+            R(comm="BgIOThr~Pool #2", t_in=1.0, run=0.2)]
+    kept, events = pool.split_events("thunderbird-send", "idle", rows)
+    assert [r.comm for r in kept] == ["BgIOThr~Pool #2"] and events == [(239.5, 2.299), (300.0, 0.01)]
+    assert ("thunderbird-send", "idle") in pool.CLOCK_EVENTS and ("chrome", "idle") not in pool.CLOCK_EVENTS
+
+
+def test_mail_clients_clock_event_is_stated_not_compiled(repo_root, fold_95):
+    # 9.5 D91 on the committed records: the 04:00 `glean.mps` run is out of the idle residual, in the pooled record as
+    # an event the fold-in does not compile, and stated in mail-client's scope
+    import json as _json
+    import yaml
+    campaign = repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+    idle = _json.load(open(campaign / "results-same-machine" / "pool-thunderbird-send.json"))["runs"]["thunderbird-send"]["phases"]["idle"]
+    h = idle["heavy_event"]
+    assert h["comm"] == "glean.mps" and h["compiled"] is False and sum(h["count"]) == 1 and h["runs_ms"] == [2.299]
+    assert "glean.mps" not in idle["components"]["residual"]["comms"]
+    entry = yaml.safe_load("archetypes:\n" + fold_95.read_text())["archetypes"]["mail-client"]
+    assert "heavy_events" not in entry["params"]
+    assert ("`glean.mps`, Glean's metrics-ping scheduler, wakes once a day at 04:00 local time (glean); it is stated, "
+            "not carried (D91): 1 run of 2.299 ms, 238.6 s into repeat 39's idle phase, the only one of the 43 whose "
+            "phase held 04:00 on the runner's clock (UTC); its run is out of the residual. ") in entry["validation_stats"]["scope"]
 
 
 def test_values_at_the_window_limit_are_reported_not_held_open():
@@ -645,7 +710,8 @@ def test_values_at_the_window_limit_are_stated_with_their_half_widths(fold_95):
     # D79: the keys-only re-measure's eight windows; its 136M mean now holds the rule
     assert "SWELL-KW 6.052 ms ±10.41 % (the rule needs 27 repeats)" in mail
     assert "136M" not in mail.split("outside the rule:")[1].split("hold within it")[0]
-    assert "the operation's `StreamT~ns` wake rate 54.54 wakes/s ±8.11 % (the rule needs 17 repeats)" in mail
+    # D90: the pool's two spellings folded into `StreamTrans`
+    assert "the operation's `StreamTrans` wake rate 55.59 wakes/s ±6.48 % (the rule needs 12 repeats)" in mail
     assert "the other 30 hold within it, the widest ±5.38 %" in mail   # SwComposite's run mean, by the 1 µs floor
     for aid in ("office-writer", "image-editor", "video-editor", "video-player", "audio-player", "video-call"):
         assert "window limit" not in s[aid].lower(), aid
