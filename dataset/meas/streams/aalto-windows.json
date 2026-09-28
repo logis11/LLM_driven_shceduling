@@ -229,7 +229,12 @@
   "Keystrokes/files/316088_keystrokes.txt": "4b039459141baff2019d8aff4b4ee85fa80cdce7b69e5375efcbd425656cf4ca",
   "Keystrokes/files/216859_keystrokes.txt": "571e21fa85000bd48958c30f95c37ec21fed389eaf398e77a7ca0e3e817f404e",
   "Keystrokes/files/476782_keystrokes.txt": "fd210b4ac1d809b32bd3b07a23bb6a731ab25da0b67c0197af43fc4f830313d7",
-  "Keystrokes/files/21934_keystrokes.txt": "fd7faba9802991e6dbd63800ab51131b7c0f915a3d66d7e489878393e70d6eb6"
+  "Keystrokes/files/21934_keystrokes.txt": "fd7faba9802991e6dbd63800ab51131b7c0f915a3d66d7e489878393e70d6eb6",
+  "Keystrokes/files/13106_keystrokes.txt": "e65447870fb9423adf9a5cd80a8d57f7ad610be2636ddabf7d5ae82f8e2cfa1d",
+  "Keystrokes/files/508222_keystrokes.txt": "afa038ef142cadad0d4d5826e650c3ec75b128b12fc3c87a1512bd5941e3c8c5",
+  "Keystrokes/files/183057_keystrokes.txt": "0a0570995fa326bb2192a6c3e2bd875795c9fbcfddbaef112073ef84223eef8c",
+  "Keystrokes/files/315990_keystrokes.txt": "fcf7c9c8efc9af8e503f47be68ae75965f5640504ed661bd5c8528518784bc04",
+  "Keystrokes/files/176736_keystrokes.txt": "3d15bbdb0e083a0dd3dec2cce0e953751a30694c7a5f590342f552f9f254e4ee"
  },
  "windows": {
   "aalto-r1": {
@@ -1281,6 +1286,23 @@
    "gap_ms_p90": 661.0,
    "gap_ms_p99": 3206.0,
    "share_gt_1s": 0.0443
+  },
+  "aalto-r70": {
+   "participants": [
+    "13106",
+    "508222",
+    "183057",
+    "315990",
+    "176736"
+   ],
+   "events": 2664,
+   "keys": 2664,
+   "pointer": 0,
+   "span_s": 600.1,
+   "gap_ms_p50": 144.0,
+   "gap_ms_p90": 345.0,
+   "gap_ms_p99": 2353.0,
+   "share_gt_1s": 0.0244
   }
  }
 }
