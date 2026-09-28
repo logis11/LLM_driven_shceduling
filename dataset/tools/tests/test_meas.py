@@ -631,7 +631,9 @@ def test_values_at_the_window_limit_are_stated_with_their_half_widths(fold_95):
             "103.9 ms ±3.01 % hold within it") in code   # D83: the idle rate the window rule nets read from 200 s
     web = s["web-browser"]
     assert "38 repeats" in web and "the per-input means and the page-load operation's values" in web
-    assert "outside the rule" not in web and "all 30 hold within it, the widest ±4.72 %" in web   # D78
+    # D84: its renderers carried, the SWELL-KW per-input mean sits outside the rule at the recording's last window
+    assert ("outside the rule: the per-input run mean under SWELL-KW 4.274 ms ±5.90 % (the rule needs 52 repeats); "
+            "the other 38 hold within it, the widest ±3.37 %") in web
     mail = s["mail-client"]
     assert "8 repeats" in mail and "the per-input means and the send operation's values" in mail
     # D79: the keys-only re-measure's eight windows; its 136M mean now holds the rule
@@ -772,7 +774,7 @@ def test_every_typing_scope_states_its_stimulus_check_read_per_repeat(fold_95):
     # D81: the pre-registered p50 sentence keeps its p50s and adds the per-repeat reading of the means
     s = _scopes(fold_95)
     want = {"office-writer": "is 1.123 of SWELL-KW's (95 % interval 1.045–1.200 over 14 repeats), a difference",
-            "web-browser": "is 1.160 of SWELL-KW's (95 % interval 1.095–1.225 over 38 repeats), a difference",
+            "web-browser": "is 1.338 of SWELL-KW's (95 % interval 1.284–1.392 over 38 repeats), a difference",   # D84
             "code-editor": "is 1.029 of SWELL-KW's (95 % interval 0.968–1.090 over 43 repeats), not resolved",   # D83
             "mail-client": "is 0.909 of SWELL-KW's (95 % interval 0.824–0.994 over 8 repeats), a difference"}
     for aid, phrase in want.items():

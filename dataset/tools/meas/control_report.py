@@ -47,8 +47,8 @@ NUMBER = {3: "three", 4: "four", 5: "five", 6: "six"}
 # lines stated beside an archetype's reading by 인지오's decisions (decision 17) — in its notes and on its page
 NOTES_STATED = {
     "web-browser": ("The operation phase's second page-load pass wakes the network service's foreground pool "
-                    "(`utility/ThreadPoolForeg`) about 40 % less than the first, which keeps that component's ratio from "
-                    "resolving."),
+                    "(`utility/ThreadPoolForeg`, in the residual since D84) about 40 % less than the first, which keeps "
+                    "the residual's ratios from resolving."),
     "chat-client": ("The second idle run wakes `Chrome_IOThread` and `Chrome_ChildIOT` about 3–4 % more than the first, "
                     "traced or not; the control ran Element 1.12.29, the carried pool 1.12.28."),
     "code-editor": ("The second idle run, 915–1815 s after the first began, differs from the first whichever is traced — the "

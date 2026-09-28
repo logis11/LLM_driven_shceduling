@@ -167,76 +167,76 @@
    "phase": "idle",
    "repeats": 38,
    "wakes_per_s": {
-    "measured": 22.655,
-    "compiled": 22.798
+    "measured": 43.187,
+    "compiled": 43.233
    },
    "bins": {
     "1 ms": {
      "measured": {
-      "median": 2.8682,
-      "min": 2.3973,
-      "max": 3.5616
+      "median": 5.4702,
+      "min": 4.5449,
+      "max": 7.2751
      },
      "compiled": {
-      "median": 1.6499,
-      "min": 1.6167,
-      "max": 1.6755
+      "median": 1.8138,
+      "min": 1.795,
+      "max": 1.8366
      },
      "ratio": {
-      "median": 1.7376,
-      "min": 1.4829,
-      "max": 2.1592
+      "median": 3.0132,
+      "min": 2.4746,
+      "max": 4.0135
      }
     },
     "10 ms": {
      "measured": {
-      "median": 3.7911,
-      "min": 2.972,
-      "max": 4.3672
+      "median": 8.0088,
+      "min": 5.3838,
+      "max": 9.6353
      },
      "compiled": {
-      "median": 2.3143,
-      "min": 2.2637,
-      "max": 2.3789
+      "median": 2.825,
+      "min": 2.77,
+      "max": 2.875
      },
      "ratio": {
-      "median": 1.6306,
-      "min": 1.2777,
-      "max": 1.9071
+      "median": 2.8353,
+      "min": 1.8959,
+      "max": 3.3934
      }
     },
     "100 ms": {
      "measured": {
-      "median": 8.2079,
-      "min": 3.8715,
-      "max": 9.6862
+      "median": 15.4757,
+      "min": 7.0191,
+      "max": 17.5961
      },
      "compiled": {
-      "median": 4.7384,
-      "min": 4.5816,
-      "max": 4.9731
+      "median": 4.5138,
+      "min": 4.3238,
+      "max": 4.6962
      },
      "ratio": {
-      "median": 1.7435,
-      "min": 0.8261,
-      "max": 2.0428
+      "median": 3.4428,
+      "min": 1.5624,
+      "max": 3.9195
      }
     },
     "1 s": {
      "measured": {
-      "median": 2.0023,
-      "min": 1.0234,
-      "max": 3.2625
+      "median": 3.0289,
+      "min": 1.2769,
+      "max": 4.1042
      },
      "compiled": {
-      "median": 3.9711,
-      "min": 3.3999,
-      "max": 4.6876
+      "median": 3.4762,
+      "min": 3.0883,
+      "max": 3.8446
      },
      "ratio": {
-      "median": 0.5004,
-      "min": 0.2477,
-      "max": 0.9078
+      "median": 0.8808,
+      "min": 0.3382,
+      "max": 1.3289
      }
     }
    }

@@ -3,21 +3,23 @@
 ## web-browser (`chrome`)
 
 6 jobs (3 traced untraced, 3 untraced traced); builds: Google Chrome 153.0.8010.52 (1, 2, 3, 4, 5, 6).
-32 intervals read; at 95 % chance alone gives about 1.6 differences; differences found: 9 (idle gpu/Chrome_ChildIOT run mean (ms), idle gpu/VizCompositorTh run mean (ms), idle gpu/VizCompositorTh wakes/s, idle utility/HangWatcher run mean (ms), idle utility/HangWatcher wakes/s, op Chrome_IOThread run mean (ms), op Chrome_IOThread wakes/s, op chrome run mean (ms), op gpu/Chrome_ChildIOT run mean (ms)).
+40 intervals read; at 95 % chance alone gives about 2.0 differences; differences found: 10 (idle gpu/Chrome_ChildIOT run mean (ms), idle gpu/VizCompositorTh run mean (ms), idle gpu/VizCompositorTh wakes/s, idle renderer/Compositor run mean (ms), op Chrome_IOThread run mean (ms), op Chrome_IOThread wakes/s, op chrome run mean (ms), op gpu/Chrome_ChildIOT run mean (ms), op renderer/Chrome_ChildIOT run mean (ms), op renderer/Compositor run mean (ms)).
 
 | value | traced median | untraced median | medians' ratio | per-job mean | 95 % interval | reading | by order | n | exited (CPU, wakes) | left out (CPU, wakes) | in the operation windows (CPU, wakes) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| driven per-input run (ms) | 1.2752 | 1.8792 | 1.4737 | 1.2281 | 0.5657–1.8905 | not resolved | traced first 1.1748; untraced first 1.2814 | 6 | — | — | — |
+| driven per-input run (ms) | 3.8499 | 4.3101 | 1.1195 | 1.1526 | 0.7408–1.5644 | not resolved | traced first 1.2111; untraced first 1.0941 | 6 | — | — | — |
 | idle chrome run mean (ms) | 0.1711 | 0.1589 | 0.9288 | 0.9633 | 0.9008–1.0259 | not resolved | traced first 0.9533; untraced first 0.9733 | 6 | 0, 0 | 0, 0 | — |
 | idle chrome wakes/s | 0.7913 | 0.7891 | 0.9972 | 0.9974 | 0.9361–1.0588 | not resolved | traced first 0.9498; untraced first 1.0451 | 6 | 0, 0 | 0, 0 | — |
 | idle gpu/Chrome_ChildIOT run mean (ms) | 0.0316 | 0.0273 | 0.8634 | 0.8634 | 0.8497–0.8772 | difference | traced first 0.8567; untraced first 0.8701 | 6 | 0, 0 | 0, 0 | — |
 | idle gpu/Chrome_ChildIOT wakes/s | 7.5429 | 7.4418 | 0.9866 | 0.9911 | 0.9752–1.007 | not resolved | traced first 1.0029; untraced first 0.9793 | 6 | 0, 0 | 0, 0 | — |
 | idle gpu/VizCompositorTh run mean (ms) | 0.0779 | 0.075 | 0.9622 | 0.9537 | 0.9291–0.9783 | difference | traced first 0.9399; untraced first 0.9675 | 6 | 0, 0 | 0, 0 | — |
 | idle gpu/VizCompositorTh wakes/s | 11.7826 | 11.5974 | 0.9843 | 0.9767 | 0.96–0.9933 | difference | traced first 0.9827; untraced first 0.9707 | 6 | 0, 0 | 0, 0 | — |
-| idle residual run mean (ms) | 0.2038 | 0.1223 | 0.6002 | 0.8506 | 0.4122–1.2889 | not resolved | traced first 0.7718; untraced first 0.9293 | 6 | 0.003, 0.002 | 0.312, 0.001 | — |
-| idle residual wakes/s | 1.0448 | 1.0341 | 0.9897 | 0.9855 | 0.8375–1.1336 | not resolved | traced first 0.8664; untraced first 1.1047 | 6 | 0.003, 0.002 | 0.312, 0.001 | — |
-| idle utility/HangWatcher run mean (ms) | 0.0429 | 0.0405 | 0.9429 | 0.9364 | 0.9109–0.9618 | difference | traced first 0.9271; untraced first 0.9457 | 6 | 0, 0 | 0, 0 | — |
-| idle utility/HangWatcher wakes/s | 0.2993 | 0.3 | 1.0025 | 1.0026 | 1.0022–1.0029 | difference | traced first 1.0025; untraced first 1.0026 | 6 | 0, 0 | 0, 0 | — |
+| idle renderer/Compositor run mean (ms) | 0.0728 | 0.0677 | 0.93 | 0.9276 | 0.9169–0.9384 | difference | traced first 0.9252; untraced first 0.9301 | 6 | 0, 0 | 0, 0 | — |
+| idle renderer/Compositor wakes/s | 12.605 | 12.5181 | 0.9931 | 0.9985 | 0.9889–1.0082 | not resolved | traced first 1.0061; untraced first 0.991 | 6 | 0, 0 | 0, 0 | — |
+| idle renderer/chrome run mean (ms) | 0.0811 | 0.0741 | 0.9128 | 0.9153 | 0.8201–1.0105 | not resolved | traced first 0.8865; untraced first 0.9441 | 6 | 0, 0 | 0, 0 | — |
+| idle renderer/chrome wakes/s | 6.4773 | 6.747 | 1.0416 | 1.0349 | 0.9325–1.1373 | not resolved | traced first 0.9885; untraced first 1.0813 | 6 | 0, 0 | 0, 0 | — |
+| idle residual run mean (ms) | 0.1411 | 0.0907 | 0.6427 | 0.8533 | 0.4603–1.2463 | not resolved | traced first 0.7689; untraced first 0.9377 | 6 | 0.004, 0.002 | 0.286, 0.001 | — |
+| idle residual wakes/s | 1.6923 | 1.6949 | 1.0016 | 0.9858 | 0.8721–1.0995 | not resolved | traced first 0.8956; untraced first 1.0759 | 6 | 0.004, 0.002 | 0.286, 0.001 | — |
 | idle utility/chrome run mean (ms) | 0.0937 | 0.0896 | 0.9563 | 0.9736 | 0.938–1.0092 | not resolved | traced first 0.949; untraced first 0.9982 | 6 | 0.002, 0 | 0, 0 | — |
 | idle utility/chrome wakes/s | 0.8129 | 0.7999 | 0.9839 | 0.9937 | 0.9773–1.0101 | not resolved | traced first 0.9937; untraced first 0.9937 | 6 | 0.002, 0 | 0, 0 | — |
 | op Chrome_IOThread run mean (ms) | 0.0252 | 0.0221 | 0.8759 | 0.8607 | 0.8184–0.9029 | difference | traced first 0.8269; untraced first 0.8944 | 6 | 0, 0 | — | 0.886, 0.903 |
@@ -33,12 +35,18 @@
 | op gpu/VizCompositorTh run mean (ms) | 0.3586 | 0.3514 | 0.98 | 0.9807 | 0.9386–1.0228 | not resolved | traced first 0.9964; untraced first 0.965 | 6 | 0, 0 | — | 0.875, 0.818 |
 | op gpu/VizCompositorTh wakes/s | 8.0823 | 8.1382 | 1.0069 | 0.9979 | 0.9746–1.0213 | not resolved | traced first 0.9854; untraced first 1.0105 | 6 | 0, 0 | — | 0.875, 0.818 |
 | op operation duration mean (ms) | 481.867 | 480.028 | 0.9962 | 0.9884 | 0.9591–1.0178 | not resolved | traced first 0.9789; untraced first 0.9979 | 6 | — | — | — |
-| op residual run mean (ms) | 0.1007 | 0.0982 | 0.9755 | 1.019 | 0.8359–1.2022 | not resolved | traced first 1.1089; untraced first 0.9292 | 6 | 0.001, 0.001 | — | 0.377, 0.517 |
-| op residual wakes/s | 5.1988 | 5.1202 | 0.9849 | 0.9914 | 0.9762–1.0065 | not resolved | traced first 1.0009; untraced first 0.9819 | 6 | 0.001, 0.001 | — | 0.377, 0.517 |
+| op renderer/Chrome_ChildIOT run mean (ms) | 0.0236 | 0.0203 | 0.8579 | 0.8562 | 0.8428–0.8695 | difference | traced first 0.8483; untraced first 0.8641 | 6 | 0.01, 0.008 | — | 0.893, 0.913 |
+| op renderer/Chrome_ChildIOT wakes/s | 15.0844 | 15.3847 | 1.0199 | 1.0191 | 0.9935–1.0448 | not resolved | traced first 1.0351; untraced first 1.0032 | 6 | 0.01, 0.008 | — | 0.893, 0.913 |
+| op renderer/Compositor run mean (ms) | 0.0856 | 0.0807 | 0.9418 | 0.942 | 0.9024–0.9816 | difference | traced first 0.9333; untraced first 0.9506 | 6 | 0.008, 0.006 | — | 0.934, 0.903 |
+| op renderer/Compositor wakes/s | 6.6174 | 6.7044 | 1.0131 | 1.0226 | 0.9705–1.0747 | not resolved | traced first 1.0627; untraced first 0.9825 | 6 | 0.008, 0.006 | — | 0.934, 0.903 |
+| op renderer/ThreadPoolForeg run mean (ms) | 0.4134 | 0.3992 | 0.9655 | 0.9869 | 0.8667–1.1071 | not resolved | traced first 1.0867; untraced first 0.8871 | 6 | 0.117, 0.097 | — | 0.685, 0.715 |
+| op renderer/ThreadPoolForeg wakes/s | 15.8698 | 16.2738 | 1.0255 | 1.0536 | 0.8064–1.3008 | not resolved | traced first 1.2669; untraced first 0.8403 | 6 | 0.117, 0.097 | — | 0.685, 0.715 |
+| op renderer/chrome run mean (ms) | 3.8827 | 4.0242 | 1.0364 | 1.0092 | 0.9522–1.0663 | not resolved | traced first 1.0281; untraced first 0.9904 | 6 | 0.002, 0.016 | — | 0.882, 0.684 |
+| op renderer/chrome wakes/s | 5.0176 | 4.9839 | 0.9933 | 0.9878 | 0.9501–1.0254 | not resolved | traced first 0.9842; untraced first 0.9913 | 6 | 0.002, 0.016 | — | 0.882, 0.684 |
+| op residual run mean (ms) | 0.0833 | 0.078 | 0.9369 | 1.0158 | 0.8108–1.2208 | not resolved | traced first 1.1439; untraced first 0.8877 | 6 | 0.014, 0.016 | — | 0.408, 0.557 |
+| op residual wakes/s | 7.2382 | 7.3035 | 1.009 | 0.9932 | 0.8972–1.0892 | not resolved | traced first 0.9102; untraced first 1.0763 | 6 | 0.014, 0.016 | — | 0.408, 0.557 |
 | op utility/Chrome_ChildIOT run mean (ms) | 0.1375 | 0.1322 | 0.9611 | 0.9505 | 0.8785–1.0224 | not resolved | traced first 0.9001; untraced first 1.0009 | 6 | 0, 0 | — | 0.963, 0.946 |
 | op utility/Chrome_ChildIOT wakes/s | 3.8205 | 3.8749 | 1.0142 | 1.0112 | 0.9444–1.0779 | not resolved | traced first 1.0561; untraced first 0.9662 | 6 | 0, 0 | — | 0.963, 0.946 |
-| op utility/ThreadPoolForeg run mean (ms) | 0.0322 | 0.0317 | 0.9849 | 0.9618 | 0.8069–1.1167 | not resolved | traced first 0.8339; untraced first 1.0897 | 6 | 0, 0 | — | 0.869, 0.9 |
-| op utility/ThreadPoolForeg wakes/s | 1.4236 | 1.4495 | 1.0182 | 1.0834 | 0.5448–1.622 | not resolved | traced first 0.6181; untraced first 1.5487 | 6 | 0, 0 | — | 0.869, 0.9 |
 
 - job 1: the screenshots after its two preludes differ in (21, 164, 22, 179)
 - job 2: the screenshots after its two preludes differ in (21, 164, 22, 179)
@@ -47,9 +55,9 @@
 - job 5: the screenshots after its two preludes differ in (21, 164, 22, 179)
 - job 6: the screenshots after its two preludes differ in (21, 164, 22, 179)
 
-The operation phase's second page-load pass wakes the network service's foreground pool (`utility/ThreadPoolForeg`) about 40 % less than the first, which keeps that component's ratio from resolving.
+The operation phase's second page-load pass wakes the network service's foreground pool (`utility/ThreadPoolForeg`, in the residual since D84) about 40 % less than the first, which keeps the residual's ratios from resolving.
 
-The traced runs against the carried pool (decision 17): largest |z| 6.31 over 45 values; only in the carried pool: input_run mean, 136M (ms).
+The traced runs against the carried pool (decision 17): largest |z| 3.11 over 59 values; only in the carried pool: input_run mean, 136M (ms).
 
 ## code-editor (`code`)
 

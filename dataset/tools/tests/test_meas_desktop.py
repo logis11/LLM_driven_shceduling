@@ -65,8 +65,8 @@ def _run_dir(tmp_path, app, phase, procs, rows, wakeups=""):
 
 
 def test_only_renderer_processes_reach_the_components_of_a_renderer_subject(tmp_path):
-    # D13: the renderer-only view is the inverse of the exclude_roles=("renderer",) filter that pooled
-    # web-browser, so the same code computes both halves of one application. The browser process and the GPU
+    # D13: the renderer-only view keeps what an exclude_roles=("renderer",) filter would drop, so the same code
+    # computes the components of every Chrome measurement. The browser process and the GPU
     # process are in the trace and must not be in the entry.
     procs = [{"pid": 100, "comm": "chrome", "cmd": "/opt/google/chrome/chrome --user-data-dir=/tmp/chrome-data"},
              {"pid": 200, "comm": "chrome", "cmd": "/opt/google/chrome/chrome --type=renderer --lang=en"},

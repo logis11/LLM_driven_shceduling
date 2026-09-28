@@ -2,10 +2,10 @@
 """Per-phase analysis of a 9.8 desktop run (changelog D13; method §5).
 
 The component layer is imported, not copied. `campaign/analyze.py` computes the components of every other
-Chrome measurement in this dataset, and the two renderer entries here are the other half of the archetype it
-computed for `web-browser`: that archetype was pooled with `exclude_roles=("renderer",)` (9.5 D14) and these
-entries keep the renderers and drop the rest. Computing the two halves with different code would put a montage
-inside one application through the analysis rather than through the measurement.
+Chrome measurement in this dataset, and the two renderer entries here describe the pages beside the one
+`web-browser` carries: that archetype carries every process of its own run, renderers included (9.5 D84), and
+these entries keep their own runs' page renderers and drop the rest. Computing Chrome's components with different
+code would put a montage inside one application through the analysis rather than through the measurement.
 
 What is NOT reused is `analyze_run`, whose phase loop is fixed to 9.5's names — `idle`, `driven`, `driven-alt`,
 `play`, `op` — and would skip every phase this slice records. Phase discovery is local, as

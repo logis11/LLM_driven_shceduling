@@ -10,7 +10,7 @@ By 인지오's decision, scope-card items 11–14 (with items 1–10 and 15–17
 
 ## D2 — Chrome's renderer processes keep a task of their own, as a measured archetype (2026-09-20)
 
-> Amended by D4 (the renderer archetype is two entries, hidden and visible).
+> Amended by D4 (the renderer archetype is two entries, hidden and visible) and 9.5 D84 (the renderers of `web-browser`'s own run are its own).
 
 By 인지오's decision, scope-card item 11: Chrome's renderer processes do not fold into `web-browser`'s one task; they take a measured archetype of their own, and the 102 renderer-bound tasks keep their identity as tasks. Grounds: 9.5 D14's carve-out is deference to this binding rather than a claim about renderers — it gives a measured archetype's task "every process of the application's tree, all threads merged into one event stream, except processes another archetype already owns — today Chrome's renderer processes (`electron-comms`, 9.8's, bound separately in every timeline that carries `chrome`)", and hands 9.8 "the Chrome runs' renderer rows as an observation of Chrome renderers on a static local page (stated scope)"; the same entry records VS Code's task carrying main, renderer, GPU and five utility processes merged, with its renderer holding idle CPU 0.011 of the application's 0.020, so an Electron renderer already sits inside its application's single task elsewhere in the dataset and Chrome's renderers are singled out only by the binding being dissolved here. The decision rests on the experiment's subject: the number of independently schedulable entities is a first-order property of a scheduling workload, and merging 102 renderer tasks into the browser tasks beside them changes what contends for the CPU, not only where the values come from. Not taken: folding the renderers into `web-browser` under 9.5 D9 and D14's merge rule, measured on a Chrome holding loaded tabs so that the renderers fall inside the observation — consistent with the dataset's one-application-one-task rule, and rejected on the entity-count ground above; it would also make the tab count a scope statement of the measurement rather than a per-file quantity. Hands to 9.10: the per-file renderer counts, and that under Chromium's documented process model a renderer task stands for one site-locked process rather than one tab (S2-01), so a count is a count of sites. No value changed by this entry.
 
@@ -438,7 +438,7 @@ No value changed by this entry.
 
 ## D25 — the fold-in: four entries replace `electron-comms`, every binding rebound or retired (2026-09-22)
 
-> Amended by D26 (every table's form and gaps; the renderer entries' components) and D31 (`renderer-hidden`'s tables and rates over 19 repeats, two Chrome builds).
+> Amended by D26 (every table's form and gaps; the renderer entries' components), D31 (`renderer-hidden`'s tables and rates over 19 repeats, two Chrome builds) and 9.5 D84 (the renderer of the page in use carried by `web-browser`).
 
 **The entries.** By 인지오's decision the ids are `renderer-hidden`, `renderer-visible`, `chat-client` and
 `game-client`, named for the kind of application as `web-browser`, `mail-client` and `video-call` are. They are

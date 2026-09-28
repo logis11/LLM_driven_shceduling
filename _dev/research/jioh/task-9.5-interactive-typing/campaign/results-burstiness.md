@@ -24,14 +24,14 @@
 
 ## web-browser (`chrome`, idle)
 
-38 repeats; wakes/s, median over the streams: measured 22.655, compiled 22.798. Dispersion (variance over mean of the wake counts per bin), median (least–largest) over the streams; the ratio measured over compiled, per stream.
+38 repeats; wakes/s, median over the streams: measured 43.187, compiled 43.233. Dispersion (variance over mean of the wake counts per bin), median (least–largest) over the streams; the ratio measured over compiled, per stream.
 
 | bin | measured | compiled | measured / compiled |
 |---|---|---|---|
-| 1 ms | 2.868 (2.397–3.562) | 1.65 (1.617–1.675) | 1.738 (1.483–2.159) |
-| 10 ms | 3.791 (2.972–4.367) | 2.314 (2.264–2.379) | 1.631 (1.278–1.907) |
-| 100 ms | 8.208 (3.872–9.686) | 4.738 (4.582–4.973) | 1.744 (0.8261–2.043) |
-| 1 s | 2.002 (1.023–3.263) | 3.971 (3.4–4.688) | 0.5004 (0.2477–0.9078) |
+| 1 ms | 5.47 (4.545–7.275) | 1.814 (1.795–1.837) | 3.013 (2.475–4.013) |
+| 10 ms | 8.009 (5.384–9.635) | 2.825 (2.77–2.875) | 2.835 (1.896–3.393) |
+| 100 ms | 15.48 (7.019–17.6) | 4.514 (4.324–4.696) | 3.443 (1.562–3.92) |
+| 1 s | 3.029 (1.277–4.104) | 3.476 (3.088–3.845) | 0.8808 (0.3382–1.329) |
 
 ## mail-client (`thunderbird-send`, idle)
 

@@ -365,7 +365,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("artifacts"); ap.add_argument("out")
     ap.add_argument("--w-ms", type=float, default=5.0); ap.add_argument("--cap-ms", type=float, default=0.0)
-    ap.add_argument("--exclude-roles", default="", help="comma-separated process roles left out of the tree (D14: renderer for chrome)")
+    ap.add_argument("--exclude-roles", default="", help="comma-separated process roles left out of the tree (D14; none since D84)")
     ap.add_argument("--cpu-model", default="", help="pool only repeats whose CPU model contains this text (D26)")
     ap.add_argument("--control", action="store_true", help="pool the untraced control's traced runs, and only them")
     args = ap.parse_args()

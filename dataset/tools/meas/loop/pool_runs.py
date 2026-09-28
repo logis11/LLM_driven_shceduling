@@ -7,8 +7,7 @@ pool_runs.py background/<app> [--since N] [--out FILE] [--exclude K[,K]... --exc
 
 Every landed artifact (common.GATE_S or longer, success) of runs numbered N or later is downloaded under the work
 directory — one folder per run for families with apps, one flat folder for build (its repeat indices never repeat) —
-and pooled with the family's pool.py and --cpu-model common.MACHINE. Options after -- go to pool.py (chrome:
---exclude-roles renderer, 9.5 D14). Validity per repeat (_dev/research/jioh/measurement-campaign-workflow.md, the loop,
+and pooled with the family's pool.py and --cpu-model common.MACHINE. Options after -- go to pool.py. Validity per repeat (_dev/research/jioh/measurement-campaign-workflow.md, the loop,
 step 4): gate open on the machine; the replay sent every event of its window; operations completed; non-zero return
 codes other than perf record's 130 (its SIGINT stop) and freshclam's 2 with a recorded database; for build, one
 ClamAV signature database across the repeats whose clamscan is pooled (9.6 D27); for background, the set's archive and manifest matching their pins and the

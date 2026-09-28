@@ -152,77 +152,77 @@ CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 776
 
 Left out of this pool: repeat 16@35712250969 — D66: window 16 measured twice — one push started runs #474 and #475, #475's copy was gated and the watcher relaunched it as #476 while #474's copy measured; the original launch's copy (#474) is kept.
 
-### idle: CPU share 0.0012–0.0017, wakes/s 21.7–24.3
-- processes by role (repeat 1): gpu: 1 pid(s), 20.56 wakes/s, CPU 0.0013; main: 1 pid(s), 1.35 wakes/s, CPU 0.0002; utility: 3 pid(s), 1.21 wakes/s, CPU 0.0001
+### idle: CPU share 0.0023–0.0032, wakes/s 40.8–46.3
+- processes by role (repeat 1): renderer: 3 pid(s), 21.47 wakes/s, CPU 0.0016; gpu: 1 pid(s), 20.56 wakes/s, CPU 0.0013; main: 1 pid(s), 1.35 wakes/s, CPU 0.0002; utility: 3 pid(s), 1.21 wakes/s, CPU 0.0001
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
 | `gpu/VizCompositorTh` | 1–1 | 11.4–13.4 | 6.13 (0.5–12.1) | 553.44 | 0.051 | 0.198 | 0.261 | 275834 |
+| `renderer/Compositor` | 1–4 | 12.2–13.3 | 3.35 (1.2–7.2) | 370.59 | 0.049 | 0.192 | 0.255 | 290250 |
+| `renderer/chrome` | 3–4 | 6.1–8.6 | 3.59 (0.3–9.5) | 586.74 | 0.066 | 0.162 | 0.263 | 168400 |
 | `gpu/Chrome_ChildIOT` | 1–1 | 7.3–7.9 | 12.62 (9.6–14.8) | 574.67 | 0.026 | 0.048 | 0.076 | 173122 |
 | `chrome` | 1–1 | 0.8–0.8 | 354.44 (80.2–731.9) | 4004.26 | 0.107 | 0.283 | 0.742 | 18248 |
-| `utility/chrome` | 3–4 | 0.8–0.8 | 303.94 (9.1–1374.5) | 3599.34 | 0.071 | 0.106 | 0.236 | 18308 |
-| `MemoryInfra` | 1–1 | 0.1–0.1 | 1363.63 (35.9–5761.0) | 43780.20 | 0.095 | 0.697 | 7.845 | 2096 |
 
-### driven: CPU share 0.0013–0.0055, wakes/s 24.4–86.8
-- processes by role (repeat 1): gpu: 1 pid(s), 21.48 wakes/s, CPU 0.0013; main: 1 pid(s), 7.05 wakes/s, CPU 0.0005; utility: 3 pid(s), 1.2 wakes/s, CPU 0.0001
+### driven: CPU share 0.0024–0.0137, wakes/s 45.6–164.6
+- processes by role (repeat 1): renderer: 3 pid(s), 26.68 wakes/s, CPU 0.0021; gpu: 1 pid(s), 21.48 wakes/s, CPU 0.0013; main: 1 pid(s), 7.05 wakes/s, CPU 0.0005; utility: 3 pid(s), 1.2 wakes/s, CPU 0.0001
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
+| `renderer/chrome` | 3–4 | 6.9–30.4 | 2.53 (1.2–10.5) | 399.86 | 0.042 | 0.383 | 0.764 | 283676 |
+| `renderer/Compositor` | 3–4 | 13.3–35.6 | 1.08 (0.7–6.1) | 198.30 | 0.044 | 0.158 | 0.252 | 435049 |
 | `gpu/VizCompositorTh` | 1–1 | 11.8–22.4 | 9.13 (3.1–13.1) | 549.55 | 0.046 | 0.211 | 0.391 | 331282 |
 | `chrome` | 1–1 | 1.3–17.7 | 1.89 (1.7–32.7) | 235.29 | 0.088 | 0.255 | 0.411 | 128891 |
-| `gpu/Chrome_ChildIOT` | 1–1 | 7.6–14.8 | 12.66 (10.8–14.6) | 570.73 | 0.024 | 0.046 | 0.072 | 216215 |
-| `Chrome_IOThread` | 1–1 | 0.6–24.5 | 0.38 (0.3–0.5) | 78.99 | 0.018 | 0.038 | 0.072 | 155263 |
-| `MemoryInfra` | 1–1 | 0.1–0.1 | 1309.54 (147.9–5766.4) | 44837.79 | 0.077 | 0.673 | 1.200 | 1978 |
+| `renderer/ThreadPoolForeg` | 3–3 | 0.2–3.3 | 107.05 (0.1–311.6) | 1169.67 | 0.219 | 0.724 | 1.113 | 22292 |
 
 Per input ([153, 110, 85, 185, 194, 219, 740, 271, 354, 350, 836, 953, 185, 165, 607, 277, 80, 237, 833, 1334, 1265, 194, 163, 354, 1216, 269, 297, 249, 47, 296, 573, 66, 342, 172, 53, 80, 61, 27] events per repeat):
 
 | rule | p50 ms | p90 | p99 | per-repeat p50 |
 |---|---|---|---|---|
-| (a) first-wake run (attributed 0.967–1.000; latency p50 2.75 ms) | 0.324 | 0.385 | 0.442 | [0.346, 0.374, 0.313, 0.339, 0.354, 0.32, 0.36, 0.325, 0.323, 0.31, 0.188, 0.312, 0.311, 0.324, 0.355, 0.324, 0.255, 0.254, 0.357, 0.313, 0.352, 0.327, 0.375, 0.185, 0.273, 0.345, 0.306, 0.352, 0.208, 0.229, 0.341, 0.33, 0.209, 0.215, 0.281, 0.35, 0.372, 0.342] |
-| (b) window run, raw (window p50 142 ms) | 1.897 | 3.138 | 48.620 | [1.952, 2.17, 1.813, 1.873, 2.017, 1.801, 2.176, 1.807, 1.956, 1.792, 1.419, 1.868, 1.75, 1.835, 2.045, 1.865, 1.57, 1.582, 2.073, 1.893, 2.108, 1.861, 2.195, 1.429, 1.861, 1.957, 1.702, 2.053, 1.475, 1.556, 1.917, 1.944, 1.558, 1.478, 1.639, 2.076, 2.079, 4.144] |
-| (b) window run minus idle rate | 1.603 | 2.088 | 3.415 | [1.528, 1.801, 1.423, 1.626, 1.677, 1.539, 1.844, 1.549, 1.55, 1.522, 1.22, 1.625, 1.465, 1.57, 1.738, 1.559, 1.312, 1.366, 1.805, 1.68, 1.876, 1.588, 1.888, 1.144, 1.546, 1.624, 1.45, 1.668, 1.029, 1.263, 1.655, 1.547, 1.2, 1.257, 1.366, 1.462, 1.749, 1.405] |
+| (a) first-wake run (attributed 0.967–1.000; latency p50 2.75 ms) | 0.321 | 0.385 | 0.441 | [0.344, 0.374, 0.302, 0.338, 0.354, 0.32, 0.359, 0.325, 0.323, 0.308, 0.188, 0.311, 0.311, 0.324, 0.354, 0.324, 0.255, 0.254, 0.356, 0.309, 0.351, 0.326, 0.37, 0.185, 0.272, 0.344, 0.304, 0.35, 0.208, 0.227, 0.34, 0.33, 0.209, 0.214, 0.281, 0.35, 0.371, 0.342] |
+| (b) window run, raw (window p50 142 ms) | 4.686 | 8.193 | 95.692 | [4.603, 5.048, 4.33, 4.453, 4.787, 4.292, 5.234, 4.393, 4.684, 4.277, 3.587, 4.786, 4.201, 4.305, 4.968, 4.453, 3.699, 3.829, 5.138, 5.021, 5.4, 4.383, 5.167, 3.389, 4.758, 4.628, 4.129, 4.795, 3.389, 3.752, 4.71, 4.55, 3.673, 3.487, 3.851, 4.859, 4.866, 9.891] |
+| (b) window run minus idle rate | 4.072 | 5.530 | 10.491 | [3.805, 4.265, 3.562, 3.939, 4.11, 3.775, 4.649, 3.853, 3.843, 3.778, 3.266, 4.276, 3.619, 3.826, 4.334, 3.878, 3.238, 3.39, 4.603, 4.565, 4.922, 3.892, 4.545, 2.882, 4.004, 3.956, 3.685, 4.04, 2.544, 3.18, 4.217, 3.684, 2.993, 3.043, 3.339, 3.78, 4.342, 3.339] |
 | (c) waker run (X wakes per input p50 3.0; first X wake latency p50 2.76 ms) | 0.477 | 0.598 | 2.497 | [0.495, 0.552, 0.462, 0.469, 0.501, 0.465, 0.532, 0.469, 0.476, 0.46, 0.327, 0.474, 0.436, 0.46, 0.512, 0.469, 0.397, 0.373, 0.527, 0.475, 0.534, 0.477, 0.531, 0.319, 0.446, 0.486, 0.442, 0.497, 0.333, 0.368, 0.493, 0.471, 0.336, 0.338, 0.418, 0.529, 0.525, 0.546] |
 
-### driven-alt: CPU share 0.0039–0.0111, wakes/s 71.6–187.1
-- processes by role (repeat 1): main: 1 pid(s), 82.54 wakes/s, CPU 0.0045; gpu: 1 pid(s), 48.6 wakes/s, CPU 0.0033; utility: 3 pid(s), 1.25 wakes/s, CPU 0.0001
+### driven-alt: CPU share 0.0095–0.0315, wakes/s 141.2–360.9
+- processes by role (repeat 1): renderer: 3 pid(s), 126.29 wakes/s, CPU 0.0134; main: 1 pid(s), 82.54 wakes/s, CPU 0.0045; gpu: 1 pid(s), 48.6 wakes/s, CPU 0.0033; utility: 3 pid(s), 1.25 wakes/s, CPU 0.0001
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
+| `renderer/chrome` | 3–4 | 30.6–75.2 | 2.01 (1.6–3.0) | 50.09 | 0.025 | 0.608 | 1.035 | 1272728 |
 | `chrome` | 1–1 | 15.1–46.4 | 1.10 (1.0–1.2) | 94.57 | 0.068 | 0.228 | 0.389 | 743529 |
+| `renderer/Compositor` | 2–4 | 30.1–71.7 | 0.91 (0.8–1.0) | 61.24 | 0.038 | 0.121 | 0.283 | 1183921 |
+| `renderer/ThreadPoolForeg` | 3–3 | 2.5–8.3 | 118.25 (79.9–198.6) | 439.66 | 0.633 | 0.951 | 1.398 | 118722 |
 | `gpu/VizCompositorTh` | 1–1 | 19.2–39.9 | 8.10 (7.1–9.1) | 80.97 | 0.042 | 0.346 | 0.546 | 664164 |
-| `Chrome_IOThread` | 1–1 | 18.7–60.4 | 0.42 (0.3–0.5) | 77.70 | 0.019 | 0.037 | 0.071 | 963555 |
-| `gpu/Chrome_ChildIOT` | 1–1 | 12.7–26.4 | 12.51 (11.6–13.7) | 161.39 | 0.022 | 0.035 | 0.063 | 439720 |
-| `ThreadPoolForeg` | 1–2 | 3.9–12.0 | 0.29 (0.1–46.5) | 295.81 | 0.009 | 0.025 | 0.091 | 184990 |
 
 Per input ([2054, 1896, 1976, 2374, 1891, 2275, 1677, 2366, 2515, 1961, 1692, 1260, 1997, 1703, 2229, 1697, 2131, 2314, 2182, 3053, 2037, 2249, 1320, 2354, 1664, 2277, 2301, 2660, 2134, 884, 2178, 2312, 2089, 1958, 2597, 2288, 1176, 1480] events per repeat):
 
 | rule | p50 ms | p90 | p99 | per-repeat p50 |
 |---|---|---|---|---|
-| (a) first-wake run (attributed 0.996–1.000; latency p50 2.77 ms) | 0.327 | 0.384 | 0.446 | [0.308, 0.367, 0.222, 0.333, 0.354, 0.324, 0.379, 0.33, 0.268, 0.326, 0.184, 0.366, 0.337, 0.347, 0.355, 0.345, 0.246, 0.276, 0.362, 0.301, 0.368, 0.334, 0.359, 0.184, 0.219, 0.348, 0.353, 0.364, 0.195, 0.254, 0.349, 0.329, 0.317, 0.226, 0.303, 0.18, 0.359, 0.348] |
-| (b) window run, raw (window p50 161 ms) | 2.119 | 2.819 | 7.413 | [2.091, 2.344, 1.792, 2.191, 2.292, 2.132, 2.491, 2.123, 1.914, 2.103, 1.667, 2.365, 2.132, 2.18, 2.368, 2.197, 1.845, 1.99, 2.333, 2.035, 2.376, 2.079, 2.453, 1.636, 1.794, 2.207, 2.303, 2.276, 1.694, 1.943, 2.199, 2.112, 2.061, 1.776, 2.104, 1.613, 2.402, 2.17] |
-| (b) window run minus idle rate | 1.844 | 2.340 | 3.505 | [1.801, 2.054, 1.499, 1.927, 2.008, 1.874, 2.144, 1.889, 1.67, 1.837, 1.391, 1.942, 1.864, 1.866, 2.073, 1.907, 1.612, 1.734, 2.07, 1.835, 2.057, 1.837, 2.092, 1.415, 1.538, 1.941, 2.05, 2.03, 1.402, 1.549, 1.922, 1.854, 1.823, 1.537, 1.858, 1.36, 2.014, 1.812] |
+| (a) first-wake run (attributed 0.996–1.000; latency p50 2.75 ms) | 0.318 | 0.383 | 0.444 | [0.299, 0.365, 0.218, 0.33, 0.352, 0.32, 0.376, 0.327, 0.261, 0.316, 0.183, 0.365, 0.332, 0.342, 0.354, 0.341, 0.24, 0.269, 0.359, 0.293, 0.364, 0.327, 0.357, 0.182, 0.215, 0.345, 0.35, 0.361, 0.191, 0.25, 0.344, 0.326, 0.308, 0.222, 0.286, 0.179, 0.356, 0.343] |
+| (b) window run, raw (window p50 161 ms) | 5.657 | 8.230 | 19.082 | [5.547, 6.28, 4.872, 5.94, 6.105, 5.744, 6.471, 5.781, 5.266, 5.592, 4.599, 6.088, 5.78, 5.708, 6.358, 5.928, 5.109, 5.473, 6.24, 5.695, 6.342, 5.64, 6.213, 4.598, 4.732, 5.993, 6.191, 6.161, 4.633, 4.917, 5.944, 5.74, 5.62, 4.851, 5.836, 4.591, 6.309, 5.64] |
+| (b) window run minus idle rate | 5.132 | 6.855 | 12.399 | [4.884, 5.624, 4.33, 5.428, 5.551, 5.277, 5.769, 5.371, 4.791, 5.077, 4.075, 5.163, 5.232, 5.098, 5.772, 5.357, 4.696, 4.928, 5.733, 5.282, 5.738, 5.203, 5.495, 4.181, 4.234, 5.419, 5.71, 5.617, 4.055, 4.091, 5.432, 5.245, 5.164, 4.402, 5.374, 4.042, 5.527, 4.928] |
 | (c) waker run (X wakes per input p50 3.0; first X wake latency p50 2.78 ms) | 0.495 | 0.590 | 0.740 | [0.494, 0.544, 0.388, 0.5, 0.531, 0.489, 0.586, 0.49, 0.433, 0.495, 0.338, 0.544, 0.513, 0.516, 0.536, 0.52, 0.4, 0.459, 0.539, 0.474, 0.555, 0.513, 0.542, 0.347, 0.385, 0.514, 0.544, 0.542, 0.351, 0.425, 0.531, 0.491, 0.484, 0.392, 0.474, 0.335, 0.536, 0.517] |
 
-### op: CPU share 0.0092–0.0126, wakes/s 84.8–88.8
+### op: CPU share 0.0354–0.0439, wakes/s 129.5–136.4
 - operation `page-load`: 2128 succeeded, 0 failed over the repeats; duration p50 465 ms, p90 560, p99 716 (per-repeat p50 [482.38, 492.351, 466.778, 463.327, 462.132, 462.272, 483.832, 471.377, 464.159, 464.002, 457.461, 465.882, 472.504, 462.976, 484.678, 514.077, 459.384, 463.042, 494.621, 461.355, 487.715, 462.297, 493.068, 457.379, 459.226, 463.978, 461.985, 459.599, 456.153, 457.845, 462.784, 484.165, 459.017, 458.339, 482.967, 486.238, 489.956, 462.919]); the thread table below is inside the operation windows only
-- processes by role (repeat 1): main: 2 pid(s), 61.89 wakes/s, CPU 0.006; gpu: 1 pid(s), 17.95 wakes/s, CPU 0.0041; utility: 3 pid(s), 7.07 wakes/s, CPU 0.0008; zygote: 1 pid(s), 0.01 wakes/s, CPU 0.0
+- processes by role (repeat 1): renderer: 4 pid(s), 45.82 wakes/s, CPU 0.0288; main: 2 pid(s), 61.89 wakes/s, CPU 0.006; gpu: 1 pid(s), 17.95 wakes/s, CPU 0.0041; utility: 3 pid(s), 7.07 wakes/s, CPU 0.0008; zygote: 1 pid(s), 0.01 wakes/s, CPU 0.0
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
+| `renderer/chrome` | 4–8 | 71.3–85.8 | 1.96 (1.4–2.3) | 33.71 | 0.053 | 4.957 | 133.302 | 82714 |
+| `renderer/ThreadPoolForeg` | 10–15 | 251.0–296.3 | 0.02 (0.0–0.0) | 4.44 | 0.007 | 0.885 | 8.626 | 288883 |
 | `chrome` | 1–1 | 237.1–262.0 | 0.66 (0.5–0.9) | 14.43 | 0.071 | 0.435 | 7.089 | 261182 |
 | `gpu/VizCompositorTh` | 1–1 | 142.3–151.5 | 4.87 (4.5–5.3) | 16.14 | 0.069 | 1.796 | 2.190 | 153204 |
 | `Chrome_IOThread` | 1–1 | 532.4–598.2 | 0.14 (0.1–0.2) | 5.33 | 0.016 | 0.038 | 0.123 | 588198 |
-| `utility/Chrome_ChildIOT` | 2–2 | 69.5–85.9 | 0.44 (0.4–0.6) | 12.80 | 0.035 | 0.227 | 1.505 | 82245 |
-| `CompositorTileW` | 1–1 | 61.3–67.1 | 16.40 (16.1–16.6) | 25.02 | 0.058 | 0.249 | 0.807 | 67163 |
 
 Stimulus sensitivity (method §3, pre-registered): per-input run, rule (b), SWELL-KW (`driven`) against 136M Keystrokes (`driven-alt`):
 
 | stream | p50 ms | p90 | p99 | per-repeat p50 | driven wakes/s |
 |---|---|---|---|---|---|
-| SWELL-KW | 1.603 | 2.088 | 3.415 | [1.528, 1.801, 1.423, 1.626, 1.677, 1.539, 1.844, 1.549, 1.55, 1.522, 1.22, 1.625, 1.465, 1.57, 1.738, 1.559, 1.312, 1.366, 1.805, 1.68, 1.876, 1.588, 1.888, 1.144, 1.546, 1.624, 1.45, 1.668, 1.029, 1.263, 1.655, 1.547, 1.2, 1.257, 1.366, 1.462, 1.749, 1.405] | 24.4–86.8 |
-| 136M Keystrokes | 1.844 | 2.340 | 3.505 | [1.801, 2.054, 1.499, 1.927, 2.008, 1.874, 2.144, 1.889, 1.67, 1.837, 1.391, 1.942, 1.864, 1.866, 2.073, 1.907, 1.612, 1.734, 2.07, 1.835, 2.057, 1.837, 2.092, 1.415, 1.538, 1.941, 2.05, 2.03, 1.402, 1.549, 1.922, 1.854, 1.823, 1.537, 1.858, 1.36, 2.014, 1.812] | 71.6–187.1 |
+| SWELL-KW | 4.072 | 5.530 | 10.491 | [3.805, 4.265, 3.562, 3.939, 4.11, 3.775, 4.649, 3.853, 3.843, 3.778, 3.266, 4.276, 3.619, 3.826, 4.334, 3.878, 3.238, 3.39, 4.603, 4.565, 4.922, 3.892, 4.545, 2.882, 4.004, 3.956, 3.685, 4.04, 2.544, 3.18, 4.217, 3.684, 2.993, 3.043, 3.339, 3.78, 4.342, 3.339] | 45.6–164.6 |
+| 136M Keystrokes | 5.132 | 6.855 | 12.399 | [4.884, 5.624, 4.33, 5.428, 5.551, 5.277, 5.769, 5.371, 4.791, 5.077, 4.075, 5.163, 5.232, 5.098, 5.772, 5.357, 4.696, 4.928, 5.733, 5.282, 5.738, 5.203, 5.495, 4.181, 4.234, 5.419, 5.71, 5.617, 4.055, 4.091, 5.432, 5.245, 5.164, 4.402, 5.374, 4.042, 5.527, 4.928] | 141.2–360.9 |
 
-Read per repeat (D81, as 9.7 D36 reads a check): the per-input run mean under 136M is 1.160 of SWELL-KW's, 95 % interval 1.095–1.225 over 38 repeats — a difference; the pooled medians' ratio 1.150.
+Read per repeat (D81, as 9.7 D36 reads a check): the per-input run mean under 136M is 1.338 of SWELL-KW's, 95 % interval 1.284–1.392 over 38 repeats — a difference; the pooled medians' ratio 1.260.
 
 ## `webrtc` — Google Chrome 152.0.7977.82 (42 repeats), Google Chrome 153.0.8010.52 (3: 37, 40, 45), repeats [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45]
 
@@ -247,7 +247,7 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 |---|---|---|---|---|---|
 | `code` | 44 | 29 | 2 | 26 | yes |
 | `thunderbird-send` | 8 | 75 | 29 | 50 | no |
-| `chrome` | 38 | 48 | 0 | 15 | yes |
+| `chrome` | 38 | 60 | 1 | 30 | yes |
 | `webrtc` | 45 | 3 | 0 | 7 | yes |
 
 ### `code`
@@ -368,27 +368,36 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 
 | quantity | repeats | mean | spread (cv) | 95 % half-width | leave-one-out | needed | holds |
 |---|---|---|---|---|---|---|---|
+| idle renderer/Compositor wakes/s | 38 | 12.7302 | 1.9% | ±0.6% | 0.1% | 5 | yes |
+| idle renderer/Compositor gap mean (ms) | 38 | 78.5532 | 1.9% | ±0.6% | 0.1% | 5 | yes |
+| idle renderer/Compositor run mean (ms) | 38 | 0.0672 | 8.5% | ±2.8% | 0.7% | 14 | yes |
 | idle gpu/VizCompositorTh wakes/s | 38 | 12.0979 | 3.5% | ±1.1% | 0.3% | 5 | yes |
 | idle gpu/VizCompositorTh gap mean (ms) | 38 | 82.6587 | 3.5% | ±1.1% | 0.3% | 5 | yes |
 | idle gpu/VizCompositorTh run mean (ms) | 38 | 0.0727 | 6.4% | ±2.1% | 0.5% | 9 | yes |
 | idle gpu/Chrome_ChildIOT wakes/s | 38 | 7.593 | 2.0% | ±0.7% | 0.1% | 5 | yes |
 | idle gpu/Chrome_ChildIOT gap mean (ms) | 38 | 131.6995 | 2.0% | ±0.7% | 0.1% | 5 | yes |
 | idle gpu/Chrome_ChildIOT run mean (ms) | 38 | 0.0295 | 6.0% | ±2.0% | 0.4% | 9 | yes |
+| idle renderer/chrome wakes/s | 38 | 7.3859 | 8.8% | ±2.9% | 0.5% | 15 | yes |
+| idle renderer/chrome gap mean (ms) | 38 | 135.3924 | 8.8% | ±2.9% | 0.4% | 15 | yes |
+| idle renderer/chrome run mean (ms) | 38 | 0.0743 | 13.3% | ±4.4% | 1.2% | 30 | yes |
 | idle utility/chrome wakes/s | 38 | 0.803 | 0.7% | ±0.2% | 0.1% | 5 | yes |
 | idle utility/chrome gap mean (ms) | 38 | 1245.3614 | 0.7% | ±0.2% | 0.1% | 5 | yes |
 | idle utility/chrome run mean (ms) | 38 | 0.0783 | 8.6% | ±2.8% | 0.7% | 14 | yes |
 | idle chrome wakes/s | 38 | 0.8003 | 2.5% | ±0.8% | 0.1% | 5 | yes |
 | idle chrome gap mean (ms) | 38 | 1249.4562 | 2.5% | ±0.8% | 0.1% | 5 | yes |
 | idle chrome run mean (ms) | 38 | 0.156 | 7.2% | ±2.4% | 0.7% | 11 | yes |
-| idle utility/HangWatcher wakes/s | 38 | 0.3 | 0.0% | ±0.0% | 0.0% | 5 | yes |
-| idle utility/HangWatcher gap mean (ms) | 38 | 3333.3446 | 0.0% | ±0.0% | 0.0% | 5 | yes |
-| idle utility/HangWatcher run mean (ms) | 38 | 0.0271 | 8.8% | ±2.9% | 0.7% | 15 | yes |
-| idle residual wakes/s | 38 | 1.1007 | 5.2% | ±1.7% | 0.3% | 7 | yes |
-| idle residual gap mean (ms) | 38 | 908.5144 | 5.2% | ±1.7% | 0.3% | 7 | yes |
-| idle residual run mean (ms) | 38 | 0.1219 | 5.7% | ±1.9% | 0.3% | 8 | yes |
+| idle residual wakes/s | 38 | 1.8038 | 6.3% | ±2.1% | 0.5% | 9 | yes |
+| idle residual gap mean (ms) | 38 | 554.3957 | 6.3% | ±2.1% | 0.5% | 9 | yes |
+| idle residual run mean (ms) | 38 | 0.0862 | 6.8% | ±2.2% | 0.4% | 10 | yes |
 | op Chrome_IOThread wakes/s | 38 | 564.5779 | 2.9% | ±0.9% | 0.2% | 5 | yes |
 | op Chrome_IOThread gap mean (ms) | 38 | 1.7724 | 2.9% | ±0.9% | 0.2% | 5 | yes |
 | op Chrome_IOThread run mean (ms) | 38 | 0.0243 | 4.3% | ±1.4% | 0.3% | 6 | yes |
+| op renderer/Chrome_ChildIOT wakes/s | 38 | 310.1619 | 2.7% | ±0.9% | 0.1% | 5 | yes |
+| op renderer/Chrome_ChildIOT gap mean (ms) | 38 | 3.2255 | 2.7% | ±0.9% | 0.2% | 5 | yes |
+| op renderer/Chrome_ChildIOT run mean (ms) | 38 | 0.0225 | 2.5% | ±0.8% | 0.1% | 5 | yes |
+| op renderer/ThreadPoolForeg wakes/s | 38 | 277.2855 | 4.0% | ±1.3% | 0.3% | 5 | yes |
+| op renderer/ThreadPoolForeg gap mean (ms) | 38 | 3.6089 | 4.1% | ±1.3% | 0.2% | 6 | yes |
+| op renderer/ThreadPoolForeg run mean (ms) | 38 | 0.3914 | 4.9% | ±1.6% | 0.4% | 7 | yes |
 | op chrome wakes/s | 38 | 250.6487 | 2.3% | ±0.8% | 0.1% | 5 | yes |
 | op chrome gap mean (ms) | 38 | 3.9916 | 2.4% | ±0.8% | 0.1% | 5 | yes |
 | op chrome run mean (ms) | 38 | 0.2987 | 6.9% | ±2.3% | 0.4% | 10 | yes |
@@ -401,20 +410,23 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | op ThreadPoolForeg wakes/s | 38 | 142.7277 | 5.6% | ±1.8% | 0.4% | 8 | yes |
 | op ThreadPoolForeg gap mean (ms) | 38 | 7.0137 | 5.7% | ±1.9% | 0.4% | 8 | yes |
 | op ThreadPoolForeg run mean (ms) | 38 | 0.031 | 6.3% | ±2.1% | 0.4% | 9 | yes |
+| op renderer/Compositor wakes/s | 38 | 132.7986 | 3.0% | ±1.0% | 0.2% | 5 | yes |
+| op renderer/Compositor gap mean (ms) | 38 | 7.5354 | 3.0% | ±1.0% | 0.2% | 5 | yes |
+| op renderer/Compositor run mean (ms) | 38 | 0.0869 | 3.8% | ±1.2% | 0.3% | 5 | yes |
+| op renderer/chrome wakes/s | 38 | 79.3942 | 4.1% | ±1.3% | 0.3% | 6 | yes |
+| op renderer/chrome gap mean (ms) | 38 | 12.6042 | 4.1% | ±1.3% | 0.3% | 6 | yes |
+| op renderer/chrome run mean (ms) | 38 | 4.9108 | 6.2% | ±2.0% | 0.4% | 9 | yes |
 | op utility/Chrome_ChildIOT wakes/s | 38 | 78.9615 | 4.8% | ±1.6% | 0.3% | 7 | yes |
 | op utility/Chrome_ChildIOT gap mean (ms) | 38 | 12.6761 | 4.9% | ±1.6% | 0.4% | 7 | yes |
 | op utility/Chrome_ChildIOT run mean (ms) | 38 | 0.1628 | 5.0% | ±1.6% | 0.3% | 7 | yes |
 | op CompositorTileW wakes/s | 38 | 64.4531 | 2.1% | ±0.7% | 0.1% | 5 | yes |
 | op CompositorTileW gap mean (ms) | 38 | 15.5226 | 2.2% | ±0.7% | 0.1% | 5 | yes |
 | op CompositorTileW run mean (ms) | 38 | 0.1009 | 6.6% | ±2.1% | 0.5% | 10 | yes |
-| op utility/ThreadPoolForeg wakes/s | 38 | 42.2353 | 6.7% | ±2.2% | 0.4% | 10 | yes |
-| op utility/ThreadPoolForeg gap mean (ms) | 38 | 23.7072 | 6.8% | ±2.2% | 0.4% | 10 | yes |
-| op utility/ThreadPoolForeg run mean (ms) | 38 | 0.0324 | 5.5% | ±1.8% | 0.4% | 8 | yes |
-| op residual wakes/s | 38 | 59.5611 | 4.1% | ±1.3% | 0.3% | 6 | yes |
-| op residual gap mean (ms) | 38 | 16.8071 | 4.2% | ±1.4% | 0.3% | 6 | yes |
-| op residual run mean (ms) | 38 | 0.0716 | 3.4% | ±1.1% | 0.2% | 5 | yes |
-| input_run mean, SWELL-KW (ms) | 38 | 1.6711 | 14.4% | ±4.7% | 1.4% | 35 | yes |
-| input_run mean, 136M (ms) | 38 | 1.9029 | 12.0% | ±3.9% | 0.8% | 25 | yes |
+| op residual wakes/s | 38 | 104.876 | 4.4% | ±1.4% | 0.3% | 6 | yes |
+| op residual gap mean (ms) | 38 | 9.5459 | 4.5% | ±1.5% | 0.3% | 6 | yes |
+| op residual run mean (ms) | 38 | 0.0553 | 3.8% | ±1.3% | 0.3% | 5 | yes |
+| input_run mean, SWELL-KW (ms) | 38 | 4.2736 | 17.9% | ±5.9% | 2.0% | 52 | no |
+| input_run mean, 136M (ms) | 38 | 5.4147 | 10.2% | ±3.4% | 0.7% | 19 | yes |
 | operation duration mean (ms) | 38 | 489.9182 | 3.0% | ±1.0% | 0.2% | 5 | yes |
 
 ### `webrtc`

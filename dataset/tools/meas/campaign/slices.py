@@ -47,7 +47,7 @@ def main():
     ap.add_argument("runs", nargs="+")
     ap.add_argument("--phase", default=None)
     ap.add_argument("--s", type=float, default=10.0, help="slice length in seconds")
-    ap.add_argument("--exclude-roles", default="", help="process roles left out of the tree (D14: renderer for chrome)")
+    ap.add_argument("--exclude-roles", default="", help="process roles left out of the tree (D14; none since D84)")
     args = ap.parse_args()
     roles = tuple(x for x in args.exclude_roles.split(",") if x)
     cpus, wakes = [], []

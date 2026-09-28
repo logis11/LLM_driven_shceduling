@@ -315,8 +315,9 @@ def phase_span(rows):
 
 def analyze_run(D, w_ms=5.0, cap_ms=0.0, waker="^Xvfb$|^Xorg$", wake_def="wakeup", exclude_roles=(), idle_from_s=0.0):
     """Return (result, raw): result as printed/dumped by the CLI; raw = per-phase wakes, segments and per-input lists for pooling.
-    exclude_roles: process roles (pid_roles) whose rows leave the tree — D14: Chrome's renderer processes belong to
-    renderer-hidden and renderer-visible (9.8 D2), so the web-browser archetype is pooled with exclude_roles=("renderer",).
+    exclude_roles: process roles (pid_roles) whose rows leave the tree — D14: the processes another archetype owns.
+    web-browser was pooled with exclude_roles=("renderer",) until D84, which found none of its run's renderers owned by
+    another entry (renderer-hidden and renderer-visible describe other tabs' and windows' pages, 9.8 D3–D4).
     idle_from_s: the idle phase read from that many seconds past its first row (D83) — its span, rows and CPU, and so
     D13's idle rate, over what is left."""
     class A: pass
@@ -351,7 +352,7 @@ def _analyze(args):
         span = max(t1 - t0, 1e-6)
         roles = pid_roles(D, phase)
         excluded = getattr(args, "exclude_roles", set())
-        if excluded:  # D14: rows of processes another archetype owns leave the tree (web-browser: renderers)
+        if excluded:  # D14: rows of processes another archetype owns leave the tree (none since D84)
             segments = [r for r in segments if roles.get(r.pid, "main") not in excluded]
         total_run_s = sum(r.run for r in segments) / 1000
         wk_path = next((p for p in (f"perf.{phase}.wakeups.txt.gz", f"perf.{phase}.wakeups.txt") if os.path.exists(os.path.join(D, p))), None)

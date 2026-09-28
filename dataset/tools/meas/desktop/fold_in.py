@@ -277,7 +277,7 @@ def entry(app, e):
     notes = ("Per-application archetype (9.5 D2): one task carries the "
              + ("one renderer process, the renderers of a browsing session bound as separate tasks (D2) — under "
                 "Chromium's site-per-process model one renderer is one site, not one tab (S2-01); web-browser carries "
-                "the rest of the browser's tree. " if renderer else "whole process tree merged (9.5 D14). ")
+                "the rest of the browser's tree, the renderer of the page in use included (9.5 D84). " if renderer else "whole process tree merged (9.5 D14). ")
              + "Timer components are per thread comm (9.5 D16), each sampled from its measured gap and run quantiles "
                "(9.5 D17) over the task's lifetime and merged into one explicit event stream at compile time (9.5 D9); "
                "the pooled residual stands for the comms below the coverage cut. No focus_components and no stimulus: "
