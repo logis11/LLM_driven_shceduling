@@ -387,3 +387,11 @@ No new decision; D40's check of the traced runs against the carried pool (the 9.
 Results: `campaign/results-control.md`, `campaign/results-control/control.json`. Tooling: `control_report.py`, the check over the archetype's own values (`control.workload`'s `names`). Tests: `test_a_session_entry_s_workload_check_reads_only_its_own_values`. Values changed: none; the notes do not carry the check, and the raw records released with D40 are unchanged.
 
 Commit: this entry.
+
+## D42 — the steady phase read in time windows; the transients past the steady edge stated (2026-09-28)
+
+By 인지오's decision, from the 2026-09-28 review of 9.5–9.9: the steady phase is read in 100 s windows, per carried component and for each entry whole, pooled over the 24 repeats — `dataset/tools/meas/windows.py`, `campaign/results-windows.md` — and where an entry does part of its work only in part of the phase, its scope states it; no value changes, the carried values staying the phase's means. `compositor-shell`: the first 100 s past the steady edge is the phase's busiest — `JS Helper` wakes at 1.46 times its phase rate and `gnome-shell`'s run mean is 8.03 ms against 5.10–6.75 ms after — the phase's windows holding 5.7 % of its CPU above its median window. `audio-server`: `wireplumber/gmain` wakes at 7.2 times its phase rate in the first 100 s — 50 of its 125 kept wakes fall in the phase's first 22 s, in 22 of the 24 repeats a pair 0.1 s apart within the first 4 s, one wake 12–22 s in, or both — beside the midnight repeats' pairs (D38). Neither is launch work the traces show, the ground on which 9.5 D34 and D83 move a phase's start; `compositor-shell` uses about 0.02 % of a CPU and `audio-server` wakes about five times in 30 minutes. `service-manager` and `message-bus` rise and fall on a cycle of about 700–800 s through the phase rather than at its start (9.8 % and 31.6 % of their CPU above the median window), and are not stated.
+
+Tooling: `WINDOWS_STATED` in `session/fold_in.py`; the reading is 9.8 D34's `meas/windows.py`. Results: `campaign/results-windows.md`, `campaign/results-windows/windows.json`. Values changed: none; `compositor-shell`'s and `audio-server`'s scopes. The raw records are unchanged.
+
+Commit: this entry.

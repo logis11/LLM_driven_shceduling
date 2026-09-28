@@ -130,6 +130,19 @@ def fmt_value(v, label, unit=True):
     return (f"{v:.1f}" if label.startswith("gap") else f"{v:.3f}") + (" ms" if unit else "")
 
 
+# D42: where the steady phase does part of its work only in part of it, read in 100 s windows over the 24 repeats
+# (meas/windows.py, `campaign/results-windows.md`) — stated beside the values, which stay the phase's means
+WINDOWS_STATED = {
+    "gnome-shell": ("Read in 100 s windows over the 24 repeats (D42): the first 100 s past the steady edge is the "
+                    "phase's busiest — `JS Helper` wakes at 1.46 times its phase rate and `gnome-shell`'s run mean is "
+                    "8.03 ms against 5.10–6.75 ms after — the phase's windows holding 5.7 % of its CPU above its "
+                    "median window. The carried values are the phase's means."),
+    "pipewire": ("Read in 100 s windows over the 24 repeats (D42): `wireplumber/gmain` wakes at 7.2 times its phase "
+                 "rate in the first 100 s past the steady edge — 50 of its 125 kept wakes fall in the phase's first "
+                 "22 s, in 22 of the 24 repeats a pair 0.1 s apart within the first 4 s, one wake 12–22 s in, or both — "
+                 "beside the midnight repeats' pairs (D38). The carried values are the phase's means."),
+}
+
 # D38: a sparse component that woke more in the repeats that crossed midnight UTC and met the cron session (D23), where
 # no rule of D23 or D27 moves the extra wakes — the split stated, with what the trace shows of them
 MIDNIGHT_SPLIT = {("pipewire", "wireplumber/gmain"): (
@@ -261,6 +274,8 @@ def entry(prog, e, run, within):
     scope += (f"Foreign user-space work on the measured CPU {min(share) * 100:.5f}–{max(share) * 100:.4f} % of the "
               f"phase per repeat, under the 2 × 10⁻⁴ bound (D20, D22); per-CPU kernel threads "
               f"{min(kth):,}–{max(kth):,} schedule-ins on it per repeat, reported, not gated (D14). ")
+    if prog in WINDOWS_STATED:
+        scope += WINDOWS_STATED[prog] + " "
     scope += "Values are this software on this machine, not desktop truth (9.5 D10)."
     out += ["      scope: >-", "        " + scope]
 

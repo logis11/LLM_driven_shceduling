@@ -105,6 +105,16 @@ def share_above(table, x):
 # each value it was not held to — at the recording's window limit (D32) or carried under D57 — with its half-width.
 LABEL = {"wakes/s": "wake rate", "gap mean (ms)": "gap mean", "run mean (ms)": "run mean"}
 # where each entry's window limit is decided: D32 the rule, D46 the send's operation phase, D68 chrome's and code's limits
+# D85: where a carried phase does part of its work only in part of it, read in time windows over the carried repeats
+# (meas/windows.py, `campaign/results-windows.md`) — stated beside the values, which stay the phase's means
+WINDOWS_STATED = {
+    "mail-client": ("Read in 100 s windows over the 43 repeats (D85): the residual's run mean falls from 0.175 ms in the "
+                    "idle phase's first 100 s to 0.040–0.045 ms in its last three, and `WebExtensions`' is 0.257 ms in "
+                    "the first 100 s against 0.078–0.108 ms after, together 0.7 % of the entry's CPU above their median "
+                    "windows; `StreamTrans`'s episodes recur through the phase. The carried values are the phase's "
+                    "means."),
+}
+
 WINDOW_LAW = {"code-editor": "D32, D68", "web-browser": "D32, D68", "mail-client": "D32, D46"}
 # D57's second finding: a between-sessions component's spread within one run, read on the D52 probe
 # (_dev/research/jioh/task-9.5-interactive-typing/campaign/within_libuv.py, D83)
@@ -399,6 +409,8 @@ def entry(aid, spec, d):
         scope += (f"Two campaigns (D79): the idle phase's values from {idle_tag}, {len(d['repeats'])} repeats; the phases "
                   f"with or after the input from {tag}, {len(later['repeats'])} repeats; the idle phase runs before any input. ")
     scope += stability_scope(aid, d)
+    if aid in WINDOWS_STATED:
+        scope += WINDOWS_STATED[aid] + " "
     scope += "Values are this software on this machine, not desktop truth (D10)."
     if aid in BUILD_BOUND:   # D69: what the pinned or recorded build leaves out of the archetype
         scope += " " + BUILD_BOUND[aid]

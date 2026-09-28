@@ -82,6 +82,20 @@ WITHIN = {("chrome-hidden", "Chrome_ChildIOT"): "±17.7 % (D24)",
           ("chrome-hidden", "Compositor"): "±10.8 % (D26)", ("chrome-hidden", "PerfettoTrace"): "±10.8 % (D26)",
           ("chrome-hidden", "ThreadPoolServi"): "±10.8 % (D26)", ("chrome-visible", "PerfettoTrace"): "±4.0 % (D26)"}
 
+# D34: where a carried phase does part of its work only in part of it, read in 100 s windows over the carried repeats
+# (meas/windows.py, `campaign/results-windows.md`) — stated beside the values, which stay the phase's means
+WINDOWS_STATED = {
+    "renderer-hidden": ("Read in 100 s windows over the 19 repeats (D34): the page's own thread `chrome` runs longer "
+                        "early in the phase than late, its run mean 0.107 ms in the first 100 s and 0.057 ms in the "
+                        "last, and the residual (`MemoryInfra`) wakes at 5.2 times its phase rate 200–300 s into the "
+                        "phase; the phase's windows hold 13.3 % of its CPU above its median window. The carried values "
+                        "are the phase's means."),
+    "renderer-visible": ("Read in 100 s windows over the 11 repeats (D34): every residual wake falls in the phase's "
+                         "first 200 s, and `chrome`'s run mean is 0.179 and 0.231 ms there against 0.092–0.123 ms "
+                         "after; the residual holds 12.5 % of the entry's CPU and the phase's windows 29.4 % of it "
+                         "above its median window. The carried values are the phase's means."),
+}
+
 # D27: the renderer residuals are sparse — a few wakes per renderer per phase — so the within-run test (D26 re-read
 # them on the probes) cannot place their spread; why, per entry, from D26's re-read.
 SPARSE_WHY = {("chrome-hidden", "residual"): ("a 600 s window of the probe catches 0–2 of its wakes (±134.2 % within "
@@ -282,6 +296,8 @@ def entry(app, e):
                       + (f", the comparison D5 rests on; the CPU share ratio, {c['cpu_share_ratio']}×, is reported with "
                          f"its spread and no effect rests on it (D18). " if app == "steam" else
                          f", CPU share {c['cpu_share_ratio']}×. "))
+    if IDS[app] in WINDOWS_STATED:
+        scope += WINDOWS_STATED[IDS[app]] + " "
     scope += "Values are this software on this machine, not desktop truth (9.5 D10)."
     out += ["      scope: >-", "        " + scope]
 
