@@ -1848,7 +1848,7 @@
       "max": 0.0
      }
     },
-    "shown CHTTPClientThre": {
+    "shown CNet Encrypt:0": {
      "exited cpu": {
       "mean": 0.0,
       "max": 0.0
@@ -1858,7 +1858,7 @@
       "max": 0.0
      }
     },
-    "shown CNet Encrypt:0": {
+    "shown CHTTPClientThre": {
      "exited cpu": {
       "mean": 0.0,
       "max": 0.0
@@ -1891,9 +1891,9 @@
    },
    "workload": {
     "z": {
-     "shown CHTTPClientThre gap mean (ms)": 0.11,
-     "shown CHTTPClientThre run mean (ms)": -0.16,
-     "shown CHTTPClientThre wakes/s": -0.11,
+     "shown CHTTPClientThre gap mean (ms)": 0.04,
+     "shown CHTTPClientThre run mean (ms)": 0.86,
+     "shown CHTTPClientThre wakes/s": -0.04,
      "shown CJobMgr::m_Work gap mean (ms)": -0.48,
      "shown CJobMgr::m_Work run mean (ms)": 0.13,
      "shown CJobMgr::m_Work wakes/s": 0.48,

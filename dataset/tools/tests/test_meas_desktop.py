@@ -437,19 +437,31 @@ def test_an_interrupted_artifact_download_leaves_nothing_behind_and_does_not_blo
     assert (dest / "report.json").exists()
 
 
-def test_the_steam_client_carries_its_http_threads_run_mean_between_sessions():
-    # changelog D30: CHTTPClientThre's run mean sits in two modes across the repeats and within ±0.2 % inside one run,
-    # so it is carried between sessions under 9.5 D57, not as the runner's speed (D18); its rate and gap hold the rule
-    two_modes = _comp([8.05] * 5, [124.3] * 5, [0.0157, 0.0161, 0.063, 0.0639, 0.0165])
-    q = pool.criterion("steam", _entry({"CHTTPClientThre": two_modes}, phase="shown"))["quantities"]
-    run = q["shown CHTTPClientThre run mean (ms)"]
-    assert run["passes"] is False and run["session_spread"] is True and run["carried"] is True
-    assert q["shown CHTTPClientThre wakes/s"]["passes"] and q["shown CHTTPClientThre gap mean (ms)"]["passes"]
+def test_the_steam_clients_http_burst_leaves_its_component_as_a_stated_event(tmp_path):
+    # changelog D33, 9.5 D64: CHTTPClientThre's runs of 1 ms or more leave the component and are stated beside it, in
+    # seconds into the phase; its other runs are the component. D30's between-sessions carry is withdrawn with it.
+    procs = [{"pid": 100, "comm": "steam", "cmd": "/home/runner/.local/share/Steam/ubuntu12_32/steam"}]
+    rows = ("   0.000010 [0000]  perf[50]    0.000      0.000      0.010      R\n"
+            "   1.000000 [0003]  CHTTPClientThre[101/100]    0.000      0.001      0.015      S\n"
+            "   2.000000 [0003]  CHTTPClientThre[101/100]    0.000      0.001      20.000      S\n"
+            "   2.100000 [0003]  CHTTPClientThre[101/100]    0.000      0.001      5.000      S\n"
+            "   3.000000 [0003]  CHTTPClientThre[101/100]    0.000      0.001      0.017      S\n"
+            "  10.000100 [0000]  perf[50]    0.000      0.000      0.010      R\n")
+    # one wakeup before each schedule-in (a row's t_in is its time minus its run), so each row is a wake of its own
+    wakeups = "".join(f"   {t:.6f} [0001]  x[9]  awakened: CHTTPClientThre[101/100]\n" for t in (0.99, 1.97, 2.09, 2.99))
+    for phase in ("shown", "minimised"):   # both sides of D5's comparison read the same way
+        (tmp_path / phase).mkdir()
+        d = _run_dir(tmp_path / phase, "steam", phase, procs, rows, wakeups)
+        ph = analyze.analyze_run_dir(str(d))["phases"][phase]
+        assert round(ph["threads"]["CHTTPClientThre"]["run_ms"]["sum"], 3) == 0.032
+        assert [run for _, run in ph["events"]] == [20.0, 5.0]
+        assert all(0 <= t <= ph["span_s"] for t, _ in ph["events"])
+    assert "steam" not in pool.SESSION_SPREAD
 
 
-def test_the_game_client_scope_states_the_http_threads_two_modes(repo_root, tmp_path):
-    # changelog D30: the scope states both modes, the within-run figure and that the pooled table mixes the modes per
-    # wake, and no longer lists the run mean among those whose spread is the runner's speed
+def test_the_game_client_carries_the_http_burst_as_a_heavy_event(repo_root, tmp_path):
+    # changelog D33: the fold-in emits the event as 9.5's web-browser carries its MemoryInfra pass — the runs' table,
+    # count, span and rate — and the scope states it where D30's two modes stood
     import sys
     from meas.desktop import fold_in
     out = tmp_path / "fold.yaml"
@@ -460,13 +472,13 @@ def test_the_game_client_scope_states_the_http_threads_two_modes(repo_root, tmp_
     finally:
         sys.argv = argv
     import yaml
-    scope = yaml.safe_load("archetypes:\n" + out.read_text())["archetypes"]["game-client"]["validation_stats"]["scope"]
-    machine = scope[scope.index("Run means whose spread is the runner's speed"):]
-    machine = machine[:machine.index(". ")]
-    assert "CHTTPClientThre" not in machine
-    assert "8 of the 12 repeats at 0.0137–0.0170 ms and 4 at 0.0572–0.0639 ms" in scope
-    assert "within one run ±0.2 % (0.01454–0.01459 ms" in scope
-    assert "the pooled table mixes the two modes wake by wake" in scope
+    entry = yaml.safe_load("archetypes:\n" + out.read_text())["archetypes"]["game-client"]
+    ev = entry["params"]["heavy_events"]
+    assert [e["comm"] for e in ev] == ["CHTTPClientThre"] and ev[0]["run_floor_ms"] == 1 and ev[0]["count"] == 62
+    assert abs(ev[0]["rate_per_s"] - 62 / ev[0]["span_s"]) < 1e-6 and "gap" not in ev[0]
+    scope = entry["validation_stats"]["scope"]
+    assert "A rare event within a run (9.5 D64; D33): `CHTTPClientThre`'s runs of 1 ms or more" in scope
+    assert "in 4 of the repeats (4, 5, 6, 12)" in scope and "two modes" not in scope
 
 
 def test_the_build_census_orders_repeats_keyed_by_landing():

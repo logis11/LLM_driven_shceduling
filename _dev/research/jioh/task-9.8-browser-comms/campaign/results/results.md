@@ -112,12 +112,12 @@ Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]  ·  mode full  ·  builds ? (1
 | shown VizCompositorTh wakes/s | 12 | 10.5416 | ±2.0% | yes |
 | shown VizCompositorTh gap mean (ms) | 12 | 94.862 | ±2.0% | yes |
 | shown VizCompositorTh run mean (ms) | 12 | 0.0818 | ±5.6% | no |
-| shown CHTTPClientThre wakes/s | 12 | 8.0464 | ±0.4% | yes |
-| shown CHTTPClientThre gap mean (ms) | 12 | 124.2798 | ±0.4% | yes |
-| shown CHTTPClientThre run mean (ms) | 12 | 0.0313 | ±46.2% | no |
 | shown CNet Encrypt:0 wakes/s | 12 | 8.0401 | ±0.2% | yes |
 | shown CNet Encrypt:0 gap mean (ms) | 12 | 124.3764 | ±0.2% | yes |
 | shown CNet Encrypt:0 run mean (ms) | 12 | 0.0161 | ±4.0% | yes |
+| shown CHTTPClientThre wakes/s | 12 | 8.0378 | ±0.3% | yes |
+| shown CHTTPClientThre gap mean (ms) | 12 | 124.4129 | ±0.3% | yes |
+| shown CHTTPClientThre run mean (ms) | 12 | 0.0162 | ±3.7% | yes |
 | shown ThreadPoolForeg wakes/s | 12 | 6.1732 | ±4.2% | yes |
 | shown ThreadPoolForeg gap mean (ms) | 12 | 161.9912 | ±4.2% | yes |
 | shown ThreadPoolForeg run mean (ms) | 12 | 0.018 | ±5.1% | yes |
@@ -125,7 +125,11 @@ Repeats: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]  ·  mode full  ·  builds ? (1
 | shown residual gap mean (ms) | 12 | 70.6584 | ±0.9% | yes |
 | shown residual run mean (ms) | 12 | 0.0296 | ±4.5% | yes |
 
+Rare event in the shown phase (D33): `CHTTPClientThre`'s runs of 1 ms or more, 62 over 7200 s (0.008611 a second), left out of the component; per repeat {1: 0, 2: 0, 3: 0, 4: 15, 5: 17, 6: 18, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 12}.
+
+Rare event in the minimised phase (D33): `CHTTPClientThre`'s runs of 1 ms or more, 89 over 7200 s (0.012361 a second), left out of the component; per repeat {1: 0, 2: 4, 3: 11, 4: 0, 5: 0, 6: 0, 7: 11, 8: 10, 9: 17, 10: 8, 11: 17, 12: 11}.
+
 | comparison | wakes/s a | wakes/s b | ratio | reading | cpu share a | cpu share b | ratio | reading |
 |---|---|---|---|---|---|---|---|---|
-| shown against minimised (D5) | 299.325 | 244.398 | 1.225 | difference | 0.015184166666666667 | 0.012063333333333334 | 1.259 | difference |
+| shown against minimised (D5) | 299.31641666666667 | 244.3855 | 1.225 | difference | 0.015060833333333334 | 0.011855 | 1.27 | difference |
 

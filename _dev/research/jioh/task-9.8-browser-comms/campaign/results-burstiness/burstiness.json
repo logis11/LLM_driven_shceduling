@@ -250,7 +250,7 @@
    "repeats": 12,
    "wakes_per_s": {
     "measured": 298.992,
-    "compiled": 299.491
+    "compiled": 299.515
    },
    "bins": {
     "1 ms": {
@@ -260,65 +260,65 @@
       "max": 3.9229
      },
      "compiled": {
-      "median": 1.7826,
-      "min": 1.7744,
-      "max": 1.7995
+      "median": 1.7833,
+      "min": 1.7735,
+      "max": 1.7979
      },
      "ratio": {
-      "median": 1.9371,
-      "min": 1.8578,
-      "max": 2.1989
+      "median": 1.9382,
+      "min": 1.8593,
+      "max": 2.2001
      }
     },
     "10 ms": {
      "measured": {
       "median": 4.3979,
       "min": 3.6139,
-      "max": 5.3942
+      "max": 5.3941
      },
      "compiled": {
-      "median": 2.1032,
-      "min": 2.0708,
-      "max": 2.1536
+      "median": 2.1012,
+      "min": 2.0704,
+      "max": 2.1573
      },
      "ratio": {
-      "median": 2.0828,
-      "min": 1.7452,
-      "max": 2.5404
+      "median": 2.0844,
+      "min": 1.7455,
+      "max": 2.5449
      }
     },
     "100 ms": {
      "measured": {
       "median": 5.418,
-      "min": 3.6928,
-      "max": 6.0293
+      "min": 3.6896,
+      "max": 6.0256
      },
      "compiled": {
-      "median": 1.8162,
-      "min": 1.7207,
-      "max": 1.8725
+      "median": 1.8121,
+      "min": 1.7341,
+      "max": 1.8569
      },
      "ratio": {
-      "median": 2.9696,
-      "min": 2.0007,
-      "max": 3.4152
+      "median": 2.9846,
+      "min": 1.9954,
+      "max": 3.4075
      }
     },
     "1 s": {
      "measured": {
       "median": 1.3691,
       "min": 1.0373,
-      "max": 2.6945
+      "max": 2.6581
      },
      "compiled": {
-      "median": 1.5469,
-      "min": 1.3833,
-      "max": 1.7011
+      "median": 1.539,
+      "min": 1.3864,
+      "max": 1.6975
      },
      "ratio": {
-      "median": 0.9135,
-      "min": 0.7229,
-      "max": 1.9479
+      "median": 0.9128,
+      "min": 0.716,
+      "max": 1.9172
      }
     }
    }

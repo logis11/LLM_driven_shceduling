@@ -41,6 +41,12 @@ RENDERER_APPS = ("chrome-hidden", "chrome-visible")
 # command lines: --extension-process sits about 129 characters in, past the 120 the snapshot keeps.
 NOT_PAGE_RENDERER = ("--extension-process", "--top-chrome-webui")
 
+# changelog D33, 9.5 D64: a rare event within a run leaves its component and is stated as its own event — the Steam
+# client's HTTP thread runs 12–18 times for 1–50 ms within about 3 s, in 4 of the 12 repeats and at no fixed time into
+# the phase, against runs under 0.28 ms otherwise. The minimised phase, measured beside it for D5's comparison, is read
+# the same way so both sides of the comparison leave the event out. (app, phase) -> (comm, the run floor in ms, design)
+HEAVY_EVENTS = {("steam", "shown"): ("CHTTPClientThre", 1.0), ("steam", "minimised"): ("CHTTPClientThre", 1.0)}
+
 
 def page_renderers(D):
     """pids of the renderers that are a page's, from renderers.tsv; None when the run recorded no such file."""
@@ -202,6 +208,11 @@ def analyze_phase(D, phase, app, keep_rows=False):
         kept = [r for r in kept if r.pid in whole_phase]
     if app == "chrome-hidden":
         kept, out["control_tab"] = drop_control_tab(kept, span)
+    spec = HEAVY_EVENTS.get((app, phase))
+    if spec:   # D33 (9.5 D64): the event's runs leave the component, stated beside it in seconds into the phase
+        heavy = lambda r: r.comm == spec[0] and r.run >= spec[1]
+        out["events"] = [[round(r.t_in - t0, 3), round(r.run, 3)] for r in kept if heavy(r)]
+        kept = [r for r in kept if not heavy(r)]
     out["wakes_per_s"] = round(len(kept) / span, 3)          # the whole measured set, a diagnostic
     out["cpu_share"] = round(sum(r.run for r in kept) / 1000 / span, 5)
     if app in RENDERER_APPS:

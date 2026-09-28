@@ -86,10 +86,9 @@ EXCEPTED_RUN_MEANS = ("chrome-hidden", "chrome-visible", "element", "steam")
 SESSION_SPREAD = {"chrome-hidden": ("Chrome_ChildIOT",
                                     # changelog D26: carried once the rates are one renderer's and exact
                                     "Compositor", "PerfettoTrace", "ThreadPoolServi"),
-                  "chrome-visible": ("Chrome_ChildIOT", "ThreadPoolForeg", "PerfettoTrace"),
-                  # changelog D30: the Steam client's HTTP thread, its run mean in two modes across the repeats and
-                  # within ±0.2 % inside one run, its rate and gap within the rule — 9.5 D57 on a run mean, not D18
-                  "steam": ("CHTTPClientThre",)}
+                  "chrome-visible": ("Chrome_ChildIOT", "ThreadPoolForeg", "PerfettoTrace")}
+# changelog D33: the Steam client's HTTP thread, carried here under D30, leaves — its two "modes" were one burst of long
+# runs in 4 of the 12 repeats, now a stated event under 9.5 D64 (analyze.HEAVY_EVENTS)
 # changelog D26: the Steam client's steamwebhelper and ThreadPoolForeg, carried between sessions under D23, hold the
 # rule over merged wake times; steamwebhelper's run mean stays carried, under D18
 
@@ -293,6 +292,17 @@ def pool_app(app, reps):
                        for c in chosen},
             "renderer_pids": {k: by_rep[k].get("renderer_pids") for k in sorted(by_rep, key=repeat_order)},
         }
+        if (app, name) in analyze.HEAVY_EVENTS:   # D33 (9.5 D64): the event, stated with its counts as campaign/pool.py states it
+            comm, floor = analyze.HEAVY_EVENTS[(app, name)]
+            order = sorted(by_rep, key=repeat_order)
+            ev = {k: by_rep[k].get("events") or [] for k in order}
+            total_s = sum(spans[k] for k in order)
+            entry["phases"][name]["heavy_event"] = {
+                "comm": comm, "run_floor_ms": floor, "count": [len(ev[k]) for k in order],
+                "runs_ms": [x for k in order for _, x in ev[k]],
+                "at_s": [[round(t, 1) for t, _ in ev[k]] for k in order],   # seconds into the phase
+                "rate_per_s": round(sum(len(ev[k]) for k in order) / total_s, 6) if total_s else None,
+                "span_s_total": round(total_s, 1)}
     # the population the entry is pooled from (D14 hands to 9.13 that each entry's scope states it): the renderers
     # measured in the carried phase, after the browser's own renderers, part-phase renderers and the control tab are
     # dropped — `renderers` above is the raw `--type=renderer` count the job observed, which includes all of those
@@ -393,6 +403,12 @@ def render(out):
             hw = f"{c['half_width']:.1%}" if c.get("half_width") is not None else "—"
             L.append(f"| {name} | {c['k']} | {c['mean']} | ±{hw} | {'yes' if c['passes'] else 'no'} |")
         L.append("")
+        for name, ph in e["phases"].items():   # D33 (9.5 D64): a rare event within a run, stated per repeat
+            h = ph.get("heavy_event")
+            if h:
+                L += [f"Rare event in the {name} phase (D33): `{h['comm']}`'s runs of {h['run_floor_ms']:g} ms or more, "
+                      f"{sum(h['count'])} over {h['span_s_total']:.0f} s ({h['rate_per_s']:g} a second), left out of "
+                      f"the component; per repeat {dict(zip(ph['repeats'], h['count']))}.", ""]
         if e.get("comparisons"):
             L += ["| comparison | wakes/s a | wakes/s b | ratio | reading | cpu share a | cpu share b | ratio | reading |",
                   "|---|---|---|---|---|---|---|---|---|"]

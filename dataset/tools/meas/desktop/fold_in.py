@@ -7,8 +7,8 @@ One entry per subject, in 9.5's measured per-application form (D10): `components
 carried phase, each with its `wakes_per_s` and its pooled `gap` and `run` quantile tables, and the residual; no
 `focus_components`, no `stimulus`. The scope states what method §7 and the changelog require of each entry: the
 machine, the program's version, the state and what it is not, the values carried under an exception with their
-half-widths and ranges (D17, D18, D21, D23, D24, D30), the spreads within and between runs (D20, D22, D24, D30), the sparse
-residuals with their counts (D27), the renderer population (D14) and the share `HangWatcher` holds (D16). The output
+half-widths and ranges (D17, D18, D21, D23, D24), the spreads within and between runs (D20, D22, D24), the sparse
+residuals with their counts (D27), a rare event within a run stated beside its component (D33), the renderer population (D14) and the share `HangWatcher` holds (D16). The output
 is a YAML fragment for `dataset/archetypes.yaml`.
 """
 
@@ -20,7 +20,7 @@ import sys
 TOOLS = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
-from meas.distribution import yaml_table  # noqa: E402
+from meas.distribution import quantile_table, yaml_table  # noqa: E402
 from meas.desktop.pool import _cp  # noqa: E402  — campaign/pool.py, for its build census (9.5 D69)
 
 TAG = "meas-ci:desktop:2026-09-20"
@@ -80,8 +80,7 @@ WITHIN = {("chrome-hidden", "Chrome_ChildIOT"): "±17.7 % (D24)",
           ("chrome-visible", "Chrome_ChildIOT"): "±18.6 % (D20)",
           ("chrome-visible", "ThreadPoolForeg"): "barely present in the probe (D20)",
           ("chrome-hidden", "Compositor"): "±10.8 % (D26)", ("chrome-hidden", "PerfettoTrace"): "±10.8 % (D26)",
-          ("chrome-hidden", "ThreadPoolServi"): "±10.8 % (D26)", ("chrome-visible", "PerfettoTrace"): "±4.0 % (D26)",
-          ("steam", "CHTTPClientThre"): "±0.2 % (0.01454–0.01459 ms, the probe's 600 s windows every 60 s, D30)"}
+          ("chrome-hidden", "ThreadPoolServi"): "±10.8 % (D26)", ("chrome-visible", "PerfettoTrace"): "±4.0 % (D26)"}
 
 # D27: the renderer residuals are sparse — a few wakes per renderer per phase — so the within-run test (D26 re-read
 # them on the probes) cannot place their spread; why, per entry, from D26's re-read.
@@ -118,30 +117,41 @@ def values_of(ph, comm, label):
     return [v for v in vals if v is not None]
 
 
-def two_modes(vals):
-    """Per-repeat values split at their largest step: (the lower mode, the upper mode)."""
-    v = sorted(vals)
-    i = max(range(1, len(v)), key=lambda j: v[j] - v[j - 1])
-    return v[:i], v[i:]
+def heavy_events_block(ph, phase, indent="      "):
+    """D33 (9.5 D64): a rare event's runs, carried as the campaign fold-in carries chrome's MemoryInfra pass — the run
+    table, the count and the span it was counted over, and the rate that follows; no interval, none being measured."""
+    h = ph.get("heavy_event")
+    if not h or not h.get("runs_ms"):
+        return []
+    runs = sorted(h["runs_ms"])
+    hit = [n for n in h["count"] if n]
+    return [f"{indent}heavy_events:",
+            f"{indent}  - comm: {json.dumps(h['comm'])}",
+            f"{indent}    run_floor_ms: {h['run_floor_ms']:g}",
+            f"{indent}    count: {sum(h['count'])}",
+            f"{indent}    span_s: {h['span_s_total']:.1f}",
+            f"{indent}    rate_per_s: {h['rate_per_s']:g}",
+            f"{indent}    run: {yaml_table(quantile_table(runs), TAG)}",
+            f"{indent}  # D33 (9.5 D64): {sum(h['count'])} runs of at least {h['run_floor_ms']:g} ms over "
+            f"{h['span_s_total']:.0f} s of {phase} phase, {min(runs):.1f}–{max(runs):.1f} ms, {min(hit)}–{max(hit)} in one "
+            f"burst in {len(hit)} of {len(h['count'])} repeats; their runs leave the component's wakes, each placed at the "
+            f"carried rate, the burst's clustering not carried."]
 
 
-def run_mean_between_sessions(app, ph, session):
-    """D30: 9.5 D57 applied to a run mean — the Steam client's HTTP thread, its rate and gap within the rule, its run
-    mean in two modes across the repeats and steady within one run."""
-    parts = []
-    for comm, texts in session.items():
-        run = ph["tables"][comm]["run_ms"]
-        lo, hi = two_modes([m for m in run["repeat_mean"] if m is not None])
-        wakes = statistics.fmean(ph["threads"][comm]["wakes_per_s"]) / statistics.fmean(ph["wakes_per_s"])
-        cpu = (sum(m * n for m, n in zip(run["repeat_mean"], run["repeat_n"]) if m is not None) / 1000
-               / sum(ph["span_s"]) / statistics.fmean(ph["cpu_share"]))
-        parts.append(f"`{comm}` " + ", ".join(texts) + f", in two modes — {len(lo)} of the {len(lo) + len(hi)} "
-                     f"repeats at {min(lo):.4f}–{max(lo):.4f} ms and {len(hi)} at {min(hi):.4f}–{max(hi):.4f} ms — "
-                     f"against within one run {WITHIN[(app, comm)]}; the pooled table mixes the two modes wake by "
-                     f"wake, where a measured session holds one. Its wake rate and gap mean hold the rule; it holds "
-                     f"{wakes * 100:.1f} % of the {CARRIED[app]} phase's wakes and {cpu * 100:.1f} % of its CPU")
-    return "A run mean that varies between sessions, carried under 9.5 D57 applied to a run mean (D30): " \
-        + "; ".join(parts) + ". "
+def heavy_sentence(ph):
+    """D33: the scope's statement of the rare event — its runs, where the repeats caught it and what is not carried."""
+    h = ph["heavy_event"]
+    runs = h["runs_ms"]
+    hit = [(ph["repeats"][i], n, ts) for i, (n, ts) in enumerate(zip(h["count"], h["at_s"])) if n]
+    at = [t for _, _, ts in hit for t in ts]
+    width = max(max(ts) - min(ts) for _, _, ts in hit)
+    return (f"A rare event within a run (9.5 D64; D33): `{h['comm']}`'s runs of {h['run_floor_ms']:g} ms or more — "
+            f"{sum(h['count'])} over the {len(h['count'])} repeats' {h['span_s_total']:.0f} s, "
+            f"{min(runs):.1f}–{max(runs):.1f} ms, {min(n for _, n, _ in hit)}–{max(n for _, n, _ in hit)} in one burst "
+            f"within {width:.1f} s in {len(hit)} of the repeats ({', '.join(str(k) for k, _, _ in hit)}), "
+            f"{min(at):.1f}–{max(at):.1f} s into the phase — leave the component, which is read without them, and are "
+            f"carried as a stated event at their rate, {h['rate_per_s']:g} a second; the burst's clustering is not "
+            f"carried. ")
 
 
 def component(comm, threads, wps, gap, run, extra=None, indent="        "):
@@ -201,6 +211,7 @@ def entry(app, e):
     unit = " per renderer" if renderer else ""
     out.append(f"        # {len(comp['selected'])} comms cover {comp['covered_share'] * 100:.1f} % of "
                f"{comp['total_wakes_per_s']:.3f} wakes/s{unit} (9.5 D16, target 95 %); the rest pooled as `residual`")
+    out += heavy_events_block(ph, CARRIED[app])
     out += ["    lifetime: segment-bound", "    binding_params: []", "    scalable: []", "    validation_stats:",
             "      referee: meas-ci"]
     runs = sorted(set(v for v in e["run_id"].values() if v))
@@ -237,9 +248,9 @@ def entry(app, e):
     if machine:
         scope += ("Run means whose spread is the runner's speed, every thread of a repeat moving together while wake "
                   f"rates hold (D17{', D18' if app == 'steam' else ''}): " + "; ".join(machine) + ". ")
-    if session and app == "steam":
-        scope += run_mean_between_sessions(app, ph, session)
-    elif session:
+    if ph.get("heavy_event"):
+        scope += heavy_sentence(ph)
+    if session:
         parts = []
         for comm, texts in session.items():
             w = WITHIN.get((app, comm))

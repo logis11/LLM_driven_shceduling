@@ -262,7 +262,7 @@ No value changed by this entry.
 
 ## D18 — D5 stated on the wake rate; the Steam client's run means excepted (2026-09-21)
 
-> Amended by D23 (`steamwebhelper`'s and `ThreadPoolForeg`'s run means carried under 9.5 D57), D26 (`steamwebhelper`'s run mean back under D18) and D30 (`CHTTPClientThre`'s run mean under 9.5 D57 in place of D18).
+> Amended by D23 (`steamwebhelper`'s and `ThreadPoolForeg`'s run means carried under 9.5 D57), D26 (`steamwebhelper`'s run mean back under D18), D30 (`CHTTPClientThre`'s run mean under 9.5 D57 in place of D18) and D33 (`CHTTPClientThre`'s burst a stated event; its run mean within the rule).
 
 D17 left the Steam client's run means under the tolerance, because D5's comparison was in part a CPU-share ratio
 built from run times. Whether the per-runner speed cancels inside that ratio — both phases of a repeat running on
@@ -584,6 +584,8 @@ Commit: this entry.
 
 ## D30 — the Steam client's `CHTTPClientThre` run mean carried between sessions (2026-09-26)
 
+> Superseded by D33 (the upper mode one burst in four repeats, a rare event within a run under 9.5 D64).
+
 By 인지오's decision, on the 2026-09-26 review of 9.5–9.9. `CHTTPClientThre`'s run mean was carried under D18 as the runner's speed, a spread that moves every thread of a repeat together. It does not move with them: its per-repeat run mean correlates with the other ten carried values' at −0.12 to +0.28, where theirs correlate with each other at a median +0.76 (45 pairs). Across the 12 repeats it sits in two modes — 8 at 0.0137–0.0170 ms, 4 (repeats 4, 5, 6, 12) at 0.0572–0.0639 ms — and within one run it holds: 0.01454–0.01459 ms (±0.2 %) over the long-phase probe's `shown` phase, 600 s windows every 60 s past the 900 s settle, D22's method. Its wake rate, 8.05 a second, and gap mean hold the rule (±0.41 %); it holds 2.7 % of the phase's wakes and 1.7 % of its CPU.
 
 - **Its run mean is carried between sessions under 9.5 D57, in place of D18.** D57 is written for a component whose rate varies between sessions; it is applied here to a run mean alone, the component's wake rate and gap mean within the rule, and the workflow's D57 says so.
@@ -616,5 +618,17 @@ The traced runs against the carried pool (decision 17): `renderer-visible` and `
 The builds, one per subject across its six jobs: the renderers Google Chrome 153.0.8010.52 (the hidden renderer's carried pool 152.0.7977.82 in 14 repeats and 153 in 5, the visible's 152 in 11); Element 1.12.29, the carried pool 1.12.28 in every repeat; the Steam client build 1788652215, as carried. The notes carry each entry's reading in 9.5 D82's form; no carried value changes.
 
 Results: `campaign/results-control.md`, `campaign/results-control/` (the record and the control's pools). Record: `measurement-campaign-record.md`, 9.8. Tooling: `control_report.py`'s build census reads `element.version` and `steam.buildid`; `desktop/fold_in.py --control`. Tests: `test_the_build_census_reads_each_subject_s_own_version_key`, `test_the_9_8_and_9_9_fold_ins_append_each_archetype_s_reading_to_its_notes`, `test_the_fold_in_regenerates_the_four_entries_from_the_pooled_record` (new: the four entries are the fold-in's output on the committed records, byte for byte). Values changed: none; the four entries' notes. Compiled with 9.5 D82's. Raw records released with 9.5 D82's, in **`meas-ci-control-2026-09-27`**: `meas-control-desktop.zip`, `chat-client`'s left-out copies in its `-excluded` folder.
+
+Commit: this entry.
+
+## D33 — the Steam client's `CHTTPClientThre` burst carried as a rare event within a run (2026-09-28)
+
+By 인지오's decision, from the 2026-09-28 review of 9.5–9.9. D30 carried `CHTTPClientThre`'s run mean between sessions under 9.5 D57, in two modes across the repeats — 8 at 0.0137–0.0170 ms, 4 at 0.0572–0.0639 ms — and ±0.2 % within the probe's run. Read per repeat in 50 s windows, the upper mode is one burst: in each of repeats 4, 5, 6 and 12, 12–18 runs of 2.0–50.2 ms within 1.8–2.8 s, 201–228 ms of CPU, 592.5, 2.8, 483.9 and 1.5 s into the phase; outside it every repeat's runs stay under 0.28 ms, run means 0.014–0.017 ms. It is a rare event within a run, 9.5 D64's class (`chrome`'s `MemoryInfra` pass), not a spread between sessions; the probe's run caught none. The minimised phase measured beside it (D5) caught the same burst in 9 of the 12 repeats, 4–17 runs, up to 226 ms.
+
+`CHTTPClientThre`'s runs of 1 ms or more (design, the floor between the two populations) leave the component in the shown phase and in the minimised phase, so both sides of D5's comparison read it the same way, and are stated per repeat in the pooled record: the shown phase 62 runs over 7,200 s, 0.008611 a second, in repeats 4, 5, 6, 12 (15, 17, 18, 12); the minimised phase 89, 0.012361 a second. `game-client` carries the shown phase's as `heavy_events`, in the form `web-browser` carries its `MemoryInfra` pass: the runs' table, their count, the span and the rate — each run placed at that rate on its own, so the burst's 3 s clustering is not carried, the 9.15 threat. D30's carry is withdrawn: `SESSION_SPREAD` holds no Steam component.
+
+Re-pooled from the campaign's artifacts (the unchanged pool reproduces the committed record but for `gated_out`, carried, as at D31). Values changed, `game-client`: `CHTTPClientThre`'s run mean 0.0313 ms ±46.2 % → 0.0162 ms ±3.7 %, within the rule; its wake rate 8.046 → 8.038 a second and gap mean 124.28 → 124.41 ms (±0.3 %); the `heavy_events` entry added; the scope's two-modes sentence replaced by the event's. D5's comparison: wake rate 299.316 against 244.386 a second, 1.225× as before; the CPU share ratio, reported with its spread and no effect resting on it (D18), 1.259 → 1.270. The other three entries unchanged. The untraced control (D32): the control's traced-run pool re-read the same way (the burst in 3 of its 6 jobs); no interval changes, the traced runs against the carried pool largest |z| 1.27 as before. Burstiness: `game-client`'s idle phase 1.9–3.0× as before.
+
+Tooling: `HEAVY_EVENTS` and the split in `desktop/analyze.py`; the event pooled in `desktop/pool.py` and stated on its page; `heavy_events_block` and the scope sentence in `desktop/fold_in.py`, D30's `WITHIN` figure and two-modes sentence removed. Tests: `test_the_steam_clients_http_burst_leaves_its_component_as_a_stated_event` and `test_the_game_client_carries_the_http_burst_as_a_heavy_event` in place of D30's two. Results: `campaign/results/pooled.json`, `campaign/results/results.md`; `campaign/results-control/pool-steam.json`, `control.json`; `campaign/results-burstiness/burstiness.json`, `results-burstiness.md`. Record: `measurement-campaign-record.md`, 9.8; the workflow's D57 and D64 bullets. Method §10, 2026-09-28. **Hands to 9.14:** demand moves where `game-client` is bound, none over 0.0004 — `c1-gaming`, `c4-gaming`, `c7-gaming`, `c2-p2a`, `c2-p2b`, `c3-evening`; 12 of 100 artifacts changing beyond the library's hash; no demand class changes; compiled with `--allow-window`. The raw records are unchanged. Values changed: `game-client`'s `CHTTPClientThre` run table and rates, its `heavy_events`, scope.
 
 Commit: this entry.

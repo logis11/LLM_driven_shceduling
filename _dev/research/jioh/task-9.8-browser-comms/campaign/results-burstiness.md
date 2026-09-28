@@ -35,11 +35,11 @@
 
 ## game-client (`steam`, shown)
 
-12 repeats; wakes/s, median over the streams: measured 298.992, compiled 299.491. Dispersion (variance over mean of the wake counts per bin), median (least–largest) over the streams; the ratio measured over compiled, per stream.
+12 repeats; wakes/s, median over the streams: measured 298.992, compiled 299.515. Dispersion (variance over mean of the wake counts per bin), median (least–largest) over the streams; the ratio measured over compiled, per stream.
 
 | bin | measured | compiled | measured / compiled |
 |---|---|---|---|
-| 1 ms | 3.448 (3.343–3.923) | 1.783 (1.774–1.8) | 1.937 (1.858–2.199) |
-| 10 ms | 4.398 (3.614–5.394) | 2.103 (2.071–2.154) | 2.083 (1.745–2.54) |
-| 100 ms | 5.418 (3.693–6.029) | 1.816 (1.721–1.873) | 2.97 (2.001–3.415) |
-| 1 s | 1.369 (1.037–2.695) | 1.547 (1.383–1.701) | 0.9135 (0.7229–1.948) |
+| 1 ms | 3.448 (3.343–3.923) | 1.783 (1.774–1.798) | 1.938 (1.859–2.2) |
+| 10 ms | 4.398 (3.614–5.394) | 2.101 (2.07–2.157) | 2.084 (1.746–2.545) |
+| 100 ms | 5.418 (3.69–6.026) | 1.812 (1.734–1.857) | 2.985 (1.995–3.408) |
+| 1 s | 1.369 (1.037–2.658) | 1.539 (1.386–1.698) | 0.9128 (0.716–1.917) |
