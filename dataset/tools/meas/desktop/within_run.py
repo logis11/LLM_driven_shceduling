@@ -8,7 +8,7 @@ same for a renderer entry: over the long-phase probe's steady phase, a window of
 in steps, and each position's rate is taken per renderer — the comms named merged within each renderer, the
 renderers averaged — as the pool computes one renderer's residual (D19).
 
-  within_run.py <probe-run-dir> <phase> <analysis.json> <window-s> <step-s> <comm>[,<comm>...]
+  within_run.py <probe-run-dir> <phase> <analysis.json> <window-s> <step-s> <comm>[,<comm>...] [<skip-s>]
   within_run.py --tree <probe-run-dir> <phase> <window-s> <step-s> <skip-s> <comm>[,<comm>...]
 
 --tree does the same for a subject that is one process tree (the Steam client), reporting at each position the
@@ -26,7 +26,7 @@ from meas.campaign.analyze import load_rows       # noqa: E402
 from meas.desktop.wake_alignment import measured_pids  # noqa: E402
 
 
-def rates(run_dir, phase, analysis, window_s, step_s, comms):
+def rates(run_dir, phase, analysis, window_s, step_s, comms, skip_s=0.0):
     res = json.load(open(analysis))["phases"][phase]
     th = next(f"perf.{phase}.timehist.txt{s}" for s in (".gz", "")
               if os.path.exists(os.path.join(run_dir, f"perf.{phase}.timehist.txt{s}")))
@@ -36,7 +36,7 @@ def rates(run_dir, phase, analysis, window_s, step_s, comms):
     segments, (t0, t1), _ = load_rows(os.path.join(run_dir, th), pids)
     keep = measured_pids(res)
     times = [r.t_in - t0 for r in segments if r.pid in keep and r.comm in comms]
-    out, start = [], 0.0
+    out, start = [], skip_s   # D38: the hidden probe read past its first 300 s (D20, D24, D26)
     while start + window_s <= (t1 - t0) + 1e-6:
         n = sum(1 for t in times if start <= t < start + window_s)
         out.append(n / window_s / len(keep))
@@ -82,5 +82,6 @@ if __name__ == "__main__":
     if len(sys.argv) < 7:
         raise SystemExit(__doc__)
     d, ph, an, w, st, cs = sys.argv[1:7]
-    v = rates(d, ph, an, float(w), float(st), set(cs.split(",")))
-    print(f"{cs}: {len(v)} positions of {w}s, per-renderer rate {spread(v)}")
+    sk = sys.argv[7] if len(sys.argv) > 7 else "0"
+    v = rates(d, ph, an, float(w), float(st), set(cs.split(",")), float(sk))
+    print(f"{cs}: {len(v)} positions of {w}s from {sk}s, per-renderer rate {spread(v)}")

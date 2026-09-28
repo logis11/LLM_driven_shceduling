@@ -75,7 +75,9 @@ APPROX = {
 
 # D20, D22, D24: where a between-sessions component's spread lies — within one run (the probe, 600 s windows every
 # 60 s) against across the repeats. Across-repeat figures for the renderer entries are recomputed from the pooled
-# record; the within-run figures are the changelog's, measured on the probes.
+# record; the within-run figures are the changelog's, measured on the probes — each regenerates (D38) with
+# `desktop/within_run.py <probe> <phase> <analysis.json> 600 60 <comms> <skip-s>`, the hidden probe (run 35501749098,
+# `steady`) from 300 s, the visible (run 35501680255, `steady-notimer`) from 0.
 WITHIN = {("chrome-hidden", "Chrome_ChildIOT"): "±17.7 % (D24)",
           ("chrome-visible", "Chrome_ChildIOT"): "±18.6 % (D20)",
           ("chrome-visible", "ThreadPoolForeg"): "barely present in the probe (D20)",
@@ -185,8 +187,17 @@ def thread_count(t):
     return str(lo) if lo == hi else f"[{lo}, {hi}]"
 
 
+def cpu_shares(ph, comms):
+    """D37: each component's share of the phase's CPU — its runs over the phase's, pooled over the repeats, the heavy
+    event's runs (D33) counted in the phase — the share of the job's time the workflow asks an excepted value to state."""
+    runs = lambda t: sum(x["sum"] for x in t["run_ms"] if x)
+    total = sum(runs(t) for t in ph["threads"].values()) + sum((ph.get("heavy_event") or {}).get("runs_ms") or [])
+    return [runs(ph["threads"][c]) / total for c in comms]
+
+
 def exceptions(app, e, ph):
     machine, session, sparse = [], {}, {}
+    machine_comms = []
     for key, c in e["stability"]["quantities"].items():
         if c["passes"]:
             continue
@@ -202,7 +213,8 @@ def exceptions(app, e, ph):
             session.setdefault(comm, []).append(text)
         else:
             machine.append(f"`{comm}` {text}")
-    return machine, session, sparse
+            machine_comms.append(comm)
+    return machine, session, sparse, machine_comms
 
 
 def entry(app, e):
@@ -236,7 +248,7 @@ def entry(app, e):
              f"{CARRIED[app]} cpu-share {min(ph['cpu_share']):.5f}–{max(ph['cpu_share']):.5f}"]
     out.append("      stats: [" + ", ".join(json.dumps(s) for s in stats) + "]")
 
-    machine, session, sparse = exceptions(app, e, ph)
+    machine, session, sparse, machine_comms = exceptions(app, e, ph)
     # 9.5 D69: Chrome's build recorded per repeat and its census stated, Google's repository serving only its current
     observed = OBSERVED[app].replace("{build}", _cp.build_census(e["version"]))
     scope = (f"One observation (phase decision 2; D10): {observed}; on {MACHINE}; {k} same-machine repeats, "
@@ -262,6 +274,10 @@ def entry(app, e):
     if machine:
         scope += ("Run means whose spread is the runner's speed, every thread of a repeat moving together while wake "
                   f"rates hold (D17{', D18' if app == 'steam' else ''}): " + "; ".join(machine) + ". ")
+        shares = [f"{x * 100:.1f} %" for x in cpu_shares(ph, machine_comms)]
+        listed = shares[0] if len(shares) == 1 else ", ".join(shares[:-1]) + " and " + shares[-1]
+        scope += (f"{'Their runs hold' if len(shares) > 1 else 'Its runs hold'} {listed} of the phase's CPU"
+                  + (f", {sum(cpu_shares(ph, machine_comms)) * 100:.1f} % together" if len(shares) > 1 else "") + " (D37). ")
     if ph.get("heavy_event"):
         scope += heavy_sentence(ph)
     if session:

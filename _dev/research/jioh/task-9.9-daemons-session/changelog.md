@@ -148,6 +148,8 @@ No value in `dataset/archetypes.yaml` changed by this entry.
 
 ## D23 — a cron job's session is an event of the phase, not a component's wake (2026-09-24)
 
+> Corrected by D44 (the window opens at `cron`'s wakeups of an entry's thread, not at every wakeup by `cron`).
+
 By 인지오's decision, in the form of 9.5 D64 (method §5): the rows an entry runs inside the window a cron job's session occupies leave the component, which is read without them, and the event is stated per repeat with its count, its runs, its times into the phase and its rate over the phase time pooled. The window is two seconds each side of every wakeup by a process with comm `cron`, overlapping windows merged (`CRON_WAKER`, `CRON_EVENT_S` in `session/analyze.py`).
 
 Grounds — the population a repeat draws from is not stationary, and the clock decides it. The first batch's six repeats split in two: 47, 48, 49 and 51 recorded 370–375 wakes of pid 1 in the phase and 58 and 60 recorded 325 and 329, on the same kernel and with all fourteen recorded package versions identical. The whole difference was one waker: `cron` woke pid 1 36–38 times in the first four and not once in the other two, every other waker matching across all six. Cron ran in both — the journals show 111 cron lines in a probe and both groups' sessions — but the job set differs with the time of day: the first batch's steady phases fell across 23:59–00:25 UTC and met the sysstat daily job and a sphinxsearch job, the later pair's sat at 01:27–01:57 and met neither. The three probes, all taken in daytime windows, recorded no cron wake of pid 1 at all over 3 h each, which is why the length of D22 was read without this in view.
@@ -412,5 +414,13 @@ By 인지오's decision, on the 2026-09-28 sweep of the 9.5–9.9 changelogs' co
 - Guards: `test_every_cause_class_is_reached_by_a_constructed_wake` reaches the classes the first case no longer did — a job named by the process pid 1 starts, an anacron job, pid 1's own helper kept, a kernel thread's wake, an unresolved waker kept as unknown, another entry acting on its own — and asserts sysstat's daily summary outside, which D32's named test did not.
 
 Values changed: none. Compiled with `--allow-window`: the library hash only, 0 of 100 artifacts changing beyond it (`tools/beyond_hash.py`); no demand moves.
+
+Commit: this entry.
+
+## D44 — the cron window stated as the code opens it: at `cron`'s wakeups of an entry's thread (2026-09-28)
+
+By 인지오's decision, on the item D43 left to its own decision: D23 wrote the window as two seconds each side of every wakeup by a process with comm `cron`, and the code opens it only at `cron`'s wakeups of an entry's thread (`session/analyze.py`, `load_wakeups` over the entries' pids). The text is corrected to the code; the carried values and every stated count follow the code. The two differ in the 24 carried repeats: `cron` wakes its own children 8–15 times in every repeat, and `systemd-journal`, `gmain`, `rcu_sched` and kernel workers beside them, while it wakes pid 1 36–38 times in repeats 47, 48, 49 and 51 alone, the four where the code opens a window. D23's grounds name that marker: `cron` waking pid 1 in the repeats that met the midnight session and not once in the others.
+
+Tooling: the comment and `cron_windows`' docstring in `session/analyze.py`; method §5. Tests: `test_a_cron_wakeup_of_a_thread_no_entry_owns_opens_no_window`. Values changed: none. The raw records are unchanged.
 
 Commit: this entry.

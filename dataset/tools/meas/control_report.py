@@ -232,9 +232,30 @@ def app_reports(family, app, jobs, carried, with_shares=True, control_pool=None)
             else:
                 rep["workload"] = None
             rep["left_out"] = (ctl or {}).get("excluded_repeats") or {}
+        rep["no_ratio"] = no_ratio(values, carried)   # 9.5 D92
         rep["notes"] = control_notes(rep)
         out[arch] = rep
     return out
+
+
+def no_ratio(values, carried):
+    """Decision 10 (9.5 D92): the carried components no ratio is read for, their threads all starting or exiting within
+    the run, each with its share of its phase's CPU in the carried pool — its runs over every component's, pooled over
+    the repeats."""
+    cpu = lambda t: sum(m * n for m, n in zip(t["run_ms"]["repeat_mean"], t["run_ms"]["repeat_n"]) if m is not None)
+    out = []
+    for name in sorted(values):
+        head, rest = name.split(" ", 1)
+        q = next((q for q in QUANTITY if rest.endswith(" " + q)), None)
+        if values[name].get("n") != 0 or q is None:
+            continue
+        comp = rest[:-len(q) - 1]
+        threads = ((carried.get("phases") or {}).get(head) or {}).get("threads") or {}
+        if comp not in threads or any(x["phase"] == head and x["component"] == comp for x in out):
+            continue
+        total = sum(cpu(t) for t in threads.values())
+        out.append({"phase": head, "component": comp, "cpu_share": round(cpu(threads[comp]) / total, 4) if total else None})
+    return sorted(out, key=lambda x: (PHASES.index(x["phase"]) if x["phase"] in PHASES else len(PHASES), -(x["cpu_share"] or 0)))
 
 
 def _mean_shares(recs):
@@ -279,6 +300,16 @@ def control_notes(rep):
                  + ", ".join(f"{c} {' and '.join(qs)}" for c, qs in groups[ph].items())
                  for ph in sorted(groups, key=lambda p: PHASES.index(p) if p in PHASES else len(PHASES))]
         s += ". Perf's effect on the carried values, which stay the traced ones — " + "; ".join(parts) + "."
+    if rep.get("no_ratio"):   # decision 10 (9.5 D92)
+        by = {}
+        for x in rep["no_ratio"]:
+            by.setdefault(x["phase"], []).append(x)
+        whole = lambda ph: "the operation's CPU" if ph == "op" else f"the {ph} phase's CPU"
+        parts = [" and ".join(f"`{x['component']}` ({x['cpu_share'] * 100:.1f} %" + (f" of {whole(ph)})" if i == 0 else ")")
+                              for i, x in enumerate(xs))
+                 + (" in the operation phase" if ph == "op" else f" in the {ph} phase") for ph, xs in by.items()]
+        s += (" No ratio is read for " + ", or for ".join(parts) + ": each ratio is taken over the threads alive at both "
+              "edges of the run, and these components' threads all start or exit within it.")
     if NOTES_STATED.get(rep.get("archetype")):
         s += " " + NOTES_STATED[rep["archetype"]]
     return s

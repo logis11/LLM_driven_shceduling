@@ -589,7 +589,7 @@ Commit: this entry.
 
 ## D82 — the untraced control: perf's own effect on the nine entries' values, read and stated in their notes (2026-09-27)
 
-> Amended by D83 (`code-editor`'s traced-run check re-read from 200 s; its stated line restated), D84 (`web-browser`'s control re-read with its renderers; its stated line restated) and D87 (`web-browser`'s and `mail-client`'s stated lines: where the second pass differs).
+> Amended by D83 (`code-editor`'s traced-run check re-read from 200 s; its stated line restated), D84 (`web-browser`'s control re-read with its renderers; its stated line restated) and D87 (`web-browser`'s and `mail-client`'s stated lines: where the second pass differs); corrected by D92 (four carried components have no ratio, not `kdenlive_render` alone; each entry's notes name them with their share of CPU).
 
 The control the 2026-09-26 review of 9.5–9.9 set, under its own spec (`_dev/docs/spec/jioh/task-9.5-untraced-control.md`, decisions 1–23): each control job runs every carried phase twice, traced under the campaign's `perf sched record` and untraced, each thread's CPU time and switches read from `/proc` at both edges of each run, and each value's per-job ratios, untraced over traced, read by their 95 % interval (decision 11). Runs `meas-ci:interactive` #620–#649 and `meas-ci:playback` #620–#649 (mode `control`): 92 jobs, 55 landed on the AMD EPYC 7763 and 37 stopped by the machine gate — AMD EPYC 9V74 13, Intel Xeon Platinum 8573C 8, AMD EPYC 9V45 7, Intel Xeon 6973P-C 5, Intel Xeon Platinum 8370C 4 — each gated window relaunched by the loop. Six jobs per application, three in each order (decision 13). `video-player`'s window 2 landed twice (#625, #627): by 인지오's decision, under D66, the original launch's copy (#625) is pooled and #627's left out (`pool_runs.py --exclude 2@36300802358`). Every job valid: every prelude returned 0 and none left its dialog up; both runs of a job replayed the same inputs; every operation completed but `video-editor`'s (below).
 
@@ -640,7 +640,7 @@ Commit: this entry.
 
 ## D84 — `web-browser` carries every renderer of its run (2026-09-28)
 
-> Corrected by D89 (the idle values re-read are 23, not 18; the stated range holds for all 23).
+> Corrected by D89 (the idle values re-read are 23, not 18; the stated range holds for all 23) and D93 (the page load's values were not read by build; `gpu/VizCompositorTh`'s run mean differs, stated).
 
 By 인지오's decision, from the 2026-09-28 review of 9.5–9.9: `web-browser` carries its run's whole process tree, its renderers included — the page the streams type into, the spare renderer the page-load operation takes over, and Chrome's own WebUI renderer. D14 takes out of a tree only what another archetype owns. The renderer entries describe unattended pages by construction, a hidden tab and a visible page nobody interacts with (9.8 D3, D4, D10), and 9.8's tooling counts Chrome's own renderers as the browser's (`desktop/analyze.NOT_PAGE_RENDERER`), so none of the run's renderers is another entry's; the page in use was described by no entry (9.8 D25's hand-off to 9.10). In the runs, three renderers through the idle and driven phases — the text-box page (about 20 wakes a second idle, its caret blinking), the WebUI renderer (about 1) and the spare (0.14); in the operation phase the spare becomes the feed page's renderer (repeat 1: 17 s of CPU at 42 wakes a second) and the text-box page's exits. Over the 38 carried repeats the renderers held 59 % (35–63 %) of each key's CPU under SWELL-KW, 65 % (63–67 %) under 136M, and 74 % (72–75 %) of each page load's.
 
@@ -751,3 +751,19 @@ The rule, read again: the idle residual's run mean 0.0463 ms ±2.31 %, the rule 
 Tooling: the `glean.mps` entry in `HEAVY_EVENTS` and `CLOCK_EVENTS` in `campaign/pool.py`, the pooled record's `compiled`; `CLOCK_STATED`, `heavy_events_block` and the scope sentence in `campaign/fold_in.py`. Tests: `test_a_clock_event_leaves_the_component_rows_at_any_run`, `test_mail_clients_clock_event_is_stated_not_compiled`. Reference: `glean` in `docs/references.md`, verified against `glean-core/src/scheduler.rs`. Results as D90's. Method §9, 2026-09-28. The raw records are unchanged.
 
 Commit: this entry, with D90.
+
+## D92 — the carried components the untraced control reads no ratio for, stated in the notes (2026-09-28)
+
+By 인지오's decision, from the 2026-09-28 coverage sweep of 9.5–9.9: D82 named `video-editor`'s `kdenlive_render` as the component whose threads start and exit within the run, and no entry's notes said which carried components the control reads no ratio for. Each ratio is taken over the threads alive at both edges of the run (the untraced-control spec's decision 10). Four carried components have none: `mail-client`'s idle `StreamTrans` and `IndexedDB IO`, holding 75.7 % and 2.2 % of the idle phase's CPU, and its send's `StreamTrans`, 1.1 % of the operation's CPU (D90's names); `video-editor`'s `kdenlive_render`, 94.7 % of the operation's CPU. Each of the two entries' control notes names its components with their share, read from the carried pool: a component's runs over every component's, pooled over the repeats. No other entry of 9.5, 9.8 or 9.9 carries a value without a ratio.
+
+Tooling: `no_ratio` and the notes' sentence in `meas/control_report.py`, the control record's `no_ratio`. Tests: `test_the_components_no_ratio_is_read_for_carry_their_share_of_the_phase_s_cpu`, `test_the_notes_state_the_components_no_ratio_is_read_for`, `test_the_9_5_control_record_states_the_components_no_ratio_is_read_for` (`tests/test_meas_control.py`). Results: `campaign/results-control/control.json`, `campaign/results-control.md`. Values changed: none; the notes of `mail-client` and `video-editor`. Compiled with `--allow-window`: the library hash only, 0 of 100 artifacts changing beyond it (`tools/beyond_hash.py`); no demand moves. The raw records are unchanged.
+
+Commit: this entry.
+
+## D93 — `web-browser`'s one value that differs between its two builds, stated (2026-09-28)
+
+By 인지오's decision, from the 2026-09-28 coverage sweep of 9.5–9.9: D84 read `web-browser`'s idle values, its per-input means and its operation's duration by build, not the page load's components, and the campaign record said every value agrees between Chrome 152 (29 repeats) and 153 (9). Read over all 60 carried values against the 152 repeats' own spread, 59 agree within 1.80 standard deviations; the page load's `gpu/VizCompositorTh` run mean does not: 0.382 ms under 153 against 0.455 ms under 152, 16.0 % lower, −2.31 standard deviations, 8 of the 9 153 repeats below every 152 repeat. The component holds 9.2 % of the page load's CPU. The carried value pools both builds, as D69 carries a build the vendor's repository no longer serves: 0.438 ms ±3.23 % at the recording's window limit, the 152 repeats' mean 4.0 % above it. `web-browser`'s scope states it; the campaign record's build line carries the reading and D89's 23 idle values.
+
+Tooling: `BUILD_BOUND` in `campaign/fold_in.py`. Tests: `test_web_browser_s_scope_states_the_value_its_two_builds_differ_in`, its figures read from the committed pool. Record: `measurement-campaign-record.md`, 9.5. Values changed: none; `web-browser`'s scope. Compiled with `--allow-window`: the library hash only, 0 of 100 artifacts changing beyond it (`tools/beyond_hash.py`); no demand moves. The raw records are unchanged.
+
+Commit: this entry.

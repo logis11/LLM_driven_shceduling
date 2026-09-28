@@ -842,6 +842,43 @@ def test_the_stimulus_check_is_read_against_the_interval_of_its_per_repeat_ratio
     assert scattered["reading"] == "not resolved"
 
 
+def test_web_browser_s_scope_states_the_value_its_two_builds_differ_in(repo_root, fold_95):
+    # 9.5 D93: the 38 repeats pool Chrome 152 and 153 (D69); every carried value read by build against the 152 repeats'
+    # spread, one past the others — stated with figures the committed pool gives
+    import json as _json
+    import statistics as st
+    e = _json.load(open(repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+                        / "results-re-measured" / "pool-chrome.json"))["runs"]["chrome"]
+    ver = {int(k): v for k, v in e["version"].items()}
+    z = {}
+    def read(name, preps, vals):
+        a = [v for r, v in zip(preps, vals) if v is not None and ver[r].startswith("Google Chrome 152.")]
+        b = [v for r, v in zip(preps, vals) if v is not None and ver[r].startswith("Google Chrome 153.")]
+        z[name] = ((st.fmean(b) - st.fmean(a)) / st.stdev(a), a, b)
+    for p in ("idle", "op"):
+        ph = e["phases"][p]
+        preps = ph.get("repeats") or e["repeats"]
+        comps = [(c, ph["threads"][c]) for c in ph["components"]["selected"] if ph["threads"][c]["gap_ms"]["q"]]
+        comps += [("residual", ph["components"]["residual"])] if ph["components"]["residual"] else []
+        for c, t in comps:
+            read(f"{p} {c} wakes/s", preps, t["wakes_per_s"])
+            read(f"{p} {c} gap mean", preps, t["gap_ms"]["repeat_mean"])
+            read(f"{p} {c} run mean", preps, t["run_ms"]["repeat_mean"])
+    for p in ("driven", "driven-alt"):
+        read(f"{p} input_run", e["phases"][p].get("repeats") or e["repeats"],
+             e["phases"][p]["per_input"]["window"]["run_ms_minus_idle"]["repeat_mean"])
+    read("operation duration", e["phases"]["op"].get("repeats") or e["repeats"], e["phases"]["op"]["operation"]["duration_ms"]["repeat_mean"])
+    assert len(z) == 60
+    viz, a, b = z.pop("op gpu/VizCompositorTh run mean")
+    assert round(viz, 2) == -2.31 and sum(x < min(a) for x in b) == 8 and len(b) == 9
+    assert round(max(abs(v[0]) for v in z.values()), 2) == 1.80
+    assert ("Build bound (D69): the 38 repeats pool two builds, Google's repository serving only its current version. "
+            "Against the 152 repeats' own spread, 59 of the 60 carried values agree between the builds within 1.80 "
+            "standard deviations; the page load's `gpu/VizCompositorTh` run mean does not: 0.382 ms under 153 against "
+            "0.455 ms under 152 (−16.0 %, −2.31 standard deviations, 8 of the 9 repeats below every 152 repeat). The "
+            "carried 0.438 ms pools both, the 152 repeats' mean 4.0 % above it (D93).") in _scopes(fold_95)["web-browser"]
+
+
 def test_every_typing_scope_states_its_stimulus_check_read_per_repeat(fold_95):
     # D81: the pre-registered p50 sentence keeps its p50s and adds the per-repeat reading of the means
     s = _scopes(fold_95)

@@ -190,6 +190,19 @@ def test_a_cron_sessions_wakes_leave_the_component_and_are_stated(tmp_path):
     assert ph["entries"]["gnome-shell"]["cron_event"]["at_s"] == [69.5, 74.5]
 
 
+def test_a_cron_wakeup_of_a_thread_no_entry_owns_opens_no_window(tmp_path):
+    # D44: the window opens at cron's wakeups of an entry's thread, not at every wakeup by cron — cron wakes its own
+    # children, journald and kernel workers in every repeat, the hourly jobs included
+    d = _run_dir(tmp_path / "r1")
+    rows = (d / "perf.steady.timehist.txt").read_text() + _row(31.0, 3, "systemd", 1, 1, 0.9)
+    wakes = (d / "perf.steady.wakeups.txt").read_text() + f"{30.998:12.6f} [0001]  cron[900/900]  awakened: sh[950/950]\n"
+    (d / "perf.steady.timehist.txt").write_text("".join(sorted(rows.splitlines(True), key=lambda l: float(l.split()[0]))))
+    (d / "perf.steady.wakeups.txt").write_text(wakes)
+    ph = analyze.analyze_run_dir(str(d))["phases"]["steady"]
+    for name, e in ph["entries"].items():
+        assert e["cron_event"]["windows"] == 0 and e["cron_event"]["count"] == 0, name
+
+
 def test_the_pool_names_probe_and_foreign_repeats_and_pools_the_rest(tmp_path):
     assert pool.NAME.match("meas-session-session-r3-full")
     assert pool.NAME.match("meas-session-session-r1-probe")

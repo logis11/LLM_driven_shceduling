@@ -228,7 +228,7 @@ No value changed by this entry.
 
 ## D17 — the first batch read against the rule; the list per component, and run means excepted (2026-09-21)
 
-> Amended by D18 (the Steam client's run means excepted too), D21 (renderer quiet threads' and residuals' run means carried under 9.5 D57) and D31 (the hidden renderer's `HangWatcher` run mean held by the rule).
+> Amended by D18 (the Steam client's run means excepted too), D21 (renderer quiet threads' and residuals' run means carried under 9.5 D57) and D31 (the hidden renderer's `HangWatcher` run mean held by the rule); corrected by D37 (the scope states the excepted run means' share of the phase's CPU, as the workflow asks).
 
 All twenty jobs of the first batch landed on the AMD EPYC 7763 — five repeats per subject, every one valid.
 
@@ -666,5 +666,21 @@ By 인지오's decision, on the 2026-09-28 sweep of the 9.5–9.9 changelogs' co
 - Guard: `test_each_subject_s_build_is_read_from_the_key_its_job_records`.
 
 Values changed: none; the results page's build census. Compiled with `--allow-window`: the library hash only, 0 of 100 artifacts changing beyond it (`tools/beyond_hash.py`); no demand moves.
+
+Commit: this entry.
+
+## D37 — the run means excepted for the runner's speed state their share of the phase's CPU (2026-09-28)
+
+By 인지오's decision, from the 2026-09-28 coverage sweep of 9.5–9.9: the workflow asks a value whose spread follows the machine to state, besides its half-width, range and repeat count, "the share of the job's time the quantity holds" (`measurement-campaign-workflow.md`, from 9.6 D29), and the scopes of D17's and D18's exceptions stated the mean, half-width and range only. Each excepted run mean's share of the carried phase's CPU is now stated: its runs over the phase's, pooled over the repeats, the heavy event's runs (D33) counted in the phase. `renderer-visible`: `HangWatcher` 40.3 % and `chrome` 42.6 %, 82.9 % together. `game-client`: `steamwebhelper` 32.4 %, `steam` 25.3 %, `IPC:CSteamEngin` 16.8 % and `VizCompositorTh` 5.7 %, 80.2 % together. `renderer-hidden` and `chat-client` carry no such exception.
+
+Tooling: `cpu_shares` and the exception sentence in `desktop/fold_in.py`. Tests: `test_the_run_means_excepted_for_the_runner_s_speed_state_their_share_of_the_phase_s_cpu`. Values changed: none; the scopes of `renderer-visible` and `game-client`. Compiled with `--allow-window`: the library hash only, 0 of 100 artifacts changing beyond it (`tools/beyond_hash.py`); no demand moves.
+
+Commit: this entry.
+
+## D38 — the within-run figures regenerate: the renderer mode reads the probe past a skip (2026-09-28)
+
+By 인지오's decision, from the 2026-09-28 coverage sweep of 9.5–9.9: D20, D24 and D26 read the hidden probe past its first 300 s, and `desktop/within_run.py`'s renderer mode had no argument to skip them — only `--tree` had one — so the figures the scopes carry (`WITHIN` and `SPARSE_WHY` in `desktop/fold_in.py`) could not be regenerated with the committed tool; read from 0 s, the hidden `Chrome_ChildIOT` gives ±86.9 %, not D24's ±17.7 %. The renderer mode takes the skip as its last argument. Re-run on the 2026-09-20 probes (the hidden, run 35501749098, `steady`, from 300 s; the visible, run 35501680255, `steady-notimer`, from 0), 600 s windows every 60 s per renderer, every figure reproduces: hidden `Chrome_ChildIOT` ±17.7 %, visible `Chrome_ChildIOT` ±18.6 %, hidden `Compositor`, `PerfettoTrace` and `ThreadPoolServi` together ±10.8 %, visible `PerfettoTrace` ±4.0 %, the hidden residual (`MemoryInfra`) ±134.2 %, the visible residual (`MemoryInfra`, `Compositor`, `ThreadPoolForeg`, `ThreadPoolServi`) ±181.3 %.
+
+Tooling: `rates`' `skip_s` and the renderer mode's `<skip-s>` in `desktop/within_run.py`; the command beside `WITHIN` in `desktop/fold_in.py`. Tests: `test_the_renderer_mode_reads_the_probe_past_a_skip`. Values changed: none. The raw records are unchanged.
 
 Commit: this entry.

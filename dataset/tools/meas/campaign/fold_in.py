@@ -69,6 +69,11 @@ BUILD_BOUND = {
                    "second in the idle phase against the 115 a second of this build's whole tree — a different workload, "
                    "and whether a code editor should describe an assistant-bearing one is the archetype's own question, "
                    "not this campaign's.",
+    'web-browser': "Build bound (D69): the 38 repeats pool two builds, Google's repository serving only its current version. "
+                   "Against the 152 repeats' own spread, 59 of the 60 carried values agree between the builds within 1.80 "
+                   "standard deviations; the page load's `gpu/VizCompositorTh` run mean does not: 0.382 ms under 153 "
+                   "against 0.455 ms under 152 (−16.0 %, −2.31 standard deviations, 8 of the 9 repeats below every 152 "
+                   "repeat). The carried 0.438 ms pools both, the 152 repeats' mean 4.0 % above it (D93).",
 }
 
 

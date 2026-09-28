@@ -658,6 +658,45 @@ def test_the_notes_state_when_no_difference_is_found_and_read_a_session_entry_s_
         "— steady phase: `gnome-shell/JS Helper` run mean 0.864 (0.841–0.886).")
 
 
+def test_the_components_no_ratio_is_read_for_carry_their_share_of_the_phase_s_cpu():
+    # decision 10 (9.5 D92): a component whose threads all start or exit within the run has no ratio; its share of the
+    # phase's CPU in the carried pool — its runs over every component's, pooled over the repeats — is read beside it
+    from meas import control_report
+    run = lambda means, counts: {"run_ms": {"repeat_mean": means, "repeat_n": counts}}
+    carried = {"phases": {"idle": {"threads": {"pool": run([4.0, 2.0], [1, 3]), "main": run([0.5, None], [2, 0])}},
+                          "op": {"threads": {"pool": run([1.0], [1]), "main": run([1.0], [3])}}}}
+    values = {"idle pool wakes/s": {"n": 0}, "idle pool run mean (ms)": {"n": 0}, "idle main wakes/s": {"n": 6},
+              "op pool run mean (ms)": {"n": 0}, "driven per-input run (ms)": {"n": 0}}
+    assert control_report.no_ratio(values, carried) == [
+        {"phase": "idle", "component": "pool", "cpu_share": 0.9091}, {"phase": "op", "component": "pool", "cpu_share": 0.25}]
+
+
+def test_the_notes_state_the_components_no_ratio_is_read_for():
+    from meas import control_report
+    rep = {"archetype": "an-entry", "app": "thunderbird-send", "jobs": 6, "intervals": 2, "chance": 0.1,
+           "differences": [], "values": {},
+           "no_ratio": [{"phase": "idle", "component": "StreamTrans", "cpu_share": 0.7571},
+                        {"phase": "idle", "component": "IndexedDB IO", "cpu_share": 0.0218},
+                        {"phase": "op", "component": "StreamTrans", "cpu_share": 0.0108}]}
+    assert control_report.control_notes(rep).endswith(
+        "none found. No ratio is read for `StreamTrans` (75.7 % of the idle phase's CPU) and `IndexedDB IO` (2.2 %) in "
+        "the idle phase, or for `StreamTrans` (1.1 % of the operation's CPU) in the operation phase: each ratio is taken "
+        "over the threads alive at both edges of the run, and these components' threads all start or exit within it.")
+
+
+def test_the_9_5_control_record_states_the_components_no_ratio_is_read_for(repo_root):
+    # 9.5 D92 on the committed record: mail-client's three and video-editor's `kdenlive_render`
+    import json as _j
+    rec = _j.load(open(repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+                       / "results-control" / "control.json"))["archetypes"]
+    assert ("No ratio is read for `StreamTrans` (75.7 % of the idle phase's CPU) and `IndexedDB IO` (2.2 %) in the idle "
+            "phase, or for `StreamTrans` (1.1 % of the operation's CPU) in the operation phase") in rec["mail-client"]["notes"]
+    assert "No ratio is read for `kdenlive_render` (94.7 % of the operation's CPU) in the operation phase" in rec["video-editor"]["notes"]
+    for aid, e in rec.items():
+        if aid not in ("mail-client", "video-editor"):
+            assert "No ratio is read" not in e["notes"], aid
+
+
 def test_the_page_carries_the_lines_stated_for_an_archetype(monkeypatch):
     from meas import control_report
     monkeypatch.setitem(control_report.NOTES_STATED, "chat-client", "Stated in the notes.")

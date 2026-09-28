@@ -54,9 +54,9 @@ ENTRIES = ("gnome-shell", "pipewire", "systemd", "dbus-daemon")
 # 11-12.
 #
 # D64 picks its event out by a run floor, chrome's heavy pass having no other marker. This one has a cause, so it
-# is taken by cause: each wakeup by `cron` opens a window of CRON_EVENT_S, and every row of every entry inside it
-# belongs to the event — the wakes cron issues and the scope work logind mediates for the session, which carries
-# logind's own comm and which a waker-only rule leaves behind. A floor would instead cut by size, removing the
+# is taken by cause: each wakeup by `cron` of an entry's thread opens a window of CRON_EVENT_S (D44), and every row
+# of every entry inside it belongs to the event — the wakes cron issues and the scope work logind mediates for the
+# session, which carries logind's own comm and which a waker-only rule leaves behind. A floor would instead cut by size, removing the
 # heavy runs of a repeat whose window met no cron session at all and biasing every quantile above it.
 #
 # The window is symmetric, two seconds each way from a wakeup. It straddles its marker because pid 1 does the
@@ -186,7 +186,8 @@ def poll_summary(D, phase, _unused=None):
 
 
 def cron_windows(times, w=CRON_EVENT_S):
-    """The windows a cron session occupies: `w` seconds each side of every wakeup by `cron`, overlaps merged."""
+    """The windows a cron session occupies: `w` seconds each side of every wakeup by `cron` of an entry's thread (D44),
+    overlaps merged."""
     out = []
     for t in sorted(times):
         if out and t - w <= out[-1][1]:

@@ -550,6 +550,45 @@ def test_the_renderer_scopes_state_the_chrome_builds_they_pool(repo_root, tmp_pa
         "validation_stats"]["scope"]
 
 
+def test_the_run_means_excepted_for_the_runner_s_speed_state_their_share_of_the_phase_s_cpu(repo_root, tmp_path):
+    # D37: the workflow asks a value whose spread follows the machine to state the share of the job's time it holds
+    # (9.6 D29); each excepted run mean's runs over the phase's, the heavy event's runs counted in the phase
+    import sys
+    from meas.desktop import fold_in
+    out = tmp_path / "fold.yaml"
+    pooled = repo_root / "_dev" / "research" / "jioh" / "task-9.8-browser-comms" / "campaign" / "results" / "pooled.json"
+    argv, sys.argv = sys.argv, ["fold_in.py", str(pooled), str(out)]
+    try:
+        fold_in.main()
+    finally:
+        sys.argv = argv
+    import yaml
+    doc = yaml.safe_load("archetypes:\n" + out.read_text())["archetypes"]
+    assert ("`chrome` run mean 0.1493 ms ±6.1 % (0.133–0.181 ms). Their runs hold 40.3 % and 42.6 % of the phase's CPU, "
+            "82.9 % together (D37).") in doc["renderer-visible"]["validation_stats"]["scope"]
+    assert ("`VizCompositorTh` run mean 0.0818 ms ±5.6 % (0.066–0.089 ms). Their runs hold 32.4 %, 25.3 %, 16.8 % and "
+            "5.7 % of the phase's CPU, 80.2 % together (D37).") in doc["game-client"]["validation_stats"]["scope"]
+    for aid in ("renderer-hidden", "chat-client"):
+        assert "Their runs hold" not in doc[aid]["validation_stats"]["scope"], aid
+
+
+def test_the_renderer_mode_reads_the_probe_past_a_skip(tmp_path):
+    # D38: D20, D24 and D26 read the hidden probe past its first 300 s; the renderer mode takes the skip `--tree` has
+    from meas.desktop import within_run
+    procs = [{"pid": 200, "comm": "chrome", "cmd": "/opt/google/chrome/chrome --type=renderer --lang=en"}]
+    row = lambda t: f"{t:11.6f} [0003]  Chrome_ChildIOT[201/200]    0.000      0.001      0.010      S\n"
+    rows = ("   0.000010 [0000]  perf[50]    0.000      0.000      0.010      R\n"
+            + "".join(row(10.0 + i * 0.1) for i in range(100))       # a launch burst in the first 300 s
+            + "".join(row(305.0 + i * 10.0) for i in range(70))      # then one wake every 10 s
+            + "1000.500000 [0000]  perf[50]    0.000      0.000      0.010      R\n")
+    d = _run_dir(tmp_path, "chrome-hidden", "steady", procs, rows)
+    an = tmp_path / "analysis.json"
+    an.write_text(json.dumps({"phases": {"steady": {"renderer_pids": [200]}}}))
+    v = within_run.rates(str(d), "steady", str(an), 600.0, 100.0, {"Chrome_ChildIOT"}, skip_s=300.0)
+    assert v == [pytest.approx(0.1), pytest.approx(0.1)]   # two positions from 300 s, the burst left out
+    assert len(within_run.rates(str(d), "steady", str(an), 600.0, 100.0, {"Chrome_ChildIOT"})) == 5
+
+
 def test_the_steam_client_carries_no_other_component_between_sessions():
     # changelog D26: over merged wake times steamwebhelper's and ThreadPoolForeg's gap means hold the rule, so of D23's
     # two components carried between sessions only steamwebhelper's run mean stays carried, under D18

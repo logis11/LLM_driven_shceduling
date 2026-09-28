@@ -1464,6 +1464,7 @@
     "max_abs_z": 3.11
    },
    "left_out": {},
+   "no_ratio": [],
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 40 intervals read, about 2.0 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 idle phase: `gpu/Chrome_ChildIOT` run mean 0.863 (0.850\u20130.877), `gpu/VizCompositorTh` run mean 0.954 (0.929\u20130.978) and wake rate 0.977 (0.960\u20130.993), `renderer/Compositor` run mean 0.928 (0.917\u20130.938); operation phase, over the whole phase: `Chrome_IOThread` run mean 0.861 (0.818\u20130.903) and wake rate 1.037 (1.014\u20131.060), `chrome` run mean 0.963 (0.933\u20130.993), `gpu/Chrome_ChildIOT` run mean 0.889 (0.859\u20130.920), `renderer/Chrome_ChildIOT` run mean 0.856 (0.843\u20130.870), `renderer/Compositor` run mean 0.942 (0.902\u20130.982). The operation phase's second page-load pass wakes the network service's foreground pool (`utility/ThreadPoolForeg`, in the residual since D84) about 40 % less than the first, which keeps the residual's ratios from resolving. The difference sits in each pass's opening burst: the pool wakes 417\u2013556 times in the first pass's first page load and 149\u2013162 times in the second pass's second, and from the fourth page load on at 18.6 and 17.7 a second (D87)."
   },
   "code-editor": {
@@ -2135,6 +2136,7 @@
     "max_abs_z": 3.24
    },
    "left_out": {},
+   "no_ratio": [],
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 19 intervals read, about 1.0 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 idle phase: `gpu/Chrome_ChildIOT` run mean 0.884 (0.836\u20130.932), `renderer/Compositor` run mean 0.948 (0.925\u20130.970), `utility/libuv-worker` run mean 0.716 (0.639\u20130.792). The second idle run, 915\u20131815 s after the first began, differs from the first whichever is traced \u2014 the main thread wakes about 7 % less and its runs are about 40 % shorter, the residual's about 70 % shorter \u2014 which keeps those ratios from resolving; the first run holds VS Code's launch work, which the carried idle values leave out (D83). Read from 200 s into each run as the carried values are, the first run agrees with the carried pool, every value within 2.1 standard deviations of its spread, and the second differs in the residual's run mean alone, about 35 % longer (0.060\u20130.066 against 0.046 ms)."
   },
   "image-editor": {
@@ -2454,6 +2456,7 @@
     "max_abs_z": 51.72
    },
    "left_out": {},
+   "no_ratio": [],
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 7 intervals read, about 0.4 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 operation phase, over the whole phase: `gimp` run mean 0.981 (0.970\u20130.992) and wake rate 1.021 (1.007\u20131.034), `script-fu` wake rate 0.972 (0.964\u20130.979). The driven runs start from the control's prelude (the image reverted, the pointer over the canvas), in which the main thread wakes about 18 % less often with about 19 % longer runs than in the carried pool at the same CPU share; the driven ratios are perf's effect in that state."
   },
   "video-editor": {
@@ -2996,7 +2999,14 @@
     "max_abs_z": 0.98
    },
    "left_out": {},
-   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 13 intervals read, about 0.7 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 driven phase: `QXcbEventQueue` run mean 0.861 (0.815\u20130.907); operation phase, over the whole phase: the operation's duration mean 0.988 (0.978\u20130.997). The first preview render of each job's second operation run did not start (`kdenlive_render` never appeared within 30 s), so that run's operation values rest on 25 renders against the first run's 26\u201327."
+   "no_ratio": [
+    {
+     "phase": "op",
+     "component": "kdenlive_render",
+     "cpu_share": 0.9474
+    }
+   ],
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 13 intervals read, about 0.7 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 driven phase: `QXcbEventQueue` run mean 0.861 (0.815\u20130.907); operation phase, over the whole phase: the operation's duration mean 0.988 (0.978\u20130.997). No ratio is read for `kdenlive_render` (94.7 % of the operation's CPU) in the operation phase: each ratio is taken over the threads alive at both edges of the run, and these components' threads all start or exit within it. The first preview render of each job's second operation run did not start (`kdenlive_render` never appeared within 30 s), so that run's operation values rest on 25 renders against the first run's 26\u201327."
   },
   "audio-player": {
    "archetype": "audio-player",
@@ -3060,6 +3070,7 @@
     "max_abs_z": 0.11
    },
    "left_out": {},
+   "no_ratio": [],
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 1 interval read, about 0.1 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 play phase: the tree's CPU share 0.860 (0.834\u20130.886)."
   },
   "video-player": {
@@ -3126,6 +3137,7 @@
    "left_out": {
     "2@36300802358": "D66: window 2 measured twice \u2014 the restarted gate loop relaunched it (#627) before the previous loop's relaunch (#625) had started; the original launch's copy (#625, 36300400332) is kept"
    },
+   "no_ratio": [],
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 1 interval read, about 0.1 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 play phase: the tree's CPU share 0.976 (0.964\u20130.988)."
   },
   "office-writer": {
@@ -3253,6 +3265,7 @@
     "max_abs_z": 0.8
    },
    "left_out": {},
+   "no_ratio": [],
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 3 intervals read, about 0.2 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 idle phase: `soffice.bin` wake rate 1.003 (1.001\u20131.005); driven phase: the per-input run 0.984 (0.969\u20130.998)."
   },
   "mail-client": {
@@ -4918,7 +4931,24 @@
     "max_abs_z": 8.96
    },
    "left_out": {},
-   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 44 intervals read, about 2.2 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 idle phase: `IPC I/O Child` run mean 0.863 (0.803\u20130.923) and wake rate 1.002 (1.002\u20131.002), `IPDL Background` run mean 0.883 (0.824\u20130.941), `Timer` run mean 0.843 (0.765\u20130.920), `glean.dispatche` run mean 0.791 (0.721\u20130.861), `residual` run mean 0.943 (0.892\u20130.993); driven phase: the per-input run 0.895 (0.853\u20130.937); operation phase, over the whole phase: `Compositor` run mean 0.817 (0.782\u20130.852), `Renderer` run mean 0.970 (0.944\u20130.995), `Socket Thread` run mean 0.825 (0.668\u20130.981), `Softwar~cThread` run mean 0.745 (0.725\u20130.766), `Timer` run mean 0.815 (0.759\u20130.870), `WRRende~ckend#0` run mean 0.911 (0.828\u20130.994), `glean.dispatche` run mean 0.738 (0.689\u20130.786). The operation phase's second send pass wakes `Socket Thread` about 22 % more and `TaskCon~ller` about 35 % less inside the sends than the first, which keeps `Socket Thread`'s wake rate and both of `TaskCon~ller`'s ratios from resolving. The second pass continues a trend that runs through the first: over the first pass's six 100 s windows `Socket Thread` wakes 638 \u2192 838 a second and `TaskCon~ller` 50.9 \u2192 35.9, over the second's 842 \u2192 963 and 34.5 \u2192 23.1 (D87)."
+   "no_ratio": [
+    {
+     "phase": "idle",
+     "component": "StreamTrans",
+     "cpu_share": 0.757
+    },
+    {
+     "phase": "idle",
+     "component": "IndexedDB IO",
+     "cpu_share": 0.0221
+    },
+    {
+     "phase": "op",
+     "component": "StreamTrans",
+     "cpu_share": 0.0115
+    }
+   ],
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 44 intervals read, about 2.2 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 idle phase: `IPC I/O Child` run mean 0.863 (0.803\u20130.923) and wake rate 1.002 (1.002\u20131.002), `IPDL Background` run mean 0.883 (0.824\u20130.941), `Timer` run mean 0.843 (0.765\u20130.920), `glean.dispatche` run mean 0.791 (0.721\u20130.861), `residual` run mean 0.943 (0.892\u20130.993); driven phase: the per-input run 0.895 (0.853\u20130.937); operation phase, over the whole phase: `Compositor` run mean 0.817 (0.782\u20130.852), `Renderer` run mean 0.970 (0.944\u20130.995), `Socket Thread` run mean 0.825 (0.668\u20130.981), `Softwar~cThread` run mean 0.745 (0.725\u20130.766), `Timer` run mean 0.815 (0.759\u20130.870), `WRRende~ckend#0` run mean 0.911 (0.828\u20130.994), `glean.dispatche` run mean 0.738 (0.689\u20130.786). No ratio is read for `StreamTrans` (75.7 % of the idle phase's CPU) and `IndexedDB IO` (2.2 %) in the idle phase, or for `StreamTrans` (1.1 % of the operation's CPU) in the operation phase: each ratio is taken over the threads alive at both edges of the run, and these components' threads all start or exit within it. The operation phase's second send pass wakes `Socket Thread` about 22 % more and `TaskCon~ller` about 35 % less inside the sends than the first, which keeps `Socket Thread`'s wake rate and both of `TaskCon~ller`'s ratios from resolving. The second pass continues a trend that runs through the first: over the first pass's six 100 s windows `Socket Thread` wakes 638 \u2192 838 a second and `TaskCon~ller` 50.9 \u2192 35.9, over the second's 842 \u2192 963 and 34.5 \u2192 23.1 (D87)."
   },
   "video-call": {
    "archetype": "video-call",
@@ -4982,6 +5012,7 @@
     "max_abs_z": 0.37
    },
    "left_out": {},
+   "no_ratio": [],
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 1 interval read, about 0.1 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 play phase: the tree's CPU share 0.952 (0.934\u20130.971)."
   }
  }
