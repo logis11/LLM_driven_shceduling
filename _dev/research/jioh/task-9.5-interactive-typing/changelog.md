@@ -541,6 +541,8 @@ Commit: this entry.
 
 ## D80 — `mail-client`'s keys-only campaign closed at the recording's last window and folded in from two pools (2026-09-27)
 
+> Amended by D86 (the standard error's ground `feller-ipta50` §12.4, in place of the provisional `feller-tams49`).
+
 The campaign D79 launched: `meas-ci:interactive:2026-09-27`, runs #604–#610 (first batch launched 2026-09-27 00:04 UTC), 20 jobs of which 12 stopped at the machine gate — AMD EPYC 9V74 6, AMD EPYC 9V45 4, Intel Xeon 6973P-C 1, Intel Xeon Platinum 8370C 1 — and 8 landed on the AMD EPYC 7763, Thunderbird 156.0.1 in every one; the batch's gated windows were relaunched together (the workflow, the loop, step 2). Every window of the Outlook recording that holds events is pooled: 8 repeats, windows 1–8. Validity: the pool tool reports every repeat valid; every repeat's screenshots were read for D79's checks — after the SWELL-KW phase the letters in the body and To empty, after the prelude the body empty in the Paragraph format, after the 136M phase its letters in the body.
 
 The build (D79, under D69): the eight repeats' own idle phases, which the entry does not carry, against the 43 repeats' — the same eleven components selected, and each of the 38 idle values (the phase's wake rate and CPU share, each component's wake rate, gap mean and run mean) within 0.86 standard deviations of the 43 repeats' per-repeat spread, median 0.21, 36 of them within 0.5; the farthest the residual's run mean, −8.5 %. No disagreement: the idle values stay the 43 repeats' and the mix is stated.
@@ -639,3 +641,11 @@ By 인지오's decision, from the 2026-09-28 review of 9.5–9.9, as 9.8 D34 and
 Tooling: `WINDOWS_STATED` in `campaign/fold_in.py`; the reading is 9.8 D34's `meas/windows.py`. Results: `campaign/results-windows.md`, `campaign/results-windows/windows.json`. Values changed: none; `mail-client`'s scope. The raw records are unchanged.
 
 Commit: this entry.
+
+## D86 — the wake-rate test's standard error cites `feller-ipta50`, not the provisional `feller-tams49` (2026-09-28)
+
+By 인지오's decision, the swap made in `990bf1d` (2026-09-27) recorded. D80's ground for the standard error in `test_every_component_set_compiles_at_its_measured_rate_and_cpu` (`_rate_se`: a component's wake count over the span a renewal count of variance span × σ²/μ³) cited `feller-tams49`, Feller's 1949 *Trans. AMS* paper, provisional, the paper not yet read. It cites `feller-ipta50`, Feller's *An Introduction to Probability Theory and Its Applications*, Volume One (1950), §12.4 (pp. 248–249): the number of occurrences of a certain recurrent event whose recurrence times have finite mean μ and variance σ² is asymptotically normal, its spread over r trials σr^½μ^−3/2; §12.2 (p. 242) for the recurrence times as mutually independent. The test takes the limit's scale; the first gap drawn from the table's forward recurrence (D77) and the components' counts adding as independent counts are the project's, as the reference entry states. The book cites the 1949 paper (§12.4, p. 249, note 3) for recurrence times of infinite mean and variance only; `feller-tams49` left `docs/references.md` unread.
+
+Applied: `docs/references.md`, `_rate_se`'s docstring in `dataset/tools/tests/test_measured_fidelity.py`. Values changed: none; the test's tolerance unchanged.
+
+Commit: `990bf1d` (the swap); this entry.
