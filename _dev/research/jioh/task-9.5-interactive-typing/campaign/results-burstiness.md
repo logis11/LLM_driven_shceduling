@@ -35,14 +35,14 @@
 
 ## mail-client (`thunderbird-send`, idle)
 
-43 repeats; wakes/s, median over the streams: measured 1.992, compiled 1.982. Dispersion (variance over mean of the wake counts per bin), median (least–largest) over the streams; the ratio measured over compiled, per stream.
+77 repeats; wakes/s, median over the streams: measured 1.992, compiled 1.955. Dispersion (variance over mean of the wake counts per bin), median (least–largest) over the streams; the ratio measured over compiled, per stream.
 
 | bin | measured | compiled | measured / compiled |
 |---|---|---|---|
-| 1 ms | 4.957 (4.547–5.546) | 2.627 (2.176–3.047) | 1.871 (1.607–2.34) |
-| 10 ms | 8.174 (6.533–9.789) | 3.47 (2.818–4.525) | 2.383 (1.853–3.175) |
-| 100 ms | 11.37 (9.178–14.97) | 3.96 (3.253–5.205) | 2.927 (2.148–3.797) |
-| 1 s | 11.42 (10.18–14.56) | 4.077 (3.108–5.511) | 2.857 (2.07–3.953) |
+| 1 ms | 4.917 (4.502–5.546) | 2.574 (2.147–3.084) | 1.923 (1.605–2.415) |
+| 10 ms | 8.154 (6.438–9.789) | 3.355 (2.754–4.634) | 2.44 (1.731–3.328) |
+| 100 ms | 11.37 (9.178–14.97) | 3.76 (3.053–5.266) | 3.041 (2.028–4.47) |
+| 1 s | 11.34 (9.052–14.67) | 4.013 (3.047–5.418) | 2.913 (1.944–4.088) |
 
 ## video-editor (`kdenlive`, idle)
 

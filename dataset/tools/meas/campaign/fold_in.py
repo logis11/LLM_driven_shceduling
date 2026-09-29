@@ -69,6 +69,10 @@ BUILD_BOUND = {
                    "second in the idle phase against the 115 a second of this build's whole tree — a different workload, "
                    "and whether a code editor should describe an assistant-bearing one is the archetype's own question, "
                    "not this campaign's.",
+    'mail-client': "Build bound (D69): the idle phase pools two builds, Thunderbird 156.0 in 43 repeats and 156.0.1 in the 34 "
+                   "added under D94. Against the 156.0 repeats' own spread, 43 of the 45 idle values agree between them "
+                   "within 0.78 standard deviations; `WebExtensions/IPC I/O Child`'s wake rate and gap mean, 22 wakes a "
+                   "phase in every 156.0 repeat and in 33 of the 34 156.0.1 repeats, differ by 0.1 % (D94).",
     'web-browser': "Build bound (D69): the 38 repeats pool two builds, Google's repository serving only its current version. "
                    "Against the 152 repeats' own spread, 59 of the 60 carried values agree between the builds within 1.80 "
                    "standard deviations; the page load's `gpu/VizCompositorTh` run mean does not: 0.382 ms under 153 "
@@ -125,6 +129,10 @@ STOPPING_STATED = {
     "audio-player": ("The repeat count is the rule's first pass (D88): simulated at the spread of the widest value, the "
                      "play phase's CPU share at ±4.68 % over 31 repeats, the rule's stated 95 % interval covers the true "
                      "mean in about 92 % of campaigns and the stopped mean leans by at most 0.2 %."),
+    "mail-client": ("The idle phase's repeat count is the rule's first pass (D88, D94): simulated at the spread of the "
+                    "widest value, `WebExtensions/StreamTrans`' run mean at ±4.75 % over 77 repeats, the rule's stated "
+                    "95 % interval covers the true mean in about 93–94 % of campaigns and the stopped mean leans by at "
+                    "most 0.2 %."),
 }
 
 # D91: an event on the clock, by its thread — what it is, from its source, and which repeats caught it, from the phases'
@@ -135,12 +143,14 @@ CLOCK_STATED = {
 }
 
 WINDOWS_STATED = {
-    "mail-client": ("Read in 100 s windows over the 43 repeats (D85, D90): `WebExtensions`' run mean is 0.257 ms in the "
-                    "idle phase's first 100 s against 0.078–0.108 ms after, 0.2 % of the entry's CPU above its median "
-                    "window; `StreamTrans`'s episodes recur through the phase. The carried values are the phase's "
-                    "means. The send read in 100 s windows over the 8 repeats (D87): from the first window to the last "
+    "mail-client": ("Read in 100 s windows over the 77 repeats (D85, D90, D94): `WebExtensions/WebExtensions`' run "
+                    "mean is 0.252 ms in the idle phase's first 100 s against 0.080–0.111 ms after, 0.2 % of the entry's "
+                    "CPU above its median window; `WebExtensions/StreamTrans` wakes at 0.56–0.58 of its mean rate in the "
+                    "first 200 s, its run mean 0.094 ms in the first 100 s against 1.86–3.91 ms after, 3.1 % of the "
+                    "entry's CPU above its median window; `StreamTrans`'s episodes recur through the phase. The carried "
+                    "values are the phase's means. The send read in 100 s windows over the 8 repeats (D87): from the first window to the last "
                     "the main thread wakes 17 % less often with runs 27 % longer (1.29 against 1.63 ms), `Socket "
-                    "Thread` wakes 21 % more, `TaskCon~ller` 27 % less with runs 36 % longer and `StreamTrans` 29 % more, "
+                    "Thread` wakes 21 % more, `TaskCon~ller` 27 % less with runs 36 % longer and `StreamTrans` 30 % more, "
                     "while each send's mean duration stays within 2.88–3.19 s and its CPU within 2.19–2.44 s across the "
                     "25. The carried values are the means over the 25."),
     "web-browser": ("The page load read one by one over the 38 repeats (D87): the first page load of each repeat takes "

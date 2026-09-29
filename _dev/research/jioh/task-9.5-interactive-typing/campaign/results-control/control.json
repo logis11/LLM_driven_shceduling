@@ -3311,54 +3311,6 @@
      },
      "n": 6
     },
-    "idle IPC I/O Child run mean (ms)": {
-     "a": 0.027930999999999997,
-     "b": 0.0243045,
-     "ratio": 0.8702,
-     "reading": "difference",
-     "per_repeat": {
-      "1": 0.8677,
-      "2": 0.8981,
-      "3": 0.849,
-      "4": 0.8878,
-      "5": 0.7574,
-      "6": 0.9174
-     },
-     "per_repeat_mean": 0.8629,
-     "interval": [
-      0.8032,
-      0.9226
-     ],
-     "order_means": {
-      "traced untraced": 0.8247,
-      "untraced traced": 0.9011
-     },
-     "n": 6
-    },
-    "idle IPC I/O Child wakes/s": {
-     "a": 0.0399,
-     "b": 0.04,
-     "ratio": 1.0025,
-     "reading": "difference",
-     "per_repeat": {
-      "1": 1.0025,
-      "2": 1.0025,
-      "3": 1.0025,
-      "4": 1.0025,
-      "5": 1.0025,
-      "6": 1.0025
-     },
-     "per_repeat_mean": 1.0025,
-     "interval": [
-      1.0025,
-      1.0025
-     ],
-     "order_means": {
-      "traced untraced": 1.0025,
-      "untraced traced": 1.0025
-     },
-     "n": 6
-    },
     "idle IPC I/O Parent run mean (ms)": {
      "a": 0.036195,
      "b": 0.032969,
@@ -3474,50 +3426,50 @@
      "n": 0
     },
     "idle JS Watchdog run mean (ms)": {
-     "a": 0.034394999999999995,
-     "b": 0.032347,
-     "ratio": 0.9405,
+     "a": 0.033171,
+     "b": 0.0314215,
+     "ratio": 0.9473,
      "reading": "not resolved",
      "per_repeat": {
-      "1": 1.1003,
-      "2": 0.9698,
-      "3": 0.9205,
-      "4": 0.9464,
-      "5": 0.8299,
-      "6": 0.9999
+      "1": 1.0633,
+      "2": 0.9571,
+      "3": 0.914,
+      "4": 0.9639,
+      "5": 0.8202,
+      "6": 1.0106
      },
-     "per_repeat_mean": 0.9611,
+     "per_repeat_mean": 0.9548,
      "interval": [
-      0.8672,
-      1.0551
+      0.8673,
+      1.0424
      ],
      "order_means": {
-      "traced untraced": 0.9502,
-      "untraced traced": 0.972
+      "traced untraced": 0.9325,
+      "untraced traced": 0.9772
      },
      "n": 6
     },
     "idle JS Watchdog wakes/s": {
-     "a": 0.1737,
-     "b": 0.18,
-     "ratio": 1.0363,
+     "a": 0.10719999999999999,
+     "b": 0.1133,
+     "ratio": 1.0569,
      "reading": "not resolved",
      "per_repeat": {
-      "1": 1.0798,
-      "2": 1.0024,
-      "3": 1.0022,
-      "4": 1.0304,
-      "5": 0.9923,
-      "6": 1.0315
+      "1": 1.1278,
+      "2": 1.0019,
+      "3": 1.0018,
+      "4": 1.0476,
+      "5": 0.9864,
+      "6": 1.0491
      },
-     "per_repeat_mean": 1.0231,
+     "per_repeat_mean": 1.0358,
      "interval": [
-      0.9894,
-      1.0568
+      0.9812,
+      1.0904
      ],
      "order_means": {
-      "traced untraced": 1.0248,
-      "untraced traced": 1.0214
+      "traced untraced": 1.0387,
+      "untraced traced": 1.0329
      },
      "n": 6
     },
@@ -3540,54 +3492,216 @@
      "n": 0
     },
     "idle Timer run mean (ms)": {
-     "a": 0.048625,
-     "b": 0.041737,
-     "ratio": 0.8583,
+     "a": 0.0470905,
+     "b": 0.041011,
+     "ratio": 0.8709,
      "reading": "difference",
      "per_repeat": {
-      "1": 0.8995,
-      "2": 0.738,
-      "3": 0.8584,
-      "4": 0.7709,
-      "5": 0.8626,
-      "6": 0.9277
+      "1": 0.9126,
+      "2": 0.7142,
+      "3": 0.877,
+      "4": 0.8045,
+      "5": 0.9319,
+      "6": 0.8815
      },
-     "per_repeat_mean": 0.8428,
+     "per_repeat_mean": 0.8536,
      "interval": [
-      0.7654,
-      0.9203
+      0.7686,
+      0.9386
      ],
      "order_means": {
-      "traced untraced": 0.8735,
-      "untraced traced": 0.8122
+      "traced untraced": 0.9072,
+      "untraced traced": 0.8001
      },
      "n": 6
     },
     "idle Timer wakes/s": {
-     "a": 0.27595000000000003,
-     "b": 0.2883,
-     "ratio": 1.0448,
+     "a": 0.21115,
+     "b": 0.2241,
+     "ratio": 1.0613,
      "reading": "not resolved",
      "per_repeat": {
-      "1": 1.0358,
-      "2": 1.1949,
-      "3": 1.0078,
-      "4": 1.0981,
-      "5": 0.885,
-      "6": 1.0277
+      "1": 0.9465,
+      "2": 1.3265,
+      "3": 0.9223,
+      "4": 1.1108,
+      "5": 0.7406,
+      "6": 1.1653
      },
-     "per_repeat_mean": 1.0415,
+     "per_repeat_mean": 1.0353,
      "interval": [
-      0.9339,
-      1.1492
+      0.8177,
+      1.2529
      ],
      "order_means": {
-      "traced untraced": 0.9762,
-      "untraced traced": 1.1069
+      "traced untraced": 0.8698,
+      "untraced traced": 1.2009
      },
      "n": 6
     },
-    "idle WebExtensions run mean (ms)": {
+    "idle WebExtensions/IPC I/O Child run mean (ms)": {
+     "a": 0.026006,
+     "b": 0.022914499999999997,
+     "ratio": 0.8811,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.8639,
+      "2": 0.8974,
+      "3": 0.8641,
+      "4": 0.9051,
+      "5": 0.7815,
+      "6": 0.9352
+     },
+     "per_repeat_mean": 0.8745,
+     "interval": [
+      0.819,
+      0.9301
+     ],
+     "order_means": {
+      "traced untraced": 0.8365,
+      "untraced traced": 0.9126
+     },
+     "n": 6
+    },
+    "idle WebExtensions/IPC I/O Child wakes/s": {
+     "a": 0.0366,
+     "b": 0.0367,
+     "ratio": 1.0027,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 1.0027,
+      "2": 1.0027,
+      "3": 1.0027,
+      "4": 1.0027,
+      "5": 1.0027,
+      "6": 1.0027
+     },
+     "per_repeat_mean": 1.0027,
+     "interval": [
+      1.0027,
+      1.0027
+     ],
+     "order_means": {
+      "traced untraced": 1.0027,
+      "untraced traced": 1.0027
+     },
+     "n": 6
+    },
+    "idle WebExtensions/JS Watchdog run mean (ms)": {
+     "a": 0.0357895,
+     "b": 0.033098,
+     "ratio": 0.9248,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.1692,
+      "2": 0.9891,
+      "3": 0.931,
+      "4": 0.9186,
+      "5": 0.8427,
+      "6": 0.9866
+     },
+     "per_repeat_mean": 0.9729,
+     "interval": [
+      0.8573,
+      1.0885
+     ],
+     "order_means": {
+      "traced untraced": 0.981,
+      "untraced traced": 0.9648
+     },
+     "n": 6
+    },
+    "idle WebExtensions/JS Watchdog wakes/s": {
+     "a": 0.0665,
+     "b": 0.0667,
+     "ratio": 1.003,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 1.003,
+      "2": 1.003,
+      "3": 1.003,
+      "4": 1.003,
+      "5": 1.003,
+      "6": 1.003
+     },
+     "per_repeat_mean": 1.003,
+     "interval": [
+      1.003,
+      1.003
+     ],
+     "order_means": {
+      "traced untraced": 1.003,
+      "untraced traced": 1.003
+     },
+     "n": 6
+    },
+    "idle WebExtensions/StreamTrans run mean (ms)": {
+     "a": null,
+     "b": null,
+     "ratio": null,
+     "reading": null,
+     "per_repeat": {},
+     "order_means": {},
+     "n": 0
+    },
+    "idle WebExtensions/StreamTrans wakes/s": {
+     "a": null,
+     "b": null,
+     "ratio": null,
+     "reading": null,
+     "per_repeat": {},
+     "order_means": {},
+     "n": 0
+    },
+    "idle WebExtensions/Timer run mean (ms)": {
+     "a": 0.059356,
+     "b": 0.0460115,
+     "ratio": 0.7752,
+     "reading": "difference",
+     "per_repeat": {
+      "1": 0.8042,
+      "2": 0.8532,
+      "3": 0.7585,
+      "4": 0.6832,
+      "5": 0.69,
+      "6": 1.0859
+     },
+     "per_repeat_mean": 0.8125,
+     "interval": [
+      0.656,
+      0.969
+     ],
+     "order_means": {
+      "traced untraced": 0.7509,
+      "untraced traced": 0.8741
+     },
+     "n": 6
+    },
+    "idle WebExtensions/Timer wakes/s": {
+     "a": 0.0615,
+     "b": 0.07164999999999999,
+     "ratio": 1.165,
+     "reading": "not resolved",
+     "per_repeat": {
+      "1": 1.4159,
+      "2": 0.8548,
+      "3": 1.3858,
+      "4": 1.0569,
+      "5": 1.4098,
+      "6": 0.722
+     },
+     "per_repeat_mean": 1.1409,
+     "interval": [
+      0.8183,
+      1.4635
+     ],
+     "order_means": {
+      "traced untraced": 1.4038,
+      "untraced traced": 0.8779
+     },
+     "n": 6
+    },
+    "idle WebExtensions/WebExtensions run mean (ms)": {
      "a": 0.0891595,
      "b": 0.09158250000000001,
      "ratio": 1.0272,
@@ -3611,7 +3725,7 @@
      },
      "n": 6
     },
-    "idle WebExtensions wakes/s": {
+    "idle WebExtensions/WebExtensions wakes/s": {
      "a": 0.24355,
      "b": 0.22494999999999998,
      "ratio": 0.9236,
@@ -3732,50 +3846,50 @@
      "n": 6
     },
     "idle residual run mean (ms)": {
-     "a": 0.0365305,
-     "b": 0.034343,
-     "ratio": 0.9401,
+     "a": 0.037117,
+     "b": 0.034578,
+     "ratio": 0.9316,
      "reading": "difference",
      "per_repeat": {
-      "1": 0.9691,
-      "2": 0.9404,
-      "3": 0.8784,
-      "4": 1.0196,
-      "5": 0.9322,
-      "6": 0.9152
+      "1": 0.9628,
+      "2": 0.9408,
+      "3": 0.8688,
+      "4": 1.0039,
+      "5": 0.9056,
+      "6": 0.9087
      },
-     "per_repeat_mean": 0.9425,
+     "per_repeat_mean": 0.9318,
      "interval": [
-      0.8919,
-      0.9931
+      0.8816,
+      0.9819
      ],
      "order_means": {
-      "traced untraced": 0.9266,
-      "untraced traced": 0.9584
+      "traced untraced": 0.9124,
+      "untraced traced": 0.9511
      },
      "n": 6
     },
     "idle residual wakes/s": {
-     "a": 0.056499999999999995,
-     "b": 0.0542,
-     "ratio": 0.9593,
+     "a": 0.05985,
+     "b": 0.057499999999999996,
+     "ratio": 0.9607,
      "reading": "not resolved",
      "per_repeat": {
-      "1": 1.0658,
-      "2": 0.8407,
-      "3": 1.2291,
-      "4": 0.8407,
-      "5": 1.1278,
-      "6": 0.8645
+      "1": 1.0619,
+      "2": 0.8488,
+      "3": 1.2149,
+      "4": 0.8488,
+      "5": 1.1204,
+      "6": 0.8703
      },
-     "per_repeat_mean": 0.9948,
+     "per_repeat_mean": 0.9942,
      "interval": [
-      0.8178,
-      1.1717
+      0.827,
+      1.1614
      ],
      "order_means": {
-      "traced untraced": 1.1409,
-      "untraced traced": 0.8486
+      "traced untraced": 1.1324,
+      "untraced traced": 0.856
      },
      "n": 6
     },
@@ -4086,22 +4200,22 @@
      "n": 6
     },
     "op TaskCon~ller run mean (ms)": {
-     "a": 0.2754585,
+     "a": 0.27547,
      "b": 0.2729765,
-     "ratio": 0.991,
+     "ratio": 0.9909,
      "reading": "not resolved",
      "per_repeat": {
       "1": 1.2151,
       "2": 0.7869,
       "3": 1.2877,
-      "4": 0.7853,
-      "5": 1.2772,
-      "6": 0.7598
+      "4": 0.7852,
+      "5": 1.2771,
+      "6": 0.7597
      },
-     "per_repeat_mean": 1.0187,
+     "per_repeat_mean": 1.0186,
      "interval": [
-      0.7398,
-      1.2976
+      0.7397,
+      1.2975
      ],
      "order_means": {
       "traced untraced": 1.26,
@@ -4110,74 +4224,74 @@
      "n": 6
     },
     "op TaskCon~ller wakes/s": {
-     "a": 20.9863,
+     "a": 20.985500000000002,
      "b": 21.29005,
      "ratio": 1.0145,
      "reading": "not resolved",
      "per_repeat": {
       "1": 0.9548,
-      "2": 1.0879,
+      "2": 1.088,
       "3": 0.8971,
-      "4": 1.0878,
-      "5": 0.8965,
-      "6": 1.1388
+      "4": 1.0879,
+      "5": 0.8966,
+      "6": 1.1389
      },
-     "per_repeat_mean": 1.0105,
+     "per_repeat_mean": 1.0106,
      "interval": [
-      0.898,
-      1.1229
+      0.8981,
+      1.123
      ],
      "order_means": {
-      "traced untraced": 0.9161,
-      "untraced traced": 1.1048
+      "traced untraced": 0.9162,
+      "untraced traced": 1.1049
      },
      "n": 6
     },
     "op Timer run mean (ms)": {
-     "a": 0.027521499999999997,
-     "b": 0.022017500000000002,
-     "ratio": 0.8,
+     "a": 0.027646,
+     "b": 0.022078,
+     "ratio": 0.7986,
      "reading": "difference",
      "per_repeat": {
-      "1": 0.7558,
+      "1": 0.7538,
       "2": 0.8382,
-      "3": 0.7972,
-      "4": 0.8723,
-      "5": 0.7556,
-      "6": 0.8678
+      "3": 0.7945,
+      "4": 0.874,
+      "5": 0.7536,
+      "6": 0.8676
      },
-     "per_repeat_mean": 0.8145,
+     "per_repeat_mean": 0.8136,
      "interval": [
-      0.759,
-      0.8699
+      0.7567,
+      0.8705
      ],
      "order_means": {
-      "traced untraced": 0.7695,
-      "untraced traced": 0.8594
+      "traced untraced": 0.7673,
+      "untraced traced": 0.8599
      },
      "n": 6
     },
     "op Timer wakes/s": {
-     "a": 14.84455,
-     "b": 14.616150000000001,
-     "ratio": 0.9846,
+     "a": 14.456150000000001,
+     "b": 14.23435,
+     "ratio": 0.9847,
      "reading": "not resolved",
      "per_repeat": {
-      "1": 1.0686,
-      "2": 0.9243,
-      "3": 1.0472,
-      "4": 0.9232,
-      "5": 1.0533,
-      "6": 0.8794
+      "1": 1.0725,
+      "2": 0.9246,
+      "3": 1.0499,
+      "4": 0.9187,
+      "5": 1.0593,
+      "6": 0.876
      },
-     "per_repeat_mean": 0.9827,
+     "per_repeat_mean": 0.9835,
      "interval": [
-      0.8959,
-      1.0694
+      0.8928,
+      1.0742
      ],
      "order_means": {
-      "traced untraced": 1.0564,
-      "untraced traced": 0.909
+      "traced untraced": 1.0606,
+      "untraced traced": 0.9064
      },
      "n": 6
     },
@@ -4302,49 +4416,49 @@
      "n": 6
     },
     "op residual run mean (ms)": {
-     "a": 0.140403,
-     "b": 0.13508350000000002,
-     "ratio": 0.9621,
+     "a": 0.1392615,
+     "b": 0.134024,
+     "ratio": 0.9624,
      "reading": "not resolved",
      "per_repeat": {
-      "1": 0.9122,
-      "2": 0.9689,
-      "3": 1.2379,
-      "4": 0.9166,
-      "5": 0.8229,
-      "6": 1.0408
+      "1": 0.9128,
+      "2": 0.9695,
+      "3": 1.2383,
+      "4": 0.9158,
+      "5": 0.824,
+      "6": 1.0403
      },
-     "per_repeat_mean": 0.9832,
+     "per_repeat_mean": 0.9834,
      "interval": [
-      0.8322,
-      1.1343
+      0.8325,
+      1.1344
      ],
      "order_means": {
-      "traced untraced": 0.991,
-      "untraced traced": 0.9754
+      "traced untraced": 0.9917,
+      "untraced traced": 0.9752
      },
      "n": 6
     },
     "op residual wakes/s": {
-     "a": 38.9798,
-     "b": 39.410849999999996,
-     "ratio": 1.0111,
+     "a": 39.372299999999996,
+     "b": 39.7786,
+     "ratio": 1.0103,
      "reading": "not resolved",
      "per_repeat": {
-      "1": 1.03,
-      "2": 1.0128,
-      "3": 1.0503,
-      "4": 1.0115,
-      "5": 0.9867,
-      "6": 0.9859
+      "1": 1.029,
+      "2": 1.0118,
+      "3": 1.0493,
+      "4": 1.0123,
+      "5": 0.9851,
+      "6": 0.9862
      },
-     "per_repeat_mean": 1.0129,
+     "per_repeat_mean": 1.0123,
      "interval": [
-      0.9867,
-      1.039
+      0.9863,
+      1.0383
      ],
      "order_means": {
-      "traced untraced": 1.0223,
+      "traced untraced": 1.0211,
       "untraced traced": 1.0034
      },
      "n": 6
@@ -4398,14 +4512,16 @@
      "n": 6
     }
    },
-   "intervals": 44,
-   "chance": 2.2,
+   "intervals": 48,
+   "chance": 2.4,
    "differences": [
     "driven per-input run (ms)",
-    "idle IPC I/O Child run mean (ms)",
-    "idle IPC I/O Child wakes/s",
     "idle IPDL Background run mean (ms)",
     "idle Timer run mean (ms)",
+    "idle WebExtensions/IPC I/O Child run mean (ms)",
+    "idle WebExtensions/IPC I/O Child wakes/s",
+    "idle WebExtensions/JS Watchdog wakes/s",
+    "idle WebExtensions/Timer run mean (ms)",
     "idle glean.dispatche run mean (ms)",
     "idle residual run mean (ms)",
     "op Compositor run mean (ms)",
@@ -4419,24 +4535,6 @@
    "validity": {},
    "shares": {
     "idle thunderbird-bin": {
-     "exited cpu": {
-      "mean": 0.0,
-      "max": 0.0
-     },
-     "exited wakes": {
-      "mean": 0.0,
-      "max": 0.0
-     },
-     "left cpu": {
-      "mean": 0.0,
-      "max": 0.0
-     },
-     "left wakes": {
-      "mean": 0.0,
-      "max": 0.0
-     }
-    },
-    "idle Timer": {
      "exited cpu": {
       "mean": 0.0,
       "max": 0.0
@@ -4490,7 +4588,25 @@
       "max": 0.0
      }
     },
-    "idle WebExtensions": {
+    "idle Timer": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle WebExtensions/WebExtensions": {
      "exited cpu": {
       "mean": 0.0,
       "max": 0.0
@@ -4526,6 +4642,24 @@
       "max": 0.0
      }
     },
+    "idle IndexedDB IO": {
+     "exited cpu": {
+      "mean": 1.0,
+      "max": 1.0
+     },
+     "exited wakes": {
+      "mean": 1.0,
+      "max": 1.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
     "idle StreamTrans": {
      "exited cpu": {
       "mean": 1.0,
@@ -4544,14 +4678,14 @@
       "max": 0.0
      }
     },
-    "idle IndexedDB IO": {
+    "idle WebExtensions/JS Watchdog": {
      "exited cpu": {
-      "mean": 1.0,
-      "max": 1.0
+      "mean": 0.0,
+      "max": 0.0
      },
      "exited wakes": {
-      "mean": 1.0,
-      "max": 1.0
+      "mean": 0.0,
+      "max": 0.0
      },
      "left cpu": {
       "mean": 0.0,
@@ -4580,6 +4714,42 @@
       "max": 0.0
      }
     },
+    "idle WebExtensions/Timer": {
+     "exited cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "exited wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
+    "idle WebExtensions/StreamTrans": {
+     "exited cpu": {
+      "mean": 1.0,
+      "max": 1.0
+     },
+     "exited wakes": {
+      "mean": 1.0,
+      "max": 1.0
+     },
+     "left cpu": {
+      "mean": 0.0,
+      "max": 0.0
+     },
+     "left wakes": {
+      "mean": 0.0,
+      "max": 0.0
+     }
+    },
     "idle IPC I/O Parent": {
      "exited cpu": {
       "mean": 0.0,
@@ -4598,7 +4768,7 @@
       "max": 0.0
      }
     },
-    "idle IPC I/O Child": {
+    "idle WebExtensions/IPC I/O Child": {
      "exited cpu": {
       "mean": 0.0,
       "max": 0.0
@@ -4618,12 +4788,12 @@
     },
     "idle residual": {
      "exited cpu": {
-      "mean": 0.3606,
-      "max": 0.4149
+      "mean": 0.3436,
+      "max": 0.3964
      },
      "exited wakes": {
-      "mean": 0.2123,
-      "max": 0.2558
+      "mean": 0.2029,
+      "max": 0.2444
      },
      "left cpu": {
       "mean": 0.0,
@@ -4752,8 +4922,8 @@
       "max": 1.0
      },
      "inside cpu": {
-      "mean": 0.175,
-      "max": 0.2051
+      "mean": 0.1771,
+      "max": 0.2108
      },
      "inside wakes": {
       "mean": 0.0695,
@@ -4776,24 +4946,6 @@
      "inside wakes": {
       "mean": 0.2109,
       "max": 0.2462
-     }
-    },
-    "op Timer": {
-     "exited cpu": {
-      "mean": 0.0,
-      "max": 0.0
-     },
-     "exited wakes": {
-      "mean": 0.0,
-      "max": 0.0
-     },
-     "inside cpu": {
-      "mean": 0.1789,
-      "max": 0.204
-     },
-     "inside wakes": {
-      "mean": 0.2497,
-      "max": 0.2723
      }
     },
     "op glean.dispatche": {
@@ -4832,28 +4984,45 @@
       "max": 0.3367
      }
     },
-    "op residual": {
+    "op Timer": {
      "exited cpu": {
-      "mean": 0.146,
-      "max": 0.2933
+      "mean": 0.0,
+      "max": 0.0
      },
      "exited wakes": {
-      "mean": 0.1639,
-      "max": 0.1744
+      "mean": 0.0,
+      "max": 0.0
      },
      "inside cpu": {
-      "mean": 0.4993,
-      "max": 0.5421
+      "mean": 0.179,
+      "max": 0.2046
      },
      "inside wakes": {
-      "mean": 0.2681,
-      "max": 0.2844
+      "mean": 0.2501,
+      "max": 0.2735
+     }
+    },
+    "op residual": {
+     "exited cpu": {
+      "mean": 0.169,
+      "max": 0.3127
+     },
+     "exited wakes": {
+      "mean": 0.1633,
+      "max": 0.1738
+     },
+     "inside cpu": {
+      "mean": 0.488,
+      "max": 0.5341
+     },
+     "inside wakes": {
+      "mean": 0.2676,
+      "max": 0.2838
      }
     }
    },
    "workload": {
     "z": {
-     "idle IPC I/O Child run mean (ms)": -0.55,
      "idle IPC I/O Parent gap mean (ms)": -0.61,
      "idle IPC I/O Parent run mean (ms)": -0.57,
      "idle IPC I/O Parent wakes/s": 0.64,
@@ -4863,25 +5032,35 @@
      "idle IndexedDB IO gap mean (ms)": 1.57,
      "idle IndexedDB IO run mean (ms)": 1.76,
      "idle IndexedDB IO wakes/s": -1.4,
-     "idle JS Watchdog gap mean (ms)": 0.11,
-     "idle JS Watchdog run mean (ms)": -1.04,
-     "idle JS Watchdog wakes/s": -0.12,
-     "idle StreamTrans gap mean (ms)": -0.24,
-     "idle StreamTrans run mean (ms)": 0.62,
-     "idle StreamTrans wakes/s": 0.25,
-     "idle Timer gap mean (ms)": 0.65,
-     "idle Timer run mean (ms)": -0.35,
-     "idle Timer wakes/s": -0.62,
-     "idle WebExtensions gap mean (ms)": -1.21,
-     "idle WebExtensions run mean (ms)": -1.53,
-     "idle WebExtensions wakes/s": 1.35,
+     "idle JS Watchdog gap mean (ms)": 0.17,
+     "idle JS Watchdog run mean (ms)": -1.07,
+     "idle JS Watchdog wakes/s": -0.17,
+     "idle StreamTrans gap mean (ms)": -0.19,
+     "idle StreamTrans run mean (ms)": 0.65,
+     "idle StreamTrans wakes/s": 0.2,
+     "idle Timer gap mean (ms)": 1.6,
+     "idle Timer run mean (ms)": -0.05,
+     "idle Timer wakes/s": -1.47,
+     "idle WebExtensions/IPC I/O Child run mean (ms)": -0.53,
+     "idle WebExtensions/JS Watchdog gap mean (ms)": -0.35,
+     "idle WebExtensions/JS Watchdog run mean (ms)": -0.99,
+     "idle WebExtensions/JS Watchdog wakes/s": 0.42,
+     "idle WebExtensions/StreamTrans gap mean (ms)": -0.09,
+     "idle WebExtensions/StreamTrans run mean (ms)": 0.45,
+     "idle WebExtensions/StreamTrans wakes/s": 0.09,
+     "idle WebExtensions/Timer gap mean (ms)": -1.35,
+     "idle WebExtensions/Timer run mean (ms)": -0.9,
+     "idle WebExtensions/Timer wakes/s": 1.55,
+     "idle WebExtensions/WebExtensions gap mean (ms)": -1.21,
+     "idle WebExtensions/WebExtensions run mean (ms)": -1.53,
+     "idle WebExtensions/WebExtensions wakes/s": 1.35,
      "idle glean.dispatche gap mean (ms)": -1.04,
      "idle glean.dispatche run mean (ms)": -0.06,
      "idle glean.dispatche wakes/s": 1.14,
      "idle gmain run mean (ms)": -0.82,
      "idle residual gap mean (ms)": -2.51,
-     "idle residual run mean (ms)": -0.38,
-     "idle residual wakes/s": 2.58,
+     "idle residual run mean (ms)": -0.42,
+     "idle residual wakes/s": 2.65,
      "idle thunderbird-bin gap mean (ms)": -0.91,
      "idle thunderbird-bin run mean (ms)": -1.17,
      "idle thunderbird-bin wakes/s": 1.01,
@@ -4899,26 +5078,26 @@
      "op Softwar~cThread run mean (ms)": -0.11,
      "op Softwar~cThread wakes/s": -0.26,
      "op StreamTrans gap mean (ms)": -1.6,
-     "op StreamTrans run mean (ms)": -0.54,
+     "op StreamTrans run mean (ms)": -0.44,
      "op StreamTrans wakes/s": 1.8,
      "op SwComposite gap mean (ms)": -2.31,
      "op SwComposite run mean (ms)": -0.24,
      "op SwComposite wakes/s": 2.36,
-     "op TaskCon~ller gap mean (ms)": 8.28,
-     "op TaskCon~ller run mean (ms)": 5.51,
-     "op TaskCon~ller wakes/s": -6.75,
-     "op Timer gap mean (ms)": -1.48,
-     "op Timer run mean (ms)": -0.89,
-     "op Timer wakes/s": 1.5,
+     "op TaskCon~ller gap mean (ms)": 8.23,
+     "op TaskCon~ller run mean (ms)": 5.47,
+     "op TaskCon~ller wakes/s": -6.74,
+     "op Timer gap mean (ms)": -1.73,
+     "op Timer run mean (ms)": -0.73,
+     "op Timer wakes/s": 1.77,
      "op WRRende~ckend#0 gap mean (ms)": 1.31,
      "op WRRende~ckend#0 run mean (ms)": 0.36,
      "op WRRende~ckend#0 wakes/s": -1.23,
      "op glean.dispatche gap mean (ms)": 2.11,
      "op glean.dispatche run mean (ms)": 0.7,
      "op glean.dispatche wakes/s": -1.93,
-     "op residual gap mean (ms)": 0.46,
-     "op residual run mean (ms)": -0.02,
-     "op residual wakes/s": -0.46,
+     "op residual gap mean (ms)": 0.54,
+     "op residual run mean (ms)": -0.1,
+     "op residual wakes/s": -0.54,
      "op thunderbird-bin gap mean (ms)": 3.14,
      "op thunderbird-bin run mean (ms)": 3.39,
      "op thunderbird-bin wakes/s": -2.67,
@@ -4935,20 +5114,25 @@
     {
      "phase": "idle",
      "component": "StreamTrans",
-     "cpu_share": 0.757
+     "cpu_share": 0.5813
+    },
+    {
+     "phase": "idle",
+     "component": "WebExtensions/StreamTrans",
+     "cpu_share": 0.1719
     },
     {
      "phase": "idle",
      "component": "IndexedDB IO",
-     "cpu_share": 0.0221
+     "cpu_share": 0.0223
     },
     {
      "phase": "op",
      "component": "StreamTrans",
-     "cpu_share": 0.0115
+     "cpu_share": 0.011
     }
    ],
-   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 44 intervals read, about 2.2 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 idle phase: `IPC I/O Child` run mean 0.863 (0.803\u20130.923) and wake rate 1.002 (1.002\u20131.002), `IPDL Background` run mean 0.883 (0.824\u20130.941), `Timer` run mean 0.843 (0.765\u20130.920), `glean.dispatche` run mean 0.791 (0.721\u20130.861), `residual` run mean 0.943 (0.892\u20130.993); driven phase: the per-input run 0.895 (0.853\u20130.937); operation phase, over the whole phase: `Compositor` run mean 0.817 (0.782\u20130.852), `Renderer` run mean 0.970 (0.944\u20130.995), `Socket Thread` run mean 0.825 (0.668\u20130.981), `Softwar~cThread` run mean 0.745 (0.725\u20130.766), `Timer` run mean 0.815 (0.759\u20130.870), `WRRende~ckend#0` run mean 0.911 (0.828\u20130.994), `glean.dispatche` run mean 0.738 (0.689\u20130.786). No ratio is read for `StreamTrans` (75.7 % of the idle phase's CPU) and `IndexedDB IO` (2.2 %) in the idle phase, or for `StreamTrans` (1.1 % of the operation's CPU) in the operation phase: each ratio is taken over the threads alive at both edges of the run, and these components' threads all start or exit within it. The operation phase's second send pass wakes `Socket Thread` about 22 % more and `TaskCon~ller` about 35 % less inside the sends than the first, which keeps `Socket Thread`'s wake rate and both of `TaskCon~ller`'s ratios from resolving. The second pass continues a trend that runs through the first: over the first pass's six 100 s windows `Socket Thread` wakes 638 \u2192 838 a second and `TaskCon~ller` 50.9 \u2192 35.9, over the second's 842 \u2192 963 and 34.5 \u2192 23.1 (D87)."
+   "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 48 intervals read, about 2.4 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 idle phase: `IPDL Background` run mean 0.883 (0.824\u20130.941), `Timer` run mean 0.854 (0.769\u20130.939), `WebExtensions/IPC I/O Child` run mean 0.875 (0.819\u20130.930) and wake rate 1.003 (1.003\u20131.003), `WebExtensions/JS Watchdog` wake rate 1.003 (1.003\u20131.003), `WebExtensions/Timer` run mean 0.812 (0.656\u20130.969), `glean.dispatche` run mean 0.791 (0.721\u20130.861), `residual` run mean 0.932 (0.882\u20130.982); driven phase: the per-input run 0.895 (0.853\u20130.937); operation phase, over the whole phase: `Compositor` run mean 0.817 (0.782\u20130.852), `Renderer` run mean 0.970 (0.944\u20130.995), `Socket Thread` run mean 0.825 (0.668\u20130.981), `Softwar~cThread` run mean 0.745 (0.725\u20130.766), `Timer` run mean 0.814 (0.757\u20130.871), `WRRende~ckend#0` run mean 0.911 (0.828\u20130.994), `glean.dispatche` run mean 0.738 (0.689\u20130.786). No ratio is read for `StreamTrans` (58.1 % of the idle phase's CPU), `WebExtensions/StreamTrans` (17.2 %) and `IndexedDB IO` (2.2 %) in the idle phase, or for `StreamTrans` (1.1 % of the operation's CPU) in the operation phase: each ratio is taken over the threads alive at both edges of the run, and these components' threads all start or exit within it. The operation phase's second send pass wakes `Socket Thread` about 22 % more and `TaskCon~ller` about 35 % less inside the sends than the first, which keeps `Socket Thread`'s wake rate and both of `TaskCon~ller`'s ratios from resolving. The second pass continues a trend that runs through the first: over the first pass's six 100 s windows `Socket Thread` wakes 638 \u2192 838 a second and `TaskCon~ller` 50.9 \u2192 35.9, over the second's 842 \u2192 963 and 34.5 \u2192 23.1 (D87)."
   },
   "video-call": {
    "archetype": "video-call",

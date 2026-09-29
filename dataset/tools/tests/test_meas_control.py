@@ -682,6 +682,9 @@ def test_the_notes_state_the_components_no_ratio_is_read_for():
         "none found. No ratio is read for `StreamTrans` (75.7 % of the idle phase's CPU) and `IndexedDB IO` (2.2 %) in "
         "the idle phase, or for `StreamTrans` (1.1 % of the operation's CPU) in the operation phase: each ratio is taken "
         "over the threads alive at both edges of the run, and these components' threads all start or exit within it.")
+    rep["no_ratio"].insert(1, {"phase": "idle", "component": "WebExtensions/StreamTrans", "cpu_share": 0.1719})
+    assert ("No ratio is read for `StreamTrans` (75.7 % of the idle phase's CPU), `WebExtensions/StreamTrans` (17.2 %) "
+            "and `IndexedDB IO` (2.2 %) in the idle phase") in control_report.control_notes(rep)
 
 
 def test_the_9_5_control_record_states_the_components_no_ratio_is_read_for(repo_root):
@@ -689,8 +692,10 @@ def test_the_9_5_control_record_states_the_components_no_ratio_is_read_for(repo_
     import json as _j
     rec = _j.load(open(repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
                        / "results-control" / "control.json"))["archetypes"]
-    assert ("No ratio is read for `StreamTrans` (75.7 % of the idle phase's CPU) and `IndexedDB IO` (2.2 %) in the idle "
-            "phase, or for `StreamTrans` (1.1 % of the operation's CPU) in the operation phase") in rec["mail-client"]["notes"]
+    # D94: the WebExtensions process's `StreamTrans` apart
+    assert ("No ratio is read for `StreamTrans` (58.1 % of the idle phase's CPU), `WebExtensions/StreamTrans` (17.2 %) "
+            "and `IndexedDB IO` (2.2 %) in the idle phase, or for `StreamTrans` (1.1 % of the operation's CPU) in the "
+            "operation phase") in rec["mail-client"]["notes"]
     assert "No ratio is read for `kdenlive_render` (94.7 % of the operation's CPU) in the operation phase" in rec["video-editor"]["notes"]
     for aid, e in rec.items():
         if aid not in ("mail-client", "video-editor"):

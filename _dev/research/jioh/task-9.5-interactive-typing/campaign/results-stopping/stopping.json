@@ -56,24 +56,24 @@
    "archetype": "mail-client",
    "app": "thunderbird-send",
    "pool": "_dev/research/jioh/task-9.5-interactive-typing/campaign/results-same-machine",
-   "repeats": 43,
+   "repeats": 77,
    "stopped_at_window_limit": false,
    "widest": {
-    "value": "idle JS Watchdog wakes/s",
-    "k": 43,
-    "cv": 0.1256,
-    "half_width": 0.0387
+    "value": "idle WebExtensions/StreamTrans run mean (ms)",
+    "k": 77,
+    "cv": 0.2093,
+    "half_width": 0.0475
    },
    "simulated": {
     "normal": {
-     "mean_bias": 0.0019892927818701894,
-     "coverage": 0.924,
-     "mean_k": 24.80125
+     "mean_bias": 0.0019794591943219516,
+     "coverage": 0.938,
+     "mean_k": 68.175
     },
     "lognormal": {
-     "mean_bias": -0.0007894545157952084,
-     "coverage": 0.91475,
-     "mean_k": 24.82825
+     "mean_bias": -0.00037515922001155034,
+     "coverage": 0.93175,
+     "mean_k": 67.79125
     }
    }
   },

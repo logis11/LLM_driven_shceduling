@@ -203,33 +203,39 @@ The traced runs against the carried pool (decision 17): largest |z| 0.8 over 4 v
 ## mail-client (`thunderbird-send`)
 
 6 jobs (3 traced untraced, 3 untraced traced); builds: Mozilla Thunderbird 156.0.1 (1, 2, 3, 4, 5, 6).
-44 intervals read; at 95 % chance alone gives about 2.2 differences; differences found: 14 (driven per-input run (ms), idle IPC I/O Child run mean (ms), idle IPC I/O Child wakes/s, idle IPDL Background run mean (ms), idle Timer run mean (ms), idle glean.dispatche run mean (ms), idle residual run mean (ms), op Compositor run mean (ms), op Renderer run mean (ms), op Socket Thread run mean (ms), op Softwar~cThread run mean (ms), op Timer run mean (ms), op WRRende~ckend#0 run mean (ms), op glean.dispatche run mean (ms)).
+48 intervals read; at 95 % chance alone gives about 2.4 differences; differences found: 16 (driven per-input run (ms), idle IPDL Background run mean (ms), idle Timer run mean (ms), idle WebExtensions/IPC I/O Child run mean (ms), idle WebExtensions/IPC I/O Child wakes/s, idle WebExtensions/JS Watchdog wakes/s, idle WebExtensions/Timer run mean (ms), idle glean.dispatche run mean (ms), idle residual run mean (ms), op Compositor run mean (ms), op Renderer run mean (ms), op Socket Thread run mean (ms), op Softwar~cThread run mean (ms), op Timer run mean (ms), op WRRende~ckend#0 run mean (ms), op glean.dispatche run mean (ms)).
 
 | value | traced median | untraced median | medians' ratio | per-job mean | 95 % interval | reading | by order | n | exited (CPU, wakes) | left out (CPU, wakes) | in the operation windows (CPU, wakes) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | driven per-input run (ms) | 6.2906 | 5.4763 | 0.8705 | 0.8951 | 0.8529–0.9373 | difference | traced first 0.8815; untraced first 0.9087 | 6 | — | — | — |
-| idle IPC I/O Child run mean (ms) | 0.0279 | 0.0243 | 0.8702 | 0.8629 | 0.8032–0.9226 | difference | traced first 0.8247; untraced first 0.9011 | 6 | 0, 0 | 0, 0 | — |
-| idle IPC I/O Child wakes/s | 0.0399 | 0.04 | 1.0025 | 1.0025 | 1.0025–1.0025 | difference | traced first 1.0025; untraced first 1.0025 | 6 | 0, 0 | 0, 0 | — |
 | idle IPC I/O Parent run mean (ms) | 0.0362 | 0.033 | 0.9109 | 0.9256 | 0.7733–1.078 | not resolved | traced first 1.0069; untraced first 0.8444 | 6 | 0, 0 | 0, 0 | — |
 | idle IPC I/O Parent wakes/s | 0.0449 | 0.0416 | 0.9276 | 0.9412 | 0.7776–1.1047 | not resolved | traced first 0.9161; untraced first 0.9663 | 6 | 0, 0 | 0, 0 | — |
 | idle IPDL Background run mean (ms) | 0.0212 | 0.018 | 0.8509 | 0.8826 | 0.8238–0.9414 | difference | traced first 0.8587; untraced first 0.9066 | 6 | 0, 0 | 0, 0 | — |
 | idle IPDL Background wakes/s | 0.2444 | 0.2466 | 1.0092 | 0.9829 | 0.9179–1.0479 | not resolved | traced first 0.9819; untraced first 0.9839 | 6 | 0, 0 | 0, 0 | — |
 | idle IndexedDB IO run mean (ms) | — | — | — | — | — | — | — | 0 | 1, 1 | 0, 0 | — |
 | idle IndexedDB IO wakes/s | — | — | — | — | — | — | — | 0 | 1, 1 | 0, 0 | — |
-| idle JS Watchdog run mean (ms) | 0.0344 | 0.0323 | 0.9405 | 0.9611 | 0.8672–1.0551 | not resolved | traced first 0.9502; untraced first 0.972 | 6 | 0, 0 | 0, 0 | — |
-| idle JS Watchdog wakes/s | 0.1737 | 0.18 | 1.0363 | 1.0231 | 0.9894–1.0568 | not resolved | traced first 1.0248; untraced first 1.0214 | 6 | 0, 0 | 0, 0 | — |
+| idle JS Watchdog run mean (ms) | 0.0332 | 0.0314 | 0.9473 | 0.9548 | 0.8673–1.0424 | not resolved | traced first 0.9325; untraced first 0.9772 | 6 | 0, 0 | 0, 0 | — |
+| idle JS Watchdog wakes/s | 0.1072 | 0.1133 | 1.0569 | 1.0358 | 0.9812–1.0904 | not resolved | traced first 1.0387; untraced first 1.0329 | 6 | 0, 0 | 0, 0 | — |
 | idle StreamTrans run mean (ms) | — | — | — | — | — | — | — | 0 | 1, 1 | 0, 0 | — |
 | idle StreamTrans wakes/s | — | — | — | — | — | — | — | 0 | 1, 1 | 0, 0 | — |
-| idle Timer run mean (ms) | 0.0486 | 0.0417 | 0.8583 | 0.8428 | 0.7654–0.9203 | difference | traced first 0.8735; untraced first 0.8122 | 6 | 0, 0 | 0, 0 | — |
-| idle Timer wakes/s | 0.276 | 0.2883 | 1.0448 | 1.0415 | 0.9339–1.1492 | not resolved | traced first 0.9762; untraced first 1.1069 | 6 | 0, 0 | 0, 0 | — |
-| idle WebExtensions run mean (ms) | 0.0892 | 0.0916 | 1.0272 | 1.0223 | 0.8506–1.194 | not resolved | traced first 0.8784; untraced first 1.1661 | 6 | 0, 0 | 0, 0 | — |
-| idle WebExtensions wakes/s | 0.2435 | 0.2249 | 0.9236 | 0.957 | 0.8501–1.0638 | not resolved | traced first 1.0449; untraced first 0.869 | 6 | 0, 0 | 0, 0 | — |
+| idle Timer run mean (ms) | 0.0471 | 0.041 | 0.8709 | 0.8536 | 0.7686–0.9386 | difference | traced first 0.9072; untraced first 0.8001 | 6 | 0, 0 | 0, 0 | — |
+| idle Timer wakes/s | 0.2112 | 0.2241 | 1.0613 | 1.0353 | 0.8177–1.2529 | not resolved | traced first 0.8698; untraced first 1.2009 | 6 | 0, 0 | 0, 0 | — |
+| idle WebExtensions/IPC I/O Child run mean (ms) | 0.026 | 0.0229 | 0.8811 | 0.8745 | 0.819–0.9301 | difference | traced first 0.8365; untraced first 0.9126 | 6 | 0, 0 | 0, 0 | — |
+| idle WebExtensions/IPC I/O Child wakes/s | 0.0366 | 0.0367 | 1.0027 | 1.0027 | 1.0027–1.0027 | difference | traced first 1.0027; untraced first 1.0027 | 6 | 0, 0 | 0, 0 | — |
+| idle WebExtensions/JS Watchdog run mean (ms) | 0.0358 | 0.0331 | 0.9248 | 0.9729 | 0.8573–1.0885 | not resolved | traced first 0.981; untraced first 0.9648 | 6 | 0, 0 | 0, 0 | — |
+| idle WebExtensions/JS Watchdog wakes/s | 0.0665 | 0.0667 | 1.003 | 1.003 | 1.003–1.003 | difference | traced first 1.003; untraced first 1.003 | 6 | 0, 0 | 0, 0 | — |
+| idle WebExtensions/StreamTrans run mean (ms) | — | — | — | — | — | — | — | 0 | 1, 1 | 0, 0 | — |
+| idle WebExtensions/StreamTrans wakes/s | — | — | — | — | — | — | — | 0 | 1, 1 | 0, 0 | — |
+| idle WebExtensions/Timer run mean (ms) | 0.0594 | 0.046 | 0.7752 | 0.8125 | 0.656–0.969 | difference | traced first 0.7509; untraced first 0.8741 | 6 | 0, 0 | 0, 0 | — |
+| idle WebExtensions/Timer wakes/s | 0.0615 | 0.0716 | 1.165 | 1.1409 | 0.8183–1.4635 | not resolved | traced first 1.4038; untraced first 0.8779 | 6 | 0, 0 | 0, 0 | — |
+| idle WebExtensions/WebExtensions run mean (ms) | 0.0892 | 0.0916 | 1.0272 | 1.0223 | 0.8506–1.194 | not resolved | traced first 0.8784; untraced first 1.1661 | 6 | 0, 0 | 0, 0 | — |
+| idle WebExtensions/WebExtensions wakes/s | 0.2435 | 0.2249 | 0.9236 | 0.957 | 0.8501–1.0638 | not resolved | traced first 1.0449; untraced first 0.869 | 6 | 0, 0 | 0, 0 | — |
 | idle glean.dispatche run mean (ms) | 0.0395 | 0.0314 | 0.7948 | 0.7912 | 0.7209–0.8614 | difference | traced first 0.8403; untraced first 0.742 | 6 | 0, 0 | 0, 0 | — |
 | idle glean.dispatche wakes/s | 0.0582 | 0.0575 | 0.988 | 0.995 | 0.8897–1.1004 | not resolved | traced first 1.0629; untraced first 0.9272 | 6 | 0, 0 | 0, 0 | — |
 | idle gmain run mean (ms) | 0.068 | 0.0649 | 0.9545 | 1.0001 | 0.8986–1.1016 | not resolved | traced first 1.0307; untraced first 0.9695 | 6 | 0, 0 | 0, 0 | — |
 | idle gmain wakes/s | 0.2502 | 0.25 | 0.9992 | 0.9992 | 0.9955–1.0029 | not resolved | traced first 1.0024; untraced first 0.996 | 6 | 0, 0 | 0, 0 | — |
-| idle residual run mean (ms) | 0.0365 | 0.0343 | 0.9401 | 0.9425 | 0.8919–0.9931 | difference | traced first 0.9266; untraced first 0.9584 | 6 | 0.361, 0.212 | 0, 0 | — |
-| idle residual wakes/s | 0.0565 | 0.0542 | 0.9593 | 0.9948 | 0.8178–1.1717 | not resolved | traced first 1.1409; untraced first 0.8486 | 6 | 0.361, 0.212 | 0, 0 | — |
+| idle residual run mean (ms) | 0.0371 | 0.0346 | 0.9316 | 0.9318 | 0.8816–0.9819 | difference | traced first 0.9124; untraced first 0.9511 | 6 | 0.344, 0.203 | 0, 0 | — |
+| idle residual wakes/s | 0.0599 | 0.0575 | 0.9607 | 0.9942 | 0.827–1.1614 | not resolved | traced first 1.1324; untraced first 0.856 | 6 | 0.344, 0.203 | 0, 0 | — |
 | idle thunderbird-bin run mean (ms) | 0.2755 | 0.2613 | 0.9485 | 0.9788 | 0.6822–1.2755 | not resolved | traced first 0.7604; untraced first 1.1973 | 6 | 0, 0 | 0, 0 | — |
 | idle thunderbird-bin wakes/s | 0.4672 | 0.4625 | 0.99 | 1.0691 | 0.7725–1.3657 | not resolved | traced first 1.3086; untraced first 0.8296 | 6 | 0, 0 | 0, 0 | — |
 | op Compositor run mean (ms) | 0.0135 | 0.0112 | 0.8269 | 0.8171 | 0.782–0.8522 | difference | traced first 0.7988; untraced first 0.8354 | 6 | 0, 0 | — | 0.374, 0.341 |
@@ -240,27 +246,27 @@ The traced runs against the carried pool (decision 17): largest |z| 0.8 over 4 v
 | op Socket Thread wakes/s | 101.8195 | 105.7403 | 1.0385 | 1.0458 | 0.784–1.3076 | not resolved | traced first 1.2709; untraced first 0.8207 | 6 | 0, 0 | — | 0.995, 0.997 |
 | op Softwar~cThread run mean (ms) | 0.0552 | 0.0415 | 0.7513 | 0.7453 | 0.7249–0.7657 | difference | traced first 0.7353; untraced first 0.7552 | 6 | 0, 0 | — | 0.25, 0.283 |
 | op Softwar~cThread wakes/s | 26.1107 | 26.0334 | 0.997 | 0.9925 | 0.978–1.007 | not resolved | traced first 0.9926; untraced first 0.9924 | 6 | 0, 0 | — | 0.25, 0.283 |
-| op StreamTrans run mean (ms) | — | — | — | — | — | — | — | 0 | 1, 1 | — | 0.175, 0.07 |
-| op StreamTrans wakes/s | — | — | — | — | — | — | — | 0 | 1, 1 | — | 0.175, 0.07 |
+| op StreamTrans run mean (ms) | — | — | — | — | — | — | — | 0 | 1, 1 | — | 0.177, 0.07 |
+| op StreamTrans wakes/s | — | — | — | — | — | — | — | 0 | 1, 1 | — | 0.177, 0.07 |
 | op SwComposite run mean (ms) | 0.0239 | 0.022 | 0.9197 | 0.9266 | 0.8102–1.0429 | not resolved | traced first 0.8598; untraced first 0.9933 | 6 | 0.797, 0.744 | — | 0.196, 0.432 |
 | op SwComposite wakes/s | 5.7466 | 5.8309 | 1.0147 | 0.9912 | 0.9531–1.0292 | not resolved | traced first 0.9937; untraced first 0.9886 | 6 | 0.797, 0.744 | — | 0.196, 0.432 |
-| op TaskCon~ller run mean (ms) | 0.2755 | 0.273 | 0.991 | 1.0187 | 0.7398–1.2976 | not resolved | traced first 1.26; untraced first 0.7773 | 6 | 0, 0 | — | 0.164, 0.211 |
-| op TaskCon~ller wakes/s | 20.9863 | 21.2901 | 1.0145 | 1.0105 | 0.898–1.1229 | not resolved | traced first 0.9161; untraced first 1.1048 | 6 | 0, 0 | — | 0.164, 0.211 |
-| op Timer run mean (ms) | 0.0275 | 0.022 | 0.8 | 0.8145 | 0.759–0.8699 | difference | traced first 0.7695; untraced first 0.8594 | 6 | 0, 0 | — | 0.179, 0.25 |
-| op Timer wakes/s | 14.8445 | 14.6162 | 0.9846 | 0.9827 | 0.8959–1.0694 | not resolved | traced first 1.0564; untraced first 0.909 | 6 | 0, 0 | — | 0.179, 0.25 |
+| op TaskCon~ller run mean (ms) | 0.2755 | 0.273 | 0.9909 | 1.0186 | 0.7397–1.2975 | not resolved | traced first 1.26; untraced first 0.7773 | 6 | 0, 0 | — | 0.164, 0.211 |
+| op TaskCon~ller wakes/s | 20.9855 | 21.2901 | 1.0145 | 1.0106 | 0.8981–1.123 | not resolved | traced first 0.9162; untraced first 1.1049 | 6 | 0, 0 | — | 0.164, 0.211 |
+| op Timer run mean (ms) | 0.0276 | 0.0221 | 0.7986 | 0.8136 | 0.7567–0.8705 | difference | traced first 0.7673; untraced first 0.8599 | 6 | 0, 0 | — | 0.179, 0.25 |
+| op Timer wakes/s | 14.4562 | 14.2343 | 0.9847 | 0.9835 | 0.8928–1.0742 | not resolved | traced first 1.0606; untraced first 0.9064 | 6 | 0, 0 | — | 0.179, 0.25 |
 | op WRRende~ckend#0 run mean (ms) | 0.3182 | 0.2965 | 0.9316 | 0.9112 | 0.8281–0.9943 | difference | traced first 0.9328; untraced first 0.8895 | 6 | 0, 0 | — | 0.367, 0.322 |
 | op WRRende~ckend#0 wakes/s | 10.4032 | 10.5561 | 1.0147 | 1.0136 | 0.9877–1.0396 | not resolved | traced first 0.9927; untraced first 1.0346 | 6 | 0, 0 | — | 0.367, 0.322 |
 | op glean.dispatche run mean (ms) | 0.0505 | 0.0374 | 0.7403 | 0.7375 | 0.6888–0.7863 | difference | traced first 0.7592; untraced first 0.7158 | 6 | 0, 0 | — | 0.317, 0.188 |
 | op glean.dispatche wakes/s | 17.7028 | 17.9597 | 1.0145 | 1.0208 | 0.9718–1.0697 | not resolved | traced first 0.9785; untraced first 1.063 | 6 | 0, 0 | — | 0.317, 0.188 |
 | op operation duration mean (ms) | 2973.304 | 2942.335 | 0.9896 | 0.9768 | 0.9126–1.0409 | not resolved | traced first 0.9868; untraced first 0.9667 | 6 | — | — | — |
-| op residual run mean (ms) | 0.1404 | 0.1351 | 0.9621 | 0.9832 | 0.8322–1.1343 | not resolved | traced first 0.991; untraced first 0.9754 | 6 | 0.146, 0.164 | — | 0.499, 0.268 |
-| op residual wakes/s | 38.9798 | 39.4108 | 1.0111 | 1.0129 | 0.9867–1.039 | not resolved | traced first 1.0223; untraced first 1.0034 | 6 | 0.146, 0.164 | — | 0.499, 0.268 |
+| op residual run mean (ms) | 0.1393 | 0.134 | 0.9624 | 0.9834 | 0.8325–1.1344 | not resolved | traced first 0.9917; untraced first 0.9752 | 6 | 0.169, 0.163 | — | 0.488, 0.268 |
+| op residual wakes/s | 39.3723 | 39.7786 | 1.0103 | 1.0123 | 0.9863–1.0383 | not resolved | traced first 1.0211; untraced first 1.0034 | 6 | 0.169, 0.163 | — | 0.488, 0.268 |
 | op thunderbird-bin run mean (ms) | 1.1553 | 1.1216 | 0.9708 | 0.985 | 0.765–1.2051 | not resolved | traced first 1.1715; untraced first 0.7986 | 6 | 0, 0 | — | 0.552, 0.375 |
 | op thunderbird-bin wakes/s | 133.7811 | 135.9434 | 1.0162 | 1.0216 | 0.877–1.1662 | not resolved | traced first 0.8962; untraced first 1.147 | 6 | 0, 0 | — | 0.552, 0.375 |
 
 The operation phase's second send pass wakes `Socket Thread` about 22 % more and `TaskCon~ller` about 35 % less inside the sends than the first, which keeps `Socket Thread`'s wake rate and both of `TaskCon~ller`'s ratios from resolving. The second pass continues a trend that runs through the first: over the first pass's six 100 s windows `Socket Thread` wakes 638 → 838 a second and `TaskCon~ller` 50.9 → 35.9, over the second's 842 → 963 and 34.5 → 23.1 (D87).
 
-The traced runs against the carried pool (decision 17): largest |z| 8.96 over 70 values; only in the carried pool: input_run mean, 136M (ms).
+The traced runs against the carried pool (decision 17): largest |z| 8.96 over 79 values; only in the carried pool: input_run mean, 136M (ms).
 
 ## video-call (`webrtc`)
 

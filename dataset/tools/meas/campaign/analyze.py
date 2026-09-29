@@ -231,7 +231,8 @@ def operation_windows(rows, ops):
 
 
 def pid_roles(D, phase):
-    """pid -> role from the snapshots' command lines: main | renderer | gpu | utility | zygote | other; for the op
+    """pid -> role from the snapshots' command lines: main | renderer | gpu | utility | zygote | other, and a Gecko
+    child (`-contentproc`) its process name (D94: `WebExtensions`, `RDD Process`); for the op
     phase also from the per-operation process lists in ops.jsonl (transient processes the snapshots never see)."""
     roles = {}
     if phase == "op" and os.path.exists(os.path.join(D, "ops.jsonl")):
@@ -247,6 +248,9 @@ def pid_roles(D, phase):
             continue
         for pr in json.load(open(p))["procs"]:
             cmd = pr.get("cmd", "")
+            if "-contentproc" in cmd:   # D94: a Gecko child, named by its process; its type argument is past the cut
+                roles[pr["pid"]] = pr["comm"]   # over ops.jsonl's `main`, which reads Chromium's --type= only
+                continue
             if "--type=renderer" in cmd:
                 role = "renderer"
             elif "--type=gpu-process" in cmd:

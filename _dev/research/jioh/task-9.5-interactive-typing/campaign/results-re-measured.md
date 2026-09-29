@@ -75,26 +75,26 @@ Read per repeat (D81, as 9.7 D36 reads a check): the per-input run mean under 13
 CPU model per repeat {'1': 'AMD EPYC 7763 64-Core Processor', '2': 'AMD EPYC 7763 64-Core Processor', '3': 'AMD EPYC 7763 64-Core Processor', '4': 'AMD EPYC 7763 64-Core Processor', '5': 'AMD EPYC 7763 64-Core Processor', '6': 'AMD EPYC 7763 64-Core Processor', '7': 'AMD EPYC 7763 64-Core Processor', '8': 'AMD EPYC 7763 64-Core Processor'}; kernel per repeat {'1': '6.17.0-1022-azure', '2': '6.17.0-1022-azure', '3': '6.17.0-1022-azure', '4': '6.17.0-1022-azure', '5': '6.17.0-1022-azure', '6': '6.17.0-1022-azure', '7': '6.17.0-1022-azure', '8': '6.17.0-1022-azure'}.
 
 ### idle: CPU share 0.0008–0.0009, wakes/s 1.9–2.1
-- processes by role (repeat 1): main: 3 pid(s), 2.07 wakes/s, CPU 0.0009
+- processes by role (repeat 1): main: 1 pid(s), 1.64 wakes/s, CPU 0.0007; WebExtensions: 1 pid(s), 0.42 wakes/s, CPU 0.0002; RDD Process: 1 pid(s), 0.01 wakes/s, CPU 0.0
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
-| `StreamTrans` | 23–27 | 0.1–0.1 | 7.54 (2.9–21.2) | 28003.62 | 0.084 | 10.512 | 28.205 | 640 |
+| `StreamTrans` | 14–18 | 0.1–0.1 | 4.35 (3.3–20.6) | 30015.39 | 0.075 | 27.207 | 28.435 | 400 |
+| `WebExtensions/StreamTrans` | 9–9 | 0.0–0.1 | 29989.32 (0.1–29990.0) | 30010.41 | 0.112 | 10.058 | 10.491 | 240 |
 | `thunderbird-bin` | 1–1 | 0.3–0.5 | 0.19 (0.1–0.9) | 10000.25 | 0.032 | 0.915 | 3.577 | 1987 |
-| `WebExtensions` | 1–1 | 0.2–0.2 | 0.13 (0.1–0.3) | 19971.56 | 0.027 | 0.221 | 0.977 | 1025 |
+| `WebExtensions/WebExtensions` | 1–1 | 0.2–0.2 | 0.13 (0.1–0.3) | 19971.56 | 0.027 | 0.221 | 0.977 | 1025 |
 | `IndexedDB IO` | 10–10 | 0.1–0.1 | 2003.03 (2000.6–10000.4) | 30000.26 | 0.080 | 0.638 | 0.719 | 499 |
-| `gmain` | 1–1 | 0.2–0.2 | 4000.00 (4000.0–4000.0) | 4000.62 | 0.047 | 0.055 | 0.061 | 1200 |
 
 ### driven: CPU share 0.0041–0.0132, wakes/s 54.0–204.5
-- processes by role (repeat 1): main: 3 pid(s), 128.63 wakes/s, CPU 0.0084
+- processes by role (repeat 1): main: 1 pid(s), 127.95 wakes/s, CPU 0.0082; WebExtensions: 1 pid(s), 0.59 wakes/s, CPU 0.0002; RDD Process: 1 pid(s), 0.08 wakes/s, CPU 0.0
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
 | `thunderbird-bin` | 1–1 | 5.0–17.5 | 1.82 (1.2–2.2) | 138.50 | 0.079 | 1.335 | 2.160 | 60917 |
 | `Compositor` | 1–1 | 33.1–131.0 | 0.02 (0.0–0.0) | 16.13 | 0.008 | 0.012 | 0.053 | 434242 |
 | `Renderer` | 1–1 | 1.6–6.3 | 17.46 (16.5–27.8) | 208.74 | 0.043 | 0.605 | 0.944 | 21522 |
-| `StreamTrans` | 28–32 | 0.1–0.2 | 20.28 (3.6–1669.5) | 27016.28 | 0.093 | 13.920 | 29.895 | 791 |
 | `Softwar~cThread` | 1–1 | 6.4–24.7 | 17.16 (17.2–17.2) | 17.24 | 0.051 | 0.072 | 0.096 | 83310 |
+| `StreamTrans` | 18–22 | 0.1–0.1 | 5.59 (2.9–21.1) | 30015.71 | 0.069 | 27.945 | 30.069 | 564 |
 
 Per input ([604, 1060, 1209, 253, 572, 785, 1046, 1070] events per repeat):
 
@@ -106,7 +106,7 @@ Per input ([604, 1060, 1209, 253, 572, 785, 1046, 1070] events per repeat):
 | (c) waker run (X wakes per input p50 3.0; first X wake latency p50 2.74 ms) | 2.108 | 2.393 | 3.494 | [2.248, 1.793, 2.237, 2.193, 1.903, 2.157, 2.122, 1.692] |
 
 ### driven-alt: CPU share 0.0169–0.0237, wakes/s 295.5–376.8
-- processes by role (repeat 1): main: 3 pid(s), 321.12 wakes/s, CPU 0.021
+- processes by role (repeat 1): main: 1 pid(s), 320.65 wakes/s, CPU 0.0209; WebExtensions: 1 pid(s), 0.46 wakes/s, CPU 0.0002; RDD Process: 1 pid(s), 0.01 wakes/s, CPU 0.0
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
@@ -127,7 +127,7 @@ Per input ([2054, 1896, 1976, 2374, 1891, 2275, 1677, 2366] events per repeat):
 
 ### op: CPU share 0.1805–0.1987, wakes/s 750.2–760.0
 - operation `send`: 200 succeeded, 0 failed over the repeats; duration p50 2897 ms, p90 3386, p99 3471 (per-repeat p50 [2887.22, 2884.706, 2884.966, 2909.266, 2906.269, 2905.781, 2885.715, 2904.233]); the thread table below is inside the operation windows only
-- processes by role (repeat 1): main: 4 pid(s), 754.25 wakes/s, CPU 0.1987
+- processes by role (repeat 1): main: 2 pid(s), 752.37 wakes/s, CPU 0.1984; WebExtensions: 1 pid(s), 1.71 wakes/s, CPU 0.0003; RDD Process: 1 pid(s), 0.18 wakes/s, CPU 0.0
 
 | thread comm | threads | wakes/s (spread) | gap p50 ms (spread) | gap p90 | run p50 ms | run p90 | run p99 | n |
 |---|---|---|---|---|---|---|---|---|
@@ -135,7 +135,7 @@ Per input ([2054, 1896, 1976, 2374, 1891, 2275, 1677, 2366] events per repeat):
 | `Renderer` | 1–2 | 119.3–124.6 | 0.47 (0.4–0.5) | 15.70 | 0.079 | 0.263 | 1.280 | 72209 |
 | `Socket Thread` | 1–1 | 721.5–745.1 | 0.06 (0.1–0.1) | 0.73 | 0.011 | 0.038 | 0.110 | 434893 |
 | `WRRende~ckend#0` | 1–1 | 26.4–29.3 | 17.07 (17.0–17.2) | 33.61 | 0.287 | 0.566 | 1.341 | 16613 |
-| `StreamTrans` | 14–21 | 48.2–61.8 | 0.02 (0.0–0.0) | 0.80 | 0.010 | 0.439 | 0.525 | 33012 |
+| `StreamTrans` | 11–17 | 48.0–61.8 | 0.02 (0.0–0.0) | 0.79 | 0.010 | 0.439 | 0.521 | 32975 |
 
 Stimulus sensitivity (method §3, pre-registered): per-input run, rule (b), SWELL-KW (`driven`) against 136M Keystrokes (`driven-alt`):
 
@@ -246,7 +246,7 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | application | repeats | quantities | out of tolerance | repeats needed at this spread | holds |
 |---|---|---|---|---|---|
 | `code` | 44 | 29 | 2 | 26 | yes |
-| `thunderbird-send` | 8 | 75 | 27 | 23 | no |
+| `thunderbird-send` | 8 | 84 | 37 | 98 | no |
 | `chrome` | 38 | 60 | 1 | 30 | yes |
 | `webrtc` | 45 | 3 | 0 | 7 | yes |
 
@@ -291,39 +291,48 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | idle thunderbird-bin wakes/s | 8 | 0.414 | 11.1% | ±9.3% | 2.9% | 22 | no |
 | idle thunderbird-bin gap mean (ms) | 8 | 2415.7104 | 11.1% | ±9.3% | 3.0% | 22 | no |
 | idle thunderbird-bin run mean (ms) | 8 | 0.2977 | 9.9% | ±8.3% | 2.8% | 18 | no |
-| idle Timer wakes/s | 8 | 0.2862 | 5.4% | ±4.5% | 1.4% | 7 | yes |
-| idle Timer gap mean (ms) | 8 | 3493.4619 | 5.4% | ±4.5% | 1.4% | 7 | yes |
-| idle Timer run mean (ms) | 8 | 0.0371 | 4.6% | ±3.8% | 1.1% | 6 | yes |
 | idle gmain wakes/s | 8 | 0.25 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle gmain gap mean (ms) | 8 | 4000.0139 | 0.0% | ±0.0% | 0.0% | 5 | yes |
 | idle gmain run mean (ms) | 8 | 0.0475 | 6.9% | ±5.8% | 1.4% | 10 | no |
 | idle IPDL Background wakes/s | 8 | 0.2379 | 5.0% | ±4.2% | 1.2% | 7 | yes |
 | idle IPDL Background gap mean (ms) | 8 | 4203.1669 | 5.0% | ±4.2% | 1.2% | 7 | yes |
 | idle IPDL Background run mean (ms) | 8 | 0.021 | 4.9% | ±4.1% | 1.2% | 7 | yes |
-| idle WebExtensions wakes/s | 8 | 0.2135 | 8.8% | ±7.3% | 2.2% | 15 | no |
-| idle WebExtensions gap mean (ms) | 8 | 4682.943 | 8.8% | ±7.3% | 2.3% | 15 | no |
-| idle WebExtensions run mean (ms) | 8 | 0.1052 | 9.7% | ±8.1% | 2.5% | 18 | no |
-| idle JS Watchdog wakes/s | 8 | 0.1754 | 4.9% | ±4.1% | 1.4% | 7 | yes |
-| idle JS Watchdog gap mean (ms) | 8 | 5700.7323 | 4.9% | ±4.1% | 1.4% | 7 | yes |
-| idle JS Watchdog run mean (ms) | 8 | 0.0215 | 6.7% | ±5.6% | 1.7% | 10 | no |
-| idle StreamTrans wakes/s | 8 | 0.1333 | 10.9% | ±9.1% | 2.9% | 21 | no |
-| idle StreamTrans gap mean (ms) | 8 | 7500.026 | 10.9% | ±9.1% | 2.8% | 21 | no |
-| idle StreamTrans run mean (ms) | 8 | 4.6799 | 11.3% | ±9.4% | 2.8% | 23 | no |
+| idle Timer wakes/s | 8 | 0.23 | 5.3% | ±4.5% | 1.4% | 7 | yes |
+| idle Timer gap mean (ms) | 8 | 4347.8411 | 5.3% | ±4.5% | 1.3% | 7 | yes |
+| idle Timer run mean (ms) | 8 | 0.0347 | 5.8% | ±4.8% | 1.4% | 8 | yes |
+| idle WebExtensions/WebExtensions wakes/s | 8 | 0.2135 | 8.8% | ±7.3% | 2.2% | 15 | no |
+| idle WebExtensions/WebExtensions gap mean (ms) | 8 | 4682.943 | 8.8% | ±7.3% | 2.3% | 15 | no |
+| idle WebExtensions/WebExtensions run mean (ms) | 8 | 0.1052 | 9.7% | ±8.1% | 2.5% | 18 | no |
+| idle JS Watchdog wakes/s | 8 | 0.1092 | 7.7% | ±6.5% | 2.3% | 12 | no |
+| idle JS Watchdog gap mean (ms) | 8 | 9160.3371 | 7.7% | ±6.5% | 2.2% | 12 | no |
+| idle JS Watchdog run mean (ms) | 8 | 0.0211 | 7.1% | ±5.9% | 1.5% | 11 | no |
 | idle IndexedDB IO wakes/s | 8 | 0.104 | 8.3% | ±6.9% | 1.9% | 14 | no |
 | idle IndexedDB IO gap mean (ms) | 8 | 9619.2718 | 8.3% | ±6.9% | 1.9% | 14 | no |
 | idle IndexedDB IO run mean (ms) | 8 | 0.1723 | 6.5% | ±5.4% | 1.5% | 9 | no |
+| idle StreamTrans wakes/s | 8 | 0.0833 | 15.1% | ±12.6% | 3.7% | 38 | no |
+| idle StreamTrans gap mean (ms) | 8 | 12000.0415 | 15.1% | ±12.6% | 3.9% | 38 | no |
+| idle StreamTrans run mean (ms) | 8 | 5.8509 | 9.1% | ±7.6% | 2.5% | 16 | no |
+| idle WebExtensions/JS Watchdog wakes/s | 8 | 0.0662 | 1.8% | ±1.5% | 0.6% | 5 | yes |
+| idle WebExtensions/JS Watchdog gap mean (ms) | 8 | 15094.3919 | 1.8% | ±1.5% | 0.6% | 5 | yes |
+| idle WebExtensions/JS Watchdog run mean (ms) | 8 | 0.0223 | 6.8% | ±5.7% | 1.9% | 10 | no |
+| idle WebExtensions/Timer wakes/s | 8 | 0.0562 | 9.7% | ±8.1% | 2.6% | 18 | no |
+| idle WebExtensions/Timer gap mean (ms) | 8 | 17777.8393 | 9.7% | ±8.1% | 2.7% | 18 | no |
+| idle WebExtensions/Timer run mean (ms) | 8 | 0.047 | 9.7% | ±8.1% | 2.5% | 17 | no |
 | idle glean.dispatche wakes/s | 8 | 0.056 | 6.7% | ±5.6% | 1.4% | 10 | no |
 | idle glean.dispatche gap mean (ms) | 8 | 17843.928 | 6.7% | ±5.6% | 1.5% | 10 | no |
 | idle glean.dispatche run mean (ms) | 8 | 0.0372 | 4.5% | ±3.8% | 0.9% | 6 | yes |
+| idle WebExtensions/StreamTrans wakes/s | 8 | 0.05 | 24.8% | ±20.8% | 6.7% | 98 | no |
+| idle WebExtensions/StreamTrans gap mean (ms) | 8 | 20000.0693 | 24.8% | ±20.8% | 7.1% | 98 | no |
+| idle WebExtensions/StreamTrans run mean (ms) | 8 | 2.728 | 23.1% | ±19.3% | 6.4% | 85 | no |
 | idle IPC I/O Parent wakes/s | 8 | 0.0423 | 7.0% | ±5.8% | 1.9% | 10 | no |
 | idle IPC I/O Parent gap mean (ms) | 8 | 23645.4021 | 7.0% | ±5.8% | 1.9% | 10 | no |
 | idle IPC I/O Parent run mean (ms) | 8 | 0.0353 | 5.5% | ±4.6% | 1.4% | 8 | yes |
-| idle IPC I/O Child wakes/s | 8 | 0.04 | 0.0% | ±0.0% | 0.0% | 5 | yes |
-| idle IPC I/O Child gap mean (ms) | 8 | 25000.0866 | 0.0% | ±0.0% | 0.0% | 5 | yes |
-| idle IPC I/O Child run mean (ms) | 8 | 0.0275 | 4.6% | ±3.9% | 1.2% | 6 | yes |
-| idle residual wakes/s | 8 | 0.069 | 1.8% | ±1.5% | 0.6% | 5 | yes |
-| idle residual gap mean (ms) | 8 | 14501.5608 | 1.8% | ±1.5% | 0.6% | 5 | yes |
-| idle residual run mean (ms) | 8 | 0.0441 | 6.0% | ±5.0% | 1.5% | 8 | yes |
+| idle WebExtensions/IPC I/O Child wakes/s | 8 | 0.0367 | 0.0% | ±0.0% | 0.0% | 5 | yes |
+| idle WebExtensions/IPC I/O Child gap mean (ms) | 8 | 27272.8217 | 0.0% | ±0.0% | 0.0% | 5 | yes |
+| idle WebExtensions/IPC I/O Child run mean (ms) | 8 | 0.0256 | 4.5% | ±3.7% | 1.5% | 6 | yes |
+| idle residual wakes/s | 8 | 0.0723 | 1.7% | ±1.4% | 0.5% | 5 | yes |
+| idle residual gap mean (ms) | 8 | 13832.9009 | 1.7% | ±1.4% | 0.5% | 5 | yes |
+| idle residual run mean (ms) | 8 | 0.0443 | 6.0% | ±5.0% | 1.5% | 9 | no |
 | op Socket Thread wakes/s | 8 | 732.0448 | 1.3% | ±1.1% | 0.2% | 5 | yes |
 | op Socket Thread gap mean (ms) | 8 | 1.3662 | 1.3% | ±1.1% | 0.2% | 5 | yes |
 | op Socket Thread run mean (ms) | 8 | 0.0213 | 4.6% | ±3.8% | 1.1% | 6 | yes |
@@ -342,24 +351,24 @@ Criterion: for every value the fold-in carries — a rate or share by its per-re
 | op Softwar~cThread wakes/s | 8 | 59.6819 | 0.3% | ±0.2% | 0.1% | 5 | yes |
 | op Softwar~cThread gap mean (ms) | 8 | 16.7553 | 0.3% | ±0.2% | 0.1% | 5 | yes |
 | op Softwar~cThread run mean (ms) | 8 | 0.0423 | 6.5% | ±5.5% | 1.8% | 10 | no |
-| op StreamTrans wakes/s | 8 | 55.5877 | 7.7% | ±6.5% | 1.9% | 12 | no |
-| op StreamTrans gap mean (ms) | 8 | 17.9988 | 7.8% | ±6.5% | 1.9% | 12 | no |
-| op StreamTrans run mean (ms) | 8 | 0.1589 | 21.8% | ±18.2% | 5.4% | 76 | no |
-| op TaskCon~ller wakes/s | 8 | 42.5422 | 2.3% | ±1.9% | 0.5% | 5 | yes |
-| op TaskCon~ller gap mean (ms) | 8 | 23.5131 | 2.3% | ±1.9% | 0.5% | 5 | yes |
-| op TaskCon~ller run mean (ms) | 8 | 0.1809 | 3.0% | ±2.5% | 0.8% | 5 | yes |
-| op Timer wakes/s | 8 | 28.6314 | 3.3% | ±2.7% | 0.7% | 5 | yes |
-| op Timer gap mean (ms) | 8 | 34.9495 | 3.3% | ±2.8% | 0.7% | 5 | yes |
-| op Timer run mean (ms) | 8 | 0.016 | 4.2% | ±3.5% | 1.0% | 5 | yes |
+| op StreamTrans wakes/s | 8 | 55.5257 | 7.8% | ±6.5% | 1.9% | 12 | no |
+| op StreamTrans gap mean (ms) | 8 | 18.019 | 7.8% | ±6.5% | 1.9% | 12 | no |
+| op StreamTrans run mean (ms) | 8 | 0.1529 | 22.0% | ±18.4% | 5.5% | 78 | no |
+| op TaskCon~ller wakes/s | 8 | 42.527 | 2.3% | ±1.9% | 0.5% | 5 | yes |
+| op TaskCon~ller gap mean (ms) | 8 | 23.5215 | 2.3% | ±1.9% | 0.5% | 5 | yes |
+| op TaskCon~ller run mean (ms) | 8 | 0.181 | 3.1% | ±2.6% | 0.8% | 5 | yes |
 | op glean.dispatche wakes/s | 8 | 28.3165 | 2.9% | ±2.5% | 0.8% | 5 | yes |
 | op glean.dispatche gap mean (ms) | 8 | 35.3298 | 3.0% | ±2.5% | 0.8% | 5 | yes |
 | op glean.dispatche run mean (ms) | 8 | 0.074 | 9.8% | ±8.2% | 2.7% | 18 | no |
 | op WRRende~ckend#0 wakes/s | 8 | 27.9733 | 3.0% | ±2.5% | 0.8% | 5 | yes |
 | op WRRende~ckend#0 gap mean (ms) | 8 | 35.7658 | 3.0% | ±2.5% | 0.8% | 5 | yes |
 | op WRRende~ckend#0 run mean (ms) | 8 | 0.3555 | 13.3% | ±11.2% | 3.8% | 30 | no |
-| op residual wakes/s | 8 | 100.8877 | 1.7% | ±1.5% | 0.5% | 5 | yes |
-| op residual gap mean (ms) | 8 | 9.9144 | 1.7% | ±1.5% | 0.5% | 5 | yes |
-| op residual run mean (ms) | 8 | 0.2522 | 8.0% | ±6.7% | 2.2% | 13 | no |
+| op Timer wakes/s | 8 | 27.7663 | 3.2% | ±2.6% | 0.6% | 5 | yes |
+| op Timer gap mean (ms) | 8 | 36.037 | 3.2% | ±2.7% | 0.6% | 5 | yes |
+| op Timer run mean (ms) | 8 | 0.0159 | 4.3% | ±3.6% | 1.0% | 5 | yes |
+| op residual wakes/s | 8 | 101.8299 | 1.8% | ±1.5% | 0.5% | 5 | yes |
+| op residual gap mean (ms) | 8 | 9.8227 | 1.8% | ±1.5% | 0.5% | 5 | yes |
+| op residual run mean (ms) | 8 | 0.2534 | 7.9% | ±6.6% | 2.1% | 13 | no |
 | input_run mean, SWELL-KW (ms) | 8 | 6.0516 | 12.4% | ±10.4% | 3.3% | 27 | no |
 | input_run mean, 136M (ms) | 8 | 5.6439 | 5.7% | ±4.8% | 1.3% | 8 | yes |
 | operation duration mean (ms) | 8 | 2970.8859 | 2.5% | ±2.1% | 0.6% | 5 | yes |

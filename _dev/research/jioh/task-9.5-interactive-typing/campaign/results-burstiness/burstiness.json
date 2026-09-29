@@ -245,44 +245,44 @@
    "archetype": "mail-client",
    "app": "thunderbird-send",
    "phase": "idle",
-   "repeats": 43,
+   "repeats": 77,
    "wakes_per_s": {
     "measured": 1.992,
-    "compiled": 1.982
+    "compiled": 1.955
    },
    "bins": {
     "1 ms": {
      "measured": {
-      "median": 4.9568,
-      "min": 4.5468,
+      "median": 4.9174,
+      "min": 4.5018,
       "max": 5.5461
      },
      "compiled": {
-      "median": 2.6275,
-      "min": 2.1764,
-      "max": 3.0474
+      "median": 2.5743,
+      "min": 2.1469,
+      "max": 3.084
      },
      "ratio": {
-      "median": 1.8709,
-      "min": 1.6074,
-      "max": 2.3403
+      "median": 1.9228,
+      "min": 1.6046,
+      "max": 2.4148
      }
     },
     "10 ms": {
      "measured": {
-      "median": 8.1741,
-      "min": 6.5332,
+      "median": 8.1538,
+      "min": 6.4383,
       "max": 9.7891
      },
      "compiled": {
-      "median": 3.4703,
-      "min": 2.8183,
-      "max": 4.5248
+      "median": 3.355,
+      "min": 2.7536,
+      "max": 4.6342
      },
      "ratio": {
-      "median": 2.383,
-      "min": 1.8526,
-      "max": 3.1745
+      "median": 2.4402,
+      "min": 1.7307,
+      "max": 3.3284
      }
     },
     "100 ms": {
@@ -292,31 +292,31 @@
       "max": 14.9727
      },
      "compiled": {
-      "median": 3.9602,
-      "min": 3.2529,
-      "max": 5.2053
+      "median": 3.7602,
+      "min": 3.0526,
+      "max": 5.2664
      },
      "ratio": {
-      "median": 2.9267,
-      "min": 2.1478,
-      "max": 3.7969
+      "median": 3.0412,
+      "min": 2.0279,
+      "max": 4.4703
      }
     },
     "1 s": {
      "measured": {
-      "median": 11.4212,
-      "min": 10.1796,
-      "max": 14.5578
+      "median": 11.3404,
+      "min": 9.0516,
+      "max": 14.673
      },
      "compiled": {
-      "median": 4.0768,
-      "min": 3.1082,
-      "max": 5.5109
+      "median": 4.0132,
+      "min": 3.0472,
+      "max": 5.4183
      },
      "ratio": {
-      "median": 2.8567,
-      "min": 2.0696,
-      "max": 3.9534
+      "median": 2.9125,
+      "min": 1.9443,
+      "max": 4.0877
      }
     }
    }

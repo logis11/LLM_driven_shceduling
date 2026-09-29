@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-28, a Gecko child's threads as components of their own (changelog D94) — §5, amending D67's reading for `thunderbird-send`: a process started with `-contentproc` takes its process name as its role (`WebExtensions`, `RDD Process`), in the op phase too; the idle pool re-read under the roles needed 77 repeats, and 34 idle-only repeats were added as one batch at that projection (windows 45–78, runs #651–#663), Thunderbird 156.0.1 in each.
+
 - 2026-09-28, `mail-client`'s 04:00 `glean.mps` run stated, not carried (changelog D91) — §6: Glean's metrics-ping scheduler wakes once a day at 04:00 local time (`glean`); its one run in the 43 repeats (2.299 ms, repeat 39, the only phase that held 04:00 UTC) leaves the component rows at any length, as D64's event does, and is kept in the pooled record as an event not compiled and stated in the scope; the idle residual is read without it. `HEAVY_EVENTS` and `CLOCK_EVENTS` in `campaign/pool.py`.
 
 - 2026-09-28, `thunderbird-send`'s components (changelog D90) — amending D38: NSPR shortens a Linux thread name longer than 15 characters to its first 7, "~" and its last 7 (`PR_SetCurrentThreadName`), so a pool whose numbered names pass 15 characters takes a second spelling (`StreamT~ns #100`, `Indexed~ IO #10`); those spellings fold back into `StreamTrans` and `IndexedDB IO`. `GECKO_POOLS` in `campaign/pool.py`.

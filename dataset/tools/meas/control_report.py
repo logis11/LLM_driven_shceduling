@@ -305,8 +305,9 @@ def control_notes(rep):
         for x in rep["no_ratio"]:
             by.setdefault(x["phase"], []).append(x)
         whole = lambda ph: "the operation's CPU" if ph == "op" else f"the {ph} phase's CPU"
-        parts = [" and ".join(f"`{x['component']}` ({x['cpu_share'] * 100:.1f} %" + (f" of {whole(ph)})" if i == 0 else ")")
-                              for i, x in enumerate(xs))
+        listed = lambda items: items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1]
+        parts = [listed([f"`{x['component']}` ({x['cpu_share'] * 100:.1f} %" + (f" of {whole(ph)})" if i == 0 else ")")
+                         for i, x in enumerate(xs)])
                  + (" in the operation phase" if ph == "op" else f" in the {ph} phase") for ph, xs in by.items()]
         s += (" No ratio is read for " + ", or for ".join(parts) + ": each ratio is taken over the threads alive at both "
               "edges of the run, and these components' threads all start or exit within it.")

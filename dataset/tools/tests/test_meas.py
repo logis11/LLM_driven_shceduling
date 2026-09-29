@@ -442,7 +442,7 @@ def test_mail_clients_clock_event_is_stated_not_compiled(repo_root, fold_95):
     entry = yaml.safe_load("archetypes:\n" + fold_95.read_text())["archetypes"]["mail-client"]
     assert "heavy_events" not in entry["params"]
     assert ("`glean.mps`, Glean's metrics-ping scheduler, wakes once a day at 04:00 local time (glean); it is stated, "
-            "not carried (D91): 1 run of 2.299 ms, 238.6 s into repeat 39's idle phase, the only one of the 43 whose "
+            "not carried (D91): 1 run of 2.299 ms, 238.6 s into repeat 39's idle phase, the only one of the 77 whose "
             "phase held 04:00 on the runner's clock (UTC); its run is out of the residual. ") in entry["validation_stats"]["scope"]
 
 
@@ -519,6 +519,24 @@ def test_one_comm_in_two_processes_is_two_components():
     assert campaign.per_thread(rows, 600.0)["Chrome_ChildIOT"]["gap_ms"]["mean"] == pytest.approx(75_075.0)
     # a single-process tree keeps plain comm names: every thread's role is `main`
     assert sorted(campaign.per_thread(rows, 600.0, {100: "main", 200: "main"})) == ["Chrome_ChildIOT"]
+
+
+def test_a_gecko_child_process_takes_its_process_name_as_its_role(tmp_path):
+    # 9.5 D94: Thunderbird's children start with -contentproc, not Chromium's --type=; the snapshots cut the command
+    # line before Gecko's type argument, so a child's role is its process name — in the op phase too, where
+    # ops.jsonl lists every process as `main`
+    import json as _json
+    procs = [{"pid": 100, "comm": "thunderbird-bin", "cmd": "/snap/thunderbird/1259/usr/lib/thunderbird/thunderbird-bin --profile /p"},
+             {"pid": 200, "comm": "WebExtensions", "cmd": "/snap/thunderbird/1259/usr/lib/thunderbird/thunderbird-bin -contentproc -isForBrowser -prefsHandle"},
+             {"pid": 300, "comm": "RDD Process", "cmd": "/snap/thunderbird/1259/usr/lib/thunderbird/thunderbird-bin -contentproc -parentBuildID 1"},
+             {"pid": 400, "comm": "chrome", "cmd": "/opt/google/chrome/chrome --type=renderer --lang=en"}]
+    for name in ("snap.idle.before.json", "snap.op.before.json"):
+        (tmp_path / name).write_text(_json.dumps({"procs": procs}))
+    (tmp_path / "ops.jsonl").write_text(_json.dumps({"op": "send", "procs": {"100": "main", "200": "main", "300": "main", "500": "main"}}) + "\n")
+    want = {100: "main", 200: "WebExtensions", 300: "RDD Process", 400: "renderer"}
+    assert campaign.pid_roles(str(tmp_path), "idle") == want
+    assert campaign.pid_roles(str(tmp_path), "op") == {**want, 500: "main"}
+    assert campaign.component_name("WebExtensions", "Timer") == "WebExtensions/Timer"
 
 
 def test_chromes_input_values_stop_at_its_recordings_last_window():
@@ -683,7 +701,7 @@ def test_the_fold_in_regenerates_the_nine_entries_from_the_pooled_records(repo_r
 def test_every_measured_scope_states_the_stability_rule_over_its_repeats(fold_95):
     # the workflow's rule (D26, D30, D78): every value within 5 % or 1 µs, a table read by the mean it carries, over the
     # repeats the pool holds
-    repeats = {"office-writer": 14, "code-editor": 44, "mail-client": 43, "web-browser": 38, "image-editor": 5,
+    repeats = {"office-writer": 14, "code-editor": 44, "mail-client": 77, "web-browser": 38, "image-editor": 5,
                "video-editor": 20, "video-player": 24, "audio-player": 31, "video-call": 45}
     scopes = _scopes(fold_95)
     assert sorted(scopes) == sorted(repeats)
@@ -710,8 +728,8 @@ def test_values_at_the_window_limit_are_stated_with_their_half_widths(fold_95):
     # D79: the keys-only re-measure's eight windows; its 136M mean now holds the rule
     assert "SWELL-KW 6.052 ms ±10.41 % (the rule needs 27 repeats)" in mail
     assert "136M" not in mail.split("outside the rule:")[1].split("hold within it")[0]
-    # D90: the pool's two spellings folded into `StreamTrans`
-    assert "the operation's `StreamTrans` wake rate 55.59 wakes/s ±6.48 % (the rule needs 12 repeats)" in mail
+    # D90: the pool's two spellings folded into `StreamTrans`; D94: the WebExtensions process's threads apart
+    assert "the operation's `StreamTrans` wake rate 55.53 wakes/s ±6.51 % (the rule needs 12 repeats)" in mail
     assert "the other 30 hold within it, the widest ±5.38 %" in mail   # SwComposite's run mean, by the 1 µs floor
     for aid in ("office-writer", "image-editor", "video-editor", "video-player", "audio-player", "video-call"):
         assert "window limit" not in s[aid].lower(), aid
@@ -805,12 +823,14 @@ def test_an_entry_from_two_campaigns_names_each_campaign_its_repeats_and_its_bui
     assert e["run"] == (f"interactive:2026-09-27, repeats {later['repeats']}, runs "
                         + ", ".join(str(40000000000 + k) for k in later["repeats"])
                         + f"; the idle phase interactive:2026-09-19, repeats {old['repeats']}, runs {old_runs}")
+    # D94: the idle pool's 34 added repeats ran 156.0.1
     assert ("Mozilla Thunderbird 156.0.1 (8 repeats) in the phases with or after the input, "
-            "Mozilla Thunderbird 156.0 (43 repeats) in the idle phase") in e["scope"]
-    assert ("Two campaigns (D79): the idle phase's values from meas-ci:interactive:2026-09-19, 43 repeats; the phases "
+            "Mozilla Thunderbird 156.0 (43 repeats), Mozilla Thunderbird 156.0.1 (34: "
+            + ", ".join(str(k) for k in range(45, 79)) + ") in the idle phase") in e["scope"]
+    assert ("Two campaigns (D79): the idle phase's values from meas-ci:interactive:2026-09-19, 77 repeats; the phases "
             "with or after the input from meas-ci:interactive:2026-09-27, 8 repeats; the idle phase runs before any input. "
             ) in e["scope"]
-    assert "over the 43 repeats obtained" in e["scope"] and "8 repeats, every window of it that holds input" in e["scope"]
+    assert "over the 77 repeats obtained" in e["scope"] and "8 repeats, every window of it that holds input" in e["scope"]
 
 
 # 9.5 D81: the stimulus-sensitivity check read per repeat, as 9.7 D36 reads a check
