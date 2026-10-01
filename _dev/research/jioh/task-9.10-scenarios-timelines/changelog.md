@@ -435,3 +435,39 @@ Demand moves (`-single`):
 | `c7-video-edit` | 1.3527 | 1.4586 |
 
 Hands to 9.14: the demand moves; the operations' windows against the scoring spec's terms. Hands to 9.15: `coreset-guide.md` on operations.
+
+## D21 — an application started mid-file runs its observed launch phase first (2026-10-01)
+
+By 인지오's decision, scope-card item 62 (9.5 D34's hand-off): each application a file starts mid-file has its launch observed on the runner — from exec to the end of the settle its entry was measured after — as a launch phase of its entry. A file that starts the application mid-file runs that phase first, then the steady state. Applications whose source holds no launch data arrive steady and the file states it: the game chain from the LAVD deck (D19). The files start these mid-file:
+
+- `c3-workday` — the writer at 60 s, Thunderbird at 360 s;
+- `c3-evening` — the game, the Steam client and the chat client at 60 s, the two players at 300 s;
+- `c3-creation` — `kdenlive` at 120 s;
+- `c4-compile` — the Chrome injection at 30 s;
+- `c4-gaming` — the chat client's injection at 30 s.
+
+The single-situation files start every application at 0 s already steady and are unchanged. The launch campaigns are 9.10's.
+
+Grounds:
+
+- **The launch work in 9.5's traces.** Launch work is large and lands at fixed points in every repeat (`task-9.5-interactive-typing/campaign/launch-work.md`, the 2026-09-18 campaigns in 10 s slices at a 30 s settle; 9.5 D34):
+  - Chrome: a burst 20–40 s into the idle phase and one ≈ 880 ms `ThreadPoolForeground` run at 65–180 s, idle CPU 9.8 ms/s over the phase against ≈ 1.4 ms/s after the burst;
+  - Thunderbird: bursts at 10–30 s and 70–90 s, 4.0 ms/s against 0.1–0.2 ms/s;
+  - the WebRTC call: saturated at 0–40 s, ≈ 60–90 s and ≈ 140–170 s;
+  - VS Code: a burst at 50–70 s;
+  - flat: `soffice`, `kdenlive` and both `mpv` players.
+- **The entries carry only steady behaviour.** Each entry describes steady behaviour after its settle — Chrome 420 s, Thunderbird 390 s, the call 210 s, the Steam client 900 s, VS Code from 200 s (`docs/workload/measurement-overview.md` §4) — and the settle's traces were never carried.
+- **Outside sources.** Cold starts on Linux average 2.4 s over 22 applications (S1-80; Fedora 12, SSD); Steam's shader pre-caching runs 30–60 min at a game's launch (S3-56).
+- **The arcs exist for the instant an application arrives.** The arcs' segment boundaries are the query points where the process set changes (`docs/workload/building-plan.md` §3 C3); starting every application at 0 s would remove them.
+
+Open, for the campaigns' method:
+
+- the applications: Chrome, Thunderbird, LibreOffice Writer, Kdenlive, `mpv`, Element, the Steam client;
+- whether the launch is cold or warm, and its ground;
+- the launch phase's form in each entry.
+
+A file that ends inside a launch shows the observed profile up to its end — `c3-workday`'s Thunderbird starts 60 s before the file ends; its launch work is a time-indexed phase, not a job (D17 does not apply).
+
+No file changed yet.
+
+Hands to 9.14: the arcs' and the injection files' demand and terms. Hands to 9.15: `measurement-overview.md` §4's "steady behaviour, not launch work" with the launch phases added.
