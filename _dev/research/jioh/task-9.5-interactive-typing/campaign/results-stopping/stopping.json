@@ -31,13 +31,14 @@
    "app": "code",
    "pool": "_dev/research/jioh/task-9.5-interactive-typing/campaign/results-re-measured",
    "repeats": 44,
-   "stopped_at_window_limit": true,
+   "stopped_at_window_limit": false,
    "widest": {
-    "value": "idle renderer/ThreadPoolForeg run mean (ms)",
-    "k": 44,
-    "cv": 0.1217,
-    "half_width": 0.037
-   }
+    "value": "input_run mean, SWELL-KW (ms)",
+    "k": 43,
+    "cv": 0.1573,
+    "half_width": 0.0484
+   },
+   "stop": "stopped at window 44, short of its recording's 57, not by the rule"
   },
   {
    "archetype": "web-browser",

@@ -31,10 +31,21 @@ def test_every_caveat_the_fold_in_states_carries_the_record_s_figures(repo_root)
     from meas.campaign import fold_in
     rec = json.load(open(repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
                          / "results-stopping" / "stopping.json"))
-    near = {e["archetype"] for e in rec["entries"] if e["widest"]["half_width"] >= stopping.NEAR}
+    near = {e["archetype"] for e in rec["entries"] if "simulated" in e and e["widest"]["half_width"] >= stopping.NEAR}
     assert set(fold_in.STOPPING_STATED) == near
     for e in rec["entries"]:
         if e["archetype"] in near:
             text = fold_in.STOPPING_STATED[e["archetype"]]
             lo, hi = stopping.coverage_range(e)
             assert f"{lo * 100:.0f}–{hi * 100:.0f} %" in text or f"{lo * 100:.0f} %" in text, e["archetype"]
+
+
+def test_code_is_listed_with_where_it_stopped_not_simulated(repo_root):
+    # D99: code's campaign stopped at window 44, short of its recording's 57 — neither the rule's first pass nor the
+    # recording's end chose the count, so the stopping simulated does not describe it
+    import json
+    rec = json.load(open(repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+                         / "results-stopping" / "stopping.json"))
+    code = next(e for e in rec["entries"] if e["archetype"] == "code-editor")
+    assert "simulated" not in code and code["stop"] == stopping.STOPPED_SHORT["code"]
+    assert not code["stopped_at_window_limit"]

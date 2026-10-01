@@ -84,26 +84,27 @@
       "max": 0.0
      },
      "left cpu": {
-      "mean": 0.9639,
-      "max": 1.0
+      "mean": 0.9401,
+      "max": 0.9772
      },
      "left wakes": {
-      "mean": 0.931,
-      "max": 1.0
+      "mean": 0.8674,
+      "max": 0.9139
      }
     }
    },
    "workload": {
     "z": {
-     "dbus-daemon system-bus/dbus-daemon gap mean (ms)": -0.41,
-     "dbus-daemon system-bus/dbus-daemon run mean (ms)": -0.4,
-     "dbus-daemon system-bus/dbus-daemon wakes/s": 0.68
+     "dbus-daemon system-bus/dbus-daemon gap mean (ms)": -0.9,
+     "dbus-daemon system-bus/dbus-daemon run mean (ms)": -0.0,
+     "dbus-daemon system-bus/dbus-daemon wakes/s": 1.15
     },
     "only_carried": [],
     "only_control": [],
-    "max_abs_z": 0.68
+    "max_abs_z": 1.15
    },
    "left_out": {},
+   "no_ratio": [],
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 2 intervals read, about 0.1 differences by chance alone, none found."
   },
   "compositor-shell": {
@@ -349,6 +350,7 @@
     "max_abs_z": 0.74
    },
    "left_out": {},
+   "no_ratio": [],
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 6 intervals read, about 0.3 differences by chance alone. Perf's effect on the carried values, which stay the traced ones \u2014 steady phase: `gnome-shell/JS Helper` run mean 0.864 (0.841\u20130.886)."
   },
   "audio-server": {
@@ -434,26 +436,27 @@
       "max": 0.0
      },
      "left cpu": {
-      "mean": 0.9841,
-      "max": 0.989
+      "mean": 0.9558,
+      "max": 0.9601
      },
      "left wakes": {
-      "mean": 0.9835,
-      "max": 0.987
+      "mean": 0.9522,
+      "max": 0.9557
      }
     }
    },
    "workload": {
     "z": {
-     "pipewire wireplumber/gmain gap mean (ms)": -0.35,
-     "pipewire wireplumber/gmain run mean (ms)": 0.6,
-     "pipewire wireplumber/gmain wakes/s": 0.41
+     "pipewire wireplumber/gmain gap mean (ms)": -0.81,
+     "pipewire wireplumber/gmain run mean (ms)": 0.38,
+     "pipewire wireplumber/gmain wakes/s": 0.91
     },
     "only_carried": [],
     "only_control": [],
-    "max_abs_z": 0.6
+    "max_abs_z": 0.91
    },
    "left_out": {},
+   "no_ratio": [],
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 2 intervals read, about 0.1 differences by chance alone, none found."
   },
   "service-manager": {
@@ -539,26 +542,27 @@
       "max": 0.0
      },
      "left cpu": {
-      "mean": 0.7484,
-      "max": 0.8441
+      "mean": 0.6697,
+      "max": 0.7625
      },
      "left wakes": {
-      "mean": 0.6106,
-      "max": 0.6297
+      "mean": 0.6013,
+      "max": 0.6203
      }
     }
    },
    "workload": {
     "z": {
-     "systemd pid1/systemd gap mean (ms)": -0.28,
-     "systemd pid1/systemd run mean (ms)": 1.19,
-     "systemd pid1/systemd wakes/s": 0.26
+     "systemd pid1/systemd gap mean (ms)": -0.31,
+     "systemd pid1/systemd run mean (ms)": 1.29,
+     "systemd pid1/systemd wakes/s": 0.32
     },
     "only_carried": [],
     "only_control": [],
-    "max_abs_z": 1.19
+    "max_abs_z": 1.29
    },
    "left_out": {},
+   "no_ratio": [],
    "notes": "Untraced control (the 9.5 untraced-control spec): six jobs each ran every carried phase twice, traced under `perf sched record` and untraced, read by the 95 % interval of the per-job ratios, untraced over traced; 2 intervals read, about 0.1 differences by chance alone, none found."
   }
  }

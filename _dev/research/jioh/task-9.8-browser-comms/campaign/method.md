@@ -1,4 +1,4 @@
-# Task 9.8 — measurement campaign method (draft, 2026-09-20)
+# Task 9.8 — measurement campaign method (2026-09-20)
 
 The observation behind the four entries that replace `electron-comms` — the idle hidden renderer, the idle visible renderer, the Electron chat client and the Steam desktop client (changelog D4, D6, D7, D10, D11) — run on GitHub-hosted runners (phase decision 5) under `../../measurement-campaign-workflow.md`, pinned to one CPU (9.5 follow-ups decision 3). Written before any measurement; amended only by a dated entry in §10.
 

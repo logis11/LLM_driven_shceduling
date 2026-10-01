@@ -50,7 +50,8 @@ LIMITS = ("Limits of the observation (method §7): GNOME Shell started with --he
           "measured CPU.")
 
 PROGRAM = {
-    "gnome-shell": ("GNOME Shell {gnome-shell} — Mutter and the shell in one process (D3)",
+    "gnome-shell": ("GNOME Shell {gnome-shell} with Mutter {mutter} (libmutter-14-0, D45) — Mutter and the shell in "
+                    "one process (D3)",
                     ["gnome-shell"]),
     "pipewire": ("the PipeWire stack — pipewire {pipewire}, wireplumber {wireplumber}, pipewire-pulse "
                  "{pipewire-pulse} — its three user services in one task (D4)",
@@ -137,14 +138,16 @@ WINDOWS_STATED = {
                     "phase's busiest — `JS Helper` wakes at 1.46 times its phase rate and `gnome-shell`'s run mean is "
                     "8.03 ms against 5.10–6.75 ms after — the phase's windows holding 5.7 % of its CPU above its "
                     "median window. The carried values are the phase's means."),
-    "pipewire": ("Read in 100 s windows over the 24 repeats (D42): `wireplumber/gmain` wakes at 7.2 times its phase "
-                 "rate in the first 100 s past the steady edge — 50 of its 125 kept wakes fall in the phase's first "
-                 "22 s, in 22 of the 24 repeats a pair 0.1 s apart within the first 4 s, one wake 12–22 s in, or both — "
-                 "beside the midnight repeats' pairs (D38). The carried values are the phase's means."),
+    "pipewire": ("Read in 100 s windows over the 24 repeats (D42, D47): `wireplumber/gmain` wakes at 3.13 times its "
+                 "phase rate in the first 100 s past the steady edge — 56 of its 402 kept wakes fall in the phase's "
+                 "first 22 s, a pair 0.1 s apart within the first 4 s, one wake 12–22 s in, or both — beside sysstat's "
+                 "collector every 10 minutes (D47) and the midnight repeats' pairs (D38). The carried values are the "
+                 "phase's means."),
 }
 
-# D38: a sparse component that woke more in the repeats that crossed midnight UTC and met the cron session (D23), where
-# no rule of D23 or D27 moves the extra wakes — the split stated, with what the trace shows of them
+# D38: a component that woke more in the repeats that crossed midnight UTC and met the cron session (D23), where no
+# rule of D23 or D27 moves the extra wakes — the split stated, with what the trace shows of them; sparse until D47,
+# held by the rule since
 MIDNIGHT_SPLIT = {("pipewire", "wireplumber/gmain"): (
     "the extra wakes are pairs of the worker's own timer 100 ms apart, 496–1205 s into the phase, 14 of the 15 pairs "
     "starting within 0.2 s of one of the runner's `dockerd` bursts, three every 10 s; the trace names no waker for them "
@@ -164,6 +167,11 @@ def midnight_split(prog, e, comp):
             f"second against {statistics.fmean(b):.4f} in the other {len(b)}: {what}. ")
 
 
+# where each between-sessions component was decided: pid 1's run mean by D29 on D28's placement, re-read by D48 once
+# sysstat's collector is the desktop's again (D47); the system bus by D48
+SPREAD_DECIDED = {"pid1/systemd": "D28, D29, D48", "system-bus/dbus-daemon": "D48"}
+
+
 def stability_text(prog, e, stab, k, within):
     ok, carried = split_list(prog, stab)
     text = ""
@@ -173,6 +181,8 @@ def stability_text(prog, e, stab, k, within):
                 f"on the list — a table read by the mean it carries, over every repeat's samples — "
                 f"hold{'s' if len(ok) == 1 else ''} within 5 % or 1 µs over the {k} repeats, the widest `{comp}` "
                 f"{LABEL[label]} ±{hw * 100:.2f} %. ")
+        for comp in sorted({c for _, c, _ in ok}):
+            text += midnight_split(prog, e, comp)
     for comp in carried:
         th, parts = e["threads"][comp], []
         for i, label in enumerate(LABEL):
@@ -196,7 +206,7 @@ def stability_text(prog, e, stab, k, within):
             continue
         w = within_figures(within[f"{prog} {comp}"])
         text += (f"`{comp}`'s three values are carried together with their half-widths under 9.5 D57 as 9.8 D21 "
-                 f"extended it (D28, D29): {'; '.join(parts)}. Within one run (the long-phase probes 36, 41 and 44, "
+                 f"extended it ({SPREAD_DECIDED[comp]}): {'; '.join(parts)}. Within one run (the long-phase probes 36, 41 and 44, "
                  f"a window of the phase every 60 s) they move by {w[0]}, {w[1]} and {w[2]} of their mean, against "
                  f"{w[3]}, {w[4]} and {w[5]} across the repeats (half the range over the mean): the spread lies in "
                  f"part within a run. It wakes {min(n)}–{max(n)} times a phase and is the entry's whole activity once "
@@ -211,10 +221,10 @@ def causes_text(e, k):
     if c.get("outside"):
         text += ("Wakes traced to a cause outside the observed desktop — a package Ubuntu 24.04's desktop manifest "
                  "does not hold, a desktop package's unit that a stock install leaves disabled and the runner image "
-                 "enabled, or the harness — left the components and are stated (D27, D32, D37): "
+                 "enabled, or the harness — left the components and are stated (D27, D37): "
                  + "; ".join(f"{lab} {rng(ns)} a phase" for lab, ns in c["outside"].items()) + ". ")
     if c.get("event"):
-        text += ("Desktop jobs bound to a clock time are events of the phase, stated and not carried (D27, in D23's "
+        text += ("Desktop jobs bound to a clock time are events of the phase, stated and not carried (D27, D47, in D23's "
                  f"form): " + "; ".join(f"{lab} {sum(ns)} over the {k} repeats" for lab, ns in c["event"].items())
                  + ". ")
     if c.get("unknown"):

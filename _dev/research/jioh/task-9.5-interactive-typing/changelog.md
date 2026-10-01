@@ -395,6 +395,8 @@ Values changed: `chrome`'s idle components are re-identified and every idle valu
 
 ## D68 — `chrome`'s window limit entered in the tooling, as D32 named it (2026-09-23)
 
+> Corrected by D99 (the Word recording holds 57 windows; 44 was the last window then cut).
+
 No new decision: D32 states that a recording's limit binds the values of the phases that replay it, that such a value pools every window the recording holds and is then carried with its half-width, and it names the two applications the limit binds — `thunderbird` at its eight Outlook windows and **`chrome` at 38 Internet Explorer windows**. `campaign/pool.py`'s `WINDOW_LIMIT` carried only the two Thunderbird entries, so `chrome`'s `input_run` mean under SWELL-KW would have gone on holding the rule open past the last window the recording has — at window 29 it projects 45, seven more than exist.
 
 The limit is 38: `ie-r38` holds 223 events over 338.6 s and `windows.json` records `ie-r39` through `ie-r44` empty (an empty window is not committed). It covers the 136M check as well, because `run.sh` reads the SWELL-KW window's index to decide both driven phases — past the recording's end a repeat replays neither (D32), so the 136M value stops at the same repeat, its own 44 Aalto windows notwithstanding.
@@ -470,7 +472,7 @@ Commit: this entry.
 
 ## D73 — `code`'s keys-only campaign closed at the recording's last window and folded in (2026-09-25)
 
-> Amended by D78 (the rule's means re-read as carried; `libuv-worker`'s D57 marking dropped) and D83 (idle phase read from 200 s; idle and per-input values changed); corrected by 9.6 D35 (half-widths past twenty repeats were too wide).
+> Amended by D78 (the rule's means re-read as carried; `libuv-worker`'s D57 marking dropped) and D83 (idle phase read from 200 s; idle and per-input values changed); corrected by 9.6 D35 (half-widths past twenty repeats were too wide) and D99 (window 44 was not the recording's last).
 
 The campaign D72 launched: `meas-ci:interactive:2026-09-25`, runs #566–#599 (first batch launched 2026-09-25 00:19 UTC), 102 jobs of which 57 stopped at the machine gate and 45 landed on the AMD EPYC 7763, VS Code 1.138.0 in every one. Every window of SWELL-KW's Word condition is pooled: 44 repeats, 43 with the driven phases — window 43 records no event and ran the idle phase alone (D32, D68) — after a first batch of windows 1–5, an added batch of 6–26 sized from the five-repeat projection (9.7 D26), a second batch of 27–36 and a third of 37–44 by 인지오's decisions of the day, each batch's gated windows relaunched together (the workflow's gate step, amended 2026-09-25). Window 42 landed twice, two pushes ten seconds apart having started runs #598 and #599; the original launch's copy is pooled and #599's left out under D66 (`pool_runs.py --exclude 42@36126168885`). Validity: every repeat's screenshot after the SWELL-KW phase shows the letters on line 28, the file's end, the editor focused and no view opened, read for all 44; the pool tool reports every repeat valid.
 
@@ -626,7 +628,7 @@ Commit: this entry.
 
 ## D83 — `code`'s idle phase read from 200 s past its start: the launch work left out (2026-09-28)
 
-> Corrected by D89 (24 values on the rule and 3 under D57, not 25 and 2).
+> Corrected by D89 (24 values on the rule and 3 under D57, not 25 and 2) and D99 (the recording holds 57 windows; `libuv-worker` stays under D57 on its spread within one run).
 
 By 인지오's decision, closing the open item from the untraced control (`code-editor`'s idle phase over a second 900 s): the pool reads `code`'s idle phase from 200 s past its start, over the 44 recorded traces, the 30 s settle and the 900 s phase unchanged; the idle rate D13 nets from each input window is read over the same span. The start is design, past the last episode. Grounds, under D34 (the idle observation starts after the launch work, the settle past the last episode where the episodes stop): over the 44 pooled repeats in 100 s windows the main thread's run mean is 0.234 and 0.247 ms in the phase's first two windows and 0.063–0.064 ms in each of the seven after, the residual's 0.481 and 0.632 against 0.037–0.055 ms; the D52 probe (run 35496163876) in 25 s windows puts both in two episodes 50–75 s and 150–175 s into the phase — the main thread's runs 0.70 and 0.84 ms, the residual's 1.3 and 1.6 ms — neither recurring through its 1,400 s. D53 read the probe's CPU, in which these two episodes pass for the one recurring about every 320 s; per component they are the main thread's and the residual's, which the later episodes (275–300 s, 600–625 s) are not. `utility/code`'s wake rate falls through the whole 900 s (17.4 → 10.8 a second) and reads 9.5 a second at 1,000–1,400 s in the probe; it is carried as read from 200 s.
 
@@ -694,7 +696,7 @@ Commit: this entry.
 
 ## D88 — the stated precision read against the rule's stopping; three entries' intervals caveated (2026-09-28)
 
-> Amended by D94 (`mail-client`'s idle count is its widest value's first pass; its interval caveated).
+> Amended by D94 (`mail-client`'s idle count is its widest value's first pass; its interval caveated); corrected by D99 (`code-editor` stopped at window 44, short of its recording's 57).
 
 By 인지오's decision, taken before 9.13 on the question 9.5's self-review left to 9.14 and 9.16 (`measurement-campaign-record.md`, "What the half-widths do and do not claim"): the rule adds repeats one at a time and stops at the first count whose half-width is within 5 % of the mean, so the count is chosen by the estimate it produces; the stated precision is reported with a caveat, not re-measured at a count fixed in advance. The rule's stopping is simulated at each entry's widest value the rule is read on (`meas/stopping.py`): repeats drawn at the value's per-repeat spread, normal and lognormal, 4,000 campaigns each, the rule run on that value alone.
 
@@ -817,5 +819,25 @@ Commit: this entry.
 ## D97 — the 34 added repeats released: `meas-ci-2026-09-28` (2026-09-29)
 
 By 인지오's decision, outward-facing on 인지오's approval: the raw records of the 34 idle-only `thunderbird-send` repeats D94 added to campaign `meas-ci:interactive:2026-09-19` are published as GitHub release `meas-ci-2026-09-28`, its tag on `jioh/dataset-rebuild` at `0aa25ac`, the commit that files the 77-repeat pools and the tooling that produced them. Asset `meas-interactive-thunderbird-send-windows-45-78.zip` (107,558,693 B): runs #651–#663, one folder per repeat under its run, 34 repeats, windows 45–78, snap revision 1274 (Thunderbird 156.0.1) in each; screenshots omitted, as in every earlier release, their per-landing checks recorded in D94. The campaign's first 43 repeats stay in `meas-ci-2026-09-18`. Values changed: none.
+
+Commit: this entry.
+
+## D98 — SWELL-KW's share of gaps over 1 s stated over the committed stream (2026-09-29)
+
+No new decision; a figure corrected, found on the 2026-09-29 reading of 9.5–9.9 for their summary. The pre-registered sensitivity check (method §3, D23) and `docs/references.md`'s `dhakal-chi18` role line gave SWELL-KW Word c1's share of gaps over 1 s as 15 %, the share in the one file S3 first read (D4: "share > 1 s 15 % on the file sampled"). Over the committed stream `dataset/stimulus/swell-word-c1.jsonl` it is 7.9 % of 82,633 gaps between events of any kind, as the campaign replayed them until D28, and 5.5 % of 78,013 gaps between keys, as replayed since; the other two streams read 14.4 % and 5.2 % (Outlook c2 and c3), 24.4 % and 9.2 % (Internet Explorer c1). The pre-registration's p50, p90 and p99 for Word c1 (156, 702 and 4,477 ms) do not reproduce from the committed stream either: 156, 780 and 4,425 ms between events of any kind, 143, 562 and 5,848 ms between keys. Over the windows the check replayed first: the 136M windows 1–5, 2.4–5.6 % of their gaps over 1 s, sentence pauses included (method §3); SWELL-KW Word c1's windows 1–5, 5.3–7.7 % between keys (6.5 % pooled), 6.9–10.9 % between events of any kind.
+
+Corrected: method §9 (2026-09-29); the `dhakal-chi18` role line, now "against 5.5 % between the keys of SWELL-KW's Word stream". Values changed: none; the archetypes carry SWELL-KW whatever the comparison shows.
+
+Commit: this entry.
+
+## D99 — `code` stopped at window 44, short of its recording's 57: the stop re-read, the per-input values held to the rule (2026-09-29)
+
+By 인지오's decision, on a finding of the 2026-09-29 reading of 9.5–9.9 for their summary. D68 entered `code`'s window limit at 44, SWELL-KW's Word condition "holding 44 windows", and D73 closed the keys-only campaign at "the recording's last window". 44 was the last window then cut: `windows.json` holds Word windows 1–57 cut by the committed rule, 56 of them with input (`word-r43` records no event), windows 45–57 cut on 2026-09-28 with the 34 idle-only `thunderbird-send` windows — participants 19–24, `word-r57` 262.8 s — and every later window empty. So the campaign stopped short of the recording, and its count was chosen neither by the rule's first pass nor by the recording's end: when it stopped, the per-input mean under SWELL-KW read ±5.17 % (D73).
+
+Decision (option A of two; B, the campaign extended over windows 45–57, not taken): the stop is re-read, no repeat added. `code`'s two per-input values are held to the rule and hold it at 44 — SWELL-KW 99.26 ms ±4.84 %, 136M 103.9 ms ±3.01 %, read as carried (D78) — so the entry's values are 26 on the rule and 3 under D57, none at a window limit. `utility/libuv-worker`'s wake rate and gap mean stay under D57 on its own ground, its wake rate ±10.6 % within one run against ±39.0 % across the repeats (D83), where D83 had also named the recording's 44 windows; with the other exception-carried values, whether they are re-measured at a count fixed in advance is 9.14's, after its sensitivity check. D88's reading does not describe this count, which the rule's stopping did not choose: `code-editor` is listed in the stopping record with where it stopped, not simulated, and its scope states the stop.
+
+Tooling: `WINDOW_LIMIT["code"]` 44 → 57 in `campaign/pool.py`; `STOPPED_SHORT` in `meas/stopping.py`; `STOP_STATED` in `campaign/fold_in.py`, and `code-editor` out of `WINDOW_LAW`. Tests: `test_the_window_limit_reads_the_highest_window_not_the_repeat_count` (57), `test_values_at_the_window_limit_are_stated_with_their_half_widths`, `test_code_is_listed_with_where_it_stopped_not_simulated`; `test_every_caveat_the_fold_in_states_carries_the_record_s_figures` reads only the simulated entries. Regenerated: `results-re-measured/pool-code.json` and `pool-code.txt` (`pool_runs.py interactive/code --since 566 --exclude 42@36126168885`; against the committed record only the two per-input values' limit marks, the limit and the projection, 26 → 41, change), `results-re-measured.md`, `results-stopping.md` and `stopping.json` (`code-editor`'s row alone), `code-editor` by the fold-in, the record. Method §9, 2026-09-29.
+
+Values changed: none; `code-editor`'s scope. Compiled with `--allow-window`: the library hash only, 0 of 100 artifacts changing beyond it (`tools/beyond_hash.py`); no demand moves.
 
 Commit: this entry.

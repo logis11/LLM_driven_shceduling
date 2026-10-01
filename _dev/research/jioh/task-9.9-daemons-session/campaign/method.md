@@ -1,4 +1,4 @@
-# Task 9.9 — measurement campaign method (draft, 2026-09-22)
+# Task 9.9 — measurement campaign method (2026-09-22)
 
 The observation behind the four entries that replace `system-daemon` — the compositor and shell, the audio stack, `systemd` and `dbus-daemon` (changelog D3–D8) — measured in the terminal idle state of an Ubuntu desktop session (D9), run on GitHub-hosted runners (phase decision 5) under `../../measurement-campaign-workflow.md`, pinned to one CPU (9.5 follow-ups decision 3). Written before any measurement; amended only by a dated entry in §10.
 

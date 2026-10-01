@@ -163,7 +163,14 @@ WINDOWS_STATED = {
                     "The carried values are the means over the 56."),
 }
 
-WINDOW_LAW = {"code-editor": "D32, D68", "web-browser": "D32, D68", "mail-client": "D32, D46"}
+WINDOW_LAW = {"web-browser": "D32, D68", "mail-client": "D32, D46"}
+# D99: an entry whose repeat count neither the rule nor its recording's end chose states where it stopped
+STOP_STATED = {
+    "code-editor": ("The repeat count is not the rule's (D99): the campaign stopped at window 44, then read as the Word "
+                    "recording's last; the recording holds 57 windows, 56 with input. At 44 every value the rule is read "
+                    "on holds, the widest the per-input run mean under SWELL-KW at ±4.84 % (±5.17 % as the rule was read "
+                    "when the campaign stopped, D73)."),
+}
 # D57's second finding: a between-sessions component's spread within one run, read on the D52 probe
 # (_dev/research/jioh/task-9.5-interactive-typing/campaign/within_libuv.py, D83)
 WITHIN = {("code-editor", "utility/libuv-worker"): "its wake rate ±10.6 % (5.41–6.71 a second over 700 s windows slid "
@@ -475,6 +482,8 @@ def entry(aid, spec, d):
                   f"half-width is read for its rate. ")
     if aid in STOPPING_STATED:
         scope += STOPPING_STATED[aid] + " "
+    if aid in STOP_STATED:
+        scope += STOP_STATED[aid] + " "
     if aid in WINDOWS_STATED:
         scope += WINDOWS_STATED[aid] + " "
     scope += "Values are this software on this machine, not desktop truth (D10)."

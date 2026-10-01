@@ -25,6 +25,9 @@ if TOOLS not in sys.path:
 from meas.stability import TOLERANCE, t975  # noqa: E402
 
 NEAR = 0.045            # a value within half a point of the tolerance (the campaign record's line)
+# D99: code's campaign stopped at window 44, then read as its recording's last; the recording holds 57, so the count is
+# neither the rule's first pass nor the recording's end, and the stopping simulated does not describe it
+STOPPED_SHORT = {"code": "stopped at window 44, short of its recording's 57, not by the rule"}
 KMAX = 2000
 
 
@@ -73,7 +76,7 @@ def coverage_range(entry):
 
 def entries(n, seed=1):
     """Each 9.5 entry whose repeat count the rule chose, in the pools the fold-in carries; an entry that stopped at its
-    recording's last window is listed, not simulated."""
+    recording's last window, or short of it (D99), is listed, not simulated."""
     from meas import control_report as cr
     out = []
     for app, arch in cr.ARCH_95.items():
@@ -82,10 +85,13 @@ def entries(n, seed=1):
         run = json.load(open(os.path.join(src, f"pool-{app}.json")))["runs"][app]
         st = run["stability"]
         by_window = st["window_limit"] is not None and not idle_from and len(run["repeats"]) >= st["window_limit"]
+        short = STOPPED_SHORT.get(app)
         name, q = widest(st["quantities"], ("idle",) if idle_from else None)
         e = {"archetype": arch, "app": app, "pool": os.path.relpath(src, cr.REPO), "repeats": len(run["repeats"]),
              "stopped_at_window_limit": by_window, "widest": {"value": name, **{k: q[k] for k in ("k", "cv", "half_width")}}}
-        if not by_window:
+        if short:
+            e["stop"] = short
+        elif not by_window:
             e["simulated"] = {d: simulate(q["cv"], n, d == "lognormal", random.Random(seed))
                               for d in ("normal", "lognormal")}
         out.append(e)
@@ -107,7 +113,7 @@ def render(record):
         w = e["widest"]
         head = (f"| `{e['archetype']}` | {w['value']} | {w['k']} | {w['cv'] * 100:.2f} % | {w['half_width'] * 100:.2f} % |")
         if "simulated" not in e:
-            lines.append(head + " stopped at its recording's last window | | |")
+            lines.append(head + " " + e.get("stop", "stopped at its recording's last window") + " | | |")
             continue
         s = e["simulated"]
         lines.append(head + " " + " · ".join(f"{s[d]['mean_bias'] * 100:+.2f} %" for d in s) + " | "

@@ -1,49 +1,4 @@
 {
- "pipewire wireplumber/gmain": {
-  "analysis": {
-   "repeats_with_it": 24,
-   "of": 24,
-   "threads": [
-    1
-   ]
-  },
-  "weight": {
-   "share_of_entry_wakes": 1.0,
-   "wakes_per_phase": [
-    2,
-    12
-   ],
-   "wakes_per_phase_mean": 5.2
-  },
-  "across": {
-   "wakes/s": 0.9600552947613973,
-   "gap mean (ms)": 0.8788392887034597,
-   "run mean (ms)": 0.16685979142526075
-  },
-  "within": {
-   "36": {
-    "positions": 143,
-    "clean_span_s": 10335.946,
-    "wakes/s": 0.532258064516129,
-    "gap mean (ms)": 1.5525727715448785,
-    "run mean (ms)": 0.15033023287702535
-   },
-   "41": {
-    "positions": 143,
-    "clean_span_s": 10335.809,
-    "wakes/s": 0.572,
-    "gap mean (ms)": 2.292011299279507,
-    "run mean (ms)": 0.14943452882378158
-   },
-   "44": {
-    "positions": 143,
-    "clean_span_s": 10335.732,
-    "wakes/s": 0.5909090909090909,
-    "gap mean (ms)": 1.781300785855509,
-    "run mean (ms)": 0.12359744790520787
-   }
-  }
- },
  "systemd pid1/systemd": {
   "analysis": {
    "repeats_with_it": 24,
@@ -55,37 +10,37 @@
   "weight": {
    "share_of_entry_wakes": 1.0,
    "wakes_per_phase": [
-    111,
-    136
+    114,
+    139
    ],
-   "wakes_per_phase_mean": 123.6
+   "wakes_per_phase_mean": 126.4
   },
   "across": {
-   "wakes/s": 0.10113996077136696,
-   "gap mean (ms)": 0.1021390611020333,
-   "run mean (ms)": 0.40104849279161203
+   "wakes/s": 0.09888024946100805,
+   "gap mean (ms)": 0.09953651090046504,
+   "run mean (ms)": 0.3000735474380976
   },
   "within": {
    "36": {
     "positions": 143,
     "clean_span_s": 10335.946,
-    "wakes/s": 0.06135364153169572,
-    "gap mean (ms)": 0.06490139359759649,
-    "run mean (ms)": 0.12836412871552624
+    "wakes/s": 0.05997378768020971,
+    "gap mean (ms)": 0.06354632923663389,
+    "run mean (ms)": 0.10731808690526838
    },
    "41": {
     "positions": 143,
     "clean_span_s": 10335.809,
-    "wakes/s": 0.1016513560804899,
-    "gap mean (ms)": 0.10029804687761387,
-    "run mean (ms)": 0.19745034695310312
+    "wakes/s": 0.09932147245819306,
+    "gap mean (ms)": 0.09809724697265619,
+    "run mean (ms)": 0.1651620714811536
    },
    "44": {
     "positions": 143,
     "clean_span_s": 10335.732,
-    "wakes/s": 0.0509287162347268,
-    "gap mean (ms)": 0.05606740567462455,
-    "run mean (ms)": 0.253274919172386
+    "wakes/s": 0.04975910064239832,
+    "gap mean (ms)": 0.054941080723074354,
+    "run mean (ms)": 0.18360719599773687
    }
   }
  },
@@ -100,37 +55,37 @@
   "weight": {
    "share_of_entry_wakes": 1.0,
    "wakes_per_phase": [
-    0,
-    30
+    16,
+    38
    ],
-   "wakes_per_phase_mean": 10.1
+   "wakes_per_phase_mean": 25.1
   },
   "across": {
-   "wakes/s": 1.4876490408574636,
-   "gap mean (ms)": 1.7565117939413704,
-   "run mean (ms)": 0.9191263282172373
+   "wakes/s": 0.4378029850746269,
+   "gap mean (ms)": 0.4260682102887177,
+   "run mean (ms)": 0.41716920893934023
   },
   "within": {
    "36": {
     "positions": 143,
     "clean_span_s": 10335.946,
-    "wakes/s": 0.23307766059443918,
-    "gap mean (ms)": 0.3216583815914606,
-    "run mean (ms)": 0.09424558394006477
+    "wakes/s": 0.23388943408570487,
+    "gap mean (ms)": 0.35397716802840373,
+    "run mean (ms)": 0.15948543029105228
    },
    "41": {
     "positions": 143,
     "clean_span_s": 10335.809,
-    "wakes/s": 0.284037558685446,
-    "gap mean (ms)": 0.5188558633424507,
-    "run mean (ms)": 0.09431696365778315
+    "wakes/s": 0.2584472732987585,
+    "gap mean (ms)": 0.470260843522707,
+    "run mean (ms)": 0.1363813563665731
    },
    "44": {
     "positions": 143,
     "clean_span_s": 10335.732,
-    "wakes/s": 0.5499999999999999,
-    "gap mean (ms)": 0.8734693645784004,
-    "run mean (ms)": 0.11834650335155408
+    "wakes/s": 0.2842942345924453,
+    "gap mean (ms)": 0.25254962766332867,
+    "run mean (ms)": 0.16674459641209408
    }
   }
  }

@@ -327,11 +327,16 @@ def test_the_rule_reads_the_exact_wake_count_not_the_rounded_rate(tmp_path):
     assert shell["wakes_per_s"] == [0.2] * 5     # twenty wakes in the same phase
 
 
-def test_a_sparse_component_is_carried_although_it_never_woke_in_some_repeats():
-    # D33: the system bus, once the runner's collector is out (D32), wakes in bursts — none at all in some phases —
-    # so 9.5 D43 lists it as sporadic; it is its entry's whole activity and is carried as a sparse component (9.8 D27):
-    # its wake rate over every repeat, zero where it never woke, its gap and run means as its tables carry them
+def test_a_sparse_component_is_carried_although_it_never_woke_in_some_repeats(monkeypatch):
+    # D33: a component that wakes a few times a phase — none at all in some — which 9.5 D43 would list as sporadic, is
+    # carried as a sparse component (9.8 D27) when it is its entry's whole activity: its wake rate over every repeat,
+    # zero where it never woke, its gap and run means as its tables carry them. D47, D48: no session component is sparse
+    # since sysstat's collector is kept — the system bus is carried between sessions — so the class is read on a
+    # constructed one
+    assert pool.SPARSE == {} and pool.SESSION_SPREAD["dbus-daemon"] == ("system-bus/dbus-daemon",)
     comm = "system-bus/dbus-daemon"
+    monkeypatch.setitem(pool.SPARSE, "dbus-daemon", (comm,))
+    monkeypatch.setitem(pool.SESSION_SPREAD, "dbus-daemon", ())
     def rec(k, times):
         th = {} if not times else {comm: {"threads": 1, "wakes_per_s": len(times) / 100.0, "gap_ms": {"mean": 100000.0 / len(times)},
                                           "run_ms": {"mean": 0.1}}}
@@ -452,7 +457,7 @@ def test_the_fold_in_regenerates_the_four_entries_from_the_pooled_record(repo_ro
 
 def test_the_audio_servers_scope_states_its_midnight_split(repo_root, tmp_path):
     # D38: WirePlumber's worker woke more in the four repeats that crossed midnight UTC and met the cron session; no rule
-    # of D23 or D27 moves the extra wakes, so the scope states the split
+    # of D23 or D27 moves the extra wakes, so the scope states the split — held by the rule since D47, stated as before
     pooled = repo_root / "_dev" / "research" / "jioh" / "task-9.9-daemons-session" / "campaign" / "results" / "pooled.json"
     out = tmp_path / "fold.yaml"
     argv, sys.argv = sys.argv, ["fold_in.py", str(pooled), str(out)]
@@ -462,7 +467,7 @@ def test_the_audio_servers_scope_states_its_midnight_split(repo_root, tmp_path):
         sys.argv = argv
     text = out.read_text()
     assert ("In the 4 repeats that crossed midnight UTC and met the cron session (47, 48, 49 and 51) "
-            "`wireplumber/gmain` woke 0.0057 times a second against 0.0023 in the other 20") in " ".join(text.split())
+            "`wireplumber/gmain` woke 0.0110 times a second against 0.0090 in the other 20") in " ".join(text.split())
 
 
 def test_the_within_run_figures_are_read_from_the_record_beside_the_pool(repo_root, tmp_path):
@@ -540,16 +545,15 @@ def test_a_wake_is_classed_by_its_cause_traced_through_the_trace():
     assert by_t[10.0003][0] == "outside" and "php8.3-fpm" in by_t[10.0003][1]
     assert by_t[30.0][0] == "outside" and "harness" in by_t[30.0][1]
     assert by_t[30.1002][0] == "outside"                       # the follow-up goes with the wake that armed it
-    assert by_t[50.0] == ("outside", "job sysstat-daily-sample (sysstat)")   # D32: every sysstat job is outside
+    assert by_t[50.0] == ("event", "job sysstat-daily-sample (sysstat)")     # D47: 23:59, a clock event
     assert by_t[60.0][0] == "outside" and "harness" in by_t[60.0][1]   # the cat's lineage reaches the loop's bash
     kept = {round(r.t_in, 4) for r in keep}
-    assert kept == {20.0, 20.01, 70.0}
+    assert kept == {20.0, 20.01, 40.0, 70.0}
     assert "systemd-logind.service (systemd)" in tally["desktop"]
     assert tally["desktop"]["systemd-logind.service (systemd)"] == 2   # the D-continuation carries logind's cause
-    # D32: sysstat's collector is outside — the package is a desktop one, but a stock install leaves its timers
-    # disabled (Debian's sysstat/enable defaults to false); the runner image enabled them
-    assert by_t[40.0] == ("outside", "job sysstat-collect (sysstat)")
-    assert "job sysstat-collect (sysstat)" not in tally.get("desktop", {})
+    # D47 (reverting D32): sysstat's collector is the desktop's — a stock install from the desktop image runs its
+    # timers, which the image's default layer holds enabled — and recurs within the phase, so it is kept
+    assert 40.0 not in by_t and tally["desktop"]["job sysstat-collect (sysstat)"] == 1
     assert tally["own"]["idle CPU (timer or interrupt)"] == 1
 
 
@@ -557,7 +561,7 @@ def test_every_cause_class_is_reached_by_a_constructed_wake():
     # D27, D32: the branches the first case does not reach — a job named by the process pid 1 starts for it
     # (`(<unit>)`) or by the programs anacron's tree ran, both clock-bound events; pid 1's own helper, a desktop job
     # kept; a kernel thread's wake, kept; a waker the trace does not resolve, kept as unknown; sysstat's daily summary,
-    # outside; another entry acting on its own, a desktop program's activity, kept
+    # a clock event (D47); another entry acting on its own, a desktop program's activity, kept
     from meas.campaign.analyze import Row
     from meas.session import causes as C
     procs = {1: {"pid": 1, "comm": "systemd", "cgroup": "/init.scope"},
@@ -581,7 +585,7 @@ def test_every_cause_class_is_reached_by_a_constructed_wake():
     keep, tally, gone = c.split(wakes)
     by_t = {round(t, 4): (cls, lab) for t, cls, lab in gone}
     assert by_t == {100.0: ("event", "job fstrim (util-linux)"), 110.0: ("event", "job anacron (anacron)"),
-                    150.0: ("outside", "job sysstat-summary (sysstat)")}
+                    150.0: ("event", "job sysstat-summary (sysstat)")}
     assert {round(r.t_in, 4) for r in keep} == {120.0, 130.0, 140.0, 159.0, 159.0002}
     assert tally["desktop"] == {"job systemd helper (systemd)": 1, "entry dbus-daemon (system-bus/dbus-daemon) on its own": 1}
     assert tally["kernel"] == {"kernel thread kworker/0:1": 1}
@@ -606,3 +610,21 @@ def test_the_results_page_names_the_exception_that_carries_each_value():
     assert pool.verdict({"passes": False, "carried": True, "sparse": False}) == "carried (D29)"
     assert pool.verdict({"passes": False, "carried": True, "sparse": True}) == "carried (D33)"
     assert pool.verdict({"passes": False, "carried": False}) == "no"
+
+
+def test_a_version_the_run_recorded_empty_is_read_from_the_install_log(tmp_path):
+    # D45: the campaign queried dpkg for `mutter` and `gnome-session`, which no noble package is named; each repeat's
+    # install log names the packages that carry them, and a version the run did record is kept
+    (tmp_path / "apt.desktop.log").write_text(
+        "Selecting previously unselected package libmutter-14-0:amd64.\n"
+        "Preparing to unpack .../libmutter-14-0_46.2-1ubuntu0.24.04.16_amd64.deb ...\n"
+        "Unpacking libmutter-14-0:amd64 (46.2-1ubuntu0.24.04.16) ...\n"
+        "Setting up gnome-session-bin (46.0-1ubuntu4) ...\n")
+    info = {"dir": str(tmp_path),
+            "report": {"version.mutter": "", "version.gnome-session": "", "version.gnome-shell": "46.0-0ubuntu6"}}
+    v = pool.versions_of(info)
+    assert (v["mutter"], v["gnome-session"], v["gnome-shell"]) == ("46.2-1ubuntu0.24.04.16", "46.0-1ubuntu4",
+                                                                    "46.0-0ubuntu6")
+    info["report"]["version.mutter"] = "46.2-1ubuntu0.24.04.17"
+    assert pool.versions_of(info)["mutter"] == "46.2-1ubuntu0.24.04.17"
+    assert pool.install_log_version(str(tmp_path / "nowhere"), "libmutter-14-0") == ""

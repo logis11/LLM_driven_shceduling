@@ -62618,7 +62618,7 @@
     "tolerance": 0.05,
     "abs_floor_ms": 0.001,
     "min_repeats": 5,
-    "window_limit": 44,
+    "window_limit": 57,
     "quantities": {
      "idle gpu/VizCompositorTh wakes/s": {
       "k": 44,
@@ -62904,8 +62904,7 @@
       "half_width_abs": 4.8058,
       "leave_one_out": 0.0121,
       "passes": true,
-      "needed": 41,
-      "limited": true
+      "needed": 41
      },
      "input_run mean, 136M (ms)": {
       "k": 43,
@@ -62915,12 +62914,11 @@
       "half_width_abs": 3.1261,
       "leave_one_out": 0.0052,
       "passes": true,
-      "needed": 18,
-      "limited": true
+      "needed": 18
      }
     },
     "passes": true,
-    "needed": 26
+    "needed": 41
    },
    "excluded_repeats": {
     "42@36126168885": "D66: two pushes ten seconds apart started runs #598 and #599 (2026-09-25 10:50 UTC), both measuring window 42; the original launch's copy (#598, 36126154552) is pooled and #599's left out"

@@ -599,7 +599,7 @@ Commit: this entry.
 
 ## D31 — the hidden renderer's repeats to the rule; `HangWatcher`'s run mean held (2026-09-26)
 
-> Corrected by D36 (the results page read no build for Element and the Steam client; each subject's key read now).
+> Corrected by D36 (the results page read no build for Element and the Steam client; each subject's key read now). The added repeats' raw records were added to release `meas-ci-desktop-2026-09-20` on 2026-09-27 (assets `meas-desktop-chrome-hidden-r12.zip` … `r16.zip`, `69e5041`), after this entry said they were not in it.
 
 By 인지오's decision, on the 2026-09-26 review of 9.5–9.9: the hidden renderer's repeats added to the pool's projection, `HangWatcher`'s run mean held by the rule and D17 no longer applied to it. Read as carried (9.5 D78) over the 14 landings the run mean was 0.0274 ms ±5.29 %, the projection 16. Repeats 12 and 13 were added (run #51); at 16 landings it read ±5.25 % and projected 18, so 14 and 15 were added; at 18, ±5.02 % projecting 19, so 16 — the rule read after each landing past the batch (the workflow; 9.7 D26). At 19 landings it holds, 0.0267 ms ±4.79 %, every repeat valid. Nine jobs, runs #51–#57: five landed on the AMD EPYC 7763 and four were stopped by the machine gate (EPYC 9V45, Xeon Platinum 8573C twice, EPYC 9V74), each in `gated_out` (41 → 45) and in `campaign/machine-draws.md`.
 

@@ -262,3 +262,11 @@ By 인지오's decision, on the 2026-09-28 sweep of the 9.5–9.9 changelogs' co
 Values changed: none; the scopes of `cpu-batch` and `compiler-child`, `build-orchestrator`'s notes, `cpu-batch`'s stats line. Compiled with `--allow-window`: the library hash only, 0 of 100 artifacts changing beyond it (`tools/beyond_hash.py`); no demand moves.
 
 Commit: this entry.
+
+## D38 — `compiler-child`'s scope names the gcc the campaign ran (2026-09-29)
+
+No new decision; found on the 2026-09-29 reading of 9.5–9.9 for their summary. `compiler-child`'s scope said "gcc 13.2.0 on Ubuntu 24.04"; every one of the 14 pooled repeats records `gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0` in its `report.kv` (release `meas-ci-build-2026-09-18`). 13.2.0 is the GCC source S2-02 read for the driver's structure (D2), not the compiler that ran. The scope now names gcc 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04.1).
+
+Values changed: none; `compiler-child`'s scope. Compiled with `--allow-window`: the library hash only, 0 of 100 artifacts changing beyond it (`tools/beyond_hash.py`); no demand moves.
+
+Commit: this entry.

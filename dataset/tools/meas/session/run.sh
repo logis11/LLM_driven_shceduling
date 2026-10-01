@@ -234,10 +234,14 @@ install_session() {
   rec apt.desktop.rc "$?"
   sudo rm -f /usr/sbin/policy-rc.d
   local p
-  for p in ubuntu-desktop-minimal gnome-shell mutter gnome-session pipewire wireplumber pipewire-pulse systemd dbus \
+  for p in ubuntu-desktop-minimal gnome-shell pipewire wireplumber pipewire-pulse systemd dbus \
            dbus-daemon dbus-broker gdm3 gnome-initial-setup ubuntu-settings; do
     rec "version.$p" "$(dpkg-query -W -f='${Version}' "$p" 2>/dev/null)"
   done
+  # D45: no package is named `mutter` or `gnome-session` on noble — Mutter ships as libmutter-14-0, the session
+  # binary as gnome-session-bin
+  rec version.mutter "$(dpkg-query -W -f='${Version}' libmutter-14-0 2>/dev/null)"
+  rec version.gnome-session "$(dpkg-query -W -f='${Version}' gnome-session-bin 2>/dev/null)"
   # D11: no display manager — the transient PAM unit is the login path — except in login mode `gdm`, where GDM's
   # own automatic login is the path and GDM stays as installed
   if [ "$LOGIN_MODE" != gdm ]; then

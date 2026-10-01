@@ -1,4 +1,4 @@
-# Task 9.5 — measurement campaign method (draft, 2026-09-14)
+# Task 9.5 — measurement campaign method (2026-09-14)
 
 The observation behind the eight archetypes of changelog D2 and D11, run on GitHub-hosted runners (phase decision 5). Written before any measurement; amended only by a dated entry in §9. Items marked **open** wait on the runner probe (`.github/workflows/meas-probe.yml`, run 34835910916) or on a decision in the changelog.
 
@@ -82,6 +82,8 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel as recorded); Xvfb with no 
 
 ## 9. Amendments
 
+- 2026-09-29, `code`'s stop re-read against its recording (changelog D99) — the 2026-09-23 window limits: SWELL-KW's Word condition holds 57 windows, 56 with input, not 44; `code`'s campaign stopped at window 44, and its per-input values are held to the rule.
+- 2026-09-29, the SWELL-KW figures beside the 136M streams (changelog D98) — §3: the pre-registration's 15 % for SWELL-KW Word c1's share of gaps over 1 s was the share in the one file S3 first read (S3-swell-kw); over the committed stream `dataset/stimulus/swell-word-c1.jsonl` it is 7.9 % of the 82,633 gaps between events of any kind, as the campaign replayed them until D28, and 5.5 % of the 78,013 gaps between keys, as replayed since. The stated p50, p90 and p99 do not reproduce from the committed stream either: 156, 780 and 4,425 ms between events of any kind, 143, 562 and 5,848 ms between keys. The 136M windows' figures stand as stated.
 - 2026-09-28, a Gecko child's threads as components of their own (changelog D94) — §5, amending D67's reading for `thunderbird-send`: a process started with `-contentproc` takes its process name as its role (`WebExtensions`, `RDD Process`), in the op phase too; the idle pool re-read under the roles needed 77 repeats, and 34 idle-only repeats were added as one batch at that projection (windows 45–78, runs #651–#663), Thunderbird 156.0.1 in each.
 
 - 2026-09-28, `mail-client`'s 04:00 `glean.mps` run stated, not carried (changelog D91) — §6: Glean's metrics-ping scheduler wakes once a day at 04:00 local time (`glean`); its one run in the 43 repeats (2.299 ms, repeat 39, the only phase that held 04:00 UTC) leaves the component rows at any length, as D64's event does, and is kept in the pooled record as an event not compiled and stated in the scope; the idle residual is read without it. `HEAVY_EVENTS` and `CLOCK_EVENTS` in `campaign/pool.py`.

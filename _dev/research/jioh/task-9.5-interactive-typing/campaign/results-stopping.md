@@ -5,7 +5,7 @@ Each entry's widest value the rule is read on, its repeats drawn at the value's 
 | entry | widest value | repeats | spread (CV) | half-width | mean bias (normal · lognormal) | coverage (normal · lognormal) | count at the stop (normal · lognormal) |
 |---|---|---|---|---|---|---|---|
 | `office-writer` | input_run mean, 136M (ms) | 14 | 8.59 % | 4.96 % | +0.12 % · -0.02 % | 92.7 % · 91.3 % | 12.8 · 12.8 |
-| `code-editor` | idle renderer/ThreadPoolForeg run mean (ms) | 44 | 12.17 % | 3.70 % | stopped at its recording's last window | | |
+| `code-editor` | input_run mean, SWELL-KW (ms) | 43 | 15.73 % | 4.84 % | stopped at window 44, short of its recording's 57, not by the rule | | |
 | `web-browser` | idle renderer/chrome run mean (ms) | 38 | 13.30 % | 4.37 % | stopped at its recording's last window | | |
 | `mail-client` | idle WebExtensions/StreamTrans run mean (ms) | 77 | 20.93 % | 4.75 % | +0.20 % · -0.04 % | 93.8 % · 93.2 % | 68.2 · 67.8 |
 | `image-editor` | op script-fu run mean (ms) | 5 | 3.54 % | 4.40 % | -0.01 % · -0.02 % | 94.8 % · 94.8 % | 5.4 · 5.4 |

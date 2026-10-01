@@ -209,7 +209,7 @@ Commit: this entry.
 
 ## D27 — a wake's cause is traced through the trace; wakes owed to causes outside the observed desktop leave the components (2026-09-24)
 
-> Amended by D32 (sysstat's jobs outside; decision 1 gains a ground) and D37 (`systemd-networkd` outside); corrected by D43 (sysstat's jobs left wakes in those four repeats; four GNOME Shell wakes over the 24 repeats are php-fpm's).
+> Amended by D32 (sysstat's jobs outside; decision 1 gains a ground) and D37 (`systemd-networkd` outside); corrected by D43 (sysstat's jobs left wakes in those four repeats; four GNOME Shell wakes over the 24 repeats are php-fpm's) and D46 (the manifest's 1,836 lines are 1,823 deb packages and 13 snaps).
 
 By 인지오's decisions of 2026-09-24, after the fold-in (D26) was found to carry wakes the desktop does not make. What wakes each entry's threads, read from the released wakeup rows of all 24 repeats: pid 1's 7,943 rows are 54.4 % `php-fpm8.3`, 180 in every repeat, one every 10.001 s — PHP 8.3's FastCGI service, which the runner image ships, signalling pid 1; the system bus's 6,031 rows are 99.8 % pid 1, and 74.9 % of them fall inside pid-1 runs that `php-fpm` started; WirePlumber's worker thread (`gmain`) has 9,249 rows, 4,320 of them raised by the workflow's own "wait for the run" step (`while kill -0 …; do sleep 10; done` in `meas-session.yml`), 180 in every repeat at the same point of each iteration, and 4,316 of those followed by the thread's own timer 100.2 ms later (1st–99th percentile 100.17–100.25 ms). `compositor-shell`'s wakes are its own threads and timers. The foreign-work bound (D20, D22) did not see any of this: it counts work on the measured CPU, and these wakers run on the others.
 
@@ -243,7 +243,7 @@ Under D27 the rule holds for GNOME Shell's nine values and fails on six: WirePlu
 
 ## D29 — the three carried with their half-widths, D57 as 9.8 D21 extended it (2026-09-24)
 
-> Amended by D31 (`audio-server` no longer carried) and D33 (the worker and the bus sparse; pid 1's run mean alone).
+> Amended by D31 (`audio-server` no longer carried) and D33 (the worker and the bus sparse; pid 1's run mean alone); and by D48 (pid 1's run mean re-read and the bus carried so again, sysstat's collector kept under D47).
 
 By 인지오's decision on D28: `wireplumber/gmain`, `pid1/systemd` and `system-bus/dbus-daemon` are carried with their half-widths over the 24 repeats, each component's three values together, under 9.5 D57 as 9.8 D21 extended it to components whose spread lies in part within a run. Each entry's scope states both spreads from D28, the wakes a phase, and that the component is its entry's whole activity once D27's causes are out. Not taken: adding repeats until each holds — about 115 more landings for the bus, some 230 jobs at the campaign's draw rate, for quantities of 0.0093, 0.075 and 0.014 wakes/s; carrying pid 1 alone and adding repeats for the other two. Whether any carried spread moves a scheduling outcome is 9.14's sensitivity question. Tooling: `SESSION_SPREAD` in `session/pool.py`; the rule holds with it (`results.md`: nine values pass, nine carried). No value changed by this entry.
 
@@ -282,7 +282,7 @@ Commit: this entry.
 
 ## D32 — sysstat's jobs are outside the observed desktop; the pool rebuilt without them (2026-09-25)
 
-> Amended by 9.5 D78 (the run mean re-read count-weighted) and D37 (`systemd-networkd` outside; the pool rebuilt); corrected by 9.6 D35 (half-widths past twenty repeats were too wide).
+> Amended by 9.5 D78 (the run mean re-read count-weighted) and D37 (`systemd-networkd` outside; the pool rebuilt); corrected by 9.6 D35 (half-widths past twenty repeats were too wide). Reverted by D47: a stock install from the desktop image runs sysstat's timers, the image built with no systemd running, so the postinst's disable step never runs there.
 
 By 인지오's decision, on a review of the D30 fold-in. D27 keeps a wake whose cause is a package Ubuntu 24.04's desktop manifest holds, and the manifest holds `sysstat`, so its collector job — `debian-sa1 1 1` every 10 minutes, three times in each 1800 s phase — stayed in the components as a desktop job whose schedule recurs within the phase (D27 decision 3). Over the 24 repeats it was 277 of `audio-server`'s 402 kept wakes (69 %, WirePlumber's worker reacting to the collector's file writes), 361 of `message-bus`'s 609 (59 %) and 68 of `service-manager`'s 3,238 (2 %).
 
@@ -296,7 +296,7 @@ Commit: this entry.
 
 ## D33 — the audio server's worker and the system bus carried as sparse components (2026-09-25)
 
-> Amended by 9.5 D78 (gap and run means over every repeat) and D37 (`message-bus` re-pooled without `systemd-networkd`); corrected by 9.6 D35 (half-widths past twenty repeats were too wide) and 9.5 D77 (over a short span not compiled at its rate) and D43 (the audio server's worker woke in every repeat, so its gap table is per repeat; only the bus's is laid end to end).
+> Amended by 9.5 D78 (gap and run means over every repeat) and D37 (`message-bus` re-pooled without `systemd-networkd`); corrected by 9.6 D35 (half-widths past twenty repeats were too wide) and 9.5 D77 (over a short span not compiled at its rate) and D43 (the audio server's worker woke in every repeat, so its gap table is per repeat; only the bus's is laid end to end). Applied to no component since D47 and D48: with sysstat's collector kept the worker holds the rule and the bus is carried between sessions.
 
 By 인지오's decision, on D32's result. Both components are their entry's whole activity once D27's and D32's causes are out, and both are sparse: `wireplumber/gmain` wakes 2–12 times a phase on its own timer; `system-bus/dbus-daemon` 0–36 times, in bursts from journald, pid 1's own activity, resolved, oomd, udevd and udisks2, and not at all in 6 of the 24 phases. They are carried as sparse components, the class 9.8 D27 set: with their half-widths over at least five repeats, their three values together, and their count stated — the wake rate over every repeat, zero where the component never woke; the gap and run means over the repeats it woke in; its gap table over the repeats laid end to end and wrapped round, a repeat in which it never woke adding its time (9.5 D71's rule for a renderer the thread never woke in), so the entry compiles at the rate it carries. Values: `wireplumber/gmain` 0.0029 wakes/s ±21.6 %, gap mean 426.7 s ±19.8 %, run mean 0.036 ms ±4.0 %; `system-bus/dbus-daemon` 0.0057 wakes/s ±43.8 % over 24, gap mean 238.6 s ±45.7 % and run mean 0.188 ms ±25.0 % over the 18 it woke in. `pid1/systemd` keeps D29 for its run mean alone, its rate and gap mean passing.
 
@@ -340,6 +340,8 @@ Commit: this entry.
 
 ## D37 — `systemd-networkd` is outside the observed desktop (2026-09-26)
 
+> Amended by D47 (the ground completed: the desktop image's preset enabling networkd is never applied, an installed desktop's first boot not being one).
+
 By 인지오's decision, on the 2026-09-26 review of 9.5–9.9: `systemd-networkd`, kept by D27's package rule and stated as unverified since, is tested against D32's ground — outside if a stock desktop leaves it inactive, else stated as verified kept. Read in the primary texts, entered in `docs/references.md`:
 
 - `systemd-ubuntu` — Ubuntu's `systemd` 255.4-1ubuntu8.17, the version the campaign ran: its postinst enables `getty@tty1.service`, `remote-fs.target` and `systemd-pstore.service` on new installs and no other unit; `override_dh_installsystemd` installs no unit of the `systemd` package, which ships `systemd-networkd.service` and `.socket`; the links file enables only `getty-static.service`.
@@ -354,7 +356,7 @@ Commit: this entry.
 
 ## D38 — the midnight repeats' WirePlumber wakes: the split stated (2026-09-26)
 
-> Corrected by D43 (repeat 61 holds two kept wakes a pid-1 job woke, and no pair in the first 4 s).
+> Corrected by D43 (repeat 61 holds two kept wakes a pid-1 job woke, and no pair in the first 4 s); restated by D47 (0.0110 against 0.0090 wakes/s, sysstat's collector kept; the worker held by the rule).
 
 By 인지오's decision, on the 2026-09-26 review of 9.5–9.9: `wireplumber/gmain` woke 0.0057 times a second in repeats 47, 48, 49 and 51 — the first batch, launched at 23:35 UTC, which crossed midnight and met the cron session (D23) — against 0.0023 in the other 20, after D23's windows. Traced to its cause, the rows leave by D23's and D27's rules if a clock-bound or outside cause is found, else the split is stated.
 
@@ -396,6 +398,8 @@ Commit: this entry.
 
 ## D42 — the steady phase read in time windows; the transients past the steady edge stated (2026-09-28)
 
+> Restated by D47 (`audio-server`'s first 100 s at 3.13 times its phase rate, 56 of its 402 kept wakes in the first 22 s).
+
 By 인지오's decision, from the 2026-09-28 review of 9.5–9.9: the steady phase is read in 100 s windows, per carried component and for each entry whole, pooled over the 24 repeats — `dataset/tools/meas/windows.py`, `campaign/results-windows.md` — and where an entry does part of its work only in part of the phase, its scope states it; no value changes, the carried values staying the phase's means. `compositor-shell`: the first 100 s past the steady edge is the phase's busiest — `JS Helper` wakes at 1.46 times its phase rate and `gnome-shell`'s run mean is 8.03 ms against 5.10–6.75 ms after — the phase's windows holding 5.7 % of its CPU above its median window. `audio-server`: `wireplumber/gmain` wakes at 7.2 times its phase rate in the first 100 s — 50 of its 125 kept wakes fall in the phase's first 22 s, in 22 of the 24 repeats a pair 0.1 s apart within the first 4 s, one wake 12–22 s in, or both — beside the midnight repeats' pairs (D38). Neither is launch work the traces show, the ground on which 9.5 D34 and D83 move a phase's start; `compositor-shell` uses about 0.02 % of a CPU and `audio-server` wakes about five times in 30 minutes. `service-manager` and `message-bus` rise and fall on a cycle of about 700–800 s through the phase rather than at its start (9.8 % and 31.6 % of their CPU above the median window), and are not stated.
 
 Tooling: `WINDOWS_STATED` in `session/fold_in.py`; the reading is 9.8 D34's `meas/windows.py`. Results: `campaign/results-windows.md`, `campaign/results-windows/windows.json`. Values changed: none; `compositor-shell`'s and `audio-server`'s scopes. The raw records are unchanged.
@@ -422,5 +426,45 @@ Commit: this entry.
 By 인지오's decision, on the item D43 left to its own decision: D23 wrote the window as two seconds each side of every wakeup by a process with comm `cron`, and the code opens it only at `cron`'s wakeups of an entry's thread (`session/analyze.py`, `load_wakeups` over the entries' pids). The text is corrected to the code; the carried values and every stated count follow the code. The two differ in the 24 carried repeats: `cron` wakes its own children 8–15 times in every repeat, and `systemd-journal`, `gmain`, `rcu_sched` and kernel workers beside them, while it wakes pid 1 36–38 times in repeats 47, 48, 49 and 51 alone, the four where the code opens a window. D23's grounds name that marker: `cron` waking pid 1 in the repeats that met the midnight session and not once in the others.
 
 Tooling: the comment and `cron_windows`' docstring in `session/analyze.py`; method §5. Tests: `test_a_cron_wakeup_of_a_thread_no_entry_owns_opens_no_window`. Values changed: none. The raw records are unchanged.
+
+Commit: this entry.
+
+## D45 — Mutter's and gnome-session's versions read from each repeat's install log (2026-09-29)
+
+No new decision; found on the 2026-09-29 reading of 9.5–9.9 for their summary. Method §1 records Mutter's version, and every pooled repeat recorded it empty, `gnome-session`'s too: `session/run.sh` queried dpkg for packages named `mutter` and `gnome-session`, and no noble package is named either — Mutter ships as `libmutter-14-0`, the session binary as `gnome-session-bin`. Each repeat's `apt.desktop.log`, in the release, names both: `libmutter-14-0` 46.2-1ubuntu0.24.04.16 and `gnome-session-bin` 46.0-1ubuntu4 in all 24. The Mutter 46.2 D3 took from the archive is the build that ran.
+
+Tooling: `session/run.sh` queries `libmutter-14-0` and `gnome-session-bin` under the keys `mutter` and `gnome-session`; `session/pool.py` fills a version a repeat recorded empty from its install log (`install_log_version`, `versions_of`); `session/fold_in.py` names Mutter's version in `compositor-shell`'s scope. Re-pooled from the release's 24 repeats: the pooled record differs from the committed one only in the two versions per repeat, and the results page is unchanged. Tests: `test_a_version_the_run_recorded_empty_is_read_from_the_install_log`; the fold-in's regeneration test holds. The untraced control's pool is not re-read.
+
+Values changed: none; `compositor-shell`'s scope. Compiled with `--allow-window`: the library hash only, 0 of 100 artifacts changing beyond it (`tools/beyond_hash.py`); no demand moves.
+
+Commit: this entry.
+
+## D46 — Ubuntu 24.04's desktop manifest entered in the reference index (2026-09-29)
+
+No new decision; found on the 2026-09-29 reading of 9.5–9.9 for their summary. D27's package rule — a wake whose waker's package Ubuntu 24.04's desktop manifest does not hold leaves the components — is stated in all four scopes, and the manifest had no `docs/references.md` entry. Entered as `ubuntu-desktop-manifest` (deployed-system), read on 2026-09-29: `ubuntu-24.04.5.1-desktop-amd64.manifest` at releases.ubuntu.com/24.04/, SHA-256 6c200933…f8ff as D27 read it, byte-identical to the image's `casper/filesystem.manifest`. It holds `sysstat` 12.6.1-2 and every package D27 names as a desktop package, and the versions the campaign ran; it holds no `php8.3-fpm`, `php-common`, `podman` or `sphinxsearch`. Correction to D27: its 1,836 lines are 1,823 deb packages and 13 snaps. The manifest lists the live session's filesystem, the union of the image's three layers; `sysstat` is in the default layer, `casper/minimal.manifest`. No `dataset/sources.yaml` entry, as `systemd-ubuntu`, `livecd-rootfs` and `netplan` have none. Values changed: none.
+
+Commit: this entry.
+
+## D47 — sysstat's collector is the desktop's: D32 reverted; D37's ground completed (2026-10-01)
+
+By 인지오's decision, on a finding of the 2026-09-29 reading of 9.5–9.9 for their summary. D32 put every sysstat job outside on the ground that a stock install leaves sysstat's units disabled: Debian's `sysstat/enable` defaults to false and the postinst disables the timers on it. The postinst does so only where systemd runs — `manage_systemd_services` returns unless `[ -d /run/systemd/system ]` — while `debian/rules` calls `dh_installsystemd` without `--no-enable`, so the units are enabled first (`sysstat-debian`, re-read 2026-10-01). A desktop image is built with no systemd running: the default install layer of the 24.04.5.1 desktop image (`casper/minimal.squashfs`) holds `sysstat.service` in `multi-user.target.wants` and both timers in `sysstat.service.wants`, as deb-systemd-helper's state file records, and `cron.service` enabled; `/etc/default/sysstat`'s `ENABLED="false"` gates only `debian-sa1`, not the timers' `sa1` and `sa2` (read from the published ISO by range requests, 2026-09-29 and 2026-10-01). A stock install therefore runs sysstat's jobs, as the runner image did.
+
+Decision: D32 is reverted. The collector, every 10 minutes, recurs within the phase and is kept as a desktop job (D27 decision 3); the summary (00:07) and the 23:59 sample are bound to a clock time and are events, stated and not carried — as before D32.
+
+D37's ground re-read in the same pass. The default install layer ships `90-systemd.preset`, which enables `systemd-networkd.service`, and an empty `/etc/machine-id`; PID 1 applies presets only on a first boot, and neither the image nor an install makes one: "If /etc/machine-id exists and is empty, a boot is not considered the first boot" (`systemd-ubuntu`, `man/machine-id.xml`; `src/core/main.c` 2152–2160), and the installer writes the live session's machine ID into the target (`ubuntu-desktop-bootstrap`: subiquity `models/subiquity.py` 479–511, applied by curtin's `extract`). The layer holds no networkd enablement link and its netplan file sets `renderer: NetworkManager`. D37 stands: networkd is outside.
+
+Values changed (re-pooled from release `meas-ci-session-2026-09-24`, the 24 repeats): `audio-server`'s `wireplumber/gmain` 0.0029 → 0.0093 wakes/s, gap mean 345.6 → 107.5 s, run mean 0.0359 → 0.0350 ms, 14–21 wakes a phase (was 2–12), its three values within the rule, the widest its wake rate ±4.48 % — the sparse class no longer applied (D33); `service-manager`'s `pid1/systemd` 0.0687 → 0.0702 wakes/s (±1.87 %), run mean 0.1282 → 0.171 ms (±7.77 %); `message-bus`'s `system-bus/dbus-daemon` 0.0056 → 0.0140 wakes/s, gap mean 178.5 → 71.6 s, run mean 0.1548 → 0.121 ms, 16–38 wakes a phase in every repeat (was 0–30, none in 6) — the last two decided by D48. `compositor-shell` unchanged. The midnight split (D38) restated: 0.0110 against 0.0090 wakes/s, the worker held by the rule; the time windows (D42) restated: `wireplumber/gmain` at 3.13 times its phase rate in the first 100 s, 56 of its 402 kept wakes in the first 22 s.
+
+Tooling: `JOBS` in `session/causes.py` (sysstat-collect desktop, sysstat-summary and sysstat-daily-sample events); the midnight split stated for a component the rule holds, the causes' citations and the windows sentence in `session/fold_in.py`. Tests: `test_a_wake_is_classed_by_its_cause_traced_through_the_trace`, `test_every_cause_class_is_reached_by_a_constructed_wake`, `test_the_audio_servers_scope_states_its_midnight_split`. Regenerated: `results/pooled.json` and `results.md`; `results/within-run.json` (pid 1 and the bus, the components the rule does not hold on); the untraced control's traced pool, `results-control/control.json` and `results-control.md` — every ratio unchanged, the shares left out lower, the traced runs against the carried pool largest |z| 1.15, 0.91 and 1.29 (were 0.68, 0.6 and 1.19), each archetype's notes unchanged; `results-windows`; `results-burstiness`, every entry about 1 at 1–100 ms, the bus 0.31–5.3 per stream; the four entries by the fold-in. References: `sysstat-debian` and `ubuntu-desktop-bootstrap` entered, `systemd-ubuntu` extended with the first-boot passages. Compiled with `--allow-window`: 4 of 100 artifacts change beyond the library hash, `c1-idle` and `c7-idle` in both sets; no demand moves at the manifest's resolution (0.0004 and 1.0004).
+
+Commit: this entry.
+
+## D48 — the system bus carried between sessions; pid 1's run mean re-read (2026-10-01)
+
+By 인지오's decision, on D47's pool. Two values do not hold the rule over the 24 repeats: pid 1's run mean, 0.171 ms ±7.77 % (55 repeats projected), and the system bus's three, 0.0140 wakes/s ±11.05 %, gap mean 71.6 s ±11.05 %, run mean 0.121 ms ±10.74 % (102–108 projected). The bus no longer fits D33's sparse class: it wakes 16–38 times a phase in every repeat, so the within-run test reads it. Re-read on the long-phase probes 36, 41 and 44 under D47's causes (`within_run.py`, a window of the phase every 60 s, half the range over the mean): pid 1's run mean ±10.7–18.4 % within one run against ±30.0 % across the repeats; the bus's wake rate ±23.4–28.4 % against ±43.8 %, gap mean ±25.3–47.0 % against ±42.6 %, run mean ±13.6–16.7 % against ±41.7 % — the spread lying in part within a run, in part between sessions, as D29's ground had it before D32.
+
+Decision (option A of three; B, the bus kept sparse with its larger count, and C, repeats added to the projections, not taken): both carried under 9.5 D57 as 9.8 D21 extended it — pid 1's run mean re-affirmed on the re-read figures, the bus's three values together with both spreads stated; `message-bus` leaves D33's class. Whether they are re-measured at a count fixed in advance is 9.14's, after its sensitivity check.
+
+Tooling: `SESSION_SPREAD` gains `system-bus/dbus-daemon` and `SPARSE` is empty in `session/pool.py`; `SPREAD_DECIDED` in `session/fold_in.py`. Tests: `test_a_sparse_component_is_carried_although_it_never_woke_in_some_repeats` reads the class on a constructed component and asserts the two sets. Values changed: none beyond D47's; the two entries' scopes.
 
 Commit: this entry.

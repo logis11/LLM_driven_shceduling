@@ -53,6 +53,30 @@ ABS_FLOOR_MS = 0.001        # the trace's resolution, as campaign/pool.py uses
 FOREIGN_CPU_SHARE_BOUND = 2e-4
 MIN_REPEATS = 5             # method §6 item 3
 
+# D45: the campaign's run.sh queried dpkg for `mutter` and `gnome-session`, which no noble package is named, so every
+# repeat recorded both empty. Each repeat's install log names the packages that carry them.
+INSTALL_LOG_VERSION = {"mutter": "libmutter-14-0", "gnome-session": "gnome-session-bin"}
+
+
+def install_log_version(run_dir, package):
+    """The version apt's install log in `run_dir` records for `package` (its `Unpacking` or `Setting up` line), or
+    an empty string when the log does not name it."""
+    try:
+        text = open(os.path.join(run_dir, "apt.desktop.log"), errors="replace").read()
+    except OSError:
+        return ""
+    m = re.search(rf"^(?:Unpacking|Setting up) {re.escape(package)}(?::\w+)? \(([^)\s]+)\)", text, re.M)
+    return m.group(1) if m else ""
+
+
+def versions_of(info):
+    """A repeat's package versions: its `version.*` records, an empty one filled from its install log (D45)."""
+    v = {x[len("version."):]: val for x, val in info["report"].items() if x.startswith("version.")}
+    for key, package in INSTALL_LOG_VERSION.items():
+        if not v.get(key):
+            v[key] = install_log_version(info["dir"], package)
+    return v
+
 
 def find_runs(root, cpu_model, modes=POOLED_MODES):
     """As `desktop/pool.py`: every repeat obtained is pooled; an index that landed more than once is keyed
@@ -173,16 +197,16 @@ def pool_entry(name, by_rep):
 # D29: 9.5 D57 as 9.8 D21 extended it — components whose spread lies in part within one run (the probes: half to
 # all of the across-repeat spread), each its entry's whole activity once D27's causes are out, carried with their
 # half-widths over at least five repeats, their three values together; both spreads, the wakes per phase and the
-# weight are stated in each entry's scope (`within_run.py`)
-SESSION_SPREAD = {"systemd": ("pid1/systemd",)}
+# weight are stated in each entry's scope (`within_run.py`). D48: pid 1's run mean re-read and the system bus's three
+# values carried so, once sysstat's collector is the desktop's again (D47) — the bus 16–38 wakes a phase in every
+# repeat, its wake rate ±23–28 % within one run against ±44 % across the repeats.
+SESSION_SPREAD = {"systemd": ("pid1/systemd",), "dbus-daemon": ("system-bus/dbus-daemon",)}
 
-# D33: sparse components (the class 9.8 D27 set), each its entry's whole activity once D27's and D32's causes are out:
-# WirePlumber's worker, 2–12 wakes a phase; the system bus, 0–36 a phase and none in 6 of the 24 repeats, which
-# 9.5 D43 would list as sporadic. Carried with their half-widths over at least five repeats, their three values
-# together, and their count stated: the wake rate over every repeat, zero where the component never woke; the gap
-# and run means over the repeats it woke in. D29 carried both between sessions on figures D28 read with the
-# collector's wakes present.
-SPARSE = {"pipewire": ("wireplumber/gmain",), "dbus-daemon": ("system-bus/dbus-daemon",)}
+# D33: sparse components (the class 9.8 D27 set) — none since D47 and D48: with sysstat's collector kept, WirePlumber's
+# worker wakes 14–21 times a phase and holds the rule, and the system bus is carried between sessions (D48). The class
+# stays for a component that wakes a few times a phase: the wake rate over every repeat, zero where the component never
+# woke; the gap and run means over the repeats it woke in.
+SPARSE = {}
 
 
 def gap_pairs(ph, comm, table):
@@ -261,7 +285,7 @@ def pool_app(app, reps):
         entry["cpu_model"][k] = info["spec"].get("cpu_model")
         entry["kernel"][k] = info["report"].get("kernel")
         entry["run_id"][k] = (info["spec"].get("github_run") or {}).get("GITHUB_RUN_ID")
-        entry["versions"][k] = {x[len("version."):]: v for x, v in info["report"].items() if x.startswith("version.")}
+        entry["versions"][k] = versions_of(info)
         entry["display_servers"][k] = ph["display_servers"]
         entry["in_unit_other"][k] = ph["in_unit_other"]
         for name, e in ph["entries"].items():

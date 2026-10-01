@@ -605,15 +605,15 @@ def test_the_window_limit_reads_the_highest_window_not_the_repeat_count():
     finally:
         if saved is not None:
             sys.modules["analyze"] = saved
-    assert pool.WINDOW_LIMIT["code"] == 44
-    reached = [r for r in range(1, 45) if r not in (5, 43)]       # 5 left out under D47, 43 replayed by none
+    assert pool.WINDOW_LIMIT["code"] == 57                       # D99: the Word recording's 57 windows, not 44
+    reached = [r for r in range(1, 58) if r not in (5, 43)]       # 5 left out under D47, 43 replayed by none
     crit = {"input_run mean, SWELL-KW (ms)": {}}
     pool.mark_limited("code", {"repeats": reached, "phases": {"driven": {"repeats": reached}}}, crit)
-    assert crit["input_run mean, SWELL-KW (ms)"].get("limited")   # 42 repeats, and every window the recording has
+    assert crit["input_run mean, SWELL-KW (ms)"].get("limited")   # 55 repeats, and every window the recording has
     crit2 = {"input_run mean, SWELL-KW (ms)": {}}
-    short = [r for r in range(1, 44) if r not in (5, 43)]
+    short = [r for r in range(1, 45) if r != 43]                  # code's campaign: windows 45–57 still to come
     pool.mark_limited("code", {"repeats": short, "phases": {"driven": {"repeats": short}}}, crit2)
-    assert not crit2["input_run mean, SWELL-KW (ms)"].get("limited")   # window 44 is still to come
+    assert not crit2["input_run mean, SWELL-KW (ms)"].get("limited")
 
 
 def test_the_results_render_sorts_an_exclusion_that_names_its_run():
@@ -714,10 +714,10 @@ def test_values_at_the_window_limit_are_stated_with_their_half_widths(fold_95):
     # D32, D46: the phases that replay a recording's window stop at its last; their values state their half-widths,
     # each one outside the rule by name with the repeats the rule would need
     s = _scopes(fold_95)
+    # D99: code stopped at window 44, short of its recording's 57; its per-input means are held to the rule
     code = s["code-editor"]
-    assert "43 repeats" in code and "outside the rule" not in code
-    assert ("the per-input run mean under SWELL-KW 99.26 ms ±4.84 % and the per-input run mean under 136M "
-            "103.9 ms ±3.01 % hold within it") in code   # D83: the idle rate the window rule nets read from 200 s
+    assert "window limit" not in code.lower() and "outside the rule" not in code
+    assert "the campaign stopped at window 44, then read as the Word recording's last" in code
     web = s["web-browser"]
     assert "38 repeats" in web and "the per-input means and the page-load operation's values" in web
     # D84: its renderers carried, the SWELL-KW per-input mean sits outside the rule at the recording's last window
@@ -732,7 +732,7 @@ def test_values_at_the_window_limit_are_stated_with_their_half_widths(fold_95):
     assert "the operation's `StreamTrans` wake rate 55.53 wakes/s ±6.51 % (the rule needs 12 repeats)" in mail
     assert "the other 30 hold within it, the widest ±5.38 %" in mail   # SwComposite's run mean, by the 1 µs floor
     for aid in ("office-writer", "image-editor", "video-editor", "video-player", "audio-player", "video-call"):
-        assert "window limit" not in s[aid].lower(), aid
+        assert "window limit" not in s[aid].lower() and "(D99)" not in s[aid], aid
 
 
 def test_code_s_idle_phase_from_200_s_carries_libuv_worker_under_d57_again(fold_95):
