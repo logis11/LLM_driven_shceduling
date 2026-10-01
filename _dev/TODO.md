@@ -157,6 +157,7 @@ Execution order: 9.1 ∥ 9.2 ∥ 9.3 first → 9.4–9.12 in parallel, after 9.1
   - [ ] Kdenlive's export of the video-editor project observed in a runner campaign, the render files rebound (D10)
   - [ ] HandBrakeCLI re-measured on CpsMark+'s transcode workload, the transcode files rebound (D11)
   - [ ] python3 re-measured on PyTorch's basic MNIST example, the ml-train files rebound (D12)
+  - [ ] Chrome's renderer count for five tabs observed on the runner, the Chrome files rebound (D15)
 - [WIP] **9.11** Scheduler-side constants and groundings — research and decisions — from 9.6 (D17): declared scheduling classes
 - [ ] **9.12** Related-work and proposal prose — research and decisions — from 9.6 (D32): the same wording rule for the `python3` binding in proposal and related-work prose — from 9.6 (D17): the proposal's `updatedb` sentence
 - [ ] **9.13** Rebuild — the dataset rebuilt once from 9.4–9.12's decisions — from 9.5: native compiled set dropped, single only (spec decision 14) — from 9.7 (D30): `network-bulk` must be gone before the rebuild, its three `thunderbird` send tasks placed by 9.10 — from 9.5 (D74): measured timer wakes are exogenous wake events, 531,740 in `coreset-single` (84 MB) — from 9.6 (D17): schema (the declared-class field, if 9.11 adds one)

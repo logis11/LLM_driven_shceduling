@@ -281,3 +281,23 @@ The two meeting files are reporting files (`harness/experiments/rq0-gate.yaml`);
 Applied: `c1-meeting.timeline.yaml` keeps the task `voice` — the frozen scoring spec's weight-1.0 term on `voice` reads the call's 10 ms audio-frame job — and drops `video`; the header restated; `c7-meeting` re-derived. The dataset was recompiled with D13. Demand: `c1-meeting` 0.476 → 0.2387, `c7-meeting` 1.476 → 1.2387. The manifest also records D7's `c2-p2a` artifact.
 
 Hands to 9.14: the scoring spec's `c1-meeting` and `c7-meeting` term on `video` (weight 0.5) has no task.
+
+## D15 — the renderer count follows Firefox's Linux tab telemetry and an observed Chrome (2026-10-01)
+
+By 인지오's decision, scope-card item 50: the number of `renderer-hidden` tasks a file showing Chrome carries is no longer a placeholder (today 11, 7, 7, 9 and 5 across `c1-browsing`, `c1-office`, `c3-workday`, `c3-evening` and `c4-compile`'s injection, and the files derived from them). The count is set in two steps.
+
+- **Tabs** — the median per-client peak of concurrent tabs in Firefox's Linux telemetry, 4.67 (S3-40: GLAM, Firefox Desktop on Glean, release 152, Linux slice, 7,535,303 clients; `browser.engagement.max_concurrent_tab_count`, "The count of maximum number of tabs open during a subsession, across all windows"), so 5 tabs: the page in use, which is `web-browser`'s own renderer (9.5 D84), and 4 others. One statistic from one observation, the same in every file that shows a browser.
+- **Renderers** — Chrome observed on the runner with that tab set, distinct sites, counting the renderer processes it keeps, the spare included if one shows. Each file then carries that count of `renderer-hidden` tasks.
+
+Grounds:
+
+- **No count carried a citation.** The tab studies the building plan names give tab counts only, nothing about processes (scope card item 50; K4 §2.2; C-tabs-1). The old totals, 6, 8, 10 and 12, coincide with four Chang figures, three of them not open-tab counts (9.8 card).
+- **The tab count is a user-side value** and a candidate from any browser and platform (stage-2 reader rule). The Linux median holds at 3.4–5.0 across releases 137–156 (S3-40). Test Pilot's 2010 logs give a time-weighted median of 4.76 for 154 Linux users (S3-41).
+- **The renderer count is a program-side value and needs Linux.** Chromium's model is one process per site (scheme plus eTLD+1), a soft limit near 96 at 16 GiB, and one spare renderer kept (S2-16, Chromium 154 source). No class found a renderer listing for a known tab set on Linux, and a runner can observe one (S4, check 12).
+- **A stated choice.** The median of a per-client peak errs high for a random instant; the per-client average of those peaks, 2.79, was the alternative not taken.
+
+Open, for the observation's method: the sites, the window, how long after the tabs load the processes are counted.
+
+No file changed yet.
+
+Hands to 9.14: every Chrome file's demand moves. Hands to 9.15: `building-plan.md` §3's browser-default paragraph; `data-contracts.md:159` ("one per tab group", C-plain-1); the `chang-chi21`, `dubroy-chi10`, `mozilla-testpilot10` role lines (item 77).
