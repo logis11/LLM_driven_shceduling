@@ -749,3 +749,18 @@ By 인지오's decision, scope-card items 79–82: `docs/workload/building-plan.
 - **The negative result, narrowed.** No public trace gives desktop process trees with names over time. BEHACOM publishes foreground executable names per minute from natural use on Linux and Windows (S3-02), and DARPA OpTC publishes process-create events with image paths on Windows 10 enterprise endpoints (C-plain-7). Mobile datasets stay excluded for foreground exclusivity; Carat's several running apps per sample are noted (C-plain-8).
 
 Hands to 9.15: `building-plan.md` §4 and `grounding-sources.md` Role C and the negative result rewritten to this; the `swell-icmi14`, `gonzalez-chi04`, `mark-chi05` and `focal-arxiv26` role lines corrected; a `docs/references.md` entry minted for BEHACOM where the docs cite it. Hands to the Backlog item "Naturalistic generator": these candidates and the open switching shape.
+
+## D36 — the unattended upgrade's pending set: one real day's security updates, 2026-07-27 (2026-10-01)
+
+By 인지오's decision, D3's first open item (the state measured): the campaign measures the stock unattended upgrade installing the security updates of one real day — the latest day before the campaign at the median of the past year's working days, 2026-07-27: `glibc` 2.39-0ubuntu8.8, four binaries of the default layer (`libc-bin`, `libc6`, `libc6-dbg`, `locales`). Each repeat rebuilds the state from Ubuntu's snapshot service: the default layer as the archive stood at 2026-07-27T00:00Z, upgraded against the archive at 2026-07-28T00:00Z.
+
+Grounds:
+
+- **What the job installs.** By default the release and security pockets (`50unattended-upgrades:6–8`, S2-30), from packages the update stage has already fetched: `apt-daily.service` runs `apt-get update`, then `unattended-upgrade --download-only`; `apt-daily-upgrade.service` runs `unattended-upgrade` (`apt.systemd.daily:437–505`, S2-03).
+- **What is pending on a day** (S3-58, reader's own; 2025-10-01 to 2026-09-30; the 1,489 binaries of the 24.04.5.1 default layer; one UTC day standing for one daily run): nothing on 222 days (61 %); non-kernel updates on 125 (34 %), a median of 2 source packages and 4 binaries, quartiles 2 and 8 binaries; a new kernel — the `linux-image-generic-hwe-24.04` meta binary published to security — on 18 (5 %), 2 to 61 days apart, median 18.
+- **The median working day.** 4 binaries, the count apt reports, is the median of the 125 non-kernel days, which are 125 of the 143 days the job installs anything. Of the year's eight days at 4 binaries, 2026-07-27 is the latest.
+- **Reproducible.** The snapshot service serves noble-security as it stood at a timestamp (S3-58: `InRelease` at 20260727T000000Z dated 2026-07-26 20:44:37 UTC, at 20260728T000000Z dated 2026-07-27 23:20:41 UTC).
+
+Open, for the campaign's method: whether a kernel day is measured as well, as the trigger of D4's DKMS autoinstall (D4's open item); the environment the state is rebuilt in; the job's boundaries; the entry's form; the comm.
+
+No file changed yet.
