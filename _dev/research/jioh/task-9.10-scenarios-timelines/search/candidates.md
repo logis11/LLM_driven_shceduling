@@ -1,6 +1,6 @@
 # Task 9.10 — candidates per scope-card item
 
-Stage 2 result. Each item of `../scope-card.md` with the candidates the four class records found (`S1-literature.md`, `S2-project-docs.md`, `S3-traces-datasets.md`, `S4-ci-observability.md`), what each covers, and what no class found. Candidate ids are the records' own. Every number below is quoted from a record; the readers' own computations are marked "reader's own" as the records mark them. Written 2026-10-01 in session; nothing here is a decision.
+Stage 2 result. Each item of `../scope-card.md` with the candidates the four class records found (`S1-literature.md`, `S2-project-docs.md`, `S3-traces-datasets.md`, `S4-ci-observability.md`), what each covers, and what no class found. Candidate ids are the records' own. Every number below is quoted from a record; the readers' own computations are marked "reader's own" as the records mark them. Written 2026-10-01 in session; nothing here is a decision except what changelog D1 dropped (section "Dropped").
 
 ## Observations that exist
 
@@ -48,6 +48,14 @@ Everything else is documentation or source (S2-01 … S2-29, S4-01 … S4-16), d
 - **Nested gamescope's cadence is the host's**: the vblank timer runs at `--nested-refresh` if given, otherwise the output refresh, initialised to 60 Hz and then set from the desktop display (S2-21); observed readouts follow the host refresh (S3-29).
 - **Chromium's process model on desktop Linux**: one process per site, a soft process limit of installed RAM / 2 ÷ 85 MB clamped between 3 and half the platform limit, one spare renderer kept (S2-16). No class found a renderer listing for a stated tab set on Linux.
 
+## Dropped (changelog D1)
+
+References and literature whose copy is unreachable or paywalled are dropped: they are neither candidates nor grounds. The search logs keep the queries that met them, as phase decision 4's search record.
+
+- **Candidates of this stage:** S1-58 (CpsMark+, abstract, highlights and graphical abstract only; the full text is the 2026-09-13 read, item 72); S3-05 (Giovanini et al.'s 31-user Windows 10 dataset, not released); S3-06 (the Activity Finder Linux field study, no released data).
+- **Works met in the searches without a readable copy:** Yeykelis, Cummings and Reeves 2014 and Yeykelis et al. 2018; Judd and Kennedy 2011; Chetty et al., CHI 2009; Labaj and Bieliková, UMAP 2013; "Is Proton Good Enough?" (Springer 2023); Grevet et al., CHI 2014; Cockburn and McKenzie, IJHCS 2001; Amann et al., SANER 2016, and Proksch et al., MSR 2018 (the KaVE interaction datasets); "Build Latency, Predictability, and Developer Productivity" (IEEE Xplore only); Sibai's PCMark05 papers (2006, 2008); Chapuis, IHM 2005; a 2011 Statista survey item; the LANL host event logs (download gated); the DOBBS dump (S3-47's paper stays, its figures read from the paper); Chrome's UMA histograms (not public).
+- **Registry and reference index:** `zhang-chb15` (item 80).
+
 ## Per item
 
 ### A. Scenario catalog (items 1–21)
@@ -60,7 +68,7 @@ Everything else is documentation or source (S2-01 … S2-29, S4-01 … S4-16), d
 - **8–10 (photo, video, transcode).** PCMark 10 DCC: GIMP, ImageMagick, FFmpeg (S2-13). SYSmark 30 Advanced Content Creation: a background Premiere encode during foreground Photoshop work (S2-15). Procyon Photo Editing runs Lightroom then Photoshop; Video Editing exports two Premiere projects (S2-14). SYSmark 2007 includes transcodes (S1-57). Kdenlive ships `kdenlive_render`; whether renders run in it is not shown (S2-12); `melt` is installed on 7,698 popcon machines (S3-54).
 - **11 (gaming).** The game process population: S3-20, S3-22, S3-23, S3-25, S1-62, S1-63; the launch chain and naming: S2-18, S2-19 (`reaper` parent, `pressure-vessel` container); Steam Deck process list: S1-67.
 - **12 (wanted download).** Steam's support pages state that the client downloads updates automatically and that a per-game setting allows or prevents other downloads while that game is played; no default is stated (S2-20, S4-10). Observations of downloads during play come only from users with the setting off (S3-26, S3-27, S3-28). Update cadence of popular games: 44 % of 45 games ship updates at a median gap of ≤ 7 days (S1-66); patch bytes concentrated after release (S1-65, 2004–2005). The default of the setting: not found in any class.
-- **13 (software development).** No scenario benchmark read defines a compile workload — PCMark 10 (S2-13), SYSmark 30 (S2-15), Procyon (S2-14), SYSmark 2007 (S1-57); SYSmark 25 and 2018 white papers not read (S2: 403, Wayback 404). Benchmark profiles that time builds exist (kernel defconfig, LLVM; S3-50). How often developers build: Google's remote builds, median 101 (Java) and 147 (C++) per developer per month (S1-92). Local object counts and incremental against full: not found.
+- **13 (software development).** No scenario benchmark read defines a compile workload — PCMark 10 (S2-13), SYSmark 30 (S2-15), Procyon (S2-14), SYSmark 2007 (S1-57); SYSmark 25 and 2018 define Productivity, Creativity and Responsiveness, read 2026-09-13 from Wayback copies of their user guides and white papers (`2026-09-13-verification/reads/R05-vendor-benchmarks.md`; the copies answer again on 2026-10-01), with compilation only in a scenario description and no compiler named (K5, C-sysmark25-1). Benchmark profiles that time builds exist (kernel defconfig, LLVM; S3-50). How often developers build: Google's remote builds, median 101 (Java) and 147 (C++) per developer per month (S1-92). Local object counts and incremental against full: not found.
 - **14 (ML training).** Procyon's AI benchmarks are inference (S2-14). Local inference prevalence: Ollama in 51.1 % of 3,760 agent-orchestration answers, 3.9 % of all respondents (S3-53, reader's own); `python3-torch` 1,135 and `llama.cpp` 140 popcon installs (S3-54). An ML training workload: not found in any class.
 - **15 (media).** PCMark 10's Video playback is in the Battery Life Profile (S2-13).
 - **16 (indexing).** Tracker 3.7.1 in the default install (S2-01, S2-02); re-crawl rule (S2-04); Baloo's start checks and its `background.slice` with CPU and I/O weight 1 (S2-05); LocalSearch and Baloo re-index reports (S3-36, S3-37); plocate not in Ubuntu's default install (S2-01) but enabled by default on Fedora 44 Workstation, which installs LocalSearch (S2-06); plocate's timer runs `/usr/sbin/updatedb.plocate` (S2-03; derived `comm` `updatedb.plocat`, S2-12).
@@ -119,17 +127,17 @@ Everything else is documentation or source (S2-01 … S2-29, S4-01 … S4-16), d
 
 ### H. Registry entries and Role C (items 72–83)
 
-- **72 (`cpsmark-tbench23`).** S1-58 read the abstract only; S2 found the article blocked every route; the 2026-09-13 read (K2) stands.
-- **73 (`pcmark10`, `sysmark30`, `sysmark25`, `procyon`).** PCMark 10 Technical Guide, updated 2018-04-11 (S2-13); SYSmark 30 white paper v1.2 and the SYSmark 25 and 2018 announcements (S2-15; the two older white papers not read); Procyon pages at named versions (S2-14).
+- **72 (`cpsmark-tbench23`).** The full text is the 2026-09-13 read (`reads/R04-cpsmark.md`: the publisher PDF from a Wayback capture of ScienceDirect's `main.pdf`, re-fetched on 2026-10-01 byte-identical, SHA-256 `04d9f106…c90f067`); S1-58, the abstract only, is dropped (D1).
+- **73 (`pcmark10`, `sysmark30`, `sysmark25`, `procyon`).** PCMark 10 Technical Guide, updated 2018-04-11 (S2-13); SYSmark 30 white paper v1.2 and the SYSmark 25 and 2018 announcements (S2-15); the SYSmark 25 and 2018 guides and white papers (R05, 2026-09-13); Procyon pages at named versions (S2-14).
 - **74 (`dkms-man`, `dkms-debian`).** DKMS 3.0.11 hooks and build loop (S2-03, S4-07); module packages (S2-23).
 - **75 (`steam-downloads`).** S2-20 (support pages: no default stated); S3-26–S3-28; S1-65, S1-66.
 - **76 (`gamemode-docs`).** No class read it (not in the topics).
 - **77 (tab and window entries).** `dubroy-chi10` read as S1-30; `chang-chi21` read as S1-36 (self-reported mean 6.15 tabs, censored at 10, 7.8 % above 10); Test Pilot's event dumps obtained and computed (S3-41); its 2010–2011 metrics posts (S2-29); the current Firefox telemetry (S3-40).
 - **78 (references that left the registry).** No new candidate.
 - **79 (`swell-icmi14`).** S3-01 (DANS v4.1, CC BY-NC-SA 4.0, open download; uLog fields; per-participant computation) and S1-10.
-- **80 (Role C).** `gonzalez-chi04` read as S1-07; Mark's later logging studies S1-04, S1-05, S1-12, S1-17; Czerwinski S1-14; Meyer S1-01; Iqbal S1-03. `zhang-chb15` was not reached by any reader (topics were neutral, no class named it); it stays unverifiable as of 2026-09-13.
+- **80 (Role C).** `gonzalez-chi04` read as S1-07; Mark's later logging studies S1-04, S1-05, S1-12, S1-17; Czerwinski S1-14; Meyer S1-01; Iqbal S1-03. `zhang-chb15` has no reachable copy (closed access; ScienceDirect 403, Elsevier API 429, `reads/R10-task-switching.md`) and is dropped from `dataset/sources.yaml` and `docs/references.md` (D1); building-plan §4's hub-and-spoke switching sentence rests on it alone.
 - **81 (`focal-arxiv26`).** S1-09, S3-03: sessions composed from templates over VideoGUI, not observed; no download location found.
-- **82 (the negative result).** BEHACOM publishes foreground executable names from natural use on Linux and Windows, open (S3-02); a 31-user Windows process-list dataset is announced but not released (S3-05); a Linux multitasking field study exists without released data (S3-06); Intel client telemetry over 1 M devices records launches but reports no rates (S1-87).
+- **82 (the negative result).** BEHACOM publishes foreground executable names from natural use on Linux and Windows, open (S3-02); Intel client telemetry over 1 M devices records launches but reports no rates (S1-87).
 - **83 (a count's source slot).** No candidate; structure.
 
 ## Not found across classes
@@ -147,7 +155,6 @@ Everything else is documentation or source (S2-01 … S2-29, S4-01 … S4-16), d
 - Launches per hour and first-minutes work from logged data beyond SWELL-KW (S1, S3).
 - Rates of image filters, preview renders and chat messages on current platforms (S1, S3); e-mails sent per hour split by attachment (S1).
 - A thread listing of a video call on Linux for Zoom, Teams, Meet or Jitsi (S1, S3).
-- Scenario definitions of SYSmark 25 and 2018 (white papers 403 / 404) and the CpsMark+ article (blocked) (S1, S2).
 
 ## What a runner could settle (S4, Appendix B)
 

@@ -300,6 +300,8 @@ Source copies under `_dev/research/jioh/task-9.10-scenarios-timelines/sources/S3
 
 #### S3-05 — Giovanini et al.: 31 Windows 10 users' process, network, mouse and keystroke profiles (data not released)
 
+- **Dropped (changelog D1, 2026-10-01).** The data is not released.
+
 - **Citation.** L. Giovanini, F. Ceschin, M. Silva, et al., "Online Binary Models are Promising for Distinguishing Temporally Consistent Computer Usage Profiles", arXiv:2105.09900.
 - **Copy read.** `https://arxiv.org/pdf/2105.09900`, accessed 2026-10-01, `sources/S3-05/`. SHA-256 `arxiv2105.09900.pdf` 92fbe5f909ec23f68aef2ffe69f172eabc0d8561b3850abbc518087f60a234c9.
 - **Verbatim.** Abstract: "We collected ecologically-valid computer usage profiles from 31 MS Windows 10 computer users over 8 weeks". §1: "All artifacts created throughout the course of this study, including our module for extracting profiles and our dataset of ecologically-valid computer usage data itself, will be made publicly available for vetted research usage1." Footnote 1: "We are discussing with our IRB and legal counsel about options of data release based on University-mediated agreements with vetted". §6.1: "each line represented one minute of computer activity on a given study day … The columns contained: (i) a timestamp, (ii) a list of all active processes, (iii) a list of all domains accessed".
@@ -307,6 +309,8 @@ Source copies under `_dev/research/jioh/task-9.10-scenarios-timelines/sources/S3
 - **One observation:** —
 
 #### S3-06 — Activity Finder: UCL Linux multitasking field study (study exists; data not found)
+
+- **Dropped (changelog D1, 2026-10-01).** No released data.
 
 - **Citation.** S. Dodier-Lazaro, "Activity Finder, a Data Collection Framework for Linux", mupuf.org, posted 2015-04-06.
 - **Copy read.** `https://mupuf.org/project/activityfinder.html`, accessed 2026-10-01, `sources/S3-06/`. SHA-256 `activityfinder.html` c8f39bf2a1879eb1567da458c4f678b240148048736f05ae76f23a529ff59c22.

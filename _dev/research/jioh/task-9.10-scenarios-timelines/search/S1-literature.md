@@ -225,7 +225,7 @@ Index (topics as covered in each entry; "partial", "existence", "locates only", 
 | S1-55 | Flautner 2001 (PhD thesis) / Flautner et al. 2000 (ASPLOS) | laboratory, Linux 2.2.3 and 2.3.99 kernels | T4 weak, T1, T6 (Linux); T7 existence |
 | S1-56 | Blake et al. 2010 (ISCA), thread-level parallelism of desktop applications | laboratory, Windows 7 / OS X | context only (T1, T4, T6) |
 | S1-57 | Bircher & John 2008 (ICS); Bircher 2010 (PhD thesis) | SYSmark 2007 composition | T7 |
-| S1-58 | Zhang & Wu 2022 (BenchCouncil Transactions), CpsMark+ | abstract, highlights and graphical abstract only | T7 partial |
+| S1-58 | Zhang & Wu 2022 (BenchCouncil Transactions), CpsMark+ | abstract, highlights and graphical abstract only | dropped (changelog D1) |
 | S1-59 | Gao et al. 2014 (ISPASS), thread-level parallelism on mobile | Android laboratory | context only (T4, T1) |
 | S1-60 | Endo et al. 1996 (OSDI), latency of interactive systems | critique of SYSmark NT/32 and Winstone | T7 |
 | S1-61 | Righi 2025, FOSDEM talk (not peer-reviewed) | one Linux desktop trace of a game | T4 (Linux); T6 context |
@@ -1367,6 +1367,8 @@ Index (topics as covered in each entry; "partial", "existence", "locates only", 
 - **Side.** Benchmark definition (existence only).
 
 ### S1-58 — Zhang & Wu 2022, CpsMark+ (abstract, highlights and graphical abstract only)
+
+- **Dropped (changelog D1, 2026-10-01).** Abstract only; unreachable through every route tried here. The full text is the 2026-09-13 read, `2026-09-13-verification/reads/R04-cpsmark.md`.
 
 - **Citation.** Yue Zhang, Tong Wu, "CpsMark+: A scenario-oriented benchmark system for office desktop performance evaluation in centralized procurement via simulating user experience", *BenchCouncil Transactions on Benchmarks, Standards and Evaluations* 2(4):100084, October 2022 (online 2023-01-05), DOI 10.1016/j.tbench.2023.100084, CC BY-NC-ND.
 - **Copy read.** Full text NOT read (ScienceDirect 403; see log). Read: Wayback snapshot https://web.archive.org/web/20230114130231id_/https://www.sciencedirect.com/science/article/pii/S2772485923000017 (article page with abstract, highlights, keywords), `sources/S1-58/cpsmark-sciencedirect-wayback-20230114.html.gz` SHA-256 `cc79bf837b460399e5e3e879b286ab33abd3c728803f6f5aaf984ca714c71461`, decompressed `…html` SHA-256 `63c919c0526b21a95bad7394783af5f2b837cbae723a42be0fbac5fc7636f135`; graphical abstract https://ars.els-cdn.com/content/image/1-s2.0-S2772485923000017-ga1_lrg.jpg, `sources/S1-58/cpsmark-graphical-abstract-lrg.jpg` SHA-256 `2fedcc29b02033e7e0b4b52fa5ceadd3d24741973fe1fc2efc38d95ec826e088`; its small version https://ars.els-cdn.com/content/image/1-s2.0-S2772485923000017-ga1.jpg (301×186 px, not used for reading), `sources/S1-58/cpsmark-graphical-abstract.jpg` SHA-256 `2e63d18b0b2048f375561a02b2d7652fb12e796c18f5f26272051ef78673e7ab`. Accessed 2026-10-01.

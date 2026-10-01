@@ -184,16 +184,6 @@ sources:
 
   # ---- segment structure & user behavior (Role C) ------------------------
 
-  zhang-chb15:
-    type: scholarly
-    notes: >-
-      31 days, 3,000 subjects, 15M+ log records, 16,406 distinct processes
-      (CNNIC data, unreleased). Establishes power-law task-switching
-      structure concentrated on hub tasks ("hub" is the paper's term; "star"
-      is our paraphrase), and an average PC-task switch roughly every 3
-      minutes (independently corroborates gonzalez-chi04). Shapes and
-      averages only — no sampled distributions.
-
   gonzalez-chi04:
     type: scholarly
     notes: >-

@@ -37,11 +37,6 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - role: stimulus of the 9.5 campaign's stimulus-sensitivity check only (follow-ups spec decision 11): the `driven-alt` phase replays streams cut from it beside the SWELL-KW streams, and the comparison is reported in the campaign results and as one scope sentence per typing archetype. It grounds no archetype value: the archetypes carry SWELL-KW whatever the comparison shows (D6's alternative not taken: transcription of memorised sentences, share of gaps over 1 s 0.7 % on a six-participant sample against 5.5 % between the keys of SWELL-KW's Word stream, `dataset/stimulus/swell-word-c1.jsonl`). Streams built by `dataset/tools/meas/probe/aalto_streams.py`, selection recorded in `dataset/meas/streams/aalto-windows.json`.
 - status: verified (2026-09-13 read, `_dev/research/jioh/task-9.5-interactive-typing/search/S3-traces-datasets.md` S3-aalto136m; re-entered 2026-09-16 after D19 dropped it)
 
-### `zhang-chb15`
-- cite: Zhang, T., Sun, X., Chai, Y., & Aghajan, H. (2015). A look at task-switching and multi-tasking behaviors: From the perspective of the computer usage among a large number of people. *Computers in Human Behavior*, 49, 237–244. DOI 10.1016/j.chb.2015.03.012.
-- role: Role C — power-law switching, hub task structure ("star" is our paraphrase — say "hub"), ~3-min average PC-task switch (independently corroborates `gonzalez-chi04`). 31 days / 3,000 subjects / 15M+ records / 16,406 processes, CNNIC data. Dataset unreleased.
-- status: verified (2026-08-26; corrects source-vetting's "Yun et al." misattribution)
-
 ### `gonzalez-chi04`
 - cite: González, V. M., & Mark, G. (2004). "Constant, Constant, Multi-tasking Craziness": Managing Multiple Working Spheres. *Proc. CHI 2004*, 113–120. DOI 10.1145/985692.985707.
 - role: Role C — THE home of both headline figures: ~12 min per working sphere (~10 spheres/day) AND ~3 min per task / >2 min per tool. (Our earlier docs attributed these to CHI 2005/2008 — wrong; repoint here.)
