@@ -849,3 +849,15 @@ Grounds:
 C is set at fold-in with D41's.
 
 Hands to 9.14: P2's terms and windows on the new length. Hands to 9.15: the scenario catalog's P2 rows.
+
+## D43 — `unattended-upgr` is familiarity tier 1 (2026-10-01)
+
+By 인지오's decision, D27's rule applied to D40's name (scope-card items 64–66): `unattended-upgr` is a new program's name, placed by the ladder's definitions at tier 1, transparent — the name says what the job is, an upgrade nobody attended, at the kernel's 15 bytes. Labelled design, as D27's tiers are.
+
+Grounds:
+
+- **The ladder's definitions** (`docs/workload/building-plan.md` §3 C5): 1 transparent (`firefox`, `blender`), 2 semi-opaque (`soffice.bin`, `gamescope`), 3 opaque (`tracker-miner-fs-3`, `cc1`, `baloo_file`); D27 placed `element-desktop` at tier 2 as "a product name that does not say what it is".
+- **The program is common.** `unattended-upgrades` is installed on 18.18 % of Debian popcon submissions and in regular use on 12.96 % (S2-30, reader's own).
+- **The C7 property.** "tier 1 so no pair changes familiarity tier" (`building-plan.md` §3 C7): with the upgrade at tier 1, as `clamscan` was, every counterpart keeps its base's tier.
+
+Applied at rebinding: `dataset/tools/wlc/grid.py`'s `NAME_TIERS`.
