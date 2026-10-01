@@ -820,3 +820,18 @@ Grounds:
 - **The other observed names.** `apt.systemd.dai` (the unit's script, cut to 15 bytes) names a wrapper; `localedef` holds 76 % of the CPU but is this day's content, glibc's locales, not the job.
 
 The entry's `modeling_notes` state that most of the CPU under the name is `locale-gen`'s 18 `localedef` runs and that the name stands for the tree. The familiarity tier follows D27's rule at rebinding.
+
+## D41 — each interactive counterpart is one segment as long as the job's CPU total, the job from 0 s (2026-10-01)
+
+By 인지오's decision, D3's hand-off on the counterparts' structure (scope-card item 56): each of the ten interactive attribute counterparts becomes its base's first C seconds — C the `package-upgrade` job's CPU total as the campaign pools it — with the job arriving at 0 s, bound whole, and one segment labelled `background_wanted: false`. The bases are unchanged.
+
+Grounds:
+
+- **The label at every instant.** On one lane a job of C seconds of CPU is alive for at least C seconds under every policy, so the job is present throughout a segment of length C — the property the C7 design states (`docs/workload/building-plan.md` §3 C7: "arriving at 0 s with `total_work` equal to the segment so the label holds at every instant").
+- **The whole job** (D17). The job is bound whole and the length follows it; it finishes inside the file only under a policy that gives it the whole lane.
+- **A 60 s file would not hold the label.** The bases' own load is 0.0004 (`c1-idle`) to 0.46 (`c1-video-edit`) and 0.92 (`c1-gaming`) of the lane (`build.manifest.json`); with the job at 0 s in a 60 s file, some policies end it 13–34 s before the segment ends in nine of the ten files.
+- **The smallest change to C7.** One segment, the job from 0 s, as before; only the length moves.
+
+C is set at fold-in, from the pool whose rule holds (the first five repeats: 25.2–29.2 s, mean 26.55 s).
+
+Hands to 9.14: the pair review and the scoring spec compare each counterpart with its base's first C seconds; the RQ0 gate spec's eight judging counterparts on the new length. Hands to 9.15: `building-plan.md` §3 C7 (the job, its length).
