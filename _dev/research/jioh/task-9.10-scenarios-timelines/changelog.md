@@ -764,3 +764,17 @@ Grounds:
 Open, for the campaign's method: whether a kernel day is measured as well, as the trigger of D4's DKMS autoinstall (D4's open item); the environment the state is rebuilt in; the job's boundaries; the entry's form; the comm.
 
 No file changed yet.
+
+## D37 — the state is rebuilt in a chroot of an English default install; the measured job is the upgrade unit's own commands (2026-10-01)
+
+By 인지오's decision, D3's open item on the environment: each repeat builds, on the harness CPUs, a chroot of the default layer of an English install — the `minimal` layer less the 43 packages its English layer removes, 1,446 binaries (S2-33) — from the archive at 2026-07-27T00:00Z (D36), and runs in it the stock download stage, `apt.systemd.daily update`, against the archive at 2026-07-28T00:00Z. The measured job is then the commands of `apt-daily-upgrade.service` — `apt-helper wait-online`, then `apt.systemd.daily install` — run in the chroot on the measured CPU. The English install is design.
+
+Grounds:
+
+- **The unit.** `ExecStartPre=-/usr/lib/apt/apt-helper wait-online`, `ExecStart=/usr/lib/apt/apt.systemd.daily install` (`apt-daily-upgrade.service`, S2-03); the update stage fetches the lists and the packages first (`apt.systemd.daily:437–489`, S2-03; D36).
+- **What the job runs that day** (S2-32): `locales`' postinst runs `locale-gen`, which compiles every locale in `/var/lib/locales/supported.d/*` — the 18 `en_*` locales of `language-pack-en-base` on an English install; `libc-bin`'s postinst runs `ldconfig`.
+- **What a chroot changes.** `libc6`'s postinst skips, when `ischroot` holds, `systemctl daemon-reexec` — systemd re-executing itself, work done in PID 1 outside the job's tree — and the reboot-required notice (`postinst:27`, `:146–170`, S2-32). The scope states both.
+- **Identical in every repeat.** The snapshot fixes the state and the pending set (D36); the runner's own installed set is its weekly image's and cannot hold it.
+- **The language layer.** The image installs its `minimal` layer with one language layer of eight (`casper/`, S2-33; `preinstalled_langs`, S2-01); D36's count over the English install is unchanged (S3-58).
+
+No file changed yet.

@@ -21,7 +21,7 @@ A reference or work whose copy is unreachable or paywalled is dropped; `zhang-ch
 
 ### 3. Unasked and user-started jobs
 
-- **The unwanted job of the ten interactive attribute counterparts and `c2-p2b`** is the stock Ubuntu 24.04 unattended upgrade, observed on the runner, in place of `clamscan` (D3). It installs one real day's security updates, 2026-07-27's `glibc`, rebuilt from Ubuntu's snapshot service (D36).
+- **The unwanted job of the ten interactive attribute counterparts and `c2-p2b`** is the stock Ubuntu 24.04 unattended upgrade, observed on the runner, in place of `clamscan` (D3). It installs one real day's security updates, 2026-07-27's `glibc`, rebuilt from Ubuntu's snapshot service (D36), in a chroot of an English default install, the upgrade unit's own commands measured (D37).
 - **`c7-compile`'s job** is an observed DKMS autoinstall of a real module (D4).
 - **The indexing files** show Tracker indexing a real user's file set, the Mahoney set, from an empty database: the first index at login (unasked) and the same work after the user's reset (asked) (D5). `c2-p1b`'s indexer carries that measured indexer's own tables (D6).
 - **`c2-p2a`'s wanted download** is an install of another game the user starts during play (D7).
@@ -76,7 +76,7 @@ A timeline's bound values carry a source tag or a design label, checked by the l
 
 Each flagged open in its decision, for the campaign's method or the rebinding:
 
-- **D3, the unattended upgrade:** the environment the state is rebuilt in; the job's boundaries; the entry's form; the comm the job shows.
+- **D3, the unattended upgrade:** the entry's form; the comm the job shows.
 - **D4, the DKMS build:** which module, grounded on prevalence for Ubuntu desktops; whether it is measured in D3's campaign.
 - **D5, the Tracker index:** the file set's placement under the indexed directories; the job window.
 - **D8, the backup:** the change set and its ground; the first backup's destination; Déjà Dup's process names.
