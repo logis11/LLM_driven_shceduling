@@ -1,6 +1,6 @@
 # Task 9.10 — the unattended-upgrade campaign: method (2026-10-01)
 
-The observation behind the unwanted job of the ten interactive attribute counterparts and `c2-p2b` (changelog D3, D36–D38), run on GitHub-hosted runners under `../../../measurement-campaign-workflow.md`, pinned to one CPU. Amended only by a dated entry in §8. Tooling: `dataset/tools/meas/background/` — the `upgrade` job of `run.sh`, the package list `upgrade-layer.txt`, `analyze.py` and `pool.py` — workflow `.github/workflows/meas-background.yml`, trigger `.github/campaign-background.json`, loop family `background`, app `upgrade`.
+The observation behind the unwanted job of the ten interactive attribute counterparts and `c2-p2b` (changelog D3, D36–D39), run on GitHub-hosted runners under `../../../measurement-campaign-workflow.md`, pinned to one CPU. Amended only by a dated entry in §8. Tooling: `dataset/tools/meas/background/` — the `upgrade` job of `run.sh`, the package list `upgrade-layer.txt`, `analyze.py` and `pool.py` — workflow `.github/workflows/meas-background.yml`, trigger `.github/campaign-background.json`, loop family `background`, app `upgrade`.
 
 ## 1. Runs
 
@@ -33,7 +33,12 @@ As 9.7's method §4 for the phases without `perf trace`: `perf sched record -k C
 
 ## 5. Analysis rules
 
-Open until the dry run: the entry's form — how the job's process tree is carried — and the comm the job shows (D3's open items).
+- **Phase read.** `upgrade-install`, the whole phase.
+- **The tree.** Rooted at the process `taskset` executed into `chroot` (`launched_root`); every process of the tree is the program's (D39).
+- **Form (D39).** `cpu-batch`'s batch loop over the tree: the runs between voluntary blocks pooled over every process, and the block after each run — the tree's off-CPU time from that run's voluntary block, zero when another of its processes runs on or is runnable (9.7 D29; `shapes`). The CPU total is the sum of the tree's perf run segments on the measured CPU, taskstats' CPU beside it as the cross-check, and is carried (D17).
+- **Wake.** As 9.7's method §9 (D21): a schedule-in is a wake when the thread's previous switch-out state is a sleep state, a resume after preemption when it is R; the wakeup rows the cross-check.
+- **Also reported.** The process count; CPU by executed program; the stages' times; the installed set's change; the logs.
+- **Open:** the name the task shows and the entry's id.
 
 ## 6. Scope, written into the entry
 

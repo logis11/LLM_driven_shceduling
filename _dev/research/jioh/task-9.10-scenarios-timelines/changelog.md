@@ -793,3 +793,18 @@ Grounds:
 The dry run otherwise held D36 and D37: the layer built from the snapshot in 581 s with the 1,445 packages and none extra; the download stage fetched the four packages; the install stage installed `libc-bin`, `libc6`, `libc6-dbg` and `locales` 2.39-0ubuntu8.7 → 2.39-0ubuntu8.8 and nothing else, in 26.1 s of CPU over 923 processes — the 18 `localedef` runs of `locale-gen` 19.8 s (76 %), `unattended-upgrade` 2.4 s, everything else 3.9 s — the CPU saturated from the install stage's start to its end.
 
 Tooling: `dataset/tools/meas/background/run.sh`, the `upgrade` job's phase command.
+
+## D39 — the unattended upgrade is a new entry in the batch-loop form, over the whole process tree (2026-10-01)
+
+By 인지오's decision, D3's open item on the entry's form: the job is a new archetype with `cpu-batch`'s batch-loop constructor (9.7 D29) — one task; a run drawn from the tree's runs between voluntary blocks, pooled over every process of the tree, then the block that followed such a run, the tree's own off-CPU time, zero when another of its processes runs on or is runnable — until the job's CPU is spent. The CPU total is the measured whole (D17) and is carried. The tree's structure — its process count, its stages and the dominant program — is stated in the entry's `modeling_notes`, as `file-archiver` states its flattened threads (9.7 D22).
+
+Grounds:
+
+- **The job is one saturated chain** (the dry run, D38): 26.1 s of CPU over 923 processes, the measured CPU busy from the install stage's start to its end — `unattended-upgrade` computing the upgrade, `dpkg` unpacking and configuring the four packages, `locale-gen`'s 18 `localedef` runs back to back (19.8 s), then `mandb`, `apt-check` and `unattended-upgrade`'s close.
+- **The form keeps that character.** Over the dry run's tree: 14,746 runs between voluntary blocks, median 7 µs, the `localedef` runs above the 99.9th percentile (over 1 s each); the block after a run zero through the 75th percentile, so consecutive runs merge into long ones, as the job is.
+- **The library's precedent.** `cpu-batch`, `file-backup`, `file-archiver` and `game-download` carry the same form (9.7 D29); `analyze.py` computes it for the tree (`batch_run_us`, `batch_block_us`).
+- **What the form drops.** The stages' order and the process count; the task shows one name (the next open item).
+
+Open, for the campaign's method: the name the task shows and the entry's id.
+
+Tooling: `dataset/tools/meas/background/analyze.py`, every process of the `upgrade` tree counted as the program's.

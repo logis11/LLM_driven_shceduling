@@ -64,7 +64,7 @@ CLASSES = ("disk", "uninterruptible", "network", "sleep", "runnable")
 
 
 def job_of(phase):
-    for job, prefix in (("borg", "borg"), ("7z", "7z"), ("steamcmd", "steam")):
+    for job, prefix in (("borg", "borg"), ("7z", "7z"), ("steamcmd", "steam"), ("upgrade", "upgrade")):
         if phase.startswith(prefix):
             return job
     return None
@@ -72,7 +72,10 @@ def job_of(phase):
 
 def is_program(job, filename, comm):
     """The program's own processes: borg's (a Python script, executed as /usr/bin/borg), 7-Zip's, and SteamCMD's
-    binary — not /usr/games/steamcmd or steamcmd.sh, the shell wrappers that start it. Without an exec row, by comm."""
+    binary — not /usr/games/steamcmd or steamcmd.sh, the shell wrappers that start it. Without an exec row, by comm.
+    The unattended upgrade (9.10 D37): every process of the tree — the job is the unit's commands and all they start."""
+    if job == "upgrade":
+        return True
     if filename:
         base = filename.rsplit("/", 1)[-1]
         if job == "borg":
