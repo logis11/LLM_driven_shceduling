@@ -26,6 +26,9 @@ from meas.desktop.pool import _cp  # noqa: E402  — campaign/pool.py, for its b
 TAG = "meas-ci:desktop:2026-09-20"
 CARRIED = {"chrome-hidden": "steady", "chrome-visible": "steady-notimer", "element": "idle", "steam": "shown"}
 CONTROL = {}   # archetype id -> the untraced control's reading for its notes
+# the entries the library carries: chrome-visible's values stay in the pooled record, its entry `renderer-visible`
+# left the library when no timeline bound it (9.10 D16)
+FOLDED = ("chrome-hidden", "element", "steam")
 IDS = {"chrome-hidden": "renderer-hidden", "chrome-visible": "renderer-visible", "element": "chat-client",
        "steam": "game-client"}
 LABEL = {"wakes/s": "wake rate", "gap mean (ms)": "gap mean", "run mean (ms)": "run mean"}
@@ -351,12 +354,12 @@ def main():
     if p.get("tag") != TAG:
         raise SystemExit(f"pooled record tagged {p.get('tag')!r}, expected {TAG!r}")
     blocks = [f"  # ---- measured per-application archetypes — 9.8 campaign ({TAG}) ----", ""]
-    for app in ("chrome-hidden", "chrome-visible", "element", "steam"):
+    for app in FOLDED:
         if not p["runs"][app]["stability"]["passes"]:
             raise SystemExit(f"{app}: the stability rule does not hold on this pooled record")
         blocks += [entry(app, p["runs"][app]), ""]
     open(sys.argv[2], "w").write("\n".join(blocks))
-    print(f"wrote {sys.argv[2]}: 4 entries")
+    print(f"wrote {sys.argv[2]}: {len(FOLDED)} entries")
 
 
 if __name__ == "__main__":

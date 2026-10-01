@@ -509,7 +509,7 @@ def test_the_build_census_orders_repeats_keyed_by_landing():
     assert census == "Chrome 152 (4 repeats), Chrome 153 (1: 12)"
 
 
-def test_the_fold_in_regenerates_the_four_entries_from_the_pooled_record(repo_root, tmp_path):
+def test_the_fold_in_regenerates_the_library_s_entries_from_the_pooled_record(repo_root, tmp_path):
     # the entries in archetypes.yaml are fold_in.py's output on the committed pooled record, byte for byte, with the
     # untraced control's reading in their notes (the 9.5 untraced-control spec, decision 20)
     import sys
@@ -525,8 +525,9 @@ def test_the_fold_in_regenerates_the_four_entries_from_the_pooled_record(repo_ro
     fragment = out.read_text().rstrip("\n")
     entries = fragment[fragment.index("\n  renderer-hidden:\n"):]   # the library holds the entries, not the fold's header
     assert entries in (repo_root / "dataset" / "archetypes.yaml").read_text()
-    for entry in fold_in.IDS.values():
-        assert f"\n  {entry}:\n" in fragment
+    for app in fold_in.FOLDED:
+        assert f"\n  {fold_in.IDS[app]}:\n" in fragment
+    assert "\n  renderer-visible:\n" not in fragment   # 9.10 D16: bound nowhere, out of the library
 
 
 def test_the_renderer_scopes_state_the_chrome_builds_they_pool(repo_root, tmp_path):
@@ -546,8 +547,6 @@ def test_the_renderer_scopes_state_the_chrome_builds_they_pool(repo_root, tmp_pa
     hidden = doc["renderer-hidden"]["validation_stats"]["scope"]
     assert ("Google Chrome 152.0.7977.82 (14 repeats), Google Chrome 153.0.8010.52 (5: 12, 13, 14, 15, 16), "
             "launched as web-browser was") in hidden
-    assert "Google Chrome 152.0.7977.82 (11 repeats), launched as the hidden entry" in doc["renderer-visible"][
-        "validation_stats"]["scope"]
 
 
 def test_the_run_means_excepted_for_the_runner_s_speed_state_their_share_of_the_phase_s_cpu(repo_root, tmp_path):
@@ -564,8 +563,6 @@ def test_the_run_means_excepted_for_the_runner_s_speed_state_their_share_of_the_
         sys.argv = argv
     import yaml
     doc = yaml.safe_load("archetypes:\n" + out.read_text())["archetypes"]
-    assert ("`chrome` run mean 0.1493 ms ±6.1 % (0.133–0.181 ms). Their runs hold 40.3 % and 42.6 % of the phase's CPU, "
-            "82.9 % together (D37).") in doc["renderer-visible"]["validation_stats"]["scope"]
     assert ("`VizCompositorTh` run mean 0.0818 ms ±5.6 % (0.066–0.089 ms). Their runs hold 32.4 %, 25.3 %, 16.8 % and "
             "5.7 % of the phase's CPU, 80.2 % together (D37).") in doc["game-client"]["validation_stats"]["scope"]
     for aid in ("renderer-hidden", "chat-client"):

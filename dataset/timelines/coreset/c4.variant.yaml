@@ -22,8 +22,6 @@ variants:
     ops:
       - add-task: {id: injected-browser, name: chrome,
                    archetype: web-browser, arrive: 30s, depart: 60s}
-      - add-task: {id: injected-renderer-shown, name: chrome,
-                   archetype: renderer-visible, arrive: 30s, depart: 60s}
       - add-task: {id: injected-renderers, name: chrome,
                    archetype: renderer-hidden, arrive: 30s, depart: 60s,
                    count: 5}

@@ -12,8 +12,6 @@ segments:
 tasks:
   - {id: browser, name: chrome, archetype: web-browser,
      arrive: 0s, depart: 60s}
-  - {id: renderer-shown, name: chrome, archetype: renderer-visible,
-     arrive: 0s, depart: 60s}
   - {id: renderers, name: chrome, archetype: renderer-hidden,
      arrive: 0s, depart: 60s, count: 11}
 

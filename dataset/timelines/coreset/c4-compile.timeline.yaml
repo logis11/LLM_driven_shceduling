@@ -35,11 +35,6 @@ tasks:
   depart: 60s
   id: injected-browser
   name: chrome
-- archetype: renderer-visible
-  arrive: 30s
-  depart: 60s
-  id: injected-renderer-shown
-  name: chrome
 - archetype: renderer-hidden
   arrive: 30s
   count: 5

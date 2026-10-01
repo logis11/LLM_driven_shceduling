@@ -18,8 +18,6 @@ segments:
 tasks:
   - {id: browser, name: chrome, archetype: web-browser,
      arrive: 0s, depart: 420s}
-  - {id: renderer-shown, name: chrome, archetype: renderer-visible,
-     arrive: 0s, depart: 420s}
   - {id: renderers, name: chrome, archetype: renderer-hidden,
      arrive: 0s, depart: 420s, count: 7}
   - {id: writer, name: soffice.bin, archetype: office-writer,
