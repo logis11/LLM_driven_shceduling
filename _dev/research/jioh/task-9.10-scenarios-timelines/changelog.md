@@ -324,3 +324,33 @@ Applied:
 The dataset was recompiled (`compile.py --allow-window`). 20 of 100 artifacts change beyond the library's hash, the ten files in both modes, and no demand moves at the manifest's four decimals. Lint reports the branch's five demand-window files and nothing else; tests 371 passed, 1 skipped, 1 xfailed.
 
 Hands to 9.14: the ten files' compiled artifacts. Hands to 9.15: 9.5 D84's sentence in the docs, `docs/workload/measurement-overview.md` §2 and §9 (`renderer-visible` among the measured archetypes), `coreset-guide.md`.
+
+## D17 — each batch job runs whole, at the input its decision fixed; files lengthen to hold it (2026-10-01)
+
+By 인지오's decision, scope-card items 56 and 53: a batch job in a core-set file runs its measured whole, at the input its decision fixed — the jobs below. A file's and its segments' lengths follow the job. No `total_work` or `spawn_count` describes part of a job.
+
+- the unattended upgrade's pending set (D3)
+- a real module's DKMS build (D4)
+- Tracker's index of the Mahoney set (D5)
+- Déjà Dup's incremental (D8)
+- the `video-editor` project's export (D10)
+- CpsMark+'s transcode (D11)
+- PyTorch's 14-epoch MNIST run (D12)
+
+Grounds:
+
+- **A slice describes part of a job.** The measured entries describe whole jobs. A `total_work` below a job's measured size describes part of a job, and how large a user's job is has no source (scope card item 56). The compiled audit at `e3d3c9a` found `c1-backup`'s `borg` could not finish even alone in its 60 s file (132.2 s uncontended; J2).
+- **File length is the design part.** It is design under phase decision 3, and the core set's segment durations are "compressed event-time (long enough to generate query points; realism not required)" (`docs/workload/building-plan.md` §0). Lengthening the files moves only what is already design.
+- **The inputs keep their grounding.** Inputs sized to fit the current lengths would turn the decisions' grounded inputs — a real file set, a benchmark's and a framework's definitions — into design.
+
+9.6 D7's and 9.7 D13's "`total_work` stays timeline design" give way: the size a file binds is the measured job's.
+
+Open:
+
+- **Each campaign's method states the job size it measured.**
+- **The compile files' `spawn_count` follows the measured build** — how much of a kernel build the user's build shows is its own question (item 53).
+- **The lengths are set when each job is measured**, the files rebinding with them. The scoring spec's `turnaround` terms then hold for every whole job.
+
+No file changed yet.
+
+Hands to 9.14: the demand window and the per-file oracle-against-random test re-read on the new lengths; the scoring spec's windows. Hands to 9.15: `building-plan.md` §3 C1 ("batch jobs are sized to finish inside the segment").
