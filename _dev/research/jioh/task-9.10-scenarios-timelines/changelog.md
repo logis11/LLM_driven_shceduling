@@ -169,3 +169,29 @@ The respondent quoted in S1-90 describes the situation the file depicts: a sched
 Applied when D8's entry exists: `c7-backup` rebinds with `c1-backup`; `c7.variant.yaml`'s comment on the backup counterpart restated. Its judging status and its layer-1 exclusion are unchanged.
 
 Hands to 9.15: `building-plan.md` §3 C7's sentence ("`ml-train`, `render`, `transcode`, `backup` have no same-mode unwanted name a distro or vendor runs under a distinct string") restated for backup.
+
+## D10 — the render files bind an observed Kdenlive export (2026-10-01)
+
+By 인지오's decision, scope-card items 9, 64 and 71: the user-started render of `c1-render` and `c2-p3a` (and `c7-render` by its flip) — today `ffmpeg` on `cpu-batch`, an encode of a generated 60 s clip (9.6 D7) standing for Kdenlive's export — becomes Kdenlive's own export of the `video-editor` entry's project, observed on the runner. Kdenlive 23.08.5, the project of that entry's scope, the default render profile; the export's process confirmed from Kdenlive 23.08's source and the run, the files binding it under the name it shows. The campaign is 9.10's, an export phase on 9.5's Kdenlive setup.
+
+Grounds:
+
+- **The export was left to a stand-in.** 9.5's follow-ups spec, decision 7: an operation is "Kdenlive's timeline preview render (not its export, which the batch archetypes stand for)" (`_dev/docs/spec/jioh/task-9.5-interactive-typing-follow-ups.md:43`).
+- **Kdenlive renders in its own process.** 9.5's campaign observed the preview render in an external `kdenlive_render` process, one per render (9.5 changelog, the `load_rows` fix; `dataset/tools/meas/probe/ops_driver.py:128`, "The render runs in an external kdenlive_render process"); Kdenlive ships `kdenlive_render` (S2-12).
+- **The project has a measured state.** The `video-editor` entry: Kdenlive 23.08.5, one 20 s 1920×1080 30 fps H.264 clip with an unsharp effect at PCMark 10's Video Editing settings (its scope; the clip's content design).
+- **"ffmpeg (render children)" has no source** (scope card item 9).
+- **One situation, one observation.** The editor's project, rendered by the editor's renderer at its defaults, holds phase decision 2 where the job today pairs Kdenlive's scenario with a CLI encode's behaviour.
+
+Open, for the campaign's method:
+
+- the export's process and its names (item 64);
+- the render profile's settings as Kdenlive 23.08 ships them.
+
+Then:
+
+- the job's size against the segments (item 56; the project's 20 s clip is design);
+- whether `cpu-batch`'s `ffmpeg` program stays bound anywhere (the transcode files are the next item).
+
+No file changed yet.
+
+Hands to 9.14: the render files' judging terms; the pair review's P3 lines. Hands to 9.15: the scenario catalog's S7 row ("ffmpeg (render children)"); `building-plan.md` §3 C1 (render {kdenlive, ffmpeg}) and C2 P3.
