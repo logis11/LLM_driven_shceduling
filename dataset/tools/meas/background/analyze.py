@@ -59,7 +59,7 @@ load_edges, outside, pct, dist, QUANTILE_PROBS = _build.load_edges, _build.outsi
 
 IOWAIT = re.compile(r"^\s*(\d+\.\d+):\s+sched:sched_stat_iowait:\s+comm=.*?\s+pid=(\d+)\s+delay=(\d+)")
 EXEC = re.compile(r"^\s*(\d+\.\d+):\s+sched:sched_process_exec:\s+filename=(.*?)\s+pid=(\d+)\s+old_pid=(\d+)")
-ROOT_COMMS = {"borg": ("borg",), "7z": ("7z", "7zz"), "steamcmd": ("steamcmd",)}
+ROOT_COMMS = {"borg": ("borg",), "7z": ("7z", "7zz"), "steamcmd": ("steamcmd",), "upgrade": ("chroot",)}   # upgrade: 9.10 D37
 CLASSES = ("disk", "uninterruptible", "network", "sleep", "runnable")
 
 

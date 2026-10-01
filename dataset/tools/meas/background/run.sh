@@ -8,6 +8,8 @@
 #   7z        7z-mmt8-warm, 7z-mmt1-warm, 7z-mmt8-cold
 #   steamcmd  steam-fresh-shaped, steam-fresh-untraced, steam-fresh-unshaped,
 #             steam-update-shaped (only with a branch to stage)
+#   upgrade   upgrade-install — 9.10's unattended-upgrade campaign (9.10 changelog D3, D36, D37): the stock
+#             Ubuntu 24.04 install stage over 2026-07-27's security updates in a chroot of the default layer
 # Every measured phase is one command pinned to the measured CPU (pin.sh,
 # phase.sh MEAS_PIN=load), observed over the whole phase from the harness CPUs
 # by `perf sched record -a` — with the exec rows that name each process's
@@ -134,6 +136,9 @@ case "$APP" in
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y steamcmd > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
         STEAMCMD="$( [ -x /usr/games/steamcmd ] && echo /usr/games/steamcmd || command -v steamcmd)"; rec steamcmd.binary "$STEAMCMD"
         rec steamcmd.package "$(dpkg-query -W -f '${Version}' steamcmd 2>/dev/null)" ;;
+  upgrade)
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mmdebstrap > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
+        rec mmdebstrap.version "$(mmdebstrap --version 2>&1 | head -1)" ;;
 esac
 rec zpaq.version "$(zpaq 2>&1 | head -1)"
 rec util-linux.version "$(fincore --version 2>&1 | head -1)"
@@ -500,6 +505,116 @@ stage_probe() {   # stage_probe <app>: D12 — does the nearest older public bui
   rm -rf "$dir"
 }
 
+# ---- the unattended upgrade (9.10 D3, D36, D37) ---------------------------------
+# The default layer of an English install (upgrade-layer.txt) built by mmdebstrap from the archive as Ubuntu's
+# snapshot service serves it at T0, on the harness CPUs; the stock download stage, `apt.systemd.daily update`, run in
+# the chroot against the archive at T1, on the harness CPUs; then the commands of apt-daily-upgrade.service —
+# `apt-helper wait-online`, `apt.systemd.daily install` — run in the chroot on the measured CPU as the phase. The
+# chroot's /run is its own tmpfs, never the runner's: with /run/systemd/system absent the packages' scripts cannot
+# reach the runner's systemd, and ischroot holds, as on any chroot (S2-32).
+UPG_T0="${MEAS_UPGRADE_T0:-20260727T000000Z}"; UPG_T1="${MEAS_UPGRADE_T1:-20260728T000000Z}"   # D36
+UPG_SNAP=http://snapshot.ubuntu.com/ubuntu
+UPG_COMPONENTS="main restricted universe multiverse"
+upg_mount() {   # upg_mount <root>: proc, sys, the runner's /dev, a fresh /run with the resolver's stub file
+  local r="$1"
+  sudo mount -t proc proc "$r/proc"; sudo mount -t sysfs sys "$r/sys"
+  sudo mount --bind /dev "$r/dev"; sudo mount --bind /dev/pts "$r/dev/pts"
+  sudo mount -t tmpfs -o mode=755 tmpfs "$r/run"
+  sudo mkdir -p "$r/run/systemd/resolve" "$r/run/lock"
+  sudo cp -L /etc/resolv.conf "$r/run/systemd/resolve/stub-resolv.conf"
+  [ -L "$r/etc/resolv.conf" ] || sudo cp -L /etc/resolv.conf "$r/etc/resolv.conf"
+  rec upgrade.run_systemd_system "$( [ -d "$r/run/systemd/system" ] && echo present || echo absent)"
+}
+upg_umount() { local r="$1" m; for m in run dev/pts dev sys proc; do sudo umount -l "$r/$m" 2>/dev/null; done; }
+upg_sources() {   # upg_sources <root> <timestamp>: the stock deb822 pair (installer form, the archive and security
+  # hosts) pointed at the snapshot of <timestamp>; mmdebstrap's own sources and apt options removed
+  local r="$1" ts="$2"
+  sudo rm -f "$r/etc/apt/sources.list" "$r/etc/apt/apt.conf.d/99mmdebstrap"
+  sudo tee "$r/etc/apt/sources.list.d/ubuntu.sources" > /dev/null <<SRC
+Types: deb
+URIs: $UPG_SNAP/$ts/
+Suites: noble noble-updates noble-backports
+Components: $UPG_COMPONENTS
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+Types: deb
+URIs: $UPG_SNAP/$ts/
+Suites: noble-security
+Components: $UPG_COMPONENTS
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+SRC
+  sudo cp "$r/etc/apt/sources.list.d/ubuntu.sources" "$OUT/upgrade.sources.$ts.txt"
+}
+upg_build() {   # upg_build <root>: the layer at T0, on the harness CPUs
+  local r="$1" t0 layer
+  layer="$(grep -v '^#' "$HERE/upgrade-layer.txt" | paste -sd, -)"
+  rec upgrade.layer.packages "$(grep -vc '^#' "$HERE/upgrade-layer.txt")"
+  rec upgrade.layer.sha256 "$(sha256sum "$HERE/upgrade-layer.txt" | cut -d' ' -f1)"
+  rec upgrade.t0 "$UPG_T0"; rec upgrade.t1 "$UPG_T1"
+  t0=$(date +%s)
+  unmeasured sudo mmdebstrap --mode=root --variant=apt --format=directory \
+    --components="$(echo $UPG_COMPONENTS | tr ' ' ',')" --include="$layer" \
+    --aptopt='Acquire::Retries "5"' \
+    noble "$r" \
+    "deb $UPG_SNAP/$UPG_T0/ noble $UPG_COMPONENTS" \
+    "deb $UPG_SNAP/$UPG_T0/ noble-updates $UPG_COMPONENTS" \
+    "deb $UPG_SNAP/$UPG_T0/ noble-security $UPG_COMPONENTS" > "$OUT/upgrade.mmdebstrap.log" 2>&1
+  rec upgrade.build.rc "$?"; rec upgrade.build_s "$(( $(date +%s) - t0 ))"
+  # the English install's system locale (design, D37); locale-gen reads supported.d and locale.gen alike (S2-32)
+  echo "LANG=en_US.UTF-8" | sudo tee "$r/etc/default/locale" > /dev/null
+  sudo chroot "$r" dpkg-query -W -f '${binary:Package}\t${Version}\t${db:Status-Abbrev}\n' > "$OUT/upgrade.dpkg.t0.tsv" 2>&1
+  rec upgrade.t0.installed "$(wc -l < "$OUT/upgrade.dpkg.t0.tsv")"
+  python3 - "$HERE/upgrade-layer.txt" "$OUT/upgrade.dpkg.t0.tsv" > "$OUT/upgrade.layer.diff.txt" <<'PY'
+import sys
+want = {l.strip() for l in open(sys.argv[1]) if l.strip() and not l.startswith("#")}
+have = {l.split("\t")[0].split(":")[0] for l in open(sys.argv[2]) if "\t" in l}
+print("missing\t" + " ".join(sorted(want - have)))
+print("extra\t" + " ".join(sorted(have - want)))
+PY
+  rec upgrade.layer.missing "$(sed -n 's/^missing\t//p' "$OUT/upgrade.layer.diff.txt" | wc -w)"
+  rec upgrade.layer.extra "$(sed -n 's/^extra\t//p' "$OUT/upgrade.layer.diff.txt" | wc -w)"
+  sudo cat "$r/etc/apt/apt.conf.d/20auto-upgrades" > "$OUT/upgrade.20auto-upgrades.txt" 2>&1
+  sudo cat "$r/etc/apt/apt.conf.d/10periodic" > "$OUT/upgrade.10periodic.txt" 2>&1
+  ls "$r/var/lib/locales/supported.d/" > "$OUT/upgrade.supported.d.txt" 2>&1
+  sudo du -sb "$r" 2>/dev/null | cut -f1 | { read -r b; rec upgrade.chroot_bytes "$b"; }
+}
+upg_download() {   # upg_download <root>: the stock download stage against T1, on the harness CPUs
+  local r="$1" t0
+  upg_sources "$r" "$UPG_T1"
+  t0=$(date +%s)
+  unmeasured sudo chroot "$r" /usr/bin/env -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+    LANG=en_US.UTF-8 /usr/lib/apt/apt.systemd.daily update < /dev/null > "$OUT/upgrade.update-stage.log" 2>&1
+  rec upgrade.update_stage.rc "$?"; rec upgrade.update_stage_s "$(( $(date +%s) - t0 ))"
+  ls -l "$r/var/cache/apt/archives/" > "$OUT/upgrade.archives.txt" 2>&1
+  rec upgrade.downloaded "$(ls "$r/var/cache/apt/archives/" | grep -c '\.deb$')"
+  sudo cat "$r/var/log/unattended-upgrades/unattended-upgrades.log" > "$OUT/upgrade.uu.download.log" 2>/dev/null
+  ls -l --time-style=full-iso "$r/var/lib/apt/periodic/" > "$OUT/upgrade.stamps.after-update.txt" 2>&1
+}
+upg_after() {   # upg_after <root>: what the measured stage installed
+  local r="$1"
+  sudo chroot "$r" dpkg-query -W -f '${binary:Package}\t${Version}\t${db:Status-Abbrev}\n' > "$OUT/upgrade.dpkg.t1.tsv" 2>&1
+  diff "$OUT/upgrade.dpkg.t0.tsv" "$OUT/upgrade.dpkg.t1.tsv" > "$OUT/upgrade.dpkg.diff.txt"
+  rec upgrade.changed "$(grep -c '^>' "$OUT/upgrade.dpkg.diff.txt")"
+  sudo cp "$r/var/log/unattended-upgrades/unattended-upgrades.log" "$OUT/upgrade.uu.log" 2>/dev/null
+  sudo cp "$r/var/log/unattended-upgrades/unattended-upgrades-dpkg.log" "$OUT/upgrade.uu-dpkg.log" 2>/dev/null
+  sudo cp "$r/var/log/dpkg.log" "$OUT/upgrade.dpkg.log" 2>/dev/null
+  ls -l --time-style=full-iso "$r/var/lib/apt/periodic/" > "$OUT/upgrade.stamps.after-install.txt" 2>&1
+  [ -e "$r/var/run/reboot-required" ] && rec upgrade.reboot_required yes || rec upgrade.reboot_required no
+}
+upg_job() {
+  local r="$WORK/chroot"
+  sudo rm -rf "$r"; upg_build "$r"; upg_mount "$r"; upg_download "$r"
+  # the unit's commands, its environment reduced to a service's (PATH, the system locale), stdin from /dev/null
+  # sudo stays on the harness CPUs; taskset puts the chroot's command, and only it, on the measured CPU
+  export MEAS_PIN=none
+  phase upgrade-install -- sudo taskset -c "$MEAS_CPU" chroot "$r" /usr/bin/env -i \
+    PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin LANG=en_US.UTF-8 \
+    /bin/sh -c '/usr/lib/apt/apt-helper wait-online; exec /usr/lib/apt/apt.systemd.daily install' < /dev/null
+  export MEAS_PIN=load
+  upg_after "$r"; upg_umount "$r"
+  df -B1 --output=target,avail "$WORK" > "$OUT/df.upgrade.txt" 2>&1
+}
+
 # ---- the job ----------------------------------------------------------------------
 case "$APP" in
   borg)
@@ -541,6 +656,7 @@ case "$APP" in
     fi
     rec steam.buildid "$(sed -n 's/^steam\.steam-fresh-shaped\.buildid=//p' "$KV" | tail -1)"
     df -B1 --output=target,avail "$WORK" > "$OUT/df.steam.txt" 2>&1 ;;
+  upgrade) upg_job ;;
   *) rec error "unknown app $APP" ;;
 esac
 
