@@ -8,6 +8,10 @@ meta:
   demand: calibration
   id: c6-fold
   seed: 105
+operations:
+- at: 30s
+  name: page-load
+  task: browser
 segments:
 - attributes:
     background_wanted: true

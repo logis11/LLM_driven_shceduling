@@ -390,3 +390,48 @@ The chain members' displayed name `game.exe` against the real thread names (S2-1
 No file changed.
 
 Hands to 9.15: `game-task-chain`'s `modeling_notes` and the gaming files' scope state the omitted share; the scenario catalog's S9 row.
+
+## D20 — one operation per focus window on an application that has one; operations start inside focus (2026-10-01)
+
+By 인지오's decision, scope-card items 60 and 61: every focus window on a task whose entry carries an operation holds one of it, starting 28 s after the window opens. That is 30 s in a window opening at 2 s, and 150 s in `c3-creation`'s window opening at 122 s. An operation starts only inside its task's focus window. One operation per window is the file's calibration and is labelled design. D13's send follows the same rule.
+
+Grounds:
+
+- **Each carried operation is the mean over its campaign's run.** `web-browser`'s first page load "takes 739 ms and 545 ms of CPU against 485 ms and 341 ms for each of the other 55", and past the first six each block holds within 2 %; the filter and the preview render are level across their runs (9.5 D87). A page load in the middle of a session is one of the 55, and the carried mean holds the first at 1/56: (739 + 55 × 485) / 56 ≈ 489.5 ms, 0.9 % above a warm load (arithmetic on 9.5 D87's figures). One per window stays within each entry's state, against 9.5 D87's hand-off on a single page load.
+- **The one observed rate.** SWELL-KW's `Browser URL changed` events run at 66.7–85.7 an hour by condition, about one a minute (S3-01: lab, Internet Explorer, reader's own). No class found a rate for image filters or preview renders. One per window asserts no rate and matches the one observed.
+- **An operation is the user's action in the focused application** (D13).
+
+Applied:
+
+- page load — `c1-browsing`, `c3-evening` and `c3-workday` (`browser`, 30 s);
+- unsharp mask — `c1-photo` (30 s), `c3-creation` (`photo-editor`, 30 s);
+- preview render — `c1-backup`, `c1-render`, `c1-transcode`, `c1-video-edit`, `c2-p3a` (30 s), `c3-creation` (`video-editor`, 150 s).
+
+The derived files inherit through their bases (`c2-p3b`, `c6-fold`, `c6-spoof`, the C7 counterparts). In `c6-fold` the inherited page load starts at 30 s, the instant its segments turn from browsing to meeting.
+
+The dataset was recompiled (`compile.py --allow-window`). 38 of 100 artifacts change beyond the library's hash. Lint reports three demand-window files — `c3-creation`, `c3-evening` and `c3-workday` — and `c2-p3a` and `c2-p3b` move into the window (0.9997 → 1.0423). Tests: 371 passed, 1 skipped, 1 xfailed.
+
+Demand moves (`-single`):
+
+| file | before | after |
+|---|---|---|
+| `c1-backup` | 0.8442 | 0.9692 |
+| `c1-browsing` | 0.012 | 0.0164 |
+| `c1-photo` | 0.0029 | 0.0442 |
+| `c1-render` | 0.8393 | 0.9581 |
+| `c1-transcode` | 0.821 | 0.9445 |
+| `c1-video-edit` | 0.3527 | 0.4586 |
+| `c2-p3a` and `c2-p3b` | 0.9997 | 1.0423 |
+| `c3-creation` | 0.8601 | 0.8843 |
+| `c3-evening` | 0.8757 | 0.8765 |
+| `c3-workday` | 4.6546 | 4.6555 |
+| `c6-fold` | 0.012 | 0.0164 |
+| `c6-spoof` | 0.512 | 0.5164 |
+| `c7-backup` | 0.8442 | 0.9692 |
+| `c7-browsing` | 1.012 | 1.0164 |
+| `c7-photo` | 1.0029 | 1.0442 |
+| `c7-render` | 0.8393 | 0.9581 |
+| `c7-transcode` | 0.821 | 0.9445 |
+| `c7-video-edit` | 1.3527 | 1.4586 |
+
+Hands to 9.14: the demand moves; the operations' windows against the scoring spec's terms. Hands to 9.15: `coreset-guide.md` on operations.

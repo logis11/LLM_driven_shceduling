@@ -30,3 +30,6 @@ tasks:
 
 focus:
   - {from: 2s, to: 58s, task: browser}
+
+operations:
+  - {at: 30s, task: browser, name: page-load}

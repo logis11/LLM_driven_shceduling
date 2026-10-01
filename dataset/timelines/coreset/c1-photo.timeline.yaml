@@ -15,3 +15,6 @@ tasks:
 
 focus:
   - {from: 2s, to: 58s, task: photo-editor}
+
+operations:
+  - {at: 30s, task: photo-editor, name: unsharp-mask}

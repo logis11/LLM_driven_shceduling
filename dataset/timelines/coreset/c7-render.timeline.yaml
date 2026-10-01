@@ -8,6 +8,10 @@ meta:
   demand: calibration
   id: c7-render
   seed: 113
+operations:
+- at: 30s
+  name: preview-render
+  task: editor
 segments:
 - attributes:
     background_wanted: false

@@ -23,3 +23,7 @@ tasks:
 focus:
   - {from: 2s, to: 118s, task: photo-editor}
   - {from: 122s, to: 238s, task: video-editor}
+
+operations:
+  - {at: 30s, task: photo-editor, name: unsharp-mask}
+  - {at: 150s, task: video-editor, name: preview-render}

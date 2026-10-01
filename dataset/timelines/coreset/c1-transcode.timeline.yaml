@@ -19,3 +19,6 @@ tasks:
 
 focus:
   - {from: 2s, to: 58s, task: video-editor}
+
+operations:
+  - {at: 30s, task: video-editor, name: preview-render}

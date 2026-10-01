@@ -8,6 +8,10 @@ meta:
   demand: calibration
   id: c7-photo
   seed: 109
+operations:
+- at: 30s
+  name: unsharp-mask
+  task: photo-editor
 segments:
 - attributes:
     background: av-scan

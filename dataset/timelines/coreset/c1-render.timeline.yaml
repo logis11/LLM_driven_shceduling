@@ -19,3 +19,6 @@ tasks:
 
 focus:
   - {from: 2s, to: 58s, task: editor}
+
+operations:
+  - {at: 30s, task: editor, name: preview-render}

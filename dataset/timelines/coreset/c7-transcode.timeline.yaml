@@ -8,6 +8,10 @@ meta:
   demand: calibration
   id: c7-transcode
   seed: 114
+operations:
+- at: 30s
+  name: preview-render
+  task: video-editor
 segments:
 - attributes:
     background_wanted: false

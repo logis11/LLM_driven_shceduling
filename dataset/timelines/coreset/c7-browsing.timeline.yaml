@@ -8,6 +8,10 @@ meta:
   demand: calibration
   id: c7-browsing
   seed: 105
+operations:
+- at: 30s
+  name: page-load
+  task: browser
 segments:
 - attributes:
     background: av-scan

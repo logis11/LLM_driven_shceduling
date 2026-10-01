@@ -7,6 +7,10 @@ focus:
 meta:
   id: c2-p3b
   seed: 203
+operations:
+- at: 30s
+  name: preview-render
+  task: editor
 segments:
 - attributes:
     background_wanted: true

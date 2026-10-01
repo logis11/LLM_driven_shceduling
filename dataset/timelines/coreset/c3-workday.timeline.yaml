@@ -33,4 +33,5 @@ focus:
   - {from: 362s, to: 418s, task: mailer}
 
 operations:
+  - {at: 30s, task: browser, name: page-load}
   - {at: 400s, task: mailer, name: send}
