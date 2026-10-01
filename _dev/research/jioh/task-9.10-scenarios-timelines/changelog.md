@@ -757,7 +757,7 @@ By 인지오's decision, D3's first open item (the state measured): the campaign
 Grounds:
 
 - **What the job installs.** By default the release and security pockets (`50unattended-upgrades:6–8`, S2-30), from packages the update stage has already fetched: `apt-daily.service` runs `apt-get update`, then `unattended-upgrade --download-only`; `apt-daily-upgrade.service` runs `unattended-upgrade` (`apt.systemd.daily:437–505`, S2-03).
-- **What is pending on a day** (S3-58, reader's own; 2025-10-01 to 2026-09-30; the 1,489 binaries of the 24.04.5.1 default layer; one UTC day standing for one daily run): nothing on 222 days (61 %); non-kernel updates on 125 (34 %), a median of 2 source packages and 4 binaries, quartiles 2 and 8 binaries; a new kernel — the `linux-image-generic-hwe-24.04` meta binary published to security — on 18 (5 %), 2 to 61 days apart, median 18.
+- **What is pending on a day** (S3-58, reader's own; 2025-10-01 to 2026-09-30; the 1,488 binaries of the 24.04.5.1 default layer; one UTC day standing for one daily run): nothing on 222 days (61 %); non-kernel updates on 125 (34 %), a median of 2 source packages and 4 binaries, quartiles 2 and 8 binaries; a new kernel — the `linux-image-generic-hwe-24.04` meta binary published to security — on 18 (5 %), 2 to 61 days apart, median 18.
 - **The median working day.** 4 binaries, the count apt reports, is the median of the 125 non-kernel days, which are 125 of the 143 days the job installs anything. Of the year's eight days at 4 binaries, 2026-07-27 is the latest.
 - **Reproducible.** The snapshot service serves noble-security as it stood at a timestamp (S3-58: `InRelease` at 20260727T000000Z dated 2026-07-26 20:44:37 UTC, at 20260728T000000Z dated 2026-07-27 23:20:41 UTC).
 
@@ -767,7 +767,7 @@ No file changed yet.
 
 ## D37 — the state is rebuilt in a chroot of an English default install; the measured job is the upgrade unit's own commands (2026-10-01)
 
-By 인지오's decision, D3's open item on the environment: each repeat builds, on the harness CPUs, a chroot of the default layer of an English install — the `minimal` layer less the 43 packages its English layer removes, 1,446 binaries (S2-33) — from the archive at 2026-07-27T00:00Z (D36), and runs in it the stock download stage, `apt.systemd.daily update`, against the archive at 2026-07-28T00:00Z. The measured job is then the commands of `apt-daily-upgrade.service` — `apt-helper wait-online`, then `apt.systemd.daily install` — run in the chroot on the measured CPU. The English install is design.
+By 인지오's decision, D3's open item on the environment: each repeat builds, on the harness CPUs, a chroot of the default layer of an English install — the `minimal` layer less the 43 packages its English layer removes, 1,445 binaries (S2-33) — from the archive at 2026-07-27T00:00Z (D36), and runs in it the stock download stage, `apt.systemd.daily update`, against the archive at 2026-07-28T00:00Z. The measured job is then the commands of `apt-daily-upgrade.service` — `apt-helper wait-online`, then `apt.systemd.daily install` — run in the chroot on the measured CPU. The English install is design.
 
 Grounds:
 
@@ -776,5 +776,6 @@ Grounds:
 - **What a chroot changes.** `libc6`'s postinst skips, when `ischroot` holds, `systemctl daemon-reexec` — systemd re-executing itself, work done in PID 1 outside the job's tree — and the reboot-required notice (`postinst:27`, `:146–170`, S2-32). The scope states both.
 - **Identical in every repeat.** The snapshot fixes the state and the pending set (D36); the runner's own installed set is its weekly image's and cannot hold it.
 - **The language layer.** The image installs its `minimal` layer with one language layer of eight (`casper/`, S2-33; `preinstalled_langs`, S2-01); D36's count over the English install is unchanged (S3-58).
+- **What the layer holds.** No kernel and no boot loader: the installer adds them from the live session's layer (S2-33). None of the four packages' triggers reaches them — `libc6` activates only `ldconfig` (`triggers`, S2-32) — and the chroot holds the layer as the image ships it.
 
 No file changed yet.
