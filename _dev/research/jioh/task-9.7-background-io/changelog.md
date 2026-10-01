@@ -56,7 +56,7 @@ By 인지오's decision, the run design of D2 and D4: every repeat runs the Stea
 
 ## D11 — the shaping rate: 121.0 Mbps, the byte-weighted median of Valve's per-country download rates (2026-09-19)
 
-> Corrected by D38 (per-country rates run 2.3–204.5 Mbps over the 238 countries; 72.0–181.5 is the five largest by bytes) and D40 (the country table's SHA-256; the network table's byte totals against the countries').
+> Corrected by D38 (per-country rates run 2.3–204.5 Mbps over the 238 countries; 72.0–181.5 is the five largest by bytes) and D40 (the country table's SHA-256; the network table's byte totals against the countries'); its snapshot released by D41.
 
 By 인지오's decision, the rate of D10's shaped phase: 121.0 Mbps — the median, weighted by bytes downloaded, of the per-country "Average Download Rate" in Valve's download statistics (store.steampowered.com/stats/content/, data file `download_traffic_per_country.jsonp`, version `09-19-2026-04`, the page's most recent seven days, all Steam clients; fetched 2026-09-19 04:44 UTC, local `sources/D11/`: country table SHA-256 03af9f1d…49c5b, network table `top_asns_per_country.jsonp` 3b478542…553b, page 8ea29372…9c5b). Computation (ours): the 238 country rows (the 51 sub-national rows excluded), each rate divided by 10^6, sorted, and the rate at which cumulative bytes pass half of the 2.090 × 10^18 total. Unit reading (inferred; Valve documents none): the country rate is in bits per second — the USA's 181,468,713 reads as 181.5 Mbps, and each country's top-ten networks agree once weighted by their bytes (USA 194.2, Germany 97.1 against 91.8, Korea 180.0 against 180.3). Grounds: the archetype describes a Steam download, so the population to weight by is downloaded bytes; the country table is the one whose rates and bytes are consistent — the network table's byte totals sum to 3.4–4.8 times the same countries' bytes, meaning undocumented; the median is robust to the extremes (per-country rates from 72.0 Mbps, Russia, to 181.5, the USA). Robustness, reported in the method: the network table's byte-weighted median is 128.9 Mbps, within 7 %; the country table's byte-weighted mean is 131.3. Stated limitations: one week's snapshot; all Steam clients, Valve publishing no split by operating system; a per-country average rate, not a distribution of links. The snapshot copies and the computation go into the campaign's method and release. Not taken: the network table's byte-weighted median (weights of undocumented meaning); its unweighted median, 65.7 Mbps (a typical network, not a typical download); one named country's rate (a population chosen by design). No value changed by this entry.
 
@@ -262,6 +262,8 @@ Commit: this entry.
 
 ## D40 — Valve's download statistics and the set check's two studies entered in the reference index (2026-09-29)
 
+> Amended by D41 (the snapshot released).
+
 No new decision; found on the 2026-09-29 reading of 9.5–9.9 for their summary. Three sources the `game-download`, `file-backup` and `file-archiver` scopes state figures from had no `docs/references.md` entry, which the citation rule asks of every citation (as D39 entered `mahoney-10gb`). Each was read against its primary copy on 2026-09-29 and entered:
 
 - `steam-download-stats` (deployed-system): Valve's Steam Download Stats, the snapshot D11 read (version `09-19-2026-04`, `sources/D11/`). `rate.py` re-run on it gives D11's figures — 238 countries, 2.090 × 10^18 bytes, the byte-weighted median 121.0 Mbps (Poland's row, 121.006), the byte-weighted mean 131.3, the network table's byte-weighted median 128.9 and its unweighted median 65.7 — and D38's range, 2.3 Mbps (Norfolk Island) to 204.5 (Monaco). The unit D11 inferred is the page's own: its rendering code formats a country's `avgmbps` as bits per second.
@@ -271,5 +273,11 @@ No new decision; found on the 2026-09-29 reading of 9.5–9.9 for their summary.
 Corrected against them: the two scopes' set check reads "the GNU/Linux users' 4.60 KB (4,707 B)" and "the 2009 Windows population's half" (was "the Windows populations' half"; method §9, 2026-09-29). D7's "mostly already-compressed" has no passage in `meyer-fast11`, which speaks of "opaque unstructured formats". D11's record: the country table's SHA-256 is 03af9f1d…ef8764e7 (D11 gave the page's suffix, …49c5b); its "3.4–4.8 times" for the network table's byte totals against the same countries' does not reproduce — 3.87 overall, per country 0.95–63.2, among the ten largest by bytes 1.92–5.20.
 
 Not done: D11 and the method put the snapshot and its computation into the release; release `meas-ci-background-2026-09-19` holds the repeats and the gate reports only, and `sources/D11/` is untracked. No `dataset/sources.yaml` entries: the dataset derives no value from these sources, only from the measurements run beside them. Values changed: none; the two scopes' set check. Compiled with `--allow-window`: the library hash only, 0 of 100 artifacts changing beyond it (`tools/beyond_hash.py`); no demand moves.
+
+Commit: this entry.
+
+## D41 — D11's snapshot released: an asset of `meas-ci-background-2026-09-19` (2026-10-01)
+
+By 인지오's decision, outward-facing on 인지오's approval, closing what D40 found not done: the copy of Valve's Steam Download Stats D11 read is published as asset `steam-download-stats-09-19-2026-04.zip` of release `meas-ci-background-2026-09-19` (81,776 B, SHA-256 3fc89e34…9896; uploaded 2026-10-01 00:35 UTC). It holds the four files of `sources/D11/` as fetched on 2026-09-19: the page (SHA-256 8ea29372…9c5b), the country table `download_traffic_per_country.jsonp` (03af9f1d…ef8764e7), the network table `top_asns_per_country.jsonp` (3b478542…553b) and `rate.py` (666ef1e3…7122), which re-run from the packaged copy prints "238 countries, 2.090e+18 bytes, byte-weighted median 121.0 Mbps". `docs/references.md`'s `steam-download-stats` names the asset. Values changed: none.
 
 Commit: this entry.

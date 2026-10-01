@@ -129,7 +129,7 @@ Execution order: 9.1 ∥ 9.2 ∥ 9.3 first → 9.4–9.12 in parallel, after 9.1
   - [x] `web-browser` carries every renderer of its run (D84)
   - [x] the carried phases read in time windows (D85; 9.8 D34, 9.9 D42)
 - [x] **9.6** Compile — research and decisions — D1–D38 (changelog `_dev/research/jioh/task-9.6-compile/changelog.md`): `compiler-child`, `build-orchestrator` and `cpu-batch` carry the measured values of campaign `meas-ci:build:2026-09-18`, release `meas-ci-build-2026-09-18`
-- [x] **9.7** Background and IO — research and decisions — D1–D40 (changelog `_dev/research/jioh/task-9.7-background-io/changelog.md`): `io-stream`/`network-bulk` split into `file-backup`, `file-archiver` and `game-download`; the Thunderbird send an operation of 9.5's `mail-client`; `background-crawler` retired
+- [x] **9.7** Background and IO — research and decisions — D1–D41 (changelog `_dev/research/jioh/task-9.7-background-io/changelog.md`): `io-stream`/`network-bulk` split into `file-backup`, `file-archiver` and `game-download`; the Thunderbird send an operation of 9.5's `mail-client`; `background-crawler` retired
   - [x] campaign tooling: `dataset/tools/meas/background/`, `meas-background.yml`; `meas-cli.yml` removed
   - [x] dry run → probe batch → campaign → pool → fold-in (D31, D34)
   - [x] raw records released as `meas-ci-background-2026-09-19`
