@@ -1,7 +1,7 @@
 CXX      ?= g++
 CXXFLAGS ?= -std=c++17 -O0 -g -Wall -Wextra -fsanitize=address,undefined
 STAGES   := a b c d e f g h i j k l m n o p
-BIG      := q r          # 실제 coreset 파일을 돌리므로 -O2, sanitizer 없이
+BIG      := q r s        # 실제 coreset 파일을 돌리므로 -O2, sanitizer 없이
 
 all: $(addprefix sim_,$(STAGES)) $(addprefix sim_,$(BIG))
 
@@ -11,6 +11,8 @@ sim_%: sim_%.cpp
 sim_q: sim_q.cpp mini_json.hpp
 	$(CXX) -std=c++17 -O2 -g -Wall -Wextra -o $@ $<
 sim_r: sim_r.cpp mini_json.hpp
+	$(CXX) -std=c++17 -O2 -g -Wall -Wextra -o $@ $<
+sim_s: sim_s.cpp mini_json.hpp
 	$(CXX) -std=c++17 -O2 -g -Wall -Wextra -o $@ $<
 
 lines:

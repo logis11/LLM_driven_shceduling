@@ -4,8 +4,8 @@
 // The scheduling policy sits behind `Policy` — the "scheduler seat" of
 // docs/simulator/simulator-guide.md §5: the core consults it only at decision points,
 // it sees nothing but scheduling-relevant task state, and adding a policy must not
-// require touching the core. `Fifo` is that claim's test — it was added without a line
-// of change inside `Sim`.
+// require touching the core. `Fifo` was the first test of that claim; `Edf` and `Lottery`
+// (stage S) are the second — the core gained a read-only view of task classes, nothing else.
 //
 // Built up in stages (see notes/ for the one-rung-at-a-time ladder). What each stage adds:
 //   A clock+queue · B Instr/Task/step · C lane+dispatch · D WAIT+wake · E depart
@@ -13,6 +13,7 @@
 //   I MLFQ rule 5 (boost) via Clock::arm · J SLEEP · K TIMER+backlog · L LOOP flattening
 //   M channels + WAKE + mailbox · N FORK/spawn_table · O JSONL trace (data-contracts §9)
 //   P deadline events · Q workload loader (mini_json) · R config schedule + handoff
+//   S EDF + LOTTERY via a TaskView seam (executor-owned task classes)
 //
 // Design notes worth carrying:
 //   · gen (F): a preempted Lane reservation cannot be removed from a priority_queue, so
@@ -27,10 +28,31 @@
 //   · loader (Q): the loader parses, validates (reject the whole file on any violation),
 //     transforms (string ids→indices, nested LOOP→flat, 2-pass forward refs), and
 //     isolates — ground_truth is never named by any structure the core can see.
+//   · task classes (S): EDF needs deadlines and LOTTERY needs the batch class, but the class
+//     is executor state, identical under every algorithm (batch-class memo 2026-09-09 §3) —
+//     so the core exposes it through a third narrow seam, TaskView, and no policy sees Sim.
+//     B2 periodic class: a task with a TIMER, plus everything reachable from it through WAKE
+//     targets (fixed at load). A chain stage has no TIMER of its own, so it inherits the
+//     deadline of whoever woke it — the WAKE carries the frame's deadline down the chain.
+//     B1 batch class: non-periodic and has received >= one slice of CPU since its last
+//     voluntary block (WAIT that blocks, SLEEP, TIMER not yet due); preemption never resets it.
+//   · determinism (S): batch_share is the only real number in the schema; the loader turns it
+//     into integer basis points, so the run itself does no floating-point math. The lottery
+//     PRNG (splitmix64) is seeded once per run from the FNV-1a hash of the workload id
+//     (interpretation-contract §1: "a PRNG the simulator seeds deterministically per run").
+//   · cold start (S): Policy::start is told whether the algorithm changed. Only then is the
+//     lane holder treated as freshly dispatched (switch memo 2026-09-08 §2, rule a); an entry
+//     with the same algorithm keeps the slice already granted (same memo §7).
+//   · policy-timer epoch (S, fixes R): a policy timer used to survive a config apply, so each
+//     MLFQ start() added one more boost chain, and the chains kept each other alive past the
+//     arm() stop rule — c1-compile under the mock-switch schedule never terminated. The switch
+//     memo says the boost timer restarts at t_apply; like F's gen, a PolicyTimer now carries
+//     the config epoch it was armed under and is dropped on mismatch.
 
 #include "mini_json.hpp"
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -48,7 +70,7 @@ struct Instr { Op op; i64 us = 0; i64 period_us = 0; int jump = -1; i64 count = 
                int chan = -1; int target = -1; };
 
 // One entry of a FORK spawn table — a child spec straight from the file (id/name/program)
-struct ChildSpec { std::string name; std::vector<Instr> prog; };
+struct ChildSpec { std::string name; std::vector<Instr> prog; bool periodic = false; };
 
 // Ready vs Running: the scheduler *picks from* the Ready set
 enum class State { Ready, Running, Blocked, Done };
@@ -71,18 +93,26 @@ struct Task {
   i64 born = -1, ended = -1;  // born is the emergence time — meaningful only for FORK children
   char blocked_by = 'w';      // why last blocked: w=wait s=sleep t=timer f=fork_slot
   std::uint64_t gen = 0;      // bumped each time the lane is released = reservation void
+  bool periodic = false;      // B2 class — fixed at load, never changes during the run
+  i64 burst = 0;              // B1 — CPU received since the last voluntary block
+  i64 chain_dl = -1;          // deadline inherited by a TIMER-less chain stage (-1 = none)
+  std::deque<i64> mail_dl;    // the deadline each mailboxed WAKE carried (pairs with mailbox)
 };
 
 constexpr i64 kNoHorizon = -1;  // the policy sets no preemption horizon
 
-// Frozen-schema MLFQ params (recognition-vocabulary §2 — OSTEP §8's worked example whole).
-// Parameters are configuration, never constants in code
+// The union of the frozen schema's params (recognition-vocabulary §2); the defaults are the
+// boot default. timeslice_us is shared by MLFQ (top-queue slice) and LOTTERY (one draw's
+// tenure). Parameters are configuration, never constants in code
 struct Params {
-  int num_queues        = 3;
-  i64 timeslice_us      = 10000;
-  int timeslice_growth  = 2;
-  i64 boost_interval_us = 100000;
+  int num_queues        = 3;        // MLFQ
+  i64 timeslice_us      = 10000;    // MLFQ, LOTTERY
+  int timeslice_growth  = 2;        // MLFQ
+  i64 boost_interval_us = 100000;   // MLFQ
+  i64 residual_timeslice_us = 10000;  // EDF — round-robin slice of the residual class
+  int batch_share_bp    = 1500;     // LOTTERY — batch_share 0.15 as an integer in 1/10000
 };
+constexpr int kShareDen = 10000;    // denominator of batch_share_bp
 
 // The core's trace writer as a policy sees it — x_ diagnostic lines only
 struct Trace {
@@ -98,12 +128,20 @@ struct Clock {
   virtual void arm(i64 t, int tag) = 0;  // delivers Policy::on_timer(tag) at t
 };
 
+// The executor-owned task classes, as much as a policy may read (no names, no ground truth)
+struct TaskView {
+  virtual ~TaskView() = default;
+  virtual i64  deadline(int id) const = 0;   // the current job's deadline, -1 = none
+  virtual bool batch(int id) const = 0;      // B1 and not B2
+};
+
 // Why a task left the lane. The first two leave it runnable; the last two take it off
 enum class Yield { SliceEnd, Preempted, Blocked, Ended };
 
 struct Policy {
   virtual ~Policy() = default;
-  virtual void start(const Params&) = 0;
+  // cold = we took over from a different algorithm; false for a same-algorithm params change
+  virtual void start(const Params&, bool cold) = 0;
   virtual void on_ready(int id) = 0;
   virtual void on_yield(int id, Yield why) = 0;
   virtual int  pick() = 0;                  // next lane holder, -1 for idle
@@ -117,7 +155,7 @@ struct Policy {
 // The second policy — non-preemptive run-until-block (stage E's behaviour)
 struct Fifo : Policy {
   std::deque<int> q;
-  void start(const Params&) override {}
+  void start(const Params&, bool) override {}
   void on_ready(int id) override { q.push_back(id); }
   void on_yield(int id, Yield why) override {
     if (why == Yield::SliceEnd || why == Yield::Preempted) q.push_back(id);
@@ -153,7 +191,7 @@ struct Mlfq : Policy {
     return s;
   }
   static constexpr int kBoost = 1;              // our tag; opaque to the core
-  void start(const Params& np) override {
+  void start(const Params& np, bool) override {   // cold ignored — levels kept, as in stage R
     p = np;
     ready.assign((std::size_t)p.num_queues, {});
     clock.arm(clock.now() + p.boost_interval_us, kBoost);
@@ -199,6 +237,124 @@ struct Mlfq : Policy {
   }
 };
 
+// Per-task lane-time ledger — EDF's residual slice, LOTTERY's per-draw tenure
+struct Ledger {
+  std::vector<i64> v;
+  i64& operator[](int id) {
+    if (v.size() <= (std::size_t)id) v.resize((std::size_t)id + 1, 0);
+    return v[(std::size_t)id];
+  }
+  void clear() { std::fill(v.begin(), v.end(), 0); }
+};
+
+// EDF (vocab §2): tasks with a deadline run earliest-deadline-first; ties go to the lower id
+// (the fixed executor rule). The deadline class has no slice — Liu & Layland's EDF is
+// preemptive without a quantum. A task with no deadline is in the residual class and
+// round-robins in the remaining lane time. No admission control (v1).
+// The class is judged at pick time through TaskView, because a ready task can gain a
+// deadline while it waits (the mailbox path)
+struct Edf : Policy {
+  TaskView& view;
+  i64 slice = 10000;
+  std::deque<int> q;                        // the ready set in ready order (= residual RR order)
+  Ledger used;                              // residual: lane time used of the current slice
+
+  explicit Edf(TaskView& v) : view(v) {}
+  void start(const Params& p, bool cold) override {
+    slice = p.residual_timeslice_us;
+    if (cold) used.clear();                 // rule (a): the holder starts a fresh slice too
+  }
+  void on_ready(int id) override { q.push_back(id); }
+  void on_yield(int id, Yield why) override {
+    if (why == Yield::SliceEnd || why == Yield::Preempted) {
+      // a preemption keeps the rest of the slice — except one landing in the same µs as the
+      // slice boundary, which is a slice end; otherwise the next dispatch has horizon 0 and
+      // traces a zero-length occupancy
+      if (why == Yield::SliceEnd || used[id] >= slice) used[id] = 0;
+      q.push_back(id);
+      return;
+    }
+    used[id] = 0;
+    q.erase(std::remove(q.begin(), q.end(), id), q.end());
+  }
+  int pick() override {
+    if (q.empty()) return -1;
+    auto best = q.end(); i64 bd = 0;
+    for (auto it = q.begin(); it != q.end(); ++it) {
+      const i64 d = view.deadline(*it);
+      if (d < 0) continue;
+      if (best == q.end() || d < bd || (d == bd && *it < *best)) { best = it; bd = d; }
+    }
+    if (best == q.end()) best = q.begin();  // no deadline work → residual round-robin
+    const int id = *best; q.erase(best); return id;
+  }
+  i64  horizon(int id) override {          // 0 if a same-algorithm entry shrank the slice
+    return view.deadline(id) >= 0 ? kNoHorizon : std::max<i64>(0, slice - used[id]);
+  }
+  void charge(int id, i64 ran) override { if (view.deadline(id) < 0) used[id] += ran; }
+  bool preempts(int c, int h) override {
+    const i64 dc = view.deadline(c), dh = view.deadline(h);
+    return dc >= 0 && (dh < 0 || dc < dh);  // a tie does not preempt
+  }
+  std::vector<int> handoff() override {
+    std::vector<int> o(q.begin(), q.end()); q.clear(); return o;
+  }
+};
+
+// LOTTERY (vocab §2, waldspurger-osdi94): tickets split batch : non-batch = share : (1−share),
+// equal tickets per task within a class. That is the same distribution as a two-stage draw:
+// ① if both classes are runnable, pick the class by share; ② pick uniformly inside it.
+// Only runnable tasks hold tickets. One draw's tenure is timeslice_us. A wake never
+// preempts — the next draw is LOTTERY's only preemption. The draw is integer-only, and
+// rejection sampling removes the modulo bias
+struct Lottery : Policy {
+  TaskView& view;
+  i64 slice = 10000;
+  int share_bp = 1500;
+  std::vector<int> pool;                    // the ready set in ready order
+  Ledger used;                              // lane time used of the current draw's tenure
+  std::uint64_t rng = 0;                    // splitmix64 state — seed() once per run
+
+  explicit Lottery(TaskView& v) : view(v) {}
+  void seed(std::uint64_t s) { rng = s; }
+  std::uint64_t next() {
+    std::uint64_t z = (rng += 0x9E3779B97F4A7C15ull);
+    z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ull;
+    z = (z ^ (z >> 27)) * 0x94D049BB133111EBull;
+    return z ^ (z >> 31);
+  }
+  std::uint64_t below(std::uint64_t n) {    // uniform in [0, n)
+    const std::uint64_t lim = UINT64_MAX - UINT64_MAX % n;
+    for (;;) { const std::uint64_t r = next(); if (r < lim) return r % n; }
+  }
+  void start(const Params& p, bool cold) override {
+    slice = p.timeslice_us; share_bp = p.batch_share_bp;
+    if (cold) used.clear();
+  }
+  void on_ready(int id) override { pool.push_back(id); }
+  void on_yield(int id, Yield why) override {
+    if (why == Yield::SliceEnd || why == Yield::Preempted) pool.push_back(id);
+    else pool.erase(std::remove(pool.begin(), pool.end(), id), pool.end());
+  }
+  int pick() override {
+    if (pool.empty()) return -1;
+    std::vector<std::size_t> b, n;          // positions in pool, per class
+    for (std::size_t k = 0; k < pool.size(); ++k) (view.batch(pool[k]) ? b : n).push_back(k);
+    const std::vector<std::size_t>* cls = b.empty() ? &n : &b;
+    if (!b.empty() && !n.empty())
+      cls = below(kShareDen) < (std::uint64_t)share_bp ? &b : &n;
+    const std::size_t k = (*cls)[cls->size() == 1 ? 0 : below(cls->size())];
+    const int id = pool[k];
+    pool.erase(pool.begin() + (std::ptrdiff_t)k);
+    used[id] = 0;                           // a new draw is a new tenure
+    return id;
+  }
+  i64  horizon(int id) override { return std::max<i64>(0, slice - used[id]); }
+  void charge(int id, i64 ran) override { used[id] += ran; }
+  bool preempts(int, int) override { return false; }
+  std::vector<int> handoff() override { std::vector<int> o = pool; pool.clear(); return o; }
+};
+
 // One line of a config schedule. The loader fills it; the core consumes it via ConfigApply
 struct ConfigEntry { i64 t_us; std::string algorithm; Params params; std::string provenance; };
 
@@ -217,10 +373,19 @@ struct Later {
   }
 };
 
-class Sim : public Trace, public Clock {
+class Sim : public Trace, public Clock, public TaskView {
  public:
-  // ── Trace / Clock seams ──
+  // ── Trace / Clock / TaskView seams ──
   i64 now() const override { return now_; }
+  i64 deadline(int id) const override {     // the task's own TIMER job first, else the inherited one
+    const Task& t = tasks_[(std::size_t)id];
+    if (!t.periodic) return -1;
+    return t.job_open ? t.job_tick + t.job_period : t.chain_dl;
+  }
+  bool batch(int id) const override {
+    const Task& t = tasks_[(std::size_t)id];
+    return !t.periodic && t.burst >= batch_slice_;
+  }
   void note(const char* what, int id) override {           // a policy's x_ line
     assert(what[0] == 'x' && what[1] == '_');
     std::printf("{\"event\":\"%s\",\"t\":%lld,\"task\":\"%s\"}\n", what, (long long)now_,
@@ -254,7 +419,7 @@ class Sim : public Trace, public Clock {
   void arm(i64 t, int tag) override {
     if (q_.empty()) return;
     for (const Task& tk : tasks_)
-      if (tk.st != State::Done) { q_.push({t, seq_++, Kind::PolicyTimer, -1, 0, tag}); return; }
+      if (tk.st != State::Done) { q_.push({t, seq_++, Kind::PolicyTimer, -1, pol_epoch_, tag}); return; }
   }
 
   int add(std::string sid, i64 t, std::vector<Instr> prog, i64 depart = -1) {
@@ -295,6 +460,27 @@ class Sim : public Trace, public Clock {
   }
 
   void wake(i64 t, int chan) { q_.push({t, seq_++, Kind::Wake, -1, 0, chan}); }
+  const std::string& workload_id() const { return wid_; }
+
+  // B2 (batch-class memo §3): every task with a TIMER, and everything reachable from one
+  // through WAKE targets. Run once after loading. A spawn-table child is periodic if its own
+  // program has a TIMER, and then its WAKE targets seed the closure too
+  void classify_periodic() {
+    auto has = [](const std::vector<Instr>& p, Op op) {
+      return std::any_of(p.begin(), p.end(), [op](const Instr& i) { return i.op == op; });
+    };
+    std::vector<int> work;
+    auto mark = [&](int id) { if (!T(id).periodic) { T(id).periodic = true; work.push_back(id); } };
+    auto seed_targets = [&](const std::vector<Instr>& p) {
+      for (const Instr& i : p) if (i.op == Op::WAKE) mark(i.target);
+    };
+    for (std::size_t k = 0; k < tasks_.size(); ++k) {
+      if (has(tasks_[k].prog, Op::TIMER)) mark((int)k);
+      for (ChildSpec& c : tasks_[k].spawn_table)
+        if ((c.periodic = has(c.prog, Op::TIMER))) seed_targets(c.prog);
+    }
+    while (!work.empty()) { const int id = work.back(); work.pop_back(); seed_targets(T(id).prog); }
+  }
 
   explicit Sim(bool check_gen = true) : check_gen_(check_gen) {}
   void attach(Policy& p) { pol_ = &p; }
@@ -303,7 +489,7 @@ class Sim : public Trace, public Clock {
     std::printf("{\"event\":\"meta\",\"workload_id\":\"%s\",\"condition\":\"%s\","
                 "\"sim\":\"src/sim\",\"schedule_entries\":%zu}\n", wid_.c_str(), cond_.c_str(),
                 schedule_.size());
-    if (schedule_.empty()) pol_->start(p);   // no schedule → start with the argument params
+    if (schedule_.empty()) { pol_->start(p, true); batch_slice_ = p.timeslice_us; }  // no schedule → argument params
     while (!q_.empty()) {
       const Event e = q_.top();
       q_.pop();
@@ -341,6 +527,9 @@ class Sim : public Trace, public Clock {
   std::map<std::string, Policy*> registry_;
   std::vector<ConfigEntry> schedule_;
   Policy* pol_ = nullptr;
+  std::string algo_;                        // the algorithm in force — decides `cold`
+  std::uint64_t pol_epoch_ = 0;             // +1 per config apply; carried in PolicyTimer's gen
+  i64 batch_slice_ = Params{}.timeslice_us; // B1's threshold = the running config's slice
   int running_ = -1;
   i64 lane_start_ = 0, now_ = 0;
   bool check_gen_ = true;
@@ -366,14 +555,21 @@ class Sim : public Trace, public Clock {
     }
     std::vector<int> waiting = pol_->handoff();
     std::sort(waiting.begin(), waiting.end());   // deterministic handoff; id is the tie-break
+    ++pol_epoch_;                                // voids every policy timer armed so far
+    const bool cold = c.algorithm != algo_;
+    algo_ = c.algorithm;
+    // B1's slice (batch-class memo §3). FIFO has no slice, so it uses the boot default's
+    batch_slice_ = c.algorithm == "EDF"  ? c.params.residual_timeslice_us
+                 : c.algorithm == "FIFO" ? Params{}.timeslice_us : c.params.timeslice_us;
     pol_ = it->second;
-    pol_->start(c.params);
+    pol_->start(c.params, cold);
     for (int id : waiting) pol_->on_ready(id);
     if (holder >= 0) { running_ = holder; T(holder).st = State::Running;
                        lane_start_ = now_; arm_lane(holder); }
   }
 
   void on_policy_timer(const Event& e) {
+    if (e.gen != pol_epoch_) return;   // armed under an earlier config — void (header, stage S)
     int holder = running_;
     if (holder >= 0) {
       release();
@@ -392,6 +588,7 @@ class Sim : public Trace, public Clock {
     T(running_).run_left -= now_ - lane_start_;
     assert(T(running_).run_left >= 0);
     pol_->charge(running_, now_ - lane_start_);
+    T(running_).burst += now_ - lane_start_;   // B1 — preemption never resets it
     ++T(running_).gen;
     running_ = -1;
   }
@@ -425,7 +622,7 @@ class Sim : public Trace, public Clock {
       if (t.pc >= t.prog.size()) { t.st = State::Done; return; }
       switch (t.prog[t.pc].op) {
         case Op::RUN:  t.st = State::Ready; t.run_left = t.prog[t.pc].us; return;
-        case Op::SLEEP: t.st = State::Blocked; t.blocked_by = 's';
+        case Op::SLEEP: t.st = State::Blocked; t.blocked_by = 's'; t.burst = 0;
                         push(now_ + t.prog[t.pc].us, Kind::Unblock, id); return;
         case Op::TIMER: {
           const i64 P = t.prog[t.pc].period_us;
@@ -442,19 +639,21 @@ class Sim : public Trace, public Clock {
           const i64 due = t.timer_next;                   // ahead of the grid — block until next tick
           t.job_tick = due; t.job_period = P; t.job_open = true;
           t.timer_next += P;
-          t.st = State::Blocked; t.blocked_by = 't';
+          t.st = State::Blocked; t.blocked_by = 't'; t.burst = 0;   // a voluntary block
           push(due, Kind::Unblock, id);
           return;
         }
         case Op::WAIT: {
           const int c = t.prog[t.pc].chan;
-          if (chan_pending_[(std::size_t)c] > 0) { --chan_pending_[(std::size_t)c]; ++t.pc; break; }
-          if (t.mailbox > 0) { --t.mailbox; ++t.pc; break; }
-          t.st = State::Blocked; t.blocked_by = 'w'; t.wait_chan = c;
+          if (chan_pending_[(std::size_t)c] > 0) { --chan_pending_[(std::size_t)c];
+                                                   t.chain_dl = -1; ++t.pc; break; }
+          if (t.mailbox > 0) { --t.mailbox; t.chain_dl = t.mail_dl.front(); t.mail_dl.pop_front();
+                               ++t.pc; break; }
+          t.st = State::Blocked; t.blocked_by = 'w'; t.wait_chan = c; t.burst = 0;
           chan_waiters_[(std::size_t)c].push_back(id);
           return;
         }
-        case Op::WAKE: deliver(t.prog[t.pc].target); ++t.pc; break;
+        case Op::WAKE: deliver(id, t.prog[t.pc].target); ++t.pc; break;
         case Op::FORK:
           if (t.spawn_next >= t.spawn_table.size()) { ++t.pc; break; }   // table exhausted
           if (t.fork_cap > 0 && t.live_children >= t.fork_cap) {
@@ -504,6 +703,7 @@ class Sim : public Trace, public Clock {
     c.name = par.spawn_table[par.spawn_next].name;
     c.sid = par.sid + "." + std::to_string(par.spawn_next + 1);
     c.prog = par.spawn_table[par.spawn_next].prog;
+    c.periodic = par.spawn_table[par.spawn_next].periodic;
     c.parent = parent_id;
     ++par.spawn_next; ++par.live_children;
     tasks_.push_back(std::move(c));            // deque, so the par reference stays valid
@@ -538,18 +738,23 @@ class Sim : public Trace, public Clock {
     if (w.empty()) { ++chan_pending_[(std::size_t)c]; return; }  // mailbox (D2)
     const int id = w.front(); w.pop_front();
     T(id).wait_chan = -1;
+    T(id).chain_dl = -1;                        // an external wake carries no deadline
     on_unblock(id);
   }
 
-  void deliver(int target) {                    // WAKE instruction — task-addressed
+  // WAKE instruction — task-addressed. It carries the waker's deadline, so a frame's
+  // deadline follows it down the chain
+  void deliver(int waker, int target) {
     Task& t = T(target);
     if (t.st == State::Done) return;
+    const i64 dl = deadline(waker);
     if (t.st == State::Blocked && t.wait_chan >= 0) {
       auto& w = chan_waiters_[(std::size_t)t.wait_chan];
       w.erase(std::remove(w.begin(), w.end(), target), w.end());
       t.wait_chan = -1;
+      t.chain_dl = dl;
       on_unblock(target);                       // recursion — a brigade unwinds here
-    } else ++t.mailbox;
+    } else { ++t.mailbox; t.mail_dl.push_back(dl); }
   }
 
   void on_unblock(int id) {                     // shared by external wake and SLEEP/TIMER expiry
@@ -674,6 +879,14 @@ static void load_workload(const std::string& path, Sim& s) {
       s.wake(e.at("t").as_int("t"), s.channel(e.at("channel").as_str("channel")));
     } else die("unknown event op: " + op);
   }
+  s.classify_periodic();
+}
+
+// The lottery PRNG seed — FNV-1a 64 of the workload id. Not a config field (vocab §2 LOTTERY)
+static std::uint64_t fnv1a(const std::string& s) {
+  std::uint64_t h = 0xCBF29CE484222325ull;
+  for (unsigned char ch : s) { h ^= ch; h *= 0x100000001B3ull; }
+  return h;
 }
 
 static void load_schedule(const std::string& path, Sim& s) {
@@ -693,9 +906,17 @@ static void load_schedule(const std::string& path, Sim& s) {
       ce.params.timeslice_us      = pp.at("timeslice_us").as_int("timeslice_us");
       ce.params.timeslice_growth  = (int)pp.at("timeslice_growth").as_int("timeslice_growth");
       ce.params.boost_interval_us = pp.at("boost_interval_us").as_int("boost_interval_us");
+    } else if (ce.algorithm == "EDF") {
+      if (pp.obj.size() != 1) die("EDF params must have 1 field");
+      ce.params.residual_timeslice_us = pp.at("residual_timeslice_us").as_int("residual_timeslice_us");
+    } else if (ce.algorithm == "LOTTERY") {
+      if (pp.obj.size() != 2) die("LOTTERY params must have 2 fields");
+      ce.params.timeslice_us   = pp.at("timeslice_us").as_int("timeslice_us");
+      // the schema's only real number → an integer here; every draw compares integers only
+      ce.params.batch_share_bp = (int)std::llround(pp.at("batch_share").as_num("batch_share") * kShareDen);
     } else if (ce.algorithm == "FIFO") {
       if (!pp.obj.empty()) die("FIFO params must be empty");
-    }  // EDF/LOTTERY are not in register_policy, so they are rejected at apply time
+    }  // an algorithm off the menu is not in register_policy, so it is rejected at apply time
     out.push_back(std::move(ce));
   }
   s.set_schedule(std::move(out));
@@ -705,11 +926,16 @@ int main(int argc, char** argv) {
   Sim sim;
   Fifo fifo;
   Mlfq mlfq(sim, sim);
+  Edf edf(sim);
+  Lottery lottery(sim);
   sim.attach(mlfq);
   sim.register_policy("MLFQ", mlfq);
   sim.register_policy("FIFO", fifo);
+  sim.register_policy("EDF", edf);
+  sim.register_policy("LOTTERY", lottery);
   if (argc < 2) die("usage: ./sim <workload.json> [<config-schedule.json>]");
   load_workload(argv[1], sim);
+  lottery.seed(fnv1a(sim.workload_id()));   // before a schedule file's workload_id overwrites it
   if (argc > 2) load_schedule(argv[2], sim);
   Params p;                     // the boot default when there is no schedule (OSTEP §8 whole)
   sim.run(p);

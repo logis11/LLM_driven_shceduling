@@ -35,8 +35,11 @@ make lines      # 단계별 코드 줄수
 | **p** | `deadline` 이벤트 | 494 (+16) | due 가 격자 시각 기준 |
 | **q** | JSON 파서(별도 헤더) + 워크로드 로더 | 531 (+37) | 진짜 coreset 파일이 돈다 |
 | **r** | config schedule + 정책 교체 + `handoff()` | 603 (+72) | MLFQ→FIFO→MLFQ 인계 |
+| **s** | EDF + LOTTERY + `TaskView` 이음매(B1/B2 부류) + 정책 타이머 epoch | 769 (+167) | EDF 마감 100% vs MLFQ 0% (`edfheavy`) / LOTTERY batch 몫 0.15→14.8%, 0.5→49.1% |
 
-큰 델타 셋(h, n, r)은 쪼갤 수 없는 단위다 — MLFQ 다섯 규칙, FORK 의 생애주기, 두 번째 입력.
+큰 델타 넷(h, n, r, s)은 쪼갤 수 없는 단위다 — MLFQ 다섯 규칙, FORK 의 생애주기, 두 번째 입력,
+그리고 **부류**: EDF 와 LOTTERY 는 같은 실행기 부류(B2 주기 / B1 batch)를 읽으므로 따로 얹으면
+이음매를 두 번 설계하게 된다.
 
 ### 나중 단계가 앞 단계를 고친 곳
 
@@ -49,6 +52,9 @@ make lines      # 단계별 코드 줄수
 | `vector<Task>`→`deque` (b→n) | FORK 가 실행 중 tasks_ 를 키운다. vector 면 `Task&` 가 댕글링 |
 | D1 tie-break 개정 (a→r) | boot 설정이 같은 t=0 의 arrive 보다 먼저여야 한다 |
 | 선점 복귀의 `ready` 제거 (f→g) | 계약의 `ready.cause` 에 preempt 가 없다 |
+| `PolicyTimer` 에 config epoch (i/r→s) | 정책 타이머가 config 적용을 넘어 살아남았다. MLFQ 가 다시 `start()` 할 때마다 boost 사슬이 하나씩 늘고, 사슬끼리 서로를 `q_` 에 남겨 `arm()` 의 종료 규칙을 무력화한다. **c1-compile × mock-switch 가 sim_r 에서 끝나지 않는다** (15초에 가상 45시간, 2,400만 줄). r 의 검증은 이 조합을 돌리지 않았다 |
+| `Policy::start(params, cold)` (g→s) | "알고리즘이 바뀌었나"를 정책이 알아야 하는 건 **같은 알고리즘 엔트리는 슬라이스 유지, 교체는 새 dispatch** (switch 메모 §2a·§7)를 둘 다 지키는 정책이 생긴 다음이다 |
+| `deliver(target)` → `deliver(waker, target)` (m→s) | WAKE 가 **마감을 싣는다** — 체인 단계는 TIMER 가 없어서 깨운 쪽의 마감 말고는 마감을 가질 길이 없다 |
 
 ---
 
@@ -86,6 +92,10 @@ make lines      # 단계별 코드 줄수
 | **D2** | §9.1 대기자 없는 wake | **우편함(깊이 있음)**. 채널별 + 태스크별 | 잃어버리면 굶주린 태스크의 수요가 줄어 **측정하려던 피해가 은폐된다** (TIMER backlog 와 같은 이유). ⚠️ 우편함이 둘인 게 걸린다 — 외생 wake 는 channel 주소, WAKE 명령어는 target 주소. 실측은 채널당 대기자 하나라 결과가 같다 → **인지오 확인 항목** |
 | **D3** | §9.4 depart mid-anything | 즉시 제거, 남은 수요·밀린 틱 전부 폐기 | guide 가 "presumable" 이라 한 그대로. 레인을 쥐었으면 `run_end reason=depart` 를 먼저 찍는다 |
 | **D4** | §9.2 TIMER 의 t₀ | 그 태스크가 **TIMER 를 처음 실행한 순간** | 도착 시각: 도착~첫TIMER 사이 명령어가 첫 주기를 갉아먹는다. 전역 0: 모든 주기 태스크를 인위적으로 동기화시켜 경합 패턴을 왜곡한다. t=0 도착 태스크는 셋 다 같아 현재 coreset 이 답을 강제하지 못한다 |
+| **D6** | EDF 의 체인 단계 마감 | WAKE 가 깨운 쪽의 현재 마감을 싣는다. 대기자가 없으면 우편함에 마감도 같이 쌓인다(`mail_dl`). 외생 wake 와 채널 우편함은 마감을 지운다 → residual | batch 메모 B2 "WAKE 로 닿는 전부 = EDF deadline class" 를 따랐다. ⚠️ **문서 충돌**: vocab §2 ("TIMER-driven") 와 pair review finding 5 ("woken stages are residual-class") 는 반대다. c2-p2b frame miss 가 0% ↔ 99.8% 로 갈린다 → `../notes/note-for-jioh-edf-chain-stage-class.md` |
+| **D7** | EDF 동률 / 마감 부류의 슬라이스 | (마감, id) 순. 마감 부류는 지평선 없음, 동률은 선점 안 함. residual 은 RR, 선점당하면 남은 슬라이스 유지 | vocab "ties broken by a fixed executor rule" — D1 과 같은 id. Liu & Layland EDF 는 quantum 이 없다 |
+| **D8** | LOTTERY 추첨 | ① 두 부류가 다 runnable 이면 bp 로 부류 ② 부류 안 균등. splitmix64, rejection 으로 편향 제거. seed = FNV-1a(workload 파일의 `meta.id`), 런당 1회 | "부류별 split + 부류 안 동일 티켓" 과 같은 분포. 스케줄 파일의 `workload_id` 는 쓰지 않는다 — 덮이기 전에 시드한다 |
+| **D9** | FIFO 아래 B1 문턱 | boot default 의 `timeslice_us` = **10000** | batch 메모 §3 의 "2000 µs" 는 09-11 이전 문장. boot-default 메모 §5 가 "이제 10000 으로 읽으면 된다"고 이미 답했다 |
 | **D5** | 알고리즘 교체 시 ready set | 떠나는 정책의 `handoff()` → id 정렬 → 새 정책 `start()` → `on_ready` 각각. 레인 홀더는 release 후 되돌려주고 재무장 | guide §5 가 미뤄둔 항목. 홀더를 ready set 에 넣으면 불필요한 컨텍스트 스위치가 생기고, 안 건드리면 새 정책의 지평선이 반영 안 된다 |
 
 ### 미결 (기록만 하고 넘어감)
@@ -94,9 +104,22 @@ make lines      # 단계별 코드 줄수
   (다음 FORK 는 cap 이 비어 블록 없이 통과 → 결과 동일). 부모가 FORK 에 도달하는 바로 그
   순간 자식이 EXIT 하면 블록하지 않는다 (EXIT 처리가 먼저 끝나 live_children 이 이미 줄었다).
   둘 다 D1 이 결정한다.
-- **EDF / LOTTERY**: 미구현. `register_policy` 에 없으므로 요구하면 **거부**한다 —
-  조용히 MLFQ 로 대체하지 않는다.
-- **`batch_bandwidth_cap`**: 파싱만 하고 집행하지 않는다.
+- **`batch_bandwidth_cap`**: 여전히 집행하지 않는다 (읽지도 않는다). B1/B2 부류는 s 에서 생겼으니
+  남은 건 "non-batch 가 runnable 한 동안 batch 몫 ≤ cap" 의 회계 창 하나다. 실행기 안전망(starvation
+  window)도 미구현 — EDF 마감 부류와 FIFO 는 지평선이 없다.
+- **cross-field 규칙 5** (`batch_share ≤ cap`) 와 범위 clamp: 로더가 하지 않는다. MLFQ 와 같이
+  상류(validator)가 합성한 설정을 믿는다.
+- **c1-gaming 은 EDF 에서 무너진다** (마감 5/5,664) — ~~과부하라 버그 아님~~ 은 반쪽 설명이었다.
+  과부하(utilization 1.46, coreset-guide)는 사실이지만, 머리·compositor 의 마감까지 무너지는 건
+  **D6 이 체인 16단을 deadline class 에 넣기 때문**이다. 상속을 끄면 7,372/7,372 met. → D6 질문.
+- **⚠️ RUN→(블록 없이)→RUN 경계의 trace 결함 — r 부터 있다, s 는 고치지 않았다.** `advance()` 가
+  다음 RUN 에 닿으면 `ready cause=arrive` 를 찍고 **run_end 없이** 레인을 놓고 재큐한다.
+  boot MLFQ 에서 c1-gaming `ready` 86,239 줄 중 35,803 (41%), c2-p2b 175,443 중 43,098.
+  **문서가 이미 답했다**: trace-clarifications 메모 §4 ("the line is emitted at that instant with the
+  task already running", fake run_end/run_start 금지), metrics §6.1·§11.1. 질문이 아니라 구현 대기다.
+  harness `records.py` 를 sim_r trace 에 돌리면 c1-media 에서 guard 4,798 — tick 0 의
+  `ready(timer_tick)` 가 없어 job 번호가 하나씩 밀리고 music job 이 전부 miss 로 읽힌다.
+  **다음 단계의 1순위.** LOTTERY 는 이 때문에 RUN 경계마다 재추첨한다.
 - **`arm()` 의 임시 규칙**: 큐에 다른 일이 남아 있을 때만 정책 타이머를 다시 건다.
   계약에 `T_end` 가 생기면 대체된다. ⚠️ 처음엔 "살아있는 태스크가 있으면"으로 짰는데
   그게 버그였다 — 더 올 wake 도 depart 도 없이 영원히 블록된 태스크는 `Done` 이 아니지만
@@ -123,7 +146,25 @@ M=../../harness/tools/tests/fixtures/mock-switch/config-schedule.json
 diff <(./sim_g fifo) <(./sim_e)           # 정책 추출이 행동을 안 바꿨나
 ./sim_r $D/c1-media.workload.json $M | grep config_applied
 diff <(./sim_r $D/c1-office.workload.json) <(./sim_r $D/c1-office.workload.json)  # 바이트 동일
+cmp <(./sim_r $D/c1-gaming.workload.json) <(./sim_s $D/c1-gaming.workload.json)   # s 회귀: 스케줄 없으면 동일
 ```
+
+s 의 검증 (24파일 전수, 스케줄 6종):
+
+| 무엇 | 결과 |
+|---|---|
+| 스케줄 없음 / MLFQ→FIFO (재진입 없음) 에서 `sim_s` == `sim_r` | 24×2 바이트 동일 |
+| mock-switch / EDF / LOTTERY(0.15) / 8-엔트리 4알고리즘 교체 | 24×4 전부 종료, 두 번 돌려 바이트 동일 |
+| `src/sim` == `sim_s` (`meta.sim` 만 정규화) | 위 전부 + 손 워크로드 18조합 동일 |
+| LOTTERY seed 양성 대조 | `meta.id` 만 바꾸면 trace 가 달라진다 |
+| `edfheavy` (TIMER 16.7ms·burst 12ms + hog) | EDF 599/599, MLFQ 0/250, LOTTERY 84/598 |
+| `share2` (주기 부류 1 + hog 1, 둘 다 늘 runnable) | batch 몫 share 0.15 → 14.8%, 0.5 → 49.1% |
+| EDF 슬라이스 경계 선점 수정 후 EDF·교체 경로 재검증 | 48/48 종료·재현·이식 동일. boot-default 메모 §5 시나리오에서 길이 0 occupancy 600 → 0 |
+
+⚠️ 같은 µs 에 residual 슬라이스 끝과 TIMER 만료가 겹치면 선점으로 처리되면서 다 쓴 슬라이스를 유지해,
+다음 dispatch 의 지평선이 0 → 길이 0 occupancy 가 생겼다. "경계와 같은 µs 의 선점 = 슬라이스 끝"으로 고쳤다.
+첫 수정은 그 태스크를 ready set 에서 **지워버렸다**(t=166670 이후 scan 이 영영 안 뜀) — 레인이
+일감을 두고 노는 걸 보고 잡았다. 상태 기록: `../memo/memo_261001.md`.
 
 ### §7 통합 게이트
 
