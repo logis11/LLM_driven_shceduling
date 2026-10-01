@@ -115,3 +115,21 @@ The pair's claim becomes two real jobs beside an editor with opposite correct po
 Applied when D5's entry exists: `c2-pairs.variant.yaml`'s P1b rename-only operation becomes a patch binding the measured indexer, its comment and `c2-p1a`'s header restated. No file changed yet.
 
 Hands to 9.14: the pair review and prior-table rows that argue on P1's identical behaviour. Hands to 9.15: `building-plan.md` §3 C2 ("behaviorally identical CPU saturation"), scenario-catalog note 2, `cpu-batch`'s `modeling_notes` sentence on `c2-p1b` inheriting `python3`'s tables (at the fold-in of D5's entry).
+
+## D7 — `c2-p2a`'s wanted download is an install of another game the user starts during play (2026-10-01)
+
+By 인지오's decision, scope-card items 12 and 39: the download in `c2-p2a`'s segment 1 depicts the user starting to install another game while playing — wanted, `initiated: user` — and no longer a background update download during play.
+
+Grounds:
+
+- **Valve's stated default.** Valve: "Steam automatically pauses your downloads when a game is launched in order to prioritize the network activity for the game itself. You can turn this feature off by navigating to your download settings: Steam > Settings > Downloads. From here, check the Allow Downloads During Gameplay box." (FAQ 4F9E-6328-E9B8-47F9, the registry's `steam-downloads`, verified 2026-09-13, K3 C-steam-2 SUPPORTED; `2026-09-13-verification/sources/steam-downloads/faq-4F9E-6328-E9B8-47F9.txt`, SHA-256 `03d733b7…34c8c4`). Stage 2's "the default not found in any class" is answered by this source.
+- **What downloads during play with the box off** (steam-for-linux #8821; S3-27). "if you have a game launched and during gameplay press "Install" for another game that game will start downloading immediately" — one user's repeated observation, SteamOS 3.4 on a Steam Deck — and Valve's issue triager's reply, "this is not specific to SteamOS or the Steam Deck".
+- **The label.** `background_wanted` `true` is "work the user deliberately initiated" (`docs/recognition-vocabulary.md` §1).
+- **The bound entry's state.** `game-download` measured a fresh install of a 10.4 GB depot (9.7 D4, D12).
+- **What the other observations show.** Desktop reports of a game patching during its own play come from users with the box off and are reported as bugs (S3-28a, S3-28c); shader-cache jobs during play (S3-26, S3-27) are unasked and no entry describes them.
+
+Applied: `c2-p2a.timeline.yaml` — header comment restated; segment 1 gains `initiated: user`. `c2-p2b`'s `patch-segment` replaces the segment's attributes whole, so the key does not reach it.
+
+Open at their own items: the download's displayed name `steam` against the SteamCMD program measured (item 66), the Steam client behind a game, measured logged out with no library (item 63), the download's size (item 56).
+
+Hands to 9.15: the scenario catalog's S10 row and the `steam-downloads` role line (`docs/references.md`, `dataset/sources.yaml`) restated — the source grounds the default pause, not a "wanted toggle" (C-steam-4); a `docs/references.md` entry minted for steam-for-linux #8821 where the docs cite it.

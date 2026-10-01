@@ -1,5 +1,8 @@
-# C2 P2 (base) — {game + steam download workers}: same game-plus-background
-# shape as the clamscan variant; wanted flips (S10 vs S17).
+# C2 P2 (base) — gaming with a download the user started: an install of
+# another game begun during play, which Steam starts at once although it
+# pauses queued downloads when a game launches (steam-downloads; Valve's
+# steam-for-linux #8821). The variant swaps in an unwanted job and flips
+# the label (c2-pairs.variant.yaml).
 meta:
   id: c2-p2a
   seed: 202
@@ -8,7 +11,8 @@ segments:
   - {from: 0s, to: 60s, mode: gaming, attributes: {background_wanted: true},
      scenario: [S9]}
   - {from: 60s, to: 120s, mode: gaming,
-     attributes: {background_wanted: true, background: download}, scenario: [S9, S10]}
+     attributes: {background_wanted: true, background: download, initiated: user},
+     scenario: [S9, S10]}
 
 tasks:
   - {id: game, name: game.exe, archetype: game-task-chain,
