@@ -69,3 +69,34 @@ Open, for the campaign's method: which module, on prevalence grounded for Ubuntu
 No file changed yet: `c7-compile` keeps the rename until the entry exists.
 
 Hands to 9.14: `c7-compile`'s judging term and the prior table's and pair review's lines on the module rebuild. Hands to 9.15: `building-plan.md` §3 C7 ("`compile` renames `make` to `dkms`") and the scenario catalog's S11 row.
+
+## D5 — the indexing files show Tracker indexing a real user's file set from an empty database (2026-10-01)
+
+By 인지오's decision, scope-card item 69 (feeding items 38 and 45): the indexer state the three indexing files depict — today "a scheduled rescan" (`c7-indexing`, `c2-p1b`: `initiated: scheduled`, unwanted) and a reindex the user started (`c1-indexing`: wanted, a pre-committed miss) — is Tracker indexing every file from an empty database:
+
+- **On the unasked side** (`c7-indexing`, `c2-p1b`): the first index of a home at login.
+- **On the asked side** (`c1-indexing`): the same work after the user's own reset.
+
+It is re-measured in a runner campaign of its own, on a real machine's files in place of the kernel's `Documentation` tree (9,462 files, 9.6 D16). The candidate is the Mahoney set (`mahoney-10gb`, 79,431 files from one laptop), which `file-backup` and `file-archiver` read. The campaign and the entry, or the `tracker` program of `cpu-batch` re-measured, are 9.10's.
+
+Grounds:
+
+- **No scheduled rescan.** Tracker Miners 3.7.1, the version in the default install of Ubuntu 24.04 (S2-01, S2-03), schedules none by default: `DEFAULT_CRAWLING_INTERVAL -1` (`tracker-config.c:49`) is "Maybe (depends on a clean last shutdown)" — it crawls at each start, and compares every directory's mtime against the database only after an unclean shutdown (`tracker-main.c:240–284`, `:964–995`; `tracker-miner-files.c:1341–1370`; S2-04 at `eae431e`).
+- **The empty-database index.** File monitors index new files as they appear (S2-03). An empty database — a first start, a new account, a reset — is crawled and every file indexed, the state 9.6's campaign observed (9.6 D16).
+- **The other reports.** Full re-indexes reported on desktops are regressions or kernel-change effects (S3-36a, S3-37); one report of a bulk import driving the indexer to all cores (S3-36c).
+- **Not the re-check after an unclean shutdown.** It compares mtimes and re-indexes only what changed, at a crash rate no source gives.
+- **Not newly arrived content.** Its size is a chosen batch on one report.
+
+One measured state serves both labels: the user's reset and the first login run the same work, so the wanted and unwanted files differ by intent alone — what `c1-indexing`'s pre-committed miss states.
+
+Open:
+
+- the campaign's method (the file set's placement under the indexed directories, the job window as 9.6 D16 read it);
+- whether `c2-p1b` takes these tables or keeps `python3`'s (9.6 D21; the next item);
+- the indexer's declared class, `SCHED_IDLE` at nice 19 (9.6 D17), 9.11's.
+
+The unasked side's `initiated: scheduled` is restated when the files rebind; it is a first login, not a schedule.
+
+No file changed yet.
+
+Hands to 9.15: the scenario catalog's S14 row ("unwanted-deferrable", "shipped defaults … plocate timers"); `docs/recognition-vocabulary.md`'s example "an indexer's scheduled rescan".
