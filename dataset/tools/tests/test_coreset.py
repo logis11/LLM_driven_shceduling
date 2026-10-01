@@ -149,10 +149,16 @@ def test_c7_and_derived_files_declare_calibration(repo_root):
             assert metas == [{"demand": "calibration"}], variant["id"]
 
 
-def test_c6_fold_tasks_unchanged(coreset):
+def test_c6_fold_names_unchanged(coreset):
+    # 9.10 D30: the meeting segment adds the call, a `chrome` task on video-call from 30 s; the browsing
+    # tasks are the base's and the process names stay {chrome}, so the canonical set does not change
     base, _ = coreset["c1-browsing"]
     variant, _ = coreset["c6-fold"]
-    assert events_by_id(base) == events_by_id(variant)
+    base_events, variant_events = events_by_id(base), events_by_id(variant)
+    assert set(variant_events) - set(base_events) == {"call"}
+    for task_id, event in base_events.items():
+        assert variant_events[task_id] == event
+    assert {e["name"] for e in variant_events.values()} == {e["name"] for e in base_events.values()} == {"chrome"}
     assert len(variant["ground_truth"]) == 2
 
 

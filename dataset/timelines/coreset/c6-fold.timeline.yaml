@@ -39,3 +39,8 @@ tasks:
   depart: 60s
   id: renderers
   name: chrome
+- archetype: video-call
+  arrive: 30s
+  depart: 60s
+  id: call
+  name: chrome

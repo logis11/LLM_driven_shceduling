@@ -22,7 +22,7 @@
     "coreset-native/c2-p2b.workload.json": "326e919a70f6674a9d46b9f03d57431c369888dc61c77f3d416ab7b2fe6585a5",
     "coreset-native/c2-p3a.workload.json": "5b8482ac5fa879087d441c990a1a20db982846173b25a8fe64ca924c0bc8c956",
     "coreset-native/c2-p3b.workload.json": "b8c7cd8917771bdea1e30eae75f24ae1102d4727e07be562b8bf78bfa716eb63",
-    "coreset-native/c3-creation.workload.json": "e4b335e56c9d9d0ce4e320c8a425a5757013903d66b52bd5a41409d45d3c0923",
+    "coreset-native/c3-creation.workload.json": "f5e2ca7c088a655f4133d0372f745ab098b5d588b79508da93126dcd209db9dd",
     "coreset-native/c3-evening.workload.json": "d9541c413acb9079c858fe1be522e76cc5bb105fea3338a01b47261a5e354ad0",
     "coreset-native/c3-workday.workload.json": "1b307ff3786be1439590904654e4f4c917f64b266b612e9f0d4b41ea1c2f4220",
     "coreset-native/c4-compile.workload.json": "702c9a162add1d6630202c96187e3d31fd949c6666b483356f2690a880d5bb0c",
@@ -32,7 +32,7 @@
     "coreset-native/c5-t4.workload.json": "c3f4451b03a6afa358a0ffe2c56c7591c5040c7b6be531387323bc0905b6a50f",
     "coreset-native/c5-t5.workload.json": "01db36045f88596261368190a7d383c5c29321422336ff1ddc8b6ec0d80944d0",
     "coreset-native/c6-dual.workload.json": "426377589af8456f50962b6db2c02356a4c1f0a736be7c4778a0befe851836c2",
-    "coreset-native/c6-fold.workload.json": "6ccbe3b53bf77ba532079460f734a61d841eb51d71e25ff90a352fe224a885d7",
+    "coreset-native/c6-fold.workload.json": "a52d6062822e475d043db7a45f0758e8d13a9d8518d596d52533f8b4194f2a73",
     "coreset-native/c6-spoof.workload.json": "cabd910dcc347501f25e2b977ceabbd2e30fd81d808a2d1b907ce17405a5d41f",
     "coreset-native/c7-backup.workload.json": "30cc06f89790f5cc02482784d3bfe9687670743287ba4636501c080eade8f94d",
     "coreset-native/c7-browsing.workload.json": "e5f6d760b817dce7f585a8a9ef929ebd70aff53761b09c80852a624734f6d10a",
@@ -72,7 +72,7 @@
     "coreset-single/c2-p2b.workload.json": "0847ebcc148c86c6929a2aa0ab732cec171590f851ab1d59413139ac066f3f4b",
     "coreset-single/c2-p3a.workload.json": "5b8482ac5fa879087d441c990a1a20db982846173b25a8fe64ca924c0bc8c956",
     "coreset-single/c2-p3b.workload.json": "b8c7cd8917771bdea1e30eae75f24ae1102d4727e07be562b8bf78bfa716eb63",
-    "coreset-single/c3-creation.workload.json": "e4b335e56c9d9d0ce4e320c8a425a5757013903d66b52bd5a41409d45d3c0923",
+    "coreset-single/c3-creation.workload.json": "f5e2ca7c088a655f4133d0372f745ab098b5d588b79508da93126dcd209db9dd",
     "coreset-single/c3-evening.workload.json": "ee58421ddf1b596b8900b1a31cbc322f29c794d104f492072c5aef234353a764",
     "coreset-single/c3-workday.workload.json": "1b307ff3786be1439590904654e4f4c917f64b266b612e9f0d4b41ea1c2f4220",
     "coreset-single/c4-compile.workload.json": "702c9a162add1d6630202c96187e3d31fd949c6666b483356f2690a880d5bb0c",
@@ -82,7 +82,7 @@
     "coreset-single/c5-t4.workload.json": "c3f4451b03a6afa358a0ffe2c56c7591c5040c7b6be531387323bc0905b6a50f",
     "coreset-single/c5-t5.workload.json": "01db36045f88596261368190a7d383c5c29321422336ff1ddc8b6ec0d80944d0",
     "coreset-single/c6-dual.workload.json": "8bd336b3f4119ed91712635d3ec95364414f3b9669a4d3add5058812bd6f87f7",
-    "coreset-single/c6-fold.workload.json": "6ccbe3b53bf77ba532079460f734a61d841eb51d71e25ff90a352fe224a885d7",
+    "coreset-single/c6-fold.workload.json": "a52d6062822e475d043db7a45f0758e8d13a9d8518d596d52533f8b4194f2a73",
     "coreset-single/c6-spoof.workload.json": "cabd910dcc347501f25e2b977ceabbd2e30fd81d808a2d1b907ce17405a5d41f",
     "coreset-single/c7-backup.workload.json": "30cc06f89790f5cc02482784d3bfe9687670743287ba4636501c080eade8f94d",
     "coreset-single/c7-browsing.workload.json": "e5f6d760b817dce7f585a8a9ef929ebd70aff53761b09c80852a624734f6d10a",
@@ -232,7 +232,7 @@
     },
     "coreset-native/c6-fold.workload.json": {
       "demand_class": "calibration",
-      "utilization": 0.0164
+      "utilization": 0.135
     },
     "coreset-native/c6-spoof.workload.json": {
       "demand_class": "calibration",
@@ -432,7 +432,7 @@
     },
     "coreset-single/c6-fold.workload.json": {
       "demand_class": "calibration",
-      "utilization": 0.0164
+      "utilization": 0.135
     },
     "coreset-single/c6-spoof.workload.json": {
       "demand_class": "calibration",

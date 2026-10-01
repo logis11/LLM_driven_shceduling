@@ -629,3 +629,18 @@ Grounds:
 Applied: the headers of `c3-workday` and `c3-creation` restated (comments only; no compiled change).
 
 Hands to 9.15: `building-plan.md` §3 C3's "Ordering grounded in the CpsMark+ CA cooperative workflow" and "grounded in CpsMark+ CC and SYSmark 30 ACC's photo↔video multitasking workload"; the `cpsmark-tbench23` and `sysmark30` role lines.
+
+## D30 — `c6-fold`'s meeting segment shows the call it is labelled: a `chrome` task on `video-call` from 30 s (2026-10-01)
+
+By 인지오's decision, scope-card item 48: `c6-fold` — `c1-browsing` split into browsing 0–30 s and meeting 30–60 s — gains a `chrome` task bound to `video-call` from 30 s to 60 s. The process names stay `{chrome}`, so the canonical set does not change at the boundary and the file stays the guaranteed miss it was built as. Its meeting segment now carries the call it is labelled.
+
+Grounds:
+
+- **The premise now has a ground.** Since D24 the meeting is a call in the browser, shown under the program observed. Teams on Linux is a browser web app (S2-26), and Chromium runs a call's WebRTC and audio threads in its own processes (S2-16), so a call started in the browser adds no new process name. The scope card's premise item 48 — browser tabs becoming a call while the process set stays unchanged — is then a real state.
+- **The behaviour comes with the name.** Before this entry the meeting segment held only the browser's idle and typing behaviour under a meeting label. Name and behaviour now come from one observation (D24).
+
+The call arrives mid-file, so its observed launch phase runs first once D21's launch campaigns have run.
+
+Applied: `c6.variant.yaml`'s `c6-fold` adds the task (`id: call`) and its comment is restated; `c6-fold` re-derived; `test_c6_fold_tasks_unchanged` restated as `test_c6_fold_names_unchanged` (the base's tasks unchanged, `call` added, every name `chrome`). Recompiled (`compile.py --allow-window`): `c6-fold`'s demand 0.0164 → 0.135; `c3-creation`'s artifacts also move, carrying D29's header change into the manifest, with no demand change. Lint reports D20's three demand-window files and nothing else; tests 371 passed, 1 skipped, 1 xfailed, after the restated test.
+
+Hands to 9.14: `c6-fold`'s demand (reporting, excluded from aggregation). Hands to 9.15: `building-plan.md` §3 C6's fold sentence.
