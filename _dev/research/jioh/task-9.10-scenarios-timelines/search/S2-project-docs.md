@@ -56,6 +56,7 @@ All rows dated 2026-10-01. "200" etc. are HTTP status codes.
 | 40 | WebSearch | `Chromium blog OR Mozilla blog telemetry "number of open tabs" percentile users desktop data` | blog.mozilla.org/metrics WordPress API: post 5078 (200); API searches `tab study`, `tabs`, `Test Pilot`, `windows` (200) → posts 4504, 4756, 2040 (200) | no Chromium or Google publication of tab or window counts found |
 | 41 | archive.ubuntu.com; snapshot.ubuntu.com (stage 3) | `pool/main/l/language-pack-en-base/language-pack-en-base_24.04+20260905_all.deb`; `ubuntu/20260728T000000Z/pool/main/g/glibc/{libc-bin,libc6}_2.39-0ubuntu8.8_amd64.deb`, `locales_2.39-0ubuntu8.8_all.deb` (all 200) → S2-32 | — | `archive.ubuntu.com` pool no longer lists glibc 2.39-0ubuntu8.8 in the current index (8.9 current); fetched from the snapshot |
 | 42 | releases.ubuntu.com (stage 3) | HTTP range requests into `ubuntu-24.04.5.1-desktop-amd64.iso`, Joliet directory `casper/` listed by `isols.py`; `minimal.manifest`, `minimal.en.manifest`, `minimal.de.manifest`, `minimal.no-languages.manifest` read out (all 206) → S2-33 | — | — |
+| 43 | salsa.debian.org (stage 3) | `apt-team/apt/-/raw/2.8.3/cmdline/apt-helper.cc` (200) → S2-34 | — | — |
 
 ## 2. Candidates
 
@@ -3634,6 +3635,14 @@ a77819313f1acef8b19c5903218978151f7013393a91286585c1a00b3f589a09  S2-15/wb-sm201
   - `minimal.en.manifest:1–2`: "--- /build/livecd.ubuntu.minimal.manifest.full	2026-09-14 19:24:22.933962140 +0000" / "+++ /build/livecd.ubuntu.minimal.en.manifest.full	2026-09-14 19:26:43.732028649 +0000"; then 43 removals and no additions, among them "-language-pack-de	1:24.04+20260905", "-language-pack-gnome-zh-hans	1:24.04+20260905", "-fonts-arphic-ukai	0.2.20080216.2-5", "-ibus-libpinyin	1.15.7-1build2", "-gnome-user-docs-de	46.0-1ubuntu1".
 - **Coverage.** T5 — the package set of a default English install: the `minimal` manifest (S2-01) less the 43 packages the English layer removes, 1,445 binaries and ten snaps (S3-58's `pending_days_en.py`). The layer holds no kernel and no boot loader: `linux-generic-hwe-24.04`, `linux-image-7.0.0-31-generic`, `grub-pc`, `grub-efi-amd64-signed` and `shim-signed` are in `minimal.standard.live.manifest` (S2-01), the live session's layer, and reach an installed system through the installer. Supports the installed set only.
 - **One observation?** Not an observation; the image's own manifests.
+
+### S2-34 — apt 2.8.3's `apt-helper wait-online` (read at stage 3, 2026-10-01)
+
+- **Citation.** APT team, *apt*, `https://salsa.debian.org/apt-team/apt`, tag `2.8.3` (the version in Ubuntu 24.04's default layer, S2-03), `cmdline/apt-helper.cc`. Read at stage 3 after the unattended-upgrade campaign's dry run (D38).
+- **Copy read.** `https://salsa.debian.org/apt-team/apt/-/raw/2.8.3/cmdline/apt-helper.cc`, accessed 2026-10-01; local `sources/S2-34/apt-helper.cc`, SHA-256 in `SHA256SUMS.txt`.
+- **Passages.** `apt-helper.cc:216–221`: `static bool ServiceIsActive(const char *service)` … `const char *argv[] = {"systemctl", "is-active", "-q", service, nullptr};`. `:223–242`: `static bool DoWaitOnline(CommandLine &)` … `{"systemd-networkd.service", "/lib/systemd/systemd-networkd-wait-online", "-q", "--timeout=30", nullptr},` / `{"NetworkManager.service", "nm-online", "-q", "--timeout", "30", nullptr},` / `{"connman.service", "connmand-wait-online", "--timeout=30", nullptr},` … `if (ServiceIsActive(task[0]))` / `pid_t pid = ExecuteProcess(task + 1);` / `ExecWait(pid, task[1]);`.
+- **Coverage.** T5 — what `apt-daily-upgrade.service`'s `ExecStartPre` does: for each of three network managers, a `systemctl is-active` query, and the manager's own wait-online command, 30 s timeout, only for a manager that answers active. Supports what the program does, not how long its waiters take on a desktop.
+- **One observation?** Not an observation; the program's source.
 
 ## 3. Not found
 

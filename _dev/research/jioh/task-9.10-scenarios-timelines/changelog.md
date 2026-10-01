@@ -779,3 +779,17 @@ Grounds:
 - **What the layer holds.** No kernel and no boot loader: the installer adds them from the live session's layer (S2-33). None of the four packages' triggers reaches them — `libc6` activates only `ldconfig` (`triggers`, S2-32) — and the chroot holds the layer as the image ships it.
 
 No file changed yet.
+
+## D38 — the measured job starts at `apt.systemd.daily install`; the unit's wait-online step is not run (2026-10-01)
+
+By 인지오's decision, amending D37's boundaries after the campaign's dry run (run 36843481310, repeat 1, `dry`, on the EPYC 7763): the measured job is `apt.systemd.daily install` alone, run in the chroot on the measured CPU. `apt-helper wait-online`, the unit's `ExecStartPre`, is not run; the scope states it is not carried.
+
+Grounds:
+
+- **What the step does** (`apt-helper.cc:216–242`, S2-34): for each of `systemd-networkd.service`, `NetworkManager.service` and `connman.service`, a `systemctl is-active -q` query, and that manager's wait-online command with a 30 s timeout only if it answers active.
+- **What it did in the chroot.** `systemctl` answers every query in a chroot with "Running in chroot, ignoring command 'is-active'" and success, so all three waiters ran: `nm-online` failed ("Could not create NMClient object"), `connmand-wait-online` was absent (exit 100), and `systemd-networkd-wait-online` reported "Timeout occurred while waiting for network connectivity" — 27 s of the 56 s phase with no CPU, before the install stage's first tree row at 30 s (`cmd.upgrade-install.log`; the per-second profile of the dry run).
+- **What it is on an online desktop.** Only the active manager's waiter runs, and it returns once the network is online (S2-34); the 27 s is the chroot's, a network-down state none of the files depict.
+
+The dry run otherwise held D36 and D37: the layer built from the snapshot in 581 s with the 1,445 packages and none extra; the download stage fetched the four packages; the install stage installed `libc-bin`, `libc6`, `libc6-dbg` and `locales` 2.39-0ubuntu8.7 → 2.39-0ubuntu8.8 and nothing else, in 26.1 s of CPU over 923 processes — the 18 `localedef` runs of `locale-gen` 19.8 s (76 %), `unattended-upgrade` 2.4 s, everything else 3.9 s — the CPU saturated from the install stage's start to its end.
+
+Tooling: `dataset/tools/meas/background/run.sh`, the `upgrade` job's phase command.

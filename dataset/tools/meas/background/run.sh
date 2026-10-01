@@ -505,11 +505,13 @@ stage_probe() {   # stage_probe <app>: D12 — does the nearest older public bui
   rm -rf "$dir"
 }
 
-# ---- the unattended upgrade (9.10 D3, D36, D37) ---------------------------------
+# ---- the unattended upgrade (9.10 D3, D36–D38) ---------------------------------
 # The default layer of an English install (upgrade-layer.txt) built by mmdebstrap from the archive as Ubuntu's
 # snapshot service serves it at T0, on the harness CPUs; the stock download stage, `apt.systemd.daily update`, run in
-# the chroot against the archive at T1, on the harness CPUs; then the commands of apt-daily-upgrade.service —
-# `apt-helper wait-online`, `apt.systemd.daily install` — run in the chroot on the measured CPU as the phase. The
+# the chroot against the archive at T1, on the harness CPUs; then apt-daily-upgrade.service's ExecStart,
+# `apt.systemd.daily install`, run in the chroot on the measured CPU as the phase. Its ExecStartPre, `apt-helper
+# wait-online`, is not run: in a chroot systemctl answers every is-active query with success, so all three waiters
+# run and systemd-networkd's times out after 30 s, a state no online desktop is in (D38). The
 # chroot's /run is its own tmpfs, never the runner's: with /run/systemd/system absent the packages' scripts cannot
 # reach the runner's systemd, and ischroot holds, as on any chroot (S2-32).
 UPG_T0="${MEAS_UPGRADE_T0:-20260727T000000Z}"; UPG_T1="${MEAS_UPGRADE_T1:-20260728T000000Z}"   # D36
@@ -604,12 +606,12 @@ upg_after() {   # upg_after <root>: what the measured stage installed
 upg_job() {
   local r="$WORK/chroot"
   sudo rm -rf "$r"; upg_build "$r"; upg_mount "$r"; upg_download "$r"
-  # the unit's commands, its environment reduced to a service's (PATH, the system locale), stdin from /dev/null
+  # the unit's ExecStart (D38), its environment reduced to a service's (PATH, the system locale), stdin from /dev/null
   # sudo stays on the harness CPUs; taskset puts the chroot's command, and only it, on the measured CPU
   export MEAS_PIN=none
   phase upgrade-install -- sudo taskset -c "$MEAS_CPU" chroot "$r" /usr/bin/env -i \
     PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin LANG=en_US.UTF-8 \
-    /bin/sh -c '/usr/lib/apt/apt-helper wait-online; exec /usr/lib/apt/apt.systemd.daily install' < /dev/null
+    /usr/lib/apt/apt.systemd.daily install < /dev/null
   export MEAS_PIN=load
   upg_after "$r"; upg_umount "$r"
   df -B1 --output=target,avail "$WORK" > "$OUT/df.upgrade.txt" 2>&1
