@@ -218,3 +218,26 @@ Then the job's size against the segments (item 56).
 No file changed yet.
 
 Hands to 9.14: `c1-transcode`'s and `c7-transcode`'s judging terms. Hands to 9.15: the scenario catalog's S8 row; `cpu-batch`'s scope at the re-measurement's fold-in.
+
+## D12 — the training job is PyTorch's own basic MNIST example on the CPU (2026-10-01)
+
+By 인지오's decision, scope-card items 14, 32 and 71: the user-started training run of `c1-ml-train`, `c2-p1a` (segment 1) and `c7-ml-train` (by its flip) — today `cpu-batch`'s `python3` program, "a PyTorch 2.14 CPU training loop of 300 steps over synthetic images" that "reads no data and writes no checkpoint" (`cpu-batch` scope; 9.6 D7, D32) — is re-measured on PyTorch's own "Basic MNIST Example" at its defaults, in a runner campaign of its own (9.10's). The run is `python main.py`: a small convolutional network trained on the real MNIST dataset, 14 epochs of batch 64, a test pass per epoch, the checkpoint written (`--save-model`), on the CPU in one process (S2-31, `pytorch/examples` at `acc295d`, `mnist/main.py:75–137`).
+
+Grounds:
+
+- **No observed workload exists.** No class found an observed ML training workload that desktop users run (stage 2; `search/candidates.md`, item 14); Procyon's AI benchmarks measure inference (S2-14).
+- **A definition that is not ours.** The framework project's documented example, reading real data and writing a checkpoint, takes the place of the project's synthetic images and step count. The same form as D11's CpsMark+ transcode and 9.5's benchmark-defined operations (`docs/workload/measurement-overview.md` §4).
+- **What is not claimed.** The files show an actual training run and do not claim that desktop users train MNIST. On the runner the run is CPU-only; GPU training, and the CPU side of it, are unobservable (`docs/workload/measurement-overview.md` §11), a stated limitation.
+
+Open, for the campaign's method:
+
+- the dataset's placement and download before the measured phase;
+- the program's tables under `cpu-batch`'s criterion (9.6 D7) or an entry of its own if the run shows another shape (its test passes, its dataset reads).
+
+Then how much of the 14-epoch run a file shows (item 56).
+
+9.6 D32's hand-off on `c1-ml-train`'s id is answered: the files depict a real training run, its scope stated.
+
+No file changed yet.
+
+Hands to 9.14: the ml-train files' judging terms; the P1 pair's training side. Hands to 9.12 and 9.15: the wording rule of 9.6 D32 restated on the new run; the scenario catalog's S12 row.
