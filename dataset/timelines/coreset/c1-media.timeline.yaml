@@ -13,7 +13,7 @@ segments:
 tasks:
   - {id: video, name: mpv, archetype: video-player,
      arrive: 0s, depart: 60s}
-  - {id: music, name: spotify, archetype: audio-player,
+  - {id: music, name: mpv, archetype: audio-player,
      arrive: 0s, depart: 60s}
 
 focus: []

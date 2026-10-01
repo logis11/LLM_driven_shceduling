@@ -1,6 +1,6 @@
 # C1 — single-situation calibration: pure indexing, the `true` cell (building-
 # plan §3 C1; Phase 7 spec decisions 3 and 8). Task set lifted from c2-p1b
-# segment 1 (editor + tracker-miner-fs-3 in full-rescan state, cpu-batch per
+# segment 1 (editor + tracker-miner-f in full-rescan state, cpu-batch per
 # the archetypes.yaml binding note); total_work resized from 130 s to 30 s so
 # the job finishes inside the 60 s segment (turnaround term). A user-initiated
 # reindex of the same indexer: the label differs from the unwanted case by
@@ -18,7 +18,7 @@ segments:
 tasks:
   - {id: editor, name: code, archetype: code-editor,
      arrive: 0s, depart: 60s}
-  - {id: hog, name: tracker-miner-fs-3, archetype: cpu-batch, arrive: 2s,
+  - {id: hog, name: tracker-miner-f, archetype: cpu-batch, arrive: 2s,
      bind: {total_work: 30s, program: tracker}}
 
 focus:

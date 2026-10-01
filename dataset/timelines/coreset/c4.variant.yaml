@@ -6,7 +6,7 @@ variants:
   - id: c4-gaming
     from: c1-gaming.timeline.yaml
     ops:
-      - add-task: {id: injected-overlay, name: discord,
+      - add-task: {id: injected-chat, name: element-desktop,
                    archetype: chat-client, arrive: 30s, depart: 60s}
       - patch-meta: {demand: calibration}
 

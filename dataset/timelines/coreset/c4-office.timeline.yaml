@@ -39,7 +39,7 @@ tasks:
   arrive: 0s
   depart: 60s
   id: mail
-  name: thunderbird
+  name: thunderbird-bin
 - archetype: file-archiver
   arrive: 30s
   bind:

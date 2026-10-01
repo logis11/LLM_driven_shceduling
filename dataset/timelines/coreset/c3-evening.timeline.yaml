@@ -1,5 +1,5 @@
-# C3 — evening arc (building-plan §3 C3): browsing -> gaming (+discord
-# overlay) -> media playback.
+# C3 — evening arc (building-plan §3 C3): browsing -> gaming (+chat client)
+# -> media playback.
 meta:
   id: c3-evening
   seed: 302
@@ -17,15 +17,16 @@ tasks:
      arrive: 0s, depart: 60s}
   - {id: renderers, name: chrome, archetype: renderer-hidden,
      arrive: 0s, depart: 60s, count: 9}
-  - {id: game, name: game.exe, archetype: game-task-chain,
-     arrive: 60s, depart: 300s, bind: {lane_share: 1.45}}
-  - {id: overlay, name: discord, archetype: chat-client,
+  - {id: game, name: Troy.exe, archetype: game-task-chain,
+     arrive: 60s, depart: 300s, bind: {lane_share: 1.45,
+           member_names: ["Task worker thr", "Task worker thr", "Task worker thr", "Task worker thr", dxvk-cs, dxvk-submit, winepulse_mainl, winepulse_timer, FAudio_AudioCli, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe]}}
+  - {id: chat, name: element-desktop, archetype: chat-client,
      arrive: 60s, depart: 300s}
   - {id: steam, name: steam, archetype: game-client,
      arrive: 60s, depart: 300s}
   - {id: video, name: mpv, archetype: video-player,
      arrive: 300s, depart: 420s}
-  - {id: music, name: spotify, archetype: audio-player,
+  - {id: music, name: mpv, archetype: audio-player,
      arrive: 300s, depart: 420s}
 
 focus:

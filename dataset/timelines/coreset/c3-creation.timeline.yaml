@@ -1,5 +1,6 @@
-# C3 — creation arc (building-plan §3 C3): gimp -> kdenlive -> HandBrakeCLI
-# batch handoff (CpsMark+ CC; SYSmark 30 ACC photo<->video multitasking).
+# C3 — creation arc (building-plan §3 C3): gimp -> kdenlive -> HandBrakeCLI.
+# The order is design; SYSmark 30 ACC defines photo editing beside a
+# background encode (existence).
 meta:
   id: c3-creation
   seed: 303

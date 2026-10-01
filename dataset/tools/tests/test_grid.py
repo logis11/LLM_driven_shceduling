@@ -121,7 +121,7 @@ def test_pre_committed_miss_is_counted_and_marked(tmp_path):
         {"from": "0s", "to": "60s", "mode": "indexing",
          "attributes": {"background_wanted": True, "initiated": "user",
                         "pre_committed_miss": True}}],
-        [{"id": "hog", "name": "tracker-miner-fs-3", "archetype": "cpu-batch",
+        [{"id": "hog", "name": "tracker-miner-f", "archetype": "cpu-batch",
           "arrive": "0s", "bind": {"total_work": "60s"}}])
     coverage = grid.build_grid(tmp_path)
     cell = next(c for c in coverage["cells"]

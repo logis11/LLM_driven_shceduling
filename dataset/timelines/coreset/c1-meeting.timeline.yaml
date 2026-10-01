@@ -13,7 +13,7 @@ segments:
      scenario: [S3]}
 
 tasks:
-  - {id: voice, name: zoom, archetype: video-call,
+  - {id: voice, name: chrome, archetype: video-call,
      arrive: 0s, depart: 60s}
 
 focus: []

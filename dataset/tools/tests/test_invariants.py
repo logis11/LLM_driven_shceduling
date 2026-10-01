@@ -117,7 +117,10 @@ def test_chain_population(fixture_path, library):
     chain = [i for i in arrivals if ".chain." in i]
     wine = [i for i in arrivals if i.endswith(".wineserver")]
     assert len(chain) == 16 and len(wine) == 1 and len(arrivals) == 17  # no tail
-    assert all(arrivals[i]["name"] == "game.exe" for i in chain)
+    names = [arrivals[i]["name"] for i in sorted(chain, key=lambda i: int(i.rsplit(".", 1)[1]))]
+    assert names == ["Troy.exe", "Task worker thr", "Task worker thr", "Task worker thr", "Task worker thr",
+                     "dxvk-cs", "dxvk-submit", "winepulse_mainl", "winepulse_timer", "FAudio_AudioCli"] + \
+        ["Troy.exe"] * 6   # 9.10 D26: the head is the task's name, the members the bound member_names
     assert arrivals[wine[0]]["name"] == "wineserver"
     # wake order: head -> wineserver -> chain.2
     head_body = arrivals[f"{chain[0].rsplit('.', 2)[0]}.chain.1"]["program"][0]["body"]

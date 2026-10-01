@@ -30,4 +30,4 @@ tasks:
     program: tracker
     total_work: 30s
   id: hog
-  name: tracker-miner-fs-3
+  name: tracker-miner-f

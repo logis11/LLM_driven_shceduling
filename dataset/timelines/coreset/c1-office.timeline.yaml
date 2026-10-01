@@ -15,7 +15,7 @@ tasks:
      arrive: 0s, depart: 60s}
   - {id: renderers, name: chrome, archetype: renderer-hidden,
      arrive: 0s, depart: 60s, count: 7}
-  - {id: mail, name: thunderbird, archetype: mail-client,
+  - {id: mail, name: thunderbird-bin, archetype: mail-client,
      arrive: 0s, depart: 60s}
 
 focus:

@@ -6,23 +6,23 @@ variants:
   - id: c5-t3   # opaque real names (corpus-recallable, not inferable)
     from: c1-media.timeline.yaml
     ops:
-      - rename: {from: mpv, to: baloo_file}
-      - rename: {from: spotify, to: tracker-miner-fs-3}
+      - patch-task: {id: video, name: baloo_file}
+      - patch-task: {id: music, name: tracker-miner-f}
       - patch-segment: {index: 0, familiarity: 3}
       - patch-meta: {demand: calibration}
 
   - id: c5-t4   # nonexistent-compositional (inferable from word semantics)
     from: c1-media.timeline.yaml
     ops:
-      - rename: {from: mpv, to: video-playback-svc}
-      - rename: {from: spotify, to: audio-stream-helper}
+      - patch-task: {id: video, name: video-playback-}
+      - patch-task: {id: music, name: audio-stream-he}
       - patch-segment: {index: 0, familiarity: 4}
       - patch-meta: {demand: calibration}
 
   - id: c5-t5   # nonexistent-opaque (neither recall nor inference possible)
     from: c1-media.timeline.yaml
     ops:
-      - rename: {from: mpv, to: qzvd}
-      - rename: {from: spotify, to: xkrr}
+      - patch-task: {id: video, name: qzvd}
+      - patch-task: {id: music, name: xkrr}
       - patch-segment: {index: 0, familiarity: 5}
       - patch-meta: {demand: calibration}

@@ -20,19 +20,30 @@ tasks:
   arrive: 0s
   bind:
     lane_share: 0.9
+    member_names:
+    - Task worker thr
+    - Task worker thr
+    - Task worker thr
+    - Task worker thr
+    - dxvk-cs
+    - dxvk-submit
+    - winepulse_mainl
+    - winepulse_timer
+    - FAudio_AudioCli
+    - Troy.exe
+    - Troy.exe
+    - Troy.exe
+    - Troy.exe
+    - Troy.exe
+    - Troy.exe
   depart: 60s
   id: game
-  name: game.exe
+  name: Troy.exe
 - archetype: game-client
   arrive: 0s
   depart: 60s
   id: steam
   name: steam
-- archetype: video-player
-  arrive: 0s
-  depart: 60s
-  id: compositor
-  name: gamescope
 - archetype: cpu-batch
   arrive: 0s
   bind:

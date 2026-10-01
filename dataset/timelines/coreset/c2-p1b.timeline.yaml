@@ -35,4 +35,4 @@ tasks:
     program: python3
     total_work: 130s
   id: hog
-  name: tracker-miner-fs-3
+  name: tracker-miner-f

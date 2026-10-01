@@ -163,8 +163,8 @@
       "segments": 6,
       "tiers": {
         "t1": 0,
-        "t2": 6,
-        "t3": 0,
+        "t2": 0,
+        "t3": 6,
         "t4": 0,
         "t5": 0
       }
@@ -176,8 +176,8 @@
       "segments": 2,
       "tiers": {
         "t1": 0,
-        "t2": 2,
-        "t3": 0,
+        "t2": 0,
+        "t3": 2,
         "t4": 0,
         "t5": 0
       }
@@ -475,7 +475,7 @@
         "scenario": [
           "S9"
         ],
-        "tier": 2
+        "tier": 3
       }
     ],
     "c1-idle": [
@@ -639,7 +639,7 @@
         "scenario": [
           "S9"
         ],
-        "tier": 2
+        "tier": 3
       },
       {
         "background_wanted": true,
@@ -648,7 +648,7 @@
           "S9",
           "S10"
         ],
-        "tier": 2
+        "tier": 3
       }
     ],
     "c2-p2b": [
@@ -658,7 +658,7 @@
         "scenario": [
           "S9"
         ],
-        "tier": 2
+        "tier": 3
       },
       {
         "background_wanted": false,
@@ -667,7 +667,7 @@
           "S9",
           "S17"
         ],
-        "tier": 2
+        "tier": 3
       }
     ],
     "c2-p3a": [
@@ -750,7 +750,7 @@
           "S9",
           "S5"
         ],
-        "tier": 2
+        "tier": 3
       },
       {
         "background_wanted": true,
@@ -813,7 +813,7 @@
         "scenario": [
           "S9"
         ],
-        "tier": 2
+        "tier": 3
       }
     ],
     "c4-office": [
@@ -948,7 +948,7 @@
           "S9",
           "S17"
         ],
-        "tier": 2
+        "tier": 3
       }
     ],
     "c7-idle": [

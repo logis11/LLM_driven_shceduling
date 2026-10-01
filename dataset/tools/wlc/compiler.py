@@ -553,7 +553,12 @@ def _chain_constructor(timeline, task, iid, entry, mode):
     # (archetypes.yaml modeling_notes).
     member_ids = [f"{iid}.chain.1", f"{iid}.wineserver"] + \
         [f"{iid}.chain.{k + 1}" for k in range(1, chain_len)]
-    names = [task["name"], "wineserver"] + [task["name"]] * (chain_len - 1)
+    # the members after the head and wineserver are named in the timeline (9.10 D26: the names the
+    # chain's source shows for the game's threads; an archetype fixes no process name)
+    member_names = list(task["bind"]["member_names"])
+    if len(member_names) != chain_len - 1:
+        raise ValueError(f"{iid}: member_names holds {len(member_names)} names for {chain_len - 1} members")
+    names = [task["name"], "wineserver"] + member_names
     runs = [sampling.sample(params["per_schedule_run"], seed, iid,
                             "per_schedule_run", 0),
             sampling.sample(params["wineserver_run"], seed, iid,

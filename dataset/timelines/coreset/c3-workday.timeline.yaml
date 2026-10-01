@@ -1,6 +1,6 @@
 # C3 — workday arc (building-plan §3 C3): chrome research -> +soffice
-# writing -> +make compile -> mail send. Ordering grounded in the CpsMark+
-# CA cooperative workflow (cpsmark-tbench23).
+# writing -> +make compile -> mail send. The order is design; CpsMark+'s CA
+# workflow defines the browsing -> office -> mail transitions (existence).
 meta:
   id: c3-workday
   seed: 301
@@ -24,7 +24,7 @@ tasks:
      arrive: 60s, depart: 420s}
   - {id: build, name: make, archetype: build-orchestrator, arrive: 120s,
      bind: {spawn_count: 4200, parallelism_cap: 8, child_name: cc1}}
-  - {id: mailer, name: thunderbird, archetype: mail-client,
+  - {id: mailer, name: thunderbird-bin, archetype: mail-client,
      arrive: 360s, depart: 420s}
 
 focus:

@@ -36,7 +36,7 @@ def test_p1_pair_rename_only(coreset):
     assert set(base_events) == set(variant_events)
     for task_id, event in base_events.items():
         if task_id == "hog":
-            assert variant_events[task_id]["name"] == "tracker-miner-fs-3"
+            assert variant_events[task_id]["name"] == "tracker-miner-f"
             assert {**variant_events[task_id], "name": "python3"} == event
         else:
             assert variant_events[task_id] == event
@@ -66,7 +66,7 @@ def test_c4_injection_only(coreset):
     base, _ = coreset["c1-gaming"]
     variant, _ = coreset["c4-gaming"]
     base_events, variant_events = events_by_id(base), events_by_id(variant)
-    assert set(variant_events) - set(base_events) == {"injected-overlay"}
+    assert set(variant_events) - set(base_events) == {"injected-chat"}   # 9.10 D23
     for task_id, event in base_events.items():
         assert variant_events[task_id] == event
 

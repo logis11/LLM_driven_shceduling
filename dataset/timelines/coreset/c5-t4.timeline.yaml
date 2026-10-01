@@ -19,9 +19,9 @@ tasks:
   arrive: 0s
   depart: 60s
   id: video
-  name: video-playback-svc
+  name: video-playback-
 - archetype: audio-player
   arrive: 0s
   depart: 60s
   id: music
-  name: audio-stream-helper
+  name: audio-stream-he

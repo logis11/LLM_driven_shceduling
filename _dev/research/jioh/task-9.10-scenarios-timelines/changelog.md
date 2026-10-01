@@ -485,3 +485,108 @@ Grounds:
 No file changed.
 
 Hands to 9.15: the gaming files' scope statements, and the scenario catalog's S9 row.
+
+## D23 — the chat client is shown idle; the overlay ids become `chat` (2026-10-01)
+
+By 인지오's decision, scope-card items 7, 46 and 63 (9.8 D25's hand-off: the overlay ids, a chat client under traffic): the chat-client task in `c3-evening` (id `overlay`) and in `c4-gaming`'s injection (`c4.variant.yaml`, id `injected-overlay`) depicts Element idle, as measured, with no messages arriving. Its id becomes `chat` (`injected-chat` in the injection), and each file states that no messages arrive.
+
+Grounds:
+
+- **The overlay role cannot exist on Linux.** Discord's own support article states "The overlay is compatible with Windows OS only; it does not function on Mac OS or Linux" (9.8 D7), so the ids named a role the platform cannot hold.
+- **The idle state is fixed by the program alone.** The entry reads Element idling against a Matrix homeserver with no messages, the one state fixed by the client and the homeserver alone. A traffic phase stayed in the campaign results because "no class found any statement of how often a real user's chat client receives messages" (9.8 D11).
+- **Stage 2 found only dated rates.** 17.6 IMs per recorded hour (S1-50, 16–19 users, 2005); 1.7 conversations a day × 17.2 turns (S1-51, 2000–2001). Neither is a current chat client's rate or the traffic phase's. No class found a voice-chat client beside a game on Linux (`search/candidates.md`, item 7).
+- **The ids are unscored**, so no term moves (`harness/scoring/scoring-spec.yaml`).
+
+The displayed name `discord` over Element's measurement is item 66's.
+
+Hands to 9.15: the scenario catalog's S5 row ("Voice chat companion (overlay on S9/S2)").
+
+Applied: `c3-evening.timeline.yaml` (`chat`) and `c4.variant.yaml` (`injected-chat`); `c4-gaming` re-derived; `test_c4_injection_only` restated to the new id. Recompiled with D24–D27.
+
+## D24 — a task shows the observed program's name, with two stated exceptions (2026-10-01)
+
+By 인지오's decision, scope-card item 66 (with 5, 11, 15 and 63): of the five bindings that show one program's name over another program's measured behaviour, three take the observed program's name, one task leaves, and one keeps its name stated.
+
+- **`zoom` → `chrome`** (`c1-meeting`, `c7-meeting`). The meeting is a call in the browser, the program `video-call` observed (a loopback WebRTC call in Chrome, 9.5 D11, D25).
+- **`spotify` → `mpv`** (`c1-media`, `c3-evening`, `c7-media`). The program `audio-player` observed. `c5.variant.yaml` renames the two players by task id, the ladder's names unchanged.
+- **`discord` → `element-desktop`** (`c3-evening`, `c4-gaming`). Element's processes keep the executable's name, `element-desktop` (`chat-client`'s components; Chromium never renames a process's main thread, S2-16).
+- **`gamescope` leaves `c1-gaming`** (and `c4-gaming`, `c7-gaming`, derived) rather than showing `mpv`. The compositor's work during a game is unobservable on the runner — no display, no refresh (`docs/workload/measurement-overview.md` §11) — and is stated.
+- **The download keeps `steam`** (`c2-p2a`), the substitution stated. SteamCMD, observed, is the Steam client's content system without its interface (9.7 D4, D12). On a desktop the work runs inside the process named `steam`, and `steamcmd`, a server tool, would be the less real name during a game.
+
+Grounds:
+
+- **Names are realism.** Process names are realism under phase decision 3, one observation per situation; a name and the behaviour it carries then come from one observation.
+- **Calls run in the browser on Linux.** Teams on Linux is a browser web app (S2-26), and Meet and Jitsi run in the browser. Zoom's native client (`zoom` and CEF helpers, S2-25) and Spotify need an account the runner does not use (9.5 D11).
+- **gamescope is not a stock desktop's compositor.** It is not packaged on Ubuntu 24.04 (S2-12, S4-06). Nested on a desktop it ticks at the host's refresh, not the clip's 30 fps (S2-21, S3-29; 9.5 D75). A stock Ubuntu desktop composites a game with GNOME Shell (S2-01).
+
+The meeting files' recognizability shifts toward the browser, which is what Linux shows.
+
+Hands to 9.14: the scoring spec's `c1-gaming` term on `compositor` (weight 0.5) and its derived files' have no task; the meeting files' recognition. Hands to 9.15: the scenario catalog's S3, S5, S9 and S13 rows; `building-plan.md` §3 C1 ({mpv, spotify}, {steam, game.exe, wineserver, gamescope}); `coreset-guide.md`.
+
+Applied: `c1-meeting` (`chrome`), `c1-media` and `c3-evening` (`mpv`), `c3-evening` and `c4.variant.yaml` (`element-desktop`), `c1-gaming`'s `compositor` task and its header line removed; `c5.variant.yaml` patches the two players by task id; derived files re-derived. Recompiled with D23, D25–D27.
+
+## D25 — a task's name is its kernel `comm` (2026-10-01)
+
+By 인지오's decision, scope-card item 64: the name a task shows is the kernel's `comm` for its process — the exec'd file's basename cut to 15 bytes, a script keeping its own name, a process that renames itself with `prctl` taking its new name (S2-11, the kernel source). For a program a campaign ran, it is the `comm` the campaign observed; for one no campaign ran, it is derived by the rule and confirmed by observation where a campaign or the names workflow (`meas-ci:names:2`) shows it.
+
+Grounds:
+
+- **It is Linux's own name for the process.** The `comm` is what `/proc/<pid>/comm`, `ps`, `top` and the scheduler's task name show, and the string the campaigns recorded.
+- **Truncation is what a recognizer faces.** A name-based recognizer on a real desktop meets `tracker-miner-f`, not `tracker-miner-fs-3` (`2026-09-13-verification/meas-report.md` §4; S2-12).
+- **Nothing settled it before.** The schema carries names only (`docs/workload/scenario-catalog.md`, header), and no document fixed which string.
+
+Applied now:
+
+- `tracker-miner-fs-3` → `tracker-miner-f` (`c1-indexing`, `c2-pairs.variant.yaml`'s P1b, `c5.variant.yaml`'s tier 3; `c2-p1b`, `c7-indexing`, `c5-t3` re-derived);
+- `thunderbird` → `thunderbird-bin`, the main process `mail-client`'s campaign observed (Thunderbird 156, its components; `c1-mail`, `c1-office`, `c3-workday`; `c7-mail`, `c4-office`, `c7-office` re-derived);
+- C5's tier-4 names, invented, cut by the same rule so they remain strings a process could carry: `video-playback-svc` → `video-playback-`, `audio-stream-helper` → `audio-stream-he`.
+
+Every other shown name is within 15 bytes and is the observed `comm` where an entry records one (`soffice.bin`, `code`, `chrome`, `kdenlive`, `gimp`, `steam`, `gnome-shell`, `systemd`, `dbus-daemon`). `7z` is checked against 9.7's raw records (release `meas-ci-background-2026-09-19`) when `c4-office` rebinds. The names of D3–D12's new entries take their observed `comm` when their campaigns run (`unattended-upgr` derived for D3's script).
+
+Hands to 9.15: the scenario catalog's name strings; `coreset-guide.md`. Hands to the grid: the familiarity tiers re-read on the new strings.
+
+## D26 — the game chain's members carry the names of the chain's own source (2026-10-01)
+
+By 인지오's decision, scope-card item 64 (9.4's hand-off on `game.exe`): the chain's members take the names the LAVD deck's slide 16 shows for the game process's tree, in place of `game.exe` for every member.
+
+- the head (the task's name): `Troy.exe`, the game's main thread and `wineserver`'s partner;
+- `wineserver`, after the head as before;
+- four `Task worker thr` → `dxvk-cs` → `dxvk-submit`, in slide 16's edge order;
+- `winepulse_mainl`, `winepulse_timer` → `FAudio_AudioCli`;
+- the six members slide 16 does not name keep the process's `comm`, `Troy.exe`.
+
+The names bind in the timeline (a `member_names` binding of `game-task-chain`), keeping the library's rule that an archetype fixes no process name (`docs/workload/building-plan.md` §2.2).
+
+Grounds:
+
+- **Slide 16's game tree** (`lavd-ossna24`; 9.4's record, nodes as `name[pid/tgid]`, tgid 7781). Ten nodes: `Troy.exe`, four `Task worker thr`, `dxvk-cs`, `dxvk-submit`, `winepulse_mainl`, `winepulse_timer`, `FAudio_AudioCli`.
+- **Its edges.** `wineserver → Troy.exe` epoll 134,200 and `Troy.exe → wineserver` pipe_read 58,134; each `Task worker thr → dxvk-cs` about 10,000; `dxvk-cs → dxvk-submit` 30,970; `winepulse_timer → FAudio_AudioCli` 10,213 (`task-9.4-gaming/search/candidates.md`).
+- **Wine's naming.** Wine renames each process to its `.exe` name, and Windows thread names become Linux thread `comm`s (S2-18); a Linux thread created without a name of its own carries its process's `comm`.
+- **One observation per situation.** The members' names and behaviour then come from one observation — 9.4 took the deck as one — under D25's `comm` rule.
+- **The chain's length** is 16, "a point chosen inside the source's '15-20 game-specific tasks'" (s12; the entry's notes).
+
+Stated: the deck's figures draw on at least three process trees (9.4's record), and the chain's linear order beyond slide 16's edges is the entry's own linearisation.
+
+Applied: `game-task-chain` gains the `member_names` binding (`dataset/archetypes.yaml`); the chain constructor names the members from it and checks its length (`dataset/tools/wlc/compiler.py`); `c1-gaming`, `c2-p2a`, `c3-evening` and `c6-dual` bind `Troy.exe` and the fifteen names; the fixture `fx-game` and `test_chain_population` restated. Recompiled with D23–D25 and D27.
+
+## D27 — familiarity tiers for the new names: same program keeps its tier, new names placed by the ladder (2026-10-01)
+
+By 인지오's decision, following D24–D26: the grid's name-to-tier map (`dataset/tools/wlc/grid.py`, `NAME_TIERS`; the familiarity ladder of `docs/workload/building-plan.md` §3 C5) takes the new names by one rule, labelled design.
+
+**The rule.** A new string for the same program keeps the old name's tier: `thunderbird-bin` tier 1 (was `thunderbird`), `tracker-miner-f` tier 3 (was `tracker-miner-fs-3`). A new program's name is placed by the ladder's definitions and examples — tier 1 transparent (`firefox`, `blender`), 2 semi-opaque (`soffice.bin`, `gamescope`), 3 opaque (`tracker-miner-fs-3`, `cc1`, `baloo_file`):
+
+- tier 2 — `element-desktop`, a product name that does not say what it is; `Troy.exe`, a game's title in place of the word `game`;
+- tier 3 — the engine internals `Task worker thr`, `dxvk-cs`, `dxvk-submit`, `winepulse_mainl`, `winepulse_timer` and `FAudio_AudioCli`.
+
+C5's tier-4 names keep their tier through C5's explicit annotation. The names of D3–D12's entries are placed by the same rule when their campaigns name them.
+
+Grounds:
+
+- **The tiers are design.** No source ranks names; the ladder defines familiarity as corpus-relative, and the map is authored.
+- **A measured tier was not adopted.** A string's count in a public corpus would measure recall, while the ladder's tiers 1–3 grade whether a name reveals its purpose; a threshold would still be design, and it would re-tier every existing name and the C5 files built on them.
+
+Effect: the gaming segments move from tier 2 to tier 3 (the most opaque name present); coverage, which counts cells, is unchanged.
+
+Applied: `dataset/tools/wlc/grid.py`'s `NAME_TIERS`; the grid counts bound `member_names` toward a segment's tier; `coverage-grid.json` regenerated — `c1-gaming`, `c2-p2a`, `c2-p2b`, `c3-evening`'s gaming segment, `c4-gaming` and `c7-gaming` from tier 2 to 3, every cell still covered; `test_grid` restated to `tracker-miner-f`.
+
+The five entries D23–D27 were recompiled together (`compile.py --allow-window`). 44 of 100 artifacts change beyond the library's hash. Lint reports the three demand-window files of D20 and nothing else; tests 371 passed, 1 skipped, 1 xfailed, after `test_c4_injection_only` was restated. Demand (`-single`): `c1-gaming` 1.0376 → 0.9153, `c4-gaming` 1.038 → 0.9158, `c7-gaming` 2.0376 → 1.9153 (the `gamescope` task gone), `c3-evening` 0.8765 → 0.8766.

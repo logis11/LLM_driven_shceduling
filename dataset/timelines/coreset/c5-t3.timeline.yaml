@@ -24,4 +24,4 @@ tasks:
   arrive: 0s
   depart: 60s
   id: music
-  name: tracker-miner-fs-3
+  name: tracker-miner-f

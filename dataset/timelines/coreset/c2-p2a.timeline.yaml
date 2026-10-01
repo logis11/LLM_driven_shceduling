@@ -15,8 +15,9 @@ segments:
      scenario: [S9, S10]}
 
 tasks:
-  - {id: game, name: game.exe, archetype: game-task-chain,
-     arrive: 0s, depart: 120s, bind: {lane_share: 0.95}}
+  - {id: game, name: Troy.exe, archetype: game-task-chain,
+     arrive: 0s, depart: 120s, bind: {lane_share: 0.95,
+           member_names: ["Task worker thr", "Task worker thr", "Task worker thr", "Task worker thr", dxvk-cs, dxvk-submit, winepulse_mainl, winepulse_timer, FAudio_AudioCli, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe]}}
   - {id: steam, name: steam, archetype: game-client,
      arrive: 0s, depart: 120s}
   - {id: download, name: steam, archetype: game-download, arrive: 60s,

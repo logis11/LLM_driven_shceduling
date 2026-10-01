@@ -1233,7 +1233,7 @@ archetypes:
         {dist: constant, value: 16, sampling: per-instance,
          source: "lavd-ossna24:s12"}
     lifetime: segment-bound
-    binding_params: [lane_share]
+    binding_params: [lane_share, member_names]   # 9.10 D26: the members' names, after the head and wineserver
     scalable:
       - fields: [chain aggregate demand]
         rule: scale the chain's aggregate demand per frame to lane_share of

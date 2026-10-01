@@ -3,12 +3,12 @@
 # structural. Seeds inherit from the bases (byte-discipline).
 variants:
   # P1b — the load-bearing flip: rename ONLY (plus the segment label).
-  # tracker-miner-fs-3 stays bound to cpu-batch deliberately (full-rescan
+  # tracker-miner-f stays bound to cpu-batch deliberately (full-rescan
   # state; archetypes.yaml binding note).
   - id: c2-p1b
     from: c2-p1a.timeline.yaml
     ops:
-      - rename: {from: python3, to: tracker-miner-fs-3}
+      - rename: {from: python3, to: tracker-miner-f}
       - patch-segment: {index: 1, mode: indexing,
                         attributes: {background_wanted: false}}
 
