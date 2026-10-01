@@ -372,3 +372,21 @@ The unmodelled archive, helper, probe and link jobs stay `build-orchestrator`'s 
 No file changed yet: the lengths are set with the other jobs' (D17), the files rebinding together.
 
 Hands to 9.14: `c1-compile`'s turnaround term and `c3-workday`'s and `c6-dual`'s demand on the new lengths. Hands to 9.15: `building-plan.md` §3 C1 (compile {code, make, cc1×N}).
+
+## D19 — a gaming file carries the game chain only; the game's other threads are omitted and stated (2026-10-01)
+
+By 인지오's decision, scope-card item 52 (9.4 D3's hand-off): a gaming file carries no game thread beyond `game-task-chain` — its 16 game members and `wineserver`. The files state that the game's remaining threads are omitted, the share of scheduling the source puts outside its busiest tasks.
+
+Grounds:
+
+- **The chain's source counts system-wide.** "Around 300 tasks are scheduled while running a game", system tasks included, and "Top 30-40 most frequently scheduled tasks take 95% of scheduling" (`lavd-ossna24`, slide 12; 9.4 D3).
+- **No source describes the threads outside the busiest set.** No observation describes the tasks outside the deck's top 30–40 (K2 C-lavd-12 NOT IN SOURCE), so a thread count from a listing would need a behaviour no source gives — the placeholder 9.4 D3 removed.
+- **Listings exist, but not with behaviour.** Monster Train 2's 105 tasks under GE-Proton (S3-22, reader's own), Dota 2's `GlobPool` workers (S3-23), Zenless Zone Zero's main thread at 95–98 % of a core (S3-25), about 125 tasks in the LAVD author's talks (S1-62, S1-63), 95 and 108 pids (9.4's S3-01, S3-02). No class found a Proton game's full thread inventory in normal play with each thread's CPU.
+- **A runner game would not be a desktop game.** A game re-observed on the runner would render on the CPU, there being no GPU (S4, checks 8 and 9). A desktop game's frame loop is not what that shows, and replacing the chain would reopen 9.4's one-source decision.
+- **Grafting would combine observations.** Threads taken from another game or a placeholder would join a second observation to the chain's in one situation (phase decision 2).
+
+The chain members' displayed name `game.exe` against the real thread names (S2-18; S3-20, S3-22, S1-62, S1-63) is item 64's.
+
+No file changed.
+
+Hands to 9.15: `game-task-chain`'s `modeling_notes` and the gaming files' scope state the omitted share; the scenario catalog's S9 row.
