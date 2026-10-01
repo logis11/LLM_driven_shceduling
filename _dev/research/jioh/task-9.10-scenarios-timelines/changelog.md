@@ -133,3 +133,27 @@ Applied: `c2-p2a.timeline.yaml` — header comment restated; segment 1 gains `in
 Open at their own items: the download's displayed name `steam` against the SteamCMD program measured (item 66), the Steam client behind a game, measured logged out with no library (item 63), the download's size (item 56).
 
 Hands to 9.15: the scenario catalog's S10 row and the `steam-downloads` role line (`docs/references.md`, `dataset/sources.yaml`) restated — the source grounds the default pause, not a "wanted toggle" (C-steam-4); a `docs/references.md` entry minted for steam-for-linux #8821 where the docs cite it.
+
+## D8 — the scheduled backup is Déjà Dup's periodic incremental run (2026-10-01)
+
+By 인지오's decision, scope-card items 40, 45 and 70: the scheduled, wanted backup of `c1-backup` and `c2-p3b` — today `borg` on `file-backup`, a first backup into a new repository (9.7 D6) — becomes Déjà Dup's periodic backup, observed as the incremental run its schedule makes, in a runner campaign of its own (9.10's). The campaign runs a first backup of the Mahoney set (`mahoney-10gb`), then the periodic incremental after a stated change set. The change set is design unless the method's search finds a source.
+
+Grounds:
+
+- **A schedule runs incrementals.** On a repeat Borg recognises unchanged files from its files cache and "does not read their contents"; a first and a repeat backup are different loads (9.7 D6). A first backup happens once per repository.
+- **Ubuntu's own backup tool.** Déjà Dup 45.2 is in Ubuntu 24.04's extended install (S2-01) with `duplicity` its default tool (gschema key `tool`, default `'duplicity'`; S4-05); its periodic backup is off by default, every 7 days once turned on, and its monitor autostarts 120 s after login (`org.gnome.DejaDup.gschema.xml:48–56`, `org.gnome.DejaDup.Monitor.desktop`; S2-03). `borg` is in no install layer (S2-01).
+- **Prevalence** (Debian popcon, S3-30's copy, reader's own over 291,196 submissions). `deja-dup` installed on 4.07 %, in regular use on 2.81 % (which may count its monitor's start at login); `borgbackup` 2.78 % and 1.26 %; `restic` 1.46 % installed.
+- **How backups run** (S1-90; Kljun, Mariani and Dix, JASIST 2016: 319 people, 542 computers, 2013, self-report, mixed operating systems). Of backed-up computers, 37.1 % fully automated, 14.4 % semi-automated, 48.5 % manual.
+- **No weekly change set in the sources read.** `meyer-fast11` gives "about 20% are modified within the last month" (§4.4.2, p. 9; Windows file systems, 2009), not a weekly change set.
+
+Open, for the campaign's method:
+
+- the change set and its ground;
+- the first backup's destination and Déjà Dup's settings left at their defaults;
+- the process names the run shows (item 64).
+
+Then: whether `file-backup` (`borg`'s first backup) stays in the library, which turns on whether any file binds it once the backup files rebind.
+
+No file changed yet.
+
+Hands to 9.14: the backup files' judging terms; the pair review's P3 lines. Hands to 9.15: the scenario catalog's S15 row; `building-plan.md` §3 C1 (backup {kdenlive, borg}) and C2 P3 ({kdenlive + borg}).
