@@ -157,3 +157,15 @@ Then: whether `file-backup` (`borg`'s first backup) stays in the library, which 
 No file changed yet.
 
 Hands to 9.14: the backup files' judging terms; the pair review's P3 lines. Hands to 9.15: the scenario catalog's S15 row; `building-plan.md` §3 C1 (backup {kdenlive, borg}) and C2 P3 ({kdenlive + borg}).
+
+## D9 — `c7-backup` stays the scheduled run's label flip, its premise restated (2026-10-01)
+
+By 인지오's decision, scope-card items 49 (its backup counterpart) and 70: `c7-backup` remains a pre-committed miss, with the label flipped alone on the same scheduled run as `c1-backup` (D8's Déjà Dup periodic incremental): a scheduled backup firing while nobody wants it right now — the vocabulary's `false`, "work nobody asked for right now" (`docs/recognition-vocabulary.md` §1).
+
+Its premise is restated. An unasked backup under its own name exists — Debian's and Ubuntu's `dpkg` enables `dpkg-db-backup.timer` (`OnCalendar=daily`, `Persistent=true`), the C-plain-5 finding — but the job compares four dpkg database files with yesterday's copies, and only if one changed copies them into `/var/backups` and rotates seven generations with `savelog`, then tars the alternatives database (`/usr/libexec/dpkg/dpkg-db-backup:50–80`, S2-03's copy of dpkg 1.22.6ubuntu6.6). It finished in the second it started on one Mint 22.1 desktop (S3-35a). A sub-second job cannot hold a backup segment, so binding it would label 60 s for a job the source puts at 0 s.
+
+The respondent quoted in S1-90 describes the situation the file depicts: a scheduled backup that "uses a significant chunk of your computers resources (slowing down everything, and make YouTube videos jumpy for example)".
+
+Applied when D8's entry exists: `c7-backup` rebinds with `c1-backup`; `c7.variant.yaml`'s comment on the backup counterpart restated. Its judging status and its layer-1 exclusion are unchanged.
+
+Hands to 9.15: `building-plan.md` §3 C7's sentence ("`ml-train`, `render`, `transcode`, `backup` have no same-mode unwanted name a distro or vendor runs under a distinct string") restated for backup.
