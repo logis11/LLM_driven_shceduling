@@ -241,3 +241,26 @@ Then how much of the 14-epoch run a file shows (item 56).
 No file changed yet.
 
 Hands to 9.14: the ml-train files' judging terms; the P1 pair's training side. Hands to 9.12 and 9.15: the wording rule of 9.6 D32 restated on the new run; the scenario catalog's S12 row.
+
+## D13 — the mail send is one `send` operation per mail file, inside focus; `network-bulk` leaves (2026-10-01)
+
+By 인지오's decision, scope-card items 55 and 61 (the send), applying 9.7 D3 and D30: each mail file carries one `send` operation of its `mail-client` task, started inside the task's focus window — `c1-mail` at 40 s (focus 2–58 s), inherited by `c7-mail`, and `c3-workday` at 400 s (focus 362–418 s). The separate `thunderbird` send tasks on `network-bulk` are dropped, and `network-bulk` leaves `dataset/archetypes.yaml`, its last bindings gone. One send per file is the file's calibration — the mail mode's characteristic operation shown once — and is labelled design.
+
+Grounds:
+
+- **The send is an operation.** 9.7 D3 made it an operation `send` of `mail-client`, now in the library (`dataset/archetypes.yaml`, `mail-client.operations.send`), and 9.7 D30 kept `network-bulk` for these three tasks only.
+- **One send is within the entry's state.** The measured send is a reply with a Word attachment (kind from `cpsmark-tbench23`, size design), carried as the mean over the campaign's 25 sends, and a timeline placing many more than 25 binds a state the entry does not describe (9.5 D87).
+- **The observed rates assert nothing about a minute.** SWELL-KW's Outlook "Send" clicks were 3.66 an hour in the e-mail-interruption condition alone, eight e-mails sent to each participant, and none in the other two (S3-01, reader's own); the Enron corpus gives a median of 3.21 sends per sending day across users (S3-46, reader's own). A single file asserts no rate; drawing sends at a rate from a prompted lab condition would leave a 60 s file almost always without one.
+- **A send is the user's click in the focused composer**, so it starts inside a focus window. Whether every operation must is decided with operations (item 61).
+
+Applied:
+
+- `c1-mail.timeline.yaml` — the send task dropped, `operations: [{at: 40s, task: mailer, name: send}]` added, the header restated;
+- `c3-workday.timeline.yaml` — the send task dropped, `operations: [{at: 400s, task: mailer, name: send}]` added;
+- `c7-mail` re-derived;
+- `network-bulk` and its section removed from `dataset/archetypes.yaml`;
+- the compiler's finite-jobs comment.
+
+The dataset was recompiled (`compile.py --allow-window`; lint reports the branch's five demand-window files and nothing else; tests 371 passed, 1 skipped, 1 xfailed). Demand: `c1-mail` 0.0549 → 0.0287, `c7-mail` 1.0549 → 1.0287, `c3-workday` 4.6602 → 4.6546.
+
+Hands to 9.14: the three files' demand moves (the send's components in place of a 3 s `network-bulk` job). Hands to 9.15: the docs naming `network-bulk` — `building-plan.md` §2.1, `archetype-plan.md`, `coreset-guide.md` (its compiled SLEEP "~5.7 ms", memo C) and `dataset/README.md`.

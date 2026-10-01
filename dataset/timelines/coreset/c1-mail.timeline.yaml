@@ -1,7 +1,7 @@
 # C1 — single-situation calibration: pure mail (building-plan §3 C1; Phase 7
 # spec decision 8). Task set lifted from c3-workday segment 3: the mode-defining
-# tasks only (thunderbird and its send burst), not the arc's still-open browser
-# and writer.
+# task only (thunderbird), not the arc's still-open browser and writer. One
+# send, an operation of the mail-client task inside its focus window (design).
 meta:
   id: c1-mail
   seed: 110
@@ -14,8 +14,9 @@ segments:
 tasks:
   - {id: mailer, name: thunderbird, archetype: mail-client,
      arrive: 0s, depart: 60s}
-  - {id: send, name: thunderbird, archetype: network-bulk, arrive: 40s,
-     bind: {total_work: 3s}}
 
 focus:
   - {from: 2s, to: 58s, task: mailer}
+
+operations:
+  - {at: 40s, task: mailer, name: send}

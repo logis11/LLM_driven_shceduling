@@ -1362,46 +1362,6 @@ archetypes:
       member instead — the same linearization applied to the whole graph,
       ours. Its RUN scales with the chain in -single mode (design).
 
-  # ---- meas family — no literature taxonomy exists ------------------------
-
-  network-bulk:
-    category_source: meas
-    pattern:
-      program:
-        - loop:                    # per-chunk download until total_work consumed
-            - WAIT: net
-            - RUN: chunk_cpu
-        - EXIT: {}
-    params:
-      chunk_cpu:
-        {dist: lognormal, median_us: 1000, sigma_log: 0.5,
-         sampling: per-iteration, source: "meas-ci:cli:3"}
-      net_wait:
-        {dist: lognormal, median_us: 16700, sigma_log: 0.5,
-         sampling: per-iteration, source: "meas-ci:cli:3"}
-    lifetime: finite
-    binding_params: [total_work]
-    scalable: []
-    validation_stats:
-      referee: meas-ci
-      stats: [cpu/net duty pattern of a saturating download]
-      note: throughput absolutes are machine-relative — runner spec recorded.
-    modeling_notes: >-
-      No literature taxonomy names this class; category_source is honestly
-      meas (behavior class observed in our measurements). Link-saturating,
-      moderate-CPU shape per building-plan §2.1. The meas-ci:cli:3 tag
-      covers the chunk pair jointly: the 1 ms chunk granularity and sigmas
-      are our convention; the measured quantity is wget's cpu:wall duty
-      saturating the runner link (kernel tarball, ~0.057, wide spread
-      0.013-0.1 and only 2 of 5 repeats' downloads ran long enough to
-      sample — stated) -> net_wait = chunk_cpu x (1/0.057 - 1) ~ 16.7 ms.
-      Structural claim only — the runner link is datacenter-class; the duty
-      ratio, not the throughput, is the grounded quantity. The chunk loop
-      shape is ours. Bound only by the three `thunderbird` send tasks (c1-mail,
-      c7-mail, c3-workday) until 9.5's `send` re-observation folds into `mail-client` and
-      9.10 places the send as an operation of the `mail-client` task; it leaves
-      before 9.13's rebuild (9.7 D30).
-
   # ---- session and system processes — 9.9 campaign (meas-ci:session:2026-09-24) ----
 
   # ---- session and system processes — 9.9 campaign (meas-ci:session:2026-09-24) ----

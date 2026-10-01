@@ -28,10 +28,11 @@ tasks:
      bind: {spawn_count: 4200, parallelism_cap: 8, child_name: cc1}}
   - {id: mailer, name: thunderbird, archetype: mail-client,
      arrive: 360s, depart: 420s}
-  - {id: send, name: thunderbird, archetype: network-bulk, arrive: 400s,
-     bind: {total_work: 3s}}
 
 focus:
   - {from: 2s, to: 58s, task: browser}
   - {from: 62s, to: 118s, task: writer}
   - {from: 362s, to: 418s, task: mailer}
+
+operations:
+  - {at: 400s, task: mailer, name: send}

@@ -379,7 +379,7 @@ def _interactive_unroll(build, timeline, task, iid, params, wakes):
         build.program = [{"op": "WAIT", "channel": channel}]
 
 
-# ---- finite jobs (cpu-batch, file-backup, file-archiver, game-download; network-bulk) ----
+# ---- finite jobs (cpu-batch, file-backup, file-archiver, game-download) ----
 
 def _batch_loop(build, params, task, seed, iid):
     """cpu-batch (D21, D22, D25): a RUN drawn from the bound program's measured runs between voluntary blocks,

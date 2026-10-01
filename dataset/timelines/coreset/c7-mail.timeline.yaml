@@ -8,6 +8,10 @@ meta:
   demand: calibration
   id: c7-mail
   seed: 110
+operations:
+- at: 40s
+  name: send
+  task: mailer
 segments:
 - attributes:
     background: av-scan
@@ -23,12 +27,6 @@ tasks:
   arrive: 0s
   depart: 60s
   id: mailer
-  name: thunderbird
-- archetype: network-bulk
-  arrive: 40s
-  bind:
-    total_work: 3s
-  id: send
   name: thunderbird
 - archetype: cpu-batch
   arrive: 0s
