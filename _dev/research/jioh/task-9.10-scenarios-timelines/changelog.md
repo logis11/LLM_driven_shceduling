@@ -264,3 +264,20 @@ Applied:
 The dataset was recompiled (`compile.py --allow-window`; lint reports the branch's five demand-window files and nothing else; tests 371 passed, 1 skipped, 1 xfailed). Demand: `c1-mail` 0.0549 → 0.0287, `c7-mail` 1.0549 → 1.0287, `c3-workday` 4.6602 → 4.6546.
 
 Hands to 9.14: the three files' demand moves (the send's components in place of a 3 s `network-bulk` job). Hands to 9.15: the docs naming `network-bulk` — `building-plan.md` §2.1, `archetype-plan.md`, `coreset-guide.md` (its compiled SLEEP "~5.7 ms", memo C) and `dataset/README.md`.
+
+## D14 — the meeting files bind one `video-call` task per call (2026-10-01)
+
+By 인지오's decision, scope-card item 54: `c1-meeting` carries one `video-call` task, and `c7-meeting` inherits it. The duplicate task is dropped — the two `zoom` tasks `video` and `voice` both bound one measured call — and the header is restated to the current bindings; it named `video-playback`, `audio-playback` and a helper task, all three gone (9.5 D11, 9.8 D8).
+
+Grounds:
+
+- **The measured call is one tree.** `video-call` is a loopback WebRTC call in Chrome whose tree carries its audio and video threads together, with one periodic job, the 10 ms audio frame (9.5 D19, D75).
+- **One task per application tree.** 9.5 D14 gives an application's whole process tree to one task. Two tasks ran the call twice, with two trees and two 10 ms audio-frame deadlines for one call (9.5 D75's hand-off).
+
+The call's displayed name `zoom` against the measured Chrome WebRTC call is item 66's.
+
+The two meeting files are reporting files (`harness/experiments/rq0-gate.yaml`); their demand falls with the dropped task.
+
+Applied: `c1-meeting.timeline.yaml` keeps the task `voice` — the frozen scoring spec's weight-1.0 term on `voice` reads the call's 10 ms audio-frame job — and drops `video`; the header restated; `c7-meeting` re-derived. The dataset was recompiled with D13. Demand: `c1-meeting` 0.476 → 0.2387, `c7-meeting` 1.476 → 1.2387. The manifest also records D7's `c2-p2a` artifact.
+
+Hands to 9.14: the scoring spec's `c1-meeting` and `c7-meeting` term on `video` (weight 0.5) has no task.

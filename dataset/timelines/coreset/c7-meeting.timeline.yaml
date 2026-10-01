@@ -19,11 +19,6 @@ tasks:
 - archetype: video-call
   arrive: 0s
   depart: 60s
-  id: video
-  name: zoom
-- archetype: video-call
-  arrive: 0s
-  depart: 60s
   id: voice
   name: zoom
 - archetype: cpu-batch
