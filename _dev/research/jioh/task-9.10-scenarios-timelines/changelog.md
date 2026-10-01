@@ -471,3 +471,17 @@ A file that ends inside a launch shows the observed profile up to its end — `c
 No file changed yet.
 
 Hands to 9.14: the arcs' and the injection files' demand and terms. Hands to 9.15: `measurement-overview.md` §4's "steady behaviour, not launch work" with the launch phases added.
+
+## D22 — the gaming files keep the logged-out Steam client, its state stated (2026-10-01)
+
+By 인지오's decision, scope-card item 63 (the client behind a game; 9.8 D25's hand-off): the gaming files keep `steam` on `game-client` beside the game chain — `c1-gaming`, `c2-p2a`, `c2-p2b`, `c3-evening`, `c4-gaming`, `c7-gaming`. Each file's scope states the client's measured state: no account, no library, no game behind it, no `gameoverlayui`.
+
+Grounds:
+
+- **No other state is observable.** A client behind a game cannot be observed: 9.8 D6 decided "no account is used, and none may be" on the Steam Subscriber Agreement §4.C and §1.C.
+- **The client is beside every Steam game listed on Linux.** Flatpak Steam beside a Proton game shows `steam`, 9 `steamwebhelper`, 2 `steam-runtime-l`, `reaper` and `gameoverlayui` (S3-21, reader's own); Steam's helpers beside Monster Train 2 are 11 `steamwebhelper` processes with 126 tasks (S3-22, reader's own); the LAVD talks show a Steam-client thread among the game's (S1-63). No class gives the client's per-thread CPU beside a game.
+- **The carried phase fits a covered window.** The entry carries the client's window shown, and Chromium on Linux tracks no cross-application occlusion (9.8 D4), so a client window covered by a fullscreen game still counts as shown to its CEF helpers. The minimised phase was measured beside it, at 244 against 299 wakes/s (9.8 D5).
+
+No file changed.
+
+Hands to 9.15: the gaming files' scope statements, and the scenario catalog's S9 row.
