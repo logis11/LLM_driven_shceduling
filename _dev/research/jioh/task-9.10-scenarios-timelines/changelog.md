@@ -835,3 +835,17 @@ Grounds:
 C is set at fold-in, from the pool whose rule holds (the first five repeats: 25.2–29.2 s, mean 26.55 s).
 
 Hands to 9.14: the pair review and the scoring spec compare each counterpart with its base's first C seconds; the RQ0 gate spec's eight judging counterparts on the new length. Hands to 9.15: `building-plan.md` §3 C7 (the job, its length).
+
+## D42 — pair P2's segment 1 is as long as the upgrade's CPU total in both files (2026-10-01)
+
+By 인지오's decision, D3's hand-off on `c2-p2b` (scope-card item 56): `c2-p2b`'s segment 1 carries the `package-upgrade` job, arriving at 60 s and bound whole, and is C seconds long — C the job's pooled CPU total, as D41 — so the file is 60 s plus C. `c2-p2a`'s segment 1 takes the same length, so the pair still shares segment 0 and differs only in segment 1's job and label. `c2-p2a`'s download keeps its size until its own item.
+
+Grounds:
+
+- **The label at every instant** (D41). The game holds 0.95 of the lane (`lane_share`); under a policy that favours the job it ends near 60 s plus C, and a 60 s segment would then carry `false` with no unwanted work for about 33 s.
+- **One diff per pair.** C2 pairs share all but one segment (`docs/workload/building-plan.md` §3, "Counts and reuse"); equal lengths keep the game's terms read over equal windows.
+- **The download's size is not D17's.** D17 lists seven jobs; the wanted download is not among them, and its size stays design at scope-card item 56 until decided there.
+
+C is set at fold-in with D41's.
+
+Hands to 9.14: P2's terms and windows on the new length. Hands to 9.15: the scenario catalog's P2 rows.

@@ -21,7 +21,7 @@ A reference or work whose copy is unreachable or paywalled is dropped; `zhang-ch
 
 ### 3. Unasked and user-started jobs
 
-- **The unwanted job of the ten interactive attribute counterparts and `c2-p2b`** is the stock Ubuntu 24.04 unattended upgrade, observed on the runner, in place of `clamscan` (D3). It installs one real day's security updates, 2026-07-27's `glibc`, rebuilt from Ubuntu's snapshot service (D36), in a chroot of an English default install (D37), `apt.systemd.daily install` measured (D38), carried as a new entry, `package-upgrade`, in the batch-loop form over the whole process tree (D39), its task showing `unattended-upgr` (D40); each interactive counterpart is one segment as long as the job's CPU total, the job from 0 s (D41).
+- **The unwanted job of the ten interactive attribute counterparts and `c2-p2b`** is the stock Ubuntu 24.04 unattended upgrade, observed on the runner, in place of `clamscan` (D3). It installs one real day's security updates, 2026-07-27's `glibc`, rebuilt from Ubuntu's snapshot service (D36), in a chroot of an English default install (D37), `apt.systemd.daily install` measured (D38), carried as a new entry, `package-upgrade`, in the batch-loop form over the whole process tree (D39), its task showing `unattended-upgr` (D40); each interactive counterpart is one segment as long as the job's CPU total, the job from 0 s (D41); pair P2's segment 1 takes the same length in both files (D42).
 - **`c7-compile`'s job** is an observed DKMS autoinstall of a real module (D4).
 - **The indexing files** show Tracker indexing a real user's file set, the Mahoney set, from an empty database: the first index at login (unasked) and the same work after the user's reset (asked) (D5). `c2-p1b`'s indexer carries that measured indexer's own tables (D6).
 - **`c2-p2a`'s wanted download** is an install of another game the user starts during play (D7).
@@ -84,6 +84,7 @@ Each flagged open in its decision, for the campaign's method or the rebinding:
 - **D12, the training run:** the dataset's placement; whether the run fits `cpu-batch`'s criterion.
 - **D15, the renderers:** the sites, the window, and when the processes are counted.
 - **D21, the launch phases:** the applications, cold or warm launch, and the launch phase's form.
+- **The download's size** in `c2-p2a`: not among D17's jobs; design at scope-card item 56 until decided (D42).
 - **At rebinding:** each file's length set by its jobs (D17); the new names' observed `comm`s (D25) and tiers (D27); the source tags (D32); the registry entries minted (D34).
 - **Declared class:** the indexer's declared scheduling class, 9.11's.
 - **Hub-and-spoke switching:** unsourced, left to the naturalistic generator's own search (D35).
