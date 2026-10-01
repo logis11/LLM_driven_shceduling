@@ -1,6 +1,6 @@
 # Docs index
 
-> Status: normative · Created 2026-08-27 · Updated 2026-09-13
+> Status: normative · Created 2026-08-27 · Updated 2026-09-29
 
 Prose only, organized by domain — one `##` section per area below, the full index table at the bottom. Statuses: **normative** (states what is; kept current) · **draft** (content real, form not final) · **record** (append-only history; never rewritten). Decision history lives in `_dev/archive/`; machine-read files live outside `docs/` (see the placement rule in `CLAUDE.md`).
 
@@ -57,6 +57,7 @@ How the dataset was designed and grounded. Reading order: building-plan → arch
 
 - [workload/building-plan.md](workload/building-plan.md) — how the dataset is built: two sets, four artifacts, build order
 - [workload/archetype-plan.md](workload/archetype-plan.md) — how one process kind is specified and grounded
+- [workload/measurement-overview.md](workload/measurement-overview.md) — how the measured archetypes' values are obtained: what each job runs and why, the stability rule and its exceptions, the checks, the literature, what the values claim
 - [workload/scenario-catalog.md](workload/scenario-catalog.md) — which processes co-occur (S1–S18) and their taxonomy sources
 - [workload/grounding-sources.md](workload/grounding-sources.md) — which source may justify which kind of claim (roles A–D)
 - [workload/source-vetting.md](workload/source-vetting.md) — per-source verdicts and extracted numbers
@@ -103,6 +104,7 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 | [daemon/prior-table-pair-review.md](daemon/prior-table-pair-review.md) | pair review of the prior driver table: knob, scored term, direction per pair; findings | record |
 | [workload/building-plan.md](workload/building-plan.md) | how the dataset is built | normative |
 | [workload/archetype-plan.md](workload/archetype-plan.md) | how one process kind is specified and grounded | normative |
+| [workload/measurement-overview.md](workload/measurement-overview.md) | how the measured archetypes' values are obtained, when their repeats stop, and what they claim | draft |
 | [workload/scenario-catalog.md](workload/scenario-catalog.md) | which processes co-occur and their sources | normative |
 | [workload/grounding-sources.md](workload/grounding-sources.md) | which source may justify which claim | normative |
 | [workload/source-vetting.md](workload/source-vetting.md) | per-source verdicts and extracted numbers | record |
