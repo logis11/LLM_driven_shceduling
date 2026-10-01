@@ -644,3 +644,108 @@ The call arrives mid-file, so its observed launch phase runs first once D21's la
 Applied: `c6.variant.yaml`'s `c6-fold` adds the task (`id: call`) and its comment is restated; `c6-fold` re-derived; `test_c6_fold_tasks_unchanged` restated as `test_c6_fold_names_unchanged` (the base's tasks unchanged, `call` added, every name `chrome`). Recompiled (`compile.py --allow-window`): `c6-fold`'s demand 0.0164 → 0.135; `c3-creation`'s artifacts also move, carrying D29's header change into the manifest, with no demand change. Lint reports D20's three demand-window files and nothing else; tests 371 passed, 1 skipped, 1 xfailed, after the restated test.
 
 Hands to 9.14: `c6-fold`'s demand (reporting, excluded from aggregation). Hands to 9.15: `building-plan.md` §3 C6's fold sentence.
+
+## D31 — the remaining calibration sizes recorded as design, each with its premise (2026-10-01)
+
+By 인지오's decision, scope-card items 44, 46 and 57–60: these are design under phase decision 3 ("label flips, injections, renames, file length, `lane_share`" are the experiment's own interventions and calibration sizes), recorded with the premises below. No file changes.
+
+- **`lane_share`** (item 57) — the game chain's share of the lane per frame: 0.9 (`c1-gaming`), 0.95 (the download pair), 1.45 (`c3-evening`), 0.6 (`c6-dual`). At 1.45 the chain cannot meet its frames alone (`docs/workload/coreset-guide.md` §12).
+- **File and segment lengths** (item 58). 60 s for the interactive single-situation files; the batch files' lengths follow their whole jobs (D17); the arcs and the limit files as authored, compressed event-time (`docs/workload/building-plan.md` §0).
+- **Arrival and departure times** (item 59) — the batch jobs at 2 s or 60 s, the injections at 30 s, the spoof at 20 s; the applications started mid-file run their launch phase first (D21).
+- **Focus windows** (item 60) — one per focused segment, opening 2 s after and closing 2 s before it; the compiler replays a contiguous slice of recorded input for each window (9.5 D18). Observed dwell per focus has a median of 9.1 s and a p90 of 55.6 s in SWELL-KW (S3-01, lab, reader's own), so a 56 s window sits near the lab's p90; that distribution is the naturalistic set's.
+- **The C4 injections' identities** (item 46) — the chat client launched during gaming, `7z` during office work (now run whole, D17; SYSmark 30 defines archive creation, S2-15, existence), Chrome opened during a compile. Mid-session launches are observed at a median of 2.86–6.00 an hour (S3-01, lab) and 19 % of window openings launch a new application (S1-13). C-focal-1's DesktopBench precedent stays the wording fix it is: there the interruption is a separately labelled task.
+- **`c6-dual`'s co-occurrence** (item 44) — gaming while actively awaiting a compile, the limit file the oracle cannot label. A kernel build beside a game appears as a stress test (S1-61, `make -j30`), a demonstration and not usage.
+- **`c6-spoof`'s `chrome`-named batch job** — design by construction (9.6 D7).
+
+Hands to 9.15: `building-plan.md` §3 C4 ("discord launch during gaming"; the DesktopBench precedent) and C6, `coreset-guide.md`, `grounding-sources.md`'s Role C line on DesktopBench.
+
+## D32 — a timeline's bound values carry the library's rule: a source tag or a design label (2026-10-01)
+
+By 인지오's decision, scope-card item 83: each value a timeline binds carries `source: <id>:<locator>` or a label for what it is (design, convention, arithmetic), checked by the linter against `dataset/sources.yaml` as Layer 1's numerics are. The values are `count`, `spawn_count`, `parallelism_cap`, `total_work`, `lane_share`, `member_names` and the bound program. 9.10 sets the content; the field and the lint are a schema change, 9.13's.
+
+Grounds:
+
+- **The provenance claim covers only the library today.** `docs/workload/building-plan.md` §6 states that "every numeric parameter in the dataset traces to an external source or to our released measurements", and the linter enforces it for the library only. Timeline bound values have no source slot (`dataset/tools/wlc/timeline.py`; memo B7), while `docs/workload/archetype-plan.md:40` calls static counts "binding-time parameters with a source tag".
+- **This slice's decisions ground several bound values** — the renderer count (D15), the build's object jobs (D18), the jobs' sizes (D17), the chain's member names (D26). Others are design (D31).
+- **Labelling is what phase decision 1 asks** of a value no source states: it "is labelled for what it is".
+
+Applied when the files rebind with their measured entries; each new ground minted under `docs/references.md`'s rule.
+
+Hands to 9.13: the field and its lint. Hands to 9.15: `archetype-plan.md:40`, `building-plan.md` §6.
+
+## D33 — the scenario catalog lists what the dataset binds, each line an existence claim that holds (2026-10-01)
+
+By 인지오's decision, scope-card items 1–21: `docs/workload/scenario-catalog.md` lists, per row, the names the files bind after D3–D32. Each name carries its existence ground — its package on Ubuntu 24.04 and the observation that showed its `comm` (D25) — and the scenario's existence is cited from a benchmark definition only where one defines it.
+
+**What leaves.** The names no file binds, and every source line the 2026-09-13 verification found wrong:
+
+- **unbound names:** `evince`, `firefox`, `teams-for-linux`, `slack`, `darktable`, `blender`, `transmission-daemon`, `cargo`, `rustc`, `ollama`, `vlc`, `updatedb`, `rsync`, `rclone`, `tar`, `xz`, `freshclam`, `Xorg`;
+- **wrong source lines:** the 2,430-process figure, a DynamoRio build (memo A1); interbench's Compile load, which forks nothing (C-interbench-9); ananicy types read as categories (C-ananicy-rules-4, -7); LAVD's "companion apps" (C-lavd-16); SchedCP's ML workloads (C-schedcp-3); the Steam toggle as a wanted/unwanted decision (C-steam-4); SYSmark's "archiving analogue" (C-sysmark30-2); the ClamAV scheduled-scan pattern (C-plain-2; D3).
+
+The rows' content, for 9.15 to write:
+
+| Row | Names | Existence of the scenario (definition) and of the names |
+|---|---|---|
+| S1 office | `soffice.bin` | PCMark 10 Productivity runs LibreOffice Writer (S2-13); SYSmark 30 Office Applications; CpsMark+ document manipulation lists products, not process names (C-cpsmark-3); `comm` observed (`office-writer`) |
+| S2 browsing | `chrome` | PCMark 10 Web Browsing (S2-13); CpsMark+ Internet service; `comm` observed (`web-browser`) |
+| S3 meeting | `chrome` (a call in the browser) | PCMark 10 Video Conferencing (S2-13); Teams on Linux a browser web app (S2-26); D24 |
+| S4 mail | `thunderbird-bin` | CpsMark+ Internet service (Outlook); SYSmark 30 keeps Outlook open (S2-15); `comm` observed (`mail-client`); D25 |
+| S5 chat client | `element-desktop` | no benchmark defines it; the composition is design (D2); the overlay role withdrawn (9.8 D7; D23) |
+| S6 photo | `gimp` | PCMark 10 Photo Editing (S2-13); CpsMark+ graphic design |
+| S7 video edit, export | `kdenlive`, the export's process (D10) | PCMark 10 Video Editing (S2-13); SYSmark 30 Advanced Content Creation (S2-15) |
+| S8 transcode | `HandBrakeCLI` | CpsMark+'s HandBrake workload (D11) |
+| S9 gaming | `Troy.exe` and its threads, `wineserver`, `steam` | the chain's source `lavd-ossna24` slide 16 (D26); the Steam client logged out, its state stated (D22); the game's other threads omitted (D19) |
+| S10 game install during play | `steam` | Valve's default pause (`steam-downloads`); a user-started install proceeds (steam-for-linux #8821; D7) |
+| S11 development and compile | `code`, `make` and its jobs' members, `dkms` | the kernel build (9.6); DKMS's hooks (D4); SYSmark 25 names compilation only in a scenario description (C-sysmark25-1) |
+| S12 ML training | `python3` | PyTorch's basic MNIST example (S2-31; D12) |
+| S13 media | `mpv` (video and audio) | PCMark 10's Video playback, Battery Life Profile (S2-13); D24 |
+| S14 indexing | `tracker-miner-f` | Tracker 3.7.1 in the default install (S2-01), its crawl rule (S2-04); D5 |
+| S15 backup | Déjà Dup's processes (observed with D8) | Déjà Dup in the extended install, periodic every 7 days once on (S2-03, S4-05); D8 |
+| S16 archive | `7z` | SYSmark 30 General Productivity's archive workload (S2-15) |
+| S17 → the stock unattended upgrade | `unattended-upgr` (observed with D3) | in the default install, enabled by default (S2-01, S2-03, S2-30); D3 |
+| S18 session | `gnome-shell`, `pipewire`, `systemd`, `dbus-daemon` | the idle files only (D28) |
+
+The notes:
+
+- note 1's coverage check is restated against the definitions above;
+- note 2's P1 pair is two real jobs (D6);
+- note 3's spoof stands;
+- note 4's name verification is D25's `comm` rule.
+
+Hands to 9.15: the catalog rewritten to this content; `docs/recognition-vocabulary.md:11`'s claim that the catalog's co-occurrence patterns are grounded in cited sources (D2).
+
+## D34 — the registry entries behind scenarios: what stays, what leaves, what is minted (2026-10-01)
+
+By 인지오's decision, scope-card items 72–78, after D2–D33. `dataset/sources.yaml` holds the sources the dataset derives values or structure from; `docs/references.md` holds every citation, under its own minting rule.
+
+| Entry | Disposition | Ground |
+|---|---|---|
+| Mozilla GLAM, Firefox Desktop Glean telemetry (S3-40) | minted in both | the tab count and the window count derive from it (D15, D16) |
+| PyTorch's basic MNIST example (S2-31) | minted at D12's fold-in | the training job's definition |
+| Ubuntu's package sources for D3, D4, D5, D8 (unattended-upgrades, dkms's hooks, Tracker 3.7.1, Déjà Dup) | minted at each campaign's fold-in | the job definitions those campaigns derive from them |
+| `cpsmark-tbench23` | kept, role restated | the existence of the S1, S2, S4, S6, S8 and S16 scenarios, and D11's transcode definition; its registry note's 1.77× restated as the CC-module figure (C-cpsmark-6) |
+| `pcmark10`, `sysmark30`, `sysmark25` | kept, roles restated to scenario existence (D33) | C-pcmark-5 and C-sysmark25-2 fixed; their `to-pin` statuses pinned |
+| `steam-downloads` | kept, role restated | Valve's default pause (D7) |
+| `procyon` | leaves `sources.yaml` | no row or job cites it after D12 |
+| `dkms-man`, `dkms-debian` | leave `sources.yaml` | D4's premise rests on Ubuntu's dkms package hooks (S2-03) |
+| `gamemode-docs` | leaves `sources.yaml` | no value derives from it; its wanted/unwanted half is NOT IN SOURCE (C-gamemode-1, -4, -5) |
+| `dubroy-chi10`, `chang-chi21`, `mozilla-testpilot10` | leave `sources.yaml` | no count derives from them after D15 |
+| `ananicy-rules`, `interbench` | no longer cited by the catalog (D33) | — |
+
+Every entry that leaves `sources.yaml` keeps its `docs/references.md` entry, corrected to its verdicts, only where 9.12's related-work and proposal prose still cites it; otherwise 9.15 removes it. Minting follows `docs/references.md`'s rule when each value lands.
+
+Hands to 9.12: which leaving entries its prose still cites. Hands to 9.13: the `sources.yaml` removals with the rebuild. Hands to 9.15: the `docs/references.md` corrections and removals.
+
+## D35 — the naturalistic generator's grounding and "the negative result" restated to their sources (2026-10-01)
+
+By 인지오's decision, scope-card items 79–82: `docs/workload/building-plan.md` §4 and `docs/workload/grounding-sources.md` (Role C, "The negative result") are restated to what their sources support. The observations stage 2 found are named as the naturalistic generator's candidates. The generator's design stays open (Backlog); only its grounding claims change.
+
+- **Segment durations.** `gonzalez-chi04` stays with its statistics as they are: about 3 min per *event* — one continuous use of a device or one interaction with a person, observed by shadowing (C-gonzalez-3) — and 11 min 28 s as the mean continuous segment of central and peripheral working spheres only (C-gonzalez-1); `mark-chi05` with its wording fixes (C-mark05-2, -3).
+- **Hub-and-spoke switching.** Its only source was `zhang-chb15`, dropped (D1). It is marked unsourced, for the generator's own search.
+- **The A→B→A interruption.** DesktopBench (`focal-arxiv26`) sessions are "assembled through template-based composition grounded in realistic creative workflows" and are not observed; its inter-action timings are a fixed 6.0 s per action (S3-03; C-focal-1, C-focal-4). It is cited only as the precedent for an evaluation shape.
+- **The generator's candidate observations.**
+  - SWELL-KW (`swell-icmi14`): focus sequences, a dwell median of 9.1 s, switches per hour, A → B → A returns after 83.4 % of episodes — 25 students and interns in a Windows 7 lab, 2012, open under CC BY-NC-SA 4.0 (S3-01; C-swell-1 CONTRADICTED its "registration required").
+  - BEHACOM: the foreground program and switches per minute for 12 users on their own computers, 4 on Linux (S3-02).
+- **The negative result, narrowed.** No public trace gives desktop process trees with names over time. BEHACOM publishes foreground executable names per minute from natural use on Linux and Windows (S3-02), and DARPA OpTC publishes process-create events with image paths on Windows 10 enterprise endpoints (C-plain-7). Mobile datasets stay excluded for foreground exclusivity; Carat's several running apps per sample are noted (C-plain-8).
+
+Hands to 9.15: `building-plan.md` §4 and `grounding-sources.md` Role C and the negative result rewritten to this; the `swell-icmi14`, `gonzalez-chi04`, `mark-chi05` and `focal-arxiv26` role lines corrected; a `docs/references.md` entry minted for BEHACOM where the docs cite it. Hands to the Backlog item "Naturalistic generator": these candidates and the open switching shape.
