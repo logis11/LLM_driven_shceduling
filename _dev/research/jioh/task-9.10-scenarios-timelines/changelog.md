@@ -590,3 +590,42 @@ Effect: the gaming segments move from tier 2 to tier 3 (the most opaque name pre
 Applied: `dataset/tools/wlc/grid.py`'s `NAME_TIERS`; the grid counts bound `member_names` toward a segment's tier; `coverage-grid.json` regenerated — `c1-gaming`, `c2-p2a`, `c2-p2b`, `c3-evening`'s gaming segment, `c4-gaming` and `c7-gaming` from tier 2 to 3, every cell still covered; `test_grid` restated to `tracker-miner-f`.
 
 The five entries D23–D27 were recompiled together (`compile.py --allow-window`). 44 of 100 artifacts change beyond the library's hash. Lint reports the three demand-window files of D20 and nothing else; tests 371 passed, 1 skipped, 1 xfailed, after `test_c4_injection_only` was restated. Demand (`-single`): `c1-gaming` 1.0376 → 0.9153, `c4-gaming` 1.038 → 0.9158, `c7-gaming` 2.0376 → 1.9153 (the `gamescope` task gone), `c3-evening` 0.8765 → 0.8766.
+
+## D28 — the session processes appear only in the idle files; every other file states them omitted (2026-10-01)
+
+By 인지오's decision, scope-card items 20 and 65 (9.9 D26's hand-off: which of the four names a file carries; X11 sessions; a scheduled system job's session): the four session entries — `compositor-shell`, `audio-server`, `service-manager`, `message-bus` — are carried only by the idle files, `c1-idle` and `c7-idle`, where their measured state holds. Every other file states that the desktop's session processes are omitted, their active state being unobservable on the runner. The scenario catalog's S18 claim, "present in every segment by construction", is withdrawn. No file depicts an X11 session or an X11 client.
+
+Grounds:
+
+- **The entries' state is an empty, blanked session.** The entries are "observed in one idle Ubuntu 24.04 desktop session", nobody present past the idle delay, the screen blanked (9.9 D9; `docs/workload/measurement-overview.md` §2).
+- **A session in use is another state.** While someone uses the desktop the compositor composes frames at the display's refresh, PipeWire runs a graph while sound plays, and the buses carry the applications' traffic — magnitudes 9.9 D1's sources put orders apart from the idle ones.
+- **That state is unobservable on the runner,** which has "no display refresh, no sound device" (`docs/workload/measurement-overview.md` §11). A headless shell on a virtual monitor would render on the CPU without a GPU.
+- **Non-user programs are most of what runs.** Dodier-Lazaro's Xubuntu field study counts about 92 % of process instances as non-user programs (S1-19, context), so the omission is stated where it applies, as D19 states the game's omitted threads.
+
+A scheduled system job's session is D3's unattended upgrade, a system service.
+
+No file changed.
+
+Hands to 9.15: the scenario catalog's S18 row and building-plan's "[system] scope"; the files' scope statements. 9.9 D26's X11 question closes here.
+
+## D29 — the arcs' order is design; benchmark sequences cited for their transitions' existence (2026-10-01)
+
+By 인지오's decision, scope-card items 41–43: the order of the three arcs — `c3-workday` browsing → office → compile → mail, `c3-creation` photo → video-edit → transcode, `c3-evening` browsing → gaming → media — is design, as D2 made the core set's composition. The files and `docs/workload/building-plan.md` §3 C3 stop presenting an order as grounded. A benchmark that defines a transition is cited for that transition's existence only:
+
+- CpsMark+'s CA workflow for browsing → office → mail (`cpsmark-tbench23`; C-cpsmark-5);
+- SYSmark 30 Advanced Content Creation for photo editing beside a background encode — "A video encode is started in Adobe Premiere and sent to the background while Adobe Photoshop is launched and used to manipulate photos in the foreground" (S2-15; C-sysmark30-3).
+
+Grounds:
+
+- **The arcs are built for their boundaries.** Their segment boundaries are the label changes the recognizer must follow — "query points that must flip" (`docs/workload/building-plan.md` §3 C3) — built for those boundaries, not sampled; D2's ground.
+- **The claimed grounds do not hold as stated.**
+  - `c3-workday`'s compile segment, its longest, has no CpsMark+ counterpart (C-cpsmark-5).
+  - CpsMark+'s order holds photo → video → transcode only as a subsequence, with no handoff stated (C-cpsmark-12).
+  - SYSmark 30 defines an overlap, not a sequence.
+  - `c3-evening` has no candidate in any class.
+- **Benchmark sequences are definitions, existence only** (stage-2 reader rule).
+- **The one ordering observation is partial.** It is SWELL-KW's, a Windows lab with prescribed tasks, its transitions dominated by Word ↔ IE at 66.7 % of switches (S3-01), and it covers part of one arc.
+
+Applied: the headers of `c3-workday` and `c3-creation` restated (comments only; no compiled change).
+
+Hands to 9.15: `building-plan.md` §3 C3's "Ordering grounded in the CpsMark+ CA cooperative workflow" and "grounded in CpsMark+ CC and SYSmark 30 ACC's photo↔video multitasking workload"; the `cpsmark-tbench23` and `sysmark30` role lines.
