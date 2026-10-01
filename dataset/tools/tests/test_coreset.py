@@ -92,20 +92,27 @@ def ground_truth(canonical):
             for s in canonical["ground_truth"]]
 
 
-def test_c7_interactive_counterparts_inject_one_scan(coreset):
-    """Phase 7 spec decision 5: base plus exactly one task, clamscan on
-    cpu-batch alive for the whole segment; label flipped."""
+C7_C_US = 26_385_000   # 9.10 D41: the package-upgrade job's measured CPU total, meas-ci:background:2026-10-01
+
+
+def test_c7_interactive_counterparts_inject_the_upgrade(coreset):
+    """9.10 D41 (restating Phase 7 spec decision 5): the base's first C seconds — every base task by its id, name
+    and arrival, departing at C — plus exactly one task, the unattended upgrade at 0 s, alive for the whole segment
+    on one lane; one segment [0, C), label flipped."""
     for mode in C7_INTERACTIVE:
         base, _ = coreset[f"c1-{mode}"]
         variant, _ = coreset[f"c7-{mode}"]
         base_events, variant_events = events_by_id(base), events_by_id(variant)
-        assert set(variant_events) - set(base_events) == {"scan"}, mode
+        assert set(variant_events) - set(base_events) == {"upgrade"}, mode
         for task_id, event in base_events.items():
-            assert variant_events[task_id] == event, (mode, task_id)
-        scan = variant_events["scan"]
-        assert scan["name"] == "clamscan" and scan["t"] == 0
+            v = variant_events[task_id]
+            assert (v["name"], v["t"]) == (event["name"], event["t"]), (mode, task_id)
+            assert v.get("depart") == C7_C_US, (mode, task_id)
+        upgrade = variant_events["upgrade"]
+        assert upgrade["name"] == "unattended-upgr" and upgrade["t"] == 0
         assert ground_truth(base) == [(mode, True)]
         assert ground_truth(variant) == [(mode, False)]
+        assert (variant["ground_truth"][0]["t_start"], variant["ground_truth"][0]["t_end"]) == (0, C7_C_US)
 
 
 def test_c7_compile_is_a_rename_only(coreset):

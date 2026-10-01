@@ -7,14 +7,14 @@ meta:
   seed: 102
 segments:
 - attributes:
-    background: av-scan
+    background: package-upgrade
     background_wanted: false
   from: 0s
   mode: gaming
   scenario:
   - S9
   - S17
-  to: 60s
+  to: 26.385s
 tasks:
 - archetype: game-task-chain
   arrive: 0s
@@ -36,18 +36,17 @@ tasks:
     - Troy.exe
     - Troy.exe
     - Troy.exe
-  depart: 60s
+  depart: 26.385s
   id: game
   name: Troy.exe
 - archetype: game-client
   arrive: 0s
-  depart: 60s
+  depart: 26.385s
   id: steam
   name: steam
-- archetype: cpu-batch
+- archetype: package-upgrade
   arrive: 0s
   bind:
-    program: clamscan
-    total_work: 60s
-  id: scan
-  name: clamscan
+    total_work: 26.385s
+  id: upgrade
+  name: unattended-upgr

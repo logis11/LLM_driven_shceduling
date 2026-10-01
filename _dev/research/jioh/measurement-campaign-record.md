@@ -1,6 +1,6 @@
 # Measured values — campaign record
 
-Every campaign behind a measured archetype value: per archetype the repeats, the values the rule covers, the widest margin among them, why it stopped, and the machine draws it took. Method: `measurement-campaign-workflow.md`. Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10` (`soffice`: `--since 38`; `chrome`: `--since 438 --exclude 16@35712250969`; `code`: `--since 566 --exclude 42@36126168885`; `thunderbird-send`: `--since 150 --exclude 29`, its keys-only campaign `--since 604`; the `desktop` family: `--since 21`; the `session` family: `--since 16 -- --tag meas-ci:session:2026-09-24`); job counts are the campaign runs' jobs, read from their job lists. Recorded 2026-09-20, the 9.8 rows 2026-09-22, the 9.9 rows 2026-09-24, the three re-measured 9.5 rows 2026-09-24, `mail-client`'s keys-only row 2026-09-27, `code-editor`'s row re-read with its idle phase from 200 s 2026-09-28 (9.5 D83), `web-browser`'s with its renderers the same day (9.5 D84), `mail-client`'s two with each Gecko pool's shortened spelling folded into the pool and the 04:00 `glean.mps` run out of the idle residual the same day (9.5 D90, D91), `code-editor`'s stop re-read against the Word recording's 57 windows 2026-09-29 (9.5 D99); the 9.5 rows were first recorded a day earlier against one headline median per archetype, which D29 and D30 replaced. Every gap mean and wake rate re-read on 2026-09-24 under 9.5 D71 (gaps over merged wake times, wrapped round the span; rates from exact counts); the 9.8 renderer residuals re-classed as sparse components on 2026-09-25 (9.8 D27); the 9.9 pool rebuilt the same day with sysstat's jobs outside and two sparse components (9.9 D32, D33); every table's mean re-read on 2026-09-26 as the table carries it, count-weighted over the repeats (9.5 D78).
+Every campaign behind a measured archetype value: per archetype the repeats, the values the rule covers, the widest margin among them, why it stopped, and the machine draws it took. Method: `measurement-campaign-workflow.md`. Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10` (`upgrade`: `--since 100`; `soffice`: `--since 38`; `chrome`: `--since 438 --exclude 16@35712250969`; `code`: `--since 566 --exclude 42@36126168885`; `thunderbird-send`: `--since 150 --exclude 29`, its keys-only campaign `--since 604`; the `desktop` family: `--since 21`; the `session` family: `--since 16 -- --tag meas-ci:session:2026-09-24`); job counts are the campaign runs' jobs, read from their job lists. Recorded 2026-09-20, the 9.8 rows 2026-09-22, the 9.9 rows 2026-09-24, the three re-measured 9.5 rows 2026-09-24, `mail-client`'s keys-only row 2026-09-27, `code-editor`'s row re-read with its idle phase from 200 s 2026-09-28 (9.5 D83), `web-browser`'s with its renderers the same day (9.5 D84), `mail-client`'s two with each Gecko pool's shortened spelling folded into the pool and the 04:00 `glean.mps` run out of the idle residual the same day (9.5 D90, D91), `code-editor`'s stop re-read against the Word recording's 57 windows 2026-09-29 (9.5 D99); the 9.5 rows were first recorded a day earlier against one headline median per archetype, which D29 and D30 replaced. Every gap mean and wake rate re-read on 2026-09-24 under 9.5 D71 (gaps over merged wake times, wrapped round the span; rates from exact counts); the 9.8 renderer residuals re-classed as sparse components on 2026-09-25 (9.8 D27); the 9.9 pool rebuilt the same day with sysstat's jobs outside and two sparse components (9.9 D32, D33); every table's mean re-read on 2026-09-26 as the table carries it, count-weighted over the repeats (9.5 D78).
 
 ## Campaigns
 
@@ -19,6 +19,7 @@ All on GitHub-hosted `ubuntu-24.04` runners, 4 vCPU, pinned to one CPU, AMD EPYC
 | `meas-ci:interactive:2026-09-25` | 9.5 | `meas-interactive.yml` | #566–#599, `code` keys only under D72; 34 runs, 102 jobs (57 gated), windows 1–44 landed, the recording holding 57 (D73, D99) | 2026-09-25 00:19 UTC |
 | `meas-ci:interactive:2026-09-27` | 9.5 | `meas-interactive.yml` | #604–#610, `thunderbird-send` keys only under D79; 7 runs, 20 jobs (12 gated), every window of the recording landed (D80); the dry checks #600 and #602 are not repeats | 2026-09-27 00:04 UTC |
 | `meas-ci:session:2026-09-24` | 9.9 | `meas-session.yml` | #16–#22; the four holding a landed repeat are #16, #20, #21, #22 | 2026-09-23 23:35 UTC (2026-09-24 KST) |
+| `meas-ci:background:2026-10-01` | 9.10 | `meas-background.yml` | #100–#105, app `upgrade`; the dry run #99 is not a repeat | 2026-10-01 10:07 UTC |
 
 ## 9.5 — nine archetypes measured
 
@@ -258,6 +259,20 @@ The differences, each value's per-job mean ratio, untraced over traced, and its 
 
 Full tables: `task-9.9-daemons-session/campaign/results-control.md`, `campaign/results-control/control.json`.
 
+## 9.10 — `package-upgrade`
+
+Repeats 1–9 on the AMD EPYC 7763, every repeat valid (the method's checks: the layer built with no package missing or extra, the four packages downloaded and installed 2.39-0ubuntu8.7 → 8.8 with the same change set, "All upgrades installed"). 15 jobs: 9 landed, 6 stopped by the machine gate (EPYC 9V45 2, EPYC 9V74 2, Xeon Platinum 8370C 1, Xeon Platinum 8573C 1; `task-9.10-scenarios-timelines/campaign/upgrade/machine-draws.md`). The first batch was repeats 1–5, the rule's minimum; at five the run mean (±6.31 %) and the CPU total (±7.72 %) failed and the pool projected nine, so repeats 6–9 were added as a batch (9.7 D26); at nine the rule holds on all three values.
+
+The entry carries `cpu-batch`'s batch loop over the whole process tree (9.10 D39) and its CPU total, the job's measured whole (D17):
+
+| archetype | program | value | repeats | mean | spread (cv) | 95 % half-width | stopped by |
+|---|---|---|---|---|---|---|---|
+| `package-upgrade` | `unattended-upgrade`'s tree | run between voluntary blocks | 9 | 1.798 ms | 4.0 % | ±3.10 % | the rule |
+| `package-upgrade` | `unattended-upgrade`'s tree | block per run | 9 | 8.90 µs | 7.8 % | ±0.53 µs (±5.97 %) | the rule (1 µs floor) |
+| `package-upgrade` | `unattended-upgrade`'s tree | CPU total | 9 | 26.385 s | 4.9 % | ±3.78 % | the rule |
+
+Reported beside them: 916 processes in every repeat; CPU over the stage's wall time 0.990–0.994; `locale-gen`'s 18 `localedef` runs 72.8–76.5 % of the CPU; taskstats over perf 0.980–0.982. The CPU total ranges 25.25–29.16 s: repeats 4, 5 and 9 ran 6–14 % above the mean of the other six (25.61 s), `unattended-upgrade`'s own Python 21–50 % above them (repeats 4 and 5), in identical work. Pooled in `task-9.10-scenarios-timelines/campaign/upgrade/results/` (`pooled.json`, `results.md`).
+
 ## Machine draws
 
 The build campaign, complete: 28 jobs, 14 on the AMD EPYC 7763 (50.0 %), 12 stopped by the machine gate — Intel Xeon Platinum 8573C 4, AMD EPYC 9V74 4, AMD EPYC 9V45 2, Intel Xeon Platinum 8370C 1, Intel Xeon 6973P-C 1 — and 2 cancelled.
@@ -269,5 +284,7 @@ The 9.7 background campaign, complete: 145 jobs — 78 drew the AMD EPYC 7763 (5
 The 9.8 desktop campaign, complete: 105 jobs, the hidden renderer's added repeats (D31, runs #51–#57) included — 60 landed on the AMD EPYC 7763 (57.1 %, all pooled), 45 stopped by the machine gate: AMD EPYC 9V74 20, Intel Xeon Platinum 8573C 11, AMD EPYC 9V45 8, Intel Xeon 6973P-C 4, Intel Xeon Platinum 8370C 2. Per entry, gate stops: `chrome-hidden` 15, `element` 14, `steam` 9, `chrome-visible` 7. With the tooling's dry runs and the long-phase probes, neither of them a repeat, 76 of 141 jobs drew the EPYC 7763 (`task-9.8-browser-comms/campaign/machine-draws.md`).
 
 The 9.9 session campaign, complete: 42 jobs — 24 landed on the AMD EPYC 7763 (57.1 %, all pooled), 18 stopped by the machine gate: AMD EPYC 9V74 6, Intel Xeon Platinum 8573C 5, AMD EPYC 9V45 3, Intel Xeon 6973P-C 3, Intel Xeon Platinum 8370C 1. With the tooling's dry runs and the long-phase probes, neither of them a repeat, 41 of the 82 jobs whose model is recorded drew the EPYC 7763; 8 more dry jobs ended without a report, 90 in all (`task-9.9-daemons-session/campaign/machine-draws.md`).
+
+The 9.10 unattended-upgrade campaign, complete: 15 jobs — 9 landed on the AMD EPYC 7763 (60.0 %, all pooled), 6 stopped by the machine gate: AMD EPYC 9V45 2, AMD EPYC 9V74 2, Intel Xeon Platinum 8370C 1, Intel Xeon Platinum 8573C 1. Its dry run (#99) drew the EPYC 7763.
 
 The untraced control of 9.5, 9.8 and 9.9, complete (9.5 D82, 9.8 D32, 9.9 D40): 148 jobs — 87 landed on the AMD EPYC 7763 (58.8 %; 84 pooled, three later copies of a window that landed twice left out under 9.5 D66), 61 stopped by the machine gate: AMD EPYC 9V74 25, AMD EPYC 9V45 13, Intel Xeon Platinum 8573C 12, Intel Xeon 6973P-C 7, Intel Xeon Platinum 8370C 4. By family: interactive 61 jobs, 36 landed; playback 31, 19; desktop 46, 26; session 10, 6.

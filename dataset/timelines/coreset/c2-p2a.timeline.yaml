@@ -2,7 +2,9 @@
 # another game begun during play, which Steam starts at once although it
 # pauses queued downloads when a game launches (steam-downloads; Valve's
 # steam-for-linux #8821). The variant swaps in an unwanted job and flips
-# the label (c2-pairs.variant.yaml).
+# the label (c2-pairs.variant.yaml). Segment 1 is as long as the variant's
+# unwanted job's measured CPU total, 26.385 s (9.10 D42); the download keeps its
+# design size until its own item (scope-card item 56).
 meta:
   id: c2-p2a
   seed: 202
@@ -10,16 +12,16 @@ meta:
 segments:
   - {from: 0s, to: 60s, mode: gaming, attributes: {background_wanted: true},
      scenario: [S9]}
-  - {from: 60s, to: 120s, mode: gaming,
+  - {from: 60s, to: 86.385s, mode: gaming,
      attributes: {background_wanted: true, background: download, initiated: user},
      scenario: [S9, S10]}
 
 tasks:
   - {id: game, name: Troy.exe, archetype: game-task-chain,
-     arrive: 0s, depart: 120s, bind: {lane_share: 0.95,
+     arrive: 0s, depart: 86.385s, bind: {lane_share: 0.95,
            member_names: ["Task worker thr", "Task worker thr", "Task worker thr", "Task worker thr", dxvk-cs, dxvk-submit, winepulse_mainl, winepulse_timer, FAudio_AudioCli, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe]}}
   - {id: steam, name: steam, archetype: game-client,
-     arrive: 0s, depart: 120s}
+     arrive: 0s, depart: 86.385s}
   - {id: download, name: steam, archetype: game-download, arrive: 60s,
      bind: {total_work: 25s}}
 

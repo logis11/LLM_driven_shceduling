@@ -828,11 +828,11 @@ By 인지오's decision, D3's hand-off on the counterparts' structure (scope-car
 Grounds:
 
 - **The label at every instant.** On one lane a job of C seconds of CPU is alive for at least C seconds under every policy, so the job is present throughout a segment of length C — the property the C7 design states (`docs/workload/building-plan.md` §3 C7: "arriving at 0 s with `total_work` equal to the segment so the label holds at every instant").
-- **The whole job** (D17). The job is bound whole and the length follows it; it finishes inside the file only under a policy that gives it the whole lane.
+- **The whole job** (D17). The job is bound whole and the length follows it; under a policy that gives it the whole lane it ends one block-total after the file, the batch loop's own blocks, about 0.13 s (corrected at fold-in, D45).
 - **A 60 s file would not hold the label.** The bases' own load is 0.0004 (`c1-idle`) to 0.46 (`c1-video-edit`) and 0.92 (`c1-gaming`) of the lane (`build.manifest.json`); with the job at 0 s in a 60 s file, some policies end it 13–34 s before the segment ends in nine of the ten files.
 - **The smallest change to C7.** One segment, the job from 0 s, as before; only the length moves.
 
-C is set at fold-in, from the pool whose rule holds (the first five repeats: 25.2–29.2 s, mean 26.55 s).
+C is set at fold-in, from the pool whose rule holds: 26.385 s, nine repeats (D45).
 
 Hands to 9.14: the pair review and the scoring spec compare each counterpart with its base's first C seconds; the RQ0 gate spec's eight judging counterparts on the new length. Hands to 9.15: `building-plan.md` §3 C7 (the job, its length).
 
@@ -872,3 +872,19 @@ Grounds:
 - **The bases' own placement.** All ten bases are one 0–60 s segment with every task 0–60 s; the five focused ones hold a 2–58 s window, and the four with an operation place it at 30 s or 40 s (`c1-*.timeline.yaml`).
 
 Tooling: `dataset/tools/wlc/deriver.py` gains `set-focus` and `set-operations`, which replace a derived file's focus windows and operations as `set-segments` replaces its segments.
+
+## D45 — the unattended-upgrade campaign holds at nine repeats; `package-upgrade` folded in, the eleven files rebound (2026-10-01)
+
+The campaign of D36–D40, `meas-ci:background:2026-10-01`, run under `../measurement-campaign-workflow.md` and recorded in `campaign/upgrade/` (method, machine draws, `results/pooled.json`, `results/results.md`) and in `measurement-campaign-record.md`.
+
+- **Runs.** The first batch, repeats 1–5 (runs #100–#104, the gated indices relaunched together): every repeat valid; the block per run held, the run between voluntary blocks (±6.31 %) and the CPU total (±7.72 %) did not, the pool projecting nine. Repeats 6–9 were added as one batch up to that projection (9.7 D26, run #105). 15 jobs, 9 landed, 6 stopped by the machine gate.
+- **The rule holds at nine** on the three values of the list: the tree's run between voluntary blocks 1.798 ms ±3.10 %, the block per run 8.90 µs ±0.53 µs (inside the 1 µs floor), the CPU total 26.385 s ±3.78 %. Every repeat valid: the layer built with no package missing or extra, the four packages downloaded and installed 2.39-0ubuntu8.7 → 8.8 with one change set in every repeat, "All upgrades installed".
+- **Reported.** 916 processes in every repeat; CPU over the stage 0.990–0.994; `localedef` 72.8–76.5 % of the CPU; 13.2–14.1 % of runs followed by a non-zero block, 0.11–0.13 s of blocks a job. Repeats 4, 5 and 9 used 6–14 % more CPU than the mean of the other six in identical work — `unattended-upgrade`'s Python 21–50 % more in 4 and 5 — on the one CPU model; the rule absorbs it at nine.
+- **Release.** The raw records are release `meas-ci-background-2026-10-01`, published on 인지오's go-ahead.
+- **Fold-in.** `package-upgrade` in `dataset/archetypes.yaml`, its two tables written by `batch_fold_in.py` from `results/pooled.json`.
+- **C** (D41, D42) is the CPU total, 26.385 s. D41's grounds sentence on finishing is corrected: the batch loop sleeps through the job's own blocks as well, so with the whole lane the job ends about 0.13 s after a file of length C; it is alive at every instant of the segment under every policy, as D41 states.
+- **Rebound.** The ten interactive counterparts (`c7.variant.yaml`, D41, D44) and `c2-p2b` (`c2-pairs.variant.yaml`), `c2-p2a`'s segment 1 to 86.385 s (D42), `unattended-upgr` at tier 1 in `grid.py` (D43); `test_c7_interactive_counterparts_inject_the_upgrade` restates the C7 test for D41.
+
+Recompiled (`compile.py --allow-window`): 24 of 100 artifacts change beyond the library's hash — the ten counterparts, `c2-p2a` and `c2-p2b` in both modes. Demand (`-single`): `c2-p2a` 1.1735 → 1.2545, `c2-p2b` 1.1735 → 1.2706 (both inside the window); `c7-browsing` 1.0164 → 1.0176, `c7-office` 1.027 → 1.0255, `c7-mail` 1.0287 → 1.0545, `c7-dev` 1.3319 → 1.295, `c7-photo` 1.0442 → 1.0967, `c7-meeting` 1.2387 → 1.24, `c7-gaming` 1.9153 → 1.9149, `c7-media` 1.128 → 1.1267, `c7-video-edit` 1.4586 → 1.5618, `c7-idle` 1.0004 → 1.0007. Lint reports the three demand-window files of D20 and nothing else; tests 372 passed, 1 skipped, 1 xfailed, after the two count tests took the new entry's tables and list.
+
+Hands to 9.14: the eight judging counterparts and P2 on their new lengths; `cpu-batch`'s `clamscan` tables are bound by no file. Hands to 9.15: `building-plan.md` §3 C7 and the scenario catalog's S17 row (D3).

@@ -4,11 +4,18 @@
 # `false` cell of the same mode (indexing the other way round — c1-indexing is
 # the user-initiated `true` cell).
 #
-# Interactive modes: one injected unwanted job — clamscan bound cpu-batch (full-
-# scan state is CPU-saturating, meas-ci:cli:3), the same name in every file so
-# the ten `false` cells differ only in mode; tier 1, so no pair changes
-# familiarity tier. Arrives at 0 s with total_work equal to the segment, so the
-# label holds at every instant under every policy.
+# Interactive modes (9.10 D3, D36–D44): one injected unwanted job — the stock
+# Ubuntu 24.04 unattended upgrade's install stage, `package-upgrade`
+# (meas-ci:background:2026-10-01), shown as `unattended-upgr` — the same name in
+# every file so the ten `false` cells differ only in mode; tier 1, so no pair
+# changes familiarity tier (D43). It arrives at 0 s bound whole, total_work its
+# measured CPU total C = 26.385 s (D17), and each counterpart is its base's
+# first C seconds (D41): one segment, every base task departing at C, so on one
+# lane the job is alive at every instant of the segment under every policy.
+# Focus windows keep the base's 2 s margins, 2 s to C − 2 s, and an operation
+# sits at its fraction of the window as in the base (D44): page load, unsharp
+# mask and preview render at the middle (the base's 30 s in 2–58 s), the mail
+# send at 38/56 of it (the base's 40 s).
 #
 # Batch modes: the batch job is itself the background work the attribute judges
 # (recognition-vocabulary §1), so the counterpart is the same job unwanted — the
@@ -27,101 +34,130 @@ variants:
   - id: c7-browsing
     from: c1-browsing.timeline.yaml
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S2, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: browsing,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S2, S17]}]
+      - patch-task: {id: browser, depart: 26.385s}
+      - patch-task: {id: renderers, depart: 26.385s}
+      - set-focus: [{from: 2s, to: 24.385s, task: browser}]
+      - set-operations: [{at: 13.1925s, task: browser, name: page-load}]
       - patch-meta: {demand: calibration}
 
   - id: c7-office
     from: c1-office.timeline.yaml
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S1, S2, S4, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: office,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S1, S2, S4, S17]}]
+      - patch-task: {id: writer, depart: 26.385s}
+      - patch-task: {id: browser, depart: 26.385s}
+      - patch-task: {id: renderers, depart: 26.385s}
+      - patch-task: {id: mail, depart: 26.385s}
+      - set-focus: [{from: 2s, to: 24.385s, task: writer}]
       - patch-meta: {demand: calibration}
 
   - id: c7-mail
     from: c1-mail.timeline.yaml
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S4, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: mail,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S4, S17]}]
+      - patch-task: {id: mailer, depart: 26.385s}
+      - set-focus: [{from: 2s, to: 24.385s, task: mailer}]
+      - set-operations: [{at: 17.189821s, task: mailer, name: send}]
       - patch-meta: {demand: calibration}
 
   - id: c7-dev
     from: c1-dev.timeline.yaml
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S11, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: dev,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S11, S17]}]
+      - patch-task: {id: editor, depart: 26.385s}
+      - set-focus: [{from: 2s, to: 24.385s, task: editor}]
       - patch-meta: {demand: calibration}
 
   - id: c7-photo
     from: c1-photo.timeline.yaml
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S6, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: photo,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S6, S17]}]
+      - patch-task: {id: photo-editor, depart: 26.385s}
+      - set-focus: [{from: 2s, to: 24.385s, task: photo-editor}]
+      - set-operations: [{at: 13.1925s, task: photo-editor, name: unsharp-mask}]
       - patch-meta: {demand: calibration}
 
   - id: c7-meeting
     from: c1-meeting.timeline.yaml
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S3, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: meeting,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S3, S17]}]
+      - patch-task: {id: voice, depart: 26.385s}
       - patch-meta: {demand: calibration}
 
   - id: c7-gaming
     from: c1-gaming.timeline.yaml
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S9, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: gaming,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S9, S17]}]
+      - patch-task: {id: game, depart: 26.385s}
+      - patch-task: {id: steam, depart: 26.385s}
       - patch-meta: {demand: calibration}
 
   - id: c7-media
     from: c1-media.timeline.yaml
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S13, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: media,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S13, S17]}]
+      - patch-task: {id: video, depart: 26.385s}
+      - patch-task: {id: music, depart: 26.385s}
       - patch-meta: {demand: calibration}
 
   - id: c7-video-edit
     from: c1-video-edit.timeline.yaml
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S7, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: video-edit,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S7, S17]}]
+      - patch-task: {id: editor, depart: 26.385s}
+      - set-focus: [{from: 2s, to: 24.385s, task: editor}]
+      - set-operations: [{at: 13.1925s, task: editor, name: preview-render}]
       - patch-meta: {demand: calibration}
 
   - id: c7-idle
     from: c1-idle.timeline.yaml
     ops:
-      - add-task: {id: scan, name: clamscan, archetype: cpu-batch,
-                   arrive: 0s, bind: {total_work: 60s, program: clamscan}}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, background: av-scan},
-                        scenario: [S18, S17]}
+      - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
+                   arrive: 0s, bind: {total_work: 26.385s}}
+      - set-segments: [{from: 0s, to: 26.385s, mode: idle,
+                         attributes: {background_wanted: false, background: package-upgrade},
+                         scenario: [S18, S17]}]
+      - patch-task: {id: shell, depart: 26.385s}
+      - patch-task: {id: audio-srv, depart: 26.385s}
+      - patch-task: {id: init, depart: 26.385s}
+      - patch-task: {id: bus, depart: 26.385s}
       - patch-meta: {demand: calibration}
 
   - id: c7-compile

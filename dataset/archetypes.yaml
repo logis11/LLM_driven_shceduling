@@ -1208,6 +1208,65 @@ archetypes:
       (0.988-0.995), so the carried runs are read under about 2.5 % more CPU than the untraced program spends. Where
       in the runs the added CPU lands is not measured.
 
+  # ---- system jobs — 9.10 unattended-upgrade campaign ---------------------
+
+  package-upgrade:
+    category_source: meas
+    pattern:
+      constructor: batch-loop      # 9.7 D29; 9.10 D39: over the job's whole process tree
+      program:
+        - loop:                    # until total_work of CPU is spent
+            - RUN: upgrade_run
+            - SLEEP: upgrade_block
+        - EXIT: {}
+    params:                        # 9.10 D39: the tree's runs, pooled over every process, and the block after each
+      upgrade_run:
+        {dist: quantiles, p: [4, 4, 4, 4, 7, 60, 313, 707, 3863, 1041069], min: 3, max: 2667594, means: [3.404, 4, 4, 4, 4.932, 30.891, 149.47, 581.806, 1366.482, 62863.079, 1115870.066], sampling: per-iteration, source: "meas-ci:background:2026-10-01"}
+      upgrade_block:
+        {dist: quantiles, p: [0, 0, 0, 0, 0, 0, 27, 35, 148, 719], min: 0, max: 8073, means: [0, 0, 0, 0, 0, 0, 4.377, 29.539, 71.341, 243.405, 1719.692], sampling: per-iteration, source: "meas-ci:background:2026-10-01"}
+    lifetime: finite
+    binding_params: [total_work]
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      run: "background:2026-10-01; repeats [1-9]; runs 36847096521, 36847549673, 36848289469, 36851095354"
+      stats: ["run between voluntary blocks mean 1.798 ms (+-3.10 %), block per run mean 8.90 us (+-0.53 us, inside the 1 us floor)",
+              "CPU total 26.385 s (+-3.78 %), 25.25-29.16 s over the repeats: the job's measured whole (9.10 D17, D39)",
+              "share of runs followed by a block 0.132-0.141; blocks 0.11-0.13 s a job",
+              "CPU over the stage 0.990-0.994: 25.25-29.16 s of CPU in 25.47-29.39 s",
+              "916 processes in every repeat; locale-gen's 18 localedef runs 72.8-76.5 % of the CPU",
+              "repeats 4, 5 and 9 ran 6-14 % above the mean of the other six in identical work, unattended-upgrade's Python 21-50 % above in 4 and 5"]
+      scope: >-
+        One observation (phase decision 2; 9.10 D3, D36-D38): the stock Ubuntu 24.04 unattended upgrade's install
+        stage, `apt.systemd.daily install` (apt-daily-upgrade.service's ExecStart), installing the security update
+        Ubuntu published on 2026-07-27 — glibc 2.39-0ubuntu8.7 to 2.39-0ubuntu8.8, four binaries: `libc-bin`,
+        `libc6`, `libc6-dbg`, `locales` — the latest day at the past year's median count of binaries a working run installs (D36). The state is a
+        chroot of the default layer of an English 24.04.5.1 desktop install, 1,445 packages, built from Ubuntu's
+        snapshot service as the archive stood at 2026-07-27T00:00Z, its download stage run against the archive at
+        2026-07-28T00:00Z (D37). In a chroot no init runs: `libc6`'s postinst skips `systemctl daemon-reexec` and
+        the reboot-required notice; the layer holds no kernel and no boot loader; the unit's `apt-helper
+        wait-online` step is not carried — on an online desktop it is a `systemctl is-active` query per network
+        manager and the active manager's waiter (D37, D38). Pinned to one CPU of a GitHub-hosted ubuntu-24.04
+        runner (4 vCPU AMD EPYC 7763, kernel 6.17.0-1022-azure), the rest of the machine idealised; the runner's
+        agent processes share the measured CPU outside the process tree; no desktop session. `perf sched record`
+        and a taskstats listener on the measured CPU. 9 same-machine repeats under the machine gate; the stability
+        rule holds on all three values. Values are this software on this machine, not desktop truth (9.5 D10).
+    modeling_notes: >-
+      The class is what the measurement shows (9.10 D39): one saturated chain of 916 short-lived processes —
+      `unattended-upgrade` working out the upgrade, `dpkg` unpacking and configuring the four packages,
+      `locale-gen`'s 18 `localedef` runs back to back, then `mandb`, `apt-check` and `unattended-upgrade`'s close
+      — the measured CPU busy from the stage's start to its end. The task is `cpu-batch`'s batch loop — a run
+      drawn from the tree's runs between voluntary blocks, pooled over every process, then the block that followed
+      such a run, the tree's own off-CPU time, zero when another of its processes runs on — until `total_work` of
+      CPU is spent; `total_work` binds the measured whole, the CPU total above (9.10 D17). The stages' order and the
+      process count are not carried: the loop draws runs independently, so the `localedef` runs (above the 99.9th
+      percentile, over 1 s each) fall anywhere in the job rather than in one 20 s stretch. The task shows
+      `unattended-upgr` (9.10 D40), the `comm` of the program the unit runs; most of the CPU under that name is
+      `localedef`'s, glibc's locales being the day's content, and the name stands for the tree. Another day's
+      pending set is another job: an empty day is a few seconds of `unattended-upgrade` alone, a kernel day adds a
+      kernel's install and an initramfs (9.10 D36). The `locales` work scales with the locales an install lists —
+      18 for English (9.10 D37).
+
   # ---- structural-special family — harvested from LAVD --------------------
 
   game-task-chain:

@@ -3,41 +3,40 @@
 focus:
 - from: 2s
   task: browser
-  to: 58s
+  to: 24.385s
 meta:
   demand: calibration
   id: c7-browsing
   seed: 105
 operations:
-- at: 30s
+- at: 13.1925s
   name: page-load
   task: browser
 segments:
 - attributes:
-    background: av-scan
+    background: package-upgrade
     background_wanted: false
   from: 0s
   mode: browsing
   scenario:
   - S2
   - S17
-  to: 60s
+  to: 26.385s
 tasks:
 - archetype: web-browser
   arrive: 0s
-  depart: 60s
+  depart: 26.385s
   id: browser
   name: chrome
 - archetype: renderer-hidden
   arrive: 0s
   count: 11
-  depart: 60s
+  depart: 26.385s
   id: renderers
   name: chrome
-- archetype: cpu-batch
+- archetype: package-upgrade
   arrive: 0s
   bind:
-    program: clamscan
-    total_work: 60s
-  id: scan
-  name: clamscan
+    total_work: 26.385s
+  id: upgrade
+  name: unattended-upgr

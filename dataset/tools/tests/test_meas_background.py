@@ -472,7 +472,10 @@ def test_the_list_is_each_archetypes_batch_loop_tables():
     # D29: every archetype compiles as cpu-batch's batch loop and carries its two tables
     for app in ("borg", "7z", "steamcmd"):
         assert [k for _p, k, _l in pool.LIST[app]] == ["batch_run_us", "batch_block_us"]
-    assert {p for _p in pool.LIST.values() for p, _k, _l in _p} == {"borg-first-warm", "7z-mmt8-warm", "steam-fresh-shaped"}
+    # 9.10 D17, D39: the unattended upgrade also carries its CPU total, the job's measured whole
+    assert [k for _p, k, _l in pool.LIST["upgrade"]] == ["batch_run_us", "batch_block_us", "program_cpu_us"]
+    assert {p for _p in pool.LIST.values() for p, _k, _l in _p} == {"borg-first-warm", "7z-mmt8-warm", "steam-fresh-shaped",
+                                                                   "upgrade-install"}
 
 
 def test_a_difference_inside_the_precision_is_not_resolved():

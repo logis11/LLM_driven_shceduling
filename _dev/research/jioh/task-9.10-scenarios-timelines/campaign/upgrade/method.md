@@ -53,3 +53,6 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel and CPU model as recorded, 
 Raw records per job are released as a GitHub release named in the registry entry at fold-in, with `upgrade-layer.txt`. The release is outward-facing and is published on 인지오's go-ahead.
 
 ## 8. Amendments
+
+- 2026-10-01, the dry run (run 36843481310, #99; changelog D38) — amending §3: the unit's `apt-helper wait-online` is not run; the phase is `apt.systemd.daily install` alone.
+- 2026-10-01, the first batch and the added batch (runs #100–#105; changelog D45) — amending §1 "First batch": repeats 1–5 held the block per run and not the run between voluntary blocks (±6.31 %) or the CPU total (±7.72 %); the pool projected nine, and repeats 6–9 were added as one batch (9.7 D26). At nine the rule holds on all three values.

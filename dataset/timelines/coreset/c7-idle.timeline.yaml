@@ -7,39 +7,38 @@ meta:
   seed: 106
 segments:
 - attributes:
-    background: av-scan
+    background: package-upgrade
     background_wanted: false
   from: 0s
   mode: idle
   scenario:
   - S18
   - S17
-  to: 60s
+  to: 26.385s
 tasks:
 - archetype: compositor-shell
   arrive: 0s
-  depart: 60s
+  depart: 26.385s
   id: shell
   name: gnome-shell
 - archetype: audio-server
   arrive: 0s
-  depart: 60s
+  depart: 26.385s
   id: audio-srv
   name: pipewire
 - archetype: service-manager
   arrive: 0s
-  depart: 60s
+  depart: 26.385s
   id: init
   name: systemd
 - archetype: message-bus
   arrive: 0s
-  depart: 60s
+  depart: 26.385s
   id: bus
   name: dbus-daemon
-- archetype: cpu-batch
+- archetype: package-upgrade
   arrive: 0s
   bind:
-    program: clamscan
-    total_work: 60s
-  id: scan
-  name: clamscan
+    total_work: 26.385s
+  id: upgrade
+  name: unattended-upgr

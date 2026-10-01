@@ -338,10 +338,11 @@ def test_a_numpy_sample_gives_the_same_table():
 
 
 def test_the_batch_tables_regenerate_from_the_pooled_records(repo_root):
-    # the compile and background entries' 28 tables are batch_fold_in.py's output on the committed pooled records
+    # the compile, background and package-upgrade entries' 30 tables are batch_fold_in.py's output on the committed
+    # pooled records
     from meas import batch_fold_in
     text = (repo_root / "dataset" / "archetypes.yaml").read_text()
-    assert len(batch_fold_in.TABLES) == 28
+    assert len(batch_fold_in.TABLES) == 30
     assert batch_fold_in.rewrite(text, batch_fold_in.load_pools(repo_root)) == text
     # every listed table is written: one the library no longer holds fails the rewrite
     with pytest.raises(SystemExit, match="cpu-batch.tracker_block"):
