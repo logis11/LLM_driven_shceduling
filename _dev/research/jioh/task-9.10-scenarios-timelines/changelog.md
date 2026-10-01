@@ -808,3 +808,15 @@ Grounds:
 Open, for the campaign's method: the name the task shows and the entry's id.
 
 Tooling: `dataset/tools/meas/background/analyze.py`, every process of the `upgrade` tree counted as the program's.
+
+## D40 — the task shows `unattended-upgr`; the entry is `package-upgrade` (2026-10-01)
+
+By 인지오's decision, D3's last open item: the one task of D39's form shows `unattended-upgr`, the `comm` of `/usr/bin/unattended-upgrade` as the dry run observed it (979 schedule rows; the kernel's 15-byte rule, D25), and the archetype's id is `package-upgrade`.
+
+Grounds:
+
+- **D24 and D25.** A task shows the observed program's name, as its kernel `comm`; D25 derived `unattended-upgr` for this job in advance.
+- **The program the unit runs.** `apt.systemd.daily install` runs `unattended-upgrade` (`apt.systemd.daily:491–505`, S2-03); in the dry run it is alive across the install stage and the parent of every `dpkg`.
+- **The other observed names.** `apt.systemd.dai` (the unit's script, cut to 15 bytes) names a wrapper; `localedef` holds 76 % of the CPU but is this day's content, glibc's locales, not the job.
+
+The entry's `modeling_notes` state that most of the CPU under the name is `locale-gen`'s 18 `localedef` runs and that the name stands for the tree. The familiarity tier follows D27's rule at rebinding.

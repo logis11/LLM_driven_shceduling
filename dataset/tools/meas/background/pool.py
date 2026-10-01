@@ -41,32 +41,39 @@ TOOLS = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__
 if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 from meas.background import analyze  # noqa: E402
-from meas.stability import ratio_stability, ratio_repeats_needed, TOLERANCE, t975  # noqa: E402
+from meas.stability import ratio_stability, ratio_repeats_needed, stability, TOLERANCE, t975  # noqa: E402
 from meas.distribution import quantile_table  # noqa: E402
 pct, QUANTILE_PROBS = analyze.pct, analyze.QUANTILE_PROBS
 
-NAME = re.compile(r"^meas-background-(borg|7z|steamcmd)-r(\d+)-(dry|probe|full)$")
+NAME = re.compile(r"^meas-background-(borg|7z|steamcmd|upgrade)-r(\d+)-(dry|probe|full)$")
 PHASES = {"borg": ("borg-first-warm", "borg-repeat-warm", "borg-first-cold", "borg-repeat-cold"),
           "7z": ("7z-mmt8-warm", "7z-mmt1-warm", "7z-mmt8-cold"),
-          "steamcmd": ("steam-fresh-shaped", "steam-fresh-untraced", "steam-fresh-unshaped", "steam-update-shaped")}
+          "steamcmd": ("steam-fresh-shaped", "steam-fresh-untraced", "steam-fresh-unshaped", "steam-update-shaped"),
+          "upgrade": ("upgrade-install",)}   # 9.10 D36–D40
 # D19 (the shared stability rule): the list — every table the fold-in carries, each tested by its mean as the table
 # carries it (9.5 D78). D29 (9.6 D21, D22, D25): each archetype compiles as cpu-batch's batch loop, so it carries the
 # program's runs between voluntary blocks, pooled over its threads, and the block after each run — the program-level
 # off-CPU time, zero when another thread runs on; the per-wake tables of D19's first list are reported, not carried
 LIST = {app: [(ph, "batch_run_us", "run between voluntary blocks (µs)"), (ph, "batch_block_us", "block per run (µs)")]
-        for app, ph in (("borg", "borg-first-warm"), ("7z", "7z-mmt8-warm"), ("steamcmd", "steam-fresh-shaped"))}
+        for app, ph in (("borg", "borg-first-warm"), ("7z", "7z-mmt8-warm"), ("steamcmd", "steam-fresh-shaped"),
+                        ("upgrade", "upgrade-install"))}
+# 9.10 D39, D17: the unattended upgrade also carries its CPU total, the job's measured whole — a per-repeat value,
+# tested by its per-repeat values (the workflow's rate rule)
+LIST["upgrade"].append(("upgrade-install", "program_cpu_us", "CPU total (µs)"))
 # D14 (1): the headline medians, pooled over all the program's threads — read by the comparisons (results only)
 HEADLINE = {"borg": [("borg-first-warm", "run_us", "run per wake (µs)"), ("borg-first-warm", "wait_us", "wait per wake (µs)")],
             "7z": [("7z-mmt8-warm", "run_us", "run per wake (µs)"), ("7z-mmt8-warm", "wait_us", "wait per wake (µs)")],
             "steamcmd": [("steam-fresh-shaped", "run_us", "run per wake (µs)"), ("steam-fresh-shaped", "network_us", "network wait (µs)"),
-                         ("steam-fresh-shaped", "bytes_per_wake", "bytes per wake")]}
+                         ("steam-fresh-shaped", "bytes_per_wake", "bytes per wake")],
+            "upgrade": [("upgrade-install", "run_us", "run per wake (µs)"), ("upgrade-install", "wait_us", "wait per wake (µs)")]}
 # results only: (a, b, what) — the headline medians side by side
 COMPARISONS = {"borg": [("borg-first-warm", "borg-first-cold", "warm against cold, first backup (D8)"),
                         ("borg-repeat-warm", "borg-repeat-cold", "warm against cold, repeat backup (D8)"),
                         ("borg-first-warm", "borg-repeat-warm", "first against repeat backup (D6)")],
                "7z": [("7z-mmt8-warm", "7z-mmt8-cold", "warm against cold (D8)")],
                "steamcmd": [("steam-fresh-shaped", "steam-fresh-unshaped", "shaped against unshaped (D10)"),
-                            ("steam-fresh-shaped", "steam-update-shaped", "fresh install against update (D12)")]}
+                            ("steam-fresh-shaped", "steam-update-shaped", "fresh install against update (D12)")],
+               "upgrade": []}
 # D18 (9.6 D23, D24): the tolerance is the larger of TOLERANCE × mean and the trace's 1 µs for times — bytes per wake,
 # a count of whole bytes, has no floor — and the rule holds only over at least five same-machine repeats
 ABS_FLOOR_US = 1.0
@@ -184,12 +191,28 @@ def criterion(app, entry):
     crit = {}
     for ph, key, label in LIST[app]:
         P = entry["phases"].get(ph, {})
+        if key == "program_cpu_us" and not P.get("missing") and key in P:   # a per-repeat value (9.10 D39)
+            crit[f"{ph} {label}"] = {**stability(P[key], None, MIN_REPEATS), "needed": repeats_needed(P[key], MIN_REPEATS)}
+            continue
         if P.get("missing") or key not in P.get("all", {}):
             continue
         sums, counts = table_pairs(P["all"][key])
         crit[f"{ph} {label}"] = {**ratio_stability(sums, counts, floor_of(key), MIN_REPEATS),
                                  "needed": ratio_repeats_needed(sums, counts, floor_of(key), MIN_REPEATS)}
     return crit
+
+
+def repeats_needed(values_by_repeat, min_k):
+    """The smallest repeat count, at least min_k, at which a per-repeat value's half-width at its present spread is
+    within the tolerance; None past 200 (the per-repeat counterpart of ratio_repeats_needed)."""
+    v = [x for x in values_by_repeat.values() if x]
+    if len(v) < 2:
+        return None
+    m, sd = statistics.fmean(v), statistics.stdev(v)
+    for k in range(max(2, min_k), 201):
+        if t975(k) * sd / k ** 0.5 <= TOLERANCE * m:
+            return k
+    return None
 
 
 def compare(a, b):
@@ -268,7 +291,8 @@ def pool_app(app, reps, jobs=1):
              "kernel": {k: ((spec[k].get("uname") or "").split() + [None, None, None])[2] for k in ks},
              "run_id": {k: (spec[k].get("github_run") or {}).get("GITHUB_RUN_ID") for k in ks},
              "versions": {k: {x: per[k]["kv"].get(x) for x in ("borg.version", "7z.version", "zpaq.version", "steamcmd.version",
-                                                              "steam.app", "steam.buildid", "perf.version", "kernel")
+                                                              "steam.app", "steam.buildid", "perf.version", "kernel",
+                                                              "mmdebstrap.version", "upgrade.layer.sha256", "upgrade.t0", "upgrade.t1")
                              if per[k]["kv"].get(x)} for k in ks},
              "phases": {}}
     all_phases = [p for p in PHASES[app] if any(p in per[k]["phases"] for k in ks)]
@@ -375,6 +399,8 @@ def also(app, entry, per):
         out["achieved_mbps"] = {ph: {k: achieved((P.get("network") or {}).get(k)) for k in P["repeats"]}
                                 for ph, P in entry["phases"].items() if not P.get("missing")}
         out["shaping"] = {k: {x: per[k]["kv"].get(x) for x in per[k]["kv"] if x.startswith(("tc.", "shape."))} for k in ks}
+    if app == "upgrade":   # 9.10: the state built and what the stage installed, per repeat
+        out["state"] = {k: {x[len("upgrade."):]: per[k]["kv"].get(x) for x in per[k]["kv"] if x.startswith("upgrade.")} for k in ks}
     cached = {ph: P["cached_fraction"] for ph, P in entry["phases"].items() if not P.get("missing") and "cached_fraction" in P}
     if cached:
         out["cached_fraction"] = cached
@@ -389,7 +415,7 @@ def fmt_q(q):
 
 def render(out):
     network = sum(g.get("gate") == "no-vf" for g in out["gated_out"])
-    L = [f"# 9.7 background campaign — pooled results{' (' + out['tag'] + ')' if out.get('tag') else ''}", "",
+    L = [f"# background campaign (9.7; 9.10's `upgrade`) — pooled results{' (' + out['tag'] + ')' if out.get('tag') else ''}", "",
          f"Machine {out.get('machine') or 'any'}; stopped by the machine gate {len(out['gated_out']) - network}"
          f"{f', by the network gate {network}' if network else ''}; other-model repeats "
          f"{len(out['other_machine'])}. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9, times in µs, "
@@ -470,7 +496,7 @@ def main():
         print("no repeats found", file=sys.stderr)
         return 1
     out = {"tag": args.tag or None, "machine": args.cpu_model or None, "gated_out": gated, "other_machine": other, "runs": {}}
-    for app in ("borg", "7z", "steamcmd"):
+    for app in ("borg", "7z", "steamcmd", "upgrade"):
         if app in runs:
             out["runs"][app] = E = pool_app(app, runs[app], args.jobs)
             st = E["stability"]

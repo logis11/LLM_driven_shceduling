@@ -122,6 +122,13 @@ def validity(family, dirs, entry):
             notes += shaping_notes(r)
             if r.get("steam.buildid"):
                 dbs.add(r["steam.buildid"])
+            if r.get("app") == "upgrade":   # 9.10 D36, D37: the state as built, and the four packages installed
+                for x, want in (("upgrade.layer.missing", "0"), ("upgrade.layer.extra", "0"), ("upgrade.downloaded", "4"),
+                                ("upgrade.changed", "4"), ("upgrade.uu.all_installed", "1"), ("upgrade.run_systemd_system", "absent")):
+                    if r.get(x) != want:
+                        notes.append(f"{x} {r.get(x)} (want {want})")
+                if r.get("upgrade.changed_sha256"):
+                    dbs.add(r["upgrade.changed_sha256"])
         if family == "desktop":   # 9.8 D13 (the gate itself is checked for every family above)
             want, got = r.get("renderers.wanted_min"), r.get("renderers.observed")
             if want and got and int(got) < int(want):
@@ -158,7 +165,7 @@ def validity(family, dirs, entry):
         bad += bool(notes)
         print(f"   r{k}: {'ok' if not notes else '; '.join(notes)}{''.join(f' ({x})' for x in info)}")
     if len(dbs) > 1:
-        what = "SteamCMD app builds" if family == "background" else "ClamAV signature databases"
+        what = ("SteamCMD app builds or upgrade change sets" if family == "background" else "ClamAV signature databases")
         print(f"   {what} differ across repeats: {sorted(dbs)}"); bad += 1
     if len(origins) > 1:
         print(f"   origin counts differ across repeats: {sorted(origins)}"); bad += 1

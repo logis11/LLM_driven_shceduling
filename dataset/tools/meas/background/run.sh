@@ -597,8 +597,10 @@ upg_after() {   # upg_after <root>: what the measured stage installed
   sudo chroot "$r" dpkg-query -W -f '${binary:Package}\t${Version}\t${db:Status-Abbrev}\n' > "$OUT/upgrade.dpkg.t1.tsv" 2>&1
   diff "$OUT/upgrade.dpkg.t0.tsv" "$OUT/upgrade.dpkg.t1.tsv" > "$OUT/upgrade.dpkg.diff.txt"
   rec upgrade.changed "$(grep -c '^>' "$OUT/upgrade.dpkg.diff.txt")"
+  rec upgrade.changed_sha256 "$(grep '^>' "$OUT/upgrade.dpkg.diff.txt" | sha256sum | cut -d' ' -f1)"
   sudo cp "$r/var/log/unattended-upgrades/unattended-upgrades.log" "$OUT/upgrade.uu.log" 2>/dev/null
   sudo cp "$r/var/log/unattended-upgrades/unattended-upgrades-dpkg.log" "$OUT/upgrade.uu-dpkg.log" 2>/dev/null
+  rec upgrade.uu.all_installed "$(grep -c 'INFO All upgrades installed' "$OUT/upgrade.uu.log" 2>/dev/null)"
   sudo cp "$r/var/log/dpkg.log" "$OUT/upgrade.dpkg.log" 2>/dev/null
   ls -l --time-style=full-iso "$r/var/lib/apt/periodic/" > "$OUT/upgrade.stamps.after-install.txt" 2>&1
   [ -e "$r/var/run/reboot-required" ] && rec upgrade.reboot_required yes || rec upgrade.reboot_required no
