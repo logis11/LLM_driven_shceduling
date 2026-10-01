@@ -861,3 +861,14 @@ Grounds:
 - **The C7 property.** "tier 1 so no pair changes familiarity tier" (`building-plan.md` §3 C7): with the upgrade at tier 1, as `clamscan` was, every counterpart keeps its base's tier.
 
 Applied at rebinding: `dataset/tools/wlc/grid.py`'s `NAME_TIERS`.
+
+## D44 — a cut counterpart keeps its base's placement in proportion: focus 2 s to C − 2 s, each operation at its fraction of the window (2026-10-01)
+
+By 인지오's decision, D41's cut against D20: in each interactive counterpart cut to C seconds, a focus window runs from 2 s to C − 2 s — the base's 2 s margins — and each operation sits at the same fraction of its window as in its base: `c7-browsing`'s page load, `c7-photo`'s unsharp mask and `c7-video-edit`'s preview render at the window's middle (the base's 30 s in 2–58 s), `c7-mail`'s send at 0.679 of it (the base's 40 s in 2–58 s). The times are written explicitly into the recipe, the rule in its header. Design (D31).
+
+Grounds:
+
+- **D20.** Every focus window on an application that has an operation holds one of it, and an operation starts only inside focus; a literal cut at C ≈ 26.5 s drops the four operations at 30 s and 40 s and leaves four windows without one.
+- **The bases' own placement.** All ten bases are one 0–60 s segment with every task 0–60 s; the five focused ones hold a 2–58 s window, and the four with an operation place it at 30 s or 40 s (`c1-*.timeline.yaml`).
+
+Tooling: `dataset/tools/wlc/deriver.py` gains `set-focus` and `set-operations`, which replace a derived file's focus windows and operations as `set-segments` replaces its segments.

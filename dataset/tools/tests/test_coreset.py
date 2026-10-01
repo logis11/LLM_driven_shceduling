@@ -174,3 +174,15 @@ def test_variant_cannot_change_seed():
     with pytest.raises(DeriveError, match="unknown op"):
         apply_ops({"meta": {"seed": 1}, "tasks": [], "segments": []},
                   [{"set-seed": 2}], "test")
+
+
+def test_set_focus_and_operations_replace_the_lists():
+    """9.10 D44: a cut counterpart replaces its base's focus windows and operations whole."""
+    base = {"meta": {"seed": 1}, "tasks": [], "segments": [],
+            "focus": [{"from": "2s", "to": "58s", "task": "a"}],
+            "operations": [{"at": "30s", "task": "a", "name": "op"}]}
+    out = apply_ops(base, [{"set-focus": [{"from": "2s", "to": "20s", "task": "a"}]},
+                           {"set-operations": [{"at": "11s", "task": "a", "name": "op"}]}], "test")
+    assert out["focus"] == [{"from": "2s", "to": "20s", "task": "a"}]
+    assert out["operations"] == [{"at": "11s", "task": "a", "name": "op"}]
+    assert base["focus"][0]["to"] == "58s"   # the base is not touched
