@@ -354,3 +354,21 @@ Open:
 No file changed yet.
 
 Hands to 9.14: the demand window and the per-file oracle-against-random test re-read on the new lengths; the scoring spec's windows. Hands to 9.15: `building-plan.md` §3 C1 ("batch jobs are sized to finish inside the segment").
+
+## D18 — the user's build runs the measured kernel build whole: 2,908 object jobs at cap 8 (2026-10-01)
+
+By 인지오's decision, scope-card item 53, under D17: every file binding the user's build on `build-orchestrator` runs the measured build whole — `spawn_count` 2,908 object jobs, `parallelism_cap` 8. Today the files bind 100 jobs (`c1-compile`, and `c4-compile` by derivation), 4,200 (`c3-workday`) and 85 (`c6-dual`). The files lengthen to hold the build, and `c3-workday`'s compile segment lengthens with it.
+
+Grounds:
+
+- **The measured build.** The Linux kernel's defconfig, warm, `-j8`, 14 repeats on the EPYC 7763 (9.6 D5, D30, D31). `build-orchestrator`'s `validation_stats`: "5 254 jobs per build: 2 908 object, 681 archive, 1 537 helper, 90 probe, 38 link"; "live jobs at cap 8: mean 7.87, peak 11". `spawn_count` counts object jobs, and the cap counts jobs as make's jobserver does (its `modeling_notes`). The cap is 9.6 D4's eight-thread desktop.
+- **The counts were sized for something else.** They were sized when a spawn-table entry was one process of about 89 ms; a job is now six processes of about 471 ms (9.6 D31's hand-off). 4,200 exceeds a whole build.
+- **No source on what users build.** An incremental rebuild after an edit would need a new observation and an edit of our design; no class found local object counts, incremental or full (`search/candidates.md`, item 53).
+
+The whole build's object jobs hold about 2,908 × 471 ms ≈ 23 min of CPU on one lane (arithmetic on the two figures above).
+
+The unmodelled archive, helper, probe and link jobs stay `build-orchestrator`'s stated limitation (9.6). The name the files show for each job (`child_name: cc1`, a six-process job) is item 64's.
+
+No file changed yet: the lengths are set with the other jobs' (D17), the files rebinding together.
+
+Hands to 9.14: `c1-compile`'s turnaround term and `c3-workday`'s and `c6-dual`'s demand on the new lengths. Hands to 9.15: `building-plan.md` §3 C1 (compile {code, make, cc1×N}).
