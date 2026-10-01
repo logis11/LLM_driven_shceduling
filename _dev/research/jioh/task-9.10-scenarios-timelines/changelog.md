@@ -195,3 +195,26 @@ Then:
 No file changed yet.
 
 Hands to 9.14: the render files' judging terms; the pair review's P3 lines. Hands to 9.15: the scenario catalog's S7 row ("ffmpeg (render children)"); `building-plan.md` §3 C1 (render {kdenlive, ffmpeg}) and C2 P3.
+
+## D11 — the transcode is `HandBrakeCLI` on CpsMark+'s workload definition (2026-10-01)
+
+By 인지오's decision, scope-card items 10 and 71: the user-started transcode of `c1-transcode` (and `c7-transcode` by its flip) and `c3-creation`'s last segment — today `cpu-batch`'s `HandBrakeCLI` program as 9.6 measured it, `HandBrakeCLI -i clip.mp4 -o out.mp4 --preset "Fast 720p30"` on "a generated 60 s 1280×720 30 fps test pattern with a sine tone (design)" (`task-9.6-compile/campaign/method.md:20–21`) — is re-measured on CpsMark+'s HandBrake workload, in a runner campaign of its own (9.10's). The workload: an H.264 4K source transcoded to H.265 at 2K in an MP4 container, by `HandBrakeCLI` as Ubuntu 24.04 packages it. The source clip's content and length are design unless a public 4K H.264 clip is chosen, and are stated either way.
+
+Grounds:
+
+- **CpsMark+'s definition** (`cpsmark-tbench23`, read in full 2026-09-13, `2026-09-13-verification/reads/R04-cpsmark.md`). It lists "HandBrake" "CLI 1.3.0" in Table 2 (p. 5), and §4.3.4 (p. 6) defines the workload: "Convert the H.264 encoded source video with 4K resolution to the H.256 [sic] encoded target video with 2K resolution, the container format is MP4. Hardware acceleration will be leveraged if enabled." It is the last workload of the multimedia module's sequence.
+- **No other benchmark read defines a transcode at 720p with a fast preset.** PCMark 10's Video Editing uses FFmpeg for sharpening and deshaking (S2-13).
+- **The program exists on Ubuntu.** `HandBrakeCLI` is its executable (S2-12). Debian popcon has HandBrake's GUI package on 1.94 % of submissions and `handbrake-cli` on 0.66 % (S3-30's copy, reader's own). The CLI is the program CpsMark+ names.
+- **The precedent.** 9.5 put its operations on benchmark definitions where no recording exists (GIMP's unsharp mask on PCMark 10's image size; `docs/workload/measurement-overview.md` §4).
+
+Open, for the campaign's method:
+
+- the source clip and its length;
+- the encoder settings that realise "H.265 … 2K, MP4" in HandBrakeCLI, with no hardware acceleration on the runner;
+- the program's tables under `cpu-batch`'s criterion (9.6 D7).
+
+Then the job's size against the segments (item 56).
+
+No file changed yet.
+
+Hands to 9.14: `c1-transcode`'s and `c7-transcode`'s judging terms. Hands to 9.15: the scenario catalog's S8 row; `cpu-batch`'s scope at the re-measurement's fold-in.
