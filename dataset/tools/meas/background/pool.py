@@ -88,6 +88,9 @@ COMPARISONS = {"borg": [("borg-first-warm", "borg-first-cold", "warm against col
 # a count of whole bytes, has no floor — and the rule holds only over at least five same-machine repeats
 ABS_FLOOR_US = 1.0
 MIN_REPEATS = 5
+# the rule's exception (campaign workflow; 9.6 D29): a value whose spread follows the machine, not the program, carried
+# over at least MIN_REPEATS repeats with its half-width, the tolerance not applied — by 인지오's decision per value
+EXCEPTED = {"dkms": ("dkms-install tail block per run (µs)",)}   # 9.10 D58
 SAMPLE_KEYS = ("run_us", "wait_us", "disk_us", "uninterruptible_us", "network_us", "sleep_us", "runnable_us", "bytes_per_wake", "batch_run_us", "batch_block_us")
 APPLIED_MBPS, NETWORK_TABLE_MBPS = 121.0, 128.9   # D11: the applied rate; the network table's byte-weighted median
 
@@ -399,9 +402,13 @@ def pool_app(app, reps, jobs=1):
         entry["phases"][ph] = P
     # D19: the shared stability rule on the list; in probe mode the first batch it sets (D14 (3))
     crit = criterion(app, entry)
-    fb = {q: c["needed"] for q, c in crit.items()}
+    for q, c in crit.items():   # the rule's exception (9.6 D29; 9.10 D58)
+        c["excepted"] = q in EXCEPTED.get(app, ())
+        c["carried"] = c["passes"] or (c["excepted"] and c["k"] >= MIN_REPEATS)
+    fb = {q: c["needed"] for q, c in crit.items() if not c["excepted"]}
     entry["stability"] = {"tolerance": TOLERANCE, "abs_floor_us": ABS_FLOOR_US, "min_repeats": MIN_REPEATS, "quantities": crit,
-                          "passes": bool(crit) and all(c["passes"] for c in crit.values())}
+                          "passes": bool(crit) and all(c["carried"] for c in crit.values()),
+                          "excepted": list(EXCEPTED.get(app, ()))}
     entry["first_batch"] = {"by_quantity": fb, "count": max(fb.values()) if fb and all(fb.values()) else None}
     entry["checks"] = checks(app, entry, per)
     entry["comparisons"] = comparisons(app, entry)
@@ -550,7 +557,8 @@ def render(out):
             hw = "–" if c["half_width"] is None else f"±{c['half_width']:.1%}"
             cv = "–" if c["cv"] is None else f"{c['cv']:.1%}"
             lo = "–" if c["leave_one_out"] is None else f"{c['leave_one_out']:.1%}"
-            L.append(f"| {q} | {c['k']} | {c['mean']} | {cv} | {hw} | {lo} | {c['needed'] or 'over 200'} | {'yes' if c['passes'] else 'no'} |")
+            L.append(f"| {q} | {c['k']} | {c['mean']} | {cv} | {hw} | {lo} | {c['needed'] or 'over 200'} | "
+                     f"{'carried (9.6 D29; 9.10 D58)' if c.get('excepted') and c.get('carried') and not c['passes'] else ('yes' if c['passes'] else 'no')} |")
         L.append("")
         if E["checks"]:
             L += ["### Checks (D15)", ""]

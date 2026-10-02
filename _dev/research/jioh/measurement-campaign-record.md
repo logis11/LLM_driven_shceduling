@@ -20,6 +20,7 @@ All on GitHub-hosted `ubuntu-24.04` runners, 4 vCPU, pinned to one CPU, AMD EPYC
 | `meas-ci:interactive:2026-09-27` | 9.5 | `meas-interactive.yml` | #604–#610, `thunderbird-send` keys only under D79; 7 runs, 20 jobs (12 gated), every window of the recording landed (D80); the dry checks #600 and #602 are not repeats | 2026-09-27 00:04 UTC |
 | `meas-ci:session:2026-09-24` | 9.9 | `meas-session.yml` | #16–#22; the four holding a landed repeat are #16, #20, #21, #22 | 2026-09-23 23:35 UTC (2026-09-24 KST) |
 | `meas-ci:background:2026-10-01` | 9.10 | `meas-background.yml` | #100–#105, app `upgrade`; the dry run #99 is not a repeat | 2026-10-01 10:07 UTC |
+| `meas-ci:background:2026-10-02` | 9.10 | `meas-background.yml` | #108–#114, app `dkms`; the dry runs #106 and #107 are not repeats | 2026-10-02 08:36 UTC |
 
 ## 9.5 — nine archetypes measured
 
@@ -273,6 +274,22 @@ The entry carries `cpu-batch`'s batch loop over the whole process tree (9.10 D39
 
 Reported beside them: 916 processes in every repeat; CPU over the stage's wall time 0.990–0.994; `locale-gen`'s 18 `localedef` runs 72.8–76.5 % of the CPU; taskstats over perf 0.980–0.982. The CPU total ranges 25.25–29.16 s: repeats 4, 5 and 9 ran 6–14 % above the mean of the other six (25.61 s), `unattended-upgrade`'s own Python 21–50 % above them (repeats 4 and 5), in identical work. Pooled in `task-9.10-scenarios-timelines/campaign/upgrade/results/` (`pooled.json`, `results.md`).
 
+## 9.10 — `module-build-orchestrator` and `module-compiler-child`
+
+Repeats 1–23 on the AMD EPYC 7763, 26 landings, every one valid (the method's checks: the layer built with no package missing or extra; the state on the kernel `7.0.0-31-generic` with `nvidia/595.91.07` built for it; the stage installing the kernel `7.0.0-34` and `xdg-desktop-portal` with the same change set, "All upgrades installed"; `nvidia/595.91.07` installed for `7.0.0-34-generic`, its five modules present). One push started runs #111 and #112 together, so repeats 7, 10 and 11 landed twice; every landing is pooled, keyed `<index>@<run id>` (9.8 D24; 9.10 D58). 37 jobs: 26 landed, 11 stopped by the machine gate (EPYC 9V74 6, Xeon Platinum 8573C 3, EPYC 9V45 1, Xeon 6973P-C 1; `task-9.10-scenarios-timelines/campaign/dkms/machine-draws.md`). The first batch was repeats 1–5, the rule's minimum; at five 37 of the 60 values failed and the pool projected 23, so repeats 6–23 were added as a batch (9.7 D26). Over the 26 landings the rule holds on 59 values; the serial tail's block per run is carried with its half-width, its spread the machine's (9.6 D29; 9.10 D58).
+
+The entries carry the build's spawn form (9.10 D52–D57): four job kinds over their process trees — 200 object jobs, 1,125 kbuild probes, 145 and 87 `conftest` tests without and with `as`, the same counts in every landing — each member's CPU per structural step (56 tables), make's dispatch run, the serial tail's batch loop, and the CPU total they carry:
+
+| archetype | value | landings | mean | spread (cv) | 95 % half-width | stopped by |
+|---|---|---|---|---|---|---|
+| `module-compiler-child` | 56 per-(kind, member, step) CPU tables | 26 | `object` `cc1` 721.9 ms, `conftest` `cc1` 171.7 and 240.0 ms, kbuild probe `cc1` 4.55 ms | – | ±0.67 % to ±4.13 % | the rule |
+| `module-build-orchestrator` | make's dispatch run | 26 | 754.3 µs | 1.8 % | ±0.72 % | the rule |
+| `module-build-orchestrator` | the tail's run between voluntary blocks | 26 | 6.151 ms | 4.5 % | ±1.82 % | the rule |
+| `module-build-orchestrator` | the tail's block per run | 26 | 44.4 µs | 20.7 % | ±8.35 % | carried, the machine's spread (9.10 D58) |
+| both | CPU total carried (jobs, make, tail) | 26 | 224.627 s | 3.6 % | ±1.46 % | the rule |
+
+Reported beside them: the build's hook run (`/etc/kernel/header_postinst.d/dkms` in every landing) 214.5–243.2 s of CPU over its span at 0.997; the carried share 0.9818–0.9825, the unmodelled remainder 3.89–4.32 s (helper and link jobs, the `dkms` script before the `make`, the kernel image's second hook run of 0.13–0.145 s); the tail 9.29–11.14 s. The job order differs between landings only by adjacent swaps. Pooled in `task-9.10-scenarios-timelines/campaign/dkms/results/` (`pooled.json`, `results.md`).
+
 ## Machine draws
 
 The build campaign, complete: 28 jobs, 14 on the AMD EPYC 7763 (50.0 %), 12 stopped by the machine gate — Intel Xeon Platinum 8573C 4, AMD EPYC 9V74 4, AMD EPYC 9V45 2, Intel Xeon Platinum 8370C 1, Intel Xeon 6973P-C 1 — and 2 cancelled.
@@ -286,5 +303,7 @@ The 9.8 desktop campaign, complete: 105 jobs, the hidden renderer's added repeat
 The 9.9 session campaign, complete: 42 jobs — 24 landed on the AMD EPYC 7763 (57.1 %, all pooled), 18 stopped by the machine gate: AMD EPYC 9V74 6, Intel Xeon Platinum 8573C 5, AMD EPYC 9V45 3, Intel Xeon 6973P-C 3, Intel Xeon Platinum 8370C 1. With the tooling's dry runs and the long-phase probes, neither of them a repeat, 41 of the 82 jobs whose model is recorded drew the EPYC 7763; 8 more dry jobs ended without a report, 90 in all (`task-9.9-daemons-session/campaign/machine-draws.md`).
 
 The 9.10 unattended-upgrade campaign, complete: 15 jobs — 9 landed on the AMD EPYC 7763 (60.0 %, all pooled), 6 stopped by the machine gate: AMD EPYC 9V45 2, AMD EPYC 9V74 2, Intel Xeon Platinum 8370C 1, Intel Xeon Platinum 8573C 1. Its dry run (#99) drew the EPYC 7763.
+
+The 9.10 DKMS campaign, complete: 37 jobs — 26 landed on the AMD EPYC 7763 (70.3 %, all pooled, three of them second landings of one push's two runs), 11 stopped by the machine gate: AMD EPYC 9V74 6, Intel Xeon Platinum 8573C 3, AMD EPYC 9V45 1, Intel Xeon 6973P-C 1. Its two dry runs (#106, #107) drew the EPYC 7763.
 
 The untraced control of 9.5, 9.8 and 9.9, complete (9.5 D82, 9.8 D32, 9.9 D40): 148 jobs — 87 landed on the AMD EPYC 7763 (58.8 %; 84 pooled, three later copies of a window that landed twice left out under 9.5 D66), 61 stopped by the machine gate: AMD EPYC 9V74 25, AMD EPYC 9V45 13, Intel Xeon Platinum 8573C 12, Intel Xeon 6973P-C 7, Intel Xeon Platinum 8370C 4. By family: interactive 61 jobs, 36 landed; playback 31, 19; desktop 46, 26; session 10, 6.
