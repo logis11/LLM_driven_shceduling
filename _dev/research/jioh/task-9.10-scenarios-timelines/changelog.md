@@ -1105,3 +1105,20 @@ Grounds:
 Open: the file set, from the search; then D5's method items, its placement under the indexed directories and the job window.
 
 No file changed yet.
+
+## D61 — the Tracker campaign runs in D37's chroot: Tracker and its extractors as the English default install holds them (2026-10-02)
+
+By 인지오's decision, D5's environment. Each repeat builds, on the harness CPUs, D37's chroot: the default layer of an English install, 1,445 binaries (S2-33), from the archive at a fixed time. Tracker runs in it as the layer holds it: `tracker-miner-fs` and `tracker-extract` 3.7.1-1ubuntu0.1 with the extraction stack beside them. Nothing is installed for the measurement.
+
+Grounds:
+
+- **The layer holds the indexer and its extractors** (S2-41): `tracker`, `tracker-extract` and `tracker-miner-fs` 3.7.1; `gstreamer1.0-plugins-base` and `gstreamer1.0-plugins-good` 1.24.2; `libpoppler-glib8t64` 24.02; `libgsf-1-114`, `libexif12`, `libgexiv2-2` and `libtotem-plparser18`.
+- **The plugins are not dependencies.** `tracker-extract` depends on GStreamer's libraries and on no plugin package, and has no `Recommends:` (S2-41). Its media extractor reads a file through GStreamer's discoverer (`tracker-extract-gstreamer.c:1178`, S2-41), so which media files it reads follows the plugins installed.
+- **D37's ground holds.** The snapshot fixes the state; the runner's own installed set is its weekly image's and cannot hold it.
+- **The settings are the shipped ones.** `ubuntu-settings` 24.04.6 overrides nothing of Tracker's (S2-41).
+
+How the miner runs in the chroot — its session bus, its view of `/proc`, its inotify limit — is the tooling's, checked at the dry run.
+
+Open: the archive time; the file set (D60); its placement under the indexed directories; the job window.
+
+No file changed yet.
