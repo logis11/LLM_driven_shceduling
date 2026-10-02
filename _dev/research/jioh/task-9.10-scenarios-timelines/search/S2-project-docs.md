@@ -67,6 +67,7 @@ All rows dated 2026-10-01. "200" etc. are HTTP status codes.
 | 51 | local copy (stage 3) | S2-04's tracker-miners 3.7.1 source, re-read for when the first index's work ends → S2-42 | — | — |
 | 52 | local copies (stage 3) | S2-04's tracker-miners 3.7.1 source and S2-03's `tracker-miner-fs` unit, re-read for the job's start and the reset path → S2-43 | — | — |
 | 53 | api.launchpad.net (stage 3) | `ubuntu/+archive/primary?ws.op=getPublishedSources&exact_match=true&distro_series=…/noble&created_since_date=2026-06-01` for `tracker-miners`, `tracker`, `gst-plugins-good1.0`, `gst-plugins-base1.0`, `gstreamer1.0`, `poppler`, `libgsf`, `libexif`, `gexiv2`, `exiv2`, `totem-pl-parser`, `libcue`, `exempi`, `giflib`, `libgxps`, `icu`, `libjpeg-turbo`, `libpng1.6`, `tiff`, `libxml2`, `glib2.0`, `libseccomp`, `sqlite3` (all 200) → S2-44 | — | — |
+| 54 | gstreamer.freedesktop.org (stage 3) | `documentation/gstreamer/running.html` (200) → S2-45 | — | — |
 
 ## 2. Candidates
 
@@ -3782,6 +3783,14 @@ a77819313f1acef8b19c5903218978151f7013393a91286585c1a00b3f589a09  S2-15/wb-sm201
   - `gstreamer1.0`, `libgsf`, `gexiv2`, `exiv2`, `totem-pl-parser`, `libcue`, `exempi`, `libgxps`, `icu`, `libjpeg-turbo`, `libpng1.6`, `tiff`, `libseccomp`: no record since 2026-06-01.
 - **Coverage.** T5 — which of the indexer's packages change between 2026-06-01 and 2026-10-02: Tracker none, five libraries by security updates. Does not cover what a change does to the indexer's work.
 - **One observation?** The archive's own record, not a sample.
+
+### S2-45 — GStreamer documentation, "Running GStreamer Applications": the plugin registry (read at stage 3, 2026-10-02)
+
+- **Citation.** GStreamer project, "Running GStreamer Applications", https://gstreamer.freedesktop.org/documentation/gstreamer/running.html. Read for the Tracker campaign's job processes (D65).
+- **Copy read.** Accessed 2026-10-02 (200), 22,646 B; `sources/S2-45/running.html`, SHA-256 adf9eb3e06d968cb994ef85a2d571ea696db988051ed5150ee23bd75e2cf3d0f.
+- **Passages** (section on environment variables). `GST_REGISTRY, GST_REGISTRY_1_0`: "Set this environment variable to make GStreamer use a different file for the plugin cache / registry than the default one. This is useful when operating in a separate environment which should not affect the default cache in the user's home directory." `GST_REGISTRY_FORK`: "Set this environment variable to "no" to prevent GStreamer from forking on startup in order to update the plugin registry." `GST_REGISTRY_UPDATE`: "Set this environment variable to "no" to prevent GStreamer from updating the plugin registry. This is useful for embedded device which is not updating the plugins frequently, it will save time when doing gst_init()."
+- **Coverage.** T5 — GStreamer keeps its plugin registry as a cache in the user's home and forks at startup to update it. Supports that a home without the cache builds it in the first GStreamer process's tree; not the build's cost or the cache's exact path.
+- **One observation?** Not an observation; the project's documentation.
 
 ## 3. Not found
 

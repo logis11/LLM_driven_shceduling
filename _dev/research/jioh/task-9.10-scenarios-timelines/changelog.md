@@ -1167,3 +1167,18 @@ Grounds:
 Open: the file set (D60); its placement under the indexed directories.
 
 No file changed yet.
+
+## D65 — the Tracker job is every process in the miner's tree (2026-10-02)
+
+By 인지오's decision, D5's job, its processes: the miner, the extractor it starts, and every process either starts, such as GStreamer's registry scanner. The session bus's `dbus-daemon` is outside, as in 9.6.
+
+Grounds:
+
+- **D50's rule:** the job is every process under the event's own start.
+- **The extractor is the miner's subprocess** and writes through the miner over a peer-to-peer connection, not the session bus (S2-42).
+- **9.6's program** was the miner, the extractor and the miner's `gst-plugin-scan` child (9.6 D16).
+- **The registry scan is the first index's work.** GStreamer forks at startup to update its plugin registry, a cache in the user's home (S2-45); a new home has none.
+
+Read at the dry run: the registry scan's CPU in D61's layer, which holds the base and good plugin sets. The scan runs on a new home's first index and not after `tracker3 reset --filesystem`, which empties only `~/.cache/tracker3/files/` (S2-43). If its CPU matters, the two labels' difference is a form question.
+
+No file changed yet.
