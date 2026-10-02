@@ -1014,3 +1014,16 @@ Grounds (the second dry run, D52):
 Open, for the campaign's method: the uncovered 7 %; the names and tiers; the entry ids; `c7-compile`'s structure against `c1-compile`; the stability rule's list.
 
 Tooling to follow: the compiler's orchestrator draws a spawn table of the three kinds in order; `analyze.py` classifies probe jobs by tree.
+
+## D54 — the serial tail is the orchestrator's own batch loop; helper and link jobs are stated unmodelled (2026-10-02)
+
+By 인지오's decision, D53's open item on the uncovered CPU. After its jobs have finished, the orchestrator runs the build's serial tail in the batch-loop form (`cpu-batch`'s, 9.7 D29; D39): runs between voluntary blocks and the block after each, drawn from the tail's own tables, until the tail's measured CPU is spent. The helper and link jobs, the `dkms` script's work before the `make` and the second hook run are stated in the entry as unmodelled, as 9.6 stated the kernel build's helper, archive, probe and link jobs.
+
+Grounds (the second dry run, D52):
+
+- **The tail is a serial phase.** After the last object and link jobs end at 212.72 s, the hook run spends 9.73 s of CPU in 9.80 s: `strip` and `zstd` compressing the five modules (7.44 s, 212.80–220.30 s), `find`, then `depmod` (1.75 s, 220.76–222.52 s), one process at a time. It is 4.4 % of the build's CPU, and a phase in which the build is one runnable process after about eight.
+- **What is left unmodelled.** 841 helper jobs (2.1 s), 13 link jobs (1.6 s), the `dkms` script before the `make` (0.22 s) and the kernel image's hook run (0.135 s): about 4 s, 1.8 % of the job. The `make` processes' own CPU, 1.81 s, is the dispatch table.
+- **The precedent.** 9.6 left the kernel build's 681 archive, 1,537 helper, 90 probe and 38 link jobs unmodelled, "together under 3 % of the build's CPU" (`build-orchestrator`'s `modeling_notes`).
+- **D17.** The job runs whole but for that stated 1.8 %.
+
+Open, for the campaign's method: the names and tiers; the entry ids; `c7-compile`'s structure against `c1-compile`; the stability rule's list.
