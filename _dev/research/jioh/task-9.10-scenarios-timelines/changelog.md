@@ -1297,3 +1297,20 @@ Grounds:
 - **Not taken:** a second table set for the asked side, made by taking one process out of the pool, carries a state not observed.
 
 No file changed yet.
+
+## D74 — the task shows `tracker-miner-f`; the entry is `file-indexer` (2026-10-02)
+
+By 인지오's decision, the last open item of the form: the one task of D70's form shows `tracker-miner-f`, the `comm` of `/usr/libexec/tracker-miner-fs-3` as the dry runs observed it (the kernel's 15-byte rule, D25), and the archetype's id is `file-indexer`.
+
+Grounds:
+
+- **D40's rule:** the task shows the program the unit runs, alive across the job and the parent of the rest — the miner is the user unit's `ExecStart` (S2-41), alive from the job's start to its end, the parent of every extractor and of the registry scanner.
+- **The other observed name:** `tracker-extract` runs 96 % of the job's CPU (37.82 s of 39.43 s, dry run 3) as the miner's subprocess, started three times within the job; it is the work under the name, as `localedef` was under `unattended-upgr`.
+- **The files and the tier:** the three indexing files already show `tracker-miner-f`, tier 3 by D27's rule.
+- **The id names the role,** beside `file-backup` and `file-archiver`.
+
+The entry's `modeling_notes` state that the name stands for the miner's tree and that most of its CPU is the extractor's.
+
+The form is complete: the campaign's list is fixed in method §8.
+
+No file changed yet.
