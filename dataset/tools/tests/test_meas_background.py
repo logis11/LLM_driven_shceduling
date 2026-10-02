@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from meas.background import analyze, appinfo, fileset, nettrace, pool
+from meas.background import analyze, appinfo, fileset, modbuild, nettrace, pool
 
 Seg = analyze._build.Seg
 
@@ -474,8 +474,14 @@ def test_the_list_is_each_archetypes_batch_loop_tables():
         assert [k for _p, k, _l in pool.LIST[app]] == ["batch_run_us", "batch_block_us"]
     # 9.10 D17, D39: the unattended upgrade also carries its CPU total, the job's measured whole
     assert [k for _p, k, _l in pool.LIST["upgrade"]] == ["batch_run_us", "batch_block_us", "program_cpu_us"]
+    # 9.10 D52–D56: the DKMS build carries the spawn form's tables — each job kind's per-(member, step) CPU over its
+    # tree, make's dispatch run, the serial tail's two tables — and the CPU total the entry carries
+    keys = [k for _p, k, _l in pool.LIST["dkms"]]
+    steps = [k for k in keys if k.startswith("mb_step:")]
+    assert len(steps) == sum(n for tree in modbuild.TREES.values() for _m, _r, n in modbuild.members(tree)) == 56
+    assert keys[len(steps):] == ["mb:dispatch_us", "mb:tail_run_us", "mb:tail_block_us", "mb_carried_cpu_us"]
     assert {p for _p in pool.LIST.values() for p, _k, _l in _p} == {"borg-first-warm", "7z-mmt8-warm", "steam-fresh-shaped",
-                                                                   "upgrade-install"}
+                                                                   "upgrade-install", "dkms-install"}
 
 
 def test_a_difference_inside_the_precision_is_not_resolved():
