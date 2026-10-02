@@ -1064,3 +1064,15 @@ Grounds:
 - **Against the alternatives.** At cap × 10 the object phases would allow up to 13 jobs at once, overstating `-j8` for most of the build. A cap counted in jobs would change the simulator's format, shared with 인경민 and 박이안, beyond this campaign.
 
 Tooling: `dataset/tools/wlc/compiler.py`'s module-build constructor.
+
+## D58 — the serial tail's block per run is carried over the 26 landings with its half-width, its spread the machine's (2026-10-02)
+
+By 인지오's decision, under the campaign workflow's exception for a value whose spread follows the machine, not the program (9.6 D29). The DKMS campaign's pool holds 26 landings: repeats 1–23, with 7, 10 and 11 landing twice, as below. It holds the stability rule on 59 of its 60 values. The 60th, the serial tail's block per run (D54), is carried over the landings obtained in place of the 5 % tolerance. Its 95 % half-width ±8.35 %, the range of its per-landing means 38.5–87.4 µs, the 26 landings, what its spread follows, and its share of the job (at most 0.06 %) are stated in `module-build-orchestrator`'s scope and `validation_stats`. No reported result rests on it.
+
+Grounds:
+
+- **What the blocks are.** About 1,500 blocks per landing. One of them, 32–49 ms, follows `dkms`'s progress indicator: `invoke_command` (`dkms:91–108`, S2-03) runs a backgrounded command beside a loop of `sleep 3 & wait $!; echo -en "."` and kills the loop when the command ends; the block is the wait from that `sleep` to `dkms` resuming. It is about two thirds of the mean. The rest are disk waits: `rm` and `depmod` in uninterruptible sleep, a few ms in all. Repeat 10's copy from run #111 had more of them (81 ms against 25–37 ms elsewhere); without that copy the spread is ±3.86 %.
+- **Its weight.** The blocks total 57.5–130.5 ms per landing (median 63.3), at most 0.0605 % of the build's CPU. The carried CPU total holds at 224.6 s ±1.46 %.
+- **Against the alternatives.** Adding repeats one at a time would take about 43 more jobs (projection 69). Reading the progress-loop block as a rare event within a run (9.5 D64) leaves repeat 10's disk waits at the tolerance's edge.
+
+**Every landing pooled.** One push (`a6f08f7e`) started two runs, #111 (36987468347) and #112 (36987471634), each relaunching repeats 7, 10, 11 and 12. Repeat 12 landed in #112 only; 7, 10 and 11 landed in both. The campaign workflow pools every landing, keyed `<index>@<run id>` (9.8 D24). An earlier pool that kept only #111's copies, as 9.5 D66 had for a recorded-input window, is superseded. Tooling: `dataset/tools/meas/background/pool.py` keys a repeat that landed more than once per landing, as `desktop/pool.py` does.

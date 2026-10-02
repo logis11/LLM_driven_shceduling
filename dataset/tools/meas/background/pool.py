@@ -103,9 +103,15 @@ def pct_sorted(v, q):
     return round(a + (b - a) * (k - lo), 3)
 
 
+def repeat_order(k):
+    """Sort key for a repeat: its index, then the run of one landing of an index that landed more than once (9.8 D24)."""
+    i, _, run = str(k).partition("@")
+    return int(i), run
+
+
 def pooled(by_repeat):
     """by_repeat: repeat -> float64 array of one table's samples. Each array is sorted once, the pooled one once."""
-    reps = sorted((r, np.asarray(vs, dtype=np.float64)) for r, vs in by_repeat.items())
+    reps = sorted(((r, np.asarray(vs, dtype=np.float64)) for r, vs in by_repeat.items()), key=lambda x: repeat_order(x[0]))
     allv = np.sort(np.concatenate([vs for _r, vs in reps])) if reps else np.empty(0)
     out = {"n": int(len(allv)), "q": [round(pct_sorted(allv, q), 1) for q in QUANTILE_PROBS] if len(allv) else None,
            "p50": round(pct_sorted(allv, .5), 1) if len(allv) else None,
@@ -279,7 +285,7 @@ def check(a, b, per_repeat):
 
 
 def ratio_by_repeat(num, den):
-    return {r: (round(num[r] / den[r], 4) if num.get(r) and den.get(r) else None) for r in sorted(set(num) & set(den))}
+    return {r: (round(num[r] / den[r], 4) if num.get(r) and den.get(r) else None) for r in sorted(set(num) & set(den), key=repeat_order)}
 
 
 def kvfile(path):
@@ -306,12 +312,20 @@ def find_runs(root, cpu_model):
         if cpu_model and cpu_model not in model:
             other.append({"app": app, "repeat": k, "cpu_model": model, "path": os.path.relpath(d, root)})
             continue
-        runs.setdefault(app, {})[k] = {"dir": d, "mode": mode, "report": rpt, "spec": spec}
-    return runs, gated, other
+        run_id = str((spec.get("github_run") or {}).get("GITHUB_RUN_ID") or os.path.basename(os.path.dirname(d)))
+        runs.setdefault(app, {}).setdefault(k, []).append((run_id, {"dir": d, "mode": mode, "report": rpt, "spec": spec}))
+    # every landing is pooled (campaign workflow; 9.8 D24): an index that landed more than once — a relaunch landing
+    # while an earlier launch of it was still queued — is keyed <index>@<run id> per landing, never the latest alone
+    keyed = {}
+    for app, by_k in runs.items():
+        for k, landings in by_k.items():
+            for run_id, info in landings:
+                keyed.setdefault(app, {})[k if len(landings) == 1 else f"{k}@{run_id}"] = info
+    return keyed, gated, other
 
 
 def pool_app(app, reps, jobs=1):
-    ks = sorted(reps)
+    ks = sorted(reps, key=repeat_order)
     code = code_hash()
     if jobs > 1:   # fill the cache first, several phases at a time; the pooling below then reads it
         import multiprocessing
