@@ -524,6 +524,28 @@ def test_the_tracker_job_runs_from_the_miners_exec_to_the_extractors_last_idle(t
     assert info["cpu_by_exec_us"] == {"tracker-extract-3": 1400.0, "tracker-miner-fs-3": 100.0}
     assert info["tail_cpu_us"] == 100.0 and info["rows_before_start"] == 1
 
+
+def test_the_tracker_initial_sleep_leaves_the_block_table(tmp_path, monkeypatch):
+    # 9.10 D71: the block that spans the miner's Initializing is the task's arrival, reported apart; the others stay
+    seg = analyze._build.Seg
+    rows = [seg(1000.6, 1000.6, 1000.7, 0.1, "tracker-miner-f", 50, 50, "S", 3),
+            seg(1015.4, 1015.4, 1015.5, 0.1, "tracker-miner-f", 50, 50, "S", 3),
+            seg(1015.6, 1015.6, 1015.8, 0.2, "tracker-miner-f", 50, 50, "S", 3)]
+    trk = {"start": 1000.5, "end": 1016.0, "initializing_s": 14.92}
+    monkeypatch.setattr(analyze, "tracker_window", lambda *a, **k: (trk, rows))
+    for name, text in (("timehist", ""), ("wakeups", ""), ("forks", "")):
+        with gzip.open(tmp_path / f"perf.tracker-index.{name}.txt.gz", "wt") as f:
+            f.write(text)
+    (tmp_path / "taskstats.tracker-index.tsv").write_text("")
+    monkeypatch.setattr(analyze, "load_segments", lambda p: rows)
+    monkeypatch.setattr(analyze, "load_wakeups", lambda p: {})
+    monkeypatch.setattr(analyze, "load_forks", lambda p: ([], {}))
+    monkeypatch.setattr(analyze, "load_exec_rows", lambda p: [(1000.5, 50, "/usr/libexec/tracker-miner-fs-3")])
+    monkeypatch.setattr(analyze, "load_taskstats", lambda p: ([], {}))
+    r = analyze.analyze_phase(str(tmp_path), "tracker-index", 3, {}, kv={})
+    assert r["tracker"]["initial_sleep_block_us"] == 14700000.0
+    assert sorted(round(x) for x in r["_samples"]["all"]["batch_block_us"]) == [0, 100000]   # the last run ends the job
+
 def test_a_difference_inside_the_precision_is_not_resolved():
     assert pool.compare(100.0, 104.0)["reading"] == "not resolved"
     assert pool.compare(100.0, 106.0)["reading"] == "difference"

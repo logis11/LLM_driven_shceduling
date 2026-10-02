@@ -488,9 +488,15 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
         batch_run[tid] = [x * 1000.0 for x in shapes.runs_between_blocks(rs)]
     if prog_rows:
         b_start, b_end = prog_rows[0].t_in, max(s_.t_end for s_ in prog_rows)
-        vol_tids = [s_.tid for s_ in prog_rows if s_.state[:1] in shapes.VOLUNTARY]
-        for tid, ms in zip(vol_tids, shapes.blocks_after_runs(prog_rows, b_start, b_end)):
-            batch_block[tid].append(ms * 1000.0)
+        vol = [s_ for s_ in prog_rows if s_.state[:1] in shapes.VOLUNTARY]
+        init_abs = (trk["start"] + trk["initializing_s"]) if trk and trk.get("initializing_s") is not None else None
+        for s_, ms in zip(vol, shapes.blocks_after_runs(prog_rows, b_start, b_end)):
+            # 9.10 D71: the Tracker job's initial sleep is the task's arrival, not a block of the table — the one
+            # block that spans the miner's Initializing, which the status trace logs as the sleep ends
+            if init_abs is not None and s_.t_end < init_abs <= s_.t_end + ms / 1000.0 + 0.1 and ms >= 1000.0:
+                trk["initial_sleep_block_us"] = round(ms * 1000.0, 1)
+                continue
+            batch_block[s_.tid].append(ms * 1000.0)
     samples = {"all": {k: [] for k in ("run_us", "wait_us", "bytes_per_wake") + tuple(c + "_us" for c in CLASSES)
                        + ("batch_run_us", "batch_block_us")}, "threads": {}}
     threads = {}

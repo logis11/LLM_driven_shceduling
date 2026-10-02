@@ -1258,3 +1258,18 @@ Grounds (dry run 3, run 37010496980, #121):
 Open: how the initial sleep appears (D63); the deadline exits; the registry scan between the two labels (D65); the entry's id and the name its task shows.
 
 No file changed yet.
+
+## D71 — the initial sleep is the task's arrival: the entry's block table leaves out its one block (2026-10-02)
+
+By 인지오's decision, D63's open item. The entry carries the job without the initial sleep: its block table leaves out the one block that spans the miner's `Initializing` (the shipped 15 s sleep); the start-up's runs stay in the run table and the CPU total stays whole. The scope states that the shipped 15 s initial sleep precedes the work, so a file's arrival time reads as the end of that sleep.
+
+Grounds (dry run 3, run 37010496980, #121; `wlc/compiler.py`):
+
+- **The job's order.** A start-up of 0.335 s of CPU in its first 1.03 s (the database created, the registry scan), one block of 14.9 s, then the crawl and extraction: 39.09 s of CPU in 43.87 s.
+- **The batch loop cannot hold the sleep in place.** It draws each run and each block independently until the CPU total is spent (`_batch_ops`, `compiler.py:408`); the 14.9 s block is one of 17,944 and 74 % of all block time — the mean block per run 1,122 µs with it, 292 µs without.
+- **The batch-loop constructor runs its loop only** (`_batch_loop`, `compiler.py:386`): a fixed step before it would be a compiler, schema, lint and test change for the order of a 0.335 s burst, 0.85 % of the CPU.
+- **The arrival is already design.** The indexing files place the indexer's arrival as a calibration size (D31; `c1-indexing` `arrive: 2s`), and no file shows the login or the reset.
+
+Tooling: `analyze.py` leaves the block out of `batch_block_us` and reports it as `initial_sleep_block_us`.
+
+No file changed yet.
