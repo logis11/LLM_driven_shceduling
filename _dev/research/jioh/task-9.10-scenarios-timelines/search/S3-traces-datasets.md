@@ -155,6 +155,7 @@ Source copies under `_dev/research/jioh/task-9.10-scenarios-timelines/sources/S3
 | 2026-10-01 | popcon.debian.org | `by_inst.gz`, `README` | 200 (Last-Modified 30 Sep 2026 13:53:26 GMT) | — |
 | 2026-10-01 | WebSearch | public dataset developer build telemetry incremental vs full build durations local machines open data | none relevant (database refresh benchmarks, a 2017 webkit-dev thread) | no dataset of user builds |
 | 2026-10-01 | WebSearch | KDE UserFeedback telemetry results published application start count usage time Plasma statistics | kate-editor.org post 2020-02-09 (200) | the post says start count is collected; no published results found |
+| 2026-10-02 | 9.7's copy | Steam Hardware & Software Survey, August 2026, Linux (`../task-9.7-background-io/sources/T9-S3-07/hwsurvey-linux.html`, same SHA-256) | copied → S3-59 | — |
 
 ## 2. Candidates
 
@@ -777,6 +778,15 @@ Each sub-entry is one observation by one user.
 - **The English install** (`python3 pending_days_en.py 2025-10-01 2026-10-01`, output `pending_days_en.out`; SHA-256 79111cadef1f32648de15e6c38a224591544cda234ebe7954d7089c78d2d504e and efced4f8d9cf938aa248fc245ec5c4fe56104ea79716569a4ab6182c28cd3328): the same computation over the 1,445 binaries of an English install, the minimal layer less the 43 packages its English layer removes (S2-33), gives every figure above unchanged.
 - **Coverage.** T5 — what the stock unattended upgrade finds pending on a stock Ubuntu 24.04 desktop kept current, day by day: the archive's side, complete for the pocket. Does not cover whether a desktop is on at the run, packages installed beyond the default layer, runs that catch up several days, or a day's split across two runs by the timers' random delays. The snapshot service serves the pocket as it stood at a timestamp.
 - **One observation?** The archive's own record of every publication in the pocket, not a sample; the grouping into days is the reader's.
+
+#### S3-59 — Steam Hardware & Software Survey, August 2026, Linux: NVIDIA GPUs by kernel-module flavour (T5; read at stage 3, 2026-10-02)
+
+- **Citation.** Valve, "Steam Hardware & Software Survey: August 2026", https://store.steampowered.com/hwsurvey/Steam-Hardware-Software-Survey-Welcome-to-Steam (`?l=english&platform=linux`). The copy 9.7 saved (`task-9.7-background-io`, T9-S3-07), read here for its Linux video-card table, for D46's open item (branch and flavour).
+- **Copy read.** `sources/S3-59/hwsurvey-linux.html`, SHA-256 af78e7b96330cf1212a1c22393bc280f40af1c63dbfb003e50da214b7273dd59 (identical to T9-S3-07's copy, accessed 2026-09-19 04:08 UTC); `survey_nvidia_open.py` a7bac57ddc0226759e03c5d67e02ac2aa56e48223f76319d0d97decb3450131f; `survey_nvidia_open.out` 9fa9ddcc578af36ac516d457748ece5e606b80a19efa6b08353d8ea8c3ef17fa.
+- **Verbatim** (rendered text, cells separated by `|`): "Video Card Description (Linux)|Steam Deck GPU|10.48%|-0.66%|NVIDIA GeForce RTX 4070|0.64%|-0.03%|Intel HD Graphics 520|0.57%|-0.02%|Intel UHD Graphics 620|1.32%|-0.07%|NVIDIA GeForce RTX 3060 Ti|1.00%|+0.13%|…"; "NVIDIA GeForce GTX 1060|0.86%"; "NVIDIA GeForce GTX 1050 Ti|0.60%"; "NVIDIA GeForce GTX 970|0.21%"; "NVIDIA GeForce RTX 5060 Max-Q / Mobile|0.25%".
+- **Reader's own computation** (`python3.12 survey_nvidia_open.py`, output `survey_nvidia_open.out`): the table's 106 rows hold 49 NVIDIA rows, 24.32 % of Linux respondents. 42 of them, 21.16 %, name a GPU in the open kernel modules' compatible-GPU table (S2-37; Valve's "<name> Max-Q / Mobile" matched to the table's "<name> Laptop GPU"); 7, 3.16 %, do not — GeForce GTX 1060, 1050 Ti, 1070, 1080, 1080 Ti, 1050 and 970. So 87.0 % of the listed NVIDIA share is a GPU the open flavour drives. These locate a candidate; they are not values.
+- **Coverage.** T5 — which NVIDIA GPUs Steam's Linux respondents have, in August 2026, by whether the open kernel modules drive them. The population is Steam users who opt in, Steam Deck 10.48 % of it; the table lists cards above Valve's cut-off only, its shares summing to 108.93 % as published. Does not cover which driver package or flavour users install, nor desktops without Steam.
+- **One observation:** yes — one monthly survey aggregate (Valve, August 2026, Linux platform).
 
 ## 3. Not found
 
