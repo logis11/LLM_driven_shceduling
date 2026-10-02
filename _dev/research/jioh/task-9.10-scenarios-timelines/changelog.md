@@ -1285,3 +1285,15 @@ Grounds:
 - **Not taken:** removing them describes a job that did not run on this machine; raising the deadline changes the depicted state and leaves the two books' whole extraction unmeasured. The deadline is wall-clock, so a faster or busier core can end more or fewer files; no source gives these files' extraction time elsewhere.
 
 No file changed yet.
+
+## D73 — the GStreamer registry scan stays in the one entry both labels bind (2026-10-02)
+
+By 인지오's decision, D65's open item. The registry scan stays in the entry's tables and CPU total; both labels bind the one entry (D5). The scope states its CPU as first-login work that a reset may not repeat.
+
+Grounds:
+
+- **Its weight:** the miner's `gst-plugin-scanner` child ran 94 ms and 93 ms in dry runs 2 and 3, about 0.24 % of the job's 39.4 s (69 ms on dry run 1's empty home), inside the stability rule's 5 % tolerance.
+- **When it runs:** GStreamer forks at startup to update its plugin registry, a cache in the user's home (S2-45); the campaign's home is new, as a first login's is. `tracker3 reset --filesystem` empties only `~/.cache/tracker3/files/` (S2-43), so the registry outlives a reset; whether GStreamer then forks the scanner was not observed.
+- **Not taken:** a second table set for the asked side, made by taking one process out of the pool, carries a state not observed.
+
+No file changed yet.
