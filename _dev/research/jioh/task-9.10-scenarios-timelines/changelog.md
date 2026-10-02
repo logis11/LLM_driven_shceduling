@@ -1230,3 +1230,17 @@ Grounds:
 The method is complete: `campaign/tracker/method.md`.
 
 No file changed yet.
+
+## D69 — the Tracker job's end read from the extractor's status, the per-file debug output dropped, amending D62's reading (2026-10-02)
+
+By 인지오's decision, on dry run 2 (run 37002910488, #119). The session runs the miner with `TRACKER_DEBUG=status` only; `G_MESSAGES_DEBUG` is not set. D62's end — the moment the extractor logs "Extraction finished" — is read as the extractor's last status change to `Idle` after `Extracting metadata`, which the status trace logs in the same millisecond.
+
+Grounds (dry run 2's log, `tracker.log`):
+
+- **The debug output is the measured processes' own work.** Of 13,399 lines, 13,215 are `Tracker-DEBUG` lines written per file by the miner and the extractor on the measured CPU ("[v24] Processing frame …" 883, "Parsing … XML file" 847, "MIME type guessed as …" 378); a stock desktop writes none.
+- **The status trace marks the same moment.** `(Miner:'TrackerExtractDecorator') set property:'status' to 'Idle'` at 12:04:04.787, .794 and .795, each in the millisecond of an "Extraction finished"; 113 lines in all (43 status, the rest progress), the initial sleep shown as the miner's `Idle` then `Initializing` 15 s later, each extractor start as `Extracting metadata`. Warnings print without any debug setting.
+- **The perf rows alone give no clean end.** Around it the miner and the extractor exchange some forty runs within 4 ms, and their threads run again inside the extractor's final 10 s.
+
+Method §8 carries the amendment; a third dry run checks it.
+
+No file changed yet.
