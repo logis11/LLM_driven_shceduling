@@ -1314,3 +1314,18 @@ The entry's `modeling_notes` state that the name stands for the miner's tree and
 The form is complete: the campaign's list is fixed in method §8.
 
 No file changed yet.
+
+## D75 — the index starts cold: the page cache dropped before the phase, its fraction recorded; the first batch is not pooled (2026-10-03)
+
+By 인지오's decision, on the first batch (runs #122–#125, repeats 1–5, six landings, every one valid). Before the phase, `sync; sysctl vm.drop_caches=3`, which drops the clean page cache (9.7 D8, S4-24); the set's cached fraction is measured with `fincore` and recorded, so the state is verified, not assumed. The first batch ran in an uncontrolled state and is not pooled; the campaign's repeats are the cold ones, from the next batch.
+
+Grounds (the first batch's pool, `background-tracker-from122`):
+
+- **The rule fails on one value, from the cache.** The run between voluntary blocks holds at ±1.66 % and the CPU total at ±0.58 %; the block per run (254.7 µs) is at ±14.5 %, projecting 32 repeats. Every landing carries the same two restart graces (1.95 s) and 1.3–2.0 s of blocks under 10 ms; the blocks of 10 ms to 0.5 s run from 3 (0.43 s) in repeat 2 to 31 (2.08 s) in repeat 5, and they are disk waits — waits of 10 ms or more 0 s in repeats 2 and 3, 0.13–1.63 s in the others.
+- **The state was the download's.** The runner has 16.4 GB of memory (`spec.json`), the set is 40.7 GB fetched by eight threads just before the index: at most some 40 % of it can sit in the page cache, which part following the download's order.
+- **A cold start is the unasked side's state:** the first index at a first login, after a boot (D5).
+- **Warm is not available:** the set is 2.5 times the runner's memory.
+
+The disk waits then follow the runner's disk; if the block per run still spreads, the stability rule's exception for a value whose spread follows the machine is 인지오's call (9.6 D29, D58).
+
+No file changed yet.
