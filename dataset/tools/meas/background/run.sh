@@ -141,7 +141,9 @@ case "$APP" in
         STEAMCMD="$( [ -x /usr/games/steamcmd ] && echo /usr/games/steamcmd || command -v steamcmd)"; rec steamcmd.binary "$STEAMCMD"
         rec steamcmd.package "$(dpkg-query -W -f '${Version}' steamcmd 2>/dev/null)" ;;
   upgrade|dkms|tracker)
-        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mmdebstrap > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
+        # tracker: util-linux-extra for fincore, the cold start's check (D75; the runner's image lacks it, run #126)
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mmdebstrap \
+          $( [ "$APP" = tracker ] && echo util-linux-extra) > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
         rec mmdebstrap.version "$(mmdebstrap --version 2>&1 | head -1)" ;;
 esac
 rec zpaq.version "$(zpaq 2>&1 | head -1)"

@@ -153,9 +153,10 @@ def validity(family, dirs, entry):
                         notes.append(f"cached fraction {r.get('cache.tracker-index.fraction')} at the start (want <= 0.01)")
                 except ValueError:
                     notes.append("cached fraction not recorded")
-                try:   # the shipped 15 s initial sleep, from the miner's status trace (D63, D69)
-                    if not 15.0 <= float(r.get("tracker.log.sleep_s") or "") < 16.0:
-                        notes.append(f"initial sleep {r.get('tracker.log.sleep_s')} s (want 15)")
+                try:   # the shipped 15 s initial sleep, from the miner's status trace (D63, D69); GLib lands a seconds
+                    # timer on a per-session mark 0.25 s before to 0.75 s after its interval (gmain.c 2.80.0, S2-46)
+                    if not 14.75 <= float(r.get("tracker.log.sleep_s") or "") < 15.8:
+                        notes.append(f"initial sleep {r.get('tracker.log.sleep_s')} s (want 14.75-15.8)")
                 except ValueError:
                     notes.append("initial sleep not in the status trace")
         if family == "desktop":   # 9.8 D13 (the gate itself is checked for every family above)

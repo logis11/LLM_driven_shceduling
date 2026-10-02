@@ -68,6 +68,7 @@ All rows dated 2026-10-01. "200" etc. are HTTP status codes.
 | 52 | local copies (stage 3) | S2-04's tracker-miners 3.7.1 source and S2-03's `tracker-miner-fs` unit, re-read for the job's start and the reset path → S2-43 | — | — |
 | 53 | api.launchpad.net (stage 3) | `ubuntu/+archive/primary?ws.op=getPublishedSources&exact_match=true&distro_series=…/noble&created_since_date=2026-06-01` for `tracker-miners`, `tracker`, `gst-plugins-good1.0`, `gst-plugins-base1.0`, `gstreamer1.0`, `poppler`, `libgsf`, `libexif`, `gexiv2`, `exiv2`, `totem-pl-parser`, `libcue`, `exempi`, `giflib`, `libgxps`, `icu`, `libjpeg-turbo`, `libpng1.6`, `tiff`, `libxml2`, `glib2.0`, `libseccomp`, `sqlite3` (all 200) → S2-44 | — | — |
 | 54 | gstreamer.freedesktop.org (stage 3) | `documentation/gstreamer/running.html` (200) → S2-45 | — | — |
+| 55 | gitlab.gnome.org; docs.gtk.org (stage 3) | `GNOME/glib/-/raw/2.80.0/glib/gmain.c`; `glib/func.timeout_add_seconds.html` (both 200) → S2-46 | — | — |
 
 ## 2. Candidates
 
@@ -3791,6 +3792,14 @@ a77819313f1acef8b19c5903218978151f7013393a91286585c1a00b3f589a09  S2-15/wb-sm201
 - **Passages** (section on environment variables). `GST_REGISTRY, GST_REGISTRY_1_0`: "Set this environment variable to make GStreamer use a different file for the plugin cache / registry than the default one. This is useful when operating in a separate environment which should not affect the default cache in the user's home directory." `GST_REGISTRY_FORK`: "Set this environment variable to "no" to prevent GStreamer from forking on startup in order to update the plugin registry." `GST_REGISTRY_UPDATE`: "Set this environment variable to "no" to prevent GStreamer from updating the plugin registry. This is useful for embedded device which is not updating the plugins frequently, it will save time when doing gst_init()."
 - **Coverage.** T5 — GStreamer keeps its plugin registry as a cache in the user's home and forks at startup to update it. Supports that a home without the cache builds it in the first GStreamer process's tree; not the build's cost or the cache's exact path.
 - **One observation?** Not an observation; the project's documentation.
+
+### S2-46 — GLib 2.80.0: how a seconds timer's expiry is set (read at stage 3, 2026-10-03)
+
+- **Citation.** GLib 2.80.0, `glib/gmain.c`, `g_timeout_set_expiration`; GLib API reference, "g_timeout_add_seconds". Ubuntu 24.04's default layer holds `libglib2.0-0t64` 2.80.0-6ubuntu3.8 (S2-01). Read for the Tracker campaign's validity check on the initial sleep (D63; method §8).
+- **Copy read.** `https://gitlab.gnome.org/GNOME/glib/-/raw/2.80.0/glib/gmain.c` and `https://docs.gtk.org/glib/func.timeout_add_seconds.html`, accessed 2026-10-03 (200); `sources/S2-46/`, SHA-256 in `SHA256SUMS.txt` (`gmain.c-2.80.0` 8b6d51bc66765bf9dad43daaafca233e0d5c3f29cf77397c18a6907aac31f392).
+- **Passages.** `gmain.c:4915–4960`, `g_timeout_set_expiration`: for a seconds timeout, `timer_perturb = ABS ((gint) g_str_hash (session_bus_address)) % 1000000;` from `DBUS_SESSION_BUS_ADDRESS` ("we want a per machine/session unique 'random' value; try the dbus address first, that has a UUID in it"); `expiration = current_time + (guint64) timeout_source->interval * 1000 * 1000;` … `expiration -= timer_perturb;` `remainder = expiration % 1000000;` `if (remainder >= 1000000/4) expiration += 1000000;` `expiration -= remainder;` `expiration += timer_perturb;`. API reference: "Note that the first call of the timer may not be precise for timeouts of one second."
+- **Coverage.** T5 — a seconds timer fires on a per-session mark, from 0.25 s before to 0.75 s after its interval; the miner's `initial-sleep` (`g_timeout_add_seconds`, S2-43) so runs 14.75–15.75 s.
+- **One observation?** Not an observation; the library's source.
 
 ## 3. Not found
 
