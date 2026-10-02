@@ -59,12 +59,15 @@ load_edges, outside, pct, dist, QUANTILE_PROBS = _build.load_edges, _build.outsi
 
 IOWAIT = re.compile(r"^\s*(\d+\.\d+):\s+sched:sched_stat_iowait:\s+comm=.*?\s+pid=(\d+)\s+delay=(\d+)")
 EXEC = re.compile(r"^\s*(\d+\.\d+):\s+sched:sched_process_exec:\s+filename=(.*?)\s+pid=(\d+)\s+old_pid=(\d+)")
-ROOT_COMMS = {"borg": ("borg",), "7z": ("7z", "7zz"), "steamcmd": ("steamcmd",), "upgrade": ("chroot",)}   # upgrade: 9.10 D37
+ROOT_COMMS = {"borg": ("borg",), "7z": ("7z", "7zz"), "steamcmd": ("steamcmd",), "upgrade": ("chroot",),   # upgrade: 9.10 D37
+              "dkms": ("chroot",)}   # dkms: 9.10 D50, the install stage as upgrade's
+# 9.10 D50: the DKMS job is every process rooted at a run of either kernel hook, which execs dkms_autoinstaller (S2-03)
+DKMS_HOOKS = ("/etc/kernel/postinst.d/dkms", "/etc/kernel/header_postinst.d/dkms", "/usr/lib/dkms/dkms_autoinstaller")
 CLASSES = ("disk", "uninterruptible", "network", "sleep", "runnable")
 
 
 def job_of(phase):
-    for job, prefix in (("borg", "borg"), ("7z", "7z"), ("steamcmd", "steam"), ("upgrade", "upgrade")):
+    for job, prefix in (("borg", "borg"), ("7z", "7z"), ("steamcmd", "steam"), ("upgrade", "upgrade"), ("dkms", "dkms")):
         if phase.startswith(prefix):
             return job
     return None
@@ -114,6 +117,29 @@ def launched_root(job, exec_rows):
             return pid
         last[pid] = f
     return None
+
+
+def hook_subtrees(exec_rows, forks):
+    """9.10 D50: {root pid: (first hook file it executed, set of tids in its subtree)} for every process that executed
+    a DKMS hook or dkms_autoinstaller; a root nested in another root's subtree is folded into the outer one."""
+    children = defaultdict(list)
+    for _t, p, _pc, c, _cc in forks:
+        children[p].append(c)
+    roots = {}
+    for _t, pid, f in exec_rows:
+        if f in DKMS_HOOKS and pid not in roots:
+            roots[pid] = f
+    subs = {}
+    for root, f in roots.items():
+        seen, stack = set(), [root]
+        while stack:
+            t = stack.pop()
+            if t not in seen:
+                seen.add(t)
+                stack.extend(children.get(t, ()))
+        subs[root] = (f, seen)
+    nested = {r for r in subs for r2, (_f, seen) in subs.items() if r2 != r and r in seen}
+    return {r: v for r, v in subs.items() if r not in nested}
 
 
 def load_exec_classes(path):
@@ -308,7 +334,14 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
     root, tree, tid2pid, last_comm, out_by_comm = phase_tree(job, segs, forks, meas_cpu, launched_root(job, exec_rows))
     pids = sorted({tid2pid.get(t, t) for t in tree})
     role = {pid: (recs[pid]["comm"] if pid in recs else last_comm.get(pid, "?")) for pid in pids}
-    prog = [p for p in pids if is_program(job, execs.get(p), role.get(p))]
+    hooks = None
+    if job == "dkms":   # 9.10 D50: the processes under the DKMS hooks, within the stage's tree
+        subs = hook_subtrees(exec_rows, forks)
+        hook_tids = set().union(*(seen for _f, seen in subs.values())) & tree if subs else set()
+        prog = sorted({tid2pid.get(t, t) for t in hook_tids})
+        hooks = {r: {"hook": f, "tids": seen & tree} for r, (f, seen) in subs.items()}
+    else:
+        prog = [p for p in pids if is_program(job, execs.get(p), role.get(p))]
     prog_set = set(prog)
     rows = [s for s in segs if s.cpu == meas_cpu and s.tid in tree]
     wake_check = {}
@@ -416,6 +449,21 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
            "all": {k: dist(v) for k, v in samples["all"].items()}, "threads": threads, "processes": procs,
            "outside_on_measured_cpu": dict(sorted(out_by_comm.items(), key=lambda kv_: -kv_[1]["run_ms"])[:25]),
            "_samples": samples}
+    if hooks is not None:   # each hook run: its processes, CPU on the measured CPU, span, and the programs it executed
+        res["dkms_hooks"] = []
+        for r_, h in sorted(hooks.items(), key=lambda kv_: min((s_.t_in for s_ in rows if s_.tid in kv_[1]["tids"]), default=0)):
+            hr = [s_ for s_ in rows if s_.tid in h["tids"]]
+            hp = sorted({tid2pid.get(t, t) for t in h["tids"]})
+            by_exec = defaultdict(float)
+            for pid in hp:
+                by_exec[(execs.get(pid) or role.get(pid) or "?").rsplit("/", 1)[-1]] += perf_cpu.get(pid, 0.0)
+            res["dkms_hooks"].append({
+                "root_pid": r_, "hook": h["hook"], "processes": len(hp),
+                "cpu_us": round(sum(s_.run for s_ in hr) * 1000.0, 1),
+                "span_s": round(max(s_.t_end for s_ in hr) - min(s_.t_in for s_ in hr), 3) if hr else None,
+                "cpu_by_exec_us": dict(sorted(((k, round(v, 1)) for k, v in by_exec.items()), key=lambda kv_: -kv_[1])[:20])})
+        stage_cpu = sum(p["perf_cpu_us"] for p in procs)
+        res["stage_cpu_us"] = round(stage_cpu, 1)
     cf = kv.get(f"cache.{phase}.fraction")
     if cf not in (None, ""):
         res["cached_fraction"] = float(cf)
@@ -468,6 +516,9 @@ def main():
               f"run/wake p50 {a['run_us'].get('p50')} µs wait p50 {a['wait_us'].get('p50')} µs "
               + " ".join(f"{c} n {a[c + '_us']['n']}" for c in CLASSES)
               + (f"; cached {r['cached_fraction']}" if "cached_fraction" in r else ""))
+        for h in r.get("dkms_hooks", []):
+            print(f"  hook {h['hook']} [{h['root_pid']}]: {h['processes']} procs, CPU {h['cpu_us'] / 1e6:.3f} s, span {h['span_s']} s; "
+                  + ", ".join(f"{k} {v / 1e6:.2f}" for k, v in list(h["cpu_by_exec_us"].items())[:8]))
         if "network" in r:
             print(f"  network {json.dumps({k: v for k, v in r['network'].items() if k != 'calls_by_name_kind'})}")
         for p in r["processes"]:

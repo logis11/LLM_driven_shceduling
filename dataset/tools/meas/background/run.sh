@@ -10,6 +10,8 @@
 #             steam-update-shaped (only with a branch to stage)
 #   upgrade   upgrade-install — 9.10's unattended-upgrade campaign (9.10 changelog D3, D36, D37): the stock
 #             Ubuntu 24.04 install stage over 2026-07-27's security updates in a chroot of the default layer
+#   dkms      dkms-install — 9.10's DKMS campaign (9.10 changelog D4, D46–D50): the same install stage on 2026-09-23,
+#             the security kernel 7.0.0-34, in that chroot with the HWE kernel 7.0.0-31 and nvidia-driver-595-open
 # Every measured phase is one command pinned to the measured CPU (pin.sh,
 # phase.sh MEAS_PIN=load), observed over the whole phase from the harness CPUs
 # by `perf sched record -a` — with the exec rows that name each process's
@@ -136,7 +138,7 @@ case "$APP" in
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y steamcmd > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
         STEAMCMD="$( [ -x /usr/games/steamcmd ] && echo /usr/games/steamcmd || command -v steamcmd)"; rec steamcmd.binary "$STEAMCMD"
         rec steamcmd.package "$(dpkg-query -W -f '${Version}' steamcmd 2>/dev/null)" ;;
-  upgrade)
+  upgrade|dkms)
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mmdebstrap > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
         rec mmdebstrap.version "$(mmdebstrap --version 2>&1 | head -1)" ;;
 esac
@@ -619,6 +621,62 @@ upg_job() {
   df -B1 --output=target,avail "$WORK" > "$OUT/df.upgrade.txt" 2>&1
 }
 
+# ---- the DKMS autoinstall (9.10 D4, D46–D50) ----------------------------------------
+# D49's state: D37's chroot built at T0 = 2026-09-23T00:00Z, then, on the harness CPUs, the kernel the installer adds
+# (linux-generic-hwe-24.04, 7.0.0-31 at T0) and the driver package D46's user installs (nvidia-driver-595-open, which
+# pulls in dkms and nvidia-dkms-595-open 595.91.07 and builds the module for 7.0.0-31). The download stage against
+# T1 = 2026-09-24T00:00Z fetches the day's security updates — the kernel 7.0.0-34 (D48) and xdg-desktop-portal — and
+# the install stage is measured as D38's. Its environment carries OMP_NUM_THREADS=8: nproc returns it (coreutils,
+# S2-40), and both NVIDIA's dkms.conf (make -j`nproc`, S2-39) and dkms's default -j read nproc, so the build runs at
+# D4's eight-thread desktop's -j on the one measured CPU (D50). The job — every process under the two DKMS hooks the
+# kernel install runs — is cut by analyze.py (D50).
+dkms_state() {   # dkms_state <root>: the kernel and the driver package at T0, on the harness CPUs
+  local r="$1" t0
+  upg_sources "$r" "$UPG_T0"
+  unmeasured sudo chroot "$r" apt-get update > "$OUT/dkms.state.apt-update.log" 2>&1; rec dkms.state.apt_update.rc "$?"
+  t0=$(date +%s)
+  unmeasured sudo chroot "$r" /usr/bin/env DEBIAN_FRONTEND=noninteractive apt-get install -y linux-generic-hwe-24.04 \
+    < /dev/null > "$OUT/dkms.state.kernel.log" 2>&1
+  rec dkms.state.kernel.rc "$?"; rec dkms.state.kernel_s "$(( $(date +%s) - t0 ))"
+  t0=$(date +%s)
+  unmeasured sudo chroot "$r" /usr/bin/env DEBIAN_FRONTEND=noninteractive apt-get install -y nvidia-driver-595-open \
+    < /dev/null > "$OUT/dkms.state.driver.log" 2>&1
+  rec dkms.state.driver.rc "$?"; rec dkms.state.driver_s "$(( $(date +%s) - t0 ))"
+  rec dkms.state.kernels "$(ls "$r/lib/modules" 2>/dev/null | paste -sd, -)"
+  rec dkms.state.status "$(sudo chroot "$r" dkms status 2>&1 | paste -sd';' -)"
+  rec dkms.version "$(sudo chroot "$r" dkms --version 2>&1 | head -1)"
+  rec dkms.state.nvidia_dkms "$(sudo chroot "$r" dpkg-query -W -f '${Version}' nvidia-dkms-595-open 2>/dev/null)"
+  rec dkms.state.gcc "$(sudo chroot "$r" sh -c 'readlink -f /usr/bin/gcc; ls /usr/bin/gcc-[0-9]* 2>/dev/null' | paste -sd, -)"
+  sudo chroot "$r" dpkg --print-foreign-architectures > "$OUT/dkms.state.foreign-arch.txt" 2>&1
+  # the installed set the measured stage starts from (upg_after diffs against it)
+  sudo chroot "$r" dpkg-query -W -f '${binary:Package}\t${Version}\t${db:Status-Abbrev}\n' > "$OUT/upgrade.dpkg.t0.tsv" 2>&1
+  rec dkms.state.installed "$(wc -l < "$OUT/upgrade.dpkg.t0.tsv")"
+  sudo du -sb "$r" 2>/dev/null | cut -f1 | { read -r b; rec dkms.state.chroot_bytes "$b"; }
+}
+dkms_after() {   # dkms_after <root>: the module the stage built, and DKMS's own records
+  local r="$1" k=7.0.0-34-generic
+  rec dkms.after.kernels "$(ls "$r/lib/modules" 2>/dev/null | paste -sd, -)"
+  rec dkms.after.status "$(sudo chroot "$r" dkms status 2>&1 | paste -sd';' -)"
+  rec dkms.after.installed_new "$(sudo chroot "$r" dkms status -k "$k" 2>/dev/null | grep -c ': installed')"
+  sudo find "$r/lib/modules/$k/updates" -name 'nvidia*.ko*' -printf '%P\t%s\n' > "$OUT/dkms.modules.$k.txt" 2>/dev/null
+  rec dkms.after.modules "$(wc -l < "$OUT/dkms.modules.$k.txt")"
+  sudo find "$r/var/lib/dkms/nvidia" -path "*$k*" -name make.log -exec cp {} "$OUT/dkms.make.$k.log" \; 2>/dev/null
+  rec dkms.after.make_log_cc "$(grep -c ' CC \[M\]' "$OUT/dkms.make.$k.log" 2>/dev/null)"
+  grep -n -E 'dkms|Building module|Signing|depmod|initrd|Done' "$OUT/upgrade.uu-dpkg.log" > "$OUT/dkms.hooks.txt" 2>/dev/null
+}
+dkms_job() {
+  local r="$WORK/chroot"
+  UPG_T0="${MEAS_DKMS_T0:-20260923T000000Z}"; UPG_T1="${MEAS_DKMS_T1:-20260924T000000Z}"   # D48
+  sudo rm -rf "$r"; upg_build "$r"; upg_mount "$r"; dkms_state "$r"; upg_download "$r"
+  export MEAS_PIN=none
+  phase dkms-install -- sudo taskset -c "$MEAS_CPU" chroot "$r" /usr/bin/env -i \
+    PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin LANG=en_US.UTF-8 OMP_NUM_THREADS=8 \
+    /usr/lib/apt/apt.systemd.daily install < /dev/null
+  export MEAS_PIN=load
+  upg_after "$r"; dkms_after "$r"; upg_umount "$r"
+  df -B1 --output=target,avail "$WORK" > "$OUT/df.dkms.txt" 2>&1
+}
+
 # ---- the job ----------------------------------------------------------------------
 case "$APP" in
   borg)
@@ -661,6 +719,7 @@ case "$APP" in
     rec steam.buildid "$(sed -n 's/^steam\.steam-fresh-shaped\.buildid=//p' "$KV" | tail -1)"
     df -B1 --output=target,avail "$WORK" > "$OUT/df.steam.txt" 2>&1 ;;
   upgrade) upg_job ;;
+  dkms) dkms_job ;;
   *) rec error "unknown app $APP" ;;
 esac
 

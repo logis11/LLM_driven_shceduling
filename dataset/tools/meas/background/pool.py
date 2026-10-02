@@ -45,11 +45,12 @@ from meas.stability import ratio_stability, ratio_repeats_needed, stability, TOL
 from meas.distribution import quantile_table  # noqa: E402
 pct, QUANTILE_PROBS = analyze.pct, analyze.QUANTILE_PROBS
 
-NAME = re.compile(r"^meas-background-(borg|7z|steamcmd|upgrade)-r(\d+)-(dry|probe|full)$")
+NAME = re.compile(r"^meas-background-(borg|7z|steamcmd|upgrade|dkms)-r(\d+)-(dry|probe|full)$")
 PHASES = {"borg": ("borg-first-warm", "borg-repeat-warm", "borg-first-cold", "borg-repeat-cold"),
           "7z": ("7z-mmt8-warm", "7z-mmt1-warm", "7z-mmt8-cold"),
           "steamcmd": ("steam-fresh-shaped", "steam-fresh-untraced", "steam-fresh-unshaped", "steam-update-shaped"),
-          "upgrade": ("upgrade-install",)}   # 9.10 D36–D40
+          "upgrade": ("upgrade-install",),   # 9.10 D36–D40
+          "dkms": ("dkms-install",)}   # 9.10 D46–D50; its list is set with the entry's form (D50)
 # D19 (the shared stability rule): the list — every table the fold-in carries, each tested by its mean as the table
 # carries it (9.5 D78). D29 (9.6 D21, D22, D25): each archetype compiles as cpu-batch's batch loop, so it carries the
 # program's runs between voluntary blocks, pooled over its threads, and the block after each run — the program-level
@@ -65,7 +66,8 @@ HEADLINE = {"borg": [("borg-first-warm", "run_us", "run per wake (µs)"), ("borg
             "7z": [("7z-mmt8-warm", "run_us", "run per wake (µs)"), ("7z-mmt8-warm", "wait_us", "wait per wake (µs)")],
             "steamcmd": [("steam-fresh-shaped", "run_us", "run per wake (µs)"), ("steam-fresh-shaped", "network_us", "network wait (µs)"),
                          ("steam-fresh-shaped", "bytes_per_wake", "bytes per wake")],
-            "upgrade": [("upgrade-install", "run_us", "run per wake (µs)"), ("upgrade-install", "wait_us", "wait per wake (µs)")]}
+            "upgrade": [("upgrade-install", "run_us", "run per wake (µs)"), ("upgrade-install", "wait_us", "wait per wake (µs)")],
+            "dkms": [("dkms-install", "run_us", "run per wake (µs)"), ("dkms-install", "wait_us", "wait per wake (µs)")]}
 # results only: (a, b, what) — the headline medians side by side
 COMPARISONS = {"borg": [("borg-first-warm", "borg-first-cold", "warm against cold, first backup (D8)"),
                         ("borg-repeat-warm", "borg-repeat-cold", "warm against cold, repeat backup (D8)"),
@@ -73,7 +75,7 @@ COMPARISONS = {"borg": [("borg-first-warm", "borg-first-cold", "warm against col
                "7z": [("7z-mmt8-warm", "7z-mmt8-cold", "warm against cold (D8)")],
                "steamcmd": [("steam-fresh-shaped", "steam-fresh-unshaped", "shaped against unshaped (D10)"),
                             ("steam-fresh-shaped", "steam-update-shaped", "fresh install against update (D12)")],
-               "upgrade": []}
+               "upgrade": [], "dkms": []}
 # D18 (9.6 D23, D24): the tolerance is the larger of TOLERANCE × mean and the trace's 1 µs for times — bytes per wake,
 # a count of whole bytes, has no floor — and the rule holds only over at least five same-machine repeats
 ABS_FLOOR_US = 1.0
