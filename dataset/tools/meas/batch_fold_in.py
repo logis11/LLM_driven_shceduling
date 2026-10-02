@@ -4,7 +4,7 @@
 batch_fold_in.py [--check]
 
 `cpu-batch`, `compiler-child` and `build-orchestrator` (9.6), `file-backup`, `file-archiver` and `game-download`
-(9.7) and `package-upgrade` (9.10) carry 30 quantile tables, each one pooled table of the campaign's record: a program's runs between voluntary
+(9.7), `package-upgrade` (9.10), and `module-build-orchestrator` and `module-compiler-child` (9.10) carry the quantile tables, each one pooled table of the campaign's record: a program's runs between voluntary
 blocks and the block after each run (9.6 D21, D22, D25; 9.7 D29), the object job's per-(role, step) CPU (9.6 D19,
 D20), make's dispatch run. Each is written in the library's table form (distribution.yaml_table: the ten quantiles,
 the extremes, the interval means), keeping the param's own sampling and source tag; nothing else in the entries is
@@ -20,13 +20,15 @@ TOOLS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 from meas.distribution import yaml_table  # noqa: E402
+from meas.background import modbuild  # noqa: E402
 
 RESEARCH = os.path.join("_dev", "research", "jioh")
 POOLS = {"build": os.path.join(RESEARCH, "task-9.6-compile", "campaign", "results", "pooled.json"),
          "borg": os.path.join(RESEARCH, "task-9.7-background-io", "campaign", "results", "borg-pooled.json"),
          "7z": os.path.join(RESEARCH, "task-9.7-background-io", "campaign", "results", "7z-pooled.json"),
          "steamcmd": os.path.join(RESEARCH, "task-9.7-background-io", "campaign", "results", "steamcmd-pooled.json"),
-         "upgrade": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "upgrade", "results", "pooled.json")}
+         "upgrade": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "upgrade", "results", "pooled.json"),
+         "dkms": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "dkms", "results", "pooled.json")}
 
 # (archetype, param) -> (record, path to the pooled table)
 _PROGRAMS = {"clamscan": "clamscan", "ffmpeg": "ffmpeg", "handbrakecli": "handbrake", "python3": "train",
@@ -44,6 +46,17 @@ for _aid, _app, _phase in (("file-backup", "borg", "borg-first-warm"), ("file-ar
                            ("game-download", "steamcmd", "steam-fresh-shaped"), ("package-upgrade", "upgrade", "upgrade-install")):
     TABLES[(_aid, f"{_app}_run")] = (_app, ("runs", _app, "phases", _phase, "all", "batch_run_us"))
     TABLES[(_aid, f"{_app}_block")] = (_app, ("runs", _app, "phases", _phase, "all", "batch_block_us"))
+
+# 9.10 D52–D54: the module build's per-(kind, member, step) CPU, make's dispatch run and the serial tail's batch loop
+_MB = ("runs", "dkms", "phases", "dkms-install", "module_build")
+for _kind, _tree in modbuild.TREES.items():
+    for _mid, _role, _n in modbuild.members(_tree):
+        for _i in range(1, _n + 1):
+            TABLES[("module-compiler-child", f"{_kind.replace('-', '_')}_{_mid}_step_{_i}")] = (
+                "dkms", _MB + ("steps", f"{_kind} {_mid} {_i}/{_n}"))
+TABLES[("module-build-orchestrator", "dispatch_overhead")] = ("dkms", _MB + ("dispatch_us",))
+TABLES[("module-build-orchestrator", "tail_run")] = ("dkms", _MB + ("tail_run_us",))
+TABLES[("module-build-orchestrator", "tail_block")] = ("dkms", _MB + ("tail_block_us",))
 
 PARAM_LINE = re.compile(r'^(\s*)\{dist: quantiles, .*sampling: (\S+), source: "([^"]+)"\}\s*$')
 

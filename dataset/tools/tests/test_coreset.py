@@ -115,20 +115,24 @@ def test_c7_interactive_counterparts_inject_the_upgrade(coreset):
         assert (variant["ground_truth"][0]["t_start"], variant["ground_truth"][0]["t_end"]) == (0, C7_C_US)
 
 
-def test_c7_compile_is_a_rename_only(coreset):
-    """Phase 7 spec decision 6: the P1b move — the orchestrator's name and
-    the label, nothing else."""
+C7_COMPILE_C_US = 225_458_000   # 9.10 D56: the module build's CPU as compiled under c7-compile's seed, to the ms below
+
+
+def test_c7_compile_is_the_module_build_in_place_of_the_users_build(coreset):
+    """9.10 D56 (restating Phase 7 spec decision 6): c1-compile's first C seconds — the editor by its id, name and
+    arrival, departing at C, its focus 2 s to C − 2 s — with the user's build replaced by the DKMS build, task `dkms`
+    on module-build-orchestrator, from 0 s; one segment, labelled false."""
     base, _ = coreset["c1-compile"]
     variant, _ = coreset["c7-compile"]
-    base_events, variant_events = events_by_id(base), events_by_id(variant)
-    assert set(base_events) == set(variant_events)
-    for task_id, event in base_events.items():
-        if task_id == "build":
-            assert variant_events[task_id]["name"] == "dkms"
-            assert {**variant_events[task_id], "name": "make"} == event
-        else:
-            assert variant_events[task_id] == event
+    b, v = events_by_id(base), events_by_id(variant)
+    assert set(b) == set(v) == {"editor", "build"}
+    assert (v["editor"]["name"], v["editor"]["t"], v["editor"]["depart"]) == (b["editor"]["name"], b["editor"]["t"], C7_COMPILE_C_US)
+    build = v["build"]
+    assert (build["name"], build["t"], build["fork_cap"]) == ("dkms", 0, 48)   # D55, D57: cap 8 × 6
+    assert {e["name"] for e in build["spawn_table"]} == {"sh", "x86_64-linux-gn", "cc1", "as", "fixdep", "rm", "mkdir", "dirname"}
+    assert sum(op["op"] == "FORK" for op in build["program"]) == len(build["spawn_table"])
     assert ground_truth(variant) == [("compile", False)]
+    assert (variant["ground_truth"][0]["t_start"], variant["ground_truth"][0]["t_end"]) == (0, C7_COMPILE_C_US)
 
 
 def test_c7_same_name_counterparts_flip_the_label_only(coreset):

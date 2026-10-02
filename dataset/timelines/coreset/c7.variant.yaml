@@ -17,13 +17,18 @@
 # mask and preview render at the middle (the base's 30 s in 2–58 s), the mail
 # send at 38/56 of it (the base's 40 s).
 #
+# Compile (9.10 D4, D46–D57): the user's build is replaced by an observed DKMS
+# autoinstall — NVIDIA's 595 open module rebuilt for 2026-09-23's security
+# kernel by the stock unattended upgrade (meas-ci:background:2026-10-02), task
+# `dkms` on module-build-orchestrator, the segment at tier 3 as its base's (D55).
+# As the interactive counterparts, c7-compile is its base's first C seconds (D56): the
+# build from 0 s bound whole, the editor departing at C, focus 2 s to C − 2 s;
+# C = 225.458 s, the build's CPU as compiled under the file's seed, so it is alive
+# at every instant of the segment.
+#
 # Batch modes: the batch job is itself the background work the attribute judges
 # (recognition-vocabulary §1), so the counterpart is the same job unwanted — the
-# P1b move, rename and label flip, mode unchanged. compile: make -> dkms, the
-# kernel-module rebuild the distro runs on a kernel change (dkms-man,
-# dkms-debian; names workflow meas-ci:names:2 observed comm `dkms` at runtime
-# level on all three distros, Fedora shipping a kernel-install hook and a
-# dkms.service unit — dataset/meas/names/run-2/). ml-train, render, transcode, backup: no same-mode orchestrator a
+# P1b move and label flip, mode unchanged. ml-train, render, transcode, backup: no same-mode orchestrator a
 # distro or vendor runs unasked under a distinct name exists (transcode: Jellyfin
 # installs its transcoder as plain `ffmpeg`), so the label flips alone and the
 # file ships as a pre-committed miss.
@@ -163,9 +168,13 @@ variants:
   - id: c7-compile
     from: c1-compile.timeline.yaml
     ops:
-      - rename: {from: make, to: dkms}
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, initiated: scheduled}}
+      - patch-task: {id: build, name: dkms, archetype: module-build-orchestrator, arrive: 0s,
+                     bind: {parallelism_cap: 8, child_name: cc1}}
+      - set-segments: [{from: 0s, to: 225.458s, mode: compile,
+                         attributes: {background_wanted: false, initiated: scheduled},
+                         scenario: [S11]}]
+      - patch-task: {id: editor, depart: 225.458s}
+      - set-focus: [{from: 2s, to: 223.458s, task: editor}]
       - patch-meta: {demand: calibration}
 
   - id: c7-indexing

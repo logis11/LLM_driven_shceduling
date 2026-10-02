@@ -1035,6 +1035,239 @@ archetypes:
       `spawn_count` was bound when a spawn-table entry was one process of about 89 ms; a job is now six processes
       of about 453 ms, and the counts are 9.10's to resize (D30, 2026-09-20).
 
+  module-build-orchestrator:
+    category_source: meas
+    pattern:
+      constructor: module-build   # 9.10 D52-D57: the measured jobs in their order, then the serial tail
+      program:
+        - loop:                    # the job order below, one entry per job (D53)
+            - RUN: dispatch_overhead
+            - FORK: {}             # x the job's members; blocks on wait-for-slot at parallelism_cap x 6 (D57)
+        - WAIT: children
+        - loop:                    # the serial tail (D54), until tail_work of CPU is spent
+            - RUN: tail_run
+            - SLEEP: tail_block
+        - EXIT: {}
+      job_order: "p21 C2 c1 p4 c1 p5 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p3 c1 p5 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p3 c1 p6 c1 p4 c1 p4 C1 p4 c1 p4 c1 p4 c1 p4 c1 p4 C1 p3 C1 p5 c1 p4 C1 p4 C1 p4 c1 p4 c1 p4 C1 p2 c1 p4 c1 p6 C1 p4 c1 p4 C1 p4 c1 p4 c1 p4 C1 p4 c1 p3 C1 p4 c1 p4 C1 p5 c1 p4 C1 p4 c1 p4 c1 p4 c1 p4 C1 p4 c1 p4 c1 p4 C1 p4 c1 p4 c1 p4 C1 p2 C1 p6 c1 p2 c1 p6 C1 p4 c1 p4 c1 p4 C1 p4 C1 p4 C1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p3 c1 p5 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 C1 p3 c1 p5 c1 p4 c1 p4 c1 p4 C1 p3 c1 p5 c1 p4 C1 p4 C1 p4 C1 p4 c1 p4 c1 p4 C1 p4 C1 p4 c1 p3 c1 p5 c1 p4 C1 p4 c1 p4 c1 p4 c1 p4 C1 p80 C1 p4 c1 p8 c1 p4 c1 p12 C1 p68 c1 p4 C1 p4 C1 p3 c1 p5 C1 p4 c1 p4 c1 p4 C1 p4 c1 p4 C1 p4 c1 p3 C1 p5 c1 p3 c1 p5 c1 p4 C1 p4 C1 p4 C1 p4 C1 p4 C1 p4 C1 p4 C1 p4 C1 p4 C1 p4 C1 p4 c1 p4 C1 p4 C1 p4 c1 p3 C1 p5 C1 p4 C1 p4 C1 p4 C1 p4 C1 p4 C1 p4 C1 p3 C1 p5 C1 p4 c1 p4 C1 p4 c1 p4 C1 p4 C1 p4 C1 p4 c1 p4 C1 p4 c1 p4 c1 p2 c1 p4 c1 p4 C1 p6 c1 p4 C1 p4 C1 p4 C1 p3 c1 p5 C1 p3 c1 p5 C1 p3 c1 p5 c1 p4 c1 p4 c1 p4 c1 p4 C1 p4 c1 p4 c1 p4 c1 p4 c1 p4 c1 p4 C1 p4 C1 p4 c1 p4 C1 p3 C1 p5 c1 p4 c1 p4 c1 p4 C1 p4 C1 p4 c1 p20 C1 p4 c1 p4 C1 p4 C1 p4 C1 p4 C1 p4 C1 p7 c1 p5 c1 p12 C1 p10 o194 C1 o6"   # 9.10 D53: landing 23's order, the medoid of the 26
+    params:
+      dispatch_overhead:
+        {dist: quantiles, p: [60, 75, 86, 127, 151, 203, 516, 1808, 2425, 220772], min: 12, max: 288886, means: [52.226, 70.232, 80.565, 105.345, 141.669, 168.379, 359.308, 1523.015, 1867.241, 22675.41, 244765.282], sampling: per-iteration, source: "meas-ci:background:2026-10-02"}
+      tail_run:
+        {dist: quantiles, p: [4, 4, 5, 13, 41, 102, 390, 959, 24211, 1598089], min: 4, max: 6338473, means: [4, 4, 4.324, 8.88, 34.544, 64.209, 199.666, 551.149, 3545.087, 212263.693, 4015000.657], sampling: per-iteration, source: "meas-ci:background:2026-10-02"}
+      tail_block:
+        {dist: quantiles, p: [0, 0, 0, 0, 26, 30, 41, 54, 146, 1634], min: 0, max: 49015, means: [0, 0, 0, 0, 2.859, 28.039, 33.214, 46.829, 79.162, 269.133, 23754.558], sampling: per-iteration, source: "meas-ci:background:2026-10-02"}
+      tail_work:
+        {dist: constant, value_us: 10027983, sampling: per-task, source: "meas-ci:background:2026-10-02"}
+    lifetime: finite
+    spawns: module-compiler-child
+    binding_params: [parallelism_cap, child_name]
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      run: "background:2026-10-02, landings [1-23; 7, 10 and 11 twice]; runs 36984969195, 36985028429, 36987366998, 36987468347, 36987471634, 36989503010, 36989807453"
+      stats: ["jobs per build in every landing: 200 object, 1 125 kbuild probes, 145 and 87 conftest tests without and with as (D53)",
+              "CPU total carried (jobs, make, tail) 224.627 s (+-1.46 %), 210.6-238.9 s over the landings: the job's measured whole but for 3.89-4.32 s unmodelled (D17, D54)",
+              "carried share of the hook run's CPU 0.9818-0.9825; the hook run 214.5-243.2 s of CPU at 0.997 of its span",
+              "dispatch run mean 754.3 us (+-0.72 %); the tail's run between voluntary blocks mean 6.151 ms (+-1.82 %), the tail 9.29-11.14 s",
+              "the tail's block per run mean 44.4 us, +-8.35 % over 26 landings, per-landing means 38.5-87.4 us: carried with its half-width, its spread dkms's progress loop and the runner's disk waits, at most 0.06 % of the job (9.6 D29; D58)",
+              "live object jobs at cap 8 in the dry run: mean 7.86, eight on 92.2 % of the build (D52)"]
+      scope: >-
+        One observation (phase decision 2; 9.10 D4, D46-D51): DKMS's autoinstall of `nvidia-dkms-595-open` 595.91.07,
+        the open kernel module of NVIDIA's production branch (D47), for the security kernel `7.0.0-34-generic`, run by
+        the stock Ubuntu 24.04 unattended upgrade's install stage of 2026-09-23 (D48). The state is a chroot of the
+        default layer of an English 24.04.5.1 desktop install, 1,445 packages, with the HWE kernel the installer adds
+        (`7.0.0-31`) and `nvidia-driver-595-open` installed by apt (D46, D49), built from Ubuntu's snapshot service as
+        the archive stood at 2026-09-22T17:00Z, its download stage run against the archive at 2026-09-24T00:00Z (D51).
+        The job is every process under the two DKMS kernel hooks of that stage (D50): the headers' hook built the module
+        in every landing; the image's hook ran after it, 0.13-0.145 s. The build runs at -j8 through
+        `OMP_NUM_THREADS=8`, `nproc` being what NVIDIA's `dkms.conf` and dkms read (D4's eight-thread desktop, design;
+        D50). No boot loader or `shim-signed` in the chroot, so no module is signed, where a Secure Boot desktop signs
+        the five. Pinned to one CPU of a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel
+        6.17.0-1022-azure), the rest of the machine idealised; no desktop session; `perf sched record` and a taskstats
+        listener on the measured CPU. 26 same-machine landings under the machine gate (repeats 7, 10 and 11 landed
+        twice, every landing pooled: D58); the stability rule holds on 59 of the 60 values, the tail's block per run
+        carried with its half-width (D58). Values are this software on this machine, not desktop truth (9.5 D10).
+    modeling_notes: >-
+      The class is what the measurement shows (9.10 D52): a parallel make, about eight jobs live at cap 8, then a
+      serial tail. The orchestrator runs the build's jobs in the order landing 23 ran them (`job_order`, run-length
+      coded: o object, p kbuild probe, c and C conftest tests without and with as; the 26 landings' orders differ only
+      by adjacent swaps, at most one job of a kind apart at any point), one dispatch run before each job's FORKs (9.6
+      D19). `fork_cap` is `parallelism_cap` x 6, 9.6 D19's rule (D57): the simulator counts live tasks, and a conftest
+      test has 8 or 10 members, so while conftest tests are in flight (about 27 % of the build) fewer than eight jobs
+      run at once; live members over the build average 49.0 against 48. With its children done, the orchestrator runs
+      the tail - strip and zstd compressing the five modules, then depmod - as cpu-batch's batch loop until
+      `tail_work`, the tail's pooled CPU, is spent (D54). Unmodelled, about 1.8 % of the job: 841 helper and 13 link
+      jobs, the dkms script before the make, and the kernel image's second hook run (D54). The premise, stated (D46):
+      the user installed `nvidia-driver-595-open` by apt, which pulls in the DKMS package; Ubuntu's `ubuntu-drivers`
+      installs prebuilt modules instead (S2-36), and its kernels ship ZFS and v4l2loopback prebuilt (S2-35). The task
+      shows `dkms`, the program that runs the make and the tail (D55); its spawned children carry their observed
+      comms. Spawn-table entries sample per-instance (interpretation-contract §5).
+
+  module-compiler-child:
+    category_source: meas
+    pattern:
+      # 9.10 D53, D55: the build's job kinds, each one process tree (a member id, or {member id: [children]},
+      # children in fork order); `letters` code the kinds in the orchestrator's job_order; `names` the members' comms
+      trees:
+        object: {sh: [{gcc: [cc1, as]}, fixdep, rm]}
+        kprobe: {sh: [mkdir, {gcc: [cc1, as]}, rm]}
+        conftest_a: {sh: [{csh: [dirname, {gcc: [cc1]}, rm, tsh1, tsh2]}]}
+        conftest_b: {sh: [{csh: [dirname, {gcc: [cc1, as]}, rm, rm2, tsh1, tsh2]}]}
+      letters: {o: object, p: kprobe, c: conftest_a, C: conftest_b}
+      names: {gcc: x86_64-linux-gn, csh: sh, tsh1: sh, tsh2: sh, rm2: rm}
+      program: []                # the compiler builds each member's program from its tree (D53)
+    params:
+      object_sh_step_1:
+        {dist: quantiles, p: [695, 710, 720, 744, 790, 861, 905, 930, 984, 1198], min: 667, max: 1576, means: [686.096, 703.986, 715.265, 731.955, 765.061, 823.958, 882.382, 916.919, 949.274, 1033.979, 1372.654], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      object_sh_step_2:
+        {dist: quantiles, p: [108, 119, 127, 138, 149, 161, 177, 192, 2891, 3413], min: 99, max: 3620, means: [104.462, 114.457, 123.058, 132.687, 143.258, 153.999, 167.242, 183.027, 1451.514, 3091.226, 3533.577], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      object_sh_step_3:
+        {dist: quantiles, p: [53, 60, 65, 76, 83, 88, 96, 105, 120, 133], min: 43, max: 196, means: [50.404, 57.125, 62.431, 72.031, 80.137, 85.648, 91.272, 99.896, 110.913, 126.034, 155.308], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      object_sh_step_4:
+        {dist: quantiles, p: [93, 98, 99, 103, 112, 124, 134, 142, 158, 203], min: 86, max: 232, means: [90.673, 96.168, 98.646, 101.137, 106.398, 118.463, 128.255, 138.058, 147.966, 167.068, 217.731], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      object_gcc_step_1:
+        {dist: quantiles, p: [1674, 1850, 1892, 1920, 1959, 2021, 2101, 2157, 2268, 2625], min: 1597, max: 3062, means: [1644.923, 1776.606, 1878.45, 1907.356, 1939.355, 1986.122, 2056.601, 2125.827, 2193.288, 2382.697, 2864.962], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      object_gcc_step_2:
+        {dist: quantiles, p: [122, 136, 146, 158, 167, 176, 187, 196, 213, 234], min: 98, max: 285, means: [117, 130.226, 140.996, 152.841, 162.501, 171.271, 181.009, 190.777, 202.519, 219.833, 254], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      object_gcc_step_3:
+        {dist: quantiles, p: [300, 323, 347, 458, 526, 603, 709, 836, 1071, 2089], min: 262, max: 2185, means: [288.077, 312.63, 335.285, 400.064, 495.442, 558.595, 648.345, 764.158, 921.019, 1504.132, 2145.308], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      object_cc1_step_1:
+        {dist: quantiles, p: [141462, 308871, 376534, 547906, 646084, 808167, 1106742, 1421038, 1968361, 4558295], min: 9246, max: 4659709, means: [15875, 260467.548, 349975.004, 466132.403, 596799.392, 715063.793, 923309.026, 1217735.215, 1610161.014, 3057106.359, 4606298.731], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      object_as_step_1:
+        {dist: quantiles, p: [2286, 2671, 3648, 14038, 20397, 32849, 53218, 79469, 134949, 328958], min: 1787, max: 333963, means: [2123.75, 2485.697, 3068.162, 9066.656, 17040.528, 25500.266, 41662.488, 64260.862, 99116.572, 218551.778, 331409.577], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      object_fixdep_step_1:
+        {dist: quantiles, p: [3503, 5685, 6109, 8523, 9246, 9608, 9853, 10000, 10343, 11070], min: 640, max: 11777, means: [786.327, 5012.048, 5919.208, 7007.869, 8924.049, 9433.658, 9721.638, 9918.215, 10116.212, 10611.35, 11417.654], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      object_rm_step_1:
+        {dist: quantiles, p: [615, 651, 694, 762, 789, 816, 839, 855, 902, 1052], min: 574, max: 1544, means: [603.904, 634.447, 672.112, 736.524, 776.628, 801.411, 825.991, 846.377, 871.812, 942.064, 1267.962], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      kprobe_sh_step_1:
+        {dist: quantiles, p: [506, 547, 555, 570, 586, 611, 646, 674, 745, 874], min: 449, max: 1500, means: [486.024, 538.918, 551.682, 563.405, 577.995, 597.29, 625.542, 658.469, 700.465, 776.858, 965.017], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      kprobe_sh_step_2:
+        {dist: quantiles, p: [76, 78, 79, 83, 87, 94, 107, 119, 144, 192], min: 70, max: 37048, means: [74.865, 76.86, 78.576, 81.368, 85.308, 90.29, 99.093, 111.751, 128.582, 154.807, 29596.991], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      kprobe_sh_step_3:
+        {dist: quantiles, p: [63, 68, 71, 76, 86, 96, 105, 110, 125, 155], min: 0, max: 286, means: [61.068, 65.451, 69.434, 73.109, 80.778, 90.642, 99.995, 107.202, 115.616, 133.887, 176.846], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      kprobe_sh_step_4:
+        {dist: quantiles, p: [79, 85, 88, 94, 105, 116, 127, 135, 153, 183], min: 0, max: 265, means: [70.296, 82.717, 86.361, 90.93, 99.88, 110.485, 120.887, 130.653, 141.668, 163.289, 203.376], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      kprobe_mkdir_step_1:
+        {dist: quantiles, p: [728, 750, 761, 788, 821, 854, 895, 928, 1024, 1171], min: 664, max: 2360, means: [712.191, 740.835, 755.95, 775.269, 805.568, 835.882, 870.781, 909.526, 960.539, 1070.921, 1335.179], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      kprobe_gcc_step_1:
+        {dist: quantiles, p: [1388, 1601, 1623, 1665, 1707, 1760, 1836, 1900, 2043, 2344], min: 0, max: 3244, means: [1038.291, 1569.882, 1612.731, 1646.386, 1687.26, 1730.429, 1791.949, 1862.592, 1957.878, 2116.075, 2584.778], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      kprobe_gcc_step_2:
+        {dist: quantiles, p: [87, 98, 100, 106, 118, 137, 151, 160, 181, 209], min: 0, max: 378, means: [76.046, 93.72, 99.376, 102.918, 111.218, 127.215, 144.109, 155.082, 167.985, 189.456, 239.667], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      kprobe_gcc_step_3:
+        {dist: quantiles, p: [227, 234, 242, 259, 282, 312, 342, 360, 391, 430], min: 0, max: 760, means: [202.665, 230.714, 237.929, 251.228, 270.419, 295.367, 325.463, 350.417, 372.414, 404.053, 459.026], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      kprobe_cc1_step_1:
+        {dist: quantiles, p: [3917, 4004, 4098, 4349, 4554, 4751, 4955, 5103, 5332, 6019], min: 0, max: 9276, means: [3517.715, 3965.382, 4050.31, 4234.921, 4461.177, 4644.242, 4839.383, 5022.547, 5194.667, 5466.387, 6769.906], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      kprobe_as_step_1:
+        {dist: quantiles, p: [1548, 1591, 1623, 1702, 1810, 1932, 2046, 2097, 2180, 2459], min: 0, max: 3409, means: [1384.345, 1574.071, 1607.699, 1664.099, 1757.022, 1867.586, 1986.317, 2070.141, 2129.576, 2236.337, 2639.632], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      kprobe_rm_step_1:
+        {dist: quantiles, p: [603, 623, 634, 657, 698, 771, 823, 852, 911, 1083], min: 547, max: 2839, means: [584.316, 614.821, 629.377, 645.75, 675.887, 730.786, 796.551, 835.598, 876.394, 947.855, 1327.684], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_a_sh_step_1:
+        {dist: quantiles, p: [547, 565, 576, 599, 624, 668, 718, 748, 815, 894], min: 497, max: 1669, means: [531.218, 557.192, 570.793, 588.024, 611.71, 642.439, 691.998, 732.042, 773.674, 842.013, 1156.867], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_a_sh_step_2:
+        {dist: quantiles, p: [77, 86, 89, 96, 106, 117, 128, 137, 162, 195], min: 73, max: 244, means: [75.408, 81.937, 87.528, 92.076, 101.126, 111.21, 121.509, 132.008, 146.082, 172.818, 216.363], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_a_csh_step_1:
+        {dist: quantiles, p: [546, 558, 567, 583, 606, 629, 659, 687, 751, 889], min: 535, max: 1085, means: [541.889, 552.227, 563.088, 575.81, 595.393, 616.608, 642.006, 671.615, 707.151, 788.518, 1000.981], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_a_csh_step_2:
+        {dist: quantiles, p: [2058, 2089, 2104, 2136, 2180, 2233, 2290, 2327, 2415, 2942], min: 2026, max: 3512, means: [2047.159, 2076.218, 2097.806, 2121.372, 2158.192, 2203.681, 2258.874, 2306.082, 2355.845, 2556.976, 3332.066], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_a_csh_step_3:
+        {dist: quantiles, p: [52, 58, 61, 67, 80, 163, 175, 183, 207, 237], min: 0, max: 246, means: [48.976, 55.541, 59.782, 63.803, 72.923, 106.53, 168.669, 178.645, 192.398, 219.146, 240.653], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_a_csh_step_4:
+        {dist: quantiles, p: [13, 14, 15, 18, 188, 205, 220, 231, 258, 291], min: 12, max: 328, means: [12.867, 13.932, 14.992, 16.14, 135.747, 196.52, 212.266, 225.069, 241.06, 266.435, 309.406], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_a_csh_step_5:
+        {dist: quantiles, p: [0, 0, 0, 0, 18, 160, 183, 196, 222, 258], min: 0, max: 268, means: [0, 0, 0, 0, 5.453, 60.453, 172.014, 189.268, 206.113, 233.199, 262.244], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_a_csh_step_6:
+        {dist: quantiles, p: [0, 0, 118, 125, 141, 163, 196, 213, 550, 957], min: 0, max: 1110, means: [0, 0, 8.037, 121.925, 131.535, 149.089, 179.097, 203.064, 256.703, 783.349, 1025.907], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_a_dirname_step_1:
+        {dist: quantiles, p: [607, 620, 628, 639, 656, 674, 699, 720, 769, 847], min: 592, max: 986, means: [602.57, 614.735, 624.249, 634.208, 647.555, 664.224, 685.047, 708.414, 737.792, 803.485, 921.419], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_a_gcc_step_1:
+        {dist: quantiles, p: [1157, 1181, 1195, 1226, 1296, 1618, 2605, 2716, 2957, 3951], min: 1083, max: 4063, means: [1138.3, 1171.615, 1188.135, 1210.966, 1256.985, 1390.367, 2477.469, 2654.064, 2796.293, 3520.77, 4020.499], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_a_gcc_step_2:
+        {dist: quantiles, p: [169, 179, 185, 198, 218, 254, 326, 360, 445, 724], min: 152, max: 800, means: [164.252, 175.081, 181.907, 191.503, 207.823, 233.266, 284.9, 342.042, 388.725, 577.42, 756.586], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_a_cc1_step_1:
+        {dist: quantiles, p: [7209, 8057, 13794, 16282, 163358, 299261, 350773, 375922, 606818, 957447], min: 6809, max: 971621, means: [7010.772, 7720.798, 9387.912, 14923.725, 86481.203, 220246.016, 323128.904, 361752.178, 425834.005, 813897.768, 967269.292], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_a_rm_step_1:
+        {dist: quantiles, p: [0, 0, 0, 0, 624, 697, 765, 796, 1412, 2277], min: 0, max: 4587, means: [0, 0, 0, 0, 443.001, 655.483, 731.136, 778.546, 952.792, 1866.878, 2945.316], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_a_tsh1_step_1:
+        {dist: quantiles, p: [0, 123, 125, 131, 148, 1875, 1976, 2034, 2171, 2457], min: 0, max: 3396, means: [0, 110.507, 124.496, 127.914, 140.406, 613.465, 1927.962, 2001.751, 2078.534, 2267.069, 2736.989], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_a_tsh2_step_1:
+        {dist: quantiles, p: [0, 130, 157, 168, 185, 226, 289, 304, 465, 854], min: 0, max: 2262, means: [0, 112.938, 143.422, 163.738, 177.207, 197.345, 264.538, 295.645, 332.795, 681.243, 1257.005], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_sh_step_1:
+        {dist: quantiles, p: [525, 578, 594, 611, 635, 681, 733, 763, 824, 949], min: 507, max: 1059, means: [517.811, 558.355, 587.551, 603.424, 622.984, 654.256, 704.538, 747.509, 788.444, 865.786, 1034.576], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_sh_step_2:
+        {dist: quantiles, p: [86, 89, 92, 100, 110, 120, 132, 140, 161, 203], min: 77, max: 306, means: [82.905, 87.816, 90.632, 96.111, 105.072, 114.992, 125.13, 135.724, 147.515, 173.412, 261.935], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_csh_step_1:
+        {dist: quantiles, p: [557, 567, 573, 592, 609, 631, 663, 691, 764, 887], min: 537, max: 1088, means: [552.447, 562.449, 569.716, 582.483, 601.664, 619.212, 644.836, 675.416, 714.332, 815.203, 1001.058], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_csh_step_2:
+        {dist: quantiles, p: [2078, 2113, 2130, 2162, 2199, 2255, 2313, 2341, 2439, 3152], min: 2046, max: 4238, means: [2063.986, 2102.077, 2121.907, 2147.306, 2179.194, 2222.959, 2280.43, 2324.85, 2372.344, 2660.062, 3784.647], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_csh_step_3:
+        {dist: quantiles, p: [53, 57, 60, 63, 70, 79, 89, 99, 175, 212], min: 49, max: 229, means: [51.895, 54.872, 58.455, 61.805, 66.16, 73.815, 83.218, 93.094, 127.584, 189.117, 224.61], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_csh_step_4:
+        {dist: quantiles, p: [43, 45, 48, 50, 52, 57, 72, 137, 744, 897], min: 41, max: 915, means: [41.939, 44.096, 46.712, 48.76, 50.713, 53.698, 62.231, 88.671, 361.872, 798.38, 911.631], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_csh_step_5:
+        {dist: quantiles, p: [10, 117, 165, 172, 178, 188, 201, 212, 244, 323], min: 0, max: 473, means: [0, 69.935, 144.415, 169.134, 175.233, 182.562, 193.182, 205.411, 223.025, 263.841, 400.365], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_csh_step_6:
+        {dist: quantiles, p: [0, 0, 0, 0, 0, 18, 22, 52, 733, 880], min: 0, max: 885, means: [0, 0, 0, 0, 0, 5.397, 19.333, 34.449, 289.763, 791.93, 883.884], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_csh_step_7:
+        {dist: quantiles, p: [0, 121, 123, 127, 141, 150, 165, 194, 2708, 3060], min: 0, max: 3163, means: [0, 114.269, 121.543, 124.718, 133.69, 145.321, 156.522, 173.162, 1165.953, 2824.698, 3119.703], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_dirname_step_1:
+        {dist: quantiles, p: [615, 626, 632, 644, 657, 677, 704, 720, 767, 874], min: 598, max: 990, means: [609.607, 622.041, 629.317, 638.947, 650.426, 666.496, 687.721, 711.298, 738.836, 805.379, 928.492], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_gcc_step_1:
+        {dist: quantiles, p: [946, 1173, 1184, 1209, 1250, 1355, 1461, 1670, 3675, 4009], min: 799, max: 4079, means: [858.263, 1153.972, 1178.802, 1197.576, 1227.483, 1295.124, 1404.177, 1508.534, 3062.572, 3812.814, 4048.714], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_gcc_step_2:
+        {dist: quantiles, p: [84, 92, 98, 107, 116, 133, 151, 186, 549, 643], min: 64, max: 693, means: [81.922, 89.192, 95.158, 103.551, 111.138, 123.697, 140.814, 162.163, 418.413, 584.788, 674.409], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_gcc_step_3:
+        {dist: quantiles, p: [234, 252, 260, 273, 291, 316, 341, 357, 386, 417], min: 222, max: 438, means: [227.341, 245.886, 255.966, 266.733, 281.61, 301.503, 327.314, 347.653, 368.074, 398.838, 435.357], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_cc1_step_1:
+        {dist: quantiles, p: [8560, 18545, 19608, 120546, 292962, 350115, 377722, 409877, 890310, 962725], min: 7489, max: 974405, means: [7955.538, 16804.134, 19131.17, 40905.207, 201816.194, 319417.223, 360862.327, 387115.487, 478272.867, 921551.832, 971824.134], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_as_step_1:
+        {dist: quantiles, p: [1637, 1686, 1713, 1772, 1858, 1978, 2088, 2135, 2428, 2669], min: 1532, max: 2768, means: [1612.287, 1666.409, 1699.231, 1743.444, 1812.573, 1909.814, 2028.701, 2110.885, 2207.722, 2523.642, 2732.334], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_rm_step_1:
+        {dist: quantiles, p: [581, 590, 598, 612, 635, 686, 753, 781, 840, 925], min: 563, max: 979, means: [576.225, 586.293, 594.382, 605.395, 622.488, 657.155, 716.574, 767.334, 804.075, 864.475, 953.778], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_rm2_step_1:
+        {dist: quantiles, p: [566, 579, 586, 596, 612, 638, 691, 808, 1982, 2277], min: 552, max: 2395, means: [562.508, 573.375, 583.592, 591.853, 604.094, 623.25, 657.913, 719.455, 1581.587, 2082.509, 2371.85], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_tsh1_step_1:
+        {dist: quantiles, p: [0, 121, 123, 126, 135, 146, 158, 166, 188, 217], min: 0, max: 382, means: [0, 46.685, 122.118, 124.732, 129.105, 141.563, 150.75, 161.892, 173.752, 197.88, 302.881], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+      conftest_b_tsh2_step_1:
+        {dist: quantiles, p: [0, 156, 161, 168, 182, 197, 211, 221, 425, 520], min: 0, max: 624, means: [0, 60.031, 159.21, 164.756, 175.436, 189.131, 202.983, 215.509, 243.638, 465.821, 572.303], sampling: per-instance, source: "meas-ci:background:2026-10-02"}
+    lifetime: spawned
+    spawned_by: module-build-orchestrator
+    binding_params: []
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      run: "background:2026-10-02, landings [1-23; 7, 10 and 11 twice]; runs 36984969195, 36985028429, 36987366998, 36987468347, 36987471634, 36989503010, 36989807453"
+      stats: ["56 per-(kind, member, step) CPU tables, half-widths +-0.67 to 4.13 %",
+              "cc1 per job mean: object 721.9 ms, conftest 171.7 ms (without as) and 240.0 ms (with as), kbuild probe 4.55 ms",
+              "jobs fitting their tree exactly in every landing: object 194 of 200 (6 with objtool), kbuild probes 1 124 of 1 125, conftest 95 of 145 and 82 of 87; the rest folded (D53)"]
+      scope: >-
+        One observation (phase decision 2; 9.10 D4, D46-D51): DKMS's autoinstall of `nvidia-dkms-595-open` 595.91.07,
+        the open kernel module of NVIDIA's production branch (D47), for the security kernel `7.0.0-34-generic`, run by
+        the stock Ubuntu 24.04 unattended upgrade's install stage of 2026-09-23 (D48). The state is a chroot of the
+        default layer of an English 24.04.5.1 desktop install, 1,445 packages, with the HWE kernel the installer adds
+        (`7.0.0-31`) and `nvidia-driver-595-open` installed by apt (D46, D49), built from Ubuntu's snapshot service as
+        the archive stood at 2026-09-22T17:00Z, its download stage run against the archive at 2026-09-24T00:00Z (D51).
+        The job is every process under the two DKMS kernel hooks of that stage (D50): the headers' hook built the module
+        in every landing; the image's hook ran after it, 0.13-0.145 s. The build runs at -j8 through
+        `OMP_NUM_THREADS=8`, `nproc` being what NVIDIA's `dkms.conf` and dkms read (D4's eight-thread desktop, design;
+        D50). No boot loader or `shim-signed` in the chroot, so no module is signed, where a Secure Boot desktop signs
+        the five. Pinned to one CPU of a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel
+        6.17.0-1022-azure), the rest of the machine idealised; no desktop session; `perf sched record` and a taskstats
+        listener on the measured CPU. 26 same-machine landings under the machine gate (repeats 7, 10 and 11 landed
+        twice, every landing pooled: D58); the stability rule holds on 59 of the 60 values, the tail's block per run
+        carried with its half-width (D58). Values are this software on this machine, not desktop truth (9.5 D10).
+    modeling_notes: >-
+      One make job is the chain of processes it runs, one task per member of its kind's tree (`trees`; 9.10 D53, 9.6
+      D19): object jobs the kernel build's six-process chain, kbuild's compiler probes `sh` -> `mkdir`, `gcc` ->
+      `cc1`, `as`, `rm`, and NVIDIA's conftest tests `sh` -> `sh` (`conftest.sh`) -> `dirname`, `gcc` -> `cc1` (->
+      `as`), `rm`, `sh`, `sh`. A member's CPU per structural step is its CPU between its own children's exits (9.6
+      D20); the compiler builds each member's program from the tree as `compiler-child`'s: the root runs first, a
+      member runs a step, wakes its next child and waits, and wakes its parent when done, waiting without CPU until
+      the root ends the job. A job is fitted to its tree by role, children in fork order; a further process of a role
+      the tree has there adds its CPU to that member, any other process its subtree's CPU to its parent member's step
+      in which it was forked (D53): a test that compiled twice is drawn as one, `objtool`'s CPU in its six object jobs
+      folds into `sh`. The compiler driver shows its comm, `x86_64-linux-gn` (D55); `cc1` takes the orchestrator's
+      `child_name`.
+
   # ---- file and download jobs — 9.7 background campaign -----------------------
 
   file-backup:
