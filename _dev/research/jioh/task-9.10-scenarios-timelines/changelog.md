@@ -1199,3 +1199,19 @@ Hands to the entry's scope at fold-in: a profile's few hundred files are HippoCa
 Open: which profile; its placement under the indexed directories.
 
 No file changed yet.
+
+## D67 — the indexed profile is HippoCamp's Bei (2026-10-02)
+
+By 인지오's decision, D66's open item. The campaign indexes the `bei_fullset` tree of HippoCamp (`Bei/Fullset/Bei/`): 875 files, 40.66 GB, 76 directories, 42 top folders and 61 loose files, up to 7 levels deep (S3-76, reader's own).
+
+Grounds (S3-76):
+
+- **No public benchmark set inside.** Bei's folders are topical (`Mount Fuji`, `Cat-Vlog`, `study music`, `IELTS`, `Receipts`, …); Adam's tree holds `caud`, `maud` and `contractnli` (83 of 344 files) and Victoria's `financebench` (368 of 711).
+- **Every extractor family.** mp4 157, jpg and jpeg 265, pdf 123, mp3 86, docx 68, png 61, txt 27: GStreamer's media extractors, the image, PDF, Office and text extractors; Adam's and Victoria's are mostly PDF.
+- **The persona.** "a student and content-creator" (paper, page 5); the core set's media timelines are design (D2), so this is a fit, not a ground.
+
+Checked at the dry run: the 40.66 GB download per repeat under the tooling's work root.
+
+Open: the tree's placement under the indexed directories.
+
+No file changed yet.
