@@ -1052,3 +1052,15 @@ Grounds:
 - **Against the alternatives.** With the build arriving at 2 s, as the user's build does, the first 2 s are labelled `false` with no unwanted work. At the base's length (about 23 min once D18's 2,908-job build is bound), the file would carry the label for about 19 min with no unwanted work after the module build ends.
 
 Hands to 9.14: the pair review and the scoring spec compare `c7-compile` with `c1-compile`'s first C seconds, as for the interactive counterparts (D41). Hands to 9.15: `building-plan.md` §3 C7 ("`compile` renames `make` to `dkms`").
+
+## D57 — the module build's fork cap is cap × 6, 9.6 D19's rule; the `conftest` phase runs fewer jobs at once, stated (2026-10-02)
+
+By 인지오's decision, raised by the compiler work for D53's three job kinds. `module-build-orchestrator`'s `fork_cap` is `parallelism_cap` × 6, as `build-orchestrator`'s (9.6 D19). The simulator's format is unchanged. While `conftest` tests are in flight, the cap holds fewer jobs than eight, and the entry's `modeling_notes` state it.
+
+Grounds:
+
+- **The cap counts tasks.** A FORK blocks while `fork_cap` children are alive (`docs/simulator/simulator-guide.md`, the spawn-table rules). A job's members are forked together and live until the job ends (9.6 D19), so cap × members bounds the jobs in flight only when every job has the same member count. Object jobs and kbuild's probes have 6 members; `conftest` tests have 8 or 10 (D53).
+- **What it costs** (the second dry run; the measured job lifetimes, each job counted at its kind's member count). Live tasks exceed 48 for 40.1 s of the 210.5 s the jobs run, 19.1 %, almost all while a `conftest` test is live (57.7 s, 27.4 %). Over the build, live tasks average 49.0, against cap × 6 = 48.
+- **Against the alternatives.** At cap × 10 the object phases would allow up to 13 jobs at once, overstating `-j8` for most of the build. A cap counted in jobs would change the simulator's format, shared with 인경민 and 박이안, beyond this campaign.
+
+Tooling: `dataset/tools/wlc/compiler.py`'s module-build constructor.
