@@ -22,7 +22,7 @@ A reference or work whose copy is unreachable or paywalled is dropped; `zhang-ch
 ### 3. Unasked and user-started jobs
 
 - **The unwanted job of the ten interactive attribute counterparts and `c2-p2b`** is the stock Ubuntu 24.04 unattended upgrade, observed on the runner, in place of `clamscan` (D3). It installs one real day's security updates, 2026-07-27's `glibc`, rebuilt from Ubuntu's snapshot service (D36), in a chroot of an English default install (D37), `apt.systemd.daily install` measured (D38), carried as a new entry, `package-upgrade`, in the batch-loop form over the whole process tree (D39), its task showing `unattended-upgr` (D40); each interactive counterpart is one segment as long as the job's CPU total, the job from 0 s (D41); pair P2's segment 1 takes the same length in both files (D42); `unattended-upgr` is tier 1 (D43); a cut counterpart keeps its base's focus margins and operation placement in proportion (D44).
-- **`c7-compile`'s job** is an observed DKMS autoinstall of a real module (D4): NVIDIA's, installed by the driver package, measured in a campaign of its own (D46): `nvidia-dkms-595-open`, the production branch's open flavour (D47), built for 2026-09-23's security kernel `7.0.0-34` (D48), the state taken at 2026-09-22T17:00Z (D51), in D37's chroot with the installer's kernel and the driver package added (D49); the job is every process under the two DKMS hooks of the kernel day's install stage (D50).
+- **`c7-compile`'s job** is an observed DKMS autoinstall of a real module (D4): NVIDIA's, installed by the driver package, measured in a campaign of its own (D46): `nvidia-dkms-595-open`, the production branch's open flavour (D47), built for 2026-09-23's security kernel `7.0.0-34` (D48), the state taken at 2026-09-22T17:00Z (D51), in D37's chroot with the installer's kernel and the driver package added (D49); the job is every process under the two DKMS hooks of the kernel day's install stage (D50), carried as a new entry in `build-orchestrator`'s spawn form with its object and probe jobs at cap 8 (D52).
 - **The indexing files** show Tracker indexing a real user's file set, the Mahoney set, from an empty database: the first index at login (unasked) and the same work after the user's reset (asked) (D5). `c2-p1b`'s indexer carries that measured indexer's own tables (D6).
 - **`c2-p2a`'s wanted download** is an install of another game the user starts during play (D7).
 - **The scheduled backup** is Déjà Dup's periodic incremental run (D8). `c7-backup` stays the scheduled run's label flip, a pre-committed miss, its premise restated (D9).
@@ -76,7 +76,7 @@ A timeline's bound values carry a source tag or a design label, checked by the l
 
 Each flagged open in its decision, for the campaign's method or the rebinding:
 
-- **D4, the DKMS build:** the entry's form and the comm, read from the dry run (D50).
+- **D4, the DKMS build:** how the probe jobs and the uncovered 7 % are carried; the names, tiers and entry ids; `c7-compile`'s structure against `c1-compile`; the stability rule's list (D52).
 - **D5, the Tracker index:** the file set's placement under the indexed directories; the job window.
 - **D8, the backup:** the change set and its ground; the first backup's destination; Déjà Dup's process names.
 - **D10, the export:** its process and names; the render profile's settings.

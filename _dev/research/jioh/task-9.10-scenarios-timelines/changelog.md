@@ -978,3 +978,19 @@ Grounds:
 The dry run otherwise held D49: the layer built from the snapshot in 519 s with the 1,445 packages and none extra; the kernel install and `nvidia-driver-595-open` installed (`dkms` 3.0.11, `gcc-13`); DKMS built the five modules, 200 `CC [M]` lines in the `make.log`; the stage's unattended upgrade read "All upgrades installed".
 
 Tooling: `run.sh`'s `dkms` job takes T0 = `20260922T170000Z`, cleans apt's cache after the state install, and measures the chroot without crossing its mounts; `pool_runs.py` checks the state's kernel and the module built for the new one.
+
+## D52 — the DKMS build is a new entry in the spawn form: an orchestrator and its object and probe jobs at cap 8 (2026-10-02)
+
+By 인지오's decision, D50's open item on the entry's form, read from the second dry run (run 36982322419, #107, repeat 1, `dry`, on the EPYC 7763; every check of the method held). The DKMS build is a new orchestrator and child pair in `build-orchestrator`'s spawn form (9.6 D19), with its own tables from this campaign. A `make` dispatches six-process jobs at most eight in flight. Both the object compiles and the probe compiles are carried as jobs. What the jobs leave out is stated in the entry as unmodelled, as 9.6 stated the kernel build's.
+
+Grounds (the dry run, `analyze.py` and 9.6's job classification, `jobs_of`, applied to each hook's subtree; a job's members stop at a nested `make`):
+
+- **The build is a parallel `make` at cap 8.** The headers' hook built the module: 12,406 processes, 221.9 s of CPU on the measured CPU in a 222.5 s span. Object jobs live: mean 7.86, max 8, eight on 92.2 % of the build's time; all jobs live: mean 8.42. The kernel image's hook ran after it: 181 processes, 0.135 s.
+- **What the CPU is.** 200 object jobs, 148.3 s (67 %), 194 of them `sh`, `x86_64-linux-gnu-gcc-13`, `cc1`, `as`, `fixdep`, `rm` (the kernel build's six-process chain, 9.6 D19), 6 with `objtool` added. 1,357 probe jobs, 58.1 s (26 %): NVIDIA's `conftest` and kbuild's probes, 1,124 of them the six-process shape with `mkdir` in `fixdep`'s place. Helpers, links and the rest, 15.5 s (7 %): 841 helper jobs 2.1 s, 13 link jobs 1.6 s, outside any job 11.8 s (the `dkms` script, `zstd` compressing the modules 7.4 s, `depmod` 1.75 s). `cc1` is 189.5 s of the whole.
+- **The form keeps the parallel structure.** On one lane the build is about eight runnable tasks against the code editor, not one. `cpu-batch`'s batch loop (D39) would make it one task that is always runnable (the block after a run is 0 at the median, `batch_block_us`). That suited the unattended upgrade's sequential stages, not a parallel `make`.
+- **One form for the pair.** `c1-compile`'s user build is `build-orchestrator`'s spawn form (9.6 D19). With the module build in the same form, the pair differs in the job's measured values and its name: the vocabulary's "a module rebuild after a kernel update in place of the user's build" (`docs/recognition-vocabulary.md` §1).
+- **Against the kernel build's tables.** Binding `build-orchestrator` with 200 jobs would carry the kernel build's per-job values for NVIDIA's module (phase decision 2) and drop the probes' 26 %.
+
+Open, for the campaign's method: how the probe jobs and the uncovered 7 % are carried; the names and tiers; the entry ids; `c7-compile`'s structure against `c1-compile`; the list the stability rule tests.
+
+Tooling to follow: `analyze.py` gains the job classification per hook run (`jobs_of`, a job's members stopping at a nested `make`); the compiler gains the second job kind.
