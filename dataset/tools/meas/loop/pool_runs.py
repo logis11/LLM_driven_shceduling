@@ -148,6 +148,11 @@ def validity(family, dirs, entry):
                                 ("tracker.done", "1"), ("tracker.db.files", "875"), ("tracker.log.debug_lines", "0")):
                     if r.get(x) != want:
                         notes.append(f"{x} {r.get(x)} (want {want})")
+                try:   # the index starts cold (D75)
+                    if float(r.get("cache.tracker-index.fraction") or "") > 0.01:
+                        notes.append(f"cached fraction {r.get('cache.tracker-index.fraction')} at the start (want <= 0.01)")
+                except ValueError:
+                    notes.append("cached fraction not recorded")
                 try:   # the shipped 15 s initial sleep, from the miner's status trace (D63, D69)
                     if not 15.0 <= float(r.get("tracker.log.sleep_s") or "") < 16.0:
                         notes.append(f"initial sleep {r.get('tracker.log.sleep_s')} s (want 15)")

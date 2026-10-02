@@ -756,11 +756,20 @@ PY
   rec tracker.gst_registry.after "$(sudo ls "$r$h/.cache/gstreamer-1.0" 2>/dev/null | paste -sd, -)"
   sudo ls -laR "$r$h/.cache" > "$OUT/tracker.cache.txt" 2>&1
 }
+trk_cold() {   # trk_cold: the clean page cache dropped before the index (D75), the set's cached fraction recorded —
+  # fincore read as root, the home being the user's alone; the second drop undoes its metadata reads (as cold())
+  local d="$WORK/chroot/home/$TRK_USER/Documents"
+  sync; sudo sysctl -q vm.drop_caches=3
+  rec cache.tracker-index.fraction "$(sudo find "$d" -type f -print0 | sudo xargs -0 fincore -b -n -r -o PAGES,SIZE 2>/dev/null \
+    | awk -v pg="$PAGE" '{r += $1; s += int(($2 + pg - 1) / pg)} END {if (s > 0) printf "%.4f", r / s}')"
+  sync; sudo sysctl -q vm.drop_caches=3
+}
 trk_job() {
   local r="$WORK/chroot"
   UPG_T0="${MEAS_TRACKER_T0:-20260922T170000Z}"   # D64
   sudo rm -rf "$r"; upg_build "$r"
   sudo mount --bind "$r" "$r"; upg_mount "$r"; trk_home "$r"
+  trk_cold
   export MEAS_PIN=none
   phase tracker-index -- sudo taskset -c "$MEAS_HARNESS_CPUS" chroot "$r" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" \
     --init-groups /usr/bin/env -i HOME="/home/$TRK_USER" USER="$TRK_USER" LOGNAME="$TRK_USER" \
