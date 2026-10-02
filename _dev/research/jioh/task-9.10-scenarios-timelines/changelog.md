@@ -903,3 +903,18 @@ Grounds:
 Open, for the campaign's method: the branch and the flavour (proprietary or open); the kernel the hook fires for; the environment the build runs in; the job's boundaries; the entry's form; the comm.
 
 No file changed yet.
+
+## D47 — the module is NVIDIA's 595 branch, open flavour: `nvidia-dkms-595-open` (2026-10-02)
+
+By 인지오's decision, D46's first open item: the module the hook builds is `nvidia-dkms-595-open`, the open kernel module of NVIDIA's production branch 595. D46's user installs it as `apt install nvidia-driver-595-open`, whose dependency resolves to it.
+
+Grounds:
+
+- **Ubuntu's recommendation.** Ubuntu 24.04's desktop driver branches are 580 (long-term support, `restricted`), 595 (production) and 610 (new feature), both in `multiverse`. Each has a proprietary and an `-open` flavour, and every one of them declares `Prefer-Variant: Open` (S2-35). An installed desktop has `multiverse` enabled (S2-38). `ubuntu-drivers` ranks the preferred `-open` flavour first, then a production or long-term branch over a new-feature one, then the higher name (S2-36). So it recommends `nvidia-driver-595-open` for every GPU in 595's device list, and `nvidia-driver-580` only for the 160 device ids that 580 lists and 595 and 610 do not.
+- **NVIDIA's recommendation.** "We recommend the use of open kernel modules on all GPUs that support it." Its installer defaults to the open flavour. The open modules run on Turing and later; in 595 the proprietary flavour covers only Turing to Hopper (S2-37).
+- **Users' GPUs.** In Steam's August 2026 Linux survey, 87.0 % of the listed NVIDIA share (21.16 % of 24.32 %) is a GPU the open modules support. The remaining 3.16 % are GeForce GTX 10xx and 970 cards (S3-59, reader's own).
+- **Against 580.** Ubuntu's autopkgtest sized the 580 builds (S3-32): open, 213 objects in 5 modules, ≈ 174 s at `-j2`; proprietary ≈ 158 s. 595's size is the campaign's to observe. Debian popcon counts the proprietary flavour most, 3.76 % against 0.74 % (S3-30).
+
+Open, for the campaign's method: the kernel the hook fires for; the environment the build runs in; the job's boundaries; the entry's form; the comm.
+
+No file changed yet.
