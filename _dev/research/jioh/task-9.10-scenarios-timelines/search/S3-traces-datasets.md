@@ -156,6 +156,7 @@ Source copies under `_dev/research/jioh/task-9.10-scenarios-timelines/sources/S3
 | 2026-10-01 | WebSearch | public dataset developer build telemetry incremental vs full build durations local machines open data | none relevant (database refresh benchmarks, a 2017 webkit-dev thread) | no dataset of user builds |
 | 2026-10-01 | WebSearch | KDE UserFeedback telemetry results published application start count usage time Plasma statistics | kate-editor.org post 2020-02-09 (200) | the post says start count is collected; no published results found |
 | 2026-10-02 | 9.7's copy | Steam Hardware & Software Survey, August 2026, Linux (`../task-9.7-background-io/sources/T9-S3-07/hwsurvey-linux.html`, same SHA-256) | copied → S3-59 | — |
+| 2026-10-02 | api.launchpad.net | `ubuntu/+archive/primary?ws.op=getPublishedBinaries`, `exact_match=true`, `noble/amd64`, created since 2026-06-01, for `nvidia-dkms-595-open`, `linux-image-generic-hwe-24.04`, `linux-headers-generic-hwe-24.04` | 200 (all three) → S3-60 | — |
 
 ## 2. Candidates
 
@@ -787,6 +788,16 @@ Each sub-entry is one observation by one user.
 - **Reader's own computation** (`python3.12 survey_nvidia_open.py`, output `survey_nvidia_open.out`): the table's 106 rows hold 49 NVIDIA rows, 24.32 % of Linux respondents. 42 of them, 21.16 %, name a GPU in the open kernel modules' compatible-GPU table (S2-37; Valve's "<name> Max-Q / Mobile" matched to the table's "<name> Laptop GPU"); 7, 3.16 %, do not — GeForce GTX 1060, 1050 Ti, 1070, 1080, 1080 Ti, 1050 and 970. So 87.0 % of the listed NVIDIA share is a GPU the open flavour drives. These locate a candidate; they are not values.
 - **Coverage.** T5 — which NVIDIA GPUs Steam's Linux respondents have, in August 2026, by whether the open kernel modules drive them. The population is Steam users who opt in, Steam Deck 10.48 % of it; the table lists cards above Valve's cut-off only, its shares summing to 108.93 % as published. Does not cover which driver package or flavour users install, nor desktops without Steam.
 - **One observation:** yes — one monthly survey aggregate (Valve, August 2026, Linux platform).
+
+#### S3-60 — Launchpad publishing history of `nvidia-dkms-595-open` and the HWE kernel metapackages, all pockets, noble amd64 (T5; read at stage 3, 2026-10-02)
+
+- **Citation.** Canonical, Launchpad web service API (`devel`), `https://api.launchpad.net/devel/ubuntu/+archive/primary?ws.op=getPublishedBinaries&binary_name=<name>&exact_match=true&distro_arch_series=https://api.launchpad.net/devel/ubuntu/noble/amd64&created_since_date=2026-06-01`, for `nvidia-dkms-595-open`, `linux-image-generic-hwe-24.04` and `linux-headers-generic-hwe-24.04`. Read for D47's open item (the kernel the hook fires for).
+- **Copy read.** Accessed 2026-10-02 (all 200); `sources/S3-60/`, SHA-256 in `SHA256SUMS.txt`.
+- **Records quoted** (`binary_package_version`, `pocket`, `component_name`, `status`, `date_published`).
+  - `nvidia-dkms-595-open`: "595.84-0ubuntu0.24.04.1 Updates multiverse Superseded 2026-07-22T22:30:59"; "595.84-0ubuntu0.24.04.1 Security multiverse Published 2026-07-23T17:33:27"; "595.91.07-0ubuntu0.24.04.1 Updates multiverse Published 2026-09-15T08:20:16"; "595.99.02-0ubuntu0.24.04.1 Proposed multiverse Published 2026-09-29T04:52:02".
+  - `linux-image-generic-hwe-24.04` (the headers metapackage's records carry the same versions, pockets and times): "7.0.0-31.31~24.04.1 Security main Superseded 2026-09-04T08:56:27"; "7.0.0-34.34~24.04.1 Updates main Superseded 2026-09-22T17:43:27"; "7.0.0-34.34~24.04.1 Security main Published 2026-09-23T15:49:46"; "7.0.0-38.38~24.04.4 Updates main Published 2026-10-01T11:17:59"; "7.0.0-39.39~24.04.1 Proposed main Published 2026-10-01T22:48:57".
+- **Coverage.** T5 — when each version reached each pocket: the security pocket's latest kernel before 2026-10-02 is 7.0.0-34 (2026-09-23), replacing 7.0.0-31 (2026-09-04); 7.0.0-38 is in the updates pocket only; `nvidia-dkms-595-open` 595.91.07 is in the updates pocket from 2026-09-15, the security pocket holding 595.84. Does not cover when a desktop installs them.
+- **One observation?** The archive's own record, not a sample.
 
 ## 3. Not found
 
