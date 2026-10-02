@@ -125,7 +125,9 @@ def _compile_instance(timeline, library, task, iid, mode, wakes):
     params = entry.get("params") or {}
     program = entry["pattern"]["program"]
 
-    if library.is_measured(task["archetype"]):
+    if entry["pattern"].get("constructor") == "module-build":
+        _module_build_unroll(build, library, task, iid, seed, params, entry)
+    elif library.is_measured(task["archetype"]):
         _measured_unroll(build, timeline, task, iid, params, wakes)
     elif library.has_input_channel(task["archetype"]):
         _interactive_unroll(build, timeline, task, iid, params, wakes)
@@ -398,13 +400,20 @@ def _batch_loop(build, params, task, seed, iid):
         build.program = [{"op": "RUN", "us": total}, {"op": "EXIT"}]
         build.demand_us = total
         return
-    runs, blocks = params[f"{program}_run"], params[f"{program}_block"]
+    ops = _batch_ops(params[f"{program}_run"], params[f"{program}_block"], total, seed, iid, "batch")
+    ops.append({"op": "EXIT"})
+    build.program, build.demand_us = ops, total
+
+
+def _batch_ops(runs, blocks, total, seed, iid, tag):
+    """The batch loop's ops (D21, D22, D25): runs drawn from `runs` and, after each, a block drawn from `blocks`,
+    until `total` µs of CPU are spent; a zero block joins the runs on either side into one RUN."""
     spent, k, ops, pending = 0, 0, [], 0
     while spent < total:
-        us = min(max(1, int(sampling.sample(runs, seed, iid, "batch_run", str(k)))), total - spent)
+        us = min(max(1, int(sampling.sample(runs, seed, iid, f"{tag}_run", str(k)))), total - spent)
         pending += us
         spent += us
-        block = int(sampling.sample(blocks, seed, iid, "batch_block", str(k), allow_zero=True))
+        block = int(sampling.sample(blocks, seed, iid, f"{tag}_block", str(k), allow_zero=True))
         if block >= 1 and spent < total:
             ops.append({"op": "RUN", "us": pending})   # a zero block means the program ran on (D25): the runs it
             ops.append({"op": "SLEEP", "us": block})   # separates join one RUN, the same CPU between two blocks
@@ -412,8 +421,7 @@ def _batch_loop(build, params, task, seed, iid):
         k += 1
     if pending:
         ops.append({"op": "RUN", "us": pending})
-    ops.append({"op": "EXIT"})
-    build.program, build.demand_us = ops, total
+    return ops
 
 
 def _finite_unroll(build, task, iid, seed, params, program):
@@ -512,6 +520,91 @@ def _orchestrator_unroll(build, library, task, iid, seed, params, program):
         build.demand_us += us
     build.program.append({"op": "WAIT", "channel": f"children:{iid}"})
     build.program.append({"op": "EXIT"})
+
+
+# ---- the DKMS module build (module-build-orchestrator, 9.10 D52–D57) ---------------------------
+
+def _tree_nodes(tree, parent=None):
+    """A job tree from the child entry's pattern — a node is a member id, or {member id: [child nodes]} — as
+    [(member id, parent id, [child ids])] depth-first, children in fork order."""
+    out = []
+    for node in tree if isinstance(tree, list) else [tree]:
+        if isinstance(node, dict):
+            (mid, kids), = node.items()
+        else:
+            mid, kids = node, []
+        names = [next(iter(k)) if isinstance(k, dict) else k for k in kids]
+        out.append((mid, parent, names))
+        out.extend(_tree_nodes(kids, mid))
+    return out
+
+
+def _tree_job(parent_iid, job_index, kind, tree, params, seed, names):
+    """One make job of `kind` as spawn-table entries, one per member of its tree (D53), in the object job's form
+    (9.6 D19, D20; _object_job): the root runs first; every other member waits on its own channel until its parent
+    wakes it; a member with children runs a step, wakes its next child and waits for it, runs its next step, and so
+    on; a member wakes its parent when its last step is done and waits, without CPU, until the root ends the job.
+    Each step's CPU is drawn from the kind's (member, step) table. Returns (entries in fork order, their CPU)."""
+    nodes = _tree_nodes(tree)
+    ids = {mid: f"{parent_iid}.j{job_index + 1}.{mid}" for mid, _p, _k in nodes}
+    demand = 0
+
+    def run(mid, step):
+        nonlocal demand
+        us = int(sampling.sample(params[f"{kind}_{mid}_step_{step}"], seed, parent_iid,
+                                 "job", str(job_index), kind, mid, str(step)))
+        demand += us
+        return {"op": "RUN", "us": us}
+
+    entries = []
+    for mid, parent, kids in nodes:
+        own = {"op": "WAIT", "channel": f"job:{ids[mid]}"}
+        body = [] if parent is None else [own]
+        body.append(run(mid, 1))
+        for i, c in enumerate(kids):
+            body += [{"op": "WAKE", "target": ids[c]}, own, run(mid, i + 2)]
+        if parent is None:
+            body += [{"op": "WAKE", "target": ids[m]} for m, _p, _k in nodes if m != mid]
+        else:
+            body += [{"op": "WAKE", "target": ids[parent]}, own]
+        body.append({"op": "EXIT"})
+        entries.append({"id": ids[mid], "name": names.get(mid, mid), "program": body})
+    return entries, demand
+
+
+def _job_order(rle):
+    """The pattern's `job_order`, run-length coded ("p21 C2 c1 …"), as one kind letter per job."""
+    out = []
+    for tok in rle.split():
+        out.extend(tok[0] * int(tok[1:] or 1))
+    return out
+
+
+def _module_build_unroll(build, library, task, iid, seed, params, entry):
+    """module-build-orchestrator (9.10 D52–D57): the jobs of the measured build in the order it ran them (D53), each
+    after one dispatch run (9.6 D19), at most `parallelism_cap` × 6 tasks in flight (D57); then, its children done,
+    the build's serial tail as its own batch loop until the tail's CPU is spent (D54)."""
+    pat = entry["pattern"]
+    child = library.entry(entry["spawns"])
+    trees, letters = child["pattern"]["trees"], child["pattern"]["letters"]
+    names = dict(child["pattern"].get("names") or {})
+    names["cc1"] = task["bind"].get("child_name", names.get("cc1", "cc1"))
+    build.fork_cap = int(task["bind"]["parallelism_cap"]) * 6   # D57: 9.6 D19's rule, six members a job
+    build.spawn_table = []
+    for i, letter in enumerate(_job_order(pat["job_order"])):
+        kind = letters[letter]
+        entries, demand = _tree_job(iid, i, kind, trees[kind], child["params"], seed, names)
+        build.spawn_table.extend(entries)
+        build.demand_us += demand
+        us = _draw(params, "dispatch_overhead", seed, iid, i)
+        build.program.append({"op": "RUN", "us": us})
+        build.program.extend({"op": "FORK"} for _ in entries)
+        build.demand_us += us
+    build.program.append({"op": "WAIT", "channel": f"children:{iid}"})
+    tail = int(sampling.sample(params["tail_work"], seed, iid, "tail_work", 0))
+    build.program += _batch_ops(params["tail_run"], params["tail_block"], tail, seed, iid, "tail")
+    build.program.append({"op": "EXIT"})
+    build.demand_us += tail
 
 
 def _spawned_program(child, entry, seed, parent_iid, index):

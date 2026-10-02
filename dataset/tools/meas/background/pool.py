@@ -43,6 +43,7 @@ if TOOLS not in sys.path:
 from meas.background import analyze  # noqa: E402
 from meas.stability import ratio_stability, ratio_repeats_needed, stability, TOLERANCE, t975  # noqa: E402
 from meas.distribution import quantile_table  # noqa: E402
+from meas.background import modbuild  # noqa: E402
 pct, QUANTILE_PROBS = analyze.pct, analyze.QUANTILE_PROBS
 
 NAME = re.compile(r"^meas-background-(borg|7z|steamcmd|upgrade|dkms)-r(\d+)-(dry|probe|full)$")
@@ -61,6 +62,13 @@ LIST = {app: [(ph, "batch_run_us", "run between voluntary blocks (µs)"), (ph, "
 # 9.10 D39, D17: the unattended upgrade also carries its CPU total, the job's measured whole — a per-repeat value,
 # tested by its per-repeat values (the workflow's rate rule)
 LIST["upgrade"].append(("upgrade-install", "program_cpu_us", "CPU total (µs)"))
+# 9.10 D52–D56: the DKMS build carries the spawn form's tables — each job kind's per-(member, step) CPU (D53), make's
+# dispatch run, the serial tail's runs between voluntary blocks and the block after each (D54) — and the CPU total the
+# entry carries, a per-repeat value (D17, D56's C)
+LIST["dkms"] = ([("dkms-install", f"mb_step:{kind} {mid} {i}/{n}", f"{kind} {mid} step {i}/{n} (µs)")
+                 for kind, tree in modbuild.TREES.items() for mid, _role, n in modbuild.members(tree) for i in range(1, n + 1)]
+                + [("dkms-install", "mb:dispatch_us", "make dispatch (µs)"), ("dkms-install", "mb:tail_run_us", "tail run between voluntary blocks (µs)"),
+                   ("dkms-install", "mb:tail_block_us", "tail block per run (µs)"), ("dkms-install", "mb_carried_cpu_us", "CPU total carried (µs)")])
 # D14 (1): the headline medians, pooled over all the program's threads — read by the comparisons (results only)
 HEADLINE = {"borg": [("borg-first-warm", "run_us", "run per wake (µs)"), ("borg-first-warm", "wait_us", "wait per wake (µs)")],
             "7z": [("7z-mmt8-warm", "run_us", "run per wake (µs)"), ("7z-mmt8-warm", "wait_us", "wait per wake (µs)")],
@@ -116,7 +124,7 @@ CACHE_VERSION = 1
 def code_hash():
     """The analysis code a cached result was made by: a change to it makes every cache stale."""
     h = hashlib.sha256(str(CACHE_VERSION).encode())
-    for m in (analyze, analyze.nettrace, analyze._build, analyze.shapes, sys.modules["meas.stability"]):
+    for m in (analyze, analyze.nettrace, analyze._build, analyze.shapes, modbuild, sys.modules["meas.stability"]):
         h.update(open(m.__file__, "rb").read())
     return h.hexdigest()[:16]
 
@@ -138,9 +146,19 @@ def cached_phase(d, ph, meas_cpu, edges, kv, code):
     os.makedirs(cdir, exist_ok=True)
     if "missing" not in r:
         smp = r.pop("_samples")
-        r["_threads"] = list(smp["threads"])
-        arrays = {f"t{i}__{s}": np.asarray(smp["threads"][t][s], dtype=np.float64)
-                  for i, t in enumerate(r["_threads"]) for s in SAMPLE_KEYS}
+        if r.get("job") == "dkms":   # 9.10: some 12 500 threads a repeat; the pooled arrays only, and the module build's
+            r["_threads"], r["_all_only"] = [], True
+            r["threads"] = {}
+            arrays = {f"all__{s}": np.asarray(smp["all"][s], dtype=np.float64) for s in SAMPLE_KEYS}
+            mb = smp.get("module_build") or {}
+            r["_mb_steps"] = sorted(mb.get("steps", {}))
+            arrays.update({f"mbs{i}": np.asarray(mb["steps"][k], dtype=np.float64) for i, k in enumerate(r["_mb_steps"])})
+            for x in ("dispatch_ms", "tail_run_ms", "tail_block_ms"):
+                arrays[f"mb__{x}"] = np.asarray(mb.get(x, []), dtype=np.float64)
+        else:
+            r["_threads"] = list(smp["threads"])
+            arrays = {f"t{i}__{s}": np.asarray(smp["threads"][t][s], dtype=np.float64)
+                      for i, t in enumerate(r["_threads"]) for s in SAMPLE_KEYS}
         del smp
         np.savez(npz_p + ".tmp.npz", **arrays)
         os.replace(npz_p + ".tmp.npz", npz_p)
@@ -156,12 +174,23 @@ def cached_phase(d, ph, meas_cpu, edges, kv, code):
 def samples_of(A, t, s):
     """One repeat's samples of table s: of thread t, or of all the program's threads when t is None."""
     with np.load(A["_npz"]) as z:
+        if A.get("_all_only"):
+            return z[f"all__{s}"] if t is None else np.empty(0)
         if t is None:
             parts = [z[f"t{i}__{s}"] for i in range(len(A["_threads"]))]
             return np.concatenate(parts) if parts else np.empty(0)
         if t not in A["_threads"]:
             return np.empty(0)
         return z[f"t{A['_threads'].index(t)}__{s}"]
+
+
+def mb_samples(A, key):
+    """One repeat's module-build samples (9.10 D52–D54), in µs: a step table by its key, or dispatch_ms, tail_run_ms,
+    tail_block_ms."""
+    with np.load(A["_npz"]) as z:
+        if key in A.get("_mb_steps", []):
+            return z[f"mbs{A['_mb_steps'].index(key)}"] * 1000.0
+        return z[f"mb__{key}"] * 1000.0 if f"mb__{key}" in z else np.empty(0)
 
 
 def _analyse_one(job):
@@ -193,6 +222,18 @@ def criterion(app, entry):
     crit = {}
     for ph, key, label in LIST[app]:
         P = entry["phases"].get(ph, {})
+        MB = P.get("module_build")
+        if key == "mb_carried_cpu_us" and MB:   # a per-repeat value (9.10 D56)
+            crit[f"{ph} {label}"] = {**stability(MB["carried_cpu_us"], None, MIN_REPEATS), "needed": repeats_needed(MB["carried_cpu_us"], MIN_REPEATS)}
+            continue
+        if key.startswith(("mb_step:", "mb:")) and MB:   # 9.10 D52–D54: the module build's tables
+            T = MB["steps"].get(key[len("mb_step:"):]) if key.startswith("mb_step:") else MB.get(key[len("mb:"):])
+            if not T or not T["n"]:
+                continue
+            sums, counts = table_pairs(T)
+            crit[f"{ph} {label}"] = {**ratio_stability(sums, counts, ABS_FLOOR_US, MIN_REPEATS),
+                                     "needed": ratio_repeats_needed(sums, counts, ABS_FLOOR_US, MIN_REPEATS)}
+            continue
         if key == "program_cpu_us" and not P.get("missing") and key in P:   # a per-repeat value (9.10 D39)
             crit[f"{ph} {label}"] = {**stability(P[key], None, MIN_REPEATS), "needed": repeats_needed(P[key], MIN_REPEATS)}
             continue
@@ -313,7 +354,8 @@ def pool_app(app, reps, jobs=1):
              "all": {s: pooled({k: samples_of(A[k], None, s) for k in have}) for s in SAMPLE_KEYS},
              "threads": {},
              "processes": {k: [{x: p[x] for x in ("pid", "role", "exec", "threads", "perf_cpu_us", "taskstats_cpu_us",
-                                                  "perf_over_taskstats", "disk")} for p in A[k]["processes"] if p["program"] or p["disk"]]
+                                                  "perf_over_taskstats", "disk")} for p in A[k]["processes"]
+                               if not A[k].get("_all_only") and (p["program"] or p["disk"])]   # dkms: none (12 500 a repeat)
                            for k in have},
              "outside_on_measured_cpu": {k: dict(list(A[k]["outside_on_measured_cpu"].items())[:5]) for k in have}}
         if any("cached_fraction" in A[k] for k in have):
@@ -325,6 +367,21 @@ def pool_app(app, reps, jobs=1):
         for t in keys:
             P["threads"][t] = {"cpu_us": {k: A[k]["threads"].get(t, {}).get("cpu_us") for k in have},
                                **{s: pooled({k: samples_of(A[k], t, s) for k in have}) for s in SAMPLE_KEYS}}
+        if any("module_build" in A[k] for k in have):   # 9.10 D52–D56
+            mb = {k: A[k]["module_build"] for k in have if "module_build" in A[k]}
+            steps = sorted({x for k in mb for x in A[k].get("_mb_steps", [])})
+            P["module_build"] = {
+                "hook": {k: mb[k]["hook"] for k in mb}, "counts": {k: mb[k]["counts"] for k in mb},
+                "exact_fit": {k: mb[k]["exact_fit"] for k in mb}, "cpu_ms": {k: mb[k]["cpu_ms"] for k in mb},
+                "carried_share": {k: mb[k]["carried_share"] for k in mb},
+                "sequence": {k: mb[k]["sequence"] for k in mb},
+                "tail_cpu_by_comm_ms": {k: mb[k]["tail"]["cpu_by_comm_ms"] for k in mb},
+                "carried_cpu_us": {k: mb[k]["cpu_ms"]["carried"] * 1000.0 for k in mb},
+                "steps": {x: pooled({k: mb_samples(A[k], x) for k in mb}) for x in steps},
+                "dispatch_us": pooled({k: mb_samples(A[k], "dispatch_ms") for k in mb}),
+                "tail_run_us": pooled({k: mb_samples(A[k], "tail_run_ms") for k in mb}),
+                "tail_block_us": pooled({k: mb_samples(A[k], "tail_block_ms") for k in mb})}
+            P["dkms_hooks"] = {k: A[k].get("dkms_hooks") for k in have}
         entry["phases"][ph] = P
     # D19: the shared stability rule on the list; in probe mode the first batch it sets (D14 (3))
     crit = criterion(app, entry)
@@ -403,6 +460,8 @@ def also(app, entry, per):
         out["shaping"] = {k: {x: per[k]["kv"].get(x) for x in per[k]["kv"] if x.startswith(("tc.", "shape."))} for k in ks}
     if app == "upgrade":   # 9.10: the state built and what the stage installed, per repeat
         out["state"] = {k: {x[len("upgrade."):]: per[k]["kv"].get(x) for x in per[k]["kv"] if x.startswith("upgrade.")} for k in ks}
+    if app == "dkms":   # 9.10 D48–D51: the state built, what the stage installed, DKMS's own records, per repeat
+        out["state"] = {k: {x: per[k]["kv"].get(x) for x in per[k]["kv"] if x.startswith(("upgrade.", "dkms."))} for k in ks}
     cached = {ph: P["cached_fraction"] for ph, P in entry["phases"].items() if not P.get("missing") and "cached_fraction" in P}
     if cached:
         out["cached_fraction"] = cached
@@ -417,7 +476,7 @@ def fmt_q(q):
 
 def render(out):
     network = sum(g.get("gate") == "no-vf" for g in out["gated_out"])
-    L = [f"# background campaign (9.7; 9.10's `upgrade`) — pooled results{' (' + out['tag'] + ')' if out.get('tag') else ''}", "",
+    L = [f"# background campaign (9.7; 9.10's `upgrade` and `dkms`) — pooled results{' (' + out['tag'] + ')' if out.get('tag') else ''}", "",
          f"Machine {out.get('machine') or 'any'}; stopped by the machine gate {len(out['gated_out']) - network}"
          f"{f', by the network gate {network}' if network else ''}; other-model repeats "
          f"{len(out['other_machine'])}. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9, times in µs, "
@@ -446,6 +505,19 @@ def render(out):
                     if x["n"]:
                         L.append(f"| `{t}` | {s} | {x['n']} | {fmt_q(x['q'])} | {x['repeat_mean']} |")
             L.append("")
+            MB = P.get("module_build")
+            if MB:   # 9.10 D52–D56
+                L += [f"module build (hook {MB['hook']}): counts {MB['counts']}; exact fit {MB['exact_fit']}; carried share {MB['carried_share']}", "",
+                      f"CPU ms {MB['cpu_ms']}", "", f"tail CPU by comm ms {MB['tail_cpu_by_comm_ms']}", "",
+                      "| table | n | quantiles | spread (per-repeat mean) |", "|---|---|---|---|"]
+                for name, T in [(f"step {x}", MB["steps"][x]) for x in MB["steps"]] + [("dispatch", MB["dispatch_us"]),
+                                ("tail run", MB["tail_run_us"]), ("tail block", MB["tail_block_us"])]:
+                    L.append(f"| {name} | {T['n']} | {fmt_q(T['q'])} | {T['repeat_mean']} |")
+                L.append("")
+                for k, hs in P.get("dkms_hooks", {}).items():
+                    for h in hs or []:
+                        L.append(f"- repeat {k} hook {h['hook']}: {h['processes']} processes, CPU {h['cpu_us']} µs, span {h['span_s']} s")
+                L.append("")
             for k, procs in P["processes"].items():
                 for p in procs:
                     L.append(f"- repeat {k}: `{p['role']}` [{p['pid']}] {p['exec']} threads {p['threads']}; perf/taskstats CPU {p['perf_over_taskstats']}; disk {p['disk']}")
@@ -498,7 +570,7 @@ def main():
         print("no repeats found", file=sys.stderr)
         return 1
     out = {"tag": args.tag or None, "machine": args.cpu_model or None, "gated_out": gated, "other_machine": other, "runs": {}}
-    for app in ("borg", "7z", "steamcmd", "upgrade"):
+    for app in ("borg", "7z", "steamcmd", "upgrade", "dkms"):
         if app in runs:
             out["runs"][app] = E = pool_app(app, runs[app], args.jobs)
             st = E["stability"]

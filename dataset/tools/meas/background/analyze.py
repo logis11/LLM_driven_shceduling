@@ -53,6 +53,7 @@ from meas.build import analyze as _build   # noqa: E402  9.6's loaders and wake 
 from meas.background import nettrace  # noqa: E402
 from meas.build import shapes  # noqa: E402  9.6's runs between voluntary blocks and the block after each (D29)
 from meas.stability import TOLERANCE  # noqa: E402
+from meas.background import modbuild  # noqa: E402  9.10 D52–D55: the DKMS build's jobs, steps, dispatch and tail
 load_segments, load_wakeups, load_forks = _build.load_segments, _build.load_wakeups, _build.load_forks
 load_taskstats, process_records, merge_resumes = _build.load_taskstats, _build.process_records, _build.merge_resumes
 load_edges, outside, pct, dist, QUANTILE_PROBS = _build.load_edges, _build.outside, _build.pct, _build.dist, _build.QUANTILE_PROBS
@@ -462,6 +463,16 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
                 "cpu_us": round(sum(s_.run for s_ in hr) * 1000.0, 1),
                 "span_s": round(max(s_.t_end for s_ in hr) - min(s_.t_in for s_ in hr), 3) if hr else None,
                 "cpu_by_exec_us": dict(sorted(((k, round(v, 1)) for k, v in by_exec.items()), key=lambda kv_: -kv_[1])[:20])})
+        # 9.10 D52–D54: the hook run that built the module (the one with the most CPU), read for the spawn-form entry
+        build_root = max(hooks, key=lambda r_: sum(s_.run for s_ in rows if s_.tid in hooks[r_]["tids"])) if hooks else None
+        if build_root is not None:
+            htids = hooks[build_root]["tids"]
+            exits = _exits
+            h_tid2pid, h_role, h_parent = modbuild.hook_run(htids, segs, forks, recs, last_comm)
+            h_jobs = modbuild.jobs_of(htids, h_tid2pid, h_role, h_parent, forks, exits, recs)
+            res["module_build"] = modbuild.readings(h_jobs, htids, h_tid2pid, h_role, h_parent, segs, forks, exits, recs, meas_cpu)
+            res["module_build"]["hook"] = hooks[build_root]["hook"]
+            samples["module_build"] = res["module_build"].pop("_samples")
         stage_cpu = sum(p["perf_cpu_us"] for p in procs)
         res["stage_cpu_us"] = round(stage_cpu, 1)
     cf = kv.get(f"cache.{phase}.fraction")
