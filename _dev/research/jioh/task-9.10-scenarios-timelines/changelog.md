@@ -1273,3 +1273,15 @@ Grounds (dry run 3, run 37010496980, #121; `wlc/compiler.py`):
 Tooling: `analyze.py` leaves the block out of `batch_block_us` and reports it as `initial_sleep_block_us`.
 
 No file changed yet.
+
+## D72 — the extractor's deadline exits are carried as observed (2026-10-02)
+
+By 인지오's decision. The two extractions the extractor's stock deadline ends, and the restarts after them, stay in the entry's run and block tables and in its CPU total. The scope states the 5 s per-file deadline, the exits and restarts, and the files skipped, as the outcome on the EPYC 7763's core; whether they recur in every repeat is read from the pool, the CPU total's stability showing any repeat that differs.
+
+Grounds:
+
+- **The deadline is shipped behaviour** (S2-04; D61): `DEFAULT_DEADLINE_SECONDS 5` (`tracker-extract.c:46`); past it the extractor logs "took too long to process. Shutting down everything" and calls `_exit (EXIT_FAILURE)` (`:332–341`); `TRACKER_EXTRACT_DEADLINE` alone overrides it. The miner restarts the extractor after its 1 s grace (`tracker-miner-files.c:244–245`); the new extractor skips the file ("failed in previous execution, ignoring") and Tracker records it ("Crash/hang handling file").
+- **On the runner it ends the same two files** in dry runs 2 and 3: `Book/TenYearsInJapan.pdf` and `Book/IslandOfBali.pdf`. In dry run 3 the two ended extractor processes ran 5.50 s and 4.92 s, 10.4 s of the job's 39.4 s; each restart adds a 0.98 s block and a process's start-up.
+- **Not taken:** removing them describes a job that did not run on this machine; raising the deadline changes the depicted state and leaves the two books' whole extraction unmeasured. The deadline is wall-clock, so a faster or busier core can end more or fewer files; no source gives these files' extraction time elsewhere.
+
+No file changed yet.
