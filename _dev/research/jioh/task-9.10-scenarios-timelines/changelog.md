@@ -888,3 +888,18 @@ The campaign of D36–D40, `meas-ci:background:2026-10-01`, run under `../measur
 Recompiled (`compile.py --allow-window`): 24 of 100 artifacts change beyond the library's hash — the ten counterparts, `c2-p2a` and `c2-p2b` in both modes. Demand (`-single`): `c2-p2a` 1.1735 → 1.2545, `c2-p2b` 1.1735 → 1.2706 (both inside the window); `c7-browsing` 1.0164 → 1.0176, `c7-office` 1.027 → 1.0255, `c7-mail` 1.0287 → 1.0545, `c7-dev` 1.3319 → 1.295, `c7-photo` 1.0442 → 1.0967, `c7-meeting` 1.2387 → 1.24, `c7-gaming` 1.9153 → 1.9149, `c7-media` 1.128 → 1.1267, `c7-video-edit` 1.4586 → 1.5618, `c7-idle` 1.0004 → 1.0007. Lint reports the three demand-window files of D20 and nothing else; tests 372 passed, 1 skipped, 1 xfailed, after the two count tests took the new entry's tables and list.
 
 Hands to 9.14: the eight judging counterparts and P2 on their new lengths; `cpu-batch`'s `clamscan` tables are bound by no file. Hands to 9.15: `building-plan.md` §3 C7 and the scenario catalog's S17 row (D3).
+
+## D46 — the DKMS build is NVIDIA's module, measured in a campaign of its own (2026-10-02)
+
+By 인지오's decision, D4's two open items. The module `c7-compile`'s autoinstall builds is NVIDIA's DKMS module. On Ubuntu 24.04 the module is installed as `nvidia-dkms-<branch>`, which `apt install nvidia-driver-<branch>` pulls in when no prebuilt `linux-modules-nvidia-<branch>-*` package is installed. The entry's `modeling_notes` state that premise: the user installed the driver package directly, not through `ubuntu-drivers`. The build is measured in a campaign of its own. D3's campaign installed 2026-07-27's `glibc` update (D36), which carries no kernel, so no DKMS hook fired in it.
+
+Grounds:
+
+- **Prevalence.** Debian popcon is the only per-module count (S3-30; Ubuntu's popcon is stale since 2021). `nvidia-kernel-dkms` is installed on 3.76 % of submissions and `nvidia-kernel-open-dkms` on 0.74 %, against `zfs-dkms` 1.87 %, `v4l2loopback-dkms` 0.86 %, `broadcom-sta-dkms` 0.44 % and `virtualbox-dkms` 0.42 %.
+- **ZFS and v4l2loopback do not build through DKMS on Ubuntu.** Every HWE kernel install depends on `linux-main-modules-zfs-<abi>` and `linux-main-modules-v4l2loopback-<abi>`. These ship the modules prebuilt and provide `zfs-dkms` and `v4l2loopback-dkms` (S2-35).
+- **The NVIDIA DKMS route on Ubuntu.** `nvidia-driver-580` depends on `nvidia-dkms-580`, which depends on `dkms`. The prebuilt `linux-modules-nvidia-580-generic-hwe-24.04` provides `nvidia-dkms-580` (S2-35). `ubuntu-drivers install` takes the prebuilt package and drops a DKMS-only driver unless given `--include-dkms` (S2-36). Ubuntu's NVIDIA page: "We don't recommend using the DKMS modules unless you are running a custom kernel" (S2-28).
+- **The alternatives.** Ubuntu's VirtualBox builds through DKMS on every install, and the Broadcom STA driver is DKMS only and auto-installed by `ubuntu-drivers` (S2-35, S2-36). Each is about a ninth of NVIDIA's count on Debian.
+
+Open, for the campaign's method: the branch and the flavour (proprietary or open); the kernel the hook fires for; the environment the build runs in; the job's boundaries; the entry's form; the comm.
+
+No file changed yet.
