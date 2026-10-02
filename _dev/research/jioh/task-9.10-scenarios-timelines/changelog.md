@@ -1215,3 +1215,18 @@ Checked at the dry run: the 40.66 GB download per repeat under the tooling's wor
 Open: the tree's placement under the indexed directories.
 
 No file changed yet.
+
+## D68 — Bei's tree is `~/Documents`, the other folders empty (2026-10-02)
+
+By 인지오's decision, D5's last method item. The tree `Bei/Fullset/Bei/` as released — its 42 folders and 61 loose files — is the content of `~/Documents`; Desktop, Downloads, Music, Pictures, Videos, Public and Templates exist and are empty. Design: HippoCamp does not place a profile in a home.
+
+Grounds:
+
+- **Every file is indexed** (D62's job): `~/Documents` is one of the miner's recursive roots (S2-41), and no path of the tree matches the shipped `ignored-files`, `ignored-directories` or `ignored-directories-with-content`, nor is hidden (reader's own, over `hf-hippocamp-api.json`, S3-76).
+- **HippoCamp's layout as released.** Splitting the topical folders into Pictures, Music and Videos would sort them by a judgement no source gives; Tracker treats a file alike in any recursive root.
+- **The tree as the home** would leave 813 of the 875 files under `$HOME`, which the miner reads one level deep (S2-41): 61 loose files and one in the tree's own `Documents` would be indexed.
+- **The folders exist.** The default layer holds `xdg-user-dirs` 0.18 (S2-01), which creates them at first login.
+
+The method is complete: `campaign/tracker/method.md`.
+
+No file changed yet.
