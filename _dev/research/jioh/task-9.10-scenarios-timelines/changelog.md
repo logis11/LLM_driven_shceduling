@@ -1194,7 +1194,7 @@ Grounds:
 - **Its terms** (S3-76): the licence permits "non-commercial research" and "benchmarking and evaluation of … retrieval systems"; it forbids publicly mirroring the raw files, and allows "aggregate statistics … provided they do not enable reconstruction or redistribution of the raw-file release". The campaign's release carries the measurement's records, not the files.
 - **The other candidates** (S3-67, S3-70): the Enron attachments are one real person's documents from a mailbox, not a home; M57-Patents' homes were filled by actors in a scripted scenario.
 
-Hands to the entry's scope at fold-in: a profile's few hundred files are HippoCamp's; a home's file count needs its own source — Dinneen, Julien & Frissen, "The scale and structure of personal file collections" (CHI 2019), to be verified against its primary text and entered in `docs/references.md` if the scope states a count. Hands to 9.15: `docs/references.md` gains a `hippocamp` entry at fold-in.
+Hands to the entry's scope at fold-in: a profile's few hundred files are HippoCamp's; a home's file count needs its own source — Dinneen, Julien & Frissen, "The scale and structure of personal file collections" (CHI 2019), to be verified against its primary text and entered in `docs/references.md` if the scope states a count. At fold-in, `docs/references.md` gains a `hippocamp` entry under its citation rule.
 
 Open: which profile; its placement under the indexed directories.
 
