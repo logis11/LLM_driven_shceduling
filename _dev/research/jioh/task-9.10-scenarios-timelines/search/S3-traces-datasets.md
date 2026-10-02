@@ -157,6 +157,7 @@ Source copies under `_dev/research/jioh/task-9.10-scenarios-timelines/sources/S3
 | 2026-10-01 | WebSearch | KDE UserFeedback telemetry results published application start count usage time Plasma statistics | kate-editor.org post 2020-02-09 (200) | the post says start count is collected; no published results found |
 | 2026-10-02 | 9.7's copy | Steam Hardware & Software Survey, August 2026, Linux (`../task-9.7-background-io/sources/T9-S3-07/hwsurvey-linux.html`, same SHA-256) | copied → S3-59 | — |
 | 2026-10-02 | api.launchpad.net | `ubuntu/+archive/primary?ws.op=getPublishedBinaries`, `exact_match=true`, `noble/amd64`, created since 2026-06-01, for `nvidia-dkms-595-open`, `linux-image-generic-hwe-24.04`, `linux-headers-generic-hwe-24.04` | 200 (all three) → S3-60 | — |
+| 2026-10-02 | mattmahoney.net | `https://mattmahoney.net/dc/10gb.html`, re-read for the licence and the contents table | 200 → S3-61 | — |
 
 ## 2. Candidates
 
@@ -798,6 +799,17 @@ Each sub-entry is one observation by one user.
   - `linux-image-generic-hwe-24.04` (the headers metapackage's records carry the same versions, pockets and times): "7.0.0-31.31~24.04.1 Security main Superseded 2026-09-04T08:56:27"; "7.0.0-34.34~24.04.1 Updates main Superseded 2026-09-22T17:43:27"; "7.0.0-34.34~24.04.1 Security main Published 2026-09-23T15:49:46"; "7.0.0-38.38~24.04.4 Updates main Published 2026-10-01T11:17:59"; "7.0.0-39.39~24.04.1 Proposed main Published 2026-10-01T22:48:57".
 - **Coverage.** T5 — when each version reached each pocket: the security pocket's latest kernel before 2026-10-02 is 7.0.0-34 (2026-09-23), replacing 7.0.0-31 (2026-09-04); 7.0.0-38 is in the updates pocket only; `nvidia-dkms-595-open` 595.91.07 is in the updates pocket from 2026-09-15, the security pocket holding 595.84. Does not cover when a desktop installs them.
 - **One observation?** The archive's own record, not a sample.
+
+#### S3-61 — Mahoney's 10 GB compression benchmark page: the licence and the set's contents (T5; read at stage 3, 2026-10-02)
+
+- **Citation.** M. Mahoney, "10 GB Compression Benchmark", https://mattmahoney.net/dc/10gb.html, "Benchmark created July 28, 2013. Last update July 25, 2019." The page `docs/references.md` enters as `mahoney-10gb` (verified 2026-09-28), re-read for D5's candidate file set.
+- **Copy read.** Accessed 2026-10-02 (200), 49,849 B; `sources/S3-61/10gb.html`, SHA-256 72df209338f2a30b41cec8708a64ab6f85f448bcaf473c68efa45610be308a02.
+- **Verbatim.**
+  - Section "License": "10gb.zpaq is copyright (C) 2013, Matt Mahoney." / "You are granted permission to download these files for your own use." / "Many of the files in this data set are copyrighted by other people and licensed under varying terms. Nothing in this license restricts you from using those files under the terms of the original license (for example, applications licensed under GPL). For some files, there is no explicit license. In particular, some documents, software, photos, and other files under the directories 10gb/www.mattmahoney.net and 10gb/2011 were hosted on my website (www.mattmahoney.net) with permission of the owners. I do not have written copies of such permissions, nor in most cases, any records of ownership, which may be hard to determine. Please do not use this data set for any purpose other than benchmarking data compression and archiving programs and related research."
+  - The set's description: "The test data is designed to test archivers in realistic backup scenarios with lots of already-compressed or hard to compress files and lots of duplicate or nearly identical files. It consists of exactly 10 GB (10^10) bytes in 79,431 files in 4006 directories from my Windows laptop collected from 2009 to 2013."
+  - The contents table (MB, name, description): "3240 hg19/ Human genome in FASTA format"; "1998 benchmarks/ Collection of data compression benchmarks"; "1584 mingw/ Several versions of MinGW g++ compiler"; "1212 www.mattmahoney.net/ Backup copy of my website in 2013"; "730 2011/ dc subdirectory of my website in 2011"; "678 progs/ Several open source applications"; "502 cygwin/ Cygwin version from 2009"; "52 zeropad File of all zero bytes".
+- **Coverage.** T5 — the terms and the contents of the file set D5 named as its candidate. Does not cover any other file set.
+- **One observation?** One real laptop's files, selected by their owner for an archiver benchmark.
 
 ## 3. Not found
 

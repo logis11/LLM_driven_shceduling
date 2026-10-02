@@ -1092,3 +1092,16 @@ The campaign of D46–D58, `meas-ci:background:2026-10-02`, run under `../measur
 Recompiled (`compile.py --allow-window`): 2 of 100 artifacts change beyond the library's hash, `c7-compile` in both modes, demand 0.8803 → 1.1138 (calibration). Lint reports the three demand-window files of D20 and nothing else. Tests: 372 passed, 1 skipped, 1 xfailed, after `test_c7_compile_is_a_rename_only` was restated as `test_c7_compile_is_the_module_build_in_place_of_the_users_build` (D56), the batch-table count went to 89, and the background list test took the DKMS list.
 
 Hands to 9.14: `c7-compile`'s judging term and the pair review against `c1-compile`'s first C seconds (D4, D56); the module build's `fork_cap` shortfall in the `conftest` phase as a sensitivity item (D57). Hands to 9.15: `building-plan.md` §3 C7 and the scenario catalog's S11 row (D4).
+
+## D60 — the Tracker campaign's file set is a real user's set other than Mahoney's, chosen by a four-class search, amending D5 (2026-10-02)
+
+By 인지오's decision, D5's candidate. The Tracker campaign does not read Mahoney's 10 GB set (`mahoney-10gb`). Its file set is another real user's file set, chosen from a search of the four classes (phase decision 4). D5's state stands: Tracker indexing a real user's file set from an empty database. 9.7's use of the set for `borg` and `7z` is unchanged.
+
+Grounds:
+
+- **The set's licence** (S3-61, "License"): "Please do not use this data set for any purpose other than benchmarking data compression and archiving programs and related research." It follows "Many of the files in this data set are copyrighted by other people and licensed under varying terms", and, of files hosted on the author's website, "I do not have written copies of such permissions". A desktop indexer is neither a compression nor an archiving program.
+- **The set's contents** (S3-61, the contents table): 3,240 MB of the human genome in FASTA format, 1,998 MB of compression benchmarks, 1,584 MB of MinGW compilers, 1,212 MB of a website backup and 730 MB of the same site's 2011 subdirectory, 678 MB of open-source applications, 502 MB of Cygwin and a 52 MB file of zero bytes: "designed to test archivers in realistic backup scenarios".
+
+Open: the file set, from the search; then D5's method items, its placement under the indexed directories and the job window.
+
+No file changed yet.
