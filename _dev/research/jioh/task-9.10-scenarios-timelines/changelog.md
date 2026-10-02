@@ -1122,3 +1122,18 @@ How the miner runs in the chroot — its session bus, its view of `/proc`, its i
 Open: the archive time; the file set (D60); its placement under the indexed directories; the job window.
 
 No file changed yet.
+
+## D62 — the Tracker job ends at the extractor's "Extraction finished", amending 9.6 D16's end for this campaign (2026-10-02)
+
+By 인지오's decision, D5's job window, its end. The measured job ends when the extractor logs "Extraction finished": every file of the set crawled and its metadata extracted. The miner's `Idle`, 9.6 D16's end, falls inside the job. The extractor's 10 s wait before it exits is outside.
+
+Grounds:
+
+- **`Idle` ends the crawl, not extraction** (S2-42). `process_stop` sets the status `Idle` once crawling is done; beside the exit taken there, the source reads "FIXME: wait for extractor to finish".
+- **Extraction is work of both processes** (S2-42). The extractor is the miner's subprocess, started with `--socket-fd 3`, and writes through an endpoint the miner serves on its own connection.
+- **The extractor marks its end** (S2-42): "Extraction finished in %s" when its queue empties; off a terminal it exits after "10 seconds inactivity".
+- **9.6's window left some out.** On the kernel's `Documentation` tree, 0.34–0.41 s of CPU followed the miner's `Idle`, against 4.78–4.94 s in the job (9.6 D16).
+
+Open: the job's start (the shipped 15 s initial sleep); the archive time (D61); the file set (D60); its placement under the indexed directories.
+
+No file changed yet.

@@ -64,6 +64,7 @@ All rows dated 2026-10-01. "200" etc. are HTTP status codes.
 | 48 | archive.ubuntu.com (stage 3) | `pool/multiverse/n/nvidia-graphics-drivers-595/nvidia-dkms-595-open_595.91.07-0ubuntu0.24.04.1_amd64.deb`, `nvidia-kernel-source-595-open_595.91.07-0ubuntu0.24.04.1_amd64.deb` (200, SHA-256 equal to the index's) → S2-39 | — | — |
 | 49 | manpages.ubuntu.com; ftp.gnu.org (stage 3) | `manpages/noble/man1/nproc.1.html` (200; coreutils 9.4-3ubuntu6.3, no mention of the OpenMP variables); `gnu/coreutils/coreutils-9.4.tar.xz` (200) → S2-40 | — | — |
 | 50 | local copies (stage 3) | S2-01's `iso-casper-minimal.manifest`; S2-03's `tracker-extract`, `tracker-miner-fs` and `ubuntu-settings` packages; S2-04's tracker-miners 3.7.1 source, re-read for the Tracker campaign's environment → S2-41 | — | — |
+| 51 | local copy (stage 3) | S2-04's tracker-miners 3.7.1 source, re-read for when the first index's work ends → S2-42 | — | — |
 
 ## 2. Candidates
 
@@ -3739,6 +3740,19 @@ a77819313f1acef8b19c5903218978151f7013393a91286585c1a00b3f589a09  S2-15/wb-sm201
   - The start at login: `x-tracker-miner-fs/usr/lib/systemd/user/tracker-miner-fs-3.service:5` `After=gnome-session.target`, `:8–10` `Type=dbus` / `BusName=org.freedesktop.Tracker3.Miner.Files` / `ExecStart=/usr/libexec/tracker-miner-fs-3`, `:14` `Slice=background.slice`, `:17` `WantedBy=gnome-session.target`; `ctl/postinst:48–51` `if deb-systemd-helper --quiet --user was-enabled 'tracker-miner-fs-3.service' ; then` … `deb-systemd-helper --user enable 'tracker-miner-fs-3.service'`, under "# was-enabled defaults to true, so new installations run enable."; `usr/lib/sysctl.d/30-tracker.conf` `fs.inotify.max_user_watches = 65536`.
 - **Coverage.** T5 — the indexer the default install holds and how it runs there: its version, the extraction stack installed beside it, the shipped settings with no Ubuntu override, and its start by the user unit in the GNOME session. Supports the indexer's state on a stock install; not how long it runs.
 - **One observation?** Not an observation; the image's manifest and the packages' own files.
+
+### S2-42 — Tracker Miners 3.7.1 source: when the miner reports `Idle`, how the extractor runs and writes, and when it finishes (read at stage 3, 2026-10-02)
+
+- **Citation.** tracker-miners 3.7.1 (GNOME `localsearch`, tag `3.7.1`), the copy of S2-04; Ubuntu ships 3.7.1-1ubuntu0.1 (S2-03). Read for the Tracker campaign's job window (D5, D62).
+- **Copy read.** `sources/S2-04/tracker-miners-3.7.1/`, commit eae431ef23ddbf0910bc716f36b5f7512c783752, re-read 2026-10-02.
+- **Passages.**
+  - The miner's `Idle`: `src/miners/fs/tracker-miner-fs.c:789–805`, `process_stop (TrackerMinerFS *fs)` — "/* Now we have finished crawling, we enable monitor events */" … `g_object_set (fs, "progress", 1.0, "status", "Idle", "remaining-time", 0, NULL);`, then `g_signal_emit (fs, signals[FINISHED], 0,`. `src/miners/fs/tracker-main.c:421–427`, on the miner's finish: "/* We're not sticking around for file updates, so stop the mainloop and exit. */" `if (no_daemon && main_loop) {` "/* FIXME: wait for extractor to finish */" `g_main_loop_quit (main_loop);`.
+  - The extractor is the miner's subprocess: `src/miners/fs/tracker-extract-watchdog.c:447` `extract_path = LIBEXECDIR "/tracker-extract-3";`, `:450–453` `g_subprocess_launcher_spawn (watchdog->launcher,` … `"--socket-fd", G_STRINGIFY (REMOTE_FD_NUMBER),`; `:29` `#define REMOTE_FD_NUMBER 3`.
+  - Its writes go through the miner: `src/miners/fs/tracker-extract-watchdog.c:264–268` "/* Create an endpoint for this peer-to-peer connection */" `watchdog->endpoint = TRACKER_ENDPOINT (tracker_endpoint_dbus_new (watchdog->sparql_conn, watchdog->conn,`; `src/tracker-extract/tracker-main.c:370–383` `if (socket_fd) {` … `connection = g_dbus_connection_new_sync (stream,`, `:403` `sparql_connection = tracker_sparql_connection_bus_new (miner_dbus_name, NULL, connection, &error);`.
+  - The extractor's end: `src/tracker-extract/tracker-extract-decorator.c:470–485`, `tracker_extract_decorator_finished` — `g_debug ("Extraction finished in %s", time_str);`; `src/tracker-extract/tracker-main.c:232–257` — `shutdown_timeout_cb`: `g_debug ("Shutting down after 10 seconds inactivity");` `g_main_loop_quit (loop);`; `on_decorator_finished`: "/* For debugging convenience, avoid the shutdown timeout if running on a terminal. */" `if (tracker_term_is_tty ()) return;` `shutdown_timeout_id = g_timeout_add_seconds (10, shutdown_timeout_cb,`.
+  - The initial sleep: `src/miners/fs/tracker-main.c:334–347` — `initial_sleep = tracker_config_get_initial_sleep (config);` `if (initial_sleep <= 0) { miner_maybe_start (miner); return; }` … `g_debug ("Performing initial sleep of %d seconds", initial_sleep);` `miners_timeout_id = g_timeout_add_seconds (initial_sleep, miner_start_idle_cb, miner);`.
+- **Coverage.** T5 — the boundaries of the indexer's work: the miner's `Idle` ends the crawl, not extraction; the extractor runs as the miner's child and writes through the miner; it logs its own finish and exits 10 s later off a terminal. Supports the job's boundaries; not its length.
+- **One observation?** Not an observation; the program's source.
 
 ## 3. Not found
 
