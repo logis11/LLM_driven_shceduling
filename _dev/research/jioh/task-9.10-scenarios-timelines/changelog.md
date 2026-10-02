@@ -1027,3 +1027,16 @@ Grounds (the second dry run, D52):
 - **D17.** The job runs whole but for that stated 1.8 %.
 
 Open, for the campaign's method: the names and tiers; the entry ids; `c7-compile`'s structure against `c1-compile`; the stability rule's list.
+
+## D55 — the task shows `dkms`; members carry their observed `comm`s; the entries are `module-build-orchestrator` and `module-compiler-child` (2026-10-02)
+
+By 인지오's decision, D54's open items on the names, tiers and ids. The orchestrator task shows `dkms`, its bound child name is `cc1`, and each spawned member carries its observed `comm`: `sh`, `x86_64-linux-gn`, `cc1`, `as`, `fixdep`, `rm`, and `mkdir` and `dirname` in the probes. The archetype is `module-build-orchestrator`. It spawns `module-compiler-child`, which holds the three job kinds' tables (D53).
+
+Grounds:
+
+- **D24 and D25.** `/usr/sbin/dkms` (`comm` `dkms`) runs the `make` and is the parent of the serial tail (D54). The hook's own process, `dkms_autoinstaller` (`comm` `dkms_autoinstal`), only waits on it. In every job the compiler driver is `/usr/bin/x86_64-linux-gnu-gcc-13`, `comm` `x86_64-linux-gn` (the dry run; the kernel build's was `gcc`).
+- **The C7 rename.** `make` would give `c7-compile` the same names as `c1-compile` (`code`, `make`, `cc1`) and drop the rename the C7 pair is built on (`docs/workload/building-plan.md` §3 C7).
+- **Tiers (D27).** `dkms` keeps tier 3 and `cc1` tier 3 (`grid.py`'s `NAME_TIERS`). The grid reads a task's name and its bound child name (`segment_tier`), so the segment stays at tier 3 (`code` 1, `dkms` 3, `cc1` 3), as `c1-compile`'s, and the pair keeps its tier. The other members' names show in the spawn table and carry no tier.
+- **The ids.** They mirror 9.6's `build-orchestrator` and `compiler-child`.
+
+Open, for the campaign's method: `c7-compile`'s structure against `c1-compile`; the stability rule's list.
