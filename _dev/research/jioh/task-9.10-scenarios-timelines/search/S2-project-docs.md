@@ -61,6 +61,8 @@ All rows dated 2026-10-01. "200" etc. are HTTP status codes.
 | 45 | launchpad.net (stage 3) | `ubuntu/+source/ubuntu-drivers-common/1:0.9.7.6ubuntu3.7` (200) → `ubuntu-drivers-common_0.9.7.6ubuntu3.7.tar.xz` (200) → S2-36 | — | — |
 | 46 | github.com; us.download.nvidia.com (stage 3) | `NVIDIA/open-gpu-kernel-modules` `README.md` at tags `595.91.07` and `580.178.04` (200); `XFree86/Linux-x86_64/595.91.07/README/kernel_open.html` (200) → S2-37 | — | — |
 | 47 | archive.ubuntu.com; github.com (stage 3) | `pool/main/l/livecd-rootfs/livecd-rootfs_24.04.100_amd64.deb` (200); `canonical/curtin` `master` `curtin/commands/apt_config.py` (200) → S2-38 | — | `canonical/subiquity` tag `24.04.5` `subiquity/models/mirror.py` and `doc/reference/autoinstall-reference.rst` (200) name no default component list |
+| 48 | archive.ubuntu.com (stage 3) | `pool/multiverse/n/nvidia-graphics-drivers-595/nvidia-dkms-595-open_595.91.07-0ubuntu0.24.04.1_amd64.deb`, `nvidia-kernel-source-595-open_595.91.07-0ubuntu0.24.04.1_amd64.deb` (200, SHA-256 equal to the index's) → S2-39 | — | — |
+| 49 | manpages.ubuntu.com; ftp.gnu.org (stage 3) | `manpages/noble/man1/nproc.1.html` (200; coreutils 9.4-3ubuntu6.3, no mention of the OpenMP variables); `gnu/coreutils/coreutils-9.4.tar.xz` (200) → S2-40 | — | — |
 
 ## 2. Candidates
 
@@ -3705,6 +3707,23 @@ a77819313f1acef8b19c5903218978151f7013393a91286585c1a00b3f589a09  S2-15/wb-sm201
   - `curtin-apt_config.py:585` `def _generate_sources_deb822(cfg, release, mirrors, target=None, arch=None):`; `:593–602` "No custom template provided, fall back to modify" … `tmpl = util.load_file(target_path)` — the installer keeps the target's own `ubuntu.sources` and replaces its mirrors.
 - **Coverage.** T5 — an Ubuntu 24.04 desktop installed from the layered image has `main universe restricted multiverse` enabled for the release, updates, backports and security pockets, so `ubuntu-drivers` sees the drivers in `multiverse`. curtin is read at `master`, not at the version in the 24.04.5.1 installer. Supports the configuration, not what users change.
 - **One observation?** Not an observation; the image builder's and the installer's source.
+
+### S2-39 — `nvidia-dkms-595-open` and `nvidia-kernel-source-595-open` 595.91.07: what the DKMS build compiles and how it picks its `-j` (read at stage 3, 2026-10-02)
+
+- **Citation.** Ubuntu `noble-updates` multiverse packages `nvidia-dkms-595-open` and `nvidia-kernel-source-595-open`, `595.91.07-0ubuntu0.24.04.1` (D47; S2-35, S3-60). Read for the DKMS campaign's method (D50).
+- **Copy read.** archive.ubuntu.com pool, accessed 2026-10-02; local `sources/S2-39/`, SHA-256 in `SHA256SUMS.txt`: `nvidia-dkms-595-open_…deb` 70264a7964b7d5eb8dd24f16585323104966a272a181a26198a7ed14ce47881c and `nvidia-kernel-source-595-open_…deb` 56d65487016ec399cccfa30be1f693e988bc37dd9875141ba8092707bb5ed44a (both equal to the index's `SHA256`); `dkms.conf` 47cdb259546ecec4ff1fe28bb5b79ad0a19c3009648018d5fc56716d76724428; `conftest.sh` 98b43f5a513c8f738ba99531f1d07fa914c8eaad3e57dede1cb0c269824de0d0; `source-counts.txt` 7ab2c9421de4eac515eba929bbc6e7494124258be72aefac76c68c9a8e220ebf.
+- **Passages.** `dkms.conf:1–2` `PACKAGE_NAME="nvidia"` / `PACKAGE_VERSION="595.91.07"`; `:6–7` ``PROCS_NUM=`nproc` `` / `[ $PROCS_NUM -gt 16 ] && PROCS_NUM=16`; `:8–9` `MAKE[0]="unset ARCH; [ ! -h /usr/bin/cc ] && export CC=/usr/bin/gcc; env NV_VERBOSE=1 \` / `'make' -j$PROCS_NUM NV_EXCLUDE_BUILD_MODULES='' KERNEL_UNAME=${kernelver} IGNORE_XEN_PRESENCE=1 IGNORE_CC_MISMATCH=1 SYSSRC=$kernel_source_dir LD=/usr/bin/ld.bfd CONFIG_X86_KERNEL_IBT= modules"`; `BUILT_MODULE_NAME[0..4]` `nvidia`, `nvidia-modeset`, `nvidia-drm`, `nvidia-uvm`, `nvidia-peermem`; `:14` `AUTOINSTALL="yes"`. The source tree ships `nvidia/nv-kernel.o_binary` (17,584,016 B) and `nvidia-modeset/nv-modeset-kernel.o_binary` (3,091,328 B), the open flavour's core prebuilt, and `conftest.sh` (5,636 lines).
+- **Reader's own count** (`find <tree>/<module> -name '*.c' | wc -l`, `source-counts.txt`): `nvidia` 59, `nvidia-uvm` 113, `nvidia-modeset` 2, `nvidia-drm` 19, `nvidia-peermem` 1. Files present, not necessarily all compiled.
+- **Coverage.** T5 — the build D47 fixes: five modules from one `make`, its parallelism `nproc` capped at 16 — not `dkms`'s `parallel_jobs`, since `MAKE[0]` does not begin with `make` (`dkms:1113` substitutes only a leading `make`, S2-03) — and the prebuilt cores linked. Supports what the build runs, not its size.
+- **One observation?** Not an observation; the packages' own files.
+
+### S2-40 — GNU coreutils 9.4: `nproc` honours `OMP_NUM_THREADS` (read at stage 3, 2026-10-02)
+
+- **Citation.** GNU coreutils 9.4 (the version in Ubuntu 24.04, `coreutils 9.4-3ubuntu6.3` per the noble manual page), `src/nproc.c`, gnulib `lib/nproc.c` and `doc/coreutils.texi`. Read for the DKMS campaign's method (D50): how the build's `-j` is set on the one measured CPU.
+- **Copy read.** `https://ftp.gnu.org/gnu/coreutils/coreutils-9.4.tar.xz`, accessed 2026-10-02 (SHA-256 37c93c4e… recorded in `coreutils-9.4.tar.xz.sha256`, the tarball not kept); local `sources/S2-40/`, SHA-256 in `SHA256SUMS.txt`: `nproc.c` 20e2d9da644856aac118a4fbba12d9db9e5bbc094a3569e1d9c727311450061f; `gnulib-nproc.c` 71af9a4fc86ee639c6a31cdbca0c05d13477152a78299638fe1e374c09343937; `coreutils.texi-nproc-17075-17105.txt` 788add8e11eda76e8325e0d4539fe3a331d6abb007d0674edd9df4dfbe815fbc.
+- **Passages.** `nproc.c:86` `enum nproc_query mode = NPROC_CURRENT_OVERRIDABLE;`. `gnulib-nproc.c:383–394` `if (query == NPROC_CURRENT_OVERRIDABLE)` … "/* Honor the OpenMP environment variables, recognized also by all" / "programs that are based on OpenMP.  */" / `omp_env_threads = parse_omp_threads (getenv ("OMP_NUM_THREADS"));` … `if (omp_env_threads)` / `return MIN (omp_env_threads, omp_env_limit);`. `coreutils.texi:17085–17087`: "If the @env{OMP_NUM_THREADS} or @env{OMP_THREAD_LIMIT} environment variables are set, then they will determine the minimum and maximum returned value respectively."
+- **Coverage.** T5 — `nproc` without options returns `OMP_NUM_THREADS` when it is set, before the CPU affinity it otherwise reports. Supports the program's behaviour.
+- **One observation?** Not an observation; the program's source.
 
 ## 3. Not found
 

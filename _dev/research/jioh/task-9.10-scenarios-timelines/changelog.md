@@ -956,7 +956,7 @@ Grounds:
 
 - **D4's observation.** "The whole run is one observation: the `dkms` script, kbuild's probes, the object jobs, modpost, link and `depmod`." Both hook runs are DKMS work the kernel install causes.
 - **The hooks** (S2-03, `dkms` 3.0.11-1ubuntu13): `postinst.d/dkms:37–38` and `header_postinst.d/dkms:37–38` run `exec /usr/lib/dkms/dkms_autoinstaller start "$inst_kern"`; `dkms_autoinstaller:71–75` skips when `/lib/modules/$kernel/build/include` is absent, and otherwise runs `dkms autoinstall --kernelver $kernel`.
-- **The parallelism is D4's.** `dkms` builds with `make -j$parallel_jobs`, `parallel_jobs` defaulting to the CPUs it counts (`dkms:1113`, `:2594`, S2-03). On the one measured CPU that is 1, so the method sets `parallel_jobs=8` in `/etc/dkms/framework.conf`, D4's eight-thread desktop, labelled design.
+- **The parallelism is D4's.** NVIDIA's `dkms.conf` runs its own `make -j$PROCS_NUM`, with ``PROCS_NUM=`nproc` `` capped at 16 (S2-39), and `dkms`'s default `parallel_jobs` is `nproc` too (`dkms:180–187`, `:2594`, S2-03). On the one measured CPU `nproc` reads 1. `nproc` returns `OMP_NUM_THREADS` when it is set (S2-40), so the method passes `OMP_NUM_THREADS=8` in the measured stage's environment: D4's eight-thread desktop, labelled design. (Corrected the same day: `parallel_jobs` is not among the variables `framework.conf` may set, `dkms:43–46`, and NVIDIA's `make` does not read it.)
 
 Which hook builds follows dpkg's configure order, recorded by the dry run. Whether the second run stays carried is read against its size after the dry run.
 
