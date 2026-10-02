@@ -1153,3 +1153,17 @@ How the sleep appears in the entry or the timeline — a block within the job or
 Open: the archive time (D61); the file set (D60); its placement under the indexed directories.
 
 No file changed yet.
+
+## D64 — the Tracker campaign's chroot is the archive at 2026-09-22T17:00Z, the DKMS campaign's state (2026-10-02)
+
+By 인지오's decision, D61's archive time. Each repeat builds D37's chroot from the archive at 2026-09-22T17:00Z (D51), the time the DKMS campaign's state was built from.
+
+Grounds:
+
+- **Tracker is the same at every candidate time** (S2-44): `tracker-miners` and `tracker` have no publication since 2026-06-01, so the layer holds `tracker-miner-fs` and `tracker-extract` 3.7.1-1ubuntu0.1 at 2026-07-27, at 2026-09-22 and at 2026-10-02.
+- **What the time changes is five libraries' security updates** (S2-44). At 2026-09-22T17:00Z the layer holds `gst-plugins-good1.0` 1.24.2-1ubuntu1.7, `gst-plugins-base1.0` 1.24.2-1ubuntu0.5, `glib2.0` 2.80.0-6ubuntu3.9, `libxml2` 2.9.14+dfsg-1.3ubuntu3.9 and `sqlite3` 3.45.1-1ubuntu2.8; a time after 2026-10-01T17:38Z adds `gst-plugins-good1.0` 1.24.2-1ubuntu1.8.
+- **The tooling has built this state** in every one of the DKMS campaign's 26 landings (D59); the DKMS and Tracker campaigns run on one layer.
+
+Open: the file set (D60); its placement under the indexed directories.
+
+No file changed yet.

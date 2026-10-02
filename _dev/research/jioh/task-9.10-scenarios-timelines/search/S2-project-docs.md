@@ -66,6 +66,7 @@ All rows dated 2026-10-01. "200" etc. are HTTP status codes.
 | 50 | local copies (stage 3) | S2-01's `iso-casper-minimal.manifest`; S2-03's `tracker-extract`, `tracker-miner-fs` and `ubuntu-settings` packages; S2-04's tracker-miners 3.7.1 source, re-read for the Tracker campaign's environment → S2-41 | — | — |
 | 51 | local copy (stage 3) | S2-04's tracker-miners 3.7.1 source, re-read for when the first index's work ends → S2-42 | — | — |
 | 52 | local copies (stage 3) | S2-04's tracker-miners 3.7.1 source and S2-03's `tracker-miner-fs` unit, re-read for the job's start and the reset path → S2-43 | — | — |
+| 53 | api.launchpad.net (stage 3) | `ubuntu/+archive/primary?ws.op=getPublishedSources&exact_match=true&distro_series=…/noble&created_since_date=2026-06-01` for `tracker-miners`, `tracker`, `gst-plugins-good1.0`, `gst-plugins-base1.0`, `gstreamer1.0`, `poppler`, `libgsf`, `libexif`, `gexiv2`, `exiv2`, `totem-pl-parser`, `libcue`, `exempi`, `giflib`, `libgxps`, `icu`, `libjpeg-turbo`, `libpng1.6`, `tiff`, `libxml2`, `glib2.0`, `libseccomp`, `sqlite3` (all 200) → S2-44 | — | — |
 
 ## 2. Candidates
 
@@ -3767,6 +3768,20 @@ a77819313f1acef8b19c5903218978151f7013393a91286585c1a00b3f589a09  S2-15/wb-sm201
   - The unit after a SIGKILL: `tracker-miner-fs-3.service:11` `Restart=on-failure`, `:12–13` "# Don't restart after tracker daemon -k (aka tracker-control -k)" `RestartPreventExitStatus=SIGKILL`.
 - **Coverage.** T5 — the miner's start on an empty database: its priority, the database's creation, and the shipped initial sleep taken because the clean-shutdown marker is absent; the reset empties the same directory, marker included, after killing the miner, which the unit does not restart. Supports the job's start on both labels; not its length.
 - **One observation?** Not an observation; the program's source and unit.
+
+### S2-44 — Launchpad publishing history of Tracker and the libraries its extractor uses, noble, since 2026-06-01 (read at stage 3, 2026-10-02)
+
+- **Citation.** Canonical, Launchpad web service API (`devel`), `https://api.launchpad.net/devel/ubuntu/+archive/primary?ws.op=getPublishedSources&source_name=<name>&exact_match=true&distro_series=https://api.launchpad.net/devel/ubuntu/noble&created_since_date=2026-06-01`, for `tracker-miners`, `tracker` and the source packages of `tracker-extract`'s dependencies and the GStreamer plugins (S2-41). Read for D61's archive time (D64).
+- **Copy read.** Accessed 2026-10-02 (all 200); `sources/S2-44/<name>.json`, SHA-256 in `SHA256SUMS.txt`.
+- **Records quoted** (`date_published`, `source_package_version`, `pocket`, `status`).
+  - `tracker-miners`, `tracker`: no record since 2026-06-01.
+  - `gst-plugins-good1.0`: "2026-07-22T12:58:21 1.24.2-1ubuntu1.5 Security Superseded"; "2026-09-17T11:43:55 1.24.2-1ubuntu1.6 Security Superseded"; "2026-09-21T18:30:33 1.24.2-1ubuntu1.7 Security Superseded"; "2026-10-01T17:38:48 1.24.2-1ubuntu1.8 Security Published" (each also in Updates, 2–3 h later).
+  - `gst-plugins-base1.0`: "2026-09-21T18:30:33 1.24.2-1ubuntu0.5 Security Published". `glib2.0`: "2026-09-21T18:30:33 2.80.0-6ubuntu3.9 Security Published". `libxml2`: "2026-06-22T12:29:18 2.9.14+dfsg-1.3ubuntu3.8 Security Superseded"; "2026-09-21T11:28:46 2.9.14+dfsg-1.3ubuntu3.9 Security Published".
+  - `sqlite3`: "2026-06-29T17:18:12 3.45.1-1ubuntu2.6 Security Superseded"; "2026-07-20T14:19:17 3.45.1-1ubuntu2.7 Security Superseded"; "2026-09-16T17:58:59 3.45.1-1ubuntu2.8 Security Published"; "2026-10-01T13:08:29 3.45.1-1ubuntu2.9 Proposed Published".
+  - `poppler`: "2026-06-08T12:51:25 24.02.0-1ubuntu9.9 Security Published". `libexif`: "2026-07-13T13:04:18 0.6.24-1ubuntu0.24.04.1 Security Published". `giflib`: "2026-07-22T12:43:35 5.2.2-1ubuntu1.2 Security Published".
+  - `gstreamer1.0`, `libgsf`, `gexiv2`, `exiv2`, `totem-pl-parser`, `libcue`, `exempi`, `libgxps`, `icu`, `libjpeg-turbo`, `libpng1.6`, `tiff`, `libseccomp`: no record since 2026-06-01.
+- **Coverage.** T5 — which of the indexer's packages change between 2026-06-01 and 2026-10-02: Tracker none, five libraries by security updates. Does not cover what a change does to the indexer's work.
+- **One observation?** The archive's own record, not a sample.
 
 ## 3. Not found
 
