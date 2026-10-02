@@ -145,11 +145,14 @@ def validity(family, dirs, entry):
                                 ("tracker.set.files", "875"), ("tracker.set.bytes", "40662407070"), ("tracker.set.verified", "875"),
                                 ("tracker.set.failed", "0"), ("tracker.set.files_on_disk", "875"),
                                 ("tracker.gst_registry.before", "absent"), ("tracker.db.before", "absent"),
-                                ("tracker.log.sleep", "1"), ("tracker.done", "1")):
+                                ("tracker.done", "1"), ("tracker.db.files", "875"), ("tracker.log.debug_lines", "0")):
                     if r.get(x) != want:
                         notes.append(f"{x} {r.get(x)} (want {want})")
-                if r.get("tracker.log.extraction_finished") in (None, "", "0"):
-                    notes.append("no \"Extraction finished\" in the log")
+                try:   # the shipped 15 s initial sleep, from the miner's status trace (D63, D69)
+                    if not 15.0 <= float(r.get("tracker.log.sleep_s") or "") < 16.0:
+                        notes.append(f"initial sleep {r.get('tracker.log.sleep_s')} s (want 15)")
+                except ValueError:
+                    notes.append("initial sleep not in the status trace")
         if family == "desktop":   # 9.8 D13 (the gate itself is checked for every family above)
             want, got = r.get("renderers.wanted_min"), r.get("renderers.observed")
             if want and got and int(got) < int(want):

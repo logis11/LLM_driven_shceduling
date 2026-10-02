@@ -731,15 +731,28 @@ trk_after() {   # trk_after <root>: the session's records and what the index lef
   rec tracker.elapsed_s "$(sed -n 's/.*elapsed_s=\([0-9]*\).*/\1/p' "$c" | tail -1)"
   rec tracker.miner_rc "$(sed -n 's/^miner_rc=//p' "$c" | tail -1)"
   rec tracker.miner_killed "$(grep -c '^miner_killed=1' "$c")"
-  rec tracker.log.lines "$(wc -l < "$OUT/tracker.log" 2>/dev/null || echo 0)"
-  rec tracker.log.sleep "$(grep -c 'Performing initial sleep of 15 seconds' "$OUT/tracker.log" 2>/dev/null)"
-  rec tracker.log.starting_extractor "$(grep -c 'Starting extractor' "$OUT/tracker.log" 2>/dev/null)"
-  rec tracker.log.extraction_finished "$(grep -c 'Extraction finished' "$OUT/tracker.log" 2>/dev/null)"
-  rec tracker.log.idle "$(grep -c "status.*Idle\|'Idle'" "$OUT/tracker.log" 2>/dev/null)"
-  rec tracker.log.warnings "$(grep -c -- '-WARNING\|-CRITICAL' "$OUT/tracker.log" 2>/dev/null)"
-  for x in files folders extracted; do
-    rec "tracker.db.$x" "$(grep -oE '[0-9]+' "$OUT/tracker.count.$x.txt" 2>/dev/null | tail -1)"
-  done
+  local L="$OUT/tracker.log"
+  rec tracker.log.lines "$(wc -l < "$L" 2>/dev/null || echo 0)"
+  rec tracker.log.debug_lines "$(grep -c -- '-DEBUG' "$L" 2>/dev/null)"
+  rec tracker.log.warnings "$(grep -c -- '-WARNING\|-CRITICAL' "$L" 2>/dev/null)"
+  # the status trace (D69): the initial sleep as the miner's first Idle to its Initializing, in s; the extractor's runs
+  rec tracker.log.sleep_s "$(python3 - "$L" <<'PY'
+import re, sys
+t = {}
+for line in open(sys.argv[1], errors="replace"):
+    m = re.search(r"Tracker-Message: (\d\d):(\d\d):(\d\d)\.(\d{3}): \(Miner:'TrackerMinerFiles'\) set property:'status' to '(Idle|Initializing)'", line)
+    if m and m.group(5) not in t:
+        h, mi, s_, ms = map(int, m.groups()[:4])
+        t[m.group(5)] = h * 3600 + mi * 60 + s_ + ms / 1000
+print(round(t["Initializing"] - t["Idle"], 3) if len(t) == 2 else "")
+PY
+)"
+  rec tracker.log.extracting "$(grep -c "TrackerExtractDecorator') set property:'status' to 'Extracting metadata'" "$L" 2>/dev/null)"
+  rec tracker.log.deadline_exits "$(grep -c 'took too long to process' "$L" 2>/dev/null)"
+  rec tracker.log.extractor_died "$(grep -c 'Extractor subprocess died unexpectedly' "$L" 2>/dev/null)"
+  rec tracker.db.files "$(sed -n 's/^Currently indexed: \([0-9]*\) files.*/\1/p' "$OUT/tracker.status.txt" 2>/dev/null)"
+  rec tracker.db.folders "$(sed -n 's/^Currently indexed: [0-9]* files, \([0-9]*\) folders.*/\1/p' "$OUT/tracker.status.txt" 2>/dev/null)"
+  rec tracker.db.failures "$(sed -n 's/^\([0-9]*\) recorded failures.*/\1/p' "$OUT/tracker.status.txt" 2>/dev/null)"
   rec tracker.gst_registry.after "$(sudo ls "$r$h/.cache/gstreamer-1.0" 2>/dev/null | paste -sd, -)"
   sudo ls -laR "$r$h/.cache" > "$OUT/tracker.cache.txt" 2>&1
 }

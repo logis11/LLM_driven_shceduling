@@ -167,10 +167,9 @@ def read_kv(path):
 
 # ---- the Tracker job's window (9.10 D62, D63, D65) -----------------------------------------
 
-TRK_LINE = re.compile(r"^(?:\(.*?\):\s*)?Tracker-(?:DEBUG|Message|INFO|WARNING|CRITICAL): (\d\d):(\d\d):(\d\d)\.(\d{3}): (.*)$")
-TRK_STATUS = re.compile(r"\(Miner:'TrackerMinerFiles'\) set property:'status' to '(.*)'$")
-TRK_MARKS = (("initial_sleep", "Performing initial sleep of"), ("starting_extractor", "Starting extractor"),
-             ("extraction_finished", "Extraction finished"), ("shutting_down", "Shutting down after 10 seconds inactivity"))
+TRK_LINE = re.compile(r"^(?:\(.*?\):\s*)?Tracker-(?:DEBUG|Message|INFO|WARNING|CRITICAL)(?: \*\*)?: (\d\d):(\d\d):(\d\d)\.(\d{3}): (.*)$")
+TRK_STATUS = re.compile(r"\(Miner:'(TrackerMinerFiles|TrackerExtractDecorator)'\) set property:'status' to '(.*)'$")
+TRK_MARKS = (("deadline_exit", "took too long to process"), ("extractor_died", "Extractor subprocess died unexpectedly"))
 TRK_MINER = "tracker-miner-fs-3"
 
 
@@ -185,8 +184,8 @@ def tod_to_mono(tod_s, start_mono_ns, start_real_ns):
 
 
 def tracker_marks(path, start_mono_ns, start_real_ns):
-    """The log's boundary lines on CLOCK_MONOTONIC: {mark: [s, ...]} for TRK_MARKS, and "status": [(s, status)], the
-    miner's status traces (TRACKER_DEBUG=status)."""
+    """The log's lines on CLOCK_MONOTONIC: {mark: [s, ...]} for TRK_MARKS (warnings, printed without a debug setting),
+    "status": [(s, status)] for the miner and "extractor": [(s, status)] for the extractor (TRACKER_DEBUG=status, D69)."""
     out = defaultdict(list)
     with open(path, errors="replace") as handle:
         for line in handle:
@@ -200,20 +199,28 @@ def tracker_marks(path, start_mono_ns, start_real_ns):
                     out[k].append(t)
             st = TRK_STATUS.search(text)
             if st:
-                out["status"].append((t, st.group(1)))
+                out["status" if st.group(1) == "TrackerMinerFiles" else "extractor"].append((t, st.group(2)))
     return dict(out)
 
 
 def tracker_window(D, phase, edges, exec_rows, root, rows, execs, tid2pid):
-    """9.10 D62, D63: the job is the miner's tree from the miner's exec — its first schedule-in — to the extractor's
-    last "Extraction finished"; returns (what was read, the tree's rows that start within the job). Without an end
-    line the rows stay whole and the end is None (an invalid repeat)."""
+    """9.10 D62, D63, D69: the job is the miner's tree from the miner's exec — its first schedule-in — to the extractor's
+    last status change to Idle after Extracting metadata (D62's "Extraction finished", logged in the same millisecond);
+    returns (what was read, the tree's rows that start within the job). Without that line the rows stay whole and the
+    end is None (an invalid repeat)."""
     start = next((t for t, pid, f in exec_rows if pid == root and f.rsplit("/", 1)[-1] == TRK_MINER), None)
     e = edges.get(phase, {})
     log = os.path.join(D, "tracker.log")
     marks = tracker_marks(log, e["start"], e["start_real"]) if os.path.exists(log) and e.get("start") and e.get("start_real") else {}
-    fin = marks.get("extraction_finished", [])
-    end = max(fin) if fin else None
+    ext = marks.get("extractor", [])
+    seen, end = False, None
+    for t, st in ext:
+        if st == "Extracting metadata":
+            seen = True
+        elif st == "Idle" and seen:
+            end = t
+    miner = marks.get("status", [])
+    init = next((t for t, st in miner if st == "Initializing"), None)
     if start is None:
         start = min((s.t_in for s in rows), default=None)
     job = [s for s in rows if start is not None and s.t_in >= start and (end is None or s.t_in < end)]
@@ -225,8 +232,12 @@ def tracker_window(D, phase, edges, exec_rows, root, rows, execs, tid2pid):
         by_exec[(execs.get(pid) or s.comm or "?").rsplit("/", 1)[-1]] += s.run * 1000.0
     info = {"start": start, "end": end, "job_s": round(end - start, 3) if end is not None and start is not None else None,
             "marks_s": {k: [rel(t) for t in marks.get(k, [])] for k, _n in TRK_MARKS},
-            "status_s": [(rel(t), st) for t, st in marks.get("status", [])],
-            "idle_s": [rel(t) for t, st in marks.get("status", []) if st == "Idle"],
+            "initializing_s": rel(init) if init is not None else None,
+            "extractor_starts_s": [rel(t) for t, _p, f in exec_rows if f.rsplit("/", 1)[-1] == "tracker-extract-3"
+                                   and start is not None and t >= start],
+            "status_s": [(rel(t), st) for t, st in miner],
+            "extractor_status_s": [(rel(t), st) for t, st in ext],
+            "idle_s": [rel(t) for t, st in miner if st == "Idle"],
             "cpu_by_exec_us": dict(sorted(((k, round(v, 1)) for k, v in by_exec.items()), key=lambda kv_: -kv_[1])),
             "registry_scan_cpu_us": round(by_exec.get("gst-plugin-scanner", 0.0), 1),
             "tail_cpu_us": round(sum(s.run for s in after) * 1000.0, 1),
@@ -607,7 +618,8 @@ def main():
               + (f"; cached {r['cached_fraction']}" if "cached_fraction" in r else ""))
         if "tracker" in r:
             t = r["tracker"]
-            print(f"  tracker job {t['job_s']} s; marks {t['marks_s']}; Idle at {t['idle_s']}; registry scan {t['registry_scan_cpu_us']} µs; "
+            print(f"  tracker job {t['job_s']} s; Initializing at {t['initializing_s']}; extractor starts {t['extractor_starts_s']}; "
+                  f"marks {t['marks_s']}; registry scan {t['registry_scan_cpu_us']} µs; "
                   f"tail {t['tail_cpu_us']} µs; " + ", ".join(f"{k} {v / 1e6:.3f}" for k, v in list(t["cpu_by_exec_us"].items())[:6]))
         for h in r.get("dkms_hooks", []):
             print(f"  hook {h['hook']} [{h['root_pid']}]: {h['processes']} procs, CPU {h['cpu_us'] / 1e6:.3f} s, span {h['span_s']} s; "
