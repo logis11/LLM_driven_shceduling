@@ -703,12 +703,15 @@ trk_home() {   # trk_home <root>: the user, its folders, the set as ~/Documents,
   trk_as_user "$r" xdg-user-dirs-update > "$OUT/tracker.xdg.log" 2>&1; rec tracker.xdg.rc "$?"
   sudo cat "$r$h/.config/user-dirs.dirs" > "$OUT/tracker.user-dirs.dirs.txt" 2>&1
   rec tracker.home.entries "$(sudo ls -A "$r$h" | paste -sd, -)"
-  sudo chown "$(id -u):$(id -g)" "$r$h/Documents"
-  unmeasured python3 "$HERE/hippocamp.py" "$TRK_REPO" "$TRK_REV" "$TRK_TREE" "$r$h/Documents" "$OUT/tracker.set.tsv" \
+  # the home is the user's alone (mode 750): the set is fetched into the work directory, then renamed into place as
+  # ~/Documents on the same filesystem (dry run 1, run #118: the fetch into the home was refused)
+  rm -rf "$WORK/trk-set"
+  unmeasured python3 "$HERE/hippocamp.py" "$TRK_REPO" "$TRK_REV" "$TRK_TREE" "$WORK/trk-set" "$OUT/tracker.set.tsv" \
     > "$OUT/tracker.set.kv" 2> "$OUT/tracker.set.log"
   rec tracker.set.rc "$?"
   while IFS='=' read -r k v; do [ -n "$k" ] && rec "tracker.set.$k" "$v"; done < "$OUT/tracker.set.kv"
   rec tracker.set.repo "$TRK_REPO"; rec tracker.set.revision "$TRK_REV"; rec tracker.set.tree "$TRK_TREE"
+  sudo rmdir "$r$h/Documents" && sudo mv "$WORK/trk-set" "$r$h/Documents"; rec tracker.set.placed.rc "$?"
   sudo chroot "$r" chown -R "$TRK_USER:$TRK_USER" "$h"
   rec tracker.set.files_on_disk "$(sudo find "$r$h/Documents" -type f | wc -l)"
   rec tracker.set.dirs_on_disk "$(sudo find "$r$h/Documents" -mindepth 1 -type d | wc -l)"
