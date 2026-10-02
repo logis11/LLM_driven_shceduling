@@ -12,6 +12,8 @@
 #             Ubuntu 24.04 install stage over 2026-07-27's security updates in a chroot of the default layer
 #   dkms      dkms-install — 9.10's DKMS campaign (9.10 changelog D4, D46–D50): the same install stage on 2026-09-23,
 #             the security kernel 7.0.0-34, in that chroot with the HWE kernel 7.0.0-31 and nvidia-driver-595-open
+#   tracker   tracker-index — 9.10's Tracker campaign (9.10 changelog D5, D60–D68): Tracker 3.7.1's first index of a
+#             home holding HippoCamp's Bei profile as ~/Documents, in that chroot built at 2026-09-22T17:00Z
 # Every measured phase is one command pinned to the measured CPU (pin.sh,
 # phase.sh MEAS_PIN=load), observed over the whole phase from the harness CPUs
 # by `perf sched record -a` — with the exec rows that name each process's
@@ -138,7 +140,7 @@ case "$APP" in
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y steamcmd > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
         STEAMCMD="$( [ -x /usr/games/steamcmd ] && echo /usr/games/steamcmd || command -v steamcmd)"; rec steamcmd.binary "$STEAMCMD"
         rec steamcmd.package "$(dpkg-query -W -f '${Version}' steamcmd 2>/dev/null)" ;;
-  upgrade|dkms)
+  upgrade|dkms|tracker)
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mmdebstrap > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
         rec mmdebstrap.version "$(mmdebstrap --version 2>&1 | head -1)" ;;
 esac
@@ -679,6 +681,80 @@ dkms_job() {
   df -B1 --output=target,avail "$WORK" > "$OUT/df.dkms.txt" 2>&1
 }
 
+# ---- the Tracker index (9.10 D5, D60–D68) ---------------------------------------------
+# D37's chroot built at D64's T0, the DKMS campaign's: Tracker 3.7.1 and its extractors as the English default install
+# holds them, nothing installed and no setting written (D61, D63). A user with its XDG folders, created by the layer's
+# xdg-user-dirs-update; HippoCamp's Bei tree at a pinned revision as the content of ~/Documents, the other folders
+# empty (D66–D68), downloaded and checked file by file on the harness CPUs (hippocamp.py). The phase is a session bus
+# of the user's own (dbus-run-session) on the harness CPUs, the miner in it on the measured CPU (tracker-session.sh);
+# the job — every process in the miner's tree, from its first schedule-in to the extractor's "Extraction finished" — is
+# cut by analyze.py (D62, D63, D65). The chroot's root is bound onto itself, so /proc/self/mountinfo inside it shows the
+# filesystem under /, where GIO looks a path's mount up for the miner's storage.
+TRK_REPO=MMMem-org/HippoCamp; TRK_REV=ff212ff7ec1a60d28023e65f7e7c4df5a87f552c; TRK_TREE=Bei/Fullset/Bei   # D67
+TRK_USER=user; TRK_UID=1000; TRK_CAP_S=3600   # the user's name: design; the phase's cap (method §3)
+trk_as_user() {   # trk_as_user <root> <cmd...>: in the chroot as the user, the environment reduced to the user's
+  local r="$1"; shift
+  sudo chroot "$r" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" --init-groups /usr/bin/env -i HOME="/home/$TRK_USER" \
+    USER="$TRK_USER" LOGNAME="$TRK_USER" PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin LANG=en_US.UTF-8 "$@"
+}
+trk_home() {   # trk_home <root>: the user, its folders, the set as ~/Documents, the session script
+  local r="$1" h="/home/$TRK_USER"
+  sudo chroot "$r" useradd -m -u "$TRK_UID" -U -s /bin/bash "$TRK_USER" > "$OUT/tracker.useradd.log" 2>&1; rec tracker.useradd.rc "$?"
+  trk_as_user "$r" xdg-user-dirs-update > "$OUT/tracker.xdg.log" 2>&1; rec tracker.xdg.rc "$?"
+  sudo cat "$r$h/.config/user-dirs.dirs" > "$OUT/tracker.user-dirs.dirs.txt" 2>&1
+  rec tracker.home.entries "$(sudo ls -A "$r$h" | paste -sd, -)"
+  sudo chown "$(id -u):$(id -g)" "$r$h/Documents"
+  unmeasured python3 "$HERE/hippocamp.py" "$TRK_REPO" "$TRK_REV" "$TRK_TREE" "$r$h/Documents" "$OUT/tracker.set.tsv" \
+    > "$OUT/tracker.set.kv" 2> "$OUT/tracker.set.log"
+  rec tracker.set.rc "$?"
+  while IFS='=' read -r k v; do [ -n "$k" ] && rec "tracker.set.$k" "$v"; done < "$OUT/tracker.set.kv"
+  rec tracker.set.repo "$TRK_REPO"; rec tracker.set.revision "$TRK_REV"; rec tracker.set.tree "$TRK_TREE"
+  sudo chroot "$r" chown -R "$TRK_USER:$TRK_USER" "$h"
+  rec tracker.set.files_on_disk "$(sudo find "$r$h/Documents" -type f | wc -l)"
+  rec tracker.set.dirs_on_disk "$(sudo find "$r$h/Documents" -mindepth 1 -type d | wc -l)"
+  rec tracker.set.bytes_on_disk "$(sudo find "$r$h/Documents" -type f -printf '%s\n' | awk '{s += $1} END {print s + 0}')"
+  rec tracker.gst_registry.before "$(sudo test -e "$r$h/.cache/gstreamer-1.0" && echo present || echo absent)"
+  rec tracker.db.before "$(sudo test -e "$r$h/.cache/tracker3" && echo present || echo absent)"
+  rec tracker.miner.version "$(sudo chroot "$r" dpkg-query -W -f '${Version}' tracker-miner-fs 2>/dev/null)"
+  rec tracker.extract.version "$(sudo chroot "$r" dpkg-query -W -f '${Version}' tracker-extract 2>/dev/null)"
+  rec tracker.chroot_tz "$(sudo chroot "$r" date +%Z)"
+  sudo mkdir -p "$r/var/tmp/meas"; sudo chroot "$r" chown "$TRK_USER:$TRK_USER" /var/tmp/meas
+  sudo install -m 755 "$HERE/tracker-session.sh" "$r/usr/local/lib/meas-tracker-session.sh"
+}
+trk_after() {   # trk_after <root>: the session's records and what the index left
+  local r="$1" h="/home/$TRK_USER" c="$OUT/cmd.tracker-index.log"
+  sudo cp "$r/var/tmp/meas/"* "$OUT/" 2>/dev/null
+  rec tracker.done "$(sed -n 's/^done=\([0-9]*\).*/\1/p' "$c" | tail -1)"
+  rec tracker.elapsed_s "$(sed -n 's/.*elapsed_s=\([0-9]*\).*/\1/p' "$c" | tail -1)"
+  rec tracker.miner_rc "$(sed -n 's/^miner_rc=//p' "$c" | tail -1)"
+  rec tracker.miner_killed "$(grep -c '^miner_killed=1' "$c")"
+  rec tracker.log.lines "$(wc -l < "$OUT/tracker.log" 2>/dev/null || echo 0)"
+  rec tracker.log.sleep "$(grep -c 'Performing initial sleep of 15 seconds' "$OUT/tracker.log" 2>/dev/null)"
+  rec tracker.log.starting_extractor "$(grep -c 'Starting extractor' "$OUT/tracker.log" 2>/dev/null)"
+  rec tracker.log.extraction_finished "$(grep -c 'Extraction finished' "$OUT/tracker.log" 2>/dev/null)"
+  rec tracker.log.idle "$(grep -c "status.*Idle\|'Idle'" "$OUT/tracker.log" 2>/dev/null)"
+  rec tracker.log.warnings "$(grep -c -- '-WARNING\|-CRITICAL' "$OUT/tracker.log" 2>/dev/null)"
+  for x in files folders extracted; do
+    rec "tracker.db.$x" "$(grep -oE '[0-9]+' "$OUT/tracker.count.$x.txt" 2>/dev/null | tail -1)"
+  done
+  rec tracker.gst_registry.after "$(sudo ls "$r$h/.cache/gstreamer-1.0" 2>/dev/null | paste -sd, -)"
+  sudo ls -laR "$r$h/.cache" > "$OUT/tracker.cache.txt" 2>&1
+}
+trk_job() {
+  local r="$WORK/chroot"
+  UPG_T0="${MEAS_TRACKER_T0:-20260922T170000Z}"   # D64
+  sudo rm -rf "$r"; upg_build "$r"
+  sudo mount --bind "$r" "$r"; upg_mount "$r"; trk_home "$r"
+  export MEAS_PIN=none
+  phase tracker-index -- sudo taskset -c "$MEAS_HARNESS_CPUS" chroot "$r" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" \
+    --init-groups /usr/bin/env -i HOME="/home/$TRK_USER" USER="$TRK_USER" LOGNAME="$TRK_USER" \
+    PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin LANG=en_US.UTF-8 \
+    dbus-run-session -- /bin/bash /usr/local/lib/meas-tracker-session.sh "$MEAS_CPU" "$TRK_CAP_S" /var/tmp/meas
+  export MEAS_PIN=load
+  trk_after "$r"; upg_umount "$r"; sudo umount -l "$r" 2>/dev/null
+  df -B1 --output=target,avail "$WORK" > "$OUT/df.tracker.txt" 2>&1
+}
+
 # ---- the job ----------------------------------------------------------------------
 case "$APP" in
   borg)
@@ -722,6 +798,7 @@ case "$APP" in
     df -B1 --output=target,avail "$WORK" > "$OUT/df.steam.txt" 2>&1 ;;
   upgrade) upg_job ;;
   dkms) dkms_job ;;
+  tracker) trk_job ;;
   *) rec error "unknown app $APP" ;;
 esac
 

@@ -37,6 +37,7 @@ counted by comm, never folded in.
 """
 
 import argparse
+import datetime
 import gzip
 import json
 import os
@@ -61,14 +62,16 @@ load_edges, outside, pct, dist, QUANTILE_PROBS = _build.load_edges, _build.outsi
 IOWAIT = re.compile(r"^\s*(\d+\.\d+):\s+sched:sched_stat_iowait:\s+comm=.*?\s+pid=(\d+)\s+delay=(\d+)")
 EXEC = re.compile(r"^\s*(\d+\.\d+):\s+sched:sched_process_exec:\s+filename=(.*?)\s+pid=(\d+)\s+old_pid=(\d+)")
 ROOT_COMMS = {"borg": ("borg",), "7z": ("7z", "7zz"), "steamcmd": ("steamcmd",), "upgrade": ("chroot",),   # upgrade: 9.10 D37
-              "dkms": ("chroot",)}   # dkms: 9.10 D50, the install stage as upgrade's
+              "dkms": ("chroot",),   # dkms: 9.10 D50, the install stage as upgrade's
+              "tracker": ("tracker-miner-fs-3", "tracker-miner-f")}   # tracker: 9.10 D65, the miner its session starts
 # 9.10 D50: the DKMS job is every process rooted at a run of either kernel hook, which execs dkms_autoinstaller (S2-03)
 DKMS_HOOKS = ("/etc/kernel/postinst.d/dkms", "/etc/kernel/header_postinst.d/dkms", "/usr/lib/dkms/dkms_autoinstaller")
 CLASSES = ("disk", "uninterruptible", "network", "sleep", "runnable")
 
 
 def job_of(phase):
-    for job, prefix in (("borg", "borg"), ("7z", "7z"), ("steamcmd", "steam"), ("upgrade", "upgrade"), ("dkms", "dkms")):
+    for job, prefix in (("borg", "borg"), ("7z", "7z"), ("steamcmd", "steam"), ("upgrade", "upgrade"), ("dkms", "dkms"),
+                        ("tracker", "tracker")):
         if phase.startswith(prefix):
             return job
     return None
@@ -77,8 +80,9 @@ def job_of(phase):
 def is_program(job, filename, comm):
     """The program's own processes: borg's (a Python script, executed as /usr/bin/borg), 7-Zip's, and SteamCMD's
     binary — not /usr/games/steamcmd or steamcmd.sh, the shell wrappers that start it. Without an exec row, by comm.
-    The unattended upgrade (9.10 D37): every process of the tree — the job is the unit's commands and all they start."""
-    if job == "upgrade":
+    The unattended upgrade (9.10 D37): every process of the tree — the job is the unit's commands and all they start.
+    The Tracker index (9.10 D65): every process in the miner's tree."""
+    if job in ("upgrade", "tracker"):
         return True
     if filename:
         base = filename.rsplit("/", 1)[-1]
@@ -159,6 +163,75 @@ def read_kv(path):
         return dict(line.rstrip("\n").split("=", 1) for line in open(path) if "=" in line)
     except OSError:
         return {}
+
+
+# ---- the Tracker job's window (9.10 D62, D63, D65) -----------------------------------------
+
+TRK_LINE = re.compile(r"^(?:\(.*?\):\s*)?Tracker-(?:DEBUG|Message|INFO|WARNING|CRITICAL): (\d\d):(\d\d):(\d\d)\.(\d{3}): (.*)$")
+TRK_STATUS = re.compile(r"\(Miner:'TrackerMinerFiles'\) set property:'status' to '(.*)'$")
+TRK_MARKS = (("initial_sleep", "Performing initial sleep of"), ("starting_extractor", "Starting extractor"),
+             ("extraction_finished", "Extraction finished"), ("shutting_down", "Shutting down after 10 seconds inactivity"))
+TRK_MINER = "tracker-miner-fs-3"
+
+
+def tod_to_mono(tod_s, start_mono_ns, start_real_ns):
+    """A log line's time of day (UTC, the chroot's zone as recorded) on CLOCK_MONOTONIC, in s: the phase's start edge
+    (edges.jsonl) gives the date and the offset between the clocks, as 9.6 D16 read the miner's log."""
+    t0 = datetime.datetime.fromtimestamp(start_real_ns / 1e9, tz=datetime.timezone.utc)
+    real = t0.replace(hour=0, minute=0, second=0, microsecond=0) + datetime.timedelta(seconds=tod_s)
+    if real < t0 - datetime.timedelta(hours=12):
+        real += datetime.timedelta(days=1)
+    return start_mono_ns / 1e9 + (real - t0).total_seconds()
+
+
+def tracker_marks(path, start_mono_ns, start_real_ns):
+    """The log's boundary lines on CLOCK_MONOTONIC: {mark: [s, ...]} for TRK_MARKS, and "status": [(s, status)], the
+    miner's status traces (TRACKER_DEBUG=status)."""
+    out = defaultdict(list)
+    with open(path, errors="replace") as handle:
+        for line in handle:
+            m = TRK_LINE.match(line.rstrip("\n"))
+            if not m:
+                continue
+            h, mi, sec, ms, text = m.groups()
+            t = tod_to_mono(int(h) * 3600 + int(mi) * 60 + int(sec) + int(ms) / 1000.0, start_mono_ns, start_real_ns)
+            for k, needle in TRK_MARKS:
+                if needle in text:
+                    out[k].append(t)
+            st = TRK_STATUS.search(text)
+            if st:
+                out["status"].append((t, st.group(1)))
+    return dict(out)
+
+
+def tracker_window(D, phase, edges, exec_rows, root, rows, execs, tid2pid):
+    """9.10 D62, D63: the job is the miner's tree from the miner's exec — its first schedule-in — to the extractor's
+    last "Extraction finished"; returns (what was read, the tree's rows that start within the job). Without an end
+    line the rows stay whole and the end is None (an invalid repeat)."""
+    start = next((t for t, pid, f in exec_rows if pid == root and f.rsplit("/", 1)[-1] == TRK_MINER), None)
+    e = edges.get(phase, {})
+    log = os.path.join(D, "tracker.log")
+    marks = tracker_marks(log, e["start"], e["start_real"]) if os.path.exists(log) and e.get("start") and e.get("start_real") else {}
+    fin = marks.get("extraction_finished", [])
+    end = max(fin) if fin else None
+    if start is None:
+        start = min((s.t_in for s in rows), default=None)
+    job = [s for s in rows if start is not None and s.t_in >= start and (end is None or s.t_in < end)]
+    rel = (lambda t: round(t - start, 3)) if start is not None else (lambda t: None)
+    after = [s for s in rows if end is not None and s.t_in >= end]
+    by_exec = defaultdict(float)
+    for s in job:
+        pid = tid2pid.get(s.tid, s.tid)
+        by_exec[(execs.get(pid) or s.comm or "?").rsplit("/", 1)[-1]] += s.run * 1000.0
+    info = {"start": start, "end": end, "job_s": round(end - start, 3) if end is not None and start is not None else None,
+            "marks_s": {k: [rel(t) for t in marks.get(k, [])] for k, _n in TRK_MARKS},
+            "status_s": [(rel(t), st) for t, st in marks.get("status", [])],
+            "idle_s": [rel(t) for t, st in marks.get("status", []) if st == "Idle"],
+            "cpu_by_exec_us": dict(sorted(((k, round(v, 1)) for k, v in by_exec.items()), key=lambda kv_: -kv_[1])),
+            "registry_scan_cpu_us": round(by_exec.get("gst-plugin-scanner", 0.0), 1),
+            "tail_cpu_us": round(sum(s.run for s in after) * 1000.0, 1),
+            "rows_before_start": sum(1 for s in rows if start is not None and s.t_in < start)}
+    return info, job
 
 
 # ---- the tree -----------------------------------------------------------------
@@ -345,6 +418,9 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
         prog = [p for p in pids if is_program(job, execs.get(p), role.get(p))]
     prog_set = set(prog)
     rows = [s for s in segs if s.cpu == meas_cpu and s.tid in tree]
+    trk = None
+    if job == "tracker":   # 9.10 D62, D63: the rows within the job's window
+        trk, rows = tracker_window(D, phase, edges, exec_rows, root, rows, execs, tid2pid)
     wake_check = {}
     per_wakes, intervals, merged = thread_wakes(rows, wakeups, wake_check)
     disk = disk_accounting(intervals, tid2pid, recs)
@@ -450,6 +526,8 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
            "all": {k: dist(v) for k, v in samples["all"].items()}, "threads": threads, "processes": procs,
            "outside_on_measured_cpu": dict(sorted(out_by_comm.items(), key=lambda kv_: -kv_[1]["run_ms"])[:25]),
            "_samples": samples}
+    if trk is not None:
+        res["tracker"] = trk
     if hooks is not None:   # each hook run: its processes, CPU on the measured CPU, span, and the programs it executed
         res["dkms_hooks"] = []
         for r_, h in sorted(hooks.items(), key=lambda kv_: min((s_.t_in for s_ in rows if s_.tid in kv_[1]["tids"]), default=0)):
@@ -527,6 +605,10 @@ def main():
               f"run/wake p50 {a['run_us'].get('p50')} µs wait p50 {a['wait_us'].get('p50')} µs "
               + " ".join(f"{c} n {a[c + '_us']['n']}" for c in CLASSES)
               + (f"; cached {r['cached_fraction']}" if "cached_fraction" in r else ""))
+        if "tracker" in r:
+            t = r["tracker"]
+            print(f"  tracker job {t['job_s']} s; marks {t['marks_s']}; Idle at {t['idle_s']}; registry scan {t['registry_scan_cpu_us']} µs; "
+                  f"tail {t['tail_cpu_us']} µs; " + ", ".join(f"{k} {v / 1e6:.3f}" for k, v in list(t["cpu_by_exec_us"].items())[:6]))
         for h in r.get("dkms_hooks", []):
             print(f"  hook {h['hook']} [{h['root_pid']}]: {h['processes']} procs, CPU {h['cpu_us'] / 1e6:.3f} s, span {h['span_s']} s; "
                   + ", ".join(f"{k} {v / 1e6:.2f}" for k, v in list(h["cpu_by_exec_us"].items())[:8]))

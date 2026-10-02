@@ -480,8 +480,44 @@ def test_the_list_is_each_archetypes_batch_loop_tables():
     steps = [k for k in keys if k.startswith("mb_step:")]
     assert len(steps) == sum(n for tree in modbuild.TREES.values() for _m, _r, n in modbuild.members(tree)) == 56
     assert keys[len(steps):] == ["mb:dispatch_us", "mb:tail_run_us", "mb:tail_block_us", "mb_carried_cpu_us"]
+    # 9.10's Tracker method §1: over the job, the batch loop's two tables and the CPU total, until the form is fixed
+    assert [k for _p, k, _l in pool.LIST["tracker"]] == ["batch_run_us", "batch_block_us", "program_cpu_us"]
     assert {p for _p in pool.LIST.values() for p, _k, _l in _p} == {"borg-first-warm", "7z-mmt8-warm", "steam-fresh-shaped",
-                                                                   "upgrade-install", "dkms-install"}
+                                                                   "upgrade-install", "dkms-install", "tracker-index"}
+
+
+def test_the_tracker_job_runs_from_the_miners_exec_to_the_last_extraction_finished(tmp_path):
+    # 9.10 D62, D63: the miner's exec starts the job; the extractor's last "Extraction finished" ends it; the 10 s
+    # before the extractor exits, and the miner's idling after, are outside
+    import datetime
+    (tmp_path / "tracker.log").write_text(
+        "Tracker-DEBUG: 10:00:01.000: Performing initial sleep of 15 seconds\n"
+        "Tracker-Message: 10:00:16.000: (Miner:'TrackerMinerFiles') set property:'status' to 'Initializing'\n"
+        "Tracker-Message: 10:00:20.000: (Miner:'TrackerMinerFiles') set property:'status' to 'Idle'\n"
+        "Tracker-DEBUG: 10:00:20.010: Starting extractor\n"
+        "Tracker-DEBUG: 10:00:30.000: Extraction finished in 9s\n"
+        "Tracker-DEBUG: 10:00:31.000: Starting to process 5 items\n"
+        "(tracker-extract-3:7): Tracker-DEBUG: 10:00:40.000: Extraction finished in 9s\n"
+        "Tracker-DEBUG: 10:00:50.000: Shutting down after 10 seconds inactivity\n")
+    real = int(datetime.datetime(2026, 10, 2, 10, 0, 0, tzinfo=datetime.timezone.utc).timestamp() * 1e9)
+    edges = {"tracker-index": {"start": 1000 * 10 ** 9, "start_real": real}}
+    seg = analyze._build.Seg
+    rows = [seg(999.5, 999.5, 999.6, 0.1, "taskset", 50, 50, "S", 3),        # taskset before the exec
+            seg(1000.6, 1000.6, 1000.7, 0.1, "tracker-miner-f", 50, 50, "S", 3),
+            seg(1021.0, 1021.0, 1021.5, 0.5, "tracker-extract", 60, 60, "S", 3),
+            seg(1039.0, 1039.0, 1039.9, 0.9, "tracker-extract", 60, 60, "S", 3),
+            seg(1045.0, 1045.0, 1045.1, 0.1, "tracker-miner-f", 50, 50, "S", 3)]   # after the end
+    exec_rows = [(999.4, 50, "/usr/bin/taskset"), (1000.5, 50, "/usr/libexec/tracker-miner-fs-3"),
+                 (1020.5, 60, "/usr/libexec/tracker-extract-3")]
+    info, job = analyze.tracker_window(str(tmp_path), "tracker-index", edges, exec_rows, 50, rows,
+                                       {50: "/usr/libexec/tracker-miner-fs-3", 60: "/usr/libexec/tracker-extract-3"},
+                                       {50: 50, 60: 60})
+    assert info["start"] == 1000.5 and info["end"] == 1040.0 and info["job_s"] == 39.5
+    assert [s.t_in for s in job] == [1000.6, 1021.0, 1039.0]
+    assert info["marks_s"]["initial_sleep"] == [0.5] and info["idle_s"] == [19.5]
+    assert info["marks_s"]["extraction_finished"] == [29.5, 39.5]
+    assert info["cpu_by_exec_us"] == {"tracker-extract-3": 1400.0, "tracker-miner-fs-3": 100.0}
+    assert info["tail_cpu_us"] == 100.0 and info["rows_before_start"] == 1
 
 
 def test_a_difference_inside_the_precision_is_not_resolved():

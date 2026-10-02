@@ -139,6 +139,17 @@ def validity(family, dirs, entry):
                         notes.append(f"{x} {r.get(x)} (want {want})")
                 if r.get("upgrade.changed_sha256"):
                     dbs.add(r["upgrade.changed_sha256"])
+            if r.get("app") == "tracker":   # 9.10 D61–D68: the state, the set whole, the index run to its end
+                for x, want in (("upgrade.layer.missing", "0"), ("upgrade.layer.extra", "0"), ("upgrade.run_systemd_system", "absent"),
+                                ("tracker.miner.version", "3.7.1-1ubuntu0.1"), ("tracker.extract.version", "3.7.1-1ubuntu0.1"),
+                                ("tracker.set.files", "875"), ("tracker.set.bytes", "40662407070"), ("tracker.set.verified", "875"),
+                                ("tracker.set.failed", "0"), ("tracker.set.files_on_disk", "875"),
+                                ("tracker.gst_registry.before", "absent"), ("tracker.db.before", "absent"),
+                                ("tracker.log.sleep", "1"), ("tracker.done", "1")):
+                    if r.get(x) != want:
+                        notes.append(f"{x} {r.get(x)} (want {want})")
+                if r.get("tracker.log.extraction_finished") in (None, "", "0"):
+                    notes.append("no \"Extraction finished\" in the log")
         if family == "desktop":   # 9.8 D13 (the gate itself is checked for every family above)
             want, got = r.get("renderers.wanted_min"), r.get("renderers.observed")
             if want and got and int(got) < int(want):
