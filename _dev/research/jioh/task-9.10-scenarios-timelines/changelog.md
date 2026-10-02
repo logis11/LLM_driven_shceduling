@@ -947,3 +947,19 @@ Grounds:
 Open, for the campaign's method: the job's boundaries; the entry's form; the comm.
 
 No file changed yet.
+
+## D50 — the measured phase is the kernel day's install stage; the job is every process under the two DKMS hooks (2026-10-02)
+
+By 인지오's decision, D49's open item on the job's boundaries. The measured phase is the stock install stage of 2026-09-23 (D48), `apt.systemd.daily install` in the chroot on the measured CPU, as D38's. The job is every process rooted at a `dkms_autoinstaller` run the kernel install causes. The kernel image's postinst runs `/etc/kernel/postinst.d/dkms`, and the headers' postinst runs `/etc/kernel/header_postinst.d/dkms`. Each runs `dkms_autoinstaller start 7.0.0-34-generic`, which runs `dkms autoinstall` (S2-03). One run builds and installs the module; the other finds it installed. The rest of the stage is recorded and reported, not carried: `unattended-upgrade`, dpkg, the initramfs rebuild and `xdg-desktop-portal`, the day's other default-layer update (S3-58).
+
+Grounds:
+
+- **D4's observation.** "The whole run is one observation: the `dkms` script, kbuild's probes, the object jobs, modpost, link and `depmod`." Both hook runs are DKMS work the kernel install causes.
+- **The hooks** (S2-03, `dkms` 3.0.11-1ubuntu13): `postinst.d/dkms:37–38` and `header_postinst.d/dkms:37–38` run `exec /usr/lib/dkms/dkms_autoinstaller start "$inst_kern"`; `dkms_autoinstaller:71–75` skips when `/lib/modules/$kernel/build/include` is absent, and otherwise runs `dkms autoinstall --kernelver $kernel`.
+- **The parallelism is D4's.** `dkms` builds with `make -j$parallel_jobs`, `parallel_jobs` defaulting to the CPUs it counts (`dkms:1113`, `:2594`, S2-03). On the one measured CPU that is 1, so the method sets `parallel_jobs=8` in `/etc/dkms/framework.conf`, D4's eight-thread desktop, labelled design.
+
+Which hook builds follows dpkg's configure order, recorded by the dry run. Whether the second run stays carried is read against its size after the dry run.
+
+Open, for the campaign's method: the entry's form and the comm, read from the dry run as D39 and D40 were.
+
+No file changed yet.
