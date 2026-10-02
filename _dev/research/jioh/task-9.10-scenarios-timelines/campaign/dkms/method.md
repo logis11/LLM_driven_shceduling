@@ -16,7 +16,7 @@ The observation behind `c7-compile`'s unwanted job (changelog D4, D46–D50), ru
 
 ## 2. Inputs (D48, D49)
 
-- **The state.** The upgrade campaign's chroot (`../upgrade/method.md` §2: the 1,445 packages of `upgrade-layer.txt`, `mmdebstrap --variant=apt`, components `main restricted universe multiverse`, `LANG=en_US.UTF-8`) built from Ubuntu's snapshot service at T0 = `20260923T000000Z`. Then, on the harness CPUs, with the stock deb822 sources pointed at T0: `apt-get install -y linux-generic-hwe-24.04` (the kernel the installer adds, S2-33; `7.0.0-31` at T0) and `apt-get install -y nvidia-driver-595-open` (D46's user), which pulls in `dkms` and `nvidia-dkms-595-open` 595.91.07 and builds the module for `7.0.0-31-generic`. Both with apt's defaults, recommended packages included.
+- **The state.** The upgrade campaign's chroot (`../upgrade/method.md` §2: the 1,445 packages of `upgrade-layer.txt`, `mmdebstrap --variant=apt`, components `main restricted universe multiverse`, `LANG=en_US.UTF-8`) built from Ubuntu's snapshot service at T0 = `20260922T170000Z` (D51). Then, on the harness CPUs, with the stock deb822 sources pointed at T0: `apt-get install -y linux-generic-hwe-24.04` (the kernel the installer adds, S2-33; `7.0.0-31` at T0) and `apt-get install -y nvidia-driver-595-open` (D46's user), which pulls in `dkms` and `nvidia-dkms-595-open` 595.91.07 and builds the module for `7.0.0-31-generic`. Both with apt's defaults, recommended packages included; apt's package cache then cleaned, so the download stage's count is the day's.
 - **The sources.** The stock deb822 pair pointed at the snapshot of T1 = `20260924T000000Z`, as the upgrade campaign's.
 - **The chroot's mounts.** As the upgrade campaign's: `/run/systemd/system` absent, `ischroot` holds.
 - **The build's parallelism** (D4, D50). `OMP_NUM_THREADS=8` in the measured stage's environment: `nproc` returns it (S2-40), and NVIDIA's `dkms.conf` builds with `make -j` of `nproc` (S2-39), as `dkms`'s own default does (S2-03) — D4's eight-thread desktop on the one measured CPU. Design.
@@ -53,3 +53,5 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel and CPU model as recorded, 
 Raw records per job are released as a GitHub release named in the registry entry at fold-in. The release is outward-facing and is published on 인지오's go-ahead.
 
 ## 8. Amendments
+
+- 2026-10-02, the dry run (run 36980404122, #106; changelog D51) — amending §2 "The state": T0 is `20260922T170000Z`, not `20260923T000000Z`. At the latter the updates pocket already held the kernel `7.0.0-34`, the state was on it, and the stage installed `xdg-desktop-portal` alone.

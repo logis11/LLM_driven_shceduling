@@ -622,7 +622,8 @@ upg_job() {
 }
 
 # ---- the DKMS autoinstall (9.10 D4, D46–D50) ----------------------------------------
-# D49's state: D37's chroot built at T0 = 2026-09-23T00:00Z, then, on the harness CPUs, the kernel the installer adds
+# D49's state: D37's chroot built at T0 = 2026-09-22T17:00Z (D51: after that day's security update to sudo, before the
+# updates pocket published the kernel 7.0.0-34), then, on the harness CPUs, the kernel the installer adds
 # (linux-generic-hwe-24.04, 7.0.0-31 at T0) and the driver package D46's user installs (nvidia-driver-595-open, which
 # pulls in dkms and nvidia-dkms-595-open 595.91.07 and builds the module for 7.0.0-31). The download stage against
 # T1 = 2026-09-24T00:00Z fetches the day's security updates — the kernel 7.0.0-34 (D48) and xdg-desktop-portal — and
@@ -642,6 +643,7 @@ dkms_state() {   # dkms_state <root>: the kernel and the driver package at T0, o
   unmeasured sudo chroot "$r" /usr/bin/env DEBIAN_FRONTEND=noninteractive apt-get install -y nvidia-driver-595-open \
     < /dev/null > "$OUT/dkms.state.driver.log" 2>&1
   rec dkms.state.driver.rc "$?"; rec dkms.state.driver_s "$(( $(date +%s) - t0 ))"
+  unmeasured sudo chroot "$r" apt-get clean   # the download stage's count is then the day's alone
   rec dkms.state.kernels "$(ls "$r/lib/modules" 2>/dev/null | paste -sd, -)"
   rec dkms.state.status "$(sudo chroot "$r" dkms status 2>&1 | paste -sd';' -)"
   rec dkms.version "$(sudo chroot "$r" dkms --version 2>&1 | head -1)"
@@ -651,7 +653,7 @@ dkms_state() {   # dkms_state <root>: the kernel and the driver package at T0, o
   # the installed set the measured stage starts from (upg_after diffs against it)
   sudo chroot "$r" dpkg-query -W -f '${binary:Package}\t${Version}\t${db:Status-Abbrev}\n' > "$OUT/upgrade.dpkg.t0.tsv" 2>&1
   rec dkms.state.installed "$(wc -l < "$OUT/upgrade.dpkg.t0.tsv")"
-  sudo du -sb "$r" 2>/dev/null | cut -f1 | { read -r b; rec dkms.state.chroot_bytes "$b"; }
+  sudo du -sbx "$r" 2>/dev/null | cut -f1 | { read -r b; rec dkms.state.chroot_bytes "$b"; }
 }
 dkms_after() {   # dkms_after <root>: the module the stage built, and DKMS's own records
   local r="$1" k=7.0.0-34-generic
@@ -666,7 +668,7 @@ dkms_after() {   # dkms_after <root>: the module the stage built, and DKMS's own
 }
 dkms_job() {
   local r="$WORK/chroot"
-  UPG_T0="${MEAS_DKMS_T0:-20260923T000000Z}"; UPG_T1="${MEAS_DKMS_T1:-20260924T000000Z}"   # D48
+  UPG_T0="${MEAS_DKMS_T0:-20260922T170000Z}"; UPG_T1="${MEAS_DKMS_T1:-20260924T000000Z}"   # D48, D51
   sudo rm -rf "$r"; upg_build "$r"; upg_mount "$r"; dkms_state "$r"; upg_download "$r"
   export MEAS_PIN=none
   phase dkms-install -- sudo taskset -c "$MEAS_CPU" chroot "$r" /usr/bin/env -i \

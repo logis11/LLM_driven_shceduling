@@ -129,6 +129,16 @@ def validity(family, dirs, entry):
                         notes.append(f"{x} {r.get(x)} (want {want})")
                 if r.get("upgrade.changed_sha256"):
                     dbs.add(r["upgrade.changed_sha256"])
+            if r.get("app") == "dkms":   # 9.10 D48, D49, D51: the state on 7.0.0-31 with the module built, the stage
+                # installing 7.0.0-34 and DKMS building the module's five files for it
+                for x, want in (("upgrade.layer.missing", "0"), ("upgrade.layer.extra", "0"), ("dkms.state.kernels", "7.0.0-31-generic"),
+                                ("dkms.state.status", "nvidia/595.91.07, 7.0.0-31-generic, x86_64: installed"),
+                                ("dkms.after.installed_new", "1"), ("dkms.after.modules", "5"),
+                                ("upgrade.uu.all_installed", "1"), ("upgrade.run_systemd_system", "absent")):
+                    if r.get(x) != want:
+                        notes.append(f"{x} {r.get(x)} (want {want})")
+                if r.get("upgrade.changed_sha256"):
+                    dbs.add(r["upgrade.changed_sha256"])
         if family == "desktop":   # 9.8 D13 (the gate itself is checked for every family above)
             want, got = r.get("renderers.wanted_min"), r.get("renderers.observed")
             if want and got and int(got) < int(want):
@@ -165,7 +175,7 @@ def validity(family, dirs, entry):
         bad += bool(notes)
         print(f"   r{k}: {'ok' if not notes else '; '.join(notes)}{''.join(f' ({x})' for x in info)}")
     if len(dbs) > 1:
-        what = ("SteamCMD app builds or upgrade change sets" if family == "background" else "ClamAV signature databases")
+        what = ("SteamCMD app builds or upgrade and DKMS change sets" if family == "background" else "ClamAV signature databases")
         print(f"   {what} differ across repeats: {sorted(dbs)}"); bad += 1
     if len(origins) > 1:
         print(f"   origin counts differ across repeats: {sorted(origins)}"); bad += 1

@@ -963,3 +963,18 @@ Which hook builds follows dpkg's configure order, recorded by the dry run. Wheth
 Open, for the campaign's method: the entry's form and the comm, read from the dry run as D39 and D40 were.
 
 No file changed yet.
+
+## D51 — the state is the archive at 2026-09-22T17:00Z, amending D48 (2026-10-02)
+
+By 인지오's decision, after the DKMS campaign's dry run (run 36980404122, #106, repeat 1, `dry`, on the EPYC 7763), amending D48's state time. The state (D49) is built from the archive at 2026-09-22T17:00Z. That is after the security pocket's only default-layer update of 2026-09-22 (`sudo`, 14:57:05) and before the updates pocket published `7.0.0-34` (17:43:27). The upgrade's archive stays at 2026-09-24T00:00Z, so the pending set is 2026-09-23's security day, the kernel `7.0.0-34` and `xdg-desktop-portal`, as D48 describes. The premise, stated: the user last took updates from the updates pocket before the kernel reached it.
+
+Grounds:
+
+- **What the dry run showed.** With the state at 2026-09-23T00:00Z, the kernel install took `7.0.0-34` from the updates pocket. The state was on the new kernel with the module built for it, and the measured stage installed `xdg-desktop-portal` alone (`dkms.state.kernels=7.0.0-34-generic`; `upgrade.uu.log`: "Packages that will be upgraded: xdg-desktop-portal").
+- **The two times** (S3-60; S3-58's copy). `7.0.0-34` reached the updates pocket at 2026-09-22T17:43:27 and the security pocket at 2026-09-23T15:49:46. The security pocket's default-layer publications were `sudo` on 2026-09-22 at 14:57:05, then the kernel and `xdg-desktop-portal` (18:33:16) on 2026-09-23.
+- **Checked on the snapshot service.** At 2026-09-22T17:00Z, `linux-generic-hwe-24.04` is `7.0.0-31.31~24.04.1` in both pockets, `sudo` `1.9.15p5-3ubuntu5.24.04.3` in security, `xdg-desktop-portal` `1.18.4-1ubuntu2.24.04.2`, and `nvidia-dkms-595-open` `595.91.07-0ubuntu0.24.04.1` in updates. At 2026-09-24T00:00Z both pockets have `7.0.0-34.34~24.04.1` and `xdg-desktop-portal` `…24.04.3`.
+- **Against the alternatives.** A state at 2026-09-22T00:00Z adds `sudo`, two security days in one run. A state at 2026-09-23T00:00Z with the kernel held back is current in every other package, which no ordinary user action produces.
+
+The dry run otherwise held D49: the layer built from the snapshot in 519 s with the 1,445 packages and none extra; the kernel install and `nvidia-driver-595-open` installed (`dkms` 3.0.11, `gcc-13`); DKMS built the five modules, 200 `CC [M]` lines in the `make.log`; the stage's unattended upgrade read "All upgrades installed".
+
+Tooling: `run.sh`'s `dkms` job takes T0 = `20260922T170000Z`, cleans apt's cache after the state install, and measures the chroot without crossing its mounts; `pool_runs.py` checks the state's kernel and the module built for the new one.
