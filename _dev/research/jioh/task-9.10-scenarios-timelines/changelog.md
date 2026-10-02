@@ -918,3 +918,18 @@ Grounds:
 Open, for the campaign's method: the kernel the hook fires for; the environment the build runs in; the job's boundaries; the entry's form; the comm.
 
 No file changed yet.
+
+## D48 — the hook fires for 2026-09-23's security kernel, `7.0.0-31` → `7.0.0-34` (2026-10-02)
+
+By 인지오's decision, D47's first open item: the kernel the hook builds the module for is the one the security pocket published on 2026-09-23. This is the latest security-kernel day before the campaign. The state is the archive at 2026-09-23T00:00Z: the desktop on HWE kernel `7.0.0-31.31~24.04.1`, with `nvidia-dkms-595-open` 595.91.07 installed and built for it. The unattended upgrade against the archive at 2026-09-24T00:00Z installs `7.0.0-34.34~24.04.1`, and the hook builds 595.91.07 for `7.0.0-34-generic`.
+
+Grounds:
+
+- **Unasked.** The stock unattended upgrade installs from the release and security pockets (`50unattended-upgrades:6–8`, S2-30; D36). `7.0.0-34` reached security on 2026-09-23T15:49:46, replacing `7.0.0-31` (2026-09-04). `7.0.0-38` is in the updates pocket only (2026-10-01), which the job does not install from (S3-60).
+- **The driver on that day.** 595.91.07 is in the updates pocket from 2026-09-15 (S3-60). A desktop's sources include the updates pocket (S2-38), and the user's own updates install from it.
+- **The day rule.** D36's state was the latest day before the campaign meeting its criterion. A security kernel arrived on 18 days of the past year, a median of 18 days apart (S3-58).
+- **Reproducible.** The snapshot service serves the pockets as they stood at a timestamp (S3-58; D36).
+
+Open, for the campaign's method: the environment the build runs in; the job's boundaries; the entry's form; the comm.
+
+No file changed yet.
