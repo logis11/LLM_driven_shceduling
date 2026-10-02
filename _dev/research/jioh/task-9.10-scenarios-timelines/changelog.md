@@ -994,3 +994,23 @@ Grounds (the dry run, `analyze.py` and 9.6's job classification, `jobs_of`, appl
 Open, for the campaign's method: how the probe jobs and the uncovered 7 % are carried; the names and tiers; the entry ids; `c7-compile`'s structure against `c1-compile`; the list the stability rule tests.
 
 Tooling to follow: `analyze.py` gains the job classification per hook run (`jobs_of`, a job's members stopping at a nested `make`); the compiler gains the second job kind.
+
+## D53 — the probes are two job kinds of their own: kbuild's probes and NVIDIA's `conftest` tests (2026-10-02)
+
+By 인지오's decision, D52's open item on the probe jobs. The entry carries three job kinds, each its own chain with its own step tables from this campaign:
+
+- **object jobs**, the kernel build's six-process chain (`sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`; 9.6 D19);
+- **kbuild's probes**, six processes: `sh` → `mkdir`; `sh` → `gcc` → `cc1`, `as`; `sh` → `rm`;
+- **NVIDIA's `conftest` tests**: `sh` → `sh` (`conftest.sh`) → `dirname`, `gcc` → `cc1` (→ `as`), `rm`, `sh`, `sh`. A test that compiled more than once is drawn as one test, its extra processes' CPU folded into the matching members.
+
+The spawn table keeps the kinds in the order the build ran them.
+
+Grounds (the second dry run, D52):
+
+- **Two populations.** 1,124 of the 1,357 probe jobs are kbuild's six-process probe, all 400 checked in that fork order, about 10 ms a job, 11.7 s in all; median CPU per process `cc1` 4.4 ms, `gcc` 2.1, `as` 1.7, the rest under 1. The other 233 are `conftest` tests, 46.4 s in all. Their commonest trees are 95 without `as` and 80 of 82 with it; `cc1` takes 230–286 ms at the median. 33 tests compiled twice, a few three times.
+- **Pooling would mix them.** One probe table over both would make `cc1` about 83 % draws near 4 ms and 17 % near 250 ms, and give the `conftest` tests kbuild's tree and names (D25).
+- **When they run.** Probes start from 0.3 s, at a median of 29.9 s; object jobs from 60.9 s, at a median of 129.9 s; some probes run among the objects, up to 210.2 s.
+
+Open, for the campaign's method: the uncovered 7 %; the names and tiers; the entry ids; `c7-compile`'s structure against `c1-compile`; the stability rule's list.
+
+Tooling to follow: the compiler's orchestrator draws a spawn table of the three kinds in order; `analyze.py` classifies probe jobs by tree.
