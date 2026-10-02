@@ -1040,3 +1040,15 @@ Grounds:
 - **The ids.** They mirror 9.6's `build-orchestrator` and `compiler-child`.
 
 Open, for the campaign's method: `c7-compile`'s structure against `c1-compile`; the stability rule's list.
+
+## D56 — `c7-compile` is its base's first C seconds, the module build from 0 s in place of the user's build (2026-10-02)
+
+By 인지오's decision, D55's open item on `c7-compile`'s structure against `c1-compile`, D41's rule applied to the compile pair. `c7-compile` is `c1-compile`'s first C seconds: the editor `code` from 0 to C, its focus window from 2 s to C − 2 s (D44). The user's build is replaced by the DKMS build, task `dkms` on `module-build-orchestrator` (D55), arriving at 0 s and bound whole. One segment, labelled `background_wanted: false`, `initiated: scheduled`. C is the module build's CPU total as the entry carries it, its jobs, dispatch and tail (D52–D54), about 218 s from the dry run. It is set at fold-in from the job's demand as compiled under the file's seed, so the job is alive at every instant of the segment. The base is unchanged.
+
+Grounds:
+
+- **D41 and D44.** The ten interactive counterparts are their bases' first C seconds with the unwanted job from 0 s, bound whole, the focus window 2 s to C − 2 s. On one lane a job of C seconds of CPU is alive for at least C seconds under every policy, so the label holds at every instant.
+- **In place of the user's build.** D4: `c7-compile` binds the module build "in place of the rename"; the vocabulary's compile `false` cell is "a module rebuild after a kernel update in place of the user's build" (`docs/recognition-vocabulary.md` §1).
+- **Against the alternatives.** With the build arriving at 2 s, as the user's build does, the first 2 s are labelled `false` with no unwanted work. At the base's length (about 23 min once D18's 2,908-job build is bound), the file would carry the label for about 19 min with no unwanted work after the module build ends.
+
+Hands to 9.14: the pair review and the scoring spec compare `c7-compile` with `c1-compile`'s first C seconds, as for the interactive counterparts (D41). Hands to 9.15: `building-plan.md` §3 C7 ("`compile` renames `make` to `dkms`").
