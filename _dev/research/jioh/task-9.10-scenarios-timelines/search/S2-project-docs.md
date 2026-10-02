@@ -65,6 +65,7 @@ All rows dated 2026-10-01. "200" etc. are HTTP status codes.
 | 49 | manpages.ubuntu.com; ftp.gnu.org (stage 3) | `manpages/noble/man1/nproc.1.html` (200; coreutils 9.4-3ubuntu6.3, no mention of the OpenMP variables); `gnu/coreutils/coreutils-9.4.tar.xz` (200) → S2-40 | — | — |
 | 50 | local copies (stage 3) | S2-01's `iso-casper-minimal.manifest`; S2-03's `tracker-extract`, `tracker-miner-fs` and `ubuntu-settings` packages; S2-04's tracker-miners 3.7.1 source, re-read for the Tracker campaign's environment → S2-41 | — | — |
 | 51 | local copy (stage 3) | S2-04's tracker-miners 3.7.1 source, re-read for when the first index's work ends → S2-42 | — | — |
+| 52 | local copies (stage 3) | S2-04's tracker-miners 3.7.1 source and S2-03's `tracker-miner-fs` unit, re-read for the job's start and the reset path → S2-43 | — | — |
 
 ## 2. Candidates
 
@@ -3753,6 +3754,19 @@ a77819313f1acef8b19c5903218978151f7013393a91286585c1a00b3f589a09  S2-15/wb-sm201
   - The initial sleep: `src/miners/fs/tracker-main.c:334–347` — `initial_sleep = tracker_config_get_initial_sleep (config);` `if (initial_sleep <= 0) { miner_maybe_start (miner); return; }` … `g_debug ("Performing initial sleep of %d seconds", initial_sleep);` `miners_timeout_id = g_timeout_add_seconds (initial_sleep, miner_start_idle_cb, miner);`.
 - **Coverage.** T5 — the boundaries of the indexer's work: the miner's `Idle` ends the crawl, not extraction; the extractor runs as the miner's child and writes through the miner; it logs its own finish and exits 10 s later off a terminal. Supports the job's boundaries; not its length.
 - **One observation?** Not an observation; the program's source.
+
+### S2-43 — Tracker Miners 3.7.1 source: the miner's start on an empty database, the initial sleep, and `tracker3 reset --filesystem` (read at stage 3, 2026-10-02)
+
+- **Citation.** tracker-miners 3.7.1, the copy of S2-04; the `tracker-miner-fs` 3.7.1-1ubuntu0.1 user unit (S2-03). Read for the Tracker campaign's job start (D5, D63).
+- **Copy read.** `sources/S2-04/tracker-miners-3.7.1/`, commit eae431ef23ddbf0910bc716f36b5f7512c783752; `sources/S2-03/x-tracker-miner-fs/usr/lib/systemd/user/tracker-miner-fs-3.service` (in the package of SHA-256 573bdac5dbd64761fe88f48bf54204f6ceb9f9c2e785e96a2e02ea0866f5ae41); re-read 2026-10-02.
+- **Passages.**
+  - The start sequence, `src/miners/fs/tracker-main.c`: `:821` `initialize_priority_and_scheduling ();` (`:199–203` "/* Set CPU priority */" `tracker_sched_idle ();`); `:915` `sparql_conn = setup_connection (domain_ontology, &error);`; `:1016` "/* Preempt creation of graphs */" (`graphs_created_cb`, `:450–461`, sets `graphs_ready = TRUE;`); `:1027` `miner_start (miner_files, config, do_mtime_checking);`.
+  - Whether the miner sleeps, `src/miners/fs/tracker-main.c:316–347`: `if (!do_mtime_checking) {` `g_debug ("Avoiding initial sleep, no mtime check needed");` `miner_maybe_start (miner); return; }` … `initial_sleep = tracker_config_get_initial_sleep (config);` … `g_debug ("Performing initial sleep of %d seconds", initial_sleep);` `miners_timeout_id = g_timeout_add_seconds (initial_sleep, miner_start_idle_cb, miner);`; `:296–300` `miner_maybe_start`: `if (!slept || !graphs_ready) return;` `miner_do_start (miner);`.
+  - The mtime check on an empty cache: `src/miners/fs/tracker-main.c:978–983` `if (force_mtime_checking) { do_mtime_checking = TRUE; } else { do_mtime_checking = tracker_miner_files_get_need_mtime_check (TRACKER_MINER_FILES (miner_files)); }`; `src/miners/fs/tracker-miner-files.c:41` `#define NEED_MTIME_CHECK_FILENAME "no-need-mtime-check.txt"`; `:1342–1354` `exists = g_file_test (filename, G_FILE_TEST_EXISTS);` "/* Existence of the file means we cleanly shutdown before and don't need to do the mtime check again on this start. */" `return !exists;`; `:779–784` the file's directory, `get_cache_dir`: `g_file_get_child (cache, "files")`.
+  - The reset, `src/tracker/tracker-reset.c:186–205`: "/* KILL processes first... */" `if (files || rss) {` "/* FIXME: we might selectively kill affected miners */" `tracker_process_stop (SIGKILL);` … `dir = g_build_filename (g_get_user_cache_dir (), "tracker3", "files", NULL);` … `delete_location_content (location);`; `:49` the option's text `N_("Remove filesystem indexer database")`.
+  - The unit after a SIGKILL: `tracker-miner-fs-3.service:11` `Restart=on-failure`, `:12–13` "# Don't restart after tracker daemon -k (aka tracker-control -k)" `RestartPreventExitStatus=SIGKILL`.
+- **Coverage.** T5 — the miner's start on an empty database: its priority, the database's creation, and the shipped initial sleep taken because the clean-shutdown marker is absent; the reset empties the same directory, marker included, after killing the miner, which the unit does not restart. Supports the job's start on both labels; not its length.
+- **One observation?** Not an observation; the program's source and unit.
 
 ## 3. Not found
 

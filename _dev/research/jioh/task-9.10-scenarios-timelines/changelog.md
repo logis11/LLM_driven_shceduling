@@ -1137,3 +1137,19 @@ Grounds:
 Open: the job's start (the shipped 15 s initial sleep); the archive time (D61); the file set (D60); its placement under the indexed directories.
 
 No file changed yet.
+
+## D63 — the Tracker job starts at the miner's first schedule-in, the shipped 15 s initial sleep kept (2026-10-02)
+
+By 인지오's decision, D5's job window, its start. The measured job starts at the miner's first schedule-in. It holds the miner's start-up — its `SCHED_IDLE` priority, the database created from the ontology, the graphs — then the shipped initial sleep of 15 s, the crawl, and extraction up to D62's end. `initial-sleep` keeps its shipped value; 9.6's override to 0 is not carried.
+
+Grounds:
+
+- **An empty database takes the sleep** (S2-43). The miner skips the initial sleep only when no mtime check is needed, and it needs one when the clean-shutdown marker `no-need-mtime-check.txt` is absent from its cache directory, as it is on an empty database. The crawl starts once the sleep and the graphs are both done.
+- **Both labels start the same way** (S2-43). `tracker3 reset --filesystem` kills the miner with SIGKILL and empties `~/.cache/tracker3/files/`, the marker with it; the unit does not restart after a SIGKILL. The next start finds an empty database and no marker, as a first login does (D5).
+- **The settings are the shipped ones** (D61; S2-41: `initial-sleep` 15).
+
+How the sleep appears in the entry or the timeline — a block within the job or the job's offset — is a form question after the dry run.
+
+Open: the archive time (D61); the file set (D60); its placement under the indexed directories.
+
+No file changed yet.
