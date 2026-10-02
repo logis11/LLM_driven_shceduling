@@ -1244,3 +1244,17 @@ Grounds (dry run 2's log, `tracker.log`):
 Method §8 carries the amendment; a third dry run checks it.
 
 No file changed yet.
+
+## D70 — the Tracker index is a new entry in the batch-loop form; `cpu-batch`'s `tracker` tables leave at fold-in (2026-10-02)
+
+By 인지오's decision, D5's open item on the entry: the index is a new archetype with `cpu-batch`'s batch-loop constructor (9.7 D29), as D39 made `package-upgrade` — one task; a run drawn from the tree's runs between voluntary blocks, pooled over every process of the miner's tree (D65), then the block that followed it, the tree's own off-CPU time, zero when another of its processes runs on or is runnable — until the job's CPU is spent. The CPU total is the measured whole (D17) and is carried. The tree's structure — the miner, the extractor runs, the deadline exits and the registry scan — is stated in `modeling_notes`. Once the three indexing files rebind to it, no file binds `cpu-batch`'s `tracker` tables; they leave at fold-in, with the `tracker` figures of `cpu-batch`'s `validation_stats` and `modeling_notes`.
+
+Grounds (dry run 3, run 37010496980, #121):
+
+- **The job does not meet `cpu-batch`'s sharing criterion** (9.6 D7: "runnable for the whole of its lifetime on one dominant thread; a program showing a distinct shape … gets its own entry"): saturation 0.659 over the job (the initial sleep one 14.9 s block), 0.891 from the miner's `Initializing`; three extractor processes in turn, two ended by the 5 s deadline, each restart after the miner's 1 s grace; the dominant thread (the extractor's `single`) 0.553 of the CPU. `cpu-batch`'s programs run at 0.925–0.9998 over their jobs (its `validation_stats`).
+- **The library's precedent:** `package-upgrade` (D39), `file-backup`, `file-archiver` and `game-download` carry the batch-loop form in entries of their own.
+- **D6 holds:** `c2-p1b`'s indexer carries the measured indexer's own tables, now this entry's.
+
+Open: how the initial sleep appears (D63); the deadline exits; the registry scan between the two labels (D65); the entry's id and the name its task shows.
+
+No file changed yet.
