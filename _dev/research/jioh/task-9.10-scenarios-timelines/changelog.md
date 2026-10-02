@@ -1182,3 +1182,20 @@ Grounds:
 Read at the dry run: the registry scan's CPU in D61's layer, which holds the base and good plugin sets. The scan runs on a new home's first index and not after `tracker3 reset --filesystem`, which empties only `~/.cache/tracker3/files/` (S2-43). If its CPU matters, the two labels' difference is a form question.
 
 No file changed yet.
+
+## D66 — the Tracker campaign indexes a HippoCamp profile; D5's "a real user's file set" restated, amending D5 and D60 (2026-10-02)
+
+By 인지오's decision, D60's search. No real person's own home directory with real content is reachable under terms that allow the measurement (S3-62–S3-77). The file set is a profile of HippoCamp (S3-76): a home-like file system its authors aggregated from participants' files, public benchmark documents and synthetic content. D5's state is restated: Tracker indexing a home-like file set from an empty database. The entry's scope states what the set is, its file count, and that no source grounds its count as a home's.
+
+Grounds:
+
+- **The search** (S3, "T5 — a file set for the indexer's first index"): the four classes of phase decision 4; the Real Data Corpus "is no longer available" (S3-66); the L3S desktop set was not released (S3-73); UMass's collections are internal-use by request (S3-72); real-machine studies publish metadata or hashes only; a runner holds no user's files.
+- **What HippoCamp is** (S3-76): "derived from interviews with 100+ participants"; the participants' files aggregated "into coherent archetypal profiles by matching file-type/modality distributions and high-level organizational patterns"; "rather than a verbatim dump of a single person's machine"; privacy-relevant content "synthetically generated"; folders carrying public benchmark sets (`caud`, `maud`, `contractnli` in Adam's tree, `financebench` in Victoria's).
+- **Its terms** (S3-76): the licence permits "non-commercial research" and "benchmarking and evaluation of … retrieval systems"; it forbids publicly mirroring the raw files, and allows "aggregate statistics … provided they do not enable reconstruction or redistribution of the raw-file release". The campaign's release carries the measurement's records, not the files.
+- **The other candidates** (S3-67, S3-70): the Enron attachments are one real person's documents from a mailbox, not a home; M57-Patents' homes were filled by actors in a scripted scenario.
+
+Hands to the entry's scope at fold-in: a profile's few hundred files are HippoCamp's; a home's file count needs its own source — Dinneen, Julien & Frissen, "The scale and structure of personal file collections" (CHI 2019), to be verified against its primary text and entered in `docs/references.md` if the scope states a count. Hands to 9.15: `docs/references.md` gains a `hippocamp` entry at fold-in.
+
+Open: which profile; its placement under the indexed directories.
+
+No file changed yet.

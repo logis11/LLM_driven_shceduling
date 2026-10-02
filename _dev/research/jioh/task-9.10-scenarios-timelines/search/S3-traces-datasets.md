@@ -159,6 +159,39 @@ Source copies under `_dev/research/jioh/task-9.10-scenarios-timelines/sources/S3
 | 2026-10-02 | api.launchpad.net | `ubuntu/+archive/primary?ws.op=getPublishedBinaries`, `exact_match=true`, `noble/amd64`, created since 2026-06-01, for `nvidia-dkms-595-open`, `linux-image-generic-hwe-24.04`, `linux-headers-generic-hwe-24.04` | 200 (all three) → S3-60 | — |
 | 2026-10-02 | mattmahoney.net | `https://mattmahoney.net/dc/10gb.html`, re-read for the licence and the contents table | 200 → S3-61 | — |
 
+### T5 — a file set for the indexer's first index (stage 3, D60)
+
+| date | engine / venue | query | hits followed | dead ends / HTTP status |
+|---|---|---|---|---|
+| 2026-10-02 | WebSearch | `NapierOne mixed file data set download licence` | registry.opendata.aws/napierone; github.com/simonrdavies/NapierOne (→ S3-63) | DagsHub mirrors not followed |
+| 2026-10-02 | WebSearch | `digitalcorpora govdocs1 million files download terms` | digitalcorpora.org/corpora/file-corpora/files/ (→ S3-62) | — |
+| 2026-10-02 | WebSearch | `"Real Data Corpus" Garfinkel used hard drives access IRB` | Real Data Corpus page and FAQ (→ S3-66) | — |
+| 2026-10-02 | WebSearch | `desktop search test collection personal files released dataset evaluation` | arXiv 2412.12330; Chernov et al. ECIR 2007; Kim & Croft CIKM 2009 (→ S3-72, S3-73) | — |
+| 2026-10-02 | curl | 21 digitalcorpora.org pages (Govdocs1 and its statistical report, Terms of Use, Real Data Corpus and FAQ, scenario pages, SafeDocs, Under Development, two posts) | all 200 | — |
+| 2026-10-02 | S3 ListObjectsV2 (`digitalcorpora.s3.amazonaws.com`) | prefixes `2009-m57-patents/drives-redacted/`, `files/govdocs1/`, `corpora/drives/`, `nps-2009-ubnist1/`, `nps-2009-domexusers/`, `nps-2008-m57-jean/`, `2018-lonewolf/`, `2019-narcos/` | sizes in S3-62, S3-67, S3-68 | `corpora/scenarios/2009-m57-jean/`: 0 objects (200) |
+| 2026-10-02 | curl HEAD | Govdocs1 `thread0.zip`; SafeDocs `0000.zip`; `NapierOne-tiny.zip`; M57 `pat-2009-12-11.E01`; CFReDS `pc.7z.001` and the seed files | 200 each | downloads.digitalcorpora.org answers 302 to S3 |
+| 2026-10-02 | curl | simson.net DFRWS 2009 corpora PDF; ADFSL 2011 corpora PDF | 200 | — |
+| 2026-10-02 | WebSearch; GNOME GitLab API | `tracker-miners localsearch test-extraction-data sample files repository`; localsearch `tests` tree, extractor-content README, COPYING, archive, MR 281 | 200 each (→ S3-74) | `tests/extractor-tests`, `tests/test-extraction-data`, `utils/data-generators`: 404 |
+| 2026-10-02 | WebSearch; framagit API | `Recoll test data set download …`; `"testrecoll" recoll test data download`; recoll tree, `tests/shared.sh` | 200 | `tests/README`, `tests/README.md`: 404 |
+| 2026-10-02 | WebSearch; KDE invent API | `Baloo KDE file indexer benchmark test dataset …`; baloo `autotests`; `kfilemetadata autotests samplefiles …`; samplefiles tree, README, archive; Debian `kf6-kfilemetadata` copyright | 200 each (→ S3-75) | `REUSE.toml`, `.reuse/dep5`: 404; Baloo benchmarks hold only `positioncodecbenchmark.cpp` |
+| 2026-10-02 | WebSearch | `desktop search engine benchmark indexing corpus "home directory" comparison Recoll Tracker Baloo files dataset` | magazine and forum articles only | no data set |
+| 2026-10-02 | WebSearch | `Woods Lee Garfinkel "Creating realistic corpora for security and forensic education" M57` | ADFSL 2011 PDF (→ S3-67) | — |
+| 2026-10-02 | WebSearch | `Kim Croft pseudo-desktop collection download …`; `"Retrieval experiments using pseudo-desktop collections" Kim Croft CIKM 2009` | cs.nuim.ie EPS2011 datasets page, 200 (→ S3-72) | ciir-publications `getpdf.php?id=871`: curl 000 |
+| 2026-10-02 | WebSearch; curl | `Chernov Demartini "desktop dataset" …`; the PIM 2008 paper | research.utwente.nl record, 200 (→ S3-73) | ResearchGate PDF 403; eprints.eemcs.utwente.nl redirects to a home page |
+| 2026-10-02 | arXiv | 2412.12330 abs and pdf | 200 (→ S3-72, S3-73) | — |
+| 2026-10-02 | WebSearch | `"home directory" dataset real user files released research file system content snapshot download` | iotta.snia.org `/traces/static/5231`, `/traces/static`; tracer.filesystems.org (200) | metadata or hashes only |
+| 2026-10-02 | WebSearch | `NIST CFReDS data leakage case disk image Windows user files scenario download` | cfreds-archive.nist.gov case page and home, 200 (→ S3-69) | cfreds.nist.gov: a 1,383 B JavaScript shell |
+| 2026-10-02 | WebSearch; curl | `EDRM Enron email data set v2 native attachments download license`; TREC 2010 Legal Track index; HEAD and an 8 MiB range of the attachment archive; EDRM 2010 announcement; Wayback copies of the v2 page (2012-10-29) and its comments (2013-02-28) | 200, 200, 206, 200, 200 (→ S3-70) | edrm.net v2 page 404 |
+| 2026-10-02 | WebSearch | `Avocado Research Email Collection LDC2015T03 attachments documents` | LDC catalog page, README, both agreements, 200 (→ S3-71) | — |
+| 2026-10-02 | WebSearch; HF API | `OSWorld benchmark VM image home directory user files Ubuntu snapshot`; `xlangai/ubuntu_osworld` | 200 | VM images of 12–24 GB, no home-directory file set |
+| 2026-10-02 | WebSearch | `benchmark "realistic file system" OR "realistic home directory" synthetic user files …` | arXiv 2604.01221 HippoCamp (→ S3-76); 2605.03596 Workspace-Bench (→ S3-77); 2604.28181, 2604.04901 (abstracts, 200) | OfficeBench not followed |
+| 2026-10-02 | HF API; project site | hippocamp-ai.github.io; `MMMem-org/HippoCamp` API, README, LICENSE; arXiv PDF | 200 each (→ S3-76) | `file_counts.json` is a Git LFS pointer |
+| 2026-10-02 | HF API | `datasets?author=Workspace-Bench`; `Workspace-Bench-Workspaces` API and README; arXiv PDF; `filesys_en.zip` range reads | 200, 200, 206 (→ S3-77) | — |
+| 2026-10-02 | WebSearch | `Dinneen Julien "personal file collections" dataset released …` | bibliographic records only | data release not determined |
+| 2026-10-02 | WebSearch | `BitCurator born-digital disk images personal computer collection publicly downloadable …`; `Linux desktop forensic disk image Ubuntu user home directory scenario challenge download E01 GNOME` | software pages, tutorials | none |
+| 2026-10-02 | WebSearch; curl | `Apache Tika regression corpus corpora.tika.apache.org commoncrawl files download` | Wayback README 2023-12-01; cwiki CommonCrawl3 page (→ S3-65) | corpora.tika.apache.org: NXDOMAIN |
+| 2026-10-02 | GitHub API; curl | NapierOne repository and README; AWS registry entry; S3 listing of `napierone.com` | 200 each (→ S3-63) | napier.ac.uk accepted-version link: HTML, not the PDF |
+
 ## 2. Candidates
 
 ### T1 and T2 — desktop-usage datasets
@@ -811,6 +844,113 @@ Each sub-entry is one observation by one user.
 - **Coverage.** T5 — the terms and the contents of the file set D5 named as its candidate. Does not cover any other file set.
 - **One observation?** One real laptop's files, selected by their owner for an archiver benchmark.
 
+### T5 — a file set for the indexer's first index (stage 3, D60)
+
+Read for D60's search: a real user's file set, with real content, whose terms allow measuring a desktop indexer and publishing the measurement. Each folder `sources/S3-NN/` holds the saved pages and a `SHA256SUMS.txt` (verified 2026-10-02). Locators `file.txt:Ln` are lines of the reader's text rendering (`h2t.py`, `p2t.py` in the folder). Counts marked "reader's own" are sums over listings, not the source's values.
+
+#### S3-62 — Govdocs1, Digital Corpora (T5; read at stage 3, 2026-10-02)
+
+- **Citation.** Garfinkel, Farrell, Roussev, Dinolt, "Bringing science to digital forensics with standardized forensic corpora", *Digital Investigation* 6 (2009) S2–S11; digitalcorpora.org, "Govdocs1 — (nearly) 1 million freely-redistributable files".
+- **Copy read.** `sources/S3-62/`.
+- **Verbatim.** "documents of specified file types that resided on web servers in the .gov domain" (`govdocs1.txt:L108`); "Files 986278" (`govdocs1-simple-statistical-report.txt:L110`); "freely available for research and may be (to the best of our knowledge) freely redistributed" (`govdocs1.txt:L108`).
+- **Coverage.** T5 — real files crawled from US government web servers, 1,000 directories of 1,000 files; not one user's set. **One observation?** No; a web crawl.
+
+#### S3-63 — NapierOne mixed file data set (T5; read at stage 3, 2026-10-02)
+
+- **Citation.** Davies, Macfarlane, Buchanan, "NapierOne: A modern mixed file data set alternative to Govdocs1", *FSI: Digital Investigation* 40 (2022) 301330, doi:10.1016/j.fsidi.2021.301330; AWS Open Data bucket `napierone.com`.
+- **Copy read.** `sources/S3-63/`.
+- **Verbatim.** Documents "gathered from the UK government domain, gov.uk"; images "from the RAISE data set", other formats "generated from this original TIF data set" (`napierone-README.md:L117–119`); "5,000 subdirectories … each directory containing between 5 and 15 files" (`L155`); "each data subset has its own license" (`L51`).
+- **Coverage.** T5 — web-sourced and generated files of 44 types, about 2 TB; not one user's set. **One observation?** No.
+
+#### S3-64 — SafeDocs CC-MAIN-2021-31-PDF-UNTRUNCATED (T5; read at stage 3, 2026-10-02)
+
+- **Citation.** Digital Corpora, "SAFEDOCS (CC-MAIN-2021-31-PDF-UNTRUNCATED)", NASA JPL for DARPA SafeDocs. **Copy read.** `sources/S3-64/`.
+- **Verbatim.** "nearly 8 million PDFs gathered from across the web in July/August of 2021" (`cc-main-2021-31-pdf-untruncated.txt:L106`).
+- **Coverage.** T5 — PDFs from a web crawl only. **One observation?** No.
+
+#### S3-65 — Apache Tika "commoncrawl3" regression corpus (T5; read at stage 3, 2026-10-02)
+
+- **Citation.** Apache Tika wiki, "Refreshing Apache Tika's Large-scale Regression Corpus" (CommonCrawl3, 2019); corpus README (Wayback 2023-12-01). **Copy read.** `sources/S3-65/`.
+- **Verbatim.** "This data was gathered from Common Crawl … as part of TIKA-2750" (`wayback-tika-cc3-README.txt:L1–2`).
+- **Coverage.** T5 — web-crawled files; the host does not resolve (2026-10-02). **One observation?** No.
+
+#### S3-66 — Real Data Corpus, Naval Postgraduate School (T5; read at stage 3, 2026-10-02)
+
+- **Citation.** digitalcorpora.org, "Real Data Corpus" and "Real Data Corpus FAQ". **Copy read.** `sources/S3-66/`.
+- **Verbatim.** "raw data extracted from data-carrying devices that were purchased on the secondary market around the world" (`real-data-corpus.txt:L104`); "Real Data Corpus is no longer available." (`L134`); "any proposed use of the RDC in research requires that an IRB application be filed" (`rdc-faq.txt:L158`).
+- **Coverage.** T5 — real users' drives; withdrawn. **One observation?** Many real devices; unavailable.
+
+#### S3-67 — 2009 M57-Patents scenario, Digital Corpora (T5; read at stage 3, 2026-10-02)
+
+- **Citation.** Woods, Lee, Garfinkel, Dittrich, Russell, Kearton, "Creating Realistic Corpora for Security and Forensic Education", ADFSL 2011. **Copy read.** `sources/S3-67/`.
+- **Verbatim.** "Corpus creation has been performed as part of a scripted scenario" (page 1, `L53`); "research assistants playing the company personas" (page 6, `L310–317`); "The 'M57-Patents' corpus can be freely redistributed without rights-restricted materials" (page 1, `L58`).
+- **Reader's own.** `drives-redacted/`: 83 E01 images, 454,320,145,629 B; `pat-2009-12-11.E01` 6,146,409,989 B.
+- **Coverage.** T5 — Windows XP/Vista disks of four personas, filled by actors in 2009. **One observation?** No; a scripted scenario.
+
+#### S3-68 — Digital Corpora's other scenario images: M57-Jean, nps-2009-domexusers, nps-2009-ubnist1, 2018 Lone Wolf, 2019 Narcos (T5; read at stage 3, 2026-10-02)
+
+- **Copy read.** `sources/S3-68/`.
+- **Verbatim.** nps-2009-domexusers: "an experimenter playing the role of two users" (`2009.DFRWS.Corpora.txt:L590–597`); nps-2009-ubnist1: "a 2GB flash USB device with a bootable copy of Ubuntu 8.10 … Files from US Government websites have been downloaded" (`nps-2009-ubnist1-narrative.txt:L3–6`); Narcos: "this scenario is imaginary, and as such, should only be used for teaching purposes" (`2019-narcos.txt:L166`).
+- **Coverage.** T5 — scripted or fictional images. **One observation?** No.
+
+#### S3-69 — NIST CFReDS "Data Leakage Case" (T5; read at stage 3, 2026-10-02)
+
+- **Copy read.** `sources/S3-69/`. **Verbatim.** "Base files for creating seed files were randomly selected from Govdocs1" (`data-leakage-case.txt:L286`).
+- **Coverage.** T5 — a scripted Windows 7 VM. **One observation?** No.
+
+#### S3-70 — EDRM Enron Email Data Set v2, native attachments (T5; read at stage 3, 2026-10-02)
+
+- **Citation.** EDRM and ZL Technologies, "EDRM Enron Email Data Set v2" (2010); the attachments through the TREC 2010 Legal Track index. **Copy read.** `sources/S3-70/`.
+- **Verbatim.** "Inclusion of 1,227,255 emails with 493,384 attachments covering 151 custodians" (`edrm-2010-11-launch-announcement.txt:L157`); "The deduplicated attachments in native format", 8G (`trec-legal10-index.txt:L81–83`); George Socha, July 1, 2010: "We have released this collection under a Creative Commons Attribution 3.0 United States License." (`wayback-edrm-enron-v2-comments1.txt:L300–304`).
+- **Reader's own.** The first 8 MiB: 722 tar members, all of custodian archive `kean-s_xml_4of8`: doc 453, htm 73, xls 20, pdf 15, ppt 10, exe 10.
+- **Coverage.** T5 — real employees' document attachments, 2000–2002, by custodian; no photos, music or video. **One observation?** Real people's mail; not a home.
+
+#### S3-71 — Avocado Research Email Collection, LDC2015T03 (T5; read at stage 3, 2026-10-02)
+
+- **Copy read.** `sources/S3-71/`. **Verbatim.** "The type is always 'text' for this rendering of the collection" (`ldc-avocado-README.txt:L259`); "End User may not redistribute the Collection, in whole or in part" (`avocado-collection-individual-agreement.txt:L19`).
+- **Coverage.** T5 — text renderings under licence and fees; not native files. **One observation?** No.
+
+#### S3-72 — UMass pseudo-desktop and CS collections, Kim & Croft (T5; read at stage 3, 2026-10-02)
+
+- **Copy read.** `sources/S3-72/`. **Verbatim.** "Documents were collected by filtering from the W3C email collection and using Yahoo! web search API" (`eps2011-datasets.txt:L33`); "may only be used for internal evaluations and research purposes, and must not be shared" (`L49`).
+- **Coverage.** T5 — constructed desktop collections, by e-mail request only. **One observation?** No.
+
+#### S3-73 — L3S desktop dataset, Chernov et al. (T5; read at stage 3, 2026-10-02)
+
+- **Copy read.** `sources/S3-73/`. **Verbatim.** Bendersky, Metzler, Najork, Wang, "Searching Personal Collections", arXiv 2412.12330, page 17: "The authors did indeed create such a collection and used it for subsequent research, but as far as we know did not make it available to the research community" (`arxiv-2412.12330.txt:L651–654`).
+- **Coverage.** T5 — not released. **One observation?** —
+
+#### S3-74 — localsearch (Tracker 3) extractor test data (T5; read at stage 3, 2026-10-02)
+
+- **Citation.** GNOME/localsearch, `tests/functional-tests/data/extractor-content`, commit 28d4be59d22a4860748f9e71c1ff03e59f7dc531. **Copy read.** `sources/S3-74/`.
+- **Reader's own.** 91 sample files, 5,321,739 B. A 2016 commit describes a dev script that "grabs a mix files from your system and creates a link farm" (`gnome-commits-2016-05-msg01889.txt:L33`); MR 281 times an unpublished tree "(10535 folders, 5703 files)".
+- **Coverage.** T5 — test fixtures; no published home-tree corpus. **One observation?** No.
+
+#### S3-75 — KFileMetadata sample files, KDE (T5; read at stage 3, 2026-10-02)
+
+- **Citation.** invent.kde.org/frameworks/kfilemetadata, `autotests/samplefiles`, commit e3503c0eca9002149815727ca899f93f58dfbc88. **Copy read.** `sources/S3-75/`.
+- **Verbatim.** "This folder contains various small files to be indexed by indexerextractortests." (`kfm-samplefiles-README:L1`). Reader's own: 125 files, 2,070,914 B.
+- **Coverage.** T5 — test fixtures. **One observation?** No.
+
+#### S3-76 — HippoCamp: personal-computer file systems for benchmarking contextual agents (T5; read at stage 3, 2026-10-02)
+
+- **Citation.** Yang, Tian, Hu, Liu, Nguyen, Zhang, Guo, Yu, Zhang, Yang, Loy, Liu, "HippoCamp: Benchmarking Contextual Agents on Personal Computers", arXiv 2604.01221 (2026-04-01); Hugging Face dataset `MMMem-org/HippoCamp`, revision ff212ff7…, licence "HippoCamp Research License v1.0".
+- **Copy read.** `sources/S3-76/` (`arxiv-2604.01221.pdf` and its text, `hf-hippocamp-README.md`, `hf-hippocamp-LICENSE`, `hf-hippocamp-api.json`); the passages below re-read by 9.10's reader on 2026-10-02.
+- **Verbatim.**
+  - Paper, page 5: "HippoCamp is derived from interviews with 100+ participants sampled to reflect general personal-computing settings." / "We then aggregate the selected participants' files into coherent archetypal profiles by matching file-type/modality distributions and high-level organizational patterns" / "These aggregated collections are then condensed into three distinct and representative profiles" / "we further remove system-generated, non-user artifacts and anonymize sensitive identifiers using consistent pseudonyms".
+  - Paper, page 14: "participants provide anonymized directory trees and representative files under controlled handling". Page 16: "All privacy-relevant content in the benchmark is either synthetically generated using a proprietary image-generation model … or reproduced to preserve task structure while removing identifiers. Any externally sourced non-sensitive assets are included only under licenses permitting redistribution and commercial use".
+  - README: "HippoCamp is built from anonymized archetypal personal-computing environments rather than a verbatim dump of a single person's machine." The table: `adam_fullset` 344 raw files, `bei_fullset` 875, `victoria_fullset` 711.
+  - LICENSE §2: "non-commercial research; benchmarking and evaluation of models, agents, retrieval systems, and related methods"; §4: "You may not: … redistribute, resell, sublicense, or publicly mirror the raw-file release or a substantially similar copy of it without prior written permission"; §5: "You may publish aggregate statistics, benchmark scores, model outputs, error analyses, and limited excerpts reasonably necessary for scientific discussion, provided they do not enable reconstruction or redistribution of the raw-file release".
+- **Reader's own** (`hf-hippocamp-api.json`, the `<Profile>/Fullset/<Profile>/` trees): Bei 875 files, 40.66 GB, 76 directories (mp4 157, jpg 136, jpeg 129, pdf 123, mp3 86, docx 68, png 61, txt 27); Adam 344 files, 2.50 GB, 38 directories (pdf 195, png 30, eml 28, mp3 24, docx 23, ics 13), top folders `Company`, `caud`, `maud`, `contractnli`; Victoria 711 files, 2.41 GB, 57 directories (pdf 435, eml 92, png 46, mp3 41, md 30, ics 28), top folders `financebench` (368), `Documents` (223), `Pictures` (37). `caud`, `maud`, `contractnli` and `financebench` carry the names of public benchmark sets.
+- **Coverage.** T5 — three home-like file systems aggregated from participants' files, public benchmark documents and synthetic content; their type mixes and folder layouts. Does not give one person's set, nor a home's file count.
+- **One observation?** No; three constructed profiles.
+
+#### S3-77 — Workspace-Bench 1.0 workspaces (T5; read at stage 3, 2026-10-02)
+
+- **Citation.** Tang, Zhou, Liu et al., "Workspace-Bench 1.0", arXiv 2605.03596 v4; Hugging Face `Workspace-Bench/Workspace-Bench-Workspaces`, Apache-2.0. **Copy read.** `sources/S3-77/`.
+- **Verbatim.** "we prompt agents to generate tree-structured directory hierarchies" (page 7, `arxiv-2605.03596.txt:L482`); "a semantic-driven agentic crawler … retrieves public resources … We then use LLMs to synthesize related artifacts" (`L486–489`). Reader's own: `filesys_en.zip` 23,268 files, 4,435 directories, 24,223,368,047 B.
+- **Coverage.** T5 — generated workspaces. **One observation?** No.
+
 ## 3. Not found
 
 **T1 — application co-occurrence on real desktops**
@@ -859,3 +999,12 @@ Each sub-entry is one observation by one user.
 - **T6 — archive creation and hand-started backups (size, duration):** none beyond popcon prevalence (S3-54); not searched in benchmark databases beyond the compress-7zip/xz profiles (which report MIPS / rates, not user archive sizes).
 - **T9 — launches per hour / applications started mid-session from logged data (outside the SWELL-KW computation in S3-01):** no public desktop dataset found. Searches: WebSearch ActivityWatch dataset (none), WebSearch application launches per hour dataset (commercial tools only), GitHub code search for ActivityWatch exports (one personal file, fixtures), KDE UserFeedback (Kate post: start count is collected, no published results).
 - **T9 — first-run work of Firefox/Chromium, VS Code extension host, Steam client first start:** no routine-case observation with durations found; VS Code issues found are pathological stalls (#193188 and the 8 "Startup Performance" hits); Thunderbird and GNOME Software covered (S3-55, S3-52).
+
+**T5 — a file set for the indexer's first index (stage 3, D60)**
+
+- **One real person's own home directory with real content under open terms:** not found. The Real Data Corpus is withdrawn (S3-66); HippoCamp is aggregated and partly synthetic (S3-76).
+- **A Linux desktop home image with real user content:** only `nps-2009-ubnist1`, a researcher-used Ubuntu 8.10 USB stick (S3-68).
+- **A Tracker, Baloo or Recoll home-tree benchmark corpus:** none published (S3-74, S3-75; Recoll's `tests/shared.sh` points to a developer-local path).
+- **Desktop-search test collections:** the L3S set was not released (S3-73); UMass's are internal-use by request (S3-72); TREC Enterprise W3C is no longer public (Bendersky et al. 2024, page 12).
+- **Real-machine studies:** SNIA IOTTA's FSL Homes, UBC-Dedup, the Microsoft longitudinal and 1998 studies publish metadata or content hashes, not content.
+- **The data release of Dinneen, Julien & Frissen, CHI 2019, "The scale and structure of personal file collections":** not determined; bibliographic records only.
