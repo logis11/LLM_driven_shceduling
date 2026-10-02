@@ -933,3 +933,17 @@ Grounds:
 Open, for the campaign's method: the environment the build runs in; the job's boundaries; the entry's form; the comm.
 
 No file changed yet.
+
+## D49 — the state is D37's chroot plus the kernel the installer adds and the NVIDIA driver package (2026-10-02)
+
+By 인지오's decision, D48's open item on the environment. Each repeat builds, on the harness CPUs, D37's chroot from the archive at 2026-09-23T00:00Z (D48): the default layer of an English install, 1,445 binaries (S2-33). It then installs the kernel the installer adds, `linux-generic-hwe-24.04` (`7.0.0-31` at that time), followed by `apt install nvidia-driver-595-open`, the install D46's user makes. That install pulls in `dkms` and `nvidia-dkms-595-open` 595.91.07 and builds the module for `7.0.0-31`, unmeasured. The sources then point at the archive at 2026-09-24T00:00Z. The kernel install that fires the hook is the stock unattended upgrade, as D3 and D4 describe the event.
+
+Grounds:
+
+- **One environment for both campaigns.** D37's grounds hold: the snapshot fixes the state and the pending set, and the runner's own installed set is its weekly image's.
+- **What the layer lacks.** The layer has no kernel and no boot loader: the installer adds `linux-generic-hwe-24.04` from the live session's layer (S2-33). It has no DKMS and no NVIDIA driver (S2-01). The kernel and the driver package are what this premise adds. The boot loader stays out, as in D37.
+- **The trigger is the event's.** Installing `7.0.0-34` from the security pocket runs the kernel's and the headers' postinst, which run DKMS's hooks (D4; S2-03).
+
+Open, for the campaign's method: the job's boundaries; the entry's form; the comm.
+
+No file changed yet.
