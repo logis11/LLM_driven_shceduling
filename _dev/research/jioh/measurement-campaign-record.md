@@ -290,6 +290,20 @@ The entries carry the build's spawn form (9.10 D52–D57): four job kinds over t
 
 Reported beside them: the build's hook run (`/etc/kernel/header_postinst.d/dkms` in every landing) 214.5–243.2 s of CPU over its span at 0.997; the carried share 0.9818–0.9825, the unmodelled remainder 3.89–4.32 s (helper and link jobs, the `dkms` script before the `make`, the kernel image's second hook run of 0.13–0.145 s); the tail 9.29–11.14 s. The job order differs between landings only by adjacent swaps. Pooled in `task-9.10-scenarios-timelines/campaign/dkms/results/` (`pooled.json`, `results.md`).
 
+## 9.10 — `file-indexer`
+
+Repeats 1–18 on the AMD EPYC 7763, 18 landings, every one valid (the method's checks: the layer built with no package missing or extra; Tracker at 3.7.1-1ubuntu0.1; HippoCamp's Bei tree whole, 875 files and 40,662,407,070 B, each checked by its SHA-256; no GStreamer registry and no database in the home before the phase; the cached fraction 0.0000 after the page cache was dropped; the initial sleep 14.91–15.73 s on the miner's status trace; the extractor's last status `Idle` after `Extracting metadata`; "Currently indexed: 875 files, 92 folders"). Each index landed once. 38 jobs: 18 landed, 20 stopped by the machine gate. Before them, a first batch run with the page cache as the download left it and a cold batch whose cached fraction went unrecorded were not pooled (9.10 D75; the method's §8).
+
+The entry carries the batch-loop form over the miner's tree (9.10 D65, D70) — the miner, the three extractor runs and the GStreamer registry scan, five processes in every landing — with the initial sleep left out of the block table as the task's arrival (D71):
+
+| archetype | value | landings | mean | spread (cv) | 95 % half-width | stopped by |
+|---|---|---|---|---|---|---|
+| `file-indexer` | run between voluntary blocks | 18 | 1.876 ms | 2.3 % | ±1.12 % | the rule |
+| `file-indexer` | block per run | 18 | 227.0 µs | 7.2 % | ±3.58 % | the rule |
+| `file-indexer` | CPU total | 18 | 39.435 s | 0.6 % | ±0.28 % | the rule |
+
+Reported beside them: the job 58.3–60.3 s from the miner's first schedule-in to the extractor's end; the initial sleep's block 14.40–15.23 s; the extractor 37.47–38.35 s of CPU, the miner 1.53–1.62 s, the registry scan 93–106 ms; saturation 0.655–0.676 over the job, 0.891–0.919 from the miner's `Initializing`; the dominant thread (the extractor's `single`) 0.556–0.559 of the CPU; the share of CPU past the 10 ms boot slice 0.844–0.849. In every landing the extractor's 5 s per-file deadline ended `Book/TenYearsInJapan.pdf` and `Book/IslandOfBali.pdf`, each followed by the miner's 1 s grace and a new extractor (D72); Tracker recorded ten failures. Pooled in `task-9.10-scenarios-timelines/campaign/tracker/results/` (`pooled.json`, `results.md`).
+
 ## Machine draws
 
 The build campaign, complete: 28 jobs, 14 on the AMD EPYC 7763 (50.0 %), 12 stopped by the machine gate — Intel Xeon Platinum 8573C 4, AMD EPYC 9V74 4, AMD EPYC 9V45 2, Intel Xeon Platinum 8370C 1, Intel Xeon 6973P-C 1 — and 2 cancelled.
@@ -307,3 +321,5 @@ The 9.10 unattended-upgrade campaign, complete: 15 jobs — 9 landed on the AMD 
 The 9.10 DKMS campaign, complete: 37 jobs — 26 landed on the AMD EPYC 7763 (70.3 %, all pooled, three of them second landings of one push's two runs), 11 stopped by the machine gate: AMD EPYC 9V74 6, Intel Xeon Platinum 8573C 3, AMD EPYC 9V45 1, Intel Xeon 6973P-C 1. Its two dry runs (#106, #107) drew the EPYC 7763.
 
 The untraced control of 9.5, 9.8 and 9.9, complete (9.5 D82, 9.8 D32, 9.9 D40): 148 jobs — 87 landed on the AMD EPYC 7763 (58.8 %; 84 pooled, three later copies of a window that landed twice left out under 9.5 D66), 61 stopped by the machine gate: AMD EPYC 9V74 25, AMD EPYC 9V45 13, Intel Xeon Platinum 8573C 12, Intel Xeon 6973P-C 7, Intel Xeon Platinum 8370C 4. By family: interactive 61 jobs, 36 landed; playback 31, 19; desktop 46, 26; session 10, 6.
+
+The 9.10 Tracker campaign, complete: 38 jobs — 18 landed on the AMD EPYC 7763 (47.4 %, all pooled), 20 stopped by the machine gate: AMD EPYC 9V74 16, Intel Xeon Platinum 8573C 1, Intel Xeon Platinum 8370C 1, AMD EPYC 9V45 1, Intel Xeon 6973P-C 1. Its three dry runs (#118, #119, #121) drew the EPYC 7763 after four stops; its first batch (12 jobs, 7 landed) and its cold batch (8 jobs, 5 landed) were not pooled.

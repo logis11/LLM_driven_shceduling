@@ -1329,3 +1329,17 @@ Grounds (the first batch's pool, `background-tracker-from122`):
 The disk waits then follow the runner's disk; if the block per run still spreads, the stability rule's exception for a value whose spread follows the machine is 인지오's call (9.6 D29, D58).
 
 No file changed yet.
+
+## D76 — the Tracker campaign is `meas-ci:background:2026-10-02b` (2026-10-03)
+
+By 인지오's decision. The campaign's tag is `meas-ci:background:2026-10-02b` and its raw records are release `meas-ci-background-2026-10-02b`. The `meas-ci` locator's campaign gains a letter for a second campaign of the same workflow launched on one date (`YYYY-MM-DDb`): `docs/references.md`'s id-minting rule and `meas-ci` entry, and `dataset/sources.yaml`'s `meas-ci.locator_pattern` (`\d{4}-\d{2}-\d{2}[a-z]?`).
+
+Grounds:
+
+- **The rule's date** (9.5 D27; method §1): the campaign is the launch date of its first batch — 2026-10-02, the first batch (#122, 13:32Z) and the first pooled batch (#130, 23:26Z) alike.
+- **The date is taken:** `meas-ci:background:2026-10-02` is the DKMS campaign's (D59), 60 uses in the dataset, release `meas-ci-background-2026-10-02` published; each tag resolves to one release, a campaign's raw records being one (9.6 D18).
+- **Not taken:** the app in the workflow field names something that is not a workflow; the next date is not the launch date; one tag for two campaigns breaks one campaign per release.
+
+Method §1's tag line reads the campaign's tag.
+
+No file changed yet.

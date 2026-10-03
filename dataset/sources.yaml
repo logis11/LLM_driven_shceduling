@@ -239,7 +239,7 @@ sources:
 
   meas-ci:
     type: measurement
-    locator_pattern: "^[a-z0-9_-]+:(\\d+|\\d{4}-\\d{2}-\\d{2})$"
+    locator_pattern: "^[a-z0-9_-]+:(\\d+|\\d{4}-\\d{2}-\\d{2}[a-z]?)$"
     notes: >-
       Our CI measurement campaigns (workflow:campaign locator — the launch
       date of the campaign's first batch; a run number names a one-run

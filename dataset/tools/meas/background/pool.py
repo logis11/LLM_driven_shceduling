@@ -505,7 +505,7 @@ def fmt_q(q):
 
 def render(out):
     network = sum(g.get("gate") == "no-vf" for g in out["gated_out"])
-    L = [f"# background campaign (9.7; 9.10's `upgrade` and `dkms`) — pooled results{' (' + out['tag'] + ')' if out.get('tag') else ''}", "",
+    L = [f"# background campaign (9.7; 9.10's `upgrade`, `dkms` and `tracker`) — pooled results{' (' + out['tag'] + ')' if out.get('tag') else ''}", "",
          f"Machine {out.get('machine') or 'any'}; stopped by the machine gate {len(out['gated_out']) - network}"
          f"{f', by the network gate {network}' if network else ''}; other-model repeats "
          f"{len(out['other_machine'])}. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9, times in µs, "
