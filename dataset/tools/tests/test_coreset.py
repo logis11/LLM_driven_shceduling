@@ -27,23 +27,21 @@ def events_by_id(canonical):
     return {e["id"]: e for e in canonical["events"] if e["op"] == "arrive"}
 
 
-def test_p1_pair_rename_only(coreset):
-    """P1 is the load-bearing pair: byte-identical except the hog's name
-    and the second segment's label."""
+def test_p1_pair_differs_in_segment_one_only(coreset):
+    """9.10 D6, D80 (restating the rename-only pair): the editor's events and segment 0 byte-identical, the files
+    the same length; P1b's hog is the measured index, `file-indexer` shown as `tracker-miner-f`, arriving at 60 s
+    as P1a's python3 does, its segment 1 labelled indexing, false, C long."""
     base, _ = coreset["c2-p1a"]
     variant, _ = coreset["c2-p1b"]
-    base_events, variant_events = events_by_id(base), events_by_id(variant)
-    assert set(base_events) == set(variant_events)
-    for task_id, event in base_events.items():
-        if task_id == "hog":
-            assert variant_events[task_id]["name"] == "tracker-miner-f"
-            assert {**variant_events[task_id], "name": "python3"} == event
-        else:
-            assert variant_events[task_id] == event
+    b, v = events_by_id(base), events_by_id(variant)
+    assert set(b) == set(v) == {"editor", "hog"}
+    assert b["editor"] == v["editor"]
+    assert (b["hog"]["name"], v["hog"]["name"]) == ("python3", "tracker-miner-f")
+    assert b["hog"]["t"] == v["hog"]["t"] == 60_000_000
     assert base["ground_truth"][0] == variant["ground_truth"][0]
-    assert variant["ground_truth"][1]["mode"] == "indexing"
-    wakes = lambda c: [e for e in c["events"] if e["op"] == "wake"]
-    assert wakes(base) == wakes(variant)
+    spans = lambda c: [(g["t_start"], g["t_end"]) for g in c["ground_truth"]]
+    assert spans(base) == spans(variant) == [(0, 60_000_000), (60_000_000, 60_000_000 + INDEX_C_US)]
+    assert ground_truth(variant)[1] == ("indexing", False)
 
 
 @pytest.mark.parametrize("pair,changed", [
@@ -84,7 +82,8 @@ def test_c5_names_only(coreset):
 
 C7_INTERACTIVE = ("browsing", "office", "mail", "dev", "photo", "meeting",
                   "gaming", "media", "video-edit", "idle")
-C7_SAME_NAME = ("ml-train", "render", "transcode", "indexing", "backup")
+C7_SAME_NAME = ("ml-train", "render", "transcode", "backup")   # indexing: its base's first C seconds (9.10 D78)
+INDEX_C_US = 39_435_000   # 9.10 D78, D80: the index's CPU total, total_work as compiled
 
 
 def ground_truth(canonical):
@@ -135,9 +134,26 @@ def test_c7_compile_is_the_module_build_in_place_of_the_users_build(coreset):
     assert (variant["ground_truth"][0]["t_start"], variant["ground_truth"][0]["t_end"]) == (0, C7_COMPILE_C_US)
 
 
+def test_c7_indexing_is_its_bases_first_c_seconds(coreset):
+    """9.10 D78 (D56's form): c1-indexing's first C seconds — the editor by its id, name and arrival, departing at
+    C, its focus 2 s to C − 2 s — the same index, `file-indexer` shown as `tracker-miner-f`, from 0 s; one segment,
+    labelled false, `initiated: session` (D79)."""
+    base, _ = coreset["c1-indexing"]
+    variant, _ = coreset["c7-indexing"]
+    b, v = events_by_id(base), events_by_id(variant)
+    assert set(b) == set(v) == {"editor", "hog"}
+    assert (v["editor"]["name"], v["editor"]["t"], v["editor"]["depart"]) == (b["editor"]["name"], b["editor"]["t"], INDEX_C_US)
+    assert (b["hog"]["name"], b["hog"]["t"]) == ("tracker-miner-f", 2_000_000)
+    assert (v["hog"]["name"], v["hog"]["t"]) == ("tracker-miner-f", 0)
+    assert ground_truth(variant) == [("indexing", False)]
+    gt = variant["ground_truth"][0]
+    assert (gt["t_start"], gt["t_end"]) == (0, INDEX_C_US)
+    assert gt["attributes"].get("initiated") == "session" and not gt["attributes"].get("pre_committed_miss")
+
+
 def test_c7_same_name_counterparts_flip_the_label_only(coreset):
     """Phase 7 spec decision 3: events byte-identical to the base, only the
-    ground truth differs; four of the five are pre-committed misses."""
+    ground truth differs; each is a pre-committed miss (indexing: 9.10 D78)."""
     for mode in C7_SAME_NAME:
         base, _ = coreset[f"c1-{mode}"]
         variant, _ = coreset[f"c7-{mode}"]
@@ -145,7 +161,7 @@ def test_c7_same_name_counterparts_flip_the_label_only(coreset):
         assert base["events"] == variant["events"], mode
         assert ground_truth(variant) == [(mode, False)]
         attrs = variant["ground_truth"][0]["attributes"]
-        assert bool(attrs.get("pre_committed_miss")) is (mode != "indexing"), mode
+        assert attrs.get("pre_committed_miss") is True, mode
 
 
 def test_c7_and_derived_files_declare_calibration(repo_root):

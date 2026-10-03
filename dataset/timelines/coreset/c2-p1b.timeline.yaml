@@ -3,7 +3,7 @@
 focus:
 - from: 2s
   task: editor
-  to: 178s
+  to: 97.435s
 meta:
   id: c2-p1b
   seed: 201
@@ -22,17 +22,16 @@ segments:
   scenario:
   - S11
   - S12
-  to: 180s
+  to: 99.435s
 tasks:
 - archetype: code-editor
   arrive: 0s
-  depart: 180s
+  depart: 99.435s
   id: editor
   name: code
-- archetype: cpu-batch
+- archetype: file-indexer
   arrive: 60s
   bind:
-    program: python3
-    total_work: 130s
+    total_work: 39.435s
   id: hog
   name: tracker-miner-f

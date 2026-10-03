@@ -2,13 +2,17 @@
 # its base by exactly the ops below — the one-segment-diff discipline is
 # structural. Seeds inherit from the bases (byte-discipline).
 variants:
-  # P1b — the load-bearing flip: rename ONLY (plus the segment label).
-  # tracker-miner-f stays bound to cpu-batch deliberately (full-rescan
-  # state; archetypes.yaml binding note).
+  # P1b — the load-bearing flip: the training run's place taken by Tracker's
+  # first index of a home, `file-indexer` (meas-ci:background:2026-10-02b)
+  # shown as `tracker-miner-f`, bound whole at its measured CPU total — the
+  # measured indexer's own tables, not python3's under a rename (9.10 D6, D17,
+  # D70, D74); segment 1 is that long in both files, so the job is alive at
+  # every instant of it under every policy (D80).
   - id: c2-p1b
     from: c2-p1a.timeline.yaml
     ops:
-      - rename: {from: python3, to: tracker-miner-f}
+      - patch-task: {id: hog, name: tracker-miner-f, archetype: file-indexer,
+                     arrive: 60s, bind: {total_work: 39.435s}}
       - patch-segment: {index: 1, mode: indexing,
                         attributes: {background_wanted: false}}
 

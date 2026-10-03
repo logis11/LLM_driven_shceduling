@@ -866,23 +866,19 @@ archetypes:
         {dist: quantiles, p: [14, 15, 26, 36, 49, 125809, 1750612, 18493185, 18986255, 19110868], min: 12, max: 19124438, means: [12.077, 14.048, 18.347, 30.872, 42.808, 30868.703, 896178.995, 10234126.268, 18757334.786, 19110868.059, 19124438], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
       python3_block:
         {dist: quantiles, p: [100, 101, 102, 142, 218, 277, 348, 391, 441, 475], min: 99, max: 479, means: [99.001, 100.459, 101.75, 117.31, 180.549, 251.367, 313.073, 378.599, 421.213, 475.2, 479], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
-      tracker_run:
-        {dist: quantiles, p: [3, 4, 6, 23, 64, 92, 220, 515, 2972, 92960], min: 3, max: 118044, means: [3, 3.439, 4.994, 15.68, 45.904, 75.172, 144.47, 304.308, 993.996, 21777.313, 100741.93], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
-      tracker_block:
-        {dist: quantiles, p: [0, 0, 0, 0, 0, 0, 5, 15, 294, 1271], min: 0, max: 94117, means: [0, 0, 0, 0, 0, 0, 1.528, 5.955, 157.356, 422.328, 6934.526], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
     lifetime: finite
     binding_params: [total_work, program]
     scalable: []
     validation_stats:
       referee: meas-ci
       run: "build:2026-09-18; repeats [4, 5, 7, 8, 9-18]; clamscan [9-18], python3 [11-18]; runs 35328071379, 35328873409, 35337322204, 35426065936, 35430430817, 35434872927, 35439345618, 35443899531, 35448942696, 35453727742, 35459121647, 35464371497, 35469642365"
-      stats: ["saturation over the job: clamscan 0.969-0.979, ffmpeg 0.9990-0.9992, HandBrakeCLI 0.989-0.992, python3 0.9997-0.9998, tracker 0.925-0.964",
-              "share of CPU past the 10 ms boot slice: clamscan 0.109, ffmpeg 0.698, HandBrakeCLI 0.626, python3 0.998, tracker 0.532",
-              "share of runs followed by a block: 1.0, 0.0015, 0.0008, 1.0, 0.16",
-              "block per run carried with its half-width (D29): clamscan 218.1 us +-9.5 % over 10 repeats (182-274 us), python3 223.2 us +-14.5 % over 8 (170-286 us), tracker 17.6 us +-15.1 % over 14 (13.3-30.4 us)",
+      stats: ["saturation over the job: clamscan 0.969-0.979, ffmpeg 0.9990-0.9992, HandBrakeCLI 0.989-0.992, python3 0.9997-0.9998",
+              "share of CPU past the 10 ms boot slice: clamscan 0.109, ffmpeg 0.698, HandBrakeCLI 0.626, python3 0.998",
+              "share of runs followed by a block: 1.0, 0.0015, 0.0008, 1.0",
+              "block per run carried with its half-width (D29): clamscan 218.1 us +-9.5 % over 10 repeats (182-274 us), python3 223.2 us +-14.5 % over 8 (170-286 us)",
               "python3 runs between blocks 1.595 s +-11.2 % over 8 repeats (1.31-1.77 s), 99.97-99.98 % of its job's time (D29)"]
       scope: >-
-        One observation (phase decision 2; D3, D7, D30): five programs measured in the same campaign as the build
+        One observation (phase decision 2; D3, D7, D30): four programs measured in the same campaign as the build
         archetypes, each pinned to one CPU of a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel
         6.17.0-1022-azure) and instrumented by `perf sched record` on the measured CPU and a taskstats listener on
         its cpumask — ClamAV 1.5.3 scanning the kernel's `Documentation` (9 462 files) with signature
@@ -890,16 +886,15 @@ archetypes:
         clip; a PyTorch 2.14 CPU training loop of 300 steps over synthetic images — a stand-in, since no source
         states what a desktop training job does (D7): it reads no data and writes no checkpoint, so it stands for
         a CPU-saturating batch task, not for ML training as observed — started warm so its runs and blocks are the
-        loop's and not the interpreter's first page-ins (D28); Tracker 3.7.1 indexing a copy of the same corpus,
-        read over its job window from the miner's first schedule-in to its own Idle status (D16). A run is the CPU
+        loop's and not the interpreter's first page-ins (D28). A run is the CPU
         from one voluntary block to the next, pooled over the program's threads; the block after a run is the
-        program's off-CPU time that followed it, zero when another thread ran on (D22, D25). Four values' spread
+        program's off-CPU time that followed it, zero when another thread ran on (D22, D25). Three values' spread
         follows the runner's disk rather than the program and is carried with its half-width instead of the 5 %
-        tolerance (D29); those blocks are 2.4 % (clamscan), 4 % (tracker) and 0.01 % (python3) of each job's time,
+        tolerance (D29); those blocks are 2.4 % (clamscan) and 0.01 % (python3) of each job's time,
         and no reported result may rest on a difference in them smaller than the stated half-width. Values are this
         software on this machine, not desktop truth (9.5 D10).
     modeling_notes: >-
-      The class is what the measurement shows: five programs runnable for the whole of their job on one dominant
+      The class is what the measurement shows: four programs runnable for the whole of their job on one dominant
       thread (D7, D16). The task is a loop — a run drawn from the bound program's measured runs between voluntary
       blocks, then the block that followed such a run — until `total_work` of CPU is spent; the table set is chosen
       by the `program` binding, never by the task's display name (D21). A zero block means the program ran on, so
@@ -909,14 +904,9 @@ archetypes:
       their level (D22). `total_work` is scenario design and binds in the timeline (D7). The `chrome` spoof is one
       uninterrupted RUN by construction (D7). The `python3` binding's job is design, a CPU-saturating training
       loop; text naming it says so rather than calling it an observed ML training workload (D32; 9.10 for the
-      timeline `c1-ml-train`, 9.12 and 9.15 for prose). The `tracker-miner-fs-3` binding's real processes declare themselves
-      background work — every thread exits with policy SCHED_IDLE at nice 19, while clamscan, ffmpeg, HandBrakeCLI
-      and python3 run at the default policy, nice 0 — and the task model carries no declared class, so a simulated
-      baseline cannot honour it (D17; handed to 9.11). The rescan's tail after its job, 0.34-0.41 s of CPU over
-      10-15 s, is the everyday daemon and outside this binding (D16). P1 binds `tracker-miner-fs-3` here
-      deliberately, an indexer in full-rescan state, and `c2-p1b` inherits `python3`'s tables through its
-      rename-only derivation so the pair stays identical apart from the label; whether it takes the rescan's own
-      tables is 9.10's (D21).
+      timeline `c1-ml-train`, 9.12 and 9.15 for prose). Tracker's index, bound here as `tracker` until 9.10, is the entry `file-indexer`, measured as
+      a first index of a home (9.10 D70); the rescan this entry carried, read from the miner's first schedule-in to
+      its own Idle status (D16), left out the extraction that follows the crawl (9.10 D62).
 
   compiler-child:
     category_source: meas
@@ -1499,6 +1489,71 @@ archetypes:
       pending set is another job: an empty day is a few seconds of `unattended-upgrade` alone, a kernel day adds a
       kernel's install and an initramfs (9.10 D36). The `locales` work scales with the locales an install lists —
       18 for English (9.10 D37).
+
+  file-indexer:
+    category_source: meas
+    pattern:
+      constructor: batch-loop      # 9.7 D29; 9.10 D70: over the miner's whole process tree
+      program:
+        - loop:                    # until total_work of CPU is spent
+            - RUN: tracker_run
+            - SLEEP: tracker_block
+        - EXIT: {}
+    params:                        # 9.10 D65, D70, D71: the tree's runs, pooled over every process, and the block after each
+      tracker_run:
+        {dist: quantiles, p: [6, 11, 16, 25, 59, 141, 336, 749, 13675, 225351], min: 3, max: 5476104, means: [4.26, 9.388, 13.329, 19.394, 42.86, 90.301, 210.404, 502.088, 2424.329, 41297.948, 1313541.803], sampling: per-iteration, source: "meas-ci:background:2026-10-02b"}
+      tracker_block:
+        {dist: quantiles, p: [0, 0, 0, 0, 91, 142, 218, 269, 470, 8645], min: 0, max: 976813, means: [0, 0, 0, 0, 29.388, 113.819, 176.453, 240.393, 330.547, 1143.239, 129170.886], sampling: per-iteration, source: "meas-ci:background:2026-10-02b"}
+    lifetime: finite
+    binding_params: [total_work]
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      run: "background:2026-10-02b; repeats [1-18]; runs 37077613408, 37077654870, 37077892756, 37079168920, 37079295954, 37079532509, 37079763885, 37080205717, 37080669302"
+      stats: ["run between voluntary blocks mean 1.876 ms (+-1.12 %), block per run mean 227.0 us (+-3.58 %), the initial sleep left out (9.10 D71)",
+              "CPU total 39.435 s (+-0.28 %), 39.10-40.07 s over the repeats: the job's measured whole (9.10 D17, D70)",
+              "the extractor 37.47-38.35 s, the miner 1.53-1.62 s, the GStreamer registry scan 93-106 ms; five processes in every repeat",
+              "saturation 0.655-0.676 over the job, 0.891-0.919 from the miner's Initializing; the dominant thread 0.556-0.559 of the CPU",
+              "share of CPU past the 10 ms boot slice 0.844-0.849; runs up to 4.98-5.48 s; share of runs followed by a block 0.648-0.669, 4.24-5.62 s of blocks a job",
+              "the initial sleep 14.40-15.23 s, carried as the task's arrival (9.10 D71); the job 58.3-60.3 s from the miner's first schedule-in",
+              "in every repeat the extractor's 5 s per-file deadline ended two PDFs, each followed by the miner's 1 s grace and a new extractor (9.10 D72); 875 files indexed, ten failures recorded"]
+      scope: >-
+        One observation (phase decision 2; 9.10 D5, D60-D68): Tracker Miners 3.7.1's first index of a home from an
+        empty database, the file system miner (`tracker-miner-fs-3`, its user unit's command) and every process it
+        starts — the metadata extractor, restarted after each deadline exit, and GStreamer's registry scanner — from
+        the miner's first schedule-in to the extractor's last status change to Idle after extracting (D62, D63, D65,
+        D69). The home holds HippoCamp's Bei profile (`hippocamp`, revision ff212ff7, `Bei/Fullset/Bei`: 875 files,
+        40,662,407,070 B, 83 directories), HippoCamp's anonymized archetypal personal-computing environment rather
+        than one person's files, placed whole as `~/Documents`, the other folders empty (design, D66-D68). Its
+        settings as shipped, the 15 s initial sleep included (D61, D63); the database, the GStreamer registry and
+        the page cache empty at the start, the cache dropped and its fraction verified (D73, D75). The state is a
+        chroot of the default layer of an English 24.04.5.1 desktop install, 1,445 packages, built from Ubuntu's
+        snapshot service as the archive stood at 2026-09-22T17:00Z (D61, D64), the miner started under a session bus
+        of its own: no GNOME session and no system bus, so the miner reaches neither UPower nor UDisks2, and the
+        extractor's sandbox cannot read /proc/self/mountinfo. Pinned to one CPU of a GitHub-hosted ubuntu-24.04
+        runner (4 vCPU AMD EPYC 7763, 16 GB, kernel 6.17.0-1022-azure), the rest of the machine idealised; the
+        runner's agent processes share the measured CPU outside the process tree, the session bus runs on the
+        others. `perf sched
+        record` and a taskstats listener on the measured CPU. 18 same-machine repeats under the machine gate; the
+        stability rule holds on all three values. The extractor's per-file deadline is wall-clock: a faster or
+        busier core ends more or fewer files (D72). Values are this software on this machine, not desktop truth
+        (9.5 D10).
+    modeling_notes: >-
+      The class is what the measurement shows (9.10 D70): the miner crawls the home in under 0.4 s after its
+      initial sleep, then starts the extractor, whose work — PDF and office text, image metadata, GStreamer's
+      discovery of audio and video — is 96 % of the job's CPU; the extractor's stock 5 s per-file deadline ends two
+      scanned books' extraction, and the miner restarts it after a 1 s grace each time (D72). The task is
+      `cpu-batch`'s batch loop — a run drawn from the tree's runs between voluntary blocks, pooled over every
+      process, then the block that followed such a run, the tree's own off-CPU time, zero when another of its
+      processes runs on — until `total_work` of CPU is spent; `total_work` binds the measured whole, the CPU total
+      above (9.10 D17). The shipped 15 s initial sleep is not a block of the table: it precedes the work, so a
+      file's arrival time reads as the end of that sleep (D71). The stages' order is not carried: the loop draws
+      runs independently, so the deadline-ended runs of about 5 s fall anywhere in the job. The task shows
+      `tracker-miner-f` (9.10 D74), the `comm` of the miner the user unit runs; most of the CPU under that name is
+      the extractor's, and the name stands for the tree. One measured state serves both labels: a first login's
+      index and the same work after the user's `tracker3 reset --filesystem` (D5); the registry scan, 93-106 ms, is
+      first-login work a reset may not repeat (D73). Every thread of the miner and the extractor declares itself
+      background work, SCHED_IDLE at nice 19 (9.6 D17); the task model carries no declared class (9.11's).
 
   # ---- structural-special family — harvested from LAVD --------------------
 

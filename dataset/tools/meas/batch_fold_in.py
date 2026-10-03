@@ -4,7 +4,7 @@
 batch_fold_in.py [--check]
 
 `cpu-batch`, `compiler-child` and `build-orchestrator` (9.6), `file-backup`, `file-archiver` and `game-download`
-(9.7), `package-upgrade` (9.10), and `module-build-orchestrator` and `module-compiler-child` (9.10) carry the quantile tables, each one pooled table of the campaign's record: a program's runs between voluntary
+(9.7), `package-upgrade` (9.10), `module-build-orchestrator` and `module-compiler-child` (9.10), and `file-indexer` (9.10) carry the quantile tables, each one pooled table of the campaign's record: a program's runs between voluntary
 blocks and the block after each run (9.6 D21, D22, D25; 9.7 D29), the object job's per-(role, step) CPU (9.6 D19,
 D20), make's dispatch run. Each is written in the library's table form (distribution.yaml_table: the ten quantiles,
 the extremes, the interval means), keeping the param's own sampling and source tag; nothing else in the entries is
@@ -28,11 +28,11 @@ POOLS = {"build": os.path.join(RESEARCH, "task-9.6-compile", "campaign", "result
          "7z": os.path.join(RESEARCH, "task-9.7-background-io", "campaign", "results", "7z-pooled.json"),
          "steamcmd": os.path.join(RESEARCH, "task-9.7-background-io", "campaign", "results", "steamcmd-pooled.json"),
          "upgrade": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "upgrade", "results", "pooled.json"),
-         "dkms": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "dkms", "results", "pooled.json")}
+         "dkms": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "dkms", "results", "pooled.json"),
+         "tracker": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "tracker", "results", "pooled.json")}
 
 # (archetype, param) -> (record, path to the pooled table)
-_PROGRAMS = {"clamscan": "clamscan", "ffmpeg": "ffmpeg", "handbrakecli": "handbrake", "python3": "train",
-             "tracker": "tracker"}
+_PROGRAMS = {"clamscan": "clamscan", "ffmpeg": "ffmpeg", "handbrakecli": "handbrake", "python3": "train"}   # tracker: file-indexer (9.10 D70)
 TABLES = {}
 for _p, _phase in _PROGRAMS.items():
     TABLES[("cpu-batch", f"{_p}_run")] = ("build", ("phases", _phase, "shape", "runs_between_blocks_us"))
@@ -43,7 +43,8 @@ for _role, _steps in (("sh", 4), ("gcc", 3), ("cc1", 1), ("as", 1), ("fixdep", 1
             "build", ("phases", "build-j8-warm", "object_members", "step_cpu_us", f"{_role} {_n}/{_steps}"))
 TABLES[("build-orchestrator", "dispatch_overhead")] = ("build", ("phases", "build-j8-warm", "dispatch", "per_dispatch_us"))
 for _aid, _app, _phase in (("file-backup", "borg", "borg-first-warm"), ("file-archiver", "7z", "7z-mmt8-warm"),
-                           ("game-download", "steamcmd", "steam-fresh-shaped"), ("package-upgrade", "upgrade", "upgrade-install")):
+                           ("game-download", "steamcmd", "steam-fresh-shaped"), ("package-upgrade", "upgrade", "upgrade-install"),
+                           ("file-indexer", "tracker", "tracker-index")):
     TABLES[(_aid, f"{_app}_run")] = (_app, ("runs", _app, "phases", _phase, "all", "batch_run_us"))
     TABLES[(_aid, f"{_app}_block")] = (_app, ("runs", _app, "phases", _phase, "all", "batch_block_us"))
 

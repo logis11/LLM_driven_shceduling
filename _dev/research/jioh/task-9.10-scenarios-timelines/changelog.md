@@ -1355,3 +1355,61 @@ Grounds:
 - **The precedent:** the DKMS release held its dry runs, every landing and the gated reports (D59).
 
 No file changed yet.
+
+## D78 — `c1-indexing` binds the index whole at its length; `c7-indexing` is its first C seconds, the index from 0 s (2026-10-03)
+
+By 인지오's decision, D56's form for the indexing pair. `c1-indexing` keeps its 60 s segment and its 2 s arrival and binds `file-indexer` whole, `total_work` C, the task shown `tracker-miner-f` (D70, D74): the job ends inside the segment under every policy, so the `true` cell's turnaround term reads a finished job. `c7-indexing` becomes `c1-indexing`'s first C seconds: the editor `code` from 0 to C, its focus window 2 s to C − 2 s (D44), `file-indexer` arriving at 0 s and bound whole, one segment labelled `background_wanted: false`. C is the index's CPU total as the entry carries it, set at fold-in from the job's demand as compiled under the file's seed, so the job is alive at every instant of the segment (D56).
+
+Grounds:
+
+- **D41 and D56:** a C7 counterpart is its base's first C seconds, the unwanted job from 0 s, bound whole, so the label holds at every instant; the base keeps its own structure.
+- **The base still finishes the job.** `c1-indexing` runs at 0.59 of the lane today with a 30 s job (`build.manifest.json`), the editor about 0.09; the index alone needs about 44 s (39.4 s of CPU and 4.8 s of its own blocks), so arriving at 2 s it ends by about 52 s under any policy, inside 60 s, the lane about 0.75.
+- **A flip alone would not hold the label:** `c7-indexing` as `c1-indexing` relabelled carries `false` for its first 2 s and some 8 s at its end with no unwanted work.
+- **D5 holds:** both files carry the same job under the same name and entry; the work they depict differs by intent alone.
+
+Open: `c7-indexing`'s `initiated`, a first login and not a schedule (D5); `c2-p1b`'s segment 1.
+
+No file changed yet.
+
+## D79 — `c7-indexing`'s segment says `initiated: session` (2026-10-03)
+
+By 인지오's decision, D5's restatement. The descriptive key `initiated` gains a third value, `session`: work the desktop session itself starts, unasked, at login. `c7-indexing`'s segment carries it in place of `scheduled`; `scheduled` keeps meaning a timer's job in every file that carries it.
+
+Grounds:
+
+- **The key** (`docs/recognition-vocabulary.md:50`): `initiated` (`user` | `scheduled`), a descriptive key "used for grading splits and failure analysis only", not the recognizer's output and not checked by the linter.
+- **The job is not a schedule** (D5): Tracker 3.7.1 schedules no rescan (`crawling-interval` -1, S2-41); the user unit starts with the GNOME session (`WantedBy=gnome-session.target`, S2-41), and an empty database makes that start a full index (S2-43).
+- **The other files:** `c1-indexing` says `user` (the reset); every other `scheduled` in the core set is a timer's job.
+
+Hands to 9.15: `docs/recognition-vocabulary.md`'s list of `initiated` values gains `session`, with D5's item on its example "an indexer's scheduled rescan".
+
+No file changed yet.
+
+## D80 — pair P1's segment 1 is as long as the index's CPU total in both files (2026-10-03)
+
+By 인지오's decision, D42's form for pair P1. `c2-p1b`'s segment 1 carries `file-indexer`, arriving at 60 s and bound whole, the task shown `tracker-miner-f` (D6, D70, D74), and is C seconds long — C the index's CPU total, as D78 — so the file is 60 s plus C. `c2-p1a`'s segment 1 takes the same length, so the pair still shares segment 0 and differs only in segment 1's job and label. `c2-p1a`'s `python3` keeps its binding until D12's item; with 130 s of CPU it is alive throughout a segment of C.
+
+Grounds:
+
+- **The label at every instant** (D41, D42): on one lane the index, C seconds of CPU, is alive for at least C seconds under every policy; in the 120 s segment it ends by about 110 s and `false` would hold some 70 s with no unwanted work.
+- **One diff per pair** (`docs/workload/building-plan.md` §3, "Counts and reuse"): C2 pairs share all but one segment; equal lengths keep the editor's terms read over equal windows.
+- **D6 applied:** P1b's indexer carries the measured indexer's own tables, in place of `python3`'s under a rename.
+
+Hands to D12's item: P1's segment 1 is read again against both jobs when `python3`'s measured job lands. Hands to 9.14: P1's terms on the new length, and the pair review that argued on P1's identical behaviour (D6).
+
+No file changed yet.
+
+## D81 — the Tracker campaign holds at 18 repeats; `file-indexer` folded in, the three indexing files rebound (2026-10-03)
+
+The campaign of D60–D80, `meas-ci:background:2026-10-02b`, run under `../measurement-campaign-workflow.md` and recorded in `campaign/tracker/` (method, machine draws, `results/pooled.json`, `results/results.md`) and in `measurement-campaign-record.md`.
+
+- **Runs.** Three dry runs (#118, the set's fetch refused and the home empty; #119, the per-file debug output dropped after it, D69; #121). A first batch, repeats 1–5 (#122–#125), ran with the page cache as the download left it: every landing valid, the block per run at ±14.5 %, its spread disk waits; it is not pooled (D75). A cold batch (#126–#129) is not pooled either, its cached fraction unrecorded (method §8). The campaign's first batch, repeats 1–5 (#130–#132), every one valid and cold: the rule held on the run between voluntary blocks and the CPU total, not on the block per run (±12.08 %), whose spread was the cold start's some 14,000 disk waits a landing; the pool projected 18 and repeats 6–18 were added as one batch (9.7 D26, #133–#140). 38 jobs: 18 landed on the EPYC 7763, 20 stopped by the machine gate.
+- **The rule holds at 18** on the three values of the list: the run between voluntary blocks 1.876 ms ±1.12 %, the block per run 227.0 µs ±3.58 % (the initial sleep left out, D71), the CPU total 39.435 s ±0.28 % (39.10–40.07 s). Every repeat valid: the layer built with no package missing or extra; the set whole, each file checked by its SHA-256; the cached fraction 0.0000; the initial sleep 14.91–15.73 s; "Currently indexed: 875 files, 92 folders"; ten failures recorded.
+- **Reported.** Five processes in every repeat; the extractor 37.47–38.35 s of CPU, the miner 1.53–1.62 s, the registry scan 93–106 ms; the job 58.3–60.3 s; saturation 0.655–0.676 over the job, 0.891–0.919 from the miner's `Initializing`; in every repeat the deadline ended `Book/TenYearsInJapan.pdf` and `Book/IslandOfBali.pdf` (D72).
+- **Release.** The raw records are release `meas-ci-background-2026-10-02b`, published on 인지오's go-ahead (D77). D77's count is corrected: the gated reports are 32 jobs — the campaign's 20 and 12 from the dry runs and the unpooled batches — not 24.
+- **Fold-in.** `file-indexer` in `dataset/archetypes.yaml`, its two tables written by `batch_fold_in.py` from `results/pooled.json`; scope, stats and notes state D60–D80. `cpu-batch`'s `tracker` tables leave with its `tracker` figures, and its scope and notes read four programs (D70); `batch_fold_in.py` drops the set. `docs/references.md` gains `hippocamp` (deployed-system, verified).
+- **Rebound.** `c1-indexing`: `tracker-miner-f` on `file-indexer` from 2 s, `total_work` 39.435 s, the 60 s segment kept (D78). `c7-indexing` (`c7.variant.yaml`): `c1-indexing`'s first C seconds, the index from 0 s, the editor departing at C, focus 2 s to 37.435 s, one segment `background_wanted: false`, `initiated: session` (D78, D79). Pair P1: `c2-p1b` (`c2-pairs.variant.yaml`) binds `file-indexer` whole from 60 s in place of the rename, segment 1 39.435 s long in both files, `c2-p1a`'s `python3` keeping its binding until D12 (D80). C is 39.435 s: `total_work`, which the batch loop compiles exactly.
+
+Recompiled (`compile.py --allow-window`): 8 of 100 artifacts change beyond the library's hash, the four files in both modes. Demand (`-single`): `c1-indexing` 0.5905 → 0.7477, `c7-indexing` 0.5905 → 1.1016 (both calibration), `c2-p1a` 1.1509 → 1.8346, `c2-p1b` 1.1509 → 0.9238. Lint reports five demand-window files: the three of D20 and now `c2-p1a` and `c2-p1b`, P1's segment 1 at the index's length (D17's hand-off to 9.14: the demand window re-read on the new lengths). Tests: 375 passed, 1 skipped, 1 xfailed, after `test_p1_pair_rename_only` was restated as `test_p1_pair_differs_in_segment_one_only` (D80), indexing left `C7_SAME_NAME` for `test_c7_indexing_is_its_bases_first_c_seconds` (D78), and the fold-in test names `file-indexer.tracker_block` (D70).
+
+Hands to D12's item: P1's segment 1 read again against both jobs. Hands to 9.14: `c7-indexing`'s and P1's terms on the new lengths; the pair review and prior-table rows that argued on P1's identical behaviour (D6); `c2-p1a` and `c2-p1b` in the demand window. Hands to 9.15: `building-plan.md` §3 C2 ("behaviorally identical CPU saturation") and C7, the scenario catalog's S14 row and note 2, `docs/recognition-vocabulary.md`'s `initiated` values and its example "an indexer's scheduled rescan" (D5, D6, D79).

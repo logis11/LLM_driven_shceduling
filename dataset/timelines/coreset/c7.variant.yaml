@@ -21,6 +21,13 @@
 # autoinstall — NVIDIA's 595 open module rebuilt for 2026-09-23's security
 # kernel by the stock unattended upgrade (meas-ci:background:2026-10-02), task
 # `dkms` on module-build-orchestrator, the segment at tier 3 as its base's (D55).
+# Indexing (9.10 D5, D60–D79): the same job as the base, Tracker's first index of a
+# home from an empty database, `file-indexer` (meas-ci:background:2026-10-02b) shown
+# as `tracker-miner-f`, now at a first login (`initiated: session`, D79). As
+# c7-compile, c7-indexing is its base's first C seconds (D78): the index from 0 s
+# bound whole, the editor departing at C, focus 2 s to C − 2 s; C = 39.435 s, the
+# index's CPU total, so it is alive at every instant of the segment.
+#
 # As the interactive counterparts, c7-compile is its base's first C seconds (D56): the
 # build from 0 s bound whole, the editor departing at C, focus 2 s to C − 2 s;
 # C = 225.458 s, the build's CPU as compiled under the file's seed, so it is alive
@@ -180,8 +187,12 @@ variants:
   - id: c7-indexing
     from: c1-indexing.timeline.yaml
     ops:
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, initiated: scheduled}}
+      - patch-task: {id: hog, arrive: 0s}
+      - set-segments: [{from: 0s, to: 39.435s, mode: indexing,
+                         attributes: {background_wanted: false, initiated: session},
+                         scenario: [S11, S14]}]
+      - patch-task: {id: editor, depart: 39.435s}
+      - set-focus: [{from: 2s, to: 37.435s, task: editor}]
       - patch-meta: {demand: calibration}
 
   - id: c7-ml-train

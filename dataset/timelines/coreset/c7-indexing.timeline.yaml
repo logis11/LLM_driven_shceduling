@@ -3,7 +3,7 @@
 focus:
 - from: 2s
   task: editor
-  to: 58s
+  to: 37.435s
 meta:
   demand: calibration
   id: c7-indexing
@@ -11,23 +11,22 @@ meta:
 segments:
 - attributes:
     background_wanted: false
-    initiated: scheduled
+    initiated: session
   from: 0s
   mode: indexing
   scenario:
   - S11
   - S14
-  to: 60s
+  to: 39.435s
 tasks:
 - archetype: code-editor
   arrive: 0s
-  depart: 60s
+  depart: 39.435s
   id: editor
   name: code
-- archetype: cpu-batch
-  arrive: 2s
+- archetype: file-indexer
+  arrive: 0s
   bind:
-    program: tracker
-    total_work: 30s
+    total_work: 39.435s
   id: hog
   name: tracker-miner-f
