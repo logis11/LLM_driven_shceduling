@@ -177,6 +177,24 @@ def validity(family, dirs, entry):
                     notes.append("cached fraction not recorded")
                 if r.get("mnist.pip-freeze.sha256"):   # one installed set across repeats
                     dbs.add(r["mnist.pip-freeze.sha256"])
+            if r.get("app") == "handbrake" and r.get("mode") != "probe":   # 9.10 D91–D94: the state, the clip, the warm start, the encode whole
+                # the layer plus handbrake-cli and the 66 packages it brings (the probe, run #151)
+                for x, want in (("upgrade.layer.missing", "0"), ("upgrade.layer.extra", "67"), ("upgrade.run_systemd_system", "absent"),
+                                ("handbrake.cli.version", "1.7.2+ds1-1build2"), ("handbrake.x265.version", "3.5-2build1"),
+                                ("handbrake.zip.pin", "ok"), ("handbrake.clip.pin", "ok"),
+                                ("handbrake.handbrake-transcode.done", "1"),
+                                ("handbrake.handbrake-transcode.picture", "storage dimensions: 1920 x 1080"),
+                                ("handbrake.handbrake-transcode.par", "pixel aspect ratio: 1 : 1"),
+                                ("thp.before.enabled", "[always] madvise never")):   # D94: the runner's mode, D87's venue
+                    if r.get(x) != want:
+                        notes.append(f"{x} {r.get(x)} (want {want})")
+                try:   # the encode starts warm (D94): the clip in the page cache
+                    if float(r.get("cache.handbrake-transcode.fraction") or "") < 0.99:
+                        notes.append(f"cached fraction {r.get('cache.handbrake-transcode.fraction')} at the start (want >= 0.99)")
+                except ValueError:
+                    notes.append("cached fraction not recorded")
+                if r.get("handbrake.handbrake-transcode.frames"):   # one stream across repeats: frames, bitrate, average QP
+                    dbs.add(f"{r['handbrake.handbrake-transcode.frames']} frames, {r.get('handbrake.handbrake-transcode.stream')}")
         if family == "desktop":   # 9.8 D13 (the gate itself is checked for every family above)
             want, got = r.get("renderers.wanted_min"), r.get("renderers.observed")
             if want and got and int(got) < int(want):
@@ -213,7 +231,7 @@ def validity(family, dirs, entry):
         bad += bool(notes)
         print(f"   r{k}: {'ok' if not notes else '; '.join(notes)}{''.join(f' ({x})' for x in info)}")
     if len(dbs) > 1:
-        what = ("SteamCMD app builds, upgrade and DKMS change sets or MNIST installed sets" if family == "background" else "ClamAV signature databases")
+        what = ("SteamCMD app builds, upgrade and DKMS change sets, MNIST installed sets or HandBrake streams" if family == "background" else "ClamAV signature databases")
         print(f"   {what} differ across repeats: {sorted(dbs)}"); bad += 1
     if len(origins) > 1:
         print(f"   origin counts differ across repeats: {sorted(origins)}"); bad += 1

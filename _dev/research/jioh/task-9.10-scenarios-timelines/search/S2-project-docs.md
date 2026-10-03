@@ -3891,6 +3891,14 @@ a77819313f1acef8b19c5903218978151f7013393a91286585c1a00b3f589a09  S2-15/wb-sm201
 - **Coverage.** T6 — at T0 Ubuntu 24.04 packages HandBrakeCLI 1.7.2 with x265 3.5 from the archive, no update in either pocket. Not what the build enables (read from the program on the runner).
 - **One observation?** Not an observation; the archive's index.
 
+### S2-57 — x265 3.5's thread pools and HandBrake 1.7.2's x265 wrapper: how many threads the encoder makes (read at stage 3, 2026-10-03)
+
+- **Citation.** MulticoreWare, *x265*, tag `3.5`, `source/common/threadpool.cpp`; HandBrake Team, *HandBrake*, tag `1.7.2`, `libhb/encx265.c`. Ubuntu's archive holds `libx265-199` 3.5-2build1, built against `libnuma1` (S2-56). Read for the HandBrakeCLI campaign's probe (D93): the encoder's thread count under the one-CPU pin.
+- **Copy read.** `https://bitbucket.org/multicoreware/x265_git/raw/3.5/source/common/threadpool.cpp` and `https://raw.githubusercontent.com/HandBrake/HandBrake/1.7.2/libhb/encx265.c`, accessed 2026-10-03 (200); `sources/S2-57/`, SHA-256 in `SHA256SUMS.txt` (`threadpool.cpp-3.5` 3d4c2e53e1201f37948d8d4890e4e2931e4f17dbcbde49a88006f0ec31f7597f, `encx265.c-1.7.2` e7b3e279cd3d04fddc58b7587d084636ef9b7bcdb7c8c01329d470217ba84196).
+- **Passages.** `threadpool.cpp:262–268`: `int numNumaNodes = X265_MIN(getNumaNodeCount(), MAX_NODE_NUM);` … `bNumaSupport = numa_available() >= 0;`. `:280–295`: `#elif HAVE_LIBNUMA` / `if (bNumaSupport)` … `int ret = numa_node_to_cpus(i, bitMask);` / `if (!ret)` / `cpusPerNode[i] = numa_bitmask_weight(bitMask);` … `#else // NUMA not supported` / `cpusPerNode[0] = getCpuCount();`. `:616–638`, `getCpuCount`: on Unix, `return sysconf(_SC_NPROCESSORS_ONLN);`. `encx265.c`: no `pools`, `frame-threads` or thread count is set; the preset's options reach x265 through `x265_param_parse`.
+- **Coverage.** T6 — x265 3.5 sizes its thread pool from the CPUs of each NUMA node (or the online CPUs), not from the process's CPU affinity, and HandBrake leaves the count to x265: under a one-CPU `taskset` on a 4-CPU machine the pool has 4 threads. Supports reading the probe's "Thread pool created using 4 threads" as the runner's CPU count.
+- **One observation?** Not an observation; the programs' source.
+
 ## 3. Not found
 
 - **T3 — numbers of open tabs and windows, and visible windows, from vendor telemetry; observed renderer-process counts for a set of tabs.** Searches: rows 33 and 40 (Mozilla telemetry dashboards and Mozilla Metrics blog; no Chromium/Google publication). The only S2 user data is new-tab openings (S2-29). The Chromium soft limit and spare process are definitions (S2-16), not observations.

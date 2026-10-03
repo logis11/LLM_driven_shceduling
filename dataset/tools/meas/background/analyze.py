@@ -524,10 +524,14 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
     for pid in pids:
         r = recs.get(pid, {})
         ts_us = r["cpu_ns"] / 1000.0 if r else None
+        # 9.10 D93: for a multi-threaded process the kernel's thread-group row overstated the CPU 2.5–3.8× (the HandBrake
+        # probe, run #151); the per-thread rows' sum is reported beside it
+        th_us = sum(r["thread_cpu_ns"].values()) / 1000.0 if r.get("thread_cpu_ns") else None
         procs.append({"pid": pid, "role": role.get(pid), "exec": execs.get(pid), "program": pid in prog_set,
                       "threads": r.get("threads"), "perf_cpu_us": round(perf_cpu.get(pid, 0.0), 1),
                       "taskstats_cpu_us": round(ts_us, 1) if ts_us is not None else None,
                       "perf_over_taskstats": round(perf_cpu.get(pid, 0.0) / ts_us, 4) if ts_us else None,
+                      "perf_over_taskstats_threads": round(perf_cpu.get(pid, 0.0) / th_us, 4) if th_us else None,
                       "blkio_ns": r.get("blkio_ns"), "etime_us": r.get("etime_us"), "disk": disk.get(pid)})
     e = edges.get(phase, {})
     span_s = (e["end"] - e["start"]) / 1e9 if "start" in e and "end" in e else None

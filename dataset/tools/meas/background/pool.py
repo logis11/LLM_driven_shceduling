@@ -46,14 +46,15 @@ from meas.distribution import quantile_table  # noqa: E402
 from meas.background import modbuild  # noqa: E402
 pct, QUANTILE_PROBS = analyze.pct, analyze.QUANTILE_PROBS
 
-NAME = re.compile(r"^meas-background-(borg|7z|steamcmd|upgrade|dkms|tracker|mnist-madvise|mnist)-r(\d+)-(dry|probe|full)$")
+NAME = re.compile(r"^meas-background-(borg|7z|steamcmd|upgrade|dkms|tracker|mnist-madvise|mnist|handbrake)-r(\d+)-(dry|probe|full)$")
 PHASES = {"borg": ("borg-first-warm", "borg-repeat-warm", "borg-first-cold", "borg-repeat-cold"),
           "7z": ("7z-mmt8-warm", "7z-mmt1-warm", "7z-mmt8-cold"),
           "steamcmd": ("steam-fresh-shaped", "steam-fresh-untraced", "steam-fresh-unshaped", "steam-update-shaped"),
           "upgrade": ("upgrade-install",),   # 9.10 D36–D40
           "dkms": ("dkms-install",),   # 9.10 D46–D50; its list is set with the entry's form (D50)
           "tracker": ("tracker-index",),   # 9.10 D60–D68; its list is fixed with the entry's form after the dry run
-          "mnist": ("mnist-train",), "mnist-madvise": ("mnist-train",)}   # mnist-madvise: D87's check   # 9.10 D82–D84; its list is fixed with the entry's form after the dry run
+          "mnist": ("mnist-train",), "mnist-madvise": ("mnist-train",),   # mnist-madvise: D87's check   # 9.10 D82–D84; its list is fixed with the entry's form after the dry run
+          "handbrake": ("handbrake-transcode",)}   # 9.10 D11, D91–; its list is fixed with the entry's form after the dry run
 # D19 (the shared stability rule): the list — every table the fold-in carries, each tested by its mean as the table
 # carries it (9.5 D78). D29 (9.6 D21, D22, D25): each archetype compiles as cpu-batch's batch loop, so it carries the
 # program's runs between voluntary blocks, pooled over its threads, and the block after each run — the program-level
@@ -71,6 +72,9 @@ LIST["tracker"] = [("tracker-index", "batch_run_us", "run between voluntary bloc
 LIST["mnist"] = [("mnist-train", "batch_run_us", "run between voluntary blocks (µs)"),
                  ("mnist-train", "batch_block_us", "block per run (µs)"), ("mnist-train", "program_cpu_us", "CPU total (µs)")]
 LIST["mnist-madvise"] = list(LIST["mnist"])   # D87's check, read beside the campaign, never pooled into it
+# 9.10 HandBrakeCLI method §1: over the job, the batch loop's two tables and the CPU total, until the form is fixed
+LIST["handbrake"] = [("handbrake-transcode", "batch_run_us", "run between voluntary blocks (µs)"),
+                     ("handbrake-transcode", "batch_block_us", "block per run (µs)"), ("handbrake-transcode", "program_cpu_us", "CPU total (µs)")]
 # 9.10 D52–D56: the DKMS build carries the spawn form's tables — each job kind's per-(member, step) CPU (D53), make's
 # dispatch run, the serial tail's runs between voluntary blocks and the block after each (D54) — and the CPU total the
 # entry carries, a per-repeat value (D17, D56's C)
@@ -87,7 +91,8 @@ HEADLINE = {"borg": [("borg-first-warm", "run_us", "run per wake (µs)"), ("borg
             "dkms": [("dkms-install", "run_us", "run per wake (µs)"), ("dkms-install", "wait_us", "wait per wake (µs)")],
             "tracker": [("tracker-index", "run_us", "run per wake (µs)"), ("tracker-index", "wait_us", "wait per wake (µs)")],
             "mnist": [("mnist-train", "run_us", "run per wake (µs)"), ("mnist-train", "wait_us", "wait per wake (µs)")],
-            "mnist-madvise": [("mnist-train", "run_us", "run per wake (µs)"), ("mnist-train", "wait_us", "wait per wake (µs)")]}
+            "mnist-madvise": [("mnist-train", "run_us", "run per wake (µs)"), ("mnist-train", "wait_us", "wait per wake (µs)")],
+            "handbrake": [("handbrake-transcode", "run_us", "run per wake (µs)"), ("handbrake-transcode", "wait_us", "wait per wake (µs)")]}
 # results only: (a, b, what) — the headline medians side by side
 COMPARISONS = {"borg": [("borg-first-warm", "borg-first-cold", "warm against cold, first backup (D8)"),
                         ("borg-repeat-warm", "borg-repeat-cold", "warm against cold, repeat backup (D8)"),
@@ -95,7 +100,7 @@ COMPARISONS = {"borg": [("borg-first-warm", "borg-first-cold", "warm against col
                "7z": [("7z-mmt8-warm", "7z-mmt8-cold", "warm against cold (D8)")],
                "steamcmd": [("steam-fresh-shaped", "steam-fresh-unshaped", "shaped against unshaped (D10)"),
                             ("steam-fresh-shaped", "steam-update-shaped", "fresh install against update (D12)")],
-               "upgrade": [], "dkms": [], "tracker": [], "mnist": [], "mnist-madvise": []}
+               "upgrade": [], "dkms": [], "tracker": [], "mnist": [], "mnist-madvise": [], "handbrake": []}
 # D18 (9.6 D23, D24): the tolerance is the larger of TOLERANCE × mean and the trace's 1 µs for times — bytes per wake,
 # a count of whole bytes, has no floor — and the rule holds only over at least five same-machine repeats
 ABS_FLOOR_US = 1.0
@@ -384,8 +389,8 @@ def pool_app(app, reps, jobs=1):
              "taskstats_enobufs": {k: A[k]["taskstats_trailer"].get("enobufs") for k in have},
              "all": {s: pooled({k: samples_of(A[k], None, s) for k in have}) for s in SAMPLE_KEYS},
              "threads": {},
-             "processes": {k: [{x: p[x] for x in ("pid", "role", "exec", "threads", "perf_cpu_us", "taskstats_cpu_us",
-                                                  "perf_over_taskstats", "disk")} for p in A[k]["processes"]
+             "processes": {k: [{x: p.get(x) for x in ("pid", "role", "exec", "threads", "perf_cpu_us", "taskstats_cpu_us",
+                                                      "perf_over_taskstats", "perf_over_taskstats_threads", "disk")} for p in A[k]["processes"]
                                if not A[k].get("_all_only") and (p["program"] or p["disk"])]   # dkms: none (12 500 a repeat)
                            for k in have},
              "outside_on_measured_cpu": {k: dict(list(A[k]["outside_on_measured_cpu"].items())[:5]) for k in have}}
@@ -502,6 +507,8 @@ def also(app, entry, per):
         out["window"] = {k: (per[k]["phases"].get("tracker-index") or {}).get("tracker") for k in ks}
     if app in ("mnist", "mnist-madvise"):   # 9.10 D82–D84, D87: the state, the venv, the dataset, the warm start and the run's own output, per repeat
         out["state"] = {k: {x: per[k]["kv"].get(x) for x in per[k]["kv"] if x.startswith(("upgrade.", "mnist.", "cache."))} for k in ks}
+    if app == "handbrake":   # 9.10 D11, D91–: the state, the clip, the warm start and the encode's own report, per repeat
+        out["state"] = {k: {x: per[k]["kv"].get(x) for x in per[k]["kv"] if x.startswith(("upgrade.", "handbrake.", "cache.", "thp."))} for k in ks}
     cached = {ph: P["cached_fraction"] for ph, P in entry["phases"].items() if not P.get("missing") and "cached_fraction" in P}
     if cached:
         out["cached_fraction"] = cached
@@ -516,7 +523,7 @@ def fmt_q(q):
 
 def render(out):
     network = sum(g.get("gate") == "no-vf" for g in out["gated_out"])
-    L = [f"# background campaign (9.7; 9.10's `upgrade`, `dkms`, `tracker` and `mnist`) — pooled results{' (' + out['tag'] + ')' if out.get('tag') else ''}", "",
+    L = [f"# background campaign (9.7; 9.10's `upgrade`, `dkms`, `tracker`, `mnist` and `handbrake`) — pooled results{' (' + out['tag'] + ')' if out.get('tag') else ''}", "",
          f"Machine {out.get('machine') or 'any'}; stopped by the machine gate {len(out['gated_out']) - network}"
          f"{f', by the network gate {network}' if network else ''}; other-model repeats "
          f"{len(out['other_machine'])}. Quantile tables are p1 / p5 / p10 / p25 / p50 / p75 / p90 / p95 / p99 / p99.9, times in µs, "
@@ -560,7 +567,8 @@ def render(out):
                 L.append("")
             for k, procs in P["processes"].items():
                 for p in procs:
-                    L.append(f"- repeat {k}: `{p['role']}` [{p['pid']}] {p['exec']} threads {p['threads']}; perf/taskstats CPU {p['perf_over_taskstats']}; disk {p['disk']}")
+                    L.append(f"- repeat {k}: `{p['role']}` [{p['pid']}] {p['exec']} threads {p['threads']}; perf/taskstats CPU {p['perf_over_taskstats']}"
+                             + (f" (thread rows {p['perf_over_taskstats_threads']})" if p.get("perf_over_taskstats_threads") else "") + f"; disk {p['disk']}")
             if "network" in P:
                 for k, n in P["network"].items():
                     if n:
@@ -611,7 +619,7 @@ def main():
         print("no repeats found", file=sys.stderr)
         return 1
     out = {"tag": args.tag or None, "machine": args.cpu_model or None, "gated_out": gated, "other_machine": other, "runs": {}}
-    for app in ("borg", "7z", "steamcmd", "upgrade", "dkms", "tracker", "mnist", "mnist-madvise"):
+    for app in ("borg", "7z", "steamcmd", "upgrade", "dkms", "tracker", "mnist", "mnist-madvise", "handbrake"):
         if app in runs:
             out["runs"][app] = E = pool_app(app, runs[app], args.jobs)
             st = E["stability"]

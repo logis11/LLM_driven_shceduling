@@ -1608,3 +1608,55 @@ Not taken: 2560×1440, a consumer usage of "2K" for which no source was read, an
 The encoder settings that realise it are open, with the clip's length (D91).
 
 No file changed yet.
+
+## D93 — the encoder settings are HandBrake's default preset with H.265 chosen; the job encodes the whole clip (2026-10-03)
+
+By 인지오's decision, D11's open item "the encoder settings that realise 'H.265 … 2K, MP4'" and D91's length, on the probe below. The transcode runs HandBrake 1.7.2's default preset, "Fast 1080p30", with its video encoder set to `x265`, the plain H.265 entry: `--preset "Fast 1080p30" --encoder x265`. Every other setting is the preset's own (S2-55). The picture is 1920×1080, D92's size, inside the preset's 1920×1080 bound. The frame rate is the source's 30 fps under the preset's peak of 30. x265 runs at the preset's "fast", RF 22, profile main, level 4.0. Audio is the first track as AAC stereo at 160 kb/s, in MP4. The job encodes the whole clip, 19,036 frames (D17, D91).
+
+Grounds:
+
+- **HandBrake's own default.** "Fast 1080p30" is the preset HandBrake 1.7.2 marks `Default` (S2-55). Its size is D92's and its container is CpsMark+'s MP4. One change, the codec, realises CpsMark+'s "H.265 … 2K, MP4" (D11). No built-in preset is software H.265 at a 2K-class size in MP4 (S2-55).
+- **The whole clip fits the workflow's job.** The probe (below) puts every candidate's whole-clip encode at 1,530–3,700 s of CPU on one CPU of the EPYC 7763. The workflow's job limit is 330 minutes. D17's "each batch job runs whole" then holds with the clip as published (D91).
+- **No hardware acceleration on the runner.** Ubuntu's HandBrakeCLI 1.7.2 lists software encoders and reports "qsv: not available on this system" (run #151's `handbrake.help.txt`).
+
+The probe (`run.sh` mode `probe`, never a repeat; run #150 stopped at the gate on an Intel Xeon 8370C, run #151's two jobs on the EPYC 7763). In D82's chroot with `handbrake-cli` added, the clip warm, 30 s of the clip from its start and from 300 s were encoded on the measured CPU at four of HandBrake's H.265 presets. The 4K presets were held to `--maxWidth 2048 --maxHeight 1080`. Per source second of CPU, the two jobs within 1.5 % of each other:
+
+| preset | x265 | CPU s per source s | whole clip, projected |
+|---|---|---|---|
+| "Very Fast 2160p60 4K HEVC" | 10-bit superfast, RF 26 | 2.41–2.58 | 1,530–1,640 s |
+| "Fast 2160p60 4K HEVC" | 10-bit faster, RF 24 | 4.20–4.32 | 2,670–2,740 s |
+| "HQ 2160p60 4K HEVC Surround" | 10-bit medium, RF 22 | 4.49–4.67 | 2,850–2,960 s |
+| "H.265 MKV 1080p30" with `--format av_mp4` | 10-bit slow, RF 22 | 5.24–5.83 | 3,320–3,700 s |
+
+Also read from the probe:
+
+- **The picture.** Held only by the maximum size, the 4K presets stored 2048×1080 at a pixel aspect of 15:16, shown as 1920×1080 (their `PicturePAR` "auto"). "H.265 MKV 1080p30", bounded at 1920×1080, stored 1920×1080.
+- **The thread shape under the pin.** One process of 26–33 threads, saturation 0.991–0.997. The busiest thread held 0.23–0.34 of the CPU and the next 0.19–0.24. x265 created a pool of 4 threads with 2 frame threads: x265 3.5 sizes its pool from the NUMA node's CPUs, not from the process's affinity (S2-57).
+- **Determinism.** Each cut's x265 summary (frames, kb/s, average QP) was the same in both jobs. The output files' SHA-256 differed.
+- **The cross-check.** For the multi-threaded process, taskstats' thread-group row gave 2.5–3.8× perf's CPU, and its per-thread rows summed to 0.90–1.00 of it. The CPU total read is perf's, the sum of the program's runs on the measured CPU (saturation above).
+
+Not taken: "Fast 2160p60 4K HEVC" held to 1920×1080 (HandBrake's MP4 H.265 preset of the default's tier, the size changed); "H.265 MKV 1080p30" in MP4 (HandBrake's H.265 preset of the size, the container changed). Neither is HandBrake's default.
+
+The chosen settings were not probed; the dry run measures them. The thread shape is read against 9.6 D7's criterion after the dry run.
+
+No file changed yet.
+
+## D94 — the transcode's state, warm start and job: D82's chroot with `handbrake-cli`, the clip warm, the encode as the user from its first schedule-in to its exit (2026-10-03)
+
+Taken under 인지오's delegation (2026-10-03), on D82–D84's precedents.
+
+- **The state.** D37's chroot at D64's T0 (2026-09-22T17:00Z), with `handbrake-cli` added from the same snapshot: 1.7.2+ds1-1build2, with x265 3.5-2build1 and FFmpeg 6.1.1 (S2-56). Its 67 packages are recorded per repeat. The Tracker campaign's user, with its XDG folders made by the layer's `xdg-user-dirs-update`. The clip (D91) is fetched and unzipped on the harness CPUs, the zip and the clip each checked by its SHA-256, and placed as `~/Videos/bbb_sunflower_2160p_30fps_normal.mp4`.
+- **The warm start.** Before the phase, on the harness CPUs: the clip is read whole, and HandBrakeCLI's own scan of it runs once (`HandBrakeCLI -i … --scan`). The clip's cached fraction is measured with `fincore`, and validity asks at least 0.99. The fraction for HandBrakeCLI and its codec libraries is recorded beside it.
+- **The job.** `HandBrakeCLI -i bbb_sunflower_2160p_30fps_normal.mp4 -o bbb_sunflower_2160p_30fps_normal.h265.mp4 --preset "Fast 1080p30" --encoder x265` in `~/Videos`, as the user in the chroot, `taskset` placing it on the measured CPU. The output's name is design. The job is every process of the tree `taskset` launched into `chroot`, from its first schedule-in on the measured CPU to its exit: the CLI's own scan, the encode and the mux. The phase has no cap of its own; the workflow's job limit is 330 minutes.
+- **The venue.** The runner's kernel as recorded, its transparent huge pages in `always` mode. The settings and counters are recorded before and after the phase.
+
+Grounds:
+
+- **One state across 9.10's campaigns** (D82). The chroot and T0 are the DKMS, Tracker and MNIST campaigns'. "As Ubuntu 24.04 packages it" (D11) is the archive's package at T0 (S2-56).
+- **A warm start** (D83; 9.6 D28's ground). The batch-loop compiler draws each run and each block independently, so the start's page-ins would be spread over the whole simulated job. A clip the user has just downloaded or copied is in the page cache. The probe's warm starts held the clip and the libraries at 1.0000.
+- **The job as D84's.** The tree from its first schedule-in to its exit, as the user, one CPU (9.5 D21). HandBrakeCLI scans its source before it encodes, so the scan is the program's own work. What x265 sees under the pin, its pool and frame threads, is recorded from each job's log (D84's "what `torch` sees under the pin").
+- **One venue** (D87's ground: 9.5 D10; 9.5 follow-ups decision 13). The MNIST campaign showed the mode can end a job's blocks (D85, D87). Whether this job's blocks are the kernel's is read from the dry run.
+
+The entry's form — `cpu-batch`'s `HandBrakeCLI` tables re-measured, or an entry of its own (9.6 D7's criterion) — and the list are fixed after the dry run.
+
+No file changed yet.

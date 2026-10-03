@@ -484,9 +484,11 @@ def test_the_list_is_each_archetypes_batch_loop_tables():
     assert [k for _p, k, _l in pool.LIST["tracker"]] == ["batch_run_us", "batch_block_us", "program_cpu_us"]
     # 9.10's MNIST method §1: the same three over the training run, until the form is fixed
     assert [k for _p, k, _l in pool.LIST["mnist"]] == ["batch_run_us", "batch_block_us", "program_cpu_us"]
+    # 9.10's HandBrakeCLI method §1: the same three over the encode, until the form is fixed
+    assert [k for _p, k, _l in pool.LIST["handbrake"]] == ["batch_run_us", "batch_block_us", "program_cpu_us"]
     assert {p for _p in pool.LIST.values() for p, _k, _l in _p} == {"borg-first-warm", "7z-mmt8-warm", "steam-fresh-shaped",
                                                                    "upgrade-install", "dkms-install", "tracker-index",
-                                                                   "mnist-train"}
+                                                                   "mnist-train", "handbrake-transcode"}
 
 
 def test_the_mnist_blocks_are_carried_under_the_machine_exception_and_the_check_is_its_own_app():
@@ -506,6 +508,17 @@ def test_the_mnist_job_is_every_process_of_the_tree_launched_into_the_chroot():
             (1.3, 11, "/usr/bin/setpriv"), (1.4, 11, "/usr/bin/env"), (1.5, 11, "/home/user/venv/bin/python")]
     assert analyze.launched_root("mnist", rows) == 11
     assert analyze.is_program("mnist", "/home/user/venv/bin/python", "python")
+
+
+def test_the_handbrake_job_is_every_process_of_the_tree_launched_into_the_chroot():
+    # 9.10 D11: the encode launched into the chroot as the MNIST run; the probe's phases and the campaign's are its job
+    assert analyze.job_of("handbrake-transcode") == "handbrake"
+    assert analyze.job_of("handbrake-probe-mkv1080-300") == "handbrake"
+    rows = [(1.0, 10, "/usr/bin/sudo"), (1.1, 11, "/usr/bin/taskset"), (1.2, 11, "/usr/sbin/chroot"),
+            (1.3, 11, "/usr/bin/setpriv"), (1.4, 11, "/usr/bin/env"), (1.5, 11, "/usr/bin/HandBrakeCLI")]
+    assert analyze.launched_root("handbrake", rows) == 11
+    assert analyze.is_program("handbrake", "/usr/bin/HandBrakeCLI", "HandBrakeCLI")
+    assert pool.NAME.match("meas-background-handbrake-r2-probe").groups() == ("handbrake", "2", "probe")
 
 
 def test_the_tracker_job_runs_from_the_miners_exec_to_the_extractors_last_idle(tmp_path):
