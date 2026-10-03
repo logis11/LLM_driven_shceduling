@@ -160,7 +160,8 @@ def validity(family, dirs, entry):
                 except ValueError:
                     notes.append("initial sleep not in the status trace")
             if r.get("app") == "mnist":   # 9.10 D82–D84: the state, the example, the pinned release, the warm start, the run whole
-                for x, want in (("upgrade.layer.missing", "0"), ("upgrade.run_systemd_system", "absent"),
+                # the layer plus python3-venv and the three packages it brings (dry run, #142)
+                for x, want in (("upgrade.layer.missing", "0"), ("upgrade.layer.extra", "4"), ("upgrade.run_systemd_system", "absent"),
                                 ("mnist.example.main.py.pin", "ok"), ("mnist.example.README.md.pin", "ok"),
                                 ("mnist.example.requirements.txt.pin", "ok"),
                                 ("mnist.torch.version", "2.14.0+cpu"), ("mnist.torchvision.version", "0.29.0+cpu"),

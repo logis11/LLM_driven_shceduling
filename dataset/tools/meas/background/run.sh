@@ -853,6 +853,14 @@ print(torch.__config__.parallel_info())' > "$OUT/mnist.probe.txt" 2>&1; rec mnis
   rec cache.mnist-train.fraction "$(mn_fraction "$raw" '*-ubyte')"   # the dataset as the run reads it (D83)
   rec cache.mnist-train.torch_lib_fraction "$(mn_fraction "$r$MN_VENV/lib" '*.so*')"
 }
+mn_thp() {   # mn_thp <label>: the kernel's transparent-hugepage settings and its counters — every block of the dry run's
+  # training run was ended by khugepaged (run #142)
+  local f k v
+  for f in enabled defrag khugepaged/defrag khugepaged/scan_sleep_millisecs khugepaged/alloc_sleep_millisecs khugepaged/pages_to_scan; do
+    rec "thp.$1.${f//\//.}" "$(cat "/sys/kernel/mm/transparent_hugepage/$f" 2>/dev/null)"
+  done
+  while read -r k v; do rec "thp.$1.$k" "$v"; done < <(grep -E '^thp_(collapse_alloc|collapse_alloc_failed|fault_alloc|fault_fallback) ' /proc/vmstat)
+}
 mn_after() {   # mn_after <root>: the run's own output and the checkpoint
   local r="$1" c="$OUT/cmd.mnist-train.log"
   rec mnist.train.epochs "$(grep -c '^Test set:' "$c")"
@@ -865,11 +873,13 @@ mn_job() {
   local r="$WORK/chroot"
   UPG_T0="${MEAS_MNIST_T0:-20260922T170000Z}"; UPG_EXTRA=python3-venv   # D82: D64's T0
   sudo rm -rf "$r"; upg_build "$r"; upg_mount "$r"; mn_state "$r"; mn_warm "$r"
+  mn_thp before
   export MEAS_PIN=none
   phase mnist-train -- sudo taskset -c "$MEAS_CPU" chroot "$r" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" --init-groups \
     /usr/bin/env -i -C "$MN_DIR" HOME="$MN_H" USER="$TRK_USER" LOGNAME="$TRK_USER" VIRTUAL_ENV="$MN_VENV" PATH="$MN_PATH" \
     LANG=en_US.UTF-8 python main.py --save-model
   export MEAS_PIN=load
+  mn_thp after
   mn_after "$r"; upg_umount "$r"
   df -B1 --output=target,avail "$WORK" > "$OUT/df.mnist.txt" 2>&1
 }
