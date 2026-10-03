@@ -1486,3 +1486,27 @@ Not taken: segment 1 at the training's length in both files (the label above); e
 Hands to 9.14: `c2-p1a` carries no finished training job, so no turnaround term reads one; P1's terms over C. Hands to 9.15: `building-plan.md` §3 C2 on P1.
 
 No file changed yet.
+
+## D87 — the campaign keeps the runner's huge-page mode; the two block values carried with their half-widths; five jobs under the desktop kernel's `madvise` checked beside (2026-10-03)
+
+By 인지오's decision, on the first batch (runs 37091275421 and 37091313419, #143 and #144; repeats 1–5, every one valid on the EPYC 7763):
+
+- The campaign runs under the runner's kernel as recorded, its transparent huge pages in `always` mode, the venue of every other campaign.
+- The run between voluntary blocks and the block per run are carried over the repeats obtained, at least five, with their half-widths and ranges, the tolerance not applied. This is the workflow's exception for a value whose spread follows the machine (9.6 D29).
+- Repeats are added until the CPU total holds.
+- Five more jobs run with the kernel's mode set to `madvise` before the phase, as app `mnist-madvise`. They are never repeats of the campaign. Their CPU totals and blocks are reported beside the pool, the difference read against its 95 % interval.
+- The entry's scope states the runner's mode, the desktop kernel's default and the check's result.
+
+Grounds:
+
+- **The blocks are the kernel's.** In every repeat, every block but the two sleeps at the start was ended by a wakeup from `khugepaged`. The blocks per repeat number 11, 21, 20, 23 and 15, and the mean run between them 54–115 s by repeat: ±33.7 %, 116 repeats projected. The block per run is ±14.8 %, 25 projected.
+- **The runner's mode** (recorded in every job). `enabled` is `[always] madvise never`, `defrag` is `madvise`, and `khugepaged` scans 4,096 pages every 10,000 ms. Each phase fault-allocated 168k–249k huge pages, with 133–145 collapses.
+- **The desktop's mode.** Ubuntu 24.04's kernel boots with `CONFIG_TRANSPARENT_HUGEPAGE_MADVISE=y` (S2-50). PyTorch 2.14.0's allocator asks for huge pages only under `THP_MEM_ALLOC_ENABLE` (S2-51), glibc 2.39's only under `glibc.malloc.hugetlb=1` (S2-52). On the desktop's kernel, then, the training heap is not collapsed.
+- **One venue.** A measured value is "this software on this machine" (9.5 D10), and the composition seam has one venue (9.5 follow-ups decision 13). Every measured value in the library is the runner's; the earlier campaigns did not record its mode.
+- **The CPU total** ranges 1,293.8–1,455.8 s (±5.32 %), and its spread does not follow the huge-page counters. At this spread the pool projects 6 repeats.
+
+Not taken: setting `madvise` for the campaign. The first batch would leave the pool, and this campaign's venue would differ in one setting from every other's.
+
+Hands to 9.14: the check's measured ratio, for the RQ0 gate spec's venue sensitivity check. Hands to 9.15: `docs/workload/measurement-overview.md`'s venue, the runner's huge-page mode against the desktop kernel's.
+
+No file changed yet.
