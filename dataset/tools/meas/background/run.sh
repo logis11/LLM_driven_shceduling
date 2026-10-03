@@ -14,6 +14,8 @@
 #             the security kernel 7.0.0-34, in that chroot with the HWE kernel 7.0.0-31 and nvidia-driver-595-open
 #   tracker   tracker-index — 9.10's Tracker campaign (9.10 changelog D5, D60–D68): Tracker 3.7.1's first index of a
 #             home holding HippoCamp's Bei profile as ~/Documents, in that chroot built at 2026-09-22T17:00Z
+#   mnist     mnist-train — 9.10's MNIST training campaign (9.10 changelog D12, D82–D84): PyTorch's basic MNIST example
+#             at its defaults, the checkpoint written, on torch 2.14.0's CPU build in that chroot, from a warm start
 # Every measured phase is one command pinned to the measured CPU (pin.sh,
 # phase.sh MEAS_PIN=load), observed over the whole phase from the harness CPUs
 # by `perf sched record -a` — with the exec rows that name each process's
@@ -140,10 +142,11 @@ case "$APP" in
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y steamcmd > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
         STEAMCMD="$( [ -x /usr/games/steamcmd ] && echo /usr/games/steamcmd || command -v steamcmd)"; rec steamcmd.binary "$STEAMCMD"
         rec steamcmd.package "$(dpkg-query -W -f '${Version}' steamcmd 2>/dev/null)" ;;
-  upgrade|dkms|tracker)
-        # tracker: util-linux-extra for fincore, the cold start's check (D75; the runner's image lacks it, run #126)
+  upgrade|dkms|tracker|mnist)
+        # tracker: util-linux-extra for fincore, the cold start's check (D75; the runner's image lacks it, run #126);
+        # mnist: the same, for the warm start's check (D83)
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mmdebstrap \
-          $( [ "$APP" = tracker ] && echo util-linux-extra) > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
+          $( [ "$APP" = tracker ] || [ "$APP" = mnist ] && echo util-linux-extra) > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
         rec mmdebstrap.version "$(mmdebstrap --version 2>&1 | head -1)" ;;
 esac
 rec zpaq.version "$(zpaq 2>&1 | head -1)"
@@ -555,8 +558,8 @@ SRC
 }
 upg_build() {   # upg_build <root>: the layer at T0, on the harness CPUs
   local r="$1" t0 layer
-  layer="$(grep -v '^#' "$HERE/upgrade-layer.txt" | paste -sd, -)"
-  rec upgrade.layer.packages "$(grep -vc '^#' "$HERE/upgrade-layer.txt")"
+  layer="$(grep -v '^#' "$HERE/upgrade-layer.txt" | paste -sd, -)${UPG_EXTRA:+,$UPG_EXTRA}"   # UPG_EXTRA: a job's own additions
+  rec upgrade.layer.packages "$(grep -vc '^#' "$HERE/upgrade-layer.txt")"; rec upgrade.layer.added "${UPG_EXTRA:-}"
   rec upgrade.layer.sha256 "$(sha256sum "$HERE/upgrade-layer.txt" | cut -d' ' -f1)"
   rec upgrade.t0 "$UPG_T0"; rec upgrade.t1 "$UPG_T1"
   t0=$(date +%s)
@@ -782,6 +785,95 @@ trk_job() {
   df -B1 --output=target,avail "$WORK" > "$OUT/df.tracker.txt" 2>&1
 }
 
+# ---- the MNIST training run (9.10 D12, D82–D84) ------------------------------------------
+# D37's chroot built at D64's T0 with python3-venv added, the package a venv needs (D82); the Tracker job's user and
+# home; torch 2.14.0 and torchvision 0.29.0, the release current at T0 (S2-48), installed into a venv in the home by
+# PyTorch's own command for Linux, pip and the CPU (S2-47), the two versions pinned; the example's three files from
+# pytorch/examples at acc295d (S2-31) as ~/examples/mnist, each checked by its SHA-256 — fetched into the work
+# directory and moved into the home, which is the user's alone. An unmeasured start of the example, its own --dry-run
+# for one epoch, on the harness CPUs: torchvision's MNIST download places the dataset in ../data, the example's own
+# path, and torch's files enter the page cache (D83; 9.6 D28). The phase is the README's `python main.py`, with
+# --save-model, as the user in the chroot with the venv activated (its bin first on PATH, VIRTUAL_ENV), on the measured
+# CPU (D84); the job — every process of the tree, from its first schedule-in to its exit — is cut by analyze.py.
+MN_REV=acc295dc7b90714f1bf47f06004fc19a7fe235c4                                    # S2-31
+MN_TORCH=2.14.0; MN_VISION=0.29.0; MN_INDEX=https://download.pytorch.org/whl/cpu   # D82; S2-47, S2-48
+MN_FILES="main.py:30a3359d1911d2d859dd090ce20be7ed132a33f508dc389f40366010b3e9ecc8
+README.md:df847dfd52aad2e1d03bcaee6d7bcf7d013202fa8727f76f38fe0fce22d32cf1
+requirements.txt:005cbc6604c36772776d4e1104cc0ab3e2869f1fab0bfbbbd3540592792f7108"
+MN_H="/home/$TRK_USER"; MN_DIR="/home/$TRK_USER/examples/mnist"; MN_VENV="/home/$TRK_USER/venv"
+MN_PATH="$MN_VENV/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+mn_user() {   # mn_user <root> <cpus> <dir> <cmd...>: in the chroot as the user, the venv activated, in <dir>, on <cpus>
+  local r="$1" cpus="$2" dir="$3"; shift 3
+  sudo taskset -c "$cpus" chroot "$r" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" --init-groups /usr/bin/env -i -C "$dir" \
+    HOME="$MN_H" USER="$TRK_USER" LOGNAME="$TRK_USER" VIRTUAL_ENV="$MN_VENV" PATH="$MN_PATH" LANG=en_US.UTF-8 "$@"
+}
+mn_state() {   # mn_state <root>: the user, the example, the venv with torch and torchvision — on the harness CPUs
+  local r="$1" t0 f name want got
+  sudo chroot "$r" useradd -m -u "$TRK_UID" -U -s /bin/bash "$TRK_USER" > "$OUT/mnist.useradd.log" 2>&1; rec mnist.useradd.rc "$?"
+  rec mnist.python.version "$(sudo chroot "$r" dpkg-query -W -f '${Version}' python3.12 2>/dev/null)"
+  rec mnist.venv_pkg.version "$(sudo chroot "$r" dpkg-query -W -f '${Version}' python3-venv 2>/dev/null)"
+  rm -rf "$WORK/mn-ex"; mkdir -p "$WORK/mn-ex/mnist"
+  for f in $MN_FILES; do
+    name="${f%%:*}"; want="${f#*:}"
+    unmeasured wget -q --tries=5 --waitretry=15 -O "$WORK/mn-ex/mnist/$name" \
+      "https://raw.githubusercontent.com/pytorch/examples/$MN_REV/mnist/$name"
+    got="$(sha256sum "$WORK/mn-ex/mnist/$name" | cut -d' ' -f1)"; rec "mnist.example.$name.pin" "$(pin_state "$want" "$got")"
+  done
+  sudo mv "$WORK/mn-ex" "$r$MN_H/examples"; sudo chroot "$r" chown -R "$TRK_USER:$TRK_USER" "$MN_H/examples"; rec mnist.example.placed.rc "$?"
+  t0=$(date +%s)
+  mn_user "$r" "$MEAS_HARNESS_CPUS" "$MN_H" /usr/bin/python3 -m venv "$MN_VENV" > "$OUT/mnist.venv.log" 2>&1; rec mnist.venv.rc "$?"
+  mn_user "$r" "$MEAS_HARNESS_CPUS" "$MN_H" pip3 install "torch==$MN_TORCH" "torchvision==$MN_VISION" --index-url "$MN_INDEX" \
+    > "$OUT/mnist.pip.log" 2>&1; rec mnist.pip.rc "$?"; rec mnist.pip_s "$(( $(date +%s) - t0 ))"
+  mn_user "$r" "$MEAS_HARNESS_CPUS" "$MN_H" pip3 freeze --all > "$OUT/mnist.pip-freeze.txt" 2>&1
+  rec mnist.torch.version "$(sed -n 's/^torch==//p' "$OUT/mnist.pip-freeze.txt")"
+  rec mnist.torchvision.version "$(sed -n 's/^torchvision==//p' "$OUT/mnist.pip-freeze.txt")"
+  rec mnist.pip-freeze.sha256 "$(sha256sum "$OUT/mnist.pip-freeze.txt" | cut -d' ' -f1)"
+  sudo du -sb "$r$MN_VENV" 2>/dev/null | cut -f1 | { read -r b; rec mnist.venv_bytes "$b"; }
+  sudo cat "$r$MN_VENV/bin/activate" > "$OUT/mnist.activate.txt" 2>&1   # what activating the venv sets (D84)
+}
+mn_fraction() {   # mn_fraction <dir> <name filter>: resident pages over the pages the files span, read as root
+  sudo find "$1" -type f -name "$2" -print0 | sudo xargs -0 fincore -b -n -r -o PAGES,SIZE 2>/dev/null \
+    | awk -v pg="$PAGE" '{r += $1; s += int(($2 + pg - 1) / pg)} END {if (s > 0) printf "%.4f", r / s}'
+}
+mn_warm() {   # mn_warm <root>: the example's own dry run for one epoch on the harness CPUs (D83), then what torch sees on
+  # the measured CPU and the page cache's state
+  local r="$1" t0 raw="$1/home/$TRK_USER/examples/data/MNIST/raw"
+  t0=$(date +%s)
+  mn_user "$r" "$MEAS_HARNESS_CPUS" "$MN_DIR" python main.py --dry-run --epochs 1 > "$OUT/mnist.warm.log" 2>&1; rec mnist.warm.rc "$?"
+  rec mnist.warm_s "$(( $(date +%s) - t0 ))"
+  sudo ls -l "$raw" > "$OUT/mnist.data.txt" 2>&1
+  sudo sh -c 'cd "$1" && sha256sum *' _ "$raw" > "$OUT/mnist.data.sha256" 2>&1
+  rec mnist.data.files "$(sudo find "$raw" -type f | wc -l)"
+  rec mnist.data.sha256 "$(sha256sum "$OUT/mnist.data.sha256" | cut -d' ' -f1)"
+  mn_user "$r" "$MEAS_CPU" "$MN_DIR" python -c 'import json, torch
+print(json.dumps({"torch": torch.__version__, "threads": torch.get_num_threads(), "interop_threads": torch.get_num_interop_threads()}))
+print(torch.__config__.parallel_info())' > "$OUT/mnist.probe.txt" 2>&1; rec mnist.probe.rc "$?"
+  rec mnist.probe.threads "$(head -1 "$OUT/mnist.probe.txt" | python3 -c 'import json,sys; print(json.load(sys.stdin)["threads"])' 2>/dev/null)"
+  rec mnist.probe.interop_threads "$(head -1 "$OUT/mnist.probe.txt" | python3 -c 'import json,sys; print(json.load(sys.stdin)["interop_threads"])' 2>/dev/null)"
+  rec cache.mnist-train.fraction "$(mn_fraction "$raw" '*-ubyte')"   # the dataset as the run reads it (D83)
+  rec cache.mnist-train.torch_lib_fraction "$(mn_fraction "$r$MN_VENV/lib" '*.so*')"
+}
+mn_after() {   # mn_after <root>: the run's own output and the checkpoint
+  local r="$1" c="$OUT/cmd.mnist-train.log"
+  rec mnist.train.epochs "$(grep -c '^Test set:' "$c")"
+  rec mnist.train.log_lines "$(grep -c '^Train Epoch:' "$c")"
+  rec mnist.train.last_test "$(grep '^Test set:' "$c" | tail -1)"
+  rec mnist.checkpoint.bytes "$(sudo stat -c %s "$r$MN_DIR/mnist_cnn.pt" 2>/dev/null || echo 0)"
+  rec mnist.checkpoint.sha256 "$(sudo sha256sum "$r$MN_DIR/mnist_cnn.pt" 2>/dev/null | cut -d' ' -f1)"
+}
+mn_job() {
+  local r="$WORK/chroot"
+  UPG_T0="${MEAS_MNIST_T0:-20260922T170000Z}"; UPG_EXTRA=python3-venv   # D82: D64's T0
+  sudo rm -rf "$r"; upg_build "$r"; upg_mount "$r"; mn_state "$r"; mn_warm "$r"
+  export MEAS_PIN=none
+  phase mnist-train -- sudo taskset -c "$MEAS_CPU" chroot "$r" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" --init-groups \
+    /usr/bin/env -i -C "$MN_DIR" HOME="$MN_H" USER="$TRK_USER" LOGNAME="$TRK_USER" VIRTUAL_ENV="$MN_VENV" PATH="$MN_PATH" \
+    LANG=en_US.UTF-8 python main.py --save-model
+  export MEAS_PIN=load
+  mn_after "$r"; upg_umount "$r"
+  df -B1 --output=target,avail "$WORK" > "$OUT/df.mnist.txt" 2>&1
+}
+
 # ---- the job ----------------------------------------------------------------------
 case "$APP" in
   borg)
@@ -826,6 +918,7 @@ case "$APP" in
   upgrade) upg_job ;;
   dkms) dkms_job ;;
   tracker) trk_job ;;
+  mnist) mn_job ;;
   *) rec error "unknown app $APP" ;;
 esac
 

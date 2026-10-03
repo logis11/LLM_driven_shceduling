@@ -482,8 +482,20 @@ def test_the_list_is_each_archetypes_batch_loop_tables():
     assert keys[len(steps):] == ["mb:dispatch_us", "mb:tail_run_us", "mb:tail_block_us", "mb_carried_cpu_us"]
     # 9.10's Tracker method §1: over the job, the batch loop's two tables and the CPU total, until the form is fixed
     assert [k for _p, k, _l in pool.LIST["tracker"]] == ["batch_run_us", "batch_block_us", "program_cpu_us"]
+    # 9.10's MNIST method §1: the same three over the training run, until the form is fixed
+    assert [k for _p, k, _l in pool.LIST["mnist"]] == ["batch_run_us", "batch_block_us", "program_cpu_us"]
     assert {p for _p in pool.LIST.values() for p, _k, _l in _p} == {"borg-first-warm", "7z-mmt8-warm", "steam-fresh-shaped",
-                                                                   "upgrade-install", "dkms-install", "tracker-index"}
+                                                                   "upgrade-install", "dkms-install", "tracker-index",
+                                                                   "mnist-train"}
+
+
+def test_the_mnist_job_is_every_process_of_the_tree_launched_into_the_chroot():
+    # 9.10 D84: the phase's job, rooted at the process taskset executed into chroot, every process of it the program's
+    assert analyze.job_of("mnist-train") == "mnist"
+    rows = [(1.0, 10, "/usr/bin/sudo"), (1.1, 11, "/usr/bin/taskset"), (1.2, 11, "/usr/sbin/chroot"),
+            (1.3, 11, "/usr/bin/setpriv"), (1.4, 11, "/usr/bin/env"), (1.5, 11, "/home/user/venv/bin/python")]
+    assert analyze.launched_root("mnist", rows) == 11
+    assert analyze.is_program("mnist", "/home/user/venv/bin/python", "python")
 
 
 def test_the_tracker_job_runs_from_the_miners_exec_to_the_extractors_last_idle(tmp_path):

@@ -159,6 +159,21 @@ def validity(family, dirs, entry):
                         notes.append(f"initial sleep {r.get('tracker.log.sleep_s')} s (want 14.75-15.8)")
                 except ValueError:
                     notes.append("initial sleep not in the status trace")
+            if r.get("app") == "mnist":   # 9.10 D82–D84: the state, the example, the pinned release, the warm start, the run whole
+                for x, want in (("upgrade.layer.missing", "0"), ("upgrade.run_systemd_system", "absent"),
+                                ("mnist.example.main.py.pin", "ok"), ("mnist.example.README.md.pin", "ok"),
+                                ("mnist.example.requirements.txt.pin", "ok"),
+                                ("mnist.torch.version", "2.14.0+cpu"), ("mnist.torchvision.version", "0.29.0+cpu"),
+                                ("mnist.train.epochs", "14")):
+                    if r.get(x) != want:
+                        notes.append(f"{x} {r.get(x)} (want {want})")
+                try:   # the run starts warm (D83): the dataset's files in the page cache
+                    if float(r.get("cache.mnist-train.fraction") or "") < 0.99:
+                        notes.append(f"cached fraction {r.get('cache.mnist-train.fraction')} at the start (want >= 0.99)")
+                except ValueError:
+                    notes.append("cached fraction not recorded")
+                if r.get("mnist.pip-freeze.sha256"):   # one installed set across repeats
+                    dbs.add(r["mnist.pip-freeze.sha256"])
         if family == "desktop":   # 9.8 D13 (the gate itself is checked for every family above)
             want, got = r.get("renderers.wanted_min"), r.get("renderers.observed")
             if want and got and int(got) < int(want):
@@ -195,7 +210,7 @@ def validity(family, dirs, entry):
         bad += bool(notes)
         print(f"   r{k}: {'ok' if not notes else '; '.join(notes)}{''.join(f' ({x})' for x in info)}")
     if len(dbs) > 1:
-        what = ("SteamCMD app builds or upgrade and DKMS change sets" if family == "background" else "ClamAV signature databases")
+        what = ("SteamCMD app builds, upgrade and DKMS change sets or MNIST installed sets" if family == "background" else "ClamAV signature databases")
         print(f"   {what} differ across repeats: {sorted(dbs)}"); bad += 1
     if len(origins) > 1:
         print(f"   origin counts differ across repeats: {sorted(origins)}"); bad += 1

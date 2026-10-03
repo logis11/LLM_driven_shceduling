@@ -63,7 +63,8 @@ IOWAIT = re.compile(r"^\s*(\d+\.\d+):\s+sched:sched_stat_iowait:\s+comm=.*?\s+pi
 EXEC = re.compile(r"^\s*(\d+\.\d+):\s+sched:sched_process_exec:\s+filename=(.*?)\s+pid=(\d+)\s+old_pid=(\d+)")
 ROOT_COMMS = {"borg": ("borg",), "7z": ("7z", "7zz"), "steamcmd": ("steamcmd",), "upgrade": ("chroot",),   # upgrade: 9.10 D37
               "dkms": ("chroot",),   # dkms: 9.10 D50, the install stage as upgrade's
-              "tracker": ("tracker-miner-fs-3", "tracker-miner-f")}   # tracker: 9.10 D65, the miner its session starts
+              "tracker": ("tracker-miner-fs-3", "tracker-miner-f"),   # tracker: 9.10 D65, the miner its session starts
+              "mnist": ("chroot",)}   # mnist: 9.10 D84, the training run launched into the chroot as upgrade's stage
 # 9.10 D50: the DKMS job is every process rooted at a run of either kernel hook, which execs dkms_autoinstaller (S2-03)
 DKMS_HOOKS = ("/etc/kernel/postinst.d/dkms", "/etc/kernel/header_postinst.d/dkms", "/usr/lib/dkms/dkms_autoinstaller")
 CLASSES = ("disk", "uninterruptible", "network", "sleep", "runnable")
@@ -71,7 +72,7 @@ CLASSES = ("disk", "uninterruptible", "network", "sleep", "runnable")
 
 def job_of(phase):
     for job, prefix in (("borg", "borg"), ("7z", "7z"), ("steamcmd", "steam"), ("upgrade", "upgrade"), ("dkms", "dkms"),
-                        ("tracker", "tracker")):
+                        ("tracker", "tracker"), ("mnist", "mnist")):
         if phase.startswith(prefix):
             return job
     return None
@@ -81,8 +82,9 @@ def is_program(job, filename, comm):
     """The program's own processes: borg's (a Python script, executed as /usr/bin/borg), 7-Zip's, and SteamCMD's
     binary — not /usr/games/steamcmd or steamcmd.sh, the shell wrappers that start it. Without an exec row, by comm.
     The unattended upgrade (9.10 D37): every process of the tree — the job is the unit's commands and all they start.
-    The Tracker index (9.10 D65): every process in the miner's tree."""
-    if job in ("upgrade", "tracker"):
+    The Tracker index (9.10 D65): every process in the miner's tree. The MNIST training run (9.10 D84): every process of
+    the tree launched into the chroot."""
+    if job in ("upgrade", "tracker", "mnist"):
         return True
     if filename:
         base = filename.rsplit("/", 1)[-1]
