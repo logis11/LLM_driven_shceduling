@@ -28,6 +28,12 @@
 # bound whole, the editor departing at C, focus 2 s to C − 2 s; C = 39.435 s, the
 # index's CPU total, so it is alive at every instant of the segment.
 #
+# As the indexing counterpart, c7-ml-train is its base's first C seconds (D78's
+# form): the training run from 0 s bound whole, the editor departing at C, focus
+# 2 s to C − 2 s; C = 1,389.885 s, the run's CPU total (meas-ci:background:2026-10-03),
+# so it is alive at every instant of the segment. The label still flips alone on the
+# same job and name, a pre-committed miss.
+#
 # As the interactive counterparts, c7-compile is its base's first C seconds (D56): the
 # build from 0 s bound whole, the editor departing at C, focus 2 s to C − 2 s;
 # C = 225.458 s, the build's CPU as compiled under the file's seed, so it is alive
@@ -198,9 +204,13 @@ variants:
   - id: c7-ml-train
     from: c1-ml-train.timeline.yaml
     ops:
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, initiated: scheduled,
-                                     pre_committed_miss: true}}
+      - patch-task: {id: hog, arrive: 0s}
+      - set-segments: [{from: 0s, to: 1389.885s, mode: ml-train,
+                         attributes: {background_wanted: false, initiated: scheduled,
+                                      pre_committed_miss: true},
+                         scenario: [S11, S12]}]
+      - patch-task: {id: editor, depart: 1389.885s}
+      - set-focus: [{from: 2s, to: 1387.885s, task: editor}]
       - patch-meta: {demand: calibration}
 
   - id: c7-render

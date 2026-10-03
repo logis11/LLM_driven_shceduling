@@ -1527,3 +1527,54 @@ Grounds for keeping D87: one venue for every measured value in the library (9.5 
 Hands to 9.14: ×1.144 (×1.102–×1.185) is a measured venue effect on one entry's CPU, for the RQ0 gate spec's venue sensitivity check. Hands to 9.15: `docs/workload/measurement-overview.md`'s venue, the runner's huge-page mode against the desktop kernel's, with this result.
 
 No file changed yet.
+
+## D89 — the MNIST campaign's raw records are release `meas-ci-background-2026-10-03` (2026-10-03)
+
+By 인지오's decision, the method's §7. The release is created at the fold-in commit. It holds, each archive without its `pool-cache/`: the 6 pooled landings (runs #143, #144, #147), the dry run (#142, its `perf.data` kept), the five `madvise` check jobs (#146, #148, #149; D87, D88) and the reports of the 7 jobs the machine gate stopped. No data file is in it: the MNIST files appear as their SHA-256 hashes and listing, the checkpoint as its size and hash.
+
+No file changed yet.
+
+## D90 — the MNIST campaign holds at 6 repeats; `cpu-batch`'s `python3` re-measured, the three training files rebound (2026-10-03)
+
+The campaign of D82–D89, `meas-ci:background:2026-10-03`, run under `../measurement-campaign-workflow.md` and recorded in `campaign/mnist/` (method, machine draws, `results/pooled.json`, `results/results.md`, the check's `results/madvise-pooled.json` and `results/madvise-results.md`) and in `measurement-campaign-record.md`.
+
+- **Runs.** The dry run, #142, after one stop at the gate (#141; D85). The first batch, repeats 1–5 (#143, #144), every one valid: the rule failed on all three values, the blocks `khugepaged`'s and the CPU total ±5.32 % (D87). Repeat 6 was added, the pool's projection (#145 stopped at the gate, #147 landed). In all, 8 jobs: 6 landed on the EPYC 7763, 2 stopped by the machine gate. The `madvise` check, never a repeat, was 9 jobs: 5 landed, 4 stopped (D87, D88).
+- **The rule holds at 6** on the CPU total, 1,389.885 s ±4.04 % (1,293.8–1,455.8 s). The run between voluntary blocks, 69.49 s ±27.3 %, and the block per run, 311.5 µs ±10.8 %, are carried with their half-widths (D87). Every repeat is valid:
+  - the layer built, with `python3-venv`'s four packages added;
+  - the example's three files matching their SHA-256;
+  - `torch` 2.14.0+cpu and `torchvision` 0.29.0+cpu, one installed set;
+  - the dataset cached at 1.0000;
+  - the kernel's mode `always`;
+  - 14 test passes, the checkpoint the same SHA-256 in every repeat.
+- **Reported.**
+  - The job is one process with one thread, `python`, saturation 0.99988–0.99991.
+  - Each repeat shows 11–24 voluntary blocks, every one but the two sleeps at the start ended by `khugepaged`, with 168k–249k huge pages fault-allocated and 133–145 collapses a phase.
+  - The `madvise` check: ×1.144 the CPU (×1.102–×1.185), no block but the two at the start (D88).
+- **Release.** The raw records are release `meas-ci-background-2026-10-03`, published on 인지오's go-ahead (D89).
+- **Fold-in.**
+  - `cpu-batch`'s `python3_run` and `python3_block` are written by `batch_fold_in.py` from `results/pooled.json`, their source `meas-ci:background:2026-10-03`. The scope, stats, run and notes state D82–D88, and 9.6's stand-in's `python3` figures leave.
+  - `docs/references.md` gains `pytorch-examples` (deployed-system, verified).
+  - `dataset/tools/wlc/grid.py` places `python` at tier 1, `python3`'s (D27: the same program keeps its tier).
+- **Rebound.**
+  - `c1-ml-train`: `python` on `cpu-batch`, program `python3`, from 2 s, `total_work` 1,389.885 s. The segment is 1,612 s, the smallest whole second by which the run ends under every policy: 2 s plus 1,389.885 s of CPU plus 0.012 s of its blocks plus the editor's 219.263 s as compiled under the file's seed, 1,611.161 s (D17; D78's arithmetic). Focus runs from 2 s to 1,610 s.
+  - `c7-ml-train` (`c7.variant.yaml`): `c1-ml-train`'s first C seconds, the run from 0 s, the editor departing at C, focus 2 s to C − 2 s, one segment `background_wanted: false`, `initiated: scheduled`, still a pre-committed miss (D78's form).
+  - `c2-p1a`: `python` bound whole, `total_work` 1,389.885 s, segment 1 still 39.435 s (D86).
+  - C is 1,389.885 s, the run's `total_work`, which the batch loop compiles exactly.
+
+Recompiled (`compile.py --allow-window`): 6 of 100 artifacts change beyond the library's hash, the three files in both modes. Demand (`-single`):
+
+| file | before | after | |
+|---|---|---|---|
+| `c1-ml-train` | 0.5426 | 0.9982 | calibration |
+| `c7-ml-train` | 0.5426 | 1.1357 | calibration |
+| `c2-p1a` | 1.8346 | 14.505 | the estimate counts the whole run, which goes on past the file's end (D86) |
+
+Lint reports the same five demand-window files: `c3-creation`, `c3-evening`, `c3-workday`, `c2-p1a` and `c2-p1b`. Tests: 378 passed, 1 skipped, 1 xfailed. Restated tests: `test_p1_pair_differs_in_segment_one_only` names `python`; `ml-train` leaves `C7_SAME_NAME` for `test_c7_ml_train_is_its_bases_first_c_seconds`; the background tests add the `mnist` job, its exception and the `madvise` check's own name.
+
+Hands to 9.14:
+- `c1-ml-train`'s and `c7-ml-train`'s terms on the new lengths;
+- `c2-p1a`'s training side, which carries no finished job (D86);
+- the check's ×1.144, for the venue sensitivity check (D88);
+- `c2-p1a` in the demand window.
+
+Hands to 9.12 and 9.15: 9.6 D32's wording rule restated on an actual training run; the scenario catalog's S12 row; `measurement-overview.md`'s venue, the huge-page mode (D88).

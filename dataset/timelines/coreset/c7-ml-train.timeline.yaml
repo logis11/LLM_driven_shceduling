@@ -3,7 +3,7 @@
 focus:
 - from: 2s
   task: editor
-  to: 58s
+  to: 1387.885s
 meta:
   demand: calibration
   id: c7-ml-train
@@ -18,17 +18,17 @@ segments:
   scenario:
   - S11
   - S12
-  to: 60s
+  to: 1389.885s
 tasks:
 - archetype: code-editor
   arrive: 0s
-  depart: 60s
+  depart: 1389.885s
   id: editor
   name: code
 - archetype: cpu-batch
-  arrive: 2s
+  arrive: 0s
   bind:
     program: python3
-    total_work: 30s
+    total_work: 1389.885s
   id: hog
-  name: python3
+  name: python

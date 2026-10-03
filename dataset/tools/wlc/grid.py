@@ -39,7 +39,8 @@ NAME_TIERS = {
         "thunderbird", "thunderbird-bin", "spotify", "gimp", "kdenlive", "ffmpeg", "mpv",
         "python3", "rsync", "tar", "xz", "7z", "borg", "rclone", "zoom",
         "slack", "vlc", "game.exe", "transmission-daemon", "clamscan",
-        "evince", "darktable", "ollama", "unattended-upgr"},   # unattended-upgr: 9.10 D43
+        "evince", "darktable", "ollama", "unattended-upgr",   # unattended-upgr: 9.10 D43
+        "python"},   # python: the training run's comm, python3's program and tier (9.10 D27, D84)
     2: {"soffice.bin", "gamescope", "wineserver", "steamwebhelper",
         "HandBrakeCLI", "freshclam", "gnome-shell", "Xorg", "pipewire",
         "systemd", "dbus-daemon", "element-desktop", "Troy.exe"},

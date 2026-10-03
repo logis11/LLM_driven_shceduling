@@ -30,13 +30,13 @@ def events_by_id(canonical):
 def test_p1_pair_differs_in_segment_one_only(coreset):
     """9.10 D6, D80 (restating the rename-only pair): the editor's events and segment 0 byte-identical, the files
     the same length; P1b's hog is the measured index, `file-indexer` shown as `tracker-miner-f`, arriving at 60 s
-    as P1a's python3 does, its segment 1 labelled indexing, false, C long."""
+    as P1a's training run does, shown as `python` (9.10 D84, D86), its segment 1 labelled indexing, false, C long."""
     base, _ = coreset["c2-p1a"]
     variant, _ = coreset["c2-p1b"]
     b, v = events_by_id(base), events_by_id(variant)
     assert set(b) == set(v) == {"editor", "hog"}
     assert b["editor"] == v["editor"]
-    assert (b["hog"]["name"], v["hog"]["name"]) == ("python3", "tracker-miner-f")
+    assert (b["hog"]["name"], v["hog"]["name"]) == ("python", "tracker-miner-f")
     assert b["hog"]["t"] == v["hog"]["t"] == 60_000_000
     assert base["ground_truth"][0] == variant["ground_truth"][0]
     spans = lambda c: [(g["t_start"], g["t_end"]) for g in c["ground_truth"]]
@@ -82,7 +82,7 @@ def test_c5_names_only(coreset):
 
 C7_INTERACTIVE = ("browsing", "office", "mail", "dev", "photo", "meeting",
                   "gaming", "media", "video-edit", "idle")
-C7_SAME_NAME = ("ml-train", "render", "transcode", "backup")   # indexing: its base's first C seconds (9.10 D78)
+C7_SAME_NAME = ("render", "transcode", "backup")   # indexing, ml-train: their bases' first C seconds (9.10 D78)
 INDEX_C_US = 39_435_000   # 9.10 D78, D80: the index's CPU total, total_work as compiled
 
 
@@ -149,6 +149,28 @@ def test_c7_indexing_is_its_bases_first_c_seconds(coreset):
     gt = variant["ground_truth"][0]
     assert (gt["t_start"], gt["t_end"]) == (0, INDEX_C_US)
     assert gt["attributes"].get("initiated") == "session" and not gt["attributes"].get("pre_committed_miss")
+
+
+ML_C_US = 1_389_885_000   # 9.10 D85, D88: the training run's CPU total, meas-ci:background:2026-10-03, total_work as compiled
+ML_BASE_US = 1_612_000_000   # c1-ml-train: the smallest whole second by which the run ends under every policy (D17, D78)
+
+
+def test_c7_ml_train_is_its_bases_first_c_seconds(coreset):
+    """9.10 D78's form for the training pair: c1-ml-train's first C seconds — the editor by its id, name and arrival,
+    departing at C, its focus 2 s to C − 2 s — the same run, `cpu-batch`'s `python3` shown as `python`, from 0 s; one
+    segment, labelled false, still a pre-committed miss. The base binds the run whole from 2 s and ends after it."""
+    base, _ = coreset["c1-ml-train"]
+    variant, _ = coreset["c7-ml-train"]
+    b, v = events_by_id(base), events_by_id(variant)
+    assert set(b) == set(v) == {"editor", "hog"}
+    assert (v["editor"]["name"], v["editor"]["t"], v["editor"]["depart"]) == (b["editor"]["name"], b["editor"]["t"], ML_C_US)
+    assert (b["hog"]["name"], b["hog"]["t"]) == ("python", 2_000_000)
+    assert (v["hog"]["name"], v["hog"]["t"]) == ("python", 0)
+    assert b["editor"]["depart"] == base["ground_truth"][0]["t_end"] == ML_BASE_US
+    assert ground_truth(variant) == [("ml-train", False)]
+    gt = variant["ground_truth"][0]
+    assert (gt["t_start"], gt["t_end"]) == (0, ML_C_US)
+    assert gt["attributes"].get("initiated") == "scheduled" and gt["attributes"].get("pre_committed_miss") is True
 
 
 def test_c7_same_name_counterparts_flip_the_label_only(coreset):

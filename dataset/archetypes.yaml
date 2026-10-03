@@ -863,35 +863,44 @@ archetypes:
       handbrakecli_block:
         {dist: quantiles, p: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], min: 0, max: 50097, means: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8895.169], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
       python3_run:
-        {dist: quantiles, p: [14, 15, 26, 36, 49, 125809, 1750612, 18493185, 18986255, 19110868], min: 12, max: 19124438, means: [12.077, 14.048, 18.347, 30.872, 42.808, 30868.703, 896178.995, 10234126.268, 18757334.786, 19110868.059, 19124438], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
+        {dist: quantiles, p: [14, 112, 132, 188, 228276, 43515311, 238567291, 348129382, 876756180, 997987710], min: 12, max: 1006372964, means: [12.333, 14.208, 124.5, 155.5, 37075.867, 16396865, 121974151.611, 300343245.333, 553154227, 993324015.481, 1006372964], sampling: per-iteration, source: "meas-ci:background:2026-10-03"}
       python3_block:
-        {dist: quantiles, p: [100, 101, 102, 142, 218, 277, 348, 391, 441, 475], min: 99, max: 479, means: [99.001, 100.459, 101.75, 117.31, 180.549, 251.367, 313.073, 378.599, 421.213, 475.2, 479], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
+        {dist: quantiles, p: [32, 46, 99, 216, 350, 404, 478, 516, 548, 560], min: 12, max: 561, means: [14.333, 35.605, 67.702, 118.854, 309.368, 380.421, 428.877, 500.632, 531.741, 559.363, 561], sampling: per-iteration, source: "meas-ci:background:2026-10-03"}
     lifetime: finite
     binding_params: [total_work, program]
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "build:2026-09-18; repeats [4, 5, 7, 8, 9-18]; clamscan [9-18], python3 [11-18]; runs 35328071379, 35328873409, 35337322204, 35426065936, 35430430817, 35434872927, 35439345618, 35443899531, 35448942696, 35453727742, 35459121647, 35464371497, 35469642365"
-      stats: ["saturation over the job: clamscan 0.969-0.979, ffmpeg 0.9990-0.9992, HandBrakeCLI 0.989-0.992, python3 0.9997-0.9998",
-              "share of CPU past the 10 ms boot slice: clamscan 0.109, ffmpeg 0.698, HandBrakeCLI 0.626, python3 0.998",
-              "share of runs followed by a block: 1.0, 0.0015, 0.0008, 1.0",
-              "block per run carried with its half-width (D29): clamscan 218.1 us +-9.5 % over 10 repeats (182-274 us), python3 223.2 us +-14.5 % over 8 (170-286 us)",
-              "python3 runs between blocks 1.595 s +-11.2 % over 8 repeats (1.31-1.77 s), 99.97-99.98 % of its job's time (D29)"]
+      run: "build:2026-09-18 (clamscan, ffmpeg, HandBrakeCLI); repeats [4, 5, 7, 8, 9-18]; clamscan [9-18]; runs 35328071379, 35328873409, 35337322204, 35426065936, 35430430817, 35434872927, 35439345618, 35443899531, 35448942696, 35453727742, 35459121647, 35464371497, 35469642365. background:2026-10-03 (python3, 9.10 D82-D88); repeats [1-6]; runs 37091275421, 37091313419, 37093607991"
+      stats: ["saturation over the job: clamscan 0.969-0.979, ffmpeg 0.9990-0.9992, HandBrakeCLI 0.989-0.992, python3 0.99988-0.99991",
+              "share of CPU past the 10 ms boot slice: clamscan 0.109, ffmpeg 0.698, HandBrakeCLI 0.626",
+              "share of runs followed by a block: clamscan 1.0, ffmpeg 0.0015, HandBrakeCLI 0.0008",
+              "block per run carried with its half-width (D29): clamscan 218.1 us +-9.5 % over 10 repeats (182-274 us)",
+              "python3 CPU total 1,389.885 s +-4.04 % over 6 repeats (1,293.8-1,455.8 s), one process with one thread, shown as `python` (9.10 D85)",
+              "python3 runs between blocks 69.49 s +-27.3 % (53.9-114.9 s a repeat) and block per run 311.5 us +-10.8 % (268-370 us), over 6 repeats, carried with their half-widths: 11-24 blocks a repeat, every one but the two sleeps at the start ended by khugepaged (9.10 D87)",
+              "python3 under the desktop kernel's transparent-hugepage default, madvise, five jobs beside the campaign: CPU total 1,589.654 s +-2.01 %, x1.144 (95 % interval x1.102-x1.185), no block but the two at the start (9.10 D88)"]
       scope: >-
-        One observation (phase decision 2; D3, D7, D30): four programs measured in the same campaign as the build
-        archetypes, each pinned to one CPU of a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel
+        One observation per program (phase decision 2; D3, D7, D30): three programs measured in the same campaign
+        as the build archetypes, each pinned to one CPU of a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel
         6.17.0-1022-azure) and instrumented by `perf sched record` on the measured CPU and a taskstats listener on
         its cpumask — ClamAV 1.5.3 scanning the kernel's `Documentation` (9 462 files) with signature
         database daily 28128 held fixed from repeat 9 (D27); ffmpeg and HandBrakeCLI encoding a generated 60 s
-        clip; a PyTorch 2.14 CPU training loop of 300 steps over synthetic images — a stand-in, since no source
-        states what a desktop training job does (D7): it reads no data and writes no checkpoint, so it stands for
-        a CPU-saturating batch task, not for ML training as observed — started warm so its runs and blocks are the
-        loop's and not the interpreter's first page-ins (D28). A run is the CPU
+        clip. `python3` re-measured in 9.10's own campaign on the same runner model and kernel (9.10 D12, D82-D88):
+        PyTorch's basic MNIST example at its defaults (`pytorch/examples` at `acc295d`, `python main.py
+        --save-model`: 14 epochs of batch 64 over the real MNIST dataset, a test pass after each, the checkpoint
+        written), `torch` 2.14.0's CPU build at one intra-op thread under the pin, in a chroot of Ubuntu 24.04's
+        English default layer built at 2026-09-22T17:00Z, started warm with the dataset local; the files show an
+        actual training run and do not claim that desktop users train MNIST, and GPU training is unobservable on
+        the runner (9.10 D12). The runner's kernel runs transparent huge pages in `always` mode; the desktop
+        kernel's default is `madvise` (9.10 D87, D88). A run is the CPU
         from one voluntary block to the next, pooled over the program's threads; the block after a run is the
-        program's off-CPU time that followed it, zero when another thread ran on (D22, D25). Three values' spread
-        follows the runner's disk rather than the program and is carried with its half-width instead of the 5 %
-        tolerance (D29); those blocks are 2.4 % (clamscan) and 0.01 % (python3) of each job's time,
-        and no reported result may rest on a difference in them smaller than the stated half-width. Values are this
+        program's off-CPU time that followed it, zero when another thread ran on (D22, D25). clamscan's block per
+        run follows the runner's disk rather than the program and is carried with its half-width instead of the 5 %
+        tolerance (D29); its blocks are 2.4 % of its job's time. `python3`'s two block values follow the
+        runner's `khugepaged` and are carried the same way (9.10 D87); its blocks are under 0.001 % of its job's
+        time. No reported result may rest on a difference in such a value smaller than its stated half-width.
+        Under the desktop kernel's `madvise` default the same run takes x1.144 the CPU (x1.102-x1.185) and blocks
+        only at its start (9.10 D88). Values are this
         software on this machine, not desktop truth (9.5 D10).
     modeling_notes: >-
       The class is what the measurement shows: four programs runnable for the whole of their job on one dominant
@@ -901,10 +910,10 @@ archetypes:
       the runs it separates are emitted as one RUN, the same CPU between two blocks. A multi-threaded program is
       one task: runs pooled over its threads, blocks the program's own off-CPU time, so the task alternates the
       threads' long and short runs in one sequence and cannot show a main thread demoted while its workers keep
-      their level (D22). `total_work` is scenario design and binds in the timeline (D7). The `chrome` spoof is one
-      uninterrupted RUN by construction (D7). The `python3` binding's job is design, a CPU-saturating training
-      loop; text naming it says so rather than calling it an observed ML training workload (D32; 9.10 for the
-      timeline `c1-ml-train`, 9.12 and 9.15 for prose). Tracker's index, bound here as `tracker` until 9.10, is the entry `file-indexer`, measured as
+      their level (D22). `total_work` binds in the timeline; a file binding `python3` binds its measured CPU
+      total, the whole job (9.10 D17). The `chrome` spoof is one uninterrupted RUN by construction (D7). The
+      `python3` binding is PyTorch's basic MNIST example, an actual training run on the CPU (9.10 D12, D85); its
+      process shows `python`, the name the venv executes (9.10 D84). Tracker's index, bound here as `tracker` until 9.10, is the entry `file-indexer`, measured as
       a first index of a home (9.10 D70); the rescan this entry carried, read from the miner's first schedule-in to
       its own Idle status (D16), left out the extraction that follows the crawl (9.10 D62).
 
