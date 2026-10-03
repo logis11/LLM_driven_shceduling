@@ -156,7 +156,7 @@ Execution order: 9.1 ∥ 9.2 ∥ 9.3 first → 9.4–9.12 in parallel, after 9.1
   - [ ] Déjà Dup's periodic incremental observed in a runner campaign, the backup files rebound (D8, D9)
   - [ ] Kdenlive's export of the video-editor project observed in a runner campaign, the render files rebound (D10)
   - [ ] HandBrakeCLI re-measured on CpsMark+'s transcode workload, the transcode files rebound (D11)
-  - [ ] python3 re-measured on PyTorch's basic MNIST example, the ml-train files rebound (D12)
+  - [WIP] python3 re-measured on PyTorch's basic MNIST example, the ml-train files rebound (D12)
   - [ ] Chrome's renderer count for five tabs observed on the runner, the Chrome files rebound (D15)
   - [ ] the launch phases of the applications the arcs and injections start mid-file observed, those files rebound (D21)
 - [WIP] **9.11** Scheduler-side constants and groundings — research and decisions — from 9.6 (D17): declared scheduling classes
