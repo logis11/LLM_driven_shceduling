@@ -3801,6 +3801,36 @@ a77819313f1acef8b19c5903218978151f7013393a91286585c1a00b3f589a09  S2-15/wb-sm201
 - **Coverage.** T5 — a seconds timer fires on a per-session mark, from 0.25 s before to 0.75 s after its interval; the miner's `initial-sleep` (`g_timeout_add_seconds`, S2-43) so runs 14.75–15.75 s.
 - **One observation?** Not an observation; the library's source.
 
+### S2-47 — PyTorch, "Start Locally": the install command for Linux, pip and the CPU (read at stage 3, 2026-10-03)
+
+- **Citation.** PyTorch Foundation, *Start Locally*, `https://pytorch.org/get-started/locally/`, the install matrix the page embeds. Read for the MNIST training campaign's state (D82): how a user installs PyTorch for the CPU on Linux.
+- **Copy read.** The page as served, accessed 2026-10-03 (200); `sources/S2-47/get-started-locally.html`, SHA-256 c2d2a44e643fa7745e0ec80f0ec92b4ad29bc8a03aebd778c70836549e8ae73d.
+- **Passages.** The matrix's entry `"stable,pip,linux,accnone,python":"pip3 install torch torchvision --index-url https:\/\/download.pytorch.org\/whl\/cpu"`; the page's `"latest_stable":"2.14.1"` and `pt_stable_version = "Stable (2.14.1)"` on the day read.
+- **Coverage.** T6 — the project's own command for the stable build on Linux with pip and no accelerator: `torch` and `torchvision` from PyTorch's CPU index. Does not state a version for a past date (the page shows the stable release of the day read); S2-48 places the release current at a date.
+- **One observation?** Not an observation; the project's documentation.
+
+### S2-48 — PyPI and PyTorch's CPU index: the `torch` and `torchvision` releases and their dates (read at stage 3, 2026-10-03)
+
+- **Citation.** Python Package Index, JSON API `https://pypi.org/pypi/torch/json` and `https://pypi.org/pypi/torchvision/json`; PyTorch's CPU wheel index `https://download.pytorch.org/whl/cpu/torch/` and `…/torchvision/`. Read for D82: which release was current at the chroot's T0, 2026-09-22T17:00Z (D64), and that its CPU wheels exist for Python 3.12.
+- **Copy read.** Accessed 2026-10-03 (200 each); `sources/S2-48/`, SHA-256 in `SHA256SUMS.txt` (`pypi-torch.json` cad63dc8aa6714ea2133a44b64985d87b3e4ebea217657f1e02e35481fa33b61, `pypi-torchvision.json` d2faf88057463f5997a83d0fc33700c32adcfa5887043590cc858604c25091cb, `whl-cpu-torch.html` 18b25d3447a61b2f4fcf0b2ecc955d9ceb19699b400f092262ad1bb692662236, `whl-cpu-torchvision.html` 6d16d49fba127d90dfcdfb70440942ab5d5733e84507e3177fc84e1ff09a2ff7).
+- **Passages.** First upload time per release (reader's own, the minimum `upload_time_iso_8601` over the release's files): `torch` 2.13.0 `2026-07-08T16:01:59Z`, 2.14.0 `2026-09-02T13:42:48Z`, 2.14.1 `2026-09-30T17:43:48Z`; `torchvision` 0.28.0 `2026-07-08T16:07:27Z`, 0.29.0 `2026-09-02T13:46:52Z`, 0.29.1 `2026-09-30T17:56:58Z`. The CPU index lists `torch-2.14.0+cpu-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=a09987c95ec4cffdb6df798d3d641558110a334cfccce22f2f046d83142bc260` and `torchvision-0.29.0+cpu-cp312-cp312-manylinux_2_28_x86_64.whl#sha256=a6bab91c40d469a656d361b8ec60ebdfd86c515ad47b2cd5037d17db30414d75`.
+- **Coverage.** T6 — at T0 the newest `torch` was 2.14.0 and the newest `torchvision` 0.29.0, the pair released together; 2.14.1 and 0.29.1 came after T0. Both have CPU wheels for CPython 3.12 on x86-64.
+- **One observation?** Not an observation; the registries' records.
+
+### S2-49 — torchvision 0.29.0: how `datasets.MNIST` finds, downloads and reads its files (read at stage 3, 2026-10-03)
+
+- **Citation.** PyTorch, *torchvision* 0.29.0, the CPU wheel for CPython 3.12 (S2-48), `torchvision/datasets/mnist.py` and `torchvision/datasets/utils.py`. Read for D83: where the example's dataset lands and what the example reads at its start.
+- **Copy read.** `https://download.pytorch.org/whl/cpu/torchvision-0.29.0%2Bcpu-cp312-cp312-manylinux_2_28_x86_64.whl`, accessed 2026-10-03; its SHA-256 equals the index's (S2-48); `sources/S2-49/`, SHA-256 in `SHA256SUMS.txt` (`mnist.py` 71d87686ad04f6102793159750fd8ac8cac7279610be75956aa12b296fdf86ec, `utils.py` 35d8f4022d313a7739d769f1f92bf7551175e382d50bbc332ca7d88b652a9d72).
+- **Passages.**
+  - `mnist.py:37–47`: `mirrors = [` `"https://ossci-datasets.s3.amazonaws.com/mnist/",` `"http://yann.lecun.com/exdb/mnist/",` `]`; `resources` the four files `train-images-idx3-ubyte.gz`, `train-labels-idx1-ubyte.gz`, `t10k-images-idx3-ubyte.gz`, `t10k-labels-idx1-ubyte.gz`, each with its MD5.
+  - `mnist.py:84–106`, `__init__`: `if download:` / `self.download()` … `if not self._check_exists():` / `raise RuntimeError("Dataset not found. You can use download=True to download it")` / `self.data, self.targets = self._load_data()`.
+  - `mnist.py:157–162`: `raw_folder` is `os.path.join(self.root, self.__class__.__name__, "raw")`.
+  - `mnist.py:168–178`: `_check_exists` calls `check_integrity` on each uncompressed file with no checksum; `download` returns at once `if self._check_exists():`, else fetches each file from the first mirror that answers.
+  - `utils.py:50–55`, `check_integrity`: `if not os.path.isfile(fpath):` / `return False` / `if md5 is None:` / `return True`.
+  - `mnist.py:508–514`, `read_sn3_pascalvincent_tensor`: `with open(path, "rb") as f:` / `data = f.read()`.
+- **Coverage.** T6 — `datasets.MNIST(root, …, download=True)` downloads the four archives into `<root>/MNIST/raw` once and extracts them; on a later start it finds the files by existence alone, downloads nothing, and reads each uncompressed file whole into memory as the dataset is built. The example's `root` is `'../data'` (S2-31, `main.py:120`).
+- **One observation?** Not an observation; the library's source.
+
 ## 3. Not found
 
 - **T3 — numbers of open tabs and windows, and visible windows, from vendor telemetry; observed renderer-process counts for a set of tabs.** Searches: rows 33 and 40 (Mozilla telemetry dashboards and Mozilla Metrics blog; no Chromium/Google publication). The only S2 user data is new-tab openings (S2-29). The Chromium soft limit and spare process are definitions (S2-16), not observations.

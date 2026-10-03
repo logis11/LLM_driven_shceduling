@@ -1413,3 +1413,44 @@ The campaign of D60–D80, `meas-ci:background:2026-10-02b`, run under `../measu
 Recompiled (`compile.py --allow-window`): 8 of 100 artifacts change beyond the library's hash, the four files in both modes. Demand (`-single`): `c1-indexing` 0.5905 → 0.7477, `c7-indexing` 0.5905 → 1.1016 (both calibration), `c2-p1a` 1.1509 → 1.8346, `c2-p1b` 1.1509 → 0.9238. Lint reports five demand-window files: the three of D20 and now `c2-p1a` and `c2-p1b`, P1's segment 1 at the index's length (D17's hand-off to 9.14: the demand window re-read on the new lengths). Tests: 375 passed, 1 skipped, 1 xfailed, after `test_p1_pair_rename_only` was restated as `test_p1_pair_differs_in_segment_one_only` (D80), indexing left `C7_SAME_NAME` for `test_c7_indexing_is_its_bases_first_c_seconds` (D78), and the fold-in test names `file-indexer.tracker_block` (D70).
 
 Hands to D12's item: P1's segment 1 read again against both jobs. Hands to 9.14: `c7-indexing`'s and P1's terms on the new lengths; the pair review and prior-table rows that argued on P1's identical behaviour (D6); `c2-p1a` and `c2-p1b` in the demand window. Hands to 9.15: `building-plan.md` §3 C2 ("behaviorally identical CPU saturation") and C7, the scenario catalog's S14 row and note 2, `docs/recognition-vocabulary.md`'s `initiated` values and its example "an indexer's scheduled rescan" (D5, D6, D79).
+
+## D82 — the MNIST campaign's state: D37's chroot at D64's T0, `python3-venv` added, `torch` 2.14.0 and `torchvision` 0.29.0 by PyTorch's own command (2026-10-03)
+
+Taken under 인지오's delegation (2026-10-03), D12's open item "the dataset's placement" and the state it needs. The campaign runs in D37's chroot of the English default install, built from the archive at D64's T0 (2026-09-22T17:00Z), with `python3-venv` added from the same snapshot. A user with a home, as the Tracker campaign's (D68). In that home, a venv into which `pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cpu` installs `torch` 2.14.0 and `torchvision` 0.29.0, the two versions pinned. The example's three files, `pytorch/examples` at `acc295d` (`mnist/main.py`, `README.md`, `requirements.txt`), as `~/examples/mnist`, each checked by its SHA-256 (S2-31).
+
+Grounds:
+
+- **One state across 9.10's campaigns.** The upgrade, DKMS and Tracker campaigns ran in this chroot (D37, D49, D61), the last two at this T0 (D51, D64).
+- **The release current at T0.** `torch` 2.14.0 and `torchvision` 0.29.0 were uploaded on 2026-09-02, and 2.14.1 and 0.29.1 on 2026-09-30, after T0 (S2-48). Both have CPU wheels for CPython 3.12, the default layer's Python. 9.6's stand-in ran a 2.14 CPU build (`cpu-batch` scope).
+- **The project's own command.** PyTorch's install matrix gives `pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cpu` for Linux, pip and no accelerator (S2-47). The example's `requirements.txt` names `torch` and `torchvision` unversioned (S2-31).
+- **What the default layer lacks.** It holds `python3.12` but neither `python3-pip` nor `python3-venv` (`dataset/tools/meas/background/upgrade-layer.txt`). `python3-venv` is the archive's package for `python3 -m venv`; the packages it adds to the layer are recorded per repeat (`upgrade.layer.extra`).
+- **What pip resolves beside the pair.** The dependencies come from the CPU index at the job's date. The installed set (`pip3 freeze --all`) is recorded and must be one set across the pooled repeats.
+
+No file changed yet.
+
+## D83 — the dataset is placed by the example's own download in an unmeasured start; the measured run starts warm (2026-10-03)
+
+Taken under 인지오's delegation (2026-10-03), D12's open item. Before the phase, the example runs once unmeasured on the harness CPUs as `python main.py --dry-run --epochs 1`: its own "quickly check a single pass", one training batch and one test pass. Its `datasets.MNIST('../data', train=True, download=True, …)` downloads the four MNIST files into `~/examples/data/MNIST/raw`, the example's own path, and the start pages `torch`'s files into the page cache. The measured run then finds the files and downloads nothing. Before the phase, the uncompressed files' cached fraction is measured with `fincore`, and validity asks at least 0.99. The fraction of `torch`'s and `torchvision`'s shared libraries is recorded beside it.
+
+Grounds:
+
+- **What the example reads** (S2-31 `main.py:120–123`; S2-49). `torchvision` downloads the four files once into `<root>/MNIST/raw`. A later start finds them by existence alone, downloads nothing, and reads each uncompressed file whole into memory. A run on a machine where the example has run reads local files. The download is network work, once per machine, ahead of any training.
+- **A warm start, 9.6 D28's ground.** The batch-loop compiler draws each run and each block independently (9.6 D21; `wlc/compiler.py` `_batch_ops`), so the start's page-ins would be spread over the whole simulated job. 9.6's cold `python3` start put 3,852 of its 3,900 sleeps in the first 3.3–3.6 s (9.6 D28).
+- **The cache state decided and checked before the first batch.** The Tracker campaign's first batch ran in the state the download left; its block per run spread with disk waits and was not pooled (D75).
+
+No file changed yet.
+
+## D84 — the measured job is `python main.py --save-model` at the example's defaults, as the user, the venv activated; the job is the tree from its first schedule-in to its exit (2026-10-03)
+
+Taken under 인지오's delegation (2026-10-03), D12's run. The phase runs `python main.py --save-model` in `~/examples/mnist`, as the user in the chroot, with the venv activated: its `bin` first on `PATH` and `VIRTUAL_ENV` set, as its `bin/activate` sets them (recorded from each job). `taskset` places the command on the measured CPU. Every other argument is the example's default: 14 epochs of batch 64, a test pass of batch 1,000 after each, Adadelta at 1.0 with a step decay of 0.7, seed 1, no data-loader workers and no shuffle on the CPU (S2-31 `main.py:75–114`). The job is every process of the tree `taskset` launched into `chroot`, from its first schedule-in on the measured CPU to its exit, the checkpoint written. The phase has no cap of its own; the workflow's job limit is 330 minutes.
+
+Grounds:
+
+- **D12:** the example at its defaults, the checkpoint written (`--save-model`), on the CPU in one process.
+- **The README's command** is `python main.py` (S2-31 `README.md:1–5`). A venv's `bin` holds `python`, so the process's `comm` is the name executed. The name the files show follows the observed `comm` at fold-in (D25).
+- **Identical work in every repeat.** The seed is fixed and the input is the same four files, so an added repeat is the next index (the campaign workflow, "What a repeat is").
+- **One CPU,** as every campaign (9.5 D21). What `torch` sees under the pin — its intra-op and inter-op thread counts and its parallel backend — is recorded from a probe on the measured CPU before the phase.
+
+The entry's form — `cpu-batch`'s `python3` tables re-measured, or an entry of its own (9.6 D7's criterion, D12) — and the list are fixed after the dry run.
+
+No file changed yet.
