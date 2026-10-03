@@ -1454,3 +1454,19 @@ Grounds:
 The entry's form — `cpu-batch`'s `python3` tables re-measured, or an entry of its own (9.6 D7's criterion, D12) — and the list are fixed after the dry run.
 
 No file changed yet.
+
+## D85 — the training run is `cpu-batch`'s `python3` program re-measured; its blocks carried as observed (2026-10-03)
+
+By 9.6 D7's criterion, fixed before 9.6's run, applied under 인지오's delegation (2026-10-03) to the dry run (run 37089156376, #142, the EPYC 7763). The training run is `cpu-batch`'s `python3` program re-measured: at fold-in its two tables, the run between voluntary blocks and the block after each run, come from this campaign in place of 9.6's stand-in. Its blocks are carried as observed. The list is the Tracker campaign's: over the job, the run between voluntary blocks and the block per run, each tested by its mean as the table carries it, and the CPU total, tested by its per-repeat values (D17).
+
+Grounds (the dry run):
+
+- **One thread, runnable throughout.** The job is one process with one thread, `python`, from its first schedule-in to its exit: 1,379.4 s, 1,379.2 s of CPU (perf; taskstats 1,379.2 s), saturation 0.9999. Under the pin `torch` runs one intra-op and one inter-op thread, its backend OpenMP, MKL at one thread (the probe). 9.6 D7's criterion: a program is `cpu-batch` when it is runnable for the whole of its lifetime on one dominant thread.
+- **The blocks are few and the kernel's.** 21 voluntary blocks in 1,379 s. Two are sleeps of 102 µs in the first 0.22 s. The other 19 are uninterruptible waits of 233–489 µs with no block-I/O, each ended by a wakeup from `khugepaged`, the kernel's huge-page daemon. The runs between them are 10.2–420 s, the long ones close to whole multiples of 10.24 s. The kernel's huge-page settings and its collapse counters are recorded from the next job (method §8).
+- **The precedent for carrying what the job shows:** the Tracker extractor's deadline exits (D72). Where a value's spread follows the machine, 9.6 D29's exception carried `python3`'s blocks with their half-width.
+
+Also recorded: 14 test passes, the last "Average loss: 0.0256, Accuracy: 9916/10000 (99%)"; the checkpoint 4,803,113 B; the warm start 8 s; the dataset's eight files, the four archives and the four uncompressed files, cached fraction 1.0000, the venv's shared libraries 1.0000; the layer plus `python3-venv`, `python3.12-venv`, `python3-pip-whl` and `python3-setuptools-whl`; pip's set, 14 packages (`torch` 2.14.0+cpu, `torchvision` 0.29.0+cpu, `numpy` 2.5.2, `pillow` 12.3.0 among them).
+
+The block count per repeat follows the kernel's daemon, not the program. If the run between voluntary blocks does not hold the tolerance, the exception for a value whose spread follows the machine is 인지오's call (9.6 D29). The process shows `python`, the name the venv executes (D84). The task's name and the `program` key the files bind are set at fold-in (D25).
+
+No file changed yet.
