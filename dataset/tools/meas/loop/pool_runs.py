@@ -159,13 +159,15 @@ def validity(family, dirs, entry):
                         notes.append(f"initial sleep {r.get('tracker.log.sleep_s')} s (want 14.75-15.8)")
                 except ValueError:
                     notes.append("initial sleep not in the status trace")
-            if r.get("app") == "mnist":   # 9.10 D82–D84: the state, the example, the pinned release, the warm start, the run whole
+            if r.get("app") in ("mnist", "mnist-madvise"):   # 9.10 D82–D84: the state, the example, the pinned release, the warm start, the run whole
                 # the layer plus python3-venv and the three packages it brings (dry run, #142)
                 for x, want in (("upgrade.layer.missing", "0"), ("upgrade.layer.extra", "4"), ("upgrade.run_systemd_system", "absent"),
                                 ("mnist.example.main.py.pin", "ok"), ("mnist.example.README.md.pin", "ok"),
                                 ("mnist.example.requirements.txt.pin", "ok"),
                                 ("mnist.torch.version", "2.14.0+cpu"), ("mnist.torchvision.version", "0.29.0+cpu"),
-                                ("mnist.train.epochs", "14")):
+                                ("mnist.train.epochs", "14"),
+                                # D87: the runner's mode for the campaign, the desktop kernel's for the check
+                                ("thp.before.enabled", "always [madvise] never" if r.get("app") == "mnist-madvise" else "[always] madvise never")):
                     if r.get(x) != want:
                         notes.append(f"{x} {r.get(x)} (want {want})")
                 try:   # the run starts warm (D83): the dataset's files in the page cache

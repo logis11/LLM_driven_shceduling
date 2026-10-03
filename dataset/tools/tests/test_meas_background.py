@@ -489,6 +489,16 @@ def test_the_list_is_each_archetypes_batch_loop_tables():
                                                                    "mnist-train"}
 
 
+def test_the_mnist_blocks_are_carried_under_the_machine_exception_and_the_check_is_its_own_app():
+    # 9.10 D87: the two block values' spread follows khugepaged, carried with their half-widths; the madvise check pools
+    # apart under its own name, never into the campaign
+    assert set(pool.EXCEPTED["mnist"]) == {"mnist-train run between voluntary blocks (µs)", "mnist-train block per run (µs)"}
+    assert "mnist-madvise" not in pool.EXCEPTED
+    m = pool.NAME.match("meas-background-mnist-madvise-r3-full")
+    assert m and m.group(1) == "mnist-madvise" and m.group(2) == "3"
+    assert pool.NAME.match("meas-background-mnist-r3-full").group(1) == "mnist"
+
+
 def test_the_mnist_job_is_every_process_of_the_tree_launched_into_the_chroot():
     # 9.10 D84: the phase's job, rooted at the process taskset executed into chroot, every process of it the program's
     assert analyze.job_of("mnist-train") == "mnist"

@@ -16,6 +16,8 @@
 #             home holding HippoCamp's Bei profile as ~/Documents, in that chroot built at 2026-09-22T17:00Z
 #   mnist     mnist-train — 9.10's MNIST training campaign (9.10 changelog D12, D82–D84): PyTorch's basic MNIST example
 #             at its defaults, the checkpoint written, on torch 2.14.0's CPU build in that chroot, from a warm start
+#   mnist-madvise  the same job with the kernel's transparent huge pages in `madvise` mode, the desktop kernel's
+#             default — D87's check, never a repeat of the campaign
 # Every measured phase is one command pinned to the measured CPU (pin.sh,
 # phase.sh MEAS_PIN=load), observed over the whole phase from the harness CPUs
 # by `perf sched record -a` — with the exec rows that name each process's
@@ -142,11 +144,11 @@ case "$APP" in
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y steamcmd > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
         STEAMCMD="$( [ -x /usr/games/steamcmd ] && echo /usr/games/steamcmd || command -v steamcmd)"; rec steamcmd.binary "$STEAMCMD"
         rec steamcmd.package "$(dpkg-query -W -f '${Version}' steamcmd 2>/dev/null)" ;;
-  upgrade|dkms|tracker|mnist)
+  upgrade|dkms|tracker|mnist|mnist-madvise)
         # tracker: util-linux-extra for fincore, the cold start's check (D75; the runner's image lacks it, run #126);
         # mnist: the same, for the warm start's check (D83)
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mmdebstrap \
-          $( [ "$APP" = tracker ] || [ "$APP" = mnist ] && echo util-linux-extra) > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
+          $( [ "$APP" = tracker ] || [ "${APP%-madvise}" = mnist ] && echo util-linux-extra) > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
         rec mmdebstrap.version "$(mmdebstrap --version 2>&1 | head -1)" ;;
 esac
 rec zpaq.version "$(zpaq 2>&1 | head -1)"
@@ -873,6 +875,10 @@ mn_job() {
   local r="$WORK/chroot"
   UPG_T0="${MEAS_MNIST_T0:-20260922T170000Z}"; UPG_EXTRA=python3-venv   # D82: D64's T0
   sudo rm -rf "$r"; upg_build "$r"; upg_mount "$r"; mn_state "$r"; mn_warm "$r"
+  # mnist-madvise: D87's check, never a repeat — the desktop kernel's transparent-hugepage mode (S2-50) for the phase
+  if [ "$APP" = mnist-madvise ]; then
+    echo madvise | sudo tee /sys/kernel/mm/transparent_hugepage/enabled > /dev/null; rec mnist.thp_set.rc "$?"
+  fi
   mn_thp before
   export MEAS_PIN=none
   phase mnist-train -- sudo taskset -c "$MEAS_CPU" chroot "$r" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" --init-groups \
@@ -928,7 +934,7 @@ case "$APP" in
   upgrade) upg_job ;;
   dkms) dkms_job ;;
   tracker) trk_job ;;
-  mnist) mn_job ;;
+  mnist|mnist-madvise) mn_job ;;
   *) rec error "unknown app $APP" ;;
 esac
 
