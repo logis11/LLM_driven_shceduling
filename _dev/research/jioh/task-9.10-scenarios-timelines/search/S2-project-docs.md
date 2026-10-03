@@ -3855,6 +3855,42 @@ a77819313f1acef8b19c5903218978151f7013393a91286585c1a00b3f589a09  S2-15/wb-sm201
 - **Coverage.** T6 — glibc's allocator calls `madvise(MADV_HUGEPAGE)` only when the `glibc.malloc.hugetlb` tunable is set to 1; unset, it never does. With S2-50 and S2-51: on the desktop's kernel in `madvise` mode, neither allocator the training process uses asks for huge pages by default.
 - **One observation?** Not an observation; the library's source.
 
+### S2-53 — Blender Foundation's download server: the open movies' 4K files and Big Buck Bunny's 4K 30 fps edition (read at stage 3, 2026-10-03)
+
+- **Citation.** Blender Foundation, `https://download.blender.org/demo/movies/` (with `BBB/` and `ToS/`), `https://download.blender.org/durian/movies/`, and Sintel's page *Download & Watch*, `https://durian.blender.org/download/`; the file `bbb_sunflower_2160p_30fps_normal.mp4.zip` from `BBB/`. Read for the HandBrakeCLI campaign's source clip (D11, D91): which open movies are published as 4K H.264, and what the chosen file is.
+- **Copy read.** The four listings and the page, accessed 2026-10-03 (200); `sources/S2-53/`, SHA-256 in `SHA256SUMS.txt`. The zip, 632,204,510 B, SHA-256 750b255c6d9fee1e2a03a6716d4f358bca56e9115bf3e06a66162fc5272ae151; the clip in it, `bbb_sunflower_2160p_30fps_normal.mp4`, 633,016,449 B, SHA-256 37f0ff251a606c2dcfa26c19fe6bf843234b4e7a8889cfab50bc26f644e55520. The clip is not kept; its boxes as read are `sources/S2-53/bbb-2160p30-boxes.txt`.
+- **Passages.**
+  - `BBB/` lists `bbb_sunflower_2160p_30fps_normal.mp4.zip` (632204510), `bbb_sunflower_2160p_30fps_stereo_abl.mp4.zip` and `bbb_sunflower_2160p_60fps_normal.mp4.zip` (671868845) beside the 1080p editions.
+  - `ToS/` lists `tearsofsteel_4k.mov.zip` (6737593114); `durian/movies/` lists `Sintel.2010.4k.mkv.zip` (4506488537) and `sintel_4k.mov.zip` (5471005010); `demo/movies/Sintel_4k/` holds only `tiff16/`.
+  - Sintel's page: "There's also a 4k UltraHD (3840 wide) H264 encoded version available now"; "Original render, 2k cinema release version: 2048 x 872 (270 Mb, mp4, 5.1)".
+  - The clip's boxes (reader's own reading, ISO/IEC 14496-12 layout): one video track, `avc1` 3840×2160, `avcC` profile 100 (High) level 51, 19,036 samples of 1,000 at timescale 30,000 — 30 fps, 634.533 s, 137 sync samples; two audio tracks, `mp4a` (1,152 samples a frame) and `ac-3`; the container MP4 (`ftyp`, `moov`, `mdat`).
+- **Coverage.** T6 — Big Buck Bunny's 4K 30 fps edition is an H.264 3840×2160 clip of 19,036 frames in MP4, published by the Blender Foundation; it is the one 4K open-movie file on the server in an MP4 container. Sintel's own page calls its 2048 × 872 release "2k cinema". Does not cover how often users transcode such a clip.
+- **One observation?** Not an observation; the publisher's files.
+
+### S2-54 — DCI, *Digital Cinema System Specification* Version 1.4.1: what 2K and 4K are (read at stage 3, 2026-10-03)
+
+- **Citation.** Digital Cinema Initiatives, LLC, *Digital Cinema System Specification*, Version 1.4.1, 2021-10-13 (archived on DCI's site 2022-07-01), `https://www.dcimovies.com/assets/DCI-DCSS-v141_2021-1013_archived-7-1-2022.CMjpbmeC.pdf`. Read for D92: the pixel count "2K" names in CpsMark+'s transcode definition (D11).
+- **Copy read.** Accessed 2026-10-03 (200), 3,709,425 B; `sources/S2-54/DCI-DCSS-v141_2021-1013_archived-7-1-2022.pdf`, SHA-256 debf9f90ff15b421059b2239e254e90faae903264e598379bb6131f923444231.
+- **Passages.** §4.3.1 "Definitions" (p. 31): "A 2K distribution – the resolution of the DCDM*[3] container is 2048x1080." / "A 4K distribution – the resolution of the DCDM*[3] container is 4096x2160." §4.3.2 (p. 31): "4K = 4096x2160 at 24 FPS" / "2K = 2048x1080 at 24 or 48 FPS". §8.2.2.7 "Spatial Resolution Conversion" (p. 72): "It is intended that the projector project the full horizontal pixel count or the full vertical pixel count of the image container."
+- **Coverage.** T6 — in digital cinema, 2K is the 2048×1080 image container, and a picture fills its full width or its full height. Supports reading CpsMark+'s "2K" as that container; consumer usages of the word are not covered.
+- **One observation?** Not an observation; the specification.
+
+### S2-55 — HandBrake 1.7.2's built-in presets (read at stage 3, 2026-10-03)
+
+- **Citation.** HandBrake Team, *HandBrake*, tag `1.7.2`, `preset/preset_builtin.json` and `preset/preset_builtin.list`. Ubuntu 24.04 ships 1.7.2 (S2-56). Read for D92 and the encoder settings (D11's open item).
+- **Copy read.** `https://raw.githubusercontent.com/HandBrake/HandBrake/1.7.2/preset/preset_builtin.json` and `…/preset_builtin.list`, accessed 2026-10-03 (200); `sources/S2-55/`, SHA-256 in `SHA256SUMS.txt` (`preset_builtin.json-1.7.2` 5fb29a61f82e7124745ce1f9ba8daa0f4881498936dc218a4a5b939aff594e46).
+- **Passages.** Preset names using "K": "… 2160p60 4K …" throughout and "Creator 1440p60 2.5K" (`PictureWidth` 2560, `PictureHeight` 1440); none says "2K". The software H.265 presets: "Very Fast 2160p60 4K HEVC" (`x265_10bit`, `VideoPreset` "superfast", RF 26, mp4), "Fast 2160p60 4K HEVC" ("faster", RF 24, mp4), "HQ 2160p60 4K HEVC Surround" ("medium", RF 22, mp4), "Super HQ 2160p60 4K HEVC Surround" ("slow", RF 20, mp4), the Devices folder's 2160p HEVC presets ("slow", RF 24), and Matroska's "H.265 MKV 2160p60 4K" … "H.265 MKV 480p30" ("slow", RF 20–24, mkv). "H.265 MKV 1080p30": `PresetDescription` "H.265 video (up to 1080p30) and AAC stereo audio, in an MKV container.", `PictureWidth` 1920, `PictureHeight` 1080, `PictureKeepRatio` true, `VideoEncoder` "x265_10bit", `VideoPreset` "slow", `VideoQualitySlider` 22.0, `VideoFramerate` "30" `pfr`, `VideoOptionExtra` "strong-intra-smoothing=0:rect=0:aq-mode=1:rd=4:psy-rd=0.75:psy-rdoq=4.0:rdoq-level=1:rskip=2", `FileFormat` "mkv". The 1080p presets in MP4 ("Fast 1080p30" and the rest) encode with `x264`; the Hardware folder's H.265 1080p presets name hardware encoders (`nvenc_h265`, `qsv_h265`, `vce_h265`, `mf_h265`, `vt_h265`).
+- **Coverage.** T6 — the settings each of HandBrake 1.7.2's own presets applies. HandBrake has no preset for software H.265 at a 2K-class size in MP4: "H.265 MKV 1080p30" is its software H.265 preset of that size, in MKV.
+- **One observation?** Not an observation; the program's source.
+
+### S2-56 — Ubuntu's archive at 2026-09-22T17:00Z: `handbrake-cli` and `libx265-199` (read at stage 3, 2026-10-03)
+
+- **Citation.** Ubuntu, `noble` `universe` `binary-amd64` `Packages` index as Ubuntu's snapshot service serves the archive at 2026-09-22T17:00Z (D64's T0), `http://snapshot.ubuntu.com/ubuntu/20260922T170000Z/dists/noble/universe/binary-amd64/Packages.xz`, checked against that suite's `InRelease`. Read for D11 ("HandBrakeCLI as Ubuntu 24.04 packages it") at the campaign's state.
+- **Copy read.** Accessed 2026-10-03 (200); `Packages.xz` SHA-256 ba9057fa1b91438cc8a1d26808d00c85389fe101d0c1496254df97236405599a, equal to `InRelease`'s line for `universe/binary-amd64/Packages.xz`; the two stanzas as `sources/S2-56/noble-universe-Packages.handbrake-x265.txt`, with `noble-InRelease`; SHA-256 in `SHA256SUMS.txt`. The `noble-updates` and `noble-security` `universe` indexes at the same timestamp were read and list neither package.
+- **Passages.** `Package: handbrake-cli` / `Version: 1.7.2+ds1-1build2` / `Depends: … libavcodec60 (>= 7:6.1), … libsvtav1enc1d1 (>= 1.7.0+dfsg), … libx264-164 (>= 2:0.164.3108+git31e19f9), libx265-199 (>= 1.8), …`. `Package: libx265-199` / `Version: 3.5-2build1` / `Depends: libc6 (>= 2.38), libnuma1 (>= 2.0.11), libstdc++6 (>= 4.1.1)`.
+- **Coverage.** T6 — at T0 Ubuntu 24.04 packages HandBrakeCLI 1.7.2 with x265 3.5 from the archive, no update in either pocket. Not what the build enables (read from the program on the runner).
+- **One observation?** Not an observation; the archive's index.
+
 ## 3. Not found
 
 - **T3 — numbers of open tabs and windows, and visible windows, from vendor telemetry; observed renderer-process counts for a set of tabs.** Searches: rows 33 and 40 (Mozilla telemetry dashboards and Mozilla Metrics blog; no Chromium/Google publication). The only S2 user data is new-tab openings (S2-29). The Chromium soft limit and spare process are definitions (S2-16), not observations.

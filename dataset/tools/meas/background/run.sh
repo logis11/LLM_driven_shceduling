@@ -18,6 +18,9 @@
 #             at its defaults, the checkpoint written, on torch 2.14.0's CPU build in that chroot, from a warm start
 #   mnist-madvise  the same job with the kernel's transparent huge pages in `madvise` mode, the desktop kernel's
 #             default — D87's check, never a repeat of the campaign
+#   handbrake handbrake-transcode — 9.10's HandBrakeCLI transcode campaign (9.10 changelog D11, D91–): HandBrake 1.7.2
+#             as Ubuntu 24.04 packages it encoding Big Buck Bunny's 4K H.264 edition to H.265 in DCI's 2K box, in that
+#             chroot; probe mode encodes the clip's first 30 s at each of HandBrake's own H.265 presets
 # Every measured phase is one command pinned to the measured CPU (pin.sh,
 # phase.sh MEAS_PIN=load), observed over the whole phase from the harness CPUs
 # by `perf sched record -a` — with the exec rows that name each process's
@@ -144,11 +147,11 @@ case "$APP" in
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y steamcmd > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
         STEAMCMD="$( [ -x /usr/games/steamcmd ] && echo /usr/games/steamcmd || command -v steamcmd)"; rec steamcmd.binary "$STEAMCMD"
         rec steamcmd.package "$(dpkg-query -W -f '${Version}' steamcmd 2>/dev/null)" ;;
-  upgrade|dkms|tracker|mnist|mnist-madvise)
+  upgrade|dkms|tracker|mnist|mnist-madvise|handbrake)
         # tracker: util-linux-extra for fincore, the cold start's check (D75; the runner's image lacks it, run #126);
-        # mnist: the same, for the warm start's check (D83)
+        # mnist and handbrake: the same, for the warm start's check (D83)
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mmdebstrap \
-          $( [ "$APP" = tracker ] || [ "${APP%-madvise}" = mnist ] && echo util-linux-extra) > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
+          $( [ "$APP" = tracker ] || [ "${APP%-madvise}" = mnist ] || [ "$APP" = handbrake ] && echo util-linux-extra) > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
         rec mmdebstrap.version "$(mmdebstrap --version 2>&1 | head -1)" ;;
 esac
 rec zpaq.version "$(zpaq 2>&1 | head -1)"
@@ -890,6 +893,105 @@ mn_job() {
   df -B1 --output=target,avail "$WORK" > "$OUT/df.mnist.txt" 2>&1
 }
 
+# ---- the HandBrakeCLI transcode (9.10 D11, D91–) ------------------------------------------
+# D37's chroot built at D64's T0 with handbrake-cli added: HandBrake 1.7.2 as Ubuntu 24.04 packages it (D11). The Tracker
+# job's user, its XDG folders; Big Buck Bunny's 4K 30 fps edition from download.blender.org (D91), fetched and unzipped
+# on the harness CPUs, the zip and the clip each checked by its SHA-256, moved into ~/Videos; the clip read into the page
+# cache and HandBrakeCLI's own scan of it run once, unmeasured (D83's warm start). Probe mode, never a repeat: 30 s of the
+# clip from its start and from 300 s, encoded on the measured CPU at each of HandBrake's own H.265 presets, the picture
+# held to DCI's 2K box (D92) — the cost per source second and the thread shape under the pin, before the encoder
+# settings are fixed.
+HB_ZIP_URL=https://download.blender.org/demo/movies/BBB/bbb_sunflower_2160p_30fps_normal.mp4.zip   # D91
+HB_ZIP_SHA=750b255c6d9fee1e2a03a6716d4f358bca56e9115bf3e06a66162fc5272ae151
+HB_CLIP=bbb_sunflower_2160p_30fps_normal.mp4; HB_CLIP_SHA=37f0ff251a606c2dcfa26c19fe6bf843234b4e7a8889cfab50bc26f644e55520
+HB_VID="/home/$TRK_USER/Videos"; HB_PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HB_BOX=(--maxWidth 2048 --maxHeight 1080)   # D92: DCI's 2K container, the 16:9 picture kept whole inside it
+HB_PROBE_S=30; HB_PROBE_AT="0 300"   # probe mode: 30 s of the clip from its start and from 300 s
+HB_PROBES=("vf2k|Very Fast 2160p60 4K HEVC|${HB_BOX[*]}" "f2k|Fast 2160p60 4K HEVC|${HB_BOX[*]}"
+           "hq2k|HQ 2160p60 4K HEVC Surround|${HB_BOX[*]}" "mkv1080|H.265 MKV 1080p30|--format av_mp4")
+hb_user() {   # hb_user <root> <cpus> <cmd...>: in the chroot as the user, in ~/Videos, on <cpus>
+  local r="$1" cpus="$2"; shift 2
+  sudo taskset -c "$cpus" chroot "$r" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" --init-groups /usr/bin/env -i -C "$HB_VID" \
+    HOME="/home/$TRK_USER" USER="$TRK_USER" LOGNAME="$TRK_USER" PATH="$HB_PATH" LANG=en_US.UTF-8 "$@"
+}
+hb_state() {   # hb_state <root>: the user, its folders, the clip in ~/Videos — on the harness CPUs
+  local r="$1" got
+  sudo chroot "$r" useradd -m -u "$TRK_UID" -U -s /bin/bash "$TRK_USER" > "$OUT/handbrake.useradd.log" 2>&1; rec handbrake.useradd.rc "$?"
+  sudo chroot "$r" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" --init-groups /usr/bin/env -i HOME="/home/$TRK_USER" \
+    USER="$TRK_USER" LOGNAME="$TRK_USER" PATH="$HB_PATH" LANG=en_US.UTF-8 xdg-user-dirs-update > "$OUT/handbrake.xdg.log" 2>&1
+  rec handbrake.xdg.rc "$?"
+  rec handbrake.cli.version "$(sudo chroot "$r" dpkg-query -W -f '${Version}' handbrake-cli 2>/dev/null)"
+  rec handbrake.x265.version "$(sudo chroot "$r" dpkg-query -W -f '${Version}' libx265-199 2>/dev/null)"
+  rec handbrake.avcodec.version "$(sudo chroot "$r" dpkg-query -W -f '${Version}' libavcodec60 2>/dev/null)"
+  sudo chroot "$r" HandBrakeCLI --version > "$OUT/handbrake.version.txt" 2>&1
+  sudo chroot "$r" HandBrakeCLI --help > "$OUT/handbrake.help.txt" 2>&1
+  sudo chroot "$r" HandBrakeCLI --preset-list > "$OUT/handbrake.presets.txt" 2>&1
+  rm -rf "$WORK/hb-clip"; mkdir -p "$WORK/hb-clip"
+  unmeasured wget -q --tries=5 --waitretry=15 -O "$WORK/hb-clip/clip.zip" "$HB_ZIP_URL"; rec handbrake.zip.rc "$?"
+  got="$(sha256sum "$WORK/hb-clip/clip.zip" | cut -d' ' -f1)"; rec handbrake.zip.pin "$(pin_state "$HB_ZIP_SHA" "$got")"
+  unmeasured unzip -q -d "$WORK/hb-clip" "$WORK/hb-clip/clip.zip" "$HB_CLIP"; rec handbrake.unzip.rc "$?"
+  rm -f "$WORK/hb-clip/clip.zip"
+  got="$(sha256sum "$WORK/hb-clip/$HB_CLIP" | cut -d' ' -f1)"; rec handbrake.clip.pin "$(pin_state "$HB_CLIP_SHA" "$got")"
+  rec handbrake.clip.bytes "$(stat -c %s "$WORK/hb-clip/$HB_CLIP")"
+  sudo mv "$WORK/hb-clip/$HB_CLIP" "$r$HB_VID/$HB_CLIP"; sudo chroot "$r" chown "$TRK_USER:$TRK_USER" "$HB_VID/$HB_CLIP"
+  rec handbrake.clip.placed.rc "$?"
+}
+hb_warm() {   # hb_warm <root>: the clip read whole into the page cache and HandBrakeCLI's own scan of it, on the harness
+  # CPUs; the clip's and the program's libraries' cached fractions
+  local r="$1" t0
+  sudo cat "$r$HB_VID/$HB_CLIP" > /dev/null
+  t0=$(date +%s)
+  hb_user "$r" "$MEAS_HARNESS_CPUS" HandBrakeCLI -i "$HB_CLIP" --scan > "$OUT/handbrake.scan.log" 2>&1; rec handbrake.scan.rc "$?"
+  rec handbrake.scan_s "$(( $(date +%s) - t0 ))"
+  rec handbrake.cache.clip_fraction "$(mn_fraction "$r$HB_VID" "$HB_CLIP")"
+  rec handbrake.cache.lib_fraction "$(sudo find "$r/usr/lib/x86_64-linux-gnu" "$r/usr/bin" -maxdepth 1 \
+    \( -name 'libx265*' -o -name 'libavcodec*' -o -name 'libavformat*' -o -name 'libavfilter*' -o -name 'libswscale*' -o -name HandBrakeCLI \) \
+    -type f -print0 | sudo xargs -0 fincore -b -n -r -o PAGES,SIZE 2>/dev/null \
+    | awk -v pg="$PAGE" '{r += $1; s += int(($2 + pg - 1) / pg)} END {if (s > 0) printf "%.4f", r / s}')"
+}
+hb_encode() {   # hb_encode <root> <phase> <output> <HandBrakeCLI options...>: one encode as the user, on the measured CPU
+  local r="$1" name="$2" out="$3"; shift 3
+  sudo rm -f "$r$HB_VID/$out"
+  export MEAS_PIN=none
+  phase "$name" -- sudo taskset -c "$MEAS_CPU" chroot "$r" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" --init-groups \
+    /usr/bin/env -i -C "$HB_VID" HOME="/home/$TRK_USER" USER="$TRK_USER" LOGNAME="$TRK_USER" PATH="$HB_PATH" LANG=en_US.UTF-8 \
+    HandBrakeCLI -i "$HB_CLIP" -o "$out" "$@"
+  export MEAS_PIN=load
+  rec "handbrake.$name.out_bytes" "$(sudo stat -c %s "$r$HB_VID/$out" 2>/dev/null || echo 0)"
+  rec "handbrake.$name.out_sha256" "$(sudo sha256sum "$r$HB_VID/$out" 2>/dev/null | cut -d' ' -f1)"
+  # the job's own report: the picture it encoded, x265's threads, the encode's end
+  tr '\r' '\n' < "$OUT/cmd.$name.log" | grep -v '^Encoding: task' > "$OUT/handbrake.$name.log"
+  rec "handbrake.$name.done" "$(grep -c 'Encode done!' "$OUT/handbrake.$name.log")"
+  rec "handbrake.$name.picture" "$(grep -m1 -oE 'storage dimensions: [0-9]+ x [0-9]+' "$OUT/handbrake.$name.log")"
+  rec "handbrake.$name.x265_pool" "$(grep -m1 -oE 'Thread pool.*' "$OUT/handbrake.$name.log")"
+  rec "handbrake.$name.x265_frame_threads" "$(grep -m1 -oE 'frame threads / pool features.*' "$OUT/handbrake.$name.log")"
+  rec "handbrake.$name.fps" "$(grep -m1 -oE 'average encoding speed for job is [0-9.]+ fps' "$OUT/handbrake.$name.log" | grep -oE '[0-9.]+ fps')"
+  sudo rm -f "$r$HB_VID/$out"
+}
+hb_job() {
+  local r="$WORK/chroot" p key preset extra at
+  UPG_T0="${MEAS_HANDBRAKE_T0:-20260922T170000Z}"; UPG_EXTRA=handbrake-cli   # D64's T0; D11: the archive's package
+  sudo rm -rf "$r"; upg_build "$r"; upg_mount "$r"; hb_state "$r"; hb_warm "$r"
+  mn_thp before
+  if [ "$MODE" = probe ]; then
+    for p in "${HB_PROBES[@]}"; do
+      IFS='|' read -r key preset extra <<< "$p"
+      for at in $HB_PROBE_AT; do
+        rec "handbrake.handbrake-probe-$key-$at.preset" "$preset"; rec "handbrake.handbrake-probe-$key-$at.extra" "$extra"
+        # shellcheck disable=SC2086  # extra is a word list
+        if [ "$at" = 0 ]; then
+          hb_encode "$r" "handbrake-probe-$key-$at" "probe.mp4" --preset "$preset" $extra --stop-at "seconds:$HB_PROBE_S"
+        else
+          hb_encode "$r" "handbrake-probe-$key-$at" "probe.mp4" --preset "$preset" $extra --start-at "seconds:$at" --stop-at "seconds:$HB_PROBE_S"
+        fi
+      done
+    done
+  fi
+  mn_thp after
+  upg_umount "$r"
+  df -B1 --output=target,avail "$WORK" > "$OUT/df.handbrake.txt" 2>&1
+}
+
 # ---- the job ----------------------------------------------------------------------
 case "$APP" in
   borg)
@@ -935,6 +1037,7 @@ case "$APP" in
   dkms) dkms_job ;;
   tracker) trk_job ;;
   mnist|mnist-madvise) mn_job ;;
+  handbrake) hb_job ;;
   *) rec error "unknown app $APP" ;;
 esac
 

@@ -1578,3 +1578,33 @@ Hands to 9.14:
 - `c2-p1a` in the demand window.
 
 Hands to 9.12 and 9.15: 9.6 D32's wording rule restated on an actual training run; the scenario catalog's S12 row; `measurement-overview.md`'s venue, the huge-page mode (D88).
+
+## D91 — the source clip is Big Buck Bunny's 4K 30 fps edition, as the Blender Foundation publishes it (2026-10-03)
+
+By 인지오's decision, D11's open item "the source clip and its length". The transcode's source is `bbb_sunflower_2160p_30fps_normal.mp4`, from `bbb_sunflower_2160p_30fps_normal.mp4.zip` on `download.blender.org/demo/movies/BBB/`, the zip and the clip each checked by its SHA-256 (S2-53). The clip: H.264 High profile, level 5.1, 3840×2160, 30 fps, 19,036 frames, 634.5 s, two audio tracks (MP3 and AC-3), in MP4. Whether the job encodes the whole clip or a cut of it is fixed with the encoder settings, on the cost a probe measures on the runner.
+
+Grounds:
+
+- **CpsMark+'s source** is "the H.264 encoded source video with 4K resolution" (`cpsmark-tbench23` §4.3.4, p. 6; D11). It names no clip, so the clip is design unless a public one is chosen (D11).
+- **The one 4K open-movie file in MP4.** Blender's server holds Big Buck Bunny's 4K editions at 30 and 60 fps in MP4, Sintel's 4K as a 4.5 GB MKV and a 5.5 GB `.mov`, and Tears of Steel's as a 6.7 GB `.mov` (S2-53). The 30 fps edition is the smallest download and has half the 60 fps edition's frames for the same film.
+- **What the file is,** read from its own boxes, not from a listing (S2-53).
+
+Not taken: the 60 fps edition (twice the encode for the same content); Sintel's and Tears of Steel's 4K files (4.5–6.7 GB per job, and Tears of Steel's codec unread).
+
+No file changed yet.
+
+## D92 — "2K" is DCI's 2048×1080 container, the picture kept whole inside it: 1920×1080 for the clip (2026-10-03)
+
+By 인지오's decision, D11's open item "the encoder settings that realise 'H.265 … 2K, MP4'": the target picture is the largest that fits DCI's 2K container, 2048×1080, at the source's aspect ratio. For the 16:9 clip (D91) that is 1920×1080, its height filling the container's.
+
+Grounds:
+
+- **DCI's definition** (S2-54). "A 2K distribution – the resolution of the DCDM container is 2048x1080" (§4.3.1, p. 31), and a picture fills "the full horizontal pixel count or the full vertical pixel count of the image container" (§8.2.2.7, p. 72).
+- **The Blender Foundation's own usage agrees.** Sintel's "2k cinema release version" is 2048 × 872, its 2.39:1 picture filling the container's width (S2-53).
+- **CpsMark+ gives no pixel count** for its "2K" (D11). HandBrake 1.7.2's presets never say "2K": they call 2160p "4K" and 1440p "2.5K" (S2-55).
+
+Not taken: 2560×1440, a consumer usage of "2K" for which no source was read, and which HandBrake calls 2.5K; 2048 wide at the source's ratio (2048×1152), which no source's rule gives and which overflows the container's height.
+
+The encoder settings that realise it are open, with the clip's length (D91).
+
+No file changed yet.
