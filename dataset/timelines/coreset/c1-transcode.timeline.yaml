@@ -1,24 +1,31 @@
 # C1 — single-situation calibration: pure transcode (building-plan §3 C1;
 # Phase 7 spec decision 8). Task set lifted from c3-creation segment 2
-# (kdenlive + HandBrakeCLI batch); total_work resized from 320 s to 30 s so the
-# job finishes inside the 60 s segment (turnaround term).
+# (kdenlive + HandBrakeCLI batch). The transcode is CpsMark+'s HandBrake
+# workload as `video-transcoder` measured it (meas-ci:background:2026-10-03b):
+# HandBrake's default preset on Big Buck Bunny's 4K H.264 edition, shown as
+# `HandBrakeCLI`, bound whole at its measured CPU total (9.10 D11, D17,
+# D91–D98). The segment is the smallest whole second by which the job ends
+# under every policy — 2 s + the job's CPU and blocks + the editor's CPU as
+# compiled under the file's seed, 4,761.296 s — so the turnaround term reads a
+# finished job (D78's arithmetic); focus keeps the 2 s margins and the preview
+# render sits at the window's middle, as the base's 30 s in 2–58 s (D96).
 meta:
   id: c1-transcode
   seed: 114
   demand: calibration
 
 segments:
-  - {from: 0s, to: 60s, mode: transcode,
+  - {from: 0s, to: 4762s, mode: transcode,
      attributes: {background_wanted: true, initiated: user}, scenario: [S8]}
 
 tasks:
   - {id: video-editor, name: kdenlive, archetype: video-editor,
-     arrive: 0s, depart: 60s}
-  - {id: batch, name: HandBrakeCLI, archetype: cpu-batch, arrive: 2s,
-     bind: {total_work: 30s, program: handbrakecli}}
+     arrive: 0s, depart: 4762s}
+  - {id: batch, name: HandBrakeCLI, archetype: video-transcoder, arrive: 2s,
+     bind: {total_work: 2970.871s}}
 
 focus:
-  - {from: 2s, to: 58s, task: video-editor}
+  - {from: 2s, to: 4760s, task: video-editor}
 
 operations:
-  - {at: 30s, task: video-editor, name: preview-render}
+  - {at: 2381s, task: video-editor, name: preview-render}

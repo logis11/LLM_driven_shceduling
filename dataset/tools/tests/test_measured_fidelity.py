@@ -338,7 +338,7 @@ def test_a_numpy_sample_gives_the_same_table():
 
 
 def test_the_batch_tables_regenerate_from_the_pooled_records(repo_root):
-    # the compile, background, package-upgrade and file-indexer entries' 30 tables and the module build's 59 (9.10 D52–D54, D70) are
+    # the compile, background, package-upgrade, file-indexer and video-transcoder entries' 30 tables and the module build's 59 (9.10 D52–D54, D70, D97) are
     # batch_fold_in.py's output on the committed pooled records
     from meas import batch_fold_in
     text = (repo_root / "dataset" / "archetypes.yaml").read_text()

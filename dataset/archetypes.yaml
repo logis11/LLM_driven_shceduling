@@ -858,10 +858,6 @@ archetypes:
         {dist: quantiles, p: [3, 4, 4, 5, 7, 20, 1076, 1207, 51116, 77879], min: 3, max: 719031, means: [3, 3.751, 4, 4.176, 5.576, 11.859, 92.401, 1147.068, 19193.891, 62711.216, 111240.098], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
       ffmpeg_block:
         {dist: quantiles, p: [0, 0, 0, 0, 0, 0, 0, 0, 0, 173], min: 0, max: 5073, means: [0, 0, 0, 0, 0, 0, 0, 0, 0, 7.995, 280.805], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
-      handbrakecli_run:
-        {dist: quantiles, p: [4, 4, 4, 6, 8, 371, 1137, 1847, 5067, 18453], min: 3, max: 36754649, means: [3.975, 4, 4, 5.013, 7.294, 64.188, 804.221, 1608.094, 2327.118, 10171.981, 681974.739], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
-      handbrakecli_block:
-        {dist: quantiles, p: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], min: 0, max: 50097, means: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8895.169], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
       python3_run:
         {dist: quantiles, p: [14, 112, 132, 188, 228276, 43515311, 238567291, 348129382, 876756180, 997987710], min: 12, max: 1006372964, means: [12.333, 14.208, 124.5, 155.5, 37075.867, 16396865, 121974151.611, 300343245.333, 553154227, 993324015.481, 1006372964], sampling: per-iteration, source: "meas-ci:background:2026-10-03"}
       python3_block:
@@ -871,20 +867,20 @@ archetypes:
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "build:2026-09-18 (clamscan, ffmpeg, HandBrakeCLI); repeats [4, 5, 7, 8, 9-18]; clamscan [9-18]; runs 35328071379, 35328873409, 35337322204, 35426065936, 35430430817, 35434872927, 35439345618, 35443899531, 35448942696, 35453727742, 35459121647, 35464371497, 35469642365. background:2026-10-03 (python3, 9.10 D82-D88); repeats [1-6]; runs 37091275421, 37091313419, 37093607991"
-      stats: ["saturation over the job: clamscan 0.969-0.979, ffmpeg 0.9990-0.9992, HandBrakeCLI 0.989-0.992, python3 0.99988-0.99991",
-              "share of CPU past the 10 ms boot slice: clamscan 0.109, ffmpeg 0.698, HandBrakeCLI 0.626",
-              "share of runs followed by a block: clamscan 1.0, ffmpeg 0.0015, HandBrakeCLI 0.0008",
+      run: "build:2026-09-18 (clamscan, ffmpeg); repeats [4, 5, 7, 8, 9-18]; clamscan [9-18]; runs 35328071379, 35328873409, 35337322204, 35426065936, 35430430817, 35434872927, 35439345618, 35443899531, 35448942696, 35453727742, 35459121647, 35464371497, 35469642365. background:2026-10-03 (python3, 9.10 D82-D88); repeats [1-6]; runs 37091275421, 37091313419, 37093607991"
+      stats: ["saturation over the job: clamscan 0.969-0.979, ffmpeg 0.9990-0.9992, python3 0.99988-0.99991",
+              "share of CPU past the 10 ms boot slice: clamscan 0.109, ffmpeg 0.698",
+              "share of runs followed by a block: clamscan 1.0, ffmpeg 0.0015",
               "block per run carried with its half-width (D29): clamscan 218.1 us +-9.5 % over 10 repeats (182-274 us)",
               "python3 CPU total 1,389.885 s +-4.04 % over 6 repeats (1,293.8-1,455.8 s), one process with one thread, shown as `python` (9.10 D85)",
               "python3 runs between blocks 69.49 s +-27.3 % (53.9-114.9 s a repeat) and block per run 311.5 us +-10.8 % (268-370 us), over 6 repeats, carried with their half-widths: 11-24 blocks a repeat, every one but the two sleeps at the start ended by khugepaged (9.10 D87)",
               "python3 under the desktop kernel's transparent-hugepage default, madvise, five jobs beside the campaign: CPU total 1,589.654 s +-2.01 %, x1.144 (95 % interval x1.102-x1.185), no block but the two at the start (9.10 D88)"]
       scope: >-
-        One observation per program (phase decision 2; D3, D7, D30): three programs measured in the same campaign
+        One observation per program (phase decision 2; D3, D7, D30): two programs measured in the same campaign
         as the build archetypes, each pinned to one CPU of a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel
         6.17.0-1022-azure) and instrumented by `perf sched record` on the measured CPU and a taskstats listener on
         its cpumask — ClamAV 1.5.3 scanning the kernel's `Documentation` (9 462 files) with signature
-        database daily 28128 held fixed from repeat 9 (D27); ffmpeg and HandBrakeCLI encoding a generated 60 s
+        database daily 28128 held fixed from repeat 9 (D27); ffmpeg encoding a generated 60 s
         clip. `python3` re-measured in 9.10's own campaign on the same runner model and kernel (9.10 D12, D82-D88):
         PyTorch's basic MNIST example at its defaults (`pytorch/examples` at `acc295d`, `python main.py
         --save-model`: 14 epochs of batch 64 over the real MNIST dataset, a test pass after each, the checkpoint
@@ -903,7 +899,7 @@ archetypes:
         only at its start (9.10 D88). Values are this
         software on this machine, not desktop truth (9.5 D10).
     modeling_notes: >-
-      The class is what the measurement shows: four programs runnable for the whole of their job on one dominant
+      The class is what the measurement shows: three programs runnable for the whole of their job on one dominant
       thread (D7, D16). The task is a loop — a run drawn from the bound program's measured runs between voluntary
       blocks, then the block that followed such a run — until `total_work` of CPU is spent; the table set is chosen
       by the `program` binding, never by the task's display name (D21). A zero block means the program ran on, so
@@ -915,7 +911,9 @@ archetypes:
       `python3` binding is PyTorch's basic MNIST example, an actual training run on the CPU (9.10 D12, D85); its
       process shows `python`, the name the venv executes (9.10 D84). Tracker's index, bound here as `tracker` until 9.10, is the entry `file-indexer`, measured as
       a first index of a home (9.10 D70); the rescan this entry carried, read from the miner's first schedule-in to
-      its own Idle status (D16), left out the extraction that follows the crawl (9.10 D62).
+      its own Idle status (D16), left out the extraction that follows the crawl (9.10 D62). HandBrakeCLI, bound here
+      until 9.10 as `handbrakecli` on a generated 720p clip, is the entry `video-transcoder`, measured as CpsMark+'s
+      transcode, its threads without a dominant one (9.10 D97).
 
   compiler-child:
     category_source: meas
@@ -1563,6 +1561,58 @@ archetypes:
       index and the same work after the user's `tracker3 reset --filesystem` (D5); the registry scan, 93-106 ms, is
       first-login work a reset may not repeat (D73). Every thread of the miner and the extractor declares itself
       background work, SCHED_IDLE at nice 19 (9.6 D17); the task model carries no declared class (9.11's).
+
+  video-transcoder:
+    category_source: meas
+    pattern:
+      constructor: batch-loop      # 9.6 D21, D22, D25; 9.10 D97: over the encoder's threads
+      program:
+        - loop:                    # until total_work of CPU is spent
+            - RUN: handbrake_run
+            - SLEEP: handbrake_block
+        - EXIT: {}
+    params:                        # 9.10 D94, D97: the process's runs, pooled over its threads, and the block after each
+      handbrake_run:
+        {dist: quantiles, p: [5, 5, 6, 8, 10, 690, 8169, 13772, 50986, 222152], min: 4, max: 101256003, means: [4.558, 5, 5.833, 7.134, 9.246, 62.994, 4157.601, 10795.658, 25680.132, 97075.013, 917778.782], sampling: per-iteration, source: "meas-ci:background:2026-10-03b"}
+      handbrake_block:
+        {dist: quantiles, p: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], min: 0, max: 50084, means: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 605.387], sampling: per-iteration, source: "meas-ci:background:2026-10-03b"}
+    lifetime: finite
+    binding_params: [total_work]
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      run: "background:2026-10-03b; repeats [1-5]; runs 37109133562, 37109333265"
+      stats: ["run between voluntary blocks mean 4.002 ms (+-1.8 %), block per run mean 0.605 us (+-36.1 %, within the 1 us floor)",
+              "CPU total 2,970.871 s (+-2.6 %), 2,863.5-3,023.8 s over the repeats: the job's measured whole (9.10 D17)",
+              "saturation 0.99938-0.99947 over the job; one process of 23 threads, the busiest 0.334-0.338 of the CPU, the next 0.205-0.208, the third 0.101-0.103 (9.10 D97)",
+              "733k-746k runs between voluntary blocks a job, up to 96-101 s; about 2 in 100,000 followed by a block, 0.26-0.60 s of blocks a job; 2-12 uninterruptible waits and 0-1 disk wait a job",
+              "the clip's 19,036 frames decoded with no error; the same video track, 19,038 frames and 276,311,652 B, in every repeat"]
+      scope: >-
+        One observation (phase decision 2; 9.10 D11, D91-D98): HandBrakeCLI 1.7.2 as Ubuntu 24.04 packages it
+        (`handbrake-cli` 1.7.2+ds1-1build2, x264 0.164.3108, FFmpeg 6.1.1) running its default preset unchanged,
+        "Fast 1080p30" (x264 at fast, RF 22, profile main, level 4.0, AAC stereo at 160 kb/s, MP4), on the Blender
+        Foundation's Big Buck Bunny in its 4K 30 fps H.264 edition, whole (19,036 frames, 634.5 s), to 1920 x 1080:
+        CpsMark+'s HandBrake workload, its H.264 codec and its 1080p "2K" from the benchmark's own code, its clip and
+        its preset's settings not (D91, D92, D95). The job is the process from its first schedule-in to its exit,
+        HandBrakeCLI's own scan of the clip included, from a warm start with the clip in the page cache (D94). The
+        state is a chroot of the default layer of an English 24.04.5.1 desktop install, 1,445 packages, built from
+        Ubuntu's snapshot service as the archive stood at 2026-09-22T17:00Z (D94), the encode run as a user. Pinned
+        to one CPU of a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, 16 GB, kernel 6.17.0-1022-azure),
+        the rest of the machine idealised; the runner's agent processes share the measured CPU outside the process.
+        `perf sched record` and a taskstats listener on the measured CPU. 5 same-machine repeats under the machine
+        gate; the stability rule holds on all three values. The runner's kernel runs transparent huge pages in
+        `always` mode; the desktop kernel's default is `madvise` (9.10 D87, D94). No hardware encoder. Values are
+        this software on this machine, not desktop truth (9.5 D10).
+    modeling_notes: >-
+      The class is what the measurement shows (9.10 D97): the encode is runnable for its whole job but spread over
+      its 23 threads, all named `HandBrakeCLI`, with no single dominant thread, so it is not `cpu-batch` by 9.6
+      D7's criterion. The task is
+      `cpu-batch`'s batch loop — a run drawn from the process's runs between voluntary blocks, pooled over its
+      threads, then the block that followed such a run, the process's own off-CPU time, zero when another of its
+      threads runs on — until `total_work` of CPU is spent; `total_work` binds the measured whole, the CPU total
+      above (9.10 D17). One task carries the process, so it alternates the threads' long and short runs in one
+      sequence (9.6 D22). The task shows `HandBrakeCLI` (9.10 D98), the process's `comm`. Every thread runs at
+      the default policy and nice 0: the encode declares no class.
 
   # ---- structural-special family — harvested from LAVD --------------------
 

@@ -318,6 +318,40 @@ The entry carries `cpu-batch`'s batch-loop form for the program `python3` (9.10 
 
 Reported beside them: the job 1,294.0–1,455.9 s, saturation 0.9999; 11–24 voluntary blocks a landing, every one but the two sleeps at the start (99–110 µs) ended by `khugepaged` under the runner's `always` mode; 168k–249k huge pages fault-allocated and 133–145 collapsed in each phase. The check under the desktop kernel's `madvise` mode (D87, D88), five jobs, pooled apart: CPU total 1,589.654 s ±2.01 %, ×1.144 the campaign's (95 % Welch interval ×1.102–×1.185), no block but the two start sleeps. Pooled in `task-9.10-scenarios-timelines/campaign/mnist/results/` (`pooled.json`, `results.md`; the check's `madvise-pooled.json`, `madvise-results.md`).
 
+## 9.10 — `video-transcoder`, HandBrakeCLI on CpsMark+'s transcode
+
+Repeats 1–5 on the AMD EPYC 7763, 5 landings, every one valid. The method's checks:
+
+- the layer built with no package missing and `handbrake-cli`'s 67 packages added;
+- `handbrake-cli` 1.7.2+ds1-1build2 and `libx264-164` 2:0.164.3108+git31e19f9-1;
+- Big Buck Bunny's 4K 30 fps clip and its zip each matching its SHA-256, the clip cached at 1.0000 after the warm start;
+- the kernel's transparent huge pages `always`;
+- HandBrake's default preset as run, `libx264` at fast and RF 22, the picture 1920 × 1080 at 1 : 1;
+- the clip's 19,036 frames decoded with no error, and the same video track, 19,038 frames and 276,311,652 B, in every landing.
+
+Each repeat landed once. 9 jobs: 5 landed, 4 stopped by the machine gate.
+
+The entry is `video-transcoder`, a batch-loop entry of its own (9.10 D97, D98): one process, `HandBrakeCLI`, of 23 threads.
+
+| archetype | value | landings | mean | spread (cv) | 95 % half-width | stopped by |
+|---|---|---|---|---|---|---|
+| `video-transcoder` | run between voluntary blocks | 5 | 4.002 ms | 1.4 % | ±1.8 % | the rule |
+| `video-transcoder` | block per run | 5 | 0.605 µs | 29.1 % | ±36.1 % | the rule's 1 µs floor |
+| `video-transcoder` | CPU total | 5 | 2,970.871 s | 2.1 % | ±2.6 % | the rule |
+
+Reported beside them:
+
+- **The job.** 2,865.0–3,025.5 s, saturation 0.99938–0.99947.
+- **The threads.** The busiest holds 0.334–0.338 of the CPU, the next 0.205–0.208, the third 0.101–0.103.
+- **The blocks.** 733k–746k runs a landing, about 2 in 100,000 followed by a block, 0.26–0.60 s of blocks a job; 2–12 uninterruptible waits a landing, 0–1 disk wait.
+
+Before the campaign:
+
+- **The probe of HandBrake's H.265 presets** (D93): 2.41–5.83 s of CPU per source second.
+- **A dry run of D93's x265 settings,** superseded by D95: 2,483.81 s of CPU, 29 threads.
+
+Pooled in `task-9.10-scenarios-timelines/campaign/handbrake/results/` (`pooled.json`, `results.md`).
+
 ## Machine draws
 
 The build campaign, complete: 28 jobs, 14 on the AMD EPYC 7763 (50.0 %), 12 stopped by the machine gate — Intel Xeon Platinum 8573C 4, AMD EPYC 9V74 4, AMD EPYC 9V45 2, Intel Xeon Platinum 8370C 1, Intel Xeon 6973P-C 1 — and 2 cancelled.
@@ -339,3 +373,5 @@ The untraced control of 9.5, 9.8 and 9.9, complete (9.5 D82, 9.8 D32, 9.9 D40): 
 The 9.10 Tracker campaign, complete: 38 jobs — 18 landed on the AMD EPYC 7763 (47.4 %, all pooled), 20 stopped by the machine gate: AMD EPYC 9V74 16, Intel Xeon Platinum 8573C 1, Intel Xeon Platinum 8370C 1, AMD EPYC 9V45 1, Intel Xeon 6973P-C 1. Its three dry runs (#118, #119, #121) drew the EPYC 7763 after four stops; its first batch (12 jobs, 7 landed) and its cold batch (8 jobs, 5 landed) were not pooled.
 
 The 9.10 MNIST campaign, complete: 8 jobs — 6 landed on the AMD EPYC 7763 (75.0 %, all pooled), 2 stopped by the machine gate: Intel Xeon 6973P-C 1, AMD EPYC 9V45 1. Its dry run (#142) drew the EPYC 7763 after one stop (AMD EPYC 9V45). Its `madvise` check (D87), never a repeat: 9 jobs, 5 landed, 4 stopped (AMD EPYC 9V45 2, AMD EPYC 9V74 2).
+
+The 9.10 HandBrakeCLI campaign, complete: 9 jobs — 5 landed on the AMD EPYC 7763 (55.6 %, all pooled), 4 stopped by the machine gate: AMD EPYC 9V74 4. Its probe (D93), never a repeat, took 3 jobs, 2 landed and 1 stopped (Intel Xeon Platinum 8370C). Its two dry runs (#152, superseded by D95; #153) drew the EPYC 7763.

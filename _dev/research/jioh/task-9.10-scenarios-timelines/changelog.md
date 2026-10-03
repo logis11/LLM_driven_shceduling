@@ -1729,3 +1729,88 @@ Also recorded:
 The entry's id is open.
 
 No file changed yet.
+
+## D98 — the task shows `HandBrakeCLI`; the entry is `video-transcoder` (2026-10-03)
+
+By 인지오's decision, D97's open item. The one task of D97's form shows `HandBrakeCLI`, the `comm` of `/usr/bin/HandBrakeCLI` as the dry run observed it, under 15 bytes (D25). The archetype's id is `video-transcoder`.
+
+Grounds:
+
+- **D24 and D25.** A task shows the observed program's name, as its kernel `comm`. The job is that one process and its 23 threads, all named `HandBrakeCLI` (D97).
+- **The files and the tier.** `c1-transcode` and `c3-creation` already show `HandBrakeCLI`; its familiarity tier is unchanged (D27: the same program keeps its tier).
+- **The id names the role** (D74's ground), beside `file-indexer`, `file-archiver` and `file-backup`. The job is a video transcode; `media-transcoder` would also claim audio-only work.
+
+Not taken: `video-transcode` (the activity, as `package-upgrade`); `media-transcoder`.
+
+No file changed yet.
+
+## D99 — the HandBrakeCLI campaign's raw records are release `meas-ci-background-2026-10-03b` (2026-10-03)
+
+By 인지오's decision, the method's §7. The release is created at the fold-in commit. It holds, each archive without its `pool-cache/`:
+
+- the 5 pooled landings (runs #154, #156);
+- the dry run #153 of D95's settings, its `perf.data` kept;
+- the dry run #152 of D93's settings, superseded by D95, its `perf.data` kept;
+- the probe's two jobs (#151; D93);
+- the reports of the 5 jobs the machine gate stopped.
+
+No video is in it: the clip appears as its SHA-256 and size, and each output as its size and hash.
+
+No file changed yet.
+
+## D100 — the HandBrakeCLI campaign holds at 5 repeats; `video-transcoder` folded in, the three transcode files rebound (2026-10-03)
+
+The campaign of D91–D99, `meas-ci:background:2026-10-03b`, run under `../measurement-campaign-workflow.md`. It is recorded in `campaign/handbrake/` (method, machine draws, `results/pooled.json`, `results/results.md`) and in `measurement-campaign-record.md`.
+
+- **Runs.**
+  - The probe: #150 stopped at the gate; #151, two jobs (D93).
+  - The dry runs: #152 of D93's settings, superseded (D95); #153 (D97).
+  - The first batch, repeats 1–5 (#154; repeats 4 and 5 stopped at the gate on the AMD EPYC 9V74 in #154 and #155, then landed in #156).
+  - In all, 9 jobs: 5 landed on the EPYC 7763, 4 stopped by the machine gate.
+- **The rule holds at 5 on all three values.** The CPU total is 2,970.871 s ±2.64 % (2,863.5–3,023.8 s). The run between voluntary blocks is 4.002 ms ±1.79 %. The block per run is 0.605 µs, within the 1 µs floor. Every repeat is valid:
+  - the layer built, with `handbrake-cli`'s 67 packages added;
+  - `handbrake-cli` 1.7.2+ds1-1build2 and `libx264-164` 2:0.164.3108+git31e19f9-1;
+  - the zip and the clip matching their SHA-256, the clip cached at 1.0000;
+  - the kernel's mode `always`;
+  - `libx264` at fast and RF 22, the picture 1920 × 1080 at 1 : 1;
+  - the clip's 19,036 frames decoded with no error, and one video track, 19,038 frames and 276,311,652 B.
+- **Reported.**
+  - The job is one process of 23 threads, `HandBrakeCLI`, saturation 0.99938–0.99947. The busiest thread holds 0.334–0.338 of the CPU, the next 0.205–0.208.
+  - 733k–746k runs a repeat, up to 96–101 s. About 2 in 100,000 are followed by a block, 0.26–0.60 s of blocks a job.
+  - 2–12 uninterruptible waits and 0–1 disk wait a repeat.
+- **Release.** The raw records are release `meas-ci-background-2026-10-03b`, published on 인지오's go-ahead (D99).
+- **Fold-in.**
+  - `video-transcoder`, a batch-loop entry, is added after `file-indexer`. Its `handbrake_run` and `handbrake_block` are written by `batch_fold_in.py` from `results/pooled.json`, their source `meas-ci:background:2026-10-03b`. Its scope, stats, run and notes state D91–D98.
+  - `cpu-batch`'s `handbrakecli_run` and `handbrakecli_block` leave (D97). Its scope, stats, run and notes are restated: two programs from 9.6's campaign, and the notes point to `video-transcoder`.
+  - `docs/references.md` gains `big-buck-bunny`, `handbrake`, `dci-dcss` and `cpsmarkplus` (deployed-system, verified). `cpsmark-tbench23`'s artifact note points to `cpsmarkplus`.
+  - `dataset/tools/wlc/grid.py` is unchanged: `HandBrakeCLI` keeps its tier (D27, D98).
+- **Rebound.**
+  - `c1-transcode`: `HandBrakeCLI` on `video-transcoder` from 2 s, `total_work` 2,970.871 s. The segment is 4,762 s, the smallest whole second by which the encode ends under every policy: 2 s plus 2,970.871 s of CPU plus 0.522 s of its blocks plus the editor's 1,787.903 s as compiled under the file's seed, 4,761.296 s (D17; D78's arithmetic, D90's form). Focus runs 2–4,760 s, and the preview render is at 2,381 s, the window's middle (D96).
+  - `c7-transcode` (`c7.variant.yaml`): `c1-transcode`'s first C seconds, the encode from 0 s, the editor departing at C, focus 2 s to C − 2 s, the preview render at 1,485.4355 s, its window's middle (D44, D96). One segment, `background_wanted: false`, `initiated: scheduled`, still a pre-committed miss (D78's form, as D90's `c7-ml-train`).
+  - `c3-creation`: the transcode segment runs from 240 s to 3,212 s, the smallest whole second by which the encode ends under every policy: 240 s plus 2,970.871 s plus 0.416 s of its blocks plus the other tasks' 0.228 s after 240 s, 3,211.514 s (D17). `kdenlive` stays open to the segment's end, as it did to 420 s; taken under 인지오's delegation, the file's structure kept.
+  - C is 2,970.871 s, the encode's `total_work`, which the batch loop compiles exactly.
+
+Recompiled (`compile.py --allow-window`): 6 of 100 artifacts change beyond the library's hash, the three files in both modes. Demand (`-single`):
+
+| file | before | after | |
+|---|---|---|---|
+| `c1-transcode` | 0.9445 | 0.9993 | calibration |
+| `c7-transcode` | 0.9445 | 1.3727 | calibration |
+| `c3-creation` | 0.8843 | 0.9410 | the demand window (D17) |
+
+Lint reports the same five demand-window files: `c2-p1a`, `c2-p1b`, `c3-creation` (now 0.94), `c3-evening` and `c3-workday`. `compile.py --check --allow-window` and `batch_fold_in.py --check` pass. Tests: 380 passed, 1 skipped, 1 xfailed.
+
+Restated tests:
+- `transcode` leaves `C7_SAME_NAME` for `test_c7_transcode_is_its_bases_first_c_seconds`;
+- `test_the_batch_tables_regenerate_from_the_pooled_records` names `video-transcoder`, its table count unchanged at 89;
+- `test_zero_inclusive_block_table_leaves_the_program_running` reads HandBrakeCLI's table from `video-transcoder`, and `cpu-batch` holds three table sets;
+- the background tests add the `handbrake` job, its list and its name.
+
+Hands to 9.14:
+- `c1-transcode`'s and `c7-transcode`'s terms on the new lengths;
+- `c3-creation` in the demand window at 0.94.
+
+Hands to 9.12 and 9.15:
+- the scenario catalog's S8 row, CpsMark+'s HandBrake workload H.264 per its own code (D95);
+- prose citing that workload as H.265;
+- `cpu-batch`'s scope without `HandBrakeCLI` (D11's hand-off).

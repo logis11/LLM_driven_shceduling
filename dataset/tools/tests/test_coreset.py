@@ -82,7 +82,7 @@ def test_c5_names_only(coreset):
 
 C7_INTERACTIVE = ("browsing", "office", "mail", "dev", "photo", "meeting",
                   "gaming", "media", "video-edit", "idle")
-C7_SAME_NAME = ("render", "transcode", "backup")   # indexing, ml-train: their bases' first C seconds (9.10 D78)
+C7_SAME_NAME = ("render", "backup")   # indexing, ml-train, transcode: their bases' first C seconds (9.10 D78)
 INDEX_C_US = 39_435_000   # 9.10 D78, D80: the index's CPU total, total_work as compiled
 
 
@@ -170,6 +170,29 @@ def test_c7_ml_train_is_its_bases_first_c_seconds(coreset):
     assert ground_truth(variant) == [("ml-train", False)]
     gt = variant["ground_truth"][0]
     assert (gt["t_start"], gt["t_end"]) == (0, ML_C_US)
+    assert gt["attributes"].get("initiated") == "scheduled" and gt["attributes"].get("pre_committed_miss") is True
+
+
+TRANSCODE_C_US = 2_970_871_000   # 9.10 D97: the encode's CPU total, meas-ci:background:2026-10-03b, total_work as compiled
+TRANSCODE_BASE_US = 4_762_000_000   # c1-transcode: the smallest whole second by which the encode ends under every policy
+
+
+def test_c7_transcode_is_its_bases_first_c_seconds(coreset):
+    """9.10 D78's form for the transcode pair: c1-transcode's first C seconds — the editor by its id, name and arrival,
+    departing at C, its focus 2 s to C − 2 s — the same encode, `video-transcoder` shown as `HandBrakeCLI`, from 0 s; one
+    segment, labelled false, still a pre-committed miss. The base binds the encode whole from 2 s and ends after it."""
+    base, _ = coreset["c1-transcode"]
+    variant, _ = coreset["c7-transcode"]
+    b, v = events_by_id(base), events_by_id(variant)
+    assert set(b) == set(v) == {"video-editor", "batch"}
+    assert (v["video-editor"]["name"], v["video-editor"]["t"], v["video-editor"]["depart"]) == (
+        b["video-editor"]["name"], b["video-editor"]["t"], TRANSCODE_C_US)
+    assert (b["batch"]["name"], b["batch"]["t"]) == ("HandBrakeCLI", 2_000_000)
+    assert (v["batch"]["name"], v["batch"]["t"]) == ("HandBrakeCLI", 0)
+    assert b["video-editor"]["depart"] == base["ground_truth"][0]["t_end"] == TRANSCODE_BASE_US
+    assert ground_truth(variant) == [("transcode", False)]
+    gt = variant["ground_truth"][0]
+    assert (gt["t_start"], gt["t_end"]) == (0, TRANSCODE_C_US)
     assert gt["attributes"].get("initiated") == "scheduled" and gt["attributes"].get("pre_committed_miss") is True
 
 

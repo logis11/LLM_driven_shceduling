@@ -120,16 +120,16 @@ def test_cpu_batch_runs_and_blocks_until_total_work(fixture_path, library):
 
 
 def test_zero_inclusive_block_table_leaves_the_program_running(library):
-    # D25: HandBrakeCLI's block table is zero up to p99.9 — 0.08 % of its runs end in a block, so the task runs on
-    # through almost every run and those runs join one RUN; the table's top interval carries the rare blocks it
-    # measured (9.5 D71: about two in the ~1,840 runs of 2 s), and the CPU still sums to total_work
+    # D25: a block table zero up to p99.9 leaves the task running on through almost every run, those runs joining
+    # one RUN; the table's top interval carries the rare blocks measured, and the CPU still sums to total_work.
+    # HandBrakeCLI's, re-measured as `video-transcoder` (9.10 D97): about 2 in 100,000 of its runs end in a block
     from wlc import compiler
     build = compiler._TaskBuild("batch", "HandBrakeCLI")
-    params = library.entry("cpu-batch")["params"]
-    compiler._batch_loop(build, params, {"bind": {"program": "handbrakecli", "total_work": "2s"}}, "seed", "batch")
+    compiler._batch_loop(build, library.entry("video-transcoder")["params"], {"bind": {"total_work": "2s"}}, "seed", "batch")
     ops = [op["op"] for op in build.program]
     assert ops[-1] == "EXIT" and ops.count("RUN") == ops.count("SLEEP") + 1 and ops.count("SLEEP") <= 10
     assert sum(op["us"] for op in build.program if op["op"] == "RUN") == 2_000_000 == build.demand_us
+    params = library.entry("cpu-batch")["params"]
     build = compiler._TaskBuild("hog", "python3")
     compiler._batch_loop(build, params, {"bind": {"program": "python3", "total_work": "2s"}}, "seed", "hog")
     assert "SLEEP" in {op["op"] for op in build.program}          # python3 blocks after every run
@@ -138,7 +138,7 @@ def test_zero_inclusive_block_table_leaves_the_program_running(library):
 
 def test_a_single_table_set_batch_loop_needs_no_program_binding(library):
     # 9.7 D29: file-backup, file-archiver and game-download each carry one table set, taken without a `program` binding;
-    # cpu-batch, with five, still needs one
+    # cpu-batch, with three, still needs one
     import pytest
     from wlc import compiler
     build = compiler._TaskBuild("backup", "borg")
