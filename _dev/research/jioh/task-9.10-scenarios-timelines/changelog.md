@@ -1814,3 +1814,72 @@ Hands to 9.12 and 9.15:
 - the scenario catalog's S8 row, CpsMark+'s HandBrake workload H.264 per its own code (D95);
 - prose citing that workload as H.265;
 - `cpu-batch`'s scope without `HandBrakeCLI` (D11's hand-off).
+
+## D101 — the export is started through Kdenlive's render dialog in every repeat; the job is the tree of the `kdenlive_render` it starts (2026-10-03)
+
+By 인지오's decision, D10's open item "the export's process and its names" and how the campaign starts it. In every repeat Kdenlive is open on the `video-editor` project. Its Render action (Ctrl+Return) opens the render dialog, and "Render to File" is pressed on the dialog as it opens: the default profile (D103), the full project, the dialog's default output file. Kdenlive writes its own playlist and starts the renderer. The job is every process of the tree rooted at the process that executes `/usr/bin/kdenlive_render`, from its first schedule-in on the measured CPU to its exit. The playlist Kdenlive writes is kept from each job.
+
+Grounds:
+
+- **Kdenlive 23.08.5's export** (S2-59). The dialog starts `kdenlive_render delivery <melt> <playlist> --pid <Kdenlive's pid>` detached. `kdenlive_render` runs `melt-7 -progress <playlist>` as its child and sends the progress to Kdenlive over D-Bus. 23.08.5 has no command-line export. Started detached, `kdenlive_render` is not Kdenlive's child, so the job's root is the process that executes it; it keeps Kdenlive's CPU affinity.
+- **D10's terms.** "Kdenlive's own export of the `video-editor` entry's project, observed on the runner"; "an export phase on 9.5's Kdenlive setup". The dialog, the playlist and the progress path are Kdenlive's own.
+- **PCMark 10's Video Editing has no export step** (S2-13 p. 55; `pcmark10` pp. 76–77). Its parts are a Media Foundation downscale and FFmpeg command lines that sharpen and deshake, the output codec unstated. The project already takes the sharpening's parameters (`video-editor`'s scope).
+- **The names are read from the run** (D25): the `comm`s of `kdenlive_render` and of the `melt` it starts, `melt-7` by Kdenlive's own lookup (S2-59 `mltconnection.cpp:106`; S2-60).
+
+Not taken: Kdenlive writes the playlist once, in a probe, and each repeat runs `kdenlive_render` on it with no window open. It is steadier, but Kdenlive's part shrinks to one recorded file and the progress path is lost.
+
+No file changed yet.
+
+## D102 — the export's state is D37's chroot at T0 with Kdenlive installed by apt; 9.5's project, settings and launch carried in (2026-10-03)
+
+By 인지오's decision. The campaign runs in D37's chroot of the English default install, built from the archive at D64's T0 (2026-09-22T17:00Z). On the harness CPUs, `apt-get install kdenlive ffmpeg` installs from the same snapshot with apt's defaults: 9.5's install line (`dataset/tools/meas/probe/appdefs.sh`), run as the DKMS campaign installed its driver package (D49). The user is the Tracker campaign's. 9.5's per-user UI file, its `kdenliverc` and its project writer (`appdefs.sh`; `dataset/tools/meas/probe/kdenlive_project.py`) are carried into the user's home. Xvfb runs on the harness CPUs, its socket visible in the chroot, and Kdenlive runs as the user under a session bus of its own.
+
+Grounds:
+
+- **One state across 9.10's campaigns** (D82, D94). The upgrade, DKMS, Tracker, MNIST and HandBrakeCLI campaigns ran in this chroot, the last four at this T0.
+- **The render stack is the one 9.5 measured** (S2-60). At T0 the archive holds Kdenlive 4:23.08.5-0ubuntu4, the version in 9.5's install logs (`video-editor`'s scope), with MLT 7.22.0, FFmpeg 6.1.1 and x264 0.164.3108, all in the release pocket with no update in either pocket.
+- **Kdenlive's recommends** (S2-60). `kdenlive` recommends `frei0r-plugins`, which carries the project's `frei0r.cairoblend` transition, with `mediainfo` and `swh-plugins`; apt's defaults install them. The packages added are recorded per repeat.
+- **D10's "9.5's Kdenlive setup"** is read as 9.5's project, its settings and its launch.
+
+Not taken: 9.5's install on the runner. The rest of the runner image is not a desktop install, and its packages are the archive's on the day.
+
+No file changed yet.
+
+## D103 — the render profile is Kdenlive 23.08.5's shipped default, MP4-H264/AAC as the dialog opens: x264 at `veryfast`, CRF 23 (2026-10-03)
+
+Taken under 인지오's delegation (2026-10-03), D10's open item "the render profile's settings, as Kdenlive 23.08 ships its default", read from the source (S2-59). The dialog opens on `renderProfile`'s default, MP4-H264/AAC, since the project names no profile. Its settings with the dialog's defaults:
+
+- `f=mp4 movflags=+faststart`;
+- `vcodec=libx264`, `crf=23` (the preset's default quality, "Custom Quality" off), `g=15`, `preset=veryfast` (speed index 6);
+- `acodec=aac ab=160k`: the project's empty audio track exported as silence;
+- `real_time=-1` (one processing thread, "Parallel Processing" off) and `threads=0` (`encodethreads`' default);
+- the full project, one pass, no proxy clips, no metadata, at the project's 1920×1080 at 30 fps.
+
+Grounds:
+
+- **D10 fixes the default render profile.** The settings are its, read, not chosen.
+- **The playlist is checked against them.** The `<consumer>` element Kdenlive writes into each job's playlist carries the profile's settings (S2-59 `renderrequest.cpp`); validity asks the settings above in every pooled repeat.
+
+What x264 and the decoder make of `threads=0` under the pin is read from the run: x264's options string in the output, and the threads perf records.
+
+No file changed yet.
+
+## D104 — the export's start: Kdenlive open on the project on the measured CPU, the clip warm; the runner's kernel (2026-10-03)
+
+Taken under 인지오's delegation (2026-10-03), on 9.5 D21, D83 and D94.
+
+- **The project.** 9.5's: the clip, 20 s of 1920×1080 at 30 fps H.264 (`testsrc`, `libx264` `veryfast`, `yuv420p`, no audio; design), and `kdenlive_project.py`'s project over its 600 frames with the unsharp effect at PCMark 10's parameters. The clip is generated by the chroot's `ffmpeg` on the harness CPUs, as `~/Videos/clip.mp4`, and the project is written as `~/Videos/project.kdenlive`. The clip's SHA-256 is recorded and must be one across the pooled repeats.
+- **The launch.** `kdenlive ~/Videos/project.kdenlive` as the user in the chroot, with 9.5's environment (`QT_QPA_PLATFORM=xcb`, `KDE_FULL_SESSION=true`). Kdenlive's whole tree is on the measured CPU (9.5 D21: the application's process tree pinned to one CPU), and the export inherits it. Kdenlive's own CPU in the phase is outside the job and reported beside it, as the runner's agent processes are (D94).
+- **The warm start.** Before the phase: Kdenlive open on the project, its own load of the clip, and left to settle; the clip read whole. The clip's cached fraction is measured with `fincore`, and validity asks at least 0.99. The fractions for `melt-7`, MLT's modules and the codec libraries are recorded beside it.
+- **The phase.** From the Render shortcut to the exit of `kdenlive_render`; no cap of its own. The workflow's job limit is 330 minutes.
+- **The venue.** The runner's kernel as recorded, its transparent huge pages in `always` mode, recorded before and after the phase (D94).
+
+Grounds:
+
+- **One CPU, the application's tree** (9.5 D21). The export is Kdenlive's child by affinity (D101), so the window and the render share the CPU, as on a one-CPU desktop. The editor's own CPU in the files is `video-editor`'s, beside the job.
+- **A warm start** (D83; D94). A user exporting a project they have open has its clip in the page cache. The batch-loop compiler would spread a cold start's page-ins over the whole simulated job.
+- **9.5's project** (D102). The clip's content and length are design (D10, D17: "the project's 20 s clip is design").
+
+The entry's form — by 9.6 D7's criterion — and the list are fixed after the dry run. The job's size against the segments is read from it (D17).
+
+No file changed yet.

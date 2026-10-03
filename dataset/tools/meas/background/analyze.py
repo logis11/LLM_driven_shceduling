@@ -65,7 +65,8 @@ ROOT_COMMS = {"borg": ("borg",), "7z": ("7z", "7zz"), "steamcmd": ("steamcmd",),
               "dkms": ("chroot",),   # dkms: 9.10 D50, the install stage as upgrade's
               "tracker": ("tracker-miner-fs-3", "tracker-miner-f"),   # tracker: 9.10 D65, the miner its session starts
               "mnist": ("chroot",),   # mnist: 9.10 D84, the training run launched into the chroot as upgrade's stage
-              "handbrake": ("chroot",)}   # handbrake: 9.10 D11, the encode launched into the chroot as mnist's run
+              "handbrake": ("chroot",),   # handbrake: 9.10 D11, the encode launched into the chroot as mnist's run
+              "kdenlive": ("kdenlive_render",)}   # kdenlive: 9.10 D101, the renderer Kdenlive's dialog starts detached
 # 9.10 D50: the DKMS job is every process rooted at a run of either kernel hook, which execs dkms_autoinstaller (S2-03)
 DKMS_HOOKS = ("/etc/kernel/postinst.d/dkms", "/etc/kernel/header_postinst.d/dkms", "/usr/lib/dkms/dkms_autoinstaller")
 CLASSES = ("disk", "uninterruptible", "network", "sleep", "runnable")
@@ -73,7 +74,7 @@ CLASSES = ("disk", "uninterruptible", "network", "sleep", "runnable")
 
 def job_of(phase):
     for job, prefix in (("borg", "borg"), ("7z", "7z"), ("steamcmd", "steam"), ("upgrade", "upgrade"), ("dkms", "dkms"),
-                        ("tracker", "tracker"), ("mnist", "mnist"), ("handbrake", "handbrake")):
+                        ("tracker", "tracker"), ("mnist", "mnist"), ("handbrake", "handbrake"), ("kdenlive", "kdenlive")):
         if phase.startswith(prefix):
             return job
     return None
@@ -84,8 +85,9 @@ def is_program(job, filename, comm):
     binary — not /usr/games/steamcmd or steamcmd.sh, the shell wrappers that start it. Without an exec row, by comm.
     The unattended upgrade (9.10 D37): every process of the tree — the job is the unit's commands and all they start.
     The Tracker index (9.10 D65): every process in the miner's tree. The MNIST training run (9.10 D84): every process of
-    the tree launched into the chroot. The HandBrakeCLI transcode (9.10 D11): the same."""
-    if job in ("upgrade", "tracker", "mnist", "handbrake"):
+    the tree launched into the chroot. The HandBrakeCLI transcode (9.10 D11): the same. The Kdenlive export (9.10
+    D101): every process of the renderer's tree."""
+    if job in ("upgrade", "tracker", "mnist", "handbrake", "kdenlive"):
         return True
     if filename:
         base = filename.rsplit("/", 1)[-1]
@@ -118,7 +120,11 @@ def load_execs(path):
 
 def launched_root(job, exec_rows):
     """The process phase.sh launched: the earliest one that executed taskset and then the job's command (borg, 7z, or
-    /usr/games/steamcmd, which becomes a bash running steamcmd.sh before it starts SteamCMD's binary)."""
+    /usr/games/steamcmd, which becomes a bash running steamcmd.sh before it starts SteamCMD's binary). The Kdenlive
+    export (9.10 D101): the earliest process that executed kdenlive_render — Kdenlive starts it detached, so no
+    taskset precedes it and it is not in Kdenlive's tree."""
+    if job == "kdenlive":
+        return next((pid for _t, pid, f in exec_rows if f.rsplit("/", 1)[-1] in ROOT_COMMS[job]), None)
     last = {}
     for _t, pid, f in exec_rows:
         if last.get(pid, "").rsplit("/", 1)[-1] == "taskset" and f.rsplit("/", 1)[-1] in ROOT_COMMS.get(job, ()):

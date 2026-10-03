@@ -201,6 +201,35 @@ def validity(family, dirs, entry):
                     notes.append("cached fraction not recorded")
                 if r.get("handbrake.handbrake-transcode.video_track"):   # one stream across repeats: the video track's frames and bytes
                     dbs.add(r["handbrake.handbrake-transcode.video_track"])
+            if r.get("app") == "kdenlive":   # 9.10 D101–D104: the state, the project, the warm start, the dialog's export whole
+                for x, want in (("upgrade.layer.missing", "0"), ("upgrade.layer.extra", "0"), ("upgrade.run_systemd_system", "absent"),
+                                ("kdenlive.state.install.rc", "0"),
+                                # S2-60: the archive's render stack at T0, with Kdenlive's recommends (D102)
+                                ("kdenlive.pkg.kdenlive", "4:23.08.5-0ubuntu4"), ("kdenlive.pkg.melt", "7.22.0-1build6"),
+                                ("kdenlive.pkg.libmlt7", "7.22.0-1build6"), ("kdenlive.pkg.libavcodec60", "7:6.1.1-3ubuntu5"),
+                                ("kdenlive.pkg.libx264-164", "2:0.164.3108+git31e19f9-1"), ("kdenlive.pkg.frei0r-plugins", "1.8.0-1build3"),
+                                ("kdenlive.clip.rc", "0"), ("kdenlive.project.rc", "0"), ("kdenlive.export.rc", "0"),
+                                ("kdenlive.export.mode", "delivery"),
+                                # D103: the default profile as the dialog opens, in the playlist's consumer
+                                ("kdenlive.consumer.mlt_service", "avformat"), ("kdenlive.consumer.f", "mp4"),
+                                ("kdenlive.consumer.vcodec", "libx264"), ("kdenlive.consumer.crf", "23"),
+                                ("kdenlive.consumer.preset", "veryfast"), ("kdenlive.consumer.g", "15"),
+                                ("kdenlive.consumer.acodec", "aac"), ("kdenlive.consumer.ab", "160k"),
+                                ("kdenlive.consumer.real_time", "-1"), ("kdenlive.consumer.threads", "0"),
+                                ("kdenlive.consumer.in", "0"), ("kdenlive.consumer.out", "599"),
+                                # the project's 600 frames exported whole, with the silence of its audio track
+                                ("kdenlive.output.video.codec", "h264"), ("kdenlive.output.video.frames", "600"),
+                                ("kdenlive.output.video.size", "1920x1080"), ("kdenlive.output.audio.codec", "aac"),
+                                ("thp.before.enabled", "[always] madvise never")):   # D104: the runner's mode, D87's venue
+                    if r.get(x) != want:
+                        notes.append(f"{x} {r.get(x)} (want {want})")
+                try:   # the export starts warm (D104): the clip in the page cache
+                    if float(r.get("cache.kdenlive-export.fraction") or "") < 0.99:
+                        notes.append(f"cached fraction {r.get('cache.kdenlive-export.fraction')} at the start (want >= 0.99)")
+                except ValueError:
+                    notes.append("cached fraction not recorded")
+                # one clip, one installed set and one encoder setup across repeats
+                dbs.add((r.get("kdenlive.clip.sha256"), r.get("kdenlive.state.added_sha256"), r.get("kdenlive.output.x264")))
         if family == "desktop":   # 9.8 D13 (the gate itself is checked for every family above)
             want, got = r.get("renderers.wanted_min"), r.get("renderers.observed")
             if want and got and int(got) < int(want):

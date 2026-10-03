@@ -22,6 +22,9 @@
 #             1.7.2 as Ubuntu 24.04 packages it encoding Big Buck Bunny's 4K H.264 edition whole with its default preset,
 #             H.264 1920×1080 in MP4, in that chroot; probe mode encodes two 30 s cuts of the clip at each of HandBrake's
 #             own H.265 presets (D93's probe)
+#   kdenlive  kdenlive-export — 9.10's Kdenlive export campaign (9.10 changelog D10, D101–D104): Kdenlive 23.08.5 as
+#             Ubuntu 24.04 packages it exporting 9.5's `video-editor` project through its render dialog with its default
+#             profile, in that chroot, the window on the measured CPU and the dialog driven from the harness CPUs
 # Every measured phase is one command pinned to the measured CPU (pin.sh,
 # phase.sh MEAS_PIN=load), observed over the whole phase from the harness CPUs
 # by `perf sched record -a` — with the exec rows that name each process's
@@ -148,11 +151,13 @@ case "$APP" in
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y steamcmd > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
         STEAMCMD="$( [ -x /usr/games/steamcmd ] && echo /usr/games/steamcmd || command -v steamcmd)"; rec steamcmd.binary "$STEAMCMD"
         rec steamcmd.package "$(dpkg-query -W -f '${Version}' steamcmd 2>/dev/null)" ;;
-  upgrade|dkms|tracker|mnist|mnist-madvise|handbrake)
+  upgrade|dkms|tracker|mnist|mnist-madvise|handbrake|kdenlive)
         # tracker: util-linux-extra for fincore, the cold start's check (D75; the runner's image lacks it, run #126);
-        # mnist and handbrake: the same, for the warm start's check (D83)
+        # mnist, handbrake and kdenlive: the same, for the warm start's check (D83); kdenlive: 9.5's display and driver
+        # tools (probe/apps.sh) and tesseract, which finds the render dialog's button in its screenshot (D101)
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mmdebstrap \
-          $( [ "$APP" = tracker ] || [ "${APP%-madvise}" = mnist ] || [ "$APP" = handbrake ] && echo util-linux-extra) > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
+          $( [ "$APP" = tracker ] || [ "${APP%-madvise}" = mnist ] || [ "$APP" = handbrake ] || [ "$APP" = kdenlive ] && echo util-linux-extra) \
+          $( [ "$APP" = kdenlive ] && echo xvfb xdotool imagemagick x11-apps tesseract-ocr tesseract-ocr-eng) > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
         rec mmdebstrap.version "$(mmdebstrap --version 2>&1 | head -1)" ;;
 esac
 rec zpaq.version "$(zpaq 2>&1 | head -1)"
@@ -1017,6 +1022,184 @@ hb_job() {
   df -B1 --output=target,avail "$WORK" > "$OUT/df.handbrake.txt" 2>&1
 }
 
+# ---- the Kdenlive export (9.10 D10, D101–D104) --------------------------------------------
+# D102's state: D37's chroot at D64's T0, then `apt-get install kdenlive ffmpeg` from the same snapshot with apt's
+# defaults — 9.5's install line (probe/appdefs.sh), recommends included (frei0r-plugins carries the project's
+# cairoblend transition; S2-60) — as the DKMS job installs its driver package. The Tracker job's user, its XDG
+# folders, 9.5's per-user UI file and kdenliverc, and 9.5's clip and project in ~/Videos (D104). Xvfb on the harness
+# CPUs, its socket bound into the chroot; Kdenlive launched as the user under a session bus of its own, its tree on the
+# measured CPU (9.5 D21), left 30 s to settle (9.5's settle for kdenlive); the clip read whole. The phase drives the
+# render dialog from the harness CPUs (kdenlive_export.py): Ctrl+Return, "Render to File" on the dialog as it opens,
+# the default profile (D103). The job — the tree of the kdenlive_render the dialog starts, detached, from its first
+# schedule-in to its exit (D101) — is cut by analyze.py.
+KD_VID="/home/$TRK_USER/Videos"; KD_PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+KD_SETTLE_S=30
+kd_user() {   # kd_user <root> <cpus> <cmd...>: in the chroot as the user, in ~/Videos, on <cpus>, with 9.5's display
+  # environment (appdefs.sh) and the runtime directory a login session has
+  local r="$1" cpus="$2"; shift 2
+  sudo taskset -c "$cpus" chroot "$r" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" --init-groups /usr/bin/env -i -C "$KD_VID" \
+    HOME="/home/$TRK_USER" USER="$TRK_USER" LOGNAME="$TRK_USER" PATH="$KD_PATH" LANG=en_US.UTF-8 DISPLAY=:99 \
+    XDG_RUNTIME_DIR="/run/user/$TRK_UID" QT_QPA_PLATFORM=xcb KDE_FULL_SESSION=true "$@"
+}
+kd_state() {   # kd_state <root>: Kdenlive installed at T0, the user, 9.5's settings, the clip and the project — on the
+  # harness CPUs
+  local r="$1" t0 p h
+  upg_sources "$r" "$UPG_T0"
+  unmeasured sudo chroot "$r" apt-get update > "$OUT/kdenlive.state.apt-update.log" 2>&1; rec kdenlive.state.apt_update.rc "$?"
+  t0=$(date +%s)
+  unmeasured sudo chroot "$r" /usr/bin/env DEBIAN_FRONTEND=noninteractive apt-get install -y kdenlive ffmpeg \
+    < /dev/null > "$OUT/kdenlive.state.install.log" 2>&1
+  rec kdenlive.state.install.rc "$?"; rec kdenlive.state.install_s "$(( $(date +%s) - t0 ))"
+  unmeasured sudo chroot "$r" apt-get clean
+  sudo chroot "$r" dpkg-query -W -f '${binary:Package}\t${Version}\t${db:Status-Abbrev}\n' > "$OUT/kdenlive.dpkg.tsv" 2>&1
+  diff "$OUT/upgrade.dpkg.t0.tsv" "$OUT/kdenlive.dpkg.tsv" > "$OUT/kdenlive.dpkg.diff.txt"
+  rec kdenlive.state.added "$(grep -c '^>' "$OUT/kdenlive.dpkg.diff.txt")"
+  rec kdenlive.state.added_sha256 "$(grep '^>' "$OUT/kdenlive.dpkg.diff.txt" | sha256sum | cut -d' ' -f1)"
+  for p in kdenlive melt libmlt7 libavcodec60 libx264-164 frei0r-plugins mediainfo swh-plugins ffmpeg; do
+    rec "kdenlive.pkg.$p" "$(sudo chroot "$r" dpkg-query -W -f '${Version}' "$p" 2>/dev/null)"
+  done
+  sudo chroot "$r" melt-7 -version > "$OUT/kdenlive.melt.version.txt" 2>&1
+  sudo chroot "$r" useradd -m -u "$TRK_UID" -U -s /bin/bash "$TRK_USER" > "$OUT/kdenlive.useradd.log" 2>&1; rec kdenlive.useradd.rc "$?"
+  sudo chroot "$r" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" --init-groups /usr/bin/env -i HOME="/home/$TRK_USER" \
+    USER="$TRK_USER" LOGNAME="$TRK_USER" PATH="$KD_PATH" LANG=en_US.UTF-8 xdg-user-dirs-update > "$OUT/kdenlive.xdg.log" 2>&1
+  rec kdenlive.xdg.rc "$?"
+  sudo mkdir -p "$r/run/user/$TRK_UID"; sudo chown "$TRK_UID:$TRK_UID" "$r/run/user/$TRK_UID"; sudo chmod 700 "$r/run/user/$TRK_UID"
+  # 9.5's per-user UI file and kdenliverc, as appdefs.sh's kdenlive case writes them (tests: the same text)
+  h="$WORK/kd-home"; rm -rf "$h"; mkdir -p "$h/.local/share/kxmlgui5/kdenlive" "$h/.config"
+  cat > "$h/.local/share/kxmlgui5/kdenlive/kdenliveui.rc" <<'RC'
+<!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
+<kpartgui name="kdenlive" version="1">
+<ActionProperties scheme="Default">
+  <Action name="clear_render_timeline_zone" shortcut="Ctrl+Shift+F10"/>
+  <Action name="set_render_timeline_zone" shortcut="Ctrl+Shift+F9"/>
+  <Action name="file_revert" shortcut="Ctrl+Shift+F8"/>
+</ActionProperties>
+</kpartgui>
+RC
+  printf '[timeline]\nautopreview=false\n' > "$h/.config/kdenliverc"
+  sudo cp -a "$h/.local" "$h/.config" "$r/home/$TRK_USER/"; sudo chroot "$r" chown -R "$TRK_USER:$TRK_USER" "/home/$TRK_USER/.local" "/home/$TRK_USER/.config"
+  rec kdenlive.settings.rc "$?"
+  # 9.5's clip by the chroot's ffmpeg (appdefs.sh: 1920×1080 H.264, PCMark 10 Video Editing; 20 s at 30 fps, synthetic
+  # content, design) and its project (kdenlive_project.py), in ~/Videos (D104)
+  kd_user "$r" "$MEAS_HARNESS_CPUS" ffmpeg -loglevel error -y -f lavfi -i testsrc=size=1920x1080:rate=30 -t 20 -an \
+    -c:v libx264 -preset veryfast -pix_fmt yuv420p clip.mp4 > "$OUT/kdenlive.clip.log" 2>&1; rec kdenlive.clip.rc "$?"
+  rec kdenlive.clip.bytes "$(sudo stat -c %s "$r$KD_VID/clip.mp4" 2>/dev/null || echo 0)"
+  rec kdenlive.clip.sha256 "$(sudo sha256sum "$r$KD_VID/clip.mp4" 2>/dev/null | cut -d' ' -f1)"
+  python3 "$MEAS/probe/kdenlive_project.py" "$KD_VID/clip.mp4" 600 30 "$WORK/project.kdenlive"; rec kdenlive.project.rc "$?"
+  cp "$WORK/project.kdenlive" "$OUT/kdenlive.project.kdenlive"
+  sudo cp "$WORK/project.kdenlive" "$r$KD_VID/project.kdenlive"; sudo chroot "$r" chown "$TRK_USER:$TRK_USER" "$KD_VID/project.kdenlive"
+}
+kd_mount() {   # kd_mount <root>: the X socket and /dev/shm, which the bind of /dev does not carry
+  local r="$1"
+  sudo mkdir -p "$r/tmp/.X11-unix"; sudo mount --bind /tmp/.X11-unix "$r/tmp/.X11-unix"; rec kdenlive.mount.x11.rc "$?"
+  sudo mount --bind /dev/shm "$r/dev/shm"; rec kdenlive.mount.shm.rc "$?"
+}
+kd_stop() {   # kd_stop <root>: every process whose root is the chroot, then the binds
+  local r="$1" p n=0
+  for p in /proc/[0-9]*; do
+    [ "$(sudo readlink "$p/root" 2>/dev/null)" = "$r" ] && { sudo kill -TERM "${p#/proc/}" 2>/dev/null; n=$((n + 1)); }
+  done
+  rec kdenlive.stop.term "$n"; sleep 5
+  for p in /proc/[0-9]*; do [ "$(sudo readlink "$p/root" 2>/dev/null)" = "$r" ] && sudo kill -KILL "${p#/proc/}" 2>/dev/null; done
+  sudo umount -l "$r/dev/shm" "$r/tmp/.X11-unix" 2>/dev/null
+}
+kd_launch() {   # kd_launch <root>: Kdenlive on the project under a session bus of its own, its tree on the measured CPU;
+  # the window found and the 30 s settle; the clip read whole and the cached fractions (D104)
+  local r="$1" wid wpid
+  start_xvfb
+  kd_mount "$r"
+  rec kdenlive.launch "dbus-run-session -- kdenlive $KD_VID/project.kdenlive"
+  setsid sudo taskset -c "$MEAS_CPU" chroot "$r" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" --init-groups /usr/bin/env -i -C "$KD_VID" \
+    HOME="/home/$TRK_USER" USER="$TRK_USER" LOGNAME="$TRK_USER" PATH="$KD_PATH" LANG=en_US.UTF-8 DISPLAY=:99 \
+    XDG_RUNTIME_DIR="/run/user/$TRK_UID" QT_QPA_PLATFORM=xcb KDE_FULL_SESSION=true \
+    dbus-run-session -- kdenlive "$KD_VID/project.kdenlive" > "$OUT/kdenlive.app.log" 2>&1 &
+  wid=$(wait_window kdenlive 120)
+  if [ -z "$wid" ]; then screenshot kdenlive-no-window; return 1; fi
+  wpid=$(xdotool getwindowpid "$wid" 2>/dev/null); rec kdenlive.window.pid "$wpid"
+  rec kdenlive.window.affinity "$(taskset -p "$wpid" 2>/dev/null | sed 's/.*: //')"
+  rec kdenlive.window.comm "$(cat "/proc/$wpid/comm" 2>/dev/null)"
+  sleep "$KD_SETTLE_S"; screenshot kdenlive-after-settle
+  rec kdenlive.windows "$(xdotool search --onlyvisible --name . 2>/dev/null | while read -r w; do xdotool getwindowname "$w"; done | paste -sd'|' -)"
+  sudo cat "$r$KD_VID/clip.mp4" > /dev/null
+  rec cache.kdenlive-export.fraction "$(mn_fraction "$r$KD_VID" clip.mp4)"
+  rec cache.kdenlive-export.lib_fraction "$(sudo find "$r/usr/lib/x86_64-linux-gnu" "$r/usr/lib/x86_64-linux-gnu/mlt-7" "$r/usr/bin" -maxdepth 1 \
+    \( -name 'libx264*' -o -name 'libavcodec*' -o -name 'libavformat*' -o -name 'libavfilter*' -o -name 'libswscale*' \
+       -o -name 'libmlt*' -o -name 'libmltavformat*' -o -name 'libmltcore*' -o -name 'libmltfrei0r*' -o -name melt-7 -o -name kdenlive_render \) \
+    -type f -print0 | sudo xargs -0 fincore -b -n -r -o PAGES,SIZE 2>/dev/null \
+    | awk -v pg="$PAGE" '{r += $1; s += int(($2 + pg - 1) / pg)} END {if (s > 0) printf "%.4f", r / s}')"
+}
+kd_after() {   # kd_after <root>: the renderer's playlist and arguments, the output, the render's log, Kdenlive's settings
+  local r="$1" target
+  python3 - "$OUT/export.json" "$OUT/export.playlist.mlt" >> "$KV" <<'PY'
+import json, sys, xml.etree.ElementTree as ET
+try:
+    e = json.load(open(sys.argv[1]))
+except OSError:
+    e = {}
+argv = e.get("renderer_argv") or []
+print(f"kdenlive.export.rc={e.get('rc', '')}")
+print(f"kdenlive.export.argv={' '.join(argv)}")
+print(f"kdenlive.export.mode={argv[1] if len(argv) > 1 else ''}")
+print(f"kdenlive.export.melt={argv[2] if len(argv) > 2 else ''}")
+print(f"kdenlive.export.notes={' | '.join(e.get('notes', []))}")
+st = e.get("steps", {})
+if "click" in st and "renderer_seen" in st:
+    print(f"kdenlive.export.click_to_seen_ms={(st['renderer_seen']['mono_ns'] - st['click']['mono_ns']) / 1e6:.1f}")
+try:
+    c = ET.parse(sys.argv[2]).getroot().find("consumer")
+except (OSError, ET.ParseError):
+    c = None
+if c is not None:
+    for k in sorted(c.attrib):
+        print(f"kdenlive.consumer.{k}={c.attrib[k]}")
+PY
+  target="$(sed -n 's/^kdenlive\.consumer\.target=//p' "$KV" | tail -1)"
+  rec kdenlive.output.path "$target"
+  if [ -n "$target" ]; then
+    rec kdenlive.output.bytes "$(sudo stat -c %s "$r$target" 2>/dev/null || echo 0)"
+    rec kdenlive.output.sha256 "$(sudo sha256sum "$r$target" 2>/dev/null | cut -d' ' -f1)"
+    sudo chroot "$r" ffprobe -v error -count_frames -show_streams -show_format -of json "$target" > "$OUT/kdenlive.output.ffprobe.json" 2>&1
+    python3 - "$OUT/kdenlive.output.ffprobe.json" >> "$KV" <<'PY'
+import json, sys
+try:
+    d = json.load(open(sys.argv[1]))
+except (OSError, ValueError):
+    d = {}
+for s in d.get("streams", []):
+    k = s.get("codec_type", "x")
+    print(f"kdenlive.output.{k}.codec={s.get('codec_name', '')}")
+    print(f"kdenlive.output.{k}.frames={s.get('nb_read_frames', '')}")
+    if k == "video":
+        print(f"kdenlive.output.video.size={s.get('width', '')}x{s.get('height', '')}")
+        print(f"kdenlive.output.video.profile={s.get('profile', '')}")
+    if k == "audio":
+        print(f"kdenlive.output.audio.bit_rate={s.get('bit_rate', '')}")
+print(f"kdenlive.output.format={d.get('format', {}).get('format_name', '')}")
+PY
+    # x264's own options string, written into the stream's first SEI
+    rec kdenlive.output.x264 "$(sudo python3 -c 'import sys; b=open(sys.argv[1],"rb").read(); i=b.find(b"x264 - core"); print(b[i:b.find(b"\0", i)].decode(errors="replace") if i >= 0 else "")' "$r$target")"
+    sudo cp "$r$target.log" "$OUT/kdenlive.render.log" 2>/dev/null
+  fi
+  sudo cp "$r/home/$TRK_USER/.config/kdenliverc" "$OUT/kdenlive.kdenliverc.after" 2>/dev/null
+  sudo chown "$(id -u):$(id -g)" "$OUT"/kdenlive.* 2>/dev/null
+}
+kd_job() {
+  local r="$WORK/chroot"
+  UPG_T0="${MEAS_KDENLIVE_T0:-20260922T170000Z}"; UPG_EXTRA=   # D64's T0; D102: Kdenlive installed by apt, not in the build
+  sudo rm -rf "$r"; upg_build "$r"; upg_mount "$r"; kd_state "$r"
+  if kd_launch "$r"; then
+    mn_thp before
+    export MEAS_PIN=harness   # the driver stimulates Kdenlive, which runs on the measured CPU, from the harness CPUs
+    phase kdenlive-export -- python3 "$HERE/kdenlive_export.py" "$r" "$OUT"
+    export MEAS_PIN=load
+    mn_thp after
+    kd_after "$r"
+  fi
+  kd_stop "$r"; kill "$(cat "$OUT/xvfb.pid" 2>/dev/null)" 2>/dev/null
+  upg_umount "$r"
+  df -B1 --output=target,avail "$WORK" > "$OUT/df.kdenlive.txt" 2>&1
+}
+
 # ---- the job ----------------------------------------------------------------------
 case "$APP" in
   borg)
@@ -1063,6 +1246,7 @@ case "$APP" in
   tracker) trk_job ;;
   mnist|mnist-madvise) mn_job ;;
   handbrake) hb_job ;;
+  kdenlive) kd_job ;;
   *) rec error "unknown app $APP" ;;
 esac
 

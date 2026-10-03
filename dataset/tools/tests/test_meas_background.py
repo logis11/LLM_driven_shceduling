@@ -486,9 +486,11 @@ def test_the_list_is_each_archetypes_batch_loop_tables():
     assert [k for _p, k, _l in pool.LIST["mnist"]] == ["batch_run_us", "batch_block_us", "program_cpu_us"]
     # 9.10's HandBrakeCLI method §1: the same three over the encode, until the form is fixed
     assert [k for _p, k, _l in pool.LIST["handbrake"]] == ["batch_run_us", "batch_block_us", "program_cpu_us"]
+    # 9.10's Kdenlive method §1: the same three over the export, until the form is fixed
+    assert [k for _p, k, _l in pool.LIST["kdenlive"]] == ["batch_run_us", "batch_block_us", "program_cpu_us"]
     assert {p for _p in pool.LIST.values() for p, _k, _l in _p} == {"borg-first-warm", "7z-mmt8-warm", "steam-fresh-shaped",
                                                                    "upgrade-install", "dkms-install", "tracker-index",
-                                                                   "mnist-train", "handbrake-transcode"}
+                                                                   "mnist-train", "handbrake-transcode", "kdenlive-export"}
 
 
 def test_the_mnist_blocks_are_carried_under_the_machine_exception_and_the_check_is_its_own_app():
@@ -519,6 +521,32 @@ def test_the_handbrake_job_is_every_process_of_the_tree_launched_into_the_chroot
     assert analyze.launched_root("handbrake", rows) == 11
     assert analyze.is_program("handbrake", "/usr/bin/HandBrakeCLI", "HandBrakeCLI")
     assert pool.NAME.match("meas-background-handbrake-r2-probe").groups() == ("handbrake", "2", "probe")
+
+
+def test_the_kdenlive_job_is_the_tree_of_the_renderer_the_dialog_starts():
+    # 9.10 D101: Kdenlive starts kdenlive_render detached, so the job's root is the first process that executed it —
+    # not Kdenlive's launch through taskset — and every process of its tree, melt-7 with it, is the program's
+    assert analyze.job_of("kdenlive-export") == "kdenlive"
+    rows = [(1.0, 10, "/usr/bin/sudo"), (1.1, 11, "/usr/bin/taskset"), (1.2, 11, "/usr/sbin/chroot"),
+            (1.3, 11, "/usr/bin/dbus-run-session"), (1.4, 12, "/usr/bin/kdenlive"),
+            (9.0, 40, "/usr/bin/kdenlive_render"), (9.1, 41, "/usr/bin/melt-7"), (20.0, 50, "/usr/bin/kdenlive_render")]
+    assert analyze.launched_root("kdenlive", rows) == 40
+    assert analyze.launched_root("kdenlive", rows[:5]) is None
+    assert analyze.is_program("kdenlive", "/usr/bin/melt-7", "melt-7")
+    assert pool.NAME.match("meas-background-kdenlive-r1-dry").groups() == ("kdenlive", "1", "dry")
+    assert pool.PHASES["kdenlive"] == ("kdenlive-export",)
+
+
+def test_the_kdenlive_job_carries_9_5s_settings_into_the_chroot():
+    # 9.10 D102: the per-user UI file and kdenliverc the kdenlive job writes are 9.5's (probe/appdefs.sh), text for text
+    import pathlib
+    import re
+    meas = pathlib.Path(analyze.__file__).resolve().parents[1]
+    rc = re.compile(r"cat > \"\$[A-Za-z]+/\.local/share/kxmlgui5/kdenlive/kdenliveui\.rc\" <<'RC'\n(.*?)\nRC\n", re.S)
+    conf = re.compile(r"printf '(\[timeline\][^']*)' > \"\$[A-Za-z]+/\.config/kdenliverc\"")
+    probe, job = (meas / "probe" / "appdefs.sh").read_text(), (meas / "background" / "run.sh").read_text()
+    assert rc.search(probe) and rc.search(job) and rc.search(probe).group(1) == rc.search(job).group(1)
+    assert conf.search(probe) and conf.search(job) and conf.search(probe).group(1) == conf.search(job).group(1)
 
 
 def test_the_tracker_job_runs_from_the_miners_exec_to_the_extractors_last_idle(tmp_path):
