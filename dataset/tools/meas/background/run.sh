@@ -18,10 +18,10 @@
 #             at its defaults, the checkpoint written, on torch 2.14.0's CPU build in that chroot, from a warm start
 #   mnist-madvise  the same job with the kernel's transparent huge pages in `madvise` mode, the desktop kernel's
 #             default — D87's check, never a repeat of the campaign
-#   handbrake handbrake-transcode — 9.10's HandBrakeCLI transcode campaign (9.10 changelog D11, D91–D94): HandBrake
-#             1.7.2 as Ubuntu 24.04 packages it encoding Big Buck Bunny's 4K H.264 edition whole with its default preset
-#             and H.265 chosen, 1920×1080 in MP4, in that chroot; probe mode encodes two 30 s cuts of the clip at each of
-#             HandBrake's own H.265 presets (D93's probe)
+#   handbrake handbrake-transcode — 9.10's HandBrakeCLI transcode campaign (9.10 changelog D11, D91–D95): HandBrake
+#             1.7.2 as Ubuntu 24.04 packages it encoding Big Buck Bunny's 4K H.264 edition whole with its default preset,
+#             H.264 1920×1080 in MP4, in that chroot; probe mode encodes two 30 s cuts of the clip at each of HandBrake's
+#             own H.265 presets (D93's probe)
 # Every measured phase is one command pinned to the measured CPU (pin.sh,
 # phase.sh MEAS_PIN=load), observed over the whole phase from the harness CPUs
 # by `perf sched record -a` — with the exec rows that name each process's
@@ -899,7 +899,8 @@ mn_job() {
 # job's user, its XDG folders; Big Buck Bunny's 4K 30 fps edition from download.blender.org (D91), fetched and unzipped
 # on the harness CPUs, the zip and the clip each checked by its SHA-256, moved into ~/Videos; the clip read into the page
 # cache and HandBrakeCLI's own scan of it run once, unmeasured (D94: D83's warm start). The phase is HandBrake's default
-# preset with H.265 chosen over the whole clip, as the user in the chroot, on the measured CPU (D93, D94); the job —
+# preset unchanged — x264 to 1080p in MP4, CpsMark+'s own code's codec (D95) — over the whole clip, as the user in the
+# chroot, on the measured CPU (D93, D94); the job —
 # every process of the tree, from its first schedule-in to its exit — is cut by analyze.py. Probe mode, never a repeat: 30 s of the
 # clip from its start and from 300 s, encoded on the measured CPU at each of HandBrake's own H.265 presets, the picture
 # held to DCI's 2K box (D92) — the cost per source second and the thread shape under the pin, before the encoder
@@ -909,8 +910,8 @@ HB_ZIP_SHA=750b255c6d9fee1e2a03a6716d4f358bca56e9115bf3e06a66162fc5272ae151
 HB_CLIP=bbb_sunflower_2160p_30fps_normal.mp4; HB_CLIP_SHA=37f0ff251a606c2dcfa26c19fe6bf843234b4e7a8889cfab50bc26f644e55520
 HB_VID="/home/$TRK_USER/Videos"; HB_PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 HB_BOX=(--maxWidth 2048 --maxHeight 1080)   # D92: DCI's 2K container, the 16:9 picture kept whole inside it
-HB_OUT=bbb_sunflower_2160p_30fps_normal.h265.mp4   # D94: the output's name, design
-HB_SETTINGS=(--preset "Fast 1080p30" --encoder x265)   # D93: HandBrake's default preset with H.265 chosen
+HB_OUT=bbb_sunflower_2160p_30fps_normal.out.mp4   # D95: the output's name, design
+HB_SETTINGS=(--preset "Fast 1080p30")   # D95: HandBrake's default preset unchanged — x264, CpsMark+'s own code's codec
 HB_PROBE_S=30; HB_PROBE_AT="0 300"   # probe mode: 30 s of the clip from its start and from 300 s
 HB_PROBES=("vf2k|Very Fast 2160p60 4K HEVC|${HB_BOX[*]}" "f2k|Fast 2160p60 4K HEVC|${HB_BOX[*]}"
            "hq2k|HQ 2160p60 4K HEVC Surround|${HB_BOX[*]}" "mkv1080|H.265 MKV 1080p30|--format av_mp4")
@@ -926,6 +927,7 @@ hb_state() {   # hb_state <root>: the user, its folders, the clip in ~/Videos �
     USER="$TRK_USER" LOGNAME="$TRK_USER" PATH="$HB_PATH" LANG=en_US.UTF-8 xdg-user-dirs-update > "$OUT/handbrake.xdg.log" 2>&1
   rec handbrake.xdg.rc "$?"
   rec handbrake.cli.version "$(sudo chroot "$r" dpkg-query -W -f '${Version}' handbrake-cli 2>/dev/null)"
+  rec handbrake.x264.version "$(sudo chroot "$r" dpkg-query -W -f '${Version}' libx264-164 2>/dev/null)"
   rec handbrake.x265.version "$(sudo chroot "$r" dpkg-query -W -f '${Version}' libx265-199 2>/dev/null)"
   rec handbrake.avcodec.version "$(sudo chroot "$r" dpkg-query -W -f '${Version}' libavcodec60 2>/dev/null)"
   sudo chroot "$r" HandBrakeCLI --version > "$OUT/handbrake.version.txt" 2>&1
@@ -970,15 +972,23 @@ hb_encode() {   # hb_encode <root> <phase> <output> <HandBrakeCLI options...>: o
   rec "handbrake.$name.picture" "$(grep -m1 -oE 'storage dimensions: [0-9]+ x [0-9]+' "$OUT/handbrake.$name.log")"
   rec "handbrake.$name.par" "$(grep -m1 -oE 'pixel aspect ratio: [0-9]+ : [0-9]+' "$OUT/handbrake.$name.log")"
   rec "handbrake.$name.display" "$(grep -m1 -oE 'display dimensions: [0-9]+ x [0-9]+' "$OUT/handbrake.$name.log")"
-  rec "handbrake.$name.x265_settings" "$(grep -m1 -oE 'x265 \[info\]: (Main|Main 10) profile.*' "$OUT/handbrake.$name.log")"
-  rec "handbrake.$name.x265_rc" "$(grep -m1 -oE 'Rate Control / qCompress.*' "$OUT/handbrake.$name.log")"
-  rec "handbrake.$name.x265_pool" "$(grep -m1 -oE 'Thread pool.*' "$OUT/handbrake.$name.log")"
+  rec "handbrake.$name.x264_cpu" "$(grep -m1 -oE 'x264 \[info\]: using cpu capabilities.*' "$OUT/handbrake.$name.log")"
+  rec "handbrake.$name.x264_profile" "$(grep -m1 -oE 'x264 \[info\]: profile .*' "$OUT/handbrake.$name.log")"
+  rec "handbrake.$name.x265_pool" "$(grep -m1 -oE 'Thread pool.*' "$OUT/handbrake.$name.log")"   # probe mode
   rec "handbrake.$name.x265_frame_threads" "$(grep -m1 -oE 'frame threads / pool features.*' "$OUT/handbrake.$name.log")"
-  # x265's own summary: the frames it encoded, its rate and the stream's bitrate and average QP — the same work in
-  # every repeat reads the same bitrate and QP (the probe, run #151: the output files' SHA-256 differ, the summaries not)
+  # the job's own accounts: the encoder as HandBrake set it up, the decoder's frames, and the video track the muxer
+  # wrote — the same work in every repeat writes the same frames and bytes (the probe, run #151: the output files'
+  # SHA-256 differ, the streams not); x265's own summary, in probe mode
+  rec "handbrake.$name.encoder" "$(grep -m1 -oE '\+ encoder: .*' "$OUT/handbrake.$name.log")"
+  rec "handbrake.$name.encoder_preset" "$(grep -m1 -oE '\+ preset: .*' "$OUT/handbrake.$name.log")"
+  rec "handbrake.$name.encoder_profile" "$(grep -m1 -oE '\+ profile: .*' "$OUT/handbrake.$name.log")"
+  rec "handbrake.$name.encoder_level" "$(grep -m1 -oE '\+ level: .*' "$OUT/handbrake.$name.log")"
+  rec "handbrake.$name.quality" "$(grep -m1 -oE '\+ quality: .*' "$OUT/handbrake.$name.log")"
+  rec "handbrake.$name.decoder" "$(grep -m1 -oE 'h264-decoder done: .*' "$OUT/handbrake.$name.log")"
+  rec "handbrake.$name.sync" "$(grep -m1 -oE 'sync: got [0-9]+ frames, [0-9]+ expected' "$OUT/handbrake.$name.log")"
+  rec "handbrake.$name.video_track" "$(grep -m1 -oE 'mux: track 0, [0-9]+ frames, [0-9]+ bytes' "$OUT/handbrake.$name.log" | sed 's/^mux: track 0, //')"
+  rec "handbrake.$name.frames" "$(grep -m1 -oE 'mux: track 0, [0-9]+ frames' "$OUT/handbrake.$name.log" | grep -oE '[0-9]+ frames' | grep -oE '[0-9]+')"
   rec "handbrake.$name.x265_summary" "$(grep -m1 -oE 'encoded [0-9]+ frames in .*' "$OUT/handbrake.$name.log")"
-  rec "handbrake.$name.frames" "$(grep -m1 -oE 'encoded [0-9]+ frames' "$OUT/handbrake.$name.log" | grep -oE '[0-9]+')"
-  rec "handbrake.$name.stream" "$(grep -m1 -oE 'encoded [0-9]+ frames in .*' "$OUT/handbrake.$name.log" | grep -oE '[0-9.]+ kb/s, Avg QP:[0-9.]+')"
   sudo rm -f "$r$HB_VID/$out"
 }
 hb_job() {

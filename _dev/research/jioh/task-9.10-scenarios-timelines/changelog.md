@@ -198,6 +198,8 @@ Hands to 9.14: the render files' judging terms; the pair review's P3 lines. Hand
 
 ## D11 — the transcode is `HandBrakeCLI` on CpsMark+'s workload definition (2026-10-01)
 
+> Amended by D95 (the codec is H.264, CpsMark+'s own code's; the paper's "H.256" is not read as H.265).
+
 By 인지오's decision, scope-card items 10 and 71: the user-started transcode of `c1-transcode` (and `c7-transcode` by its flip) and `c3-creation`'s last segment — today `cpu-batch`'s `HandBrakeCLI` program as 9.6 measured it, `HandBrakeCLI -i clip.mp4 -o out.mp4 --preset "Fast 720p30"` on "a generated 60 s 1280×720 30 fps test pattern with a sine tone (design)" (`task-9.6-compile/campaign/method.md:20–21`) — is re-measured on CpsMark+'s HandBrake workload, in a runner campaign of its own (9.10's). The workload: an H.264 4K source transcoded to H.265 at 2K in an MP4 container, by `HandBrakeCLI` as Ubuntu 24.04 packages it. The source clip's content and length are design unless a public 4K H.264 clip is chosen, and are stated either way.
 
 Grounds:
@@ -1611,6 +1613,8 @@ No file changed yet.
 
 ## D93 — the encoder settings are HandBrake's default preset with H.265 chosen; the job encodes the whole clip (2026-10-03)
 
+> Amended by D95 (`--encoder x265` leaves: HandBrake's default preset unchanged, x264). The whole clip and the probe stand.
+
 By 인지오's decision, D11's open item "the encoder settings that realise 'H.265 … 2K, MP4'" and D91's length, on the probe below. The transcode runs HandBrake 1.7.2's default preset, "Fast 1080p30", with its video encoder set to `x265`, the plain H.265 entry: `--preset "Fast 1080p30" --encoder x265`. Every other setting is the preset's own (S2-55). The picture is 1920×1080, D92's size, inside the preset's 1920×1080 bound. The frame rate is the source's 30 fps under the preset's peak of 30. x265 runs at the preset's "fast", RF 22, profile main, level 4.0. Audio is the first track as AAC stereo at 160 kb/s, in MP4. The job encodes the whole clip, 19,036 frames (D17, D91).
 
 Grounds:
@@ -1643,6 +1647,8 @@ No file changed yet.
 
 ## D94 — the transcode's state, warm start and job: D82's chroot with `handbrake-cli`, the clip warm, the encode as the user from its first schedule-in to its exit (2026-10-03)
 
+> Amended by D95 (the command drops `--encoder x265`; the output is `bbb_sunflower_2160p_30fps_normal.out.mp4`).
+
 Taken under 인지오's delegation (2026-10-03), on D82–D84's precedents.
 
 - **The state.** D37's chroot at D64's T0 (2026-09-22T17:00Z), with `handbrake-cli` added from the same snapshot: 1.7.2+ds1-1build2, with x265 3.5-2build1 and FFmpeg 6.1.1 (S2-56). Its 67 packages are recorded per repeat. The Tracker campaign's user, with its XDG folders made by the layer's `xdg-user-dirs-update`. The clip (D91) is fetched and unzipped on the harness CPUs, the zip and the clip each checked by its SHA-256, and placed as `~/Videos/bbb_sunflower_2160p_30fps_normal.mp4`.
@@ -1658,5 +1664,33 @@ Grounds:
 - **One venue** (D87's ground: 9.5 D10; 9.5 follow-ups decision 13). The MNIST campaign showed the mode can end a job's blocks (D85, D87). Whether this job's blocks are the kernel's is read from the dry run.
 
 The entry's form — `cpu-batch`'s `HandBrakeCLI` tables re-measured, or an entry of its own (9.6 D7's criterion) — and the list are fixed after the dry run.
+
+No file changed yet.
+
+## D95 — the transcode is H.264, CpsMark+'s own code's codec: HandBrake's default preset unchanged, amending D11's reading and D93 (2026-10-03)
+
+By 인지오's decision, on CpsMark+'s source code (S2-58). The transcode runs HandBrake 1.7.2's default preset, "Fast 1080p30", unchanged: `--preset "Fast 1080p30"`. Its settings (S2-55):
+
+- x264 0.164.3108 as the archive packages it (S2-56), at "fast", RF 22, profile main, level 4.0;
+- 1920×1080 at most, D92's size;
+- a peak frame rate of 30, so the clip's 30 fps are kept;
+- the first audio track as AAC stereo at 160 kb/s;
+- MP4.
+
+D11's workload is read as an H.264 4K source transcoded to H.264 at 2K in MP4. The clip stays Big Buck Bunny's 4K 30 fps edition, whole (D91, D93). D92 stands. D93's `--encoder x265` leaves, and with it D94's output name: the output is `bbb_sunflower_2160p_30fps_normal.out.mp4` (design). Everything else in D94 stands.
+
+Grounds:
+
+- **The benchmark's code is H.264 throughout** (S2-58). Its software preset is `fast_1080p_h264_sw`, and its hardware presets are `fast_1080p_h264_nvenc`, `fast_1080p_h264_vce` and `fast_1080p_qsv`. It confirms hardware use by HandBrake reporting `qsv_h264`, `nvenc_h264` or `vce_h264`. A commented-out earlier command used the built-in x264 preset "HQ 1080p30 Surround". The paper's "H.256" (`cpsmark-tbench23` §4.3.4, p. 6), which D11 read as H.265, is the one H.265 reading against all of these, and it is itself a typo.
+- **The code's "2K" is 1080p.** Every preset it names targets 1080p, and it logs the run as "4K->2K". D92's 1920×1080 agrees.
+- **HandBrake's default preset is "Fast 1080p30"** (S2-55). The code's preset name, `fast_1080p_h264`, matches it, but the preset file is not in the repository and the resource package was not reached (S2-58). The preset's exact settings are therefore HandBrake's own default, not read from CpsMark+.
+- **The code's clip is not obtainable** (S2-58): a 10 s 4K 24 fps cut of Tears of Steel in the unreached package. D91's public clip stays.
+
+Not taken:
+
+- D93's H.265 with the paper's text: the weaker of the two sources, its codec word a typo.
+- A 10 s cut of Tears of Steel of our own: the cut and its H.264 encoding would be design, and Blender's 4K `.mov`'s codec is unread.
+
+The dry run of D93's settings (run #152) is superseded and is not pooled. D93's probe stands as a record of HandBrake's H.265 presets on the runner.
 
 No file changed yet.
