@@ -3929,6 +3929,14 @@ a77819313f1acef8b19c5903218978151f7013393a91286585c1a00b3f589a09  S2-15/wb-sm201
 - **Coverage.** T6 — at T0 Ubuntu 24.04 packages Kdenlive 23.08.5 with MLT 7.22.0, FFmpeg 6.1.1 and x264 0.164.3108 from the release pocket, with no update in either pocket; the version 9.5's install logs show for Kdenlive (`video-editor`'s scope). Kdenlive recommends `frei0r-plugins`, which carries the project's `frei0r.cairoblend` transition. Not what the programs do at run time.
 - **One observation?** Not an observation; the archive's index.
 
+### S2-61 — MLT 7.22.0's `melt`: its progress loop's 40 ms sleep (read at stage 3, 2026-10-03)
+
+- **Citation.** Meltytech, *MLT*, tag `v7.22.0` (commit `4b427bfa708db50eb0a3d840c6f83b71269f7e41`), `src/melt/melt.c`, `https://github.com/mltframework/mlt`. Ubuntu 24.04 packages MLT 7.22.0 as `melt` 7.22.0-1build6 (S2-60); the package's own patches were not read. Read for D109: why the export's block per run splits across repeats.
+- **Copy read.** `https://raw.githubusercontent.com/mltframework/mlt/v7.22.0/src/melt/melt.c`, accessed 2026-10-03 (200); `sources/S2-61/melt.c-v7.22.0`, SHA-256 48d5831dda13e751cd1b57d806f117822e74b082bf28fd6a7ff885e4c7a729d0.
+- **Passages.** `melt.c:407–413`, `transport`: `int progress = mlt_properties_get_int(MLT_CONSUMER_PROPERTIES(consumer), "progress");` … `struct timespec tm = {0, 40000000};`. `:443–480`: `while (mlt_properties_get_int(properties, "done") == 0 && !mlt_consumer_is_stopped(consumer)) {` … with `progress`, `fprintf(stderr, "Current Frame: %10d, percentage: %10d%c", …)` when the position has advanced … `if (silent || progress) nanosleep(&tm, NULL);`. `:793–794`: `-progress` sets `is_progress = 1`; `:990–991`: it is set on the consumer as `progress`.
+- **Coverage.** T6 — `melt -progress`, as `kdenlive_render` runs it (S2-59 `renderjob.cpp:59`), keeps its main thread in a loop that prints the frame and percentage and sleeps 40 ms until the consumer stops. Supports reading the 40.05 ms blocks of `melt-7`'s main thread at the export's end as that sleep.
+- **One observation?** Not an observation; the program's source.
+
 ## 3. Not found
 
 - **T3 — numbers of open tabs and windows, and visible windows, from vendor telemetry; observed renderer-process counts for a set of tabs.** Searches: rows 33 and 40 (Mozilla telemetry dashboards and Mozilla Metrics blog; no Chromium/Google publication). The only S2 user data is new-tab openings (S2-29). The Chromium soft limit and spare process are definitions (S2-16), not observations.

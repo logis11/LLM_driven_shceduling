@@ -1932,3 +1932,32 @@ Grounds:
 - **The C7 property** (`building-plan.md` §3 C7, as D43 cites it): "tier 1 so no pair changes familiarity tier". Pair P3 keeps one tier in both files, `kdenlive` and `kdenlive_render` in `c2-p3a` against `kdenlive` and `borg` in `c2-p3b`.
 
 Applied at rebinding: `dataset/tools/wlc/grid.py`'s `NAME_TIERS`.
+
+## D108 — pair P3's segment 2 stays 60 s in both files; `c2-p3a` binds the whole export (2026-10-03)
+
+By 인지오's decision, D10's open item "the job's size against the segments" for pair P3. Segment 2 keeps its 60 s, 60–120 s, in both files. `c2-p3a`'s render binds the whole export from 60 s: `kdenlive_render` on `cpu-batch`, `total_work` its measured CPU total (D105, D106). `c2-p3b`'s `borg` is unchanged until D8's item.
+
+Grounds:
+
+- **The render ends inside the segment.** With the dry run's 16.0 s of CPU, it ends by about 99 s under every policy: 60 s, plus the job's CPU and blocks, plus the editor's 23.0 s of CPU released after 60 s (D78's arithmetic). The `true` cell's turnaround term then reads a finished job, as D78 kept `c1-indexing`'s segment for a job that fits it.
+- **One diff per pair** (`docs/workload/building-plan.md` §3, "Counts and reuse"; D80). Both files keep one length and still differ only in segment 2's job and label.
+- **The label at every instant concerns `false`.** D41's counterparts and D80's `c2-p1b` sized a segment to its job so that `false` never held with no unwanted work alive. Both of P3's segments say `true`.
+
+Not taken: segment 2 at the export's CPU total in both files, D42's and D80's form (the render could not finish inside it on a shared lane); segment 2 at the render's smallest finishing length in both files (the pair sized to one half's job while the other half is still a stand-in).
+
+Hands to D8's item: P3's segment 2 is read again against both jobs when the backup is measured.
+
+No file changed yet.
+
+## D109 — the block per run is settled by running on to the pool's projection, not by 9.6 D29's exception (2026-10-03)
+
+By 인지오's decision. At the first batch's five landings (runs #162, #163, `meas-ci:background:2026-10-03c`), every repeat valid, the run between voluntary blocks (1.930 ms ±1.6 %) and the CPU total (16.498 s ±1.7 %) hold the rule and the block per run does not: its per-repeat means are 4.91, 0.21, 5.56, 5.47 and 0.74 µs, ±98 % against the 1 µs floor, 30 repeats projected. The campaign runs on in one batch up to the projection, repeats 6–30 (9.7 D26), the rule read after each landing.
+
+Grounds:
+
+- **The spread is melt's own timer.** Repeats 1, 3 and 4 each end with one block of 40.05 ms, `melt-7`'s main thread about 16.39 s into the job, and repeats 2 and 5 with none; the block per run's other values are alike across repeats. With `-progress`, which `kdenlive_render` passes (S2-59 `renderjob.cpp:59`), melt's `transport` loop prints its progress and sleeps `{0, 40000000}`, 40 ms, until the consumer stops (MLT 7.22.0, `src/melt/melt.c:413`, `:480`; S2-61). Whether a job ends on one such sleep with nothing else of the tree running follows where the last sleep falls against the encode's end.
+- **The exception's ground does not fit.** 9.6 D29's exception carries "a value whose spread follows the machine, not the program" with its half-width; its two uses here followed the runner's disk (D58) and `khugepaged` (D87).
+
+Not taken: the block per run carried with its half-width at five repeats under the exception.
+
+No file changed yet.
