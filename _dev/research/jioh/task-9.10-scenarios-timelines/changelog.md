@@ -1694,3 +1694,38 @@ Not taken:
 The dry run of D93's settings (run #152) is superseded and is not pooled. D93's probe stands as a record of HandBrake's H.265 presets on the runner.
 
 No file changed yet.
+
+## D96 — a lengthened base keeps its operation at its fraction of the focus window: `c1-transcode`'s preview render at the window's middle (2026-10-03)
+
+By 인지오's decision, at the transcode files' rebinding. `c1-transcode` lengthens to hold the whole encode (D17), its length set as D90 set `c1-ml-train`'s: the smallest whole second by which the job ends under every policy. Its focus window keeps the 2 s margins, 2 s to T − 2 s. Its one operation, `preview-render` on `video-editor`, sits at the same fraction of the window as in the 60 s base: the middle, the base's 30 s in 2–58 s. `c7-transcode`, cut to C, places it by D44 as written, also at its window's middle.
+
+Grounds:
+
+- **D44's rule is the dataset's one placement rule for a re-timed file.** "A cut counterpart keeps its base's placement in proportion … each operation at its fraction of the window." The rule extends to a base re-timed the other way.
+- **D20 holds either way.** One operation per focus window on an application that has one, inside focus.
+- **The pair stays aligned.** Base and counterpart both place the render mid-job. At the base's literal 30 s, the render would meet the encode in its first 28 s, which hold HandBrakeCLI's own scan of the clip (D94). `c7-transcode` would then place it 28/(T − 4) of the way into its window.
+
+Not taken: the base's literal 30 s.
+
+No file changed yet.
+
+## D97 — the transcode is a new entry in the batch-loop form; `cpu-batch`'s `HandBrakeCLI` tables leave at fold-in (2026-10-03)
+
+By 인지오's decision, 9.6 D7's criterion applied to the dry run of D95's settings (run 37105339193, #153, the EPYC 7763). The encode is an entry of its own in the batch-loop form: a run drawn from the program's runs between voluntary blocks, pooled over its threads, then the block that followed it, until `total_work` of CPU is spent (9.6 D21, D22, D25). At fold-in, `cpu-batch`'s `handbrakecli_run` and `handbrakecli_block` leave, with the `handbrakecli` program, and the transcode files bind the new entry. The list is the MNIST campaign's: over the job, the run between voluntary blocks and the block per run, each tested by its mean as the table carries it, and the CPU total, tested by its per-repeat values (D17).
+
+Grounds (the dry run):
+
+- **Runnable throughout, not on one dominant thread.** The job is one process, `HandBrakeCLI`, 2,974.0 s from its first schedule-in to its exit, with 2,972.35 s of CPU (perf; taskstats 2,973.32 s): saturation 0.9994. Its 23 threads, all named `HandBrakeCLI`, hold 0.335, 0.207, 0.101, 0.088, 0.067, 0.056 and 0.043 of the CPU. 9.6 D7's criterion: a program is `cpu-batch` when it is runnable for the whole of its lifetime on one dominant thread, and sustained I/O waits or several equal threads give it its own entry. 9.6's 720p x264 encode, bound to `cpu-batch` (9.6 D12), had its main thread at 0.61 of 22 and the next at 0.09.
+- **The precedent.** Tracker's index failed the criterion and became `file-indexer`, a batch-loop entry of its own, while `cpu-batch`'s `tracker` tables left (D70).
+- **The blocks are rare and short.** 742,663 runs between voluntary blocks, mean 4.00 ms. The block after a run, the program's off-CPU time, has mean 0.602 µs and is zero at the 99th percentile. There are 3 uninterruptible waits of 0.37–0.47 ms, each ended by a wakeup from `khugepaged` (333 collapses in the phase, `thp_collapse_alloc` 60 → 393), and no disk wait. The threads' other sleeps are pipeline hand-offs: another thread of the program runs on.
+
+Also recorded:
+
+- **The state and clip.** The layer plus `handbrake-cli`'s 67 packages; `handbrake-cli` 1.7.2+ds1-1build2, `libx264-164` 2:0.164.3108+git31e19f9-1; the zip and the clip matching their SHA-256; the clip and the libraries cached at 1.0000 after the warm start.
+- **The encoder and picture.** `+ encoder: H.264 (libx264)`, preset fast, profile main, level 4.0, RF 22; x264's "profile Main, level 4.0, 4:2:0, 8-bit"; stored 1920 × 1080 at 1 : 1.
+- **The frames.** The decoder's 19,036 frames with no error; 19,038 frames synced and muxed, 276,311,652 B of video; the output 289,921,239 B.
+- **The superseded dry run of D93's settings** (run 37103205438, #152, the EPYC 7763, not pooled). x265's 4-thread pool encoded 19,038 frames with 2,483.81 s of CPU, saturation 0.9993, one process of 29 threads, the busiest 0.282 of the CPU.
+
+The entry's id is open.
+
+No file changed yet.

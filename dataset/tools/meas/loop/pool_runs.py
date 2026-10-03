@@ -187,6 +187,8 @@ def validity(family, dirs, entry):
                                 ("handbrake.handbrake-transcode.encoder", "+ encoder: H.264 (libx264)"),
                                 ("handbrake.handbrake-transcode.encoder_preset", "+ preset:  fast"),
                                 ("handbrake.handbrake-transcode.quality", "+ quality: 22.00 (RF)"),
+                                # the dry run, #153: the clip's 19,036 frames decoded whole
+                                ("handbrake.handbrake-transcode.decoder", "h264-decoder done: 19036 frames, 0 decoder errors"),
                                 ("handbrake.handbrake-transcode.picture", "storage dimensions: 1920 x 1080"),
                                 ("handbrake.handbrake-transcode.par", "pixel aspect ratio: 1 : 1"),
                                 ("thp.before.enabled", "[always] madvise never")):   # D94: the runner's mode, D87's venue
