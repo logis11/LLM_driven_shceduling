@@ -3831,6 +3831,30 @@ a77819313f1acef8b19c5903218978151f7013393a91286585c1a00b3f589a09  S2-15/wb-sm201
 - **Coverage.** T6 — `datasets.MNIST(root, …, download=True)` downloads the four archives into `<root>/MNIST/raw` once and extracts them; on a later start it finds the files by existence alone, downloads nothing, and reads each uncompressed file whole into memory as the dataset is built. The example's `root` is `'../data'` (S2-31, `main.py:120`).
 - **One observation?** Not an observation; the library's source.
 
+### S2-50 — Ubuntu 24.04's HWE kernel 7.0.0-31-generic: its transparent-hugepage default (read at stage 3, 2026-10-03)
+
+- **Citation.** Ubuntu noble-updates binary package `linux-buildinfo-7.0.0-31-generic` 7.0.0-31.31~24.04.1 (amd64), source `linux-hwe-7.0`, as Ubuntu's snapshot service serves the archive at 2026-09-22T17:00Z; the kernel `linux-generic-hwe-24.04` installs on a desktop at that date (D48, D51). Read for the MNIST campaign after its first batch: which transparent-hugepage mode the desktop's kernel starts in.
+- **Copy read.** `https://snapshot.ubuntu.com/ubuntu/20260922T170000Z/pool/main/l/linux-hwe-7.0/linux-buildinfo-7.0.0-31-generic_7.0.0-31.31~24.04.1_amd64.deb`, accessed 2026-10-03; its SHA-256 equals the `noble-updates` `Packages` index's at that date (fd9dad94bea6aba9e0a2fd9b84eb3ba38c83766caae4b417e7e130ba33f48f72); `sources/S2-50/`, the unpacked `usr/lib/linux/7.0.0-31-generic/config` as `config-7.0.0-31-generic` (66a6335641be2fe0f13e11a544b23ab3a12b45b59b6a1dd1853337baf70a304f). The same file as the headers package's `.config` (7.0.0-31.31~24.04.1, b4bff6ea35a6432482508908af5da5f35171a914cb31dcac5beecef19b81afd2), compared line by line.
+- **Passages.** `config:1288–1291`: `CONFIG_TRANSPARENT_HUGEPAGE=y` / `# CONFIG_TRANSPARENT_HUGEPAGE_ALWAYS is not set` / `CONFIG_TRANSPARENT_HUGEPAGE_MADVISE=y` / `# CONFIG_TRANSPARENT_HUGEPAGE_NEVER is not set`. `config:542–543`: `CONFIG_HZ_1000=y` / `CONFIG_HZ=1000`.
+- **Coverage.** T5 — the desktop's kernel boots with transparent huge pages in `madvise` mode: a process's anonymous memory is backed by huge pages, and collapsed by `khugepaged`, only where the process asks with `madvise(MADV_HUGEPAGE)`. Supports the kernel's default; a setting written at boot by a package not in the default layer is not covered.
+- **One observation?** Not an observation; the kernel package's own build configuration.
+
+### S2-51 — PyTorch 2.14.0's CPU allocator: when it asks for huge pages (read at stage 3, 2026-10-03)
+
+- **Citation.** PyTorch, *pytorch*, tag `v2.14.0`, `c10/core/impl/alloc_cpu.cpp`. Read with S2-50: whether the training run's tensors ask for huge pages.
+- **Copy read.** `https://raw.githubusercontent.com/pytorch/pytorch/v2.14.0/c10/core/impl/alloc_cpu.cpp`, accessed 2026-10-03 (200); `sources/S2-51/alloc_cpu.cpp-v2.14.0`, SHA-256 804e33b49071c92a8446c69081d77df3a10b6b76bf7d5da8c124552097a30a30.
+- **Passages.** `:58–70`: `inline bool is_thp_alloc_enabled() {` … `auto env = c10::utils::check_env("THP_MEM_ALLOC_ENABLE");` / `return env.has_value() ? env.value() : 0;` … `inline bool is_thp_alloc(size_t nbytes) {` / `// enable thp (transparent huge pages) for larger buffers` / `return (is_thp_alloc_enabled() && (nbytes >= gAlloc_threshold_thp));`. `:136–140`: `if (is_thp_alloc(nbytes)) {` … `int ret = madvise(data, nbytes, MADV_HUGEPAGE);`.
+- **Coverage.** T6 — on Linux, PyTorch's default CPU allocator advises huge pages only when `THP_MEM_ALLOC_ENABLE` is set; unset, as the example runs, it never calls `madvise(MADV_HUGEPAGE)`. Supports the allocator's behaviour at the tag; glibc's own allocator is not covered.
+- **One observation?** Not an observation; the library's source.
+
+### S2-52 — glibc 2.39's `malloc`: when it asks for huge pages (read at stage 3, 2026-10-03)
+
+- **Citation.** GNU C Library, tag `glibc-2.39`, `malloc/malloc.c` and `elf/dl-tunables.list`; Ubuntu 24.04's default layer holds `libc6` 2.39-0ubuntu8.x (S2-32), whose patches were not read. Read with S2-50 and S2-51: whether the training process's heap asks for huge pages.
+- **Copy read.** `https://sourceware.org/git/?p=glibc.git;a=blob_plain;f=malloc/malloc.c;hb=refs/tags/glibc-2.39` and the same for `elf/dl-tunables.list`, accessed 2026-10-03 (200); `sources/S2-52/`, SHA-256 `malloc.c-2.39` 5c2e41a83c1c4d1ddaaad761088b93469110a79067ba6485eb594a0423048663, `dl-tunables.list-2.39` 1acf9ff84df31de44746c5a4ddfb73613055a61f8f1ca01b64fdc7b89de1e0bb.
+- **Passages.** `malloc.c:2003–2009`, `madvise_thp`: "Do not consider areas smaller than a huge page or if the tunable is not active." / `if (mp_.thp_pagesize == 0 || size < mp_.thp_pagesize)` / `return;`. `malloc.c:5539–5549`, `do_set_hugetlb`: `if (value == 1)` … "Only enable THP madvise usage if system does support it and has 'madvise' mode." … `mp_.thp_pagesize = __malloc_default_thp_pagesize ();`. `dl-tunables.list:81–84`: `hugetlb {` / `type: SIZE_T` / `minval: 0` / `}`, no default given.
+- **Coverage.** T6 — glibc's allocator calls `madvise(MADV_HUGEPAGE)` only when the `glibc.malloc.hugetlb` tunable is set to 1; unset, it never does. With S2-50 and S2-51: on the desktop's kernel in `madvise` mode, neither allocator the training process uses asks for huge pages by default.
+- **One observation?** Not an observation; the library's source.
+
 ## 3. Not found
 
 - **T3 — numbers of open tabs and windows, and visible windows, from vendor telemetry; observed renderer-process counts for a set of tabs.** Searches: rows 33 and 40 (Mozilla telemetry dashboards and Mozilla Metrics blog; no Chromium/Google publication). The only S2 user data is new-tab openings (S2-29). The Chromium soft limit and spare process are definitions (S2-16), not observations.
