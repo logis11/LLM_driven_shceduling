@@ -1470,3 +1470,19 @@ Also recorded: 14 test passes, the last "Average loss: 0.0256, Accuracy: 9916/10
 The block count per repeat follows the kernel's daemon, not the program. If the run between voluntary blocks does not hold the tolerance, the exception for a value whose spread follows the machine is 인지오's call (9.6 D29). The process shows `python`, the name the venv executes (D84). The task's name and the `program` key the files bind are set at fold-in (D25).
 
 No file changed yet.
+
+## D86 — pair P1's segment 1 stays the index's CPU total in both files; `c2-p1a` binds the whole training job (2026-10-03)
+
+By 인지오's decision, D80's hand-off to D12's item: P1's segment 1 read again against both jobs. Segment 1 stays C seconds long in both files, C the index's CPU total (D80; 39.435 s, D81). `c2-p1a`'s training job arrives at 60 s and is bound whole, `total_work` its measured CPU total (the dry run's 1,379.2 s, D85). The file ends while it runs. `c2-p1b` is unchanged.
+
+Grounds:
+
+- **The label at every instant** (D41, D56, D78, D80). On one lane a job of more than C seconds of CPU is alive throughout a segment of C under every policy. With segment 1 at the training's length, `c2-p1b`'s index, 39.4 s of CPU, would end some 40 s in, and `false` would hold some 1,335 s with no unwanted work alive.
+- **One diff per pair** (`docs/workload/building-plan.md` §3, "Counts and reuse"; D80). Equal lengths keep the editor's terms read over equal windows. Two lengths would make the pair differ in length as well as in job and label.
+- **D17's ground holds.** No `total_work` describes part of a job: `c2-p1a` binds the whole run. Not held for `c2-p1a`: D17's "a file's and its segments' lengths follow the job". The file shows the training's first C seconds, as it showed the 130 s stand-in's (D80).
+
+Not taken: segment 1 at the training's length in both files (the label above); each file at its own job's length (one diff per pair).
+
+Hands to 9.14: `c2-p1a` carries no finished training job, so no turnaround term reads one; P1's terms over C. Hands to 9.15: `building-plan.md` §3 C2 on P1.
+
+No file changed yet.
