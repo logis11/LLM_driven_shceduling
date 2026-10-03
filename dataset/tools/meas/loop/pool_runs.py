@@ -203,7 +203,7 @@ def validity(family, dirs, entry):
                     dbs.add(r["handbrake.handbrake-transcode.video_track"])
             if r.get("app") == "kdenlive":   # 9.10 D101–D104: the state, the project, the warm start, the dialog's export whole
                 for x, want in (("upgrade.layer.missing", "0"), ("upgrade.layer.extra", "0"), ("upgrade.run_systemd_system", "absent"),
-                                ("kdenlive.state.install.rc", "0"),
+                                ("kdenlive.state.install.rc", "0"), ("kdenlive.state.added", "427"),   # the dry run, #161
                                 # S2-60: the archive's render stack at T0, with Kdenlive's recommends (D102)
                                 ("kdenlive.pkg.kdenlive", "4:23.08.5-0ubuntu4"), ("kdenlive.pkg.melt", "7.22.0-1build6"),
                                 ("kdenlive.pkg.libmlt7", "7.22.0-1build6"), ("kdenlive.pkg.libavcodec60", "7:6.1.1-3ubuntu5"),

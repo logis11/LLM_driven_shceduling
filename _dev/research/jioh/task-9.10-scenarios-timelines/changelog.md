@@ -1883,3 +1883,52 @@ Grounds:
 The entry's form — by 9.6 D7's criterion — and the list are fixed after the dry run. The job's size against the segments is read from it (D17).
 
 No file changed yet.
+
+## D105 — the export is `cpu-batch`'s new program `kdenlive_render`; `cpu-batch`'s `ffmpeg` tables leave at fold-in (2026-10-03)
+
+By 인지오's decision, 9.6 D7's criterion applied to the dry run (run 37123567963, #161, the EPYC 7763). The export is a new program in `cpu-batch`: its two tables, the run between voluntary blocks and the block after each run, pooled over every process of the job's tree (D101), and the job's CPU total, carried as measured (D17). At fold-in `cpu-batch`'s `ffmpeg_run` and `ffmpeg_block` leave with the `ffmpeg` program, which no file binds once the render files rebind. The list is the MNIST and HandBrakeCLI campaigns': over the job, the run between voluntary blocks and the block per run, each tested by its mean as the table carries it, and the CPU total, tested by its per-repeat values (D17).
+
+Grounds (the dry run):
+
+- **Runnable throughout, on one dominant thread.** The job is the tree of `kdenlive_render`, 16.095 s from its first schedule-in to its exit, with 15.972 s of CPU (perf; taskstats 15.995 s): saturation 0.9924. `melt-7` holds 15.913 s in 9 threads; the busiest thread holds 0.689 of the job's CPU, the next 0.184, four others 0.026–0.030 each, the rest under 0.011. `kdenlive_render` holds 54 ms. 9.6 D7's criterion: a program is `cpu-batch` when it is runnable for the whole of its lifetime on one dominant thread; sustained I/O waits or several equal threads give it its own entry. 9.6's encode, bound to `cpu-batch` as `ffmpeg` (9.6 D12), had its main thread at 0.61 and the next at 0.09 (D97).
+- **The blocks are short and the waits few.** 8,555 runs between voluntary blocks, mean 1.867 ms; the block after a run mean 4.9 µs, 42 ms over the job. One disk wait of 0.1 ms (`kdenlive_render`), no uninterruptible wait ended by `khugepaged`.
+- **The tree is one program's work.** `melt-7` holds 99.6 % of the CPU. The unattended upgrade's own entry (D39) rested on 923 processes across many programs.
+- **What the stand-in's tables become.** After the rebinding no file binds `ffmpeg` (D10's open item). D97 retired `cpu-batch`'s `HandBrakeCLI` tables when their files bound the measured job.
+
+Also recorded:
+
+- **The dialog.** Ctrl+Return opened "Rendering" once Kdenlive's window held the X input focus; `kdenlive_render` was seen 115 ms after the click on "Render to File". Its arguments: `delivery /usr/bin/melt-7 /tmp/kdenlive-OcFcGp-1.mlt --pid 32402`.
+- **The profile** (D103). The playlist's `<consumer>`: `mlt_service=avformat f=mp4 movflags=+faststart vcodec=libx264 crf=23 preset=veryfast g=15 acodec=aac ab=160k channels=2 real_time=-1 threads=0`, `in=0 out=599`, target `~/Videos/project.mp4`. x264's options string: `threads=1 lookahead_threads=1 sliced_threads=0`, `keyint=15`, `rc=crf crf=23.0`.
+- **The output.** 600 H.264 High frames at 1920 × 1080 and 938 AAC frames, in MP4, 966,107 B.
+- **`kuiserver`.** `kdenlive_render` logs "No org.kde.JobViewServer registered, trying to start kuiserver" and "Failed to start kuiserver" (S2-59 `renderjob.cpp:206–222`): two forks of it, 0.8 and 1.1 ms, execute nothing. They are part of the tree.
+- **The state.** The layer plus the 427 packages `apt-get install kdenlive ffmpeg` added, Kdenlive's recommends among them; the clip and the render stack's libraries cached at 1.0000.
+- **Beside the job.** Kdenlive's window held 65 ms of the measured CPU during the job, the session bus 3 ms.
+- **The dry runs before it.** Run 37121829327 (#157): Ctrl+Return opened no dialog. Xvfb runs no window manager, and Kdenlive's window did not hold the input focus. The driver now gives it the focus, with the Project menu's "Render…" as a fallback (method §8). Run #158 stopped at the gate (an AMD EPYC 9V74).
+
+The program's name and the task's are open.
+
+No file changed yet.
+
+## D106 — the task shows `kdenlive_render`; the program key is `kdenlive_render` (2026-10-03)
+
+By 인지오's decision, D105's open item. The task shows `kdenlive_render`, the `comm` of `/usr/bin/kdenlive_render` as the dry run observed it, 15 bytes (D25). `cpu-batch`'s program key is the same: `kdenlive_render_run` and `kdenlive_render_block`.
+
+Grounds:
+
+- **A tree's task shows its root.** `unattended-upgr` (D40) over a tree whose CPU went mostly to `localedef` and `dpkg`; `dkms` (D55) over its compile jobs; `tracker-miner-f` (D74) over its extractor. `kdenlive_render` is the process Kdenlive's dialog starts, and `melt-7` its child (D101, D105).
+- **The name says what the job is:** Kdenlive's renderer, the process a desktop's process list shows while Kdenlive exports.
+
+Not taken: `melt-7`, the child that holds 99.6 % of the CPU, with the program key `melt`.
+
+No file changed yet.
+
+## D107 — `kdenlive_render` is familiarity tier 1 (2026-10-03)
+
+By 인지오's decision, D27's rule applied to D106's name: `kdenlive_render` is a new program's name, placed by the ladder's definitions at tier 1, transparent. The name says what the job is, Kdenlive rendering. Labelled design, as D27's tiers are.
+
+Grounds:
+
+- **The ladder's definitions** (`docs/workload/building-plan.md` §3 C5): 1 transparent (`firefox`, `blender`), 2 semi-opaque (`soffice.bin`, `gamescope`), 3 opaque (`tracker-miner-fs-3`, `cc1`, `baloo_file`). `kdenlive` is tier 1, as is `unattended-upgr` (D43).
+- **The C7 property** (`building-plan.md` §3 C7, as D43 cites it): "tier 1 so no pair changes familiarity tier". Pair P3 keeps one tier in both files, `kdenlive` and `kdenlive_render` in `c2-p3a` against `kdenlive` and `borg` in `c2-p3b`.
+
+Applied at rebinding: `dataset/tools/wlc/grid.py`'s `NAME_TIERS`.
