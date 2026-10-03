@@ -1343,3 +1343,15 @@ Grounds:
 Method §1's tag line reads the campaign's tag.
 
 No file changed yet.
+
+## D77 — the Tracker campaign's raw records are release `meas-ci-background-2026-10-02b`, the records naming the set's paths included (2026-10-03)
+
+By 인지오's decision, method §7's open item and the release's go-ahead. The release is created at the fold-in commit and holds, each archive without its `pool-cache/`: the 18 pooled landings (runs #130–#140), the three dry runs (#118, #119, #121), the twelve landings of the first and cold batches that were not pooled (#122–#129; D75 and method §8 rest on them), and the reports of the 24 jobs the machine gate stopped. The records that name the set's paths are included: `tracker.set.tsv` (the 875 paths, sizes and SHA-256 hashes), `tracker.log` and `tracker.status.txt` (the deadline exits' and the ten failures' URIs), and dry run 2's debug log (per-file lines naming URIs, extractor modules and MIME types). No file of the set is released.
+
+Grounds:
+
+- **HippoCamp's licence** (S3-76): §4 forbids publicly mirroring "the raw-file release or a substantially similar copy of it"; §5 allows "aggregate statistics … and limited excerpts reasonably necessary for scientific discussion, provided they do not enable reconstruction or redistribution of the raw-file release". Paths, sizes and hashes enable neither; the paths are in HippoCamp's own ungated listing (`hf-hippocamp-api.json`).
+- **The records show what the numbers rest on:** which set, verified file by file, and which files the deadline ended and Tracker recorded as failures.
+- **The precedent:** the DKMS release held its dry runs, every landing and the gated reports (D59).
+
+No file changed yet.
