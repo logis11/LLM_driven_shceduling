@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """kdenlive_export.py <chroot> <out dir> — the export phase's driver (9.10 D101), run on the harness CPUs.
 
-Kdenlive's window is raised under the pointer and its Render action, Ctrl+Return (Kdenlive 23.08.5's `project_render`;
-S2-59 mainwindow.cpp:1483–1484), opens the "Rendering" dialog. "Render to File" is a Qt widget, not an X window, so
-it is found in a screenshot of the dialog by tesseract's word boxes and clicked. The dialog starts `kdenlive_render`
+Kdenlive's window is given the X input focus under the pointer — Xvfb runs no window manager, and Qt fires a window's
+shortcuts only in its active window — and its Render action, `project_render` (S2-59 mainwindow.cpp:1483–1484),
+opens the "Rendering" dialog: by its shortcut, Ctrl+Return, or, when no dialog follows within 10 s, by its entry in
+the Project menu, "Render…" (kdenliveui.rc:50; dry run #157: the shortcut opened nothing). Menu entries and "Render
+to File" are Qt widgets, not X windows, so each is found in a screenshot by tesseract's word boxes and clicked. The dialog starts `kdenlive_render`
 detached (renderwidget.cpp:790). The driver waits for it, copies the playlist its arguments name — kdenlive_render
 erases a playlist under the temporary directory when it ends (renderjob.cpp:44) — and waits for it to exit.
 Writes export.json: the steps' times (CLOCK_MONOTONIC and wall, ns), the renderer's pid and arguments, the button's
@@ -53,26 +55,58 @@ def find_window(rx, secs, by="--name"):
     return None
 
 
-def find_button(png, out, scale=2):
-    """The box of the words "Render to File" on one line of tesseract's TSV, in the image's pixels; read from the
-    screenshot scaled up (the dialog's text is small for tesseract at the screen's size)."""
-    big = os.path.join(out, "export.dialog.x2.png")
+def ocr_words(png, out, name, scale=2):
+    """tesseract's words in a screenshot scaled up (the interface's text is small for tesseract at the screen's size),
+    their boxes back in the screenshot's pixels."""
+    big = os.path.join(out, f"export.{name}.x2.png")
     subprocess.run(["convert", png, "-resize", f"{scale * 100}%", big], capture_output=True)
     tsv = subprocess.run(["tesseract", big, "-", "--psm", "11", "tsv"], capture_output=True, text=True).stdout
-    open(os.path.join(out, "export.dialog.tsv"), "w").write(tsv)
+    open(os.path.join(out, f"export.{name}.tsv"), "w").write(tsv)
     words = []
     for line in tsv.splitlines()[1:]:
         f = line.split("\t")
         if len(f) == 12 and f[11].strip():
-            words.append({"text": f[11].strip(), "left": int(f[6]), "top": int(f[7]), "w": int(f[8]), "h": int(f[9]),
-                          "line": (f[2], f[3], f[4])})
+            words.append({"text": f[11].strip(), "left": int(f[6]) // scale, "top": int(f[7]) // scale,
+                          "w": int(f[8]) // scale, "h": int(f[9]) // scale, "line": (f[2], f[3], f[4])})
+    return words
+
+
+def centre(w):
+    return w["left"] + w["w"] // 2, w["top"] + w["h"] // 2
+
+
+def by_menu(out, rec):
+    """Project > Render…: the menu bar's "Project" clicked, then the open menu's "Render" entry."""
+    png = shot(out, "menubar")
+    bar = [w for w in ocr_words(png, out, "menubar") if w["text"] == "Project" and w["top"] < 30]
+    if not bar:
+        rec["notes"].append("no 'Project' in the menu bar's words")
+        return False
+    px, py = centre(bar[0])
+    xdo("mousemove", str(px), str(py)); time.sleep(0.3); xdo("click", "1"); time.sleep(1.5)
+    png = shot(out, "menu")
+    items = [w for w in ocr_words(png, out, "menu") if w["text"].startswith("Render") and w["top"] > 30
+             and abs(w["left"] - bar[0]["left"]) < 300]
+    if not items:
+        rec["notes"].append("no 'Render' entry in the Project menu's words")
+        xdo("key", "Escape")
+        return False
+    rx, ry = centre(items[0])
+    rec["menu_clicks"] = [[px, py], [rx, ry]]
+    xdo("mousemove", str(rx), str(ry)); time.sleep(0.3); xdo("click", "1")
+    return True
+
+
+def find_button(png, out):
+    """The box of the words "Render to File" on one line of the dialog's screenshot."""
+    words = ocr_words(png, out, "dialog")
     for i in range(len(words) - 2):
         trio = words[i:i + 3]
         if tuple(w["text"] for w in trio) == BUTTON and len({w["line"] for w in trio}) == 1:
             left, top = trio[0]["left"], min(w["top"] for w in trio)
             right = trio[2]["left"] + trio[2]["w"]
             bottom = max(w["top"] + w["h"] for w in trio)
-            return {"left": left // scale, "top": top // scale, "right": right // scale, "bottom": bottom // scale}
+            return {"left": left, "top": top, "right": right, "bottom": bottom}
     return None
 
 
@@ -92,20 +126,28 @@ def main():
 
     main_wid = find_window("kdenlive", 10, "--class")
     rec["main_wid"] = main_wid
+    rec["focus_before"] = xdo("getwindowfocus").stdout.strip()
     if main_wid:
         x, y, w, h = geometry(main_wid)
         xdo("mousemove", str(x + w // 2), str(y + h // 2))
-        xdo("windowactivate", "--sync", main_wid)
-    time.sleep(0.5)
+        xdo("windowfocus", main_wid)
+    time.sleep(1.0)
+    rec["focus_after"] = xdo("getwindowfocus").stdout.strip()
     before = set(pids_named(RENDERER))
     rec["steps"]["shortcut"] = stamp()
     xdo("key", "--clearmodifiers", "ctrl+Return")
-    dlg = find_window(DIALOG, 30)
+    dlg = find_window(DIALOG, 10)
+    rec["how"] = "shortcut"
+    if not dlg:
+        rec["steps"]["menu"] = stamp()
+        rec["how"] = "menu"
+        if by_menu(out, rec):
+            dlg = find_window(DIALOG, 30)
     rec["steps"]["dialog"] = stamp()
     rec["dialog_wid"] = dlg
     if not dlg:
         shot(out, "no-dialog")
-        rec["notes"].append("no Rendering dialog within 30 s")
+        rec["notes"].append("no Rendering dialog by the shortcut or the menu")
         done(2)
     time.sleep(2.0)   # the dialog's profiles and output path filled before the shot
     dx, dy, dw, dh = geometry(dlg)

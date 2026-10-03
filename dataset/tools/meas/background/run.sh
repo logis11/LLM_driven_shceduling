@@ -1142,6 +1142,8 @@ print(f"kdenlive.export.argv={' '.join(argv)}")
 print(f"kdenlive.export.mode={argv[1] if len(argv) > 1 else ''}")
 print(f"kdenlive.export.melt={argv[2] if len(argv) > 2 else ''}")
 print(f"kdenlive.export.notes={' | '.join(e.get('notes', []))}")
+print(f"kdenlive.export.how={e.get('how', '')}")
+print(f"kdenlive.export.focus={e.get('focus_before', '')} -> {e.get('focus_after', '')} (window {e.get('main_wid', '')})")
 st = e.get("steps", {})
 if "click" in st and "renderer_seen" in st:
     print(f"kdenlive.export.click_to_seen_ms={(st['renderer_seen']['mono_ns'] - st['click']['mono_ns']) / 1e6:.1f}")
