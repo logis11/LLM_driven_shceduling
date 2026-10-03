@@ -304,6 +304,20 @@ The entry carries the batch-loop form over the miner's tree (9.10 D65, D70) — 
 
 Reported beside them: the job 58.3–60.3 s from the miner's first schedule-in to the extractor's end; the initial sleep's block 14.40–15.23 s; the extractor 37.47–38.35 s of CPU, the miner 1.53–1.62 s, the registry scan 93–106 ms; saturation 0.655–0.676 over the job, 0.891–0.919 from the miner's `Initializing`; the dominant thread (the extractor's `single`) 0.556–0.559 of the CPU; the share of CPU past the 10 ms boot slice 0.844–0.849. In every landing the extractor's 5 s per-file deadline ended `Book/TenYearsInJapan.pdf` and `Book/IslandOfBali.pdf`, each followed by the miner's 1 s grace and a new extractor (D72); Tracker recorded ten failures. Pooled in `task-9.10-scenarios-timelines/campaign/tracker/results/` (`pooled.json`, `results.md`).
 
+## 9.10 — `cpu-batch`'s `python3`, PyTorch's basic MNIST example
+
+Repeats 1–6 on the AMD EPYC 7763, 6 landings, every one valid (the method's checks: the layer built with no package missing and `python3-venv`'s four packages added; the example's three files each matching its SHA-256 at `acc295d`; `torch` 2.14.0+cpu and `torchvision` 0.29.0+cpu, one installed set; the dataset's files cached at 1.0000 after the warm start; the kernel's transparent huge pages `always`; 14 test passes; the checkpoint written, the same SHA-256 in every landing). Each repeat landed once. 8 jobs: 6 landed, 2 stopped by the machine gate.
+
+The entry carries `cpu-batch`'s batch-loop form for the program `python3` (9.10 D85), one process with one thread, shown as `python`:
+
+| archetype | value | landings | mean | spread (cv) | 95 % half-width | stopped by |
+|---|---|---|---|---|---|---|
+| `cpu-batch` (`python3`) | run between voluntary blocks | 6 | 69.49 s | 26.0 % | ±27.3 % | carried with its half-width, its spread `khugepaged`'s (D87) |
+| `cpu-batch` (`python3`) | block per run | 6 | 311.5 µs | 10.3 % | ±10.8 % | carried with its half-width, its spread `khugepaged`'s (D87) |
+| `cpu-batch` (`python3`) | CPU total | 6 | 1,389.885 s | 3.9 % | ±4.04 % | the rule |
+
+Reported beside them: the job 1,294.0–1,455.9 s, saturation 0.9999; 11–24 voluntary blocks a landing, every one but the two sleeps at the start (99–110 µs) ended by `khugepaged` under the runner's `always` mode; 168k–249k huge pages fault-allocated and 133–145 collapsed in each phase. The check under the desktop kernel's `madvise` mode (D87, D88), five jobs, pooled apart: CPU total 1,589.654 s ±2.01 %, ×1.144 the campaign's (95 % Welch interval ×1.102–×1.185), no block but the two start sleeps. Pooled in `task-9.10-scenarios-timelines/campaign/mnist/results/` (`pooled.json`, `results.md`; the check's `madvise-pooled.json`, `madvise-results.md`).
+
 ## Machine draws
 
 The build campaign, complete: 28 jobs, 14 on the AMD EPYC 7763 (50.0 %), 12 stopped by the machine gate — Intel Xeon Platinum 8573C 4, AMD EPYC 9V74 4, AMD EPYC 9V45 2, Intel Xeon Platinum 8370C 1, Intel Xeon 6973P-C 1 — and 2 cancelled.
@@ -323,3 +337,5 @@ The 9.10 DKMS campaign, complete: 37 jobs — 26 landed on the AMD EPYC 7763 (70
 The untraced control of 9.5, 9.8 and 9.9, complete (9.5 D82, 9.8 D32, 9.9 D40): 148 jobs — 87 landed on the AMD EPYC 7763 (58.8 %; 84 pooled, three later copies of a window that landed twice left out under 9.5 D66), 61 stopped by the machine gate: AMD EPYC 9V74 25, AMD EPYC 9V45 13, Intel Xeon Platinum 8573C 12, Intel Xeon 6973P-C 7, Intel Xeon Platinum 8370C 4. By family: interactive 61 jobs, 36 landed; playback 31, 19; desktop 46, 26; session 10, 6.
 
 The 9.10 Tracker campaign, complete: 38 jobs — 18 landed on the AMD EPYC 7763 (47.4 %, all pooled), 20 stopped by the machine gate: AMD EPYC 9V74 16, Intel Xeon Platinum 8573C 1, Intel Xeon Platinum 8370C 1, AMD EPYC 9V45 1, Intel Xeon 6973P-C 1. Its three dry runs (#118, #119, #121) drew the EPYC 7763 after four stops; its first batch (12 jobs, 7 landed) and its cold batch (8 jobs, 5 landed) were not pooled.
+
+The 9.10 MNIST campaign, complete: 8 jobs — 6 landed on the AMD EPYC 7763 (75.0 %, all pooled), 2 stopped by the machine gate: Intel Xeon 6973P-C 1, AMD EPYC 9V45 1. Its dry run (#142) drew the EPYC 7763 after one stop (AMD EPYC 9V45). Its `madvise` check (D87), never a repeat: 9 jobs, 5 landed, 4 stopped (AMD EPYC 9V45 2, AMD EPYC 9V74 2).

@@ -1510,3 +1510,20 @@ Not taken: setting `madvise` for the campaign. The first batch would leave the p
 Hands to 9.14: the check's measured ratio, for the RQ0 gate spec's venue sensitivity check. Hands to 9.15: `docs/workload/measurement-overview.md`'s venue, the runner's huge-page mode against the desktop kernel's.
 
 No file changed yet.
+
+## D88 — the `madvise` check: the training run takes ×1.144 the CPU under the desktop kernel's mode; D87 kept (2026-10-03)
+
+By 인지오's decision, on the check D87 set (runs #146, #148, #149; five jobs on the EPYC 7763, every one valid, `enabled` read `always [madvise] never` before the phase). D87 stands: the campaign is the runner's `always` mode. The check's result is stated in the entry's scope and handed to 9.14.
+
+The check's result, against the campaign's six repeats:
+
+- **CPU total.** 1,589.7 s under `madvise` (1,555.8–1,626.5 s, ±2.01 %) against 1,389.9 s under `always` (1,293.8–1,455.8 s, ±4.04 %). The difference is 199.8 s, ×1.144, its 95 % Welch interval 142.2–257.4 s, ×1.102–×1.185.
+- **Blocks.** None but the two sleeps at the start, 99–111 µs, in every check job. No huge page was fault-allocated and none was collapsed in the phase (`thp_fault_alloc`, `thp_collapse_alloc` unchanged). The run is one run of the whole job, 1,555.6–1,626.3 s.
+- **The work is the same.** Every job of the campaign and of the check wrote the same checkpoint, SHA-256 `18f1b8f5…`, and ended at "Average loss: 0.0256, Accuracy: 9916/10000 (99%)".
+- **The rule holds on the check's own five,** all three values within 5 % (±2.01 %, ±2.77 %, ±2.01 %), so its spread is not the campaign's.
+
+Grounds for keeping D87: one venue for every measured value in the library (9.5 D10; 9.5 follow-ups decision 13). This entry alone at the desktop kernel's mode would differ in one setting from every other entry, while the others' sensitivity to the mode stays unmeasured.
+
+Hands to 9.14: ×1.144 (×1.102–×1.185) is a measured venue effect on one entry's CPU, for the RQ0 gate spec's venue sensitivity check. Hands to 9.15: `docs/workload/measurement-overview.md`'s venue, the runner's huge-page mode against the desktop kernel's, with this result.
+
+No file changed yet.
