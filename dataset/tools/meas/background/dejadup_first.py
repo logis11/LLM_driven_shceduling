@@ -5,9 +5,11 @@
 (S2-62 AssistantBackup.vala, add_custom_config_pages, when last-run is empty), then the password page
 (AssistantOperation.vala:336–375). The driver gives the window the X input focus — Xvfb runs no window manager — and
 works it by tesseract's word boxes in screenshots, as the Kdenlive export's driver does: "Forward" on the folders and
-location pages as they open; on the password page the password, from DD_BACKUP_PW, into "Encryption password" and
+location pages as they open; on the password page — an interrupt page, whose button reads "Continue" once the
+password is valid (Assistant.vala:281–285) — the password, from DD_BACKUP_PW, into "Encryption password" and
 "Confirm password", and a click on "Remember password", whose row toggles its switch (SwitchRow.ui,
-activatable-widget), then "Forward" (D117). It waits for deja-dup to exit; a summary page that stays open — when
+activatable-widget), then "Continue", found in a screenshot taken after the filling (D117); Return, which the
+entries pass to the default button, when no such word is read. It waits for deja-dup to exit; a summary page that stays open — when
 Déjà Dup has a detail to show — is closed by its "Close". Writes first.json: the pages seen, the clicks, the steps'
 times, notes. Exit status: 0 the backup ran and deja-dup exited; 2 no window; 3 no password page; 4 deja-dup still
 running at the cap.
@@ -87,7 +89,7 @@ def main():
     xdo("windowfocus", wid)
     time.sleep(2.0)
     filled = False
-    for n in range(12):
+    for n in range(30):   # the password page follows the first collection-status, a few seconds after the location page
         png = shot(out, f"page{n}", wid)
         words = ocr_words(png, out, f"first.page{n}")
         texts = " ".join(t["text"] for t in words)
@@ -99,17 +101,23 @@ def main():
             page["kind"] = "password"
             conf = phrase(words, ("Confirm", "password"))
             rem = phrase(words, ("Remember", "password"))
-            if not (conf and rem and fwd):
-                rec["notes"].append(f"password page without its rows: confirm {bool(conf)}, remember {bool(rem)}, forward {bool(fwd)}")
+            if not (conf and rem):
+                rec["notes"].append(f"password page without its rows: confirm {bool(conf)}, remember {bool(rem)}")
                 done(3)
             rec["clicks"].append(["encryption", click_at(wid, enc)])
             xdo("type", "--delay", "40", pw)
             rec["clicks"].append(["confirm", click_at(wid, conf)])
             xdo("type", "--delay", "40", pw)
             rec["clicks"].append(["remember", click_at(wid, rem)])
-            shot(out, "password-filled", wid)
+            time.sleep(1.0)
+            words = ocr_words(shot(out, "password-filled", wid), out, "first.password-filled")
+            go = phrase(words, ("Continue",)) or phrase(words, ("Forward",))
             rec["steps"]["password"] = stamp()
-            rec["clicks"].append(["forward", click_at(wid, fwd)])
+            if go:
+                rec["clicks"].append(["continue", click_at(wid, go)])
+            else:
+                rec["notes"].append("no 'Continue' read on the filled password page: Return pressed")
+                xdo("key", "Return")
             filled = True
             break
         if fwd:
