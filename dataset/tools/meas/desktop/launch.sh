@@ -36,7 +36,7 @@ ln_quit_for() {
     soffice|thunderbird-send|element) echo "ctrl+q" ;;
     kdenlive|chrome|chrome-hidden|webrtc) echo "close-window" ;;
     mpv-video|mpv-audio) echo "q" ;;
-    steam) echo "steam -shutdown" ;;
+    steam) echo "close-window" ;;   # dry run #77: the logged-out client's sign-in window; `steam -shutdown` after 30 s
   esac
 }
 # what a window the quit puts up is given: a "save changes?" dialog's discard key, or Element's confirmation "Are you
@@ -239,16 +239,19 @@ ln_quit() {
   rec launch.quit "$quit"
   # the quit goes to the application's largest visible window, as the export's driver finds Kdenlive's main window: a
   # search by class can return a secondary top-level first (dry run #78 closed Kdenlive's window titled "Kdenlive")
-  [ "$SUBJ" = steam ] || WID="$(ln_main_window)"
+  WID="$(ln_main_window)"
   rec launch.quit_window "$(xdotool getwindowname "$WID" 2>/dev/null | head -c 120)"
   before="$(ln_visible)"
   ledge first.quit mark
-  if [ "$SUBJ" = steam ]; then timeout 60 steam -shutdown > "$OUT/quit.log" 2>&1 &
-  elif [ "$quit" = close-window ]; then rec launch.close_window "$(python3 "$HERE/close_window.py" "$WID" 2>&1 | tail -1)"
+  if [ "$quit" = close-window ]; then rec launch.close_window "$(python3 "$HERE/close_window.py" "$WID" 2>&1 | tail -1)"
   else xdotool windowfocus --sync "$WID" 2>/dev/null; xdotool key --clearmodifiers "$quit"; fi
-  for i in $(seq 1 "$LN_QUIT_WAIT"); do
+  local qwait="$LN_QUIT_WAIT"; [ "$SUBJ" = steam ] && qwait=120
+  for i in $(seq 1 "$qwait"); do
     left="$(python3 "$HERE/launch.py" tree --root "$APP_PID" --app-only)"
     [ -z "$left" ] && break
+    if [ "$SUBJ" = steam ] && [ "$i" = 30 ]; then   # the client's own command, if its window's close left it running
+      rec launch.quit_second "steam -shutdown"; timeout 60 steam -shutdown > "$OUT/quit.log" 2>&1 &
+    fi
     if [ "$i" = 4 ]; then   # a window the quit put up: recorded, and given the program's answer where it has one
       xdotool search --onlyvisible --name '.' getwindowname %@ > "$OUT/quit-windows.txt" 2>/dev/null
       dlg="$(comm -13 <(echo "$before") <(ln_visible) | head -1)"
@@ -263,7 +266,7 @@ ln_quit() {
   done
   rec launch.first.quit_s "$i"
   rec launch.first.left_after_quit "$(python3 "$HERE/launch.py" tree --root "$APP_PID" | wc -w | tr -d ' ')"
-  [ -z "$left" ] || { screenshot unclean-quit; stop_recorded unclean-quit "the tree did not exit within ${LN_QUIT_WAIT}s of its quit ($quit): $left"; }
+  [ -z "$left" ] || { screenshot unclean-quit; stop_recorded unclean-quit "the tree did not exit within ${qwait}s of its quit ($quit): $left"; }
   ledge first.exited mark
   python3 "$HERE/launch.py" warm "$OUT/launch.mapped.txt" --tsv "$OUT/launch.cache.tsv" >> "$KV"
   sleep 5
