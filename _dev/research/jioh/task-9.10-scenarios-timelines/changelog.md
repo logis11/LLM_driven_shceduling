@@ -1933,19 +1933,19 @@ Grounds:
 
 Applied at rebinding: `dataset/tools/wlc/grid.py`'s `NAME_TIERS`.
 
-## D108 — pair P3's segment 2 stays 60 s in both files; `c2-p3a` binds the whole export (2026-10-03)
+## D108 — pair P3's segment 1 stays 60 s in both files; `c2-p3a` binds the whole export (2026-10-03)
 
-By 인지오's decision, D10's open item "the job's size against the segments" for pair P3. Segment 2 keeps its 60 s, 60–120 s, in both files. `c2-p3a`'s render binds the whole export from 60 s: `kdenlive_render` on `cpu-batch`, `total_work` its measured CPU total (D105, D106). `c2-p3b`'s `borg` is unchanged until D8's item.
+By 인지오's decision, D10's open item "the job's size against the segments" for pair P3. Segment 1, the second, keeps its 60 s, 60–120 s, in both files. `c2-p3a`'s render binds the whole export from 60 s: `kdenlive_render` on `cpu-batch`, `total_work` its measured CPU total (D105, D106). `c2-p3b`'s `borg` is unchanged until D8's item.
 
 Grounds:
 
 - **The render ends inside the segment.** With the dry run's 16.0 s of CPU, it ends by about 99 s under every policy: 60 s, plus the job's CPU and blocks, plus the editor's 23.0 s of CPU released after 60 s (D78's arithmetic). The `true` cell's turnaround term then reads a finished job, as D78 kept `c1-indexing`'s segment for a job that fits it.
-- **One diff per pair** (`docs/workload/building-plan.md` §3, "Counts and reuse"; D80). Both files keep one length and still differ only in segment 2's job and label.
+- **One diff per pair** (`docs/workload/building-plan.md` §3, "Counts and reuse"; D80). Both files keep one length and still differ only in segment 1's job and label.
 - **The label at every instant concerns `false`.** D41's counterparts and D80's `c2-p1b` sized a segment to its job so that `false` never held with no unwanted work alive. Both of P3's segments say `true`.
 
-Not taken: segment 2 at the export's CPU total in both files, D42's and D80's form (the render could not finish inside it on a shared lane); segment 2 at the render's smallest finishing length in both files (the pair sized to one half's job while the other half is still a stand-in).
+Not taken: segment 1 at the export's CPU total in both files, D42's and D80's form (the render could not finish inside it on a shared lane); segment 1 at the render's smallest finishing length in both files (the pair sized to one half's job while the other half is still a stand-in).
 
-Hands to D8's item: P3's segment 2 is read again against both jobs when the backup is measured.
+Hands to D8's item: P3's segment 1 is read again against both jobs when the backup is measured.
 
 No file changed yet.
 
@@ -1961,3 +1961,74 @@ Grounds:
 Not taken: the block per run carried with its half-width at five repeats under the exception.
 
 No file changed yet.
+
+## D110 — the Kdenlive export campaign's raw records are release `meas-ci-background-2026-10-03c` (2026-10-04)
+
+By 인지오's decision, the method's §7. The release is created at the fold-in commit. It holds, each archive without its `pool-cache/`:
+
+- the 30 pooled landings (runs #162–#174);
+- the dry runs #160 and #161 of the fixed driver (D105), their `perf.data` kept;
+- the dry run #157 of the first driver, whose shortcut opened no dialog, its `perf.data` kept;
+- the reports of the 28 jobs the machine gate stopped, 26 of the campaign's and 2 of the dry runs'.
+
+No video is in it: the clip and the output appear as their size and SHA-256. The archives carry the project file, the playlist Kdenlive wrote and the dialog's screenshots.
+
+No file changed yet.
+
+## D111 — the Kdenlive export campaign holds at 30 repeats; `cpu-batch`'s `kdenlive_render` folded in, `ffmpeg`'s tables retired, the three render files rebound (2026-10-04)
+
+The campaign of D101–D110, `meas-ci:background:2026-10-03c`, run under `../measurement-campaign-workflow.md`. It is recorded in `campaign/kdenlive/` (method, machine draws, `results/pooled.json`, `results/results.md`) and in `measurement-campaign-record.md`.
+
+- **Runs.**
+  - The dry runs: #157, the first driver, whose shortcut opened no dialog; #158 and #159 stopped at the gate; #160 and #161, the fixed driver (D105).
+  - The first batch, repeats 1–5 (#162–#164).
+  - The batch to the projection, repeats 6–30 (#165–#174; D109).
+  - In all, 56 campaign jobs: 30 landed on the EPYC 7763, 26 stopped by the machine gate.
+- **The rule holds at 30 on all three values.** The CPU total is 16.545 s ±0.8 % (16.055–17.305 s). The run between voluntary blocks is 1.932 ms ±0.8 %. The block per run is 4.593 µs ±13.1 %, within the 1 µs floor. Every repeat is valid:
+  - the layer built, with the 427 packages `apt-get install kdenlive ffmpeg` added, one set across the landings;
+  - `kdenlive` 4:23.08.5-0ubuntu4, `melt` and `libmlt7` 7.22.0-1build6, `libavcodec60` 7:6.1.1-3ubuntu5, `libx264-164` 2:0.164.3108+git31e19f9-1, `frei0r-plugins` 1.8.0-1build3;
+  - the clip one SHA-256 across the landings, cached at 1.0000;
+  - the kernel's mode `always`;
+  - the dialog opened by the shortcut, `kdenlive_render delivery /usr/bin/melt-7`, the playlist's consumer D103's settings;
+  - the same output in every landing, 600 H.264 frames at 1920 × 1080 and 938 AAC frames, 966,107 B, one SHA-256 and one x264 options string.
+- **Reported.**
+  - The job is 4 processes of 14 threads, 16.181–17.427 s, saturation 0.9920–0.9946. `melt-7` holds 0.9960–0.9963 of the CPU; its busiest thread 0.682–0.691, the next 0.183–0.192.
+  - 8,454–8,641 runs a repeat; 1.8–50.5 ms of blocks a job, 26 of 30 jobs ending on one 40 ms block, melt's progress sleep (D109); 47 disk waits over the 30 landings, 3 uninterruptible waits.
+  - Kdenlive's window held 66.9–78.7 ms of the measured CPU during the job.
+- **Release.** The raw records are release `meas-ci-background-2026-10-03c`, published on 인지오's go-ahead (D110).
+- **Fold-in.**
+  - `cpu-batch` gains the program `kdenlive_render`. Its `kdenlive_render_run` and `kdenlive_render_block` are written by `batch_fold_in.py` from `results/pooled.json`, their source `meas-ci:background:2026-10-03c` (D105, D106).
+  - `cpu-batch`'s `ffmpeg_run` and `ffmpeg_block` leave, with the `ffmpeg` program (D105). Its scope, stats, run and notes are restated: `clamscan` from 9.6's campaign, `python3` and `kdenlive_render` from 9.10's.
+  - `docs/references.md` gains `kdenlive` and `mlt` (deployed-system, verified).
+  - `dataset/tools/wlc/grid.py` places `kdenlive_render` at tier 1 (D107).
+  - The test fixture `fx-mixed` binds `kdenlive_render` in place of `ffmpeg`.
+- **Rebound.**
+  - `c1-render`: `kdenlive_render` on `cpu-batch` from 2 s, `total_work` 16.545 s, `program: kdenlive_render`. The segment keeps its 60 s: the export ends by 46.039 s under every policy, 2 s plus 16.545 s of CPU plus 0.008 s of its blocks plus the editor's 27.486 s as compiled under the file's seed (D17; D78's arithmetic and form). Taken under 인지오's delegation, on D78. The preview render stays at 30 s.
+  - `c7-render` (`c7.variant.yaml`): `c1-render`'s first C seconds, the export from 0 s, the editor departing at C, focus 2 s to C − 2 s, the preview render at 8.2725 s, its window's middle (D44, D96). The compiler cuts the render at the editor's departure (`wlc/compiler.py`, the operation window's end at the task's `depart`): about 8.3 s of it. One segment, `background_wanted: false`, `initiated: scheduled`, still a pre-committed miss (D78's form, as D90's and D100's).
+  - `c2-p3a`: segment 1 keeps its 60 s; `kdenlive_render` from 60 s, `total_work` 16.545 s, ending by 99.55 s under every policy (D108). `c2-p3b` is unchanged.
+  - C is 16.545 s, the export's `total_work`, which the batch loop compiles exactly.
+
+Recompiled (`compile.py --allow-window`): 6 of 100 artifacts change beyond the library's hash, the three files in both modes. Demand (`-single`):
+
+| file | before | after | |
+|---|---|---|---|
+| `c1-render` | 0.9581 | 0.7339 | calibration |
+| `c7-render` | 0.9581 | 1.6189 | calibration |
+| `c2-p3a` | 1.0423 | 0.5552 | the demand window (D17) |
+
+Lint reports six demand-window files: `c2-p1a`, `c2-p1b`, `c2-p3a` (now 0.56), `c3-creation`, `c3-evening` and `c3-workday`. `compile.py --check --allow-window` and `batch_fold_in.py --check` pass. Tests: 383 passed, 1 skipped, 1 xfailed.
+
+Restated tests:
+- `render` leaves `C7_SAME_NAME` for `test_c7_render_is_its_bases_first_c_seconds`;
+- `test_the_batch_tables_regenerate_from_the_pooled_records` names `cpu-batch`'s `kdenlive_render`, its table count unchanged at 89;
+- the background tests add the `kdenlive` job, its root rule, its list and its settings' text against 9.5's.
+
+Hands to 9.14:
+- `c1-render`'s, `c7-render`'s and `c2-p3a`'s terms on the measured export;
+- P3's terms over segment 1 (D108);
+- `c2-p3a` in the demand window at 0.56.
+
+Hands to 9.12 and 9.15:
+- the scenario catalog's S7 row ("ffmpeg (render children)"): Kdenlive's `kdenlive_render` and its `melt-7`;
+- `building-plan.md` §3 C1 (render {kdenlive, ffmpeg}) and C2 P3;
+- `cpu-batch`'s scope without `ffmpeg` (D10's hand-off).

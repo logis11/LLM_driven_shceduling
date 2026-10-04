@@ -39,6 +39,12 @@
 # C − 2 s, the preview render at the window's middle (D44, D96); C = 2,970.871 s,
 # the encode's CPU total (meas-ci:background:2026-10-03b). A pre-committed miss.
 #
+# c7-render likewise (D78's form): Kdenlive's export, `cpu-batch`'s
+# `kdenlive_render`, from 0 s bound whole, the editor departing at C, focus 2 s
+# to C − 2 s, the preview render at the window's middle (D44, D96), cut at the
+# editor's departure; C = 16.545 s, the export's CPU total
+# (meas-ci:background:2026-10-03c). A pre-committed miss.
+#
 # As the interactive counterparts, c7-compile is its base's first C seconds (D56): the
 # build from 0 s bound whole, the editor departing at C, focus 2 s to C − 2 s;
 # C = 225.458 s, the build's CPU as compiled under the file's seed, so it is alive
@@ -221,9 +227,14 @@ variants:
   - id: c7-render
     from: c1-render.timeline.yaml
     ops:
-      - patch-segment: {index: 0,
-                        attributes: {background_wanted: false, initiated: scheduled,
-                                     pre_committed_miss: true}}
+      - patch-task: {id: bulk, arrive: 0s}
+      - set-segments: [{from: 0s, to: 16.545s, mode: render,
+                         attributes: {background_wanted: false, initiated: scheduled,
+                                      pre_committed_miss: true},
+                         scenario: [S7, S8]}]
+      - patch-task: {id: editor, depart: 16.545s}
+      - set-focus: [{from: 2s, to: 14.545s, task: editor}]
+      - set-operations: [{at: 8.2725s, task: editor, name: preview-render}]
       - patch-meta: {demand: calibration}
 
   - id: c7-transcode

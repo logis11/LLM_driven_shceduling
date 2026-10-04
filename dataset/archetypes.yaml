@@ -854,41 +854,52 @@ archetypes:
         {dist: quantiles, p: [81, 979, 7598, 7848, 8148, 8682, 9666, 10541, 14246, 31278], min: 3, max: 4980610, means: [37.864, 870.429, 5588.12, 7742.715, 7992.758, 8375.286, 9067.255, 10049.467, 11605.228, 18497.631, 831708.232], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
       clamscan_block:
         {dist: quantiles, p: [100, 115, 123, 137, 156, 192, 253, 324, 1932, 5076], min: 1, max: 25099, means: [70.645, 109.756, 119.711, 130.706, 146.34, 170.163, 218.119, 279.155, 712.947, 2837.563, 7543.473], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
-      ffmpeg_run:
-        {dist: quantiles, p: [3, 4, 4, 5, 7, 20, 1076, 1207, 51116, 77879], min: 3, max: 719031, means: [3, 3.751, 4, 4.176, 5.576, 11.859, 92.401, 1147.068, 19193.891, 62711.216, 111240.098], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
-      ffmpeg_block:
-        {dist: quantiles, p: [0, 0, 0, 0, 0, 0, 0, 0, 0, 173], min: 0, max: 5073, means: [0, 0, 0, 0, 0, 0, 0, 0, 0, 7.995, 280.805], sampling: per-iteration, source: "meas-ci:build:2026-09-18"}
       python3_run:
         {dist: quantiles, p: [14, 112, 132, 188, 228276, 43515311, 238567291, 348129382, 876756180, 997987710], min: 12, max: 1006372964, means: [12.333, 14.208, 124.5, 155.5, 37075.867, 16396865, 121974151.611, 300343245.333, 553154227, 993324015.481, 1006372964], sampling: per-iteration, source: "meas-ci:background:2026-10-03"}
       python3_block:
         {dist: quantiles, p: [32, 46, 99, 216, 350, 404, 478, 516, 548, 560], min: 12, max: 561, means: [14.333, 35.605, 67.702, 118.854, 309.368, 380.421, 428.877, 500.632, 531.741, 559.363, 561], sampling: per-iteration, source: "meas-ci:background:2026-10-03"}
+      kdenlive_render_run:
+        {dist: quantiles, p: [4, 5, 6, 6, 9, 41, 2809, 3034, 5156, 13338], min: 4, max: 11553331, means: [4, 4.994, 5.218, 6, 7.497, 18.236, 1526.62, 2912.762, 3620.477, 5975.115, 1350900.31], sampling: per-iteration, source: "meas-ci:background:2026-10-03c"}
+      kdenlive_render_block:
+        {dist: quantiles, p: [0, 0, 0, 0, 0, 0, 0, 0, 10, 34], min: 0, max: 40097, means: [0, 0, 0, 0, 0, 0, 0, 0, 0.561, 15.313, 4432.871], sampling: per-iteration, source: "meas-ci:background:2026-10-03c"}
     lifetime: finite
     binding_params: [total_work, program]
     scalable: []
     validation_stats:
       referee: meas-ci
-      run: "build:2026-09-18 (clamscan, ffmpeg); repeats [4, 5, 7, 8, 9-18]; clamscan [9-18]; runs 35328071379, 35328873409, 35337322204, 35426065936, 35430430817, 35434872927, 35439345618, 35443899531, 35448942696, 35453727742, 35459121647, 35464371497, 35469642365. background:2026-10-03 (python3, 9.10 D82-D88); repeats [1-6]; runs 37091275421, 37091313419, 37093607991"
-      stats: ["saturation over the job: clamscan 0.969-0.979, ffmpeg 0.9990-0.9992, python3 0.99988-0.99991",
-              "share of CPU past the 10 ms boot slice: clamscan 0.109, ffmpeg 0.698",
-              "share of runs followed by a block: clamscan 1.0, ffmpeg 0.0015",
+      run: "build:2026-09-18 (clamscan); repeats [9-18]; runs 35426065936, 35430430817, 35434872927, 35439345618, 35443899531, 35448942696, 35453727742, 35459121647, 35464371497, 35469642365. background:2026-10-03 (python3, 9.10 D82-D88); repeats [1-6]; runs 37091275421, 37091313419, 37093607991. background:2026-10-03c (kdenlive_render, 9.10 D101-D109); repeats [1-30]; runs 37124818629, 37124854279, 37125022331, 37125789856, 37125847561, 37126020125, 37126535233, 37127200770, 37127738977, 37127913545"
+      stats: ["saturation over the job: clamscan 0.969-0.979, python3 0.99988-0.99991, kdenlive_render 0.9920-0.9946",
+              "share of CPU past the 10 ms boot slice: clamscan 0.109",
+              "share of runs followed by a block: clamscan 1.0",
               "block per run carried with its half-width (D29): clamscan 218.1 us +-9.5 % over 10 repeats (182-274 us)",
               "python3 CPU total 1,389.885 s +-4.04 % over 6 repeats (1,293.8-1,455.8 s), one process with one thread, shown as `python` (9.10 D85)",
               "python3 runs between blocks 69.49 s +-27.3 % (53.9-114.9 s a repeat) and block per run 311.5 us +-10.8 % (268-370 us), over 6 repeats, carried with their half-widths: 11-24 blocks a repeat, every one but the two sleeps at the start ended by khugepaged (9.10 D87)",
-              "python3 under the desktop kernel's transparent-hugepage default, madvise, five jobs beside the campaign: CPU total 1,589.654 s +-2.01 %, x1.144 (95 % interval x1.102-x1.185), no block but the two at the start (9.10 D88)"]
+              "python3 under the desktop kernel's transparent-hugepage default, madvise, five jobs beside the campaign: CPU total 1,589.654 s +-2.01 %, x1.144 (95 % interval x1.102-x1.185), no block but the two at the start (9.10 D88)",
+              "kdenlive_render CPU total 16.545 s +-0.8 % over 30 repeats (16.055-17.305 s), run between voluntary blocks 1.932 ms +-0.8 %, block per run 4.593 us +-13.1 %, within the 1 us floor (9.10 D105, D109)",
+              "kdenlive_render's tree: `kdenlive_render` and the `melt-7` it starts, 4 processes of 14 threads; `melt-7` holds 0.9960-0.9963 of the CPU, its busiest thread 0.682-0.691, the next 0.183-0.192 (9.10 D105)",
+              "kdenlive_render: 8,454-8,641 runs a repeat; 26 of 30 jobs end on one 40 ms block, melt's progress sleep (9.10 D109); 47 disk waits over 30 repeats; the same output, 600 H.264 frames at 1920 x 1080 in 966,107 B, in every repeat"]
       scope: >-
-        One observation per program (phase decision 2; D3, D7, D30): two programs measured in the same campaign
-        as the build archetypes, each pinned to one CPU of a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel
+        One observation per program (phase decision 2; D3, D7, D30): `clamscan` measured in the same campaign
+        as the build archetypes, pinned to one CPU of a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, kernel
         6.17.0-1022-azure) and instrumented by `perf sched record` on the measured CPU and a taskstats listener on
         its cpumask — ClamAV 1.5.3 scanning the kernel's `Documentation` (9 462 files) with signature
-        database daily 28128 held fixed from repeat 9 (D27); ffmpeg encoding a generated 60 s
-        clip. `python3` re-measured in 9.10's own campaign on the same runner model and kernel (9.10 D12, D82-D88):
+        database daily 28128 held fixed from repeat 9 (D27). `python3` re-measured in 9.10's own campaign on the same runner model and kernel (9.10 D12, D82-D88):
         PyTorch's basic MNIST example at its defaults (`pytorch/examples` at `acc295d`, `python main.py
         --save-model`: 14 epochs of batch 64 over the real MNIST dataset, a test pass after each, the checkpoint
         written), `torch` 2.14.0's CPU build at one intra-op thread under the pin, in a chroot of Ubuntu 24.04's
         English default layer built at 2026-09-22T17:00Z, started warm with the dataset local; the files show an
         actual training run and do not claim that desktop users train MNIST, and GPU training is unobservable on
         the runner (9.10 D12). The runner's kernel runs transparent huge pages in `always` mode; the desktop
-        kernel's default is `madvise` (9.10 D87, D88). A run is the CPU
+        kernel's default is `madvise` (9.10 D87, D88). `kdenlive_render` measured in 9.10's own campaign on the
+        same runner model and kernel (9.10 D10, D101-D109): Kdenlive 23.08.5 as Ubuntu 24.04 packages it (MLT
+        7.22.0, FFmpeg 6.1.1, x264 0.164.3108) exporting the `video-editor` project through its render dialog
+        with its shipped default profile, MP4-H264/AAC (x264 `veryfast`, CRF 23, a GOP of 15, AAC at 160 kb/s,
+        one processing thread) — 9.5's 20 s 1920 x 1080 30 fps H.264 clip (synthetic content, design) with an
+        unsharp effect at PCMark 10's Video Editing parameters, 600 frames, rendered whole. The job is the tree
+        of the `kdenlive_render` the dialog starts and the `melt-7` it runs, from its first schedule-in to its
+        exit; Kdenlive's window is open on the project, on the measured CPU and outside the job, in a chroot of
+        the same default layer built at 2026-09-22T17:00Z with Kdenlive installed by apt, the clip warm, under
+        Xvfb with no window manager, no display refresh, no GPU and no sound device. A run is the CPU
         from one voluntary block to the next, pooled over the program's threads; the block after a run is the
         program's off-CPU time that followed it, zero when another thread ran on (D22, D25). clamscan's block per
         run follows the runner's disk rather than the program and is carried with its half-width instead of the 5 %
@@ -913,7 +924,11 @@ archetypes:
       a first index of a home (9.10 D70); the rescan this entry carried, read from the miner's first schedule-in to
       its own Idle status (D16), left out the extraction that follows the crawl (9.10 D62). HandBrakeCLI, bound here
       until 9.10 as `handbrakecli` on a generated 720p clip, is the entry `video-transcoder`, measured as CpsMark+'s
-      transcode, its threads without a dominant one (9.10 D97).
+      transcode, its threads without a dominant one (9.10 D97). The `kdenlive_render` binding is Kdenlive's export
+      of the `video-editor` project, a tree of two programs pooled as one, `melt-7` doing its work, the task shown
+      as `kdenlive_render`, the tree's root (9.10 D105, D106); a file binding it binds the measured CPU total, the
+      whole export (9.10 D17). It replaces `ffmpeg`, 9.6's encode of a generated 60 s clip, which stood for the
+      export until 9.10 and whose tables left with it (9.10 D10, D105).
 
   compiler-child:
     category_source: meas

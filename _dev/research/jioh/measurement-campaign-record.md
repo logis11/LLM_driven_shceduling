@@ -352,6 +352,38 @@ Before the campaign:
 
 Pooled in `task-9.10-scenarios-timelines/campaign/handbrake/results/` (`pooled.json`, `results.md`).
 
+## 9.10 — `cpu-batch`'s `kdenlive_render`, Kdenlive's export of the `video-editor` project
+
+Repeats 1–30 on the AMD EPYC 7763, 30 landings, every one valid. The method's checks:
+
+- the layer built with no package missing and the 427 packages `apt-get install kdenlive ffmpeg` added, one set across the landings;
+- `kdenlive` 4:23.08.5-0ubuntu4, `melt` and `libmlt7` 7.22.0-1build6, `libavcodec60` 7:6.1.1-3ubuntu5, `libx264-164` 2:0.164.3108+git31e19f9-1 and `frei0r-plugins` 1.8.0-1build3;
+- 9.5's clip, one SHA-256 across the landings, cached at 1.0000 with the render stack's libraries;
+- the kernel's transparent huge pages `always`;
+- the render dialog opened by its shortcut in every landing, `kdenlive_render delivery /usr/bin/melt-7 <playlist>`, the playlist's consumer Kdenlive 23.08.5's default profile (x264 `veryfast`, CRF 23);
+- the same output in every landing: 600 H.264 frames at 1920 × 1080 and 938 AAC frames, 966,107 B, one SHA-256, one x264 options string.
+
+Each repeat landed once. 56 jobs: 30 landed, 26 stopped by the machine gate.
+
+The program is `cpu-batch`'s `kdenlive_render` (9.10 D105, D106): the tree of `kdenlive_render` and the `melt-7` it starts, pooled.
+
+| archetype | value | landings | mean | spread (cv) | 95 % half-width | stopped by |
+|---|---|---|---|---|---|---|
+| `cpu-batch` (`kdenlive_render`) | run between voluntary blocks | 30 | 1.932 ms | 2.1 % | ±0.8 % | the rule |
+| `cpu-batch` (`kdenlive_render`) | block per run | 30 | 4.593 µs | 35.2 % | ±13.1 % | the rule's 1 µs floor, at the projection (D109) |
+| `cpu-batch` (`kdenlive_render`) | CPU total | 30 | 16.545 s | 2.1 % | ±0.8 % | the rule |
+
+Reported beside them:
+
+- **The job.** 16.181–17.427 s, 16.055–17.305 s of CPU, saturation 0.9920–0.9946; 14 threads, `melt-7`'s 9 holding 99.6 % of the CPU.
+- **The threads.** The busiest holds 0.682–0.691 of the CPU, the next 0.183–0.192.
+- **The blocks.** 8,454–8,641 runs a landing; 1.8–50.5 ms of blocks a job, 26 of the 30 jobs ending on one 40 ms block, melt's progress sleep (D109); 47 disk waits over the 30 landings (0.03–0.86 ms) and 3 uninterruptible waits.
+- **Beside the job.** Kdenlive's window held 66.9–78.7 ms of the measured CPU during the job.
+
+Before the campaign, five dry runs, three on the EPYC 7763: #157, whose shortcut opened no dialog, and #160 and #161, the fixed driver's (D105).
+
+Pooled in `task-9.10-scenarios-timelines/campaign/kdenlive/results/` (`pooled.json`, `results.md`).
+
 ## Machine draws
 
 The build campaign, complete: 28 jobs, 14 on the AMD EPYC 7763 (50.0 %), 12 stopped by the machine gate — Intel Xeon Platinum 8573C 4, AMD EPYC 9V74 4, AMD EPYC 9V45 2, Intel Xeon Platinum 8370C 1, Intel Xeon 6973P-C 1 — and 2 cancelled.
@@ -375,3 +407,5 @@ The 9.10 Tracker campaign, complete: 38 jobs — 18 landed on the AMD EPYC 7763 
 The 9.10 MNIST campaign, complete: 8 jobs — 6 landed on the AMD EPYC 7763 (75.0 %, all pooled), 2 stopped by the machine gate: Intel Xeon 6973P-C 1, AMD EPYC 9V45 1. Its dry run (#142) drew the EPYC 7763 after one stop (AMD EPYC 9V45). Its `madvise` check (D87), never a repeat: 9 jobs, 5 landed, 4 stopped (AMD EPYC 9V45 2, AMD EPYC 9V74 2).
 
 The 9.10 HandBrakeCLI campaign, complete: 9 jobs — 5 landed on the AMD EPYC 7763 (55.6 %, all pooled), 4 stopped by the machine gate: AMD EPYC 9V74 4. Its probe (D93), never a repeat, took 3 jobs, 2 landed and 1 stopped (Intel Xeon Platinum 8370C). Its two dry runs (#152, superseded by D95; #153) drew the EPYC 7763.
+
+The 9.10 Kdenlive export campaign, complete: 56 jobs — 30 landed on the AMD EPYC 7763 (53.6 %, all pooled), 26 stopped by the machine gate: AMD EPYC 9V74 14, AMD EPYC 9V45 7, Intel Xeon Platinum 8370C 3, Intel Xeon Platinum 8573C 2. Its five dry runs (#157–#161): 3 drew the EPYC 7763, 2 stopped (AMD EPYC 9V74, AMD EPYC 9V45).

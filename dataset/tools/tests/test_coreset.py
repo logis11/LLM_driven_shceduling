@@ -82,7 +82,7 @@ def test_c5_names_only(coreset):
 
 C7_INTERACTIVE = ("browsing", "office", "mail", "dev", "photo", "meeting",
                   "gaming", "media", "video-edit", "idle")
-C7_SAME_NAME = ("render", "backup")   # indexing, ml-train, transcode: their bases' first C seconds (9.10 D78)
+C7_SAME_NAME = ("backup",)   # indexing, ml-train, transcode, render: their bases' first C seconds (9.10 D78)
 INDEX_C_US = 39_435_000   # 9.10 D78, D80: the index's CPU total, total_work as compiled
 
 
@@ -193,6 +193,28 @@ def test_c7_transcode_is_its_bases_first_c_seconds(coreset):
     assert ground_truth(variant) == [("transcode", False)]
     gt = variant["ground_truth"][0]
     assert (gt["t_start"], gt["t_end"]) == (0, TRANSCODE_C_US)
+    assert gt["attributes"].get("initiated") == "scheduled" and gt["attributes"].get("pre_committed_miss") is True
+
+
+RENDER_C_US = 16_545_000   # 9.10 D105: the export's measured CPU total, meas-ci:background:2026-10-03c
+
+
+def test_c7_render_is_its_bases_first_c_seconds(coreset):
+    """9.10 D78's form for the render pair: c1-render's first C seconds — the editor by its id, name and arrival,
+    departing at C, its focus 2 s to C − 2 s, the preview render at the window's middle (D44, D96) — the same export,
+    `cpu-batch`'s `kdenlive_render`, from 0 s; one segment, labelled false, still a pre-committed miss. The base keeps
+    its 60 s and binds the export whole from 2 s (D108's ground, D78)."""
+    base, _ = coreset["c1-render"]
+    variant, _ = coreset["c7-render"]
+    b, v = events_by_id(base), events_by_id(variant)
+    assert set(b) == set(v) == {"editor", "bulk"}
+    assert (v["editor"]["name"], v["editor"]["t"], v["editor"]["depart"]) == (b["editor"]["name"], b["editor"]["t"], RENDER_C_US)
+    assert (b["bulk"]["name"], b["bulk"]["t"]) == ("kdenlive_render", 2_000_000)
+    assert (v["bulk"]["name"], v["bulk"]["t"]) == ("kdenlive_render", 0)
+    assert b["editor"]["depart"] == base["ground_truth"][0]["t_end"] == 60_000_000
+    assert ground_truth(variant) == [("render", False)]
+    gt = variant["ground_truth"][0]
+    assert (gt["t_start"], gt["t_end"]) == (0, RENDER_C_US)
     assert gt["attributes"].get("initiated") == "scheduled" and gt["attributes"].get("pre_committed_miss") is True
 
 

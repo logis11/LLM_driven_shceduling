@@ -1,5 +1,8 @@
-# C2 P3 (base) — {kdenlive + ffmpeg render}: user-initiated bulk; the
-# variant swaps in borg (scheduled bulk).
+# C2 P3 (base) — {kdenlive + its export}: user-initiated bulk; the variant
+# swaps in borg (scheduled bulk). The export is `cpu-batch`'s
+# `kdenlive_render` bound whole from 60 s (9.10 D105, D106); segment 1 keeps
+# its 60 s in both files, the export ending inside it under every policy
+# (9.10 D108).
 meta:
   id: c2-p3a
   seed: 203
@@ -13,8 +16,8 @@ segments:
 tasks:
   - {id: editor, name: kdenlive, archetype: video-editor,
      arrive: 0s, depart: 120s}
-  - {id: bulk, name: ffmpeg, archetype: cpu-batch, arrive: 60s,
-     bind: {total_work: 75s, program: ffmpeg}}
+  - {id: bulk, name: kdenlive_render, archetype: cpu-batch, arrive: 60s,
+     bind: {total_work: 16.545s, program: kdenlive_render}}
 
 focus:
   - {from: 2s, to: 118s, task: editor}

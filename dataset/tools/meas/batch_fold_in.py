@@ -3,7 +3,7 @@
 
 batch_fold_in.py [--check]
 
-`cpu-batch` (9.6; its `python3` program from 9.10's MNIST campaign), `compiler-child` and `build-orchestrator` (9.6), `file-backup`, `file-archiver` and `game-download`
+`cpu-batch` (9.6; its `python3` program from 9.10's MNIST campaign, its `kdenlive_render` program from 9.10's Kdenlive export campaign), `compiler-child` and `build-orchestrator` (9.6), `file-backup`, `file-archiver` and `game-download`
 (9.7), `package-upgrade` (9.10), `module-build-orchestrator` and `module-compiler-child` (9.10), `file-indexer` (9.10) and `video-transcoder` (9.10) carry the quantile tables, each one pooled table of the campaign's record: a program's runs between voluntary
 blocks and the block after each run (9.6 D21, D22, D25; 9.7 D29), the object job's per-(role, step) CPU (9.6 D19,
 D20), make's dispatch run. Each is written in the library's table form (distribution.yaml_table: the ten quantiles,
@@ -31,10 +31,11 @@ POOLS = {"build": os.path.join(RESEARCH, "task-9.6-compile", "campaign", "result
          "dkms": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "dkms", "results", "pooled.json"),
          "tracker": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "tracker", "results", "pooled.json"),
          "mnist": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "mnist", "results", "pooled.json"),
-         "handbrake": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "handbrake", "results", "pooled.json")}
+         "handbrake": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "handbrake", "results", "pooled.json"),
+         "kdenlive": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "kdenlive", "results", "pooled.json")}
 
 # (archetype, param) -> (record, path to the pooled table)
-_PROGRAMS = {"clamscan": "clamscan", "ffmpeg": "ffmpeg"}   # tracker: file-indexer (9.10 D70); handbrakecli: video-transcoder (9.10 D97)
+_PROGRAMS = {"clamscan": "clamscan"}   # tracker: file-indexer (9.10 D70); handbrakecli: video-transcoder (9.10 D97); ffmpeg: kdenlive_render (9.10 D105)
 TABLES = {}
 for _p, _phase in _PROGRAMS.items():
     TABLES[("cpu-batch", f"{_p}_run")] = ("build", ("phases", _phase, "shape", "runs_between_blocks_us"))
@@ -46,6 +47,9 @@ for _role, _steps in (("sh", 4), ("gcc", 3), ("cc1", 1), ("as", 1), ("fixdep", 1
 # 9.10 D85: `python3` re-measured as PyTorch's basic MNIST example, from the MNIST campaign's record
 TABLES[("cpu-batch", "python3_run")] = ("mnist", ("runs", "mnist", "phases", "mnist-train", "all", "batch_run_us"))
 TABLES[("cpu-batch", "python3_block")] = ("mnist", ("runs", "mnist", "phases", "mnist-train", "all", "batch_block_us"))
+# 9.10 D105, D106: `kdenlive_render`, Kdenlive's export of the video-editor project, from the export campaign's record
+TABLES[("cpu-batch", "kdenlive_render_run")] = ("kdenlive", ("runs", "kdenlive", "phases", "kdenlive-export", "all", "batch_run_us"))
+TABLES[("cpu-batch", "kdenlive_render_block")] = ("kdenlive", ("runs", "kdenlive", "phases", "kdenlive-export", "all", "batch_block_us"))
 TABLES[("build-orchestrator", "dispatch_overhead")] = ("build", ("phases", "build-j8-warm", "dispatch", "per_dispatch_us"))
 for _aid, _app, _phase in (("file-backup", "borg", "borg-first-warm"), ("file-archiver", "7z", "7z-mmt8-warm"),
                            ("game-download", "steamcmd", "steam-fresh-shaped"), ("package-upgrade", "upgrade", "upgrade-install"),
