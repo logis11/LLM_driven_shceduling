@@ -2216,3 +2216,19 @@ Grounds:
 Not taken: running on to the projection, 72 repeats, about 15 hours of jobs at the gate's rate (D109's choice for melt's timer); the exception at five repeats.
 
 No file changed yet.
+
+## D123 — pair P3's segment 1 lengthens in both files until the backup ends inside it (2026-10-04)
+
+By 인지오's decision, D108's hand-off ("P3's segment 1 is read again against both jobs when the backup is measured"). Segment 1 of `c2-p3a` and `c2-p3b` runs from 60 s to the smallest whole second by which `c2-p3b`'s backup, arriving at 60 s, ends under every policy. That second is 60 s, plus the backup's CPU total, plus its blocks, plus the editor's CPU released after 60 s as compiled under the files' seed (D78's arithmetic, D108's reading). The files end with the segment, the editor departing at its end, focus to 2 s before it. The length is set at fold-in from the pooled CPU total. At the first batch's 167.492 s it is about 270 s, the files about 330 s: the editor releases 101.3 s of CPU in 60–330 s. `c2-p3a`'s export still ends by about 99.5 s, early in the segment.
+
+Grounds:
+
+- **D108's ground on both halves.** "The render ends inside the segment. … The `true` cell's turnaround term then reads a finished job." Both halves' jobs are now measured, and each ends inside segment 1.
+- **One diff per pair** (`docs/workload/building-plan.md` §3, "Counts and reuse"; D80, D108). Both files keep one length and differ only in segment 1's job and label.
+- **Both segments say `true`.** No instant needs unwanted work alive, so the segment is not sized to a job's CPU total (D42, D80).
+
+Not taken: segment 1 at 60 s in both files, `c2-p3b`'s backup running past the file's end as `c2-p1a`'s training run does (D86); segment 1 at the backup's CPU total, D42's and D80's form for an unwanted job, inside which the backup could not end on a shared lane.
+
+Hands to 9.14: P3's terms over the longer segment 1; `c2-p3a`'s and `c2-p3b`'s demand on the new length.
+
+No file changed yet.
