@@ -260,9 +260,17 @@ pin_state() { [ -z "$1" ] && echo unpinned || { [ "$1" = "$2" ] && echo ok || ec
 fetch_set() {   # fetch_set <name> <record prefix>: fetched, checked, extracted on the harness CPUs, manifest verified; sets SET
   local name="$1" p="$2" url ok=0 t0
   local dest="$WORK/sets/$name" arc="$WORK/$name.zpaq"   # a separate statement: `local` expands every word before assigning any
+  local pin; pin="$(set_field "$name" archive_sha256)"
   for url in $(set_field "$name" urls); do
     t0=$(date +%s)
-    if unmeasured wget -q --tries=5 --waitretry=15 --retry-connrefused -O "$arc" "$url"; then ok=1; rec "$p.url" "$url"; rec "$p.fetch_s" "$(( $(date +%s) - t0 ))"; break; fi
+    if unmeasured wget -q --tries=5 --waitretry=15 --retry-connrefused -O "$arc" "$url"; then
+      # a page served in place of the archive (9.7's borg repeat 3; 9.10's dejadup repeats 12 and 25: 12 KB from
+      # mattmahoney.net, wget's success) is passed over for the next link when the archive is pinned
+      if [ -n "$pin" ] && [ "$(sha256sum "$arc" | cut -d' ' -f1)" != "$pin" ]; then
+        rec "$p.passed_over" "$url $(stat -c %s "$arc") B"; continue
+      fi
+      ok=1; rec "$p.url" "$url"; rec "$p.fetch_s" "$(( $(date +%s) - t0 ))"; break
+    fi
   done
   rec "$p.fetch.ok" "$ok"
   rec "$p.archive_bytes" "$(stat -c %s "$arc" 2>/dev/null || echo 0)"

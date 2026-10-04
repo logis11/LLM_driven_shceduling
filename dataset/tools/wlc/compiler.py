@@ -381,14 +381,15 @@ def _interactive_unroll(build, timeline, task, iid, params, wakes):
         build.program = [{"op": "WAIT", "channel": channel}]
 
 
-# ---- finite jobs (cpu-batch, file-backup, file-archiver, game-download) ----
+# ---- finite jobs (cpu-batch and the one-table-set batch loops: file-archiver, game-download, incremental-backup, …) ----
 
 def _batch_loop(build, params, task, seed, iid):
     """cpu-batch (D21, D22, D25): a RUN drawn from the bound program's measured runs between voluntary blocks,
     then the program's off-CPU time that followed such a run — the block table is zero-inclusive, a zero meaning
     another thread of the program ran on — until `total_work` of CPU is spent. The table set is chosen by the
-    `program` binding, never by the task's display name. An archetype with one table set (9.7 D29: `file-backup`,
-    `file-archiver`, `game-download`) needs no `program` binding: its one set is taken."""
+    `program` binding, never by the task's display name. An archetype with one table set (9.7 D29: `file-archiver`,
+    `game-download`; 9.10's measured jobs, `incremental-backup` among them) needs no `program` binding: its one set is
+    taken."""
     program = task["bind"].get("program")
     if program is None:
         sets = sorted(name[:-len("_run")] for name in params if name.endswith("_run"))

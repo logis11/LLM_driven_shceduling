@@ -2232,3 +2232,80 @@ Not taken: segment 1 at 60 s in both files, `c2-p3b`'s backup running past the f
 Hands to 9.14: P3's terms over the longer segment 1; `c2-p3a`'s and `c2-p3b`'s demand on the new length.
 
 No file changed yet.
+
+## D124 — the Déjà Dup campaign's raw records are release `meas-ci-background-2026-10-04` (2026-10-04)
+
+By 인지오's decision, the method's §7. The release is created at the fold-in commit. It holds, each archive without its `pool-cache/`:
+
+- the 30 landings (runs #183–#198), the 28 pooled and repeats 12 and 25 beside them as left out;
+- the dry runs #180 and #182, their `perf.data` kept, and #176, cancelled, and #177, whose first backup's driver failed before the phase, with the records they left;
+- the reports of the 30 jobs the machine gate stopped, 26 of the campaign's and 4 of the dry runs', in `gated-reports.zip`.
+
+No backup data is in it. The set appears as its manifest (79,431 paths, sizes and SHA-256), and the change plan names files in it, as 9.7's `meas-ci-background-2026-09-19` already published. The backup volumes never left the runners. The archives carry the assistant's screenshots, its password fields masked, and the session's environment, whose passwords are the design strings in `run.sh`.
+
+No file changed yet.
+
+## D125 — the Déjà Dup campaign holds at 28 repeats; `incremental-backup` folded in, `file-backup` retired, the four backup files rebound (2026-10-04)
+
+The campaign of D112–D124, `meas-ci:background:2026-10-04`, run under `../measurement-campaign-workflow.md`. It is recorded in `campaign/dejadup/` (method, machine draws, `results/pooled.json`, `results/results.md`) and in `measurement-campaign-record.md`.
+
+- **Runs.**
+  - The dry runs: #176 and #177, the first drivers, which met a black window and an unread button; #180, the whole job on the 100 MB subset; #182, the job on the 10 GB set (D119). #175, #178, #179 and #181 stopped at the gate.
+  - The first batch, repeats 1–5 (#183–#186).
+  - The batch to 30 repeats, repeats 6–30 (#187–#198; D122).
+  - In all, 56 campaign jobs: 30 landed on the EPYC 7763, 26 stopped by the machine gate. Repeats 12 and 25 fail the validity step and are left out. In both, the set's fetch returned a 12 KB page from mattmahoney.net in place of the archive, its SHA-256 off the pin, and the backup ran on an empty tree, as 9.7's `borg` repeat 3 did. The fetch now passes over such a page for the next link (method §8).
+- **The rule holds at 28 on all three values.** The CPU total is 165.668 s ±0.56 % (161.661–173.977 s). The run between voluntary blocks is 1.966 ms ±4.4 %. The block per run is 3.730 µs ±6.2 %, within the 1 µs floor. D122's exception is not taken. Every pooled repeat is valid:
+  - the layer built, with the 9 packages `apt-get install deja-dup` added, one set across the landings;
+  - `deja-dup` 45.2-1build2, `duplicity` 2.1.4-3ubuntu2, `librsync2t64` 2.3.4-1.1ubuntu2;
+  - the set's archive and manifest on their pins, the tree verified as `~/10gb`;
+  - the drive mounted with direct I/O; the first backup by the assistant, one full chain of 24 volumes, the password in the keyring;
+  - the change set, one plan across the landings;
+  - the set cached at 0.9915–1.0000; the kernel's mode `always`;
+  - `deja-dup --backup --auto` in `SCHED_IDLE` and the idle I/O class, `last-backup` advanced, the drive's chain one full backup and one incremental.
+- **Reported.**
+  - The job is 162.5–174.9 s, saturation 0.9935–0.9952, 52 processes of 115–118 threads.
+  - `duplicity` holds 0.569–0.576 of the CPU over its eight runs, `deja-dup` 0.283–0.291, `gpg` 0.134–0.140. The busiest thread holds 0.320–0.333, the next 0.283–0.291, the third 0.223–0.239.
+  - The stages: duplicity's dry run 59.9–64.1 s, the incremental 96.9–106.4 s, the verify 4.1–4.3 s.
+  - 80,712–118,619 runs a landing, 0.24–0.45 s of blocks a job; 246–362 disk waits a job (0.12–0.33 s).
+  - In the dry run `deja-dup` read duplicity's log after nearly every write in 2 of the 28 landings and in batches in 26 (D122).
+  - The monitor started the backup 120.0–121.0 s after the session's start.
+- **Release.** The raw records are release `meas-ci-background-2026-10-04`, published on 인지오's go-ahead (D124).
+- **Fold-in.**
+  - `incremental-backup` enters as a `batch-loop` entry. Its `dejadup_run` and `dejadup_block` are written by `batch_fold_in.py` from `results/pooled.json`, their source `meas-ci:background:2026-10-04` (D119, D120). Its scope, stats and notes state D112–D123.
+  - `file-backup` leaves `dataset/archetypes.yaml`, bound nowhere (D119), and `batch_fold_in.py` no longer writes `borg`'s tables. 9.7's campaign stays released as `meas-ci-background-2026-09-19`. The table count stays 89.
+  - `docs/references.md` gains `deja-dup` and `duplicity` (deployed-system, verified) and `vrable-fast09`, the Cumulus paper behind the change set's size (scholarly, verified). 9.7's `fileset.py` already cited it without an entry.
+  - `dataset/tools/wlc/grid.py` places `deja-dup` at tier 1 (D121).
+  - The compiler's and the deriver's one-table-set examples name `incremental-backup`; `test_canonical`'s blocking example is `game-download`.
+- **Rebound.**
+  - `c1-backup`: `deja-dup` on `incremental-backup` from 2 s, `total_work` 165.668 s. The segment is 277 s, the smallest whole second by which the backup ends under every policy: 2 s plus 165.668 s of CPU plus 0.315 s of its blocks plus the editor's 108.487 s as compiled under the file's seed, 276.470 s (D17; D78's arithmetic, D90's form). Focus runs 2–275 s, and the preview render is at 138.5 s, the window's middle (D96). Taken under 인지오's delegation, on D90 and D100.
+  - `c7-backup` (`c7.variant.yaml`): `c1-backup`'s first C seconds, the backup from 0 s, the editor departing at C, focus 2 s to C − 2 s, the preview render at 82.834 s, its window's middle (D44, D96). One segment, `background_wanted: false`, `initiated: scheduled`, still a pre-committed miss, its premise D9's (D78's form, as D90's, D100's and D111's). Taken under 인지오's delegation.
+  - `c2-p3a` and `c2-p3b`: segment 1 runs 60–326 s in both files (D123). That is 60 s plus 165.668 s of CPU plus 0.190 s of the backup's blocks plus the editor's 99.805 s released after 60 s as compiled under the files' seed, 325.663 s. `c2-p3b` binds `deja-dup` on `incremental-backup` from 60 s, `total_work` 165.668 s; `c2-p3a`'s export still ends by about 99.5 s. Segment 0 and its preview render at 30 s are unchanged.
+  - C is 165.668 s, the backup's `total_work`, which the batch loop compiles exactly.
+
+Recompiled (`compile.py --allow-window`): 8 of 100 artifacts change beyond the library's hash, the four files in both modes. Demand (`-single`):
+
+| file | before | after | |
+|---|---|---|---|
+| `c1-backup` | 0.9692 | 0.9897 | calibration |
+| `c7-backup` | 0.9692 | 1.4032 | calibration |
+| `c2-p3a` | 0.5552 | 0.4401 | the demand window (D17) |
+| `c2-p3b` | 1.0423 | 0.8975 | the demand window (D17) |
+
+Lint reports seven demand-window files: `c2-p1a`, `c2-p1b`, `c2-p3a` (now 0.44), `c2-p3b` (now 0.90), `c3-creation`, `c3-evening` and `c3-workday`. `compile.py --check --allow-window` and `batch_fold_in.py --check` pass. Tests: 387 passed, 1 skipped, 1 xfailed.
+
+Restated tests:
+- `backup` leaves `C7_SAME_NAME` for `test_c7_backup_is_its_bases_first_c_seconds`;
+- `test_p3_pair_segment_one_holds_the_backup_in_both_files` reads segment 1's 60–326 s in both files;
+- `test_a_single_table_set_batch_loop_needs_no_program_binding` takes `game-download` for its blocking case;
+- the background tests add the `dejadup` job, its root rule and the seven-day change set.
+
+Hands to 9.14:
+- `c1-backup`'s, `c7-backup`'s and pair P3's terms on the measured backup and the new lengths;
+- `c2-p3a` (0.44) and `c2-p3b` (0.90) in the demand window.
+
+Hands to 9.11: the scheduled backup's idle CPU and I/O classes, which the task model does not carry (D112, D117).
+
+Hands to 9.12 and 9.15:
+- the scenario catalog's S15 row: Déjà Dup's `deja-dup` and its `duplicity` and `gpg`;
+- `building-plan.md` §3 C1 (backup {kdenlive, borg}), C2 P3 ({kdenlive + borg}), and C7's sentence for backup (D9's hand-off);
+- `docs/workload/measurement-overview.md`'s `file-backup` rows.

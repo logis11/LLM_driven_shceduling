@@ -137,13 +137,13 @@ def test_zero_inclusive_block_table_leaves_the_program_running(library):
 
 
 def test_a_single_table_set_batch_loop_needs_no_program_binding(library):
-    # 9.7 D29: file-backup, file-archiver and game-download each carry one table set, taken without a `program` binding;
+    # 9.7 D29: file-archiver and game-download each carry one table set, taken without a `program` binding;
     # cpu-batch, with three, still needs one
     import pytest
     from wlc import compiler
-    build = compiler._TaskBuild("backup", "borg")
-    compiler._batch_loop(build, library.entry("file-backup")["params"], {"bind": {"total_work": "2s"}}, "seed", "backup")
-    assert "SLEEP" in {op["op"] for op in build.program}          # borg blocks after almost every run
+    build = compiler._TaskBuild("download", "steam")
+    compiler._batch_loop(build, library.entry("game-download")["params"], {"bind": {"total_work": "2s"}}, "seed", "download")
+    assert "SLEEP" in {op["op"] for op in build.program}          # SteamCMD blocks after about 5 % of its runs
     assert sum(op["us"] for op in build.program if op["op"] == "RUN") == 2_000_000 == build.demand_us
     build = compiler._TaskBuild("archive", "7z")
     compiler._batch_loop(build, library.entry("file-archiver")["params"], {"bind": {"total_work": "2s"}}, "seed", "archive")

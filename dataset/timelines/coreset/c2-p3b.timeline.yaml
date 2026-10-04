@@ -3,7 +3,7 @@
 focus:
 - from: 2s
   task: editor
-  to: 118s
+  to: 324s
 meta:
   id: c2-p3b
   seed: 203
@@ -27,16 +27,16 @@ segments:
   scenario:
   - S7
   - S15
-  to: 120s
+  to: 326s
 tasks:
 - archetype: video-editor
   arrive: 0s
-  depart: 120s
+  depart: 326s
   id: editor
   name: kdenlive
-- archetype: file-backup
+- archetype: incremental-backup
   arrive: 60s
   bind:
-    total_work: 75s
+    total_work: 165.668s
   id: bulk
-  name: borg
+  name: deja-dup

@@ -384,6 +384,42 @@ Before the campaign, five dry runs, three on the EPYC 7763: #157, whose shortcut
 
 Pooled in `task-9.10-scenarios-timelines/campaign/kdenlive/results/` (`pooled.json`, `results.md`).
 
+## 9.10 — `incremental-backup`, Déjà Dup's scheduled weekly incremental
+
+Repeats 1–30 on the AMD EPYC 7763, 30 landings, 28 valid; repeats 12 and 25 left out — the set's fetch returned a 12 KB page from mattmahoney.net in place of the archive, and their backups ran on an empty tree. The method's checks:
+
+- the layer built with no package missing and the 9 packages `apt-get install deja-dup` added, one set across the landings;
+- `deja-dup` 45.2-1build2, `duplicity` 2.1.4-3ubuntu2 and `librsync2t64` 2.3.4-1.1ubuntu2;
+- Mahoney's set, its archive and manifest matching their pins, verified where Déjà Dup reads it as `~/10gb`;
+- the first backup by Déjà Dup's own assistant, one full chain of 24 volumes on the loop-mounted drive, the password in the keyring;
+- the change set, seven days of Cumulus's rates, one plan across the landings: 9,729 changed files of 883.1 MB and 304.2 MB of new files;
+- the set cached at 0.9915–1.0000 at the start;
+- the kernel's transparent huge pages `always`;
+- `deja-dup --backup --auto` started by the monitor 120.0–121.0 s after the session's start, in `SCHED_IDLE` and the idle I/O class; `last-backup` advanced; the drive's chain one full backup and one incremental of four volumes.
+
+Each repeat landed once. 56 jobs: 30 landed, 26 stopped by the machine gate.
+
+The entry is `incremental-backup` (9.10 D119–D121): the tree of the `deja-dup` the monitor starts, pooled.
+
+| archetype | value | landings | mean | spread (cv) | 95 % half-width | stopped by |
+|---|---|---|---|---|---|---|
+| `incremental-backup` | run between voluntary blocks | 28 | 1.966 ms | 11.3 % | ±4.4 % | the rule |
+| `incremental-backup` | block per run | 28 | 3.730 µs | 16.0 % | ±6.2 % | the rule's 1 µs floor |
+| `incremental-backup` | CPU total | 28 | 165.668 s | 1.4 % | ±0.56 % | the rule |
+
+Reported beside them:
+
+- **The job.** 162.5–174.9 s, 161.7–174.0 s of CPU, saturation 0.9935–0.9952; 52 processes of 115–118 threads. `duplicity` holds 0.569–0.576 of the CPU over eight runs, `deja-dup` 0.283–0.291, `gpg` 0.134–0.140.
+- **The threads.** The busiest holds 0.320–0.333 of the CPU, the next 0.283–0.291, the third 0.223–0.239.
+- **The stages.** duplicity's dry run 59.9–64.1 s, the incremental 96.9–106.4 s, the verify 4.1–4.3 s. Every backup runs the dry run: `ToolJob.Flags` is a plain enum (9.10 D119).
+- **The blocks.** 80,712–118,619 runs a landing; 0.24–0.45 s of blocks a job; 246–362 disk waits a job (0.12–0.33 s) and 85–117 uninterruptible waits. In the dry run `deja-dup` reads duplicity's log after nearly every write in 2 of the 28 landings and in batches in 26, the run between voluntary blocks 1.40–1.41 ms against 1.99–2.09 ms (9.10 D122).
+
+At the first batch's five landings the run between voluntary blocks stood at ±26.3 %, the two modes 2 to 3; the batch to 30 repeats (D122) brought it within the rule, and no exception was taken.
+
+Before the campaign, eight dry runs, four on the EPYC 7763: #176 and #177, whose drivers met a black window and an unread button; #180, the whole job on the 100 MB subset; #182, the job on the 10 GB set, read for D119.
+
+Pooled in `task-9.10-scenarios-timelines/campaign/dejadup/results/` (`pooled.json`, `results.md`).
+
 ## Machine draws
 
 The build campaign, complete: 28 jobs, 14 on the AMD EPYC 7763 (50.0 %), 12 stopped by the machine gate — Intel Xeon Platinum 8573C 4, AMD EPYC 9V74 4, AMD EPYC 9V45 2, Intel Xeon Platinum 8370C 1, Intel Xeon 6973P-C 1 — and 2 cancelled.
@@ -409,3 +445,5 @@ The 9.10 MNIST campaign, complete: 8 jobs — 6 landed on the AMD EPYC 7763 (75.
 The 9.10 HandBrakeCLI campaign, complete: 9 jobs — 5 landed on the AMD EPYC 7763 (55.6 %, all pooled), 4 stopped by the machine gate: AMD EPYC 9V74 4. Its probe (D93), never a repeat, took 3 jobs, 2 landed and 1 stopped (Intel Xeon Platinum 8370C). Its two dry runs (#152, superseded by D95; #153) drew the EPYC 7763.
 
 The 9.10 Kdenlive export campaign, complete: 56 jobs — 30 landed on the AMD EPYC 7763 (53.6 %, all pooled), 26 stopped by the machine gate: AMD EPYC 9V74 14, AMD EPYC 9V45 7, Intel Xeon Platinum 8370C 3, Intel Xeon Platinum 8573C 2. Its five dry runs (#157–#161): 3 drew the EPYC 7763, 2 stopped (AMD EPYC 9V74, AMD EPYC 9V45).
+
+The 9.10 Déjà Dup backup campaign, complete: 56 jobs — 30 landed on the AMD EPYC 7763 (53.6 %; 28 pooled, repeats 12 and 25 left out), 26 stopped by the machine gate: AMD EPYC 9V74 11, AMD EPYC 9V45 7, Intel Xeon Platinum 8573C 4, Intel Xeon 6973P-C 3, Intel Xeon Platinum 8370C 1. Its eight dry runs (#175–#182): 4 drew the EPYC 7763, 4 stopped (AMD EPYC 9V74 3, AMD EPYC 9V45 1).

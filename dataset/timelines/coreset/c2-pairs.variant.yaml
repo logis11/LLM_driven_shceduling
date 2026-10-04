@@ -30,12 +30,15 @@ variants:
                         attributes: {background_wanted: false, background: package-upgrade},
                         scenario: [S9, S17]}
 
-  # P3b — user-initiated bulk -> scheduled bulk (S15).
+  # P3b — user-initiated bulk -> scheduled bulk (S15): Déjà Dup's scheduled
+  # weekly incremental, `incremental-backup` shown as `deja-dup`, bound whole at
+  # its measured CPU total (meas-ci:background:2026-10-04; 9.10 D17, D119, D120);
+  # segment 1 is as long in both files as the backup needs to end inside it (D123).
   - id: c2-p3b
     from: c2-p3a.timeline.yaml
     ops:
-      - patch-task: {id: bulk, name: borg, archetype: file-backup,
-                     arrive: 60s, bind: {total_work: 75s}}
+      - patch-task: {id: bulk, name: deja-dup, archetype: incremental-backup,
+                     arrive: 60s, bind: {total_work: 165.668s}}
       - patch-segment: {index: 1, mode: backup,
                         attributes: {background_wanted: true, initiated: scheduled},
                         scenario: [S7, S15]}

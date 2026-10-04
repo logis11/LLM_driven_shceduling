@@ -1282,54 +1282,6 @@ archetypes:
 
   # ---- file and download jobs — 9.7 background campaign -----------------------
 
-  file-backup:
-    category_source: meas
-    pattern:
-      constructor: batch-loop      # 9.7 D29: a run between voluntary blocks, then the block that followed it
-      program:
-        - loop:                    # until total_work of CPU is spent
-            - RUN: borg_run
-            - SLEEP: borg_block
-        - EXIT: {}
-    params:                        # D29: the program's runs, pooled over its threads, and the block after each
-      borg_run:
-        {dist: quantiles, p: [3, 3, 3, 4, 5, 7, 11, 18, 6720, 4860305], min: 2, max: 8122040, means: [2.944, 3, 3, 3.186, 4.096, 5.557, 8.273, 12.583, 1245.263, 960744.872, 6326728.642], sampling: per-iteration, source: "meas-ci:background:2026-09-19"}
-      borg_block:
-        {dist: quantiles, p: [1, 2, 3, 6, 7, 14, 201, 5521, 93852, 109511], min: 0, max: 745348, means: [0.687, 1.348, 2.344, 4.769, 6.575, 9.315, 34.526, 1627.512, 47484.986, 99867.273, 201688.391], sampling: per-iteration, source: "meas-ci:background:2026-09-19"}
-    lifetime: finite
-    binding_params: [total_work]
-    scalable: []
-    validation_stats:
-      referee: meas-ci
-      run: "background:2026-09-19; repeats [1, 2, 4-31]"
-      stats: ["run between voluntary blocks mean 15.03 ms (+-3.82 %), block per run mean 3.091 ms (+-4.71 %)",
-              "share of runs followed by a block 0.9955-0.9997",
-              "CPU over the job 0.812-0.835: 46.6-48.1 s of CPU in 56.1-59.2 s",
-              "disk wait per wake 3.119 ms (+-4.68 %), reported"]
-      scope: >-
-        One observation (phase decision 2; 9.7 D2, D6–D9): borg 1.2.8 (Ubuntu 24.04's `borgbackup`), its repository
-        initialised with `--encryption=repokey` and compressing at its default lz4, making a first backup into a new
-        repository of Matt Mahoney's 10 GB benchmark set — 79 431 files from one Windows laptop, 2009–2013 (D7); set
-        check: median file 2 891 B against the GNU/Linux users' 4.60 KB (4,707 B), share of bytes in files over 30 MB 0.606
-        against the 2009 Windows population's half — the set cached (cached fraction 1.0 in every repeat, D8), the
-        repository written to the runner's disk. Pinned to one CPU of a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD
-        EPYC 7763, kernel 6.17.0-1022-azure), the rest of the machine idealised; the runner's agent processes share
-        the measured CPU outside the process tree; no human and no desktop session. `perf sched record` on the
-        measured CPU and a taskstats listener on its cpumask. 30 same-machine repeats under the machine gate; the
-        stability rule holds (D19, D29). Repeat 3 is left out: its set fetched as a 12 108 B file in place of the
-        3.70 GB archive, so its phases ran on an empty tree. Values are this software on this machine, not desktop
-        truth (9.5 D10).
-    modeling_notes: >-
-      The class is what the measurement shows (D1): borg is one process on one thread, reading every file, cutting
-      content-defined chunks, hashing, compressing and encrypting them and writing its repository. The task is
-      `cpu-batch`'s batch loop (D29) — a run drawn from borg's runs between voluntary blocks, then the block that
-      followed such a run — until `total_work` of CPU is spent; `total_work` is scenario design and binds in the
-      timeline (D13 (v)). The archetype describes a first backup into a new repository (D6): a timeline that is to
-      show a routine periodic backup gets an incremental archetype made from the campaign's repeat phase, its change
-      set stated as design (9.10). It describes a cached file set (D8); the cold figures are in the campaign results.
-      The blocks are mostly borg's own disk waits — it writes through `sync_file_range` windows and drops what it
-      read from the page cache — on the runner's disk, which is not a desktop drive (D8).
-
   file-archiver:
     category_source: meas
     pattern:
@@ -1628,6 +1580,66 @@ archetypes:
       above (9.10 D17). One task carries the process, so it alternates the threads' long and short runs in one
       sequence (9.6 D22). The task shows `HandBrakeCLI` (9.10 D98), the process's `comm`. Every thread runs at
       the default policy and nice 0: the encode declares no class.
+
+  incremental-backup:
+    category_source: meas
+    pattern:
+      constructor: batch-loop      # 9.10 D119: over every process of the tree
+      program:
+        - loop:                    # until total_work of CPU is spent
+            - RUN: dejadup_run
+            - SLEEP: dejadup_block
+        - EXIT: {}
+    params:                        # 9.10 D119: the tree's runs, pooled over its processes and threads, and the block after each
+      dejadup_run:
+        {dist: quantiles, p: [5, 9, 15, 161, 1323, 1529, 1657, 1771, 3545, 139878], min: 3, max: 40113977, means: [4.832, 7.229, 10.844, 70.153, 645.167, 1449.889, 1579.241, 1709.845, 2010.442, 29441.351, 762761.762], sampling: per-iteration, source: "meas-ci:background:2026-10-04"}
+      dejadup_block:
+        {dist: quantiles, p: [0, 0, 0, 0, 0, 0, 0, 0, 0, 85], min: 0, max: 150308, means: [0, 0, 0, 0, 0, 0, 0, 0, 0, 5.658, 3678.795], sampling: per-iteration, source: "meas-ci:background:2026-10-04"}
+    lifetime: finite
+    binding_params: [total_work]
+    scalable: []
+    validation_stats:
+      referee: meas-ci
+      run: "background:2026-10-04; repeats [1-11, 13-24, 26-30]; runs 37177580623, 37177612398, 37177897212, 37180238545, 37180281641, 37180430331, 37180982965, 37181647319, 37182261621, 37182754648"
+      stats: ["run between voluntary blocks mean 1.966 ms (+-4.4 %), block per run mean 3.730 us (+-6.2 %, within the 1 us floor)",
+              "CPU total 165.668 s (+-0.56 %), 161.661-173.977 s over the repeats: the job's measured whole (9.10 D17)",
+              "saturation 0.9935-0.9952 over the job; 52 processes of 115-118 threads: duplicity 0.569-0.576 of the CPU over eight runs, deja-dup 0.283-0.291, gpg 0.134-0.140; the busiest thread 0.320-0.333, the next 0.283-0.291, the third 0.223-0.239 (9.10 D119)",
+              "80,712-118,619 runs between voluntary blocks a job, 0.24-0.45 s of blocks; 246-362 disk waits a job, 0.12-0.33 s; deja-dup reading duplicity's log after nearly every write in the dry run in 2 of the 28 repeats, in batches in 26 (9.10 D122)",
+              "the job 162.5-174.9 s: duplicity's dry run 59.9-64.1 s, the incremental 96.9-106.4 s, the verify 4.1-4.3 s"]
+      scope: >-
+        One observation (phase decision 2; 9.10 D8, D112-D121): Déjà Dup 45.2 and duplicity 2.1.4 as Ubuntu 24.04
+        packages them (`deja-dup` 45.2-1build2, `duplicity` 2.1.4-3ubuntu2), at Déjà Dup's defaults with its password
+        remembered (D117) — encrypted by gpg, 200 MB volumes — making its scheduled weekly incremental, started by
+        its own monitor through `chrt --idle 0 ionice -c3` (D112), of a home holding Matt Mahoney's 10 GB set (79,431
+        files; 9.7 D7) after seven days of Cumulus's personal-machine change rates — 9,729 changed files of 883.1 MB
+        and 304.2 MB of new files, the changed part an upper bound (D115) — following a first backup made by Déjà
+        Dup's own assistant, to an ext4 filesystem on a loop device standing in for an external drive (D114). The job
+        is the tree of the `deja-dup` the monitor starts, from its first schedule-in to its exit: duplicity's
+        collection-status, its dry-run sizing pass, which every backup runs (D119), the incremental with one gpg per
+        volume, and the verify's restore; the set and Déjà Dup's cache in the page cache (D116). The state is a chroot
+        of the default layer of an English 24.04.5.1 desktop install, 1,445 packages, built from Ubuntu's snapshot
+        service as the archive stood at 2026-09-22T17:00Z, with `apt-get install deja-dup` adding 9 (D113). Pinned to
+        one CPU of a GitHub-hosted ubuntu-24.04 runner (4 vCPU AMD EPYC 7763, 16 GB, kernel 6.17.0-1022-azure), the
+        rest of the machine idealised; the session — the monitor, its bus, the keyring — and the runner's agent
+        processes share the measured CPU outside the tree; no system bus. `perf sched record` and a taskstats listener
+        on the measured CPU. 30 same-machine repeats under the machine gate, 28 pooled (repeats 12 and 25 fetched no
+        set); the stability rule holds on all three values. The disks' I/O scheduler is `none`, so the idle I/O class
+        has no effect. Values are this software on this machine, not desktop truth (9.5 D10).
+    modeling_notes: >-
+      The class is what the measurement shows (9.10 D119): the tree is runnable for its whole job but spread over
+      several threads — duplicity's incremental and its dry run, and deja-dup's main thread, which runs beside each
+      duplicity — with no dominant thread, so it is not `cpu-batch` by 9.6 D7's criterion. The task is `cpu-batch`'s
+      batch loop — a run drawn from the tree's runs between voluntary blocks, pooled over every process, then the
+      block that followed such a run, the tree's own off-CPU time, zero when another of its processes runs on --
+      until `total_work` of CPU is spent; `total_work` binds the measured whole, the CPU total above (9.10 D17). The
+      stages' order is not carried: the loop draws runs independently. The task shows `deja-dup` (9.10 D120), the
+      `comm` of the process the monitor starts; most of the CPU under that name is duplicity's and gpg's. The run
+      between voluntary blocks pools two ways deja-dup reads duplicity's log in the dry run, after nearly every write
+      or in batches, the interleaving of a pipe's writer and reader on one CPU (9.10 D122). Every process of the tree
+      runs in SCHED_IDLE and the idle I/O class, as the monitor starts it (9.10 D112); the task model carries no
+      declared class (9.11's). The two-monthly restore test, with a fresh cache and the password asked, about one
+      weekly run in nine, is not depicted (9.10 D118). `file-backup`, borg's first backup into a new repository, left
+      the library when the backup files bound this entry (9.10 D119).
 
   # ---- structural-special family — harvested from LAVD --------------------
 

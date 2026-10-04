@@ -41,7 +41,8 @@ NAME_TIERS = {
         "slack", "vlc", "game.exe", "transmission-daemon", "clamscan",
         "evince", "darktable", "ollama", "unattended-upgr",   # unattended-upgr: 9.10 D43
         "python",   # python: the training run's comm, python3's program and tier (9.10 D27, D84)
-        "kdenlive_render"},   # kdenlive_render: the export's comm, a new program at tier 1 (9.10 D106, D107)
+        "kdenlive_render",   # kdenlive_render: the export's comm, a new program at tier 1 (9.10 D106, D107)
+        "deja-dup"},   # deja-dup: the scheduled backup's comm, a new program at tier 1 (9.10 D120, D121)
     2: {"soffice.bin", "gamescope", "wineserver", "steamwebhelper",
         "HandBrakeCLI", "freshclam", "gnome-shell", "Xorg", "pipewire",
         "systemd", "dbus-daemon", "element-desktop", "Troy.exe"},

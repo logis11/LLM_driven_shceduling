@@ -1,8 +1,9 @@
 # C2 P3 (base) — {kdenlive + its export}: user-initiated bulk; the variant
-# swaps in borg (scheduled bulk). The export is `cpu-batch`'s
-# `kdenlive_render` bound whole from 60 s (9.10 D105, D106); segment 1 keeps
-# its 60 s in both files, the export ending inside it under every policy
-# (9.10 D108).
+# swaps in Déjà Dup's scheduled weekly incremental (scheduled bulk). The export
+# is `cpu-batch`'s `kdenlive_render` bound whole from 60 s (9.10 D105, D106).
+# Segment 1 runs in both files to the smallest whole second by which the
+# variant's backup, arriving at 60 s, ends under every policy, so each file's
+# job ends inside it (9.10 D123); the export ends by about 99.5 s.
 meta:
   id: c2-p3a
   seed: 203
@@ -10,17 +11,17 @@ meta:
 segments:
   - {from: 0s, to: 60s, mode: video-edit, attributes: {background_wanted: true},
      scenario: [S7]}
-  - {from: 60s, to: 120s, mode: render,
+  - {from: 60s, to: 326s, mode: render,
      attributes: {background_wanted: true, initiated: user}, scenario: [S7, S8]}
 
 tasks:
   - {id: editor, name: kdenlive, archetype: video-editor,
-     arrive: 0s, depart: 120s}
+     arrive: 0s, depart: 326s}
   - {id: bulk, name: kdenlive_render, archetype: cpu-batch, arrive: 60s,
      bind: {total_work: 16.545s, program: kdenlive_render}}
 
 focus:
-  - {from: 2s, to: 118s, task: editor}
+  - {from: 2s, to: 324s, task: editor}
 
 operations:
   - {at: 30s, task: editor, name: preview-render}

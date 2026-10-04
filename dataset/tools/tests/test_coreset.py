@@ -82,7 +82,7 @@ def test_c5_names_only(coreset):
 
 C7_INTERACTIVE = ("browsing", "office", "mail", "dev", "photo", "meeting",
                   "gaming", "media", "video-edit", "idle")
-C7_SAME_NAME = ("backup",)   # indexing, ml-train, transcode, render: their bases' first C seconds (9.10 D78)
+C7_SAME_NAME = ()   # indexing, ml-train, transcode, render, backup: their bases' first C seconds (9.10 D78)
 INDEX_C_US = 39_435_000   # 9.10 D78, D80: the index's CPU total, total_work as compiled
 
 
@@ -216,6 +216,41 @@ def test_c7_render_is_its_bases_first_c_seconds(coreset):
     gt = variant["ground_truth"][0]
     assert (gt["t_start"], gt["t_end"]) == (0, RENDER_C_US)
     assert gt["attributes"].get("initiated") == "scheduled" and gt["attributes"].get("pre_committed_miss") is True
+
+
+BACKUP_C_US = 165_668_000   # 9.10 D119: the scheduled incremental's measured CPU total, meas-ci:background:2026-10-04
+
+
+def test_c7_backup_is_its_bases_first_c_seconds(coreset):
+    """9.10 D78's form for the backup pair: c1-backup's first C seconds — the editor by its id, name and arrival,
+    departing at C, its focus 2 s to C − 2 s, the preview render at the window's middle (D44, D96) — the same scheduled
+    incremental, `incremental-backup` shown as `deja-dup`, from 0 s; one segment, labelled false, still a pre-committed
+    miss. The base binds the backup whole from 2 s and ends by the smallest whole second it needs (D90's form)."""
+    base, _ = coreset["c1-backup"]
+    variant, _ = coreset["c7-backup"]
+    b, v = events_by_id(base), events_by_id(variant)
+    assert set(b) == set(v) == {"editor", "bulk"}
+    assert (v["editor"]["name"], v["editor"]["t"], v["editor"]["depart"]) == (b["editor"]["name"], b["editor"]["t"], BACKUP_C_US)
+    assert (b["bulk"]["name"], b["bulk"]["t"]) == ("deja-dup", 2_000_000)
+    assert (v["bulk"]["name"], v["bulk"]["t"]) == ("deja-dup", 0)
+    assert b["editor"]["depart"] == base["ground_truth"][0]["t_end"] == 277_000_000
+    assert ground_truth(variant) == [("backup", False)]
+    gt = variant["ground_truth"][0]
+    assert (gt["t_start"], gt["t_end"]) == (0, BACKUP_C_US)
+    assert gt["attributes"].get("initiated") == "scheduled" and gt["attributes"].get("pre_committed_miss") is True
+
+
+def test_p3_pair_segment_one_holds_the_backup_in_both_files(coreset):
+    """9.10 D123: pair P3's segment 1 runs from 60 s to the second the backup needs in both files, which keep one length
+    and differ only in segment 1's job — the export in c2-p3a, the scheduled incremental shown as `deja-dup` in c2-p3b."""
+    base, _ = coreset["c2-p3a"]
+    variant, _ = coreset["c2-p3b"]
+    spans = lambda c: [(g["t_start"], g["t_end"]) for g in c["ground_truth"]]
+    assert spans(base) == spans(variant) == [(0, 60_000_000), (60_000_000, 326_000_000)]
+    b, v = events_by_id(base), events_by_id(variant)
+    assert (b["bulk"]["name"], b["bulk"]["t"]) == ("kdenlive_render", 60_000_000)
+    assert (v["bulk"]["name"], v["bulk"]["t"]) == ("deja-dup", 60_000_000)
+    assert b["editor"]["depart"] == v["editor"]["depart"] == 326_000_000
 
 
 def test_c7_same_name_counterparts_flip_the_label_only(coreset):

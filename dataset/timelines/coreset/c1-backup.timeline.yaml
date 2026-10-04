@@ -1,24 +1,27 @@
 # C1 — single-situation calibration: pure backup (building-plan §3 C1; Phase 7
-# spec decision 8). Task set lifted from c2-p3b segment 1 (kdenlive + borg,
-# scheduled and wanted, as P3b labels it); total_work resized from 75 s to
-# 30 s so the job finishes inside the 60 s segment (turnaround term).
+# spec decision 8). Task set lifted from c2-p3b segment 1: the editor and Déjà
+# Dup's scheduled weekly incremental, `incremental-backup` shown as `deja-dup`,
+# bound whole at its measured CPU total (meas-ci:background:2026-10-04; 9.10 D17,
+# D119, D120). The segment is the smallest whole second by which the backup ends
+# under every policy (9.10 D78's arithmetic, D90's form); the preview render sits
+# at the focus window's middle (D96).
 meta:
   id: c1-backup
   seed: 116
   demand: calibration
 
 segments:
-  - {from: 0s, to: 60s, mode: backup,
+  - {from: 0s, to: 277s, mode: backup,
      attributes: {background_wanted: true, initiated: scheduled}, scenario: [S7, S15]}
 
 tasks:
   - {id: editor, name: kdenlive, archetype: video-editor,
-     arrive: 0s, depart: 60s}
-  - {id: bulk, name: borg, archetype: file-backup, arrive: 2s,
-     bind: {total_work: 30s}}
+     arrive: 0s, depart: 277s}
+  - {id: bulk, name: deja-dup, archetype: incremental-backup, arrive: 2s,
+     bind: {total_work: 165.668s}}
 
 focus:
-  - {from: 2s, to: 58s, task: editor}
+  - {from: 2s, to: 275s, task: editor}
 
 operations:
-  - {at: 30s, task: editor, name: preview-render}
+  - {at: 138.5s, task: editor, name: preview-render}
