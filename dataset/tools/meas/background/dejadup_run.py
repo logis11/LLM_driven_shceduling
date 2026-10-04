@@ -7,8 +7,11 @@ deja-dup-monitor started in it (dejadup-session.sh monitor) — in a session of 
 run.sh stops it. Waits for the deja-dup the monitor starts, after its 120 s wait, as `chrt --idle 0 ionice -c3
 deja-dup --backup --auto` (S2-62 BackupInterface.vala:39, CommonUtils.vala:107–131); reads its arguments, parent,
 scheduling policy, I/O class and CPU affinity once it runs deja-dup — its parent as /proc shows it is recorded, not
-checked: the perf fork rows carry the lineage from the monitor — and returns at its exit, the job's end. Writes
-run.json: the steps' times (CLOCK_MONOTONIC and wall, ns), the process's readings, notes. Exit status: 0 the backup
+checked: the perf fork rows carry the lineage from the monitor — and returns at its exit, the job's end. While it
+waits it reads, from /proc on the harness CPUs, the command line of every duplicity and gpg process that appears, so
+each duplicity run's mode is the run's own record (dry run #180: seven duplicity runs under one deja-dup). Writes
+run.json: the steps' times (CLOCK_MONOTONIC and wall, ns), the process's readings, the children's command lines,
+notes. Exit status: 0 the backup
 ran and deja-dup exited; 2 no deja-dup within 900 s; 3 deja-dup still running at the cap.
 """
 
@@ -36,6 +39,17 @@ def read(path):
         return open(path, "rb").read()
     except OSError:
         return b""
+
+
+def comms():
+    """{pid: comm} of every process."""
+    out = {}
+    for d in os.listdir("/proc"):
+        if d.isdigit():
+            c = read(f"/proc/{d}/comm")
+            if c:
+                out[int(d)] = c.decode(errors="replace").strip()
+    return out
 
 
 def out_of(*cmd):
@@ -78,9 +92,15 @@ def main():
     rec["io_class"] = out_of("ionice", "-p", str(pid))
     rec["affinity"] = out_of("taskset", "-pc", str(pid))
     rec["comm"] = read(f"/proc/{pid}/comm").decode(errors="replace").strip()
-    end = time.monotonic() + CAP_S
+    end, seen = time.monotonic() + CAP_S, {}
+    rec["children"] = []
     while os.path.exists(f"/proc/{pid}") and time.monotonic() < end:
-        time.sleep(0.1)
+        for p, c in comms().items():
+            if c in ("duplicity", "gpg") and p not in seen:
+                argv = [x.decode(errors="replace") for x in read(f"/proc/{p}/cmdline").split(b"\0") if x]
+                seen[p] = True
+                rec["children"].append({"pid": p, "comm": c, "argv": argv, **stamp()})
+        time.sleep(0.05)
     rec["steps"]["gone"] = stamp()
     if os.path.exists(f"/proc/{pid}"):
         rec["notes"].append(f"{PROGRAM} still running after {CAP_S} s")

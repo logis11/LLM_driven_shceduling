@@ -1367,6 +1367,20 @@ print(f"dejadup.run.policy={policy[0] if policy else ''}")
 print(f"dejadup.run.io_class={e.get('io_class', '')}")
 print(f"dejadup.run.affinity={e.get('affinity', '').rsplit(':', 1)[-1].strip()}")
 print(f"dejadup.run.notes={' | '.join(e.get('notes', []))}")
+# each duplicity run's mode: the first word after the program that is not an option (DuplicityInstance.vala builds the
+# command line as the program, --log-fd, the mode, its options); and the gpg runs' operations
+modes = []
+for ch in e.get("children", []):
+    a = ch.get("argv", [])
+    i = next((j for j, x in enumerate(a) if x.endswith("/duplicity") or x == "duplicity"), None)
+    if ch.get("comm") == "duplicity" and i is not None:
+        modes.append(next((x for x in a[i + 1:] if not x.startswith("-")), "(none)"))
+print(f"dejadup.run.duplicity_runs={len(modes)}")
+print(f"dejadup.run.duplicity_modes={','.join(modes)}")
+gpg = [" ".join(x for x in ch.get("argv", []) if x in ("--symmetric", "--decrypt", "--encrypt", "--version", "--sign"))
+       for ch in e.get("children", []) if ch.get("comm") == "gpg"]
+print(f"dejadup.run.gpg_runs={len(gpg)}")
+print(f"dejadup.run.gpg_ops={','.join(g or '(other)' for g in gpg)}")
 st = e.get("steps", {})
 if "session" in st and "seen" in st:
     print(f"dejadup.run.session_to_seen_s={(st['seen']['mono_ns'] - st['session']['mono_ns']) / 1e9:.3f}")
