@@ -56,7 +56,7 @@ PHASES = {"borg": ("borg-first-warm", "borg-repeat-warm", "borg-first-cold", "bo
           "mnist": ("mnist-train",), "mnist-madvise": ("mnist-train",),   # mnist-madvise: D87's check   # 9.10 D82–D84; its list is fixed with the entry's form after the dry run
           "handbrake": ("handbrake-transcode",),   # 9.10 D11, D91–; its list is fixed with the entry's form after the dry run
           "kdenlive": ("kdenlive-export",),   # 9.10 D10, D101–D106
-          "dejadup": ("dejadup-incremental",)}   # 9.10 D8, D112–D118; its list is fixed with the entry's form after the dry run
+          "dejadup": ("dejadup-incremental",)}   # 9.10 D8, D112–D121
 # D19 (the shared stability rule): the list — every table the fold-in carries, each tested by its mean as the table
 # carries it (9.5 D78). D29 (9.6 D21, D22, D25): each archetype compiles as cpu-batch's batch loop, so it carries the
 # program's runs between voluntary blocks, pooled over its threads, and the block after each run — the program-level
@@ -81,7 +81,8 @@ LIST["handbrake"] = [("handbrake-transcode", "batch_run_us", "run between volunt
 # kdenlive_render (D105, D106)
 LIST["kdenlive"] = [("kdenlive-export", "batch_run_us", "run between voluntary blocks (µs)"),
                     ("kdenlive-export", "batch_block_us", "block per run (µs)"), ("kdenlive-export", "program_cpu_us", "CPU total (µs)")]
-# 9.10 Déjà Dup method §1: over the job (D112), the batch loop's two tables and the CPU total, until the form is fixed
+# 9.10 Déjà Dup method §1: over the job (D112), the batch loop's two tables and the CPU total — the new entry
+# incremental-backup (D119, D120)
 LIST["dejadup"] = [("dejadup-incremental", "batch_run_us", "run between voluntary blocks (µs)"),
                    ("dejadup-incremental", "batch_block_us", "block per run (µs)"), ("dejadup-incremental", "program_cpu_us", "CPU total (µs)")]
 # 9.10 D52–D56: the DKMS build carries the spawn form's tables — each job kind's per-(member, step) CPU (D53), make's

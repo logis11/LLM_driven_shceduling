@@ -2035,6 +2035,8 @@ Hands to 9.12 and 9.15:
 
 ## D112 — the periodic backup is started by Déjà Dup's own monitor in every repeat; the job is the tree of the `deja-dup` it starts (2026-10-04)
 
+> Corrected by D119: every backup runs the `--dry-run` sizing pass, automatic ones included (`ToolJob.Flags` is a plain enum).
+
 By 인지오's decision, how D8's campaign starts the scheduled run. In every repeat, after the first backup and the change set (D115, D118), `deja-dup-monitor` is started in the user's session with `last-backup` older than the schedule's last slot. When its own 120 s wait ends it finds the backup due and starts it. The job is every process of the tree rooted at the process the monitor starts, from its first schedule-in on the measured CPU to its exit.
 
 Grounds:
@@ -2141,3 +2143,61 @@ Taken under 인지오's delegation (2026-10-04), on D101, D104 and D112.
 The entry's form — by 9.6 D7's criterion — and the list are fixed after the dry run. The job's size against the segments is read from it (D17).
 
 No file changed yet.
+
+## D119 — the incremental is a new entry in the batch-loop form over the whole tree; `file-backup` leaves at fold-in (2026-10-04)
+
+By 인지오's decision, 9.6 D7's criterion applied to the dry run on the 10 GB set (run 37174980221, #182, the EPYC 7763). The incremental is a new entry in the batch-loop form. Its two tables are the run between voluntary blocks and the block after each run, pooled over every process of the job's tree (D112), and it carries the job's CPU total as measured (D17). At fold-in `file-backup`, `borg`'s first backup into a new repository (9.7 D6), leaves `dataset/archetypes.yaml`: once the backup files rebind, no file binds it (D8's last item), the rule D16 applied to `renderer-visible` and 9.7 D30 to `network-bulk`. The list is the HandBrakeCLI and Kdenlive campaigns': over the job, the run between voluntary blocks and the block per run, each tested by its mean as the table carries it, and the CPU total, tested by its per-repeat values (D17).
+
+Grounds (the dry run):
+
+- **Runnable throughout, on no dominant thread.** The job is the tree of `deja-dup`, 170.70 s from its first schedule-in to its last row, with 169.686 s of CPU (perf; taskstats 169.670 s): saturation 0.9940. By program, `duplicity` holds 0.569 of the CPU over its eight runs, `deja-dup` 0.291, `gpg` 0.135 and `gpg-agent` 0.004. The busiest threads are the incremental's `duplicity` at 0.322, `deja-dup`'s main thread at 0.291 and the dry run's `duplicity` at 0.232; each `gpg` holds about 0.03. 9.6 D7's criterion: a program is `cpu-batch` when it is runnable for the whole of its lifetime on one dominant thread; sustained I/O waits or several equal threads give it its own entry. The transcode took its own entry with 23 threads, the busiest at 0.334 and the next at 0.205 (D97); the export stayed in `cpu-batch` with its busiest thread at 0.689 (D105).
+- **`deja-dup` runs beside each `duplicity`.** In the dry run's 64.5 s, `duplicity` took 39.36 s of CPU and `deja-dup` 24.72 s. In the incremental's 100.7 s, `duplicity` took 54.68 s, `deja-dup` 24.51 s and `gpg` 20.42 s. The verify took 4.2 s.
+- **The blocks are short and the waits few.** 114,809 runs between voluntary blocks, mean 1.478 ms; the block after a run has a mean of 2.77 µs, 0.318 s over the job. 285 disk waits, 0.204 s in all; 95 uninterruptible waits.
+- **A different program from the one `file-backup` describes.** Déjà Dup and `duplicity` making a weekly incremental replace `borg`'s first backup. D97 and D105 retired `cpu-batch`'s `HandBrakeCLI` and `ffmpeg` tables when their files bound the measured job.
+
+Also recorded:
+
+- **The run's order,** from the command lines the driver read (method §8):
+  1. `duplicity --version`;
+  2. `collection-status --no-encryption`, then an `incremental --dry-run` without the password, ending within 0.3 s. Déjà Dup takes `duplicity`'s asking for the password as a bad password and restarts the job with the keyring's (S2-62 `DuplicityJob.vala:1034–1038`; `Operation.vala`, `connect_to_job`);
+  3. `collection-status`, then `incremental --dry-run`, 64.5 s, with one `gpg --decrypt`;
+  4. `incremental`, 100.7 s, with one `gpg --decrypt` and six `gpg --symmetric`, writing four new volumes;
+  5. the verify's `collection-status` and `restore --path-to-restore=home/user/.cache/deja-dup/metadata`, 4.2 s, with two `gpg --decrypt`.
+- **Other processes in the tree.** A `gpg-agent`, started by the incremental's first `gpg --symmetric`, outlives the job. At its start `deja-dup` runs the monitor through `chrt` and `ionice`, and that monitor exits on finding the bus name held (S2-62 `WidgetUtils.vala:30–47`).
+- **D112 corrected.** Every backup runs the dry run, automatic ones included. `ToolJob.Flags` is a plain enum, `{ NO_PROGRESS, NO_CACHE, }`, so `NO_PROGRESS` is 0 (S2-62 `ToolJob.vala:43–46`). `Operation.vala:131–132`'s `job.flags |= ToolJob.Flags.NO_PROGRESS` sets no bit, and the dry run's test, `(flags & NO_PROGRESS) == 0`, holds for every job. D112 read the code's intent, not its effect.
+- **The state.**
+  - The layer, plus the 9 packages `apt-get install deja-dup` added.
+  - The first backup by the assistant: 526 s, 5,025,070,033 B in 24 volumes, the password in the keyring.
+  - The week's change set: 9,729 changed files (883,122,363 B, 480,780,930 B of them rewritten) and 304,219,409 B of new files.
+  - The set cached at 0.9995 and Déjà Dup's cache folder at 1.0000.
+- **The classes.** `deja-dup` runs in `SCHED_IDLE` and the idle I/O class on the measured CPU. The disks' I/O scheduler is `none`, under which the I/O class has no effect (D118).
+- **Beside the job,** on the measured CPU: the runner's agents (`provjobd…` 492 ms, `.NET TP Worker` 141 ms), the session's bus-started services (`xdg-desktop-portal` 80 ms, `dbus-daemon` 61 ms, `gdbus` 51 ms) and kernel workers.
+- **The dry runs before it** (method §8): #176 and #177 fixed the first backup's driver; #180 ran the whole job on the 100 MB subset, 6.8 s; #175, #178, #179 and #181 stopped at the gate.
+
+No file changed yet.
+
+## D120 — the task shows `deja-dup`; the entry is `incremental-backup` (2026-10-04)
+
+By 인지오's decision, D119's open names. The task shows `deja-dup`, the `comm` of `/usr/bin/deja-dup` as the dry run observed it (D25). The entry is `incremental-backup`.
+
+Grounds:
+
+- **A tree's task shows its root.** `unattended-upgr` (D40) shows over a tree whose CPU went mostly to `localedef` and `dpkg`; `dkms` (D55) over its compile jobs; `tracker-miner-f` (D74) over its extractor; `kdenlive_render` (D106) over `melt-7`. `deja-dup` is the process the monitor starts (D112), and its own main thread holds 0.291 of the CPU (D119).
+- **The id names what was measured.** It is a weekly incremental, the counterpart of the leaving `file-backup`'s "first backup into a new repository" (9.7 D6). The files state the trigger, `initiated: scheduled`, and `c7-backup` flips only the wanted label on the same run (D9).
+
+Not taken: the task showing `duplicity`, which holds 0.569 of the CPU over its eight runs; the id `scheduled-backup`, which would put into the entry what the files' labels carry.
+
+No file changed yet.
+
+## D121 — `deja-dup` is familiarity tier 1 (2026-10-04)
+
+By 인지오's decision, D27's rule applied to D120's name: `deja-dup` is a new program's name, placed by the ladder's definitions at tier 1, transparent. Labelled design, as D27's tiers are.
+
+Grounds:
+
+- **The ladder's definitions** (`docs/workload/building-plan.md` §3 C5): 1 transparent (`firefox`, `blender`), 2 semi-opaque (`soffice.bin`, `gamescope`), 3 opaque (`tracker-miner-fs-3`, `cc1`, `baloo_file`); familiarity "defined corpus-relative, not human-relative". `deja-dup` is the program's own name, which its package describes as "a simple backup tool" (S2-03, `deja-dup` 45.2-1build2's control). `borg`, the backup name the files bound until now, is tier 1.
+- **The C7 property** (`building-plan.md` §3 C7): "tier 1 so no pair changes familiarity tier". Pair P3 keeps one tier in both files, `kdenlive_render` in `c2-p3a` against `deja-dup` in `c2-p3b` (D107).
+
+Not taken: tier 2, on the name being a pun whose role the string does not state.
+
+Applied at rebinding: `dataset/tools/wlc/grid.py`'s `NAME_TIERS`.
