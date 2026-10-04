@@ -2201,3 +2201,18 @@ Grounds:
 Not taken: tier 2, on the name being a pun whose role the string does not state.
 
 Applied at rebinding: `dataset/tools/wlc/grid.py`'s `NAME_TIERS`.
+
+## D122 — the run between voluntary blocks splits in two modes: a batch to 30 repeats, then 9.6 D29's exception if it still fails (2026-10-04)
+
+By 인지오's decision. At the first batch's five landings (runs #183–#186, `meas-ci:background:2026-10-04`), every repeat is valid. The CPU total (167.492 s ±2.8 %) and the block per run (3.24 µs, within the 1 µs floor) hold the rule; the run between voluntary blocks does not, 1.734 ms ±26.3 %, 72 repeats projected. The campaign runs on in one batch to 30 repeats, repeats 6–30 (9.7 D26), the Kdenlive campaign's count (D109). If the value still fails there, it is carried over the 30 repeats under 9.6 D29's exception with its 95 % half-width, the two modes' shares stated.
+
+Grounds:
+
+- **The value splits in two modes.** Its per-repeat means are 1.40 and 1.41 ms in repeats 2 and 4 and 2.02–2.09 ms in repeats 1, 3 and 5, with 118,619 and 117,944 runs against 81,341–83,209. The CPU totals agree (165.2–174.0 s).
+- **The split is `deja-dup`'s, in the dry run.** `deja-dup`'s main thread holds the same CPU in every landing (47.5–50.7 s). In the dry-run stage of repeat 1 it runs 16,723 times, median 1.49 ms, between blocks of median 2.46 ms; in repeat 4 it runs 53,464 times, median 0.055 ms, between blocks of 0.072 ms. The incremental stage is the same in both, about 19,000 runs of median 1.4 ms. `duplicity`, whose `--verbosity=9` log `deja-dup` reads through a pipe (`--log-fd`, S2-62 `DuplicityInstance.vala:61–90`), wakes it 36,276 times in repeat 1 and 71,836 in repeat 4. The two processes share one CPU, both in `SCHED_IDLE`. In one mode the reader reads after nearly every write; in the other it reads in batches. The dry run #182 was in the ping-pong mode (114,809 runs).
+- **The exception's ground, if taken.** 9.6 D29 carries "a value whose spread follows the machine rather than the program" with its half-width; its uses followed the runner's disk (9.6 D29, D58) and `khugepaged` (D87). Here the spread follows the kernel's interleaving of a pipe's writer and reader on the one measured CPU, the venue's, as D87 read `khugepaged`. It is stated as that, not as the program's own timer, which D109 did not take under the exception.
+- **Thirty landings weigh the modes as drawn.** A table pooled over five landings mixes the modes 3:2.
+
+Not taken: running on to the projection, 72 repeats, about 15 hours of jobs at the gate's rate (D109's choice for melt's timer); the exception at five repeats.
+
+No file changed yet.
