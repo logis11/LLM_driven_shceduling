@@ -125,8 +125,10 @@ ln_once() {
   ledge "$L.settle" start
   if [ "$SUBJ" = chrome-hidden ]; then
     sleep "$LN_SETTLE"
-    ln_renderers "$L"
-    n="$(grep -c -- '--type=renderer' "$OUT/launch.renderers.$L.tsv" | head -1)"
+    # the tabs' renderers are those at the gate: a plain renderer can start later in the grace (dry run #80, client
+    # id 21 against the tabs' 6–18), and it hosts no tab
+    ln_renderers "$L.gate"
+    n="$(grep -c -- '--type=renderer' "$OUT/launch.renderers.$L.gate.tsv" | head -1)"
     # run.sh's renderer gate: at least N + 1 renderers, the control tab's and the N measured ones
     [ "$n" -ge $((LN_ORIGINS + 1)) ] || stop_recorded wrong-renderer-count "wanted at least $((LN_ORIGINS + 1)) renderers, observed $n ($L launch)"
     ledge "$L.backgrounded" mark

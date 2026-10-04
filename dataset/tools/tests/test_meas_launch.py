@@ -109,6 +109,12 @@ def test_the_hidden_tabs_renderers_are_streams_of_their_own_the_control_tab_drop
     assert sorted(k for k in out["streams"] if k != "tree") == ["renderer1", "renderer2"]
     assert out["streams"]["renderer1"]["cpu_ms"] == 2.0 and out["streams"]["renderer2"]["cpu_ms"] == 3.0
     assert {e[0] for e in events} == {"tree", "renderer1", "renderer2"}
+    # the gate's listing names the tabs' renderers: one started later in the grace hosts no tab (dry run #80)
+    (D / "launch.renderers.traced.gate.tsv").write_text(
+        "201\t/opt/google/chrome/chrome --type=renderer --renderer-client-id=5\n"
+        "202\t/opt/google/chrome/chrome --type=renderer --renderer-client-id=6\n")
+    out, _ = launch.analyze(str(D))
+    assert out["late_renderers"] == [203] and sorted(k for k in out["streams"] if k != "tree") == ["renderer1"]
 
 
 def test_the_live_tree_is_the_roots_session_and_its_descendants():

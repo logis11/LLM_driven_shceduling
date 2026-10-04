@@ -299,8 +299,10 @@ def validity(family, dirs, entry):
                     notes.append("no /sync reached the homeserver — the client was not signed in")
                 if subj == "steam" and r.get("launch.traced.steamid") != "0":
                     notes.append(f"steamid {r.get('launch.traced.steamid')} (want 0, logged out)")
-                if subj == "chrome-hidden" and int(r.get("launch.traced.page_renderers") or 0) < 13:
-                    notes.append(f"{r.get('launch.traced.page_renderers')} renderers in the traced launch (want >= 13)")
+                if subj == "chrome-hidden" and int(r.get("launch.traced.gate.page_renderers") or 0) < 13:
+                    notes.append(f"{r.get('launch.traced.gate.page_renderers')} renderers at the traced launch's gate (want >= 13)")
+                if subj == "chrome-hidden" and r.get("launch.renderer_streams") != "12":
+                    notes.append(f"{r.get('launch.renderer_streams')} renderer streams (want 12, the background tabs')")
                 if subj == "thunderbird-send" and not r.get("launch.traced.postwindow"):
                     notes.append("no compose window in the traced launch")
                 if r.get("launch.quit_dialog"):

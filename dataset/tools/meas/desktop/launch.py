@@ -294,8 +294,12 @@ def analyze(D):
     def role(r):
         return roles.get(r.pid) or last_exec.get(r.pid) or r.comm
     streams = {"tree": wakes}
-    if subject == "launch-chrome-hidden":   # D127: each page renderer but the control tab is one stream
-        pages = page_renderers(D) or set()
+    if subject == "launch-chrome-hidden":   # D127: each tab's page renderer but the control tab's is one stream
+        # the tabs' renderers are the page renderers at the gate; one started later hosts no tab (dry run #80)
+        gate = page_renderers(D, "traced.gate")
+        end = page_renderers(D) or set()
+        pages = gate if gate is not None else end
+        out["late_renderers"] = sorted(end - pages)
         by_pid = defaultdict(list)
         for r in wakes:
             if r.pid in pages:
