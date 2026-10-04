@@ -28,7 +28,7 @@ import sys
 TOOLS = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))   # dataset/tools
 if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
-from meas.desktop import analyze, tabs  # noqa: E402
+from meas.desktop import analyze, launch, tabs  # noqa: E402
 from meas.campaign.analyze import pct  # noqa: E402
 from meas.stability import stability, ratio_stability, ratio_repeats_needed, TOLERANCE  # noqa: E402
 from meas.distribution import circular_gaps  # noqa: E402
@@ -51,8 +51,8 @@ _cp = _campaign_pool()
 # the coverage cut and the residual exactly as `web-browser` — the other half of the same application — was pooled
 QUANTILE_PROBS, select_components = _cp.QUANTILE_PROBS, _cp.select_components
 
-APPS = ("chrome-hidden", "chrome-visible", "chrome-tabs", "element", "steam")
-NAME = re.compile(r"^meas-desktop-(chrome-hidden|chrome-visible|chrome-tabs|element|steam)-r(\d+)-(dry|probe|full|control)$")
+APPS = ("chrome-hidden", "chrome-visible", "chrome-tabs", "element", "steam")   # and the launch subjects, `launch-<arm>`
+NAME = re.compile(r"^meas-desktop-(chrome-hidden|chrome-visible|chrome-tabs|element|steam|launch-[a-z0-9-]+)-r(\d+)-(dry|probe|full|control)$")
 POOLED_MODES = ("dry", "full")          # `probe` is parsed so it can be reported, never pooled
 
 # the phase each entry reads. The visible entry reads the no-timer phase where that phase yields enough and the
@@ -399,12 +399,16 @@ def comparisons(app, entry):
 
 
 def render(out):
-    what = ("9.10 Chrome tab-set campaign" if set(out["runs"]) == {"chrome-tabs"} else "9.8 desktop campaign")
+    what = ("9.10 Chrome tab-set campaign" if set(out["runs"]) == {"chrome-tabs"}
+            else "9.10 launch campaign" if all(a.startswith("launch-") for a in out["runs"]) else "9.8 desktop campaign")
     L = [f"# {what} — pooled results ({out.get('tag') or 'untagged'})", "",
          f"Machine: {out.get('machine')}. Repeats pooled per subject; `probe` jobs are never repeats.", ""]
     for app, e in sorted(out["runs"].items()):
         if app == "chrome-tabs":
             L += tabs.render(app, e)
+            continue
+        if app.startswith("launch-"):   # 9.10 D133: the launch phases, side by side
+            L += launch.render_subject(app, e)
             continue
         pop = (f"renderers measured {e['renderers_measured']} (observed {e['renderers']})"
                if any(e.get("renderers_measured", {}).values()) else "")
@@ -454,6 +458,10 @@ def main():
         if app == "chrome-tabs":   # 9.10 D129: a count, carried as observed
             entry = out["runs"][app] = tabs.pool(reps)
             print(f"== {app}: repeats {entry['repeats']}  hidden {entry['hidden']}  spare {entry['spare']}")
+            continue
+        if app.startswith("launch-"):   # 9.10 D133: the launch phases, side by side
+            entry = out["runs"][app] = launch.pool_reps(reps)
+            print(f"== {app}: repeats {entry['repeats']}  phase s {entry.get('phase_s')}  CPU ms {entry.get('cpu_ms')}")
             continue
         entry = pool_app(app, reps)
         entry["comparisons"] = comparisons(app, entry)

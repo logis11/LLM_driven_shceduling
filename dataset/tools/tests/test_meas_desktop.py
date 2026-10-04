@@ -695,7 +695,7 @@ def test_the_tab_set_is_five_tabs_in_every_mode(repo_root):
     # D15: the page in use and four others; a dry run shortens the phases, never the tab set
     src = (repo_root / "dataset" / "tools" / "meas" / "desktop" / "run.sh").read_text()
     assert re.search(r"^TAB_ORIGINS=4\b", src, re.M)
-    dry = re.search(r'^if \[ "\$MODE" = dry \]; then\n(.*?)\n', src, re.M).group(1)
+    dry = re.search(r'^if \[ "\$MODE" = dry \][^\n]*; then[^\n]*\n(.*?)\n', src, re.M).group(1)
     assert "TAB_ORIGINS" not in dry
     body = re.search(r"^tabs_subject\(\) \{(.*?)^\}", src, re.S | re.M).group(1)
     assert 'MEAS_ORIGINS="$TAB_ORIGINS"' in body

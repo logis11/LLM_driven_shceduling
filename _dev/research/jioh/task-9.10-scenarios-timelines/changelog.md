@@ -2417,3 +2417,75 @@ Hands to 9.15:
 Hands to 9.13: the count's source tags, `glam` and `meas-ci:desktop:2026-10-04`, when D32's field exists.
 
 Commit: this entry.
+
+## D132 — the observed launch is warm: an unmeasured first launch, a clean close, then the measured launch (2026-10-04)
+
+By 인지오's decision (Q17), D21's open item "whether the launch is cold or warm, and its ground". In each job, the application is launched once unmeasured and closed cleanly; the observed launch is the next one, from its exec to the end of its entry's settle. Before that launch, the cached fraction of the files the first launch's tree mapped is measured with `fincore`, and validity asks at least 0.99.
+
+Grounds:
+
+- **A warm start is a real state.** Joo et al. define it as an application "launched again shortly after its closure", every code block it needs found in the page cache (S1-80, p. 4, §3.1); Ryu et al. as one "running recently, so the disk cache still holds all, or most, of the data that it needs" (S1-82, p. 1, §1). In it "the CPU stays fully active until the launch is completed as there is no wait" (S1-80, p. 10).
+- **A cold start's waits would be the runner's disk.** The same ground as the export (D104), the transcode (D94) and the incremental backup (D116): its read waits would be the runner's datacentre disk, documented only as "SSD", not a desktop drive. The runner shows it at its first launch of the preinstalled Chrome, which mapped its window 1.1–43.7 s after exec against about 0.55 s for the second launch in the same job (release `meas-ci-desktop-2026-10-04`, `report.kv`'s `window.wait_ms`; D130).
+- **First-run work stays out of the observed launch.** The first launch does the work a user's launch does not repeat — building a fresh profile, the Steam bootstrap's download of the client, Element's sign-in — as the example's own unmeasured start placed MNIST's files (D83) and Déjà Dup's assistant made the first backup (D118).
+
+Stated: the files show a relaunch, not the day's first launch. Joo et al. call the cold start "the first launch of an application upon system bootup, representing the worst-case application launch performance" (S1-80, p. 4, §3.1); no source read states which state a launch inside a session starts in.
+
+Not taken: cold, `sync; sysctl vm.drop_caches=3` before the observed launch (D75's form), which also evicts the shared libraries the applications already running in a file keep cached — Ryu et al.'s "system cold start", "when no user-launched app is already running" (S1-82, p. 1); both, a cold and a warm launch in each job with one carried, as D128 ran Chrome twice.
+
+No file changed yet.
+
+## D133 — each launch is its entry's own observation's launch, traced from exec to the end of that entry's settle; the subjects are new subjects of the desktop family (2026-10-04)
+
+Taken under 인지오's delegation (2026-10-04), on D21, D132, 9.5 D21, D34 and D35 and the entries' own campaigns.
+
+- **Which launch.** An entry's launch phase is observed on the launch of the campaign its values come from: the same install and inputs, command line, post-launch steps and settle (`probe/appdefs.sh`, `campaign/run.sh`'s `settle_for`, `desktop/run.sh`'s `launch_settle_for`). D21 bounds the phase by "the settle its entry was measured after", so the phase joins the entry's steady values where they began. The launch is the second one in the job (D132).
+- **The entries**, those the files start mid-file (D21, D30):
+
+| entry | started mid-file in | its campaign's subject | settle after the window and the post-launch steps |
+|---|---|---|---|
+| `office-writer` | `c3-workday` at 60 s | 9.5's `soffice` | 30 s |
+| `mail-client` | `c3-workday` at 360 s | 9.5's `thunderbird-send` | 390 s |
+| `video-editor` | `c3-creation` at 120 s | 9.5's `kdenlive` | 30 s |
+| `video-player`, `audio-player` | `c3-evening` at 300 s | 9.5's `mpv-video`, `mpv-audio` | 30 s |
+| `chat-client` | `c3-evening` at 60 s; `c4-gaming` at 30 s | 9.8's `element` | 20 s |
+| `game-client` | `c3-evening` at 60 s | 9.8's `steam` | 900 s |
+| `web-browser` | `c4-compile` at 30 s | 9.5's `chrome` | 420 s |
+| `renderer-hidden` | `c4-compile` at 30 s, four tasks | 9.8's `chrome-hidden` | 20 s, then the 630 s grace |
+| `video-call` | `c6-fold` at 30 s | 9.5's `webrtc` | 210 s |
+
+  The four `renderer-hidden` tasks came into `c4-compile`'s Chrome injection after D21 (D131), so they are the injection's too. The game chain arrives steady, its source holding no launch data (D19, D21).
+- **The trace.** `perf sched record` on `CLOCK_MONOTONIC` from before the exec to the end of the settle, the application's tree on the measured CPU and the harness on the others (9.5 D21), as the entries' phases were traced. Each phase's process tree is the entry's own (`PAT`, the campaign's tree rule).
+- **The jobs.** New subjects of the desktop family, one per entry's subject, named `launch-<subject>`: `desktop/run.sh` already sources 9.5's `appdefs.sh` and holds 9.8's Element and Steam setups. Tag `meas-ci:desktop:<launch date>`. The machine gate is kept, and the first batch is the workflow's floor of five repeats.
+
+How `video-call`'s launch is started in `c6-fold`, where the call begins inside a browser that is already running (D30), is 인지오's (Q18). The launch phase's form and the values the stability rule tests are fixed after the dry run, by 9.6 D7's criterion.
+
+No file changed yet.
+
+## D134 — `video-call`'s launch is a call opened in a Chrome already running past `web-browser`'s settle (2026-10-04)
+
+By 인지오's decision (Q18), the exception D133 left open. Chrome is launched with 9.5's `webrtc` subject's flags — its fake camera and microphone are browser-wide, set at launch — on `web-browser`'s page, and left through `web-browser`'s 420 s settle. The call page (`probe/webrtc-loopback.html`, whose call starts at its load) then opens in a new tab of that browser. The launch phase is Chrome's whole tree, as the entry carries it, from the opening to 210 s after it (9.5 D54's settle).
+
+Grounds:
+
+- **The file's event.** D30's premise is browser tabs becoming a call while the process set stays unchanged: in `c6-fold` the call starts at 30 s inside the browser that has run since 0 s.
+- **The browser's own launch is not the call's.** Chrome run onto the call page, as 9.5's `webrtc` subject ran it, starts the browser process, the GPU process and the profile, and its launch work holds the ≈ 880 ms `ThreadPoolForeground` run 9.5 found once per session (`task-9.5-interactive-typing/campaign/launch-work.md`). `c6-fold`'s browser did that work before the file began.
+
+Stated: the page the browser holds before the call is `web-browser`'s, the page `c6-fold`'s browser shows; design.
+
+Not taken: the entry's own launch, Chrome run onto the call page from exec (D133's rule without the exception).
+
+No file changed yet.
+
+## D135 — the launch job: the subject's sequence twice, the first through its settle unmeasured and quit by the program's own command; a dry run at the campaign's lengths (2026-10-04)
+
+Taken under 인지오's delegation (2026-10-04), on D132–D134, D83, D104, D118 and 9.8 D13.
+
+- **The first launch** runs the subject's whole sequence — exec, the window, the post-launch steps and the settle; for the call, the browser's settle and the call's 210 s — so the first-run work its campaign's own launch held is done before the observed launch (D132). Element signs in here, and the Steam bootstrap downloads the client.
+- **The quit.** The program's own quit, as a user ends a session: LibreOffice, Thunderbird, Kdenlive and Element by Ctrl+Q, Chrome by Ctrl+Shift+Q, `mpv` by `q`, the Steam client by `steam -shutdown`. The tree must exit within 60 s of it, or the job stops recorded: a killed program can restore a crashed session at its next start, which is not a relaunch.
+- **The warm check** (D132). Before the quit, the files every process of the tree maps (`/proc/<pid>/maps`). After it, each is read whole on the harness CPUs, as the clip was before the export (D104) and the set before the incremental (D116), and their cached fraction is measured by `fincore`. A mapped file is paged in only where the launch touches it, so without the read a warm relaunch could read below 0.99.
+- **The observed launch** repeats the sequence under `perf sched record` from 2 s before the exec (for the call, before the opening) to the settle's end; the trace is stopped there.
+- **The tree** is the launched process and every descendant by the fork rows (the background family's `phase_tree`, D50's rule); for the call, Chrome's threads alive at the opening and their descendants.
+- **Element's settle** (9.8's sequence). 9.8 signed in, waited 30 s, checked the `/sync` long poll, then settled 20 s. The relaunch restores its session without a sign-in, so its settle runs from the relaunched client's first `/sync` request for 30 s + 20 s.
+- **The dry run** runs one job per subject at the campaign's lengths, gated on no model and never pooled, as the export's dry run ran the whole export (D104): the form's question by 9.6 D7's criterion is read from it.
+
+No file changed yet.

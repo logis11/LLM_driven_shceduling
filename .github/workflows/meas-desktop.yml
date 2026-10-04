@@ -11,7 +11,9 @@ name: meas-desktop
 #
 # 9.10 adds the subject `chrome-tabs` (9.10 changelog D126–D129; method
 # _dev/research/jioh/task-9.10-scenarios-timelines/campaign/chrome-tabs/method.md): Chrome's renderers counted for
-# five tabs, the spare renderer off and on, with no perf.
+# five tabs, the spare renderer off and on, with no perf. It adds the subjects `launch-<arm>` (9.10 changelog
+# D132–D135; method _dev/research/jioh/task-9.10-scenarios-timelines/campaign/launch/method.md): an entry's own
+# campaign's launch, run twice in the job, the second traced by perf from its exec to its settle's end.
 #
 # The long-phase probe is mode `probe` of this family rather than a run of meas-long-probe.yml, so that this
 # slice's parameters do not enter a trigger file 9.5 is launching thunderbird-send probes from (D13). A probe is

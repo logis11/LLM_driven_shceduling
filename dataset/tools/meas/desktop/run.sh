@@ -12,6 +12,10 @@
 #   chrome-tabs     9.10 D126–D129: the hidden subject's window at five tabs, the page in use and four background
 #                   tabs at loopback addresses, launched twice — the spare renderer off, then on, or the reverse —
 #                   with Chrome's tree listed every 10 s through the phases; no perf
+#   launch-<arm>    9.10 D132–D135: an entry's own campaign's launch (9.5's soffice, thunderbird-send, kdenlive,
+#                   mpv-video, mpv-audio, chrome; 9.8's chrome-hidden, element, steam; webrtc, the call opened in a
+#                   running Chrome), run twice — the first through its settle and quit by the program's own command,
+#                   the second traced by perf from its exec to its settle's end (launch.sh, launch.py)
 #
 # Phases are a sequence with recorded edges (method §3), not one settle figure: launch, launch-settle, for the
 # hidden subject the recorded moment the tabs are backgrounded, grace-settle, then the steady phase(s). Only a
@@ -32,6 +36,7 @@ source "$MEAS/probe/common.sh"          # OUT, KV, TOOLS, rec, finish_report, st
 source "$MEAS/pin.sh"
 pin_self_harness
 source "$TOOLS/appdefs.sh"              # appdef, apt_install, ver, appdef_cleanup
+source "$HERE/launch.sh"                # launch_subject (9.10 D132–D135)
 APP="$1"; REPEAT="$2"; MODE_ARG="${3:-full}"
 # the untraced control (_dev/docs/spec/jioh/task-9.5-untraced-control.md): `control` runs full's lengths and
 # `control-dry` dry's, the subject's carried phase as a traced and an untraced run
@@ -78,6 +83,7 @@ launch_settle_for() {
   case "$1" in
     chrome-hidden|chrome-visible|chrome-tabs|element) echo 20 ;;
     steam) echo 900 ;;
+    launch-*) echo launch ;;   # 9.10 D133: each subject's own settle, launch.sh's ln_settle_for
     *) echo "" ;;
   esac
 }
@@ -87,11 +93,12 @@ launch_settle_for() {
 steady_for() {
   case "$1" in
     chrome-hidden|chrome-visible|chrome-tabs|element|steam) echo 600 ;;
+    launch-*) echo none ;;     # no steady phase: the launch is the phase (9.10 D133)
     *) echo "" ;;
   esac
 }
 
-if [ "$MODE" = dry ]; then
+if [ "$MODE" = dry ] && [ "${APP#launch-}" = "$APP" ]; then   # 9.10 D135: a launch dry run keeps the campaign's lengths
   LAUNCH_SETTLE=20; STEADY=45; GRACE_S=75; ORIGINS=3; STEP_GAP=40; STEP_WAIT=180; STEAM_CLIENT_WAIT=900
 elif [ "$MODE" = probe ]; then
   LAUNCH_SETTLE=20; STEADY=1800          # one long phase, read per 10 s slice by campaign/slices.py
@@ -625,6 +632,7 @@ start_xvfb
 case "$APP" in
   chrome-hidden|chrome-visible) chrome_subject ;;
   chrome-tabs) tabs_subject ;;
+  launch-*) launch_subject "${APP#launch-}" ;;
   element)
     element_setup
     if [ "$CONTROL" = 1 ]; then pair idle "$STEADY"     # decision 3: the traffic phase is carried by no archetype
@@ -649,7 +657,7 @@ esac
 
 kill -- "-$APP_PID" 2>/dev/null; sleep 2; kill -9 -- "-$APP_PID" 2>/dev/null
 appdef_cleanup
-[ "$APP" = element ] && element_cleanup
+case "$APP" in element|launch-element) element_cleanup ;; esac
 kill "$(cat "$OUT/openbox.pid" 2>/dev/null)" 2>/dev/null
 kill "$(cat "$OUT/xvfb.pid" 2>/dev/null)" 2>/dev/null
 rec finished_utc "$(date -u +%FT%TZ)"

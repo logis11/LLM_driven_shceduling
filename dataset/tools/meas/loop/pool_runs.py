@@ -279,6 +279,31 @@ def validity(family, dirs, entry):
                                     f"{r.get(f'tabs.{arm}.steady.plain_min')}–{r.get(f'tabs.{arm}.steady.plain_max')}")
                     if r.get(f"tabs.{arm}.steady.plain_pids_stable") not in (None, "1"):
                         info.append(f"spare {arm}: the steady phase's plain renderers changed pids")
+            if (r.get("app") or "").startswith("launch-"):   # 9.10 D132–D135: both launches, a clean quit, warm, traced whole
+                subj = r["app"][len("launch-"):]
+                for x, want in (("launch.first.left_after_quit", "0"), ("tree.traced.harness_procs", "0"),
+                                ("perf.launch.record.rc", "0"), ("perf.launch.lost", "")):
+                    if r.get(x) != want:
+                        notes.append(f"{x} {r.get(x)} (want {want or 'none'})")
+                try:   # the relaunch starts warm (D132): the files the first launch mapped, in the page cache
+                    if float(r.get("cache.launch.fraction") or "") < 0.99:
+                        notes.append(f"cached fraction {r.get('cache.launch.fraction')} before the traced launch (want >= 0.99)")
+                except ValueError:
+                    notes.append("cached fraction not recorded")
+                if r.get("launch.analysis"):
+                    notes.append(f"analysis: {r['launch.analysis']}")
+                if subj == "webrtc" and r.get("launch.traced.call_connected") != "1":
+                    notes.append(f"the call did not connect: {r.get('launch.traced.call_title')}")
+                if subj == "element" and r.get("matrix.sync_rows") in (None, "0"):
+                    notes.append("no /sync reached the homeserver — the client was not signed in")
+                if subj == "steam" and r.get("launch.traced.steamid") != "0":
+                    notes.append(f"steamid {r.get('launch.traced.steamid')} (want 0, logged out)")
+                if subj == "chrome-hidden" and int(r.get("launch.traced.page_renderers") or 0) < 13:
+                    notes.append(f"{r.get('launch.traced.page_renderers')} renderers in the traced launch (want >= 13)")
+                if subj == "thunderbird-send" and not r.get("launch.traced.postwindow"):
+                    notes.append("no compose window in the traced launch")
+                if r.get("launch.quit_dialog"):
+                    info.append(f"the quit put up a dialog: {r['launch.quit_dialog']}")
             if r.get("app") == "element" and r.get("matrix.sync_rows") in (None, "0"):
                 notes.append("no /sync reached the homeserver — the client was not signed in")
             # every repeat of one subject must have run at one N, or the pool is not a pool. A probe is never a
