@@ -29,20 +29,23 @@ ln_settle_for() {
     *) echo "" ;;
   esac
 }
-# D135: the program's own quit; the key a "save changes?" dialog's discard takes, where the program has one
+# D135: the program's own quit, sent to its main window; the dry runs (#77, #78) took the window's own close (the title
+# bar's, close_window.py) where the shortcut did nothing under Xvfb with no window manager: Kdenlive, Chrome
 ln_quit_for() {
   case "$1" in
     soffice|thunderbird-send|element) echo "ctrl+q" ;;
-    kdenlive) echo "close-window" ;;   # dry run #77: no Ctrl+Q without a window manager; the window's own close
-    chrome|chrome-hidden|webrtc) echo "ctrl+shift+q" ;;
+    kdenlive|chrome|chrome-hidden|webrtc) echo "close-window" ;;
     mpv-video|mpv-audio) echo "q" ;;
     steam) echo "steam -shutdown" ;;
   esac
 }
+# what a window the quit puts up is given: a "save changes?" dialog's discard key, or Element's confirmation "Are you
+# sure you want to quit?", whose right-hand button is "Close Element" (dry run #77)
 ln_discard_for() {
   case "$1" in
     soffice) echo "alt+n" ;;    # LibreOffice's "Don't Save" (9.5's soffice prelude)
     kdenlive) echo "alt+d" ;;   # KDE's "Discard"
+    element) echo "right-button" ;;
     *) echo "" ;;
   esac
 }
@@ -226,9 +229,11 @@ ln_main_window() {   # the largest visible window of the application's class (kd
   echo "$best"
 }
 
+ln_visible() { { xdotool search --onlyvisible --class '' 2>/dev/null; xdotool search --onlyvisible --name '' 2>/dev/null; } | sort -u; }
+
 # ln_quit: D135 — the files the tree maps, the program's own quit, the tree's exit within LN_QUIT_WAIT, the warm check
 ln_quit() {
-  local quit discard i left dlg
+  local quit discard i left dlg before
   rec launch.first.mapped_files "$(python3 "$HERE/launch.py" maps --root "$APP_PID" --out "$OUT/launch.mapped.txt")"
   quit="$(ln_quit_for "$SUBJ")"; discard="$(ln_discard_for "$SUBJ")"
   rec launch.quit "$quit"
@@ -236,6 +241,7 @@ ln_quit() {
   # search by class can return a secondary top-level first (dry run #78 closed Kdenlive's window titled "Kdenlive")
   [ "$SUBJ" = steam ] || WID="$(ln_main_window)"
   rec launch.quit_window "$(xdotool getwindowname "$WID" 2>/dev/null | head -c 120)"
+  before="$(ln_visible)"
   ledge first.quit mark
   if [ "$SUBJ" = steam ]; then timeout 60 steam -shutdown > "$OUT/quit.log" 2>&1 &
   elif [ "$quit" = close-window ]; then rec launch.close_window "$(python3 "$HERE/close_window.py" "$WID" 2>&1 | tail -1)"
@@ -243,13 +249,14 @@ ln_quit() {
   for i in $(seq 1 "$LN_QUIT_WAIT"); do
     left="$(python3 "$HERE/launch.py" tree --root "$APP_PID" --app-only)"
     [ -z "$left" ] && break
-    if [ "$i" = 8 ]; then   # a "save changes?" dialog: recorded, and given the program's discard where it has one
+    if [ "$i" = 4 ]; then   # a window the quit put up: recorded, and given the program's answer where it has one
       xdotool search --onlyvisible --name '.' getwindowname %@ > "$OUT/quit-windows.txt" 2>/dev/null
-      dlg="$(xdotool search --onlyvisible --name '[Ss]ave|[Dd]iscard|[Cc]hanges|[Cc]lose|[Ww]arning|[Qq]uestion|[Cc]onfirm' 2>/dev/null | head -1)"
+      dlg="$(comm -13 <(echo "$before") <(ln_visible) | head -1)"
       if [ -n "$dlg" ]; then
-        rec launch.quit_dialog "$(xdotool getwindowname "$dlg" 2>/dev/null | head -c 120)"
+        rec launch.quit_dialog "$(xdotool getwindowname "$dlg" 2>/dev/null | head -c 120)|$(xdotool getwindowgeometry "$dlg" 2>/dev/null | tr '\n' ' ')"
         screenshot quit-dialog
-        [ -n "$discard" ] && { xdotool windowfocus --sync "$dlg" 2>/dev/null; xdotool key --clearmodifiers "$discard"; }
+        if [ "$discard" = right-button ]; then click_right_button "$dlg" launch.quit_dialog
+        elif [ -n "$discard" ]; then xdotool windowfocus --sync "$dlg" 2>/dev/null; xdotool key --clearmodifiers "$discard"; fi
       fi
     fi
     sleep 1

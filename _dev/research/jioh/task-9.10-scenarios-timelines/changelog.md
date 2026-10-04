@@ -2489,3 +2489,20 @@ Taken under 인지오's delegation (2026-10-04), on D132–D134, D83, D104, D118
 - **The dry run** runs one job per subject at the campaign's lengths, gated on no model and never pooled, as the export's dry run ran the whole export (D104): the form's question by 9.6 D7's criterion is read from it.
 
 No file changed yet.
+
+## D136 — a launch phase is replayed: the entry carries each pooled repeat's observed wakes, and a task started mid-file replays one (2026-10-04)
+
+By 인지오's decision (Q19), D21's open item "the launch phase's form in each entry", by 9.6 D7's criterion: no entry carries a launch phase, so each entry with one gains a new form. The entry carries its launch phase as observed: one stream per pooled repeat, each wake's time from the phase's start, its run and its thread. A task a file starts mid-file draws one repeat by the file's seed and replays its wakes from its arrival, each a wait on the task's timer channel woken at its time and the run that follows (9.5 D74). At the phase's end the entry's steady stream begins, already running (9.5 D77). Each of `c4-compile`'s four `renderer-hidden` tasks draws one renderer's stream (D133). A task that departs, or a file that ends, inside the phase replays the phase up to there (D21).
+
+Grounds:
+
+- **D21's wording.** A file that ends inside a launch "shows the observed profile up to its end".
+- **Launch work is a sequence, not a steady rate.** 9.5's launch work lands at the same points in every repeat (`task-9.5-interactive-typing/campaign/launch-work.md`). The dry run's soffice spends 1.6 s of CPU in its first 2 s, 887 of it in two runs of 427 and 459 ms (dry run #77). Tables sampled within a slice would place such runs anywhere in it, or nowhere.
+- **The dataset already replays a recorded series.** The SWELL-KW keystroke streams (9.5 D18): each focus window replays a slice of the recording at an offset drawn from the seed.
+- **One form for every entry.** The replay is a prefix of waits and runs, before the component entries' sampled stream and before the playback and call entries' periodic jobs alike.
+
+Stated: no value is a distribution, so the stability rule tests no table; the pooled repeats are the observations, carried as observed as D129 carried the renderer count, with each repeat's phase length and CPU total reported beside them.
+
+Not taken: tables per 10 s slice, the library's form for steady behaviour (9.5 D16–D17), compiled slice by slice.
+
+No file changed yet.
