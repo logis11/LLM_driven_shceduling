@@ -443,8 +443,11 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
         prog = [p for p in pids if is_program(job, execs.get(p), role.get(p))]
     prog_set = set(prog)
     rows = [s for s in segs if s.cpu == meas_cpu and s.tid in tree]
-    if job == "dejadup" and root in _exits:   # 9.10 D118: the job ends at deja-dup's exit; an agent gpg starts lives on
-        rows = [s for s in rows if s.t_in < _exits[root][0]]
+    if job == "dejadup":   # 9.10 D118: the job ends at deja-dup's exit — the last row of its process's threads, the
+        # record holding no exit rows (dry run #180) — while an agent gpg starts lives on
+        ends = [s.t_end for s in segs if tid2pid.get(s.tid, s.tid) == root]
+        if ends:
+            rows = [s for s in rows if s.t_in < max(ends)]
     trk = None
     if job == "tracker":   # 9.10 D62, D63: the rows within the job's window
         trk, rows = tracker_window(D, phase, edges, exec_rows, root, rows, execs, tid2pid)
