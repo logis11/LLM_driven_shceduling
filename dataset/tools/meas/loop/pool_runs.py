@@ -230,6 +230,35 @@ def validity(family, dirs, entry):
                     notes.append("cached fraction not recorded")
                 # one clip, one installed set and one encoder setup across repeats
                 dbs.add((r.get("kdenlive.clip.sha256"), r.get("kdenlive.state.added_sha256"), r.get("kdenlive.output.x264")))
+            if r.get("app") == "dejadup":   # 9.10 D112–D118: the state, the set, the first backup, the week, the monitor's run
+                for x, want in (("upgrade.layer.missing", "0"), ("upgrade.layer.extra", "0"), ("upgrade.run_systemd_system", "absent"),
+                                ("dejadup.state.install.rc", "0"),
+                                # S2-64: the archive's backup stack at T0 (D113)
+                                ("dejadup.pkg.deja-dup", "45.2-1build2"), ("dejadup.pkg.duplicity", "2.1.4-3ubuntu2"),
+                                ("dejadup.pkg.librsync2t64", "2.3.4-1.1ubuntu2"),
+                                # 9.7 D7: the set as pinned, verified where Déjà Dup reads it (D118)
+                                ("set.archive_pin", "ok"), ("set.manifest_pin", "ok"), ("set.verify.placed", "ok"),
+                                ("dejadup.drive.mount.rc", "0"), ("dejadup.drive.dio", "1"),   # D114
+                                # the first backup through the assistant: one full chain, the password remembered (D117, D118)
+                                ("dejadup.first.driver.rc", "0"), ("dejadup.first.first_rc", "0"),
+                                ("dejadup.first.keyring_items", "1"), ("dejadup.drive.first.full_manifests", "1"),
+                                ("dejadup.drive.first.inc_manifests", "0"),
+                                ("dejadup.week.rc", "0"), ("change.week.rc", "0"), ("change.week.days", "7"),   # D115
+                                # the monitor's child (D112): deja-dup --backup --auto in the idle classes, advancing last-backup
+                                ("dejadup.run.rc", "0"), ("dejadup.run.argv", "deja-dup --backup --auto"),
+                                ("dejadup.run.policy", "SCHED_IDLE"),
+                                ("dejadup.run.io_class", "idle"), ("dejadup.after.advanced", "1"),
+                                ("dejadup.drive.after.full_manifests", "1"), ("dejadup.drive.after.inc_manifests", "1"),
+                                ("thp.before.enabled", "[always] madvise never")):   # D118: the runner's mode, D87's venue
+                    if r.get(x) != want:
+                        notes.append(f"{x} {r.get(x)} (want {want})")
+                try:   # the incremental starts warm (D116): the set in the page cache
+                    if float(r.get("cache.dejadup-incremental.fraction") or "") < 0.99:
+                        notes.append(f"cached fraction {r.get('cache.dejadup-incremental.fraction')} at the start (want >= 0.99)")
+                except ValueError:
+                    notes.append("cached fraction not recorded")
+                # one set, one installed set and one change set across repeats
+                dbs.add((r.get("set.manifest_sha256"), r.get("dejadup.state.added_sha256"), r.get("change.week.sha256")))
         if family == "desktop":   # 9.8 D13 (the gate itself is checked for every family above)
             want, got = r.get("renderers.wanted_min"), r.get("renderers.observed")
             if want and got and int(got) < int(want):

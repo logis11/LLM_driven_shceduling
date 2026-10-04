@@ -6,12 +6,17 @@ fileset.py manifest <set-dir> <out.tsv.gz>          write the manifest — path,
                                                     a later job's tree is verified against
 fileset.py verify <set-dir> <manifest.tsv.gz>       the tree against a manifest file; prints a key=value summary, exit 1 on a mismatch
 fileset.py setcheck <manifest.tsv.gz>               the pre-registered set check (D7), key=value
-fileset.py change <set-dir> <stash-dir> <out.json>  apply the repeat backup's change set (D6), originals kept in the stash
+fileset.py change [--days N] <set-dir> <stash-dir> <out.json>
+                                                    apply the repeat backup's change set (D6), originals kept in the stash;
+                                                    --days scales it to N days of the trace's rates (default 1, 9.7's;
+                                                    9.10 D115: 7, Déjà Dup's weekly period)
 fileset.py restore <set-dir> <stash-dir> <change.json>   undo it: originals back, new files removed
 
 The change set's size follows Cumulus's personal-machine trace (T9-S1-05: 10.3 MB new and 29.9 MB changed per day over
 a 2.37 GB home directory), scaled to the set: new files totalling NEW_SHARE of its bytes and changed files totalling
-CHANGED_SHARE. Which files change, how and the new files' content are design, drawn from SEED: the changed files in a
+CHANGED_SHARE, each times the days the change spans (9.10 D115: seven days of new data add up; seven days' changed
+data is the week's upper bound, a file changed on several days counted once a day). Which files change, how and the
+new files' content are design, drawn from SEED: the changed files in a
 seeded order over the sorted file list, each taken when it still fits under the target, in each one contiguous range — length
 uniform in [1, size], offset uniform over the rest — rewritten with seeded random bytes, the file's length kept; new
 files of seeded random bytes, their sizes drawn from the set's own file sizes until the target is reached (the last
@@ -118,12 +123,12 @@ def set_check(manifest):
     return out
 
 
-def plan_change(entries, dirs, seed=SEED):
-    """The change set for a tree given as (rel, size) entries and its directories: {changed: [{path, size, offset,
-    length}], new: [{path, size}], targets}."""
+def plan_change(entries, dirs, seed=SEED, days=1):
+    """The change set for a tree given as (rel, size) entries and its directories, over `days` days of the trace's
+    rates: {changed: [{path, size, offset, length}], new: [{path, size}], targets}."""
     rng = random.Random(seed)
     total = sum(s for _, s in entries)
-    t_changed, t_new = round(total * CHANGED_SHARE), round(total * NEW_SHARE)
+    t_changed, t_new = round(total * CHANGED_SHARE * days), round(total * NEW_SHARE * days)
     order = [e for e in sorted(entries) if e[1] > 0]
     rng.shuffle(order)
     changed, acc = [], 0
@@ -142,7 +147,7 @@ def plan_change(entries, dirs, seed=SEED):
         new.append({"path": os.path.join(d, f"change-{seed}-{i:05d}.bin") if d else f"change-{seed}-{i:05d}.bin", "size": size})
         acc += size
         i += 1
-    return {"seed": seed, "set_bytes": total, "target_changed_bytes": t_changed, "target_new_bytes": t_new,
+    return {"seed": seed, "days": days, "set_bytes": total, "target_changed_bytes": t_changed, "target_new_bytes": t_new,
             "changed_file_bytes": sum(c["size"] for c in changed), "rewritten_bytes": sum(c["length"] for c in changed),
             "new_bytes": sum(n["size"] for n in new), "changed": changed, "new": new}
 
@@ -209,9 +214,12 @@ def main():
         _kv(set_check(read_manifest(a[1])))
         return 0
     if cmd == "change":
+        days = 1
+        if a[1] == "--days":
+            days, a = int(a[2]), a[:1] + a[3:]
         root, stash, out = a[1], a[2], a[3]
         rels = files_of(root)
-        plan = plan_change([(r, os.path.getsize(os.path.join(root, r))) for r in rels], dirs_of(root))
+        plan = plan_change([(r, os.path.getsize(os.path.join(root, r))) for r in rels], dirs_of(root), days=days)
         apply_change(root, stash, plan)
         json.dump(plan, open(out, "w"), indent=1)
         _kv({k: v for k, v in plan.items() if k not in ("changed", "new")})

@@ -25,6 +25,9 @@
 #   kdenlive  kdenlive-export — 9.10's Kdenlive export campaign (9.10 changelog D10, D101–D104): Kdenlive 23.08.5 as
 #             Ubuntu 24.04 packages it exporting 9.5's `video-editor` project through its render dialog with its default
 #             profile, in that chroot, the window on the measured CPU and the dialog driven from the harness CPUs
+#   dejadup   dejadup-incremental — 9.10's Déjà Dup backup campaign (9.10 changelog D8, D112–D118): Déjà Dup 45.2 as
+#             Ubuntu 24.04 packages it making its scheduled weekly incremental, started by its own monitor, of a home
+#             holding Mahoney's set after seven days of Cumulus's change rates, to a loop-mounted drive, in that chroot
 # Every measured phase is one command pinned to the measured CPU (pin.sh,
 # phase.sh MEAS_PIN=load), observed over the whole phase from the harness CPUs
 # by `perf sched record -a` — with the exec rows that name each process's
@@ -79,6 +82,7 @@ export BORG_PASSPHRASE="meas-9.7"           # design: repokey's passphrase, from
 rec family background; rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE"; rec started_utc "$(date -u +%FT%TZ)"
 rec settings.work_root "${MEAS_WORK_ROOT:-auto}"; rec settings.steam_app "$STEAM_APP"; rec settings.steam_update_from "$UPDATE_FROM"
 rec settings.steam_update_to "$UPDATE_TO"; rec settings.steam_dry_app "$DRY_APP"; rec settings.archiver_set "$ARCH_SET"
+rec settings.dejadup_set "${MEAS_DEJADUP_SET:-10gb}"
 pin_record | tee -a "$KV" | sed 's/^/  /' >&2
 python3 "$MEAS/runner_spec.py" > "$OUT/spec.json"
 # same-machine repeats: a job that drew another CPU model stops here, recorded, before any install or measurement
@@ -151,13 +155,15 @@ case "$APP" in
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y steamcmd > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
         STEAMCMD="$( [ -x /usr/games/steamcmd ] && echo /usr/games/steamcmd || command -v steamcmd)"; rec steamcmd.binary "$STEAMCMD"
         rec steamcmd.package "$(dpkg-query -W -f '${Version}' steamcmd 2>/dev/null)" ;;
-  upgrade|dkms|tracker|mnist|mnist-madvise|handbrake|kdenlive)
+  upgrade|dkms|tracker|mnist|mnist-madvise|handbrake|kdenlive|dejadup)
         # tracker: util-linux-extra for fincore, the cold start's check (D75; the runner's image lacks it, run #126);
-        # mnist, handbrake and kdenlive: the same, for the warm start's check (D83); kdenlive: 9.5's display and driver
-        # tools (probe/apps.sh) and tesseract, which finds the render dialog's button in its screenshot (D101)
+        # mnist, handbrake, kdenlive and dejadup: the same, for the warm start's check (D83); kdenlive and dejadup: 9.5's
+        # display and driver tools (probe/apps.sh) and tesseract, which finds the dialogs' buttons in their screenshots
+        # (D101, D118); dejadup: zpaq for the set (9.7's fetch_set)
         sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends mmdebstrap \
-          $( [ "$APP" = tracker ] || [ "${APP%-madvise}" = mnist ] || [ "$APP" = handbrake ] || [ "$APP" = kdenlive ] && echo util-linux-extra) \
-          $( [ "$APP" = kdenlive ] && echo xvfb xdotool imagemagick x11-apps tesseract-ocr tesseract-ocr-eng) > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
+          $( [ "$APP" = tracker ] || [ "${APP%-madvise}" = mnist ] || [ "$APP" = handbrake ] || [ "$APP" = kdenlive ] || [ "$APP" = dejadup ] && echo util-linux-extra) \
+          $( [ "$APP" = kdenlive ] || [ "$APP" = dejadup ] && echo xvfb xdotool imagemagick x11-apps tesseract-ocr tesseract-ocr-eng) \
+          $( [ "$APP" = dejadup ] && echo zpaq) > "$OUT/apt.app.log" 2>&1; rec apt.app.rc "$?"
         rec mmdebstrap.version "$(mmdebstrap --version 2>&1 | head -1)" ;;
 esac
 rec zpaq.version "$(zpaq 2>&1 | head -1)"
@@ -1202,6 +1208,200 @@ kd_job() {
   df -B1 --output=target,avail "$WORK" > "$OUT/df.kdenlive.txt" 2>&1
 }
 
+# ---- the Déjà Dup backup (9.10 D8, D112–D118) ------------------------------------------------
+# D113's state: D37's chroot at D64's T0, then `apt-get install deja-dup` from the same snapshot with apt's defaults
+# (S2-64), as the Kdenlive job installs Kdenlive. The Tracker job's user, its XDG folders and runtime directory;
+# Mahoney's set (9.7 D7) fetched, checked and extracted by 9.7's tooling and placed as ~/10gb (D118); the drive — an
+# ext4 image on a loop device with direct I/O, mounted at /media/<user>/Backup (D114). The first backup by Déjà Dup's
+# own assistant, `deja-dup --backup`, in a session of the user's own on the harness CPUs, worked from the harness CPUs
+# (dejadup_first.py): the location written as its location page stores it, the password page filled, "Remember
+# password" on (D117). The week (D118): "Back Up Automatically" on, the change set — seven days of Cumulus's rates
+# (D115) — applied, last-backup and last-run 8 days back; the set and Déjà Dup's cache read whole (D116). The phase
+# starts the user's session on the measured CPU with deja-dup-monitor in it and ends at the exit of the deja-dup the
+# monitor starts (dejadup_run.py); the job — that deja-dup's tree, from its first schedule-in to its exit (D112) — is
+# cut by analyze.py. Dry mode takes MEAS_DEJADUP_SET (100mb | 10gb); full mode always the 10 GB set.
+DD_SET="${MEAS_DEJADUP_SET:-10gb}"; [ "$MODE" = full ] && DD_SET=10gb
+DD_H="/home/$TRK_USER"; DD_MEDIA="/media/$TRK_USER/Backup"; DD_IMG_GIB=40
+DD_FOLDER="$DD_MEDIA/\$HOSTNAME"   # the drive backend's default folder, '$HOSTNAME', under the drive (D114)
+DD_PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export DD_KEYRING_PW=meas-9.10-keyring DD_BACKUP_PW=meas-9.10-backup   # design (D117)
+dd_session_cmd() {   # dd_session_cmd <root> <cpus> <mode>: DD_CMD, the session script as the user under a session bus
+  # of its own, on <cpus>, with 9.5's display and the runtime directory a login session has
+  DD_CMD=(sudo taskset -c "$2" chroot "$1" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" --init-groups /usr/bin/env -i -C "$DD_H"
+    HOME="$DD_H" USER="$TRK_USER" LOGNAME="$TRK_USER" PATH="$DD_PATH" LANG=en_US.UTF-8 DISPLAY=:99
+    XDG_RUNTIME_DIR="/run/user/$TRK_UID" DD_KEYRING_PW="$DD_KEYRING_PW" DD_FOLDER="$DD_FOLDER"
+    dbus-run-session -- /bin/bash /usr/local/lib/meas-dejadup-session.sh "$3" /var/tmp/meas)
+}
+dd_take() {   # dd_take <root>: the session's records out of the chroot
+  sudo cp "$1/var/tmp/meas/"* "$OUT/" 2>/dev/null; sudo chown "$(id -u):$(id -g)" "$OUT"/* 2>/dev/null; true
+}
+dd_state() {   # dd_state <root>: Déjà Dup installed at T0, the user, its folders, the session script — on the harness CPUs
+  local r="$1" t0 p
+  upg_sources "$r" "$UPG_T0"
+  unmeasured sudo chroot "$r" apt-get update > "$OUT/dejadup.state.apt-update.log" 2>&1; rec dejadup.state.apt_update.rc "$?"
+  t0=$(date +%s)
+  unmeasured sudo chroot "$r" /usr/bin/env DEBIAN_FRONTEND=noninteractive apt-get install -y deja-dup \
+    < /dev/null > "$OUT/dejadup.state.install.log" 2>&1
+  rec dejadup.state.install.rc "$?"; rec dejadup.state.install_s "$(( $(date +%s) - t0 ))"
+  unmeasured sudo chroot "$r" apt-get clean
+  sudo chroot "$r" dpkg-query -W -f '${binary:Package}\t${Version}\t${db:Status-Abbrev}\n' > "$OUT/dejadup.dpkg.tsv" 2>&1
+  diff "$OUT/upgrade.dpkg.t0.tsv" "$OUT/dejadup.dpkg.tsv" > "$OUT/dejadup.dpkg.diff.txt"
+  rec dejadup.state.added "$(grep -c '^>' "$OUT/dejadup.dpkg.diff.txt")"
+  rec dejadup.state.added_sha256 "$(grep '^>' "$OUT/dejadup.dpkg.diff.txt" | sha256sum | cut -d' ' -f1)"
+  for p in deja-dup duplicity librsync2t64 python3-fasteners python3-paramiko gnome-keyring gpg gpg-agent libgtk-4-1 python3-gi util-linux; do
+    rec "dejadup.pkg.$p" "$(sudo chroot "$r" dpkg-query -W -f '${Version}' "$p" 2>/dev/null)"
+  done
+  sudo chroot "$r" duplicity --version > "$OUT/dejadup.duplicity.version.txt" 2>&1
+  sudo chroot "$r" gpg --version > "$OUT/dejadup.gpg.version.txt" 2>&1
+  sudo chroot "$r" useradd -m -u "$TRK_UID" -U -s /bin/bash "$TRK_USER" > "$OUT/dejadup.useradd.log" 2>&1; rec dejadup.useradd.rc "$?"
+  sudo chroot "$r" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" --init-groups /usr/bin/env -i HOME="$DD_H" \
+    USER="$TRK_USER" LOGNAME="$TRK_USER" PATH="$DD_PATH" LANG=en_US.UTF-8 xdg-user-dirs-update > "$OUT/dejadup.xdg.log" 2>&1
+  rec dejadup.xdg.rc "$?"
+  sudo mkdir -p "$r/run/user/$TRK_UID"; sudo chown "$TRK_UID:$TRK_UID" "$r/run/user/$TRK_UID"; sudo chmod 700 "$r/run/user/$TRK_UID"
+  sudo mkdir -p "$r/var/tmp/meas"; sudo chroot "$r" chown "$TRK_USER:$TRK_USER" /var/tmp/meas
+  sudo install -m 755 "$HERE/dejadup-session.sh" "$r/usr/local/lib/meas-dejadup-session.sh"
+  rec dejadup.hostname "$(hostname)"
+}
+dd_place() {   # dd_place <root>: the set fetched, checked and extracted (9.7's fetch_set), then placed as ~/<its tree> (D118)
+  local r="$1" name
+  fetch_set "$DD_SET" set
+  name="$(basename "$SET")"; DD_SETNAME="$name"
+  sudo mv "$SET" "$r$DD_H/$name"; rec dejadup.set.placed.rc "$?"
+  SET="$r$DD_H/$name"; rec dejadup.set.home_path "$DD_H/$name"
+  sudo chroot "$r" chown -R "$TRK_USER:$TRK_USER" "$DD_H/$name"
+  unmeasured sudo python3 "$HERE/fileset.py" verify "$SET" "$SET_MANIFEST" > "$OUT/verify.placed.kv" 2>&1
+  rec set.verify.placed "$( [ "$?" = 0 ] && echo ok || echo mismatch)"
+  rm -rf "$WORK/sets"
+}
+dd_drive() {   # dd_drive <root>: the drive (D114) — a sparse ext4 image on a loop device with direct I/O, at /media/<user>/Backup
+  local r="$1" img="$WORK/drive.img"
+  rm -f "$img"; truncate -s "${DD_IMG_GIB}G" "$img"
+  unmeasured mkfs.ext4 -q -L Backup "$img" > "$OUT/dejadup.drive.mkfs.log" 2>&1; rec dejadup.drive.mkfs.rc "$?"
+  DD_LOOP="$(sudo losetup --direct-io=on --find --show "$img" 2> "$OUT/dejadup.drive.losetup.log")"; rec dejadup.drive.loop "$DD_LOOP"
+  sudo losetup -l -O NAME,BACK-FILE,DIO,LOG-SEC,SIZELIMIT > "$OUT/dejadup.drive.losetup.txt" 2>&1
+  rec dejadup.drive.dio "$(sudo losetup -l -n -O DIO "$DD_LOOP" 2>/dev/null | tr -d ' ')"
+  sudo mkdir -p "$r$DD_MEDIA"; sudo mount "$DD_LOOP" "$r$DD_MEDIA"; rec dejadup.drive.mount.rc "$?"
+  sudo chroot "$r" chown "$TRK_USER:$TRK_USER" "/media/$TRK_USER" "$DD_MEDIA"
+  findmnt -no SOURCE,FSTYPE,OPTIONS "$r$DD_MEDIA" > "$OUT/dejadup.drive.findmnt.txt" 2>&1
+  local d
+  for d in sda "${DD_LOOP#/dev/}"; do rec "disk.scheduler.$d" "$(cat "/sys/block/$d/queue/scheduler" 2>/dev/null)"; done
+}
+dd_drive_files() {   # dd_drive_files <label>: the files on the drive, their sizes, and the chain's counts
+  sudo find "$WORK/chroot$DD_MEDIA" -type f -printf '%P\t%s\n' 2>/dev/null | sort > "$OUT/dejadup.drive.$1.tsv"
+  rec "dejadup.drive.$1.files" "$(wc -l < "$OUT/dejadup.drive.$1.tsv")"
+  rec "dejadup.drive.$1.bytes" "$(awk -F'\t' '{s += $2} END {print s + 0}' "$OUT/dejadup.drive.$1.tsv")"
+  rec "dejadup.drive.$1.full_manifests" "$(grep -c 'duplicity-full\.[^/]*\.manifest' "$OUT/dejadup.drive.$1.tsv")"
+  rec "dejadup.drive.$1.inc_manifests" "$(grep -c 'duplicity-inc\.[^/]*\.manifest' "$OUT/dejadup.drive.$1.tsv")"
+  rec "dejadup.drive.$1.volumes" "$(grep -c '\.difftar' "$OUT/dejadup.drive.$1.tsv")"
+}
+dd_first() {   # dd_first <root>: the first backup through Déjà Dup's assistant, on the harness CPUs (D118)
+  local r="$1" spid t0
+  dd_session_cmd "$r" "$MEAS_HARNESS_CPUS" first
+  t0=$(date +%s)
+  setsid "${DD_CMD[@]}" > "$OUT/dejadup.first.session.log" 2>&1 &
+  spid=$!
+  pin_harness python3 "$HERE/dejadup_first.py" "$OUT" > "$OUT/dejadup.first.driver.log" 2>&1; rec dejadup.first.driver.rc "$?"
+  wait "$spid"; rec dejadup.first.session.rc "$?"
+  rec dejadup.first.wall_s "$(( $(date +%s) - t0 ))"
+  dd_take "$r"
+  local k
+  for k in keyring_unlock_rc keyring_start_rc set_backend_rc set_folder_rc first_rc first_s keyring_items_rc; do
+    rec "dejadup.first.$k" "$(sed -n "s/^$k=//p" "$OUT/dejadup.first.session.log" | tail -1)"
+  done
+  # the password the keyring holds for Déjà Dup (D117): SearchItems' unlocked paths
+  rec dejadup.first.keyring_items "$(grep -o "/org/freedesktop/secrets/collection/[^']*" "$OUT/keyring.items.first.txt" 2>/dev/null | wc -l)"
+  rec dejadup.first.last_backup "$(sed -n "s/^org.gnome.DejaDup last-backup //p" "$OUT/dejadup.settings.first-after.txt" 2>/dev/null)"
+  dd_drive_files first
+}
+dd_week() {   # dd_week <root>: the week (D118) — periodic on, the change set (D115), last-backup and last-run 8 days back
+  local r="$1" k
+  dd_session_cmd "$r" "$MEAS_HARNESS_CPUS" week
+  "${DD_CMD[@]}" > "$OUT/dejadup.week.session.log" 2>&1; rec dejadup.week.rc "$?"
+  dd_take "$r"
+  for k in set_periodic_rc week_back set_last_backup_rc set_last_run_rc; do
+    rec "dejadup.week.$k" "$(sed -n "s/^$k=//p" "$OUT/dejadup.week.session.log" | tail -1)"
+  done
+  rm -rf "$WORK/stash"; mkdir -p "$WORK/stash"
+  unmeasured sudo python3 "$HERE/fileset.py" change --days 7 "$SET" "$WORK/stash" "$OUT/change.week.json" > "$OUT/change.week.kv" 2>&1
+  rec change.week.rc "$?"
+  sudo chown "$(id -u):$(id -g)" "$OUT/change.week.json" "$OUT/change.week.kv" 2>/dev/null
+  while IFS='=' read -r k v; do [ -n "$k" ] && rec "change.week.$k" "$v"; done < "$OUT/change.week.kv"
+  rec change.week.sha256 "$(sha256sum "$OUT/change.week.json" | cut -d' ' -f1)"
+  sudo chroot "$r" chown -R "$TRK_USER:$TRK_USER" "$DD_H/$DD_SETNAME"   # the new files are the user's
+  rm -rf "$WORK/stash"   # one change per job: the originals are not restored
+}
+dd_warm() {   # dd_warm <root>: the set and Déjà Dup's cache read whole (D116), their cached fractions
+  local r="$1"
+  sudo find "$SET" -type f -exec cat {} + > /dev/null
+  sudo find "$r$DD_H/.cache/deja-dup" -type f -exec cat {} + > /dev/null 2>&1
+  rec cache.dejadup-incremental.fraction "$(mn_fraction "$SET" '*')"
+  rec cache.dejadup-incremental.cache_fraction "$(mn_fraction "$r$DD_H/.cache/deja-dup" '*')"
+}
+dd_stop() {   # dd_stop <root> <label>: every process whose root is the chroot — a session's bus, keyring daemon, agents
+  local r="$1" p n=0
+  for p in /proc/[0-9]*; do
+    [ "$(sudo readlink "$p/root" 2>/dev/null)" = "$r" ] && { sudo kill -TERM "${p#/proc/}" 2>/dev/null; n=$((n + 1)); }
+  done
+  rec "dejadup.stop.$2.term" "$n"; sleep 5
+  for p in /proc/[0-9]*; do [ "$(sudo readlink "$p/root" 2>/dev/null)" = "$r" ] && sudo kill -KILL "${p#/proc/}" 2>/dev/null; done
+}
+dd_after() {   # dd_after <root>: the monitor's child as the driver read it, the settings, Déjà Dup's cache and the drive
+  local r="$1"
+  python3 - "$OUT/run.json" >> "$KV" <<'PY'
+import json, sys
+try:
+    e = json.load(open(sys.argv[1]))
+except (OSError, ValueError):
+    e = {}
+print(f"dejadup.run.rc={e.get('rc', '')}")
+print(f"dejadup.run.argv={' '.join(e.get('argv', []))}")
+print(f"dejadup.run.comm={e.get('comm', '')}")
+print(f"dejadup.run.parent_comm={e.get('parent_comm', '')}")
+policy = [ln.rsplit(":", 1)[-1].strip() for ln in e.get("policy", "").splitlines() if "policy:" in ln]
+print(f"dejadup.run.policy={policy[0] if policy else ''}")
+print(f"dejadup.run.io_class={e.get('io_class', '')}")
+print(f"dejadup.run.affinity={e.get('affinity', '').rsplit(':', 1)[-1].strip()}")
+print(f"dejadup.run.notes={' | '.join(e.get('notes', []))}")
+st = e.get("steps", {})
+if "session" in st and "seen" in st:
+    print(f"dejadup.run.session_to_seen_s={(st['seen']['mono_ns'] - st['session']['mono_ns']) / 1e9:.3f}")
+if "seen" in st and "gone" in st:
+    print(f"dejadup.run.seen_to_gone_s={(st['gone']['mono_ns'] - st['seen']['mono_ns']) / 1e9:.3f}")
+PY
+  dd_session_cmd "$r" "$MEAS_HARNESS_CPUS" read
+  "${DD_CMD[@]}" > "$OUT/dejadup.read.session.log" 2>&1; rec dejadup.read.rc "$?"
+  dd_take "$r"
+  local after back
+  after="$(sed -n "s/^org.gnome.DejaDup last-backup //p" "$OUT/dejadup.settings.after.txt" 2>/dev/null | tr -d "'")"
+  back="$(sed -n 's/^dejadup\.week\.week_back=//p' "$KV" | tail -1)"
+  rec dejadup.after.last_backup "$after"
+  rec dejadup.after.advanced "$( [ -n "$after" ] && [ "$after" != "$back" ] && echo 1 || echo 0)"
+  dd_drive_files after
+}
+dd_job() {
+  local r="$WORK/chroot"
+  UPG_T0="${MEAS_DEJADUP_T0:-20260922T170000Z}"; UPG_EXTRA=   # D64's T0; D113: Déjà Dup installed by apt, not in the build
+  sudo rm -rf "$r"; upg_build "$r"; upg_mount "$r"; dd_state "$r"; dd_place "$r"; dd_drive "$r"
+  start_xvfb; kd_mount "$r"
+  dd_first "$r"; dd_stop "$r" first
+  if [ "$(sed -n 's/^dejadup\.first\.driver\.rc=//p' "$KV" | tail -1)" = 0 ]; then
+    dd_week "$r"; dd_stop "$r" week; dd_warm "$r"
+    dd_session_cmd "$r" "$MEAS_CPU" monitor
+    mn_thp before
+    export MEAS_PIN=harness   # the driver starts the session on the measured CPU and waits from the harness CPUs
+    phase dejadup-incremental -- python3 "$HERE/dejadup_run.py" "$OUT" -- "${DD_CMD[@]}"
+    export MEAS_PIN=load
+    mn_thp after
+    dd_stop "$r" phase; dd_after "$r"
+  else
+    rec dejadup.skipped "the first backup's driver failed"
+  fi
+  dd_stop "$r" end; sudo umount -l "$r/dev/shm" "$r/tmp/.X11-unix" 2>/dev/null; kill "$(cat "$OUT/xvfb.pid" 2>/dev/null)" 2>/dev/null
+  sudo umount "$r$DD_MEDIA" 2>/dev/null; [ -n "${DD_LOOP:-}" ] && sudo losetup -d "$DD_LOOP" 2>/dev/null
+  upg_umount "$r"
+  df -B1 --output=target,avail "$WORK" > "$OUT/df.dejadup.txt" 2>&1
+}
+
 # ---- the job ----------------------------------------------------------------------
 case "$APP" in
   borg)
@@ -1249,6 +1449,7 @@ case "$APP" in
   mnist|mnist-madvise) mn_job ;;
   handbrake) hb_job ;;
   kdenlive) kd_job ;;
+  dejadup) dd_job ;;
   *) rec error "unknown app $APP" ;;
 esac
 

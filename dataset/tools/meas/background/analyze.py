@@ -66,7 +66,8 @@ ROOT_COMMS = {"borg": ("borg",), "7z": ("7z", "7zz"), "steamcmd": ("steamcmd",),
               "tracker": ("tracker-miner-fs-3", "tracker-miner-f"),   # tracker: 9.10 D65, the miner its session starts
               "mnist": ("chroot",),   # mnist: 9.10 D84, the training run launched into the chroot as upgrade's stage
               "handbrake": ("chroot",),   # handbrake: 9.10 D11, the encode launched into the chroot as mnist's run
-              "kdenlive": ("kdenlive_render",)}   # kdenlive: 9.10 D101, the renderer Kdenlive's dialog starts detached
+              "kdenlive": ("kdenlive_render",),   # kdenlive: 9.10 D101, the renderer Kdenlive's dialog starts detached
+              "dejadup": ("deja-dup",)}   # dejadup: 9.10 D112, the deja-dup Déjà Dup's monitor starts through chrt and ionice
 # 9.10 D50: the DKMS job is every process rooted at a run of either kernel hook, which execs dkms_autoinstaller (S2-03)
 DKMS_HOOKS = ("/etc/kernel/postinst.d/dkms", "/etc/kernel/header_postinst.d/dkms", "/usr/lib/dkms/dkms_autoinstaller")
 CLASSES = ("disk", "uninterruptible", "network", "sleep", "runnable")
@@ -74,7 +75,8 @@ CLASSES = ("disk", "uninterruptible", "network", "sleep", "runnable")
 
 def job_of(phase):
     for job, prefix in (("borg", "borg"), ("7z", "7z"), ("steamcmd", "steam"), ("upgrade", "upgrade"), ("dkms", "dkms"),
-                        ("tracker", "tracker"), ("mnist", "mnist"), ("handbrake", "handbrake"), ("kdenlive", "kdenlive")):
+                        ("tracker", "tracker"), ("mnist", "mnist"), ("handbrake", "handbrake"), ("kdenlive", "kdenlive"),
+                        ("dejadup", "dejadup")):
         if phase.startswith(prefix):
             return job
     return None
@@ -86,8 +88,9 @@ def is_program(job, filename, comm):
     The unattended upgrade (9.10 D37): every process of the tree — the job is the unit's commands and all they start.
     The Tracker index (9.10 D65): every process in the miner's tree. The MNIST training run (9.10 D84): every process of
     the tree launched into the chroot. The HandBrakeCLI transcode (9.10 D11): the same. The Kdenlive export (9.10
-    D101): every process of the renderer's tree."""
-    if job in ("upgrade", "tracker", "mnist", "handbrake", "kdenlive"):
+    D101): every process of the renderer's tree. The Déjà Dup backup (9.10 D112): every process of the tree of the
+    deja-dup the monitor starts."""
+    if job in ("upgrade", "tracker", "mnist", "handbrake", "kdenlive", "dejadup"):
         return True
     if filename:
         base = filename.rsplit("/", 1)[-1]
@@ -122,8 +125,10 @@ def launched_root(job, exec_rows):
     """The process phase.sh launched: the earliest one that executed taskset and then the job's command (borg, 7z, or
     /usr/games/steamcmd, which becomes a bash running steamcmd.sh before it starts SteamCMD's binary). The Kdenlive
     export (9.10 D101): the earliest process that executed kdenlive_render — Kdenlive starts it detached, so no
-    taskset precedes it and it is not in Kdenlive's tree."""
-    if job == "kdenlive":
+    taskset precedes it and it is not in Kdenlive's tree. The Déjà Dup backup (9.10 D112): the earliest process that
+    executed deja-dup — the monitor's child, which executes chrt, then ionice, then deja-dup under one pid; the
+    monitor itself executes deja-dup-monitor."""
+    if job in ("kdenlive", "dejadup"):
         return next((pid for _t, pid, f in exec_rows if f.rsplit("/", 1)[-1] in ROOT_COMMS[job]), None)
     last = {}
     for _t, pid, f in exec_rows:
@@ -438,6 +443,8 @@ def analyze_phase(D, phase, meas_cpu, edges, kv=None):
         prog = [p for p in pids if is_program(job, execs.get(p), role.get(p))]
     prog_set = set(prog)
     rows = [s for s in segs if s.cpu == meas_cpu and s.tid in tree]
+    if job == "dejadup" and root in _exits:   # 9.10 D118: the job ends at deja-dup's exit; an agent gpg starts lives on
+        rows = [s for s in rows if s.t_in < _exits[root][0]]
     trk = None
     if job == "tracker":   # 9.10 D62, D63: the rows within the job's window
         trk, rows = tracker_window(D, phase, edges, exec_rows, root, rows, execs, tid2pid)

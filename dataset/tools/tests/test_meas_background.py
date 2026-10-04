@@ -488,9 +488,12 @@ def test_the_list_is_each_archetypes_batch_loop_tables():
     assert [k for _p, k, _l in pool.LIST["handbrake"]] == ["batch_run_us", "batch_block_us", "program_cpu_us"]
     # 9.10's Kdenlive method §1: the same three over the export, until the form is fixed
     assert [k for _p, k, _l in pool.LIST["kdenlive"]] == ["batch_run_us", "batch_block_us", "program_cpu_us"]
+    # 9.10's Déjà Dup method §1: the same three over the backup, until the form is fixed
+    assert [k for _p, k, _l in pool.LIST["dejadup"]] == ["batch_run_us", "batch_block_us", "program_cpu_us"]
     assert {p for _p in pool.LIST.values() for p, _k, _l in _p} == {"borg-first-warm", "7z-mmt8-warm", "steam-fresh-shaped",
                                                                    "upgrade-install", "dkms-install", "tracker-index",
-                                                                   "mnist-train", "handbrake-transcode", "kdenlive-export"}
+                                                                   "mnist-train", "handbrake-transcode", "kdenlive-export",
+                                                                   "dejadup-incremental"}
 
 
 def test_the_mnist_blocks_are_carried_under_the_machine_exception_and_the_check_is_its_own_app():
@@ -535,6 +538,35 @@ def test_the_kdenlive_job_is_the_tree_of_the_renderer_the_dialog_starts():
     assert analyze.is_program("kdenlive", "/usr/bin/melt-7", "melt-7")
     assert pool.NAME.match("meas-background-kdenlive-r1-dry").groups() == ("kdenlive", "1", "dry")
     assert pool.PHASES["kdenlive"] == ("kdenlive-export",)
+
+
+def test_the_dejadup_job_is_the_tree_of_the_deja_dup_the_monitor_starts():
+    # 9.10 D112: the monitor's child executes chrt, ionice and deja-dup under one pid; the job's root is the first
+    # process that executed deja-dup — not the monitor, which executes deja-dup-monitor — and every process of its tree
+    assert analyze.job_of("dejadup-incremental") == "dejadup"
+    rows = [(1.0, 10, "/usr/bin/sudo"), (1.1, 11, "/usr/bin/taskset"), (1.2, 11, "/usr/sbin/chroot"),
+            (1.3, 11, "/usr/bin/dbus-run-session"), (1.4, 12, "/bin/bash"), (1.5, 13, "/usr/libexec/deja-dup/deja-dup-monitor"),
+            (121.6, 40, "/usr/bin/chrt"), (121.6, 40, "/usr/bin/ionice"), (121.7, 40, "/usr/bin/deja-dup"),
+            (122.0, 41, "/usr/bin/duplicity"), (130.0, 42, "/usr/bin/gpg")]
+    assert analyze.launched_root("dejadup", rows) == 40
+    assert analyze.launched_root("dejadup", rows[:6]) is None
+    assert analyze.is_program("dejadup", "/usr/bin/gpg", "gpg")
+    assert pool.NAME.match("meas-background-dejadup-r1-dry").groups() == ("dejadup", "1", "dry")
+    assert pool.PHASES["dejadup"] == ("dejadup-incremental",)
+
+
+def test_the_weekly_change_set_is_seven_days_of_the_trace(tmp_path):
+    # 9.10 D115: --days scales both targets of 9.7's change set by the days it spans; one day is 9.7's own
+    entries = [(f"d/f{i:03d}", 10_000 + 37 * i) for i in range(400)]
+    one = fileset.plan_change(entries, ["", "d"])
+    week = fileset.plan_change(entries, ["", "d"], days=7)
+    total = sum(sz for _r, sz in entries)
+    assert one["days"] == 1 and week["days"] == 7
+    assert one["target_new_bytes"] == round(total * fileset.NEW_SHARE)
+    assert week["target_new_bytes"] == round(total * fileset.NEW_SHARE * 7)
+    assert week["target_changed_bytes"] == round(total * fileset.CHANGED_SHARE * 7)
+    assert week["new_bytes"] == week["target_new_bytes"] and week["changed_file_bytes"] <= week["target_changed_bytes"]
+    assert week == fileset.plan_change(entries, ["", "d"], days=7)   # the seed makes every repeat's change the same
 
 
 def test_the_kdenlive_job_carries_9_5s_settings_into_the_chroot():

@@ -2032,3 +2032,112 @@ Hands to 9.12 and 9.15:
 - the scenario catalog's S7 row ("ffmpeg (render children)"): Kdenlive's `kdenlive_render` and its `melt-7`;
 - `building-plan.md` §3 C1 (render {kdenlive, ffmpeg}) and C2 P3;
 - `cpu-batch`'s scope without `ffmpeg` (D10's hand-off).
+
+## D112 — the periodic backup is started by Déjà Dup's own monitor in every repeat; the job is the tree of the `deja-dup` it starts (2026-10-04)
+
+By 인지오's decision, how D8's campaign starts the scheduled run. In every repeat, after the first backup and the change set (D115, D118), `deja-dup-monitor` is started in the user's session with `last-backup` older than the schedule's last slot. When its own 120 s wait ends it finds the backup due and starts it. The job is every process of the tree rooted at the process the monitor starts, from its first schedule-in on the measured CPU to its exit.
+
+Grounds:
+
+- **Déjà Dup 45.2's scheduled run** (S2-62). The monitor autostarts at login and waits 120 s before its first check (`monitor/monitor.vala`, `begin_monitoring`). It counts the backup due once `last-backup` is older than the latest slot of the period, a fixed time between 2 and 4 AM drawn from the machine id (`libdeja/CommonUtils.vala:196–254`). It checks game mode, power saver and, for a remote location only, the network (`monitor/ReadyWatcher.vala`). Then it runs `chrt --idle 0 ionice -c3 deja-dup --backup --auto` (`monitor/BackupInterface.vala:39`; `CommonUtils.vala:107–149`, `nice_prefix`), so the whole tree runs in the kernel's idle CPU class and idle I/O class.
+- **What `deja-dup --backup --auto` runs** (S2-62, S2-63). `duplicity collection-status`, then `duplicity incremental … --volsize=200`; an automatic run skips the dry run that sizes a progress bar unless the backup is a full one (`app/AssistantBackup.vala`, `create_op`; `libdeja/duplicity/DuplicityJob.vala:370–415`). After a successful backup it chains a verify, `duplicity restore` of its own check file (`libdeja/OperationBackup.vala`, `operation_finished`; `libdeja/OperationVerify.vala`). An encrypted backup runs `gpg --symmetric` for each volume (`duplicity/gpg.py:134–210`).
+- **The program's own trigger** (D101's form). Kdenlive's export was started through its render dialog, not by running `kdenlive_render`.
+
+Not taken: the driver running the monitor's command line itself, with no monitor. The tree and the classes are the same, but the trigger would be the driver's, and the prefix copied from the source rather than applied by Déjà Dup.
+
+The names the run shows are read from it (D25).
+
+No file changed yet.
+
+## D113 — the backup's state is D37's chroot at T0 with Déjà Dup installed by apt (2026-10-04)
+
+By 인지오's decision. The campaign runs in D37's chroot of the English default install, built from the archive at D64's T0 (2026-09-22T17:00Z). On the harness CPUs, `apt-get install deja-dup` installs from the same snapshot with apt's defaults, as the DKMS campaign installed its driver package (D49) and the Kdenlive campaign Kdenlive (D102). The user is the Tracker campaign's.
+
+Grounds:
+
+- **One state across 9.10's campaigns** (D82, D94, D102).
+- **The same backup stack as the extended install** (S2-01, S2-64). The extended layer (`minimal.standard`) adds `deja-dup` 45.2-1build2, `duplicity` 2.1.4-3ubuntu2, `librsync2t64` 2.3.4-1.1ubuntu2, `python3-fasteners`, `python3-monotonic`, and `python3-paramiko`, `python3-bcrypt` and `python3-nacl`, `duplicity`'s recommends. At T0 the archive's release pocket has `deja-dup` and `duplicity` at those versions with no update in either pocket. `deja-dup`'s own recommends, `gvfs-backends` and `packagekit`, and the keyring, `gnome-keyring`, are in the default layer.
+- **Ubuntu ships Déjà Dup unpatched** (S2-62). The source package 45.2-1build2 has an empty patch series; its build enables PackageKit, with borg and restic off.
+
+Not taken: the default layer plus the extended layer's 223 packages. Its other ~215 are applications that leave the home untouched until run, among them Thunderbird as a snap, which a chroot cannot install.
+
+No file changed yet.
+
+## D114 — the backups go to an external drive, the location Déjà Dup's help points to; a loop-mounted ext4 stands in (2026-10-04)
+
+By 인지오's decision, D8's open item "the first backup's destination", in two steps. Déjà Dup's default location, `auto`, resolves to Google Drive (`libdeja/BackendAuto.vala`), which needs an account the runner does not use. The backups go to an external drive. The stand-in is an ext4 filesystem in a sparse image on a loop device with direct I/O, mounted in the chroot at `/media/<user>/<label>`. Déjà Dup uses it through its `local` backend, the folder at the drive backend's default `$HOSTNAME` under the mount (`org.gnome.DejaDup.Drive` `folder`, default `'$HOSTNAME'`).
+
+Grounds:
+
+- **Déjà Dup's help** (S2-62, `help/C/prefs.page:29–30`): "If you'd like to use an external drive as a storage location, plug it in and it will show up in the list." And: "While you can choose a local folder for your backups, this is not recommended. If your hardware fails, you will lose both your original data and your backups all at once."
+- **The two backends hand `duplicity` the same location** (S2-62). Both `local` and `drive` are file backends, and `duplicity` gets `gio+file://<path>` (`DuplicityJob.vala:213–220`), so it writes the same way to either. The `drive` backend finds its drive by UUID through GIO's volume monitor, which needs udisks, absent in a chroot. What it adds over `local` is that readiness check and the mount, both outside the job.
+- **A separate filesystem and block device** (Q6, by 인지오's decision). `duplicity` stages each volume in a temporary folder on the home's filesystem (`CommonUtils.vala:654–719`, `get_tempdir`) and copies it to the location through GIO. Onto a drive the copy crosses filesystems, and the volume's flush waits on that drive's device. A loop device with direct I/O keeps both.
+
+The first decision, an external drive on the runner's second disk, rested on a second disk that today's runners do not have. The Kdenlive campaign's landings record one 150 GB virtual disk, `sda`, with `/` and `/mnt` both on `/dev/root` (run 37124818629). 인지오 then chose the loop-mounted filesystem.
+
+Stated: the drive is the runner's own disk behind a loop device. The loop driver's kernel threads carry its I/O, outside the job, and are reported beside it when they run on the measured CPU.
+
+Not taken: a folder outside the home on the chroot's own filesystem (no separate filesystem or device); the `local` backend's own default, `~/<hostname>`, on the home's filesystem, the location the help warns against.
+
+No file changed yet.
+
+## D115 — the change set is seven days of Cumulus's personal-machine rates, by 9.7's method (2026-10-04)
+
+By 인지오's decision, D8's open item "the change set and its ground". Between the first backup and the measured incremental, the set takes seven days of the daily rates of the one personal-machine trace in the records. That is Cumulus (Vrable, Savage and Voelker, FAST 2009; 9.7's T9-S1-05): 10.3 MB new and 29.9 MB changed a day over a 2.37 GB home directory, 223 days. Scaled to the set: new files totalling 7 × 0.4346 % = 3.042 % of its bytes (304.2 MB), and changed files totalling 7 × 1.2616 % = 8.831 % (883.1 MB). Which files change, how, and the new files' content follow 9.7's seeded method and seed (`fileset.py change`; 9.7 method §2). The changed part is an upper bound, stated.
+
+Grounds:
+
+- **The period is Déjà Dup's.** The periodic backup runs every 7 days once turned on (D8; S2-03, `periodic-period` default 7).
+- **The rates are the one personal-machine trace's.** 9.7's search for bytes changed between consecutive backups found no population figure and one personal machine's daily rates (9.7 `search/T9-S1-literature.md`, synthesis (c)). Its weekly figures are shared servers': students' home directories, an unmodified file modified within a week with 0.14 % probability (Tarasov et al., ATC 2012, Table 2; 9.7's T9-S1-19; file counts); university home-directory servers, more than 98.5 % of bytes repeated week to week (Meister and Brinkmann, SYSTOR 2009; 9.7's T9-S1-27).
+- **New data adds up; changed data is bounded.** Each day's new files are new, so a week's new data is seven days'. The trace counts a file once for each day its hash changes (Cumulus §5.2.1), and a weekly incremental takes it once. Seven days' changed data is the week's upper bound, and no source gives the union.
+
+Not taken: 9.7's one-day change set unchanged, a day's change under a weekly schedule; seven days of new data with one day's changed files, the lower bound, as if the same files changed every day. Cumulus names two such files (§5.4.4), and two examples do not make a weekly union.
+
+No file changed yet.
+
+## D116 — the incremental starts warm (2026-10-04)
+
+By 인지오's decision, on 9.7 D8. After the change set, the set and Déjà Dup's cache folder (`~/.cache/deja-dup`, its signature chain) are read whole on the harness CPUs before the monitor starts. The set's cached fraction is measured with `fincore`, and validity asks at least 0.99. The cache folder's fraction is recorded beside it.
+
+Grounds:
+
+- **The backup archetype's precedent** (9.7 D8). The same set and the same kind of job read the warm phase: a cold phase's read waits would be the runner's datacentre disk, documented only as "SSD", not a desktop drive. The export started warm too (D104).
+- **No source states the cache state a desktop backup starts in.** Both states are design. Déjà Dup's help puts scheduled backups "in the middle of the night if possible" (`help/C/prefs.page:38`). A desktop off at night runs the overdue backup at the monitor's first check after the next login, when the cache is cold.
+- **Warm fits the runner.** 9.7 held the set at a cached fraction of 1.0000 in 16 GB. D75 chose cold for the Tracker index partly because its set was 2.5 times the runner's memory.
+
+Not taken: cold, `sync; sysctl vm.drop_caches=3` before the monitor starts (D75's form).
+
+No file changed yet.
+
+## D117 — Déjà Dup's settings are its defaults, the backup encrypted and its password remembered (2026-10-04)
+
+Taken under 인지오's delegation (2026-10-04), D8's open item "Déjà Dup's settings left at their defaults", read from the source (S2-62), as D103 read Kdenlive's profile.
+
+- **Folders:** `include-list` `[ '$HOME' ]` and `exclude-list` `[ '$TRASH', '$DOWNLOAD' ]`, with Déjà Dup's own exclusions (`OperationBackup.vala`, `add_always_excluded_dirs`: `~/.cache` and its own cache, `~/.ccache`, `~/.steam/root`, `~/.xsession-errors`, its temporary folders, among others).
+- **Tool:** `duplicity` (`tool` default `'duplicity'`), volumes of 200 MB (`DuplicityJob.vala:1333–1356`).
+- **Schedule:** `periodic-period` 7. A fresh full backup is made after 90 days (`full-backup-period` 90). `delete-after` 0: backups kept forever.
+- **Encryption on,** the first-backup page's default ("always default to encrypted", `app/AssistantOperation.vala:345`): `duplicity` runs `gpg --symmetric --force-mdc --pinentry-mode=loopback`, gpg's own compression on (S2-63).
+- **"Remember password" on,** its one departure from the defaults. The switch is off by default (`AssistantOperation.vala:370–373`). An automatic run that finds no stored password emits `passphrase_required` and waits for the user (`libdeja/Operation.vala:291–317`), so with the default no scheduled run finishes unattended. The password goes to the default layer's `gnome-keyring` through libsecret (`CommonUtils.vala:605–630`). The keyring's and the backup's passwords are design strings.
+- **Location:** D114.
+
+The idle classes (D112) are recorded as 9.6 D17 recorded Tracker's SCHED_IDLE: in the entry's notes, the task model carrying no declared class (9.11's).
+
+No file changed yet.
+
+## D118 — the incremental's start: the first backup through Déjà Dup's assistant, a week's passing written into its settings, the session on the measured CPU; the runner's kernel (2026-10-04)
+
+Taken under 인지오's delegation (2026-10-04), on D101, D104 and D112.
+
+- **The set.** Mahoney's 10 GB set (`mahoney-10gb`, 9.7 D7), fetched, checked against its pinned SHA-256 and manifest and extracted on the harness CPUs by 9.7's tooling. Its tree `10gb/`, as `zpaq` restores it, is placed directly in the user's home as `~/10gb`.
+- **The first backup.** Run by Déjà Dup's own first-backup path, `deja-dup --backup` ("Back Up Now"), as the user on the harness CPUs, in a session of its own with the keyring unlocked. The location is written beforehand with `gsettings` as the location page stores it (`backend` `'local'`, `local` `folder` `/media/<user>/<label>/$HOSTNAME`). The assistant's folders and location pages are taken as they open, and its password page filled: the password twice, "Remember password" turned on (D117). The driver works the window from the harness CPUs by its screenshots, as the Kdenlive export's did. Not measured; its duration, log and the files it wrote are recorded.
+- **A week passing.** After the first backup, "Back Up Automatically" (`periodic`) is turned on with `gsettings`, the change set is applied (D115), and `last-backup` and `last-run` are set back 8 days. The monitor then finds the backup overdue at its first check. `nag-check`, which the first backup's verify sets, is left as written: the two-monthly restore test, with its password prompt and fresh cache (`OperationVerify.vala`; `CommonUtils.vala:352–373`), is not due. The measured run is the ordinary weekly incremental. The restore test, about one weekly run in nine, is stated as not depicted.
+- **The warm start** (D116).
+- **The session.** Xvfb on the harness CPUs, its socket visible in the chroot; a session bus of the user's own (`dbus-run-session`), the keyring unlocked in it, and `deja-dup-monitor` started in it with `DISPLAY` set, the whole session on the measured CPU. The monitor's child inherits its affinity, so the backup runs on the measured CPU, as on a one-CPU desktop (D104's form). No session manager starts the monitor, so the desktop file's own 120 s autostart delay (`X-GNOME-Autostart-Delay=120`) is not applied; it falls before the job.
+- **The job** (D112): every process of the tree rooted at the first process in the phase that executed `/usr/bin/deja-dup`, the one the monitor starts through `chrt` and `ionice`, from its first schedule-in to its exit. A process of the tree that outlives `deja-dup`, such as an agent `gpg` starts, counts only until that exit. The monitor, the session bus, the keyring daemon, anything the bus starts and the loop device's kernel threads are outside the job, reported by `comm` beside it.
+- **What the chroot lacks.** No system bus: PackageKit's dependency check (`Operation.vala:362–440`) and GIO's volume monitor fail at once, and Déjà Dup goes on by design. No notification server for its notices.
+- **The phase.** From the session's start to the exit of that `deja-dup`, the monitor's 120 s wait inside it; no cap of its own. The workflow's job limit is 330 minutes.
+- **The venue.** The runner's kernel as recorded, its transparent huge pages in `always` mode, recorded before and after the phase (D104). The disk's I/O scheduler is recorded: the idle I/O class takes effect only under a scheduler that implements I/O priorities.
+
+The entry's form — by 9.6 D7's criterion — and the list are fixed after the dry run. The job's size against the segments is read from it (D17).
+
+No file changed yet.
