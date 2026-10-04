@@ -111,6 +111,12 @@ def lint_repo(archetypes_path, sources_path, references_md, freeze=False):
                 for kind in param.get("kinds") or []:
                     if kind not in STIMULUS_KINDS:
                         errors.append(f"{where}: kind {kind!r} is not an event kind of the streams")
+            if pname == "launch":
+                # 9.10 D136: the observed launch phase, replayed; its streams' file must exist beside the library
+                stream = param.get("stream")
+                path = pathlib.Path(archetypes_path).resolve().parent / "launch" / f"{stream}.json.gz"
+                if not stream or not path.exists():
+                    errors.append(f"{where}: stream {stream!r} has no file at dataset/launch/")
             errors.extend(_check_param(where, param, registry, freeze))
     return errors
 

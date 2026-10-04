@@ -19,6 +19,7 @@ scheduling can influence. Concretely:
 """
 
 import bisect
+import gzip
 import json
 import math
 import pathlib
@@ -272,14 +273,24 @@ def _component_events(components, seed, iid, t0, t1, tag):
     return events
 
 
-def _periodic_unroll(build, seed, iid, params, t0, t1):
+def _periodic_unroll(build, seed, iid, params, t0, t1, launch=None):
     """9.5 D75: one job per medium cycle — TIMER(period) at arrival + k·period over the lifetime (contract §3's absolute
-    grid, tick 0 consumed at arrival), each followed by its cycle's run drawn from the measured per-cycle table."""
+    grid, tick 0 consumed at arrival), each followed by its cycle's run drawn from the measured per-cycle table. A launch
+    phase (9.10 D138) is binned onto the grid: a cycle starting inside it runs the replay's CPU in its window."""
     period = sampling.sample(params["period"], seed, iid, "period", 0)
+    phase_us, binned = 0, {}
+    if launch:
+        phase_us = launch[0]
+        for t_rel, run in launch[1]:
+            if t_rel < phase_us:
+                binned[t_rel // period] = binned.get(t_rel // period, 0) + run
     t, k = t0, 0
     while t < t1:
         build.program.append({"op": "TIMER", "period_us": period})
-        run = sampling.sample(params["cycle_run"], seed, iid, "cycle", k, allow_zero=True)
+        if t - t0 < phase_us:
+            run = binned.get(k, 0)
+        else:
+            run = sampling.sample(params["cycle_run"], seed, iid, "cycle", k, allow_zero=True)
         if run:
             build.program.append({"op": "RUN", "us": run})
             build.demand_us += run
@@ -293,9 +304,11 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
     timer_channel = f"timer:{iid}"
     t0 = task["arrive"]
     t1 = task["depart"] or timeline.duration_us
+    launch = _launch_stream(task, iid, seed, params)
     if "cycle_run" in params:
-        _periodic_unroll(build, seed, iid, params, t0, t1)
+        _periodic_unroll(build, seed, iid, params, t0, t1, launch)
         return
+    t_steady = t0 + launch[0] if launch else t0   # D136: the steady stream begins at the launch phase's end
     windows = [w for w in timeline.focus if w["task"] == task["id"]]
     # operations (spec decisions 8–9): a window from the authored start for a duration drawn from the measured
     # table; inside it the operation's components replace whatever is active and no input wake is emitted
@@ -309,15 +322,24 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
     def in_operation(t):
         return any(w["from"] <= t < w["to"] for w in op_windows)
     events = []
-    # timer components over the lifetime; cadence archetypes swap inside focus windows
+    # the launch phase's replay (9.10 D136): each observed wake a timer wake at its time from the arrival; an operation's
+    # window replaces it as it replaces the components (D137)
+    if launch:
+        for t_rel, run in launch[1]:
+            t = t0 + t_rel
+            if t_rel >= launch[0] or t >= t1:
+                break
+            if not in_operation(t):
+                events.append((t, run, "timer"))
+    # timer components over the lifetime past any launch phase; cadence archetypes swap inside focus windows
     focus_components = params.get("focus_components")
-    for ev in _component_events(params.get("components") or [], seed, iid, t0, t1, "idle"):
+    for ev in _component_events(params.get("components") or [], seed, iid, t_steady, t1, "idle"):
         if focus_components and any(w["from"] <= ev[0] < w["to"] for w in windows):
             continue
         if in_operation(ev[0]):
             continue
         events.append(ev)
-    events.extend(ev for ev in _heavy_events(params.get("heavy_events"), seed, iid, t0, t1) if not in_operation(ev[0]))
+    events.extend(ev for ev in _heavy_events(params.get("heavy_events"), seed, iid, t_steady, t1) if not in_operation(ev[0]))
     if focus_components:
         for j, w in enumerate(windows):
             events.extend(ev for ev in _component_events(focus_components, seed, iid, w["from"], w["to"], ("focus", j))
@@ -353,6 +375,40 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
             build.demand_us += run
     if not build.program:  # alive but silent: block forever
         build.program = [{"op": "WAIT", "channel": channel}]
+
+
+# ---- launch phases (9.10 D21, D133, D136–D138) -------------------------------
+#
+# An entry with a `launch` param carries its observed launch phase (dataset/launch/<stream>.json.gz): per pooled
+# repeat, the phase's length and one or more streams of wakes, each [t_us from the phase's start, run_us, thread].
+# A task the file starts mid-file — arriving after 0 s; one at 0 s is already steady (D21) — draws one repeat by the
+# file's seed; a task group (`count`) draws one repeat and distinct streams of it, the four hidden tabs' renderers of
+# one launch (D133).
+
+_LAUNCH = {}
+
+
+def _load_launch(name):
+    if name not in _LAUNCH:
+        path = pathlib.Path(__file__).resolve().parents[2] / "launch" / f"{name}.json.gz"
+        with gzip.open(path, "rt") as handle:
+            _LAUNCH[name] = json.load(handle)
+    return _LAUNCH[name]
+
+
+def _launch_stream(task, iid, seed, params):
+    """(phase length µs, [(t_rel_us, run_us), …] sorted) for this instance; None without a launch phase."""
+    spec = params.get("launch")
+    if not spec or task["arrive"] <= 0:
+        return None
+    reps = _load_launch(spec["stream"])["repeats"]
+    rep = reps[min(int(sampling.uniform(seed, task["id"], "launch", "repeat") * len(reps)), len(reps) - 1)]
+    streams = rep["streams"]
+    order = sorted(range(len(streams)), key=lambda i: sampling.uniform(seed, task["id"], "launch", "stream", i))
+    n = int(iid.rsplit(".", 1)[1]) - 1 if task["count"] > 1 else 0
+    if n >= len(order):
+        raise ValueError(f"{iid}: {task['count']} tasks draw from a launch repeat of {len(order)} streams")
+    return rep["phase_us"], [(w[0], w[1]) for w in streams[order[n]]]
 
 
 # ---- input-driven tasks (desktop-interactive) -------------------------------

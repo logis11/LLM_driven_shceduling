@@ -2506,3 +2506,33 @@ Stated: no value is a distribution, so the stability rule tests no table; the po
 Not taken: tables per 10 s slice, the library's form for steady behaviour (9.5 D16–D17), compiled slice by slice.
 
 No file changed yet.
+
+## D137 — inside a launch phase, the file's inputs, focus cadence and operations land where it places them, over the replay (2026-10-04)
+
+By 인지오's decision (Q20). The replay runs whole through the launch phase (D136). The replayed input wakes, the focus windows' driven components and the operations a file places on the task land where it places them, as on the steady stream. An operation's window replaces the replay inside it, as it replaces the steady components (spec decisions 8–9). Three files place them inside a phase: `c3-workday`'s writer (focus from 62 s, the phase to about 101 s) and Thunderbird (focus from 362 s and `send` at 400 s, the phase past the file's end), and `c3-creation`'s Kdenlive (focus from 122 s and `preview-render` at 150 s, the phase to about 151 s).
+
+Grounds:
+
+- **The placements hold** (D20, D44). Every focus window on an application with an operation holds one, inside focus. A focus window opens 2 s after its application arrives, and the window is up by then: 0.55–2.6 s after the exec in the dry runs (#77, #79).
+- **The settle is the measurement's margin.** It bounds the phase where the entry's steady values began (D21, D133); the application takes input from its window.
+
+Stated: the replayed launch was observed with no input, so an input's run, the focus cadence and an operation's components are their steady values over it. Inside focus, Kdenlive's driven components also carry the idle work the replay holds, about 0.1 ms/s (9.5's `kdenlive` idle phase, `launch-work.md`).
+
+Not taken: deferring them to the phase's end, which drops the writer's typing to about 101 s and all of Thunderbird's, and moves the `send` past the file's end; moving the three files' focus windows and operations past the phases.
+
+No file changed yet.
+
+## D138 — the periodic entries take their replay binned onto their cycle grid (2026-10-04)
+
+By 인지오's decision (Q21), on D136. `video-player`, `audio-player` and `video-call` compile to one TIMER job per cycle from the task's arrival (9.5 D75), and the harness reads tick k at the arrival plus k periods (`harness/tools/harness/primitives.py`, the metrics document's §11 assumption 4). A replay of waits before the first TIMER would leave every tick of the phase as backlog. Their jobs therefore run from the arrival as now; during the launch phase, cycle k's run is the replay's CPU in [k·period, (k + 1)·period) from the phase's start.
+
+Grounds:
+
+- **9.5 D75's own definition.** Each job's run is the process tree's whole CPU from one cycle's start to the next. The launch's CPU lands in the cycle it was observed in, at the period's resolution: 10.001 ms for the call, 33.348 ms for the video player, 49.635 ms for the audio player.
+- **The grid stays where the harness anchors it.**
+
+Stated: the wakes inside a cycle merge into its one job, as in the steady entry. A cycle holding more launch CPU than its period runs late.
+
+Not taken: the task split at the phase's end, a replay task departing as the periodic one arrives; TIMER's grid anchored at its first TIMER instead, a change to the simulator's contract and the metrics.
+
+No file changed yet.

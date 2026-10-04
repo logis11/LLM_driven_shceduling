@@ -179,3 +179,26 @@ def test_a_launch_dry_run_keeps_the_campaigns_lengths(repo_root):
     src = (repo_root / "dataset" / "tools" / "meas" / "desktop" / "run.sh").read_text()
     assert re.search(r'^if \[ "\$MODE" = dry \] && \[ "\$\{APP#launch-\}" = "\$APP" \]; then', src, re.M)
     assert 'launch-*) launch_subject "${APP#launch-}" ;;' in src
+
+
+def test_the_fold_in_carries_each_streams_wakes_with_its_threads(tmp_path):
+    from meas.desktop import launch_fold_in
+    D = tmp_path
+    json.dump({"phase_s": 12.3456789, "streams": {"tree": {}, "renderer2": {}, "renderer1": {}}},
+              open(D / "launch.summary.json", "w"))
+    with gzip.open(D / "launch.events.tsv.gz", "wt") as f:
+        f.write("stream\tt_us\trun_us\ttid\tpid\tcomm\trole\n"
+                "renderer1\t500\t20\t11\t11\tchrome\trenderer\n"
+                "renderer2\t100\t30\t12\t12\tchrome\trenderer\n"
+                "renderer1\t200\t10\t13\t11\tHangWatcher\trenderer\n"
+                "tree\t0\t99\t1\t1\tchrome\tchrome\n")
+    phase, streams, comms = launch_fold_in.streams_of(str(D), "chrome-hidden")
+    assert phase == 12_345_679
+    assert comms == ["chrome", "HangWatcher"]
+    # the renderers in their index order, each sorted by time; the tree's stream is not a renderer's
+    assert streams == [[[200, 10, 1], [500, 20, 0]], [[100, 30, 0]]]
+    phase, streams, _ = launch_fold_in.streams_of(str(D), "soffice")
+    assert streams == [[[0, 99, 0]]]
+    # byte-stable: the same document encodes to the same bytes
+    doc = {"repeats": [{"phase_us": phase, "streams": streams}]}
+    assert launch_fold_in.encode(doc) == launch_fold_in.encode(doc)
