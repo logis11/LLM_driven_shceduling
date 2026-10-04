@@ -32,7 +32,8 @@ ln_settle_for() {
 # D135: the program's own quit; the key a "save changes?" dialog's discard takes, where the program has one
 ln_quit_for() {
   case "$1" in
-    soffice|thunderbird-send|kdenlive|element) echo "ctrl+q" ;;
+    soffice|thunderbird-send|element) echo "ctrl+q" ;;
+    kdenlive) echo "close-window" ;;   # dry run #77: no Ctrl+Q without a window manager; the window's own close
     chrome|chrome-hidden|webrtc) echo "ctrl+shift+q" ;;
     mpv-video|mpv-audio) echo "q" ;;
     steam) echo "steam -shutdown" ;;
@@ -223,6 +224,7 @@ ln_quit() {
   rec launch.quit "$quit"
   ledge first.quit mark
   if [ "$SUBJ" = steam ]; then timeout 60 steam -shutdown > "$OUT/quit.log" 2>&1 &
+  elif [ "$quit" = close-window ]; then rec launch.close_window "$(python3 "$HERE/close_window.py" "$WID" 2>&1 | tail -1)"
   else xdotool windowfocus --sync "$WID" 2>/dev/null; xdotool key --clearmodifiers "$quit"; fi
   for i in $(seq 1 "$LN_QUIT_WAIT"); do
     left="$(python3 "$HERE/launch.py" tree --root "$APP_PID" --app-only)"
@@ -251,6 +253,9 @@ launch_subject() {
   LN_SETTLE="$(ln_settle_for "$SUBJ")"
   rec launch.subject "$SUBJ"; rec launch.settle_s "$LN_SETTLE"; rec launch.quit_wait_s "$LN_QUIT_WAIT"
   [ -n "$LN_SETTLE" ] || stop_recorded unknown-subject "no launch subject $SUBJ (D133)"
+  # fincore for the warm check (the image lacks it; the background family's run #126), python3-xlib for close_window.py
+  sudo apt-get install -y --no-install-recommends util-linux-extra python3-xlib > "$OUT/apt.launch.log" 2>&1; rec apt.launch.rc "$?"
+  rec util-linux.version "$(fincore --version 2>&1 | head -1)"
   case "$SUBJ" in
     element)
       LAUNCH_SETTLE=20                        # 9.8's sequence through its launch-settle: the first launch

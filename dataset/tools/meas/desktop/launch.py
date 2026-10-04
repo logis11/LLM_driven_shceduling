@@ -113,8 +113,13 @@ def mapped_files(pids, proc="/proc"):
     return sorted(files)
 
 
+PAGE = 4096
+
+
 def warm(paths, chunk=200):
-    """Read each file whole, then fincore it: (rows of (path, resident bytes, size bytes), unreadable count)."""
+    """Read each file whole, then fincore it: (rows of (path, resident pages, pages the file spans), unreadable count).
+    Residency is counted in whole pages, so the fraction is pages over the pages the files span (the background
+    family's `cached`)."""
     bad = 0
     for p in paths:
         try:
@@ -126,12 +131,12 @@ def warm(paths, chunk=200):
     rows = []
     for i in range(0, len(paths), chunk):
         part = paths[i:i + chunk]
-        res = subprocess.run(["fincore", "--bytes", "--noheadings", "--raw", "--output", "RES,SIZE,FILE", *part],
+        res = subprocess.run(["fincore", "--bytes", "--noheadings", "--raw", "--output", "PAGES,SIZE,FILE", *part],
                              capture_output=True, text=True)
         for line in res.stdout.splitlines():
             f = line.split(None, 2)
             if len(f) == 3 and f[0].isdigit() and f[1].isdigit():
-                rows.append((f[2], int(f[0]), int(f[1])))
+                rows.append((f[2], int(f[0]), -(-int(f[1]) // PAGE)))
     return rows, bad
 
 
@@ -442,14 +447,19 @@ def main():
         print(len(files))
     elif args.cmd == "warm":
         paths = [ln.strip() for ln in open(args.file) if ln.strip()]
-        rows, bad = warm(paths)
-        res, size = sum(r[1] for r in rows), sum(r[2] for r in rows)
+        try:
+            rows, bad = warm(paths)
+        except FileNotFoundError as e:   # no fincore: recorded, and the job's validity then fails on the fraction
+            print(f"cache.launch.error={e}")
+            return
+        res, span = sum(r[1] for r in rows), sum(r[2] for r in rows)
         if args.tsv:
             open(args.tsv, "w").write("".join(f"{p}\t{r}\t{z}\n" for p, r, z in rows))
         print(f"cache.launch.files={len(paths)}")
+        print(f"cache.launch.measured={len(rows)}")
         print(f"cache.launch.unreadable={bad}")
-        print(f"cache.launch.bytes={size}")
-        print(f"cache.launch.fraction={res / size:.4f}" if size else "cache.launch.fraction=")
+        print(f"cache.launch.pages={span}")
+        print(f"cache.launch.fraction={res / span:.4f}" if span else "cache.launch.fraction=")
     elif args.cmd == "seed":
         rows = seed(args.pattern, procs())
         open(args.out, "w").write("".join(f"{p}\t{t}\t{c}\n" for p, t, c in rows))

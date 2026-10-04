@@ -281,8 +281,9 @@ def validity(family, dirs, entry):
                         info.append(f"spare {arm}: the steady phase's plain renderers changed pids")
             if (r.get("app") or "").startswith("launch-"):   # 9.10 D132–D135: both launches, a clean quit, warm, traced whole
                 subj = r["app"][len("launch-"):]
+                # perf stopped by SIGINT exits 130, as the background family's phases record it
                 for x, want in (("launch.first.left_after_quit", "0"), ("tree.traced.harness_procs", "0"),
-                                ("perf.launch.record.rc", "0"), ("perf.launch.lost", "")):
+                                ("perf.launch.record.rc", "130"), ("perf.launch.lost", "")):
                     if r.get(x) != want:
                         notes.append(f"{x} {r.get(x)} (want {want or 'none'})")
                 try:   # the relaunch starts warm (D132): the files the first launch mapped, in the page cache
