@@ -2309,3 +2309,61 @@ Hands to 9.12 and 9.15:
 - the scenario catalog's S15 row: Déjà Dup's `deja-dup` and its `duplicity` and `gpg`;
 - `building-plan.md` §3 C1 (backup {kdenlive, borg}), C2 P3 ({kdenlive + borg}), and C7's sentence for backup (D9's hand-off);
 - `docs/workload/measurement-overview.md`'s `file-backup` rows.
+
+## D126 — the five tabs open five loopback addresses serving 9.8's idle page (2026-10-04)
+
+By 인지오's decision (Q13), D15's open item "the sites". The first tab opens `http://127.0.0.1:8099/idle-page.html` and the other four the same page at 127.0.0.2 to 127.0.0.5, with the query 9.8's hidden-tab subject serves: a 100 ms `setInterval` whose callback only counts (9.8 D13).
+
+Grounds:
+
+- **Five distinct sites.** Chromium 154.0.8037.57 takes an address's site as the scheme and the address, the port not kept (S2-65, `site_info.cc:1279–1286`), and site-per-process gives each site a renderer of its own (S2-16). Same-site sharing of a renderer by main frames, on by default on desktop up to two a process, is refused for an IP address or `localhost` (S2-65), and D15's tab set has no two tabs on one site.
+- **The page `renderer-hidden`'s values come from.** 9.8's hidden-tab subject measured this page at 12 loopback addresses (9.8 D12, D13), so the count multiplies values read from the same page.
+- **No network.** The pages come from a server on the harness CPUs, and every job loads the same five.
+
+Stated: the pages hold no subframes. A real page's cross-site iframes (ads, embeds, sign-in widgets) take processes of their own under site isolation (S2-16), and the count leaves them out. It is a floor for browsing real sites, by an amount no reference read states.
+
+Not taken: five real sites loaded live. Their subframe processes would vary with each site's ads and embeds from day to day and with the runner's region, the sites would need a ranked list as a source, and their renderers would be busy pages, which `renderer-hidden` does not describe.
+
+No file changed yet.
+
+## D127 — `renderer-hidden` counts the other tabs' page renderers; the spare and Chrome's own renderers stay in `web-browser`, amending D15 (2026-10-04)
+
+By 인지오's decision (Q14). A file showing Chrome carries one `renderer-hidden` task for each page renderer the observation holds beyond the page in use. The spare renderer, Chrome's WebUI renderer and its extension renderers are not counted. D15's "the spare included if one shows" is amended: whether the spare shows is recorded (D128), and it stays in `web-browser`.
+
+Grounds:
+
+- **`web-browser` already carries them** (9.5 D84). Its task is the run's whole tree, its renderers included: the typed-into page's, the spare renderer the page-load operation takes over (0.14 wakes/s idle), and Chrome's own WebUI renderer. The library's `web-browser` scope says "other tabs' renderers are renderer-hidden's".
+- **The spare hosts no page** (S2-16: "a live but unlocked renderer process, which is used the next time a renderer process is needed"). 9.8's dry run read it at 0.356 wakes/s (9.8 D14). As a `renderer-hidden` task it would be counted twice, and described by an entry for a page it does not host.
+- **Chrome's own renderers are the browser's.** 9.8's tooling tells them by command line, `--extension-process` and `--top-chrome-webui` (`desktop/analyze.NOT_PAGE_RENDERER`).
+
+Not taken: the spare as a `renderer-hidden` task, as D15 read.
+
+No file changed yet.
+
+## D128 — Chrome runs twice in each job, the spare off and the spare on, each in a fresh profile (2026-10-04)
+
+By 인지오's decision (Q15). A spare renderer and a page renderer carry the same command line, neither naming its site (9.8 D14), and Chromium 154's spare manager logs nothing that names it (S2-16's `spare_render_process_host_manager_impl.cc`, identical at 154.0.8037.57, S2-65). Each job therefore runs two launches one after the other, each in a fresh profile and through the same phases (D129), the order alternating by repeat: odd repeats the spare off first, even repeats the spare on first.
+
+- **Spare off.** 9.8's renderer flags, with `--disable-features=SpareRendererForSitePerProcess` (9.8 D14). Every renderer without `--extension-process` or `--top-chrome-webui` is a page renderer: the count D127 reads.
+- **Spare on.** The `chrome` arm's flags, 9.5's launch of Chrome as shipped. Its renderers beyond the spare-off launch's are the spare, recorded: whether it shows (D15).
+
+Grounds: 9.8 D14 turned the spare off because it "cannot be separated afterwards"; 9.5 D84 told it apart by its wake rate, a threshold that here would be design with nothing to cite.
+
+Not taken: one launch as shipped, the spare told apart by its wake rate; one launch with the spare off only, the spare left to the source.
+
+No file changed yet.
+
+## D129 — the observation: the runner's Chrome, 9.8's hidden-tab window, listed every 10 s over the phases `renderer-hidden`'s values come from (2026-10-04)
+
+Taken under 인지오's delegation (2026-10-04), on D15, D16, 9.8 D12–D15 and 9.5's Chrome campaign.
+
+- **A new observation.** 9.8's records hold 13 tabs at 13 loopback addresses with the spare off, under Google Chrome 152.0.7977.82 (release `meas-ci-desktop-2026-09-20`, `chrome-hidden` repeat 1, `renderers.tsv` and the snapshots). They show one page renderer per tab and the top-chrome WebUI renderer at the gate 20 s after launch, all 14 alive at the steady phase's end about 1,250 s after launch, and two extension renderers at the gate that had exited before the steady phase. They back the source but are not D15's tab set.
+- **The window** (D15's open item): D16's one window. The page in use is the first tab, selected from launch; the other four are background tabs of that window from launch. This is 9.8's hidden-tab layout (`chrome-hidden`, its control tab).
+- **Chrome.** The runner image's preinstalled Google Chrome, its version recorded per job, as 9.5 and 9.8 ran it: Google's repository serves only the current build. It is the build `web-browser` and `renderer-hidden` were measured on. The image of 2026-09-27 ships 154.0.8037.57, whose process model S2-65 read. A fresh profile for each launch, `--no-first-run`, so no variations seed (S2-65). Flags as D128. Not D37's chroot: Chrome is not in the default install, and the entries the count multiplies were measured on the runner's Chrome.
+- **When counted** (D15's open item). Over the phases `renderer-hidden`'s values come from (9.8 D15, `desktop/run.sh`): the launch, a 20 s launch settle, the 630 s grace and the 600 s steady phase. Every process of Chrome's tree is listed every 10 s from the launch, with its role and its renderer client id. The count carried is the page renderers held through the steady phase. Anything that comes and goes before it, such as 9.8's extension renderers, is recorded beside it.
+- **The loads checked.** The page server's log holds one request for the page per tab in each launch.
+- **No `perf`.** A count needs none. Xvfb 1280×800 and the pin as 9.8's: Chrome on the measured CPU, the harness and the page server on the others.
+- **Repeats.** The machine gate is kept (the workflow's one CPU model), and at least five repeats are run (the workflow's floor). A count is not on the stability rule's list: the workflow carries thread counts as their observed range. The count is carried as observed. If the repeats disagree, the decision returns to 인지오.
+- **The job** is a new subject of the desktop family, `chrome-tabs`; tag `meas-ci:desktop:<launch date>`.
+
+No file changed yet.

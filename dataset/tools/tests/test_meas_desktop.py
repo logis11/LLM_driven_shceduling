@@ -673,3 +673,102 @@ def test_a_renderer_thread_that_wakes_twice_across_the_renderers_is_carried(tmp_
         reps[k] = {"dir": str(d), "mode": "full", "report": {}, "spec": {}}
     comps = pool.pool_app("chrome-visible", reps)["phases"]["steady-notimer"]["components"]
     assert comps["selected"] == ["chrome", "Quiet"]
+
+
+# ---- 9.10 D126–D129: the tab set whose renderers are counted ----------------------------------------------------
+
+from meas.desktop import tabs  # noqa: E402
+
+
+def test_the_tab_subject_s_two_launches_differ_by_the_spare_flag_alone(repo_root):
+    # D128: the spare-off launch is the renderer subjects' CHROME, the spare-on launch the same with that one flag
+    # taken off — the `chrome` arm's flags, which test_the_three_chrome_arms_launch_with_identical_flags ties to it
+    src = (repo_root / "dataset" / "tools" / "meas" / "probe" / "appdefs.sh").read_text()
+    off = re.search(r'^\s*LAUNCH_OFF="\$CHROME (\S+)"', src, re.M)
+    on = re.search(r'^\s*LAUNCH_ON="\$\{CHROME% --disable-features=SpareRendererForSitePerProcess\} (\S+)"', src, re.M)
+    assert off and on, "expected LAUNCH_OFF from $CHROME and LAUNCH_ON from $CHROME less the spare flag"
+    assert off.group(1) == on.group(1), "the two launches open the same tabs"
+    assert off.group(1).startswith("http://127.0.0.1:$PORT/idle-page.html?$PAGEQ$URLS")
+
+
+def test_the_tab_set_is_five_tabs_in_every_mode(repo_root):
+    # D15: the page in use and four others; a dry run shortens the phases, never the tab set
+    src = (repo_root / "dataset" / "tools" / "meas" / "desktop" / "run.sh").read_text()
+    assert re.search(r"^TAB_ORIGINS=4\b", src, re.M)
+    dry = re.search(r'^if \[ "\$MODE" = dry \]; then\n(.*?)\n', src, re.M).group(1)
+    assert "TAB_ORIGINS" not in dry
+    body = re.search(r"^tabs_subject\(\) \{(.*?)^\}", src, re.S | re.M).group(1)
+    assert 'MEAS_ORIGINS="$TAB_ORIGINS"' in body
+
+
+def test_the_listing_reads_a_renderer_s_role_as_the_renderer_analysis_does():
+    base = ["/opt/google/chrome/chrome", "--type=renderer", "--user-data-dir=/tmp/chrome-data"]
+    assert tabs.role_of(base) == ("renderer", "plain")
+    assert tabs.role_of(base + ["--top-chrome-webui"]) == ("renderer", "webui")
+    assert tabs.role_of(base + ["--extension-process"]) == ("renderer", "extension")
+    assert tabs.role_of(["/opt/google/chrome/chrome", "--type=gpu-process"]) == ("gpu-process", "")
+    assert tabs.role_of(["/opt/google/chrome/chrome", "--user-data-dir=/tmp/chrome-data"]) == ("browser", "")
+    assert {f for f, _ in tabs.OWN} == set(analyze.NOT_PAGE_RENDERER)
+
+
+def test_the_listing_reads_proc_and_leaves_out_what_does_not_hold_the_pattern(tmp_path):
+    def proc(pid, ppid, argv, threads=7, start=100, ut=3, st=2):
+        d = tmp_path / str(pid)
+        d.mkdir()
+        (d / "cmdline").write_bytes(b"\0".join(a.encode() for a in argv) + b"\0")
+        f = ["S", ppid] + [0] * 9 + [ut, st] + [0] * 4 + [threads, 0, start] + [0] * 30   # fields 3, 4, 5–13, 14–15, 16–19, 20–22
+        (d / "stat").write_text(f"{pid} (chrome) " + " ".join(str(x) for x in f))
+    proc(10, 1, ["/opt/google/chrome/chrome", "--user-data-dir=/tmp/chrome-data"])
+    proc(11, 10, ["/opt/google/chrome/chrome", "--type=renderer", "--user-data-dir=/tmp/chrome-data",
+                  "--renderer-client-id=6"], threads=12, start=150)
+    proc(12, 1, ["/usr/bin/python3", "-m", "http.server"])
+    got = tabs.listing("chrome-data", proc=str(tmp_path))
+    assert [p[0] for p in got] == [10, 11]
+    assert got[1][1:2] == (10,) and got[1][3:] == (150, 12, 5)
+    row = list(tabs.rows("off", "steady", 0, got, 2_000_000_000))[1]
+    assert row == ("off", "steady", "2.0", 11, 10, "renderer", "plain", "6", 150, 12, 5)
+
+
+def _tabs_rows(arm, phase, t, plain, webui=1, extension=0, first_pid=100):
+    out, pid = [], first_pid
+    for role, n in (("plain", plain), ("webui", webui), ("extension", extension)):
+        for _ in range(n):
+            out.append(dict(zip(tabs.COLUMNS, (arm, phase, str(t), str(pid), "1", "renderer", role, "", "0", "1", "0"))))
+            pid += 1
+    out.append(dict(zip(tabs.COLUMNS, (arm, phase, str(t), "1", "0", "browser", "", "", "0", "1", "0"))))
+    return out
+
+
+def test_the_summary_reads_the_spare_as_the_two_launches_difference():
+    # D127, D128: the spare-off launch's plain renderers are pages, the page in use one of them; what the spare-on
+    # launch holds beyond them is the spare. Extension renderers that leave before the steady phase are recorded.
+    rs = []
+    for t in (10.0, 20.0):
+        rs += _tabs_rows("off", "launch-settle", t, plain=5, extension=2)
+        rs += _tabs_rows("on", "launch-settle", t, plain=6, extension=2, first_pid=200)
+    for t in (650.0, 660.0, 1250.0):
+        rs += _tabs_rows("off", "steady", t, plain=5)
+        rs += _tabs_rows("on", "steady", t, plain=6, first_pid=200)
+    k = tabs.summary(rs)
+    assert k["tabs.hidden"] == 4 and k["tabs.spare"] == 1
+    assert k["tabs.off.steady.plain_pids_stable"] == 1 and k["tabs.on.steady.plain_pids_stable"] == 1
+    assert k["tabs.off.launch-settle.extension_max"] == 2 and k["tabs.off.steady.extension_max"] == 0
+    assert k["tabs.off.steady.webui_max"] == 1 and k["tabs.off.plain_reached_s"] == 10.0
+
+
+def test_a_steady_phase_whose_count_moves_carries_no_count():
+    rs = _tabs_rows("off", "steady", 650.0, plain=5) + _tabs_rows("off", "steady", 660.0, plain=4)
+    k = tabs.summary(rs)
+    assert "tabs.hidden" not in k and k["tabs.off.steady.plain_min"] == 4 and k["tabs.off.steady.plain_max"] == 5
+
+
+def test_the_tab_count_holds_only_when_every_repeat_has_one_count():
+    def rep(hidden, spare):
+        return {"mode": "full", "spec": {}, "report": {"tabs.hidden": hidden, "tabs.spare": spare}}
+    e = tabs.pool({k: rep("4", "1") for k in range(1, 6)})
+    assert e["hidden"] == ["4"] and e["spare"] == ["1"]
+    assert e["stability"]["passes"] and e["stability"]["half_width"] == 0
+    assert not tabs.pool({k: rep("4", "1") for k in range(1, 5)})["stability"]["passes"], "five repeats at least"
+    e = tabs.pool({**{k: rep("4", "1") for k in range(1, 5)}, 5: rep("4", "0")})
+    assert not e["stability"]["passes"] and e["stability"]["half_width"] is None and e["spare"] == ["0", "1"]
+    assert "| 5 |" in "\n".join(tabs.render("chrome-tabs", e))

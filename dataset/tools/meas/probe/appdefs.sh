@@ -245,8 +245,8 @@ PY
       # left — a click on blank body right of the box (x 18–842 at the page's top) takes focus off any field, Ctrl+Home
       # scrolls to the top, a click in the box focuses it, Ctrl+A and Delete empty it
       ALTPRELUDE="xdotool mousemove 950 600 click 1; sleep 1; xdotool key ctrl+Home; sleep 2; xdotool mousemove 430 255 click 1; sleep 1; xdotool key ctrl+a; sleep 1; xdotool key Delete; sleep 2" ;;
-    chrome-hidden|chrome-visible)
-      # 9.8 D13: the two renderer subjects. The flags match the `chrome` arm above — web-browser carries Chrome's
+    chrome-hidden|chrome-visible|chrome-tabs)
+      # 9.8 D13: the two renderer subjects; 9.10 D126–D129: `chrome-tabs`, the tab set whose renderers are counted. The flags match the `chrome` arm above — web-browser carries Chrome's
       # tree minus its renderers (9.5 D14) and these entries carry the renderers, so the two halves of one
       # application must be the same program launched the same way; tests/test_meas_desktop.py asserts the three
       # arms' flag portions are identical. The `chrome` arm is not called: its feed page costs thirty ImageMagick
@@ -282,7 +282,16 @@ PY
       # changes only the renderer population, which is the half `web-browser` excludes (9.5 D14) and these
       # entries own; the browser, GPU and utility processes launch as they do for `chrome`.
       CHROME="google-chrome --no-sandbox --disable-gpu --no-first-run --user-data-dir=/tmp/chrome-data --disable-features=SpareRendererForSitePerProcess"
-      if [ "$app" = chrome-hidden ]; then
+      if [ "$app" = chrome-tabs ]; then
+        # 9.10 D126–D129: the hidden subject's window — the first tab selected, the page in use, and N background
+        # tabs at N loopback addresses — launched twice by desktop/run.sh, each time in a fresh profile: the spare
+        # off (CHROME as the renderer subjects run it) and the spare on (the `chrome` arm's flags, Chrome as
+        # shipped). A spare and a page renderer carry the same command line (D128), so the page renderers are
+        # counted where no spare exists, and the spare is what the second launch holds beyond them.
+        LAUNCH_OFF="$CHROME http://127.0.0.1:$PORT/idle-page.html?$PAGEQ$URLS"
+        LAUNCH_ON="${CHROME% --disable-features=SpareRendererForSitePerProcess} http://127.0.0.1:$PORT/idle-page.html?$PAGEQ$URLS"
+        LAUNCH="$LAUNCH_OFF"
+      elif [ "$app" = chrome-hidden ]; then
         # one window: the first tab stays selected and is the control tab, the N measured tabs are background
         # pages. The control tab carries the SAME timer as the measured pages: being the selected tab it stays
         # visible to Blink and is never throttled, so it wakes at the timer rate while the measured renderers

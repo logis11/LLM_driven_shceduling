@@ -9,6 +9,9 @@
 #                   timer removed by navigation rather than relaunch
 #   element         Element Desktop signed in to a Synapse homeserver on the harness CPUs; idle then traffic
 #   steam           Valve's desktop client, logged out, under a window manager; shown then minimised
+#   chrome-tabs     9.10 D126–D129: the hidden subject's window at five tabs, the page in use and four background
+#                   tabs at loopback addresses, launched twice — the spare renderer off, then on, or the reverse —
+#                   with Chrome's tree listed every 10 s through the phases; no perf
 #
 # Phases are a sequence with recorded edges (method §3), not one settle figure: launch, launch-settle, for the
 # hidden subject the recorded moment the tabs are backgrounded, grace-settle, then the steady phase(s). Only a
@@ -42,6 +45,8 @@ APP_PID=0; WID=""; PAT="?"; RX="?"
 
 # ---- design constants (method §2, §3) ----------------------------------------------------------------------
 ORIGINS=12                  # N: distinct loopback origins, hence distinct site-locked renderers
+TAB_ORIGINS=4               # 9.10 D15: five tabs — the page in use and four others; never shortened by a dry run
+TABS_EVERY=10               # 9.10 D129: seconds between listings of Chrome's tree
 TIMER_MS=100                # the page's setInterval period; above both throttling caps
 PAGE_PORT=8099
 # The grace before intensive throttling is sixty seconds for a page that has finished loading and five minutes
@@ -71,7 +76,7 @@ SYNAPSE_PORT=8008; SYNAPSE_DIR=/tmp/synapse
 # 900 s and is flat after it, so that step is settled through rather than measured.
 launch_settle_for() {
   case "$1" in
-    chrome-hidden|chrome-visible|element) echo 20 ;;
+    chrome-hidden|chrome-visible|chrome-tabs|element) echo 20 ;;
     steam) echo 900 ;;
     *) echo "" ;;
   esac
@@ -81,7 +86,7 @@ launch_settle_for() {
 # the hidden subject 3.7% past its settle, the Steam client 0.3% past its own.
 steady_for() {
   case "$1" in
-    chrome-hidden|chrome-visible|element|steam) echo 600 ;;
+    chrome-hidden|chrome-visible|chrome-tabs|element|steam) echo 600 ;;
     *) echo "" ;;
   esac
 }
@@ -282,6 +287,67 @@ chrome_subject() {
     screenshot after-notimer
     if [ "$CONTROL" = 1 ]; then pair steady-notimer "$STEADY"; else phase steady-notimer "$STEADY" ""; fi
   fi
+}
+
+# ---- the tab set (9.10 D126–D129) -------------------------------------------------------------------------------
+
+# tabs_hold <arm> <phase> <seconds> — the phase's edges, and a listing of Chrome's tree every TABS_EVERY seconds
+# through it, the last at its end
+tabs_hold() {
+  local arm="$1" ph="$2" end
+  edge "$arm.$ph" start
+  end=$(( $(date +%s) + $3 ))
+  while [ "$(date +%s)" -lt "$end" ]; do
+    pin_harness python3 "$HERE/tabs.py" list --arm "$arm" --phase "$ph" --t0 "$ARM_T0" --pattern "$PAT" >> "$OUT/tabs.tsv"
+    sleep "$TABS_EVERY"
+  done
+  pin_harness python3 "$HERE/tabs.py" list --arm "$arm" --phase "$ph" --t0 "$ARM_T0" --pattern "$PAT" >> "$OUT/tabs.tsv"
+  edge "$arm.$ph" end
+}
+
+# tabs_arm <off|on> — one launch in a fresh profile, through the phases renderer-hidden's values come from (D129):
+# launch settle, the grace, the steady phase. The tabs are background pages from the launch, as the hidden subject's.
+tabs_arm() {
+  local arm="$1" n0 i
+  if [ "$arm" = off ]; then LAUNCH="$LAUNCH_OFF"; else LAUNCH="$LAUNCH_ON"; fi
+  rec "tabs.$arm.launch" "$LAUNCH"
+  rm -rf /tmp/chrome-data
+  n0="$(grep -c 'GET /idle-page.html' /tmp/idle-page/httpd.log 2>/dev/null)"
+  ARM_T0="$(date +%s%9N)"
+  launch_app
+  rec "tabs.$arm.affinity" "$(taskset -p "$APP_PID" 2>/dev/null | sed 's/.*: //' || echo unknown)"
+  WID=$(wait_window "$CLASS" 120)
+  [ -n "$WID" ] || { screenshot "no-window-$arm"; stop_recorded no-window "no browser window after 120 s ($arm)"; }
+  tabs_hold "$arm" launch-settle "$LAUNCH_SETTLE"
+  screenshot "after-launch-settle-$arm"
+  check_tree "chrome-tree-$arm"
+  # one request for the page per tab: each tab loaded its page (D129)
+  rec "tabs.$arm.page_loads" "$(( $(grep -c 'GET /idle-page.html' /tmp/idle-page/httpd.log 2>/dev/null) - n0 ))"
+  edge "$arm.backgrounded" mark
+  tabs_hold "$arm" grace "$GRACE_S"
+  tabs_hold "$arm" steady "$STEADY"
+  screenshot "after-steady-$arm"
+  # every renderer's whole command line, which the listing reduces to its role
+  for r in $(pgrep -f -- "--type=renderer" 2>/dev/null); do
+    printf '%s\t%s\t%s\n' "$arm" "$r" "$(tr '\0' ' ' < "/proc/$r/cmdline" 2>/dev/null)" >> "$OUT/renderers.tsv"
+  done
+  kill -- "-$APP_PID" 2>/dev/null
+  for i in $(seq 1 30); do pgrep -f -- "$PAT" > /dev/null || break; sleep 1; done
+  pkill -9 -f -- "$PAT" 2>/dev/null
+  rec "tabs.$arm.exit_s" "$i"
+}
+
+tabs_subject() {
+  export MEAS_ORIGINS="$TAB_ORIGINS" MEAS_TIMER_MS="$TIMER_MS" MEAS_PAGE_PORT="$PAGE_PORT"
+  appdef "$APP" || exit 0
+  rec rx "$RX"; rec pat "$PAT"; rec tabs.tabs "$((TAB_ORIGINS + 1))"; rec tabs.every_s "$TABS_EVERY"
+  # D128: the order alternates — odd repeats the spare off first, even repeats the spare on first
+  local arms
+  if [ $((REPEAT % 2)) -eq 1 ]; then arms="off on"; else arms="on off"; fi
+  rec tabs.order "$arms"
+  for arm in $arms; do tabs_arm "$arm"; done
+  cp /tmp/idle-page/httpd.log "$OUT/httpd.log" 2>/dev/null
+  python3 "$HERE/tabs.py" summary "$OUT" >> "$KV"
 }
 
 # ---- the chat client -----------------------------------------------------------------------------------------
@@ -558,6 +624,7 @@ start_xvfb
 
 case "$APP" in
   chrome-hidden|chrome-visible) chrome_subject ;;
+  chrome-tabs) tabs_subject ;;
   element)
     element_setup
     if [ "$CONTROL" = 1 ]; then pair idle "$STEADY"     # decision 3: the traffic phase is carried by no archetype

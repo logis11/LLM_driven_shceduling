@@ -267,6 +267,18 @@ def validity(family, dirs, entry):
                 info.append("long-phase probe, never a repeat")
             if r.get("page.server") not in (None, "200"):
                 notes.append(f"page server answered {r.get('page.server')}")
+            if r.get("app") == "chrome-tabs":   # 9.10 D128, D129: both launches, every tab loaded, one count held
+                tabs = r.get("tabs.tabs")
+                for arm in ("off", "on"):
+                    if r.get(f"tabs.{arm}.page_loads") != tabs:
+                        notes.append(f"spare {arm}: {r.get(f'tabs.{arm}.page_loads')} page loads for {tabs} tabs")
+                    if r.get(f"tabs.{arm}.steady.plain_min") is None:
+                        notes.append(f"spare {arm}: no steady phase listed")
+                    elif r.get(f"tabs.{arm}.steady.plain_min") != r.get(f"tabs.{arm}.steady.plain_max"):
+                        info.append(f"spare {arm}: the steady phase's plain renderers moved "
+                                    f"{r.get(f'tabs.{arm}.steady.plain_min')}–{r.get(f'tabs.{arm}.steady.plain_max')}")
+                    if r.get(f"tabs.{arm}.steady.plain_pids_stable") not in (None, "1"):
+                        info.append(f"spare {arm}: the steady phase's plain renderers changed pids")
             if r.get("app") == "element" and r.get("matrix.sync_rows") in (None, "0"):
                 notes.append("no /sync reached the homeserver — the client was not signed in")
             # every repeat of one subject must have run at one N, or the pool is not a pool. A probe is never a

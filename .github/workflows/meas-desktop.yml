@@ -9,6 +9,10 @@ name: meas-desktop
 # different phase lengths is not a pool (D13). Registry tag meas-ci:desktop:<launch date of the first batch>
 # (9.5 D27). One artifact per (subject, repeat).
 #
+# 9.10 adds the subject `chrome-tabs` (9.10 changelog D126–D129; method
+# _dev/research/jioh/task-9.10-scenarios-timelines/campaign/chrome-tabs/method.md): Chrome's renderers counted for
+# five tabs, the spare renderer off and on, with no perf.
+#
 # The long-phase probe is mode `probe` of this family rather than a run of meas-long-probe.yml, so that this
 # slice's parameters do not enter a trigger file 9.5 is launching thunderbird-send probes from (D13). A probe is
 # never a repeat, and desktop/pool.py refuses to pool its artifacts.
