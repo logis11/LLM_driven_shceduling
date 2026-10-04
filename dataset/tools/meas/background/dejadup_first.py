@@ -24,7 +24,7 @@ import time
 from kdenlive_export import centre, geometry, ocr_words, pids_named, stamp, xdo
 
 PROGRAM = "deja-dup"          # the window is found by its process: the assistant retitles it per page (Assistant.vala:204–209)
-CAP_S = 4 * 3600
+CAP_S = int(os.environ.get("DD_CAP_S", 4 * 3600))   # run.sh: 20 min on the 100 MB subset
 
 
 def dd_window(secs):
@@ -84,6 +84,9 @@ def main():
         rec["notes"].append("no deja-dup window within 180 s")
         done(2)
     rec["steps"]["window"] = stamp()
+    rec["windows"] = [{"wid": w_, "name": xdo("getwindowname", w_).stdout.strip(), "geometry": geometry(w_)}
+                      for p in pids_named(PROGRAM) for w_ in xdo("search", "--onlyvisible", "--pid", str(p)).stdout.split()]
+    subprocess.run(["import", "-window", "root", os.path.join(out, "first.root0.png")], capture_output=True)
     x, y, w, h = geometry(wid)
     xdo("mousemove", str(x + w // 2), str(y + h // 2))
     xdo("windowfocus", wid)
@@ -128,6 +131,7 @@ def main():
         page["kind"] = "waiting"
         time.sleep(2.0)
     if not filled:
+        subprocess.run(["import", "-window", "root", os.path.join(out, "first.root-nopassword.png")], capture_output=True)
         rec["notes"].append("no password page among the assistant's pages")
         done(3)
     rec["steps"]["backing_up"] = stamp()

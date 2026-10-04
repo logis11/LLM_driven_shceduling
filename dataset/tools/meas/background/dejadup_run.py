@@ -20,7 +20,7 @@ import time
 
 PROGRAM = "deja-dup"
 APPEAR_S = 900
-CAP_S = 4 * 3600
+CAP_S = int(os.environ.get("DD_CAP_S", 4 * 3600))   # run.sh: 20 min on the 100 MB subset
 
 
 def stamp():
@@ -84,6 +84,7 @@ def main():
     rec["steps"]["gone"] = stamp()
     if os.path.exists(f"/proc/{pid}"):
         rec["notes"].append(f"{PROGRAM} still running after {CAP_S} s")
+        subprocess.run(["import", "-window", "root", os.path.join(out, "run.cap.png")], capture_output=True)
         done(3)
     done(0)
 

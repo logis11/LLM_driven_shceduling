@@ -1225,12 +1225,14 @@ DD_H="/home/$TRK_USER"; DD_MEDIA="/media/$TRK_USER/Backup"; DD_IMG_GIB=40
 DD_FOLDER="$DD_MEDIA/\$HOSTNAME"   # the drive backend's default folder, '$HOSTNAME', under the drive (D114)
 DD_PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 export DD_KEYRING_PW=meas-9.10-keyring DD_BACKUP_PW=meas-9.10-backup   # design (D117)
-dd_session_cmd() {   # dd_session_cmd <root> <cpus> <mode>: DD_CMD, the session script as the user under a session bus
-  # of its own, on <cpus>, with 9.5's display and the runtime directory a login session has
-  DD_CMD=(sudo taskset -c "$2" chroot "$1" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" --init-groups /usr/bin/env -i -C "$DD_H"
+[ "$DD_SET" = 100mb ] && export DD_CAP_S=1200   # the drivers' wait for deja-dup's exit: 20 min on the subset, else 4 h
+dd_session_cmd() {   # dd_session_cmd <root> <cpus> <mode> [VAR=value ...]: DD_CMD, the session script as the user under a
+  # session bus of its own, on <cpus>, with 9.5's display and the runtime directory a login session has
+  local r="$1" cpus="$2" mode="$3"; shift 3
+  DD_CMD=(sudo taskset -c "$cpus" chroot "$r" setpriv --reuid="$TRK_UID" --regid="$TRK_UID" --init-groups /usr/bin/env -i -C "$DD_H"
     HOME="$DD_H" USER="$TRK_USER" LOGNAME="$TRK_USER" PATH="$DD_PATH" LANG=en_US.UTF-8 DISPLAY=:99
-    XDG_RUNTIME_DIR="/run/user/$TRK_UID" DD_KEYRING_PW="$DD_KEYRING_PW" DD_FOLDER="$DD_FOLDER"
-    dbus-run-session -- /bin/bash /usr/local/lib/meas-dejadup-session.sh "$3" /var/tmp/meas)
+    XDG_RUNTIME_DIR="/run/user/$TRK_UID" DD_KEYRING_PW="$DD_KEYRING_PW" DD_FOLDER="$DD_FOLDER" "$@"
+    dbus-run-session -- /bin/bash /usr/local/lib/meas-dejadup-session.sh "$mode" /var/tmp/meas)
 }
 dd_take() {   # dd_take <root>: the session's records out of the chroot
   sudo cp "$1/var/tmp/meas/"* "$OUT/" 2>/dev/null; sudo chown "$(id -u):$(id -g)" "$OUT"/* 2>/dev/null; true
@@ -1295,12 +1297,15 @@ dd_drive_files() {   # dd_drive_files <label>: the files on the drive, their siz
   rec "dejadup.drive.$1.volumes" "$(grep -c '\.difftar' "$OUT/dejadup.drive.$1.tsv")"
 }
 dd_first() {   # dd_first <root>: the first backup through Déjà Dup's assistant, on the harness CPUs (D118)
-  local r="$1" spid t0
-  dd_session_cmd "$r" "$MEAS_HARNESS_CPUS" first
+  local r="$1" spid t0 drc
+  # GTK 4's own renderer leaves the assistant's window black to a screenshot under Xvfb (dry run #176); the first
+  # backup's session, which is not measured, draws with cairo so the driver can read the window
+  dd_session_cmd "$r" "$MEAS_HARNESS_CPUS" first GSK_RENDERER=cairo
   t0=$(date +%s)
   setsid "${DD_CMD[@]}" > "$OUT/dejadup.first.session.log" 2>&1 &
   spid=$!
-  pin_harness python3 "$HERE/dejadup_first.py" "$OUT" > "$OUT/dejadup.first.driver.log" 2>&1; rec dejadup.first.driver.rc "$?"
+  pin_harness python3 "$HERE/dejadup_first.py" "$OUT" > "$OUT/dejadup.first.driver.log" 2>&1; drc=$?; rec dejadup.first.driver.rc "$drc"
+  if [ "$drc" != 0 ]; then screenshot dejadup-first-failed; dd_stop "$r" first-failed; fi   # the assistant left open: the session stopped
   wait "$spid"; rec dejadup.first.session.rc "$?"
   rec dejadup.first.wall_s "$(( $(date +%s) - t0 ))"
   dd_take "$r"
