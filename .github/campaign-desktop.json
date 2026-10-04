@@ -1,19 +1,17 @@
 {
   "note": "Trigger for meas-desktop.yml (9.8 campaign). Dispatch is unavailable off the default branch, so a push that changes this file starts the runs it names. Set apps to [] to skip; repeats is one list for every subject or a map subject -> list. Subjects: chrome-hidden | chrome-visible | element | steam (9.8); chrome-tabs (9.10 D126\u2013D129); launch-soffice | launch-thunderbird-send | launch-kdenlive | launch-mpv-video | launch-mpv-audio | launch-chrome | launch-chrome-hidden | launch-webrtc | launch-element | launch-steam (9.10 D132\u2013D135). mode: dry | probe | full \u2014 probe is the long-phase probe and is never a repeat. These five keys are the whole trigger by D13: N, the timer period, the grace, the phase lengths, the homeserver and the traffic rate are constants in dataset/tools/meas/desktop/run.sh, because a pool whose repeats ran at different settings is not a pool. A dry run sets cpu_model to \"\" so machine_gate opens on any model: it verifies the tooling, is never pooled and is not a repeat, so it has no reason to hold the campaign's machine.",
   "mode": "full",
-  "attempt": 86,
+  "attempt": 87,
   "cpu_model": "EPYC 7763",
   "apps": [
-    "launch-chrome",
     "launch-steam"
   ],
   "repeats": {
-    "launch-chrome": [
-      2,
-      3
-    ],
     "launch-steam": [
-      1
+      2,
+      3,
+      4,
+      5
     ]
   }
 }
