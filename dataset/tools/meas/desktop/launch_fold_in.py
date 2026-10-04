@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """Write the launch phases' streams from the pooled landings (9.10 changelog D133, D136–D138).
 
-launch_fold_in.py <artifacts-root> --source <tag> [--cpu-model "EPYC 7763"] [--out dataset/launch] [--check]
+launch_fold_in.py <artifacts-root> --source <tag> [--cpu-model "EPYC 7763"] [--out dataset/launch]
+                  [--library dataset/archetypes.yaml] [--check]
 
 For each launch subject's entry, dataset/launch/launch-<entry>.json.gz: per pooled repeat, the run id, the phase's
 length and its streams — the whole tree's, or for `renderer-hidden` each measured renderer's (D133) — each wake
 [t_us from the phase's start, run_us, thread] with the thread an index into the repeat's comm list. Every same-machine
 repeat obtained is pooled (pool.py's find_runs). The file is written byte-stable (gzip without a timestamp, sorted
-keys), so --check exits 1 when a file differs from what the landings give.
+keys), so --check exits 1 when a file differs from what the landings give. Each entry's params gain, as their first
+param, `launch: {stream: launch-<entry>, sampling: per-task, source: <tag>}` — the line rewritten in place if present;
+nothing else in the library is touched.
 """
 
 import argparse
@@ -66,6 +69,21 @@ def build(root, source, cpu_model):
     return out
 
 
+def library_text(text, docs, source):
+    """The library with each entry's `launch` param (D136): inserted after its `params:` line, or rewritten."""
+    lines = text.split("\n")
+    for name, doc in sorted(docs.items()):
+        head = f"  {doc['entry']}:"
+        i = lines.index(head)
+        j = next(n for n in range(i + 1, len(lines)) if lines[n] == "    params:")
+        param = [f"      launch:", f"        {{stream: {name}, sampling: per-task, source: \"{source}\"}}"]
+        if lines[j + 1] == "      launch:":
+            lines[j + 1:j + 3] = param
+        else:
+            lines[j + 1:j + 1] = param
+    return "\n".join(lines)
+
+
 def encode(doc):
     raw = (json.dumps(doc, sort_keys=True, separators=(",", ":")) + "\n").encode()
     buf = io.BytesIO()
@@ -80,6 +98,7 @@ def main():
     ap.add_argument("--source", required=True)
     ap.add_argument("--cpu-model", default="EPYC 7763")
     ap.add_argument("--out", default=os.path.join(os.path.dirname(TOOLS), "launch"))
+    ap.add_argument("--library", default=os.path.join(os.path.dirname(TOOLS), "archetypes.yaml"))
     ap.add_argument("--check", action="store_true")
     a = ap.parse_args()
     docs = build(a.root, a.source, a.cpu_model)
@@ -98,6 +117,14 @@ def main():
                 differ.append(name)
         else:
             open(path, "wb").write(data)
+    text = open(a.library).read()
+    new = library_text(text, docs, a.source)
+    if new != text:
+        print(f"{a.library}: launch params {'differ' if a.check else 'written'}")
+        if a.check:
+            differ.append("archetypes.yaml")
+        else:
+            open(a.library, "w").write(new)
     if a.check and differ:
         raise SystemExit(f"differ from the landings: {', '.join(differ)}")
 
