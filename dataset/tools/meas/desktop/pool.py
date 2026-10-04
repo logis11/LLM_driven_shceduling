@@ -399,7 +399,8 @@ def comparisons(app, entry):
 
 
 def render(out):
-    L = [f"# 9.8 desktop campaign — pooled results ({out.get('tag') or 'untagged'})", "",
+    what = ("9.10 Chrome tab-set campaign" if set(out["runs"]) == {"chrome-tabs"} else "9.8 desktop campaign")
+    L = [f"# {what} — pooled results ({out.get('tag') or 'untagged'})", "",
          f"Machine: {out.get('machine')}. Repeats pooled per subject; `probe` jobs are never repeats.", ""]
     for app, e in sorted(out["runs"].items()):
         if app == "chrome-tabs":

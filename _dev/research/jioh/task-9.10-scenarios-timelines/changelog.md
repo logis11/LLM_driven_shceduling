@@ -2367,3 +2367,53 @@ Taken under 인지오's delegation (2026-10-04), on D15, D16, 9.8 D12–D15 and 
 - **The job** is a new subject of the desktop family, `chrome-tabs`; tag `meas-ci:desktop:<launch date>`.
 
 No file changed yet.
+
+## D130 — the Chrome tab-set campaign's raw records are release `meas-ci-desktop-2026-10-04` (2026-10-04)
+
+By 인지오's decision (Q16), the method's §7. The release is created at the fold-in commit. It holds:
+
+- the 5 landings (runs #74 and #76), all pooled;
+- the dry runs #72, whose listing read every process as the browser, its `renderers.tsv` holding the by-hand count, and #73, the tooling holding;
+- the reports of the 4 jobs the machine gate stopped, in `gated-reports.zip`.
+
+The archives hold Chrome's process listings and whole command lines, the page server's log of loopback requests, Xvfb screenshots of the local page, the runner spec and the report keys. No account, network capture or user data.
+
+No file changed yet.
+
+## D131 — the Chrome tab-set campaign holds at 5 repeats; the ten Chrome files carry four `renderer-hidden` tasks (2026-10-04)
+
+D129's rule: the count is carried as observed, and it holds when every repeat gives one count. Over repeats 1–5 (runs #74 and #76; the AMD EPYC 7763; Google Chrome 154.0.8037.57), every spare-off launch held five page renderers and every spare-on launch six, each one pid set from the launch's first listing, 0.6–9.0 s after the launch, to the steady phase's end. `renderer-hidden` 4 and the spare 1 in all five repeats. The count holds at the workflow's five, and no repeat was added (method §8; `measurement-campaign-record.md`, "9.10 — Chrome's renderer count for five tabs").
+
+Reported beside it, Chrome's own renderers, which stay `web-browser`'s (D127):
+
+- one WebUI renderer in every listing;
+- four extension renderers in each launch's first 12 s, two at a time, gone by 22–40 s after the launch;
+- the exceptions: one extension renderer in the spare-on launch of repeat 3 and one in the spare-off launch of repeat 4, started 10.7 s after the launch and alive at the steady phase's end. 9.5's `web-browser` run recorded the WebUI renderer and the spare and no extension renderer (9.5 D84).
+
+Applied:
+
+- `count: 4` in `c1-browsing` (11 before), `c1-office` (7), `c3-workday` (7), `c3-evening` (9) and `c4.variant.yaml`'s `c4-compile` injection (5), each file's header naming the count's sources, `glam` and `meas-ci:desktop:2026-10-04`;
+- the derived `c4-compile`, `c4-office`, `c6-fold`, `c6-spoof`, `c7-browsing` and `c7-office` re-derived;
+- `glam` minted in `docs/references.md`, under 인지오's delegation on `steam-download-stats`'s precedent: a vendor's published statistics behind a value, in the deployed-system section under a project-name id. No `dataset/sources.yaml` entry: the timelines' bound values have no source field until 9.13 adds it (D32);
+- the desktop pool's report titled for this campaign when it pools `chrome-tabs` alone.
+
+The dataset was recompiled (`compile.py --allow-window`). 20 of 100 artifacts change beyond the library's hash: the ten files in both modes, each now holding four renderer tasks. A throttled hidden tab's renderer costs little, and demand moves at the manifest's four decimals in two files:
+
+| file | demand before | after | class |
+|---|---|---|---|
+| `c3-workday` | 4.6555 | 4.6554 | oversubscribed |
+| `c6-fold` | 0.1350 | 0.1349 | calibration |
+
+The other eight hold their four decimals: `c1-browsing` 0.0164, `c1-office` 0.0270, `c3-evening` 0.4213 native and 0.8766 single, `c4-compile` 0.8818, `c4-office` 0.1270, `c6-spoof` 0.5164, `c7-browsing` 1.0176, `c7-office` 1.0255.
+
+Lint reports the seven demand-window files it reported before, and nothing else: `c2-p1a`, `c2-p1b`, `c2-p3a`, `c2-p3b`, `c3-creation`, `c3-evening` (0.88) and `c3-workday` (4.66). `batch_fold_in.py --check` passes. Tests: 394 passed, 1 skipped, 1 xfailed, the desktop tests adding the `chrome-tabs` subject's launches, tab set, listing, summary and pool.
+
+Hands to 9.14: the ten files' compiled artifacts and the two demand moves (D15's "every Chrome file's demand moves").
+
+Hands to 9.15:
+- D15's: `building-plan.md` §3's browser-default paragraph; `data-contracts.md:159` ("one per tab group"); the `chang-chi21`, `dubroy-chi10` and `mozilla-testpilot10` role lines;
+- D126's stated floor, wherever the docs state the renderer count: a real page's cross-site iframes take renderers this count leaves out.
+
+Hands to 9.13: the count's source tags, `glam` and `meas-ci:desktop:2026-10-04`, when D32's field exists.
+
+Commit: this entry.

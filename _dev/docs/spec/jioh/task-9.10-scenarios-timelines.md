@@ -43,7 +43,7 @@ Each batch job runs its measured whole at the input its decision fixed, and file
 
 ### 6. The browser
 
-The tab count is Firefox's Linux telemetry median per-client peak, 4.67, so five tabs, with the renderer count observed on the runner for that tab set (D15). A file shows one browser window: `renderer-visible` has left the files and the library (D16).
+The tab count is Firefox's Linux telemetry median per-client peak, 4.67, so five tabs, with the renderer count observed on the runner for that tab set (D15). A file shows one browser window: `renderer-visible` has left the files and the library (D16). The five tabs are five loopback addresses serving 9.8's idle page, the first the page in use, the others background tabs of that window (D126, D129). A file carries one `renderer-hidden` task for each page renderer beyond the page in use; the spare and Chrome's WebUI and extension renderers stay in `web-browser` (D127). Each job runs Chrome twice in fresh profiles, the spare off and on (D128), on the runner image's Google Chrome, its tree listed every 10 s through the phases `renderer-hidden`'s values come from (D129). The campaign, `meas-ci:desktop:2026-10-04`, holds at 5 repeats, 4 page renderers beyond the page in use and 1 spare in every one, its records release `meas-ci-desktop-2026-10-04` (D130); the ten Chrome files carry four `renderer-hidden` tasks each (D131).
 
 ### 7. Games
 
@@ -78,7 +78,6 @@ A timeline's bound values carry a source tag or a design label, checked by the l
 
 Each flagged open in its decision, for the campaign's method or the rebinding:
 
-- **D15, the renderers:** the sites, the window, and when the processes are counted.
 - **D21, the launch phases:** the applications, cold or warm launch, and the launch phase's form.
 - **The download's size** in `c2-p2a`: not among D17's jobs; design at scope-card item 56 until decided (D42).
 - **At rebinding:** each file's length set by its jobs (D17); the new names' observed `comm`s (D25) and tiers (D27); the source tags (D32); the registry entries minted (D34).

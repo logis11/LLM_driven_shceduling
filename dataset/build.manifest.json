@@ -1,7 +1,7 @@
 {
   "artifacts": {
     "coreset-native/c1-backup.workload.json": "7b5b987096cd5713288c23ed464e9f5b3f59f08e43351ca2e9678400f89ab8c5",
-    "coreset-native/c1-browsing.workload.json": "f582493c89a795251885a16fc07c27d338f0d8f9b772ecfac44f414bc3c5e6f3",
+    "coreset-native/c1-browsing.workload.json": "82b1284cac6acde11c56ab928b266f6a573d7aee9066e40cdc74034094f2ac85",
     "coreset-native/c1-compile.workload.json": "48866b5ae1eb7f2400a00c1895b96aa447071af36bd5b5120028a525a57ed47d",
     "coreset-native/c1-dev.workload.json": "9f81ea17f805fe3aa4ad8d715e387a2b3c931caa35919a39ebaf899a76e0e8a4",
     "coreset-native/c1-gaming.workload.json": "e79307db6665d01ef200e5251237074909bf98e050f4eb0502e09fa770f0cf7b",
@@ -11,7 +11,7 @@
     "coreset-native/c1-media.workload.json": "54ab2aeb5e963f8f2ae4fe648aa9c465f85477eefa769bb2999811156d8b9e38",
     "coreset-native/c1-meeting.workload.json": "049b36b9ec576a0c8cf1d9f933abc12aefdd50089fbb4f00bdd08c11f50a27e5",
     "coreset-native/c1-ml-train.workload.json": "b91bd4bb7cf511e7681eff674b1057fc589a96267f414a81b5e519d6beb830fd",
-    "coreset-native/c1-office.workload.json": "b90a5467cda4670f0b6f0662d6da363bfd6243cb901541bb026ed7c8155295db",
+    "coreset-native/c1-office.workload.json": "d49757c8e117bd1c66773e8180e097c37d30e2d6d3b7134e5abd88df31798412",
     "coreset-native/c1-photo.workload.json": "993c79210889785ec1424ddb3485a8aa329b2e00897489c9e653a3b55ad7e892",
     "coreset-native/c1-render.workload.json": "884e128f7b6a2e41923c05174d60178489e2f99785fa9c8393fbe4a926814684",
     "coreset-native/c1-transcode.workload.json": "74fa78b9be33b5d9aa57146997fac7c7ac188ed46199ece220177ac0b99d1bbe",
@@ -23,19 +23,19 @@
     "coreset-native/c2-p3a.workload.json": "f084a5f13ed3ab054f2fbb28560514af4f495a8c436885d09a4888d3a5e1eb6d",
     "coreset-native/c2-p3b.workload.json": "997d1d3e92c2341f60922caf76e448d57f7b716eb4bd3f9c801d68a8e3e32d1e",
     "coreset-native/c3-creation.workload.json": "efd10a99ceec4c94d2eb82d2bf7f891211ead15a137419b7b421c442b90ca7ca",
-    "coreset-native/c3-evening.workload.json": "1b6a92c0dca30921e444cb289d4c217b44936bc2f0f0de1cbe35437184559b14",
-    "coreset-native/c3-workday.workload.json": "168a5a893d8c791bf4c148d26492387cd6117d3295739ce9d63bc32095ec5b28",
-    "coreset-native/c4-compile.workload.json": "34f1cf6bca393bec1c33c47f5826e376331d77c7c8391ee5f616c6c65d26c40c",
+    "coreset-native/c3-evening.workload.json": "e2e99b28ca9488e542d1ffb0f1e8df31eb9a826bc8555e3323ce6b7905897e5f",
+    "coreset-native/c3-workday.workload.json": "9b490b98952693daa86f3dee3732d27ba16ccb337ee1f4cd8e2ed4d5f55cd2a7",
+    "coreset-native/c4-compile.workload.json": "cd35d0e56087915a34a77bcf0fd0b8f3abf35d78fe5d935bca2daa883f9e1ce8",
     "coreset-native/c4-gaming.workload.json": "8cff6968de919fc36fa9c87696c26bc7a4cf772e7a8a69210765dd1d0137d7b2",
-    "coreset-native/c4-office.workload.json": "0cfdce912b968bfad41ba419777d1e0b2157e5e5df4da3b32f4c2fda660576b4",
+    "coreset-native/c4-office.workload.json": "ec090e436cdc2ce2b08d7030d5a53801b85d60d9da8660c13880c40a279b9087",
     "coreset-native/c5-t3.workload.json": "87bcf8d8ad50cdfaf3b623712436bb2ebd7ef73ba3c74031cd06128922028b48",
     "coreset-native/c5-t4.workload.json": "49973c947dfa4f5eaef2791a780ce7ddedeea33e33dc1ac051e509d4d7a7f17c",
     "coreset-native/c5-t5.workload.json": "7ec27e72df5be850d53de22ec588e9c21485cbf9bec7ad34bcb6ad763f3e8bdc",
     "coreset-native/c6-dual.workload.json": "377a6a35e1d8e9668d3db7f9e65dad34af111f4a77edc2ffe5e5f63ed92e5a68",
-    "coreset-native/c6-fold.workload.json": "6bfb95d77680a7b71784528f5c66153a1a81b02041d85e2c13f8b347e8527c47",
-    "coreset-native/c6-spoof.workload.json": "a0e9f139a6467006544f4e6aa8a3668f417010fcaeb381aef847e07e87b483e1",
+    "coreset-native/c6-fold.workload.json": "ab61a5c379c48c2299b1eea049d961b41ebe50cabfc817eef7f22dbd56b7e8a9",
+    "coreset-native/c6-spoof.workload.json": "a8846063d6cdcd194d91424b2c24750ce3f411be71c7116ff996afee6cb5756d",
     "coreset-native/c7-backup.workload.json": "01512c99b5d940541aa8c62363cbcff2cc275910849ed519c0a64eb5b3494912",
-    "coreset-native/c7-browsing.workload.json": "30012ce2d12347a4473ef2100d370f92e808f291c827617f0d9355a50577e3aa",
+    "coreset-native/c7-browsing.workload.json": "a6dd5819c5eec9ef7ca70641d692bd45136406966298d82298704e0ed6443d32",
     "coreset-native/c7-compile.workload.json": "58fb7a534f667a2ca894f653fb35b011caf4e3565e87f2c19a4ede2b6e9454c9",
     "coreset-native/c7-dev.workload.json": "517ec4f693cec9efa01d18a002982fb2534e57fcd0d8c15ee4bf676f718d97d8",
     "coreset-native/c7-gaming.workload.json": "09fd7f2a5cdd4a165f588b7d9935c3638767cf685c006db951f981031562622e",
@@ -45,13 +45,13 @@
     "coreset-native/c7-media.workload.json": "355613f20d94d24ec3f83604beffc65dd4933c9c169f7626b2de4cb862bc5d94",
     "coreset-native/c7-meeting.workload.json": "aed5d6208df7645cf9e0379511e950d69644b055a4f8026c112c4283dfe395ea",
     "coreset-native/c7-ml-train.workload.json": "d8348f6200d15acadcf86767afa27cb3d4003d6938485a535cdffe8071a480ba",
-    "coreset-native/c7-office.workload.json": "21a53947df1f01ac8e1a5ccaa5eeba1c798121e355e858f4d83593b9e235073e",
+    "coreset-native/c7-office.workload.json": "a91796d65e3fb32db84457b9f8a0bcd3e043d2543fafdda2269aabf4a39d0719",
     "coreset-native/c7-photo.workload.json": "bdcce4f19b5204080257f4218a00e8de5d6dc3519c98e340319d016a2f29691f",
     "coreset-native/c7-render.workload.json": "52bd9f34d2f56503b9b01a443fed2982b781fa9e44d01cdf9f7e6ea7133de382",
     "coreset-native/c7-transcode.workload.json": "77e71e548d880d354d83707e49573ac686515a938ea883c9697666cb35a5c76e",
     "coreset-native/c7-video-edit.workload.json": "5849eaabeccd5577336bdcfbf97f8879f17201a855b8e93b91ec3b9cebdf33df",
     "coreset-single/c1-backup.workload.json": "7b5b987096cd5713288c23ed464e9f5b3f59f08e43351ca2e9678400f89ab8c5",
-    "coreset-single/c1-browsing.workload.json": "f582493c89a795251885a16fc07c27d338f0d8f9b772ecfac44f414bc3c5e6f3",
+    "coreset-single/c1-browsing.workload.json": "82b1284cac6acde11c56ab928b266f6a573d7aee9066e40cdc74034094f2ac85",
     "coreset-single/c1-compile.workload.json": "48866b5ae1eb7f2400a00c1895b96aa447071af36bd5b5120028a525a57ed47d",
     "coreset-single/c1-dev.workload.json": "9f81ea17f805fe3aa4ad8d715e387a2b3c931caa35919a39ebaf899a76e0e8a4",
     "coreset-single/c1-gaming.workload.json": "4671a37b1cc532d992f84fdbf81fa340642a00b9e80d21f4648ca3ff09fe8d7a",
@@ -61,7 +61,7 @@
     "coreset-single/c1-media.workload.json": "54ab2aeb5e963f8f2ae4fe648aa9c465f85477eefa769bb2999811156d8b9e38",
     "coreset-single/c1-meeting.workload.json": "049b36b9ec576a0c8cf1d9f933abc12aefdd50089fbb4f00bdd08c11f50a27e5",
     "coreset-single/c1-ml-train.workload.json": "b91bd4bb7cf511e7681eff674b1057fc589a96267f414a81b5e519d6beb830fd",
-    "coreset-single/c1-office.workload.json": "b90a5467cda4670f0b6f0662d6da363bfd6243cb901541bb026ed7c8155295db",
+    "coreset-single/c1-office.workload.json": "d49757c8e117bd1c66773e8180e097c37d30e2d6d3b7134e5abd88df31798412",
     "coreset-single/c1-photo.workload.json": "993c79210889785ec1424ddb3485a8aa329b2e00897489c9e653a3b55ad7e892",
     "coreset-single/c1-render.workload.json": "884e128f7b6a2e41923c05174d60178489e2f99785fa9c8393fbe4a926814684",
     "coreset-single/c1-transcode.workload.json": "74fa78b9be33b5d9aa57146997fac7c7ac188ed46199ece220177ac0b99d1bbe",
@@ -73,19 +73,19 @@
     "coreset-single/c2-p3a.workload.json": "f084a5f13ed3ab054f2fbb28560514af4f495a8c436885d09a4888d3a5e1eb6d",
     "coreset-single/c2-p3b.workload.json": "997d1d3e92c2341f60922caf76e448d57f7b716eb4bd3f9c801d68a8e3e32d1e",
     "coreset-single/c3-creation.workload.json": "efd10a99ceec4c94d2eb82d2bf7f891211ead15a137419b7b421c442b90ca7ca",
-    "coreset-single/c3-evening.workload.json": "17536482481737fe61f7a902ffffe88446537b674b9a30beb1c8caa1b8095ae0",
-    "coreset-single/c3-workday.workload.json": "168a5a893d8c791bf4c148d26492387cd6117d3295739ce9d63bc32095ec5b28",
-    "coreset-single/c4-compile.workload.json": "34f1cf6bca393bec1c33c47f5826e376331d77c7c8391ee5f616c6c65d26c40c",
+    "coreset-single/c3-evening.workload.json": "c72a14c664ffa96988c018b0675251a8a4022e5f7ccf2432710ef07b1ecb0f45",
+    "coreset-single/c3-workday.workload.json": "9b490b98952693daa86f3dee3732d27ba16ccb337ee1f4cd8e2ed4d5f55cd2a7",
+    "coreset-single/c4-compile.workload.json": "cd35d0e56087915a34a77bcf0fd0b8f3abf35d78fe5d935bca2daa883f9e1ce8",
     "coreset-single/c4-gaming.workload.json": "b57b5149395110e172d0dde348be1a5e0b167adf9e031a1af9340570ef7f7415",
-    "coreset-single/c4-office.workload.json": "0cfdce912b968bfad41ba419777d1e0b2157e5e5df4da3b32f4c2fda660576b4",
+    "coreset-single/c4-office.workload.json": "ec090e436cdc2ce2b08d7030d5a53801b85d60d9da8660c13880c40a279b9087",
     "coreset-single/c5-t3.workload.json": "87bcf8d8ad50cdfaf3b623712436bb2ebd7ef73ba3c74031cd06128922028b48",
     "coreset-single/c5-t4.workload.json": "49973c947dfa4f5eaef2791a780ce7ddedeea33e33dc1ac051e509d4d7a7f17c",
     "coreset-single/c5-t5.workload.json": "7ec27e72df5be850d53de22ec588e9c21485cbf9bec7ad34bcb6ad763f3e8bdc",
     "coreset-single/c6-dual.workload.json": "8abac34b7eede5e9575456323f5a3f65786933fc83b22f5068c48cd11fcf2e64",
-    "coreset-single/c6-fold.workload.json": "6bfb95d77680a7b71784528f5c66153a1a81b02041d85e2c13f8b347e8527c47",
-    "coreset-single/c6-spoof.workload.json": "a0e9f139a6467006544f4e6aa8a3668f417010fcaeb381aef847e07e87b483e1",
+    "coreset-single/c6-fold.workload.json": "ab61a5c379c48c2299b1eea049d961b41ebe50cabfc817eef7f22dbd56b7e8a9",
+    "coreset-single/c6-spoof.workload.json": "a8846063d6cdcd194d91424b2c24750ce3f411be71c7116ff996afee6cb5756d",
     "coreset-single/c7-backup.workload.json": "01512c99b5d940541aa8c62363cbcff2cc275910849ed519c0a64eb5b3494912",
-    "coreset-single/c7-browsing.workload.json": "30012ce2d12347a4473ef2100d370f92e808f291c827617f0d9355a50577e3aa",
+    "coreset-single/c7-browsing.workload.json": "a6dd5819c5eec9ef7ca70641d692bd45136406966298d82298704e0ed6443d32",
     "coreset-single/c7-compile.workload.json": "58fb7a534f667a2ca894f653fb35b011caf4e3565e87f2c19a4ede2b6e9454c9",
     "coreset-single/c7-dev.workload.json": "517ec4f693cec9efa01d18a002982fb2534e57fcd0d8c15ee4bf676f718d97d8",
     "coreset-single/c7-gaming.workload.json": "7510ed9c04cc8fd1e5d0477ebe1e9e8780667fd61d92ae081f0cd5bbd33718bb",
@@ -95,7 +95,7 @@
     "coreset-single/c7-media.workload.json": "355613f20d94d24ec3f83604beffc65dd4933c9c169f7626b2de4cb862bc5d94",
     "coreset-single/c7-meeting.workload.json": "aed5d6208df7645cf9e0379511e950d69644b055a4f8026c112c4283dfe395ea",
     "coreset-single/c7-ml-train.workload.json": "d8348f6200d15acadcf86767afa27cb3d4003d6938485a535cdffe8071a480ba",
-    "coreset-single/c7-office.workload.json": "21a53947df1f01ac8e1a5ccaa5eeba1c798121e355e858f4d83593b9e235073e",
+    "coreset-single/c7-office.workload.json": "a91796d65e3fb32db84457b9f8a0bcd3e043d2543fafdda2269aabf4a39d0719",
     "coreset-single/c7-photo.workload.json": "bdcce4f19b5204080257f4218a00e8de5d6dc3519c98e340319d016a2f29691f",
     "coreset-single/c7-render.workload.json": "52bd9f34d2f56503b9b01a443fed2982b781fa9e44d01cdf9f7e6ea7133de382",
     "coreset-single/c7-transcode.workload.json": "77e71e548d880d354d83707e49573ac686515a938ea883c9697666cb35a5c76e",
@@ -200,7 +200,7 @@
     },
     "coreset-native/c3-workday.workload.json": {
       "demand_class": "oversubscribed",
-      "utilization": 4.6555
+      "utilization": 4.6554
     },
     "coreset-native/c4-compile.workload.json": {
       "demand_class": "calibration",
@@ -232,7 +232,7 @@
     },
     "coreset-native/c6-fold.workload.json": {
       "demand_class": "calibration",
-      "utilization": 0.135
+      "utilization": 0.1349
     },
     "coreset-native/c6-spoof.workload.json": {
       "demand_class": "calibration",
@@ -400,7 +400,7 @@
     },
     "coreset-single/c3-workday.workload.json": {
       "demand_class": "oversubscribed",
-      "utilization": 4.6555
+      "utilization": 4.6554
     },
     "coreset-single/c4-compile.workload.json": {
       "demand_class": "calibration",
@@ -432,7 +432,7 @@
     },
     "coreset-single/c6-fold.workload.json": {
       "demand_class": "calibration",
-      "utilization": 0.135
+      "utilization": 0.1349
     },
     "coreset-single/c6-spoof.workload.json": {
       "demand_class": "calibration",

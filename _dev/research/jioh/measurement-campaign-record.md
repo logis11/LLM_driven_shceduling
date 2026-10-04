@@ -1,6 +1,6 @@
 # Measured values — campaign record
 
-Every campaign behind a measured archetype value: per archetype the repeats, the values the rule covers, the widest margin among them, why it stopped, and the machine draws it took. Method: `measurement-campaign-workflow.md`. Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10` (`upgrade`: `--since 100`; `soffice`: `--since 38`; `chrome`: `--since 438 --exclude 16@35712250969`; `code`: `--since 566 --exclude 42@36126168885`; `thunderbird-send`: `--since 150 --exclude 29`, its keys-only campaign `--since 604`; the `desktop` family: `--since 21`; the `session` family: `--since 16 -- --tag meas-ci:session:2026-09-24`); job counts are the campaign runs' jobs, read from their job lists. Recorded 2026-09-20, the 9.8 rows 2026-09-22, the 9.9 rows 2026-09-24, the three re-measured 9.5 rows 2026-09-24, `mail-client`'s keys-only row 2026-09-27, `code-editor`'s row re-read with its idle phase from 200 s 2026-09-28 (9.5 D83), `web-browser`'s with its renderers the same day (9.5 D84), `mail-client`'s two with each Gecko pool's shortened spelling folded into the pool and the 04:00 `glean.mps` run out of the idle residual the same day (9.5 D90, D91), `code-editor`'s stop re-read against the Word recording's 57 windows 2026-09-29 (9.5 D99); the 9.5 rows were first recorded a day earlier against one headline median per archetype, which D29 and D30 replaced. Every gap mean and wake rate re-read on 2026-09-24 under 9.5 D71 (gaps over merged wake times, wrapped round the span; rates from exact counts); the 9.8 renderer residuals re-classed as sparse components on 2026-09-25 (9.8 D27); the 9.9 pool rebuilt the same day with sysstat's jobs outside and two sparse components (9.9 D32, D33); every table's mean re-read on 2026-09-26 as the table carries it, count-weighted over the repeats (9.5 D78).
+Every campaign behind a measured archetype value: per archetype the repeats, the values the rule covers, the widest margin among them, why it stopped, and the machine draws it took. Method: `measurement-campaign-workflow.md`. Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10` (`upgrade`: `--since 100`; `soffice`: `--since 38`; `chrome`: `--since 438 --exclude 16@35712250969`; `code`: `--since 566 --exclude 42@36126168885`; `thunderbird-send`: `--since 150 --exclude 29`, its keys-only campaign `--since 604`; the `desktop` family: `--since 21`, its `chrome-tabs`: `--since 74`; the `session` family: `--since 16 -- --tag meas-ci:session:2026-09-24`); job counts are the campaign runs' jobs, read from their job lists. Recorded 2026-09-20, the 9.8 rows 2026-09-22, the 9.9 rows 2026-09-24, the three re-measured 9.5 rows 2026-09-24, `mail-client`'s keys-only row 2026-09-27, `code-editor`'s row re-read with its idle phase from 200 s 2026-09-28 (9.5 D83), `web-browser`'s with its renderers the same day (9.5 D84), `mail-client`'s two with each Gecko pool's shortened spelling folded into the pool and the 04:00 `glean.mps` run out of the idle residual the same day (9.5 D90, D91), `code-editor`'s stop re-read against the Word recording's 57 windows 2026-09-29 (9.5 D99); the 9.5 rows were first recorded a day earlier against one headline median per archetype, which D29 and D30 replaced. Every gap mean and wake rate re-read on 2026-09-24 under 9.5 D71 (gaps over merged wake times, wrapped round the span; rates from exact counts); the 9.8 renderer residuals re-classed as sparse components on 2026-09-25 (9.8 D27); the 9.9 pool rebuilt the same day with sysstat's jobs outside and two sparse components (9.9 D32, D33); every table's mean re-read on 2026-09-26 as the table carries it, count-weighted over the repeats (9.5 D78).
 
 ## Campaigns
 
@@ -420,6 +420,28 @@ Before the campaign, eight dry runs, four on the EPYC 7763: #176 and #177, whose
 
 Pooled in `task-9.10-scenarios-timelines/campaign/dejadup/results/` (`pooled.json`, `results.md`).
 
+## 9.10 — Chrome's renderer count for five tabs (`renderer-hidden`'s count in the Chrome files)
+
+Repeats 1–5 on the AMD EPYC 7763, each landing once, all valid. Google Chrome 154.0.8037.57 as the runner image ships it, one window of five tabs at five loopback addresses serving 9.8's idle page, the first selected (9.10 D126, D129); two launches per job in fresh profiles, the spare renderer off and on, their order alternating (D128); Chrome's tree listed every 10 s through a 20 s launch settle, the 630 s grace and the 600 s steady phase, no `perf`. The method's checks: both launches run with a window; five page loads in each launch; the measured tree holding no harness process; each launch's steady phase listed.
+
+9 jobs: 5 landed, 4 stopped by the machine gate.
+
+A count is not on the stability rule's list; it is carried as observed, and the count holds when every repeat gives one (D129).
+
+| value | landings | observed | stopped by |
+|---|---|---|---|
+| `renderer-hidden` tasks: page renderers beyond the page in use, the spare off, the steady phase (D127) | 5 | 4 in every repeat | one count in every repeat, at the workflow's five |
+| the spare: the spare-on launch's plain renderers beyond the spare-off launch's (D128) | 5 | 1 in every repeat | as above |
+
+Reported beside them:
+
+- **The plain renderers** held their count from each launch's first listing, 0.6–9.0 s after the launch, to the steady phase's end, one pid set through the steady phase: five with the spare off, six with it on.
+- **Chrome's own renderers.** One WebUI renderer in every listing. Four extension renderers in each launch's first 12 s, two at a time, gone by 22–40 s after the launch, except one in the spare-on launch of repeat 3 and one in the spare-off launch of repeat 4, started 10.7 s after the launch and alive at the steady phase's end. Both kinds are `web-browser`'s (9.5 D84; 9.10 D127).
+
+Before the campaign, two dry runs: #72, whose listing read every process as the browser, Chrome rewriting its children's process titles; #73 on the EPYC 7763, the tooling holding.
+
+Pooled in `task-9.10-scenarios-timelines/campaign/chrome-tabs/results/` (`pooled.json`, `results.md`).
+
 ## Machine draws
 
 The build campaign, complete: 28 jobs, 14 on the AMD EPYC 7763 (50.0 %), 12 stopped by the machine gate — Intel Xeon Platinum 8573C 4, AMD EPYC 9V74 4, AMD EPYC 9V45 2, Intel Xeon Platinum 8370C 1, Intel Xeon 6973P-C 1 — and 2 cancelled.
@@ -447,3 +469,5 @@ The 9.10 HandBrakeCLI campaign, complete: 9 jobs — 5 landed on the AMD EPYC 77
 The 9.10 Kdenlive export campaign, complete: 56 jobs — 30 landed on the AMD EPYC 7763 (53.6 %, all pooled), 26 stopped by the machine gate: AMD EPYC 9V74 14, AMD EPYC 9V45 7, Intel Xeon Platinum 8370C 3, Intel Xeon Platinum 8573C 2. Its five dry runs (#157–#161): 3 drew the EPYC 7763, 2 stopped (AMD EPYC 9V74, AMD EPYC 9V45).
 
 The 9.10 Déjà Dup backup campaign, complete: 56 jobs — 30 landed on the AMD EPYC 7763 (53.6 %; 28 pooled, repeats 12 and 25 left out), 26 stopped by the machine gate: AMD EPYC 9V74 11, AMD EPYC 9V45 7, Intel Xeon Platinum 8573C 4, Intel Xeon 6973P-C 3, Intel Xeon Platinum 8370C 1. Its eight dry runs (#175–#182): 4 drew the EPYC 7763, 4 stopped (AMD EPYC 9V74 3, AMD EPYC 9V45 1).
+
+The 9.10 Chrome tab-set campaign, complete: 9 jobs — 5 landed on the AMD EPYC 7763 (55.6 %, all pooled), 4 stopped by the machine gate: AMD EPYC 9V74 2, AMD EPYC 9V45 1, Intel Xeon 6973P-C 1. Its two dry runs, the gate open on any model: #72 on an Intel Xeon Platinum 8370C, #73 on the EPYC 7763 (`task-9.10-scenarios-timelines/campaign/chrome-tabs/machine-draws.md`).

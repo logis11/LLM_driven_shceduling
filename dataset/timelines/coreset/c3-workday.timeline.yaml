@@ -1,6 +1,10 @@
 # C3 — workday arc (building-plan §3 C3): chrome research -> +soffice
 # writing -> +make compile -> mail send. The order is design; CpsMark+'s CA
 # workflow defines the browsing -> office -> mail transitions (existence).
+# The four renderer-hidden tasks are the other tabs' page renderers of one
+# five-tab window: five tabs from Firefox's Linux telemetry (glam; 9.10 D15,
+# D16), one renderer per tab observed in Chrome (meas-ci:desktop:2026-10-04;
+# 9.10 D126-D129, D131).
 meta:
   id: c3-workday
   seed: 301
@@ -19,7 +23,7 @@ tasks:
   - {id: browser, name: chrome, archetype: web-browser,
      arrive: 0s, depart: 420s}
   - {id: renderers, name: chrome, archetype: renderer-hidden,
-     arrive: 0s, depart: 420s, count: 7}
+     arrive: 0s, depart: 420s, count: 4}
   - {id: writer, name: soffice.bin, archetype: office-writer,
      arrive: 60s, depart: 420s}
   - {id: build, name: make, archetype: build-orchestrator, arrive: 120s,

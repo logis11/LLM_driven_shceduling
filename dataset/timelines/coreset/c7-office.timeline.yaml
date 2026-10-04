@@ -33,7 +33,7 @@ tasks:
   name: chrome
 - archetype: renderer-hidden
   arrive: 0s
-  count: 7
+  count: 4
   depart: 26.385s
   id: renderers
   name: chrome

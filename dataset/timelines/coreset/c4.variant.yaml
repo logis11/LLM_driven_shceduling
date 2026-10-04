@@ -22,7 +22,9 @@ variants:
     ops:
       - add-task: {id: injected-browser, name: chrome,
                    archetype: web-browser, arrive: 30s, depart: 60s}
+      # the four other tabs' page renderers of one five-tab window (glam;
+      # meas-ci:desktop:2026-10-04; 9.10 D15, D126-D129, D131)
       - add-task: {id: injected-renderers, name: chrome,
                    archetype: renderer-hidden, arrive: 30s, depart: 60s,
-                   count: 5}
+                   count: 4}
       - patch-meta: {demand: calibration}
