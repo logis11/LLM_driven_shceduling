@@ -44,7 +44,9 @@ def listing(pattern, proc="/proc"):
             stat = open(os.path.join(proc, d, "stat")).read()
         except OSError:
             continue
-        argv = [a.decode(errors="replace") for a in raw.split(b"\0") if a]
+        # Chrome rewrites a child's process title: its cmdline is then one string, the arguments joined by spaces
+        # (dry run #72), so the arguments are split on both
+        argv = raw.replace(b"\0", b" ").decode(errors="replace").split()
         if not any(pattern in a for a in argv):
             continue
         f = stat[stat.rindex(")") + 2:].split()   # fields from state on: field 3 is f[0]

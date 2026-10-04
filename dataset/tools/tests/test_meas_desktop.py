@@ -722,8 +722,11 @@ def test_the_listing_reads_proc_and_leaves_out_what_does_not_hold_the_pattern(tm
     proc(11, 10, ["/opt/google/chrome/chrome", "--type=renderer", "--user-data-dir=/tmp/chrome-data",
                   "--renderer-client-id=6"], threads=12, start=150)
     proc(12, 1, ["/usr/bin/python3", "-m", "http.server"])
+    # a renamed child: Chrome rewrites its title, and the cmdline is one string with the arguments joined by spaces
+    proc(13, 10, ["/opt/google/chrome/chrome --type=renderer --top-chrome-webui --user-data-dir=/tmp/chrome-data"])
     got = tabs.listing("chrome-data", proc=str(tmp_path))
-    assert [p[0] for p in got] == [10, 11]
+    assert [p[0] for p in got] == [10, 11, 13]
+    assert tabs.role_of(got[2][2]) == ("renderer", "webui")
     assert got[1][1:2] == (10,) and got[1][3:] == (150, 12, 5)
     row = list(tabs.rows("off", "steady", 0, got, 2_000_000_000))[1]
     assert row == ("off", "steady", "2.0", 11, 10, "renderer", "plain", "6", 150, 12, 5)

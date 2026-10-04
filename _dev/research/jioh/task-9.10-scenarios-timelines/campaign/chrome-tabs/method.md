@@ -55,3 +55,5 @@ Runner spec (4 vCPU Azure VM, `ubuntu-24.04`, kernel and CPU model as recorded, 
 Raw records per job are released as a GitHub release named in the record at fold-in. The release is outward-facing and is published on 인지오's go-ahead.
 
 ## 8. Amendments
+
+- 2026-10-04, dry run #72 (37193532949; an Intel Xeon Platinum 8370C, a dry run opening the gate on any model; Google Chrome 154.0.8037.57). Every listing read every process as the browser, so every count read 0: Chrome rewrites a child's process title, and its `cmdline` is then one string, the arguments joined by spaces. The renderers' whole command lines (`renderers.tsv`) held, in the spare-off launch, the WebUI renderer and five plain renderers; in the spare-on launch, the WebUI renderer and six, the sixth started later (renderer client id 34, against 5–10). Five page loads in each launch; no extension renderer. The first launch's window took 43.7 s to map, the second's 0.5 s. Amending §4: the listing splits a command line on spaces as well as NULs.
