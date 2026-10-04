@@ -216,12 +216,26 @@ ln_steam_traced() {
   ln_trace_stop
 }
 
+ln_main_window() {   # the largest visible window of the application's class (kdenlive_export.py's find_window)
+  local w best="$WID" area=0 a
+  for w in $(xdotool search --onlyvisible --class "$CLASS" 2>/dev/null); do
+    eval "$(xdotool getwindowgeometry --shell "$w" 2>/dev/null)"
+    a=$(( ${WIDTH:-0} * ${HEIGHT:-0} ))
+    [ "$a" -gt "$area" ] && { area="$a"; best="$w"; }
+  done
+  echo "$best"
+}
+
 # ln_quit: D135 — the files the tree maps, the program's own quit, the tree's exit within LN_QUIT_WAIT, the warm check
 ln_quit() {
   local quit discard i left dlg
   rec launch.first.mapped_files "$(python3 "$HERE/launch.py" maps --root "$APP_PID" --out "$OUT/launch.mapped.txt")"
   quit="$(ln_quit_for "$SUBJ")"; discard="$(ln_discard_for "$SUBJ")"
   rec launch.quit "$quit"
+  # the quit goes to the application's largest visible window, as the export's driver finds Kdenlive's main window: a
+  # search by class can return a secondary top-level first (dry run #78 closed Kdenlive's window titled "Kdenlive")
+  [ "$SUBJ" = steam ] || WID="$(ln_main_window)"
+  rec launch.quit_window "$(xdotool getwindowname "$WID" 2>/dev/null | head -c 120)"
   ledge first.quit mark
   if [ "$SUBJ" = steam ]; then timeout 60 steam -shutdown > "$OUT/quit.log" 2>&1 &
   elif [ "$quit" = close-window ]; then rec launch.close_window "$(python3 "$HERE/close_window.py" "$WID" 2>&1 | tail -1)"
