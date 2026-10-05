@@ -2,10 +2,10 @@
 """9.10's span probes read (9.10 changelog D143, D144; `task-9.10-scenarios-timelines/campaign/spans/method.md` §3).
 
   span_probe.py level <run-dir> <phase> <phase-s> <span-s> [--s 10] [--json OUT]
-      D143's standard (9.5 D53, D56): from the 10 s slice profile (slices.py), the level over the file's span — CPU
-      ms/s and wakes/s from the phase's opening — against the observed phase's window at the placement every repeat
-      takes, the phase's first <phase-s>; the worst placement of a <phase-s> window inside the span, stepped by one
-      slice, beside it. A difference over 5 % in either is a phase that does not hold over the span. <phase> `driven`
+      D143's standard (9.5 D53, D56): from the 10 s slice profile (slices.py's, unrounded), the level over the
+      file's span — CPU ms/s and wakes/s from the phase's opening — against the observed phase's window at the
+      placement every repeat takes, the phase's first <phase-s>; the worst placement of a <phase-s> window inside the
+      span, stepped by one slice, beside it. A difference over 5 % in either is a phase that does not hold over the span. <phase> `driven`
       reads a probe-driven run's windows driven-w01, driven-w02, … in order, their slices end to end.
   span_probe.py level-desktop <run-dir> <app> <phase-s> <span-s> [--s 10] [--json OUT]
       The same on a desktop probe's carried rows (desktop/analyze.py's view of the subject, 9.8's renderers).
@@ -30,7 +30,6 @@ if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 
 from meas.campaign.analyze import analyze_run  # noqa: E402
-from meas.campaign.slices import profile  # noqa: E402
 from meas.stability import t975  # noqa: E402
 
 TOLERANCE = 0.05   # the dataset's tolerance (`measurement-campaign-workflow.md`, "The stability rule")
@@ -92,13 +91,32 @@ def slices_of_rows(rows, t0, span, slice_s):
     return [c / slice_s for c in cpu], [w / slice_s for w in wakes]
 
 
+def phase_slices(run_dir, phase, slice_s):
+    """A phase's slice profile as slices.profile cuts it — a segment's run in the slice of its schedule-in, a wake as
+    the wake rule keeps it — left unrounded: slices.profile prints CPU to 0.1 ms/s, coarser than an idle phase's
+    whole level (Kdenlive's 0.1 ms/s, Writer's 0.6)."""
+    _, raw = analyze_run(run_dir)
+    p = raw["phases"][phase]
+    n = max(1, int(p["span"] // slice_s))
+    cpu, wakes = [0.0] * n, [0] * n
+    for r in p["segments"]:
+        i = int((r.t_in - p["t0"]) // slice_s)
+        if 0 <= i < n:
+            cpu[i] += r.run
+    for r in p["rows"]:
+        i = int((r.t_in - p["t0"]) // slice_s)
+        if 0 <= i < n:
+            wakes[i] += 1
+    return [c / slice_s for c in cpu], [w / slice_s for w in wakes]
+
+
 def driven_profile(run_dir, slice_s):
     """The probe-driven run's windows' slice profiles end to end, the gaps between windows left out."""
     cpu, wakes = [], []
     tmp = tempfile.mkdtemp()
     try:
         for name in window_names(run_dir):
-            _, c, w = profile(view(run_dir, name, os.path.join(tmp, name)), "driven", slice_s)
+            c, w = phase_slices(view(run_dir, name, os.path.join(tmp, name)), "driven", slice_s)
             cpu += c
             wakes += w
     finally:
@@ -170,7 +188,7 @@ def main():
         if a.phase == "driven":
             cpu, wakes = driven_profile(a.run_dir, a.s)
         else:
-            _, cpu, wakes = profile(a.run_dir, a.phase, a.s)
+            cpu, wakes = phase_slices(a.run_dir, a.phase, a.s)
         out = level_reading(cpu, wakes, a.s, a.phase_s, a.span_s)
     elif a.cmd == "level-desktop":
         from meas.desktop import analyze as a98
