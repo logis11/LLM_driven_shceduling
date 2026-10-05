@@ -2761,3 +2761,11 @@ By 인지오's decision (Q30): a second driven probe, `kdenlive` 12 of the long-
 Not taken: the carried values kept with the step stated; the driven phase re-measured at the files' span.
 
 No value changed by this entry.
+
+## D151 — three releases at the fold-in commit: the Kdenlive idle repeats, the launch re-trace and the span probes (2026-10-05)
+
+By 인지오's decision (Q31). Each release takes `meas-ci-desktop-2026-10-04b`'s form — every artifact of its runs zipped as `<artifact>-<run id>.zip`, the gated jobs' reports in `gated-reports.zip` — and is created at the fold-in commit of D146:
+
+- `meas-ci-interactive-2026-10-05`: `kdenlive`'s idle repeats 1–16;
+- `meas-ci-desktop-2026-10-05`: `launch-kdenlive`'s repeats 1–5;
+- `meas-ci-probes-2026-10-05`: the span probes of D145, D149 and D150 and their dry run, which belong to no campaign tag. D146's settle and phase rest on one of them, and Actions artifacts expire after 90 days.
