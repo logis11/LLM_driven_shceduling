@@ -33,7 +33,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from stability import stability, ratio_stability, ratio_repeats_needed, TOLERANCE, t975  # noqa: E402
 from distribution import circular_gaps, quantile_table  # noqa: E402
 
-NAME = re.compile(r"^meas-(interactive|playback)-(.+)-r(\d+)-(dry|full|control)$")
+# `idle`: a repeat of the settle and the idle phase alone (9.10 D146), pooled into an idle-only record
+NAME = re.compile(r"^meas-(interactive|playback)-(.+)-r(\d+)-(dry|full|control|idle)$")
 
 
 def pooled_mode(mode, control):

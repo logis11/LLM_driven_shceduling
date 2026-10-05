@@ -98,7 +98,9 @@ def jobs(family, run_id):
 
 
 def mode(family):
-    return json.load(open(os.path.join(REPO, FAMILIES[family]["trigger"]))).get("mode", "full")
+    """The trigger's mode, which names the family's artifacts; MEAS_LOOP_MODE reads a campaign landed in another mode
+    while the shared trigger already names the next one (9.10 D149: a desktop probe launched beside a full batch)."""
+    return os.environ.get("MEAS_LOOP_MODE") or json.load(open(os.path.join(REPO, FAMILIES[family]["trigger"]))).get("mode", "full")
 
 
 def artifact(family, app, k):
