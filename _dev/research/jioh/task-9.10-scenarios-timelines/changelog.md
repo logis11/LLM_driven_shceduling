@@ -2660,3 +2660,24 @@ The dataset was recompiled (`compile.py --allow-window`). 2 of 100 artifacts cha
 Lint reports nine demand-window files: the eight of D141 and `c2-p2a` at 9.38. Tests: 409 passed, 1 skipped, 1 xfailed, none restated.
 
 Hands to 9.14: `c2-p2a` carries no finished download, so no turnaround term reads one; P2's terms over segment 1; `c2-p2a` in the demand window. Hands to 9.15: D42's, the scenario catalog's P2 rows, and `building-plan.md` §3 C2 on P2.
+
+## D143 — an entry a file holds past its observed phase is probed at the file's span before the span stands (2026-10-05)
+
+By 인지오's decision (Q25), after D141 and D142 lengthened the files. Each interactive entry was observed over phases of fixed length: 600 s driven for every application, and 120 s idle except Chrome's and Thunderbird's 600 s and VS Code's 900 s read from 200 s (9.5 method §2; `campaign/run.sh`, `DRIVEN=600` and `idle_for`). The compiler draws an entry's steady values for as long as a file holds it. Where a file holds an entry in a state longer than that state's observed phase, one long-phase probe of the state, at least the file's span long, tests the observed phase against the probe's level over that span — CPU share and wake rate, within the dataset's 5 % tolerance at the placement every repeat takes, the worst placement reported (9.5 D53's and D56's standard). A probe is never a repeat and changes no value; a phase that does not hold over its span is a decision of its own.
+
+The spans, at `aec957aa`:
+
+| entry, state | longest span, file | other files | observed phase | evidence before this entry |
+|---|---|---|---|---|
+| `code-editor`, driven | 12,068 s, `c6-dual` | `c1-compile` and `c4-compile` 1,590 s, `c1-ml-train` 1,608 s, `c7-ml-train` 1,386 s | 600 s | none: no driven phase was probed |
+| `video-editor`, driven | 4,758 s, `c1-transcode` | `c7-transcode` 2,967 s | 600 s | none |
+| `video-editor`, idle | 2,976 s, `c3-creation` | — | 120 s | none: its 30 s settle held no launch work, so no probe ran (9.5 D34) |
+| `office-writer`, idle | 1,429 s, `c3-workday` | — | 120 s | none, as `video-editor`'s |
+| `renderer-hidden` | 1,545 s, `c3-workday` | — | 600 s past a 630 s grace-settle (9.8 D15) | 9.8's probe: a 1,800 s phase past the 330 s grace, its first 300 s still settling — 1,500 s of steady region, 45 s short |
+| `web-browser`, idle | 1,489 s, `c3-workday` | — | 600 s past a 420 s settle | held: 9.5's D50 probe holds 1,610 s of steady region past D58's settle, and a 600 s phase at the placement repeats take reads CPU +0.0 % and wakes +0.7 % of its level (9.5 D56) |
+
+No file binds VS Code idle: every file that holds it focuses it from 2 s to 2 s before its end, so 9.5 D83's "`code` idle past 900 s" does not arise. 9.5 D87's two other states hold: a page load placed mid-session is one of the 55 warm loads (D20), and no file places more than one send.
+
+Probed, then: the two driven states, the two 120 s idle states and the hidden renderer. The three idle probes follow 9.5 D35's and 9.8 D15's form under each family's own probe mode, their lengths the span rounded up, design: `office-writer` 1,500 s and `video-editor` 3,000 s past the 30 s settle, `renderer-hidden` a 2,000 s phase past the 330 s grace (1,700 s past D15's 300 s of settling). Taken under 인지오's delegation, on 9.5 D35, D53 and D56 and 9.8 D15. What a driven probe compares, its lengths and its tooling are the method's, set before its launch.
+
+No value changed by this entry.
