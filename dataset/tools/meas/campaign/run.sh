@@ -23,8 +23,11 @@ source "$TOOLS/appdefs.sh"
 APP="$1"; REPEAT="$2"; MODE_ARG="${3:-full}"
 # the untraced control (_dev/docs/spec/jioh/task-9.5-untraced-control.md): `control` runs full's lengths and
 # `control-dry` dry's, every carried phase as a traced and an untraced run
-CONTROL=0; MODE="$MODE_ARG"
+CONTROL=0; MODE="$MODE_ARG"; RESET=0
 case "$MODE_ARG" in control) CONTROL=1; MODE=full ;; control-dry) CONTROL=1; MODE=dry ;; esac
+# 9.10 D154: probe-driven-reset — probe-driven with the application back in its designed state before every window
+# past the first (ctrl_prelude), so the session ages while the document does not
+[ "$MODE_ARG" = probe-driven-reset ] && { MODE=probe-driven; RESET=1; }
 # its decision 5: the pair's order alternates across jobs — odd jobs run it traced first, even jobs untraced first
 if [ $((REPEAT % 2)) -eq 1 ]; then ORDER="traced untraced"; else ORDER="untraced traced"; fi
 STREAMS="$(cd "$TOOLS/../../.." && pwd)/meas/streams"
@@ -78,7 +81,7 @@ else SETTLE="$(settle_for "$APP")"; IDLE="$(idle_for "$APP")"; DRIVEN=600; PLAY=
 rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE_ARG"; rec control "$CONTROL"; rec started_utc "$(date -u +%FT%TZ)"
 [ "$CONTROL" = 1 ] && rec control.order "$ORDER"
 rec settle_s "${SETTLE:-unset}"; rec idle_s "$IDLE"; rec driven_s "$DRIVEN"; rec play_s "$PLAY"; rec op_s "$OPS"
-[ "$MODE" = probe-driven ] && rec windows "$WINDOWS"
+[ "$MODE" = probe-driven ] && rec windows "$WINDOWS" && rec windows.reset "$RESET"
 if [ -z "$SETTLE" ]; then
   rec finished_utc "$(date -u +%FT%TZ)"; finish_report
   echo "settle: no settle stated for $APP (D34, D35) — stopping before any measurement" >&2
@@ -271,6 +274,10 @@ driven_windows() {
   rec stream_kinds "$KINDS"
   for k in $(seq 1 "$WINDOWS"); do
     name="driven-w$(printf %02d "$k")"
+    if [ "$RESET" = 1 ] && [ "$k" -gt 1 ]; then
+      if [ -z "$CTRLPRELUDE" ]; then rec "$name.stopped" "no prelude for $APP"; break; fi
+      ctrl_prelude "$name"   # D154: rereads the window, so the driver below takes the window it reopened
+    fi
     if [ "$DRIVER" = stream ]; then
       f="$STREAMS/$STREAM-r$k.jsonl"
       if [ ! -s "$f" ]; then rec "$name.stopped" "window $STREAM-r$k not cut"; break; fi

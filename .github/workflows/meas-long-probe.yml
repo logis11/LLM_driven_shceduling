@@ -38,7 +38,9 @@ jobs:
           for a in c.get("apps", []):
               for r in reps.get(a, []):
                   if r in driven.get(a, []):
-                      inc.append({"app": a, "repeat": r, "run_mode": "probe-driven", "phase_s": 0,
+                      # 9.10 D154: an index under `reset` restores the application between windows
+                      mode = "probe-driven-reset" if r in c.get("reset", {}).get(a, []) else "probe-driven"
+                      inc.append({"app": a, "repeat": r, "run_mode": mode, "phase_s": 0,
                                   "windows": int(windows[a]), "window_s": window_s})
                   else:
                       inc.append({"app": a, "repeat": r, "run_mode": "probe", "phase_s": int(phase_s[a]),

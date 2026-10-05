@@ -119,3 +119,10 @@ def test_the_plan_keeps_9_5s_trigger_form(tmp_path):
     out = plan(tmp_path, {"mode": "probe", "apps": ["webrtc"], "repeats": {"webrtc": [1]}, "phase_s": {"webrtc": 2000}})
     assert json.loads(out["matrix"])["include"] == [{"app": "webrtc", "repeat": 1, "run_mode": "probe",
                                                      "phase_s": 2000, "windows": 0, "window_s": 0}]
+
+
+def test_the_plan_runs_a_reset_index_in_probe_driven_reset_mode(tmp_path):
+    out = plan(tmp_path, {"mode": "probe", "apps": ["code"], "repeats": {"code": [11, 12]}, "phase_s": {},
+                          "driven": {"code": [11, 12]}, "reset": {"code": [12]}, "windows": {"code": 21}})
+    inc = {j["repeat"]: j["run_mode"] for j in json.loads(out["matrix"])["include"]}
+    assert inc == {11: "probe-driven", 12: "probe-driven-reset"}   # 9.10 D154

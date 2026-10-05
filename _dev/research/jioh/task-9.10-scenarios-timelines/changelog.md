@@ -2788,3 +2788,13 @@ By 인지오's decision (Q33), on D150's second probe (`campaign/spans/results/r
 Applied with D146's fold-in: `video-editor`'s scope states the two probes' reading and the state. Not taken: a third probe; the driven phase re-measured at the files' span.
 
 Hands to 9.14: the state's CPU +9 % and wakes −14 % where it holds, beside `c1-transcode`'s and `c7-transcode`'s terms.
+
+## D154 — `code-editor`'s cost rises with continuous typing; a second probe restores the file between windows (2026-10-05)
+
+On D144's probe (`campaign/spans/results/results.md`): against 9.5's repeat k, the per-input run mean runs 1.06, 1.08 and 1.19 in windows 1–3, 1.25–1.37 in 4–8, 2.29–3.85 in 12–14 and 1.75 in 18; VS Code stopped responding by the end of window 19, some 11,400 s into the input. The replayed keys are a fixed letter cycle with no line break (9.5 D4), so the probe typed one line growing to about 19,600 characters, a state 9.5's repeats, each typing one window into the committed file, never reached: the probe does not separate the session's age, D144's question, from the line's length. `c1-compile`, `c4-compile`, `c1-ml-train` and `c7-ml-train` hold the editor focused 1,386–1,608 s, the first three windows' span (ratio mean 1.11); `c6-dual` holds it 12,068 s, past the hang.
+
+By 인지오's decision (Q34): a second probe, `code` 12, as `code` 11 but with the committed file restored before every window past the first — the prelude 9.5 runs before a driven run of its untraced control (`campaign/run.sh`, `ctrl_prelude`: the pointer to the window's centre, the pristine copy back on disk, the buffer reverted, the caret at the end) — so the session ages and no line outgrows one window's typing. Read as D144's: ratios near 1 put the rise on the line, and the spans stand with that stated; a rise puts it on the session, a decision of its own.
+
+Not taken: the spans kept with the rise stated, its cause unseparated; the files' focused typing bounded to what was observed.
+
+No value changed by this entry.
