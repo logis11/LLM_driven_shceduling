@@ -2751,3 +2751,13 @@ By 인지오's decision (Q29), for `renderer-hidden`: one longer probe first, it
 Not taken: the carried values kept with the trend stated; a 1,200 s steady phase re-measured now, 9.5 D53's standard read on the 1,545 s probe.
 
 No value changed by this entry.
+
+## D150 — `video-editor`'s driven phase steps 1,200 s into the input; a second driven probe first (2026-10-05)
+
+On D145's Kdenlive driven probe (`campaign/spans/results/results.md`): over eight 600 s windows of 9.5's scripted pointer loop, the first two read CPU 358.6 and 353.5 ms/s and wakes 224.8 and 230.4/s, the next six 384.4–394.6 ms/s and 189.2–201.1/s. The main thread `kdenlive` carries the step, waking less (148.0 and 153.1/s, then 125.6–127.7) with longer runs (2.4 ms a wake, then 3.0); `QXcbEventQueue`'s run per wake moves 5 %, and the screenshots after each window show the same timeline and clip monitor. The carried 600 s phase reads as the first windows do, and against the level over `c1-transcode`'s 4,758 s its placement reads CPU −6.0 % and wakes +10.9 %. One probe does not say whether the step recurs at the same point of the input (9.5 D56). Only `c1-transcode` (4,758 s) and `c7-transcode` (2,967 s) hold Kdenlive focused past 1,200 s.
+
+By 인지오's decision (Q30): a second driven probe, `kdenlive` 12 of the long-probe family, as `kdenlive` 11 — eight 600 s windows past the campaign's 30 s settle and 120 s idle phase. Where the step recurs near the same point of the input, the carried phase describes the input's first 20 minutes, a decision of its own; where it does not, the span stands.
+
+Not taken: the carried values kept with the step stated; the driven phase re-measured at the files' span.
+
+No value changed by this entry.
