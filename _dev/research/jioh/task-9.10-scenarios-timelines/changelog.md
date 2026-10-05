@@ -2633,3 +2633,30 @@ The dataset was recompiled (`compile.py --allow-window`). 8 of 100 artifacts cha
 Lint reports eight demand-window files: the seven it reported before, `c3-workday` now at 0.89, and `c6-dual` at 0.9997, below the window's 1.00 — a segment that ends where the build ends under every policy holds no more work than its length. Tests: 409 passed, 1 skipped, 1 xfailed, none restated.
 
 Hands to 9.14: D18's — `c1-compile`'s turnaround term, `c3-workday`'s and `c6-dual`'s demand on the new lengths — `c6-dual` in the demand window, and `c4-compile`'s injection, 30 s of a 1,594 s file. Hands to 9.15: D18's, `building-plan.md` §3 C1.
+
+## D142 — `c2-p2a`'s download bound whole at the fresh install's CPU total, 727.170 s; pair P2's segment 1 stays 26.385 s (2026-10-05)
+
+By 인지오's decision (Q24), D42's open item "the download's size" (scope-card item 56). `c2-p2a`'s download, `steam` on `game-download` from 60 s, is bound whole: `total_work` is the measured fresh install's CPU total. Segment 1 keeps D42's 26.385 s, the upgrade's CPU total, in both files, so `c2-p2a` ends while the download runs — D86's form for pair P1, here for P2.
+
+- **The value.** 727.170 s ±0.80 %: the per-repeat mean of SteamCMD's CPU total over 9.7's 30 valid repeats of the shaped fresh install, 696.6–760.5 s (`meas-ci:background:2026-09-19`; `program_cpu_us` in `task-9.7-background-io/campaign/results/steamcmd-pooled.json`), its half-width by the shared stability rule, which it passes at 30. 9.7 reported the CPU total and did not carry it (9.7 D19), and `total_work` stayed the timeline's (9.7 D13 (v)).
+
+Grounds:
+
+- **D17's ground.** No `total_work` describes part of a job; the 25 s bound part of an install of 697–760 s of CPU.
+- **The label at every instant, and one diff per pair** (D42, D86). Segment 1 at the install's length in both files would leave `c2-p2b`'s `false` with no unwanted work alive for some 700 s; a length for each file would make the pair differ in length as well as in job and label.
+- **Not held for `c2-p2a`:** D17's "a file's and its segments' lengths follow the job", as for `c2-p1a` (D86). The file shows the install's first 26.385 s.
+
+Not taken: 25 s kept as a labelled design size (D17's ground); segment 1 at the install's length in both files (the label, D42).
+
+Rebound: `c2-p2a`'s download, `total_work` 25 s → 727.170 s, its header restated. `c2-p2b` is unchanged: its recipe binds its own job (`c2-pairs.variant.yaml`), and the derived file is byte-identical.
+
+The dataset was recompiled (`compile.py --allow-window`). 2 of 100 artifacts change beyond the library's hash: `c2-p2a` in both modes, and no other; `c2-p2b`'s artifact is byte-identical. Demand:
+
+| file | before | after | class |
+|---|---|---|---|
+| `c2-p2a` native | 1.0637 | 9.1921 | oversubscribed |
+| `c2-p2a` single | 1.2545 | 9.3829 | the estimate counts the whole install, which goes on past the file's end, as `c2-p1a`'s (D90) |
+
+Lint reports nine demand-window files: the eight of D141 and `c2-p2a` at 9.38. Tests: 409 passed, 1 skipped, 1 xfailed, none restated.
+
+Hands to 9.14: `c2-p2a` carries no finished download, so no turnaround term reads one; P2's terms over segment 1; `c2-p2a` in the demand window. Hands to 9.15: D42's, the scenario catalog's P2 rows, and `building-plan.md` §3 C2 on P2.

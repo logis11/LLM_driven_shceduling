@@ -3,8 +3,10 @@
 # pauses queued downloads when a game launches (steam-downloads; Valve's
 # steam-for-linux #8821). The variant swaps in an unwanted job and flips
 # the label (c2-pairs.variant.yaml). Segment 1 is as long as the variant's
-# unwanted job's measured CPU total, 26.385 s (9.10 D42); the download keeps its
-# design size until its own item (scope-card item 56).
+# unwanted job's measured CPU total, 26.385 s (9.10 D42). The download is the
+# measured fresh install bound whole at its CPU total, 727.170 s
+# (meas-ci:background:2026-09-19; 9.10 D17, D142); the file ends while it runs
+# (D86's form).
 meta:
   id: c2-p2a
   seed: 202
@@ -23,6 +25,6 @@ tasks:
   - {id: steam, name: steam, archetype: game-client,
      arrive: 0s, depart: 86.385s}
   - {id: download, name: steam, archetype: game-download, arrive: 60s,
-     bind: {total_work: 25s}}
+     bind: {total_work: 727.170s}}
 
 focus: []

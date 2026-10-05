@@ -18,7 +18,7 @@
     "coreset-native/c1-video-edit.workload.json": "c4d00e2075f82709f1ff4b8559b10ad510985cc5b9109b072fcefde67acf0252",
     "coreset-native/c2-p1a.workload.json": "187193932bf0d4253ef51549812b73c949cd33b5cf48d3fb8df558d4bcaacfb2",
     "coreset-native/c2-p1b.workload.json": "0dab86eb6a9d7f7d7bba974c233b96e9dd9284c2434a7d9eab4c5b9104b8d758",
-    "coreset-native/c2-p2a.workload.json": "ae9b0e36ad9f37a0b26116bcd3089c60b9ae21efb8bb3ed611eaba9476e7ff56",
+    "coreset-native/c2-p2a.workload.json": "66edd63565b7d53435e060e2989b4d70a002b27556159a4215f60e51eba77d8d",
     "coreset-native/c2-p2b.workload.json": "013686a7c989fe2a39901c7001d865722cf13f894a82dbbedd8088b7fabbdc4b",
     "coreset-native/c2-p3a.workload.json": "c703ae8b1cbdaa18afbd916688c6e80355263f4c0906a6210a510b3962143ef5",
     "coreset-native/c2-p3b.workload.json": "6369adf7ebc63ee6f0536be69ce921037ad22761e77cc92302732caf77c70395",
@@ -68,7 +68,7 @@
     "coreset-single/c1-video-edit.workload.json": "c4d00e2075f82709f1ff4b8559b10ad510985cc5b9109b072fcefde67acf0252",
     "coreset-single/c2-p1a.workload.json": "187193932bf0d4253ef51549812b73c949cd33b5cf48d3fb8df558d4bcaacfb2",
     "coreset-single/c2-p1b.workload.json": "0dab86eb6a9d7f7d7bba974c233b96e9dd9284c2434a7d9eab4c5b9104b8d758",
-    "coreset-single/c2-p2a.workload.json": "283f4b14d5fc69e32f7177a116e0e96a8545b6c6624c480cbb70df156ee84bf8",
+    "coreset-single/c2-p2a.workload.json": "85b3c1b09d9c65be87edebb69a4cdd251ce05581a841934072b5520dd9d41fb8",
     "coreset-single/c2-p2b.workload.json": "085d70001bba08c6ae3594bcf9756bad71d0964e676d0bc81c673e84f3da9d05",
     "coreset-single/c2-p3a.workload.json": "c703ae8b1cbdaa18afbd916688c6e80355263f4c0906a6210a510b3962143ef5",
     "coreset-single/c2-p3b.workload.json": "6369adf7ebc63ee6f0536be69ce921037ad22761e77cc92302732caf77c70395",
@@ -176,7 +176,7 @@
     },
     "coreset-native/c2-p2a.workload.json": {
       "demand_class": "oversubscribed",
-      "utilization": 1.0637
+      "utilization": 9.1921
     },
     "coreset-native/c2-p2b.workload.json": {
       "demand_class": "oversubscribed",
@@ -376,7 +376,7 @@
     },
     "coreset-single/c2-p2a.workload.json": {
       "demand_class": "oversubscribed",
-      "utilization": 1.2545
+      "utilization": 9.3829
     },
     "coreset-single/c2-p2b.workload.json": {
       "demand_class": "oversubscribed",
