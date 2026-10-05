@@ -1,25 +1,32 @@
 {
   "note": "Trigger for meas-long-probe.yml (9.5 D35, D42): a long-phase probe of an application's idle or play phase, never a campaign repeat. A push that changes this file starts the runs it names. apps and repeats (a map app -> probe indices) as in the other triggers; phase_s: each application's phase length in seconds, design, stated in the method before its launch. 9.10 D143-D145: an index listed under driven runs probe-driven - the campaign's settle and idle phase, then windows[app] driven windows of window_s seconds back to back.",
-  "mode": "dry",
-  "attempt": 6,
-  "cpu_model": "",
+  "mode": "probe",
+  "attempt": 7,
+  "cpu_model": "EPYC 7763",
   "apps": [
     "code",
-    "kdenlive"
+    "kdenlive",
+    "soffice"
   ],
   "repeats": {
     "code": [
       11
     ],
     "kdenlive": [
+      10,
       11
+    ],
+    "soffice": [
+      10
     ]
   },
   "phase_s": {
     "thunderbird-send": 2000,
     "chrome": 2000,
     "code": 1400,
-    "webrtc": 2000
+    "webrtc": 2000,
+    "soffice": 1500,
+    "kdenlive": 3000
   },
   "driven": {
     "code": [
@@ -30,8 +37,8 @@
     ]
   },
   "windows": {
-    "code": 3,
-    "kdenlive": 3
+    "code": 21,
+    "kdenlive": 8
   },
-  "window_s": 60
+  "window_s": 600
 }
