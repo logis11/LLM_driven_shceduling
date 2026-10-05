@@ -101,7 +101,8 @@ steady_for() {
 if [ "$MODE" = dry ] && [ "${APP#launch-}" = "$APP" ]; then   # 9.10 D135: a launch dry run keeps the campaign's lengths
   LAUNCH_SETTLE=20; STEADY=45; GRACE_S=75; ORIGINS=3; STEP_GAP=40; STEP_WAIT=180; STEAM_CLIENT_WAIT=900
 elif [ "$MODE" = probe ]; then
-  LAUNCH_SETTLE=20; STEADY=1800          # one long phase, read per 10 s slice by campaign/slices.py
+  LAUNCH_SETTLE=20; STEADY=3600          # one long phase, read per 10 s slice by campaign/slices.py; 3,600 s since
+                                        # 9.10 D149, the hidden renderer's page thread still winding down at 1,500 s
 else
   LAUNCH_SETTLE="$(launch_settle_for "$APP")"; STEADY="$(steady_for "$APP")"
 fi

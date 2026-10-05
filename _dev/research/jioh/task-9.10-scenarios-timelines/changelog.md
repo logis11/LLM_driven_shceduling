@@ -2729,6 +2729,7 @@ D146 written into `campaign/kdenlive-idle/method.md` before any launch. Taken un
 Tests: `test_meas_launch.py`, `test_meas_span_probe.py` and the measurement tests that read `run.sh` or the fold-in, 223 passed. No value changed by this entry.
 
 ## D148 — `renderer-hidden`'s and `office-writer`'s idle spans stand; the CPU's scatter within a run is stated (2026-10-05)
+> Amended by D149 (the CPU's patterns within the run; `renderer-hidden` reopened).
 
 By 인지오's decision (Q28), on D145's probes (`campaign/spans/results/results.md`). Over the files' spans the wake rates hold at the placement every repeat takes (+2.5 % and +0.1 %); the CPU share does not (+10.1 % and −7.5 %). The CPU's differences run in opposite directions with no trend over the span and lie inside each entry's between-session spread (CPU share cv 8.4 % over 19 repeats and 8.0 % over 14); each carried value is the mean of those repeats, each at its own point of the scatter, and `office-writer`'s carried CPU share lies within 3.7 % of the probe's level, its wakes within 0.1 %. The two loads are the library's smallest, 0.11 and 0.61 ms/s. `renderer-hidden`'s probe ran on Google Chrome 154 against the 152 and 153 carried, its level some 20 % above the carried values throughout.
 
@@ -2737,3 +2738,16 @@ Applied with D146's fold-in: each entry's scope states the probe's reading — t
 Not taken: phases lengthened by 9.5 D53's standard and re-measured — `office-writer`'s idle phase 600 s, `renderer-hidden`'s steady phase 1,200 s; a second probe of each first.
 
 Hands to 9.14: the two CPU shares' scatter within a run beside their half-widths.
+
+## D149 — D148 restated: `office-writer`'s CPU rises early and its span stands; `renderer-hidden`'s page thread winds down, and a 3,600 s probe comes first (2026-10-05)
+
+D148 called both entries' CPU differences scatter with no trend; each carried phase sits at the start of a pattern within the run.
+
+- **`office-writer`.** Its CPU per minute rises from 0.56–0.58 ms/s in the idle phase's first two minutes to 0.64–0.66 by minutes 5–11, then holds 0.56–0.63; its wakes stay 3.42–3.47/s. The carried CPU share, over 14 repeats, lies within 3.7 % of the probe's level over the span and the wakes within 0.1 %, so D148 stands for it, its scope naming the early rise.
+- **`renderer-hidden`.** The page's own thread `chrome` runs shorter through the probe's first 1,200 s — run means 0.092, 0.082, 0.071 and 0.060 ms in 300 s windows, CPU 0.082 to 0.046 ms/s — then 0.085 and 0.061; `HangWatcher` (0.024–0.028 ms) and `Chrome_ChildIOT` (0.032–0.035 ms) hold, so the program, not the runner's speed. 9.8 D34 read the same direction inside the carried 600 s phase over 19 repeats, 0.107 ms in its first 100 s against 0.057 ms in its last. The probe ran on Chrome 154, so its level is not compared with the carried values.
+
+By 인지오's decision (Q29), for `renderer-hidden`: one longer probe first, its steady phase 3,600 s past the 630 s grace-settle, to show where the page thread's decline ends; the settle or the phase is then set from its trace, 9.5 D35's rule, as D146 set Kdenlive's. `desktop/run.sh`'s probe mode runs 3,600 s; the probe is `chrome-hidden` 11, launched once `launch-kdenlive`'s first batch has landed, the desktop trigger's mode being shared by every job it relaunches.
+
+Not taken: the carried values kept with the trend stated; a 1,200 s steady phase re-measured now, 9.5 D53's standard read on the 1,545 s probe.
+
+No value changed by this entry.
