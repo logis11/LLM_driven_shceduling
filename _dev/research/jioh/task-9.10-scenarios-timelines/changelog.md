@@ -2727,3 +2727,13 @@ D146 written into `campaign/kdenlive-idle/method.md` before any launch. Taken un
 - **Two campaigns.** The idle repeats, `meas-ci:interactive:2026-10-05`, first batch 1–5 in mode `idle`; the launch re-trace, `meas-ci:desktop:2026-10-05`, `launch-kdenlive` 1–5.
 
 Tests: `test_meas_launch.py`, `test_meas_span_probe.py` and the measurement tests that read `run.sh` or the fold-in, 223 passed. No value changed by this entry.
+
+## D148 — `renderer-hidden`'s and `office-writer`'s idle spans stand; the CPU's scatter within a run is stated (2026-10-05)
+
+By 인지오's decision (Q28), on D145's probes (`campaign/spans/results/results.md`). Over the files' spans the wake rates hold at the placement every repeat takes (+2.5 % and +0.1 %); the CPU share does not (+10.1 % and −7.5 %). The CPU's differences run in opposite directions with no trend over the span and lie inside each entry's between-session spread (CPU share cv 8.4 % over 19 repeats and 8.0 % over 14); each carried value is the mean of those repeats, each at its own point of the scatter, and `office-writer`'s carried CPU share lies within 3.7 % of the probe's level, its wakes within 0.1 %. The two loads are the library's smallest, 0.11 and 0.61 ms/s. `renderer-hidden`'s probe ran on Google Chrome 154 against the 152 and 153 carried, its level some 20 % above the carried values throughout.
+
+Applied with D146's fold-in: each entry's scope states the probe's reading — the wakes held over the file's span, and the CPU of a phase-length window scattering within one run (`renderer-hidden` +10.1 % at the placement, −15.9 % at the worst, over 1,545 s; `office-writer` −7.5 % and −8.8 %, over 1,429 s) — in each entry's own fold-in.
+
+Not taken: phases lengthened by 9.5 D53's standard and re-measured — `office-writer`'s idle phase 600 s, `renderer-hidden`'s steady phase 1,200 s; a second probe of each first.
+
+Hands to 9.14: the two CPU shares' scatter within a run beside their half-widths.
