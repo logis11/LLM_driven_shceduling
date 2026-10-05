@@ -166,6 +166,24 @@ WINDOWS_STATED = {
 }
 
 WINDOW_LAW = {"web-browser": "D32, D68", "mail-client": "D32, D46"}
+# 9.10 D143–D150: an entry a core-set file holds past its observed phase, read in one long-phase probe at the file's
+# span (`task-9.10-scenarios-timelines/campaign/spans/results/results.md`) — stated beside the values
+SPAN_STATED = {
+    "office-writer": ("Read over 1,429 s, the span `c3-workday` holds it, in one long-phase probe (9.10 D145, D148, D149): "
+                      "the idle phase's wakes hold within 0.1 % of the probe's level; its CPU rises from 0.56–0.58 ms/s "
+                      "in the first two minutes to 0.64–0.66 by minutes 5–11 and holds 0.56–0.63 after, so a 120 s phase "
+                      "at the placement every repeat takes reads −7.5 % against the level, −8.8 % at the worst; the "
+                      "carried CPU share lies within 3.7 % of the level."),
+    "video-editor": ("The idle phase opens 240 s after the window, past the work Kdenlive does after launch, and runs "
+                     "180 s (9.10 D146): over 2,790 s of one long-phase probe past that settle, a 180 s phase holds its "
+                     "CPU within 1.1 % and its wakes within 0.7 % of the probe's level at the placement every repeat "
+                     "takes, within 4.6 % and 3.9 % at the worst. Read over 4,758 s, the span `c1-transcode` holds it "
+                     "focused, in two long-phase probes of the pointer loop (9.10 D145, D150, D153): averaged, the 600 s "
+                     "driven phase at the placement every repeat takes reads CPU −2.8 % and wakes +4.8 % against their "
+                     "level; some 20 minutes into the input both probes enter a state of fewer, longer main-thread "
+                     "wakes, 126 a second at 3.06 ms against 135–153 at 2.3–2.8 ms, which one of them kept to its end, "
+                     "the CPU then 9 % above the carried phase and the wakes 14 % below."),
+}
 # D99: an entry whose repeat count neither the rule nor its recording's end chose states where it stopped
 STOP_STATED = {
     "code-editor": ("The repeat count is not the rule's (D99): the campaign stopped at window 44, then read as the Word "
@@ -488,6 +506,8 @@ def entry(aid, spec, d):
         scope += STOP_STATED[aid] + " "
     if aid in WINDOWS_STATED:
         scope += WINDOWS_STATED[aid] + " "
+    if aid in SPAN_STATED:
+        scope += SPAN_STATED[aid] + " "
     scope += "Values are this software on this machine, not desktop truth (D10)."
     if aid in BUILD_BOUND:   # D69: what the pinned or recorded build leaves out of the archetype
         scope += " " + BUILD_BOUND[aid]

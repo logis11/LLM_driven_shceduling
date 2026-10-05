@@ -2780,3 +2780,11 @@ By 인지오's decision (Q32), on D149's 3,600 s probe (`campaign/spans/results/
 - **The launch phase is re-traced**: `launch-chrome-hidden` to the end of the 1,030 s grace (D133), its 5 repeats replacing `launch-renderer-hidden`'s stream.
 
 The campaign is `meas-ci:desktop:2026-10-05b`. The method and the fold-in follow. Hands to 9.14: `renderer-hidden`'s values. No value changed by this entry.
+
+## D153 — `video-editor`'s driven span stands; the state some 20 minutes into the input is stated (2026-10-05)
+
+By 인지오's decision (Q33), on D150's second probe (`campaign/spans/results/results.md`). Both probes enter the same state in their third window, 1,200–1,800 s into the scripted input — the main thread at 126 wakes/s and 3.06 ms a wake, against 135–153/s and 2.3–2.8 ms before — the first keeping it to its eighth window, the second leaving it in its fourth. By D143's standard the first probe fails and the second holds (CPU +0.5 %, wakes −1.0 % at the placement); the two averaged hold over `c1-transcode`'s 4,758 s (CPU −2.8 %, wakes +4.8 %) and `c7-transcode`'s 2,967 s (−2.1 %, +3.5 %), the worst placement reaching wakes +8.3 %.
+
+Applied with D146's fold-in: `video-editor`'s scope states the two probes' reading and the state. Not taken: a third probe; the driven phase re-measured at the files' span.
+
+Hands to 9.14: the state's CPU +9 % and wakes −14 % where it holds, beside `c1-transcode`'s and `c7-transcode`'s terms.
