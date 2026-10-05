@@ -11,7 +11,7 @@ The probes of `../method.md` (changelog D143–D145), each one job on the AMD EP
 | Writer idle | 37264950064 | `soffice` 10 | 1,605 s | LibreOffice 24.2.7.2 |
 | Kdenlive idle | 37264996600 (37264950064 gated: EPYC 9V74) | `kdenlive` 10 | 3,159 s | Kdenlive 23.08.5 |
 | Kdenlive driven | 37264950064 | `kdenlive` 11 | 5,162 s | Kdenlive 23.08.5 |
-| hidden renderer, 3,600 s (D149) | 37273691029 (37273549541, 37273631811 gated: Xeon 8573C, EPYC 9V45) | `chrome-hidden` 11 | 4,453 s | Google Chrome 154.0.8037.57 |
+| hidden renderer, 3,600 s (D149) | 37273691029 (37273549541, 37273631811 gated: Xeon 8573C, EPYC 9V45) | `chrome-hidden` 11 | 4,309 s | Google Chrome 154.0.8037.57 |
 
 ## Readings
 
