@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# run.sh <app> <repeat> <dry|full|probe|probe-driven> — one campaign run (9.5 method §1–§4), or a long-phase probe
+# run.sh <app> <repeat> <dry|full|idle|probe|probe-driven> — one campaign run (9.5 method §1–§4; idle: the settle and
+# the idle phase alone, 9.10 D146), or a long-phase probe
 # (probe: the 30 s settle, then one idle or play phase of $MEAS_PHASE_S seconds and nothing after it; 9.5 D35, D42), or
 # a long driven probe (probe-driven: the campaign's settle and idle phase, then $MEAS_WINDOWS driven windows of
 # $MEAS_WINDOW_S seconds back to back, each a phase of its own; 9.10 D143, D144).
@@ -33,7 +34,9 @@ STREAMS="$(cd "$TOOLS/../../.." && pwd)/meas/streams"
 # before any measurement.
 settle_for() {
   case "$1" in
-    soffice|gimp|kdenlive|mpv-video|mpv-audio) echo 30 ;;
+    soffice|gimp|mpv-video|mpv-audio) echo 30 ;;
+    kdenlive) echo 240 ;;           # 9.10 D146: its main thread's work after launch ends about 200 s after the window
+                                    # (the span probe; 9.5 D34's flat reading was on CPU printed to 0.1 ms/s)
     thunderbird-send) echo 390 ;;   # D44: its launch work ends ~340 s into a 30 s-settled idle phase (long-phase probe)
     chrome) echo 420 ;;             # D58: that run lands 95–300 s after the window over seven sessions (D51's 270 s
                                     # caught it in one repeat of five); the slice profile guards the rest
@@ -50,7 +53,9 @@ idle_for() {
     thunderbird-send) echo 600 ;;
     code) echo 900 ;;   # D53: its ~320 s episode is launch-anchored — a 120 s phase reads CPU +15.5 % at the placement
     chrome) echo 600 ;; # every repeat takes, a 900 s one +1.6 % (long-phase probe). D56: past D51's settle chrome's idle
-    *) echo 120 ;;      # phase is quiet, and a 120 s window reads CPU +13.6 % there, a 600 s one +0.0 %
+                        # phase is quiet, and a 120 s window reads CPU +13.6 % there, a 600 s one +0.0 %
+    kdenlive) echo 180 ;;   # 9.10 D146: past its 240 s settle 120 s reads +6.4 % at the worst placement, 180 s +4.6 %
+    *) echo 120 ;;
   esac
 }
 # D54: the play phase holds whole cycles of a recurring episode — 480 s for webrtc, two of its 240 s saturation
@@ -66,6 +71,7 @@ if [ "$MODE" = dry ]; then SETTLE=10; IDLE=30; DRIVEN=60; PLAY=60; OPS=90
 elif [ "$MODE" = probe ]; then SETTLE=30; IDLE="${MEAS_PHASE_S:?probe needs MEAS_PHASE_S}"; DRIVEN=0; PLAY="$IDLE"; OPS=0
 # 9.10 D143, D144: the campaign's own settle and idle phase, so the driven windows open where every repeat's driven
 # phase opened; each window as long as a repeat's driven phase (600 s; a dry run shorter)
+elif [ "$MODE" = idle ]; then SETTLE="$(settle_for "$APP")"; IDLE="$(idle_for "$APP")"; DRIVEN=0; PLAY=0; OPS=0
 elif [ "$MODE" = probe-driven ]; then SETTLE="$(settle_for "$APP")"; IDLE="$(idle_for "$APP")"
   DRIVEN="${MEAS_WINDOW_S:-600}"; WINDOWS="${MEAS_WINDOWS:?probe-driven needs MEAS_WINDOWS}"; PLAY=0; OPS=0
 else SETTLE="$(settle_for "$APP")"; IDLE="$(idle_for "$APP")"; DRIVEN=600; PLAY="$(play_for "$APP")"; OPS=600; fi
@@ -326,7 +332,7 @@ case "$DRIVER" in
     WINDOW="$(window_state)"
     rec recording.window "$WINDOW"
     $PH idle -- bash -c "true"; phase idle "$IDLE" ""
-    if [ "$MODE" = probe ]; then OP=""
+    if [ "$MODE" = probe ] || [ "$MODE" = idle ]; then OP=""
     elif [ "$MODE" = probe-driven ]; then OP=""; sleep 10; driven_windows
     elif [ "$WINDOW" = empty ]; then rec recording.past_end 1; OP=""; else
     sleep 10
@@ -346,7 +352,7 @@ case "$DRIVER" in
     fi ;;
   pointer)
     $PH idle -- bash -c "true"; phase idle "$IDLE" ""
-    if [ "$MODE" = probe ]; then OP=""
+    if [ "$MODE" = probe ] || [ "$MODE" = idle ]; then OP=""
     elif [ "$MODE" = probe-driven ]; then OP=""; sleep 10; driven_windows; else
     sleep 10
     DRV="$(pointer_loop)"

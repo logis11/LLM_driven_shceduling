@@ -19,7 +19,8 @@ LN_ELEMENT_SETTLE=50     # D135: 9.8's 30 s after the sign-in and its 20 s launc
 # the settle after the window and the post-launch steps (D133: campaign/run.sh's settle_for, run.sh's launch_settle_for)
 ln_settle_for() {
   case "$1" in
-    soffice|kdenlive|mpv-video|mpv-audio) echo 30 ;;
+    soffice|mpv-video|mpv-audio) echo 30 ;;
+    kdenlive) echo 240 ;;       # 9.10 D146: campaign/run.sh's new settle_for, past its work after launch
     thunderbird-send) echo 390 ;;
     chrome) echo 420 ;;
     chrome-hidden) echo 20 ;;   # then the grace

@@ -3,9 +3,11 @@
 
 fold_in.py <results-dir> <out.yaml> [--tag interactive=meas-ci:interactive:<campaign> --tag playback=meas-ci:playback:<campaign> --tag <app>=meas-ci:interactive:<campaign>]
     [--idle-from <app>=<pool.json> --idle-tag <app>=meas-ci:interactive:<campaign>] [--control <record>]
+    [--only <archetype>[,<archetype>...]]
 (<campaign>: the launch date, D27; a run number for a one-run campaign from before it. --idle-from: the app's idle
 phase from another campaign's pool, D79. --control: the untraced control's record, each archetype's reading appended
-to its notes)
+to its notes. --only: those entries alone, so <results-dir> need hold only their pools — 9.10 D146 regenerates
+`video-editor` with its idle phase from a campaign of its own)
 
 One entry per campaign run, per the 9.5 changelog: D2/D11 ids, D9 shape,
 D13 per-input run (window rule), D16 timer components with a pooled
@@ -541,8 +543,13 @@ def main():
     R, out = sys.argv[1], sys.argv[2]
     rest = sys.argv[3:]
     flags = {"--tag": RUN_TAG, "--idle-from": IDLE_FROM, "--idle-tag": IDLE_TAG}
+    only = None
     while rest:  # --tag interactive=meas-ci:interactive:N, --idle-from <app>=<pool.json>, --idle-tag <app>=<tag> (repeatable)
-        if rest[0] == "--control" and len(rest) > 1:
+        if rest[0] == "--only" and len(rest) > 1:
+            only = set(rest[1].split(",")); rest = rest[2:]
+            if only - set(ARCHETYPES):
+                raise SystemExit(f"--only names no 9.5 archetype: {', '.join(sorted(only - set(ARCHETYPES)))}")
+        elif rest[0] == "--control" and len(rest) > 1:
             CONTROL.update({a: r["notes"] for a, r in json.load(open(rest[1]))["archetypes"].items()}); rest = rest[2:]
         elif rest[0] in flags and len(rest) > 1 and "=" in rest[1]:
             key, val = rest[1].split("=", 1); flags[rest[0]][key] = val; rest = rest[2:]
@@ -552,14 +559,15 @@ def main():
         raise SystemExit("--idle-from and --idle-tag name the same applications")
     tags = ", ".join(sorted(set(RUN_TAG.values()) | set(IDLE_TAG.values())))
     blocks = [f"  # ---- measured per-application archetypes — 9.5 same-machine campaigns ({tags}) ----", ""]
-    for aid, spec in ARCHETYPES.items():
+    ids = [a for a in ARCHETYPES if only is None or a in only]
+    for aid, spec in ((a, ARCHETYPES[a]) for a in ids):
         d = json.load(open(os.path.join(R, f"pool-{spec[0]}.json")))["runs"][spec[0]]
         if spec[0] in IDLE_FROM:
             d = with_idle(d, json.load(open(IDLE_FROM[spec[0]]))["runs"][spec[0]])
         blocks.append(entry(aid, spec, d))
         blocks.append("")
     open(out, "w").write("\n".join(blocks))
-    print(f"wrote {out}: {len(ARCHETYPES)} entries")
+    print(f"wrote {out}: {len(ids)} entries")
 
 
 if __name__ == "__main__":

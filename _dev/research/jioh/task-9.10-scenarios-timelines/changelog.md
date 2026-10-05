@@ -2706,3 +2706,24 @@ D143's and D144's probes written into `campaign/spans/method.md` before any laun
 - **A dry run first**: `probe-driven` at three 60 s windows of each driven subject, on any model, never read.
 
 Tests: `test_meas_span_probe.py`, the readings on constructed profiles and the workflow's plan on two trigger forms. No value changed by this entry.
+
+## D146 — `video-editor`'s idle phase re-measured past Kdenlive's launch tail: a 240 s settle, a 180 s phase; its launch phase re-traced to the new settle (2026-10-05)
+
+By 인지오's decision (Q27), on the Kdenlive idle probe of D145 (`campaign/spans/results/results.md`). Kdenlive's main thread wakes 17, 16, 14 and then 13 times per 10 s until about 170 s past the 30 s settle, 12 after it; the carried 120 s idle phase, from the 30 s settle, sits inside that work: carried wakes 1.363/s over 20 repeats, the probe's first 120 s 1.375/s, the level past the work 1.212/s. 9.5 D34 found Kdenlive's idle phase flat at its 30 s settle on CPU slices printed to 0.1 ms/s, against a whole idle CPU of about 0.07 ms/s, and showed no wake profile (`task-9.5-interactive-typing/campaign/launch-work.md`).
+
+- **The settle is 240 s from the window**, design: the work ends about 200 s after the window (the probe's last slice of 13 or more wakes at 160–170 s past its 30 s settle), and the settle covers it by 40 s, the margin 9.5 D54 set for `webrtc` (its episodes ending by 170 s, its settle 210 s). Taken under 인지오's delegation, on 9.5 D34, D35 and D54.
+- **The idle phase is 180 s**, design, on 9.5 D53's standard — the shortest length keeping both the CPU share and the wake rate within 5 % of the level at the placement every repeat takes and at the worst placement — read over the probe past the new settle, 2,790 s: 120 s holds at the placement (CPU −2.0 %, wakes −0.4 %) and not at the worst (+5.5 %, +6.4 %); 180 s at both (−1.1 % and +4.6 %; −0.7 % and +3.9 %); 300 s at both (−1.3 % and −2.9 %; +1.3 % and +3.3 %). Taken under 인지오's delegation, on 9.5 D45, D53 and D56.
+- **New repeats run the settle and the idle phase alone**, from the window to the phase's end, and pool into `video-editor`'s idle values; its driven and operation values stay those of 9.5's 20 repeats (`meas-ci:interactive:2026-09-18`), as 9.5 D79 and D80 took `mail-client`'s idle phase from one campaign and its other phases from another (`campaign/fold_in.py --idle-from`). The repeats run under the stability rule, the first batch five.
+- **The launch phase is re-traced to the new settle**: `launch-kdenlive`'s trace runs from the exec to the end of the settle `video-editor`'s steady values begin after (D133), so 240 s; its 5 repeats replace `launch-video-editor`'s stream (D136, D139, D140).
+
+The method, tooling and campaigns follow. Hands to 9.14: `video-editor`'s idle values and the files holding Kdenlive unfocused. No value changed by this entry.
+
+## D147 — the Kdenlive idle campaign's method and tooling (2026-10-05)
+
+D146 written into `campaign/kdenlive-idle/method.md` before any launch. Taken under 인지오's delegation, on D146, 9.5 D79 and D80, and the launch campaign's method.
+
+- **Tooling.** `campaign/run.sh` gains mode `idle`, the window, the settle and the idle phase alone, and `kdenlive`'s settle and idle phase become 240 s and 180 s (`settle_for`, `idle_for`); `desktop/launch.sh`'s `ln_settle_for` follows to 240 s, `test_meas_launch.py` holding the two equal. `campaign/fold_in.py` gains `--only <archetype>`, which writes those entries alone from their own pools.
+- **The fold-in path checked.** `fold_in.py --only video-editor --tag kdenlive=meas-ci:interactive:2026-09-18 --control <the untraced control's record>` over 9.5's `results-same-machine/pool-kdenlive.json`, spliced by `splice.py`, reproduces `dataset/archetypes.yaml` byte for byte; the campaign's fold-in adds `--idle-from` and `--idle-tag` to that command.
+- **Two campaigns.** The idle repeats, `meas-ci:interactive:2026-10-05`, first batch 1–5 in mode `idle`; the launch re-trace, `meas-ci:desktop:2026-10-05`, `launch-kdenlive` 1–5.
+
+Tests: `test_meas_launch.py`, `test_meas_span_probe.py` and the measurement tests that read `run.sh` or the fold-in, 223 passed. No value changed by this entry.
