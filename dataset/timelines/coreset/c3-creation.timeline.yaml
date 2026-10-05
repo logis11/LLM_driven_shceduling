@@ -6,6 +6,8 @@
 # to the smallest whole second by which it ends under every policy — 240 s + the
 # job's CPU and blocks + the other tasks' CPU after 240 s as compiled under the
 # file's seed, 3,211.514 s — kdenlive staying open to its end (D78's arithmetic).
+# kdenlive, started at 120 s, runs its observed launch phase first, replayed
+# (meas-ci:desktop:2026-10-04b; 9.10 D21, D132-D138).
 meta:
   id: c3-creation
   seed: 303

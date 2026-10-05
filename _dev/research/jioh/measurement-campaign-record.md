@@ -1,6 +1,6 @@
 # Measured values — campaign record
 
-Every campaign behind a measured archetype value: per archetype the repeats, the values the rule covers, the widest margin among them, why it stopped, and the machine draws it took. Method: `measurement-campaign-workflow.md`. Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10` (`upgrade`: `--since 100`; `soffice`: `--since 38`; `chrome`: `--since 438 --exclude 16@35712250969`; `code`: `--since 566 --exclude 42@36126168885`; `thunderbird-send`: `--since 150 --exclude 29`, its keys-only campaign `--since 604`; the `desktop` family: `--since 21`, its `chrome-tabs`: `--since 74`; the `session` family: `--since 16 -- --tag meas-ci:session:2026-09-24`); job counts are the campaign runs' jobs, read from their job lists. Recorded 2026-09-20, the 9.8 rows 2026-09-22, the 9.9 rows 2026-09-24, the three re-measured 9.5 rows 2026-09-24, `mail-client`'s keys-only row 2026-09-27, `code-editor`'s row re-read with its idle phase from 200 s 2026-09-28 (9.5 D83), `web-browser`'s with its renderers the same day (9.5 D84), `mail-client`'s two with each Gecko pool's shortened spelling folded into the pool and the 04:00 `glean.mps` run out of the idle residual the same day (9.5 D90, D91), `code-editor`'s stop re-read against the Word recording's 57 windows 2026-09-29 (9.5 D99); the 9.5 rows were first recorded a day earlier against one headline median per archetype, which D29 and D30 replaced. Every gap mean and wake rate re-read on 2026-09-24 under 9.5 D71 (gaps over merged wake times, wrapped round the span; rates from exact counts); the 9.8 renderer residuals re-classed as sparse components on 2026-09-25 (9.8 D27); the 9.9 pool rebuilt the same day with sysstat's jobs outside and two sparse components (9.9 D32, D33); every table's mean re-read on 2026-09-26 as the table carries it, count-weighted over the repeats (9.5 D78).
+Every campaign behind a measured archetype value: per archetype the repeats, the values the rule covers, the widest margin among them, why it stopped, and the machine draws it took. Method: `measurement-campaign-workflow.md`. Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10` (`upgrade`: `--since 100`; `soffice`: `--since 38`; `chrome`: `--since 438 --exclude 16@35712250969`; `code`: `--since 566 --exclude 42@36126168885`; `thunderbird-send`: `--since 150 --exclude 29`, its keys-only campaign `--since 604`; the `desktop` family: `--since 21`, its `chrome-tabs`: `--since 74`, its `launch-*`: `--since 81` for `soffice`, `mpv-video`, `mpv-audio`, `kdenlive` and `element`, `--since 84` for the rest; the `session` family: `--since 16 -- --tag meas-ci:session:2026-09-24`); job counts are the campaign runs' jobs, read from their job lists. Recorded 2026-09-20, the 9.8 rows 2026-09-22, the 9.9 rows 2026-09-24, the three re-measured 9.5 rows 2026-09-24, `mail-client`'s keys-only row 2026-09-27, `code-editor`'s row re-read with its idle phase from 200 s 2026-09-28 (9.5 D83), `web-browser`'s with its renderers the same day (9.5 D84), `mail-client`'s two with each Gecko pool's shortened spelling folded into the pool and the 04:00 `glean.mps` run out of the idle residual the same day (9.5 D90, D91), `code-editor`'s stop re-read against the Word recording's 57 windows 2026-09-29 (9.5 D99); the 9.5 rows were first recorded a day earlier against one headline median per archetype, which D29 and D30 replaced. Every gap mean and wake rate re-read on 2026-09-24 under 9.5 D71 (gaps over merged wake times, wrapped round the span; rates from exact counts); the 9.8 renderer residuals re-classed as sparse components on 2026-09-25 (9.8 D27); the 9.9 pool rebuilt the same day with sysstat's jobs outside and two sparse components (9.9 D32, D33); every table's mean re-read on 2026-09-26 as the table carries it, count-weighted over the repeats (9.5 D78).
 
 ## Campaigns
 
@@ -442,6 +442,38 @@ Before the campaign, two dry runs: #72, whose listing read every process as the 
 
 Pooled in `task-9.10-scenarios-timelines/campaign/chrome-tabs/results/` (`pooled.json`, `results.md`).
 
+## 9.10 — the launch phases of the applications started mid-file (ten entries' `launch`)
+
+Repeats 1–5 of each of ten subjects on the AMD EPYC 7763, each landing once, all valid. Each subject is an entry's own campaign's launch (9.10 D133): LibreOffice 24.2.7.2 on the generated document (`office-writer`), Thunderbird 157.0 with its compose window (`mail-client`), Kdenlive 23.08.5 on 9.5's project (`video-editor`), `mpv` 0.37.0 on the video and the audio (`video-player`, `audio-player`), Element Desktop 1.12.30 signed in to the local homeserver (`chat-client`), the Steam client build 1788652215 logged out (`game-client`), Google Chrome 154.0.8037.57 on 9.5's typed page (`web-browser`) and on 9.8's hidden-tab window (`renderer-hidden`), and the loopback call opened in a Chrome running past `web-browser`'s settle (`video-call`, D134). Each job launches the subject once unmeasured through its settle, quits it by the program's own command, reads the files it mapped whole, and traces the next launch with `perf sched record` from the exec (the call: its opening) to the end of the entry's settle (D132, D135). The method's checks: the tree's exit within 60 s of the quit (120 s for the Steam client); the mapped files' cached fraction at least 0.99 before the traced launch (1.0000 in every repeat, over the files the host can read); the traced tree holding no harness process; the trace stopped cleanly with no lost events; Element signed in, the Steam client logged out, the call connected, the hidden-tab window's 13 tab renderers at the gate.
+
+86 jobs: 50 landed, 36 stopped by the machine gate.
+
+A launch phase is replayed (D136): no value is on the stability rule's list, and each repeat is carried as observed. Per entry, over the five repeats:
+
+| entry | subject | phase, s | CPU, ms | wakes | first 10 s, ms/s (mean) |
+|---|---|---|---|---|---|
+| `office-writer` | `launch-soffice` | 40.8 | 1,641–1,709 | 838–863 | 162.8 |
+| `mail-client` | `launch-thunderbird-send` | 408.9 | 3,217–3,386 | 13,083–13,176 | 227.9 |
+| `video-editor` | `launch-kdenlive` | 30.6 | 2,096–2,259 | 1,836–1,893 | 217.6 |
+| `video-player` | `launch-mpv-video` | 30.6–30.7 | 3,671–4,488 | 23,809–26,888 | 138.5 |
+| `audio-player` | `launch-mpv-audio` | 30.6 | 437–479 | 6,849–6,991 | 32.3 |
+| `chat-client` | `launch-element` | 53.2–53.7 | 3,096–3,355 | 9,745–9,768 | 296.0 |
+| `game-client` | `launch-steam` | 905.8–916.7 | 21,367–25,352 | 309,067–315,165 | 423.9 |
+| `web-browser` | `launch-chrome` | 420.6 | 2,760–3,300 | 24,628–25,898 | 153.0 |
+| `renderer-hidden` | `launch-chrome-hidden`, Chrome's whole tree | 651.2 | 3,996–4,494 | 25,646–27,482 | 274.1 |
+| `video-call` | `launch-webrtc` | 210.1 | 121,142–124,276 | 414,509–418,464 | 171.0 |
+
+Reported beside them:
+
+- **`renderer-hidden`'s streams.** The 12 background tabs' renderers of each launch, the control tab's identified at 10.8–11.0 wakes/s against 0.88–1.10 for the next renderer: 52.4–65.0 ms of CPU and 528–714 wakes each over the phase. No renderer started after the gate in any repeat.
+- **The warm state.** The fraction is over the mapped files the host can read: Thunderbird's snap maps 160 of its 211 files from content snaps mounted in its own namespace, and the Steam client's web helpers 131–134 of 399–418 from their pressure-vessel container; Element 1 of 160. In the traces, the launched tree's waits in uninterruptible sleep total 0.004–0.115 s per traced launch (Thunderbird 0.045–0.068 s, the Steam client 0.066–0.112 s).
+- **The quits.** LibreOffice, Thunderbird and Element by Ctrl+Q, Element's confirmation answered; `mpv` by `q`; Kdenlive, Chrome and the Steam client by their main window's own close. Every tree exited in 1–5 s, Element's in 5 s after its confirmation; the Steam client's fallback, `steam -shutdown`, never ran.
+- **The builds.** The vendors' repositories serve the current build: Thunderbird 157.0 against `mail-client`'s 156.0 and 156.0.1, Element 1.12.30 against `chat-client`'s 1.12.28, Google Chrome 154.0.8037.57 against the 152 and 153 `web-browser`, `renderer-hidden` and `video-call` were measured on.
+
+Before the campaign, four dry runs (#77–#80), the gate open on any model, their findings amending the method (§8): `fincore` installed for the warm check; Kdenlive's and Chrome's shortcuts ignored under Xvfb with no window manager, both closed by their window's own close; Kdenlive's first window by class a secondary one; Thunderbird's quit sent to its main window; Element's confirmation answered; the Steam client's `steam -shutdown` replaced by its sign-in window's close; the hidden tabs' renderers taken at the gate, a later renderer reported and not a stream.
+
+Pooled in `task-9.10-scenarios-timelines/campaign/launch/results/` (`launch-<subject>-pooled.json`, `results.md`); the streams in `dataset/launch/`.
+
 ## Machine draws
 
 The build campaign, complete: 28 jobs, 14 on the AMD EPYC 7763 (50.0 %), 12 stopped by the machine gate — Intel Xeon Platinum 8573C 4, AMD EPYC 9V74 4, AMD EPYC 9V45 2, Intel Xeon Platinum 8370C 1, Intel Xeon 6973P-C 1 — and 2 cancelled.
@@ -471,3 +503,5 @@ The 9.10 Kdenlive export campaign, complete: 56 jobs — 30 landed on the AMD EP
 The 9.10 Déjà Dup backup campaign, complete: 56 jobs — 30 landed on the AMD EPYC 7763 (53.6 %; 28 pooled, repeats 12 and 25 left out), 26 stopped by the machine gate: AMD EPYC 9V74 11, AMD EPYC 9V45 7, Intel Xeon Platinum 8573C 4, Intel Xeon 6973P-C 3, Intel Xeon Platinum 8370C 1. Its eight dry runs (#175–#182): 4 drew the EPYC 7763, 4 stopped (AMD EPYC 9V74 3, AMD EPYC 9V45 1).
 
 The 9.10 Chrome tab-set campaign, complete: 9 jobs — 5 landed on the AMD EPYC 7763 (55.6 %, all pooled), 4 stopped by the machine gate: AMD EPYC 9V74 2, AMD EPYC 9V45 1, Intel Xeon 6973P-C 1. Its two dry runs, the gate open on any model: #72 on an Intel Xeon Platinum 8370C, #73 on the EPYC 7763 (`task-9.10-scenarios-timelines/campaign/chrome-tabs/machine-draws.md`).
+
+The 9.10 launch campaign, complete: 86 jobs — 50 landed on the AMD EPYC 7763 (58.1 %, all pooled), 36 stopped by the machine gate: AMD EPYC 9V45 14, AMD EPYC 9V74 12, Intel Xeon Platinum 8370C 4, Intel Xeon Platinum 8573C 3, Intel Xeon 6973P-C 3. Its four dry runs (#77–#80), the gate open on any model: 18 jobs, 11 on the EPYC 7763 (`task-9.10-scenarios-timelines/campaign/launch/machine-draws.md`).

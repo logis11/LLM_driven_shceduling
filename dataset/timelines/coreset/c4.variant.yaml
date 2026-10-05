@@ -5,6 +5,8 @@
 variants:
   - id: c4-gaming
     from: c1-gaming.timeline.yaml
+    # the injected chat client runs its observed launch phase first, replayed
+    # (meas-ci:desktop:2026-10-04b; 9.10 D21, D132-D138)
     ops:
       - add-task: {id: injected-chat, name: element-desktop,
                    archetype: chat-client, arrive: 30s, depart: 60s}
@@ -19,6 +21,9 @@ variants:
 
   - id: c4-compile
     from: c1-compile.timeline.yaml
+    # the injected browser and its four hidden tabs' renderers run their
+    # observed launch phases first, replayed (meas-ci:desktop:2026-10-04b;
+    # 9.10 D21, D132-D138)
     ops:
       - add-task: {id: injected-browser, name: chrome,
                    archetype: web-browser, arrive: 30s, depart: 60s}

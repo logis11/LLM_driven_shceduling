@@ -524,7 +524,9 @@ def test_the_fold_in_regenerates_the_library_s_entries_from_the_pooled_record(re
         sys.argv = argv
     fragment = out.read_text().rstrip("\n")
     entries = fragment[fragment.index("\n  renderer-hidden:\n"):]   # the library holds the entries, not the fold's header
-    assert entries in (repo_root / "dataset" / "archetypes.yaml").read_text()
+    # each entry's `launch` param is launch_fold_in.py's (9.10 D136), checked by its own --check
+    library = re.sub(r"\n      launch:\n        \{stream: launch-[^\n]*\}", "", (repo_root / "dataset" / "archetypes.yaml").read_text())
+    assert entries in library
     for app in fold_in.FOLDED:
         assert f"\n  {fold_in.IDS[app]}:\n" in fragment
     assert "\n  renderer-visible:\n" not in fragment   # 9.10 D16: bound nowhere, out of the library

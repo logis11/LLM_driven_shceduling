@@ -50,6 +50,13 @@
 #     processes (9.9) carry `components` alone, one per process instance and
 #     thread comm (`<instance>/<comm>`) where one task holds several processes
 #     of a program
+#   - `launch` (9.10 D21, D136–D138): the observed launch phase of an entry a
+#     timeline starts mid-file, a stream file under dataset/launch/ — per pooled
+#     repeat, the phase's length and its wakes, each its time from the phase's
+#     start, its run and its thread. A task arriving after 0 s replays one repeat
+#     from its arrival, then its steady stream begins; inputs, focus cadence and
+#     operations land over the replay (D137); the periodic entries bin it onto
+#     their cycle grid (D138)
 #   - all source ids resolve against dataset/sources.yaml; locators validate
 #     against each entry's locator_pattern
 
@@ -69,6 +76,8 @@ archetypes:
             - WAIT: input
             - RUN: event
     params:
+      launch:
+        {stream: launch-office-writer, sampling: per-task, source: "meas-ci:desktop:2026-10-04b"}
       input_run:
         {dist: quantiles, p: [2049, 2364, 2532, 2850, 3230, 6328, 9551, 10167, 11367, 62153], min: 0, max: 194092, means: [1870.685, 2236.17, 2449.671, 2703.725, 3043.957, 3988.081, 8731.309, 9832.528, 10615.573, 13356.447, 166364.952], sampling: per-iteration, source: "meas-ci:interactive:2026-09-18"}
       stimulus:
@@ -172,6 +181,8 @@ archetypes:
             - WAIT: input
             - RUN: event
     params:
+      launch:
+        {stream: launch-mail-client, sampling: per-task, source: "meas-ci:desktop:2026-10-04b"}
       input_run:
         {dist: quantiles, p: [2512, 2890, 3210, 3802, 4652, 5793, 6741, 8835, 47869, 130088], min: 1724, max: 219349, means: [2305.741, 2727.825, 3059.923, 3527.053, 4225.718, 5219.134, 6171.865, 7487.995, 17918.894, 73530.175, 197501.311], sampling: per-iteration, source: "meas-ci:interactive:2026-09-27"}
       stimulus:
@@ -340,6 +351,8 @@ archetypes:
             - WAIT: input
             - RUN: event
     params:
+      launch:
+        {stream: launch-web-browser, sampling: per-task, source: "meas-ci:desktop:2026-10-04b"}
       input_run:
         {dist: quantiles, p: [0, 2686, 2931, 3463, 4072, 4731, 5530, 6232, 10491, 21298], min: 0, max: 108991, means: [0, 2182.462, 2818.833, 3206.32, 3788.456, 4372.86, 5060.035, 5823.981, 7636.888, 12424.809, 56568.485], sampling: per-iteration, source: "meas-ci:interactive:2026-09-20"}
       stimulus:
@@ -519,6 +532,8 @@ archetypes:
             - WAIT: input
             - RUN: event
     params:
+      launch:
+        {stream: launch-video-editor, sampling: per-task, source: "meas-ci:desktop:2026-10-04b"}
       components:
         - comm: "kdenlive"
           threads: 2
@@ -585,6 +600,8 @@ archetypes:
             - TIMER: period
             - RUN: cycle_run
     params:
+      launch:
+        {stream: launch-video-player, sampling: per-task, source: "meas-ci:desktop:2026-10-04b"}
       period: {dist: constant, value_us: 33348, sampling: per-task, source: "meas-ci:playback:2026-09-18"}
       cycle_run: {dist: quantiles, p: [2281, 2661, 2800, 3189, 3982, 4890, 5376, 5665, 6406, 7519], min: 1747, max: 16020, means: [2131.486, 2529.382, 2736.913, 2980.484, 3654.718, 4368.632, 5124.664, 5502.455, 5935.966, 6753.422, 8148.534], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
     lifetime: segment-bound
@@ -607,6 +624,8 @@ archetypes:
             - TIMER: period
             - RUN: cycle_run
     params:
+      launch:
+        {stream: launch-audio-player, sampling: per-task, source: "meas-ci:desktop:2026-10-04b"}
       period: {dist: constant, value_us: 49635, sampling: per-task, source: "meas-ci:playback:2026-09-18"}
       cycle_run: {dist: quantiles, p: [145, 186, 204, 250, 328, 438, 531, 600, 709, 876], min: 84, max: 2381, means: [133.771, 169.604, 196.183, 227.504, 283.826, 382.233, 480.063, 561.654, 642.299, 756.705, 1203.214], sampling: per-iteration, source: "meas-ci:playback:2026-09-18"}
     lifetime: segment-bound
@@ -629,6 +648,8 @@ archetypes:
             - TIMER: period
             - RUN: cycle_run
     params:
+      launch:
+        {stream: launch-video-call, sampling: per-task, source: "meas-ci:desktop:2026-10-04b"}
       period: {dist: constant, value_us: 10001, sampling: per-task, source: "meas-ci:playback:2026-09-20"}
       cycle_run: {dist: quantiles, p: [340, 417, 508, 751, 1187, 2823, 7379, 9992, 12221, 13934], min: 111, max: 18851, means: [318.297, 380.154, 465.067, 632.326, 958.966, 1683.52, 3699.044, 9042.775, 10953.204, 12731.146, 14512.667], sampling: per-iteration, source: "meas-ci:playback:2026-09-20"}
     lifetime: segment-bound
@@ -651,6 +672,8 @@ archetypes:
             - WAIT: timer
             - RUN: event
     params:
+      launch:
+        {stream: launch-renderer-hidden, sampling: per-task, source: "meas-ci:desktop:2026-10-04b"}
       components:
         - comm: "HangWatcher"
           threads: 1
@@ -709,6 +732,8 @@ archetypes:
             - WAIT: timer
             - RUN: event
     params:
+      launch:
+        {stream: launch-chat-client, sampling: per-task, source: "meas-ci:desktop:2026-10-04b"}
       components:
         - comm: "ThreadPoolForeg"
           threads: [11, 13]
@@ -762,6 +787,8 @@ archetypes:
             - WAIT: timer
             - RUN: event
     params:
+      launch:
+        {stream: launch-game-client, sampling: per-task, source: "meas-ci:desktop:2026-10-04b"}
       components:
         - comm: "steamwebhelper"
           threads: [4, 6]

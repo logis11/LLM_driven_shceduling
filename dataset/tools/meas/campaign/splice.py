@@ -2,7 +2,8 @@
 """Splice fold_in.py's YAML fragment into dataset/archetypes.yaml: every entry
 in the fragment replaces the entry of the same id in the library, text for
 text, so hand-written entries and comments elsewhere are untouched. An entry
-missing from the library is appended under `archetypes:`.
+missing from the library is appended under `archetypes:`. A replaced entry keeps
+its `launch` param, which launch_fold_in.py writes (9.10 D136), as its first param.
 
 splice.py <fragment.yaml> <archetypes.yaml>
 """
@@ -11,6 +12,8 @@ import re
 import sys
 
 import yaml
+
+LAUNCH = re.compile(r"^    params:\n(      launch:\n        \{stream: [^\n]*\}\n)", re.M)
 
 
 def blocks(text):
@@ -34,6 +37,9 @@ def main():
         lb = blocks(lib)
         if aid in lb:
             la, lbnd = lb[aid]
+            kept = LAUNCH.search(lib[la:lbnd])
+            if kept and not LAUNCH.search(entry):
+                entry = entry.replace("    params:\n", "    params:\n" + kept.group(1), 1)
             # keep the blank-line spacing the library had after the entry
             lib = lib[:la] + entry + lib[lbnd:].lstrip("\n")
             replaced.append(aid)

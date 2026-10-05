@@ -4,7 +4,9 @@
 # The four renderer-hidden tasks are the other tabs' page renderers of one
 # five-tab window: five tabs from Firefox's Linux telemetry (glam; 9.10 D15,
 # D16), one renderer per tab observed in Chrome (meas-ci:desktop:2026-10-04;
-# 9.10 D126-D129, D131).
+# 9.10 D126-D129, D131). The writer and Thunderbird, started mid-file, run
+# their observed launch phases first, replayed (meas-ci:desktop:2026-10-04b;
+# 9.10 D21, D132-D138); the file ends inside Thunderbird's.
 meta:
   id: c3-workday
   seed: 301

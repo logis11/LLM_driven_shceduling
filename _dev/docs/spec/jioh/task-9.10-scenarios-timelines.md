@@ -53,7 +53,7 @@ The tab count is Firefox's Linux telemetry median per-client peak, 4.67, so five
 
 ### 8. Launch work
 
-An application a file starts mid-file runs its observed launch phase first. Applications whose source holds no launch data arrive steady, stated (D21).
+An application a file starts mid-file runs its observed launch phase first. Applications whose source holds no launch data arrive steady, stated (D21). The observed launch is warm: an unmeasured first launch, the program's own quit, then the measured launch (D132, D135). Each entry's launch is its own campaign's, traced from the exec to the end of the settle its steady values began after (D133); `video-call`'s is a call opened in a Chrome already running past `web-browser`'s settle (D134). The entry carries each pooled repeat's observed wakes, and a task started mid-file replays one, then runs steady (D136); the file's inputs, focus cadence and operations land over the replay (D137); the periodic entries bin it onto their cycle grid (D138). The campaign, `meas-ci:desktop:2026-10-04b`, holds at 5 repeats of each of the ten subjects, its records release `meas-ci-desktop-2026-10-04b` (D139); ten entries carry their launch phases, and the six files that start them mid-file are rebound (D140).
 
 ### 9. Names, states and tiers
 
@@ -78,7 +78,6 @@ A timeline's bound values carry a source tag or a design label, checked by the l
 
 Each flagged open in its decision, for the campaign's method or the rebinding:
 
-- **D21, the launch phases:** the applications, cold or warm launch, and the launch phase's form.
 - **The download's size** in `c2-p2a`: not among D17's jobs; design at scope-card item 56 until decided (D42).
 - **At rebinding:** each file's length set by its jobs (D17); the new names' observed `comm`s (D25) and tiers (D27); the source tags (D32); the registry entries minted (D34).
 - **Declared class:** the indexer's declared scheduling class, 9.11's.

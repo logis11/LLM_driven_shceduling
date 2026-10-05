@@ -2536,3 +2536,62 @@ Stated: the wakes inside a cycle merge into its one job, as in the steady entry.
 Not taken: the task split at the phase's end, a replay task departing as the periodic one arrives; TIMER's grid anchored at its first TIMER instead, a change to the simulator's contract and the metrics.
 
 No file changed yet.
+
+## D139 — the launch campaign's raw records are release `meas-ci-desktop-2026-10-04b` (2026-10-05)
+
+By 인지오's decision (Q22), the method's §7. The release is created at the fold-in commit. It holds:
+
+- the 50 landings, repeats 1–5 of each of the ten subjects (runs #81–#98), all pooled;
+- the 18 dry-run jobs, runs #77–#80, with their raw `perf` data: seven of #77's ten and #78's Kdenlive stopped at the quit (method §8);
+- the reports of the 36 jobs the machine gate stopped, in `gated-reports.zip`.
+
+The archives hold the runner's scheduler traces, the launched trees' command lines and roles, the files the first launch mapped and their cached fractions, Xvfb screenshots of the applications' windows, the local Synapse homeserver's log, the runner spec and the report keys. No account credential or network capture; the Steam client stays logged out.
+
+No file changed yet.
+
+## D140 — the launch campaign holds at 5 repeats of each subject; ten entries carry their launch phases, the six files that start them mid-file rebound (2026-10-05)
+
+D136's rule: a launch phase is carried as observed, each pooled repeat a stream. The campaign of D132–D139, `meas-ci:desktop:2026-10-04b`, ran repeats 1–5 of each of the ten subjects, each landing once on the AMD EPYC 7763, all fifty valid (runs #81–#98; method §8; `measurement-campaign-record.md`, "9.10 — the launch phases of the applications started mid-file"). The workflow's floor of five repeats closes it, and no repeat was added. Over the five repeats:
+
+| entry | phase, s | CPU, ms | first 10 s, ms/s (mean) |
+|---|---|---|---|
+| `office-writer` | 40.8 | 1,641–1,709 | 162.8 |
+| `mail-client` | 408.9 | 3,217–3,386 | 227.9 |
+| `video-editor` | 30.6 | 2,096–2,259 | 217.6 |
+| `video-player` | 30.6–30.7 | 3,671–4,488 | 138.5 |
+| `audio-player` | 30.6 | 437–479 | 32.3 |
+| `chat-client` | 53.2–53.7 | 3,096–3,355 | 296.0 |
+| `game-client` | 905.8–916.7 | 21,367–25,352 | 423.9 |
+| `web-browser` | 420.6 | 2,760–3,300 | 153.0 |
+| `renderer-hidden`, each of the 12 tabs' renderers | 651.2 | 52.4–65.0 | — |
+| `video-call`, from the call's opening | 210.1 | 121,142–124,276 | 171.0 |
+
+Stated: the warm check's fraction, 1.0000 in every repeat, is over the mapped files the host can read. Thunderbird's snap maps 160 of its 211 files from content snaps mounted in its own namespace, and the Steam client's web helpers 131–134 of 399–418 from their pressure-vessel container. The traces show the warm state: the launched tree's waits in uninterruptible sleep total 0.004–0.115 s per traced launch, against the 1.1–43.7 s the runner's cold first Chrome launch took to map its window (D132; method §8).
+
+Stated: the vendors' repositories serve the current build, so Thunderbird is 157.0 against `mail-client`'s 156.0 and 156.0.1, Element 1.12.30 against `chat-client`'s 1.12.28, and Google Chrome 154.0.8037.57 against the 152 and 153 `web-browser`, `renderer-hidden` and `video-call` were measured on. The launch phases join steady values measured on the earlier builds.
+
+Applied:
+
+- `dataset/launch/`, one stream file per entry (`launch_fold_in.py`): 21 MB in all, `video-call`'s 10.7 MB (2,080,805 wakes over its five repeats) and `game-client`'s 8.6 MB (1,554,842) the largest;
+- each of the ten entries in `archetypes.yaml` gains `launch: {stream: launch-<entry>, sampling: per-task, source: "meas-ci:desktop:2026-10-04b"}`, and the library's encoding rules state the param;
+- the headers of `c3-workday`, `c3-evening` and `c3-creation`, and the `c4-compile`, `c4-gaming` and `c6-fold` variants, name the launch phases' source;
+- `campaign/splice.py` keeps a replaced entry's `launch` param, which 9.5's fold-in does not write; the 9.8 fold-in's regeneration test reads the library without it.
+
+The dataset was recompiled (`compile.py --allow-window`). 12 of 100 artifacts change beyond the library's hash: the six files in both modes, and no other. The demand classes hold:
+
+| file | demand before | after | class |
+|---|---|---|---|
+| `c3-creation` | 0.9410 | 0.9417 | oversubscribed |
+| `c3-evening` native | 0.4213 | 0.4453 | oversubscribed |
+| `c3-evening` single | 0.8766 | 0.9006 | oversubscribed |
+| `c3-workday` | 4.6554 | 4.6660 | oversubscribed |
+| `c4-compile` | 0.8818 | 0.9112 | calibration |
+| `c4-gaming` native | 0.7014 | 0.7494 | calibration |
+| `c4-gaming` single | 0.9158 | 0.9638 | calibration |
+| `c6-fold` | 0.1349 | 0.3144 | calibration |
+
+`c3-creation`'s transcode segment keeps its end, 3,212 s (D78's arithmetic): `kdenlive`'s CPU after 240 s moves from 227.758 ms to 227.610 ms, its steady stream now beginning at its launch phase's end.
+
+Lint reports the seven demand-window files it reported before, and nothing else: `c2-p1a`, `c2-p1b`, `c2-p3a`, `c2-p3b`, `c3-creation` (0.94), `c3-evening` (0.90) and `c3-workday` (4.67). `batch_fold_in.py --check` and `launch_fold_in.py --check` pass. Tests: 409 passed, 1 skipped, 1 xfailed, with the launch campaign's tooling, its compilation and its fold-in tested.
+
+Hands to 9.14: the six files' compiled artifacts and demand (D21's "the arcs' and the injection files' demand and terms"). Hands to 9.15: `docs/workload/measurement-overview.md` §4's "Steady behaviour, not launch work", with the launch phases added (D21), and the `dataset/launch/` streams wherever the docs list the dataset's files.

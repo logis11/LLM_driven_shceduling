@@ -19,6 +19,9 @@ variants:
 
   - id: c6-fold
     from: c1-browsing.timeline.yaml
+    # the call runs its observed launch phase first: the call opened in the
+    # running browser, binned onto its cycle grid (meas-ci:desktop:2026-10-04b;
+    # 9.10 D30, D134, D136, D138)
     ops:
       - set-segments:
           - {from: 0s, to: 30s, mode: browsing, attributes: {background_wanted: true},
