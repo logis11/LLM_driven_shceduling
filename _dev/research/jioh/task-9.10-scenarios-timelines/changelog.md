@@ -2806,3 +2806,23 @@ In `meas-ci:desktop:2026-10-05b`'s launch re-trace, repeats 2 and 5 carry 13 ren
 Taken under 인지오's delegation, on D127 and the launch campaign's rule: past the control tab's and the 12 background tabs' count, the page renderers with the lowest client ids are the tabs' — Chromium numbers its renderers as it starts them, and the tabs open at launch (`desktop/launch.py`, `client_ids`). The five landings re-analysed locally with `launch.py analyze` from their raw traces: repeats 1, 3 and 4 reproduce the runner's streams and summary byte for byte; repeats 2 and 5 lose the late renderer, 13 page renderers and 12 streams, their report keys rewritten and marked `launch.reanalysed`. The launch phase runs 1,051.2 s in each, its tree's CPU 4,096.8–5,123.3 ms. Test: `test_meas_launch.py`.
 
 The steady repeats' first batch, `chrome-hidden` 1–5, holds the stability rule under 9.8's per-value treatments as `desktop/pool.py` applies them (D17's run means following the runner's speed, 9.5 D57's components varying between sessions, D27's sparse residual), 12 renderers measured in each; every repeat valid. Pooled records in `campaign/renderer-hidden/results/`.
+
+## D156 — `renderer-hidden` folded from `meas-ci:desktop:2026-10-05b`, Google Chrome 154; the build split from `web-browser` stated (2026-10-05)
+
+By 인지오's decision (Q35). D152's repeats ran the runner image's Google Chrome 154.0.8037.57, the build Google's repository serves (9.5 D69), against the 152 and 153 9.8's campaign and `web-browser` ran. Against 9.8's 19 repeats the page's own thread wakes 1.72 times as often (0.0669 against 0.0389 per renderer a second) with runs 35 % shorter (0.062 against 0.096 ms), its settling past; `Chrome_ChildIOT` wakes 2.51 times as often; `Compositor`, `PerfettoTrace` and `ThreadPoolServi` 1.28 times; `HangWatcher` holds at 0.100/s. The renderer's wakes are 0.211 against 0.169/s, its CPU share 9.6 against 9.2 × 10⁻⁵.
+
+- **The entry** is folded from this campaign's 5 repeats (`desktop/fold_in.py`, which now takes the tag from the pooled record and folds that campaign's subjects; 9.8's three entries regenerate from 9.8's record byte for byte). Its scope states the build, the build split from `web-browser`, D149's probe past the old settle and D152's swing past the new one.
+- **Its statements re-read on this campaign.** In 100 s windows over the 5 repeats (`meas/windows.py`): the page thread 0.068 ms in the first 100 s and 0.057–0.072 after, the residual waking at 3.6 times its phase rate in the first 100 s, the windows holding 5.2 % of the CPU above the median window (9.8: 13.3 %). Within one run, on D149's 3,600 s probe from 400 s, 600 s windows every 60 s (`desktop/within_run.py`): `Chrome_ChildIOT` ±8.1 % (9.8: ±17.7 %); `Compositor` and `PerfettoTrace` ±30.6 % (9.8: ±10.8 %), each 4–6 wakes per renderer a phase, kept as components varying between sessions (9.8 D26), their spread within a run stated beside their spread across the repeats; the residual, now `MemoryInfra` and `ThreadPoolServi`, 1–4 wakes per renderer a window, ±64.0 % within one run, sparse (9.8 D27).
+- **Its launch stream** is D155's five re-analysed landings, `--source meas-ci:desktop:2026-10-05b`.
+
+`dataset/tools/meas/control_report.py` names each 9.8 subject's pooled record (`pool_98`) and `kdenlive`'s idle pool (`IDLE_FROM_95`), which `windows.py`, `burstiness.py` and `desktop/probe_windows.py` read.
+
+Not taken: 9.8's values kept with D152's settling bias stated; `web-browser` re-measured on Chrome 154.
+
+Hands to 9.14: the build split beside the Chrome files' terms. Hands to 9.16: the split, and the burstiness and window readings re-run on this entry's pool.
+
+## D157 — a fourth release at the fold-in commit: the hidden-renderer campaign (2026-10-05)
+
+By 인지오's decision (Q36). `meas-ci-desktop-2026-10-05b` takes D151's form — every artifact of its runs zipped as `<artifact>-<run id>.zip`, the gated jobs' reports in `gated-reports.zip` — and is created at the fold-in commit: `chrome-hidden`'s repeats 1–5 and `launch-chrome-hidden`'s repeats 1–5, as the runner wrote them, the 6 gated jobs' reports beside them. `renderer-hidden`'s values and its launch stream rest on them, and Actions artifacts expire after 90 days. Launch repeats 2 and 5 are released raw; their streams are re-derived from their traces by `launch.py analyze` (D155).
+
+Not taken: no release; the campaign folded into `meas-ci-probes-2026-10-05`.

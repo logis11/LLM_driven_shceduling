@@ -514,31 +514,40 @@ def test_the_fold_in_regenerates_the_library_s_entries_from_the_pooled_record(re
     # untraced control's reading in their notes (the 9.5 untraced-control spec, decision 20)
     import sys
     from meas.desktop import fold_in
-    campaign = repo_root / "_dev" / "research" / "jioh" / "task-9.8-browser-comms" / "campaign"
-    pooled, control = campaign / "results" / "pooled.json", campaign / "results-control" / "control.json"
-    out = tmp_path / "fold.yaml"
-    argv, sys.argv = sys.argv, ["fold_in.py", str(pooled), str(out), "--control", str(control)]
-    try:
-        fold_in.main()
-    finally:
-        sys.argv = argv
-    fragment = out.read_text().rstrip("\n")
-    entries = fragment[fragment.index("\n  renderer-hidden:\n"):]   # the library holds the entries, not the fold's header
+    research = repo_root / "_dev" / "research" / "jioh"
+    control = research / "task-9.8-browser-comms" / "campaign" / "results-control" / "control.json"
+    # 9.8's record writes the chat and Steam clients; 9.10 D152's writes renderer-hidden past its page thread's settling
+    records = {research / "task-9.8-browser-comms" / "campaign" / "results" / "pooled.json": ("chat-client", "game-client"),
+               research / "task-9.10-scenarios-timelines" / "campaign" / "renderer-hidden" / "results" / "pooled.json":
+                   ("renderer-hidden",)}
     # each entry's `launch` param is launch_fold_in.py's (9.10 D136), checked by its own --check
     library = re.sub(r"\n      launch:\n        \{stream: launch-[^\n]*\}", "", (repo_root / "dataset" / "archetypes.yaml").read_text())
-    assert entries in library
-    for app in fold_in.FOLDED:
-        assert f"\n  {fold_in.IDS[app]}:\n" in fragment
-    assert "\n  renderer-visible:\n" not in fragment   # 9.10 D16: bound nowhere, out of the library
+    folded = []
+    for k, (pooled, ids) in enumerate(records.items()):
+        out = tmp_path / f"fold{k}.yaml"
+        argv, sys.argv = sys.argv, ["fold_in.py", str(pooled), str(out), "--control", str(control)]
+        try:
+            fold_in.main()
+        finally:
+            sys.argv = argv
+        fragment = out.read_text().rstrip("\n")
+        entries = fragment[fragment.index(f"\n  {ids[0]}:\n"):]   # the library holds the entries, not the fold's header
+        assert entries in library
+        for aid in ids:
+            assert f"\n  {aid}:\n" in fragment
+        assert "\n  renderer-visible:\n" not in fragment   # 9.10 D16: bound nowhere, out of the library
+        folded += ids
+    assert sorted(folded) == sorted(fold_in.IDS[a] for a in fold_in.FOLDED)
 
 
 def test_the_renderer_scopes_state_the_chrome_builds_they_pool(repo_root, tmp_path):
     # 9.5 D69: Google's repository serves only its current Chrome, so the build is recorded per repeat and the census
-    # stated in the observed line; the hidden renderer's added repeats (D31) ran 153
+    # stated in the observed line; 9.10 D156: the hidden renderer re-measured on 154, the split from web-browser stated
     import sys
     from meas.desktop import fold_in
     out = tmp_path / "fold.yaml"
-    pooled = repo_root / "_dev" / "research" / "jioh" / "task-9.8-browser-comms" / "campaign" / "results" / "pooled.json"
+    pooled = (repo_root / "_dev" / "research" / "jioh" / "task-9.10-scenarios-timelines" / "campaign" / "renderer-hidden"
+              / "results" / "pooled.json")
     argv, sys.argv = sys.argv, ["fold_in.py", str(pooled), str(out)]
     try:
         fold_in.main()
@@ -547,8 +556,9 @@ def test_the_renderer_scopes_state_the_chrome_builds_they_pool(repo_root, tmp_pa
     import yaml
     doc = yaml.safe_load("archetypes:\n" + out.read_text())["archetypes"]
     hidden = doc["renderer-hidden"]["validation_stats"]["scope"]
-    assert ("Google Chrome 152.0.7977.82 (14 repeats), Google Chrome 153.0.8010.52 (5: 12, 13, 14, 15, 16), "
-            "launched as web-browser was") in hidden
+    assert "Google Chrome 154.0.8037.57 (5 repeats), launched as web-browser was" in hidden
+    assert "grace-settle 1,030 s" in hidden and "the two halves of one browser on two builds" in hidden
+    assert doc["renderer-hidden"]["validation_stats"]["run"].startswith("desktop:2026-10-05b, repeats [1, 2, 3, 4, 5]")
 
 
 def test_the_run_means_excepted_for_the_runner_s_speed_state_their_share_of_the_phase_s_cpu(repo_root, tmp_path):
@@ -567,8 +577,7 @@ def test_the_run_means_excepted_for_the_runner_s_speed_state_their_share_of_the_
     doc = yaml.safe_load("archetypes:\n" + out.read_text())["archetypes"]
     assert ("`VizCompositorTh` run mean 0.0818 ms ±5.6 % (0.066–0.089 ms). Their runs hold 32.4 %, 25.3 %, 16.8 % and "
             "5.7 % of the phase's CPU, 80.2 % together (D37).") in doc["game-client"]["validation_stats"]["scope"]
-    for aid in ("renderer-hidden", "chat-client"):
-        assert "Their runs hold" not in doc[aid]["validation_stats"]["scope"], aid
+    assert "Their runs hold" not in doc["chat-client"]["validation_stats"]["scope"]
 
 
 def test_the_renderer_mode_reads_the_probe_past_a_skip(tmp_path):

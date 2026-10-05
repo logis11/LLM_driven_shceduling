@@ -653,8 +653,11 @@ def test_repeats_that_share_an_exclusion_reason_are_named_once():
 
 POOLS_95 = ([("results-same-machine", a) for a in ("gimp", "kdenlive", "mpv-audio", "mpv-video", "soffice")]
             + [("results-re-measured", a) for a in ("chrome", "code", "webrtc", "thunderbird-send")])
-# D79: thunderbird-send's idle phase from the 43-repeat pool, every phase with or after the input from the keys-only one
-IDLE_POOL_95 = ("results-same-machine", "thunderbird-send")
+# D79: thunderbird-send's idle phase from the 43-repeat pool, every phase with or after the input from the keys-only one;
+# 9.10 D146: kdenlive's from its own campaign past its launch work (a path from the research root)
+IDLE_POOLS_95 = [(("task-9.5-interactive-typing", "campaign", "results-same-machine"), "thunderbird-send", None),
+                 (("task-9.10-scenarios-timelines", "campaign", "kdenlive-idle", "results"), "kdenlive",
+                  "meas-ci:interactive:2026-10-05")]   # thunderbird-send's idle tag is in TAGS_95
 TAGS_95 = ["--tag", "interactive=meas-ci:interactive:2026-09-18", "--tag", "playback=meas-ci:playback:2026-09-18",
            "--tag", "thunderbird-send=meas-ci:interactive:2026-09-27", "--tag", "chrome=meas-ci:interactive:2026-09-20",
            "--tag", "webrtc=meas-ci:playback:2026-09-20", "--tag", "code=meas-ci:interactive:2026-09-25",
@@ -673,10 +676,13 @@ def fold_95(repo_root, tmp_path_factory):
     campaign_dir = repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
     for sub, app in POOLS_95:
         shutil.copy(campaign_dir / sub / f"pool-{app}.json", d / "pools")
-    idle = campaign_dir / IDLE_POOL_95[0] / f"pool-{IDLE_POOL_95[1]}.json"
+    research = repo_root / "_dev" / "research" / "jioh"
+    idle = [a for parts, app, tag in IDLE_POOLS_95
+            for a in ("--idle-from", f"{app}={research.joinpath(*parts) / f'pool-{app}.json'}",
+                      *(("--idle-tag", f"{app}={tag}") if tag else ()))]
     frag = d / "frag.yaml"
     subprocess.run([sys.executable, str(repo_root / "dataset" / "tools" / "meas" / "campaign" / "fold_in.py"),
-                    str(d / "pools"), str(frag), *TAGS_95, "--idle-from", f"{IDLE_POOL_95[1]}={idle}",
+                    str(d / "pools"), str(frag), *TAGS_95, *idle,
                     "--control", str(campaign_dir.joinpath(*CONTROL_95))], check=True, capture_output=True)
     return frag
 
@@ -702,7 +708,7 @@ def test_every_measured_scope_states_the_stability_rule_over_its_repeats(fold_95
     # the workflow's rule (D26, D30, D78): every value within 5 % or 1 µs, a table read by the mean it carries, over the
     # repeats the pool holds
     repeats = {"office-writer": 14, "code-editor": 44, "mail-client": 77, "web-browser": 38, "image-editor": 5,
-               "video-editor": 20, "video-player": 24, "audio-player": 31, "video-call": 45}
+               "video-editor": 16, "video-player": 24, "audio-player": 31, "video-call": 45}   # the idle pool's (D79)
     scopes = _scopes(fold_95)
     assert sorted(scopes) == sorted(repeats)
     for aid, scope in scopes.items():

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the four 9.8 archetype entries from the desktop campaign's pooled record (changelog D10, D25).
 
-  fold_in.py <pooled.json> <out.yaml> [--control <record>]
+  fold_in.py <pooled.json> <out.yaml> [--control <record>] [--only <subject>[,<subject>...]]
 
 One entry per subject, in 9.5's measured per-application form (D10): `components`, one per thread comm of the
 carried phase, each with its `wakes_per_s` and its pooled `gap` and `run` quantile tables, and the residual; no
@@ -24,6 +24,11 @@ from meas.distribution import quantile_table, yaml_table  # noqa: E402
 from meas.desktop.pool import _cp  # noqa: E402  — campaign/pool.py, for its build census (9.5 D69)
 
 TAG = "meas-ci:desktop:2026-09-20"
+# the campaigns an entry may be folded from: 9.8's, and 9.10 D152's for the hidden renderer past its page thread's
+# settling, whose entry 9.8's record no longer writes (9.10 D156). The pooled record's tag picks the campaign; its
+# subjects alone are folded (--only narrows them further).
+CAMPAIGNS = {"meas-ci:desktop:2026-09-20": ("element", "steam"),
+             "meas-ci:desktop:2026-10-05b": ("chrome-hidden",)}
 CARRIED = {"chrome-hidden": "steady", "chrome-visible": "steady-notimer", "element": "idle", "steam": "shown"}
 CONTROL = {}   # archetype id -> the untraced control's reading for its notes
 # the entries the library carries: chrome-visible's values stay in the pooled record, its entry `renderer-visible`
@@ -41,8 +46,7 @@ OBSERVED = {
                       "--disable-features=SpareRendererForSitePerProcess), one window holding a foreground control tab "
                       "and 12 background tabs at 12 loopback origins of one local page whose setInterval callback only "
                       "increments a counter; observed past Chromium's intensive-wake-up-throttling grace (launch-settle "
-                      "20 s, grace-settle 630 s: 330 s of the documented five-minute default and 300 s read from the "
-                      "probe, D15), a 600 s steady phase, under Xvfb with no window manager"),
+                      "{grace}), a 600 s steady phase, under Xvfb with no window manager"),
     "chrome-visible": ("{build}, launched as the hidden entry, the same page at the same 12 origins "
                        "opened as 12 windows of one tab each, nothing interacting with them; the steady phase with the "
                        "page's timer removed (D16), 600 s, under Xvfb with no window manager, where Chromium tracks no "
@@ -81,6 +85,37 @@ APPROX = {
 # record; the within-run figures are the changelog's, measured on the probes — each regenerates (D38) with
 # `desktop/within_run.py <probe> <phase> <analysis.json> 600 60 <comms> <skip-s>`, the hidden probe (run 35501749098,
 # `steady`) from 300 s, the visible (run 35501680255, `steady-notimer`) from 0.
+# 9.10 D156: the hidden renderer's own, re-read on 9.10's 3,600 s probe (run 37273691029) past its 1,030 s settle —
+# `within_run.py <probe> steady <analysis.json> 600 60 <comms> 400`
+GRACE = {"meas-ci:desktop:2026-09-20": ("20 s, grace-settle 630 s: 330 s of the documented five-minute default and 300 s "
+                                       "read from the probe, D15"),
+         "meas-ci:desktop:2026-10-05b": ("20 s, grace-settle 1,030 s: 330 s of the documented five-minute default, 300 s "
+                                        "read from the probe (D15) and 400 s past the page thread's settling read from "
+                                        "9.10's 3,600 s probe (9.10 D152)")}
+WINDOWS_1005B = {
+    "renderer-hidden": ("Read in 100 s windows over the 5 repeats (9.10 D156): the page's own thread `chrome` runs "
+                        "0.068 ms in the first 100 s and 0.057–0.072 ms after, its settling past; the residual "
+                        "(`MemoryInfra`, `ThreadPoolServi`) wakes at 3.6 times its phase rate in the first 100 s and "
+                        "2.4 times 400–500 s in; the phase's windows hold 5.2 % of its CPU above its median window. The "
+                        "carried values are the phase's means."),
+}
+SPAN_1005B = {
+    "renderer-hidden": ("Read over 3,600 s in one long-phase probe past the 630 s grace-settle (9.10 D149, D152): the "
+                        "page's own thread runs 0.106, 0.083, 0.077 and 0.080 ms a wake in its first four minutes and "
+                        "0.055–0.060 ms from the seventh, the settling the 1,030 s settle now covers; past it a 600 s "
+                        "window holds the wakes within 3.7 % of the probe's level at every placement and the CPU within "
+                        "−7.2 % and +10.4 %, an episode recurring some 1,800 s apart — the page thread at 0.072–0.075 ms, "
+                        "`Chrome_ChildIOT` waking 0.243–0.247/s against 0.200–0.210. The probe ran Google Chrome "
+                        "154.0.8037.57, the build these repeats ran. That build is not the 152 and 153 9.8's campaign "
+                        "and `web-browser` ran, Google's repository serving only its current build (9.5 D69; 9.10 "
+                        "D156): against 9.8's 19 repeats the page's own thread wakes 1.72 times as often and "
+                        "`Chrome_ChildIOT` 2.51 times, the renderer 0.211 against 0.169 wakes/s, while the page "
+                        "thread's runs, its settling past, are 35 % shorter and the CPU share 9.6 against 9.2 × 10⁻⁵; "
+                        "`web-browser` stays 152 and 153's, the two halves of one browser on two builds."),
+}
+WITHIN_1005B = {("chrome-hidden", "Chrome_ChildIOT"): "±8.1 % (9.10 D156)",
+                ("chrome-hidden", "Compositor"): "±30.6 % (9.10 D156)",
+                ("chrome-hidden", "PerfettoTrace"): "±30.6 % (9.10 D156)"}
 WITHIN = {("chrome-hidden", "Chrome_ChildIOT"): "±17.7 % (D24)",
           ("chrome-visible", "Chrome_ChildIOT"): "±18.6 % (D20)",
           ("chrome-visible", "ThreadPoolForeg"): "barely present in the probe (D20)",
@@ -103,6 +138,8 @@ WINDOWS_STATED = {
 
 # D27: the renderer residuals are sparse — a few wakes per renderer per phase — so the within-run test (D26 re-read
 # them on the probes) cannot place their spread; why, per entry, from D26's re-read.
+SPARSE_WHY_1005B = {("chrome-hidden", "residual"): ("a 600 s window of 9.10's probe catches 1–4 of its wakes per renderer "
+                                                    "(±64.0 % within one run, 9.10 D156)")}
 SPARSE_WHY = {("chrome-hidden", "residual"): ("a 600 s window of the probe catches 0–2 of its wakes (±134.2 % within "
                                               "one run, D26)"),
               ("chrome-visible", "residual"): ("the probe does not reproduce its comms, 0.0009 against 0.0068 wakes/s "
@@ -245,7 +282,7 @@ def entry(app, e):
             "      referee: meas-ci"]
     runs = sorted(set(v for v in e["run_id"].values() if v))
     reps = ", ".join(str(x) for x in e["repeats"])
-    out.append(f"      run: \"desktop:2026-09-20, repeats [{reps}], runs {', '.join(runs)}\"")
+    out.append(f"      run: \"{TAG.split(':', 1)[1]}, repeats [{reps}], runs {', '.join(runs)}\"")
     per = ph["wakes_per_s_per_renderer"] if renderer else ph["wakes_per_s"]
     stats = [f"{CARRIED[app]} wakes/s{unit} {min(per):.4f}–{max(per):.4f}",
              f"{CARRIED[app]} cpu-share {min(ph['cpu_share']):.5f}–{max(ph['cpu_share']):.5f}"]
@@ -253,7 +290,8 @@ def entry(app, e):
 
     machine, session, sparse, machine_comms = exceptions(app, e, ph)
     # 9.5 D69: Chrome's build recorded per repeat and its census stated, Google's repository serving only its current
-    observed = OBSERVED[app].replace("{build}", _cp.build_census(e["version"]))
+    observed = OBSERVED[app].replace("{build}", _cp.build_census(e["version"])).replace("{grace}", GRACE[TAG])
+    new = TAG == "meas-ci:desktop:2026-10-05b"   # 9.10 D152: the hidden renderer's own campaign
     scope = (f"One observation (phase decision 2; D10): {observed}; on {MACHINE}; {k} same-machine repeats, "
              f"every landing pooled (D24). ")
     if renderer:
@@ -286,12 +324,12 @@ def entry(app, e):
     if session:
         parts = []
         for comm, texts in session.items():
-            w = WITHIN.get((app, comm))
+            w = (WITHIN_1005B if new else WITHIN).get((app, comm))
             wr = values_of(ph, comm, "wakes/s")
             across = f"±{(max(wr) - min(wr)) / 2 / statistics.fmean(wr) * 100:.1f} %" if statistics.fmean(wr) else "—"
             where = f"; within one run {w}, its wake rate across the repeats {across}" if w else ""
             parts.append(f"`{comm}` " + ", ".join(texts) + where)
-        law = {"chrome-hidden": "D21, D24, D26", "chrome-visible": "D21, D26"}[app]
+        law = {"chrome-hidden": "D21, D24, D26" + ("; 9.10 D156" if new else ""), "chrome-visible": "D21, D26"}[app]
         scope += (f"Components whose rate varies between sessions, their values carried together (9.5 D57; {law}): "
                   + "; ".join(parts) + ". ")
         if renderer:
@@ -304,7 +342,7 @@ def entry(app, e):
             per = [w * s for w, s in zip(values_of(ph, comm, "wakes/s"), ph["span_s"])]
             parts.append(f"`{comm}` (" + ", ".join(f"`{c}`" for c in comms) + ") " + ", ".join(texts)
                          + f", {min(per):.1f}–{max(per):.1f} wakes per renderer per 600 s phase; "
-                         + SPARSE_WHY[(app, comm)])
+                         + (SPARSE_WHY_1005B if new else SPARSE_WHY)[(app, comm)])
         scope += ("Sparse components, waking a few times per renderer per phase, their values carried together with "
                   "their half-widths and their count, a spread that is the count's own and which the within-run test "
                   "cannot place (D27): " + "; ".join(parts) + ". ")
@@ -315,8 +353,11 @@ def entry(app, e):
                       + (f", the comparison D5 rests on; the CPU share ratio, {c['cpu_share_ratio']}×, is reported with "
                          f"its spread and no effect rests on it (D18). " if app == "steam" else
                          f", CPU share {c['cpu_share_ratio']}×. "))
-    if IDS[app] in WINDOWS_STATED:
-        scope += WINDOWS_STATED[IDS[app]] + " "
+    windows = WINDOWS_1005B if new else WINDOWS_STATED
+    if IDS[app] in windows:
+        scope += windows[IDS[app]] + " "
+    if new and IDS[app] in SPAN_1005B:
+        scope += SPAN_1005B[IDS[app]] + " "
     scope += "Values are this software on this machine, not desktop truth (9.5 D10)."
     out += ["      scope: >-", "        " + scope]
 
@@ -347,19 +388,27 @@ def main():
         i = args.index("--control")
         CONTROL.update({a: r["notes"] for a, r in json.load(open(args[i + 1]))["archetypes"].items()})
         del args[i:i + 2]
+    only = None
+    if "--only" in args and args.index("--only") + 1 < len(args):
+        i = args.index("--only")
+        only = set(args[i + 1].split(","))
+        del args[i:i + 2]
     if len(args) != 2:
         raise SystemExit(__doc__)
     sys.argv[1:] = args
     p = json.load(open(sys.argv[1]))
-    if p.get("tag") != TAG:
-        raise SystemExit(f"pooled record tagged {p.get('tag')!r}, expected {TAG!r}")
+    global TAG
+    if p.get("tag") not in CAMPAIGNS:
+        raise SystemExit(f"pooled record tagged {p.get('tag')!r}, expected one of {', '.join(CAMPAIGNS)}")
+    TAG = p["tag"]
+    folded = [a for a in FOLDED if a in CAMPAIGNS[TAG] and (only is None or a in only)]
     blocks = [f"  # ---- measured per-application archetypes — 9.8 campaign ({TAG}) ----", ""]
-    for app in FOLDED:
+    for app in folded:
         if not p["runs"][app]["stability"]["passes"]:
             raise SystemExit(f"{app}: the stability rule does not hold on this pooled record")
         blocks += [entry(app, p["runs"][app]), ""]
     open(sys.argv[2], "w").write("\n".join(blocks))
-    print(f"wrote {sys.argv[2]}: {len(FOLDED)} entries")
+    print(f"wrote {sys.argv[2]}: {len(folded)} entries")
 
 
 if __name__ == "__main__":

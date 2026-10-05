@@ -29,7 +29,7 @@ def entry(D, app):
     from meas import control_report as cr
     from meas.desktop import analyze as a98
     from meas.desktop.fold_in import CARRIED, IDS
-    run = json.load(open(cr.POOL_98))["runs"][app]
+    run = json.load(open(cr.pool_98(app)))["runs"][app]
     carried_s = float(round(min(run["phases"][CARRIED[app]]["span_s"])))
     carried = [c["comm"] for c in windows._library()[IDS[app]]["params"]["components"] if c["comm"] != "residual"]
     ph = a98.analyze_phase(D, CARRIED[app], app, keep_rows=True)

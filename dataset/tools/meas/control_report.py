@@ -29,11 +29,21 @@ REMEASURED = os.path.join(RESEARCH, "task-9.5-interactive-typing", "campaign", "
 # the pools the 9.5 fold-in reads (tests/test_meas.py POOLS_95): thunderbird-send's idle phase from the 43-repeat pool
 POOL_95 = {**{a: SAME for a in ("gimp", "kdenlive", "mpv-audio", "mpv-video", "soffice")},
            **{a: REMEASURED for a in ("chrome", "code", "webrtc", "thunderbird-send")}}
-IDLE_FROM_95 = {"thunderbird-send": SAME}
+# 9.10 D146: kdenlive's idle phase from its own campaign past the launch work, meas-ci:interactive:2026-10-05
+KDENLIVE_IDLE = os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "kdenlive-idle", "results")
+IDLE_FROM_95 = {"thunderbird-send": SAME, "kdenlive": KDENLIVE_IDLE}
 ARCH_95 = {"soffice": "office-writer", "code": "code-editor", "chrome": "web-browser", "thunderbird-send": "mail-client",
            "gimp": "image-editor", "kdenlive": "video-editor", "mpv-audio": "audio-player", "mpv-video": "video-player",
            "webrtc": "video-call"}
 POOL_98 = os.path.join(RESEARCH, "task-9.8-browser-comms", "campaign", "results", "pooled.json")
+# 9.10 D152: renderer-hidden re-measured past its page thread's settling, meas-ci:desktop:2026-10-05b
+POOL_98_OF = {"chrome-hidden": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "renderer-hidden",
+                                            "results", "pooled.json")}
+
+
+def pool_98(app):
+    """The pooled record a 9.8 subject's entry is folded from."""
+    return POOL_98_OF.get(app, POOL_98)
 POOL_99 = os.path.join(RESEARCH, "task-9.9-daemons-session", "campaign", "results", "pooled.json")
 # the 9.8 subjects whose job records the build under its own key (a renderer's is `version`), and the name it goes by
 VERSION_98 = {"chat-client": ("element.version", "Element "),
@@ -373,7 +383,7 @@ def main():
         if a.family == "campaign":
             carried = carried_95(app)
         else:
-            carried = json.load(open(POOL_98 if a.family == "desktop" else POOL_99))["runs"][app]
+            carried = json.load(open(pool_98(app) if a.family == "desktop" else POOL_99))["runs"][app]
         record["archetypes"].update(app_reports(a.family, app, jobs, carried, control_pool=ctl))
     json.dump(record, open(a.out, "w"), indent=1)
     if a.md:

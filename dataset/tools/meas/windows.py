@@ -236,11 +236,11 @@ def desktop_entries(root, apps=()):
     from meas import burstiness as b, control_report as cr
     from meas.desktop import analyze as a98
     from meas.desktop.fold_in import CARRIED, IDS
-    pooled, lib, out = json.load(open(cr.POOL_98)), _library(), {}
+    lib, out = _library(), {}
     for app in sorted(CARRIED):
         if apps and app not in apps:
             continue
-        run, phase = pooled["runs"][app], CARRIED[app]
+        run, phase = json.load(open(cr.pool_98(app)))["runs"][app], CARRIED[app]
         carried = [c["comm"] for c in lib[IDS[app]]["params"]["components"] if c["comm"] != "residual"]
         readings, win = [], None
         for rep in run["repeats"]:

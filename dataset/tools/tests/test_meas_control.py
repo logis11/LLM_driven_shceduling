@@ -735,15 +735,18 @@ def test_the_9_5_fold_in_appends_each_archetype_s_reading_to_its_notes(repo_root
     import shutil
     import subprocess
     import sys
-    from test_meas import IDLE_POOL_95, POOLS_95, TAGS_95
-    campaign = repo_root / "_dev" / "research" / "jioh" / "task-9.5-interactive-typing" / "campaign"
+    from test_meas import IDLE_POOLS_95, POOLS_95, TAGS_95
+    research = repo_root / "_dev" / "research" / "jioh"
+    campaign = research / "task-9.5-interactive-typing" / "campaign"
     (tmp_path / "pools").mkdir()
     for sub, app in POOLS_95:
         shutil.copy(campaign / sub / f"pool-{app}.json", tmp_path / "pools")
-    idle = campaign / IDLE_POOL_95[0] / f"pool-{IDLE_POOL_95[1]}.json"
+    idle = [a for parts, app, tag in IDLE_POOLS_95
+            for a in ("--idle-from", f"{app}={research.joinpath(*parts) / f'pool-{app}.json'}",
+                      *(("--idle-tag", f"{app}={tag}") if tag else ()))]
     run = lambda out, *extra: subprocess.run(
         [sys.executable, str(repo_root / "dataset" / "tools" / "meas" / "campaign" / "fold_in.py"), str(tmp_path / "pools"),
-         str(out), *TAGS_95, "--idle-from", f"{IDLE_POOL_95[1]}={idle}", *extra], check=True, capture_output=True)
+         str(out), *TAGS_95, *idle, *extra], check=True, capture_output=True)
     run(tmp_path / "plain.yaml")
     run(tmp_path / "read.yaml", "--control", str(_control_record(tmp_path, {"audio-player": "Untraced control: one."})))
     _only_notes_gain((tmp_path / "plain.yaml").read_text(), (tmp_path / "read.yaml").read_text(), "audio-player",
@@ -755,9 +758,12 @@ def test_the_9_8_and_9_9_fold_ins_append_each_archetype_s_reading_to_its_notes(r
     from meas.desktop import fold_in as f98
     from meas.session import fold_in as f99
     results = repo_root / "_dev" / "research" / "jioh"
-    for mod, slice_, archetype in ((f98, "task-9.8-browser-comms", "renderer-hidden"),
-                                   (f99, "task-9.9-daemons-session", "compositor-shell")):
-        pooled = results / slice_ / "campaign" / "results" / "pooled.json"
+    # 9.10 D156: 9.8's record writes the chat and Steam clients, 9.10's the hidden renderer
+    for mod, campaign, archetype in (
+            (f98, ("task-9.8-browser-comms", "campaign"), "chat-client"),
+            (f98, ("task-9.10-scenarios-timelines", "campaign", "renderer-hidden"), "renderer-hidden"),
+            (f99, ("task-9.9-daemons-session", "campaign"), "compositor-shell")):
+        pooled = results.joinpath(*campaign) / "results" / "pooled.json"
         ctl = _control_record(tmp_path, {archetype: "Untraced control: one."})
         outs = {}
         for name, extra in (("plain", []), ("read", ["--control", str(ctl)])):
