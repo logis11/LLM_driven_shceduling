@@ -59,8 +59,9 @@ PAGE_PORT=8099
 # default: the steady phase then begins throttled whichever class Chromium put the pages in. 330 s of this is
 # that documented default; the remaining 300 s is design, set from the 2026-09-20 probe, whose steady phase was
 # still settling for its first 300 s — dropping them took the spread of 500 s windows from 11.3% to 3.7%
-# (method section 10, changelog D15).
-GRACE_S=630
+# (method section 10, changelog D15). 9.10 D152 adds 400 s: past that 630 s the page's own thread still runs
+# longer for about 360 s (the 3,600 s span probe, 9.10 D149), covered with 9.10 D146's 40 s margin.
+GRACE_S=1030
 # The visible subject's two steady phases come from a page plan, not from driving the browser: the page holds
 # the timer for STEP1 seconds from its load and then none. STEP1 is generous because the run waits on what the
 # pages report rather than on this number; it only has to be long enough that the switch cannot fall inside the

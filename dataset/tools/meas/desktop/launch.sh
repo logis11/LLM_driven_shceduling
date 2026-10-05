@@ -11,7 +11,7 @@
 # hold in every mode: a dry run checks the tooling at them (D135).
 
 LN_ORIGINS=12            # 9.8's hidden-tab N (run.sh ORIGINS); a dry run does not shorten it here
-LN_GRACE=630             # 9.8 D15's grace
+LN_GRACE=1030            # 9.8 D15's grace and 9.10 D152's 400 s past it (desktop/run.sh, GRACE_S)
 LN_QUIT_WAIT=60          # D135: the tree exits within this of its quit, or the job stops
 LN_BROWSER_SETTLE=420    # D134: web-browser's settle, before the call opens
 LN_ELEMENT_SETTLE=50     # D135: 9.8's 30 s after the sign-in and its 20 s launch-settle

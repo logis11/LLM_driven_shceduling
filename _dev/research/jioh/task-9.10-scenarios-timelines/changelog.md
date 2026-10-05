@@ -2769,3 +2769,14 @@ By 인지오's decision (Q31). Each release takes `meas-ci-desktop-2026-10-04b`'
 - `meas-ci-interactive-2026-10-05`: `kdenlive`'s idle repeats 1–16;
 - `meas-ci-desktop-2026-10-05`: `launch-kdenlive`'s repeats 1–5;
 - `meas-ci-probes-2026-10-05`: the span probes of D145, D149 and D150 and their dry run, which belong to no campaign tag. D146's settle and phase rest on one of them, and Actions artifacts expire after 90 days.
+
+## D152 — `renderer-hidden` re-measured past its page thread's settling: a 1,030 s grace-settle, the 600 s steady phase; its launch phase re-traced (2026-10-05)
+
+By 인지오's decision (Q32), on D149's 3,600 s probe (`campaign/spans/results/results.md`). Past the 630 s grace-settle the page's own thread runs 0.106, 0.083, 0.077 and 0.080 ms a wake in the steady phase's first four minutes, 0.139 and 0.083 in the next two, then 0.055–0.060 ms to the hour's end, while `HangWatcher` and `Chrome_ChildIOT` hold: the carried 600 s phase sits on settling that ends about 360 s in. Against the level over 1,545 s it reads CPU +11.8 %, wakes +1.7 %.
+
+- **The grace-settle is 1,030 s**, design: 9.8 D15's 630 s, then the 360 s of settling and 9.10 D146's 40 s margin (`desktop/run.sh`, `GRACE_S`; `desktop/launch.sh`, `LN_GRACE`). Taken under 인지오's delegation, on 9.5 D34, D35, D54 and D146.
+- **The steady phase stays 600 s.** Past the settling a 600 s window holds the wakes within 3.7 % of the probe's level at every placement; its CPU swings −7.2 % to +10.4 % around the level with an episode some 1,800 s apart — the page thread at 0.072–0.075 ms, `Chrome_ChildIOT` waking 0.243–0.247/s against 0.200–0.210 — which no length up to 1,800 s holds within 5 % at the worst placement (−5.9 %). The swing is stated in the scope, as 9.8 D34 states the residual's within the phase. Taken under 인지오's delegation, on 9.8 D15 and D34.
+- **New repeats** of 9.8's `chrome-hidden` subject, unchanged but for the grace-settle, on the runner image's Google Chrome (154.0.8037.57 today, against the 152 and 153 9.8 measured), pool into `renderer-hidden`'s values, every value of the entry under the stability rule, 9.8's per-value decisions (D17, D18, D26, D27, D33) taken as precedent for the same classes of values and recorded as they are read.
+- **The launch phase is re-traced**: `launch-chrome-hidden` to the end of the 1,030 s grace (D133), its 5 repeats replacing `launch-renderer-hidden`'s stream.
+
+The campaign is `meas-ci:desktop:2026-10-05b`. The method and the fold-in follow. Hands to 9.14: `renderer-hidden`'s values. No value changed by this entry.

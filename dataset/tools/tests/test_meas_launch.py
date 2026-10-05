@@ -173,7 +173,7 @@ def test_each_subjects_settle_is_its_campaigns(repo_root):
         assert ours[arm] == theirs[arm], arm
     desk = (meas / "desktop" / "run.sh").read_text()
     assert re.search(r"chrome-hidden\|chrome-visible\|chrome-tabs\|element\) echo 20 ;;", desk)
-    assert ours["chrome-hidden"] == "20" and "LN_GRACE=630" in sh
+    assert ours["chrome-hidden"] == "20" and "LN_GRACE=1030" in sh and "\nGRACE_S=1030\n" in desk   # 9.10 D152
     assert re.search(r"steam\) echo 900 ;;", desk) and ours["steam"] == "900"
     # Element: 9.8's 30 s after the sign-in and its 20 s launch-settle (D135)
     assert ours["element"] == "$LN_ELEMENT_SETTLE" and "LN_ELEMENT_SETTLE=50" in sh
