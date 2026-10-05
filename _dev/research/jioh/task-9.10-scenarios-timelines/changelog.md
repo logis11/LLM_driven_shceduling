@@ -2595,3 +2595,41 @@ The dataset was recompiled (`compile.py --allow-window`). 12 of 100 artifacts ch
 Lint reports the seven demand-window files it reported before, and nothing else: `c2-p1a`, `c2-p1b`, `c2-p3a`, `c2-p3b`, `c3-creation` (0.94), `c3-evening` (0.90) and `c3-workday` (4.67). `batch_fold_in.py --check` and `launch_fold_in.py --check` pass. Tests: 409 passed, 1 skipped, 1 xfailed, with the launch campaign's tooling, its compilation and its fold-in tested.
 
 Hands to 9.14: the six files' compiled artifacts and demand (D21's "the arcs' and the injection files' demand and terms"). Hands to 9.15: `docs/workload/measurement-overview.md` §4's "Steady behaviour, not launch work", with the launch phases added (D21), and the `dataset/launch/` streams wherever the docs list the dataset's files.
+
+## D141 — the user's build bound whole: `c1-compile` 1,594 s, `c3-workday`'s compile segment to 1,485 s, `c6-dual` 12,072 s (2026-10-05)
+
+D18's rebinding, under D17. D18 fixed the user's build as 9.6's measured kernel build whole, `spawn_count` 2,908 object jobs at `parallelism_cap` 8, and set the files' lengths with the other jobs'. Those jobs' files were rebound at D45, D59, D81, D90, D100, D111 and D125. Taken under 인지오's delegation (2026-10-05), on D17, D18 and D78's arithmetic in D90's and D100's forms.
+
+- **The length.** Each segment ends at the smallest whole second by which the build ends under every policy: the build's arrival, plus its CPU as compiled under the file's seed, plus the other tasks' CPU. In a C1 base that is the editor's whole CPU (D90's form). Where other tasks run before the build, it is every other task's CPU released between the build's arrival and the segment's end (D100's form). The build has no timed block — its jobs run, wake each other and wait — so its blocks add nothing. The game chain's CPU is its per-frame CPU over the frames its timer releases in the window.
+
+| file | build from | build CPU | others' CPU | bound | one second less |
+|---|---|---|---|---|---|
+| `c1-compile` | 2 s | 1,315.907 s | 275.298 s, the editor | 1,593.204 s → 1,594 s | 1,593.197 s at 1,593 s |
+| `c3-workday` | 120 s | 1,360.020 s | 4.680 s: Chrome 3.836 s, its four renderers 0.044 s, the writer 0.799 s | 1,484.700 s → 1,485 s | 1,484.694 s at 1,484 s |
+| `c6-dual` | 10 s | 1,363.243 s | 10,698.551 s, the game chain and the editor | 12,071.794 s → 12,072 s | 12,071.179 s at 12,071 s |
+
+The build's CPU as compiled, 21.9–22.7 min under the three seeds, against D18's arithmetic of about 2,908 × 471 ms ≈ 23 min.
+
+Rebound:
+
+- `c1-compile`: `make` on `build-orchestrator` from 2 s, `spawn_count` 2,908, cap 8, `child_name` `cc1`; one segment of 1,594 s, the editor departing at its end, focus 2 s to 1,592 s.
+- `c4-compile` takes its base's length. Its injected Chrome and the four renderers stay at 30–60 s, the recipe unchanged: the injection's times are design (D31). Taken under 인지오's delegation.
+- `c7-compile` is unchanged: its recipe sets its own segment, C = 225.458 s, and the module build's binding (D56), and the derived file is byte-identical.
+- `c3-workday`: `spawn_count` 2,908 from 120 s, the compile segment 120–1,485 s. The mail segment keeps its 60 s and its placement inside it: Thunderbird arriving at 1,485 s, focus 1,487–1,543 s, the send at 1,525 s, every task departing at 1,545 s. The file still ends inside Thunderbird's 408.9 s launch phase (D140). Taken under 인지오's delegation, the file's structure kept, as D100's `c3-creation`.
+- `c6-dual`: `spawn_count` 2,908 from 10 s; the game chain and the editor departing at 12,072 s, focus 2 s to 12,070 s. The chain keeps its `lane_share` 0.6 (D31); with the editor it leaves the build about 0.11 of the lane, so the file runs 3 h 21 min.
+
+The editor's focus windows replay a slice of SWELL-KW's Word stream, 33,862.9 s long (`dataset/stimulus/streams.json`), so `c6-dual`'s 12,068 s window lies inside it. The coverage grid is unchanged: every cell covered, `c6-dual` outside the grid.
+
+The dataset was recompiled (`compile.py --allow-window`). 8 of 100 artifacts change beyond the library's hash: the four files in both modes, and no other; `c7-compile`'s artifact is byte-identical. Demand:
+
+| file | before | after | class |
+|---|---|---|---|
+| `c1-compile` | 0.8803 | 0.9982 | calibration |
+| `c4-compile` | 0.9112 | 0.9994 | calibration |
+| `c3-workday` | 4.666 | 0.888 | oversubscribed |
+| `c6-dual` native | 1.5193 | 1.2898 | oversubscribed |
+| `c6-dual` single | 1.2292 | 0.9997 | oversubscribed |
+
+Lint reports eight demand-window files: the seven it reported before, `c3-workday` now at 0.89, and `c6-dual` at 0.9997, below the window's 1.00 — a segment that ends where the build ends under every policy holds no more work than its length. Tests: 409 passed, 1 skipped, 1 xfailed, none restated.
+
+Hands to 9.14: D18's — `c1-compile`'s turnaround term, `c3-workday`'s and `c6-dual`'s demand on the new lengths — `c6-dual` in the demand window, and `c4-compile`'s injection, 30 s of a 1,594 s file. Hands to 9.15: D18's, `building-plan.md` §3 C1.

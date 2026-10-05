@@ -6,7 +6,11 @@
 # D16), one renderer per tab observed in Chrome (meas-ci:desktop:2026-10-04;
 # 9.10 D126-D129, D131). The writer and Thunderbird, started mid-file, run
 # their observed launch phases first, replayed (meas-ci:desktop:2026-10-04b;
-# 9.10 D21, D132-D138); the file ends inside Thunderbird's.
+# 9.10 D21, D132-D138); the file ends inside Thunderbird's. The build is the
+# user's build whole: the Linux kernel's defconfig, 2,908 object jobs at cap 8
+# (meas-ci:build:2026-09-18; 9.10 D17, D18); the compile segment ends at the
+# smallest whole second by which it ends under every policy (9.10 D78's
+# arithmetic, D100's form), the mail segment after it.
 meta:
   id: c3-workday
   seed: 301
@@ -16,28 +20,28 @@ segments:
      scenario: [S2]}
   - {from: 60s, to: 120s, mode: office, attributes: {background_wanted: true},
      scenario: [S1, S2]}
-  - {from: 120s, to: 360s, mode: compile, attributes: {background_wanted: true},
+  - {from: 120s, to: 1485s, mode: compile, attributes: {background_wanted: true},
      scenario: [S11]}
-  - {from: 360s, to: 420s, mode: mail, attributes: {background_wanted: true},
+  - {from: 1485s, to: 1545s, mode: mail, attributes: {background_wanted: true},
      scenario: [S4]}
 
 tasks:
   - {id: browser, name: chrome, archetype: web-browser,
-     arrive: 0s, depart: 420s}
+     arrive: 0s, depart: 1545s}
   - {id: renderers, name: chrome, archetype: renderer-hidden,
-     arrive: 0s, depart: 420s, count: 4}
+     arrive: 0s, depart: 1545s, count: 4}
   - {id: writer, name: soffice.bin, archetype: office-writer,
-     arrive: 60s, depart: 420s}
+     arrive: 60s, depart: 1545s}
   - {id: build, name: make, archetype: build-orchestrator, arrive: 120s,
-     bind: {spawn_count: 4200, parallelism_cap: 8, child_name: cc1}}
+     bind: {spawn_count: 2908, parallelism_cap: 8, child_name: cc1}}
   - {id: mailer, name: thunderbird-bin, archetype: mail-client,
-     arrive: 360s, depart: 420s}
+     arrive: 1485s, depart: 1545s}
 
 focus:
   - {from: 2s, to: 58s, task: browser}
   - {from: 62s, to: 118s, task: writer}
-  - {from: 362s, to: 418s, task: mailer}
+  - {from: 1487s, to: 1543s, task: mailer}
 
 operations:
   - {at: 30s, task: browser, name: page-load}
-  - {at: 400s, task: mailer, name: send}
+  - {at: 1525s, task: mailer, name: send}

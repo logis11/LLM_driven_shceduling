@@ -1,18 +1,23 @@
-# C1 — single-situation calibration: pure compile (building-plan §3 C1).
+# C1 — single-situation calibration: pure compile (building-plan §3 C1). The
+# editor and the user's build: the Linux kernel's defconfig built whole, warm,
+# `-j8` — 2,908 object jobs at cap 8 on `build-orchestrator`
+# (meas-ci:build:2026-09-18; 9.6 D5, D30, D31; 9.10 D17, D18). The segment is
+# the smallest whole second by which the build ends under every policy (9.10
+# D78's arithmetic, D90's form).
 meta:
   id: c1-compile
   seed: 103
   demand: calibration
 
 segments:
-  - {from: 0s, to: 60s, mode: compile, attributes: {background_wanted: true},
+  - {from: 0s, to: 1594s, mode: compile, attributes: {background_wanted: true},
      scenario: [S11]}
 
 tasks:
   - {id: editor, name: code, archetype: code-editor,
-     arrive: 0s, depart: 60s}
+     arrive: 0s, depart: 1594s}
   - {id: build, name: make, archetype: build-orchestrator, arrive: 2s,
-     bind: {spawn_count: 100, parallelism_cap: 8, child_name: cc1}}
+     bind: {spawn_count: 2908, parallelism_cap: 8, child_name: cc1}}
 
 focus:
-  - {from: 2s, to: 58s, task: editor}
+  - {from: 2s, to: 1592s, task: editor}

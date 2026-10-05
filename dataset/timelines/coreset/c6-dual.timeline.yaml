@@ -1,22 +1,26 @@
 # C6 — dual-active ambiguity (building-plan §3 C6): equally-active dual
 # foregrounds — gaming while actively awaiting a compile. The point where
 # even the oracle cannot assign a label; shipped so the limit is concrete.
+# The build is the user's build whole: the Linux kernel's defconfig, 2,908
+# object jobs at cap 8 (meas-ci:build:2026-09-18; 9.10 D17, D18). The segment
+# is the smallest whole second by which it ends under every policy, the game
+# holding its share of the lane (9.10 D78's arithmetic, D100's form).
 meta:
   id: c6-dual
   seed: 601
 
 segments:
-  - {from: 0s, to: 240s, mode: ambiguous,
+  - {from: 0s, to: 12072s, mode: ambiguous,
      attributes: {dual_active: true}, scenario: [S9, S11]}
 
 tasks:
   - {id: game, name: Troy.exe, archetype: game-task-chain,
-     arrive: 0s, depart: 240s, bind: {lane_share: 0.6,
+     arrive: 0s, depart: 12072s, bind: {lane_share: 0.6,
            member_names: ["Task worker thr", "Task worker thr", "Task worker thr", "Task worker thr", dxvk-cs, dxvk-submit, winepulse_mainl, winepulse_timer, FAudio_AudioCli, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe]}}
   - {id: editor, name: code, archetype: code-editor,
-     arrive: 0s, depart: 240s}
+     arrive: 0s, depart: 12072s}
   - {id: build, name: make, archetype: build-orchestrator, arrive: 10s,
-     bind: {spawn_count: 85, parallelism_cap: 8, child_name: cc1}}
+     bind: {spawn_count: 2908, parallelism_cap: 8, child_name: cc1}}
 
 focus:
-  - {from: 2s, to: 238s, task: editor}
+  - {from: 2s, to: 12070s, task: editor}

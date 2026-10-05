@@ -32,7 +32,7 @@ A reference or work whose copy is unreachable or paywalled is dropped; `zhang-ch
 
 ### 4. Sizes
 
-Each batch job runs its measured whole at the input its decision fixed, and files lengthen to hold it (D17). The user's build is the measured kernel build whole: 2,908 object jobs at cap 8 (D18).
+Each batch job runs its measured whole at the input its decision fixed, and files lengthen to hold it (D17). The user's build is the measured kernel build whole: 2,908 object jobs at cap 8 (D18); `c1-compile` runs 1,594 s, `c3-workday`'s compile segment 120–1,485 s and `c6-dual` 12,072 s, each the smallest whole second by which the build ends under every policy (D141).
 
 ### 5. Operations, the mail send and the call
 
