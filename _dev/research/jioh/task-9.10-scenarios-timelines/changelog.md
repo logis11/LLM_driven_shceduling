@@ -2662,6 +2662,7 @@ Lint reports nine demand-window files: the eight of D141 and `c2-p2a` at 9.38. T
 Hands to 9.14: `c2-p2a` carries no finished download, so no turnaround term reads one; P2's terms over segment 1; `c2-p2a` in the demand window. Hands to 9.15: D42's, the scenario catalog's P2 rows, and `building-plan.md` §3 C2 on P2.
 
 ## D143 — an entry a file holds past its observed phase is probed at the file's span before the span stands (2026-10-05)
+> Amended by D145 (the hidden renderer's probe length).
 
 By 인지오's decision (Q25), after D141 and D142 lengthened the files. Each interactive entry was observed over phases of fixed length: 600 s driven for every application, and 120 s idle except Chrome's and Thunderbird's 600 s and VS Code's 900 s read from 200 s (9.5 method §2; `campaign/run.sh`, `DRIVEN=600` and `idle_for`). The compiler draws an entry's steady values for as long as a file holds it. Where a file holds an entry in a state longer than that state's observed phase, one long-phase probe of the state, at least the file's span long, tests the observed phase against the probe's level over that span — CPU share and wake rate, within the dataset's 5 % tolerance at the placement every repeat takes, the worst placement reported (9.5 D53's and D56's standard). A probe is never a repeat and changes no value; a phase that does not hold over its span is a decision of its own.
 
@@ -2681,3 +2682,27 @@ No file binds VS Code idle: every file that holds it focuses it from 2 s to 2 s 
 Probed, then: the two driven states, the two 120 s idle states and the hidden renderer. The three idle probes follow 9.5 D35's and 9.8 D15's form under each family's own probe mode, their lengths the span rounded up, design: `office-writer` 1,500 s and `video-editor` 3,000 s past the 30 s settle, `renderer-hidden` a 2,000 s phase past the 330 s grace (1,700 s past D15's 300 s of settling). Taken under 인지오's delegation, on 9.5 D35, D53 and D56 and 9.8 D15. What a driven probe compares, its lengths and its tooling are the method's, set before its launch.
 
 No value changed by this entry.
+
+## D144 — `code-editor`'s driven probe is read in paired windows; `video-editor`'s on 9.5 D53's standard (2026-10-05)
+
+By 인지오's decision (Q26), D143's driven half. `code-editor`'s per-input run follows its input: later SWELL-KW participants type more densely and the language server re-checks less per key, so the driven CPU share runs 0.14–0.45 across 9.5's repeats (`validation_stats`, 9.5's results). A window of a long driven phase that differs from the rest may therefore be its typist, not the session's age.
+
+- **`code-editor`.** The probe replays the Word stream `swell-word-c1` from its start, its 600 s windows 1 to 21 back to back, 12,600 s past the campaign's settle and idle phase. Probe window k types what 9.5's repeat k typed, into a session (k − 1) × 600 s older. Each window's per-input run mean is divided by repeat k's, and the 21 ratios are read as their mean with its 95 % interval and their trend over k: a difference where the interval excludes 1, as 9.5 D81 and 9.7 D36 read a check of the campaign's own making.
+- **`video-editor`.** Its driven input is the scripted pointer loop, the same in every repeat, so its probe is read on D143's standard: the 600 s phase at the placement repeats take against the probe's level over the span, CPU share and wake rate within 5 %. Taken under 인지오's delegation.
+
+Not taken, for `code-editor`: D143's standard as for the other states, which would mix the typist with the session's age; one 600 s window looped 21 times, which removes the input's variation by replaying input the entry does not carry.
+
+The probes' lengths, phases and tooling are written into the campaign's method before the launch. No value changed by this entry.
+
+## D145 — the span probes' method: five probes, VS Code's and Kdenlive's driven phases in back-to-back 600 s windows (2026-10-05)
+
+D143's and D144's probes written into `campaign/spans/method.md` before any launch. Taken under 인지오's delegation, on 9.5 D35, D42, D53, D56 and D81 and 9.8 D15.
+
+- **Five probes**, each running its campaign's own phases up to the long one, so the long phase opens where every repeat's opened: Writer idle 1,500 s and Kdenlive idle 3,000 s past the 30 s settle; Kdenlive driven 8 and VS Code driven 21 windows of 600 s past each one's idle phase (120 s and 900 s); the hidden renderer the desktop family's probe mode as it stands. Indices 10 (idle, steady) and 11 (driven), clear of 9.5's and 9.8's.
+- **The hidden renderer's length, amending D143.** The desktop family's probe mode runs its 1,800 s steady phase past the 630 s grace-settle 9.8 D15 set (`desktop/run.sh`, `GRACE_S`, `STEADY`), 255 s more than `c3-workday` holds. D143's "a 2,000 s phase past the 330 s grace" read the probe 9.8 ran before that settle existed; no change to the tooling is needed.
+- **A driven window is one 9.5 driven phase** — `perf` over 605 s, the driver inside it from 1 s — and the next opens when its trace stops, the trace converted in the background at the lowest priority and its `perf.data` deleted, so 12,600 s of VS Code never holds more than a window's trace on the runner's disk (9.5's driven timehists run 16–21 MB a window compressed). Consecutive windows are about 6 s apart, as a 9.5 driven phase's own tail. `campaign/run.sh` mode `probe-driven`; `meas-long-probe.yml` runs a trigger's `driven` indices in it, with a 330-minute timeout.
+- **VS Code's window k replays `word-r<k>`**, the window 9.5's repeat k replayed, into the document the earlier windows typed, with no prelude between windows (D144).
+- **The readings** (`campaign/span_probe.py`): `level` and `level-desktop` for D143's standard on the slice profile, `paired` for D144's. `paired` reads each window as the pool reads a repeat; on 9.5's repeat 1 dressed as a probe's window it returns 98.8811 ms, the pooled record's mean. The ratios' mean carries the probe's one session against each repeat's own — 9.5's window 5, read on repeat 1's idle rate, comes out 1.0 % above its own repeat's mean — and their slope the session's age; both are reported.
+- **A dry run first**: `probe-driven` at three 60 s windows of each driven subject, on any model, never read.
+
+Tests: `test_meas_span_probe.py`, the readings on constructed profiles and the workflow's plan on two trigger forms. No value changed by this entry.

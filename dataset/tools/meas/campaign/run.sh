@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# run.sh <app> <repeat> <dry|full|probe> — one campaign run (9.5 method §1–§4), or a long-phase probe (probe: the
-# 30 s settle, then one idle or play phase of $MEAS_PHASE_S seconds and nothing after it; 9.5 D35, D42).
+# run.sh <app> <repeat> <dry|full|probe|probe-driven> — one campaign run (9.5 method §1–§4), or a long-phase probe
+# (probe: the 30 s settle, then one idle or play phase of $MEAS_PHASE_S seconds and nothing after it; 9.5 D35, D42), or
+# a long driven probe (probe-driven: the campaign's settle and idle phase, then $MEAS_WINDOWS driven windows of
+# $MEAS_WINDOW_S seconds back to back, each a phase of its own; 9.10 D143, D144).
 # Installs the application (appdefs.sh), starts Xvfb, launches, waits for the
 # window, then runs the phases with `perf sched record -a` over each whole
 # phase: interactive apps — settle, idle, driven (stream or scripted pointer),
@@ -62,10 +64,15 @@ play_for() {
 }
 if [ "$MODE" = dry ]; then SETTLE=10; IDLE=30; DRIVEN=60; PLAY=60; OPS=90
 elif [ "$MODE" = probe ]; then SETTLE=30; IDLE="${MEAS_PHASE_S:?probe needs MEAS_PHASE_S}"; DRIVEN=0; PLAY="$IDLE"; OPS=0
+# 9.10 D143, D144: the campaign's own settle and idle phase, so the driven windows open where every repeat's driven
+# phase opened; each window as long as a repeat's driven phase (600 s; a dry run shorter)
+elif [ "$MODE" = probe-driven ]; then SETTLE="$(settle_for "$APP")"; IDLE="$(idle_for "$APP")"
+  DRIVEN="${MEAS_WINDOW_S:-600}"; WINDOWS="${MEAS_WINDOWS:?probe-driven needs MEAS_WINDOWS}"; PLAY=0; OPS=0
 else SETTLE="$(settle_for "$APP")"; IDLE="$(idle_for "$APP")"; DRIVEN=600; PLAY="$(play_for "$APP")"; OPS=600; fi
 rec app "$APP"; rec repeat "$REPEAT"; rec mode "$MODE_ARG"; rec control "$CONTROL"; rec started_utc "$(date -u +%FT%TZ)"
 [ "$CONTROL" = 1 ] && rec control.order "$ORDER"
 rec settle_s "${SETTLE:-unset}"; rec idle_s "$IDLE"; rec driven_s "$DRIVEN"; rec play_s "$PLAY"; rec op_s "$OPS"
+[ "$MODE" = probe-driven ] && rec windows "$WINDOWS"
 if [ -z "$SETTLE" ]; then
   rec finished_utc "$(date -u +%FT%TZ)"; finish_report
   echo "settle: no settle stated for $APP (D34, D35) — stopping before any measurement" >&2
@@ -222,6 +229,57 @@ op_run_driver() {
   OPS_OUT="$log" op_driver "$WID" "$OPS"
 }
 
+# window_phase <name> <seconds> <driver-cmd>: phase()'s twin for a long driven probe (9.10 D144) — perf over the
+# window with the driver inside it from 1 s, as phase(); the trace converted in the background at the lowest
+# priority, on the harness CPUs this script is pinned to, so the next window opens as soon as this one's trace stops
+# and the perf data, deleted once converted, never accumulates
+WINDOW_JOBS=""
+window_phase() {
+  local name="$1" secs="$2" driver="$3"
+  snap "$PAT" "" "$name.before"
+  pin_harness sudo perf sched record -k CLOCK_MONOTONIC -a -o "$OUT/perf.$name.data" -- sleep "$secs" > "$OUT/perf.$name.log" 2>&1 &
+  local perf_pid=$!
+  sleep 1
+  $PH "$name-driver" -- bash -c "$driver" > "$OUT/driver.$name.log" 2>&1
+  wait "$perf_pid"; rec "perf.$name.record.rc" "$?"
+  snap "$PAT" "" "$name.after"
+  screenshot "after-$name"
+  phase_summary "$name"
+  convert_window "$name" &
+  WINDOW_JOBS="$WINDOW_JOBS $!"
+}
+convert_window() {
+  local name="$1"
+  nice -n 19 sudo perf sched timehist --state -i "$OUT/perf.$name.data" 2>> "$OUT/perf.$name.log" | gzip > "$OUT/perf.$name.timehist.txt.gz"
+  rec "perf.$name.timehist.rc" "${PIPESTATUS[0]}"
+  rec "perf.$name.rows_matching" "$(gzip -dc "$OUT/perf.$name.timehist.txt.gz" | grep -cE "$RX" || echo 0)"
+  nice -n 19 sudo perf sched timehist -w -i "$OUT/perf.$name.data" 2>> "$OUT/perf.$name.log" | grep -E "awakened|wakeup|\bwaker\b|^\s*[0-9]+\.[0-9]+ +\[[0-9]+\] +\S.*\[[0-9/]+\] +awakened" | gzip > "$OUT/perf.$name.wakeups.txt.gz"
+  rec "perf.$name.wakeups.rows" "$(gzip -dc "$OUT/perf.$name.wakeups.txt.gz" | wc -l)"
+  sudo rm -f "$OUT/perf.$name.data"
+}
+# driven_windows: the probe's driven phase, $WINDOWS windows back to back (9.10 D144). A stream application's window
+# k replays the stream's window k, the one 9.5's repeat k replayed, into the document the earlier windows typed — no
+# prelude between windows; a pointer application runs its loop in every window
+driven_windows() {
+  local k name drv f
+  rec stream_kinds "$KINDS"
+  for k in $(seq 1 "$WINDOWS"); do
+    name="driven-w$(printf %02d "$k")"
+    if [ "$DRIVER" = stream ]; then
+      f="$STREAMS/$STREAM-r$k.jsonl"
+      if [ ! -s "$f" ]; then rec "$name.stopped" "window $STREAM-r$k not cut"; break; fi
+      rec "$name.stream_file" "$(basename "$f")"
+      drv="python3 $TOOLS/replay_stream.py $f $WID $OUT/replay.$name.jsonl --seconds $DRIVEN --area $AREA --kinds $KINDS"
+    else
+      drv="$(pointer_loop)"
+    fi
+    $PH "$name" -- bash -c "true"; window_phase "$name" "$((DRIVEN + 5))" "$drv"
+    [ "$DRIVER" = stream ] && rec "replay.$name.sent" "$(wc -l < "$OUT/replay.$name.jsonl" 2>/dev/null || echo 0)"
+  done
+  # shellcheck disable=SC2086
+  wait $WINDOW_JOBS
+}
+
 # window_state: whether this job's recorded-input window is cut and holds events — ok, empty or uncut
 window_state() {
   python3 -c 'import json, sys; w = json.load(open(sys.argv[1]))["windows"].get(sys.argv[2]); print("uncut" if w is None else "ok" if w.get("events") else "empty")' "$STREAMS/windows.json" "$STREAM-r$REPEAT"
@@ -269,6 +327,7 @@ case "$DRIVER" in
     rec recording.window "$WINDOW"
     $PH idle -- bash -c "true"; phase idle "$IDLE" ""
     if [ "$MODE" = probe ]; then OP=""
+    elif [ "$MODE" = probe-driven ]; then OP=""; sleep 10; driven_windows
     elif [ "$WINDOW" = empty ]; then rec recording.past_end 1; OP=""; else
     sleep 10
     SFILE="$STREAMS/$STREAM-r$REPEAT.jsonl"; rec stream_file "$(basename "$SFILE")"; rec stream_kinds "$KINDS"
@@ -287,7 +346,8 @@ case "$DRIVER" in
     fi ;;
   pointer)
     $PH idle -- bash -c "true"; phase idle "$IDLE" ""
-    if [ "$MODE" = probe ]; then OP=""; else
+    if [ "$MODE" = probe ]; then OP=""
+    elif [ "$MODE" = probe-driven ]; then OP=""; sleep 10; driven_windows; else
     sleep 10
     DRV="$(pointer_loop)"
     $PH driven -- bash -c "true"; phase driven "$((DRIVEN + 5))" "$DRV"

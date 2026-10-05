@@ -5,7 +5,9 @@ name: meas-long-probe
 # whether an application's launch-time episodes stop or recur. Never a repeat of a campaign. Started by a push
 # changing .github/campaign-long-probe.json, which names the applications, their probe indices, the CPU model and
 # each application's phase length in seconds (`phase_s`, design, stated in the method before the launch; an
-# application without one fails the plan). One artifact per (app, index).
+# application without one fails the plan). One artifact per (app, index), suffixed with the trigger's mode.
+# 9.10 D143, D144: a probe index named under `driven` runs campaign/run.sh in probe-driven mode instead — the
+# campaign's settle and idle phase, then `windows` driven windows of `window_s` seconds back to back.
 
 on:
   push:
@@ -21,6 +23,7 @@ jobs:
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
       cpu_model: ${{ steps.plan.outputs.cpu_model }}
+      mode: ${{ steps.plan.outputs.mode }}
       count: ${{ steps.plan.outputs.count }}
     steps:
       - uses: actions/checkout@v4
@@ -30,18 +33,28 @@ jobs:
           import json
           c = json.load(open(".github/campaign-long-probe.json"))
           reps, phase_s = c.get("repeats", {}), c.get("phase_s", {})
-          inc = [{"app": a, "repeat": r, "phase_s": int(phase_s[a])} for a in c.get("apps", []) for r in reps.get(a, [])]
+          driven, windows, window_s = c.get("driven", {}), c.get("windows", {}), int(c.get("window_s", 600))
+          inc = []
+          for a in c.get("apps", []):
+              for r in reps.get(a, []):
+                  if r in driven.get(a, []):
+                      inc.append({"app": a, "repeat": r, "run_mode": "probe-driven", "phase_s": 0,
+                                  "windows": int(windows[a]), "window_s": window_s})
+                  else:
+                      inc.append({"app": a, "repeat": r, "run_mode": "probe", "phase_s": int(phase_s[a]),
+                                  "windows": 0, "window_s": 0})
           print("matrix=" + json.dumps({"include": inc}))
           print("cpu_model=" + c.get("cpu_model", ""))
+          print("mode=" + c.get("mode", "probe"))
           print("count=" + str(len(inc)))
           PY
   run:
-    # named as the loop tools parse a job, "run (<app>, <k>)": the matrix's phase_s stays out of the name
+    # named as the loop tools parse a job, "run (<app>, <k>)": the matrix's other fields stay out of the name
     name: run (${{ matrix.app }}, ${{ matrix.repeat }})
     needs: plan
     if: needs.plan.outputs.count != '0'
     runs-on: ubuntu-24.04
-    timeout-minutes: 150
+    timeout-minutes: 330   # 9.10 D144: code's driven probe, its 900 s idle phase and 21 windows of 605 s, about 4 h
     strategy:
       fail-fast: false
       max-parallel: 5
@@ -49,13 +62,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get update > /dev/null && sudo apt-get install -y --no-install-recommends xvfb > /dev/null
-      - run: MEAS_OUT=/tmp/meas MEAS_CPU_MODEL="${{ needs.plan.outputs.cpu_model }}" MEAS_PHASE_S="${{ matrix.phase_s }}" bash dataset/tools/meas/campaign/run.sh ${{ matrix.app }} ${{ matrix.repeat }} probe
+      - run: MEAS_OUT=/tmp/meas MEAS_CPU_MODEL="${{ needs.plan.outputs.cpu_model }}" MEAS_PHASE_S="${{ matrix.phase_s }}" MEAS_WINDOWS="${{ matrix.windows }}" MEAS_WINDOW_S="${{ matrix.window_s }}" bash dataset/tools/meas/campaign/run.sh ${{ matrix.app }} ${{ matrix.repeat }} ${{ matrix.run_mode }}
       - name: own the output
         if: always()
         run: sudo chown -R "$(id -u):$(id -g)" /tmp/meas && sudo chmod -R a+rX /tmp/meas
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: meas-long-probe-${{ matrix.app }}-r${{ matrix.repeat }}-probe
+          name: meas-long-probe-${{ matrix.app }}-r${{ matrix.repeat }}-${{ needs.plan.outputs.mode }}
           path: /tmp/meas
           if-no-files-found: error
