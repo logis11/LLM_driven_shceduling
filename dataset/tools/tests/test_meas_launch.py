@@ -208,3 +208,19 @@ def test_the_fold_in_carries_each_streams_wakes_with_its_threads(tmp_path):
     # byte-stable: the same document encodes to the same bytes
     doc = {"repeats": [{"phase_us": phase, "streams": streams}]}
     assert launch_fold_in.encode(doc) == launch_fold_in.encode(doc)
+
+
+def test_the_tabs_renderers_are_the_lowest_client_ids(tmp_path):
+    # 9.10 D155: a plain renderer that starts before the gate (client id 21, after the tabs' and the extensions') hosts
+    # no tab; the client ids order the renderers as Chromium started them
+    from meas.desktop import launch
+    rows = [(4681, "--type=renderer --top-chrome-webui --renderer-client-id=5"),
+            (4692, "--type=renderer --renderer-client-id=6"), (4701, "--type=renderer --renderer-client-id=7"),
+            (4890, "--type=renderer --extension-process --renderer-client-id=19"),
+            (4915, "--type=renderer --renderer-client-id=21")]
+    (tmp_path / "launch.renderers.traced.gate.tsv").write_text("".join(f"{p}\t/opt/chrome {a}\n" for p, a in rows))
+    ids = launch.client_ids(str(tmp_path), "traced.gate")
+    assert ids == {4681: 5, 4692: 6, 4701: 7, 4890: 19, 4915: 21}
+    pages = launch.page_renderers(str(tmp_path), "traced.gate")
+    assert pages == {4692, 4701, 4915}   # 9.8's page-renderer rule leaves out the WebUI and the extension
+    assert sorted(pages, key=lambda q: ids[q])[:2] == [4692, 4701]

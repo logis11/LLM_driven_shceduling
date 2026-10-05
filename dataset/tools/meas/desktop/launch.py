@@ -246,6 +246,22 @@ def page_renderers(D, label="traced"):
     return out
 
 
+CLIENT_ID = re.compile(r"--renderer-client-id=(\d+)")
+
+
+def client_ids(D, label):
+    """pid -> --renderer-client-id from launch.renderers.<label>.tsv: Chromium numbers its renderers as it starts them."""
+    p = os.path.join(D, f"launch.renderers.{label}.tsv")
+    out = {}
+    if os.path.exists(p):
+        for line in open(p):
+            parts = line.rstrip("\n").split("\t", 1)
+            m = CLIENT_ID.search(parts[1]) if len(parts) == 2 else None
+            if m:
+                out[int(parts[0])] = int(m.group(1))
+    return out
+
+
 def analyze(D):
     kv, edges = read_kv(D), read_edges(D)
     subject = kv.get("app", "")
@@ -299,6 +315,14 @@ def analyze(D):
         gate = page_renderers(D, "traced.gate")
         end = page_renderers(D) or set()
         pages = gate if gate is not None else end
+        # 9.10 D155: the tabs open at launch and take the lowest client ids among the page renderers; a plain renderer
+        # can also start before the gate (client id 21 after the tabs' 6–18 and the two extensions' 19–20, 2026-10-05
+        # repeats 2 and 5), and it hosts no tab — so past the control tab's and the N background tabs' count, the
+        # renderers with the lowest client ids are the tabs'
+        want = int(kv.get("launch.origins", "0") or 0) + 1
+        if want > 1 and len(pages) > want:
+            ids = client_ids(D, "traced.gate")
+            pages = set(sorted(pages, key=lambda q: (ids.get(q, 1 << 30), q))[:want])
         out["late_renderers"] = sorted(end - pages)
         by_pid = defaultdict(list)
         for r in wakes:

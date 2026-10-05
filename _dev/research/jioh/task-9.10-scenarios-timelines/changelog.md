@@ -2798,3 +2798,11 @@ By 인지오's decision (Q34): a second probe, `code` 12, as `code` 11 but with 
 Not taken: the spans kept with the rise stated, its cause unseparated; the files' focused typing bounded to what was observed.
 
 No value changed by this entry.
+
+## D155 — the hidden renderer's launch streams: the tabs' renderers are the lowest client ids; two landings re-analysed (2026-10-05)
+
+In `meas-ci:desktop:2026-10-05b`'s launch re-trace, repeats 2 and 5 carry 13 renderer streams against the 12 background tabs': a plain renderer, `--renderer-client-id=21`, started some 2 s after the tabs' renderers (client ids 6–18) and the two extension renderers (19, 20), before the gate's listing 20 s after launch. The launch campaign's rule took the tabs' renderers as the page renderers at the gate, against the same renderer starting later in the grace (its dry run #80); started before the gate, it passes.
+
+Taken under 인지오's delegation, on D127 and the launch campaign's rule: past the control tab's and the 12 background tabs' count, the page renderers with the lowest client ids are the tabs' — Chromium numbers its renderers as it starts them, and the tabs open at launch (`desktop/launch.py`, `client_ids`). The five landings re-analysed locally with `launch.py analyze` from their raw traces: repeats 1, 3 and 4 reproduce the runner's streams and summary byte for byte; repeats 2 and 5 lose the late renderer, 13 page renderers and 12 streams, their report keys rewritten and marked `launch.reanalysed`. The launch phase runs 1,051.2 s in each, its tree's CPU 4,096.8–5,123.3 ms. Test: `test_meas_launch.py`.
+
+The steady repeats' first batch, `chrome-hidden` 1–5, holds the stability rule under 9.8's per-value treatments as `desktop/pool.py` applies them (D17's run means following the runner's speed, 9.5 D57's components varying between sessions, D27's sparse residual), 12 renderers measured in each; every repeat valid. Pooled records in `campaign/renderer-hidden/results/`.
