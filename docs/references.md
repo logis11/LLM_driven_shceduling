@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-10-04
+> Status: normative · Created 2026-08-26 · Updated 2026-10-06
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -442,6 +442,26 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - cite: Mozilla. *GLAM: Glean Aggregated Metrics Explorer*, public data API glam.telemetry.mozilla.org/api/v1/data/ (POST), product `fog` (Firefox Desktop on Glean), `app_id=release`, `ping_type=metrics`, `aggregationLevel=version`, probe `browser_engagement_max_concurrent_tab_count` (and `…max_concurrent_window_count`), OS slices Linux, Windows and Darwin, versions 137–156, accessed 2026-10-01. Metric definitions: `browser/modules/metrics.yaml`, mozilla-firefox/firefox at commit cf51949351fa0f0333d1db4d77a3184ed59da99c (2026-09-26). Local copies `_dev/research/jioh/task-9.10-scenarios-timelines/sources/S3-40/` (untracked), the Linux tab-count response SHA-256 b302a11980d6493703703570091aaff67b415d59c1bb5b18c84de37a49d6e2c0.
 - role: the tab count of every file that shows Chrome (`_dev/research/jioh/task-9.10-scenarios-timelines/changelog.md` D15) and its one window (D16). `max_concurrent_tab_count` is "The count of maximum number of tabs open during a subsession, across all windows, including tabs in private windows and restored at startup" (`metrics.yaml:254–256`); GLAM aggregates a client's metrics pings per version, `max` the client's largest value. Linux, release 152, 7,535,303 clients: the median per-client peak of concurrent tabs 4.67, so five tabs; windows, the median per-client peak 1. The Linux median of the tab peak holds at 3.4–5.0 across releases 137–156. A user-side value from Firefox, not Chromium; GLAM's percentiles are bucket-interpolated; the median of a per-client peak errs high for a random instant (D15's stated choice). The renderer count it multiplies is `meas-ci:desktop:2026-10-04`'s (D126–D131).
 - status: verified (2026-10-01; the API responses, the metric definitions at the commit and the GLAM dataset documentation read, `_dev/research/jioh/task-9.10-scenarios-timelines/search/S3-traces-datasets.md` S3-40)
+
+### `mpv`
+- cite: mpv project. *mpv* 0.37.0, `DOCS/man/options.rst`, `video/out/vo.c`, `audio/out/buffer.c`, `audio/out/ao_null.c`, `osdep/threads-posix.h` at tag `v0.37.0` (commit 818ce7c51a6b9179307950e919983e0909942098), github.com/mpv-player/mpv, accessed 2026-10-06.
+- role: what mpv does with late work, for the TIMER backlog statement in `simulator/simulator-guide.md`. The default `--framedrop=vo`: "Drop late frames on video output (default). This still decodes and filters all frames, but doesn't render them on the VO" (`options.rst:1144–1145`, `:1160`); a late frame is counted dropped and not drawn, degrading to 10 FPS at worst rather than "freezing the display forever" (`vo.c:887`, `:892–894`). The audio output thread wakes on a relative timeout of a quarter of the device buffer and writes all free space at each wake (`buffer.c:620`, `:703–706`; `threads-posix.h:184`); on underrun it fills "the rest of the user-provided buffer with silence" (`buffer.c:198–200`); the null output's buffer is 0.2 s (`ao_null.c:213`). Existence only: the program's own code, not how a late cycle is perceived.
+- status: verified (2026-10-06; the files read at the tag)
+
+### `chromium`
+- cite: The Chromium Authors. *Chromium* 152.0.7977.82, `media/base/fake_audio_worker.cc`, `media/audio/fake_audio_output_stream.cc`, `media/audio/audio_output_resampler.cc`, `services/audio/owning_audio_manager_accessor.cc` at tag `152.0.7977.82` (commit d04cdb24d67b081f6cf80200ffc5233f44b61109), chromium.googlesource.com/chromium/src, accessed 2026-10-06.
+- role: what Chromium's fake audio output does with a late period, for the TIMER backlog statement in `simulator/simulator-guide.md`. The audio service's `AudioWorkerThread` runs at a 10 ms realtime period (`owning_audio_manager_accessor.cc:35`, `:67`) and hosts the fake output stream's worker (`fake_audio_output_stream.cc:28`), the fallback when no audio device opens (`audio_output_resampler.cc:383–388`). When late, the worker runs the callback once ("Even if we're late, this callback must be called") and moves to "the next nearest ontime interval" (`fake_audio_worker.cc:177–190`). Existence only: the fallback path of a machine without a sound device, not a desktop's sound-server path; that the measured `utility/AudioWorkerThre` is this worker is inferred from the thread name and the venue, not traced.
+- status: verified (2026-10-06; the files read at the tag)
+
+### `vulkan`
+- cite: The Khronos Group. *Vulkan specification*, `chapters/VK_KHR_surface/wsi.adoc`, `VkPresentModeKHR`, Vulkan-Docs commit e4e53e4b31e13eeaee1ad99fb940aa72b2ec1b14 (2026-10-02), github.com/KhronosGroup/Vulkan-Docs, accessed 2026-10-06.
+- role: the presentation contract a display-paced frame loop runs against, for the TIMER statement in `simulator/simulator-guide.md`: `VK_PRESENT_MODE_FIFO_KHR` "waits for the next vertical blanking period to update the current image", and "one request is removed from the beginning of the queue and processed during each vertical blanking period in which the queue is non-empty" (`wsi.adoc:4418–4426`) — a late frame takes the next vertical blank. Existence only: what the contract states, not what a given game's loop does.
+- status: verified (2026-10-06; the file read at the commit)
+
+### `fiedler-gaffer04`
+- cite: Fiedler, G. "Fix Your Timestep!" *Gaffer On Games*, 2004-06-10. gafferongames.com/post/fix_your_timestep/ (accessed 2026-10-06).
+- role: a documented game-loop pattern, not a claim about all engines: "the renderer produces time and the simulation consumes it in discrete dt sized steps"; behind, the update simulates "more steps to catch up", bounded by a clamp on frame time (`frameTime > 0.25`) or "a maximum # of steps per-frame"; the final loop renders once per iteration. Practitioner article, footnote tier.
+- status: verified (2026-10-06; the page read in full)
 
 ## Grounding — measurement
 
