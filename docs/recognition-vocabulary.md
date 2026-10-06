@@ -1,5 +1,5 @@
 # Recognition Vocabulary
-> Status: normative · Created 2026-08-28 · Updated 2026-09-12
+> Status: normative · Created 2026-08-28 · Updated 2026-10-06
 
 The shared vocabulary of the recognition signal — the one contract that the recognizer's output schema, the validator's menu, the driver table, and the Layer-1 grader all agree on. Ratified 2026-08-28 (인지오 · 인경민 · 박이안 — pending team review of this doc).
 
@@ -86,7 +86,7 @@ Demotion on a fully consumed slice and stay-on-block are fixed MLFQ rules, not c
 |---|---|---|---|
 | `residual_timeslice_us` | int, 500–100000 | 10000 | round-robin slice for the residual (non-deadline) class |
 
-The deadline class is the TIMER-driven tasks, behaviorally observed; each job's deadline is its next period boundary (period-implicit). Deadline tasks run earliest-deadline-first (ties broken by a fixed executor rule); the residual class round-robins in the remaining lane time. No admission control in v1.
+The deadline class is the TIMER-driven tasks and every task reachable from one by following `WAKE` targets (the frame chain), behaviorally observed; each job's deadline is its next period boundary (period-implicit), and a woken task's job carries the deadline of the job that woke it. Deadline tasks run earliest-deadline-first (ties broken by a fixed executor rule); the residual class round-robins in the remaining lane time. No admission control in v1.
 
 ### LOTTERY
 
@@ -169,6 +169,7 @@ Adding or removing a mode, promoting an annotation to a graded attribute, changi
 
 ## 5. Changelog
 
+- **2026-10-06 — EDF's deadline class holds the frame chain (jioh).** No value changed. §2's EDF paragraph now states the class as `docs/memos/2026-09-09-batch-class-rule-for-the-simulator.md` rule B2 defines the periodic class — the TIMER tasks and every task reachable from one through `WAKE` targets — and that a woken task's job carries the deadline of the job that woke it, so a frame's stages are ordered by the frame's own deadline, the one the harness's `job` primitive scores (`docs/harness/metrics.md` §6.2). The former wording, read literally, left a chain's woken stages in the residual class.
 - **2026-09-12 — the sensitivity check is a sweep (jioh 8.8).** No value changed. §2's sensitivity paragraph now states the pre-registered form: nine alternative boot defaults varying the top slice only, the reasons per point in the RQ0 gate spec, and the correction that only the `fixed` run varies — the earlier sentence that the pair varies all three slices together described a design the runner never had. Reference added: `linux-sched-ext` (the 20 ms point).
 - **2026-09-11 — boot default from OSTEP (jioh 8.1).** Three values changed: MLFQ `timeslice_us` 2000 → 10000, EDF `residual_timeslice_us` 2000 → 10000, LOTTERY `timeslice_us` 2000 → 10000. The MLFQ boot default is now OSTEP §8's worked example whole (3 queues, 10 ms, doubling, 100 ms boost, allotment equal to slice), one source for all four values; the other two slices follow by the same-granularity rule, now stated in §2 as the project's own; the alternative pair of the sensitivity check is the team's to fix before execution. The former 2 ms slice named no source (it lay inside the range `linux-sched-fair`, `illumos-ts`, and `ostep` bound). The prior table's rows follow by their header rule; the metrics doc's latency floor is untied from the slice (its changelog). Research behind the change: no source read claims a standard MLFQ configuration; memo `docs/memos/2026-09-11-boot-default-from-ostep.md`.
 - **2026-09-11 — the cap's shipped counterpart (jioh).** No value changed. §2's `batch_bandwidth_cap` paragraph now points to `linux-sched-bwc` (Linux CFS bandwidth control) as the existence reference for a per-class CPU bandwidth ceiling; what the class is, the range, and the floor remain this project's.
