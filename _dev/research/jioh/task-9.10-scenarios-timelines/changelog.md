@@ -2858,3 +2858,14 @@ Taken under 인지오's delegation, on D32 ("9.10 sets the content; the field an
 One value is not settled: `c4-office` binds the injected `7z` at `total_work: 6s`, against 9.7's measured job of 4,882–5,283 s of CPU over the Mahoney set. D17 rules out a `total_work` that describes part of a job, and D31's "now run whole, D17" does not hold: D17's list leaves the archive job out, and `c4-office` never rebound. Q38.
 
 Hands to 9.13: the list, applied when the field exists.
+
+## D161 — `c4-office`'s `7z` burst stays 6 s, design: an exception to D17 for injections (2026-10-06)
+
+By 인지오's decision (Q38). The C4 files are clones of C1 files with a label-invariant process injected mid-segment, each paired with its clean original for the within-segment distractor-robustness measurement (`docs/workload/building-plan.md` §3 C4: "7z burst during office"). `c4-office` binds the injected `7z` on `file-archiver` at `total_work: 6s`, inside `c1-office`'s 60 s segment; 9.7's measured job, 7-Zip archiving the Mahoney set, is 4,882–5,283 s of CPU (`meas-ci:background:2026-09-19`).
+
+- **The 6 s is design**, the injection's size: phase decision 3 makes injections the experiment's own interventions. The burst is part of a measured job, which D17 otherwise rules out; the exception is stated in `c4.variant.yaml` and in `bound-values.md`.
+- **D31's "now run whole, D17"** for this injection is withdrawn: D17's list never held the archive job, and `c4-office` never rebound.
+
+Not taken: `7z` run whole, `c4-office` lengthening to about 5,100 s and its pairing with `c1-office` broken; a new campaign of 7-Zip on a smaller input, whose size no source gives.
+
+No value changes.

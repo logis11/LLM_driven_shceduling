@@ -14,6 +14,9 @@ variants:
 
   - id: c4-office
     from: c1-office.timeline.yaml
+    # the 7z burst's 6 s is design, the injection's size (phase decision 3):
+    # part of 9.7's measured archive of the Mahoney set, 4,882-5,283 s of CPU
+    # (meas-ci:background:2026-09-19), an exception to 9.10 D17 (9.10 D161)
     ops:
       - add-task: {id: injected-burst, name: 7z, archetype: file-archiver,
                    arrive: 30s, bind: {total_work: 6s}}

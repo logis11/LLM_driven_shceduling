@@ -27,9 +27,4 @@ Every value a core-set timeline binds — `count`, `spawn_count`, `parallelism_c
 | `parallelism_cap: 8` | the kernel build; the module rebuild | `c1-compile`, `c4-compile`, `c3-workday`, `c6-dual`; `c7-compile` | design: the eight-thread desktop | 9.6 D4; D18, D50 |
 | `lane_share`: 0.9, 0.95, 1.45, 0.6 | the game chain | 0.9 `c1-gaming`, `c4-gaming`, `c7-gaming`; 0.95 `c2-p2a`, `c2-p2b`; 1.45 `c3-evening`; 0.6 `c6-dual` | design: a calibration size | D31 |
 | `total_work: 30s`, `program: spoof` | the `chrome`-named batch job | `c6-spoof` | design: by construction | 9.6 D7; D31 |
-
-## Not settled
-
-| value | task | files | state |
-|---|---|---|---|
-| `total_work: 6s` | the injected archive job, `7z` (`file-archiver`) | `c4-office` | 9.7's measured job is 4,882–5,283 s of CPU; 6 s is part of it, which D17 rules out. D31's "now run whole, D17" does not hold: D17's list leaves the job out, and the file never rebound (Q38). |
+| `total_work: 6s` | the injected archive job, `7z` (`file-archiver`) | `c4-office` | design: the injection's size, part of 9.7's measured job (4,882–5,283 s of CPU, `meas-ci:background:2026-09-19`), an exception to D17 | D161 |
