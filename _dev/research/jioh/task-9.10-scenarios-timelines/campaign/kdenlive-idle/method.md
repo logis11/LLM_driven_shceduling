@@ -35,3 +35,4 @@ The pooled `results/pool-kdenlive.json` and `results/results.md`; the launch lan
 ## 6. Amendments
 
 - 2026-10-05, the method written (D146, D147).
+- 2026-10-05, the campaigns. The idle repeats (runs #664–#674; `meas-ci:interactive:2026-10-05`): repeats 1–16, each landing once, all valid; 16 jobs stopped at the gate; the rule holds at 16. The launch re-trace (runs #100–#101; `meas-ci:desktop:2026-10-05`): repeats 1–5, all valid; 1 job stopped at the gate. Folded in at commit `626c27a6`; released as `meas-ci-interactive-2026-10-05` and `meas-ci-desktop-2026-10-05` (D151).

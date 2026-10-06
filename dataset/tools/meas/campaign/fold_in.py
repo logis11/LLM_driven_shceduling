@@ -183,6 +183,14 @@ SPAN_STATED = {
                      "level; some 20 minutes into the input both probes enter a state of fewer, longer main-thread "
                      "wakes, 126 a second at 3.06 ms against 135–153 at 2.3–2.8 ms, which one of them kept to its end, "
                      "the CPU then 9 % above the carried phase and the wakes 14 % below."),
+    "code-editor": ("Read over 12,068 s, the span `c6-dual` holds it focused, in two long-phase probes of the replayed "
+                    "typing (9.10 D144, D154, D158): with the committed file restored before each 600 s window, the "
+                    "per-input run mean against 9.5's repeat of the same window is 1.00 (95 % interval 0.97–1.03) over "
+                    "19 windows, with no trend; the rise of the probe that typed one growing line was the line's length. "
+                    "In each probed session VS Code's extension host, the process holding the TypeScript and JSON "
+                    "language servers, ran for 2–4 windows at up to 400 s of CPU a window, the per-input run mean up to "
+                    "3.9 times the carried, until VS Code replaced the host: 6,100–8,500 s into the input in one "
+                    "session, 10,700–12,050 s in the other. The episode is not carried."),
 }
 # D99: an entry whose repeat count neither the rule nor its recording's end chose states where it stopped
 STOP_STATED = {

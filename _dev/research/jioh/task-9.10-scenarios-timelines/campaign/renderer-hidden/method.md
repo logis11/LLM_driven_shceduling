@@ -27,3 +27,4 @@ The pooled records and `results/results.md` beside this page; the record's entry
 ## 5. Amendments
 
 - 2026-10-05, the method written (D152).
+- 2026-10-05, the campaign (runs #105–#107; `meas-ci:desktop:2026-10-05b`). `chrome-hidden` 1–5 and `launch-chrome-hidden` 1–5, each landing once on the AMD EPYC 7763 under Google Chrome 154.0.8037.57, all valid; 6 jobs stopped at the gate. Launch repeats 2 and 5 re-analysed, the tabs' renderers the lowest client ids (D155); the rule holds at 5 under 9.8's per-value treatments; folded with the build split from `web-browser` stated (D156); released as `meas-ci-desktop-2026-10-05b` (D157).

@@ -40,3 +40,7 @@ Each probe's run id and artifact, and its reading, go into `results/` and `resul
 ## 6. Amendments
 
 - 2026-10-05, the method written (D145).
+- 2026-10-05, the first probes (runs 37263321218, 37264950064, 37264996600; the dry run 37263264550; changelog D145); the readings in `results/results.md`.
+- 2026-10-05, D149 — amending §1 "Probes": the hidden renderer probed again, `chrome-hidden` 11, its steady phase 3,600 s past the 630 s grace-settle (`desktop/run.sh`'s probe mode), to show where the page thread's decline ends. Run 37273691029; 37273549541 and 37273631811 stopped at the gate.
+- 2026-10-05, D150 — amending §1 "Probes": Kdenlive driven probed again, `kdenlive` 12, as `kdenlive` 11, to see whether the step about 1,200 s into the input recurs. Run 37274214398.
+- 2026-10-05, D154 — amending §1 "Probes" and §2 "VS Code": VS Code driven probed again, `code` 12, mode `probe-driven-reset`, the committed file restored before every window past the first by 9.5's untraced-control prelude (`campaign/run.sh`, `ctrl_prelude`), so no line outgrows one window's typing. The dry run 37287429163, three 60 s windows; the probe, run 37289898127, read under D158.

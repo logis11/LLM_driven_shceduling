@@ -2826,3 +2826,14 @@ Hands to 9.14: the build split beside the Chrome files' terms. Hands to 9.16: th
 By 인지오's decision (Q36). `meas-ci-desktop-2026-10-05b` takes D151's form — every artifact of its runs zipped as `<artifact>-<run id>.zip`, the gated jobs' reports in `gated-reports.zip` — and is created at the fold-in commit: `chrome-hidden`'s repeats 1–5 and `launch-chrome-hidden`'s repeats 1–5, as the runner wrote them, the 6 gated jobs' reports beside them. `renderer-hidden`'s values and its launch stream rest on them, and Actions artifacts expire after 90 days. Launch repeats 2 and 5 are released raw; their streams are re-derived from their traces by `launch.py analyze` (D155).
 
 Not taken: no release; the campaign folded into `meas-ci-probes-2026-10-05`.
+
+## D158 — `code-editor`'s driven span stands; the extension host's episode is stated, not carried (2026-10-05)
+
+By 인지오's decision (Q37), on D154's probe, `code` 12, the committed file restored before every window (`campaign/spans/results/results.md`). Against 9.5's repeat of the same window, the per-input run mean reads 0.88–1.14 in windows 1–17 and 1.03 and 0.92 in windows 20 and 21: over those 19 windows the ratios' mean is 1.001 (95 % interval 0.968–1.034), their slope +0.0022 ± 0.0061 a window. The first probe's rise in windows 4–10, 1.25–1.51, was the one line's length. Windows 18 and 19, 10,711–12,050 s into the input, read 1.89 and 3.50: VS Code's extension host (`node.mojom.NodeService`, holding the TypeScript and JSON language servers) took 104 and 398 s of CPU against 12–39 s in the other windows, until 65.4 s into window 20 a new host, with new language servers, replaced it 0.16 s after the old one's last event. The first probe holds the same episode in windows 11–14, 6,078–8,514 s into the input — 58, 136, 257 and 326 s, its ratios 1.43–3.85 — the host replaced in window 15. D154's reading of the first probe put its rise on the line, the session's age unseparated; its largest ratios, windows 12–14, were this episode.
+
+- **The span stands**, `c6-dual`'s 12,068 s of focused typing; the four files holding the editor 1,386–1,608 s lie before either episode. `code-editor`'s scope states the flat ratios and the episode (`campaign/fold_in.py`, `SPAN_STATED`), as D153 stated `video-editor`'s state some 20 minutes into the input.
+- **The episode is not carried**: two sightings, at different points of the input, give it no rate and no placement.
+
+Not taken: the episode carried as a rare event within a run (9.8 D33 carried the Steam client's burst over 62 runs in 12 repeats); `c6-dual`'s focused typing cut to end before the earliest episode.
+
+The `code-editor` entry's scope changes; no value changes. Hands to 9.14: `c6-dual`'s typing past the episodes' onset.
