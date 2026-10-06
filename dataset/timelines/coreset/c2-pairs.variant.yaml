@@ -7,14 +7,16 @@ variants:
   # shown as `tracker-miner-f`, bound whole at its measured CPU total — the
   # measured indexer's own tables, not python3's under a rename (9.10 D6, D17,
   # D70, D74); segment 1 is that long in both files, so the job is alive at
-  # every instant of it under every policy (D80).
+  # every instant of it under every policy (D80). The index is a first login's,
+  # as c7-indexing's: `initiated: session`, scenario S14 (D5, D79, D164).
   - id: c2-p1b
     from: c2-p1a.timeline.yaml
     ops:
       - patch-task: {id: hog, name: tracker-miner-f, archetype: file-indexer,
                      arrive: 60s, bind: {total_work: 39.435s}}
       - patch-segment: {index: 1, mode: indexing,
-                        attributes: {background_wanted: false}}
+                        attributes: {background_wanted: false, initiated: session},
+                        scenario: [S11, S14]}
 
   # P2b — same game-plus-background shape; wanted flips (S17 vs S10). The
   # unwanted job is the stock unattended upgrade's install stage,

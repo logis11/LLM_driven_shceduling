@@ -72,13 +72,9 @@ STATE_NOT = {
               "the gaming timelines depict (D6)."),
 }
 
-APPROX = {
-    "element": ("Bound by stated approximation (D7): discord, whose Linux client cannot be observed without an account "
-                "and has no self-hosted server. Discord keeps its connection with a gateway heartbeat at a "
-                "server-assigned interval (documented example 45 s) where Matrix clients hold a 30 s /sync long poll; "
-                "no Linux observation of Discord's wake cadence or CPU per wake exists, so the direction of the error "
-                "is not known. The injected-overlay role is withdrawn: Discord's overlay is Windows-only (D7)."),
-}
+# 9.10 D24: every file shows the observed program's name, `element-desktop` for the chat client, so no entry is bound
+# by stated approximation (discord left the notes)
+APPROX = {}
 
 # D20, D22, D24: where a between-sessions component's spread lies — within one run (the probe, 600 s windows every
 # 60 s) against across the repeats. Across-repeat figures for the renderer entries are recomputed from the pooled

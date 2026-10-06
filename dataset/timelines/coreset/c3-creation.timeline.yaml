@@ -5,9 +5,10 @@
 # (meas-ci:background:2026-10-03b; 9.10 D17, D97): its segment runs from 240 s
 # to the smallest whole second by which it ends under every policy — 240 s + the
 # job's CPU and blocks + the other tasks' CPU after 240 s as compiled under the
-# file's seed, 3,211.514 s — kdenlive staying open to its end (D78's arithmetic).
-# kdenlive, started at 120 s, runs its observed launch phase first, replayed
-# (meas-ci:desktop:2026-10-04b; 9.10 D21, D132-D138).
+# file's seed, 3,211.504 s — kdenlive staying open to its end (D78's arithmetic,
+# D162). kdenlive, started at 120 s, runs its observed launch phase first,
+# replayed, traced to its 240 s settle (meas-ci:desktop:2026-10-05; 9.10 D21,
+# D132-D138, D146).
 meta:
   id: c3-creation
   seed: 303

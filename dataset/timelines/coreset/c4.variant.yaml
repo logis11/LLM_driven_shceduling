@@ -5,7 +5,8 @@
 variants:
   - id: c4-gaming
     from: c1-gaming.timeline.yaml
-    # the injected chat client runs its observed launch phase first, replayed
+    # the injected chat client is Element shown idle, no messages arriving
+    # (9.10 D23); it runs its observed launch phase first, replayed
     # (meas-ci:desktop:2026-10-04b; 9.10 D21, D132-D138)
     ops:
       - add-task: {id: injected-chat, name: element-desktop,
@@ -15,7 +16,8 @@ variants:
   - id: c4-office
     from: c1-office.timeline.yaml
     # the 7z burst's 6 s is design, the injection's size (phase decision 3):
-    # part of 9.7's measured archive of the Mahoney set, 4,882-5,283 s of CPU
+    # part of 9.7's measured archive of the Mahoney set, the set cached,
+    # 4,882-5,283 s of CPU
     # (meas-ci:background:2026-09-19), an exception to 9.10 D17 (9.10 D161)
     ops:
       - add-task: {id: injected-burst, name: 7z, archetype: file-archiver,
@@ -25,8 +27,10 @@ variants:
   - id: c4-compile
     from: c1-compile.timeline.yaml
     # the injected browser and its four hidden tabs' renderers run their
-    # observed launch phases first, replayed (meas-ci:desktop:2026-10-04b;
-    # 9.10 D21, D132-D138)
+    # observed launch phases first, replayed — the browser's from
+    # meas-ci:desktop:2026-10-04b, the renderers' traced to their 1,030 s
+    # grace-settle from meas-ci:desktop:2026-10-05b (9.10 D21, D132-D138,
+    # D152, D155, D156)
     ops:
       - add-task: {id: injected-browser, name: chrome,
                    archetype: web-browser, arrive: 30s, depart: 60s}

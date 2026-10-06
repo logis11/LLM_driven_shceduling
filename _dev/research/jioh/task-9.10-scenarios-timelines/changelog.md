@@ -676,6 +676,7 @@ Applied when the files rebind with their measured entries; each new ground minte
 Hands to 9.13: the field and its lint. Hands to 9.15: `archetype-plan.md:40`, `building-plan.md` §6.
 
 ## D33 — the scenario catalog lists what the dataset binds, each line an existence claim that holds (2026-10-01)
+> Amended by D163 (S12's name is `python`, the observed `comm`; D84, D90).
 
 By 인지오's decision, scope-card items 1–21: `docs/workload/scenario-catalog.md` lists, per row, the names the files bind after D3–D32. Each name carries its existence ground — its package on Ubuntu 24.04 and the observation that showed its `comm` (D25) — and the scenario's existence is cited from a benchmark definition only where one defines it.
 
@@ -2869,3 +2870,57 @@ By 인지오's decision (Q38). The C4 files are clones of C1 files with a label-
 Not taken: `7z` run whole, `c4-office` lengthening to about 5,100 s and its pairing with `c1-office` broken; a new campaign of 7-Zip on a smaller input, whose size no source gives.
 
 No value changes.
+
+## D162 — the rebinding check after the two re-measures: every length holds (2026-10-06)
+
+Taken under 인지오's delegation, on the two methods' rebinding steps, which D146's and D156's fold-in (`626c27a6`) did not record: `campaign/kdenlive-idle/method.md` §4 (each file whose length rests on a job ending under every policy beside Kdenlive read again — `c1-render`, `c1-backup`, `c1-transcode`, `c3-creation`, `c2-p3a`, `c2-p3b`) and `campaign/renderer-hidden/method.md` §3 (the ten Chrome files of D131 read again for their demand). Read on the compiled artifacts at `9158730a` against the same files compiled at `626c27a6^`.
+
+- **The bound** is D78's arithmetic: the job's arrival, plus its CPU and its blocks, plus the other tasks' CPU released after its arrival, as compiled under the file's seed. `dataset/tools/end_bound.py` reads it from an artifact: a task beside the job releases each run at the wake its wait consumes. It reports the other tasks' backlog at the arrival, which the arithmetic leaves out, 0 in all six files. Every figure is the same in both modes. It reproduces the bounds D100, D111 and D125 recorded for these files as they stand: `c1-render`'s 46.039 s, `c1-transcode`'s 4,761.296 s, `c1-backup`'s 276.470 s and pair P3's 325.663 s. On `c3-creation` compiled at `626c27a6^` it gives D100's 3,211.514 s.
+
+| file | job, segment end | the other tasks' CPU after the arrival, before → after | bound | margin |
+|---|---|---|---|---|
+| `c1-render` | `kdenlive_render`, 60 s | 27.486237 → 27.486254 s | 46.039 s | 13.961 s |
+| `c1-backup` | `deja-dup`, 277 s | 108.487197 → 108.487290 s | 276.470 s | 0.530 s |
+| `c1-transcode` | `HandBrakeCLI`, 4,762 s | 1,787.902974 → 1,787.902989 s | 4,761.296 s | 0.704 s |
+| `c3-creation` | `HandBrakeCLI`, 3,212 s | 0.227610 → 0.217611 s | 3,211.514 → 3,211.504 s | 0.496 s |
+| `c2-p3a` | `kdenlive_render`, 326 s | 99.805495 → 99.805553 s | 176.399 s | 149.601 s |
+| `c2-p3b` | `deja-dup`, 326 s | 99.805495 → 99.805553 s | 325.663 s | 0.337 s |
+
+Every length holds: `c1-backup`, `c1-transcode`, `c3-creation`'s transcode segment and pair P3's segment 1 are still the smallest whole second by which their job ends (D100, D123, D125), and `c1-render` keeps its 60 s (D111).
+
+- **Why the moves are small.** In the `c1` files and pair P3, Kdenlive is focused from 2 s to 2 s before the end, so its new idle values reach only those margins, 93 µs at most. In `c3-creation` Kdenlive is unfocused through the transcode segment. Its launch phase, re-traced to the 240 s settle (D146), now replays from its 120 s arrival to 360.6 s. Past 400 s it wakes 1.262 times a second against 1.366 before, 0.205 s of CPU over 400–3,212 s against 0.215 s.
+- **D125's "the export still ends by about 99.5 s"** (`c2-p3a` and its header). D111's figure was read when segment 1 ran 60–120 s. In today's file the export ends by 88.713 s under every policy: the least instant E at which 60 s, plus the export's CPU and blocks, plus the other tasks' CPU released between 60 s and E, reaches E (`end_bound.py`'s fixed point). The statement holds.
+- **The Chrome files.** `beyond_hash.py`'s comparison against `626c27a6^`'s manifest, the library's blob swapped, finds 42 of 100 artifacts changed beyond the library's hash: the eleven Kdenlive files (`c1-backup`, `c1-render`, `c1-transcode`, `c1-video-edit`, `c2-p3a`, `c2-p3b`, `c3-creation`, `c7-backup`, `c7-render`, `c7-transcode`, `c7-video-edit`) and the ten Chrome files, in both modes. No demand moves at the manifest's four decimals in any file. The ten Chrome files read `c1-browsing` 0.0164, `c1-office` 0.0270, `c3-workday` 0.8880, `c3-evening` 0.4453 native and 0.9006 single, `c4-compile` 0.9994, `c4-office` 0.1270, `c6-fold` 0.3144, `c6-spoof` 0.5164, `c7-browsing` 1.0176, `c7-office` 1.0255.
+
+`c3-creation`'s header states the new bound (D163). No other value changes.
+
+## D163 — the files' and the library's statements brought to the decisions (2026-10-06)
+
+Taken under 인지오's delegation, on the decisions named in each item: statements in the timelines and the library that their decisions changed or asked for and that were never applied. No value changes.
+
+- **Launch tags.** `c3-creation`'s header names Kdenlive's launch stream as `meas-ci:desktop:2026-10-05`, traced to the 240 s settle (D146), and its bound as 3,211.504 s (D162). `c4.variant.yaml`'s `c4-compile` injection names the hidden renderers' stream as `meas-ci:desktop:2026-10-05b`, traced to the 1,030 s grace-settle (D152, D155, D156), the browser's still `meas-ci:desktop:2026-10-04b`. Every other file's launch tag names a stream D140's campaign still carries: Element, Steam, the two players, the writer, Thunderbird and the call.
+- **`c7.variant.yaml`'s backup premise, D9's restatement.** D9 asked for the comment to be restated when D8's entry existed, and D125 did not. It now states that the one unasked backup under its own name, dpkg's daily `dpkg-db-backup`, finished in the second it started on the one desktop observed and cannot hold a backup segment.
+- **`c7.variant.yaml`'s batch-mode premise.** "the P1b move" left: `c2-p1b` binds the measured indexer since D81. No unasked ml-train, render or transcode job was found: in the 2026-09-13 verification Jellyfin runs its transcoder as plain `ffmpeg` and Plex ships a distinct `Plex Transcoder`, neither found converting media on a schedule (scope card item 49). Backup's one unasked job is D9's sub-second one.
+- **D23's "each file states that no messages arrive"**, applied to `c3-evening`'s header and `c4-gaming`'s injection.
+- **D18's warm `-j8` build** stated in `c3-workday`'s and `c6-dual`'s headers as `c1-compile`'s states it. **`c4-office`'s `7z`** reads the cached set, as `file-archiver`'s scope states (D161).
+- **The approximation notes leave** `video-player`, `audio-player`, `video-call` and `chat-client`. Since D14 and D24 no file binds `zoom`, `gamescope`, `spotify` or `discord` over those entries. The notes are written by `campaign/fold_in.py` (each entry's list of names bound by approximation) and `desktop/fold_in.py` (`APPROX`), now empty, and both fold-ins re-ran and were spliced. Before the edit they reproduced the library byte for byte; after it only the four notes changed.
+- **`cpu-batch`'s `clamscan` tables leave**, bound by no file since the unattended upgrade replaced the scan (D3; D45 noted them to 9.14). `batch_fold_in.py` drops the set, as D70, D97, D105 and D119 retired the replaced programs' tables: 87 tables. The entry's run, stats, scope and notes are restated to its two programs, `python3` and `kdenlive_render`, and the notes say what `clamscan` stood for. 9.6's campaign stays released.
+- **`file-indexer`'s scope** gains D66's sentence: no source grounds its 875 files as a home's file count.
+- **D33's hand-off content.** S12's row names `python`, the observed `comm` the files show (D84, D90), not `python3`.
+
+Tests: `test_the_batch_tables_regenerate_from_the_pooled_records` counts 87 tables; `test_end_bound.py` holds D162's arithmetic on a constructed artifact.
+
+Hands to 9.15: `docs/workload/measurement-overview.md:18` and `:114`, which list `clamscan` among `cpu-batch`'s programs.
+
+## D164 — `c2-p1b`'s segment 1 says `initiated: session` and shows S14 (2026-10-06)
+
+Taken under 인지오's delegation, on D5 and D79. `c2-p1b`'s segment 1 carries `initiated: session` and the scenarios `[S11, S14]`, development beside file indexing, as `c7-indexing`'s segment does.
+
+- **D5** restated both unasked indexing files' `initiated: scheduled` "when the files rebind; it is a first login, not a schedule". D79 gave `c7-indexing` the value `session`, and `c2-p1b`, rebound by D81, has carried no `initiated` since.
+- **S12, ML training,** reached `c2-p1b`'s segment 1 from `c2-p1a`'s through the variant's patch, which set no scenario. The segment shows Tracker's index; `c1-indexing` and `c7-indexing` carry `[S11, S14]`.
+
+`initiated` is a descriptive key "used for grading splits and failure analysis only" (D79's grounds), and the coverage grid's cells are mode, label and tier, so no cell moves; `coverage-grid.json`'s row for the file names S14. `c2-p1b` re-derived.
+
+Hands to 9.14: `c2-p1b` in the `initiated` splits as `session`.
+
+Recompiled with D163 (`compile.py --allow-window`). 10 of 100 artifacts change beyond the library's hash, in both modes: `c2-p1b`, its segment 1's ground truth; and `c3-creation`, `c3-evening`, `c3-workday` and `c6-dual`, whose headers changed. Each of those four, recompiled from its previous text against the new library, is identical but for its timeline's blob hash. No demand moves. Lint reports the nine demand-window files 9.14 owns and nothing else. `compile.py --check --allow-window`, `derive.py --check --require-coverage` and `batch_fold_in.py --check` pass. Tests: 426 passed, 1 skipped, 1 xfailed.

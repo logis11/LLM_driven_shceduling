@@ -7,7 +7,8 @@
 # 9.10 D126-D129, D131). The writer and Thunderbird, started mid-file, run
 # their observed launch phases first, replayed (meas-ci:desktop:2026-10-04b;
 # 9.10 D21, D132-D138); the file ends inside Thunderbird's. The build is the
-# user's build whole: the Linux kernel's defconfig, 2,908 object jobs at cap 8
+# user's build whole: the Linux kernel's defconfig built warm, `-j8` — 2,908
+# object jobs at cap 8
 # (meas-ci:build:2026-09-18; 9.10 D17, D18); the compile segment ends at the
 # smallest whole second by which it ends under every policy (9.10 D78's
 # arithmetic, D100's form), the mail segment after it.

@@ -339,11 +339,11 @@ def test_a_numpy_sample_gives_the_same_table():
 
 def test_the_batch_tables_regenerate_from_the_pooled_records(repo_root):
     # the compile, background, package-upgrade, file-indexer and video-transcoder entries' 30 tables and the module build's 59 (9.10 D52–D54, D70, D97;
-    # cpu-batch's kdenlive_render in place of ffmpeg, D105) are
+    # cpu-batch's kdenlive_render in place of ffmpeg, D105; clamscan's two left, bound nowhere, D163) are
     # batch_fold_in.py's output on the committed pooled records
     from meas import batch_fold_in
     text = (repo_root / "dataset" / "archetypes.yaml").read_text()
-    assert len(batch_fold_in.TABLES) == 89
+    assert len(batch_fold_in.TABLES) == 87
     assert batch_fold_in.rewrite(text, batch_fold_in.load_pools(repo_root)) == text
     # every listed table is written: one the library no longer holds fails the rewrite
     with pytest.raises(SystemExit, match="file-indexer.tracker_block"):   # 9.10 D70: cpu-batch's tracker set left

@@ -3,7 +3,7 @@
 
 batch_fold_in.py [--check]
 
-`cpu-batch` (9.6; its `python3` program from 9.10's MNIST campaign, its `kdenlive_render` program from 9.10's Kdenlive export campaign), `compiler-child` and `build-orchestrator` (9.6), `file-archiver` and `game-download`
+`cpu-batch` (its `python3` program from 9.10's MNIST campaign, its `kdenlive_render` program from 9.10's Kdenlive export campaign), `compiler-child` and `build-orchestrator` (9.6), `file-archiver` and `game-download`
 (9.7), `package-upgrade` (9.10), `module-build-orchestrator` and `module-compiler-child` (9.10), `file-indexer`, `video-transcoder` and `incremental-backup` (9.10) carry the quantile tables, each one pooled table of the campaign's record: a program's runs between voluntary
 blocks and the block after each run (9.6 D21, D22, D25; 9.7 D29), the object job's per-(role, step) CPU (9.6 D19,
 D20), make's dispatch run. Each is written in the library's table form (distribution.yaml_table: the ten quantiles,
@@ -35,11 +35,9 @@ POOLS = {"build": os.path.join(RESEARCH, "task-9.6-compile", "campaign", "result
          "dejadup": os.path.join(RESEARCH, "task-9.10-scenarios-timelines", "campaign", "dejadup", "results", "pooled.json")}
 
 # (archetype, param) -> (record, path to the pooled table)
-_PROGRAMS = {"clamscan": "clamscan"}   # tracker: file-indexer (9.10 D70); handbrakecli: video-transcoder (9.10 D97); ffmpeg: kdenlive_render (9.10 D105)
+# 9.6's cpu-batch programs have all left: tracker for file-indexer (9.10 D70), handbrakecli for video-transcoder (9.10 D97),
+# ffmpeg for kdenlive_render (9.10 D105), clamscan bound nowhere since the unattended upgrade replaced it (9.10 D3, D45)
 TABLES = {}
-for _p, _phase in _PROGRAMS.items():
-    TABLES[("cpu-batch", f"{_p}_run")] = ("build", ("phases", _phase, "shape", "runs_between_blocks_us"))
-    TABLES[("cpu-batch", f"{_p}_block")] = ("build", ("phases", _phase, "shape", "blocks_after_runs_us"))
 for _role, _steps in (("sh", 4), ("gcc", 3), ("cc1", 1), ("as", 1), ("fixdep", 1), ("rm", 1)):
     for _n in range(1, _steps + 1):
         TABLES[("compiler-child", f"{_role}_step_{_n}")] = (

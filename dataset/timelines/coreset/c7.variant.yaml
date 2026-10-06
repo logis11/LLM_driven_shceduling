@@ -50,7 +50,9 @@
 # departing at C, focus 2 s to C − 2 s, the preview render at the window's middle
 # (D44, D96); C = 165.668 s, the backup's CPU total
 # (meas-ci:background:2026-10-04), so it is alive at every instant of the segment.
-# A pre-committed miss: no unwanted backup runs under a distinct name (9.10 D9).
+# A pre-committed miss, its premise D9's: the one unasked backup under its own
+# name, dpkg's daily `dpkg-db-backup`, finished in the second it started on the
+# one desktop observed and cannot hold a backup segment.
 #
 # As the interactive counterparts, c7-compile is its base's first C seconds (D56): the
 # build from 0 s bound whole, the editor departing at C, focus 2 s to C − 2 s;
@@ -58,10 +60,12 @@
 # at every instant of the segment.
 #
 # Batch modes: the batch job is itself the background work the attribute judges
-# (recognition-vocabulary §1), so the counterpart is the same job unwanted — the
-# P1b move and label flip, mode unchanged. ml-train, render, transcode, backup: no same-mode orchestrator a
-# distro or vendor runs unasked under a distinct name exists (transcode: Jellyfin
-# installs its transcoder as plain `ffmpeg`), so the label flips alone and the
+# (recognition-vocabulary §1), so the counterpart is the same job unwanted, the
+# label flipped on the same job and name, mode unchanged. No distro or vendor
+# was found starting an ml-train, render or transcode job unasked (the
+# 2026-09-13 verification: Jellyfin runs its transcoder as plain `ffmpeg` and
+# Plex as `Plex Transcoder`, neither found converting media on a schedule);
+# backup's one unasked job under its own name is sub-second (9.10 D9). Each
 # file ships as a pre-committed miss.
 #
 # Every counterpart declares demand: calibration in its own recipe (Phase 7 spec

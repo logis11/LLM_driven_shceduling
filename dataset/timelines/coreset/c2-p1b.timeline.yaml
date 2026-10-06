@@ -17,11 +17,12 @@ segments:
   to: 60s
 - attributes:
     background_wanted: false
+    initiated: session
   from: 60s
   mode: indexing
   scenario:
   - S11
-  - S12
+  - S14
   to: 99.435s
 tasks:
 - archetype: code-editor

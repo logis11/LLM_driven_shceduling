@@ -34,7 +34,8 @@ CONTROL = {}   # archetype id -> the untraced control's reading for its notes (c
 # the observed setup per run — `{version}` is filled from the run's recorded application version (report.json)
 
 ARCHETYPES = {
-    # id: (run, program observed, kind, stimulus stream, stimulus tag, bound names by approximation)
+    # id: (run, program observed, kind, stimulus stream, stimulus tag, bound names by approximation — none since
+    # 9.10 D24: every file shows the observed program's name, so zoom, gamescope and spotify left the notes)
     "office-writer": ("soffice", "{version} (Ubuntu 24.04 apt), a generated document of about 76 pages (100 sections of five 100-word paragraphs, ten 1024×768 pictures; design — no source states a length, S7) with the stream typing at its end", "input",
                       "swell-word-c1", "swell-icmi14:word-c1", []),
     "code-editor": ("code", "Visual Studio Code {version} (vendor .deb), the TypeScript project sindresorhus/got at commit 64f21e2a (tag v16.0.0, dependencies installed; design) open on source/index.ts with the built-in TypeScript language server running", "input",
@@ -47,12 +48,9 @@ ARCHETYPES = {
                     "swell-ie-c1", "swell-icmi14:ie-c1", []),
     "image-editor": ("gimp", "{version} (apt), a 4952×3288 image open (PCMark 10 Photo Editing's interactive image size, Technical Guide p. 71; synthetic content, imported as 16-bit; design); driven by a scripted pointer loop (drag, click, wheel; design); operation unsharp-mask: plug-in-unsharp-mask std-dev 4.0, amount 0.32, threshold 8 (PCMark 10's batch unsharp parameters mapped onto GIMP's PDB, p. 74; design) through the Script-Fu server, completion by its reply", "cadence", None, None, []),
     "video-editor": ("kdenlive", "Kdenlive 23.08.5 (Ubuntu 24.04 apt; 4:23.08.5-0ubuntu4 in every repeat's install log, `kdenlive --version` printing none), a project with one 20 s 1920×1080 30 fps H.264 clip (PCMark 10 Video Editing's 1080p H.264, p. 76; synthetic content, design) on V1 with an avfilter.unsharp effect at PCMark 10's sharpening parameters (p. 76); driven by a scripted pointer loop that scrubs the clip monitor (design); llvmpipe software-rasteriser threads excluded (D15); operation preview-render: the whole-clip timeline preview rendered by Kdenlive's external kdenlive_render process (part of the tree), completion when it exits", "cadence", None, None, []),
-    "video-player": ("mpv-video", "{version}, --vo=x11 --ao=null, a 1280×720 30 fps H.264 file with AAC audio, looped", "play", None, None,
-                     ["zoom (video) → video-call instead (D12)", "gamescope: compositor, not a decoder (9.4's record)"]),
-    "audio-player": ("mpv-audio", "{version}, --no-video --ao=null, the same file's AAC audio, looped", "play", None, None,
-                     ["spotify: streaming client with network fetch, decode and a Chromium-based interface (S2-18: no documentation)"]),
-    "video-call": ("webrtc", "{version}, a loopback WebRTC call in one page with a synthetic 1280×720 30 fps camera and microphone (--use-fake-device-for-media-stream); encode and decode at ~20 fps", "play", None, None,
-                   ["zoom voice and video: a proprietary client with capture, encode, network and playback threads (S2-17; S6: whole-client CPU only)"]),
+    "video-player": ("mpv-video", "{version}, --vo=x11 --ao=null, a 1280×720 30 fps H.264 file with AAC audio, looped", "play", None, None, []),
+    "audio-player": ("mpv-audio", "{version}, --no-video --ao=null, the same file's AAC audio, looped", "play", None, None, []),
+    "video-call": ("webrtc", "{version}, a loopback WebRTC call in one page with a synthetic 1280×720 30 fps camera and microphone (--use-fake-device-for-media-stream); encode and decode at ~20 fps", "play", None, None, []),
 }
 
 VENUE_BOUND = {
@@ -82,8 +80,6 @@ BUILD_BOUND = {
                    "repeat). The carried 0.438 ms pools both, the 152 repeats' mean 4.0 % above it (D93).",
 }
 
-
-APPROX_BY = {"video-player": ["gamescope"], "audio-player": ["spotify"], "video-call": ["zoom"]}
 
 # D75: where each playback archetype's medium cycle starts, as the scope states it (the rule itself: pool.py CYCLES)
 CYCLE_START = {

@@ -1,8 +1,9 @@
 # C6 — dual-active ambiguity (building-plan §3 C6): equally-active dual
 # foregrounds — gaming while actively awaiting a compile. The point where
 # even the oracle cannot assign a label; shipped so the limit is concrete.
-# The build is the user's build whole: the Linux kernel's defconfig, 2,908
-# object jobs at cap 8 (meas-ci:build:2026-09-18; 9.10 D17, D18). The segment
+# The build is the user's build whole: the Linux kernel's defconfig built warm,
+# `-j8` — 2,908 object jobs at cap 8 (meas-ci:build:2026-09-18; 9.10 D17, D18).
+# The segment
 # is the smallest whole second by which it ends under every policy, the game
 # holding its share of the lane (9.10 D78's arithmetic, D100's form).
 meta:
