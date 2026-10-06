@@ -2837,3 +2837,24 @@ By 인지오's decision (Q37), on D154's probe, `code` 12, the committed file re
 Not taken: the episode carried as a rare event within a run (9.8 D33 carried the Steam client's burst over 62 runs in 12 repeats); `c6-dual`'s focused typing cut to end before the earliest episode.
 
 The `code-editor` entry's scope changes; no value changes. Hands to 9.14: `c6-dual`'s typing past the episodes' onset.
+
+## D159 — the registry entries D34 left unminted: the upgrade's, the DKMS build's and Tracker's sources (2026-10-06)
+
+Taken under 인지오's delegation, on D34 ("Ubuntu's package sources for D3, D4, D5, D8 … minted at each campaign's fold-in") and the precedent of every other 9.10 job, whose program and input both carry an entry (`deja-dup` and `mahoney-10gb`, `handbrake` and `big-buck-bunny`, `kdenlive` and `mlt`, `pytorch-examples`, `hippocamp`). D34's mints for the upgrade, the DKMS build and Tracker were not made at their fold-ins (D45, D59, D81). Six `docs/references.md` entries, deployed-system, existence only:
+
+- `apt` — 2.8.3's `apt-daily-upgrade` timer and service and `apt.systemd.daily`, how the upgrade starts (D37, D38);
+- `unattended-upgrades` — 2.9.1+nmu4ubuntu1, the program (D3, D36–D40);
+- `glibc` — Ubuntu's 2.39-0ubuntu8.8 security update of 2026-07-27, the upgrade's input (D36, D37);
+- `dkms` — 3.0.11-1ubuntu13's kernel hooks and autoinstaller, how the module rebuild starts (D4, D48–D50);
+- `nvidia-open-kernel-modules` — `nvidia-dkms-595-open` 595.91.07, the rebuild's input (D46, D47, D52);
+- `tracker-miners` — 3.7.1 at commit `eae431e` and its Ubuntu unit, the indexer (D5, D61–D63, D72).
+
+Each cited passage was re-read in the stage-2 and stage-3 package and source copies (`sources/S2-03`, `S2-04`, `S2-32`, `S2-39`) and each package's SHA-256 re-checked against the search record. The versions are the ones measured: `apt` 2.8.3 and `unattended-upgrades` 2.9.1+nmu4ubuntu1 in all nine repeats of `meas-ci:background:2026-10-01`, read from each repeat's package list, glibc 8.7 → 8.8 in every one; `dkms` 3.0.11 in the DKMS campaign's state (D51); Tracker 3.7.1-1ubuntu0.1 at every candidate state (D64). No `dataset/sources.yaml` entry: the jobs' values are `meas-ci`'s, and the timelines' bound values have no source field until 9.13 adds it (D32), as `glam`'s (D131).
+
+## D160 — the timelines' bound values listed with their source tags and labels (2026-10-06)
+
+Taken under 인지오's delegation, on D32 ("9.10 sets the content; the field and the lint are 9.13's"): every value the core-set timelines bind is listed with its `source:` or its label in `bound-values.md`. The measured job sizes carry their campaigns' `meas-ci` tags, the renderer count `glam` and the tab-set campaign (D131), the game chain's names `lavd-ossna24` (D26); the compile caps, `lane_share` and the spoof are design (9.6 D4, D7; D31).
+
+One value is not settled: `c4-office` binds the injected `7z` at `total_work: 6s`, against 9.7's measured job of 4,882–5,283 s of CPU over the Mahoney set. D17 rules out a `total_work` that describes part of a job, and D31's "now run whole, D17" does not hold: D17's list leaves the archive job out, and `c4-office` never rebound. Q38.
+
+Hands to 9.13: the list, applied when the field exists.
