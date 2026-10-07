@@ -146,8 +146,9 @@ def read(D):
     comm_of = {}
     for _t, _ptid, _pcomm, ctid, ccomm in forks:
         comm_of.setdefault(ctid, ccomm)
-    for r in rows:                                      # the last name a process runs under, after its exec
-        comm_of[r.pid] = r.comm
+    for r in rows:                                      # the last name a process runs under, after its exec —
+        if r.tid == r.pid or r.pid not in comm_of:      # its main thread's where it has one
+            comm_of[r.pid] = r.comm
     # a process the trace holds no fork row for — started between the census and the recording — takes its parent
     # from the censuses
     censuses = [before] + [c for c in (census(D, x) for x in ("job.start", "job.end", "probe.end")) if c]

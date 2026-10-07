@@ -3005,3 +3005,21 @@ Taken under 인지오's delegation, on D34 and D169: D34's dispositions for the 
 - `docs/references.md`'s role lines for the other four stay 9.15's (D34's hand-off).
 
 No value changes.
+
+## D171 — the upgrade probe's reading: the session starts nothing, PID 1 starts PackageKit and its generators (2026-10-07)
+
+D165's probe (D166, D167), session 95 (run 37579102734), on the AMD EPYC 7763: valid under its method's §5, read in `campaign/session-upgrade/results/results.md`. The job was glibc's seven binaries 8.7 → 8.8 through `apt-daily-upgrade.service` beside the blanked session: 11.62 s, 945 processes, 10.12 s of CPU on the harness CPUs.
+
+- **No process in the session started.** The session's `update-notifier` used 7.2 ms in the job, against 0.2 ms at its idle rate.
+- **Under PID 1, two kinds started:**
+  - `packagekitd`, D-Bus-activated by apt's PackageKit hook 8.99 s into the job, 42.8 ms of CPU in the window, alive at the job's end, gone 600 s later;
+  - 31 generator processes in 63 ms, 69.9 ms of CPU — the generators PID 1 runs when the upgrade's `daemon-reexec` re-executes it — with 106 of its own `(sd-…)` helpers.
+- **The four entries' work above their idle rate over the job:**
+  - PID 1: +372.3 ms, 464 runs;
+  - the system bus: +98.8 ms, 482 runs;
+  - WirePlumber: +2.7 ms;
+  - GNOME Shell: no more CPU, 80 runs against about 11;
+  - `pipewire`, `pipewire-pulse`, the user manager and the session bus: no run;
+  - in the 600 s after the job, each at its idle rate.
+
+New names appeared, PID 1's, not the session's: under D165, what `c7-idle` does with them is a decision of its own.

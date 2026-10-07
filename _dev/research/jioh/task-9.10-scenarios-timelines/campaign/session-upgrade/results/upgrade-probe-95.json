@@ -1,0 +1,9096 @@
+{
+ "windows": {
+  "pre": {
+   "start": 1450.265938821,
+   "end": 1750.286109345
+  },
+  "job": {
+   "start": 1750.377478849,
+   "end": 1761.997848177
+  },
+  "post": {
+   "start": 1762.086523614,
+   "end": 2362.106305323
+  }
+ },
+ "trace_span": [
+  1449.182034,
+  2362.118425
+ ],
+ "job": {
+  "roots": [
+   {
+    "pid": 29963,
+    "execs": [
+     "/proc/self/fd/9",
+     "/usr/lib/apt/apt-helper"
+    ]
+   },
+   {
+    "pid": 29974,
+    "execs": [
+     "/proc/self/fd/9",
+     "/usr/lib/apt/apt.systemd.daily"
+    ]
+   }
+  ],
+  "processes": 945,
+  "cpu_ms": 10118.232,
+  "comms": [
+   "(md.daily)",
+   "(t-helper)",
+   "9",
+   "apt-check",
+   "apt-config",
+   "apt-extracttemp",
+   "apt-get",
+   "apt-helper",
+   "apt.systemd.dai",
+   "awk",
+   "cat",
+   "chmod",
+   "cmp",
+   "cut",
+   "date",
+   "dirname",
+   "dpkg",
+   "dpkg-deb",
+   "dpkg-divert",
+   "dpkg-preconfigu",
+   "dpkg-query",
+   "dpkg-split",
+   "du",
+   "echo",
+   "expr",
+   "find",
+   "flock",
+   "frontend",
+   "gdbus",
+   "getopt",
+   "gettext",
+   "gmain",
+   "grep",
+   "gzip",
+   "ischroot",
+   "ldconfig.real",
+   "libc-bin.postin",
+   "libc6-i386.post",
+   "libc6:amd64.pos",
+   "locale",
+   "locale-gen",
+   "localedef",
+   "locales.config",
+   "locales.config.",
+   "locales.postins",
+   "locales.postrm",
+   "locales.prerm",
+   "ls",
+   "lsb_release",
+   "man-db.postinst",
+   "mktemp",
+   "mv",
+   "nm-online",
+   "notify-reboot-r",
+   "on_ac_power",
+   "perl",
+   "pool-nm-online",
+   "pool-spawner",
+   "preinst",
+   "rm",
+   "sed",
+   "sh",
+   "sort",
+   "systemctl",
+   "systemd",
+   "systemd-network",
+   "tar",
+   "test",
+   "touch",
+   "tr",
+   "uname",
+   "unattended-upgr",
+   "update-motd-upd",
+   "xargs"
+  ]
+ },
+ "harness": {
+  "pid": 2331,
+  "processes": 42
+ },
+ "new_processes": [
+  {
+   "pid": 29816,
+   "comm": "sleep",
+   "class": "pre-recording",
+   "execs": [],
+   "window": "outside",
+   "first_s_from_job": -300.127,
+   "cpu_ms": 0.216,
+   "chain": [],
+   "ancestor": null
+  },
+  {
+   "pid": 29823,
+   "comm": "rm",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/rm"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.588,
+   "cpu_ms": 4.912,
+   "chain": [],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29824,
+   "comm": "mkdir",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/mkdir"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.579,
+   "cpu_ms": 1.293,
+   "chain": [],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29825,
+   "comm": "sudo",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sudo"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.578,
+   "cpu_ms": 7.337,
+   "chain": [],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29826,
+   "comm": "cp",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cp"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.571,
+   "cpu_ms": 7.09,
+   "chain": [
+    {
+     "pid": 29825,
+     "comm": "sudo"
+    }
+   ],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29827,
+   "comm": "cp",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cp"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.563,
+   "cpu_ms": 1.486,
+   "chain": [],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29828,
+   "comm": "sudo",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sudo"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.561,
+   "cpu_ms": 6.882,
+   "chain": [],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29829,
+   "comm": "rm",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/rm"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.555,
+   "cpu_ms": 1.158,
+   "chain": [
+    {
+     "pid": 29828,
+     "comm": "sudo"
+    }
+   ],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29830,
+   "comm": "id",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/id"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.553,
+   "cpu_ms": 1.21,
+   "chain": [],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29831,
+   "comm": "id",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/id"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.552,
+   "cpu_ms": 1.198,
+   "chain": [],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29832,
+   "comm": "sudo",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sudo"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.55,
+   "cpu_ms": 6.807,
+   "chain": [],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29833,
+   "comm": "chown",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/chown"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.544,
+   "cpu_ms": 2.341,
+   "chain": [
+    {
+     "pid": 29832,
+     "comm": "sudo"
+    }
+   ],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29834,
+   "comm": "bash",
+   "class": "agent",
+   "execs": [],
+   "window": "pre",
+   "first_s_from_job": -299.541,
+   "cpu_ms": 0.705,
+   "chain": [],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29835,
+   "comm": "ls",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/ls"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.541,
+   "cpu_ms": 1.284,
+   "chain": [
+    {
+     "pid": 29834,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29836,
+   "comm": "xargs",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/xargs"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.541,
+   "cpu_ms": 1.716,
+   "chain": [
+    {
+     "pid": 29834,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29837,
+   "comm": "tr",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/tr"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.54,
+   "cpu_ms": 1.242,
+   "chain": [
+    {
+     "pid": 29834,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29838,
+   "comm": "basename",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/basename"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.54,
+   "cpu_ms": 1.039,
+   "chain": [
+    {
+     "pid": 29836,
+     "comm": "xargs"
+    },
+    {
+     "pid": 29834,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29839,
+   "comm": "basename",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/basename"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.538,
+   "cpu_ms": 0.881,
+   "chain": [
+    {
+     "pid": 29836,
+     "comm": "xargs"
+    },
+    {
+     "pid": 29834,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29840,
+   "comm": "basename",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/basename"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.537,
+   "cpu_ms": 0.818,
+   "chain": [
+    {
+     "pid": 29836,
+     "comm": "xargs"
+    },
+    {
+     "pid": 29834,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29841,
+   "comm": "basename",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/basename"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.536,
+   "cpu_ms": 0.803,
+   "chain": [
+    {
+     "pid": 29836,
+     "comm": "xargs"
+    },
+    {
+     "pid": 29834,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29842,
+   "comm": "basename",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/basename"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.536,
+   "cpu_ms": 0.835,
+   "chain": [
+    {
+     "pid": 29836,
+     "comm": "xargs"
+    },
+    {
+     "pid": 29834,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29843,
+   "comm": "basename",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/basename"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.535,
+   "cpu_ms": 0.865,
+   "chain": [
+    {
+     "pid": 29836,
+     "comm": "xargs"
+    },
+    {
+     "pid": 29834,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 29111,
+    "comm": "bash",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/usr/bin/bash -e /home/runner/work/_temp/ad2f175c-60ae-4372-9657-0bee673abb87.sh"
+   }
+  },
+  {
+   "pid": 29844,
+   "comm": "MainThread",
+   "class": "agent",
+   "execs": [
+    "/home/runner/actions-runner/cached/2.337.0/externals/node24/bin/node"
+   ],
+   "window": "pre",
+   "first_s_from_job": -299.526,
+   "cpu_ms": 508.345,
+   "chain": [],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29860,
+   "comm": "bash",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/bash"
+   ],
+   "window": "pre",
+   "first_s_from_job": -298.654,
+   "cpu_ms": 54.307,
+   "chain": [],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29861,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -298.652,
+   "cpu_ms": 1.093,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29862,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -298.651,
+   "cpu_ms": 0.973,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29863,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -288.649,
+   "cpu_ms": 1.348,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29864,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -288.648,
+   "cpu_ms": 1.008,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29865,
+   "comm": "sh",
+   "class": "candidate",
+   "execs": [
+    "/bin/sh"
+   ],
+   "window": "pre",
+   "first_s_from_job": -284.116,
+   "cpu_ms": 0.897,
+   "chain": [],
+   "ancestor": {
+    "pid": 24480,
+    "comm": "anacron",
+    "cgroup": "/system.slice/anacron.service",
+    "cmd": "/usr/sbin/anacron -d -q -s"
+   }
+  },
+  {
+   "pid": 29866,
+   "comm": "run-parts",
+   "class": "candidate",
+   "execs": [
+    "/usr/bin/run-parts"
+   ],
+   "window": "pre",
+   "first_s_from_job": -284.115,
+   "cpu_ms": 0.776,
+   "chain": [
+    {
+     "pid": 29865,
+     "comm": "sh"
+    }
+   ],
+   "ancestor": {
+    "pid": 24480,
+    "comm": "anacron",
+    "cgroup": "/system.slice/anacron.service",
+    "cmd": "/usr/sbin/anacron -d -q -s"
+   }
+  },
+  {
+   "pid": 29867,
+   "comm": "0anacron",
+   "class": "candidate",
+   "execs": [
+    "/etc/cron.monthly/0anacron"
+   ],
+   "window": "pre",
+   "first_s_from_job": -284.114,
+   "cpu_ms": 0.701,
+   "chain": [
+    {
+     "pid": 29866,
+     "comm": "run-parts"
+    },
+    {
+     "pid": 29865,
+     "comm": "sh"
+    }
+   ],
+   "ancestor": {
+    "pid": 24480,
+    "comm": "anacron",
+    "cgroup": "/system.slice/anacron.service",
+    "cmd": "/usr/sbin/anacron -d -q -s"
+   }
+  },
+  {
+   "pid": 29868,
+   "comm": "anacron",
+   "class": "candidate",
+   "execs": [
+    "/usr/sbin/anacron"
+   ],
+   "window": "pre",
+   "first_s_from_job": -284.113,
+   "cpu_ms": 0.662,
+   "chain": [
+    {
+     "pid": 29867,
+     "comm": "0anacron"
+    },
+    {
+     "pid": 29866,
+     "comm": "run-parts"
+    },
+    {
+     "pid": 29865,
+     "comm": "sh"
+    }
+   ],
+   "ancestor": {
+    "pid": 24480,
+    "comm": "anacron",
+    "cgroup": "/system.slice/anacron.service",
+    "cmd": "/usr/sbin/anacron -d -q -s"
+   }
+  },
+  {
+   "pid": 29869,
+   "comm": "anacron",
+   "class": "candidate",
+   "execs": [],
+   "window": "pre",
+   "first_s_from_job": -284.113,
+   "cpu_ms": 0.738,
+   "chain": [
+    {
+     "pid": 29868,
+     "comm": "anacron"
+    },
+    {
+     "pid": 29867,
+     "comm": "0anacron"
+    },
+    {
+     "pid": 29866,
+     "comm": "run-parts"
+    },
+    {
+     "pid": 29865,
+     "comm": "sh"
+    }
+   ],
+   "ancestor": {
+    "pid": 24480,
+    "comm": "anacron",
+    "cgroup": "/system.slice/anacron.service",
+    "cmd": "/usr/sbin/anacron -d -q -s"
+   }
+  },
+  {
+   "pid": 29870,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "pre",
+   "first_s_from_job": -284.11,
+   "cpu_ms": 0.251,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 29872,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -278.646,
+   "cpu_ms": 1.303,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29873,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -278.645,
+   "cpu_ms": 0.981,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29874,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -268.643,
+   "cpu_ms": 1.448,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29875,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -268.642,
+   "cpu_ms": 0.978,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29876,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -258.64,
+   "cpu_ms": 1.287,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29877,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -258.639,
+   "cpu_ms": 1.014,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29881,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -248.637,
+   "cpu_ms": 1.37,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29882,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -248.636,
+   "cpu_ms": 0.934,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29883,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -238.635,
+   "cpu_ms": 1.253,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29884,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -238.633,
+   "cpu_ms": 0.98,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29885,
+   "comm": "iptables",
+   "class": "candidate",
+   "execs": [
+    "/usr/sbin/iptables"
+   ],
+   "window": "pre",
+   "first_s_from_job": -236.616,
+   "cpu_ms": 1.579,
+   "chain": [],
+   "ancestor": {
+    "pid": 1707,
+    "comm": "python3",
+    "cgroup": "/azure.slice/walinuxagent.service",
+    "cmd": "/usr/bin/python3 -u bin/WALinuxAgent-2.16.0.2-py3.12.egg -run-exthandlers"
+   }
+  },
+  {
+   "pid": 29886,
+   "comm": "iptables",
+   "class": "candidate",
+   "execs": [
+    "/usr/sbin/iptables"
+   ],
+   "window": "pre",
+   "first_s_from_job": -236.615,
+   "cpu_ms": 1.896,
+   "chain": [],
+   "ancestor": {
+    "pid": 1707,
+    "comm": "python3",
+    "cgroup": "/azure.slice/walinuxagent.service",
+    "cmd": "/usr/bin/python3 -u bin/WALinuxAgent-2.16.0.2-py3.12.egg -run-exthandlers"
+   }
+  },
+  {
+   "pid": 29887,
+   "comm": "iptables",
+   "class": "candidate",
+   "execs": [
+    "/usr/sbin/iptables"
+   ],
+   "window": "pre",
+   "first_s_from_job": -236.613,
+   "cpu_ms": 1.369,
+   "chain": [],
+   "ancestor": {
+    "pid": 1707,
+    "comm": "python3",
+    "cgroup": "/azure.slice/walinuxagent.service",
+    "cmd": "/usr/bin/python3 -u bin/WALinuxAgent-2.16.0.2-py3.12.egg -run-exthandlers"
+   }
+  },
+  {
+   "pid": 29888,
+   "comm": "iptables",
+   "class": "candidate",
+   "execs": [
+    "/usr/sbin/iptables"
+   ],
+   "window": "pre",
+   "first_s_from_job": -236.611,
+   "cpu_ms": 1.357,
+   "chain": [],
+   "ancestor": {
+    "pid": 1707,
+    "comm": "python3",
+    "cgroup": "/azure.slice/walinuxagent.service",
+    "cmd": "/usr/bin/python3 -u bin/WALinuxAgent-2.16.0.2-py3.12.egg -run-exthandlers"
+   }
+  },
+  {
+   "pid": 29890,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -228.632,
+   "cpu_ms": 1.27,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29891,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -228.63,
+   "cpu_ms": 1.073,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29896,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -218.629,
+   "cpu_ms": 1.274,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29897,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -218.627,
+   "cpu_ms": 1.01,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29898,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -208.626,
+   "cpu_ms": 1.418,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29899,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -208.624,
+   "cpu_ms": 0.987,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29900,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -198.623,
+   "cpu_ms": 1.337,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29901,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -198.621,
+   "cpu_ms": 0.935,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29902,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -188.62,
+   "cpu_ms": 1.482,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29903,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -188.618,
+   "cpu_ms": 0.949,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29904,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -178.617,
+   "cpu_ms": 1.289,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29905,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -178.615,
+   "cpu_ms": 0.976,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29908,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -168.614,
+   "cpu_ms": 1.412,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29909,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -168.612,
+   "cpu_ms": 0.957,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29911,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -158.611,
+   "cpu_ms": 1.273,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29912,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -158.61,
+   "cpu_ms": 1.055,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29913,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -148.608,
+   "cpu_ms": 1.488,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29914,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -148.606,
+   "cpu_ms": 1.007,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29915,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -138.605,
+   "cpu_ms": 1.28,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29916,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -138.603,
+   "cpu_ms": 1.011,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29917,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -128.602,
+   "cpu_ms": 1.37,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29918,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -128.6,
+   "cpu_ms": 0.971,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29920,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -118.599,
+   "cpu_ms": 1.508,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29921,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -118.597,
+   "cpu_ms": 1.001,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29925,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -108.596,
+   "cpu_ms": 1.275,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29926,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -108.594,
+   "cpu_ms": 0.949,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29928,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -98.593,
+   "cpu_ms": 1.353,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29929,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -98.591,
+   "cpu_ms": 0.969,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29931,
+   "comm": "cron",
+   "class": "candidate",
+   "execs": [],
+   "window": "pre",
+   "first_s_from_job": -91.847,
+   "cpu_ms": 4.337,
+   "chain": [],
+   "ancestor": {
+    "pid": 1086,
+    "comm": "cron",
+    "cgroup": "/system.slice/cron.service",
+    "cmd": "/usr/sbin/cron -f -P"
+   }
+  },
+  {
+   "pid": 29932,
+   "comm": "cron",
+   "class": "candidate",
+   "execs": [],
+   "window": "pre",
+   "first_s_from_job": -91.846,
+   "cpu_ms": 4.001,
+   "chain": [],
+   "ancestor": {
+    "pid": 1086,
+    "comm": "cron",
+    "cgroup": "/system.slice/cron.service",
+    "cmd": "/usr/sbin/cron -f -P"
+   }
+  },
+  {
+   "pid": 29933,
+   "comm": "sh",
+   "class": "candidate",
+   "execs": [
+    "/bin/sh"
+   ],
+   "window": "pre",
+   "first_s_from_job": -91.843,
+   "cpu_ms": 1.665,
+   "chain": [
+    {
+     "pid": 29932,
+     "comm": "cron"
+    }
+   ],
+   "ancestor": {
+    "pid": 1086,
+    "comm": "cron",
+    "cgroup": "/system.slice/cron.service",
+    "cmd": "/usr/sbin/cron -f -P"
+   }
+  },
+  {
+   "pid": 29934,
+   "comm": "sh",
+   "class": "candidate",
+   "execs": [
+    "/bin/sh"
+   ],
+   "window": "pre",
+   "first_s_from_job": -91.843,
+   "cpu_ms": 1.397,
+   "chain": [
+    {
+     "pid": 29931,
+     "comm": "cron"
+    }
+   ],
+   "ancestor": {
+    "pid": 1086,
+    "comm": "cron",
+    "cgroup": "/system.slice/cron.service",
+    "cmd": "/usr/sbin/cron -f -P"
+   }
+  },
+  {
+   "pid": 29935,
+   "comm": "debian-sa1",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/sysstat/debian-sa1"
+   ],
+   "window": "pre",
+   "first_s_from_job": -91.841,
+   "cpu_ms": 0.602,
+   "chain": [
+    {
+     "pid": 29933,
+     "comm": "sh"
+    },
+    {
+     "pid": 29932,
+     "comm": "cron"
+    }
+   ],
+   "ancestor": {
+    "pid": 1086,
+    "comm": "cron",
+    "cgroup": "/system.slice/cron.service",
+    "cmd": "/usr/sbin/cron -f -P"
+   }
+  },
+  {
+   "pid": 29936,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -88.59,
+   "cpu_ms": 1.308,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29937,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -88.588,
+   "cpu_ms": 1.004,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29938,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -78.587,
+   "cpu_ms": 1.447,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29939,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -78.585,
+   "cpu_ms": 0.999,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29940,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -68.584,
+   "cpu_ms": 1.259,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29941,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -68.583,
+   "cpu_ms": 1.056,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29942,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -58.581,
+   "cpu_ms": 1.377,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29943,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -58.579,
+   "cpu_ms": 0.976,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29944,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -48.578,
+   "cpu_ms": 1.432,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29945,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -48.576,
+   "cpu_ms": 0.967,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29948,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -38.575,
+   "cpu_ms": 1.283,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29949,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -38.574,
+   "cpu_ms": 1.036,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29950,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -28.572,
+   "cpu_ms": 1.242,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29951,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -28.571,
+   "cpu_ms": 0.959,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29953,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -18.569,
+   "cpu_ms": 1.359,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29954,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -18.568,
+   "cpu_ms": 0.974,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29955,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "pre",
+   "first_s_from_job": -8.566,
+   "cpu_ms": 1.312,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29956,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "pre",
+   "first_s_from_job": -8.565,
+   "cpu_ms": 0.994,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 29973,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 0.065,
+   "cpu_ms": 0.321,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30058,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "job",
+   "first_s_from_job": 1.437,
+   "cpu_ms": 1.301,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 30059,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "job",
+   "first_s_from_job": 1.438,
+   "cpu_ms": 1.016,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 30235,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.082,
+   "cpu_ms": 0.322,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30236,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.085,
+   "cpu_ms": 0.244,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30237,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.085,
+   "cpu_ms": 0.238,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30238,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.085,
+   "cpu_ms": 0.241,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30239,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.085,
+   "cpu_ms": 0.23,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30240,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.085,
+   "cpu_ms": 0.254,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30241,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.086,
+   "cpu_ms": 0.23,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30242,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.086,
+   "cpu_ms": 0.231,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30243,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.089,
+   "cpu_ms": 0.256,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30244,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.089,
+   "cpu_ms": 0.227,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30245,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.089,
+   "cpu_ms": 0.225,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30246,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.089,
+   "cpu_ms": 0.223,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30247,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.089,
+   "cpu_ms": 0.25,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30248,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.09,
+   "cpu_ms": 0.224,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30249,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.09,
+   "cpu_ms": 0.227,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30250,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.09,
+   "cpu_ms": 0.221,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30251,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.09,
+   "cpu_ms": 0.248,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30252,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.093,
+   "cpu_ms": 0.231,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30253,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.093,
+   "cpu_ms": 0.224,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30254,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.093,
+   "cpu_ms": 0.227,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30255,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.093,
+   "cpu_ms": 0.244,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30256,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.094,
+   "cpu_ms": 0.228,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30257,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.094,
+   "cpu_ms": 0.217,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30258,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.094,
+   "cpu_ms": 0.222,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30259,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.094,
+   "cpu_ms": 0.247,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30260,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.097,
+   "cpu_ms": 0.233,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30261,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.097,
+   "cpu_ms": 0.22,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30262,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.097,
+   "cpu_ms": 0.225,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30263,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.097,
+   "cpu_ms": 0.242,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30264,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.098,
+   "cpu_ms": 0.225,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30265,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.098,
+   "cpu_ms": 0.216,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30266,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.098,
+   "cpu_ms": 0.217,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30267,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.098,
+   "cpu_ms": 0.219,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30268,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.101,
+   "cpu_ms": 0.23,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30269,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.101,
+   "cpu_ms": 0.222,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30270,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.101,
+   "cpu_ms": 0.223,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30271,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.101,
+   "cpu_ms": 0.216,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30272,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.101,
+   "cpu_ms": 0.247,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30273,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.102,
+   "cpu_ms": 0.221,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30274,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.102,
+   "cpu_ms": 0.222,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30275,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.102,
+   "cpu_ms": 0.224,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30276,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.105,
+   "cpu_ms": 0.233,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30277,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.105,
+   "cpu_ms": 0.228,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30278,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.105,
+   "cpu_ms": 0.228,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30279,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.105,
+   "cpu_ms": 0.22,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30280,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.105,
+   "cpu_ms": 0.247,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30281,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.106,
+   "cpu_ms": 0.224,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30282,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.106,
+   "cpu_ms": 0.224,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30283,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.108,
+   "cpu_ms": 0.236,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30284,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.108,
+   "cpu_ms": 0.226,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30285,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.108,
+   "cpu_ms": 0.23,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30286,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.108,
+   "cpu_ms": 0.238,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30287,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.109,
+   "cpu_ms": 0.255,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30288,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.11,
+   "cpu_ms": 0.236,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30289,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.11,
+   "cpu_ms": 0.229,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30290,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.11,
+   "cpu_ms": 0.23,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30291,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.112,
+   "cpu_ms": 0.254,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30292,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.113,
+   "cpu_ms": 0.227,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30293,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.113,
+   "cpu_ms": 0.231,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30294,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.113,
+   "cpu_ms": 0.227,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30295,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.113,
+   "cpu_ms": 0.25,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30296,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.114,
+   "cpu_ms": 0.225,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30297,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.114,
+   "cpu_ms": 0.225,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30298,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.114,
+   "cpu_ms": 0.228,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30299,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.116,
+   "cpu_ms": 0.233,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30300,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.116,
+   "cpu_ms": 0.225,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30301,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.116,
+   "cpu_ms": 0.224,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30302,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.116,
+   "cpu_ms": 0.242,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30303,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.118,
+   "cpu_ms": 0.232,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30304,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.118,
+   "cpu_ms": 0.222,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30305,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.118,
+   "cpu_ms": 0.221,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30306,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.121,
+   "cpu_ms": 0.252,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30307,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.121,
+   "cpu_ms": 0.225,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30308,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.121,
+   "cpu_ms": 0.227,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30309,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.121,
+   "cpu_ms": 0.222,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30310,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.121,
+   "cpu_ms": 0.251,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30311,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.122,
+   "cpu_ms": 0.228,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30312,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.122,
+   "cpu_ms": 0.232,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30313,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.122,
+   "cpu_ms": 0.226,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30314,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.122,
+   "cpu_ms": 0.255,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30315,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.124,
+   "cpu_ms": 0.234,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30316,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.124,
+   "cpu_ms": 0.26,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30317,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.124,
+   "cpu_ms": 0.228,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30318,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.126,
+   "cpu_ms": 0.232,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30319,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.126,
+   "cpu_ms": 0.228,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30320,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.126,
+   "cpu_ms": 0.226,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30321,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.126,
+   "cpu_ms": 0.222,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30322,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.126,
+   "cpu_ms": 0.244,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30323,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.129,
+   "cpu_ms": 0.237,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30324,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.129,
+   "cpu_ms": 0.226,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30325,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.129,
+   "cpu_ms": 0.245,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30326,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.13,
+   "cpu_ms": 0.224,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30327,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.13,
+   "cpu_ms": 0.259,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30328,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.13,
+   "cpu_ms": 0.228,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30329,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.13,
+   "cpu_ms": 0.244,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30330,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.131,
+   "cpu_ms": 0.229,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30331,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.131,
+   "cpu_ms": 0.235,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30332,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.132,
+   "cpu_ms": 0.226,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30333,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.133,
+   "cpu_ms": 0.262,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30334,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.134,
+   "cpu_ms": 0.236,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30335,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.134,
+   "cpu_ms": 0.251,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30336,
+   "comm": "(sd-exec-strv)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.186,
+   "cpu_ms": 0.943,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30337,
+   "comm": "linux-base-sgx",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-environment-generators/linux-base-sgx"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.186,
+   "cpu_ms": 1.011,
+   "chain": [
+    {
+     "pid": 30336,
+     "comm": "(sd-exec-strv)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30338,
+   "comm": "snapd-env-gener",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-environment-generators/snapd-env-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.188,
+   "cpu_ms": 0.854,
+   "chain": [
+    {
+     "pid": 30336,
+     "comm": "(sd-exec-strv)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30339,
+   "comm": "(sd-gens)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.189,
+   "cpu_ms": 1.413,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30340,
+   "comm": "(sd-exec-strv)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 6.19,
+   "cpu_ms": 4.9,
+   "chain": [
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30341,
+   "comm": "cloud-init-gene",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/cloud-init-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.191,
+   "cpu_ms": 1.313,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30342,
+   "comm": "friendly-recove",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/friendly-recovery"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.192,
+   "cpu_ms": 1.034,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30343,
+   "comm": "netplan",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/netplan"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.193,
+   "cpu_ms": 3.254,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30344,
+   "comm": "openvpn-generat",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/openvpn-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.195,
+   "cpu_ms": 1.038,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30345,
+   "comm": "podman-system-g",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/podman-system-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.195,
+   "cpu_ms": 1.864,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30346,
+   "comm": "cat",
+   "class": "candidate",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.197,
+   "cpu_ms": 0.809,
+   "chain": [
+    {
+     "pid": 30342,
+     "comm": "friendly-recove"
+    },
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30347,
+   "comm": "mkdir",
+   "class": "candidate",
+   "execs": [
+    "/usr/bin/mkdir"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.197,
+   "cpu_ms": 0.911,
+   "chain": [
+    {
+     "pid": 30344,
+     "comm": "openvpn-generat"
+    },
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30348,
+   "comm": "ds-identify",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/cloud-init/ds-identify"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.198,
+   "cpu_ms": 2.078,
+   "chain": [
+    {
+     "pid": 30341,
+     "comm": "cloud-init-gene"
+    },
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30349,
+   "comm": "ls",
+   "class": "candidate",
+   "execs": [
+    "/usr/bin/ls"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.2,
+   "cpu_ms": 1.061,
+   "chain": [
+    {
+     "pid": 30344,
+     "comm": "openvpn-generat"
+    },
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30350,
+   "comm": "postgresql-gene",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/postgresql-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.203,
+   "cpu_ms": 1.177,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30351,
+   "comm": "snapd-generator",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/snapd-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.204,
+   "cpu_ms": 0.965,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30352,
+   "comm": "sshd-socket-gen",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/sshd-socket-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.205,
+   "cpu_ms": 2.647,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30353,
+   "comm": "systemd-cryptse",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-cryptsetup-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.207,
+   "cpu_ms": 3.206,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30354,
+   "comm": "systemd-debug-g",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-debug-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.209,
+   "cpu_ms": 3.241,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30355,
+   "comm": "systemd-fstab-g",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-fstab-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.21,
+   "cpu_ms": 3.839,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30356,
+   "comm": "systemd-getty-g",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-getty-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.212,
+   "cpu_ms": 3.277,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30357,
+   "comm": "systemd-hiberna",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-hibernate-resume-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.214,
+   "cpu_ms": 3.05,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30358,
+   "comm": "systemd-integri",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-integritysetup-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.216,
+   "cpu_ms": 3.174,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30359,
+   "comm": "systemd-rc-loca",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-rc-local-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.217,
+   "cpu_ms": 3.084,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30360,
+   "comm": "mkdir",
+   "class": "candidate",
+   "execs": [
+    "/usr/bin/mkdir"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.219,
+   "cpu_ms": 0.895,
+   "chain": [
+    {
+     "pid": 30350,
+     "comm": "postgresql-gene"
+    },
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30365,
+   "comm": "uname",
+   "class": "candidate",
+   "execs": [
+    "/usr/bin/uname"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.223,
+   "cpu_ms": 0.806,
+   "chain": [
+    {
+     "pid": 30348,
+     "comm": "ds-identify"
+    },
+    {
+     "pid": 30341,
+     "comm": "cloud-init-gene"
+    },
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30366,
+   "comm": "sed",
+   "class": "candidate",
+   "execs": [
+    "/usr/bin/sed"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.224,
+   "cpu_ms": 1.29,
+   "chain": [
+    {
+     "pid": 30350,
+     "comm": "postgresql-gene"
+    },
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30367,
+   "comm": "mkdir",
+   "class": "candidate",
+   "execs": [
+    "/usr/bin/mkdir"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.229,
+   "cpu_ms": 0.894,
+   "chain": [
+    {
+     "pid": 30341,
+     "comm": "cloud-init-gene"
+    },
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30368,
+   "comm": "ln",
+   "class": "candidate",
+   "execs": [
+    "/usr/bin/ln"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.23,
+   "cpu_ms": 0.702,
+   "chain": [
+    {
+     "pid": 30341,
+     "comm": "cloud-init-gene"
+    },
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30369,
+   "comm": "systemd-run-gen",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-run-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.233,
+   "cpu_ms": 3.025,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30370,
+   "comm": "systemd-system-",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-system-update-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.236,
+   "cpu_ms": 3.006,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30371,
+   "comm": "systemd-sysv-ge",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-sysv-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.238,
+   "cpu_ms": 12.679,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30372,
+   "comm": "systemd-veritys",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-veritysetup-generator"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.24,
+   "cpu_ms": 3.017,
+   "chain": [
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30373,
+   "comm": "ln",
+   "class": "candidate",
+   "execs": [
+    "/usr/bin/ln"
+   ],
+   "window": "job",
+   "first_s_from_job": 6.249,
+   "cpu_ms": 0.694,
+   "chain": [
+    {
+     "pid": 30350,
+     "comm": "postgresql-gene"
+    },
+    {
+     "pid": 30340,
+     "comm": "(sd-exec-strv)"
+    },
+    {
+     "pid": 30339,
+     "comm": "(sd-gens)"
+    }
+   ],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 30999,
+   "comm": "packagekitd",
+   "class": "candidate",
+   "execs": [
+    "/proc/self/fd/9",
+    "/usr/libexec/packagekitd"
+   ],
+   "window": "job",
+   "first_s_from_job": 8.985,
+   "cpu_ms": 42.811,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 31085,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "job",
+   "first_s_from_job": 10.805,
+   "cpu_ms": 0.365,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 31087,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "job",
+   "first_s_from_job": 11.439,
+   "cpu_ms": 1.467,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31088,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "job",
+   "first_s_from_job": 11.441,
+   "cpu_ms": 1.029,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31098,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 21.443,
+   "cpu_ms": 1.403,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31099,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 21.444,
+   "cpu_ms": 1.015,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31100,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 31.446,
+   "cpu_ms": 1.28,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31101,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 31.447,
+   "cpu_ms": 0.964,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31105,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 41.449,
+   "cpu_ms": 1.418,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31106,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 41.45,
+   "cpu_ms": 0.958,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31108,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 51.451,
+   "cpu_ms": 1.29,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31109,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 51.453,
+   "cpu_ms": 0.963,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31110,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 61.454,
+   "cpu_ms": 1.411,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31111,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 61.456,
+   "cpu_ms": 0.98,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31112,
+   "comm": "iptables",
+   "class": "candidate",
+   "execs": [
+    "/usr/sbin/iptables"
+   ],
+   "window": "post",
+   "first_s_from_job": 63.391,
+   "cpu_ms": 1.603,
+   "chain": [],
+   "ancestor": {
+    "pid": 1707,
+    "comm": "python3",
+    "cgroup": "/azure.slice/walinuxagent.service",
+    "cmd": "/usr/bin/python3 -u bin/WALinuxAgent-2.16.0.2-py3.12.egg -run-exthandlers"
+   }
+  },
+  {
+   "pid": 31113,
+   "comm": "iptables",
+   "class": "candidate",
+   "execs": [
+    "/usr/sbin/iptables"
+   ],
+   "window": "post",
+   "first_s_from_job": 63.393,
+   "cpu_ms": 1.781,
+   "chain": [],
+   "ancestor": {
+    "pid": 1707,
+    "comm": "python3",
+    "cgroup": "/azure.slice/walinuxagent.service",
+    "cmd": "/usr/bin/python3 -u bin/WALinuxAgent-2.16.0.2-py3.12.egg -run-exthandlers"
+   }
+  },
+  {
+   "pid": 31114,
+   "comm": "iptables",
+   "class": "candidate",
+   "execs": [
+    "/usr/sbin/iptables"
+   ],
+   "window": "post",
+   "first_s_from_job": 63.395,
+   "cpu_ms": 1.382,
+   "chain": [],
+   "ancestor": {
+    "pid": 1707,
+    "comm": "python3",
+    "cgroup": "/azure.slice/walinuxagent.service",
+    "cmd": "/usr/bin/python3 -u bin/WALinuxAgent-2.16.0.2-py3.12.egg -run-exthandlers"
+   }
+  },
+  {
+   "pid": 31115,
+   "comm": "iptables",
+   "class": "candidate",
+   "execs": [
+    "/usr/sbin/iptables"
+   ],
+   "window": "post",
+   "first_s_from_job": 63.396,
+   "cpu_ms": 1.342,
+   "chain": [],
+   "ancestor": {
+    "pid": 1707,
+    "comm": "python3",
+    "cgroup": "/azure.slice/walinuxagent.service",
+    "cmd": "/usr/bin/python3 -u bin/WALinuxAgent-2.16.0.2-py3.12.egg -run-exthandlers"
+   }
+  },
+  {
+   "pid": 31116,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 71.457,
+   "cpu_ms": 1.344,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31117,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 71.459,
+   "cpu_ms": 0.946,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31120,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 81.461,
+   "cpu_ms": 1.273,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31121,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 81.462,
+   "cpu_ms": 1.026,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31122,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 91.463,
+   "cpu_ms": 1.395,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31123,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 91.465,
+   "cpu_ms": 0.942,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31125,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 101.466,
+   "cpu_ms": 1.263,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31126,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 101.468,
+   "cpu_ms": 0.917,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31127,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 111.469,
+   "cpu_ms": 1.237,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31128,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 111.47,
+   "cpu_ms": 1.004,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31130,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 121.472,
+   "cpu_ms": 1.33,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31131,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 121.473,
+   "cpu_ms": 1.06,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31133,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 131.475,
+   "cpu_ms": 1.285,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31134,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 131.476,
+   "cpu_ms": 0.8,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31136,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 141.478,
+   "cpu_ms": 1.337,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31137,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 141.479,
+   "cpu_ms": 1.063,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31140,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 151.481,
+   "cpu_ms": 1.371,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31141,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 151.482,
+   "cpu_ms": 1.038,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31143,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 161.484,
+   "cpu_ms": 1.277,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31144,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 161.485,
+   "cpu_ms": 0.995,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31146,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 171.487,
+   "cpu_ms": 1.265,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31147,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 171.488,
+   "cpu_ms": 0.996,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31148,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 181.49,
+   "cpu_ms": 1.349,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31149,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 181.491,
+   "cpu_ms": 0.99,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31150,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 191.493,
+   "cpu_ms": 1.329,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31151,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 191.494,
+   "cpu_ms": 1.001,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31153,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 201.496,
+   "cpu_ms": 1.287,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31154,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 201.497,
+   "cpu_ms": 0.98,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31156,
+   "comm": "sadc",
+   "class": "candidate",
+   "execs": [
+    "/proc/self/fd/9",
+    "/usr/lib/sysstat/sa1",
+    "/usr/lib/sysstat/sadc"
+   ],
+   "window": "post",
+   "first_s_from_job": 207.853,
+   "cpu_ms": 8.232,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 31157,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "post",
+   "first_s_from_job": 207.874,
+   "cpu_ms": 0.3,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 31160,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 211.499,
+   "cpu_ms": 1.289,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31161,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 211.5,
+   "cpu_ms": 0.989,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31163,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 221.502,
+   "cpu_ms": 1.343,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31164,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 221.503,
+   "cpu_ms": 0.948,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31167,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 231.504,
+   "cpu_ms": 1.345,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31168,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 231.506,
+   "cpu_ms": 0.972,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31169,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 241.507,
+   "cpu_ms": 1.359,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31170,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 241.509,
+   "cpu_ms": 0.995,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31172,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 251.51,
+   "cpu_ms": 1.374,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31173,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 251.512,
+   "cpu_ms": 1.041,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31174,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 261.513,
+   "cpu_ms": 1.389,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31175,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 261.515,
+   "cpu_ms": 0.984,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31177,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 271.516,
+   "cpu_ms": 1.359,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31178,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 271.518,
+   "cpu_ms": 1.002,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31180,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 281.519,
+   "cpu_ms": 1.485,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31181,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 281.521,
+   "cpu_ms": 1.099,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31182,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 291.522,
+   "cpu_ms": 1.403,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31183,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 291.524,
+   "cpu_ms": 0.968,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31184,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 301.525,
+   "cpu_ms": 1.319,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31185,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 301.527,
+   "cpu_ms": 0.975,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31186,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 311.528,
+   "cpu_ms": 1.52,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31187,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 311.53,
+   "cpu_ms": 1.0,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31188,
+   "comm": "(sd-close)",
+   "class": "pid1-helper",
+   "execs": [],
+   "window": "post",
+   "first_s_from_job": 314.628,
+   "cpu_ms": 0.249,
+   "chain": [],
+   "ancestor": {
+    "pid": 1,
+    "comm": "systemd",
+    "cgroup": "/init.scope",
+    "cmd": "/usr/lib/systemd/systemd --system --deserialize=62"
+   }
+  },
+  {
+   "pid": 31189,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 321.531,
+   "cpu_ms": 1.392,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31190,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 321.533,
+   "cpu_ms": 0.915,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31193,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 331.534,
+   "cpu_ms": 1.369,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31194,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 331.536,
+   "cpu_ms": 0.938,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31195,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 341.537,
+   "cpu_ms": 1.332,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31196,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 341.539,
+   "cpu_ms": 0.97,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31198,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 351.54,
+   "cpu_ms": 1.306,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31199,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 351.541,
+   "cpu_ms": 0.944,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31200,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 361.543,
+   "cpu_ms": 1.432,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31201,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 361.544,
+   "cpu_ms": 0.958,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31202,
+   "comm": "iptables",
+   "class": "candidate",
+   "execs": [
+    "/usr/sbin/iptables"
+   ],
+   "window": "post",
+   "first_s_from_job": 363.398,
+   "cpu_ms": 1.575,
+   "chain": [],
+   "ancestor": {
+    "pid": 1707,
+    "comm": "python3",
+    "cgroup": "/azure.slice/walinuxagent.service",
+    "cmd": "/usr/bin/python3 -u bin/WALinuxAgent-2.16.0.2-py3.12.egg -run-exthandlers"
+   }
+  },
+  {
+   "pid": 31203,
+   "comm": "iptables",
+   "class": "candidate",
+   "execs": [
+    "/usr/sbin/iptables"
+   ],
+   "window": "post",
+   "first_s_from_job": 363.4,
+   "cpu_ms": 1.791,
+   "chain": [],
+   "ancestor": {
+    "pid": 1707,
+    "comm": "python3",
+    "cgroup": "/azure.slice/walinuxagent.service",
+    "cmd": "/usr/bin/python3 -u bin/WALinuxAgent-2.16.0.2-py3.12.egg -run-exthandlers"
+   }
+  },
+  {
+   "pid": 31204,
+   "comm": "iptables",
+   "class": "candidate",
+   "execs": [
+    "/usr/sbin/iptables"
+   ],
+   "window": "post",
+   "first_s_from_job": 363.402,
+   "cpu_ms": 1.295,
+   "chain": [],
+   "ancestor": {
+    "pid": 1707,
+    "comm": "python3",
+    "cgroup": "/azure.slice/walinuxagent.service",
+    "cmd": "/usr/bin/python3 -u bin/WALinuxAgent-2.16.0.2-py3.12.egg -run-exthandlers"
+   }
+  },
+  {
+   "pid": 31205,
+   "comm": "iptables",
+   "class": "candidate",
+   "execs": [
+    "/usr/sbin/iptables"
+   ],
+   "window": "post",
+   "first_s_from_job": 363.403,
+   "cpu_ms": 1.373,
+   "chain": [],
+   "ancestor": {
+    "pid": 1707,
+    "comm": "python3",
+    "cgroup": "/azure.slice/walinuxagent.service",
+    "cmd": "/usr/bin/python3 -u bin/WALinuxAgent-2.16.0.2-py3.12.egg -run-exthandlers"
+   }
+  },
+  {
+   "pid": 31206,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 371.546,
+   "cpu_ms": 1.418,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31207,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 371.547,
+   "cpu_ms": 0.998,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31208,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 381.549,
+   "cpu_ms": 1.333,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31209,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 381.55,
+   "cpu_ms": 0.946,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31211,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 391.552,
+   "cpu_ms": 1.326,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31212,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 391.553,
+   "cpu_ms": 0.965,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31213,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 401.554,
+   "cpu_ms": 1.304,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31214,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 401.556,
+   "cpu_ms": 0.963,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31215,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 411.557,
+   "cpu_ms": 1.339,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31216,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 411.559,
+   "cpu_ms": 0.944,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31217,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 421.56,
+   "cpu_ms": 1.422,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31218,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 421.562,
+   "cpu_ms": 0.974,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31221,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 431.563,
+   "cpu_ms": 1.331,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31222,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 431.565,
+   "cpu_ms": 1.151,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31223,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 441.566,
+   "cpu_ms": 1.263,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31224,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 441.568,
+   "cpu_ms": 0.969,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31226,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 451.569,
+   "cpu_ms": 1.332,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31227,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 451.57,
+   "cpu_ms": 1.008,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31228,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 461.572,
+   "cpu_ms": 1.428,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31229,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 461.573,
+   "cpu_ms": 1.032,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31230,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 471.575,
+   "cpu_ms": 1.272,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31231,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 471.576,
+   "cpu_ms": 1.005,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31232,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 481.578,
+   "cpu_ms": 1.347,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31233,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 481.579,
+   "cpu_ms": 1.088,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31234,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 491.581,
+   "cpu_ms": 1.327,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31235,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 491.582,
+   "cpu_ms": 0.941,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31237,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 501.584,
+   "cpu_ms": 1.228,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31238,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 501.585,
+   "cpu_ms": 0.961,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31239,
+   "comm": "cron",
+   "class": "candidate",
+   "execs": [],
+   "window": "post",
+   "first_s_from_job": 508.163,
+   "cpu_ms": 4.113,
+   "chain": [],
+   "ancestor": {
+    "pid": 1086,
+    "comm": "cron",
+    "cgroup": "/system.slice/cron.service",
+    "cmd": "/usr/sbin/cron -f -P"
+   }
+  },
+  {
+   "pid": 31240,
+   "comm": "sh",
+   "class": "candidate",
+   "execs": [
+    "/bin/sh"
+   ],
+   "window": "post",
+   "first_s_from_job": 508.166,
+   "cpu_ms": 1.51,
+   "chain": [
+    {
+     "pid": 31239,
+     "comm": "cron"
+    }
+   ],
+   "ancestor": {
+    "pid": 1086,
+    "comm": "cron",
+    "cgroup": "/system.slice/cron.service",
+    "cmd": "/usr/sbin/cron -f -P"
+   }
+  },
+  {
+   "pid": 31241,
+   "comm": "debian-sa1",
+   "class": "candidate",
+   "execs": [
+    "/usr/lib/sysstat/debian-sa1"
+   ],
+   "window": "post",
+   "first_s_from_job": 508.168,
+   "cpu_ms": 0.56,
+   "chain": [
+    {
+     "pid": 31240,
+     "comm": "sh"
+    },
+    {
+     "pid": 31239,
+     "comm": "cron"
+    }
+   ],
+   "ancestor": {
+    "pid": 1086,
+    "comm": "cron",
+    "cgroup": "/system.slice/cron.service",
+    "cmd": "/usr/sbin/cron -f -P"
+   }
+  },
+  {
+   "pid": 31242,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 511.586,
+   "cpu_ms": 1.292,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31243,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 511.588,
+   "cpu_ms": 0.962,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31244,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 521.589,
+   "cpu_ms": 1.3,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31245,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 521.591,
+   "cpu_ms": 0.929,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31246,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 531.592,
+   "cpu_ms": 1.235,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31247,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 531.593,
+   "cpu_ms": 0.95,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31248,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 541.595,
+   "cpu_ms": 1.231,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31249,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 541.596,
+   "cpu_ms": 0.971,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31250,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 551.598,
+   "cpu_ms": 1.243,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31251,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 551.599,
+   "cpu_ms": 0.961,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31253,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 561.6,
+   "cpu_ms": 1.257,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31254,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 561.602,
+   "cpu_ms": 0.947,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31256,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 571.603,
+   "cpu_ms": 1.359,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31257,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 571.605,
+   "cpu_ms": 0.942,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31259,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 581.606,
+   "cpu_ms": 1.335,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31260,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 581.607,
+   "cpu_ms": 0.942,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31261,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 591.609,
+   "cpu_ms": 1.281,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31262,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 591.61,
+   "cpu_ms": 0.951,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31263,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 601.612,
+   "cpu_ms": 1.269,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31264,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 601.613,
+   "cpu_ms": 0.969,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31265,
+   "comm": "cat",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/cat"
+   ],
+   "window": "post",
+   "first_s_from_job": 611.614,
+   "cpu_ms": 1.472,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  },
+  {
+   "pid": 31266,
+   "comm": "sleep",
+   "class": "agent",
+   "execs": [
+    "/usr/bin/sleep"
+   ],
+   "window": "post",
+   "first_s_from_job": 611.616,
+   "cpu_ms": 0.789,
+   "chain": [
+    {
+     "pid": 29860,
+     "comm": "bash"
+    }
+   ],
+   "ancestor": {
+    "pid": 2191,
+    "comm": "Runner.Worker",
+    "cgroup": "/system.slice/hosted-compute-agent.service",
+    "cmd": "/home/runner/actions-runner/cached/2.337.0/bin/Runner.Worker spawnclient 142 145"
+   }
+  }
+ ],
+ "groups": [
+  {
+   "window": "outside",
+   "class": "pre-recording",
+   "comm": "sleep",
+   "ancestor": null,
+   "ancestor_cgroup": null,
+   "count": 1,
+   "cpu_ms": 0.216,
+   "execs": []
+  },
+  {
+   "window": "pre",
+   "class": "agent",
+   "comm": "MainThread",
+   "ancestor": "Runner.Worker",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 1,
+   "cpu_ms": 508.345,
+   "execs": [
+    "/home/runner/actions-runner/cached/2.337.0/externals/node24/bin/node"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "agent",
+   "comm": "bash",
+   "ancestor": "Runner.Worker",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 1,
+   "cpu_ms": 54.307,
+   "execs": [
+    "/usr/bin/bash"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "agent",
+   "comm": "cat",
+   "ancestor": "Runner.Worker",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 30,
+   "cpu_ms": 40.15,
+   "execs": [
+    "/usr/bin/cat"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "agent",
+   "comm": "sleep",
+   "ancestor": "Runner.Worker",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 30,
+   "cpu_ms": 29.683,
+   "execs": [
+    "/usr/bin/sleep"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "agent",
+   "comm": "sudo",
+   "ancestor": "bash",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 3,
+   "cpu_ms": 21.026,
+   "execs": [
+    "/usr/bin/sudo"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "agent",
+   "comm": "cp",
+   "ancestor": "bash",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 2,
+   "cpu_ms": 8.576,
+   "execs": [
+    "/usr/bin/cp"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "candidate",
+   "comm": "cron",
+   "ancestor": "cron",
+   "ancestor_cgroup": "/system.slice/cron.service",
+   "count": 2,
+   "cpu_ms": 8.338,
+   "execs": []
+  },
+  {
+   "window": "pre",
+   "class": "candidate",
+   "comm": "iptables",
+   "ancestor": "python3",
+   "ancestor_cgroup": "/azure.slice/walinuxagent.service",
+   "count": 4,
+   "cpu_ms": 6.201,
+   "execs": [
+    "/usr/sbin/iptables"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "agent",
+   "comm": "rm",
+   "ancestor": "bash",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 2,
+   "cpu_ms": 6.07,
+   "execs": [
+    "/usr/bin/rm"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "agent",
+   "comm": "basename",
+   "ancestor": "bash",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 6,
+   "cpu_ms": 5.241,
+   "execs": [
+    "/usr/bin/basename"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "candidate",
+   "comm": "sh",
+   "ancestor": "cron",
+   "ancestor_cgroup": "/system.slice/cron.service",
+   "count": 2,
+   "cpu_ms": 3.062,
+   "execs": [
+    "/bin/sh"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "agent",
+   "comm": "id",
+   "ancestor": "bash",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 2,
+   "cpu_ms": 2.408,
+   "execs": [
+    "/usr/bin/id"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "agent",
+   "comm": "chown",
+   "ancestor": "bash",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 1,
+   "cpu_ms": 2.341,
+   "execs": [
+    "/usr/bin/chown"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "agent",
+   "comm": "xargs",
+   "ancestor": "bash",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 1,
+   "cpu_ms": 1.716,
+   "execs": [
+    "/usr/bin/xargs"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "candidate",
+   "comm": "anacron",
+   "ancestor": "anacron",
+   "ancestor_cgroup": "/system.slice/anacron.service",
+   "count": 2,
+   "cpu_ms": 1.4,
+   "execs": [
+    "/usr/sbin/anacron"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "agent",
+   "comm": "mkdir",
+   "ancestor": "bash",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 1,
+   "cpu_ms": 1.293,
+   "execs": [
+    "/usr/bin/mkdir"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "agent",
+   "comm": "ls",
+   "ancestor": "bash",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 1,
+   "cpu_ms": 1.284,
+   "execs": [
+    "/usr/bin/ls"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "agent",
+   "comm": "tr",
+   "ancestor": "bash",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 1,
+   "cpu_ms": 1.242,
+   "execs": [
+    "/usr/bin/tr"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "candidate",
+   "comm": "sh",
+   "ancestor": "anacron",
+   "ancestor_cgroup": "/system.slice/anacron.service",
+   "count": 1,
+   "cpu_ms": 0.897,
+   "execs": [
+    "/bin/sh"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "candidate",
+   "comm": "run-parts",
+   "ancestor": "anacron",
+   "ancestor_cgroup": "/system.slice/anacron.service",
+   "count": 1,
+   "cpu_ms": 0.776,
+   "execs": [
+    "/usr/bin/run-parts"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "agent",
+   "comm": "bash",
+   "ancestor": "bash",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 1,
+   "cpu_ms": 0.705,
+   "execs": []
+  },
+  {
+   "window": "pre",
+   "class": "candidate",
+   "comm": "0anacron",
+   "ancestor": "anacron",
+   "ancestor_cgroup": "/system.slice/anacron.service",
+   "count": 1,
+   "cpu_ms": 0.701,
+   "execs": [
+    "/etc/cron.monthly/0anacron"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "candidate",
+   "comm": "debian-sa1",
+   "ancestor": "cron",
+   "ancestor_cgroup": "/system.slice/cron.service",
+   "count": 1,
+   "cpu_ms": 0.602,
+   "execs": [
+    "/usr/lib/sysstat/debian-sa1"
+   ]
+  },
+  {
+   "window": "pre",
+   "class": "pid1-helper",
+   "comm": "(sd-close)",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 0.251,
+   "execs": []
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "packagekitd",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 42.811,
+   "execs": [
+    "/usr/libexec/packagekitd"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "pid1-helper",
+   "comm": "(sd-close)",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 103,
+   "cpu_ms": 24.263,
+   "execs": []
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "systemd-sysv-ge",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 12.679,
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-sysv-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "pid1-helper",
+   "comm": "(sd-exec-strv)",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 2,
+   "cpu_ms": 5.843,
+   "execs": []
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "systemd-fstab-g",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 3.839,
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-fstab-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "systemd-getty-g",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 3.277,
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-getty-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "netplan",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 3.254,
+   "execs": [
+    "/usr/lib/systemd/system-generators/netplan"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "systemd-debug-g",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 3.241,
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-debug-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "systemd-cryptse",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 3.206,
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-cryptsetup-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "systemd-integri",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 3.174,
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-integritysetup-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "systemd-rc-loca",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 3.084,
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-rc-local-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "systemd-hiberna",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 3.05,
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-hibernate-resume-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "systemd-run-gen",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 3.025,
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-run-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "systemd-veritys",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 3.017,
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-veritysetup-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "systemd-system-",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 3.006,
+   "execs": [
+    "/usr/lib/systemd/system-generators/systemd-system-update-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "agent",
+   "comm": "cat",
+   "ancestor": "Runner.Worker",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 2,
+   "cpu_ms": 2.768,
+   "execs": [
+    "/usr/bin/cat"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "mkdir",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 3,
+   "cpu_ms": 2.7,
+   "execs": [
+    "/usr/bin/mkdir"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "sshd-socket-gen",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 2.647,
+   "execs": [
+    "/usr/lib/systemd/system-generators/sshd-socket-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "ds-identify",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 2.078,
+   "execs": [
+    "/usr/lib/cloud-init/ds-identify"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "agent",
+   "comm": "sleep",
+   "ancestor": "Runner.Worker",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 2,
+   "cpu_ms": 2.045,
+   "execs": [
+    "/usr/bin/sleep"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "podman-system-g",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 1.864,
+   "execs": [
+    "/usr/lib/systemd/system-generators/podman-system-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "pid1-helper",
+   "comm": "(sd-gens)",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 1.413,
+   "execs": []
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "ln",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 2,
+   "cpu_ms": 1.396,
+   "execs": [
+    "/usr/bin/ln"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "cloud-init-gene",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 1.313,
+   "execs": [
+    "/usr/lib/systemd/system-generators/cloud-init-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "sed",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 1.29,
+   "execs": [
+    "/usr/bin/sed"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "postgresql-gene",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 1.177,
+   "execs": [
+    "/usr/lib/systemd/system-generators/postgresql-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "ls",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 1.061,
+   "execs": [
+    "/usr/bin/ls"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "openvpn-generat",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 1.038,
+   "execs": [
+    "/usr/lib/systemd/system-generators/openvpn-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "friendly-recove",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 1.034,
+   "execs": [
+    "/usr/lib/systemd/system-generators/friendly-recovery"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "linux-base-sgx",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 1.011,
+   "execs": [
+    "/usr/lib/systemd/system-environment-generators/linux-base-sgx"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "snapd-generator",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 0.965,
+   "execs": [
+    "/usr/lib/systemd/system-generators/snapd-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "snapd-env-gener",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 0.854,
+   "execs": [
+    "/usr/lib/systemd/system-environment-generators/snapd-env-generator"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "cat",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 0.809,
+   "execs": [
+    "/usr/bin/cat"
+   ]
+  },
+  {
+   "window": "job",
+   "class": "candidate",
+   "comm": "uname",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 0.806,
+   "execs": [
+    "/usr/bin/uname"
+   ]
+  },
+  {
+   "window": "post",
+   "class": "agent",
+   "comm": "cat",
+   "ancestor": "Runner.Worker",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 60,
+   "cpu_ms": 80.104,
+   "execs": [
+    "/usr/bin/cat"
+   ]
+  },
+  {
+   "window": "post",
+   "class": "agent",
+   "comm": "sleep",
+   "ancestor": "Runner.Worker",
+   "ancestor_cgroup": "/system.slice/hosted-compute-agent.service",
+   "count": 60,
+   "cpu_ms": 58.594,
+   "execs": [
+    "/usr/bin/sleep"
+   ]
+  },
+  {
+   "window": "post",
+   "class": "candidate",
+   "comm": "iptables",
+   "ancestor": "python3",
+   "ancestor_cgroup": "/azure.slice/walinuxagent.service",
+   "count": 8,
+   "cpu_ms": 12.142,
+   "execs": [
+    "/usr/sbin/iptables"
+   ]
+  },
+  {
+   "window": "post",
+   "class": "candidate",
+   "comm": "sadc",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 1,
+   "cpu_ms": 8.232,
+   "execs": [
+    "/usr/lib/sysstat/sadc"
+   ]
+  },
+  {
+   "window": "post",
+   "class": "candidate",
+   "comm": "cron",
+   "ancestor": "cron",
+   "ancestor_cgroup": "/system.slice/cron.service",
+   "count": 1,
+   "cpu_ms": 4.113,
+   "execs": []
+  },
+  {
+   "window": "post",
+   "class": "candidate",
+   "comm": "sh",
+   "ancestor": "cron",
+   "ancestor_cgroup": "/system.slice/cron.service",
+   "count": 1,
+   "cpu_ms": 1.51,
+   "execs": [
+    "/bin/sh"
+   ]
+  },
+  {
+   "window": "post",
+   "class": "candidate",
+   "comm": "debian-sa1",
+   "ancestor": "cron",
+   "ancestor_cgroup": "/system.slice/cron.service",
+   "count": 1,
+   "cpu_ms": 0.56,
+   "execs": [
+    "/usr/lib/sysstat/debian-sa1"
+   ]
+  },
+  {
+   "window": "post",
+   "class": "pid1-helper",
+   "comm": "(sd-close)",
+   "ancestor": "systemd",
+   "ancestor_cgroup": "/init.scope",
+   "count": 2,
+   "cpu_ms": 0.549,
+   "execs": []
+  }
+ ],
+ "new_in_later_census": [
+  {
+   "census": "job.start",
+   "pid": 29860,
+   "comm": "bash",
+   "cmd": "/usr/bin/bash -e /home/runner/work/_temp/2d2f4bfc-49cc-4f97-82c5-e490ef725866.sh",
+   "cgroup": "/system.slice/hosted-compute-agent.service",
+   "ppid": 2191
+  },
+  {
+   "census": "job.start",
+   "pid": 29956,
+   "comm": "sleep",
+   "cmd": "sleep 10",
+   "cgroup": "/system.slice/hosted-compute-agent.service",
+   "ppid": 29860
+  },
+  {
+   "census": "job.end",
+   "pid": 30999,
+   "comm": "packagekitd",
+   "cmd": "/usr/libexec/packagekitd",
+   "cgroup": "/system.slice/packagekit.service",
+   "ppid": 1
+  },
+  {
+   "census": "job.end",
+   "pid": 31088,
+   "comm": "sleep",
+   "cmd": "sleep 10",
+   "cgroup": "/system.slice/hosted-compute-agent.service",
+   "ppid": 29860
+  },
+  {
+   "census": "probe.end",
+   "pid": 31266,
+   "comm": "sleep",
+   "cmd": "sleep 10",
+   "cgroup": "/system.slice/hosted-compute-agent.service",
+   "ppid": 29860
+  }
+ ],
+ "entries": {
+  "gnome-shell": {
+   "gnome-shell": {
+    "pids": [
+     28080
+    ],
+    "pre": {
+     "s": 300.02,
+     "cpu_ms": 74.953,
+     "runs": 280,
+     "cpu_ms_per_s": 0.2498,
+     "runs_per_s": 0.9333
+    },
+    "job": {
+     "s": 11.62,
+     "cpu_ms": 1.904,
+     "runs": 80,
+     "cpu_ms_per_s": 0.1639,
+     "runs_per_s": 6.8845
+    },
+    "post": {
+     "s": 600.02,
+     "cpu_ms": 143.879,
+     "runs": 554,
+     "cpu_ms_per_s": 0.2398,
+     "runs_per_s": 0.9233
+    }
+   }
+  },
+  "pipewire": {
+   "pipewire": {
+    "pids": [
+     27946
+    ],
+    "pre": {
+     "s": 300.02,
+     "cpu_ms": 0,
+     "runs": 0,
+     "cpu_ms_per_s": 0.0,
+     "runs_per_s": 0.0
+    },
+    "job": {
+     "s": 11.62,
+     "cpu_ms": 0,
+     "runs": 0,
+     "cpu_ms_per_s": 0.0,
+     "runs_per_s": 0.0
+    },
+    "post": {
+     "s": 600.02,
+     "cpu_ms": 0,
+     "runs": 0,
+     "cpu_ms_per_s": 0.0,
+     "runs_per_s": 0.0
+    }
+   },
+   "wireplumber": {
+    "pids": [
+     27948
+    ],
+    "pre": {
+     "s": 300.02,
+     "cpu_ms": 3.109,
+     "runs": 68,
+     "cpu_ms_per_s": 0.0104,
+     "runs_per_s": 0.2267
+    },
+    "job": {
+     "s": 11.62,
+     "cpu_ms": 2.816,
+     "runs": 94,
+     "cpu_ms_per_s": 0.2423,
+     "runs_per_s": 8.0892
+    },
+    "post": {
+     "s": 600.02,
+     "cpu_ms": 4.741,
+     "runs": 124,
+     "cpu_ms_per_s": 0.0079,
+     "runs_per_s": 0.2067
+    }
+   },
+   "pipewire-pulse": {
+    "pids": [
+     27949
+    ],
+    "pre": {
+     "s": 300.02,
+     "cpu_ms": 0,
+     "runs": 0,
+     "cpu_ms_per_s": 0.0,
+     "runs_per_s": 0.0
+    },
+    "job": {
+     "s": 11.62,
+     "cpu_ms": 0,
+     "runs": 0,
+     "cpu_ms_per_s": 0.0,
+     "runs_per_s": 0.0
+    },
+    "post": {
+     "s": 600.02,
+     "cpu_ms": 0,
+     "runs": 0,
+     "cpu_ms_per_s": 0.0,
+     "runs_per_s": 0.0
+    }
+   }
+  },
+  "systemd": {
+   "pid1": {
+    "pids": [
+     1
+    ],
+    "pre": {
+     "s": 300.02,
+     "cpu_ms": 11.139,
+     "runs": 57,
+     "cpu_ms_per_s": 0.0371,
+     "runs_per_s": 0.19
+    },
+    "job": {
+     "s": 11.62,
+     "cpu_ms": 372.685,
+     "runs": 464,
+     "cpu_ms_per_s": 32.0717,
+     "runs_per_s": 39.9299
+    },
+    "post": {
+     "s": 600.02,
+     "cpu_ms": 25.155,
+     "runs": 128,
+     "cpu_ms_per_s": 0.0419,
+     "runs_per_s": 0.2133
+    }
+   },
+   "user-manager": {
+    "pids": [
+     27928
+    ],
+    "pre": {
+     "s": 300.02,
+     "cpu_ms": 0,
+     "runs": 0,
+     "cpu_ms_per_s": 0.0,
+     "runs_per_s": 0.0
+    },
+    "job": {
+     "s": 11.62,
+     "cpu_ms": 0,
+     "runs": 0,
+     "cpu_ms_per_s": 0.0,
+     "runs_per_s": 0.0
+    },
+    "post": {
+     "s": 600.02,
+     "cpu_ms": 0,
+     "runs": 0,
+     "cpu_ms_per_s": 0.0,
+     "runs_per_s": 0.0
+    }
+   }
+  },
+  "dbus-daemon": {
+   "system-bus": {
+    "pids": [
+     2985
+    ],
+    "pre": {
+     "s": 300.02,
+     "cpu_ms": 10.22,
+     "runs": 33,
+     "cpu_ms_per_s": 0.0341,
+     "runs_per_s": 0.11
+    },
+    "job": {
+     "s": 11.62,
+     "cpu_ms": 99.183,
+     "runs": 482,
+     "cpu_ms_per_s": 8.5353,
+     "runs_per_s": 41.4789
+    },
+    "post": {
+     "s": 600.02,
+     "cpu_ms": 22.492,
+     "runs": 86,
+     "cpu_ms_per_s": 0.0375,
+     "runs_per_s": 0.1433
+    }
+   },
+   "session-bus": {
+    "pids": [
+     27956
+    ],
+    "pre": {
+     "s": 300.02,
+     "cpu_ms": 0,
+     "runs": 0,
+     "cpu_ms_per_s": 0.0,
+     "runs_per_s": 0.0
+    },
+    "job": {
+     "s": 11.62,
+     "cpu_ms": 0,
+     "runs": 0,
+     "cpu_ms_per_s": 0.0,
+     "runs_per_s": 0.0
+    },
+    "post": {
+     "s": 600.02,
+     "cpu_ms": 0,
+     "runs": 0,
+     "cpu_ms_per_s": 0.0,
+     "runs_per_s": 0.0
+    }
+   }
+  }
+ },
+ "unit": {
+  "upgrade.unit.result": "success",
+  "upgrade.unit.status": "0",
+  "upgrade.uu.all_installed": "1",
+  "upgrade.reboot_required": "yes",
+  "upgrade.glibc.not_at_new": "0"
+ }
+}
