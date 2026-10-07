@@ -617,12 +617,25 @@ upg_prepare() {
   rec upgrade.locale "$(sed -n 's/^LANG=//p' /etc/default/locale 2>/dev/null)"
   ls -la --time-style=full-iso /var/lib/apt/periodic/ > "$OUT/upgrade.stamps.runner.txt" 2>&1
   sudo rm -f /var/lib/apt/periodic/*-stamp
+  sudo apt-get clean                   # the stage's own downloads counted, not the install's
   local t0; t0=$(date +%s)
   sudo /usr/lib/apt/apt.systemd.daily update < /dev/null > "$OUT/upgrade.update-stage.log" 2>&1
   rec upgrade.update_stage.rc "$?"; rec upgrade.update_stage_s "$(( $(date +%s) - t0 ))"
   ls -l /var/cache/apt/archives/ > "$OUT/upgrade.archives.txt" 2>&1
   rec upgrade.downloaded "$(ls /var/cache/apt/archives/ | grep -c '\.deb$')"
   sudo cp /var/log/unattended-upgrades/unattended-upgrades.log "$OUT/upgrade.uu.download.log" 2>/dev/null
+  # the measured job's pending set is glibc's alone (9.10 D36). The runner image holds packages the snapshot's
+  # archive takes as upgrades — its PPA Firefox against the archive's snap transitional `firefox` (the third dry
+  # run, method §8) — so every pending package of another source is held for the job
+  sudo apt-get -s -o Debug::NoLocking=1 dist-upgrade 2>/dev/null | awk '/^Inst /{print $2}' | sort -u > "$OUT/upgrade.pending.txt"
+  local held=""
+  for p in $(cat "$OUT/upgrade.pending.txt"); do
+    [ "$(dpkg-query -W -f='${source:Package}' "$p" 2>/dev/null)" = glibc ] && continue
+    held="$held $p"
+  done
+  rec upgrade.pending "$(paste -sd' ' "$OUT/upgrade.pending.txt")"
+  [ -n "$held" ] && sudo apt-mark hold $held > "$OUT/upgrade.hold.log" 2>&1
+  rec upgrade.held "${held# }"
 }
 
 # the install stage runs once, when the probe starts it: both timers stopped, after the boot units have started them
@@ -654,6 +667,16 @@ upgrade_probe() {
   sudo $CENSUS procs "$MEAS_UID" job.start "$OUT/census.job.start.json" 2>> "$OUT/census.log"
   mono_edge job start
   sudo systemctl start apt-daily-upgrade.service > "$OUT/upgrade.unit.log" 2>&1; rec upgrade.unit.start.rc "$?"
+  # the start command can return early: pid 1's daemon-reexec inside the job drops its D-Bus wait (the third dry
+  # run, method §8), so the job ends when the unit leaves the active states
+  local w=0
+  while [ "$w" -lt 1800 ]; do
+    case "$(systemctl show -p ActiveState --value apt-daily-upgrade.service 2>/dev/null)" in
+      active|activating|deactivating|reloading) sleep 1; w=$((w + 1)) ;;
+      *) break ;;
+    esac
+  done
+  rec upgrade.unit.waited_s "$w"
   mono_edge job end
   sudo $CENSUS procs "$MEAS_UID" job.end "$OUT/census.job.end.json" 2>> "$OUT/census.log"
   mono_edge post start; sleep "$UPG_POST"; mono_edge post end

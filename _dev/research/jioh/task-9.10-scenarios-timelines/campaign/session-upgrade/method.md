@@ -85,3 +85,13 @@ The result decides what D165 sets out. No new name: `c7-idle`'s statement takes 
 
   Amending §1: the dry run is relaunched as session 92, and the probe takes the next index after a dry run that passes.
 - 2026-10-07, the second dry run (run 37570816998, session 92). The downgrade landed: seven glibc binaries at 8.7, nothing removed, apt's plan as simulated. The runner was lost some 20 s after the sources moved to the day after, the last upload 432 s into the job, at the step that removes the runner's `needrestart`. That removal ran without `NEEDRESTART_SUSPEND`, so `needrestart`'s apt hook could restart every service still mapping the replaced glibc, the runner's agent among them — the loss 9.9's install guards against (`session/run.sh`, `install_session`). Amending §2.2: every apt call of the probe runs with `needrestart` suspended. The dry run is relaunched as session 93.
+- 2026-10-07, the third dry run (run 37575205780, session 93, on an AMD EPYC 9V45), every step landed: glibc back to 8.7, the session idle at the edge, the unit `success`, "All upgrades installed", the reboot notice raised. Three findings, each amending the method:
+  - **The pending set held more than glibc.** The runner image carries Firefox as the Mozilla Team PPA's deb (`156.0+build1-0ubuntu0.24.04.1~mt1`), which the snapshot's archive replaces with its snap transitional `firefox` (`1:1snap1-0ubuntu5`). The job installed it, and snapd installed the Firefox snap after the job. Amending §2.2: after the download stage every pending package of a source other than glibc is held (`apt-mark hold`, recorded as `upgrade.held`), and apt's cache is cleaned before the stage.
+  - **The job's end.** PID 1's `daemon-reexec` inside the job dropped the start command's D-Bus wait ("Connection reset by peer"), so the command returned while the unit ran on. Amending §3: the job ends when the unit leaves the active states.
+  - **The reading.**
+    - Each process takes its last name.
+    - A process with no fork row takes its parent from the censuses.
+    - The runner agent's processes (`hosted-compute-agent.service`) are counted apart; PID 1's own `(sd-…)` helpers and the processes present before the recording are labelled.
+    - The new processes are summed by window, class, name and ancestor (§6).
+
+  The dry run is relaunched as session 94.

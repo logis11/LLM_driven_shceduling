@@ -15,7 +15,9 @@ upgrade unit started through pid 1 (`job`), the session after it (`post`). Two r
 
 The job's tree is every process pid 1 forks inside `job` that executes apt-helper or apt.systemd.daily (the unit's
 ExecStartPre and ExecStart), and its descendants; the harness is the run's shell (`harness.pid` in report.kv) and its
-descendants. The trace's rows are 9.9's (`analyze.load_trace`), its fork and exit rows 9.6's (`build.analyze`), its
+descendants. A process the trace holds no fork row for takes its parent from the censuses. Of the new processes, the
+runner agent's (their first census ancestor in AGENT_CGROUP) are counted apart, pid 1's own helpers (`(sd-…)`) are
+labelled, and the rest are the candidates; `groups` sums them by window, class, name and first census ancestor. The trace's rows are 9.9's (`analyze.load_trace`), its fork and exit rows 9.6's (`build.analyze`), its
 exec rows the background family's.
 """
 
@@ -35,6 +37,8 @@ from meas.session.analyze import KTHREAD_NAME, load_trace  # noqa: E402
 EXEC = re.compile(r"^\s*(\d+\.\d+):\s+sched:sched_process_exec:\s+filename=(.*?)\s+pid=(\d+)\s+old_pid=(\d+)")
 JOB_EXECS = ("apt-helper", "apt.systemd.daily")   # the unit's ExecStartPre and ExecStart
 WINDOWS = ("pre", "job", "post")
+AGENT_CGROUP = "/hosted-compute-agent.service"     # the GitHub-hosted runner's agent and the workflow's own steps
+PID1_HELPER = re.compile(r"^\(sd-")
 NAME = "upgrade-probe"
 
 
@@ -140,10 +144,17 @@ def read(D):
     for t, pid, f in execs:
         execs_of.setdefault(pid, []).append(f)
     comm_of = {}
-    for r in rows:
-        comm_of.setdefault(r.pid, r.comm)
     for _t, _ptid, _pcomm, ctid, ccomm in forks:
         comm_of.setdefault(ctid, ccomm)
+    for r in rows:                                      # the last name a process runs under, after its exec
+        comm_of[r.pid] = r.comm
+    # a process the trace holds no fork row for — started between the census and the recording — takes its parent
+    # from the censuses
+    censuses = [before] + [c for c in (census(D, x) for x in ("job.start", "job.end", "probe.end")) if c]
+    for c in censuses:
+        for pr in c.get("procs", []):
+            if pr["pid"] not in parent and pr["pid"] not in known:
+                parent[pr["pid"]] = (None, pr["ppid"])
 
     # the job's tree: pid 1's children inside `job` that execute the unit's commands, and their descendants
     j0, j1 = wins.get("job", (None, None))
@@ -178,7 +189,10 @@ def read(D):
         if anc is not None and anc in harness:
             continue
         a = known.get(anc) or {}
-        new.append({"pid": pid, "comm": comm, "execs": execs_of.get(pid, []), "window": window_of(first_run[pid], wins),
+        cls = ("agent" if AGENT_CGROUP in (a.get("cgroup") or "") else
+               "pid1-helper" if PID1_HELPER.match(comm) else
+               "pre-recording" if anc is None and window_of(first_run[pid], wins) == "outside" else "candidate")
+        new.append({"pid": pid, "comm": comm, "class": cls, "execs": execs_of.get(pid, []), "window": window_of(first_run[pid], wins),
                     "first_s_from_job": round(first_run[pid] - j0, 3) if j0 is not None else None,
                     "cpu_ms": round(cpu[pid], 3), "chain": [{"pid": x, "comm": comm_of.get(x, "")} for x in up],
                     "ancestor": {"pid": anc, "comm": a.get("comm"), "cgroup": a.get("cgroup"), "cmd": a.get("cmd")}
@@ -213,6 +227,17 @@ def read(D):
                           "runs_per_s": round(len(sel) / (b - a), 4) if b > a else None}
             entries.setdefault(e, {})[i] = {"pids": sorted(ps), **out}
 
+    groups = {}
+    for n in new:
+        a = n["ancestor"] or {}
+        k = (n["window"], n["class"], n["comm"], a.get("comm"), a.get("cgroup"))
+        g = groups.setdefault(k, {"window": k[0], "class": k[1], "comm": k[2], "ancestor": k[3], "ancestor_cgroup": k[4],
+                                  "count": 0, "cpu_ms": 0.0, "execs": set()})
+        g["count"] += 1
+        g["cpu_ms"] = round(g["cpu_ms"] + n["cpu_ms"], 3)
+        g["execs"].update(n["execs"][-1:])
+    groups = sorted(({**g, "execs": sorted(g["execs"])} for g in groups.values()),
+                    key=lambda g: (WINDOWS.index(g["window"]) if g["window"] in WINDOWS else -1, -g["cpu_ms"]))
     job_rows = [r for r in rows if r.pid in job]
     return {
         "windows": {w: {"start": v[0], "end": v[1]} for w, v in wins.items()},
@@ -222,6 +247,7 @@ def read(D):
                 "comms": sorted({r.comm for r in job_rows})},
         "harness": {"pid": harness_pid, "processes": len(harness)},
         "new_processes": new,
+        "groups": groups,
         "new_in_later_census": later,
         "entries": entries,
         "unit": {k: kv.get(k) for k in ("upgrade.unit.result", "upgrade.unit.status", "upgrade.uu.all_installed",
@@ -232,12 +258,14 @@ def read(D):
 def summary(r):
     out = [f"job: {len(r['job']['roots'])} roots, {r['job']['processes']} processes, {r['job']['cpu_ms'] / 1000:.3f} s CPU"]
     out.append(f"unit: {r['unit']}")
-    out.append(f"new processes outside the census, the job and the harness: {len(r['new_processes'])}")
-    for n in r["new_processes"]:
-        anc = n["ancestor"] or {}
-        out.append(f"  {n['window']:<7} {n['comm']:<16} pid {n['pid']:<7} {n['cpu_ms']:9.3f} ms  "
-                   f"{' '.join(n['execs'][-1:]) or '-'}  <- {' <- '.join(x['comm'] for x in n['chain']) or '.'} "
-                   f"<- {anc.get('comm')} [{anc.get('cgroup')}]")
+    agent = [n for n in r["new_processes"] if n["class"] == "agent"]
+    out.append(f"new processes outside the census, the job and the harness: {len(r['new_processes'])}, of them the "
+               f"runner agent's {len(agent)} ({sum(n['cpu_ms'] for n in agent):.1f} ms)")
+    for g in r["groups"]:
+        if g["class"] == "agent":
+            continue
+        out.append(f"  {g['window']:<7} {g['class']:<11} {g['count']:>4} x {g['comm']:<16} {g['cpu_ms']:10.3f} ms  "
+                   f"{' '.join(g['execs'][:2]) or '-'}  <- {g['ancestor']} [{g['ancestor_cgroup']}]")
     out.append(f"new in a later census: {len(r['new_in_later_census'])}")
     for n in r["new_in_later_census"]:
         out.append(f"  {n['census']:<10} {n['comm']:<16} pid {n['pid']:<7} {n['cgroup']}  {n['cmd'][:80]}")
