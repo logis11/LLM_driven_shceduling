@@ -1,6 +1,6 @@
 # Docs index
 
-> Status: normative · Created 2026-08-27 · Updated 2026-09-29
+> Status: normative · Created 2026-08-27 · Updated 2026-10-07
 
 Prose only, organized by domain — one `##` section per area below, the full index table at the bottom. Statuses: **normative** (states what is; kept current) · **draft** (content real, form not final) · **record** (append-only history; never rewritten). Decision history lives in `_dev/archive/`; machine-read files live outside `docs/` (see the placement rule in `CLAUDE.md`).
 
@@ -85,6 +85,7 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 - [memos/2026-09-13-critical-findings.md](memos/2026-09-13-critical-findings.md) — the archetype sources read against their primary texts: the 2,430-process workload is a DynamoRio build, the 16.7 ms frame budget is absent from the LAVD slides, Roeser's fluent value is a log-scale location, Coetzee's short-lived processes are `cp`/`mkdir`, `ananicy-rules` types are prescriptions; plus declared-but-unrealised archetype params, a placeholder spread under a measurement tag, the 16-vs-8 concurrency unit, sampling granularity, and stale prose after the measurement fold-in
 - [memos/2026-09-13-dataset-rebuild-heads-up.md](memos/2026-09-13-dataset-rebuild-heads-up.md) — to 인경민, 박이안 (Korean): heads-up on the workload dataset rebuild — the findings in brief, what changes (dataset, the decisions built on it, citations outside it), what stays (the programs' input and output formats), what it means for each owner, and three executor questions to 인경민: LOTTERY's split when an editor's burst tail is batch-class, the EDF class of chain stages, a keystroke arriving while the editor runs
 - [memos/2026-09-20-dataset-validity-review.md](memos/2026-09-20-dataset-validity-review.md) — the workload dataset read against what the two research claims need from it: the recognizer reads identity so the compile path carries the recognition claim while the campaign carries the benefit claim, what the stability rule establishes and what it does not, the stability ledger to publish, the demand window to state as a scoping decision, the bound the measurement venue puts on the benefit claim, and segment composition as the untouched axis
+- [memos/2026-10-07-timer-skip-rule-for-the-simulator.md](memos/2026-10-07-timer-skip-rule-for-the-simulator.md) — to 인경민: TIMER skips missed ticks on its grid — the rule, a worked example against backlog, the trace lines it emits, and what the simulator and the contract change
 
 ## Full index
 
@@ -128,3 +129,4 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 | [memos/2026-09-13-critical-findings.md](memos/2026-09-13-critical-findings.md) | what the archetype sources' primary texts contradict in the repository's citations, and the dataset/tooling gaps found alongside | memo |
 | [memos/2026-09-13-dataset-rebuild-heads-up.md](memos/2026-09-13-dataset-rebuild-heads-up.md) | to 인경민, 박이안 (Korean): the dataset rebuild ahead — what changes, what stays, three executor questions | memo |
 | [memos/2026-09-20-dataset-validity-review.md](memos/2026-09-20-dataset-validity-review.md) | what the dataset's grounding and measurement establish for each research claim, and the four things to carry into the paper | memo |
+| [memos/2026-10-07-timer-skip-rule-for-the-simulator.md](memos/2026-10-07-timer-skip-rule-for-the-simulator.md) | to 인경민: the TIMER skip rule that replaces backlog, and what the simulator, the trace and the contract change | memo |
