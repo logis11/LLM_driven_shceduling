@@ -2924,3 +2924,43 @@ Taken under 인지오's delegation, on D5 and D79. `c2-p1b`'s segment 1 carries 
 Hands to 9.14: `c2-p1b` in the `initiated` splits as `session`.
 
 Recompiled with D163 (`compile.py --allow-window`). 10 of 100 artifacts change beyond the library's hash, in both modes: `c2-p1b`, its segment 1's ground truth; and `c3-creation`, `c3-evening`, `c3-workday` and `c6-dual`, whose headers changed. Each of those four, recompiled from its previous text against the new library, is identical but for its timeline's blob hash. No demand moves. Lint reports the nine demand-window files 9.14 owns and nothing else. `compile.py --check --allow-window`, `derive.py --check --require-coverage` and `batch_fold_in.py --check` pass. Tests: 426 passed, 1 skipped, 1 xfailed.
+
+## D165 — `c7-idle` keeps the four session tasks beside the upgrade, the work it causes in them stated; a probe sizes it (2026-10-07)
+
+By 인지오's decision (Q39). D28 carries the four session entries only in the idle files, where their measured state holds: `compositor-shell`, `audio-server`, `service-manager` and `message-bus`, observed in an empty, blanked session with nobody present (9.9 D9). `c7-idle` holds them for 26.385 s beside `unattended-upgr`, and a system job does work in them that the entries do not carry:
+- in 9.9's midnight repeats, cron jobs woke the audio server, the message bus and systemd — a footprint 9.9 took out of the values and stated (9.9 D26, D43);
+- on a booted desktop the upgrade's `libc6` post-install script re-executes systemd in PID 1 (`systemctl daemon-reexec`), which D37's chroot skipped.
+
+- **The tasks stay**, and `c7-idle` states that beside the upgrade they carry the idle session's measured state, not the work the upgrade causes in them. The idle pair stays one diff apart. The file has no performance metric (`harness/scoring/scoring-spec.yaml`: "c1-idle and c7-idle have no entry"), and the recognizer reads names, not timing (`docs/memos/2026-09-20-dataset-validity-review.md` §1): what the file feeds the experiment is its process names.
+- **A probe** runs the upgrade once where systemd is PID 1, beside an idle session. It records the processes that appear and the CPU of PID 1, the buses, GNOME Shell and the PipeWire stack over the job. It is never a repeat and changes no value (D143's form).
+  - If no new name appears, the statement takes the probe's size.
+  - If one appears — a process the session or PID 1 starts because of the upgrade — that is a decision of its own: the file would show the recognizer a process set a desktop does not.
+
+Not taken:
+- the session tasks removed from `c7-idle`: the pair would differ by more than the upgrade, and the idle mode would hold no task of its own;
+- the session entries measured during an upgrade: a booted state whose session is not 9.9's, so both idle files' entries would be re-measured in it to keep the pair one diff apart.
+
+Applied: `c7.variant.yaml`'s comment on `c7-idle`. Open: the probe's venue.
+
+## D166 — the upgrade probe runs in 9.9's session venue, the upgrade 8.7 → 8.8 beside the blanked session (2026-10-07)
+
+By 인지오's decision (Q40), D165's open item. The probe runs on the runner's own system, with systemd as PID 1, in 9.9's session venue: `ubuntu-desktop-minimal` installed from the runner's archive, GDM's automatic login of the measured user, GNOME Shell headless on a virtual monitor, the session idled until the shield rises and the monitor blanks (9.9 method §2, §3).
+
+- **The pending set.** Ubuntu 24.04's glibc stands at `2.39-0ubuntu8.9` in the security and updates pockets (2026-09-04, Launchpad's `glibc` page for noble), so the runner's system has no glibc update pending. Before the first login, every installed binary of the glibc source is taken back to `2.39-0ubuntu8.7` from the snapshot service's archive at D36's T0, 2026-07-27T00:00Z, and the reboot notice the downgrade leaves is removed. The system's sources then become the snapshot at D36's T1, 2026-07-28T00:00Z, and the stock download stage runs against it. The upgrade is then 8.7 → 8.8, the version pair `package-upgrade` measured.
+- **The job** is `apt-daily-upgrade.service` started through PID 1, as its timer starts it, beside the blanked session.
+- **The rest of the system is the runner image's**, not D37's default layer; the probe states it. A dry run shows whether apt accepts the downgrade.
+
+Not taken: D37's snapshot booted as a container (`systemd-nspawn --boot`), which has its own PID 1 and system bus but no GNOME session, PipeWire or notifier; both venues.
+
+## D167 — the upgrade probe's method and tooling (2026-10-07)
+
+D165's and D166's probe written into `campaign/session-upgrade/method.md` before any launch. Taken under 인지오's delegation, on 9.9's method (§2–§4), 9.10's upgrade method (§4's exec rows) and D143's and D145's probe form.
+
+- **The job.** 9.9's full job up to the steady edge, unchanged: the install, the units, the priming login, the measured login, the pin, the two sweeps, the edge check. In place of the steady phase, one recording: 300 s of the blanked session, the upgrade, then 600 s after its end. The lengths are design.
+- **Instruments.** `perf sched record` on every CPU with the fork, exec and exit rows. 9.9's census at the recording's start, at the job's start and end, and at the recording's end. The journal followed. The packages' versions and unattended-upgrades' logs before and after.
+- **The readings** (`session/upgrade_probe.py`):
+  - every process that runs in the recording outside the upgrade's own tree and outside the before-census — its name, its parent and its control group;
+  - each entry instance's CPU and wakes over the 300 s before, over the job and over the 600 s after.
+- **Runs.** A dry run (`upgrade-dry`, session index 90, any model): shortened priming and windows. Then the probe (`upgrade`, index 91, the AMD EPYC 7763). Neither is a repeat; `session/pool.py` takes neither.
+
+Tests: `test_meas_session_upgrade.py`, the readings on a constructed trace. No value changed by this entry.

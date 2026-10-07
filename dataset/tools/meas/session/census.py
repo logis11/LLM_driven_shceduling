@@ -8,6 +8,9 @@
   census.py others <uid>                         the pinned units' processes that are none of the entries', one
                                                  "<manager> <pid>" per line, for the sweep to adopt (changelog D15)
   census.py mask <cpu-list>                      a CPU list as the `ay` bitmask StartTransientUnit takes
+  census.py procs <uid> <label> <out.json>       every process and the instances, read from /proc alone — the one
+                                                 census that reaches no measured process, taken inside a recording
+                                                 (9.10 D167)
 
 Every query here reaches a measured process — `systemctl` pid 1 and the user manager, `loginctl` logind over the
 system bus, the state queries the session bus, gnome-session and GNOME Shell — so the run calls this outside the
@@ -257,6 +260,14 @@ def snapshot(uid, label):
     }
 
 
+def procs_only(uid, label):
+    """snapshot()'s processes and instances with nothing queried: /proc alone, so it may run inside a recording."""
+    procs = processes()
+    inst, other = instances(procs, uid)
+    return {"label": label, "uid": uid, "mono_ns": time.monotonic_ns(), "procs": procs, "instances": inst,
+            "in_unit_other": other, "kthreads": [p["pid"] for p in procs if p["kthread"]]}
+
+
 def others(uid):
     """The processes in a pinned unit that are not its program (changelog D15), by the manager that owns their unit:
     `user` under the measured user's manager, `system` otherwise."""
@@ -295,6 +306,8 @@ def main():
             print(mgr, pid)
     elif a[:1] == ["mask"] and len(a) == 2:
         print(mask(a[1]))
+    elif a[:1] == ["procs"] and len(a) == 4:
+        json.dump(procs_only(int(a[1]), a[2]), open(a[3], "w"), indent=1)
     else:
         raise SystemExit(__doc__)
 
