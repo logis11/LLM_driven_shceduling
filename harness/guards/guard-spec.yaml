@@ -23,13 +23,16 @@
 #
 # provenance_share — 0.5, stated assumption. The guard exists for the case the
 #   research proposal §6.3 names: "a condition that scores well while 70% of its
-#   configurations were fallbacks did not demonstrate anything about recognition".
-#   "Mostly" is read as a majority of the run's time, so the time-weighted share
-#   of `fallback` + `held` intervals (metrics doc §8, fallback share) must stay
-#   below one half. Under `fixed` the whole run is the boot default by
-#   definition, so the guard does not apply. `c6-dual`, whose ground truth is
-#   `ambiguous` and where 100% fallback is the correct outcome, is an exemption
-#   in the RQ0 gate spec.
+#   configurations were fallbacks did not demonstrate anything about recognition";
+#   its appendix B.3 says "most of its configurations were fallbacks". The
+#   proposal counts configurations (§6.3's provenance breakdown, a "fraction of
+#   applied configurations"); this guard, by design, weighs them by time, since a
+#   run's score accrues over its time under each configuration, and counts `held`
+#   with `fallback`. The time-weighted share of `fallback` + `held` intervals
+#   (metrics doc §8, fallback share) must stay below one half. Under `fixed` the
+#   whole run is the boot default by definition, so the guard does not apply.
+#   `c6-dual`, whose ground truth is `ambiguous` and where 100% fallback is the
+#   correct outcome, is an exemption in the RQ0 gate spec.
 #
 # config_age — structural, no number. The failure it catches is attribution
 #   breaking: a config computed from one situation's telemetry taking effect
@@ -110,8 +113,9 @@ guards:
     direction: below
     applies_to: [oracle, random, whitelist, llm_vocab, llm_algo, llm_full]
     grounding: >
-      Stated assumption: "mostly running fallback" (research-proposal §6.3) read as a
-      majority of the run's time; time-weighted fallback + held share below one half.
+      Stated assumption: "most of its configurations were fallbacks" (research
+      proposal §6.3, appendix B.3) read as a majority of the run's time,
+      by design; time-weighted fallback + held share below one half.
 
   - id: config_age
     reads: schedule+log+workload

@@ -135,3 +135,12 @@ By 인지오's decision, scope-card item 9: the four method citations of `docs/h
 Applied: `docs/harness/metrics.md` §8 (two sentences); `docs/references.md` `field-jrssb07` (role, status — §4 and Table 2 re-read 2026-10-07 in a copy byte-identical to S1-09) and `chicco-bmcg20` (role). No method or value changed.
 
 Hands to: **9.14** — the stated caveat on the Layer-1 intervals (narrower than nominal possible at the coreset's file count and unequal file sizes) carried into the RQ0 gate spec's reporting, and whether a small-sample correction is pre-registered.
+
+## D10 — the provenance-share guard: its quotation corrected, its readings stated as design (2026-10-07)
+
+By 인지오's decision, scope-card item 27: `provenance_share` keeps its reading — the time-weighted share of `fallback` + `held` configuration intervals below 0.5, under every condition but `fixed`. Its grounding quoted "mostly running fallback" from the research proposal §6.3, a phrase the proposal does not contain; the proposal says "a condition that scores well while 70% of its configurations were fallbacks did not demonstrate anything about recognition" (`docs/research-proposal.md:718`) and, in appendix B.3, "a condition that scored well while most of its configurations were fallbacks demonstrated nothing about recognition" (`:916`).
+
+- **Two readings, the guard's own, now stated as design:** the proposal counts configurations — its provenance breakdown is the "fraction of applied configurations that were unmodified, clamped, held, or fallback" (`:714`) — and the guard weighs them by time, a run's score accruing over its time under each configuration; and the proposal names fallbacks, the guard counting `held` with them. The harness computes both the count-weighted and the time-weighted shares (`docs/harness/metrics.md` §8).
+- **Not taken:** the count-weighted `fallback` share alone (B), which passes a run that spent most of its time under a few long fallbacks; both readings at once (C), a second way to void the verdict for no further purpose.
+
+Applied: `harness/guards/guard-spec.yaml` — the `provenance_share` grounding and header comment. `guards_lint.py` clean; `test_guards.py` 26 passed. The guard spec's hash moves again under the RQ0 gate spec's pin (D7), 9.14's re-pin.
