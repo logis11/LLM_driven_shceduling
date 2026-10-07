@@ -44,16 +44,16 @@
 #   metrics doc §8 measure time in force, a different quantity, and are reported
 #   beside the score, not guarded.
 #
-# starvation_floor — 1 000 000 µs, stated assumption. The executor's starvation
-#   net promises every ready task progress within a bounded window regardless of
-#   configuration (docs/memos/2026-09-09-batch-class-rule-for-the-simulator.md);
-#   the window's length is not yet stated by the simulator's owner. One second of
-#   virtual time is an order of magnitude above `T_interaction` (metrics doc §10),
-#   so no interactive term's own latency can trip it, and any wait that long in a
-#   segment of tens of seconds is a broken net, not a configuration. Superseded by
-#   the executor's declared window when 인경민 states it (changelog entry). Read as
-#   each task's maximum `ready_wait` over any cause on the whole file (metrics doc
-#   §6.1, starvation). Applies under every condition, `fixed` included.
+# starvation_floor — 30 000 000 µs, sched_ext's watchdog. The kernel ejects a BPF
+#   scheduler, the kind of scheduler the daemon drives, when a runnable task waits
+#   longer than its `timeout_ms`, which "may not exceed the default timeout of 30
+#   seconds" and defaults to it (`kernel/sched/ext.c` at v6.17, `linux-sched-ext`).
+#   A run in which a task waits longer describes a configuration a real deployment
+#   could not keep running; a shorter wait is damage the scored terms read. The
+#   executor has no starvation net of its own (simulator memo 2026-10-01 §6). Read
+#   as each task's maximum `ready_wait` over any cause on the whole file (metrics
+#   doc §6.1, starvation), idle-class tasks included, as the watchdog covers every
+#   task it schedules. Applies under every condition, `fixed` included.
 #
 # determinism — structural. Same run file + same config schedule ⇒ byte-identical
 #   trace (docs/simulator/simulator-guide.md, non-negotiable 4; data-contracts §9).
@@ -126,14 +126,15 @@ guards:
 
   - id: starvation_floor
     reads: aggregates
-    threshold: 1000000
+    threshold: 30000000
     unit: us
     direction: at_or_below
     applies_to: all
     grounding: >
-      Stated assumption pending the executor's declared window: one second of virtual
-      time, an order of magnitude above T_interaction; per task, max ready_wait over
-      any cause on the whole file (metrics doc §6.1).
+      sched_ext's watchdog: a runnable task left longer than timeout_ms — at most and
+      by default 30 s — ejects the BPF scheduler (kernel/sched/ext.c:749-757,
+      3645-3662, 5649-5654 at v6.17); per task, max ready_wait over any cause on the
+      whole file (metrics doc §6.1).
 
   - id: determinism
     reads: records+rerun_trace

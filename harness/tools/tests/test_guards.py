@@ -122,6 +122,18 @@ def test_every_run_gets_one_row_per_guard(tmp_path, spec):
     assert [r["guard"] for r in rows] == list(GUARDS)
 
 
+def test_starvation_fails_past_its_threshold(tmp_path, spec):
+    """The fixture's `batch` waits 1.95 s, inside the 30 s watchdog (9.11 D7); the
+    same run read against a 1 s threshold fails, naming the task."""
+    run, aggs = _records(tmp_path)
+    tight = copy.deepcopy(spec)
+    for g in tight["guards"]:
+        if g["id"] == "starvation_floor":
+            g["threshold"] = 1000000
+    starve = _row(evaluate([run], tight, aggs), "starvation_floor")
+    assert starve["result"] == "fail" and starve["reason"].startswith("batch:")
+
+
 def test_the_rules_show_in_the_rows(tmp_path, spec):
     run, aggs = _records(tmp_path)
     rows = evaluate([run], spec, aggs)
@@ -131,8 +143,8 @@ def test_the_rules_show_in_the_rows(tmp_path, spec):
     assert age["result"] == "fail" and age["value"] == "40000.000000000000"
     assert "80000" in age["reason"] and "query 1" in age["reason"]
     starve = _row(rows, "starvation_floor")
-    assert starve["result"] == "fail" and starve["reason"].startswith("batch:")
-    assert starve["threshold"] == "1000000.000000000000"
+    assert starve["result"] == "pass" and starve["value"] == "1950000.000000000000"
+    assert starve["threshold"] == "30000000.000000000000"
     det = _row(rows, "determinism")
     assert det["result"] == "pass"
     assert det["partner"] == hashlib.sha256((MG / "trace.jsonl").read_bytes()).hexdigest()
@@ -292,7 +304,7 @@ def test_cli_reproduces_the_fixture_and_exits_2_on_a_fail(tmp_path):
                         "--out", str(out)], capture_output=True, text=True)
     assert r.returncode == 2, r.stderr
     assert out.read_bytes() == (MG / "expected-guards.csv").read_bytes()
-    assert "2 fail" in r.stdout
+    assert "1 fail" in r.stdout
 
 
 def test_lint_cli_is_clean_on_the_committed_spec():

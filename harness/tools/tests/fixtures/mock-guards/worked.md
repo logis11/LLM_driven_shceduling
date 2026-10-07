@@ -70,7 +70,7 @@ The daemon queries at every pinned set change: 0 (`code`), 50000 (`python3`), 10
 |---|---|---|---|---|
 | `provenance_share` | 11200 / 3000000 = 0.003733333333 | 0.5 | pass | `fallback` 600 + `held` 10600, time-weighted |
 | `config_age` | 40000 (the largest age: entries 1–3 aged 600, 40000, 600; entry 4 skipped, no covering segment) | — | **fail** | entry 2 stamped at 90000, after segment 1 ended at 80000 |
-| `starvation_floor` | 1950000 (`batch`) | 1000000 | **fail** | the lane never yielded to `batch` under FIFO for 1.95 s |
+| `starvation_floor` | 1950000 (`batch`) | 30000000 | pass | the lane never yielded to `batch` under FIFO for 1.95 s, below sched_ext's 30 s watchdog |
 | `determinism` | — (partner: the trace's SHA-256) | — | pass | the rerun is the same file in the test |
 | `utilisation_sanity` | 2508000 / 3000000 = 0.836 | 1.0 | pass | |
 | `tick_count` | 0 messages | — | pass | no chains; two wake lines for two wake events; config lines match the schedule |
