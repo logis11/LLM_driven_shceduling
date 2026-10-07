@@ -124,3 +124,14 @@ By 인지오's decision, scope-card items 13–17 and 24: the four MLFQ values s
 - "OSTEP §8's worked example, whole" → the values chapter 8's worked examples use: three queues and a 10 ms top slice from Example 1 (p. 4), doubling from Figure 8.6 (p. 9), the boost from Figure 8.4 (pp. 6–7) — three examples of one chapter, not one example.
 
 Applied: `docs/recognition-vocabulary.md` §2 (the lead sentence and the `num_queues` row); `harness/experiments/rq0-gate.yaml`, the primary point's reason; `docs/references.md` `ostep` role and status. Memo 2026-09-11 keeps its wording as a point-in-time record. Values changed: none.
+
+## D9 — the §8 statistics citations: two scope statements corrected (2026-10-07)
+
+By 인지오's decision, scope-card item 9: the four method citations of `docs/harness/metrics.md` §8 stand — balanced accuracy defined on a two-by-two matrix in a binary setting (`brodersen-icpr10`, S1-04, p. 3122); the coefficient's all-four-cells property (`chicco-bmcg20`, S1-08); the cluster bootstrap's consistency in the number of clusters (`field-jrssb07`, S1-09, Corollary 4); pairing, with the difference of two proportions and the resampled t test ruled out (`dietterich-neco98`, S1-06, §3.2 and abstract). Two scope statements change, wording only:
+
+- **The cluster bootstrap's small-sample behaviour.** "anti-conservative at very few" → the paper's own: its §4 simulations at g = 5 and g = 15 clusters of m = 4 (Table 2) find that "the cluster bootstrap consistently underestimates the bootstrap variance for all the statistics", and its consistency result is for a balanced one-way array, clusters of equal size (§2). The workload files hold unequal numbers of query points, so a Layer-1 interval may be narrower than its nominal level. The `field-jrssb07` role line's "Our Layer-1 set has roughly forty-nine files, well clear of that regime" is removed: the paper reports no simulation above 15 clusters, so no source places 49 clear of it.
+- **The coefficient's undefined case.** Chicco & Jurman: "undefined when a whole row or column of M is zero" (Methods); the grader already returns undefined then (`harness/tools/harness/grader.py:349–372`), now stated in §8 and in the role line.
+
+Applied: `docs/harness/metrics.md` §8 (two sentences); `docs/references.md` `field-jrssb07` (role, status — §4 and Table 2 re-read 2026-10-07 in a copy byte-identical to S1-09) and `chicco-bmcg20` (role). No method or value changed.
+
+Hands to: **9.14** — the stated caveat on the Layer-1 intervals (narrower than nominal possible at the coreset's file count and unequal file sizes) carried into the RQ0 gate spec's reporting, and whether a small-sample correction is pre-registered.
