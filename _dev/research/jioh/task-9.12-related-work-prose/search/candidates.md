@@ -1,0 +1,100 @@
+# Task 9.12 — candidates per scope-card item
+
+This is the stage-2 result. It lists each item of `../scope-card.md` with the candidates the four class records found and what each covers, and it lists what no class found. The four records are `S1-literature.md` (29 candidates, S1-01…S1-30, no S1-22), `S2-project-docs.md` (44, S2-01…S2-44), `S3-traces-datasets.md` (17, S3-01…S3-18, no S3-14) and `S4-ci-observability.md` (10, S4-01…S4-10, plus a labelled sandbox illustration). Candidate ids are the records' own. The passages, copy identification and SHA-256 are in the records; this file only routes them to the card's items. Nothing here judges a repository sentence. That comparison is stage 3's.
+
+## Observations that exist
+
+The table lists observations (a population, trace or run with numbers), as distinct from documentation, source code and guidelines.
+
+| Id | What | Machine / subject / window | Kind of data |
+|---|---|---|---|
+| S1-01 (ghOSt, SOSP 2021) | CFS context switch against ghOSt's message and schedule costs | Xeon Platinum 8173M, Linux 4.15 (per the paper) | 599 ns per CFS context switch (Table 3) |
+| S1-21 (Li, Ding & Shen, ExpCS 2007) | context-switch cost, direct and with cache effects | IBM eServer, dual 2.0 GHz Pentium Xeon, Linux 2.6.17; 20 000 switches | 3.8 µs direct; 4.2 µs to over 1 000 µs with cache effects |
+| S1-23 (Becker & Chakraborty, arXiv 1811.01412) | context-switch cost in cycles | Sandy Bridge i7-2640M @ 2.8 GHz, Linux 3.16.51 | at least 3 400 cycles, typically about 30 000 |
+| S1-11 (ASA, arXiv 2511.11628) | recognition accuracy of a behavioural (XGBoost) workload classifier | 28 scenarios on 10 VMs | 96.83 %, and 99.19 % after fine-tuning |
+| S1-12 (Agentic OS v1–v4) | kernel build and schbench speedups; workload classification by Claude Opus / Sonnet | 86-core Xeon 6787P (Linux 6.14) and 8-core Core Ultra 7 258V (6.13); 3 runs | 1.79× over EEVDF; Opus classified 8 of 8 workloads, Sonnet failed |
+| S1-19 (AKTS, arXiv 2609.12276, 2026-09) | small-LLM classification of telemetry into a policy index | A100 + EPYC 7J13, Linux 6.14; Qwen2.5 0.5/1.5/3B; n = 30–48 | 20/40 correct (chance); 33 % invalid outputs (0.5B); median 13.5 ms per decision |
+| S1-24 (MELT), S1-29 (llama.cpp quantization study) | on-device / server LLM latency | phones and edge boards; a server Xeon | no consumer x86 end-to-end latency for a short output |
+| S1-25 (Atil et al.) | output variance at temperature 0 with a fixed seed | hosted models, named tasks | accuracy varies by up to 15 % |
+| S3-05 (LocalScore records) | local LLM latency per run | per-run machines named; Llama 3.1 8B Q4_K_M; Qwen2.5-3B on GTX 1070 | median TTFT 40.8 s on CPU and 1.6 s on GPU (long prompts); one run 828 ms TTFT, 53.9 tok/s |
+| S3-04 (HF LLM-Perf) | prefill and decode for 8B AWQ | Tesla T4 only | prefill 0.37 s, 31.2 tok/s |
+| S3-18 (Artificial Analysis) | hosted-API latency | Groq API, ~10k-token prompt | TTFT 0.84 s |
+| S3-07 (Perfetto example trace) | sched_switch rate and run-slice length | Android, Linux 4.4.177, 8 CPUs, 14.73 s; device model not named | 22 022 switches/s in total, 1 826–4 089 per CPU, median run slice 56 µs |
+| S3-09 (lmbench `ctx.tbl`, 1996) | context-switch latency table | about 30 mid-1990s systems named only by OS/architecture string | historical values |
+| S3-01 (Debian Code Search) | declared idle, nice or I/O classes in Debian units and C sources | Debian unstable, query date 2026-10-07 | 1 593 source packages ship a `[Service]` unit; `CPUSchedulingPolicy=idle` 10, `Nice=19` 26, `IOSchedulingClass=idle` 20, any `Nice=` 48, any `IOSchedulingClass=` 40; `SCHED_IDLE` in C in 93 packages |
+| S3-03 (ananicy-rules @ `03ef03fb`) | catalogue entries per type | 361 files, 15 813 entries | Game 13 528, BG_CPUIO 1 615, Service 194; no `updatedb` or `tracker` entry |
+| S3-11 (WoWAH) | game session duration | one WoW realm, 91 065 avatars | mean 2.8 h, median 1.8 h, p95 5.5 h |
+| S3-12 (SWELL-KW), S3-16 (BEHACOM) | foreground-application changes per hour | 25 participants in a lab; 12 users on their own PCs | about 178/h neutral, 262/h with interruptions, 5.7/h relaxing; 0–50/h per user, about 10/h pooled |
+| Sandbox (S4, not a runner) | context switches per second; a pinned pipe ping-pong | this cloud container: 4 × Xeon 2.10 GHz, kernel 6.18.44; 5 s window, 3 runs | ≈1 143 switches/s near idle; 3.09–3.13 µs per round trip (≈1.55 µs per switch plus syscalls) |
+
+Nothing was observed on a GitHub Actions runner (S4, Not found). No observation covers a desktop's scheduling-decision rate with the machine named, a Linux pick-next cost, or a consumer x86 end-to-end latency for a short structured LLM output.
+
+## Per item
+
+### A. `related-work.md`
+
+- **1 ghOSt's motivation.** S1-01: kernel rollouts are "not well-tolerated below an O(month) granularity", and a crashed agent makes the system "fall back to the default scheduler, such as CFS". The ghOSt class sits below CFS, and a watchdog destroys an enclave after a user-configurable number of milliseconds.
+- **2 sched_ext's safety.** S2-01 (v6.12) and S2-02 (mainline `7b63ef2d`, 7.3-rc6) both say the default scheduler is restored "anytime an error is detected, a runnable task stalls, or on invoking … SysRq-S". The target is CFS at v6.12 and "the fair-class scheduler" at mainline. Neither version states the kernel version it was merged in. The verifier appears only in a comment in the example code. S2-09 says sched_ext is upstream "starting from version 6.12". By contrast, S1-12 v1 p. 4 itself says SchedCP uses "the kernel's standard eBPF verifier to guarantee fundamental memory safety and termination". That is a paper's claim, not the kernel document's.
+- **3 production schedulers.** S2-09 (scx `v1.1.3`) ships 15 Rust schedulers and states "Meta is in the process of mass production deployment" (of sched_ext). It lists install routes for six distributions. No class found a default-enable statement by a vendor for any scx scheduler other than item 7's SteamOS line.
+- **4 MLFQ and EEVDF heuristics.** S1-02 (OSTEP v1.10) gives Rules 4a/4b and the revised Rule 4, which demotes on the allotment whether the task gives up the CPU or not, and the gaming attack. S1-04 (Corbató): a program not done within 2^ℓ quanta drops to level ℓ+1, dormant programs also enter ℓ+1, and the classification "is entirely automatic". S1-05 (EEVDF TR): a lag bound of −q < lag < q. S2-03 and S2-04 are the kernel's EEVDF and CFS documents on sleeping tasks and lag.
+- **5 scx_lavd's latency criticality and origin.** S2-09: `lat_cri.bpf.c` (Copyright Valve) computes it from wait and wake frequency, inverse runtime, a weight boost and waker/wakee propagation, quoted at file:line, with no name matching. The talk and its reports are S2-10 (OSS NA 2024 slides, per slide), S2-12 (LWN 991205) and S2-13 (LWN 1051430), plus S2-14 (Igalia blog).
+- **6, 47 the ML-training / indexer pair.** S2-24 (LocalSearch sets `SCHED_IDLE`, idle I/O and nice 19 in its source), S2-25 (Baloo: `CPUWeight=1`, `IOWeight=1`, `SCHED_BATCH`/`SCHED_IDLE`), S3-02 per tool. No class covers an observed desktop ML training workload. The 9.6 D32 and 9.10 restatement stand as the input.
+- **7 "Valve ships it".** S2-15 (Valve, the SteamOS 3.8 note through the Steam news API, stable 2026-06-18, first seen 2026-03-19): "Initial support for LAVD CPU scheduler via `steamosctl set-cpu-scheduler lavd`". It does not say LAVD is the default. S2-12 (Corbet, 2024-09-26): "headed for shipment in Steam Deck". On Meta: S2-11 (LPC 2025 abstract #2099) calls LAVD a "candidate" default fleet scheduler, and S2-13 (Edge, 2026-01-07) speaks of "adapting LAVD to be the default scheduler for Meta's production fleet".
+- **8 Decima, FIRM, Park.** S1-06 (Decima learns workload-specific policies, generalizes poorly to an "anti-skewed" workload, and trains for at least 50 000 iterations), S1-07 (FIRM uses transfer learning for "rapid (re)training"), S1-08 (Park: the simulation-to-reality gap). None of them speaks of retraining for new hardware.
+- **9 limits "documented by the LLM lineage".** In S1-12, v1 cites Decima and FIRM for RL schedulers that "cannot grasp the semantic intent". v2–v4 add "require extensive training per workload type … only tweak configurations after engineers have already defined the entire problem space: selecting features, specifying knobs, and writing objective functions", citing Decima, FIRM, Park and Zhang et al. (TPDS 2024). The "show no improvement … hardware-specific retraining" sentence cites an LWN article (Corbet, July 2025) in every version.
+- **10, 11 ASA.** S1-11 uses an XGBoost classifier over behavioural features, not an LLM, with time-weighted voting. Its mapping table is built per machine, the recognition model needs no retraining, and it has no venue.
+- **12 Kgent.** S1-13 is read through the KEN repository. The ACM DL page and PDF answered 403.
+- **13, 15 SchedCP.** S1-12 (v1–v4): the "semantic gap" sentence is identical in every version. The tiered Workload Analysis Engine uses perf and strace in v1/v2 and perf and top in v3/v4. The v3/v4 Observation Agent starts "from process name and commands". The research questions are RQ1–RQ4, none on recognition accuracy, though the paper reports that Opus classified 8 of 8 workloads. The 1.79× is kernel compilation over EEVDF. The venue is the NeurIPS 2025 ML for Systems workshop (journal-ref "MLforSystem 2025").
+- **14 TuneAgent and HPC-LLM.** S1-14 says TuneAgent v2 appeared at KDD 2026. S1-15 (Jadhav, arXiv 2506.02025) and S1-16 (Sharma & Kunkel, arXiv 2511.11612) are the two HPC candidates.
+- **16, 21, 37 Game Mode.** S2-16 (Microsoft Learn): Game Mode "works by default for most Windows games", and the app "must be in the foreground and have focus". The state is a boolean. Nothing is said about how a game is recognized or about Windows Update. S2-17 (Xbox Support) was not obtained because the page is script-only. S2-18 and S2-20 (Apple): Game Mode turns on in full screen and gives "highest priority access to your CPU and GPU". It is a per-game on/off switch, and apps opt in with `LSSupportsGameMode`. S2-19 (Feral): the game requests the mode itself or is launched through `gamemoderun`, with an optional user whitelist/blacklist and no built-in list. None of them mentions audio workstations.
+- **17, 18 ananicy.** S2-30 (upstream, archived), S2-31 (ananicy-cpp) and S2-32/S3-03 (CachyOS rules) all match on process name. The catalogue has 15 813 entries at `03ef03fb`.
+- **19 "first … at the recognition layer".** S1-11 (ASA, 96.83 %), S1-12 (Opus 8/8, reported but not a research question), S1-19 (AKTS 2026: LLM classification of telemetry at chance), S1-20 (LumOS, NeurIPS 2025 MLForSys, abstract only). S1-17 (TuxBot) and S1-18 (Vulcan, EuroSys 2027 per S1) are adjacent.
+- **20 citation forms.** S1-05 (EEVDF TR-95-22, 1995), S1-12 (venue), S1-14 (KDD 2026), S1-11 (no venue), S2-09 (`v1.1.3`), S3-03 (catalogue commit `03ef03fb`).
+
+### B. `research-proposal.md`
+
+- **22, 39 Linux policies.** S2-07 `sched(7)`, S2-08 `sched_setscheduler(2)`, S2-05 `sched-deadline.rst`, S2-06 `sched-rt-group.rst`, S2-03/S2-04 (the default class is EEVDF).
+- **23, 46 sched_ext.** S2-01, S2-02, S2-09.
+- **24 macOS QoS.** S2-21 (Apple Energy Efficiency Guide: the four classes and who declares them).
+- **25 Feral GameMode.** S2-19.
+- **26 declared classes and `updatedb`.** S2-22 (plocate `Nice=19`, `IOSchedulingClass=idle`) and S2-23 (Debian's mlocate unit adds `IOSchedulingPriority=7`). S3-02: findutils' unit does the same. S2-24, S2-25, S2-27 (Déjà Dup wraps its jobs in `chrt --idle` / `ionice -c3`). S2-26 (ClamAV units set nothing). S2-28 (borg ships no unit; restic's FAQ shows users how to raise its priority). S3-01 gives the counts over Debian. For over-claiming priority: only S2-29 (the rtkit README's limits). No documented case was found.
+- **27 "Linux, macOS, Windows ship MLFQ".** S1-02 names "BSD UNIX derivatives…, Solaris…, Windows NT" as using forms of MLFQ and never mentions Linux. S2-03/S2-04 describe Linux's default class as EEVDF/CFS. No class read a macOS scheduler document.
+- **28 kernel quantities.** Context switch: S1-01 (599 ns), S1-21 (3.8 µs direct; up to over 1 000 µs with cache effects), S1-23 (3 400 to ~30 000 cycles), S3-09 (1996), and the sandbox illustration. Switch rate: S3-07 (Android, 1 826–4 089 per CPU per second). Time slices: S2-03/S2-04 and 9.11's reads. Scheduling-decision cost: none. S4 gives the method for each on a runner (S4-03–S4-07, S4-10).
+- **29, 30 local inference and constrained decoding.** S3-05, S3-04, S3-18 and S1-24/S1-29 give latency. None is a short structured output on consumer x86 end to end. S1-19 gives 13.5 ms for a single-digit output on an A100. For decoding: S2-33 (GBNF: the root rule must match "the entire output"; unsupported JSON-schema features "are skipped silently"), S2-34 (vLLM v0.31.0: output "will follow the JSON schema") and S2-35 (Ollama: "will always be a well-formed JSON object"). S4-08 is the runner method.
+- **31 SJF, slices per level.** S1-03 (SJF is optimal "given our assumptions") and S1-02 (lower priority, longer quanta).
+- **33, 45 own-measurement claims.** Not a stage-2 search object. They are read against 9.6 and 9.7's measured values in stage 3.
+- **34 Steam download "user-initiated".** No new candidate. The input is 9.10 D170's restatement of `steam-downloads`.
+- **35 OBS and other world-knowledge examples.** No candidate was searched (not in the topics).
+- **36 media deadlines.** S2-36 (PipeWire 1.6.9: 48 000 Hz, quantum 1024, minimum 32), S2-37 (jackd v1.9.22: period 1024, rate 48 000, 2 periods), S2-38 (Ardour: a latency target under 5 ms, no default buffer), S2-39 (Steam Deck LCD up to 60 Hz, adjustable 40–60; OLED up to 90 Hz), S1-30 (Wessel & Wright: ≤10 ms latency, ≤1 ms jitter).
+- **38 lottery scheduling.** S1-09: "the conventional problem of starvation does not exist"; selection is O(n) with a list and O(lg n) with a tree.
+- **40 EDF optimality.** S1-10: Theorem 7, feasible if and only if ΣCᵢ/Tᵢ ≤ 1, under (A1)–(A5).
+- **42 session length.** S3-11 (WoW, median 1.8 h). Nothing for PC gaming generally (S3-15 and S3-17 do not cover it). For how often the set of running applications changes, there is only foreground-switch rates (S3-12, S3-16).
+- **43, 44 reasoning-first output and determinism.** S1-26 (chain-of-thought helps only at about 100B parameters), S1-28 (Sprague: when chain-of-thought helps), S1-27 (Tam: JSON mode hurts reasoning but helps classification), S1-25 (Atil: up to 15 % variation at temperature 0 with a fixed seed).
+- **41 (§6.3 70 %), 32 (illustration).** Not searched. These are conventions.
+
+### C–E. Registry entries, the guidebook and the hand-offs
+
+- **48 TuxBot, 49 Vulcan.** S1-17 and S1-18 read the full bodies. S1 records Vulcan's venue as EuroSys 2027.
+- **50 TuneAgent.** S1-14 (KDD 2026). **51 Jadhav.** S1-15, with the alternate S1-16. **52 ASA.** S1-11. **53 SchedCP.** S1-12, and successor candidates S1-19 and S1-20. **54 Kgent.** S1-13 (ACM 403). **55 ghOSt, Decima, FIRM, Park, EEVDF, Corbató.** S1-01, S1-06–S1-08, S1-05, S1-04, now with copies and hashes.
+- **56–57 scx, sched-ext docs.** S2-09, S2-01, S2-02. **58 LAVD and LWN.** S2-10–S2-15. **59 Game Mode, ananicy.** S2-16–S2-20, S2-30–S2-32. The Windows Update question is still unread first-hand: S2-17 was script-only.
+- **60 vol-02.** The quoted entries are now read in S1 and S2, so stage 3 can match each chapter's quotations against them.
+- **70 SYSmark 2011.** S2-40 (AMD press release, 2011-06-21: AMD "does not believe SM2012 achieves this objective"), S2-41 (AnandTech via Wayback: the dispute was over "weighting of scores"; Nvidia "No reason was given"; VIA: the benchmarks "do not accurately reflect real world PC usage"; BAPCo's response), S2-42 (Tom's Hardware quoting Dessau's blog, "favor our competitor's designs"), S2-43 (APH quoting X-bit Labs), S2-44 (SemiAccurate).
+- **61–69.** These are pass-through items. They had no search.
+
+## Not found, across classes
+
+- **T2:** that SteamOS or Valve ships LAVD as the default (S2-15 says "initial support" and is opt-in by command); that Meta has adopted it, as distinct from a "candidate" or "adapting".
+- **T5:** a published LLM-reading-process-names recognition study other than SchedCP's 8/8 workloads and AKTS's telemetry result; LumOS's full text (OpenReview 403).
+- **T6:** any Microsoft document on how a game is recognized or on Windows Update deferral (the Xbox article is script-only and its content API failed: 502/404); a built-in executable list in any of the three game modes; any game mode covering DAWs.
+- **T7:** a survey of how often applications declare a scheduling class beyond S3-01's Debian counts; a documented case of applications over-claiming priority; Nvidia's own stated reason for leaving BAPCo (T14); Dessau's original blog post (T14).
+- **T10:** Linux pick-next cost; scheduling decisions per second on a desktop or server with the machine named; any value on a runner.
+- **T11:** end-to-end latency of a short structured output from a 3–8B quantized model on consumer x86; any value on a runner.
+- **T12:** PC gaming session length beyond one MMO; the rate at which the set of running applications changes (only foreground switches were found).
+- **T13:** a DAW's default buffer size.
+
+Reachability across readers:
+- HTTP 403: ACM DL (Kgent; David et al. 2007), OpenReview PDF, ossna2024.sched.com, guru3d, openbenchmarking.org and phoronix.com (Cloudflare), github.com discussions, api.github.com, the Debian Code Search API (the no-JS HTML page worked), and runner-images issue #4974.
+- Proxy 502: git.sesse.net and the Xbox content API host. The Xbox content API itself returned 404.
+- Other errors: Rochester switch.pdf 404; WoWAH home page 500 (the WPI mirror worked); eprints.soton 401; archive.org availability API 429; salsa (plocate) needs a login; semiaccurate.com has a TLS name mismatch (not bypassed); lmbench.org and the mmnet download host gave no connection.
+- Paywalled: Statista.
+- Not downloaded because of size: wowah.rar (578 MB) and 0_SWELL.zip (7.5 GB).
