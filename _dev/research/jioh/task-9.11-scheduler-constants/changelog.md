@@ -39,4 +39,6 @@ Verification: `harness/tools/tests/test_boot_defaults.py` passes; `experiment_li
 
 Compiled effect: none on any compiled file. The sweep's `fixed` re-run under this point is 9.14's and the RQ0 run's.
 
+Raw records: by 인지오's decision, release `meas-ci-sched-2026-10-07` at `e82356d3`, run 37601932147's three artifacts as `meas-sched-<artifact>-37601932147.zip`; Actions artifacts expire after 90 days.
+
 Hands to: 9.14 — the RQ0 gate spec's re-pin carries the renamed file; the second reason on this point (the 831 µs frame slack) is read there against the rebuilt files.
