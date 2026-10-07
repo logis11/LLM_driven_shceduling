@@ -42,3 +42,29 @@ Compiled effect: none on any compiled file. The sweep's `fixed` re-run under thi
 Raw records: by 인지오's decision, release `meas-ci-sched-2026-10-07` at `e82356d3`, run 37601932147's three artifacts as `meas-sched-<artifact>-37601932147.zip`; Actions artifacts expire after 90 days.
 
 Hands to: 9.14 — the RQ0 gate spec's re-pin carries the renamed file; the second reason on this point (the 831 µs frame slack) is read there against the rebuilt files.
+
+## D3 — TIMER skips missed ticks on its grid; a skipped tick is a missed job (2026-10-07)
+
+By 인지오's decision, scope-card items 11 and 39 (the 9.5 D11 hand-off; C-rt-app-2): a TIMER task that reaches its TIMER after one or more ticks of its grid have passed no longer runs every overdue tick back to back. It replaces the backlog rule of `docs/simulator/interpretation-contract.md:31`, which `simulator/simulator-guide.md` restated on 2026-10-06 (`5479dcab`) as a measurement choice that overstates a configuration's damage.
+
+**The rule.** A TIMER task with period P has its grid t₀ + k·P, as now. When it reaches a TIMER at time `now`:
+- if its next unconsumed tick is later than `now`, it blocks until that tick — unchanged;
+- otherwise, with m the last grid index whose tick is at or before `now`, it consumes tick m at once: job m is released at `now`, due at tick m + 1. Every unconsumed tick before m is skipped — no work runs for it, and it is a job that missed its deadline. Its next tick is m + 1.
+
+One overdue tick is consumed at once, as before; only ticks beyond it are skipped, and the job run late is the current tick's, not the oldest's. Skipping happens only at a TIMER, so work already started always finishes — a RUN's demand still survives preemption. A chain skips at its head only, so no frame is dropped mid-chain. A task's executed CPU now depends on the scheduler; its offered load does not.
+
+**Grounds** — every program and periodic framework found skips; only rt-app's non-default mode catches up (each re-read on 2026-10-07 in a copy byte-identical to the search record's):
+- interbench (S2-15, `interbench.c:398–436` at `e612a65`): a missed period is counted as missed deadlines and "deadline += intervals * interval_usecs" moves it past the current time; late before its burn, the burn is bypassed.
+- ROS 2's executor (S1-16, Teper et al., arXiv:2408.03696v1, §II): "the next activation time point is determined by increasing the current activation time by the minimal multiple of the timer period, such that it is greater than the current time. As a result, the executor may skip timer jobs".
+- Lipari & Palopoli's reference periodic thread for Linux (S1-15, arXiv:1512.01978v1, Listing 2): `while (timespec_cmp (&now, &next) > 0) { // Skip late instances`.
+- rt-app (S2-14, `tutorial.txt:507–509`, `rt-app.c:589–597` at `d6f8be4`): the default "relative" mode re-anchors the next activation to now on an overrun; only "absolute" mode keeps the grid and catches up.
+- The programs the TIMER tasks stand for (`docs/references.md`, verified 2026-10-06): mpv drops late video frames by default (`mpv`); Chromium's fake audio worker runs a late callback once and moves to "the next nearest ontime interval" (`chromium`); a FIFO-presented frame takes the next vertical blank (`vulkan`); GStreamer's video sinks drop frames more than 5 ms late (S2-17, `gstvideosink.c:177`). A fixed-timestep loop catches up its simulation steps, capped, and renders once per loop (`fiedler-gaffer04`).
+
+**The scored terms it moves.** `job` miss rate is 26 of the scoring spec's 78 terms. Under backlog a stall's overdue ticks run back to back after it, each late, the cascade longest for a task whose run fills most of its period; a chain needing more than the lane (`c3-evening`'s game segment at `lane_share` 1.45, 인경민's 2026-10-06 note) never drains, so nearly every frame misses under every condition. Under the rule above the miss rate is the share of ticks not served on time, bounded under overload and read by policy.
+
+Hands to:
+- **인경민** (the simulator's owner): `simulator/src/sim.cpp`'s TIMER (step K, "TIMER + backlog"), the `deadline` line per job including the skipped ones, and the contract's TIMER row (`interpretation-contract.md:31`, ratified) — his note `simulator/notes/note-for-jioh-timer-backlog-vs-drop.md` (2026-09-29) is answered by this entry.
+- **9.14:** `docs/harness/metrics.md` §6.2 — the consumed tick's index from its `ready(cause = timer_tick)` line, the latest tick at or before it; the skipped ticks counted as missed jobs; the chain guard's count the consumed ticks — and `harness/tools/harness/primitives.py`'s `job`; the `mock-media` fixture, which pins backlog ("A simulator that skipped backlogged ticks would show four"); the scoring spec's no-headroom notes on the periodic files; whether `c3-evening`'s `job` term stays scored (from 인경민's 2026-10-06 note); the RQ0 gate spec's `c7-gaming` note ("frames miss under every row").
+- **9.15:** `docs/simulator/simulator-guide.md` (the TIMER section, its worked example, the glossary's "backlog (of a TIMER)"), `docs/workload/coreset-guide.md` (the TIMER row; `c1-media`, `c3-evening`), `docs/guidebook/vol-06-archetypes-and-grounding.md` (the TIMER passage), `docs/harness/harness-and-records-guide.md` ch. 11 (the backlog mock); `docs/references.md`'s `mpv` and `chromium` role lines ("for the TIMER backlog statement"), `rt-app`'s, and entries for Teper et al. and Lipari & Palopoli where that prose cites them. Each after the simulator implements the rule.
+
+Compiled effect: none on any compiled file — the TIMER op and its period are unchanged; the rule is the simulator's.
