@@ -157,3 +157,18 @@ By 인지오's decision, scope-card item 10: `docs/harness/metrics.md` §11 item
 Applied: `docs/harness/metrics.md` §11 — the lead paragraph and items 1–4.
 
 Hands to: **9.13** — a linter invariant that every task carrying a TIMER begins its program with it, so t₀ and the arrival cannot come apart silently; **인경민** — item 1's zero-wait line, already his first item; **9.14** — the harness reader's `t₀` (`harness/tools/harness/reader.py`, `_task_info`, the arrival) checked against the invariant.
+
+## D12 — the precedent registry entries corrected (2026-10-07)
+
+By 인지오's decision, scope-card items 12 and 35–37 (C-schbench-1, -2; C-hackbench-1, -2; C-stress-ng-1; C-corbet-1, -2; C-scx-1; C-interbench-11): the `docs/references.md` entries cited as precedents, none grounding a dataset value, brought to their sources.
+
+- **`schbench`** (S2-18, S2-19): cite → git.kernel.org `mason/schbench`, tag `v1.0` (commit `ab22f3f8`, 2023-04-17), its only tag, the GitHub repository continuing the history without tags; © 2016 Facebook, GPLv2. Role → what it prints: at v1.0 wakeup and request latency at p50/p90/p99/p99.9, p99 marked, and RPS at p20/p50/p90 (`schbench.c:101–104`, `:1275–1285`); the 2016 first version p50/75/90/95/99/99.5/99.9. SchedCP cites it at kernel.googlesource.com, not by the GitHub URL (2026-09-13 verification, `reads/R03-build-papers.md:218–219`).
+- **`hackbench`** (S2-20): GPL-2.0 → GPL-2.0-or-later (the source headers; 2026-09-13 verification, `compare/K1.md`); pinned at tag `v2.11` (commit `62da2bef`), the one read, in place of "latest v2.10"; role "many-task IPC burst model" → existence only, a scheduler benchmark and stress test cited for the contrast with `schbench`, grounding no archetype (memo 2026-09-13 B7: no IPC archetype exists).
+- **`stress-ng`** (S2-21): GPL-2.0 → GPL-2.0-or-later; pinned at commit `3ac9d7a8`; role "fallback archetypes only" → existence only: `--workload` "emulates bursty scheduled compute" (`stress-ng.1:11793–11809`), `--cyclic` reports wake-latency percentiles (`:2744–2752`), its README disclaims precise benchmarking (`README.md:32–35`); it grounds no archetype.
+- **`corbet-lwn24`**: the later article's byline "unverified" → Jake Edge, 2026-01-07 (2026-09-13 verification, `compare/K2.md:12, 49`).
+- **`scx`**: "(pin commit)" → release `v1.1.3` (2026-08-19; tag object `b2cd800e`, commit `c8728c6b`), each quotation located there and re-read on 2026-10-07 — the watchdog sentence `README.md:82–84`, "Meta is in the process of mass production deployment" `README.md:33–35`, "Distros are able to package and release these schedulers" `OVERVIEW.md:283`; licence GPLv2 (`LICENSE`).
+- **`interbench`** unchanged: its "~7 ms" jitter figure is stated without a source in its man page, readmes and code (S2-15), and no harness or metrics constant cites it.
+
+Applied: `docs/references.md`, the six entries. The repo lint is clean.
+
+Hands to **9.15**: the prose repeating the old wordings — `docs/workload/source-vetting.md:58` (schbench's GitHub URL "(mirror on kernel.googlesource.com)" and its percentile list 20/50/75/90/95/99/99.5/99.9, printed by no version), `:61` (hackbench's `github.com/jlelli/rt-tests`, unread, and its licence), `:64` ("LWN LPC 2025 coverage", which `corbet-lwn24` is not — LPC 2025 is the Jake Edge article), `:67` (stress-ng's "no behavioral timing" and licence); `docs/workload/grounding-sources.md:29` (hackbench as a "load-balancing stressor"; the man page says "benchmark and a stress test for the Linux kernel scheduler") and `:30` ("Meta adopted the scheduler server-side", MISATTRIBUTED, C-lavd-18b); interbench's 7 ms wherever prose states it as a perception fact.
