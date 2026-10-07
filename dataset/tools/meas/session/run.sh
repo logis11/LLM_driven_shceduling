@@ -582,14 +582,15 @@ upg_prepare() {
   rec upgrade.uu.installed_by_desktop "$(dpkg-query -W -f='${db:Status-Abbrev}' unattended-upgrades 2>/dev/null | cut -c1-2)"
   if [ "$(dpkg-query -W -f='${db:Status-Abbrev}' unattended-upgrades 2>/dev/null | cut -c1-2)" != ii ]; then
     hold_services
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y unattended-upgrades > "$OUT/upgrade.uu.install.log" 2>&1
+    sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_SUSPEND=1 apt-get install -y unattended-upgrades > "$OUT/upgrade.uu.install.log" 2>&1
     rec upgrade.uu.install.rc "$?"
     sudo rm -f /usr/sbin/policy-rc.d
   fi
   # needrestart is the runner image's, not the default install's (upgrade-layer.txt): its apt hook would restart
-  # services after the job, so it leaves before the session
+  # services after the job, so it leaves before the session — suspended while it leaves, since its hook would
+  # otherwise restart every service still mapping the replaced glibc, the runner's agent with them (method §8)
   if [ "$(dpkg-query -W -f='${db:Status-Abbrev}' needrestart 2>/dev/null | cut -c1-2)" = ii ]; then
-    sudo DEBIAN_FRONTEND=noninteractive apt-get remove -y needrestart > "$OUT/upgrade.needrestart.remove.log" 2>&1
+    sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_SUSPEND=1 apt-get remove -y needrestart > "$OUT/upgrade.needrestart.remove.log" 2>&1
     rec upgrade.needrestart.removed "$?"
   else
     rec upgrade.needrestart.removed none
