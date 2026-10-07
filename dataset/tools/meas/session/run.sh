@@ -539,10 +539,30 @@ glibc_back() {
   upg_sources_system "$UPG_T0"
   sudo apt-get -o Acquire::Retries=5 update > "$OUT/upgrade.apt-update.t0.log" 2>&1; rec upgrade.apt_update.t0.rc "$?"
   for p in $(cut -f1 "$OUT/upgrade.glibc.runner.tsv"); do spec="$spec $p=$UPG_GLIBC"; done
+  # the first dry run lost its runner in this step with no log (method §8): what runs, and apt's plan, first
+  systemctl list-units --type=service --state=running --no-legend --plain --no-pager > "$OUT/upgrade.services.before.txt" 2>&1
+  ps -eo pid,ppid,comm,args > "$OUT/upgrade.ps.before.txt" 2>&1
+  sudo apt-get install -s -y --allow-downgrades --no-install-recommends $spec > "$OUT/upgrade.glibc.downgrade.sim.log" 2>&1
+  rec upgrade.glibc.sim.rc "$?"
+  rec upgrade.glibc.sim.inst "$(grep -c '^Inst ' "$OUT/upgrade.glibc.downgrade.sim.log")"
+  rec upgrade.glibc.sim.remove "$(grep '^Remv ' "$OUT/upgrade.glibc.downgrade.sim.log" | awk '{print $2}' | paste -sd' ')"
+  sync
+  if [ -n "$(grep '^Remv ' "$OUT/upgrade.glibc.downgrade.sim.log")" ]; then
+    stop_recorded glibc-would-remove "apt's downgrade plan removes packages (upgrade.glibc.downgrade.sim.log)"
+  fi
   hold_services
   sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_SUSPEND=1 apt-get install -y --allow-downgrades --no-install-recommends \
-    $spec > "$OUT/upgrade.glibc.downgrade.log" 2>&1
-  rec upgrade.glibc.downgrade.rc "$?"
+    $spec > "$OUT/upgrade.glibc.downgrade.log" 2>&1 &
+  local apid=$! rc
+  # apt's and dpkg's own logs copied every 5 s while it runs, so a partial upload carries them (method §8)
+  while kill -0 "$apid" 2>/dev/null; do
+    sudo cp /var/log/apt/term.log "$OUT/upgrade.glibc.term.log" 2>/dev/null
+    sudo cp /var/log/dpkg.log "$OUT/upgrade.glibc.dpkg.log" 2>/dev/null
+    sync; sleep 5
+  done
+  wait "$apid"; rc=$?
+  rec upgrade.glibc.downgrade.rc "$rc"
+  sudo cp /var/log/apt/term.log "$OUT/upgrade.glibc.term.log" 2>/dev/null
   sudo rm -f /usr/sbin/policy-rc.d
   glibc_versions t0
   rec upgrade.glibc.not_at_t0 "$(awk -F'\t' -v v="$UPG_GLIBC" '$2 != v' "$OUT/upgrade.glibc.t0.tsv" | wc -l)"
@@ -713,8 +733,11 @@ rec settings.login_mode "$LOGIN_MODE"
 install_session
 [ "$LOGIN_MODE" = stub ] && start_dm_stub
 [ -n "$SESSION_EXEC" ] || stop_recorded no-session-file "no Ubuntu Wayland session file after the install (method §2.1)"
-[ "$UPGRADE" = 1 ] && { glibc_back; upg_prepare; }
-checkpoint install
+if [ "$UPGRADE" = 1 ]; then          # 9.10 D167: the install's upload first, so the downgrade's logs reach the uploads
+  checkpoint install; glibc_back; upg_prepare; checkpoint glibc
+else
+  checkpoint install
+fi
 start_boot_units
 [ "$UPGRADE" = 1 ] && upg_timers_off
 checkpoint units

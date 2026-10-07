@@ -10,7 +10,7 @@ Tooling:
 ## 1. Runs
 
 - **Machine.** The AMD EPYC 7763 (`machine_gate.sh`), the model 9.9's entries were measured on; the dry run on any model.
-- **Indices.** `upgrade-dry` 90 and `upgrade` 91, clear of the session family's 1–88. Artifacts are `meas-session-session-r<k>-<mode>`; `session/pool.py`'s name pattern takes neither.
+- **Indices.** `upgrade-dry` from 90 and `upgrade` after it, clear of the session family's 1–88 (amended in §8). Artifacts are `meas-session-session-r<k>-<mode>`; `session/pool.py`'s name pattern takes neither.
 - **One probe after the dry run.** A probe that fails §5 is relaunched as the next index.
 
 ## 2. The venue (D166)
@@ -77,3 +77,10 @@ The result decides what D165 sets out. No new name: `c7-idle`'s statement takes 
 ## 8. Amendments
 
 - 2026-10-07, the method written (D165–D167).
+- 2026-10-07, the first dry run (run 37566551146, session 90, on an Intel Xeon Platinum 8573C). The install and the snapshot's package lists landed. The runner then lost communication with the server during the glibc downgrade (§2.1), before any later upload, so no log of the step survived. Amending §2.1:
+  - apt's plan is simulated first, and a plan that removes a package stops the job;
+  - the running services and processes are recorded before the step;
+  - apt's and dpkg's logs are copied every 5 s while it runs;
+  - the install's checkpoint comes before the step, so the workflow's 20 s uploads carry them.
+
+  Amending §1: the dry run is relaunched as session 92, and the probe takes the next index after a dry run that passes.
