@@ -1,5 +1,5 @@
 # Recognition Vocabulary
-> Status: normative · Created 2026-08-28 · Updated 2026-10-06
+> Status: normative · Created 2026-08-28 · Updated 2026-10-07
 
 The shared vocabulary of the recognition signal — the one contract that the recognizer's output schema, the validator's menu, the driver table, and the Layer-1 grader all agree on. Ratified 2026-08-28 (인지오 · 인경민 · 박이안 — pending team review of this doc).
 
@@ -103,11 +103,11 @@ No fields: `"params": {}`. Run in arrival order until each task blocks or exits.
 
 ### Provenance of the boot default
 
-The seven default values above are the **boot default configuration** and the `fixed` condition, so they are the floor every normalised score is measured against. None was measured. Since 2026-09-11 the four MLFQ values are OSTEP §8's worked example, whole (`ostep`, read in Version 1.10); the two other slices equal the MLFQ slice by the same-granularity rule below; LOTTERY `batch_share` has no source. A configuration whose numbers come from one text is one claim; a value assembled from several sources is not used.
+The seven default values above are the **boot default configuration** and the `fixed` condition, so they are the floor every normalised score is measured against. None was measured. Since 2026-09-11 the four MLFQ values are the ones OSTEP chapter 8's worked examples use (`ostep`, read in Version 1.10) — three queues and a 10 ms top slice (Example 1), doubling per level (Figure 8.6), a 100 ms boost (Figure 8.4); the two other slices equal the MLFQ slice by the same-granularity rule below; LOTTERY `batch_share` has no source. A configuration whose numbers come from one text is one claim; a value assembled from several sources is not used.
 
 | field | default | grounding | status |
 |---|---|---|---|
-| MLFQ `num_queues` | 3 | `ostep` §8.2: the worked examples run in "a three-queue scheduler"; every figure has Q2, Q1, Q0. | OSTEP's example |
+| MLFQ `num_queues` | 3 | `ostep` §8.2, Example 1: "a three-queue scheduler"; Figures 8.2–8.6 have Q2, Q1, Q0 (Figure 8.1 draws eight queues). | OSTEP's example |
 | MLFQ `timeslice_us` | 10000 | `ostep` §8.2, Example 1: "with a time slice of 10 ms (and with the allotment set equal to the time slice)". | OSTEP's example |
 | MLFQ `timeslice_growth` | 2 | `ostep` §8.5, Fig. 8.6 ("Lower Priority, Longer Quanta"): 10 ms, 20 ms, 40 ms per level. | OSTEP's example |
 | MLFQ `boost_interval_us` | 100000 | `ostep` §8.3, Fig. 8.4: "a priority boost every 100 ms (which is likely too small of a value, but used here for the example)"; OSTEP names S a voo-doo constant after Ousterhout. | OSTEP's example; the caveat is OSTEP's own |
