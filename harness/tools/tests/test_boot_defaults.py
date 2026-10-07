@@ -17,7 +17,7 @@ def _schema():
     return json.loads(SCHEMA.read_text())
 
 
-SWEEP_US = (500, 750, 900, 1200, 2000, 3000, 5000, 20000, 100000)   # the RQ0 gate spec's sweep (8.8)
+SWEEP_US = (500, 700, 900, 1200, 2000, 3000, 5000, 20000, 100000)   # the RQ0 gate spec's sweep (8.8)
 
 
 def test_every_boot_default_validates_against_the_schema():
