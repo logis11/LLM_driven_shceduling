@@ -1,6 +1,6 @@
 # Task 9.10 — the desktop session beside the unattended upgrade: the probe's reading
 
-The probe of `../method.md` (changelog D165–D167), session 95, run 37579102734, on the AMD EPYC 7763. Never a repeat; it changes no value. The reading beside this page: `upgrade-probe-95.json` and `upgrade-probe-95.txt` (`session/upgrade_probe.py`). The raw records are released on 인지오's go-ahead.
+The probe of `../method.md` (changelog D165–D167), session 95, run 37579102734, on the AMD EPYC 7763. Never a repeat; it changes no value. The reading beside this page: `upgrade-probe-95.json` and `upgrade-probe-95.txt` (`session/upgrade_probe.py`). The raw records are release `meas-ci-probes-2026-10-07` (D174).
 
 ## Validity (method §5)
 

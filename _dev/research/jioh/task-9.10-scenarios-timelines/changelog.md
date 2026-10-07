@@ -3056,3 +3056,9 @@ Grounds:
 Not taken: a `packagekitd` task and the extra work carried in the `systemd` and `dbus-daemon` tasks, which need a campaign of repeated upgrade runs; `packagekitd`'s name alone, which D24 and D25 tie to an observation of the program.
 
 Applied: `c7.variant.yaml`'s comment on `c7-idle`; `c7-idle`'s derived file is unchanged. Hands to 9.14: the idle pair's rows in the prior table and the pair review, beside this statement.
+
+## D174 — the upgrade probe's raw records are release `meas-ci-probes-2026-10-07` (2026-10-07)
+
+By 인지오's decision (Q45). The release takes D151's form, every artifact of its runs as `<artifact>-<run id>.zip`, at commit `9423206a`: the probe, session 95 (run 37579102734), and its four dry runs, sessions 90 and 92 by their last partial uploads (each runner lost), 93 and 94 whole. No job stopped at the gate. D171 and D173 rest on them, and Actions artifacts expire after 90 days.
+
+Not taken: no release; the probe alone, without the dry runs the method's amendments cite.
