@@ -189,9 +189,11 @@ variants:
   - id: c7-idle
     from: c1-idle.timeline.yaml
     # the four session tasks carry the idle session's measured state (9.9 D9),
-    # not the work the upgrade causes in them: PID 1's daemon-reexec, which the
-    # upgrade's chroot skipped (9.10 D37), and the wakes a system job causes
-    # (9.9 D43); a probe sizes it (9.10 D165)
+    # not the work the upgrade causes in them. On a booted desktop (the probe,
+    # 9.10 D171) the session starts nothing; PID 1 does some 372 ms more work
+    # and the system bus some 99 ms over an 11.6 s job, PID 1's daemon-reexec
+    # running its generators (31 processes in 63 ms), and apt's PackageKit hook
+    # starts `packagekitd`. The file carries none of it (9.10 D165, D173)
     ops:
       - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
                    arrive: 0s, bind: {total_work: 26.385s}}

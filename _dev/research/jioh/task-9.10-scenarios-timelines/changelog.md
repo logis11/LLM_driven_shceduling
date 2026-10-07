@@ -3037,3 +3037,22 @@ By 인지오's decision (Q43). D28's "No file depicts an X11 session or an X11 c
 Not taken: the sentence kept; one application measured on a Wayland session, which belongs with the validity review's real-desktop comparison (`docs/memos/2026-09-20-dataset-validity-review.md` §5).
 
 Hands to 9.15: the docs' statement of the venue, D28's sentence as restated here.
+
+## D173 — `c7-idle` states the probe's names and sizes and carries none (2026-10-07)
+
+By 인지오's decision (Q44), the decision D165 left for a new name. `c7-idle` keeps its four session tasks and `unattended-upgr`, and states what the probe found (D171):
+- the session starts nothing;
+- PID 1 starts `packagekitd` (D-Bus-activated by apt's PackageKit hook) and, on the upgrade's `daemon-reexec`, its generators;
+- over the job, PID 1 does some 372 ms more work and the system bus some 99 ms.
+
+The file carries none of it.
+
+Grounds:
+
+- **The class D28 omits.** The new names are system services outside the session, the processes D28 states omitted in every file but the idle ones. 9.9 stated the cron session's wakes in the same way rather than carrying them (9.9 D26).
+- **Carrying needs a measured entry.** A task's behaviour is a measured entry under the stability rule, and the probe is one observation that changes no value (its method's §1). The generators a booted system runs are its installed set's: on the runner they include `cloud-init`'s, `podman`'s and `postgresql`'s, which a stock desktop does not hold.
+- **The file's use.** `c7-idle` has no performance metric (`harness/scoring/scoring-spec.yaml`), and the unwanted job's own name, `unattended-upgr`, is in it.
+
+Not taken: a `packagekitd` task and the extra work carried in the `systemd` and `dbus-daemon` tasks, which need a campaign of repeated upgrade runs; `packagekitd`'s name alone, which D24 and D25 tie to an observation of the program.
+
+Applied: `c7.variant.yaml`'s comment on `c7-idle`; `c7-idle`'s derived file is unchanged. Hands to 9.14: the idle pair's rows in the prior table and the pair review, beside this statement.
