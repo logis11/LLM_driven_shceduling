@@ -255,13 +255,20 @@ def test_c2_pair_under_oracle_passes_on_different_bodies(tmp_path, spec):
 
 
 def test_c2_pair_under_fixed_requires_identical_bodies_where_flagged(tmp_path, spec):
+    """Every committed pair changes its background task, so none is flagged
+    (9.11 D15); a copy flagging P1 keeps the identity path's fail and pass."""
     runs = [_pair_run(tmp_path, "c2-p1a", "fixed", SAME), _pair_run(tmp_path, "c2-p1b", "fixed", OTHER),
             _pair_run(tmp_path, "c2-p2a", "fixed", SAME), _pair_run(tmp_path, "c2-p2b", "fixed", OTHER)]
     rows = evaluate(runs, spec, [])
-    assert _row(rows, "c2_pair", workload_id="c2-p1a")["result"] == "fail"
+    assert _row(rows, "c2_pair", workload_id="c2-p1a")["result"] == "not_applicable"
     assert _row(rows, "c2_pair", workload_id="c2-p2a")["result"] == "not_applicable"
+    flagged = copy.deepcopy(spec)
+    for p in flagged["pairs"]:
+        if p["a"] == "c2-p1a":
+            p["fixed_identical"] = True
+    assert _row(evaluate(runs, flagged, []), "c2_pair", workload_id="c2-p1a")["result"] == "fail"
     same = [_pair_run(tmp_path, "c2-p1a", "fixed", SAME), _pair_run(tmp_path, "c2-p1b", "fixed", SAME)]
-    assert _row(evaluate(same, spec, []), "c2_pair", workload_id="c2-p1b")["result"] == "pass"
+    assert _row(evaluate(same, flagged, []), "c2_pair", workload_id="c2-p1b")["result"] == "pass"
 
 
 def test_c2_pair_without_a_trace_fails_with_a_reason(tmp_path, spec):

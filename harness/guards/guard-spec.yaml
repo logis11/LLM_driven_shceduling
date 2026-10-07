@@ -82,17 +82,20 @@
 #   sequence minus the boot entry (data-contracts §8). Compared positionally;
 #   a length mismatch or a differing value fails, naming the first index.
 #
-# c2_pair — structural. The two files of a C2 pair differ in one segment's
-#   label; under a recognition-driven condition their configurations must differ,
-#   so their traces must differ — identical traces mean the configuration never
-#   changed between wanted and unwanted and a zero gap is a table defect, not a
+# c2_pair — structural. The two files of a C2 pair differ in one segment: its
+#   label and the background task it holds (c2-pairs.variant.yaml); under a
+#   recognition-driven condition their configurations must differ, so their
+#   traces must differ — identical traces mean the configuration never changed
+#   between wanted and unwanted and a zero gap is a table defect, not a
 #   recognition result (_dev/docs/rq0-preparation-notes.md, stage 4.2;
 #   data-contracts §10 lints the table for the same case). Under `fixed` the two
-#   files run the same boot default, so where their events are identical apart
-#   from the label (P1: a rename plus the label, c2-pairs.variant.yaml) their
-#   traces must be identical; P2 and P3 change the background task itself, so
-#   no identity is expected there (`fixed_identical: false`). Under `random` the
-#   draws ignore telemetry and a shared seed legitimately yields identical
+#   files run the same boot default, so where a pair's events are identical
+#   apart from the label its traces must be identical (`fixed_identical: true`);
+#   every pair changes the background task itself — P1 Tracker's indexer in the
+#   training run's place, P2 the unattended upgrade in the game download's, P3
+#   Déjà Dup's scheduled backup in the video render's — so no identity is
+#   expected under `fixed` (`fixed_identical: false` on all three). Under
+#   `random` the draws ignore telemetry and a shared seed legitimately yields identical
 #   traces, so the guard does not apply. Partner: the other file of the pair
 #   under the same condition, seed, and boot default. Identity is the trace's
 #   body hash — every line after the header — because the header names the
@@ -199,6 +202,6 @@ guards:
 # `b` its variant. `fixed_identical` says whether the pair's events are identical
 # apart from the label, so that `fixed` must reproduce one trace for both.
 pairs:
-  - {a: c2-p1a, b: c2-p1b, fixed_identical: true}
+  - {a: c2-p1a, b: c2-p1b, fixed_identical: false}
   - {a: c2-p2a, b: c2-p2b, fixed_identical: false}
   - {a: c2-p3a, b: c2-p3b, fixed_identical: false}
