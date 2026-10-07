@@ -172,3 +172,17 @@ By 인지오's decision, scope-card items 12 and 35–37 (C-schbench-1, -2; C-ha
 Applied: `docs/references.md`, the six entries. The repo lint is clean.
 
 Hands to **9.15**: the prose repeating the old wordings — `docs/workload/source-vetting.md:58` (schbench's GitHub URL "(mirror on kernel.googlesource.com)" and its percentile list 20/50/75/90/95/99/99.5/99.9, printed by no version), `:61` (hackbench's `github.com/jlelli/rt-tests`, unread, and its licence), `:64` ("LWN LPC 2025 coverage", which `corbet-lwn24` is not — LPC 2025 is the Jake Edge article), `:67` (stress-ng's "no behavioral timing" and licence); `docs/workload/grounding-sources.md:29` (hackbench as a "load-balancing stressor"; the man page says "benchmark and a stress test for the Linux kernel scheduler") and `:30` ("Meta adopted the scheduler server-side", MISATTRIBUTED, C-lavd-18b); interbench's 7 ms wherever prose states it as a perception fact.
+
+## D13 — the items that stand; the percentile method labelled (2026-10-07)
+
+By 인지오's decision, the scope-card items whose text holds against its sources or is labelled for what it is:
+
+- **2–5, 7, 8** (`docs/harness/metrics.md` §10, §6.9–§6.10): the latency floor, 1 000 µs, and the fraction floor, 0.01, stated assumptions; the bootstrap seed 20260911 and 10 000 repetitions, "pinned, not estimated"; the 95 % interval, convention; `W_single` at the boot default, 10 000 × (1 + 2) = 30 000 µs; the boost grid, confirmed with 인경민 (§11 item 7).
+- **18:** the same-granularity rule's premise that no shipped EDF has a residual round-robin slice — Linux's deadline class serves fair tasks through the fair-server reservation, 50 ms per 1 000 ms per CPU from v6.12, not a residual slice (S2-05); on the runner 50 000 000 / 1 000 000 000 ns per CPU (`meas-ci:sched:2026-10-07`).
+- **19, 20:** LOTTERY's `batch_share` 0.15, "assumption, unbounded" — a full-text search of Waldspurger & Weihl found ticket ratios only between peer clients (S1-03); the 10 ms quantum sentence quoted as the paper gives it and "not a grounding".
+- **21:** `linux-sched-bwc`, existence only — quota per period on a cgroup, default period 100 ms (S2-03).
+- **22, 25:** the config schema's ranges and the sweep's 500 µs and 100 000 µs points, design.
+- **26b:** illumos TS's top-level quantum, 2 ticks at level 59, 2 ms at the default hz of 1000 (S2-08, S2-09). **26c:** sched_ext's `SCX_SLICE_DFL`, 20 ms at v6.12, v6.17 and v7.0, unscaled (D7's entry update).
+- **29–34:** `utilisation_sanity`, arithmetic; `config_age`, `determinism`, `tick_count`, `validation_matches_provenance`, `c2_pair`, structural — `tick_count` as applied to the compiled gaming files is 9.14's (scope card, Boundary).
+
+One label added — **item 6**: §8's percentile rule, linear interpolation at position (n − 1)·p/100 (numpy `linear`, R type 7), is now called a convention where it is stated, as decision 1 asks of a value no source states. Applied: `docs/harness/metrics.md` §8, one word.
