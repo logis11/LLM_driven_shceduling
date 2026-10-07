@@ -61,7 +61,7 @@ An application a file starts mid-file runs its observed launch phase first. Appl
 - A task shows the observed program's name: `chrome` for the call, `mpv` for music, `element-desktop` for the chat client. `gamescope` leaves the gaming files, and the download keeps `steam`, stated (D24).
 - A name is the kernel's `comm` (D25).
 - New names take tiers by one rule: the same program keeps its tier, and a new program is placed by the ladder's definitions (D27).
-- The session processes appear only in the idle files (D28). Beside `c7-idle`'s upgrade they carry the idle session's measured state, the work the upgrade causes in them stated; a probe in 9.9's session venue, glibc 8.7 → 8.8 beside the blanked session with the unit started through PID 1, sizes it (D165–D167).
+- The session processes appear only in the idle files (D28); no file holds an application beside them, the application entries X11 clients of Xvfb and the session entries a Wayland session's (D172). Beside `c7-idle`'s upgrade they carry the idle session's measured state, the work the upgrade causes in them stated; a probe in 9.9's session venue, glibc 8.7 → 8.8 beside the blanked session with the unit started through PID 1, sizes it (D165–D167).
 
 ### 10. Provenance
 

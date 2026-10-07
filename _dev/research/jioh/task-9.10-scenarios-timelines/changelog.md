@@ -594,6 +594,7 @@ Applied: `dataset/tools/wlc/grid.py`'s `NAME_TIERS`; the grid counts bound `memb
 The five entries D23–D27 were recompiled together (`compile.py --allow-window`). 44 of 100 artifacts change beyond the library's hash. Lint reports the three demand-window files of D20 and nothing else; tests 371 passed, 1 skipped, 1 xfailed, after `test_c4_injection_only` was restated. Demand (`-single`): `c1-gaming` 1.0376 → 0.9153, `c4-gaming` 1.038 → 0.9158, `c7-gaming` 2.0376 → 1.9153 (the `gamescope` task gone), `c3-evening` 0.8765 → 0.8766.
 
 ## D28 — the session processes appear only in the idle files; every other file states them omitted (2026-10-01)
+> Amended by D172 (the X11 sentence restated to what the entries' scopes and 9.9 D26 show).
 
 By 인지오's decision, scope-card items 20 and 65 (9.9 D26's hand-off: which of the four names a file carries; X11 sessions; a scheduled system job's session): the four session entries — `compositor-shell`, `audio-server`, `service-manager`, `message-bus` — are carried only by the idle files, `c1-idle` and `c7-idle`, where their measured state holds. Every other file states that the desktop's session processes are omitted, their active state being unobservable on the runner. The scenario catalog's S18 claim, "present in every segment by construction", is withdrawn. No file depicts an X11 session or an X11 client.
 
@@ -3023,3 +3024,16 @@ D165's probe (D166, D167), session 95 (run 37579102734), on the AMD EPYC 7763: v
   - in the 600 s after the job, each at its idle rate.
 
 New names appeared, PID 1's, not the session's: under D165, what `c7-idle` does with them is a decision of its own.
+
+## D172 — D28's X11 sentence restated (2026-10-07)
+
+By 인지오's decision (Q43). D28's "No file depicts an X11 session or an X11 client" rested on no source, and is restated:
+
+- **No file carries the desktop session beside an application** (D28), so none depicts an X11 client inside a Wayland session, and none needs Xwayland.
+- **The application entries were measured as X11 clients of Xvfb.** Every application entry's scope says it ran "under Xvfb" (`dataset/archetypes.yaml`). Kdenlive's `QXcbEventQueue`, a component of `video-editor`, is Qt's X11 event thread. `video-player` ran with `--vo=x11`, and its venue note states that "the x11 output copies frames on the CPU".
+- **The session entries were measured in a Wayland session** whose compositor is the display server, Xwayland only on demand and none at idle (9.9 D26).
+- **How each program would run on a Wayland desktop, natively or through Xwayland, is not observed.**
+
+Not taken: the sentence kept; one application measured on a Wayland session, which belongs with the validity review's real-desktop comparison (`docs/memos/2026-09-20-dataset-validity-review.md` §5).
+
+Hands to 9.15: the docs' statement of the venue, D28's sentence as restated here.
