@@ -1,0 +1,476 @@
+# S2 — project and vendor documentation, source code, primary news reports
+
+Reader class S2. Access date for every source: 2026-10-07. Copies saved under `sources/S2-NN/` (gitignored; not part of the record). Every SHA-256 below is of the exact file fetched (HTML as served, not the text reduction). Where a page was reduced to text for reading, the passage is quoted from the text of that hashed HTML.
+
+Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs), T11 (decoding documentation), T13, T14.
+
+## 1. Search log
+
+| # | Date | Engine / venue | Exact query or URL | Hits followed | Dead ends (HTTP status) |
+|---|---|---|---|---|---|
+| 1 | 2026-10-07 | git | `git ls-remote https://github.com/torvalds/linux HEAD refs/tags/v6.12` | HEAD = 7b63ef2d55f24519e7e9e5f4d15dbea03f126e40 (Makefile at that commit: VERSION 7, PATCHLEVEL 3, EXTRAVERSION -rc6); v6.12 tag object 06090c9b622a7e1f797e775db4c035e0d779b76e | — |
+| 2 | 2026-10-07 | raw.githubusercontent.com | `torvalds/linux/v6.12/Documentation/scheduler/sched-ext.rst`; same path at 7b63ef2d…; `sched-eevdf.rst`, `sched-design-CFS.rst`, `sched-deadline.rst`, `sched-rt-group.rst` at 7b63ef2d… | all 200 → S2-01…S2-06 | — |
+| 3 | 2026-10-07 | man7.org | `/linux/man-pages/man7/sched.7.html`, `/linux/man-pages/man2/sched_setscheduler.2.html` | 200 → S2-07, S2-08 | — |
+| 4 | 2026-10-07 | git | `git ls-remote --tags https://github.com/sched-ext/scx` → latest v1.1.3; `git clone --depth 1 --branch v1.1.3` | S2-09 | — |
+| 5 | 2026-10-07 | static.sched.com | `/hosted_files/ossna2024/9b/scx-lavd-oss-na24.pdf` | 200 → S2-10 | `https://ossna2024.sched.com/event/1aBOT` → 403 |
+| 6 | 2026-10-07 | lwn.net | `/Articles/991205/`, `/Articles/1051430/` | 200 → S2-12, S2-13 (full text served, no paywall at access) | — |
+| 7 | 2026-10-07 | lpc.events | `/event/18/sessions/192/` (LPC 2024 sched_ext MC) | 200 → S2-11 (contribution JSON embedded in page) | — |
+| 8 | 2026-10-07 | WebSearch | `lpc.events 2025 sched_ext microconference LAVD Meta production fleet default scheduler` | no lpc.events hit; pointed to lpc.events/event/19 | — |
+| 9 | 2026-10-07 | lpc.events | `https://lpc.events/export/timetable/19.json`; `/event/19/contributions/` | 200 → S2-11 (LPC 2025 timetable JSON) | — |
+| 10 | 2026-10-07 | blogs.igalia.com | `/changwoo/` (index: two posts only, both generic sched_ext); `/changwoo/sched-ext-a-bpf-extensible-scheduler-class-part-1/` | 200 → S2-14 | no Igalia post on LAVD found in the index |
+| 11 | 2026-10-07 | WebSearch | `SteamOS release notes scx_lavd scheduler` | secondary coverage only (pbxscience, overclock3d); led to Steam news API | — |
+| 12 | 2026-10-07 | api.steampowered.com | `ISteamNews/GetNewsForApp/v2/?appid=1675200&count=200&maxlength=0` | 200 → S2-15 (Valve SteamOS announcements) | — |
+| 13 | 2026-10-07 | learn.microsoft.com | `/en-us/previous-versions/windows/desktop/gamemode/game-mode-portal`; `/en-us/windows/win32/api/expandedresources/` and two function pages | 200 → S2-16 | — |
+| 14 | 2026-10-07 | support.xbox.com | `/en-US/help/games-apps/game-setup-and-play/use-game-mode-gaming-on-pc` | 200 but script-only shell (no article text). Content API found in JS bundle (`VITE_CMS_CONTENT_URL` = `https://content.support.xboxlive.com/content`): `?path=help/games-apps/…/use-game-mode-gaming-on-pc`, `/help/…`, `use-game-mode-gaming-on-pc`, `/SXC/help/…`, `/SXC/Help/Games-Apps/…` → all 404; `content.assist.gameservices.xboxlive.com` → proxy CONNECT 502 | Xbox article not obtained |
+| 15 | 2026-10-07 | WebSearch | `support.xbox.com "Game Mode" Windows PC help article`; `"Game Mode" Windows "Windows Update" "background" support article game mode prevents driver installs`; `support.microsoft.com "Game Mode" "Settings > Gaming > Game Mode" Windows 11` | only third-party pages and the "Xbox mode / full screen experience" article (a different feature); no Microsoft-authored Game Mode article on Windows Update behaviour | — |
+| 16 | 2026-10-07 | support.apple.com | `/en-us/105118` ("Use Game Mode") | 200 → S2-18 | — |
+| 17 | 2026-10-07 | WebSearch | `developer.apple.com Game Mode LSApplicationCategoryType games full screen macOS Sonoma documentation` | Apple Developer Forums threads; doc keys GCSupportsGameMode / LSSupportsGameMode | `developer.apple.com/forums/thread/739387` → 200 but script-rendered, no reply text in HTML (not quotable) |
+| 18 | 2026-10-07 | developer.apple.com JSON | `/tutorials/data/documentation/bundleresources/information-property-list/gcsupportsgamemode.json`, `…/lssupportsgamemode.json` | 200 → S2-20 | `/tutorials/data/documentation/dispatch/dispatchqos/qosclass.json` → 404 |
+| 19 | 2026-10-07 | raw.githubusercontent.com + git | `FeralInteractive/gamemode/master/README.md`; `git clone --depth 1` (HEAD a74b8106…) | S2-19 | — |
+| 20 | 2026-10-07 | developer.apple.com archive | `/library/archive/documentation/Performance/Conceptual/EnergyGuide-iOS/PrioritizeWorkWithQoS.html`; `…/power_efficiency_guidelines_osx/PrioritizeWorkAtTheTaskLevel.html` | 200 → S2-21 | — |
+| 21 | 2026-10-07 | git / sources.debian.org | `git clone https://git.sesse.net/plocate` → proxy CONNECT 502; `salsa.debian.org/debian/plocate.git` → auth prompt (not public); `https://sources.debian.org/api/src/plocate/` → 200 (versions 1.1.25-1 sid/forky …); `https://sources.debian.org/data/main/p/plocate/1.1.25-1/plocate-updatedb.service.in` | 200 → S2-22 | git.sesse.net 502; salsa plocate not cloneable |
+| 22 | 2026-10-07 | git | `salsa.debian.org/debian/mlocate.git`; `gitlab.gnome.org/GNOME/localsearch.git`; `invent.kde.org/frameworks/baloo.git`; `github.com/Cisco-Talos/clamav`; `gitlab.gnome.org/World/deja-dup.git`; `github.com/borgbackup/borg`; `github.com/restic/restic` (all `--depth 1`) | S2-23…S2-28 | — |
+| 23 | 2026-10-07 | grep over clones | `Nice=|CPUSchedulingPolicy|IOSchedulingClass|IOSchedulingPriority|SCHED_IDLE|SCHED_BATCH|ioprio_set|IOPRIO_CLASS|setpriority\(|nice\(|ionice|CPUWeight|IOWeight|sched_setscheduler` | hits in mlocate, localsearch, baloo, deja-dup, restic docs; none in clamav units; none in borg | — |
+| 24 | 2026-10-07 | raw.githubusercontent.com | `heftig/rtkit/master/README` (HEAD c295fa84…) | 200 → S2-29 | — |
+| 25 | 2026-10-07 | git + GitHub MCP | clone `Nefelim4ag/Ananicy`, `gitlab.com/ananicy-cpp/ananicy-cpp.git`, `CachyOS/ananicy-rules`; MCP `search_repositories repo:Nefelim4ag/Ananicy` | S2-30…S2-32; MCP reports `"archived":true`, `pushed_at 2023-03-21T15:03:42Z` | — |
+| 26 | 2026-10-07 | raw.githubusercontent.com | `ggml-org/llama.cpp/<HEAD bd4eeaa0…>/grammars/README.md` | 200 → S2-33 | — |
+| 27 | 2026-10-07 | git + raw | `git ls-remote --tags vllm-project/vllm` → v0.31.0; `vllm/v0.31.0/docs/features/structured_outputs.md` | 200 → S2-34 | — |
+| 28 | 2026-10-07 | ollama.com + raw | `https://ollama.com/blog/structured-outputs`; `ollama/ollama/<HEAD f9f4af6c…>/docs/api.md`, `docs/capabilities/structured-outputs.mdx` | 200 → S2-35 | `docs/structured-outputs.md` → 404 |
+| 29 | 2026-10-07 | gitlab.freedesktop.org | `git ls-remote --tags pipewire` → 1.6.9; `/-/raw/1.6.9/src/daemon/pipewire.conf.in`, `/-/raw/1.6.9/doc/dox/config/pipewire.conf.5.md` | 200 → S2-36 | — |
+| 30 | 2026-10-07 | raw.githubusercontent.com | `jackaudio/jack2/v1.9.22/man/jackd.0` | 200 → S2-37 | — |
+| 31 | 2026-10-07 | git | `github.com/Ardour/manual` clone (HEAD 9628c8ba…); grep `buffer size` | S2-38 | — |
+| 32 | 2026-10-07 | store.steampowered.com | `/steamdeck/?l=english`; `/steamdeck/specs?l=english` | 200 → S2-39 (specs in embedded JSON) | specs page: no Hz strings in served HTML (script-rendered) |
+| 33 | 2026-10-07 | WebSearch | `AMD resigns BAPCo SYSmark 2012 June 2011 statement Nigel Dessau` | ir.amd.com press release, Tom's Hardware, AnandTech | — |
+| 34 | 2026-10-07 | WebSearch | `Nvidia VIA leave BAPCo 2011 SYSmark statement` | AnandTech update, APH Networks (X-bit Labs excerpt), SemiAccurate | `guru3d.com/story/nvidia-and-via-also-left-bapco/` → 403; `semiaccurate.com/2011/06/20/…` → TLS name mismatch (not bypassed); `www.anandtech.com/show/4464…` → 200 bot-check page only; `at-web1.www.anandtech.com/…` → connection reset |
+| 35 | 2026-10-07 | web.archive.org | `/web/2011id_/http://www.anandtech.com/show/4464/amd-resigns-from-bapco-over-sysmark12-concerns` → snapshot 20120106144430 | 200 → S2-41 | `archive.org/wayback/available` → 429 |
+| 36 | 2026-10-07 | www.semiaccurate.com | `/?p=9333` | 200 → S2-44 | — |
+| 37 | 2026-10-07 | WebSearch | `Nigel Dessau blog "SYSmark" "The heart of our complaint" blogs.amd.com` | only coverage quoting the blog; original blog post not located | — |
+
+## 2. Candidates
+
+### S2-01 — Linux kernel, `Documentation/scheduler/sched-ext.rst` at v6.12
+
+- Citation: The Linux kernel documentation, "Extensible Scheduler Class", `Documentation/scheduler/sched-ext.rst`, tag v6.12 (tag object 06090c9b622a7e1f797e775db4c035e0d779b76e).
+- Copy: https://raw.githubusercontent.com/torvalds/linux/v6.12/Documentation/scheduler/sched-ext.rst · accessed 2026-10-07 · `sources/S2-01/sched-ext-v6.12.rst` · SHA-256 `b5a95750fb7e7d2778454b80e89c25d525ce739700b6528029ed7701613228e6`
+- Passages:
+  - `sched-ext.rst:5-6` (v6.12): "sched_ext is a scheduler class whose behavior can be defined by a set of BPF programs - the BPF scheduler."
+  - `:14`: "* The BPF scheduler can be turned on and off dynamically anytime."
+  - `:16-19`: "* The system integrity is maintained no matter what the BPF scheduler does. The default scheduling behavior is restored anytime an error is detected, a runnable task stalls, or on invoking the SysRq key sequence :kbd:`SysRq-S`."
+  - `:49-51`: "If a task explicitly sets its scheduling policy to ``SCHED_EXT``, it will be treated as ``SCHED_NORMAL`` and scheduled by CFS until the BPF scheduler is loaded."
+  - `:62-64`: "Terminating the sched_ext scheduler program, triggering :kbd:`SysRq-S`, or detection of any internal error including stalled runnable tasks aborts the BPF scheduler and reverts all tasks back to CFS."
+  - `:145` (the only occurrence of "verifier", inside the `scx_simple` example code): "/* Need to initialize or the BPF verifier will reject the program */"
+  - `:319-326` (ABI Instability): "The APIs provided by sched_ext to BPF schedulers programs have no stability guarantees. … While we will attempt to provide a relatively stable API surface when possible, they are subject to change without warning between kernel versions."
+- Coverage: T1 — covers sched_ext's stated safety/fallback (object: kernel scheduler class; fallback triggers: error, stalled runnable task, SysRq-S; fallback target: CFS at this tag). The document does not state the kernel version in which sched_ext was merged (no "6.12" or "merged" string in the file; the version is only the tag the file was read at). The BPF verifier appears only in a code comment of the example. T9 — does not cover. Not an observation (documentation).
+
+### S2-02 — Linux kernel, `sched-ext.rst` at mainline
+
+- Citation: as S2-01, mainline commit 7b63ef2d55f24519e7e9e5f4d15dbea03f126e40 (Makefile: 7.3.0-rc6).
+- Copy: https://raw.githubusercontent.com/torvalds/linux/7b63ef2d55f24519e7e9e5f4d15dbea03f126e40/Documentation/scheduler/sched-ext.rst · 2026-10-07 · `sources/S2-02/sched-ext-master.rst` · SHA-256 `3c96c6a67bfe6fcaaa5f02753cfe7547e3918312f586366389a219a1ae796113`
+- Passages:
+  - `:18-21`: "* The system integrity is maintained no matter what the BPF scheduler does. The default scheduling behavior is restored anytime an error is detected, a runnable task stalls, or on invoking the SysRq key sequence `SysRq-S`."
+  - `:49-51`: "If a task explicitly sets its scheduling policy to ``SCHED_EXT``, it will be treated as ``SCHED_NORMAL`` and scheduled by the fair-class scheduler until the BPF scheduler is loaded."
+  - `:63-65`: "Terminating the sched_ext scheduler program, triggering `SysRq-S`, or detection of any internal error including stalled runnable tasks aborts the BPF scheduler and reverts all tasks back to the fair-class scheduler."
+  - `:119-120`: "* ``SCX_EV_SELECT_CPU_FALLBACK``: ops.select_cpu() returned a CPU unusable by the task and the core scheduler silently picked a fallback CPU."
+  - `:195`: "/* Need to initialize or the BPF verifier will reject the program */"
+  - `:248-258` (Scheduler-Dependent Knobs): "The fair-class scheduler enforces CPU controller settings such as ``cpu.max``, ``cpu.weight`` and ``cpu.idle``. For sched_ext tasks, the scheduler core communicates these settings to the BPF scheduler … Similarly, per-task nice changes are converted to weights and reported through ``ops.set_weight()``. Each BPF scheduler is responsible for implementing the scheduling semantics of these settings and may choose to ignore them."
+- Coverage: T1 — same safety/fallback statements as v6.12, with "CFS" replaced by "the fair-class scheduler"; no merge version stated; verifier only in example comment. Adds: nice/cgroup weights are delivered to the BPF scheduler, which "may choose to ignore them". Not an observation.
+
+### S2-03 — Linux kernel, `Documentation/scheduler/sched-eevdf.rst` (mainline 7b63ef2d)
+
+- Copy: https://raw.githubusercontent.com/torvalds/linux/7b63ef2d55f24519e7e9e5f4d15dbea03f126e40/Documentation/scheduler/sched-eevdf.rst · 2026-10-07 · `sources/S2-03/sched-eevdf.rst` · SHA-256 `75b99048d738b7683d06c5844e150253e91d75ec46e774f7a96cf0e9d39056a0`
+- Passages:
+  - `:5-11`: "The "Earliest Eligible Virtual Deadline First" (EEVDF) was first introduced in a scientific publication in 1995 [1]. The Linux kernel began transitioning to EEVDF in version 6.6 (as a new option in 2024), moving away from the earlier Completely Fair Scheduler (CFS) in favor of a version of EEVDF proposed by Peter Zijlstra in 2023 [2-4]."
+  - `:13-22`: "Similarly to CFS, EEVDF aims to distribute CPU time equally among all runnable tasks with the same priority. To do so, it assigns a virtual run time to each task, creating a "lag" value that can be used to determine whether a task has received its fair share of CPU time. In this way, a task with a positive lag is owed CPU time, while a negative lag means the task has exceeded its portion. EEVDF picks tasks with lag greater or equal to zero and calculates a virtual deadline (VD) for each, selecting the task with the earliest VD to execute next. It's important to note that this allows latency-sensitive tasks with shorter time slices to be prioritized, which helps with their responsiveness."
+  - `:24-32`: "There are ongoing discussions on how to manage lag, especially for sleeping tasks; but at the time of writing EEVDF uses a "decaying" mechanism based on virtual run time (VRT). This prevents tasks from exploiting the system by sleeping briefly to reset their negative lag: when a task sleeps, it remains on the run queue but marked for "deferred dequeue," allowing its lag to decay over VRT. Hence, long-sleeping tasks eventually have their lag reset. Finally, tasks can preempt others if their VD is earlier, and tasks can request specific time slices using the new sched_setattr() system call, which further facilitates the job of latency-sensitive applications."
+- Coverage: T9 (and T3, kernel side) — the default fair class's algorithm at mainline described as EEVDF; lag, eligibility, virtual deadline, sleeping-task lag decay; slice requests via sched_setattr(). Note the document's own internal inconsistency ("version 6.6 (as a new option in 2024)") is quoted as written. Not an observation.
+
+### S2-04 — Linux kernel, `Documentation/scheduler/sched-design-CFS.rst` (mainline 7b63ef2d)
+
+- Copy: https://raw.githubusercontent.com/torvalds/linux/7b63ef2d55f24519e7e9e5f4d15dbea03f126e40/Documentation/scheduler/sched-design-CFS.rst · 2026-10-07 · `sources/S2-04/sched-design-CFS.rst` · SHA-256 `25a5fa2bf66e2a076aaac1492f306bd6c92d1c5b399976831e637c30072e76b7`
+- Passages:
+  - `:11-16`: "CFS stands for "Completely Fair Scheduler," and is the "desktop" process scheduler implemented by Ingo Molnar and merged in Linux 2.6.23. When originally merged, it was the replacement for the previous vanilla scheduler's SCHED_OTHER interactivity code. Nowadays, CFS is making room for EEVDF, for which documentation can be found in Documentation/scheduler/sched-eevdf.rst."
+  - `:18-19`: "80% of CFS's design can be summed up in a single sentence: CFS basically models an "ideal, precise multi-tasking CPU" on real hardware."
+  - `:51-53`: "Most of the rest of CFS's design just falls out of this really simple concept, with a few add-on embellishments like nice levels, multiprocessing and various algorithm variants to recognize sleepers."
+  - `:96-105`: "CFS uses nanosecond granularity accounting and does not rely on any jiffies or other HZ detail. Thus the CFS scheduler has no notion of "timeslices" in the way the previous scheduler had, and has no heuristics whatsoever. There is only one central tunable: /sys/kernel/debug/sched/base_slice_ns which can be used to tune the scheduler from "desktop" (i.e., low latencies) to "server" (i.e., good batching) workloads. It defaults to a setting suitable for desktop workloads."
+  - `:110-113`: "Due to its design, the CFS scheduler is not prone to any of the "attacks" that exist today against the heuristics of the stock scheduler: fiftyp.c, thud.c, chew.c, ring-test.c, massive_intr.c all work fine and do not impact interactivity and produce the expected behavior."
+  - `:129-144`: "CFS implements three scheduling policies: - SCHED_NORMAL (traditionally called SCHED_OTHER): The scheduling policy that is used for regular tasks. - SCHED_BATCH: Does not preempt nearly as often as regular tasks would, thereby allowing tasks to run longer and make better use of caches but at the cost of interactivity. This is well suited for batch jobs. - SCHED_IDLE: This is even weaker than nice 19, but its not a true idle timer scheduler in order to avoid to get into priority inversion problems which would deadlock the machine. SCHED_FIFO/_RR are implemented in sched/rt.c and are as specified by POSIX."
+  - `:161-164`: "sched/rt.c implements SCHED_FIFO and SCHED_RR semantics, in a simpler way than the previous vanilla scheduler did. It uses 100 runqueues (for all 100 RT priority levels, instead of 140 in the previous scheduler) and it needs no expired array."
+- Coverage: T9/T3 (kernel side) — default class described as modelling an ideal multitasking CPU via vruntime (proportional-share style), "no heuristics whatsoever", no fixed timeslices; one tunable base_slice_ns with no numeric default given in the text; policies SCHED_NORMAL/BATCH/IDLE; FIFO/RR per POSIX. T10 — mentions base_slice_ns but gives no value. Not an observation.
+
+### S2-05 — Linux kernel, `Documentation/scheduler/sched-deadline.rst` (mainline 7b63ef2d)
+
+- Copy: https://raw.githubusercontent.com/torvalds/linux/7b63ef2d55f24519e7e9e5f4d15dbea03f126e40/Documentation/scheduler/sched-deadline.rst · 2026-10-07 · `sources/S2-05/sched-deadline.rst` · SHA-256 `1525a646181778a0e054731cf3785da7d3c42df93f0f6cfd09e08e6797a3b436`
+- Passages:
+  - `:33-35` (WARNING): "Fiddling with these settings can result in an unpredictable or even unstable system behavior. As for -rt (group) scheduling, it is assumed that root users know what they're doing."
+  - `:41-44`: "The SCHED_DEADLINE policy contained inside the sched_dl scheduling class is basically an implementation of the Earliest Deadline First (EDF) scheduling algorithm, augmented with a mechanism (called Constant Bandwidth Server, CBS) that makes it possible to isolate the behavior of tasks between each other."
+  - `:53-57`: "SCHED_DEADLINE [18] uses three parameters, named "runtime", "period", and "deadline", to schedule tasks. A SCHED_DEADLINE task should receive "runtime" microseconds of execution time every "period" microseconds, and these "runtime" microseconds are available within "deadline" microseconds from the beginning of the period."
+  - `:378-380` (3.2 Schedulability Analysis for Uniprocessor Systems): "If D_i = P_i for all tasks, then EDF is able to respect all the deadlines of all the tasks executing on a CPU if and only if the total utilization of the tasks running on such a CPU is smaller or equal than 1."
+  - `:381-389`: "If D_i != P_i for some task, then it is possible to define the density of a task as WCET_i/min{D_i,P_i}, and EDF is able to respect all the deadlines of all the tasks running on a CPU if the sum of the densities of the tasks running on such a CPU is smaller or equal than 1: sum(WCET_i / min{D_i, P_i}) <= 1 It is important to notice that this condition is only sufficient, and not necessary"
+  - `:413-415`: "In any case, this kind of analysis is too complex as well as too time-consuming to be performed on-line. Hence, as explained in Section 4 Linux uses an admission test based on the tasks' utilizations."
+  - `:456-458`: "As seen, enforcing that the total utilization is smaller than M does not guarantee that global EDF schedules the tasks without missing any deadline (in other words, global EDF is not an optimal scheduling algorithm)."
+  - `:651-655` (4.3 Default behavior): "The default value for SCHED_DEADLINE bandwidth is to have rt_runtime equal to 950000. With rt_period equal to 1000000, by default, it means that -deadline tasks can use at most 95%, multiplied by the number of CPUs that compose the root_domain, for each root_domain. This means that non -deadline tasks will receive at least 5% of the CPU time"
+- Coverage: T9 — SCHED_DEADLINE = EDF + CBS; uniprocessor EDF schedulable iff utilisation ≤ 1 when D=P; global EDF not optimal on multiprocessors; admission test default 95% per root domain. Not an observation.
+
+### S2-06 — Linux kernel, `Documentation/scheduler/sched-rt-group.rst` (mainline 7b63ef2d)
+
+- Copy: https://raw.githubusercontent.com/torvalds/linux/7b63ef2d55f24519e7e9e5f4d15dbea03f126e40/Documentation/scheduler/sched-rt-group.rst · 2026-10-07 · `sources/S2-06/sched-rt-group.rst` · SHA-256 `c822e506021e8ee06ebc9be4e59b9d0dc52f12b6c2dd1ba3306f294b34ccadf6`
+- Passages:
+  - `:21-22`: "Fiddling with these settings can result in an unstable system, the knobs are root only and assumes root knows what he is doing."
+  - `:60-64`: "Let's consider an example: a frame fixed real-time renderer must deliver 25 frames a second, which yields a period of 0.04s per frame. Now say it will also have to play some music and respond to input, leaving it with around 80% CPU time dedicated for the graphics. We can then give this group a run time of 0.8 * 0.04s = 0.032s."
+  - `:66-70`: "Now if the audio thread needs to refill the DMA buffer every 0.005s, but needs only about 3% CPU time to do so, it can do with a 0.03 * 0.005s = 0.00015s."
+  - `:76-77`: "NOTE: the above example is not fully implemented yet. We still lack an EDF scheduler to make non-uniform periods usable."
+  - `:113-117`: "The default values for sched_rt_period_us (1000000 or 1s) and sched_rt_runtime_us (950000 or 0.95s). This gives 0.05s to be used by SCHED_OTHER (non-RT tasks). These defaults were chosen so that a run-away real-time tasks will not lock up the machine but leave a little time to recover it."
+  - `:124-128`: "Real-time group scheduling means you have to assign a portion of total CPU bandwidth to the group before it will accept real-time tasks. Therefore you will not be able to run real-time tasks as any user other than root until you have done that, even if the user has the rights to run processes with real-time priority!"
+- Coverage: T9 — RT throttling defaults (0.95 s of 1 s). T13 — illustrative only (25 fps renderer, 5 ms audio DMA refill) — a worked example, not a documented default. Not an observation.
+
+### S2-07 — Linux man-pages, `sched(7)`
+
+- Citation: Linux man-pages 6.19, sched(7), dated 2026-02-08 (footer).
+- Copy: https://man7.org/linux/man-pages/man7/sched.7.html · 2026-10-07 · `sources/S2-07/sched.7.html` · SHA-256 `3b52e0157557b7854f013eb13cee0ecdeacddc7f5f27c9e155dbbddc85786814`
+- Passages (locator = section heading):
+  - DESCRIPTION: "Since Linux 2.6.23, the default scheduler is CFS, the "Completely Fair Scheduler". The CFS scheduler replaced the earlier "O(1)" scheduler." (The page contains no mention of EEVDF.)
+  - SCHED_FIFO: "SCHED_FIFO can be used only with static priorities higher than 0, which means that when a SCHED_FIFO thread becomes runnable, it will always immediately preempt any currently running SCHED_OTHER, SCHED_BATCH, or SCHED_IDLE thread. SCHED_FIFO is a simple scheduling algorithm without time slicing."
+  - SCHED_RR: "SCHED_RR is a simple enhancement of SCHED_FIFO. Everything described above for SCHED_FIFO also applies to SCHED_RR, except that each thread is allowed to run only for a maximum time quantum. … The length of the time quantum can be retrieved using sched_rr_get_interval(2)."
+  - The nice value: "In the current implementation, each unit of difference in the nice values of two processes results in a factor of 1.25 in the degree to which the scheduler favors the higher priority process. This causes very low nice values (+19) to truly provide little CPU to a process whenever there is any other higher priority load on the system, and makes high nice values (-20) deliver most of the CPU to applications that require it (e.g., some audio applications)."
+  - The nice value: "On Linux, the RLIMIT_NICE resource limit can be used to define a limit to which an unprivileged process's nice value can be raised; see setrlimit(2) for details."
+  - SCHED_BATCH: "This policy is useful for workloads that are noninteractive, but do not want to lower their nice value, and for workloads that want a deterministic scheduling policy without interactivity causing extra preemptions (between the workload's tasks)."
+  - SCHED_IDLE: "This policy is intended for running jobs at extremely low priority (lower even than a +19 nice value with the SCHED_OTHER or SCHED_BATCH policies)."
+  - Privileges and resource limits: "A thread must be privileged (CAP_SYS_NICE) in order to set or modify a SCHED_DEADLINE policy." / "Since Linux 2.6.12, the RLIMIT_RTPRIO resource limit defines a ceiling on an unprivileged thread's static priority for the SCHED_RR and SCHED_FIFO policies." / "If the RLIMIT_RTPRIO soft limit is 0, then the only permitted changes are to lower the priority, or to switch to a non-real-time policy." / "Privileged (CAP_SYS_NICE) threads ignore the RLIMIT_RTPRIO limit; as with older kernels, they can make arbitrary changes to scheduling policy and priority."
+- Coverage: T7 — policies and who may set each (unprivileged: lower priority / non-RT policies within RLIMIT_NICE; RT up to RLIMIT_RTPRIO; DEADLINE needs CAP_SYS_NICE). T9 — FIFO/RR semantics; default policy still described as CFS in man-pages 6.19 (contrast S2-03). Not an observation.
+
+### S2-08 — Linux man-pages, `sched_setscheduler(2)`
+
+- Citation: Linux man-pages 6.19, sched_setscheduler(2), 2026-02-08.
+- Copy: https://man7.org/linux/man-pages/man2/sched_setscheduler.2.html · 2026-10-07 · `sources/S2-08/sched_setscheduler.2.html` · SHA-256 `403bccdc846bfbc1ac00c69133f41412235517cd043b9175787aa749bb6a6f43`
+- Passages (DESCRIPTION / ERRORS):
+  - "Currently, Linux supports the following "normal" (i.e., non-real-time) scheduling policies as values that may be specified in policy: SCHED_OTHER the standard round-robin time-sharing policy; SCHED_BATCH for "batch" style execution of processes; and SCHED_IDLE for running very low priority background jobs."
+  - "Various "real-time" policies are also supported, for special time-critical applications that need precise control over the way in which runnable threads are selected for execution. For the rules governing when a process may use these policies, see sched(7)."
+  - "On Linux, these system calls return, respectively, 1 and 99."
+  - "EPERM The calling thread does not have appropriate privileges."
+- Coverage: T7 — policy list; who-may-set deferred to sched(7). Not an observation.
+
+### S2-09 — sched-ext/scx repository, release v1.1.3
+
+- Citation: sched-ext/scx, tag v1.1.3, commit c8728c6b6a3fde451f0f10b95f99aad7a32a750a (committed 2026-08-19); scx_lavd Cargo.toml version 1.1.3.
+- Copy: `git clone --depth 1 --branch v1.1.3 https://github.com/sched-ext/scx` · 2026-10-07 · `sources/S2-09/scx/`. SHA-256: `README.md` `b285939f618abb76625912cfa7f6a3f7017675852d6aa2b9de51ea2db419ae6b`; `OVERVIEW.md` `0a97538a0407981a5f48ccb1e69e1196eeb7ef32e154d35f8258b12d89a4b706`; `INSTALL.md` `34ca0f20932adf05ff6a29f10da572a25c00a98ab265ab5d1be7f746b4831663`; `scheds/rust/README.md` `8bdde4f8ae91d9938347ee340444f3edd39bfa8953ec878eafc3771333628026`; `scheds/rust/scx_lavd/README.md` `8e4f48c103d082585d4dfea98c436818bff6530632725f65108393451f3bb65f`; `scheds/rust/scx_lavd/src/bpf/lat_cri.bpf.c` `f325f0165ce381530f93969ed8090e8a06ef904b1f5290ee2c5640a3d6e257d4`.
+- Passages:
+  - `README.md:10-12`: "`sched_ext` enables safe and rapid iterations of scheduler implementations, thus radically widening the scope of scheduling strategies that can be experimented with and deployed; even in massive and complex production environments."
+  - `README.md:33-35`: "`sched_ext` is supported by the upstream kernel starting from version 6.12. Both Meta and Google are fully committed to `sched_ext` and Meta is in the process of mass production deployment."
+  - `README.md:81-84`: "In addition to terminating the program, there are two more ways to disable a `sched_ext` scheduler - `sysrq-S` and the watchdog timer. Ignoring kernel bugs, the worst damage a `sched_ext` scheduler can do to a system is starving some threads until the watchdog timer triggers."
+  - `README.md:94-101`: "## Install Instructions by Distro - [Ubuntu] - [Arch Linux] - [Gentoo Linux] - [Fedora] - [Nix] - [openSUSE Tumbleweed]" (link targets elided)
+  - `README.md:255-257`: "## Kernel Feature Status sched-ext has been fully upstreamed as of 6.12."
+  - `INSTALL.md:35-38`: "## Arch Linux ``` sudo pacman -S scx-scheds"; `INSTALL.md:60`: "There are multiple ways to install scx_scheds on Fedora. The simplest way is to use the schedulers [COPR package](https://copr.fedorainfracloud.org/coprs/bieszczaders/kernel-cachyos-addons), which is maintained by the CachyOS community."
+  - `OVERVIEW.md:138-146`: "Another critical advantage provided by `sched_ext` is the use of BPF. BPF provides strong safety guarantees by statically analyzing programs at load time to ensure that they cannot corrupt or crash the system. `sched_ext` guarantees system integrity no matter what BPF scheduler is loaded, and provides mechanisms to safely disable the current BPF scheduler and migrate tasks back to a trusted scheduler. For example, we also implement in-kernel safety mechanisms to guarantee that a misbehaving scheduler cannot indefinitely starve tasks."
+  - `OVERVIEW.md:279-284`: "Both Meta and Google open-source the schedulers they implement which have any relevance to the broader upstream community. … Distros are able to package and release these schedulers, allowing users to utilize these schedulers out-of-the-box"
+  - `OVERVIEW.md:474-480`: "Both Meta and Google have experimented quite a lot with schedulers in the last several years. Google has benchmarked various workloads using user space scheduling, and have achieved performance wins by trading off generality for application specific needs. At Meta, we are actively experimenting with multiple production workloads and seeing significant performance gains, and are in the process of deploying `sched_ext` schedulers on production workloads at scale."
+  - `scheds/rust/README.md:15-29` (schedulers shipped): scx_beerland, scx_bpfland, scx_flash, scx_cake, scx_chaos, scx_cosmos, scx_forge, scx_lavd, scx_layered, scx_mitosis, scx_pandemonium, scx_p2dq, scx_rustland, scx_rusty, scx_tickless. `README.md:77-79`: "Note: C schedulers like `scx_simple` were previously included in this repository but have since been moved to [scx-c-examples]."
+  - `scx_lavd/README.md:7-12`: "`scx_lavd` is a BPF scheduler that implements an `LAVD` (Latency-criticality Aware Virtual Deadline) scheduling algorithm. While `LAVD` is new and still evolving, its core ideas are 1) measuring how much a task is latency critical and 2) leveraging the task's latency-criticality information in making various scheduling decisions (e.g., task's deadline, time slice, etc.)."
+  - `scx_lavd/README.md:20-23`: "`scx_lavd` is initially motivated by gaming workloads. It aims to improve interactivity and reduce stuttering while playing games on Linux. Hence, this scheduler's typical use case involves highly interactive applications, such as gaming, which requires high throughput and low tail latencies."
+  - `scx_lavd/README.md:25-31`: "## Production Ready? Yes, `scx_lavd` should be performant across various CPU architectures. … It mainly targets single CCX / single-socket systems."
+  - `lat_cri.bpf.c:3-4`: "Copyright (c) 2023-2025 Valve Corporation. Author: Changwoo Min <changwoo@igalia.com>"
+  - `lat_cri.bpf.c:179-186`: "A task is more latency-critical as its wait or wake frequencies (i.e., wait_freq and wake_freq) are higher, and its runtime is shorter." followed by `wait_ft = calc_wait_factor(taskc); wake_ft = calc_wake_factor(taskc); runtime_ft = calc_reverse_runtime_factor(taskc);`
+  - `lat_cri.bpf.c:192`: `weight_ft = calc_weight_factor(p, taskc);` — `:25-27` "Prioritize a wake-up task since this is a clear sign of immediate consumer. If it is a synchronous wakeup, double the prioritization."; `:68-71` "Prioritize a kernel task since many kernel tasks serve latency-critical jobs."; `:110-113` "Respect nice priority. */ return p->scx.weight * weight_boost + 1;"
+  - `lat_cri.bpf.c:194-201`: "Wake frequency and wait frequency represent how much a task is used for a producer and a consumer, respectively. If both are high, the task is in the middle of a task chain. The ratio tends to follow an exponentially skewed distribution, so we linearize it using sqrt." then `log_wwf = log2x(wait_ft * wake_ft); lat_cri = log_wwf + log2x(runtime_ft * weight_ft);`
+  - `lat_cri.bpf.c:209-217`: "Determine latency criticality of a task in a context-aware manner by considering its waker and wakee's latency criticality. Forward propagation is to keep the waker's momentum forward to the wakee, and backward propagation is to boost the low-priority waker (i.e., priority inversion) for the next time. Propagation decays geometrically and is capped to a limit to prevent unlimited cyclic inflation of latency-criticality."
+- Coverage: T1 — schedulers shipped at v1.1.3 (15 Rust schedulers listed); production statements (Meta "in the process of mass production deployment"; Meta/Google "fully committed"); distro install routes (Ubuntu, Arch package `scx-scheds`, Gentoo, Fedora COPR maintained by CachyOS community, Nix, openSUSE). No statement in these files that Valve/SteamOS ships an scx scheduler. Safety: watchdog, sysrq-S; OVERVIEW credits BPF static analysis at load time. T2 — LAVD's latency-criticality estimate is computed from task behaviour (wait frequency, wake frequency, inverse average runtime, a weight factor from wakeup type/kernel-task/lock-holder/affinity, nice weight) plus waker/wakee propagation; no process-name matching in `lat_cri.bpf.c`. Copyright line names Valve Corporation. Not an observation.
+
+### S2-10 — Changwoo Min, "Optimizing Scheduler for Linux Gaming", OSS NA 2024 slides
+
+- Citation: Changwoo Min (Igalia), "Optimizing Scheduler for Linux Gaming", Open Source Summit North America 2024, 17 April 2024; slide deck PDF (30 slides; PDF title "scx-lavd-oss-na24").
+- Copy: https://static.sched.com/hosted_files/ossna2024/9b/scx-lavd-oss-na24.pdf · 2026-10-07 · `sources/S2-10/scx-lavd-oss-na24.pdf` · SHA-256 `e62d69cd401021f8bfedadde2c4de62b01383facaa83acce7d218af3b6402475`. Event page ossna2024.sched.com/event/1aBOT → 403 (abstract not obtained).
+- Passages:
+  - Slide 12: "Around 300 tasks are scheduled while running a game. ○ Around 90% are long-living tasks; only 10% of tasks are terminated. ● Top 30-40 most frequently scheduled tasks take 95% of scheduling. ○ Around half of them are system tasks -- especially, wine, graphics, and audio servers, taking 30--40% of scheduling. ○ There are 15-20 game-specific tasks, which takes 60-70% scheduling. ● CPU utilization is moderately high -- around 65-95%, but not overloaded (i.e., no 100%)."
+  - Slide 13: "In general, tasks run for very short duration – roughly a few 100s usec on average to a few msec maximum. ● Task execution time is very stable and is predictable using its average."
+  - Slide 14: "Preemption (e.g., timer interrupt) takes only 25-30% of scheduling. ● 70-75% of scheduling is initiated by waiting system calls – such as epoll, pipe_read, futex_wait, etc."
+  - Slide 19: "The development procedure is somewhat similar to kernel module programming but BPF guarantees safety (e.g., no memory bugs)"
+  - Slide 20: "Rapid experimentation is possible ○ No reboot required, yay! ○ BPF cannot crash the host machine!"
+  - Slide 22: "A new scheduling algorithm motivated by gaming workloads on Linux … Proportional share scheduler ○ Respect nice value to pursue the fair use of CPU time ● (Virtual) deadline based algorithm … But it is not a real-time scheduling algorithm ● Latency-criticality is the first class factor in making scheduling decisions ○ Infer a latency criticality of a task from task's behavior in a task graph"
+  - Slide 25: "[Task A] --> [Task B] --> [Task C] ● We define Task B is more latency-critical in the following cases: ○ as Task B's runtime per schedule is shorter (runtime B) … ○ as Task B wakes Task C more frequently (wake_freq B) … ○ as Task B waits for Task A more frequently (wait_freq B)"
+  - Slide 27: "The LAVD scheduler tries to schedule all runnable tasks at least once within a predefined time window, which is called a targeted latency (e.g., 15 msec)."
+  - Slide 29: "In many cases, LAVD provides better or similar performance than EEVDF in terms of average FPS and Low 1% FPS" (chart labelled "6.9-rc1 upstream kernel").
+- Coverage: T2 — latency criticality from runtime, wake frequency, wait frequency in a task graph; origin in gaming (Steam Deck/Proton context, slide 4); no deployment claim. T12 (adjacent, not assigned) — "around 300 tasks" per game run, unnamed games/machine. One observation set (traces "while playing games"); machine, games and window not named in the slides; slide 6 FPS comparison names neither game nor schedulers ("Scheduler A/B").
+
+### S2-11 — Linux Plumbers Conference sched_ext microconference pages (2024, 2025)
+
+- Citation: LPC 2024 (Vienna, 18–20 Sep 2024) "Sched-Ext: The BPF extensible scheduler class MC" session page; LPC 2025 (Tokyo) timetable export.
+- Copies: https://lpc.events/event/18/sessions/192/ · 2026-10-07 · `sources/S2-11/lpc2024-mc.html` · SHA-256 `72f0096ed12302ed72489ce86ea909f7484a9b6392d01718bf73a31e5d2fb796`; https://lpc.events/export/timetable/19.json · 2026-10-07 · `sources/S2-11/lpc2025-timetable.json` · SHA-256 `3157aac98e4bf1057a3fa1c8c8e75619baa839877d41ad08cf1c0d511aa8f367`.
+- Passages (abstract text from the embedded/exported JSON, field `description`):
+  - LPC 2024, contribution 1713, "Using sched_ext to improve frame rates on the SteamDeck" (Changwoo Min): "Igalia has been working to leverage sched_ext support on the SteamDeck, and has been seeing encouraging results. This discussion will allow us to discuss techniques that do and don't work for interactive workload testing, optimizing for gaming workloads, and how to validate interactive scheduler changes."
+  - LPC 2024 session description: "Practical applications of sched_ext: exploring how sched_ext can be utilized and its benefits in real production environments (e.g., SteamDeck, Meta)."
+  - LPC 2024, contribution 1873, "Deploying and managing sched_ext schedulers in CachyOS" (Peter Jung, Piotr Górski): "As early adopters of sched-ext (we started shipping it in December 2023), we've learned some important lessons from the experience with our user base"
+  - LPC 2024, contribution 1687, "Optimizing Google Search and beyond with pluggable scheduling" (Barret Rhoden, Josh Don): "A look at some of the BPF based policies we've developed that are currently running (or will soon be running), large chunks of Google's infrastructure."
+  - LPC 2025, contribution 2099, "How do we make a Steamdeck scheduler work on large servers" (David Dai, Ryan Newton), 2025-12-12 18:12 JST: "With the proliferations of many sched_ext schedulers, including ones that caters for very specific workloads within Meta. There exists a need for a "default" fleet scheduler that "just works" for a wide range of hardware and use cases. SCX_LAVD is one such candidate as one of the more mature sched_ext schedulers out there with various heuristics to favor latency critical threads."
+  - LPC 2025, contribution 2033, "The Current Status and Future Direction of the LAVD Scheduler" (Changwoo Min), 2025-12-12 17:54 JST: "The LAVD scheduler is a sched_ext scheduler designed to optimize latency and energy efficiency, with an initial focus on gaming workloads."
+  - LPC 2025, contribution 2150, "Steps Towards a Gaming-Optimized Scheduler" (Changwoo Min), 2025-12-13: "As a case study, we will share insights from developing LAVD, a sched_ext-based scheduler designed for gaming workloads in mind."
+  - LPC 2025, contribution 2039, "Accelerating AI training fleets with sched_ext" (Patrick Lu, Valentin Andrei, Pat Somaru): "We used sched_ext, a user-space scheduler (scx_layered) and we deployed it to the entire Reality Labs GPU fleet with tens of thousands of GPUs."
+- Coverage: T2 — at LPC 2025 LAVD is described by Meta speakers as a *candidate* default fleet scheduler (not as deployed). T1 — CachyOS shipping sched_ext since December 2023 (self-report); Google BPF policies "currently running (or will soon be running)"; Meta scx_layered deployed across Reality Labs GPU fleet. These are talk abstracts (claims by speakers), not observations.
+
+### S2-12 — LWN, "Sched_ext at LPC 2024"
+
+- Citation: Jonathan Corbet, "Sched_ext at LPC 2024", LWN.net, 26 September 2024.
+- Copy: https://lwn.net/Articles/991205/ · 2026-10-07 · `sources/S2-12/lwn-991205.html` · SHA-256 `9421ec522a2be2dbc5ae7a57ddee3d8c8fae088e31aa0af50ee67d178c62b93a`
+- Passages (section "An overview" / "Higher frame rates"):
+  - "Sched_ext has engendered its share of controversy since, but is currently slated to be part of the 6.12 kernel release."
+  - "One of the best things about sched_ext, he said, is that it cannot crash the machine. All of the usual BPF safety checks apply here. Additionally, if the kernel detects a scheduling problem, it will simply revert the system to the EEVDF scheduler and life goes on."
+  - "One of those appears to be scx_lavd (about which more was heard later), which is headed for shipment in Steam Deck gaming systems. scx_bpfland is showing promising results for personal machines, while scx_layered has been deployed in over one million machines and is delivering significant performance gains."
+  - "Support for sched_ext is now shipping in a number of distributions, including CachyOS, Arch Linux, Ubuntu, Fedora, Nix, and openSUSE."
+  - "The goal behind this scheduler was to provide the best gaming experience on Linux in general — not just on the Steam Deck."
+  - "A key aspect of gaming workloads is that tasks tend to run quickly, typically no more than 100µs at a time. … tasks that wait on others, and are waited on in turn, have a large impact on overall performance and are thus "latency critical"."
+  - "Each task has a virtual deadline calculated for it, which is a function of both its waking and waiting frequencies — its latency criticality, in other words. Tasks that both wait often for others and are often waited upon are seen as the most critical, so their deadline is the shortest."
+  - "Min concluded by saying that, for gaming applications, scx_lavd consistently enables higher frame rates than the EEVDF scheduler while using (slightly) less power and with fewer stutters."
+- Coverage: T1 — fallback to EEVDF; distributions shipping sched_ext support (as reported from Heo's talk). T2 — LAVD "headed for shipment in Steam Deck" (Sept 2024, future tense); mechanism (wake/wait frequency); scx_layered >1M machines (attributed to Heo). Report of talks; not an observation.
+
+### S2-13 — LWN, "Lessons from creating a gaming-oriented scheduler"
+
+- Citation: Jake Edge, "Lessons from creating a gaming-oriented scheduler", LWN.net, 7 January 2026 (report of Changwoo Min's session, Gaming on Linux MC, LPC 2025, Tokyo).
+- Copy: https://lwn.net/Articles/1051430/ · 2026-10-07 · `sources/S2-13/lwn-1051430.html` · SHA-256 `bd65bcac0d4bcd75dee60080a4cbbb8d7b6e03acc4f9700c64c7052f6cbf2ddd`
+- Passages:
+  - "Min said that he has been developing LAVD as part of his work at Igalia on SteamOS and the Steam Deck. The name of the scheduler is a bit of a mouthful, but it is focused on making Windows games run better on Linux."
+  - "In addition, there were sessions on LAVD as part of the sched_ext microconference this year, including one about adapting LAVD to be the default scheduler for Meta's production fleet."
+  - "So he developed VaporMark—the name refers to Steam—which analyzes data collected using "perf sched record"."
+  - "there are often 20 or 30 tasks in a chain that all need to collaborate. Finding tasks with a high waker or wakee frequency and prioritizing them is the basis of the LAVD scheduling policy."
+  - "An attendee asked whether LAVD used the same scheduler for all games on the Steam Deck. Min said that LAVD is a single scheduler, though there are some tuning knobs that can be changed with command-line parameters."
+- Coverage: T2 — origin (Igalia work on SteamOS/Steam Deck), mechanism (waker/wakee frequency), Meta "adapting LAVD to be the default scheduler" (as a session topic, not a deployment statement). The article does not state that SteamOS ships LAVD by default. Not an observation.
+
+### S2-14 — Changwoo Min, Igalia blog, "sched_ext: a BPF-extensible scheduler class (Part 1)"
+
+- Citation: Changwoo Min, blogs.igalia.com/changwoo, 18 December 2023.
+- Copy: https://blogs.igalia.com/changwoo/sched-ext-a-bpf-extensible-scheduler-class-part-1/ · 2026-10-07 · `sources/S2-14/igalia-part1.html` · SHA-256 `90043014ee0a7a6d084ae23c0c1ab8b486e593e748011df3465d4e35484348f2`
+- Passages:
+  - "Due to such limitations, the CFS scheduler was recently retired after serving 15+ years. The Earliest Eligible Virtual Deadline First (EEVDF) scheduler was introduced as a new default scheduler in the Linux kernel 6.6 release (November 2023)."
+  - "For example, Linux-based gaming devices, like the Steam Deck, usually run Windows-based games. Hyperscalars, like Google and Meta, standardize their servers to a few types (e.g., OCP) for maintenance and run a certain set of workloads in a cluster."
+- Coverage: T2 (motivation context only; no LAVD content); T9 (EEVDF default since 6.6 — author's statement). Not an observation. The Igalia blog index lists only this and a Part 2; no LAVD post.
+
+### S2-15 — Valve, SteamOS 3.8 release announcement (Steam news feed)
+
+- Citation: Valve, "SteamOS 3.8", Steam Community Announcements for the Steam Deck app (appid 1675200), gid 1835871199302299, posted 2026-06-18 00:07 UTC (feed author field "nya"); the same line appears in "SteamOS 3.8.0 Preview: Second Clutch" (gid 1827626365755956, 2026-03-19) and every 3.8.x beta between.
+- Copy: https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=1675200&count=200&maxlength=0 · 2026-10-07 · `sources/S2-15/steam-news.json` · SHA-256 `f8bfe8727e14c13a64441d863810eca9f91cd3ed59e471b7e2dc020132ae3b75` (item URL https://steamstore-a.akamaihd.net/news/externalpost/steam_community_announcements/1835871199302299)
+- Passage (item `contents`, BBCode): "[*][p]Initial support for LAVD CPU scheduler via `steamosctl set-cpu-scheduler lavd`[/p][/*]"
+- Coverage: T2 — Valve's own release note: SteamOS 3.8 (stable 2026-06-18; first in preview 2026-03-19) adds "Initial support" for LAVD selectable by a command. It does not say LAVD is the default. Not an observation.
+
+### S2-16 — Microsoft Learn, Game Mode API documentation
+
+- Citation: Microsoft, "Game Mode" (previous-versions/windows/desktop/gamemode/game-mode-portal; ms.date 2018-05-31, updated_at 2021-10-26); "expandedresources.h header" (ms.date 2019-01-11); "HasExpandedResources function" (ms.date 2018-12-05, "Last updated on 2024-02-22"); "GetExpandedResourceExclusiveCpuCount function" (ms.date 2018-12-05).
+- Copies (2026-10-07): game-mode-portal → `sources/S2-16/gamemode-portal.html` SHA-256 `20bb539421a92b44ac2f5d53378c82d1092d8923ae65e0c48a4cbed5297117d0`; expandedresources → `expandedresources.html` `0614bd3ae3b0a531d96e5c33d1e0b2bae8e329ac07c6f5fd7ff06d40966231e7`; HasExpandedResources → `hasexpandedresources.html` `aa3aab9ee8e7eac88a427dbff298546af3ad8f397a53efa6408de4f5ca960ade`; GetExpandedResourceExclusiveCpuCount → `getexpandedresourceexclusivecpucount.html` `787e3c5cf070dc1f055fc766d7c34651197bafe5e6e6fc498980aafb45c7810e`.
+- Passages (game-mode-portal):
+  - "The Game Mode APIs are deprecated in Windows 10, version 1809 and later."
+  - "Game Mode provides customers with the best possible gaming experience by fully utilizing the capacity of their current hardware. It does this by granting a game exclusive or priority access to hardware resources. These resources being dedicated to the game help it hit performance targets more consistently. The performance increase that comes from Game Mode is directly related to the number and impact of other activities running on the device."
+  - "The app must be in the foreground and have focus before exclusive resources are granted."
+  - "Game Mode works by default for most Windows games, requiring no action or opt-in by the customer, and no work by the game developer."
+  - "By using the expandedResources capability, you can explicitly declare that the game will work with Game Mode. As part of launching the game, the process will go into Game Mode with a set of defaults"
+  - "ReleaseExclusiveCpuSets: Opt out of CPU exclusivity."
+  - HasExpandedResources: "Gets the current resource state (that is, whether the app is running in Game Mode or shared mode)." / "True if the app is running in Game Mode; otherwise, false."
+- Coverage: T6 — recognition: works by default "for most Windows games" (mechanism of recognising a game not documented on these pages), or declared via the `expandedResources` capability; foreground+focus required; state exposed as a boolean (Game Mode vs shared mode) — on/off, not graded; effect on other processes stated only as "exclusive or priority access to hardware resources" / CPU exclusivity. Windows Update is not mentioned. No list of executables, no audio-workstation mention. Not an observation.
+
+### S2-17 — Xbox Support, Game Mode article (not obtained)
+
+- URL https://support.xbox.com/en-US/help/games-apps/game-setup-and-play/use-game-mode-gaming-on-pc · 2026-10-07 · `sources/S2-17/xbox-gamemode.html` SHA-256 `2556b45c49631ebe5bb837cc131915c39aa74eb136ef7ff3bce81fad7149d06e` — a 2.9 kB JavaScript shell (`<noscript>You need to enable JavaScript to run this app.</noscript>`); no article text. Content API attempts 404/502 (search log #14). No passage; recorded for the dead end only.
+
+### S2-18 — Apple Support, "Use Game Mode"
+
+- Citation: Apple, "Use Game Mode", support.apple.com/en-us/105118, "Published Date: September 14, 2026".
+- Copy: https://support.apple.com/en-us/105118 · 2026-10-07 · `sources/S2-18/apple-gamemode.html` · SHA-256 `10857702fd6e6ebdf41c7ee87c0e429f5ae4424eb9d9ab60df0a61fb36c95336`
+- Passages:
+  - "Game Mode optimizes your gaming experience by giving your game the highest priority access to your CPU and GPU, lowering usage for background tasks. This can result in smoother, more consistent frame rates and improved in-game responsiveness."
+  - "Game Mode doubles the Bluetooth sampling rate, which reduces input latency and audio latency for wireless accessories like game controllers and AirPods."
+  - "Mac with Apple silicon and macOS Sonoma 14 or later and a game that supports macOS full-screen mode."
+  - "When your game enters full screen, Game Mode automatically turns on for that game. Quitting the game automatically turns Game Mode off. You can also turn Game Mode off or on manually while your game is still in full screen."
+  - "If you turn Game Mode off in this way, it remains off for that game until you turn it on again — even if you quit and reopen the game."
+- Coverage: T6 — engages on full screen for "your game" (how the OS knows it is a game is not stated on this page); effect: highest CPU/GPU priority, lower background usage, doubled Bluetooth sampling; per-game on/off only. No audio-workstation coverage. Not an observation.
+
+### S2-19 — Feral Interactive GameMode (README, gamemoded(8), example config)
+
+- Citation: FeralInteractive/gamemode, master commit a74b8106a2236d1f2696aa44c93bc4c8ef13b42e (2026-06-15), meson version 1.8.2.
+- Copy: `git clone --depth 1 https://github.com/FeralInteractive/gamemode` and raw README (identical) · 2026-10-07 · `sources/S2-19/`. SHA-256: `README.md` `e45ea9a6c46221db01321aeeaf38d66beb711b1acd0f08a06cd5951790afea26`; `data/gamemoded.8.in` `f984c2c7ef0aca9037df7e709b108bc2cba177cab847810fc85407d691cb3d67`; `example/gamemode.ini` `5c54f8872556aa78f3b2731ddef0286621e41d2ba9877421ea1a99d7e46eee87`.
+- Passages:
+  - `README.md:2`: "**GameMode** is a daemon/lib combo for Linux that allows games to request a set of optimisations be temporarily applied to the host OS and/or a game process."
+  - `README.md:6-14`: "Currently GameMode includes support for optimisations including: * CPU governor * I/O priority * Process niceness * Kernel scheduler (`SCHED_ISO`) * Screensaver inhibiting * GPU performance mode (NVIDIA and AMD), GPU overclocking (NVIDIA) * CPU core pinning or parking * Custom scripts"
+  - `README.md:23-28`: "For games/launchers which integrate GameMode support, simply running the game will automatically activate GameMode. For others, you must manually request GameMode when running the game. This can be done by launching the game through `gamemoderun`: ```bash gamemoderun ./game ```"
+  - `gamemoded.8.in:49-56`: "if( gamemode_request_start() < 0 ) { … } /* run the process */ /* Not required, gamemoded can clean up after game exits */ gamemode_request_end();"
+  - `gamemode.ini:24-27`: "GameMode can change the scheduler policy to SCHED_ISO on kernels which support it (currently not supported by upstream kernels). Can be set to "auto", "on" or "off". … Defaults to "off"."
+  - `gamemode.ini:29-33`: "GameMode can renice game processes. You can put any value between 0 and 20 here, the value will be negated and applied as a nice value (0 means no change). Defaults to 0."
+  - `gamemode.ini:35-39`: "By default, GameMode adjusts the iopriority of clients to BE/0"
+  - `gamemode.ini:49-55`: "[filter] ; If "whitelist" entry has a value(s) ; gamemode will reject anything not in the whitelist ;whitelist=RiseOfTheTombRaider ; Gamemode will always reject anything in the blacklist ;blacklist=HalfLife3"
+- Coverage: T6 — a game enters by its own request (library call / integrated launcher) or by being launched under `gamemoderun`; no built-in list of games (an optional user whitelist/blacklist in config, commented out by default); changes governor, ioprio (default BE/0), optional renice (default 0), optional SCHED_ISO (default off, not upstream). Mode is per-client on/off; settings are configured globally. No audio-workstation mention. Not an observation.
+
+### S2-20 — Apple Developer documentation, Info.plist keys `GCSupportsGameMode` and `LSSupportsGameMode`
+
+- Copies: https://developer.apple.com/tutorials/data/documentation/bundleresources/information-property-list/gcsupportsgamemode.json · 2026-10-07 · `sources/S2-20/gcsupportsgamemode.json` · SHA-256 `95900804680b265f69ed03c7bc7712aa8b500a5627fcfe68279ae9c25a19fbf8`; …/lssupportsgamemode.json · `sources/S2-20/lssupportsgamemode.json` · SHA-256 `a712464b1dd11aada283ec3991b77e6e39fe78cd486669a66b40a304653db04b`.
+- Passages (JSON `abstract` and `primaryContentSections` text):
+  - GCSupportsGameMode abstract: "A Boolean value indicating whether the app supports game mode." (platforms iOS/iPadOS introducedAt 18.0, deprecatedAt 18.6)
+  - LSSupportsGameMode abstract: "A Boolean value indicating whether the app supports Game Mode." (iOS/iPadOS 18.6, macOS 26.0)
+  - LSSupportsGameMode discussion: "Game Mode turns on automatically when you launch a game, and minimizes background activity for smoother gameplay and more consistent frame rates. Set this key to YES to make Game Mode available when your app is running. For games that aren't resource intensive enough to benefit from Game Mode, set this key to NO to turn off Game Mode for your app." / "If you don't include this key in your Info.plist, Game Mode might not turn on for your game."
+- Coverage: T6 — the app declares support via a Boolean Info.plist key (developer-declared, not a system list). How the system decides an app is "a game" is not stated here. Not an observation.
+
+### S2-21 — Apple, Energy Efficiency Guides: Quality-of-Service classes
+
+- Citation: Apple, "Energy Efficiency Guide for iOS Apps — Prioritize Work with Quality of Service Classes" and "Energy Efficiency Guide for Mac Apps — Prioritize Work at the Task Level" (documentation archive; page footer "Copyright © 2018 Apple Inc."; "Updated: 2016-09-13").
+- Copies: https://developer.apple.com/library/archive/documentation/Performance/Conceptual/EnergyGuide-iOS/PrioritizeWorkWithQoS.html → `sources/S2-21/energy-qos-ios.html` SHA-256 `14ef57b3508997a5385ab672d52b3e32971750344f362b8aa3dca57c10d25980`; https://developer.apple.com/library/archive/documentation/Performance/Conceptual/power_efficiency_guidelines_osx/PrioritizeWorkAtTheTaskLevel.html → `sources/S2-21/energy-qos-mac.html` SHA-256 `310680a33cba5abf33c3ade15bf87bb52cc03fdf0bac1bbca716b90b3df5119d`. Both 2026-10-07.
+- Passages (Mac guide unless noted):
+  - About QoS: "A quality of service (QoS) class allows you to categorize work to be performed by NSOperation, NSOperationQueue, NSTask, NSThread, dispatch queues, and pthreads (POSIX threads). By assigning a QoS to work, you indicate its importance, and the system prioritizes it and schedules it accordingly."
+  - "As a developer, you can help the system prioritize work more effectively by categorizing your app's work, based on importance."
+  - Choosing: "The system uses QoS information to adjust priorities such as scheduling, CPU and I/O throughput, and timer latency."
+  - Table 10-1 (Primary QoS classes): "User-interactive … Work is virtually instantaneous." / "User-initiated … Work is nearly instantaneous, such as a few seconds or less." / "Utility … Work takes a few seconds to a few minutes." / "Background — Work that operates in the background and isn't visible to the user, such as indexing, synchronizing, and backups. Focuses on energy efficiency. Work takes significant time, such as minutes or hours."
+  - Table 10-2 (Special): "Default — The priority level of this QoS falls between user-initiated and utility. Work that has no QoS information assigned is treated as default." / "Unspecified — This represents the absence of QoS information and cues the system that an environmental QoS should be inferred."
+  - "Important: Optimally, run your app at a QoS level of utility or lower at least 90% of the time when user activity is not occurring."
+  - iOS guide Note: "QoS is available in iOS 8 and later."
+- Coverage: T7 — QoS class names (user-interactive, user-initiated, utility, background; default, unspecified); declared by the developer on work items; work with none is treated as default. Contains a recommendation (≤ utility 90% of idle time) but no data on uptake. Not an observation.
+
+### S2-22 — plocate, `plocate-updatedb.service.in` (Debian source 1.1.25-1)
+
+- Copy: https://sources.debian.org/data/main/p/plocate/1.1.25-1/plocate-updatedb.service.in · 2026-10-07 · `sources/S2-22/plocate-updatedb.service.in` · SHA-256 `d8867da6abc3e7062679c51c8b7e46d8f9484c337b127a0efe97410e0bede5a7` (upstream tarball file as packaged in Debian sid/forky 1.1.25-1; upstream git.sesse.net unreachable, 502).
+- Passages: `:5-9` "Type=oneshot / ExecStart=@sbindir@/@updatedb_progname@ / LimitNOFILE=131072 / IOSchedulingClass=idle / Nice=19"
+- Coverage: T7 — plocate's updatedb unit declares idle I/O class and nice 19; no CPUSchedulingPolicy. Not an observation.
+
+### S2-23 — mlocate, Debian packaging (salsa.debian.org/debian/mlocate, 0.26-5)
+
+- Copy: `git clone --depth 1 https://salsa.debian.org/debian/mlocate.git` commit cb06595e75334fc5bbc4285b82bf7d1bec89e340 (2020-12-02; debian/changelog top entry 0.26-5) · 2026-10-07 · `sources/S2-23/mlocate/`. SHA-256: `debian/mlocate.service` `6d532515da72cf737b2c89d2d7f39c1330f25b6f9a4599f7d8eaa71bbfe4ed50`; `debian/mlocate.cron.daily` `d65238b71157afaaf0e7180aef6f2d0731bd8783fb1276e00c765b20d37d93aa`.
+- Passages: `debian/mlocate.service:7-10` "ExecStart=/usr/bin/updatedb.mlocate / Nice=19 / IOSchedulingClass=idle / IOSchedulingPriority=7"; `debian/mlocate.cron.daily:20-23` "# See ionice(1) / if [ -x /usr/bin/ionice ] && / /usr/bin/ionice -c3 true 2>/dev/null; then / IONICE="/usr/bin/ionice -c3""
+- Coverage: T7 — the Debian packaging (not upstream mlocate) declares nice 19 and idle I/O class. Not an observation.
+
+### S2-24 — GNOME LocalSearch (formerly tracker-miners), indexer source
+
+- Copy: `git clone --depth 1 https://gitlab.gnome.org/GNOME/localsearch.git` commit 30d07f6c9be0d6d36b04a1f9c501cb71b9fad5b9 (2026-10-03; meson.build `version: '3.12.0'`) · 2026-10-07 · `sources/S2-24/localsearch/src/indexer/tracker-main.c` SHA-256 `bf0bf720467204e003ad50ccfdd5530211664574714755a3d37e342041d0bf5a`.
+- Passages: `tracker-main.c:84` `TRACKER_NOTE (CONFIG, g_message ("Setting scheduler policy to SCHED_IDLE"));`; `:95` `if (pthread_setschedparam (pthread_self(), SCHED_IDLE, &sp) < 0)`; `:100-102` "ioprio = 7; /* priority is ignored with idle class */ ioclass = IOPRIO_CLASS_IDLE << IOPRIO_CLASS_SHIFT; if (syscall (SYS_ioprio_set, IOPRIO_WHO_PROCESS, 0, ioprio | ioclass) < 0)"; `:106-107` "Setting priority nice level to 19" … `if (nice (19) < 0)`.
+- Coverage: T7 — the indexer sets SCHED_IDLE, idle I/O class and nice 19 in source (not via its systemd unit). Not an observation.
+
+### S2-25 — KDE Baloo file indexer
+
+- Copy: `git clone --depth 1 https://invent.kde.org/frameworks/baloo.git` commit 20e6821bae1e24d3e480746c4bfa9ef68d5163b2 (2026-10-07; KF_VERSION 6.32.0) · 2026-10-07 · `sources/S2-25/baloo/`. SHA-256: `src/file/kde-baloo.service.in` `68da2312f10da6986108515e28001bc9d4f753cee0441f9dd71036f098ca44d3`; `src/file/priority.cpp` `b6df2a1172131df3fec91fbf5fb254909dd6abe282b339b35f8b90739109d7d5`.
+- Passages: `kde-baloo.service.in:8-12` "Slice=background.slice … # We'll basically only want to consume resources if they aren't needed anywhere else, hence weights are way low. CPUWeight=1 IOWeight=1"; `priority.cpp:27` `syscall(SYS_ioprio_set, IOPRIO_WHO_PROCESS, 0, ioprio_value(IOPRIO_CLASS_IDLE, 0, IOPRIO_HINT_NONE))`; `:44` `return !setpriority(PRIO_PROCESS, 0, 19);`; `:53` `return !sched_setscheduler(0, SCHED_BATCH, &param);`; `:65` `return !sched_setscheduler(0, SCHED_IDLE, &param);`. Callers: `src/file/main.cpp:28-30` `lowerIOPriority(); lowerSchedulingPriority(); lowerPriority();` (daemon → SCHED_BATCH); `src/file/extractor/main.cpp:21-23` `lowerIOPriority(); setIdleSchedulingPriority(); lowerPriority();` (extractor → SCHED_IDLE).
+- Coverage: T7 — unit declares CPUWeight=1/IOWeight=1 in background.slice; source sets idle I/O, nice 19, SCHED_BATCH (daemon) / SCHED_IDLE (extractor). Not an observation.
+
+### S2-26 — ClamAV systemd units
+
+- Copy: `git clone --depth 1 https://github.com/Cisco-Talos/clamav` commit 72cd48c9faed4fa4afc22bc4ed0b9b19f8d3f8f7 (2026-08-27) · 2026-10-07 · SHA-256: `clamd/clamav-daemon.service.in` `e0bd83bb1bb454bdb7a374c276a4a840476a2525b9926bd771d8fa1741d241ff`; `freshclam/clamav-freshclam.service.in` `eaefe47e09e594d77c12c5c3d0f936f989d4db5976bf4cbaebfb48f43f3efdb1`; `freshclam/clamav-freshclam-once.service.in` `07deb4061f0c4261bd55b1212fd9dc6df28626af8b4fa78aa75ba08e6baed0d8`.
+- Passages: `clamav-daemon.service.in:9-13` "[Service] / ExecStart=@prefix@/sbin/clamd --foreground=true / # Reload the database / ExecReload=/bin/kill -USR2 $MAINPID / TimeoutStartSec=420"; `clamav-freshclam.service.in:9-10` "[Service] / ExecStart=@prefix@/bin/freshclam -d --foreground=true".
+- Coverage: T7 — upstream clamd and freshclam units declare no Nice=, CPUSchedulingPolicy= or IOSchedulingClass= (full [Service] sections quoted; grep over the whole tree found no scheduling-priority call). Not an observation.
+
+### S2-27 — Déjà Dup
+
+- Copy: `git clone --depth 1 https://gitlab.gnome.org/World/deja-dup.git` commit bd44277d731bb40165a7ef73b2a2dd038911995f (2026-09-28; version 50.3) · 2026-10-07 · `libdeja/CommonUtils.vala` SHA-256 `4963c2501f20e74c6b76c8b1d15ff9a0ac6af7e181c5896135ba5d79f273a010`.
+- Passages: `CommonUtils.vala:129-135` "// Check for ionice to be a good disk citizen … cmd = {"ionice", "-t", "-c3"}; // idle class … cmd = {"ionice", "-t", "-c2", "-n7"}; // lowest priority in best-effort class"; `:138-148` "// chrt's idle class is more-idle than nice, so prefer it … cmd += "chrt"; cmd += "--idle"; cmd += "0"; … cmd += "nice"; cmd += "-n19";"
+- Coverage: T7 — backup subprocesses wrapped in idle I/O and SCHED_IDLE (chrt --idle) or nice 19, in source. Not an observation.
+
+### S2-28 — BorgBackup and restic
+
+- Copies: `git clone --depth 1` borgbackup/borg commit 257212e23dd02d23f8e062365920b74ed14aee95 (2026-10-07); restic/restic commit 5127c4abf921857fde4ae51f566c86028c8c2911 (2026-09-25) · 2026-10-07 · `sources/S2-28/`; restic `doc/faq.rst` SHA-256 `c2230724948ab7828a900ab97d98d1c1a879f546fa2b102934c42a2117a3dc31`.
+- Passages: restic `doc/faq.rst:156-163` "If you'd like to change the **IO priority** of restic, run it in the following way :: $ ionice -c2 -n0 ./restic -r /media/your/backup/ backup /home This runs ``restic`` in the so-called best *effort class* (``-c2``), with the highest possible priority (``-n0``)."; `:170-175` "To change the **CPU scheduling priority** to a higher-than-standard value, you would run: :: $ nice --10 ./restic -r /media/your/backup/ backup /home"
+- Coverage: T7 — neither repository ships a systemd unit (find found no `*.service`/`*.timer`); borg: no scheduling-priority setting found by grep; restic: none set by the program; its FAQ shows users how to *raise* restic's I/O and CPU priority (documentation example, not a measured case). Not an observation.
+
+### S2-29 — RealtimeKit (rtkit) README
+
+- Copy: https://raw.githubusercontent.com/heftig/rtkit/master/README (HEAD c295fa849f52b487be6433e69e08b46251950399) · 2026-10-07 · `sources/S2-29/rtkit-README` · SHA-256 `d72cc9442375efee4f0da08451e74e3e82ef2067eccf8827bd5c7db08ff6a7f4`
+- Passages: `README:7-11` "RealtimeKit is a D-Bus system service that changes the scheduling policy of user processes/threads to SCHED_RR (i.e. realtime scheduling mode) on request. It is intended to be used as a secure mechanism to allow real-time scheduling to be used by normal user processes."; `:24-29` "* Limits are enforced on all user controllable resources, only a maximum number of users, processes, threads can request RT scheduling at the same time. * Only a limited number of threads may be made RT in a specific time frame."; `:36-40` "RealtimeKit also provides a-posteriori policy enforcement, i.e. it includes a canary-based watchdog that automatically demotes all real-time threads to SCHED_OTHER should the system overload despite the logic pointed out above."; `:52-56` "If processes that have real-time scheduling privileges enter a busy loop they can freeze the entire the system."
+- Coverage: T7 — a mechanism for unprivileged processes to obtain RT/negative-nice on request, with rate limits and a demotion watchdog; documents the risk of runaway RT, but no documented case of an application over-claiming. Not an observation.
+
+### S2-30 — Ananicy (Nefelim4ag/Ananicy)
+
+- Copy: `git clone --depth 1 https://github.com/Nefelim4ag/Ananicy` commit 1e2cc9a62ba3b6793e59da66aa0039f89e1ad49f (2023-03-21) · 2026-10-07 · `README.md` SHA-256 `7879441e10863035f42421925356910a9bbcc3040fc76346abb349e3bdc6b8d2`. Repository status via GitHub API (MCP search_repositories, 2026-10-07): `"archived":true`, `"pushed_at":"2023-03-21T15:03:42Z"`.
+- Passages: `README.md:22` "Ananicy (ANother Auto NICe daemon) — is a shell daemon created to manage processes' IO and CPU priorities, with community-driven set of rules for popular applications (anyone may add their own rule via github's pull request mechanism). It's mainly for desktop usage."; `:13-17` "Support for cmdline in rules added. This is particularly useful for applications that share the same name (looking at you Java). … { "name": "java", "cmdlines": ["freenet.node.NodeStarter"], "type": "service" }"; `:68` `{ "name": "gcc", "type": "Heavy_CPU", "nice": 19, "ioclass": "best-effort", "ionice": 7, "cgroup": "cpu90" }`; `:71-79` "All fields except `name` are optional. `name` used for match processes by exec bin name … Currently matching by other things is not supported."; `:86` "Ananicy loads all rules in ram while starting, so to apply rules, you must restart the service."; `:99-100` "Don't try set to high priority! Niceness can fix some performance problems, but can't give you more. Example: pulseaudio uses `nice` -11 by default, if you set other cpu hungry task, with `nice` {-20..-12} you can catch a sound glitches."
+- Coverage: T8 — matches on executable name (plus later cmdline); sets nice, ioclass, ionice, cgroup, type; rules added by pull request; repo archived. Note: the README's top section (lines 1-17) points to a fork (minq-ananicy) while the "Old description" says matching is by name only. Not an observation.
+
+### S2-31 — ananicy-cpp
+
+- Copy: `git clone --depth 1 https://gitlab.com/ananicy-cpp/ananicy-cpp.git` commit 3554447c1ca495478bd00e002078847dfd2205d6 (2026-08-18) · 2026-10-07 · `README.md` SHA-256 `603e16e86a3037f986669abd231c67b294a2cfd63e04dfe87839a012da7cbb39`.
+- Passages: `README.md:62-63` "If you want pre-made community rules, you can use the rules from the original Ananicy project. Simply copy them to your rules directory (by default, `/etc/ananicy.d`)."; `:176-183` "Add rules in `/etc/ananicy.d`. … Rules are defined in files ending with `.rules`. … Add `{"name": "gcc", "nice": 19, "latency_nice": 19, "sched": "batch", "ioclass": "idle"}` to the file."; `:214` "`nice: [-20-19]`: Set the nice value of the process."; `:221-225` "`sched: {"fifo", "rr", "normal", "batch", "idle"}`: Set the scheduling policy. - `fifo` and `rr` (for round-robin) are realtime scheduling policies, and must only be used for latency critical programs, like `Xorg` or `pulseaudio` for instance."; `:234-235` "`idle`: Very, very low priority, even lower than a nice value of `19`. Useful for background, low priority stuff, like file indexer for instance."; `:252` "`oom_score_adj: [-999, 999]`"; `:255` "`cpuset`: Pin the process to the specified CPU cores".
+- Coverage: T8 — rule keyed by `name`; sets nice, latency_nice, sched policy, rtprio, ioclass/ionice, oom_score_adj, cpuset, cgroup; rules are files in /etc/ananicy.d. Not an observation.
+
+### S2-32 — CachyOS/ananicy-rules
+
+- Copy: `git clone --depth 1 https://github.com/CachyOS/ananicy-rules` commit 03ef03fbf7e834385377432ccecaedd32e3414bb (2026-09-08) · 2026-10-07 · SHA-256: `README.md` `0886ec1f23a1ef772e676ba65bc13961ce7942bec6e0dc9d0936a4f60b16b7ed`; `00-types.types` `667d89cb61a949ac9b6595f2f318dc452b65c735d8cd6d4fcd5f934dc940591d`.
+- Passages: `README.md:3` "This is a ananicy-cpp-rules collection for ananicy-cpp maintained by the CachyOS team and the community."; `:22-30` "You can add your favorite games, apps, and more. … Game is meant to be ran under with Proton: `wine_proton` → … Provides a native version for Linux: `linux-native` → *Open the corresponding file depending on the letter.*"; `:43-46` "# Just Cause 2 https://store.steampowered.com/app/8190/Just_Cause_2/ { "name": "JustCause2.exe", "type": "Game" }"; `:35` "some games generate multiple processes. In such cases, you need to add all the processes related to the game."; `:63-65` "You can also contribute by opening an issue and providing information about the application … Make sure the app is not already in the repository before opening an issue."; `:73` "This will check rules syntax and also check for duplicates."; `:90` "Don't use absolute paths for the executables. Process name alone is enough."; `:94` "GameMode and ananicy-cpp both adjust the nice levels of processes. However, combining both tools is not recommended, and we strongly advise against doing so."; `00-types.types:4` `{ "type": "Game", "nice": -5, "ioclass": "best-effort", "sched": "normal" }`; `:22` `{ "type": "BG_CPUIO", "nice": 16, "ioclass": "idle", "sched": "idle" }`.
+- Own count on this clone (reader's observation, S3 territory, noted for completeness): 361 `.rules` files under `00-default/`; 15,815 lines containing `"name"`, of which 15,094 under `00-default/Games/`.
+- Coverage: T8 — matches on process name; maps to a type (Game → nice −5; BG_CPUIO → nice 16, idle I/O, SCHED_IDLE); maintained by CachyOS team and community via PR/issue with a lint for syntax and duplicates; per-game entries keyed by executable name. One snapshot (commit named).
+
+### S2-33 — llama.cpp `grammars/README.md` (GBNF)
+
+- Copy: https://raw.githubusercontent.com/ggml-org/llama.cpp/bd4eeaa047006cb1fe71999fbd11134b5836e167/grammars/README.md · 2026-10-07 · `sources/S2-33/grammars-README.md` · SHA-256 `e1874c0f08abbcfe45eff0b7b0290faa58f630981bf94274e2d99751ef3b0208`
+- Passages: `:3` "GBNF (GGML BNF) is a format for defining formal grammars to constrain model outputs in `llama.cpp`. For example, you can use it to force the model to generate valid JSON, or speak only in emojis."; `:106` "In a full grammar, the `root` rule always defines the starting point of the grammar. In other words, it specifies what the entire output must match."; `:125` "Grammars currently have performance gotchas (see https://github.com/ggml-org/llama.cpp/issues/4218)."; `:143` "`llama.cpp` supports converting a subset of https://json-schema.org/ to GBNF grammars"; `:151` "The JSON schema is only used to constrain the model output and is not injected into the prompt. The model has no visibility into the schema, so if you want it to understand the expected structure, describe it explicitly in your prompt."; `:207` "Unsupported features are skipped silently."
+- Coverage: T11 — grammar constrains output (root rule = entire output must match); JSON-schema support is a subset with silent skipping of unsupported features; no statement about truncation at token limits. Not an observation.
+
+### S2-34 — vLLM, "Structured Outputs" documentation, v0.31.0
+
+- Copy: https://raw.githubusercontent.com/vllm-project/vllm/v0.31.0/docs/features/structured_outputs.md · 2026-10-07 · `sources/S2-34/structured_outputs.md` · SHA-256 `0720d1d9b94f77b00710f76bb0c06a90b5ea7fbcbfb165ea65261bdf88733b1c`
+- Passages: `:3-5` "vLLM supports the generation of structured outputs using [xgrammar] or [guidance] as backends."; `:26-30` "- `choice`: the output will be exactly one of the choices. - `regex`: the output will follow the regex pattern. - `json`: the output will follow the JSON schema. - `grammar`: the output will follow the context free grammar. - `structural_tag`: Follow a JSON schema within a set of specified tags within the generated text."; `:82` "One of the most relevant features in structured text generation is the option to generate a valid JSON with pre-defined fields and formats."; `:214-216` "When using Qwen3 Coder models with reasoning enabled, structured outputs might become disabled if the reasoning content does not get parsed into the `reasoning` field separately (v0.11.2+). To use both features together, you must explicitly enable structured outputs in reasoning mode."
+- Coverage: T11 — documented guarantee: output "will follow" the regex/schema/grammar; reasoning + structured output interaction noted. No latency figure. Not an observation.
+
+### S2-35 — Ollama structured outputs (blog and API docs)
+
+- Copies (2026-10-07): https://ollama.com/blog/structured-outputs → `sources/S2-35/ollama-blog-structured-outputs.html` SHA-256 `5195d3ac338f801d91697211fdd061cf8abc2099a42f0986108d9fe1501897ae` (dated December 6, 2024); https://raw.githubusercontent.com/ollama/ollama/f9f4af6ce09223fde24949a5b3ccff061ca0abf4/docs/api.md → `docs_api.md` SHA-256 `96db03080e385dbabf5d70e75f298d41b75983bc30975cae56f7119f848dd0f5`; …/docs/capabilities/structured-outputs.mdx → `docs_capabilities_structured-outputs.mdx` SHA-256 `58ff3c8fb28ff567157e33759ca258f5eeb369a3b58a2a1ee856b72c4fcd6194`.
+- Passages: blog: "Ollama now supports structured outputs making it possible to constrain a model's output to a specific format defined by a JSON schema."; blog Tips: "For reliable use of structured outputs, consider to: Use Pydantic (Python) or Zod (JavaScript) to define the schema for the response / Add "return as JSON" to the prompt to help the model understand the request / Set the temperature to 0 for more deterministic output"; `api.md:63` "Structured outputs are supported by providing a JSON schema in the `format` parameter. The model will generate a response that matches the schema."; `api.md:67-70` "Enable JSON mode by setting the `format` parameter to `json`. This will structure the response as a valid JSON object. … It's important to instruct the model to use JSON in the `prompt`. Otherwise, the model may generate large amounts whitespace."; `api.md:246` "When `format` is set to `json`, the output will always be a well-formed JSON object. It's important to also instruct the model to respond in JSON."; `structured-outputs.mdx:5-9` "Ollama's Cloud currently does not support structured outputs. … Structured outputs let you enforce a JSON schema on model responses so you can reliably extract structured data".
+- Coverage: T11 — documented guarantees (schema match; well-formed JSON in json mode) with the caveats quoted. Not an observation.
+
+### S2-36 — PipeWire 1.6.9, `pipewire.conf(5)` and default `pipewire.conf`
+
+- Copies (2026-10-07): https://gitlab.freedesktop.org/pipewire/pipewire/-/raw/1.6.9/doc/dox/config/pipewire.conf.5.md → `sources/S2-36/pipewire.conf.5.md` SHA-256 `8e08d8e6ff3d2ccb8277066e937210e39928372dc92fe0cffd2dcef917d3a0d9`; …/-/raw/1.6.9/src/daemon/pipewire.conf.in → `pipewire.conf.in` SHA-256 `ad8d088fc02f4e8669e1731861c5839acf498eb5621913d4fdfeefd5dd40586e`.
+- Passages: `pipewire.conf.5.md:214-218` "@PAR@ pipewire.conf default.clock.rate = 48000 The default clock rate determines the real time duration of the min/max/default quantums."; `:227-228` "default.clock.min-quantum = 32 Default minimum quantum."; `:230-231` "default.clock.max-quantum = 8192 Default maximum quantum."; `:233-234` "default.clock.quantum = 1024 Default quantum used when no client specifies one."; `pipewire.conf.in:44-48` "#default.clock.rate = 48000 / #default.clock.allowed-rates = [ 48000 ] / #default.clock.quantum = 1024 / #default.clock.min-quantum = 32 / #default.clock.max-quantum = 2048" (note: the shipped config's commented max-quantum 2048 differs from the man page's 8192).
+- Coverage: T13 — defaults 48 kHz, quantum 1024 (implies 1024/48000 ≈ 21.3 ms; reader's arithmetic), min 32 (≈ 0.67 ms). Not an observation.
+
+### S2-37 — JACK2 v1.9.22, `jackd(1)` man page
+
+- Copy: https://raw.githubusercontent.com/jackaudio/jack2/v1.9.22/man/jackd.0 · 2026-10-07 · `sources/S2-37/jackd.0` · SHA-256 `2c4eb5886fc7bd153622f200225070690c4f487e794c2ef4359d5d380941a47b`
+- Passages (ALSA BACKEND OPTIONS): `:242-246` "-n, --nperiods int Number of periods of playback latency. In seconds, this corresponds to --nperiods times --period divided by --rate. The default is 2, the minimum allowed."; `:280-287` "-p, --period int Number of frames between JACK process() calls. This value must be a power of 2. If you need low latency, set -p as low as you can go without seeing xruns. A larger period size yields higher latency, but makes xruns less likely. The JACK capture latency in seconds is --period divided by --rate. (default: 1024)"; `:289-291` "-r, --rate int Sample rate. (default: 48000)"; COREAUDIO BACKEND `:362-364` "-p, --period Frames per period, must be a power of 2. (default: 128)". (Roff font escapes `\fB…\fR` removed for readability.)
+- Coverage: T13 — ALSA backend defaults 1024 frames, 48 kHz, 2 periods; latency formula stated by the source. Not an observation.
+
+### S2-38 — Ardour manual (Ardour/manual repository)
+
+- Copy: `git clone --depth 1 https://github.com/Ardour/manual` commit 9628c8bad094537fddd967ef137e8a692e2b1503 (2026-09-15) · 2026-10-07 · `include/latency-considerations.html` SHA-256 `2f7429aa5dca1f1f2cecfe42d86d704084e41c3dbe81e7902fb483567fa58b17`; `include/audio-midi-setup.html` SHA-256 `941de6a35fd79f146c46c34c017d745c43455e530199ce6c3a6ff70741a2bf63`.
+- Passages: `latency-considerations.html:11-23` "The latency of any conversion from analog to digital and back to analog is about 1.5–2 ms. … Latency below 5 ms should be suitable for a professional recording setup. Because 2 ms are already used in the A/D/A process, extremely low buffer sizes must be used in the workstation I/O setup to keep the overall latency below 5ms." (HTML entities and tags removed); `audio-midi-setup.html:40-44` "Buffer Size: The size of the buffer used by the audio interface can be adjusted to allow for either lower latency, or lower CPU usage and higher latency."
+- Coverage: T13 — a latency target (< 5 ms) for recording; no default buffer size stated. Not an observation.
+
+### S2-39 — Valve, Steam Deck store page
+
+- Copy: https://store.steampowered.com/steamdeck/?l=english · 2026-10-07 · `sources/S2-39/steamdeck.html` · SHA-256 `de862af68dd9159012141837c4ff18613ce02ed90f77d0ee18c49811e93bab93`
+- Passages (embedded BBCode strings): "[*] 1280 x 800 HDR OLED display … [*] 7.4" Diagonal display size … [*] up to 90Hz refresh rate"; "[*] up to 60Hz refresh rate" (LCD SKU); "The in-game screen refresh rate can now be adjusted on the fly anywhere between 40-60Hz. This feature is a game changer for finding that perfect balance between framerate, game quality, and battery life."
+- Coverage: T13 — display refresh rates for one PC-gaming device (LCD up to 60 Hz, adjustable 40–60 Hz; OLED up to 90 Hz). Frame budget not stated. Not an observation.
+
+### S2-40 — AMD press release, "AMD Will Not Endorse SYSmark 2012 Benchmark"
+
+- Citation: AMD, press release, 21 June 2011 10:01 am EDT (Market Wire), ir.amd.com.
+- Copy: https://ir.amd.com/news-events/press-releases/detail/368/amd-will-not-endorse-sysmark-2012-benchmark · 2026-10-07 · `sources/S2-40/amd-pr-368.html` · SHA-256 `e7b265c2594d87f2d15494b77e2747333782cffb6d5939ccf7e56ab372eff8e0`
+- Passages: "AMD (NYSE: AMD) today announced that it will not endorse the SYSmark 2012 Benchmark (SM2012), which is published by BAPCo (Business Applications Performance Corporation). Along with the withdrawal of support, AMD has resigned from the BAPCo organization."; ""Technology is evolving at an incredible pace, and customers need clear and reliable measurements to understand the expected performance and value of their systems," said Nigel Dessau, senior vice president and Chief Marketing Officer at AMD. "AMD does not believe SM2012 achieves this objective. Hence AMD cannot endorse or support SM2012 or remain part of the BAPCo consortium.""; "AMD will only endorse benchmarks based on real-world computing models and software applications, and which provide useful and relevant information. AMD believes benchmarks should be constructed to provide unbiased results and be transparent to customers making decisions based on those results."
+- Coverage: T14 — AMD's own statement and date. Not an observation.
+
+### S2-41 — AnandTech, "Update: AMD Resigns from BAPCo Over SYSmark 2012 Concerns; NVIDIA & VIA Also Leave, BAPCo Responds" (Wayback copy)
+
+- Citation: Jarred Walton, AnandTech, 21 June 2011 12:03 PM, article 4464.
+- Copy: https://web.archive.org/web/20120106144430id_/http://www.anandtech.com/show/4464/amd-resigns-from-bapco-over-sysmark12-concerns · 2026-10-07 · `sources/S2-41/wayback-anandtech-4464.html` · SHA-256 `65be098e5412c24698ad0334404957cd6c050bbd4fd968e22e34402c6d812352` (live site served a bot-check page only).
+- Passages: "Today, AMD has announced that they are resigning from BAPCo over a long standing dispute over the weighting of scores within the SYSmark suite."; "Reading through AMD's announcement and Nigel's blog, it's pretty clear what AMD is after: they want the GPU to play a more prominent role in measurements of overall system performance."; "However, AMD claims that a disproportionate weight is given to some tests, with mention of optical character recognition and file compression activities in particular."; "Update: … We've just confirmed with NVIDIA that they have also left the BAPCo consortium. No reason was given."; "Update 3: We've finally gotten official confirmation (as rumored earlier) that VIA has also left the consortium. … The basis of their complaints are much the same as AMD's: they don't consider SYSMark 2012 to reflect real world usage."; VIA statement as reproduced: "VIA today confirmed reports that we have tendered our resignation to BAPCo. We strongly believe that the benchmarking applications tests developed for SYSmark 2012 and EEcoMark 2.0 do not accurately reflect real world PC usage scenarios and workloads and therefore feel we can no longer remain as a member of the organization."; BAPCo statement as reproduced: "AMD voted in support of over 80% of the SYSmark 2012 development milestones, and were supported by BAPCo in 100% of the SYSmark 2012 proposals they put forward to the consortium." / "BAPCo believes the performance measured in each of the six scenarios in SYSmark 2012, which is based on the research of its membership, fairly reflects the performance that users will see when fully utilizing the included applications."
+- Coverage: T14 — contemporaneous report: AMD (weighting; GPU role), Nvidia (left, no reason given), VIA (does not reflect real-world usage; SYSmark 2012 and EEcoMark 2.0), and BAPCo's response. Not an observation.
+
+### S2-42 — Tom's Hardware, "AMD Won't Endorse SYSmark 2012 Benchmark"
+
+- Citation: Kevin Parrish, Tom's Hardware, 22 June 2011 (datetime 2011-06-22T08:50:02Z).
+- Copy: https://www.tomshardware.com/uk/news/Nigel-Dessau-SYSMark-2012-BAPCo-benchmark-real-world-computing,12984.html · 2026-10-07 · `sources/S2-42/tomshw.html` · SHA-256 `5424cc850f420f71da5b4a52ed699f8eec2c62b5cb2eee1d861e5d7badb8d9b4`
+- Passages (quoting Dessau's blog): ""The heart of our complaint is this: the SYSmark benchmark is not only comprised of unrepresentative workloads (workloads that ignore the importance of heterogeneous computing and, frankly, favor our competitor's designs), but it actually generates misleading results that can lead to very poor purchasing decisions, causing governments worldwide to historically overspend somewhere in the area of approximately $8B!" he said."; ""Our good intentions were met with an outcome that we believe does a disservice to the industry and our customers," he said. "We weren't able to effect positive change within BAPCo, and the resulting benchmark continues to distort workload performance and offers even less transparency to end users.""
+- Coverage: T14 — AMD's reasons as given in Dessau's blog (quoted second-hand; blog itself not located). Not an observation.
+
+### S2-43 — APH Networks, "Nvidia, Via Technologies Confirm Quitting BAPCo" (excerpt from X-bit Labs)
+
+- Citation: APH Networks news item, 24 June 2011, "From X-bit Labs".
+- Copy: https://aphnetworks.com/news/2011/06/24/nvidia-technologies-confirm-quitting-bapco · 2026-10-07 · `sources/S2-43/aph-nvidia-via.html` · SHA-256 `f4bba1dd88cf00538545764111b5ac092b3cda17462b6129d599a90de47b4c3b`
+- Passages: "Nvidia Corp. and Via Technologies confirmed on Thursday that they had quit BAPCo (Business Applications Performance Corp.) due to disagreements over the scoring system of SYSmark2012 which does not take graphics card's role into account while measuring performance in applications that are considered by many as outdated."; ""We have tendered our resignation to BAPCo. We strongly believe that the benchmarking applications tests developed for SYSmark 2012 and EEcoMark 2.0 do not accurately reflect real world PC usage scenarios and workloads and therefore feel we can no longer remain as a member of the organization," said Richard Brown, a vice president at Via Technologies."; ""We have resigned [from BAPCo]," said Irina Shekhovtsova, a senior spokesperson for Nvidia."
+- Coverage: T14 — named spokespersons for VIA (Richard Brown) and Nvidia (Irina Shekhovtsova); the "scoring system … graphics card's role" reason is the reporter's attribution, not in either quoted statement. Aggregator excerpt of X-bit Labs (original not fetched). Not an observation.
+
+### S2-44 — SemiAccurate, "Nvidia, AMD, and VIA quit BAPCO over SYSmark 2012"
+
+- Citation: Charlie Demerjian, SemiAccurate, 20 June 2011 (updates 21 June 2011).
+- Copy: https://www.semiaccurate.com/?p=9333 · 2026-10-07 · `sources/S2-44/semiaccurate-p9333.html` · SHA-256 `6c9517144ec695f45f7553303090b8135aa0b4ced7c394ef2d746c4f1bedb06f`
+- Passages: "BAPCO has turned into a bad joke, so bad that Nvidia (NASDAQ:NVDA), AMD (NYSE:AMD), and VIA (2388:Taiwan) just quit. Yes, that leaves Intel (NASDAQ:INTC) as the only semiconductor maker still in the consortium"; "The complaint, again from multiple vendors, is that Intel owns the process, and overrides anyone's views, thoughts and additions."; "One of the biggest is that the benchmark completely ignores GPU power, if you have a barely functional Intel IGP and add a GTX580, your score won't budge."
+- Coverage: T14 — contemporaneous (first) report; reasons attributed to unnamed vendors; opinion-laden. Not an observation.
+
+## 3. Not found
+
+- **T1 — merge version stated in `sched-ext.rst`**: neither the v6.12 nor the mainline file names the kernel version of merge (searched both copies for "6.1", "version", "merged"); the version is stated in the scx README (S2-09, "starting from version 6.12") and LWN (S2-12, "slated to be part of the 6.12 kernel release").
+- **T1/T2 — any vendor statement that SteamOS ships LAVD *by default*, or that Meta has deployed LAVD fleet-wide**: not found. Valve's release note says "Initial support … via `steamosctl set-cpu-scheduler lavd`" (S2-15); Meta material describes LAVD as a "candidate" (S2-11) / "adapting" (S2-13). Searches: log #8, #11, #12; scx README/OVERVIEW grep for valve/steam/meta (S2-09).
+- **T2 — Igalia blog post on LAVD**: the blog index (blogs.igalia.com/changwoo/) lists two generic sched_ext posts only (log #10). OSS NA 2024 event abstract page: 403 (log #5).
+- **T6 — Microsoft-authored statement on how Game Mode recognises a game and on Windows Update**: Xbox Support article is script-only and its content API returned 404/502 (log #14); WebSearch found only third-party pages (log #15). The Microsoft Learn pages (S2-16) do not mention Windows Update and do not say how a game is recognised beyond "works by default for most Windows games".
+- **T6 — Apple statement of how macOS decides an app is a game** (e.g. LSApplicationCategoryType): only on Apple Developer Forums, which are script-rendered and not quotable from the fetched HTML (log #17). Apple QoS dispatch JSON 404 (log #18).
+- **T6 — any game-mode documentation covering audio workstations**: none of S2-16, S2-18, S2-19, S2-20 mentions audio production software.
+- **T7 — a survey or count of applications/packages/units declaring a scheduling policy, nice level or I/O class**: none found in S2 sources (class S3 covers counts). **Documented case of an application over-claiming priority**: none found; rtkit README (S2-29) documents the risk and limits, Ananicy README (S2-30) cautions against high priority; restic FAQ (S2-28) shows raising priority as a user example. Searches: log #22–#24.
+- **T9 — EEVDF default time slice value at mainline**: sched-design-CFS.rst names `base_slice_ns` without a number; sched-eevdf.rst gives none (S2-03, S2-04).
+- **T11 — vendor documentation of latency for short structured outputs**: none of S2-33/34/35 gives a latency figure.
+- **T13 — DAW default buffer sizes (Ardour, Reaper, Bitwig)**: Ardour manual gives a < 5 ms target but no default (S2-38); Reaper and Bitwig documentation not searched beyond this (no fetch attempted for time); **VRR / frame-budget documentation**: not found (Steam Deck page gives refresh rates only).
+- **T14 — Nvidia's own stated reason; Dessau's original blog post; X-bit Labs original**: Nvidia gave none ("No reason was given", S2-41; "We have resigned", S2-43). Dessau blog not located (log #37); guru3d 403; semiaccurate.com bare domain TLS name mismatch (not bypassed); live anandtech.com bot check; at-web1.www.anandtech.com connection reset (log #34).
+- Topics outside this class (T3 texts, T4, T5, T10, T12, T15) were not searched by S2.
