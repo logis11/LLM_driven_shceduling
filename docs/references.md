@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-10-06
+> Status: normative · Created 2026-08-26 · Updated 2026-10-07
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -251,9 +251,9 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - status: verified (2026-09-12), **with a retrieval caveat to resolve before submission.** bapco.com refused every direct request from the verifying environment (HTTP 403 on the product page, the PDF and the site root), so the guide was read from the Internet Archive's capture of BAPCo's own URL (snapshot 2025-04-23); the bytes are BAPCo's PDF and the live fetch is what failed. The four scenario names and descriptions were independently corroborated against store.bapco.com/product/sysmark-30/, which was reachable. Re-download from bapco.com and pin the live URL, version and access date.
 
 ### `sysmark25`
-- cite: BAPCo. SYSmark 25 documentation. [URL to pin.]
-- role: Role A — adds software development (code compilation) and Responsiveness.
-- status: to-pin. bapco.com refused direct requests at the 2026-09-12 check (see `sysmark30`); if the live site stays unreachable, the Internet Archive holds captures of BAPCo's own upload paths and the same retrieval caveat applies.
+- cite: BAPCo. *SYSmark 25 User Guide*, Revision 1.9, 37 pp. bapco.com/wp-content/uploads/2024/03/bapco_sysmark25_user_guide_v1.9.pdf, read from the Internet Archive's capture of that URL (2024-05-24, web.archive.org/web/20240524222849id_/…) (accessed 2026-10-07; SHA-256 865081c8a2619f6f7b9f9943c5717df22486f3bc126a25c1f0fc75a70a44ae52). Revision 1.4 (2020-09) carries the same scenario text.
+- role: Role A — existence only. The Productivity scenario's description names "software development (code compilation)" (p. 32); no compiler or IDE appears in any application list (p. 31), so it grounds compilation's existence in a desktop benchmark scenario, not a program. SYSmark 2018 already defines the same three scenarios, Productivity, Creativity and Responsiveness, its Productivity naming software development; SYSmark 30 carries neither.
+- status: verified (2026-10-07: the capture re-fetched byte-identical to the 2026-09-13 read R05 in `_dev/research/jioh/2026-09-13-verification/`, the scenario passages re-read in it), **with `sysmark30`'s retrieval caveat**: bapco.com still refuses direct requests (HTTP 403 on the PDF, 2026-10-07). Re-download from bapco.com and pin the live URL before submission.
 
 ### `procyon`
 - cite: UL Solutions. "Procyon benchmark suite." benchmarks.ul.com/procyon (accessed 2026-09-12).

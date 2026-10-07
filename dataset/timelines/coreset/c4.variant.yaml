@@ -11,6 +11,7 @@ variants:
     ops:
       - add-task: {id: injected-chat, name: element-desktop,
                    archetype: chat-client, arrive: 30s, depart: 60s}
+      - patch-segment: {index: 0, scenario: [S9, S5]}   # 9.10 D168: the chat client the segment shows
       - patch-meta: {demand: calibration}
 
   - id: c4-office
@@ -22,6 +23,7 @@ variants:
     ops:
       - add-task: {id: injected-burst, name: 7z, archetype: file-archiver,
                    arrive: 30s, bind: {total_work: 6s}}
+      - patch-segment: {index: 0, scenario: [S1, S2, S4, S16]}   # 9.10 D168: the archive the segment shows
       - patch-meta: {demand: calibration}
 
   - id: c4-compile
@@ -39,4 +41,5 @@ variants:
       - add-task: {id: injected-renderers, name: chrome,
                    archetype: renderer-hidden, arrive: 30s, depart: 60s,
                    count: 4}
+      - patch-segment: {index: 0, scenario: [S11, S2]}   # 9.10 D168: the browser the segment shows
       - patch-meta: {demand: calibration}

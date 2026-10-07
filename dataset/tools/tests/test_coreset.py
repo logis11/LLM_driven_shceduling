@@ -315,3 +315,33 @@ def test_set_focus_and_operations_replace_the_lists():
     assert out["focus"] == [{"from": "2s", "to": "20s", "task": "a"}]
     assert out["operations"] == [{"at": "11s", "task": "a", "name": "op"}]
     assert base["focus"][0]["to"] == "58s"   # the base is not touched
+
+
+# 9.10 D168: the catalog scenario each bound program shows, as D33's rows name them; cpu-batch by its `program`
+SCENARIO_OF = {"office-writer": "S1", "web-browser": "S2", "renderer-hidden": "S2", "video-call": "S3",
+               "mail-client": "S4", "chat-client": "S5", "image-editor": "S6", "video-editor": "S7",
+               "video-transcoder": "S8", "game-task-chain": "S9", "game-client": "S9", "game-download": "S10",
+               "code-editor": "S11", "build-orchestrator": "S11", "module-build-orchestrator": "S11",
+               "video-player": "S13", "audio-player": "S13", "file-indexer": "S14", "incremental-backup": "S15",
+               "file-archiver": "S16", "package-upgrade": "S17", "compositor-shell": "S18", "audio-server": "S18",
+               "service-manager": "S18", "message-bus": "S18"}
+SCENARIO_OF_PROGRAM = {"kdenlive_render": "S7", "python3": "S12", "spoof": "S2"}   # the spoof shows `chrome` (S2)
+
+
+def test_every_segment_tags_the_scenarios_of_the_programs_it_shows(repo_root, library):
+    # a segment's `scenario` names each catalog scenario whose program is alive in it; a task with no `depart` (a batch
+    # job, ending inside its segment) counts in the segment its arrival falls in (9.10 D168)
+    for path in sorted((repo_root / "dataset" / "timelines").glob("**/*.timeline.yaml")):
+        t = Timeline(path, library)
+        for seg in t.segments:
+            a, b = seg["t_start"], seg["t_end"]
+            shown = set()
+            for task in t.tasks:
+                if task["depart"] is None:
+                    alive = a <= task["arrive"] < b
+                else:
+                    alive = task["arrive"] < b and task["depart"] > a
+                if alive:
+                    shown.add(SCENARIO_OF_PROGRAM[task["bind"]["program"]] if task["archetype"] == "cpu-batch"
+                              else SCENARIO_OF[task["archetype"]])
+            assert set(seg["scenario"]) == shown, f"{t.id} {seg['mode']} {a / 1e6:g}-{b / 1e6:g} s"

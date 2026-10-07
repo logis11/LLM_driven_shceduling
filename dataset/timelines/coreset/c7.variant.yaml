@@ -246,7 +246,7 @@ variants:
       - set-segments: [{from: 0s, to: 16.545s, mode: render,
                          attributes: {background_wanted: false, initiated: scheduled,
                                       pre_committed_miss: true},
-                         scenario: [S7, S8]}]
+                         scenario: [S7]}]
       - patch-task: {id: editor, depart: 16.545s}
       - set-focus: [{from: 2s, to: 14.545s, task: editor}]
       - set-operations: [{at: 8.2725s, task: editor, name: preview-render}]
@@ -259,7 +259,7 @@ variants:
       - set-segments: [{from: 0s, to: 2970.871s, mode: transcode,
                          attributes: {background_wanted: false, initiated: scheduled,
                                       pre_committed_miss: true},
-                         scenario: [S8]}]
+                         scenario: [S8, S7]}]
       - patch-task: {id: video-editor, depart: 2970.871s}
       - set-focus: [{from: 2s, to: 2968.871s, task: video-editor}]
       - set-operations: [{at: 1485.4355s, task: video-editor, name: preview-render}]

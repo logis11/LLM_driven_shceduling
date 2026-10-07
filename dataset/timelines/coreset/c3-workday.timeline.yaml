@@ -22,9 +22,9 @@ segments:
   - {from: 60s, to: 120s, mode: office, attributes: {background_wanted: true},
      scenario: [S1, S2]}
   - {from: 120s, to: 1485s, mode: compile, attributes: {background_wanted: true},
-     scenario: [S11]}
+     scenario: [S11, S1, S2]}
   - {from: 1485s, to: 1545s, mode: mail, attributes: {background_wanted: true},
-     scenario: [S4]}
+     scenario: [S4, S1, S2]}
 
 tasks:
   - {id: browser, name: chrome, archetype: web-browser,

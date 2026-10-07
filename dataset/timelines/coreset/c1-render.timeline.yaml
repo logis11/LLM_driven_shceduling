@@ -15,7 +15,7 @@ meta:
 
 segments:
   - {from: 0s, to: 60s, mode: render,
-     attributes: {background_wanted: true, initiated: user}, scenario: [S7, S8]}
+     attributes: {background_wanted: true, initiated: user}, scenario: [S7]}
 
 tasks:
   - {id: editor, name: kdenlive, archetype: video-editor,

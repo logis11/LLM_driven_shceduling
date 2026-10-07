@@ -21,6 +21,7 @@ segments:
   mode: transcode
   scenario:
   - S8
+  - S7
   to: 2970.871s
 tasks:
 - archetype: video-editor

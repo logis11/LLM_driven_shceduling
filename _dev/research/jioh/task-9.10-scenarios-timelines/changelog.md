@@ -2964,3 +2964,44 @@ D165's and D166's probe written into `campaign/session-upgrade/method.md` before
 - **Runs.** A dry run (`upgrade-dry`, session index 90, any model): shortened priming and windows. Then the probe (`upgrade`, index 91, the AMD EPYC 7763). Neither is a repeat; `session/pool.py` takes neither.
 
 Tests: `test_meas_session_upgrade.py`, the readings on a constructed trace. No value changed by this entry.
+
+## D168 — a segment's scenario tags name every catalog scenario whose program the segment shows (2026-10-07)
+
+By 인지오's decision (Q41). A segment's `scenario` names each scenario of the catalog (D33's rows) whose program is alive in the segment, the program's scenario as D33's table gives it. A task with no `depart`, a batch job ending inside its segment, counts in the segment its arrival falls in. Most segments already followed this: `c1-office` names office, browsing and mail; `c3-evening`'s gaming segment gaming and the chat client; the C7 counterparts the upgrade; the backup and indexing files the editor beside the job. Twelve did not, and are brought to it:
+
+- the transcode segments of `c1-transcode`, `c7-transcode` and `c3-creation` add S7 (video edit and export): Kdenlive is open beside the encode;
+- the render segments of `c1-render`, `c7-render` and `c2-p3a` drop S8 (transcode): D33's catalog lists the export under S7, and S8's one program, `HandBrakeCLI`, is in none of them;
+- `c3-workday`'s compile segment adds S1 (office) and S2 (browsing), Writer and Chrome open; its mail segment adds the same two;
+- `c4-office` adds S16 (archive) for the injected `7z`, `c4-gaming` S5 (chat client) for the injected Element, and `c4-compile` S2 (browsing) for the injected Chrome and its renderers, each by a `patch-segment` in `c4.variant.yaml`;
+- `c6-fold`'s meeting segment adds S2 (browsing): the call runs in Chrome beside the page.
+
+The tags are descriptive keys to the catalog (`docs/recognition-vocabulary.md:11`). No scoring term and no harness code reads them, so no term moves. Test: `test_every_segment_tags_the_scenarios_of_the_programs_it_shows`.
+
+Not taken: tags naming what a segment is about, its mode's scenario and its background job's; render's S8 alone fixed, the rest stated as exceptions.
+
+Recompiled (`compile.py --allow-window`): 22 of 100 artifacts change beyond the library's hash — the eleven files above in both modes, their ground truth's tags. No demand moves. Lint reports the nine demand-window files 9.14 owns and nothing else; `compile.py --check --allow-window` and `derive.py --check --require-coverage` pass. Tests: 430 passed, 1 skipped, 1 xfailed.
+
+## D169 — owners for three leftovers no task held (2026-10-07)
+
+By 인지오's decision (Q42).
+
+- **A segment-length sensitivity sweep** goes to 9.14. The dataset validity review (`docs/memos/2026-09-20-dataset-validity-review.md`, "Untouched") names segment composition as authored from averages, the role `docs/workload/source-vetting.md` calls highest-risk, and names 9.5's pre-registered stimulus-sensitivity check as the template such a sweep would follow. 9.14 holds the RQ0 gate spec and 9.5's sensitivity check of the demand-window rule.
+- **The references-only entries D35 left** — `czerwinski-chi04`, `mark-chi08`, `mark-chi14` and `mark-gallup06` (scope-card item 80), with the wording fixes C-czerwinski-1 and C-gallup-1, and `videogui-arxiv24`, provisional (item 81) — go to 9.15, once 9.12 says which its prose still cites: D34's split for entries leaving the registry.
+- **`sysmark25`'s pin and the kept entries' role notes** stay with 9.10: D34 decided them ("kept, roles restated to scenario existence (D33)", their `to-pin` statuses pinned), and they were never applied.
+
+Applied: the first two in `_dev/TODO.md`'s 9.14 and 9.15 lines.
+
+## D170 — D34's kept entries restated and `sysmark25` pinned (2026-10-07)
+
+Taken under 인지오's delegation, on D34 and D169: D34's dispositions for the five kept registry entries applied, each against the 2026-09-13 verification's reads.
+
+- **`sysmark25` pinned** (`docs/references.md`). The cite is the *SYSmark 25 User Guide*, Revision 1.9, at BAPCo's own upload path, read from the Internet Archive's capture of 2024-05-24. The capture answered on 2026-10-07 and re-fetched byte-identical to the read R05 (SHA-256 `865081c8…`); bapco.com still answers 403. The scenario passages were re-read in the local copy: Productivity names "software development (code compilation)" (p. 32), and no compiler appears in any application list (p. 31). The status is verified, with `sysmark30`'s retrieval caveat.
+- **Roles restated to scenario existence (D33)**, in `dataset/sources.yaml`'s notes:
+  - `sysmark25`: "Adds software development … to the BAPCo taxonomy" leaves. SYSmark 2018 already defines Productivity, Creativity and Responsiveness, its Productivity naming software development (C-sysmark25-1, -2).
+  - `pcmark10`: "activity composition only" leaves. The guide times each workload's scripted tasks; it documents no per-process timing (C-pcmark-5).
+  - `sysmark30`: the sentence on "the contested scoring" leaves. The 2011 dispute concerned SYSmark 2012's workloads (C-sysmark30-5); the prose is 9.12's.
+  - `cpsmark-tbench23`: its role becomes the existence of S1, S2, S4, S6, S8 and S16 (office, browsing, mail, photo, transcode, archive) and D11's transcode definition. The 1.77× is restated as the CC module's figure for its best graphics-card configuration (§4.7.2; C-cpsmark-6).
+  - `steam-downloads`: "the wanted/unwanted background toggle" leaves (C-steam-4, our characterization). It states the default pause and a per-game setting the article leaves unnamed (C-steam-3; D7).
+- `docs/references.md`'s role lines for the other four stay 9.15's (D34's hand-off).
+
+No value changes.

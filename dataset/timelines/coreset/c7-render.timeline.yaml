@@ -21,7 +21,6 @@ segments:
   mode: render
   scenario:
   - S7
-  - S8
   to: 16.545s
 tasks:
 - archetype: video-editor

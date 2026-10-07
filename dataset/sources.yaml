@@ -94,40 +94,45 @@ sources:
     type: scholarly
     locator_pattern: "^(table-\\d+|sec-[0-9.]+)$"
     notes: >-
-      Establishes: four office usage scenarios merged into two modules
-      (CA light/middleweight, CC heavyweight); user-profile tiers (table-1);
-      named applications with versions (table-2); CA cooperative workflow
-      ordering (Internet -> creation -> document processing -> email
-      delivery); per-workload hardware sensitivity (table-4: CC up to 1.77x
-      GPU-sensitive, CA ~1.0x). Scope limits: Windows 10 applications — the
+      Establishes the existence of the office, browsing, mail, photo,
+      transcode and archive scenarios (S1, S2, S4, S6, S8, S16) and the
+      transcode's definition, its HandBrake workload (9.10 D11, D95): four
+      office usage scenarios merged into two modules (CA light/middleweight,
+      CC heavyweight); user-profile tiers (table-1); named applications with
+      versions (table-2); the CA cooperative workflow's order (Internet ->
+      creation -> document processing -> email delivery), cited for its
+      transitions' existence (9.10 D29); hardware sensitivity per workload
+      and module (table-4), the CC module's best graphics-card configuration
+      performing 1.77 times its base configuration and the CA module showing
+      no significant difference (sec-4.7.2). Scope limits: Windows 10 applications — the
       Linux name mapping is ours; no gaming scenario; no process-level burst
       timing.
 
   pcmark10:
     type: deployed-system
     notes: >-
-      Establishes existence of scenario groups and their application lists:
-      Essentials (web browsing, video conferencing, app start-up),
+      Existence only (9.10 D33): the scenario groups and their application
+      lists — Essentials (web browsing, video conferencing, app start-up),
       Productivity (spreadsheets, writing), Digital Content Creation (photo/
-      video editing, rendering), Gaming. Activity composition only; no
-      per-process timing.
+      video editing, rendering), Gaming. The guide times each workload's
+      scripted tasks; it documents no per-process timing.
 
   sysmark30:
     type: deployed-system
     notes: >-
-      Establishes existence of scenario/application lists: Office
-      Applications, General Productivity (incl. archiving/compression, OCR,
-      browsing), Photo Editing, Advanced Content Creation (incl. a
-      multitasking workload switching photo<->video editing). Second
-      independent industry taxonomy beside PCMark. Scenario lists are
-      documented separately from the contested scoring.
+      Existence only (9.10 D33): four scenarios and their application
+      lists — Office Applications, General Productivity (incl. archiving and
+      unpacking a mixed file set, OCR, browsing), Photo Editing, Advanced
+      Content Creation (incl. a multitasking workload switching photo<->video
+      editing). A second industry taxonomy beside PCMark.
 
   sysmark25:
     type: deployed-system
     notes: >-
-      Adds software development (code compilation) and a Responsiveness
-      scenario to the BAPCo taxonomy — grounds compile as a mainstream
-      desktop scenario.
+      Existence only (9.10 D33): the Productivity scenario's description
+      names software development (code compilation), no compiler or IDE in
+      any application list; Productivity, Creativity and Responsiveness are
+      SYSmark 2018's scenarios as well.
 
   procyon:
     type: deployed-system
@@ -153,10 +158,10 @@ sources:
   steam-downloads:
     type: deployed-system
     notes: >-
-      Establishes the "Allow Downloads During Gameplay" checkbox (Steam ->
+      Establishes the "Allow Downloads During Gameplay" check box (Steam ->
       Settings -> Downloads), that downloads pause during gameplay by
-      default, and the per-game override — the wanted/unwanted background
-      toggle as a real user-facing setting (S10). Existence only.
+      default, and a per-game setting the article leaves unnamed (S10;
+      9.10 D7). Existence only.
 
   steamos-refresh:
     type: deployed-system

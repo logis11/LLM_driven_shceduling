@@ -15,6 +15,7 @@ segments:
   mode: compile
   scenario:
   - S11
+  - S2
   to: 1594s
 tasks:
 - archetype: code-editor

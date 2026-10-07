@@ -568,8 +568,7 @@
         "background_wanted": true,
         "mode": "render",
         "scenario": [
-          "S7",
-          "S8"
+          "S7"
         ],
         "tier": 1
       }
@@ -579,7 +578,8 @@
         "background_wanted": true,
         "mode": "transcode",
         "scenario": [
-          "S8"
+          "S8",
+          "S7"
         ],
         "tier": 2
       }
@@ -683,8 +683,7 @@
         "background_wanted": true,
         "mode": "render",
         "scenario": [
-          "S7",
-          "S8"
+          "S7"
         ],
         "tier": 1
       }
@@ -729,7 +728,8 @@
         "background_wanted": true,
         "mode": "transcode",
         "scenario": [
-          "S8"
+          "S8",
+          "S7"
         ],
         "tier": 2
       }
@@ -783,7 +783,9 @@
         "background_wanted": true,
         "mode": "compile",
         "scenario": [
-          "S11"
+          "S11",
+          "S1",
+          "S2"
         ],
         "tier": 3
       },
@@ -791,7 +793,9 @@
         "background_wanted": true,
         "mode": "mail",
         "scenario": [
-          "S4"
+          "S4",
+          "S1",
+          "S2"
         ],
         "tier": 3
       }
@@ -801,7 +805,8 @@
         "background_wanted": true,
         "mode": "compile",
         "scenario": [
-          "S11"
+          "S11",
+          "S2"
         ],
         "tier": 3
       }
@@ -811,7 +816,8 @@
         "background_wanted": true,
         "mode": "gaming",
         "scenario": [
-          "S9"
+          "S9",
+          "S5"
         ],
         "tier": 3
       }
@@ -823,7 +829,8 @@
         "scenario": [
           "S1",
           "S2",
-          "S4"
+          "S4",
+          "S16"
         ],
         "tier": 2
       }
@@ -881,7 +888,8 @@
         "background_wanted": true,
         "mode": "meeting",
         "scenario": [
-          "S3"
+          "S3",
+          "S2"
         ],
         "tier": 1
       }
@@ -1048,8 +1056,7 @@
         "mode": "render",
         "pre_committed_miss": true,
         "scenario": [
-          "S7",
-          "S8"
+          "S7"
         ],
         "tier": 1
       }
@@ -1060,7 +1067,8 @@
         "mode": "transcode",
         "pre_committed_miss": true,
         "scenario": [
-          "S8"
+          "S8",
+          "S7"
         ],
         "tier": 2
       }

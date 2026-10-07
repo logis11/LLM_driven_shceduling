@@ -12,6 +12,7 @@ segments:
   mode: gaming
   scenario:
   - S9
+  - S5
   to: 60s
 tasks:
 - archetype: game-task-chain

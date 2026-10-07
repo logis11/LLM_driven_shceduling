@@ -27,7 +27,7 @@ variants:
           - {from: 0s, to: 30s, mode: browsing, attributes: {background_wanted: true},
              scenario: [S2]}
           - {from: 30s, to: 60s, mode: meeting, attributes: {background_wanted: true},
-             scenario: [S3]}
+             scenario: [S3, S2]}
       - add-task: {id: call, name: chrome, archetype: video-call,
                    arrive: 30s, depart: 60s}
       - patch-meta: {demand: calibration}
