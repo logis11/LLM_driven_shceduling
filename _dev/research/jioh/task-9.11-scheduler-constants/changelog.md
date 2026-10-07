@@ -186,3 +186,17 @@ By 인지오's decision, the scope-card items whose text holds against its sourc
 - **29–34:** `utilisation_sanity`, arithmetic; `config_age`, `determinism`, `tick_count`, `validation_matches_provenance`, `c2_pair`, structural — `tick_count` as applied to the compiled gaming files is 9.14's (scope card, Boundary).
 
 One label added — **item 6**: §8's percentile rule, linear interpolation at position (n − 1)·p/100 (numpy `linear`, R type 7), is now called a convention where it is stated, as decision 1 asks of a value no source states. Applied: `docs/harness/metrics.md` §8, one word.
+
+## D14 — the boot-default memo's comparison points: a dated correction note (2026-10-07)
+
+By 인지오's decision, scope-card item 23: `docs/memos/2026-09-11-boot-default-from-ostep.md` §3 states that it records "only what was confirmed by reading the originals on 2026-09-11; no number from memory", and four of its statements were not read. The memo gets a dated correction note — its original text otherwise kept, as a point-in-time record — stating, claim by claim:
+
+- **Holds:** OSTEP's "no easy answers … only some experience with workloads and subsequent tuning" (S1-02, p. 8); Arpaci-Dusseau's lecture notes, the memo's Korean a translation of "no one really knows how to configure these tables well" (S1-19 = S2-28); illumos/Solaris TS — 60 levels, quanta 2 ticks at the top to 20 at the bottom, 2–20 ms at the default hz of 1000, `ts_update` once a second lifting starved threads into levels 50–59 (S2-08, S2-09); MINIX 3 — 16 queues, a 200 ms quantum, demoted processes raised a level every 5 s (S2-10); sched_ext's default slice, 20 ms (D7); the scx schedulers' slices — lavd 0.5–5 ms, bpfland 1 ms, rusty 1–20 ms (S2-11 to S2-13, read at the unpinned commit `00fec1e`, to be re-read at release `v1.1.3`).
+- **Wrong for today's kernels:** Linux CFS/EEVDF's default slice "0.75 ms" — 0.70 ms from v6.15, scaled by 1 + log2 of the online CPUs up to 8 (D2).
+- **Not found:** that Silberschatz and Stallings give only example numbers (no copy read); that papers call per-level doubling a convention (no such paper found).
+- **Unverifiable:** that only two table-based MLFQs ever shipped (a universal negative).
+- **Not searched:** that macOS, FreeBSD and Windows compute priority by decaying usage.
+
+None of these carries the boot default, which rests on OSTEP's chapter alone (D8).
+
+Hands to **9.15**: the correction note in the memo, with the memo's corrections; `docs/references.md` entries for the verified points the memo names without an id — MINIX 3's scheduler source, the CS 537 lecture notes on the Solaris TS scheduler, and the scx per-scheduler slices re-read at release `v1.1.3` — minted with the note that cites them.
