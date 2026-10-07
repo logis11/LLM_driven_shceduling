@@ -32,6 +32,12 @@ MEAS="$(cd "$HERE/.." && pwd)"
 source "$MEAS/probe/common.sh"          # OUT, KV, rec, finish_report
 source "$MEAS/pin.sh"
 pin_self_harness
+# 9.11 D4: in a dry job only — a repeat's venue stays as its pool's — every thread's scheduling policy, real-time
+# priority and nice over the job, logged when first seen and on each change (sched/classes.py), on the harness CPUs
+if [ "${3:-full}" = dry ]; then
+  python3 "$(cd "$(dirname "${BASH_SOURCE[0]}")/../sched" && pwd)/classes.py" "$OUT/classes.tsv" 2 & CLASSES_PID=$!
+  trap 'kill "$CLASSES_PID" 2>/dev/null; wait "$CLASSES_PID" 2>/dev/null' EXIT
+fi
 APP="$1"; REPEAT="$2"; MODE_ARG="${3:-full}"
 # the untraced control (_dev/docs/spec/jioh/task-9.5-untraced-control.md): `control` runs full's lengths and
 # `control-dry` dry's, the steady phase as a traced and an untraced run
