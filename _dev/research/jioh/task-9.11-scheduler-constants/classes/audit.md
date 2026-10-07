@@ -21,3 +21,42 @@ One full repeat per subject, its taskstats files read from the release by HTTP r
 `.NET …` threads are the runner agent's; `journal-offline` (nice 255 as printed) is journald's.
 
 Not readable from the records: `office-writer`, `code-editor`, `mail-client`, `web-browser`, `image-editor`, `video-editor`, `video-player`, `audio-player`, `video-call` (9.5), `renderer-hidden`, `chat-client`, `game-client` (9.8), `compositor-shell`, `audio-server`, `service-manager`, `message-bus` (9.9). `game-task-chain` (9.4) is no measurement.
+
+## Part two — the class census (2026-10-07)
+
+The entries above not readable from their records, observed again in their campaigns' venues: one dry job per subject (`campaign/run.sh`, `desktop/run.sh`, `session/run.sh` in mode `dry`, the machine gate open on any model, `.github/campaign*.json` at `7cd13b4f`), each running `dataset/tools/meas/sched/classes.py` (`025b50af`) through the whole job — every thread's policy, real-time priority and nice from `/proc/<pid>/task/<tid>/stat`, read every 2 s and logged when a thread is first seen and on each change. A thread living under 2 s can be missed. A declared class is configuration, not timing, so one job per subject and no machine gate. The venues are headless runners: a program that asks RTKit or a desktop session for a real-time thread gets what the venue grants, which is stated per entry where it matters.
+
+| entry | subject, run | machine | observed |
+|---|---|---|---|
+| `office-writer` | `soffice`, 37605116943 | EPYC 7763 | NORMAL, nice 0: every `soffice.bin` and `oosplash` thread |
+| `code-editor` | `code`, 37605116943 | EPYC 7763 | NORMAL, nice 0: all 242 `code` threads |
+| `mail-client` | `thunderbird-send`, 37605116943 | EPYC 7763 | NORMAL, nice 0: every `thunderbird-bin`, `RDD Process` and `crashhelper` thread |
+| `web-browser` | `chrome`, 37605116943 | EPYC 9V74 | NORMAL, nice 0: all 169 `chrome` threads |
+| `image-editor` | `gimp`, 37605116943 | EPYC 7763 | NORMAL, nice 0: `gimp`, `script-fu`, `python3` |
+| `video-editor` | `kdenlive`, 37605116943 | EPYC 7763 | NORMAL, nice 0: 33 `kdenlive` threads and 72 `kdenlive_render`; NORMAL, nice 19: SDL's `SDLHotplugALSA`; BATCH, nice 19: `kdenliv:disk$0` |
+| `video-player` | `mpv-video`, 37605116900 | EPYC 7763 | NORMAL, nice 0: every `mpv` thread |
+| `audio-player` | `mpv-audio`, 37605116900 | EPYC 7763 | NORMAL, nice 0: every `mpv` thread but `mpv:disk$0`, BATCH, nice 19 |
+| `video-call` | `webrtc`, 37605116900 | EPYC 7763 | NORMAL, nice 0: all 198 `chrome` threads, the audio worker included (no RTKit in the venue) |
+| `renderer-hidden` | `chrome-hidden`, 37605116858 | EPYC 7763 | NORMAL, nice 0: all 160 `chrome` threads |
+| (the visible renderer, 9.8) | `chrome-visible`, 37605116858 | EPYC 9V74 | NORMAL, nice 0: all 149 `chrome` threads |
+| `chat-client` | `element`, 37605116858 | EPYC 7763 | NORMAL, nice 0: all 88 `element-desktop` threads |
+| `game-client` | `steam`, 37605116858 | EPYC 9V45 | NORMAL, nice 0: `steam`, `steamwebhelper`, the runtime's `pressure-vessel`, `srt-*`; BATCH, nice 19: `steam:disk$0`, `steamwe:disk$0` |
+
+| `compositor-shell` | `session` 96, 37605116929 | Xeon 8370C | NORMAL, nice 0: every carried `gnome-shell` thread — main, `JS Helper`, `gmain` — and the rest; RR, real-time priority 20: mutter's `KMS thread`; BATCH, nice 19: `gnome-s:disk$0`, `gnome-s:disk$1` |
+| `audio-server` | `session` 96, 37605116929 | Xeon 8370C | `pipewire`, `pipewire-pulse`, `wireplumber`: RR, real-time priority 20, each `pw-data-loop` thread; NORMAL, nice −11, each main thread; NORMAL, nice 0, the rest — `wireplumber`'s carried `gmain` among them. `rtkit-daemon` ran in the session (its own thread RR 99) |
+| `service-manager` | `session` 96, 37605116929 | Xeon 8370C | NORMAL, nice 0: `systemd` |
+| `message-bus` | `session` 96, 37605116929 | Xeon 8370C | NORMAL, nice 0: every `dbus-daemon` |
+No thread of any subject changed its policy, real-time priority or nice during its job.
+
+`…:disk$0` is Mesa's shader disk-cache queue (`src/util/disk_cache.c:89`, `util_queue_init(&cache->cache_queue, "disk$", …, UTIL_QUEUE_INIT_USE_MINIMUM_PRIORITY …)`), whose threads set nice 19 and `SCHED_BATCH` on themselves (`src/util/u_queue.c:270–272`, `:348–359`, read at tag `mesa-24.0.0`): a library thread in any program that uses OpenGL, the same `deja-du:disk$0` in Déjà Dup's census above, there inheriting the idle class.
+
+
+The session's real-time threads are present but none is carried: 9.9's entries carry `gnome-shell`'s main thread, `JS Helper` and `gmain`, `wireplumber`'s `gmain`, pid 1 and the system bus (`dataset/archetypes.yaml`), all NORMAL at nice 0; in the idle session neither the KMS thread nor a data loop is among the carried components. The playback venue has no audio server (`--ao=null`, 9.5 D11), so no carried audio work passes through one.
+
+## By class, the work the dataset carries
+
+- **`SCHED_IDLE`:** `file-indexer` — every Tracker thread (nice 19, which the idle policy ignores); `incremental-backup` — `deja-dup`, `duplicity` and `gpg`.
+- **NORMAL at a nice other than 0:** `game-download` — SteamCMD's async file threads (`CGenericAsyncFi`, `COfflineMessage`, `CContentUpdateC`) at nice 10, its HTTP and main threads at nice 0, inside one program's tables.
+- **Real-time:** none carried.
+- **`SCHED_BATCH`:** none carried; Mesa's disk-cache threads only, in any program using OpenGL.
+- **NORMAL at nice 0:** every other measured entry, whole.
