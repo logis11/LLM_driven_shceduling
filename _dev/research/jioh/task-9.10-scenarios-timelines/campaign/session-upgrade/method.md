@@ -95,3 +95,4 @@ The result decides what D165 sets out. No new name: `c7-idle`'s statement takes 
     - The new processes are summed by window, class, name and ancestor (§6).
 
   The dry run is relaunched as session 94.
+- 2026-10-07, the fourth dry run (run 37577186151, session 94, on the AMD EPYC 7763) passes §5. The pending set was glibc's seven binaries, `firefox` held; the job was 945 processes and 8.2 s of CPU over 9.0 s; no snap work followed it. The probe is launched as session 95.
