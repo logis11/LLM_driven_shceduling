@@ -48,6 +48,8 @@ The entries above not readable from their records, observed again in their campa
 | `message-bus` | `session` 96, 37605116929 | Xeon 8370C | NORMAL, nice 0: every `dbus-daemon` |
 No thread of any subject changed its policy, real-time priority or nice during its job.
 
+Raw records: release `meas-ci-probes-2026-10-07b` at `07af2d92`, the fourteen jobs' final artifacts as `<artifact>-<run id>.zip`.
+
 `…:disk$0` is Mesa's shader disk-cache queue (`src/util/disk_cache.c:89`, `util_queue_init(&cache->cache_queue, "disk$", …, UTIL_QUEUE_INIT_USE_MINIMUM_PRIORITY …)`), whose threads set nice 19 and `SCHED_BATCH` on themselves (`src/util/u_queue.c:270–272`, `:348–359`, read at tag `mesa-24.0.0`): a library thread in any program that uses OpenGL, the same `deja-du:disk$0` in Déjà Dup's census above, there inheriting the idle class.
 
 
