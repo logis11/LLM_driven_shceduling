@@ -298,12 +298,12 @@ Floors are stated assumptions and may be revised by the RQ0 gate spec with a cha
 
 ## 11. Simulator assumptions
 
-The definitions above, and the mock traces that test them, assume the following simulator behaviour. Items 1–3 were sent to the simulator's owner as clarifications of the trace contract (`../memos/2026-09-07-trace-clarifications-for-the-simulator.md`); items 4–6 are mock-local choices that fill gaps the contracts leave open. A different decision on any of them changes the mocks deliberately, not the definitions.
+The definitions above, and the mock traces that test them, assume the following simulator behaviour. Items 1–3 are the trace contract's clarifications (`../memos/2026-09-07-trace-clarifications-for-the-simulator.md`); item 4 is the simulator's own reading, pinned here; items 5–6 are mock-local choices that fill gaps the contracts leave open. The simulator's state is its owner's record (`../../simulator/src/notes.md` §4, `../../simulator/memo/memo_261001.md`). A different decision on any of them changes the mocks deliberately, not the definitions.
 
-1. A `ready` line is emitted at **every completion of a blocking primitive** (`WAIT`, `TIMER`, `SLEEP`, fork slot), at zero wait when it did not block; inside an occupancy it appears after the `run_start` and pairs with wait 0.
-2. **Wakes queue with depth**: two wakes sent to a busy task complete its next two WAITs, so iteration k of every chain stage is tick k.
-3. Same-instant events follow a **written, deterministic tie-break**; the mocks apply config entries first in list order, then arrivals in file order.
-4. TIMER's `t₀` is the task's arrival time, so a TIMER task arriving at 0 consumes tick 0 at 0 without blocking.
+1. A `ready` line is emitted at **every completion of a blocking primitive** (`WAIT`, `TIMER`, `SLEEP`, fork slot), at zero wait when it did not block; inside an occupancy it appears after the `run_start` and pairs with wait 0. The simulator does not yet emit the zero-wait line: a primitive that completes without blocking prints `ready cause=arrive` and gives up the lane without a `run_end` — owed, its owner's first item (notes §4, gap 10).
+2. **Wakes queue with depth**: two wakes sent to a busy task complete its next two WAITs, so iteration k of every chain stage is tick k. The simulator implements it: a wake with no waiter goes to a mailbox, never lost (notes, step M).
+3. Same-instant events follow a **written, deterministic tie-break**; the mocks apply config entries first in list order, then arrivals in file order. The simulator applies config entries first, then events in insertion order (its rule D1; memo_261001 §6).
+4. TIMER's `t₀` is the task's first TIMER execution, as the simulator sets it (its decision D4). Every periodic task's program begins with its TIMER, so `t₀` is the task's arrival, and a TIMER task arriving at 0 consumes tick 0 at 0 without blocking.
 5. An arriving task whose first instruction blocks is scheduled like any other, reaches the WAIT, and blocks: a zero-length occupancy when the lane is free.
 6. The simulator keeps emitting `deadline` lines as the contract says; the harness uses them only as the §6.2 cross-check.
 7. **The boost timer restarts at `t_apply`** after a switch into MLFQ, so the boost grid of §8 is `t_apply + k · boost_interval_us`. Confirmed with 인경민 on 2026-09-09 (memo §5, §7).

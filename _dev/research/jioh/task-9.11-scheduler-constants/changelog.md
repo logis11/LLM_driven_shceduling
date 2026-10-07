@@ -144,3 +144,16 @@ By 인지오's decision, scope-card item 27: `provenance_share` keeps its readin
 - **Not taken:** the count-weighted `fallback` share alone (B), which passes a run that spent most of its time under a few long fallbacks; both readings at once (C), a second way to void the verdict for no further purpose.
 
 Applied: `harness/guards/guard-spec.yaml` — the `provenance_share` grounding and header comment. `guards_lint.py` clean; `test_guards.py` 26 passed. The guard spec's hash moves again under the RQ0 gate spec's pin (D7), 9.14's re-pin.
+
+## D11 — the simulator assumptions of metrics §11 restated to the simulator's state; TIMER's t₀ pinned (2026-10-07)
+
+By 인지오's decision, scope-card item 10: `docs/harness/metrics.md` §11 items 1–4 state what the simulator does, read from its owner's records (`simulator/src/notes.md` §4, `simulator/memo/memo_261001.md`, 2026-10-01):
+
+- **Item 1** (a `ready` line at every completion of a blocking primitive, zero wait included) stands as the contract's clarification; the simulator does not yet emit the zero-wait line — a primitive completing without blocking prints `ready cause=arrive` and gives up the lane without a `run_end` (notes §4, gaps 4 and 10, "owed implementation, and the top priority"). D3's skip rule reads the same `ready(cause = timer_tick)` lines.
+- **Item 2** (wakes queue with depth): implemented — a wake with no waiter goes to a mailbox, never lost (notes, step M; memo D2).
+- **Item 3** (the same-instant tie-break): the simulator applies config entries first, then events in insertion order (rule D1, memo §6 question 2), as the mocks do.
+- **Item 4** (TIMER's t₀): pinned to the simulator's reading — the task's first TIMER execution (its decision D4) — in place of the arrival time. Its notes call the pick "ours to pin, not a question" (gap 3); the two coincide for a task whose program begins with its TIMER, every compiled periodic task today (memo §5.4: 12 periodic tasks arrive mid-run, in `c3-evening` and `c4-compile`, all TIMER-first).
+
+Applied: `docs/harness/metrics.md` §11 — the lead paragraph and items 1–4.
+
+Hands to: **9.13** — a linter invariant that every task carrying a TIMER begins its program with it, so t₀ and the arrival cannot come apart silently; **인경민** — item 1's zero-wait line, already his first item; **9.14** — the harness reader's `t₀` (`harness/tools/harness/reader.py`, `_task_info`, the arrival) checked against the invariant.
