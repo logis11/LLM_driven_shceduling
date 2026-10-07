@@ -1,0 +1,36 @@
+name: meas-sched
+
+# 9.11 runner read (research-slice changelog D2): the scheduler tunables of the ubuntu-24.04 runner's kernel —
+# the EEVDF base slice at the boot CPU count and at each count down to one CPU and back (the kernel recomputes
+# it on every CPU online and offline), the other sched debugfs, sysctl and sched_ext values beside it. A
+# configuration read, not a workload measurement: no machine gate, the CPU model recorded in spec.json. Three
+# jobs, three runner draws. Started by a push changing this file or dataset/tools/meas/sched/.
+
+on:
+  push:
+    branches: [jioh/dataset-rebuild]
+    paths: [.github/workflows/meas-sched.yml, dataset/tools/meas/sched/**]
+
+permissions:
+  contents: read
+
+jobs:
+  tunables:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        draw: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo -E PROBE_OUT=/tmp/probe bash dataset/tools/meas/sched/tunables.sh
+      - name: own the probe output
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" /tmp/probe && sudo chmod -R a+rX /tmp/probe
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sched-tunables-${{ matrix.draw }}
+          path: /tmp/probe
+          if-no-files-found: error
