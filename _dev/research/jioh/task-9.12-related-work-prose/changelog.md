@@ -436,3 +436,14 @@ By 인지오's decision, scope-card items 23 and 46: `docs/research-proposal.md:
 Hands to 9.15: `docs/research-proposal.md:152` restated as above; `:844`'s "The realistic deployment path for this work" kept with the same scope; `docs/references.md` — the Ubuntu kernel's configuration (S2-52) entered under the id-minting rule where the prose cites it.
 
 Compiled effect: none.
+
+## D28 — macOS QoS row kept, cited to Apple's current API page and its archived guide; undeclared work runs as `default` (2026-10-08)
+
+By 인지오's decision, scope-card item 24: `docs/research-proposal.md:147`'s row "macOS | Quality-of-Service classes (`user-interactive`, `user-initiated`, `utility`, `background`) | Developer declares it in code" stands, with one addition: work the developer leaves undeclared is treated as `default`.
+
+- **The classes** (S2-53, Apple Developer documentation, Foundation `QualityOfService`, accessed 2026-10-08): "Constants that indicate the nature and importance of work to the system"; cases `userInteractive`, `userInitiated`, `utility`, `background`, `default`; macOS 10.10 and later; "Work with higher quality of service classes receive more resources than work with lower quality of service classes whenever there's resource contention."
+- **The declaration and its effect** (S2-21, Apple's Energy Efficiency Guide for Mac Apps, archived, updated 2016-09-13): "By assigning a QoS to work, you indicate its importance, and the system prioritizes it and schedules it accordingly"; "The system uses QoS information to adjust priorities such as scheduling, CPU and I/O throughput, and timer latency"; "Work that has no QoS information assigned is treated as default"; `background` is for work "such as indexing, synchronizing, and backups".
+
+Hands to 9.15: `docs/research-proposal.md:147` with the addition; `docs/references.md` — Apple's `QualityOfService` page and the archived guide entered under the id-minting rule where the prose cites them; the guidebook vol-01 `:3277`, `:3342`, `:3718` and vol-03 `:55` checked against the same passages.
+
+Compiled effect: none.
