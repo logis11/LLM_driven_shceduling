@@ -68,7 +68,7 @@ Nothing was observed on a GitHub Actions runner (S4, Not found). No observation 
 - **36 media deadlines.** S2-36 (PipeWire 1.6.9: 48 000 Hz, quantum 1024, minimum 32), S2-37 (jackd v1.9.22: period 1024, rate 48 000, 2 periods), S2-38 (Ardour: a latency target under 5 ms, no default buffer), S2-39 (Steam Deck LCD up to 60 Hz, adjustable 40–60; OLED up to 90 Hz), S1-30 (Wessel & Wright: ≤10 ms latency, ≤1 ms jitter). Stage 3 (2026-10-09): S2-57 (Ardour's manual: an xrun leaves "clicks, pops and crackles").
 - **38 lottery scheduling.** S1-09: "the conventional problem of starvation does not exist"; selection is O(n) with a list and O(lg n) with a tree.
 - **40 EDF optimality.** S1-10: Theorem 7, feasible if and only if ΣCᵢ/Tᵢ ≤ 1, under (A1)–(A5).
-- **42 session length.** S3-11 (WoW, median 1.8 h). Nothing for PC gaming generally (S3-15 and S3-17 do not cover it). For how often the set of running applications changes, there is only foreground-switch rates (S3-12, S3-16).
+- **42 session length.** S3-11 (WoW, median 1.8 h). Stage 3 (2026-10-09): S3-23 (one Counter-Strike server, 2004–2005: more than 99 % of sessions under 2 hours). Nothing for PC gaming generally (S3-15 and S3-17 do not cover it). For how often the set of running applications changes, there is only foreground-switch rates (S3-12, S3-16).
 - **43, 44 reasoning-first output and determinism.** S1-26 (chain-of-thought helps only at about 100B parameters), S1-28 (Sprague: when chain-of-thought helps), S1-27 (Tam: JSON mode hurts reasoning but helps classification), S1-25 (Atil: up to 15 % variation at temperature 0 with a fixed seed).
 - **41 (§6.3 70 %), 32 (illustration).** Not searched. These are conventions.
 

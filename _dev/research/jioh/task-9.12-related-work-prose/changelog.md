@@ -583,3 +583,15 @@ Taken under 인지오's delegation (2026-10-09), scope-card item 41: `docs/resea
 Hands to 9.15: `docs/research-proposal.md:718`, and `:916` (B.3) with it, stated as above.
 
 Compiled effect: none.
+
+## D39 — "a gaming session lasts an hour" restated to the two measured games; "stable for the whole thing" stated as the premise it is (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), scope-card item 42, after a stage-3 read (S3-23): `docs/research-proposal.md:303` ("A gaming session may last an hour; polling every 30 seconds would produce 120 identical answers") and `:732` ("A gaming session lasts an hour; the situation is stable for the whole thing") are restated to what the sources measure.
+
+- **The measured sessions:** on one World of Warcraft realm over three years, per-avatar mean session time 2.8 h, median 1.8 h, 5th–95th percentile 0.4–5.5 h, with a "knee" at about one hour — "a high probability that players will stay for at least one hour, but usually no longer than 5 hours" (S3-11, WoWAH, MMSys 2011, Table 4 and p. 126; 10-minute sampling); on one Counter-Strike server over 13 months, "more than 99% of all sessions last less than 2 hours" (S3-23, Chambers et al., IMC 2005). Both are server-side connection time to one game, not a PC's process activity. No measurement of PC gaming sessions in general was found (S3, "Not found", T12; the 2026-10-09 search).
+- **Restated `:303`:** a gaming session can run an hour or more — a median 1.8 h on one MMO realm, under 2 h for more than 99 % on one shooter's server — so polling every 30 s would ask the same question about 120 times an hour (arithmetic).
+- **Restated `:732`:** "the situation is stable for the whole thing" leaves as a statement of fact. It is the premise of the risk: if the process set stays unchanged through a session, the moments where recognition matters are its transitions — which is why the workloads are built around transitions. How often a desktop's process set changes is not measured by any source found (only foreground-window switching, S3-12, S3-16).
+
+Hands to 9.15: `docs/research-proposal.md:303`, `:732` restated as above; `docs/references.md` entries for WoWAH (S3-11) and Chambers et al. (S3-23) where the prose cites them, under the id-minting rule.
+
+Compiled effect: none.

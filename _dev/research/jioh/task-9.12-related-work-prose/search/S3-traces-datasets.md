@@ -46,6 +46,7 @@ Topics in scope: T7 (counts over units, packages or a rules catalogue), T10 (tra
 | 34 | 2026-10-08 | codesearch.debian.net (stage 3) | `^\[Service\] path:\.service` grouped, all 319 pages, first sequentially (13 min), then in one burst; the same with `-path:(^\|/)(tests?\|testsuite\|testdata\|examples?\|samples?\|demos?\|contrib\|docs?)/` (301 pages, the first burst inconsistent, the second consistent); `^\s*Nice=`, `^\s*IOSchedulingClass=`, `^\s*CPUSchedulingPolicy=` with `path:\.service`, with and without that filter | → S3-20 | the sequential read spanned a re-run of the query |
 | 35 | 2026-10-08 | deb.debian.org (stage 3) | `dists/sid/Release`; `main/Contents-amd64.gz`, `main/Contents-all.gz`, `main/binary-amd64/Packages.xz`, `main/binary-all/Packages.xz` | 200; each SHA-256 equal to Release's → S3-20 | — |
 | 36 | 2026-10-09 | local copies (stage 3) | the campaigns' downloaded artifacts under `~/.cache/meas-loop` (2 028 `report.json`, 2 259 `perf.*.timehist.txt.gz`): every gate-open EPYC 7763 repeat's timehist files, counted per CPU (A.17) | → S3-21 | — |
+| 37 | 2026-10-09 | WebSearch (standard); usenix.org (stage 3) | `measured PC game play session length distribution study Steam telemetry hours per session`; the IMC '05 paper's HTML (`index`, `node2`, `node3`, `node5`) | 200 → S3-23; the other results — arXiv 1703.04696 ("On Quitting", platform not stated in the snippet), the AAU/Fraunhofer "Playtime Principle" (total playtime, not sessions), a developer's blog, a 2009 Nielsen report, Statista (a survey) — not read | — |
 
 ---
 
@@ -633,6 +634,13 @@ ANY of the three: 56 packages (3.9 % of 1438); lowering 40 (2.8 %); raising 16 (
   ```
   Of the 71 groups' medians, 57 are at least 100 a second, 13 at least 1 000, 2 at least 10 000 (both SteamCMD's download phases).
 - **Coverage.** T10 covered for one quantity: context switches per second on one CPU running one desktop program at a time, for the dataset's programs, on the EPYC 7763 runner (kernel 6.17.0-1022-azure), from 12 a second (single-threaded MNIST training) to 12 447 (SteamCMD's download), the median group 437. A switch is a lower bound on schedule() calls (the runner's idle CPUs call schedule() more often than they switch, `meas-ci:costs` dry run). Not covered: a desktop CPU shared by several programs at once, which this measurement isolates by design (`pin.sh`).
+
+### S3-23 — Chambers, Feng, Sahu & Saha, IMC 2005: session times on one Counter-Strike server (T12; stage 3, 2026-10-09)
+
+- **Citation.** Chris Chambers, Wu-chang Feng, Sambit Sahu, Debanjan Saha. "Measurement-based Characterization of a Collection of On-line Games." Internet Measurement Conference (IMC '05), 2005. HTML edition at usenix.org/legacy/event/imc05/tech/full_papers/chambers/chambers_html/.
+- **Copy read** (2026-10-09, `sources/S3-23/`): `index.html` SHA-256 `5322b990249ded0bb162aaefd248624f612d2f8ad81e4635a4290d616edf5636`; `node2.html` (Methodology) `00fa689944a676286847d4dc49da8239d5cacbf71989e6ddfdb5f98f3dcbc296`; `node3.html` `076db7e2…`; `node5.html` ("Gamers have short attention spans") `f3d1c2eb16cb1bd376a04f60850cfe22e6036ce2f3d0dfb6f3c84b475d0f6d8e`.
+- **Passages.** Methodology: "we examined the activity of one of the busiest and longest running Counter-Strike servers in the country located at cs.mshmro.com"; the abstract's "a 13-month trace of an extremely busy game server containing over 2.8 million connections". §"Gamers have short attention spans": "a significant number of players play only for a short time before disconnecting and that the number of players that play for longer periods of time drops sharply as time increases" … "more than 99% of all sessions last less than 2 hours" … "the data can be closely matched to a Weibull distribution".
+- **Coverage.** T12 covered for one game: session time on one Counter-Strike server, server-side connection time, 13 months; not PC process activity, and a player's session on one server, not a sitting. Other topics: does not cover.
 
 ## 3. Not found
 
