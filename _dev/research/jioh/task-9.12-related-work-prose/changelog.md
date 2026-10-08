@@ -139,3 +139,19 @@ Hands to 9.15:
 - The guidebook: vol-02 ch. 3.3–3.4 ("얼마나 실제로 쓰이나", `:1226–1240`) given the operators' statements above beside the repository's. Also found in this sweep, with no source behind it: vol-02 `:2699` ("지금 수백만 대의 컴퓨터에서 실제로 돌고 있는 소프트웨어입니다", of Game Mode and the priority daemons) — restated to what D2 and D3 ground, with no count.
 
 Compiled effect: none.
+
+## D9 — "Valve shipping it": Valve sponsors LAVD and ships it in SteamOS as a selectable scheduler, installed and configured but not enabled (2026-10-08)
+
+By 인지오's decision, scope-card item 7, after two stage-3 reads (S2-49, S2-50): `docs/related-work.md:20`'s note "Valve shipping it legitimizes 'desktop scheduling matters'" is restated to what Valve ships.
+
+- **Sponsorship** (S2-09, `scheds/rust/scx_lavd/src/bpf/lat_cri.bpf.c:3–4` at scx `v1.1.3`): "Copyright (c) 2023-2025 Valve Corporation. Author: Changwoo Min"; the author develops it "as part of his work at Igalia on SteamOS and the Steam Deck" (S2-13).
+- **Selectable in SteamOS 3.8** (S2-15, S2-49): Valve's release notes, the only ones through 2026-10-08 that name LAVD, say "Initial support for LAVD CPU scheduler via `steamosctl set-cpu-scheduler lavd`"; Valve's settings daemon `steamos-manager` offers `None` and `LAVD` through an "Optional interface for adjusting CPU scheduler", and selecting `LAVD` starts `scx.service`.
+- **Not enabled out of the box** (S2-50, the SteamOS 3.8.14 recovery image, `BUILD_ID=20260707.10`): `scx-scheds` 1.1.1 is installed, `/etc/default/scx` sets `SCX_SCHEDULER=scx_lavd`, and `scx.service` is not enabled — no `wants` link in the root or the `/etc` overlay, presets `disable *` with no line naming `scx`. The kernel's default scheduler runs until the user selects LAVD.
+- **Meta** — a "candidate" default fleet scheduler (S2-11), not adopted; that half of `grounding-sources.md:30` is item 58's.
+
+Hands to 9.15:
+
+- `docs/related-work.md:20`'s note restated: Valve sponsors LAVD's development and ships it in SteamOS 3.8 as a scheduler the user selects, not enabled by default.
+- `docs/references.md`: a deployed-system entry for SteamOS's LAVD support — the SteamOS 3.8 release note (S2-15), `steamos-manager` at `302d37b9` (S2-49), and the 3.8.14 image observation (S2-50) in its status line.
+
+Compiled effect: none.
