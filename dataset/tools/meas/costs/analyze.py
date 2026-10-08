@@ -75,14 +75,40 @@ def lat_ctx(out):
     return res
 
 
+def load_line(path):
+    """The pingpong line of a load's output: ns per round trip (pair) or per call (getpid), and n."""
+    if not os.path.exists(path):
+        return None
+    for line in open(path, errors="replace"):
+        d = kv(line)
+        if d.get("mode") == "pair" and d.get("child_status") == "0":
+            return {"ns": float(d["ns_per_round_trip"]), "n": int(d["n"])}
+        if d.get("mode") == "getpid":
+            return {"ns": float(d["ns_per_call"]), "n": int(d["n"])}
+    return None
+
+
 def traces(out):
+    """Per traced pass, the durations; where the load is the ping-pong or the getpid loop, its cost per round trip
+    or call traced and untraced, and the tracer's whole cost per traced call: the difference over the calls per
+    round trip (the trace's count over the load's n)."""
     res = {}
+    untraced = {"pingpong": load_line(os.path.join(out, "untraced.pingpong.load.txt")),
+                "getpid": load_line(os.path.join(out, "untraced.getpid.load.txt"))}
     for path in sorted(glob.glob(os.path.join(out, "trace.*.json"))):
         name = os.path.basename(path)[len("trace."):-len(".json")]
         try:
             res[name] = json.load(open(path))
         except ValueError:
             res[name] = None
+            continue
+        label = name.rsplit(".", 1)[1]
+        traced = load_line(os.path.join(out, f"trace.{name}.load.txt"))
+        base = untraced.get(label)
+        if traced and base and res[name].get("n"):
+            calls = res[name]["n"] / traced["n"]
+            res[name].update({"load_ns_traced": traced["ns"], "load_ns_untraced": base["ns"], "calls_per_load_unit": calls,
+                              "tracer_ns_per_call": (traced["ns"] - base["ns"]) / calls if calls else None})
     return res
 
 

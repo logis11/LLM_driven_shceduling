@@ -477,3 +477,18 @@ Hands to 9.15:
 - Found in the sweep (`grep -rn -i "starvation\|bandwidth cap" docs`), beyond 9.11 D19's lines (`docs/terminology.md:122`; guidebook vol-03 `:1089–1091`, `:1327–1329`; vol-04 `:1196`, `:1227`, `:1251–1257`, `:1317`): `docs/simulator/simulator-guide.md:210` ("per-class bandwidth caps, enforced by the executor regardless of what any config says"), restated to the one cap the configuration sets; guidebook vol-03 `:1093` ("이 상한은 실행부가 지킵니다. 설정이 무엇을 요구하든 상관없습니다"), the same; vol-03 `:451` and `:3749` ("class별 대역폭 상한") → the batch class's cap. The memos that told 인경민 a net exists (2026-09-08 `:16`, 2026-09-09 `:45`, `:82`) are point-in-time records, answered by the declared-class memo's paragraph (9.11 D19).
 
 Compiled effect: none.
+
+## D31 — a runner campaign for items 28 and 29: the kernel's switch and pick costs and a structured answer's latency, measured on the dataset's machine (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09); the push it needs approved by 인지오 the same day ("approve to push"). Scope-card items 28 (the proposal's kernel quantities) and 29 (local inference latency).
+
+- **Why a measurement.** The literature found gives context-switch costs on three machines of 2007–2021 (S1-01: 599 ns, Linux 4.15; S1-21: 3.8 µs direct, Linux 2.6.17; S1-23: at least 3 400 cycles, Linux 3.16) and nothing for the scheduler's pick (S1 search log; candidates "Not found", T10); no published latency of a short structured answer from a 3–8B model on a named x86 machine (T11). The proposal's §4.1 table states both. The dataset's values are this machine's (`measurement-campaign-workflow.md`), and the S4 record gives the method (S4-03–S4-10).
+- **The method** (`campaign/method.md`, fixed before the gated launch): job `kernel` — the pipe ping-pong of Li, Ding & Shen with its single-process subtraction, `perf bench sched pipe` and lmbench `lat_ctx`; `pick_next_task_fair`, `pick_task_fair` and `sched_balance_newidle` timed per call by ftrace's function-graph tracer under three loads, a getpid-path calibration and the tracer's whole cost per call; per-CPU switch rates at idle. Job `llm` — llama.cpp at the commit S4-08 read, Qwen2.5-3B and Llama 3.1 8B at Q4_K_M (LocalScore's two models, S3-05), a stand-in recognizer request built from the frozen vocabulary and telemetry shapes, the `system`-only and the full-proposal schema, and llama-bench. EPYC 7763 under the machine gate; the workflow's stability rule on every value of the list.
+- **The dry run** (run 37859640740, no gate): both jobs ran end to end. On the EPYC 7763, ping-pong 6.41–6.52 µs per round trip, self pipe 0.81–0.82 µs per pair, `perf bench sched pipe` 5.59–5.71 µs per round trip, `lat_ctx` 2.36–2.47 µs per switch; `pick_next_task_fair` median 791–802 ns under the ping-pong, the tracer's share not yet calibrated — `__x64_sys_getpid` is not traceable on 6.17.0-1022-azure, so the calibration moves to `__task_pid_nr_ns` and the untraced loads are added. On an EPYC 9V45 (not a repeat), the 3B answered the `system` block in 5.4 s and the full proposal in 9.0 s, the 8B in 13.4 s and 19.5 s, prompt processing most of each.
+- **A consumer machine beside it.** The proposal's latency claim names "consumer hardware"; the runner is a server CPU's 4 vCPUs. The same request runs on 인지오's development Mac (Apple M1 Pro) as a separate observation, recorded in the S3 record.
+
+Applied: `.github/workflows/meas-costs.yml`, `.github/campaign-costs.json`, `dataset/tools/meas/costs/`, `dataset/tools/meas/llm/`, `campaign/method.md`.
+
+Hands to: items 28 and 29's decisions, on the pooled values.
+
+Compiled effect: none.
