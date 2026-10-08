@@ -267,3 +267,19 @@ Hands to 9.15:
 - 9.10 D3 already handed the workload docs (the scenario catalog's S17 row, `docs/recognition-vocabulary.md`'s examples, `building-plan.md` §3 C2 and C7, and with them `docs/workload/coreset-guide.md:650–663`, `:915–929`, `:957–959`).
 
 Compiled effect: none.
+
+## D16 — "a Steam download is something the user initiated" narrowed to the depicted install; Steam's own updates queue themselves and pause at game launch (2026-10-08)
+
+By 인지오's decision, scope-card item 34 (with 9.10 D7 and D170): the proposal's general claim that a Steam download is user-initiated is narrowed to the download the dataset depicts — an install of another game the user starts during play, which Steam runs at once.
+
+- **What Valve states** (`steam-downloads`; 2026-09-13 read R07, C-steam-2, C-steam-3): "Steam automatically pauses your downloads when a game is launched in order to prioritize the network activity for the game itself. You can turn this feature off by navigating to your download settings: Steam > Settings > Downloads. From here, check the Allow Downloads During Gameplay box." (FAQ 4F9E-6328-E9B8-47F9); "Games are automatically put into your download queue when a game releases an update", and "There's also a per-game setting to allow/prevent the downloading of other updates while you're playing." (FAQ 71AB-698D-57EB-178C). A Steam download is in general not user-initiated: updates queue themselves, and by default queued downloads pause while a game runs.
+- **What the dataset depicts** (9.10 D7): the user starts installing another game while playing; "if you have a game launched and during gameplay press "Install" for another game that game will start downloading immediately" (steam-for-linux #8821, one user's repeated observation on SteamOS 3.4), with Valve's issue triager: "this is not specific to SteamOS or the Steam Deck" (9.10 S3-27). That download is user-initiated (`initiated: user`).
+- **What recognition faces:** the name `steam` downloading is an install the user started or an update nobody started; the name alone does not settle which.
+
+Hands to 9.15:
+
+- `docs/research-proposal.md:185` ("that a Steam download is something the user initiated and is waiting on") restated to the install the user just started, beside an update nobody started; `:174`, `:621` ("Steam download", "transfer the user wants") named as that install; `:311–313`'s sample model output ("The Steam process is downloading, which the user started deliberately") restated to the same install.
+- `docs/references.md`: `steam-downloads`' role line without "the wanted/unwanted toggle" (9.10 D170) and with the automatic update queue (FAQ 71AB); an entry for steam-for-linux #8821 (9.10 D7's hand-off).
+- The guidebook: vol-01 `:1397`, `:2527`; vol-02 `:3116`; vol-03 `:141`, `:154`, `:171`, `:193`, `:265`, `:316`, `:500`, `:640`, `:1164`; vol-04 `:376`.
+
+Compiled effect: none.
