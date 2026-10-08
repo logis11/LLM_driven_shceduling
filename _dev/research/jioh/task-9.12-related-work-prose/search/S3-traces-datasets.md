@@ -43,6 +43,8 @@ Topics in scope: T7 (counts over units, packages or a rules catalogue), T10 (tra
 | 31 | 2026-10-07 | cseweb.ucsd.edu | `https://cseweb.ucsd.edu/~jmcauley/datasets.html` (Steam Video Game and Bundle Data) | 1 page | — |
 | 32 | 2026-10-07 | kaggle.com | `https://www.kaggle.com/datasets` (reachability probe only) | 200 | Not used: Kaggle downloads need a login |
 | 33 | 2026-10-08 | git (stage 3) | `git clone https://github.com/CachyOS/ananicy-rules` (full history) | HEAD `03ef03fb`, 2 762 commits → S3-19 | — |
+| 34 | 2026-10-08 | codesearch.debian.net (stage 3) | `^\[Service\] path:\.service` grouped, all 319 pages, first sequentially (13 min), then in one burst; the same with `-path:(^\|/)(tests?\|testsuite\|testdata\|examples?\|samples?\|demos?\|contrib\|docs?)/` (301 pages, the first burst inconsistent, the second consistent); `^\s*Nice=`, `^\s*IOSchedulingClass=`, `^\s*CPUSchedulingPolicy=` with `path:\.service`, with and without that filter | → S3-20 | the sequential read spanned a re-run of the query |
+| 35 | 2026-10-08 | deb.debian.org (stage 3) | `dists/sid/Release`; `main/Contents-amd64.gz`, `main/Contents-all.gz`, `main/binary-amd64/Packages.xz`, `main/binary-all/Packages.xz` | 200; each SHA-256 equal to Release's → S3-20 | — |
 
 ---
 
@@ -511,6 +513,41 @@ q08  Nice= values over hits (count, value):
   - T8 covered for how entries enter: by commit, from contributors — 112 authors for the current entries. Whether a contributor wrote an entry by hand or produced it with a tool outside the repository is not observable from the history.
   - T7 (counts): growth from 1 645 entries at the end of 2025 to 15 813 at `03ef03fb`, nearly all of it `Game` entries (965 → 13 528). One observation per date (one commit each); no machine.
 
+### S3-20 — Debian unstable: declared scheduling classes over the systemd units Debian installs (T7; stage 3, 2026-10-08)
+
+Redoes S3-01's percentages, by 인지오's decision on scope-card item 26. Two findings about S3-01's method come first.
+
+- **The grouped Debian Code Search view is not a package list.** Fetched page by page (`perpkg=1`, `^\[Service\] path:\.service`), the 319 pages carry 1 595 package headers. Debian Code Search keeps a query's result set for a few minutes and then re-runs it in a different order: page 5 fetched at 20:58 and again after 21:05 listed different packages, page 200 the same (the sequential fetch's pages are kept under `sources/S3-20/denom_all/`). Read inside one result set — every page fetched in one parallel burst, page 0 identical before and after (`dcs_burst.sh`, Appendix A.15) — the 1 595 headers still hold only 1 248 distinct packages, and packages whose units carry a matched directive are absent from them (`e2fsprogs`' `scrub/e2scrub@.service.in`, `btrfsmaintenance`, `wtmpdb`, `espeakup` and nine more). S3-01's denominator, 318 × 5 + 3 = 1 593, counts headers, not packages.
+- **The denominator is taken from Debian's own indexes instead.** `dists/sid/main/Contents-amd64.gz` and `Contents-all.gz` list every file every binary package installs; `binary-amd64/Packages.xz` and `binary-all/Packages.xz` map binary to source. All four were fetched from deb.debian.org on 2026-10-08 and verified against the `Release` file (`Date: Thu, 08 Oct 2026 08:27:44 UTC`; Release SHA-256 `0c7e059f95f9d77662acd6d8a850eb990ec40dcc990c7cb5d22999581600bb07`): `Contents-amd64.gz` `6891558de9344e90a3ac260051e13afa6a952c8660448a6490d8df9445cc3da0`, `Contents-all.gz` `22977015fb491c22b21c4f768a5499e8db685d7ec76b82bd9bdb67d864b10351`, `binary-amd64/Packages.xz` `d01b8095aa94531e63c3d44eedd229ab112c2d62b7abef9ca83beadb9b3f2a12`, `binary-all/Packages.xz` `aa59b51545989cb2ee34e44ce8c01ec5a5e997ee644635b1da635b81a13bc588` (`sources/S3-20/debian-index/`).
+
+- **Method** (`installed_units_count.py`, Appendix A.16).
+  - Denominator: source packages whose binaries in `main` install at least one systemd service unit, `(usr/)lib/systemd/{system,user}/*.service`.
+  - Numerator: Debian Code Search hits of an uncommented `Nice=`, `IOSchedulingClass=` or `CPUSchedulingPolicy=` line in a `\.service` path (regex `^\s*Nice=` and the like; each query read in one burst, page 0 unchanged: `burst/nice_all.1`, `ioclass_all.1`, `cpupolicy_all.1`; page manifests SHA-256 `6af6c52869b023f73e0d39ce3e8decfda4be29b841b46b3a16ef97f9c36046eb`, `b1fefb118db3b250ed76fd08131768cff6063c74502682a28a714c7b5e1d7953`, `e2950f95f36f05e5181f7012c489771be90b85f176016793e903305fe2a5828f`; no hit duplicated), counted only where the file's installed name — its basename without `.in`, `.cmake` or `.tmpl`; a drop-in with its `<unit>.service.d/` parent; debhelper's `debian/<binary>.<unit>.service` as `<unit>.service`; one rename read in the source's build file, `snapper_0.10.6-1.3/data/Makefile.am:29`, `install -D -m 644 cleanup.service $(DESTDIR)/usr/lib/systemd/system/snapper-cleanup.service` — is among that source package's installed units.
+  - Direction: `Nice=` above 0, `CPUSchedulingPolicy=` `idle` or `batch`, `IOSchedulingClass=` `idle` or `3` lower a unit's priority; `Nice=` below 0, `rr` or `fifo`, `realtime` or `1` raise it.
+- **Computed** (verbatim, the first fourteen lines of `installed_units_count.out`, SHA-256 `db9cb9c3956c44fb950b5d80133286700366406ced03c7bf755f2eca139c186f`):
+
+```
+denominator: source packages installing >= 1 .service unit: 1438 (system units 1261, user units 218); binary names in Contents without a Packages stanza: 0
+Nice=                  hits  68, in installed units  49; packages  38 (2.6 %), lowering 27 (1.9 %), raising 11 (0.8 %)
+   values: 19 x25, -5 x8, 10 x6, -10 x5, 9 x2, -20 x2, -11 x1
+   lowering: apt-show-versions apt-xapian-index boinc borgmatic chkrootkit debusine dnf5 drkonqi exim4 findutils kanboard lighttpd logcheck logrotate lynis mailgraph man-db openqa-server pk4 plocate privoxy rauc-hawkbit-updater rtags sitesummary storebackup systemd xfsprogs
+   raising: brltty deepin-boot-maker deepin-log-viewer earlyoom espeakup frr gdnsd hdapsd railcontrol readsb svxlink
+IOSchedulingClass=     hits  71, in installed units  41; packages  30 (2.1 %), lowering 18 (1.3 %), raising 2 (0.1 %)
+   values: idle x26, best-effort x10, realtime x2, 2 x2, 3 x1
+   lowering: apt-listchanges apt-xapian-index boinc btrfsd btrfsmaintenance clsync e2fsprogs etckeeper findutils flatpak man-db ntpsec pk4 plocate rust-rebuilderd-worker snapper systemd xfsprogs
+   raising: hipercontracer railcontrol
+CPUSchedulingPolicy=   hits  45, in installed units  25; packages  17 (1.2 %), lowering 12 (0.8 %), raising 5 (0.3 %)
+   values: idle x16, rr x4, batch x3, fifo x2
+   lowering: apt-xapian-index borgmatic btrfsd btrfsmaintenance bumblebee e2fsprogs grokmirror radvd rtags rust-rebuilderd-worker snapper xfsprogs
+   raising: hipercontracer low-memory-monitor osmo-bts osmo-mgw osmo-pcu
+ANY of the three: 56 packages (3.9 % of 1438); lowering 40 (2.8 %); raising 16 (1.1 %); lowering only 40, raising only 16, both 0
+```
+
+- **Not matched to an installed unit** (69 lines in 54 files, listed in full in the output): systemd's test units (`test/test-execute/`, `test/test-sched-prio/`, `test/fuzz/`) and its Ubuntu-only `debian/extra/units-ubuntu/systemd-journald.service.d/nice.conf`; the `systemd-udeb` source; example units (`duply_2.5.6-1/systemd-unit.examples/`); upstream `contrib/` units (`osmo-bts`, `osmo-trx`, `vdradmin-am`); an RPM-only file (`coturn_4.18.0-1/rpm/turnserver.service.fc`); `ctags` test inputs (`codelite`, `universal-ctags`); and units the binaries do not install (`dnf_4.24.0-1/etc/systemd/*`, `hw-probe`'s `periodic/`, `jacktrip`'s container unit, `jamulus`' upstream `linux/debian/`, `keepalived-non-root`, `openqa-gru`, `brltty@`, `wtmpdb-rotate`).
+- **Coverage.**
+  - T7 covered for units. Object: Debian unstable `main`, binaries for amd64 and all, on 2026-10-08. Unit: source package. Statistic: packages installing a service unit (1 438); packages whose installed units carry each directive, and its direction. Of the 1 438, 56 (3.9 %) carry any of the three directives in an installed unit: 40 (2.8 %) only lowering, 16 (1.1 %) only raising, none both. Of the 49 `Nice=` values in installed units, 33 lower priority (25 at 19) and 16 raise it.
+  - Not counted: a class a program sets on itself in code (LocalSearch, Baloo, tumbler, recoll, akonadi-search; S3-02) or through a wrapper (Déjà Dup's `chrt --idle 0 ionice -c3`, 9.11 S2-27) — the desktop indexers are of this kind, so the unit count is a floor on declaration, not its total; packages Debian Code Search does not index (S3-01 names `clamav`; its units declare nothing, S3-02). One observation per index snapshot, not a machine.
+
 ## 3. Not found
 
 - **T10 — context-switch rate per core on a desktop or server, with machine and kernel named, from a public dataset.** Not found. The only trace with a computable rate is S3-07, from an Android phone (Linux 4.4.177, aarch64). Searches that established this:
@@ -891,6 +928,135 @@ for f in sorted(build.glob('*.workload.json')):
 print('files whose every arriving name matches (exact or truncated):', files_all[True], 'of', nfiles)
 ```
 Run: `python3 -I names_vs_catalogue.py dataset/build/coreset-single <S3-19 clone> 03ef03fbf7e834385377432ccecaedd32e3414bb` from the repository root.
+
+### A.15 `dcs_burst.sh` and `dcs_run2.sh` (stage 3, 2026-10-08)
+```bash
+#!/bin/bash
+# Fetch every result page of one Debian Code Search query inside one cache window: page 0 until the search finishes,
+# then all pages in parallel (8 at a time), then page 0 again; valid only if page 0's packages/hits are unchanged.
+# usage: dcs_burst.sh OUTDIR PERPKG QUERY   (OUTDIR must not exist yet)
+set -u
+out=$1; perpkg=$2; q=$3
+[ -e "$out" ] && { echo "EXISTS $out"; exit 1; }
+mkdir -p "$out"; printf '%s\n' "$q" > "$out/query.txt"
+enc=$(python3 -I -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1],safe=""))' "$q")
+export base="https://codesearch.debian.net/search?q=$enc&literal=0&perpkg=$perpkg&page=" out
+get() { for t in $(seq 1 30); do curl -sS -m 120 --retry 5 --retry-all-errors -o "$2" "$base$1" && [ -s "$2" ] && ! grep -q 'Still searching' "$2" && return 0; sleep 3; done; return 1; }
+export -f get
+get 0 "$out/page_0.html" || { echo "FAIL $out page 0"; exit 1; }
+last=$(grep -o 'page=[0-9]*">[0-9]*<' "$out/page_0.html" | sed 's/page=\([0-9]*\).*/\1/' | sort -n | tail -1); last=${last:-0}
+seq 1 "$last" | xargs -P 8 -I{} bash -c 'get {} "$out/page_{}.html" || echo "FAIL page {}"'
+get 0 "$out/page_0_after.html"
+sig() { grep -o -E '<h2>[^<]*</h2>|href="/show\?file=[^"]*' "$1" | md5; }
+if [ "$(sig "$out/page_0.html")" = "$(sig "$out/page_0_after.html")" ]; then echo "$out pages $((last+1)) consistent"; else echo "$out pages $((last+1)) INCONSISTENT"; fi
+```
+```bash
+#!/bin/bash
+set -u
+mkdir -p "$1/burst"; cd "$1/burst"
+B=/private/tmp/claude-501/-Users-jiohin-Desktop-future-of-sw-LLM-driven-shceduling/a0ea6242-8fee-4db5-99ef-2a68c44081db/scratchpad/dcs_burst.sh
+F=' -path:(^|/)(tests?|testsuite|testdata|examples?|samples?|demos?|contrib|docs?)/'
+try() { for a in 1 2 3; do $B "$1.$a" "$2" "$3" | tee -a run.log | grep -q ' consistent$' && return 0; done; return 1; }
+try denom_all 1 '^\[Service\] path:\.service'
+try denom_F 1 "^\[Service\] path:\.service$F"
+for kind in all F; do
+  if [ $kind = F ]; then x="$F"; else x=''; fi
+  try nice_$kind 0 "^\s*Nice= path:\.service$x"
+  try ioclass_$kind 0 "^\s*IOSchedulingClass= path:\.service$x"
+  try cpupolicy_$kind 0 "^\s*CPUSchedulingPolicy= path:\.service$x"
+done
+echo DCS_DONE | tee -a run.log
+```
+`burst/run.log`: `denom_all.1 pages 319 consistent` / `denom_F.1 pages 301 INCONSISTENT` / `denom_F.2 pages 301 consistent` / `nice_all.1 pages 7 consistent` / `ioclass_all.1 pages 8 consistent` / `cpupolicy_all.1 pages 5 consistent` / `nice_F.1 pages 7 consistent` / `ioclass_F.1 pages 6 consistent` / `cpupolicy_F.1 pages 3 consistent`.
+
+### A.16 `installed_units_count.py` (stage 3, 2026-10-08)
+```python
+"""S3-20: declared scheduling classes over the systemd units Debian unstable installs.
+usage: python3 -I installed_units_count.py S3_20_DIR
+Denominator: source packages whose binaries (amd64 + all, main) install >= 1 systemd unit (.service) under
+(usr/)lib/systemd/{system,user}/ — from Contents-{amd64,all}.gz, binary->source from Packages.xz.
+Numerator: Debian Code Search hits (consistent runs, unfiltered) of an uncommented Nice= / IOSchedulingClass= /
+CPUSchedulingPolicy= line in a source file whose installed name (basename without .in; drop-ins keep their
+'<unit>.service.d/' parent) is among that source package's installed unit paths."""
+import sys, re, gzip, lzma, glob, html, urllib.parse, pathlib, collections
+root = pathlib.Path(sys.argv[1]); idx = root / 'debian-index'; burst = root / 'burst'
+src_of = {}
+for f in ('main_binary-amd64_Packages.xz', 'main_binary-all_Packages.xz'):
+    for stanza in lzma.open(idx / f, 'rt', encoding='utf-8').read().split('\n\n'):
+        m = re.search(r'^Package: (\S+)', stanza, re.M)
+        if not m: continue
+        s = re.search(r'^Source: (\S+)', stanza, re.M)
+        src_of.setdefault(m.group(1), s.group(1) if s else m.group(1))
+unit_re = re.compile(r'^(?:usr/)?lib/systemd/(system|user)/([^/]+\.service|[^/]+\.service\.d/[^/]+\.conf)$')
+units = collections.defaultdict(set); kinds = collections.defaultdict(set); nobin = set()
+for f in ('main_Contents-amd64.gz', 'main_Contents-all.gz'):
+    for line in gzip.open(idx / f, 'rt', encoding='utf-8', errors='replace'):
+        path, _, locs = line.rstrip('\n').rpartition(' ')
+        path = path.strip()
+        m = unit_re.match(path)
+        if not m: continue
+        for loc in locs.split(','):
+            b = loc.rsplit('/', 1)[-1]
+            s = src_of.get(b)
+            if s is None: nobin.add(b); continue
+            units[s].add(m.group(2)); kinds[s].add(m.group(1))
+denom = {s for s, u in units.items() if any(x.endswith('.service') for x in u)}
+print(f'denominator: source packages installing >= 1 .service unit: {len(denom)} '
+      f'(system units {sum(1 for s in denom if "system" in kinds[s])}, user units {sum(1 for s in denom if "user" in kinds[s])}); '
+      f'binary names in Contents without a Packages stanza: {len(nobin)}')
+def pages(d): return sorted([x for x in glob.glob(str(burst / d / 'page_*.html')) if not x.endswith('_after.html')], key=lambda x: int(re.findall(r'page_(\d+)', x)[0]))
+def hits(d):
+    for f in pages(d):
+        t = open(f, encoding='utf-8').read()
+        for m in re.finditer(r'<li><a href="/show\?file=([^&"]+)&(?:amp;)?line=(\d+)[^>]*>.*?<pre>\n?(.*?)</pre>', t, re.S):
+            segs = m.group(3).split('<br>'); ml = [s for s in segs if '<strong>' in s]
+            yield urllib.parse.unquote(m.group(1)), int(m.group(2)), html.unescape(re.sub(r'<[^>]+>', '', ml[0] if ml else '')).strip()
+def direction(key, v):
+    v = v.strip().strip('"').lower()
+    if key == 'nice':
+        try: n = int(v)
+        except ValueError: return 'other'
+        return 'lower' if n > 0 else 'raise' if n < 0 else 'zero'
+    if key == 'cpupolicy': return 'lower' if v in ('idle', 'batch') else 'raise' if v in ('rr', 'fifo') else 'other'
+    return 'lower' if v in ('idle', '3') else 'raise' if v in ('realtime', '1') else 'other'
+# renames documented in the source's build files (read through Debian Code Search):
+# snapper_0.10.6-1.3/data/Makefile.am:29 'install -D -m 644 cleanup.service $(DESTDIR)/usr/lib/systemd/system/snapper-cleanup.service'
+RENAME = {('snapper', 'cleanup.service'): 'snapper-cleanup.service'}
+DIRS = {'nice': ('nice_all.1', 'Nice='), 'ioclass': ('ioclass_all.1', 'IOSchedulingClass='), 'cpupolicy': ('cpupolicy_all.1', 'CPUSchedulingPolicy=')}
+anyp = collections.defaultdict(set); unmatched = collections.Counter(); per = {}
+for key, (d, directive) in DIRS.items():
+    pk = collections.defaultdict(set); vals = collections.Counter(); n_inst = 0; n_hits = 0
+    for path, ln, line in hits(d):
+        n_hits += 1
+        m = re.match(r'\s*' + re.escape(directive) + r'(.*)$', line)
+        if not m: continue
+        v = m.group(1).split('#')[0].strip()
+        src = re.match(r'([^_/]+)_', path).group(1)
+        parts = path.split('/'); base = re.sub(r'\.(in|cmake|tmpl)$', '', parts[-1])
+        cands = {(parts[-2] + '/' + base) if parts[-2].endswith('.service.d') else base}
+        if len(parts) >= 3 and parts[1] == 'debian':
+            # debhelper: debian/<binary>.<unit>.service installs <unit>.service; debian/<binary>.service installs <binary>.service
+            segs = base.split('.')
+            if len(segs) >= 3: cands.add('.'.join(segs[1:]))
+        cands |= {RENAME[(src, base)]} if (src, base) in RENAME else set()
+        inst = units.get(src, set())
+        if cands & inst:
+            n_inst += 1; vals[v] += 1; dirn = direction(key, v); pk[src].add(dirn); anyp[src].add(dirn)
+        else:
+            unmatched[(src, path)] += 1
+    low = {p for p, s in pk.items() if 'lower' in s}; rai = {p for p, s in pk.items() if 'raise' in s}
+    per[key] = (pk, low, rai)
+    print(f'{directive:22s} hits {n_hits:3d}, in installed units {n_inst:3d}; packages {len(pk):3d} ({100*len(pk)/len(denom):.1f} %), '
+          f'lowering {len(low)} ({100*len(low)/len(denom):.1f} %), raising {len(rai)} ({100*len(rai)/len(denom):.1f} %)')
+    print('   values:', ', '.join(f'{k or "(empty)"} x{c}' for k, c in vals.most_common()))
+    print('   lowering:', ' '.join(sorted(low))); print('   raising:', ' '.join(sorted(rai)))
+A = set(anyp); low = {p for p, s in anyp.items() if 'lower' in s}; rai = {p for p, s in anyp.items() if 'raise' in s}
+print(f'ANY of the three: {len(A)} packages ({100*len(A)/len(denom):.1f} % of {len(denom)}); lowering {len(low)} ({100*len(low)/len(denom):.1f} %); '
+      f'raising {len(rai)} ({100*len(rai)/len(denom):.1f} %); lowering only {len(low - rai)}, raising only {len(rai - low)}, both {len(low & rai)}')
+print(f'hits not matched to an installed unit: {sum(unmatched.values())} lines in {len(unmatched)} files')
+for (s, p), c in sorted(unmatched.items()): print('   ', p, f'x{c}')
+```
+Run: `python3 -I installed_units_count.py sources/S3-20`.
 
 ## Appendix B — long outputs (verbatim)
 
