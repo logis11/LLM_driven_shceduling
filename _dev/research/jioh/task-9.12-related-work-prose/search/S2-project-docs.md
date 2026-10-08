@@ -57,6 +57,7 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
 | 47 | 2026-10-08 | man7.org (stage 3) | `/linux/man-pages/man7/sched.7.html`; `/linux/man-pages/man2/sched_setattr.2.html` | 200 → S2-51 | — |
 | 48 | 2026-10-08 | local copy (stage 3) | 9.11's `sources/D2-ubuntu-hwe-7.0/linux-hwe-7.0_7.0.0-34.34~24.04.1.diff.gz` (archive.ubuntu.com, read by 9.11 D2) | `debian.master/config/annotations` → S2-52 | — |
 | 49 | 2026-10-08 | developer.apple.com (stage 3) | `/tutorials/data/documentation/foundation/qualityofservice.json`; `/tutorials/data/documentation/dispatch/dispatchqos/qosclass.json` | 200 → S2-53 | the Dispatch page 404 |
+| 50 | 2026-10-08 | GitHub API; learn.microsoft.com (stage 3) | `repos/apple-oss-distributions/xnu/contents/doc/scheduler/sched_clutch_edge.md?ref=xnu-12377.121.6`; `/en-us/windows/win32/procthread/{scheduling-priorities,priority-boosts,context-switches}` | 200 each → S2-54 | — |
 
 ## 2. Candidates
 
@@ -559,6 +560,20 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
 - Copy: https://developer.apple.com/tutorials/data/documentation/foundation/qualityofservice.json (the data behind developer.apple.com/documentation/foundation/qualityofservice) · 2026-10-08 · `sources/S2-53/qualityofservice.json` · SHA-256 `fcc979e02d151be8bd6427e1955c1911ade2be6a3fcc0a4547dbbc0039c148f2`.
 - Passages: title `QualityOfService`; abstract "Constants that indicate the nature and importance of work to the system."; overview "Work with higher quality of service classes receive more resources than work with lower quality of service classes whenever there's resource contention."; cases `userInteractive`, `userInitiated`, `utility`, `background`, `default`; platforms iOS 8.0, iPadOS 8.0, Mac Catalyst 13.1, macOS 10.10, tvOS 9.0.
 - Coverage: T7 — the current API's QoS classes and what they do, on a maintained page, beside S2-21's archived guide (2016). Not an observation.
+
+### S2-54 — How macOS and Windows schedule, from Apple's XNU document and Microsoft Learn (stage 3, 2026-10-08)
+
+- Copies (2026-10-08, `sources/S2-54/`):
+  - Apple's XNU, tag `xnu-12377.121.6` (tag commit `9b6e7590204b89788e28b137ddfc897bb1292d8b`; the newest of the repository's tags; `main` at `f6217f89`, 2025-10-16), `doc/scheduler/sched_clutch_edge.md` → `sched_clutch_edge.md`, SHA-256 `5f4201d269593c0a7d39e347ccf7241fc43f88073db3be54339e19d7bd51532c`.
+  - Microsoft Learn, Win32 "Scheduling Priorities", "Priority Boosts", "Context Switches" (each `ms.date` 2025-07-14, "Last updated on 2025-07-14") → `win-scheduling-priorities.html` `8262202be4614951d11ab85342040f6f2e890dfbc2dd33b74cb27b06edfb1396`, `win-priority-boosts.html` `8cc60b3684eee8f1ad7cd7a88de825bc4e879cebe0784062f1c103e81ef68da4`, `win-context-switches.html` `0f2d06564e656a47de44d5e658c7ac9eefd7dad6a9af66ffdbbefecc775ec5c8`.
+- Passages:
+  - XNU, "Clutch Scheduler" (`:1–12`): "The traditional Mach scheduler attempts to achieve these goals by expecting all threads in the system to be tagged with a priority number" … "In the Mach scheduler, timesharing is achieved by decaying the priority of threads depending on global system load" … "The clutch scheduler is the timesharing algorithm for threads on a single cluster. The **Edge scheduler** extends on the clutch scheduler design to support multiple clusters".
+  - XNU, scheduling-bucket level (`:24–28`): buckets that "roughly map to the QoS classes used by the OS runtime"; "The scheduling bucket level uses an Earliest Deadline First (EDF) algorithm to decide which root bucket should be selected next for execution."
+  - XNU, thread-group level (`:72`): "The thread group level implements a variation of the FreeBSD ULE scheduler".
+  - XNU, thread level (`:95–99`, `:156–162`): "The `sched_pri` calculation for the threads is based on the traditional Mach scheduling algorithm which uses load & CPU usage to decay priority for a thread"; "thread priority = base priority - (thread CPU usage >> priority shift)".
+  - Windows, "Scheduling Priorities": "The priority levels range from zero (lowest priority) to 31 (highest priority)." … "The system assigns time slices in a round-robin fashion to all threads with the highest priority. If none of these threads are ready to run, the system assigns time slices in a round-robin fashion to all threads with the next highest priority."
+  - Windows, "Priority Boosts": "Each thread has a dynamic priority … The system can boost and lower the dynamic priority, to ensure that it is responsive and that no threads are starved for processor time." … "When the wait conditions for a blocked thread are satisfied, the scheduler boosts the priority of the thread. For example, when a wait operation associated with disk or keyboard I/O finishes, the thread receives a priority boost." … "After raising a thread's dynamic priority, the scheduler reduces that priority by one level each time the thread completes a time slice, until the thread drops back to its base priority."
+- Coverage: T3 — Windows: multilevel priorities, round-robin within a level, boosts on I/O completion, foreground and input, one level lost per completed slice — the MLFQ form OSTEP names (S1-02, p. 10). macOS: EDF across QoS buckets, a ULE variant across thread groups, Mach timesharing with CPU-usage priority decay at the thread level. Linux's default is EEVDF (S2-03). Documentation, not an observation.
 
 ## 3. Not found
 
