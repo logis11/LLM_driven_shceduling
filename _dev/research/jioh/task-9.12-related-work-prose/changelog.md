@@ -190,3 +190,22 @@ Hands to 9.15:
 - The 2026-09-13 verdicts on the same sources already handed through item 61 — `docs/workload/coreset-guide.md:64`, `:184` ("LAVD 논문", WORDING-FIX: talk slides, not a paper) — applied with these.
 
 Compiled effect: none.
+
+## D12 — the priority claim scoped and dated: no prior work measures an LLM recognizing a desktop situation from process identity against labels, to the literature searched through 2026-10-08 (2026-10-08)
+
+By 인지오's decision, scope-card item 19 (and the substance of item 15's third clause): `docs/related-work.md:48`'s "evaluated, for the first time in this line, at the recognition layer itself" is replaced by a scoped, dated statement, with the three nearest measurements named and their figures given.
+
+- **The statement:** to our knowledge — the literature searched through 2026-10-08 (S1 search log, stage 2 and the stage-3 refresh, eight arXiv queries; S1 "Not found", T5) — no prior work measures an LLM's accuracy at recognizing a desktop situation from process identity against ground-truth labels.
+- **The nearest measurements:**
+  - ASA (arXiv 2511.11628v1, 2025-11-07; S1-11, p. 9): "the base workload classifier achieves a notable accuracy of 96.83%", 99.19 % after online fine-tuning; an XGBoost-led ensemble, not an LLM, over behavioural OS metrics (Table 1) — no process identity among its features.
+  - SchedCP (arXiv 2509.01245v4, NeurIPS 2025 Workshop on ML for Systems; S1-12, v4 p. 5): "Claude Opus successfully classified all 8 workloads at $0.15 per analysis, while Claude Sonnet failed" — an outcome reported beside its four research questions, none of which is on recognition; its agent starts "from process name and commands" and then profiles.
+  - AKTS (arXiv 2609.12276v2, 2026-10-07; S1-19, S1-32, §4.2): Qwen2.5 at 0.5B, 1.5B and 3B route high- and low-load telemetry to a policy index at "20/40 correct, i.e. chance; n=40 per model"; 16 of 48 of the 0.5B model's decisions were not a valid index.
+- **`:34`'s "prior LLM-scheduling work measures end-to-end performance only"** is restated to the same three: SchedCP reports a classification outcome, AKTS measures recognition on telemetry. Item 15's other two clauses are its own.
+
+Hands to 9.15:
+
+- `docs/related-work.md:48`, `:34` restated as above; `:36`'s note ("which SchedCP's evaluation has no analogue of") brought in line.
+- `docs/references.md`: an entry for AKTS, arXiv 2609.12276v2 (2026-10-07), scholarly tier as an archived preprint, with S1-32's copy and SHA-256; `asa-arxiv25`'s role line — its "'measuring recognition itself has no analogue in prior work' … false of this one" — kept, with the scoped statement beside it; `schedcp-mlsys25` — the 8-of-8 outcome at v4 p. 5.
+- The search log dates the statement: any re-run before submission extends it.
+
+Compiled effect: none.
