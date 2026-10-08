@@ -456,3 +456,11 @@ Left as it is: `simulator/src/sim.cpp:940`'s comment "OSTEP §8 whole", 인경�
 Applied: `_dev/TODO.md` — the 9.12, 9.13, 9.14 and 9.15 lines.
 
 Hands to: as listed.
+
+## D34 — the declared-class memo: three frozen contracts, not two (2026-10-08)
+
+By 인지오's decision, correcting D18. D18 and its memo named two frozen contracts, the workload and the run file. The class is the entry's, so the field sits on each archetype entry, and the archetype format is a frozen dataset contract too (`docs/data-contracts.md` §13: "The dataset contracts (archetype, timeline, workload) are frozen and enforced by schema and CI today"). The change touches three — the archetype, the workload and the run file — and a fourth, the visible projection, if 박이안 answers that it shows the class.
+
+Applied: `docs/memos/2026-10-08-declared-scheduling-class.md` — the header, §1's "Where it goes", §4's third request (the memo not yet sent); `_dev/TODO.md` — 9.13's line names §2's archetype beside §4's workload and its two views.
+
+Hands to: as D18.
