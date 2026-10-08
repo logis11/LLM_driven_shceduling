@@ -229,3 +229,22 @@ Hands to 9.15:
 - The guidebook lines saying the same: vol-01 `:2097` ("대부분의 프로그램이 선언하지 않습니다"), `:2099` ("성능에 민감한 프로그램들이 필요 이상으로 높은 priority를 요구하는 경향", no source), `:2143`, `:3338`, `:3364`; vol-03 `:107`, `:109` ("파일 색인을 만드는 프로그램이 자진해서 … 말하는 일은 잘 없습니다", contradicted by S3-02 and 9.11 S2-22), `:314`.
 
 Compiled effect: none.
+
+## D14 — the load-bearing pair restated: two real jobs beside an editor, with opposite correct policies, differing in behaviour and in declared class (2026-10-08)
+
+By 인지오's decision, scope-card items 6 and 47 (with 9.6 D17, D21, D32 and 9.10 D6, D12's hand-offs): `docs/related-work.md:18`'s "an ML training run versus a file indexer, both manifesting as one CPU-saturating process beside an editor — is constructed so that the two situations are behaviorally indistinguishable in principle, yet demand opposite policies. No refinement of this quadrant can separate them; the distinguishing information exists only in what the processes *are*, not in what they *do*", and `docs/research-proposal.md:627`'s "no behavioural heuristic can separate them even in principle", are restated to 9.10 D6: two real jobs beside an editor with opposite correct policies.
+
+- **The two jobs, as the dataset carries them:**
+  - The training side (`c2-p1a`): PyTorch's basic MNIST example on the CPU, an actual training run that does not claim desktop users train MNIST (9.6 D32, 9.10 D12, D82–D90; `dataset/archetypes.yaml` `cpu-batch` scope). One thread, saturation 0.99988–0.99991; the run between voluntary blocks 69.49 s ±27.3 %; CPU total 1 389.885 s ±4.04 % (9.10 D90). Default policy, nice 0 (9.6 D17).
+  - The indexer side (`c2-p1b`): GNOME's Tracker indexing a home folder (9.10 D81). Five processes, saturation 0.655–0.676 over the job; the run between voluntary blocks 1.876 ms ±1.12 %, the block per run 227.0 µs ±3.58 %; CPU total 39.435 s ±0.28 % (9.10 D81). `SCHED_IDLE`, nice 19, idle I/O class, set by the program on itself (9.6 D17; 9.11 S2-22).
+  - The share of each program's CPU past a 10 ms slice without a voluntary block: Tracker 0.530–0.536, `python3` 0.917–0.920 (9.6 D21).
+- **What the pair tests** (9.10 D6; 9.11 D4): whether recognition improves on a baseline that already honours the indexer's declared class — "a baseline may deprioritize the indexer without recognition; the RQ0 gate then measures that headroom as it is."
+- **Leave:** "behaviorally indistinguishable in principle", "No refinement of this quadrant can separate them", "the distinguishing information exists only in what the processes *are*, not in what they *do*" (`related-work.md:18`); "no behavioural heuristic can separate them even in principle" (`research-proposal.md:627`); `related-work.md:20`'s "which the F2 pair defeats by construction".
+
+Hands to 9.15:
+
+- `docs/related-work.md:18`, `:20`; `docs/research-proposal.md:624`, `:627` restated as above; "ML training run" worded per 9.6 D32 and 9.10 D12.
+- The same premise for P1 elsewhere: the guidebook vol-03 `:1565`, `:1635`, `:3701`; vol-04 `:1084`, `:1100`, `:1275`; vol-05 `:90`, `:112`, `:2171`, `:2364`; vol-06 `:115`, `:200`, `:1495–1499`; vol-02 `:1453`, `:2177`, `:3574` (the behaviour channel's limit stated through the pair); `docs/workload/coreset-guide.md:182`, `:436`. 9.10 D6 already handed `building-plan.md` §3 C2 (`:91`) and `archetype-plan.md:77`'s rationale.
+- The general "same behaviour, opposite treatment" passages that illustrate with a download against a scan or a training run against a scan — vol-01 `:448`, `:1314`, `:1350`, `:1396`, `:2561`, `:3751`, and `docs/research-proposal.md:131`, `:175` — are read with item 33 (the download and the virus scan, against 9.6's and 9.7's measured values).
+
+Compiled effect: none.
