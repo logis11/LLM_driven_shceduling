@@ -58,6 +58,8 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
 | 48 | 2026-10-08 | local copy (stage 3) | 9.11's `sources/D2-ubuntu-hwe-7.0/linux-hwe-7.0_7.0.0-34.34~24.04.1.diff.gz` (archive.ubuntu.com, read by 9.11 D2) | `debian.master/config/annotations` → S2-52 | — |
 | 49 | 2026-10-08 | developer.apple.com (stage 3) | `/tutorials/data/documentation/foundation/qualityofservice.json`; `/tutorials/data/documentation/dispatch/dispatchqos/qosclass.json` | 200 → S2-53 | the Dispatch page 404 |
 | 50 | 2026-10-08 | GitHub API; learn.microsoft.com (stage 3) | `repos/apple-oss-distributions/xnu/contents/doc/scheduler/sched_clutch_edge.md?ref=xnu-12377.121.6`; `/en-us/windows/win32/procthread/{scheduling-priorities,priority-boosts,context-switches}` | 200 each → S2-54 | — |
+| 51 | 2026-10-09 | obsproject.com; raw.githubusercontent.com (stage 3) | `/`; `/kb/encoding-performance-troubleshooting`; `/kb/dropped-frames-and-general-connection-issues`; obsproject/obs-studio at HEAD `7d98bebe` `frontend/data/locale/en-US.ini` (`UI/data/locale/en-US.ini` tried second) | 200 → S2-55 | the dropped-frames KB page 404 |
+| 52 | 2026-10-09 | doc.rust-lang.org (stage 3) | `/cargo/index.html`; `/cargo/commands/cargo-build.html` | 200 → S2-56 | — |
 
 ## 2. Candidates
 
@@ -574,6 +576,21 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
   - Windows, "Scheduling Priorities": "The priority levels range from zero (lowest priority) to 31 (highest priority)." … "The system assigns time slices in a round-robin fashion to all threads with the highest priority. If none of these threads are ready to run, the system assigns time slices in a round-robin fashion to all threads with the next highest priority."
   - Windows, "Priority Boosts": "Each thread has a dynamic priority … The system can boost and lower the dynamic priority, to ensure that it is responsive and that no threads are starved for processor time." … "When the wait conditions for a blocked thread are satisfied, the scheduler boosts the priority of the thread. For example, when a wait operation associated with disk or keyboard I/O finishes, the thread receives a priority boost." … "After raising a thread's dynamic priority, the scheduler reduces that priority by one level each time the thread completes a time slice, until the thread drops back to its base priority."
 - Coverage: T3 — Windows: multilevel priorities, round-robin within a level, boosts on I/O completion, foreground and input, one level lost per completed slice — the MLFQ form OSTEP names (S1-02, p. 10). macOS: EDF across QoS buckets, a ULE variant across thread groups, Mach timesharing with CPU-usage priority decay at the thread level. Linux's default is EEVDF (S2-03). Documentation, not an observation.
+
+### S2-55 — OBS Studio: what it is, and what it does when its encoder falls behind (stage 3, 2026-10-09)
+
+- Copies (2026-10-09, `sources/S2-55/`): obsproject.com home page → `obsproject.com.html`, SHA-256 `578b8fa40c4af2799654e085d96d573e7df4dd800a0af602e3c006f1ebffc9e8`; the Knowledge Base page "Encoding Performance Troubleshooting" (dated 2021-06-12 on the page) → `obsproject.com_kb_encoding-performance-troubleshooting.html` `06a57e86615323aab8d9151c87e657344b6a919712aafb053ddeb92d1cf53ebf`; obsproject/obs-studio at `7d98bebe1115b12608837b622164ea5fe6d9483a` (HEAD on access), `frontend/data/locale/en-US.ini` → `en-US.ini` `475995992fde014e6abb52293435c50892726c66d62e0c9857b62779dc8f7cb3`.
+- Passages:
+  - Home page, `meta name="description"`: "OBS (Open Broadcaster Software) is free and open source software for video recording and live streaming."
+  - `en-US.ini:58`: `HighResourceUsage="Encoding overloaded! Consider turning down video settings or using a faster encoding preset."`; `:271`: `Basic.Stats.SkippedFrames="Skipped frames due to encoding lag"`.
+  - KB page: "If you are struggling with choppy/laggy output, and you are getting "encoding overloaded" messages, you may need to take some steps to leave some resources free for OBS Studio to use." The page carries a banner: "The OBS knowledge base is still currently a work in progress. While it is publicly accessible, we ask that you avoid linking users to any knowledge base pages at this time."
+- Coverage: T6-adjacent (item 35) — OBS records and live-streams, encoding as it goes; when the encoder falls behind it skips frames, counts them and warns. The KB page is quoted, not cited, at its own request; the locale strings are the citable ground. Documentation and source, not an observation.
+
+### S2-56 — The Cargo Book: `cargo build` (stage 3, 2026-10-09)
+
+- Copies (2026-10-09, `sources/S2-56/`): `https://doc.rust-lang.org/cargo/index.html` → `index.html`, SHA-256 `5ba0a57ad1a542022b1363d50a64c01fc9a299c8cdaaa065652e42523e954ecb`; `https://doc.rust-lang.org/cargo/commands/cargo-build.html` → `cargo-build.html` `cc3858cb5974e41ae7247b180e4533f973280b30e274a79326f488253d93ca49`.
+- Passages: index — "Cargo is the Rust package manager. Cargo downloads your Rust package's dependencies, compiles your packages, makes distributable packages, and uploads them to crates.io, the Rust community's package registry"; `cargo-build(1)` — "cargo-build — Compile the current package"; DESCRIPTION: "Compile local packages and all of their dependencies."
+- Coverage: item 35 — `cargo build` is Cargo's command that compiles a Rust package and its dependencies; Cargo is the package manager, rustc the compiler it drives. Documentation, not an observation.
 
 ## 3. Not found
 

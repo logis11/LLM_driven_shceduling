@@ -518,3 +518,16 @@ Taken under 인지오's delegation (2026-10-09), scope-card item 32: `docs/resea
 Hands to 9.15: `docs/research-proposal.md:123` and `docs/background-guide.md:115` restated as above, the diagram `:101–108` labelled with the same two programs; found in the sweep (`grep -n cc1plus docs`): `:177`'s §2.3 row "cc1plus ×8, bash" named for the build the dataset depicts (`cc1`, `-j8`).
 
 Compiled effect: none.
+
+## D34 — the world-knowledge examples restated: OBS encodes live and skips frames when it falls behind; `cargo build` compiles a Rust package; `updatedb` leaves the list, its unit declaring its class (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), scope-card item 35, after a stage-3 read (S2-55, S2-56): `docs/research-proposal.md:185`'s "knowing things about software that an operating system has no way to learn on its own: that OBS is a real-time encoder, … that `cargo build` is a compiler and `updatedb` is maintenance", and `:176`'s row "LoL, Discord, OBS | Gaming while streaming | Encoder is now latency-critical too — it cannot drop frames", are restated to the sources. The Steam and antivirus clauses of `:185` are D16's and D15's.
+
+- **OBS** (S2-55): "free and open source software for video recording and live streaming" (obsproject.com); when its encoder falls behind it warns "Encoding overloaded! Consider turning down video settings or using a faster encoding preset." and counts "Skipped frames due to encoding lag" (obs-studio `7d98bebe`, `frontend/data/locale/en-US.ini:58`, `:271`). Restated: OBS records and streams, encoding as it goes, so its encoder has a deadline per frame; "it cannot drop frames" leaves — an encoder that falls behind skips frames, which OBS counts and reports.
+- **`cargo build`** (S2-56): "cargo-build — Compile the current package"; "Compile local packages and all of their dependencies"; Cargo is "the Rust package manager". Restated: `cargo build` compiles a Rust package and its dependencies, Cargo driving the compiler.
+- **`updatedb`** leaves the list of what "an operating system has no way to learn on its own": its installed unit declares its class — plocate's `Nice=19`, `IOSchedulingClass=idle`; findutils' the same with `IOSchedulingPriority=7` (S3-02; D13). What the declaration leaves unsaid stays the point of `:185` — whether the user is waiting on the work, which D13's count shows is declared for some background tools and not others.
+- **"None of that is observable from process behaviour"** (`:187`) restated as D14 and D15 state the pairs: what a process is for, and whether the user is waiting on it, is not stated by its behaviour; its run shape and declared class are, and the experiment tests what recognition adds over them.
+
+Hands to 9.15: `docs/research-proposal.md:176`, `:185`, `:187` restated as above; `docs/references.md` — entries for OBS Studio (the locale file at `7d98bebe`; the home page) and the Cargo Book's `cargo build` page where the prose cites them, under the id-minting rule; the KB page quoted, not linked, at its own request. The sweep (`grep -rn -w -i obs docs`) finds no guidebook line on OBS; `docs/background-guide.md:20` ("what OBS does") and `docs/terminology.md:151` ("the model knows what OBS is") stay.
+
+Compiled effect: none.
