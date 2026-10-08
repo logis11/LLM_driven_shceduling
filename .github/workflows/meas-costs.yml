@@ -1,0 +1,84 @@
+name: meas-costs
+
+# 9.12 campaign (research-slice changelog D31; method
+# _dev/research/jioh/task-9.12-related-work-prose/campaign/method.md): job `kernel` — the runner kernel's
+# context-switch cost, the fair class's pick timed per call, and per-CPU switch rates at idle
+# (dataset/tools/meas/costs/run.sh); job `llm` — the end-to-end latency of a recognizer-shaped structured answer from
+# a 3B and an 8B Q4_K_M model under llama.cpp (dataset/tools/meas/llm/run.sh). Started by a push changing
+# .github/campaign-costs.json, which names each job's repeats, the mode (dry | full) and the CPU model.
+# Registry tag meas-ci:costs:<campaign launch date> (9.5 D27). One artifact per repeat.
+
+on:
+  push:
+    branches: [jioh/dataset-rebuild]
+    paths: [.github/campaign-costs.json]
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    outputs:
+      kernel: ${{ steps.plan.outputs.kernel }}
+      llm: ${{ steps.plan.outputs.llm }}
+      nkernel: ${{ steps.plan.outputs.nkernel }}
+      nllm: ${{ steps.plan.outputs.nllm }}
+      mode: ${{ steps.plan.outputs.mode }}
+      cpu_model: ${{ steps.plan.outputs.cpu_model }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        run: |
+          python3 - >> "$GITHUB_OUTPUT" <<'PY'
+          import json
+          c = json.load(open(".github/campaign-costs.json"))
+          for job in ("kernel", "llm"):
+              inc = [{"repeat": r} for r in c.get(job, [])]
+              print(f"{job}=" + json.dumps({"include": inc or [{"repeat": 0}]}))
+              print(f"n{job}=" + str(len(inc)))
+          print("mode=" + c.get("mode", "full"))
+          print("cpu_model=" + c.get("cpu_model", ""))
+          PY
+  kernel:
+    needs: plan
+    if: needs.plan.outputs.nkernel != '0'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix: ${{ fromJSON(needs.plan.outputs.kernel) }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: MEAS_OUT=/tmp/meas MEAS_CPU_MODEL="${{ needs.plan.outputs.cpu_model }}" bash dataset/tools/meas/costs/run.sh ${{ matrix.repeat }} ${{ needs.plan.outputs.mode }}
+      - name: own the output
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" /tmp/meas && sudo chmod -R a+rX /tmp/meas
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: costs-kernel-${{ matrix.repeat }}
+          path: /tmp/meas
+          if-no-files-found: error
+  llm:
+    needs: plan
+    if: needs.plan.outputs.nllm != '0'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix: ${{ fromJSON(needs.plan.outputs.llm) }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: MEAS_OUT=/tmp/meas MEAS_CPU_MODEL="${{ needs.plan.outputs.cpu_model }}" bash dataset/tools/meas/llm/run.sh ${{ matrix.repeat }} ${{ needs.plan.outputs.mode }}
+      - name: own the output
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" /tmp/meas && sudo chmod -R a+rX /tmp/meas
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: costs-llm-${{ matrix.repeat }}
+          path: /tmp/meas
+          if-no-files-found: error
