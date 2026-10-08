@@ -60,6 +60,7 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
 | 50 | 2026-10-08 | GitHub API; learn.microsoft.com (stage 3) | `repos/apple-oss-distributions/xnu/contents/doc/scheduler/sched_clutch_edge.md?ref=xnu-12377.121.6`; `/en-us/windows/win32/procthread/{scheduling-priorities,priority-boosts,context-switches}` | 200 each → S2-54 | — |
 | 51 | 2026-10-09 | obsproject.com; raw.githubusercontent.com (stage 3) | `/`; `/kb/encoding-performance-troubleshooting`; `/kb/dropped-frames-and-general-connection-issues`; obsproject/obs-studio at HEAD `7d98bebe` `frontend/data/locale/en-US.ini` (`UI/data/locale/en-US.ini` tried second) | 200 → S2-55 | the dropped-frames KB page 404 |
 | 52 | 2026-10-09 | doc.rust-lang.org (stage 3) | `/cargo/index.html`; `/cargo/commands/cargo-build.html` | 200 → S2-56 | — |
+| 53 | 2026-10-09 | git (stage 3) | `git fetch --depth 1 https://github.com/Ardour/manual 9628c8ba…` (S2-38's commit); `grep -il xrun include/*.html` | → S2-57 | — |
 
 ## 2. Candidates
 
@@ -591,6 +592,12 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
 - Copies (2026-10-09, `sources/S2-56/`): `https://doc.rust-lang.org/cargo/index.html` → `index.html`, SHA-256 `5ba0a57ad1a542022b1363d50a64c01fc9a299c8cdaaa065652e42523e954ecb`; `https://doc.rust-lang.org/cargo/commands/cargo-build.html` → `cargo-build.html` `cc3858cb5974e41ae7247b180e4533f973280b30e274a79326f488253d93ca49`.
 - Passages: index — "Cargo is the Rust package manager. Cargo downloads your Rust package's dependencies, compiles your packages, makes distributable packages, and uploads them to crates.io, the Rust community's package registry"; `cargo-build(1)` — "cargo-build — Compile the current package"; DESCRIPTION: "Compile local packages and all of their dependencies."
 - Coverage: item 35 — `cargo build` is Cargo's command that compiles a Rust package and its dependencies; Cargo is the package manager, rustc the compiler it drives. Documentation, not an observation.
+
+### S2-57 — Ardour manual at S2-38's commit: what an xrun is and what it sounds like (stage 3, 2026-10-09)
+
+- Copies (2026-10-09, `sources/S2-38/ardour-manual/`, the repository at `9628c8bad094537fddd967ef137e8a692e2b1503`, S2-38's commit; `include/latency-considerations.html` byte-identical to S2-38's, `2f7429aa…`): `include/latency-and-latency-compensation.html` SHA-256 `d3af5c17f37fcd70ccf9b7811d1201e43ffcde52575d3a74b570bb7038518346`; `include/preferences.html` `02fa43bca439d2dda3dde77d822988062215ac8861541b4e36c1932088d0c704`.
+- Passages (tags removed): `latency-and-latency-compensation.html` — "The lower the latency, the more likely the system will fail to meet its processing deadline and the dreaded xrun (short for buffer over- or under-run) will make its appearance more often, leaving its merry trail of clicks, pops and crackles."; `preferences.html` — "Dropout (xrun) Handling Stop recording when an xrun occurs will stop the transport when an xrun occurs during recording, ensuring no audible glitches are recorded."
+- Coverage: T13 — a missed audio deadline is an xrun, heard as clicks, pops and crackles; lower latency makes it more likely. Documentation, not an observation.
 
 ## 3. Not found
 

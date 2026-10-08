@@ -531,3 +531,17 @@ Taken under 인지오's delegation (2026-10-09), scope-card item 35, after a sta
 Hands to 9.15: `docs/research-proposal.md:176`, `:185`, `:187` restated as above; `docs/references.md` — entries for OBS Studio (the locale file at `7d98bebe`; the home page) and the Cargo Book's `cargo build` page where the prose cites them, under the id-minting rule; the KB page quoted, not linked, at its own request. The sweep (`grep -rn -w -i obs docs`) finds no guidebook line on OBS; `docs/background-guide.md:20` ("what OBS does") and `docs/terminology.md:151` ("the model knows what OBS is") stay.
 
 Compiled effect: none.
+
+## D35 — the media deadlines stated as arithmetic on named rates: 16.7 ms at 60 Hz, 2.67 ms for 128 frames at 48 kHz; the audio workstation's "1–3 ms" restated to its buffer and Ardour's 5 ms target (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), scope-card item 36: `docs/research-proposal.md:414` ("this must complete within 3 ms or a frame drops"), `:640` ("Its deadlines are 1–3 ms rather than gaming's 16 ms, buffer underruns are audible rather than a dropped frame") and `:820` ("A game rendering at 60 fps has a 16 ms deadline every frame … An audio buffer at 128 samples has a deadline nearer 3 ms; missing it is audible") are restated to arithmetic on rates their sources name.
+
+- **The frame** (arithmetic): 1 / 60 Hz = 16.67 ms. Steam Deck's LCD runs "up to 60Hz", adjustable 40–60 Hz; its OLED "up to 90Hz" (S2-39), 11.1 ms. The dataset's game chain ticks every 16 667 µs (`steamos-refresh`, design, 9.4). Restated: "16.7 ms at 60 Hz".
+- **The audio buffer** (arithmetic): 128 / 48 000 Hz = 2.67 ms. 48 kHz is PipeWire's and JACK's default rate; their default buffer is 1 024 frames, 21.3 ms (`default.clock.quantum = 1024`, S2-36; `jackd -p` "(default: 1024)", S2-37); a smaller buffer is the user's low-latency choice — "If you need low latency, set -p as low as you can go without seeing xruns" (S2-37). Restated: a 128-frame buffer at 48 kHz, a low-latency setting below the 1 024-frame default, comes due every 2.67 ms.
+- **The audio workstation** (`:640`): no source states "1–3 ms". Ardour's manual: the A/D/A conversion alone is "about 1.5–2 ms", and "Latency below 5 ms should be suitable for a professional recording setup", which needs "extremely low buffer sizes" (S2-38). Restated: recording through a 64–128-frame buffer at 48 kHz gives a period of 1.33–2.67 ms (arithmetic), the buffer Ardour's 5 ms target calls for; "gaming's 16 ms" as the 60 Hz frame above.
+- **"audible"** kept, cited: a missed audio deadline is an xrun, "leaving its merry trail of clicks, pops and crackles" (S2-57, Ardour's manual).
+- **`:414`'s EDF row** restated without mixing the two: a periodic job's deadline is its next period — a frame every 16.7 ms at 60 Hz, a 128-frame audio buffer every 2.67 ms at 48 kHz.
+
+Hands to 9.15: `docs/research-proposal.md:414`, `:640`, `:820` restated as above (`:640`'s Game Mode and whitelist clauses are D5's); `docs/references.md` — PipeWire's and JACK's defaults (S2-36, S2-37), the Ardour manual's two pages (S2-38, S2-57) and the Steam Deck page (S2-39) where the prose cites them, under the id-minting rule.
+
+Compiled effect: none.
