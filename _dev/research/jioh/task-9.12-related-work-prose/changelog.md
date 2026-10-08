@@ -293,3 +293,16 @@ By 인지오's decision, scope-card item 1: `docs/related-work.md:8`'s "ghOSt de
 Hands to 9.15: `docs/related-work.md:8` as above; the guidebook vol-02 ch. 3.2 checked against the same passages (item 60).
 
 Compiled effect: none.
+
+## D18 — the classic heuristics: MLFQ classifies by CPU use; CFS and EEVDF account against a fair share, their sleeper handling shaping a waking task's place (2026-10-08)
+
+By 인지오's decision, scope-card item 4 (and the `mlfq` and `eevdf` keys of item 20): `docs/related-work.md:16`'s "Classic interactivity heuristics — MLFQ's demotion by CPU consumption, and the sleep/wake accounting behind CFS and EEVDF — classify tasks by how they use the CPU [mlfq, eevdf]" keeps MLFQ as a classifier and restates CFS and EEVDF as accounting.
+
+- **MLFQ** (`ostep`, ch. 8, Version 1.10; S1-02): "If, for example, a job repeatedly relinquishes the CPU while waiting for input from the keyboard, MLFQ will keep its priority high … If, instead, a job uses the CPU intensively for long periods of time, MLFQ will reduce its priority" (p. 2); Rules 4a/4b (p. 3), revised to Rule 4: "Once a job uses up its time allotment at a given level (regardless of how many times it has given up the CPU), its priority is reduced" (p. 8). The original (`corbato-sjcc62`; S1-04, printed p. 341–342): a program not done within 2^ℓ quanta moves to level ℓ+1, and "the level classification procedure for programs is entirely automatic, depending on performance and program size rather than on the declarations (or hopes) of each user".
+- **CFS** (`Documentation/scheduler/sched-design-CFS.rst` at mainline `7b63ef2d`; S2-04): "CFS basically models an "ideal, precise multi-tasking CPU" on real hardware" (`:18–19`); "has no heuristics whatsoever" (`:96–105`), beside "various algorithm variants to recognize sleepers" (`:51–53`) in the same document.
+- **EEVDF** (`sched-eevdf.rst` at `7b63ef2d`, S2-03; `eevdf-tr95`, S1-05): a virtual run time and a lag per task, the eligible task with the earliest virtual deadline run next, "latency-sensitive tasks with shorter time slices" favoured (`:13–22`); a sleeping task's lag decays (`:24–32`). The report bounds the lag by a quantum (Corollary 2, p. 20) and leaves the compensation of a rejoining client a policy choice (§5, p. 11–12).
+- **The key map:** `mlfq` → `ostep` with `corbato-sjcc62`; `eevdf` → `eevdf-tr95` with the kernel's `sched-eevdf.rst` and `sched-design-CFS.rst`.
+
+Hands to 9.15: `docs/related-work.md:16`'s first sentence restated as above, its keys resolved; the guidebook vol-02 ch. 2.2 and 2.5 checked against the same passages (item 60).
+
+Compiled effect: none.
