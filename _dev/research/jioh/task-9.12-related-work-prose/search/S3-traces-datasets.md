@@ -1,0 +1,905 @@
+# S3 — public traces and datasets (reader record)
+
+Reader class S3. Access date for every fetch and computation: 2026-10-07. Sandbox: Ubuntu 24.04.5 LTS container, outbound HTTPS through the session proxy (TLS verified against the proxy CA bundle). Copies were saved under `sources/S3-NN/` (gitignored). Everything a reader needs is quoted below. Counts I computed myself come with the exact command or script and its verbatim output. Scripts are reproduced in full in Appendix A, and long outputs are in Appendix B.
+
+Topics in scope: T7 (counts over units, packages or a rules catalogue), T10 (traces or datasets with context-switch rates or latencies), T11 (benchmark datasets of local LLM latency), T12 (session-duration or application-usage datasets). For T1–T6, T8, T9 and T13–T15, see the end of section 2.
+
+---
+
+## 1. Search log
+
+| # | Date | Engine / venue | Exact query or URL | Hits followed | Dead ends (HTTP status) |
+|---|---|---|---|---|---|
+| 1 | 2026-10-07 | Debian Code Search (codesearch.debian.net), no-JS HTML `/search` | `CPUSchedulingPolicy=idle` (literal) | 3 result pages, 13 packages | `GET /api/v1/search?query=…&match_mode=literal` → **403** (API needs key). The no-JS page returns results after polling (it first shows "Still searching", then refreshes) |
+| 2 | 2026-10-07 | DCS | `CPUSchedulingPolicy=idle path:\.(service\|timer)` (literal) | 2 pages | — |
+| 3 | 2026-10-07 | DCS | `CPUSchedulingPolicy=batch path:\.(service\|timer)` (literal) | 1 page | — |
+| 4 | 2026-10-07 | DCS | `Nice=19 path:\.(service\|timer)` (literal) | 4 pages | — |
+| 5 | 2026-10-07 | DCS | `IOSchedulingClass=idle path:\.(service\|timer)` (literal) | 4 pages | — |
+| 6 | 2026-10-07 | DCS | `IOSchedulingClass=3 path:\.(service\|timer)` (literal) | 1 page | — |
+| 7 | 2026-10-07 | DCS | `CPUSchedulingPolicy= path:\.(service\|timer)` (literal) | 5 pages | — |
+| 8 | 2026-10-07 | DCS | `^\s*Nice= path:\.(service\|timer)` (regex) | 7 pages | — |
+| 9 | 2026-10-07 | DCS | `IOSchedulingClass= path:\.(service\|timer)` (literal) | 8 pages | — |
+| 10 | 2026-10-07 | DCS | `SCHED_IDLE path:\.(c\|cc\|cpp\|h)$` (literal) | 34 pages | The first run broke at page 15 (curl transfer error, file not written; the proxy status listed `ws_closed_mid_exchange … codesearch.debian.net:443`). I re-ran it with `--retry 5` and it completed |
+| 11 | 2026-10-07 | DCS, grouped by package (`perpkg=1`) | `^\[Service\] path:\.service` (regex), pages 0, 1, 318 | denominator: 319 pages | — |
+| 12 | 2026-10-07 | DCS, per package | `^\[Service\] path:\.service package:<p>` (regex) for p ∈ {clamav, localsearch, kf6-baloo, plocate, mlocate, findutils, deja-dup, borgbackup, restic, timeshift, backintime, tracker-miners, baloo-kf5, akonadi-search} | unit files of localsearch, kf6-baloo, plocate, findutils, restic-rest-server | Zero hits for clamav, mlocate, deja-dup, borgbackup, timeshift, backintime, tracker-miners, baloo-kf5 and akonadi-search. A check query `package:clamav freshclam` (literal) matched only `clamav-cvdupdate`, so the `clamav` source package is **absent from the DCS index** even though its units exist (row 13) |
+| 13 | 2026-10-07 | sources.debian.org `/data/main/…` and `/api/src/…` | Raw files: plocate 1.1.25-1 `plocate-updatedb.service.in`; findutils 4.11.0-3 `debian/locate.service`; localsearch 3.12.0-1 `src/indexer/tracker-miner-fs.service.in` and `src/indexer/tracker-main.c`; kf6-baloo 6.30.0-1 `src/file/kde-baloo.service.in`, `src/file/priority.cpp`, `src/file/main.cpp`, `src/file/extractor/main.cpp`; tumbler 4.20.2-1 `tumblerd/tumbler-scheduler.c`; recoll 1.43.16-1 `index/recollindex.cpp`; akonadi-search 4:26.04.3-3 `agent/priority.cpp`; clamav 1.4.6+dfsg-1 `clamd/clamav-daemon.service.in`, `freshclam/clamav-freshclam.service.in`, `clamonacc/clamav-clamonacc.service.in` | all 200 | — |
+| 14 | 2026-10-07 | Local filesystem of this sandbox | `/lib/systemd/system/*.{service,timer}`, `/usr/lib/systemd/user/*.{service,timer}` | 163 unit files | `dpkg -S` printed nothing (dpkg database not usable here) |
+| 15 | 2026-10-07 | git clone | `https://github.com/CachyOS/ananicy-rules.git` (depth 1) | commit 03ef03fb… | — |
+| 16 | 2026-10-07 | Hugging Face Hub API | `https://huggingface.co/api/datasets/optimum-benchmark/llm-perf-leaderboard`; `…/resolve/94a9713e…/data/perf-df-pytorch-cuda-awq-1xT4.csv` | 1 CSV (12.3 MB) | — |
+| 17 | 2026-10-07 | localscore.ai | `/`, `/about`, `/latest`, `/download`, `/model/1`, `/model/2`, `/model/3`, `/accelerator/349`, `/accelerator/43`, `/result/4246`, `/result/4252`, `/result/4254`, `/result/4255` | all 200 | — |
+| 18 | 2026-10-07 | mlcommons.org | `https://mlcommons.org/benchmarks/client/` | 1 page | No public results table was found on that page |
+| 19 | 2026-10-07 | github.com (llama.cpp performance discussions) | `https://github.com/ggml-org/llama.cpp/discussions/4167`, `…/discussions/15013`, `https://api.github.com/repos/ggml-org/llama.cpp/discussions/4167` | — | **403** on all three |
+| 20 | 2026-10-07 | artificialanalysis.ai (hosted-API latency) | `/models/llama-3-1-instruct-8b/providers` | 1 page | — |
+| 21 | 2026-10-07 | storage.googleapis.com (Perfetto example trace) | `https://storage.googleapis.com/perfetto-misc/example_android_trace_15s` (57.2 MB); `https://get.perfetto.dev/trace_processor` → `https://commondatastorage.googleapis.com/perfetto-luci-artifacts/v58.2/linux-amd64/trace_processor_shell` | trace + tool (tool SHA-256 matches the launcher's pinned hash) | — |
+| 22 | 2026-10-07 | raw.githubusercontent.com / drive.google.com | google/cluster-data `ClusterData2019.md`, `ClusterData2011_2.md`, `README.md`; 2019 schema PDF (drive id 10r6cnJ5…), 2011 schema PDF (drive id 0B5g07T_…); alibaba/clusterdata `README.md`, `cluster-trace-v2018/trace_2018.md`, `cluster-trace-v2018/schema.txt`, `cluster-trace-v2017/trace_201708.md` | all 200 | Grep for `context.switch\|context_switch\|ctx` in all of them returned no hits |
+| 23 | 2026-10-07 | openbenchmarking.org / phoronix.com | `https://openbenchmarking.org/test/pts/ctx-clock`, `…/pts/ctx-clock-1.0.0`, `…/pts/stress-ng`, `https://www.phoronix.com/`, `https://www.phoronix.com/review/linux-611-features` | — | **403** on all of them (the body is a Cloudflare "Just a moment… Enable JavaScript and cookies to continue" challenge) |
+| 24 | 2026-10-07 | git clone | `https://github.com/intel/lmbench.git` (depth 1) | `doc/ctx.tbl`, `doc/usenix96.ms`, `doc/lat_ctx.8` | `results/` holds only a Makefile. `https://www.lmbench.org/` → no connection (curl 000) |
+| 25 | 2026-10-07 | raw.githubusercontent.com | torvalds/linux master `tools/perf/Documentation/perf-sched.txt` | 1 file | — |
+| 26 | 2026-10-07 | WebSearch | `World of Warcraft Avatar History dataset WoWAH download session length` | web.cs.wpi.edu mirror (paper + index), homepage.iis.sinica.edu.tw | `https://homepage.iis.sinica.edu.tw/~swc/pub/world_of_warcraft_avatar_history.html` → **500**; `https://mmnet.iis.sinica.edu.tw/dl/wowah/` → no connection (curl 000) |
+| 27 | 2026-10-07 | WebSearch | `dataset PC game play session durations telemetry public download` | researchdata.gla.ac.uk/2227 Readme.md; eprints.soton.ac.uk/377465 (IdleWars) | `https://eprints.soton.ac.uk/377465/` → **401** |
+| 28 | 2026-10-07 | WebSearch | `SWELL-KW dataset computer interaction logging application switches DANS` | cs.ru.nl SWELL-KW pages, ICMI 2014 paper, DANS (ssh.datastations.nl) dataset API, arXiv 2404.10505 (RLKWiC) | — |
+| 29 | 2026-10-07 | WebSearch | `BEHACOM dataset keyboard mouse application statistics resource consumption Mendeley Data` | PMC7270191, Mendeley Data cg4br62535 v2 | — |
+| 30 | 2026-10-07 | Zenodo REST API `https://zenodo.org/api/records?q=…&size=8` | `"World of Warcraft" avatar history`; `game session length`; `gaming session duration dataset`; `application usage log desktop`; `SWELL knowledge work`; `computer interaction logging window switching`; `active window log dataset` | none relevant (top 8 of each were off-topic) | `steam playtime sessions` → curl (35) SSL_ERROR_SYSCALL (connection reset) |
+| 31 | 2026-10-07 | cseweb.ucsd.edu | `https://cseweb.ucsd.edu/~jmcauley/datasets.html` (Steam Video Game and Bundle Data) | 1 page | — |
+| 32 | 2026-10-07 | kaggle.com | `https://www.kaggle.com/datasets` (reachability probe only) | 200 | Not used: Kaggle downloads need a login |
+
+---
+
+## 2. Candidates
+
+(Id S3-14 was assigned to the IdleWars record at eprints.soton.ac.uk/377465, which returned 401. It has no copy and is not a candidate, so the numbering skips it.)
+
+### S3-01 — Debian Code Search: units and C sources in Debian that declare an idle/batch/nice/I-O class (T7)
+
+- **Citation.** Debian Code Search, https://codesearch.debian.net/ (dcs-web commit `7c71293812877aa110d277a9b747b2d29485c65a`, as printed in the page footer). It indexes the current Debian unstable source packages. The package versions in the hits (e.g. `systemd_262-1`, `e2fsprogs_1.47.4-1`, `plocate_1.1.25-1`) identify the snapshot.
+- **Copy read.** No-JS HTML result pages fetched on 2026-10-07 with `dcs.sh` (Appendix A.1). Queries q01–q09 used the first version of the script, without `--retry`; q10–q12 used the version shown. Saved under `sources/S3-01/qNN_*/page_N.html`. Per-query manifests are `sources/S3-01/qNN_*.sha256`; the SHA-256 of each manifest:
+
+| Query dir | Query | Mode | Pages | SHA-256 of manifest |
+|---|---|---|---|---|
+| q01_cpuidle_unit | `CPUSchedulingPolicy=idle path:\.(service\|timer)` | literal | 2 | d2299d91e0c519c83e6b32617b1fac7057630622e3dbdb75c8687eeb628fcad0 |
+| q02_cpuidle_all | `CPUSchedulingPolicy=idle` | literal | 3 | 2e9a7d8721ef8b809bf237b55fbdbcb069b294499d89308a43e11e523d690c8c |
+| q03_cpubatch_unit | `CPUSchedulingPolicy=batch path:\.(service\|timer)` | literal | 1 | a8eda383005e2775d1591418cbe75a1281aee178dbfa8d06673a77a80a1b577b |
+| q04_nice19_unit | `Nice=19 path:\.(service\|timer)` | literal | 4 | 3d7b36c5eb044fa042448e8a47942967debdf11206df61e7838abac080531b15 |
+| q05_ioidle_unit | `IOSchedulingClass=idle path:\.(service\|timer)` | literal | 4 | 19730ca89ff3493aedeec2b80a93495a4eab9d90529700bbfaeb55ec756b2712 |
+| q06_io3_unit | `IOSchedulingClass=3 path:\.(service\|timer)` | literal | 1 | cb7f43b0b160715c88ff9ee8752c41b10ea62dba1666596ebc9c0ccc70c879c0 |
+| q07_cpupolicy_any_unit | `CPUSchedulingPolicy= path:\.(service\|timer)` | literal | 5 | 5e4b5b8fdb47aee21b5a21c08cb93a0026e2e09dac13fa6eaea599e876a00a5d |
+| q08_nice_any_unit | `^\s*Nice= path:\.(service\|timer)` | regex | 7 | 0af6d44c1debb21b57d3e2f9fb718b4988f9c51eff51ddcf73cedded4bf17a42 |
+| q09_ioclass_any_unit | `IOSchedulingClass= path:\.(service\|timer)` | literal | 8 | e1e98c79538e1e5f85722d78e2b1361450154241a34d3fa63e19479b2071483b |
+| q10_sched_idle_c | `SCHED_IDLE path:\.(c\|cc\|cpp\|h)$` | literal | 34 | 1a37730d2ccdd7e26a5ace2d62fe807cae848407b799ddf681e9a39d5bec6220 |
+| q11_denominator | `^\[Service\] path:\.service` (perpkg=1; pages 0, 1, 318) | regex | 3 fetched | dc8108d6de04fcbf33e01b26fe97279c6f612c404b183ab90dbbe8332a5b30bd |
+
+  Note: the `path:` filter is a regex on the file path, so `\.service` also matches `.service.in` templates.
+- **Computed counts** (`python3 -I parse.py <dir>`, Appendix A.2; the first three output lines are verbatim). Lines whose matched text starts with `#` or `;` count as "commented".
+
+```
+== q01_cpuidle_unit
+hits 16 files 16 packages 10 | uncommented hits 16 packages(uncommented) 10
+packages: apt-xapian-index btrfsd btrfsmaintenance bumblebee e2fsprogs radvd rtags rust-rebuilderd-worker snapper xfsprogs
+== q02_cpuidle_all
+hits 28 files 26 packages 13 | uncommented hits 28 packages(uncommented) 13
+packages: apt-xapian-index btrfsd btrfsmaintenance bumblebee debian-reference e2fsprogs manpages-l10n radvd rtags rust-rebuilderd-worker snapper systemd-cron xfsprogs
+== q03_cpubatch_unit
+hits 3 files 3 packages 2 | uncommented hits 3 packages(uncommented) 2
+packages: borgmatic grokmirror
+== q04_nice19_unit
+hits 35 files 35 packages 26 | uncommented hits 35 packages(uncommented) 26
+packages: apt-show-versions apt-xapian-index borgmatic codelite debusine dnf dnf5 exim4 findutils hw-probe kanboard lighttpd logrotate lynis mailgraph man-db openqa openqa-server pk4 plocate privoxy rtags storebackup universal-ctags wtmpdb xfsprogs
+== q05_ioidle_unit
+hits 39 files 37 packages 20 | uncommented hits 39 packages(uncommented) 20
+packages: apt-listchanges apt-xapian-index boinc btrfsd btrfsmaintenance clsync duply e2fsprogs etckeeper findutils flatpak hw-probe man-db ntpsec pk4 plocate snapper systemd systemd-udeb xfsprogs
+== q06_io3_unit
+hits 3 files 3 packages 3 | uncommented hits 3 packages(uncommented) 3
+packages: codelite rust-rebuilderd-worker universal-ctags
+== q07_cpupolicy_any_unit
+hits 49 files 49 packages 22 | uncommented hits 45 packages(uncommented) 21
+packages: apt-xapian-index borgmatic btrfsd btrfsmaintenance bumblebee coturn e2fsprogs grokmirror hipercontracer low-memory-monitor nohang osmo-bts osmo-mgw osmo-pcu osmo-trx radvd rtags rust-rebuilderd-worker snapper systemd systemd-udeb xfsprogs
+== q08_nice_any_unit
+hits 68 files 68 packages 48 | uncommented hits 68 packages(uncommented) 48
+packages: apt-show-versions apt-xapian-index boinc borgmatic brltty chkrootkit codelite debusine deepin-boot-maker deepin-log-viewer dnf dnf5 drkonqi earlyoom espeakup exim4 findutils frr gdnsd hdapsd hw-probe jacktrip jamulus kanboard lighttpd logcheck logrotate lynis mailgraph man-db openqa openqa-server pk4 plocate privoxy railcontrol rauc-hawkbit-updater readsb rtags sitesummary storebackup svxlink systemd systemd-udeb universal-ctags vdradmin-am wtmpdb xfsprogs
+== q09_ioclass_any_unit
+hits 80 files 71 packages 40 | uncommented hits 79 packages(uncommented) 39
+packages: apt-listchanges apt-show-versions apt-xapian-index boinc borgmatic btrfsd btrfsmaintenance clsync codelite dnf dnf5 duply e2fsprogs etckeeper exim4 findutils flatpak hipercontracer hw-probe jacktrip jamulus kanboard keepalived lighttpd logrotate lynis man-db ntpsec pk4 plocate privoxy railcontrol rust-rebuilderd-worker snapper storebackup systemd systemd-udeb universal-ctags wtmpdb xfsprogs
+== q10_sched_idle_c
+hits 337 files 170 packages 93 | uncommented hits 211 packages(uncommented) 84
+```
+
+  For q10 (C sources) the "uncommented" heuristic means nothing, because `#define` and `#ifdef` lines start with `#`. Hits there include libc headers, kernels and process viewers that only define or print `SCHED_IDLE`; they are not callers that set the policy.
+
+- **Value tabulations** (verbatim output; commands in Appendix A.3):
+
+```
+q07  CPUSchedulingPolicy= values over hits (count, value):
+     19  CPUSchedulingPolicy=rr
+     16  CPUSchedulingPolicy=idle
+      4  #CPUSchedulingPolicy=rr
+      3  CPUSchedulingPolicy=batch
+      2  CPUSchedulingPolicy=fifo
+      2  CPUSchedulingPolicy=ext
+      2  CPUSchedulingPolicy=
+      1  CPUSchedulingPolicy=other
+q08  Nice= values over hits (count, value):
+     35  Nice=19
+      8  Nice=-5
+      7  Nice=10
+      6  Nice=-10
+      4  Nice=9
+      4  Nice=-20
+      2  Nice=
+      1  Nice=-11
+      1  Nice=-1
+```
+
+  The rr/fifo/ext hits come from systemd's own tests (`systemd_262-1/test/test-sched-prio/…`), osmo-bts/osmo-mgw/osmo-pcu/osmo-trx (`contrib/systemd/*.service`, `debian/*.service`), `hipercontracer_2.2.10-1/src/udp-echo-server.service:46` and `low-memory-monitor_2.1-3/data/low-memory-monitor.service.in:12` (fifo). Negative `Nice=` hits are listed in full in Appendix B.1. Examples: `earlyoom_1.9.0-1/earlyoom.service.in:12 | Nice=-20`, `jamulus_3.9.1+dfsg-2/linux/debian/jamulus-headless.service:13 | Nice=-20`, `brltty_6.9.1+repack-2/debian/brltty.service:30 | Nice=-10`, `systemd_262-1/debian/extra/units-ubuntu/systemd-journald.service.d/nice.conf:4 | Nice=-1`.
+
+- **Denominator.** Grouped view of `^\[Service\] path:\.service` (regex, perpkg=1). Page 0 shows the pagination string `… <a …page=318">319</a>`. Each grouped page lists 5 packages, and page 318 (the last) lists 3 (`smartdns`, `kylin-ai-runtime`, `debiman`). Verbatim command output:
+  ```
+  h2 package headers on page 1:
+  5
+  ...
+  h2 package headers on page 318:
+  3
+  <h2>All results <h2>Results by package <h2>Search Results by package for "^\[Service\] path:\.service" <h2>smartdns <h2>kylin-ai-runtime <h2>debiman
+  5   (page 0)
+  ```
+  That gives 318×5+3 = **1,593 source packages** with at least one file whose path matches `\.service` and that has a line beginning `[Service]`. I assumed stable paging and did not fetch all 319 pages. On that denominator: CPUSchedulingPolicy=idle in a unit, 10 packages (0.6%); Nice=19, 26 (1.6%); IOSchedulingClass=idle, 20 (1.3%); any `Nice=`, 48 (3.0%); any `IOSchedulingClass=`, 40 (2.5%). These percentages are my arithmetic. The numerator also counts example, contrib and test units, and the denominator excludes packages missing from the index (e.g. `clamav`; see search log row 12).
+- **Verbatim passages** (DCS hit lines, `file:line | matched line`, from q04/q05):
+  - `plocate_1.1.25-1/plocate-updatedb.service.in:8 | IOSchedulingClass=idle` and `…:9 | Nice=19`
+  - `findutils_4.11.0-3/debian/locate.service:9 | Nice=19`, `…:10 | IOSchedulingClass=idle`
+  - `man-db_2.13.1-1/init/systemd/man-db.service.in:13 | Nice=19`, `…:14 | IOSchedulingClass=idle`
+  - `systemd_262-1/units/systemd-tmpfiles-clean.service:23 | IOSchedulingClass=idle`
+  - `xfsprogs_7.2.0-1/scrub/xfs_scrub@.service.in:30` context: `# Run scrub with minimal CPU and IO priority so that nothing else will starve.` / `IOSchedulingClass=idle` / `CPUSchedulingPolicy=idle` / `CPUAccounting=true` / `Nice=19`
+  - `radvd_1:2.20-1/radvd.service.in:20` context: `# Set the CPU scheduling policy to idle which is for running very low priority background jobs` / `CPUSchedulingPolicy=idle`
+  - `borgmatic_2.0.11-2/sample/systemd/borgmatic.service:64 | CPUSchedulingPolicy=batch`
+  - q10 (C): `kf6-baloo_6.30.0-1/src/file/priority.cpp:65 | return !sched_setscheduler(0, SCHED_IDLE, &param);`; `localsearch_3.12.0-1/src/indexer/tracker-main.c:95 | if (pthread_setschedparam (pthread_self(), SCHED_IDLE, &sp) < 0)`; `tumbler_4.20.2-1/tumblerd/tumbler-scheduler.c:332 | sched_setscheduler (0, SCHED_IDLE, &sp);`; `recoll_1.43.16-1/index/recollindex.cpp:212 | sched_setscheduler(getpid(), SCHED_IDLE, &param);`; `akonadi-search_4:26.04.3-3/agent/priority.cpp:96 | return !sched_setscheduler(0, SCHED_IDLE, &param);`; `boinc_8.2.15+dfsg-10/client/app_start.cpp:1116 | if (sched_setscheduler(0, SCHED_IDLE, &sp)) {`; `pinot_1.24-1/Core/pinot-dbus-daemon.cpp:392 | else if (sched_setscheduler(0, SCHED_IDLE, &schedParam) == -1)`.
+- **Coverage.**
+  - T7 covered. Object: Debian unstable source packages. Unit: source package, file and line. Statistic: count of packages and files containing each directive in a `.service`/`.timer`(/.in) path, plus a denominator of 1,593 packages with a `[Service]` unit file. Scope: Debian main source as indexed by DCS on 2026-10-07. Population: all indexed source packages (packages missing from the index excluded). This is one observation (one index snapshot, window = access date), not a machine. It counts declarations in source, not what is installed or enabled on any system.
+  - Other topics: does not cover.
+
+### S3-02 — Debian source files of desktop background tools (T7, per-tool declarations)
+
+- **Citation.** Debian sources archive, https://sources.debian.org/data/main/… (versions in the file names below), accessed 2026-10-07.
+- **Copy read** (`sources/S3-02/`, SHA-256):
+  - plocate 1.1.25-1 `plocate-updatedb.service.in`: d8867da6abc3e7062679c51c8b7e46d8f9484c337b127a0efe97410e0bede5a7
+  - findutils 4.11.0-3 `debian/locate.service`: 48cb7fe113e740ac879f59cc5508c70a461b4c5885ffe240166855fab54e7b3f
+  - localsearch 3.12.0-1 `src/indexer/tracker-miner-fs.service.in`: aef73d13f1229fd9a494385078e7595dfe55b542579da0b859ccac53da4d7eb4
+  - localsearch 3.12.0-1 `src/indexer/tracker-main.c`: bf0bf720467204e003ad50ccfdd5530211664574714755a3d37e342041d0bf5a
+  - kf6-baloo 6.30.0-1 `src/file/kde-baloo.service.in`: 68da2312f10da6986108515e28001bc9d4f753cee0441f9dd71036f098ca44d3
+  - kf6-baloo `src/file/priority.cpp`: b6df2a1172131df3fec91fbf5fb254909dd6abe282b339b35f8b90739109d7d5
+  - kf6-baloo `src/file/main.cpp`: 8eef78475cd3dad766137ef9efd2e73624b7f3de216463e459e9fed0dd788bab
+  - kf6-baloo `src/file/extractor/main.cpp`: 69cf06518045f5c5b2d13c06f1678684faeb89542776c37c9955cdfa93e2acf9
+  - tumbler 4.20.2-1 `tumblerd/tumbler-scheduler.c`: d7b47cce25b3f89b3eb364123a06f54612afe0acfdd17fa3f45451489246a75d
+  - recoll 1.43.16-1 `index/recollindex.cpp`: 4aa4829007344ad10c8b1484e33348025c860d7c20a4a9b9eb228652826619a6
+  - akonadi-search 4:26.04.3-3 `agent/priority.cpp`: 9fc0476e7a592570b23519ed96da1d7fdc3262c133fd27110aeff3b89ab935cf
+  - clamav 1.4.6+dfsg-1 `clamd/clamav-daemon.service.in`: e0bd83bb1bb454bdb7a374c276a4a840476a2525b9926bd771d8fa1741d241ff
+  - clamav `freshclam/clamav-freshclam.service.in`: eaefe47e09e594d77c12c5c3d0f936f989d4db5976bf4cbaebfb48f43f3efdb1
+  - clamav `clamonacc/clamav-clamonacc.service.in`: 2bdb09552829872b358bab42b0102bb030c9ab9e10bbbaa9add5e22619cf72a5
+- **Verbatim passages.**
+  - `plocate-updatedb.service.in:4-9`: `[Service]` / `Type=oneshot` / `ExecStart=@sbindir@/@updatedb_progname@` / `LimitNOFILE=131072` / `IOSchedulingClass=idle` / `Nice=19`
+  - `findutils debian/locate.service:6-11`: `[Service]` / `Type=oneshot` / `ExecStart=/etc/cron.daily/locate systemd-timer` / `Nice=19` / `IOSchedulingClass=idle` / `IOSchedulingPriority=7`
+  - `localsearch tracker-miner-fs.service.in:7-12`: `[Service]` / `Type=notify` / `BusName=org.freedesktop.LocalSearch3` / `ExecStart=@libexecdir@/localsearch-3` / `Restart=on-failure` / `Slice=background.slice` (no Nice/CPUSchedulingPolicy/IOSchedulingClass in the unit)
+  - `localsearch tracker-main.c:84`: `TRACKER_NOTE (CONFIG, g_message ("Setting scheduler policy to SCHED_IDLE"));`; `:95`: `if (pthread_setschedparam (pthread_self(), SCHED_IDLE, &sp) < 0)`; `:100-102`: `ioprio = 7; /* priority is ignored with idle class */` / `ioclass = IOPRIO_CLASS_IDLE << IOPRIO_CLASS_SHIFT;` / `if (syscall (SYS_ioprio_set, IOPRIO_WHO_PROCESS, 0, ioprio | ioclass) < 0)`; `:106-107`: `TRACKER_NOTE (CONFIG, g_message ("Setting priority nice level to 19"));` / `if (nice (19) < 0)`
+  - `kf6-baloo kde-baloo.service.in:8-12`: `Slice=background.slice` / `ExecCondition=…` / `# We'll basically only want to consume resources if they aren't needed anywhere else, hence weights are way low.` / `CPUWeight=1` / `IOWeight=1`
+  - `kf6-baloo priority.cpp:27`: `if (syscall(SYS_ioprio_set, IOPRIO_WHO_PROCESS, 0, ioprio_value(IOPRIO_CLASS_IDLE, 0, IOPRIO_HINT_NONE)) >= 0) {`; `:44`: `return !setpriority(PRIO_PROCESS, 0, 19);`; `:53`: `return !sched_setscheduler(0, SCHED_BATCH, &param);` (in `lowerSchedulingPriority()`); `:65`: `return !sched_setscheduler(0, SCHED_IDLE, &param);` (in `setIdleSchedulingPriority()`)
+  - `kf6-baloo src/file/main.cpp:28-30`: `lowerIOPriority();` / `lowerSchedulingPriority();` / `lowerPriority();`. `src/file/extractor/main.cpp:21-23`: `lowerIOPriority();` / `setIdleSchedulingPriority();` / `lowerPriority();`. So the indexer daemon uses SCHED_BATCH and the extractor uses SCHED_IDLE, and both use nice 19 and the idle I/O class.
+  - `tumbler-scheduler.c:325-332`: `ioprio = 7; /* priority is ignored with idle class */` / `ioclass = IOPRIO_CLASS_IDLE << IOPRIO_CLASS_SHIFT;` / … / `sched_setscheduler (0, SCHED_IDLE, &sp);`
+  - `recollindex.cpp:208-212`: `// By default, or if the user has set idxniceprio > 19, use SCHED_IDLE if available.` / `if (prio > 19) {` / … / `sched_setscheduler(getpid(), SCHED_IDLE, &param);`
+  - `akonadi-search agent/priority.cpp:96`: `return !sched_setscheduler(0, SCHED_IDLE, &param);`
+  - `clamav-daemon.service.in:9-13`: `[Service]` / `ExecStart=@prefix@/sbin/clamd --foreground=true` / `# Reload the database` / `ExecReload=/bin/kill -USR2 $MAINPID` / `TimeoutStartSec=420`. `clamav-freshclam.service.in:9-10`: `[Service]` / `ExecStart=@prefix@/bin/freshclam -d --foreground=true`. `clamav-clamonacc.service.in:10-15`: `[Service]` / `Type=simple` / `User=root` / `ExecStartPre=…` / `ExecStart=@prefix@/sbin/clamonacc -F --log=/var/log/clamav/clamonacc.log --move=/root/quarantine` / `ExecStop=/bin/kill -SIGKILL $MAINPID`. None of the three ClamAV units sets Nice, CPUSchedulingPolicy or IOSchedulingClass.
+- **Coverage.** T7 covered. Object: per-tool declarations. Unit: the directive or call in a named file:line at a named Debian version. Population: plocate, findutils locate, localsearch (Tracker 3), Baloo (KF6), tumbler, recoll, akonadi-search, ClamAV. Not searched: mlocate (no Debian unstable source per DCS query 12), deja-dup, borgbackup, timeshift, backintime (DCS found no `.service` unit for them). Each item is one observation per file version. Other topics: does not cover.
+
+### S3-03 — CachyOS ananicy-rules catalogue (T7 counts over a rules catalogue; T8 by content)
+
+- **Citation.** CachyOS, ananicy-rules, https://github.com/CachyOS/ananicy-rules, commit `03ef03fbf7e834385377432ccecaedd32e3414bb` (2026-09-08T19:11:25-03:00, "Merge pull request #605 from Tiagoquix/samp").
+- **Copy read.** `git clone --depth 1` on 2026-10-07 into `sources/S3-03/ananicy-rules/`. SHA-256: `00-types.types` 667d89cb61a949ac9b6595f2f318dc452b65c735d8cd6d4fcd5f934dc940591d; `README.md` 0886ec1f23a1ef772e676ba65bc13961ce7942bec6e0dc9d0936a4f60b16b7ed; `00-default/System Utilities & Maintenance/clamav.rules` 14709997d06ba912f4367ee968496615aabf087eab4fe279a8d1941c5663e006; `00-default/DEs-and-WMs/plasma.rules` 090a8f88fb82a3be2699d762d431f80814e4bb466a8ea1ea467039001cc56800; `00-default/DEs-and-WMs/gnome.rules` 4cd43aab6cd3170348c0d36d53195cef6b9ef884b6cc101c1c2c324f879fce23; `…/borg.rules` 594126ae9ca6f6a607c8fbbad54f52cae42f65051ac5ed1e0191d71d744f07d5; `…/restic.rules` c1d472c5215562c37a991b7186445876d17e702e081dd5acc835029b34c22431; `…/recoll.rules` 50418dc6b0d8d0653cfe37492726868d56a10a0de79bc9f6bdc8cbfb03d535de; `00-default/Networking/syncthing.rules` d44cd25238421653d1d446407756a07182a9b375d0e159fffc018587710296e4; `00-default/Tools/rsync.rules` ecd9608546e9915a38700fea3ec8d590b417a501dcc017942659db21c48d038a; `…/thrash-protect.rules` fc797eb60f34e11b1d05c8c20a9d1d7aa75e9150540a384d4a16b8dec0f028d2.
+- **Verbatim passages** (`file:line` at 03ef03fb).
+  - `00-types.types:4`: `{ "type": "Game", "nice": -5, "ioclass": "best-effort", "sched": "normal" }`
+  - `00-types.types:20-22`: `# Type: BackGround CPU/IO Load` / `# Background CPU/IO it's needed, but it must be as silent as possible` / `{ "type": "BG_CPUIO", "nice": 16, "ioclass": "idle", "sched": "idle" }`
+  - `00-types.types:18`: `{ "type": "LowLatency_RT", "nice": -12, "ioclass": "best-effort" }`; `:39`: `{ "type": "Service", "nice": 10, "ioclass": "best-effort", "ionice": 6 }`; `:33`: `{ "type": "Heavy_CPU", "nice": 9, "ioclass": "best-effort", "ionice": 7 }`
+  - `README.md:3`: `This is a ananicy-cpp-rules collection for ananicy-cpp maintained by the CachyOS team and the community.`; `README.md:22`: `You can add your favorite games, apps, and more. Any help would be greatly appreciated!`; `README.md:44-45`: `# Just Cause 2 https://store.steampowered.com/app/8190/Just_Cause_2/` / `{ "name": "JustCause2.exe", "type": "Game" }`
+  - `00-default/System Utilities & Maintenance/clamav.rules:1-4`: `# ClamAV Daemon` / `{ "name": "clamd", "type": "BG_CPUIO" }` / `# ClamUI` / `{ "name": "clamui", "type": "Service" }`
+  - `00-default/DEs-and-WMs/plasma.rules:10-14`: `# https://community.kde.org/Baloo` / `# Baloo is the file indexing and file search framework for KDE.` / `{ "name": "baloo_file", "type": "BG_CPUIO" }` / `{ "name": "baloorunner", "type": "BG_CPUIO" }` / `{ "name": "baloo_file_extractor", "type": "BG_CPUIO" }`
+  - `…/borg.rules:2`: `{ "name": "borg", "type": "BG_CPUIO" }`; `…/restic.rules:2`: `{ "name": "restic", "type": "BG_CPUIO" }`; `…/recoll.rules:2`: `{ "name": "recollindex", "type": "BG_CPUIO" }`; `…/kopia.rules:2-3`: `{ "name": "kopia", "type": "BG_CPUIO" }` / `{ "name": "kopia-ui", "type": "BG_CPUIO" }`; `Networking/syncthing.rules:2`: `{ "name": "syncthing", "type": "BG_CPUIO" }`; `Tools/rsync.rules:1`: `{ "name": "rsync", "type": "BG_CPUIO" }`
+  - `DEs-and-WMs/gnome.rules:1-2`: `# http://live.gnome.org/ThumbnailerSpec ` / `{ "name": "tumblerd", "type": "TODO" }`
+  - `System Utilities & Maintenance/thrash-protect.rules:2`: `{ "name": "thrash-protect", "nice": -12, "ioclass": "realtime" }`; `DEs-and-WMs/plasma.rules:29`: `{ "name": "plasmashell", "nice": -6 }`
+- **Computed counts** (`python3 -I ananicy_count.py sources/S3-03/ananicy-rules`, Appendix A.4; verbatim output in Appendix B.2, summary):
+  ```
+  rules files 361 entries 15813 unparseable 1
+  entries per type: Game 13528, BG_CPUIO 1615, Service 194, Doc-View 160, LowLatency_RT 109, Chat 51, Heavy_CPU 33, Image-View 32, Player-Audio 28, Launcher 24, Player-Video 24, IN_DIFF 10, OOM_NO_KILL 2, (no type: explicit fields) 2, TODO 1
+  ```
+  The one unparseable line is `00-default/Games/linux-native/linux-native_d.rules:315`: `{ "name": "Dungeon Drafters.x86_64", "type": "Game" }+` (trailing `+`). Of the 15,813 entries, 15,093 sit under `00-default/Games` (13,528 of type Game). Name search for indexers, updatedb, backup and antivirus (regex in A.4) found baloo_file/baloorunner/baloo_file_extractor, clamd, borg, restic, recollindex, syncthing, rsync and kopia, all **BG_CPUIO**. `clamui` is **Service** and `tumblerd` is `"TODO"`. No entry matched `updatedb`, `locate`, `tracker`, `localsearch` or `freshclam`. Other regex hits were game executables (listed in B.2).
+- **Coverage.**
+  - T7 covered. Object: a rules catalogue. Unit: rule entry (one JSON line). Statistic: count per type. Scope: the whole repository at one commit. Population: every `.rules` file. One observation (one commit); no machine.
+  - T8: covers by content what a rule matches on (`"name"`, the process name) and sets (type → nice/ioclass/sched). How entries are added is quoted from README. T8 is not my class topic.
+  - Other topics: does not cover.
+
+### S3-04 — Hugging Face optimum-benchmark LLM-Perf Leaderboard dataset (T11)
+
+- **Citation.** optimum-benchmark, "llm-perf-leaderboard" dataset, https://huggingface.co/datasets/optimum-benchmark/llm-perf-leaderboard, revision `94a9713e1842c87029a1dcc829e0003533a6d275` (lastModified 2024-12-13T10:07:03.000Z per the API).
+- **Copy read.** `api.json` (SHA-256 6e574427f695cb21fa7f9cb630d34c76562c783ae0b9c946833f57c2f58fcab0) and `data/perf-df-pytorch-cuda-awq-1xT4.csv` at that revision (12,278,222 bytes, SHA-256 268adc57b15d3b97e1778c152c1496d9c42f75464a5a03a90511818ab7f7270b), in `sources/S3-04/`. Other files in the dataset are named for hardware: `…-1xA10`, `…-1xA100`, `…-1xT4`, `…-32vCPU-C7i` (datacenter GPUs and AWS server CPU).
+- **Verbatim passage.** The CSV record ending at physical line 4509, with column=value pairs printed by Appendix A.5:
+  ```
+  config.name = '4bit-awq-gemv-sdpa'
+  config.backend.model = 'meta-llama/Llama-3.1-8B-Instruct'
+  config.backend.version = '2.4.1+cu124'
+  config.scenario.input_shapes.batch_size = '1'
+  config.scenario.input_shapes.sequence_length = '256'
+  config.scenario.generate_kwargs.max_new_tokens = '64'
+  config.environment.cpu = ' Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz'
+  config.environment.gpu = "['Tesla T4']"
+  config.environment.platform = 'Linux-5.10.225-213.878.amzn2.x86_64-x86_64-with-glibc2.35'
+  report.prefill.latency.unit = 's'
+  report.prefill.latency.mean = '0.3676786682128906'
+  report.prefill.latency.p50 = '0.3678643798828125'
+  report.decode.latency.mean = '2.0179779541015628'
+  report.decode.throughput.unit = 'tokens/s'
+  report.decode.throughput.value = '31.219369801316113'
+  report.per_token.latency.mean = '0.032026476781330415'
+  ```
+  The file holds 1,362 rows, 427 with a prefill latency (`rows 1362 with prefill latency 427`). For Llama-3/3.1-8B AWQ 4-bit on the T4, the 24 rows give prefill means of 0.21–3.25 s and decode throughput of 22.0–33.5 tokens/s across kernel variants (Appendix B.3; min/max computed with a regex over the B.3 output).
+- **Coverage.**
+  - T11 covered, partly. Object: latency of a 4-bit (AWQ) 8B model. Units: s (prefill), tokens/s (decode). Statistic: mean/p50 over iterations. Scope: batch 1, 256 input tokens, 64 new tokens. Each row is one benchmark config. Machine named: Tesla T4 with Xeon Platinum 8259CL, an AWS datacenter GPU. Not a consumer CPU/GPU and not llama.cpp/Ollama/vLLM; PyTorch backend, 2024 data.
+  - Other topics: does not cover.
+
+### S3-05 — LocalScore public results database (T11)
+
+- **Citation.** LocalScore (a Mozilla Builders project), https://www.localscore.ai/, accessed 2026-10-07.
+- **Copy read** (`sources/S3-05/`, SHA-256): `about.html` 3fffc1e033945eae9bf03ae17934704a36e837ba3db44c0ba86849a5ce9cacac; `index.html` 3107be67d3f4d6378c8b70986d2557b20b8dbd29aaf19d5c2f311266be0d0174; `latest.html` c9fd095810ef8382b1514e928f9cbdf5079a62eee4ccac4fa885f40a3e400661; `download.html` a7821688a963c26bf991f2220a5f53e50d1b387b48ce20b4583efffe978d2db2; `model_1.html` 54146204e5a0c4e5da5aafb3ca02ec59ffb20570737edb212ff84cdfe8589ee2; `model_2.html` 44fe13b105be3bc0059b5903280e68bc74fe4938b1e2d6b94615b932147519e5; `model_3.html` 4de495d8560b9e613c5d03eba9aac12bc05544d01f2f10174eeab433e735fdde; `accelerator_349.html` c3167525ba9c6a3bd0f23d040252eb68c5cf3d43012174d85cfaeb349d47b6fb; `accelerator_43.html` 09b35df8a91ef99af30ba3e0c4fc05abc97f554e33a92ab19f41827e4001582b; `result_4246.html` ce3e705680852173656f2a4e2aaa430dcd4a34ac54f5a74bce9d079be98654fd; `result_4252.html` 54aefbc5371a96c5ba78d6246254645f8224ea139865c7350ff5f28196545994; `result_4254.html` 197ddbd9af49c82448616defc9c3849d3c463c5b7f34207f4ef3d0261b9ff5a5; `result_4255.html` 4b4d25f8485c2fb8e0d10643d607e2f19beb3a6d24a488b9fef2cd1155e05c02. The data was read from each page's embedded `__NEXT_DATA__` JSON.
+- **Verbatim passages.**
+  - `/about`: "LocalScore is an open-source benchmarking tool designed to measure how fast Large Language Models (LLMs) run on your specific hardware. It is also a public database for the benchmark results." … "Time to First Token:The latency before the first response appears (milliseconds)" … "Under the hood, LocalScore leverages Llamafile to ensure portability across different systems". Test table (rendered text): "1024tokens 16tokens Classification, sentiment analysis, keyword extraction." (that is, 1024 prompt tokens, 16 generated). The site reports nine tests, from pp1024+tg16 to pp16+tg1536. "We collect the following non personally identifiable system information: Operating System Info: Name, Version, Release CPU Info: Name, Architecture RAM Info: Capacity GPU Info: Name, Manufacturer, Total Memory".
+  - `/result/4252`, test pp1024+tg16 (JSON verbatim): `{"id":38260,"benchmark_run_id":4252,"name":"pp1024+tg16","n_prompt":1024,"n_gen":16,"avg_time_ms":1106.549945,"power_watts":0,"prompt_tps":1264.59026,"gen_tps":53.908791,"prompt_tps_watt":0,"gen_tps_watt":0,"ttft_ms":828.379409,"created_at":"2026-10-07 12:08:43"}`. Same run: accelerator `NVIDIA GeForce GTX 1070`; model `{'name': 'qwen2.5-3b-instruct', 'quant': 'Q4_K - Medium', … 'params': 3397103616}`; system `cpu_name: 'Intel Core i7-7700K CPU @ 4.20GHz (skylake)', ram_gb: 31.1, kernel_type: 'Linux', kernel_release: '6.17.13-21-pve'`; runtime `llamafile 0.9.3`.
+  - `/result/4255`, test pp1024+tg16: `{"id":38287,"benchmark_run_id":4255,"name":"pp1024+tg16","n_prompt":1024,"n_gen":16,"avg_time_ms":3614.8654,"power_watts":0,"prompt_tps":322.521889,"gen_tps":36.373184,"prompt_tps_watt":0,"gen_tps_watt":0,"ttft_ms":3202.4788,"created_at":"2026-10-07 20:05:10"}`. Accelerator `AMD Ryzen AI 9 HX 470 w/ Radeon 890M`, type CPU; model `Llama 3.2 1B Instruct`, `Q4_K - Medium`; `kernel_type: 'Windows', kernel_release: '10.0'`; `llamafile 0.9.3`. The same run's pp64+tg1024 test: `ttft_ms 256.8712 gen_tps 36.613062` (printed by Appendix A.6).
+  - `/result/4246` (CPU `Intel Core i7-14700HX (alderlake)`, Linux `6.1.0-53-amd64`, model name `'..'`, `Q4_0`, 1.10B params): pp1024+tg16 `ttft_ms 3593.630016 gen_tps 57.196733`.
+  - `/model/1` aggregate for one accelerator: `{"avg_prompt_tps":93.41267666666666,"avg_gen_tps":10.939956444444444,"avg_ttft":14656.055673111114,"performance_score":41.15931147695306,"performance_rank":200,"number_ranked":417,"accelerator":{"name":"AMD Ryzen 7 7800X3D 8-Core Processor (znver4)","type":"CPU","id":349,"memory_gb":31,…}}` and `{"avg_prompt_tps":1482.5665064537036,"avg_gen_tps":51.28081109259259,"avg_ttft":881.7180316018517,…,"accelerator":{"name":"NVIDIA GeForce RTX 3060","type":"GPU","id":43,"memory_gb":12,…}}` (model: Meta Llama 3.1 8B Instruct, Q4_K - Medium).
+- **Computed summary** (`python3 -I localscore.py model_N.html …`, Appendix A.6; verbatim):
+  ```
+  {'name': 'Meta Llama 3.1 8B Instruct', 'quant': 'Q4_K - Medium', 'id': 1, 'variantId': 1, 'params': 8030263296}
+  accelerator entries 417 by type Counter({'CPU': 233, 'GPU': 184})
+  CPU n 233 avg_ttft ms median 40757 min 5437 max 1737533 | avg_gen_tps median 7.76 min 0.66 max 26.59
+  GPU n 184 avg_ttft ms median 1583 min 176 max 31480 | avg_gen_tps median 37.91 min 1.31 max 120.98
+  {'name': 'Llama 3.2 1B Instruct', 'quant': 'Q4_K - Medium', 'id': 3, 'variantId': 3, 'params': 1498483200}
+  accelerator entries 869 by type Counter({'CPU': 641, 'GPU': 228})
+  CPU n 641 avg_ttft ms median 7534 min 849 max 2959599 | avg_gen_tps median 34.73 min 0.32 max 156.30
+  GPU n 228 avg_ttft ms median 405 min 53 max 11448 | avg_gen_tps median 116.69 min 5.91 max 410.76
+  ```
+  The per-accelerator `avg_ttft` averages the nine tests (prompts of 16–4,096 tokens), so it is dominated by long prompts. It is not the latency of a short prompt.
+- **Coverage.**
+  - T11 covered. Object: TTFT (ms) and generation speed (tokens/s) of Q4 GGUF models (1B, 3B, 8B, 14B) run with llamafile (llama.cpp-based) on consumer CPUs and GPUs. Statistic: per-test value per run, and per-accelerator averages. Population: crowd-submitted runs. A per-run record (`/result/N`) is one observation with machine (CPU/GPU name, RAM, OS kernel), model and date named. Aggregates are not single observations.
+  - There is no structured or JSON-output test, and the shortest-prompt test is pp16+tg1536.
+  - Other topics: does not cover.
+
+### S3-06 — MLCommons MLPerf Client benchmark page (T11, metric definitions only)
+
+- **Citation.** MLCommons, "MLPerf Client" benchmark page, https://mlcommons.org/benchmarks/client/ (describes v2.0), accessed 2026-10-07.
+- **Copy read.** `sources/S3-06/client.html`, SHA-256 5aac529d091203540de2525a96d7ebb643f5098447f6195cf67b3c213f54a2df.
+- **Verbatim passages** (section "What do the performance metrics mean?"): "Time to first token (TTFT): This the wait time in seconds before the system produces the first token in response to each prompt. In LLM interactions, the wait for the first output token is typically the longest one in the ensuing response. Following widespread industry practice, we have chosen to report this result separately." From the FAQ: "the benchmark actually runs each test four times internally in the default configuration files. There's one warm-up run and three performance runs. The application then reports the averages of the results of the three performance runs." From "What's new in MLPerf Client v2.0": "Transitioned select summarization tasks to structured JSON output tasks." Models list: "Llama 3.1 8B Instruct / Phi 4 Mini Instruct / Phi 4 Reasoning 14B* / Qwen 3 8B*".
+- **Coverage.**
+  - T11 covers the metric definitions for TTFT and TPS on client PCs, plus a structured-JSON task. It holds **no published results table**, so it gives no numbers.
+  - Other topics: does not cover.
+
+### S3-07 — Perfetto example trace `example_android_trace_15s` (T10)
+
+- **Citation.** Perfetto project, example trace `example_android_trace_15s`, https://storage.googleapis.com/perfetto-misc/example_android_trace_15s (object last-modified "Wed, 11 Mar 2026 13:47:18 GMT", etag `"c724b58b0b6d104f37381fbdc0291647"`, x-goog-hash md5=xyS1iwttEE83OB+9wCkWRw==).
+- **Copy read.** `sources/S3-07/example_android_trace_15s`, 57,202,082 bytes, SHA-256 7f6d973d06e478e1266a83f7cb7e59bcb41df90449f6cc7f59211e385b8fad92. Analysed with `trace_processor_shell` v58.2 linux-amd64 (SHA-256 58042408e6cc861fb1a731c26bb082dc222285561eaa4e12a48a8b2b90dca7b9, equal to the hash pinned in https://get.perfetto.dev/trace_processor).
+- **Trace metadata** (verbatim output of `select name, str_value, int_value from metadata where name not like 'trace_config%';`):
+  ```
+  "system_name","Linux","[NULL]"
+  "system_version","#1 SMP PREEMPT Wed Jun 12 20:42:24 UTC 2019","[NULL]"
+  "system_release","4.4.177-g17696cf513dd","[NULL]"
+  "system_machine","aarch64","[NULL]"
+  "trace_size_bytes","[NULL]",57202082
+  ```
+  The embedded trace config contains `duration_ms: 15000`. The metadata does not name the device model.
+- **Computed counts** (SQL in Appendix A.7; output verbatim):
+  ```
+  "start_ts","end_ts","dur_s"
+  261187012114381,261201738290119,14.726176
+
+  "cpu","slices","first_ts","last_end","slices_per_s","idle_slices"
+  0,60207,261187012454537,261201738290119,4088.500000,16248
+  1,44061,261187012574745,261201730885743,2993.600000,12518
+  2,29892,261187012170995,261201712336887,2033.400000,9244
+  3,26894,261187012460318,261201737248764,1826.400000,7362
+  4,42409,261187012421099,261201734271160,2880.700000,13011
+  5,39974,261187012640474,261201736962723,2714.800000,11210
+  6,39731,261187013945787,261201735013452,2698.900000,8508
+  7,41137,261187021438288,261201738020171,2795.300000,8238
+
+  "total_slices","per_s_all_cpus"
+  324305,22022.400000
+
+  "n"            (select count(*) from ftrace_event where name='sched_switch')
+  324305
+
+  "nonidle_slices","median_dur_ns","mean_dur_ns"
+  237958,56250,200117.991574
+  ```
+  So: 324,305 `sched_switch` events in 14.73 s on 8 CPUs, which is 22,022 per second in total and 1,826–4,089 per second per CPU. The median non-idle run slice is 56.25 µs and the mean 200 µs. ("idle_slices" counts slices of the tid-0 swapper thread.)
+- **Coverage.**
+  - T10 covered. Object: context switches (sched_switch events) per second per CPU, and run-slice lengths. Scope: one 14.7 s trace on one Android device (Linux 4.4.177, aarch64, 8 CPUs; model unnamed; 2019 kernel build; workload not described in the trace metadata). It is one observation. Machine partly named (kernel and arch only). Not a desktop or server, and not x86.
+  - Other topics: does not cover.
+
+### S3-08 — Google and Alibaba cluster traces: schemas (T10, negative)
+
+- **Citation.** J. Wilkes et al., "Google cluster-usage traces v3" (schema document, "Original version 2020-04-01, updated 2020-05-01, 2020-07-28, 2020-08-10, 2020-08-18"), linked from https://github.com/google/cluster-data/blob/master/ClusterData2019.md. Google "cluster-usage traces: format + schema" (2011 trace, linked from ClusterData2011_2.md). Alibaba cluster-trace-v2018 `schema.txt` (https://github.com/alibaba/clusterdata).
+- **Copy read** (`sources/S3-08/`, SHA-256): `google_2019_schema.pdf` 17267c7c634a6ee01146b8032bacc26d9c7354e7b3bdb6a48fc0cbb69f02d6f9 (16 pp.); `google_2011_schema.pdf` a1bd9dffe09157873c321a942bbcd66e50c454c22db6bac4316af3f6bdcab1a5 (14 pp.); `alibaba_v2018_schema.txt` 731763f9570c555cce6e27bab66fc6cf2aa19ea98ee9607063845bd37bb5af2e; `google_ClusterData2019.md` 6209413ba5dc94e45b9dda811871b7eab406980aab5279466fa9eb48578ff6e3; `google_ClusterData2011_2.md` e189e6d6716603855707238eab489f54163620310f46683ff521a5c1922050a1; `alibaba_cluster-trace-v2018_trace_2018.md` daea8423c65cd24995500fcb6da103b1d4dec505f7b13ff2f6975caae0ede2fc.
+- **Verbatim passages.**
+  - Google 2019 schema, p. 13 (InstanceUsage table): "14. cycles_per_instruction – the mean CPI during the window (obtained by counting the CPU cycles used and dividing by the number of instructions executed)" … "16. sample_rate – the number of samples taken per second during the window. The nominal target is 1 Hz". Also "Cycles Per Instruction (CPI) and Memory Accesses Per Instruction (MAI) statistics are collected from processor performance counters; not all machines collect this data."
+  - Google 2011 schema, pp. 10–11: "16. cycles per instruction (CPI)" / "17. memory accesses per instruction (MAI)".
+  - Alibaba v2018 `schema.txt:22-34` (machine usage): `| cpu_util_percent | bigint | | [0, 100] |`, `| mkpi | bigint | | cache miss per thousand instruction |`, `| disk_io_percent | double | | [0, 100], abnormal values are of -1 or 101 |`.
+- **Coverage.**
+  - T10: **does not cover.** None of the schemas has a context-switch count or a scheduling-latency field. A grep for `context.switch|context_switch|ctx` across all of them matched nothing. The 2019 PDF's only "switch" hits refer to the top-of-rack network switch.
+  - Other topics: does not cover.
+
+### S3-09 — lmbench `ctx.tbl` (published context-switch table, 1996) (T10)
+
+- **Citation.** L. McVoy and C. Staelin, "lmbench: Portable tools for performance analysis" (USENIX 1996), troff source `doc/usenix96.ms` and table `doc/ctx.tbl` in https://github.com/intel/lmbench, commit `27b43aeec9dc0bb45f420388c78e42dde4c23bf0` (2026-09-29).
+- **Copy read.** `sources/S3-09/lmbench/doc/` (clone of 2026-10-07). SHA-256: `ctx.tbl` 3b94f25d8a33434ff8a941e3f8e445176addc56d76023002795acfdc33645e0c; `usenix96.ms` 39fd20389fe3c7cbdbc254d09bcca4b9b3ddcc428b97c13917ffeee2be2957e2; `lat_ctx.8` 04015eb32f5378d88dbcf7945d00bd484247e9a7fa6ec881943e9f5191c6c634.
+- **Verbatim passages.**
+  - `ctx.tbl:7-11`: `\t2 processes\t8 processes` / `System\t\fB0KB\fP\t32KB\t0KB\t32KB` / `=` / `Linux alpha\t10\t17\t13\t41\ ` / `Linux i486\t11\t394\t18\t594\ `
+  - `ctx.tbl:35`: `Linux i686\t6\t22\t7\t107\ `
+  - `usenix96.ms:1353-1355`: `.TSTART` / `.so ../Results/tmp/ctx.tbl` / `.TEND "Context switch time (microseconds)"`
+  - `lat_ctx.8` DESCRIPTION: "lat_ctx measures context switching time for any reasonable number of processes of any reasonable size. The processes are connected in a ring of Unix pipes."
+- **Coverage.**
+  - T10 covered, but for historical hardware only. Object: context-switch time (µs) for 2 and 8 processes at 0 KB and 32 KB per-process footprint. Population: about 30 mid-1990s systems, named only by OS/architecture string (e.g. "Linux i686"). The table names no kernel versions. Each row is one machine. It does not cover current x86.
+  - Other topics: does not cover.
+
+### S3-10 — Linux `perf-sched` documentation example output (T10, illustrative)
+
+- **Citation.** Linux kernel, `tools/perf/Documentation/perf-sched.txt`, fetched from raw.githubusercontent.com torvalds/linux `master`. `git ls-remote` gave master = `7b63ef2d55f24519e7e9e5f4d15dbea03f126e40` at access time.
+- **Copy read.** `sources/S3-10/perf-sched.txt`, SHA-256 19f10af4a255882c0159317165fe87de78b2b6a97c6649434d2764a5936139be.
+- **Verbatim passages.**
+  - `:79`: `        79371.874569 [0011]  gcc[31949]                0.014      0.000      1.148` (columns: time, cpu, task, wait time, sch delay, run time; `:87` "Times are in msec.usec.")
+  - `:102`: `        perf sched stats record -- sleep 1`
+  - `:125`: `   Time elapsed (in jiffies)                                   :        2323`
+  - `:131`: `   In the example below, schedule() left the CPU0 idle 36.58% of the time. 0.45% of total`
+  - `:142-143`: `   sched_count                                                      :      402267` / `   sched_goidle                                                     :      147161  (    36.58% )`
+  - `:166`: `   CPU 0, DOMAIN SMT CPUS 0,64`
+- **Coverage.**
+  - T10: illustrative only. The example's machine, kernel, HZ and workload are not named, so no rate can be derived: jiffies are given but HZ is not. It is not an observation with a named machine.
+  - Other topics: does not cover.
+
+### S3-11 — World of Warcraft Avatar History (WoWAH) dataset paper (T12)
+
+- **Citation.** Y.-T. Lee, K.-T. Chen, Y.-M. Cheng, C.-L. Lei, "World of Warcraft Avatar History Dataset," Proc. ACM MMSys 2011, San Jose, pp. 123–128. Mirror: https://web.cs.wpi.edu/~claypool/mmsys-dataset/2011/wow/p123.pdf.
+- **Copy read.** `sources/S3-11/p123.pdf` (974,596 bytes, 6 pp., SHA-256 5ef59d759f236cbe6f4dfc6a10bac2f7d0fff6db449dc84c3793c38a1a7ce9c5); mirror index `wpi_index.html` (SHA-256 233c67b212c948758c0ee58060b9418b3e9d24499bf81ce664a94142c657cc51). The data archive `wowah.rar` on the same mirror is 577,556,091 bytes (Last-Modified Sat, 19 Feb 2011). It is over the 300 MB limit and was **not downloaded**.
+- **Verbatim passages.**
+  - p. 124: "Observations were made at 10-minute intervals; hence, during the 3-year period, we made approximately 157, 680 observations (samples) on a WoW server."
+  - p. 124: "To collect the trace, we created a character in a World of Warcraft realm (the Light's Hope realm in Taiwan) and kept it online throughout the 3-year study period." … "If an avatar logins and logouts within 10 minutes, we may not be able to observe his re-login activity in consecutive snapshots."
+  - p. 125: "During the monitored period, 91, 065 avatars, and 667, 032 sessions associated with the avatars were observed."
+  - p. 126, Table 4 "Summary of daily game play activities", (Mean, SD) and Quantiles (5%, 25%, 50%, 75%, 95%): "Session time (hr) (2.8, 1.8) (0.4, 1.0, 1.8, 3.0, 5.5)"; "Daily session count (1.7, 0.9) (1.0, 1.1, 1.4, 2.1, 3.3)"; "Daily play time (hr) (3.7, 2.8) (0.5, 1.6, 3.1, 5.1, 8.8)".
+  - p. 126: "If we analyze the average session play time, we find significant "knee" around 1 hour and 5 hours, which indicate that after logging into the game, there is a high probability that players will stay for at least one hour, but usually no longer than 5 hours."
+- **Coverage.**
+  - T12 covered. Object: MMORPG play session length (hours) and sessions per day. Statistic: per-avatar averages, then mean/SD/quantiles across avatars. Scope: one realm (Light's Hope, Taiwan), Jan 2006–Jan 2009 (1,107 days). Population: 91,065 avatars (one faction, as observed by `who`). One observation (one server and window named). Resolution is 10 minutes. It is game-server-side login presence, not PC process activity.
+  - Other topics: does not cover.
+
+### S3-12 — SWELL-KW dataset (computer interaction features per minute) (T12)
+
+- **Citation.** S. Koldijk, M. Sappelli, S. Verberne, M. Neerincx, W. Kraaij, "The SWELL Knowledge Work Dataset for Stress and User Modeling Research," ICMI 2014. Dataset: W. Kraaij, S. Koldijk, M. Sappelli, DANS Data Station SSH, doi:10.17026/dans-x55-69zp, version 4 (releaseTime 2025-06-04T08:57:35Z).
+- **Copy read** (`sources/S3-12/`, SHA-256): `swell_dataset.html` (https://cs.ru.nl/~skoldijk/SWELL-KW/Dataset.html) 9f3df722d7d45e019f1815d700a042262d16096b102f4f3af7775f28b7cc2a75; `icmi2014.pdf` (https://cs.ru.nl/~skoldijk/Papers/ICMI%202014%20paper_final_cr.pdf) a10bffe9ea55cb66af6a8e7c2b61fbc5dfeffb3ebef57db8ef0f41cc6c1e5720; `dans_meta.json` fa6e6ee01d0246d4864df69744ca65453b72330acc74f2c272ed3538cbec7c3e; `swell_ulog_features_sheet1.csv` (DANS datafile id 189419, "A - Computer interaction features (Ulog - All Features per minute)-Sheet_1.csv", 256,466 bytes) b9799737fc6d86b40776079e0c755465ba8ce5b3d1796010954805fd7ba09f44. Not downloaded: `0_SWELL.zip`, 7,534,108,141 bytes (over the size limit).
+- **Verbatim passages.**
+  - Dataset page: "The SWELL-KW dataset contains data from 25 participants (~3 hours each), for working under 3 conditions: neutral, interruptions and time pressure (plus a relax phase)." Features table: "Computer interactions … Mouse (3) Keyboard (7) Applications (2)".
+  - ICMI paper p. 4 (§3.4): "Participants performed their tasks on a computer (Dell Latitude E6400) with Windows 7 Professional with a 17 inch screen"; (§3.6) "Computer interactions were logged with the key-logging application uLog (version 3.2.5, by Noldus Information Technology)". Table 2: "AppChanges … Number of application changes" / "TabfocusChange … Number of tab focus changes". p. 5: "we computed several relevant mouse, keyboard and application characteristics per minute (listed in Table 2)".
+  - CSV header (line 1): `PP,Blok,Condition,timestamp,SnMouseAct,…,SnAppChange,SnTabfocusChange,,`. Line 1360: `PP11,3,I,20121009T115500000,999,999,…,999,,uLog crashed…  12:18:00`, which shows that 999 marks missing minutes.
+- **Computed** (`python3 -I swell.py swell_ulog_features_sheet1.csv`, Appendix A.8; verbatim):
+  ```
+  rows 3139 participants 25 conditions Counter({'N': 1028, 'I': 996, 'T': 664, 'R': 451})
+  SnAppChange min 0.0 max 999.0 all integer True
+  condition I minutes 996 mean per minute 35.324 -> per hour 2119.5 median per minute 4.0
+  condition N minutes 1028 mean per minute 2.966 -> per hour 178.0 median per minute 2.0
+  condition R minutes 451 mean per minute 0.095 -> per hour 5.7 median per minute 0.0
+  condition T minutes 664 mean per minute 3.517 -> per hour 211.0 median per minute 3.0
+  per-participant per-hour rate (work conditions N,I,T pooled): n 25 min 94.8 median 208.5 max 11665.9
+  minutes with SnAppChange>60: 31 [('PP11', 'I', '20121009T115500000', '999'), …]
+  condition I excluding minutes >60: minutes 965 mean per hour 262.0
+  condition N excluding minutes >60: minutes 1028 mean per hour 178.0
+  condition R excluding minutes >60: minutes 451 mean per hour 5.7
+  condition T excluding minutes >60: minutes 664 mean per hour 211.0
+  ```
+  Valid only with the 999 (missing) minutes excluded: about 178 application changes per hour in the neutral condition, 262 under interruptions, 211 under time pressure and 5.7 during relaxation. The per-participant line above still includes the 999 minutes, so its max is invalid.
+- **Coverage.**
+  - T12 covered, partly. Object: **foreground application changes** per minute (focus switches between applications). This is not a change in the set of running applications. Population: 25 participants in a lab, Windows 7 laptop (named), ~3 h each, with assigned tasks, in Sept–Nov 2012 (CSV timestamps). One observation (one experiment).
+  - Other topics: does not cover.
+
+### S3-13 — RLKWiC dataset paper (T12, describes logging but reports no rate)
+
+- **Citation.** M. Bakhshizadeh, C. Jilek, M. Schröder, H. Maus, A. Dengel, "Data Collection of Real-Life Knowledge Work in Context: The RLKWiC Dataset," arXiv:2404.10505v1, 16 Apr 2024.
+- **Copy read.** `sources/S3-13/rlkwic.pdf` (1,486,529 bytes), SHA-256 e540f3fec18de419b5a68d86e0749cda8b6c5cc2e8fac7d8d538740329395b9b.
+- **Verbatim passages.**
+  - Abstract: "This paper presents RLKWiC, a novel dataset of Real-Life Knowledge Work in Context, derived from monitoring the computer interactions of eight participants over a span of two months."
+  - Example context record (Table, §IV): "used apps / SearchApp, cSpaces, javaw, pycharm64, chrome".
+  - Related-work table row: "BEHACOM [19] Modelling users' behavior 2020 Real-life tasks no task assignment 12 males with ages ranging from 20 to 45 years old 55 days keyboard, mouse, application statistics and resource consumption".
+- **Coverage.**
+  - T12: the dataset logs app names and window titles, but the paper (as read) reports **no** per-hour application-change statistic. It does not cover the quantity directly. I did not download the dataset.
+  - Other topics: does not cover.
+
+### S3-15 — UCSD Steam Video Game and Bundle Data (T12, negative)
+
+- **Citation.** J. McAuley lab, "Steam Video Game and Bundle Data," https://cseweb.ucsd.edu/~jmcauley/datasets.html.
+- **Copy read.** `sources/S3-15/ucsd_datasets.html`, SHA-256 dcfea83f969e6e2897a9ae2af1de550df18c1a23b1c5bd626cae7acb739cc6c3.
+- **Verbatim passage.** "These datasets contain reviews from the Steam video game platform, and information about which games were bundled together." … "Metadata / reviews / purchases, plays, recommends ("likes") / product bundles / pricing information".
+- **Coverage.** T12: does not cover session duration. The page lists reviews, purchases, plays, likes, bundles and prices, with no per-session timing. Other topics: does not cover.
+
+### S3-16 — BEHACOM dataset (per-minute application statistics on personal computers) (T12)
+
+- **Citation.** P. M. Sánchez Sánchez et al., "BEHACOM – a dataset modelling users' behaviour in computers," *Data in Brief* (2020), doi:10.1016/j.dib.2020.105767 (PMC7270191). Data: Mendeley Data doi:10.17632/cg4br62535.2 (version 2, files created 2020-05-06).
+- **Copy read** (`sources/S3-16/`, SHA-256): `pmc7270191.html` aa16e6e67815afd8b2dd6d54a7ea9a9d0985fdfe30b3808985d1fc8c3a661f0c; `mendeley.json` 193d4c6c6acae0d0d649979efdec32ec3e7c05a780cc6ef383572021e6e513f4; `Behacom.zip` (37,414,157 bytes) 92e1b44b0d0853435f8e984e8dff76aa5ad7a90c5f04fdb7936045d3d0a15e44, which equals the `sha256_hash` Mendeley lists for the file; `Behacom_Readme.txt` (from the zip) c02056adaf0f013adb940fa4cd25ace9809bf7c9c12ef44dbfaf448b7863b1b5. The zip unpacks to 5.7 GB of CSV; I analysed it and then deleted the unpacked files, keeping the zip.
+- **Verbatim passages.**
+  - Article abstract: "The generated dataset, called BEHACOM, contains for each user a set of features that models, in one-minute time windows, the usage of computer resources such as CPU or memory, as well as the activities registered by applications, mouse and keyboard." Also: monitoring of "twelve users for fifty-five consecutive days without preestablished indications or restrictions" (fragment, abstract).
+  - Article Table 5: "active_apps_average / Average number of applications active during the time window." … "changes_between_apps / Number of changes between different foreground applications during the time window."
+  - `Readme.txt:67`: `    -  active_apps_average. This feature measures the average number of applications active during the time window.`; `:73`: `    -  changes_between_apps. This feature contains the number of changes between different foreground applications during the time window.`
+  - Article: "Client application for Windows and Linux operating systems".
+- **Computed** (`behacom.py`, Appendix A.9; verbatim):
+  ```
+  User0 vectors=6059 span=2019-11-20..2020-01-11 changes_between_apps mean/min=0.26 (=16/h) median/min=0.0 active_apps_average mean=2.0 consecutive-pairs=5324 with active_apps_average changed=12.2%
+  User1 vectors=42281 span=2019-12-04..2020-01-14 changes_between_apps mean/min=0.01 (=0/h) median/min=0.0 active_apps_average mean=31.3 consecutive-pairs=2389 with active_apps_average changed=0.6%
+  User2 vectors=179 span=2019-12-02..2019-12-02 changes_between_apps mean/min=0.34 (=20/h) median/min=0.0 active_apps_average mean=6.0 consecutive-pairs=11 with active_apps_average changed=72.7%
+  User3 vectors=3221 span=2019-12-09..2020-01-13 changes_between_apps mean/min=0.15 (=9/h) median/min=0.0 active_apps_average mean=5.3 consecutive-pairs=2044 with active_apps_average changed=13.6%
+  User4 vectors=10114 span=2019-11-26..2020-01-14 changes_between_apps mean/min=0.82 (=49/h) median/min=0.0 active_apps_average mean=5.6 consecutive-pairs=5894 with active_apps_average changed=39.0%
+  User5 vectors=2128 span=2019-12-02..2019-12-06 changes_between_apps mean/min=0.27 (=16/h) median/min=0.0 active_apps_average mean=4.2 consecutive-pairs=1395 with active_apps_average changed=21.1%
+  User6 vectors=1332 span=2019-12-18..2020-01-14 changes_between_apps mean/min=0.27 (=16/h) median/min=0.0 active_apps_average mean=1.5 consecutive-pairs=1301 with active_apps_average changed=9.9%
+  User7 vectors=55778 span=2019-12-04..2020-01-14 changes_between_apps mean/min=0.02 (=1/h) median/min=0.0 active_apps_average mean=8.9 consecutive-pairs=17957 with active_apps_average changed=1.0%
+  User8 vectors=5404 span=2019-11-20..2020-01-13 changes_between_apps mean/min=0.51 (=31/h) median/min=0.0 active_apps_average mean=5.8 consecutive-pairs=2496 with active_apps_average changed=31.5%
+  User9 vectors=7920 span=2019-11-20..2019-12-15 changes_between_apps mean/min=0.83 (=50/h) median/min=0.0 active_apps_average mean=4.6 consecutive-pairs=4718 with active_apps_average changed=29.7%
+  User10 vectors=15358 span=2019-11-20..2020-01-14 changes_between_apps mean/min=0.11 (=7/h) median/min=0.0 active_apps_average mean=5.0 consecutive-pairs=9527 with active_apps_average changed=8.3%
+  User11 vectors=17284 span=2019-11-20..2020-01-14 changes_between_apps mean/min=0.24 (=14/h) median/min=0.0 active_apps_average mean=8.6 consecutive-pairs=6893 with active_apps_average changed=15.5%
+  ALL users pooled: vectors=167058 changes_between_apps mean per vector 0.17 (=10 per hour of logged minutes)
+  ```
+  "consecutive-pairs" counts adjacent vectors 60 ± 5 s apart. The last column is the share of such adjacent minutes in which `active_apps_average` changed value; that is my derived proxy for a change in the active-application set. User1 has 42,281 vectors but only 2,389 adjacent pairs, so its timestamps are irregular or duplicated. I did not investigate why.
+- **Coverage.**
+  - T12 covered, partly. Objects: foreground-application changes per one-minute window, and the average number of "applications active" per window. Population: 12 users on their own personal computers (Windows/Linux; machines not named), 2019-11-20 to 2020-01-14 by timestamps, real-life use. It is one dataset. Per-user rows are observations with subject (anonymised user id) and window named, but no machine.
+  - Rate of foreground changes: roughly 0–50 per logged hour per user, pooled about 10 per hour. The paper does not report a rate of change of the running set directly; my proxy is above.
+  - Other topics: does not cover.
+
+### S3-17 — University of Glasgow "Context-Guided Agents Dataset" (60 Seconds! telemetry) (T12, different notion of session)
+
+- **Citation.** University of Glasgow Enlighten Research Data, record 2227, "Context-Guided Agents Dataset," https://researchdata.gla.ac.uk/2227/ (Readme.md).
+- **Copy read.** `sources/S3-17/Readme.md` (18,052 bytes), SHA-256 0193fcb6d09ac0001a351eb0e2f85b1b1b7579c9151965a99c14ee72370fb38e.
+- **Verbatim passages.** `Readme.md:6`: "Data was crowd-sourced from the players of the Steam desktop PC version of the game. The dataset contains 8,244,111 gameplay telemetry samples, each representing a single game session, for 808,659 unique players. It was crowdsourced from the real players of the game, playing the game in their natural play setups between January 2017 and May 2022." `:48`: "**total_time**: game session total time, including exploration and collection times (integer)". `:49`: "**elapsed_time**: actual game session total time, which includes startup and conclusion margins (float)".
+- **Coverage.**
+  - T12: here a "session" is one round of the game's scavenge mode (the per-second distribution fields are 60 characters long), not a sitting of PC play. It does not cover gaming-session length as asked. Data not downloaded.
+  - Other topics: does not cover.
+
+### S3-18 — Artificial Analysis provider benchmarks, Llama 3.1 8B (T11, hosted-API latency)
+
+- **Citation.** Artificial Analysis, "Llama 3.1 8B: API Provider Benchmarking," https://artificialanalysis.ai/models/llama-3-1-instruct-8b/providers, accessed 2026-10-07. The page's schema.org block says: "citation":"Artificial Analysis (2025). LLM benchmarks dataset."
+- **Copy read.** `sources/S3-18/aa_llama31_8b_providers.html`, SHA-256 99a25492dca28c779fdfb2ff057e9bda664599babb721412ae6b10586951bb98.
+- **Verbatim passages** (embedded JSON, with backslash-escaped quotes removed):
+  - `"slug":"groq_llama-3-1-instruct-8b","host":{"name":"Groq",…` then `"performance":{"outputSpeed":{"median":639.265170259853,"percentile05":448.039011391206,"percentile95":952.805624880943,…},"timeToFirstToken":{"median":0.839711704999957,"percentile05":0.713398121400014,"percentile95":1.1482771917,…},…"endToEndResponseTime":{"inputTime":0.839711704999957,"reasoningTime":0,"answerTime":0.78214804006412,"totalTime":1.6218597450640768},"byPromptType":{"long":{"medianOutputSpeed":639.265170259853,"medianTimeToFirstChunk":0.839711704999957,"medianEndToEndResponseTime":1.6218597450640768}}}`
+  - UI strings: `"promptLengths":"Moderate prompts are ~1,000 input tokens, Long prompts ~10,000, and 100k prompts ~100,000."`; chart caption "Seconds to first token received · Lower is better · 10,000 input tokens"; `"measurementTechnique":"Independent test run by Artificial Analysis on dedicated hardware."`
+  - Other providers' medians on the same page (my extraction, Appendix A.10): Novita TTFT 0.913 s / 150.8 tok/s; CoreWeave 0.661 s / 141.5 tok/s; DeepInfra (Turbo, FP8) 1.143 s / 30.9 tok/s; DeepInfra 1.074 s / 27.5 tok/s.
+- **Coverage.**
+  - T11 (hosted-API part) covered. Object: median TTFT (s), output speed (tokens/s) and end-to-end response time for Llama 3.1 8B per API provider. Scope: the "long" (~10,000-token) prompt. Population: providers listed on the page. The measurement window and the number of output tokens are not stated in the quoted data. It is not a short-prompt measurement.
+  - Other topics: does not cover.
+
+### Topics outside S3's assignment
+
+- T1, T2, T3, T4, T5, T6, T9, T13, T14: not applicable to this class. They concern papers, documentation or news, not datasets, and I did not search for them.
+- T8: not my topic. S3-03 incidentally quotes the catalogue's rule format and README.
+- T15: not applicable; that is S4's own measurement.
+
+---
+
+## 3. Not found
+
+- **T10 — context-switch rate per core on a desktop or server, with machine and kernel named, from a public dataset.** Not found. The only trace with a computable rate is S3-07, from an Android phone (Linux 4.4.177, aarch64). Searches that established this:
+  - Google 2011/2019 and Alibaba 2017/2018 cluster traces (S3-08): no context-switch field.
+  - OpenBenchmarking pts/ctx-clock and stress-ng, and Phoronix: **403** (Cloudflare challenge).
+  - lmbench: only the 1996 table (S3-09); `results/` is empty; www.lmbench.org gave no connection.
+  - perf-sched doc example (S3-10): machine unnamed.
+- **T10 — cost of one pick-next-task decision, and current-x86 context-switch cost, as a published dataset.** Not found among datasets; OpenBenchmarking (403) was the only results database tried. lmbench `ctx.tbl` covers 1990s hardware only.
+- **T10 — typical time-slice lengths as a dataset.** Not found. S3-07 gives run-slice durations (median 56.25 µs, mean 200 µs) for one Android trace. Those are observed run lengths, not configured slices.
+- **T11 — dataset of local short structured-output (JSON) latency for 3–8B quantized models on consumer hardware.** Not found:
+  - LocalScore (S3-05) has consumer CPU/GPU TTFT and tokens/s, but no structured-output test.
+  - LLM-Perf (S3-04) is datacenter hardware.
+  - MLPerf Client (S3-06) defines a JSON task but publishes no results table.
+  - llama.cpp performance discussions (#4167, #15013) returned **403**.
+- **T12 — PC (desktop) gaming session-length dataset.** Not found with PC-side process data:
+  - WoWAH (S3-11) measures game-server login presence for one MMORPG realm.
+  - The Glasgow dataset (S3-17) uses "session" for one game round.
+  - The UCSD Steam data (S3-15) has no per-session timing.
+  - IdleWars (Southampton eprint 377465) returned **401**.
+  - The WoWAH home and download host gave **500** and no connection; the WPI mirror worked.
+  - Zenodo searches (log row 30) found nothing relevant; one query failed with a connection reset.
+- **T12 — how often the set of running applications changes per hour.** Not found as a reported statistic. Two datasets give foreground-application change rates per minute:
+  - SWELL-KW (S3-12): lab, Windows 7.
+  - BEHACOM (S3-16): 12 users, real use. BEHACOM also has an "applications active" count per minute, from which I derived only a proxy (share of adjacent minutes in which it changes).
+  - RLKWiC (S3-13) logs apps but reports no rate.
+- **T7 — any published survey or count of how many packages or units declare a scheduling policy, nice level or I/O class.** No published count was found; S3-01 is my own count from Debian Code Search. No query was made for a published survey. The documented case of an application raising its own priority beyond what its work warrants is outside a dataset search; S3-01's negative-`Nice=` and rr/fifo hits only list declarations and do not judge whether they are warranted.
+
+---
+
+## Appendix A — scripts and commands (verbatim)
+
+### A.1 `dcs.sh` (Debian Code Search fetcher; q01–q09 ran an earlier copy whose curl line lacked `--retry 5 --retry-all-errors -m 120`)
+```bash
+#!/bin/bash
+# usage: dcs.sh OUTDIR LITERAL QUERY  -> fetches all result pages (non-grouped) of Debian Code Search, no-JS HTML
+out=$1; lit=$2; q=$3
+mkdir -p "$out"
+enc=$(python3 -I -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1],safe=""))' "$q")
+p=0
+while :; do
+  f="$out/page_$p.html"
+  for t in 1 2 3 4 5 6 7 8 9 10; do
+    code=$(curl -sS --retry 5 --retry-all-errors -m 120 -o "$f" -w "%{http_code}" "https://codesearch.debian.net/search?q=$enc&literal=$lit&page=$p")
+    if grep -q 'Still searching' "$f"; then sleep 5; else break; fi
+  done
+  echo "page $p http $code" >&2
+  grep -q "page=$((p+1))\" rel=\"next\"" "$f" || break
+  p=$((p+1)); [ $p -gt 400 ] && break
+done
+```
+Invocations: `./dcs.sh sources/S3-01/q01_cpuidle_unit 1 'CPUSchedulingPolicy=idle path:\.(service|timer)'` and likewise for each row of the S3-01 table (literal flag 1, or 0 for regex). The q11 grouped pages were fetched with `curl -sS -m 120 "https://codesearch.debian.net/search?q=%5E%5C%5BService%5C%5D+path%3A%5C.service&literal=0&perpkg=1&page=$p"` (p = 0, 1, 318), re-polled while the page contained `Still searching`, and counted with `sed 's/<style.*<\/style>//' $f | grep -c '^<h2>[a-z0-9]'`.
+
+### A.2 `parse.py`
+```python
+# usage: python3 -I parse.py DIR  -> for all page_*.html of a Debian Code Search no-JS result set:
+# prints hit count, unique files, unique source packages, and each hit as file:line | matched line
+import sys,glob,re,urllib.parse,html
+d=sys.argv[1]
+hits=[]
+for f in sorted(glob.glob(d+'/page_*.html'),key=lambda x:int(re.findall(r'page_(\d+)',x)[0])):
+    t=open(f,encoding='utf-8').read()
+    for m in re.finditer(r'<li><a href="/show\?file=([^&"]+)&(?:amp;)?line=(\d+)[^>]*>.*?<pre>\n?(.*?)</pre>',t,re.S):
+        segs=m.group(3).split('<br>')
+        ml=[s for s in segs if '<strong>' in s]
+        line=html.unescape(re.sub(r'<[^>]+>','',ml[0] if ml else '')).strip()
+        hits.append((urllib.parse.unquote(m.group(1)),m.group(2),line))
+files=sorted({h[0] for h in hits})
+pk=sorted({re.match(r'([^_/]+)_',x).group(1) for x in files})
+nc=[h for h in hits if not h[2].lstrip().startswith(('#',';'))]
+pknc=sorted({re.match(r'([^_/]+)_',h[0]).group(1) for h in nc})
+print('hits',len(hits),'files',len(files),'packages',len(pk),'| uncommented hits',len(nc),'packages(uncommented)',len(pknc))
+print('packages:',' '.join(pk))
+print('packages(uncommented):',' '.join(pknc))
+for h in hits: print('  %s:%s | %s'%h)
+```
+
+### A.3 value tabulations
+```bash
+python3 -I parse.py sources/S3-01/q07_cpupolicy_any_unit | sed -n '4,100p' | awk -F'|' '{print $2}' | sort | uniq -c | sort -rn
+python3 -I parse.py sources/S3-01/q08_nice_any_unit | sed -n '4,200p' | awk -F'|' '{print $2}' | sed 's/ *#.*//' | sort | uniq -c | sort -rn
+python3 -I parse.py sources/S3-01/q08_nice_any_unit | grep 'Nice=-'
+```
+
+### A.4 `ananicy_count.py` (run as `python3 -I ananicy_count.py sources/S3-03/ananicy-rules`)
+```python
+# usage: python3 -I ananicy_count.py REPO_ROOT
+# Parses every *.rules file separately: one JSON object per non-blank line not starting with '#'.
+import sys,os,json,collections,re
+root=sys.argv[1]
+types=collections.Counter(); bytop=collections.defaultdict(collections.Counter)
+n=0; bad=[]; nofile=0; notype=collections.Counter(); names=[]
+for dp,dn,fn in os.walk(root):
+    if '.git' in dp: continue
+    for f in fn:
+        if not f.endswith('.rules'): continue
+        nofile+=1
+        p=os.path.join(dp,f); rel=os.path.relpath(p,root)
+        top=rel.split(os.sep)[1] if rel.startswith('00-default'+os.sep) and rel.count(os.sep)>=2 else rel.split(os.sep)[0]
+        for i,l in enumerate(open(p,encoding='utf-8'),1):
+            s=l.strip()
+            if not s or s.startswith('#'): continue
+            try: o=json.loads(s)
+            except Exception as e: bad.append((rel,i,s[:80])); continue
+            n+=1
+            t=o.get('type')
+            if t is None: notype[tuple(sorted(k for k in o if k!='name'))]+=1; t='(no type: explicit fields)'
+            types[t]+=1; bytop[top][t]+=1
+            names.append((o.get('name',''),t,rel,i))
+print('rules files',nofile,'entries',n,'unparseable',len(bad))
+for b in bad[:20]: print('  BAD',b)
+print('entries per type:')
+for t,c in types.most_common(): print('  %-30s %d'%(t,c))
+print('entries without "type", by field set:')
+for k,c in notype.most_common(): print('  ',k,c)
+print('entries per 00-default subdirectory (top 3 types):')
+for top in sorted(bytop): print('  %-40s %5d  %s'%(top,sum(bytop[top].values()),bytop[top].most_common(3)))
+pat=re.compile(sys.argv[2] if len(sys.argv)>2 else r'updatedb|locate|baloo|tracker|localsearch|miner|clam|freshclam|backup|borg|restic|timeshift|deja|duplicity|rsync|syncthing|snapper|indexer|recoll|akonadi|antivir|virus',re.I)
+print('name matches for',pat.pattern)
+for nm,t,rel,i in names:
+    if pat.search(nm): print('  %s:%d  %s -> %s'%(rel,i,nm,t))
+```
+
+### A.5 `llmperf.py` and row extraction
+```python
+# usage: python3 -I llmperf.py CSV REGEX  -> rows with a prefill latency, model matching REGEX
+import csv,sys,re
+csv.field_size_limit(10**9)
+rows=list(csv.DictReader(open(sys.argv[1])))
+ok=[r for r in rows if r['report.prefill.latency.mean']]
+print('rows',len(rows),'with prefill latency',len(ok))
+pat=re.compile(sys.argv[2])
+for r in ok:
+    if pat.search(r['config.backend.model']):
+        print(' | '.join([r['config.name'],r['config.backend.model'],r['config.backend.quantization_scheme'],r.get('config.backend.quantization_config.bits',''),'bs='+r['config.scenario.input_shapes.batch_size'],'seq='+r['config.scenario.input_shapes.sequence_length'],'new='+r['config.scenario.generate_kwargs.max_new_tokens'],'prefill_mean='+r['report.prefill.latency.mean']+' '+r['report.prefill.latency.unit'],'decode_tput='+r['report.decode.throughput.value']+' '+r['report.decode.throughput.unit'],'decode_lat_mean='+r['report.decode.latency.mean'],'gpu='+r['config.environment.gpu'],'cpu='+r['config.environment.cpu'].strip()]))
+```
+Run: `python3 -I llmperf.py perf-df-pytorch-cuda-awq-1xT4.csv '(?i)llama-3.*8b|mistral-7b|qwen2.*7b|llama-2-7b'`. The single-row printout in S3-04 came from an inline script that opens the CSV with `csv.reader`, finds the row with `config.name==4bit-awq-gemv-sdpa` and `config.backend.model==meta-llama/Llama-3.1-8B-Instruct`, prints `rd.line_num` (4509) and the listed columns.
+
+### A.6 `localscore.py`
+```python
+# usage: python3 -I localscore.py model_N.html  -> per-accelerator averages from the page's __NEXT_DATA__ JSON
+import re,json,sys,collections,statistics
+t=open(sys.argv[1]).read()
+d=json.loads(re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>',t,re.S).group(1)); r=d['props']['pageProps']['result']
+print(r['model'])
+res=r['results']; print('accelerator entries',len(res), 'by type',collections.Counter(x['accelerator']['type'] for x in res))
+for ty in ['CPU','GPU']:
+    s=[x for x in res if x['accelerator']['type']==ty]
+    if not s: continue
+    tt=[x['avg_ttft'] for x in s]; g=[x['avg_gen_tps'] for x in s]
+    print(ty,'n',len(s),'avg_ttft ms median %.0f min %.0f max %.0f'%(statistics.median(tt),min(tt),max(tt)),'| avg_gen_tps median %.2f min %.2f max %.2f'%(statistics.median(g),min(g),max(g)))
+want=sys.argv[2:] 
+for x in res:
+    if any(w.lower() in x['accelerator']['name'].lower() for w in want):
+        print('  %-55s %-4s ttft_ms=%.1f gen_tps=%.2f prompt_tps=%.1f rank=%s/%s'%(x['accelerator']['name'],x['accelerator']['type'],x['avg_ttft'],x['avg_gen_tps'],x['avg_prompt_tps'],x['performance_rank'],x['number_ranked']))
+```
+Run: `python3 -I localscore.py model_1.html 'Ryzen 7 7800X3D' 'i7-12700' …` (also model_2, model_3). Per-run test values came from an inline script that loads `__NEXT_DATA__` from `result_N.html` and prints `name, ttft_ms, gen_tps, prompt_tps, avg_time_ms` for each entry of `props.pageProps.result.results`.
+
+### A.7 Perfetto trace_processor SQL (run as `./trace_processor_shell -q qN.sql example_android_trace_15s`)
+```sql
+select name, str_value, int_value from metadata;
+select start_ts, end_ts, (end_ts-start_ts)/1e9 as dur_s from trace_bounds;
+select cpu, count(*) as slices, min(ts) as first_ts, max(ts+dur) as last_end, round(count(*)/((max(ts+dur)-min(ts))/1e9),1) as slices_per_s, sum(case when utid=0 then 1 else 0 end) as idle_slices from sched group by cpu order by cpu;
+select count(*) as total_slices, round(count(*)/((select end_ts-start_ts from trace_bounds)/1e9),1) as per_s_all_cpus from sched;
+select name, str_value, int_value from metadata where name not like 'trace_config%';
+select cpu, count(*) as slices, sum(case when t.tid=0 then 1 else 0 end) as swapper_slices from sched s join thread t using(utid) group by cpu order by cpu;
+select count(*) as n from ftrace_event where name='sched_switch';
+select cpu, max(freq) from cpu_frequency_counters group by cpu;
+select count(*) as nonidle_slices, (select dur from sched s2 join thread t2 using(utid) where t2.tid!=0 and s2.dur>0 order by s2.dur limit 1 offset (select count(*)/2 from sched s3 join thread t3 using(utid) where t3.tid!=0 and s3.dur>0)) as median_dur_ns, avg(dur) as mean_dur_ns from sched s join thread t using(utid) where t.tid!=0 and s.dur>0;
+```
+(The `cpu_frequency_counters` query in q2 failed with "no such table"; the others ran.)
+
+### A.8 `swell.py` (run as `python3 -I swell.py swell_ulog_features_sheet1.csv`)
+```python
+# usage: python3 -I swell.py CSV -> SnAppChange per minute aggregated to per hour, by condition and overall
+import csv,sys,collections,statistics
+rows=list(csv.DictReader(open(sys.argv[1],encoding='utf-8-sig')))
+print('rows',len(rows),'participants',len({r['PP'] for r in rows}),'conditions',collections.Counter(r['Condition'] for r in rows))
+vals=[float(r['SnAppChange']) for r in rows]
+print('SnAppChange min',min(vals),'max',max(vals),'all integer',all(v==int(v) for v in vals))
+by=collections.defaultdict(list)
+for r in rows: by[r['Condition']].append(float(r['SnAppChange']))
+for c,v in sorted(by.items()): print('condition',c,'minutes',len(v),'mean per minute %.3f -> per hour %.1f'%(statistics.mean(v),60*statistics.mean(v)),'median per minute',statistics.median(v))
+pp=collections.defaultdict(list)
+for r in rows:
+    if r['Condition']!='R': pp[r['PP']].append(float(r['SnAppChange']))
+ph=sorted(60*statistics.mean(v) for v in pp.values())
+print('per-participant per-hour rate (work conditions N,I,T pooled): n',len(ph),'min %.1f median %.1f max %.1f'%(ph[0],statistics.median(ph),ph[-1]))
+big=[(r['PP'],r['Condition'],r['timestamp'],r['SnAppChange']) for r in rows if float(r['SnAppChange'])>60]
+print('minutes with SnAppChange>60:',len(big),big[:8])
+for c,v in sorted(by.items()):
+    w=[x for x in v if x<=60]
+    print('condition',c,'excluding minutes >60: minutes',len(w),'mean per hour %.1f'%(60*statistics.mean(w)))
+```
+
+### A.9 `behacom.py` (run as `ls User*/User*_BEHACOM.csv | sort -V | xargs python3 -I behacom.py` inside the unzipped `Behacom/` folder)
+```python
+# usage: python3 -I behacom.py User*/User*_BEHACOM.csv
+# Per user: number of one-minute vectors, first/last timestamp (UTC), mean changes_between_apps per vector (x60 = per hour of logged minutes),
+# mean active_apps_average, and fraction of consecutive vectors (gap == 60 s +-5 s) whose active_apps_average differs.
+import csv,sys,statistics,datetime
+csv.field_size_limit(10**9)
+allc=[];
+for fn in sys.argv[1:]:
+    with open(fn,newline='',encoding='latin-1') as f:
+        rd=csv.reader(f); h=next(rd); it=h.index('timestamp'); ia=h.index('active_apps_average'); ic=h.index('changes_between_apps')
+        ts=[];aa=[];ch=[]
+        for r in rd:
+            try: ts.append(int(float(r[it]))); aa.append(float(r[ia])); ch.append(float(r[ic]))
+            except Exception: pass
+    o=sorted(range(len(ts)),key=lambda i:ts[i]); ts=[ts[i] for i in o]; aa=[aa[i] for i in o]; ch=[ch[i] for i in o]
+    pairs=[(aa[i-1],aa[i]) for i in range(1,len(ts)) if abs(ts[i]-ts[i-1]-60000)<=5000]
+    diff=sum(1 for a,b in pairs if a!=b)
+    d=lambda x: datetime.datetime.fromtimestamp(x/1000,datetime.UTC).strftime('%Y-%m-%d')
+    allc+=ch
+    print('%s vectors=%d span=%s..%s changes_between_apps mean/min=%.2f (=%.0f/h) median/min=%.1f active_apps_average mean=%.1f consecutive-pairs=%d with active_apps_average changed=%.1f%%'%(fn.split('/')[0],len(ts),d(ts[0]),d(ts[-1]),statistics.mean(ch),60*statistics.mean(ch),statistics.median(ch),statistics.mean(aa),len(pairs),100*diff/max(1,len(pairs))))
+print('ALL users pooled: vectors=%d changes_between_apps mean per vector %.2f (=%.0f per hour of logged minutes)'%(len(allc),statistics.mean(allc),60*statistics.mean(allc)))
+```
+
+### A.10 Artificial Analysis extraction (inline)
+```python
+import re
+t=open('aa_llama31_8b_providers.html',encoding='utf-8').read().replace('\\"','"')
+seen=set()
+for m in re.finditer(r'"performance":\{"outputSpeed":\{"median":([0-9.]+)[^}]*\},"timeToFirstToken":\{"median":([0-9.]+)',t):
+    back=t[max(0,m.start()-6000):m.start()]
+    hs=re.findall(r'"host":\{[^{}]*?"name":"([^"]+)"',back) or re.findall(r'"hostName":"([^"]+)"',back) or re.findall(r'"name":"([^"]+)"',back)
+    key=(hs[-1] if hs else '?',m.group(1)[:6])
+    if key in seen: continue
+    seen.add(key)
+    print(key[0],'| outputSpeed median',round(float(m.group(1)),1),'tok/s | TTFT median',round(float(m.group(2)),3),'s')
+```
+Output:
+```
+Groq | outputSpeed median 639.3 tok/s | TTFT median 0.84 s
+Novita | outputSpeed median 150.8 tok/s | TTFT median 0.913 s
+CoreWeave | outputSpeed median 141.5 tok/s | TTFT median 0.661 s
+DeepInfra (Turbo, FP8) | outputSpeed median 30.9 tok/s | TTFT median 1.143 s
+DeepInfra | outputSpeed median 27.5 tok/s | TTFT median 1.074 s
+```
+The Groq attribution was checked directly: `"slug":"groq_llama-3-1-instruct-8b"` precedes that performance block by 582 characters. The other four attributions are by nearest preceding host name and were not checked one by one.
+
+### A.11 Local illustration (sandbox image, Ubuntu 24.04.5 LTS "Noble Numbat")
+```
+$ ls /lib/systemd/system/*.service /lib/systemd/system/*.timer /usr/lib/systemd/user/*.service /usr/lib/systemd/user/*.timer 2>/dev/null | wc -l
+163
+$ grep -HnE '^(CPUSchedulingPolicy|Nice|IOSchedulingClass|IOSchedulingPriority|CPUWeight|IOWeight)=' <same globs>
+/lib/systemd/system/e2scrub@.service:16:IOSchedulingClass=idle
+/lib/systemd/system/e2scrub@.service:17:CPUSchedulingPolicy=idle
+/lib/systemd/system/e2scrub_reap.service:17:IOSchedulingClass=idle
+/lib/systemd/system/e2scrub_reap.service:18:CPUSchedulingPolicy=idle
+/lib/systemd/system/systemd-tmpfiles-clean.service:23:IOSchedulingClass=idle
+/usr/lib/systemd/user/systemd-tmpfiles-clean.service:21:IOSchedulingClass=idle
+```
+So 3 of the 163 unit files in this minimal container image declare an idle class: e2scrub@, e2scrub_reap, and systemd-tmpfiles-clean (system and user). This is a labelled illustration only; the image is a minimal sandbox, not a desktop install.
+
+## Appendix B — long outputs (verbatim)
+
+### B.1 Negative `Nice=` hits (q08)
+```
+  systemd_262-1/debian/extra/units-ubuntu/systemd-journald.service.d/nice.conf:4 | Nice=-1
+  brltty_6.9.1+repack-2/Autostart/Systemd/brltty@.service.in:62 | Nice=-10
+  brltty_6.9.1+repack-2/debian/brltty.service:30 | Nice=-10
+  svxlink_26.05.1-1/src/svxlink/systemd/svxlink.service.in:50 | Nice=-10
+  svxlink_26.05.1-1/src/svxlink/systemd/svxreflector.service.in:48 | Nice=-10
+  svxlink_26.05.1-1/src/svxlink/systemd/remotetrx.service.in:44 | Nice=-10
+  frr_10.7.1-2/tools/frr@.service.in:10 | Nice=-5
+  frr_10.7.1-2/tools/frr.service.in:10 | Nice=-5
+  espeakup_1:0.90-18/services/systemd/espeakup.service.in:16 | Nice=-10
+  jacktrip_3.0.1+ds-1/linux/container/jacktrip.service:13 | Nice=-20
+  earlyoom_1.9.0-1/earlyoom.service.in:12 | Nice=-20
+  deepin-boot-maker_6.0.19+dfsg-1/src/service/data/deepin-boot-maker.service:52 | Nice=-5
+  jamulus_3.9.1+dfsg-2/linux/debian/jamulus-headless.service:13 | Nice=-20
+  hdapsd_1:20250908-1/misc/hdapsd@.service.in:7 | Nice=-5
+  hdapsd_1:20250908-1/misc/hdapsd.service.in:7 | Nice=-5
+  readsb_3.16-2/debian/readsb.service:23 | Nice=-5
+  deepin-log-viewer_6.5.33+ds1-1/application/configs/coredump-reporter.service:12 | Nice=-5
+  deepin-log-viewer_6.5.33+ds1-1/logViewerService/assets/data/deepin-log-viewer-daemon.service:21 | Nice=-5
+  gdnsd_3.8.3-2.1/init/gdnsd.service.tmpl:34 | Nice=-11
+  railcontrol_026+dfsg1-3/debian/railcontrol.service:25 | Nice=-20
+```
+
+### B.1b q07 non-idle/batch hits
+```
+  systemd_262-1/test/test-sched-prio/sched_rr_change.service:10 | CPUSchedulingPolicy=rr
+  systemd_262-1/test/test-sched-prio/sched_rr_ok.service:7 | CPUSchedulingPolicy=rr
+  systemd_262-1/test/test-sched-prio/sched_rr_bad.service:9 | CPUSchedulingPolicy=rr
+  systemd_262-1/test/test-sched-prio/sched_ext_ok.service:8 | CPUSchedulingPolicy=ext
+  systemd_262-1/test/fuzz/fuzz-unit-file/directives-all.service:786 | CPUSchedulingPolicy=
+  hipercontracer_2.2.10-1/src/udp-echo-server.service:46 | CPUSchedulingPolicy=fifo
+  low-memory-monitor_2.1-3/data/low-memory-monitor.service.in:12 | CPUSchedulingPolicy=fifo
+  osmo-mgw_1.15.0+dfsg1-1/contrib/systemd/osmo-mgw.service:18 | CPUSchedulingPolicy=rr
+  coturn_4.18.0-1/rpm/turnserver.service.fc:21 | CPUSchedulingPolicy=other
+  osmo-bts_1.9.0+dfsg1-2/contrib/systemd/osmo-bts-virtual.service:18 | CPUSchedulingPolicy=rr
+  osmo-bts_1.9.0+dfsg1-2/contrib/systemd/osmo-bts-trx.service:18 | CPUSchedulingPolicy=rr
+  osmo-bts_1.9.0+dfsg1-2/contrib/systemd/osmo-bts-oc2g.service:16 | CPUSchedulingPolicy=rr
+  osmo-bts_1.9.0+dfsg1-2/contrib/systemd/osmo-bts-sysmo.service:18 | CPUSchedulingPolicy=rr
+  osmo-bts_1.9.0+dfsg1-2/contrib/systemd/osmo-bts-lc15.service:16 | CPUSchedulingPolicy=rr
+  osmo-bts_1.9.0+dfsg1-2/debian/osmo-bts.service:14 | CPUSchedulingPolicy=rr
+  osmo-pcu_1.5.3-1/debian/osmo-pcu.service:14 | CPUSchedulingPolicy=rr
+  osmo-pcu_1.5.3-1/contrib/systemd/osmo-pcu.service:17 | CPUSchedulingPolicy=rr
+  osmo-trx_1.8.0-1/contrib/systemd/osmo-trx-usrp1.service:17 | CPUSchedulingPolicy=rr
+  osmo-trx_1.8.0-1/contrib/systemd/osmo-trx-lms.service:17 | CPUSchedulingPolicy=rr
+  osmo-trx_1.8.0-1/contrib/systemd/osmo-trx-uhd.service:18 | CPUSchedulingPolicy=rr
+  osmo-trx_1.8.0-1/contrib/systemd/osmo-trx-ipc.service:17 | CPUSchedulingPolicy=rr
+  systemd-udeb_262-1/test/test-sched-prio/sched_rr_change.service:10 | CPUSchedulingPolicy=rr
+  systemd-udeb_262-1/test/test-sched-prio/sched_rr_bad.service:9 | CPUSchedulingPolicy=rr
+  systemd-udeb_262-1/test/test-sched-prio/sched_ext_ok.service:8 | CPUSchedulingPolicy=ext
+  systemd-udeb_262-1/test/test-sched-prio/sched_rr_ok.service:7 | CPUSchedulingPolicy=rr
+  nohang_0.3.0-3/debian/nohang.service:57 | #CPUSchedulingPolicy=rr
+  nohang_0.3.0-3/systemd/nohang-desktop.service.in:57 | #CPUSchedulingPolicy=rr
+  nohang_0.3.0-3/debian/nohang-desktop.service:57 | #CPUSchedulingPolicy=rr
+  nohang_0.3.0-3/systemd/nohang.service.in:57 | #CPUSchedulingPolicy=rr
+  systemd-udeb_262-1/test/fuzz/fuzz-unit-file/directives-all.service:786 | CPUSchedulingPolicy=
+```
+
+### B.2 `ananicy_count.py` full output
+```
+rules files 361 entries 15813 unparseable 1
+  BAD ('00-default/Games/linux-native/linux-native_d.rules', 315, '{ "name": "Dungeon Drafters.x86_64", "type": "Game" }+')
+entries per type:
+  Game                           13528
+  BG_CPUIO                       1615
+  Service                        194
+  Doc-View                       160
+  LowLatency_RT                  109
+  Chat                           51
+  Heavy_CPU                      33
+  Image-View                     32
+  Player-Audio                   28
+  Launcher                       24
+  Player-Video                   24
+  IN_DIFF                        10
+  OOM_NO_KILL                    2
+  (no type: explicit fields)     2
+  TODO                           1
+entries without "type", by field set:
+   ('nice',) 1
+   ('ioclass', 'nice') 1
+entries per 00-default subdirectory (top 3 types):
+  Audio-Video                                 62  [('Player-Video', 20), ('Player-Audio', 19), ('BG_CPUIO', 7)]
+  Browsers                                    44  [('Doc-View', 42), ('BG_CPUIO', 2)]
+  Chats                                       50  [('Chat', 50)]
+  Creative                                    27  [('Player-Audio', 9), ('Image-View', 9), ('Player-Video', 4)]
+  DEs-and-WMs                                184  [('LowLatency_RT', 72), ('Service', 42), ('BG_CPUIO', 29)]
+  Development & Programming                   35  [('BG_CPUIO', 22), ('Heavy_CPU', 9), ('Service', 2)]
+  Document Viewers                             3  [('Doc-View', 3)]
+  Games                                    15093  [('Game', 13528), ('BG_CPUIO', 1453), ('Service', 80)]
+  Networking                                  57  [('BG_CPUIO', 40), ('LowLatency_RT', 13), ('Service', 2)]
+  Productivity & Office                       23  [('Doc-View', 21), ('Heavy_CPU', 2)]
+  Services                                    77  [('Service', 61), ('BG_CPUIO', 13), ('LowLatency_RT', 3)]
+  System Utilities & Maintenance              26  [('BG_CPUIO', 23), ('Service', 1), ('(no type: explicit fields)', 1)]
+  Terminals & Shells                          33  [('Doc-View', 33)]
+  Text Editors                                39  [('Doc-View', 28), ('Heavy_CPU', 11)]
+  Tools                                       48  [('BG_CPUIO', 24), ('Doc-View', 11), ('Heavy_CPU', 6)]
+  VPN                                         12  [('LowLatency_RT', 6), ('IN_DIFF', 6)]
+name matches for updatedb|locate|baloo|tracker|localsearch|miner|clam|freshclam|backup|borg|restic|timeshift|deja|duplicity|rsync|syncthing|snapper|indexer|recoll|akonadi|antivir|virus
+  00-default/DEs-and-WMs/plasma.rules:12  baloo_file -> BG_CPUIO
+  00-default/DEs-and-WMs/plasma.rules:13  baloorunner -> BG_CPUIO
+  00-default/DEs-and-WMs/plasma.rules:14  baloo_file_extractor -> BG_CPUIO
+  00-default/Audio-Video/gpu-screen-recorder.rules:4  gsr-game-tracker -> BG_CPUIO
+  00-default/Networking/syncthing.rules:2  syncthing -> BG_CPUIO
+  00-default/Networking/syncthing.rules:3  syncthing-gtk -> BG_CPUIO
+  00-default/Tools/rsync.rules:1  rsync -> BG_CPUIO
+  00-default/System Utilities & Maintenance/clamav.rules:2  clamd -> BG_CPUIO
+  00-default/System Utilities & Maintenance/clamav.rules:4  clamui -> Service
+  00-default/System Utilities & Maintenance/borg.rules:2  borg -> BG_CPUIO
+  00-default/System Utilities & Maintenance/recoll.rules:2  recollindex -> BG_CPUIO
+  00-default/System Utilities & Maintenance/restic.rules:2  restic -> BG_CPUIO
+  00-default/Games/linux-native/linux-native_f.rules:15  FACEMINER -> Game
+  00-default/Games/linux-native/linux-native_i.rules:16  Idle Cave Miner.x86_64 -> Game
+  00-default/Games/linux-native/linux-native_the.rules:288  TheZachtronicsSolitaireCollection -> Game
+  00-default/Games/linux-native/linux-native_a.rules:210  AntiVirus Girl.x86_64 -> Game
+  00-default/Games/linux-native/linux-native_m.rules:292  MurderMiners -> Game
+  00-default/Games/wine_proton/wine_proton_c.rules:448  CastleMinerZ.exe -> Game
+  00-default/Games/wine_proton/wine_proton_m.rules:969  Mineral Mining Simulator.exe -> Game
+  00-default/Games/wine_proton/wine_proton_m.rules:1412  MooseMiners.exe -> Game
+  00-default/Games/wine_proton/wine_proton_m.rules:1701  Murder Miners.exe -> Game
+  00-default/Games/wine_proton/wine_proton_f.rules:76  FACEMINER.exe -> Game
+  00-default/Games/wine_proton/wine_proton_x.rules:80  Xvirus.exe -> Game
+  00-default/Games/wine_proton/wine_proton_s.rules:2768  STORY OF SEASONS Friends of Mineral Town.exe -> Game
+  00-default/Games/wine_proton/wine_proton_s.rules:2769  STORY OF SEASONS Friends of Mineral Town_Compatibility.exe -> Game
+  00-default/Games/wine_proton/wine_proton_t.rules:728  TimeShift.Exe -> Game
+  00-default/Games/wine_proton/wine_proton_a.rules:936  AntiVirus Girl.exe -> Game
+  00-default/Games/wine_proton/wine_proton_k.rules:218  Kiborg-Win64-Shipping.exe -> Game
+  00-default/Games/wine_proton/wine_proton_k.rules:219  Kiborg.exe -> BG_CPUIO
+  00-default/Games/wine_proton/wine_proton_d.rules:1245  DO NOT FEED THE VIRUS.exe -> Game
+  00-default/Games/wine_proton/wine_proton_n.rules:533  NOBACKUP.exe -> BG_CPUIO
+  00-default/Games/wine_proton/wine_proton_n.rules:534  NOBACKUP-Win64-Shipping.exe -> Game
+  00-default/Games/wine_proton/wine_proton_n.rules:821  NTR_DejaVu.exe -> BG_CPUIO
+  00-default/Games/wine_proton/wine_proton_n.rules:822  NTR_DejaVu-Win64-Shipping.exe -> Game
+  00-default/Games/wine_proton/wine_proton_i.rules:73  Idle Cave Miner.exe -> Game
+  00-default/Games/wine_proton/wine_proton_q.rules:44  CookerSync.exe -> BG_CPUIO
+  00-default/Games/wine_proton/common.rules:218  BeamEyeTracker.exe -> Game
+  00-default/Games/wine_proton/wine_proton_z.rules:157  Zomborg.exe -> Game
+```
+
+### B.3 `llmperf.py` output (Llama-3/3.1-8B rows, AWQ, 1xT4)
+```
+rows 1362 with prefill latency 427
+4bit-awq-gemm-eager | meta-llama/Meta-Llama-3-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.40531998901367183 s | decode_tput=22.27493301865801 tokens/s | decode_lat_mean=2.8282913330078125 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-exllama-v1-sdpa | meta-llama/Meta-Llama-3-8B | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=3.235117993164063 s | decode_tput=33.28901257083097 tokens/s | decode_lat_mean=1.8925163330078125 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-exllama-v2-sdpa | meta-llama/Meta-Llama-3-8B | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.21179373321533204 s | decode_tput=32.918606701295445 tokens/s | decode_lat_mean=1.9138112548828126 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-gemv-eager | meta-llama/Meta-Llama-3-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.3746915832519532 s | decode_tput=27.371389720982876 tokens/s | decode_lat_mean=2.3016734130859375 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-gemv-eager | meta-llama/Llama-3.1-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.3761126342773437 s | decode_tput=27.090488865596804 tokens/s | decode_lat_mean=2.3255394287109374 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-gemm-eager | meta-llama/Llama-3.1-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.40519516296386715 s | decode_tput=22.024580134036633 tokens/s | decode_lat_mean=2.8604404541015627 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-exllama-v2-eager | meta-llama/Meta-Llama-3-8B | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.2200324401855469 s | decode_tput=28.465174571799047 tokens/s | decode_lat_mean=2.21323076171875 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-gemm-eager | meta-llama/Meta-Llama-3-8B | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.4094328796386718 s | decode_tput=22.44153612753104 tokens/s | decode_lat_mean=2.8072944580078127 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-exllama-v1-sdpa | meta-llama/Llama-3.1-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=3.2326163085937503 s | decode_tput=33.312253482330604 tokens/s | decode_lat_mean=1.8911959838867187 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-gemv-sdpa | meta-llama/Meta-Llama-3-8B | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.3682376434326172 s | decode_tput=31.411470420974908 tokens/s | decode_lat_mean=2.005636767578125 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-gemm-sdpa | meta-llama/Meta-Llama-3-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.41649641723632813 s | decode_tput=23.621633369379833 tokens/s | decode_lat_mean=2.6670467285156247 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-gemv-eager | meta-llama/Meta-Llama-3-8B | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.3750298034667968 s | decode_tput=28.14105919667357 tokens/s | decode_lat_mean=2.2387217041015623 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-exllama-v1-eager | meta-llama/Meta-Llama-3-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=3.250932910156249 s | decode_tput=28.633491453643803 tokens/s | decode_lat_mean=2.2002206787109375 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-exllama-v2-eager | meta-llama/Llama-3.1-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.22021053161621093 s | decode_tput=28.12034568165892 tokens/s | decode_lat_mean=2.2403707519531246 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-exllama-v1-sdpa | meta-llama/Meta-Llama-3-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=3.2356754638671874 s | decode_tput=33.247221010685216 tokens/s | decode_lat_mean=1.89489521484375 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-exllama-v1-eager | meta-llama/Meta-Llama-3-8B | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=3.2459571533203126 s | decode_tput=28.277173678694854 tokens/s | decode_lat_mean=2.2279454345703122 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-gemv-sdpa | meta-llama/Llama-3.1-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.3676786682128906 s | decode_tput=31.219369801316113 tokens/s | decode_lat_mean=2.0179779541015628 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-exllama-v1-eager | meta-llama/Llama-3.1-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=3.245940185546875 s | decode_tput=28.471721370364452 tokens/s | decode_lat_mean=2.212721850585937 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-exllama-v2-sdpa | meta-llama/Llama-3.1-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.21214552307128906 s | decode_tput=33.07810714951686 tokens/s | decode_lat_mean=1.9045829833984373 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-exllama-v2-sdpa | meta-llama/Meta-Llama-3-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.21281651611328126 s | decode_tput=33.460910879444036 tokens/s | decode_lat_mean=1.8827939331054686 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-exllama-v2-eager | meta-llama/Meta-Llama-3-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.21970255432128907 s | decode_tput=28.548940110862578 tokens/s | decode_lat_mean=2.2067369140624997 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-gemm-sdpa | meta-llama/Llama-3.1-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.41426298217773433 s | decode_tput=23.833781540589897 tokens/s | decode_lat_mean=2.64330693359375 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-gemv-sdpa | meta-llama/Meta-Llama-3-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.36864620361328126 s | decode_tput=31.6722433403514 tokens/s | decode_lat_mean=1.9891233886718749 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+4bit-awq-gemm-sdpa | meta-llama/Meta-Llama-3-8B | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.4163207153320313 s | decode_tput=23.93802318448678 tokens/s | decode_lat_mean=2.6317962646484374 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
+```
