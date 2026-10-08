@@ -283,3 +283,13 @@ Hands to 9.15:
 - The guidebook: vol-01 `:1397`, `:2527`; vol-02 `:3116`; vol-03 `:141`, `:154`, `:171`, `:193`, `:265`, `:316`, `:500`, `:640`, `:1164`; vol-04 `:376`.
 
 Compiled effect: none.
+
+## D17 — related-work's ghOSt sentence: "without kernel rebuilds" becomes "without deploying a new kernel or rebooting" (2026-10-08)
+
+By 인지오's decision, scope-card item 1: `docs/related-work.md:8`'s "ghOSt delegates kernel scheduling decisions to userspace agents, motivated by the need to iterate on policy across a fleet without kernel rebuilds [ghost-sosp21]" keeps its mechanism and motivation; "without kernel rebuilds" becomes "without deploying a new kernel or rebooting".
+
+- **Grounds** (`ghost-sosp21`; S1-01, the SOSP '21 PDF, SHA-256 `c37d6360…`): Abstract — "kernel schedulers are difficult to implement, test, and deploy efficiently across a large fleet"; policies "are modified without a host reboot". §2, p. 3 — "Deploying changes to scheduling policy requires deploying a new kernel across a large fleet … kernel rollouts are not well-tolerated below an O(month) granularity"; "ghOSt enables scheduler update, testing, and tuning without having to update the kernel and/or reboot machines and applications." The mechanism: a kernel scheduling class with user-space agents, falling back to CFS when agents crash (§3, p. 5; §3.4, p. 8).
+
+Hands to 9.15: `docs/related-work.md:8` as above; the guidebook vol-02 ch. 3.2 checked against the same passages (item 60).
+
+Compiled effect: none.
