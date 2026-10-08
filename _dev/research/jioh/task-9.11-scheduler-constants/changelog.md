@@ -441,3 +441,18 @@ By 인지오's decision, each checked on 2026-10-08 against the local census cop
 Applied: `classes/audit.md`; `dataset/tools/meas/sched/classes.py`.
 
 Hands to: none. Release `meas-ci-probes-2026-10-07b`'s notes say "Eleven jobs on the AMD EPYC 7763"; the jobs' `spec.json` give ten — an edit to the release, on 인지오's go-ahead.
+
+## D33 — batch: hand-off pointers (2026-10-08)
+
+By 인지오's decision, the hand-offs the audit found missing or short, each location read on 2026-10-08 at the current line:
+
+- **9.12** — 9.11 D4's survey of which programs declare a class, against the proposal's "Most applications never do" (`docs/research-proposal.md:158`). 9.12 runs as issue #18; the pointer reaches it by a comment there, on 인지오's go-ahead, with D19's two proposal lines.
+- **9.13** — the TIMER-first invariant on the first executed instruction: the gaming chain heads and the mocks are LOOPs whose body begins with TIMER, so "begins its program with it" read literally fails them (D11). No I/O class field: 9.10 D125 handed 9.11 the backup's "idle CPU and I/O classes"; D4–D5 carry the CPU class; the I/O class is not carried, the simulator scheduling one CPU lane and nothing else (`docs/simulator/simulator-guide.md:44`, "Exactly one simulated CPU").
+- **9.14** — D3's harness side beyond its pointer (the consumed tick's index; the chain guard's count; the length-one `deadline` cross-check, which pairs lines with job ends by index, `primitives.py:292–300`; the `tick_count` header and README; metrics `:317`'s `mock-media`; the `c7-gaming` note's place); the scope card's routings to 9.14 (`scope-card.md:21–23`), which no pointer carried; 인경민's EDF chain-stage note, with its measured consequences (the note's table, `:36–40`) for the pair review's gaming rows (`docs/daemon/prior-table-pair-review.md:37`, `:52`), and the reply it is owed.
+- **9.15** — the stale TIMER-backlog, t₀, OSTEP, 0.75 ms, `T_interaction` and precedent passages the D2, D3, D8, D11 and D12 pointers did not name (the 9.15 line lists each); the dataset docs D6 and D20 meant, named; 인경민's 2026-10-06 note, cited by D3 and the TIMER memo, absent from the repository, its content on the 9.14 line and in the coreset guide.
+
+Left as it is: `simulator/src/sim.cpp:940`'s comment "OSTEP §8 whole", 인경민's code.
+
+Applied: `_dev/TODO.md` — the 9.12, 9.13, 9.14 and 9.15 lines.
+
+Hands to: as listed.
