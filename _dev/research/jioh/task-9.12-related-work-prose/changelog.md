@@ -410,3 +410,17 @@ New keys from D1–D24, added to the table: AKTS (D12), SteamOS's LAVD support (
 Hands to 9.15: `docs/related-work.md:54–73` rewritten as the map above; the registry entries it names minted or restated as the listed decisions hand them.
 
 Compiled effect: none.
+
+## D26 — the proposal's Linux scheduling-class statements: who declares and through which call; EEVDF a proportional-share algorithm (2026-10-08)
+
+By 인지오's decision, scope-card items 22 and 39: `docs/research-proposal.md:145`'s row "Scheduling classes (`SCHED_FIFO`, `SCHED_RR`, `SCHED_DEADLINE`, `SCHED_BATCH`, `SCHED_IDLE`) — Application or admin declares it via `sched_setscheduler`" and `:424`'s "`SCHED_DEADLINE` is EDF, `SCHED_FIFO` is fixed-priority real-time, `SCHED_OTHER` is EEVDF, a deterministic relative of proportional-share scheduling" are restated to the kernel's documents and man-pages 6.19.
+
+- **The policies** (sched(7), sched_setattr(2); S2-07, S2-51): `SCHED_OTHER` (the default), `SCHED_BATCH`, `SCHED_IDLE`, `SCHED_FIFO`, `SCHED_RR`, `SCHED_DEADLINE`; and `SCHED_EXT` since Linux 6.12 (S2-47).
+- **Who declares and how**: the program itself, its systemd unit (`CPUSchedulingPolicy=`, `Nice=`) or a wrapper (`chrt`) (D13; S3-02, S3-20); through `sched_setscheduler(2)`, or for `SCHED_DEADLINE` "one must use the Linux-specific sched_setattr(2) and sched_getattr(2) system calls" (sched(7)). Unprivileged threads may lower priority or switch to a non-real-time policy; real-time priority is capped by `RLIMIT_RTPRIO`; "A thread must be privileged (CAP_SYS_NICE) in order to set or modify a SCHED_DEADLINE policy" (sched(7)).
+- **`SCHED_DEADLINE`**: "basically an implementation of the Earliest Deadline First (EDF) scheduling algorithm, augmented with a mechanism (called Constant Bandwidth Server, CBS)" (`sched-deadline.rst:41–44`, S2-05); "implemented using GEDF (Global Earliest Deadline First) in conjunction with CBS" (sched(7)).
+- **`SCHED_FIFO`**: static priorities above 0; it "will always immediately preempt any currently running SCHED_OTHER, SCHED_BATCH, or SCHED_IDLE thread"; "a simple scheduling algorithm without time slicing" (sched(7)).
+- **`SCHED_OTHER`**: EEVDF since Linux 6.6 (`sched-eevdf.rst:5–11`, S2-03), a deterministic proportional-share algorithm — the report's title, "…A Flexible and Accurate Mechanism for Proportional Share Resource Allocation" (`eevdf-tr95`). Man-pages 6.19's sched(7) still names CFS as the default; the kernel's own document is cited for the default class.
+
+Hands to 9.15: `docs/research-proposal.md:145` and `:424` restated as above; `docs/references.md` entries for sched(7) and sched_setattr(2) (man-pages 6.19) and the kernel's `sched-deadline.rst` and `sched-eevdf.rst` where the prose cites them, under the id-minting rule.
+
+Compiled effect: none.
