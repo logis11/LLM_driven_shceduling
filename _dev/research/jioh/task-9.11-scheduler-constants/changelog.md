@@ -348,3 +348,19 @@ By 인지오's decision, scope-card item 26a, on D2. The point stays 700 µs.
 Applied: `harness/experiments/rq0-gate.yaml` — the 700 µs point's reason (design: the one-CPU value for the simulator's one lane; the runner's 2.1 ms at 4 CPUs); `docs/references.md` `linux-sched-fair` — the role (unscaled magnitudes; the value taken by design; the desktop on 7.0.0-31 before its upgrade), the cite's access dates and the status (every tag; the -31 diff).
 
 Hands to: **9.14** — the gate spec's reason with the re-pin, and its second half, the 831 µs frame slack, already judged wrong by the compiled audit (`_dev/research/jioh/2026-09-13-verification/compiled-numbers-report.md:69`, `:138`; scope card `:21`), read against the rebuilt files (D2).
+
+## D26 — the RQ0 gate spec's executor assumptions: the simulator's current answers, and 인경민's reply asked for (2026-10-08)
+
+By 인지오's decision, scope-card item 10, extending D7 and D11 to the gate spec. `harness/experiments/rq0-gate.yaml` statement `executor-assumptions` (`:133–143`) commits three assumptions "pending 인경민's confirmation" and calls confirmation "a Phase 9 prerequisite"; statement `judging-set` (`:123–129`) lets `c7-meeting` and `c7-media` re-enter the judging set if the answers are that "a residual task keeps its slice when a deadline task wakes and that a slice boundary is dispatched before a same-microsecond wake". 인경민's status memo §6 (`simulator/memo/memo_261001.md:96–102`, "current behaviour; the reply is kyungmin's to send"):
+
+1. "Does a waking deadline task take the lane from a residual slice at once? Yes (option A). [confirmed]" — `video` waits 0 µs on all 3 600 ticks of the memo's scenario. Assumption (1) holds as the simulator behaves today.
+2. "Rule D1: config applies first, then insertion order. It is **not** 'wake first' by rule. [inferred …]"; "Under option A the wait is 0 either way." Assumption (2) — the wake processed first — is not the simulator's rule; metrics §11 item 3 states D1 (D11).
+3. Answered by D7 and D19: no executor window; the guard's 30 s, by design.
+
+On answer 1, the re-entry condition's first half fails, so `c7-meeting` and `c7-media` stay reporting-only.
+
+- **Not taken:** the hand-off alone, with 인경민's formal reply left outstanding (A).
+
+Applied: `docs/memos/2026-10-08-declared-scheduling-class.md` — a fourth request: 인경민 confirms §6's answers 1 and 2 as his reply.
+
+Hands to: **9.14** — the gate spec's `executor-assumptions` restated on 인경민's reply — (1) as today, (2) replaced by rule D1, (3) per D7 and D19 — with the `judging-set` statement's re-entry condition read against them (on today's answers, `c7-meeting` and `c7-media` stay reporting-only), as the harness changelog entry the statement requires; **인경민** — the memo's fourth request.

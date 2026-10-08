@@ -1,7 +1,7 @@
 # The declared scheduling class — a field in the workload, a rule in the executor
 
 > Status: memo · Created 2026-10-08 · Updated 2026-10-08
-> From 인지오 to 인경민 and 박이안. Decisions D4–D6, D16, D18 and D19 of task 9.11 (`_dev/research/jioh/task-9.11-scheduler-constants/changelog.md`). The workload and the run file gain a field, a change to two frozen contracts that needs the three of us (`docs/data-contracts.md` §13). The heads-up memo of 2026-09-13 said your programs' input and output formats were outside the rebuild; this field is the exception.
+> From 인지오 to 인경민 and 박이안. Decisions D4–D6, D16, D18, D19 and D26 of task 9.11 (`_dev/research/jioh/task-9.11-scheduler-constants/changelog.md`). The workload and the run file gain a field, a change to two frozen contracts that needs the three of us (`docs/data-contracts.md` §13). The heads-up memo of 2026-09-13 said your programs' input and output formats were outside the rebuild; this field is the exception.
 
 ## 1. The field
 
@@ -27,3 +27,4 @@ The recognizer's view (`docs/data-contracts.md` §4, "The two derived views": na
 1. 인경민: the rule of §2 in the executor, and anything in it that conflicts with the simulator's other invariants.
 2. 박이안: whether the visible projection shows the class.
 3. Both: the contract change agreed — the workload and the run file carry the class of §1 — so that the rebuild can add the field with an entry in `docs/data-contracts.md` §14.
+4. 인경민: your status memo's §6 answers 1 and 2 (`simulator/memo/memo_261001.md`) confirmed as your reply to the boot-default memo's questions 1 and 2 (`docs/memos/2026-09-11-boot-default-from-ostep.md` §5) — a waking deadline task takes the lane from a residual slice at once; same-microsecond events follow your rule D1, config changes first, then insertion order. The RQ0 gate spec's executor assumptions, and whether `c7-meeting` and `c7-media` re-enter its judging set, are restated on them.
