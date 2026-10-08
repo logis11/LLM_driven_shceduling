@@ -55,6 +55,7 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
 | 45 | 2026-10-08 | api.steampowered.com; gitlab.steamos.cloud (stage 3) | `ISteamNews/GetNewsForApp/v2/?appid=1675200&count=300&maxlength=0`; `git clone https://gitlab.steamos.cloud/holo/steamos-manager` | 200; clone at `302d37b9` → S2-49 | — |
 | 46 | 2026-10-08 | steamdeck-images.steamos.cloud (stage 3) | `/recovery/steamdeck-repair-latest.img.bz2` → `steamdeck-oobe-repair-20260707.10-3.8.14.img.bz2`; checksum files `.sha256`, `.sha512`, `.md5`, `.sig` | 200 → S2-50 | checksum files 404 |
 | 47 | 2026-10-08 | man7.org (stage 3) | `/linux/man-pages/man7/sched.7.html`; `/linux/man-pages/man2/sched_setattr.2.html` | 200 → S2-51 | — |
+| 48 | 2026-10-08 | local copy (stage 3) | 9.11's `sources/D2-ubuntu-hwe-7.0/linux-hwe-7.0_7.0.0-34.34~24.04.1.diff.gz` (archive.ubuntu.com, read by 9.11 D2) | `debian.master/config/annotations` → S2-52 | — |
 
 ## 2. Candidates
 
@@ -545,6 +546,12 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
   - sched(7), "SCHED_DEADLINE: Sporadic task model deadline scheduling": "Since Linux 3.14, Linux provides a deadline scheduling policy (SCHED_DEADLINE). This policy is currently implemented using GEDF (Global Earliest Deadline First) in conjunction with CBS (Constant Bandwidth Server). To set and fetch this policy and associated attributes, one must use the Linux-specific sched_setattr(2) and sched_getattr(2) system calls."
   - sched_setattr(2), DESCRIPTION: "The sched_setattr() system call sets the scheduling policy and associated attributes for the thread whose ID is specified in pid." … "The real-time policies that may be specified in policy are: SCHED_FIFO a first-in, first-out policy; and SCHED_RR a round-robin policy. Linux also provides the following policy: SCHED_DEADLINE a deadline scheduling policy; see sched(7) for details."
 - Coverage: T7, T9 — SCHED_DEADLINE is set through `sched_setattr`, not `sched_setscheduler`; implemented as global EDF with CBS. Not an observation.
+
+### S2-52 — Ubuntu 24.04's HWE kernel 7.0.0-34: sched_ext built in (stage 3, 2026-10-08)
+
+- Copy: 9.11's copy of the Ubuntu source diff `linux-hwe-7.0_7.0.0-34.34~24.04.1.diff.gz` (archive.ubuntu.com, read and hashed by 9.11 D2), SHA-256 `81b9d83f6863ea9d41bde191923134fe6bf4261bfcf94a376b85c094fafd6c32`, at `_dev/research/jioh/task-9.11-scheduler-constants/sources/D2-ubuntu-hwe-7.0/`.
+- Passages (the diff's added `linux-hwe-7.0-7.0.0/debian.master/config/annotations`; `debian.hwe-7.0/config/annotations` does not set the option): `CONFIG_SCHED_CLASS_EXT policy<{'amd64': 'y', 'arm64': 'y', 'ppc64el': 'y', 'riscv64': 'y', 's390x': 'y'}>`; its dependencies `CONFIG_BPF_JIT policy<{'amd64': 'y', …}>` and `CONFIG_DEBUG_INFO_BTF policy<{'amd64': 'y', …}>` (S2-47: `SCHED_CLASS_EXT` "depends on BPF_SYSCALL && BPF_JIT && DEBUG_INFO_BTF").
+- Coverage: T1 — the depicted desktop's kernel (Ubuntu 24.04 HWE 7.0, 9.10 D48) is built with sched_ext for amd64; the runner's 6.17.0-1022-azure kernel exposes it too (`/sys/kernel/sched_ext` state `disabled`, 9.11 D2). Source configuration, not an observation of a booted desktop.
 
 ## 3. Not found
 
