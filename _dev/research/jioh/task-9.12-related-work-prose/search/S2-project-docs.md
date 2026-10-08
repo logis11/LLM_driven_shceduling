@@ -54,6 +54,7 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
 | 44 | 2026-10-08 | lpc.events (stage 3) | `/export/timetable/18.json`; `/event/18/contributions/1694/` and its attachment `sched_ext status and plans.pdf` | 200 → S2-48 | — |
 | 45 | 2026-10-08 | api.steampowered.com; gitlab.steamos.cloud (stage 3) | `ISteamNews/GetNewsForApp/v2/?appid=1675200&count=300&maxlength=0`; `git clone https://gitlab.steamos.cloud/holo/steamos-manager` | 200; clone at `302d37b9` → S2-49 | — |
 | 46 | 2026-10-08 | steamdeck-images.steamos.cloud (stage 3) | `/recovery/steamdeck-repair-latest.img.bz2` → `steamdeck-oobe-repair-20260707.10-3.8.14.img.bz2`; checksum files `.sha256`, `.sha512`, `.md5`, `.sig` | 200 → S2-50 | checksum files 404 |
+| 47 | 2026-10-08 | man7.org (stage 3) | `/linux/man-pages/man7/sched.7.html`; `/linux/man-pages/man2/sched_setattr.2.html` | 200 → S2-51 | — |
 
 ## 2. Candidates
 
@@ -536,6 +537,14 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
   - `etc/default/scx`: `# List of scx_schedulers: scx_beerland scx_bpfland scx_chaos scx_cosmos scx_flash scx_lavd scx_p2dq scx_rustland scx_rusty scx_tickless` / `SCX_SCHEDULER=scx_lavd`.
   - No `scx*` link in any `*.wants` directory under the root's `etc/systemd` or `usr/lib/systemd`, nor under var-A (whose `lib/overlays/etc` carries the `/etc` overlay). Presets: `99-default.preset` is `disable *`; `90-systemd.preset` names only systemd's own units; no preset line names `scx`.
 - Coverage: T2 (deployment), observed on Valve's published image: SteamOS 3.8.14 ships `scx_lavd` (scx-scheds 1.1.1) and configures it as the scheduler `scx.service` would run, and the service is not enabled out of the box — the kernel's default scheduler runs until the user selects LAVD (`steamosctl set-cpu-scheduler lavd`, which starts the service, S2-49). Whether the image's kernel is built with sched_ext was not read (the service's condition requires `/sys/kernel/sched_ext`).
+
+### S2-51 — Linux man-pages 6.19: sched(7) on setting SCHED_DEADLINE; sched_setattr(2) (stage 3, 2026-10-08)
+
+- Copies (2026-10-08, `sources/S2-51/`): https://man7.org/linux/man-pages/man7/sched.7.html → `sched.7.html`, SHA-256 `3b52e0157557b7854f013eb13cee0ecdeacddc7f5f27c9e155dbbddc85786814` (byte-identical to S2-07); https://man7.org/linux/man-pages/man2/sched_setattr.2.html → `sched_setattr.2.html`, `0406c9faf4dfd9f666b1c9d32a52474c7bce1e9779922e5fd14a236511b4be94` (footer "Linux man-pages 6.19 2026-02-08").
+- Passages:
+  - sched(7), "SCHED_DEADLINE: Sporadic task model deadline scheduling": "Since Linux 3.14, Linux provides a deadline scheduling policy (SCHED_DEADLINE). This policy is currently implemented using GEDF (Global Earliest Deadline First) in conjunction with CBS (Constant Bandwidth Server). To set and fetch this policy and associated attributes, one must use the Linux-specific sched_setattr(2) and sched_getattr(2) system calls."
+  - sched_setattr(2), DESCRIPTION: "The sched_setattr() system call sets the scheduling policy and associated attributes for the thread whose ID is specified in pid." … "The real-time policies that may be specified in policy are: SCHED_FIFO a first-in, first-out policy; and SCHED_RR a round-robin policy. Linux also provides the following policy: SCHED_DEADLINE a deadline scheduling policy; see sched(7) for details."
+- Coverage: T7, T9 — SCHED_DEADLINE is set through `sched_setattr`, not `sched_setscheduler`; implemented as global EDF with CBS. Not an observation.
 
 ## 3. Not found
 
