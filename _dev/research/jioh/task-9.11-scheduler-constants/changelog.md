@@ -312,3 +312,13 @@ Items 7 and 8 have no recorded deviation; item 7's boost restart matches `simula
 Applied: `docs/harness/metrics.md` — §11 item 9 and §6.9, one sentence each: the simulator does not yet, owed, its owner's record.
 
 Hands to: **9.14** — the primitives reading §6.9's re-learning time and §11 item 9's same-algorithm entries run against a simulator with both fixed, or their readings stated as the current simulator's.
+
+## D23 — the same-granularity rule's note: the universal negative dropped (2026-10-08)
+
+By 인지오's decision, scope-card item 18, correcting D13's reading. `docs/recognition-vocabulary.md` §2 labels the rule this project's, then said "No shipped EDF has a residual round-robin slice to cite"; D13 let it stand because Linux's fair-server reservation is not a residual slice. The sentence is a universal negative (the kind D14 classes unverifiable), and the shipped EDF it would cover leaves other tasks to their own classes' slices: sched(7) (man-pages 6.19): SCHED_DEADLINE threads preempt "any thread scheduled under one of the other policies", whose slices remain — SCHED_RR's, 100 ms on the runner (`sched_rr_timeslice_ms`, `meas-ci:sched:2026-10-07`), and the fair class's base slice (D2). What a source does say: Liu and Layland's algorithms "are pre-emptive and priority driven ones. … Thus the specification of such algorithms amounts to the specification of the method of assigning priorities to tasks" (`liu-jacm73`, p. 48, the scan re-read 2026-10-08); the model has no quantum.
+
+- **Not taken:** a scoped Linux statement in its place, with a registry entry for `include/linux/sched/rt.h` (B) — a source for values the rule does not use.
+
+Applied: `docs/recognition-vocabulary.md` §2 — "Neither slice takes a value from a source: Liu and Layland's EDF is preemptive and priority-driven with no quantum (`liu-jacm73`), and no second source is introduced for LOTTERY."; `docs/references.md` `liu-jacm73` — the role covers the note, p. 48.
+
+Hands to: none.
