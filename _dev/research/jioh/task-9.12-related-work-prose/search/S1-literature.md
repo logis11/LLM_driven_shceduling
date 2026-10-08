@@ -62,6 +62,7 @@ Access date for every copy below: 2026-10-07. All copies saved under `sources/<i
 | 48 | 2026-10-07 | WebSearch | `Wessel Wright "Problems and prospects for intimate musical control of computers" latency 10 ms pdf` | arXiv 2010.01570 → S1-30 | — |
 | 49 | 2026-10-08 | arXiv API (stage 3) | `all:LAVD AND all:scheduler`; `all:"latency criticality" AND all:"virtual deadline"` | 0 results each | — |
 | 50 | 2026-10-08 | OpenAlex API (stage 3) | `search=LAVD scheduler` (68 works), `latency-criticality aware virtual deadline` (11 891), `sched_ext gaming scheduler` (4); first 15 of each read | no work describing LAVD by its authors | dblp: bot challenge, then 429 |
+| 51 | 2026-10-08 | arXiv API (stage 3) | eight queries, sorted by submission date, 100 results each: `all:"language model" AND all:workload AND all:recognition AND all:scheduler` (3); `all:LLM AND all:"process list"` (1); `all:LLM AND all:sched_ext` (1); `all:LLM AND all:"workload classification" AND all:"operating system"` (0); `all:"agentic OS"` (10); `all:LLM AND all:scheduler AND all:desktop` (3); `all:LLM AND all:"process names"` (5); `all:LLM AND all:"kernel scheduler"` (4) | 26 distinct works read by title; none measures an LLM's accuracy at recognizing workloads from a process list; AKTS has a v2 (2026-10-07) → S1-32 | — |
 
 ---
 
@@ -484,6 +485,15 @@ Access date for every copy below: 2026-10-07. All copies saved under `sources/<i
 - **One observation?** Position/design paper; the 7 ms is a measured figure attributed to their ref [2].
 
 ---
+
+### S1-32 — AKTS v2, arXiv:2609.12276v2 (T5; stage 3, 2026-10-08)
+
+- **Copies read.** https://arxiv.org/abs/2609.12276 (`sources/S1-32/akts-abs-arxivorg.html`, SHA-256 `9e67b8488acc459e79a1da3a01e277897307cc38f9bed915c578deeb671f86cf`; submission history: "[v1] Thu, 10 Sep 2026 23:10:25 UTC (14 KB) [v2] Wed, 7 Oct 2026 11:31:07 UTC (13 KB)"); https://arxiv.org/pdf/2609.12276v2 (`akts-2609.12276v2.pdf`, `dfc179fc2395b41a6f13e606ea033bb7e61a1272d82faa89e0f794a1dc3239fe`, 5 pages); v1 re-fetched byte-identical to S1-19 (`65451f32…`). Text by `pdftotext -layout` (poppler 26.10.0); v2 text SHA-256 `47b0bf46a7cd80bea5cfa9cb094ed6057dd63032b154c4df6c1034578b1dbc77`.
+- **Passages (v2).**
+  - §4.2: "Serving Qwen2.5-0.5B [12], the model class this design targets, on the A100 with single-digit output, median decision latency is 13.5 ms (n=30, temperature 0), fast enough for a coarse adaptation loop. Decision validity is another matter. Across three prompt formulations and two telemetry regimes, 16 of 48 decisions (33%) were not a valid index: the model returned "3" and, in one case, "0.3", not an integer. Nor does scale fix the underlying problem: with a stronger prompt, Qwen2.5 at 0.5B, 1.5B and 3B all emit valid indices, and all emit a constant one, answering identically for high-load and low-load telemetry (20/40 correct, i.e. chance; n=40 per model; p50 13.3–23.9 ms). Constraining decoding to {0, 1} [13] changes nothing, so the failure at these scales is the decision, not the output format."
+  - §5: "Switching here is oracle-driven, an upper bound on any online detector. An agent-driven arm must show a language model beats a bandit baseline."
+- **Against v1 (S1-19).** The abstract and introduction are shortened; §4.2's figures are unchanged; v1's "the models we tested do not yet route reliably on telemetry" (§5) is not in v2.
+- **Coverage.** T5: as S1-19, at v2. One host, one model family, n = 40 per model; not an observation of ours.
 
 ## 3. Not found
 
