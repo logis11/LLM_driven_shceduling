@@ -10,7 +10,7 @@
 # guard judges; every other condition gets `not_applicable`. `reads` names the
 # input the guard measures from. `grounding` is the argument behind the
 # threshold, required for every entry: an arithmetic identity, a structural
-# rule, a design value, or a stated assumption, each written as such
+# rule, or a design value, each written as such
 # (docs/harness/metrics.md §10 uses the same status for its floors). The lint (tools/harness/guards.py,
 # `lint_spec`) checks the ids against the code's registry, every grounding
 # non-empty, and `pairs` against dataset/timelines/coreset/c2-pairs.variant.yaml.
@@ -21,7 +21,7 @@
 #
 # Groundings, in one place:
 #
-# provenance_share — 0.5, stated assumption. The guard exists for the case the
+# provenance_share — 0.5, design. The guard exists for the case the
 #   research proposal §6.3 names: "a condition that scores well while 70% of its
 #   configurations were fallbacks did not demonstrate anything about recognition";
 #   its appendix B.3 says "most of its configurations were fallbacks". The
@@ -119,8 +119,8 @@ guards:
     direction: below
     applies_to: [oracle, random, whitelist, llm_vocab, llm_algo, llm_full]
     grounding: >
-      Stated assumption: "most of its configurations were fallbacks" (research
-      proposal §6.3, appendix B.3) read as a majority of the run's time,
+      Design: "most of its configurations were fallbacks" (research proposal
+      appendix B.3, restating §6.3) read as a majority of the run's time,
       by design; time-weighted fallback + held share below one half.
 
   - id: config_age

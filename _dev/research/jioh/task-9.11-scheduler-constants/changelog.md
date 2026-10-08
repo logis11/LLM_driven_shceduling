@@ -391,3 +391,17 @@ By 인지오's decision: D8's correction — the boot default is the values of t
 Applied: the five places above.
 
 Hands to: **9.14** — the gate spec's comment with the re-pin.
+
+## D29 — batch: labels in decision 1's words (2026-10-08)
+
+By 인지오's decision. Phase spec decision 1: "A value no source states carries no source tag and is labelled for what it is: convention, arithmetic, placeholder, or design." D13 left labels outside those four standing ("stated assumption", "stated rule, no source", "assumption, unbounded") and the config schema's ranges unlabelled where stated; each value so labelled is one the project chose, so each is design, its qualifier kept:
+
+- `docs/harness/metrics.md` §10: the latency floor (1 000 µs) and the fraction floor (0.01), "stated assumption" → design; the bootstrap seed and repetitions, "pinned, not estimated" → "design, pinned, not estimated"; "Floors are stated assumptions" → design values; the guard-threshold row's kinds — an identity, a structural rule, or a design value. §9's sensitivity sentence: the boot default's values are OSTEP's worked examples' for MLFQ and design for EDF and LOTTERY (they had been called stated assumptions), and the RQ0 gate spec's sweep is nine alternative boot defaults (it said two).
+- `docs/recognition-vocabulary.md` §2: EDF's and LOTTERY's slices, "stated rule, no source" → "design (the same-granularity rule)"; LOTTERY's `batch_share`, "assumption, unbounded" → "design, unbounded by any source"; the schema's ranges, "design, frozen with the schema on 2026-08-28; no source states them".
+- `harness/guards/guard-spec.yaml`: the grounding kinds; `provenance_share` 0.5, design — its quotation located in appendix B.3, which restates §6.3 (`docs/research-proposal.md:916`; §6.3, `:718`, says "70% of its configurations were fallbacks"); `harness/guards/README.md`'s kinds.
+
+The RQ0 gate spec's `executor-assumptions` keep their word: they await 인경민's reply (D26).
+
+Applied: the files above. `guards_lint.py` clean; `test_guards.py` passed.
+
+Hands to: **9.14** — the guard spec's changes with the re-pin.

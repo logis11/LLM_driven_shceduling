@@ -53,7 +53,7 @@ Ground-truth segments may carry additional descriptive keys used for grading spl
 
 ## 2. The `subsystems` block — `cpu_scheduler` config schema (frozen 2026-08-28)
 
-The configuration language of the CPU driver: what a scheduler configuration may say. This is the value space of the driver table, the field list the validator enforces, and the exact surface the simulator implements. (`cpu_scheduler` is the only subsystem key this project defines; a future consumer would add its own key with its own schema, without touching this one.)
+The configuration language of the CPU driver: what a scheduler configuration may say. This is the value space of the driver table, the field list the validator enforces, and the exact surface the simulator implements. (`cpu_scheduler` is the only subsystem key this project defines; a future consumer would add its own key with its own schema, without touching this one.) Every range below is design, frozen with the schema on 2026-08-28; no source states them.
 
 ### Envelope
 
@@ -111,9 +111,9 @@ The seven default values above are the **boot default configuration** and the `f
 | MLFQ `timeslice_us` | 10000 | `ostep` §8.2, Example 1: "with a time slice of 10 ms (and with the allotment set equal to the time slice)". | OSTEP's example |
 | MLFQ `timeslice_growth` | 2 | `ostep` §8.5, Fig. 8.6 ("Lower Priority, Longer Quanta"): 10 ms, 20 ms, 40 ms per level. | OSTEP's example |
 | MLFQ `boost_interval_us` | 100000 | `ostep` §8.3, Fig. 8.4: "a priority boost every 100 ms (which is likely too small of a value, but used here for the example)"; OSTEP names S a voo-doo constant after Ousterhout. | OSTEP's example; the caveat is OSTEP's own |
-| EDF `residual_timeslice_us` | 10000 | Equal to MLFQ `timeslice_us` by the same-granularity rule. | stated rule, no source |
-| LOTTERY `batch_share` | 0.15 | No source names a batch-class share. `waldspurger-osdi94` defines shares as proportional to tickets and gives no ratio between classes. | assumption, unbounded |
-| LOTTERY `timeslice_us` | 10000 | Equal to MLFQ `timeslice_us` by the same-granularity rule. | stated rule, no source |
+| EDF `residual_timeslice_us` | 10000 | Equal to MLFQ `timeslice_us` by the same-granularity rule. | design (the same-granularity rule) |
+| LOTTERY `batch_share` | 0.15 | No source names a batch-class share. `waldspurger-osdi94` defines shares as proportional to tickets and gives no ratio between classes. | design, unbounded by any source |
+| LOTTERY `timeslice_us` | 10000 | Equal to MLFQ `timeslice_us` by the same-granularity rule. | design (the same-granularity rule) |
 
 **Allotment.** OSTEP's Rule 4 demotes a job once it "uses up its time allotment at a given level". Example 1 sets the allotment equal to the slice; Figure 8.6 gives the top two levels two slices each. This schema has no allotment field and demotes on one fully consumed slice, so the boot default is OSTEP's slice ladder and boost with the allotment equal to the slice, as in Example 1. That matches Example 1 and departs from Figure 8.6.
 

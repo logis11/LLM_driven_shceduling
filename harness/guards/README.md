@@ -19,7 +19,7 @@ Two files live here. `guard-spec.yaml` is the list of guards with their threshol
 | `validation_matches_provenance` | the log's `validation` sequence not equal, entry by entry, to the schedule's `provenance` sequence after the boot entry |
 | `c2_pair` | the two files of a C2 pair producing identical trace bodies under a recognition-driven condition, or different ones under `fixed`; identical under `oracle` means the configuration never changed between wanted and unwanted |
 
-Each threshold's grounding is written in the spec's header: an arithmetic identity, a structural rule, a design value, or a stated assumption, each marked as such.
+Each threshold's grounding is written in the spec's header: an arithmetic identity, a structural rule, or a design value, each marked as such.
 
 ## The guards file
 
