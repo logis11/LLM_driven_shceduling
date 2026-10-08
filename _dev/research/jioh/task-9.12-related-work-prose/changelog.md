@@ -367,3 +367,19 @@ By 인지오's decision, scope-card items 13 and 15 (its first two clauses; the 
 Hands to 9.15: `docs/related-work.md:32` cited to v4 as above, `:34` restated; the guidebook vol-02 ch. 6.2 checked against the same passages (item 60).
 
 Compiled effect: none.
+
+## D24 — the adjacent LLM efforts: TuneAgent tunes the kernel's build configuration, cited as KDD '26 by its DOI; Jadhav et al. kept as a preprint (2026-10-08)
+
+By 인지오's decision, scope-card items 14, 50 and 51 (and the `tuneagent`, `hpc-llm` keys of item 20): `docs/related-work.md:32`'s "Adjacent efforts tune kernel parameters [tuneagent] and schedule HPC jobs [hpc-llm] with LLMs in the loop" becomes "Adjacent efforts tune the kernel's build configuration [tuneagent] and schedule HPC jobs [hpc-llm] with LLMs in the loop".
+
+- **TuneAgent** (S1-14, S1-35): v1, "OS-R1", abstracts "the kernel configuration space as an RL environment"; v2, "TuneAgent formulates the kernel space as a constrained RL environment, enabling large language models (LLMs) to autonomously explore the kernel while enforcing valid and precise configuration modifications"; Qwen2.5 3B and 7B, evaluated on UnixBench. Venue: Crossref resolves DOI 10.1145/3770855.3817987 to *Proceedings of the 32nd ACM SIGKDD Conference on Knowledge Discovery and Data Mining V.2*, published 2026-08-08 (KDD '26), authors Lin, Li, Luo, Lin, Zhang, Xing, Wu.
+- **Jadhav et al.** (`jadhav-arxiv25`; S1-15, S1-35): a ReAct-style LLM scheduler for HPC job queues, o4-mini and Claude 3.7 on "seven real-world HPC workload scenarios"; arXiv 2506.02025 v2 (2025-09-03), "work under review", no later version.
+- **The alternate candidate leaves** `jadhav-arxiv25`'s role line: arXiv 2511.11612 (Sharma & Kunkel; S1-16) is a one-shot task-to-node mapping over 21 models, journal-ref *Robot Autom Eng J.*
+
+Hands to 9.15:
+
+- `docs/related-work.md:32` as above, its keys resolved.
+- `docs/references.md`: `tuneagent-arxiv25` re-minted under the id-minting rule as a scholarly entry for the KDD '26 paper — `tuneagent-kdd26` — cited by its DOI, the arXiv versions named (v1 "OS-R1", v2 "TuneAgent"), status verified (S1-35's Crossref record), "to-pin" retired; `jadhav-arxiv25` — status re-checked 2026-10-08 (still v2, under review), the "(Alternate candidate …)" sentence removed.
+- The guidebook vol-02 ch. 6.4 checked against the same passages (item 60).
+
+Compiled effect: none.
