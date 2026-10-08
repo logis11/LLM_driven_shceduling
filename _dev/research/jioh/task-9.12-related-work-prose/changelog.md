@@ -571,3 +571,15 @@ Taken under 인지오's delegation (2026-10-09), scope-card item 40: `docs/resea
 Hands to 9.15: `docs/research-proposal.md:824` restated as above; `:414`'s EDF row read with it (D35).
 
 Compiled effect: none.
+
+## D38 — the "70 % fallbacks" example stated through the guard that judges it (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), scope-card item 41: `docs/research-proposal.md:718`'s "A condition that scores well while 70% of its configurations were fallbacks did not demonstrate anything about recognition; it demonstrated that MLFQ is fine" is an example with no source, and the project has since fixed the line it illustrates.
+
+- **The line, as designed** (`harness/guards/guard-spec.yaml:115–124`; 9.11 D10): `provenance_share`, the time-weighted share of `fallback` and `held` configuration intervals, below 0.5 under every condition but `fixed`; design, reading appendix B.3's "most of its configurations were fallbacks" (`:916`) as a majority of the run's time. A failing guard on a run the RQ0 criterion reads makes the verdict invalid (D30).
+- **What a fallback is** (`docs/data-contracts.md` §6): "the default, from boot or after repeated failures" — the boot default configuration, plain MLFQ (`docs/recognition-vocabulary.md` §2), so "it demonstrated that MLFQ is fine" holds of a fallback-heavy run.
+- **Restated:** a condition whose run spent half or more of its time under fallback or held configurations fails the `provenance_share` guard — it demonstrated nothing about recognition, only that the boot default is fine. "70%" leaves, or stays marked as an example above the guard's line.
+
+Hands to 9.15: `docs/research-proposal.md:718`, and `:916` (B.3) with it, stated as above.
+
+Compiled effect: none.
