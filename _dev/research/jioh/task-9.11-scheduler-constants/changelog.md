@@ -379,3 +379,15 @@ By 인지오's decision, the audit's routine corrections to wording 9.11 wrote o
 Applied: `docs/harness/metrics.md` §6.2, §8, §10, §11; `docs/references.md` `chicco-bmcg20`; `harness/tools/tests/fixtures/README.md`; `harness/tools/tests/fixtures/mock-guards/worked.md`.
 
 Hands to: none.
+
+## D28 — batch: the stale OSTEP and 0.75 ms wording in 9.11's own files (2026-10-08)
+
+By 인지오's decision: D8's correction — the boot default is the values of three worked examples of OSTEP's chapter 8 (Example 1, p. 4; Figure 8.6, p. 9; Figure 8.4, pp. 6–7), not one example whole — and D2's 700 µs point reached the lead sentence, the `num_queues` row, the RQ0 gate spec's primary reason and the `ostep` entry, but not these:
+
+- `docs/recognition-vocabulary.md` §2, the sensitivity paragraph: "the floor is one example's values" and the sweep's "0.75" ms — now the values of one chapter's worked examples, and 0.7 ms (`harness/boot-defaults/ostep-slice-700us.json`).
+- §2, the allotment paragraph: "That is the one point where this model and the example differ" — the boot default's allotment equals the slice as in Example 1 and departs from Figure 8.6, which gives the top two levels two slices each.
+- `harness/experiments/rq0-gate.yaml`'s comment on the primary; `harness/boot-defaults/README.md`'s `ostep.json` line ("OSTEP §8's worked MLFQ example whole"); `docs/references.md` `illumos-ts`'s role ("OSTEP's example whole").
+
+Applied: the five places above.
+
+Hands to: **9.14** — the gate spec's comment with the re-pin.

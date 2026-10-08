@@ -17,7 +17,8 @@ conditions: [fixed, random, oracle]
 # N — statement `n-grounding`
 seed_count: 100
 
-# The primary is OSTEP §8's example (recognition-vocabulary §2, 2026-09-11). Each
+# The primary is the values OSTEP chapter 8's worked examples use
+# (recognition-vocabulary §2, 2026-09-11). Each
 # alternative is the same configuration with only the top slice changed; the
 # reason for each point is on the sensitivity line below (statement `boot-default-sweep`).
 boot_defaults:
