@@ -210,3 +210,22 @@ Hands to 9.15:
 - The guidebook: vol-02 `:2088` ("인식 자체를 따로 재는 평가는 그쪽에 대응물이 없다", said of the LLM line) restated — AKTS measures LLM recognition on telemetry and SchedCP reports an 8-of-8 outcome; `:2092`, `:2180`, `:2465` already agree with D12 and stay.
 
 Compiled effect: none.
+
+## D13 — the "Cooperation" limit restated: who declares, how many do, in which direction, and which background tools (2026-10-08)
+
+By 인지오's decision, scope-card item 26 (with 9.6 D17's and 9.11 D33's hand-offs), after a stage-3 recount (S3-20): `docs/research-proposal.md:158`'s "Linux scheduling classes and macOS QoS require the application to declare its own nature. Most applications never do. Those that do tend to claim they are the most important thing on the system. `updatedb` does not volunteer that it is background work." is restated to the sources.
+
+- **Who declares.** On Linux a program's policy, nice value and I/O class are set by the program itself (LocalSearch's `tracker-main.c`, Baloo's `priority.cpp`; S3-02), by its installed unit (plocate's, findutils'; S3-02), or by a wrapper (Déjà Dup's `chrt --idle 0 ionice -c3`; 9.11 S2-27); on macOS the developer declares a QoS class in code (S2-21).
+- **How many, in units** (S3-20, Debian unstable `main`, 2026-10-08): of 1 438 source packages that install a systemd service unit, 56 (3.9 %) carry `Nice=`, `IOSchedulingClass=` or `CPUSchedulingPolicy=` in an installed unit — a floor, since a class set in code or by a wrapper is not counted.
+- **In which direction.** 40 of the 56 only lower their priority, 16 only raise it, none both; of the 49 `Nice=` values in installed units, 33 lower priority (25 at nice 19) and 16 raise it (S3-20). "Those that do tend to claim they are the most important thing on the system" leaves: contradicted by the count, and no documented case of over-claiming was found (S2-29).
+- **Which background tools.** `updatedb` declares itself background work: plocate's unit sets `Nice=19` and `IOSchedulingClass=idle`, findutils' `locate.service` the same with `IOSchedulingPriority=7` (S3-02). LocalSearch (Tracker) and Baloo set background classes on themselves; Déjà Dup wraps its scheduled backup in `chrt --idle 0`; ClamAV's units, borg and restic declare nothing; borgmatic's sample unit runs `SCHED_BATCH` at nice 19 (9.11 D4, D33; S2-22 to S2-27 of 9.11). On Ubuntu 24.04 Tracker's own unit also places it in `background.slice`, weighted 30 against `app.slice`'s 100, while Déjà Dup's backup runs in `app.slice` beside the editor (9.11 D16).
+- **The limit the bullet can claim** rests on these facts: declaration is partial — present for some background tools and absent for others — and fixed per program by its author or packager.
+- **S3-01's denominator** (1 593) counted the grouped search view's headers, not packages (S3-20); its percentages are not used.
+
+Hands to 9.15:
+
+- `docs/research-proposal.md:158` and `docs/background-guide.md:18` ("they rarely do, and when they do declare something, everyone claims to be important") restated as above.
+- `docs/references.md`: the Debian count's sources — Debian unstable's `Contents` and `Packages` indexes of 2026-10-08 and Debian Code Search — entered under the id-minting rule, with S3-20's hashes; plocate's and findutils' units (S3-02) where the prose names them.
+- The guidebook lines saying the same: vol-01 and vol-03 wherever "목록" / "선언" passages state that applications rarely declare or over-claim — found by `grep -n -E '선언|declare' docs/guidebook/*.md` at 9.15.
+
+Compiled effect: none.
