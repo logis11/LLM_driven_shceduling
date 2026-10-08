@@ -56,3 +56,18 @@ Hands to 9.15:
 - `docs/references.md`: a deployed-system entry for CachyOS's default installation of ananicy-cpp — the `cachyos-settings` package (PKGBUILD and install hook at CachyOS-PKGBUILDS `03924f78`, version 1.4.1), the installer's base package list (cachyos-calamares `5f098957`), and the 2026-08-09 ISO observation (S2-46) in its status line; `ananicy-rules` — the catalogue packaged as `cachyos-ananicy-rules` 1.1.49 = `03ef03fb`, and the growth counts with their commits; `ananicy` — the version pinned (ananicy-cpp 1.2.0 as shipped, S2-46; upstream commit `3554447c` read, S2-31) and upstream Ananicy's archived state.
 
 Compiled effect: none.
+
+## D4 — the proposal's Feral GameMode row: the game requests the mode, or the user launches it under `gamemoderun`; the whitelist is a filter (2026-10-08)
+
+By 인지오's decision, scope-card item 25: `docs/research-proposal.md:150`'s row "Linux | Feral GameMode daemon | Explicit opt-in list, or game calls the API itself" is restated to Feral's repository (S2-19, FeralInteractive/gamemode `a74b8106a2236d1f2696aa44c93bc4c8ef13b42e`, 2026-06-15, version 1.8.2), and Feral GameMode is cited from a new registry entry.
+
+- **How a game enters** (`README.md:2`, `:23–28`; `data/gamemoded.8.in:49–56`): GameMode "allows games to request a set of optimisations be temporarily applied to the host OS and/or a game process"; "For games/launchers which integrate GameMode support, simply running the game will automatically activate GameMode. For others, you must manually request GameMode when running the game. This can be done by launching the game through `gamemoderun`"; the library call is `gamemode_request_start()`.
+- **The whitelist** (`example/gamemode.ini:49–55`): "If "whitelist" entry has a value(s) gamemode will reject anything not in the whitelist" — a user-set filter on requesters, commented out in the example config. It opts no program in; "Explicit opt-in list" leaves.
+- Item 18 (`docs/related-work.md:44`'s note) needs no decision of its own: D1–D3 answer it, and D2 hands `:44` to 9.15.
+
+Hands to 9.15:
+
+- `docs/research-proposal.md:150` restated: the game requests the mode through the library or an integrating launcher, or the user launches it under `gamemoderun`; an optional user-set whitelist restricts which requesters are accepted. The guidebook's copy of the row, vol-03 `:58` ("명시적 참여 목록, 또는 게임이 직접 API를 호출"), the same.
+- `docs/references.md`: a deployed-system entry for Feral GameMode, pinned to commit `a74b8106` (version 1.8.2), with S2-19's copies of `README.md`, `data/gamemoded.8.in` and `example/gamemode.ini` and their SHA-256.
+
+Compiled effect: none.
