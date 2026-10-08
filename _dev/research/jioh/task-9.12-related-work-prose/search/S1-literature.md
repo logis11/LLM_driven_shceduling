@@ -60,6 +60,8 @@ Access date for every copy below: 2026-10-07. All copies saved under `sources/<i
 | 46 | 2026-10-07 | WebSearch | `peer-reviewed study PC video game play session length telemetry average session duration minutes` | Nielsen 2009 industry report, Fraunhofer Steam paper abstract, Statista (paywalled), arXiv 1707.00863 (Flappy Bird, mobile) — none gives a PC session-length measurement I could read in full; not used | Statista: paywalled |
 | 47 | 2026-10-07 | arXiv API | `abs:"audio latency" AND abs:"buffer size"` | 0 | — |
 | 48 | 2026-10-07 | WebSearch | `Wessel Wright "Problems and prospects for intimate musical control of computers" latency 10 ms pdf` | arXiv 2010.01570 → S1-30 | — |
+| 49 | 2026-10-08 | arXiv API (stage 3) | `all:LAVD AND all:scheduler`; `all:"latency criticality" AND all:"virtual deadline"` | 0 results each | — |
+| 50 | 2026-10-08 | OpenAlex API (stage 3) | `search=LAVD scheduler` (68 works), `latency-criticality aware virtual deadline` (11 891), `sched_ext gaming scheduler` (4); first 15 of each read | no work describing LAVD by its authors | dblp: bot challenge, then 429 |
 
 ---
 
@@ -486,6 +488,7 @@ Access date for every copy below: 2026-10-07. All copies saved under `sources/<i
 ## 3. Not found
 
 - **T1 (ghOSt) — none missing.** (sched_ext docs / scx repo are S2.)
+- **T2 — a peer-reviewed paper or archived preprint describing LAVD** (stage 3, 2026-10-08; searches #49, #50; responses in `sources/S1-31/`, SHA-256 `cf05addc…` and `347efa1d…` for the two arXiv queries, `d78f0b60…`, `9cc9257b…`, `6b052ab7…` for the three OpenAlex queries). None found: arXiv returns no result for either query; OpenAlex's hits are unrelated works or later papers that use scx_lavd ("SchedAgent", 2026; "Rethinking Provenance Completeness with a Learning-Based Linux Scheduler", arXiv 2025). LAVD's own descriptions are its talks (S2-10, S2-11), LWN's reports of them (S2-12, S2-13) and its source and README (S2-09).
 - **T3 — Linux's default class description in literature.** OSTEP chapters read (S1-02, S1-03) contain no description of Linux's scheduler (`grep -c Linux` = 0 in ch. 8). The kernel's `sched-eevdf.rst` / `sched-design-CFS.rst` are S2. No literature source in this search states whether Linux's default class is MLFQ or proportional share.
 - **T4 — any statement in Decima/FIRM/Park about retraining for new hardware specifically.** Decima speaks of workloads and cluster size (S1-06), FIRM of "underlying systems and workloads" (S1-07), Park of operating environments/simulation-reality (S1-08); no hardware-specific retraining statement found by full-text search for "retrain", "hardware", "generaliz".
 - **T5 — the eBPF '24 Kgent paper body.** ACM DL 403 (searches #12); read only the authors' repository abstract and arXiv predecessor KEN.
