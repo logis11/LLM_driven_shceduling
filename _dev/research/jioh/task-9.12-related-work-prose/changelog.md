@@ -333,3 +333,16 @@ By 인지오's decision, scope-card item 9: `docs/related-work.md:24`'s "limits 
 Hands to 9.15: `docs/related-work.md:24` restated as above; the guidebook vol-02 ch. 5 checked against the same passages (item 60).
 
 Compiled effect: none.
+
+## D21 — the ASA sentences: a recognizer trained once over behavioural metrics, a per-machine measurement pass for the mapping table; "training per deployment context" leaves (2026-10-08)
+
+By 인지오's decision, scope-card items 10 and 11: `docs/related-work.md:24`'s "ASA recognizes workload patterns online — via time-weighted voting over behavioral signals — and routes to expert scheduling policies atop sched_ext [asa]" and `:26`'s "ASA's recognizer, like the RL line, reads behavioral features and requires offline training per deployment context; ours reads process identity against world knowledge that requires no training on the target machine" are restated to the paper (`asa-arxiv25`; S1-11, arXiv 2511.11628v1).
+
+- **What ASA does** (Abstract, p. 1): "an offline process trains a universal, hardware-agnostic machine learning model to recognize abstract workload patterns from system behaviors. Second, at runtime, ASA continually processes the model's predictions using a time-weighted probability voting algorithm to identify the workload, then makes a scheduling decision by consulting a pre-configured, machine-specific mapping table to switch to the optimal scheduler via Linux's sched_ext framework." The classifier is an XGBoost-led ensemble (§3.3, p. 4).
+- **What it reads** (Table 1, p. 4): CPU, memory, disk, process, scheduling and network metrics, among them the window-focused process's CPU and memory and input events; no process identity.
+- **What each new machine needs** (§4.4, p. 7): "By exclusively running the "Generalization Model Training" (Stage 3) on the target machine, ASA can interact directly with the new environment and its available schedulers, resulting in the creation of a precise, hardware-specific scheduler mapping table ready for immediate use. The entire process can then be followed by an optional, low-overhead fine-tuning process" — a measurement pass, not a retraining of the recognizer.
+- **Restated:** item 10 — ASA classifies the workload from OS metrics with a model trained once offline, smooths its predictions by time-weighted voting, and switches among expert sched_ext schedulers through a per-machine mapping table. Item 11 — its recognizer reads behavioural metrics with no process identity; each new machine needs a measurement pass that builds the mapping table, with optional fine-tuning; "requires offline training per deployment context" leaves. "Ours … requires no training on the target machine" stays, scoped to the recognizer.
+
+Hands to 9.15: `docs/related-work.md:24`'s last sentence and `:26` restated as above; the guidebook vol-02 ch. 5.6 (`:2110`, `:2148`, `:2177–2180` already agree) checked against the same passages (item 60).
+
+Compiled effect: none.
