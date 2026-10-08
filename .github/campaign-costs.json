@@ -1,0 +1,6 @@
+{
+  "kernel": [1, 2],
+  "llm": [1],
+  "mode": "dry",
+  "cpu_model": ""
+}
