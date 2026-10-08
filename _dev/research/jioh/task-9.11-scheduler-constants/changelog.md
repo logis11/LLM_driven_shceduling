@@ -405,3 +405,11 @@ The RQ0 gate spec's `executor-assumptions` keep their word: they await 인경민
 Applied: the files above. `guards_lint.py` clean; `test_guards.py` passed.
 
 Hands to: **9.14** — the guard spec's changes with the re-pin.
+
+## D30 — batch: the two docs' own changelogs (2026-10-08)
+
+By 인지오's decision. `docs/harness/metrics.md` §13 says "Every change to a primitive, an aggregate, a constant, or a floor lands here" and logged a grounding-only change before (8.1's latency floor); `docs/recognition-vocabulary.md` §5 logs §2's wording changes (2026-09-12, 2026-10-06). D1 recorded "Not added to §13", and D8, D9, D11, D13, D19, D22–D24 and D27–D29 changed the two docs without an entry.
+
+Applied: one dated entry in each — metrics §13, "scheduler-side constants and groundings (jioh 9.11)"; vocabulary §5, "scheduler-side groundings (jioh 9.11)".
+
+Hands to: none.
