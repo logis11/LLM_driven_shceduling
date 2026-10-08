@@ -173,7 +173,7 @@ One row per tick inside the window whose completion is also inside it. Entity = 
 
 ### 6.9 `switch_window`
 
-*How long, after a switch into MLFQ, the scheduler was re-learning who is batch.* From the 2026-09-08 memo on algorithm-switch semantics (`../memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md` §4): a cold start into MLFQ puts every task in the top queue, the state MLFQ's own boost produces, so a switch is one extra boost and is measured in those units.
+*How long, after a switch into MLFQ, the scheduler was re-learning who is batch.* From the 2026-09-08 memo on algorithm-switch semantics (`../memos/2026-09-08-algorithm-switch-semantics-for-the-simulator.md` §4): a cold start into MLFQ puts every task in the top queue, the state MLFQ's own boost produces, so a switch is one extra boost and is measured in those units. The simulator does not yet: `Mlfq::start()` keeps each task's level, so a switch MLFQ → FIFO → MLFQ resumes the old levels — owed, its owner's record (`../../simulator/memo/memo_261001.md` §5.2, from reading the code).
 
 One row per `config_applied` line inside the window whose algorithm differs from the previous applied entry's; the boot entry has no predecessor and never produces a row, and an entry that changes only params or the cap is not a switch (it applies at its stamped time with queue levels kept, §11 item 9). Entity `schedule`, `t` = the applied time (`t_apply`), with `algorithm` (incoming), `index`, and `hogs` on the row.
 
@@ -308,7 +308,7 @@ The definitions above, and the mock traces that test them, assume the following 
 6. The simulator keeps emitting `deadline` lines as the contract says; the harness uses them only as the §6.2 cross-check.
 7. **The boost timer restarts at `t_apply`** after a switch into MLFQ, so the boost grid of §8 is `t_apply + k · boost_interval_us`. Confirmed with 인경민 on 2026-09-09 (memo §5, §7).
 8. A switch out of FIFO applies immediately and the running task is treated as freshly dispatched by the incoming algorithm (the memo's rule (a)); a switch out of any other algorithm applies at the running task's slice boundary (the drain). Confirmed with 인경민 on 2026-09-09. The primitives read the applied instant off the trace either way.
-9. **An entry with the same algorithm is not a switch.** It applies at its stamped time, no drain, queue levels kept; the running task finishes the slice it was granted and the new params govern from its next dispatch; the cap takes effect at once. Confirmed with 인경민 on 2026-09-09 (memo §7).
+9. **An entry with the same algorithm is not a switch.** It applies at its stamped time, no drain, queue levels kept; the running task finishes the slice it was granted and the new params govern from its next dispatch; the cap takes effect at once. Confirmed with 인경민 on 2026-09-09 (memo §7). The simulator does not yet: `on_config_apply` re-arms the running task with the incoming params' slice at once — owed, its owner's record (memo_261001 §5.3, from reading the code).
 
 ---
 

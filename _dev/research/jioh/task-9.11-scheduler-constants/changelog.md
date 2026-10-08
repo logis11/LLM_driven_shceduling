@@ -297,3 +297,18 @@ By 인지오's decision, scope-card item 38, on D6's hand-off to 9.14: `c2-p2a` 
 Applied: this changelog.
 
 Hands to: **9.13** — the `game-download` variant (its tables, class `idle`) and the `c2-p2a` variant binding it, outside the judging set; **9.14** — the bounding check pre-registered in the RQ0 gate spec on `c2-p2a` and its variant, the verdict under each reported and the difference stated as the reach of D6's limitation (D20's numbers).
+
+## D22 — metrics §11 item 9 and §6.9 given the simulator's state (2026-10-08)
+
+By 인지오's decision, scope-card item 10, completing D11: §11's lead says "The simulator's state is its owner's record (`simulator/src/notes.md` §4, `simulator/memo/memo_261001.md`)", and D11 stated that state for items 1–4 only. 인경민's status memo files two deviations under "Open gaps the docs already answer — implementation owed by the simulator", both marked inferred from reading the code:
+
+- §5.3, against §11 item 9 ("the running task finishes the slice it was granted and the new params govern from its next dispatch"): "`on_config_apply` re-arms the holder with the incoming policy's horizon"; a smaller new MLFQ `timeslice_us` can schedule a lane event in the past and trip `assert(e.t >= now_)`.
+- §5.2, against §6.9's premise ("a cold start into MLFQ puts every task in the top queue", from the switch memo §4): "`Mlfq::start()` keeps the per-task levels (`st`), so MLFQ→FIFO→MLFQ resumes the old levels."
+
+Items 7 and 8 have no recorded deviation; item 7's boost restart matches `simulator/src/sim.cpp:194–197`.
+
+- **Not taken:** narrowing §11's lead to items 1–4 (B).
+
+Applied: `docs/harness/metrics.md` — §11 item 9 and §6.9, one sentence each: the simulator does not yet, owed, its owner's record.
+
+Hands to: **9.14** — the primitives reading §6.9's re-learning time and §11 item 9's same-algorithm entries run against a simulator with both fixed, or their readings stated as the current simulator's.
