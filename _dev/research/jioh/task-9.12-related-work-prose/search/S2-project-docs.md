@@ -56,6 +56,7 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
 | 46 | 2026-10-08 | steamdeck-images.steamos.cloud (stage 3) | `/recovery/steamdeck-repair-latest.img.bz2` → `steamdeck-oobe-repair-20260707.10-3.8.14.img.bz2`; checksum files `.sha256`, `.sha512`, `.md5`, `.sig` | 200 → S2-50 | checksum files 404 |
 | 47 | 2026-10-08 | man7.org (stage 3) | `/linux/man-pages/man7/sched.7.html`; `/linux/man-pages/man2/sched_setattr.2.html` | 200 → S2-51 | — |
 | 48 | 2026-10-08 | local copy (stage 3) | 9.11's `sources/D2-ubuntu-hwe-7.0/linux-hwe-7.0_7.0.0-34.34~24.04.1.diff.gz` (archive.ubuntu.com, read by 9.11 D2) | `debian.master/config/annotations` → S2-52 | — |
+| 49 | 2026-10-08 | developer.apple.com (stage 3) | `/tutorials/data/documentation/foundation/qualityofservice.json`; `/tutorials/data/documentation/dispatch/dispatchqos/qosclass.json` | 200 → S2-53 | the Dispatch page 404 |
 
 ## 2. Candidates
 
@@ -552,6 +553,12 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
 - Copy: 9.11's copy of the Ubuntu source diff `linux-hwe-7.0_7.0.0-34.34~24.04.1.diff.gz` (archive.ubuntu.com, read and hashed by 9.11 D2), SHA-256 `81b9d83f6863ea9d41bde191923134fe6bf4261bfcf94a376b85c094fafd6c32`, at `_dev/research/jioh/task-9.11-scheduler-constants/sources/D2-ubuntu-hwe-7.0/`.
 - Passages (the diff's added `linux-hwe-7.0-7.0.0/debian.master/config/annotations`; `debian.hwe-7.0/config/annotations` does not set the option): `CONFIG_SCHED_CLASS_EXT policy<{'amd64': 'y', 'arm64': 'y', 'ppc64el': 'y', 'riscv64': 'y', 's390x': 'y'}>`; its dependencies `CONFIG_BPF_JIT policy<{'amd64': 'y', …}>` and `CONFIG_DEBUG_INFO_BTF policy<{'amd64': 'y', …}>` (S2-47: `SCHED_CLASS_EXT` "depends on BPF_SYSCALL && BPF_JIT && DEBUG_INFO_BTF").
 - Coverage: T1 — the depicted desktop's kernel (Ubuntu 24.04 HWE 7.0, 9.10 D48) is built with sched_ext for amd64; the runner's 6.17.0-1022-azure kernel exposes it too (`/sys/kernel/sched_ext` state `disabled`, 9.11 D2). Source configuration, not an observation of a booted desktop.
+
+### S2-53 — Apple Developer documentation, Foundation `QualityOfService` (stage 3, 2026-10-08)
+
+- Copy: https://developer.apple.com/tutorials/data/documentation/foundation/qualityofservice.json (the data behind developer.apple.com/documentation/foundation/qualityofservice) · 2026-10-08 · `sources/S2-53/qualityofservice.json` · SHA-256 `fcc979e02d151be8bd6427e1955c1911ade2be6a3fcc0a4547dbbc0039c148f2`.
+- Passages: title `QualityOfService`; abstract "Constants that indicate the nature and importance of work to the system."; overview "Work with higher quality of service classes receive more resources than work with lower quality of service classes whenever there's resource contention."; cases `userInteractive`, `userInitiated`, `utility`, `background`, `default`; platforms iOS 8.0, iPadOS 8.0, Mac Catalyst 13.1, macOS 10.10, tvOS 9.0.
+- Coverage: T7 — the current API's QoS classes and what they do, on a maintained page, beside S2-21's archived guide (2016). Not an observation.
 
 ## 3. Not found
 
