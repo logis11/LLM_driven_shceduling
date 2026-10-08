@@ -346,3 +346,13 @@ By 인지오's decision, scope-card items 10 and 11: `docs/related-work.md:24`'s
 Hands to 9.15: `docs/related-work.md:24`'s last sentence and `:26` restated as above; the guidebook vol-02 ch. 5.6 (`:2110`, `:2148`, `:2177–2180` already agree) checked against the same passages (item 60).
 
 Compiled effect: none.
+
+## D22 — Kgent's sentence kept; `kgent-ebpf24` read in full from its open-access copy (2026-10-08)
+
+By 인지오's decision, scope-card items 12 and 54: `docs/related-work.md:32`'s "Kgent synthesizes kernel extensions from natural language [kgent]" stands; the registry's open point closes.
+
+- **Grounds** (S1-33; the eBPF '24 paper, DOI 10.1145/3672197.3673434, read from UC Santa Cruz's eScholarship copy, https://escholarship.org/content/qt3jg1f0jr/qt3jg1f0jr.pdf, CC BY 4.0, SHA-256 `1292f750…`): "This paper presents Kgent, an alternative framework that alleviates the difficulty of writing an eBPF program by allowing Kernel Extensions to be written in Natural language. Kgent uses recent advances in large language models (LLMs) to synthesize an eBPF program given a user's English language prompt." (Abstract, p. 1).
+
+Hands to 9.15: `docs/references.md` `kgent-ebpf24` — status: the paper read 2026-10-08 from the open-access eScholarship copy, with its URL and SHA-256; "DOI record not re-checked (ACM DL unreachable)" leaves. The guidebook vol-02 ch. 6.3 checked against the same passages (item 60).
+
+Compiled effect: none.
