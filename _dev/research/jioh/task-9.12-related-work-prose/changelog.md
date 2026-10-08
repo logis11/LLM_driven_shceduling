@@ -155,3 +155,21 @@ Hands to 9.15:
 - `docs/references.md`: a deployed-system entry for SteamOS's LAVD support — the SteamOS 3.8 release note (S2-15), `steamos-manager` at `302d37b9` (S2-49), and the 3.8.14 image observation (S2-50) in its status line.
 
 Compiled effect: none.
+
+## D10 — related-work's scx_lavd sentence: the mechanism from its code and README, the origin in its README's words; "most developed" leaves (2026-10-08)
+
+By 인지오's decision, scope-card item 5: `docs/related-work.md:16`'s "The most developed recent instance is scx_lavd, which estimates each task's latency criticality from its wake/wait patterns and task-chain structure, and feeds that estimate into deadline assignment; it originated in gaming workloads, where mis-scheduling within a task chain surfaces as stutter [lavd]" is restated to scx_lavd's source and README at scx `v1.1.3` (S2-09), with the OSS NA 2024 slides (`lavd-ossna24`, S2-10) beside them.
+
+- **Inputs** (`scheds/rust/scx_lavd/src/bpf/lat_cri.bpf.c:179–186`): "A task is more latency-critical as its wait or wake frequencies (i.e., wait_freq and wake_freq) are higher, and its runtime is shorter"; a weight factor (`:192`) that boosts wakeups and kernel tasks and respects nice (`:25–27`, `:68–71`, `:110–113`).
+- **Task chains** (`:194–201`): "If both are high, the task is in the middle of a task chain"; criticality propagates between waker and wakee, "Forward propagation is to keep the waker's momentum forward to the wakee, and backward propagation is to boost the low-priority waker" (`:209–217`). Slide 25 defines the chain A → B → C on runtime, wake frequency and wait frequency.
+- **Use** (`scx_lavd/README.md:7–12`): "leveraging the task's latency-criticality information in making various scheduling decisions (e.g., task's deadline, time slice, etc.)"; slide 22: "(Virtual) deadline based algorithm".
+- **Origin** (`README.md:20–23`): "`scx_lavd` is initially motivated by gaming workloads. It aims to improve interactivity and reduce stuttering while playing games on Linux."
+- **Leave:** "The most developed recent instance" (no source compares behavioural schedulers); "where mis-scheduling within a task chain surfaces as stutter" as one causal claim (no copy states it; the README states the aim, the slides and LWN 991205 the chain's latency-critical tasks, each stated as its source states it).
+
+Hands to 9.15:
+
+- `docs/related-work.md:16` restated: scx_lavd estimates each task's latency criticality from its wait and wake frequencies, runtime and weight, propagating it between wakers and wakees along task chains, and uses it to set the task's virtual deadline and time slice; it was motivated by gaming workloads, to reduce stuttering. Cited to the scx_lavd README and `lat_cri.bpf.c` at `v1.1.3` and to `lavd-ossna24` slides 22 and 25.
+- `docs/references.md` `scx`: its role extended to scx_lavd's documented design (the README and `lat_cri.bpf.c` at the release, with SHA-256 from S2-09).
+- The guidebook: vol-02 `:3572` ("이 칸의 가장 발전한 형태", the same superlative) restated without it; `:1331` and `:3863` checked against the inputs above.
+
+Compiled effect: none.
