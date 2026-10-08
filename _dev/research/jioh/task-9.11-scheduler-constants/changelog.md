@@ -413,3 +413,19 @@ By 인지오's decision. `docs/harness/metrics.md` §13 says "Every change to a 
 Applied: one dated entry in each — metrics §13, "scheduler-side constants and groundings (jioh 9.11)"; vocabulary §5, "scheduler-side groundings (jioh 9.11)".
 
 Hands to: none.
+
+## D31 — batch: registry details, and D14's note corrected (2026-10-08)
+
+By 인지오's decision, each checked on 2026-10-08:
+
+- **`scx`** (D12): the watchdog quotation spans `README.md:81–84`, the distros quotation `OVERVIEW.md:283–284` (the local v1.1.3 copies); of the release's fifteen Rust schedulers, ten READMEs carry a "Production Ready?" line and scx_cake, scx_chaos, scx_mitosis, scx_p2dq and scx_pandemonium none (the tree at `v1.1.3` listed through the GitHub API, each README read) — the role had "each". The cite's access dates added.
+- **Access dates on the deployed-system cites** `schbench`, `stress-ng` (2026-09-24, their status lines' reads) and `scx`, as the citation-tier rule asks (`docs/references.md`, "deployed-system → footnote with URL + accessed date + pinned version").
+- **`ostep`**: the cite gains the year, Version 1.10 and the chapter number, as the copy prints them ("[VERSION 1.10]", "© 2008–23").
+- **`rt-app`**: pinned at `d6f8be41…` (2026-06-10), the commit D3 read (search record S2-14); "pin commit" retired.
+- **`interbench`**: the role adds the TIMER memo's citation of its missed-period handling (`interbench.c:398–436`), beside "no longer cited by the dataset" for the emulations' parameters.
+- **`nielsen-ue93`**: the chapter's title, "Usability Heuristics", is not in the excerpt read ("Excerpt from Chapter 5 in my book Usability Engineering"); marked not verified. **`hackbench`**: the superseded GitHub mirror is not recorded; said so.
+- **D14's note, for 9.15** (D14's own lines read with these): scx_lavd's regular slice is 0.5–5 ms (`scheds/rust/scx_lavd/src/bpf/lavd.bpf.h:74–75` at v1.1.3), and its slice boost, on unless `--no-slice-boost` is passed (`src/main.rs:220–222`), lets a long-running task's slice reach `LAVD_SLICE_BOOST_MAX`, 500 ms (`lavd.bpf.h:77`; `src/bpf/main.bpf.c:348–351`); scx_rusty uses two values, 20 ms and 1 ms when the host is fully utilised (`src/main.rs:97–103`; `src/tuner.rs:139`, `:173–177`), not a range. D14's "Not searched: that macOS, FreeBSD and Windows compute priority by decaying usage" — for FreeBSD, OSTEP (S1-02, p. 9) states it: "the FreeBSD scheduler (version 4.3) uses a formula to calculate the current priority level of a job, basing it on how much CPU the process has used [LM+89]; in addition, usage is decayed over time"; macOS and Windows not searched.
+
+Applied: `docs/references.md` — `scx`, `schbench`, `stress-ng`, `ostep`, `rt-app`, `interbench`, `nielsen-ue93`, `hackbench`. The references lint 0 errors.
+
+Hands to: **9.15** — D14's correction note with these values: lavd's boost and rusty's two values, FreeBSD 4.3's decaying usage stated by OSTEP.
