@@ -335,3 +335,16 @@ By 인지오's decision, scope-card item 1, on D1. The value stays 100 000 µs. 
 Applied: `docs/harness/metrics.md` §10 — the status cell (design: the strict end of a guideline's range) and the paragraph (Miller's two delays, the choice and its reason, Long's trend, Deber's 12 tapping sessions); `docs/references.md` — `miller-fjcc68`'s role (the strict end taken by design; "physically activated"; "sixteen other topics", Topic 1 one of the seventeen, p. 269), `deber-chi15`'s role (the tapping thresholds' 12 sessions).
 
 Hands to: **9.15** — the guidebook's `T_interaction` passages (vol-01 `:818`, `:820`; vol-02 `:720`, `:823`; vol-03 `:3127`), which call Nielsen a second grounding (D1) and state 0.1 s as Miller's value, restated to D1 and this entry.
+
+## D25 — the 700 µs point labelled a one-CPU design choice; the desktop's running kernel; every tag recorded (2026-10-08)
+
+By 인지오's decision, scope-card item 26a, on D2. The point stays 700 µs.
+
+- **The one-CPU value is a choice.** The kernel scales the base slice by 1 + log₂ of the online CPUs up to 8 (`fair.c:192–221` at v7.0); the runner reads 2.1 ms at its 4 CPUs (`meas-ci:sched:2026-10-07`). D2 took the unscaled value for the simulator's one lane and recorded the scaled one as not taken, but the RQ0 gate spec's reason ("the kernels of the runner and of the depicted desktop") read as if those kernels run 0.70 ms, and `linux-sched-fair`'s "sub-millisecond base slice" holds at one CPU only. Both now label the value design.
+- **The desktop's running kernel is 7.0.0-31.** 9.10 D48 (9.10 changelog `:928`): "the desktop on HWE kernel `7.0.0-31.31~24.04.1`"; the depicted upgrade installs 7.0.0-34. D2 read only -34. Read 2026-10-08 from launchpad.net: `linux-hwe-7.0_7.0.0-31.31~24.04.1.diff.gz`, matching its `.dsc` (same orig tarball, `c6343795…`); its `kernel/sched/fair.c` hunks change the wake-up pick (`pick_eevdf`, `pick_next_entity`, the wake-preemption pick at `:8809`, `:8920` of the orig) and no line of the base slice or its scaling; `features.h` changes only `RT_PUSH_IPI`'s default. 700 µs holds on the running kernel.
+- **Every tag read.** `kernel/sched/fair.c` at v6.6 through v7.2, from the torvalds/linux mirror on 2026-10-08: `750000ULL` at v6.6–v6.14, `700000ULL` at v6.15–v7.2 (`:78` at v6.6, `:76` at v6.7–v6.13, `:79` from v6.14); the SHA-256 of v6.14, v6.15, v6.17 and v7.0 match D2's (`77dfa23e…`, `cd623f6e…`, `e00d16ce…`, `931c64fb…`).
+- **Not taken:** the sweep point moved to the runner's scaled 2.1 ms (B).
+
+Applied: `harness/experiments/rq0-gate.yaml` — the 700 µs point's reason (design: the one-CPU value for the simulator's one lane; the runner's 2.1 ms at 4 CPUs); `docs/references.md` `linux-sched-fair` — the role (unscaled magnitudes; the value taken by design; the desktop on 7.0.0-31 before its upgrade), the cite's access dates and the status (every tag; the -31 diff).
+
+Hands to: **9.14** — the gate spec's reason with the re-pin, and its second half, the 831 µs frame slack, already judged wrong by the compiled audit (`_dev/research/jioh/2026-09-13-verification/compiled-numbers-report.md:69`, `:138`; scope card `:21`), read against the rebuilt files (D2).
