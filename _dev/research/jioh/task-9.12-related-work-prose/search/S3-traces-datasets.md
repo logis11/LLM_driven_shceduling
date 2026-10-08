@@ -45,6 +45,7 @@ Topics in scope: T7 (counts over units, packages or a rules catalogue), T10 (tra
 | 33 | 2026-10-08 | git (stage 3) | `git clone https://github.com/CachyOS/ananicy-rules` (full history) | HEAD `03ef03fb`, 2 762 commits → S3-19 | — |
 | 34 | 2026-10-08 | codesearch.debian.net (stage 3) | `^\[Service\] path:\.service` grouped, all 319 pages, first sequentially (13 min), then in one burst; the same with `-path:(^\|/)(tests?\|testsuite\|testdata\|examples?\|samples?\|demos?\|contrib\|docs?)/` (301 pages, the first burst inconsistent, the second consistent); `^\s*Nice=`, `^\s*IOSchedulingClass=`, `^\s*CPUSchedulingPolicy=` with `path:\.service`, with and without that filter | → S3-20 | the sequential read spanned a re-run of the query |
 | 35 | 2026-10-08 | deb.debian.org (stage 3) | `dists/sid/Release`; `main/Contents-amd64.gz`, `main/Contents-all.gz`, `main/binary-amd64/Packages.xz`, `main/binary-all/Packages.xz` | 200; each SHA-256 equal to Release's → S3-20 | — |
+| 36 | 2026-10-09 | local copies (stage 3) | the campaigns' downloaded artifacts under `~/.cache/meas-loop` (2 028 `report.json`, 2 259 `perf.*.timehist.txt.gz`): every gate-open EPYC 7763 repeat's timehist files, counted per CPU (A.17) | → S3-21 | — |
 
 ---
 
@@ -547,6 +548,91 @@ ANY of the three: 56 packages (3.9 % of 1438); lowering 40 (2.8 %); raising 16 (
 - **Coverage.**
   - T7 covered for units. Object: Debian unstable `main`, binaries for amd64 and all, on 2026-10-08. Unit: source package. Statistic: packages installing a service unit (1 438); packages whose installed units carry each directive, and its direction. Of the 1 438, 56 (3.9 %) carry any of the three directives in an installed unit: 40 (2.8 %) only lowering, 16 (1.1 %) only raising, none both. Of the 49 `Nice=` values in installed units, 33 lower priority (25 at 19) and 16 raise it.
   - Not counted: a class a program sets on itself in code (LocalSearch, Baloo, tumbler, recoll, akonadi-search; S3-02) or through a wrapper (Déjà Dup's `chrt --idle 0 ionice -c3`, 9.11 S2-27) — the desktop indexers are of this kind, so the unit count is a floor on declaration, not its total; packages Debian Code Search does not index (S3-01 names `clamav`; its units declare nothing, S3-02). One observation per index snapshot, not a machine.
+
+### S3-21 — Context switches per second on the measured CPU, from the campaigns' own traces (T10; stage 3, 2026-10-09)
+
+- **Copy read.** The artifacts of the measurement campaigns as downloaded by the loop tools (`~/.cache/meas-loop`, the development Mac; 2 028 `report.json`, 2 259 `perf.*.timehist.txt.gz`), each a `perf sched timehist --state` of a `perf sched record -a` over a whole phase (`dataset/tools/meas/campaign/run.sh:152`, `:162`; `build/run.sh:106`; `background/run.sh:212`, `:231`; `desktop/run.sh:127`). Script `sources/S3-21/switch_rates.py` (A.17, SHA-256 `07fd828ee78eb048f6b93a94b4300bed2443fdbcca7caf97f829b0fab1c6d252`), output `rates.tsv` (2 195 lines, `5c732b7c6e3658ee2bed091f4f410646b092710a689058fd0ef6978e3757f30b`); `summarize.py` (`334a8a8a…`), output `summary.txt` (`ed80b65c…`).
+- **Method.** A timehist row is one switch-out on the CPU in its second column, `<idle>` included; every CPU is recorded. Per phase file: the rows on the repeat's load CPU (`pin.load_cpu`, CPU 3) over the file's span, first row to last. Kept: `gate` open and `machine.model` the EPYC 7763; one row per (run, family, application, repeat, phase). The summary keeps full-mode repeats: 1 806 phase files over 509 runs, 71 program-phase groups. The load CPU holds the measured program and whatever else the runner schedules there (the runner's agent shares it, each entry's scope; the session's idle phase, 17 a second, is the floor).
+- **Output** (`summary.txt`, verbatim):
+  ```
+  rows 2195, full-mode 1806, groups 71
+  family       app                      phase               n    median       min       max
+  background   steamcmd                 steam-fresh-untraced   33   12446.7     297.0   14036.3
+  background   steamcmd                 steam-fresh-shaped   33   11094.4    5579.8   12192.0
+  background   steamcmd                 steam-fresh-unshaped   33    5634.5     299.1    9169.9
+  None         webrtc                   play               50    3112.9    2985.6    3332.9
+  desktop      launch-webrtc            launch              5    2907.4    2900.6    2922.4
+  background   borg                     borg-first-cold    31    2206.0     239.5    2304.4
+  None         thunderbird-send         op                 17    1585.9    1554.4    1629.5
+  None         mpv-video                play               24    1577.7    1453.7    1729.0
+  desktop      launch-mpv-video         launch              5    1521.2    1416.8    1599.0
+  None         code                     driven-alt        127    1503.1    1034.1    1809.0
+  build        None                     handbrake          14    1489.0    1473.7    1510.5
+  build        None                     ffmpeg             14    1141.1    1118.8    1160.9
+  None         code                     driven            127    1075.3     751.4    1752.1
+  background   upgrade                  upgrade-install     9     981.5     911.2    1012.0
+  background   borg                     borg-repeat-cold   31     978.1     224.5    1007.5
+  build        None                     dkms               14     973.1     916.9    1048.0
+  background   dkms                     dkms-install       26     963.2     907.9     996.5
+  None         thunderbird              driven-alt          8     771.1     703.1     869.3
+  build        None                     tracker            14     766.9     736.0     898.4
+  None         thunderbird-send         driven-alt         16     744.8     686.0     867.1
+  background   handbrake                handbrake-transcode    5     694.8     690.8     705.6
+  background   kdenlive                 kdenlive-export    30     692.1     651.7     747.7
+  desktop      launch-steam             launch              5     670.8     668.1     676.6
+  background   dejadup                  dejadup-incremental   30     612.7     237.4     841.4
+  desktop      steam                    shown              12     604.0     591.2     610.0
+  None         kdenlive                 op                 20     597.5     586.1     607.9
+  background   7z                       7z-mmt8-cold        6     590.8     571.9     598.6
+  background   tracker                  tracker-index      30     568.8     464.4     598.2
+  background   7z                       7z-mmt8-warm        6     558.0     549.3     564.9
+  desktop      steam                    minimised          12     528.3     517.1     535.9
+  None         thunderbird              driven              8     463.4     327.4     570.3
+  desktop      launch-mpv-audio         launch              5     453.8     411.4     457.4
+  None         chrome                   driven-alt         86     451.4     204.6     616.3
+  build        None                     build-j8-cold      14     450.9     447.4     454.8
+  None         thunderbird-send         driven             17     442.0      78.9     558.1
+  build        None                     build-j8-warm      14     436.9     434.1     439.5
+  None         mpv-audio                play               31     422.0     404.7     436.9
+  None         kdenlive                 driven             20     379.2     344.2     414.8
+  desktop      launch-element           launch              5     360.5     357.3     395.2
+  desktop      chrome-visible           steady-timer       11     331.6     320.8     335.8
+  None         chrome                   op                 86     274.6     261.8     287.4
+  None         code                     idle              128     244.2     201.1     330.9
+  build        None                     clamscan           14     224.1     213.8     233.2
+  None         chrome                   driven             86     194.9     157.4     339.7
+  None         soffice                  driven-alt         14     179.0     165.4     202.3
+  desktop      launch-chrome            launch              5     168.4     154.3     175.8
+  desktop      element                  traffic            18     163.3     152.8     175.2
+  None         soffice                  driven             14     147.4     127.3     170.7
+  desktop      launch-thunderbird-send  launch              5     140.4     132.7     147.6
+  desktop      launch-kdenlive          launch             10     140.2      82.1     236.8
+  None         chrome                   idle               86     139.9     123.2     247.9
+  desktop      launch-chrome-hidden     launch             10     139.1     127.3     151.9
+  build        None                     build-j1-warm      14     138.3     135.1     142.4
+  background   borg                     borg-first-warm    31     128.9     105.2     281.0
+  desktop      launch-soffice           launch              5     117.1     115.4     128.0
+  desktop      chrome-hidden            steady             24     107.1      94.5     122.8
+  None         thunderbird              idle                8     100.9      89.7     112.3
+  None         gimp                     driven              5      98.6      97.2     112.9
+  desktop      element                  idle               18      95.6      88.0     112.7
+  desktop      chrome-visible           steady-notimer     11      94.7      77.8     105.7
+  None         soffice                  idle               14      86.1      75.8     101.0
+  None         thunderbird-send         idle               86      84.8      67.8      98.5
+  None         kdenlive                 idle               20      84.6      69.5     102.4
+  None         gimp                     idle                5      83.3      61.3      91.5
+  None         gimp                     op                  5      45.9      43.5      52.4
+  background   borg                     borg-repeat-warm   31      40.8      32.8     171.3
+  build        None                     train              14      37.0      19.6     334.9
+  session      session                  steady             24      16.9      14.8      19.1
+  background   7z                       7z-mmt1-warm        6      13.0       9.9      14.0
+  background   mnist                    mnist-train         6      12.9      12.0      13.9
+  background   mnist-madvise            mnist-train         5      12.2      11.2      13.7
+  group medians: min 12.2, median 436.9, max 12446.7
+  full-mode phase files: n 1806, p10 90.1, p50 419.9, p90 2103.7, max 14036.3
+  ```
+  Of the 71 groups' medians, 57 are at least 100 a second, 13 at least 1 000, 2 at least 10 000 (both SteamCMD's download phases).
+- **Coverage.** T10 covered for one quantity: context switches per second on one CPU running one desktop program at a time, for the dataset's programs, on the EPYC 7763 runner (kernel 6.17.0-1022-azure), from 12 a second (single-threaded MNIST training) to 12 447 (SteamCMD's download), the median group 437. A switch is a lower bound on schedule() calls (the runner's idle CPUs call schedule() more often than they switch, `meas-ci:costs` dry run). Not covered: a desktop CPU shared by several programs at once, which this measurement isolates by design (`pin.sh`).
 
 ## 3. Not found
 
@@ -1057,6 +1143,107 @@ print(f'hits not matched to an installed unit: {sum(unmatched.values())} lines i
 for (s, p), c in sorted(unmatched.items()): print('   ', p, f'x{c}')
 ```
 Run: `python3 -I installed_units_count.py sources/S3-20`.
+
+### A.17 `switch_rates.py` and `summarize.py` (stage 3, 2026-10-09)
+
+```python
+#!/usr/bin/env python3
+"""Context switches per second on the measured CPU, from the campaigns' `perf sched timehist --state` files
+(9.12 stage 3, search record S3-21). A timehist row is one switch-out on the CPU in its second column, `<idle>`
+included; every CPU is recorded (`perf sched record -a`). Per phase file: the rows on the repeat's load CPU
+(`pin.load_cpu`) over the file's span, first row to last. Kept: gate `open`, `machine.model` containing EPYC 7763;
+one row per (run id, family, app, repeat, phase), the first path found; rows sorted by path.
+
+    switch_rates.py <root>   → TSV on stdout: run, family, app, mode, repeat, phase, load_cpu, span_s, rows, per_s,
+                               and the other CPUs' rates
+"""
+import collections, glob, gzip, json, multiprocessing, os, re, sys
+
+ROW = re.compile(rb"^\s*([0-9]+\.[0-9]+)\s+\[([0-9]+)\]\s")
+
+
+def count(job):
+    """One phase file: rows per CPU and the span, first row to last."""
+    th, cpu, fields = job
+    counts, t_first, t_last = collections.Counter(), None, None
+    try:
+        with gzip.open(th, "rb") as fh:
+            for line in fh:
+                m = ROW.match(line)
+                if not m:
+                    continue
+                t = float(m.group(1)); counts[int(m.group(2))] += 1
+                t_first = t if t_first is None else t_first
+                t_last = t
+    except (OSError, EOFError):
+        return None
+    if t_first is None or t_last <= t_first:
+        return None
+    span = t_last - t_first
+    other = ",".join(f"{c}:{n / span:.1f}" for c, n in sorted(counts.items()) if c != cpu)
+    return "\t".join(str(x) for x in fields + [cpu, f"{span:.3f}", counts[cpu], f"{counts[cpu] / span:.1f}", other,
+                                               os.path.relpath(th, sys.argv[1])])
+
+
+def build_jobs(root):
+    jobs, seen = [], set()
+    for rep in sorted(glob.glob(os.path.join(root, "**", "report.json"), recursive=True)):
+        d = os.path.dirname(rep)
+        try:
+            r = json.load(open(rep))
+        except ValueError:
+            continue
+        if r.get("gate") != "open" or "EPYC 7763" not in r.get("machine.model", ""):
+            continue
+        try:
+            run = json.load(open(os.path.join(d, "spec.json")))["github_run"]["GITHUB_RUN_ID"]
+        except (OSError, ValueError, KeyError, TypeError):
+            run = "?"
+        cpu = int(r.get("pin.load_cpu", "-1"))
+        for th in sorted(glob.glob(os.path.join(d, "perf.*.timehist.txt.gz"))):
+            phase = os.path.basename(th)[len("perf."):-len(".timehist.txt.gz")]
+            key = (run, r.get("family"), r.get("app"), r.get("repeat"), phase)
+            if key in seen:
+                continue
+            seen.add(key)
+            jobs.append((th, cpu, [run, r.get("family"), r.get("app"), r.get("mode"), r.get("repeat"), phase]))
+
+    return jobs
+
+
+if __name__ == "__main__":
+    print("\t".join(["run", "family", "app", "mode", "repeat", "phase", "load_cpu", "span_s", "rows", "per_s", "other_cpus_per_s", "path"]))
+    jobs = build_jobs(sys.argv[1])
+    with multiprocessing.Pool(8) as pool:
+        rows = [x for x in pool.map(count, jobs, chunksize=4) if x]
+    for row in sorted(rows, key=lambda x: x.rsplit("\t", 1)[1]):
+        print(row)
+```
+
+```python
+#!/usr/bin/env python3
+"""Summarise rates.tsv (switch_rates.py): per (family, app, phase), over the full-mode repeats, the measured CPU's
+context switches per second — repeats, median, min, max — and the same over every row.
+
+    summarize.py rates.tsv   → table on stdout
+"""
+import collections, csv, statistics, sys
+rows = list(csv.DictReader(open(sys.argv[1]), delimiter="\t"))
+full = [r for r in rows if r["mode"] == "full"]
+g = collections.defaultdict(list)
+for r in full:
+    g[(r["family"], r["app"], r["phase"])].append(float(r["per_s"]))
+print(f"rows {len(rows)}, full-mode {len(full)}, groups {len(g)}")
+print(f"{'family':12} {'app':24} {'phase':16} {'n':>4} {'median':>9} {'min':>9} {'max':>9}")
+for k in sorted(g, key=lambda k: -statistics.median(g[k])):
+    v = g[k]
+    print(f"{str(k[0]):12} {str(k[1]):24} {k[2]:16} {len(v):>4} {statistics.median(v):>9.1f} {min(v):>9.1f} {max(v):>9.1f}")
+meds = [statistics.median(v) for v in g.values()]
+print(f"group medians: min {min(meds):.1f}, median {statistics.median(meds):.1f}, max {max(meds):.1f}")
+allv = [float(r["per_s"]) for r in full]
+q = sorted(allv)
+print(f"full-mode phase files: n {len(q)}, p10 {q[len(q)//10]:.1f}, p50 {statistics.median(q):.1f}, p90 {q[9*len(q)//10]:.1f}, max {q[-1]:.1f}")
+```
 
 ## Appendix B — long outputs (verbatim)
 
