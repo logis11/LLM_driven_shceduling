@@ -1,5 +1,5 @@
 # Recognition Vocabulary
-> Status: normative · Created 2026-08-28 · Updated 2026-10-07
+> Status: normative · Created 2026-08-28 · Updated 2026-10-08
 
 The shared vocabulary of the recognition signal — the one contract that the recognizer's output schema, the validator's menu, the driver table, and the Layer-1 grader all agree on. Ratified 2026-08-28 (인지오 · 인경민 · 박이안 — pending team review of this doc).
 
@@ -67,7 +67,7 @@ Every configuration, regardless of algorithm:
 }
 ```
 
-`batch_bandwidth_cap` is the ceiling on the fraction of the lane the **batch class** may consume while non-batch work is runnable; `null` means no ceiling. The idea has a shipped counterpart, a per-class CPU bandwidth ceiling (`linux-sched-bwc`, existence only); the range, the floor, and the class rule below are ours. The batch class is determined behaviorally by the executor (observed CPU-bound behavior — the same evidence MLFQ demotion uses); the classification rule is identical across algorithms, frozen in the simulator's docs, and not configurable. Starvation protection is executor-owned and has no config field: every runnable task makes progress within a bounded window regardless of what any configuration says.
+`batch_bandwidth_cap` is the ceiling on the fraction of the lane the **batch class** may consume while non-batch work is runnable; `null` means no ceiling. The idea has a shipped counterpart, a per-class CPU bandwidth ceiling (`linux-sched-bwc`, existence only); the range, the floor, and the class rule below are ours. The batch class is determined behaviorally by the executor (observed CPU-bound behavior — the same evidence MLFQ demotion uses); the classification rule is identical across algorithms, frozen in the simulator's docs, and not configurable. The executor has no starvation window and no config field for one; the harness's `starvation_floor` guard bounds every task's wait at 30 s, the bound sched_ext's watchdog enforces (`harness/guards/guard-spec.yaml`).
 
 ### MLFQ
 
@@ -99,7 +99,7 @@ Two classes, tickets split `batch_share : (1 − batch_share)`, equal tickets pe
 
 ### FIFO
 
-No fields: `"params": {}`. Run in arrival order until each task blocks or exits. The cap and the executor safety net still apply.
+No fields: `"params": {}`. Run in arrival order until each task blocks or exits. The cap still applies.
 
 ### Provenance of the boot default
 

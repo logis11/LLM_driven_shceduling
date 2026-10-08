@@ -1,6 +1,6 @@
 # guards
 
-A guard is a check that must pass before a run's numbers are read. It does not say whether a configuration was good; it says whether the run is evidence at all. A condition that scored well while most of its configurations were fallbacks, a simulator whose rerun differs from its first run, a task starved past the executor's own safety net: each of those is a run whose numbers say nothing about recognition, and each has a guard.
+A guard is a check that must pass before a run's numbers are read. It does not say whether a configuration was good; it says whether the run is evidence at all. A condition that scored well while most of its configurations were fallbacks, a simulator whose rerun differs from its first run, a task left waiting past the bound sched_ext's watchdog enforces: each of those is a run whose numbers say nothing about recognition, and each has a guard.
 
 Two files live here. `guard-spec.yaml` is the list of guards with their thresholds, the conditions each applies to, the C2 pairs, and a grounding for every threshold. `schema/guards.schema.json` is the shape of the guards file the checks write.
 
@@ -12,14 +12,14 @@ Two files live here. `guard-spec.yaml` is the list of guards with their threshol
 |---|---|
 | `provenance_share` | a run that spent most of its time on `fallback` or `held` configurations |
 | `config_age` | a configuration taking effect after the situation it was computed for had ended |
-| `starvation_floor` | a ready task waiting longer than the executor's starvation window |
+| `starvation_floor` | a ready task waiting longer than 30 s, the bound sched_ext's watchdog enforces |
 | `determinism` | a rerun trace that is not byte-identical to the first |
 | `utilisation_sanity` | delivered CPU exceeding the lane's elapsed time, or a scored file that delivered none: an empty trace that parsed |
 | `tick_count` | any consistency message from the records build: a chain tail's iterations not matching its head's ticks, the deadline cross-check, stimulus counts against the run file, a wake line past the last WAIT of its task's program, applied config lines against the schedule |
 | `validation_matches_provenance` | the log's `validation` sequence not equal, entry by entry, to the schedule's `provenance` sequence after the boot entry |
 | `c2_pair` | the two files of a C2 pair producing identical trace bodies under a recognition-driven condition, or different ones under `fixed`; identical under `oracle` means the configuration never changed between wanted and unwanted |
 
-Each threshold's grounding is written in the spec's header: an arithmetic identity, a structural rule, or a stated assumption marked as such. The starvation window is the one stated assumption still waiting on its owner, and the RQ0 gate spec records that.
+Each threshold's grounding is written in the spec's header: an arithmetic identity, a structural rule, a design value, or a stated assumption, each marked as such.
 
 ## The guards file
 

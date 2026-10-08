@@ -10,8 +10,8 @@
 # guard judges; every other condition gets `not_applicable`. `reads` names the
 # input the guard measures from. `grounding` is the argument behind the
 # threshold, required for every entry: an arithmetic identity, a structural
-# rule, or a stated assumption written as such (docs/harness/metrics.md §10
-# uses the same status for its floors). The lint (tools/harness/guards.py,
+# rule, a design value, or a stated assumption, each written as such
+# (docs/harness/metrics.md §10 uses the same status for its floors). The lint (tools/harness/guards.py,
 # `lint_spec`) checks the ids against the code's registry, every grounding
 # non-empty, and `pairs` against dataset/timelines/coreset/c2-pairs.variant.yaml.
 #
@@ -47,13 +47,16 @@
 #   metrics doc §8 measure time in force, a different quantity, and are reported
 #   beside the score, not guarded.
 #
-# starvation_floor — 30 000 000 µs, sched_ext's watchdog. The kernel ejects a BPF
-#   scheduler, the kind of scheduler the daemon drives, when a runnable task waits
-#   longer than its `timeout_ms`, which "may not exceed the default timeout of 30
-#   seconds" and defaults to it (`kernel/sched/ext.c` at v6.17, `linux-sched-ext`).
-#   A run in which a task waits longer describes a configuration a real deployment
-#   could not keep running; a shorter wait is damage the scored terms read. The
-#   executor has no starvation net of its own (simulator memo 2026-10-01 §6). Read
+# starvation_floor — 30 000 000 µs, design: the bound sched_ext's watchdog
+#   enforces at most and by default, borrowed as the validity bound of the
+#   project's deployment path (docs/research-proposal.md §2.1). The kernel ejects a
+#   BPF scheduler when a runnable task waits longer than its `timeout_ms`, which
+#   "may not exceed the default timeout of 30 seconds" and defaults to it
+#   (`kernel/sched/ext.c` at v6.17, `linux-sched-ext`); the shipped scx schedulers
+#   set 30 s (lavd), 10 s (rusty) and 5 s (bpfland) at release v1.1.3 (`scx`). A
+#   run in which a task waits longer describes a configuration such a deployment
+#   could not keep running. The executor has no starvation net of its own
+#   (simulator memo 2026-10-01 §6). Read
 #   as each task's maximum `ready_wait` over any cause on the whole file (metrics
 #   doc §6.1, starvation), idle-class tasks included, as the watchdog covers every
 #   task it schedules. Applies under every condition, `fixed` included.
@@ -138,10 +141,11 @@ guards:
     direction: at_or_below
     applies_to: all
     grounding: >
-      sched_ext's watchdog: a runnable task left longer than timeout_ms — at most and
-      by default 30 s — ejects the BPF scheduler (kernel/sched/ext.c:749-757,
-      3645-3662, 5649-5654 at v6.17); per task, max ready_wait over any cause on the
-      whole file (metrics doc §6.1).
+      Design: sched_ext's watchdog bound, borrowed for the deployment path — a
+      runnable task left longer than timeout_ms, at most and by default 30 s, ejects
+      the BPF scheduler (kernel/sched/ext.c:749-757, 3645-3662, 5649-5654 at v6.17);
+      the shipped scx schedulers set 5-30 s; per task, max ready_wait over any cause
+      on the whole file (metrics doc §6.1).
 
   - id: determinism
     reads: records+rerun_trace

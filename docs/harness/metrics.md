@@ -1,6 +1,6 @@
 # Metrics — primitives, records, and the aggregates the research reads
 
-> Status: normative · Created 2026-09-08 · Updated 2026-10-07
+> Status: normative · Created 2026-09-08 · Updated 2026-10-08
 
 Every number the project reports is defined here. The document fixes three things: the **primitives** — the raw observations the harness computes from a trace or a recognition log; the **records** file they land in; and the **aggregates** — the statistics, the normalisation rule, and the constants that turn records into the figures the research questions ask for. Per-file weights are not here; they are data, in the scoring spec (`harness/scoring/scoring-spec.yaml`, §2). The code that implements the trace primitives lives in `harness/`; the grader that implements the recognition primitives is built in Phase 8 to the definitions below.
 
@@ -286,7 +286,7 @@ with `fixed` and `oracle` the same workload under the same table. The rule appli
 | `T_interaction` — the interaction-latency threshold | **100 000 µs** (0.1 s) | a guideline (`miller-fjcc68`), cross-checked against a measured detection threshold (`deber-chi15`); see below |
 | floor for latency-type aggregates (`ready_wait` mean/P50/P95/P99/max; `job` latency P50/P99; `turnaround`) | **1 000 µs** | stated assumption, tied to no scheduler parameter (2026-09-11): one millisecond, below which a latency difference between two configurations is not read; the RQ0 gate spec pre-registers a floor-sensitivity line, the verdict recomputed under a band of floors at scoring time |
 | floor for fraction-type aggregates (`over_threshold`, miss rate, progress, completion) | **0.01** | stated assumption: one percentage point |
-| counts, provenance shares, utilisation | not normalised | guard and sanity inputs only; the guards' thresholds are the guard spec's (`../../harness/guards/guard-spec.yaml`), each an identity, a structural rule, or a stated assumption |
+| counts, provenance shares, utilisation | not normalised | guard and sanity inputs only; the guards' thresholds are the guard spec's (`../../harness/guards/guard-spec.yaml`), each an identity, a structural rule, a design value, or a stated assumption |
 | cluster-bootstrap seed; repetitions (§8) | **20260911**; **10 000** | pinned, not estimated: a fixed seed makes an interval byte-identical on a rerun, so the harness keeps its own determinism rule. The RQ0 gate spec pins both |
 | interval level (§8) | **95 per cent** | convention |
 
