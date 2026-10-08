@@ -306,3 +306,15 @@ By 인지오's decision, scope-card item 4 (and the `mlfq` and `eevdf` keys of i
 Hands to 9.15: `docs/related-work.md:16`'s first sentence restated as above, its keys resolved; the guidebook vol-02 ch. 2.2 and 2.5 checked against the same passages (item 60).
 
 Compiled effect: none.
+
+## D19 — the learned-scheduler sentence: Decima and FIRM kept; Park restated as an open platform of twelve environments (2026-10-08)
+
+By 인지오's decision, scope-card item 8 (and the `decima`, `firm`, `park` keys of item 20): `docs/related-work.md:24`'s "Decima learns cluster scheduling policies via RL over job DAGs [decima]; Firm learns SLO-driven resource management for microservices [firm]; Park generalizes the setting [park]" keeps its first two clauses; "Park generalizes the setting" becomes "Park offers an open platform of twelve system-optimization environments for learning-augmented systems".
+
+- **Decima** (`decima-sigcomm19`; S1-06): "Decima encodes its scheduling policy in a neural network trained via a large number of simulated experiments" (p. 1); its graph embedding "takes as input the job DAGs whose nodes carry a set of stage attributes" (§5.1, p. 4).
+- **FIRM** (`firm-osdi20`; S1-07): an RL agent (DDPG, p. 9) sets per-microservice resource limits for CPU, memory, LLC, I/O and network (Table 3, p. 10), beside an SVM that localizes SLO violations (p. 3); the title names "SLO-Oriented Microservices".
+- **Park** (`park-neurips19`; S1-08): "Park: An Open Platform for Learning-Augmented Computer Systems"; "Currently, Park consists of 12 real world system-centric optimization problems with one common easy to use interface" (Abstract), 7 backed by real systems and 5 by simulators (p. 2).
+
+Hands to 9.15: `docs/related-work.md:24`'s first sentence as above, its keys resolved; the guidebook vol-02 ch. 5.2–5.4 checked against the same passages (item 60).
+
+Compiled effect: none.
