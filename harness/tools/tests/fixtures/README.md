@@ -50,7 +50,7 @@ These are the assumptions sent to 인경민 (`docs/memos/2026-09-07-trace-clarif
 
 1. A `ready` line is emitted at every completion of a blocking primitive, at zero wait when it did not block. Inside an occupancy it appears after the `run_start` and pairs with wait 0.
 2. Wakes queue with depth: two wakes sent to a busy task complete its next two WAITs.
-3. TIMER's `t₀` is the task's arrival time (simulator-guide §9.2), so a TIMER task arriving at 0 consumes tick 0 at 0 without blocking.
+3. TIMER's `t₀` is the task's first TIMER execution (metrics doc §11, assumption 4); every mock TIMER task's first executed instruction is its TIMER, the head of its loop, so `t₀` is its arrival, and a TIMER task arriving at 0 consumes tick 0 at 0 without blocking.
 4. An arriving task whose first instruction blocks is scheduled like any other: it reaches the WAIT and blocks. When the lane is free this is a zero-length occupancy (`run_start` and `run_end` at the same instant).
 5. Same-instant order: config entries first, in list order; then arrivals in file order; ready before `run_start` of another task at the same instant is written in the order the scheduler acted.
 6. The scheduler in each mock is stated in its `worked.md` (idle lane, FIFO, or MLFQ with a 2 ms slice). Any legal scheduler is acceptable; the primitives never depend on which one produced the trace. Since 2026-09-11 the boot default's slice is 10 ms (OSTEP's example), so `mock-p1a` and `mock-switch` stamp their 2 ms MLFQ by an explicit `unmodified` entry at 600 µs beside the boot entry, the way `mock-media` stamps FIFO beside it; the boot entry's own params govern no occupancy in either mock.

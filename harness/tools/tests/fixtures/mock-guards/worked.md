@@ -1,6 +1,6 @@
 # mock-guards — worked derivation
 
-The guards' fixture (8.3): a schedule that mixes all four provenances, a recognition log whose `validation` sequence mirrors it, ground-truth segments for the staleness check, and a trace shaped so that two run-level guards fail by design (config age, starvation floor) while the rest pass. Condition `llm_vocab` on the prior table. Scheduler: the boot MLFQ governs nothing (no task runs before 600); entry 1 stamps FIFO at 600 and every later entry keeps FIFO, so the lane runs first-come-first-served with no preemption. All times µs.
+The guards' fixture (8.3): a schedule that mixes all four provenances, a recognition log whose `validation` sequence mirrors it, ground-truth segments for the staleness check, and a trace shaped so that one run-level guard fails by design (config age) while the rest pass — the starvation floor among them, `batch`'s 1.95 s wait inside its 30 s; a test reads the same run against 1 s for the fail path. Condition `llm_vocab` on the prior table. Scheduler: the boot MLFQ governs nothing (no task runs before 600); entry 1 stamps FIFO at 600 and every later entry keeps FIFO, so the lane runs first-come-first-served with no preemption. All times µs.
 
 ## Run file
 

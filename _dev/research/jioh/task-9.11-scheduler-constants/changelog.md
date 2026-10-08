@@ -364,3 +364,18 @@ On answer 1, the re-entry condition's first half fails, so `c7-meeting` and `c7-
 Applied: `docs/memos/2026-10-08-declared-scheduling-class.md` — a fourth request: 인경민 confirms §6's answers 1 and 2 as his reply.
 
 Hands to: **9.14** — the gate spec's `executor-assumptions` restated on 인경민's reply — (1) as today, (2) replaced by rule D1, (3) per D7 and D19 — with the `judging-set` statement's re-entry condition read against them (on today's answers, `c7-meeting` and `c7-media` stay reporting-only), as the harness changelog entry the statement requires; **인경민** — the memo's fourth request.
+
+## D27 — batch: metrics and citation wording (2026-10-08)
+
+By 인지오's decision, the audit's routine corrections to wording 9.11 wrote or kept, each checked against its source on 2026-10-08:
+
+- **The coefficient's undefined case** (D9). Chicco & Jurman (Europe PMC full text, PMC6941312, SHA-256 `8c497f0d…`), Methods: "MCC is undefined when a whole row or column of M is zero … However, some mathematical considerations can help meaningfully fill in the gaps for these cases. If M has only one non-zero entry … MCC=1 for the former case and MCC=−1 for the latter case", the four remaining cases taken as a limit "→ 0", "With these positions MCC is now defined for all confusion matrices M". Reporting it undefined (`harness/tools/harness/grader.py:349–372`) is the project's choice: design. The role line's quotation restored to "We cannot consider such measures fully informative …".
+- **The Layer-1 interval caveat** (D9). Field & Welsh (S1-09): §2, p. 371, "a balanced single classification with g clusters … of m observations each"; §4, p. 387, "The cluster bootstrap consistently underestimates the bootstrap variance for all the statistics. However, we should note that for the cluster bootstrap we are essentially working with five and 15 observations respectively." The underestimate is found with few clusters of equal size; unequal sizes are outside the paper, not the cause D9's "so … unequal size" gave. Stated now: the coreset's files are more than 15 and of unequal size, outside both, so the interval's coverage is untested. Changelog D9 (`:132`, `:137`) reads with this.
+- **The bootstrap seed and repetitions are pinned in the grader** (`grader.py:69–70`), not by the RQ0 gate spec, whose pins (`harness/experiments/rq0-gate.yaml:222–226`) are the scoring spec, guard spec, driver table and dataset manifest (D13, item 4).
+- **TIMER's `t₀`** (D11): metrics §6.2's cross-reference now reads "the task's first TIMER execution (§11, assumption 4)"; §11 item 4's "every periodic task's program begins with its TIMER" scoped to the 24 files of the current coreset and to the first executed instruction — `memo_261001` §5.4 states it of those files, and a loop's head is its TIMER, not the loop marker (the `mock-chain` and `mock-media` tasks; the gaming chain heads). The fixtures README's t₀ line likewise.
+- **The `mock-guards` derivation** (D7): one run-level guard fails by design, config age; the starvation floor passes, `batch`'s 1.95 s inside 30 s.
+- **D1's "It is the only candidate that names keyboard input"** (`:9`) reads "the only candidate threshold": Shneiderman's report of Long (S1-07, p. 268) and Deber's "key typing" (S1-11, p. 1831) name it too.
+
+Applied: `docs/harness/metrics.md` §6.2, §8, §10, §11; `docs/references.md` `chicco-bmcg20`; `harness/tools/tests/fixtures/README.md`; `harness/tools/tests/fixtures/mock-guards/worked.md`.
+
+Hands to: none.
