@@ -43,7 +43,10 @@ def stat_fields(path):
 def cmdline(pid):
     try:
         with open(f"/proc/{pid}/cmdline", "rb") as handle:
-            return handle.read().replace(b"\0", b" ").decode(errors="replace").strip()[:200]
+            raw = handle.read().replace(b"\0", b" ").decode(errors="replace")
+            for ch in "\t\r\n":                 # one TSV field: an argument's tabs and newlines become spaces
+                raw = raw.replace(ch, " ")
+            return raw.strip()[:200]
     except OSError:
         return ""
 

@@ -429,3 +429,15 @@ By 인지오's decision, each checked on 2026-10-08:
 Applied: `docs/references.md` — `scx`, `schbench`, `stress-ng`, `ostep`, `rt-app`, `interbench`, `nielsen-ue93`, `hackbench`. The references lint 0 errors.
 
 Hands to: **9.15** — D14's correction note with these values: lavd's boost and rusty's two values, FreeBSD 4.3's decaying usage stated by OSTEP.
+
+## D32 — batch: records and tooling (2026-10-08)
+
+By 인지오's decision, each checked on 2026-10-08 against the local census copies (byte-identical to release `meas-ci-probes-2026-10-07b`) and the repository:
+
+- **`classes/audit.md`.** The perf-removal citation, `campaign/run.sh:156–162`, now `dataset/tools/meas/campaign/run.sh:156–163` at `5c08d1a7` (the `rm -f` on line 163; the block has since moved). `image-editor`'s `python3`: every `python3` in the `gimp` job is the harness's tools or the runner agent's `waagent` (its threads and children by `ppid`), none GIMP's. `audio-server`'s nice −11: the main threads of `pipewire`, `pipewire-pulse` and `wireplumber`, four sessions each; the filter-chain instance's, `pipewire -c filter-chain.conf`, at nice 0. "No thread … changed its policy, real-time priority or nice during its job": after its first sample — `classes.py` samples every 2 s (the hooks' interval argument), so a class set within 2 s of a thread's start is first seen already set. The census table's blank line, which split the session rows from their header, moved after the table.
+- **`dataset/tools/meas/sched/classes.py`.** `cmdline` turned a tab or newline inside an argument into a tab or newline in the TSV row: release `meas-ci-probes-2026-10-07b`'s `steam` job (`classes.tsv`, SHA-256 `e713389e…`) has two such rows, zenity's multi-line `--text`, their class fields intact. Tabs, carriage returns and newlines now become spaces. Records already released stand.
+- **Earlier lines of this changelog, read with these.** D2 (`:31`): n is the online count when the kernel recomputes the slice, which on the way down still counts the leaving CPU, as release `meas-ci-sched-2026-10-07`'s notes put it — "before the CPU left" holds on the way down only (on the way up, 1 → 2 gives 1 400 000, 3 → 4 2 100 000). D11 (`:155`): "12 periodic tasks arrive mid-run, in `c3-evening` and `c4-compile`" is `simulator/memo/memo_261001.md`'s count of 2026-10-01; at the committed build (`dataset/build.manifest.json`, the 50 local files matching it) 22 tasks carry a TIMER and 4 arrive mid-run, 3 in `c3-evening` and 1 in `c6-fold`, all TIMER-first. D3 (`:48`): the guide is `docs/simulator/simulator-guide.md`; (`:68`): `teper-arxiv24` and `lipari-arxiv15` were minted with D3 (`a9b3eab0`), so 9.15 cites them, not mints them.
+
+Applied: `classes/audit.md`; `dataset/tools/meas/sched/classes.py`.
+
+Hands to: none. Release `meas-ci-probes-2026-10-07b`'s notes say "Eleven jobs on the AMD EPYC 7763"; the jobs' `spec.json` give ten — an edit to the release, on 인지오's go-ahead.

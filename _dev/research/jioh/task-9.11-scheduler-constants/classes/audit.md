@@ -1,6 +1,6 @@
 # Declared scheduling classes — audit of the measured entries
 
-D4's step (1): each measured entry's observed scheduling policy and nice value, read from its campaign's raw records. Taskstats rows (`ac_sched`, `ac_nice`, one per exiting thread on the measured CPU, `type = pid`) exist for the build and background families only; the interactive, playback, desktop and session families kept `perf sched timehist` text, which carries neither policy nor priority (`campaign/run.sh:156–162`, `desktop/run.sh`, `session/run.sh`: `perf.data` is removed after `timehist` in full mode).
+D4's step (1): each measured entry's observed scheduling policy and nice value, read from its campaign's raw records. Taskstats rows (`ac_sched`, `ac_nice`, one per exiting thread on the measured CPU, `type = pid`) exist for the build and background families only; the interactive, playback, desktop and session families kept `perf sched timehist` text, which carries neither policy nor priority (`dataset/tools/meas/campaign/run.sh:156–163` at `5c08d1a7`, `desktop/run.sh`, `session/run.sh`: `perf.data` is removed after `timehist` in full mode).
 
 One full repeat per subject, its taskstats files read from the release by HTTP range reads of the zip (2026-10-07). Policy codes per `include/uapi/linux/sched.h`: 0 NORMAL, 3 BATCH, 5 IDLE. A `SCHED_IDLE` task's nice value has no effect (`sched(7)`).
 
@@ -32,7 +32,7 @@ The entries above not readable from their records, observed again in their campa
 | `code-editor` | `code`, 37605116943 | EPYC 7763 | NORMAL, nice 0: all 242 `code` threads |
 | `mail-client` | `thunderbird-send`, 37605116943 | EPYC 7763 | NORMAL, nice 0: every `thunderbird-bin`, `RDD Process` and `crashhelper` thread |
 | `web-browser` | `chrome`, 37605116943 | EPYC 9V74 | NORMAL, nice 0: all 169 `chrome` threads |
-| `image-editor` | `gimp`, 37605116943 | EPYC 7763 | NORMAL, nice 0: `gimp`, `script-fu`, `python3` |
+| `image-editor` | `gimp`, 37605116943 | EPYC 7763 | NORMAL, nice 0: `gimp`, `script-fu` — the job's `python3` processes are the harness's tools and the runner agent's `waagent`, not GIMP's |
 | `video-editor` | `kdenlive`, 37605116943 | EPYC 7763 | NORMAL, nice 0: 33 `kdenlive` threads and 72 `kdenlive_render`; NORMAL, nice 19: SDL's `SDLHotplugALSA`; BATCH, nice 19: `kdenliv:disk$0` |
 | `video-player` | `mpv-video`, 37605116900 | EPYC 7763 | NORMAL, nice 0: every `mpv` thread |
 | `audio-player` | `mpv-audio`, 37605116900 | EPYC 7763 | NORMAL, nice 0: every `mpv` thread but `mpv:disk$0`, BATCH, nice 19 |
@@ -41,12 +41,12 @@ The entries above not readable from their records, observed again in their campa
 | (the visible renderer, 9.8) | `chrome-visible`, 37605116858 | EPYC 9V74 | NORMAL, nice 0: all 149 `chrome` threads |
 | `chat-client` | `element`, 37605116858 | EPYC 7763 | NORMAL, nice 0: all 88 `element-desktop` threads |
 | `game-client` | `steam`, 37605116858 | EPYC 9V45 | NORMAL, nice 0: `steam`, `steamwebhelper`, the runtime's `pressure-vessel`, `srt-*`; BATCH, nice 19: `steam:disk$0`, `steamwe:disk$0` |
-
 | `compositor-shell` | `session` 96, 37605116929 | Xeon 8370C | NORMAL, nice 0: every carried `gnome-shell` thread — main, `JS Helper`, `gmain` — and the rest; RR, real-time priority 20: mutter's `KMS thread`; BATCH, nice 19: `gnome-s:disk$0`, `gnome-s:disk$1` |
-| `audio-server` | `session` 96, 37605116929 | Xeon 8370C | `pipewire`, `pipewire-pulse`, `wireplumber`: RR, real-time priority 20, each `pw-data-loop` thread; NORMAL, nice −11, each main thread; NORMAL, nice 0, the rest — `wireplumber`'s carried `gmain` among them. `rtkit-daemon` ran in the session (its own thread RR 99) |
+| `audio-server` | `session` 96, 37605116929 | Xeon 8370C | `pipewire`, `pipewire-pulse`, `wireplumber`: RR, real-time priority 20, each `pw-data-loop` thread; NORMAL, nice −11, the main threads of `pipewire`, `pipewire-pulse` and `wireplumber` — the filter-chain instance's, `pipewire -c filter-chain.conf`, at nice 0; NORMAL, nice 0, the rest — `wireplumber`'s carried `gmain` among them. `rtkit-daemon` ran in the session (its own thread RR 99) |
 | `service-manager` | `session` 96, 37605116929 | Xeon 8370C | NORMAL, nice 0: `systemd` |
 | `message-bus` | `session` 96, 37605116929 | Xeon 8370C | NORMAL, nice 0: every `dbus-daemon` |
-No thread of any subject changed its policy, real-time priority or nice during its job.
+
+No thread of any subject changed its policy, real-time priority or nice after its first sample; `classes.py` samples every 2 s, so a class set within 2 s of a thread's start is first seen already set.
 
 Raw records: release `meas-ci-probes-2026-10-07b` at `07af2d92`, the fourteen jobs' final artifacts as `<artifact>-<run id>.zip`.
 
