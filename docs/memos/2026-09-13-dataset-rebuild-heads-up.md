@@ -1,6 +1,6 @@
 # workload dataset 다시 만들기 예고 — 무엇이 바뀌고 무엇이 그대로인지, 인경민께 질문 세 개
 
-> Status: memo · Created 2026-09-13 · Updated 2026-09-13
+> Status: memo · Created 2026-09-13 · Updated 2026-10-08
 > From 인지오 to 인경민, 박이안. 가벼운 예고예요. workload dataset의 근거를 원문과 build에 대조해 봤더니 고칠 게 꽤 나와서, dataset을 한 번 다시 만들고 그 위에 올린 결정들을 다시 해요. 두 분 프로그램의 입출력 형식은 이번 작업 범위 밖이에요. 인경민께는 executor 질문이 세 개 있어요(§4).
 
 ## 1. 왜 — 찾은 것 요약
@@ -45,3 +45,7 @@
    - simulator guide §9.1에 열어 둔 질문 그대로예요: 기억되나(쌓이면 깊이까지), 버려지나.
    - lane을 혼자 써도 keystroke의 31–42%가 이전 burst가 끝나기 전에 도착해서, 드문 경우가 아니에요.
    - 답에 따라: editor의 wait 점수(metrics doc §6.1에서는 task 자신의 occupancy 안에 온 `ready`는 wait 0), guard `tick_count`의 stimulus 개수 대조.
+
+## 정정 (2026-10-08)
+
+"두 분 프로그램의 입출력 형식은 이번 작업 범위 밖이에요"에 예외가 하나 생겼어요: workload와 run file에 task의 scheduling class 필드가 들어가요. 무엇이 들어가는지, executor 규칙, 세 사람의 합의가 필요한 이유는 `2026-10-08-declared-scheduling-class.md`에 적었어요.

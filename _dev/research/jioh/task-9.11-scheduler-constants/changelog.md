@@ -245,3 +245,16 @@ By 인지오's decision, scope-card items 11 and 39, on D3's rule. The rule stan
 Applied: `docs/references.md` — `gstreamer` minted (deployed-system, existence only: the sink's code at the commit); `docs/memos/2026-10-07-timer-skip-rule-for-the-simulator.md` — the dated correction note, the header's Updated date.
 
 Hands to: **인경민** — the memo's correction note (§1 unchanged; §5.1's zero-wait line comes before the rule's reading); **9.14** — the `job` primitive and metrics §6.2's `deadline` cross-check read `met` for a skipped tick, not the slack's sign; **9.15** — where the docs D3 hands over restate TIMER's rule, its grounds as above: GStreamer's sink for video playback, design for audio and games.
+
+## D18 — the declared class to 인경민 and 박이안: a memo and the frozen-contract change (2026-10-08)
+
+By 인지오's decision, scope-card item 38: D4's field and D5's executor rule, handed to 인경민, had reached no one — no memo, nothing in 인경민's section of `_dev/TODO.md`, nothing on the 9.15 line.
+
+- **A change to frozen contracts.** The field enters the workload, a dataset contract frozen and enforced by schema, and the run file the simulator reads, a protocol contract frozen on 2026-09-06; `docs/data-contracts.md` §13 (`:525`): "any change to a frozen contract needs all three of us and a changelog entry". The heads-up memo of 2026-09-13 told both teammates "두 분 프로그램의 입출력 형식은 이번 작업 범위 밖이에요" (`:4`).
+- **The recognizer's side open.** The visible projection (`docs/data-contracts.md` §4, "The two derived views", `:256`: "names, counts, and *pinned* lifetime times only") does not say whether a task's class is shown — 박이안's question.
+- **D5's rule names FIFO.** D5 names MLFQ, EDF and LOTTERY; the config schema's fourth algorithm, FIFO, runs "in arrival order until each task blocks or exits" (`docs/recognition-vocabulary.md:64`, `:102`). D5 applies its rule "below whatever the configured algorithm decides", so under FIFO too a waking task of another class preempts a running idle one; the memo says so.
+- **Not taken:** folding it into 9.15's final memo (B) — 9.13 adds the field and 9.14 reads the rule before 9.15, and §13 asks for agreement before a frozen contract changes.
+
+Applied: `docs/memos/2026-10-08-declared-scheduling-class.md` (the field — policy, not nice; `normal` and `idle`; the entry's class, never the task name's; its name and place 9.13's — the executor rule under the four algorithms, D16's comparison with the depicted desktop, the visible-projection question, the change to agree); the heads-up memo's dated note in Korean; `docs/README.md`'s index.
+
+Hands to: **인경민** — the rule in the executor; **박이안** — whether the visible projection shows the class; **9.13** — the field added only after the three agree, with a `docs/data-contracts.md` §14 entry and §4's two views stated.

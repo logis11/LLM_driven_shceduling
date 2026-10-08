@@ -1,6 +1,6 @@
 # Docs index
 
-> Status: normative · Created 2026-08-27 · Updated 2026-10-07
+> Status: normative · Created 2026-08-27 · Updated 2026-10-08
 
 Prose only, organized by domain — one `##` section per area below, the full index table at the bottom. Statuses: **normative** (states what is; kept current) · **draft** (content real, form not final) · **record** (append-only history; never rewritten). Decision history lives in `_dev/archive/`; machine-read files live outside `docs/` (see the placement rule in `CLAUDE.md`).
 
@@ -86,6 +86,7 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 - [memos/2026-09-13-dataset-rebuild-heads-up.md](memos/2026-09-13-dataset-rebuild-heads-up.md) — to 인경민, 박이안 (Korean): heads-up on the workload dataset rebuild — the findings in brief, what changes (dataset, the decisions built on it, citations outside it), what stays (the programs' input and output formats), what it means for each owner, and three executor questions to 인경민: LOTTERY's split when an editor's burst tail is batch-class, the EDF class of chain stages, a keystroke arriving while the editor runs
 - [memos/2026-09-20-dataset-validity-review.md](memos/2026-09-20-dataset-validity-review.md) — the workload dataset read against what the two research claims need from it: the recognizer reads identity so the compile path carries the recognition claim while the campaign carries the benefit claim, what the stability rule establishes and what it does not, the stability ledger to publish, the demand window to state as a scoping decision, the bound the measurement venue puts on the benefit claim, and segment composition as the untouched axis
 - [memos/2026-10-07-timer-skip-rule-for-the-simulator.md](memos/2026-10-07-timer-skip-rule-for-the-simulator.md) — to 인경민: TIMER skips missed ticks on its grid — the rule, a worked example against backlog, the trace lines it emits, and what the simulator and the contract change
+- [memos/2026-10-08-declared-scheduling-class.md](memos/2026-10-08-declared-scheduling-class.md) — to 인경민, 박이안: the declared scheduling class — the workload field (policy, not nice; the entry's, never the task name's), the executor's strict idle rule under all four algorithms, the visible-projection question, and the contract change to agree
 
 ## Full index
 
@@ -130,3 +131,4 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 | [memos/2026-09-13-dataset-rebuild-heads-up.md](memos/2026-09-13-dataset-rebuild-heads-up.md) | to 인경민, 박이안 (Korean): the dataset rebuild ahead — what changes, what stays, three executor questions | memo |
 | [memos/2026-09-20-dataset-validity-review.md](memos/2026-09-20-dataset-validity-review.md) | what the dataset's grounding and measurement establish for each research claim, and the four things to carry into the paper | memo |
 | [memos/2026-10-07-timer-skip-rule-for-the-simulator.md](memos/2026-10-07-timer-skip-rule-for-the-simulator.md) | to 인경민: the TIMER skip rule that replaces backlog, and what the simulator, the trace and the contract change | memo |
+| [memos/2026-10-08-declared-scheduling-class.md](memos/2026-10-08-declared-scheduling-class.md) | to 인경민, 박이안: the declared-class field, the executor's idle rule, and the frozen-contract change they need | memo |
