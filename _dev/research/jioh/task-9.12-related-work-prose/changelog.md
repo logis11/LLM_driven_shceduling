@@ -506,3 +506,15 @@ Taken under 인지오's delegation (2026-10-09), scope-card item 31: `docs/resea
 Hands to 9.15: `docs/research-proposal.md:87`, `:95`, `:111`, `:113` restated as above; `:818`'s glossary "discards cache locality" with `:111` (its "1–5 μs" is item 28's). The guidebook vol-01 ch. 7.3 (`:1522–1524`) already states SJF's conditions and stays.
 
 Compiled effect: none.
+
+## D33 — the MLFQ illustration stated with the dataset's measured pair: an editor's runs between blocks against `cc1`'s object compile (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), scope-card item 32: `docs/research-proposal.md:123`'s "`bash` given a 10 ms slice uses 0.5 ms of it, while `cc1plus` burns all 10 ms" and `docs/background-guide.md:115`'s "The editor wakes for a keystroke, computes 0.5 ms of a 10 ms slice … The compiler chews through its full 10 ms slice" carry no source; the dataset measured both kinds of program on its machine, so the illustration is stated with them.
+
+- **The editor** (9.5's `office-writer`, `meas-ci:interactive:2026-09-18`, 14 repeats, `task-9.5-interactive-typing/campaign/results-same-machine.md`, the driven phase): LibreOffice Writer's `soffice.bin` threads, while SWELL-KW keystrokes are typed, run 0.046 ms between blocks at the median, 1.13 ms at p90 and 2.98 ms at p99 (238 329 runs); the first run after a key 0.062 ms at the median; all of a key's CPU 3.23 ms at the median (D32).
+- **The compiler** (9.6's `compiler-child`, `meas-ci:build:2026-09-18`, 14 repeats, `dataset/archetypes.yaml` `cc1_step_1`): `cc1` compiling one object of a warm `-j8` linux-6.6 build wakes once in 99.3 % of jobs and runs 367.6 ms of CPU at the median (p10 165.9 ms, p90 778.3 ms) before it next blocks.
+- **Restated:** on the dataset's machine an editor's threads run a few hundredths of a millisecond between blocks, a few milliseconds at the 99th percentile, while `cc1` runs hundreds of milliseconds without blocking — the first gives up a 10 ms slice almost at once, the second uses every slice it is given. `bash` (not measured) and `cc1plus` (the C++ compiler; the dataset's build is C) leave the sentence. The measurements are this software on this machine (9.5 D10).
+
+Hands to 9.15: `docs/research-proposal.md:123` and `docs/background-guide.md:115` restated as above, the diagram `:101–108` labelled with the same two programs; found in the sweep (`grep -n cc1plus docs`): `:177`'s §2.3 row "cc1plus ×8, bash" named for the build the dataset depicts (`cc1`, `-j8`).
+
+Compiled effect: none.
