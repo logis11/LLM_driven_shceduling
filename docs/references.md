@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-10-07
+> Status: normative · Created 2026-08-26 · Updated 2026-10-08
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -487,6 +487,11 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - cite: The Khronos Group. *Vulkan specification*, `chapters/VK_KHR_surface/wsi.adoc`, `VkPresentModeKHR`, Vulkan-Docs commit e4e53e4b31e13eeaee1ad99fb940aa72b2ec1b14 (2026-10-02), github.com/KhronosGroup/Vulkan-Docs, accessed 2026-10-06.
 - role: the presentation contract a display-paced frame loop runs against, for the TIMER statement in `simulator/simulator-guide.md`: `VK_PRESENT_MODE_FIFO_KHR` "waits for the next vertical blanking period to update the current image", and "one request is removed from the beginning of the queue and processed during each vertical blanking period in which the queue is non-empty" (`wsi.adoc:4418–4426`) — a late frame takes the next vertical blank. Existence only: what the contract states, not what a given game's loop does.
 - status: verified (2026-10-06; the file read at the commit)
+
+### `gstreamer`
+- cite: The GStreamer project. *GStreamer*, `subprojects/gstreamer/libs/gst/base/gstbasesink.c` and `subprojects/gst-plugins-base/gst-libs/gst/video/gstvideosink.c` at main commit `83e7df9168dd73f5dcd1caa60195a9d9dce558b4`, gitlab.freedesktop.org/gstreamer/gstreamer, accessed 2026-09-24 and 2026-10-08.
+- role: what a GStreamer sink does with a late frame, for the TIMER skip rule's choice of the tick run at once (`docs/memos/2026-10-07-timer-skip-rule-for-the-simulator.md`). "A buffer arrives too late in the sink when the presentation time (as a combination of the last segment, buffer timestamp and element base_time) plus the duration is before the current time of the clock. If the frame is later than max-lateness, the sink will drop the buffer without calling the render method" (`gstbasesink.c:118–124`); the check adds the buffer's stop time to `max-lateness` (`:3199`) and drops past it (`:3208`); a video sink sets `max-lateness` to 5 ms (`gstvideosink.c:177`). The frame whose interval contains the current time is rendered, the earlier ones dropped. Existence only: the sink's code at the commit, not a given player's pipeline; the release a desktop ships not read.
+- status: verified (2026-10-08; both files byte-identical to the 9.11 search record's S2-17 copies, SHA-256 `43a7223c…` and `cbaceaad…`)
 
 ### `fiedler-gaffer04`
 - cite: Fiedler, G. "Fix Your Timestep!" *Gaffer On Games*, 2004-06-10. gafferongames.com/post/fix_your_timestep/ (accessed 2026-10-06).

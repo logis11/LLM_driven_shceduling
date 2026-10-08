@@ -1,6 +1,6 @@
 # TIMER skips missed ticks — the rule for the simulator
 
-> Status: memo · Created 2026-10-07 · Updated 2026-10-07
+> Status: memo · Created 2026-10-07 · Updated 2026-10-08
 > From 인지오 to 인경민. Answers your note `simulator/notes/note-for-jioh-timer-backlog-vs-drop.md` (2026-09-29): TIMER's backlog rule is replaced by a skip rule. Decision D3 of task 9.11 (`_dev/research/jioh/task-9.11-scheduler-constants/changelog.md`). Absorb into the simulator guide and the interpretation contract once implemented.
 
 ## 1. The rule
@@ -56,3 +56,11 @@ The harness side — the `job` primitive in `docs/harness/metrics.md` §6.2, `ha
 1. The rule implemented in the simulator.
 2. The interpretation contract's TIMER row (`docs/simulator/interpretation-contract.md:31`) ratified as: "absolute periodic wake on the grid t₀ + k·period, drift-free. Reached after one or more ticks have passed, the task consumes the last passed tick at once and skips the earlier ones, each a missed job with no work."
 3. Anything in §1 or §5 that conflicts with the simulator's other invariants, before you build it.
+
+## Correction (2026-10-08)
+
+Three statements above are corrected; the rule of §1 is unchanged.
+
+- **§4, "none replays them."** rt-app's "absolute" mode replays missed activations (§4's own rt-app bullet), and so does a fixed-timestep game loop's simulation, capped (`fiedler-gaffer04`). The sources read share less: by default each skips. They differ on which tick the late job is. ROS 2's executor runs one job at once, stamped with the oldest pending activation (`teper-arxiv24`, §II, p. 3). interbench and Lipari and Palopoli's thread run nothing late and wait for a later tick (`interbench.c:398–411`, `:441`; `lipari-arxiv15`, Listing 2). A GStreamer sink drops a frame only once the clock has passed the frame's stop time plus `max-lateness`, 5 ms for a video sink, so the frame whose interval contains the current time is rendered and the earlier ones dropped (`gstreamer`). §1's choice — the latest passed tick, run at once, due at the next tick — is the GStreamer sink's for video playback, and design for the audio and game TIMER tasks, whose sources read (`chromium`, `vulkan`) do not say which tick late work stands for.
+- **§5, "as today."** Today a tick consumed at once emits no `ready(cause = timer_tick)` line: the TIMER branch for a passed tick continues without blocking (`simulator/src/sim.cpp:635–637`), and the next RUN prints `ready cause=arrive` (your `simulator/memo/memo_261001.md` §5.1). The harness reads consumed ticks, and from them the skipped ones, off the `timer_tick` lines, so §5.1's zero-wait line comes before the skip rule can be read.
+- **§5, the skipped tick's `deadline` line.** When a TIMER is reached exactly on a tick, the skipped tick before it has `slack_us` = 0 with `met: false`, while a job that ran is judged met when it ends at or before its due time (`sim.cpp:631`). A skipped tick is missed whatever its slack; `met` is the field to read.
