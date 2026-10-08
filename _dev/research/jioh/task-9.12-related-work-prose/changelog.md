@@ -545,3 +545,29 @@ Taken under 인지오's delegation (2026-10-09), scope-card item 36: `docs/resea
 Hands to 9.15: `docs/research-proposal.md:414`, `:640`, `:820` restated as above (`:640`'s Game Mode and whitelist clauses are D5's); `docs/references.md` — PipeWire's and JACK's defaults (S2-36, S2-37), the Ardour manual's two pages (S2-38, S2-57) and the Steam Deck page (S2-39) where the prose cites them, under the id-minting rule.
 
 Compiled effect: none.
+
+## D36 — lottery scheduling as the paper states it: shares proportional in expectation, starvation absent for any client holding tickets, O(n) selection with a list and O(lg n) with a tree; "Stride" leaves the menu row (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), scope-card item 38: `docs/research-proposal.md:415` ("Lottery / Stride … MLFQ cannot guarantee proportions. "Roughly less" is easy; "exactly 15% to background" is not"), `:422` ("its advantage is proportional guarantees and starvation-freedom, not speed. Selection is O(n) in the number of processes (O(log n) with a tree)") and `:828` ("Gives proportional CPU shares and freedom from starvation, at O(n) selection cost") are restated to `waldspurger-osdi94` (S1-09; the copy re-downloaded 2026-10-09, SHA-256 `e704678e…`, equal to the record's).
+
+- **Proportional, in expectation** (§2.2, p. 2): "Scheduling by lottery is probabilistically fair. The expected allocation of resources to clients is proportional to the number of tickets that they hold. … the actual allocated proportions are not guaranteed to match the expected proportions exactly. However, the disparity between them decreases as the number of allocations increases"; throughput proportional to tickets "with accuracy that improves with √n". "proportional guarantees" and "exactly 15% to background" restated: lottery gives the background an expected 15 %, its error shrinking as lotteries accumulate.
+- **Starvation** (p. 2): "Since any client with a non-zero number of tickets will eventually win a lottery, the conventional problem of starvation does not exist." Kept, scoped to a client holding tickets.
+- **Selection cost** (§4.2, p. 3): "O(n) operations to traverse a client list of length n"; with "a tree of partial ticket sums … only O(lg n) operations". Kept. "slower per decision than popping an MLFQ queue head" kept as the complexity comparison it is: MLFQ runs the jobs of the highest non-empty queue in round-robin (OSTEP ch. 8, Rules 1–2).
+- **"Stride"** leaves `:415`'s row: no registry entry and no read carries stride scheduling, and the frozen menu's algorithm is `LOTTERY` (`docs/recognition-vocabulary.md` §2). "It earns its place because ticket allocation is the natural way to express something like `batch_bandwidth_cap`" (`:422`) is a design statement and stays.
+
+Hands to 9.15: `docs/research-proposal.md:415`, `:422`, `:828` restated as above; `docs/references.md` `waldspurger-osdi94`'s role line with the selection cost (§4.2) beside the quantum it quotes.
+
+Compiled effect: none.
+
+## D37 — EDF's optimality stated with its conditions: one processor, Liu and Layland's (A1)–(A5), utilisation at most 1 (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), scope-card item 40: `docs/research-proposal.md:824`'s "Optimal for meeting deadlines on a single core, but requires deadlines to be declared" is restated to `liu-jacm73` (S1-10; the scan re-downloaded 2026-10-09, SHA-256 `de9fb725…`, equal to the record's).
+
+- **The conditions** (printed p. 48): (A1) periodic requests at constant intervals; (A2) "each task must be completed before the next request for it occurs"; (A3) independent tasks; (A4) constant run-time; (A5) no critical non-periodic tasks — on "a single processor" (Abstract).
+- **The result** (printed p. 55–56): "if a set of tasks can be scheduled by any algorithm, it can be scheduled by the deadline driven scheduling algorithm"; "THEOREM 7. For a given set of m tasks, the deadline driven scheduling algorithm is feasible if and only if (C1/T1) + (C2/T2) + ··· + (Cm/Tm) ≤ 1." The paper says nothing of behaviour above a utilisation of 1 (`liu-jacm73`'s registry line).
+- **"requires deadlines to be declared"**: under (A2) a task's deadline is its next request, so the algorithm needs each task's period; Linux's `SCHED_DEADLINE` takes a declared runtime, deadline and period through `sched_setattr(2)` (D26).
+- **Restated:** on one processor, for independent periodic tasks whose deadline is the next request, EDF schedules every task set any algorithm can — exactly those whose utilisation is at most 1 — and it needs each task's period or deadline.
+
+Hands to 9.15: `docs/research-proposal.md:824` restated as above; `:414`'s EDF row read with it (D35).
+
+Compiled effect: none.
