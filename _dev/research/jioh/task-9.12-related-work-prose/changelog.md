@@ -106,3 +106,19 @@ Hands to:
 - **9.15** — every doc naming `whitelist` restated to the two conditions: `docs/research-proposal.md:530`, `:536` (D1, D3), `docs/research-claims.md:83`, `:128–137`, `docs/related-work.md:34`, `:36`, `:42`, `:48`, `docs/terminology.md:133`, `:181`, `:189–192`, `docs/background-guide.md:60`, `docs/daemon/daemon-guide.md:25`, `:44`, `:92`, `:121`, `:136`, `:152`, `docs/data-contracts.md:49`, `:344`, `:376`, `:382`, `:467`, `:516`, `docs/harness/metrics.md:74`, `docs/harness/harness-and-records-guide.md:1139`, `:1243`, `:1390`, `docs/workload/building-plan.md:86`, `:113`, `docs/workload/scenario-catalog.md:6`, the guidebook (vol-04 `:448`, `:492`, `:1797`, and every other `whitelist` line), and the docs the sweep `grep -rn -i whitelist docs` finds beyond these.
 
 Compiled effect: none on any compiled file.
+
+## D7 — related-work's sched_ext sentence: first released in 6.12, loadable at runtime, integrity and fallback as the kernel states them; "verifier-enforced safety" leaves (2026-10-08)
+
+By 인지오's decision, scope-card item 2: `docs/related-work.md:8`'s "sched_ext, merged in Linux 6.12 … custom schedulers load at runtime with verifier-enforced safety and automatic fallback to the default scheduler [schedext]" is restated to the kernel's own statements, citing `schedext-docs`.
+
+- **First release** (S2-47): `kernel/sched/ext.c` and `Documentation/scheduler/sched-ext.rst` are absent at v6.11 and present from v6.12-rc1; Linux 6.12 is the first release carrying sched_ext. The scx README's "starting from version 6.12" (S2-09) agrees.
+- **Loadable at runtime** (S2-01, `sched-ext.rst:14` at v6.12): "The BPF scheduler can be turned on and off dynamically anytime." `kernel/Kconfig.preempt:150–151` at v6.12 (S2-47): "Rapid scheduler deployments: Non-disruptive swap outs of scheduling policies in production environments."
+- **Integrity and fallback** (S2-01 `:16–19`; S2-02 `:18–21` at mainline `7b63ef2d`): "The system integrity is maintained no matter what the BPF scheduler does. The default scheduling behavior is restored anytime an error is detected, a runnable task stalls, or on invoking the SysRq key sequence `SysRq-S`." The fallback target is CFS at v6.12 and "the fair-class scheduler" at mainline.
+- **"verifier-enforced safety" leaves.** The kernel document names the BPF verifier only in a comment of its example code (S2-01 `:145`, S2-02 `:195`), the Kconfig help not at all (S2-47); `schedext-docs`' constraint (1) stands: no verifier-safety claim is sourced here.
+
+Hands to 9.15:
+
+- `docs/related-work.md:8` restated as above; `:59`'s placeholder row (`schedext` "Linux 6.12") is item 20's.
+- `docs/references.md` `schedext-docs`: the v6.11 / v6.12-rc1 / v6.12 tree check (S2-47) in its status line as the ground of "first released in 6.12".
+
+Compiled effect: none.
