@@ -226,6 +226,6 @@ Hands to 9.15:
 
 - `docs/research-proposal.md:158` and `docs/background-guide.md:18` ("they rarely do, and when they do declare something, everyone claims to be important") restated as above.
 - `docs/references.md`: the Debian count's sources — Debian unstable's `Contents` and `Packages` indexes of 2026-10-08 and Debian Code Search — entered under the id-minting rule, with S3-20's hashes; plocate's and findutils' units (S3-02) where the prose names them.
-- The guidebook lines saying the same: vol-01 and vol-03 wherever "목록" / "선언" passages state that applications rarely declare or over-claim — found by `grep -n -E '선언|declare' docs/guidebook/*.md` at 9.15.
+- The guidebook lines saying the same: vol-01 `:2097` ("대부분의 프로그램이 선언하지 않습니다"), `:2099` ("성능에 민감한 프로그램들이 필요 이상으로 높은 priority를 요구하는 경향", no source), `:2143`, `:3338`, `:3364`; vol-03 `:107`, `:109` ("파일 색인을 만드는 프로그램이 자진해서 … 말하는 일은 잘 없습니다", contradicted by S3-02 and 9.11 S2-22), `:314`.
 
 Compiled effect: none.
