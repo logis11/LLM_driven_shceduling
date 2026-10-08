@@ -65,6 +65,7 @@ Access date for every copy below: 2026-10-07. All copies saved under `sources/<i
 | 51 | 2026-10-08 | arXiv API (stage 3) | eight queries, sorted by submission date, 100 results each: `all:"language model" AND all:workload AND all:recognition AND all:scheduler` (3); `all:LLM AND all:"process list"` (1); `all:LLM AND all:sched_ext` (1); `all:LLM AND all:"workload classification" AND all:"operating system"` (0); `all:"agentic OS"` (10); `all:LLM AND all:scheduler AND all:desktop` (3); `all:LLM AND all:"process names"` (5); `all:LLM AND all:"kernel scheduler"` (4) | 26 distinct works read by title; none measures an LLM's accuracy at recognizing workloads from a process list; AKTS has a v2 (2026-10-07) → S1-32 | — |
 | 52 | 2026-10-08 | dl.acm.org; OpenAlex; escholarship.org (stage 3) | `https://dl.acm.org/doi/pdf/10.1145/3672197.3673434`; `api.openalex.org/works/doi:10.1145/3672197.3673434` (open-access locations); `https://escholarship.org/content/qt3jg1f0jr/qt3jg1f0jr.pdf` | eScholarship 200 (first request 202, empty) → S1-33 | ACM DL 403 (both URLs) |
 | 53 | 2026-10-08 | arxiv.org (stage 3) | `/pdf/2509.01245v1`, `/pdf/2509.01245v4` | 200, byte-identical to S1-12's copies → S1-34 | — |
+| 54 | 2026-10-08 | api.crossref.org; arxiv.org (stage 3) | `works/10.1145/3770855.3817987`; `/abs/2506.02025`; `/abs/2508.12551` | 200 each → S1-35 | — |
 
 ---
 
@@ -513,6 +514,15 @@ Access date for every copy below: 2026-10-07. All copies saved under `sources/<i
   - §3, p. 3: "1. Workload Analysis Engine Provides tiered access to system performance data: (1) cost-effective API endpoints with pre-processed summaries (CPU load, memory usage), (2) secure sandbox access to file reading, application building, Linux profiling tools (perf, top) and dynamically attachable eBPF probes, (3) feedback channel reporting post-deployment metrics (percentage change in throughput/latency)."
   - §4, p. 4: the Observation, Planning, Execution and Learning Agents; the Planning Agent's "decision hierarchy: configuring existing schedulers, generating patches, or composing new schedulers from primitives".
 - **Coverage.** T5: SchedCP names edge and personal devices among its motivations and evaluates on given workloads (kernel compilation, schbench, batch workloads) on an 86-core Xeon and an 8-core Core Ultra 7 258V. Not an observation.
+
+### S1-35 — TuneAgent's DOI resolved; the two adjacent preprints' versions re-checked (T5; stage 3, 2026-10-08)
+
+- **Copies** (2026-10-08, `sources/S1-35/`): Crossref's record of DOI 10.1145/3770855.3817987 → `crossref-tuneagent.json`, SHA-256 `2af8e0717a40c5c2524dcede9a80fd2048cd93df855934c2430acd0fc56c1281`; the arXiv abstract pages of 2506.02025 (`5f7117a4…`, byte-identical to S1-15's) and 2508.12551 (`220f6ca1…`, byte-identical to S1-14's).
+- **Passages.**
+  - Crossref: title "TuneAgent: Agentic Operating System Kernel Tuning with Reinforcement Learning"; container "Proceedings of the 32nd ACM SIGKDD Conference on Knowledge Discovery and Data Mining V.2"; published 2026-08-08; event "KDD '26: The 32nd ACM SIGKDD Conference on Knowledge Discovery and Data Mining"; authors Lin, Li, Luo, Lin, Zhang, Xing, Wu — the venue S1-14's v2 PDF states, now in the DOI registry.
+  - arXiv 2508.12551: "[v1] Mon, 18 Aug 2025 … [v2] Sun, 31 May 2026"; no later version.
+  - arXiv 2506.02025: "[v1] Thu, 29 May 2025 … [v2] Wed, 3 Sep 2025"; "Comments: 10 pages, 6 figures, work under review" — no later version, no venue.
+- **Coverage.** T5: TuneAgent's venue confirmed by its DOI; Jadhav et al. still an unpublished preprint. Not an observation.
 
 ## 3. Not found
 
