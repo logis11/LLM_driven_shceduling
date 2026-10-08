@@ -42,6 +42,7 @@ Topics in scope: T7 (counts over units, packages or a rules catalogue), T10 (tra
 | 30 | 2026-10-07 | Zenodo REST API `https://zenodo.org/api/records?q=…&size=8` | `"World of Warcraft" avatar history`; `game session length`; `gaming session duration dataset`; `application usage log desktop`; `SWELL knowledge work`; `computer interaction logging window switching`; `active window log dataset` | none relevant (top 8 of each were off-topic) | `steam playtime sessions` → curl (35) SSL_ERROR_SYSCALL (connection reset) |
 | 31 | 2026-10-07 | cseweb.ucsd.edu | `https://cseweb.ucsd.edu/~jmcauley/datasets.html` (Steam Video Game and Bundle Data) | 1 page | — |
 | 32 | 2026-10-07 | kaggle.com | `https://www.kaggle.com/datasets` (reachability probe only) | 200 | Not used: Kaggle downloads need a login |
+| 33 | 2026-10-08 | git (stage 3) | `git clone https://github.com/CachyOS/ananicy-rules` (full history) | HEAD `03ef03fb`, 2 762 commits → S3-19 | — |
 
 ---
 
@@ -479,6 +480,27 @@ q08  Nice= values over hits (count, value):
 
 ---
 
+### S3-19 — CachyOS ananicy-rules, history (T8; stage 3, 2026-10-08)
+
+- **Copy read.** Full `git clone https://github.com/CachyOS/ananicy-rules` on 2026-10-08 into `sources/S3-19/ananicy-rules/`. HEAD `03ef03fbf7e834385377432ccecaedd32e3414bb`, unchanged since S3-03. 2,762 commits (2,239 non-merge, 523 merges); first commit `c3efeb28371e835151f928e321fbfeeadbb1125d`, 2022-03-16. Tag `1.1.49`, the version CachyOS packages (S2-45), resolves to `03ef03fb…`.
+- **Computed: entries over time** (`count_at.py`, Appendix A.12; S3-03's method — each `.rules` file parsed separately, one JSON object per non-blank, non-`#` line; at the last first-parent commit on or before each date):
+
+  | Date | Commit | `.rules` files | Entries | `Game` |
+  |---|---|---|---|---|
+  | 2022-12-31 | `8dda7561` (2022-12-13) | 348 | 880 | 524 |
+  | 2023-12-31 | `f524ad42` (2023-12-27) | 245 | 1 066 | 675 |
+  | 2024-12-31 | `32c77758` (2024-12-30) | 257 | 1 367 | 764 |
+  | 2025-12-31 | `3f1f24c3` (2025-12-28) | 292 | 1 645 | 965 |
+  | 2026-03-31 | `7460ed8d` (2026-03-30) | 331 | 6 329 | 5 533 |
+  | 2026-06-30 | `fd4e898d` (2026-06-29) | 352 | 14 731 | 12 602 |
+  | HEAD | `03ef03fb` (2026-09-08) | 361 | 15 813 (1 unparseable line) | 13 528 |
+
+- **Computed: who last changed each current entry** (`blame_rules.py`, Appendix A.13; `git blame --line-porcelain -w -M -C` on every `.rules` file at HEAD): the 15 813 entries trace to 1 214 commits by 112 authors. Two authors account for 13 493 (85.3 %): Luka Ogadze 9 445, pollux78 4 048; then Shendisx 1 100, jilv220 204. 22 commits cover half the entries. 15 077 lines date from 2026 commits. Blame dates a line's last change, which includes re-sorts and retypings (e.g. `7a1d26ab`, "updated UE game rules", retypes `Game` entries to `BG_CPUIO`), so these figures say who last edited each entry, not who first added it; the dated counts above are the growth measure.
+- **What the repository carries besides rules** (`git ls-files` at HEAD): `00-types.types`, `00-cgroups.cgroups`, `ananicy.conf`, the two JSON schemas, `Makefile`, `README.md`, an issue template, `lint.py` (added `75ab9bc5`, 2026-08-25: "add lint.py script and JSONSchema for rules and cgroups definitions") and `sort-games.sh` (added `9100589b`, 2026-04-09). No script that generates entries.
+- **Coverage.**
+  - T8 covered for how entries enter: by commit, from contributors — 112 authors for the current entries. Whether a contributor wrote an entry by hand or produced it with a tool outside the repository is not observable from the history.
+  - T7 (counts): growth from 1 645 entries at the end of 2025 to 15 813 at `03ef03fb`, nearly all of it `Game` entries (965 → 13 528). One observation per date (one commit each); no machine.
+
 ## 3. Not found
 
 - **T10 — context-switch rate per core on a desktop or server, with machine and kernel named, from a public dataset.** Not found. The only trace with a computable rate is S3-07, from an Android phone (Linux 4.4.177, aarch64). Searches that established this:
@@ -733,6 +755,95 @@ $ grep -HnE '^(CPUSchedulingPolicy|Nice|IOSchedulingClass|IOSchedulingPriority|C
 /usr/lib/systemd/user/systemd-tmpfiles-clean.service:21:IOSchedulingClass=idle
 ```
 So 3 of the 163 unit files in this minimal container image declare an idle class: e2scrub@, e2scrub_reap, and systemd-tmpfiles-clean (system and user). This is a labelled illustration only; the image is a minimal sandbox, not a desktop install.
+
+### A.12 `count_at.py` (stage 3, 2026-10-08)
+```python
+"""Count rule entries at a commit: each .rules file parsed separately, one JSON object per non-blank, non-# line."""
+import json, subprocess, sys, collections
+repo, rev = sys.argv[1], sys.argv[2]
+names = subprocess.run(['git', '-C', repo, 'ls-tree', '-r', '--name-only', rev], capture_output=True, text=True, check=True).stdout.split('\n')
+files = [n for n in names if n.endswith('.rules')]
+entries, bad, types = 0, 0, collections.Counter()
+for f in files:
+    blob = subprocess.run(['git', '-C', repo, 'show', f'{rev}:{f}'], capture_output=True, check=True).stdout.decode('utf-8', 'replace')
+    for line in blob.split('\n'):
+        s = line.strip()
+        if not s or s.startswith('#'):
+            continue
+        try:
+            o = json.loads(s)
+        except Exception:
+            bad += 1
+            continue
+        if isinstance(o, dict) and 'name' in o:
+            entries += 1
+            types[o.get('type')] += 1
+print(rev[:8], 'files', len(files), 'entries', entries, 'unparseable', bad, 'Game', types.get('Game', 0))
+```
+Run: `for d in 2022-12-31 2023-12-31 2024-12-31 2025-12-31 2026-03-31 2026-06-30; do c=$(git rev-list -1 --first-parent --before="$d 23:59:59" HEAD); python3 -I count_at.py . $c; done` in `sources/S3-19/ananicy-rules`.
+
+### A.13 `blame_rules.py` (stage 3, 2026-10-08)
+```python
+"""Attribute each rule entry at HEAD to the commit that introduced its line (git blame -w -M -C)."""
+import json, subprocess, sys, collections, pathlib, concurrent.futures as cf
+repo = pathlib.Path(sys.argv[1])
+files = sorted(p for p in repo.rglob('*.rules') if '.git' not in p.parts)
+def blame(p):
+    out = subprocess.run(['git', '-C', str(repo), 'blame', '--line-porcelain', '-w', '-M', '-C', '--', str(p.relative_to(repo))],
+                         capture_output=True, text=True, check=True).stdout
+    rows, cur = [], {}
+    for line in out.split('\n'):
+        if line.startswith('\t'):
+            text = line[1:].strip()
+            if text and not text.startswith('#'):
+                try:
+                    obj = json.loads(text)
+                except Exception:
+                    obj = None
+                if isinstance(obj, dict) and 'name' in obj:
+                    rows.append((cur['sha'], cur['author'], cur['time'], cur['summary'], obj.get('type'), str(p.relative_to(repo))))
+            cur = {}
+        elif not cur:
+            cur['sha'] = line.split(' ')[0]
+        elif line.startswith('author '):
+            cur['author'] = line[7:]
+        elif line.startswith('author-time '):
+            cur['time'] = int(line.split()[1])
+        elif line.startswith('summary '):
+            cur['summary'] = line[8:]
+    return rows
+rows = []
+with cf.ThreadPoolExecutor(8) as ex:
+    for r in ex.map(blame, files):
+        rows.extend(r)
+print('files', len(files), 'entries', len(rows))
+by_commit = collections.Counter((r[0][:8], r[1], r[3]) for r in rows)
+by_author = collections.Counter(r[1] for r in rows)
+print('commits introducing current entries', len(by_commit), 'authors', len(by_author))
+print('top commits:')
+for (sha, a, s), n in by_commit.most_common(15):
+    print(f'  {n:6d} {sha} {a} | {s}')
+print('top authors:')
+for a, n in by_author.most_common(10):
+    print(f'  {n:6d} {a}')
+import datetime
+yr = collections.Counter(datetime.datetime.utcfromtimestamp(r[2]).year for r in rows)
+print('entries by year of introducing commit:', sorted(yr.items()))
+n = len(rows); top = by_commit.most_common()
+cum = 0
+for i, (_, c) in enumerate(top, 1):
+    cum += c
+    if cum >= n / 2:
+        print(f'commits covering half the entries: {i}'); break
+```
+Run: `python3 -I blame_rules.py ananicy-rules` in `sources/S3-19`. Output (summary lines verbatim):
+```
+files 361 entries 15813
+commits introducing current entries 1214 authors 112
+top authors: 9445 Luka Ogadze; 4048 pollux78; 1100 Shendisx; 204 jilv220; 71 Mach565; 68 NIICKTCHUNS; 62 Masum Reza; 62 Peter Jung; 47 pinitik1906; 46 miwakasa
+entries by year of introducing commit: [(2022, 295), (2023, 85), (2024, 210), (2025, 146), (2026, 15077)]
+commits covering half the entries: 22
+```
 
 ## Appendix B — long outputs (verbatim)
 
