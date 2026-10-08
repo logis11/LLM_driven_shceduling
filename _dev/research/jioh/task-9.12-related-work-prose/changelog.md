@@ -356,3 +356,14 @@ By 인지오's decision, scope-card items 12 and 54: `docs/related-work.md:32`'s
 Hands to 9.15: `docs/references.md` `kgent-ebpf24` — status: the paper read 2026-10-08 from the open-access eScholarship copy, with its URL and SHA-256; "DOI record not re-checked (ACM DL unreachable)" leaves. The guidebook vol-02 ch. 6.3 checked against the same passages (item 60).
 
 Compiled effect: none.
+
+## D23 — SchedCP's description kept to v4; "a given server or batch workload" names its evaluation and its personal-device motivation (2026-10-08)
+
+By 인지오's decision, scope-card items 13 and 15 (its first two clauses; the third is D12's): `docs/related-work.md:32`'s description of SchedCP stands, cited to v4's locators; `:34`'s "SchedCP optimizes a given server or batch workload" becomes "SchedCP optimizes a given workload (its evaluation runs kernel compilation, schbench and batch workloads), though it names edge and personal devices among its motivations"; "through an agentic session with sandboxed profiling (reading source, running perf)" stands.
+
+- **Item 13** (`schedcp-mlsys25`, v4; S1-12, S1-34): "Operating system schedulers suffer from a fundamental semantic gap, where kernel policies fail to understand application-specific needs" (Abstract); "1. Workload Analysis Engine Provides tiered access to system performance data … (2) secure sandbox access to file reading, application building, Linux profiling tools (perf, top) and dynamically attachable eBPF probes" (§3, p. 3); the Observation, Planning, Execution and Learning Agents, the Planning Agent "configuring existing schedulers, generating patches, or composing new schedulers from primitives" (§4, p. 4); "reaching 1.79× total improvement over EEVDF" for kernel compilation (§5, p. 4).
+- **Item 15** (v4; S1-34): §2, p. 2 — "edge/personal device users lack both kernel optimization expertise and understanding of application-specific targets"; §5, p. 4 — "Evaluation uses two machines: 86-core Intel Xeon 6787P with 758GB RAM running Linux 6.14, and 8-core Intel Core Ultra 7 258V with 30GB RAM running Linux 6.13"; its workloads kernel compilation, schbench and batch workloads (S1-12).
+
+Hands to 9.15: `docs/related-work.md:32` cited to v4 as above, `:34` restated; the guidebook vol-02 ch. 6.2 checked against the same passages (item 60).
+
+Compiled effect: none.
