@@ -248,3 +248,22 @@ Hands to 9.15:
 - The general "same behaviour, opposite treatment" passages that illustrate with a download against a scan or a training run against a scan — vol-01 `:448`, `:1314`, `:1350`, `:1396`, `:2561`, `:3751`, and `docs/research-proposal.md:131`, `:175` — are read with item 33 (the download and the virus scan, against 9.6's and 9.7's measured values).
 
 Compiled effect: none.
+
+## D15 — the download-against-scan premise restated to the dataset's pair: the game download against the stock unattended upgrade, two real jobs differing in run shape, structure, size and declared priority (2026-10-08)
+
+By 인지오's decision, scope-card item 33 (with 9.10 D3's replacement of the scan, and the general passages D14 routed here): `docs/research-proposal.md:131`'s "a game download the user is impatiently waiting for, and a virus scan the user did not ask for, are behaviourally identical. Both are sustained background bulk work hammering the disk. … No CPU utilization graph will ever separate them", the §2.3 table's row and sentence (`:175`, `:178`: "same process count, same behavioural signature, opposite correct policy") and `docs/background-guide.md:12–16` ("these two machines look **identical** … Every measurement the OS can take … comes out the same") are restated to the pair the dataset carries, `c2-p2a` against `c2-p2b`.
+
+- **The unwanted job** is Ubuntu 24.04's stock unattended upgrade, not a virus scan (9.10 D3): ClamAV's documentation states "ClamAV is not a traditional anti-virus or endpoint security suite" and no ClamAV package examined ships a scheduled scan; a scheduled desktop `clamscan` runs only through ClamTk, which "is no longer maintained", in regular use on 0.11 % of Debian popcon submissions; `unattended-upgrades` is in the stock desktop's default layer, enabled by default, run daily (9.10 S2-01, S2-03, S2-30, S3-30).
+- **The two jobs, as measured:**
+  - `game-download` (`dataset/archetypes.yaml`, `meas-ci:background:2026-09-19`, 9.7 D28–D29): CPU over the job 0.907–0.958, 697–761 s in 760–822 s; one process of 83–84 threads; the run between voluntary blocks 162.7 µs ±2.21 %; network wait 220.6 µs ±4.18 %. Nice 10 does 75.33 % of its CPU over the 30 pooled repeats (9.11, the `game-download` pool; D6).
+  - `package-upgrade` (`meas-ci:background:2026-10-01`, 9.10 D17, D39): CPU over the stage 0.990–0.994; 916 short-lived processes, locale-gen's 18 `localedef` runs 72.8–76.5 % of the CPU; the run between voluntary blocks 1.798 ms ±3.10 %; CPU total 26.385 s ±3.78 %. Nice 19 does 2.67 % of its CPU (9.11).
+- **What holds:** both keep a CPU 91–99 % busy beside the game. **What leaves:** "behaviourally identical", "same behavioural signature", "No CPU utilization graph will ever separate them", "Every measurement the OS can take … comes out the same" — the jobs differ in how their work is cut (163 µs against 1.8 ms between blocks), in structure (one 84-thread process against 916 processes), in size (about 700 s of CPU against 26 s) and in declared priority (the wanted download at nice 10 for three quarters of its CPU).
+- **The pair's claim**, as D14 states P1's: two real jobs beside a game with opposite correct policies — the wanted download throttled and never starved, the unwanted upgrade deferred — testing what recognition adds over a behavioural and declared-priority baseline.
+
+Hands to 9.15:
+
+- `docs/research-proposal.md:131`, `:175`, `:178`, `:622` ("Game + antivirus full scan"), `:185`'s "that a scheduled antivirus scan is not" (its Steam clause is item 34's); `docs/background-guide.md:12–16`; `docs/research-claims.md:222` ("download versus antivirus scan"); `docs/data-contracts.md:92` ("a virus scan in full swing") — restated as above.
+- The guidebook: the general passages D14 routed here, vol-01 `:448`, `:1314`, `:1348–1352`, `:1396`, `:2561`, `:3422`, `:3751`; vol-03 `:74`, `:142`, `:150`, `:168`, `:180–183`, `:266`, `:1484`; vol-04 `:1398`; vol-05 `:941`, `:1011–1014`, `:1056`, `:1075–1077`, `:1194–1198`, `:1259`, `:1300`, `:1386`, `:1402`, `:1449`, `:1636–1643`, `:2638`.
+- 9.10 D3 already handed the workload docs (the scenario catalog's S17 row, `docs/recognition-vocabulary.md`'s examples, `building-plan.md` §3 C2 and C7, and with them `docs/workload/coreset-guide.md:650–663`, `:915–929`, `:957–959`).
+
+Compiled effect: none.
