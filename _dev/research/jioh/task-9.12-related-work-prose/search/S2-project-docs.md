@@ -52,6 +52,7 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
 | 42 | 2026-10-08 | cachyos.org; cdn77.cachyos.org (stage 3) | `https://cachyos.org/download/` → `…/ISO/desktop/260809/cachyos-desktop-linux-260809.iso` and `.sha256` | 200; SHA-256 equal to the published one → S2-46 | — |
 | 43 | 2026-10-08 | GitHub API (stage 3) | `repos/torvalds/linux/contents/{kernel/sched/ext.c,Documentation/scheduler/sched-ext.rst}?ref={v6.11,v6.12-rc1,v6.12}`; `kernel/Kconfig.preempt?ref=v6.12` | 200 at v6.12-rc1 and v6.12 → S2-47 | 404 at v6.11 (both files) |
 | 44 | 2026-10-08 | lpc.events (stage 3) | `/export/timetable/18.json`; `/event/18/contributions/1694/` and its attachment `sched_ext status and plans.pdf` | 200 → S2-48 | — |
+| 45 | 2026-10-08 | api.steampowered.com; gitlab.steamos.cloud (stage 3) | `ISteamNews/GetNewsForApp/v2/?appid=1675200&count=300&maxlength=0`; `git clone https://gitlab.steamos.cloud/holo/steamos-manager` | 200; clone at `302d37b9` → S2-49 | — |
 
 ## 2. Candidates
 
@@ -512,6 +513,17 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
   - `:10–19`: "SCX schedulers" / "https://github.com/sched-ext/scx" / "Still very early days" / "Interactivity focused: scx_lavd, scx_bpfland" / "Userspace scheduling: scx_rustland, scx_rlfifo" / "For complex topologies: scx_rusty" / "Customizable soft-partitioning: scx_layered".
   - `:20–27`: "What we're doing now" / "Keep building up and learning" / "Accumulate practical wins" / "scx_lavd in steamdeck" / "scx_bpfland for laptops and desktops" / "scx_layered deployed in 1M+ machines with significant perf gains" / "Build community" / "Distro support: cachyOS, arch, ubuntu, fedora, nix, openSUSE".
 - Coverage: T1 — the primary for LWN's "scx_layered has been deployed in over one million machines" (S2-12): a slide of the sched_ext maintainers' status talk, 2024-09-18, stating the figure without naming the operator or a method; the same slide calls the schedulers "Still very early days". `scx_rusty` is listed for "complex topologies" with no deployment statement; "scx_lavd in steamdeck" sits under "Accumulate practical wins" with no shipping statement. A talk's slides (self-report), not an observation.
+
+### S2-49 — SteamOS: the Steam Deck news feed to 2026-10-08, and `steamos-manager`'s CPU-scheduler interface (stage 3, 2026-10-08)
+
+- Copies (2026-10-08, `sources/S2-49/`):
+  - https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=1675200&count=300&maxlength=0 → `steam-news-2026-10-08.json`, SHA-256 `bd276c704eb05ce10dfdf3ccc8b380bf5a9f0528bf743e9b16bfabb786dc311f`; 300 items, the newest 2026-10-08 ("Steam Beta Client Update: October 7th").
+  - `git clone https://gitlab.steamos.cloud/holo/steamos-manager` (Valve's SteamOS system-settings daemon; GitLab project 1288), `main` at `302d37b98d5563152aaee757d50dbde242f0ba31` (2026-10-07), newest tag `v26.4.1`: `steamos-manager/src/power.rs` SHA-256 `3f388bebe3b405540a5231a0fdd37d70f275ceb7297ace5f67b5080d580394a2`; `data/interfaces/com.steampowered.SteamOSManager1.xml` `0c8c181501d1e24480d2394369c362770d32424e1d107014aa86639e185d405c`. The scheduler support entered in `3eacff5` (2025-10-22, "Add CpuScheduler and support for LAVD scheduler.").
+- Passages:
+  - News feed: every item whose text names LAVD, a CPU scheduler, sched_ext or scx is a SteamOS 3.8 preview, beta or release note (2026-03-19 to 2026-06-18), each carrying the one line "Initial support for LAVD CPU scheduler via `steamosctl set-cpu-scheduler lavd`"; no later item names any of them.
+  - `SteamOSManager1.xml:98–117`: "com.steampowered.SteamOSManager1.CpuScheduler1" / "@short_description: Optional interface for adjusting CPU scheduler." / "AvailableCpuSchedulers: Enumerate the supported CPU schedulers on the system." / "CpuScheduler: The current CPU scheduler used for the system's CPUs."
+  - `power.rs:60`: `const LAVD_PATH: &str = "/usr/bin/scx_lavd";`; `:90–93`: `pub enum CpuScheduler {` / `None,` / `LAVD,`; `:321–328`: the current scheduler is `LAVD` when `scx.service` is enabled, otherwise `None`; `:340–345`: the available list is `None`, and `LAVD` when `scx.service` exists; `:352–380`: setting `LAVD` starts `scx.service`, setting `None` stops it.
+- Coverage: T2 (deployment) — SteamOS offers LAVD as a selectable CPU scheduler beside the kernel's default ("None"), through Valve's settings daemon; through 2026-10-08 Valve's release notes state only its "Initial support" by command. Whether a SteamOS image enables `scx.service` by default was not read (the image was not inspected). Source and release notes, not an observation.
 
 ## 3. Not found
 
