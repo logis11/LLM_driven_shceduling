@@ -447,3 +447,16 @@ By 인지오's decision, scope-card item 24: `docs/research-proposal.md:147`'s r
 Hands to 9.15: `docs/research-proposal.md:147` with the addition; `docs/references.md` — Apple's `QualityOfService` page and the archived guide entered under the id-minting rule where the prose cites them; the guidebook vol-01 `:3277`, `:3342`, `:3718` and vol-03 `:55` checked against the same passages.
 
 Compiled effect: none.
+
+## D29 — MLFQ as the baseline: restated to what each OS ships; "the family Linux, macOS and Windows all ship" leaves (2026-10-09)
+
+By 인지오's decision, scope-card item 27: `docs/research-proposal.md:117`'s "MLFQ … is the algorithm family that Linux, macOS, and Windows all ship variants of", `:830`'s "The basis of most production schedulers" and `docs/background-guide.md:203`'s "the default scheduler family real OSes use" are restated to each vendor's own documentation (S2-54).
+
+- **Windows** (Microsoft Learn, "Scheduling Priorities", "Priority Boosts", 2025-07-14): 32 priority levels, round-robin within the highest ready level; a thread is boosted "when a wait operation associated with disk or keyboard I/O finishes", on foreground and on input, and "the scheduler reduces that priority by one level each time the thread completes a time slice, until the thread drops back to its base priority" — an MLFQ form, as OSTEP names "Windows NT and subsequent Windows operating systems" (S1-02, p. 10).
+- **macOS** (Apple's XNU, `doc/scheduler/sched_clutch_edge.md` at `xnu-12377.121.6`): "The scheduling bucket level uses an Earliest Deadline First (EDF) algorithm" across buckets that "roughly map to the QoS classes"; "a variation of the FreeBSD ULE scheduler" across thread groups; at the thread level the Mach timesharing algorithm, "thread priority = base priority - (thread CPU usage >> priority shift)" — usage-decayed priority inside an EDF-over-QoS hierarchy.
+- **Linux**: EEVDF since 6.6, a proportional-share algorithm (D18, D26); OSTEP's MLFQ chapter never names Linux (S1-02).
+- **Why MLFQ is the baseline**, restated: it is the textbook form of classification by behaviour (OSTEP ch. 8; Corbató 1962, D18), not a family every OS ships. "The basis of most production schedulers" and "the default scheduler family real OSes use" leave.
+
+Hands to 9.15: `docs/research-proposal.md:117`, `:830`, `docs/background-guide.md:203` restated as above; `docs/references.md` entries for Apple's XNU scheduler document and Microsoft's two Learn pages under the id-minting rule; the guidebook vol-01's MLFQ-everywhere passages (`:3320` table, `:3338`, `:3344`) checked against S2-54.
+
+Compiled effect: none.
