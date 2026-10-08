@@ -506,6 +506,7 @@ q08  Nice= values over hits (count, value):
   - `00-default/Audio-Video/audioserver.rules:1–4` (`3b8b4a9d6f52298e7f9ac738615909846932645ec9af2edf9ed4c8b1baa41bd5`): `pipewire`, `pipewire-pulse`, `wireplumber`, `pulseaudio`, each `"type": "LowLatency_RT"`; `00-default/Audio-Video/mixxx.rules:2`: `{ "name": "mixxx", "type": "LowLatency_RT" }`
   - `00-types.types:9`: `{ "type": "Player-Audio", "nice": -4 }`; `:18`: `{ "type": "LowLatency_RT", "nice": -12, "ioclass": "best-effort" }`
   - The 28 `Player-Audio` entries are the five workstations above with `helgobox`, `KholorsStation`, `BitwigStudioEngine` and `tenacity`, and nineteen music players (`clementine`, `spotify`, `rhythmbox`, `mpd`, `cmus`, `audacious`, …). No entry names `qtractor`, `rosegarden`, `zrythm`, `renoise`, `hydrogen`, `carla` or `jackd`.
+- **Computed: the core set's process names in the catalogue** (`names_vs_catalogue.py`, Appendix A.14; the 50 compiled files of `dataset/build/coreset-single/` at repository commit `06895b81`, every `arrive` event's `name`, matched exactly against entry names at `03ef03fb`, and after truncating entry names to 15 characters): 35 distinct names; 14 match exactly — `Troy.exe` (`Game`), `steam` (`Launcher`), `wineserver`, `gnome-shell`, `pipewire` (`LowLatency_RT`), `chrome`, `code`, `soffice.bin` (`Doc-View`), `mpv` (`Player-Video`), `gimp` (`Image-View`), `element-desktop` (`Chat`), `dbus-daemon` (`Service`), `7z`, `baloo_file` (`BG_CPUIO`); none more after truncation. Unmatched: `kdenlive`, `kdenlive_render`, `make`, `python`, `HandBrakeCLI`, `deja-dup`, `tracker-miner-f`, `thunderbird-bin` (the catalogue carries `thunderbird`), `unattended-upgr`, `dkms`, `systemd`, the game chain's `dxvk-cs`, `dxvk-submit`, `FAudio_AudioCli`, `Task worker thr`, `winepulse_mainl`, `winepulse_timer`, and `audio-stream-he`, `video-playback-`, `qzvd`, `xkrr`. Files whose every arriving name matches: 7 of 50. Whether ananicy-cpp compares a rule's `name` with the 15-character `comm` or with the executable's basename was not read.
 - **Coverage.**
   - T8 covered for how entries enter: by commit, from contributors — 112 authors for the current entries. Whether a contributor wrote an entry by hand or produced it with a tool outside the repository is not observable from the history.
   - T7 (counts): growth from 1 645 entries at the end of 2025 to 15 813 at `03ef03fb`, nearly all of it `Game` entries (965 → 13 528). One observation per date (one commit each); no machine.
@@ -853,6 +854,43 @@ top authors: 9445 Luka Ogadze; 4048 pollux78; 1100 Shendisx; 204 jilv220; 71 Mac
 entries by year of introducing commit: [(2022, 295), (2023, 85), (2024, 210), (2025, 146), (2026, 15077)]
 commits covering half the entries: 22
 ```
+
+### A.14 `names_vs_catalogue.py` (stage 3, 2026-10-08)
+```python
+"""Process names arriving in the compiled core set, matched against catalogue entry names at a commit.
+Exact match, and match after truncating the entry name to 15 characters (the kernel's comm length)."""
+import json, subprocess, sys, pathlib, collections
+build, repo, rev = pathlib.Path(sys.argv[1]), sys.argv[2], sys.argv[3]
+files_by_name = collections.defaultdict(set)
+for f in sorted(build.glob('*.workload.json')):
+    for e in json.loads(f.read_text())['events']:
+        if e.get('op') == 'arrive' and 'name' in e:
+            files_by_name[e['name']].add(f.name.split('.')[0])
+cat = {}
+for fn in subprocess.run(['git', '-C', repo, 'ls-tree', '-r', '--name-only', rev], capture_output=True, text=True, check=True).stdout.split('\n'):
+    if not fn.endswith('.rules'): continue
+    for line in subprocess.run(['git', '-C', repo, 'show', f'{rev}:{fn}'], capture_output=True, check=True).stdout.decode('utf-8', 'replace').split('\n'):
+        s = line.strip()
+        if not s or s.startswith('#'): continue
+        try: o = json.loads(s)
+        except Exception: continue
+        if isinstance(o, dict) and 'name' in o: cat.setdefault(o['name'], o.get('type'))
+trunc = {}
+for n, t in cat.items(): trunc.setdefault(n[:15], (n, t))
+nfiles = len(list(build.glob('*.workload.json')))
+exact = [n for n in files_by_name if n in cat]
+viatrunc = [n for n in files_by_name if n not in cat and n in trunc]
+print(f'workload files {nfiles}; distinct arriving names {len(files_by_name)}; exact matches {len(exact)}; matches only after 15-char truncation {len(viatrunc)}')
+for n in sorted(files_by_name, key=str.lower):
+    tag = f'EXACT {cat[n]}' if n in cat else (f'TRUNC {trunc[n][0]} {trunc[n][1]}' if n in trunc else '-')
+    print(f'  {n:18s} {tag:40s} files {len(files_by_name[n])}')
+files_all = collections.Counter()
+for f in sorted(build.glob('*.workload.json')):
+    names = {e['name'] for e in json.loads(f.read_text())['events'] if e.get('op') == 'arrive' and 'name' in e}
+    files_all[sum(1 for n in names if n in cat or n in trunc) == len(names)] += 1
+print('files whose every arriving name matches (exact or truncated):', files_all[True], 'of', nfiles)
+```
+Run: `python3 -I names_vs_catalogue.py dataset/build/coreset-single <S3-19 clone> 03ef03fbf7e834385377432ccecaedd32e3414bb` from the repository root.
 
 ## Appendix B — long outputs (verbatim)
 
