@@ -173,3 +173,20 @@ Hands to 9.15:
 - The guidebook: vol-02 `:3572` ("이 칸의 가장 발전한 형태", the same superlative) restated without it; `:1331` and `:3863` checked against the inputs above.
 
 Compiled effect: none.
+
+## D11 — every LAVD source is footnote tier; the source naming and the production clause of `grounding-sources.md:30` restated (2026-10-08)
+
+By 인지오's decision, scope-card item 58 (with item 61's read lines): LAVD has no scholarly citation — no peer-reviewed paper or archived preprint describes it (S1 "Not found", T2: arXiv 0 results, OpenAlex none; stage 3) — so every LAVD source sits in the deployed-system / footnote tier, and the paper keeps its two tiers.
+
+- **The sources and what each carries:** `lavd-ossna24` — Changwoo Min's OSS NA 2024 talk slides (Seattle, 2024-04-17; S2-10), the numbers and the task-chain characterization; scx_lavd's source and README at scx `v1.1.3` (`scx`, D10), the mechanism and origin; `corbet-lwn24` — LWN 991205 (Jonathan Corbet, 2024-09-26), its report of the LPC 2024 talks, qualitative only (its "typically no more than 100µs at a time" differs from slide 13); LWN 1051430 (Jake Edge, 2026-01-07; S2-13), its report of the LPC 2025 talks; the SteamOS sources of D9; the LPC slides and abstracts of D8. LWN articles carry only what they report, attributed as reports.
+- **`grounding-sources.md:74`** (C-lavd-20 / C-corbet-1, CONTRADICTED): "LAVD/LWN-covered work" leaves the scholarly list.
+- **`grounding-sources.md:30`, the source column** (C-lavd-20, MISATTRIBUTED): "LAVD design notes (LKML, LPC talks)" restated to the OSS NA 2024 slides, scx_lavd's source and README at `v1.1.3`, and LWN's reports of the LPC 2024 and 2025 talks.
+- **`grounding-sources.md:30`, the production clause** (C-lavd-18 (a), (b), MISATTRIBUTED): "Valve ships it; Meta adopted the scheduler server-side" restated per D9 (Valve sponsors LAVD and ships it in SteamOS 3.8 as a scheduler the user selects, not enabled by default) and D8 (Meta presented it as a candidate default fleet scheduler).
+
+Hands to 9.15:
+
+- `docs/workload/grounding-sources.md:30`, `:74` restated as above.
+- `docs/references.md`: an entry for LWN 1051430 (Jake Edge, "Lessons from creating a gaming-oriented scheduler", 2026-01-07; copy and SHA-256 from S2-13), footnote tier; `corbet-lwn24` names 991205 only, its role "prose-citable secondary" restated to an attributed report, qualitative only, and its "Later option to evaluate" line replaced by the new entry; `lavd-ossna24` unchanged (footnote tier).
+- The 2026-09-13 verdicts on the same sources already handed through item 61 — `docs/workload/coreset-guide.md:64`, `:184` ("LAVD 논문", WORDING-FIX: talk slides, not a paper) — applied with these.
+
+Compiled effect: none.
