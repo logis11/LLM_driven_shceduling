@@ -4,6 +4,7 @@ The slice's decision record (`research-slice-workflow.md`, Records). Scope card 
 
 ## D1 — `whitelist` reproduces the name-keyed catalogue, `ananicy-rules`; Game Mode is cited for its category only (2026-10-08)
 > Amended by D3 (CachyOS installs ananicy-cpp with the catalogue and enables it by default: the design point ships in a distribution; `:536` and the `whitelist` lines restated to it).
+> Amended by D6 (the `whitelist` condition becomes two conditions: the shipped catalogue, and the strongest name table in its design).
 
 By 인지오's decision, scope-card item 21: the `whitelist` condition reproduces the name-keyed catalogue design point — a hand-maintained table from executable name to priority class, matched by name — grounded in `ananicy-rules`, with `ananicy` for the matching rule. No shipped game mode is cited as working from a list of executables, and no sentence says an operating system ships the design point.
 
@@ -40,6 +41,7 @@ Hands to 9.15:
 Compiled effect: none.
 
 ## D3 — related-work's ananicy sentence: ananicy-cpp and the CachyOS catalogue, which CachyOS installs and enables by default (2026-10-08)
+> Amended by D6 (the `whitelist` lines of D3's hand-off restated to the two conditions).
 
 By 인지오's decision, scope-card item 17, after a stage-3 read (search records S2-45, S2-46, S3-19): `docs/related-work.md:40`'s sentence "On Linux, ananicy adjusts process priorities from a community-maintained catalog mapping process names to priority classes; the catalog is maintained by hand, and every entry is a human decision made in advance [ananicy]" is restated to the sources.
 
@@ -87,3 +89,20 @@ Hands to 9.15:
 - The guidebook: vol-04 `:1410`, `:1414` the same.
 
 Compiled effect: none.
+
+## D6 — the `whitelist` condition becomes two: the shipped catalogue, and the strongest name table in its design (2026-10-08)
+
+By 인지오's decision, raised by D1–D5: the experiment carries two name-table conditions in place of `whitelist`, each answering the claim that names it.
+
+- **The shipped-catalogue condition** reproduces what CachyOS ships enabled (D3): its rule list is `ananicy-rules`' entries at the pinned commit, matched by name as ananicy-cpp matches them, with a stated mapping from the catalogue's types to the recognition vocabulary (design). It answers research question 2 as worded — "Does that reading beat what shipping systems do?" (`docs/research-claims.md:128–132`).
+- **The strongest-name-table condition** is a rule list in the catalogue's design — name to situation, matched by name — written to cover the software the dataset presents as known; the unregistered software of the proposal's Family 3 and the invented names of familiarity tiers 4–5 carry no rule. It tests world knowledge against enumeration at its best: "the strongest non-LLM implementation of semantic recognition" (`docs/related-work.md:34`), the condition `docs/workload/building-plan.md:86` expects to score perfectly on the single-situation calibration files, and the condition that fails structurally on mechanism 2, world knowledge (`docs/research-claims.md:62–76`).
+- **Why one list cannot be both** (S3-19, "the core set's process names in the catalogue"): of the 35 process names the 50 compiled core-set files bind, the catalogue at `03ef03fb` carries 14 exactly and none more after truncation to 15 characters; every name of a file is carried in 7 of 50 files. Unmatched include `kdenlive`, `make`, `python`, `HandBrakeCLI`, `deja-dup`, `tracker-miner-f`, `thunderbird-bin` and most of the game chain's threads.
+- **Open, for the build of the two conditions:** their identifiers; the type-to-vocabulary mapping; which names the strongest table carries at the familiarity tiers' boundary; and how ananicy-cpp compares a rule's `name` — the 15-character `comm` or the executable's basename (not read; S3-19) — read from ananicy-cpp's source at the pinned version before the shipped-catalogue list is built.
+
+Hands to:
+
+- **9.14** — the condition list amended where the harness freezes it: `harness/tools/harness/evaluator.py` (`CONDITIONS`), the schemas that enumerate conditions (`harness/{records,grades,scores,aggregates,experiments,guards}/schema/*.json`), `harness/guards/guard-spec.yaml`'s `applies_to` lists, in its one harness changelog entry; the two identifiers chosen there. The RQ0 gate's conditions (`fixed`, `random`, `oracle`) are unchanged.
+- **The build of the two conditions** (no phase yet in `_dev/TODO.md`) — the two rule lists and the open points above. Phase 6's spec froze the condition names (`_dev/docs/spec/jioh/phase-6-driver-table-v0-and-scoring-spec.md:87`); the amendment is this entry.
+- **9.15** — every doc naming `whitelist` restated to the two conditions: `docs/research-proposal.md:530`, `:536` (D1, D3), `docs/research-claims.md:83`, `:128–137`, `docs/related-work.md:34`, `:36`, `:42`, `:48`, `docs/terminology.md:133`, `:181`, `:189–192`, `docs/background-guide.md:60`, `docs/daemon/daemon-guide.md:25`, `:44`, `:92`, `:121`, `:136`, `:152`, `docs/data-contracts.md:49`, `:344`, `:376`, `:382`, `:467`, `:516`, `docs/harness/metrics.md:74`, `docs/harness/harness-and-records-guide.md:1139`, `:1243`, `:1390`, `docs/workload/building-plan.md:86`, `:113`, `docs/workload/scenario-catalog.md:6`, the guidebook (vol-04 `:448`, `:492`, `:1797`, and every other `whitelist` line), and the docs the sweep `grep -rn -i whitelist docs` finds beyond these.
+
+Compiled effect: none on any compiled file.
