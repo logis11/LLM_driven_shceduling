@@ -424,3 +424,15 @@ By 인지오's decision, scope-card items 22 and 39: `docs/research-proposal.md:
 Hands to 9.15: `docs/research-proposal.md:145` and `:424` restated as above; `docs/references.md` entries for sched(7) and sched_setattr(2) (man-pages 6.19) and the kernel's `sched-deadline.rst` and `sched-eevdf.rst` where the prose cites them, under the id-minting rule.
 
 Compiled effect: none.
+
+## D27 — sched_ext as the deployment path: the mechanism kept; the path stated as what could run on a kernel the depicted desktop already carries; "prototype of something shippable" stated as intent (2026-10-08)
+
+By 인지오's decision, scope-card items 23 and 46: `docs/research-proposal.md:146` and `:844` (sched_ext as "Pluggable schedulers loaded from userspace as BPF programs") stand; `:152`'s "it is the concrete deployment path for anything this project produces, and it means our simulator work is a prototype of something shippable rather than a purely academic exercise" is restated to what holds, `:804`'s future-work sentence kept.
+
+- **The mechanism** (`schedext-docs`; S2-01, S2-47): "sched_ext is a scheduler class whose behavior can be defined by a set of BPF programs - the BPF scheduler" (`sched-ext.rst:5–6` at v6.12); "The BPF scheduler can be turned on and off dynamically anytime" (`:14`); `SCHED_CLASS_EXT` "allows scheduling policies to be implemented as BPF programs" (`kernel/Kconfig.preempt` at v6.12).
+- **The path on the depicted machine** (S2-52): Ubuntu 24.04's HWE kernel 7.0.0-34 (the depicted desktop's, 9.10 D48) sets `CONFIG_SCHED_CLASS_EXT` `y` for amd64 (`debian.master/config/annotations`); the runner's 6.17.0-1022-azure exposes `/sys/kernel/sched_ext` (state `disabled`, 9.11 D2). Operators run sched_ext schedulers in production (D8), and SteamOS ships LAVD as a selectable scheduler (D9).
+- **What is intent, not fact:** the simulator models one CPU lane and nothing else (`docs/simulator/simulator-guide.md:44`); no algorithm or executor of this project has a sched_ext implementation. `:152` states sched_ext as the path by which the CPU driver could run on a real kernel, the port future work as `:804` says; "a prototype of something shippable" is stated as the intent.
+
+Hands to 9.15: `docs/research-proposal.md:152` restated as above; `:844`'s "The realistic deployment path for this work" kept with the same scope; `docs/references.md` — the Ubuntu kernel's configuration (S2-52) entered under the id-minting rule where the prose cites it.
+
+Compiled effect: none.
