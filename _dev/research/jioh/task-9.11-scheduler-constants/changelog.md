@@ -322,3 +322,16 @@ By 인지오's decision, scope-card item 18, correcting D13's reading. `docs/rec
 Applied: `docs/recognition-vocabulary.md` §2 — "Neither slice takes a value from a source: Liu and Layland's EDF is preemptive and priority-driven with no quantum (`liu-jacm73`), and no second source is introduced for LOTTERY."; `docs/references.md` `liu-jacm73` — the role covers the note, p. 48.
 
 Hands to: none.
+
+## D24 — `T_interaction`: 0.1 s labelled the strict end of Miller's echo range; Long and Deber restated (2026-10-08)
+
+By 인지오's decision, scope-card item 1, on D1. The value stays 100 000 µs. Re-read 2026-10-08 in the S1-01, S1-07 and S1-11 copies:
+
+- **Miller gives two delays.** Topic 1 (p. 271): the indication "by the movement of a key, switch or other control member that signals it has been physically activated. The click of the typewriter key … Time delay: No more than 0.1 second"; and for typed text, "the delay between depressing the key and the visual feedback should be no more than 0.1 to 0.2 seconds", with "this delay in feedback may be far too slow for skilled keyboard users". The constant reads a keystroke's response — the second statement's object — and D1's paraphrase had dropped "physically". 0.1 s is the strict end of the echo range, taken on Miller's caveat on skilled typists: design.
+- **Long, as Shneiderman reports him** (p. 268): "delays of approximately 0.1-0.5 second in the time for a keystroke to produce a character on an impact printer … worked more slowly and made more errors with longer response times. Even these brief delays were distracting" — a trend within the range, keystroke to print; §10's "already slowed … so 0.1 s is the loose end" went beyond it.
+- **Deber's population** (p. 1830): "A total of 24 sessions were run across both form-factors (12 drag and 12 tap). The sessions were performed by 14 right-handed participants"; the 69 ms and 96 ms tapping thresholds rest on the 12 tapping sessions.
+- **Not taken:** Long and Deber restated with the 0.1 s left a guideline's value (B).
+
+Applied: `docs/harness/metrics.md` §10 — the status cell (design: the strict end of a guideline's range) and the paragraph (Miller's two delays, the choice and its reason, Long's trend, Deber's 12 tapping sessions); `docs/references.md` — `miller-fjcc68`'s role (the strict end taken by design; "physically activated"; "sixteen other topics", Topic 1 one of the seventeen, p. 269), `deber-chi15`'s role (the tapping thresholds' 12 sessions).
+
+Hands to: **9.15** — the guidebook's `T_interaction` passages (vol-01 `:818`, `:820`; vol-02 `:720`, `:823`; vol-03 `:3127`), which call Nielsen a second grounding (D1) and state 0.1 s as Miller's value, restated to D1 and this entry.
