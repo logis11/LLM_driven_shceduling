@@ -207,5 +207,6 @@ Hands to 9.15:
 - `docs/related-work.md:48`, `:34` restated as above; `:36`'s note ("which SchedCP's evaluation has no analogue of") brought in line.
 - `docs/references.md`: an entry for AKTS, arXiv 2609.12276v2 (2026-10-07), scholarly tier as an archived preprint, with S1-32's copy and SHA-256; `asa-arxiv25`'s role line — its "'measuring recognition itself has no analogue in prior work' … false of this one" — kept, with the scoped statement beside it; `schedcp-mlsys25` — the 8-of-8 outcome at v4 p. 5.
 - The search log dates the statement: any re-run before submission extends it.
+- The guidebook: vol-02 `:2088` ("인식 자체를 따로 재는 평가는 그쪽에 대응물이 없다", said of the LLM line) restated — AKTS measures LLM recognition on telemetry and SchedCP reports an 8-of-8 outcome; `:2092`, `:2180`, `:2465` already agree with D12 and stay.
 
 Compiled effect: none.
