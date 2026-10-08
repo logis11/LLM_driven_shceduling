@@ -286,3 +286,14 @@ Restated: D6's limitation covers `game-download`'s nice-10 work, 75 % of SteamCM
 Applied: `classes/audit.md` — the `game-download` row's nice-0 tasks (25 SteamCMD threads; 12 tasks outside the entry), the carried-class list (the content-update threads; `package-upgrade` and `module-build-orchestrator` at nice 19).
 
 Hands to: **9.13** — whether `module-build-orchestrator`'s tables hold the nice-19 `apt-check` and `dpkg` work, read on its landings with the DKMS tree's split; **9.15** — the dataset docs' `game-download` limitation with these numbers, and `package-upgrade`'s nice-19 share beside it.
+
+## D21 — the `c2-p2a` bounding check: a variant entry and file for its idle half (2026-10-08)
+
+By 인지오's decision, scope-card item 38, on D6's hand-off to 9.14: `c2-p2a` scored with the download as measured and with it in the idle class, each verdict reported and the difference stated as the limitation's reach. The class is the entry's, never the task's (D18), and `game-download` is `normal`, so no file can put that download in the idle class; the RQ0 gate spec pins one dataset manifest (`harness/experiments/rq0-gate.yaml:226`), and no hand-off asked 9.13 for the idle half. The 9.14 pointer had dropped the reporting.
+
+- **The idle half's inputs.** A variant of `game-download` — the same tables, the declared class `idle` — and a variant of `c2-p2a` binding it in the download's place, both built by the rebuild and in the manifest the RQ0 gate spec pins. The variant file is outside the judging set; the bounding check alone reads it.
+- **Not taken:** dropping the idle half, the download carried as measured with the limitation stated alone (B); a harness override setting a task's class for one run (C) — against the class being the entry's, and a knob at run time.
+
+Applied: this changelog.
+
+Hands to: **9.13** — the `game-download` variant (its tables, class `idle`) and the `c2-p2a` variant binding it, outside the judging set; **9.14** — the bounding check pre-registered in the RQ0 gate spec on `c2-p2a` and its variant, the verdict under each reported and the difference stated as the reach of D6's limitation (D20's numbers).
