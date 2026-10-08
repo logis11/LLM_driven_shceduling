@@ -383,3 +383,30 @@ Hands to 9.15:
 - The guidebook vol-02 ch. 6.4 checked against the same passages (item 60).
 
 Compiled effect: none.
+
+## D25 — the reference-placeholder table becomes the final key-to-registry map (2026-10-08)
+
+By 인지오's decision, scope-card item 20 (with entries 52 and 53): `docs/related-work.md:56–73`'s table maps each citation key to its registry entries and their settled form; the "verify" column leaves, every open point being closed by D1–D24 and the checks below.
+
+| Key | Registry entries and form | Decision |
+|---|---|---|
+| `ghost` | `ghost-sosp21`, SOSP '21 | D17 |
+| `schedext` | `schedext-docs`; first released in Linux 6.12 (the kernel tree, S2-47) | D7 |
+| `scx` | `scx` at release `v1.1.3`, commit `c8728c6b` | D8, D10 |
+| `lavd` | `lavd-ossna24` (OSS NA 2024 slides), scx_lavd's README and `lat_cri.bpf.c` at `v1.1.3` (`scx`), `corbet-lwn24` (LWN 991205) and the LWN 1051430 entry — all footnote tier; "LKML + LPC talks" leaves (C-lavd-20, MISATTRIBUTED) | D10, D11 |
+| `mlfq` | `ostep` ch. 8, Version 1.10, with `corbato-sjcc62` | D18 |
+| `eevdf` | `eevdf-tr95` (1995; "Revised January 26, 1996" is the revision, not the year) with the kernel's `sched-eevdf.rst` and `sched-design-CFS.rst` | D18 |
+| `decima`, `firm`, `park` | `decima-sigcomm19`, `firm-osdi20`, `park-neurips19` | D19, D20 |
+| `asa` | `asa-arxiv25`: arXiv 2511.11628v1 (2025-11-07), no venue — re-checked 2026-10-08, still v1, no journal reference | D21 |
+| `schedcp` | `schedcp-mlsys25`: arXiv 2509.01245v4; venue as the NeurIPS virtual site lists it, NeurIPS 2025 Workshop on ML for Systems (S1-12; C-schedcp-4 WORDING-FIX of "MLforSystems '25"); no successor by its authors in the searches through 2026-10-08 (S1 search log) | D12, D23 |
+| `kgent` | `kgent-ebpf24`, eBPF '24, DOI 10.1145/3672197.3673434, the open-access eScholarship copy | D22 |
+| `tuneagent` | `tuneagent-kdd26`, KDD '26, DOI 10.1145/3770855.3817987 | D24 |
+| `hpc-llm` | `jadhav-arxiv25`, arXiv 2506.02025v2, under review | D24 |
+| `gamemode` | `gamemode-docs` (Microsoft Learn, four pages) and Apple's two Game Mode entries | D1, D2 |
+| `ananicy` | `ananicy` (ananicy-cpp, 1.2.0 as CachyOS ships it), `ananicy-rules` at `03ef03fb` = tag 1.1.49, and the CachyOS default-install entry | D3 |
+
+New keys from D1–D24, added to the table: AKTS (D12), SteamOS's LAVD support (D9), the LPC 2024 slides "sched_ext status and plans" and the LPC 2025 abstract on the Reality Labs fleet (D8), Feral GameMode (D4), LWN 1051430 (D11).
+
+Hands to 9.15: `docs/related-work.md:54–73` rewritten as the map above; the registry entries it names minted or restated as the listed decisions hand them.
+
+Compiled effect: none.
