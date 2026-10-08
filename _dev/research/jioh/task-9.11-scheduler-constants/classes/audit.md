@@ -12,7 +12,7 @@ One full repeat per subject, its taskstats files read from the release by HTTP r
 | `file-indexer` | `meas-ci-background-2026-10-02b`, `…-tracker-r3-full-37014118970.zip` | `taskstats.tracker-index.tsv` | IDLE, nice 19: all 68 Tracker threads (`pool-tracker-mi`, `single`, `pool-tracker-ex`, `gmain`, `pool-spawner`, …); NORMAL: `systemd-tmpfile`, a kworker |
 | `incremental-backup` | `meas-ci-background-2026-10-04`, `…-dejadup-r25-full-37180238545.zip` | `taskstats.dejadup-incremental.tsv` | IDLE: `duplicity` ×23, `gpg` ×15 and Déjà Dup's own threads, 103 tasks; NORMAL, nice 0: the session's `dbus-daemon` ×16, `gsettings`, `gnome-keyring-d` and others, 48 tasks |
 | `file-archiver` | `meas-ci-background-2026-09-19`, `meas-background-7z-r6-full.zip` | `taskstats.7z-mmt8-warm.tsv` | NORMAL, nice 0: `7z` ×34 |
-| `game-download` | `meas-ci-background-2026-09-19`, `meas-background-steamcmd-r32-full.zip` | `taskstats.steam-fresh-shaped.tsv` | NORMAL, nice 10: `CGenericAsyncFi` ×55, `COfflineMessage` ×2, `CContentUpdateC` ×2; NORMAL, nice 0: `CHTTPClientThre`, `steamcmd` and the rest, 37 tasks |
+| `game-download` | `meas-ci-background-2026-09-19`, `meas-background-steamcmd-r32-full.zip` | `taskstats.steam-fresh-shaped.tsv` | NORMAL, nice 10: `CGenericAsyncFi` ×55, `COfflineMessage` ×2, `CContentUpdateC` ×2; NORMAL, nice 0: `CHTTPClientThre`, `steamcmd` and the rest of SteamCMD's thread group, 25 threads; 12 other tasks, not the entry's (the runner agent's `.NET` threads ×3, `bash` ×2, `uname` ×2, `dirname`, `basename`, `run-parts`, `cron`, a kworker) |
 | `cpu-batch` (`python`) | `meas-ci-background-2026-10-03`, `…-mnist-r1-full-37091275421.zip` | `taskstats.mnist-train.tsv` | NORMAL, nice 0 |
 | `cpu-batch` (`kdenlive_render`) | `meas-ci-background-2026-10-03c`, `…-kdenlive-r16-full-37126535233.zip` | `taskstats.kdenlive-export.tsv` | NORMAL, nice 0: `melt-7`, `kdenlive_render` |
 | `video-transcoder` | `meas-ci-background-2026-10-03b`, `…-handbrake-r3-full-37109133562.zip` | `taskstats.handbrake-transcode.tsv` | NORMAL, nice 0: `HandBrakeCLI` ×23 |
@@ -58,7 +58,7 @@ The session's real-time threads are present but none is carried: 9.9's entries c
 ## By class, the work the dataset carries
 
 - **`SCHED_IDLE`:** `file-indexer` — every Tracker thread (nice 19, which the idle policy ignores); `incremental-backup` — `deja-dup`, `duplicity` and `gpg`.
-- **NORMAL at a nice other than 0:** `game-download` — SteamCMD's async file threads (`CGenericAsyncFi`, `COfflineMessage`, `CContentUpdateC`) at nice 10, its HTTP and main threads at nice 0, inside one program's tables.
+- **NORMAL at a nice other than 0:** `game-download` — SteamCMD's content-update threads (`CContentUpdateC`, nearly all the nice-10 CPU) and async threads (`CGenericAsyncFi`, `COfflineMessage`) at nice 10, its HTTP and main threads at nice 0, inside one program's tables; `package-upgrade` — `apt-check` and `dpkg` at nice 19, 2.67 % of its pooled CPU, inside the tables that pool every process of the upgrade (D20); `module-build-orchestrator` — `apt-check` and `dpkg` at nice 19, 0.85 % of landing 10's CPU, whether its tables hold them not settled (D20).
 - **Real-time:** none carried.
 - **`SCHED_BATCH`:** none carried; Mesa's disk-cache threads only, in any program using OpenGL.
 - **NORMAL at nice 0:** every other measured entry, whole.
