@@ -122,3 +122,20 @@ Hands to 9.15:
 - `docs/references.md` `schedext-docs`: the v6.11 / v6.12-rc1 / v6.12 tree check (S2-47) in its status line as the ground of "first released in 6.12".
 
 Compiled effect: none.
+
+## D8 — related-work's production-scheduler sentence: per scheduler, as each operator reports it; `scx_rusty` leaves (2026-10-08)
+
+By 인지오's decision, scope-card item 3, after a stage-3 read (S2-48): `docs/related-work.md:8`'s "Production schedulers built on it — scx_rusty, scx_layered, scx_lavd — demonstrate that non-default policies are deployable at scale [scx]" is restated per scheduler, each statement attributed to its operator. `scx` stays an existence-only source: it grounds that the repository ships the schedulers (fifteen at `v1.1.3`, S2-09), not their deployment.
+
+- **`scx_layered`** — Meta reports it deployed on "1M+ machines with significant perf gains" (S2-48: the LPC 2024 sched_ext microconference talk "The current status and future potential of sched_ext", 2024-09-18, presenter David Vernet, Meta, per the conference timetable; its slides "sched_ext status and plans", which also call the schedulers "Still very early days"; no operator or method named on the slide) and across its Reality Labs GPU fleet — "we deployed it to the entire Reality Labs GPU fleet with tens of thousands of GPUs" (S2-11, LPC 2025 contribution 2039, Meta speakers). LWN's "over one million machines" (S2-12) is the report of the 2024 slide, not a second source.
+- **`scx_lavd`** — Valve's SteamOS 3.8 (stable 2026-06-18) offers it as an opt-in scheduler: "Initial support for LAVD CPU scheduler via `steamosctl set-cpu-scheduler lavd`" (S2-15); Meta presented it as a candidate default fleet scheduler — "SCX_LAVD is one such candidate" (S2-11, LPC 2025 contribution 2099).
+- **`scx_rusty`** — no deployment statement in any copy read (S2-09, S2-48); it leaves the sentence.
+- The sentence's conclusion is restated to what the statements carry: a non-default policy deployed at fleet scale, as its operator reports — not "demonstrate that non-default policies are deployable at scale".
+
+Hands to 9.15:
+
+- `docs/related-work.md:8` restated as above.
+- `docs/references.md`: deployed-system or footnote-tier entries for the LPC 2024 slides "sched_ext status and plans" (URL, accessed 2026-10-08, SHA-256 from S2-48; footnote tier, as `lavd-ossna24`), the LPC 2025 abstract "Accelerating AI training fleets with sched_ext" (contribution 2039, S2-11), and Valve's SteamOS 3.8 release note (S2-15); `scx`'s role line keeps existence only.
+- The guidebook: vol-02 ch. 3.3–3.4 ("얼마나 실제로 쓰이나", `:1226–1240`) given the operators' statements above beside the repository's. Also found in this sweep, with no source behind it: vol-02 `:2699` ("지금 수백만 대의 컴퓨터에서 실제로 돌고 있는 소프트웨어입니다", of Game Mode and the priority daemons) — restated to what D2 and D3 ground, with no count.
+
+Compiled effect: none.
