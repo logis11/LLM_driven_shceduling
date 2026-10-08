@@ -71,3 +71,19 @@ Hands to 9.15:
 - `docs/references.md`: a deployed-system entry for Feral GameMode, pinned to commit `a74b8106` (version 1.8.2), with S2-19's copies of `README.md`, `data/gamemoded.8.in` and `example/gamemode.ini` and their SHA-256.
 
 Compiled effect: none.
+
+## D5 — the audio-workstation case: no game mode's documentation addresses it; the shipped catalogue registers the major DAWs, in the music players' class (2026-10-08)
+
+By 인지오's decision, scope-card item 37: `docs/research-proposal.md:640`'s "no shipping Game Mode covers it. It is simultaneously our hardest deadline test and a clean whitelist-failure case" is restated to the sources; "a clean whitelist-failure case" is withdrawn.
+
+- **The game modes.** Microsoft's and Apple's Game Mode documentation speaks of games only and names no audio workstation (S2-16, S2-18, S2-20). Feral's GameMode acts on any process that requests it or is launched under `gamemoderun` (S2-19, D4), so a user can apply it to an audio workstation; its documentation speaks of games only.
+- **The shipped catalogue** (`ananicy-rules` at `03ef03fb`, which `whitelist` reproduces, D1, D3; S3-19, "Passages: audio entries"): `reaper`, `bitwig-studio` and `BitwigStudioEngine`, `ArdourGUI`, `lmms` and `audacity` are entries of type `Player-Audio` (nice −4); the audio servers `pipewire`, `pipewire-pulse`, `wireplumber` and `pulseaudio`, and `mixxx`, are `LowLatency_RT` (nice −12, best-effort I/O). `Player-Audio` is also the type of nineteen music players (`spotify`, `rhythmbox`, `mpd`, …). No entry names `qtractor`, `rosegarden`, `zrythm`, `renoise`, `hydrogen`, `carla` or `jackd`.
+- **What the catalogue's limit is for this case.** It registers the major audio workstations by name and gives them the music players' class: a recording session and playback receive the same nice value. A registration failure holds only for an audio workstation the catalogue does not carry.
+- Whether the proposal's Family 3 keeps an audio-workstation row — an audio workstation shown absent from the catalogue at the pinned commit — is that family's design, not decided here. The deadline figures in the same sentence ("1–3 ms rather than gaming's 16 ms") are item 36.
+
+Hands to 9.15:
+
+- `docs/research-proposal.md:640` restated: no game mode's documentation addresses audio workstations, Feral's can be applied by the user; the catalogue registers the major audio workstations, in the music players' class; "a clean whitelist-failure case" removed. `:635`'s row ("Audio DAW + plugin chain") no longer stated as unregistered software under Family 3's heading ("Where the whitelist fails structurally") while it names no program absent from the catalogue.
+- The guidebook: vol-04 `:1410`, `:1414` the same.
+
+Compiled effect: none.
