@@ -318,3 +318,18 @@ By 인지오's decision, scope-card item 8 (and the `decima`, `firm`, `park` key
 Hands to 9.15: `docs/related-work.md:24`'s first sentence as above, its keys resolved; the guidebook vol-02 ch. 5.2–5.4 checked against the same passages (item 60).
 
 Compiled effect: none.
+
+## D20 — the learned line's limits grounded in the learned papers' own statements, SchedCP as the LLM line's summary of them (2026-10-08)
+
+By 인지오's decision, scope-card item 9: `docs/related-work.md:24`'s "limits are by now well documented — including by later work in the LLM lineage: they require extensive per-workload retraining, and they operate inside a problem space a human has already formalized (features, knobs, objectives) [schedcp]" keeps both limits; "by now well documented" becomes "stated by the learned papers themselves and summarized by later LLM work", and each limit cites its primary.
+
+- **Per-workload training:**
+  - Decima (`decima-sigcomm19`; S1-06, §7.4, p. 11): "As Decima learns workload-specific policies, we expect its effectiveness to depend on whether broad test workload characteristics, such as interarrival time and job size distributions, match the training workload"; trained with an "anti-skewed" workload, "it generalizes poorly and underperforms the optimized weighted fair policy".
+  - FIRM (`firm-osdi20`; S1-07, p. 3, p. 10, p. 13): "To enable rapid (re)training of the proposed system as the underlying systems and workloads change in datacenter environments, FIRM uses transfer learning"; about 2 000 iterations with it against about 15 000 for the one-for-all agent.
+  - Park (`park-neurips19`; S1-08, §3.3, p. 5): "discrepancies between simulation and reality prevent direct generalization"; training from simulation's method "would take a single-threaded agent more than 10 years to complete training in reality".
+- **A human-formalized problem space:** each paper's own state and action design — Decima's stage attributes and scheduling actions (§4, §5.1), FIRM's state and action space (Table 3, p. 10).
+- **The summary** (`schedcp-mlsys25`, v4 §2, p. 2; S1-12): "Prior RL-based schedulers [10, 17, 19, 11] require extensive training per workload type, lack semantic understanding to transfer across workloads, and only tweak configurations after engineers have already defined the entire problem space: selecting features, specifying knobs, and writing objective functions" — [10] Decima, [17] FIRM, [19] Zhang et al. TPDS 2024, [11] Park.
+
+Hands to 9.15: `docs/related-work.md:24` restated as above; the guidebook vol-02 ch. 5 checked against the same passages (item 60).
+
+Compiled effect: none.
