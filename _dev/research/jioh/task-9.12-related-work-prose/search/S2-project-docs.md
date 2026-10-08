@@ -53,6 +53,7 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
 | 43 | 2026-10-08 | GitHub API (stage 3) | `repos/torvalds/linux/contents/{kernel/sched/ext.c,Documentation/scheduler/sched-ext.rst}?ref={v6.11,v6.12-rc1,v6.12}`; `kernel/Kconfig.preempt?ref=v6.12` | 200 at v6.12-rc1 and v6.12 → S2-47 | 404 at v6.11 (both files) |
 | 44 | 2026-10-08 | lpc.events (stage 3) | `/export/timetable/18.json`; `/event/18/contributions/1694/` and its attachment `sched_ext status and plans.pdf` | 200 → S2-48 | — |
 | 45 | 2026-10-08 | api.steampowered.com; gitlab.steamos.cloud (stage 3) | `ISteamNews/GetNewsForApp/v2/?appid=1675200&count=300&maxlength=0`; `git clone https://gitlab.steamos.cloud/holo/steamos-manager` | 200; clone at `302d37b9` → S2-49 | — |
+| 46 | 2026-10-08 | steamdeck-images.steamos.cloud (stage 3) | `/recovery/steamdeck-repair-latest.img.bz2` → `steamdeck-oobe-repair-20260707.10-3.8.14.img.bz2`; checksum files `.sha256`, `.sha512`, `.md5`, `.sig` | 200 → S2-50 | checksum files 404 |
 
 ## 2. Candidates
 
@@ -524,6 +525,17 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
   - `SteamOSManager1.xml:98–117`: "com.steampowered.SteamOSManager1.CpuScheduler1" / "@short_description: Optional interface for adjusting CPU scheduler." / "AvailableCpuSchedulers: Enumerate the supported CPU schedulers on the system." / "CpuScheduler: The current CPU scheduler used for the system's CPUs."
   - `power.rs:60`: `const LAVD_PATH: &str = "/usr/bin/scx_lavd";`; `:90–93`: `pub enum CpuScheduler {` / `None,` / `LAVD,`; `:321–328`: the current scheduler is `LAVD` when `scx.service` is enabled, otherwise `None`; `:340–345`: the available list is `None`, and `LAVD` when `scx.service` exists; `:352–380`: setting `LAVD` starts `scx.service`, setting `None` stops it.
 - Coverage: T2 (deployment) — SteamOS offers LAVD as a selectable CPU scheduler beside the kernel's default ("None"), through Valve's settings daemon; through 2026-10-08 Valve's release notes state only its "Initial support" by command. Whether a SteamOS image enables `scx.service` by default was not read (the image was not inspected). Source and release notes, not an observation.
+
+### S2-50 — SteamOS 3.8.14 recovery image: `scx_lavd` installed and configured, `scx.service` not enabled (stage 3, 2026-10-08)
+
+- Copy: https://steamdeck-images.steamos.cloud/recovery/steamdeck-repair-latest.img.bz2 → 302 → `…/recovery/steamdeck-oobe-repair-20260707.10-3.8.14.img.bz2` (3 357 999 306 bytes, `Last-Modified: Tue, 07 Jul 2026 23:28:15 GMT`, ETag `"6a4d8b8f-c82700ca"`) · SHA-256 `4254ee02ec34ae8add9aceef1881a2ce675a9d0176171df92e0eaa1bf014c594` (Valve publishes no checksum: `.sha256`, `.sha512`, `.md5`, `.sig` all 404). The image is not kept. Decompressed (8 120 172 544 bytes) and mounted read-only by loop in an Alpine 3.20 container (`inspect.sh`, kept with its log in `sources/S2-50/`): GPT partitions `esp`, `efi-A`, `rootfs-A` (btrfs), `var-A` (ext4), `home`. Files copied out: `os-release` SHA-256 `193fb60eb20c525ca44df097e6cf21004234b619ad80ac7950a4c8fa8af672d6`; `usr/lib/systemd/system/scx.service` `5b5960155a5f24101a206dd8d085037d045ea0d4c4a98e3f355b62d1b8bc519a`; `etc/default/scx` `331b9c16c5760c7606f49aaa99af6b9780c271a57171d554fc2e295c979bebb9`; `usr/lib/systemd/system-preset/90-systemd.preset` `8243c547ef02bc5894b5b194f11fd82c8d3d3cd51237560746bf39b7f4a3000e`, `99-default.preset` `3127b197b9eae62eb84eeed69b0413419612238332006183e36a3fba89578378`.
+- Observed (rootfs-A, var-A):
+  - `etc/os-release`: `NAME="SteamOS"`, `VARIANT_ID=steamdeck-oobe`, `VERSION_ID=3.8.14`, `BUILD_ID=20260707.10`, `STEAMOS_DEFAULT_UPDATE_BRANCH=stable`.
+  - pacman database: `scx-scheds-1.1.1.linux.steamos-1`, `steamos-manager-26.2.1-1`, `linux-neptune-616-6.16.12.valve24.4-1`; `/usr/bin/scx_lavd` present.
+  - `scx.service`: `Description=Start scx_scheduler`, `ConditionPathIsDirectory=/sys/kernel/sched_ext`, `EnvironmentFile=/etc/default/scx`, `ExecStart=/bin/bash -c 'exec ${SCX_SCHEDULER_OVERRIDE:-$SCX_SCHEDULER} ${SCX_FLAGS_OVERRIDE:-$SCX_FLAGS} '`, `[Install]` `WantedBy=multi-user.target`.
+  - `etc/default/scx`: `# List of scx_schedulers: scx_beerland scx_bpfland scx_chaos scx_cosmos scx_flash scx_lavd scx_p2dq scx_rustland scx_rusty scx_tickless` / `SCX_SCHEDULER=scx_lavd`.
+  - No `scx*` link in any `*.wants` directory under the root's `etc/systemd` or `usr/lib/systemd`, nor under var-A (whose `lib/overlays/etc` carries the `/etc` overlay). Presets: `99-default.preset` is `disable *`; `90-systemd.preset` names only systemd's own units; no preset line names `scx`.
+- Coverage: T2 (deployment), observed on Valve's published image: SteamOS 3.8.14 ships `scx_lavd` (scx-scheds 1.1.1) and configures it as the scheduler `scx.service` would run, and the service is not enabled out of the box — the kernel's default scheduler runs until the user selects LAVD (`steamosctl set-cpu-scheduler lavd`, which starts the service, S2-49). Whether the image's kernel is built with sched_ext was not read (the service's condition requires `/sys/kernel/sched_ext`).
 
 ## 3. Not found
 
