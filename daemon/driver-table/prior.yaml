@@ -1,27 +1,50 @@
 # Prior driver table — written from theory before any measurement.
 # Contract: docs/data-contracts.md §10. Decisions: _dev/docs/spec/jioh/phase-6-driver-table-v0-and-scoring-spec.md
-# and its 2026-09-09 spec session. Scored terms per file: harness/scoring/scoring-spec.yaml.
+# and its 2026-09-09 spec session; the sentences re-read on the rebuilt dataset in sub-task 9.14
+# (_dev/docs/spec/jioh/task-9.14-consumer-rework.md, decision 8), no value changed. Scored terms per
+# file: harness/scoring/scoring-spec.yaml.
 #
 # Rules this table follows, so a row can be read against them:
 # - The mode picks the algorithm family, the attribute picks the cap (research-proposal §4.5).
 #   EDF for the periodic-consumer modes (gaming, media, meeting): a TIMER task's deadline is its
 #   next period boundary, and deadline ordering meets every periodic deadline whenever any policy
-#   can (Liu & Layland 1973, Theorem 7). LOTTERY for wanted batch work (compile, ml-train, render,
-#   transcode, indexing, backup with background_wanted true): a wanted job is a stated share, and
-#   lottery makes consumption proportional to allocated shares (Waldspurger & Weihl 1994). MLFQ for
-#   the interactive-only modes, idle, and unwanted batch work: interactive first, CPU-bound work
-#   sunk by observed behaviour (OSTEP ch. 8). FIFO nowhere: its place in the menu is throughput
-#   through fewer context switches and cache locality, and the simulator charges neither (switch
-#   memo 2026-09-08 §3); what remains of FIFO is non-preemption, which only hurts the foreground
-#   term every scored file carries.
+#   can (Liu & Layland 1973, Theorem 7, under utilisation at most one); the frame chain's woken
+#   stages are in the deadline class with the frame's deadline (recognition-vocabulary §2,
+#   2026-10-06), so EDF serves a whole frame before any residual task. LOTTERY for wanted batch
+#   work (compile, ml-train, render, transcode, indexing, backup with background_wanted true): a
+#   wanted job is a stated share, and lottery makes consumption proportional to allocated shares
+#   (Waldspurger & Weihl 1994). MLFQ for the interactive-only modes, idle, and unwanted batch work:
+#   interactive first, CPU-bound work sunk by observed behaviour (OSTEP ch. 8). FIFO nowhere: its
+#   place in the menu is throughput through fewer context switches and cache locality, and the
+#   simulator charges neither (switch memo 2026-09-08 §3); what remains of FIFO is non-preemption,
+#   which only hurts the foreground term every scored file carries.
 # - batch_bandwidth_cap is never null. A wanted row's cap is the batch term's share of the file's
 #   scoring weight, w_batch / (w_fg + w_batch): 0.5 against 1.0 gives 1/3 (0.333), 1.0 against 1.0
 #   gives 0.5, 0.25 gives 0.2. A wanted row whose files carry no batch term gets 0.5 — equal
 #   shares, a stated assumption (since Phase 7's C1 bases every wanted batch row has a term;
 #   the interactive-only rows' 0.5 remains the assumption). An unwanted row sits at the schema floor,
-#   0.05; the executor's starvation net lies beneath it. A LOTTERY row's batch_share equals its cap.
-# - Params are the boot values (recognition-vocabulary §2, provenance table); no held reference
-#   names a different value for a situation, so the rows differ by algorithm and cap only.
+#   0.05. The cap is work-conserving — a ceiling on the batch class only while a non-batch task is
+#   runnable (batch-class memo 2026-09-09) — and the executor has no starvation net of its own: the
+#   harness's starvation_floor guard bounds every task's wait at 30 s, the bound sched_ext's
+#   watchdog enforces (guard spec; 9.11 D7, D19). A LOTTERY row's batch_share equals its cap.
+# - Two executor rules sit below every row (9.11 D5, D16; 9.13): a task whose declared class is
+#   idle — the Tracker indexer, the Déjà Dup backup — runs only when no other-class task is
+#   runnable and is preempted at once when one wakes, so no row's share or cap reaches it; and the
+#   cap reaches a task only while it is in the behavioural batch class. Where either rule makes a
+#   row's knob inert on the file that exercises it, the row says so.
+# - Params are the boot values (recognition-vocabulary §2, provenance table: OSTEP's 10 ms slice,
+#   three queues, doubling, a 100 ms boost; the same 10 ms for EDF's residual slice and LOTTERY's
+#   quantum by the same-granularity rule, design); no held reference names a different value for a
+#   situation, so the rows differ by algorithm and cap only.
+# - The editors the rows protect are measured programs (9.5). A keystroke costs the office writer
+#   and the mail client about 5 ms of CPU and the browser next to nothing, so those block inside one
+#   10 ms slice and stay on top under MLFQ (rule 4b); a keystroke costs VS Code about 78 ms, several
+#   slices, so MLFQ demotes it within the keystroke (rule 4a) and the 100 ms boost is what returns
+#   it. The wake-to-run wait the scoring measures is protected whenever the editor is in Q0 at the
+#   wake; a demoted editor's keystroke waits behind whatever holds Q0 or Q1. The video editor
+#   (Kdenlive) and the image editor (GIMP) carry no keystroke stream — their measured driven phases
+#   are mouse-driven operations on their own timer components — so their foreground term reads the
+#   wait of their own wakes (scoring spec header).
 # - sources lists the docs/references.md ids each sentence rests on; the lint resolves them.
 
 role: prior
@@ -38,19 +61,19 @@ rows:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "MLFQ serves the interactive job first and sinks CPU-bound work by observed behaviour without prior knowledge (OSTEP ch. 8, rules 1–5); boot params, whose provenance is recognition-vocabulary §2."
+        justification: "MLFQ serves the interactive job first and sinks CPU-bound work by observed behaviour without prior knowledge (OSTEP ch. 8, rules 1–5); the browser's keystroke work is far below one slice, so it stays on top (rule 4b); boot params, whose provenance is recognition-vocabulary §2."
         sources: [ostep]
   - mode: browsing
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "Web browsing while work nobody asked for runs behind it (c7-browsing's clamscan): the batch class gets the schema floor and the browser the rest, so the page never waits on the indexer."
+    justification: "Web browsing while work nobody asked for runs behind it (c7-browsing's unattended upgrade, the stock Ubuntu install stage bound whole): the batch class gets the schema floor and the browser the rest, so the page never waits on the upgrade."
     sources: [ostep]
     entries:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "Unwanted CPU-bound work is what MLFQ's demotion rule sinks (OSTEP ch. 8, rule 4a); the cap bounds what the bottom queue can still take; boot params."
+        justification: "Unwanted CPU-bound work is what MLFQ's demotion rule sinks (OSTEP ch. 8, rule 4a); the cap bounds what the bottom queue can still take while the browser is runnable; boot params."
         sources: [ostep]
 
   # ------------------------------------------------------------ office
@@ -64,19 +87,19 @@ rows:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "A keystroke-driven task blocks before its slice ends and stays on top under MLFQ (OSTEP ch. 8, rule 4b), which is the property the writer needs; boot params."
+        justification: "A keystroke costs the writer about 5 ms (9.5), so it blocks before its slice ends and stays on top under MLFQ (OSTEP ch. 8, rule 4b), which is the property the writer needs; boot params."
         sources: [ostep]
   - mode: office
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "Typing into a document while an unwanted job runs (c7-office's clamscan): the writer's echo leads and the job gets the floor (c4-office's 7z burst is the shape of it)."
+    justification: "Typing into a document while an unwanted job runs (c7-office's unattended upgrade): the writer's echo leads and the job gets the floor (c4-office's 7z archive run whole is the shape of a wanted one)."
     sources: [ostep]
     entries:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "MLFQ demotes the CPU-bound intruder within a few slices and the floor cap keeps it there (OSTEP ch. 8); boot params."
+        justification: "MLFQ demotes the CPU-bound intruder within a few slices and the floor cap keeps it there while the writer is runnable (OSTEP ch. 8); boot params."
         sources: [ostep]
 
   # ------------------------------------------------------------ mail
@@ -84,19 +107,19 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.5
     default: MLFQ
-    justification: "Reading and writing email with nothing unwanted behind it: the mailer's keystrokes lead (c3-workday's mailer P99), background is treated as wanted and held to half."
+    justification: "Reading and writing email with nothing unwanted behind it: the mailer's keystrokes lead (c1-mail's and c3-workday's mailer P99), background is treated as wanted and held to half."
     sources: [ostep]
     entries:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "Interactive-first by observed behaviour (OSTEP ch. 8); the mail client's short bursts stay in the top queue; boot params."
+        justification: "Interactive-first by observed behaviour (OSTEP ch. 8); a keystroke costs the mail client about 5 ms (9.5), inside one slice, so it stays in the top queue; boot params."
         sources: [ostep]
   - mode: mail
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "Email with an unwanted job behind it (c7-mail's clamscan): the mailer leads, the job gets the floor."
+    justification: "Email with an unwanted job behind it (c7-mail's unattended upgrade): the mailer leads, the job gets the floor."
     sources: [ostep]
     entries:
       MLFQ:
@@ -116,19 +139,19 @@ rows:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "The editor blocks on every keystroke and stays on top under MLFQ (OSTEP ch. 8, rule 4b); boot params."
+        justification: "Interactive-first by observed behaviour (OSTEP ch. 8). A keystroke costs VS Code about 78 ms (9.5), so MLFQ demotes it within the keystroke (rule 4a) and the 100 ms boost returns it (rule 5); the wake-to-run wait the term scores is protected while the editor sits in Q0, and with nothing CPU-bound beside it the queue below is empty; boot params."
         sources: [ostep]
   - mode: dev
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "Writing code while an unwanted job runs (c7-dev's clamscan): the editor leads, the job gets the floor."
+    justification: "Writing code while an unwanted job runs (c7-dev's unattended upgrade): the editor leads, the job gets the floor."
     sources: [ostep]
     entries:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "MLFQ demotes the intruder within a few slices and the floor cap keeps it there (OSTEP ch. 8); boot params."
+        justification: "MLFQ demotes the intruder within a few slices and the floor cap keeps it there while the editor is runnable (OSTEP ch. 8); a demoted editor keystroke meets the upgrade only in the queue they share, and the cap bounds the upgrade there; boot params."
         sources: [ostep]
 
   # ------------------------------------------------------------ photo
@@ -136,7 +159,7 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.5
     default: MLFQ
-    justification: "Photo editing with nothing unwanted behind it (c3-creation's photo-editor P99): the editor's bursts lead; background that appears is treated as wanted and held to half."
+    justification: "Photo editing with nothing unwanted behind it (c1-photo's and c3-creation's photo-editor P99, read on GIMP's own wakes): the editor's bursts lead; background that appears is treated as wanted and held to half."
     sources: [ostep]
     entries:
       MLFQ:
@@ -148,7 +171,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "Photo editing while an unwanted job runs (c7-photo's clamscan): the editor leads, the job gets the floor."
+    justification: "Photo editing while an unwanted job runs (c7-photo's unattended upgrade): the editor leads, the job gets the floor."
     sources: [ostep]
     entries:
       MLFQ:
@@ -162,25 +185,25 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.5
     default: EDF
-    justification: "A live video call is a periodic producer and consumer of audio and video frames, each due at its next period; nothing unwanted runs behind it, so background that appears is treated as wanted and held to half."
+    justification: "A live video call is one measured task, a periodic job per 10 ms audio frame, each due at the next; nothing unwanted runs behind it, so background that appears is treated as wanted and held to half. Its own overruns — about one cycle in twenty exceeds its period — set a floor under its miss rate that no row moves."
     sources: [liu-jacm73]
     entries:
       EDF:
         params: {residual_timeslice_us: 10000}
         basis: theory
-        justification: "Deadline ordering meets every periodic deadline whenever any policy can (Liu & Layland 1973, Theorem 7, under their assumption A2 that a job is due at its next request); the residual slice is the boot value (recognition-vocabulary §2)."
+        justification: "Deadline ordering meets every periodic deadline whenever any policy can (Liu & Layland 1973, Theorem 7, under their assumption A2 that a job is due at its next request); the call is in the deadline class and the cap never reaches it; the residual slice is the boot value (recognition-vocabulary §2)."
         sources: [liu-jacm73]
   - mode: meeting
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: EDF
-    justification: "A live video call with an unwanted job behind it (c7-meeting's clamscan): frames keep their deadlines and the job gets the floor so it never steals one."
+    justification: "A live video call with an unwanted job behind it (c7-meeting's unattended upgrade): EDF serves the call's frames before the residual job whatever the cap, so the cap is inert on the scored term and the two meeting rows tie on it; against the boot MLFQ, which demotes the call's long cycles into the upgrade's queue, the EDF rows have headroom (pair review)."
     sources: [liu-jacm73]
     entries:
       EDF:
         params: {residual_timeslice_us: 10000}
         basis: theory
-        justification: "Deadline-driven scheduling keeps the periodic frames (Liu & Layland 1973, Theorem 7) while the floor cap bounds the residual intruder; boot residual slice."
+        justification: "Deadline-driven scheduling keeps the periodic frames (Liu & Layland 1973, Theorem 7); the floor cap bounds the residual intruder's share of what the deadline class leaves, not the frames; boot residual slice."
         sources: [liu-jacm73]
 
   # ------------------------------------------------------------ gaming
@@ -188,25 +211,25 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.333
     default: EDF
-    justification: "Game frames are periodic deadlines (the chain's 16.7 ms period, scored as game.chain.1's miss rate) and a download the user started is wanted background weighed 0.5 against the frames' 1.0 in c2-p2a, so the batch class gets a third."
+    justification: "Game frames are periodic deadlines (the chain's 16.7 ms period, scored as game.chain.1's miss rate) and a download the user started is wanted background weighed 0.5 against the frames' 1.0 in c2-p2a, so the batch class gets a third. The measured download runs back to back and is batch class, but the chain takes 0.95 of the lane under EDF, so what it leaves is below any cap and the download's progress is expected no headroom (scoring spec)."
     sources: [liu-jacm73, waldspurger-osdi94]
     entries:
       EDF:
         params: {residual_timeslice_us: 10000}
         basis: theory
-        justification: "Deadline ordering meets every periodic deadline whenever any policy can (Liu & Layland 1973, Theorem 7); c1-gaming and c3-evening run above utilisation 1, outside that theorem, where EDF orders the misses rather than preventing them; boot residual slice."
+        justification: "Deadline ordering meets every periodic deadline whenever any policy can (Liu & Layland 1973, Theorem 7); the whole frame chain is in the deadline class, so EDF serves a frame before any residual task. c3-evening's chain at 1.45 lanes runs above utilisation 1, outside the theorem, where EDF orders the misses rather than preventing them; the base and the pair fit the lane at 0.9 and 0.95; boot residual slice."
         sources: [liu-jacm73]
   - mode: gaming
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: EDF
-    justification: "A game with a scan nobody asked for behind it (c2-p2b's and c7-gaming's clamscan): the frames keep their deadlines and the scan gets the floor, the only scored term being the chain's miss rate."
+    justification: "A game with a job nobody asked for behind it (c2-p2b's and c7-gaming's unattended upgrade): EDF keeps the frames first whatever the cap, so the cap is inert on the chain term and the two gaming rows tie on it; the floor bounds the upgrade's share of the residual. The pair's gap against the boot MLFQ, whose 100 ms boost hands the upgrade a 10 ms slice inside a frame with under 1.7 ms of slack, is an EDF-against-MLFQ result (pair review)."
     sources: [liu-jacm73]
     entries:
       EDF:
         params: {residual_timeslice_us: 10000}
         basis: theory
-        justification: "Deadline-driven scheduling keeps the frame chain first (Liu & Layland 1973, Theorem 7) while the floor cap bounds the CPU-bound scan; boot residual slice."
+        justification: "Deadline-driven scheduling keeps the frame chain first (Liu & Layland 1973, Theorem 7) while the floor cap bounds the CPU-bound upgrade's share of the residual; boot residual slice."
         sources: [liu-jacm73]
 
   # ------------------------------------------------------------ media
@@ -214,7 +237,7 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.5
     default: EDF
-    justification: "Video and audio playback are two periodic consumers (60 Hz and 20 Hz ticks, scored as miss rates); nothing unwanted runs behind them, so background that appears is treated as wanted and held to half."
+    justification: "Video and audio playback are two measured periodic consumers (mpv's 30 fps frames and its 49.6 ms audio cycles, scored as miss rates); nothing unwanted runs behind them, so background that appears is treated as wanted and held to half."
     sources: [liu-jacm73]
     entries:
       EDF:
@@ -226,13 +249,13 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: EDF
-    justification: "Playback with an unwanted job behind it (c7-media's clamscan): the ticks keep their deadlines and the job gets the floor."
+    justification: "Playback with an unwanted job behind it (c7-media's unattended upgrade): EDF keeps both players' ticks before the residual job whatever the cap, so the cap is inert on the scored terms and the two media rows tie on them; the boot MLFQ keeps them too on the measured tables (a 32 ms worst case against a 33.3 ms period), so the file is expected no headroom against fixed as well (scoring spec)."
     sources: [liu-jacm73]
     entries:
       EDF:
         params: {residual_timeslice_us: 10000}
         basis: theory
-        justification: "Deadline-driven scheduling keeps both players' ticks (Liu & Layland 1973, Theorem 7) while the floor cap bounds the residual intruder; boot residual slice."
+        justification: "Deadline-driven scheduling keeps both players' ticks (Liu & Layland 1973, Theorem 7) while the floor cap bounds the residual intruder's share of what they leave; boot residual slice."
         sources: [liu-jacm73]
 
   # ------------------------------------------------------------ video-edit
@@ -240,7 +263,7 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.5
     default: MLFQ
-    justification: "Interactive video editing with nothing unwanted behind it (kdenlive's keystrokes in c2-p3's first minute and c3-creation): the editor leads; background that appears is treated as wanted and held to half."
+    justification: "Interactive video editing with nothing unwanted behind it (Kdenlive in c2-p3's first minute and c3-creation, its term read on the editor's own wakes): the editor leads; background that appears is treated as wanted and held to half."
     sources: [ostep]
     entries:
       MLFQ:
@@ -252,7 +275,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "Video editing while an unwanted job runs (c7-video-edit's clamscan): the editor leads, the job gets the floor."
+    justification: "Video editing while an unwanted job runs (c7-video-edit's unattended upgrade): the editor leads, the job gets the floor."
     sources: [ostep]
     entries:
       MLFQ:
@@ -266,25 +289,25 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.5
     default: LOTTERY
-    justification: "A build the user started while editing: c1-compile weighs the makespan 1.0 against the editor's 1.0, so the build's share is half — the compiler children progress at a stated rate and the editor keeps the other half."
+    justification: "A build the user started while editing: c1-compile weighs the makespan 1.0 against the editor's 1.0, so the build's share is half — the measured kernel build's 2,908 object jobs progress at a stated rate and the editor is guaranteed the other half while it is runnable."
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:
         params: {batch_share: 0.5, timeslice_us: 10000}
         basis: theory
-        justification: "Lottery makes consumption proportional to allocated shares (Waldspurger & Weihl 1994, §1), which is a wanted build's contract; the share equals the cap so the two cannot disagree; 2 ms quantum per the boot value, inside the range their §2 recommends."
+        justification: "Lottery makes consumption proportional to allocated shares (Waldspurger & Weihl 1994, §1), which is a wanted build's contract; the share equals the cap so the two cannot disagree; the 10 ms quantum is the boot value by the same-granularity rule (design). How LOTTERY splits tickets inside the batch class while the editor's own burst tail is batch class is the simulator's rule (batch-class memo §7 item 3), asked of 인경민 in the heads-up memo and not yet answered."
         sources: [waldspurger-osdi94]
   - mode: compile
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "A build nobody asked for (c7-compile's dkms module rebuild after a kernel update) behind interactive work: sink it and hold it to the floor; no user is waiting on its makespan."
+    justification: "A build nobody asked for (c7-compile's DKMS module rebuild after a kernel update, the measured NVIDIA module built by the stock unattended upgrade) behind interactive work: sink it and hold it to the floor; no user is waiting on its makespan."
     sources: [ostep]
     entries:
       MLFQ:
         params: {num_queues: 3, timeslice_us: 10000, timeslice_growth: 2, boost_interval_us: 100000}
         basis: theory
-        justification: "MLFQ demotes each CPU-bound compiler child within a few slices (OSTEP ch. 8, rule 4a) and the floor cap bounds the whole class; boot params."
+        justification: "MLFQ demotes each CPU-bound compiler child within a few slices (OSTEP ch. 8, rule 4a) and the floor cap bounds the whole class while the editor is runnable; boot params."
         sources: [ostep]
 
   # ------------------------------------------------------------ ml-train
@@ -292,13 +315,13 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.333
     default: LOTTERY
-    justification: "A training run the user started is a stated share of the lane, not a nuisance: c2-p1a weighs its progress 0.5 against the editor's 1.0, so the batch class gets a third and the editor's keystrokes the rest."
+    justification: "A training run the user started is a stated share of the lane, not a nuisance: c2-p1a weighs its progress 0.5 against the editor's 1.0, so the batch class gets a third and the editor's keystrokes the rest while they are runnable."
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:
         params: {batch_share: 0.333, timeslice_us: 10000}
         basis: theory
-        justification: "Lottery makes consumption proportional to allocated shares (Waldspurger & Weihl 1994, §1) and is starvation-free for the minority class; the share equals the cap; 2 ms quantum per the boot value."
+        justification: "Lottery makes consumption proportional to allocated shares (Waldspurger & Weihl 1994, §1) and is starvation-free for the minority class; the share equals the cap; the 10 ms quantum is the boot value (design)."
         sources: [waldspurger-osdi94]
   - mode: ml-train
     background_wanted: false
@@ -318,13 +341,13 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.333
     default: LOTTERY
-    justification: "A render the user kicked off while still editing (c2-p3a's ffmpeg): progress weighs 0.5 against the editor's 1.0, so the render's share is a third."
+    justification: "A render the user kicked off while still editing (Kdenlive's measured export in c1-render and c2-p3a): its turnaround weighs 0.5 against the editor's 1.0, so the render's share is a third."
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:
         params: {batch_share: 0.333, timeslice_us: 10000}
         basis: theory
-        justification: "Proportional share by tickets (Waldspurger & Weihl 1994, §1) gives the render a rate the user can count on without taking the editor's remainder; share equals cap; 2 ms quantum per the boot value."
+        justification: "Proportional share by tickets (Waldspurger & Weihl 1994, §1) gives the render a rate the user can count on without taking the editor's remainder; share equals cap; the 10 ms quantum is the boot value (design)."
         sources: [waldspurger-osdi94]
   - mode: render
     background_wanted: false
@@ -344,13 +367,13 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.333
     default: LOTTERY
-    justification: "A conversion the user started (c3-creation's HandBrake): progress weighs 0.5 against the editor's 1.0, so its share is a third; after the user walks away no foreground is runnable and the cap no longer bites."
+    justification: "A conversion the user started (HandBrake's measured encode in c1-transcode and c3-creation): its turnaround weighs 0.5 against the editor's 1.0, so its share is a third; once the user stops editing the editor's idle wakes are all that is runnable beside it and the cap barely bites."
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:
         params: {batch_share: 0.333, timeslice_us: 10000}
         basis: theory
-        justification: "Proportional share by tickets (Waldspurger & Weihl 1994, §1); share equals cap; 2 ms quantum per the boot value."
+        justification: "Proportional share by tickets (Waldspurger & Weihl 1994, §1); share equals cap; the 10 ms quantum is the boot value (design)."
         sources: [waldspurger-osdi94]
   - mode: transcode
     background_wanted: false
@@ -370,19 +393,19 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.5
     default: LOTTERY
-    justification: "An indexing run the user asked for (c1-indexing: the reindex's turnaround weighed 1.0 against the editor's 1.0): equal shares, the cap derived as w_batch / (w_fg + w_batch) like compile/true."
+    justification: "An indexing run the user asked for (c1-indexing: the reindex's turnaround weighed 1.0 against the editor's 1.0): equal shares, the cap derived as w_batch / (w_fg + w_batch) like compile/true. The measured indexer declares the idle class, so the executor runs it only in the editor's gaps and this share never reaches it: the row stands by the rule above and is inert on the file that exercises it (9.11 D5, D16; the depicted desktop gives the indexer's slice about 23 % against the editor's, a stated limitation)."
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:
         params: {batch_share: 0.5, timeslice_us: 10000}
         basis: theory
-        justification: "Proportional share by tickets (Waldspurger & Weihl 1994, §1); share equals cap; 2 ms quantum per the boot value."
+        justification: "Proportional share by tickets (Waldspurger & Weihl 1994, §1); share equals cap; the 10 ms quantum is the boot value (design)."
         sources: [waldspurger-osdi94]
   - mode: indexing
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "An indexer's rescan nobody called (c2-p1b's and c7-indexing's tracker-miner under an editor): sink it and hold it to the floor; the only scored term is the editor's keystroke echo."
+    justification: "An indexer's first index nobody called (c2-p1b's and c7-indexing's Tracker under an editor): sink it and hold it to the floor; the only scored term is the editor's keystroke echo. The indexer declares the idle class, so it already runs only in the editor's gaps under every row; the floor is inert on it and the pair's attribute is unmeasured here (pair review)."
     sources: [ostep]
     entries:
       MLFQ:
@@ -396,19 +419,19 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.2
     default: LOTTERY
-    justification: "A scheduled backup the user wants but nobody is waiting on (c2-p3b's borg): progress weighs 0.25 against the editor's 1.0, so its share is a fifth — wanted, never starved, below a user-initiated render."
+    justification: "A scheduled backup the user wants but nobody is waiting on (Déjà Dup's weekly incremental in c1-backup and c2-p3b): progress weighs 0.25 against the editor's 1.0, so its share is a fifth — wanted, never starved, below a user-initiated render. The measured backup declares the idle class, so the executor runs it only in the editor's gaps and this share never reaches it: the row stands by the rule above and is inert on the files that exercise it (9.11 D5, D16; on the depicted desktop the backup shares the editor's task group and the idle class acts as here)."
     sources: [waldspurger-osdi94]
     entries:
       LOTTERY:
         params: {batch_share: 0.2, timeslice_us: 10000}
         basis: theory
-        justification: "Proportional share by tickets (Waldspurger & Weihl 1994, §1) states a small guaranteed rate exactly; share equals cap; 2 ms quantum per the boot value."
+        justification: "Proportional share by tickets (Waldspurger & Weihl 1994, §1) states a small guaranteed rate exactly; share equals cap; the 10 ms quantum is the boot value (design)."
         sources: [waldspurger-osdi94]
   - mode: backup
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "A backup nobody asked for behind interactive work (c7-backup, flipped by intent — a pre-committed miss): sink it and hold it to the floor."
+    justification: "A backup nobody asked for behind interactive work (c7-backup, flipped by intent — a pre-committed miss): sink it and hold it to the floor. The backup declares the idle class, so the floor is inert on it, as on indexing/false."
     sources: [ostep]
     entries:
       MLFQ:
@@ -422,7 +445,7 @@ rows:
     background_wanted: true
     batch_bandwidth_cap: 0.5
     default: MLFQ
-    justification: "Nobody present, maintenance only (c1-idle's five daemons): there is no foreground to protect and nothing unwanted running, so the MLFQ default with equal shares."
+    justification: "Nobody present, maintenance only (c1-idle's four session daemons — the compositor shell, the audio server, the service manager and the message bus, observed in an idle Ubuntu session): there is no foreground to protect and nothing unwanted running, so the MLFQ default with equal shares."
     sources: [ostep]
     entries:
       MLFQ:
@@ -434,7 +457,7 @@ rows:
     background_wanted: false
     batch_bandwidth_cap: 0.05
     default: MLFQ
-    justification: "Nobody present but work nobody asked for is running (c7-idle's clamscan): hold it to the floor so a returning user or a wanted job finds the lane free."
+    justification: "Nobody present but work nobody asked for is running (c7-idle's unattended upgrade): hold it to the floor so a returning user or a wanted job finds the lane free."
     sources: [ostep]
     entries:
       MLFQ:
