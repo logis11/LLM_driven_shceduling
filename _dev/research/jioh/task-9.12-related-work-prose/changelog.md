@@ -654,3 +654,14 @@ Each status line keeps its 2026-09-12 read and adds: "independently read in full
 Hands to 9.15: `docs/references.md` — the six status lines as above.
 
 Compiled effect: none.
+
+## D44 — `scx` and `schedext-docs` confirmed against D7, D8 and D10: tier and role as those decisions leave them (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), scope-card items 56 and 57: no further read; the two entries' role and status lines are brought to what D7, D8, D10 and D27 decided.
+
+- **`scx`** (deployed-system): role — the repository ships the schedulers (fifteen at `v1.1.3`, S2-09) and documents scx_lavd's design (its README and `lat_cri.bpf.c`, D10), and holds the three schedulers' watchdog timeouts (9.11 D19); "existence of production sched_ext schedulers" restated to existence of the schedulers, production deployment being stated by the operators' own entries (D8: Meta's LPC 2024 slides and LPC 2025 abstract; D9: Valve's SteamOS sources), never by `scx`. Status — adds the D10 read of scx_lavd's README and `lat_cri.bpf.c` at `v1.1.3`.
+- **`schedext-docs`** (deployed-system): role kept — mechanism, runtime loading and the integrity and fallback statement, with no verifier claim (D7); the deployment path as D27 states it (what could run on a kernel the depicted desktop already carries). Status — adds the v6.11 / v6.12-rc1 / v6.12 tree check (S2-47) as the ground of "first released in 6.12" (D7's hand-off).
+
+Hands to 9.15: `docs/references.md` `scx` (`:214`, `:216`) and `schedext-docs` (`:291`, `:293`) as above.
+
+Compiled effect: none.
