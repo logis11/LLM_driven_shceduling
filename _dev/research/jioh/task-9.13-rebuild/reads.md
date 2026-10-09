@@ -86,3 +86,27 @@ Nine of the ten oversubscribed-class files are outside the window:
 `c2-p1a`'s and `c2-p2a`'s demands follow the training run and the download bound whole at their CPU totals (9.10 D17, D90, D142) inside short files. The research-slice workflow (`_dev/research/jioh/research-slice-workflow.md`, "CI on the branch") already states the window check may fail on this branch until 9.14 redoes the rule; the bless uses the compiler's allowance that reports violations as warnings (spec decision 10).
 
 Hands to 9.14: these nine files and demands as the state the demand-window redo inherits; the dataset CI gate stays red on the window until then.
+
+## R6 — the harness against the blessed set (2026-10-09)
+
+The harness lint (`harness/tools/lint.py`) is clean on the blessed set. The harness test suite (`harness/tools/tests`, Python 3.12, 16 minutes): 264 tests, 255 passed, 9 failed. Each failure read; none is a parser break on `declared_class` — the mock daemon's projection, the mock simulator and the records pipeline flow `c2-p2a-idle`, `c1-indexing` and `c1-compile` under `fixed` and `oracle` with no guard message (checked directly, 2026-10-09).
+
+Five follow from the 51st file, `c2-p2a-idle`, reaching consumers that assume the 50 files or enumerate the C2 variants:
+
+| Test | What it asserts | Why it fails |
+|---|---|---|
+| `test_mock_daemon.py::test_oracle_over_the_coreset_reproduces_the_measured_graded_set` | 50 compiled files | 51 |
+| `test_mock_simulator.py::test_every_coreset_file_flows_through_records_with_no_message` | 50 compiled files | 51 (the flow itself was checked by hand, above) |
+| `test_scoring.py::test_every_coreset_file_but_idle_has_terms` | every file but `c1-idle`, `c7-idle` has scoring terms | `c2-p2a-idle` has none — the scoring spec is 9.14's |
+| `test_guards.py::test_committed_spec_lints_clean`, `::test_lint_cli_is_clean_on_the_committed_spec` | the guard spec's `pairs` equal the recipes' `c2-*` variants (`harness/tools/harness/guards.py:372`, every variant id starting `c2-` in any recipe file) | the lint reads `c2-p2a-idle` → `c2-p2a` as a fourth pair the guard spec does not list |
+
+Four predate 9.13 — the slices changed task ids, file lengths and the compile's job count, and the scoring spec and one mock-daemon test still carry the earlier state; 9.13 changed no id, length or count:
+
+| Test | The stale state |
+|---|---|
+| `test_scoring.py::test_committed_spec_lints_clean`, `::test_window_must_lie_inside_the_file`, `::test_cli_exit_codes` | the scoring spec's `compositor/job` terms in `c1-gaming`, `c4-gaming`, `c7-gaming` and `video/job` in `c1-meeting`, `c7-meeting` name tasks no compiled file holds (9.9's split, 9.5 D75); its windows `[60 s, 180 s]` on `c2-p1a`/`c2-p1b` and `[60 s, 120 s]` on `c2-p2a`/`c2-p2b` lie outside files 9.10 cut to 99.435 s and 86.385 s — nine lint errors, none about `c2-p2a-idle` |
+| `test_mock_daemon.py::test_c1_compile_opens_with_the_guides_two_snapshots` | the test expects Phase 2's `c1-compile`, 100 `cc1` children; the file holds 9.10 D141's kernel build, 2,908 jobs of six members (9.6 D19) |
+
+The mock daemon's projection shows name and lifetime only (`{"name", "t_arrive", "t_depart"}`); the contract now grants the recognizer each task's `declared_class` (spec decision 3), so the mock's projection is to carry it.
+
+Hands to 9.14: the five consumer items of the 51st file (the two counts, the scoring spec's terms or exemption for `c2-p2a-idle`, the guard spec's pair list or the lint's exemption of the bounding pair — the `c2_pair` guard's reading of a pair byte-identical but for a class is 9.14's call); the four stale items, already in its scoring-spec rework; the mock daemon's projection carrying `declared_class`. The harness CI job stays red on these until 9.14.
