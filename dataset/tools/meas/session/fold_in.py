@@ -249,7 +249,7 @@ def cron_text(e):
 def entry(prog, e, run, within):
     comp = e["components"]
     k = len(e["repeats"])
-    out = [f"  {IDS[prog]}:", "    category_source: meas", "    pattern:", "      program:",
+    out = [f"  {IDS[prog]}:", "    category_source: meas", "    declared_class: normal", "    pattern:", "      program:",
            "        - loop:                    # measured timer components merged at compile time, each wake on the task's timer channel (9.5 D9, D16, D74)",
            "            - WAIT: timer", "            - RUN: event", "    params:", "      components:"]
     for comm in comp["selected"]:

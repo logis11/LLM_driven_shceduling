@@ -19,7 +19,8 @@ LAUNCH = re.compile(r"^    params:\n(      launch:\n        \{stream: [^\n]*\}\n
 def blocks(text):
     """id -> (start, end) of each top-level entry (two-space indented key) in a YAML text."""
     out = {}
-    starts = [(m.start(), m.group(1)) for m in re.finditer(r"^  ([A-Za-z0-9_-]+):\n", text, re.M)]
+    starts = [(m.start(), m.group(1))   # an entry line, anchored or not (9.13 D4)
+              for m in re.finditer(r"^  ([A-Za-z0-9_-]+):(?: &[A-Za-z0-9_-]+)?\n", text, re.M)]
     for i, (pos, aid) in enumerate(starts):
         end = starts[i + 1][0] if i + 1 < len(starts) else len(text)
         out[aid] = (pos, end)

@@ -258,7 +258,7 @@ def entry(app, e):
     comp = ph["components"]
     k = len(e["repeats"])
     renderer = app.startswith("chrome")
-    out = [f"  {IDS[app]}:", "    category_source: meas", "    pattern:", "      program:",
+    out = [f"  {IDS[app]}:", "    category_source: meas", "    declared_class: normal", "    pattern:", "      program:",
            "        - loop:                    # measured timer components merged at compile time, each wake on the task's timer channel (9.5 D9, D16, D74)",
            "            - WAIT: timer", "            - RUN: event", "    params:", "      components:"]
     for comm in comp["selected"]:

@@ -78,7 +78,7 @@ def rewrite(text, pools):
     lines = text.split("\n")
     archetype, written = None, set()
     for i, line in enumerate(lines):
-        m = re.match(r"^  ([a-z0-9-]+):\s*$", line)
+        m = re.match(r"^  ([a-z0-9-]+):(?:\s+&[A-Za-z0-9_-]+)?\s*$", line)   # an entry, anchored or not (9.13 D4)
         if m:
             archetype = m.group(1)
             continue

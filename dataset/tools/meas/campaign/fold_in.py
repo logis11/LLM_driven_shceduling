@@ -381,7 +381,7 @@ def entry(aid, spec, d):
     if later:
         census = f"{build_census(later.get('version'))} in the phases with or after the input, {census} in the idle phase"
     observed = observed.replace("{version}", census)
-    out = [f"  {aid}:", "    category_source: meas", "    pattern:", "      program:"]
+    out = [f"  {aid}:", "    category_source: meas", "    declared_class: normal", "    pattern:", "      program:"]
     if kind == "play":
         out += ["        - loop:                    # one periodic job per medium cycle, its deadline the next cycle's start (D74, D75)",
                 "            - TIMER: period", "            - RUN: cycle_run"]
