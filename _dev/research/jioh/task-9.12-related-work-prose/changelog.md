@@ -635,3 +635,22 @@ Taken under 인지오's delegation (2026-10-09), scope-card items 48 and 49: bot
 Hands to 9.15: `docs/related-work.md:32` with the two sentences above; `docs/references.md` `tuxbot-arxiv26` and `vulcan-arxiv25` status and role lines as above (Vulcan's "Comments field: "19 pages"" and "(v2, submitted 2026-06-16)" brought to v3, "21 pages, 12 figures. Accepted for publication at EuroSys 2027"); the D25 key map gains `tuxbot` and `vulcan`; `schedcp-mlsys25`'s status line ("both `provisional` — identified from their abstract pages, bodies unread") updated.
 
 Compiled effect: none.
+
+## D43 — the six scholarly entries' status lines gain the independent read and its copies (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), scope-card item 55: `ghost-sosp21`, `decima-sigcomm19`, `firm-osdi20`, `park-neurips19`, `eevdf-tr95` and `corbato-sjcc62` carry "verified 2026-09-12" from the author's own reads, with no independent read and no copy in the clone. Stage 2 read each in full (S1-01, S1-06, S1-07, S1-08, S1-05, S1-04), D17–D20 rest on those reads, and the copies were re-downloaded on 2026-10-09 from the same URLs, byte-identical, a passage of each re-read:
+
+| Entry | Record | SHA-256 | Passage re-read 2026-10-09 |
+|---|---|---|---|
+| `ghost-sosp21` | S1-01 | `c37d6360…` | "not well-tolerated below an O(month) granularity" (§2, p. 3) |
+| `decima-sigcomm19` | S1-06 | `b6b50a58…` | "generalizes poorly and underperforms the optimized weighted fair policy" (§7.4, p. 11) |
+| `firm-osdi20` | S1-07 | `a0adcf98…` | "rapid (re)training of the proposed system" (p. 3) |
+| `park-neurips19` | S1-08 | `c686bc44…` | "consists of 12 real world system-centric optimization problems" (Abstract) |
+| `eevdf-tr95` | S1-05 | `b44b71a7…` | the title, "…Proportional Share Resource Allocation" |
+| `corbato-sjcc62` | S1-04 | `3e5f2a3b…` | "entirely automatic, depending on performance and program size" (printed p. 342) |
+
+Each status line keeps its 2026-09-12 read and adds: "independently read in full 2026-10-07 (9.12 S1-xx), the copy's SHA-256, re-verified 2026-10-09". The tier of each is unchanged (scholarly).
+
+Hands to 9.15: `docs/references.md` — the six status lines as above.
+
+Compiled effect: none.
