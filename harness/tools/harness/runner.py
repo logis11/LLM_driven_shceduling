@@ -263,8 +263,14 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
     exp_dir.mkdir(parents=True, exist_ok=True)
     result = Result(report=None, experiment_dir=exp_dir)
     runs = expand(spec_path, machine, root)
+    # the scoring spec, with an entry per variant file (9.14 decision 12: scored on its base's terms, its windows
+    # on its own segments); each run is aggregated as soon as its records are built, so a run's rows — fourteen
+    # million for c6-dual — live only until its aggregates exist, never all runs' at once
+    scoring_spec = scoring.with_variants(scoring.load_spec(scoring_path),
+                                         {wid: machine.build_dir / f"{wid}.workload.json"
+                                          for wid in (spec["files"].get("variants") or [])})
 
-    built: Dict[tuple, dict] = {}           # identity -> {dir, rows, messages}
+    built: Dict[tuple, dict] = {}           # identity -> {run, dir, aggregates, messages}
     for run in runs:
         run_dir = exp_dir / run.workload_id / run.name
         run_dir.mkdir(parents=True, exist_ok=True)
@@ -291,7 +297,10 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
             for inv in (d, s):
                 result.cached += int(inv.cached)
                 result.executed += int(not inv.cached)
-            built[run.identity] = {"run": run, "dir": run_dir, "rows": rows, "messages": list(messages)}
+            aggregates = agg.compute_aggregates(rows, scoring.windows_from_spec(scoring_spec, run.workload_id),
+                                                scoring.interactive_from_spec(scoring_spec, run.workload_id))
+            del rows
+            built[run.identity] = {"run": run, "dir": run_dir, "aggregates": aggregates, "messages": list(messages)}
         except (RunError, ValueError, OSError) as exc:
             for name in ("schedule.json", "log.json", "trace.jsonl", "trace.rerun.jsonl", "records.csv"):
                 (run_dir / name).unlink(missing_ok=True)
@@ -302,16 +311,8 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
         return result
     (exp_dir / "failures.json").unlink(missing_ok=True)
 
-    # aggregates and scores; a variant file (9.14 decision 12) is scored on its base's terms, its windows on its
-    # own segments
-    scoring_spec = scoring.with_variants(scoring.load_spec(scoring_path),
-                                         {b["run"].workload_id: b["run"].workload_file for b in built.values()
-                                          if "@" in b["run"].workload_id})
-    agg_rows = []
-    for identity, b in sorted(built.items()):
-        wid = identity[0]
-        agg_rows.extend(agg.compute_aggregates(b["rows"], scoring.windows_from_spec(scoring_spec, wid),
-                                               scoring.interactive_from_spec(scoring_spec, wid)))
+    # aggregates and scores
+    agg_rows = [row for _identity, b in sorted(built.items()) for row in b["aggregates"]]
     write_csv(agg_rows, agg.COLUMNS, exp_dir / "aggregates.csv")
     term_rows, file_rows = scorer.score(agg_rows, scoring_spec)
     write_csv(term_rows + file_rows, scorer.COLUMNS, exp_dir / "scores.csv")
