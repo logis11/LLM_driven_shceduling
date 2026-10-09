@@ -61,6 +61,7 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
 | 51 | 2026-10-09 | obsproject.com; raw.githubusercontent.com (stage 3) | `/`; `/kb/encoding-performance-troubleshooting`; `/kb/dropped-frames-and-general-connection-issues`; obsproject/obs-studio at HEAD `7d98bebe` `frontend/data/locale/en-US.ini` (`UI/data/locale/en-US.ini` tried second) | 200 → S2-55 | the dropped-frames KB page 404 |
 | 52 | 2026-10-09 | doc.rust-lang.org (stage 3) | `/cargo/index.html`; `/cargo/commands/cargo-build.html` | 200 → S2-56 | — |
 | 53 | 2026-10-09 | git (stage 3) | `git fetch --depth 1 https://github.com/Ardour/manual 9628c8ba…` (S2-38's commit); `grep -il xrun include/*.html` | → S2-57 | — |
+| 54 | 2026-10-09 | support.xbox.com via headless Chrome 154.0.8037.98 (stage 3) | `--headless=new --dump-dom --virtual-time-budget=20000` on S2-17's URL, a throwaway profile | rendered DOM → S2-58 | — |
 
 ## 2. Candidates
 
@@ -598,6 +599,12 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
 - Copies (2026-10-09, `sources/S2-38/ardour-manual/`, the repository at `9628c8bad094537fddd967ef137e8a692e2b1503`, S2-38's commit; `include/latency-considerations.html` byte-identical to S2-38's, `2f7429aa…`): `include/latency-and-latency-compensation.html` SHA-256 `d3af5c17f37fcd70ccf9b7811d1201e43ffcde52575d3a74b570bb7038518346`; `include/preferences.html` `02fa43bca439d2dda3dde77d822988062215ac8861541b4e36c1932088d0c704`.
 - Passages (tags removed): `latency-and-latency-compensation.html` — "The lower the latency, the more likely the system will fail to meet its processing deadline and the dreaded xrun (short for buffer over- or under-run) will make its appearance more often, leaving its merry trail of clicks, pops and crackles."; `preferences.html` — "Dropout (xrun) Handling Stop recording when an xrun occurs will stop the transport when an xrun occurs during recording, ensuring no audible glitches are recorded."
 - Coverage: T13 — a missed audio deadline is an xrun, heard as clicks, pops and crackles; lower latency makes it more likely. Documentation, not an observation.
+
+### S2-58 — Xbox Support, "Use Game Mode while gaming on your Windows device", rendered (stage 3, 2026-10-09)
+
+- Copy: https://support.xbox.com/en-US/help/games-apps/game-setup-and-play/use-game-mode-gaming-on-pc (S2-17's URL) · 2026-10-09 · rendered by Google Chrome 154.0.8037.98 headless (`--dump-dom`, 20 s virtual time, a fresh profile) on the development Mac → `sources/S2-58/xbox-gamemode.rendered.html`, SHA-256 `565be1216463499428b478a4c3f0bccbab19ab7e0f0cf9277e3c97eafd4b0e8e`. The page shows no date.
+- Passages (the article body, tags removed): "Use Game Mode while gaming on your Windows device" … "When you use Game Mode, Windows prioritizes your gaming experience by turning things off in the background. When you're running a game, Game Mode: Prevents Windows Update from performing driver installations and sending restart notifications; Helps achieve a more stable frame rate depending on the specific game and system" … "Note: Game Mode is turned on by default."
+- Coverage: T6 — what Windows Game Mode does to background work while a game runs, in Microsoft's words: it holds back Windows Update's driver installations and restart notifications; on by default. It does not say how a game is recognised. Documentation, not an observation. S2-17's open item closed.
 
 ## 3. Not found
 

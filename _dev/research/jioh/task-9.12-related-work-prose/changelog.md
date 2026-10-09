@@ -665,3 +665,18 @@ Taken under 인지오's delegation (2026-10-09), scope-card items 56 and 57: no 
 Hands to 9.15: `docs/references.md` `scx` (`:214`, `:216`) and `schedext-docs` (`:291`, `:293`) as above.
 
 Compiled effect: none.
+
+## D45 — `gamemode-docs`' open question resolved: Microsoft's Xbox Support article states Game Mode holds back Windows Update's driver installs and restart notifications while a game runs (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), scope-card item 59, after a stage-3 read (S2-58): the registry's "one open question, deliberately unresolved" — "whether Microsoft documents that Game Mode defers Windows Update driver installs or restart/notification prompts during play" — is answered by the Microsoft-published page the entry named, read rendered.
+
+- **What Microsoft states** (S2-58, Xbox Support, "Use Game Mode while gaming on your Windows device", rendered 2026-10-09): "When you use Game Mode, Windows prioritizes your gaming experience by turning things off in the background. When you're running a game, Game Mode: Prevents Windows Update from performing driver installations and sending restart notifications; Helps achieve a more stable frame rate depending on the specific game and system"; "Game Mode is turned on by default." K5's C-gamemode-5 (CONTRADICTED against the status line) is confirmed first-hand.
+- **What it adds to D2's Game Mode sentence:** besides exclusive CPU sets and GPU priority (Microsoft Learn, S2-16), Windows Game Mode defers part of the system's own background work while a game runs — Windows Update's driver installations and restart notifications. With Steam pausing its downloads at game launch (D16), it is a shipped instance of background work held back during play, the half of `docs/workload/grounding-sources.md:18`'s Role A line ("the wanted/unwanted-background distinction") that K3's C-ananicy-rules-4 found NOT IN SOURCE for ananicy: the instance holds back named system work, by the vendor's rule, not by a judgement of what the user wants.
+- **How a game is recognised** stays undocumented (S2-58 does not say); D1 stands.
+
+Hands to 9.15:
+
+- `docs/references.md` — a deployed-system entry for the Xbox Support article under the id-minting rule (URL, rendered 2026-10-09, SHA-256 from S2-58, "no date on the page"); `gamemode-docs`' status line: the open question closed, pointing to the new entry; its "[Exact URLs to pin.]" replaced per D2.
+- `docs/related-work.md:40` (D2's restated Game Mode sentence) and `docs/research-proposal.md:148–149` (the §2.1 rows, D1) gain the Windows Update deferral, cited to the new entry; `docs/workload/grounding-sources.md:18`'s Role A line restated to what the instances ground: the gaming category (Windows, macOS, Feral), background work held back during play by vendor rule (Windows Update in Game Mode; Steam's downloads, D16), and a per-name priority catalogue (`ananicy-rules`, D3) — not a wanted/unwanted judgement by any of them.
+
+Compiled effect: none.

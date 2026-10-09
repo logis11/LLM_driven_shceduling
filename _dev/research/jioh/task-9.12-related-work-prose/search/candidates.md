@@ -76,7 +76,7 @@ Nothing was observed on a GitHub Actions runner (S4, Not found). No observation 
 
 - **48 TuxBot, 49 Vulcan.** S1-17 and S1-18 read the full bodies. S1 records Vulcan's venue as EuroSys 2027.
 - **50 TuneAgent.** S1-14 (KDD 2026). **51 Jadhav.** S1-15, with the alternate S1-16. **52 ASA.** S1-11. **53 SchedCP.** S1-12, and successor candidates S1-19 and S1-20. **54 Kgent.** S1-13 (ACM 403). **55 ghOSt, Decima, FIRM, Park, EEVDF, Corbató.** S1-01, S1-06–S1-08, S1-05, S1-04, now with copies and hashes.
-- **56–57 scx, sched-ext docs.** S2-09, S2-01, S2-02. **58 LAVD and LWN.** S2-10–S2-15. **59 Game Mode, ananicy.** S2-16–S2-20, S2-30–S2-32. The Windows Update question is still unread first-hand: S2-17 was script-only.
+- **56–57 scx, sched-ext docs.** S2-09, S2-01, S2-02. **58 LAVD and LWN.** S2-10–S2-15. **59 Game Mode, ananicy.** S2-16–S2-20, S2-30–S2-32. The Windows Update question is still unread first-hand: S2-17 was script-only. Stage 3 (2026-10-09): S2-58, the article rendered by headless Chrome — Game Mode "Prevents Windows Update from performing driver installations and sending restart notifications".
 - **60 vol-02.** The quoted entries are now read in S1 and S2, so stage 3 can match each chapter's quotations against them.
 - **70 SYSmark 2011.** S2-40 (AMD press release, 2011-06-21: AMD "does not believe SM2012 achieves this objective"), S2-41 (AnandTech via Wayback: the dispute was over "weighting of scores"; Nvidia "No reason was given"; VIA: the benchmarks "do not accurately reflect real world PC usage"; BAPCo's response), S2-42 (Tom's Hardware quoting Dessau's blog, "favor our competitor's designs"), S2-43 (APH quoting X-bit Labs), S2-44 (SemiAccurate).
 - **61–69.** These are pass-through items. They had no search.
