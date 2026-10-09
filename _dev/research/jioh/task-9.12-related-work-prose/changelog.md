@@ -656,6 +656,7 @@ Compiled effect: none.
 
 ## D42 — TuxBot and Vulcan read in full and cited in related-work as adjacent LLM work: TuxBot beside the tuning efforts, Vulcan beside the synthesis line (2026-10-09)
 > Amended by D72 (Vulcan's v3 Table 1; "the nearest architecture" leaves; DOI out of the cite line; LumOS read in full).
+> Amended by D111 (related-work cites TuxBot, LumOS and Vulcan, each by what it does, without superlatives; by 인지오's decision).
 
 Taken under 인지오's delegation (2026-10-09), scope-card items 48 and 49: both entries were `provisional` (abstract pages only); stage 2 read both bodies (S1-17, TuxBot v2; S1-18, Vulcan v3 and v1), and the 2026-10-09 re-check finds no newer version (S1 search log #56).
 
@@ -1642,5 +1643,18 @@ By 인지오's decision (2026-10-09), on the 9.12 audit's finding that the lapto
 - **The laptop figures** stay in D50's and D51's restatements with D60's scope: one Apple M1 Pro with Metal and its own work beside it, one stand-in request, the answer stopping at `system`, five repeats with their spread — one machine's observation, not a campaign held to the 5 % rule.
 
 Hands to 9.15: `docs/references.md` — the id rule gains `meas-local` as above; a `meas-local` entry whose role admits machine-relative absolutes stated with the machine's specification and spread, never as a population's figure; the laptop figures cited `meas-local:m1pro-llm:2026-10-08`.
+
+Compiled effect: none.
+
+## D111 — related-work cites TuxBot, LumOS and Vulcan, each by what it does, without superlatives (2026-10-09)
+
+By 인지오's decision (2026-10-09), amending D42 (scope-card items 48, 49) on the 9.12 audit's question whether the owned prose cites these works at all (D42 took it under delegation; the card had recorded "Cited by owned prose? no" for items 48 and 49) and its full read of LumOS (S1-20, A2-17).
+
+- **TuxBot** (S1-17, A2-16): an LLM tuning up to 41 Linux parameters online, "out of band", "not kernel fast-path controllers such as the CPU scheduler, a packet scheduler, or a TCP congestion controller" (v2 p. 1), on hosted Gemini 2.5 Flash and Flash-Lite, each change through typed validation.
+- **LumOS** (S1-20, A2-17; Liargkovas, Jabrayilov, Franke and Kaffes, "An Expert in Residence: LLM Agents for Always-On Operating System Tuning", NeurIPS 2025 Workshop: Machine Learning for Systems; read from the authors' PDF linked from the project page, a draft-watermarked copy, OpenReview returning 403): an LLM loop (Gemini 2.5 Flash) adjusting CFS's `latency_ns` and `min_granularity_ns` online to minimise a PostgreSQL workload's p99 latency, one proposal per "10-second workload run" (p. 2), "reduces p99 by 5.0% in 1-parameter tuning … and by 7.1% in 2-parameter tuning" against Bayesian optimisation (p. 3).
+- **Vulcan** (S1-18, A2-15): offline LLM synthesis of small policy functions, evaluated on spot-VM scheduling, cache eviction and tiered memory (§3.2); CPU scheduling an example task in its interface table (v3 Table 1), not evaluated; its cite line as D42 and D72 state it — the arXiv id, the DOI left out until it resolves.
+- **Decided:** `docs/related-work.md` cites all three, each by what it does — TuxBot and LumOS beside the adjacent LLM tuning efforts (D24) as LLM tuning of a live host's parameters out of the fast path, LumOS the scheduler instance; Vulcan beside the synthesis line, its evaluated domains named — with no superlative. None measures recognition, so D12's scoped claim stands.
+
+Hands to 9.15: `docs/related-work.md:32`'s sentences as above (with D42's and D72's restatements); `docs/references.md` — `tuxbot-arxiv26`, `vulcan-arxiv25` (D42, D72) and an entry for LumOS under the id rule, the workshop the same as `schedcp-mlsys25`'s, its status naming the copy read (the authors' draft-watermarked PDF; OpenReview unreachable on 2026-10-09).
 
 Compiled effect: none.
