@@ -119,6 +119,13 @@ def lint_repo(archetypes_path, sources_path, references_md, freeze=False):
                 path = pathlib.Path(archetypes_path).resolve().parent / "launch" / f"{stream}.json.gz"
                 if not stream or not path.exists():
                     errors.append(f"{where}: stream {stream!r} has no file at dataset/launch/")
+            if pname == "replay":
+                # 9.14 decision 12: one pooled repeat's observed stream in place of the sampled one (the trace-replay
+                # variant); its file must exist beside the library
+                stream = param.get("stream")
+                path = pathlib.Path(archetypes_path).resolve().parent / "replay" / f"{stream}.json.gz"
+                if not stream or not path.exists():
+                    errors.append(f"{where}: stream {stream!r} has no file at dataset/replay/")
             errors.extend(_check_param(where, param, registry, freeze))
     return errors
 

@@ -55,6 +55,8 @@ def build(root, only=None):
                             "transform": params, "sha256": sha256(data)}
             if report is not None:
                 records[rel]["utilization"] = round(report["utilization"], 4)
+                if report.get("replay"):   # the trace-replay set: per task, the stream and the window's offset
+                    records[rel]["replay"] = report["replay"]
     except (VariantError, OSError, KeyError, ValueError) as exc:
         errors.append(f"variants: {exc}")
     manifest = {

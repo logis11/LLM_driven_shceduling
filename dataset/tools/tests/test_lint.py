@@ -196,9 +196,9 @@ def test_timeline_rules(tmp_path, library, expect, mutate):
         Timeline(load_bad(tmp_path, mutate), library)
 
 
-def test_demand_window_enforced(tmp_path, library, schema):
-    """An underloaded default-class file fails -single lint; the calibration
-    class is exempt."""
+def test_no_demand_window_gates_a_file(tmp_path, library, schema):
+    """9.14 decision 4: the demand window is retired as a gate — an underloaded default-class file lints clean, its
+    demand a measured fact the compile report states per segment."""
     data = {"meta": {"id": "under", "seed": 1},
             "segments": [{"from": "0s", "to": "60s", "mode": "office",
                           "attributes": {"background_wanted": True}}],
@@ -210,14 +210,9 @@ def test_demand_window_enforced(tmp_path, library, schema):
     timeline = Timeline(path, library)
 
     canonical, report = compile_timeline(timeline, library, "single")
-    errors = lint_canonical(canonical, schema, report=report, mode="single")
-    assert len(errors) == 1 and "outside" in errors[0]
-
-    data["meta"]["demand"] = "calibration"
-    path.write_text(yaml.safe_dump(data))
-    timeline = Timeline(path, library)
-    canonical, report = compile_timeline(timeline, library, "single")
     assert lint_canonical(canonical, schema, report=report, mode="single") == []
+    assert report["demand_class"] == "oversubscribed" and report["utilization"] == 20 / 60
+    assert [s["utilization"] for s in report["per_segment"]] == [20 / 60]
 
 
 def test_a_heavy_event_states_its_runs_and_no_gap(tmp_path):

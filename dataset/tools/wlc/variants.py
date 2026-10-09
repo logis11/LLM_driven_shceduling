@@ -23,7 +23,7 @@ import tempfile
 
 import yaml
 
-from .compiler import compile_timeline
+from .compiler import _load_replay, compile_timeline
 from .library import Library
 from .timeline import Timeline
 from .units import parse_us
@@ -181,15 +181,17 @@ def _library_from(doc, workdir):
 
 def replayed_library(lib_doc, streams):
     """A copy of the library with each named entry's `replay` param pointing at
-    its observed stream (dataset/replay/<stream>.json.gz); the compiler replays
-    it in place of the entry's sampled stream over the task's whole lifetime."""
+    its observed stream (dataset/replay/<stream>.json.gz), the param's source
+    the stream file's; the compiler replays it in place of the entry's sampled
+    stream over a seeded window of the task's lifetime (a batch job from its
+    start)."""
     doc = copy.deepcopy(lib_doc)
     entries = doc.get("archetypes") or doc
     for entry_name, stream in streams.items():
         if entry_name not in entries:
             raise VariantError(f"no entry {entry_name!r} to replay")
         params = entries[entry_name].setdefault("params", {})
-        params["replay"] = {"stream": stream, "sampling": "per-task"}
+        params["replay"] = {"stream": stream, "sampling": "per-task", "source": _load_replay(stream).get("source")}
     return doc
 
 

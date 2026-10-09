@@ -40,6 +40,7 @@ class _TaskBuild:
         self.spawn_table = None
         self.fork_cap = None
         self.depart = None
+        self.replay = None   # 9.14 decision 12: what the trace-replay variant did for this task, if anything
         self.demand_us = 0  # exact static CPU demand, accumulated in-context
 
 
@@ -83,6 +84,9 @@ def compile_timeline(timeline, library, mode, rel_path=None):
         "operations": {b.id: b.operations for b in builds if getattr(b, "operations", None)},
         "demand_class": timeline.demand_class,
     }
+    replay = {b.id: b.replay for b in builds if b.replay}
+    if replay:   # 9.14 decision 12: the trace-replay variant's provenance per task
+        report["replay"] = replay
     return canonical, report
 
 
@@ -277,10 +281,12 @@ def _component_events(components, seed, iid, t0, t1, tag):
     return events
 
 
-def _periodic_unroll(build, seed, iid, params, t0, t1, launch=None):
+def _periodic_unroll(build, seed, iid, params, t0, t1, launch=None, replay=None):
     """9.5 D75: one job per medium cycle — TIMER(period) at arrival + k·period over the lifetime (contract §3's absolute
     grid, tick 0 consumed at arrival), each followed by its cycle's run drawn from the measured per-cycle table. A launch
-    phase (9.10 D138) is binned onto the grid: a cycle starting inside it runs the replay's CPU in its window."""
+    phase (9.10 D138) is binned onto the grid: a cycle starting inside it runs the replay's CPU in its window. Under a
+    trace replay (9.14 decision 12) the grid and the period stay and the k-th tick takes the k-th observed cycle's work
+    from the window's offset, in order; a stream holding too few cycles fails the build."""
     period = sampling.sample(params["period"], seed, iid, "period", 0)
     phase_us, binned = 0, {}
     if launch:
@@ -288,10 +294,19 @@ def _periodic_unroll(build, seed, iid, params, t0, t1, launch=None):
         for t_rel, run in launch[1]:
             if t_rel < phase_us:
                 binned[t_rel // period] = binned.get(t_rel // period, 0) + run
+    works = None
+    if replay:
+        works = [work for t_rel, work, _ in replay["stream"] if t_rel >= replay["offset"]]
+        ticks = -(-(t1 - t0) // period)
+        if len(works) < ticks:
+            raise ValueError(f"{iid}: {replay['archetype']}'s replay stream {replay['name']!r} holds {len(works)} "
+                             f"cycles from its offset, short of the task's {ticks} ticks")
     t, k = t0, 0
     while t < t1:
         build.program.append({"op": "TIMER", "period_us": period})
-        if t - t0 < phase_us:
+        if works is not None:
+            run = works[k]
+        elif t - t0 < phase_us:
             run = binned.get(k, 0)
         else:
             run = sampling.sample(params["cycle_run"], seed, iid, "cycle", k, allow_zero=True)
@@ -308,9 +323,14 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
     timer_channel = f"timer:{iid}"
     t0 = task["arrive"]
     t1 = task["depart"] or timeline.duration_us
-    launch = _launch_stream(task, iid, seed, params)
+    # 9.14 decision 12: under a trace replay the observed stream stands in for the components, the heavy events and
+    # the launch phase alike; the operations and the stimulus stay as compiled
+    replay = _replay_window(task, iid, seed, params, "cycles" if "cycle_run" in params else "wakes", t0, t1)
+    launch = None if replay else _launch_stream(task, iid, seed, params)
+    if replay:
+        build.replay = {"stream": replay["name"], "offset_us": replay["offset"]}
     if "cycle_run" in params:
-        _periodic_unroll(build, seed, iid, params, t0, t1, launch)
+        _periodic_unroll(build, seed, iid, params, t0, t1, launch, replay)
         return
     t_steady = t0 + launch[0] if launch else t0   # D136: the steady stream begins at the launch phase's end
     windows = [w for w in timeline.focus if w["task"] == task["id"]]
@@ -326,28 +346,41 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
     def in_operation(t):
         return any(w["from"] <= t < w["to"] for w in op_windows)
     events = []
-    # the launch phase's replay (9.10 D136): each observed wake a timer wake at its time from the arrival; an operation's
-    # window replaces it as it replaces the components (D137)
-    if launch:
-        for t_rel, run in launch[1]:
-            t = t0 + t_rel
-            if t_rel >= launch[0] or t >= t1:
+    focus_components = params.get("focus_components")
+    if replay:
+        # the observed wakes from the window's offset, each a timer wake at its time from the arrival; an operation's
+        # window replaces them as it replaces the components (D137)
+        for t_rel, run, _ in replay["stream"]:
+            if t_rel < replay["offset"]:
+                continue
+            t = t0 + (t_rel - replay["offset"])
+            if t >= t1:
                 break
             if not in_operation(t):
                 events.append((t, run, "timer"))
-    # timer components over the lifetime past any launch phase; cadence archetypes swap inside focus windows
-    focus_components = params.get("focus_components")
-    for ev in _component_events(params.get("components") or [], seed, iid, t_steady, t1, "idle"):
-        if focus_components and any(w["from"] <= ev[0] < w["to"] for w in windows):
-            continue
-        if in_operation(ev[0]):
-            continue
-        events.append(ev)
-    events.extend(ev for ev in _heavy_events(params.get("heavy_events"), seed, iid, t_steady, t1) if not in_operation(ev[0]))
-    if focus_components:
-        for j, w in enumerate(windows):
-            events.extend(ev for ev in _component_events(focus_components, seed, iid, w["from"], w["to"], ("focus", j))
-                          if not in_operation(ev[0]))
+    else:
+        # the launch phase's replay (9.10 D136): each observed wake a timer wake at its time from the arrival; an
+        # operation's window replaces it as it replaces the components (D137)
+        if launch:
+            for t_rel, run in launch[1]:
+                t = t0 + t_rel
+                if t_rel >= launch[0] or t >= t1:
+                    break
+                if not in_operation(t):
+                    events.append((t, run, "timer"))
+        # timer components over the lifetime past any launch phase; cadence archetypes swap inside focus windows
+        for ev in _component_events(params.get("components") or [], seed, iid, t_steady, t1, "idle"):
+            if focus_components and any(w["from"] <= ev[0] < w["to"] for w in windows):
+                continue
+            if in_operation(ev[0]):
+                continue
+            events.append(ev)
+        events.extend(ev for ev in _heavy_events(params.get("heavy_events"), seed, iid, t_steady, t1)
+                      if not in_operation(ev[0]))
+        if focus_components:
+            for j, w in enumerate(windows):
+                events.extend(ev for ev in _component_events(focus_components, seed, iid, w["from"], w["to"], ("focus", j))
+                              if not in_operation(ev[0]))
     for j, w in enumerate(op_windows):
         events.extend(_component_events(w["spec"]["components"], seed, iid, w["from"], w["to"], ("operation", j)))
     # replayed stimulus inside focus windows
@@ -415,6 +448,81 @@ def _launch_stream(task, iid, seed, params):
     return rep["phase_us"], [(w[0], w[1]) for w in streams[order[n]]]
 
 
+# ---- trace replay (9.14 decision 12; dataset/variants.yaml's `replay` set) ---------
+#
+# An entry whose params carry `replay: {stream, sampling: per-task, source}` compiles each of its tasks from one pooled
+# repeat's observed stream, dataset/replay/<stream>.json.gz, written by dataset/tools/meas/replay_fold_in.py from the
+# raw release: {entry, program, kind, source, …, repeats: [{repeat, run_id, phase_us, comms, streams}]}, one repeat, one
+# or more streams of [t_us, x, y] rows whose columns the `kind` fixes — `wakes` (a measured entry): [t from the phase's
+# start, run_us, thread]; `cycles` (a periodic entry): [the cycle's start, its work_us, its length_us]; `runs` (a batch
+# entry): [the run's start, run_us, the block_us after it]. A measured or periodic task takes a seeded window of the
+# stream — a uniform offset by the file's seed over the phase's span less the task's lifetime, as the stimulus replay
+# draws its window — and a task group (`count`) distinct streams of the repeat, as the launch phases are drawn; a
+# batch task takes the job's runs from its start. A stream shorter than its task fails the build; nothing is wrapped
+# or padded. A batch stream naming a program applies to tasks bound to it alone.
+
+_REPLAY = {}
+
+
+def _load_replay(name):
+    if name not in _REPLAY:
+        path = pathlib.Path(__file__).resolve().parents[2] / "replay" / f"{name}.json.gz"
+        with gzip.open(path, "rt") as handle:
+            _REPLAY[name] = json.load(handle)
+    return _REPLAY[name]
+
+
+def _replay_window(task, iid, seed, params, kind, t0, t1):
+    """{name, archetype, offset, stream, doc} for this instance's replay, or None without a `replay` param."""
+    spec = params.get("replay")
+    if not spec:
+        return None
+    name, archetype = spec["stream"], task["archetype"]
+    doc = _load_replay(name)
+    if doc.get("kind") != kind:
+        raise ValueError(f"{iid}: {archetype} needs a {kind} replay stream; {name!r} holds {doc.get('kind')}")
+    rep = doc["repeats"][0]
+    streams = rep["streams"]
+    order = sorted(range(len(streams)), key=lambda i: sampling.uniform(seed, task["id"], "replay", "stream", i))
+    n = int(iid.rsplit(".", 1)[1]) - 1 if task["count"] > 1 else 0
+    if n >= len(order):
+        raise ValueError(f"{iid}: {task['count']} tasks draw from a replay repeat of {len(order)} streams")
+    stream = sorted(streams[order[n]])
+    offset = 0
+    if kind != "runs":
+        span, length = rep["phase_us"], t1 - t0
+        if span < length:
+            raise ValueError(f"{iid}: {archetype}'s replay stream {name!r} spans {span} µs, shorter than the "
+                             f"task's {length} µs")
+        offset = round(sampling.uniform(seed, iid, "replay", "offset") * (span - length))
+    return {"name": name, "archetype": archetype, "offset": offset, "stream": stream, "doc": doc}
+
+
+def _replay_batch_ops(replay, total, iid):
+    """The batch loop's ops from the observed runs and the block after each, in time order, until `total` µs of CPU
+    are spent; a zero block joins the runs on either side into one RUN, as _batch_ops does."""
+    pairs = [(run, block) for _t, run, block in replay["stream"]]
+    held = sum(run for run, _ in pairs)
+    if held < total:
+        raise ValueError(f"{iid}: {replay['archetype']}'s replay stream {replay['name']!r} holds {held} µs of CPU, "
+                         f"short of the bind's {total} µs")
+    spent, ops, pending = 0, [], 0
+    for run, block in pairs:
+        if spent >= total:
+            break
+        us = min(max(1, int(run)), total - spent)
+        pending += us
+        spent += us
+        block = int(block)
+        if block >= 1 and spent < total:
+            ops.append({"op": "RUN", "us": pending})
+            ops.append({"op": "SLEEP", "us": block})
+            pending = 0
+    if pending:
+        ops.append({"op": "RUN", "us": pending})
+    return ops
+
+
 # ---- input-driven tasks (desktop-interactive) -------------------------------
 
 def _interactive_unroll(build, timeline, task, iid, params, wakes):
@@ -461,7 +569,15 @@ def _batch_loop(build, params, task, seed, iid):
         build.program = [{"op": "RUN", "us": total}, {"op": "EXIT"}]
         build.demand_us = total
         return
-    ops = _batch_ops(params[f"{program}_run"], params[f"{program}_block"], total, seed, iid, "batch")
+    replay = _replay_window(task, iid, seed, params, "runs", 0, 0)   # 9.14 decision 12: the job's observed runs
+    if replay and replay["doc"].get("program") not in (None, program):
+        build.replay = {"stream": replay["name"], "applied": False, "program": program}
+        replay = None
+    if replay:
+        build.replay = {"stream": replay["name"], "offset_us": 0}
+        ops = _replay_batch_ops(replay, total, iid)
+    else:
+        ops = _batch_ops(params[f"{program}_run"], params[f"{program}_block"], total, seed, iid, "batch")
     ops.append({"op": "EXIT"})
     build.program, build.demand_us = ops, total
 
