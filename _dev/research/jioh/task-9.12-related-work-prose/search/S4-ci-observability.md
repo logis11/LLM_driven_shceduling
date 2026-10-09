@@ -188,6 +188,18 @@ All candidates are documentation of the runner or of a measurement method. **Non
 
 ---
 
+### S4-11 — `meas-ci:costs:2026-10-08`, job `kernel`: the runner kernel's switch and pick costs (stage 3, 2026-10-09)
+
+- **What and where.** 9.12's runner campaign (changelog D31; `campaign/method.md`; tools `dataset/tools/meas/costs/`), 19 repeats on the AMD EPYC 7763 (4 vCPUs, kernel `6.17.0-1022-azure`, `CONFIG_PREEMPT_VOLUNTARY`, `CONFIG_HZ=1000`), each load pinned to CPU 3. Pooled record `campaign/results/pooled.json`, rendered `campaign/results.md`.
+- **Values** (mean over repeats ±95 % half-width): lmbench `lat_ctx` 2.382 µs ±1.17 % (0 KB), 2.415 (16 KB), 2.441 (64 KB); the pipe ping-pong 6.454 µs per round trip ±0.74 %, the self pipe 0.8135 µs per write+read pair ±0.16 %, so 2.414 µs ±0.98 % per switch by (pair − 2 × self) / 2; `perf bench sched pipe` 5.625 µs per round trip ±0.78 %. `pick_next_task_fair` per call as traced by the function-graph tracer, median 795.6 ns ±0.64 % under the ping-pong and 892.0 ns ±2.14 % under `perf bench sched messaging` (80 processes); `pick_task_fair` 493.3 ns ±0.52 % and 547.8 ns ±3.07 %; the calibration `__task_pid_nr_ns` under getpid 260.9 ns ±0.04 %; the tracer's whole cost per call 576 ns (calibration) and 929 ns (`pick_next_task_fair`). The idle path (a 1 ms sleeper): `pick_next_task_fair` median 481–902 ns across repeats, `sched_balance_newidle` mean 471–842 ns, outside the rule. At idle: the four CPUs' context switches 319.8 a second ±3.54 %; the measured CPU's 61–108, its schedule() calls 117–567, outside the rule.
+- **Coverage.** T15 and T10 now observed on a runner: the context-switch cost, the fair class's pick cost and the idle switch rate, on the dataset's machine. The switch rate under the dataset's programs is S3-21.
+
+### S4-12 — `meas-ci:costs:2026-10-08`, job `llm`: a recognizer-shaped structured answer under llama.cpp on the runner's CPU (stage 3, 2026-10-09)
+
+- **What and where.** The same campaign's `llm` job (`dataset/tools/meas/llm/`), 11 repeats on the AMD EPYC 7763, 4 threads on the 4 vCPUs, CPU only (AVX2; no AVX-512): llama.cpp at `bd4eeaa0`; Qwen2.5-3B-Instruct and Llama 3.1 8B Instruct at Q4_K_M; the stand-in request of `prompt.json` (437 and 454 prompt tokens) under the `system`-only and the full-proposal schema, five each per repeat; llama-bench pp512 and tg64.
+- **Values** (mean ±95 % half-width): 3B — `system` 14.10 s ±0.40 % (prompt 12.53 s, 25 tokens in 1.57 s), full 17.48 s ±0.46 % (76 tokens in 4.94 s), load 6.68 s, pp512 35.2 t/s, tg64 17.2 t/s; 8B — `system` 36.39 s ±0.31 % (prompt 32.67 s, 26 tokens in 3.71 s), full 43.43 s ±0.92 % (71–79 tokens in 10.75 s), load 15.25 s, pp512 14.1 t/s, tg64 7.46 t/s. Every answer parsed and stopped at `eos`. Answers byte-identical across the five requests of a repeat and across repeats for each model, schema and prompt; the 8B's prompt carries the day (two prompts, see `campaign/results.md`).
+- **Coverage.** T11 observed on a runner: end-to-end latency of a short structured answer from a 3B and an 8B quantized model on four server vCPUs, and its determinism on one CPU model. The consumer machine is S3-22.
+
 ## 3. Method a later runner measurement would use (derived from the passages above; not executed on a runner)
 
 Runner: `runs-on: ubuntu-24.04` (not `ubuntu-latest`, which moves to 26.04 in November 2026 — S4-01:3); record `uname -a`, `nproc`, `/proc/cpuinfo` model name, image version (`$ImageVersion` / README version), job start/end time, and repository visibility (4 vs 2 vCPU — S4-02).

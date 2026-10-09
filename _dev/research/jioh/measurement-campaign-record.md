@@ -21,6 +21,7 @@ All on GitHub-hosted `ubuntu-24.04` runners, 4 vCPU, pinned to one CPU, AMD EPYC
 | `meas-ci:session:2026-09-24` | 9.9 | `meas-session.yml` | #16–#22; the four holding a landed repeat are #16, #20, #21, #22 | 2026-09-23 23:35 UTC (2026-09-24 KST) |
 | `meas-ci:background:2026-10-01` | 9.10 | `meas-background.yml` | #100–#105, app `upgrade`; the dry run #99 is not a repeat | 2026-10-01 10:07 UTC |
 | `meas-ci:background:2026-10-02` | 9.10 | `meas-background.yml` | #108–#114, app `dkms`; the dry runs #106 and #107 are not repeats | 2026-10-02 08:36 UTC |
+| `meas-ci:costs:2026-10-08` | 9.12 | `meas-costs.yml` | 37860888052, 37861874535, 37864232540 (jobs `kernel` and `llm`); the dry run 37859640740 is not a repeat | 2026-10-08 23:42 UTC (2026-10-09 KST) |
 
 ## 9.5 — nine archetypes measured
 
@@ -512,6 +513,15 @@ The launch re-trace runs `launch-chrome-hidden` from the exec to the end of the 
 
 Pooled in `task-9.10-scenarios-timelines/campaign/renderer-hidden/results/` (`pooled.json`, `launch-chrome-hidden-pooled.json`, `results.md`).
 
+## 9.12 — the kernel's switch and pick costs and a structured answer's latency (prose grounding, no archetype)
+
+Pooled in `task-9.12-related-work-prose/campaign/results/` and rendered in `campaign/results.md`; method `campaign/method.md` (D31). Every repeat on one AMD EPYC 7763, kernel `6.17.0-1022-azure`. The values ground the proposal's stated quantities (items 28, 29, 44); no archetype reads them.
+
+| job | repeats | values | widest held | stopped by | jobs (gated) |
+|---|---|---|---|---|---|
+| `kernel` | 19 | 27, 23 holding the rule | `pick_task_fair` messaging mean ±4.28 % | the rule on the 23; four values carried with their ranges, their spread following the runner's idle state (the measured CPU's idle switch and schedule() rates, the idle-path pick median, newidle's mean; D50) | 60 (41) |
+| `llm` | 11 | 30 | `llama3.1-8b` full generation time ±3.64 % | the rule | 36 (25) |
+
 ## Machine draws
 
 The build campaign, complete: 28 jobs, 14 on the AMD EPYC 7763 (50.0 %), 12 stopped by the machine gate — Intel Xeon Platinum 8573C 4, AMD EPYC 9V74 4, AMD EPYC 9V45 2, Intel Xeon Platinum 8370C 1, Intel Xeon 6973P-C 1 — and 2 cancelled.
@@ -547,3 +557,5 @@ The 9.10 launch campaign, complete: 86 jobs — 50 landed on the AMD EPYC 7763 (
 The 9.10 Kdenlive idle campaign, complete: 32 jobs — 16 landed on the AMD EPYC 7763 (50.0 %, all pooled), 16 stopped by the machine gate: AMD EPYC 9V45 5, AMD EPYC 9V74 4, Intel Xeon Platinum 8573C 4, Intel Xeon 6973P-C 2, Intel Xeon Platinum 8370C 1. Its launch re-trace (`launch-kdenlive`, runs #100–#101): 6 jobs, 5 landed (83.3 %), 1 stopped (AMD EPYC 9V45). Neither campaign took a dry run.
 
 The 9.10 hidden-renderer campaign, complete (runs #105–#107): 16 jobs — 10 landed on the AMD EPYC 7763 (62.5 %, all pooled), 6 stopped by the machine gate: AMD EPYC 9V74 3, AMD EPYC 9V45 1, Intel Xeon Platinum 8370C 1, Intel Xeon 6973P-C 1. Per subject: `chrome-hidden` 10 jobs, 5 landed; `launch-chrome-hidden` 6 jobs, 5 landed. It took no dry run; the hidden renderer's span probes before it, run #99 (D143) and runs #102–#104 (D149's 3,600 s probe), are not repeats.
+
+The 9.12 costs campaign, complete (runs 37860888052, 37861874535, 37864232540): 96 jobs — 30 landed on the AMD EPYC 7763 (31.3 %, all pooled: 19 `kernel`, 11 `llm`), 66 stopped by the machine gate: AMD EPYC 9V74 26, AMD EPYC 9V45 22, Intel Xeon Platinum 8573C 12, Intel Xeon 6973P-C 4, Intel Xeon Platinum 8370C 2.
