@@ -1,108 +1,674 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "experiment-spec.schema.json",
-  "title": "Per-experiment spec",
-  "description": "One experiment's pre-registered description (Phase 8 spec, decision 8; sub-task 8.7): a generic part every experiment needs — the conditions, the seed count, the boot defaults, the judging and reporting files, the Layer-1 exclusions derived from the pre_committed_miss annotation, the guard exemptions, the reporting lines, and the pins of the scoring spec, guard spec, driver table, and dataset — and a typed criterion section. The runner reads the generic part as its run matrix; the RQ0 gate evaluator reads the whole file. Every judgement the evaluator applies is data here, never a constant in code. The lint (tools/experiment_lint.py) checks what the schema cannot: files against the compiled build, judging files against the pinned scoring spec's terms, exemptions against the guard registry, pins against the files' bytes. Added in 8.8: `statements` echoed verbatim into the report, per-point `reasons` on the sensitivity line, the `g_band` line, and the `seed_standard_error` line.",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["experiment", "conditions", "seed_count", "boot_defaults", "files", "layer1_exclusions",
-               "guard_exemptions", "reporting_lines", "pins", "criterion"],
-  "$defs": {
-    "condition": {"type": "string",
-                  "enum": ["fixed", "random", "shipped_catalogue", "strongest_name_table", "llm_vocab", "llm_algo", "llm_full", "oracle"]},
-    "workload": {"type": "string", "minLength": 1},
-    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "pin": {"type": "object", "additionalProperties": false, "required": ["path", "sha256"],
-            "properties": {"path": {"type": "string", "minLength": 1},
-                           "sha256": {"$ref": "#/$defs/sha256"},
-                           "version": {"type": "string", "minLength": 1}}},
-    "stem": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"}
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "experiment-spec.schema.json",
+ "title": "Per-experiment spec",
+ "description": "One experiment's pre-registered description (Phase 8 spec, decision 8; sub-task 8.7): a generic part every experiment needs — the conditions, the seed count, the boot defaults, the judging and reporting files, the Layer-1 exclusions derived from the pre_committed_miss annotation, the guard exemptions, the reporting lines, and the pins of the scoring spec, guard spec, driver table, and dataset — and a typed criterion section. The runner reads the generic part as its run matrix; the RQ0 gate evaluator reads the whole file. Every judgement the evaluator applies is data here, never a constant in code. The lint (tools/experiment_lint.py) checks what the schema cannot: files against the compiled build, judging files against the pinned scoring spec's terms, exemptions against the guard registry, pins against the files' bytes. Added in 8.8: `statements` echoed verbatim into the report, per-point `reasons` on the sensitivity line, the `g_band` line, and the `seed_standard_error` line.",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "experiment",
+  "conditions",
+  "seed_count",
+  "boot_defaults",
+  "files",
+  "layer1_exclusions",
+  "guard_exemptions",
+  "reporting_lines",
+  "pins",
+  "criterion"
+ ],
+ "$defs": {
+  "condition": {
+   "type": "string",
+   "enum": [
+    "fixed",
+    "random",
+    "shipped_catalogue",
+    "strongest_name_table",
+    "llm_vocab",
+    "llm_algo",
+    "llm_full",
+    "oracle"
+   ]
   },
-  "properties": {
-    "experiment": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
-    "conditions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/condition"}},
-    "seed_count": {"type": "integer", "minimum": 1,
-                   "description": "N: the runner uses seeds 1 through N for every condition that draws"},
-    "boot_defaults": {
-      "type": "object", "additionalProperties": false, "required": ["primary", "alternatives"],
-      "properties": {
-        "primary": {"$ref": "#/$defs/stem", "description": "the file stem under harness/boot-defaults/; its runs carry an empty boot_default"},
-        "alternatives": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/stem"},
-                         "description": "file stems; each is one more fixed run per judging file (Phase 8 spec, decision 12)"}}},
-    "files": {
-      "type": "object", "additionalProperties": false, "required": ["judging", "reporting"],
-      "properties": {
-        "judging": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/workload"}},
-        "reporting": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/workload"}}}},
-    "layer1_exclusions": {
-      "type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/workload"},
-      "description": "the listed files whose ground truth carries a pre_committed_miss segment — derived, linted to match, never authoritative (Phase 8 spec, decision 13)"},
-    "guard_exemptions": {
-      "type": "array",
-      "items": {"type": "object", "additionalProperties": false, "required": ["guard", "workload", "reason"],
-                "properties": {
-                  "guard": {"type": "string", "minLength": 1},
-                  "workload": {"$ref": "#/$defs/workload"},
-                  "conditions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/condition"}},
-                  "reason": {"type": "string", "minLength": 1}}}},
-    "reporting_lines": {
-      "type": "array",
-      "items": {
-        "type": "object", "required": ["type"],
-        "properties": {"type": {"type": "string", "minLength": 1}},
-        "allOf": [
-          {"if": {"properties": {"type": {"const": "sensitivity"}}},
-           "then": {"additionalProperties": false, "required": ["type", "boot_defaults"],
-                    "properties": {"type": true, "boot_defaults": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/stem"}},
-                                   "reasons": {"type": "object", "propertyNames": {"$ref": "#/$defs/stem"}, "additionalProperties": {"type": "string", "minLength": 1},
-                                               "description": "one reason per boot default in the sweep, the primary included, keyed by stem (8.8)"}}}},
-          {"if": {"properties": {"type": {"const": "g_band"}}},
-           "then": {"additionalProperties": false, "required": ["type", "gaps"],
-                    "properties": {"type": true, "gaps": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
-                                                          "description": "the verdict count recomputed under each gap threshold at scoring time (8.8)"}}}},
-          {"if": {"properties": {"type": {"const": "seed_standard_error"}}},
-           "then": {"additionalProperties": false, "properties": {"type": true}}},
-          {"if": {"properties": {"type": {"const": "floor_band"}}},
-           "then": {"additionalProperties": false, "required": ["type", "latency_floors_us"],
-                    "properties": {"type": true, "latency_floors_us": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 0}}}}},
-          {"if": {"properties": {"type": {"const": "exclusion_accuracy"}}},
-           "then": {"additionalProperties": false, "properties": {"type": true}}},
-          {"if": {"properties": {"type": {"const": "layer1_headline"}}},
-           "then": {"additionalProperties": false, "properties": {"type": true}}},
-          {"if": {"properties": {"type": {"const": "random_beats_oracle"}}},
-           "then": {"additionalProperties": false, "properties": {"type": true}}},
-          {"if": {"properties": {"type": {"const": "note"}}},
-           "then": {"additionalProperties": false, "required": ["type", "workload", "text"],
-                    "properties": {"type": true, "workload": {"$ref": "#/$defs/workload"}, "text": {"type": "string", "minLength": 1}}}}
-        ]}},
-    "statements": {
-      "type": "array",
-      "description": "pre-registered statements the RQ0 gate evaluator copies into the report verbatim, in order: the grounding written beside each number, the failure procedure, the conditions under which the spec changes before a run (Phase 8 spec, decisions 16, 17, 20; sub-task 8.8)",
-      "items": {"type": "object", "additionalProperties": false, "required": ["id", "text"],
-                "properties": {"id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$"},
-                               "text": {"type": "string", "minLength": 1}}}},
-    "pins": {
-      "type": "object", "additionalProperties": false,
-      "required": ["scoring_spec", "guard_spec", "driver_table", "dataset"],
-      "properties": {
-        "scoring_spec": {"$ref": "#/$defs/pin"},
-        "guard_spec": {"allOf": [{"$ref": "#/$defs/pin"}, {"required": ["version"]}]},
-        "driver_table": {"$ref": "#/$defs/pin"},
-        "dataset": {"$ref": "#/$defs/pin", "description": "the dataset build manifest, whose artifact hashes pin every compiled file"}}},
-    "criterion": {
-      "type": "object", "required": ["type"],
-      "properties": {"type": {"type": "string", "minLength": 1}},
-      "allOf": [
-        {"if": {"properties": {"type": {"const": "k_of_n_gap"}}},
-         "then": {"additionalProperties": false,
-                  "required": ["type", "k", "g", "reference", "compared", "seed_statistic"],
-                  "properties": {
-                    "type": true,
-                    "k": {"type": "integer", "minimum": 1, "description": "an absolute count of judging files (Phase 8 spec, decision 5)"},
-                    "g": {"type": "number", "exclusiveMinimum": 0, "maximum": 1, "description": "the gap a judging file must show"},
-                    "reference": {"$ref": "#/$defs/condition", "description": "whose score is the file's headroom (the oracle)"},
-                    "compared": {"$ref": "#/$defs/condition", "description": "whose captured share the gap measures (random)"},
-                    "seed_statistic": {"enum": ["mean"]}}}}
-      ]}
+  "workload": {
+   "type": "string",
+   "minLength": 1
+  },
+  "sha256": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
+  "pin": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "path",
+    "sha256"
+   ],
+   "properties": {
+    "path": {
+     "type": "string",
+     "minLength": 1
+    },
+    "sha256": {
+     "$ref": "#/$defs/sha256"
+    },
+    "version": {
+     "type": "string",
+     "minLength": 1
+    }
+   }
+  },
+  "stem": {
+   "type": "string",
+   "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
   }
+ },
+ "properties": {
+  "experiment": {
+   "type": "string",
+   "pattern": "^[a-z0-9][a-z0-9-]*$"
+  },
+  "conditions": {
+   "type": "array",
+   "minItems": 1,
+   "uniqueItems": true,
+   "items": {
+    "$ref": "#/$defs/condition"
+   }
+  },
+  "seed_count": {
+   "type": "integer",
+   "minimum": 1,
+   "description": "N: the runner uses seeds 1 through N for every condition that draws"
+  },
+  "boot_defaults": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "primary",
+    "alternatives"
+   ],
+   "properties": {
+    "primary": {
+     "$ref": "#/$defs/stem",
+     "description": "the file stem under harness/boot-defaults/; its runs carry an empty boot_default"
+    },
+    "alternatives": {
+     "type": "array",
+     "uniqueItems": true,
+     "items": {
+      "$ref": "#/$defs/stem"
+     },
+     "description": "file stems; each is one more fixed run per judging file (Phase 8 spec, decision 12)"
+    }
+   }
+  },
+  "files": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "judging",
+    "reporting"
+   ],
+   "properties": {
+    "judging": {
+     "type": "array",
+     "minItems": 1,
+     "uniqueItems": true,
+     "items": {
+      "$ref": "#/$defs/workload"
+     }
+    },
+    "reporting": {
+     "type": "array",
+     "uniqueItems": true,
+     "items": {
+      "$ref": "#/$defs/workload"
+     }
+    },
+    "variants": {
+     "type": "array",
+     "uniqueItems": true,
+     "items": {
+      "$ref": "#/$defs/workload"
+     },
+     "description": "rebuilt judging files the sensitivity lines read (9.14 decisions 10, 12): run under the primary boot default alone, never judged, listed neither as judging nor as reporting"
+    }
+   }
+  },
+  "layer1_exclusions": {
+   "type": "array",
+   "uniqueItems": true,
+   "items": {
+    "$ref": "#/$defs/workload"
+   },
+   "description": "the listed files whose ground truth carries a pre_committed_miss segment — derived, linted to match, never authoritative (Phase 8 spec, decision 13)"
+  },
+  "guard_exemptions": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "guard",
+     "workload",
+     "reason"
+    ],
+    "properties": {
+     "guard": {
+      "type": "string",
+      "minLength": 1
+     },
+     "workload": {
+      "$ref": "#/$defs/workload"
+     },
+     "conditions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+       "$ref": "#/$defs/condition"
+      }
+     },
+     "reason": {
+      "type": "string",
+      "minLength": 1
+     }
+    }
+   }
+  },
+  "reporting_lines": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "type"
+    ],
+    "properties": {
+     "type": {
+      "type": "string",
+      "minLength": 1
+     }
+    },
+    "allOf": [
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "sensitivity"
+        }
+       }
+      },
+      "then": {
+       "additionalProperties": false,
+       "required": [
+        "type",
+        "boot_defaults"
+       ],
+       "properties": {
+        "type": true,
+        "boot_defaults": {
+         "type": "array",
+         "minItems": 1,
+         "uniqueItems": true,
+         "items": {
+          "$ref": "#/$defs/stem"
+         }
+        },
+        "reasons": {
+         "type": "object",
+         "propertyNames": {
+          "$ref": "#/$defs/stem"
+         },
+         "additionalProperties": {
+          "type": "string",
+          "minLength": 1
+         },
+         "description": "one reason per boot default in the sweep, the primary included, keyed by stem (8.8)"
+        }
+       }
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "g_band"
+        }
+       }
+      },
+      "then": {
+       "additionalProperties": false,
+       "required": [
+        "type",
+        "gaps"
+       ],
+       "properties": {
+        "type": true,
+        "gaps": {
+         "type": "array",
+         "minItems": 1,
+         "uniqueItems": true,
+         "items": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+         },
+         "description": "the verdict count recomputed under each gap threshold at scoring time (8.8)"
+        }
+       }
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "seed_standard_error"
+        }
+       }
+      },
+      "then": {
+       "additionalProperties": false,
+       "properties": {
+        "type": true
+       }
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "floor_band"
+        }
+       }
+      },
+      "then": {
+       "additionalProperties": false,
+       "required": [
+        "type",
+        "latency_floors_us"
+       ],
+       "properties": {
+        "type": true,
+        "latency_floors_us": {
+         "type": "array",
+         "minItems": 1,
+         "uniqueItems": true,
+         "items": {
+          "type": "integer",
+          "minimum": 0
+         }
+        }
+       }
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "exclusion_accuracy"
+        }
+       }
+      },
+      "then": {
+       "additionalProperties": false,
+       "properties": {
+        "type": true
+       }
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "layer1_headline"
+        }
+       }
+      },
+      "then": {
+       "additionalProperties": false,
+       "properties": {
+        "type": true
+       }
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "random_beats_oracle"
+        }
+       }
+      },
+      "then": {
+       "additionalProperties": false,
+       "properties": {
+        "type": true
+       }
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "note"
+        }
+       }
+      },
+      "then": {
+       "additionalProperties": false,
+       "required": [
+        "type",
+        "workload",
+        "text"
+       ],
+       "properties": {
+        "type": true,
+        "workload": {
+         "$ref": "#/$defs/workload"
+        },
+        "text": {
+         "type": "string",
+         "minLength": 1
+        }
+       }
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "variant_set"
+        }
+       }
+      },
+      "then": {
+       "additionalProperties": false,
+       "required": [
+        "type",
+        "name",
+        "axis",
+        "value",
+        "files"
+       ],
+       "properties": {
+        "type": true,
+        "name": {
+         "$ref": "#/$defs/stem"
+        },
+        "axis": {
+         "$ref": "#/$defs/stem"
+        },
+        "value": {
+         "type": [
+          "string",
+          "number"
+         ]
+        },
+        "files": {
+         "type": "object",
+         "minProperties": 1,
+         "propertyNames": {
+          "$ref": "#/$defs/workload"
+         },
+         "additionalProperties": {
+          "$ref": "#/$defs/workload"
+         },
+         "description": "judging file → its variant file"
+        },
+        "reason": {
+         "type": "string"
+        }
+       },
+       "description": "the verdict count with each named judging file's gap taken from its variant's runs (9.14 decision 10)"
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "trace_replay"
+        }
+       }
+      },
+      "then": {
+       "additionalProperties": false,
+       "required": [
+        "type",
+        "files",
+        "tolerance"
+       ],
+       "properties": {
+        "type": true,
+        "files": {
+         "type": "object",
+         "minProperties": 1,
+         "propertyNames": {
+          "$ref": "#/$defs/workload"
+         },
+         "additionalProperties": {
+          "$ref": "#/$defs/workload"
+         },
+         "description": "judging file → its variant file"
+        },
+        "tolerance": {
+         "type": "number",
+         "exclusiveMinimum": 0,
+         "maximum": 1
+        },
+        "reason": {
+         "type": "string"
+        }
+       },
+       "description": "each named judging file built on a pooled repeat's measured wake sequence; agreement when the gap keeps its side of g and differs by less than the tolerance (9.14 decision 10)"
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "bounding_pair"
+        }
+       }
+      },
+      "then": {
+       "additionalProperties": false,
+       "required": [
+        "type",
+        "a",
+        "b"
+       ],
+       "properties": {
+        "type": true,
+        "a": {
+         "$ref": "#/$defs/workload"
+        },
+        "b": {
+         "$ref": "#/$defs/workload"
+        },
+        "reason": {
+         "type": "string"
+        }
+       },
+       "description": "two files differing in one task's declared class alone; each file's gap and verdict, and the difference (9.11 D21; 9.14 decision 10)"
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "input_wake_count"
+        }
+       }
+      },
+      "then": {
+       "additionalProperties": false,
+       "required": [
+        "type"
+       ],
+       "properties": {
+        "type": true
+       },
+       "description": "per judging file and interaction-latency term, the number of wakes its P99 rests on (9.14 decision 10)"
+      }
+     },
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "longest_wait"
+        }
+       }
+      },
+      "then": {
+       "additionalProperties": false,
+       "required": [
+        "type",
+        "threshold_us",
+        "reopen_us"
+       ],
+       "properties": {
+        "type": true,
+        "threshold_us": {
+         "type": "integer",
+         "minimum": 1
+        },
+        "reopen_us": {
+         "type": "integer",
+         "minimum": 1
+        }
+       },
+       "description": "per run, the longest ready_wait over every task and cause against the starvation floor, flagged past the reopen point (9.11 D19; 9.14 decision 10)"
+      }
+     }
+    ]
+   }
+  },
+  "statements": {
+   "type": "array",
+   "description": "pre-registered statements the RQ0 gate evaluator copies into the report verbatim, in order: the grounding written beside each number, the failure procedure, the conditions under which the spec changes before a run (Phase 8 spec, decisions 16, 17, 20; sub-task 8.8)",
+   "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+     "id",
+     "text"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+     },
+     "text": {
+      "type": "string",
+      "minLength": 1
+     }
+    }
+   }
+  },
+  "pins": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "scoring_spec",
+    "guard_spec",
+    "driver_table",
+    "dataset"
+   ],
+   "properties": {
+    "scoring_spec": {
+     "$ref": "#/$defs/pin"
+    },
+    "guard_spec": {
+     "allOf": [
+      {
+       "$ref": "#/$defs/pin"
+      },
+      {
+       "required": [
+        "version"
+       ]
+      }
+     ]
+    },
+    "driver_table": {
+     "$ref": "#/$defs/pin"
+    },
+    "dataset": {
+     "$ref": "#/$defs/pin",
+     "description": "the dataset build manifest, whose artifact hashes pin every compiled file"
+    },
+    "variants": {
+     "type": "object",
+     "additionalProperties": {
+      "$ref": "#/$defs/pin"
+     },
+     "description": "one pin per variant manifest the lines read (9.14 decision 12), keyed by the variant set's name"
+    }
+   }
+  },
+  "criterion": {
+   "type": "object",
+   "required": [
+    "type"
+   ],
+   "properties": {
+    "type": {
+     "type": "string",
+     "minLength": 1
+    }
+   },
+   "allOf": [
+    {
+     "if": {
+      "properties": {
+       "type": {
+        "const": "k_of_n_gap"
+       }
+      }
+     },
+     "then": {
+      "additionalProperties": false,
+      "required": [
+       "type",
+       "k",
+       "g",
+       "reference",
+       "compared",
+       "seed_statistic"
+      ],
+      "properties": {
+       "type": true,
+       "k": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "an absolute count of judging files (Phase 8 spec, decision 5)"
+       },
+       "g": {
+        "type": "number",
+        "exclusiveMinimum": 0,
+        "maximum": 1,
+        "description": "the gap a judging file must show"
+       },
+       "reference": {
+        "$ref": "#/$defs/condition",
+        "description": "whose score is the file's headroom (the oracle)"
+       },
+       "compared": {
+        "$ref": "#/$defs/condition",
+        "description": "whose captured share the gap measures (random)"
+       },
+       "seed_statistic": {
+        "enum": [
+         "mean"
+        ]
+       }
+      }
+     }
+    }
+   ]
+  }
+ }
 }

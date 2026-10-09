@@ -120,11 +120,12 @@ def expand(spec_path, machine: Machine, root) -> List[RunSpec]:
     drawing = {"random"}
     runs = []
     files = list(spec["files"]["judging"]) + list(spec["files"]["reporting"])
-    for wid in files:
+    variants = list(spec["files"].get("variants") or [])          # 9.14 decision 12: the primary boot default alone
+    for wid in files + variants:
         workload = machine.build_dir / f"{wid}.workload.json"
         for condition in spec["conditions"]:
             if condition == "fixed":
-                for stem in [primary] + alternatives:
+                for stem in [primary] + ([] if wid in variants else alternatives):
                     boot = "" if stem == primary else stem
                     runs.append(RunSpec(wid, "fixed", "", "", boot, machine.boot_defaults_dir / f"{stem}.json",
                                         workload))

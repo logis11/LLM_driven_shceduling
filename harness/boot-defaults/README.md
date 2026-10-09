@@ -7,7 +7,7 @@ Files are named by content, never by role, so a file's name says what is in it a
 ## The files
 
 - `ostep.json` is the primary: the values OSTEP chapter 8's worked examples use — three queues and a 10 ms top slice (Example 1), doubling per level (Figure 8.6), a 100 ms boost (Figure 8.4) — and no cap. A test pins it to the daemon's config-schema defaults, so the two cannot drift apart.
-- `ostep-slice-<µs>us.json`, nine files, are the same configuration with only the top slice changed: 500, 700, 900, 1 200, 2 000, 3 000, 5 000, 20 000, and 100 000 µs. They are the points of the RQ0 gate spec's boot-default sensitivity sweep, and the reason for each point is written on the spec's sensitivity line. A test pins each to `ostep.json` with the one field swapped.
+- `ostep-slice-<µs>us.json`, ten files, are the same configuration with only the top slice changed: 500, 700, 900, 1 200, 2 000, 3 000, 5 000, 14 000, 20 000, and 100 000 µs. They are the points of the RQ0 gate spec's boot-default sensitivity sweep, and the reason for each point is written on the spec's sensitivity line (the 14 000 µs point added by 9.14 on the far side of the measured call's demotion edge). A test pins each to `ostep.json` with the one field swapped.
 
 `schema/boot-default.schema.json` is the frozen configuration shape from the recognition vocabulary §2; `make lint` validates every file here against it.
 

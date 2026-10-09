@@ -16,9 +16,9 @@ from harness.scoring import LEGAL, SCHEMA_PATH, SPEC_PATH, lint_spec, load_spec
 BUILD = REPO / "dataset" / "build" / "coreset-single"
 RECIPES = REPO / "dataset" / "timelines" / "coreset"
 
-C2_WINDOWS = {"c2-p1a": (60000000, 180000000), "c2-p1b": (60000000, 180000000),
-              "c2-p2a": (60000000, 120000000), "c2-p2b": (60000000, 120000000),
-              "c2-p3a": (60000000, 120000000), "c2-p3b": (60000000, 120000000)}
+C2_WINDOWS = {"c2-p1a": (60000000, 99435000), "c2-p1b": (60000000, 99435000),
+              "c2-p2a": (60000000, 86385000), "c2-p2a-idle": (60000000, 86385000), "c2-p2b": (60000000, 86385000),
+              "c2-p3a": (60000000, 326000000), "c2-p3b": (60000000, 326000000)}   # each file's second segment (9.14 decision 5)
 
 
 @pytest.fixture(scope="module")
@@ -66,12 +66,15 @@ def test_c2_weights_and_windows(spec):
             else:
                 assert "window" not in t, (wid, t)
     assert one(spec, "c2-p1a", "editor", "ready_wait")["cause"] == "wake"
+    assert one(spec, "c2-p1a", "editor", "ready_wait")["channel"] == "input"
     assert one(spec, "c2-p1a", "hog", "cpu_delivered")["weight"] == 0.5
     assert [t["entity"] for t in terms(spec, "c2-p1b")] == ["editor"]
     assert one(spec, "c2-p2a", "game.chain.1", "job")["aggregate"] == "miss_rate"
     assert one(spec, "c2-p2a", "download", "cpu_delivered")["weight"] == 0.5
+    assert spec["files"]["c2-p2a-idle"]["base"] == "c2-p2a" and terms(spec, "c2-p2a-idle") == terms(spec, "c2-p2a")
     assert [t["entity"] for t in terms(spec, "c2-p2b")] == ["game.chain.1"]
-    assert one(spec, "c2-p3a", "bulk", "cpu_delivered")["weight"] == 0.5
+    assert one(spec, "c2-p3a", "bulk", "turnaround")["weight"] == 0.5     # the measured export finishes (9.14 decision 6)
+    assert one(spec, "c2-p3a", "editor", "ready_wait")["channel"] == "timer"  # Kdenlive carries no keystroke stream
     assert one(spec, "c2-p3b", "bulk", "cpu_delivered")["weight"] == 0.25
 
 
@@ -82,8 +85,9 @@ def test_c1_terms(spec):
     assert one(spec, "c1-compile", "build", "turnaround")["weight"] == 1.0
     assert one(spec, "c1-media", "music", "job")["weight"] == 1.0
     assert one(spec, "c1-media", "video", "job")["weight"] == 0.5
-    assert one(spec, "c1-gaming", "game.chain.1", "job")["weight"] == 1.0
-    assert one(spec, "c1-gaming", "compositor", "job")["weight"] == 0.5
+    assert [(t["entity"], t["metric"], t["weight"]) for t in terms(spec, "c1-gaming")] == [("game.chain.1", "job", 1.0)]
+    assert [(t["entity"], t["metric"], t["weight"]) for t in terms(spec, "c1-meeting")] == [("voice", "job", 1.0)]
+    assert one(spec, "c1-office", "writer", "ready_wait")["channel"] == "input"
     for wid in ("c1-office", "c1-browsing", "c1-compile", "c1-media", "c1-gaming"):
         assert all("window" not in t for t in terms(spec, wid))
 
@@ -110,8 +114,11 @@ def test_derived_files_carry_their_base_terms_verbatim(spec):
     expected = {"c4-office": "c1-office", "c4-compile": "c1-compile", "c4-gaming": "c1-gaming",
                 "c5-t3": "c1-media", "c5-t4": "c1-media", "c5-t5": "c1-media",
                 "c6-spoof": "c1-browsing", "c6-fold": "c1-browsing"}
-    expected.update({f"c7-{m}": f"c1-{m}" for m in C7_MODES})
-    assert bases == expected
+    expected.update({f"c7-{m}": f"c1-{m}" for m in C7_MODES if m != "mail"})
+    expected["c2-p2a-idle"] = "c2-p2a"
+    assert bases == expected          # c7-mail declares no base: its cut holds no keystroke (9.14 decision 2 as amended)
+    assert "base" not in spec["files"]["c7-mail"]
+    assert one(spec, "c7-mail", "mailer", "ready_wait")["channel"] == "timer"
     for wid, base in bases.items():
         if wid.startswith("c7-") and wid[3:] in BATCH_C7:
             continue
@@ -192,9 +199,22 @@ def test_weight_must_be_positive(tmp_path):
 
 
 def test_window_must_lie_inside_the_file(tmp_path):
-    bad = term(window={"start_us": 60000000, "end_us": 190000000})     # T_end is 180 s
+    bad = term(window={"start_us": 60000000, "end_us": 100000000})     # T_end is 99.435 s
     errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [bad]}}))
-    assert any("window" in e and "180000000" in e for e in errs)
+    assert any("window" in e and "99435000" in e for e in errs)
+
+
+def test_window_must_lie_on_segment_boundaries(tmp_path):
+    """9.14 decision 5: a window is a segment by design; a window inside the file but off its
+    segment boundaries fails the lint, in either direction."""
+    early = term(window={"start_us": 60000000, "end_us": 90000000})      # ends 9.435 s before the file
+    errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [early]}}))
+    assert any("segment boundaries" in e for e in errs), errs
+    late_start = term(window={"start_us": 61000000, "end_us": 99435000})
+    errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [late_start]}}))
+    assert any("segment boundaries" in e for e in errs), errs
+    good = term(window={"start_us": 60000000, "end_us": 99435000})
+    assert not [e for e in errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [good]}})) if "window" in e]
     bad = term(window={"start_us": 70000000, "end_us": 60000000})
     errs = errors_of(tmp_path, minimal(**{"c2-p1a": {"terms": [bad]}}))
     assert any("window" in e for e in errs)

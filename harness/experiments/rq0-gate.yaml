@@ -1,14 +1,17 @@
 # RQ0 gate spec — the pre-registered description of the RQ0 run (research-proposal
 # §5.3; Phase 8 spec, decisions 1–8, 12, 16, 17, 20, 21; sub-task 8.8, decided in
-# the 2026-09-12 grill). Executable data: the runner reads the generic part as its
-# run matrix, the RQ0 gate evaluator reads the whole file and writes the report.
-# Every number here has its reason beside it — in `reasons`, in `statements`, or
-# in the comment on its line. Nothing changes after execution begins except by an
-# entry in harness/CHANGELOG.md made before any run; the two pending items
-# (statements `executor-assumptions`, `random-reading`) are the ones expected to.
+# the 2026-09-12 grill; reworked on the rebuilt workload dataset in sub-task 9.14,
+# decided in the 2026-10-09 grill, _dev/docs/spec/jioh/task-9.14-consumer-rework.md).
+# Executable data: the runner reads the generic part as its run matrix, the RQ0
+# gate evaluator reads the whole file and writes the report. Every number here has
+# its reason beside it — in `reasons`, in `statements`, or in the comment on its
+# line. Nothing changes after execution begins except by an entry in
+# harness/CHANGELOG.md made before any run.
 #
 # Committed 2026-09-12 by 인지오 on the freeze of the scoring spec and the guard
-# spec (harness/CHANGELOG.md). Team ratification follows in a team meeting.
+# spec (harness/CHANGELOG.md); re-pinned 2026-10-09 on the rebuilt dataset and the
+# reworked consumers (the 9.14 entry there). Team ratification follows in a team
+# meeting.
 
 experiment: rq0-gate
 
@@ -17,36 +20,70 @@ conditions: [fixed, random, oracle]
 # N — statement `n-grounding`
 seed_count: 100
 
-# The primary is the values OSTEP chapter 8's worked examples use
-# (recognition-vocabulary §2, 2026-09-11). Each
-# alternative is the same configuration with only the top slice changed; the
-# reason for each point is on the sensitivity line below (statement `boot-default-sweep`).
+# The primary is the values OSTEP chapter 8's worked examples use — three queues and
+# a 10 ms top slice (Example 1), doubling per level (Figure 8.6), a 100 ms boost
+# (Figure 8.4) (recognition-vocabulary §2, 2026-09-11; 9.11 D8). It sits on the
+# measured call's demotion edge: about a fifth of the call's audio-frame cycles
+# consume a 10 ms slice (9.14). Each alternative is the same configuration with
+# only the top slice changed; the reason for each point is on the sensitivity line
+# below (statement `boot-default-sweep`).
 boot_defaults:
   primary: ostep
   alternatives: [ostep-slice-500us, ostep-slice-700us, ostep-slice-900us, ostep-slice-1200us,
-                 ostep-slice-2000us, ostep-slice-3000us, ostep-slice-5000us, ostep-slice-20000us,
-                 ostep-slice-100000us]
+                 ostep-slice-2000us, ostep-slice-3000us, ostep-slice-5000us, ostep-slice-14000us,
+                 ostep-slice-20000us, ostep-slice-100000us]
 
-# Judging (25): a file judges when it is one side of a label-varying pair and its
+# Judging (19): a file judges when it is one side of a label-varying pair and its
 # scored term registers the rows' difference by design (7.7, 2026-09-10; RQ0
-# preparation notes §8) — the three C2 pairs, the six batch C1 bases, and the C7
-# counterparts with a term, less c7-meeting and c7-media (statement `judging-set`).
-# Reporting (25): every other coreset file — the interactive and periodic C1 bases,
-# c1-gaming on its own line, the idle pair, C3, C4, and C5 and C6, which run and
-# report but are excluded from Layer-2 aggregation.
+# preparation notes §8), applied to the rebuilt files on 2026-10-09 (statement
+# `judging-set`): the C2 pairs' normal-class halves, the four batch C1 bases whose
+# job the row's share reaches, and the C7 counterparts with a term the row choice
+# can move. Reporting (32): every other coreset file — the interactive and periodic
+# C1 bases, c1-gaming on its own line, the idle pair, the six files holding
+# idle-class work (statement `idle-class-files`), c7-mail (its cut holds no
+# keystroke), c7-media (no headroom on the measured tables), C3, C4, C5 and C6,
+# which run and report but are excluded from Layer-2 aggregation, and the bounding
+# variant c2-p2a-idle (statement `bounding-check`). Variants (statement
+# `sensitivity-lines`): rebuilt judging files the lines read, run under the
+# primary boot default alone, never judged.
 files:
-  judging: [c2-p1a, c2-p1b, c2-p2a, c2-p2b, c2-p3a, c2-p3b,
-            c1-compile, c1-ml-train, c1-render, c1-transcode, c1-indexing, c1-backup,
-            c7-browsing, c7-office, c7-mail, c7-dev, c7-photo, c7-gaming, c7-video-edit,
-            c7-compile, c7-ml-train, c7-render, c7-transcode, c7-indexing, c7-backup]
+  judging: [c2-p1a, c2-p2a, c2-p2b, c2-p3a,
+            c1-compile, c1-ml-train, c1-render, c1-transcode,
+            c7-browsing, c7-office, c7-dev, c7-photo, c7-meeting, c7-gaming, c7-video-edit,
+            c7-compile, c7-ml-train, c7-render, c7-transcode]
   reporting: [c1-browsing, c1-office, c1-mail, c1-dev, c1-photo, c1-meeting, c1-media, c1-video-edit,
-              c1-gaming, c1-idle, c7-idle, c7-meeting, c7-media,
+              c1-gaming, c1-idle, c7-idle,
+              c1-indexing, c7-indexing, c2-p1b, c1-backup, c7-backup, c2-p3b,
+              c7-mail, c7-media,
               c3-creation, c3-evening, c3-workday, c4-compile, c4-gaming, c4-office,
-              c5-t3, c5-t4, c5-t5, c6-dual, c6-fold, c6-spoof]
+              c5-t3, c5-t4, c5-t5, c6-dual, c6-fold, c6-spoof,
+              c2-p2a-idle]
+  variants: [c2-p1a@venue-x0.8, c2-p2a@venue-x0.8, c2-p2b@venue-x0.8, c2-p3a@venue-x0.8,
+             c1-compile@venue-x0.8, c1-ml-train@venue-x0.8, c1-render@venue-x0.8, c1-transcode@venue-x0.8,
+             c7-browsing@venue-x0.8, c7-office@venue-x0.8, c7-dev@venue-x0.8, c7-photo@venue-x0.8,
+             c7-meeting@venue-x0.8, c7-gaming@venue-x0.8, c7-video-edit@venue-x0.8, c7-compile@venue-x0.8,
+             c7-ml-train@venue-x0.8, c7-render@venue-x0.8, c7-transcode@venue-x0.8,
+             c2-p1a@venue-x1.25, c2-p2a@venue-x1.25, c2-p2b@venue-x1.25, c2-p3a@venue-x1.25,
+             c1-compile@venue-x1.25, c1-ml-train@venue-x1.25, c1-render@venue-x1.25, c1-transcode@venue-x1.25,
+             c7-browsing@venue-x1.25, c7-office@venue-x1.25, c7-dev@venue-x1.25, c7-photo@venue-x1.25,
+             c7-meeting@venue-x1.25, c7-gaming@venue-x1.25, c7-video-edit@venue-x1.25, c7-compile@venue-x1.25,
+             c7-ml-train@venue-x1.25, c7-render@venue-x1.25, c7-transcode@venue-x1.25,
+             c2-p2a@chain-x1.2, c2-p2b@chain-x1.2, c7-gaming@chain-x1.2,
+             c2-p2a@chain-x1.4, c2-p2b@chain-x1.4, c7-gaming@chain-x1.4,
+             c2-p1a@seg1-30s, c2-p2a@seg1-30s, c2-p2b@seg1-30s, c2-p3a@seg1-30s,
+             c2-p1a@seg1-120s, c2-p2a@seg1-120s, c2-p2b@seg1-120s, c2-p3a@seg1-120s,
+             c1-compile@corner-low, c1-ml-train@corner-low, c2-p1a@corner-low, c2-p2a@corner-low, c2-p2b@corner-low,
+             c7-browsing@corner-low, c7-office@corner-low, c7-dev@corner-low, c7-gaming@corner-low,
+             c7-compile@corner-low, c7-ml-train@corner-low,
+             c1-compile@corner-high, c1-ml-train@corner-high, c2-p1a@corner-high, c2-p2a@corner-high, c2-p2b@corner-high,
+             c7-browsing@corner-high, c7-office@corner-high, c7-dev@corner-high, c7-gaming@corner-high,
+             c7-compile@corner-high, c7-ml-train@corner-high,
+             c7-dev@replay, c7-browsing@replay, c7-meeting@replay, c2-p1a@replay]
 
 # derived from the `pre_committed_miss` annotation in the compiled files; the lint
-# checks it (Phase 8 spec, decision 13). These files judge (the gate needs labels,
-# not recognizability) and leave recognition accuracy.
+# checks it (Phase 8 spec, decision 13). These files leave recognition accuracy;
+# three of them judge (the gate needs labels, not recognizability) and two —
+# c1-indexing and c7-backup, idle-class files — report.
 layer1_exclusions: [c1-indexing, c7-backup, c7-ml-train, c7-render, c7-transcode]
 
 guard_exemptions:
@@ -63,20 +100,25 @@ guard_exemptions:
 reporting_lines:
   # decision 12 as amended 2026-09-12: the fixed run re-run under each alternative,
   # the gaps recomputed against each, the verdict count printed per boot default.
+  # The ten points of 2026-10-09 (9.14 decision 9): five backbone points the dataset
+  # does not inform and five threshold points placed either side of the steps the
+  # rebuilt judging files have — the chain's slack per frame and its stages'
+  # demotion edges, the video player's cycle range, the call's demotion edge.
   - type: sensitivity
     boot_defaults: [ostep-slice-500us, ostep-slice-700us, ostep-slice-900us, ostep-slice-1200us,
-                    ostep-slice-2000us, ostep-slice-3000us, ostep-slice-5000us, ostep-slice-20000us,
-                    ostep-slice-100000us]
+                    ostep-slice-2000us, ostep-slice-3000us, ostep-slice-5000us, ostep-slice-14000us,
+                    ostep-slice-20000us, ostep-slice-100000us]
     reasons:
-      ostep: "the primary: the values OSTEP chapter 8's worked examples use, 10 ms top slice (recognition-vocabulary §2)"
+      ostep: "the primary: the values OSTEP chapter 8's worked examples use, a 10 ms top slice (recognition-vocabulary §2); it sits on the measured call's demotion edge, about a fifth of its audio-frame cycles consuming the slice"
       ostep-slice-500us: "backbone: the config schema's lower bound on the top slice"
-      ostep-slice-700us: "backbone: Linux's EEVDF base slice at one CPU, 0.70 ms since v6.15 (linux-sched-fair) — design: the one-CPU value for the simulator's one lane, the runner running 2.1 ms at its 4 CPUs; also below the C2 gaming pair's 831 µs frame slack"
-      ostep-slice-900us: "threshold: between the 831 µs frame slack (c2-p2a, c2-p2b) and the 1 ms point where a slice after the 100 ms boost reaches 1% of the boost interval and enters the wake-latency p99"
-      ostep-slice-1200us: "threshold: above the 1 ms post-boost point, below c7-gaming's longest chain stage (1 470 µs)"
-      ostep-slice-2000us: "backbone: illumos TS's top-level quantum (illumos-ts); also between c7-gaming's longest stage (1 470 µs) and the C2 gaming pair's (2 176 µs)"
-      ostep-slice-3000us: "threshold: above the C2 gaming pair's longest chain stage (2 176 µs), below the 6 667 µs compositor burst"
-      ostep-slice-5000us: "threshold: below the 6 667 µs compositor burst (c7-gaming), nearer than 3 ms"
-      ostep-slice-20000us: "backbone: sched_ext's default slice (linux-sched-ext); above the primary"
+      ostep-slice-700us: "backbone: Linux's base slice at one CPU, 0.70 ms since v6.15 (linux-sched-fair) — design, the one-CPU value for the simulator's one lane, the runner running 2.1 ms at its 4 CPUs (9.11 D25); also below the C2 gaming pair's 834 µs chain slack per frame (its chain 15 833 µs of 16 667, the Steam client taking about 250 µs of the slack on average), so a boosted intruder's slice fits inside a frame"
+      ostep-slice-900us: "threshold: above the C2 gaming pair's 834 µs chain slack, below the gaming base's 1 668 µs (its chain 14 999 µs); demotes the gaming base's nine chain stages at 992 to 1 436 µs"
+      ostep-slice-1200us: "threshold: above the 1 ms post-boost point (arithmetic on the boost: 1 % of the 100 ms interval) and the gaming base's cluster of stages at 992 to 1 191 µs, below its longest stage, 1 436 µs; demotes four C2 stages (1 220 to 2 131 µs)"
+      ostep-slice-2000us: "backbone: illumos TS's top-level quantum (illumos-ts); also above every gaming-base stage and the C2 pair's 1 733 µs stage, below its 2 099 and 2 131 µs stages"
+      ostep-slice-3000us: "threshold: above every chain stage (the longest 2 131 µs); inside the video player's cycle range (decile cuts 2.3 to 7.5 ms), demoting about seven in ten of its cycles"
+      ostep-slice-5000us: "threshold: between the video player's median cycle (4.0 ms) and its upper decile (7.5 ms); the 2026-09 reason, the 6 667 µs compositor burst, left with the compositor task (9.9)"
+      ostep-slice-14000us: "threshold: above the call's 12.2 ms ninth-decile cycle, below its 18.9 ms and the video player's 16.0 ms maxima, so the call is demoted in under a tenth of its cycles and the player almost never (added 2026-10-09)"
+      ostep-slice-20000us: "backbone: sched_ext's default slice, 20 ms (linux-sched-ext); above every periodic task's longest cycle, so no periodic task is ever demoted"
       ostep-slice-100000us: "backbone: the config schema's upper bound on the top slice"
   # 8.1 decision 4: the verdict count recomputed under a band of latency floors at scoring time
   - {type: floor_band, latency_floors_us: [500, 1000, 2000, 5000]}
@@ -87,61 +129,209 @@ reporting_lines:
   - {type: exclusion_accuracy}
   - {type: layer1_headline}
   - {type: random_beats_oracle}
+  # 9.14 decision 10 — the sensitivity lines (statement `sensitivity-lines`): each a
+  # rebuilt set of judging files run under the primary; a verdict count that moves
+  # makes the verdict a range over that axis.
+  - type: variant_set
+    name: venue-x0.8
+    axis: venue_factor
+    value: "0.8"
+    reason: "every measured RUN value scaled by 1/1.25 (9.6 D32): the lower edge of a design bracket containing the two measured venue effects — the ×1.144 huge-page ratio of the training run under the desktop kernel's mode (×1.102 to ×1.185, 9.10 D88) and the tracing overhead's ×1.02 to ×1.16 (the untraced controls, 9.5); the chain excluded, it has its own line"
+    files: {c2-p1a: c2-p1a@venue-x0.8, c2-p2a: c2-p2a@venue-x0.8, c2-p2b: c2-p2b@venue-x0.8, c2-p3a: c2-p3a@venue-x0.8,
+            c1-compile: c1-compile@venue-x0.8, c1-ml-train: c1-ml-train@venue-x0.8, c1-render: c1-render@venue-x0.8,
+            c1-transcode: c1-transcode@venue-x0.8, c7-browsing: c7-browsing@venue-x0.8, c7-office: c7-office@venue-x0.8,
+            c7-dev: c7-dev@venue-x0.8, c7-photo: c7-photo@venue-x0.8, c7-meeting: c7-meeting@venue-x0.8,
+            c7-gaming: c7-gaming@venue-x0.8, c7-video-edit: c7-video-edit@venue-x0.8, c7-compile: c7-compile@venue-x0.8,
+            c7-ml-train: c7-ml-train@venue-x0.8, c7-render: c7-render@venue-x0.8, c7-transcode: c7-transcode@venue-x0.8}
+  - type: variant_set
+    name: venue-x1.25
+    axis: venue_factor
+    value: "1.25"
+    reason: "every measured RUN value scaled by 1.25: the upper edge of the same bracket"
+    files: {c2-p1a: c2-p1a@venue-x1.25, c2-p2a: c2-p2a@venue-x1.25, c2-p2b: c2-p2b@venue-x1.25, c2-p3a: c2-p3a@venue-x1.25,
+            c1-compile: c1-compile@venue-x1.25, c1-ml-train: c1-ml-train@venue-x1.25, c1-render: c1-render@venue-x1.25,
+            c1-transcode: c1-transcode@venue-x1.25, c7-browsing: c7-browsing@venue-x1.25, c7-office: c7-office@venue-x1.25,
+            c7-dev: c7-dev@venue-x1.25, c7-photo: c7-photo@venue-x1.25, c7-meeting: c7-meeting@venue-x1.25,
+            c7-gaming: c7-gaming@venue-x1.25, c7-video-edit: c7-video-edit@venue-x1.25, c7-compile: c7-compile@venue-x1.25,
+            c7-ml-train: c7-ml-train@venue-x1.25, c7-render: c7-render@venue-x1.25, c7-transcode: c7-transcode@venue-x1.25}
+  - type: variant_set
+    name: chain-x1.2
+    axis: chain_scale
+    value: "1.2"
+    reason: "the frame chain's RUN values scaled by 1.2 (9.4 D9; 9.5's scale check of the one archetype still grounded in literature at another machine's scale): the deck's per-schedule runtime understates a wake's demand by the schedules a wake is cut into, about 1.4 on average (lavd-ossna24 s14)"
+    files: {c2-p2a: c2-p2a@chain-x1.2, c2-p2b: c2-p2b@chain-x1.2, c7-gaming: c7-gaming@chain-x1.2}
+  - type: variant_set
+    name: chain-x1.4
+    axis: chain_scale
+    value: "1.4"
+    reason: "the chain's RUN values scaled by 1.4, the deck's bound; at this factor the chain exceeds the lane in all three files (1.14 and 1.26 lanes), so the expected reading is that the gaming verdicts depend on the literature-grounded archetype's scale — its stated limitation, not a result"
+    files: {c2-p2a: c2-p2a@chain-x1.4, c2-p2b: c2-p2b@chain-x1.4, c7-gaming: c7-gaming@chain-x1.4}
+  - type: variant_set
+    name: seg1-30s
+    axis: segment_length
+    value: "30s"
+    reason: "the C2 pairs' first segment, the one authored length a judging file has (60 s, design, 9.10 D31), at 30 s; every other judging length is a job's measured CPU total (9.10 D169's sweep)"
+    files: {c2-p1a: c2-p1a@seg1-30s, c2-p2a: c2-p2a@seg1-30s, c2-p2b: c2-p2b@seg1-30s, c2-p3a: c2-p3a@seg1-30s}
+  - type: variant_set
+    name: seg1-120s
+    axis: segment_length
+    value: "120s"
+    reason: "the same first segment at 120 s; expected unchanged, the terms reading the second segment"
+    files: {c2-p1a: c2-p1a@seg1-120s, c2-p2a: c2-p2a@seg1-120s, c2-p2b: c2-p2b@seg1-120s, c2-p3a: c2-p3a@seg1-120s}
+  - type: variant_set
+    name: corner-low
+    axis: carried_half_widths
+    value: "low"
+    reason: "every value the library carries under the stability rule's exceptions (9.5 D57, 9.6 D29, 9.8 D27, 9.9 D29) set to the lower bound of its stated interval, on the judging files holding those entries (statement `sensitivity-lines`, the list in dataset/variants.yaml); a changed count triggers the re-measurement contingency (statement `re-measurement-contingency`)"
+    files: {c1-compile: c1-compile@corner-low, c1-ml-train: c1-ml-train@corner-low, c2-p1a: c2-p1a@corner-low,
+            c2-p2a: c2-p2a@corner-low, c2-p2b: c2-p2b@corner-low, c7-browsing: c7-browsing@corner-low,
+            c7-office: c7-office@corner-low, c7-dev: c7-dev@corner-low, c7-gaming: c7-gaming@corner-low,
+            c7-compile: c7-compile@corner-low, c7-ml-train: c7-ml-train@corner-low}
+  - type: variant_set
+    name: corner-high
+    axis: carried_half_widths
+    value: "high"
+    reason: "the same values at the upper bound of their intervals"
+    files: {c1-compile: c1-compile@corner-high, c1-ml-train: c1-ml-train@corner-high, c2-p1a: c2-p1a@corner-high,
+            c2-p2a: c2-p2a@corner-high, c2-p2b: c2-p2b@corner-high, c7-browsing: c7-browsing@corner-high,
+            c7-office: c7-office@corner-high, c7-dev: c7-dev@corner-high, c7-gaming: c7-gaming@corner-high,
+            c7-compile: c7-compile@corner-high, c7-ml-train: c7-ml-train@corner-high}
+  - type: trace_replay
+    tolerance: 0.17
+    reason: "four judging files, one per term shape, rebuilt on one pooled repeat's measured wake sequence in place of the compiled stream (the launch-phase replay of 9.10 D136 extended to the carried phases); agreement when each file's gap falls on the same side of g under both builds and differs by less than the g band's step; a disagreement is stated beside the verdict as the compiled streams' ordering threat (the 2026-09-26 burstiness finding: the streams reproduce each component's rates and distributions, not the order of its gaps nor its components waking together)"
+    files: {c7-dev: c7-dev@replay, c7-browsing: c7-browsing@replay, c7-meeting: c7-meeting@replay, c2-p1a: c2-p1a@replay}
+  - type: input_wake_count
+  - type: longest_wait
+    threshold_us: 30000000
+    reopen_us: 15000000
+  - type: bounding_pair
+    a: c2-p2a
+    b: c2-p2a-idle
+    reason: "the download bounding check (9.11 D6, D20, D21; 9.13 D4): the two files are byte-identical but for the download task's declared class — carried at full standing as measured (a), or in the idle class (b); a stock desktop gives SteamCMD's content-update threads, 75 % of its CPU, nice 10, about a tenth of the CPU against a busy nice-0 thread, which lies between the two. The verdict on each is reported and the difference stated as the reach of carrying the nice-10 work at full standing"
   - type: note
     workload: c7-gaming
     text: >
-      Judging note (Phase 7 pair review): the base already needs 1.46 lanes; with the
-      scan, frames miss under every row, so only the gap between rows reads, not the
-      absolute miss rate.
+      Judging note (9.14 decision 2; pair review finding 5): the chain is deadline
+      class and the file's two gaming rows tie on the chain term by design — the
+      cap axis is inert — so the gap reads EDF against the drawn algorithm. The
+      chain takes 0.9 of the lane (9.4), 1 668 µs of slack per frame, and the boot
+      MLFQ's 100 ms boost hands the upgrade a 10 ms slice inside a frame; the
+      2026-09 note's "frames miss under every row" read the old chain at 1.46 lanes.
   - type: note
     workload: c1-gaming
     text: >
-      Separate line, added 2026-09-06 after reading demand estimates and before
-      execution: single-situation file at demand 1.46, the highest in the coreset;
-      lets gap size be read against demand level separately from family type. Not
-      judging: no pair, so no attribute variation, and selecting the highest-demand
-      file after reading demand numbers is selection along an axis correlated with
-      expected gap size.
+      Separate line, added 2026-09-06 before execution: a single-situation file
+      whose chain takes 0.9 of the lane (9.4; 1.46 before), beside the Steam
+      client; lets gap size be read against the chain's load separately from
+      family type. Not judging: no pair, so no attribute variation, and the file
+      was chosen on its demand after reading demand numbers.
   - type: note
     workload: c7-meeting
     text: >
-      Reporting-only under the executor assumptions (statement `judging-set`): both
-      rows are EDF; TIMER consumers sit in the deadline class and one 10 ms residual
-      slice equals video's tick tolerance exactly, and fixed no longer demotes the
-      video burst, so on the arithmetic the rows tie and fixed ties too — no headroom
-      on every term. Re-enters the judging set before any run if 인경민's answers are
-      slice-end waiting with dispatch before wake.
+      Judging since 2026-10-09 (9.14 decision 2): the measured call is one task
+      with a job per 10 ms audio frame whose cycle run consumes the boot slice in
+      about a fifth of its cycles; demoted, it waits behind the upgrade's slice
+      until the next boost, while under either EDF row it is deadline class and
+      misses only its own overruns, about 5 %. The tie with fixed that made it
+      reporting-only in 8.8 held on the old 2.5 ms and 6.67 ms bursts and is
+      gone; the cap axis is inert and the gap reads EDF against the drawn
+      algorithm, as on c7-gaming. The call's own overruns set a floor under its
+      miss rate under every row.
   - type: note
     workload: c7-media
-    text: "Same as c7-meeting."
+    text: >
+      Reporting-only (9.14 decision 2): on the measured tables the video player's
+      worst cycle is 16.0 ms of run against a 33.3 ms period and the longest wait
+      the boot MLFQ can impose on it is one 20 ms Q1 slice after a rare demotion,
+      32 ms in all; the music player's 2.4 ms against 49.6 ms never comes near.
+      No headroom against fixed and none between the two EDF rows, on a 1.3 ms
+      margin stated here.
+  - type: note
+    workload: c7-mail
+    text: >
+      Reporting-only (9.14 decision 2 as amended 2026-10-09): the counterpart is
+      c1-mail's first 26.385 s and holds no keystroke — the base's 35 fall between
+      45.9 s and 53.1 s, the SWELL Outlook stream's one typing burst — so its term
+      reads the mailer's own wakes and cannot read keystroke latency; the mail
+      mode's attribute pair is unmeasured.
 
 statements:
   - id: judging-set
     text: >
       A file judges when it is one side of a label-varying pair and its scored term
-      registers the rows' difference by design (7.7, 2026-09-10). That admits the
-      three C2 pairs, the six batch C1 bases, and the C7 counterparts with a term.
-      c7-meeting and c7-media are reporting-only: under the executor assumptions
-      below their two EDF rows tie on every term and tie with fixed, so the term does
-      not register the rows' difference by design. Re-entry condition: if 인경민's
-      answers to memo 2026-09-11 §5 questions 1 and 2 are that a residual task keeps
-      its slice when a deadline task wakes and that a slice boundary is dispatched
-      before a same-microsecond wake, both files re-enter the judging set before any
-      run, as a harness changelog entry, and K is restated by its reading (14 of 27).
-      A judging file whose every term shows no headroom at scoring time stays in the
+      registers the rows' difference by design (7.7, 2026-09-10), read on the
+      rebuilt files and the ratified executor rules on 2026-10-09 (9.14 decision 2).
+      That admits the C2 pairs' normal-class halves (c2-p1a, c2-p2a, c2-p2b,
+      c2-p3a), the four batch C1 bases whose job the row's share reaches
+      (c1-compile, c1-ml-train, c1-render, c1-transcode), and eleven C7
+      counterparts (browsing, office, dev, photo, meeting, gaming, video-edit,
+      compile, ml-train, render, transcode): nineteen files. Reporting-only by the
+      same rule: the six files holding idle-class work (statement
+      `idle-class-files`); c7-mail, whose cut holds no keystroke; c7-media, no
+      headroom against fixed or between its rows on the measured tables; the
+      interactive and periodic C1 bases, C3, C4, C5, C6 and the idle pair as
+      before. On the EDF files that judge — c2-p2a, c2-p2b, c7-gaming, c7-meeting
+      — the two rows tie on the scored term by design, since EDF serves the
+      deadline-class chain or call before any residual task whatever the cap; the
+      gap there reads EDF against the drawn algorithm, mode recognition, with the
+      attribute's row difference unmeasured, as 7.7 first read c7-gaming. A
+      judging file whose every term shows no headroom at scoring time stays in the
       set and counts as not meeting g (Phase 8 spec, decision 4); it is also a
-      trigger for the table check in the failure procedure.
+      trigger for the table check in the failure procedure. No file leaves or
+      enters the set after any gap is seen.
+  - id: idle-class-files
+    text: >
+      c1-indexing, c7-indexing and c2-p1b hold Tracker's indexer and c1-backup,
+      c7-backup and c2-p3b Déjà Dup's backup, programs that declare SCHED_IDLE on
+      themselves (9.11 D4). The dataset carries the class and the executor runs
+      an idle task only when no other-class task is runnable, under every
+      algorithm (9.11 D5; 9.13), and the cap is work-conserving, so no row's
+      share or cap reaches the background task: its turnaround or progress is
+      identical under every row and the editor's wait is untouched by it. The
+      six files are reporting-only by the judging rule's own reason for the
+      interactive C1 bases — nothing the row choice can move runs behind the
+      foreground — with the prediction stated here before any run: no headroom
+      on the background term, and on the editor term only what the algorithm
+      does to the editor's own threads. The depicted desktop differs for the
+      indexer, which runs in background.slice at about 23 % of the CPU against
+      the editor's slice (9.11 D16), so the simulated indexer interferes less
+      than the real one and these files understate a desktop's headroom; the
+      backup shares the editor's task group and the simulation matches. The
+      files re-enter the judging set only if the executor's idle rule changes
+      before any run, by a harness changelog entry.
   - id: executor-assumptions
     text: >
-      Proposed 2026-09-11 (memo 2026-09-11-boot-default-from-ostep §5), pending
-      인경민's confirmation, and committed as stated assumptions: (1) under EDF a waking
-      deadline-class task preempts a running residual task at once; (2) when a
-      residual slice boundary and a TIMER expiry fall on the same microsecond, the
-      wake is processed before the dispatch decision, and the trace's line order
-      shows it; (3) the executor's starvation window is 1 000 000 µs, the guard spec's
-      starvation_floor threshold. The answers are recorded here when they arrive; a
-      changed value is a harness changelog entry before any run. Confirmation is a
-      Phase 9 prerequisite.
+      Stated on 인경민's simulator status memo of 2026-10-01 (§6) and the 9.11
+      decisions, as committed assumptions (9.11 D26; 9.14): (1) under EDF a
+      waking deadline-class task preempts a running residual task at once, as the
+      simulator behaves today; (2) same-microsecond events apply config entries
+      first, then events in insertion order — the simulator's rule D1 — not a
+      wake before a slice boundary, as the 2026-09-11 memo proposed; (3) the
+      executor has no starvation window; the harness's starvation_floor guard
+      reads 30 s, the bound sched_ext's watchdog enforces at most and by default,
+      borrowed by design as the deployment path's validity bound (9.11 D7, D19).
+      인경민's formal reply to (1) and (2) is asked in the declared-class memo of
+      2026-10-08; a differing answer is a harness changelog entry before any run.
+  - id: simulator-conformance
+    text: >
+      Every consumer this spec pins is written against the ratified contract, not
+      the simulator as it stands (9.14 decision 1). Before the RQ0 run the
+      simulator must show, on the hand fixtures replayed through it with their
+      traces compared line by line: (a) a ready line at every completion of a
+      blocking primitive, at zero wait when it did not block, inside the
+      occupancy after the run_start (metrics doc §11 item 1); (b) the TIMER skip
+      rule — a TIMER reached after ticks passed consumes the latest and skips the
+      rest, each skipped tick a deadline line with met false and no work (9.11
+      D3, D17; the 2026-10-07 memo); (c) a switch into MLFQ as a cold start into
+      the top queue, and a same-algorithm entry letting the granted slice finish
+      (metrics doc §6.9, §11 item 9); (d) batch_bandwidth_cap read and applied
+      as a work-conserving ceiling on the behavioural batch class (the 2026-09-09
+      batch-class memo); (e) the strict idle class, an idle task running only
+      when no other-class task is runnable and preempted at once when one wakes,
+      under every algorithm (the 2026-10-08 declared-class memo); (f) the frame
+      chain's woken stages in EDF's deadline class with the frame's deadline
+      (recognition-vocabulary §2, 2026-10-06). (f) the simulator does today; the
+      others its owner holds as owed. The run does not start until each is shown.
   - id: g-grounding
     text: >
       g = 0.5 reads: recognition accounts for at least half of the achievable
@@ -155,19 +345,19 @@ statements:
       A known property of the prior driver table, stated before execution: its 32
       rows carry 8 distinct configurations, since params are boot values in every
       row and rows differ by algorithm and cap only. Thirteen rows share MLFQ with
-      cap 0.05 (every unwanted row of a non-periodic mode), so on the 13 judging
-      files whose scored segment maps to that row — the twelve C7 counterparts of the
-      interactive and batch modes other than gaming, and c2-p1b — a uniform draw is the
-      oracle's configuration 41% of the time, and their gap has a structural ceiling.
-      The other twelve judging files map to rows shared by at most three (9% or
-      less). The duplicate structure makes the gate conservative; a fail
-      concentrated in the 13-file class routes to the failure procedure's table check
-      first.
+      cap 0.05 (every unwanted row of a non-periodic mode), so on the nine judging
+      files whose scored segment maps to that row — the C7 counterparts of
+      browsing, office, dev, photo, video-edit, compile, ml-train, render and
+      transcode — a uniform draw is the oracle's configuration 41 % of the time,
+      and their gap has a structural ceiling. The other ten judging files map to
+      rows shared by at most three (9 % or less). The duplicate structure makes the
+      gate conservative; a fail concentrated in the nine-file class routes to the
+      failure procedure's table check first.
   - id: k-grounding
     text: >
-      K = 13 reads: a majority of the 25 judging files. The report prints the count
-      whatever K is; K draws the pass line. On re-entry of c7-meeting and c7-media
-      the number is restated to 14 by the same reading before any run.
+      K = 10 reads: a majority of the 19 judging files (13 of 25 by the same
+      reading until 2026-10-09; 9.14 decision 2). The report prints the count
+      whatever K is; K draws the pass line.
   - id: n-grounding
     text: >
       N = 100, by two arguments. Precision: the gap uses the mean of the compared
@@ -176,9 +366,10 @@ statements:
       of g. Coverage: each draw is uniform over the 32 rows, and the chance a
       single-row configuration is never drawn in N seeds is (31/32)^N, below 5% at
       N = 95. The seed standard-error line prints the measured error per judging
-      file beside the mean. If the real simulator's measured cost makes N = 100
-      unaffordable, N changes by a harness changelog entry before any run (Phase 8
-      spec, decision 20).
+      file beside the mean. The sensitivity lines run their variant files at the
+      same N, about two and a half times the main judging run in all (9.14). If
+      the real simulator's measured cost makes N = 100 unaffordable, N changes by
+      a harness changelog entry before any run (Phase 8 spec, decision 20).
   - id: random-reading
     text: >
       The random condition draws, at every telemetry set change, one uniform draw
@@ -194,23 +385,78 @@ statements:
       boot default, and every judging file's gaps are recomputed against that fixed
       run. The oracle and random runs stay on the primary and on the pinned driver
       table. The sweep is a backbone the dataset does not inform — the config
-      schema's two bounds and three shipped defaults — plus one point either side of
-      each step the judging set's periodic tasks have (frame slack, longest chain
-      stage, compositor burst) and of the 1 ms post-boost point; every point's reason
-      is on the sensitivity line. If the verdict count changes across the sweep, the
+      schema's two bounds and three shipped defaults — plus threshold points placed
+      either side of the steps the rebuilt judging files' periodic tasks have (9.14
+      decision 9): the chain's slack per frame (834 µs in the C2 pair, 1 668 µs in
+      the gaming base), its stages' demotion edges (the base's longest 1 436 µs, the
+      pair's 2 131 µs), the video player's cycle range (2.3 to 7.5 ms at the decile
+      cuts, 16.0 ms at most) and the call's demotion edge (about a fifth of its
+      cycles above 10 ms, its ninth decile 12.2 ms, its maximum 18.9 ms). A slice
+      below a stage's run demotes that stage; a slice shorter than the slack lets
+      a boosted intruder's slice fit inside a frame. Every point's reason is on
+      the sensitivity line. If the verdict count changes across the sweep, the
       verdict is reported as a range over the boot default.
+  - id: sensitivity-lines
+    text: >
+      Every check that asks whether something moves a scheduling outcome is a
+      reporting line run with the RQ0 run, its sweep values and reading rule
+      fixed here (9.14 decision 3), on variant files the dataset's variant builder
+      produces from the pinned library and the blessed set and this spec pins by
+      manifest (decision 12; dataset/variants.yaml names each set's transform,
+      files and the carried values it moves). The venue factor scales every
+      measured RUN value by 1/1.25 and 1.25, a design bracket containing the two
+      measured venue effects; the chain scale multiplies the chain's RUN values
+      by 1.2 and 1.4; the segment length sets the C2 pairs' first segment to 30 s
+      and 120 s; the carried half-widths set every exception-carried value to the
+      bounds of its stated interval, all low and all high, and 9.6 D29's rule
+      holds with it — no reported result may rest on a difference smaller than a
+      carried value's half-width; the trace replay rebuilds four files on measured
+      wake sequences. A verdict count that moves under any line makes the verdict
+      a range over that axis. The input-wake-count line prints, per judging file
+      and interaction-latency term, the number of wakes its P99 rests on: a 26 s
+      counterpart holds about a hundred keystrokes and c3-workday's browser seven,
+      so a P99 there is the top one or two waits; the pair comparison is on the
+      same wakes. The longest-wait line prints each run's longest ready_wait
+      against the 30 s floor; any run past 15 s reopens the executor-net question
+      with 인경민 before the verdict is read (9.11 D19).
+  - id: re-measurement-contingency
+    text: >
+      The values the library carries under the stability rule's exceptions —
+      the editor's utility/libuv-worker wake rate and gap mean (9.5 D57, D99: ±39 %
+      across repeats, ±10.6 % within one), the training run's runs between blocks
+      and block per run (9.6 D29; 9.10 D87: ±27 % and ±11 %), the renderers'
+      sparse residuals (9.8 D27: ±9 to ±18 %), the DKMS tail's block per run
+      (9.10 D58: ±8.35 %), pid 1's run mean and the system bus's three values
+      (9.9 D48: ±7.8 % and ±11 %) — are carried with their half-widths, not
+      re-measured (9.5 D88's reading of the stated precision). If the
+      carried-half-width lines move any judging file across g, the verdict is
+      reported as a range over that axis and the entry whose value moved it is
+      re-measured at a count fixed now — the count the stability rule projects at
+      the carried spread (9.9 D48: 55 repeats for pid 1, 102 to 108 for the bus;
+      9.5 D88's stopping method for the others) — before the result is reported,
+      as a harness changelog entry and a second bless.
+  - id: layer1-interval
+    text: >
+      The Layer-1 headline's interval is a seeded cluster bootstrap over files
+      (10 000 repetitions, seed 20260911, pinned in the grader). Field and Welsh's
+      consistency result holds for balanced one-way arrays and their simulations
+      ran 5 and 15 clusters of equal size, where the cluster bootstrap
+      underestimated the variance; the coreset's files are more than 15 and of
+      unequal size, outside both, so the interval's coverage is untested and may
+      be narrower than nominal (9.11 D9, D27). No correction is pre-registered:
+      none is sourced. The interval is printed with this caveat.
   - id: failure-procedure
     text: >
       On a fail, in order: (1) a configuration search on three failing judging
       files chosen by rule — the failing file with the largest oracle improvement
-      over fixed in the 13-file duplicate-heavy class, the same in the low-duplicate
-      class, and the failing file whose gap fell furthest below g anywhere; ties by
-      workload id order; files with no headroom are skipped for the first two picks,
-      since they already trigger the table check — before any workload change; (2)
-      no spread found by the search means workload redesign; (3) spread the prior
-      table missed means the table is rewritten; (4) a judging file with no headroom
-      on every term is an additional trigger for the table check. The search tool is
-      built in Phase 9 only if the gate fails.
+      over fixed in the nine-file duplicate-heavy class, the same in the
+      low-duplicate class, and the failing file whose gap fell furthest below g
+      anywhere; ties by workload id order; files with no headroom are skipped for
+      the first two picks, since they already trigger the table check — before any
+      workload change; (2) no spread found by the search means workload redesign;
+      (3) spread the prior table missed means the table is rewritten; (4) a judging
+      file with no headroom on every term is an additional trigger for the table
+      check. The search tool is built only if the gate fails.
   - id: held-out-rows
     text: >
       Pre-registration for the held-out-rows arm (research-proposal §4.6 item 3):
@@ -219,16 +465,19 @@ statements:
       for a true row, its C7 counterpart for a false row, plus any C2 or C3 segment
       labelled with that row.
 
-# SHA-256 of the frozen files at the freeze commit (harness/CHANGELOG.md, 2026-09-12)
+# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-09); the
+# variant manifests pin the rebuilt files the sensitivity lines read.
 pins:
-  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: e0f46d3f8717c610dd6ea9dfa6ce3695b60e68c69352fc79b4a17798562e87ad}
-  guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.0", sha256: 1eaf8ab0c202cc3780bfbb2d852d06203e684561e4c6e528d4124676eae8a258}
-  driver_table: {path: daemon/driver-table/prior.yaml, sha256: 9adc44399c6c5ba5a43413629ff6efec6b7bf7100913f4672e9bc270d7f20686}
-  dataset:      {path: dataset/build.manifest.json, sha256: f457247215a45ede6a8b46c2010ab38989c8f964101142037731a8c121fdfb7c}
+  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 5d8a3243c2c01912ced7aa564810068f54e54feca6f1f5677bdcab83aa381f4b}
+  guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.1", sha256: 24ccb875ff666615de75d80bc5351b7f5c62713d605438844938f9ab6ef1676c}
+  driver_table: {path: daemon/driver-table/prior.yaml, sha256: 6e271dd042b38c23b85459cec7545fde990aec9be5a2c8bd6081690d98243f7f}
+  dataset:      {path: dataset/build.manifest.json, sha256: c3767e1028e1d8c4446a0cd216dfe19f8741b3fef1caba28ceeab95bf680f872}
+  variants:
+    all: {path: dataset/build.variants.manifest.json, sha256: "0000000000000000000000000000000000000000000000000000000000000000"}
 
 criterion:
   type: k_of_n_gap
-  k: 13            # statement `k-grounding`
+  k: 10            # statement `k-grounding`
   g: 0.5           # statement `g-grounding`
   reference: oracle
   compared: random

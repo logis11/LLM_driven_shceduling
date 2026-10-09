@@ -89,8 +89,10 @@ def _schema_errors(spec):
 
 def _pin_errors(spec, root):
     errors = []
-    for name in PINS:
-        pin = (spec.get("pins") or {}).get(name)
+    pins = spec.get("pins") or {}
+    named = [(name, pins.get(name)) for name in PINS]
+    named += [(f"variants/{name}", pin) for name, pin in sorted((pins.get("variants") or {}).items())]
+    for name, pin in named:
         if not isinstance(pin, dict):
             continue
         path = pathlib.Path(root) / pin.get("path", "")
@@ -106,6 +108,12 @@ def _pin_errors(spec, root):
 def _listed(spec):
     files = spec.get("files") or {}
     return list(files.get("judging") or []), list(files.get("reporting") or [])
+
+
+def _variants(spec):
+    """The variant files (9.14 decisions 10 and 12): rebuilt judging files the
+    sensitivity lines read — run under the primary boot default, never judged."""
+    return list((spec.get("files") or {}).get("variants") or [])
 
 
 # --------------------------------------------------------------------- lint
@@ -125,6 +133,7 @@ def lint_spec(spec_path, schema_path, build_dir, root):
         return errors
     build_dir = pathlib.Path(build_dir)
     judging, reporting = _listed(spec)
+    variants = _variants(spec)
     conditions = spec["conditions"]
 
     crit = spec["criterion"]
@@ -147,6 +156,18 @@ def lint_spec(spec_path, schema_path, build_dir, root):
                                   f"nor a boot default of the line")
         elif line["type"] == "note" and line["workload"] not in judging + reporting:
             errors.append(f"reporting_lines/{i}: note workload {line['workload']!r} is not a listed file")
+        elif line["type"] in ("variant_set", "trace_replay"):
+            for base, variant in (line.get("files") or {}).items():
+                if base not in judging:
+                    errors.append(f"reporting_lines/{i}: {base!r} is not a judging file")
+                if variant not in variants:
+                    errors.append(f"reporting_lines/{i}: {variant!r} is not a listed variant file")
+        elif line["type"] == "bounding_pair":
+            for key in ("a", "b"):
+                if line[key] not in judging + reporting + variants:
+                    errors.append(f"reporting_lines/{i}: {line[key]!r} is not a listed file")
+        elif line["type"] == "longest_wait" and int(line["reopen_us"]) > int(line["threshold_us"]):
+            errors.append(f"reporting_lines/{i}: reopen_us lies past threshold_us")
     for i, ex in enumerate(spec["guard_exemptions"]):
         if ex["guard"] not in guards.GUARDS:
             errors.append(f"guard_exemptions/{i}: guard {ex['guard']!r} is not in the guard registry")
@@ -158,10 +179,13 @@ def lint_spec(spec_path, schema_path, build_dir, root):
     both = sorted(set(judging) & set(reporting))
     if both:
         errors.append(f"files listed as both judging and reporting: {both}")
+    twice = sorted(set(variants) & set(judging + reporting))
+    if twice:
+        errors.append(f"files listed as variants and as judging or reporting: {twice}")
 
     # the compiled files and the derived exclusions
     with_miss = []
-    for wid in judging + reporting:
+    for wid in judging + reporting + variants:
         path = build_dir / f"{wid}.workload.json"
         if not path.is_file():
             errors.append(f"file {wid!r} is not in the build ({build_dir})")
@@ -171,7 +195,7 @@ def lint_spec(spec_path, schema_path, build_dir, root):
         except (OSError, ValueError, KeyError) as exc:
             errors.append(f"file {wid!r}: unreadable ground truth: {exc}")
             continue
-        if any(s.pre_committed_miss for s in segments):
+        if any(s.pre_committed_miss for s in segments) and wid not in variants:
             with_miss.append(wid)
     declared = sorted(spec["layer1_exclusions"])
     if declared != sorted(with_miss) and not any("is not in the build" in e for e in errors):
@@ -210,7 +234,8 @@ class _Set:
     def __init__(self, spec, agg_rows, score_rows, guard_rows, grade_rows):
         self.spec = spec
         self.judging, self.reporting = _listed(spec)
-        self.listed = self.judging + self.reporting
+        self.variants = _variants(spec)
+        self.listed = self.judging + self.reporting + self.variants
         self.agg_rows = [r for r in agg_rows if r["workload_id"] in self.listed]
         self.file_rows = {_identity(r): r for r in score_rows
                           if r["level"] == "file" and r["workload_id"] in self.listed}
@@ -260,6 +285,15 @@ class _Set:
                 if run not in guarded:
                     raise GateError(f"{wid}: no guard rows for run {run[1]}"
                                     f"{' seed ' + run[3] if run[3] else ''}; the guards were not run on it")
+        for wid in self.variants:                        # run under the primary boot default alone
+            if not [k for k in self.file_rows if k[0] == wid and k[1] == "fixed" and k[4] == ""]:
+                raise GateError(f"{wid}: no fixed run scored against the primary boot default (a variant file)")
+            if not self.scored(wid, self.reference, ""):
+                raise GateError(f"{wid}: no {self.reference} run scored against the primary (a variant file)")
+            seeds = self.scored(wid, self.compared, "")
+            if len(seeds) != self.n_seeds:
+                raise GateError(f"{wid}: {len(seeds)} {self.compared} seed(s) scored against the primary, the spec "
+                                f"names {self.n_seeds} (a variant file)")
 
 
 # ------------------------------------------------------------- criterion
@@ -457,10 +491,129 @@ def line_note(rs, params, ctx):
     return {"type": "note", "workload_id": params["workload"], "text": params["text"]}
 
 
+def _primary_gaps(ctx):
+    return {r["workload_id"]: r for r in ctx["gaps"] if r["boot_default"] == ""}
+
+
+def _gap_cell(r):
+    return ({"gap": r["gap"], "meets_g": r["meets_g"], "all_no_headroom": r["all_no_headroom"],
+             "available": r["available"]} if r is not None
+            else {"gap": "", "meets_g": None, "all_no_headroom": None, "available": False})
+
+
+def line_variant_set(rs, params, ctx):
+    """9.14 decision 10: the verdict count with each named judging file's gap taken
+    from its variant's runs — a rebuilt file (every measured RUN scaled, the chain
+    scaled, a segment length changed, the carried half-widths at a bound). Files
+    the line does not name keep their primary gap. A count that moves makes the
+    verdict a range over this axis."""
+    primary = _primary_gaps(ctx)
+    files = dict(params["files"])
+    rows = [{"workload_id": base, "variant": variant, "primary": _gap_cell(primary.get(base)),
+             "variant_result": _gap_cell(primary.get(variant))} for base, variant in sorted(files.items())]
+    met, judging, available = 0, 0, True
+    for wid in rs.judging:
+        r = primary.get(files.get(wid, wid))
+        if r is None:
+            available = False
+            continue
+        judging += 1
+        met += bool(r["meets_g"])
+        available = available and bool(r["available"])
+    verdict = ("pass" if met >= ctx["k"] else "fail") if available else None
+    return {"type": "variant_set", "name": params["name"], "axis": params["axis"], "value": str(params["value"]),
+            "reason": params.get("reason", ""), "met": met, "judging": judging, "verdict": verdict,
+            "primary_met": _count(ctx["gaps"], "", ctx["k"])["met"], "rows": rows}
+
+
+def line_trace_replay(rs, params, ctx):
+    """9.14 decision 10: each named judging file built twice — as compiled, and
+    on a pooled repeat's measured wake sequence — agrees when its gap falls on
+    the same side of g under both and differs by less than the tolerance."""
+    primary = _primary_gaps(ctx)
+    tol = Fraction(str(params["tolerance"]))
+    rows = []
+    for base, variant in sorted(params["files"].items()):
+        b, v = primary.get(base), primary.get(variant)
+        if b is None or v is None:
+            rows.append({"workload_id": base, "variant": variant, "gap": b["gap"] if b else "",
+                         "replayed_gap": v["gap"] if v else "", "difference": "", "same_side_of_g": None,
+                         "within_tolerance": None, "agrees": None})
+            continue
+        gb, gv = Fraction(b["gap"]), Fraction(v["gap"])
+        same, within = b["meets_g"] == v["meets_g"], abs(gv - gb) < tol
+        rows.append({"workload_id": base, "variant": variant, "gap": b["gap"], "replayed_gap": v["gap"],
+                     "difference": fmt(gv - gb), "same_side_of_g": same, "within_tolerance": within,
+                     "agrees": same and within})
+    decided = [r["agrees"] for r in rows if r["agrees"] is not None]
+    return {"type": "trace_replay", "tolerance": str(params["tolerance"]), "reason": params.get("reason", ""),
+            "rows": rows, "agreement": all(decided) if decided and len(decided) == len(rows) else None}
+
+
+def line_bounding_pair(rs, params, ctx):
+    """9.14 decision 10 (9.11 D21): two files that differ in one task's declared
+    class alone; each file's gap and verdict, and the difference between them."""
+    primary = _primary_gaps(ctx)
+    a, b = primary.get(params["a"]), primary.get(params["b"])
+    difference = fmt(Fraction(b["gap"]) - Fraction(a["gap"])) if a is not None and b is not None else ""
+    return {"type": "bounding_pair", "a": {"workload_id": params["a"], **_gap_cell(a)},
+            "b": {"workload_id": params["b"], **_gap_cell(b)}, "difference": difference,
+            "reason": params.get("reason", "")}
+
+
+def line_input_wake_count(rs, params, ctx):
+    """9.14 decision 10: per judging file and interaction-latency term, the number
+    of wakes the P99 rests on — the `ready_wait` count aggregate of the term's
+    entity, cause and channel inside its window, read on the fixed run under the
+    primary boot default."""
+    spec = scoring.load_spec(ctx["scoring_spec_path"])
+    rows = []
+    for wid in rs.judging:
+        for t in (spec["files"].get(wid) or {}).get("terms") or []:
+            if t["metric"] != "ready_wait":
+                continue
+            w = t.get("window") or {}
+            start, end = str(w.get("start_us", "")), str(w.get("end_us", ""))
+            value = next((r["value"] for r in rs.agg_rows
+                          if r["workload_id"] == wid and r["condition"] == "fixed" and r["boot_default"] == ""
+                          and r["entity"] == t["entity"] and r["metric"] == "ready_wait"
+                          and r["aggregate"] == "count" and r["cause"] == t.get("cause", "")
+                          and r["channel"] == t.get("channel", "")
+                          and str(r["window_start_us"]) == start and str(r["window_end_us"]) == end), None)
+            rows.append({"workload_id": wid, "entity": t["entity"], "cause": t.get("cause", ""),
+                         "channel": t.get("channel", ""), "window_start_us": start, "window_end_us": end,
+                         "count": None if value is None else int(Decimal(value))})
+    return {"type": "input_wake_count", "rows": rows}
+
+
+def line_longest_wait(rs, params, ctx):
+    """9.14 decision 10 (9.11 D19): per run, the longest `ready_wait` over every
+    task and cause — what the starvation floor reads — its margin to the
+    threshold, and whether it lies past the point at which the executor-net
+    question reopens."""
+    threshold, reopen = int(params["threshold_us"]), int(params["reopen_us"])
+    per_run = {}
+    for r in rs.agg_rows:
+        if (r["metric"] == "ready_wait" and r["aggregate"] == "max" and not r["cause"] and not r["channel"]
+                and not r["window_start_us"] and not r["window_end_us"]):
+            key = _identity(r)
+            value = int(Decimal(r["value"]))
+            if value > per_run.get(key, (-1, ""))[0]:
+                per_run[key] = (value, r["entity"])
+    rows = [{**dict(zip(agg.IDENTITY, key)), "longest_wait_us": value, "entity": entity,
+             "margin_us": threshold - value, "past_reopen": value > reopen}
+            for key, (value, entity) in sorted(per_run.items())]
+    return {"type": "longest_wait", "threshold_us": threshold, "reopen_us": reopen, "rows": rows,
+            "longest_us": max((r["longest_wait_us"] for r in rows), default=None),
+            "any_past_reopen": any(r["past_reopen"] for r in rows)}
+
+
 LINES = {"sensitivity": line_sensitivity, "g_band": line_g_band, "seed_standard_error": line_seed_standard_error,
          "floor_band": line_floor_band,
          "exclusion_accuracy": line_exclusion_accuracy, "layer1_headline": line_layer1_headline,
-         "random_beats_oracle": line_random_beats_oracle, "note": line_note}
+         "random_beats_oracle": line_random_beats_oracle, "note": line_note,
+         "variant_set": line_variant_set, "trace_replay": line_trace_replay, "bounding_pair": line_bounding_pair,
+         "input_wake_count": line_input_wake_count, "longest_wait": line_longest_wait}
 
 
 # --------------------------------------------------------------- evaluate
@@ -618,6 +771,43 @@ def render(report) -> str:
                               [[r["workload_id"], r["flagged"], r["gap"]] for r in line["rows"]]))
         elif t == "note":
             out.append(f"**{line['workload_id']}** — {line['text'].strip()}")
+        elif t == "variant_set":
+            out.append(f"**{line['name']}** ({line['axis']} = {line['value']}): {line['met']} of {line['judging']} met, "
+                       f"verdict {line['verdict']} (primary {line['primary_met']} met)."
+                       + (f" {line['reason'].strip()}" if line["reason"] else ""))
+            out.append("")
+            out.append(_table(["workload", "variant", "gap", "meets g", "variant gap", "variant meets g",
+                               "variant no headroom"],
+                              [[r["workload_id"], r["variant"], r["primary"]["gap"], r["primary"]["meets_g"],
+                                r["variant_result"]["gap"], r["variant_result"]["meets_g"],
+                                r["variant_result"]["all_no_headroom"]] for r in line["rows"]]))
+        elif t == "trace_replay":
+            out.append(f"Agreement: {line['agreement']} (tolerance {line['tolerance']})."
+                       + (f" {line['reason'].strip()}" if line["reason"] else ""))
+            out.append("")
+            out.append(_table(["workload", "replayed as", "gap", "replayed gap", "difference", "same side of g",
+                               "within tolerance", "agrees"],
+                              [[r["workload_id"], r["variant"], r["gap"], r["replayed_gap"], r["difference"],
+                                r["same_side_of_g"], r["within_tolerance"], r["agrees"]] for r in line["rows"]]))
+        elif t == "bounding_pair":
+            out.append(_table(["file", "gap", "meets g", "all no headroom", "available"],
+                              [[x["workload_id"], x["gap"], x["meets_g"], x["all_no_headroom"], x["available"]]
+                               for x in (line["a"], line["b"])]))
+            out.append("")
+            out.append(f"Difference (b − a): {line['difference']}."
+                       + (f" {line['reason'].strip()}" if line["reason"] else ""))
+        elif t == "input_wake_count":
+            out.append(_table(["workload", "entity", "cause", "channel", "window", "wakes the P99 rests on"],
+                              [[r["workload_id"], r["entity"], r["cause"], r["channel"],
+                                f"[{r['window_start_us']}, {r['window_end_us']}]" if r["window_start_us"] else "(whole file)",
+                                r["count"]] for r in line["rows"]]))
+        elif t == "longest_wait":
+            out.append(f"Longest wait in any run: {line['longest_us']} µs against the {line['threshold_us']} µs floor; "
+                       f"any run past the {line['reopen_us']} µs reopen point: {line['any_past_reopen']}.")
+            out.append("")
+            out.append(_table(["run", "task", "longest wait (µs)", "margin (µs)", "past reopen"],
+                              [[_ident(r), r["entity"], r["longest_wait_us"], r["margin_us"], r["past_reopen"]]
+                               for r in line["rows"]]))
         out.append("")
     fails = [r for r in report["guards"] if r["result"] == "fail"]
     out += ["## Guards", "",
