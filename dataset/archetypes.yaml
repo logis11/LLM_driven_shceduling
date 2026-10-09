@@ -10,6 +10,13 @@
 #   - top-level key = archetype id
 #   - `category_source`: Tier-1 provenance — the taxonomy the entry was
 #     harvested from, or `meas` (behavior class observed in our measurements)
+#   - `declared_class`: the scheduling class the program declares for itself
+#     (9.11 D4–D6, D16; 9.13): `normal`, or `idle` where the program sets
+#     SCHED_IDLE on itself (`file-indexer`, `incremental-backup`); batch and
+#     real-time values are added only when an entry carries work in that
+#     class. Required on every entry, no default. The compiler copies it onto
+#     every task that binds the entry and onto every spawned child from the
+#     child entry; a task's class is its entry's, never read from its name
 #   - `pattern.program`: program over the six grammar primitives
 #     (RUN/SLEEP/TIMER/WAIT/WAKE/FORK+EXIT), referencing `params` by name
 #   - `params`: every numeric is a distribution object
@@ -70,6 +77,7 @@ archetypes:
 
   office-writer:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # merged event stream, explicit at compile time (D9): replayed stimulus in focus windows (D18) + timer components (D16)
@@ -103,6 +111,7 @@ archetypes:
 
   code-editor:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # merged event stream, explicit at compile time (D9): replayed stimulus in focus windows (D18) + timer components (D16)
@@ -175,6 +184,7 @@ archetypes:
 
   mail-client:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # merged event stream, explicit at compile time (D9): replayed stimulus in focus windows (D18) + timer components (D16)
@@ -345,6 +355,7 @@ archetypes:
 
   web-browser:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # merged event stream, explicit at compile time (D9): replayed stimulus in focus windows (D18) + timer components (D16)
@@ -483,6 +494,7 @@ archetypes:
 
   image-editor:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # merged event stream, explicit at compile time (D9): replayed stimulus in focus windows (D18) + timer components (D16)
@@ -526,6 +538,7 @@ archetypes:
 
   video-editor:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # merged event stream, explicit at compile time (D9): replayed stimulus in focus windows (D18) + timer components (D16)
@@ -594,6 +607,7 @@ archetypes:
 
   video-player:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # one periodic job per medium cycle, its deadline the next cycle's start (D74, D75)
@@ -618,6 +632,7 @@ archetypes:
 
   audio-player:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # one periodic job per medium cycle, its deadline the next cycle's start (D74, D75)
@@ -642,6 +657,7 @@ archetypes:
 
   video-call:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # one periodic job per medium cycle, its deadline the next cycle's start (D74, D75)
@@ -666,6 +682,7 @@ archetypes:
 
   renderer-hidden:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # measured timer components merged at compile time, each wake on the task's timer channel (9.5 D9, D16, D74)
@@ -721,6 +738,7 @@ archetypes:
 
   chat-client:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # measured timer components merged at compile time, each wake on the task's timer channel (9.5 D9, D16, D74)
@@ -776,6 +794,7 @@ archetypes:
 
   game-client:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # measured timer components merged at compile time, each wake on the task's timer channel (9.5 D9, D16, D74)
@@ -864,6 +883,7 @@ archetypes:
 
   cpu-batch:
     category_source: meas
+    declared_class: normal
     pattern:
       constructor: batch-loop      # D21: a run between voluntary blocks, then the block that followed it
       program:
@@ -944,6 +964,7 @@ archetypes:
 
   compiler-child:
     category_source: meas
+    declared_class: normal
     pattern:
       program:                 # D19: one object job, six members forked together, woken in D2's order; the
         # compiler builds the members (a spawned child has no spawn table of its own), so this states their shape
@@ -1015,6 +1036,7 @@ archetypes:
 
   build-orchestrator:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # consumes the pre-sampled spawn table, six entries per object job (D19)
@@ -1061,6 +1083,7 @@ archetypes:
 
   module-build-orchestrator:
     category_source: meas
+    declared_class: normal
     pattern:
       constructor: module-build   # 9.10 D52-D57: the measured jobs in their order, then the serial tail
       program:
@@ -1129,6 +1152,7 @@ archetypes:
 
   module-compiler-child:
     category_source: meas
+    declared_class: normal
     pattern:
       # 9.10 D53, D55: the build's job kinds, each one process tree (a member id, or {member id: [children]},
       # children in fork order); `letters` code the kinds in the orchestrator's job_order; `names` the members' comms
@@ -1296,6 +1320,7 @@ archetypes:
 
   file-archiver:
     category_source: meas
+    declared_class: normal
     pattern:
       constructor: batch-loop      # 9.7 D29
       program:
@@ -1346,8 +1371,9 @@ archetypes:
       1 246–1 575 wakes at 0.40–0.74 ms in repeats 3, 4 and 5 — for a cause not identified (D23). It describes a
       cached file set (D8); the cold figures are in the campaign results.
 
-  game-download:
+  game-download: &game-download
     category_source: meas
+    declared_class: normal
     pattern:
       constructor: batch-loop      # 9.7 D29
       program:
@@ -1417,10 +1443,24 @@ archetypes:
       (0.988-0.995), so the carried runs are read under about 2.5 % more CPU than the untraced program spends. Where
       in the runs the added CPU lands is not measured.
 
+  # The idle half of the `c2-p2a` bounding check (9.11 D6, D20, D21; 9.13): `game-download`'s tables, lifetime,
+  # scaling rule and validation record by reference — the merge key below — under the declared class `idle`.
+  game-download-idle:
+    <<: *game-download
+    declared_class: idle
+    modeling_notes: >-
+      `game-download` with the declared class `idle` in place of the measured download's `normal`; every table and the
+      validation record are the base entry's own, shared by reference, so the two entries cannot drift apart. The
+      measured download runs 75 % of its CPU at nice 10 and the rest at nice 0 (9.11 D20), a weight the task model
+      does not carry (9.11 D6); this entry and the base bracket a stock desktop's treatment of that work. Bound by
+      `c2-p2a-idle` alone — `c2-p2a` with the download rebound here — outside the judging set; 9.14's pre-registered
+      bounding check scores the two files and states the difference as the reach of the nice-10 limitation.
+
   # ---- system jobs — 9.10 unattended-upgrade campaign ---------------------
 
   package-upgrade:
     category_source: meas
+    declared_class: normal
     pattern:
       constructor: batch-loop      # 9.7 D29; 9.10 D39: over the job's whole process tree
       program:
@@ -1478,6 +1518,7 @@ archetypes:
 
   file-indexer:
     category_source: meas
+    declared_class: idle
     pattern:
       constructor: batch-loop      # 9.7 D29; 9.10 D70: over the miner's whole process tree
       program:
@@ -1539,10 +1580,18 @@ archetypes:
       the extractor's, and the name stands for the tree. One measured state serves both labels: a first login's
       index and the same work after the user's `tracker3 reset --filesystem` (D5); the registry scan, 93-106 ms, is
       first-login work a reset may not repeat (D73). Every thread of the miner and the extractor declares itself
-      background work, SCHED_IDLE at nice 19 (9.6 D17); the task model carries no declared class (9.11's).
+      background work, SCHED_IDLE at nice 19 (9.6 D17), so the entry carries the declared class `idle` (9.11 D5,
+      D6; 9.13): the task runs only when no task of another class is runnable and is preempted at once when one
+      wakes, under every algorithm. Nice is not carried. A limitation of the strict class, stated (9.11 D16): on the
+      depicted Ubuntu 24.04 desktop the miner's unit runs in `background.slice`, a separate CPU group from the
+      editor's `app.slice`, where the slice weights give it about 23 % of the CPU against the editor's while both are
+      runnable; the idle policy acts only among siblings of one group. The simulated indexer therefore interferes
+      with the editor less than the depicted desktop's does, and the headroom the indexer files can show is
+      understated. Its idle I/O class is not carried: the simulator schedules one CPU lane (9.11 D33).
 
   video-transcoder:
     category_source: meas
+    declared_class: normal
     pattern:
       constructor: batch-loop      # 9.6 D21, D22, D25; 9.10 D97: over the encoder's threads
       program:
@@ -1595,6 +1644,7 @@ archetypes:
 
   incremental-backup:
     category_source: meas
+    declared_class: idle
     pattern:
       constructor: batch-loop      # 9.10 D119: over every process of the tree
       program:
@@ -1648,8 +1698,12 @@ archetypes:
       `comm` of the process the monitor starts; most of the CPU under that name is duplicity's and gpg's. The run
       between voluntary blocks pools two ways deja-dup reads duplicity's log in the dry run, after nearly every write
       or in batches, the interleaving of a pipe's writer and reader on one CPU (9.10 D122). Every process of the tree
-      runs in SCHED_IDLE and the idle I/O class, as the monitor starts it (9.10 D112); the task model carries no
-      declared class (9.11's). The two-monthly restore test, with a fresh cache and the password asked, about one
+      runs in SCHED_IDLE and the idle I/O class, as the monitor starts it (9.10 D112), so the entry carries the
+      declared class `idle` (9.11 D5, D6; 9.13): the task runs only when no task of another class is runnable and is
+      preempted at once when one wakes, under every algorithm. Nice is not carried. The backup runs in the editor's
+      own CPU group — the monitor's autostart scope under `app.slice` — so the strict class matches the depicted
+      desktop's treatment, an idle weight of 3 against 1 024 and preemption at once (9.11 D16). Its idle I/O class
+      is not carried: the simulator schedules one CPU lane (9.11 D33). The two-monthly restore test, with a fresh cache and the password asked, about one
       weekly run in nine, is not depicted (9.10 D118). `file-backup`, borg's first backup into a new repository, left
       the library when the backup files bound this entry (9.10 D119).
 
@@ -1657,6 +1711,7 @@ archetypes:
 
   game-task-chain:
     category_source: lavd-ossna24
+    declared_class: normal
     pattern:
       constructor: chain           # expanded at load time, interpretation-contract §6
       program:                     # per constructed chain member; the
@@ -1765,6 +1820,7 @@ archetypes:
 
   compositor-shell:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # measured timer components merged at compile time, each wake on the task's timer channel (9.5 D9, D16, D74)
@@ -1802,6 +1858,7 @@ archetypes:
 
   audio-server:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # measured timer components merged at compile time, each wake on the task's timer channel (9.5 D9, D16, D74)
@@ -1829,6 +1886,7 @@ archetypes:
 
   service-manager:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # measured timer components merged at compile time, each wake on the task's timer channel (9.5 D9, D16, D74)
@@ -1856,6 +1914,7 @@ archetypes:
 
   message-bus:
     category_source: meas
+    declared_class: normal
     pattern:
       program:
         - loop:                    # measured timer components merged at compile time, each wake on the task's timer channel (9.5 D9, D16, D74)
