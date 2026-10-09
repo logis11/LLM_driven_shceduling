@@ -704,3 +704,16 @@ Taken under 인지오's delegation (2026-10-09), scope-card items 62, 63 and 66�
 Hands to 9.15: `docs/workload/grounding-sources.md:32` restated as above; items 62 and 66–69's lines applied from their recorded verdicts.
 
 Compiled effect: none.
+
+## D48 — constrained decoding stated as the servers document it: a completed answer is well-formed; a schema feature the converter lacks is skipped silently and an answer cut at the token limit is not, so the parse branch stays (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), scope-card item 30: `docs/research-proposal.md:489`'s "a local server (Ollama or vLLM)" and "constrained decoding (GBNF grammars, guided decoding) can make malformed output structurally impossible, removing an entire class of validator branches" are restated to the servers' documentation (S2-33, S2-34, S2-35, S2-59) and the project's own requests.
+
+- **What is guaranteed.** llama.cpp: "the `root` rule always defines the starting point of the grammar. In other words, it specifies what the entire output must match" (S2-33, `grammars/README.md:106`); vLLM: with `json`, "the output will follow the JSON schema" (S2-34); Ollama: "The model will generate a response that matches the schema", and in JSON mode "the output will always be a well-formed JSON object" (S2-35).
+- **What is not.** llama.cpp converts "a subset" of JSON Schema and "Unsupported features are skipped silently" (S2-33, `:143`, `:207`), so an answer can satisfy the grammar and miss a constraint of the schema; and a generation can end at the token limit before the grammar completes — `stop_type` "`limit`: Stopped because `n_predict` tokens were generated before stop words or EOS was encountered" (S2-59). The schema is not shown to the model: "describe it explicitly in your prompt" (S2-33, `:151`).
+- **What the project observed** (D31's runner repeats landed by 2026-10-09, the dry run, and S3-22): 164 of 164 requests under a JSON schema parsed, every one stopping at `eos`, at an `n_predict` of 384 against answers of 25–96 tokens.
+- **Restated:** constrained decoding restricts every generated token to the grammar compiled from the schema, so an answer that completes is well-formed; the validator still needs its parse-failure branch for an answer cut off at the token limit — the data contracts' `proposal: null` with the verbatim `raw` (`docs/data-contracts.md` §7) — and its own checks for what the schema cannot carry or the converter skips (the menu, ranges and cross-field rules of `docs/recognition-vocabulary.md` §2). "structurally impossible" and "removing an entire class of validator branches" leave. "a local server (Ollama or vLLM)" names llama.cpp's server beside them, the server the project's measurements ran.
+
+Hands to 9.15: `docs/research-proposal.md:489`'s two clauses restated as above (its latency clause is item 29's); `docs/references.md` — llama.cpp's grammar and server documentation at `bd4eeaa0`, vLLM's at `v0.31.0` and Ollama's at `f9f4af6c` under the id-minting rule where the prose cites them.
+
+Compiled effect: none.

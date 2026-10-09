@@ -62,6 +62,7 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
 | 52 | 2026-10-09 | doc.rust-lang.org (stage 3) | `/cargo/index.html`; `/cargo/commands/cargo-build.html` | 200 → S2-56 | — |
 | 53 | 2026-10-09 | git (stage 3) | `git fetch --depth 1 https://github.com/Ardour/manual 9628c8ba…` (S2-38's commit); `grep -il xrun include/*.html` | → S2-57 | — |
 | 54 | 2026-10-09 | support.xbox.com via headless Chrome 154.0.8037.98 (stage 3) | `--headless=new --dump-dom --virtual-time-budget=20000` on S2-17's URL, a throwaway profile | rendered DOM → S2-58 | — |
+| 55 | 2026-10-09 | raw.githubusercontent.com (stage 3) | ggml-org/llama.cpp at `bd4eeaa0` `tools/server/README.md` | 200 → S2-59 | — |
 
 ## 2. Candidates
 
@@ -605,6 +606,12 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
 - Copy: https://support.xbox.com/en-US/help/games-apps/game-setup-and-play/use-game-mode-gaming-on-pc (S2-17's URL) · 2026-10-09 · rendered by Google Chrome 154.0.8037.98 headless (`--dump-dom`, 20 s virtual time, a fresh profile) on the development Mac → `sources/S2-58/xbox-gamemode.rendered.html`, SHA-256 `565be1216463499428b478a4c3f0bccbab19ab7e0f0cf9277e3c97eafd4b0e8e`. The page shows no date.
 - Passages (the article body, tags removed): "Use Game Mode while gaming on your Windows device" … "When you use Game Mode, Windows prioritizes your gaming experience by turning things off in the background. When you're running a game, Game Mode: Prevents Windows Update from performing driver installations and sending restart notifications; Helps achieve a more stable frame rate depending on the specific game and system" … "Note: Game Mode is turned on by default."
 - Coverage: T6 — what Windows Game Mode does to background work while a game runs, in Microsoft's words: it holds back Windows Update's driver installations and restart notifications; on by default. It does not say how a game is recognised. Documentation, not an observation. S2-17's open item closed.
+
+### S2-59 — llama.cpp `tools/server/README.md` at `bd4eeaa0` (stage 3, 2026-10-09)
+
+- Copy: https://raw.githubusercontent.com/ggml-org/llama.cpp/bd4eeaa047006cb1fe71999fbd11134b5836e167/tools/server/README.md (S2-33's and S4-08's commit) · 2026-10-09 · `sources/S2-59/server-README.md` · SHA-256 `14824a98d0b67f910c083c1aa2f5585b786c2d56276c11aadecb7ee247673cab`.
+- Passages: `POST /completion` — "`json_schema`: Set a JSON schema for grammar-based sampling … See tests for supported features."; "`n_predict`: Set the maximum number of tokens to predict when generating text."; "`cache_prompt`: Re-use KV cache from a previous request if possible. … Because (depending on the backend) the logits are **not** guaranteed to be bit-for-bit identical for different batch sizes (prompt processing vs. token generation) enabling this option can cause nondeterministic results. Default: `true`"; the response's "`stop_type`: … `eos`: Stopped because it encountered the EOS token; `limit`: Stopped because `n_predict` tokens were generated before stop words or EOS was encountered"; the `timings` object (`prompt_n`, `prompt_ms`, `predicted_n`, `predicted_ms`).
+- Coverage: T11 — the server's grammar-constrained sampling from a JSON schema; an answer can stop at the token limit before the grammar completes; the prompt cache's batch-size non-determinism; the timing fields the campaign reads. Documentation, not an observation.
 
 ## 3. Not found
 
