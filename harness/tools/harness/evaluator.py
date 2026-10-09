@@ -43,7 +43,7 @@ EXPERIMENTS = HARNESS / "experiments"
 SPEC_SCHEMA = EXPERIMENTS / "schema" / "experiment-spec.schema.json"
 REPORT_SCHEMA = EXPERIMENTS / "schema" / "report.schema.json"
 
-CONDITIONS = ("fixed", "random", "whitelist", "llm_vocab", "llm_algo", "llm_full", "oracle")
+CONDITIONS = ("fixed", "random", "shipped_catalogue", "strongest_name_table", "llm_vocab", "llm_algo", "llm_full", "oracle")
 PINS = ("scoring_spec", "guard_spec", "driver_table", "dataset")
 PROVENANCE_AGGREGATES = tuple(f"time_share_{p}" for p in agg.PROVENANCES) + ("fallback_share",)
 PLACES = scorer.PLACES

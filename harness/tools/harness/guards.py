@@ -22,7 +22,7 @@ per-experiment data (the RQ0 gate spec), never here.
 
 `lint_spec` checks the spec against its schema, its ids against this module's
 registry, every grounding non-empty, a threshold on every bounded guard, and
-`pairs` against the dataset's C2 variant recipe.
+`pairs` against the dataset's label-changing C2 variants.
 """
 
 import hashlib
@@ -39,7 +39,8 @@ from . import records as rec
 from .aggregates import IDENTITY, fmt
 from .reader import (LogError, ScheduleError, read_config_schedule,
                      read_recognition_log, RESERVED_ENTITIES)
-from .scoring import variant_bases
+from .reader import read_config_schedule
+from .scoring import label_changing_variants
 
 HARNESS = pathlib.Path(__file__).resolve().parents[2]
 SPEC_PATH = HARNESS / "guards" / "guard-spec.yaml"
@@ -245,32 +246,68 @@ def validation_matches_provenance(run, ctx, params):
     return _pass(value=fmt(0))
 
 
+def _differing_segment(a_workload, b_workload):
+    """The bounds of the first ground-truth segment whose mode or attributes differ
+    between the two compiled files (the C2 pair's one-segment diff), or None."""
+    def segments(path):
+        with open(path, encoding="utf-8") as f:
+            return json.load(f).get("ground_truth") or []
+    for sa, sb in zip(segments(a_workload), segments(b_workload)):
+        if (sa.get("mode"), sa.get("attributes") or {}) != (sb.get("mode"), sb.get("attributes") or {}):
+            return int(sa["t_start"]), int(sa["t_end"])
+    return None
+
+
+def _config_sequence(schedule_path, bounds):
+    """The configurations in force over [s0, s1): the entry in force at s0, then every
+    entry stamped inside the segment, each as (algorithm, params, cap)."""
+    s0, s1 = bounds
+    sched = read_config_schedule(schedule_path)
+    entries = sorted(sched.entries, key=lambda e: (e.t_us, e.index))
+    in_force = None
+    inside = []
+    for e in entries:
+        key = (e.algorithm, json.dumps(e.params, sort_keys=True), e.batch_bandwidth_cap)
+        if e.t_us <= s0:
+            in_force = key
+        elif e.t_us < s1:
+            inside.append(key)
+    return ([in_force] if in_force is not None else []) + inside
+
+
 def c2_pair(run, ctx, params):
+    """9.14 decision 7: the two files of a C2 pair differ in one segment's label, so
+    under a recognition-driven condition their configurations over that segment must
+    differ; identical sequences mean the recognizer never changed its answer between
+    wanted and unwanted and a zero gap is a table or recognizer defect, not a result.
+    Traces are not compared: every pair's background task is a different job since
+    9.10, so the traces differ whatever the configuration (9.11 D15)."""
     pair = next((p for p in ctx["pairs"] if run.workload_id in (p["a"], p["b"])), None)
-    if pair is None:
-        return _na()
-    if run.condition == "fixed" and not pair["fixed_identical"]:
+    if pair is None or run.condition in ("fixed", "random"):
         return _na()
     other = pair["b"] if run.workload_id == pair["a"] else pair["a"]
     partner = ctx["runs"].get((other, run.condition, run.table, run.seed, run.boot_default))
     if partner is None:
         return _fail(f"partner {other} not in the run set (condition {run.condition}, seed {run.seed!r}, "
                      f"boot_default {run.boot_default!r})")
-    if run.trace is None or partner.trace is None:
-        missing = run.workload_id if run.trace is None else other
-        return _fail(f"no trace recorded for {missing}; the pair check compares the traces' bodies",
-                     partner=other)
-    mine, theirs = _body_sha256(run.trace), _body_sha256(partner.trace)
-    same = mine == theirs
-    if run.condition == "fixed":
-        if not same:
-            return _fail(f"traces differ under fixed where the pair's events are identical apart from the label "
-                         f"({run.workload_id} vs {other})", partner=other)
-        return _pass(partner=other)
-    if same:
-        return _fail(f"identical trace bodies under {run.condition}: the configuration never changed "
-                     f"between {run.workload_id} and {other} ({mine[:12]})", partner=other)
-    return _pass(partner=other)
+    for r in (run, partner):
+        if r.schedule is None or r.workload is None:
+            return _fail(f"no config schedule or workload recorded for {r.workload_id}; the pair check "
+                         f"compares the configuration sequences over the differing segment", partner=other)
+    try:
+        bounds = _differing_segment(run.workload, partner.workload)
+        if bounds is None:
+            return _fail(f"the ground truth of {run.workload_id} and {other} differs in no segment",
+                         partner=other)
+        mine = _config_sequence(run.schedule, bounds)
+        theirs = _config_sequence(partner.schedule, bounds)
+    except (OSError, ValueError, KeyError) as exc:
+        return _fail(f"pair inputs unreadable: {exc}", partner=other)
+    if mine == theirs:
+        return _fail(f"identical configuration sequences over [{bounds[0]}, {bounds[1]}) under "
+                     f"{run.condition}: the configuration never changed between {run.workload_id} and "
+                     f"{other} ({len(mine)} entr{'y' if len(mine) == 1 else 'ies'})", partner=other)
+    return _pass(value=fmt(len(mine)), partner=other)
 
 
 REGISTRY = {
@@ -369,11 +406,14 @@ def lint_spec(spec_path, schema_path, recipes_dir):
         if g.get("direction") == "structural" and g.get("threshold") is not None:
             errors.append(f"guard {g['id']!r}: a structural guard carries no threshold")
 
-    expected = {v: b for v, b in variant_bases(recipes_dir).items() if v.startswith("c2-")}
+    # 9.14 decision 7: a C2 pair is a recipe variant that changes a segment's label (its
+    # mode or background_wanted); a variant that changes a task's entry and no label — the
+    # idle download of the bounding check — is not one
+    expected = {v: b for v, b in label_changing_variants(recipes_dir).items() if v.startswith("c2-")}
     declared = {p["b"]: p["a"] for p in (spec.get("pairs") or [])
                 if isinstance(p, dict) and "a" in p and "b" in p}
     if declared != expected:
-        errors.append(f"pairs {sorted(declared.items())} != the recipe's "
+        errors.append(f"pairs {sorted(declared.items())} != the recipe's label-changing c2 variants "
                       f"{sorted(expected.items())} (dataset/timelines/coreset/c2-pairs.variant.yaml)")
     return errors
 

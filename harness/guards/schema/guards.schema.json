@@ -8,7 +8,7 @@
   "required": ["workload_id", "condition", "guard", "result"],
   "properties": {
     "workload_id": {"type": "string", "minLength": 1},
-    "condition": {"type": "string", "enum": ["fixed", "random", "whitelist", "llm_vocab", "llm_algo", "llm_full", "oracle"]},
+    "condition": {"type": "string", "enum": ["fixed", "random", "shipped_catalogue", "strongest_name_table", "llm_vocab", "llm_algo", "llm_full", "oracle"]},
     "table": {"type": "string", "enum": ["prior", "calibrated"]},
     "seed": {"type": "string", "minLength": 1},
     "boot_default": {"type": "string", "minLength": 1},

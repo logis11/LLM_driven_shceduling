@@ -216,79 +216,107 @@ def test_utilisation_zero_fails_only_where_the_file_has_terms(tmp_path, spec):
 
 # ------------------------------------------------------------- pair guards
 
-def _pair_run(tmp_path, wid, condition, body, seed="", boot="", trace=True):
-    """A run whose trace is a header naming `wid` plus `body`: two pair members
-    with the same body differ in their header line alone."""
+BOOT_CFG = {"algorithm": "MLFQ", "params": {"num_queues": 3, "timeslice_us": 10000,
+                                              "timeslice_growth": 2, "boost_interval_us": 100000},
+            "batch_bandwidth_cap": None}
+LOTTERY_CFG = {"algorithm": "LOTTERY", "params": {"batch_share": 0.333, "timeslice_us": 10000},
+               "batch_bandwidth_cap": 0.333}
+MLFQ_FLOOR_CFG = {"algorithm": "MLFQ", "params": BOOT_CFG["params"], "batch_bandwidth_cap": 0.05}
+
+
+def _pair_run(tmp_path, wid, condition, config, seed="", boot="", schedule=True,
+              wanted=None, early=None):
+    """A run of a pair member: a two-segment workload whose second segment carries the
+    label (`wanted` defaults to true for an `a` file, false for a `b` file) and a config
+    schedule of the boot entry, an optional entry inside the first segment (`early`) and
+    `config` stamped at the second segment's start (9.14 decision 7: the guard reads the
+    configuration sequence over the differing segment)."""
     stem = f"{wid}-{condition}-{seed or 'x'}-{boot or 'x'}"
     out = tmp_path / f"{stem}.csv"
-    tr = tmp_path / f"{stem}.trace.jsonl"
-    tr.write_text(f'{{"event":"meta","workload_id":"{wid}","condition":"{condition}","sim":"mock@0",'
-                  f'"schedule_entries":1}}\n' + body)
-    sha = hashlib.sha256(tr.read_bytes()).hexdigest()
     records.write_csv([{"workload_id": wid, "condition": condition, "table": "prior", "seed": seed,
-                        "boot_default": boot, "sim": "mock@0", "source_sha256": sha,
+                        "boot_default": boot, "sim": "mock@0", "source_sha256": "0" * 64,
                         "entity": "lane", "metric": "busy", "t": 100, "value": 50}], out)
+    if wanted is None:
+        wanted = wid.endswith("a")
+    workload = tmp_path / f"{stem}.workload.json"
+    workload.write_text(json.dumps({"meta": {"id": wid}, "events": [], "ground_truth": [
+        {"t_start": 0, "t_end": 60, "mode": "dev", "attributes": {"background_wanted": True}},
+        {"t_start": 60, "t_end": 120, "mode": "ml-train", "attributes": {"background_wanted": wanted}}]}))
+    entries = [{"t_us": 0, "config": BOOT_CFG, "provenance": "fallback"}]
+    if early is not None:
+        entries.append({"t_us": 30, "config": early, "provenance": "unmodified"})
+    entries.append({"t_us": 60, "config": config, "provenance": "unmodified"})
+    sched = tmp_path / f"{stem}.schedule.json"
+    sched.write_text(json.dumps({"workload_id": wid, "condition": condition, "schedule": entries}))
     return Run(workload_id=wid, condition=condition, table="prior", seed=seed, boot_default=boot,
-               records=out, schedule=None, log=None, workload=None, rerun_trace=None,
-               guard_messages=[], trace=tr if trace else None)
+               records=out, schedule=sched if schedule else None, log=None, workload=workload,
+               rerun_trace=None, guard_messages=[], trace=None)
 
 
-SAME = '{"event":"task_arrive","t":0,"task":"editor","source":"file"}\n'
-OTHER = '{"event":"task_arrive","t":0,"task":"editor","source":"file"}\n' \
-        '{"event":"ready","t":0,"task":"editor","cause":"arrive"}\n'
-
-
-def test_c2_pair_under_oracle_fails_on_identical_bodies_despite_differing_headers(tmp_path, spec):
-    runs = [_pair_run(tmp_path, "c2-p1a", "oracle", SAME), _pair_run(tmp_path, "c2-p1b", "oracle", SAME)]
+def test_c2_pair_under_oracle_fails_on_identical_configuration_sequences(tmp_path, spec):
+    runs = [_pair_run(tmp_path, "c2-p1a", "oracle", LOTTERY_CFG),
+            _pair_run(tmp_path, "c2-p1b", "oracle", LOTTERY_CFG)]
     rows = evaluate(runs, spec, [])
     a = _row(rows, "c2_pair", workload_id="c2-p1a")
     b = _row(rows, "c2_pair", workload_id="c2-p1b")
-    assert a["result"] == "fail" and a["partner"] == "c2-p1b"
+    assert a["result"] == "fail" and a["partner"] == "c2-p1b" and "identical configuration" in a["reason"]
     assert b["result"] == "fail" and b["partner"] == "c2-p1a"
-    assert hashlib.sha256(runs[0].trace.read_bytes()).hexdigest() != \
-        hashlib.sha256(runs[1].trace.read_bytes()).hexdigest()          # the whole files do differ
 
 
-def test_c2_pair_under_oracle_passes_on_different_bodies(tmp_path, spec):
-    runs = [_pair_run(tmp_path, "c2-p1a", "oracle", SAME), _pair_run(tmp_path, "c2-p1b", "oracle", OTHER)]
-    assert _row(evaluate(runs, spec, []), "c2_pair", workload_id="c2-p1a")["result"] == "pass"
+def test_c2_pair_under_oracle_passes_on_different_configurations(tmp_path, spec):
+    runs = [_pair_run(tmp_path, "c2-p1a", "oracle", LOTTERY_CFG),
+            _pair_run(tmp_path, "c2-p1b", "oracle", MLFQ_FLOOR_CFG)]
+    row = _row(evaluate(runs, spec, []), "c2_pair", workload_id="c2-p1a")
+    assert row["result"] == "pass" and row["partner"] == "c2-p1b"
 
 
-def test_c2_pair_under_fixed_requires_identical_bodies_where_flagged(tmp_path, spec):
-    """Every committed pair changes its background task, so none is flagged
-    (9.11 D15); a copy flagging P1 keeps the identity path's fail and pass."""
-    runs = [_pair_run(tmp_path, "c2-p1a", "fixed", SAME), _pair_run(tmp_path, "c2-p1b", "fixed", OTHER),
-            _pair_run(tmp_path, "c2-p2a", "fixed", SAME), _pair_run(tmp_path, "c2-p2b", "fixed", OTHER)]
+def test_c2_pair_reads_the_differing_segment_only(tmp_path, spec):
+    """Configurations that differ only inside the first segment, where the labels agree,
+    do not count: over the differing segment the sequences are identical."""
+    runs = [_pair_run(tmp_path, "c2-p1a", "llm_vocab", LOTTERY_CFG, early=MLFQ_FLOOR_CFG),
+            _pair_run(tmp_path, "c2-p1b", "llm_vocab", LOTTERY_CFG)]
+    assert _row(evaluate(runs, spec, []), "c2_pair", workload_id="c2-p1a")["result"] == "fail"
+
+
+def test_c2_pair_under_fixed_and_random_is_not_applicable(tmp_path, spec):
+    """9.11 D15: no pair's events are identical apart from the label, so `fixed` has
+    nothing to require; `random` ignores telemetry."""
+    runs = [_pair_run(tmp_path, "c2-p1a", "fixed", BOOT_CFG), _pair_run(tmp_path, "c2-p1b", "fixed", BOOT_CFG),
+            _pair_run(tmp_path, "c2-p2a", "random", LOTTERY_CFG, seed="1"),
+            _pair_run(tmp_path, "c2-p2b", "random", LOTTERY_CFG, seed="1")]
     rows = evaluate(runs, spec, [])
     assert _row(rows, "c2_pair", workload_id="c2-p1a")["result"] == "not_applicable"
     assert _row(rows, "c2_pair", workload_id="c2-p2a")["result"] == "not_applicable"
-    flagged = copy.deepcopy(spec)
-    for p in flagged["pairs"]:
-        if p["a"] == "c2-p1a":
-            p["fixed_identical"] = True
-    assert _row(evaluate(runs, flagged, []), "c2_pair", workload_id="c2-p1a")["result"] == "fail"
-    same = [_pair_run(tmp_path, "c2-p1a", "fixed", SAME), _pair_run(tmp_path, "c2-p1b", "fixed", SAME)]
-    assert _row(evaluate(same, flagged, []), "c2_pair", workload_id="c2-p1b")["result"] == "pass"
 
 
-def test_c2_pair_without_a_trace_fails_with_a_reason(tmp_path, spec):
-    runs = [_pair_run(tmp_path, "c2-p1a", "oracle", SAME, trace=False),
-            _pair_run(tmp_path, "c2-p1b", "oracle", OTHER)]
+def test_c2_pair_without_a_schedule_fails_with_a_reason(tmp_path, spec):
+    runs = [_pair_run(tmp_path, "c2-p1a", "oracle", LOTTERY_CFG, schedule=False),
+            _pair_run(tmp_path, "c2-p1b", "oracle", MLFQ_FLOOR_CFG)]
     row = _row(evaluate(runs, spec, []), "c2_pair", workload_id="c2-p1a")
-    assert row["result"] == "fail" and "trace" in row["reason"]
+    assert row["result"] == "fail" and "schedule" in row["reason"]
 
 
-def test_c2_pair_under_random_is_not_applicable(tmp_path, spec):
-    runs = [_pair_run(tmp_path, "c2-p1a", "random", SAME, seed="1"),
-            _pair_run(tmp_path, "c2-p1b", "random", SAME, seed="1")]
-    assert _row(evaluate(runs, spec, []), "c2_pair", workload_id="c2-p1a")["result"] == "not_applicable"
+def test_c2_pair_with_no_differing_segment_fails(tmp_path, spec):
+    runs = [_pair_run(tmp_path, "c2-p1a", "oracle", LOTTERY_CFG, wanted=True),
+            _pair_run(tmp_path, "c2-p1b", "oracle", MLFQ_FLOOR_CFG, wanted=True)]
+    row = _row(evaluate(runs, spec, []), "c2_pair", workload_id="c2-p1a")
+    assert row["result"] == "fail" and "differs in no segment" in row["reason"]
 
 
 def test_c2_pair_partner_is_matched_on_seed_and_boot_default(tmp_path, spec):
-    runs = [_pair_run(tmp_path, "c2-p1a", "oracle", SAME, boot="alt"),
-            _pair_run(tmp_path, "c2-p1b", "oracle", SAME, boot="")]
+    runs = [_pair_run(tmp_path, "c2-p1a", "oracle", LOTTERY_CFG, boot="alt"),
+            _pair_run(tmp_path, "c2-p1b", "oracle", MLFQ_FLOOR_CFG, boot="")]
     row = _row(evaluate(runs, spec, []), "c2_pair", workload_id="c2-p1a")
     assert row["result"] == "fail" and "partner" in row["reason"] and row["partner"] == ""
+
+
+def test_the_idle_download_variant_is_not_a_pair(spec):
+    """9.14 decision 7: the lint's pair rule reads the recipes' label-changing c2 variants;
+    c2-p2a-idle changes a task's entry and no label."""
+    from harness.scoring import label_changing_variants
+    pairs = {v: b for v, b in label_changing_variants(RECIPES).items() if v.startswith("c2-")}
+    assert pairs == {"c2-p1b": "c2-p1a", "c2-p2b": "c2-p2a", "c2-p3b": "c2-p3a"}
+    assert {p["b"]: p["a"] for p in spec["pairs"]} == pairs
 
 
 # -------------------------------------------------------------------- CLIs

@@ -17,7 +17,7 @@ Two files live here. `guard-spec.yaml` is the list of guards with their threshol
 | `utilisation_sanity` | delivered CPU exceeding the lane's elapsed time, or a scored file that delivered none: an empty trace that parsed |
 | `tick_count` | any consistency message from the records build: a chain tail's iterations not matching its head's ticks, the deadline cross-check, stimulus counts against the run file, a wake line past the last WAIT of its task's program, applied config lines against the schedule |
 | `validation_matches_provenance` | the log's `validation` sequence not equal, entry by entry, to the schedule's `provenance` sequence after the boot entry |
-| `c2_pair` | the two files of a C2 pair producing identical trace bodies under a recognition-driven condition, or different ones under `fixed`; identical under `oracle` means the configuration never changed between wanted and unwanted |
+| `c2_pair` | the two files of a C2 pair receiving identical configuration sequences over the segment whose label differs, under a recognition-driven condition: the recognizer's answer never changed between wanted and unwanted (since 2026-10-09; the trace-body reading before it passed vacuously once every pair's background task was a different job) |
 
 Each threshold's grounding is written in the spec's header: an arithmetic identity, a structural rule, or a design value, each marked as such.
 

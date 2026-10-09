@@ -13,7 +13,8 @@
 # rule, or a design value, each written as such
 # (docs/harness/metrics.md §10 uses the same status for its floors). The lint (tools/harness/guards.py,
 # `lint_spec`) checks the ids against the code's registry, every grounding
-# non-empty, and `pairs` against dataset/timelines/coreset/c2-pairs.variant.yaml.
+# non-empty, and `pairs` against the label-changing C2 variants of
+# dataset/timelines/coreset/c2-pairs.variant.yaml.
 #
 # Output: one row per (run, guard) in the `guards` file (schema/guards.schema.json)
 # — result pass / fail / not_applicable, the measured value, the threshold in
@@ -87,29 +88,34 @@
 #
 # c2_pair — structural. The two files of a C2 pair differ in one segment: its
 #   label and the background task it holds (c2-pairs.variant.yaml); under a
-#   recognition-driven condition their configurations must differ, so their
-#   traces must differ — identical traces mean the configuration never changed
-#   between wanted and unwanted and a zero gap is a table defect, not a
-#   recognition result (_dev/docs/rq0-preparation-notes.md, stage 4.2;
-#   data-contracts §10 lints the table for the same case). Under `fixed` the two
-#   files run the same boot default, so where a pair's events are identical
-#   apart from the label its traces must be identical (`fixed_identical: true`);
-#   every pair changes the background task itself — P1 Tracker's indexer in the
-#   training run's place, P2 the unattended upgrade in the game download's, P3
-#   Déjà Dup's scheduled backup in the video render's — so no identity is
-#   expected under `fixed` (`fixed_identical: false` on all three). Under
-#   `random` the draws ignore telemetry and a shared seed legitimately yields identical
-#   traces, so the guard does not apply. Partner: the other file of the pair
-#   under the same condition, seed, and boot default. Identity is the trace's
-#   body hash — every line after the header — because the header names the
-#   workload, so two files' traces can never be byte-identical as wholes and a
-#   whole-file hash would fail every `fixed` pair and pass every other one
-#   vacuously (found by the 8.6 smoke run, 2026-09-11; 8.3 spec, amendment to
-#   decision 12).
+#   recognition-driven condition the configurations the daemon chose over that
+#   segment must differ — identical sequences mean the recognizer's answer never
+#   changed between wanted and unwanted and a zero gap is a table or recognizer
+#   defect, not a recognition result (_dev/docs/rq0-preparation-notes.md, stage
+#   4.2; data-contracts §10 lints the table for the same case). The guard reads
+#   the two runs' config schedules (data-contracts §7) and compares, entry by
+#   entry, the configuration in force at the differing segment's start and every
+#   entry stamped inside it, as (algorithm, params, cap). Under `oracle` the
+#   sequences differ by construction, so the guard is a plumbing check there;
+#   under the LLM and name-table conditions it is the real one. Traces are not
+#   compared (the reading until 2026-10-09): since 9.10 every pair's background
+#   task is a different measured job — P1 Tracker's indexer in the training
+#   run's place, P2 the unattended upgrade in the game download's, P3 Déjà Dup's
+#   scheduled backup in the video render's — so the traces differ whatever the
+#   configuration and a body-hash check passed vacuously (9.11 D15; 9.14
+#   decision 7). Under `fixed` both files run the boot default and no identity
+#   is expected; under `random` the draws ignore telemetry; neither applies.
+#   Partner: the other file of the pair under the same condition, seed, and
+#   boot default. The differing segment is read off the two files' ground truth
+#   (the first segment whose mode or attributes differ).
 
-# 1.0 is the freeze of 2026-09-12 (Phase 8 spec, decision 19; harness/CHANGELOG.md), pinned by
-# the RQ0 gate spec. A change after it is a new version and a changelog entry.
-version: "1.0"
+# 1.0 was the freeze of 2026-09-12 (Phase 8 spec, decision 19; harness/CHANGELOG.md), pinned by
+# the RQ0 gate spec. 1.1 (2026-10-09, sub-task 9.14) carries 9.11's starvation floor (30 s),
+# provenance-share grounding and P1 flag, the grounding-kind labels, the pair guard's reading of
+# configuration sequences, the retired `fixed_identical` flag, and the two name-table conditions
+# in place of `whitelist` (9.12 D6). Pinned anew by the RQ0 gate spec; a change after it is a new
+# version and a changelog entry.
+version: "1.1"
 
 guards:
   - id: provenance_share
@@ -117,7 +123,7 @@ guards:
     threshold: 0.5
     unit: fraction
     direction: below
-    applies_to: [oracle, random, whitelist, llm_vocab, llm_algo, llm_full]
+    applies_to: [oracle, random, shipped_catalogue, strongest_name_table, llm_vocab, llm_algo, llm_full]
     grounding: >
       Design: "most of its configurations were fallbacks" (research proposal
       appendix B.3, restating §6.3) read as a majority of the run's time,
@@ -128,7 +134,7 @@ guards:
     threshold: null
     unit: us
     direction: structural
-    applies_to: [oracle, random, whitelist, llm_vocab, llm_algo, llm_full]
+    applies_to: [oracle, random, shipped_catalogue, strongest_name_table, llm_vocab, llm_algo, llm_full]
     grounding: >
       Structural: every non-boot entry takes effect before the ground-truth segment
       containing its query's t_set_change ends, or the recognition grade and the
@@ -184,28 +190,31 @@ guards:
     threshold: null
     unit: index
     direction: structural
-    applies_to: [oracle, random, whitelist, llm_vocab, llm_algo, llm_full]
+    applies_to: [oracle, random, shipped_catalogue, strongest_name_table, llm_vocab, llm_algo, llm_full]
     grounding: >
       Structural: the log's validation sequence equals the schedule's provenance
       sequence minus the boot entry (data-contracts §8), compared positionally.
 
   - id: c2_pair
-    reads: trace
+    reads: schedule+workload
     threshold: null
-    unit: sha256
+    unit: entries
     direction: structural
-    applies_to: [fixed, oracle, whitelist, llm_vocab, llm_algo, llm_full]
+    applies_to: [oracle, shipped_catalogue, strongest_name_table, llm_vocab, llm_algo, llm_full]
     grounding: >
       Structural: under a recognition-driven condition the two files of a C2 pair
-      must produce different traces (rq0-preparation-notes stage 4.2); under fixed,
-      identical ones where the pair's events are identical apart from the label.
-      Compared on the traces' bodies, header line excluded, since the header names
-      the workload (2026-09-11).
+      must receive different configuration sequences over the segment whose label
+      differs (rq0-preparation-notes stage 4.2) — the configuration in force at the
+      segment's start and every entry stamped inside it, compared as (algorithm,
+      params, cap); identical sequences fail. Traces are not compared: every pair's
+      background task differs, so traces differ whatever the configuration (9.11 D15;
+      9.14 decision 7). Value: the entries compared.
 
 # The C2 pairs (dataset/timelines/coreset/c2-pairs.variant.yaml): `a` is the base,
-# `b` its variant. `fixed_identical` says whether the pair's events are identical
-# apart from the label, so that `fixed` must reproduce one trace for both.
+# `b` the variant that changes one segment's label. The lint requires the list to
+# equal the recipe's label-changing `c2-` variants; `c2-p2a-idle`, which changes a
+# task's entry and no label (the bounding check's idle download), is not a pair.
 pairs:
-  - {a: c2-p1a, b: c2-p1b, fixed_identical: false}
-  - {a: c2-p2a, b: c2-p2b, fixed_identical: false}
-  - {a: c2-p3a, b: c2-p3b, fixed_identical: false}
+  - {a: c2-p1a, b: c2-p1b}
+  - {a: c2-p2a, b: c2-p2b}
+  - {a: c2-p3a, b: c2-p3b}

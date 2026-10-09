@@ -9,7 +9,7 @@
                "guard_exemptions", "reporting_lines", "pins", "criterion"],
   "$defs": {
     "condition": {"type": "string",
-                  "enum": ["fixed", "random", "whitelist", "llm_vocab", "llm_algo", "llm_full", "oracle"]},
+                  "enum": ["fixed", "random", "shipped_catalogue", "strongest_name_table", "llm_vocab", "llm_algo", "llm_full", "oracle"]},
     "workload": {"type": "string", "minLength": 1},
     "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
     "pin": {"type": "object", "additionalProperties": false, "required": ["path", "sha256"],

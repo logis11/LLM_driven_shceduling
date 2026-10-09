@@ -23,7 +23,7 @@
       "enum": [
         "fixed",
         "random",
-        "whitelist",
+        "shipped_catalogue", "strongest_name_table",
         "llm_vocab",
         "llm_algo",
         "llm_full",
