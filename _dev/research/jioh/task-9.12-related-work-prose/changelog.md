@@ -690,6 +690,7 @@ Compiled effect: none.
 
 ## D44 — `scx` and `schedext-docs` confirmed against D7, D8 and D10: tier and role as those decisions leave them (2026-10-09)
 > Amended by D73 (scx's README states Meta's deployment in progress; the deployment-path claim and :215 restated).
+> Amended by D112 (the tier rule admits a deployed system's documented design or behaviour, attributed at its pinned version, and its published figures as its report; by 인지오's decision).
 
 Taken under 인지오's delegation (2026-10-09), scope-card items 56 and 57: no further read; the two entries' role and status lines are brought to what D7, D8, D10 and D27 decided.
 
@@ -1656,5 +1657,17 @@ By 인지오's decision (2026-10-09), amending D42 (scope-card items 48, 49) on 
 - **Decided:** `docs/related-work.md` cites all three, each by what it does — TuxBot and LumOS beside the adjacent LLM tuning efforts (D24) as LLM tuning of a live host's parameters out of the fast path, LumOS the scheduler instance; Vulcan beside the synthesis line, its evaluated domains named — with no superlative. None measures recognition, so D12's scoped claim stands.
 
 Hands to 9.15: `docs/related-work.md:32`'s sentences as above (with D42's and D72's restatements); `docs/references.md` — `tuxbot-arxiv26`, `vulcan-arxiv25` (D42, D72) and an entry for LumOS under the id rule, the workshop the same as `schedcp-mlsys25`'s, its status naming the copy read (the authors' draft-watermarked PDF; OpenReview unreachable on 2026-10-09).
+
+Compiled effect: none.
+
+## D112 — the citation-tier rule: a deployed-system source may support its own documented design or behaviour, attributed at its pinned version, and a figure it publishes as its report with date, window and computation (2026-10-09)
+
+By 인지오's decision (2026-10-09), amending D44 (scope-card items 56, 57) on the 9.12 audit's finding that the citation-tier rule — deployed-system: "footnote with URL + accessed date + pinned version. Supports **existence claims only** ("this scenario/setting/category exists in shipped software") — never behavioral or statistical claims"; "An entry's `role:` line states what claims it may support; do not cite outside the role" (`docs/references.md:20–22`) — is exceeded by sentences 9.12's decisions ground on deployed-system sources:
+
+- **Documented design or behaviour:** the kernel's sched_ext documentation, "The system integrity is maintained no matter what the BPF scheduler does" (`schedext-docs`, D7); scx_lavd's mechanism from its README and `lat_cri.bpf.c` (`scx`, D10, D44); who sets a Linux scheduling class (man-pages, D26); undeclared work running as `default` (Apple's QoS page, D28); Game Mode holding back Windows Update's driver installs and restart notifications (the Xbox Support article and Xbox Wire, D45, D74).
+- **Published figures:** LocalScore's 0.88 s for the 12 GB RTX 3060 and Artificial Analysis's per-provider 72-hour medians (D51, D107).
+- **Decided:** the rule admits, beside existence claims, (i) a deployed system's own documented design or behaviour, stated as that source's at its pinned version or accessed date ("the kernel's documentation states …"), and (ii) a figure the source publishes, stated as its report with the date read, the window and how it is computed (D107's form); never a behavioural or statistical claim stated as the paper's own or as a population's. The sentences above stand in their attributed form.
+
+Hands to 9.15: `docs/references.md:20–22` — the deployed-system tier restated as above; the role lines of `schedext-docs`, `scx`, the man-pages, Apple's QoS, Microsoft's Game Mode and Xbox entries, LocalScore and Artificial Analysis stating which design statements or figures each supports, attributed.
 
 Compiled effect: none.
