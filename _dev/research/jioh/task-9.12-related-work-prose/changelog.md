@@ -1271,6 +1271,7 @@ Hands to 9.15: `docs/related-work.md:34`'s first sentence restated as above, cit
 Compiled effect: none.
 
 ## D83 — the positioning paragraph: the LLM line's outputs and settings stated per work; the identity-reading, signal-producing cell's one documented recognizer is a name table, beside declarations and window-state triggers; the mechanisms clause scoped (2026-10-09)
+> Amended by D116 (ASA and AKTS in the behaviour-reading, signal-producing cell; declarations and window-state triggers named as not recognition; by 인지오's decision).
 
 Taken under 인지오's delegation (2026-10-09), on the 9.12 audit's coverage finding (no scope-card item): `docs/related-work.md:48`'s "Mechanisms (ghOSt, sched_ext) underlie all quadrants", "The LLM-agent line reads meaning but spends it on per-workload policy synthesis for servers" and "The meaning-reading, signal-producing quadrant — where desktop situation awareness must live — is today occupied only by static name tables" are read against D2, D3, D4, D12, D13, D21, D23, D24, D28, D42 and A4-01 to A4-07. D12 takes the paragraph's "for the first time in this line"; D6 its `whitelist` wording.
 
@@ -1706,5 +1707,15 @@ By 인지오's decision (2026-10-09), amending D6 (scope-card item 21) on the 9.
 - **Decided:** `:536` is restated per condition — beating the shipped catalogue answers RQ2, a comparison with what a deployed daemon does on a distribution that enables it (D1, D3); beating the strongest name table is the paper's claim, "the one that matters most"; failing to beat either is a finding. "what shipping operating systems actually do today" is D1's and D3's restatement.
 
 Hands to 9.15: `docs/research-proposal.md:536` restated as above; `docs/research-claims.md:128–132` ("The second is the claim") per condition with it.
+
+Compiled effect: none.
+
+## D116 — related-work's positioning: ASA and AKTS in the behaviour-reading, signal-producing cell; declarations and window-state triggers named as not recognition, outside the figure (2026-10-09)
+
+By 인지오's decision (2026-10-09), amending D83 (`docs/related-work.md:48`, the audit's coverage finding) on the placement D83 left open: the paragraph's axes are what recognition reads (runtime behaviour vs. process identity and world knowledge) and what it produces (generated policy code vs. a selected signal over fixed policies). D83 found two systems it does not place — AKTS, an LLM reading load telemetry that selects among verified kernel policies, "recognize the regime at a coarse timescale and switch kernel scheduling behavior to match" (v2 §1, A4-04), and ASA, the same shape with an XGBoost classifier (D21) — and deployed systems that act on what is declared (Linux classes and units, macOS QoS, a game's request to Feral GameMode, `LSSupportsGameMode`; D4, D13, D28, D2) or on window state (Game Mode's foreground or full-screen trigger; D2, D80), in which nothing is recognized.
+
+- **Decided:** ASA and AKTS sit in the behaviour-reading, signal-producing cell — an LLM signal-selector that reads telemetry exists (AKTS); the cell this work fills is identity-reading and signal-producing, whose one documented deployed recognizer is ananicy-cpp's catalogue (D83). Declarations and window-state triggers are named in one clause as not recognition and stay outside the figure.
+
+Hands to 9.15: `docs/related-work.md:48` and its quadrant figure, if made, with these placements and D83's restatement.
 
 Compiled effect: none.
