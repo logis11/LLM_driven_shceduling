@@ -481,6 +481,7 @@ Compiled effect: none.
 
 ## D30 — "It cannot remove starvation protection" leaves the model's bounds: the executor has no starvation window, the cap is a field the model sets, and the harness's 30 s guard judges the run (2026-10-09)
 > Amended by D79 (the cap is the driver table's under every condition but llm_full and is to be enforced, not yet; four more lines and the trace example restated).
+> Amended by D114 (§4.7 as D30 and D79 state it; `:756`, 인경민's team area, leaves the hand-off; by 인지오's decision).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 71 (added from 9.11 D19's hand-off): `docs/research-proposal.md:473`'s bullet "It cannot remove starvation protection. Per-class bandwidth caps are enforced by the executor regardless of what any configuration says", in §4.7's list of what the model is never allowed to do, and `:756`'s "Bandwidth caps and starvation protection" among 인경민's areas, are restated to the project's own design and executor.
 
@@ -1682,5 +1683,17 @@ By 인지오's decision (2026-10-09), amending D8 and D11 (scope-card items 3, 5
 - `lavd-ossna24` and `corbet-lwn24` are this type; the three handed entries are minted under it.
 
 Hands to 9.15: `docs/references.md` — the id rule (`:10–16`) and the citation-tier rule (`:18–22`) gain the type as above; `lavd-ossna24` and `corbet-lwn24` moved to it; the LPC 2024 slides, the LPC 2025 abstract and LWN 1051430 minted under it (D8, D11).
+
+Compiled effect: none.
+
+## D114 — §4.7 stays as D30 and D79 state it; `:756`, 인경민's team area, leaves 9.12's restatements (2026-10-09)
+
+By 인지오's decision (2026-10-09), amending D30 (scope-card item 71) on the 9.12 audit's question about its two lines: D30 removed `docs/research-proposal.md:473`'s "It cannot remove starvation protection" from §4.7's list and stated what holds (D79: the cap the driver table's under every condition but `llm_full`, to be enforced, not yet; no executor starvation window; FIFO and EDF's deadline class without a horizon; the idle class's wait by design; the 30 s `starvation_floor` guard), and restated `:756`'s "Bandwidth caps and starvation protection" in 인경민's area (§8.1) to "the batch class's bandwidth cap". The scope card's boundary puts team areas outside 9.12 ("Not 9.12: the proposal's design statements (vocabulary, validator, conditions, metrics definitions, milestones, team areas)"); 9.11 D19's hand-off named the line.
+
+- **Decided:** §4.7 as D30 and D79 state it. `:756` is a team assignment, left to 인지오 and 인경민; it leaves D30's hand-off. No executor starvation bound is stated as planned (9.11 D7 took no executor net; 9.11 D19 reconsiders one with 인경민 only if 9.14's dry runs show waits near 30 s).
+
+Applied: `_dev/TODO.md` — the 9.15 line's "§4.7 starvation protection and §8.1's duty (D30)" → "§4.7 starvation protection (D30, D79)".
+
+Hands to 9.15: `docs/research-proposal.md:473` and `:287` as D30 and D79 state them; not `:756`.
 
 Compiled effect: none.
