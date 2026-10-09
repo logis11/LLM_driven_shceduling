@@ -32,6 +32,16 @@ variants:
                         attributes: {background_wanted: false, background: package-upgrade},
                         scenario: [S9, S17]}
 
+  # P2a-idle — the idle half of the c2-p2a bounding check (9.11 D21; 9.13): c2-p2a with
+  # the download bound to `game-download-idle`, the entry that shares `game-download`'s
+  # tables and declares `idle`; nothing else changes, the seed inherited, so the two
+  # compiled files differ in that task's class alone. Outside the judging set; read by
+  # 9.14's bounding check alone.
+  - id: c2-p2a-idle
+    from: c2-p2a.timeline.yaml
+    ops:
+      - patch-task: {id: download, archetype: game-download-idle}
+
   # P3b — user-initiated bulk -> scheduled bulk (S15): Déjà Dup's scheduled
   # weekly incremental, `incremental-backup` shown as `deja-dup`, bound whole at
   # its measured CPU total (meas-ci:background:2026-10-04; 9.10 D17, D119, D120);

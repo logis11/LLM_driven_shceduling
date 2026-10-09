@@ -44,6 +44,25 @@ def test_p1_pair_differs_in_segment_one_only(coreset):
     assert ground_truth(variant)[1] == ("indexing", False)
 
 
+def test_idle_download_variant_differs_in_the_class_alone(coreset):
+    """9.11 D21 (9.13 spec decision 4): `c2-p2a-idle` is `c2-p2a` with the download bound to `game-download-idle` —
+    the same tables under the declared class `idle` — so the two compiled files differ in that task's class and
+    nowhere else: every other event, the download's program, the wakes and the ground truth byte-identical."""
+    base, _ = coreset["c2-p2a"]
+    variant, _ = coreset["c2-p2a-idle"]
+    assert variant["ground_truth"] == base["ground_truth"]
+    b, v = events_by_id(base), events_by_id(variant)
+    assert set(b) == set(v) and "download" in b
+    for task_id, event in b.items():
+        if task_id == "download":
+            assert (event["declared_class"], v[task_id]["declared_class"]) == ("normal", "idle")
+            assert {**v[task_id], "declared_class": "normal"} == event
+        else:
+            assert v[task_id] == event
+    wakes = lambda c: [e for e in c["events"] if e["op"] == "wake"]
+    assert wakes(variant) == wakes(base)
+
+
 @pytest.mark.parametrize("pair,changed", [
     (("c2-p2a", "c2-p2b"), "download"),
     (("c2-p3a", "c2-p3b"), "bulk"),
@@ -321,6 +340,7 @@ def test_set_focus_and_operations_replace_the_lists():
 SCENARIO_OF = {"office-writer": "S1", "web-browser": "S2", "renderer-hidden": "S2", "video-call": "S3",
                "mail-client": "S4", "chat-client": "S5", "image-editor": "S6", "video-editor": "S7",
                "video-transcoder": "S8", "game-task-chain": "S9", "game-client": "S9", "game-download": "S10",
+               "game-download-idle": "S10",   # the bounding check's idle half depicts the same download (9.13)
                "code-editor": "S11", "build-orchestrator": "S11", "module-build-orchestrator": "S11",
                "video-player": "S13", "audio-player": "S13", "file-indexer": "S14", "incremental-backup": "S15",
                "file-archiver": "S16", "package-upgrade": "S17", "compositor-shell": "S18", "audio-server": "S18",

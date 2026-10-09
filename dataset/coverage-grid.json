@@ -160,11 +160,11 @@
       "background_wanted": true,
       "mode": "gaming",
       "pre_committed_miss": 0,
-      "segments": 6,
+      "segments": 8,
       "tiers": {
         "t1": 0,
         "t2": 0,
-        "t3": 6,
+        "t3": 8,
         "t4": 0,
         "t5": 0
       }
@@ -651,6 +651,25 @@
         "tier": 3
       }
     ],
+    "c2-p2a-idle": [
+      {
+        "background_wanted": true,
+        "mode": "gaming",
+        "scenario": [
+          "S9"
+        ],
+        "tier": 3
+      },
+      {
+        "background_wanted": true,
+        "mode": "gaming",
+        "scenario": [
+          "S9",
+          "S10"
+        ],
+        "tier": 3
+      }
+    ],
     "c2-p2b": [
       {
         "background_wanted": true,
@@ -1085,5 +1104,5 @@
       }
     ]
   },
-  "segments_total": 64
+  "segments_total": 66
 }
