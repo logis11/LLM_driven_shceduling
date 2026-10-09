@@ -12,10 +12,10 @@ scheduling can influence. Concretely:
   without one are real channels (input, children, chain wiring).
 - The chain constructor (contract §6) expands game-task-chain at compile
   time into chain_length driven members.
-- The lane-scaling pass (`single` mode) transforms declared-scalable fields
-  only — for game-task-chain, chain RUN values are scaled so the chain's
-  aggregate demand is lane_share of the lane; nothing else differs from
-  `native` output.
+- The lane-scaling pass (the one compile mode, `single`) transforms
+  declared-scalable fields only — for game-task-chain, chain RUN values are
+  scaled so the chain's aggregate demand is lane_share of the lane. The
+  unscaled `native` mode left with the native set (9.5 spec decision 14, 9.13).
 """
 
 import bisect
@@ -27,13 +27,14 @@ import pathlib
 from . import sampling
 from .units import parse_us
 
-MODES = ("native", "single")
+MODES = ("single",)
 
 
 class _TaskBuild:
-    def __init__(self, task_id, name):
+    def __init__(self, task_id, name, declared_class):
         self.id = task_id
         self.name = name
+        self.declared_class = declared_class   # the bound entry's (9.13 spec decision 2)
         self.program = []
         self.spawn_table = None
         self.fork_cap = None
@@ -102,7 +103,8 @@ def _ground_truth_segment(segment):
 
 def _arrive_event(build):
     event = {"t": build.arrive, "op": "arrive", "id": build.id,
-             "name": build.name, "program": build.program}
+             "name": build.name, "declared_class": build.declared_class,
+             "program": build.program}
     if build.depart is not None:
         event["depart"] = build.depart
     if build.spawn_table is not None:
@@ -118,7 +120,7 @@ def _compile_instance(timeline, library, task, iid, mode, wakes):
     if entry["pattern"].get("constructor") == "chain":
         return _chain_constructor(timeline, task, iid, entry, mode)
 
-    build = _TaskBuild(iid, task["name"])
+    build = _TaskBuild(iid, task["name"], entry["declared_class"])
     build.arrive = task["arrive"]
     build.depart = task["depart"]
     lifespan = (task["depart"] or timeline.duration_us) - task["arrive"]
@@ -554,7 +556,8 @@ def _object_job(parent_iid, job_index, child_entry, seed, child_name):
         "fixdep": [wait("fixdep"), run("fixdep", 1), wake("sh"), wait("fixdep"), {"op": "EXIT"}],
         "rm": [wait("rm"), run("rm", 1), wake("sh"), wait("rm"), {"op": "EXIT"}],
     }
-    return [{"id": ids[role], "name": names[role], "program": bodies[role]}
+    return [{"id": ids[role], "name": names[role], "declared_class": child_entry["declared_class"],
+             "program": bodies[role]}
             for role, _ in OBJECT_JOB], demand
 
 
@@ -596,12 +599,13 @@ def _tree_nodes(tree, parent=None):
     return out
 
 
-def _tree_job(parent_iid, job_index, kind, tree, params, seed, names):
+def _tree_job(parent_iid, job_index, kind, tree, params, seed, names, declared_class):
     """One make job of `kind` as spawn-table entries, one per member of its tree (D53), in the object job's form
     (9.6 D19, D20; _object_job): the root runs first; every other member waits on its own channel until its parent
     wakes it; a member with children runs a step, wakes its next child and waits for it, runs its next step, and so
     on; a member wakes its parent when its last step is done and waits, without CPU, until the root ends the job.
-    Each step's CPU is drawn from the kind's (member, step) table. Returns (entries in fork order, their CPU)."""
+    Each step's CPU is drawn from the kind's (member, step) table; each member carries the child entry's
+    `declared_class`. Returns (entries in fork order, their CPU)."""
     nodes = _tree_nodes(tree)
     ids = {mid: f"{parent_iid}.j{job_index + 1}.{mid}" for mid, _p, _k in nodes}
     demand = 0
@@ -625,7 +629,8 @@ def _tree_job(parent_iid, job_index, kind, tree, params, seed, names):
         else:
             body += [{"op": "WAKE", "target": ids[parent]}, own]
         body.append({"op": "EXIT"})
-        entries.append({"id": ids[mid], "name": names.get(mid, mid), "program": body})
+        entries.append({"id": ids[mid], "name": names.get(mid, mid), "declared_class": declared_class,
+                        "program": body})
     return entries, demand
 
 
@@ -650,7 +655,8 @@ def _module_build_unroll(build, library, task, iid, seed, params, entry):
     build.spawn_table = []
     for i, letter in enumerate(_job_order(pat["job_order"])):
         kind = letters[letter]
-        entries, demand = _tree_job(iid, i, kind, trees[kind], child["params"], seed, names)
+        entries, demand = _tree_job(iid, i, kind, trees[kind], child["params"], seed, names,
+                                    child["declared_class"])
         build.spawn_table.extend(entries)
         build.demand_us += demand
         us = _draw(params, "dispatch_overhead", seed, iid, i)
@@ -723,7 +729,7 @@ def _chain_constructor(timeline, task, iid, entry, mode):
 
     builds = []
     for k, member_id in enumerate(member_ids):
-        member = _TaskBuild(member_id, names[k])
+        member = _TaskBuild(member_id, names[k], entry["declared_class"])
         member.arrive, member.depart = task["arrive"], task["depart"]
         body = ([{"op": "TIMER", "period_us": frame}] if k == 0 else
                 [{"op": "WAIT", "channel": f"chain:{member_id}"}])

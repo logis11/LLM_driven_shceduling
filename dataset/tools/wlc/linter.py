@@ -18,9 +18,10 @@ from .estimate import check_window
 from .timeline import Timeline, TimelineError
 
 REQUIRED_ARCHETYPE_FIELDS = (
-    "category_source", "pattern", "params", "lifetime", "binding_params",
+    "category_source", "declared_class", "pattern", "params", "lifetime", "binding_params",
     "scalable", "validation_stats", "modeling_notes")
 LIFETIMES = {"segment-bound", "finite", "spawned"}
+DECLARED_CLASSES = {"normal", "idle"}   # 9.13 spec decision 2: widened only when an entry carries batch or real-time work
 SAMPLING = {"per-instance", "per-task", "per-iteration"}
 
 
@@ -48,6 +49,8 @@ def lint_repo(archetypes_path, sources_path, references_md, freeze=False):
                 errors.append(f"{aid}: missing field {field!r}")
         if entry.get("lifetime") not in LIFETIMES:
             errors.append(f"{aid}: bad lifetime {entry.get('lifetime')!r}")
+        if "declared_class" in entry and entry["declared_class"] not in DECLARED_CLASSES:
+            errors.append(f"{aid}: bad declared_class {entry['declared_class']!r}")
         if entry.get("lifetime") == "spawned" and "spawned_by" not in entry:
             errors.append(f"{aid}: spawned but no spawned_by")
         for pname, param in (entry.get("params") or {}).items():
@@ -223,6 +226,15 @@ def lint_canonical(canonical, schema, report=None, mode=None, name=""):
     if duplicates:
         errors.append(f"{prefix}duplicate task ids: {sorted(duplicates)}")
 
+    # 9.11 D11, D33 (9.13): a TIMER-carrying program begins, in execution order, with its TIMER — a LOOP head's body
+    # counting — so TIMER's t₀, its first execution, is the task's arrival and the two cannot come apart silently
+    for entry in arrivals:
+        for record in [entry] + list(entry.get("spawn_table") or []):
+            opens_with = _timer_first_violation(record["program"])
+            if opens_with:
+                errors.append(f"{prefix}{record['id']}: TIMER is not the first executed instruction — the program "
+                              f"opens with {opens_with}, so TIMER's t₀ would not be the arrival (9.11 D11)")
+
     waits = {}  # task id -> set of channels its program waits on
     for entry in arrivals:
         forks = _count_ops(entry["program"], "FORK")
@@ -272,6 +284,26 @@ def _walk(program):
 
 def _count_ops(program, op):
     return sum(1 for i in _walk(program) if i["op"] == op)
+
+
+def _first_executed(program):
+    """The first instruction a program executes, descending LOOP heads; None for an empty program."""
+    while program:
+        head = program[0]
+        if head["op"] != "LOOP":
+            return head
+        program = head["body"]
+    return None
+
+
+def _timer_first_violation(program):
+    """None when the program holds no TIMER or executes one first; otherwise the op it opens with instead."""
+    if not _count_ops(program, "TIMER"):
+        return None
+    first = _first_executed(program)
+    if first is not None and first["op"] == "TIMER":
+        return None
+    return first["op"] if first is not None else "nothing"
 
 
 def _wait_channels(program):

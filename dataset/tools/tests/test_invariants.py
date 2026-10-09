@@ -1,10 +1,11 @@
 """The task-2.3 spec's invariant charter: determinism, keyed isolation,
-one-entry diffs, and the -native/-single scalable-fields-only rule."""
+one-entry diffs, and the single-lane scaling rule (the native mode left in 9.13)."""
 
+import pytest
 import yaml
 
 from wlc import Timeline, compile_timeline
-from wlc.compiler import canonical_bytes
+from wlc.compiler import MODES, canonical_bytes
 
 
 def compile_fixture(path, library, mode, rel="fx"):
@@ -78,35 +79,24 @@ def test_one_entry_diff(fixture_path, library, tmp_path):
     assert variant["ground_truth"] == base["ground_truth"]
 
 
-def test_modes_identical_without_scalable_archetypes(fixture_path, library):
-    path = fixture_path("fx-mixed.timeline.yaml")
-    native, _ = compile_fixture(path, library, "native")
-    single, _ = compile_fixture(path, library, "single")
-    assert canonical_bytes(native) == canonical_bytes(single)
+def test_single_is_the_only_mode(fixture_path, library):
+    """9.5 spec decision 14 (9.13): the dataset ships the single-lane set only; the native mode is gone."""
+    assert MODES == ("single",)
+    with pytest.raises(ValueError, match="mode must be one of"):
+        compile_fixture(fixture_path("fx-mixed.timeline.yaml"), library, "native")
 
 
-def test_lane_scaling_touches_only_chain_runs(fixture_path, library):
-    path = fixture_path("fx-game.timeline.yaml")
-    native, _ = compile_fixture(path, library, "native")
-    single, _ = compile_fixture(path, library, "single")
-
-    native_arrivals, single_arrivals = arrivals_by_id(native), arrivals_by_id(single)
-    assert set(native_arrivals) == set(single_arrivals)
+def test_lane_scaling_lands_chain_on_lane_share(fixture_path, library):
+    """The lane-scaling pass: the chain's aggregate demand per frame is lane_share of the lane."""
+    single, _ = compile_fixture(fixture_path("fx-game.timeline.yaml"), library, "single")
     single_run_total = 0
     frame = None
-    for task_id, native_event in native_arrivals.items():
-        single_event = single_arrivals[task_id]
-        body_native = native_event["program"][0]["body"]
-        body_single = single_event["program"][0]["body"]
-        assert len(body_native) == len(body_single)
-        for op_native, op_single in zip(body_native, body_single):
-            if op_native["op"] == "RUN":
-                single_run_total += op_single["us"]
-            else:
-                assert op_native == op_single  # only RUN values may differ
-            if op_native["op"] == "TIMER":
-                frame = op_native["period_us"]
-    # the chain's aggregate demand per frame lands on lane_share of the lane
+    for event in arrivals_by_id(single).values():
+        for op in event["program"][0]["body"]:
+            if op["op"] == "RUN":
+                single_run_total += op["us"]
+            if op["op"] == "TIMER":
+                frame = op["period_us"]
     assert abs(single_run_total / frame - 0.6) < 0.01
 
 

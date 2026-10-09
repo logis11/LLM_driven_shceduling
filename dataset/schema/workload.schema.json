@@ -94,10 +94,15 @@
       "type": "string",
       "minLength": 1
     },
+    "declared_class": {
+      "description": "The scheduling class the task's program declares for itself — the class of the archetype entry the task binds, never one read from its name (9.13; memo 2026-10-08-declared-scheduling-class). `normal`: the default policy. `idle`: SCHED_IDLE, run only when no task of another class is runnable and preempted at once when one wakes, under every algorithm. A batch or real-time value is added only when an entry carries work in that class.",
+      "type": "string",
+      "enum": ["normal", "idle"]
+    },
     "arrive_event": {
       "description": "A task comes into existence carrying its fully resolved program. `depart` is present iff the task is segment-bound; a top-level task without `depart` is finite and ends via EXIT at an emergent time; spawned tasks never appear here — they live in spawn tables (contract §5).",
       "type": "object",
-      "required": ["t", "op", "id", "name", "program"],
+      "required": ["t", "op", "id", "name", "declared_class", "program"],
       "additionalProperties": false,
       "properties": {
         "t": {"$ref": "#/$defs/time_us"},
@@ -108,6 +113,7 @@
           "type": "string",
           "minLength": 1
         },
+        "declared_class": {"$ref": "#/$defs/declared_class"},
         "program": {"$ref": "#/$defs/program"},
         "depart": {
           "description": "Pinned exogenous depart time (the user closing the app). Present iff segment-bound.",
@@ -138,13 +144,14 @@
       }
     },
     "spawn_entry": {
-      "description": "One spawn-table entry: a fully resolved child task. Ids are pre-assigned at compile time so runs stay RNG-free and traces stable.",
+      "description": "One spawn-table entry: a fully resolved child task. Ids are pre-assigned at compile time so runs stay RNG-free and traces stable. `declared_class` is the child entry's.",
       "type": "object",
-      "required": ["id", "name", "program"],
+      "required": ["id", "name", "declared_class", "program"],
       "additionalProperties": false,
       "properties": {
         "id": {"$ref": "#/$defs/task_id"},
         "name": {"type": "string", "minLength": 1},
+        "declared_class": {"$ref": "#/$defs/declared_class"},
         "program": {"$ref": "#/$defs/program"}
       }
     },

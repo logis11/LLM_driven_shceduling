@@ -2,6 +2,7 @@
 invariants, focus-driven wake generation, and the demand estimate."""
 
 from wlc import Timeline, compile_timeline
+from wlc.compiler import MODES
 from wlc.linter import lint_canonical
 
 
@@ -14,10 +15,59 @@ def compiled(fixture_path, library, name, mode="single"):
 def test_fixtures_lint_clean(fixture_path, library, schema):
     for name in ("fx-mixed.timeline.yaml", "fx-game.timeline.yaml",
                  "fx-oversub.timeline.yaml"):
-        for mode in ("native", "single"):
+        for mode in MODES:
             _, canonical, report = compiled(fixture_path, library, name, mode)
             assert lint_canonical(canonical, schema, report=report,
                                   mode=mode) == []
+
+
+def instance_archetypes(timeline):
+    """instance id -> archetype id, as the compiler names instances (`id` or `id.n` for a task group)."""
+    out = {}
+    for task in timeline.tasks:
+        ids = [task["id"]] if task["count"] == 1 else [f"{task['id']}.{n}" for n in range(1, task["count"] + 1)]
+        for iid in ids:
+            out[iid] = task["archetype"]
+    return out
+
+
+def test_tasks_carry_their_entrys_declared_class(fixture_path, library):
+    """9.13 spec decision 2: every task record carries the class of the entry it binds — a spawn-table entry its
+    child entry's, a chain member its chain entry's."""
+    timeline, canonical, _ = compiled(fixture_path, library, "fx-mixed.timeline.yaml")
+    archetypes = instance_archetypes(timeline)
+    arrivals = [e for e in canonical["events"] if e["op"] == "arrive"]
+    assert arrivals
+    for event in arrivals:
+        assert event["declared_class"] == library.entry(archetypes[event["id"]])["declared_class"]
+        if event.get("spawn_table"):
+            child = library.entry(library.entry(archetypes[event["id"]])["spawns"])
+            assert {s["declared_class"] for s in event["spawn_table"]} == {child["declared_class"]}
+    assert any(e.get("spawn_table") for e in arrivals)   # the fixture exercises the spawn path
+
+    timeline, canonical, _ = compiled(fixture_path, library, "fx-game.timeline.yaml")
+    chain_class = library.entry("game-task-chain")["declared_class"]
+    members = [e for e in canonical["events"] if e["op"] == "arrive"]
+    assert len(members) > 1 and {e["declared_class"] for e in members} == {chain_class}
+
+
+def test_schema_requires_declared_class_on_every_task_record(fixture_path, library, schema):
+    """9.13 spec decision 8: the schema requires `declared_class` on arrive events and spawn entries."""
+    _, canonical, report = compiled(fixture_path, library, "fx-mixed.timeline.yaml")
+    assert lint_canonical(canonical, schema, report=report, mode="single") == []
+    build = next(e for e in canonical["events"] if e["op"] == "arrive" and e.get("spawn_table"))
+    del build["spawn_table"][0]["declared_class"]
+    errors = lint_canonical(canonical, schema, report=report, mode="single")
+    assert errors and all("declared_class" in e for e in errors)
+    # an arrive event sits under the events' oneOf, so the schema reports the event, not the field
+    _, canonical, report = compiled(fixture_path, library, "fx-mixed.timeline.yaml")
+    index, arrive = next((i, e) for i, e in enumerate(canonical["events"]) if e["op"] == "arrive")
+    del arrive["declared_class"]
+    errors = lint_canonical(canonical, schema, report=report, mode="single")
+    assert errors and all(e.endswith(f"at events/{index}") for e in errors)
+    arrive["declared_class"] = "nice"
+    errors = lint_canonical(canonical, schema, report=report, mode="single")
+    assert errors and all(e.endswith(f"at events/{index}") for e in errors)
 
 
 def test_events_sorted_and_ids_unique(fixture_path, library):
@@ -124,13 +174,13 @@ def test_zero_inclusive_block_table_leaves_the_program_running(library):
     # one RUN; the table's top interval carries the rare blocks measured, and the CPU still sums to total_work.
     # HandBrakeCLI's, re-measured as `video-transcoder` (9.10 D97): about 2 in 100,000 of its runs end in a block
     from wlc import compiler
-    build = compiler._TaskBuild("batch", "HandBrakeCLI")
+    build = compiler._TaskBuild("batch", "HandBrakeCLI", "normal")
     compiler._batch_loop(build, library.entry("video-transcoder")["params"], {"bind": {"total_work": "2s"}}, "seed", "batch")
     ops = [op["op"] for op in build.program]
     assert ops[-1] == "EXIT" and ops.count("RUN") == ops.count("SLEEP") + 1 and ops.count("SLEEP") <= 10
     assert sum(op["us"] for op in build.program if op["op"] == "RUN") == 2_000_000 == build.demand_us
     params = library.entry("cpu-batch")["params"]
-    build = compiler._TaskBuild("hog", "python3")
+    build = compiler._TaskBuild("hog", "python3", "normal")
     compiler._batch_loop(build, params, {"bind": {"program": "python3", "total_work": "2s"}}, "seed", "hog")
     assert "SLEEP" in {op["op"] for op in build.program}          # python3 blocks after every run
     assert sum(op["us"] for op in build.program if op["op"] == "RUN") == 2_000_000
@@ -141,13 +191,13 @@ def test_a_single_table_set_batch_loop_needs_no_program_binding(library):
     # cpu-batch, with three, still needs one
     import pytest
     from wlc import compiler
-    build = compiler._TaskBuild("download", "steam")
+    build = compiler._TaskBuild("download", "steam", "normal")
     compiler._batch_loop(build, library.entry("game-download")["params"], {"bind": {"total_work": "2s"}}, "seed", "download")
     assert "SLEEP" in {op["op"] for op in build.program}          # SteamCMD blocks after about 5 % of its runs
     assert sum(op["us"] for op in build.program if op["op"] == "RUN") == 2_000_000 == build.demand_us
-    build = compiler._TaskBuild("archive", "7z")
+    build = compiler._TaskBuild("archive", "7z", "normal")
     compiler._batch_loop(build, library.entry("file-archiver")["params"], {"bind": {"total_work": "2s"}}, "seed", "archive")
     assert [op["op"] for op in build.program] == ["RUN", "EXIT"]  # 7-Zip's block is zero at every quantile
     with pytest.raises(ValueError):
-        compiler._batch_loop(compiler._TaskBuild("x", "x"), library.entry("cpu-batch")["params"],
+        compiler._batch_loop(compiler._TaskBuild("x", "x", "normal"), library.entry("cpu-batch")["params"],
                              {"bind": {"total_work": "2s"}}, "seed", "x")
