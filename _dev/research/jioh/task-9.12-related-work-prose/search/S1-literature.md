@@ -551,3 +551,17 @@ Access date for every copy below: 2026-10-07. All copies saved under `sources/<i
 - **T12 — PC gaming session length; application-set change rate per hour.** Searches #45, #46: no peer-reviewed measurement read in full. Hits were an industry report (Nielsen 2009, casual games, not read in full), a Steam telemetry conference paper (abstract seen only via search results, no session-length figure), Statista (paywalled survey), and a mobile game preprint. Nothing on desktop application-set change rates.
 - **T13 — literature on audio buffer sizes / sample rates and game frame budgets.** Searches #47, #48: only Wessel & Wright's 10 ms / 1 ms requirement (S1-30). No literature source on buffer sizes, sample rates or display frame budgets was found in this search (vendor documentation is S2).
 - **Paywalled / unreachable:** dl.acm.org Kgent HTML and PDF (403); dl.acm.org David et al. 2007 PDF (403); openreview.net Expert-in-Residence PDF (403); rochester.edu `~cli/research/switch.pdf` (404); Statista session-length page (paywalled).
+
+---
+
+## Audit notes (9.12 audit, 2026-10-09)
+
+The records above stay as read; the audit's re-reads are `search/A-audit.md`.
+
+- **S1-12** — SchedCP's hot-path statement is in v4 too, §2, p. 2 (A4-01; D82).
+- **S1-17, S1-18** — the copies were not on this machine; re-downloaded, each byte-identical to the hash recorded here (A2-15, A2-16).
+- **S1-20** — read in full from the author's PDF linked from the project page; OpenReview still returns 403 (A2-17; D72).
+- **S1-21** — the DOI 10.1145/1281700.1281702 verified at Crossref (A3-06; D104); the three regions and the stride experiment as D57 states them (A1-12).
+- **S1-23** — both figures of §2.2.2: "at least 3,400 cycles, with a frequent value around 30,000 cycles" (A1-12; D57).
+- **S1-25** — published as Eval4NLP 2025, pp. 135–148 (A3-06; D104).
+- **S1-27** — published as EMNLP 2024 Industry Track, pp. 1218–1236; the passages D40 and D71 quote are in it (A2-14, A3-06; D71, D104).

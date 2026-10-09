@@ -519,8 +519,8 @@ Pooled in `task-9.12-related-work-prose/campaign/results/` and rendered in `camp
 
 | job | repeats | values | widest held | stopped by | jobs (gated) |
 |---|---|---|---|---|---|
-| `kernel` | 19 | 27, 23 holding the rule | `pick_task_fair` messaging mean ±4.28 % | the rule on the 23; four values carried with their ranges, their spread following the runner's idle state (the measured CPU's idle switch and schedule() rates, the idle-path pick median, newidle's mean; D50) | 60 (41) |
-| `llm` | 11 | 30 | `llama3.1-8b` full generation time ±3.64 % | the rule | 36 (25) |
+| `kernel` | 19 | 23 on the list, all holding the rule; 4 read and left off the list (D55) | `pick_task_fair` messaging mean ±4.28 % | the rule; the measured CPU's idle switch and schedule() rates, the idle-path pick median and newidle's mean left off the list by 인지오's decision, kept in `results.md` as observed ranges (9.12 D55) | 60 (41) |
+| `llm` | 11 | 30 | `llama3.1-8b` full generation time ±3.64 % (the 8B's two prompts pooled; ±1.67 % on the 9 Oct prompt alone, 9.12 D59) | the rule | 36 (25) |
 
 ## Machine draws
 

@@ -555,3 +555,7 @@ Locators given for the sources are mine. Wherever the guidebook attributes a pag
 - not found: **0**
 
 Supplementary verbatim code blocks and inline text: 7 checked, 7 exact.
+
+---
+
+Audit note (9.12 audit, 2026-10-09): the counting rule, the re-graded rows `:1032` and `:1967`, the descriptions of `:949` and `:582`, and reader 3's 52 entries — changelog D97; the copies and their provenance — D98 (A3-01–A3-03).

@@ -627,3 +627,16 @@ Topics assigned: T1 (sched_ext docs, scx repo), T2, T6, T7, T8, T9 (kernel docs)
 - **T13 — DAW default buffer sizes (Ardour, Reaper, Bitwig)**: Ardour manual gives a < 5 ms target but no default (S2-38); Reaper and Bitwig documentation not searched beyond this (no fetch attempted for time); **VRR / frame-budget documentation**: not found (Steam Deck page gives refresh rates only).
 - **T14 — Nvidia's own stated reason; Dessau's original blog post; X-bit Labs original**: Nvidia gave none ("No reason was given", S2-41; "We have resigned", S2-43). Dessau blog not located (log #37); guru3d 403; semiaccurate.com bare domain TLS name mismatch (not bypassed); live anandtech.com bot check; at-web1.www.anandtech.com connection reset (log #34).
 - Topics outside this class (T3 texts, T4, T5, T10, T12, T15) were not searched by S2.
+
+---
+
+## Audit notes (9.12 audit, 2026-10-09)
+
+The records above stay as read; the audit's re-reads are `search/A-audit.md`.
+
+- **S2-16** — the stage-2 copies are not on this machine; the portal's twelve quotations are verbatim in a fixed capture of 2026-09-07 and in the 2026-09-13 verification's copy (A3-03; D98).
+- **S2-33** — the converter's behaviour read in code at `bd4eeaa0`: unread keywords ignored, an inexpressible pattern accepted with a server-log warning, some constructs a request error (A2-22; D77).
+- **S2-54** — the word "macOS" does not occur in the document; the passage is a design rationale with no named subsystem (A2-23; D78).
+- **S2-55** — the banner "we ask that you avoid linking users to any knowledge base pages at this time" is inside an HTML comment and not displayed (A2-06; D65).
+- **S2-58** — dated: the support article's wording in the Internet Archive's capture of 2018-12-30, Microsoft's statement on Xbox Wire, 2018-10-02 (A2-19; D74).
+- **§3 Not found, T14** — Dessau's post found through the Internet Archive (capture 20110623165026), and X-bit Labs' report (capture 20110625114727) (A2-20; D75).

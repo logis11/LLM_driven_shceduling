@@ -32,3 +32,7 @@ None is reported: the values ground stated quantities and no two are compared. T
 ## First batch
 
 Twelve repeats of each job, indices 1–12. The EPYC 7763 was 26 of 56 and 22 of 45 recorded draws (the workflow's figures), about 45 %, so twelve draws land about five. Gated indices are replaced by new indices in one push (identical work); then one at a time until every value holds.
+
+## Amendments
+
+- 2026-10-09, four values leave the list (changelog D55, by 인지오's decision) — `kernel`'s measured CPU's context switches and schedule() calls per second at idle, the median of `pick_next_task_fair` under the sleeper and the mean of `sched_balance_newidle` under the sleeper leave the list: no stated quantity rests on them, and over the 19 repeats they held ±7.96 %, ±18.39 %, ±7.81 % and ±6.49 %, the pool projecting 45, 227, 43 and 31 repeats. `results.md` keeps them as observed ranges. The list's other 23 `kernel` values and the 30 `llm` values hold the rule.

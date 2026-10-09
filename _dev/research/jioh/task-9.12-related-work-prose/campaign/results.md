@@ -4,6 +4,8 @@ Campaign of 9.12 (changelog D31; method `method.md`). Runs: dry run 37859640740 
 
 The llm job's `llama3.1-8b` values pool two prompts: Llama 3.1's chat template writes the day into its system header, so repeats 6 and 8 (2026-10-08 UTC) read "Today Date: 08 Oct 2026" and the other nine "09 Oct 2026" — the same length, a different input; the `full` answer is 79 tokens on the first and 71 on the second, identical within each.
 
+The 8B's figures the changelog states read the nine repeats on the 9 Oct prompt, the prompt the M1 Pro read (D59). Four `kernel` rows below are observed ranges, not carried values — `idle.cs_per_s.measured_cpu`, `idle.schedule_per_s.measured_cpu`, `pick_next_task_fair.sleep.median_ns`, `sched_balance_newidle.sleep.mean_ns` — left off the method's list by 인지오's decision (D55, 2026-10-09).
+
 ```
 
 == kernel: 19 repeats on the EPYC 7763 (11@37860888052, 13@37861874535, 19@37861874535, 24@37861874535, 27@37861874535, 2@37860888052, 36@37861874535, 3@37860888052, 41@37864232540, 42@37864232540, 46@37864232540, 47@37864232540, 48@37864232540, 49@37864232540, 50@37864232540, 53@37864232540, 54@37864232540, 57@37864232540, 9@37860888052)

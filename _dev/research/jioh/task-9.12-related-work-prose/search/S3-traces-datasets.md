@@ -1575,3 +1575,19 @@ rows 1362 with prefill latency 427
 4bit-awq-gemv-sdpa | meta-llama/Meta-Llama-3-8B-Instruct | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.36864620361328126 s | decode_tput=31.6722433403514 tokens/s | decode_lat_mean=1.9891233886718749 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
 4bit-awq-gemm-sdpa | meta-llama/Meta-Llama-3-8B | awq | 4 | bs=1 | seq=256 | new=64 | prefill_mean=0.4163207153320313 s | decode_tput=23.93802318448678 tokens/s | decode_lat_mean=2.6317962646484374 | gpu=['Tesla T4'] | cpu=Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz
 ```
+
+---
+
+## Audit notes (9.12 audit, 2026-10-09)
+
+The records above stay as read; the audit's re-reads and recounts are `search/A-audit.md`.
+
+- **S3-02** — on Ubuntu 24.04, the distribution the dataset depicts, `updatedb` is not in the stock desktop image, and the installable plocate 1.1.19 declares only `IOSchedulingClass=idle`; `Nice=19` enters with plocate 1.1.23 (A2-05; D64).
+- **S3-05** — the 0.88 s is the 12 GB RTX 3060 (accelerator 43), a mean over the runs submitted for it (A2-21; D107).
+- **S3-11** — Table 4 is a distribution of each avatar's average session, over one realm's Horde faction (A2-13; D70).
+- **S3-18** — the figures are 72-hour medians, one per provider; they move between reads (A2-21; D107).
+- **S3-19** — the 14-of-35 count is on the dataset's bound names; ananicy-cpp keys a process by its `argv[0]` basename (A3-07; D105); recounted on that key, 19 of 35, every name in 7 of 50 files (A3-09; D109).
+- **S3-20** — the count re-run, output byte-identical; the 16 that raise are named (A2-24; D64).
+- **S3-21** — restricted to the repeat lists the owning slices pooled, the madvise check left out: 67 program phases over 1 223 phase files; group medians 12.9 to 12 497.2 a second, the median phase 422.0; 53 at 100 or more, 13 at 1 000 or more, 2 at 10 000 or more. 594 of the 1 806 full-mode files kept above lie outside those lists. The busy shares are over whole phase files, harness time included; restricted, `clamscan` 0.9334–0.9435 over 10 repeats and `train` 0.8475–0.8575 over 8 (A1-07, A1-08; D58).
+- **S3-22** — every request's answer counted per model, schema, prompt and machine (A1-05; D60).
+- **S3-23** — the session-time fit's median, about 9.6 minutes (arithmetic); the trace table spans 14 months against the abstract's "13-month" (A2-12; D70).

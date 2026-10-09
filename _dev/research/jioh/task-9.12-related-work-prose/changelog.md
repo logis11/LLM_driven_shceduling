@@ -5,6 +5,8 @@ The slice's decision record (`research-slice-workflow.md`, Records). Scope card 
 ## D1 — `whitelist` reproduces the name-keyed catalogue, `ananicy-rules`; Game Mode is cited for its category only (2026-10-08)
 > Amended by D3 (CachyOS installs ananicy-cpp with the catalogue and enables it by default: the design point ships in a distribution; `:536` and the `whitelist` lines restated to it).
 > Amended by D6 (the `whitelist` condition becomes two conditions: the shipped catalogue, and the strongest name table in its design).
+> Amended by D45 (the §2.1 Windows row gains the Windows Update deferral; the Xbox Support article read rendered, S2-58).
+> Amended by D94 (the macOS row's versions: Game Mode on macOS Sonoma 14 or later; the LSSupportsGameMode declaration listed for macOS 26.0 and later).
 
 By 인지오's decision, scope-card item 21: the `whitelist` condition reproduces the name-keyed catalogue design point — a hand-maintained table from executable name to priority class, matched by name — grounded in `ananicy-rules`, with `ananicy` for the matching rule. No shipped game mode is cited as working from a list of executables, and no sentence says an operating system ships the design point.
 
@@ -25,6 +27,7 @@ Hands to 9.15:
 Compiled effect: none.
 
 ## D2 — related-work states Game Mode as a shipped category, Windows and macOS each from its own documentation; the name-table instance is ananicy alone (2026-10-08)
+> Amended by D45 (the `:40` sentence gains the Windows Update deferral) and D99 (`gamemode-docs` has five Learn pages, D53).
 
 By 인지오's decision, scope-card item 16: `docs/related-work.md:40`'s sentence "Windows Game Mode reprioritizes resources when a foreground executable matches a curated list [gamemode]" leaves the name-table paragraph. Game Mode is stated in a sentence of its own as a shipped foreground-game category, Windows citing `gamemode-docs` and macOS citing Apple's documentation. The paragraph's premise sentence ("These systems validate our premise — process identity carries actionable scheduling information") rests on ananicy alone.
 
@@ -75,6 +78,7 @@ Hands to 9.15:
 Compiled effect: none.
 
 ## D5 — the audio-workstation case: no game mode's documentation addresses it; the shipped catalogue registers the major DAWs, in the music players' class (2026-10-08)
+> Amended by D6 (the catalogue is the shipped-catalogue condition's rule list, not `whitelist`'s).
 
 By 인지오's decision, scope-card item 37: `docs/research-proposal.md:640`'s "no shipping Game Mode covers it. It is simultaneously our hardest deadline test and a clean whitelist-failure case" is restated to the sources; "a clean whitelist-failure case" is withdrawn.
 
@@ -91,6 +95,9 @@ Hands to 9.15:
 Compiled effect: none.
 
 ## D6 — the `whitelist` condition becomes two: the shipped catalogue, and the strongest name table in its design (2026-10-08)
+> Amended by D91 (research-proposal.md:60 and :216's clause restated to the two conditions).
+> Amended by D105 (ananicy-cpp matches a rule by `argv[0]`'s basename; the open points homed).
+> Amended by D109 (on ananicy-cpp's key the catalogue keys 19 of the 35 bound names, every name in 7 of 50 files — a different seven; "after truncation" leaves).
 
 By 인지오's decision, raised by D1–D5: the experiment carries two name-table conditions in place of `whitelist`, each answering the claim that names it.
 
@@ -175,6 +182,7 @@ Hands to 9.15:
 Compiled effect: none.
 
 ## D11 — every LAVD source is footnote tier; the source naming and the production clause of `grounding-sources.md:30` restated (2026-10-08)
+> Amended by D100 (`lavd-ossna24`'s pairing clause leaves with `corbet-lwn24`'s "prose-citable").
 
 By 인지오's decision, scope-card item 58 (with item 61's read lines): LAVD has no scholarly citation — no peer-reviewed paper or archived preprint describes it (S1 "Not found", T2: arXiv 0 results, OpenAlex none; stage 3) — so every LAVD source sits in the deployed-system / footnote tier, and the paper keeps its two tiers.
 
@@ -213,6 +221,7 @@ Compiled effect: none.
 
 ## D13 — the "Cooperation" limit restated: who declares, how many do, in which direction, and which background tools (2026-10-08)
 > Amended by D49 (a vendor-documented case of priority inflation: Apple's XNU scheduler document, on the traditional Mach model).
+> Amended by D64 (on the depicted Ubuntu 24.04 desktop updatedb is not installed and the installable plocate declares only the idle I/O class; the count shows direction, mostly daemons raising).
 
 By 인지오's decision, scope-card item 26 (with 9.6 D17's and 9.11 D33's hand-offs), after a stage-3 recount (S3-20): `docs/research-proposal.md:158`'s "Linux scheduling classes and macOS QoS require the application to declare its own nature. Most applications never do. Those that do tend to claim they are the most important thing on the system. `updatedb` does not volunteer that it is background work." is restated to the sources.
 
@@ -232,6 +241,7 @@ Hands to 9.15:
 Compiled effect: none.
 
 ## D14 — the load-bearing pair restated: two real jobs beside an editor, with opposite correct policies, differing in behaviour and in declared class (2026-10-08)
+> Amended by D88 (the premise's other lines: research-proposal.md:129, :617, research-claims.md:23, :214–216, background-guide.md:115; the past-10 ms shares read from the pair the dataset carries).
 
 By 인지오's decision, scope-card items 6 and 47 (with 9.6 D17, D21, D32 and 9.10 D6, D12's hand-offs): `docs/related-work.md:18`'s "an ML training run versus a file indexer, both manifesting as one CPU-saturating process beside an editor — is constructed so that the two situations are behaviorally indistinguishable in principle, yet demand opposite policies. No refinement of this quadrant can separate them; the distinguishing information exists only in what the processes *are*, not in what they *do*", and `docs/research-proposal.md:627`'s "no behavioural heuristic can separate them even in principle", are restated to 9.10 D6: two real jobs beside an editor with opposite correct policies.
 
@@ -251,6 +261,8 @@ Hands to 9.15:
 Compiled effect: none.
 
 ## D15 — the download-against-scan premise restated to the dataset's pair: the game download against the stock unattended upgrade, two real jobs differing in run shape, structure, size and declared priority (2026-10-08)
+> Amended by D89 (research-proposal.md:133).
+> Amended by D101 (locator: `:179`, not `:178`).
 
 By 인지오's decision, scope-card item 33 (with 9.10 D3's replacement of the scan, and the general passages D14 routed here): `docs/research-proposal.md:131`'s "a game download the user is impatiently waiting for, and a virus scan the user did not ask for, are behaviourally identical. Both are sustained background bulk work hammering the disk. … No CPU utilization graph will ever separate them", the §2.3 table's row and sentence (`:175`, `:178`: "same process count, same behavioural signature, opposite correct policy") and `docs/background-guide.md:12–16` ("these two machines look **identical** … Every measurement the OS can take … comes out the same") are restated to the pair the dataset carries, `c2-p2a` against `c2-p2b`.
 
@@ -296,6 +308,7 @@ Hands to 9.15: `docs/related-work.md:8` as above; the guidebook vol-02 ch. 3.2 c
 Compiled effect: none.
 
 ## D18 — the classic heuristics: MLFQ classifies by CPU use; CFS and EEVDF account against a fair share, their sleeper handling shaping a waking task's place (2026-10-08)
+> Amended by D101 (locator: `related-work.md:16`'s second sentence).
 
 By 인지오's decision, scope-card item 4 (and the `mlfq` and `eevdf` keys of item 20): `docs/related-work.md:16`'s "Classic interactivity heuristics — MLFQ's demotion by CPU consumption, and the sleep/wake accounting behind CFS and EEVDF — classify tasks by how they use the CPU [mlfq, eevdf]" keeps MLFQ as a classifier and restates CFS and EEVDF as accounting.
 
@@ -309,6 +322,7 @@ Hands to 9.15: `docs/related-work.md:16`'s first sentence restated as above, its
 Compiled effect: none.
 
 ## D19 — the learned-scheduler sentence: Decima and FIRM kept; Park restated as an open platform of twelve environments (2026-10-08)
+> Amended by D101 (locator: `related-work.md:24`'s second sentence).
 
 By 인지오's decision, scope-card item 8 (and the `decima`, `firm`, `park` keys of item 20): `docs/related-work.md:24`'s "Decima learns cluster scheduling policies via RL over job DAGs [decima]; Firm learns SLO-driven resource management for microservices [firm]; Park generalizes the setting [park]" keeps its first two clauses; "Park generalizes the setting" becomes "Park offers an open platform of twelve system-optimization environments for learning-augmented systems".
 
@@ -386,6 +400,7 @@ Hands to 9.15:
 Compiled effect: none.
 
 ## D25 — the reference-placeholder table becomes the final key-to-registry map (2026-10-08)
+> Amended by D99 (the `gamemode` row: five Learn pages and the Xbox Support entry).
 
 By 인지오's decision, scope-card item 20 (with entries 52 and 53): `docs/related-work.md:56–73`'s table maps each citation key to its registry entries and their settled form; the "verify" column leaves, every open point being closed by D1–D24 and the checks below.
 
@@ -463,6 +478,7 @@ Hands to 9.15: `docs/research-proposal.md:117`, `:830`, `docs/background-guide.m
 Compiled effect: none.
 
 ## D30 — "It cannot remove starvation protection" leaves the model's bounds: the executor has no starvation window, the cap is a field the model sets, and the harness's 30 s guard judges the run (2026-10-09)
+> Amended by D79 (the cap is the driver table's under every condition but llm_full and is to be enforced, not yet; four more lines and the trace example restated).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 71 (added from 9.11 D19's hand-off): `docs/research-proposal.md:473`'s bullet "It cannot remove starvation protection. Per-class bandwidth caps are enforced by the executor regardless of what any configuration says", in §4.7's list of what the model is never allowed to do, and `:756`'s "Bandwidth caps and starvation protection" among 인경민's areas, are restated to the project's own design and executor.
 
@@ -495,6 +511,9 @@ Hands to: items 28 and 29's decisions, on the pooled values.
 Compiled effect: none.
 
 ## D32 — the proposal's scheduling background (§1.1–§1.2) restated to OSTEP, Miller and Deber, Li et al., and the dataset's measured CPU per keystroke (2026-10-09)
+> Amended by D57 (Li, Ding & Shen's regions: in cache, beyond it, and the stride experiment) and D62 (the per-key venue and VS Code's stimulus).
+> Amended by D63 (Miller's echo 0.1–0.2 s; Deber's indirect touch surface; EEVDF's requested slice; SJF's full conditions; Solaris's table as OSTEP describes it).
+> Amended by D93 (research-proposal.md:416's FIFO clause and background-guide.md:119).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 31: `docs/research-proposal.md:87`, `:95`, `:111` and `:113` are restated to their sources. OSTEP's chapters 7 and 8 re-read from copies byte-identical to S1-03 and S1-02 (SHA-256 `0912b1a3…`, `96241b4e…`; re-downloaded 2026-10-09).
 
@@ -509,6 +528,7 @@ Hands to 9.15: `docs/research-proposal.md:87`, `:95`, `:111`, `:113` restated as
 Compiled effect: none.
 
 ## D33 — the MLFQ illustration stated with the dataset's measured pair: an editor's runs between blocks against `cc1`'s object compile (2026-10-09)
+> Amended by D62 (cc1's 367.6 ms runs from start to exit, unblocked in 99.4 % of object jobs).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 32: `docs/research-proposal.md:123`'s "`bash` given a 10 ms slice uses 0.5 ms of it, while `cc1plus` burns all 10 ms" and `docs/background-guide.md:115`'s "The editor wakes for a keystroke, computes 0.5 ms of a 10 ms slice … The compiler chews through its full 10 ms slice" carry no source; the dataset measured both kinds of program on its machine, so the illustration is stated with them.
 
@@ -521,6 +541,8 @@ Hands to 9.15: `docs/research-proposal.md:123` and `docs/background-guide.md:115
 Compiled effect: none.
 
 ## D34 — the world-knowledge examples restated: OBS encodes live and skips frames when it falls behind; `cargo build` compiles a Rust package; `updatedb` leaves the list, its unit declaring its class (2026-10-09)
+> Amended by D65 (updatedb per D64; the OBS KB banner is commented out; Cargo's own words).
+> Amended by D92 (research-proposal.md:160's encoder clause).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 35, after a stage-3 read (S2-55, S2-56): `docs/research-proposal.md:185`'s "knowing things about software that an operating system has no way to learn on its own: that OBS is a real-time encoder, … that `cargo build` is a compiler and `updatedb` is maintenance", and `:176`'s row "LoL, Discord, OBS | Gaming while streaming | Encoder is now latency-critical too — it cannot drop frames", are restated to the sources. The Steam and antivirus clauses of `:185` are D16's and D15's.
 
@@ -534,6 +556,8 @@ Hands to 9.15: `docs/research-proposal.md:176`, `:185`, `:187` restated as above
 Compiled effect: none.
 
 ## D35 — the media deadlines stated as arithmetic on named rates: 16.7 ms at 60 Hz, 2.67 ms for 128 frames at 48 kHz; the audio workstation's "1–3 ms" restated to its buffer and Ardour's 5 ms target (2026-10-09)
+> Amended by D66 (no source ties 64–128 frames to Ardour's 5 ms; the target's arithmetic is about 32 frames; JACK's defaults are its ALSA backend's).
+> Amended by D90 (the consequence of a missed deadline, per kind: research-proposal.md:414, :820, background-guide.md:207).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 36: `docs/research-proposal.md:414` ("this must complete within 3 ms or a frame drops"), `:640` ("Its deadlines are 1–3 ms rather than gaming's 16 ms, buffer underruns are audible rather than a dropped frame") and `:820` ("A game rendering at 60 fps has a 16 ms deadline every frame … An audio buffer at 128 samples has a deadline nearer 3 ms; missing it is audible") are restated to arithmetic on rates their sources name.
 
@@ -548,6 +572,7 @@ Hands to 9.15: `docs/research-proposal.md:414`, `:640`, `:820` restated as above
 Compiled effect: none.
 
 ## D36 — lottery scheduling as the paper states it: shares proportional in expectation, starvation absent for any client holding tickets, O(n) selection with a list and O(lg n) with a tree; "Stride" leaves the menu row (2026-10-09)
+> Amended by D67 (a ticket holder eventually wins, after 1/p lotteries on average, with no bound).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 38: `docs/research-proposal.md:415` ("Lottery / Stride … MLFQ cannot guarantee proportions. "Roughly less" is easy; "exactly 15% to background" is not"), `:422` ("its advantage is proportional guarantees and starvation-freedom, not speed. Selection is O(n) in the number of processes (O(log n) with a tree)") and `:828` ("Gives proportional CPU shares and freedom from starvation, at O(n) selection cost") are restated to `waldspurger-osdi94` (S1-09; the copy re-downloaded 2026-10-09, SHA-256 `e704678e…`, equal to the record's).
 
@@ -561,6 +586,7 @@ Hands to 9.15: `docs/research-proposal.md:415`, `:422`, `:828` restated as above
 Compiled effect: none.
 
 ## D37 — EDF's optimality stated with its conditions: one processor, Liu and Layland's (A1)–(A5), utilisation at most 1 (2026-10-09)
+> Amended by D68 (the optimality sentence is on p. 58; above utilisation 1 no feasible schedule exists, p. 56).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 40: `docs/research-proposal.md:824`'s "Optimal for meeting deadlines on a single core, but requires deadlines to be declared" is restated to `liu-jacm73` (S1-10; the scan re-downloaded 2026-10-09, SHA-256 `de9fb725…`, equal to the record's).
 
@@ -574,6 +600,7 @@ Hands to 9.15: `docs/research-proposal.md:824` restated as above; `:414`'s EDF r
 Compiled effect: none.
 
 ## D38 — the "70 % fallbacks" example stated through the guard that judges it (2026-10-09)
+> Amended by D69 (held time runs the configuration in force; data contracts §7; "70%" leaves).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 41: `docs/research-proposal.md:718`'s "A condition that scores well while 70% of its configurations were fallbacks did not demonstrate anything about recognition; it demonstrated that MLFQ is fine" is an example with no source, and the project has since fixed the line it illustrates.
 
@@ -586,6 +613,7 @@ Hands to 9.15: `docs/research-proposal.md:718`, and `:916` (B.3) with it, stated
 Compiled effect: none.
 
 ## D39 — "a gaming session lasts an hour" restated to the two measured games; "stable for the whole thing" stated as the premise it is (2026-10-09)
+> Amended by D70 (Chambers is the counter-case; WoWAH's 1.8 h is a median of per-avatar averages, one realm's Horde faction; six coreset files test transitions).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 42, after a stage-3 read (S3-23): `docs/research-proposal.md:303` ("A gaming session may last an hour; polling every 30 seconds would produce 120 identical answers") and `:732` ("A gaming session lasts an hour; the situation is stable for the whole thing") are restated to what the sources measure.
 
@@ -598,6 +626,7 @@ Hands to 9.15: `docs/research-proposal.md:303`, `:732` restated as above; `docs/
 Compiled effect: none.
 
 ## D40 — "stating its reading first tends to produce better decisions" restated to what the literature finds and turned into a question the project measures (2026-10-09)
+> Amended by D71 (the scale leg restated to current 7–9B models; the format leg to what Tam et al.'s published version tests).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 43: `docs/research-proposal.md:340`'s "*Quality.* Requiring the model to state its reading before committing to a decision tends to produce better decisions than asking for the decision alone" has no source, and the sources found bound it. The copies re-downloaded 2026-10-09 are byte-identical to S1-25–S1-28's, each passage below re-read in them.
 
@@ -611,6 +640,7 @@ Hands to 9.15: `docs/research-proposal.md:340` restated as above; `docs/referenc
 Compiled effect: none.
 
 ## D41 — "batch processes consume every cycle you give them" restated to the measured batch jobs: most keep a CPU busy, the indexer does not (2026-10-09)
+> Amended by D61 (every measured batch job keeps a CPU busy while it works; the indexer 88–91 % from Initializing; the rescan figure leaves).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 45: `docs/research-proposal.md:97`'s "**Batch** processes have nobody waiting — a compile, a backup, a file indexer, a video encode. Their defining trait is that they consume every cycle you give them. An eight-second compile computes for eight solid seconds" is read against the dataset's measurements of the same four kinds, each alone on one CPU of the EPYC 7763 runner.
 
@@ -625,6 +655,7 @@ Hands to 9.15: `docs/research-proposal.md:97` restated as above; the bash/cc1plu
 Compiled effect: none.
 
 ## D42 — TuxBot and Vulcan read in full and cited in related-work as adjacent LLM work: TuxBot beside the tuning efforts, Vulcan beside the synthesis line (2026-10-09)
+> Amended by D72 (Vulcan's v3 Table 1; "the nearest architecture" leaves; DOI out of the cite line; LumOS read in full).
 
 Taken under 인지오's delegation (2026-10-09), scope-card items 48 and 49: both entries were `provisional` (abstract pages only); stage 2 read both bodies (S1-17, TuxBot v2; S1-18, Vulcan v3 and v1), and the 2026-10-09 re-check finds no newer version (S1 search log #56).
 
@@ -657,6 +688,7 @@ Hands to 9.15: `docs/references.md` — the six status lines as above.
 Compiled effect: none.
 
 ## D44 — `scx` and `schedext-docs` confirmed against D7, D8 and D10: tier and role as those decisions leave them (2026-10-09)
+> Amended by D73 (scx's README states Meta's deployment in progress; the deployment-path claim and :215 restated).
 
 Taken under 인지오's delegation (2026-10-09), scope-card items 56 and 57: no further read; the two entries' role and status lines are brought to what D7, D8, D10 and D27 decided.
 
@@ -668,6 +700,7 @@ Hands to 9.15: `docs/references.md` `scx` (`:214`, `:216`) and `schedext-docs` (
 Compiled effect: none.
 
 ## D45 — `gamemode-docs`' open question resolved: Microsoft's Xbox Support article states Game Mode holds back Windows Update's driver installs and restart notifications while a game runs (2026-10-09)
+> Amended by D74 (dated: Xbox Wire 2018-10-02 and the 2018-12-30 capture; ananicy-rules' role line handed).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 59, after a stage-3 read (S2-58): the registry's "one open question, deliberately unresolved" — "whether Microsoft documents that Game Mode defers Windows Update driver installs or restart/notification prompts during play" — is answered by the Microsoft-published page the entry named, read rendered.
 
@@ -683,6 +716,7 @@ Hands to 9.15:
 Compiled effect: none.
 
 ## D46 — the SYSmark 2011 note: the departures concerned SYSmark 2012, and the reasons given include its workloads, not its scoring alone (2026-10-09)
+> Amended by D75 (Dessau's own post read; the weighting complaint is AMD's; the registry's :250 note handed).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 70: the paper's prose (`docs/related-work.md`, `docs/research-proposal.md`, `docs/research-claims.md`, `docs/background-guide.md`) carries no sentence on the 2011 departures (`grep -n -i "sysmark\|bapco"`, 2026-10-09). The claim stands only in `docs/workload/source-vetting.md:40` — "2011 AMD/Nvidia/VIA departure concerned scoring weights, not scenario lists — state this explicitly in the paper" — and its premise, "Scenario/application lists documented separately from scoring methodology, so taxonomy can be cited without touching contested scoring" (C-sysmark30-5, prose only). The registry and `dataset/sources.yaml` lines the 2026-09-13 verification named no longer carry it.
 
@@ -695,6 +729,8 @@ Hands to 9.15: `docs/workload/source-vetting.md:40`'s sentence restated as above
 Compiled effect: none.
 
 ## D47 — part E: the kernel build's grounding line restated to SchedCP's own use and the dataset's measured build; items 62 and 66–69 pass through (2026-10-09)
+> Amended by D76 (SchedCP's evaluation, singular; ocallahan-atc17 kept; cc1_step_1).
+> Amended by D103 (item 63's pass-through lines handed).
 
 Taken under 인지오's delegation (2026-10-09), scope-card items 62, 63 and 66–69.
 
@@ -707,6 +743,7 @@ Hands to 9.15: `docs/workload/grounding-sources.md:32` restated as above; items 
 Compiled effect: none.
 
 ## D48 — constrained decoding stated as the servers document it: a completed answer is well-formed; a schema feature the converter lacks is skipped silently and an answer cut at the token limit is not, so the parse branch stays (2026-10-09)
+> Amended by D77 (the converter's behaviour as its code shows; the schema carries the menu, not the number ranges).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 30: `docs/research-proposal.md:489`'s "a local server (Ollama or vLLM)" and "constrained decoding (GBNF grammars, guided decoding) can make malformed output structurally impossible, removing an entire class of validator branches" are restated to the servers' documentation (S2-33, S2-34, S2-35, S2-59) and the project's own requests.
 
@@ -720,6 +757,7 @@ Hands to 9.15: `docs/research-proposal.md:489`'s two clauses restated as above (
 Compiled effect: none.
 
 ## D49 — D13 amended: Apple documents priority inflation on its own platform under the traditional Mach scheduler; Linux's units still lower more than they raise (2026-10-09)
+> Amended by D78 (Apple's words: priority inflation as the Mach scheduler's artifact; no "macOS's own", no "instance").
 
 Taken under 인지오's delegation (2026-10-09), amending D13 (scope-card item 26) on a passage found while reading S2-54 for item 28: D13 said of `docs/research-proposal.md:158`'s "Those that do tend to claim they are the most important thing on the system" that "no documented case of over-claiming was found (S2-29)". One is documented by a vendor.
 
@@ -732,6 +770,11 @@ Hands to 9.15: with D13's lines (`docs/research-proposal.md:158`, `docs/backgrou
 Compiled effect: none.
 
 ## D50 — the kernel quantities restated to the dataset's machine and the published measurements: a pick of about half a microsecond, a 2.4 µs switch, hundreds of switches a second per CPU, seconds per answer (2026-10-09)
+> Amended by D55 (the four values outside the 5 % rule leave the campaign's list, by 인지오's decision; kept in `results.md` as observed ranges).
+> Amended by D56 (the pick: the fair-class pick, about 0.45–0.54 and 0.54–0.63 µs less the tracer's share read in the scheduler; traced values upper bounds).
+> Amended by D57 (others' switch costs: Li, Ding & Shen's regions as measured, Becker & Chakraborty's frequent ~30 000 cycles, ghOSt's patched kernel).
+> Amended by D58 (the switch rates over the pooled repeats: 13 to 12 497 a second, median phase 422, 13 of 67 at 1 000 or more; switches as a lower bound on picks).
+> Amended by D59 (the ratio with one denominator: four to eight orders, six to seven on the laptop; the 8B on one input; :241; hand-off extended).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 28, on the campaign `meas-ci:costs:2026-10-08` (D31; `campaign/results.md`; S4-11, S4-12), S3-21 and S3-22: `docs/research-proposal.md:85` ("Thousands to tens of thousands of times per second, per core. Its decision logic has a budget measured in microseconds"), the §4.1 table (`:233–241`: decision "~1-10 microseconds", context switch "~1-5 microseconds", time slice "~1-10 milliseconds", one LLM inference "~200-3000 milliseconds", "5-6 orders of magnitude slower"), `:243` ("In the time it takes to answer once, the scheduler has made hundreds of thousands of decisions"), `:204` ("scheduling decisions happen tens of thousands of times per second and inference cannot"), `:818` ("Costs 1–5 μs and discards cache locality") and `:848` ("Typically 1–10 ms") are restated to what was measured.
 
@@ -750,6 +793,8 @@ Hands to 9.15: `docs/research-proposal.md:85`, `:204`, `:233–243`, `:818`, `:8
 Compiled effect: none.
 
 ## D51 — local inference latency restated to the measured answers: about 1–3 s for the `system` block on a consumer laptop, 14–36 s on four server vCPUs; "well under the hosted-API figures" and "substantially faster" leave; "a handful of times per hour" stated as an assumption (2026-10-09)
+> Amended by D59 (the 8B's runner answer on one input: 43.18 s, reasoning 6.81 s) and D60 (one M1 Pro, one stand-in request, the answer stops at system).
+> Amended by D107 (the published figures as their pages compute them: Artificial Analysis's per-provider 72-hour medians, LocalScore's 12 GB RTX 3060 mean over submitted runs).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 29: `docs/research-proposal.md:263`'s "A quantized 3–8B model running locally emits a short structured output in roughly 200–800 ms on consumer hardware, well under the hosted-API figures usually quoted. Since the model fires only when the process set changes materially — a handful of times per hour in real use — local inference is the realistic deployment shape", and `:489`'s "local inference is substantially faster on short structured outputs", are restated to the project's measurements.
 
@@ -766,6 +811,7 @@ Hands to 9.15: `docs/research-proposal.md:263`, `:489`'s latency clause, restate
 Compiled effect: none.
 
 ## D52 — determinism at temperature 0 restated to what was observed: byte-identical answers to the same input on the same hardware; longer answers differ across hardware; Llama 3.1's template puts the day into the input (2026-10-09)
+> Amended by D60 (comparisons per prompt; the 8B's system answer unchanged across days; the EPYC 9V45 as the dry run's observation).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 44: `docs/research-proposal.md:740`'s "Local inference with a fixed seed and temperature 0 reduces it substantially" (non-determinism) is restated to the project's requests and the literature.
 
@@ -780,6 +826,7 @@ Hands to 9.15: `docs/research-proposal.md:740` restated as above; `docs/referenc
 Compiled effect: none.
 
 ## D53 — vol-02's quotations read against their sources: 239 of 278 exact, none missing; the corrections listed for 9.15 (2026-10-09)
+> Amended by D97 (277 passages by its own rule: 238 exact, 39 differ; `:1032`, `:949`, `:582`, `:1967`) and D98 (the copies: two record copies replaced by fixed captures; the ghOSt repository entry).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 60: every block-quoted source passage in `docs/guidebook/vol-02-related-work.md` (278 lines: 92 in chapters 2–3, 134 in 4–6, 52 in 7–8; the guidebook's own callouts excluded) was compared word for word with a copy of its source (`search/V60-vol02-quotations.md`, three readers' reports verbatim). Every copy equals its record's SHA-256 except two live pages whose quoted text is unchanged — Nielsen's NN/g excerpt and Microsoft's Game Mode concept page. Spot-checked here: the Kgent table row, the Park and Kgent omissions, the ghOSt order and Miller's count, each confirmed in the copy.
 
@@ -818,5 +865,768 @@ Taken under 인지오's delegation (2026-10-09), stage 4: every decision's hand-
 Applied: `_dev/TODO.md` — the 9.14 and 9.15 lines.
 
 Hands to: as listed.
+
+Compiled effect: none.
+
+## D55 — the four values D50 carried outside the 5 % rule leave the campaign's list: the measured CPU's idle switch and schedule() rates, the idle-path pick median and newidle balancing's mean, kept in `results.md` as observed ranges (2026-10-09)
+
+By 인지오's decision (2026-10-09), amending D50 (scope-card item 28) and D31's campaign method, on the 9.12 audit's re-pool of `meas-ci:costs:2026-10-08` (A1-01, A1-02). D50 carried four values "with their ranges over the 19 repeats" under the workflow's exception for "a value whose spread follows the machine, not the program", which is taken "by 인지오's decision per value, recorded in the slice's changelog, and only for a value that carries none of the effects the slice reports", with "Its 95 % half-width, observed range and repeat count, the part of the machine its spread follows, and the share of the job's time the quantity holds" stated and "when it was taken and the pool's projection" recorded (`measurement-campaign-workflow.md:29–30`).
+
+- **The four** (`campaign/results.md`, 19 repeats; half-width, observed range, the pool's projection): `idle.cs_per_s.measured_cpu` ±7.96 %, 61.0–108.3 a second, 45 repeats; `idle.schedule_per_s.measured_cpu` ±18.39 %, 117.1–567.2 a second, 227; `pick_next_task_fair.sleep.median_ns` ±7.81 %, 481–902 ns, 43; `sched_balance_newidle.sleep.mean_ns` ±6.49 %, 470.8–842.5 ns, 31.
+- **What rests on them:** no quantity D50–D52 state. The pick is read under the ping-pong and messaging loads; the idle switch rate stated is the four CPUs' sum, 319.8 a second ±3.54 %, within the rule (A1-02).
+- **Decided:** the four leave the campaign's list by a dated amendment to its method; `results.md` keeps them as observed ranges, not carried values. The exception is not taken. D50's "Outside the rule" bullet leaves.
+
+Applied: `campaign/method.md` — an Amendments section, the list without the four; `campaign/results.md` — a note naming the four as observed only; `measurement-campaign-record.md` — the 9.12 `kernel` row.
+
+Hands to: none.
+
+Compiled effect: none.
+
+## D56 — D50's pick restated: the fair-class pick `pick_next_task_fair`, about 0.45–0.54 µs under the ping-pong and 0.54–0.63 µs under 80 messaging processes once the tracer's share is taken out; the traced values are upper bounds (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D50 (scope-card item 28) on the 9.12 audit's re-pool of `meas-ci:costs:2026-10-08` from its release and its reading of the traced calls (A1-01–A1-03, A1-06). D50 said: "Less that, the pick is about 535 and 631 ns and the selection about 232 and 287 ns — the subtraction also removes the calibration function's own few tens of nanoseconds, so these lean low, and the traced values are upper bounds. Its whole cost per call (traced minus untraced) is 929 ns, so the tracer hides no larger cost."
+
+- **The re-pool:** the release's 34 archives match GitHub's digests; its 30 pooled job folders are byte-identical to the loop's copies; `pool.py --cpu-model "EPYC 7763"` over the release gives `pool.txt` lines 1–68 and `pooled.json`'s `jobs` unchanged (A1-01, A1-02). Every value D50 states from the campaign stands as pooled.
+- **What the two timestamps hold** (A1-06): the function-graph tracer takes `calltime` on entry (`kernel/trace/trace_functions_graph.c:255` at v6.17) and `rettime` as the first statement of the return handler (`:356`), so the duration of every traced call holds the same in-bracket tracer work plus the function's body. The subtraction assumes that in-bracket share is the same for the calibration call and for the pick.
+- **The in-bracket share read inside the scheduler** (A1-03): in the sleeper pass, a `pick_task_fair` call followed by a switch to `<idle>` returned at its first test — "`if (!cfs_rq->nr_queued) return NULL;`" (`kernel/sched/fair.c:8747–8748` at v6.17) — and its traced median is 340–351 ns across the 19 repeats (mean of the repeat medians 349.3 ns), against the getpid-path calibration's 260.9 ns. A near-empty call inside the scheduler reads about 90 ns more than the calibration; the subtraction of 260.9 ns does not lean low.
+- **The whole cost per call** (`pick_next_task_fair.pingpong.tracer_ns_per_call` 929.1 ns, `__task_pid_nr_ns.getpid.tracer_ns_per_call` 576.1 ns; `campaign/results.md`) exceeds the traced duration it would bound (795.6 ns) and differs between the two contexts by 353 ns; it bounds nothing about the pick.
+- **The pick, both subtractions** (arithmetic): under the ping-pong 795.6 − 349.3 = 446 ns to 795.6 − 260.9 = 535 ns; under 80 messaging processes 543 to 631 ns. The selection alone (`pick_task_fair`): 144–232 ns and 199–287 ns. The put-previous and set-next bookkeeping, both traced under the same load: 795.6 − 493.3 = 302 ns and 892.0 − 547.8 = 344 ns. The traced medians, 795.6 and 892.0 ns, are upper bounds.
+- **What the pick is** (A1-06): `pick_next_task_fair` (`fair.c:8771`) is the fair class's pick — `pick_task_fair`'s EEVDF selection, the put-previous and set-next walk under group scheduling, and `sched_balance_newidle` when nothing is runnable — called directly from `__pick_next_task` (`kernel/sched/core.c:6001`) when every runnable task is in the fair class. It is not the whole of `__schedule` (the runqueue lock, the clock update, dequeuing the blocking task, `context_switch`) and not the scheduler's other choices, made outside `__schedule`: the wakeup's CPU (`select_task_rq_fair`), the wakeup preemption check (`check_preempt_wakeup_fair`), the tick (`task_tick_fair`).
+- **Restated** (D50's "The pick" bullet and the §4.1 table's decision row, `docs/research-proposal.md:233`): the fair class's pick of the next task (`pick_next_task_fair`), traced per call on the dataset's machine, 0.80 µs under the ping-pong and 0.89 µs under 80 messaging processes, upper bounds; less the tracer's share — 0.26 µs read from the calibration call in a getpid loop, 0.35 µs from a near-empty call on the scheduler's idle path — about 0.45–0.54 µs and 0.54–0.63 µs — about half a microsecond. The EEVDF selection inside it is 0.14–0.29 µs. The row is labelled as the fair-class pick; the rest of a context switch is the switch row's.
+- **Noted:** `dataset/tools/meas/costs/graph_durations.py:10` names the calibration `__x64_sys_getpid`, the function D31's dry run found untraceable; `run.sh:114` traces `__task_pid_nr_ns`, as `campaign/method.md` and the results state.
+
+Hands to 9.15: `docs/research-proposal.md:85`'s "Its decision logic has a budget measured in microseconds" and the §4.1 table's decision row (`:233`) restated as above.
+
+Compiled effect: none.
+
+## D57 — the context switch's cost as others measured it: Li, Ding & Shen's three regions attributed as measured, Becker & Chakraborty's frequent value beside their minimum, ghOSt's 599 ns on its patched kernel (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D50 and D32 (scope-card items 28 and 31) on the 9.12 audit's re-read of S1-21, S1-23 and S1-01 from copies byte-identical to their records (A1-12). D50 said: "Others measured 599 ns (ghOSt, Table 3: a Xeon Platinum 8173M, Linux 4.15; S1-01), 3.8 µs direct (Li et al. …) and at least 3 400 cycles (Becker & Chakraborty …); Li et al. measured the total with cache refill at 4.2–8.7 µs for 1–200 KB working sets and up to over 1 000 µs at the largest"; D32: "4.2–8.7 µs for working sets of 1–200 KB and 38.6–203.2 µs at 256–512 KB, past 1 000 µs at the largest … by an amount that grows with its working set"; D31 and D50 quote S1-23 as "at least 3 400 cycles" only.
+
+- **Li, Ding & Shen** (S1-21, `expcs2007.pdf`, §3.1–§3.2, pp. 2–3): sequential access, three regions — from 1 KB to about 200 KB, "context switch times ranging from 4.2µs to 8.7µs. This is because the entire dataset … can fit into the L2 cache, and the context switch does not cause any visible cache interference"; from 256 KB, where each process's data fits the 512 KB L2 cache but the combined dataset does not, "from 38.6µs to 203.2µs"; from 512 KB, "the curves do not increase monotonously with the array size". The figure past 1 000 µs is the stride experiment's (§3.2, arrays of 32 KB–2 MB): "When the access stride is 128B, the cost ranges between 133.8µs and 1496.1µs with the mean 825.3µs" — "the data access pattern can affect the cost of context switch significantly". Direct cost "3.8 microsecond" (p. 2; dual 2.0 GHz Pentium Xeon, Linux 2.6.17).
+- **Becker & Chakraborty** (S1-23, `becker-1811.01412v2.pdf`, §2.2.2, p. 7): "Using lmbench, we found that context switches on our system take at least 3,400 cycles, with a frequent value around 30,000 cycles" (Table 1, p. 2: i7-2640M at 2.8 GHz, Sandy Bridge, Linux 3.16.51-3) — at the nominal 2.8 GHz about 1.2 µs and 10.7 µs (arithmetic).
+- **ghOSt** (S1-01, Table 3, printed p. 596, "CFS Context Switch Overhead 599 ns"; printed p. 595: "experiments run on Linux 4.15 with our ghOSt patches applied", Xeon Platinum 8173M at 2 GHz).
+- **Restated D50** (the switch bullet's "Others measured"): others measured 599 ns (ghOSt's CFS on its patched Linux 4.15) and 3.8 µs (Li et al., direct, Linux 2.6.17) for the switch itself, and Becker & Chakraborty's lmbench runs at least 3 400 cycles with a frequent value around 30 000 (Linux 3.16); with its cache effects, Li et al. measured 4.2–8.7 µs while the data fit the L2 cache, 38.6–203.2 µs once the two processes' data no longer did, and up to 1 496 µs with a 128-byte stride. **`:818`** → about 2.4 µs on the dataset's machine, 0.6–3.8 µs for the switch itself and a frequent value near 10 µs on others' machines, more with the cache state it disturbs.
+- **Restated D32** (the cost of interruption): each switch costs the switch itself and the cache state the program built, by an amount that depends on whether its data still fit the cache and on its access pattern (Li et al.: 4.2–8.7 µs in cache, 38.6–203.2 µs beyond it, up to 1 496 µs with a 128-byte stride).
+
+Hands to 9.15: `docs/research-proposal.md:111` and `:818` restated as above; `docs/references.md` — Li, Ding & Shen and Becker & Chakraborty cited with both figures where the prose cites them.
+
+Compiled effect: none.
+
+## D58 — the switch rate per CPU over the repeats each slice pooled: 13 to 12 497 a second, the median program phase 422; the switches during one answer as switches, a lower bound on picks (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D50 (scope-card item 28) and the search record S3-21 on the 9.12 audit's re-run of S3-21 restricted to the pooled repeats (A1-07). D50 said: "on one CPU running one of the dataset's programs, 12 to 12 447 context switches a second, the median program 437; 13 of 71 program phases at 1 000 or more, 2 at 10 000 or more, both SteamCMD's download (S3-21)"; and "during the laptop's 1.19 s answer, one CPU running the median program switches about 520 times, running SteamCMD's download about 14 800 times". S3-21 (Method) kept every gate-open, full-mode EPYC 7763 phase file on disk, 1 806 over 509 runs.
+
+- **The selection:** 594 of the 1 806 full-mode files are outside the repeat lists the owning slices pooled — 541 from superseded campaigns or replaced phases (9.5 D55, D65, D72, D79–D80; 9.7 D3; 9.10 D146, D152), 31 left out by a slice's validity check or as a duplicate landing (borg's repeat 3 and Déjà Dup's repeats 12 and 25, their sets fetched as a 12 KB page, 9.10 D125 for Déjà Dup; SteamCMD repeats 21, 32, 33, 9.7 D27, D32, D33; 9.5 D66's twice-landed windows), 22 landed but not pooled (9.10 D75's Tracker batches; 9.6 D27's `clamscan` repeats 4–8; 9.6 D28's `train` repeats 4–10); 16 idle-mode files come in (Kdenlive's re-measured idle phase, 9.10 D146). Every pooled (run, repeat) pair is on disk.
+- **The madvise check** leaves the count: 9.10's MNIST check under the desktop kernel's `madvise` mode is "never a repeat" (`measurement-campaign-record.md:545`), pooled apart (9.10 D87, D88).
+- **Restricted** (A1-07): 67 program phases over 1 223 phase files; group medians from 12.9 (single-threaded MNIST training) to 12 497.2 a second, the median phase 422.0 (`mpv-audio/play`); 53 phases at 100 or more, 13 at 1 000 or more — the same 13 as recorded — and 2 at 10 000 or more, SteamCMD's shaped fresh install traced (11 094.5) and untraced (12 497.2).
+- **The counting rule** holds (A1-07): `perf sched timehist` prints one row per `sched:sched_switch` event (`tools/perf/builtin-sched.c` at v6.17), the event fires only when the outgoing and incoming task differ, where `rq->nr_switches` counts (`kernel/sched/core.c`), so a CPU's rows are its context switches, those to and from `<idle>` included; over all 2 195 files every matched line is a switch row and no "lost events" line appears. A schedule() call that keeps the same task is not a row, so a switch is a lower bound on picks.
+- **Switches during one answer** (arithmetic): in the M1 Pro's 1.19 s answer (S3-22), one runner CPU running the median program phase switches about 500 times, running SteamCMD's download about 14 900 times — each switch at least one pick; the answer is the laptop's and the rates the runner's.
+- **Restated D50 "How often":** on one CPU running one of the dataset's programs, 13 to 12 497 context switches a second over the repeats each slice pooled, the median program phase 422; 13 of 67 program phases at 1 000 or more, 2 at 10 000 or more, both SteamCMD's download, traced and untraced (S3-21, restricted). The runner at idle switches 320 times a second over its four CPUs (±3.5 %).
+- **S3-21's busy shares** are over whole phase files, harness time included; restricted to the pooled repeats, `clamscan` 0.9334–0.9435 over 10 repeats and `train` 0.8475–0.8575 over 8; the other seven lines unchanged (A1-08).
+
+Applied: `search/S3-traces-datasets.md` — S3-21 gains a "Restricted (9.12 audit, 2026-10-09)" note: the selection above, the restricted output (A1-07) and busy shares (A1-08), the phase-file denominator. The record's own lines stay as read.
+
+Hands to 9.15: `docs/research-proposal.md:85` and `:204` ("hundreds to thousands of times a second per CPU") and `:241` as above.
+
+Compiled effect: none.
+
+## D59 — the answer over the pick with one denominator and one input: four to eight orders of magnitude, six to seven on the laptop; Llama 3.1 8B's runner answer on the comparable prompt, 43.2 s; D50's hand-off extended (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D50 and D51 (scope-card items 28 and 29) on the 9.12 audit's re-pool and its split of the 8B's runner repeats by prompt (A1-04). D50 said: "an answer over a pick — 1.19 s / 0.8 µs ≈ 1.5 × 10⁶ on the laptop; 13.5 ms / 0.8 µs ≈ 1.7 × 10⁴ for AKTS's 0.5B model on a datacenter GPU; 43.4 s / 0.53 µs ≈ 8 × 10⁷ on four server vCPUs. Four to eight orders of magnitude across the settings measured, about six on a consumer laptop"; D51: "reasoning first 17.48 s and 43.43 s", and the reasoning field's cost "3.4 s and 7.0 s on the runner".
+
+- **The 8B's two inputs** (A1-04): `pool.py` pools the `llama3.1-8b` values per model; repeats 6 and 8 read "Today Date: 08 Oct 2026" and the other nine "09 Oct 2026" (`campaign/results.md`). The nine on the 9 Oct prompt — byte-identical to the M1 Pro's (prompt SHA-256 prefix `b765936ca9` on both, A1-05) — give reasoning first 43.18 s ±0.43 % (71 tokens, generation 10.50 s ±1.67 %) and `system` 36.37 s ±0.35 %, each within the stability rule over nine; repeats 6 and 8, 44.34 s and 44.75 s (79 tokens). The workflow's "identical work" leaves repeats 6 and 8 out of the 8B's figures: the runner's 8B answers are 36.37 s (`system`) and 43.18 s (reasoning first); the reasoning field's cost 6.81 s; the 3B's unchanged (14.10 s, 17.48 s; 3.39 s).
+- **One denominator:** the pick under the ping-pong, 0.45 µs (less the scheduler-side tracer share) to 0.80 µs (traced), D56. Each ratio is an answer on its machine over a pick on the runner (arithmetic): the M1 Pro's 1.19 s (3B, `system`) 1.5–2.7 × 10⁶ and 5.34 s (8B, reasoning first) 6.7 × 10⁶–1.2 × 10⁷; AKTS's 13.5 ms on an A100 1.7–3.0 × 10⁴; the runner's 14.10 s 1.8–3.2 × 10⁷ and 43.18 s 5.4–9.7 × 10⁷. 4.2 to 8.0 orders of magnitude across the settings measured; 6.2–7.1 on the laptop.
+- **Locator:** "In the time it takes to answer once, the scheduler has made hundreds of thousands of decisions" is `docs/research-proposal.md:241`, not `:243`.
+- **The slices** (D50's slice bullet): Solaris's TS table, 20 ms at the top to a few hundred at the bottom, is OSTEP's description (p. 9) of the table at a 100 Hz clock; the illumos table at the default 1 000 Hz clock gives 2–20 ms (`docs/references.md:327`). It is stated as OSTEP describes it.
+- **Restated D50 "The ratio":** an answer on each machine over a pick on the dataset's machine — four to eight orders of magnitude across the settings measured, six to seven on a consumer laptop; the conclusion the table supports — the LLM cannot sit in the decision path — stands. **D51:** "reasoning first 17.48 s and 43.18 s"; the reasoning field's cost on the runner 3.4 s and 6.8 s.
+- **D50's hand-off extended** to the same quantities elsewhere: `docs/research-proposal.md:204`'s "five to six orders of magnitude" (with its rate, already handed), `:220` (RQ4: "LLM inference takes hundreds of milliseconds to seconds. Scheduling decisions take microseconds"), `:293` (the diagram's "scheduling loop (1000s/sec)"), `docs/background-guide.md:24` ("hundreds of thousands of times per second, in microseconds … five to six orders of magnitude, and it will never close"), `docs/research-claims.md:232–233` ("five to six orders of magnitude slower").
+
+Hands to 9.15: the lines above restated as D50 and this entry state them. **9.14:** `dataset/tools/meas/costs/pool.py` keys the LLM values by the formatted prompt's hash if the campaign is re-pooled; the RQ4 figures read 43.18 s and 6.81 s for the 8B on the runner.
+
+Compiled effect: none.
+
+## D60 — the latency and determinism statements bound to what was measured: one Apple M1 Pro, one stand-in request, an answer that stops at `system`; the 8B's comparisons per prompt; the EPYC 9V45 as the dry run's observation (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D51 and D52 (scope-card items 29 and 44) on the 9.12 audit's recount of every request record (A1-05). D51's restatement of `:263` says "on a consumer laptop" and "a recognizer-shaped request"; D52's restatement says "local inference one request at a time returned the same answer to the same input on the same hardware", with "(the same prompt bytes)" across hardware.
+
+- **What was measured:** one Apple M1 Pro with Metal (S3-22), the machine's own work beside it; one stand-in request, `dataset/tools/meas/llm/prompt.json` — its own note: "Not the project's recognizer prompt" — of 437 (3B) and 454 (8B) prompt tokens, one snapshot (`c2-p2a` at 60 s, nine process names); no recognizer prompt exists in the repository to measure instead. The "full" schema (`schema.full.json`) carries `reasoning`, `situation` and `system`; the proposal's `subsystems` block (`docs/data-contracts.md` §6) is not in it, so the answers measured stop at `system`.
+- **Warm-up:** each repeat's warm-up request is labelled and left out (`pool.py`, `summarize_llm.py`); no stated latency includes a model load (S3-22: loads after repeat 1 warm).
+- **Answer identity** (A1-05; temperature 0, seed 1): every (model, schema, prompt, hardware) group returned one answer — EPYC 7763: 3B `system` 66 requests, reasoning first 55; 8B `system` 12 (8 Oct prompt) and 54 (9 Oct), reasoning first 10 and 45; M1 Pro: 30, 25, 30, 25.
+- **Across hardware, per prompt:** the 3B's prompt is the same bytes on the three machines: its `system` answer identical on all three, its reasoning-first answer three different texts, each `gaming`, `false`. The 8B's prompt depends on the day: the EPYC 9V45 (D31's dry run, one server start) and the EPYC 7763's repeats 6 and 8 read the 8 Oct prompt, the M1 Pro and the other nine the 9 Oct prompt; the reasoning-first answer was identical on the EPYC 9V45 and the EPYC 7763 on the first, and differed between the M1 Pro (`background_wanted` `false`) and the EPYC 7763 (`true`) on the second; the `system` answer is the same 26-token text on both prompts and all three machines.
+- **The day in the input:** across the two prompts only the 8B's reasoning-first answer changed (79 and 71 tokens); its `system` answer did not.
+- **The EPYC 9V45** is the dry run's observation, not a repeat ("A job on any other model measures nothing", `measurement-campaign-workflow.md`); it is stated as observed in the dry run.
+- **Locators:** the daemon's latency stamp is `docs/data-contracts.md` §7 (the config schedule, `:334`), not §6; the telemetry shape `prompt.json`'s note and `campaign/method.md:19` cite as §4 is §5 (`:271`).
+- **Restated D51 `:263`:** a quantized 3–8B model answered one stand-in recognizer request of about 440–450 tokens in 1.2–3.0 s for the `system` block on one consumer laptop (an Apple M1 Pro with Metal; 2.3–5.3 s with reasoning first) and in 14–36 s on four server vCPUs without a GPU; the `subsystems` block was not measured. **D52:** for the two models and the one request measured, the same input on the same hardware returned the same answer at temperature 0 with a fixed seed; the longer answers differed across hardware, and an input that carries the day changes from one day to the next.
+
+Hands to 9.15: `docs/research-proposal.md:263`, `:740` restated as above; `:345` and `:742` ("the duty cycle is low") stated with D51's assumption; `:559` ("LLMs are non-deterministic; a single good output means nothing") restated to D52's observation. **9.14:** the latency figures carry the one-machine, one-request scope; Layer 1 measures the real recognizer prompt with its `subsystems` block.
+
+Compiled effect: none.
+
+## D61 — batch work restated: every measured batch job keeps a CPU busy while it works; the indexer differs by a 15 s start and its declared idle class, not by idling (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D41 (scope-card item 45) on the 9.12 audit's recount from the raw records of the repeats each slice pooled (A1-08–A1-10). D41 said: "Tracker's first index of a home, saturation 0.655–0.676 over the job, its run between voluntary blocks 1.876 ms (`file-indexer`, 9.10 D81; D14); 9.6's rescan phase kept the CPU 20.4–25.4 % busy (S3-21)", and restated "but not all: a file indexer blocks every couple of milliseconds and leaves a third of the CPU idle".
+
+- **The indexer's job** (A1-09; 18 repeats, the pool of 9.10 D81): saturation 0.655–0.676 over the job, which opens with Tracker's shipped 15 s initial sleep — `Initializing` arrives 15.37–16.24 s into a 58.3–60.3 s job — and the dataset carries that sleep as the task's arrival (9.10 D71; `dataset/archetypes.yaml` `file-indexer`: "the initial sleep 14.40-15.23 s, carried as the task's arrival"). From `Initializing` on, the program's saturation is 0.884–0.911 (the campaign record's 0.891–0.919 divides the whole job's CPU, 0.33–0.36 s of it before `Initializing`, by the span after it). Its runs between voluntary blocks: mean 1.86 ms (the record's 1.876 ms is a mean), median 0.058 ms; 0.843–0.848 of its CPU runs past 10 ms without a voluntary block. Every thread runs SCHED_IDLE at nice 19 (9.6 D17; `file-indexer` notes).
+- **9.6's rescan** (A1-08, A1-09; 14 repeats): the 20.4–25.4 % is the busy share over the whole phase file, 20.8–25.9 s, which runs to the harness's stop rule; over the job 9.6 D16 defines (the miner's first schedule-in to its own `Idle`, about 5 s) the program's saturation is 0.926–0.964, `cpu-batch`'s stated 0.925–0.964 (9.6 D37). 9.6 D16 withdrew the phase-lifetime reading.
+- **The others** (A1-10): the HandBrakeCLI transcode, saturation 0.99938–0.99947 over 5 repeats (9.10 D100); Déjà Dup's incremental backup 0.99352–0.99517 over 28 (9.10 D125, repeats 12 and 25 left out); the warm `-j8` build's load CPU busy 0.9974–0.9977 over 14 (S3-21's busy share, 9.6's pool). The build's figure is the CPU's busy share over the phase, the encode's and the backup's the program's saturation over its job.
+- **Restated:** batch work has nobody waiting on each step and runs long, and every batch job measured keeps a CPU busy while it works — a kernel build at 99.7 % (busy share), a video encode at 99.9 % and a backup at 99.4–99.5 % (saturation over the job), a first index of a home at 88–91 % once it starts indexing; the indexer runs short by count (median 0.06 ms between blocks) yet 84–85 % of its CPU past a 10 ms slice. What sets the indexer and the backup apart is that they declare themselves background — the indexer SCHED_IDLE at nice 19, the backup in the idle class — and the indexer waits out a 15 s start first. "consume every cycle you give them" is restated to "nearly every cycle while they work".
+
+Hands to 9.15: `docs/research-proposal.md:97` restated as above; the glossary's "Batch process — … Consumes all available CPU" (`:814`) restated with it.
+
+Compiled effect: none.
+
+## D62 — the editor and the compiler stated as measured: `cc1`'s 367.6 ms runs from its start to its exit, unblocked in 99.4 % of object jobs; the per-key figures name their stimulus and their venue (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D33 and D32 (scope-card items 32 and 31) on the 9.12 audit's recount of 9.5's and 9.6's pools (A1-11). D33 said `cc1` "wakes once in 99.3 % of jobs and runs 367.6 ms of CPU at the median … before it next blocks"; D32 said "under Xvfb with no GPU, so rendering runs on the CPU (each entry's venue bound)" and "79.7 ms for VS Code, its TypeScript language server re-checking the file".
+
+- **`cc1_step_1`** (`dataset/archetypes.yaml`, p50 367 630 µs, n 39 998 over 14 repeats; 9.6 D20): `cc1` has no child, so its one structural step runs from its start to its exit; it ends at exit, not at a block. It wakes once in 39 749 of the 39 998 object jobs (99.4 %; per repeat 99.2–99.6 %); 99.3 % is repeat 4's (9.6 D20).
+- **The per-key venue** (9.5 `campaign/method.md` §4, "Single core"): the application's process tree pinned to one CPU, "Xvfb, perf, the replay driver and the snapshots run on the other vCPUs … with the display server idealised" — the per-key CPU is the application's tree; the X server's drawing is not in it.
+- **VS Code's stimulus** (`code-editor` scope): "the keys are a fixed letter cycle (D4: timing only), so the per-key cost is the language server re-checking a file being filled with letter runs".
+- **Restated D33:** on the dataset's machine an editor's threads run a few hundredths of a millisecond between blocks, a few milliseconds at the 99th percentile, while `cc1` runs a median 368 ms of CPU from its start to its exit, unblocked in 99.4 % of object jobs. **D32:** the per-key figures are the application's process tree on one CPU, the X server's drawing left out; VS Code's 79.7 ms is its language server re-checking a file being filled with letter runs.
+
+Hands to 9.15: `docs/research-proposal.md:123`, `docs/background-guide.md:115` (D33) and `:95` (D32) as restated; the glossary's "Interactive process — … Short CPU bursts, long sleeps" (`:826`) stated with D32's measurements (VS Code 14–45 % of its CPU while typing).
+
+Compiled effect: none.
+
+## D63 — D32 amended: Miller's echo limit is 0.1–0.2 s; Deber's indirect input is a touch surface; EEVDF's shorter slice is a requested one; SJF's optimality carries "only the CPU"; Solaris's table is OSTEP's 100 Hz figures (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D32 (scope-card item 31) on the 9.12 audit's re-read of its sources (A2-01–A2-04).
+
+- **The 100 ms** (`:111`). D32's restatement "about 100 ms is the guideline's limit for a keystroke's echo" narrows Miller. Miller, p. 271: for a key's visual feedback, "the delay between depressing the key and the visual feedback should be no more than 0.1 to 0.2 seconds", with "(Note that this delay in feedback may be far too slow for skilled keyboard users …)"; for a control's own response, "Time delay: No more than 0.1 second"; the estimates are "the best calculated guesses by the author" (A2-01). Deber et al.'s indirect input is finger tapping on a touch surface whose image appears on a separate screen, "an indirect setup akin to a laptop touchpad and screen" (p. 1829); its mean detection threshold 96 ms and "the textbook threshold of 100 ms (a value based on Miller's work …)" (p. 1831) (A2-02). No keyboard was measured.
+- **Short turns** (`:113`). D32's "Linux's EEVDF gives a latency-sensitive task a shorter slice without a priority level" restated to the kernel document: EEVDF "calculates a virtual deadline (VD) for each, selecting the task with the earliest VD to execute next. It's important to note that this allows latency-sensitive tasks with shorter time slices to be prioritized"; "tasks can request specific time slices using the new sched_setattr() system call" (`sched-eevdf.rst:18–22`, `:30–32`; A2-03). Solaris's table "from 20 milliseconds (highest priority) to a few hundred milliseconds (lowest)" is OSTEP's description (ch. 8, p. 9); at illumos's default `hz` of 1 000 the same table's quanta are 2–20 ms (`illumos-ts`'s role line), so it is cited as OSTEP describes it, not as a current value.
+- **SJF's optimality** (`:87`). OSTEP's conditions are carried in full: by §7.4 the first of §7.1's five assumptions is already relaxed (§7.3, p. 3: "let's relax assumption 1"), so "given our assumptions about jobs all arriving at the same time, we could prove that SJF is indeed an optimal scheduling algorithm" (p. 5) holds under assumptions 2–5; §7.6, p. 6: "if we knew job lengths, and that jobs only used the CPU, and our only metric was turnaround time, STCF would be a great policy" (A2-04).
+- **Restated:**
+  - `:111` — Miller's guideline puts a keystroke's echo at 0.1–0.2 s and a control's own response at 0.1 s, his "best calculated guesses"; Deber et al. measured a mean detection threshold of 96 ms for tapping on an indirect touch surface, near "the textbook threshold of 100 ms"; "is perceived as lag" attributed to them.
+  - `:113` — EEVDF selects the task with the earliest virtual deadline, which lets a task with a shorter slice run sooner; a task requests its slice through `sched_setattr()`. Solaris's table as OSTEP describes it.
+  - `:87` — SJF minimises average turnaround when every job arrives at once, runs to completion, uses only the CPU and has a known length; STCF without the simultaneous arrival.
+  - D32's cache-cost clause and Li, Ding & Shen's figures are D57's.
+
+Hands to 9.15: `docs/research-proposal.md:87`, `:111`, `:113` restated as above, replacing D32's wording of the same lines.
+
+Compiled effect: none.
+
+## D64 — D13 amended: on the depicted Ubuntu 24.04 desktop `updatedb` is not installed, and the plocate a user installs declares only the idle I/O class; the Linux count shows direction, mostly daemons raising (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D13 (scope-card item 26, with 9.6 D17's hand-off) on the 9.12 audit's read of `updatedb` on the distribution the dataset depicts — a stock Ubuntu 24.04 desktop session (`docs/workload/measurement-overview.md:21`, `:93`) — and its re-run of S3-20 (A2-05, A2-24).
+
+- **D13's statement** "`updatedb` declares itself background work: plocate's unit sets `Nice=19` and `IOSchedulingClass=idle`, findutils' `locate.service` the same with `IOSchedulingPriority=7` (S3-02)" holds for Debian unstable (plocate 1.1.25-1, findutils 4.11.0-3; byte-identical to S3-02's copies).
+- **On Ubuntu 24.04** (A2-05): the desktop image's manifest (`ubuntu-24.04.5.1-desktop-amd64.manifest`) carries no `plocate`, `mlocate` or `locate` package, and `ubuntu-desktop`, `ubuntu-desktop-minimal` and `ubuntu-standard` 1.539 neither depend on nor recommend one. The plocate a user can install is 1.1.19-2ubuntu2 (universe; the only version published to noble's Release pocket, no update — Launchpad, read 2026-10-09); its `plocate-updatedb.service` sets `IOSchedulingClass=idle` and no `Nice=` or `CPUSchedulingPolicy=`, so its CPU priority is the default. `Nice=19` enters with plocate 1.1.23 (NEWS: "plocate 1.1.23, November 24th, 2024 — Various improvements, in particular to the systemd unit file"; absent from 1.1.18-1 and 1.1.19). findutils' `locate` 4.9.0-5build1 on noble ships no unit, only `/etc/cron.daily/locate`, running `nice -n ${NICE:-10}` with `NICE=10`, `IONICE_CLASS=3` (`:31`, `:35`, `:68`).
+- **"declares its class"** is an I/O class, plus a nice value from plocate 1.1.23 on; no `updatedb` unit read declares a CPU scheduling policy.
+- **The direction count** (S3-20 re-run, output byte-identical, A2-24): 40 packages only lower, 16 only raise. The 16 that raise are brltty, espeakup, svxlink, osmo-bts, osmo-mgw, osmo-pcu, frr, gdnsd, earlyoom, low-memory-monitor, readsb, railcontrol, hdapsd, hipercontracer, deepin-boot-maker and deepin-log-viewer — mostly latency-bound daemons; a raise is not by itself an over-claim. The count is of Debian packages' service units, mostly daemons, not of applications; it shows the direction of declarations, not whether any declaration exceeds what its work warrants.
+- **D13's restatement amended:** "Which background tools" — on the depicted Ubuntu 24.04 desktop `updatedb` is not in the stock image; where a user installs plocate (1.1.19), its unit declares the idle I/O class and leaves its CPU priority at the default; plocate's units from 1.1.23 (Debian unstable's) declare both. "In which direction" — stated as the direction of Debian's unit declarations, with who raises.
+
+Hands to 9.15: `docs/research-proposal.md:158` ("`updatedb` does not volunteer that it is background work") restated to the depicted distribution as above — on it the sentence holds for the CPU and not for I/O; `docs/background-guide.md:18` with it; guidebook vol-03 `:109` restated to the same (D13's hand-off said "contradicted by S3-02"; on Ubuntu 24.04 the contradiction is the I/O class only). `docs/references.md` — plocate's unit cited at the version the prose names (1.1.19-2ubuntu2 for the depicted desktop, 1.1.23+ where Debian's is meant), with A2-05's hashes.
+
+Compiled effect: none.
+
+## D65 — D34 amended: `updatedb` per D64; the OBS knowledge-base page carries no live request against linking; Cargo's own words for "driving the compiler" (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D34 (scope-card item 35) on the 9.12 audit's re-read of S2-55, S2-56 and S3-02 (A2-05–A2-07).
+
+- **`updatedb`** — D34's "its installed unit declares its class — plocate's `Nice=19`, `IOSchedulingClass=idle`; findutils' the same with `IOSchedulingPriority=7`" restated per D64: on the depicted Ubuntu 24.04 desktop it is not installed; the installable plocate 1.1.19 unit declares the idle I/O class only; plocate from 1.1.23 also `Nice=19`. It still leaves `:185`'s list of what "an operating system has no way to learn on its own": where it is installed, its unit declares it background work for I/O.
+- **The OBS knowledge-base page** (A2-06): the banner "we ask that you avoid linking users to any knowledge base pages at this time" sits inside an HTML comment (`<!--<div id="noticeBar" …>…</div>-->`, line 150 of both S2-55's copy and the 2026-10-09 copy) and is not displayed. "the KB page quoted, not linked, at its own request" leaves; the page is cited like any other copy where the prose quotes it.
+- **"Cargo driving the compiler"** (A2-07): the Cargo Book, "Why Cargo Exists": Cargo "Invokes `rustc` or another build tool with the correct parameters to build your package."
+
+Hands to 9.15: `docs/research-proposal.md:185`'s `updatedb` clause as above; `docs/references.md` — the Cargo Book's "Why Cargo Exists" page beside its `cargo build` page; the OBS KB page entered without the "at its own request" note.
+
+Compiled effect: none.
+
+## D66 — D35 amended: no source ties a 64–128-frame buffer to Ardour's 5 ms; the target's arithmetic under jackd's default periods is about 32 frames; JACK's defaults are its ALSA backend's (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D35 (scope-card item 36) on the 9.12 audit's re-read of S2-36–S2-39 and S2-57 (A2-08).
+
+- **Ardour's target** (`latency-considerations.html:12–23`): "The latency of any conversion from analog to digital and back to analog is about 1.5–2 ms … Latency below 5 ms should be suitable for a professional recording setup. Because 2 ms are already used in the A/D/A process, extremely low buffer sizes must be used in the workstation I/O setup to keep the overall latency below 5ms. Not all computer audio systems are able to work reliably at such low buffer sizes." It names no frame count. It continues (`:26–28`): "For this reason it is sometimes best to route the monitor signal through an external mixing console while recording, an approach taken by most if not all professional recording studios."
+- **What the target takes** (arithmetic on the sources' formulas): the latency that matters is round trip, capture "usually one audio period" plus playback (`latency-and-latency-compensation.html`); jackd: capture latency is "--period divided by --rate", playback "--nperiods times --period divided by --rate. The default is 2" (jackd(1) `:244–246`, `:285–286`, ALSA backend). At 48 kHz with two playback periods, a 128-frame period gives 2.67 + 5.33 = 8.0 ms before conversion, 9.5–10 ms with it; 64 frames 4.0 ms, 5.5–6 ms; 32 frames (0.67 ms; PipeWire's `default.clock.min-quantum = 32`) 2.0 ms, 3.5–4 ms — the largest power-of-two period under 5 ms.
+- **Defaults:** jackd's `-r` 48000 and `-p` 1024 are its ALSA backend's (`:287`, `:292`); its CoreAudio backend's are 44100 and 128 (`:359`, `:364`). PipeWire's `default.clock.quantum = 1024` is the "Default quantum used when no client specifies one" (`pipewire.conf.5.md:233–234`). Steam Deck's 40–60 Hz range is an embedded update post on its page ("The in-game screen refresh rate can now be adjusted on the fly anywhere between 40-60Hz"), beside the specification lists' "up to 60Hz" (LCD) and "up to 90Hz" (OLED).
+- **Restated `:640`:** no source states "1–3 ms". Ardour's manual sets a recording target below 5 ms round trip, which under jackd's default two periods at 48 kHz takes a 32-frame period (0.67 ms, arithmetic), and notes that studios usually monitor through an external console instead; a 128-frame buffer at 48 kHz comes due every 2.67 ms (arithmetic). "the buffer Ardour's 5 ms target calls for" leaves. `:414` and `:820` as D35 restated them.
+
+Hands to 9.15: `docs/research-proposal.md:640` restated as above, replacing D35's wording; `:414`, `:820` as D35 states them, with JACK's defaults named as its ALSA backend's.
+
+Compiled effect: none.
+
+## D67 — D36 amended: a ticket holder "will eventually win", its expected wait 1/p lotteries, with no bound (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D36 (scope-card item 38) on the 9.12 audit's re-read of `waldspurger-osdi94` (A2-09).
+
+- **The paper** (§2.2, p. 2): "The number of lotteries required for a client's first win has a geometric distribution. The expected number of lotteries n that a client must wait before its first win is E[n] = 1/p, with variance σ²ₙ = (1 − p)/p². Thus, a client's average response time is inversely proportional to its ticket allocation"; "Since any client with a non-zero number of tickets will eventually win a lottery, the conventional problem of starvation does not exist." The guarantee is eventual; the paper states no worst-case wait.
+- **Against the harness's 30 s guard** (arithmetic): a client holding 1/1 000 of the tickets, at 10 ms a lottery, waits past 30 s (3 000 lotteries) with probability 0.999³⁰⁰⁰ ≈ 5 %.
+- **Restated:** D36's "Starvation … Kept, scoped to a client holding tickets" becomes: a client holding tickets eventually wins, after 1/p lotteries on average (p its share of the tickets), with no bound on the wait. "freedom from starvation" (`:828`) and "starvation-freedom" (`:422`) restated so.
+
+Hands to 9.15: `docs/research-proposal.md:422`, `:828` as above, with D36's other restatements.
+
+Compiled effect: none.
+
+## D68 — D37 amended: the optimality sentence is on printed p. 58; above a utilisation of 1 no feasible schedule exists (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D37 (scope-card item 40) on the 9.12 audit's re-read of `liu-jacm73` (A2-10).
+
+- **Locators:** "if a set of tasks can be scheduled by any algorithm, it can be scheduled by the deadline driven scheduling algorithm" is on printed p. 58 (end of §7), not pp. 55–56; p. 55 states it as "if a set of tasks can be scheduled by some priority assignment, it can also be scheduled by this method", and there EDF is defined: "priorities are assigned to tasks according to the deadlines of their current requests".
+- **Above 1** (Theorem 7's proof, printed p. 56): "(C1/T1) + … + (Cm/Tm) > 1, there is clearly no feasible scheduling algorithm." D37's "The paper says nothing of behaviour above a utilisation of 1" leaves: above 1 no algorithm meets every deadline; how EDF misses deadlines there the paper does not say.
+- **Restated:** on one processor, for independent periodic tasks whose deadline is the next request, EDF — priority by the deadline of the current request (p. 55) — schedules every task set any algorithm can (p. 58), exactly those whose utilisation is at most 1 (Theorem 7, p. 56); above 1 none can (p. 56). It needs each task's period or deadline.
+
+Hands to 9.15: `docs/research-proposal.md:824` as above; `docs/references.md` `liu-jacm73`'s role clause "it says nothing about behaviour above utilisation 1" → "above utilisation 1 no feasible schedule exists (p. 56); how EDF behaves there it does not say".
+
+Compiled effect: none.
+
+## D69 — D38 amended: held time runs the configuration in force, not the boot default; the definition is the data contracts' §7; "70%" leaves (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D38 (scope-card item 41) on the 9.12 audit's read of the contracts, the guard and the aggregates code (A2-11).
+
+- **The definitions** are in `docs/data-contracts.md` §7 (`:344`), not §6: "`held` (proposal rejected; previous config carried forward), or `fallback` (the default, from boot or after repeated failures)"; "`config` is the post-validation configuration actually in force after the entry — … the carried-forward config for `held`".
+- **The guard sums both** (`harness/tools/harness/aggregates.py:185–187`: `fb = ci[ci["provenance"].isin(["fallback", "held"])]`, emitted as `fallback_share`; `guard-spec.yaml:114–123`). Held time runs whatever configuration was last in force — a recognized one (MLFQ, EDF, LOTTERY or FIFO) or the boot default; fallback time runs the boot default, MLFQ in all ten committed boot-default files (`harness/boot-defaults/`).
+- **Restated:** a condition whose run spent half or more of its time under fallback or held configurations fails the `provenance_share` guard, and its score is not read as evidence about recognition; the part of that time under fallback measured the boot default, MLFQ. "70%" leaves (an example with no source; the guard's line is one half).
+
+Hands to 9.15: `docs/research-proposal.md:718`, and `:916` (B.3) with it, stated as above, replacing D38's wording.
+
+Compiled effect: none.
+
+## D70 — D39 amended: one shooter's sessions are mostly minutes; WoWAH's 1.8 h is the median of each avatar's average session on one realm's Horde faction; the transitions are six coreset files (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D39 (scope-card item 42) on the 9.12 audit's re-reads of S3-11 and S3-23 (A2-12, A2-13).
+
+- **Counter-Strike** (Chambers et al., IMC '05, §3.2 "Gamers have short attention spans", p. 4): "a significant number of players play only for a short time before disconnecting and … the number of players that play for longer periods of time drops sharply as time increases"; "more than 99% of all sessions last less than 2 hours"; "a Weibull distribution with β = 0.5, η = 20, and γ = 0 closely fits the PDF of measured session times" (minutes; Figure 2). Its median is η(ln 2)^(1/β) ≈ 9.6 minutes (arithmetic). The source is the counter-case to "an hour", not support for it. One server, cs.mshmro.com; the trace table (p. 2) runs Tue Apr 1 2003 to Mon May 31 2004, the abstract says "13-month".
+- **World of Warcraft** (WoWAH, MMSys '11, A2-13): Table 4 (p. 126), "Session time (hr)", (mean, SD) (2.8, 1.8), quantiles (5 %, 25 %, 50 %, 75 %, 95 %) (0.4, 1.0, 1.8, 3.0, 5.5) — "the quantiles and averages of the average daily play time, average session play time, and average daily session count": a distribution over 91 065 avatars of each avatar's average session, not over the 667 032 sessions (p. 125); one realm, TW-Light's Hope, one faction, Horde (Table 1, p. 125); the "knee" sentence is likewise of "the average session play time" (p. 126).
+- **The coreset's transitions** (`dataset/README.md:83–91`): three transition arcs (C3) and three distractor injections (C4), 6 of the 50 files.
+- **Restated `:303`:** polling every 30 s asks the same question 120 times in an hour of play (arithmetic); how long a session lasts depends on the game — on one World of Warcraft realm the median avatar's average session was 1.8 h (5th–95th percentile 0.4–5.5 h), while on one Counter-Strike server most sessions lasted minutes and more than 99 % under 2 h.
+- **Restated `:732`:** "the situation is stable for the whole thing" stays a premise, as D39 states it; "which is why the workloads are built around transitions" → the coreset's three transition arcs and three distractor injections test the transitions.
+
+Hands to 9.15: `docs/research-proposal.md:303`, `:732` restated as above, replacing D39's wording; `docs/references.md` WoWAH (S3-11) and Chambers et al. (S3-23) with these locators.
+
+Compiled effect: none.
+
+## D71 — D40 amended: the scale leg restated to current 7–9B models; the format leg to what Tam et al. test, on the published version (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D40 (scope-card item 43) on the 9.12 audit's re-read of S1-26–S1-28 and the published version of Tam et al. (A2-14).
+
+- **Scale.** Wei et al.'s threshold (p. 4: gains "only … with models of ∼100B parameters") is measured on 2022 models on arithmetic reasoning (§3.1, p. 4: GPT-3 "350M, 1.3B, 6.7B, and 175B", LaMDA "422M, 2B, 8B, 68B, and 137B", PaLM "8B, 62B, and 540B", UL2 20B, Codex). Sprague et al.'s Table 6 (p. 25; direct answer % → CoT %) shows current 7–9B instruction-tuned models gaining on math: Meta-Llama 3.1 8b 16.0 → 47.8, Gemma 2 9b 18.5 → 50.5, Qwen 2 7b 15.9 → 53.5. The ∼100B threshold does not bound them.
+- **Task kind** (Sprague et al.): on commonsense, language-understanding and reading-comprehension datasets "there is little to no separation between the performance of zero-shot CoT and zero-shot direct answer" (§4.2, p. 6); "For non-math questions, we find no features to indicate when CoT will help" (p. 2); Meta-Llama 3.1 8b commonsense 72.9 → 73.4, knowledge 70.1 → 74.1, soft reasoning 55.0 → 56.2; Qwen 2 7b soft reasoning 54.4 → 49.4 (Table 6).
+- **Format** (Tam et al., EMNLP 2024 Industry Track, pp. 1218–1236; the published version): every format carries both fields — "we limit the number of key-value pairs for each dataset to 2: reasoning and answer fields" (§3.2, p. 1220); "In Table 11 we found in classification task JSON-mode performs much better than text due to the restriction on answer space. However in reasoning related task, JSON-mode failed to adhere to the order of reasoning first followed by answer" (p. 1222); "100% of GPT 3.5 Turbo JSON-mode responses placed the "answer" key before the "reason" key, resulting in zero-shot direct answering instead of zero-shot chain-of-thought reasoning", and "The order of keys in structured outputs and the decoupling of reasoning from format adherence emerge as important factors" (p. 1221); "Format restrictions, particularly constrained decoding (JSON-mode), can hinder reasoning abilities while enhancing classification task accuracy" (Conclusion, p. 1224). Open-weight models tested: LLaMA3-8B-Instruct and Gemma-2-9B-Instruct (§3.3, p. 1220). They do not compare an answer with and without a reasoning field. The passages are worded the same in arXiv v3.
+- **Restated:** the recognizer's answer is a classification from a closed menu, by a 3–8B local model under a JSON schema. For classification-like, non-math questions the literature finds little or no gain from reasoning first (Sprague et al.); models of this size do gain on math, so scale alone does not rule a gain out; under a JSON schema, constrained decoding helped classification by restricting the answer space and hurt reasoning, and an answer generated before its reasoning turned chain-of-thought into direct answering (Tam et al.). No source compares a classification with and without a reasoning field. The *Quality* bullet leaves as a claim and stands as the question Layer 1 can answer, as D40 decided; Wei et al. leaves the grounds.
+
+Hands to 9.15: `docs/research-proposal.md:340` as above; `docs/references.md` — Tam et al. under its published version (EMNLP 2024 Industry Track, its ACL Anthology copy), Sprague et al. (ICLR 2025); Wei et al. only if the prose cites it. **9.14:** with D40's question, Tam et al.'s key-order finding: the comparison holds only if `reasoning` is generated before `system` (the contract and the stand-in schema list it first: `docs/data-contracts.md` §6; `dataset/tools/meas/llm/schema.full.json`).
+
+Compiled effect: none.
+
+## D72 — D42 amended: Vulcan lists CPU scheduling as an example task in its v3 Table 1; "the nearest architecture" leaves; Vulcan's DOI stays out of the cite line; LumOS read in full (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D42 (scope-card items 48, 49) on the 9.12 audit's re-reads of S1-17 and S1-18 and its full read of S1-20 (A2-15–A2-17).
+
+- **Vulcan's tables** (A2-15): v3's Table 1 (p. 6), "Examples of systems resource management tasks", lists "CPU scheduling [70] | Select which thread to schedule next. | Rank: all runnable threads."; v1 lists it in Table 1 (p. 4) and in Table 3, "Examples of RANK tasks" (p. 6). D42's "CPU scheduling appears only as an interface example in v1's Table 3" → an example task in its interface tables (v3 Table 1; v1 Tables 1 and 3), not an evaluated domain. Its evaluation: spot-VM scheduling, cache eviction (libCacheSim) and tiered memory, searched with OpenEvolve and ShinkaEvolve (§3.2).
+- **"as the nearest architecture to this work's"** leaves: no source compares TuxBot's architecture with this work's or with ASA's and SchedCP's, which `docs/related-work.md:24` ("Closest to our architecture in shape, ASA") and `:32` ("SchedCP, the closest prior work") already rank — as D10 removed "the most developed". TuxBot is stated as what it does (A2-16): an online tuner whose fast loop proposes updates out of band, "not kernel fast-path controllers such as the CPU scheduler" (p. 1), on hosted Gemini 2.5 Flash and Flash-Lite (p. 9), every change through "typed validation"; the registry's "Nearest point of contact … is the gating" stays as its role line words it.
+- **Vulcan's DOI** 10.1145/3842654.3848582, printed on v3 (p. 1), resolves nowhere on 2026-10-09: doi.org handle API `{"responseCode":100}`, Crossref "Resource not found.", DataCite 404; the ACM Digital Library returned a challenge page (A2-15). The cite line carries the arXiv id only, as D42 states, until the DOI resolves.
+- **LumOS** (S1-20, read in full from the author's PDF linked from the project page, A2-17): Liargkovas, Jabrayilov, Franke and Kaffes, "An Expert in Residence: LLM Agents for Always-On Operating System Tuning", NeurIPS 2025 Workshop: Machine Learning for Systems — TuxBot's first two authors' earlier work. An LLM loop (Gemini 2.5 Flash) tunes CFS's `latency_ns` and `min_granularity_ns` online against a TPC-C/PostgreSQL workload's p99 latency, one proposal per "10-second workload run" (p. 2), on Linux 5.15; against Bayesian optimisation "reduces p99 by 5.0% in 1-parameter tuning … and by 7.1% in 2-parameter tuning" (p. 3); the proposed agent's actions are JSON-Schema tools "validated server-side (types/ranges)" (p. 3). It reports no measurement of recognition, so D12's scoped statement holds. Whether related-work cites it is decided with D42's citations (pending 인지오).
+
+Hands to 9.15: `docs/related-work.md:32`'s TuxBot sentence without the superlative; Vulcan's sentence naming its evaluated domains; `docs/references.md` `vulcan-arxiv25` — "CPU scheduling … an example task in its interface tables (v3 Table 1), not evaluated"; S1-20's entry status updated to the full read.
+
+Compiled effect: none.
+
+## D73 — D44 amended: `scx`'s README states Meta's deployment in progress; the role's "deployment-path claim" and the "Bound on the deployment claim" paragraph are restated with it (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D44 (scope-card items 56, 57) on the 9.12 audit's re-read of `scx` at `v1.1.3` (A2-18).
+
+- **What the repository states** (`README.md:33–35` at `c8728c6b`): "`sched_ext` is supported by the upstream kernel starting from version 6.12. Both Meta and Google are fully committed to `sched_ext` and Meta is in the process of mass production deployment"; `OVERVIEW.md:283–284`: "Distros are able to package and release these schedulers". D44's "production deployment being stated by the operators' own entries … never by `scx`" restated: `scx`'s README states Meta's deployment as in progress; the paper's production statements cite the operators' own entries (D8: Meta's LPC 2024 slides and LPC 2025 abstract; D9: Valve's SteamOS sources), and `scx` for the schedulers' existence and design.
+- **The role's "the deployment-path claim"** (`docs/references.md:214`) is D27's path, grounded in `schedext-docs` and the Ubuntu kernel configuration (D27); it leaves `scx`'s role.
+- **The "Bound on the deployment claim" paragraph** (`:215`) stays with its quotations, restated to the line above.
+
+Hands to 9.15: `docs/references.md` `scx` — `:214` (role without "the deployment-path claim"; "existence of production sched_ext schedulers" → existence of the schedulers, D44) and `:215` as above, beside D44's `:216`.
+
+Compiled effect: none.
+
+## D74 — D45 amended: Microsoft's statement is dated: Xbox Wire, 2018-10-02, and the support article's wording captured on 2018-12-30; `ananicy-rules`' role line handed (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D45 (scope-card item 59) on the 9.12 audit's dating of S2-58 (A2-19).
+
+- **The article today** (rendered 2026-10-09; body text identical to S2-58's rendering): "When you use Game Mode, Windows prioritizes your gaming experience by turning things off in the background. When you're running a game, Game Mode: Prevents Windows Update from performing driver installations and sending restart notifications"; the page carries no date.
+- **Its dated copies:** the Internet Archive's capture of `https://support.xbox.com/en-US/games/game-setup/use-game-mode-gaming-on-pc` of 2018-12-30 (20181230054712) reads "When you use Game Mode, Windows prioritizes your gaming experience. When you're running a game, Game Mode: Prevents Windows Update from performing driver installations and sending restart notifications."; the capture of 2018-07-06 (20180706084246) has no Windows Update sentence.
+- **Microsoft's dated statement:** Xbox Wire, "Latest October 2018 Windows Update Gaming Features", `datePublished` 2018-10-02T21:44:22Z (capture 20220808125358): "Now auto-enabled for all games with a master On/Off toggle in Windows Settings, Game Mode suppresses Windows Update driver installs and blocks Windows Update interruptions such as restart notifications while you're gaming." It does not say how Windows recognises a game; D1 stands.
+- **`ananicy-rules`' role line** (`docs/references.md:236`: "grounds the wanted/unwanted-background distinction as deployed practice") says what D45 restated `grounding-sources.md:18` away from; it is restated the same.
+
+Hands to 9.15: `docs/references.md` — the Xbox Support entry carries the 2018-12-30 capture as the earliest dated copy of the wording and the Xbox Wire post (2018-10-02) as Microsoft's dated statement, in place of "no date on the page" alone; `ananicy-rules`' role line `:236` restated to a per-name priority catalogue, not a wanted/unwanted judgement (D3, D45).
+
+Compiled effect: none.
+
+## D75 — D46 amended: Dessau's own post is read: AMD's CMO gave weighting, GPU acceleration and unrepresentative workloads; the registry still carries the old note (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D46 (scope-card item 70) on the 9.12 audit's read of Dessau's blog post and X-bit Labs' report through the Internet Archive (A2-20).
+
+- **Dessau's post** (Nigel Dessau, "Voting for Openness", blogs.amd.com, June 21, 2011; capture 20110623165026; AMD's release links it as "Executive Blog"; "Nigel Dessau is Senior Vice President & Chief Marketing Officer for AMD. His postings are his own opinions and may not represent AMD's positions"): "We got workloads included that represent the things you and I actually do in a day … But the question remained: what weighting would BAPCo ultimately give to the real-world workloads − since it is this weighting that defines the actual benchmark scores"; "only 7 applications and less than 10 percent of the total measurements dominate the overall score"; "a relatively large proportion of the SM2012 score is based on system performance rated during optical character recognition (OCR) and file compression activities"; "SM2012 scores do not take into account GPU-accelerated applications"; "The heart of our complaint is this: the SYSmark benchmark is not only comprised of unrepresentative workloads (workloads that ignore the importance of heterogeneous computing and, frankly, favor our competitor's designs), but it actually generates misleading results".
+- **X-bit Labs** (capture 20110625114727 of its 2011-06-23 report): "disagreements over the scoring system of SYSmark2012 which does not take graphics card's role into account" is the reporter's wording; Nvidia's spokesperson: "We have resigned [from BAPCo]".
+- **Restated:** AMD's CMO gave the weighting of SYSmark 2012's scores and its neglect of GPU-accelerated work, calling its workloads unrepresentative; VIA said its tests "do not accurately reflect real world PC usage scenarios and workloads"; Nvidia gave no reason, its departure tied to SYSmark 2012 by reporters. D46's "AMD's dispute over weighting is a report of it beside that" leaves: the weighting complaint is AMD's own. The conclusion stands — the reasons were not the scoring alone — and no sentence of the paper needs it.
+- **The registry** (`docs/references.md:250`, `sysmark30`'s role): "Note in paper: the 2011 vendor departures concerned scoring, not scenario lists." — D46's "The registry … no longer carry it" is wrong for this line.
+
+Hands to 9.15: `docs/references.md:250`'s note removed or restated as above (with `docs/workload/source-vetting.md:40`, D46's hand-off); if prose ever cites the dispute, Dessau's post through its 2011-06-23 capture, not through Tom's Hardware.
+
+Compiled effect: none.
+
+## D76 — D47 amended: SchedCP's evaluation, singular; the compile family's short-lived structure keeps `ocallahan-atc17`; the 368 ms is `cc1_step_1` (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D47 (scope-card item 63) on the 9.12 audit's re-read of its grounds.
+
+- **"a compile workload scheduler evaluations use, SchedCP's among them"** — the plural rests on SchedCP alone in this slice's reads (v4 §5, p. 4: "For kernel compilation (tinyconfig, "make -j 172" on 6.14 source) … 1.79× total improvement over EEVDF"). Restated: a compile workload SchedCP's evaluation uses (1.79×).
+- **The short-lived structure** keeps the registry's ground: `ocallahan-atc17`, "make forks and execs 2430 processes, mostly short-lived" (§4.3; `docs/references.md:107`), which `dataset/archetypes.yaml`'s compile notes already cite for "the class's existence and short-lived character only" (9.6's read: a `make -j8` build, "not a kernel build"); the measured structure is the dataset's build (D47), SchedCP's "short-lived processes" its agent's profile text.
+- **"`cc1` a median 368 ms of CPU"** is `compiler-child`'s `cc1_step_1` p50, 367 630 µs (`dataset/archetypes.yaml:971–972`), the `cc1` process's CPU from start to exit (D62).
+
+Hands to 9.15: `docs/workload/grounding-sources.md:32` as above, replacing D47's wording.
+
+Compiled effect: none.
+
+## D77 — D48 amended: what llama.cpp's converter does with what it does not support, as its code at `bd4eeaa0` shows; the schema carries the menu, not the number ranges (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D48 (scope-card item 30) on the 9.12 audit's read of llama.cpp's code at the commit the project's runner pins (A2-22).
+
+- **Silent:** the schema reader (`common/json-schema.cpp`) reads 22 keywords — `$ref`, `oneOf`, `anyOf`, `allOf`, `type`, `const`, `enum`, `properties`, `additionalProperties`, `required`, `items`, `prefixItems`, `minItems`, `maxItems`, `pattern`, `format`, `minLength`, `maxLength`, `minimum`, `maximum`, `exclusiveMinimum`, `exclusiveMaximum`; any other is ignored without a message. A `number` is built with no bounds (`json-schema-to-grammar.cpp:963–964`; an `integer`'s bounds are built, `:952–961`).
+- **Warned on the server only:** a pattern it cannot express is accepted as any string — "pattern … is not supported (…), accepting any string" (`:394–397`) — and the server prints "WARNING: JSON schema conversion was incomplete" to its stderr (`:979–980`); the client is not told.
+- **An error:** a `$ref` outside the document fails the request ("unsupported $ref …, only references into the same document are supported", `json-schema.cpp:104–105`), as does any conversion error (`json-schema-to-grammar.cpp:976–977`; `tools/server/server-schema.cpp:268–269`).
+- **A completed answer is well-formed:** the end-of-generation token's logit is set to −∞ unless a grammar stack is empty (`src/llama-grammar.cpp:1366–1387`), so an `eos` stop implies the grammar completed. Besides `limit`, a generation ends at a stop word (`word`, `tools/server/README.md:669`; the project sends none) or past the context (`truncated`, `:674`).
+- **The runner's build** pins `LLAMA_SHA=bd4eeaa0…` (`dataset/tools/meas/llm/run.sh:14`) with default CMake, and `LLAMA_LLGUIDANCE` defaults `OFF` (`CMakeLists.txt:146`), so requests go through this converter; `request.py` sends `json_schema` to `/completion` with `n_predict` 384. The two measured schemas use only keywords it reads.
+- **What the schema carries:** the algorithm menu is an `enum` the converter supports; the number ranges (`timeslice_growth` 1–8, `batch_share` 0.01–0.90, `batch_bandwidth_cap` 0.05–0.95), the clamping rule and the cross-field rule (`docs/recognition-vocabulary.md` §2, validation rules 3–5) are not enforced by the grammar.
+- **Restated:** D48's "a schema feature the converter lacks is skipped silently" → llama.cpp converts a subset of JSON Schema: keywords it does not read are ignored without notice, a pattern it cannot express is accepted as any string with only a server-log warning, and some unsupported constructs fail the request. D48's "(the menu, ranges and cross-field rules …)" → the number ranges, the clamping rule and the cross-field rule. The parse-failure branch stays for answers ended by the token limit or the context.
+
+Hands to 9.15: `docs/research-proposal.md:489` as above, replacing D48's wording of the two clauses.
+
+Compiled effect: none.
+
+## D78 — D49 amended: Apple's document, in its own words: "priority inflation across the platform", subsystems raising priority to avoid starvation, as an artifact of the Mach scheduler (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D49 (scope-card item 26) on the 9.12 audit's re-read of S2-54 (A2-23).
+
+- **The passage in context** (`doc/scheduler/sched_clutch_edge.md:7` at `xnu-12377.121.6`; the same text in `osfmk/kern/sched_clutch.md:5` at `xnu-6153.11.26`): "The XNU kernel runs on a variety of platforms … The traditional Mach scheduler attempts to achieve these goals by expecting all threads in the system to be tagged with a priority number … It then uses a timesharing model based on priority decay … One artifact of this thread based timesharing approach is that threads at the same priority level are treated similarly irrespective of which user workload they are servicing, which often leads to non-optimal decisions. It ultimately leads to priority inflation across the platform with individual subsystems raising their priority to avoid starvation and timesharing with other unrelated threads."
+- **Not in the source:** "macOS" (the document says "the platform"; the word macOS does not occur), "macOS's own subsystems" (no subsystem is named or attributed), "a documented instance" (a design rationale, with no named case, date or data), "over-declaration" (the motive stated is defensive: to avoid starvation and timesharing with unrelated threads).
+- **D49's restatement amended:** Apple's XNU scheduler documentation gives priority inflation across the platform — individual subsystems raising their priority to avoid starvation and timesharing with unrelated threads — as an artifact of the traditional Mach scheduler's thread-level timesharing and a motivation for the Clutch scheduler (S2-54). The limit at `:158` may cite it so; on Linux, Debian's unit declarations mostly lower priority, and those that raise are mostly latency-bound daemons (D64).
+
+Hands to 9.15: with D13's and D49's lines (`docs/research-proposal.md:158`, `docs/background-guide.md:18`, guidebook vol-01 `:2099`), worded as above; `docs/references.md`'s XNU entry role with this passage, without "macOS's own" or "instance".
+
+Compiled effect: none.
+
+## D79 — D30 amended: the cap is the driver table's under every condition but `llm_full`, and the executor is to enforce it, not yet; four more lines rest on the removed premise (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D30 (scope-card item 71) on the 9.12 audit's read of the code, the contracts and the proposal (A2-25).
+
+- **Who sets the cap.** Only `llm_full` fills the `cpu_scheduler` block (`docs/research-proposal.md:441`); under `llm_algo` "the cap and the constants remain the table's" (`:439`); `random`, `whitelist`, `llm_vocab` and `oracle` "receive the row's **default** entry" (`docs/data-contracts.md` §10, `:467`). The driver table's cap "is never null" (`daemon/driver-table/prior.yaml:17`): 16 rows at 0.05, 11 at 0.5, 4 at 0.333, 1 at 0.2. An unset cap comes from the boot default (`batch_bandwidth_cap: null`, `docs/recognition-vocabulary.md` §2) and from `llm_full`. D30's "the cap is a field the model sets" restated so.
+- **Who enforces it.** The simulator's loader reads no cap (`simulator/src/sim.cpp:892–925`; no occurrence of "bandwidth" in the file); the simulator guide lists "per-class bandwidth caps, enforced by the executor regardless of what any config says" among what is "Needed eventually" (`docs/simulator/simulator-guide.md:210`, §5). D30's restated "which the executor enforces" → which the executor is to enforce, not yet implemented.
+- **When a wait is unbounded.** FIFO's and EDF's deadline tasks return no horizon (`sim.cpp:165`, `:291–293`); the cap is a ceiling on the batch class's share while non-batch work is runnable (`recognition-vocabulary.md:70`), not a floor, so an unset cap leaves a wait unbounded only beside an algorithm without a horizon. An idle-class task "runs only when no task of another class is runnable" and "waits behind every run of its editor by design" (9.11 D5, D7) under every configuration; the simulator has no idle class yet (`sim.cpp`).
+- **Lines the sweep missed** (`grep "starvation\|bandwidth cap"` does not match them): `docs/research-proposal.md:517`, the identical-executor diagram's "same algorithms / same parameters / same caps" — the caps differ by condition and row; `:131` "throttled but never starved", `:174` "throttled, not starved", `:621` "Throttle, never starve" — no executor rule gives the download a floor; `:908`, the appendix trace's `"reason": "bandwidth_cap"`, not a value of the trace contract ("reason ∈ block | preempt | exit | depart", `docs/data-contracts.md:415`).
+- **Restated (the parts not pending):** §4.7's statement of what holds reads: the executor has no starvation window; FIFO and EDF's deadline class have no horizon, so beside them an unset cap can leave a task waiting without bound, and an idle-class task waits behind other classes by design; MLFQ's boost can be lengthened to 10 s but not removed; a run in which any task waits more than 30 s fails `starvation_floor`, and on a run the criterion reads that makes the verdict invalid. The batch class's cap is a configuration field — the driver table row's under every condition but `llm_full`, unset or 0.05–0.95 there — which the executor is to enforce.
+
+Hands to 9.15: `docs/research-proposal.md:473`'s replacement as above (replacing D30's wording); `:517` → the same executor, with the algorithm, parameters and cap each configuration sets; `:131`, `:174`, `:621` → throttled by the batch class's cap, its waits judged by the 30 s guard, not guaranteed; `:908` → a trace reason the contract defines; `docs/simulator/simulator-guide.md:210` (D30's hand-off) to the one cap, "to be enforced". `:756` is pending 인지오.
+
+Compiled effect: none.
+
+## D80 — related-work's opening of the behavioural section: inside the scheduler what is inferred is inferred from behaviour; deployed systems also act on declarations, the window system and a name table (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), on the 9.12 audit's coverage finding (no scope-card item): `docs/related-work.md:16`'s "Where situational awareness exists in deployed schedulers today, it is inferred from runtime behavior." is read against the slice's reads of what deployed systems act on (A4-09 to A4-12; D2, D10, D13, D18, D26, D28, D29).
+
+- **Inferred from behaviour, inside the scheduler:** MLFQ's demotion by CPU use, CFS's and EEVDF's sleeper handling (D18), scx_lavd's latency criticality from wake/wait patterns (D10); Windows boosts a thread "when a wait operation associated with disk or keyboard I/O finishes" (A4-09).
+- **Declared by the program, its packager or a wrapper:** on Linux the policy, nice value and I/O class — "The nice value can be modified using nice(2), setpriority(2), or sched_setattr(2)" (sched(7), A4-12) — set by the program, its unit or a wrapper (D13, D26); on macOS a QoS class the developer assigns, "Constants that indicate the nature and importance of work to the system" (Apple's `QualityOfService`, A4-12), which XNU's scheduler follows: "These scheduling buckets roughly map to the QoS classes used by the OS runtime to define performance expectations for various pieces of work" (`sched_clutch_edge.md:24`, A4-12; D28, D29).
+- **From the window system:** Windows — "When a process that uses NORMAL_PRIORITY_CLASS is brought to the foreground, the scheduler boosts the priority class of the process associated with the foreground window" and "When a window receives input, such as timer messages, mouse messages, or keyboard input, the scheduler boosts the priority of the thread that owns the window" (Microsoft Learn, "Priority Boosts", A4-09); Game Mode — "The app must be in the foreground and have focus before exclusive resources are granted" (A4-10), and on macOS "When your game enters full screen, Game Mode automatically turns on for that game" (A4-11; D2).
+- **From a name table:** ananicy-cpp's catalogue, matched by executable name (D3).
+- **"it is inferred from runtime behavior"** holds for what a scheduler infers about a task itself; as a statement of where deployed situational awareness comes from it is contradicted by the declared classes, the foreground and input boosts and the game modes above.
+- **Restated:** inside the scheduler, what a deployed scheduler infers about a task it infers from runtime behaviour; the other signals deployed systems act on are declared — a Linux class, nice value or unit setting, a macOS QoS class — or come from the window system (Windows' foreground and input boosts; Game Mode's foreground or full-screen game) or from a name table (ananicy-cpp's catalogue). D18's restatement is of `:16`'s second sentence and D10's of its third; this decision is the first's.
+
+Hands to 9.15: `docs/related-work.md:16`'s first sentence restated as above; the section heading ("Behavioral inference inside the scheduler") stands; Microsoft's "Priority Boosts" page is D29's registry entry.
+
+Compiled effect: none.
+
+## D81 — the learned line's mapping: Decima and FIRM learn a policy from observed state to actions — Decima's scheduling decisions, FIRM's resource limits; Park defines such state and action spaces (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), on the 9.12 audit's coverage finding (no scope-card item): `docs/related-work.md:24`'s "These systems learn a mapping from observed system state to scheduling actions" is read against the three papers (A4-08), after D19 (`:24`'s first sentence, Park restated as a platform) and D20 (the limits clause that follows).
+
+- **Decima** (`decima-sigcomm19`): "a scheduling agent observes the cluster state to decide a scheduling action on the cluster environment … The agent uses a graph neural network to turn job DAGs into vectors for the policy network, which outputs actions" (Fig. 4 caption, PDF p. 4); "Mapping the cluster state to a scheduling decision takes less than 15ms" (§6.1, PDF p. 8).
+- **FIRM** (`firm-osdi20`): the RL agent "performs an action at ∈ A based on its policy πθ (s) … which maps state space S to action space A" (RL primer, PDF p. 8); its state is SLO maintenance ratio, workload changes, request composition and resource utilization, its action "Resource Limits RLTi (t), i ∈ {CPU, Mem, LLC, IO, Net}" (Table 3, PDF p. 10) — resource-management actions, not scheduling actions.
+- **Park** (`park-neurips19`): "an open, extensible platform that presents a common RL interface to connect to a suite of 12 computer system environments"; "For each environment, Park defines the MDP formulation, e.g., events that triggers an MDP step, the state and action spaces and the reward function" (§1, PDF p. 2) — it learns nothing itself; agents are learned in its environments.
+- **Restated:** Decima and FIRM learn a policy mapping observed system state to actions — Decima's scheduling decisions over job DAGs, FIRM's per-microservice resource limits — and Park defines such state and action spaces for the twelve environments in which agents are learned. D20's limits clause follows unchanged.
+
+Hands to 9.15: `docs/related-work.md:24`'s second sentence, its opening clause restated as above.
+
+Compiled effect: none.
+
+## D82 — the two shared commitments scoped to the works that state them: the semantic gap SchedCP's, the LLM out of the per-decision path SchedCP's, TuxBot's, Vulcan's and AKTS's; Jadhav et al.'s LLM makes the decisions (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), on the 9.12 audit's coverage finding (no scope-card item): `docs/related-work.md:34`'s "We share two commitments with this line: the semantic gap as the problem, and LLM reasoning kept strictly out of the scheduling hot path." is read against the LLM works related-work cites or will cite (D12, D22–D24, D42): SchedCP, Kgent, TuneAgent, Jadhav et al., TuxBot, Vulcan, AKTS (A4-01 to A4-07).
+
+- **The semantic gap as the problem:**
+  - SchedCP frames it: "Operating system schedulers suffer from a fundamental semantic gap, where kernel policies fail to understand application-specific needs" (v4 Abstract, A4-01).
+  - TuxBot frames prior tuners' failure as "Lack of semantic understanding" (v2 §1, p. 1, A4-02).
+  - Kgent's problem is writing eBPF ("alleviates the difficulty of writing an eBPF program", Abstract, A4-07); TuneAgent's the kernel configuration space (A4-06); Jadhav et al.'s multiobjective HPC job scheduling (A4-05); Vulcan's LLM-friendly interfaces for systems heuristics (A4-03); AKTS's switching kernel scheduling to a serving node's load regime (A4-04). None frames a semantic gap.
+- **The LLM out of the scheduling hot path:**
+  - SchedCP: "operating in the control plane to generate optimized code that runs natively with negligible runtime overhead, unlike traditional ML models that would cause unacceptable inference latency in the scheduler hot path" (v4 §2, PDF p. 2; v2 §3.1: "producing native eBPF code that executes without any ML inference overhead during actual scheduling decisions", A4-01).
+  - TuxBot: "We study tuners that operate out of band: they are not inline on each request, and they are not kernel fast-path controllers such as the CPU scheduler, a packet scheduler, or a TCP congestion controller" (v2 §1, p. 1, A4-02).
+  - Vulcan: "Vulcan takes a different stance: it avoids neural inference in the hot path entirely, confining learning to an offline search over small, interpretable LLM-generated code snippets" (v3 §9, PDF p. 14, A4-03).
+  - AKTS: "Schedulers place tasks every few microseconds while even small models need milliseconds per decision, so inference on the scheduling path is ruled out by construction" (v2 §1, p. 1, A4-04).
+  - Kgent and TuneAgent state no such commitment; their LLM's output is an eBPF program (Kgent) or a kernel configuration that is rebuilt and deployed before it runs — "kernel tuning requires rebuilding, deploying, and benchmarking the system" (TuneAgent v2 §1, PDF p. 2, A4-06).
+  - Jadhav et al.: the LLM is the scheduler — "a novel Large Language Model (LLM)-based scheduler using a ReAct-style framework (Reason + Act), enabling iterative, interpretable decision-making" (Abstract, p. 1); "The wall-clock times required (up to an hour for 100 jobs) indicate that, at the moment, LLM-based scheduling is not suitable for real-time job submission scenarios" (§3.7.3, PDF p. 9, A4-05).
+- **Restated:** we share with SchedCP the semantic gap as the problem, and with SchedCP, TuxBot, Vulcan and AKTS the LLM kept out of the scheduler's per-decision path, each stating it; Jadhav et al.'s LLM makes the HPC job-scheduling decisions itself. "this line" and "strictly" leave.
+
+Hands to 9.15: `docs/related-work.md:34`'s first sentence restated as above, cited per work (`schedcp-mlsys25` v4 §2 and Abstract; `tuxbot-arxiv26`; `vulcan-arxiv25`; the AKTS entry D12 mints; `jadhav-arxiv25`). The sentences after it are D12's and D23's.
+
+Compiled effect: none.
+
+## D83 — the positioning paragraph: the LLM line's outputs and settings stated per work; the identity-reading, signal-producing cell's one documented recognizer is a name table, beside declarations and window-state triggers; the mechanisms clause scoped (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), on the 9.12 audit's coverage finding (no scope-card item): `docs/related-work.md:48`'s "Mechanisms (ghOSt, sched_ext) underlie all quadrants", "The LLM-agent line reads meaning but spends it on per-workload policy synthesis for servers" and "The meaning-reading, signal-producing quadrant — where desktop situation awareness must live — is today occupied only by static name tables" are read against D2, D3, D4, D12, D13, D21, D23, D24, D28, D42 and A4-01 to A4-07. D12 takes the paragraph's "for the first time in this line"; D6 its `whitelist` wording.
+
+- **What the LLM line produces:**
+  - Policy code: SchedCP's agents configure existing schedulers, generate patches or compose new ones (D23); Kgent synthesizes eBPF programs (D22); Vulcan synthesizes stateless decision functions in a restricted language (D42).
+  - Configuration and parameters: TuneAgent the kernel's build configuration (D24); TuxBot up to 41 Linux parameters, online and out of band (D42).
+  - Decisions: Jadhav et al.'s LLM schedules HPC jobs (D24; A4-05).
+  - A selection among fixed policies: AKTS routes high- and low-load telemetry to a policy index — "recognize the regime at a coarse timescale and switch kernel scheduling behavior to match" — and its actuator lets "a slow agent switch among verified kernel policies" (A4-04; D12).
+- **What it reads:** SchedCP's Observation Agent starts "from process name and commands" and then profiles (D12); TuxBot reads "knob schemas, telemetry, current configuration, recent action–response history, and retrieved prior runs" (A4-02); AKTS reads load telemetry (D12).
+- **Where it is evaluated:** SchedCP on an 86-core Xeon server and an 8-core Core Ultra 7 258V laptop, naming edge and personal devices among its motivations (D23); AKTS on a GPU-backed LLM serving node (A4-04); Jadhav et al. on HPC job traces (A4-05); TuneAgent on UnixBench and server applications (A4-06). "per-workload policy synthesis for servers" holds for part of SchedCP only.
+- **The identity-reading, signal-producing cell:**
+  - The one deployed system documented as recognizing a situation from process identity is ananicy-cpp's name catalogue, which CachyOS installs and enables (D3).
+  - Beside it, deployed systems act on what a program declares — a Linux class, nice value or unit setting (D13, D26), a macOS QoS class (D28), a game's request to Feral GameMode (D4), the `LSSupportsGameMode` key (D2) — and on window state: Windows' and macOS's Game Mode act on the foreground or full-screen game, how Windows recognises a game being undocumented (D2; D80). Nothing in these is recognized; the program or the window system states it.
+  - Behaviour-reading recognizers that produce a selection among fixed policies exist: ASA (D21) and AKTS, the latter with an LLM (D12).
+- **"Mechanisms (ghOSt, sched_ext) underlie all quadrants":** SchedCP and ASA deploy through sched_ext (D21, D23); ananicy-cpp's types set nice, I/O class and scheduling policy through the kernel's existing interfaces (D3); Windows Game Mode grants CPU sets (D2). The mechanisms underlie the policy-replacing systems, not the name table or the game modes.
+- **"Behavioral heuristics and learned schedulers occupy the behavior-reading column and cannot see intent"** is the paper's argument; D14 restated the pair that grounded it in `:18`, and the clause follows D14.
+- **Restated:** the LLM line turns what it reads — process names and profiles, telemetry, knob schemas — into policy code (SchedCP, Kgent, Vulcan), configuration and parameters (TuneAgent, TuxBot), job decisions (Jadhav et al.) or a selection among verified policies from telemetry (AKTS), evaluated on servers, HPC queues and, for SchedCP, a laptop; in the cell that reads process identity and produces a signal, the one documented recognizer deployed today is a static name table (ananicy-cpp's catalogue), beside the declarations and window-state triggers deployed systems act on; mechanisms such as ghOSt and sched_ext let a policy-replacing system take effect.
+
+Hands to 9.15: `docs/related-work.md:48` restated as above, its quadrant figure (if made) drawn from the same placements; the guidebook's positioning passages checked against it.
+
+Compiled effect: none.
+
+## D84 — the `:12` note: "the mechanism layer is already proven" stated as D7 and D8 ground it; "forfeits less than it appears to" is the authors' argument, the simulator one lane with no sched_ext port (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), on the 9.12 audit's coverage finding (no scope-card item): `docs/related-work.md:12`'s note — "this paragraph doubles as the honest framing for why our evaluation is simulator-based with sched_ext as future work — the mechanism layer is already proven, so simulating the executor forfeits less than it appears to" — is read against D7, D8 and D27. The note is a writing note: "Each subsection ends with an italicized note … Delete the notes before submission" (`docs/related-work.md:3`).
+
+- **"the mechanism layer is already proven"** — what the sources ground: the kernel states sched_ext's integrity and fallback ("The system integrity is maintained no matter what the BPF scheduler does", D7); operators report sched_ext schedulers deployed at fleet scale, Meta's `scx_layered` on "1M+ machines" and Valve's SteamOS offering `scx_lavd` (D8, D9). Restated to these.
+- **"so simulating the executor forfeits less than it appears to"** is the authors' argument, with no source. What the simulation is: "**One lane.** Exactly one simulated CPU. The scheduler answers one question: *who holds the lane until the next event*" (`docs/simulator/simulator-guide.md:44`, A4-13); no algorithm or executor of this project has a sched_ext implementation (D27).
+- **Restated:** the note, if kept in any form, states the mechanism layer as D7 and D8 ground it and the simulator as one lane with sched_ext as future work (D27); "forfeits less than it appears to" leaves or is stated as the authors' expectation.
+
+Hands to 9.15: `docs/related-work.md:12`'s note brought in line with D7, D8 and D27, or removed with the notes before submission.
+
+Compiled effect: none.
+
+## D85 — the proposal's Family 3 rows read against the shipped catalogue: Discord, the Godot editor, Blender, Resolve and `node` are entries; the cluster's and the databases' programs are not (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), on the 9.12 audit's coverage finding (sentences no scope-card item carries): `docs/research-proposal.md:631`'s "Where the whitelist fails structurally, and where the world-knowledge claim in §2.4 is decided", its rows `:636–638` ("Godot-built indie game + Discord", "Blender background render + Resolve timeline playback", "Local Kubernetes + database + dev server") and `docs/research-claims.md:75` ("A Godot-built indie game is a game that nobody registered.") are read against `ananicy-rules` at `03ef03fb` as D5 read `:635`'s row (A5-01).
+
+- **The catalogue's entries for the rows' programs** (A5-01; a rule's `name` is "used for match processes by exec bin name", D1):
+  - `:636` — `Discord` and `discord` are entries of type `Chat` (`Chats/chats.rules:17–18`; nice −3, best-effort I/O 7, `00-types.types:36`). Godot: the editor's builds `godot.x11.opt.tools.64` and `.32` are `Game` (`Games/linux-native/linux-native_g.rules:90–91`; nice −5), and `GodotWorkshopUtility.x86_64` is `BG_CPUIO` (`Games/linux-native/common.rules:524`). A game made with Godot is matched only if its own process name is an entry.
+  - `:637` — `blender` (`Creative/blender.rules:2`) and `resolve` (`Creative/davinci.rules:2`) are both `Heavy_CPU` (nice 9, best-effort I/O 7, `00-types.types:33`).
+  - `:638` — no entry for `kubelet`, `kube-apiserver`, `k3s`, `k3d`, `kind`, `minikube`, `containerd`, `dockerd`, `docker`, `etcd`, `postgres`, `mysqld`, `mariadbd`, `redis-server` or `mongod`; `node` is `BG_CPUIO` (`Development & Programming/node.rules:2`; nice 16, idle I/O, `SCHED_IDLE`, `00-types.types:22`), `podman` is `Service` (`Tools/podman.rules:2`).
+- **What holds of the heading, row by row:**
+  - `:636` — a registration failure for a game whose process name the catalogue does not carry; Discord, beside it, is registered. `docs/research-claims.md:75` holds as written for such a game; "A finite list cannot cover software it never enumerated" (`:76`) stands.
+  - `:637` — not a registration failure: both programs are entries. The row's split — Resolve's playback in the foreground, Blender's render wanted in the background (`media`, `background_wanted: true`) — is one the catalogue's single type for both does not make, which is mechanism 1, combination (`docs/research-claims.md:69–72`), not mechanism 2.
+  - `:638` — a registration failure for the cluster's and the databases' programs; a Node.js dev server is an entry, in the idle class.
+- **D6's conditions:** the shipped-catalogue condition matches `:636`'s Discord, `:637`'s two programs and `:638`'s `node` as above; the strongest-name-table condition gives Family 3's software no rule by its definition (D6). Which of these programs Family 3 keeps, and which names the strongest table carries at the familiarity tiers' boundary, is that family's design and the build of the two conditions (D6's open points), not decided here.
+
+Hands to 9.15:
+
+- `docs/research-proposal.md:631` — "Where the whitelist fails structurally" stated of the programs the catalogue does not carry; `:636` and `:638` named as such, Discord and a Node.js dev server noted as entries; `:637` no longer stated as unregistered software under Family 3's heading while it names programs the catalogue carries (as D5 did for `:635`).
+- `docs/research-claims.md:75–77` stand.
+
+Hands to the build of the two conditions (D6): Family 3's rows as one input to the strongest table's boundary.
+
+Compiled effect: none.
+
+## D86 — "every real scheduler is a guessing machine" restated: schedulers act on CPU used against a share, on what programs declare, and on recent behaviour (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), on the 9.12 audit's coverage finding: `docs/research-proposal.md:89`'s "So every real scheduler is a guessing machine: a pile of heuristics that watch past behaviour to estimate the future" is read against the kernel's own documents and the reads D18, D26, D28 and D29 took.
+
+- **CFS** (A5-02; `sched-design-CFS.rst` at `7b63ef2d`, byte-identical to S2-04): "CFS basically models an "ideal, precise multi-tasking CPU" on real hardware" (`:18–19`); "it always tries to run the task with the smallest p->se.vruntime value (i.e., the task which executed least so far)" (`:45–47`); "the CFS scheduler has no notion of "timeslices" in the way the previous scheduler had, and has no heuristics whatsoever" (`:96–98`), beside "a few add-on embellishments like nice levels, multiprocessing and various algorithm variants to recognize sleepers" (`:51–53`). It replaced "the previous vanilla scheduler's SCHED_OTHER interactivity code" (`:13–14`).
+- **EEVDF** (A5-03; `sched-eevdf.rst` at `7b63ef2d`, byte-identical to S2-03): "EEVDF aims to distribute CPU time equally among all runnable tasks with the same priority" (`:13–14`); it "picks tasks with lag greater or equal to zero and calculates a virtual deadline (VD) for each, selecting the task with the earliest VD to execute next" (`:18–20`); "tasks can request specific time slices using the new sched_setattr() system call" (`:30–32`).
+- **Declarations:** Linux's scheduling classes, set by the program, its unit or a wrapper (D26); macOS's QoS classes, "Work that has no QoS information assigned is treated as default" (D28); a requested slice (EEVDF above).
+- **Behaviour:** MLFQ's demotion by CPU used (OSTEP ch. 8; D18); Windows' boosts on I/O completion, foreground and input, decaying one level per slice (D29); XNU's usage-decayed thread priority inside its EDF-over-QoS hierarchy (D29).
+- **What stands:** no scheduler knows a job's future length (OSTEP §7.9, p. 10; D32). **What leaves:** "every real scheduler is a guessing machine", "a pile of heuristics" — CFS's document says it has none, and part of what the schedulers act on is declared, not watched.
+- **Restated:** no scheduler knows how long a job will run; each acts on what it has — the CPU a task has used against its fair share (CFS, EEVDF), what a program or its unit declares (a scheduling class, a QoS class, a requested slice), and recent behaviour (MLFQ's demotion, Windows' boosts, XNU's usage decay).
+
+Hands to 9.15: `docs/research-proposal.md:89` restated as above.
+
+Compiled effect: none.
+
+## D87 — the MLFQ rules stated as OSTEP's revised Rule 4 and Rule 5, which the simulator implements; "slept before the slice ran out → stay high" stated with its accounting (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), on the 9.12 audit's coverage finding: `docs/research-proposal.md:119–121` ("Used up your entire time slice? → probably batch → demote to a lower queue / Went to sleep for I/O before your slice ran out? → probably interactive → stay high / Periodically, boost everything back up so nothing starves forever"), `docs/background-guide.md:111–113` (the same three rules) and the rule text of `docs/background-guide.md:203`'s glossary row ("burn your whole slice → demoted (probably batch), sleep before it ends → stay high (probably interactive); periodic boost so nothing starves") are read against OSTEP and the project's simulator.
+
+- **OSTEP ch. 8** (A5-04; Version 1.10, byte-identical to S1-02): the first attempt, p. 3 — "Rule 4a: If a job uses up its allotment while running, its priority is reduced (i.e., it moves down one queue)"; "Rule 4b: If a job gives up the CPU (for example, by performing an I/O operation) before the allotment is up, it stays at the same priority level (i.e., its allotment is reset)". Rule 4b can be gamed, p. 8: "Without any protection from gaming, a process can issue an I/O before its allotment ends, thus staying at the same priority level, and dominating CPU time." Revised, p. 8: "We thus rewrite Rules 4a and 4b to the following single rule: Rule 4: Once a job uses up its time allotment at a given level (regardless of how many times it has given up the CPU), its priority is reduced (i.e., it moves down one queue)." The boost, p. 6: "Rule 5: After some time period S, move all the jobs in the system to the topmost queue", by which "processes are guaranteed not to starve".
+- **The simulator** (A5-05; `simulator/src/sim.cpp` at `a7ad2f29`, "The five textbook rules", `:173`): a full slice at a level demotes (`:214`); blocking "keeps both level and allotment" (`:221`); the CPU a task runs is charged to its allotment (`:231`) and its turn ends when the slice less the allotment is used (`:230`); every `boost_interval_us` all tasks return to the top queue with their allotments cleared (`:199–206`), 100 ms by default (`docs/recognition-vocabulary.md:113`). This is Rule 4 with the allotment equal to one slice, and Rule 5.
+- **Restated:** used up your allotment at this level — a slice's worth of CPU, counted across every sleep along the way? → demoted (Rule 4); gave up the CPU before using it up? → stay at your level, the CPU you used still counted (Rule 4b's reset leaves, OSTEP's reason given); every boost interval, everything returns to the top queue, so no job starves (Rule 5).
+
+Hands to 9.15: `docs/research-proposal.md:119–121`, `docs/background-guide.md:111–113` and `:203`'s rule text restated as above (`:203`'s "the default scheduler family real OSes use" is D29's). The guidebook vol-01 §10.7–10.9 states Rule 4b as the first attempt and its revision (`:2225`, `:2336–2348`) and stays.
+
+Compiled effect: none.
+
+## D88 — D14 amended: the premise's other lines — the proposal's §1.4 and Family 2 sentences, the claims page's thesis and pair, the background guide's MLFQ story; the past-10 ms shares of the pair the dataset carries (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D14 (scope-card items 6 and 47) on the 9.12 audit's coverage finding: lines that carry the premise D14 restated, and that D14 did not hand, are restated with it.
+
+- **`docs/research-proposal.md:129`** — "A C++ compiler and a cryptocurrency miner both look like "CPU-bound." A file indexer and a chat client both look like "sleeps often, low CPU."" Measured (A5-10): the dataset's file indexer, Tracker's first index of a home, keeps its CPU about nine-tenths busy from the miner's `Initializing` (0.884–0.911 on one basis, D61; the 0.891–0.919 of `dataset/archetypes.yaml:1502` divides the whole job's CPU by the span after `Initializing`; 9.10 D81) and runs 0.844–0.849 of its CPU past a 10 ms slice without a voluntary block (`:1503`); the chat client, Element idle in one room, uses 0.088–0.114 % of its CPU at 12.0–12.6 wakes a second (`:771`; `meas-ci:desktop:2026-09-20`, 18 repeats). No cryptocurrency miner is read or measured; the compiler (`cc1`, D33) and the ML training run (D14) are, both keeping a CPU busy. Restated: a compiler and a training run both look CPU-bound; a chat client sleeps often at low CPU, the indexer does not once it is indexing — the training run and the indexer both keep a CPU busy, and differ in how their work is cut and in declared class (D14).
+- **D14's "The share of each program's CPU past a 10 ms slice without a voluntary block: Tracker 0.530–0.536, `python3` 0.917–0.920 (9.6 D21)"** is of 9.6's measured phases — its Tracker rescan and its training-loop stand-in — not of the pair the dataset carries: the dataset's indexer (`file-indexer`, 9.10 D81) runs 0.844–0.849 of its CPU past the 10 ms slice (`dataset/archetypes.yaml:1503`), and its training run, PyTorch's basic MNIST example (9.10 D12, D87–D90), runs 69.49 s ±27.3 % between voluntary blocks (`:891`), nearly all of its CPU past any slice. D14's bullet restated to these.
+- **`docs/research-proposal.md:617`** — "Pairs whose process sets and behavioural signatures are nearly identical and whose correct policies differ." Restated as D14 and D15 state the pairs: pairs of real jobs whose correct policies differ, which also differ in behaviour and declared class as measured; the pair tests what recognition adds over them.
+- **`docs/research-claims.md:23`** — "On workloads where behaviour is identical and the correct policy differs, a language model reading process names recovers the difference, and a name whitelist cannot." "behaviour is identical" restated: workloads where the correct policy differs and neither behaviour nor declared class settles it (D14, D15); "a name whitelist" is D6's sweep.
+- **`docs/research-claims.md:214–216`** — "Both are one sustained CPU-bound process beside an editor. No behavioural heuristic separates them, even in principle. The difference exists only in the names." Restated as D14 restates `docs/related-work.md:18` and `docs/research-proposal.md:627`.
+- **`docs/background-guide.md:115`**, last sentence — "a wanted training run and an unwanted indexer behave identically, so MLFQ necessarily treats them identically" restated the same way (the sentence's 0.5 ms illustration is D33's).
+
+Hands to 9.15: the five lines above restated as stated.
+
+Compiled effect: none.
+
+## D89 — D15 amended: "That difference appears only in the name" (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D15 (scope-card item 33) on the 9.12 audit's coverage finding: `docs/research-proposal.md:133`'s "That difference appears only in the *name*. That gap is the entire project.", which closes the download-against-scan paragraph D15 restated (`:131`), was not handed.
+
+- D15: the pair's jobs differ in how their work is cut, in structure, in size and in declared priority; what they share is a busy CPU beside the game, and whether the user wants the work is stated by neither's behaviour.
+- **Restated:** whether the user wants the work is not in its behaviour, and its declared class does not settle it; the name, read with what is known of the software, carries it — what recognition adds over behaviour and declared class is what the experiment measures (D14, D15). "appears only in the name" leaves.
+
+Hands to 9.15: `docs/research-proposal.md:133` restated as above.
+
+Compiled effect: none.
+
+## D90 — D35 amended: what a missed deadline does, per kind — a late game frame waits for the next vertical blank, a late video frame is dropped, a late audio buffer is an xrun (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D35 (scope-card item 36) on the 9.12 audit's coverage finding: D35 restated the deadlines' lengths; the consequence clauses of the same lines — `docs/research-proposal.md:414` ("or a frame drops"), `:820` ("A game rendering at 60 fps has a 16 ms deadline every frame; missing it drops the frame") — and `docs/background-guide.md:207` ("each job must finish within its period or the frame drops / audio pops") are read against 9.11 D17's grounds (A5-07).
+
+- **A game frame** (`vulkan`; Vulkan-Docs `e4e53e4b`, `chapters/VK_KHR_surface/wsi.adoc`): "VK_PRESENT_MODE_FIFO_KHR specifies that the presentation engine waits for the next vertical blanking period to update the current image" (`:4418–4419`); "one request is removed from the beginning of the queue and processed during each vertical blanking period in which the queue is non-empty" (`:4422–4424`); it is "the only value of pname:presentMode that is required: to be supported" (`:4425–4426`). A late frame is shown at the next vertical blank, the previous image held one more period.
+- **A video frame** (`gstreamer`; `gstbasesink.c` at `83e7df91`, byte-identical to the registry's copy): "If the frame is later than max-lateness, the sink will drop the buffer without calling the render method" (`:123–124`).
+- **An audio buffer:** an xrun, "clicks, pops and crackles" (D35; S2-57).
+- 9.11 D17 kept the late-tick rule as GStreamer's sink for video playback and as design for the audio and game TIMER tasks.
+- **Restated:** `:414` — MLFQ has no concept of a deadline: it knows priority, not "this must complete by the end of its period"; `:820` — a game rendering at 60 fps has a deadline every 16.7 ms; a frame that misses it is shown a vertical blank late under FIFO presentation, and a video sink drops a frame later than its allowed lateness; an audio buffer's miss is audible (D35); `docs/background-guide.md:207` — each job must finish within its period, or the frame is shown late or dropped, or the audio clicks.
+
+Hands to 9.15: `docs/research-proposal.md:414`, `:820` and `docs/background-guide.md:207` restated as above, with D35's deadline lengths.
+
+Compiled effect: none.
+
+## D91 — D6 amended: "a faithful reproduction of what shipping systems do today" and "the whitelist approach real operating systems currently use" restated to the two conditions (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D6 on the 9.12 audit's coverage finding: `docs/research-proposal.md:60` ("Does the signal actually improve CPU scheduling, against a faithful reproduction of what shipping systems do today?") names no `whitelist`, so D6's sweep (`grep -rn -i whitelist docs`) does not reach it; `:216`'s "(b) the whitelist approach real operating systems currently use" is reached by the word, not by its clause. No operating system is documented as shipping a name table (D1); a Linux distribution, CachyOS, ships one enabled by default (D3).
+
+- **Restated:** `:60` — against the name-keyed catalogue a shipping Linux distribution enables by default, and the strongest name table in its design (D3, D6); `:216` — (b) the same two conditions; "real operating systems currently use" leaves.
+
+Hands to 9.15: `docs/research-proposal.md:60`, `:216` restated as above, with D6's sweep.
+
+Compiled effect: none.
+
+## D92 — D34 amended: "so the encoder must not drop frames" (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D34 (scope-card item 35) on the 9.12 audit's coverage finding: `docs/research-proposal.md:160`'s "There is no "gaming while streaming to Twitch, so the encoder must not drop frames" mode" carries the clause D34 restated at `:176`; D1 kept the line's "Game Mode is on or off".
+
+- D34: an encoder that falls behind skips frames, which OBS counts and reports ("Skipped frames due to encoding lag", S2-55).
+- **Restated:** there is no "gaming while streaming, so the encoder keeps its frame deadline" mode.
+
+Hands to 9.15: `docs/research-proposal.md:160`'s clause restated as above.
+
+Compiled effect: none.
+
+## D93 — D32 amended: FIFO's "maximum cache locality" and the background guide's "real context switches trash CPU caches" stated to the measured cost (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D32 (scope-card item 31) on the 9.12 audit's coverage finding: `docs/research-proposal.md:416`'s FIFO row ("Throughput wants minimum context switching and maximum cache locality; MLFQ keeps interrupting") and `docs/background-guide.md:119`'s "no cache effects (real context switches trash CPU caches; our timetable doesn't model that)" carry the claim D32 restated at `:111`, and were not handed.
+
+- **OSTEP §7.7, p. 8** (D32): switching "causes this state to be flushed and new state relevant to the currently-running job to be brought in, which may exact a noticeable performance cost".
+- **Li, Ding & Shen** (A5-08; ExpCS '07, the copy the audit re-downloaded, SHA-256 `8b7a6069…`, equal to S1-21's): while every process's data fit in the 512 KB L2 cache, "context switch times ranging from 4.2µs to 8.7µs" — "the context switch does not cause any visible cache interference" (p. 2); when the communicating processes' data no longer fit, "from 38.6µs to 203.2µs" (p. 2); with a 128-byte access stride, "between 133.8µs and 1496.1µs" (p. 3).
+- **Restated:** `:416` — a job switched out loses cache state it built, at a cost that depends on whether its data still fit in the cache and on how it accesses them; FIFO switches only when a job blocks or ends (the row's note on the simulator stands); `docs/background-guide.md:119` — a real context switch can cost the cache state a program built, nothing visible while the data fit in the cache, up to hundreds of microseconds or more when they do not; the timetable models none of it. "trash" leaves.
+
+Hands to 9.15: `docs/research-proposal.md:416`'s first clause and `docs/background-guide.md:119`'s parenthesis restated as above.
+
+Compiled effect: none.
+
+## D94 — D1 amended: the macOS Game Mode row's versions — Game Mode on macOS Sonoma 14 or later; the `LSSupportsGameMode` declaration listed for macOS 26.0 and later (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D1 (scope-card item 21) on the 9.12 audit's coverage finding: D1 restated `docs/research-proposal.md:148`'s row ("macOS 14+ | Game Mode | Hardcoded detection of full-screen games") to "full screen, with the app's `LSSupportsGameMode` declaration"; D2 records the key as listed for macOS 26.0 and later. Apple's two pages re-read (A5-06).
+
+- **Apple Support "Use Game Mode"** (support.apple.com/en-us/105118, byte-identical to S2-18): Game Mode requires a "Mac with Apple silicon and macOS Sonoma 14 or later and a game that supports macOS full-screen mode"; "When your game enters full screen, Game Mode automatically turns on for that game."
+- **`LSSupportsGameMode`** (the developer documentation's JSON, byte-identical to S2-20): platforms iOS and iPadOS from 18.6, macOS from 26.0; "If you don't include this key in your Info.plist, Game Mode might not turn on for your game." The app-category key, `LSApplicationCategoryType` (macOS 10.0, its game categories listed), says nothing of Game Mode. How macOS 14 and 15 decide an app is a game is not stated in any page read.
+- **Restated:** `:148`'s row — macOS (Sonoma 14 or later, Apple silicon) | Game Mode | turns on when a game enters full screen; from macOS 26 an app declares support with `LSSupportsGameMode`; how the system recognises a game is not documented. D2's related-work sentence already states both.
+
+Hands to 9.15: `docs/research-proposal.md:148` restated as above, with D1's row restatement.
+
+Compiled effect: none.
+
+## D95 — "A CPU core runs exactly one thread at a time … hundreds of processes that could run" stated to the kernel's document and the dataset's session census (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), on the 9.12 audit's coverage finding: `docs/research-proposal.md:79`'s "A CPU core runs exactly one thread at a time. But a typical machine has hundreds of processes that *could* run."
+
+- **One task per CPU** (A5-02; `sched-design-CFS.rst:26–27`): "On real hardware, we can run only a single task at once, so we have to introduce the concept of "virtual runtime."" The kernel's unit is the CPU it schedules on, not the core.
+- **How many** (A5-09; the 9.9 session census, `meas-ci:session:2026-09-24`, the 24 adopted repeats 47–49, 51, 58, 60–63, 68, 69, 71–77, 79, 83, 85–88, each the census at the start of `steady`, `dataset/tools/meas/session/census.py` at `a7ad2f29`): the idle, locked Ubuntu 24.04 GNOME session runs 66 processes with 319–321 threads in the user's session; the machine runs 125 user-space processes with 501–505 threads in all (the runner's own services among them), beside 113–118 kernel threads, on the EPYC 7763's four vCPUs.
+- **Restated:** each CPU runs one task at a time; an idle desktop session on the dataset's machine holds about 66 processes and 320 threads, the machine about 125 processes and 500 threads beside some 115 kernel threads, and the scheduler chooses among those ready to run. "a typical machine has hundreds of processes that could run" leaves — hundreds of threads exist on the measured machine; how many are ready to run at once the census does not record.
+
+Hands to 9.15: `docs/research-proposal.md:79` restated as above.
+
+Compiled effect: none.
+
+## D96 — the percentile sentences: "a good average with a bad P99 feels terrible" attributed to what Shneiderman's review finds; "reached roughly once per second" restated to the arithmetic (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), on the 9.12 audit's coverage finding: `docs/research-proposal.md:700`'s "Report percentiles, not just means. For interactive work the tail is the experience; a good average with a bad P99 feels terrible to a human." and `:953`'s "At 60 fps the 99th percentile is reached roughly once per second — often enough to be perceived as stutter while the mean still looks healthy."
+
+- **Shneiderman** (A5-11; `shneiderman-csur84`, §5.3, p. 282, the 9.11 S1-07 copy, SHA-256 `7ea65246…`): "In summary, modest variations in response time (plus or minus 50 percent of the mean) appear to be tolerable and to have little impact on performance. As the variability grows, there may be some decrease in performance speed. Frustration may emerge only if delays are unusually long--at least twice the anticipated time." The studies reviewed in §5.2 used mean response times of 1 to 32 seconds.
+- **The arithmetic** (`:953`): the 99th percentile is exceeded by one frame in a hundred; at 60 frames a second, 0.6 frames a second, one about every 1.7 s. No source read states the perception of a late frame.
+- **Restated:** `:700` — report percentiles, not just means: a mean hides the rare long waits, and the review of response-time studies finds modest variation tolerable, with frustration emerging when delays are unusually long — at least twice the anticipated time (studies of second-scale responses); "feels terrible to a human" leaves. `:953` — at 60 fps one frame in a hundred, about one every 1.7 s, lands past the 99th percentile while the mean looks healthy; "often enough to be perceived as stutter" leaves. The rest of `:953` and the §6.1 requirement are design and stand.
+
+Hands to 9.15: `docs/research-proposal.md:700`, `:953` restated as above; `shneiderman-csur84`'s role line gains §5.3 where the prose cites it.
+
+Compiled effect: none.
+
+## D97 — vol-02's quotations counted by D53's own rule: 277 passages, 238 exact, 39 differ, none missing; `:1032` re-graded, `:949` and `:582` re-described, `:1967` filed with `:865` (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D53 (scope-card item 60), on the 9.12 audit's re-check of the three readers' verdicts (A3-01, A3-02): all 38 "differs" re-read against their copies, 45 "exact" verdicts sampled character by character (Python `random.Random(20261009)`, one per source group and 13 more; all 45 confirmed), and all 239 "exact" verdicts machine-matched against their copies.
+
+- **The counting rule**, stated: a block-quote line of `docs/guidebook/vol-02-related-work.md` whose text opens with a quotation mark (`^>\s*["“]`; 277 lines at `a7ad2f29`, the file unchanged since `2f7c7b58`), less `:3360` (the guidebook's own commentary, in Korean), plus the nested source quotation `:2715` (`> > "The Game Mode APIs are deprecated in Windows 10, version 1809 and later."`); continuation lines (`:1119–1121`, `:3236–3237`, `:3250–3251`) belong to the quotation they continue. 277 passages: 92 in chapters 2–3, 133 in 4–6, 52 in 7–8. `:2609` — TuneAgent v1's title, quoted inline in the guidebook's "인용 정보 정정" callout — leaves the count under D53's rule ("the guidebook's own callouts excluded"); its text, checked exact by reader 2, stands. Reader 3's "the 51 entries … whose `sec` starts with 7. or 8." are 52 (23 in chapter 7, 29 in chapter 8); its count of 52 quotations stands.
+- **Re-graded:**
+  - `:1032` (ghOSt §1, p. 589) — exact → differs, markers only. The source: "…these overheads allow just a single ghOSt agent to schedule over 2 million threads per second (Fig. 5)."; the guidebook ends "…per second." with no elision mark — the class reader 1 graded differs at `:887`, `:931`, `:949`, `:993`.
+  - `:1967` (ASA, Abstract) — "locator wrong" → exact, with a locator nuance, as `:867` is. The text is exact; `:1965`'s "초록의 첫 문장입니다" introduces the first sentence and the start of the second ("…This "one-policy-fits-all" approach leads to significant compromises in fairness, throughput, and latency", the source continuing ", particularly with the rise of heterogeneous hardware…"), as `:865`'s "논문의 초록 첫 문장입니다" introduces ghOSt's first two. It leaves D53's substantive corrections.
+- **Re-described:**
+  - `:949` (ghOSt §3, p. 591) — drops "[40]" and, at its end, "(see §3.4)": "…such as per-NUMA-socket or per-AMD-CCX [40]. Enclaves also help in isolating faults, limiting the damage of an agent-crash to the enclave it belongs to (see §3.4)."
+  - `:582` (EEVDF TR, p. 3) — "virtual dead line" for "virtual deadline" is a spelling change, no word added or dropped: it moves from D53's substantive corrections to its small corrections, beside `:1048` and `:2551`; the fix is unchanged.
+- **Counts** (277): exact 238 (83, 103, 52); differs 39 (9, 30, 0), 28 of them only dropping citation or cross-reference markers without an elision mark; not found 0. Substantive corrections: `:1080`, `:1867`, `:2579`, `:2568`. The claims around the quotes, the nuances (with `:1965` beside `:865`) and the registry points stand as D53 lists them.
+- **"Seven code-block passages in chapter 7"**: six code blocks in chapter 7 (`:2864`, `:2878`, `:2925`, `:2944–2990`, `:3071–3074`, `:3082–3086`) and one inline output line in chapter 8 (`:3229`, `Time: 0.890`, `hackbench.8:72`), all exact.
+
+Hands to 9.15: `docs/guidebook/vol-02-related-work.md` — `:1032` "(Fig. 5)" kept or its drop marked; `:949` both drops marked; `:865` "첫 두 문장", `:1965` the first sentence and the start of the second; `:582` "virtual deadline"; the rest as D53 lists them.
+
+Compiled effect: none.
+
+## D98 — vol-02's copies: two record copies gone, fixed captures kept; the copies V60 first recorded unchanged; the ghOSt repository gets an entry (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D53 (scope-card item 60), on the audit's provenance check (A3-03). D53's "Every copy equals its record's SHA-256 except two live pages whose quoted text is unchanged" is restated:
+
+- **Two record copies are not on this machine as recorded.**
+  - Nielsen (`nielsen-ue93`, `:698`): the 9.11 search record S1-05 gives `sources/S1-05/nngroup.html`, 120 613 bytes, SHA-256 `ee93bba73ca6307f8bdea3ba918d7959ef39a8c8cea6f43484b6ff078fc9ee83`; the file at that path is 121 941 bytes, `cd24ce28eaf2c4ded93a1a45ae9c2a939b896b30e9887ecd1d939c24785e43a8`, written 2026-10-07. V60's re-fetch is `075f609c…`. The fixed copy kept is the Internet Archive capture of the record's access date, `sources/nielsen-ue93/audit-2026-10-09/nngroup-wayback-20260924002157.html`, SHA-256 `e6a7eb4f888cfc9a58b8ee3b1d5a6883f1bf84b657c5f5d7d68f22084ae8324f`; "0.1 second is about the limit for having the user feel that the system is reacting instantaneously" and "Excerpt from Chapter 5 in my book Usability Engineering, from 1993" are in it verbatim.
+  - Microsoft's Game Mode concept page (`gamemode-docs`, the twelve concept-page quotations of ch. 7.2): S2-16's copies (`sources/S2-16/`, the portal `20bb5394…17d0`) were made in the stage-2 sandbox and are not on this machine; V60's re-fetch is `d18e2969…`. The twelve are verbatim in V60's re-fetch, in the 2026-09-13 verification's copy (`_dev/research/jioh/2026-09-13-verification/sources/gamemode-docs/game-mode-portal.html`, `ea08757d68e15e1ea6ed66f3706646b3a06c366c2673c9213ac2548e9cf1cc74`) and in the fixed copy kept, the Internet Archive capture of 2026-09-07, `sources/gamemode-docs/audit-2026-10-09/game-mode-portal-wayback-20260907131311.html`, SHA-256 `329382052bc020258a9d3a616134c0137167cacec00ceb61df1d0d9638df62c3`.
+- **Copies first recorded in V60** — no earlier record to equal; each re-hashed 2026-10-09 and equal to V60's record:
+  - the ghOSt repository README, `google/ghost-userspace` at `9ca0a1fb6ed88f0c4b0b40a5a35502938efa567f` (2023-11-08; `sources/V60/ghost-sosp21/ghost-userspace/README.md`, `ebac49bb2f82a6f4ef17f133bee0285eb054ccbb4d73b623c4d5109c39e3e14a`) — the only source of `:873`, `:875`, `:911`, `:917`, `:955`, `:957`, `:975`, `:1003`, which vol-02 attributes to "저장소" (the repository);
+  - Microsoft Learn's `ReleaseExclusiveCpuSets` page (`sources/V60/gamemode-docs/releaseexclusivecpusets.html`, `77de8a946e47b1796b16c2f8a722ac7167cff9c12fbbbb00b09826b16b6e5618`) — the only source of `:2777`;
+  - rt-app's `README.in` at `d6f8be4` (`_dev/research/jioh/2026-09-13-verification/sources/rt-app/README.in`, `a35dec3593020b2fcb0be7ac17ede7c16c06e2a289623db3e582635ff3d3ad93`) — `:3299`;
+  - SchedCP's arXiv e-print sources v1–v4 (`sources/V60/schedcp-mlsys25/eprint-v{1,2,3,4}.bin`: `df54a986…f791`, `3421050c…d327`, `3a1a1aaf…5939`, `289b0d4a…ca46`) — `:2457`, a line commented out in v1's and v2's `sections/evaluation.tex:13` (`% \item \textbf{RQ5}: How effectively can \sys understand workloads?`), as vol-02 says.
+- **The ghOSt repository** is a citable artifact of its own — "A project with several citable artifacts (paper + slides + repo) gets several entries" (`docs/references.md`, the id-minting rule); the registry has the paper only (`ghost-sosp21`).
+
+Hands to 9.15: `docs/references.md` — a deployed-system entry for the `google/ghost-userspace` repository pinned at `9ca0a1fb` (its README, SHA-256 `ebac49bb…`), cited by vol-02's eight README quotations; `nielsen-ue93`'s and `gamemode-docs`' status lines name the fixed captures above; `schedcp-mlsys25`'s status line names the e-print sources read for `:2457`; D53's `gamemode-docs` (the fifth page) and `rt-app` (`README.in`) points stand.
+
+Compiled effect: none.
+
+## D99 — the `gamemode` key: five Learn pages and the Xbox Support entry; D45's and D6's changes to D1, D2 and D5 marked (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D2 and D25 (scope-card items 16, 20), on the audit's finding that D45, D53 and D6 changed what D1, D2, D5 and D25 state without marking them.
+
+- **`gamemode-docs`' pages.** D2 hands "the four Learn URLs of S2-16"; D25's map lists "`gamemode-docs` (Microsoft Learn, four pages)"; D53 adds the `ReleaseExclusiveCpuSets` page, the only source of vol-02 `:2777` ("After this function is called, the app will still have access to other Game Mode resources, such as increased GPU prioritization."). The entry's Learn pages are five: the Game Mode portal, the `expandedresources.h` header page, `HasExpandedResources`, `GetExpandedResourceExclusiveCpuCount` and `ReleaseExclusiveCpuSets`. S2-16 kept the first four; the registry's status line counts the portal and three function pages, as vol-02 `:2711` does — each a subset of the five.
+- **D25's `gamemode` row**, restated: `gamemode-docs` (Microsoft Learn, five pages, the deprecation note carried), the Xbox Support article (D45, a deployed-system entry of its own) and Apple's two Game Mode entries — D1, D2, D45, D53.
+- **D45's changes to D1 and D2**, marked: D1's §2.1 Windows row (`docs/research-proposal.md:148–149`) and D2's `docs/related-work.md:40` sentence gain the Windows Update deferral; D1's "The Xbox Support article (S2-17) renders by script and was not read" is superseded by S2-58, its rendered read.
+- **D5's "which `whitelist` reproduces"** reads, after D6, "which the shipped-catalogue condition reproduces".
+
+Hands to 9.15: `docs/related-work.md:54–73` — the `gamemode` row as above; `docs/references.md` `gamemode-docs`' cite line — the five Learn URLs in place of "[Exact URLs to pin.]" (D2).
+
+Compiled effect: none.
+
+## D100 — `lavd-ossna24`'s pairing clause leaves with `corbet-lwn24`'s "prose-citable" (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D11 (scope-card item 58): D11 restates `corbet-lwn24`'s role from "prose-citable secondary" to an attributed report, qualitative only, and leaves `lavd-ossna24` "unchanged". `lavd-ossna24`'s role (`docs/references.md:220`) ends "Talk slides — footnote tier despite carrying numbers; pair with `corbet-lwn24` for prose-citable coverage." After D11 every LAVD source is footnote tier and none is a prose-citable secondary, so the pairing clause leaves; "Talk slides — footnote tier despite carrying numbers" stays.
+
+Hands to 9.15: `docs/references.md:220`'s last sentence as above, with D11's `corbet-lwn24` restatement.
+
+Compiled effect: none.
+
+## D101 — four pointers corrected: scope-card item 34, D15, D18 and D19's lines; the 9.7 D17 hand-off is `ananicy-rules`' (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), on the audit's locator check (A3-08); the claims the pointers carry are unchanged.
+
+- **Scope-card item 34** cites `docs/research-proposal.md:315`, a blank line at `60149db`; the quoted text ("The Steam process is downloading, which / the user started deliberately") is at `:312–313`, where D16 places it.
+- **D15** hands `:178`, a blank line; the sentence ("Rows 3 and 4 are the sharpest pair in the table: same process count, same behavioural signature, opposite correct policy") is at `:179`.
+- **D18** hands "`docs/related-work.md:16`'s first sentence"; the sentence it restates is `:16`'s second ("Classic interactivity heuristics — MLFQ's demotion by CPU consumption, and the sleep/wake accounting behind CFS and EEVDF — classify tasks by how they use the CPU [mlfq, eevdf]"). **D19** hands "`:24`'s first sentence"; the sentence it restates is `:24`'s second ("Decima learns cluster scheduling policies via RL over job DAGs [decima]; Firm …; Park generalizes the setting [park]"). The first sentences — `:16` "Where situational awareness exists in deployed schedulers today, it is inferred from runtime behavior." and `:24` "A second lineage replaces hand-written heuristics with learned policies." — are restated by neither.
+- **The 9.7 D17 hand-off** (`scope-card.md:15`, item 67) is attributed to `interbench`'s entry; 9.7 D17 (b) says it of `ananicy-rules`: "its `docs/references.md` entry stays while the scenario catalog and prose cite it (9.10, 9.12, 9.15)". Answered by D3 and D25: the related-work prose cites `ananicy-rules`, so its entry stays. 9.7 D17 (a) concerns `interbench`'s `sources.yaml` lines; the card's `interbench` answer (neither owned file cites it; the Role B prose and vol-02 ch. 8.3 do) stands as D47 records it.
+
+Hands to 9.15: D15's, D18's and D19's lines as above.
+
+Compiled effect: none.
+
+## D102 — 9.10's hand-offs to 9.12 answered: which leaving and references-only entries the prose still cites; the workload-doc rows pass through (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), on the scope card's boundary ("9.10 D169/D170 (which references-only entries the prose still cites…)") and the "To 9.12" lines of 9.10 D12, D34, D90, D100, D111, D125 and D169, which no 9.12 decision acknowledged (A3-04, A3-05). "9.12's related-work and proposal prose" (9.10 D34) is read as the four owned files — `docs/related-work.md`, `docs/research-proposal.md`, `docs/research-claims.md`, `docs/background-guide.md` — and the guidebook's related-work volume, whose quotations the scope card puts in 9.12.
+
+- **9.10 D34** ("Hands to 9.12: which leaving entries its prose still cites"; a leaving entry "keeps its `docs/references.md` entry, corrected to its verdicts, only where 9.12's related-work and proposal prose still cites it; otherwise 9.15 removes it"):
+  - `procyon` — cited by vol-02 ch. 8.4 (`:3421`, `:3449`) and `:3897`. Its entry stays, corrected to its verdicts (D53: the page lists ten benchmarks, not nine). The workload docs cite it too: `docs/workload/source-vetting.md:42`, `:93`, `:114`; `grounding-sources.md:16`; `scenario-catalog.md:23`, `:33`.
+  - `dkms-man`, `dkms-debian`, `dubroy-chi10`, `chang-chi21`, `mozilla-testpilot10` — cited by none of the four owned files nor vol-02 (each id and author or product name, `grep -i` at `60149db` and `a7ad2f29`: no line). 9.15 removes them under 9.10 D34, restating in the same edit the lines that still cite them: `docs/workload/scenario-catalog.md:22` (`dkms-man`, `dkms-debian`); `docs/workload/building-plan.md:82`, `:189`, `archetype-plan.md:40`, `measurement-overview.md:162`, guidebook vol-06 `:1162`, `:1180`, `:2519`, `:3954–3956` (the three tab-count entries). The dated memos keep their text.
+- **9.10 D169** (`czerwinski-chi04`, `mark-chi08`, `mark-chi14`, `mark-gallup06`, `videogui-arxiv24`, "once 9.12 says which its prose still cites"): cited by none of the four owned files nor vol-02 — the scope card's answer (`scope-card.md:104`), confirmed at `a7ad2f29`. 9.15 corrects or removes them per 9.10 D169, `mark-gallup06` with the lines citing it (`docs/workload/source-vetting.md:76`, `building-plan.md:136`). The dropped `zhang-chb15`: cited by none (`scope-card.md:104`).
+- **9.10 D12 and D90** (9.6 D32's wording rule restated on the new run; the scenario catalog's S12 row; `measurement-overview.md`'s venue and huge-page mode): the owned prose's wording is D14's — "an actual training run that does not claim desktop users train MNIST" (9.10 D12); the S12 row and `measurement-overview.md` pass through to 9.15 as 9.10 decided them, no owned sentence naming either (`grep -i "S12\|huge.page\|THP"`: no line).
+- **9.10 D100** (the S8 row; "prose citing that workload as H.265"; `cpu-batch`'s scope): no doc names H.265 (`grep -rn -i "H\.265\|hevc\|x265" docs dataset/README.md`: no line); the S8 row and the scope pass through.
+- **9.10 D111** (the S7 row; `building-plan.md` §3 C1 and C2 P3; `cpu-batch`'s scope) and **9.10 D125** (the S15 row; `building-plan.md` §3 C1, C2 P3 and C7's backup sentence; `measurement-overview.md`'s `file-backup` rows): workload-doc lines whose verdicts are 9.10's; no owned sentence names `kdenlive`, `ffmpeg`, `deja-dup`, `borg`, `cpu-batch` or `file-backup` (grep: no line); they pass through to 9.15. The owned prose's generic "a backup" and "a video encode" (`docs/research-proposal.md:97`) are D41's.
+
+Hands to 9.15: `docs/references.md` — `procyon` kept and corrected; the five D34 entries removed with the lines listed restated; the D169 entries per 9.10 D169; the workload-doc lines of 9.10 D12, D90, D100, D111 and D125 as 9.10 decided them.
+
+Compiled effect: none.
+
+## D103 — item 63's pass-through lines handed (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D47 (scope-card item 63): D47 reads item 63's `docs/workload/grounding-sources.md:32` and hands "items 62 and 66–69's lines"; item 63's other lines, pass-through by the card, are in no hand-off: `docs/workload/source-vetting.md:47`, `:70`, `:95`, `:123`; `grounding-sources.md:15`; `archetype-plan.md:31`, `:39`, `:53–54`, `:86`; `building-plan.md:61–62`; `interpretation-contract.md:56`; `scenario-catalog.md:22` (K1 and K3 verdicts). C-schedcp-4 is D25's; C-kernelbuild-2 is D47's.
+
+Hands to 9.15: item 63's lines above, applied from their recorded verdicts.
+
+Compiled effect: none.
+
+## D104 — citation forms: Li, Ding & Shen's DOI verified; Tam et al. and Atil et al. cited to their published versions; `schedcp-mlsys25`'s journal-ref quoted as the field reads (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), on the audit's citation check (A3-06): the scholarly entries D32, D40, D50 and D52 hand to 9.15, in the minting rule's form ("scholarly → `<label>-<venue><yy>` … arXiv-only works use `arxiv` in the venue slot", `docs/references.md`).
+
+- **Li, Ding & Shen** (S1-21; D32, D50): the DOI 10.1145/1281700.1281702, recorded "from search-result listing; not on the copy", is verified at Crossref (2026-10-09; `sources/S1-21/audit-2026-10-09/crossref-1281700.1281702.json`, SHA-256 `83081c17e17ffcb2cdb5f102eefccdb621a4af8f6941787220eeaad74d58fdc8`): "Quantifying the cost of context switch", *Proceedings of the 2007 workshop on Experimental computer science* (ExpCS07, 2007-06-13), article 2; Li, Ding, Shen. Id `li-expcs07`.
+- **Tam et al.** (S1-27; D40): arXiv 2408.02442v3 states no venue; Crossref lists the paper in *Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing: Industry Track*, pp. 1218–1236, DOI 10.18653/v1/2024.emnlp-industry.91, titled "Let Me Speak Freely? A Study On The Impact Of Format Restrictions On Large Language Model Performance." (record SHA-256 `6b87fa0c83ca2c193ef43b030a942fbc20f9a9966cba2e4b9560c5a85723bc32`). The ACL Anthology copy (`sources/S1-27/audit-2026-10-09/2024.emnlp-industry.91.pdf`, SHA-256 `c8145f4d94b4112833a3f6f90535a60671864408dce0d0479d2fb6e6bdf80d6e`) carries D40's passage verbatim on p. 1224 — "Format restrictions, particularly constrained decoding (JSON-mode), can hinder reasoning abilities while enhancing classification task accuracy." — and the key-order finding on p. 1221 — "…placed the "answer" key before the "reason" key, resulting in zero-shot direct answering instead of zero-shot chain-of-thought reasoning." Id `tam-emnlp24`, cited to the published version, D40's locator "arXiv 2408.02442v3, p. 7" read as p. 1224.
+- **Atil et al.** (S1-25; D52): arXiv 2408.04667v5 states no venue; Crossref lists *Proceedings of the 5th Workshop on Evaluation and Comparison of NLP Systems* (Eval4NLP 2025), pp. 135–148, DOI 10.18653/v1/2025.eval4nlp-1.12, titled "Non-Determinism of "Deterministic" LLM System Settings in Hosted Environments" (record SHA-256 `0a6d98a0dfee363c2ab6376c78d10e72049cf52aab3361a49bfe144e0b29ca31`). The ACL Anthology copy (`sources/S1-25/audit-2026-10-09/2025.eval4nlp-1.12.pdf`, SHA-256 `d94638d0e14f1e936cb3c980427221a588628c53d5f8075b81206b2e9b56adc5`) carries D52's claim: "Experiments reveal accuracy variations of up to 15% across runs" (Abstract, p. 135), "We set temperature at 0, top-p at 1, and we fix the seed." (p. 138), its models API-based ("We apply five API-based LLMs configured to be deterministic", p. 135). Id `atil-eval4nlp25`, cited to the published version, its models described as hosted.
+- **`schedcp-mlsys25`'s cite line** reads "ML for Systems 2025 (arXiv journal-ref)"; the field on arXiv's abstract page reads "MLforSystem 2025" (`sources/V60/schedcp-mlsys25/abs.html`; D53). The cite names the venue as D25 does — the NeurIPS 2025 Workshop on ML for Systems, as the NeurIPS virtual site lists it — and where it gives the journal-ref field, quotes "MLforSystem 2025".
+
+Hands to 9.15: `docs/references.md` — `li-expcs07`, `tam-emnlp24` and `atil-eval4nlp25` minted as above where the prose cites them (D32, D40, D50, D52); `schedcp-mlsys25`'s cite line restated.
+
+Compiled effect: none.
+
+## D105 — D6's open points: ananicy-cpp matches a rule by `argv[0]`'s basename, untruncated; the rest homed with the build of the two rule lists (2026-10-09)
+> Amended by D109 (the recount on that key: 19 of 35, 7 of 50 files).
+
+Taken under 인지오's delegation (2026-10-09), amending D6, on the audit's finding that D6's open points have no home (A3-07).
+
+- **How ananicy-cpp names a process** (D6: "the 15-character `comm` or the executable's basename … (not read; S3-19)"), read at tag `v1.2.0` (`cf5ac2eb`, 2026-03-26), the version CachyOS's ISO installs (S2-46; its pacman record: `ananicy-cpp` `1.2.0-1`, packager Peter Jung `<ptr1337@archlinux.org>`, depending on `pcre2` and `libbpf`). `get_command_from_pid` (`src/platform/linux/process.cpp:193`) returns, in order: the basename of the first `/proc/<pid>/cmdline` argument ("Cmdline method", `:197`, `find_last_of('/')` at `:201`); failing that, the basename of the `/proc/<pid>/exe` link ("Exe method", `:217`); failing that, `/proc/<pid>/comm` ("Comm method", `:250`). A name ending `.exe` is cut to its file name (`:61–64`). The rule is looked up by that name exactly (`src/rules.cpp:184`, `m_program_rules.contains(name)`; called at `src/worker.cpp:80`). A `name_regex` fallback (`rules.cpp:186`) is compiled only with `ENABLE_REGEX_SUPPORT` (default `OFF`, `cmake/StandardProjectSettings.cmake:40`), which Arch's `ananicy-cpp` 1.2.0-1 build turns on (`-DENABLE_REGEX_SUPPORT=ON`); the catalogue at `03ef03fb` carries no `name_regex` rule. A matched rule's nice value is set on every thread of the process (`src/platform/linux/priority.cpp:41–50`, over `/proc/<pid>/task`). These files are the same at `3554447c` (S2-31) but for one `#include`.
+  So the shipped catalogue matches a rule's `name` against the process's `argv[0]` basename, untruncated, and applies it to the process's threads; a thread's own name (`dxvk-cs`, `Task worker thr`) is never the key. The dataset binds `comm`-style names (`tracker-miner-f`, `thunderbird-bin`, the game chain's threads; S3-19): the shipped-catalogue list is built by mapping each bound task to its process's `argv[0]` basename before the lookup, and S3-19's 14-of-35 exact matches and "none more after truncation" are a count on the dataset's names, not on the key ananicy-cpp uses.
+- **Homed:** the two conditions' identifiers — 9.14 (D6, D54); the type-to-vocabulary mapping, the strongest table's names at the familiarity tiers' boundary, and the name mapping above — the build of the two rule lists, which has no phase yet; its owner is the whitelist baseline's, 박이안 (`docs/research-proposal.md:538`, `:755`).
+
+Hands to: `_dev/TODO.md` — a line for the build of the two rule lists carrying the three points above (the coordinator places it).
+
+Compiled effect: none.
+
+## D106 — two stale clauses of the 9.15 line: 9.6 D32's training-run wording and 9.10 D169's wait (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), on the audit's consistency finding: two clauses of `_dev/TODO.md`'s 9.15 line still carry instructions later decisions replaced.
+
+- **"from 9.6 (D32): text naming the `python3` binding of `cpu-batch` calls it a CPU-saturating training-loop stand-in, never an observed ML training workload"** — 9.10 D12 replaced the synthetic loop with PyTorch's basic MNIST example: "The files show an actual training run and do not claim that desktop users train MNIST." D14 states the owned prose that way, and D54 marked 9.6 D32 answered on 9.12's line; 9.15's clause was left. It becomes 9.10 D12's rule: an actual training run, PyTorch's basic MNIST example on the CPU, without the claim that desktop users train MNIST.
+- **"from 9.10 (D169): … once 9.12 says which its prose still cites (D34's split)"** — answered by D102: the owned prose cites none of the five.
+
+Hands to: `_dev/TODO.md` 9.15 line — the two clauses as above.
+
+Compiled effect: none.
+
+## D107 — D51 amended: the published latency figures stated as their pages compute them — Artificial Analysis's per-provider 72-hour medians, 0.66–1.14 s to first token on a ~10 000-token prompt as read 2026-10-07; LocalScore's 0.88 s the 12 GB RTX 3060's mean over submitted runs (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D51 (scope-card item 29) on the 9.12 audit's re-read of S3-05 and S3-18 (A2-21). D51 said: "LocalScore's crowd-submitted runs of Llama 3.1 8B Q4_K_M give an RTX 3060's average time to first token as 0.88 s, averaged over nine tests of 16–4 096 prompt tokens (S3-05) … the one hosted figure found is a ~10 000-token prompt's 0.84 s to first token on Groq (S3-18)".
+
+- **Artificial Analysis** (S3-18): "Figures represent median (P50) measurement over the past 72 hours to reflect sustained changes in performance." The page gives one median per provider; as read 2026-10-07 (S3-18): CoreWeave 0.661 s, Groq 0.840 s, Novita 0.913 s, DeepInfra 1.074 s and 1.143 s (Turbo, FP8). The figures move: Groq 0.922 s in the capture of 2026-09-26 and 0.870 s live on 2026-10-09, CoreWeave 0.711 s and 0.658 s (A2-21). The 2026-10-07 copy is not on this machine and no capture lies nearer than 2026-09-26, so the record's values stand as read on its date.
+- **LocalScore** (S3-05): the 0.88 s is the 12 GB "NVIDIA GeForce RTX 3060" (accelerator 43), 881.7 ms in the capture of 2026-09-26 and live on 2026-10-09; an 8 GB RTX 3060 is listed separately. The site's figure for a card is a mean over the runs submitted for it (`cjpais/LocalScore` at `bd6ffe9d`, `src/db/queries.ts:816`), each run's value the mean of its nine tests (llamafile `localscore/localscore.cpp:293–328` at `a3ccf098`); how many runs stand behind it the page does not show.
+- **Restated D51's "Elsewhere":** LocalScore's submitted runs of Llama 3.1 8B Q4_K_M give the 12 GB RTX 3060 a time to first token of 0.88 s, a mean over the runs submitted, each the mean of nine tests of 16–4 096 prompt tokens; no hosted API was measured — Artificial Analysis's 72-hour medians of time to first token on a ~10 000-token prompt ran from 0.66 s (CoreWeave) to 1.14 s across the providers listed on 2026-10-07, Groq's 0.84 s.
+
+Hands to 9.15: `docs/references.md` — LocalScore and Artificial Analysis, where the prose cites them, with the date read and the window each figure is computed over.
+
+Compiled effect: none.
+
+## D108 — batch: the audit's hand-off pointers (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), stage 4, as D54: D55–D107's hand-offs reach their tasks through `_dev/TODO.md`.
+
+- **9.14** — D59: `pool.py` keys the LLM values by the formatted prompt's hash if the campaign is re-pooled, and the 8B's runner figures read the 9 Oct prompt alone (43.18 s, the reasoning field 6.81 s); D60: the latency figures carry their scope — one Apple M1 Pro, one stand-in request, an answer that stops at `system` — and Layer 1 measures the recognizer's real prompt with its `subsystems` block; D71: the with/without-`reasoning` comparison holds only if `reasoning` is generated before `system`; D105: the build of the two rule lists (no phase yet; with 박이안) carries the type-to-vocabulary mapping, the strongest table's names at the familiarity tiers' boundary, and each bound task mapped to its process's `argv[0]` basename before the catalogue lookup.
+- **9.15** — every "Hands to 9.15" of D55–D107. The 9.15 line states that the changelog's "Hands to 9.15" lines of D1–D107 are the complete list and names the files and registry entries they touch; D106's two stale clauses are replaced.
+
+Applied: `_dev/TODO.md` — the 9.14 and 9.15 lines.
+
+Hands to: as listed.
+
+Compiled effect: none.
+
+## D109 — D6 amended: on ananicy-cpp's key the catalogue keys 19 of the 35 bound names, and every name in 7 of 50 files — a different seven; "after truncation" leaves (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D6 (scope-card item 21) and D105 on the 9.12 audit's recount of S3-19 on the key ananicy-cpp 1.2.0 looks up (A3-09). D6 said: "of the 35 process names the 50 compiled core-set files bind, the catalogue at `03ef03fb` carries 14 exactly and none more after truncation to 15 characters; every name of a file is carried in 7 of 50 files. Unmatched include `kdenlive`, `make`, `python`, `HandBrakeCLI`, `deja-dup`, `tracker-miner-f`, `thunderbird-bin` and most of the game chain's threads." D105 read the key: the basename of the process's `argv[0]`, untruncated, the rule applied to every thread of the process.
+
+- **The recount** (A3-09): each of the 35 names mapped to the process it stands for in the measured runs, and that process's `argv[0]` basename looked up exactly. Four are invented names with no process (`audio-stream-he`, `video-playback-`, `qzvd`, `xkrr`; `dataset/timelines/coreset/c5.variant.yaml`). 19 are keyed:
+  - twelve through their program's own entry — `7z`, `baloo_file`, `code`, `element-desktop`, `gimp`, `gnome-shell`, `mpv`, `pipewire`, `soffice.bin`, `steam`, `Troy.exe`, `wineserver`;
+  - six game-chain thread names — `dxvk-cs`, `dxvk-submit`, `FAudio_AudioCli`, `Task worker thr`, `winepulse_mainl`, `winepulse_timer` — through their process's `Troy.exe` entry, which takes the `.exe` cut of ananicy-cpp's BPF build (`src/platform/linux/process.cpp:61–65`, under `USE_BPF_PROC_IMPL`; off by default, on in Arch's 1.2.0-1 build); without the cut the game's Windows-path `argv[0]` is not keyed and these seven fall out;
+  - `dkms` through `bash`, its interpreter (`#!/bin/bash`) — the interpreter's rule, not its own.
+- **Not keyed:** `chrome` — the browser runs as `/usr/bin/google-chrome` (the catalogue has `chrome`, not `google-chrome`) and its children under titles Chromium rewrites; `dbus-daemon` — the carried system bus runs as `@dbus-daemon` (the session bus, `/usr/bin/dbus-daemon`, is keyed: 20 with it); `thunderbird-bin` (the catalogue has `thunderbird`); `tracker-miner-f` (`tracker-miner-fs-3`); `unattended-upgr` (`python3`, its interpreter); `python`; `systemd`; `make`; `kdenlive`; `kdenlive_render`; `HandBrakeCLI`; `deja-dup`.
+- **Files:** every bound name keyed in 7 of 50 files — c1-dev, c1-gaming, c1-media, c1-photo, c2-p2a, c4-gaming, c7-compile; S3-19's seven were c1-browsing, c1-dev, c1-media, c1-meeting, c1-photo, c6-fold, c6-spoof.
+- **Not established** (A3-09): no cmdline was captured for the game chain or `wineserver`, whose rows rest on Wine's source and the LAVD slide's thread list; VS Code's main process is taken as not retitled, as Chrome's and Element's main processes are not under the same harness; a launch through a `.desktop` Exec line was not read.
+- **Restated D6's bullet:** of the 35 process names the 50 compiled core-set files bind — four invented, with no process — mapped to the `argv[0]` basename of the process each stands for, the key ananicy-cpp looks up, the catalogue at `03ef03fb` keys 19, six of them game threads through their game's entry and `dkms` through its interpreter's; every bound name of a file is keyed in 7 of 50 files. Unkeyed include `chrome` (run as `google-chrome`), `thunderbird-bin`, `tracker-miner-fs-3`, `kdenlive`, `make`, `python`, `HandBrakeCLI` and `deja-dup`. "none more after truncation to 15 characters" leaves: ananicy-cpp does not truncate. D6's case — the shipped catalogue is not the strongest name table — stands on the unkeyed names.
+
+Applied: `search/S3-traces-datasets.md` — the audit note on S3-19 points here; `_dev/TODO.md` — the 9.14 and 9.15 lines' audit ranges extended to D109.
+
+Hands to 9.15: wherever the prose states the catalogue's coverage of the dataset, the figures above. **9.14:** the build of the two rule lists (D105) maps each bound task as above.
 
 Compiled effect: none.
