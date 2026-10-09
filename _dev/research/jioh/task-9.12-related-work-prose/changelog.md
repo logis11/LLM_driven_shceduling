@@ -778,3 +778,30 @@ Taken under 인지오's delegation (2026-10-09), scope-card item 44: `docs/resea
 Hands to 9.15: `docs/research-proposal.md:740` restated as above; `docs/references.md` entries for Cooper et al. (S1-36) and Atil et al. (S1-25) where the prose cites them. **9.14 and 박이안:** the recognizer's prompt fixes or records what its chat template inserts — Llama 3.1's "Today Date" — so the same snapshot is the same input on every day, and the recognition log keeps the formatted prompt; Layer 1's consistency measure states its hardware.
 
 Compiled effect: none.
+
+## D53 — vol-02's quotations read against their sources: 239 of 278 exact, none missing; the corrections listed for 9.15 (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), scope-card item 60: every block-quoted source passage in `docs/guidebook/vol-02-related-work.md` (278 lines: 92 in chapters 2–3, 134 in 4–6, 52 in 7–8; the guidebook's own callouts excluded) was compared word for word with a copy of its source (`search/V60-vol02-quotations.md`, three readers' reports verbatim). Every copy equals its record's SHA-256 except two live pages whose quoted text is unchanged — Nielsen's NN/g excerpt and Microsoft's Game Mode concept page. Spot-checked here: the Kgent table row, the Park and Kgent omissions, the ghOSt order and Miller's count, each confirmed in the copy.
+
+- **Counts:** exact 239 (84, 103, 52); differs 38 (8, 30, 0) — 27 of them only drop citation or cross-reference markers without an elision mark; locator wrong 1 (line 1967); not found 0. Seven code-block passages in chapter 7 are exact, the ananicy-rules type file at `:2944–2990` identical to the source by `diff`.
+- **Substantive corrections:**
+  - `:1080` (ghOSt §4.4, p. 599) — two sentences joined in reverse source order behind an elision that also hides "(i.e., within 10%)".
+  - `:582` (EEVDF TR, p. 3) — "virtual dead line" for "virtual deadline".
+  - `:1867` (Park) — drops "(affecting job runtime in the rewards)" without a mark.
+  - `:2579` (Kgent) — "the comprehension and symbolic execution component" for "the comprehension engine and symbolic execution component".
+  - `:2568` (Kgent, Table 1) — the human-expertise row's columns swapped: the source reads accuracy 72.5 %, false positive 2.5 %, false negative 25 %; the guidebook shows 72.5 % as failed-to-produce and 25 % as accuracy (the paper's prose agrees with its table: Kgent's 80 % beats the human baseline).
+  - `:1967` — introduced as ASA's first sentence, it runs into the second.
+- **Claims around the quotes:**
+  - `:558` — "lag" is not in the EEVDF introduction: it is defined in §2 (p. 4), virtual time formally in §3 (p. 6).
+  - `:674` — Miller has seventeen topics, not eighteen ("The seventeen types of response category and response time", p. 269).
+  - `:2209`, `:2674` — SchedCP's journal-reference field reads "MLforSystem 2025", not "ML for Systems 2025" (D25).
+  - `:2211` — "went back" to a short form is unsupported: v1 and v2 are the same 8-page manuscript, v3 and v4 6 pages, with no earlier short version.
+  - `:2791–2797`, `:3174` — the Windows Update question stated as unconfirmed; D45 settled it (S2-58).
+  - `:3421` — "nine" Procyon benchmarks; the page lists ten, one of them "AI Inference Benchmark for Android".
+  - Nuances: `:865` (the abstract's first two sentences), `:1116` (five bullets in `sched-ext.rst`, not four), `:1208` (each scx README's Overview line, after a shared first line), `:696` (the Nielsen chapter title not in the copy, the registry already marking it); `:875` duplicates `:873`.
+- **Small corrections:** `:1048` prints "RocksDB" where ghOSt has "RockDB" (a [sic] or the source's spelling); `:1339`, `:1571`, `:1757`, `:1851`, `:2395`, `:2551` — a joined heading, cut clauses and figure references, a capitalised "We" (the report's rows give the source text); the marker drops at `:887`, `:925`, `:931`, `:949`, `:993` and the 22 listed for chapters 4–6 — an elision mark where the guidebook elides, as it does at `:600`.
+- **Registry points from the read:** `gamemode-docs` gains the `ReleaseExclusiveCpuSets` page, the source of `:2777` ("After this function is called, the app will still have access to other Game Mode resources, such as increased GPU prioritization.") — S2-16 copied the concept and header pages and two function pages, not it; `hackbench` — vol-02 cites HEAD `fd45df83`, the registry pins tag v2.11 (`62da2bef`), the quoted files byte-identical at both; `rt-app` — `:3299` comes from `README.in`, a file the entry's cite does not list. SchedCP's version marking holds throughout (every unmarked quote in v4; every long-version quote in v2 only).
+
+Hands to 9.15: `docs/guidebook/vol-02-related-work.md` — each line above corrected to its source as the report's row gives it; `docs/references.md` `gamemode-docs` (the fifth page), `hackbench` (the version vol-02 names), `rt-app` (`README.in`).
+
+Compiled effect: none.
