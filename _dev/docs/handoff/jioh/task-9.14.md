@@ -13,7 +13,7 @@ Branch `jioh/dataset-rebuild` (Phase 9 works on this branch only, `_dev/` includ
 | the prior table's sentences and the pair review | done, D5; daemon lint clean |
 | `docs/harness/metrics.md` §5, §6.2, §11, §13 | done, D1 |
 | the RQ0 gate spec | written, D7 (judging 19, K 10, ten points, statements, lines, notes); **pins not final**: `pins.variants.all` is a zero placeholder; the experiment lint reports only the 78 variant files not yet built and that pin |
-| the compiler's variant transforms and the variant sets | four transforms written and tested by construction, D8; the four scaling sets' build was running in the background at hand-off (`python3.12 dataset/tools/variants.py --sets venue-x0.8,venue-x1.25,chain-x1.2,chain-x1.4`; writes 44 `@` files into `dataset/build/coreset-single/`, no manifest for a partial build); segment-length and corner sets not yet built; **the trace-replay transform is not implemented** (below) |
+| the compiler's variant transforms and the variant sets | four transforms written and tested by construction, D8; the four scaling sets built and linted (`python3.12 dataset/tools/variants.py --sets venue-x0.8,venue-x1.25,chain-x1.2,chain-x1.4`: 44 `@` files in `dataset/build/coreset-single/`, 19 + 19 venue and 3 + 3 chain, about 40 minutes; a partial build writes no manifest); segment-length and corner sets not yet built; **the trace-replay transform is not implemented** (below) |
 | the harness changelog entry and the re-pin | not done |
 | `docs/workload/building-plan.md` §5a paragraph (decision 4); `_dev/research/jioh/research-slice-workflow.md` "CI on the branch" | not done |
 | hand-offs: the Phase 10 bullet (decision 11), the 9.15 and 9.16 lines | not done (each changelog entry carries its hand-offs) |
