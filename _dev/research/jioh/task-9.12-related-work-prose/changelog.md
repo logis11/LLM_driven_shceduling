@@ -805,3 +805,18 @@ Taken under 인지오's delegation (2026-10-09), scope-card item 60: every block
 Hands to 9.15: `docs/guidebook/vol-02-related-work.md` — each line above corrected to its source as the report's row gives it; `docs/references.md` `gamemode-docs` (the fifth page), `hackbench` (the version vol-02 names), `rt-app` (`README.in`).
 
 Compiled effect: none.
+
+## D54 — batch: hand-off pointers (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), stage 4: every decision's hand-off reaches its task through `_dev/TODO.md`, as 9.11 D33 did.
+
+- **9.14** — D6's condition split where the harness freezes the condition list (the two identifiers chosen there; the build of the two rule lists has no phase yet); D40's question whether Layer 1 pre-registers the recognizer with and without `reasoning`; D51 and D52's measured latencies for RQ4 and the daemon's stamp, the consistency measure's hardware, and the chat template's inserted date, with 박이안.
+- **9.15** — every decision's "Hands to 9.15": the restatements of `docs/related-work.md` and `docs/research-proposal.md` by section, `whitelist` across the docs (D6), the workload docs' lines (D11, D45–D47), `docs/simulator/simulator-guide.md:210` (D30), the registry entries minted and restated, the guidebook lines each decision names, and vol-02's quotation corrections (D53).
+- **The inputs on 9.12's own line**, answered: 9.6 D32's training-run wording (D14), 9.6 D17's `updatedb` sentence (D13), 9.11 D19's starvation lines (D30), 9.11 D33's declared-class survey (D13, D49).
+- **The campaign** `meas-ci:costs:2026-10-08` is in `measurement-campaign-record.md`; its raw records are not released (outward-facing; 인지오's call).
+
+Applied: `_dev/TODO.md` — the 9.14 and 9.15 lines.
+
+Hands to: as listed.
+
+Compiled effect: none.
