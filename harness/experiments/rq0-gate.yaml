@@ -198,7 +198,7 @@ reporting_lines:
             c7-compile: c7-compile@corner-high, c7-ml-train: c7-ml-train@corner-high}
   - type: trace_replay
     tolerance: 0.17
-    reason: "four judging files, one per term shape, rebuilt on one pooled repeat's measured wake sequence in place of the compiled stream (the launch-phase replay of 9.10 D136 extended to the carried phases); agreement when each file's gap falls on the same side of g under both builds and differs by less than the g band's step; a disagreement is stated beside the verdict as the compiled streams' ordering threat (the 2026-09-26 burstiness finding: the streams reproduce each component's rates and distributions, not the order of its gaps nor its components waking together)"
+    reason: "four judging files, one per term shape, rebuilt on one pooled repeat's measured wake sequence in place of the compiled stream (the launch-phase replay of 9.10 D136 extended to the carried phases): a measured or periodic task takes a window of its entry's carried phase at an offset the file's seed draws, the operations and the keystroke replay as compiled; a batch job its repeat's runs from the start, the repeat the nearest whose CPU covers the file's bind (dataset/replay/, each file stating its landing); agreement when each file's gap falls on the same side of g under both builds and differs by less than the g band's step; a disagreement is stated beside the verdict as the compiled streams' ordering threat (the 2026-09-26 burstiness finding: the streams reproduce each component's rates and distributions, not the order of its gaps nor its components waking together)"
     files: {c7-dev: c7-dev@replay, c7-browsing: c7-browsing@replay, c7-meeting: c7-meeting@replay, c2-p1a: c2-p1a@replay}
   - type: input_wake_count
   - type: longest_wait
@@ -411,7 +411,10 @@ statements:
       bounds of its stated interval, all low and all high, and 9.6 D29's rule
       holds with it — no reported result may rest on a difference smaller than a
       carried value's half-width; the trace replay rebuilds four files on measured
-      wake sequences. A verdict count that moves under any line makes the verdict
+      wake sequences — one pooled repeat per entry over its carried phase, a
+      seeded window of it per measured or periodic task, a batch job's runs from
+      its start on the nearest repeat whose CPU covers the bind (the six streams
+      under dataset/replay/, each stating its landing). A verdict count that moves under any line makes the verdict
       a range over that axis. The input-wake-count line prints, per judging file
       and interaction-latency term, the number of wakes its P99 rests on: a 26 s
       counterpart holds about a hundred keystrokes and c3-workday's browser seven,

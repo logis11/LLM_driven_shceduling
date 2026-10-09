@@ -24,4 +24,4 @@ How the Phase 9 research-and-decision sub-tasks (9.4–9.12) run. Fixed on 2026-
 
 ## CI on the branch
 
-The window check may fail on `jioh/dataset-rebuild` when an amended value moves a file's demand, until 9.14 redoes the demand-window rule. The changelog entry that causes it says so.
+No check fails on a file's demand: the demand window is retired (9.14 decision 4), the compiler records each file's demand per file and per segment in `dataset/build.manifest.json`, and the pair review reads it there.
