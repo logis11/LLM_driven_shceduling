@@ -43,7 +43,7 @@ def test_committed_spec_lints_clean():
 
 
 def test_every_coreset_file_but_idle_has_terms(spec):
-    compiled = {p.name.replace(".workload.json", "") for p in BUILD.glob("*.workload.json")}
+    compiled = {p.name.replace(".workload.json", "") for p in BUILD.glob("*.workload.json") if "@" not in p.name}   # the blessed set; the variants (9.14 D8) read their base's terms
     assert compiled - set(spec["files"]) == {"c1-idle", "c7-idle"}
     assert set(spec["files"]) <= compiled
     assert all(f["terms"] for f in spec["files"].values())
@@ -309,3 +309,38 @@ def test_cli_exit_codes(tmp_path):
     p = subprocess.run([sys.executable, str(TOOLS / "scoring_lint.py"), "--spec", str(bad)],
                        capture_output=True, text=True)
     assert p.returncode == 1
+
+
+# ------------------------------------------------------- the variant files
+
+def _workload(path, segments):
+    path.write_text(json.dumps({"meta": {"id": path.name.replace(".workload.json", "")},
+                                "ground_truth": [{"t_start": a, "t_end": b, "mode": "dev"} for a, b in segments],
+                                "events": []}))
+    return path
+
+
+def test_a_variant_file_reads_its_bases_terms_with_the_windows_on_its_own_segments(tmp_path):
+    # 9.14 decision 12: a rebuilt judging file is scored on its base's terms; a window is a segment by design
+    # (decision 5), so under a segment-length variant it follows the segment, not the number
+    from harness.scoring import with_variants, windows_from_spec
+    _workload(tmp_path / "c2-p1a.workload.json", [(0, 60_000_000), (60_000_000, 99_435_000)])
+    short = _workload(tmp_path / "c2-p1a@seg1-30s.workload.json", [(0, 30_000_000), (30_000_000, 69_435_000)])
+    same = _workload(tmp_path / "c2-p1a@venue-x0.8.workload.json", [(0, 60_000_000), (60_000_000, 99_435_000)])
+    _workload(tmp_path / "c1-idle.workload.json", [(0, 60_000_000)])
+    idle = _workload(tmp_path / "c1-idle@venue-x0.8.workload.json", [(0, 60_000_000)])
+    windowed = {"entity": "hog", "metric": "turnaround", "aggregate": "p50", "direction": "lower", "weight": 1,
+                "window": {"start_us": 60_000_000, "end_us": 99_435_000}}
+    whole = {"entity": "editor", "metric": "ready_wait", "aggregate": "p99", "cause": "wake", "channel": "input",
+             "direction": "lower", "weight": 1}
+    spec = {"files": {"c2-p1a": {"terms": [windowed, whole]}}}
+    out = with_variants(spec, {"c2-p1a@seg1-30s": short, "c2-p1a@venue-x0.8": same, "c1-idle@venue-x0.8": idle})
+    assert set(out["files"]) == {"c2-p1a", "c2-p1a@seg1-30s", "c2-p1a@venue-x0.8"}   # no terms, no entry
+    assert out["files"]["c2-p1a@seg1-30s"]["terms"][0]["window"] == {"start_us": 30_000_000, "end_us": 69_435_000}
+    assert out["files"]["c2-p1a@seg1-30s"]["terms"][1] == whole
+    assert out["files"]["c2-p1a@venue-x0.8"]["terms"] == [windowed, whole]
+    assert windows_from_spec(out, "c2-p1a@seg1-30s") == {("hog", "turnaround"): [(30_000_000, 69_435_000)]}
+    assert spec["files"].keys() == {"c2-p1a"} and spec["files"]["c2-p1a"]["terms"][0] is windowed   # a copy
+    odd = _workload(tmp_path / "c2-p1a@odd.workload.json", [(0, 99_435_000)])
+    with pytest.raises(ValueError, match="c2-p1a@odd.*segments"):
+        with_variants(spec, {"c2-p1a@odd": odd})

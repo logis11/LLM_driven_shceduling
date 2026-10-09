@@ -209,7 +209,51 @@ def _where(path):
     return ("/".join(str(p) for p in parts) + ": ") if parts else ""
 
 
-__all__ = ["LEGAL", "SPEC_PATH", "SCHEMA_PATH", "label_changing_variants", "lint_spec", "load_spec", "variant_bases"]
+__all__ = ["LEGAL", "SPEC_PATH", "SCHEMA_PATH", "base_id", "label_changing_variants", "lint_spec", "load_spec",
+           "variant_bases", "with_variants"]
+
+
+def base_id(workload_id):
+    """A variant file's base: the id before `@` (`c7-dev@replay` → `c7-dev`); a base's own id otherwise."""
+    return workload_id.split("@", 1)[0]
+
+
+def with_variants(spec, variant_files):
+    """A copy of the scoring spec with an entry per variant file (9.14 decision 12: a rebuilt judging file is
+    scored on its base's terms): `variant_files` maps each variant id to its compiled file, whose base lies beside
+    it. Each window follows its segment (decision 5: a window is a segment by design): the base's and the
+    variant's ground-truth segments are paired by index and a bound on the base's k-th boundary moves to the
+    variant's k-th. A variant whose base has no entry gets none; segment lists of different lengths are an error."""
+    out = dict(spec, files=dict(spec["files"]))
+    for vid, path in sorted(variant_files.items()):
+        base = base_id(vid)
+        entry = spec["files"].get(base)
+        if entry is None or vid in spec["files"]:
+            continue
+        path = pathlib.Path(path)
+        with open(path, encoding="utf-8") as f:
+            v_segments = json.load(f).get("ground_truth") or []
+        with open(path.parent / f"{base}.workload.json", encoding="utf-8") as f:
+            b_segments = json.load(f).get("ground_truth") or []
+        if len(v_segments) != len(b_segments):
+            raise ValueError(f"{vid}: {len(v_segments)} segments against its base's {len(b_segments)}")
+        moved = {}
+        for b, v in zip(sorted(b_segments, key=lambda s: int(s["t_start"])),
+                        sorted(v_segments, key=lambda s: int(s["t_start"]))):
+            moved[int(b["t_start"])] = int(v["t_start"])
+            moved[int(b["t_end"])] = int(v["t_end"])
+        terms = []
+        for term in entry["terms"]:
+            term = dict(term)
+            w = term.get("window")
+            if w:
+                try:
+                    term["window"] = {"start_us": moved[int(w["start_us"])], "end_us": moved[int(w["end_us"])]}
+                except KeyError as err:
+                    raise ValueError(f"{vid}: the base's window bound {err} is not a segment boundary") from None
+            terms.append(term)
+        out["files"][vid] = dict(entry, terms=terms)
+    return out
 
 
 def windows_from_spec(spec, workload_id):

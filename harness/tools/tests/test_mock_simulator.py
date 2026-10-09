@@ -202,7 +202,7 @@ def test_contract_invalid_input_is_refused(tmp_path):
 def test_every_coreset_file_flows_through_records_with_no_message(tmp_path):
     table = read_driver_table(PRIOR)
     boot = json.loads(BOOT.read_text())
-    files = sorted(BUILD.glob("*.workload.json"))
+    files = sorted(p for p in BUILD.glob("*.workload.json") if "@" not in p.name)   # the variants (9.14 D8) aside
     assert len(files) == 51                                     # the blessed set of 2026-10-09 (9.13 D7)
     for path in files:
         doc = json.loads(path.read_text())

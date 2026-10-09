@@ -222,7 +222,7 @@ def test_other_conditions_and_wrong_seed_pairings_are_refused(table, boot):
 
 @needs_build
 def test_oracle_over_the_coreset_reproduces_the_measured_graded_set(table, boot, tmp_path):
-    files = sorted(BUILD.glob("*.workload.json"))
+    files = sorted(p for p in BUILD.glob("*.workload.json") if "@" not in p.name)   # the variants (9.14 D8) aside
     assert len(files) == 51                                     # the blessed set of 2026-10-09 (9.13 D7)
     points = terminal = ambiguous = 0
     graded, graded_files, miss, headline, headline_files = 0, set(), 0, 0, set()

@@ -302,8 +302,11 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
         return result
     (exp_dir / "failures.json").unlink(missing_ok=True)
 
-    # aggregates and scores
-    scoring_spec = scoring.load_spec(scoring_path)
+    # aggregates and scores; a variant file (9.14 decision 12) is scored on its base's terms, its windows on its
+    # own segments
+    scoring_spec = scoring.with_variants(scoring.load_spec(scoring_path),
+                                         {b["run"].workload_id: b["run"].workload_file for b in built.values()
+                                          if "@" in b["run"].workload_id})
     agg_rows = []
     for identity, b in sorted(built.items()):
         wid = identity[0]
