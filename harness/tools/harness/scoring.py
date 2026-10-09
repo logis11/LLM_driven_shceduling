@@ -10,7 +10,9 @@ terms only — which files judge, report, or are excluded is the RQ0 gate spec's
 `lint_spec` checks the file against its JSON schema and against the compiled
 coreset: every entity is a task id in that file's compiled workload or a
 reserved name; metric and aggregate form a scored pair; the direction is the
-pair's; weights are positive; windows lie inside [0, T_end]; a file that
+pair's; weights are positive; windows lie inside [0, T_end] and on the compiled
+file's ground-truth segment boundaries (a window is a segment by design, 9.14
+decision 5); a file that
 declares a `base` is that base's variant in the dataset's recipes and carries
 its terms verbatim — or, when its ground truth flips the base's
 `background_wanted` to false, the base's terms minus the batch terms (unwanted
@@ -65,6 +67,24 @@ def variant_bases(recipes_dir):
     return bases
 
 
+def label_changing_variants(recipes_dir):
+    """{variant id: base id} for the recipe variants that change a segment's label —
+    its mode or its background_wanted — the C2 pair shape (9.14 decision 7). A variant
+    that changes a task's entry alone, as the bounding check's idle download does, is
+    not one."""
+    out = {}
+    for recipe in sorted(pathlib.Path(recipes_dir).glob("*.variant.yaml")):
+        doc = yaml.safe_load(recipe.read_text()) or {}
+        for v in doc.get("variants", []):
+            src = str(v.get("from", "")).replace(".timeline.yaml", "")
+            for op in v.get("ops") or []:
+                seg = op.get("patch-segment") if isinstance(op, dict) else None
+                if isinstance(seg, dict) and ("mode" in seg or "background_wanted" in (seg.get("attributes") or {})):
+                    out[v["id"]] = src
+                    break
+    return out
+
+
 def label_flipped(build_dir, base, variant):
     """True when some segment is background_wanted true in the base's compiled
     ground truth and false in the variant's (the C7 counterpart shape)."""
@@ -75,6 +95,13 @@ def label_flipped(build_dir, base, variant):
     return any((b.get("attributes") or {}).get("background_wanted") is True
                and (v.get("attributes") or {}).get("background_wanted") is False
                for b, v in pairs)
+
+
+def segment_bounds(compiled_path):
+    """The compiled file's ground-truth segment starts and ends, in µs."""
+    with open(compiled_path, encoding="utf-8") as f:
+        segments = json.load(f).get("ground_truth") or []
+    return ({int(s["t_start"]) for s in segments}, {int(s["t_end"]) for s in segments})
 
 
 def lint_spec(spec_path, schema_path, build_dir, recipes_dir):
@@ -131,6 +158,15 @@ def lint_spec(spec_path, schema_path, build_dir, recipes_dir):
                 if not (0 <= win["start_us"] < win["end_us"] <= run.t_end):
                     errors.append(f"{where}window [{win['start_us']}, {win['end_us']}] is not "
                                   f"inside [0, T_end={run.t_end}] or is empty")
+                else:
+                    # 9.14 decision 5: a window is a segment by design, so each bound must be a
+                    # ground-truth segment boundary of the compiled file; a stale window in
+                    # either direction fails here
+                    starts, ends = segment_bounds(compiled)
+                    if win["start_us"] not in starts or win["end_us"] not in ends:
+                        errors.append(f"{where}window [{win['start_us']}, {win['end_us']}] does not lie on "
+                                      f"the file's segment boundaries (starts {sorted(starts)}, "
+                                      f"ends {sorted(ends)})")
         if "base" not in entry and wid in bases and bases[wid] in files:
             base_entry = files[bases[wid]]
             if isinstance(base_entry, dict) and entry.get("terms") == base_entry.get("terms"):
@@ -173,7 +209,7 @@ def _where(path):
     return ("/".join(str(p) for p in parts) + ": ") if parts else ""
 
 
-__all__ = ["LEGAL", "SPEC_PATH", "SCHEMA_PATH", "lint_spec", "load_spec", "variant_bases"]
+__all__ = ["LEGAL", "SPEC_PATH", "SCHEMA_PATH", "label_changing_variants", "lint_spec", "load_spec", "variant_bases"]
 
 
 def windows_from_spec(spec, workload_id):
