@@ -4,6 +4,9 @@ dataset:            ## derive variants + grid, compile timelines -> build/ + man
 	$(PY) tools/derive.py
 	$(PY) tools/compile.py
 
+variants:           ## the RQ0 gate spec's sensitivity variants -> build/ + variants manifest (needs `dataset`)
+	$(PY) tools/variants.py
+
 lint:               ## repo + timeline + canonical lints (no writes)
 	$(PY) tools/lint.py
 
@@ -14,4 +17,4 @@ check:              ## CI gate: verify derived files, grid (all 32 cells), and m
 	$(PY) tools/derive.py --check --require-coverage
 	$(PY) tools/compile.py --check
 
-.PHONY: dataset lint test check
+.PHONY: dataset variants lint test check

@@ -14,6 +14,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r harness/tools/requirements.txt -r dataset/tools/requirements.txt
-      - run: make -C dataset dataset        # the scoring lint reads the compiled coreset
+      - run: make -C dataset dataset
+      - run: make -C dataset variants    # the RQ0 gate spec lists the variant files (9.14)        # the scoring lint reads the compiled coreset
       - run: make -C harness lint
       - run: make -C harness test

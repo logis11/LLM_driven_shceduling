@@ -1,0 +1,126 @@
+# The sensitivity variants of the RQ0 gate spec (9.14 decisions 10 and 12;
+# _dev/docs/spec/jioh/task-9.14-consumer-rework.md). Each set names a transform, its
+# parameters and the files it rebuilds; `dataset/tools/variants.py` builds every set
+# from the pinned library (dataset/archetypes.yaml) and the blessed artifacts
+# (dataset/build/coreset-single/), writes each variant as
+# dataset/build/coreset-single/<base>@<set>.workload.json and records every artifact's
+# hash, its base's hash and the transform in dataset/build.variants.manifest.json, which
+# the RQ0 gate spec pins. A variant keeps its base's `meta.derived_from` and `sampled`
+# (the workload contract has no slot for a transform); the manifest is the provenance.
+#
+# Transforms:
+#   scale-runs       every RUN of every task but the frame chain's members multiplied by
+#                    `factor` (the measured values; the chain has its own line), rounded
+#                    to whole µs, at least 1 — on the blessed artifact, no recompile
+#   scale-chain      every RUN of the chain's members (ids game.chain.* and
+#                    game.wineserver) multiplied by `factor` — likewise
+#   segment-length   the timeline's segment `segment` set to `length`; the segments,
+#                    task arrivals and departs, focus windows and operations after its
+#                    end shifted by the difference; recompiled with the pinned library
+#   carried-bounds   every table listed under `carried_values` multiplied by
+#                    (1 − half_width) on the `low` side and (1 + half_width) on the
+#                    `high` side — shorter gaps, runs and blocks on the low side, longer
+#                    on the high — in a copy of the library; the files recompiled with it
+#   trace-replay     the named entries' streams replaced by one pooled repeat's observed
+#                    wake sequence over the carried phase (dataset/replay/, built by
+#                    dataset/tools/meas/replay_fold_in.py from the raw releases); the
+#                    files recompiled with the pinned library and those streams
+
+judging: &judging
+  [c2-p1a, c2-p2a, c2-p2b, c2-p3a, c1-compile, c1-ml-train, c1-render, c1-transcode,
+   c7-browsing, c7-office, c7-dev, c7-photo, c7-meeting, c7-gaming, c7-video-edit,
+   c7-compile, c7-ml-train, c7-render, c7-transcode]
+
+sets:
+  - name: venue-x0.8
+    transform: scale-runs
+    factor: 0.8
+    files: *judging
+    reason: "the venue factor's lower edge, 1/1.25 (9.6 D32; the bracket contains the ×1.144 huge-page ratio of 9.10 D88 and the tracing overhead's ×1.02–1.16)"
+  - name: venue-x1.25
+    transform: scale-runs
+    factor: 1.25
+    files: *judging
+    reason: "the venue factor's upper edge"
+  - name: chain-x1.2
+    transform: scale-chain
+    factor: 1.2
+    files: [c2-p2a, c2-p2b, c7-gaming]
+    reason: "the chain's per-schedule runtime read as the per-wake RUN understates a wake by the schedules it is cut into (9.4 D9; lavd-ossna24 s14, about 1.4 on average)"
+  - name: chain-x1.4
+    transform: scale-chain
+    factor: 1.4
+    files: [c2-p2a, c2-p2b, c7-gaming]
+    reason: "the deck's bound; the chain exceeds the lane in all three files"
+  - name: seg1-30s
+    transform: segment-length
+    segment: 0
+    length: 30s
+    files: [c2-p1a, c2-p2a, c2-p2b, c2-p3a]
+    reason: "the C2 pairs' first segment, the one authored length a judging file has (60 s, design, 9.10 D31), halved (9.10 D169)"
+  - name: seg1-120s
+    transform: segment-length
+    segment: 0
+    length: 120s
+    files: [c2-p1a, c2-p2a, c2-p2b, c2-p3a]
+    reason: "the same segment doubled"
+  - name: corner-low
+    transform: carried-bounds
+    side: low
+    files: [c1-compile, c1-ml-train, c2-p1a, c2-p2a, c2-p2b, c7-browsing, c7-office, c7-dev, c7-gaming, c7-compile, c7-ml-train]
+    reason: "every exception-carried value at the lower bound of its stated 95 % interval (statement `re-measurement-contingency` of the RQ0 gate spec)"
+  - name: corner-high
+    transform: carried-bounds
+    side: high
+    files: [c1-compile, c1-ml-train, c2-p1a, c2-p2a, c2-p2b, c7-browsing, c7-office, c7-dev, c7-gaming, c7-compile, c7-ml-train]
+    reason: "the same values at the upper bound"
+  - name: replay
+    transform: trace-replay
+    files: [c7-dev, c7-browsing, c7-meeting, c2-p1a]
+    streams:
+      code-editor: replay-code-editor
+      web-browser: replay-web-browser
+      renderer-hidden: replay-renderer-hidden
+      video-call: replay-video-call
+      package-upgrade: replay-package-upgrade
+      cpu-batch: replay-cpu-batch-python3
+    reason: "one pooled repeat's measured wake sequence in place of the compiled stream, for the four judging files that cover every term shape (9.14 decision 10; the 2026-09-26 burstiness finding)"
+
+# The values the library carries under the stability rule's exceptions — a spread that
+# follows the machine or the session rather than the program — with the 95 % half-width
+# each entry's scope states, as the corner sets read them. `table` names the parameter
+# (a component's `gap` or `run` table, or a program's run or block table) the half-width
+# scales. Values on entries no judging file holds (the session daemons' pid 1 and
+# system bus, 9.9 D48; the Tracker indexer's block, 9.6 D29) are not swept: the files
+# holding them are reporting-only.
+carried_values:
+  - {entry: code-editor, component: "utility/libuv-worker", table: gap, half_width: 0.0563,
+     source: "9.5 D57, D99: gap mean 185.8 ms ±5.63 % (wake rate 5.382/s ±5.63 %); across repeats the rate spreads ±39.0 %, the sessions' own, inside the pooled table"}
+  - {entry: code-editor, component: "utility/libuv-worker", table: run, half_width: 0.0236,
+     source: "9.5 D57, D99: run mean 0.0102 ms ±2.36 %"}
+  - {entry: renderer-hidden, component: "residual", table: gap, half_width: 0.202,
+     source: "9.8 D27 (9.10 D156): the sparse residual (ThreadPoolServi, MemoryInfra), wake rate 0.0096/s and gap mean 104.3 s, ±20.2 %"}
+  - {entry: renderer-hidden, component: "residual", table: run, half_width: 0.613,
+     source: "9.8 D27 (9.10 D156): run mean 0.0346 ms ±61.3 %"}
+  - {entry: renderer-hidden, component: "HangWatcher", table: run, half_width: 0.181,
+     source: "9.8 D17: run mean 0.0262 ms ±18.1 %, a spread that is the runner's speed"}
+  - {entry: renderer-hidden, component: "chrome", table: run, half_width: 0.114,
+     source: "9.8 D17: run mean 0.0624 ms ±11.4 %"}
+  - {entry: renderer-hidden, component: "Chrome_ChildIOT", table: gap, half_width: 0.065,
+     source: "9.8 D21, D24, D26 (9.10 D156): wake rate 0.0176/s and gap mean 56.8 s, ±6.5 %, a rate that varies between sessions"}
+  - {entry: renderer-hidden, component: "Chrome_ChildIOT", table: run, half_width: 0.075,
+     source: "9.8 D21, D24, D26 (9.10 D156): run mean 0.0324 ms ±7.5 %"}
+  - {entry: game-client, component: "steamwebhelper", table: run, half_width: 0.053,
+     source: "9.8 D17, D18: run mean 0.0695 ms ±5.3 %, the runner's speed"}
+  - {entry: game-client, component: "steam", table: run, half_width: 0.101,
+     source: "9.8 D17, D18: run mean 0.0554 ms ±10.1 %"}
+  - {entry: game-client, component: "IPC:CSteamEngin", table: run, half_width: 0.088,
+     source: "9.8 D17, D18: run mean 0.0574 ms ±8.8 %"}
+  - {entry: game-client, component: "VizCompositorTh", table: run, half_width: 0.056,
+     source: "9.8 D17, D18: run mean 0.0818 ms ±5.6 %"}
+  - {entry: cpu-batch, program: python3, table: python3_run, half_width: 0.273,
+     source: "9.10 D87, D88 (9.6 D29's exception): runs between voluntary blocks 69.49 s ±27.3 %, the runner's khugepaged"}
+  - {entry: cpu-batch, program: python3, table: python3_block, half_width: 0.108,
+     source: "9.10 D87, D88: block per run 311.5 µs ±10.8 %"}
+  - {entry: module-build-orchestrator, table: tail_block, half_width: 0.0835,
+     source: "9.10 D58: the serial tail's block per run ±8.35 % over 26 landings, dkms's progress loop and the runner's disk"}

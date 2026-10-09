@@ -24,4 +24,5 @@ jobs:
           python-version: "3.12"
       - run: pip install -r harness/tools/requirements.txt -r dataset/tools/requirements.txt
       - run: make -C dataset dataset
+      - run: make -C dataset variants    # the RQ0 gate spec lists the variant files (9.14)
       - run: make -C harness smoke
