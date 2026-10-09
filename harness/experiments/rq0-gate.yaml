@@ -476,7 +476,7 @@ pins:
   driver_table: {path: daemon/driver-table/prior.yaml, sha256: 6e271dd042b38c23b85459cec7545fde990aec9be5a2c8bd6081690d98243f7f}
   dataset:      {path: dataset/build.manifest.json, sha256: c3767e1028e1d8c4446a0cd216dfe19f8741b3fef1caba28ceeab95bf680f872}
   variants:
-    all: {path: dataset/build.variants.manifest.json, sha256: "0000000000000000000000000000000000000000000000000000000000000000"}
+    all: {path: dataset/build.variants.manifest.json, sha256: 2a8893a921c1879727d2d090e7706b2bcb932f909d4a24a0f9356d21b3832ee1}
 
 criterion:
   type: k_of_n_gap
