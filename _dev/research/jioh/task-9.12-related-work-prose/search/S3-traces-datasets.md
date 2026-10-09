@@ -47,6 +47,7 @@ Topics in scope: T7 (counts over units, packages or a rules catalogue), T10 (tra
 | 35 | 2026-10-08 | deb.debian.org (stage 3) | `dists/sid/Release`; `main/Contents-amd64.gz`, `main/Contents-all.gz`, `main/binary-amd64/Packages.xz`, `main/binary-all/Packages.xz` | 200; each SHA-256 equal to Release's → S3-20 | — |
 | 36 | 2026-10-09 | local copies (stage 3) | the campaigns' downloaded artifacts under `~/.cache/meas-loop` (2 028 `report.json`, 2 259 `perf.*.timehist.txt.gz`): every gate-open EPYC 7763 repeat's timehist files, counted per CPU (A.17) | → S3-21 | — |
 | 37 | 2026-10-09 | WebSearch (standard); usenix.org (stage 3) | `measured PC game play session length distribution study Steam telemetry hours per session`; the IMC '05 paper's HTML (`index`, `node2`, `node3`, `node5`) | 200 → S3-23; the other results — arXiv 1703.04696 ("On Quitting", platform not stated in the snippet), the AAU/Fraunhofer "Playtime Principle" (total playtime, not sessions), a developer's blog, a 2009 Nielsen report, Statista (a survey) — not read | — |
+| 38 | 2026-10-09 | own run (stage 3) | the development Mac: llama.cpp at `bd4eeaa0` built with Metal; the two GGUF files of `meas-ci:costs` (D31); `sources/S3-22/m1_run.sh` (A.18), five repeats | → S3-22 | — |
 
 ---
 
@@ -653,6 +654,27 @@ ANY of the three: 56 packages (3.9 % of 1438); lowering 40 (2.8 %); raising 16 (
 - **Copy read** (2026-10-09, `sources/S3-23/`): `index.html` SHA-256 `5322b990249ded0bb162aaefd248624f612d2f8ad81e4635a4290d616edf5636`; `node2.html` (Methodology) `00fa689944a676286847d4dc49da8239d5cacbf71989e6ddfdb5f98f3dcbc296`; `node3.html` `076db7e2…`; `node5.html` ("Gamers have short attention spans") `f3d1c2eb16cb1bd376a04f60850cfe22e6036ce2f3d0dfb6f3c84b475d0f6d8e`.
 - **Passages.** Methodology: "we examined the activity of one of the busiest and longest running Counter-Strike servers in the country located at cs.mshmro.com"; the abstract's "a 13-month trace of an extremely busy game server containing over 2.8 million connections". §"Gamers have short attention spans": "a significant number of players play only for a short time before disconnecting and that the number of players that play for longer periods of time drops sharply as time increases" … "more than 99% of all sessions last less than 2 hours" … "the data can be closely matched to a Weibull distribution".
 - **Coverage.** T12 covered for one game: session time on one Counter-Strike server, server-side connection time, 13 months; not PC process activity, and a player's session on one server, not a sitting. Other topics: does not cover.
+
+### S3-22 — A recognizer-shaped request's latency on a consumer machine: Apple M1 Pro, llama.cpp with Metal (T11; stage 3, 2026-10-09)
+
+- **Machine** (`sources/S3-22/machine.txt`): 인지오's development Mac, Apple M1 Pro (8 performance and 2 efficiency cores), 16 GB, macOS 27.0.1 (26A434), on AC power; the machine's own work running beside it (the VS Code tunnel, this session). Run 2026-10-08T23:54Z onward.
+- **Software and inputs.** llama.cpp at `bd4eeaa047006cb1fe71999fbd11134b5836e167`, built with CMake, Release, Metal on (`GGML_METAL=ON`); the two GGUF files of the runner campaign (D31), SHA-256 equal to the pinned `626b4a66…` and `7b064f58…`; `dataset/tools/meas/llm/request.py` with `prompt.json` and the two schemas (the runner campaign's request, unchanged). Per repeat and model: `llama-server -c 4096 -np 1` at its default offload, the time to `/health`, a warm-up and five requests per schema, then `llama-bench -p 512 -n 64 -r 3`. Five repeats. Script `m1_run.sh` (A.18, SHA-256 `613a5cb62d086412f889147631dd070c61733d2a557e252ba43be95b48603d48`), summary `summarize_llm.py` (A.18, `2205fe69f019da7247ba37a7618d92aba5728272194d46473d772ca9b5135a85`), output `summary.txt` (`dbb990a2d40e4b54cedda805b0a3c3d76fd456e825365d19c08ea0204eb1f9f7`); the page cache is not dropped between repeats (`purge` needs `sudo`), so the load times after the first are warm (8.8 s and 3.4 s cold in repeat 1, 1.2–1.9 s after).
+- **Output** (`summary.txt`, verbatim; ms, means over each repeat's five requests, then the mean and range over the five repeats):
+  ```
+  llama3.1-8b  full   repeats 5: wall_ms 5340.1 (5335.7–5345.3), prompt_n 454.0 (454.0–454.0), prompt_ms 1907.6 (1906.9–1907.9), predicted_n 82.0 (82.0–82.0), predicted_ms 3431.0 (3426.3–3435.8)
+                      distinct answers over every request: 1
+  llama3.1-8b  system repeats 5: wall_ms 2951.9 (2950.2–2953.5), prompt_n 454.0 (454.0–454.0), prompt_ms 1907.7 (1906.8–1908.9), predicted_n 26.0 (26.0–26.0), predicted_ms 1042.7 (1041.1–1044.5)
+                      distinct answers over every request: 1
+  qwen2.5-3b   full   repeats 5: wall_ms 2254.7 (2244.9–2281.4), prompt_n 437.0 (437.0–437.0), prompt_ms 731.7 (731.3–732.3), predicted_n 81.0 (81.0–81.0), predicted_ms 1521.3 (1511.6–1547.3)
+                      distinct answers over every request: 1
+  qwen2.5-3b   system repeats 5: wall_ms 1190.2 (1187.0–1195.8), prompt_n 437.0 (437.0–437.0), prompt_ms 731.8 (731.6–731.9), predicted_n 25.0 (25.0–25.0), predicted_ms 456.7 (453.1–462.1)
+                      distinct answers over every request: 1
+  llama3.1-8b  bench: pp512 255.57 t/s (255.42–255.74, n 5), tg64 25.58 t/s (25.48–25.65, n 5)
+  qwen2.5-3b   bench: pp512 623.42 t/s (622.92–623.72, n 5), tg64 59.78 t/s (59.75–59.82, n 5)
+  ```
+- **Placement.** llama-bench reports `backends: MTL,BLAS`, `gpu_info: Apple M1 Pro`, `n_gpu_layers: -1` (every layer on the GPU); the server's prompt rate, 238 tokens a second for the 8B, matches the bench's Metal rate.
+- **Answers.** Each model and schema returned one answer, byte-identical, across all 25 requests (5 repeats × 5) at temperature 0 and seed 1. To this one prompt (`c2-p2a` at 60 s: a game and a user-started download, ground truth `gaming`, `background_wanted: true`), the 3B answered `idle` with the `system` block alone and `gaming` with reasoning first, `background_wanted: false`; the 8B `gaming`, `true` alone and `gaming`, `false` with reasoning first. One prompt, not a measure of accuracy.
+- **Coverage.** T11 covered on one consumer machine: end-to-end latency of a 437–454-token recognizer prompt and a 25–82-token JSON answer from a 3B and an 8B Q4_K_M model — 1.19 s and 2.95 s for the `system` block, 2.25 s and 5.34 s with `reasoning` and `situation` first — prompt processing 0.73 s and 1.91 s of it; determinism of the answer on one machine. One machine, one prompt.
 
 ## 3. Not found
 
@@ -1305,6 +1327,83 @@ for rep in sorted(glob.glob(os.path.join(root, "**", "report.json"), recursive=T
 for p, v in res.items():
     if v:
         print(f"{family} {p}: repeats {len(v)}, busy share {min(v):.4f}–{max(v):.4f}, median {statistics.median(v):.4f}")
+```
+
+### A.18 `m1_run.sh` and `summarize_llm.py` (stage 3, 2026-10-09)
+
+```bash
+#!/usr/bin/env bash
+# m1_run.sh <scratch> <repo> <repeats> — the 9.12 latency request on the development Mac (Apple M1 Pro), search
+# record S3-22: llama.cpp at bd4eeaa0 built with Metal; per repeat and model, llama-server with its default GPU
+# offload, the time to /health, dataset/tools/meas/llm/request.py's five requests per schema, then llama-bench.
+set -u
+S="$1"; REPO="$2"; N="$3"; OUT="$(cd "$(dirname "$0")" && pwd)"
+BIN="$S/llama.cpp/build/bin"
+now_ms() { python3 -c 'import time; print(int(time.time()*1000))'; }
+for k in $(seq 1 "$N"); do
+  for m in "qwen2.5-3b:qwen2.5-3b-instruct-q4_k_m.gguf" "llama3.1-8b:Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"; do
+    name="${m%%:*}"; file="${m#*:}"; R="$OUT/r$k"; mkdir -p "$R"
+    t0=$(now_ms)
+    "$BIN/llama-server" -m "$S/models/$file" -c 4096 -np 1 --host 127.0.0.1 --port 8091 > "$R/server.$name.log" 2>&1 &
+    SPID=$!
+    up=0
+    for _ in $(seq 1 600); do
+      if curl -sf http://127.0.0.1:8091/health > /dev/null 2>&1; then up=1; break; fi
+      kill -0 "$SPID" 2>/dev/null || break
+      sleep 0.2
+    done
+    echo "repeat=$k model=$name up=$up load_ms=$(( $(now_ms) - t0 ))" >> "$OUT/loads.txt"
+    [ "$up" = 1 ] && python3 -I "$REPO/dataset/tools/meas/llm/request.py" http://127.0.0.1:8091 "$REPO/dataset/tools/meas/llm" 5 > "$R/requests.$name.jsonl" 2> "$R/requests.$name.err"
+    kill "$SPID" 2>/dev/null; wait "$SPID" 2>/dev/null
+    "$BIN/llama-bench" -m "$S/models/$file" -p 512 -n 64 -r 3 -o json > "$R/bench.$name.json" 2> "$R/bench.$name.err"
+  done
+done
+echo done >> "$OUT/loads.txt"
+```
+
+```python
+#!/usr/bin/env python3
+"""Summarise llm/request.py outputs (search record S3-22, and the runner repeats of meas-ci:costs): per model and
+schema, over the repeats (r<k>/ folders or artifact folders), the mean over each repeat's five requests of the wall
+time, prompt and generation times and token counts, then min–max and mean across repeats; the llama-bench rates;
+and whether the answers are identical across every request and repeat.
+
+    summarize_llm.py <dir of repeat folders>
+"""
+import collections, glob, json, os, statistics, sys
+root = sys.argv[1]
+per = collections.defaultdict(lambda: collections.defaultdict(list))
+answers = collections.defaultdict(set)
+bench = collections.defaultdict(lambda: collections.defaultdict(list))
+for path in sorted(glob.glob(os.path.join(root, "**", "requests.*.jsonl"), recursive=True)):
+    model = os.path.basename(path)[len("requests."):-len(".jsonl")]
+    rows = [json.loads(x) for x in open(path) if x.strip()]
+    reqs = [r for r in rows if r.get("kind") == "request" and r.get("label") != "warmup" and r.get("timings")]
+    for schema in ("system", "full"):
+        rs = [r for r in reqs if r["schema"] == schema]
+        if not rs:
+            continue
+        for key, f in (("wall_ms", lambda r: r["wall_ms"]), ("prompt_n", lambda r: r["timings"]["prompt_n"]),
+                       ("prompt_ms", lambda r: r["timings"]["prompt_ms"]), ("predicted_n", lambda r: r["timings"]["predicted_n"]),
+                       ("predicted_ms", lambda r: r["timings"]["predicted_ms"])):
+            per[(model, schema)][key].append(statistics.fmean(f(r) for r in rs))
+        for r in rs:
+            answers[(model, schema)].add(r["content"])
+    b = os.path.join(os.path.dirname(path), f"bench.{model}.json")
+    try:
+        for x in json.load(open(b)):
+            tag = f"pp{x['n_prompt']}" if x.get("n_prompt") and not x.get("n_gen") else f"tg{x['n_gen']}"
+            bench[model][tag].append(x["avg_ts"])
+    except (OSError, ValueError, KeyError):
+        pass
+for (model, schema), d in sorted(per.items()):
+    k = len(d["wall_ms"])
+    line = f"{model:12} {schema:6} repeats {k}: " + ", ".join(
+        f"{key} {statistics.fmean(v):.1f} ({min(v):.1f}–{max(v):.1f})" for key, v in d.items())
+    print(line)
+    print(f"{'':19} distinct answers over every request: {len(answers[(model, schema)])}")
+for model, d in sorted(bench.items()):
+    print(f"{model:12} bench: " + ", ".join(f"{t} {statistics.fmean(v):.2f} t/s ({min(v):.2f}–{max(v):.2f}, n {len(v)})" for t, v in sorted(d.items())))
 ```
 
 ## Appendix B — long outputs (verbatim)
