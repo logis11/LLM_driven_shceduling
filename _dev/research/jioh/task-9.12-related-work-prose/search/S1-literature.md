@@ -66,6 +66,7 @@ Access date for every copy below: 2026-10-07. All copies saved under `sources/<i
 | 52 | 2026-10-08 | dl.acm.org; OpenAlex; escholarship.org (stage 3) | `https://dl.acm.org/doi/pdf/10.1145/3672197.3673434`; `api.openalex.org/works/doi:10.1145/3672197.3673434` (open-access locations); `https://escholarship.org/content/qt3jg1f0jr/qt3jg1f0jr.pdf` | eScholarship 200 (first request 202, empty) → S1-33 | ACM DL 403 (both URLs) |
 | 53 | 2026-10-08 | arxiv.org (stage 3) | `/pdf/2509.01245v1`, `/pdf/2509.01245v4` | 200, byte-identical to S1-12's copies → S1-34 | — |
 | 54 | 2026-10-08 | api.crossref.org; arxiv.org (stage 3) | `works/10.1145/3770855.3817987`; `/abs/2506.02025`; `/abs/2508.12551` | 200 each → S1-35 | — |
+| 55 | 2026-10-09 | arxiv.org (stage 3) | `/abs/2609.25624`, `/pdf/2609.25624v1` (surfaced by the 2026-10-08 arXiv refresh) | 200 → S1-36 | — |
 
 ---
 
@@ -523,6 +524,17 @@ Access date for every copy below: 2026-10-07. All copies saved under `sources/<i
   - arXiv 2508.12551: "[v1] Mon, 18 Aug 2025 … [v2] Sun, 31 May 2026"; no later version.
   - arXiv 2506.02025: "[v1] Thu, 29 May 2025 … [v2] Wed, 3 Sep 2025"; "Comments: 10 pages, 6 figures, work under review" — no later version, no venue.
 - **Coverage.** T5: TuneAgent's venue confirmed by its DOI; Jadhav et al. still an unpublished preprint. Not an observation.
+
+### S1-36 — Cooper et al., cross-architecture nondeterminism of greedy LLM inference (T11; stage 3, 2026-10-09)
+
+- **Citation.** Liam Cooper, Shinnung Jeong, Hyeran Jeon, Jeffrey Young, Hyesoon Kim. "Accelerating the Mitigation of LLM Inference Nondeterminism Across GPU Architectures." arXiv:2609.25624v1, 22 Sep 2026; 14 pages, 5 figures; no venue stated.
+- **Copies read** (2026-10-09, `sources/S1-36/`): `abs.html` SHA-256 `37438cea42dfa0e6b8248eae8314f2f62fe54c57f86bd086da6e55a267999248`; `2609.25624v1.pdf` `47e414ac4b3f0bb5b8031676edac2e9bcf24beea89023f253802b61fd18fa5fe`; full text.
+- **Passages.**
+  - Abstract: "Large language model (LLM) outputs are expected to be reproducible under greedy decoding, yet in practice the same model, prompt, and software stack produce different outputs on different GPUs. The root cause is floating-point non-associativity combined with hardware-dependent kernel selection."
+  - §2, p. 2: "Run-to-run determinism on a single device is typically guaranteed, but nothing constrains two different architectures to select the same kernel."
+  - §2, p. 2, reporting others: Yuan et al. (2025) "showing that greedy decoding is not reproducible in practice: under BF16, accuracy on AIME'24 … varies by up to 9% … across 12 runtime configurations"; "He and Thinking Machines Lab (2025) attribute serving nondeterminism to the lack of batch invariance: varying batch sizes change GEMM tilings and reduction orders, producing different outputs despite deterministic kernels."
+  - Table 1 caption: "Unmitigated BF16 diverges on 30.81–100% of problems across GPUs."
+- **Coverage.** T11: covers the sources of non-determinism under greedy decoding — reduction order across GPU architectures, and batch composition within one device when serving — and states run-to-run determinism on one device as typical; NVIDIA GPUs only (A100, L40S, H100), no CPU or Apple silicon. Others: does not cover.
 
 ## 3. Not found
 

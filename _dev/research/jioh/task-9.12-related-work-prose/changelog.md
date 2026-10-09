@@ -595,3 +595,16 @@ Taken under 인지오's delegation (2026-10-09), scope-card item 42, after a sta
 Hands to 9.15: `docs/research-proposal.md:303`, `:732` restated as above; `docs/references.md` entries for WoWAH (S3-11) and Chambers et al. (S3-23) where the prose cites them, under the id-minting rule.
 
 Compiled effect: none.
+
+## D40 — "stating its reading first tends to produce better decisions" restated to what the literature finds and turned into a question the project measures (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), scope-card item 43: `docs/research-proposal.md:340`'s "*Quality.* Requiring the model to state its reading before committing to a decision tends to produce better decisions than asking for the decision alone" has no source, and the sources found bound it. The copies re-downloaded 2026-10-09 are byte-identical to S1-25–S1-28's, each passage below re-read in them.
+
+- **Scale** (S1-26, Wei et al., NeurIPS 2022, p. 4): chain-of-thought prompting "does not positively impact performance for small models, and only yields performance gains when used with models of ∼100B parameters. We qualitatively found that models of smaller scale produced fluent but illogical chains of thought, leading to lower performance than standard prompting."
+- **Task kind** (S1-28, Sprague et al., ICLR 2025, Abstract): "CoT gives strong performance benefits primarily on tasks involving math or logic, with much smaller gains on other types of tasks. On MMLU, directly generating the answer without CoT leads to almost identical accuracy as CoT unless the question or model's response contains an equals sign".
+- **Format** (S1-27, Tam et al., arXiv 2408.02442v3, p. 7): "Format restrictions, particularly constrained decoding (JSON-mode), can hinder reasoning abilities while enhancing classification task accuracy."
+- **Restated:** the recognizer's answer is a classification from a closed menu, from a 3–8B local model under a JSON schema — a task kind, a scale and a format for which the literature reports little or no gain from reasoning first. The *Quality* bullet leaves as a claim; whether stating the reading first improves the answer is stated as a question Layer 1 can answer, the recognizer run with and without the `reasoning` field. The *Diagnosis* and *Auditability* bullets (`:339`, `:341`) stand: they argue for the field's use, not its effect on accuracy. The latency cost of the field is item 29's measurement (D31: the full-proposal schema against the `system` block alone).
+
+Hands to 9.15: `docs/research-proposal.md:340` restated as above; `docs/references.md` entries for Wei et al., Sprague et al. and Tam et al. where the prose cites them, under the id-minting rule. **9.14:** whether Layer 1 pre-registers the with-and-without-`reasoning` comparison is the RQ0 gate spec's and the recognizer's design, not decided here.
+
+Compiled effect: none.

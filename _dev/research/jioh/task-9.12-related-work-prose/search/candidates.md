@@ -69,7 +69,7 @@ Nothing was observed on a GitHub Actions runner (S4, Not found). No observation 
 - **38 lottery scheduling.** S1-09: "the conventional problem of starvation does not exist"; selection is O(n) with a list and O(lg n) with a tree.
 - **40 EDF optimality.** S1-10: Theorem 7, feasible if and only if ΣCᵢ/Tᵢ ≤ 1, under (A1)–(A5).
 - **42 session length.** S3-11 (WoW, median 1.8 h). Stage 3 (2026-10-09): S3-23 (one Counter-Strike server, 2004–2005: more than 99 % of sessions under 2 hours). Nothing for PC gaming generally (S3-15 and S3-17 do not cover it). For how often the set of running applications changes, there is only foreground-switch rates (S3-12, S3-16).
-- **43, 44 reasoning-first output and determinism.** S1-26 (chain-of-thought helps only at about 100B parameters), S1-28 (Sprague: when chain-of-thought helps), S1-27 (Tam: JSON mode hurts reasoning but helps classification), S1-25 (Atil: up to 15 % variation at temperature 0 with a fixed seed).
+- **43, 44 reasoning-first output and determinism.** S1-26 (chain-of-thought helps only at about 100B parameters), S1-28 (Sprague: when chain-of-thought helps), S1-27 (Tam: JSON mode hurts reasoning but helps classification), S1-25 (Atil: up to 15 % variation at temperature 0 with a fixed seed). Stage 3 (2026-10-09): S1-36 (Cooper et al., arXiv 2609.25624v1: run-to-run determinism on one device typical, divergence across GPU architectures and with batch composition); the `meas-ci:costs` campaign's repeated temperature-0 requests (D31) and S3-22.
 - **41 (§6.3 70 %), 32 (illustration).** Not searched. These are conventions.
 
 ### C–E. Registry entries, the guidebook and the hand-offs
