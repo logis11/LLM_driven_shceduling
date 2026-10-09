@@ -98,6 +98,7 @@ Compiled effect: none.
 > Amended by D91 (research-proposal.md:60 and :216's clause restated to the two conditions).
 > Amended by D105 (ananicy-cpp matches a rule by `argv[0]`'s basename; the open points homed).
 > Amended by D109 (on ananicy-cpp's key the catalogue keys 19 of the 35 bound names, every name in 7 of 50 files — a different seven; "after truncation" leaves).
+> Amended by D115 (`:536` per condition: the shipped catalogue answers RQ2, the strongest name table carries the claim; by 인지오's decision).
 
 By 인지오's decision, raised by D1–D5: the experiment carries two name-table conditions in place of `whitelist`, each answering the claim that names it.
 
@@ -1695,5 +1696,15 @@ By 인지오's decision (2026-10-09), amending D30 (scope-card item 71) on the 9
 Applied: `_dev/TODO.md` — the 9.15 line's "§4.7 starvation protection and §8.1's duty (D30)" → "§4.7 starvation protection (D30, D79)".
 
 Hands to 9.15: `docs/research-proposal.md:473` and `:287` as D30 and D79 state them; not `:756`.
+
+Compiled effect: none.
+
+## D115 — `:536`'s "the one that matters most … Beating it is the claim" restated per condition: the shipped catalogue answers RQ2, the strongest name table carries the claim (2026-10-09)
+
+By 인지오's decision (2026-10-09), amending D6 (scope-card item 21) on the 9.12 audit's finding that no decision says which of D6's two conditions `docs/research-proposal.md:536` refers to: "The `whitelist` condition is the one that matters most for the paper. It is not a strawman we invented — it is what shipping operating systems actually do today. Beating it is the claim; failing to beat it is a legitimate finding." D6's conditions: the shipped catalogue (`ananicy-rules` at `03ef03fb`, as CachyOS installs and enables it; on ananicy-cpp's key 19 of the 35 bound names, D109) and the strongest name table in the catalogue's design. RQ2 asks "Does that reading beat what shipping systems do?" (`docs/research-claims.md:128`); `docs/research-proposal.md:538` and `:758` call the whitelist baseline "the strongest counter-hypothesis".
+
+- **Decided:** `:536` is restated per condition — beating the shipped catalogue answers RQ2, a comparison with what a deployed daemon does on a distribution that enables it (D1, D3); beating the strongest name table is the paper's claim, "the one that matters most"; failing to beat either is a finding. "what shipping operating systems actually do today" is D1's and D3's restatement.
+
+Hands to 9.15: `docs/research-proposal.md:536` restated as above; `docs/research-claims.md:128–132` ("The second is the claim") per condition with it.
 
 Compiled effect: none.
