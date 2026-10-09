@@ -515,7 +515,7 @@ Pooled in `task-9.10-scenarios-timelines/campaign/renderer-hidden/results/` (`po
 
 ## 9.12 — the kernel's switch and pick costs and a structured answer's latency (prose grounding, no archetype)
 
-Pooled in `task-9.12-related-work-prose/campaign/results/` and rendered in `campaign/results.md`; method `campaign/method.md` (D31). Every repeat on one AMD EPYC 7763, kernel `6.17.0-1022-azure`. The values ground the proposal's stated quantities (items 28, 29, 44); no archetype reads them.
+Pooled in `task-9.12-related-work-prose/campaign/results/` and rendered in `campaign/results.md`; method `campaign/method.md` (D31). Raw records: release `meas-ci-costs-2026-10-08` (34 archives, at `ab379f2e`). Every repeat on one AMD EPYC 7763, kernel `6.17.0-1022-azure`. The values ground the proposal's stated quantities (items 28, 29, 44); no archetype reads them.
 
 | job | repeats | values | widest held | stopped by | jobs (gated) |
 |---|---|---|---|---|---|

@@ -813,7 +813,7 @@ Taken under 인지오's delegation (2026-10-09), stage 4: every decision's hand-
 - **9.14** — D6's condition split where the harness freezes the condition list (the two identifiers chosen there; the build of the two rule lists has no phase yet); D40's question whether Layer 1 pre-registers the recognizer with and without `reasoning`; D51 and D52's measured latencies for RQ4 and the daemon's stamp, the consistency measure's hardware, and the chat template's inserted date, with 박이안.
 - **9.15** — every decision's "Hands to 9.15": the restatements of `docs/related-work.md` and `docs/research-proposal.md` by section, `whitelist` across the docs (D6), the workload docs' lines (D11, D45–D47), `docs/simulator/simulator-guide.md:210` (D30), the registry entries minted and restated, the guidebook lines each decision names, and vol-02's quotation corrections (D53).
 - **The inputs on 9.12's own line**, answered: 9.6 D32's training-run wording (D14), 9.6 D17's `updatedb` sentence (D13), 9.11 D19's starvation lines (D30), 9.11 D33's declared-class survey (D13, D49).
-- **The campaign** `meas-ci:costs:2026-10-08` is in `measurement-campaign-record.md`; its raw records are not released (outward-facing; 인지오's call).
+- **The campaign** `meas-ci:costs:2026-10-08` is in `measurement-campaign-record.md`; its raw records released on 인지오's go-ahead (2026-10-09) as the GitHub release `meas-ci-costs-2026-10-08` at `ab379f2e`: the 30 pooled repeats, the three dry-run jobs and the 66 gated jobs' reports, 34 archives.
 
 Applied: `_dev/TODO.md` — the 9.14 and 9.15 lines.
 
