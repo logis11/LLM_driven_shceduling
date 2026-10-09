@@ -622,3 +622,16 @@ Taken under 인지오's delegation (2026-10-09), scope-card item 45: `docs/resea
 Hands to 9.15: `docs/research-proposal.md:97` restated as above; the bash/cc1plus diagram (`:101–108`) is D33's.
 
 Compiled effect: none.
+
+## D42 — TuxBot and Vulcan read in full and cited in related-work as adjacent LLM work: TuxBot beside the tuning efforts, Vulcan beside the synthesis line (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), scope-card items 48 and 49: both entries were `provisional` (abstract pages only); stage 2 read both bodies (S1-17, TuxBot v2; S1-18, Vulcan v3 and v1), and the 2026-10-09 re-check finds no newer version (S1 search log #56).
+
+- **TuxBot** (S1-17): "a host-side framework for steady-state OS tuning with bounded language-model guidance"; "every proposed change passes through typed validation before reaching kernel or sysctl interfaces"; it adjusts "the parameters of such OS controllers, e.g., the CPU scheduler time slice or the network stack's polling budget, over seconds-to-minutes timescales", out of band, not "kernel fast-path controllers such as the CPU scheduler"; "13 live workloads from five benchmark suites while tuning up to 41 Linux parameters". It reports no measurement of recognition, so D12's scoped statement holds.
+- **Vulcan** (S1-18): LLM-driven search synthesizing "simple stateless decision functions" in a restricted language, Anvil, "that guarantees important properties by construction"; evaluated on spot-VM scheduling, cache eviction and tiered memory; CPU scheduling appears only as an interface example in v1's Table 3. "Accepted for publication at EuroSys 2027" (the authors' arXiv comment); its DOI 10.1145/3842654.3848582 is not registered at Crossref on 2026-10-09.
+- **Where related-work cites them** (`docs/related-work.md:32`): TuxBot beside the adjacent tuning efforts, as the nearest architecture to this work's — an LLM setting a live host's controller parameters out of the fast path, behind a typed validator; Vulcan beside Kgent, as LLM synthesis of verifiable policy code, its domains named (not CPU scheduling).
+- **Status:** `tuxbot-arxiv26` — verified, v2's full text read 2026-10-07 (S1-17, SHA-256 `543bd4fc…`), no venue; "Read the paper before citing, and decide which related-work subsection it belongs to" answered. `vulcan-arxiv25` — verified, v3's full text read (S1-18, `ed85ead6…`), the EuroSys 2027 acceptance stated as the authors'; the id stays arXiv's under the id-minting rule until the DOI resolves, then re-minted for the proceedings.
+
+Hands to 9.15: `docs/related-work.md:32` with the two sentences above; `docs/references.md` `tuxbot-arxiv26` and `vulcan-arxiv25` status and role lines as above (Vulcan's "Comments field: "19 pages"" and "(v2, submitted 2026-06-16)" brought to v3, "21 pages, 12 figures. Accepted for publication at EuroSys 2027"); the D25 key map gains `tuxbot` and `vulcan`; `schedcp-mlsys25`'s status line ("both `provisional` — identified from their abstract pages, bodies unread") updated.
+
+Compiled effect: none.

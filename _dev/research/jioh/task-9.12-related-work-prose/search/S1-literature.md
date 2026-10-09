@@ -67,6 +67,7 @@ Access date for every copy below: 2026-10-07. All copies saved under `sources/<i
 | 53 | 2026-10-08 | arxiv.org (stage 3) | `/pdf/2509.01245v1`, `/pdf/2509.01245v4` | 200, byte-identical to S1-12's copies → S1-34 | — |
 | 54 | 2026-10-08 | api.crossref.org; arxiv.org (stage 3) | `works/10.1145/3770855.3817987`; `/abs/2506.02025`; `/abs/2508.12551` | 200 each → S1-35 | — |
 | 55 | 2026-10-09 | arxiv.org (stage 3) | `/abs/2609.25624`, `/pdf/2609.25624v1` (surfaced by the 2026-10-08 arXiv refresh) | 200 → S1-36 | — |
+| 56 | 2026-10-09 | arxiv.org; api.crossref.org (stage 3) | `/abs/2605.15026`, `/abs/2512.25065` (re-check of S1-17, S1-18); `works/10.1145/3842654.3848582` | abstract pages 200, byte-identical to S1-17's and S1-18's (`4cb1f85e…`, `4395b2c2…`): TuxBot still v2, Vulcan still v3; Crossref 404 (`sources/S1-37/`) | the Vulcan DOI not registered |
 
 ---
 
