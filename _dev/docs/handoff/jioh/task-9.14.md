@@ -1,0 +1,58 @@
+# Handoff — task 9.14 Consumer rework (2026-10-09, ~19:40 KST) — in progress
+
+Branch `jioh/dataset-rebuild` (Phase 9 works on this branch only, `_dev/` included); committed through `bbe95e7c`, nothing pushed this session. Spec `_dev/docs/spec/jioh/task-9.14-consumer-rework.md` (14 decisions, decision 2 amended); changelog `_dev/research/jioh/task-9.14-consumer-rework/changelog.md` (D1–D9). Use `python3.12` (3.12.4, the project's dependencies); the default `python3` is 3.13 without `jsonschema`.
+
+## Where 9.14 stands
+
+| Deliverable (TODO sub-bullet) | State |
+|---|---|
+| the harness to the ratified contract (skip rule, t₀ off the trace, `skipped` column, mock-media, mock daemon's projection, the 51-file counts) | done, D1 |
+| the scoring spec (terms, channels, windows + segment-boundary lint, header) | done, D2, D6, D9; lint clean, 49 files, 75 terms |
+| the guard spec 1.1 (pair guard on configuration sequences, pair lint, two name-table conditions) | done, D3 |
+| the demand window retired; demand per segment in the manifest | done, D4; manifest regenerated, artifact hashes unchanged |
+| the prior table's sentences and the pair review | done, D5; daemon lint clean |
+| `docs/harness/metrics.md` §5, §6.2, §11, §13 | done, D1 |
+| the RQ0 gate spec | written, D7 (judging 19, K 10, ten points, statements, lines, notes); **pins not final**: `pins.variants.all` is a zero placeholder; the experiment lint reports only the 78 variant files not yet built and that pin |
+| the compiler's variant transforms and the variant sets | four transforms written and tested by construction, D8; the four scaling sets' build was running in the background at hand-off (`python3.12 dataset/tools/variants.py --sets venue-x0.8,venue-x1.25,chain-x1.2,chain-x1.4`; writes 44 `@` files into `dataset/build/coreset-single/`, no manifest for a partial build); segment-length and corner sets not yet built; **the trace-replay transform is not implemented** (below) |
+| the harness changelog entry and the re-pin | not done |
+| `docs/workload/building-plan.md` §5a paragraph (decision 4); `_dev/research/jioh/research-slice-workflow.md` "CI on the branch" | not done |
+| hand-offs: the Phase 10 bullet (decision 11), the 9.15 and 9.16 lines | not done (each changelog entry carries its hand-offs) |
+| CI green | not run; see "Tests" |
+
+## What remains, in order
+
+1. **Trace replay (decision 12, set `replay`).** Two pieces.
+   - *The compiler's `replay` param* (`dataset/tools/wlc/compiler.py`): an entry whose params carry `replay: {stream: <name> | {program: <name>}}` (set by `wlc/variants.py:replayed_library`) compiles its task from `dataset/replay/<name>.json.gz` instead of its sampled stream. In `_measured_unroll`: events `(t0 + t_rel, run, "timer")` from the stream for `t_rel` inside the lifetime, in place of `_component_events` (idle and focus components alike) and of the launch replay; the stimulus replay (input wakes) and the operations stay as compiled. In `_periodic_unroll`: the cycle runs taken from the stream in order, one per tick, the period the entry's. In `_batch_loop`: RUN/SLEEP pairs from the stream until `total_work` (a zero block joins runs, as `_batch_ops` does). A `count > 1` task (the four hidden renderers) takes distinct streams of the one repeat, as `_launch_stream` does. Stream shape = the launch streams' (`dataset/launch/launch-*.json.gz`, written by `dataset/tools/meas/desktop/launch_fold_in.py`): `{entry, source, subject, repeats: [{repeat, run_id, phase_us, comms, streams: [[t_us, run_us, thread_index], …]}]}`; one repeat per entry.
+   - *The extraction tool* (new, `dataset/tools/meas/replay_fold_in.py`), one pooled repeat per entry over its carried phase, from the raw releases:
+
+     | entry | release / landing | phase | pids | stream |
+     |---|---|---|---|---|
+     | `code-editor` | `meas-ci-2026-09-25`, `meas-interactive-code-windows-1-22.zip`, `36076988843/meas-interactive-code-r1-full` | `idle` (`perf.idle.timehist.txt.gz`, `perf.idle.wakeups.txt.gz`), read from 200 s past its start (9.5 D83) | `snap.idle.before/after.json` `procs` (pid, comm, cmd) + `report.json` `rx` (`code|Code`); roles by `campaign/analyze.py:pid_roles` | merged wakes (`load_rows` → `merge_resumes` with `load_all_wakeups`) of the whole tree, `[t_in − t_start, run_us, thread]` |
+     | `web-browser` | `meas-ci-2026-09-20`, `meas-interactive-chrome.zip`, `interactive-chrome-from438/35667380500/meas-interactive-chrome-r1-full` | `idle` | as above, `rx` `chrome` | as above |
+     | `renderer-hidden` | `meas-ci-desktop-2026-10-05b`, `meas-desktop-chrome-hidden-r1-full-37281847886.zip` | `steady` | the page renderers from `renderers.tsv` (`desktop/analyze.py`, the pid helper at its line 52) | one stream per renderer pid |
+     | `video-call` | `meas-ci-2026-09-20`, `meas-playback-webrtc.zip`, `playback-webrtc-from245/35498811122/meas-playback-webrtc-r1-full` | `play` | `snap.play.before.json`, `rx` `chrome` | cycles: a cycle starts at each wake of `utility/AudioWorkerThre`; its run is the tree's CPU to the next start; `[t_start, cycle_run, 0]` |
+     | `package-upgrade` | `meas-ci-background-2026-10-01`, `meas-background-upgrade-r1-full-36847549673.zip` | `upgrade-install` (`edges.jsonl` has the phase's mono_ns bounds; `execs.*.tsv`, `taskstats.*.tsv`) | the stage's tree as `background/analyze.py:phase_tree` builds it (forks + execs from the launched root) | the tree's merged runs in time order as RUN/block pairs |
+     | `cpu-batch` (`python3`) | `meas-ci-background-2026-10-03`, `meas-background-mnist-r1-full-37091275421.zip` | `mnist-train` | the `python` process (one thread) | RUN/block pairs |
+
+     The perf text formats and the parsers: `dataset/tools/meas/campaign/analyze.py` (`load_rows`, `load_all_wakeups`, `merge_resumes`, `pid_roles`, `per_thread`). The six zips (about 4 GB) were in this session's scratchpad and are gone with it; re-download with `gh release download <release> -p '<asset>' -R <owner/repo>`. Then `make -C dataset variants` (every set; writes `dataset/build.variants.manifest.json`, commit it), and `variants.py --check` must pass.
+2. **The re-pin.** `harness/experiments/rq0-gate.yaml` `pins`: recompute the four hashes (`shasum -a 256`) and `pins.variants.all` from the variants manifest; `python3.12 harness/tools/experiment_lint.py` clean. Then the `harness/CHANGELOG.md` entry dated 2026-10-09 (9.14): the scoring spec re-frozen (49 files, 75 terms; what changed), the guard spec 1.0 → 1.1 (what changed), the gate spec's judging set 25 → 19 and K 13 → 10 with the reason per file, the ten-point sweep, the new lines and statements, the records' 24th column, the two name-table conditions, the pins. The changelog entry is the last commit of 9.14 (spec decision 14).
+3. **Docs in 9.14's scope:** `docs/workload/building-plan.md` §5a's demand-budget paragraph restated per decision 4 (the window retired; the `oversubscribed` class marks a file designed to hold contention; demand a measured fact reported per file and per segment); `_dev/research/jioh/research-slice-workflow.md` "CI on the branch" (the window check no longer fails). Bump `Updated` in the building plan's header.
+4. **Tests and CI.** Run the whole harness suite (`cd harness/tools && python3.12 -m pytest tests -q`, about 35 minutes with the build present) — the last complete run predates the fixes (the mock-experiment re-pin, the reader counts, the primitives, the scoring tests) and is stale; targeted reruns pass (below). Then `make -C dataset lint` (about 41 minutes), `make -C dataset check`, `make -C harness lint`, `make -C harness test`, `make -C harness smoke`; push and watch the three workflows. The harness workflows now run `make -C dataset variants`, which needs the replay set to exist.
+5. **TODO and hand-offs.** `_dev/TODO.md`: tick the 9.14 sub-bullets; the Phase 10 line gains a bullet for the Layer-1 and RQ4 items (decision 11: the recognizer with and without `reasoning` and its key-order condition, Layer 1's hardware statement, RQ4's latency scope and the costs pool's keying, the two rule lists' build) and the recognition-log items go to 박이안 through 9.15's final memo; the 9.15 and 9.16 lines gain every "Hands to" of D1–D9 and of the entries still to write. Changelog D10+ for steps 1–4. Then `daily-work-harness:wrap-up`.
+
+## Decisions taken this session (spec decisions 1–14; chat Q1–Q13)
+
+1. Every consumer written against the ratified contract (skip rule, zero-wait line, cold start, slice finish, cap, idle class, deadline-class chain); a conformance statement in the gate spec. 2. Judging set 19, K 10: the six idle-class files out (`c1-indexing`, `c7-indexing`, `c2-p1b`, `c1-backup`, `c7-backup`, `c2-p3b`), `c7-mail` out (its 26 s cut holds no keystroke — found during implementation, decided in chat), `c7-meeting` back in (the measured call's cycles are demoted under the boot MLFQ), `c7-media` out, the gaming three in with the cap-axis caveat. 3. Every outcome-dependent check pre-registered; re-measurement a contingency. 4. The demand window retired as a gate. 5. Windows as numbers tied to segment boundaries by lint. 6. The terms (compositor and meeting-video terms gone; `c2-p3a`'s render as turnaround; channel named on every interaction term — `timer` on Kdenlive's and GIMP's fourteen, which carry no keystroke stream). 7. Guard spec 1.1, `c2_pair` on configuration sequences, `shipped_catalogue` and `strongest_name_table`. 8. Prior table and pair review rewritten in place. 9. Ten sweep points (14 000 µs added). 10. The lines as tabled. 11. The Layer-1 and RQ4 items are hand-offs. 12. Variants built in 9.14 and pinned. 13. The gate spec's other statements. 14. Records and process as 9.13's.
+
+## Tests — state at hand-off
+
+Passing on targeted reruns: `test_primitives`, `test_records`, `test_reader`, `test_mock_daemon` (the non-build tests), `test_guards` (28), `test_scoring` (24, reads the build), `test_evaluator` (incl. the five new-line tests), `test_experiment_spec`, `test_boot_defaults`, `test_runner` (the non-pipeline tests). Not re-run after the fixes: `test_mock_daemon`'s and `test_mock_simulator`'s coreset tests (counts and facts updated to the blessed set: 51 files; 130 points, 51 terminal, 2 ambiguous; 77 graded over 50, 6 misses; 71 headline over 45), `test_runner`'s pipeline, CLI and smoke tests (slow). Dataset: `test_coreset`'s two new demand tests and `test_manifest` pass in memory; the full dataset suite (32 minutes) not run.
+
+## Facts worth not rediscovering
+
+- `dataset/build/` (not `build/` at the root) holds the compiled set; the bless of 9.13 is there, and the 2026-10-09 recompile rewrote it with identical artifact bytes.
+- The compile (`python3.12 dataset/tools/compile.py`) takes about 22 minutes; the variants builder lints every variant against the workload schema, which is most of its time on the large files (`c1-transcode` 153 MB, `c1-compile` 30 MB, `c1-ml-train` 24 MB).
+- The scaling transforms work on the blessed artifact because every compiled measured task is an explicit WAIT/RUN list (finite); spawn children follow their parent's scaling; chain members are the ids `game.chain.*` and `game.wineserver`.
+- `write_csv(rows, columns, path)` in `harness/tools/harness/outputs.py` takes the columns before the path; `read_csv(path, columns)` needs the module's `COLUMNS` tuple.
+- The harness tests must be run from `harness/tools` with absolute test paths in this environment; the shell's working directory resets between commands.
+- The chain scan that gave the sweep's step values is `_dev/research/jioh/task-9.14-consumer-rework/scans/chain_scan.py` (compiles the gaming files in memory and prints each member's RUN).
