@@ -775,6 +775,7 @@ Compiled effect: none.
 > Amended by D57 (others' switch costs: Li, Ding & Shen's regions as measured, Becker & Chakraborty's frequent ~30 000 cycles, ghOSt's patched kernel).
 > Amended by D58 (the switch rates over the pooled repeats: 13 to 12 497 a second, median phase 422, 13 of 67 at 1 000 or more; switches as a lower bound on picks).
 > Amended by D59 (the ratio with one denominator: four to eight orders, six to seven on the laptop; the 8B on one input; :241; hand-off extended).
+> Amended by D110 (the laptop figures cited as `meas-local:m1pro-llm:2026-10-08`; by 인지오's decision).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 28, on the campaign `meas-ci:costs:2026-10-08` (D31; `campaign/results.md`; S4-11, S4-12), S3-21 and S3-22: `docs/research-proposal.md:85` ("Thousands to tens of thousands of times per second, per core. Its decision logic has a budget measured in microseconds"), the §4.1 table (`:233–241`: decision "~1-10 microseconds", context switch "~1-5 microseconds", time slice "~1-10 milliseconds", one LLM inference "~200-3000 milliseconds", "5-6 orders of magnitude slower"), `:243` ("In the time it takes to answer once, the scheduler has made hundreds of thousands of decisions"), `:204` ("scheduling decisions happen tens of thousands of times per second and inference cannot"), `:818` ("Costs 1–5 μs and discards cache locality") and `:848` ("Typically 1–10 ms") are restated to what was measured.
 
@@ -795,6 +796,7 @@ Compiled effect: none.
 ## D51 — local inference latency restated to the measured answers: about 1–3 s for the `system` block on a consumer laptop, 14–36 s on four server vCPUs; "well under the hosted-API figures" and "substantially faster" leave; "a handful of times per hour" stated as an assumption (2026-10-09)
 > Amended by D59 (the 8B's runner answer on one input: 43.18 s, reasoning 6.81 s) and D60 (one M1 Pro, one stand-in request, the answer stops at system).
 > Amended by D107 (the published figures as their pages compute them: Artificial Analysis's per-provider 72-hour medians, LocalScore's 12 GB RTX 3060 mean over submitted runs).
+> Amended by D110 (the laptop figures cited as `meas-local:m1pro-llm:2026-10-08`, their records prepared for release with the hostname removed; by 인지오's decision).
 
 Taken under 인지오's delegation (2026-10-09), scope-card item 29: `docs/research-proposal.md:263`'s "A quantized 3–8B model running locally emits a short structured output in roughly 200–800 ms on consumer hardware, well under the hosted-API figures usually quoted. Since the model fires only when the process set changes materially — a handful of times per hour in real use — local inference is the realistic deployment shape", and `:489`'s "local inference is substantially faster on short structured outputs", are restated to the project's measurements.
 
@@ -1628,5 +1630,17 @@ Taken under 인지오's delegation (2026-10-09), amending D6 (scope-card item 21
 Applied: `search/S3-traces-datasets.md` — the audit note on S3-19 points here; `_dev/TODO.md` — the 9.14 and 9.15 lines' audit ranges extended to D109.
 
 Hands to 9.15: wherever the prose states the catalogue's coverage of the dataset, the figures above. **9.14:** the build of the two rule lists (D105) maps each bound task as above.
+
+Compiled effect: none.
+
+## D110 — the laptop measurement gets a registry form, `meas-local`, its records to be released with the hostname removed; the laptop figures stay with their scope (2026-10-09)
+
+By 인지오's decision (2026-10-09), on the 9.12 audit's finding that the laptop figures of D50 and D51 (S3-22) have no form under the id rule: the rule types a source as scholarly, deployed-system, or measurement → `meas-ci`, "with campaign identification in the locator" and "its raw records are one release" (`docs/references.md:14`); `meas-ci`'s role admits "machine-relative absolutes [that] carry the runner spec" (`:505`). S3-22 is the runner campaign's request run five times on 인지오's Apple M1 Pro, not a CI campaign, and its records are not released (`machine.txt` carries the machine's hostname).
+
+- **Decided:** a measurement on a named local machine is minted as `meas-local`, its locator `meas-local:<machine>-<subject>:<date>`, the date the run started (UTC) as for a `meas-ci` campaign; as with `meas-ci`, its raw records are one release, the machine's specification is stated with every figure, and its spread over its repeats is reported. S3-22 is `meas-local:m1pro-llm:2026-10-08`.
+- **The records prepared:** S3-22's 55 files with two substitutions — the earlier session's scratch path of the model files → `<models>/`, the machine's hostname → `<host>`. 21 files change (the bench JSON, the server logs, `machine.txt`); the request records, `summary.txt`, `loads.txt` and the scripts are byte-identical to the record's copy. `MANIFEST.txt` lists each file's SHA-256 before and after. Archive `meas-local-m1pro-llm-2026-10-08.tar.gz`, SHA-256 `0f41f42b89fd1913f2dad827be9bfa7fb8bc7eb2a5a794df997e2b614e858ada`, to be published as the GitHub release `meas-local-m1pro-llm-2026-10-08` on 인지오's go-ahead.
+- **The laptop figures** stay in D50's and D51's restatements with D60's scope: one Apple M1 Pro with Metal and its own work beside it, one stand-in request, the answer stopping at `system`, five repeats with their spread — one machine's observation, not a campaign held to the 5 % rule.
+
+Hands to 9.15: `docs/references.md` — the id rule gains `meas-local` as above; a `meas-local` entry whose role admits machine-relative absolutes stated with the machine's specification and spread, never as a population's figure; the laptop figures cited `meas-local:m1pro-llm:2026-10-08`.
 
 Compiled effect: none.
