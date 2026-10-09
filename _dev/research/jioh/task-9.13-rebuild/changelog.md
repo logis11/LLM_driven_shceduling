@@ -37,3 +37,20 @@ Hands to 9.14: the three indexer files' expected no-headroom reading is a conseq
 Spec decisions 6, 9 and 11. `docs/data-contracts.md`: §2 the archetype contract at v0.2 with the field stated and the two example entries carrying it; §4 the file path `coreset-single` alone, the three example `arrive` events and the spawn entry carrying the field, a paragraph on the field and the executor's rule, the run file carrying it to the simulator, the visible projection showing it per task with the example; §14 the dated entry naming the change, the agreement and the grounds; header `Updated` 2026-10-09. `docs/memos/2026-10-08-declared-scheduling-class.md`: one dated line under §1 naming the field and pointing to §14; `Updated` bumped. `dataset/README.md`: the layout (one compiled set of 51 files, the library at v0.2), the pipeline, the canonical-format example and its `declared_class` bullet, the coresets section (one set, 66 segments, the C2 count and the `c2-p2a-idle` paragraph), the generalsets' name, the tools map, two rules (declared class, TIMER first). The §2 archetype list and every other doc under `docs/` are left to 9.15.
 
 Hands to 9.15: `docs/data-contracts.md` §2's "There are twelve (…)" list of archetypes, stale since the slices; `docs/README.md` needs no index change (no doc added, renamed or re-statused).
+
+## D7 — the bless (2026-10-09)
+
+Spec decision 10. The dataset target's two steps — the deriver, then the compiler with its allowance that reports demand-window violations as warnings and still writes — run on the final library (`dataset/archetypes.yaml` blob `c6af7623…`) and schema (`2b38b2a0…`): 51 artifacts under `coreset-single/` alone, `dataset/build.manifest.json` rewritten (the 50 native entries gone, 51 single-lane entries with their demand), `dataset/coverage-grid.json` at 66 segments with all 32 cells instanced. 15:18:40 → 15:40:47 on the M1 Pro, 22 minutes, the schema validation most of it.
+
+| Quantity | Blessed set |
+|---|---|
+| Files | 51 |
+| Canonical bytes | 680,806,752 (681 MB) |
+| Exogenous wake events | 4,522,200 |
+| Largest file | `c6-dual`, 190.3 MB, 1,391,059 wakes |
+| Files carrying an `idle` task | `c1-indexing`, `c7-indexing`, `c2-p1b` (`tracker-miner-f`); `c1-backup`, `c7-backup`, `c2-p3b` (`deja-dup`); `c2-p2a-idle` (`steam`) — 9.11 D16's six and the variant |
+| Window warnings | 10 — the nine of `reads.md` R5 and `c2-p2a-idle`, which inherits `c2-p2a`'s 9.38 |
+
+The bounding pair read on the built files: `c2-p2a` and `c2-p2a-idle` differ in the `download` task's `declared_class` and in nothing else — every other arrive event, every wake event and the ground truth byte-identical. `build/` stays uncommitted; a stale `build/coreset-native/` left by earlier local builds was removed, the compiler writing no such set.
+
+Hands to 9.14: the re-pin takes this manifest (`harness/experiments/rq0-gate.yaml` `pins.dataset`); the ten window files; the run's cost over files × conditions × seeds. Hands to 9.15: the final memo's figures (681 MB, `c6-dual` 190 MB). Hands to 9.16: the manifest reproduces from the library and schema at these blobs; the full dataset lint with schema validation takes about 41 minutes and the bless 22 on this machine, the CI job on the pull request to `main` correspondingly long.
