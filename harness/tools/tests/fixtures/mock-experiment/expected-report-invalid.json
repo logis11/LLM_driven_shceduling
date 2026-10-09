@@ -1,6 +1,6 @@
 {
  "experiment": "mock-experiment",
- "spec_sha256": "8935ace626233fb381eb5aeba3b6b3cdd5cafc9ffdfb9bd4ecb9870bd4379af1",
+ "spec_sha256": "2f3c16600b886f6d6cac6a3d99dd4813cac80ad9e309389436bd070659fe52ec",
  "pins": {
   "scoring_spec": {
    "path": "harness/tools/tests/fixtures/mock-scores/scoring-spec.yaml",
@@ -9,7 +9,7 @@
   "guard_spec": {
    "path": "harness/tools/tests/fixtures/mock-experiment/guard-spec.yaml",
    "version": "0.1",
-   "sha256": "40bdfb01dd8bbfc451ebf3ee84d9f1d48b641400f01eb38fbe64b088212f9fb0"
+   "sha256": "84324b465490e566ce0fab9cbee5d53636cf8fe636997bf8c6c39494ddf9ad1d"
   },
   "driver_table": {
    "path": "harness/tools/tests/fixtures/mock-grades/driver-table.yaml",

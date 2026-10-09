@@ -1,345 +1,407 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "records.schema.json",
-  "title": "Records row",
-  "description": "One row of the harness's records file (docs/harness/metrics.md \u00a75; `boot_default` added 2026-09-11, sub-task 8.2; `channel` added 2026-09-26): one raw observation with its run identity and the attributes its metric carries. CSV cells that are empty are absent here; integer columns are integers.",
-  "type": "object",
-  "required": [
-    "workload_id",
-    "condition",
-    "source_sha256",
-    "entity",
-    "metric",
-    "t",
-    "value"
-  ],
-  "additionalProperties": false,
-  "properties": {
-    "workload_id": {
-      "type": "string",
-      "minLength": 1
-    },
-    "condition": {
-      "type": "string",
-      "enum": [
-        "fixed",
-        "random",
-        "whitelist",
-        "llm_vocab",
-        "llm_algo",
-        "llm_full",
-        "oracle"
-      ]
-    },
-    "table": {
-      "type": "string",
-      "enum": [
-        "prior",
-        "calibrated"
-      ]
-    },
-    "seed": {
-      "type": "string",
-      "minLength": 1
-    },
-    "boot_default": {
-      "type": "string",
-      "minLength": 1
-    },
-    "sim": {
-      "type": "string",
-      "description": "Absent on recognition rows, which come from a log and not a trace (8.4)."
-    },
-    "source_sha256": {
-      "type": "string",
-      "pattern": "^[0-9a-f]{64}$"
-    },
-    "entity": {
-      "type": "string",
-      "minLength": 1
-    },
-    "metric": {
-      "type": "string",
-      "enum": [
-        "ready_wait",
-        "job",
-        "cpu_delivered",
-        "demand",
-        "completed",
-        "turnaround",
-        "preempt_count",
-        "config_interval",
-        "switch_window",
-        "boost_window",
-        "busy",
-        "mode_correct",
-        "attr_correct",
-        "latency_us",
-        "algo_choice_correct",
-        "config_correct"
-      ]
-    },
-    "t": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "value": {
-      "type": "integer"
-    },
-    "cause": {
-      "type": "string",
-      "enum": [
-        "arrive",
-        "wake",
-        "sleep_end",
-        "timer_tick",
-        "fork_slot"
-      ]
-    },
-    "channel": {
-      "description": "On a ready_wait row with cause wake: the kind of the channel the completed WAIT named, its name before the colon (input, timer, chain, job, children); added 2026-09-26, from 9.5 D74",
-      "type": "string",
-      "pattern": "^[^:]+$"
-    },
-    "provenance": {
-      "type": "string",
-      "enum": [
-        "unmodified",
-        "clamped",
-        "held",
-        "fallback"
-      ]
-    },
-    "algorithm": {
-      "type": "string",
-      "enum": [
-        "MLFQ",
-        "EDF",
-        "LOTTERY",
-        "FIFO"
-      ]
-    },
-    "index": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "period_us": {
-      "type": "integer",
-      "minimum": 1
-    },
-    "predicted": {
-      "type": "string"
-    },
-    "truth": {
-      "type": "string"
-    },
-    "validation": {
-      "type": "string",
-      "enum": [
-        "unmodified",
-        "clamped",
-        "held",
-        "fallback"
-      ]
-    },
-    "familiarity": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 5
-    },
-    "hogs": {
-      "type": "integer",
-      "minimum": 0
-    },
-    "pre_committed_miss": {
-      "description": "1 when the covering ground-truth segment carries pre_committed_miss; recognition rows only (added 2026-09-11, sub-task 8.4)",
-      "type": "integer",
-      "enum": [
-        0,
-        1
-      ]
-    }
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "records.schema.json",
+ "title": "Records row",
+ "description": "One row of the harness's records file (docs/harness/metrics.md §5; `boot_default` added 2026-09-11, sub-task 8.2; `channel` added 2026-09-26): one raw observation with its run identity and the attributes its metric carries. CSV cells that are empty are absent here; integer columns are integers.",
+ "type": "object",
+ "required": [
+  "workload_id",
+  "condition",
+  "source_sha256",
+  "entity",
+  "metric",
+  "t"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "workload_id": {
+   "type": "string",
+   "minLength": 1
   },
-  "allOf": [
-    {
-      "if": {
-        "required": [
-          "channel"
-        ]
-      },
-      "then": {
-        "required": [
-          "cause"
-        ],
-        "properties": {
-          "metric": {
-            "const": "ready_wait"
-          },
-          "cause": {
-            "const": "wake"
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "metric": {
-            "const": "ready_wait"
-          }
-        }
-      },
-      "then": {
-        "required": [
-          "cause"
-        ]
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "metric": {
-            "const": "job"
-          }
-        }
-      },
-      "then": {
-        "required": [
-          "period_us"
-        ]
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "metric": {
-            "const": "config_interval"
-          }
-        }
-      },
-      "then": {
-        "required": [
-          "provenance",
-          "algorithm",
-          "index"
-        ],
-        "properties": {
-          "entity": {
-            "const": "schedule"
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "metric": {
-            "enum": [
-              "switch_window",
-              "boost_window"
-            ]
-          }
-        }
-      },
-      "then": {
-        "required": [
-          "algorithm",
-          "index",
-          "hogs"
-        ],
-        "properties": {
-          "entity": {
-            "const": "schedule"
-          },
-          "value": {
-            "minimum": 0
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "metric": {
-            "const": "busy"
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "entity": {
-            "const": "lane"
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "metric": {
-            "enum": [
-              "mode_correct",
-              "attr_correct",
-              "latency_us",
-              "algo_choice_correct",
-              "config_correct"
-            ]
-          }
-        }
-      },
-      "then": {
-        "required": [
-          "validation"
-        ],
-        "properties": {
-          "entity": {
-            "const": "recognizer"
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "metric": {
-            "enum": [
-              "mode_correct",
-              "attr_correct",
-              "algo_choice_correct",
-              "config_correct"
-            ]
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "value": {
-            "enum": [
-              0,
-              1
-            ]
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "metric": {
-            "const": "completed"
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "value": {
-            "enum": [
-              0,
-              1
-            ]
-          }
-        }
-      }
+  "condition": {
+   "type": "string",
+   "enum": [
+    "fixed",
+    "random",
+    "shipped_catalogue", "strongest_name_table",
+    "llm_vocab",
+    "llm_algo",
+    "llm_full",
+    "oracle"
+   ]
+  },
+  "table": {
+   "type": "string",
+   "enum": [
+    "prior",
+    "calibrated"
+   ]
+  },
+  "seed": {
+   "type": "string",
+   "minLength": 1
+  },
+  "boot_default": {
+   "type": "string",
+   "minLength": 1
+  },
+  "sim": {
+   "type": "string",
+   "description": "Absent on recognition rows, which come from a log and not a trace (8.4)."
+  },
+  "source_sha256": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
+  "entity": {
+   "type": "string",
+   "minLength": 1
+  },
+  "metric": {
+   "type": "string",
+   "enum": [
+    "ready_wait",
+    "job",
+    "cpu_delivered",
+    "demand",
+    "completed",
+    "turnaround",
+    "preempt_count",
+    "config_interval",
+    "switch_window",
+    "boost_window",
+    "busy",
+    "mode_correct",
+    "attr_correct",
+    "latency_us",
+    "algo_choice_correct",
+    "config_correct"
+   ]
+  },
+  "t": {
+   "type": "integer",
+   "minimum": 0
+  },
+  "value": {
+   "type": "integer"
+  },
+  "cause": {
+   "type": "string",
+   "enum": [
+    "arrive",
+    "wake",
+    "sleep_end",
+    "timer_tick",
+    "fork_slot"
+   ]
+  },
+  "channel": {
+   "description": "On a ready_wait row with cause wake: the kind of the channel the completed WAIT named, its name before the colon (input, timer, chain, job, children); added 2026-09-26, from 9.5 D74",
+   "type": "string",
+   "pattern": "^[^:]+$"
+  },
+  "provenance": {
+   "type": "string",
+   "enum": [
+    "unmodified",
+    "clamped",
+    "held",
+    "fallback"
+   ]
+  },
+  "algorithm": {
+   "type": "string",
+   "enum": [
+    "MLFQ",
+    "EDF",
+    "LOTTERY",
+    "FIFO"
+   ]
+  },
+  "index": {
+   "type": "integer",
+   "minimum": 0
+  },
+  "period_us": {
+   "type": "integer",
+   "minimum": 1
+  },
+  "predicted": {
+   "type": "string"
+  },
+  "truth": {
+   "type": "string"
+  },
+  "validation": {
+   "type": "string",
+   "enum": [
+    "unmodified",
+    "clamped",
+    "held",
+    "fallback"
+   ]
+  },
+  "familiarity": {
+   "type": "integer",
+   "minimum": 1,
+   "maximum": 5
+  },
+  "hogs": {
+   "type": "integer",
+   "minimum": 0
+  },
+  "pre_committed_miss": {
+   "description": "1 when the covering ground-truth segment carries pre_committed_miss; recognition rows only (added 2026-09-11, sub-task 8.4)",
+   "type": "integer",
+   "enum": [
+    0,
+    1
+   ]
+  },
+  "skipped": {
+   "description": "job rows only: 1 when the tick was skipped under the TIMER skip rule — no work ran for it and it has no completion, so `value` is absent and the job counts as missed; 0 on a consumed tick's row (added 2026-10-09, sub-task 9.14; metrics doc §6.2)",
+   "type": "integer",
+   "enum": [
+    0,
+    1
+   ]
+  }
+ },
+ "allOf": [
+  {
+   "if": {
+    "required": [
+     "channel"
+    ]
+   },
+   "then": {
+    "required": [
+     "cause"
+    ],
+    "properties": {
+     "metric": {
+      "const": "ready_wait"
+     },
+     "cause": {
+      "const": "wake"
+     }
     }
-  ]
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "metric": {
+      "const": "ready_wait"
+     }
+    }
+   },
+   "then": {
+    "required": [
+     "cause"
+    ]
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "metric": {
+      "const": "job"
+     }
+    }
+   },
+   "then": {
+    "required": [
+     "period_us"
+    ]
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "metric": {
+      "const": "config_interval"
+     }
+    }
+   },
+   "then": {
+    "required": [
+     "provenance",
+     "algorithm",
+     "index"
+    ],
+    "properties": {
+     "entity": {
+      "const": "schedule"
+     }
+    }
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "metric": {
+      "enum": [
+       "switch_window",
+       "boost_window"
+      ]
+     }
+    }
+   },
+   "then": {
+    "required": [
+     "algorithm",
+     "index",
+     "hogs"
+    ],
+    "properties": {
+     "entity": {
+      "const": "schedule"
+     },
+     "value": {
+      "minimum": 0
+     }
+    }
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "metric": {
+      "const": "busy"
+     }
+    }
+   },
+   "then": {
+    "properties": {
+     "entity": {
+      "const": "lane"
+     }
+    }
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "metric": {
+      "enum": [
+       "mode_correct",
+       "attr_correct",
+       "latency_us",
+       "algo_choice_correct",
+       "config_correct"
+      ]
+     }
+    }
+   },
+   "then": {
+    "required": [
+     "validation"
+    ],
+    "properties": {
+     "entity": {
+      "const": "recognizer"
+     }
+    }
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "metric": {
+      "enum": [
+       "mode_correct",
+       "attr_correct",
+       "algo_choice_correct",
+       "config_correct"
+      ]
+     }
+    }
+   },
+   "then": {
+    "properties": {
+     "value": {
+      "enum": [
+       0,
+       1
+      ]
+     }
+    }
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "metric": {
+      "const": "completed"
+     }
+    }
+   },
+   "then": {
+    "properties": {
+     "value": {
+      "enum": [
+       0,
+       1
+      ]
+     }
+    }
+   }
+  },
+  {
+   "if": {
+    "required": [
+     "skipped"
+    ]
+   },
+   "then": {
+    "properties": {
+     "metric": {
+      "const": "job"
+     }
+    }
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "metric": {
+      "const": "job"
+     }
+    },
+    "required": [
+     "metric"
+    ]
+   },
+   "then": {
+    "required": [
+     "skipped"
+    ]
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "skipped": {
+      "const": 1
+     }
+    },
+    "required": [
+     "skipped"
+    ]
+   },
+   "then": {
+    "not": {
+     "required": [
+      "value"
+     ]
+    }
+   },
+   "else": {
+    "required": [
+     "value"
+    ]
+   }
+  }
+ ]
 }

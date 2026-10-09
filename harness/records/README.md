@@ -4,7 +4,7 @@ The records file is the harness's first product and the only thing every later s
 
 ## What a row is
 
-A row is one observation of one entity at one time: a task's wait after it became ready, one job's latency against its period, one switch window's excess, one recognition query's grade. The columns are the run's identity (`workload_id`, `condition`, `table`, `seed`, `boot_default`), the trace's identity (`sim`, `source_sha256`), the observation (`entity`, `metric`, `t`, `value`), and the attributes a metric may carry (`cause`, `channel`, `provenance`, `algorithm`, `index`, `period_us`, `predicted`, `truth`, `validation`, `familiarity`, `hogs`, `pre_committed_miss`). Empty cells mean the attribute does not apply. `schema/records.schema.json` is the machine form; `docs/harness/metrics.md` §5 is the definition and §6 lists every metric.
+A row is one observation of one entity at one time: a task's wait after it became ready, one job's latency against its period, one switch window's excess, one recognition query's grade. The columns are the run's identity (`workload_id`, `condition`, `table`, `seed`, `boot_default`), the trace's identity (`sim`, `source_sha256`), the observation (`entity`, `metric`, `t`, `value`), and the attributes a metric may carry (`cause`, `channel`, `provenance`, `algorithm`, `index`, `period_us`, `predicted`, `truth`, `validation`, `familiarity`, `hogs`, `pre_committed_miss`, `skipped`). Empty cells mean the attribute does not apply; a skipped tick's `job` row (`skipped` 1) has an empty `value`, since no work ran for it. `schema/records.schema.json` is the machine form; `docs/harness/metrics.md` §5 is the definition and §6 lists every metric.
 
 ## How it is produced
 

@@ -203,7 +203,7 @@ def test_every_coreset_file_flows_through_records_with_no_message(tmp_path):
     table = read_driver_table(PRIOR)
     boot = json.loads(BOOT.read_text())
     files = sorted(BUILD.glob("*.workload.json"))
-    assert len(files) == 50
+    assert len(files) == 51                                     # the blessed set of 2026-10-09 (9.13 D7)
     for path in files:
         doc = json.loads(path.read_text())
         wid = doc["meta"]["id"]

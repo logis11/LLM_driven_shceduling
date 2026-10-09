@@ -20,9 +20,9 @@ COLUMNS = ("workload_id", "condition", "table", "seed", "boot_default", "sim", "
            "entity", "metric", "t", "value",
            "cause", "channel", "provenance", "algorithm", "index", "period_us",
            "predicted", "truth", "validation", "familiarity", "hogs",
-           "pre_committed_miss")
+           "pre_committed_miss", "skipped")
 _INT_COLUMNS = ("t", "value", "index", "period_us", "familiarity", "hogs",
-                "pre_committed_miss")
+                "pre_committed_miss", "skipped")
 
 SCHEMA_PATH = (pathlib.Path(__file__).resolve().parents[2]
                / "records" / "schema" / "records.schema.json")

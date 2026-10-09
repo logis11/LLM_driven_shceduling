@@ -25,7 +25,7 @@ needs_build = pytest.mark.skipif(not BUILD.exists(), reason="compiled coreset ab
 
 
 def _arrive(tid, name, t, depart=None, spawn=None):
-    ev = {"op": "arrive", "t": t, "id": tid, "name": name,
+    ev = {"op": "arrive", "t": t, "id": tid, "name": name, "declared_class": "normal",
           "program": [{"op": "RUN", "us": 10}, {"op": "EXIT"}]}
     if depart is not None:
         ev["depart"] = depart
@@ -52,7 +52,7 @@ HAND = {
         _arrive("chrome3", "chrome", 300, depart=1000),
         _arrive("chrome4", "chrome", 600, depart=1000),           # replaces chrome1: no set change
         _arrive("build", "make", 800, spawn=[
-            {"id": f"build.c{i}", "name": "cc1",
+            {"id": f"build.c{i}", "name": "cc1", "declared_class": "normal",
              "program": [{"op": "RUN", "us": 3}, {"op": "EXIT"}]} for i in range(3)]),
         {"op": "wake", "t": 50, "channel": "input:editor", "target": "editor"},
     ],
@@ -77,8 +77,26 @@ def test_projection_is_one_entry_per_task_with_children_folded_by_name():
     by_id = {(t["name"], t["t_arrive"], t.get("t_depart")) for t in proj["tasks"]}
     assert ("chrome", 0, 600) in by_id and ("chrome", 0, 1000) in by_id      # never folded
     make = next(t for t in proj["tasks"] if t["name"] == "make")
-    assert make == {"name": "make", "t_arrive": 800, "children": [{"name": "cc1", "count": 3}]}
-    assert all(set(t) <= {"name", "t_arrive", "t_depart", "children"} for t in proj["tasks"])
+    assert make == {"name": "make", "declared_class": "normal", "t_arrive": 800,
+                    "children": [{"name": "cc1", "declared_class": "normal", "count": 3}]}
+    assert all(set(t) <= {"name", "declared_class", "t_arrive", "t_depart", "children"} for t in proj["tasks"])
+    assert all(t["declared_class"] == "normal" for t in proj["tasks"])          # contract 3b: shown per task
+
+
+def test_projection_folds_children_by_name_and_class():
+    """data-contracts §4 (2026-10-09): the class rides on every task and on each folded child group."""
+    doc = {"meta": {"id": "x"}, "ground_truth": [], "events": [
+        {"op": "arrive", "t": 0, "id": "idx", "name": "tracker-miner-f", "declared_class": "idle",
+         "program": [{"op": "RUN", "us": 1}, {"op": "EXIT"}]},
+        {"op": "arrive", "t": 0, "id": "b", "name": "make", "declared_class": "normal", "fork_cap": 2,
+         "program": [{"op": "RUN", "us": 1}, {"op": "FORK"}, {"op": "FORK"}, {"op": "EXIT"}],
+         "spawn_table": [
+             {"id": "b.1", "name": "cc1", "declared_class": "normal", "program": [{"op": "RUN", "us": 1}, {"op": "EXIT"}]},
+             {"id": "b.2", "name": "cc1", "declared_class": "idle", "program": [{"op": "RUN", "us": 1}, {"op": "EXIT"}]}]}]}
+    proj = daemon.projection(doc)
+    assert proj["tasks"][0] == {"name": "tracker-miner-f", "declared_class": "idle", "t_arrive": 0}
+    assert proj["tasks"][1]["children"] == [{"name": "cc1", "declared_class": "idle", "count": 1},
+                                            {"name": "cc1", "declared_class": "normal", "count": 1}]
 
 
 # ---------------------------------------------------------- snapshots (§5)
@@ -97,14 +115,18 @@ def test_snapshots_follow_the_five_telemetry_rules():
 
 
 @needs_build
-def test_c1_compile_opens_with_the_guides_two_snapshots():
+def test_c1_compile_opens_with_the_editor_then_the_whole_build():
+    """The rebuilt c1-compile (9.10 D141, 9.6 D19): the editor at 0, then at 2 s `make` with its
+    2,908 object jobs, six members each, folded by name; the terminal snapshot at the file's end
+    (rule 4) with the editor gone and the finite build still present."""
     doc = json.loads((BUILD / "c1-compile.workload.json").read_text())
     snaps = daemon.snapshots(daemon.projection(doc))
     assert snaps[0] == {"t_us": 0, "processes": [{"name": "code", "count": 1}]}
-    assert snaps[1] == {"t_us": 2000000, "processes": [{"name": "cc1", "count": 100},
-                                                        {"name": "code", "count": 1},
-                                                        {"name": "make", "count": 1}]}
-    assert snaps[2]["t_us"] == 60000000 and len(snaps) == 3                  # rule 4
+    members = [{"name": n, "count": 2908} for n in ("as", "cc1")] + [{"name": "code", "count": 1}] + \
+              [{"name": n, "count": 2908} for n in ("fixdep", "gcc")] + [{"name": "make", "count": 1}] + \
+              [{"name": n, "count": 2908} for n in ("rm", "sh")]
+    assert snaps[1] == {"t_us": 2000000, "processes": members}
+    assert snaps[2]["t_us"] == 1594000000 and len(snaps) == 3                 # rule 4
 
 
 # -------------------------------------------------------------- conditions
@@ -186,8 +208,8 @@ def test_random_draws_uniformly_over_the_sorted_rows_from_the_seed(table, boot, 
 
 
 def test_other_conditions_and_wrong_seed_pairings_are_refused(table, boot):
-    with pytest.raises(MockDaemonError, match="whitelist"):
-        daemon.run(HAND, "whitelist", table, boot)
+    with pytest.raises(MockDaemonError, match="shipped_catalogue"):
+        daemon.run(HAND, "shipped_catalogue", table, boot)
     with pytest.raises(MockDaemonError, match="seed"):
         daemon.run(HAND, "random", table, boot)
     with pytest.raises(MockDaemonError, match="seed"):
@@ -201,7 +223,7 @@ def test_other_conditions_and_wrong_seed_pairings_are_refused(table, boot):
 @needs_build
 def test_oracle_over_the_coreset_reproduces_the_measured_graded_set(table, boot, tmp_path):
     files = sorted(BUILD.glob("*.workload.json"))
-    assert len(files) == 50
+    assert len(files) == 51                                     # the blessed set of 2026-10-09 (9.13 D7)
     points = terminal = ambiguous = 0
     graded, graded_files, miss, headline, headline_files = 0, set(), 0, 0, set()
     for path in files:
@@ -229,9 +251,13 @@ def test_oracle_over_the_coreset_reproduces_the_measured_graded_set(table, boot,
             else:
                 headline += 1
                 headline_files.add(doc["meta"]["id"])
-    assert (points, terminal, ambiguous) == (134, 50, 2)
-    assert (graded, len(graded_files), miss) == (82, 49, 10)
-    assert (headline, len(headline_files)) == (72, 44)
+    # re-measured on the 2026-10-09 blessed set (9.14): 51 files, one terminal snapshot each,
+    # c6-dual's two ambiguous query points; 77 graded points over 50 files, six in pre-committed-miss
+    # segments; 71 headline points over 45 files (the 8.4 facts on the Phase 7 set were 134/50/2,
+    # 82/49/10 and 72/44)
+    assert (points, terminal, ambiguous) == (130, 51, 2)
+    assert (graded, len(graded_files), miss) == (77, 50, 6)
+    assert (headline, len(headline_files)) == (71, 45)
 
 
 # --------------------------------------------------------------- the command

@@ -113,7 +113,7 @@ def test_no_demand_row_for_unbounded_program():
     r = compute(run, events)
     assert rows_of(r, "demand", "v") == []
     assert rows_of(r, "job", "v") == [{"entity": "v", "metric": "job", "t": 0, "value": 10,
-                                       "period_us": 50}]
+                                       "period_us": 50, "skipped": 0}]
     assert r.guards == []
 
 
@@ -422,3 +422,83 @@ def test_schedule_disagreeing_with_the_trace_is_a_guard():
     assert any("index 1" in g and "EDF" in g and "FIFO" in g for g in r.guards)
     r = compute(run, [cfg(0, 0, "MLFQ"), cfg(10, 3, "EDF")], sched)
     assert any("index 3" in g for g in r.guards)
+
+
+# ---- the TIMER skip rule (metrics doc §6.2; 9.11 D3, D17; 9.14 decision 1)
+
+def _timer_trace(lines):
+    return [{"event": "task_arrive", "t": 0, "task": "v", "source": "file"},
+            {"event": "ready", "t": 0, "task": "v", "cause": "arrive"}] + lines
+
+
+def test_skipped_ticks_are_missed_job_rows_without_a_value():
+    """A head that reaches its TIMER after two ticks passed consumes the latest and skips
+    the one before: one job row per tick, the skipped one with no value and skipped 1."""
+    run = runfile(1000, [task("v", period=100)], chains=[["v"]])
+    # a TIMER reached at 250 with ticks 100 and 200 passed consumes 200 at once and skips 100:
+    events = _timer_trace([
+        {"event": "run_start", "t": 0, "task": "v"},
+        {"event": "ready", "t": 0, "task": "v", "cause": "timer_tick"},           # tick 0 consumed at 0
+        {"event": "deadline", "t": 250, "task": "v", "due": 100, "met": False, "slack_us": -150},   # job 0 missed
+        {"event": "deadline", "t": 250, "task": "v", "due": 200, "met": False, "slack_us": -50},    # tick 1 skipped
+        {"event": "ready", "t": 250, "task": "v", "cause": "timer_tick"},         # tick 2 consumed at 250
+        {"event": "run_end", "t": 270, "task": "v", "reason": "block", "blocked_on": "timer"},
+        {"event": "deadline", "t": 270, "task": "v", "due": 300, "met": True, "slack_us": 30},     # job 2 met
+        {"event": "ready", "t": 300, "task": "v", "cause": "timer_tick"},         # tick 3 on time
+        {"event": "run_start", "t": 300, "task": "v"},
+        {"event": "run_end", "t": 310, "task": "v", "reason": "block", "blocked_on": "timer"},
+        {"event": "deadline", "t": 310, "task": "v", "due": 400, "met": True, "slack_us": 90},
+    ])
+    r = compute(run, events)
+    jobs = rows_of(r, "job", "v")
+    assert [(j["t"], j.get("value"), j["skipped"]) for j in jobs] == [
+        (0, 250, 0), (100, None, 1), (200, 70, 0), (300, 10, 0)]
+    assert r.guards == []
+
+
+def test_t0_is_the_first_timer_tick_line_not_the_arrival():
+    """A head arriving on a busy lane executes its first TIMER at its first dispatch; the
+    grid starts there (metrics doc §11, item 4)."""
+    run = runfile(1000, [task("v", period=100)], chains=[["v"]])
+    events = _timer_trace([
+        {"event": "run_start", "t": 40, "task": "v"},
+        {"event": "ready", "t": 40, "task": "v", "cause": "timer_tick"},          # t0 = 40, tick 0
+        {"event": "run_end", "t": 50, "task": "v", "reason": "block", "blocked_on": "timer"},
+        {"event": "deadline", "t": 50, "task": "v", "due": 140, "met": True, "slack_us": 90},
+        {"event": "ready", "t": 140, "task": "v", "cause": "timer_tick"},         # tick 1 at 140
+        {"event": "run_start", "t": 140, "task": "v"},
+        {"event": "run_end", "t": 150, "task": "v", "reason": "block", "blocked_on": "timer"},
+        {"event": "deadline", "t": 150, "task": "v", "due": 240, "met": True, "slack_us": 90},
+    ])
+    r = compute(run, events)
+    assert [(j["t"], j["value"]) for j in rows_of(r, "job", "v")] == [(40, 10), (140, 10)]
+    assert r.guards == []
+
+
+def test_a_skipped_ticks_deadline_line_is_read_by_met_alone():
+    run = runfile(1000, [task("v", period=100)], chains=[["v"]])
+    events = _timer_trace([
+        {"event": "run_start", "t": 0, "task": "v"},
+        {"event": "ready", "t": 0, "task": "v", "cause": "timer_tick"},
+        {"event": "deadline", "t": 250, "task": "v", "due": 100, "met": False, "slack_us": -150},
+        {"event": "deadline", "t": 250, "task": "v", "due": 200, "met": True, "slack_us": 0},      # wrong: skipped, says met
+        {"event": "ready", "t": 250, "task": "v", "cause": "timer_tick"},
+        {"event": "run_end", "t": 270, "task": "v", "reason": "block", "blocked_on": "timer"},
+        {"event": "deadline", "t": 270, "task": "v", "due": 300, "met": True, "slack_us": 30},
+    ])
+    r = compute(run, events)
+    assert [g for g in r.guards if "says met where tick 1 was skipped" in g]
+
+
+def test_a_consumption_that_does_not_advance_the_tick_is_a_guard():
+    run = runfile(1000, [task("v", period=100)], chains=[["v"]])
+    events = _timer_trace([
+        {"event": "run_start", "t": 0, "task": "v"},
+        {"event": "ready", "t": 0, "task": "v", "cause": "timer_tick"},
+        {"event": "run_end", "t": 10, "task": "v", "reason": "block", "blocked_on": "timer"},
+        {"event": "ready", "t": 50, "task": "v", "cause": "timer_tick"},          # before tick 1 at 100: still tick 0
+        {"event": "run_start", "t": 50, "task": "v"},
+        {"event": "run_end", "t": 60, "task": "v", "reason": "block", "blocked_on": "timer"},
+    ])
+    r = compute(run, events)
+    assert any("consumes tick 0, not after tick 0" in g for g in r.guards)

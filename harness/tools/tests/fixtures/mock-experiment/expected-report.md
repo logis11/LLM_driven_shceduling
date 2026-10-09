@@ -1,6 +1,6 @@
 # Report — mock-experiment
 
-**Verdict: pass** — 1 of 1 judging files met the criterion (K = 1). Spec `1b9669bbafb9`.
+**Verdict: pass** — 1 of 1 judging files met the criterion (K = 1). Spec `0b57530fd67d`.
 
 ## Criterion
 
@@ -18,7 +18,7 @@
 | pin | path | sha256 | version |
 |---|---|---|---|
 | scoring_spec | harness/tools/tests/fixtures/mock-scores/scoring-spec.yaml | da3b9f9c4adb9a75f195925abe49d0a24ad690f2333b27df383cb8012c82e1fb |  |
-| guard_spec | harness/tools/tests/fixtures/mock-experiment/guard-spec.yaml | 40bdfb01dd8bbfc451ebf3ee84d9f1d48b641400f01eb38fbe64b088212f9fb0 | 0.1 |
+| guard_spec | harness/tools/tests/fixtures/mock-experiment/guard-spec.yaml | 84324b465490e566ce0fab9cbee5d53636cf8fe636997bf8c6c39494ddf9ad1d | 0.1 |
 | driver_table | harness/tools/tests/fixtures/mock-grades/driver-table.yaml | 04fdb608c64661905af94f1a01e5502f5f84f004cd4c433b9297fc284c99f3de |  |
 | dataset | harness/tools/tests/fixtures/mock-experiment/build.manifest.json | b60942339c09f9ea6155bdac98c293a8184de082f4fd95f1b9134dee98bdd44f |  |
 

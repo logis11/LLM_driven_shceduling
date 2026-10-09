@@ -101,7 +101,7 @@ guards:
     threshold: 0.5
     unit: fraction
     direction: below
-    applies_to: [oracle, random, whitelist, llm_vocab, llm_algo, llm_full]
+    applies_to: [oracle, random, shipped_catalogue, strongest_name_table, llm_vocab, llm_algo, llm_full]
     grounding: >
       Stated assumption: "mostly running fallback" (research-proposal §6.3) read as a
       majority of the run's time; time-weighted fallback + held share below one half.
@@ -111,7 +111,7 @@ guards:
     threshold: null
     unit: us
     direction: structural
-    applies_to: [oracle, random, whitelist, llm_vocab, llm_algo, llm_full]
+    applies_to: [oracle, random, shipped_catalogue, strongest_name_table, llm_vocab, llm_algo, llm_full]
     grounding: >
       Structural: every non-boot entry takes effect before the ground-truth segment
       containing its query's t_set_change ends, or the recognition grade and the
@@ -165,7 +165,7 @@ guards:
     threshold: null
     unit: index
     direction: structural
-    applies_to: [oracle, random, whitelist, llm_vocab, llm_algo, llm_full]
+    applies_to: [oracle, random, shipped_catalogue, strongest_name_table, llm_vocab, llm_algo, llm_full]
     grounding: >
       Structural: the log's validation sequence equals the schedule's provenance
       sequence minus the boot entry (data-contracts §8), compared positionally.
@@ -175,7 +175,7 @@ guards:
     threshold: null
     unit: sha256
     direction: structural
-    applies_to: [fixed, oracle, whitelist, llm_vocab, llm_algo, llm_full]
+    applies_to: [oracle, shipped_catalogue, strongest_name_table, llm_vocab, llm_algo, llm_full]
     grounding: >
       Structural: under a recognition-driven condition the two files of a C2 pair
       must produce different traces (rq0-preparation-notes stage 4.2); under fixed,

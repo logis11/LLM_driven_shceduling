@@ -42,7 +42,7 @@ def test_events_are_yielded_in_order_with_counts(fixture_dir):
     assert kinds.count("config_applied") == 2
     assert kinds.count("task_arrive") == 3
     assert kinds.count("task_end") == 3
-    assert kinds.count("ready") == 11
+    assert kinds.count("ready") == 10                # the skipped tick has no line
     assert kinds.count("deadline") == 8
     times = [e["t"] for e in events]
     assert times == sorted(times)
@@ -162,7 +162,7 @@ def test_demand_is_finite_run_total_or_absent(fixture_dir):
     assert office.tasks["browser"].demand == 0
     media = read_run_file(fixture_dir("mock-media") / "run.json")
     assert media.tasks["video"].demand is None          # unbounded LOOP
-    assert media.tasks["scan"].demand == 31000
+    assert media.tasks["scan"].demand == 46666
     p1a = read_run_file(fixture_dir("mock-p1a") / "run.json")
     assert p1a.tasks["hog"].demand == 90000
 

@@ -267,36 +267,67 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
         rows.append(_row("schedule", "switch_window", t_apply, value,
                          algorithm=ev["algorithm"], index=ev["index"], hogs=len(hogs)))
 
-    # ---- job rows and chain guards
+    # ---- job rows and chain guards (§6.2 under the TIMER skip rule; 9.11 D3, D17; 9.14 decision 1)
     for chain in run.chains:
         head, tail = chain[0], chain[-1]
         if head not in tasks:
             continue
         hs, ts = tasks[head], tasks[tail]
         period = run.tasks[head].period_us
-        # The k-th ready(timer_tick) line marks the consumption of tick k; the
-        # tick itself sits on the TIMER grid, t0 + k*period, with t0 the task's
-        # arrival (metrics doc §11, assumption 4). A tick is consumed late when
-        # the lane was busy or the task was in backlog, so the line's time is
-        # never the tick's.
+        # Each ready(timer_tick) line marks the consumption of one tick: the latest
+        # grid tick at or before the line's time, the grid being t0 + k*period with
+        # t0 the task's first TIMER execution — its first ready(timer_tick) line
+        # (metrics doc §11, assumption 4; the TIMER-first invariant fixes a task's
+        # first instruction, not its first dispatch). A tick consumed late sits
+        # before its line, never at it. Every unconsumed tick between two
+        # consumptions was skipped: a job with no work and no completion, missed.
+        # The j-th consumption is the tail's j-th iteration, since a skipped tick
+        # sends no wake down the chain and wakes queue with depth.
         consumed = [tk for tk in hs.ticks if tk <= t_end]
-        t0 = hs.arrive_t
-        ticks = [t0 + k * period for k in range(len(consumed))]
+        if not consumed:
+            continue
+        t0 = consumed[0]
+        indices = [(tk - t0) // period for tk in consumed]
         ends = [e for e in ts.iter_ends if e <= t_end]
-        if len(ends) != len(ticks):
+        if len(ends) != len(consumed):
             guards.append(f"chain {head}: tail {tail} completed {len(ends)} iteration(s) "
-                          f"for {len(ticks)} head tick(s) inside the window")
-        for k, tick in enumerate(ticks):
-            if k < len(ends):
-                rows.append(_row(head, "job", tick, ends[k] - tick, period_us=period))
+                          f"for {len(consumed)} consumed head tick(s) inside the window")
+        jobs = []                                   # (tick index, completion or None, skipped)
+        prev = -1
+        for j, k in enumerate(indices):
+            if k <= prev:
+                guards.append(f"chain {head}: ready(timer_tick) at t={consumed[j]} consumes tick {k}, "
+                              f"not after tick {prev}")
+                continue
+            for s in range(prev + 1, k):
+                jobs.append((s, None, True))
+            jobs.append((k, ends[j] if j < len(ends) else None, False))
+            prev = k
+        for k, completion, skipped in jobs:
+            tick = t0 + k * period
+            if skipped:
+                rows.append(_row(head, "job", tick, None, period_us=period, skipped=1))
+            elif completion is not None:
+                rows.append(_row(head, "job", tick, completion - tick, period_us=period, skipped=0))
         if len(chain) == 1:
-            for k, dl in enumerate(hs.deadlines):
-                if k >= len(ends) or dl["t"] > t_end:
+            # one deadline line per tick, consumed or skipped, in tick order; a skipped
+            # tick's line is read by `met` alone (9.11 D17), a consumed tick's by its
+            # completion and slack
+            lines = [dl for dl in hs.deadlines if dl["t"] <= t_end]
+            for n, (k, completion, skipped) in enumerate(jobs):
+                if n >= len(lines):
                     break
-                if dl["t"] != ends[k] or dl["slack_us"] != period - (ends[k] - ticks[k]):
-                    guards.append(f"deadline line for {head} job {k} (t={dl['t']}, "
-                                  f"slack={dl['slack_us']}) disagrees with the job row "
-                                  f"(completion {ends[k]}, value {ends[k] - ticks[k]})")
+                dl = lines[n]
+                tick = t0 + k * period
+                if skipped:
+                    if dl["met"]:
+                        guards.append(f"deadline line {n} for {head} (t={dl['t']}) says met where "
+                                      f"tick {k} was skipped")
+                elif completion is not None:
+                    if dl["t"] != completion or dl["slack_us"] != period - (completion - tick):
+                        guards.append(f"deadline line for {head} job {k} (t={dl['t']}, "
+                                      f"slack={dl['slack_us']}) disagrees with the job row "
+                                      f"(completion {completion}, value {completion - tick})")
 
     # ---- stimulus guard, and wake lines the run file has no WAIT for
     for tid, n in run.input_wakes.items():

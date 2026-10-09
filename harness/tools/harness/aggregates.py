@@ -89,7 +89,7 @@ def compute_aggregates(rows, windows=None, interactive=()):
     windows = windows or {}
     identity = run_identity(rows)
     df = pd.DataFrame(rows)
-    for col in ("cause", "channel", "provenance", "algorithm", "index", "period_us"):
+    for col in ("cause", "channel", "provenance", "algorithm", "index", "period_us", "skipped"):
         if col not in df.columns:
             df[col] = np.nan
     out = []
@@ -133,20 +133,25 @@ def compute_aggregates(rows, windows=None, interactive=()):
                 over = sum(1 for v in vals if v > T_INTERACTION_US)
                 emit(entity, "ready_wait", "over_threshold", Fraction(over, len(vals)), **kw)
 
-    # --- job: per entity, per window
+    # --- job: per entity, per window. A skipped tick (metrics doc §6.2, the TIMER skip
+    # rule) is a job row with no completion: it counts, it is missed, it has no latency.
     jobs = df[df["metric"] == "job"]
     for entity, g in jobs.groupby("entity", sort=True):
         for window in windows_for(entity, "job"):
             sel = g[[_in_window(int(t), window) for t in g["t"]]]
             if sel.empty:
                 continue
-            vals = sel["value"].astype(int).tolist()
-            periods = sel["period_us"].astype(int).tolist()
-            emit(entity, "job", "count", len(vals), "", window)
-            missed = sum(1 for v, per in zip(vals, periods) if v > per)
-            emit(entity, "job", "miss_rate", Fraction(missed, len(vals)), "", window)
-            emit(entity, "job", "latency_p50", percentile(vals, 50), "", window)
-            emit(entity, "job", "latency_p99", percentile(vals, 99), "", window)
+            is_skipped = sel["skipped"].fillna(0).astype(int) == 1
+            done = sel[~is_skipped]
+            vals = done["value"].astype(int).tolist()
+            periods = done["period_us"].astype(int).tolist()
+            n = len(sel)
+            emit(entity, "job", "count", n, "", window)
+            missed = sum(1 for v, per in zip(vals, periods) if v > per) + int(is_skipped.sum())
+            emit(entity, "job", "miss_rate", Fraction(missed, n), "", window)
+            if vals:
+                emit(entity, "job", "latency_p50", percentile(vals, 50), "", window)
+                emit(entity, "job", "latency_p99", percentile(vals, 99), "", window)
 
     # --- lifetime rows: progress, completion, turnaround (and the censored bound), preempts
     per_entity = {}

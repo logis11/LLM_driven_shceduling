@@ -2,7 +2,7 @@
 decision 11; 8.5 spec, decisions 13–16).
 
 `projection` extracts the visible projection (data-contracts §4, contract 3b)
-from a canonical workload; `snapshots` walks its pinned events under the five
+from a canonical workload, each task with its `declared_class`; `snapshots` walks its pinned events under the five
 telemetry rules of §5; `run` answers every snapshot through the driver table
 and returns a contract-valid config schedule (§7) and recognition log (§8).
 It emits `unmodified` only — no validator, no clamping, no `held`, no LLM
@@ -34,18 +34,20 @@ def workload_id(doc) -> str:
 # ------------------------------------------------------ the visible projection
 
 def projection(doc) -> dict:
-    """One entry per canonical task instance, never folded; a spawn table's
-    children folded by name under their parent (§4)."""
+    """One entry per canonical task instance, never folded, each with its
+    `declared_class` (§4, contract 3b, 2026-10-09); a spawn table's children
+    folded by name and class under their parent."""
     tasks = []
     for ev in doc.get("events", []):
         if ev.get("op") != "arrive":
             continue
-        task = {"name": ev["name"], "t_arrive": int(ev["t"])}
+        task = {"name": ev["name"], "declared_class": ev["declared_class"], "t_arrive": int(ev["t"])}
         if ev.get("depart") is not None:
             task["t_depart"] = int(ev["depart"])
         if ev.get("spawn_table"):
-            counts = Counter(child["name"] for child in ev["spawn_table"])
-            task["children"] = [{"name": n, "count": c} for n, c in sorted(counts.items())]
+            counts = Counter((child["name"], child["declared_class"]) for child in ev["spawn_table"])
+            task["children"] = [{"name": n, "declared_class": k, "count": c}
+                                for (n, k), c in sorted(counts.items())]
         tasks.append(task)
     return {"workload_id": workload_id(doc), "tasks": tasks}
 

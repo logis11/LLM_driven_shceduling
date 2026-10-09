@@ -45,13 +45,13 @@ def test_fixture_csv_validates_against_schema(fixture_dir, mock):
     validate_rows(rows)            # raises on the first invalid row
 
 
-def test_columns_are_the_twenty_three_in_order(fixture_dir):
+def test_columns_are_the_twenty_four_in_order(fixture_dir):
     with open(fixture_dir("mock-office") / "expected.csv", newline="") as f:
         header = next(csv.reader(f))
     assert header == list(COLUMNS)
-    assert len(COLUMNS) == 23
+    assert len(COLUMNS) == 24
     assert COLUMNS[COLUMNS.index("cause") + 1] == "channel"
-    assert COLUMNS[-2:] == ("hogs", "pre_committed_miss")
+    assert COLUMNS[-3:] == ("hogs", "pre_committed_miss", "skipped")
 
 
 def test_channel_rides_on_wake_rows_only(fixture_dir):
