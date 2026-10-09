@@ -608,3 +608,17 @@ Taken under 인지오's delegation (2026-10-09), scope-card item 43: `docs/resea
 Hands to 9.15: `docs/research-proposal.md:340` restated as above; `docs/references.md` entries for Wei et al., Sprague et al. and Tam et al. where the prose cites them, under the id-minting rule. **9.14:** whether Layer 1 pre-registers the with-and-without-`reasoning` comparison is the RQ0 gate spec's and the recognizer's design, not decided here.
 
 Compiled effect: none.
+
+## D41 — "batch processes consume every cycle you give them" restated to the measured batch jobs: most keep a CPU busy, the indexer does not (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), scope-card item 45: `docs/research-proposal.md:97`'s "**Batch** processes have nobody waiting — a compile, a backup, a file indexer, a video encode. Their defining trait is that they consume every cycle you give them. An eight-second compile computes for eight solid seconds" is read against the dataset's measurements of the same four kinds, each alone on one CPU of the EPYC 7763 runner.
+
+- **The compile:** the warm `-j8` linux-6.6 build keeps the CPU 99.74–99.77 % busy over 14 repeats, `-j1` 99.70–99.71 % (S3-21, the busy share; 9.6's `meas-ci:build:2026-09-18`); `cc1` runs a median 368 ms of CPU between blocks (D33).
+- **The backup:** Déjà Dup's incremental backup, saturation 0.9935–0.9952 over the job (`incremental-backup`, 9.10 D119), and it runs in the idle class: Déjà Dup wraps it in `chrt --idle 0` (9.10 D112; 9.11 S2-27).
+- **The video encode:** HandBrakeCLI 1.7.2 at its default preset, saturation 0.99938–0.99947 (`video-transcoder`, 9.10 D97).
+- **The indexer:** Tracker's first index of a home, saturation 0.655–0.676 over the job, its run between voluntary blocks 1.876 ms (`file-indexer`, 9.10 D81; D14); 9.6's rescan phase kept the CPU 20.4–25.4 % busy (S3-21).
+- **Restated:** batch work has nobody waiting on each step and runs long; most of it keeps a CPU busy for as long as it runs — a kernel build, a video encode and a backup at 99.4–99.9 % on the dataset's machine — but not all: a file indexer blocks every couple of milliseconds and leaves a third of the CPU idle. "consume every cycle you give them" leaves as a trait of all batch work; "An eight-second compile computes for eight solid seconds" stands as an illustration, the build measured at 99.7 %.
+
+Hands to 9.15: `docs/research-proposal.md:97` restated as above; the bash/cc1plus diagram (`:101–108`) is D33's.
+
+Compiled effect: none.

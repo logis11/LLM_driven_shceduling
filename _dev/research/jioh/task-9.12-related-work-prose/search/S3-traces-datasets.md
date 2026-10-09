@@ -633,6 +633,18 @@ ANY of the three: 56 packages (3.9 % of 1438); lowering 40 (2.8 %); raising 16 (
   full-mode phase files: n 1806, p10 90.1, p50 419.9, p90 2103.7, max 14036.3
   ```
   Of the 71 groups' medians, 57 are at least 100 a second, 13 at least 1 000, 2 at least 10 000 (both SteamCMD's download phases).
+- **The measured CPU's busy share** (`sources/S3-21/busy_share.py`, A.17, SHA-256 `16e234bb600423f8629c6be0d5ef12731a879ffda819bfc0f8173d76bb59d398`; one minus the `<idle>` task's run time on the load CPU over the span), 9.6's build-family phases, 14 repeats each (output verbatim):
+  ```
+  build build-j8-warm: repeats 14, busy share 0.9974–0.9977, median 0.9976
+  build build-j8-cold: repeats 14, busy share 0.9973–0.9974, median 0.9974
+  build build-j1-warm: repeats 14, busy share 0.9970–0.9971, median 0.9971
+  build handbrake: repeats 14, busy share 0.9345–0.9389, median 0.9371
+  build ffmpeg: repeats 14, busy share 0.9179–0.9208, median 0.9196
+  build tracker: repeats 14, busy share 0.2042–0.2541, median 0.2069
+  build clamscan: repeats 14, busy share 0.9334–0.9440, median 0.9387
+  build train: repeats 14, busy share 0.8190–0.8575, median 0.8506
+  build dkms: repeats 14, busy share 0.4036–0.4166, median 0.4090
+  ```
 - **Coverage.** T10 covered for one quantity: context switches per second on one CPU running one desktop program at a time, for the dataset's programs, on the EPYC 7763 runner (kernel 6.17.0-1022-azure), from 12 a second (single-threaded MNIST training) to 12 447 (SteamCMD's download), the median group 437. A switch is a lower bound on schedule() calls (the runner's idle CPUs call schedule() more often than they switch, `meas-ci:costs` dry run). Not covered: a desktop CPU shared by several programs at once, which this measurement isolates by design (`pin.sh`).
 
 ### S3-23 — Chambers, Feng, Sahu & Saha, IMC 2005: session times on one Counter-Strike server (T12; stage 3, 2026-10-09)
@@ -1152,7 +1164,7 @@ for (s, p), c in sorted(unmatched.items()): print('   ', p, f'x{c}')
 ```
 Run: `python3 -I installed_units_count.py sources/S3-20`.
 
-### A.17 `switch_rates.py` and `summarize.py` (stage 3, 2026-10-09)
+### A.17 `switch_rates.py`, `summarize.py` and `busy_share.py` (stage 3, 2026-10-09)
 
 ```python
 #!/usr/bin/env python3
@@ -1251,6 +1263,48 @@ print(f"group medians: min {min(meds):.1f}, median {statistics.median(meds):.1f}
 allv = [float(r["per_s"]) for r in full]
 q = sorted(allv)
 print(f"full-mode phase files: n {len(q)}, p10 {q[len(q)//10]:.1f}, p50 {statistics.median(q):.1f}, p90 {q[9*len(q)//10]:.1f}, max {q[-1]:.1f}")
+```
+
+```python
+#!/usr/bin/env python3
+"""The measured CPU's busy share per phase, from the campaigns' timehist files (search record S3-21): one minus the
+`<idle>` task's run time on the load CPU over the file's span, first row to last. Same selection as switch_rates.py
+(gate open, EPYC 7763, one row per run/family/app/repeat/phase), restricted to the families and phases named.
+
+    busy_share.py <root> <family> <phase>...   → per phase: repeats, busy share min–max and median
+"""
+import glob, gzip, json, os, re, statistics, sys
+
+ROW = re.compile(rb"^\s*([0-9]+\.[0-9]+)\s+\[([0-9]+)\]\s+(\S.*?)\s+([0-9]+\.[0-9]+)\s+([0-9]+\.[0-9]+)\s+([0-9]+\.[0-9]+)\s")
+root, family, phases = sys.argv[1], sys.argv[2], sys.argv[3:]
+res, seen = {p: [] for p in phases}, set()
+for rep in sorted(glob.glob(os.path.join(root, "**", "report.json"), recursive=True)):
+    d = os.path.dirname(rep)
+    r = json.load(open(rep))
+    if r.get("gate") != "open" or "EPYC 7763" not in r.get("machine.model", "") or r.get("family") != family or r.get("mode") != "full":
+        continue
+    run = json.load(open(os.path.join(d, "spec.json")))["github_run"]["GITHUB_RUN_ID"]
+    cpu = int(r.get("pin.load_cpu", "-1"))
+    for p in phases:
+        th = os.path.join(d, f"perf.{p}.timehist.txt.gz")
+        key = (run, r.get("repeat"), p)
+        if not os.path.exists(th) or key in seen:
+            continue
+        seen.add(key)
+        idle, t0, t1 = 0.0, None, None
+        with gzip.open(th, "rb") as fh:
+            for line in fh:
+                m = ROW.match(line)
+                if not m:
+                    continue
+                t = float(m.group(1)); t0 = t if t0 is None else t0; t1 = t
+                if int(m.group(2)) == cpu and m.group(3).startswith(b"<idle>"):
+                    idle += float(m.group(6)) / 1000.0
+        if t0 is not None and t1 > t0:
+            res[p].append(1 - idle / (t1 - t0))
+for p, v in res.items():
+    if v:
+        print(f"{family} {p}: repeats {len(v)}, busy share {min(v):.4f}–{max(v):.4f}, median {statistics.median(v):.4f}")
 ```
 
 ## Appendix B — long outputs (verbatim)
