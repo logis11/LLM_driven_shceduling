@@ -131,6 +131,7 @@ Hands to 9.15:
 Compiled effect: none.
 
 ## D8 — related-work's production-scheduler sentence: per scheduler, as each operator reports it; `scx_rusty` leaves (2026-10-08)
+> Amended by D113 (the LPC slides, the LPC abstract and LWN 1051430 minted under the new talk, abstract or news-report type; by 인지오's decision).
 
 By 인지오's decision, scope-card item 3, after a stage-3 read (S2-48): `docs/related-work.md:8`'s "Production schedulers built on it — scx_rusty, scx_layered, scx_lavd — demonstrate that non-default policies are deployable at scale [scx]" is restated per scheduler, each statement attributed to its operator. `scx` stays an existence-only source: it grounds that the repository ships the schedulers (fifteen at `v1.1.3`, S2-09), not their deployment.
 
@@ -183,6 +184,7 @@ Compiled effect: none.
 
 ## D11 — every LAVD source is footnote tier; the source naming and the production clause of `grounding-sources.md:30` restated (2026-10-08)
 > Amended by D100 (`lavd-ossna24`'s pairing clause leaves with `corbet-lwn24`'s "prose-citable").
+> Amended by D113 (`lavd-ossna24` and `corbet-lwn24` are the new talk, abstract or news-report type; by 인지오's decision).
 
 By 인지오's decision, scope-card item 58 (with item 61's read lines): LAVD has no scholarly citation — no peer-reviewed paper or archived preprint describes it (S1 "Not found", T2: arXiv 0 results, OpenAlex none; stage 3) — so every LAVD source sits in the deployed-system / footnote tier, and the paper keeps its two tiers.
 
@@ -1669,5 +1671,16 @@ By 인지오's decision (2026-10-09), amending D44 (scope-card items 56, 57) on 
 - **Decided:** the rule admits, beside existence claims, (i) a deployed system's own documented design or behaviour, stated as that source's at its pinned version or accessed date ("the kernel's documentation states …"), and (ii) a figure the source publishes, stated as its report with the date read, the window and how it is computed (D107's form); never a behavioural or statistical claim stated as the paper's own or as a population's. The sentences above stand in their attributed form.
 
 Hands to 9.15: `docs/references.md:20–22` — the deployed-system tier restated as above; the role lines of `schedext-docs`, `scx`, the man-pages, Apple's QoS, Microsoft's Game Mode and Xbox entries, LocalScore and Artificial Analysis stating which design statements or figures each supports, attributed.
+
+Compiled effect: none.
+
+## D113 — the id rule gains a type for talks, conference abstracts and news reports: `<label>-<venue><yy>`, footnote tier, their claims the speaker's or reporter's (2026-10-09)
+
+By 인지오's decision (2026-10-09), amending D8 and D11 (scope-card items 3, 58) on the 9.12 audit's finding that the id rule (`docs/references.md:10–16`: scholarly, deployed-system, measurement) has no type for a talk, a conference abstract or a news report, while two entries already are one — `lavd-ossna24` (Min's OSS NA 2024 talk slides; its role "Talk slides — footnote tier despite carrying numbers") and `corbet-lwn24` (an LWN article), both with scholarly-form ids in the deployed-system section (`:218–227`) — and D8 and D11 hand three more "as `lavd-ossna24`": the LPC 2024 slides "sched_ext status and plans", the LPC 2025 abstract on Meta's Reality Labs fleet, LWN 1051430.
+
+- **Decided:** a fifth type, talk, conference abstract or news report → `<label>-<venue><yy>`, the label the speaker's or author's surname or the system's name; footnote tier; its claims stated as the speaker's or reporter's (D11: "LWN articles carry only what they report, attributed as reports"), never as the paper's own; a number it carries stated only as its report, with its date (D112's published-figure clause).
+- `lavd-ossna24` and `corbet-lwn24` are this type; the three handed entries are minted under it.
+
+Hands to 9.15: `docs/references.md` — the id rule (`:10–16`) and the citation-tier rule (`:18–22`) gain the type as above; `lavd-ossna24` and `corbet-lwn24` moved to it; the LPC 2024 slides, the LPC 2025 abstract and LWN 1051430 minted under it (D8, D11).
 
 Compiled effect: none.
