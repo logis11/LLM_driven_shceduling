@@ -212,6 +212,7 @@ Hands to 9.15:
 Compiled effect: none.
 
 ## D13 — the "Cooperation" limit restated: who declares, how many do, in which direction, and which background tools (2026-10-08)
+> Amended by D49 (a vendor-documented case of priority inflation: Apple's XNU scheduler document, on the traditional Mach model).
 
 By 인지오's decision, scope-card item 26 (with 9.6 D17's and 9.11 D33's hand-offs), after a stage-3 recount (S3-20): `docs/research-proposal.md:158`'s "Linux scheduling classes and macOS QoS require the application to declare its own nature. Most applications never do. Those that do tend to claim they are the most important thing on the system. `updatedb` does not volunteer that it is background work." is restated to the sources.
 
@@ -715,5 +716,17 @@ Taken under 인지오's delegation (2026-10-09), scope-card item 30: `docs/resea
 - **Restated:** constrained decoding restricts every generated token to the grammar compiled from the schema, so an answer that completes is well-formed; the validator still needs its parse-failure branch for an answer cut off at the token limit — the data contracts' `proposal: null` with the verbatim `raw` (`docs/data-contracts.md` §7) — and its own checks for what the schema cannot carry or the converter skips (the menu, ranges and cross-field rules of `docs/recognition-vocabulary.md` §2). "structurally impossible" and "removing an entire class of validator branches" leave. "a local server (Ollama or vLLM)" names llama.cpp's server beside them, the server the project's measurements ran.
 
 Hands to 9.15: `docs/research-proposal.md:489`'s two clauses restated as above (its latency clause is item 29's); `docs/references.md` — llama.cpp's grammar and server documentation at `bd4eeaa0`, vLLM's at `v0.31.0` and Ollama's at `f9f4af6c` under the id-minting rule where the prose cites them.
+
+Compiled effect: none.
+
+## D49 — D13 amended: Apple documents priority inflation on its own platform under the traditional Mach scheduler; Linux's units still lower more than they raise (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), amending D13 (scope-card item 26) on a passage found while reading S2-54 for item 28: D13 said of `docs/research-proposal.md:158`'s "Those that do tend to claim they are the most important thing on the system" that "no documented case of over-claiming was found (S2-29)". One is documented by a vendor.
+
+- **The passage** (Apple's XNU, `doc/scheduler/sched_clutch_edge.md:7` at `xnu-12377.121.6`, S2-54, SHA-256 `5f4201d2…`, "Background"): "One artifact of this thread based timesharing approach is that threads at the same priority level are treated similarly irrespective of which user workload they are servicing, which often leads to non-optimal decisions. It ultimately leads to priority inflation across the platform with individual subsystems raising their priority to avoid starvation and timesharing with other unrelated threads." Apple states it as a motivation for the Clutch scheduler, of macOS's own subsystems under the traditional Mach model.
+- **What it does and does not ground.** A documented instance: on macOS, under thread-level timesharing, subsystems raised their priority to avoid starvation — by Apple's account, not measured here. Not a tendency of declaring programs in general: on Debian's installed units, 40 of the 56 that declare only lower their priority and 16 only raise it (S3-20, D13), and macOS's QoS classes are declared per unit of work by the developer (D28).
+- **D13's restatement amended:** "Those that do tend to claim they are the most important thing on the system" still leaves as a general claim; the limit may add that over-declaration is documented on one platform — Apple's subsystems under the traditional Mach scheduler (S2-54) — while the Linux count runs the other way.
+
+Hands to 9.15: with D13's lines (`docs/research-proposal.md:158`, `docs/background-guide.md:18`, the guidebook vol-01 `:2099` — "성능에 민감한 프로그램들이 필요 이상으로 높은 priority를 요구하는 경향" — restated to this instance with its source, not left unsourced); `docs/references.md`'s entry for Apple's XNU scheduler document (D29's hand-off) with this passage in its role.
 
 Compiled effect: none.
