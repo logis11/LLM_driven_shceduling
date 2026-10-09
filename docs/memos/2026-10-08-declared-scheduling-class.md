@@ -1,6 +1,6 @@
 # The declared scheduling class — a field in the workload, a rule in the executor
 
-> Status: memo · Created 2026-10-08 · Updated 2026-10-08
+> Status: memo · Created 2026-10-08 · Updated 2026-10-09
 > From 인지오 to 인경민 and 박이안. Decisions D4–D6, D16, D18, D19, D26 and D34 of task 9.11 (`_dev/research/jioh/task-9.11-scheduler-constants/changelog.md`). Archetype entries gain a field that the workload and the run file carry, a change to three frozen contracts — the archetype, the workload and the run file, four if the visible projection shows it (§3) — that needs the three of us (`docs/data-contracts.md` §13). The heads-up memo of 2026-09-13 said your programs' input and output formats were outside the rebuild; this field is the exception.
 
 ## 1. The field
@@ -9,6 +9,7 @@
 - **The class is the entry's.** A task carries the class of the entry it binds, never one inferred from its name: `c5-t3` shows two media players as `tracker-miner-f` and `baloo_file`, and they stay `normal`.
 - **Nice is not carried.** Nice is a weight within the normal class, not a class, and of the four algorithms only LOTTERY has a weight to carry it.
 - **Where it goes.** On each archetype entry, compiled into each task of the workload file and so into the run file the simulator reads. Its name and place in the schema are set by the dataset rebuild (task 9.13), after your agreement.
+- **2026-10-09.** Agreed and added by 9.13 as `declared_class`, required on every archetype entry and on every task record of the workload — each `arrive` event and each spawn-table entry — from the closed set `normal` and `idle`; the visible projection shows it per task. The contract entry: `docs/data-contracts.md` §14, 2026-10-09.
 
 ## 2. The executor rule (인경민)
 

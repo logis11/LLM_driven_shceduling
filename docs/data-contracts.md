@@ -1,5 +1,5 @@
 # Data Contracts — every format in the project, with examples
-> Status: normative · Created 2026-08-28 · Updated 2026-09-12
+> Status: normative · Created 2026-08-28 · Updated 2026-10-09
 
 Everything the three of us build talks to everything else through data — a file one side writes and another side reads. Each such format is a **contract**: as long as both sides honor it, we can work independently and integration stays boring. This document lists every contract in the project, shows what each one looks like with real (or, where not yet frozen, illustrative) examples, and explains every example in plain sentences. Same audience as `background-guide.md`: general CS knowledge is enough, no OS background needed.
 
@@ -71,7 +71,9 @@ The dotted lines are the deliberate cheat paths, and they are the experiment's c
 
 ## 2. Archetype — how one kind of process behaves
 
-**Frozen (v0.1). File: `dataset/archetypes.yaml`. Read only by wlc, at compile time — the simulator never sees archetypes.**
+**Frozen (v0.2, 2026-10-09 — §14). File: `dataset/archetypes.yaml`. Read only by wlc, at compile time — the simulator never sees archetypes.**
+
+Every entry carries `declared_class`, the scheduling class the program declares for itself: `normal`, or `idle` where the program sets SCHED_IDLE on itself (`file-indexer`, `incremental-backup`); a batch or real-time value is added only when an entry carries work in that class. The field is required on every entry, with no default; the compiler copies it onto every task that binds the entry and onto every spawned child from the child entry, so a task's class is its entry's and never read from its name (the spoofed indexer names on the media players in `c5-t3` stay `normal`). `game-download-idle` shares `game-download`'s tables by reference and declares `idle`; it exists for the `c2-p2a` bounding check alone.
 
 An archetype is a reusable behavior template: "things of this kind use the CPU in this pattern." There are twelve (`audio-playback`, `video-playback`, `desktop-interactive`, `cpu-batch`, `compiler-child`, `build-orchestrator`, `io-stream`, `background-crawler`, `game-task-chain`, `network-bulk`, `electron-comms`, `system-daemon`). Every number in the library is either taken from published measurements or measured by us in CI, and each value records its source.
 
@@ -80,6 +82,7 @@ An archetype is a reusable behavior template: "things of this kind use the CPU i
 ```yaml
 cpu-batch:
   category_source: interbench
+  declared_class: normal
   pattern:
     program:
       - RUN: total_work
@@ -98,6 +101,7 @@ Before reading it, one convention that governs every number in the library: a pa
 ```yaml
 desktop-interactive:
   category_source: interbench
+  declared_class: normal
   pattern:
     program:
       - loop:
@@ -176,7 +180,7 @@ In sentences: many coreset files are deliberate near-copies of each other, and r
 
 ## 4. Workload (canonical) — the compiled master file, and its two views
 
-**Frozen. Files: `dataset/build/coreset-{single,native}/*.workload.json`. Schema: `dataset/schema/workload.schema.json`. Produced by wlc.**
+**Frozen. Files: `dataset/build/coreset-single/*.workload.json` — the single-lane set, the only set the dataset ships since 2026-10-09 (§14). Schema: `dataset/schema/workload.schema.json`. Produced by wlc.**
 
 This is the file at the center of everything — everything soft in the two contracts above (distributions, archetype references, sugar) resolved to hard numbers. One file has three top-level keys, and *no experiment component reads the whole file*: each consumer gets a derived view containing only its slice.
 
@@ -201,7 +205,7 @@ In sentences: `meta` is pure provenance — which timeline at which git commit p
 ```jsonc
 // (1) An interactive, segment-bound task — the editor. Its program is a long
 //     flat list of concrete numbers; every value was drawn at compile time.
-{ "op": "arrive", "t": 0, "id": "editor", "name": "code", "depart": 180000000,
+{ "op": "arrive", "t": 0, "id": "editor", "name": "code", "declared_class": "normal", "depart": 180000000,
   "program": [
     { "op": "WAIT", "channel": "input:editor" },
     { "op": "RUN",  "us": 23439 },
@@ -211,7 +215,7 @@ In sentences: `meta` is pure provenance — which timeline at which git commit p
   ] }
 
 // (2) A periodic task — a game's frame producer (from c1-gaming).
-{ "op": "arrive", "t": 0, "id": "game.chain.1", "name": "game.exe", "depart": 60000000,
+{ "op": "arrive", "t": 0, "id": "game.chain.1", "name": "game.exe", "declared_class": "normal", "depart": 60000000,
   "program": [
     { "op": "LOOP", "count": "unbounded", "body": [
         { "op": "TIMER", "period_us": 16667 },
@@ -221,16 +225,18 @@ In sentences: `meta` is pure provenance — which timeline at which git commit p
   ] }
 
 // (3) An orchestrator — `make` driving 100 compiler children (from c1-compile).
-{ "op": "arrive", "t": 2000000, "id": "build", "name": "make", "fork_cap": 8,
+{ "op": "arrive", "t": 2000000, "id": "build", "name": "make", "declared_class": "normal", "fork_cap": 8,
   "program": [ { "op": "RUN", "us": 105 }, { "op": "FORK" },
                { "op": "RUN", "us": 653 }, { "op": "FORK" } /* …98 more… */ ],
   "spawn_table": [
-    { "id": "build.c1", "name": "cc1",
+    { "id": "build.c1", "name": "cc1", "declared_class": "normal",
       "program": [ { "op": "RUN", "us": 664 }, { "op": "SLEEP", "us": 3126 },
                    { "op": "RUN", "us": 9 }, { "op": "EXIT" } ] }
     // …one fully-written entry per child, 100 in total
   ] }
 ```
+
+Every task record — each `arrive` event and each spawn-table entry — carries `declared_class`, required, from the closed set `normal` and `idle` (2026-10-09, §14): the class of the archetype entry the task binds, a spawned child's that of its child entry. An `idle` task runs only when no task of another class is runnable and is preempted at once when one wakes, under every algorithm; the executor applies this below whatever the configured algorithm decides. Nice is not carried. In the shipped set the `idle` tasks are the indexer (`file-indexer`) and the backup (`incremental-backup`), and the download of `c2-p2a-idle`.
 
 In sentences, one per task: **(1)** the editor arrives at time zero and will be forcibly removed at exactly t = 180 s (`depart` present = segment-bound — the "user" closes it). Its program alternates "wait for a keystroke on my input channel" with "compute for exactly this many microseconds" — 23,439 µs, then 253,642 µs, and so on; the variety that was a distribution in the archetype is now literal numbers. **(2)** the frame producer runs a compact endless loop: wait for the next tick of a 16,667 µs metronome (that's 60 frames per second), do 646 µs of frame work, then wake the next stage of the frame pipeline — sixteen tasks pass each frame down a bucket brigade this way, and the compiled `c1-gaming` contains **300 tasks named `game.exe`** (the chain plus hundreds of small helpers the constructor expands). The metronome ticks on a fixed grid, so a late frame doesn't push the schedule later; missed ticks pile up as backlog. **(3)** `make` arrives at t = 2 s carrying a `spawn_table`: a pre-written list of 100 compiler children, each with its own complete program already sampled. Each `FORK` in make's program launches the next child from the table, but never more than `fork_cap: 8` alive at once — exactly `make -j8`. Which children exist is fixed in the file; *when* each one gets to start depends on how the scheduler treats the family. Note also (3) has no `depart` and its children end in `EXIT`: those are the other two lifetime classes, finite and spawned.
 
@@ -246,21 +252,21 @@ In sentences: at exactly t = 2.098333 s, a keystroke arrives for the editor. If 
 
 **Frozen 2026-09-06. These views are not files the dataset ships — each consumer's own loader extracts its view from `*.workload.json` and discards the rest at the parse boundary. The dataset tree stays consumer-agnostic: it provides the raw canonical files and nothing else.**
 
-**Run file** (`simulator` input): the workload minus everything the simulator must not see — `ground_truth` gone, `meta` reduced to the id. Structurally it is just the `events` list:
+**Run file** (`simulator` input): the workload minus everything the simulator must not see — `ground_truth` gone, `meta` reduced to the id. Structurally it is just the `events` list, so every task record's `declared_class` reaches the simulator, which honours it by the rule above:
 
 ```jsonc
 { "workload_id": "c2-p1a",
   "events": [ /* exactly the arrive and wake events of Example B and C */ ] }
 ```
 
-**Visible projection** (`daemon` input): what a recognizer is entitled to know — names, counts, and *pinned* lifetime times only. No programs, no burst durations, no labels. From `c1-compile`:
+**Visible projection** (`daemon` input): what a recognizer is entitled to know — names, counts, *pinned* lifetime times, and each task's `declared_class`, a fact as public on a real machine as the process name (`/proc`, `sched_getattr`). No programs, no burst durations, no labels. From `c1-compile`:
 
 ```jsonc
 { "workload_id": "c1-compile",
   "tasks": [
-    { "name": "code", "t_arrive": 0, "t_depart": 60000000 },
-    { "name": "make", "t_arrive": 2000000,
-      "children": [ { "name": "cc1", "count": 100 } ] }
+    { "name": "code", "declared_class": "normal", "t_arrive": 0, "t_depart": 60000000 },
+    { "name": "make", "declared_class": "normal", "t_arrive": 2000000,
+      "children": [ { "name": "cc1", "declared_class": "normal", "count": 100 } ] }
   ] }
 ```
 
@@ -530,6 +536,7 @@ The dataset contracts (archetype, timeline, workload) are frozen and enforced by
 
 Every change to a frozen contract lands here, dated, with the sub-task that made it.
 
+- **2026-10-09 — the declared scheduling class; the single-lane set alone (jioh 9.13).** Contract 2 (archetype, now v0.2): every entry carries `declared_class`, required, from the closed set `normal` and `idle` — `idle` on `file-indexer` and `incremental-backup`, and on the new `game-download-idle`, which shares `game-download`'s tables by reference for the `c2-p2a` bounding check (its file `c2-p2a-idle` is outside the judging set). Contract 3 (workload): every `arrive` event and every spawn-table entry carries `declared_class`, required, the bound entry's (`dataset/schema/workload.schema.json`; compiler, lints, tests); the native compile mode is gone and `dataset/build/coreset-single/` is the only set. Contract 3a (run file): the field reaches the simulator with the events; the executor runs an `idle` task only when no task of another class is runnable and preempts it at once when one wakes, under every algorithm. Contract 3b (visible projection): the class is shown per task. Decided by 인지오 on the 2026-10-08 declared-scheduling-class memo, which 인경민 and 박이안 agreed; the phase's final memo carries the actual change. Grounds: 9.11 D4–D6, D16, D18, D21; spec `_dev/docs/spec/jioh/task-9.13-rebuild.md`.
 - **2026-09-11 — invocation contract (jioh 8.5).** New §11: the command line the runner starts the daemon and the simulator with becomes contract 10, frozen — one run per invocation; named required flags (the daemon: workload, condition, driver table, boot default, seed exactly when the condition draws; the simulator: workload, schedule); absolute paths, declared outputs only, gzip by `.gz`; exit 0 or failure, stdout ignored, stderr captured; byte-identical outputs from the same argument line as the one behavioural clause; no version channel; a configured command prefix. The boot default becomes a committed file under `harness/boot-defaults/` with its schema. The mock daemon and mock simulator (`harness/tools/tests/mocks/`) are the first implementations. No frozen contract changed; Terms, the freeze rule, and this changelog renumber to §12–§14; the glossary gains *run* and *boot default*.
 - **2026-09-11 — boot default example values (jioh 8.1).** No contract changed. The example schedules in §6 and §7 and the EDF example sentence carry the re-sourced boot default (`recognition-vocabulary.md` §2, changelog): MLFQ `timeslice_us` 10000, EDF `residual_timeslice_us` 10000. Field lists, ranges, and provenance rules are as frozen.
 - **2026-09-09 — `sources` on driver-table rows and entries (jioh 6.3).** Contract 9 gains an optional `sources` list of `docs/references.md` ids on the row and on each entry (schema), checked by the lint; the prior table requires it on every row and every `basis: theory` entry. Nothing else in the format changes; the calibrated table's `tuned` entries carry no sources.

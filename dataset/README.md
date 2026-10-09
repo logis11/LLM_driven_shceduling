@@ -5,15 +5,14 @@ The **workload dataset**: everything that produces the canonical workload files 
 ## Layout
 
 ```
-archetypes.yaml        # behavior library — one entry per process kind (fully measured, v0.1)
+archetypes.yaml        # behavior library — one entry per process kind, each with its declared scheduling class (fully measured, v0.2)
 sources.yaml           # machine registry of citation sources (subset of docs/references.md)
 schema/
   workload.schema.json # canonical format, machine form — the simulator's loader contract
 timelines/
   coreset/             # authored core set: *.timeline.yaml (novel) + *.variant.yaml (derivation recipes)
 build/                 # compiled artifacts — NOT committed; verified via build.manifest.json
-  coreset-native/      # 50 workloads, native lane counts
-  coreset-single/      # same 50, lane-scaled to a single lane (experiments run on these)
+  coreset-single/      # 51 workloads, lane-scaled to a single lane — the one compiled set (experiments run on these)
 build.manifest.json    # lockfile: input/output hashes of the last blessed build + per-file static demand (utilization, demand_class)
 coverage-grid.json     # driver-table cell (mode × background_wanted) × tier coverage grid over all segments; all 32 cells instanced (CI-enforced)
 meas/                  # meas-ci campaign outputs: analysis summary + verified name tables (names/: run 1; names/run-2/: the Phase 7 dkms run)
@@ -30,7 +29,6 @@ flowchart LR
     A["archetypes.yaml"] --> W
     S["seed (per timeline)"] --> W
     W{{"wlc — workload compiler"}}
-    W --> N["build/coreset-native/*.workload.json"]
     W --> G["build/coreset-single/*.workload.json"]
     W --> M["build.manifest.json"]
 ```
@@ -55,7 +53,7 @@ One `*.workload.json` per workload, validated by `schema/workload.schema.json`, 
     { "t_start": 60000000, "t_end": 180000000, "mode": "ml-train", "attributes": { "wanted": true } }
   ],
   "events": [                   // the workload itself — closed op set {arrive, wake}
-    { "op": "arrive", "t": 0, "id": "editor", "name": "code", "depart": 180000000,
+    { "op": "arrive", "t": 0, "id": "editor", "name": "code", "declared_class": "normal", "depart": 180000000,
       "program": [ { "op": "WAIT", "channel": "input:editor" },
                    { "op": "RUN", "us": 23439 }, /* … */ ] },
     { "op": "wake", "t": 2098333, "channel": "input:editor", "target": "editor" }
@@ -64,6 +62,7 @@ One `*.workload.json` per workload, validated by `schema/workload.schema.json`, 
 ```
 
 - **`arrive`** brings a task into existence: its `name` (what the recognizer will see), its pre-sampled `program` over the six grammar primitives (RUN/SLEEP/TIMER/WAIT/WAKE/FORK+EXIT — every RUN duration already a concrete number), and its lifetime (`depart` for segment-bound tasks; finite tasks end when their program exits).
+- **`declared_class`** on every task record — each `arrive` event and each spawn-table entry — is the scheduling class the real program declares for itself, `normal` or `idle`, copied from the archetype entry the task binds (a spawned child's from its child entry), never read from the task's name. The simulator runs an `idle` task only when no task of another class is runnable and preempts it at once when one wakes, under every algorithm; the visible projection shows the class per task (`docs/data-contracts.md` §4).
 - **`wake`** delivers an exogenous stimulus on a channel (keystrokes, network replies…); a task blocked in `WAIT` on that channel becomes runnable. This is how "interactive" behavior exists without modeling a human.
 - **`ground_truth`** never reaches the simulator's scheduler or any recognizer — information asymmetry is enforced by who gets handed which key.
 
@@ -71,28 +70,29 @@ Field semantics are normative in `docs/simulator/interpretation-contract.md`; th
 
 ### Coresets
 
-Two compiled variants of the same 50 workloads (64 labeled segments total):
+One compiled set, 51 workloads (66 labeled segments):
 
 | Set | What it is | Use |
 |---|---|---|
 | `build/coreset-single/` | lane-scaled so total demand targets one CPU lane (~100–150%) | **all experiments run on these** |
-| `build/coreset-native/` | native lane counts, no scaling | reference / sanity |
 
-The 50 files come in seven groups (design rationale: `docs/workload/building-plan.md`):
+The files come in seven groups (design rationale: `docs/workload/building-plan.md`):
 
 | Group | Files | The question it answers |
 |---|---|---|
 | **C1** calibration | 16 | Can a recognizer handle the *easy* case — one unmistakable situation per file, one file per mode of the menu (pure gaming, pure office, pure compile…)? This is the floor everything should pass, and the ground where a name whitelist looks perfect. |
-| **C2** intent pairs | 6 (3 pairs) | When two workloads **behave identically** and differ only in intent — an ML training run vs. an indexer nobody asked for, a game download vs. a virus scan — can anything separate them? The two files in a pair differ in exactly one segment, so any difference in outcome is attributable to that one change. |
+| **C2** intent pairs | 6 (3 pairs) + 1 | When two workloads **behave identically** and differ only in intent — an ML training run vs. an indexer nobody asked for, a game download vs. a virus scan — can anything separate them? The two files in a pair differ in exactly one segment, so any difference in outcome is attributable to that one change. |
 | **C3** transition arcs | 3 | When the situation *changes mid-run* (browsing → gaming → media over an evening), how quickly and correctly does recognition follow the change? |
 | **C4** distractor injection | 3 | If an irrelevant process appears mid-situation (Discord pops up during a game, chrome opens during a compile), does the reading wrongly flip? Each file is a clone of a C1/C3 file plus one injected process, so it's measured against its own clean original. |
 | **C5** familiarity ladder | 3 | Does recognition survive as process names get less recognizable — `firefox` → `soffice.bin` → `tracker-miner-fs-3` → invented names no software carries? Behavior is held identical across tiers; only the names change. A whitelist scores zero on the invented tiers by construction. |
 | **C6** resolution limits | 3 | Where does name-based recognition break *by design*? A miner named `chrome`, a change happening inside one process (browser tab → video call), two equally-active foregrounds. These are known, pre-committed misses — shipped so the limits are measured, not just claimed. |
 | **C7** attribute counterparts | 16 | Does the reading flip when the background work is *unwanted*? One counterpart per mode, derived from its C1 base: interactive modes gain an unwanted scan, batch modes have their job re-cast as one nobody asked for. Every driver-table cell has a one-diff pair; the five cells that differ by intent alone ship as pre-committed misses. |
 
+The 51st file, `c2-p2a-idle`, is `c2-p2a` with its download bound to `game-download-idle` — the same tables under the declared class `idle` — and differs from `c2-p2a` in that task's class alone. It is outside the judging set; the RQ0 gate spec's bounding check reads the pair to bracket a stock desktop's treatment of the download's nice-10 work.
+
 ### Generalsets
 
-*Not built yet.* The second timeline set, `generalset-{native,single}`: naturalistic workloads emitted by a generator rather than hand-authored, sharing the same compile path, linter, and provenance as the coresets. Lands with the naturalistic generator in a later phase (build-order step 7, `docs/workload/building-plan.md`).
+*Not built yet.* The second timeline set, `generalset-single`: naturalistic workloads emitted by a generator rather than hand-authored, sharing the same compile path, linter, and provenance as the coresets. Lands with the naturalistic generator in a later phase (build-order step 7, `docs/workload/building-plan.md`).
 
 ## Commands
 
@@ -120,7 +120,7 @@ tools/wlc/             # wlc, the workload compiler — the library behind those
                        #   estimate.py                static per-file CPU-demand estimate
                        #   linter.py / grid.py        lint rules, coverage grid
 tools/meas/            # meas-ci campaign tooling (samplers, analyzer, name verification)
-tools/tests/           # invariant suite (71 tests) + fixtures
+tools/tests/           # invariant suite + fixtures
 ```
 
 ## Rules of the tree
@@ -130,6 +130,8 @@ tools/tests/           # invariant suite (71 tests) + fixtures
 - **Every parameter value is sourced.** Numbers carry a `source` tag resolving through `sources.yaml` → `docs/references.md`. Measured values are tagged `meas-ci:<workflow>:<run>`; raw data lives on the GitHub release named in the tag's registry entry.
 - **Demand window.** Every compiled `-single` file of demand class `oversubscribed` must land in the ~100–150% window by the static estimate (`compile.py` prints per-file demand and records it under `demand` in the manifest); `calibration` files are exempt. Files outside it get redesigned, not waved through.
 - **Zero `meas-pending`.** The library is fully measured; the linter keeps it that way.
+- **Declared class on every entry and every task.** The repo lint requires `declared_class` on every archetype entry, from the closed set `normal` and `idle`, with no default; the schema requires it on every `arrive` event and spawn-table entry; the tests check that each compiled task carries its bound entry's class.
+- **TIMER first.** A compiled program that contains a TIMER anywhere has a TIMER as its first executed instruction — a LOOP head's body counting — so TIMER's t₀, its first execution, is the task's arrival (canonical lint; `docs/harness/metrics.md` §11).
 
 ## Where to go deeper
 
