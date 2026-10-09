@@ -692,3 +692,15 @@ Taken under 인지오's delegation (2026-10-09), scope-card item 70: the paper's
 Hands to 9.15: `docs/workload/source-vetting.md:40`'s sentence restated as above or removed; `docs/references.md` — entries for AMD's release and AnandTech's report only if prose cites them.
 
 Compiled effect: none.
+
+## D47 — part E: the kernel build's grounding line restated to SchedCP's own use and the dataset's measured build; items 62 and 66–69 pass through (2026-10-09)
+
+Taken under 인지오's delegation (2026-10-09), scope-card items 62, 63 and 66–69.
+
+- **Item 63 — `docs/workload/grounding-sources.md:32`**: "kernel build (make -jN) | The de facto standard compile workload in every scheduler evaluation, including SchedCP's | The compile Family's fork-heavy, short-lived-children structure". "in every scheduler evaluation" is a universal no source states (NOT IN SOURCE, K1). What SchedCP states (v4, S1-34, SHA-256 `cce49d3c…`, §5): "For kernel compilation (tinyconfig, "make -j 172" on 6.14 source), SchedCP achieves 1.63× speedup with scx_rusty initially, then iterative refinement selects scx_layered for 16% additional gain, reaching 1.79× total improvement over EEVDF"; and "short-lived processes" is its Observation Agent's generated profile, "it produces profiles like "CPU-intensive parallel compilation with short-lived processes, inter-process dependencies, targeting makespan minimization."" (§4; C-kernelbuild-2). The structure the dataset carries is its own measurement: a warm `-j8` linux-6.6 defconfig build, 5 957 forks under 719 make processes and 2 857 six-member object jobs per build, `cc1` a median 368 ms of CPU (9.6's `build-orchestrator` and `compiler-child`, D33). Restated: a compile workload scheduler evaluations use, SchedCP's among them (kernel compilation, its 1.79×); the compile family's structure grounded in the dataset's measured build; SchedCP's "short-lived processes" attributed as its agent's profile text, not a measurement.
+- **Item 62 — `source-vetting.md:14`'s precedent sentence** ("interbench/hackbench/rt-app/stress-ng have LWN-documented or peer-reviewed usage precedents"): the paper's prose names none of these tools (`grep -n -i "interbench\|schbench\|hackbench\|rt-app\|stress-ng\|precedent"` over `docs/related-work.md`, `docs/research-proposal.md`, `docs/research-claims.md`, 2026-10-09: no line), so no read is owed; the K1 verdicts (C-interbench-13 and the lines of item 62) pass through to 9.15 as recorded, with 9.11 D12's precedent wording.
+- **Items 66–69** (9.7, 9.7 D17, 9.8, 9.9): pass through as the scope card lists them; no sentence of the paper relies on them. Item 67's `interbench` entry stays while the Role B prose and vol-02 ch. 8.3 cite it (the scope card's answer).
+
+Hands to 9.15: `docs/workload/grounding-sources.md:32` restated as above; items 62 and 66–69's lines applied from their recorded verdicts.
+
+Compiled effect: none.
