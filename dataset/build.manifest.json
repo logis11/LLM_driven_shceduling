@@ -55,206 +55,704 @@
   "demand": {
     "coreset-single/c1-backup.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 277000000,
+          "t_start_us": 0,
+          "utilization": 0.9897
+        }
+      ],
       "utilization": 0.9897
     },
     "coreset-single/c1-browsing.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0164
+        }
+      ],
       "utilization": 0.0164
     },
     "coreset-single/c1-compile.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 1594000000,
+          "t_start_us": 0,
+          "utilization": 0.9982
+        }
+      ],
       "utilization": 0.9982
     },
     "coreset-single/c1-dev.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.3319
+        }
+      ],
       "utilization": 0.3319
     },
     "coreset-single/c1-gaming.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9153
+        }
+      ],
       "utilization": 0.9153
     },
     "coreset-single/c1-idle.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0004
+        }
+      ],
       "utilization": 0.0004
     },
     "coreset-single/c1-indexing.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7477
+        }
+      ],
       "utilization": 0.7477
     },
     "coreset-single/c1-mail.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0287
+        }
+      ],
       "utilization": 0.0287
     },
     "coreset-single/c1-media.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.128
+        }
+      ],
       "utilization": 0.128
     },
     "coreset-single/c1-meeting.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.2387
+        }
+      ],
       "utilization": 0.2387
     },
     "coreset-single/c1-ml-train.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 1612000000,
+          "t_start_us": 0,
+          "utilization": 0.9982
+        }
+      ],
       "utilization": 0.9982
     },
     "coreset-single/c1-office.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.027
+        }
+      ],
       "utilization": 0.027
     },
     "coreset-single/c1-photo.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0442
+        }
+      ],
       "utilization": 0.0442
     },
     "coreset-single/c1-render.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7339
+        }
+      ],
       "utilization": 0.7339
     },
     "coreset-single/c1-transcode.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 4762000000,
+          "t_start_us": 0,
+          "utilization": 0.9993
+        }
+      ],
       "utilization": 0.9993
     },
     "coreset-single/c1-video-edit.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.4586
+        }
+      ],
       "utilization": 0.4586
     },
     "coreset-single/c2-p1a.workload.json": {
       "demand_class": "oversubscribed",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.5272
+        },
+        {
+          "index": 1,
+          "t_end_us": 99435000,
+          "t_start_us": 60000000,
+          "utilization": 35.7721
+        }
+      ],
       "utilization": 14.505
     },
     "coreset-single/c2-p1b.workload.json": {
       "demand_class": "oversubscribed",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.5272
+        },
+        {
+          "index": 1,
+          "t_end_us": 99435000,
+          "t_start_us": 60000000,
+          "utilization": 1.5272
+        }
+      ],
       "utilization": 0.9238
     },
     "coreset-single/c2-p2a-idle.workload.json": {
       "demand_class": "oversubscribed",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9651
+        },
+        {
+          "index": 1,
+          "t_end_us": 86385000,
+          "t_start_us": 60000000,
+          "utilization": 28.5251
+        }
+      ],
       "utilization": 9.3829
     },
     "coreset-single/c2-p2a.workload.json": {
       "demand_class": "oversubscribed",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9651
+        },
+        {
+          "index": 1,
+          "t_end_us": 86385000,
+          "t_start_us": 60000000,
+          "utilization": 28.5251
+        }
+      ],
       "utilization": 9.3829
     },
     "coreset-single/c2-p2b.workload.json": {
       "demand_class": "oversubscribed",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9651
+        },
+        {
+          "index": 1,
+          "t_end_us": 86385000,
+          "t_start_us": 60000000,
+          "utilization": 1.9651
+        }
+      ],
       "utilization": 1.2706
     },
     "coreset-single/c2-p3a.workload.json": {
       "demand_class": "oversubscribed",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.3893
+        },
+        {
+          "index": 1,
+          "t_end_us": 326000000,
+          "t_start_us": 60000000,
+          "utilization": 0.4515
+        }
+      ],
       "utilization": 0.4401
     },
     "coreset-single/c2-p3b.workload.json": {
       "demand_class": "oversubscribed",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.3893
+        },
+        {
+          "index": 1,
+          "t_end_us": 326000000,
+          "t_start_us": 60000000,
+          "utilization": 1.0122
+        }
+      ],
       "utilization": 0.8975
     },
     "coreset-single/c3-creation.workload.json": {
       "demand_class": "oversubscribed",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 120000000,
+          "t_start_us": 0,
+          "utilization": 0.0151
+        },
+        {
+          "index": 1,
+          "t_end_us": 240000000,
+          "t_start_us": 120000000,
+          "utilization": 0.0169
+        },
+        {
+          "index": 2,
+          "t_end_us": 3212000000,
+          "t_start_us": 240000000,
+          "utilization": 1.0165
+        }
+      ],
       "utilization": 0.9417
     },
     "coreset-single/c3-evening.workload.json": {
       "demand_class": "oversubscribed",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0139
+        },
+        {
+          "index": 1,
+          "t_end_us": 300000000,
+          "t_start_us": 60000000,
+          "utilization": 1.5062
+        },
+        {
+          "index": 2,
+          "t_end_us": 420000000,
+          "t_start_us": 300000000,
+          "utilization": 0.1327
+        }
+      ],
       "utilization": 0.9006
     },
     "coreset-single/c3-workday.workload.json": {
       "demand_class": "oversubscribed",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0031
+        },
+        {
+          "index": 1,
+          "t_end_us": 120000000,
+          "t_start_us": 60000000,
+          "utilization": 0.0053
+        },
+        {
+          "index": 2,
+          "t_end_us": 1485000000,
+          "t_start_us": 120000000,
+          "utilization": 0.9597
+        },
+        {
+          "index": 3,
+          "t_end_us": 1545000000,
+          "t_start_us": 1485000000,
+          "utilization": 1.0251
+        }
+      ],
       "utilization": 0.888
     },
     "coreset-single/c4-compile.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 1594000000,
+          "t_start_us": 0,
+          "utilization": 0.9994
+        }
+      ],
       "utilization": 0.9994
     },
     "coreset-single/c4-gaming.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9638
+        }
+      ],
       "utilization": 0.9638
     },
     "coreset-single/c4-office.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.127
+        }
+      ],
       "utilization": 0.127
     },
     "coreset-single/c5-t3.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.128
+        }
+      ],
       "utilization": 0.128
     },
     "coreset-single/c5-t4.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.128
+        }
+      ],
       "utilization": 0.128
     },
     "coreset-single/c5-t5.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.128
+        }
+      ],
       "utilization": 0.128
     },
     "coreset-single/c6-dual.workload.json": {
       "demand_class": "oversubscribed",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 12072000000,
+          "t_start_us": 0,
+          "utilization": 0.9997
+        }
+      ],
       "utilization": 0.9997
     },
     "coreset-single/c6-fold.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 30000000,
+          "t_start_us": 0,
+          "utilization": 0.0164
+        },
+        {
+          "index": 1,
+          "t_end_us": 60000000,
+          "t_start_us": 30000000,
+          "utilization": 0.6123
+        }
+      ],
       "utilization": 0.3144
     },
     "coreset-single/c6-spoof.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.5164
+        }
+      ],
       "utilization": 0.5164
     },
     "coreset-single/c7-backup.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 165668000,
+          "t_start_us": 0,
+          "utilization": 1.4032
+        }
+      ],
       "utilization": 1.4032
     },
     "coreset-single/c7-browsing.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 26385000,
+          "t_start_us": 0,
+          "utilization": 1.0176
+        }
+      ],
       "utilization": 1.0176
     },
     "coreset-single/c7-compile.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 225458000,
+          "t_start_us": 0,
+          "utilization": 1.1138
+        }
+      ],
       "utilization": 1.1138
     },
     "coreset-single/c7-dev.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 26385000,
+          "t_start_us": 0,
+          "utilization": 1.295
+        }
+      ],
       "utilization": 1.295
     },
     "coreset-single/c7-gaming.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 26385000,
+          "t_start_us": 0,
+          "utilization": 1.9149
+        }
+      ],
       "utilization": 1.9149
     },
     "coreset-single/c7-idle.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 26385000,
+          "t_start_us": 0,
+          "utilization": 1.0007
+        }
+      ],
       "utilization": 1.0007
     },
     "coreset-single/c7-indexing.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 39435000,
+          "t_start_us": 0,
+          "utilization": 1.1016
+        }
+      ],
       "utilization": 1.1016
     },
     "coreset-single/c7-mail.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 26385000,
+          "t_start_us": 0,
+          "utilization": 1.0545
+        }
+      ],
       "utilization": 1.0545
     },
     "coreset-single/c7-media.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 26385000,
+          "t_start_us": 0,
+          "utilization": 1.1267
+        }
+      ],
       "utilization": 1.1267
     },
     "coreset-single/c7-meeting.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 26385000,
+          "t_start_us": 0,
+          "utilization": 1.24
+        }
+      ],
       "utilization": 1.24
     },
     "coreset-single/c7-ml-train.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 1389885000,
+          "t_start_us": 0,
+          "utilization": 1.1357
+        }
+      ],
       "utilization": 1.1357
     },
     "coreset-single/c7-office.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 26385000,
+          "t_start_us": 0,
+          "utilization": 1.0255
+        }
+      ],
       "utilization": 1.0255
     },
     "coreset-single/c7-photo.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 26385000,
+          "t_start_us": 0,
+          "utilization": 1.0967
+        }
+      ],
       "utilization": 1.0967
     },
     "coreset-single/c7-render.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 16545000,
+          "t_start_us": 0,
+          "utilization": 1.6189
+        }
+      ],
       "utilization": 1.6189
     },
     "coreset-single/c7-transcode.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 2970871000,
+          "t_start_us": 0,
+          "utilization": 1.3727
+        }
+      ],
       "utilization": 1.3727
     },
     "coreset-single/c7-video-edit.workload.json": {
       "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 26385000,
+          "t_start_us": 0,
+          "utilization": 1.5618
+        }
+      ],
       "utilization": 1.5618
     }
   },

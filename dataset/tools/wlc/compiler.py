@@ -25,6 +25,7 @@ import math
 import pathlib
 
 from . import sampling
+from .estimate import per_segment
 from .units import parse_us
 
 MODES = ("single",)
@@ -78,6 +79,7 @@ def compile_timeline(timeline, library, mode, rel_path=None):
         "demand_us": sum(per_task.values()),
         "utilization": sum(per_task.values()) / duration,
         "per_task": per_task,
+        "per_segment": per_segment(builds, timeline.segments, duration),   # 9.14 decision 4
         "operations": {b.id: b.operations for b in builds if getattr(b, "operations", None)},
         "demand_class": timeline.demand_class,
     }

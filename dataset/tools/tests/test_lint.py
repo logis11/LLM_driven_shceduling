@@ -1,5 +1,5 @@
 """Linter behavior: repo lints on the real repo, the freeze gate, the
-registry subset rule, timeline structural rules, and the demand window."""
+registry subset rule, and timeline structural rules."""
 
 import pytest
 import yaml

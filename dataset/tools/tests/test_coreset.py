@@ -1,5 +1,5 @@
 """Coreset-level invariants (task-2.4 spec): derive idempotency, the C2
-one-entry-diff discipline on the real pair files, and window compliance."""
+one-entry-diff discipline on the real pair files, and the per-segment demand record."""
 
 import pytest
 
@@ -310,12 +310,22 @@ def test_c6_fold_names_unchanged(coreset):
     assert len(variant["ground_truth"]) == 2
 
 
-@pytest.mark.xfail(strict=False, reason="jioh/dataset-rebuild: eight -single files sit below the demand window "
-                   "after the 9.5 fold-in (D19); 9.14 redoes the window rule")
-def test_windows(coreset, schema):
+def test_no_file_fails_on_its_demand(coreset, schema):
+    """9.14 decision 4: the demand window retired as a gate; every file lints clean whatever its demand."""
     for name, (canonical, report) in coreset.items():
         assert lint_canonical(canonical, schema, report=report,
                               mode="single", name=name) == []
+
+
+def test_demand_is_recorded_per_segment(coreset):
+    """9.14 decision 4: one record per ground-truth segment, the tasks' demand spread over their lifetimes,
+    so the segments' time-weighted mean is the file's utilization."""
+    for name, (canonical, report) in coreset.items():
+        segs = report["per_segment"]
+        assert [(s["t_start_us"], s["t_end_us"]) for s in segs] == \
+            [(g["t_start"], g["t_end"]) for g in canonical["ground_truth"]]
+        weighted = sum(s["utilization"] * (s["t_end_us"] - s["t_start_us"]) for s in segs)
+        assert abs(weighted / report["duration_us"] - report["utilization"]) < 1e-6, name
 
 
 def test_variant_cannot_change_seed():

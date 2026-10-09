@@ -4,7 +4,7 @@ Three lint layers, each returning a list of error strings:
   repo lints       registry subset, archetype provenance, meas-pending freeze
   timeline lints   structural rules (delegated to Timeline's loader)
   canonical lints  event ordering, id uniqueness, FORK <-> spawn_table,
-                   channel resolution, JSON-Schema validation, demand window
+                   channel resolution, JSON-Schema validation
 """
 
 import json
@@ -14,7 +14,6 @@ import re
 import jsonschema
 import yaml
 
-from .estimate import check_window
 from .timeline import Timeline, TimelineError
 
 REQUIRED_ARCHETYPE_FIELDS = (
@@ -267,10 +266,6 @@ def lint_canonical(canonical, schema, report=None, mode=None, name=""):
                 errors.append(f"{prefix}{entry['id']}: WAKE targets unknown "
                               f"task {target!r}")
 
-    if report is not None and mode is not None:
-        violation = check_window(report, mode)
-        if violation:
-            errors.append(f"{prefix}{violation}")
     return errors
 
 

@@ -9,4 +9,4 @@ from .units import parse_us
 from .library import Library
 from .timeline import Timeline, TimelineError
 from .compiler import compile_timeline
-from .estimate import demand_estimate
+from .estimate import per_segment

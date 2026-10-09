@@ -57,7 +57,11 @@ def build_all(root):
                    f"{timeline.id}.workload.json")
             artifacts[out] = canonical_bytes(canonical)
             demand[out] = {"utilization": round(report["utilization"], 4),
-                           "demand_class": report["demand_class"]}
+                           "demand_class": report["demand_class"],
+                           "segments": [{"index": seg["index"], "t_start_us": seg["t_start_us"],
+                                         "t_end_us": seg["t_end_us"],
+                                         "utilization": round(seg["utilization"], 4)}
+                                        for seg in report["per_segment"]]}
             reports.append((timeline.id, mode, report))
 
     manifest = {
@@ -78,9 +82,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--repo", default=None)
-    parser.add_argument("--allow-window", action="store_true",
-                        help="report demand-window violations as warnings and still write "
-                             "(local builds on a research branch until the window rule is redone; CI stays strict)")
     args = parser.parse_args()
     root = (pathlib.Path(args.repo).resolve() if args.repo
             else pathlib.Path(__file__).resolve().parents[2])
@@ -89,11 +90,6 @@ def main():
     for timeline_id, mode, report in reports:
         print(f"  {timeline_id}[{mode}]: demand {report['utilization']:.2f} "
               f"({report['demand_class']})")
-    if args.allow_window:
-        window = [m for m in errors if "demand estimate" in m]
-        errors = [m for m in errors if "demand estimate" not in m]
-        for message in window:
-            print(f"  warning (window): {message}", file=sys.stderr)
     if errors:
         print(f"{len(errors)} error(s):", file=sys.stderr)
         for message in errors:
