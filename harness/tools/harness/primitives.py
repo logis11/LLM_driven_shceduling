@@ -20,6 +20,7 @@ carry, or carries with another algorithm; a switch into MLFQ with no schedule
 given).
 """
 
+import bisect
 from dataclasses import dataclass, field
 from typing import Dict, Iterable, Iterator, List, Optional
 
@@ -351,17 +352,20 @@ def _is_hog(st, t_apply) -> bool:
         return False
     if st.end is not None and st.end[0] <= t_apply:
         return False
-    first = next(((t, reason) for (t, reason) in st.run_ends if t > t_apply), None)
-    return first is not None and first[1] == "preempt"
+    # run_ends is in trace order, so the first run end past t_apply is found by bisection — the boost-window loop
+    # asks this per hog per boost instant, and a long file's task holds millions of run ends (9.14 D14)
+    i = bisect.bisect_right(st.run_ends, t_apply, key=lambda e: e[0])
+    return i < len(st.run_ends) and st.run_ends[i][1] == "preempt"
 
 
 def _time_of_cpu_since(occupancy, t0, need) -> Optional[int]:
     """The instant a task's CPU received since t0 reaches `need`, from its
-    occupancy intervals; None if it never does inside the window."""
+    occupancy intervals; None if it never does inside the window. The intervals
+    are in trace order and disjoint, so those ending at or before t0 are a prefix
+    skipped by bisection (9.14 D14)."""
     got = 0
-    for (start, end) in occupancy:
-        if end <= t0:
-            continue
+    for j in range(bisect.bisect_right(occupancy, t0, key=lambda iv: iv[1]), len(occupancy)):
+        start, end = occupancy[j]
         start = max(start, t0)
         if got + (end - start) >= need:
             return start + (need - got)

@@ -502,3 +502,50 @@ def test_a_consumption_that_does_not_advance_the_tick_is_a_guard():
     ])
     r = compute(run, events)
     assert any("consumes tick 0, not after tick 0" in g for g in r.guards)
+
+
+# ---- the hog test and the CPU-since reading on long runs (9.14 D14) --------------------------------------------
+
+def test_the_hog_test_and_the_cpu_since_reading_match_their_scans_on_time_ordered_lists():
+    """`run_ends` and `occupancy` are appended in trace order, so the first run end past an instant and the
+    occupancy that reaches `need` are found by bisection; this pins them to the linear definitions (memo §4,
+    §6.9) over random time-ordered lists, every instant between and on the entries."""
+    import random
+    from harness.primitives import _TaskState, _is_hog, _time_of_cpu_since
+
+    def hog_scan(st, t):
+        if st.arrive_t is None or st.arrive_t > t:
+            return False
+        if st.end is not None and st.end[0] <= t:
+            return False
+        first = next(((te, reason) for (te, reason) in st.run_ends if te > t), None)
+        return first is not None and first[1] == "preempt"
+
+    def cpu_since_scan(occupancy, t0, need):
+        got = 0
+        for (start, end) in occupancy:
+            if end <= t0:
+                continue
+            start = max(start, t0)
+            if got + (end - start) >= need:
+                return start + (need - got)
+            got += end - start
+        return None
+
+    rng = random.Random(914)
+    for _ in range(200):
+        t, occupancy, run_ends = 0, [], []
+        for _ in range(rng.randint(0, 12)):
+            start = t + rng.randint(1, 20)
+            end = start + rng.randint(1, 20)
+            occupancy.append((start, end))
+            run_ends.append((end, rng.choice(("preempt", "block", "exit"))))
+            t = end
+        st = _TaskState(arrive_t=rng.choice((None, 0, 5)), end=rng.choice((None, (t + 3, "exit"), (t // 2 or 1, "exit"))),
+                        run_ends=run_ends, occupancy=occupancy)
+        instants = sorted({0, t, t + 10} | {x for (a, b) in occupancy for x in (a - 1, a, b - 1, b, b + 1)})
+        for t_apply in instants:
+            assert _is_hog(st, t_apply) == hog_scan(st, t_apply), (st, t_apply)
+            for need in (1, 7, 30, 10_000):
+                assert _time_of_cpu_since(occupancy, t_apply, need) == cpu_since_scan(occupancy, t_apply, need), \
+                    (occupancy, t_apply, need)
