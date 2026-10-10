@@ -36,6 +36,8 @@ make lines      # 단계별 코드 줄수
 | **q** | JSON 파서(별도 헤더) + 워크로드 로더 | 531 (+37) | 진짜 coreset 파일이 돈다 |
 | **r** | config schedule + 정책 교체 + `handoff()` | 603 (+72) | MLFQ→FIFO→MLFQ 인계 |
 | **s** | EDF + LOTTERY + `TaskView` 이음매(B1/B2 부류) + 정책 타이머 epoch | 769 (+167) | EDF 마감 100% vs MLFQ 0% (`edfheavy`) / LOTTERY batch 몫 0.15→14.8%, 0.5→49.1% |
+| **t** | 자식 trace id = 파일의 `spawn_table` id (q 의 버그 수정) | 773 (+1) | coreset 24파일 중 자식 없는 20개는 sim_s 와 바이트 동일. 자식 있는 4개(c1-compile, c3-workday, c4-compile, c6-dual)는 `task`/`parent` 문자열 말고 diff 0, spawn 된 id 전부가 파일 테이블에 있다 |
+| **u** | 교체 의미론: MLFQ cold start(U1) / 같은 알고리즘 엔트리는 홀더 불간섭·큐 순서 유지(U2) / drain(U3) | 801 (+28) | harness `mock-switch` 손 유도 trace 의 `config_applied` 4개 시각 일치(t 는 2번이 10600, 기대 12000). 스케줄 없음·boot 1엔트리 48/48 sim_t 와 바이트 동일. 9엔트리 4알고리즘 스케줄: u 24/24 종료·재현·index 전부 순서대로, t 는 23/24 assert 로 죽는다 |
 
 큰 델타 넷(h, n, r, s)은 쪼갤 수 없는 단위다 — MLFQ 다섯 규칙, FORK 의 생애주기, 두 번째 입력,
 그리고 **부류**: EDF 와 LOTTERY 는 같은 실행기 부류(B2 주기 / B1 batch)를 읽으므로 따로 얹으면
@@ -51,6 +53,10 @@ make lines      # 단계별 코드 줄수
 | ready set 이 코어→정책 (c→g) | MLFQ 의 ready set 은 "큐 여러 개"다. 구조 자체가 정책이다 |
 | `vector<Task>`→`deque` (b→n) | FORK 가 실행 중 tasks_ 를 키운다. vector 면 `Task&` 가 댕글링 |
 | D1 tie-break 개정 (a→r) | boot 설정이 같은 t=0 의 arrive 보다 먼저여야 한다 |
+| `Mlfq::start` 가 `cold` 를 쓴다 (r/s→u) | s 가 `cold` 를 만들 때 MLFQ 만 "R 의 행동 그대로" 남겼다. MLFQ→X→MLFQ 를 손으로 따라가 본 trace(mock-switch)와 맞춰 보기 전에는 옛 레벨이 되살아나는 게 안 보인다 |
+| 같은 알고리즘 엔트리가 홀더를 재무장 (r→u) | r 의 교체 경로가 "알고리즘이 바뀐다"만 상정했다. 슬라이스를 줄이는 엔트리 + 슬라이스 중간의 홀더 → 음수 지평선 → `assert(e.t >= now_)`. mock-switch 는 그 순간 레인이 비어 있어 못 밟는다 |
+| 교체 즉시 적용 → drain (r→u) | r 은 `t_us` 에 바로 바꿨다. metrics §11.8 이 정하기(09-09) 전 설계라 drain 이 없었다 |
+| 자식 sid 를 파일 id 로 (o/q→t) | o 가 손 시나리오에서 sid 를 `부모.N` 으로 지었고, q 의 로더가 테이블 엔트리의 `id` 를 읽지 않아 그 규칙이 남았다. q 의 검증 "진짜 coreset 이 돈다"는 **돌기만 하면** 통과한다 — harness `reader.py` 는 `build.c1` 으로 알고 trace 는 `build.1` 이었다 |
 | 선점 복귀의 `ready` 제거 (f→g) | 계약의 `ready.cause` 에 preempt 가 없다 |
 | `PolicyTimer` 에 config epoch (i/r→s) | 정책 타이머가 config 적용을 넘어 살아남았다. MLFQ 가 다시 `start()` 할 때마다 boost 사슬이 하나씩 늘고, 사슬끼리 서로를 `q_` 에 남겨 `arm()` 의 종료 규칙을 무력화한다. **c1-compile × mock-switch 가 sim_r 에서 끝나지 않는다** (15초에 가상 45시간, 2,400만 줄). r 의 검증은 이 조합을 돌리지 않았다 |
 | `Policy::start(params, cold)` (g→s) | "알고리즘이 바뀌었나"를 정책이 알아야 하는 건 **같은 알고리즘 엔트리는 슬라이스 유지, 교체는 새 dispatch** (switch 메모 §2a·§7)를 둘 다 지키는 정책이 생긴 다음이다 |
@@ -89,10 +95,10 @@ make lines      # 단계별 코드 줄수
 | id | 질문 (guide §) | 답 | 이유 / 버린 대안 |
 |---|---|---|---|
 | **D1** | §9.3 동시각 이벤트 순서 | (종류 우선순위, 삽입 순번). ConfigApply 가 최우선 | 삽입 순번만 쓰면 t=0 boot 설정이 arrive 뒤로 갈 수 있다(실제로 segfault). 종류 우선순위만 쓰면 같은 종류끼리 미정의 |
-| **D2** | §9.1 대기자 없는 wake | **우편함(깊이 있음)**. 채널별 + 태스크별 | 잃어버리면 굶주린 태스크의 수요가 줄어 **측정하려던 피해가 은폐된다** (TIMER backlog 와 같은 이유). ⚠️ 우편함이 둘인 게 걸린다 — 외생 wake 는 channel 주소, WAKE 명령어는 target 주소. 실측은 채널당 대기자 하나라 결과가 같다 → **인지오 확인 항목** |
+| **D2** | §9.1 대기자 없는 wake | **우편함(깊이 있음)**. 채널별 + 태스크별 | 잃어버리면 굶주린 태스크의 수요가 줄어 **측정하려던 피해가 은폐된다** (TIMER backlog 와 같은 이유). ⚠️ 우편함이 둘인 게 걸린다 — 외생 wake 는 channel 주소, WAKE 명령어는 target 주소. 실측은 채널당 대기자 하나라 결과가 같다 → ✅ **2026-10-10 결정: 하나로 합친다** (지워도 된다). 어느 쪽을 남길지·구현은 미정 — `../memo/memo_261010.md` Part E |
 | **D3** | §9.4 depart mid-anything | 즉시 제거, 남은 수요·밀린 틱 전부 폐기 | guide 가 "presumable" 이라 한 그대로. 레인을 쥐었으면 `run_end reason=depart` 를 먼저 찍는다 |
 | **D4** | §9.2 TIMER 의 t₀ | 그 태스크가 **TIMER 를 처음 실행한 순간** | 도착 시각: 도착~첫TIMER 사이 명령어가 첫 주기를 갉아먹는다. 전역 0: 모든 주기 태스크를 인위적으로 동기화시켜 경합 패턴을 왜곡한다. t=0 도착 태스크는 셋 다 같아 현재 coreset 이 답을 강제하지 못한다 |
-| **D6** | EDF 의 체인 단계 마감 | WAKE 가 깨운 쪽의 현재 마감을 싣는다. 대기자가 없으면 우편함에 마감도 같이 쌓인다(`mail_dl`). 외생 wake 와 채널 우편함은 마감을 지운다 → residual | batch 메모 B2 "WAKE 로 닿는 전부 = EDF deadline class" 를 따랐다. ⚠️ **문서 충돌**: vocab §2 ("TIMER-driven") 와 pair review finding 5 ("woken stages are residual-class") 는 반대다. c2-p2b frame miss 가 0% ↔ 99.8% 로 갈린다 → `../notes/note-for-jioh-edf-chain-stage-class.md` |
+| **D6** | EDF 의 체인 단계 마감 | WAKE 가 깨운 쪽의 현재 마감을 싣는다. 대기자가 없으면 우편함에 마감도 같이 쌓인다(`mail_dl`). 외생 wake 와 채널 우편함은 마감을 지운다 → residual | batch 메모 B2 "WAKE 로 닿는 전부 = EDF deadline class" 를 따랐다. ⚠️ **문서 충돌**: vocab §2 ("TIMER-driven") 와 pair review finding 5 ("woken stages are residual-class") 는 반대다. c2-p2b frame miss 가 0% ↔ 99.8% 로 갈린다 → `../notes/note-for-jioh-edf-chain-stage-class.md`. ✅ **2026-10-10 인지오 답: deadline class 가 맞다, 상속(head tick + 1 period) 그대로.** 코드 변경 없음. 데이터셋 개조(c1-gaming compositor 제거, c2-p2b clamscan → unattended-upgrade) 뒤 EDF 수치 재측정 |
 | **D7** | EDF 동률 / 마감 부류의 슬라이스 | (마감, id) 순. 마감 부류는 지평선 없음, 동률은 선점 안 함. residual 은 RR, 선점당하면 남은 슬라이스 유지 | vocab "ties broken by a fixed executor rule" — D1 과 같은 id. Liu & Layland EDF 는 quantum 이 없다 |
 | **D8** | LOTTERY 추첨 | ① 두 부류가 다 runnable 이면 bp 로 부류 ② 부류 안 균등. splitmix64, rejection 으로 편향 제거. seed = FNV-1a(workload 파일의 `meta.id`), 런당 1회 | "부류별 split + 부류 안 동일 티켓" 과 같은 분포. 스케줄 파일의 `workload_id` 는 쓰지 않는다 — 덮이기 전에 시드한다 |
 | **D9** | FIFO 아래 B1 문턱 | boot default 의 `timeslice_us` = **10000** | batch 메모 §3 의 "2000 µs" 는 09-11 이전 문장. boot-default 메모 §5 가 "이제 10000 으로 읽으면 된다"고 이미 답했다 |

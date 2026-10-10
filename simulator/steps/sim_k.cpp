@@ -397,7 +397,7 @@ int main(int argc, char** argv) {
   s.add("mpv", 0, {{Op::TIMER, 0, 16667}, {Op::RUN, 6667},
                    {Op::TIMER, 0, 16667}, {Op::RUN, 6667},
                    {Op::TIMER, 0, 16667}, {Op::RUN, 6667}, {Op::EXIT, 0}});
-  const int ed = s.add("editor", 0, {{Op::WAIT, 0}, {Op::RUN, 3000},
+  const int ed = s.add("editor", 0, {{Op::WAIT, 0}, {Op::RUN  , 3000},
                                      {Op::WAIT, 0}, {Op::RUN, 2000}, {Op::WAIT, 0}}, 50000);
   s.add("hog", 0, {{Op::RUN, 20000}, {Op::EXIT, 0}});
   s.wake(10000, ed);

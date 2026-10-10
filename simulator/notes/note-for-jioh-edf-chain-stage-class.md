@@ -1,6 +1,6 @@
 # Note for jioh — under EDF, are the WAKE-driven chain stages in the deadline class?
 
-> Status: memo · Created 2026-10-01 · Updated 2026-10-01
+> Status: memo · Created 2026-10-01 · Updated 2026-10-10 · **Answered 2026-10-10 — see the end**
 > Author: kyungmin. Raised while implementing EDF (stage S of the `steps/` ladder). A question, not a spec change. The full simulator status is in `../memo/memo_261001.md`.
 
 ## Checked first: what the repo already answers
@@ -48,8 +48,18 @@ Caveat: these traces still have a known simulator defect (missing zero-wait `rea
 
 ## What I need
 
-- [ ] **Which class** do the WAKE-driven chain stages belong to under EDF: deadline (batch memo B2) or residual (vocabulary wording, pair review)?
-- [ ] If **deadline class**: is "a stage inherits the deadline of the task that woke it" the deadline you intend?
-- [ ] If **residual class**: should the batch memo's sentence "Under EDF, the deadline class is the periodic class of B2" be narrowed to the TIMER tasks themselves? (B2's other effect, that periodic tasks are never batch-class, is not part of this question.)
+- [x] **Which class** do the WAKE-driven chain stages belong to under EDF: deadline (batch memo B2) or residual (vocabulary wording, pair review)?
+- [x] If **deadline class**: is "a stage inherits the deadline of the task that woke it" the deadline you intend?
+- [x] ~~If **residual class**: should the batch memo's sentence … be narrowed?~~ — moot.
 
 Switching the implementation either way is a two-line change in `deliver()` (both variants were run for the table above).
+
+## Answer — from jioh, 2026-10-10 (relayed by kyungmin)
+
+- **Deadline class.** Chain stages 2–16 are in EDF's deadline class. The current code stays as it is.
+- **Inheritance is intended.** A stage inherits the waker's deadline unchanged: the head's tick + one period. Frames are scored from the head's tick to the tail's end, so ordering the stages by that deadline is the natural choice.
+- **Dataset change pending.** jioh is reworking the dataset. In that rework, `c1-gaming` loses the compositor, and `c2-p2b`'s clamscan is replaced by Ubuntu unattended-upgrade. The EDF numbers above must be re-measured after the rebuild.
+
+Consequences on the simulator side:
+- D6 is closed: no code change. `steps/README.md` D6 and `src/notes.md` gap 11 are updated.
+- Still to re-check after the rebuild: the "Deadline class" consequence above, that the p2 pair's two EDF rows would not differ on `game.chain.1`'s frames. jioh's answer does not address it, and the `c2-p2b` background task is changing. It is on kyungmin's TODO backlog.
