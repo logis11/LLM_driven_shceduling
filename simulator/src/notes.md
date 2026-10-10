@@ -11,7 +11,16 @@
 earlier snapshot (stage I: core + MLFQ + preemption + gen, with a hardcoded `main`
 and no loader) to **stage R** (full instruction set, workload loader, config
 schedule with policy handoff) and then **stage S** (EDF + LOTTERY — all four algorithms of
-the frozen menu), matching the one-rung-at-a-time ladder in `../steps/`.
+the frozen menu), **stage T** (children traced under their spawn_table id) and **stage U**
+(config-switch semantics: MLFQ cold start, same-algorithm entries, drain), matching the
+one-rung-at-a-time ladder in `../steps/`.
+
+**Ported 2026-10-10 (T + U):** `src/sim` equals `steps/sim_u` byte for byte after normalizing
+`meta.sim`. The check covered 25 workloads (the 24 coreset files plus the harness
+`mock-switch` run file) under 4 schedules each: none, the one-entry boot default, the
+`mock-switch` schedule, and a 9-entry four-algorithm stress schedule. Result 100/100. The
+pre-port binary differs on `c1-compile`, which serves as the positive control. Details:
+`../memo/memo_261010.md` Part B.
 
 Build:
 ```
@@ -125,9 +134,9 @@ independent of the `sim_r` comparison.
    a backlog-consumed TIMER tick and a mailbox-satisfied WAIT just advance `pc`.
    Measured: `c1-gaming` emits 4,482 `deadline` but only 218 `ready(cause=timer_tick)`.
    If the harness counts jobs from `ready(timer_tick)` lines (§6.2 B3), this diverges.
-5. **`spawn_entry.id` ignored** — schema §A8 marks it required; the code synthesizes
-   the child's trace id as `parent.N` instead of using the file's spawn id. The trace
-   emits children under the synthesized id.
+5. ~~**`spawn_entry.id` ignored**~~ — **fixed in T (2026-10-10).** The loader dropped the
+   spawn entry's `id`, and children were traced as `parent.N` (`build.1`). The harness
+   `reader.py` registers them as `build.c1`. Children are now traced under the file's id.
 6. **Loader does not re-check linter invariants** — id uniqueness, `spawn_table`
    present iff FORK, program ends in EXIT or has a `depart`, unbounded LOOP only in
    segment-bound tasks. These are linter invariants the JSON Schema does not enforce;
@@ -165,7 +174,10 @@ independent of the `sim_r` comparison.
    the 16 WAKE-driven chain stages in the deadline class; with that off, 7,372/7,372 are met.)*
    The docs disagree on that class (vocab §2 and the pair review vs batch-class memo B2), and
    it flips `c2-p2b`'s frames under EDF from 0% to 99.8% missed — asked of 인지오 in
-   `../notes/note-for-jioh-edf-chain-stage-class.md`.
+   `../notes/note-for-jioh-edf-chain-stage-class.md`. **Answered 2026-10-10: deadline class,
+   inherited deadline (head tick + one period) as implemented — no code change.** The EDF numbers
+   must be re-measured once 인지오's dataset rework lands (`c1-gaming` loses the compositor;
+   `c2-p2b`'s clamscan becomes unattended-upgrade).
 12. **Fixed in S — EDF slice-boundary preemption.** A residual task preempted in the same µs
    as its slice end kept the fully used slice, so its next dispatch had horizon 0 (600
    zero-length occupancies on the boot-default memo's video/music/scan scenario). Now counted

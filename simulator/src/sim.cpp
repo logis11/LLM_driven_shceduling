@@ -14,6 +14,7 @@
 //   M channels + WAKE + mailbox · N FORK/spawn_table · O JSONL trace (data-contracts §9)
 //   P deadline events · Q workload loader (mini_json) · R config schedule + handoff
 //   S EDF + LOTTERY via a TaskView seam (executor-owned task classes)
+//   T children traced under their spawn_table id · U config-switch semantics (cold/same/drain)
 //
 // Design notes worth carrying:
 //   · gen (F): a preempted Lane reservation cannot be removed from a priority_queue, so
@@ -41,8 +42,18 @@
 //     PRNG (splitmix64) is seeded once per run from the FNV-1a hash of the workload id
 //     (interpretation-contract §1: "a PRNG the simulator seeds deterministically per run").
 //   · cold start (S): Policy::start is told whether the algorithm changed. Only then is the
-//     lane holder treated as freshly dispatched (switch memo 2026-09-08 §2, rule a); an entry
-//     with the same algorithm keeps the slice already granted (same memo §7).
+//     lane holder treated as freshly dispatched (switch memo 2026-09-08 §2, rule a).
+//   · config-switch semantics (U; switch memo §2–§7, metrics §11.7–9):
+//     U1 a switch into MLFQ is a cold start — every task back to Q0 with no allotment.
+//     U2 a same-algorithm entry is not a switch: the holder is neither released nor re-armed
+//        (its pending Lane event is the slice it was granted), queue order is kept, MLFQ
+//        levels clamp to a smaller num_queues, and a task whose allotment now exceeds the
+//        shrunken slice is demoted when next picked (otherwise its horizon would be negative).
+//     U3 drain: a switch out of MLFQ/EDF/LOTTERY applies the next time the lane is free
+//        (slice end, block, preemption, exit, depart); out of FIFO it applies at once.
+//        Entries arriving meanwhile queue behind it, so every index applies, in order.
+//   · child ids (T): a spawned child is traced under its spawn_table `id`, the id the run
+//     file and the harness know it by.
 //   · policy-timer epoch (S, fixes R): a policy timer used to survive a config apply, so each
 //     MLFQ start() added one more boost chain, and the chains kept each other alive past the
 //     arm() stop rule — c1-compile under the mock-switch schedule never terminated. The switch
@@ -70,7 +81,7 @@ struct Instr { Op op; i64 us = 0; i64 period_us = 0; int jump = -1; i64 count = 
                int chan = -1; int target = -1; };
 
 // One entry of a FORK spawn table — a child spec straight from the file (id/name/program)
-struct ChildSpec { std::string name; std::vector<Instr> prog; bool periodic = false; };
+struct ChildSpec { std::string sid, name; std::vector<Instr> prog; bool periodic = false; };
 
 // Ready vs Running: the scheduler *picks from* the Ready set
 enum class State { Ready, Running, Blocked, Done };
@@ -191,9 +202,11 @@ struct Mlfq : Policy {
     return s;
   }
   static constexpr int kBoost = 1;              // our tag; opaque to the core
-  void start(const Params& np, bool) override {   // cold ignored — levels kept, as in stage R
+  void start(const Params& np, bool cold) override {
     p = np;
     ready.assign((std::size_t)p.num_queues, {});
+    if (cold) for (St& s : st) s = St{};                                   // U1: all to Q0
+    else for (St& s : st) s.level = std::min(s.level, p.num_queues - 1);   // U2: levels kept
     clock.arm(clock.now() + p.boost_interval_us, kBoost);
   }
   void on_timer(int) override {                 // rule 5: everyone back to the top queue
@@ -223,8 +236,20 @@ struct Mlfq : Policy {
     }
   }
   int pick() override {                         // rules 1 + 2
-    for (auto& q : ready)
-      if (!q.empty()) { int id = q.front(); q.pop_front(); return id; }
+    for (std::size_t lv = 0; lv < ready.size(); ++lv) {
+      auto& q = ready[lv];
+      while (!q.empty()) {
+        const int id = q.front(); q.pop_front();
+        St& s = slot(id);
+        if (s.allot <= slice_of(s.level)) return id;
+        // U2: a same-algorithm entry shrank the slice below this allotment → rule 3 now
+        s.allot = 0;
+        if (s.level + 1 >= p.num_queues) return id;   // bottom: a fresh slice, as is
+        ++s.level;
+        ready[(std::size_t)s.level].push_back(id);
+        trace.note("x_mlfq_demote", id);
+      }
+    }
     return -1;
   }
   i64  horizon(int id) override { return slice_of(slot(id).level) - slot(id).allot; }
@@ -540,32 +565,47 @@ class Sim : public Trace, public Clock, public TaskView {
   void push(i64 t, Kind k, int task, std::uint64_t gen = 0) { q_.push({t, seq_++, k, task, gen, 0}); }
   Task& T(int id) { return tasks_[static_cast<std::size_t>(id)]; }
 
+  std::deque<int> pending_;                  // U3: entries waiting for the drain, in arrival order
+
   void on_config_apply(int idx) {
     const ConfigEntry& c = schedule_[(std::size_t)idx];
-    auto it = registry_.find(c.algorithm);
-    if (it == registry_.end()) die("unregistered algorithm: " + c.algorithm);
+    if (registry_.find(c.algorithm) == registry_.end()) die("unregistered algorithm: " + c.algorithm);
+    const bool drains = running_ >= 0 && c.algorithm != algo_ && algo_ != "FIFO";
+    if (!pending_.empty() || drains) {        // U3: dispatch() applies it once the lane is free
+      pending_.push_back(idx);
+      std::printf("{\"event\":\"x_config_pending\",\"t\":%lld,\"index\":%d}\n", (long long)now_, idx);
+      return;
+    }
+    apply_config(idx);
+  }
+
+  void apply_config(int idx) {
+    const ConfigEntry& c = schedule_[(std::size_t)idx];
+    Policy* next = registry_.at(c.algorithm);
     std::printf("{\"event\":\"config_applied\",\"t\":%lld,\"index\":%d,"
                 "\"algorithm\":\"%s\",\"provenance\":\"%s\"}\n",
                 (long long)now_, idx, c.algorithm.c_str(), c.provenance.c_str());
 
-    int holder = running_;
-    if (holder >= 0) {                       // same pattern as I's PolicyTimer
+    const bool cold = c.algorithm != algo_;
+    int holder = running_;                    // a holder here means out of FIFO, or same algorithm
+    if (holder >= 0 && cold) {                // rule a: freshly dispatched by the new algorithm
       release();
       if (T(holder).run_left == 0) { advance(holder); holder = -1; }
     }
     std::vector<int> waiting = pol_->handoff();
-    std::sort(waiting.begin(), waiting.end());   // deterministic handoff; id is the tie-break
+    if (cold) std::sort(waiting.begin(), waiting.end());   // D5; U2 keeps the queue order
     ++pol_epoch_;                                // voids every policy timer armed so far
-    const bool cold = c.algorithm != algo_;
     algo_ = c.algorithm;
     // B1's slice (batch-class memo §3). FIFO has no slice, so it uses the boot default's
     batch_slice_ = c.algorithm == "EDF"  ? c.params.residual_timeslice_us
                  : c.algorithm == "FIFO" ? Params{}.timeslice_us : c.params.timeslice_us;
-    pol_ = it->second;
+    pol_ = next;
     pol_->start(c.params, cold);
     for (int id : waiting) pol_->on_ready(id);
-    if (holder >= 0) { running_ = holder; T(holder).st = State::Running;
-                       lane_start_ = now_; arm_lane(holder); }
+    if (holder >= 0 && cold) { running_ = holder; T(holder).st = State::Running;
+                               lane_start_ = now_; arm_lane(holder); }
+    // U2: same algorithm — the holder is untouched; its pending Lane event (same gen) is
+    // the slice it was granted
   }
 
   void on_policy_timer(const Event& e) {
@@ -701,7 +741,7 @@ class Sim : public Trace, public Clock, public TaskView {
     Task& par = T(parent_id);
     Task c;
     c.name = par.spawn_table[par.spawn_next].name;
-    c.sid = par.sid + "." + std::to_string(par.spawn_next + 1);
+    c.sid = par.spawn_table[par.spawn_next].sid;   // the file's id (stage T)
     c.prog = par.spawn_table[par.spawn_next].prog;
     c.periodic = par.spawn_table[par.spawn_next].periodic;
     c.parent = parent_id;
@@ -782,6 +822,10 @@ class Sim : public Trace, public Clock, public TaskView {
 
   void dispatch() {
     if (running_ >= 0) return;
+    while (!pending_.empty()) {                // U3: the lane is free — the drain is over
+      const int idx = pending_.front(); pending_.pop_front();
+      apply_config(idx);
+    }
     const int id = pol_->pick();
     if (id < 0) return;
     running_ = id;
@@ -871,7 +915,8 @@ static void load_workload(const std::string& path, Sim& s) {
         for (const Json& c : e.at("spawn_table").arr) {
           std::vector<Instr> cp;
           compile_prog(c.at("program"), s, ids, cp);
-          tab.push_back(ChildSpec{c.at("name").as_str("name"), std::move(cp)});
+          tab.push_back(ChildSpec{c.at("id").as_str("id"), c.at("name").as_str("name"),
+                                  std::move(cp)});
         }
         s.set_spawn(id, std::move(tab), (int)e.at("fork_cap").as_int("fork_cap"));
       }
