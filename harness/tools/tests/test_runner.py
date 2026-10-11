@@ -169,7 +169,7 @@ def test_the_pipeline_runs_a_handful_of_files_through_to_the_report(tmp_path):
                  "grade-manifest.json", "report.json", "report.md"):
         assert (exp / name).exists(), name
     wid = doc["files"]["judging"][0]
-    run_dir = exp / wid / "random-1"
+    run_dir = exp / wid / "random-1~focus"   # <condition>-<seed>~<shape> (9.17); the smoke spec's one shape is focus
     for name in ("schedule.json", "log.json", "trace.jsonl", "trace.rerun.jsonl", "daemon.stderr.log",
                  "simulator.stderr.log", "records.csv", "recognition-records.csv"):
         assert (run_dir / name).exists(), name

@@ -29,10 +29,12 @@ def test_quantiles_are_keyed_and_deterministic():
     assert [sampling.sample(Q, 7, "a", i) for i in range(50)] != [sampling.sample(Q, 7, "b", i) for i in range(50)]
 
 
-def _timeline(tmp_path, tasks, focus, seed=3):
+def _timeline(tmp_path, tasks, windows, seed=3):
+    """A one-segment timeline whose keystroke windows are `windows`; each is also its task's focus interval
+    (9.17: the `input` track for the keystrokes, the `focus` track for the window in front)."""
     data = {"meta": {"id": "x-measured", "seed": seed, "demand": "calibration"},
             "segments": [{"from": "0s", "to": "20s", "mode": "office", "attributes": {"background_wanted": True}}],
-            "tasks": tasks, "focus": focus}
+            "tasks": tasks, "input": windows, "focus": [dict(w) for w in windows]}
     path = tmp_path / "x-measured.timeline.yaml"
     path.write_text(yaml.safe_dump(data))
     return path
