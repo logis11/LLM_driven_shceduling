@@ -19,8 +19,11 @@ tasks:
   - {id: renderers, name: chrome, archetype: renderer-hidden,
      arrive: 0s, depart: 60s, count: 4}
 
-focus:
+input:
   - {from: 2s, to: 58s, task: browser}
+
+focus:
+  - {from: 0s, to: 60s, task: browser}
 
 operations:
   - {at: 30s, task: browser, name: page-load}

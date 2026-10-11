@@ -13,8 +13,11 @@ tasks:
   - {id: photo-editor, name: gimp, archetype: image-editor,
      arrive: 0s, depart: 60s}
 
-focus:
+input:
   - {from: 2s, to: 58s, task: photo-editor}
+
+focus:
+  - {from: 0s, to: 60s, task: photo-editor}
 
 operations:
   - {at: 30s, task: photo-editor, name: unsharp-mask}

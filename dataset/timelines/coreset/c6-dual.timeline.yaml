@@ -23,5 +23,37 @@ tasks:
   - {id: build, name: make, archetype: build-orchestrator, arrive: 10s,
      bind: {spawn_count: 2908, parallelism_cap: 8, child_name: cc1}}
 
+# the focus alternates between the editor and the game every 688 s — the mean continuous segment in
+# a working sphere before switching, 11 min 28 s (gonzalez-chi04; 9.10 C-gonzalez-1); the regular
+# alternation, the editor first and the typing's 2 s lead-in are design. The input windows are the
+# editor's intervals: the user types into the window in front (9.17 spec, decisions 1 and 4).
+input:
+  - {from: 2s, to: 688s, task: editor}
+  - {from: 1376s, to: 2064s, task: editor}
+  - {from: 2752s, to: 3440s, task: editor}
+  - {from: 4128s, to: 4816s, task: editor}
+  - {from: 5504s, to: 6192s, task: editor}
+  - {from: 6880s, to: 7568s, task: editor}
+  - {from: 8256s, to: 8944s, task: editor}
+  - {from: 9632s, to: 10320s, task: editor}
+  - {from: 11008s, to: 11696s, task: editor}
+
 focus:
-  - {from: 2s, to: 12070s, task: editor}
+  - {from: 0s, to: 688s, task: editor}
+  - {from: 688s, to: 1376s, task: game}
+  - {from: 1376s, to: 2064s, task: editor}
+  - {from: 2064s, to: 2752s, task: game}
+  - {from: 2752s, to: 3440s, task: editor}
+  - {from: 3440s, to: 4128s, task: game}
+  - {from: 4128s, to: 4816s, task: editor}
+  - {from: 4816s, to: 5504s, task: game}
+  - {from: 5504s, to: 6192s, task: editor}
+  - {from: 6192s, to: 6880s, task: game}
+  - {from: 6880s, to: 7568s, task: editor}
+  - {from: 7568s, to: 8256s, task: game}
+  - {from: 8256s, to: 8944s, task: editor}
+  - {from: 8944s, to: 9632s, task: game}
+  - {from: 9632s, to: 10320s, task: editor}
+  - {from: 10320s, to: 11008s, task: game}
+  - {from: 11008s, to: 11696s, task: editor}
+  - {from: 11696s, to: 12072s, task: game}

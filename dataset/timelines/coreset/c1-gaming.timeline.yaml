@@ -15,4 +15,7 @@ tasks:
   - {id: steam, name: steam, archetype: game-client,
      arrive: 0s, depart: 60s}
 
-focus: []
+input: []
+
+focus:
+  - {from: 0s, to: 60s, task: game}

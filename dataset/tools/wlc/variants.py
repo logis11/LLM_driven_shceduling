@@ -90,8 +90,8 @@ def _shift(value_us, cut_us, delta_us):
 
 def shifted_timeline(raw, segment_index, length_us):
     """The base timeline's raw document with segment `segment_index` set to
-    `length_us` long, and every segment bound, task arrival and depart, focus
-    window edge and operation instant at or past the segment's old end shifted
+    `length_us` long, and every segment bound, task arrival and depart, input
+    and focus window edge and operation instant at or past the segment's old end shifted
     by the difference. Times stay as strings in µs."""
     doc = copy.deepcopy(raw)
     segs = doc["segments"]
@@ -114,8 +114,9 @@ def shifted_timeline(raw, segment_index, length_us):
             task["arrive"] = move(task["arrive"])
         if task.get("depart") is not None:
             task["depart"] = move(task["depart"])
-    for win in doc.get("focus") or []:
-        win["from"], win["to"] = move(win["from"]), move(win["to"])
+    for track in ("input", "focus"):
+        for win in doc.get(track) or []:
+            win["from"], win["to"] = move(win["from"]), move(win["to"])
     for op in doc.get("operations") or []:
         op["at"] = move(op["at"])
     return doc

@@ -20,8 +20,11 @@ tasks:
   - {id: bulk, name: kdenlive_render, archetype: cpu-batch, arrive: 60s,
      bind: {total_work: 16.545s, program: kdenlive_render}}
 
-focus:
+input:
   - {from: 2s, to: 324s, task: editor}
+
+focus:
+  - {from: 0s, to: 326s, task: editor}
 
 operations:
   - {at: 30s, task: editor, name: preview-render}

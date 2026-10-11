@@ -21,5 +21,8 @@ tasks:
   - {id: hog, name: python, archetype: cpu-batch, arrive: 2s,
      bind: {total_work: 1389.885s, program: python3}}
 
-focus:
+input:
   - {from: 2s, to: 1610s, task: editor}
+
+focus:
+  - {from: 0s, to: 1612s, task: editor}

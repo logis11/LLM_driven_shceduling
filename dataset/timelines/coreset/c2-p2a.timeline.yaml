@@ -27,4 +27,7 @@ tasks:
   - {id: download, name: steam, archetype: game-download, arrive: 60s,
      bind: {total_work: 727.170s}}
 
-focus: []
+input: []
+
+focus:
+  - {from: 0s, to: 86.385s, task: game}

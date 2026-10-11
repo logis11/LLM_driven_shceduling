@@ -122,13 +122,13 @@ def test_count_expansion(fixture_path, library):
     assert len(streams) == 3  # per-instance draws differ across the expansion
 
 
-def test_focus_wakes_inside_windows(fixture_path, library):
+def test_input_wakes_inside_windows(fixture_path, library):
     timeline, canonical, _ = compiled(fixture_path, library,
                                       "fx-mixed.timeline.yaml")
     wake_events = [e for e in canonical["events"] if e["op"] == "wake" and e["target"] == "editor"]
     inputs = [e for e in wake_events if e["channel"] == "input:editor"]
-    assert inputs, "focused interactive task must receive input wakes"
-    windows = [(w["from"], w["to"]) for w in timeline.focus]
+    assert inputs, "a typed-into interactive task must receive input wakes"
+    windows = [(w["from"], w["to"]) for w in timeline.input]
     for event in inputs:
         assert any(lo <= event["t"] < hi for lo, hi in windows)
     # every other wake is a timer wake on the task's own timer channel (9.5 D74)

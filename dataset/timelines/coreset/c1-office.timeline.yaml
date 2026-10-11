@@ -22,5 +22,8 @@ tasks:
   - {id: mail, name: thunderbird-bin, archetype: mail-client,
      arrive: 0s, depart: 60s}
 
-focus:
+input:
   - {from: 2s, to: 58s, task: writer}
+
+focus:
+  - {from: 0s, to: 60s, task: writer}

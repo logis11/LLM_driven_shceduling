@@ -48,13 +48,16 @@ def compile_timeline(timeline, library, mode, rel_path=None):
     """Returns (canonical_dict, demand_report)."""
     if mode not in MODES:
         raise ValueError(f"mode must be one of {MODES}")
-    builds, wakes = [], []
+    builds, wakes, heads = [], [], {}
     for task in timeline.tasks:
         instance_ids = ([task["id"]] if task["count"] == 1 else
                         [f"{task['id']}.{n}" for n in range(1, task["count"] + 1)])
         for iid in instance_ids:
-            builds.extend(_compile_instance(timeline, library, task, iid,
-                                            mode, wakes))
+            own = _compile_instance(timeline, library, task, iid, mode, wakes)
+            builds.extend(own)
+            # 9.17: the task's top-level record the focus track names — the task itself, or for a constructor the
+            # first member carrying the task's display name (the chain's head)
+            heads.setdefault(task["id"], next((b.id for b in own if b.name == task["name"]), own[0].id))
 
     events = [_arrive_event(b) for b in builds]
     events += [{"t": t, "op": "wake", "target": target, "channel": channel}
@@ -71,6 +74,7 @@ def compile_timeline(timeline, library, mode, rel_path=None):
                         "archetypes": f"archetypes.yaml@{library.blob_hex}"},
         },
         "ground_truth": [_ground_truth_segment(s) for s in timeline.segments],
+        "focus": [{"t_start": w["from"], "t_end": w["to"], "task": heads[w["task"]]} for w in timeline.focus],
         "events": events,
     }
     duration = timeline.duration_us
@@ -218,10 +222,11 @@ def _unbounded_loop(build, iid, seed, params, program, lifespan):
 #   - timer components (`components`): each comm's wakes are sampled from its
 #     measured gap quantiles over the whole lifetime, each wake's RUN from its
 #     run quantiles; cadence archetypes (`focus_components`) swap to the
-#     driven-phase components inside focus windows; every component starts as
-#     a stream already running — at arrival, and at each focus window's or
-#     operation's start (9.5 D77);
-#   - replayed stimulus (`stimulus`): inside each focus window a contiguous
+#     driven-phase components inside input windows (the timeline's `input`
+#     track, the keystroke windows; 9.17 renamed it from `focus`); every
+#     component starts as a stream already running — at arrival, and at each
+#     input window's or operation's start (9.5 D77);
+#   - replayed stimulus (`stimulus`): inside each input window a contiguous
 #     slice of the named stream (dataset/stimulus/<stream>.jsonl) of the
 #     window's length, at an offset drawn from the seed; each input is an
 #     exogenous wake on the task's input channel with a RUN from `input_run`.
@@ -333,7 +338,7 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
         _periodic_unroll(build, seed, iid, params, t0, t1, launch, replay)
         return
     t_steady = t0 + launch[0] if launch else t0   # D136: the steady stream begins at the launch phase's end
-    windows = [w for w in timeline.focus if w["task"] == task["id"]]
+    windows = [w for w in timeline.input if w["task"] == task["id"]]
     # operations (spec decisions 8–9): a window from the authored start for a duration drawn from the measured
     # table; inside it the operation's components replace whatever is active and no input wake is emitted
     op_windows = []
@@ -368,7 +373,7 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
                     break
                 if not in_operation(t):
                     events.append((t, run, "timer"))
-        # timer components over the lifetime past any launch phase; cadence archetypes swap inside focus windows
+        # timer components over the lifetime past any launch phase; cadence archetypes swap inside input windows
         for ev in _component_events(params.get("components") or [], seed, iid, t_steady, t1, "idle"):
             if focus_components and any(w["from"] <= ev[0] < w["to"] for w in windows):
                 continue
@@ -383,7 +388,7 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
                               if not in_operation(ev[0]))
     for j, w in enumerate(op_windows):
         events.extend(_component_events(w["spec"]["components"], seed, iid, w["from"], w["to"], ("operation", j)))
-    # replayed stimulus inside focus windows
+    # replayed stimulus inside input windows
     stimulus = params.get("stimulus")
     if stimulus:
         stream = _load_stream(stimulus["stream"], stimulus.get("kinds"))
@@ -529,7 +534,7 @@ def _interactive_unroll(build, timeline, task, iid, params, wakes):
     seed = timeline.seed
     channel = f"input:{iid}"
     k = 0
-    for window in timeline.focus:
+    for window in timeline.input:
         if window["task"] != task["id"]:
             continue
         t = window["from"]
@@ -545,7 +550,7 @@ def _interactive_unroll(build, timeline, task, iid, params, wakes):
             build.program.append({"op": "RUN", "us": burst})
             build.demand_us += burst
             k += 1
-    if not build.program:  # alive but never focused: block forever
+    if not build.program:  # alive but never typed into: block forever
         build.program = [{"op": "WAIT", "channel": channel}]
 
 

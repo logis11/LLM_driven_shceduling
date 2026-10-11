@@ -17,4 +17,6 @@ tasks:
   - {id: bus, name: dbus-daemon, archetype: message-bus,
      arrive: 0s, depart: 60s}
 
+input: []
+
 focus: []

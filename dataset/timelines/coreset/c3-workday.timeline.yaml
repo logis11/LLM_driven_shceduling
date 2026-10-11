@@ -38,10 +38,15 @@ tasks:
   - {id: mailer, name: thunderbird-bin, archetype: mail-client,
      arrive: 1485s, depart: 1545s}
 
-focus:
+input:
   - {from: 2s, to: 58s, task: browser}
   - {from: 62s, to: 118s, task: writer}
   - {from: 1487s, to: 1543s, task: mailer}
+
+focus:
+  - {from: 0s, to: 60s, task: browser}
+  - {from: 60s, to: 1485s, task: writer}
+  - {from: 1485s, to: 1545s, task: mailer}
 
 operations:
   - {at: 30s, task: browser, name: page-load}

@@ -334,16 +334,19 @@ def test_variant_cannot_change_seed():
                   [{"set-seed": 2}], "test")
 
 
-def test_set_focus_and_operations_replace_the_lists():
-    """9.10 D44: a cut counterpart replaces its base's focus windows and operations whole."""
+def test_set_input_focus_and_operations_replace_the_lists():
+    """9.10 D44: a cut counterpart replaces its base's keystroke windows and operations whole; 9.17: and its focus
+    track."""
     base = {"meta": {"seed": 1}, "tasks": [], "segments": [],
-            "focus": [{"from": "2s", "to": "58s", "task": "a"}],
+            "input": [{"from": "2s", "to": "58s", "task": "a"}], "focus": [{"from": "0s", "to": "60s", "task": "a"}],
             "operations": [{"at": "30s", "task": "a", "name": "op"}]}
-    out = apply_ops(base, [{"set-focus": [{"from": "2s", "to": "20s", "task": "a"}]},
+    out = apply_ops(base, [{"set-input": [{"from": "2s", "to": "20s", "task": "a"}]},
+                           {"set-focus": [{"from": "0s", "to": "22s", "task": "a"}]},
                            {"set-operations": [{"at": "11s", "task": "a", "name": "op"}]}], "test")
-    assert out["focus"] == [{"from": "2s", "to": "20s", "task": "a"}]
+    assert out["input"] == [{"from": "2s", "to": "20s", "task": "a"}]
+    assert out["focus"] == [{"from": "0s", "to": "22s", "task": "a"}]
     assert out["operations"] == [{"at": "11s", "task": "a", "name": "op"}]
-    assert base["focus"][0]["to"] == "58s"   # the base is not touched
+    assert base["input"][0]["to"] == "58s"   # the base is not touched
 
 
 # 9.10 D168: the catalog scenario each bound program shows, as D33's rows name them; cpu-batch by its `program`

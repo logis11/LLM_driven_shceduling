@@ -29,9 +29,13 @@ tasks:
   - {id: batch, name: HandBrakeCLI, archetype: video-transcoder, arrive: 240s,
      bind: {total_work: 2970.871s}}
 
-focus:
+input:
   - {from: 2s, to: 118s, task: photo-editor}
   - {from: 122s, to: 238s, task: video-editor}
+
+focus:
+  - {from: 0s, to: 120s, task: photo-editor}
+  - {from: 120s, to: 3212s, task: video-editor}
 
 operations:
   - {at: 30s, task: photo-editor, name: unsharp-mask}

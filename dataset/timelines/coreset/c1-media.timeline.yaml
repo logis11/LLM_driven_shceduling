@@ -16,4 +16,7 @@ tasks:
   - {id: music, name: mpv, archetype: audio-player,
      arrive: 0s, depart: 60s}
 
-focus: []
+input: []
+
+focus:
+  - {from: 0s, to: 60s, task: video}

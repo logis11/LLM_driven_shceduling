@@ -37,8 +37,13 @@ tasks:
   - {id: music, name: mpv, archetype: audio-player,
      arrive: 300s, depart: 420s}
 
-focus:
+input:
   - {from: 2s, to: 58s, task: browser}
+
+focus:
+  - {from: 0s, to: 60s, task: browser}
+  - {from: 60s, to: 300s, task: game}
+  - {from: 300s, to: 420s, task: video}
 
 operations:
   - {at: 30s, task: browser, name: page-load}

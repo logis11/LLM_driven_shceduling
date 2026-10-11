@@ -37,7 +37,8 @@ def _lib(tmp_path, repo_root, monkeypatch, entries, streams=DATA):
 def _compile(tmp_path, lib, tasks, focus=(), operations=(), end="20s", seed=7):
     data = {"meta": {"id": "x-launch", "seed": seed, "demand": "calibration"},
             "segments": [{"from": "0s", "to": end, "mode": "office", "attributes": {"background_wanted": True}}],
-            "tasks": tasks, "focus": list(focus), "operations": list(operations)}
+            "tasks": tasks, "input": list(focus), "operations": list(operations),
+            "focus": [dict(w) for w in focus]}   # 9.17: the holder over each keystroke window
     path = tmp_path / "x-launch.timeline.yaml"
     path.write_text(yaml.safe_dump(data))
     return compile_timeline(Timeline(path, lib), lib, "single", rel_path="fx")

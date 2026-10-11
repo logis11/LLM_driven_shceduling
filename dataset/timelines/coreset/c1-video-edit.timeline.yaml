@@ -14,8 +14,11 @@ tasks:
   - {id: editor, name: kdenlive, archetype: video-editor,
      arrive: 0s, depart: 60s}
 
-focus:
+input:
   - {from: 2s, to: 58s, task: editor}
+
+focus:
+  - {from: 0s, to: 60s, task: editor}
 
 operations:
   - {at: 30s, task: editor, name: preview-render}

@@ -39,7 +39,7 @@ Same timeline + same library + same seed ⇒ byte-identical output. That determi
 
 ### Canonical format
 
-One `*.workload.json` per workload, validated by `schema/workload.schema.json`, three top-level keys. All times are integer **microseconds**.
+One `*.workload.json` per workload, validated by `schema/workload.schema.json`, four top-level keys — `meta`, `ground_truth`, `focus`, `events`. All times are integer **microseconds**.
 
 ```jsonc
 {
@@ -51,6 +51,9 @@ One `*.workload.json` per workload, validated by `schema/workload.schema.json`, 
   "ground_truth": [             // labeled segments — oracle + Layer-1 grader ONLY
     { "t_start": 0,        "t_end": 60000000,  "mode": "dev",      "attributes": { "wanted": true } },
     { "t_start": 60000000, "t_end": 180000000, "mode": "ml-train", "attributes": { "wanted": true } }
+  ],
+  "focus": [                    // the window-focus track — shown to the recognizer by name; the simulator ignores it
+    { "t_start": 0, "t_end": 180000000, "task": "editor" }
   ],
   "events": [                   // the workload itself — closed op set {arrive, wake}
     { "op": "arrive", "t": 0, "id": "editor", "name": "code", "declared_class": "normal", "depart": 180000000,
@@ -65,6 +68,7 @@ One `*.workload.json` per workload, validated by `schema/workload.schema.json`, 
 - **`declared_class`** on every task record — each `arrive` event and each spawn-table entry — is the scheduling class the real program declares for itself, `normal` or `idle`, copied from the archetype entry the task binds (a spawned child's from its child entry), never read from the task's name. The simulator runs an `idle` task only when no task of another class is runnable and preempts it at once when one wakes, under every algorithm; the visible projection shows the class per task (`docs/data-contracts.md` §4).
 - **`wake`** delivers an exogenous stimulus on a channel (keystrokes, network replies…); a task blocked in `WAIT` on that channel becomes runnable. This is how "interactive" behavior exists without modeling a human.
 - **`ground_truth`** never reaches the simulator's scheduler or any recognizer — information asymmetry is enforced by who gets handed which key.
+- **`focus`** — the timeline's window-focus track carried through compilation: which top-level task holds the focus over which pinned intervals, `[{t_start, t_end, task}]`, empty when no window does (data-contracts §4, 2026-10-11). The recognizer is shown it by name (§5, rule 6); the simulator reads `events` alone. The timeline's `input` track, the keystroke windows, is consumed at compile time and lies inside the task's focus intervals.
 
 Field semantics are normative in `docs/simulator/interpretation-contract.md`; the schema is the machine check, not the definition.
 

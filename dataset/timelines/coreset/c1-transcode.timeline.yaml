@@ -24,8 +24,11 @@ tasks:
   - {id: batch, name: HandBrakeCLI, archetype: video-transcoder, arrive: 2s,
      bind: {total_work: 2970.871s}}
 
-focus:
+input:
   - {from: 2s, to: 4760s, task: video-editor}
+
+focus:
+  - {from: 0s, to: 4762s, task: video-editor}
 
 operations:
   - {at: 2381s, task: video-editor, name: preview-render}

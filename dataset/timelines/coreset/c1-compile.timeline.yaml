@@ -19,5 +19,8 @@ tasks:
   - {id: build, name: make, archetype: build-orchestrator, arrive: 2s,
      bind: {spawn_count: 2908, parallelism_cap: 8, child_name: cc1}}
 
-focus:
+input:
   - {from: 2s, to: 1592s, task: editor}
+
+focus:
+  - {from: 0s, to: 1594s, task: editor}

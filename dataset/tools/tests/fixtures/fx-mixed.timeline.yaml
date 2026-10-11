@@ -19,6 +19,9 @@ tasks:
   - {id: transcode, name: ffmpeg, archetype: cpu-batch, arrive: 2s, bind: {total_work: 500ms, program: kdenlive_render}}
   - {id: renderers, name: chrome, archetype: renderer-hidden, arrive: 0s, depart: 60s, count: 3}
 
-focus:
+input:
   - {from: 1s, to: 20s, task: editor}
   - {from: 25s, to: 30s, task: editor}
+
+focus:
+  - {from: 0s, to: 60s, task: editor}

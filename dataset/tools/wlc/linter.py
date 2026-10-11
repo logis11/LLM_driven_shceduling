@@ -273,6 +273,26 @@ def lint_canonical(canonical, schema, report=None, mode=None, name=""):
                 errors.append(f"{prefix}{entry['id']}: WAKE targets unknown "
                               f"task {target!r}")
 
+    # 9.17: the focus track names top-level tasks within their pinned lifetimes, in time order, never overlapping
+    by_id = {e["id"]: e for e in arrivals}
+    focus = canonical.get("focus") or []
+    for win in focus:
+        task = by_id.get(win["task"])
+        if task is None:
+            errors.append(f"{prefix}focus names {win['task']!r}, not a top-level task")
+            continue
+        if win["t_start"] >= win["t_end"]:
+            errors.append(f"{prefix}focus interval of {win['task']!r}: t_start >= t_end")
+        if win["t_start"] < task["t"] or (task.get("depart") is not None and win["t_end"] > task["depart"]):
+            errors.append(f"{prefix}focus interval of {win['task']!r} lies outside its pinned lifetime")
+    starts = [w["t_start"] for w in focus]
+    if starts != sorted(starts):
+        errors.append(f"{prefix}focus intervals not sorted by t_start")
+    else:
+        for a, b in zip(focus, focus[1:]):
+            if a["t_end"] > b["t_start"]:
+                errors.append(f"{prefix}focus intervals overlap at {b['t_start']} (one user, one attention track)")
+
     return errors
 
 

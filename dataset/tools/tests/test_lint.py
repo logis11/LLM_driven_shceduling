@@ -74,7 +74,7 @@ def canonical_of(program, spawned=None):
         task["depart"] = 1_000_000
     return {"meta": {"id": "t", "derived_from": "t.timeline.yaml@abcdef1",
                      "sampled": {"seed": 1, "archetypes": "archetypes.yaml@abcdef1"}},
-            "ground_truth": [], "events": [task]}
+            "ground_truth": [], "focus": [], "events": [task]}
 
 
 TIMER, RUN = {"op": "TIMER", "period_us": 10}, {"op": "RUN", "us": 5}
@@ -138,7 +138,7 @@ BASE = {
 def load_bad(tmp_path, mutate):
     data = {"meta": dict(BASE["meta"]),
             "segments": [dict(s) for s in BASE["segments"]],
-            "tasks": [dict(t) for t in BASE["tasks"]], "focus": []}
+            "tasks": [dict(t) for t in BASE["tasks"]], "input": [], "focus": []}
     mutate(data)
     path = tmp_path / "bad.timeline.yaml"
     path.write_text(yaml.safe_dump(data))
@@ -169,18 +169,41 @@ def load_bad(tmp_path, mutate):
      lambda d: d["segments"].append({"from": "5s", "to": "15s", "mode": "x",
                                      "attributes": {"background_wanted": True}})),
     ("no input channel",
-     lambda d: d["focus"].append({"from": "1s", "to": "2s", "task": "player"})),
-    ("focus windows overlap",
+     lambda d: d["input"].append({"from": "1s", "to": "2s", "task": "player"})),
+    ("input windows overlap",
      lambda d: (d["tasks"].append({"id": "ed", "name": "code",
                                    "archetype": "code-editor",
                                    "arrive": "0s", "depart": "10s"}),
-                d["focus"].extend([{"from": "1s", "to": "5s", "task": "ed"},
+                d["focus"].append({"from": "0s", "to": "10s", "task": "ed"}),
+                d["input"].extend([{"from": "1s", "to": "5s", "task": "ed"},
                                    {"from": "4s", "to": "6s", "task": "ed"}]))),
-    ("outside task",
+    ("input window outside task",
      lambda d: (d["tasks"].append({"id": "ed", "name": "code",
                                    "archetype": "code-editor",
                                    "arrive": "2s", "depart": "10s"}),
-                d["focus"].append({"from": "1s", "to": "5s", "task": "ed"}))),
+                d["focus"].append({"from": "2s", "to": "10s", "task": "ed"}),
+                d["input"].append({"from": "1s", "to": "5s", "task": "ed"}))),
+    # 9.17: the window-focus track
+    ("missing focus track",
+     lambda d: d.pop("focus")),
+    ("focus targets unknown task",
+     lambda d: d["focus"].append({"from": "1s", "to": "2s", "task": "nobody"})),
+    ("a counted task",
+     lambda d: (d["tasks"].append({"id": "tabs", "name": "chrome", "archetype": "renderer-hidden",
+                                   "arrive": "0s", "depart": "10s", "count": 3}),
+                d["focus"].append({"from": "0s", "to": "10s", "task": "tabs"}))),
+    ("focus interval outside task",
+     lambda d: d["focus"].append({"from": "0s", "to": "11s", "task": "player"})),
+    ("focus intervals overlap",
+     lambda d: (d["tasks"].append({"id": "ed", "name": "code", "archetype": "code-editor",
+                                   "arrive": "0s", "depart": "10s"}),
+                d["focus"].extend([{"from": "0s", "to": "6s", "task": "player"},
+                                   {"from": "5s", "to": "10s", "task": "ed"}]))),
+    ("lies outside its focus intervals",
+     lambda d: (d["tasks"].append({"id": "ed", "name": "code", "archetype": "code-editor",
+                                   "arrive": "0s", "depart": "10s"}),
+                d["focus"].append({"from": "0s", "to": "4s", "task": "ed"}),
+                d["input"].append({"from": "1s", "to": "5s", "task": "ed"}))),
     ("meta.demand",
      lambda d: d["meta"].update(demand="whatever")),
     ("segment 'office': background_wanted missing",
@@ -204,7 +227,8 @@ def test_no_demand_window_gates_a_file(tmp_path, library, schema):
                           "attributes": {"background_wanted": True}}],
             "tasks": [{"id": "job", "name": "python3", "archetype": "cpu-batch",
                        "arrive": "0s",
-                       "bind": {"total_work": "20s", "program": "python3"}}]}
+                       "bind": {"total_work": "20s", "program": "python3"}}],
+            "focus": []}
     path = tmp_path / "under.timeline.yaml"
     path.write_text(yaml.safe_dump(data))
     timeline = Timeline(path, library)
@@ -236,3 +260,24 @@ def test_a_heavy_event_states_its_runs_and_no_gap(tmp_path):
     a.write_text(yaml.safe_dump(lib))
     errs = linter.lint_repo(str(a), str(src), str(refs))
     assert any("states no gap" in e for e in errs), errs
+
+
+@pytest.mark.parametrize("focus,expect", [
+    ([{"t_start": 0, "t_end": 1_000_000, "task": "a"}], None),
+    ([{"t_start": 0, "t_end": 1_000_000, "task": "nobody"}], "not a top-level task"),
+    ([{"t_start": 0, "t_end": 2_000_000, "task": "a"}], "outside its pinned lifetime"),
+    ([{"t_start": 500_000, "t_end": 1_000_000, "task": "a"}, {"t_start": 0, "t_end": 400_000, "task": "a"}],
+     "not sorted"),
+    ([{"t_start": 0, "t_end": 600_000, "task": "a"}, {"t_start": 500_000, "t_end": 1_000_000, "task": "a"}],
+     "overlap"),
+])
+def test_canonical_focus_track_names_live_top_level_tasks_in_order(schema, focus, expect):
+    """9.17 spec decisions 2 and 3: the canonical focus list names top-level tasks within their pinned lifetimes, in
+    time order, never overlapping."""
+    doc = canonical_of([{"op": "WAIT", "channel": "input:a"}, {"op": "RUN", "us": 5}])
+    doc["focus"] = focus
+    errors = lint_canonical(doc, schema)
+    if expect is None:
+        assert errors == []
+    else:
+        assert len(errors) == 1 and expect in errors[0], errors

@@ -15,8 +15,11 @@ tasks:
   - {id: mailer, name: thunderbird-bin, archetype: mail-client,
      arrive: 0s, depart: 60s}
 
-focus:
+input:
   - {from: 2s, to: 58s, task: mailer}
+
+focus:
+  - {from: 0s, to: 60s, task: mailer}
 
 operations:
   - {at: 40s, task: mailer, name: send}
