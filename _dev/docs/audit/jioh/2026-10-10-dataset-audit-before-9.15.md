@@ -121,3 +121,10 @@ The distractor's Layer 1 axis is the name's relation to the vocabulary, not its 
 - The ladder is generated over the sixteen modes: each C1 file with its names substituted per tier, tiers 3–5 (tiers 1–2 are the C1 files). Tier 4 names are compositional (`<function>-<role>`), tier 5 names opaque strings; every name within the 15-character `comm` limit.
 - Tier 3 is the program's own real name that carries no meaning; it exists only for the modes whose C1 names supply one, and those are its cells. The present C5 tier-3 files, a real name of another program standing in (an indexer's name on a player), move to C6 as the name-collision limit.
 - With the focus in the telemetry, which processes carry the substituted name is an axis: the focus holder only, the background only, or all. Whether every cell is built is a cost decision.
+
+### C2 direction, and A1 closed (2026-10-11, 인지오)
+
+- The rate claim on intent runs on the sixteen C1–C7 pairs; no new C2 pairs are generated. The three authored pairs remain, the P1 pair the RQ0 load-bearing one.
+- A1 is taken as option (ii): the compiler draws a derived file's stimulus offset from its base's window, so a counterpart's keystrokes are its base's first C seconds; the ten interactive counterparts and their variants are rebuilt, re-blessed and re-pinned; the test "c7 input wakes ⊂ c1 input wakes in [0, C)" is added; the pair review's finding 8 and the scoring spec's c7-mail comment are restated to the mechanism.
+- The building plan's C2 text ("behaviorally identical", "differ only in intent") is restated to the rebuilt state: the unwanted side is a measured job of its own (file-indexer, package-upgrade, incremental-backup), differing in name and in behaviour; P3 flips the mode and `initiated`, not `background_wanted`. A 9.15 item.
+- Widening the set of measured unwanted jobs is a measurement backlog item, not part of the generated layer.
