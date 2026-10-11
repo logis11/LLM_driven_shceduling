@@ -83,3 +83,7 @@ A4. **Build-gate holes (process, not content).** `make check` compares an in-mem
 2. Decide A1 (recommend the compiler rule + rebuild), A2 (field + lint now or deferred with a stated limitation), A3 (re-type the entry per D113 and state the chain as reported-then-designed).
 3. Close A4's gate holes in one small change set; push a CI run that compiles this manifest on Linux.
 4. Fold the additions above into the 9.15 line; then run 9.15.
+
+## Resolutions (2026-10-11, 인지오)
+
+- A3, the game chain on the talk-tier source: resolved as is. The figures stand as the talk's reported values; the chain-x1.2 and chain-x1.4 variants are the sensitivity check. No change to the entry or the files.
