@@ -93,3 +93,9 @@ A4. **Build-gate holes (process, not content).** `make check` compares an in-mem
 The core set serves milestones 1–7 (RQ0–RQ4), not RQ0 alone. Its C3 group holds three arcs with about eight segment boundaries in all, each ordered mode pair seen at most once, and the set has 64 segments over 32 driver-table cells. It cannot carry a statistical claim on transition recognition (RQ1), on recognition accuracy per cell, or on the phase-shift family (RQ4: a fixed sequence at 60 s / 10 s / 2 s transitions, whose files do not exist). The building plan assigns generalisation to the Layer 3b naturalistic set, which is not built and is on no phase line. Fidelity-map row "co-occurrence / order: design, ungrounded" is this finding; the consolidation under-classed it by reading it against RQ0 only.
 
 Status: open. 인지오 is weighing whether the core set as defined is the right instrument at all, against a naturalistic or generated set. To be decided before 9.15 proceeds.
+
+### Direction taken on the open item (2026-10-11, 인지오)
+
+- A generated layer is added beside the core set; the core set stays. Each group whose claim is a rate gets a generated set that enumerates the factor in full, with no realism claim (design). The naturalistic set stays in the backlog for the frequency claims.
+- C3: a 2-segment grid over the 240 ordered mode pairs (recognition at a transition, with direction), and a 3-segment return grid A → B → A over the same pairs with the middle segment's length as a variant (RQ4's stale-configuration cost). Longer chains are not enumerated. The three authored arcs remain as existence cases; the building plan's C3 role is restated to that.
+- A small flap-stress set (a few files with fast repeated set changes) is the tuning and test material for the daemon's hold time and hysteresis; the values are tuned on files disjoint from the ones measured.
