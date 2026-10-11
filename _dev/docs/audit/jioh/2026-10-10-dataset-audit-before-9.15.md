@@ -115,3 +115,9 @@ Lands in: 9.15 for the documents and the final memo (the contract text, the prop
 ### C4 direction (2026-10-11, 인지오)
 
 The distractor's Layer 1 axis is the name's relation to the vocabulary, not its CPU behaviour: another mode's foreground program (the 240 cross-mode cells, the focus staying on the running mode), a program outside the vocabulary (the library's measured ones), an unknown name (C5's axis). CPU behaviour is a Layer 2 axis, read on the same files. The three authored C4 files remain as cells of the grid.
+
+### C5 direction (2026-10-11, 인지오)
+
+- The ladder is generated over the sixteen modes: each C1 file with its names substituted per tier, tiers 3–5 (tiers 1–2 are the C1 files). Tier 4 names are compositional (`<function>-<role>`), tier 5 names opaque strings; every name within the 15-character `comm` limit.
+- Tier 3 is the program's own real name that carries no meaning; it exists only for the modes whose C1 names supply one, and those are its cells. The present C5 tier-3 files, a real name of another program standing in (an indexer's name on a player), move to C6 as the name-collision limit.
+- With the focus in the telemetry, which processes carry the substituted name is an axis: the focus holder only, the background only, or all. Whether every cell is built is a cost decision.
