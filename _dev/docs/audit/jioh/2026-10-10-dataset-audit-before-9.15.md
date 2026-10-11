@@ -99,3 +99,19 @@ Status: open. 인지오 is weighing whether the core set as defined is the right
 - A generated layer is added beside the core set; the core set stays. Each group whose claim is a rate gets a generated set that enumerates the factor in full, with no realism claim (design). The naturalistic set stays in the backlog for the frequency claims.
 - C3: a 2-segment grid over the 240 ordered mode pairs (recognition at a transition, with direction), and a 3-segment return grid A → B → A over the same pairs with the middle segment's length as a variant (RQ4's stale-configuration cost). Longer chains are not enumerated. The three authored arcs remain as existence cases; the building plan's C3 role is restated to that.
 - A small flap-stress set (a few files with fast repeated set changes) is the tuning and test material for the daemon's hold time and hysteresis; the values are tuned on files disjoint from the ones measured.
+
+### Decision — focus enters the telemetry (2026-10-11, 인지오)
+
+The recognizer's snapshot carries, beside the name → count multiset, which process holds the focus (none when no window does). The telemetry contract (`docs/data-contracts.md` §4, frozen 2026-09-06), the proposal's B.2 table and RQ1 wording, the research-claims chain's C3 line, and the daemon guide restate to it. Behaviour (burst patterns, CPU use) stays out; labels stay out; PIDs stay out.
+
+Consequences recorded with the decision:
+- A focus change is a set change: it emits a snapshot and a query point, as a count change does.
+- The whitelist condition receives the focus as every other condition does.
+- Every condition can be run on the same files with the focus field present and absent; the difference is reported.
+- The generated layer's ground truth states the focus holder per segment. The transition grid has two forms, "A departs, B arrives" and "A stays, the focus moves to B"; the distractor grid is "B arrives, the focus stays on A".
+
+Lands in: 9.15 for the documents and the final memo (the contract text, the proposal, the claims chain, the daemon guide); the simulator's telemetry extraction and the daemon's prompt follow the memo.
+
+### C4 direction (2026-10-11, 인지오)
+
+The distractor's Layer 1 axis is the name's relation to the vocabulary, not its CPU behaviour: another mode's foreground program (the 240 cross-mode cells, the focus staying on the running mode), a program outside the vocabulary (the library's measured ones), an unknown name (C5's axis). CPU behaviour is a Layer 2 axis, read on the same files. The three authored C4 files remain as cells of the grid.
