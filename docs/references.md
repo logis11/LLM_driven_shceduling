@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-10-08
+> Status: normative · Created 2026-08-26 · Updated 2026-10-11
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -497,6 +497,21 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - cite: Fiedler, G. "Fix Your Timestep!" *Gaffer On Games*, 2004-06-10. gafferongames.com/post/fix_your_timestep/ (accessed 2026-10-06).
 - role: a documented game-loop pattern, not a claim about all engines: "the renderer produces time and the simulation consumes it in discrete dt sized steps"; behind, the update simulates "more steps to catch up", bounded by a clamp on frame time (`frameTime > 0.25`) or "a maximum # of steps per-frame"; the final loop renders once per iteration. Practitioner article, footnote tier.
 - status: verified (2026-10-06; the page read in full)
+
+### `feral-gamemode`
+- cite: Feral Interactive. GameMode 1.8.2, `example/gamemode.ini` (the shipped example configuration). github.com/FeralInteractive/gamemode/blob/1.8.2/example/gamemode.ini (accessed 2026-10-11; release 1.8.2 published 2024-08-19).
+- role: the flap-stress set's 5 s interval (`dataset/grids.yaml`; 9.19 decision 7, the hold-time plan's step 3): the daemon's `reaper_freq=5` — "The reaper thread will check every 5 seconds for exited clients, for config file changes, and for the CPU/iGPU power balance". Existence of a 5 s check interval in a shipped desktop game-mode daemon; never a claim that the value suits any other switch.
+- status: verified (2026-10-11; the file read at the release tag and at `master`, identical lines)
+
+### `tuned`
+- cite: Red Hat Performance. tuned v2.28.0, `tuned-main.conf` (the daemon's main configuration). github.com/redhat-performance/tuned/blob/v2.28.0/tuned-main.conf (accessed 2026-10-11; release v2.28.0 published 2026-08-22).
+- role: the flap-stress set's 10 s interval (`dataset/grids.yaml`; 9.19 decision 7): `update_interval = 10` — "Update interval for dynamic tunings (in seconds). It must be multiply of the sleep_interval" — over `sleep_interval = 1` ("How long to sleep before checking for events (in seconds); higher number means lower overhead but longer response time"). Carry with it that dynamic tuning ships disabled: `dynamic_tuning = 0`, "if disabled only static tuning will be used". Existence of the value only.
+- status: verified (2026-10-11; the file read at the release tag and at `master`, identical lines)
+
+### `systemd-oomd`
+- cite: systemd. `oomd.conf(5)`, from `man/oomd.conf.xml` at `main` (version 263~devel). github.com/systemd/systemd/blob/main/man/oomd.conf.xml (accessed 2026-10-11; freedesktop.org's rendered page refused the request at this check).
+- role: the flap-stress set's 30 s interval (`dataset/grids.yaml`; 9.19 decision 7): `DefaultMemoryPressureDurationSec=` "Sets the amount of time a unit's control group needs to have exceeded memory pressure limits" before systemd-oomd acts — "Must be set to 0, or at least 1 second. Defaults to 30 seconds when unset or 0"; the limit, `DefaultMemoryPressureLimit=`, "represents the fraction of time in a 10 second window in which all tasks in the control group were delayed", "Defaults to 60%". Existence of the value only.
+- status: verified (2026-10-11; the XML source read on `main`)
 
 ## Grounding — measurement
 

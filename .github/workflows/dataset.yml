@@ -18,5 +18,6 @@ jobs:
       - run: make -C dataset lint
       - run: make -C dataset dataset
       - run: make -C dataset variants
+      - run: make -C dataset generated  # the generated layer: one manifest per set (9.19)
       - run: make -C dataset test      # the coreset fixture reads the build just written (9.18)
-      - run: make -C dataset check     # both manifests reproduce; build/ equals them
+      - run: make -C dataset check     # every manifest reproduces; build/ equals their union

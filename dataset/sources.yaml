@@ -300,3 +300,35 @@ sources:
       Placeholder sentinel for parameters awaiting the CI campaign. Valid
       only until the schema freeze; the linter rejects any meas-pending tag
       after freeze.
+
+  # ---- grounds of the flap-stress set's intervals (9.19 decision 7; the hold-time plan's step 3) ----
+
+  feral-gamemode:
+    type: deployed-system
+    notes: >-
+      Feral Interactive's GameMode daemon, release 1.8.2: the shipped example
+      configuration's `reaper_freq=5`, "the reaper thread will check every 5
+      seconds for exited clients, for config file changes, and for the CPU/iGPU
+      power balance". Grounds the flap-stress set's 5 s interval (`grids.yaml`)
+      as the check interval of a shipped desktop game-mode daemon. Existence
+      of the value; no claim that 5 s is right for any other switch.
+
+  tuned:
+    type: deployed-system
+    notes: >-
+      Red Hat's tuned daemon, release v2.28.0: `tuned-main.conf`'s dynamic
+      tuning `update_interval = 10` ("Update interval for dynamic tunings (in
+      seconds)") over a `sleep_interval = 1`; dynamic tuning itself ships off
+      (`dynamic_tuning = 0`). Grounds the flap-stress set's 10 s interval
+      (`grids.yaml`) as the update interval of a shipped daemon that re-tunes
+      the system on what it observes. Existence of the value only.
+
+  systemd-oomd:
+    type: deployed-system
+    notes: >-
+      systemd's `oomd.conf(5)`: `DefaultMemoryPressureDurationSec=` "sets the
+      amount of time a unit's control group needs to have exceeded memory
+      pressure limits" before systemd-oomd acts, "defaults to 30 seconds";
+      the limit a 60 % fraction of a 10 s window. Grounds the flap-stress set's
+      30 s interval (`grids.yaml`) as the sustain-before-acting duration of a
+      shipped system daemon. Existence of the value only.

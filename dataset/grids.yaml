@@ -1,0 +1,60 @@
+# dataset/grids.yaml — the generated layer's grid definition (9.19 spec).
+#
+# `tools/generate.py` reads this file and the sixteen C1 timelines
+# (`timelines/coreset/c1-<mode>.timeline.yaml`) and writes one timeline per cell
+# under `generated/<set>/` (not committed), compiles them with the workload
+# compiler and writes one manifest per set, `build.<set>.manifest.json`, that
+# pins this file, the generator, the C1 timelines and the compile's inputs by
+# content. Every generated file is design: it composes the C1 task sets and
+# claims nothing about how often or in what order desktops see the modes.
+#
+# A segment is `segment_length` long (9.19 decision 1). A task set lands in a
+# segment by 9.10 D44 — its C1 arrive offsets kept, the input window with the
+# C1's 2 s margins, each operation at its fraction of the window (decision 3);
+# a segment of `no_input_below` or less has no input window and its batch job
+# arrives at the segment's start. A batch job's `total_work` or `spawn_count` is
+# the C1 value scaled to the span the job must be alive in, labelled `design`
+# (decision 1). Every seed and every split is a keyed SHA-256 draw from the
+# cell's id; nothing here is chosen by hand.
+
+segment_length: 60s
+no_input_below: 4s
+
+sets:
+
+  # The 2-segment transition grid over the 240 ordered mode pairs (A, B), two forms
+  # (decision 2): `departs` — at the boundary A's tasks depart, B's arrive, the
+  # focus moves to B; `focus` — B's tasks arrive and the focus moves to B, A's
+  # tasks stay to the end of the file. No split: RQ1 tunes nothing on it.
+  transition-grid:
+    forms: [departs, focus]
+
+  # The 3-segment return grid A -> B -> A over the same pairs, form `departs`
+  # throughout (decision 10), the middle segment's length a variant (RQ4's
+  # phase-shift family at 60 s / 10 s / 2 s). Split by pair: the 240 pairs
+  # ranked by keyed hash, the first half tuning, a pair's three variants on the
+  # same side (decision 6).
+  return-grid:
+    middle_lengths: [60s, 10s, 2s]
+    split: {by: pair, tuning: 120}
+
+  # The flap-stress set, the hold-time and hysteresis tuning material (the
+  # hold-time plan, `_dev/docs/plan/jioh/hold-time-and-hysteresis.md`): a 60 s
+  # lead-in on A, then `alternations` segments of one interval each, B and A in
+  # turn, form `departs`. Three ordered pairs drawn from the 240 by keyed hash;
+  # each file built under two seeds, one tuning and one measurement (decision 6).
+  # The intervals are the hold-time plan's step 3 (decision 7): 5 s, 10 s and
+  # 30 s are the debounce values of the daemon-level switches comparable to
+  # ours — GameMode's reaper interval, tuned's dynamic-tuning update interval,
+  # systemd-oomd's pressure duration — each tagged with its source; 2 s is a
+  # point below that range, design.
+  flap-stress:
+    lead_in: 60s
+    alternations: 8
+    pairs: 3
+    intervals:
+      - {length: 2s, source: design}
+      - {length: 5s, source: feral-gamemode}
+      - {length: 10s, source: tuned}
+      - {length: 30s, source: systemd-oomd}
+    split: {by: seed, names: [tuning, measurement]}

@@ -1,4 +1,5 @@
-"""`check_build.py` (9.18 spec, decision 6): build/ equals the union of the two manifests."""
+"""`check_build.py` (9.18 spec, decision 6; 9.19 decision 9): build/ equals the union of every manifest — the core
+set's, the variants' and one per generated set the grid definition names."""
 
 import hashlib
 import importlib
@@ -35,7 +36,7 @@ def test_a_missing_build_fails(tmp_path):
     root = make_repo(tmp_path)
     import shutil
     shutil.rmtree(root / "dataset" / "build")
-    assert check_build.check(root) == ["dataset/build: missing (run `make dataset variants` first)"]
+    assert check_build.check(root) == ["dataset/build: missing (run `make dataset variants generated` first)"]
 
 
 def test_a_missing_pinned_file_an_unpinned_file_and_a_drifted_file_are_each_named(tmp_path):
@@ -49,3 +50,22 @@ def test_a_missing_pinned_file_an_unpinned_file_and_a_drifted_file_are_each_name
                                                  "build/coreset-single/stale.workload.json",
                                                  "build/coreset-single/a@venue-x0.8.workload.json"]
     assert "missing on disk" in errors[0] and "pinned by no manifest" in errors[1] and "differs" in errors[2]
+
+
+def test_a_generated_sets_manifest_joins_the_union_when_the_grid_definition_names_it(tmp_path):
+    root = make_repo(tmp_path)
+    dataset = root / "dataset"
+    assert check_build.manifests(root) == list(check_build.FIXED_MANIFESTS)
+    (dataset / "grids.yaml").write_text(json.dumps({"sets": {"transition-grid": {}}}))
+    assert check_build.manifests(root) == [*check_build.FIXED_MANIFESTS, "dataset/build.transition-grid.manifest.json"]
+    assert check_build.check(root) == []          # a manifest not yet written pins nothing
+    grid = dataset / "build" / "transition-grid-single"
+    grid.mkdir()
+    (grid / "tr-a-to-b-departs.workload.json").write_bytes(b"G\n")
+    (grid / "tr-a-to-b-departs.report.json").write_bytes(b"RG\n")
+    assert [e.split(":")[0] for e in check_build.check(root)] == ["build/transition-grid-single/tr-a-to-b-departs.report.json",
+                                                                  "build/transition-grid-single/tr-a-to-b-departs.workload.json"]
+    (dataset / "build.transition-grid.manifest.json").write_text(json.dumps({
+        "inputs": {}, "artifacts": {"transition-grid-single/tr-a-to-b-departs.workload.json": sha(b"G\n")},
+        "reports": {"transition-grid-single/tr-a-to-b-departs.report.json": sha(b"RG\n")}, "demand": {}, "grid": {}}))
+    assert check_build.check(root) == []

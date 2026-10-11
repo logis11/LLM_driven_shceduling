@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""Verify the build against the committed manifests (9.18 spec, decision 6; 9.22 spec, decision 1).
+"""Verify the build against the committed manifests (9.18 spec, decision 6; 9.22 spec, decision 1; 9.19 decision 9).
 
 Usage: check_build.py [--repo ROOT]
 
-Two checks. The two manifests on disk equal their committed bytes (`git show
-HEAD:<path>`): the build step rewrote them, so equality says the recompile
-reproduces the committed set. And `dataset/build/` equals the union of
-`dataset/build.manifest.json` (artifacts and reports) and
-`dataset/build.variants.manifest.json` (variant artifacts): every file present
-with the pinned hash, every pinned entry present, no file pinned by neither. A
-missing build directory fails. Writes nothing.
+Two checks over every manifest — `dataset/build.manifest.json` (the core set:
+artifacts and reports), `dataset/build.variants.manifest.json` (the variant
+artifacts) and one `dataset/build.<set>.manifest.json` per generated set that
+`dataset/grids.yaml` names (artifacts and reports). Each manifest on disk equals
+its committed bytes (`git show HEAD:<path>`): the build steps rewrote them, so
+equality says the rebuild reproduces the committed sets. And `dataset/build/`
+equals the union of the manifests: every file present with the pinned hash,
+every pinned entry present, no file pinned by none. A missing build directory
+fails. Writes nothing.
 """
 
 import argparse
@@ -19,7 +21,20 @@ import pathlib
 import subprocess
 import sys
 
-MANIFESTS = ("dataset/build.manifest.json", "dataset/build.variants.manifest.json")
+import yaml
+
+FIXED_MANIFESTS = ("dataset/build.manifest.json", "dataset/build.variants.manifest.json")
+BUILD_STEPS = "`make dataset variants generated`"
+
+
+def manifests(root):
+    """The manifest paths, repo-relative: the two fixed ones and one per generated set in grids.yaml."""
+    out = list(FIXED_MANIFESTS)
+    grids = pathlib.Path(root) / "dataset" / "grids.yaml"
+    if grids.is_file():
+        sets = (yaml.safe_load(grids.read_text()) or {}).get("sets") or {}
+        out += [f"dataset/build.{name}.manifest.json" for name in sets]
+    return out
 
 
 def committed_bytes(root, rel):
@@ -29,12 +44,12 @@ def committed_bytes(root, rel):
 
 
 def check_committed(root):
-    """Returns error strings; empty when both manifests equal their committed bytes (9.22 spec, decision 1)."""
+    """Returns error strings; empty when every manifest equals its committed bytes (9.22 spec, decision 1)."""
     errors = []
-    for rel in MANIFESTS:
+    for rel in manifests(root):
         path = root / rel
         if not path.is_file():
-            errors.append(f"{rel}: missing (run `make dataset variants` first)")
+            errors.append(f"{rel}: missing (run {BUILD_STEPS} first)")
             continue
         committed = committed_bytes(root, rel)
         if committed is None:
@@ -46,15 +61,17 @@ def check_committed(root):
 
 
 def expected_hashes(root):
-    """{relpath under build/: sha256} from both manifests."""
-    dataset = root / "dataset"
+    """{relpath under build/: sha256} from every manifest: `artifacts` (a hash, or a record carrying `sha256`) and
+    `reports`."""
     expected = {}
-    manifest = json.loads((dataset / "build.manifest.json").read_text(encoding="utf-8"))
-    for section in ("artifacts", "reports"):
-        expected.update(manifest.get(section) or {})
-    variants = json.loads((dataset / "build.variants.manifest.json").read_text(encoding="utf-8"))
-    for rel, record in (variants.get("artifacts") or {}).items():
-        expected[rel] = record["sha256"] if isinstance(record, dict) else record
+    for rel in manifests(root):
+        path = pathlib.Path(root) / rel
+        if not path.is_file():
+            continue
+        manifest = json.loads(path.read_text(encoding="utf-8"))
+        for section in ("artifacts", "reports"):
+            for file_rel, record in (manifest.get(section) or {}).items():
+                expected[file_rel] = record["sha256"] if isinstance(record, dict) else record
     return expected
 
 
@@ -62,7 +79,7 @@ def check(root):
     """Returns error strings; empty when build/ equals the manifests."""
     build_dir = root / "dataset" / "build"
     if not build_dir.is_dir():
-        return [f"{build_dir.relative_to(root)}: missing (run `make dataset variants` first)"]
+        return [f"{build_dir.relative_to(root)}: missing (run {BUILD_STEPS} first)"]
     expected = expected_hashes(root)
     errors = []
     on_disk = {p.relative_to(build_dir).as_posix(): p for p in sorted(build_dir.rglob("*")) if p.is_file()}
@@ -89,7 +106,7 @@ def main():
         for message in errors:
             print(f"  - {message}", file=sys.stderr)
         return 1
-    print(f"build verified ({len(expected_hashes(root))} files)")
+    print(f"build verified ({len(expected_hashes(root))} files, {len(manifests(root))} manifests)")
     return 0
 
 

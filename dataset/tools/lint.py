@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dataset linter CLI — the checks before a compile: repo lints and timeline lints.
+"""Dataset linter CLI — the checks before a compile: repo lints, timeline lints and the grid definition's.
 
 The canonical lints run inside the compile, on every artifact as it is built
 (compile.py, variants.py); a `lint` pass repeats none of it (9.22 spec, decision 2).
@@ -17,6 +17,7 @@ import yaml
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 from wlc import Library, Timeline, TimelineError  # noqa: E402
+from gen import lint_grids  # noqa: E402
 from wlc.linter import lint_bound_sources, lint_repo  # noqa: E402
 
 
@@ -32,6 +33,7 @@ def run(root, freeze=False):
             Timeline(path, library)
         except TimelineError as err:
             errors.append(str(err))
+    errors.extend(lint_grids(dataset / "grids.yaml", registry))   # 9.19: the generated layer's definition and its interval sources
     return errors
 
 
