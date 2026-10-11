@@ -41,7 +41,7 @@ Spec invariant. The compiler's sources are inputs the manifest pins by content (
 | `make lint` | ~42 min | 0.8 s |
 | `make dataset` | 22–24 min | 52 s |
 | `make variants` | 33–35 min | 1 min 46 s |
-| `make test` | 44 min | (measured below) |
+| `make test` | 44 min | 2 min 01 s (500 passed, 1 skipped; the slowest test 28 s) |
 | `make check` | 56–59 min | 1.7 s |
 
-The compile's 24 minutes were mostly the schema validation (18 of them, by 9.18 D7's measurement), which `jsonschema-rs` removes; the parallel pool takes the rest from about 6 min of compute to 52 s of wall time on 10 cores. The variants, 78 jobs over the pool, likewise.
+One local `make lint dataset variants test check` is about 5 min against 3.5 h. The compile's 24 minutes were mostly the schema validation (18 of them, by 9.18 D7's measurement), which `jsonschema-rs` removes; the parallel pool takes the rest from about 6 min of compute to 52 s of wall time on 10 cores. The variants, 78 jobs over the pool, likewise.
