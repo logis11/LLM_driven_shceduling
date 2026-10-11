@@ -1,6 +1,6 @@
 # Coreset 안내 — 50개 workload를 하나씩 뜯어보기
 
-> Status: draft · Created 2026-09-08 · Updated 2026-09-11
+> Status: draft · Created 2026-09-08 · Updated 2026-10-11
 
 이 문서는 **공부용 문서**예요. dataset이 무엇이고, 어떻게 만들어지고, 50개 coreset 파일 각각이 무슨 상황을 담고 있으며 어떤 숫자를 갖고 있는지를 OS/시스템 지식이 거의 없는 사람 기준으로 풀어 써요. 설계의 규범적 근거는 building-plan(`docs/workload/building-plan.md`), archetype의 규범적 정의는 archetype-plan(`docs/workload/archetype-plan.md`), 실행 semantics는 interpretation contract(`docs/simulator/interpretation-contract.md`)에 있어요. 이 문서는 그 셋을 읽을 수 있게 만드는 다리이고, 숫자는 2026-09-08에 `make dataset`으로 빌드한 `coreset-single`에서 직접 읽은 값이에요.
 
@@ -86,13 +86,17 @@ tasks:
   - {id: editor, name: code, archetype: desktop-interactive, arrive: 0s, depart: 180s}
   - {id: hog, name: python3, archetype: cpu-batch, arrive: 60s, bind: {total_work: 130s}}
 
-focus:
+input:
   - {from: 2s, to: 178s, task: editor}
+
+focus:
+  - {from: 0s, to: 180s, task: editor}
 ```
 
 - `segments`: 0–60초는 `dev`, 60–180초는 `ml-train`. 둘 다 `background_wanted: true`. `scenario`는 근거 tag.
 - `tasks`: `editor`는 `code`라는 이름으로 `desktop-interactive`처럼 행동하고 0초에 와서 180초에 사용자가 닫음. `hog`는 `python3`라는 이름으로 `cpu-batch`처럼 행동하고 60초에 와서 130초짜리 일을 함. 퇴장 시각 없음(일이 끝나면 스스로 나감).
-- `focus`: 사용자의 주의가 어디에 있나. 2–178초 동안 `editor`. **keystroke는 focus window 안에서만 생성돼요.** 이게 "interactive"의 정의예요.
+- `input`: keystroke가 어느 task로 들어가나. 2–178초 동안 `editor`. **keystroke는 input window 안에서만 생성돼요.** 이게 "interactive"의 정의예요. (2026-10-11 전에는 이 track의 이름이 `focus`였어요.)
+- `focus`: 어느 task의 창이 **focus**를 갖고 있나. 0–180초 동안 `editor`. 사용자가 마지막으로 앞에 세운 창에 머물고, typing을 멈춰도 사라지지 않고, 창이 하나도 없을 때만 비어 있어요. 모든 `input` window는 같은 task의 `focus` interval 안에 있어야 해요. 이 track은 compile된 파일의 `focus` key로 실려 recognizer에게 **보여지는** 것이에요(7장).
 
 ---
 
@@ -143,9 +147,9 @@ keystroke를 기다리다가 오면 burst만큼 일해요. 두 개의 분포가 
 - `input_gap`: keystroke 간격. 두 성분 lognormal mixture. 유창하게 칠 때 평균 158 ms, 34% 확률로 멈춤(평균 395 ms). 전체 평균 238.66 ms. 출처는 dhakal-chi18(타이핑 연구)과 roeser-rw24(분포 family).
 - `burst_fraction`: burst의 길이 = 직전 gap × uniform(0, 1). interbench의 "0–100% 가변 CPU"를 선형화한 것. 우리 modeling.
 
-compile되면 **unroll**돼요. `LOOP`가 아니라 `WAIT, RUN, WAIT, RUN, …`가 수백 쌍 펼쳐진 형태. 각 RUN의 값이 다 달라요. 예를 들어 `c1-office`의 `writer`는 234쌍이고 RUN 중앙값 ≈ 90 ms, 총 29.8 s. 즉 focus window 56초 중 약 절반을 일해요. 이게 왜 그런지는 `burst = fraction × gap`에서 fraction 평균이 0.5라서예요.
+compile되면 **unroll**돼요. `LOOP`가 아니라 `WAIT, RUN, WAIT, RUN, …`가 수백 쌍 펼쳐진 형태. 각 RUN의 값이 다 달라요. 예를 들어 `c1-office`의 `writer`는 234쌍이고 RUN 중앙값 ≈ 90 ms, 총 29.8 s. 즉 input window 56초 중 약 절반을 일해요. 이게 왜 그런지는 `burst = fraction × gap`에서 fraction 평균이 0.5라서예요.
 
-**중요한 결과:** focus되지 않은 desktop-interactive task는 keystroke를 하나도 안 받아요. compile 결과는 `WAIT(input:<id>)` 하나뿐인 program이에요. 영원히 자요. `c1-office`의 `browser`가 그래요. recognizer에게는 `chrome`으로 보이지만 CPU는 0.
+**중요한 결과:** input window가 없는 desktop-interactive task는 keystroke를 하나도 안 받아요. compile 결과는 `WAIT(input:<id>)` 하나뿐인 program이에요. 영원히 자요. `c1-office`의 `browser`가 그래요. recognizer에게는 `chrome`으로 보이지만 CPU는 0.
 
 ### 4.2 compute/batch family
 
@@ -256,7 +260,7 @@ sampling 단위 세 가지:
 ### 5.2 desktop-interactive의 unroll (keystroke 생성)
 
 ```
-for each focus window of this task:
+for each input window of this task:
     t = window.from
     loop:
         gap = draw(input_gap)          # ~238 ms 평균의 mixture
@@ -267,7 +271,7 @@ for each focus window of this task:
         append WAIT(input:<id>), RUN(burst) to program
 ```
 
-`c1-office`의 `writer`: focus 2–58 s → 234개 wake, 234쌍 WAIT/RUN. 첫 wake는 2.216 s. focus가 없는 task는 program이 `WAIT` 하나.
+`c1-office`의 `writer`: input 2–58 s → 234개 wake, 234쌍 WAIT/RUN. 첫 wake는 2.216 s. input window가 없는 task는 program이 `WAIT` 하나.
 
 ### 5.3 finite job의 unroll
 
@@ -365,7 +369,7 @@ op는 딱 둘. `arrive`와 `wake`.
 
 ## 7. recognizer가 보는 것 — telemetry snapshot과 query point
 
-daemon은 run file에서 **pinned event**(등장, 그리고 `depart`가 있는 퇴장)만 시간순으로 걸으면서 "살아 있는 이름의 multiset"을 유지해요. 그 집합이 바뀔 때마다 snapshot 하나 = **query point** 하나. recognizer는 그때만 호출돼요. 중간에는 아무것도 안 물어요.
+daemon은 visible projection에서 **pinned event**(등장, `depart`가 있는 퇴장, 그리고 focus interval의 시작과 끝)만 시간순으로 걸으면서 "살아 있는 이름의 multiset + focus holder의 이름"을 유지해요. 그 집합이 바뀔 때마다 snapshot 하나 = **query point** 하나. recognizer는 그때만 호출돼요. 중간에는 아무것도 안 물어요.
 
 규칙 몇 가지:
 - 개수 변화도 변화예요. `chrome ×13`이 `×14`가 되면 snapshot이 나와요(`c6-spoof`가 이걸 이용).
@@ -373,14 +377,15 @@ daemon은 run file에서 **pinned event**(등장, 그리고 `depart`가 있는 �
 - finite task는 `depart`가 없으니 **끝나도 telemetry에서 안 사라져요.** recognizer는 batch job이 끝난 걸 몰라요.
 - spawn 자식(`cc1 ×100`)은 부모 `make`가 나타날 때 같이 보여요. 언제 태어나는지는 emergent라 알 수 없으니 부모의 lifetime에 붙여요.
 - 마지막 순간(모든 segment-bound task가 떠남)의 snapshot도 나와요. 하지만 그 뒤에는 채점할 segment가 없으니 채점에서 빠져요.
+- **focus holder**(2026-10-11, 9.17): snapshot에 `focus: "code"`처럼 focus를 가진 process의 **이름**이 실려요(아무 창도 없으면 `null`). focus가 다른 이름으로 옮겨가면 set change라 snapshot이 나오고, 같은 이름의 다른 instance(chrome tab A → B)로 옮겨가는 건 아무것도 바꾸지 않아요. daemon은 두 **telemetry shape** 중 하나로 보여줘요: `focus`(위 모양) 또는 `names`(`focus` field 없음). query point는 두 shape에서 같아요 — `names`에서는 focus만 바뀐 순간에 직전과 똑같은 snapshot이 다시 나가요. 두 shape의 차이가 이 field의 측정된 가치예요.
 
 `c2-p1a`의 query point 셋:
 
-| t | 보이는 것 | 채점 |
-|---|---|---|
-| 0 s | `code ×1` | `dev`, wanted |
-| 60 s | `code ×1, python3 ×1` | `ml-train`, wanted |
-| 180 s | `python3 ×1` | (terminal, 채점 안 함) |
+| t | 보이는 것 | focus | 채점 |
+|---|---|---|---|
+| 0 s | `code ×1` | `code` | `dev`, wanted |
+| 60 s | `code ×1, python3 ×1` | `code` | `ml-train`, wanted |
+| 180 s | `python3 ×1` | `null` | (terminal, 채점 안 함) |
 
 recognizer는 두 번 답해요. 그 답이 config schedule의 두 entry(+ boot entry)가 되고, recognition log의 두 query가 돼요. 10장의 파일별 표에 각 파일의 query point를 다 적어뒀어요.
 
@@ -394,7 +399,7 @@ compiler는 파일마다 static demand estimate를 내요.
 utilization = Σ(모든 task의 RUN 총합) / T_end
 ```
 
-editor는 focus window 안의 burst 합, batch는 total_work, periodic은 (RUN/period) × 살아 있는 시간, spawn 자식은 전부 합산. 1.0이면 파일 전체 시간 동안 lane을 100% 요구한다는 뜻. 1.2면 120%: 어떻게 해도 누군가는 기다려요. **이 oversubscription이 실험의 재료예요.** 의자가 남으면 scheduler가 뭘 하든 차이가 안 나니까.
+editor는 input window 안의 burst 합, batch는 total_work, periodic은 (RUN/period) × 살아 있는 시간, spawn 자식은 전부 합산. 1.0이면 파일 전체 시간 동안 lane을 100% 요구한다는 뜻. 1.2면 120%: 어떻게 해도 누군가는 기다려요. **이 oversubscription이 실험의 재료예요.** 의자가 남으면 scheduler가 뭘 하든 차이가 안 나니까.
 
 **demand window 규칙:** `-single` 파일 중 demand class가 `oversubscribed`인 것은 utilization이 1.00–1.50 안에 있어야 해요. lint가 검사. `calibration` class는 면제. class는 timeline의 `meta.demand`로 선언하고, 파일의 실제 demand가 낮다는 뜻이 아니라 "검사 면제"라는 뜻이에요(`c1-gaming`은 calibration인데 1.46).
 
@@ -464,14 +469,14 @@ editor는 focus window 안의 burst 합, batch는 total_work, periodic은 (RUN/p
 
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| writer | soffice.bin | desktop-interactive | 0 → 60 | focus 2–58 s. wake 234개. RUN 234개, 중앙값 89.7 ms, 총 29.8 s |
-| browser | chrome | desktop-interactive | 0 → 60 | focus 없음 → `WAIT` 하나. **한 번도 안 깸** |
+| writer | soffice.bin | desktop-interactive | 0 → 60 | input 2–58 s. wake 234개. RUN 234개, 중앙값 89.7 ms, 총 29.8 s |
+| browser | chrome | desktop-interactive | 0 → 60 | input 없음 → `WAIT` 하나. **한 번도 안 깸** |
 | renderers.1–8 | chrome | electron-comms | 0 → 60 | TIMER 0.7–2.5 s, RUN 88–749 µs |
 | mail | thunderbird | electron-comms | 0 → 60 | TIMER 2.02 s, RUN 71 µs |
 
 recognizer: 0 s `chrome ×9, soffice.bin ×1, thunderbird ×1` → 정답 office/wanted. 60 s 빈 집합(terminal).
 
-harness: writer의 `ready_wait(cause=wake)` 234개. contention 상대는 renderer/mail의 작은 heartbeat뿐이라 대부분 0에 가까울 거예요. utilization 0.50. **Phase 5의 mock 1번**이 이 파일의 축소판이에요(focus된 editor, burst 중간에 queued된 keystroke 하나, 한 번도 안 깨는 unfocused task).
+harness: writer의 `ready_wait(cause=wake)` 234개. contention 상대는 renderer/mail의 작은 heartbeat뿐이라 대부분 0에 가까울 거예요. utilization 0.50. **Phase 5의 mock 1번**이 이 파일의 축소판이에요(input window 안의 editor, burst 중간에 queued된 keystroke 하나, 한 번도 안 깨는 unfocused task).
 
 #### `c1-browsing` — 웹 브라우징
 
@@ -483,7 +488,7 @@ chrome 하나에 탭 12개. 60초. C6의 두 파일이 여기서 파생돼요.
 
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| browser | chrome | desktop-interactive | 0 → 60 | focus 2–58 s. wake 229개. RUN 중앙값 90.4 ms, 총 26.6 s |
+| browser | chrome | desktop-interactive | 0 → 60 | input 2–58 s. wake 229개. RUN 중앙값 90.4 ms, 총 26.6 s |
 | renderers.1–12 | chrome | electron-comms | 0 → 60 | TIMER 1.1–4.1 s, RUN 86 µs–2.4 ms |
 
 recognizer: 0 s `chrome ×13`. 60 s 빈 집합.
@@ -500,7 +505,7 @@ VS Code에 타이핑하면서 2초에 `make -j8`을 돌려요. 자식 100개.
 
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| editor | code | desktop-interactive | 0 → 60 | focus 2–58 s. wake 239개. RUN 중앙값 79.9 ms, 총 28.5 s |
+| editor | code | desktop-interactive | 0 → 60 | input 2–58 s. wake 239개. RUN 중앙값 79.9 ms, 총 28.5 s |
 | build | make | build-orchestrator | 2 → finite | fork_cap 8. dispatch RUN 100개 (중앙값 272 µs). spawn_table 100 |
 | build.c1–c100 | cc1 | compiler-child | spawn | 각 `RUN, SLEEP, RUN, EXIT`. 총 3.84 s, 중앙값 18.5 ms, 최대 478 ms, SLEEP 중앙값 3.6 ms |
 
@@ -510,7 +515,7 @@ harness: **양면** 파일. editor의 `ready_wait(wake)`와 `make`의 `turnaroun
 
 #### `c1-gaming` — 게임
 
-Proton 게임. `game.exe` 300개 task, Steam과 helper 셋, wineserver, compositor(gamescope). focus 없음(게임은 keystroke 모델이 아니라 frame 모델).
+Proton 게임. `game.exe` 300개 task, Steam과 helper 셋, wineserver, compositor(gamescope). input 없음(게임은 keystroke 모델이 아니라 frame 모델).
 
 | segment | mode | attributes |
 |---|---|---|
@@ -570,7 +575,7 @@ harness: **성능 metric 없음.** utilization 0.0004. 이 파일의 역할은 "
 
 #### Phase 7에서 추가된 열 개의 C1 (2026-09-10)
 
-원래 C1은 여섯이었고 나머지 열 mode는 다른 파일의 segment 안에만 있었어요. Phase 7이 mode당 하나씩 채웠어요 — 모양은 위와 같아요(60 s, segment 하나, `background_wanted: true`, `demand: calibration`, focus 2–58 s). task set은 그 mode를 이미 담고 있던 segment에서 그대로 가져왔고(파일 header에 출처가 적혀 있어요), batch job은 60 s 안에 끝나도록 30 s로 줄였어요(turnaround term을 갖기 위해). `c1-meeting`만 새로 설계했어요 — `c6-fold`의 meeting segment는 browser 그대로라 가져올 task set이 없었고, S3는 archetype-plan OQ-2대로 video-playback에 묶어요.
+원래 C1은 여섯이었고 나머지 열 mode는 다른 파일의 segment 안에만 있었어요. Phase 7이 mode당 하나씩 채웠어요 — 모양은 위와 같아요(60 s, segment 하나, `background_wanted: true`, `demand: calibration`, input 2–58 s). task set은 그 mode를 이미 담고 있던 segment에서 그대로 가져왔고(파일 header에 출처가 적혀 있어요), batch job은 60 s 안에 끝나도록 30 s로 줄였어요(turnaround term을 갖기 위해). `c1-meeting`만 새로 설계했어요 — `c6-fold`의 meeting segment는 browser 그대로라 가져올 task set이 없었고, S3는 archetype-plan OQ-2대로 video-playback에 묶어요.
 
 | 파일 | task set | 출처 segment | utilization |
 |---|---|---|---|
@@ -604,7 +609,7 @@ VS Code에 타이핑하다가 60초에 `python3` training을 시작해요. 사�
 
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| editor | code | desktop-interactive | 0 → 180 | focus 2–178 s. wake 774개. RUN 중앙값 80.4 ms, 총 86.7 s |
+| editor | code | desktop-interactive | 0 → 180 | input 2–178 s. wake 774개. RUN 중앙값 80.4 ms, 총 86.7 s |
 | hog | python3 | cpu-batch | 60 → finite | `RUN 130 s, EXIT` |
 
 recognizer: 0 s `code ×1`. 60 s `code ×1, python3 ×1`. 180 s `python3 ×1`.
@@ -673,7 +678,7 @@ kdenlive에서 편집하다가 60초에 ffmpeg 렌더를 걸어요.
 
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| editor | kdenlive | desktop-interactive | 0 → 120 | focus 2–118 s. wake 480개. RUN 중앙값 89.4 ms, 총 59.6 s |
+| editor | kdenlive | desktop-interactive | 0 → 120 | input 2–118 s. wake 480개. RUN 중앙값 89.4 ms, 총 59.6 s |
 | bulk | ffmpeg | cpu-batch | 60 → finite | `RUN 75 s, EXIT` |
 
 recognizer: 0 s `kdenlive ×1`. 60 s `ffmpeg ×1, kdenlive ×1`. 120 s `ffmpeg ×1`.
@@ -716,12 +721,12 @@ chrome 검색 → LibreOffice 글쓰기 → make 빌드 시작 → Thunderbird �
 
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| browser | chrome | desktop-interactive | 0 → 420 | focus 2–58 s만. wake 242개, RUN 총 27.5 s |
+| browser | chrome | desktop-interactive | 0 → 420 | input 2–58 s만. wake 242개, RUN 총 27.5 s |
 | renderers.1–8 | chrome | electron-comms | 0 → 420 | TIMER 0.6–10 s |
-| writer | soffice.bin | desktop-interactive | 60 → 420 | focus 62–118 s. wake 244개, 총 27.8 s |
+| writer | soffice.bin | desktop-interactive | 60 → 420 | input 62–118 s. wake 244개, 총 27.8 s |
 | build | make | build-orchestrator | 120 → finite | spawn 4200, cap 8. dispatch 총 1.1 s |
 | build.c1–c4200 | cc1 | compiler-child | spawn | **총 349 s**, 중앙값 20 ms, 최대 5.6 s |
-| mailer | thunderbird | desktop-interactive | 360 → 420 | focus 362–418 s. wake 220개, 총 27.7 s |
+| mailer | thunderbird | desktop-interactive | 360 → 420 | input 362–418 s. wake 220개, 총 27.7 s |
 | send | thunderbird | network-bulk | 400 → finite | RUN 총 3.0 s |
 
 recognizer (6 query point): 0 s `chrome ×9` → 60 s `+soffice.bin` → 120 s `+make, cc1 ×4200` → 360 s `+thunderbird` → 400 s `thunderbird ×2` → 420 s `make, cc1, thunderbird`(terminal).
@@ -766,13 +771,13 @@ GIMP 사진 편집 → kdenlive 영상 편집 → HandBrake 변환.
 
 | id | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| photo-editor | gimp | desktop-interactive | 0 → 120 | focus 2–118 s. wake 488개, 총 58.2 s |
-| video-editor | kdenlive | desktop-interactive | 120 → 420 | focus 122–238 s만. wake 510개, 총 56.6 s |
+| photo-editor | gimp | desktop-interactive | 0 → 120 | input 2–118 s. wake 488개, 총 58.2 s |
+| video-editor | kdenlive | desktop-interactive | 120 → 420 | input 122–238 s만. wake 510개, 총 56.6 s |
 | batch | HandBrakeCLI | cpu-batch | 240 → finite | `RUN 320 s` |
 
 recognizer (4): 0 s `gimp` → 120 s `kdenlive` → 240 s `HandBrakeCLI, kdenlive` → 420 s `HandBrakeCLI`.
 
-harness: 240초 이후 kdenlive는 focus가 없어요(사용자가 변환을 걸어놓고 손을 뗌). 그래서 마지막 segment는 batch 혼자 lane을 쓰고 contention이 없어요. 320 s 일을 180초에 → 못 끝남. progress만. utilization 1.04. 중요한 구간은 오히려 photo → video-edit 전환에서 recognizer가 mode를 갈아타는 것.
+harness: 240초 이후 kdenlive는 input window가 없어요(사용자가 변환을 걸어놓고 손을 뗌; 창의 focus는 kdenlive에 남아요). 그래서 마지막 segment는 batch 혼자 lane을 쓰고 contention이 없어요. 320 s 일을 180초에 → 못 끝남. progress만. utilization 1.04. 중요한 구간은 오히려 photo → video-edit 전환에서 recognizer가 mode를 갈아타는 것.
 
 ---
 
@@ -810,7 +815,7 @@ harness: 이 파일은 성능 차이도 조금 있어요. 7z가 30초 동안 3 m
 
 | 주입된 task | name | archetype | arrive → depart | compile 결과 |
 |---|---|---|---|---|
-| injected-browser | chrome | desktop-interactive | 30 → 60 | focus 없음 → `WAIT` 하나 |
+| injected-browser | chrome | desktop-interactive | 30 → 60 | input 없음 → `WAIT` 하나 |
 | injected-renderers.1–6 | chrome | electron-comms | 30 → 60 | TIMER 0.8–7 s |
 
 recognizer: 0 s `code` → 2 s `+make, cc1 ×100` → **30 s `+chrome ×7`** → 60 s `make, cc1`.
@@ -897,7 +902,7 @@ harness: 성능은 c1-browsing과 동일(같은 task, 같은 trace). Layer 1에�
 |---|---|---|---|---|
 | game.chain.1–16 | game.exe | game-task-chain | 0 → 240 | lane_share 0.6. stage RUN 182 µs–1.09 ms |
 | game.tail.1–284 | game.exe | game-task-chain | 0 → 240 | |
-| editor | code | desktop-interactive | 0 → 240 | focus 2–238 s. wake 976개, 총 117.7 s |
+| editor | code | desktop-interactive | 0 → 240 | input 2–238 s. wake 976개, 총 117.7 s |
 | build | make | build-orchestrator | 10 → finite | spawn 85, cap 8. 자식 총 10.6 s |
 | wine | wineserver | system-daemon | 0 → 240 | |
 
@@ -976,7 +981,7 @@ recipe는 `dataset/timelines/coreset/*.variant.yaml` 다섯(`c2-pairs`, `c4`, `c
 이 문서를 쓰면서 compiled file에서 직접 확인한 것들. 일부는 Phase 5 spec 세션의 아카이브에도 있어요.
 
 **행동에 관한 것**
-- focus가 없는 `desktop-interactive` task는 `WAIT` 하나짜리 program이라 CPU를 전혀 안 써요. `c1-office`의 `browser`, `c4-compile`의 `injected-browser`, `c3-creation`의 240초 이후 `kdenlive`.
+- input window가 없는 `desktop-interactive` task는 `WAIT` 하나짜리 program이라 CPU를 전혀 안 써요. `c1-office`의 `browser`, `c4-compile`의 `injected-browser`, `c3-creation`의 240초 이후 `kdenlive`.
 - `system-daemon`의 SLEEP은 편차가 매우 커서 어떤 instance는 파일 안에서 한 번도 안 깨요. `c1-gaming`/`c4-gaming`의 `wineserver`(1225 s), `c3-evening`의 `wineserver`(457 s).
 - C2의 batch task 셋과 C3의 batch/build 셋은 **전부 window 안에 못 끝나요.** `c2-p1a` hog 130 s/120 s 남음, `c2-p2a` download 25 s이지만 chain이 95% 요구, `c2-p3a` ffmpeg 75 s/60 s, `c3-creation` HandBrake 320 s/180 s, `c3-workday` 자식 349 s/300 s. 그래서 judging set에서 `turnaround`는 관측 불가이고 progress(`cpu_delivered / demand`)가 batch 쪽의 metric이에요.
 - `c3-evening`의 chain은 lane_share 1.45라 혼자서도 frame을 못 맞춰요. backlog가 설계상 발생.
@@ -1018,7 +1023,8 @@ recipe는 `dataset/timelines/coreset/*.variant.yaml` 다섯(`c2-pairs`, `c4`, `c
 | **primitive** | RUN, SLEEP, TIMER, WAIT, WAKE, FORK/EXIT |
 | **channel** | WAIT/WAKE가 만나는 이름. `input:<id>`, `chain:<id>`, `children:<id>` |
 | **wake event** | run file의 외부 자극. keystroke |
-| **focus** | timeline에서 사용자 주의가 어느 task에 있나. keystroke가 생성되는 window |
+| **input** | timeline에서 keystroke가 어느 task로 들어가나. keystroke가 생성되는 window (2026-10-11 전의 이름은 `focus`) |
+| **focus** | timeline에서 어느 task의 창이 focus를 갖나. compile된 파일의 `focus` key, projection의 task별 interval, snapshot의 `focus` 이름으로 recognizer에게 보여요 |
 | **segment-bound / finite / spawned** | lifetime 세 종류 |
 | **depart** | segment-bound task의 pinned 퇴장 시각 |
 | **spawn table** | orchestrator가 만들 자식들의 program 목록. compile 시점에 고정 |

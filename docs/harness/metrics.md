@@ -1,6 +1,6 @@
 # Metrics — primitives, records, and the aggregates the research reads
 
-> Status: normative · Created 2026-09-08 · Updated 2026-10-08
+> Status: normative · Created 2026-09-08 · Updated 2026-10-11
 
 Every number the project reports is defined here. The document fixes three things: the **primitives** — the raw observations the harness computes from a trace or a recognition log; the **records** file they land in; and the **aggregates** — the statistics, the normalisation rule, and the constants that turn records into the figures the research questions ask for. Per-file weights are not here; they are data, in the scoring spec (`harness/scoring/scoring-spec.yaml`, §2). The code that implements the trace primitives lives in `harness/`; the grader that implements the recognition primitives is built in Phase 8 to the definitions below.
 
@@ -75,6 +75,7 @@ One CSV file per trace (or per recognition log), every row self-contained, twent
 | `table` | `prior` or `calibrated`; empty for `fixed`, which uses no table |
 | `seed` | `random`'s PRNG seed; empty otherwise |
 | `boot_default` | the id of the boot configuration the run started in; empty for the primary. Only the `fixed` runs of the RQ0 gate spec's sensitivity check carry one; the scorer pairs a run with the `fixed` run of the same `boot_default` (added 2026-09-11, 8.2) |
+| `telemetry` | the telemetry shape the run's daemon showed the recognizer (data-contracts §5, rule 6): `focus`, the name → count multiset with the focus holder, or `names`, the multiset alone. An axis of every experiment, orthogonal to the condition: the scorer pairs a run with the `fixed` run of its own shape, the grader groups by it, and a `paired` grades row of one condition under its two shapes is the field's measured difference (added 2026-10-11, 9.17) |
 | `sim` | the simulator version from the trace header; absent on recognition rows, which come from a log and not a trace, so the schema does not require it (8.4) |
 | `source_sha256` | SHA-256 of the trace or log file the row was computed from |
 
@@ -322,6 +323,8 @@ The definitions above, and the mock traces that test them, assume the following 
 ---
 
 ## 13. Changelog
+
+- **2026-10-11 — the telemetry shape as an identity column (jioh 9.17).** Records gain a twenty-fifth column, `telemetry` (§5), after `boot_default`: the shape the run's daemon showed, `focus` or `names` (data-contracts §5, rule 6). It is an identity column of aggregates, scores, guards and grades alike — the grades file's rows are identified by condition, table, seed and `telemetry`, and a `paired` row carries `partner_telemetry` beside `partner_condition`, so one condition under its two shapes is paired like two conditions. The per-experiment spec lists the shapes to run (`telemetry`, every condition under every shape listed; the criterion judged on the first), the runner passes `--telemetry` to the daemon and keys its cache on it, a run directory is `<condition>[-seed][+boot]~<shape>`. The fixtures' expected records, aggregates, scores, guards and grades gain the column at `names`, the shape their hand-written logs show. No primitive, constant, or floor changed.
 
 Every change to a primitive, an aggregate, a constant, or a floor lands here, dated, with the sub-task that made it.
 

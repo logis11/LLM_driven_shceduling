@@ -1,5 +1,5 @@
 # Interpretation Contract — workload ⇄ simulator
-> Status: normative · Created 2026-08-26 · Updated 2026-08-28
+> Status: normative · Created 2026-08-26 · Updated 2026-10-11
 
 The contract between the workload dataset and the simulator: what a canonical workload file contains and how the simulator turns it into scheduled tasks. Written before the simulator exists; simulator Phase 0 is built to this document. Decision record: `_dev/archive/2026-08-26-workload-generation-grill.md` (D10–D16).
 
@@ -41,6 +41,7 @@ One closed type per file; the parser has zero case-splits. The JSON Schema is a 
 
 - **`meta`** — id, `derived_from` (timeline@commit), `sampled: {seed, archetypes.yaml@commit}`, harness-only grading expectations. Not read by the scheduler.
 - **`ground_truth`** — flat list of labeled intervals (mode + attributes). Visible to the oracle condition and the Layer-1 grader only.
+- **`focus`** — the window-focus track, `[{t_start, t_end, task}]`: which top-level task holds the window focus over which pinned intervals (2026-10-11, data-contracts §4 and §14). Shown to the recognizer through the visible projection; not read by the scheduler — the run file is the `events` alone.
 - **`events`** — flat timestamped list with a **closed op set of two**:
   - `{t, op: arrive, name, program, depart?}` — a task comes into existence carrying its fully resolved program (every distribution already sampled to concrete values). `depart` is present **iff** the task is segment-bound (§5).
   - `{t, op: wake, target, channel}` — an exogenous wake (pre-sampled aperiodic input, e.g. keystrokes for interactive tasks). The task blocks on `WAIT(channel)`; these events supply the wakes at absolute times.
