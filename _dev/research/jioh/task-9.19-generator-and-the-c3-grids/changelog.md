@@ -53,3 +53,9 @@ Tests: `dataset/tools/tests/test_generated.py` (the definition, both transition 
 ## D6 — the documents (2026-10-11)
 
 Spec decision 8. `dataset/README.md` (the layout, the pipeline, the C3 row restated to existence cases, a "Generated layer" section, the commands, the tools map, a rule); `docs/workload/building-plan.md` (the C3 role restated; §3a "Generated layer — the grids over the C1 task sets"); `docs/data-contracts.md` §14; `harness/CHANGELOG.md`. The proposal's Family 4 wording, the research-claims chain's C3 line, the daemon guide's §9.3 and `docs/workload/coreset-guide.md`'s C3 text are 9.15's (the hand-offs on the TODO line).
+
+## D7 — the CI run (2026-10-11)
+
+Spec decision 9. `dataset.yml` by `workflow_dispatch` on commit `4394dbb5`: run 38135623993 (https://github.com/logis11/LLM_driven_shceduling/actions/runs/38135623993), `ubuntu-latest` (4 vCPU), success — `lint` 2 s, `dataset` 3 min 02 s, `variants` 5 min 17 s, `generated` 7 min 53 s, `test` 3 min 47 s, `check` 6 s (2,628 files, five manifests); 20 min 24 s from checkout to completion. This runner ran the unchanged steps about 1.9× slower than run 38131040159's (`dataset` 1 min 34 s, `variants` 2 min 49 s there), so the generated step's share on a runner of that speed is about 4 min; the five manifests reproduced byte for byte on Linux. Locally the dataset suite is 513 passed, 1 skipped in 2 min 08 s; the harness lint is clean and its suite 284 passed in 30 min 19 s (nothing in it reads the generated sets; run for the workflow change).
+
+Hands to 9.16: the three generated manifests reproduce on Linux (this run) and on the home machine (`generate.py --check`, D5). Hands to 9.21: the CI figures above beside D5's local ones.
