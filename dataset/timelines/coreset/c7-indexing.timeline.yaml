@@ -6,6 +6,10 @@ focus:
   to: 39.435s
 input:
 - from: 2s
+  slice_of:
+    from: 2s
+    index: 0
+    to: 58s
   task: editor
   to: 37.435s
 meta:
@@ -34,3 +38,5 @@ tasks:
     total_work: 39.435s
   id: hog
   name: tracker-miner-f
+  source:
+    total_work: meas-ci:background:2026-10-02b

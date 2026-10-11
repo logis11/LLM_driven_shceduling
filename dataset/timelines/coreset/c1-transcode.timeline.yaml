@@ -22,7 +22,8 @@ tasks:
   - {id: video-editor, name: kdenlive, archetype: video-editor,
      arrive: 0s, depart: 4762s}
   - {id: batch, name: HandBrakeCLI, archetype: video-transcoder, arrive: 2s,
-     bind: {total_work: 2970.871s}}
+     bind: {total_work: 2970.871s},
+     source: {total_work: "meas-ci:background:2026-10-03b"}}
 
 input:
   - {from: 2s, to: 4760s, task: video-editor}

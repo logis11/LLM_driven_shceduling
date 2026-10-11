@@ -116,6 +116,10 @@ def shifted_timeline(raw, segment_index, length_us):
             task["depart"] = move(task["depart"])
     for track in ("input", "focus"):
         for win in doc.get(track) or []:
+            if win.get("slice_of"):   # 9.18: the stream window moves with the slice's start, the slice's identity kept
+                lead = parse_us(move(win["from"])) - parse_us(win["from"])
+                outer = win["slice_of"]
+                outer["from"], outer["to"] = us(parse_us(outer["from"]) + lead), us(parse_us(outer["to"]) + lead)
             win["from"], win["to"] = move(win["from"]), move(win["to"])
     for op in doc.get("operations") or []:
         op["at"] = move(op["at"])

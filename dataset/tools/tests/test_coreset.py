@@ -1,18 +1,50 @@
 """Coreset-level invariants (task-2.4 spec): derive idempotency, the C2
 one-entry-diff discipline on the real pair files, and the per-segment demand record."""
 
+import hashlib
+import json
+
 import pytest
 
 from wlc import Timeline, compile_timeline
 from wlc.deriver import DeriveError, apply_ops, run as derive_check
 from wlc.linter import lint_canonical
+from wlc.variants import shifted_timeline
+
+
+def _blessed(build_dir, rel, manifest):
+    """The artifact and its report read from the blessed build when both hash to the manifest's entries (9.18 spec,
+    decision 8); None otherwise."""
+    report_rel = rel[:-len(".workload.json")] + ".report.json"
+    pair = []
+    for path, pinned in ((build_dir / rel, manifest.get("artifacts", {}).get(rel)),
+                         (build_dir / report_rel, manifest.get("reports", {}).get(report_rel))):
+        if pinned is None or not path.is_file():
+            return None
+        data = path.read_bytes()
+        if hashlib.sha256(data).hexdigest() != pinned:
+            return None
+        pair.append(json.loads(data))
+    return tuple(pair)
 
 
 @pytest.fixture(scope="module")
 def coreset(repo_root, library):
+    """Every timeline's (canonical, report) in `single` mode: read from the blessed build where the artifact and its
+    report hash to the manifest's entries, compiled otherwise, so a run after `make dataset` costs the tests alone."""
+    dataset = repo_root / "dataset"
+    manifest_path = dataset / "build.manifest.json"
+    manifest = json.loads(manifest_path.read_text()) if manifest_path.is_file() else {}
+    timelines_dir = dataset / "timelines"
     compiled = {}
-    for path in sorted((repo_root / "dataset" / "timelines").glob(
-            "**/*.timeline.yaml")):
+    for path in sorted(timelines_dir.glob("**/*.timeline.yaml")):
+        relative = path.relative_to(timelines_dir)
+        artifact_set = relative.parts[0] if len(relative.parts) > 1 else "adhoc"
+        rel = f"{artifact_set}-single/{path.name[:-len('.timeline.yaml')]}.workload.json"
+        blessed = _blessed(dataset / "build", rel, manifest)
+        if blessed is not None:
+            compiled[blessed[0]["meta"]["id"]] = blessed
+            continue
         timeline = Timeline(path, library)
         canonical, report = compile_timeline(timeline, library, "single")
         compiled[timeline.id] = (canonical, report)
@@ -131,6 +163,32 @@ def test_c7_interactive_counterparts_inject_the_upgrade(coreset):
         assert ground_truth(base) == [(mode, True)]
         assert ground_truth(variant) == [(mode, False)]
         assert (variant["ground_truth"][0]["t_start"], variant["ground_truth"][0]["t_end"]) == (0, C7_C_US)
+
+
+def input_wakes(canonical, task_id):
+    return {e["t"] for e in canonical["events"] if e["op"] == "wake" and e["channel"] == f"input:{task_id}"}
+
+
+# the counterparts that keep a keystroke window (c7.variant.yaml `set-input`), by the task typed into
+C7_TYPED = {"browsing": "browser", "office": "writer", "mail": "mailer", "dev": "editor", "photo": "photo-editor",
+            "video-edit": "editor"}
+
+
+def test_c7_input_wakes_are_a_subset_of_the_bases_in_the_first_c_seconds(coreset):
+    """9.18 spec, decisions 1–3 (audit A1, option ii): a counterpart's keystroke window is a slice of its base's, so
+    its input wakes are its base's over [0, C) — a subset, not the whole: the counterpart's operations sit at their
+    own positions (9.10 D44) and a keystroke inside an operation is not emitted. c1-mail's keystrokes all fall past
+    C, so c7-mail holds none (pair review finding 8)."""
+    shared = {}
+    for mode, task in C7_TYPED.items():
+        base, _ = coreset[f"c1-{mode}"]
+        variant, _ = coreset[f"c7-{mode}"]
+        b, v = input_wakes(base, task), input_wakes(variant, task)
+        assert v <= b, mode
+        assert all(t < C7_C_US for t in v), mode
+        shared[mode] = len(v)
+    assert shared["mail"] == 0
+    assert all(shared[mode] > 0 for mode in ("browsing", "office", "dev"))
 
 
 C7_COMPILE_C_US = 225_458_000   # 9.10 D56: the module build's CPU as compiled under c7-compile's seed, to the ms below
@@ -336,17 +394,65 @@ def test_variant_cannot_change_seed():
 
 def test_set_input_focus_and_operations_replace_the_lists():
     """9.10 D44: a cut counterpart replaces its base's keystroke windows and operations whole; 9.17: and its focus
-    track."""
+    track; 9.18: a new window inside a base window of its task is written as its slice."""
     base = {"meta": {"seed": 1}, "tasks": [], "segments": [],
             "input": [{"from": "2s", "to": "58s", "task": "a"}], "focus": [{"from": "0s", "to": "60s", "task": "a"}],
             "operations": [{"at": "30s", "task": "a", "name": "op"}]}
     out = apply_ops(base, [{"set-input": [{"from": "2s", "to": "20s", "task": "a"}]},
                            {"set-focus": [{"from": "0s", "to": "22s", "task": "a"}]},
                            {"set-operations": [{"at": "11s", "task": "a", "name": "op"}]}], "test")
-    assert out["input"] == [{"from": "2s", "to": "20s", "task": "a"}]
+    assert out["input"] == [{"from": "2s", "to": "20s", "task": "a", "slice_of": {"from": "2s", "to": "58s", "index": 0}}]
     assert out["focus"] == [{"from": "0s", "to": "22s", "task": "a"}]
     assert out["operations"] == [{"at": "11s", "task": "a", "name": "op"}]
     assert base["input"][0]["to"] == "58s"   # the base is not touched
+
+
+def test_set_input_writes_the_bases_window_as_slice_of():
+    """9.18 spec, decisions 1–2: a new window wholly inside one of the base's windows of its task is that window's
+    slice — `slice_of` names the base window's edges and its index among the task's windows in time order; a window
+    inside none is its own; an authored `slice_of` stands."""
+    base = {"meta": {"seed": 1}, "tasks": [], "segments": [],
+            "input": [{"from": "100s", "to": "200s", "task": "b"}, {"from": "60s", "to": "90s", "task": "a"},
+                      {"from": "2s", "to": "58s", "task": "a"}], "focus": []}
+    out = apply_ops(base, [{"set-input": [{"from": "2s", "to": "24.385s", "task": "a"},
+                                          {"from": "61s", "to": "70s", "task": "a"},
+                                          {"from": "150s", "to": "160s", "task": "b"},
+                                          {"from": "300s", "to": "310s", "task": "a"},
+                                          {"from": "3s", "to": "4s", "task": "a",
+                                           "slice_of": {"from": "0s", "to": "10s", "index": 7}}]}], "test")
+    assert out["input"] == [
+        {"from": "2s", "to": "24.385s", "task": "a", "slice_of": {"from": "2s", "to": "58s", "index": 0}},
+        {"from": "61s", "to": "70s", "task": "a", "slice_of": {"from": "60s", "to": "90s", "index": 1}},
+        {"from": "150s", "to": "160s", "task": "b", "slice_of": {"from": "100s", "to": "200s", "index": 0}},
+        {"from": "300s", "to": "310s", "task": "a"},
+        {"from": "3s", "to": "4s", "task": "a", "slice_of": {"from": "0s", "to": "10s", "index": 7}}]
+
+
+def test_every_counterpart_keystroke_window_is_its_bases_slice(repo_root):
+    """The twelve `set-input` windows of c7.variant.yaml are written as slices of their bases' one window."""
+    import yaml
+    seen = 0
+    for path in sorted((repo_root / "dataset" / "timelines" / "coreset").glob("c7-*.timeline.yaml")):
+        for win in yaml.safe_load(path.read_text()).get("input") or []:
+            assert win["slice_of"]["index"] == 0 and win["slice_of"]["from"] == "2s", path.name
+            seen += 1
+    assert seen == 12
+
+
+def test_segment_shift_moves_a_slice_with_its_window():
+    """9.18 spec invariant: a shifted derived file keeps its outer windows shifted with their slices, so the slice
+    draws the same keystrokes."""
+    raw = {"meta": {"id": "x", "seed": 1},
+           "segments": [{"from": "0s", "to": "60s", "mode": "office", "attributes": {"background_wanted": True}},
+                        {"from": "60s", "to": "120s", "mode": "office", "attributes": {"background_wanted": True}}],
+           "tasks": [{"id": "ed", "name": "code", "archetype": "code-editor", "arrive": "0s", "depart": "120s"}],
+           "input": [{"from": "2s", "to": "58s", "task": "ed"},
+                     {"from": "62s", "to": "80s", "task": "ed", "slice_of": {"from": "62s", "to": "118s", "index": 1}}],
+           "focus": [{"from": "0s", "to": "120s", "task": "ed"}]}
+    out = shifted_timeline(raw, 0, 90_000_000)   # the first segment lengthened by 30 s: everything at or past 60 s moves
+    assert out["input"][0] == {"from": "2000000us", "to": "58000000us", "task": "ed"}
+    assert out["input"][1] == {"from": "92000000us", "to": "110000000us", "task": "ed",
+                               "slice_of": {"from": "92000000us", "to": "148000000us", "index": 1}}
 
 
 # 9.10 D168: the catalog scenario each bound program shows, as D33's rows name them; cpu-batch by its `program`

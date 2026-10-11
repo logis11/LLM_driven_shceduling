@@ -6,6 +6,10 @@ focus:
   to: 2970.871s
 input:
 - from: 2s
+  slice_of:
+    from: 2s
+    index: 0
+    to: 4760s
   task: video-editor
   to: 2968.871s
 meta:
@@ -39,3 +43,5 @@ tasks:
     total_work: 2970.871s
   id: batch
   name: HandBrakeCLI
+  source:
+    total_work: meas-ci:background:2026-10-03b

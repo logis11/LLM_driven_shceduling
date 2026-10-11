@@ -194,6 +194,48 @@ def _check_tag(where, tag, registry):
 
 # ---- timeline lints ---------------------------------------------------------
 
+BOUND_LABELS = ("design", "convention", "arithmetic")   # 9.10 D32: a value no source states is labelled for what it is
+
+
+def lint_bound_sources(path, registry):
+    """9.18 spec, decision 4 (9.10 D32): every value a timeline binds — the `bind` keys and the task's `count` when
+    stated — has an entry in the task's `source` map, and nothing else does; an entry is one source tag, a list of
+    source tags, or one of BOUND_LABELS. Tags are checked against the registry as the library's are."""
+    errors = []
+    raw = yaml.safe_load(pathlib.Path(path).read_text())
+    name = pathlib.Path(path).name
+    for task in raw.get("tasks") or []:
+        where = f"{name}: task {task.get('id')!r}"
+        bound = set(task.get("bind") or {}) | ({"count"} if "count" in task else set())
+        source = task.get("source")
+        if source is None:
+            if bound:
+                errors.append(f"{where}: bound values {sorted(bound)} carry no source map")
+            continue
+        if not isinstance(source, dict):
+            errors.append(f"{where}: source must be a map keyed by the bound values")
+            continue
+        missing, extra = bound - set(source), set(source) - bound
+        if missing:
+            errors.append(f"{where}: bound values {sorted(missing)} have no source entry")
+        if extra:
+            errors.append(f"{where}: source entries {sorted(extra)} name no bound value")
+        for key in sorted(set(source) & bound):
+            value = source[key]
+            tags = value if isinstance(value, list) else [value]
+            if not tags:
+                errors.append(f"{where}: source of {key!r} is empty")
+            for tag in tags:
+                if not isinstance(tag, str):
+                    errors.append(f"{where}: source of {key!r} is not a tag or a label: {tag!r}")
+                elif tag in BOUND_LABELS:
+                    if isinstance(value, list):
+                        errors.append(f"{where}: source of {key!r} lists the label {tag!r}; a label stands alone")
+                else:
+                    errors.extend(_check_tag(f"{where}.{key}", tag, registry))
+    return errors
+
+
 def lint_timeline(path, library):
     try:
         Timeline(path, library)

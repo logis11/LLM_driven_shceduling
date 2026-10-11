@@ -9,11 +9,13 @@ import argparse
 import pathlib
 import sys
 
+import yaml
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 from wlc import Library, Timeline, TimelineError, compile_timeline  # noqa: E402
 from wlc.compiler import MODES  # noqa: E402
-from wlc.linter import lint_canonical, lint_repo, load_schema  # noqa: E402
+from wlc.linter import lint_bound_sources, lint_canonical, lint_repo, load_schema  # noqa: E402
 
 
 def run(root, freeze=False):
@@ -22,7 +24,9 @@ def run(root, freeze=False):
                        root / "docs" / "references.md", freeze=freeze)
     library = Library(dataset / "archetypes.yaml")
     schema = load_schema(dataset / "schema" / "workload.schema.json")
+    registry = yaml.safe_load((dataset / "sources.yaml").read_text())["sources"]
     for path in sorted((dataset / "timelines").glob("**/*.timeline.yaml")):
+        errors.extend(lint_bound_sources(path, registry))   # 9.18: every bound value tagged or labelled
         try:
             timeline = Timeline(path, library)
         except TimelineError as err:

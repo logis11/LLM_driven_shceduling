@@ -21,7 +21,8 @@ tasks:
   - {id: editor, name: kdenlive, archetype: video-editor,
      arrive: 0s, depart: 60s}
   - {id: bulk, name: kdenlive_render, archetype: cpu-batch, arrive: 2s,
-     bind: {total_work: 16.545s, program: kdenlive_render}}
+     bind: {total_work: 16.545s, program: kdenlive_render},
+     source: {total_work: "meas-ci:background:2026-10-03c", program: [kdenlive, "meas-ci:background:2026-10-03c"]}}
 
 input:
   - {from: 2s, to: 58s, task: editor}

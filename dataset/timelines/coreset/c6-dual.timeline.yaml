@@ -17,11 +17,13 @@ segments:
 tasks:
   - {id: game, name: Troy.exe, archetype: game-task-chain,
      arrive: 0s, depart: 12072s, bind: {lane_share: 0.6,
-           member_names: ["Task worker thr", "Task worker thr", "Task worker thr", "Task worker thr", dxvk-cs, dxvk-submit, winepulse_mainl, winepulse_timer, FAudio_AudioCli, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe]}}
+           member_names: ["Task worker thr", "Task worker thr", "Task worker thr", "Task worker thr", dxvk-cs, dxvk-submit, winepulse_mainl, winepulse_timer, FAudio_AudioCli, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe]},
+     source: {lane_share: design, member_names: "lavd-ossna24:s16"}}
   - {id: editor, name: code, archetype: code-editor,
      arrive: 0s, depart: 12072s}
   - {id: build, name: make, archetype: build-orchestrator, arrive: 10s,
-     bind: {spawn_count: 2908, parallelism_cap: 8, child_name: cc1}}
+     bind: {spawn_count: 2908, parallelism_cap: 8, child_name: cc1},
+     source: {spawn_count: "meas-ci:build:2026-09-18", parallelism_cap: design, child_name: "meas-ci:build:2026-09-18"}}
 
 # the focus alternates between the editor and the game every 688 s — the mean continuous segment in
 # a working sphere before switching, 11 min 28 s (gonzalez-chi04; 9.10 C-gonzalez-1); the regular

@@ -6,6 +6,10 @@ focus:
   to: 16.545s
 input:
 - from: 2s
+  slice_of:
+    from: 2s
+    index: 0
+    to: 58s
   task: editor
   to: 14.545s
 meta:
@@ -39,3 +43,8 @@ tasks:
     total_work: 16.545s
   id: bulk
   name: kdenlive_render
+  source:
+    program:
+    - kdenlive
+    - meas-ci:background:2026-10-03c
+    total_work: meas-ci:background:2026-10-03c

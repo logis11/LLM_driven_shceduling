@@ -6,6 +6,10 @@ focus:
   to: 26.385s
 input:
 - from: 2s
+  slice_of:
+    from: 2s
+    index: 0
+    to: 58s
   task: mailer
   to: 24.385s
 meta:
@@ -38,3 +42,5 @@ tasks:
     total_work: 26.385s
   id: upgrade
   name: unattended-upgr
+  source:
+    total_work: meas-ci:background:2026-10-01

@@ -43,6 +43,9 @@ tasks:
   depart: 26.385s
   id: game
   name: Troy.exe
+  source:
+    lane_share: design
+    member_names: lavd-ossna24:s16
 - archetype: game-client
   arrive: 0s
   depart: 26.385s
@@ -54,3 +57,5 @@ tasks:
     total_work: 26.385s
   id: upgrade
   name: unattended-upgr
+  source:
+    total_work: meas-ci:background:2026-10-01

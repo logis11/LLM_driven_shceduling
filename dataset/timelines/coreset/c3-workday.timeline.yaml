@@ -30,11 +30,13 @@ tasks:
   - {id: browser, name: chrome, archetype: web-browser,
      arrive: 0s, depart: 1545s}
   - {id: renderers, name: chrome, archetype: renderer-hidden,
-     arrive: 0s, depart: 1545s, count: 4}
+     arrive: 0s, depart: 1545s, count: 4,
+     source: {count: [glam, "meas-ci:desktop:2026-10-04"]}}
   - {id: writer, name: soffice.bin, archetype: office-writer,
      arrive: 60s, depart: 1545s}
   - {id: build, name: make, archetype: build-orchestrator, arrive: 120s,
-     bind: {spawn_count: 2908, parallelism_cap: 8, child_name: cc1}}
+     bind: {spawn_count: 2908, parallelism_cap: 8, child_name: cc1},
+     source: {spawn_count: "meas-ci:build:2026-09-18", parallelism_cap: design, child_name: "meas-ci:build:2026-09-18"}}
   - {id: mailer, name: thunderbird-bin, archetype: mail-client,
      arrive: 1485s, depart: 1545s}
 

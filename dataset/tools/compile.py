@@ -4,6 +4,11 @@
 Usage: compile.py [--check] [--repo ROOT]
   --check   recompile and fail if dataset/build.manifest.json would change
             (CI determinism / drift gate; writes nothing)
+
+Every artifact is written with its compile report beside it (`<id>.report.json`);
+the manifest pins both, and its `inputs` pin by content everything the compile
+reads besides the timelines: the library, the schema, the compiler's sources and
+the stimulus and replay streams (9.18 spec, decisions 5 and 8).
 """
 
 import argparse
@@ -32,6 +37,29 @@ def artifact_set(timelines_dir, path):
     return relative.parts[0] if len(relative.parts) > 1 else "adhoc"
 
 
+def report_path(artifact_rel):
+    """The compile report's path beside its artifact: `<set>-<mode>/<id>.report.json`."""
+    assert artifact_rel.endswith(".workload.json"), artifact_rel
+    return artifact_rel[:-len(".workload.json")] + ".report.json"
+
+
+def report_bytes(report):
+    """The byte form of a compile report the manifest hashes (9.18 spec, decision 8)."""
+    return (json.dumps(report, sort_keys=True, indent=2) + "\n").encode()
+
+
+def input_files(root):
+    """The files the compile reads besides the timelines, pinned by content in the manifest's `inputs` (9.18 spec,
+    decision 5): the library, the schema, the compiler's sources, the stimulus and replay streams."""
+    dataset = root / "dataset"
+    files = [dataset / "archetypes.yaml", dataset / "schema" / "workload.schema.json",
+             dataset / "tools" / "compile.py"]
+    files += sorted((dataset / "tools" / "wlc").glob("*.py"))
+    files += sorted((dataset / "stimulus").glob("*.jsonl"))
+    files += sorted((dataset / "replay").glob("*.json.gz"))
+    return files
+
+
 def build_all(root):
     """Returns (manifest_dict, artifacts {relpath: bytes}, errors, reports)."""
     dataset = root / "dataset"
@@ -39,7 +67,7 @@ def build_all(root):
     schema = load_schema(dataset / "schema" / "workload.schema.json")
     timelines_dir = dataset / "timelines"
 
-    artifacts, demand, errors, reports = {}, {}, [], []
+    artifacts, demand, errors, reports, report_of = {}, {}, [], [], {}
     for path in discover(timelines_dir):
         rel_path = path.relative_to(root).as_posix()
         try:
@@ -63,17 +91,14 @@ def build_all(root):
                                          "utilization": round(seg["utilization"], 4)}
                                         for seg in report["per_segment"]]}
             reports.append((timeline.id, mode, report))
+            report_of[out] = report
 
     manifest = {
-        "inputs": {
-            "dataset/archetypes.yaml":
-                sha256((dataset / "archetypes.yaml").read_bytes()),
-            "dataset/schema/workload.schema.json":
-                sha256((dataset / "schema" / "workload.schema.json").read_bytes()),
-        },
+        "inputs": {path.relative_to(root).as_posix(): sha256(path.read_bytes()) for path in input_files(root)},
         "artifacts": {rel: sha256(data)
                       for rel, data in sorted(artifacts.items())},
         "demand": {rel: demand[rel] for rel in sorted(demand)},
+        "reports": {rel: sha256(report_bytes(report)) for rel, report in sorted(report_of.items())},
     }
     return manifest, artifacts, errors, reports
 
@@ -115,8 +140,11 @@ def main():
         out_path = build_dir / rel
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_bytes(data)
+    for timeline_id, mode, report in reports:
+        rel = next(r for r in artifacts if r.endswith(f"-{mode}/{timeline_id}.workload.json"))
+        (build_dir / report_path(rel)).write_bytes(report_bytes(report))
     manifest_path.write_bytes(manifest_bytes)
-    print(f"wrote {len(artifacts)} artifacts + manifest")
+    print(f"wrote {len(artifacts)} artifacts + reports + manifest")
     return 0
 
 

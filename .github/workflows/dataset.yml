@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:    # one run on a branch compiles its blessed manifests on Linux (9.18)
 
 jobs:
   dataset:
@@ -15,5 +16,7 @@ jobs:
           python-version: "3.12"
       - run: pip install -r dataset/tools/requirements.txt
       - run: make -C dataset lint
-      - run: make -C dataset test
-      - run: make -C dataset check
+      - run: make -C dataset dataset
+      - run: make -C dataset variants
+      - run: make -C dataset test      # the coreset fixture reads the build just written (9.18)
+      - run: make -C dataset check     # both manifests reproduce; build/ equals them

@@ -44,3 +44,5 @@ tasks:
     total_work: 165.668s
   id: bulk
   name: deja-dup
+  source:
+    total_work: meas-ci:background:2026-10-04

@@ -13,7 +13,8 @@ via a closed op set applied to the raw yaml:
           - patch-task: {id: bulk, name: deja-dup, archetype: incremental-backup}
           - add-task: {id: overlay, name: discord, ...}
           - set-segments: [...]     # wholesale segment-list replacement
-          - set-input: [...]        # the keystroke windows, replaced whole
+          - set-input: [...]        # the keystroke windows, replaced whole; a window inside one of the
+                                    # base's windows of its task is written as that window's slice (9.18)
           - set-focus: [...]        # the window-focus track, replaced whole
           - patch-meta: {demand: calibration}   # meta keys except the seed
 
@@ -26,6 +27,8 @@ seeds + keyed substreams.
 import pathlib
 
 import yaml
+
+from .units import parse_us
 
 OPS = ("rename", "patch-segment", "patch-task", "add-task", "set-segments",
        "set-input", "set-focus", "set-operations", "patch-meta")   # set-input (as set-focus), set-operations: 9.10 D44;
@@ -40,8 +43,24 @@ class DeriveError(Exception):
     pass
 
 
+def _sliced(win, base_input):
+    """9.18 spec, decisions 1–2: a new input window lying wholly inside one of the base's windows of the same task
+    is that window's slice — `slice_of` names the base window's edges and its index among the task's windows in time
+    order, the index the compiler keys the stimulus offset on. A window inside none is its own; an authored
+    `slice_of` stands."""
+    if "slice_of" in win:
+        return dict(win)
+    own = sorted((w for w in base_input if w["task"] == win["task"]), key=lambda w: parse_us(w["from"]))
+    lo, hi = parse_us(win["from"]), parse_us(win["to"])
+    for index, outer in enumerate(own):
+        if parse_us(outer["from"]) <= lo and hi <= parse_us(outer["to"]):
+            return dict(win, slice_of={"from": outer["from"], "to": outer["to"], "index": index})
+    return dict(win)
+
+
 def apply_ops(base, ops, where):
     data = yaml.safe_load(yaml.safe_dump(base))  # deep copy
+    base_input = list(base.get("input") or [])
     for op_entry in ops:
         (op, arg), = op_entry.items()
         if op not in OPS:
@@ -75,7 +94,7 @@ def apply_ops(base, ops, where):
         elif op == "set-segments":
             data["segments"] = list(arg)
         elif op == "set-input":
-            data["input"] = list(arg)
+            data["input"] = [_sliced(win, base_input) for win in arg]
         elif op == "set-focus":
             data["focus"] = list(arg)
         elif op == "set-operations":

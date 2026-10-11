@@ -44,6 +44,10 @@ tasks:
   depart: 60s
   id: renderers
   name: chrome
+  source:
+    count:
+    - glam
+    - meas-ci:desktop:2026-10-04
 - archetype: video-call
   arrive: 30s
   depart: 60s

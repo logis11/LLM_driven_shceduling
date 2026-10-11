@@ -6,6 +6,10 @@ focus:
   to: 1389.885s
 input:
 - from: 2s
+  slice_of:
+    from: 2s
+    index: 0
+    to: 1610s
   task: editor
   to: 1387.885s
 meta:
@@ -36,3 +40,8 @@ tasks:
     total_work: 1389.885s
   id: hog
   name: python
+  source:
+    program:
+    - pytorch-examples
+    - meas-ci:background:2026-10-03
+    total_work: meas-ci:background:2026-10-03

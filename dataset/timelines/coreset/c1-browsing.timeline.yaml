@@ -17,7 +17,8 @@ tasks:
   - {id: browser, name: chrome, archetype: web-browser,
      arrive: 0s, depart: 60s}
   - {id: renderers, name: chrome, archetype: renderer-hidden,
-     arrive: 0s, depart: 60s, count: 4}
+     arrive: 0s, depart: 60s, count: 4,
+     source: {count: [glam, "meas-ci:desktop:2026-10-04"]}}
 
 input:
   - {from: 2s, to: 58s, task: browser}

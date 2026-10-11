@@ -42,6 +42,9 @@ tasks:
   depart: 60s
   id: game
   name: Troy.exe
+  source:
+    lane_share: design
+    member_names: lavd-ossna24:s16
 - archetype: game-client
   arrive: 0s
   depart: 60s

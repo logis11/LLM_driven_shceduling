@@ -5,7 +5,7 @@ import pytest
 import yaml
 
 from wlc import Timeline, TimelineError, compile_timeline
-from wlc.linter import lint_canonical, lint_repo
+from wlc.linter import lint_bound_sources, lint_canonical, lint_repo
 
 
 def test_real_repo_lint_clean(repo_root):
@@ -204,6 +204,24 @@ def load_bad(tmp_path, mutate):
                                    "arrive": "0s", "depart": "10s"}),
                 d["focus"].append({"from": "0s", "to": "4s", "task": "ed"}),
                 d["input"].append({"from": "1s", "to": "5s", "task": "ed"}))),
+    # 9.18: a window that is a slice of a stream window
+    ("slice_of missing 'index'",
+     lambda d: (d["tasks"].append({"id": "ed", "name": "code", "archetype": "code-editor",
+                                   "arrive": "0s", "depart": "10s"}),
+                d["focus"].append({"from": "0s", "to": "10s", "task": "ed"}),
+                d["input"].append({"from": "1s", "to": "5s", "task": "ed", "slice_of": {"from": "1s", "to": "9s"}}))),
+    ("slice_of.index must be a non-negative integer",
+     lambda d: (d["tasks"].append({"id": "ed", "name": "code", "archetype": "code-editor",
+                                   "arrive": "0s", "depart": "10s"}),
+                d["focus"].append({"from": "0s", "to": "10s", "task": "ed"}),
+                d["input"].append({"from": "1s", "to": "5s", "task": "ed",
+                                   "slice_of": {"from": "1s", "to": "9s", "index": -1}}))),
+    ("lies outside the stream window it names as slice_of",
+     lambda d: (d["tasks"].append({"id": "ed", "name": "code", "archetype": "code-editor",
+                                   "arrive": "0s", "depart": "10s"}),
+                d["focus"].append({"from": "0s", "to": "10s", "task": "ed"}),
+                d["input"].append({"from": "1s", "to": "5s", "task": "ed",
+                                   "slice_of": {"from": "2s", "to": "9s", "index": 0}}))),
     ("meta.demand",
      lambda d: d["meta"].update(demand="whatever")),
     ("segment 'office': background_wanted missing",
@@ -217,6 +235,61 @@ def load_bad(tmp_path, mutate):
 def test_timeline_rules(tmp_path, library, expect, mutate):
     with pytest.raises(TimelineError, match=expect):
         Timeline(load_bad(tmp_path, mutate), library)
+
+
+def test_real_timelines_bound_values_are_sourced(repo_root):
+    """9.18 spec, decision 4 (9.10 D32): every value a core-set timeline binds carries a source tag or a label."""
+    registry = yaml.safe_load((repo_root / "dataset" / "sources.yaml").read_text())["sources"]
+    errors = []
+    for path in sorted((repo_root / "dataset" / "timelines").glob("**/*.timeline.yaml")):
+        errors.extend(lint_bound_sources(path, registry))
+    assert errors == []
+
+
+REGISTRY = {"meas-ci": {"type": "measurement", "locator_pattern": r"^[a-z0-9_-]+:\d{4}-\d{2}-\d{2}[a-z]?$"},
+            "glam": {"type": "deployed-system"}}
+
+
+def bound_task(bind=None, count=None, source=None):
+    task = {"id": "job", "name": "x", "archetype": "cpu-batch", "arrive": "0s"}
+    if bind is not None:
+        task["bind"] = bind
+    if count is not None:
+        task["count"] = count
+    if source is not None:
+        task["source"] = source
+    return task
+
+
+@pytest.mark.parametrize("task,expect", [
+    (bound_task({"total_work": "1s"}, source={"total_work": "meas-ci:background:2026-10-01"}), []),
+    (bound_task({"total_work": "1s"}, source={"total_work": "design"}), []),
+    (bound_task({"total_work": "1s", "program": "p"},
+                source={"total_work": "meas-ci:background:2026-10-01", "program": ["glam", "meas-ci:desktop:2026-10-04"]}), []),
+    (bound_task(count=4, source={"count": ["glam", "meas-ci:desktop:2026-10-04"]}), []),
+    (bound_task(), []),                                              # nothing bound, nothing to source
+    (bound_task({"total_work": "1s"}), ["bound values ['total_work'] carry no source map"]),
+    (bound_task(count=4), ["bound values ['count'] carry no source map"]),
+    (bound_task({"total_work": "1s", "program": "p"}, source={"total_work": "design"}),
+     ["bound values ['program'] have no source entry"]),
+    (bound_task({"total_work": "1s"}, source={"total_work": "design", "lane_share": "design"}),
+     ["source entries ['lane_share'] name no bound value"]),
+    (bound_task({"total_work": "1s"}, source={"total_work": "guess"}), ["source id 'guess' not in registry"]),
+    (bound_task({"total_work": "1s"}, source={"total_work": "meas-ci:background:yesterday"}),
+     ["locator 'background:yesterday' violates meas-ci pattern"]),
+    (bound_task({"total_work": "1s"}, source={"total_work": ["design", "glam"]}), ["a label stands alone"]),
+    (bound_task({"total_work": "1s"}, source={"total_work": []}), ["source of 'total_work' is empty"]),
+])
+def test_bound_values_carry_a_source_tag_or_a_label(tmp_path, task, expect):
+    """9.18 spec, decision 4: `source` mirrors the bound values — the `bind` keys and `count` when stated — each a
+    registry tag, a list of tags, or one of the labels design / convention / arithmetic."""
+    path = tmp_path / "probe.timeline.yaml"
+    path.write_text(yaml.safe_dump({"meta": {"id": "probe", "seed": 1}, "segments": [], "tasks": [task],
+                                    "input": [], "focus": []}))
+    errors = lint_bound_sources(path, REGISTRY)
+    assert len(errors) == len(expect)
+    for error, fragment in zip(errors, expect):
+        assert fragment in error, error
 
 
 def test_no_demand_window_gates_a_file(tmp_path, library, schema):

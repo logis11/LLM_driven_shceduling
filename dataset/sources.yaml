@@ -240,6 +240,39 @@ sources:
       VideoGUI, not natural usage. Data terms restrict redistribution;
       methodological reuse is unrestricted.
 
+  # ---- grounds of the timelines' bound values (9.10 D32; 9.18) -------------
+
+  pytorch-examples:
+    type: deployed-system
+    notes: >-
+      PyTorch's "Basic MNIST Example" at commit acc295d: the job
+      `cpu-batch`'s `python3` program was measured on (9.10 D12, D82-D85), run
+      as the README's `python main.py` with `--save-model` at the defaults.
+      Grounds the bound program of the training-run tasks (`c1-ml-train`,
+      `c7-ml-train`, `c2-p1a`), with the campaign that measured it. Identifies
+      the job; no claim about what or how often desktop users train.
+
+  kdenlive:
+    type: deployed-system
+    notes: >-
+      Kdenlive 23.08.5 as Ubuntu 24.04 packages it: the render dialog starts
+      `kdenlive_render`, which runs `melt-7` on the project's playlist with the
+      shipped default MP4-H264/AAC profile (9.10 D101-D106). Grounds the bound
+      program of the export tasks (`c1-render`, `c7-render`, `c2-p3a`), with
+      the campaign that measured it. Identifies the program and its profile;
+      no claim about what users export.
+
+  glam:
+    type: deployed-system
+    notes: >-
+      Mozilla's GLAM public API, Firefox Desktop release, probe
+      browser_engagement_max_concurrent_tab_count (versions 137-156, Linux,
+      Windows and Darwin): the per-subsession maximum of open tabs across all
+      windows. Grounds the hidden tabs' `count: 4` of every file that shows
+      Chrome (9.10 D15, D130, D131), read with the desktop campaign that
+      measured a hidden renderer. Firefox's distribution read for Chrome's
+      tab count is our modeling (archetypes.yaml `renderer-hidden`).
+
   # ---- our measurements --------------------------------------------------
 
   meas-ci:

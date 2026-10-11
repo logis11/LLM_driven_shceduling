@@ -13,8 +13,10 @@ lint:               ## repo + timeline + canonical lints (no writes)
 test:               ## invariant test suite
 	$(PY) -m pytest tools/tests -q
 
-check:              ## CI gate: verify derived files, grid (all 32 cells), and manifest
+check:              ## CI gate: derived files, grid (all 32 cells), both manifests, and build/ equal to them (needs `dataset variants`)
 	$(PY) tools/derive.py --check --require-coverage
 	$(PY) tools/compile.py --check
+	$(PY) tools/variants.py --check
+	$(PY) tools/check_build.py
 
 .PHONY: dataset variants lint test check

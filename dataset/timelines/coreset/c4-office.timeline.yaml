@@ -40,6 +40,10 @@ tasks:
   depart: 60s
   id: renderers
   name: chrome
+  source:
+    count:
+    - glam
+    - meas-ci:desktop:2026-10-04
 - archetype: mail-client
   arrive: 0s
   depart: 60s
@@ -51,3 +55,5 @@ tasks:
     total_work: 6s
   id: injected-burst
   name: 7z
+  source:
+    total_work: design

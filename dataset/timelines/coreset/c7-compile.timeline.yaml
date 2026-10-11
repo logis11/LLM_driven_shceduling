@@ -6,6 +6,10 @@ focus:
   to: 225.458s
 input:
 - from: 2s
+  slice_of:
+    from: 2s
+    index: 0
+    to: 1592s
   task: editor
   to: 223.458s
 meta:
@@ -34,3 +38,6 @@ tasks:
     parallelism_cap: 8
   id: build
   name: dkms
+  source:
+    child_name: meas-ci:background:2026-10-02
+    parallelism_cap: design

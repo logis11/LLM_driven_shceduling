@@ -13,7 +13,7 @@ variants:
     from: c2-p1a.timeline.yaml
     ops:
       - patch-task: {id: hog, name: tracker-miner-f, archetype: file-indexer,
-                     arrive: 60s, bind: {total_work: 39.435s}}
+                     arrive: 60s, bind: {total_work: 39.435s}, source: {total_work: "meas-ci:background:2026-10-02b"}}
       - patch-segment: {index: 1, mode: indexing,
                         attributes: {background_wanted: false, initiated: session},
                         scenario: [S11, S14]}
@@ -27,7 +27,7 @@ variants:
     from: c2-p2a.timeline.yaml
     ops:
       - patch-task: {id: download, name: unattended-upgr, archetype: package-upgrade,
-                     arrive: 60s, bind: {total_work: 26.385s}}
+                     arrive: 60s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
       - patch-segment: {index: 1,
                         attributes: {background_wanted: false, background: package-upgrade},
                         scenario: [S9, S17]}
@@ -50,7 +50,7 @@ variants:
     from: c2-p3a.timeline.yaml
     ops:
       - patch-task: {id: bulk, name: deja-dup, archetype: incremental-backup,
-                     arrive: 60s, bind: {total_work: 165.668s}}
+                     arrive: 60s, bind: {total_work: 165.668s}, source: {total_work: "meas-ci:background:2026-10-04"}}
       - patch-segment: {index: 1, mode: backup,
                         attributes: {background_wanted: true, initiated: scheduled},
                         scenario: [S7, S15]}

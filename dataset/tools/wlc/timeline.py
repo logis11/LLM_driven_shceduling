@@ -3,7 +3,8 @@
 A timeline is meta + four tracks:
   segments: [{from, to, mode, attributes?, scenario?}]   -> ground_truth
   tasks:    [{id, name, archetype, arrive, depart?, bind?, count?}]
-  input:    [{from, to, task}]   the keystroke windows — where the replayed stimulus lands (one user, one typing hand)
+  input:    [{from, to, task, slice_of?}]   the keystroke windows — where the replayed stimulus lands (one user, one
+            typing hand); `slice_of: {from, to, index}` names the stream window this one is a slice of (9.18)
   focus:    [{from, to, task}]   the window-focus track — which top-level task holds the focus (9.17); -> canonical `focus`
 """
 
@@ -135,6 +136,7 @@ class Timeline:
                 "depart": parse_us(task["depart"]) if has_depart else None,
                 "bind": bind,
                 "count": count,
+                "source": task.get("source") or {},   # the bound values' provenance (9.18); checked by the linter
             }
             if entry["depart"] is not None and entry["depart"] <= entry["arrive"]:
                 self._err(f"task {tid!r}: depart <= arrive")
@@ -142,17 +144,32 @@ class Timeline:
         self.task_by_id = {t["id"]: t for t in self.tasks}
 
     def _load_input(self, raw, library):
-        """input: [{from, to, task}] — the keystroke windows. The replayed stimulus lands inside them (compiler), so a
-        window targets a task whose archetype has an input channel, within its lifetime; windows do not overlap."""
+        """input: [{from, to, task, slice_of?}] — the keystroke windows. The replayed stimulus lands inside them
+        (compiler), so a window targets a task whose archetype has an input channel, within its lifetime; windows do
+        not overlap. `slice_of: {from, to, index}` (9.18 spec, decision 1) names the stream window this one is a slice
+        of — the compiler draws the stimulus offset for that window, by its length and its index among the task's
+        windows, and places inside this one the keystrokes that fall in it; the window lies inside it."""
         self.input = []
         for win in raw.get("input") or []:
             for field in ("from", "to", "task"):
                 if field not in win:
                     self._err(f"input window missing {field!r}")
             entry = {"from": parse_us(win["from"]), "to": parse_us(win["to"]),
-                     "task": win["task"]}
+                     "task": win["task"], "slice_of": None}
             if entry["from"] >= entry["to"]:
                 self._err("input window: from >= to")
+            if win.get("slice_of") is not None:
+                outer = win["slice_of"]
+                for field in ("from", "to", "index"):
+                    if field not in outer:
+                        self._err(f"input window slice_of missing {field!r}")
+                if not isinstance(outer["index"], int) or outer["index"] < 0:
+                    self._err("input window slice_of.index must be a non-negative integer")
+                entry["slice_of"] = {"from": parse_us(outer["from"]), "to": parse_us(outer["to"]),
+                                     "index": outer["index"]}
+                if not (entry["slice_of"]["from"] <= entry["from"] and entry["to"] <= entry["slice_of"]["to"]):
+                    self._err(f"input window {entry['from']}–{entry['to']} µs lies outside the stream window it "
+                              "names as slice_of")
             task = self.task_by_id.get(entry["task"]) or self._err(
                 f"input targets unknown task {win['task']!r}")
             if not library.has_input_channel(task["archetype"]):

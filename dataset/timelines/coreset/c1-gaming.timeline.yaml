@@ -11,7 +11,8 @@ segments:
 tasks:
   - {id: game, name: Troy.exe, archetype: game-task-chain,
      arrive: 0s, depart: 60s, bind: {lane_share: 0.9,
-           member_names: ["Task worker thr", "Task worker thr", "Task worker thr", "Task worker thr", dxvk-cs, dxvk-submit, winepulse_mainl, winepulse_timer, FAudio_AudioCli, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe]}}
+           member_names: ["Task worker thr", "Task worker thr", "Task worker thr", "Task worker thr", dxvk-cs, dxvk-submit, winepulse_mainl, winepulse_timer, FAudio_AudioCli, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe, Troy.exe]},
+     source: {lane_share: design, member_names: "lavd-ossna24:s16"}}
   - {id: steam, name: steam, archetype: game-client,
      arrive: 0s, depart: 60s}
 

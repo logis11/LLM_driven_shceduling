@@ -40,3 +40,5 @@ tasks:
     total_work: 39.435s
   id: hog
   name: tracker-miner-f
+  source:
+    total_work: meas-ci:background:2026-10-02b

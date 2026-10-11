@@ -228,7 +228,9 @@ def _unbounded_loop(build, iid, seed, params, program, lifespan):
 #     input window's or operation's start (9.5 D77);
 #   - replayed stimulus (`stimulus`): inside each input window a contiguous
 #     slice of the named stream (dataset/stimulus/<stream>.jsonl) of the
-#     window's length, at an offset drawn from the seed; each input is an
+#     window's length, at an offset drawn from the seed — for a window that is
+#     a slice of a stream window (`slice_of`, 9.18), the offset drawn for that
+#     window plus the slice's lead inside it; each input is an
 #     exogenous wake on the task's input channel with a RUN from `input_run`.
 # Timer wakes compile to WAIT steps on the task's timer channel, each woken by a
 # `wake` event at its sampled absolute time, with no deadline (9.5 D74); input
@@ -396,7 +398,11 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
         k = 0
         for j, w in enumerate(windows):
             length = w["to"] - w["from"]
-            offset = round(sampling.uniform(seed, iid, "stimulus", j) * max(0, span - length))
+            # 9.18 spec, decision 1: a window that is a slice of a stream window takes that window's draw — its
+            # length and its index — and the slice's lead inside it, so a derived file's keystrokes are its base's
+            outer = w.get("slice_of") or {"from": w["from"], "to": w["to"], "index": j}
+            offset = round(sampling.uniform(seed, iid, "stimulus", outer["index"])
+                           * max(0, span - (outer["to"] - outer["from"]))) + (w["from"] - outer["from"])
             lo = bisect.bisect_left(stream, offset)
             for t_rel in stream[lo:]:
                 if t_rel >= offset + length:

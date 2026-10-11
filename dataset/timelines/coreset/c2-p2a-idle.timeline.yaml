@@ -50,6 +50,9 @@ tasks:
   depart: 86.385s
   id: game
   name: Troy.exe
+  source:
+    lane_share: design
+    member_names: lavd-ossna24:s16
 - archetype: game-client
   arrive: 0s
   depart: 86.385s
@@ -61,3 +64,5 @@ tasks:
     total_work: 727.170s
   id: download
   name: steam
+  source:
+    total_work: meas-ci:background:2026-09-19

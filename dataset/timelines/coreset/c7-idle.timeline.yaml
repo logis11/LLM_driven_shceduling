@@ -43,3 +43,5 @@ tasks:
     total_work: 26.385s
   id: upgrade
   name: unattended-upgr
+  source:
+    total_work: meas-ci:background:2026-10-01
