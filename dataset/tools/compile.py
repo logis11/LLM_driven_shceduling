@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Compile every timeline to canonical form and write the build manifest.
 
-Usage: compile.py [--check] [--repo ROOT]
+Usage: compile.py [--check] [--jobs N] [--repo ROOT]
   --check   recompile and fail if dataset/build.manifest.json would change
-            (CI determinism / drift gate; writes nothing)
+            (an independent verification; the gate compares the manifest the
+            build wrote with the committed one — check_build.py; 9.22)
+  --jobs N  worker processes, one timeline each (default: the CPU count)
 
 Every artifact is written with its compile report beside it (`<id>.report.json`);
 the manifest pins both, and its `inputs` pin by content everything the compile
@@ -12,8 +14,10 @@ the stimulus and replay streams (9.18 spec, decisions 5 and 8).
 """
 
 import argparse
+import concurrent.futures
 import hashlib
 import json
+import os
 import pathlib
 import sys
 
@@ -60,38 +64,70 @@ def input_files(root):
     return files
 
 
-def build_all(root):
-    """Returns (manifest_dict, artifacts {relpath: bytes}, errors, reports)."""
-    dataset = root / "dataset"
-    library = Library(dataset / "archetypes.yaml")
-    schema = load_schema(dataset / "schema" / "workload.schema.json")
-    timelines_dir = dataset / "timelines"
+_PER_PROCESS = {}   # root -> (library, schema), loaded once per worker process
+
+
+def _tools(root):
+    if root not in _PER_PROCESS:
+        dataset = root / "dataset"
+        _PER_PROCESS[root] = (Library(dataset / "archetypes.yaml"),
+                              load_schema(dataset / "schema" / "workload.schema.json"))
+    return _PER_PROCESS[root]
+
+
+def compile_one(root, path):
+    """One timeline in every mode: (errors, [(out, artifact bytes, demand entry, report, timeline id, mode)]).
+    Pure in its inputs, so the timelines compile in parallel (9.22) and in any order; the manifest sorts."""
+    root, path = pathlib.Path(root), pathlib.Path(path)
+    library, schema = _tools(root)
+    timelines_dir = root / "dataset" / "timelines"
+    rel_path = path.relative_to(root).as_posix()
+    try:
+        timeline = Timeline(path, library)
+    except TimelineError as err:
+        return [str(err)], []
+    errors, built = [], []
+    for mode in MODES:
+        canonical, report = compile_timeline(timeline, library, mode, rel_path=rel_path)
+        errors.extend(lint_canonical(canonical, schema, report=report, mode=mode,
+                                     name=f"{timeline.id}[{mode}]"))
+        out = f"{artifact_set(timelines_dir, path)}-{mode}/{timeline.id}.workload.json"
+        demand = {"utilization": round(report["utilization"], 4),
+                  "demand_class": report["demand_class"],
+                  "segments": [{"index": seg["index"], "t_start_us": seg["t_start_us"],
+                                "t_end_us": seg["t_end_us"],
+                                "utilization": round(seg["utilization"], 4)}
+                               for seg in report["per_segment"]]}
+        built.append((out, canonical_bytes(canonical), demand, report, timeline.id, mode))
+    return errors, built
+
+
+def default_jobs():
+    return max(1, os.cpu_count() or 1)
+
+
+def build_all(root, jobs=None):
+    """Returns (manifest_dict, artifacts {relpath: bytes}, errors, reports). The timelines compile in `jobs`
+    worker processes (9.22); the results are the same in any order."""
+    root = pathlib.Path(root)
+    timelines_dir = root / "dataset" / "timelines"
+    paths = discover(timelines_dir)
+    jobs = min(jobs or default_jobs(), max(1, len(paths)))
 
     artifacts, demand, errors, reports, report_of = {}, {}, [], [], {}
-    for path in discover(timelines_dir):
-        rel_path = path.relative_to(root).as_posix()
-        try:
-            timeline = Timeline(path, library)
-        except TimelineError as err:
-            errors.append(str(err))
-            continue
-        for mode in MODES:
-            canonical, report = compile_timeline(timeline, library, mode,
-                                                 rel_path=rel_path)
-            errors.extend(lint_canonical(
-                canonical, schema, report=report, mode=mode,
-                name=f"{timeline.id}[{mode}]"))
-            out = (f"{artifact_set(timelines_dir, path)}-{mode}/"
-                   f"{timeline.id}.workload.json")
-            artifacts[out] = canonical_bytes(canonical)
-            demand[out] = {"utilization": round(report["utilization"], 4),
-                           "demand_class": report["demand_class"],
-                           "segments": [{"index": seg["index"], "t_start_us": seg["t_start_us"],
-                                         "t_end_us": seg["t_end_us"],
-                                         "utilization": round(seg["utilization"], 4)}
-                                        for seg in report["per_segment"]]}
-            reports.append((timeline.id, mode, report))
+    if jobs == 1:
+        results = [compile_one(root, path) for path in paths]
+    else:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=jobs) as pool:
+            results = list(pool.map(compile_one, [root] * len(paths), paths))
+    for path_errors, built in results:
+        errors.extend(path_errors)
+        for out, data, entry, report, timeline_id, mode in built:
+            artifacts[out] = data
+            demand[out] = entry
+            reports.append((timeline_id, mode, report))
             report_of[out] = report
+    reports.sort(key=lambda r: (r[0], r[1]))
 
     manifest = {
         "inputs": {path.relative_to(root).as_posix(): sha256(path.read_bytes()) for path in input_files(root)},
@@ -106,12 +142,13 @@ def build_all(root):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--jobs", type=int, default=None)
     parser.add_argument("--repo", default=None)
     args = parser.parse_args()
     root = (pathlib.Path(args.repo).resolve() if args.repo
             else pathlib.Path(__file__).resolve().parents[2])
 
-    manifest, artifacts, errors, reports = build_all(root)
+    manifest, artifacts, errors, reports = build_all(root, jobs=args.jobs)
     for timeline_id, mode, report in reports:
         print(f"  {timeline_id}[{mode}]: demand {report['utilization']:.2f} "
               f"({report['demand_class']})")

@@ -1,14 +1,53 @@
 """The build manifest carries each artifact's static demand estimate, per file and per segment."""
 
+import hashlib
 import importlib
 import json
+
+import pytest
 
 compile_tool = importlib.import_module("compile")
 
 
-def test_manifest_records_demand_per_artifact(repo_root):
+def _blessed_build(repo_root):
+    """(manifest, artifacts, reports) read from the blessed build when every artifact and report hashes to the
+    committed manifest's entries (9.18 spec, decision 8; 9.22); None otherwise."""
+    dataset = repo_root / "dataset"
+    manifest_path = dataset / "build.manifest.json"
+    if not manifest_path.is_file():
+        return None
+    manifest = json.loads(manifest_path.read_text())
+    artifacts, reports = {}, []
+    for rel, digest in manifest.get("artifacts", {}).items():
+        path = dataset / "build" / rel
+        report_rel = compile_tool.report_path(rel)
+        report_file = dataset / "build" / report_rel
+        if not (path.is_file() and report_file.is_file()):
+            return None
+        data, report_data = path.read_bytes(), report_file.read_bytes()
+        if hashlib.sha256(data).hexdigest() != digest or \
+                hashlib.sha256(report_data).hexdigest() != manifest.get("reports", {}).get(report_rel):
+            return None
+        artifacts[rel] = data
+        timeline_id = rel.rsplit("/", 1)[1][:-len(".workload.json")]
+        mode = rel.split("/", 1)[0].rsplit("-", 1)[1]
+        reports.append((timeline_id, mode, json.loads(report_data)))
+    return manifest, artifacts, reports
+
+
+@pytest.fixture(scope="module")
+def built(repo_root):
+    """The manifest, artifacts and reports: the blessed build when the hashes match, a compile otherwise."""
+    blessed = _blessed_build(repo_root)
+    if blessed is not None:
+        return blessed
     manifest, artifacts, errors, reports = compile_tool.build_all(repo_root)
     assert errors == []
+    return manifest, artifacts, reports
+
+
+def test_manifest_records_demand_per_artifact(built):
+    manifest, artifacts, reports = built
     assert set(manifest["demand"]) == set(artifacts)
     for timeline_id, mode, report in reports:
         entry = next(v for k, v in manifest["demand"].items()

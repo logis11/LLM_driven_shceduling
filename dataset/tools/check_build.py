@@ -1,19 +1,48 @@
 #!/usr/bin/env python3
-"""Verify the on-disk build against the two committed manifests (9.18 spec, decision 6).
+"""Verify the build against the committed manifests (9.18 spec, decision 6; 9.22 spec, decision 1).
 
 Usage: check_build.py [--repo ROOT]
 
-`dataset/build/` must equal the union of `dataset/build.manifest.json` (artifacts
-and reports) and `dataset/build.variants.manifest.json` (variant artifacts): every
-file present with the pinned hash, every pinned entry present, no file pinned by
-neither. A missing build directory fails. Writes nothing.
+Two checks. The two manifests on disk equal their committed bytes (`git show
+HEAD:<path>`): the build step rewrote them, so equality says the recompile
+reproduces the committed set. And `dataset/build/` equals the union of
+`dataset/build.manifest.json` (artifacts and reports) and
+`dataset/build.variants.manifest.json` (variant artifacts): every file present
+with the pinned hash, every pinned entry present, no file pinned by neither. A
+missing build directory fails. Writes nothing.
 """
 
 import argparse
 import hashlib
 import json
 import pathlib
+import subprocess
 import sys
+
+MANIFESTS = ("dataset/build.manifest.json", "dataset/build.variants.manifest.json")
+
+
+def committed_bytes(root, rel):
+    """The file's bytes at HEAD, or None when git has no such file."""
+    done = subprocess.run(["git", "-C", str(root), "show", f"HEAD:{rel}"], capture_output=True)
+    return done.stdout if done.returncode == 0 else None
+
+
+def check_committed(root):
+    """Returns error strings; empty when both manifests equal their committed bytes (9.22 spec, decision 1)."""
+    errors = []
+    for rel in MANIFESTS:
+        path = root / rel
+        if not path.is_file():
+            errors.append(f"{rel}: missing (run `make dataset variants` first)")
+            continue
+        committed = committed_bytes(root, rel)
+        if committed is None:
+            errors.append(f"{rel}: not in git at HEAD")
+        elif committed != path.read_bytes():
+            errors.append(f"{rel}: the build wrote a manifest that differs from the committed one — "
+                          "re-bless (commit it) if the change is intended")
+    return errors
 
 
 def expected_hashes(root):
@@ -54,7 +83,7 @@ def main():
     args = parser.parse_args()
     root = (pathlib.Path(args.repo).resolve() if args.repo
             else pathlib.Path(__file__).resolve().parents[2])
-    errors = check(root)
+    errors = check_committed(root) + check(root)
     if errors:
         print(f"{len(errors)} build error(s):", file=sys.stderr)
         for message in errors:

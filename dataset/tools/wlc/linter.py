@@ -11,7 +11,7 @@ import json
 import pathlib
 import re
 
-import jsonschema
+import jsonschema_rs
 import yaml
 
 from .timeline import Timeline, TimelineError
@@ -250,14 +250,25 @@ def load_schema(schema_path):
     return json.loads(pathlib.Path(schema_path).read_text())
 
 
+_VALIDATORS = {}   # id(schema) -> (schema, compiled validator); one compile per schema document per process
+
+
+def _validator(schema):
+    """The schema compiled by jsonschema-rs (9.22 spec, decision 3): the same 2020-12 validation as the Python
+    jsonschema package gave, about a hundred times faster on the set's largest artifacts."""
+    entry = _VALIDATORS.get(id(schema))
+    if entry is None or entry[0] is not schema:
+        entry = _VALIDATORS[id(schema)] = (schema, jsonschema_rs.validator_for(schema))
+    return entry[1]
+
+
 def lint_canonical(canonical, schema, report=None, mode=None, name=""):
     errors = []
     prefix = f"{name}: " if name else ""
 
-    validator = jsonschema.Draft202012Validator(schema)
-    for err in validator.iter_errors(canonical):
+    for err in _validator(schema).iter_errors(canonical):
         errors.append(f"{prefix}schema: {err.message} at "
-                      f"{'/'.join(map(str, err.absolute_path))}")
+                      f"{'/'.join(map(str, err.instance_path))}")
     if errors:
         return errors  # structural failures make the rest unreliable
 

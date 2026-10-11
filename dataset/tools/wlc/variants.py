@@ -232,13 +232,26 @@ def build_variant(spec, set_spec, base_id, root, build_dir, workdir):
     return canonical, report
 
 
+def jobs_of(spec, only=None):
+    """The (set_spec, base_id) pairs in spec order."""
+    jobs = []
+    for set_spec in spec["sets"]:
+        if only and set_spec["name"] not in only:
+            continue
+        if set_spec["transform"] not in TRANSFORMS:
+            raise VariantError(f"set {set_spec['name']!r}: unknown transform {set_spec['transform']!r}")
+        jobs.extend((set_spec, base_id) for base_id in set_spec["files"])
+    return jobs
+
+
+def build_job(spec, set_spec, base_id, root, build_dir):
+    """(canonical, report or None) for one (set, file) in a working directory of its own, so that jobs run in
+    parallel (9.22): a scaled or replayed library and the shifted timeline are written there."""
+    with tempfile.TemporaryDirectory() as workdir:
+        return build_variant(spec, set_spec, base_id, root, build_dir, workdir)
+
+
 def build_all(spec, root, build_dir, only=None):
     """Yields (set_spec, base_id, canonical, report) for every (set, file), in spec order."""
-    with tempfile.TemporaryDirectory() as workdir:
-        for set_spec in spec["sets"]:
-            if only and set_spec["name"] not in only:
-                continue
-            if set_spec["transform"] not in TRANSFORMS:
-                raise VariantError(f"set {set_spec['name']!r}: unknown transform {set_spec['transform']!r}")
-            for base_id in set_spec["files"]:
-                yield set_spec, base_id, *build_variant(spec, set_spec, base_id, root, build_dir, workdir)
+    for set_spec, base_id in jobs_of(spec, only):
+        yield set_spec, base_id, *build_job(spec, set_spec, base_id, root, build_dir)

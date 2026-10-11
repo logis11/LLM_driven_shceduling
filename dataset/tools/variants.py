@@ -2,9 +2,11 @@
 """Build the RQ0 gate spec's sensitivity variants and write their manifest (9.14
 decisions 10 and 12; dataset/variants.yaml).
 
-Usage: variants.py [--check] [--sets NAME,…] [--repo ROOT]
+Usage: variants.py [--check] [--sets NAME,…] [--jobs N] [--repo ROOT]
   --check   rebuild and fail if dataset/build.variants.manifest.json would change
-            (CI determinism gate; writes nothing)
+            (an independent verification; the gate compares the manifest the
+            build wrote with the committed one — check_build.py; 9.22)
+  --jobs N  worker processes, one (set, file) each (default: the CPU count)
   --sets    build the named sets only (the manifest then covers those alone; not
             for the committed manifest)
 
@@ -16,8 +18,10 @@ transform and parameters, and the inputs' hashes.
 """
 
 import argparse
+import concurrent.futures
 import hashlib
 import json
+import os
 import pathlib
 import sys
 
@@ -25,14 +29,32 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 from wlc.compiler import canonical_bytes  # noqa: E402
 from wlc.linter import lint_canonical, load_schema  # noqa: E402
-from wlc.variants import VariantError, build_all, load_spec, variant_id  # noqa: E402
+from wlc.variants import VariantError, build_job, jobs_of, load_spec, variant_id  # noqa: E402
 
 
 def sha256(data):
     return hashlib.sha256(data).hexdigest()
 
 
-def build(root, only=None):
+def _job(args):
+    spec, set_spec, base_id, root, build_dir = args
+    return build_job(spec, set_spec, base_id, root, build_dir)
+
+
+def build_results(spec, root, build_dir, only=None, jobs=None):
+    """[(set_spec, base_id, canonical, report)] in spec order, the jobs run in `jobs` worker processes (9.22)."""
+    pairs = jobs_of(spec, only)
+    jobs = min(jobs or max(1, os.cpu_count() or 1), max(1, len(pairs)))
+    args = [(spec, set_spec, base_id, root, build_dir) for set_spec, base_id in pairs]
+    if jobs == 1:
+        built = [_job(a) for a in args]
+    else:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=jobs) as pool:
+            built = list(pool.map(_job, args))
+    return [(set_spec, base_id, canonical, report) for (set_spec, base_id), (canonical, report) in zip(pairs, built)]
+
+
+def build(root, only=None, jobs=None):
     """Returns (manifest, artifacts {relpath: bytes}, errors)."""
     root = pathlib.Path(root)
     dataset = root / "dataset"
@@ -42,7 +64,7 @@ def build(root, only=None):
     base_manifest = json.loads((dataset / "build.manifest.json").read_text(encoding="utf-8"))
     artifacts, records, errors = {}, {}, []
     try:
-        for set_spec, base_id, canonical, report in build_all(spec, root, build_dir, only=only):
+        for set_spec, base_id, canonical, report in build_results(spec, root, build_dir, only=only, jobs=jobs):
             vid = variant_id(base_id, set_spec["name"])
             errors.extend(lint_canonical(canonical, schema, name=vid))
             rel = f"coreset-single/{vid}.workload.json"
@@ -73,6 +95,7 @@ def build(root, only=None):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
+    ap.add_argument("--jobs", type=int, default=None)
     ap.add_argument("--sets", default=None)
     ap.add_argument("--repo", default=None)
     args = ap.parse_args()
@@ -80,7 +103,7 @@ def main():
             else pathlib.Path(__file__).resolve().parents[2])
     only = set(args.sets.split(",")) if args.sets else None
 
-    manifest, artifacts, errors = build(root, only=only)
+    manifest, artifacts, errors = build(root, only=only, jobs=args.jobs)
     if errors:
         print(f"{len(errors)} error(s):", file=sys.stderr)
         for message in errors:
