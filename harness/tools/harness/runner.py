@@ -98,15 +98,16 @@ class RunSpec:
     boot_default: str           # the alternative's stem; "" for the primary
     boot_file: pathlib.Path
     workload_file: pathlib.Path
+    telemetry: str              # the telemetry shape shown to the recognizer: `focus` or `names` (9.17)
 
     @property
     def name(self) -> str:
         return self.condition + (f"-{self.seed}" if self.seed else "") \
-            + (f"+{self.boot_default}" if self.boot_default else "")
+            + (f"+{self.boot_default}" if self.boot_default else "") + f"~{self.telemetry}"
 
     @property
     def identity(self):
-        return (self.workload_id, self.condition, self.table, self.seed, self.boot_default)
+        return (self.workload_id, self.condition, self.table, self.seed, self.boot_default, self.telemetry)
 
 
 def expand(spec_path, machine: Machine, root) -> List[RunSpec]:
@@ -121,19 +122,22 @@ def expand(spec_path, machine: Machine, root) -> List[RunSpec]:
     runs = []
     files = list(spec["files"]["judging"]) + list(spec["files"]["reporting"])
     variants = list(spec["files"].get("variants") or [])          # 9.14 decision 12: the primary boot default alone
+    shapes = list(spec["telemetry"])                                # 9.17: every condition under every shape listed
     for wid in files + variants:
         workload = machine.build_dir / f"{wid}.workload.json"
-        for condition in spec["conditions"]:
-            if condition == "fixed":
-                for stem in [primary] + ([] if wid in variants else alternatives):
-                    boot = "" if stem == primary else stem
-                    runs.append(RunSpec(wid, "fixed", "", "", boot, machine.boot_defaults_dir / f"{stem}.json",
-                                        workload))
-            else:
-                seeds = [str(i) for i in range(1, n_seeds + 1)] if condition in drawing else [""]
-                for seed in seeds:
-                    runs.append(RunSpec(wid, condition, role, seed, "",
-                                        machine.boot_defaults_dir / f"{primary}.json", workload))
+        for shape in shapes:
+            for condition in spec["conditions"]:
+                if condition == "fixed":
+                    for stem in [primary] + ([] if wid in variants else alternatives):
+                        boot = "" if stem == primary else stem
+                        runs.append(RunSpec(wid, "fixed", "", "", boot, machine.boot_defaults_dir / f"{stem}.json",
+                                            workload, telemetry=shape))
+                else:
+                    seeds = [str(i) for i in range(1, n_seeds + 1)] if condition in drawing else [""]
+                    for seed in seeds:
+                        runs.append(RunSpec(wid, condition, role, seed, "",
+                                            machine.boot_defaults_dir / f"{primary}.json", workload,
+                                            telemetry=shape))
     return runs
 
 
@@ -147,9 +151,10 @@ def _sha256(path) -> str:
     return h.hexdigest()
 
 
-def cache_key(program: Program, role: str, condition: str, seed: str, inputs: Dict[str, pathlib.Path]) -> str:
+def cache_key(program: Program, role: str, condition: str, seed: str, inputs: Dict[str, pathlib.Path],
+              telemetry: str = "") -> str:
     material = {"program": role, "version": program.version, "command": list(program.command),
-                "condition": condition, "seed": seed,
+                "condition": condition, "seed": seed, "telemetry": telemetry,
                 "inputs": {name: _sha256(path) for name, path in sorted(inputs.items())}}
     return hashlib.sha256(json.dumps(material, sort_keys=True).encode()).hexdigest()
 
@@ -170,13 +175,14 @@ def _execute(argv, out_dir, stderr_path):
 
 def invoke(program: Program, role: str, cache_dir, condition: str, seed: str,
            inputs: Dict[str, pathlib.Path], outputs: Dict[str, pathlib.Path], stderr_log,
-           with_condition: bool = True) -> Invocation:
+           with_condition: bool = True, telemetry: str = "") -> Invocation:
     """Run `program` for one run, twice, through the invocation contract, or
     serve it from the cache; copy the first execution's outputs to `outputs`
     and its stderr to `stderr_log`. `inputs` and `outputs` map flag names
-    (without dashes) to paths."""
+    (without dashes) to paths. `telemetry`, the daemon's shape flag (9.17), is
+    passed when given and is part of the key."""
     cache_dir = pathlib.Path(cache_dir)
-    key = cache_key(program, role, condition, seed, inputs)
+    key = cache_key(program, role, condition, seed, inputs, telemetry)
     entry = cache_dir / key
     stderr_log = pathlib.Path(stderr_log)
     if not entry.is_dir():
@@ -189,6 +195,8 @@ def invoke(program: Program, role: str, cache_dir, condition: str, seed: str,
                 flags += [f"--{name}", str(pathlib.Path(path).resolve())]
             if with_condition:
                 flags += ["--condition", condition] + (["--seed", seed] if seed else [])
+            if telemetry:
+                flags += ["--telemetry", telemetry]
             for which in ("first", "second"):
                 out_dir = tmp / which
                 argv = list(program.command) + flags
@@ -211,7 +219,7 @@ def invoke(program: Program, role: str, cache_dir, condition: str, seed: str,
                                    f"(contract 10, determinism)")
             (tmp / "meta.json").write_text(json.dumps(
                 {"program": role, "version": program.version, "command": list(program.command),
-                 "condition": condition, "seed": seed,
+                 "condition": condition, "seed": seed, "telemetry": telemetry,
                  "inputs": {n: _sha256(p) for n, p in sorted(inputs.items())},
                  "outputs": sorted(pathlib.Path(p).name for p in outputs.values())}, indent=1) + "\n")
             tmp.rename(entry)
@@ -279,7 +287,7 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
                        inputs={"workload": run.workload_file, "driver-table": table_path,
                                "boot-default": run.boot_file},
                        outputs={"out-schedule": run_dir / "schedule.json", "out-log": run_dir / "log.json"},
-                       stderr_log=run_dir / "daemon.stderr.log")
+                       stderr_log=run_dir / "daemon.stderr.log", telemetry=run.telemetry)
             s = invoke(machine.simulator, "simulator", machine.cache_dir, run.condition, run.seed,
                        inputs={"workload": run.workload_file, "schedule": run_dir / "schedule.json"},
                        outputs={"out-trace": run_dir / "trace.jsonl"},
@@ -291,7 +299,7 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
                                f"{machine.simulator.version!r}")
             rows, messages = records.build(run.workload_file, run_dir / "trace.jsonl", table=run.table,
                                            seed=run.seed, schedule_path=run_dir / "schedule.json",
-                                           boot_default=run.boot_default)
+                                           boot_default=run.boot_default, telemetry=run.telemetry)
             records.write_csv(rows, run_dir / "records.csv")
             (run_dir / "records-messages.json").write_text(json.dumps(messages, indent=1) + "\n")
             for inv in (d, s):
@@ -323,7 +331,7 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
     for identity, b in sorted(built.items()):
         run, run_dir = b["run"], b["dir"]
         entry = {"workload_id": run.workload_id, "condition": run.condition, "table": run.table,
-                 "seed": run.seed, "boot_default": run.boot_default,
+                 "seed": run.seed, "boot_default": run.boot_default, "telemetry": run.telemetry,
                  "records": str(run_dir / "records.csv"), "schedule": str(run_dir / "schedule.json"),
                  "log": str(run_dir / "log.json"), "workload": str(run.workload_file),
                  "rerun_trace": str(run_dir / "trace.rerun.jsonl"), "trace": str(run_dir / "trace.jsonl"),
@@ -334,7 +342,7 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
                                      records=run_dir / "records.csv", schedule=run_dir / "schedule.json",
                                      log=run_dir / "log.json", workload=run.workload_file,
                                      rerun_trace=run_dir / "trace.rerun.jsonl", guard_messages=b["messages"],
-                                     trace=run_dir / "trace.jsonl"))
+                                     trace=run_dir / "trace.jsonl", telemetry=run.telemetry))
     (exp_dir / "guards-manifest.json").write_text(json.dumps(manifest, indent=1) + "\n")
     guard_rows = guards.evaluate(guard_runs, guards.load_spec(guard_spec_path), agg_rows, scoring_spec)
     write_csv(guard_rows, guards.COLUMNS, exp_dir / "guards.csv")
@@ -350,11 +358,13 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
             continue
         gmanifest["runs"].append({"workload_id": run.workload_id, "condition": run.condition,
                                   "table": run.table, "seed": run.seed, "boot_default": run.boot_default,
+                                  "telemetry": run.telemetry,
                                   "log": str(run_dir / "log.json"), "workload": str(run.workload_file)})
         rows, _messages = grader.grade_log(grader.Run(workload_id=run.workload_id, condition=run.condition,
                                                       table=run.table, seed=run.seed,
                                                       boot_default=run.boot_default, log=run_dir / "log.json",
-                                                      workload=run.workload_file, table_path=table_path))
+                                                      workload=run.workload_file, table_path=table_path,
+                                                      telemetry=run.telemetry))
         records.write_csv(rows, run_dir / "recognition-records.csv")
         grade_rows.extend(rows)
     (exp_dir / "grade-manifest.json").write_text(json.dumps(gmanifest, indent=1) + "\n")
@@ -390,7 +400,7 @@ def write_smoke_spec(path, machine: Machine, root, files=None, experiment="smoke
                   if any(s.pre_committed_miss
                          for s in grader.read_ground_truth(machine.build_dir / f"{wid}.workload.json"))]
     guard_version = str(yaml.safe_load((root / pins["guard_spec"]).read_text()).get("version"))
-    doc = {"experiment": experiment, "conditions": list(SMOKE_CONDITIONS), "seed_count": 2,
+    doc = {"experiment": experiment, "conditions": list(SMOKE_CONDITIONS), "telemetry": ["focus"], "seed_count": 2,
            "boot_defaults": {"primary": "ostep", "alternatives": []},
            "files": {"judging": judging, "reporting": []},
            "layer1_exclusions": exclusions, "guard_exemptions": [],

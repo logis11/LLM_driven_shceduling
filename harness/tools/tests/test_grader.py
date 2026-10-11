@@ -30,7 +30,7 @@ def _stem(condition, seed):
 
 def _identity(condition, workload, seed=""):
     return {"workload_id": workload, "condition": condition, "table": "calibrated",
-            "seed": seed, "boot_default": ""}
+            "seed": seed, "boot_default": "", "telemetry": "names"}
 
 
 def _runs(conditions=None, workloads=None):

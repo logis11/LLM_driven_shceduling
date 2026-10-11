@@ -42,7 +42,24 @@ def test_expand_gives_one_run_per_cell_of_the_matrix(tmp_path):
     assert {r.workload_id for r in runs} == {"mock-score"}
     assert [r.table for r in runs] == ["", "", "calibrated", "calibrated", "calibrated"]   # fixed: none
     assert runs[0].boot_file.name == "ostep.json" and runs[1].boot_file.name == "alt.json"
-    assert [r.name for r in runs] == ["fixed", "fixed+alt", "oracle", "random-1", "random-2"]
+    assert {r.telemetry for r in runs} == {"names"}                                  # the one shape the spec lists
+    assert [r.name for r in runs] == ["fixed~names", "fixed+alt~names", "oracle~names", "random-1~names",
+                                      "random-2~names"]
+
+
+def test_expand_runs_every_condition_under_every_telemetry_shape(tmp_path):
+    """9.17: the telemetry shape is an axis of the matrix, orthogonal to the condition."""
+    doc = yaml.safe_load((FX / "experiment.yaml").read_text())
+    doc["telemetry"] = ["focus", "names"]
+    spec = tmp_path / "two-shapes.yaml"
+    spec.write_text(yaml.safe_dump(doc))
+    runs = expand(spec, _machine(tmp_path), REPO)
+    assert [(r.condition, r.seed, r.boot_default, r.telemetry) for r in runs] == [
+        ("fixed", "", "", "focus"), ("fixed", "", "alt", "focus"), ("oracle", "", "", "focus"),
+        ("random", "1", "", "focus"), ("random", "2", "", "focus"),
+        ("fixed", "", "", "names"), ("fixed", "", "alt", "names"), ("oracle", "", "", "names"),
+        ("random", "1", "", "names"), ("random", "2", "", "names")]
+    assert len({r.identity for r in runs}) == 10 and len({r.name for r in runs}) == 10
 
 
 def test_load_machine_resolves_paths_against_the_root():
@@ -65,13 +82,16 @@ def test_cache_key_depends_on_version_prefix_condition_seed_and_input_bytes(tmp_
     assert k != cache_key(Program(command=["x"], version="v2"), "daemon", "oracle", "", {"workload": a})
     assert k != cache_key(Program(command=["x", "--flag"], version="v1"), "daemon", "oracle", "", {"workload": a})
     assert k != cache_key(p, "simulator", "oracle", "", {"workload": a})
+    assert k != cache_key(p, "daemon", "oracle", "", {"workload": a}, telemetry="focus")        # 9.17: the shape
+    assert cache_key(p, "daemon", "oracle", "", {"workload": a}, "focus") != \
+        cache_key(p, "daemon", "oracle", "", {"workload": a}, "names")
 
 
 FAKE = textwrap.dedent('''
     import argparse, pathlib, sys
     ap = argparse.ArgumentParser()
     ap.add_argument("--workload"); ap.add_argument("--out-a", dest="a"); ap.add_argument("--out-b", dest="b")
-    ap.add_argument("--condition"); ap.add_argument("--seed", default=None)
+    ap.add_argument("--condition"); ap.add_argument("--seed", default=None); ap.add_argument("--telemetry", default=None)
     args = ap.parse_args()
     side = pathlib.Path(sys.argv[0]).with_suffix(".calls")
     side.write_text(side.read_text() + "x" if side.exists() else "x")

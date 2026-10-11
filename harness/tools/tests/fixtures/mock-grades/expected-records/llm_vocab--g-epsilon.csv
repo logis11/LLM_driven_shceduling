@@ -1,5 +1,5 @@
-workload_id,condition,table,seed,boot_default,sim,source_sha256,entity,metric,t,value,cause,channel,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss,skipped
-g-epsilon,llm_vocab,calibrated,,,,509a8e480ad796b6b7b59c0391f68065095b755d9a18956a30ae38cf152ed47c,recognizer,attr_correct,0,1,,,,,,,false,false,unmodified,,,0,
-g-epsilon,llm_vocab,calibrated,,,,509a8e480ad796b6b7b59c0391f68065095b755d9a18956a30ae38cf152ed47c,recognizer,config_correct,0,1,,,,,,,,,unmodified,,,0,
-g-epsilon,llm_vocab,calibrated,,,,509a8e480ad796b6b7b59c0391f68065095b755d9a18956a30ae38cf152ed47c,recognizer,latency_us,0,450000,,,,,,,,,unmodified,,,0,
-g-epsilon,llm_vocab,calibrated,,,,509a8e480ad796b6b7b59c0391f68065095b755d9a18956a30ae38cf152ed47c,recognizer,mode_correct,0,1,,,,,,,indexing,indexing,unmodified,,,0,
+workload_id,condition,table,seed,boot_default,telemetry,sim,source_sha256,entity,metric,t,value,cause,channel,provenance,algorithm,index,period_us,predicted,truth,validation,familiarity,hogs,pre_committed_miss,skipped
+g-epsilon,llm_vocab,calibrated,,,names,,3d530b9fa418fd3f0e89321303f140a6bf0514183153e0bc7acbabc4a27e3370,recognizer,attr_correct,0,1,,,,,,,false,false,unmodified,,,0,
+g-epsilon,llm_vocab,calibrated,,,names,,3d530b9fa418fd3f0e89321303f140a6bf0514183153e0bc7acbabc4a27e3370,recognizer,config_correct,0,1,,,,,,,,,unmodified,,,0,
+g-epsilon,llm_vocab,calibrated,,,names,,3d530b9fa418fd3f0e89321303f140a6bf0514183153e0bc7acbabc4a27e3370,recognizer,latency_us,0,450000,,,,,,,,,unmodified,,,0,
+g-epsilon,llm_vocab,calibrated,,,names,,3d530b9fa418fd3f0e89321303f140a6bf0514183153e0bc7acbabc4a27e3370,recognizer,mode_correct,0,1,,,,,,,indexing,indexing,unmodified,,,0,

@@ -8,7 +8,7 @@ Two levels. A `term` row is one scoring-spec term of one run: the aggregate's va
 
 ## How runs are paired
 
-A run's `fixed` baseline is the `fixed` run with the same workload and the same `boot_default`; `fixed` carries no table, so one baseline serves both tables. Its `oracle` is the `oracle` run with the same workload, table, and boot default. An alternative-default `fixed` run re-scores the oracle and every other condition against itself, and those rows carry the alternative's stem in `boot_default`, which is how the sensitivity line in the report is formed without re-running anything but `fixed`.
+A run's `fixed` baseline is the `fixed` run with the same workload, the same `boot_default` and the same `telemetry` shape; `fixed` carries no table, so one baseline serves both tables. Its `oracle` is the `oracle` run with the same workload, table, and boot default. An alternative-default `fixed` run re-scores the oracle and every other condition against itself, and those rows carry the alternative's stem in `boot_default`, which is how the sensitivity line in the report is formed without re-running anything but `fixed`.
 
 ## Two rules to know before reading a score
 

@@ -2,6 +2,7 @@
  "workload_id": "g-epsilon",
  "condition": "oracle",
  "seed": null,
+ "telemetry": "names",
  "queries": [
   {
    "t_set_change": 0,

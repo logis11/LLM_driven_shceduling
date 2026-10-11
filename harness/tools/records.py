@@ -28,9 +28,11 @@ def main():
     ap.add_argument("--seed", default="")
     ap.add_argument("--boot-default", default="", dest="boot_default",
                     help="id of the boot configuration the run started in; empty = the primary")
+    ap.add_argument("--telemetry", default="", choices=["", "focus", "names"],
+                    help="the telemetry shape the run's daemon showed (9.17)")
     args = ap.parse_args()
     rows, guards = build(args.run, args.trace, table=args.table, seed=args.seed,
-                         schedule_path=args.schedule, boot_default=args.boot_default)
+                         schedule_path=args.schedule, boot_default=args.boot_default, telemetry=args.telemetry)
     write_csv(rows, args.out)
     for g in guards:
         print(f"guard: {g}", file=sys.stderr)

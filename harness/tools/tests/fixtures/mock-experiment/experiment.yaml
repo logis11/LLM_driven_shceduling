@@ -6,6 +6,7 @@
 experiment: mock-experiment
 
 conditions: [fixed, oracle, random]
+telemetry: [names]
 seed_count: 2
 
 boot_defaults:

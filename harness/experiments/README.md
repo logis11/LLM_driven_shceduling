@@ -9,6 +9,7 @@ A per-experiment spec is the pre-registration of one experiment as data the harn
 ```yaml
 experiment: rq0-gate
 conditions: [fixed, random, oracle]
+telemetry: [focus]                              # the shapes shown to the recognizer: every condition under each; the criterion judged on the first (9.17)
 seed_count: 100                                 # seeds 1..N for every condition that draws
 boot_defaults: {primary: ostep, alternatives: [ostep-slice-500us, …]}
 files: {judging: [...], reporting: [...]}

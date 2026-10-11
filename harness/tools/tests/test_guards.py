@@ -22,7 +22,7 @@ from harness.outputs import read_csv, validate_rows, write_csv
 MG = TOOLS / "tests" / "fixtures" / "mock-guards"
 RECIPES = REPO / "dataset" / "timelines" / "coreset"
 IDENTITY = {"workload_id": "mock-guards", "condition": "llm_vocab", "table": "prior",
-            "seed": "", "boot_default": ""}
+            "seed": "", "boot_default": "", "telemetry": "names"}
 
 
 @pytest.fixture(scope="module")
@@ -33,7 +33,7 @@ def spec():
 def _records(tmp_path, log="recognition-log.json"):
     """mock-guards' records from the writer, its aggregates, and its Run."""
     rows, msgs = records.build(MG / "run.json", MG / "trace.jsonl", table="prior",
-                               schedule_path=MG / "config-schedule.json")
+                               schedule_path=MG / "config-schedule.json", telemetry="names")
     out = tmp_path / "records.csv"
     records.write_csv(rows, out)
     aggs = agg.compute_aggregates(records.read_csv(out))
@@ -97,7 +97,7 @@ def test_lint_rejects_a_missing_threshold_on_a_bounded_guard(tmp_path):
 
 def test_mock_guards_records_byte_for_byte(tmp_path):
     rows, msgs = records.build(MG / "run.json", MG / "trace.jsonl", table="prior",
-                               schedule_path=MG / "config-schedule.json")
+                               schedule_path=MG / "config-schedule.json", telemetry="names")
     assert msgs == []
     out = tmp_path / "records.csv"
     records.write_csv(rows, out)
@@ -234,7 +234,7 @@ def _pair_run(tmp_path, wid, condition, config, seed="", boot="", schedule=True,
     stem = f"{wid}-{condition}-{seed or 'x'}-{boot or 'x'}"
     out = tmp_path / f"{stem}.csv"
     records.write_csv([{"workload_id": wid, "condition": condition, "table": "prior", "seed": seed,
-                        "boot_default": boot, "sim": "mock@0", "source_sha256": "0" * 64,
+                        "boot_default": boot, "telemetry": "names", "sim": "mock@0", "source_sha256": "0" * 64,
                         "entity": "lane", "metric": "busy", "t": 100, "value": 50}], out)
     if wanted is None:
         wanted = wid.endswith("a")
@@ -248,7 +248,7 @@ def _pair_run(tmp_path, wid, condition, config, seed="", boot="", schedule=True,
     entries.append({"t_us": 60, "config": config, "provenance": "unmodified"})
     sched = tmp_path / f"{stem}.schedule.json"
     sched.write_text(json.dumps({"workload_id": wid, "condition": condition, "schedule": entries}))
-    return Run(workload_id=wid, condition=condition, table="prior", seed=seed, boot_default=boot,
+    return Run(workload_id=wid, condition=condition, table="prior", seed=seed, boot_default=boot, telemetry="names",
                records=out, schedule=sched if schedule else None, log=None, workload=workload,
                rerun_trace=None, guard_messages=[], trace=None)
 
@@ -323,7 +323,7 @@ def test_the_idle_download_variant_is_not_a_pair(spec):
 
 def test_cli_reproduces_the_fixture_and_exits_2_on_a_fail(tmp_path):
     rows, msgs = records.build(MG / "run.json", MG / "trace.jsonl", table="prior",
-                               schedule_path=MG / "config-schedule.json")
+                               schedule_path=MG / "config-schedule.json", telemetry="names")
     rec = tmp_path / "records.csv"
     records.write_csv(rows, rec)
     aggs = tmp_path / "aggregates.csv"

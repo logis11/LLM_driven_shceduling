@@ -42,7 +42,7 @@ T_INTERACTION_US = 100_000          # metrics doc §10
 PERCENTILE_METHOD = "linear"        # numpy's linear interpolation, R type 7 (metrics doc §8)
 PLACES = 12                         # decimal places in the aggregates file
 
-IDENTITY = ("workload_id", "condition", "table", "seed", "boot_default")
+IDENTITY = ("workload_id", "condition", "table", "seed", "boot_default", "telemetry")
 COLUMNS = IDENTITY + ("entity", "metric", "aggregate", "cause", "channel",
                       "window_start_us", "window_end_us", "index", "value")
 PROVENANCES = ("unmodified", "clamped", "held", "fallback")

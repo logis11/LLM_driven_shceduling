@@ -67,11 +67,12 @@ class Run:
     workload: Optional[pathlib.Path]
     rerun_trace: Optional[pathlib.Path]
     guard_messages: Optional[List[str]]
+    telemetry: str = ""                   # the telemetry shape the run's daemon showed (9.17)
     trace: Optional[pathlib.Path] = None      # the trace itself, for the pair check's body hash
 
     @property
     def identity(self):
-        return (self.workload_id, self.condition, self.table, self.seed, self.boot_default)
+        return (self.workload_id, self.condition, self.table, self.seed, self.boot_default, self.telemetry)
 
 
 class GuardError(ValueError):
@@ -286,10 +287,10 @@ def c2_pair(run, ctx, params):
     if pair is None or run.condition in ("fixed", "random"):
         return _na()
     other = pair["b"] if run.workload_id == pair["a"] else pair["a"]
-    partner = ctx["runs"].get((other, run.condition, run.table, run.seed, run.boot_default))
+    partner = ctx["runs"].get((other, run.condition, run.table, run.seed, run.boot_default, run.telemetry))
     if partner is None:
         return _fail(f"partner {other} not in the run set (condition {run.condition}, seed {run.seed!r}, "
-                     f"boot_default {run.boot_default!r})")
+                     f"boot_default {run.boot_default!r}, telemetry {run.telemetry!r})")
     for r in (run, partner):
         if r.schedule is None or r.workload is None:
             return _fail(f"no config schedule or workload recorded for {r.workload_id}; the pair check "

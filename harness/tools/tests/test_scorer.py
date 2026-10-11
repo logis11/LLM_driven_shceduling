@@ -96,7 +96,7 @@ def test_seam_records_writer_to_scorer(fixture_dir):
     hand-written fixed and oracle records for the same reduced workload."""
     d = fixture_dir("mock-p1a")
     llm_rows, _ = records.build(d / "run.json", d / "trace.jsonl", table="prior",
-                                schedule_path=d / "config-schedule.json")
+                                schedule_path=d / "config-schedule.json", telemetry="names")
     spec = _spec()
     win = _windows(spec, "mock-p1a")
     rows = agg.compute_aggregates(llm_rows, win)

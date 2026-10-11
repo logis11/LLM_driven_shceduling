@@ -95,7 +95,7 @@ def test_the_invalid_variant_names_the_guard_and_the_run():
     assert report["verdict"] == "invalid"
     assert report["verdict_detail"]["invalid_runs"] == [
         {"workload_id": "mock-score", "condition": "random", "table": "prior", "seed": "s2",
-         "boot_default": "", "guard": "starvation_floor"}]
+         "boot_default": "", "telemetry": "names", "guard": "starvation_floor"}]
     assert _gap(report)["gap"] == "0.585462"                       # still computed and reported
     fails = [r for r in report["guards"] if r["result"] == "fail"]
     assert len(fails) == 1 and fails[0]["exempt"] is False and fails[0]["invalidating"] is True

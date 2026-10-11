@@ -2,8 +2,10 @@
 decision 11; 8.5 spec, decisions 13–16).
 
 `projection` extracts the visible projection (data-contracts §4, contract 3b)
-from a canonical workload, each task with its `declared_class`; `snapshots` walks its pinned events under the five
-telemetry rules of §5; `run` answers every snapshot through the driver table
+from a canonical workload, each task with its `declared_class` and its focus
+intervals; `snapshots` walks its pinned events under the six telemetry rules of
+§5 — the sixth (9.17) makes a focus change a set change and lets the shape
+shown hide the holder; `run` answers every snapshot through the driver table
 and returns a contract-valid config schedule (§7) and recognition log (§8).
 It emits `unmodified` only — no validator, no clamping, no `held`, no LLM
 path. Where the oracle's answer is undefined (an `ambiguous` segment, the
@@ -19,6 +21,8 @@ from harness.drivertable import compose_row
 
 CONDITIONS = ("fixed", "oracle", "random")
 DRAWING = ("random",)                   # the conditions that take a seed
+TELEMETRY = ("focus", "names")          # the telemetry shapes (§5, rule 6; 9.17): the multiset with the focus
+                                        # holder, or the multiset alone
 
 
 class MockDaemonError(ValueError):
@@ -35,8 +39,12 @@ def workload_id(doc) -> str:
 
 def projection(doc) -> dict:
     """One entry per canonical task instance, never folded, each with its
-    `declared_class` (§4, contract 3b, 2026-10-09); a spawn table's children
-    folded by name and class under their parent."""
+    `declared_class` (§4, contract 3b, 2026-10-09) and, when the focus track
+    names it, its pinned focus intervals (2026-10-11, 9.17); a spawn table's
+    children folded by name and class under their parent."""
+    focus = defaultdict(list)
+    for win in doc.get("focus") or []:
+        focus[win["task"]].append({"t_start": int(win["t_start"]), "t_end": int(win["t_end"])})
     tasks = []
     for ev in doc.get("events", []):
         if ev.get("op") != "arrive":
@@ -44,6 +52,8 @@ def projection(doc) -> dict:
         task = {"name": ev["name"], "declared_class": ev["declared_class"], "t_arrive": int(ev["t"])}
         if ev.get("depart") is not None:
             task["t_depart"] = int(ev["depart"])
+        if ev["id"] in focus:
+            task["focus"] = sorted(focus[ev["id"]], key=lambda w: w["t_start"])
         if ev.get("spawn_table"):
             counts = Counter((child["name"], child["declared_class"]) for child in ev["spawn_table"])
             task["children"] = [{"name": n, "declared_class": k, "count": c}
@@ -54,28 +64,46 @@ def projection(doc) -> dict:
 
 # ------------------------------------------------------------- telemetry (§5)
 
-def snapshots(proj) -> list:
-    """The telemetry snapshots: the name→count multiset after every pinned
-    instant at which it changed. Rule 1: counts matter. Rule 2: all events at
-    one instant give one snapshot. Rule 3: sorted by name. Rule 4: the final
-    instant is emitted like any other. Rule 5: nothing else emits. Children
-    enter with their parent and never leave (8.5 spec, decision 16)."""
+def snapshots(proj, telemetry="focus") -> list:
+    """The telemetry snapshots: the set after every pinned instant at which it
+    changed. Rule 1: counts matter. Rule 2: all events at one instant give one
+    snapshot. Rule 3: sorted by name. Rule 4: the final instant is emitted like
+    any other. Rule 5: nothing else emits. Rule 6 (9.17): the set is the
+    name→count multiset together with the focus holder's name — `None` when no
+    window holds it — so a focus move is a set change; a move between two
+    instances of one name changes nothing. The shape shown, `telemetry`, is
+    `focus` (the holder beside the multiset) or `names` (the multiset alone):
+    the query points are the same under both, and under `names` a focus-only
+    change repeats the previous snapshot byte for byte. Children enter with
+    their parent and never leave (8.5 spec, decision 16)."""
+    if telemetry not in TELEMETRY:
+        raise MockDaemonError(f"telemetry shape {telemetry!r}: one of {', '.join(TELEMETRY)}")
     deltas = defaultdict(Counter)
+    gains, losses = defaultdict(list), defaultdict(list)
     for task in proj["tasks"]:
         deltas[task["t_arrive"]][task["name"]] += 1
         for child in task.get("children", []):
             deltas[task["t_arrive"]][child["name"]] += child["count"]
         if "t_depart" in task:
             deltas[task["t_depart"]][task["name"]] -= 1
-    live = Counter()
+        for win in task.get("focus", []):
+            gains[win["t_start"]].append(task["name"])
+            losses[win["t_end"]].append(task["name"])
+    live, holder = Counter(), None
     out = []
-    for t in sorted(deltas):
-        before = dict(live)
-        live.update(deltas[t])
+    for t in sorted(set(deltas) | set(gains) | set(losses)):
+        before = (dict(live), holder)
+        live.update(deltas.get(t, {}))
         live = Counter({n: c for n, c in live.items() if c > 0})
-        if dict(live) != before:
-            out.append({"t_us": t, "processes": [{"name": n, "count": c}
-                                                 for n, c in sorted(live.items())]})
+        if losses.get(t):                 # the intervals never overlap: an end at t precedes a start at t
+            holder = None
+        if gains.get(t):
+            holder = gains[t][0]
+        if (dict(live), holder) != before:
+            snap = {"t_us": t, "processes": [{"name": n, "count": c} for n, c in sorted(live.items())]}
+            if telemetry == "focus":
+                snap["focus"] = holder
+            out.append(snap)
     return out
 
 
@@ -91,9 +119,12 @@ def _config(row) -> dict:
     return json.loads(compose_row(row))
 
 
-def run(doc, condition, table, boot, seed=None):
-    """(config schedule, recognition log) for one workload under one condition.
-    `table` is a harness `DriverTable`, `boot` the boot-default configuration."""
+def run(doc, condition, table, boot, seed=None, telemetry="focus"):
+    """(config schedule, recognition log) for one workload under one condition
+    and one telemetry shape. `table` is a harness `DriverTable`, `boot` the
+    boot-default configuration."""
+    if telemetry not in TELEMETRY:
+        raise MockDaemonError(f"telemetry shape {telemetry!r}: one of {', '.join(TELEMETRY)}")
     if condition not in CONDITIONS:
         raise MockDaemonError(f"condition {condition!r}: the mock daemon implements "
                               f"{', '.join(CONDITIONS)} only")
@@ -104,14 +135,14 @@ def run(doc, condition, table, boot, seed=None):
     wid = workload_id(doc)
     schedule = {"workload_id": wid, "condition": condition,
                 "schedule": [{"t_us": 0, "config": boot, "provenance": "fallback"}]}
-    log = {"workload_id": wid, "condition": condition, "seed": seed, "queries": []}
+    log = {"workload_id": wid, "condition": condition, "seed": seed, "telemetry": telemetry, "queries": []}
     if condition == "fixed":
         return schedule, log
 
     segments = doc.get("ground_truth") or []
     ordered = sorted(table.rows)
     rng = random.Random(seed)
-    for snap in snapshots(projection(doc)):
+    for snap in snapshots(projection(doc), telemetry):
         t = snap["t_us"]
         if condition == "oracle":
             seg = _covering(segments, t)

@@ -40,7 +40,7 @@ def floors_for(latency_floor_us=LATENCY_FLOOR_US, fraction_floor=FRACTION_FLOOR)
     lat, frac = Fraction(latency_floor_us), Fraction(fraction_floor)
     return {"p99": lat, "turnaround": lat, "miss_rate": frac, "progress": frac}
 
-IDENTITY = ("workload_id", "condition", "table", "seed", "boot_default")
+IDENTITY = ("workload_id", "condition", "table", "seed", "boot_default", "telemetry")
 COLUMNS = IDENTITY + ("level", "entity", "metric", "aggregate", "cause", "channel",
                       "window_start_us", "window_end_us", "direction", "weight",
                       "value_fixed", "value_oracle", "value_condition",
@@ -98,27 +98,30 @@ def score(agg_rows, spec, floors=None):
     floors = FLOOR if floors is None else floors
     runs = _runs(agg_rows)
     files = spec["files"]
-    fixed_runs = {(k[0], k[4]): v for k, v in runs.items() if k[1] == "fixed"}
+    fixed_runs = {(k[0], k[4], k[5]): v for k, v in runs.items() if k[1] == "fixed"}
     term_rows, file_rows = [], []
-    # every (workload, table, boot_default) group present among non-fixed runs
-    groups = sorted({(k[0], k[2], k[4]) for k in runs if k[1] != "fixed"})
-    for workload, table, run_boot in groups:
+    # every (workload, table, boot_default, telemetry) group present among non-fixed runs; a run's baselines
+    # are the fixed runs of its own telemetry shape (9.17)
+    groups = sorted({(k[0], k[2], k[4], k[5]) for k in runs if k[1] != "fixed"})
+    for workload, table, run_boot, shape in groups:
         if workload not in files:
             continue
         terms = files[workload]["terms"]
-        conditions = sorted(k for k in runs if k[0] == workload and k[2] == table and k[4] == run_boot)
+        conditions = sorted(k for k in runs
+                            if k[0] == workload and k[2] == table and k[4] == run_boot and k[5] == shape)
         # baselines: every fixed run of the workload whose boot_default is the runs' own (""),
         # plus every alternative-default fixed run, each scoring the same runs
-        baselines = sorted(b for (w, b) in fixed_runs if w == workload) if run_boot == "" else [run_boot]
+        baselines = (sorted(b for (w, b, s) in fixed_runs if w == workload and s == shape) if run_boot == ""
+                     else [run_boot])
         for boot in baselines:
-            fixed = fixed_runs.get((workload, boot))
+            fixed = fixed_runs.get((workload, boot, shape))
             if fixed is None:
-                raise ScoringError(f"{workload}: no fixed run for boot_default {boot!r}")
-            oracle_key = (workload, "oracle", table, "", run_boot)
+                raise ScoringError(f"{workload}: no fixed run for boot_default {boot!r} (telemetry {shape!r})")
+            oracle_key = (workload, "oracle", table, "", run_boot, shape)
             if oracle_key not in runs:
-                raise ScoringError(f"{workload}/{table}: no oracle run to normalise against")
+                raise ScoringError(f"{workload}/{table}: no oracle run to normalise against (telemetry {shape!r})")
             oracle = runs[oracle_key]
-            scored = list(conditions) + [(workload, "fixed", table, "", run_boot)]
+            scored = list(conditions) + [(workload, "fixed", table, "", run_boot, shape)]
             for key in scored:
                 run = fixed if key[1] == "fixed" else runs[key]
                 identity = dict(zip(IDENTITY, key)); identity["boot_default"] = boot

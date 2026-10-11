@@ -2,6 +2,7 @@
  "workload_id": "g-beta",
  "condition": "llm_vocab",
  "seed": null,
+ "telemetry": "names",
  "queries": [
   {
    "t_set_change": 0,

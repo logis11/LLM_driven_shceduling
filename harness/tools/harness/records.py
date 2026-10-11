@@ -16,7 +16,7 @@ import jsonschema
 from .primitives import compute
 from .reader import read_config_schedule, read_run_file, read_trace
 
-COLUMNS = ("workload_id", "condition", "table", "seed", "boot_default", "sim", "source_sha256",
+COLUMNS = ("workload_id", "condition", "table", "seed", "boot_default", "telemetry", "sim", "source_sha256",
            "entity", "metric", "t", "value",
            "cause", "channel", "provenance", "algorithm", "index", "period_us",
            "predicted", "truth", "validation", "familiarity", "hogs",
@@ -38,15 +38,16 @@ def sort_key(row):
             str(row.get("channel", "")))
 
 
-def build(run_path, trace_path, table="", seed="", schedule_path=None, boot_default=""):
-    """Rows for one pair, sorted, with identity filled. Returns (rows, guards)."""
+def build(run_path, trace_path, table="", seed="", schedule_path=None, boot_default="", telemetry=""):
+    """Rows for one pair, sorted, with identity filled — `telemetry` the shape the run's daemon showed (9.17).
+    Returns (rows, guards)."""
     run = read_run_file(run_path)
     trace = read_trace(trace_path)
     schedule = read_config_schedule(schedule_path) if schedule_path else None
     result = compute(run, trace, schedule)
     identity = {"workload_id": trace.meta.workload_id,
                 "condition": trace.meta.condition,
-                "table": table, "seed": seed, "boot_default": boot_default,
+                "table": table, "seed": seed, "boot_default": boot_default, "telemetry": telemetry,
                 "sim": trace.meta.sim, "source_sha256": trace.sha256}
     rows = []
     for r in result.rows:

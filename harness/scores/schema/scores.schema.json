@@ -42,6 +42,14 @@
       "type": "string",
       "minLength": 1
     },
+    "telemetry": {
+      "description": "The telemetry shape the run's daemon showed the recognizer (data-contracts \u00a75, rule 6; 9.17): `focus`, the name \u2192 count multiset with the focus holder, or `names`, the multiset alone.",
+      "type": "string",
+      "enum": [
+        "focus",
+        "names"
+      ]
+    },
     "level": {
       "type": "string",
       "enum": [

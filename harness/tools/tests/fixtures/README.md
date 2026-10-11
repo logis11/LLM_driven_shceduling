@@ -4,7 +4,7 @@ Six mock pairs (five for the harness's lower half — Phase 5, sub-task 5.1; `mo
 
 - `run.json` — the run-file view (`workload_id` + `events`), reduced from a coreset file. This is the reader's second input: it supplies `T_end`, the chain topology, and each task's `demand`.
 - `trace.jsonl` — the trace a simulator would emit for that run file under the scheduler behaviour stated in `worked.md`. Hand-written, 20–50 lines, every line in the frozen format (`docs/data-contracts.md` §9).
-- `expected.csv` — the records the primitives must produce from this pair, byte for byte. Every row was derived by hand in `worked.md`; a script only formatted, sorted, and filled the identity columns.
+- `expected.csv` — the records the primitives must produce from this pair, byte for byte. Every row was derived by hand in `worked.md`; a script only formatted, sorted, and filled the identity columns. Every fixture's identity carries `telemetry` `names` (9.17): their logs predate the focus and show the multiset alone.
 - `worked.md` — the derivation: what happens at each instant, and how every row follows from the trace lines.
 - `config-schedule.json` — only where the pair needs the reader's third input (data-contracts §7): the params of each applied entry, by `index`, for `switch_window`. The lint parses it when present; `build` takes it as `schedule_path`.
 

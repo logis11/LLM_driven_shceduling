@@ -2,6 +2,7 @@
  "workload_id": "g-gamma",
  "condition": "random",
  "seed": "s2",
+ "telemetry": "names",
  "queries": [
   {
    "t_set_change": 0,

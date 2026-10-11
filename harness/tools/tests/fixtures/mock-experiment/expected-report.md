@@ -1,6 +1,6 @@
 # Report — mock-experiment
 
-**Verdict: pass** — 1 of 1 judging files met the criterion (K = 1). Spec `0b57530fd67d`.
+**Verdict: pass** — 1 of 1 judging files met the criterion (K = 1). Spec `d1b206acb4b9`. Telemetry shape judged: `names`.
 
 ## Criterion
 
@@ -117,17 +117,17 @@ Confusion, attribute, random (prior):
 
 | run | guard | value | threshold | reason | exempt | invalidating |
 |---|---|---|---|---|---|---|
-| mock-score · random · s2 | starvation_floor | 1500000.000000000000 | 1000000.000000000000 | train: max ready_wait 1500000 exceeds 1000000 | The fixture's random s2 run starves `train` by construction; the exemption keeps the pass variant judgeable (worked.md). | False |
+| mock-score · random · s2 · telemetry names | starvation_floor | 1500000.000000000000 | 1000000.000000000000 | train: max ready_wait 1500000 exceeds 1000000 | The fixture's random s2 run starves `train` by construction; the exemption keeps the pass variant judgeable (worked.md). | False |
 
 ## Provenance breakdown
 
 | run | unmodified | clamped | held | fallback | fallback share |
 |---|---|---|---|---|---|
-| mock-score · fixed | 0.000000000000 | 0.000000000000 | 0.000000000000 | 1.000000000000 | 1.000000000000 |
-| mock-score · fixed · boot alt | 0.000000000000 | 0.000000000000 | 0.000000000000 | 1.000000000000 | 1.000000000000 |
-| mock-score · oracle | 1.000000000000 | 0.000000000000 | 0.000000000000 | 0.000000000000 | 0.000000000000 |
-| mock-score · random · s1 | 1.000000000000 | 0.000000000000 | 0.000000000000 | 0.000000000000 | 0.000000000000 |
-| mock-score · random · s2 | 1.000000000000 | 0.000000000000 | 0.000000000000 | 0.000000000000 | 0.000000000000 |
+| mock-score · fixed · telemetry names | 0.000000000000 | 0.000000000000 | 0.000000000000 | 1.000000000000 | 1.000000000000 |
+| mock-score · fixed · boot alt · telemetry names | 0.000000000000 | 0.000000000000 | 0.000000000000 | 1.000000000000 | 1.000000000000 |
+| mock-score · oracle · telemetry names | 1.000000000000 | 0.000000000000 | 0.000000000000 | 0.000000000000 | 0.000000000000 |
+| mock-score · random · s1 · telemetry names | 1.000000000000 | 0.000000000000 | 0.000000000000 | 0.000000000000 | 0.000000000000 |
+| mock-score · random · s2 · telemetry names | 1.000000000000 | 0.000000000000 | 0.000000000000 | 0.000000000000 | 0.000000000000 |
 
 ## Scores
 

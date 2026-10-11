@@ -371,6 +371,7 @@ class RecognitionLog:
     workload_id: str
     condition: str
     seed: Optional[str]
+    telemetry: Optional[str]       # the shape shown (§8, 2026-10-11): `focus` or `names`; None when absent
     queries: List[Query]
 
 
@@ -394,6 +395,8 @@ def read_recognition_log(path) -> RecognitionLog:
                              validation=q["validation"], latency_us=int(q["latency_us"]),
                              proposal=proposal if isinstance(proposal, dict) else None))
     seed = doc.get("seed")
+    telemetry = doc.get("telemetry")
     return RecognitionLog(workload_id=doc.get("workload_id", ""),
                           condition=doc.get("condition", ""),
-                          seed=None if seed is None else str(seed), queries=queries)
+                          seed=None if seed is None else str(seed),
+                          telemetry=None if telemetry is None else str(telemetry), queries=queries)

@@ -12,6 +12,7 @@
     "table": {"type": "string", "enum": ["prior", "calibrated"]},
     "seed": {"type": "string", "minLength": 1},
     "boot_default": {"type": "string", "minLength": 1},
+    "telemetry": {"type": "string", "enum": ["focus", "names"], "description": "the telemetry shape the run's daemon showed (9.17)"},
     "guard": {"type": "string", "enum": ["provenance_share", "config_age", "starvation_floor", "determinism", "utilisation_sanity", "tick_count", "validation_matches_provenance", "c2_pair"]},
     "result": {"type": "string", "enum": ["pass", "fail", "not_applicable"]},
     "value": {"type": "string", "pattern": "^-?[0-9]+\\.[0-9]{12}$"},

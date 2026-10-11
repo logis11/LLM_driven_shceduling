@@ -245,30 +245,34 @@ class _Set:
         self.reference, self.compared = crit["reference"], crit["compared"]
         self.n_seeds = int(spec["seed_count"])
         self.boots = [""] + list(spec["boot_defaults"]["alternatives"])
+        # 9.17: the criterion is judged on the first telemetry shape the spec lists; runs under any other listed
+        # shape are scored and graded beside it and read by no criterion
+        self.telemetry = str(spec["telemetry"][0])
 
     def scored(self, wid, condition, boot):
-        """File-level score rows of `condition` on `wid` scored against `boot`, by seed."""
+        """File-level score rows of `condition` on `wid` scored against `boot`, by seed, under the judged shape."""
         return {k[3]: r for k, r in self.file_rows.items()
-                if k[0] == wid and k[1] == condition and k[4] == boot}
+                if k[0] == wid and k[1] == condition and k[4] == boot and k[5] == self.telemetry}
 
     def runs_feeding(self, wid, boot):
         """Identities (own) of the runs a gap under `boot` reads."""
         found = set()
         for key in self.file_rows:
-            if key[0] != wid:
+            if key[0] != wid or key[5] != self.telemetry:
                 continue
             cond = key[1]
             if cond == "fixed" and key[4] == boot:
                 # the scorer stamps fixed's rows with the group's table; the run itself has none
-                found.add((wid, "fixed", "", "", boot))
+                found.add((wid, "fixed", "", "", boot, key[5]))
             elif cond in (self.reference, self.compared) and key[4] == boot:
-                found.add((wid, cond, key[2], key[3], ""))
+                found.add((wid, cond, key[2], key[3], "", key[5]))
         return found
 
     def check_complete(self):
         for wid in self.judging:
             for boot in self.boots:
-                fixed = [k for k in self.file_rows if k[0] == wid and k[1] == "fixed" and k[4] == boot]
+                fixed = [k for k in self.file_rows
+                         if k[0] == wid and k[1] == "fixed" and k[4] == boot and k[5] == self.telemetry]
                 if not fixed:
                     raise GateError(f"{wid}: no fixed run scored against boot default {boot or 'the primary'!r}")
                 if not self.scored(wid, self.reference, boot):
@@ -286,7 +290,8 @@ class _Set:
                     raise GateError(f"{wid}: no guard rows for run {run[1]}"
                                     f"{' seed ' + run[3] if run[3] else ''}; the guards were not run on it")
         for wid in self.variants:                        # run under the primary boot default alone
-            if not [k for k in self.file_rows if k[0] == wid and k[1] == "fixed" and k[4] == ""]:
+            if not [k for k in self.file_rows
+                    if k[0] == wid and k[1] == "fixed" and k[4] == "" and k[5] == self.telemetry]:
                 raise GateError(f"{wid}: no fixed run scored against the primary boot default (a variant file)")
             if not self.scored(wid, self.reference, ""):
                 raise GateError(f"{wid}: no {self.reference} run scored against the primary (a variant file)")
@@ -314,8 +319,10 @@ def _gap_rows(rs: _Set, g: Fraction, file_rows=None, boots=None, unavailable=())
     rows = []
     for wid in rs.listed:
         for boot in (rs.boots if boots is None else boots):
-            ref = {k[3]: r for k, r in file_rows.items() if k[0] == wid and k[1] == rs.reference and k[4] == boot}
-            cmp = {k[3]: r for k, r in file_rows.items() if k[0] == wid and k[1] == rs.compared and k[4] == boot}
+            ref = {k[3]: r for k, r in file_rows.items()
+                   if k[0] == wid and k[1] == rs.reference and k[4] == boot and k[5] == rs.telemetry}
+            cmp = {k[3]: r for k, r in file_rows.items()
+                   if k[0] == wid and k[1] == rs.compared and k[4] == boot and k[5] == rs.telemetry}
             if not ref or not cmp:
                 continue
             ref_row = next(iter(ref.values()))
@@ -350,8 +357,7 @@ def k_of_n_gap(rs: _Set, crit, guard_report):
     condition's seed-mean score over the reference's, with a failed non-exempt
     guard on a run the criterion reads making the verdict invalid."""
     k, g = int(crit["k"]), Fraction(str(crit["g"]))
-    failing = {(r["workload_id"], r["condition"], r["table"], r["seed"], r["boot_default"]): r
-               for r in guard_report if r["result"] == "fail" and not r["exempt"]}
+    failing = {_identity(r): r for r in guard_report if r["result"] == "fail" and not r["exempt"]}
     unavailable = set()
     invalid_runs = []
     for wid in rs.judging:
@@ -576,6 +582,7 @@ def line_input_wake_count(rs, params, ctx):
             start, end = str(w.get("start_us", "")), str(w.get("end_us", ""))
             value = next((r["value"] for r in rs.agg_rows
                           if r["workload_id"] == wid and r["condition"] == "fixed" and r["boot_default"] == ""
+                          and r["telemetry"] == rs.telemetry
                           and r["entity"] == t["entity"] and r["metric"] == "ready_wait"
                           and r["aggregate"] == "count" and r["cause"] == t.get("cause", "")
                           and r["channel"] == t.get("channel", "")
@@ -668,7 +675,8 @@ def evaluate(spec_path, aggregates_path, scores_path, guards_path, grades_path, 
 
     lines = [LINES[line["type"]](rs, line, ctx) for line in spec["reporting_lines"]]
     return {"experiment": spec["experiment"], "spec_sha256": _sha256(spec_path), "pins": spec["pins"],
-            "conditions": list(spec["conditions"]), "seed_count": int(spec["seed_count"]),
+            "conditions": list(spec["conditions"]), "telemetry": list(spec["telemetry"]),
+            "seed_count": int(spec["seed_count"]),
             "boot_defaults": spec["boot_defaults"], "criterion": shown,
             "verdict": verdict, "verdict_detail": detail, "gaps": gaps, "scores": scores_out,
             "provenance": prov_out, "guards": guard_report,
@@ -696,7 +704,8 @@ def _table(headers, rows):
 
 def _ident(r):
     return f"{r['workload_id']} · {r['condition']}" + (f" · {r['seed']}" if r["seed"] else "") \
-        + (f" · boot {r['boot_default']}" if r["boot_default"] else "")
+        + (f" · boot {r['boot_default']}" if r["boot_default"] else "") \
+        + (f" · telemetry {r['telemetry']}" if r.get("telemetry") else "")
 
 
 def render(report) -> str:
@@ -705,7 +714,9 @@ def render(report) -> str:
     d = report["verdict_detail"]
     out = [f"# Report — {report['experiment']}", "",
            f"**Verdict: {report['verdict']}** — {d['met']} of {d['judging']} judging files met the criterion "
-           f"(K = {d['k']}). Spec `{report['spec_sha256'][:12]}`.", ""]
+           f"(K = {d['k']}). Spec `{report['spec_sha256'][:12]}`. Telemetry shape judged: "
+           f"`{report['telemetry'][0]}`" + (f" (also run: {', '.join(f'`{t}`' for t in report['telemetry'][1:])})"
+                                            if len(report["telemetry"]) > 1 else "") + ".", ""]
     if d["invalid_runs"]:
         out.append("Invalidating guard failures (non-exempt, on runs the criterion reads):")
         out.append("")
