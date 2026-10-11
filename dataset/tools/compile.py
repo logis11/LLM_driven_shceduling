@@ -98,7 +98,7 @@ def build_all(root):
         "artifacts": {rel: sha256(data)
                       for rel, data in sorted(artifacts.items())},
         "demand": {rel: demand[rel] for rel in sorted(demand)},
-        "reports": {rel: sha256(report_bytes(report)) for rel, report in sorted(report_of.items())},
+        "reports": {report_path(rel): sha256(report_bytes(report)) for rel, report in sorted(report_of.items())},
     }
     return manifest, artifacts, errors, reports
 
