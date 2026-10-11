@@ -169,26 +169,27 @@ def input_wakes(canonical, task_id):
     return {e["t"] for e in canonical["events"] if e["op"] == "wake" and e["channel"] == f"input:{task_id}"}
 
 
-# the counterparts that keep a keystroke window (c7.variant.yaml `set-input`), by the task typed into
+# the counterparts that keep a keystroke window (c7.variant.yaml's twelve `set-input` ops), by the task typed into
 C7_TYPED = {"browsing": "browser", "office": "writer", "mail": "mailer", "dev": "editor", "photo": "photo-editor",
-            "video-edit": "editor"}
+            "video-edit": "editor", "indexing": "editor", "compile": "editor", "ml-train": "editor",
+            "render": "editor", "transcode": "video-editor", "backup": "editor"}
 
 
 def test_c7_input_wakes_are_a_subset_of_the_bases_in_the_first_c_seconds(coreset):
     """9.18 spec, decisions 1–3 (audit A1, option ii): a counterpart's keystroke window is a slice of its base's, so
-    its input wakes are its base's over [0, C) — a subset, not the whole: the counterpart's operations sit at their
-    own positions (9.10 D44) and a keystroke inside an operation is not emitted. c1-mail's keystrokes all fall past
-    C, so c7-mail holds none (pair review finding 8)."""
+    its input wakes are its base's over the counterpart's span — a subset, not the whole: the counterpart's
+    operations sit at their own positions (9.10 D44) and a keystroke inside an operation is not emitted. c1-mail's
+    keystrokes all fall past C, so c7-mail holds none (pair review finding 8)."""
     shared = {}
     for mode, task in C7_TYPED.items():
-        base, _ = coreset[f"c1-{mode}"]
-        variant, _ = coreset[f"c7-{mode}"]
+        base, report = coreset[f"c1-{mode}"]
+        variant, variant_report = coreset[f"c7-{mode}"]
         b, v = input_wakes(base, task), input_wakes(variant, task)
         assert v <= b, mode
-        assert all(t < C7_C_US for t in v), mode
+        assert all(t < variant_report["duration_us"] for t in v), mode
         shared[mode] = len(v)
     assert shared["mail"] == 0
-    assert all(shared[mode] > 0 for mode in ("browsing", "office", "dev"))
+    assert all(shared[mode] > 0 for mode in ("browsing", "office", "dev", "indexing", "compile", "ml-train"))
 
 
 C7_COMPILE_C_US = 225_458_000   # 9.10 D56: the module build's CPU as compiled under c7-compile's seed, to the ms below
