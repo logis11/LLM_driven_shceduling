@@ -87,3 +87,9 @@ A4. **Build-gate holes (process, not content).** `make check` compares an in-mem
 ## Resolutions (2026-10-11, 인지오)
 
 - A3, the game chain on the talk-tier source: resolved as is. The figures stand as the talk's reported values; the chain-x1.2 and chain-x1.4 variants are the sensitivity check. No change to the entry or the files.
+
+## Open — the core set's coverage of transitions and of generalisation (2026-10-11, raised by 인지오)
+
+The core set serves milestones 1–7 (RQ0–RQ4), not RQ0 alone. Its C3 group holds three arcs with about eight segment boundaries in all, each ordered mode pair seen at most once, and the set has 64 segments over 32 driver-table cells. It cannot carry a statistical claim on transition recognition (RQ1), on recognition accuracy per cell, or on the phase-shift family (RQ4: a fixed sequence at 60 s / 10 s / 2 s transitions, whose files do not exist). The building plan assigns generalisation to the Layer 3b naturalistic set, which is not built and is on no phase line. Fidelity-map row "co-occurrence / order: design, ungrounded" is this finding; the consolidation under-classed it by reading it against RQ0 only.
+
+Status: open. 인지오 is weighing whether the core set as defined is the right instrument at all, against a naturalistic or generated set. To be decided before 9.15 proceeds.
