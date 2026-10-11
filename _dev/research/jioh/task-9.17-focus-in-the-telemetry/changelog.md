@@ -32,6 +32,6 @@ Spec decisions 1–8. `docs/data-contracts.md`: §3 (the two tracks, the example
 
 ## D6 — the rebuild, re-bless and re-pin (2026-10-11)
 
-Spec decision 8. `python3.12 dataset/tools/compile.py`: 51 artifacts, 24 min 20 s, `dataset/build.manifest.json` rewritten (every hash changed with the fourth key; `c6-dual`'s events also); `derive.py --check --require-coverage` clean. `harness/experiments/rq0-gate.yaml`: `pins.dataset` at the new manifest's SHA-256 `625e431fb0540c5c50f8cabcdfd63c62ec14fb218b50ea2cb7e9b40f627e1892`. The variants manifest and its pin follow in this entry once `variants.py` completes (below).
+Spec decision 8. `python3.12 dataset/tools/compile.py`: 51 artifacts, 24 min 20 s, `dataset/build.manifest.json` rewritten (every hash changed with the fourth key; `c6-dual`'s events also); `derive.py --check --require-coverage` clean. `harness/experiments/rq0-gate.yaml`: `pins.dataset` at the new manifest's SHA-256 `625e431fb0540c5c50f8cabcdfd63c62ec14fb218b50ea2cb7e9b40f627e1892`. `python3.12 dataset/tools/variants.py`: the 78 variants rebuilt on the new bases, 34 min 34 s, `dataset/build.variants.manifest.json` rewritten; `pins.variants.all` at its SHA-256 `328560cf64f2ed89deed6aa8df411a00be70654c092d09d52db955934205279a`. `experiment_lint.py` on the gate spec: clean.
 
 Hands to 9.16: the set reproduces from the timelines with the 9.17 compiler; the pins equal the committed bytes.

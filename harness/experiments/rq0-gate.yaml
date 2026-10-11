@@ -17,6 +17,11 @@ experiment: rq0-gate
 
 conditions: [fixed, random, oracle]
 
+# The telemetry shape shown to the recognizer (data-contracts §5, rule 6; 9.17): the
+# name → count multiset with the focus holder. The gate's three conditions read no
+# telemetry, so one shape is run.
+telemetry: [focus]
+
 # N — statement `n-grounding`
 seed_count: 100
 
@@ -474,9 +479,9 @@ pins:
   scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 5d8a3243c2c01912ced7aa564810068f54e54feca6f1f5677bdcab83aa381f4b}
   guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.1", sha256: 24ccb875ff666615de75d80bc5351b7f5c62713d605438844938f9ab6ef1676c}
   driver_table: {path: daemon/driver-table/prior.yaml, sha256: 6e271dd042b38c23b85459cec7545fde990aec9be5a2c8bd6081690d98243f7f}
-  dataset:      {path: dataset/build.manifest.json, sha256: c3767e1028e1d8c4446a0cd216dfe19f8741b3fef1caba28ceeab95bf680f872}
+  dataset:      {path: dataset/build.manifest.json, sha256: 625e431fb0540c5c50f8cabcdfd63c62ec14fb218b50ea2cb7e9b40f627e1892}
   variants:
-    all: {path: dataset/build.variants.manifest.json, sha256: 2a8893a921c1879727d2d090e7706b2bcb932f909d4a24a0f9356d21b3832ee1}
+    all: {path: dataset/build.variants.manifest.json, sha256: 328560cf64f2ed89deed6aa8df411a00be70654c092d09d52db955934205279a}
 
 criterion:
   type: k_of_n_gap
