@@ -13,7 +13,7 @@ timelines/
   coreset/             # authored core set: *.timeline.yaml (novel) + *.variant.yaml (derivation recipes)
 build/                 # compiled artifacts — NOT committed; verified via build.manifest.json
   coreset-single/      # 51 workloads, lane-scaled to a single lane — the one compiled set (experiments run on these)
-build.manifest.json    # lockfile: input/output hashes of the last blessed build + per-file static demand (utilization, demand_class)
+build.manifest.json    # lockfile: hashes of the last blessed build — its inputs (library, schema, compiler sources, streams), its artifacts and their compile reports — + per-file static demand (utilization, demand_class)
 coverage-grid.json     # driver-table cell (mode × background_wanted) × tier coverage grid over all segments; all 32 cells instanced (CI-enforced)
 meas/                  # meas-ci campaign outputs: analysis summary + verified name tables (names/: run 1; names/run-2/: the Phase 7 dkms run)
 tools/                 # all executable tooling (see below)
@@ -103,19 +103,22 @@ The 51st file, `c2-p2a-idle`, is `c2-p2a` with its download bound to `game-downl
 Needs Python 3.12+ with `pip install -r tools/requirements.txt` (PyYAML, jsonschema, pytest).
 
 ```
-make dataset    # derive variants + grid, compile everything, refresh the manifest
-make lint       # repo + timeline + canonical lints (no writes)
-make test       # invariant test suite (pytest, tools/tests/)
-make check      # what CI runs: derive --check + compile --check against the manifest
+make dataset    # derive variants + grid, compile everything (each artifact with its compile report beside it), refresh the manifest
+make variants   # the RQ0 gate spec's sensitivity variants -> build/ + build.variants.manifest.json (needs `dataset`)
+make lint       # repo + timeline + canonical lints, the bound values' sources among them (no writes)
+make test       # invariant test suite (pytest, tools/tests/); its coreset fixture reads the blessed build when the hashes match
+make check      # the gate: derive --check, compile --check and variants --check against the two manifests, and build/ equal to them (needs `dataset variants`)
 ```
 
-CI (`.github/workflows/dataset.yml`) runs `lint` / `test` / `check` on every PR and push to `main`. If you edit any timeline, variant file, or `archetypes.yaml`, run `make dataset` and commit the manifest change with it — otherwise `check` fails.
+CI (`.github/workflows/dataset.yml`) runs `lint` / `dataset` / `variants` / `test` / `check` on every PR and push to `main`, and by hand (`workflow_dispatch`) on any branch — one Linux run that compiles a blessed manifest. If you edit any timeline, variant file, `archetypes.yaml`, a stream or the compiler, run `make dataset variants` and commit both manifests with it — otherwise `check` fails.
 
 ## Tools map
 
 ```
-tools/compile.py       # CLI: timelines -> canonical (+ --check verify mode)
+tools/compile.py       # CLI: timelines -> canonical + compile reports + manifest (+ --check verify mode)
 tools/derive.py        # CLI: variant recipes -> derived timelines + coverage grid (+ --check; --require-coverage fails on an empty cell)
+tools/variants.py      # CLI: the sensitivity variants + their manifest (+ --check)
+tools/check_build.py   # CLI: build/ equals the union of the two manifests — every file pinned, every pin present
 tools/lint.py          # CLI: all lints (+ --freeze for freeze-readiness)
 tools/wlc/             # wlc, the workload compiler — the library behind those CLIs:
                        #   timeline.py / compiler.py  parse + compile
@@ -131,7 +134,8 @@ tools/tests/           # invariant suite + fixtures
 
 - **Canonical semantics live in the docs, not here.** The compiler implements `docs/simulator/interpretation-contract.md`; the build order and set design follow `docs/workload/building-plan.md`; archetype authoring follows `docs/workload/archetype-plan.md`. When code and doc disagree, the doc wins — fix the code.
 - **Behavior parameters live in `archetypes.yaml`, never inline in a timeline.** Timelines bind `(name, archetype)` and supply only the knobs listed in the archetype's `binding_params`.
-- **Every parameter value is sourced.** Numbers carry a `source` tag resolving through `sources.yaml` → `docs/references.md`. Measured values are tagged `meas-ci:<workflow>:<run>`; raw data lives on the GitHub release named in the tag's registry entry.
+- **Every parameter value is sourced.** Numbers carry a `source` tag resolving through `sources.yaml` → `docs/references.md`. Measured values are tagged `meas-ci:<workflow>:<run>`; raw data lives on the GitHub release named in the tag's registry entry. A timeline's bound values too (9.10 D32): a task's `source` map mirrors its `bind` keys and its `count`, each entry a tag, a list of tags, or one of the labels `design` / `convention` / `arithmetic`; the linter checks the key sets and the tags.
+- **A derived file's keystrokes are its base's.** A derived input window lying inside a base window of its task is written as that window's slice (`slice_of: {from, to, index}`, the deriver's doing), and the compiler draws the stimulus offset for the base window, so a counterpart's keystrokes are byte-identical to its base's over the slice.
 - **Demand window.** Every compiled `-single` file of demand class `oversubscribed` must land in the ~100–150% window by the static estimate (`compile.py` prints per-file demand and records it under `demand` in the manifest); `calibration` files are exempt. Files outside it get redesigned, not waved through.
 - **Zero `meas-pending`.** The library is fully measured; the linter keeps it that way.
 - **Declared class on every entry and every task.** The repo lint requires `declared_class` on every archetype entry, from the closed set `normal` and `idle`, with no default; the schema requires it on every `arrive` event and spawn-table entry; the tests check that each compiled task carries its bound entry's class.

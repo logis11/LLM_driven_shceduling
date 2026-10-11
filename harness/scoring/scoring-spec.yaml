@@ -54,9 +54,11 @@
 #   improvement is negative and reads as no headroom.
 # - c3-creation's transcode: uncontended after 240 s but for the editor's idle
 #   wakes, so the cap barely bites.
-# - c7-mail: its cut holds no keystroke, so its term reads the mailer's own
-#   wakes and the file is reporting-only; the mail mode's attribute pair is
-#   unmeasured (9.14 decision 2 as amended).
+# - c7-mail: its keystroke window is a slice of c1-mail's (9.18: the compiler
+#   draws the stimulus offset for the base's window), and c1-mail's 35
+#   keystrokes all fall past the cut, so the slice holds none; its term reads
+#   the mailer's own wakes and the file is reporting-only; the mail mode's
+#   attribute pair is unmeasured (9.14 decision 2 as amended).
 # - c3-evening's chain term stays scored on a reporting-only file: its 1.45
 #   lane share is design (9.10 D31), a chain that cannot meet its frames alone,
 #   so under the TIMER skip rule the term reads the policies' ordering above a
@@ -256,9 +258,11 @@ files:
     terms:
       - {entity: writer, metric: ready_wait, cause: wake, channel: input, aggregate: p99, direction: lower, weight: 1.0}
   c7-mail:
-    # the counterpart is the base's first 26.385 s and holds no keystroke — c1-mail's 35 fall between
-    # 45.9 s and 53.1 s — so its term reads the mailer's own wakes, not its base's input term, and the
-    # file is reporting-only (9.14 decision 2 as amended 2026-10-09); no `base`, the terms differ
+    # the counterpart's keystroke window, 2 s to 24.385 s, is a slice of c1-mail's 2–58 s window — the
+    # same stimulus offset, so the same keystrokes over the slice (9.18) — and c1-mail's 35 fall between
+    # 45.9 s and 53.1 s, so the slice holds none; its term reads the mailer's own wakes, not its base's
+    # input term, and the file is reporting-only (9.14 decision 2 as amended 2026-10-09); no `base`,
+    # the terms differ
     terms:
       - {entity: mailer, metric: ready_wait, cause: wake, channel: timer, aggregate: p99, direction: lower, weight: 1.0}
   c7-dev:

@@ -254,11 +254,12 @@ reporting_lines:
   - type: note
     workload: c7-mail
     text: >
-      Reporting-only (9.14 decision 2 as amended 2026-10-09): the counterpart is
-      c1-mail's first 26.385 s and holds no keystroke — the base's 35 fall between
-      45.9 s and 53.1 s, the SWELL Outlook stream's one typing burst — so its term
-      reads the mailer's own wakes and cannot read keystroke latency; the mail
-      mode's attribute pair is unmeasured.
+      Reporting-only (9.14 decision 2 as amended 2026-10-09): the counterpart's
+      keystroke window is a slice of c1-mail's, drawn at the base's stimulus offset
+      (9.18), and the base's 35 keystrokes fall between 45.9 s and 53.1 s, the
+      SWELL Outlook stream's one typing burst, past the 26.385 s cut — so the slice
+      holds none, its term reads the mailer's own wakes and cannot read keystroke
+      latency; the mail mode's attribute pair is unmeasured.
 
 statements:
   - id: judging-set
@@ -423,8 +424,11 @@ statements:
       a range over that axis. The input-wake-count line prints, per judging file
       and interaction-latency term, the number of wakes its P99 rests on: a 26 s
       counterpart holds about a hundred keystrokes and c3-workday's browser seven,
-      so a P99 there is the top one or two waits; the pair comparison is on the
-      same wakes. The longest-wait line prints each run's longest ready_wait
+      so a P99 there is the top one or two waits. The comparison across conditions
+      is on one file's wakes; across the pair, a counterpart's keystroke window is
+      a slice of its base's at the base's stimulus offset (9.18), so its input
+      wakes are those of the base's first 26.385 s less the ones inside its own
+      operations. The longest-wait line prints each run's longest ready_wait
       against the 30 s floor; any run past 15 s reopens the executor-net question
       with 인경민 before the verdict is read (9.11 D19).
   - id: re-measurement-contingency

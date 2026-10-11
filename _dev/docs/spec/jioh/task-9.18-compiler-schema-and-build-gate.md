@@ -14,7 +14,7 @@ The three class-A process findings of the 2026-10-10 dataset audit (`_dev/docs/a
 
 ### 1. A derived input window names the stream window it is a slice of
 
-An input window may carry the window of which it is a slice: that window's `from`, `to` and index in its file's input list. The compiler draws the stimulus offset for the outer window — by its length and its index — and places inside the slice the keystrokes that fall in it, so a counterpart's keystrokes are byte-identical to its base's over the slice. A window carrying no outer window is its own. The field is compile-time: the canonical workload and its schema do not change.
+An input window may carry the window of which it is a slice: that window's `from`, `to` and index among its task's windows in time order, the index the compiler keys the offset on. The compiler draws the stimulus offset for the outer window — by its length and its index — and places inside the slice the keystrokes that fall in it, so a counterpart's keystrokes are byte-identical to its base's over the slice. A window carrying no outer window is its own. The field is compile-time: the canonical workload and its schema do not change.
 
 ### 2. The deriver writes the field
 
@@ -26,7 +26,7 @@ For every interactive counterpart, the counterpart's input wakes are a subset of
 
 ### 4. `source` is a map beside `bind`
 
-Each task carrying a `bind` carries a `source` map with the same keys. A value is one source tag, a list of source tags, or one of the labels `design`, `convention`, `arithmetic`. Tags are checked against `dataset/sources.yaml` as the library's are; labels are not registry entries. Variant ops that write a `bind` write its `source`. The reason behind a design label stays in `bound-values.md` and the timeline's comment.
+Each task carrying a `bind`, or a `count`, carries a `source` map with the same keys: the `bind` keys, and `count` when it is stated, since a task's count is a bound value (9.10 D32). A value is one source tag, a list of source tags, or one of the labels `design`, `convention`, `arithmetic`. Tags are checked against `dataset/sources.yaml` as the library's are; labels are not registry entries. Variant ops that write a `bind` write its `source`. The reason behind a design label stays in `bound-values.md` and the timeline's comment.
 
 ### 5. The manifest pins the compiler and the streams by content
 
@@ -52,5 +52,5 @@ The compiler writes each artifact's report beside it in `build/`, and the manife
 
 - An input window lies inside the outer window it names; the index names an existing window of that list.
 - A shifted variant of a derived file keeps its outer windows shifted with it.
-- `bind` and `source` have the same key set on every task.
+- `source` has the key set of the bound values — the `bind` keys and `count` when stated — on every task.
 - The `source` field changes every timeline blob, so every artifact and every variant is rebuilt, re-blessed and re-pinned in this sub-task: the dataset manifest, the variants manifest and the scoring spec pins in the RQ0 gate spec, and the harness's build-dependent fixtures.

@@ -94,8 +94,8 @@ focus:
 ```
 
 - `segments`: 0–60초는 `dev`, 60–180초는 `ml-train`. 둘 다 `background_wanted: true`. `scenario`는 근거 tag.
-- `tasks`: `editor`는 `code`라는 이름으로 `desktop-interactive`처럼 행동하고 0초에 와서 180초에 사용자가 닫음. `hog`는 `python3`라는 이름으로 `cpu-batch`처럼 행동하고 60초에 와서 130초짜리 일을 함. 퇴장 시각 없음(일이 끝나면 스스로 나감).
-- `input`: keystroke가 어느 task로 들어가나. 2–178초 동안 `editor`. **keystroke는 input window 안에서만 생성돼요.** 이게 "interactive"의 정의예요. (2026-10-11 전에는 이 track의 이름이 `focus`였어요.)
+- `tasks`: `editor`는 `code`라는 이름으로 `desktop-interactive`처럼 행동하고 0초에 와서 180초에 사용자가 닫음. `hog`는 `python3`라는 이름으로 `cpu-batch`처럼 행동하고 60초에 와서 130초짜리 일을 함. 퇴장 시각 없음(일이 끝나면 스스로 나감). `bind`로 묶는 값(그리고 `count`)마다 출처가 있어요: 같은 key로 된 `source` map에 registry tag(`meas-ci:background:2026-10-03` 같은), tag 목록, 또는 label(`design` / `convention` / `arithmetic`) 중 하나. linter가 key set과 tag를 검사해요(2026-10-11, 9.18).
+- `input`: keystroke가 어느 task로 들어가나. 2–178초 동안 `editor`. **keystroke는 input window 안에서만 생성돼요.** 이게 "interactive"의 정의예요. (2026-10-11 전에는 이 track의 이름이 `focus`였어요.) derived file의 window는 `slice_of: {from, to, index}`로 base의 어느 window의 조각인지 들고 있어요 — deriver가 적고, compiler는 그 base window 기준으로 stimulus offset을 뽑아요. 그래서 c7 counterpart의 keystroke는 base의 같은 구간과 byte-identical이에요(9.18).
 - `focus`: 어느 task의 창이 **focus**를 갖고 있나. 0–180초 동안 `editor`. 사용자가 마지막으로 앞에 세운 창에 머물고, typing을 멈춰도 사라지지 않고, 창이 하나도 없을 때만 비어 있어요. 모든 `input` window는 같은 task의 `focus` interval 안에 있어야 해요. 이 track은 compile된 파일의 `focus` key로 실려 recognizer에게 **보여지는** 것이에요(7장).
 
 ---
