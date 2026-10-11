@@ -2,7 +2,17 @@
 
 **Goal:** Decide whether the daemon needs flap protection, and if so fix the policy's form and values before the RQ4 run, with the values chosen on files disjoint from the ones measured and the result reported as a sweep over the values.
 
-**Scope:** The daemon's post-recognition rule (daemon guide §9.3, open), the generated flap-stress set and the C3 return grid (audit record, 2026-10-11 direction), the RQ4 phase-shift family (research proposal, Family 4). Not scheduled to a phase line; the dataset prerequisites belong to the generated-layer work, the rest to the RQ4 line.
+**Scope:** The daemon's post-recognition rule (daemon guide §9.3, open), the generated flap-stress set and the C3 return grid (audit record, 2026-10-11 direction), the RQ4 phase-shift family (research proposal, Family 4).
+
+**When:**
+
+| step | when | needs |
+|---|---|---|
+| 3, the precedent search | sub-task 9.19's spec session; its range sets the flap-stress intervals | nothing |
+| 0, the need measured with no rule | right after Phase 10's integration, in the RQ0 run's pipeline | the flap-stress set (9.19), the C4 files, the Layer 2 cost aggregates (9.21), the real simulator and daemon; `oracle` and `random` only, no LLM |
+| 1, 2, 4, 5, 6 | the RQ4 experiment spec's session, after step 0 and before any LLM condition runs | step 0's result |
+
+Both later blocks are on the Phase 10 backlog in `_dev/TODO.md`.
 
 ## Terms
 
