@@ -7,13 +7,20 @@ The **workload dataset**: everything that produces the canonical workload files 
 ```
 archetypes.yaml        # behavior library — one entry per process kind, each with its declared scheduling class (fully measured, v0.2)
 sources.yaml           # machine registry of citation sources (subset of docs/references.md)
+grids.yaml             # the generated layer's grid definition: the sets, their forms, lengths, intervals (with sources) and splits
 schema/
   workload.schema.json # canonical format, machine form — the simulator's loader contract
 timelines/
   coreset/             # authored core set: *.timeline.yaml (novel) + *.variant.yaml (derivation recipes)
-build/                 # compiled artifacts — NOT committed; verified via build.manifest.json
-  coreset-single/      # 51 workloads, lane-scaled to a single lane — the one compiled set (experiments run on these)
+generated/             # the generated layer's timelines, one per cell — NOT committed; written by tools/generate.py from grids.yaml + the C1 timelines
+  transition-grid/     #   480: the 2-segment transition grid over the 240 ordered mode pairs, two forms
+  return-grid/         #   720: the 3-segment return grid A -> B -> A, the middle 60 s / 10 s / 2 s
+  flap-stress/         #   24: the flap-stress set, the hold-time tuning material
+build/                 # compiled artifacts — NOT committed; verified via the manifests
+  coreset-single/      # 51 workloads, lane-scaled to a single lane — the core set (the RQ0 experiments run on these)
+  transition-grid-single/, return-grid-single/, flap-stress-single/   # the generated sets, compiled the same way
 build.manifest.json    # lockfile: hashes of the last blessed build — its inputs (library, schema, compiler sources, streams), its artifacts and their compile reports — + per-file static demand (utilization, demand_class)
+build.<set>.manifest.json   # one per generated set: the same sections, its inputs also the definition, the generator and the C1 timelines, plus `grid` — each file's coordinates and split
 coverage-grid.json     # driver-table cell (mode × background_wanted) × tier coverage grid over all segments; all 32 cells instanced (CI-enforced)
 meas/                  # meas-ci campaign outputs: analysis summary + verified name tables (names/: run 1; names/run-2/: the Phase 7 dkms run)
 tools/                 # all executable tooling (see below)
@@ -25,15 +32,17 @@ Makefile               # entry point for everything in this tree
 ```mermaid
 flowchart LR
     V["timelines/coreset/*.variant.yaml"] -- "wlc deriver" --> T
+    D["grids.yaml + the C1 timelines"] -- "generator" --> X["generated/&lt;set&gt;/*.timeline.yaml"]
+    X --> W
     T["timelines/coreset/*.timeline.yaml"] --> W
     A["archetypes.yaml"] --> W
     S["seed (per timeline)"] --> W
     W{{"wlc — workload compiler"}}
     W --> G["build/coreset-single/*.workload.json"]
-    W --> M["build.manifest.json"]
+    W --> M["build.manifest.json, build.&lt;set&gt;.manifest.json"]
 ```
 
-Same timeline + same library + same seed ⇒ byte-identical output. That determinism is load-bearing (experiment hygiene), which is why `build/` isn't committed: CI recompiles and diffs hashes against `build.manifest.json` instead.
+Same timeline + same library + same seed ⇒ byte-identical output. That determinism is load-bearing (experiment hygiene), which is why `build/` isn't committed: CI recompiles and diffs hashes against the manifests instead. The generated layer's timelines aren't committed either — the generator is pure in its committed inputs, and each set's manifest pins them by content.
 
 ## Workload Dataset
 
@@ -86,13 +95,25 @@ The files come in seven groups (design rationale: `docs/workload/building-plan.m
 |---|---|---|
 | **C1** calibration | 16 | Can a recognizer handle the *easy* case — one unmistakable situation per file, one file per mode of the menu (pure gaming, pure office, pure compile…)? This is the floor everything should pass, and the ground where a name whitelist looks perfect. |
 | **C2** intent pairs | 6 (3 pairs) + 1 | When two workloads **behave identically** and differ only in intent — an ML training run vs. an indexer nobody asked for, a game download vs. a virus scan — can anything separate them? The two files in a pair differ in exactly one segment, so any difference in outcome is attributable to that one change. |
-| **C3** transition arcs | 3 | When the situation *changes mid-run* (browsing → gaming → media over an evening), how quickly and correctly does recognition follow the change? |
+| **C3** transition arcs | 3 | Three authored arcs — a workday (browsing → office → compile → mail), an evening, a creation chain — kept as existence cases: transitions of these shapes occur. The rate question — how quickly and correctly recognition follows a change, over every ordered pair of modes — is the generated transition grid's (below). |
 | **C4** distractor injection | 3 | If an irrelevant process appears mid-situation (Discord pops up during a game, chrome opens during a compile), does the reading wrongly flip? Each file is a clone of a C1/C3 file plus one injected process, so it's measured against its own clean original. |
 | **C5** familiarity ladder | 3 | Does recognition survive as process names get less recognizable — `firefox` → `soffice.bin` → `tracker-miner-fs-3` → invented names no software carries? Behavior is held identical across tiers; only the names change. A whitelist scores zero on the invented tiers by construction. |
 | **C6** resolution limits | 3 | Where does name-based recognition break *by design*? A miner named `chrome`, a change happening inside one process (browser tab → video call), two equally-active foregrounds. These are known, pre-committed misses — shipped so the limits are measured, not just claimed. |
 | **C7** attribute counterparts | 16 | Does the reading flip when the background work is *unwanted*? One counterpart per mode, derived from its C1 base: interactive modes gain an unwanted scan, batch modes have their job re-cast as one nobody asked for. Every driver-table cell has a one-diff pair; the five cells that differ by intent alone ship as pre-committed misses. |
 
 The 51st file, `c2-p2a-idle`, is `c2-p2a` with its download bound to `game-download-idle` — the same tables under the declared class `idle` — and differs from `c2-p2a` in that task's class alone. It is outside the judging set; the RQ0 gate spec's bounding check reads the pair to bracket a stock desktop's treatment of the download's nice-10 work.
+
+### Generated layer
+
+Beside the core set, three sets a generator composes from the sixteen C1 task sets (`grids.yaml`, `tools/generate.py`). Every file is **design**: it enumerates a factor in full and claims nothing about how often or in what order desktops see the modes. Each segment is 60 s, the C1 interactive files' length; a task set lands in a segment by the dataset's one re-timing rule (9.10 D44: the C1 arrive offsets kept, the input window with the C1's 2 s margins, each operation at its fraction of the window), and a batch job's `total_work` or `spawn_count` is the C1 value scaled to the span the job must be alive in, labelled `design` in its `source` map. A 2 s segment shows its task set with no keystroke.
+
+| Set | Files | What it enumerates |
+|---|---|---|
+| `transition-grid` | 480 | the 240 ordered mode pairs (A, B) in two forms: **departs** — at 60 s A's tasks depart, B's arrive, the focus moves to B; **focus** — B's tasks arrive and the focus moves to B, A's tasks stay to the end of the file (so this form and the 9.20 cross-mode distractor cell, "B arrives, the focus stays on A", differ in the focus alone). Recognition at a transition, with direction (RQ1). |
+| `return-grid` | 720 | A → B → A over the same pairs, A departing at each boundary, the middle segment 60 s, 10 s or 2 s (RQ4's phase-shift family: the stale configuration's cost). Split by pair into a tuning half and a measurement half, 120 pairs each, a pair's three variants on one side. |
+| `flap-stress` | 24 | three ordered pairs drawn by keyed hash; a 60 s lead-in on A, then eight segments of one interval each, B and A in turn, at 2 s, 5 s, 10 s and 30 s — 5, 10 and 30 s the debounce intervals of GameMode's reaper, tuned's dynamic tuning and systemd-oomd (`feral-gamemode`, `tuned`, `systemd-oomd` in `sources.yaml`), 2 s a point below them (design). Each file under two seeds, tuning and measurement. The hold-time plan's material (`_dev/docs/plan/jioh/hold-time-and-hysteresis.md`). |
+
+Every seed and every split is a keyed SHA-256 draw from the cell's or the pair's id; nothing is chosen by hand. Each set's manifest records under `grid`, per file, its coordinates (`a`, `b`, and `form`, `middle` or `interval`) and its `split`. The three authored C3 arcs stay in the core set as existence cases.
 
 ### Generalsets
 
@@ -105,12 +126,13 @@ Needs Python 3.12+ with `pip install -r tools/requirements.txt` (PyYAML, jsonsch
 ```
 make dataset    # derive variants + grid, compile everything (each artifact with its compile report beside it), refresh the manifest
 make variants   # the RQ0 gate spec's sensitivity variants -> build/ + build.variants.manifest.json (needs `dataset`)
+make generated  # the generated layer: grids.yaml + the C1 timelines -> generated/<set>/ (not committed) -> build/<set>-single/ + build.<set>.manifest.json, one per set
 make lint       # the checks before a compile: repo + timeline lints, the bound values' sources among them (no writes; seconds)
 make test       # invariant test suite (pytest, tools/tests/); the tests that read the set take the blessed build when the hashes match
-make check      # the gate, after `dataset variants`: derive --check, both manifests equal to their committed bytes, build/ equal to them
+make check      # the gate, after `dataset variants generated`: derive --check, every manifest equal to its committed bytes, build/ equal to their union
 ```
 
-The compile and the variants run one timeline (one set-and-file) per worker process, as many as the CPU has (`--jobs N` to change); the canonical lints run inside the compile on every artifact, validated by `jsonschema-rs`. CI (`.github/workflows/dataset.yml`) runs `lint` / `dataset` / `variants` / `test` / `check` on every PR and push to `main`, and by hand (`workflow_dispatch`) on any branch — one Linux run that compiles the set once and compares what it wrote with the committed manifests. If you edit any timeline, variant file, `archetypes.yaml`, a stream or the compiler, run `make dataset variants` and commit both manifests with it — otherwise `check` fails. `compile.py --check` and `variants.py --check` remain for an independent in-memory verification; they are not in the gate.
+The compile, the variants and the generated sets run one timeline (one set-and-file) per worker process, as many as the CPU has (`--jobs N` to change); the canonical lints run inside the compile on every artifact, validated by `jsonschema-rs`. CI (`.github/workflows/dataset.yml`) runs `lint` / `dataset` / `variants` / `generated` / `test` / `check` on every PR and push to `main`, and by hand (`workflow_dispatch`) on any branch — one Linux run that compiles every set once and compares what it wrote with the committed manifests. If you edit any timeline, variant file, `archetypes.yaml`, a stream or the compiler, run `make dataset variants generated` and commit every manifest with it; if you edit `grids.yaml`, the generator or a C1 timeline, `make generated` and the three generated manifests — otherwise `check` fails. `compile.py --check`, `variants.py --check` and `generate.py --check` remain for an independent in-memory verification; they are not in the gate.
 
 ## Tools map
 
@@ -118,7 +140,9 @@ The compile and the variants run one timeline (one set-and-file) per worker proc
 tools/compile.py       # CLI: timelines -> canonical + compile reports + manifest (+ --check verify mode)
 tools/derive.py        # CLI: variant recipes -> derived timelines + coverage grid (+ --check; --require-coverage fails on an empty cell)
 tools/variants.py      # CLI: the sensitivity variants + their manifest (+ --check)
-tools/check_build.py   # CLI: both manifests equal their committed bytes; build/ equals their union — every file pinned, every pin present
+tools/generate.py      # CLI: grids.yaml + the C1 timelines -> the generated sets' timelines, artifacts, reports and manifests (+ --check)
+tools/gen/             # the generator: cells.py (the definition, the 240 pairs, keyed seeds and splits), compose.py (a C1 task set into a segment, D44)
+tools/check_build.py   # CLI: every manifest equals its committed bytes; build/ equals their union — every file pinned, every pin present
 tools/lint.py          # CLI: all lints (+ --freeze for freeze-readiness)
 tools/wlc/             # wlc, the workload compiler — the library behind those CLIs:
                        #   timeline.py / compiler.py  parse + compile
@@ -135,6 +159,7 @@ tools/tests/           # invariant suite + fixtures
 - **Canonical semantics live in the docs, not here.** The compiler implements `docs/simulator/interpretation-contract.md`; the build order and set design follow `docs/workload/building-plan.md`; archetype authoring follows `docs/workload/archetype-plan.md`. When code and doc disagree, the doc wins — fix the code.
 - **Behavior parameters live in `archetypes.yaml`, never inline in a timeline.** Timelines bind `(name, archetype)` and supply only the knobs listed in the archetype's `binding_params`.
 - **Every parameter value is sourced.** Numbers carry a `source` tag resolving through `sources.yaml` → `docs/references.md`. Measured values are tagged `meas-ci:<workflow>:<run>`; raw data lives on the GitHub release named in the tag's registry entry. A timeline's bound values too (9.10 D32): a task's `source` map mirrors its `bind` keys and its `count`, each entry a tag, a list of tags, or one of the labels `design` / `convention` / `arithmetic`; the linter checks the key sets and the tags.
+- **The generated layer is design.** A generated file composes the C1 task sets by `grids.yaml`'s rules and claims nothing about real desktops; its only authored numbers are the definition's, each with a source or a label. The values the generator scales (a batch job's work over its span) are `design` in the file's `source` map; the ones it carries unchanged keep the C1's tags.
 - **A derived file's keystrokes are its base's.** A derived input window lying inside a base window of its task is written as that window's slice (`slice_of: {from, to, index}`, the deriver's doing), and the compiler draws the stimulus offset for the base window, so a counterpart's keystrokes are byte-identical to its base's over the slice.
 - **Demand window.** Every compiled `-single` file of demand class `oversubscribed` must land in the ~100–150% window by the static estimate (`compile.py` prints per-file demand and records it under `demand` in the manifest); `calibration` files are exempt. Files outside it get redesigned, not waved through.
 - **Zero `meas-pending`.** The library is fully measured; the linter keeps it that way.

@@ -1,5 +1,5 @@
 # Workload Dataset Building Plan
-> Status: normative · Created 2026-08-25 · Updated 2026-10-09
+> Status: normative · Created 2026-08-25 · Updated 2026-10-11
 
 > Consolidates the dataset methodology decided across Q7 (segments, canonicalization, caches), source-vetting (per-source verdicts and extracted parameters), SCENARIO_CATALOG (S1–S18, names-only schema, source-column rules), docs/references.md + dataset/sources.yaml (citation index and machine registry), and docs/simulator/interpretation-contract.md (simulator-facing semantics). Those documents are normative for their own content; this plan defines how their pieces compose into the dataset and in what order it gets built. Decision record: `_dev/archive/2026-08-26-workload-generation-grill.md`.
 
@@ -93,12 +93,12 @@ All segments identical except one:
 - **P3:** {kdenlive + ffmpeg render} vs {kdenlive + borg} — user-initiated bulk vs scheduled bulk (S7/S8 vs S15).
 Per Q7, each pair is a one-segment diff between two otherwise byte-identical files — a tighter control than two independently authored scenarios.
 
-### C3 — Mode-transition arcs (~3 files)
+### C3 — Mode-transition arcs (3 files; existence cases)
 Multi-segment sequences whose boundaries are real label changes (query points that must flip):
 - **workday arc** (~4 segments): chrome research → +soffice.bin writing → +make compile → mail send. Ordering grounded in the CpsMark+ CA cooperative workflow (`cpsmark-tbench23`).
 - **evening arc:** browsing → gaming (+discord overlay) → media playback.
 - **creation arc:** gimp → kdenlive → HandBrakeCLI batch handoff (grounded in CpsMark+ CC and SYSmark 30 ACC's photo↔video multitasking workload).
-Role: transition recognition latency and correctness at segment boundaries.
+Role (restated 2026-10-11): existence cases — transitions of these shapes, in these orders, occur. The rate claims on transition recognition — latency and correctness at a boundary, with direction, over every ordered pair of modes — and on the cost of a stale configuration are the generated layer's (§3a below): the three arcs hold about eight boundaries in all, each ordered pair at most once, and carry no statistical claim.
 
 ### C4 — Distractor injection (~3 files)
 Clones of C1/C3 files with a label-invariant process injected mid-segment: discord launch during gaming; 7z burst during office; chrome open during compile. Paired with their clean originals, giving Q7's within-segment distractor-robustness as a **paired measurement**.
@@ -128,6 +128,19 @@ Per Q7, §5.5 balance counts **segments, not files**. The segments lie on the dr
 
 ### Label rule for mixtures
 Scenario mixing is the norm; most mixtures resolve to one driver-table cell because the attributes exist to describe them ("game + Steam download" = gaming, wanted=true). Core authors only author mixtures with a defensible label (the Q7 author-specifies principle); genuinely ambiguous dual-active states are the C6 boundary above, never accidental.
+
+## 3a. Generated layer — the grids over the C1 task sets (added 2026-10-11)
+
+A generated layer stands beside the core set (Phase 9 spec decision 9; the audit record `_dev/docs/audit/jioh/2026-10-10-dataset-audit-before-9.15.md`, "Direction taken on the open item"). Each group whose claim is a rate has a generated set that enumerates the factor in full from the sixteen C1 task sets; every file is **design** — it claims nothing about how often or in what order desktops see the modes — and the authored files of the group remain as existence cases. The definition is `dataset/grids.yaml`, the generator `dataset/tools/generate.py`; the timelines are build products, not committed, and each set has its own manifest, `dataset/build.<set>.manifest.json`, pinning the definition, the generator, the C1 timelines and the compile's inputs by content (9.19 spec, decisions 4 and 5).
+
+Composition rules (9.19 spec, decisions 1–3): every segment is 60 s, the C1 interactive files' length; a C1 task set lands in a segment by the dataset's one re-timing rule, 9.10 D44 — its arrive offsets kept, the input window with the C1's 2 s margins, each operation at its fraction of the window — so a segment of 4 s or less shows its task set with no keystroke; a batch job's `total_work` or `spawn_count` is the C1 value scaled to the span the job must be alive in, labelled `design` in the file's `source` map. Every seed and every split is a keyed SHA-256 draw from the cell's or the pair's id.
+
+The C3 sets:
+- **Transition grid** (`transition-grid`, 480 files): the 240 ordered mode pairs (A, B) in two forms. *Departs* — at 60 s A's tasks depart, B's arrive, the focus moves to B. *Focus* — B's tasks arrive and the focus moves to B; A's tasks stay to the end of the file, A typing no more once the focus has moved. The focus form and the C4 cross-mode distractor cell ("B arrives, the focus stays on A", 9.20) share the multiset sequence and differ in the focus alone. Role: recognition at a transition, with direction (RQ1).
+- **Return grid** (`return-grid`, 720 files): A → B → A over the same pairs, A departing at each boundary, the middle segment 60 s, 10 s or 2 s — RQ4's phase-shift family. Split by pair into a tuning half and a measurement half (120 pairs each, a pair's three variants on one side) for the hold-time plan (`_dev/docs/plan/jioh/hold-time-and-hysteresis.md`, step 4). Role: the stale configuration's cost against the speed of the change.
+- **Flap-stress set** (`flap-stress`, 24 files): three ordered pairs drawn by keyed hash; a 60 s lead-in on A, then eight segments of one interval each, B and A in turn, at 2 s, 5 s, 10 s and 30 s — 5, 10 and 30 s the debounce intervals of the daemon-level switches comparable to ours (GameMode's reaper, tuned's dynamic tuning, systemd-oomd's pressure duration; `feral-gamemode`, `tuned`, `systemd-oomd`), 2 s a point below them, design. Each file under two seeds, tuning and measurement. Role: the hold-time plan's tuning and test material.
+
+The C4 and C5 generated sets are 9.20's; the consumer work over the layer — terms by rule, coverage, the grid axes as records split keys — is 9.21's. The naturalistic set (§4) stays in the backlog.
 
 ## 4. Layer 3b — Naturalistic set (generated timelines)
 
