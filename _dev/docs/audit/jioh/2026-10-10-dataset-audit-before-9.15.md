@@ -128,3 +128,21 @@ The distractor's Layer 1 axis is the name's relation to the vocabulary, not its 
 - A1 is taken as option (ii): the compiler draws a derived file's stimulus offset from its base's window, so a counterpart's keystrokes are its base's first C seconds; the ten interactive counterparts and their variants are rebuilt, re-blessed and re-pinned; the test "c7 input wakes ⊂ c1 input wakes in [0, C)" is added; the pair review's finding 8 and the scoring spec's c7-mail comment are restated to the mechanism.
 - The building plan's C2 text ("behaviorally identical", "differ only in intent") is restated to the rebuilt state: the unwanted side is a measured job of its own (file-indexer, package-upgrade, incremental-backup), differing in name and in behaviour; P3 flips the mode and `initiated`, not `background_wanted`. A 9.15 item.
 - Widening the set of measured unwanted jobs is a measurement backlog item, not part of the generated layer.
+
+### Backlog — unwanted jobs to measure (2026-10-11)
+
+Selection rule: `background_wanted: false` by the vocabulary's definition; in the stock Ubuntu 24.04 desktop image and enabled by default; measurable on the CI runner with the real program; a name distinct from `unattended-upgr` and `tracker-miner-f`. Each is one campaign under `_dev/research/jioh/measurement-campaign-workflow.md`. Unmeasured candidates, in priority order:
+
+| candidate | job | CPU character | to check first |
+|---|---|---|---|
+| `gnome-software` + `packagekitd` | the login-time update and appstream refresh | moderate, tens of seconds | needs a session, as 9.9's daemon campaigns had |
+| `snapd` auto-refresh | the four-times-daily snap refresh and unpack | CPU burst (unsquashfs) | snapd present on the runner image |
+| `updatedb.plocate` | plocate's daily index rebuild | I/O with CPU | the runner's filesystem size shapes the result |
+| `update-initramfs` | the initramfs recompression after a kernel update | CPU-bound compression | whether it is already inside the `package-upgrade` measurement; separate only if so |
+| `mandb`, `apt-get update` | the manual index and package-list refreshes | small (9.10 D3: 1–11 s and 2–42 s wall) | none; these fill the small-job, no-headroom case |
+
+Outside the rule, recorded for the narrative:
+- `clamscan`: the proposal §1.4 example; not stock (9.10 D3). Either re-added as a by-design non-stock job or the proposal's example restated to the unattended upgrade. Checked in 9.15 against 9.12's proposal wording.
+- Steam shader pre-caching (`fossilize`): not measurable on the runner (9.4 S4: no headless Steam client route).
+
+The naturalistic set (Layer 3b of the building plan) stays in the backlog; its prerequisite is a source for Linux-desktop co-occurrence and transition frequency, which 9.10's search did not find.
