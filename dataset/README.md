@@ -105,12 +105,12 @@ Needs Python 3.12+ with `pip install -r tools/requirements.txt` (PyYAML, jsonsch
 ```
 make dataset    # derive variants + grid, compile everything (each artifact with its compile report beside it), refresh the manifest
 make variants   # the RQ0 gate spec's sensitivity variants -> build/ + build.variants.manifest.json (needs `dataset`)
-make lint       # repo + timeline + canonical lints, the bound values' sources among them (no writes)
-make test       # invariant test suite (pytest, tools/tests/); its coreset fixture reads the blessed build when the hashes match
-make check      # the gate: derive --check, compile --check and variants --check against the two manifests, and build/ equal to them (needs `dataset variants`)
+make lint       # the checks before a compile: repo + timeline lints, the bound values' sources among them (no writes; seconds)
+make test       # invariant test suite (pytest, tools/tests/); the tests that read the set take the blessed build when the hashes match
+make check      # the gate, after `dataset variants`: derive --check, both manifests equal to their committed bytes, build/ equal to them
 ```
 
-CI (`.github/workflows/dataset.yml`) runs `lint` / `dataset` / `variants` / `test` / `check` on every PR and push to `main`, and by hand (`workflow_dispatch`) on any branch — one Linux run that compiles a blessed manifest. If you edit any timeline, variant file, `archetypes.yaml`, a stream or the compiler, run `make dataset variants` and commit both manifests with it — otherwise `check` fails.
+The compile and the variants run one timeline (one set-and-file) per worker process, as many as the CPU has (`--jobs N` to change); the canonical lints run inside the compile on every artifact, validated by `jsonschema-rs`. CI (`.github/workflows/dataset.yml`) runs `lint` / `dataset` / `variants` / `test` / `check` on every PR and push to `main`, and by hand (`workflow_dispatch`) on any branch — one Linux run that compiles the set once and compares what it wrote with the committed manifests. If you edit any timeline, variant file, `archetypes.yaml`, a stream or the compiler, run `make dataset variants` and commit both manifests with it — otherwise `check` fails. `compile.py --check` and `variants.py --check` remain for an independent in-memory verification; they are not in the gate.
 
 ## Tools map
 
@@ -118,7 +118,7 @@ CI (`.github/workflows/dataset.yml`) runs `lint` / `dataset` / `variants` / `tes
 tools/compile.py       # CLI: timelines -> canonical + compile reports + manifest (+ --check verify mode)
 tools/derive.py        # CLI: variant recipes -> derived timelines + coverage grid (+ --check; --require-coverage fails on an empty cell)
 tools/variants.py      # CLI: the sensitivity variants + their manifest (+ --check)
-tools/check_build.py   # CLI: build/ equals the union of the two manifests — every file pinned, every pin present
+tools/check_build.py   # CLI: both manifests equal their committed bytes; build/ equals their union — every file pinned, every pin present
 tools/lint.py          # CLI: all lints (+ --freeze for freeze-readiness)
 tools/wlc/             # wlc, the workload compiler — the library behind those CLIs:
                        #   timeline.py / compiler.py  parse + compile

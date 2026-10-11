@@ -26,6 +26,6 @@ The canonical lint validates against the unchanged workload schema with `jsonsch
 
 ## Invariants
 
-- No artifact, report or manifest byte changes: the sampling, the canonical form and the compile's output are untouched, and the gate's statement — the committed manifests are what a recompile writes — is unchanged in meaning.
+- No artifact or report byte changes: the sampling, the canonical form and the compile's output are untouched, and the gate's statement — the committed manifests are what a recompile writes — is unchanged in meaning. The manifests' `inputs` pin the compiler's sources by content (9.18 decision 5), so the compiler change re-blesses both manifests and re-pins the RQ0 gate spec, the artifacts identical.
 - The tests that read the set follow 9.18 decision 8: the blessed build when the hashes match, a compile otherwise.
 - The measurements before and after are recorded in the sub-task changelog.

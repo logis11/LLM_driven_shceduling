@@ -478,14 +478,14 @@ statements:
       labelled with that row.
 
 # SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-11, the
-# 9.18 entry); the variant manifests pin the rebuilt files the sensitivity lines read.
+# 9.18 and 9.22 entries); the variant manifests pin the rebuilt files the sensitivity lines read.
 pins:
   scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 1f7e9e3039332def5062bb09c121b9116d7c12a21850539b3ab1cb80e9b8c434}
   guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.1", sha256: 24ccb875ff666615de75d80bc5351b7f5c62713d605438844938f9ab6ef1676c}
   driver_table: {path: daemon/driver-table/prior.yaml, sha256: 6e271dd042b38c23b85459cec7545fde990aec9be5a2c8bd6081690d98243f7f}
-  dataset:      {path: dataset/build.manifest.json, sha256: 976a943ce0f0ae9eb8395006e22c19d9fe01c6149da774e0071c9d48d3f16dd6}
+  dataset:      {path: dataset/build.manifest.json, sha256: d10bcd42a31ea0617133bccf739941ecf347dab296c68a5ab5bc6a4000377d4d}
   variants:
-    all: {path: dataset/build.variants.manifest.json, sha256: 6c244f17a99408d6d7ea07429043d33f1eeddb927ac9b7efc0184b5785a54358}
+    all: {path: dataset/build.variants.manifest.json, sha256: 831a854ebcd23c0047e710a04ee6851478924a96b6320e4a91ca1d368c9ba0b8}
 
 criterion:
   type: k_of_n_gap

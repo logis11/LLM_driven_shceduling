@@ -2,6 +2,11 @@
 
 The harness tree's own record of what its committed data files and programs changed, newest first. The scoring spec (`scoring/scoring-spec.yaml`) and the guard spec (`guards/guard-spec.yaml`) are frozen here (Phase 8 spec, decision 19): a change to either after its freeze is an entry below before any run reads it, and the RQ0 gate spec (`experiments/rq0-gate.yaml`) pins the frozen bytes by hash. The metrics doc and the data contracts keep their own changelogs.
 
+## 2026-10-11 — the dataset manifests re-pinned on the faster build tooling (jioh 9.22)
+
+- **Pins**: dataset manifest `d10bcd42a31ea0617133bccf739941ecf347dab296c68a5ab5bc6a4000377d4d`, variants manifest `831a854ebcd23c0047e710a04ee6851478924a96b6320e4a91ca1d368c9ba0b8`. The artifacts, the reports and the variants are byte-identical to the 9.18 build; the manifests differ in their `inputs` alone — the compiler's sources changed (the canonical lint on `jsonschema-rs`, the compile and the variants parallel over files, `dataset/tools/compile.py`, `wlc/linter.py`, `wlc/variants.py`), and the manifest pins them by content (9.18 decision 5). The scoring spec, the guard spec and the driver table are unchanged.
+- **The gate**: `make -C dataset check` compares the manifests the build wrote with their committed bytes and `build/` with the manifests, no longer recompiling; the harness workflows' `make -C dataset check` step reads the same. Decisions and measurements: `_dev/research/jioh/task-9.22-build-time/changelog.md`.
+
 ## 2026-10-11 — the counterparts' keystrokes as their bases'; the dataset re-pinned with sourced bound values (jioh 9.18)
 
 - **The slice rule** (data-contracts §3, §14): a derived keystroke window is a slice of its base's window, drawn at the base's stimulus offset, so the ten interactive counterparts' input wakes are subsets of their bases' over the counterpart's span — less only the keystrokes inside the counterpart's own operations (9.10 D44). The pinned sentences on `c7-mail` (the scoring spec's comments, the gate spec's note) and the gate spec's `sensitivity-lines` statement on "the same wakes" are restated to the mechanism; `docs/daemon/prior-table-pair-review.md` findings 8 and 10 and its counterpart table carry the rebuilt counts (`c7-browsing` 79, `c7-office` 91, `c7-dev` 47, `c7-indexing` 27 input wakes).
