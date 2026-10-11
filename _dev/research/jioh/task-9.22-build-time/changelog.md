@@ -45,3 +45,9 @@ Spec invariant. The compiler's sources are inputs the manifest pins by content (
 | `make check` | 56–59 min | 1.7 s |
 
 One local `make lint dataset variants test check` is about 5 min against 3.5 h. The compile's 24 minutes were mostly the schema validation (18 of them, by 9.18 D7's measurement), which `jsonschema-rs` removes; the parallel pool takes the rest from about 6 min of compute to 52 s of wall time on 10 cores. The variants, 78 jobs over the pool, likewise.
+
+## D6 — the CI run (2026-10-11)
+
+Spec scope. `dataset.yml` by `workflow_dispatch` on commit `232cf22d`: run 38131040159 (https://github.com/logis11/LLM_driven_shceduling/actions/runs/38131040159), `ubuntu-latest` (4 vCPU), success — pip install 4 s, `lint` 1 s, `dataset` 1 min 34 s, `variants` 2 min 49 s, `test` 1 min 54 s, `check` 2 s; 6 min 34 s from checkout to completion. Before: the 9.18 tooling's run 38129714928 on `61f245ff` was cancelled 23 min in, still in `lint` — its five steps, 3.5 h on the home machine, would have run past the runner's 6 h job limit. This run is also 9.18's Linux run (its D7).
+
+Hands to 9.16: the three pins (`d10bcd42…`, `831a854e…`, the scoring spec's `1f7e9e30…`) equal the committed bytes; the CI run above reproduces the manifests from the timelines on Linux. Hands to 9.15: `docs/workload/coreset-guide.md` §5.1's sentence on CI ("CI가 다시 compile해서 hash를 `build.manifest.json`과 비교해요") reads against the gate as it is now (the build rewrites the manifests, `check` compares them with the committed bytes).
