@@ -18,9 +18,10 @@ MODES = ["browsing", "office", "mail", "dev", "photo", "meeting", "gaming",
 # decision 1): 17 cells exercised before Phase 7. 7.2 added indexing/true,
 # 7.3 the fifteen remaining false cells: all 32 instanced. Five segments are
 # pre-committed misses (decision 3): indexing/true and the ml-train, render,
-# transcode, backup false cells.
+# transcode, backup false cells; media/true since c6-alias (9.20 decision 8), the
+# name-collision alias beside the authored ladder files.
 MISS_CELLS = {("indexing", True), ("ml-train", False), ("render", False),
-              ("transcode", False), ("backup", False)}
+              ("transcode", False), ("backup", False), ("media", True)}
 
 
 @pytest.fixture(scope="module")

@@ -141,7 +141,7 @@ def test_c6_alias_is_a_pre_committed_miss_without_a_familiarity_tier(coreset):
     assert segment["mode"] == "media"
     assert segment["attributes"] == {"background_wanted": True, "spoof": True, "pre_committed_miss": True}
     assert "familiarity" not in segment
-    names = sorted(e["name"] for e in alias["events"] if e["type"] == "arrive")
+    names = sorted(e["name"] for e in alias["events"] if e["op"] == "arrive")
     assert names == ["baloo_file", "tracker-miner-f"]
     for wid, tier in (("c5-t4", 4), ("c5-t5", 5)):
         (segment,) = coreset[wid][0]["ground_truth"]
