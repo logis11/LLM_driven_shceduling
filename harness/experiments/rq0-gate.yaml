@@ -87,9 +87,10 @@ files:
 
 # derived from the `pre_committed_miss` annotation in the compiled files; the lint
 # checks it (Phase 8 spec, decision 13). These files leave recognition accuracy;
-# three of them judge (the gate needs labels, not recognizability) and two —
-# c1-indexing and c7-backup, idle-class files — report.
-layer1_exclusions: [c1-indexing, c7-backup, c7-ml-train, c7-render, c7-transcode]
+# three of them judge (the gate needs labels, not recognizability) and three —
+# c1-indexing and c7-backup, idle-class files, and c6-alias, the name-collision
+# alias (9.20 decision 8) — report.
+layer1_exclusions: [c1-indexing, c6-alias, c7-backup, c7-ml-train, c7-render, c7-transcode]
 
 guard_exemptions:
   - guard: provenance_share
