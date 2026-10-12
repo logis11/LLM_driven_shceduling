@@ -13,6 +13,13 @@ A placement puts a mode's C1 task set into a segment [start, end) with its tasks
   past its segment types no more once the focus has moved (decision 2).
 - focus: the C1 interval over the segment, the same way.
 - operations: each at its C1 fraction of its task's window (D44); dropped with the window.
+
+9.20 adds two compositions. A distractor cell (decisions 1–3): A's placement labels the first segment while its
+tasks, focus, input and operations run to the file's end (`track_end`); the arrival — B's task set placed without
+tracks, or one program — lands at the boundary and stays; the second segment is A's label again with the arrival's
+scenario tags added, and `pre_committed_miss` where the two focus holders share a name. A ladder cell (decisions
+5–7): the mode's C1 file as it stands, the cell's rename map applied to task names, an orchestrator's child name
+and a chain's member names (their `source` entries becoming `design`), the segment carrying the tier.
 """
 
 import copy
@@ -52,11 +59,14 @@ def _scaled_value(key, old, span_us, ref_span_us):
     return new, new != old
 
 
-def _place(c1, k, start, end, alive_until, no_input_below):
-    """The tracks of one placement: (segment, tasks, input, focus, operations)."""
+def _place(c1, k, start, end, alive_until, no_input_below, track_end=None, tracks=True):
+    """The tracks of one placement: (segment, tasks, input, focus, operations). The input, focus and operations
+    span [start, track_end) — the segment unless the placement keeps the focus past it (the distractor grid's A);
+    `tracks=False` places the tasks alone (an arrival the user never turns to)."""
     c1 = copy.deepcopy(c1)   # no shared objects between placements (yaml would write anchors)
     seg = c1["segments"][0]
     T = parse_us(seg["to"])
+    track_end = end if track_end is None else track_end
     short = (end - start) <= no_input_below
     tasks = []
     for task in c1["tasks"]:
@@ -83,18 +93,18 @@ def _place(c1, k, start, end, alive_until, no_input_below):
     segment.update({"from": fmt_s(start), "to": fmt_s(end)})
 
     windows, window_of = [], {}
-    for w in c1.get("input") or []:
-        lo, hi = start + parse_us(w["from"]), end - (T - parse_us(w["to"]))
+    for w in (c1.get("input") or []) if tracks else []:
+        lo, hi = start + parse_us(w["from"]), track_end - (T - parse_us(w["to"]))
         if lo < hi:
             windows.append({"from": fmt_s(lo), "to": fmt_s(hi), "task": f"{w['task']}-s{k}"})
             window_of[w["task"]] = (parse_us(w["from"]), parse_us(w["to"]), lo, hi)
     focus = []
-    for f in c1.get("focus") or []:
-        lo, hi = start + parse_us(f["from"]), end - (T - parse_us(f["to"]))
+    for f in (c1.get("focus") or []) if tracks else []:
+        lo, hi = start + parse_us(f["from"]), track_end - (T - parse_us(f["to"]))
         if lo < hi:
             focus.append({"from": fmt_s(lo), "to": fmt_s(hi), "task": f"{f['task']}-s{k}"})
     operations = []
-    for op in c1.get("operations") or []:
+    for op in (c1.get("operations") or []) if tracks else []:
         if op["task"] not in window_of:
             continue
         a, b, lo, hi = window_of[op["task"]]
@@ -103,8 +113,81 @@ def _place(c1, k, start, end, alive_until, no_input_below):
     return segment, tasks, windows, focus, operations
 
 
+def _meta(cell):
+    return {"id": cell["id"], "seed": cell["seed"], "demand": "calibration"}
+
+
+def _compose_distractor(cell, sets, defn):
+    """9.20 decisions 1–3: A over both segments (its tasks, focus and input to the file's end), the arrival at the
+    boundary without tracks, the second segment A's label with the arrival's scenario tags added."""
+    no_input_below = parse_us(defn["no_input_below"])
+    L = parse_us(defn["segment_length"])
+    seg_a, tasks, windows, focus, operations = _place(sets[cell["a"]], 0, 0, L, 2 * L, no_input_below,
+                                                       track_end=2 * L)
+    arrival = cell["arrival"]
+    if "mode" in arrival:
+        seg_b, tasks_b, _, _, _ = _place(sets[arrival["mode"]], 1, L, 2 * L, 2 * L, no_input_below, tracks=False)
+        tasks.extend(tasks_b)
+        added = list(seg_b.get("scenario") or [])
+    else:
+        program = arrival["program"]
+        task = {"id": "distractor", "name": program["name"], "archetype": program["archetype"], "arrive": fmt_s(L)}
+        if program.get("total_work") == "span":
+            task["bind"] = {"total_work": fmt_s(L)}
+            task["source"] = {"total_work": "design"}
+        else:
+            task["depart"] = fmt_s(2 * L)
+        tasks.append(task)
+        added = [program["scenario"]]
+    second = copy.deepcopy(seg_a)
+    second.update({"from": fmt_s(L), "to": fmt_s(2 * L)})
+    scenario = list(seg_a.get("scenario") or [])
+    scenario.extend(tag for tag in added if tag not in scenario)
+    second["scenario"] = scenario
+    if cell["grid"].get("focus_name_shared"):
+        attributes = dict(second.get("attributes") or {})
+        attributes["pre_committed_miss"] = True
+        second["attributes"] = attributes
+    data = {"meta": _meta(cell), "segments": [seg_a, second], "tasks": tasks, "input": windows, "focus": focus}
+    if operations:
+        data["operations"] = operations
+    return data
+
+
+def _compose_ladder(cell, sets, defn):
+    """9.20 decisions 5–7: the mode's C1 task set in one segment of `segment_length` by the composition rules (a
+    batch job scaled to the span, 9.19 decision 1), the cell's rename map applied — task names, an orchestrator's
+    child name, a chain's member names — and the tier on the segment."""
+    no_input_below = parse_us(defn["no_input_below"])
+    L = parse_us(defn["segment_length"])
+    seg, tasks, windows, focus, operations = _place(sets[cell["a"]], 0, 0, L, L, no_input_below)
+    rename = cell["rename"]
+    for task in tasks:
+        if task["name"] in rename:
+            task["name"] = rename[task["name"]]
+        bind = task.get("bind") or {}
+        source = dict(task.get("source") or {})
+        if bind.get("child_name") in rename:
+            bind["child_name"] = rename[bind["child_name"]]
+            source["child_name"] = "design"
+        if any(name in rename for name in bind.get("member_names") or []):
+            bind["member_names"] = [rename.get(name, name) for name in bind["member_names"]]
+            source["member_names"] = "design"
+        if source:
+            task["source"] = source
+    seg["familiarity"] = cell["grid"]["tier"]
+    data = {"meta": _meta(cell), "segments": [seg], "tasks": tasks, "input": windows, "focus": focus}
+    if operations:
+        data["operations"] = operations
+    return data
+
+
 def compose(cell, sets, defn):
     """The cell's timeline as a raw dict: meta, segments, tasks, input, focus, operations."""
+    if cell["set"] == "distractor-grid":
+        return _compose_distractor(cell, sets, defn)
+    if cell["set"] == "familiarity-ladder":
+        return _compose_ladder(cell, sets, defn)
     no_input_below = parse_us(defn["no_input_below"])
     segments, tasks, windows, focus, operations = [], [], [], [], []
     for k, (mode, start, end, alive_until) in enumerate(cell["placements"]):
@@ -114,8 +197,7 @@ def compose(cell, sets, defn):
         windows.extend(ws)
         focus.extend(fs)
         operations.extend(ops)
-    data = {"meta": {"id": cell["id"], "seed": cell["seed"], "demand": "calibration"},
-            "segments": segments, "tasks": tasks, "input": windows, "focus": focus}
+    data = {"meta": _meta(cell), "segments": segments, "tasks": tasks, "input": windows, "focus": focus}
     if operations:
         data["operations"] = operations
     return data
@@ -123,6 +205,18 @@ def compose(cell, sets, defn):
 
 def describe(cell):
     g = cell["grid"]
+    if cell["set"] == "distractor-grid":
+        what = f"{g['b']}'s task set" if g["relation"] == "cross-mode" else f"the program {g['b']}"
+        shared = "; the two focus holders share a name, a pre-committed miss" if g.get("focus_name_shared") else ""
+        return f"the user stays in {g['a']} while {what} arrives at the boundary ({g['relation']}){shared}"
+    if cell["set"] == "familiarity-ladder":
+        names = ", ".join(f"{real} -> {new}" for real, new in sorted(g["renamed"].items()))
+        wording = {"all": "every name", "focus": "the focus holder's name", "others": "the other names"}
+        if g["tier"] == 3:
+            carrier = "the job's own opaque real name"
+        else:
+            carrier = " = ".join(wording[c] for c in g["carriers"])
+        return f"{g['mode']} at familiarity tier {g['tier']}, {carrier} substituted ({names})"
     if cell["set"] == "transition-grid":
         return (f"{g['a']} -> {g['b']}, form {g['form']} ("
                 f"{'A departs and B arrives' if g['form'] == 'departs' else 'A stays and the focus moves to B'})")

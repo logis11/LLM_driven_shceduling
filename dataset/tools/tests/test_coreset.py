@@ -121,14 +121,31 @@ def test_c4_injection_only(coreset):
 
 
 def test_c5_names_only(coreset):
+    """The authored ladder cells (tiers 4 and 5) and `c6-alias` (two indexers' names on the players; 9.20 decision 8)
+    are c1-media but for the names."""
     base, _ = coreset["c1-media"]
-    for tier in ("c5-t3", "c5-t4", "c5-t5"):
-        variant, _ = coreset[tier]
+    for wid in ("c5-t4", "c5-t5", "c6-alias"):
+        variant, _ = coreset[wid]
         base_events, variant_events = events_by_id(base), events_by_id(variant)
         assert set(base_events) == set(variant_events)
         for task_id, event in base_events.items():
             trimmed = {**variant_events[task_id], "name": event["name"]}
             assert trimmed == event  # identical but for the name
+
+
+def test_c6_alias_is_a_pre_committed_miss_without_a_familiarity_tier(coreset):
+    """9.20 decision 8: another program's real name is a name collision, not the player's own opaque name — the
+    segment carries `spoof` and `pre_committed_miss`, no `familiarity`."""
+    alias, _ = coreset["c6-alias"]
+    (segment,) = alias["ground_truth"]
+    assert segment["mode"] == "media"
+    assert segment["attributes"] == {"background_wanted": True, "spoof": True, "pre_committed_miss": True}
+    assert "familiarity" not in segment
+    names = sorted(e["name"] for e in alias["events"] if e["type"] == "arrive")
+    assert names == ["baloo_file", "tracker-miner-f"]
+    for wid, tier in (("c5-t4", 4), ("c5-t5", 5)):
+        (segment,) = coreset[wid][0]["ground_truth"]
+        assert segment["familiarity"] == tier
 
 
 C7_INTERACTIVE = ("browsing", "office", "mail", "dev", "photo", "meeting",

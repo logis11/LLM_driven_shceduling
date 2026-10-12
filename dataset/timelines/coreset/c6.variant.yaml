@@ -12,10 +12,24 @@ variants:
                    arrive: 20s, bind: {total_work: 30s, program: spoof}, source: {total_work: design, program: design}}
       - patch-segment: {index: 0, attributes: {background_wanted: true, spoof: true}}
 
+      - patch-meta: {demand: calibration}
+
+  # Name-collision alias (9.20 decision 8; until 2026-10-12 the C5 tier-3 file
+  # `c5-t3`): c1-media's two players wearing two real indexers' names, `baloo_file`
+  # (KDE Baloo) and `tracker-miner-f` (GNOME Tracker). Another program's real name
+  # on the whole foreground — the limit `c6-spoof` does not show. No recognizer
+  # reaches `media` from these names, so the segment is a pre-committed miss.
+  - id: c6-alias
+    from: c1-media.timeline.yaml
+    ops:
+      - patch-task: {id: video, name: baloo_file}
+      - patch-task: {id: music, name: tracker-miner-f}
+      - patch-segment: {index: 0, attributes: {background_wanted: true, spoof: true, pre_committed_miss: true}}
+      - patch-meta: {demand: calibration}
+
   # Fold-internal change: browsing becomes a call in the browser — the call
   # runs under the browser's own name, so the canonical set does not change and
   # no query fires; a guaranteed miss, pre-registered as a scope boundary.
-      - patch-meta: {demand: calibration}
 
   - id: c6-fold
     from: c1-browsing.timeline.yaml

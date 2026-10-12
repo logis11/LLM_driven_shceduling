@@ -61,7 +61,7 @@ files:
               c1-indexing, c7-indexing, c2-p1b, c1-backup, c7-backup, c2-p3b,
               c7-mail, c7-media,
               c3-creation, c3-evening, c3-workday, c4-compile, c4-gaming, c4-office,
-              c5-t3, c5-t4, c5-t5, c6-dual, c6-fold, c6-spoof,
+              c5-t4, c5-t5, c6-alias, c6-dual, c6-fold, c6-spoof,
               c2-p2a-idle]
   variants: [c2-p1a@venue-x0.8, c2-p2a@venue-x0.8, c2-p2b@venue-x0.8, c2-p3a@venue-x0.8,
              c1-compile@venue-x0.8, c1-ml-train@venue-x0.8, c1-render@venue-x0.8, c1-transcode@venue-x0.8,
@@ -477,15 +477,15 @@ statements:
       for a true row, its C7 counterpart for a false row, plus any C2 or C3 segment
       labelled with that row.
 
-# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-11, the
-# 9.18 and 9.22 entries); the variant manifests pin the rebuilt files the sensitivity lines read.
+# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-12, the 9.20
+# entry; 2026-10-11, the 9.18 and 9.22 entries); the variant manifests pin the rebuilt files the sensitivity lines read.
 pins:
-  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 1f7e9e3039332def5062bb09c121b9116d7c12a21850539b3ab1cb80e9b8c434}
+  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 9cd9a155db7a6f9521a73c89a5159736e7b9ff185a63fbf61b2cc453bc38e360}
   guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.1", sha256: 24ccb875ff666615de75d80bc5351b7f5c62713d605438844938f9ab6ef1676c}
   driver_table: {path: daemon/driver-table/prior.yaml, sha256: 6e271dd042b38c23b85459cec7545fde990aec9be5a2c8bd6081690d98243f7f}
-  dataset:      {path: dataset/build.manifest.json, sha256: d10bcd42a31ea0617133bccf739941ecf347dab296c68a5ab5bc6a4000377d4d}
+  dataset:      {path: dataset/build.manifest.json, sha256: fad7192d2a290c9d0b9f9563a45a0f9834b8c48403c4c88d84ae1869107accd3}
   variants:
-    all: {path: dataset/build.variants.manifest.json, sha256: 831a854ebcd23c0047e710a04ee6851478924a96b6320e4a91ca1d368c9ba0b8}
+    all: {path: dataset/build.variants.manifest.json, sha256: 03f14b2c5520edaf304915a2c773f8ac30436a9f88ea9cd2d8b319949c3605d5}
 
 criterion:
   type: k_of_n_gap

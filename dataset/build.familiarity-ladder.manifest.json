@@ -1,0 +1,1782 @@
+{
+  "artifacts": {
+    "familiarity-ladder-single/fl-backup-t3.workload.json": "57218d8f4d37a59907c25afc9c9ba44b3f74d9cc1278075153751dfab58b66ac",
+    "familiarity-ladder-single/fl-backup-t4-all.workload.json": "223449ebe43c9777c9b8ba2d27369dde36c678cdad6f6edd6a73a80a574befff",
+    "familiarity-ladder-single/fl-backup-t4-focus.workload.json": "1652d16cbde093a977524b8613c6c07fb5404c0b8d9e8dae0d97aa127eac2764",
+    "familiarity-ladder-single/fl-backup-t4-others.workload.json": "2f258b115bf7da01acae6abd583c841b7aed971c300bd2f33b75222d32040c14",
+    "familiarity-ladder-single/fl-backup-t5-all.workload.json": "7d360c88571ca777d982d29f3292af02a2323a35770ab469101a0776b2582a07",
+    "familiarity-ladder-single/fl-backup-t5-focus.workload.json": "ed42cead0635a1c0720eef15b5a65bac2018c8a6b04be67f47d118d055b6570f",
+    "familiarity-ladder-single/fl-backup-t5-others.workload.json": "8142c8911f73071e2befdc0fcb48e551070c9e41a4db7fdd82ccc856a55e4305",
+    "familiarity-ladder-single/fl-browsing-t4-all.workload.json": "0a0139c9d89f150e5804bc7156f51f653a9797c2c0fd2eab2d4c89dcae875f32",
+    "familiarity-ladder-single/fl-browsing-t5-all.workload.json": "58db41a35f309681dc9e2c188e7435bde55608f37c6c7b6b3dda13297a086f40",
+    "familiarity-ladder-single/fl-compile-t4-all.workload.json": "24e7d2efa46ea947f624467180a89ccf196722f67af1a3a07a728902d6a1f06c",
+    "familiarity-ladder-single/fl-compile-t4-focus.workload.json": "5c0f2cbe8b91bb134c71830469b6cff9c773aa879126bf97a00dcda07f9c7203",
+    "familiarity-ladder-single/fl-compile-t4-others.workload.json": "2c2bdcdfdf70884adc843dc54121dcad0324cfb516cf87b7b01632e61027886a",
+    "familiarity-ladder-single/fl-compile-t5-all.workload.json": "96ee2d16cad36bc647c9d210a5aedce4384fd8cb2e525d2e6820a23d4d054c64",
+    "familiarity-ladder-single/fl-compile-t5-focus.workload.json": "53017481a72d5a3b67a604f2a0e9c3eafdc73de108a321b69f414e82effeca08",
+    "familiarity-ladder-single/fl-compile-t5-others.workload.json": "52f29b8a5f848be57301c4c20b6d47308cdef8c354fc042482bdf2ffb42b625b",
+    "familiarity-ladder-single/fl-dev-t4-all.workload.json": "02f38fda6b6099ef4bca5d78db04a2c297e4723890568baab888d849c20d04fc",
+    "familiarity-ladder-single/fl-dev-t5-all.workload.json": "9d55ac94a1dcfbc44e3120c5083cd0a396e25b8703a0233383e08c61c2934bcc",
+    "familiarity-ladder-single/fl-gaming-t4-all.workload.json": "ba3cc686a9ac33d20df3db6763a8f71bf9cf8fc7541962847a24a1eaf6d5d305",
+    "familiarity-ladder-single/fl-gaming-t4-focus.workload.json": "5900ef937f47778681eacbae9edaca3e125eaa8bb963a6ebf465e95602e9fb01",
+    "familiarity-ladder-single/fl-gaming-t4-others.workload.json": "1134fd075c73daa8c8d52053150cb41bee705e13f164a06dade0ff244907e95f",
+    "familiarity-ladder-single/fl-gaming-t5-all.workload.json": "eb7fa8f0aed279f4fc35caa8f4dd33151abdd9750d7e74b95cb3a2c47da541f0",
+    "familiarity-ladder-single/fl-gaming-t5-focus.workload.json": "3623f943d0d16960794e263425810636b540db818a47267f4f0a1f6d80fd02df",
+    "familiarity-ladder-single/fl-gaming-t5-others.workload.json": "9291b5cc152619885a350387688fe8598bbcc77981b94cf84cd7e128587dfd1e",
+    "familiarity-ladder-single/fl-idle-t4-all.workload.json": "da3093e55102c150058be7f8cd9edbd3c6613285e7bb44aaaac1f335c2b20878",
+    "familiarity-ladder-single/fl-idle-t5-all.workload.json": "f2e7f051fc8eab881f320b48181a904d10a0c9bf1f20153857a63bc78d8698f1",
+    "familiarity-ladder-single/fl-indexing-t4-all.workload.json": "0977fc4c90b48e8b375482991413dfe6b96a751891df3407427411c02ea78c93",
+    "familiarity-ladder-single/fl-indexing-t4-focus.workload.json": "9e04443e4667f70cf21fc55f15e7310e4495f5b46754fb45059446c3972ef322",
+    "familiarity-ladder-single/fl-indexing-t4-others.workload.json": "be5652bbd07e8ba1acee020c196f3e36fa3a9797688dede7e708afe86fb91549",
+    "familiarity-ladder-single/fl-indexing-t5-all.workload.json": "c324189bf3f6a0c9e07913e9d87a7eb7822e4c3529d1e5d2ef19c94f689ebcc8",
+    "familiarity-ladder-single/fl-indexing-t5-focus.workload.json": "781f3d506fad073afa1214d9f3e2302acefa043272f11ad7088e0013c2307e6e",
+    "familiarity-ladder-single/fl-indexing-t5-others.workload.json": "2502c330698cc26722fe21dde73109a293e5a0c2b21bb32375d085342a529f30",
+    "familiarity-ladder-single/fl-mail-t4-all.workload.json": "0c3f9ea757896eacb7298c772c4c014a24dc8f50b5151c5ebd3b4b8372a33b4f",
+    "familiarity-ladder-single/fl-mail-t5-all.workload.json": "699ac5f2ec6200848ca3d29f2483a0bb29980e05a7fc89b1381b732d4d0526c2",
+    "familiarity-ladder-single/fl-media-t4-all.workload.json": "401921050966a87872fd1cc8cd5439fa5c20f97daba979c9de38d670d903513e",
+    "familiarity-ladder-single/fl-media-t5-all.workload.json": "25896fb5b446960c93ef6eea48536f4de166b0179fc6451ad7f23eae1a12fd02",
+    "familiarity-ladder-single/fl-meeting-t4-all.workload.json": "01c5c3c6bdd62ccd7abcf6aa6ca7c86016d8a1619df67fc439da72f2bbfec636",
+    "familiarity-ladder-single/fl-meeting-t5-all.workload.json": "2d4b9b59d11d599608d66f0953b8f4a926ab6e5ed3aee22ee049b2ae3d53a4f9",
+    "familiarity-ladder-single/fl-ml-train-t4-all.workload.json": "1daaee6be5d978e5f48b71111c4bcf7b3df361adf7c0dec8147a13503ea09a21",
+    "familiarity-ladder-single/fl-ml-train-t4-focus.workload.json": "96f476d5895f9c31916ea4e844db5c0d27bd3d4ae360cb735baa7a32a94a3c12",
+    "familiarity-ladder-single/fl-ml-train-t4-others.workload.json": "13820fbc8da65776519395b27a52babcf3b52c59dbc3459a71e1bd0d946482ab",
+    "familiarity-ladder-single/fl-ml-train-t5-all.workload.json": "206d4ffa6d7dc544b52a9f66456fe39f515ce3a541341f9de499eed3985a406c",
+    "familiarity-ladder-single/fl-ml-train-t5-focus.workload.json": "662f448d249e9a9c38f14c35da3359852feaa6f4766cd122488f62f5c93509d3",
+    "familiarity-ladder-single/fl-ml-train-t5-others.workload.json": "879a90f9390eb2aa22c0963fc0a286c04eb54c6909933bdb51f1ce1035233bfb",
+    "familiarity-ladder-single/fl-office-t4-all.workload.json": "f4235182ec465fe077e617ca9fa3cb190fe7c515bd69cec385568db7f264196e",
+    "familiarity-ladder-single/fl-office-t4-focus.workload.json": "360961a1a64c64cce3ac3845f44bf75ed18ac7d8f802873157c27ad68d3387d4",
+    "familiarity-ladder-single/fl-office-t4-others.workload.json": "c267e169ac63d0a5cb8c0088945a5903d8bc95baff7734638e1b371230d907ea",
+    "familiarity-ladder-single/fl-office-t5-all.workload.json": "a6554032653e41107aef786c42e5c2b824587d8f58b7ad2285a88246877c164b",
+    "familiarity-ladder-single/fl-office-t5-focus.workload.json": "66feedb0660125880f076381dd64e98aeec67576114efbf7580a1e69a8343a40",
+    "familiarity-ladder-single/fl-office-t5-others.workload.json": "af2184e1032952f119835d9f23d45fb587d284150661224c12d6580f5a7f6724",
+    "familiarity-ladder-single/fl-photo-t4-all.workload.json": "9714d08d98fb9f458136ef18113639a53acdb433e0f23d49a8cb42247aab2597",
+    "familiarity-ladder-single/fl-photo-t5-all.workload.json": "edc1beb357b3acf89be99f7e9a655f7ca46f676136851328237bf677f88e6289",
+    "familiarity-ladder-single/fl-render-t3.workload.json": "c331654e6fb8dc7819dd7df73179780a20d43de7ad2c76064eca1583ea0251ed",
+    "familiarity-ladder-single/fl-render-t4-all.workload.json": "355e3b0157fb6ecb5e9b9c6e688f1706c1d9a4d1e300afce49243ea45ff8cced",
+    "familiarity-ladder-single/fl-render-t4-focus.workload.json": "8d3d3cb88bdc2a793a89a69b0ad5dcb4bbe0b81e4b787d3502f09a0a7942a241",
+    "familiarity-ladder-single/fl-render-t4-others.workload.json": "6f49ed67e49495ce545442543bcb6a05f03d90034111ea0eb470ba0c245c0801",
+    "familiarity-ladder-single/fl-render-t5-all.workload.json": "c407e84bf9365fb4476147d2776ee4925ff146fc55d4c912725186eb9e3a822d",
+    "familiarity-ladder-single/fl-render-t5-focus.workload.json": "1893ce181eef5bd3d5e6c14ba11a612f7f3be9bc567b6b116ebe8be54382cf27",
+    "familiarity-ladder-single/fl-render-t5-others.workload.json": "a2041e1e606e981240483a515e28fb1634b77ac0b419c06b21d810bc96d26bab",
+    "familiarity-ladder-single/fl-transcode-t4-all.workload.json": "d26b90abd9e55fa2cce0122d8bf5b221bf2ba61b12752421cc3c36439e66fd41",
+    "familiarity-ladder-single/fl-transcode-t4-focus.workload.json": "cf264ffc7ce9aee71becaac26eeaa7abe3638ff22d7bda7cc7e1411341ad810b",
+    "familiarity-ladder-single/fl-transcode-t4-others.workload.json": "2f1ec8adefab14fe1f4553268a6cbc40f5a6e88ee7640df352a400fd19f8f029",
+    "familiarity-ladder-single/fl-transcode-t5-all.workload.json": "7920246dbef35641102f637b777e7816349821fc3897e4bd2f4600a03f7b4ec2",
+    "familiarity-ladder-single/fl-transcode-t5-focus.workload.json": "c7a6aab3e5f2ab5a518b2075fade7d44e79d826e39d13316e00d9b87c194d3bc",
+    "familiarity-ladder-single/fl-transcode-t5-others.workload.json": "fe9845697c04b98781f91a76bf14122ada88cd38bad6e2032b5d6b0ac96fc7f1",
+    "familiarity-ladder-single/fl-video-edit-t4-all.workload.json": "63b32a3f43204d8aacef1a47c96352e393b591d1917e8802916da01f3986c5e2",
+    "familiarity-ladder-single/fl-video-edit-t5-all.workload.json": "79f025b14c5a07d7b2fd9f443a3319d80d06db6b59cd7cce7612238e50035a17"
+  },
+  "demand": {
+    "familiarity-ladder-single/fl-backup-t3.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0323
+        }
+      ],
+      "utilization": 1.0323
+    },
+    "familiarity-ladder-single/fl-backup-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0683
+        }
+      ],
+      "utilization": 1.0683
+    },
+    "familiarity-ladder-single/fl-backup-t4-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0548
+        }
+      ],
+      "utilization": 1.0548
+    },
+    "familiarity-ladder-single/fl-backup-t4-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0372
+        }
+      ],
+      "utilization": 1.0372
+    },
+    "familiarity-ladder-single/fl-backup-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0408
+        }
+      ],
+      "utilization": 1.0408
+    },
+    "familiarity-ladder-single/fl-backup-t5-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0475
+        }
+      ],
+      "utilization": 1.0475
+    },
+    "familiarity-ladder-single/fl-backup-t5-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0466
+        }
+      ],
+      "utilization": 1.0466
+    },
+    "familiarity-ladder-single/fl-browsing-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0081
+        }
+      ],
+      "utilization": 0.0081
+    },
+    "familiarity-ladder-single/fl-browsing-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0159
+        }
+      ],
+      "utilization": 0.0159
+    },
+    "familiarity-ladder-single/fl-compile-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0158
+        }
+      ],
+      "utilization": 1.0158
+    },
+    "familiarity-ladder-single/fl-compile-t4-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.8727
+        }
+      ],
+      "utilization": 0.8727
+    },
+    "familiarity-ladder-single/fl-compile-t4-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.1125
+        }
+      ],
+      "utilization": 1.1125
+    },
+    "familiarity-ladder-single/fl-compile-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0491
+        }
+      ],
+      "utilization": 1.0491
+    },
+    "familiarity-ladder-single/fl-compile-t5-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9902
+        }
+      ],
+      "utilization": 0.9902
+    },
+    "familiarity-ladder-single/fl-compile-t5-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0303
+        }
+      ],
+      "utilization": 1.0303
+    },
+    "familiarity-ladder-single/fl-dev-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.5655
+        }
+      ],
+      "utilization": 0.5655
+    },
+    "familiarity-ladder-single/fl-dev-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.4257
+        }
+      ],
+      "utilization": 0.4257
+    },
+    "familiarity-ladder-single/fl-gaming-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9151
+        }
+      ],
+      "utilization": 0.9151
+    },
+    "familiarity-ladder-single/fl-gaming-t4-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.915
+        }
+      ],
+      "utilization": 0.915
+    },
+    "familiarity-ladder-single/fl-gaming-t4-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.915
+        }
+      ],
+      "utilization": 0.915
+    },
+    "familiarity-ladder-single/fl-gaming-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9154
+        }
+      ],
+      "utilization": 0.9154
+    },
+    "familiarity-ladder-single/fl-gaming-t5-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.915
+        }
+      ],
+      "utilization": 0.915
+    },
+    "familiarity-ladder-single/fl-gaming-t5-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9152
+        }
+      ],
+      "utilization": 0.9152
+    },
+    "familiarity-ladder-single/fl-idle-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0001
+        }
+      ],
+      "utilization": 0.0001
+    },
+    "familiarity-ladder-single/fl-idle-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0002
+        }
+      ],
+      "utilization": 0.0002
+    },
+    "familiarity-ladder-single/fl-indexing-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0056
+        }
+      ],
+      "utilization": 1.0056
+    },
+    "familiarity-ladder-single/fl-indexing-t4-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9224
+        }
+      ],
+      "utilization": 0.9224
+    },
+    "familiarity-ladder-single/fl-indexing-t4-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7363
+        }
+      ],
+      "utilization": 0.7363
+    },
+    "familiarity-ladder-single/fl-indexing-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9717
+        }
+      ],
+      "utilization": 0.9717
+    },
+    "familiarity-ladder-single/fl-indexing-t5-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9979
+        }
+      ],
+      "utilization": 0.9979
+    },
+    "familiarity-ladder-single/fl-indexing-t5-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7275
+        }
+      ],
+      "utilization": 0.7275
+    },
+    "familiarity-ladder-single/fl-mail-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0149
+        }
+      ],
+      "utilization": 0.0149
+    },
+    "familiarity-ladder-single/fl-mail-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.024
+        }
+      ],
+      "utilization": 0.024
+    },
+    "familiarity-ladder-single/fl-media-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.1289
+        }
+      ],
+      "utilization": 0.1289
+    },
+    "familiarity-ladder-single/fl-media-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.1286
+        }
+      ],
+      "utilization": 0.1286
+    },
+    "familiarity-ladder-single/fl-meeting-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.2391
+        }
+      ],
+      "utilization": 0.2391
+    },
+    "familiarity-ladder-single/fl-meeting-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.2341
+        }
+      ],
+      "utilization": 0.2341
+    },
+    "familiarity-ladder-single/fl-ml-train-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.8492
+        }
+      ],
+      "utilization": 0.8492
+    },
+    "familiarity-ladder-single/fl-ml-train-t4-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.9822
+        }
+      ],
+      "utilization": 0.9822
+    },
+    "familiarity-ladder-single/fl-ml-train-t4-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0916
+        }
+      ],
+      "utilization": 1.0916
+    },
+    "familiarity-ladder-single/fl-ml-train-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.1599
+        }
+      ],
+      "utilization": 1.1599
+    },
+    "familiarity-ladder-single/fl-ml-train-t5-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0595
+        }
+      ],
+      "utilization": 1.0595
+    },
+    "familiarity-ladder-single/fl-ml-train-t5-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0606
+        }
+      ],
+      "utilization": 1.0606
+    },
+    "familiarity-ladder-single/fl-office-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0224
+        }
+      ],
+      "utilization": 0.0224
+    },
+    "familiarity-ladder-single/fl-office-t4-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0114
+        }
+      ],
+      "utilization": 0.0114
+    },
+    "familiarity-ladder-single/fl-office-t4-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0185
+        }
+      ],
+      "utilization": 0.0185
+    },
+    "familiarity-ladder-single/fl-office-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0197
+        }
+      ],
+      "utilization": 0.0197
+    },
+    "familiarity-ladder-single/fl-office-t5-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0088
+        }
+      ],
+      "utilization": 0.0088
+    },
+    "familiarity-ladder-single/fl-office-t5-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0277
+        }
+      ],
+      "utilization": 0.0277
+    },
+    "familiarity-ladder-single/fl-photo-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0022
+        }
+      ],
+      "utilization": 0.0022
+    },
+    "familiarity-ladder-single/fl-photo-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.0382
+        }
+      ],
+      "utilization": 0.0382
+    },
+    "familiarity-ladder-single/fl-render-t3.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7557
+        }
+      ],
+      "utilization": 0.7557
+    },
+    "familiarity-ladder-single/fl-render-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7705
+        }
+      ],
+      "utilization": 0.7705
+    },
+    "familiarity-ladder-single/fl-render-t4-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7822
+        }
+      ],
+      "utilization": 0.7822
+    },
+    "familiarity-ladder-single/fl-render-t4-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.6824
+        }
+      ],
+      "utilization": 0.6824
+    },
+    "familiarity-ladder-single/fl-render-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7609
+        }
+      ],
+      "utilization": 0.7609
+    },
+    "familiarity-ladder-single/fl-render-t5-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7363
+        }
+      ],
+      "utilization": 0.7363
+    },
+    "familiarity-ladder-single/fl-render-t5-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.7037
+        }
+      ],
+      "utilization": 0.7037
+    },
+    "familiarity-ladder-single/fl-transcode-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0771
+        }
+      ],
+      "utilization": 1.0771
+    },
+    "familiarity-ladder-single/fl-transcode-t4-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0666
+        }
+      ],
+      "utilization": 1.0666
+    },
+    "familiarity-ladder-single/fl-transcode-t4-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0647
+        }
+      ],
+      "utilization": 1.0647
+    },
+    "familiarity-ladder-single/fl-transcode-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0587
+        }
+      ],
+      "utilization": 1.0587
+    },
+    "familiarity-ladder-single/fl-transcode-t5-focus.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0879
+        }
+      ],
+      "utilization": 1.0879
+    },
+    "familiarity-ladder-single/fl-transcode-t5-others.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 1.0754
+        }
+      ],
+      "utilization": 1.0754
+    },
+    "familiarity-ladder-single/fl-video-edit-t4-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.426
+        }
+      ],
+      "utilization": 0.426
+    },
+    "familiarity-ladder-single/fl-video-edit-t5-all.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.4804
+        }
+      ],
+      "utilization": 0.4804
+    }
+  },
+  "grid": {
+    "familiarity-ladder-single/fl-backup-t3.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "backup",
+      "renamed": {
+        "deja-dup": "duplicity"
+      },
+      "sources": {
+        "deja-dup": "meas-ci:background:2026-10-04"
+      },
+      "tier": 3
+    },
+    "familiarity-ladder-single/fl-backup-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "backup",
+      "renamed": {
+        "deja-dup": "backup-tool",
+        "kdenlive": "video-editor"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-backup-t4-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "backup",
+      "renamed": {
+        "kdenlive": "video-editor"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-backup-t4-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "backup",
+      "renamed": {
+        "deja-dup": "backup-tool"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-backup-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "backup",
+      "renamed": {
+        "deja-dup": "cncp",
+        "kdenlive": "rrqy"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-backup-t5-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "backup",
+      "renamed": {
+        "kdenlive": "pqxi"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-backup-t5-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "backup",
+      "renamed": {
+        "deja-dup": "kktf"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-browsing-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "browsing",
+      "renamed": {
+        "chrome": "web-browser"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-browsing-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "browsing",
+      "renamed": {
+        "chrome": "hnjz"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-compile-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "compile",
+      "renamed": {
+        "cc1": "c-compiler",
+        "code": "text-editor",
+        "make": "build-runner"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-compile-t4-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "compile",
+      "renamed": {
+        "code": "text-editor"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-compile-t4-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "compile",
+      "renamed": {
+        "cc1": "c-compiler",
+        "make": "build-runner"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-compile-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "compile",
+      "renamed": {
+        "cc1": "xsfc",
+        "code": "owcp",
+        "make": "lgar"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-compile-t5-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "compile",
+      "renamed": {
+        "code": "pyzd"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-compile-t5-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "compile",
+      "renamed": {
+        "cc1": "mvhh",
+        "make": "qvho"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-dev-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "dev",
+      "renamed": {
+        "code": "text-editor"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-dev-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "dev",
+      "renamed": {
+        "code": "jsrx"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-gaming-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "gaming",
+      "renamed": {
+        "FAudio_AudioCli": "audio-client",
+        "Task worker thr": "game-worker",
+        "Troy.exe": "game-engine",
+        "dxvk-cs": "gpu-cmd-stream",
+        "dxvk-submit": "gpu-submitter",
+        "steam": "game-launcher",
+        "winepulse_mainl": "audio-mainloop",
+        "winepulse_timer": "audio-timer"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-gaming-t4-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "gaming",
+      "renamed": {
+        "Troy.exe": "game-engine"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-gaming-t4-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "gaming",
+      "renamed": {
+        "FAudio_AudioCli": "audio-client",
+        "Task worker thr": "game-worker",
+        "dxvk-cs": "gpu-cmd-stream",
+        "dxvk-submit": "gpu-submitter",
+        "steam": "game-launcher",
+        "winepulse_mainl": "audio-mainloop",
+        "winepulse_timer": "audio-timer"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-gaming-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "gaming",
+      "renamed": {
+        "FAudio_AudioCli": "bkyi",
+        "Task worker thr": "adtc",
+        "Troy.exe": "jzyn",
+        "dxvk-cs": "osra",
+        "dxvk-submit": "peqg",
+        "steam": "siko",
+        "winepulse_mainl": "bapt",
+        "winepulse_timer": "ndig"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-gaming-t5-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "gaming",
+      "renamed": {
+        "Troy.exe": "xqhe"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-gaming-t5-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "gaming",
+      "renamed": {
+        "FAudio_AudioCli": "vdvu",
+        "Task worker thr": "xkej",
+        "dxvk-cs": "tqlm",
+        "dxvk-submit": "ogip",
+        "steam": "dgjr",
+        "winepulse_mainl": "wlad",
+        "winepulse_timer": "wkec"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-idle-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "others"
+      ],
+      "mode": "idle",
+      "renamed": {
+        "dbus-daemon": "message-bus",
+        "gnome-shell": "desktop-shell",
+        "pipewire": "audio-server",
+        "systemd": "service-mgr"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-idle-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "others"
+      ],
+      "mode": "idle",
+      "renamed": {
+        "dbus-daemon": "xdhu",
+        "gnome-shell": "vvct",
+        "pipewire": "qumc",
+        "systemd": "eblo"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-indexing-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "indexing",
+      "renamed": {
+        "code": "text-editor",
+        "tracker-miner-f": "file-indexer"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-indexing-t4-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "indexing",
+      "renamed": {
+        "code": "text-editor"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-indexing-t4-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "indexing",
+      "renamed": {
+        "tracker-miner-f": "file-indexer"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-indexing-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "indexing",
+      "renamed": {
+        "code": "ntoo",
+        "tracker-miner-f": "iakw"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-indexing-t5-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "indexing",
+      "renamed": {
+        "code": "lrja"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-indexing-t5-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "indexing",
+      "renamed": {
+        "tracker-miner-f": "llcc"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-mail-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "mail",
+      "renamed": {
+        "thunderbird-bin": "mail-reader"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-mail-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "mail",
+      "renamed": {
+        "thunderbird-bin": "iynp"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-media-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "media",
+      "renamed": {
+        "mpv": "media-player"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-media-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "media",
+      "renamed": {
+        "mpv": "tvvh"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-meeting-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "meeting",
+      "renamed": {
+        "chrome": "web-browser"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-meeting-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "meeting",
+      "renamed": {
+        "chrome": "nnhd"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-ml-train-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "ml-train",
+      "renamed": {
+        "code": "text-editor",
+        "python": "model-trainer"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-ml-train-t4-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "ml-train",
+      "renamed": {
+        "code": "text-editor"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-ml-train-t4-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "ml-train",
+      "renamed": {
+        "python": "model-trainer"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-ml-train-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "ml-train",
+      "renamed": {
+        "code": "wzfc",
+        "python": "qmhy"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-ml-train-t5-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "ml-train",
+      "renamed": {
+        "code": "wirx"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-ml-train-t5-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "ml-train",
+      "renamed": {
+        "python": "hwgl"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-office-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "office",
+      "renamed": {
+        "chrome": "web-browser",
+        "soffice.bin": "doc-writer",
+        "thunderbird-bin": "mail-reader"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-office-t4-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "office",
+      "renamed": {
+        "soffice.bin": "doc-writer"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-office-t4-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "office",
+      "renamed": {
+        "chrome": "web-browser",
+        "thunderbird-bin": "mail-reader"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-office-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "office",
+      "renamed": {
+        "chrome": "dlwd",
+        "soffice.bin": "nklw",
+        "thunderbird-bin": "ovqj"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-office-t5-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "office",
+      "renamed": {
+        "soffice.bin": "pmhn"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-office-t5-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "office",
+      "renamed": {
+        "chrome": "yeva",
+        "thunderbird-bin": "tlod"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-photo-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "photo",
+      "renamed": {
+        "gimp": "image-editor"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-photo-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "photo",
+      "renamed": {
+        "gimp": "wgbg"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-render-t3.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "render",
+      "renamed": {
+        "kdenlive_render": "melt-7"
+      },
+      "sources": {
+        "kdenlive_render": "meas-ci:background:2026-10-03c"
+      },
+      "tier": 3
+    },
+    "familiarity-ladder-single/fl-render-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "render",
+      "renamed": {
+        "kdenlive": "video-editor",
+        "kdenlive_render": "clip-exporter"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-render-t4-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "render",
+      "renamed": {
+        "kdenlive": "video-editor"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-render-t4-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "render",
+      "renamed": {
+        "kdenlive_render": "clip-exporter"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-render-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "render",
+      "renamed": {
+        "kdenlive": "pxzo",
+        "kdenlive_render": "jgex"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-render-t5-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "render",
+      "renamed": {
+        "kdenlive": "iorq"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-render-t5-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "render",
+      "renamed": {
+        "kdenlive_render": "qapo"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-transcode-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "transcode",
+      "renamed": {
+        "HandBrakeCLI": "video-encoder",
+        "kdenlive": "video-editor"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-transcode-t4-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "transcode",
+      "renamed": {
+        "kdenlive": "video-editor"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-transcode-t4-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "transcode",
+      "renamed": {
+        "HandBrakeCLI": "video-encoder"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-transcode-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all"
+      ],
+      "mode": "transcode",
+      "renamed": {
+        "HandBrakeCLI": "deay",
+        "kdenlive": "tari"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-transcode-t5-focus.workload.json": {
+      "carrier": "focus",
+      "carriers": [
+        "focus"
+      ],
+      "mode": "transcode",
+      "renamed": {
+        "kdenlive": "ajlg"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-transcode-t5-others.workload.json": {
+      "carrier": "others",
+      "carriers": [
+        "others"
+      ],
+      "mode": "transcode",
+      "renamed": {
+        "HandBrakeCLI": "tijw"
+      },
+      "tier": 5
+    },
+    "familiarity-ladder-single/fl-video-edit-t4-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "video-edit",
+      "renamed": {
+        "kdenlive": "video-editor"
+      },
+      "tier": 4
+    },
+    "familiarity-ladder-single/fl-video-edit-t5-all.workload.json": {
+      "carrier": "all",
+      "carriers": [
+        "all",
+        "focus"
+      ],
+      "mode": "video-edit",
+      "renamed": {
+        "kdenlive": "qtrk"
+      },
+      "tier": 5
+    }
+  },
+  "inputs": {
+    "dataset/archetypes.yaml": "c6af7623c5164bdf1eb267f6335d4269dcbb6c7508fbc6331aab2724f782762d",
+    "dataset/grids.yaml": "5cfed870a8fa1e2f1349930088ce2d727f656804950a08c945e8375c0b3e0cc1",
+    "dataset/replay/replay-code-editor.json.gz": "153143212589f0ec40c0d85578a0cc0f71d38f25f11f0d18dd96c15d66d50d92",
+    "dataset/replay/replay-cpu-batch-python3.json.gz": "9dbe1e282b555af662e4456405513dc47e52aa5c5bfa5630f7764dcd8d291ec6",
+    "dataset/replay/replay-package-upgrade.json.gz": "3496e4263bd0ccc63118d2ffa3ca54232fbbd0214dfbac351793074249d83939",
+    "dataset/replay/replay-renderer-hidden.json.gz": "aa97e9b3f780318dc74573f7e0e4d20246695f32d491dd9af5d4c80457eeed29",
+    "dataset/replay/replay-video-call.json.gz": "fbf0b9e9833b0b77cbed4abc9348c6d2abe2cc53731ba9057cdb7653fe21cfaa",
+    "dataset/replay/replay-web-browser.json.gz": "c433285bdea549ebad1daf87aa9d2a52d9eda0836ce367d87afab750cd4e9632",
+    "dataset/schema/workload.schema.json": "a323b4df7046eac96a8016bb22bc44a5bda3dfac578be20769aef08639855fb7",
+    "dataset/stimulus/swell-ie-c1.jsonl": "ebdf895722978516da3e5a51aa6b44251e45de80c0a42c8bb90b90783729c260",
+    "dataset/stimulus/swell-outlook-c23.jsonl": "491d6ead5277617b6cc8057bdc597ca27a11fcb60b47e40d645575cb8053dac2",
+    "dataset/stimulus/swell-word-c1.jsonl": "1175db0cd291df40f49950e8a8b377243c0148bf2fddaf9daf8e2fddc68062ff",
+    "dataset/timelines/coreset/c1-backup.timeline.yaml": "b5905d8eb72f6343154a73e859ce7969bdacfabf96451b49f48829c92477d7db",
+    "dataset/timelines/coreset/c1-browsing.timeline.yaml": "ce2c9fd461befe4f7c389ef05bdee011a4af1f0200fda828c2b75de42ca40ea2",
+    "dataset/timelines/coreset/c1-compile.timeline.yaml": "b6d9f82be71189f2d37ac7dbadcc77b45db145cfb32d9f810e9aeb7de4ac4e01",
+    "dataset/timelines/coreset/c1-dev.timeline.yaml": "fba553343fd3606cc9785be8b2be60c628f5d99831065b06f0ee1a59ef4ad1e7",
+    "dataset/timelines/coreset/c1-gaming.timeline.yaml": "9e419a3d2053a5bb22d2821ec670aff799c954502bb8f1bf3d83341486c67c28",
+    "dataset/timelines/coreset/c1-idle.timeline.yaml": "7d7e048c990e4aab5847a240d07309b09cc55089b19562798b072e37547ce06e",
+    "dataset/timelines/coreset/c1-indexing.timeline.yaml": "4a61091e3a3b70340100b4c45953c991c3baa9f693b27276bef0bed5c65f27d3",
+    "dataset/timelines/coreset/c1-mail.timeline.yaml": "2d408bac831f205cffdd314c19af608ac00623968db5dc876ce44f197c2efefd",
+    "dataset/timelines/coreset/c1-media.timeline.yaml": "a08a54c63407ffc8df8355ffea477592c7db6e832556281f6f50766d4ea289d2",
+    "dataset/timelines/coreset/c1-meeting.timeline.yaml": "2b37c4b3ff9d573077a70c1d036c65c7168cc472bd33de2804845396544f278c",
+    "dataset/timelines/coreset/c1-ml-train.timeline.yaml": "8adbd6d64d0fbb798821845c01279583a50267ecf8082f93ac0f71307f10999d",
+    "dataset/timelines/coreset/c1-office.timeline.yaml": "0ad2302178287bc176bba6f60dfee630cc5d4ac10b3d10d6e42b88027977e58a",
+    "dataset/timelines/coreset/c1-photo.timeline.yaml": "b1029b203f5f23a75c87f835f4a04c3323ab1ff815fbc48e033722cce37c75f5",
+    "dataset/timelines/coreset/c1-render.timeline.yaml": "57d2307ba42b7fb31d33042ac2a5c74bd81e9aed2cfda2640ca53b3e11dd811b",
+    "dataset/timelines/coreset/c1-transcode.timeline.yaml": "eabb5e6fefa5276c1cfbbbba5bc4d25eb7d5da79dfa34952292c91e1577e2fd0",
+    "dataset/timelines/coreset/c1-video-edit.timeline.yaml": "a4ad1c87c721bf0c26cd1759be55ac625436b6a5aa8e6f24ef5777ff9e9adc9b",
+    "dataset/tools/compile.py": "1e6b1dd3d7a44ae4d9e8081afb0f22d1770d29b2b3cac48aae03e38673e7140a",
+    "dataset/tools/gen/__init__.py": "4d33de4322db81eb70ee8f702122853a25f995f7dfecb93868721ea94377ffe0",
+    "dataset/tools/gen/cells.py": "5b8ef682222ecc0ac91306c8afb8bc560a52949b016c3b6b236f2b04f371ac7c",
+    "dataset/tools/gen/compose.py": "6c67041c1c60c26fa7b375d49c137b233eb2b3f07a78c48cc2a0cb0e82b3f7dc",
+    "dataset/tools/generate.py": "341b8b940efe1a3568791414582ac05360352648a90f30b8caf04d04f74c550f",
+    "dataset/tools/wlc/__init__.py": "8af88d31985ddc82e26504b9d88cad31a1b11a7b2d869314e47c0a399e35ef06",
+    "dataset/tools/wlc/compiler.py": "35d1bcee6ff15875b0b2d524fde20fd8533d8bc4850526f72137241c0da45402",
+    "dataset/tools/wlc/deriver.py": "6e725a858c8aabe03b7d52f0719c877fb4cffcc011117850fe33aadb688974ae",
+    "dataset/tools/wlc/estimate.py": "746294053801a55facba2e91dc9bdbe4040d618a2d72ce128a7691f7e38f5e5f",
+    "dataset/tools/wlc/grid.py": "7079592c60648c5255644c971bf121fc0ca6ac4a28fbe7466fef910fe7fd4bd8",
+    "dataset/tools/wlc/library.py": "9ada360cbe79c1dfcf3c36c5856a60e8ce68bc8af753f7b925138e4e22e0a66b",
+    "dataset/tools/wlc/linter.py": "c91f9ffed85799bbad8c5f512483dffc918eb4f79bf207fa3e66a85d81829938",
+    "dataset/tools/wlc/sampling.py": "93d9b773490a2d5c6162d0654963d21a9d802da2c2b4d059f16ca95fcb59dc0d",
+    "dataset/tools/wlc/timeline.py": "a35727817d210391ca0a62afc3c7e07b13f8f57c69b29f8e11aef17829e4e1c4",
+    "dataset/tools/wlc/units.py": "2c32e9ee9ed08615769a15fdb7406c4b5a2eb6588dcc9acc09c30b6fb9ab2778",
+    "dataset/tools/wlc/variants.py": "15b597b31e08d51089f6fc7e983d89c7e19af0b3018ee7271809d39eff6d5e50"
+  },
+  "reports": {
+    "familiarity-ladder-single/fl-backup-t3.report.json": "2fa2dca01afb155a71fe0ee595668cf254c3eb70ad032b1533a0bdcb1677f665",
+    "familiarity-ladder-single/fl-backup-t4-all.report.json": "9b4f40199bb2cba224c9e9da052779a2364ef90dd41a085635ff848b0f4bdac5",
+    "familiarity-ladder-single/fl-backup-t4-focus.report.json": "6193804ed76152d657aa566a51e5944e14ef1d83634664849fea12324e10ff37",
+    "familiarity-ladder-single/fl-backup-t4-others.report.json": "25a9e4125dc98b950f80ba87d45daa9440b0073961278e2b5cbc759476d4ce5d",
+    "familiarity-ladder-single/fl-backup-t5-all.report.json": "dc2d0358578f48e181d5d26ce28c1dbbb4ca3785c7d85f903e9ace2cf64f4715",
+    "familiarity-ladder-single/fl-backup-t5-focus.report.json": "06f94a4e44fa620db5963723498acc9f43d536982e6f659bcfe05044eb8ed0d3",
+    "familiarity-ladder-single/fl-backup-t5-others.report.json": "e2f82fd51229230140c31a565e196dcb7c52d727555e866f3d5b5a6541c0ee24",
+    "familiarity-ladder-single/fl-browsing-t4-all.report.json": "a60f7918445f93facd15a81ec378cf80f0f0b19f1513d5c122cbd32b27d2df97",
+    "familiarity-ladder-single/fl-browsing-t5-all.report.json": "a4f8d98b580913403f459713b5e10799a8a7c81cfd3716d983c9f5653d7954c0",
+    "familiarity-ladder-single/fl-compile-t4-all.report.json": "1dc57d34e83216945c89235740d78048f184d4d87c6702d07ad03deeaa3f779f",
+    "familiarity-ladder-single/fl-compile-t4-focus.report.json": "f13614101e70516c08c2f424283de30906c71a252768652ca10f8362bb3e5ebf",
+    "familiarity-ladder-single/fl-compile-t4-others.report.json": "282f596bdbc6466389420beca32268e76c8b6ec7f8a57e21c1bdd4c55f741c29",
+    "familiarity-ladder-single/fl-compile-t5-all.report.json": "52360e51179901e5de2e74022ccbc6320113320af16ac7874717f70df2e9961c",
+    "familiarity-ladder-single/fl-compile-t5-focus.report.json": "73fb061dab0cf2744820889f5becc6bec108787756e1ed216e61809b6e0b04ad",
+    "familiarity-ladder-single/fl-compile-t5-others.report.json": "5f09d0b27afe9db0a3f518bd665c883ce64756e25febab9a24e039e96e2e4a0c",
+    "familiarity-ladder-single/fl-dev-t4-all.report.json": "6a238c3ae6fa22528a25451ac2de794f35cac632f6a336bdf4b0c10442b7e7e2",
+    "familiarity-ladder-single/fl-dev-t5-all.report.json": "f9c6a3237e59bbaa9aae3c2159f62f89558910b2a269252e646f7a71ba84a403",
+    "familiarity-ladder-single/fl-gaming-t4-all.report.json": "3912bd238f7d0e11aee7d125ffe03a291e9068f36ce808bb6eb8948ae2f67844",
+    "familiarity-ladder-single/fl-gaming-t4-focus.report.json": "90a83f96a9ecc64f0bbb56a8e724aec24493b19f4ef0b1d95850b96db07630f1",
+    "familiarity-ladder-single/fl-gaming-t4-others.report.json": "badccaec70417c2a42106316ad6ce6a01260543940f4d1830ae7d5b667292b2f",
+    "familiarity-ladder-single/fl-gaming-t5-all.report.json": "337b84e2d965e3b286e5208c4b4be56ad4dca38434a94bedd43ff4272379c3bc",
+    "familiarity-ladder-single/fl-gaming-t5-focus.report.json": "e1eadc3f13e86b7be303e828e9fbfcd11711f9636548133c9472647085f83b0a",
+    "familiarity-ladder-single/fl-gaming-t5-others.report.json": "8f3078ce85a7183d1775be7e327b9140141ba48f05b8c8494e89d62c972341fd",
+    "familiarity-ladder-single/fl-idle-t4-all.report.json": "4eb07557890387ded8edecd9c3c19bd4740ecb3f31343ba824a16f02f8bd6551",
+    "familiarity-ladder-single/fl-idle-t5-all.report.json": "bc55d0089c131cb4afe63e9a83438e71254d71a67f84830e310f825c5408f05e",
+    "familiarity-ladder-single/fl-indexing-t4-all.report.json": "f153ff24fc045ad1d2cbe611aec6825bacccb68b03b6ff2987e42efa153c5a21",
+    "familiarity-ladder-single/fl-indexing-t4-focus.report.json": "8dc6c108e6cf44ead3f67d1581c8827548c24a806aa340b0ddf21024c9e604c4",
+    "familiarity-ladder-single/fl-indexing-t4-others.report.json": "73ead58a357da6ed8b9958067bdaf1bbe0f99fd4b5b48d77af33b722c2f9604b",
+    "familiarity-ladder-single/fl-indexing-t5-all.report.json": "a990264f57dd070da125bef761f9ac36e786a3f65a1856625752a9794e3882d5",
+    "familiarity-ladder-single/fl-indexing-t5-focus.report.json": "43a1279e8ccea383cb84e1277bce2b904d03a0e232496faef815fdc41f952617",
+    "familiarity-ladder-single/fl-indexing-t5-others.report.json": "2ee16b503ce3a463dc9b6258cc94d3c9699f17db69c9a58175494fcf8ed98365",
+    "familiarity-ladder-single/fl-mail-t4-all.report.json": "0b1e299d2aef1c428f77835612f1d515cdd90fbe93792f89306f9c262e0a956f",
+    "familiarity-ladder-single/fl-mail-t5-all.report.json": "547b4d4d3b8e170061edc048649978c51cbfbf93b0f160a7896ceed3b6100be1",
+    "familiarity-ladder-single/fl-media-t4-all.report.json": "ebf5176a2dfd18e93f1bcc1bacb94808e45915c3235ea5c1e7006c755ce479d5",
+    "familiarity-ladder-single/fl-media-t5-all.report.json": "e4c38582004343405c796d477f1b0006d642cdd1d1ff66fc437e61c58d61ce00",
+    "familiarity-ladder-single/fl-meeting-t4-all.report.json": "3a95f4e3f25dbb6364d16279ca8a8bdb132c407b0ffd1c63dac969521ad3158e",
+    "familiarity-ladder-single/fl-meeting-t5-all.report.json": "0ca9f3101b3162065f5221335f64bfbc417bd4bf3a5928b0b7872e2fa3ae64aa",
+    "familiarity-ladder-single/fl-ml-train-t4-all.report.json": "f66559dcc527b36a4fcd010651e2204c0e9a2fdf8053a0ea223c5f34c03bf16d",
+    "familiarity-ladder-single/fl-ml-train-t4-focus.report.json": "b0f9a7ee28c2dd9e1c214bd42525796d392ff03ffc0e95531ad7ddeb77cd637f",
+    "familiarity-ladder-single/fl-ml-train-t4-others.report.json": "30d2d32d6ee30e00ebd39134fcf5baa36f2db4fd3b45fcc64ea475e445afcd08",
+    "familiarity-ladder-single/fl-ml-train-t5-all.report.json": "26f91bc23055405839c4f0d6f95c9d046a5602d7847a06680a5906e35dadf878",
+    "familiarity-ladder-single/fl-ml-train-t5-focus.report.json": "4348bf99065d608eaf8a2d1edaf98f66ca74f6c235f418466313a27ab2fc9a42",
+    "familiarity-ladder-single/fl-ml-train-t5-others.report.json": "e458ddebedcd6907dea168d3ff25208fc78163e04eb27837cfcb1015c4cc8b90",
+    "familiarity-ladder-single/fl-office-t4-all.report.json": "1ada2659be2a03a9450ff5ad1abcf5d56fa86ff6656fbd8b7262fad7b25e67e9",
+    "familiarity-ladder-single/fl-office-t4-focus.report.json": "ea308414c3487aa2303b090433ee4ff727e722132e0919990cb46833bfec991e",
+    "familiarity-ladder-single/fl-office-t4-others.report.json": "7fb259aa08805824f313fe446be0cb51396740231f1fcd42950865ada1b8634b",
+    "familiarity-ladder-single/fl-office-t5-all.report.json": "1b8a514728570750d0bf50edc6669eb963135cd1bbdaa7b298721f330cf6a5b2",
+    "familiarity-ladder-single/fl-office-t5-focus.report.json": "50f36646922edaa3f5efd3730a0999450dd4393800446a9fad9919f4a0a09efc",
+    "familiarity-ladder-single/fl-office-t5-others.report.json": "7690600470369ecd8df41f7ce7306278bb1b75bd043077b3771eedfb0c6fe7fb",
+    "familiarity-ladder-single/fl-photo-t4-all.report.json": "fa12677722acd8a7aff6c018804300d962e771d741b68b158172f812b2365d5a",
+    "familiarity-ladder-single/fl-photo-t5-all.report.json": "bb90ecc894abe6f242b335545a74009a86472bb6d0b19200ca57bf737230be7c",
+    "familiarity-ladder-single/fl-render-t3.report.json": "e40b51ac536286c2c4903744329acf65d8af4d90774c6e2ff6512f5b71f8f005",
+    "familiarity-ladder-single/fl-render-t4-all.report.json": "d19c95ecdafeacf247564c6921487e9cb569d67b0edbbe76d19d527a5bf4560a",
+    "familiarity-ladder-single/fl-render-t4-focus.report.json": "d678206fc6ac23b3b65206d00afd93f7afeead2afab62e82dae78dc2d43a5e4b",
+    "familiarity-ladder-single/fl-render-t4-others.report.json": "fab3d2b733186c460ad842536b2836b6a31e409599ee32bbbc19dd3d6bc0fa46",
+    "familiarity-ladder-single/fl-render-t5-all.report.json": "d3a9f87cb6dd2e3e696178b1b4708d0fa52acbbd901d79c7938fb93ea99157f5",
+    "familiarity-ladder-single/fl-render-t5-focus.report.json": "96e3cdd72cc1338ac49e977b544c12cf99e7a8fa01c517f5a0fe14d795bf7044",
+    "familiarity-ladder-single/fl-render-t5-others.report.json": "6de45d7198e6e35a22832e30e0ae05e8e4425538ffb7f7d4c754761d9b6cbbbe",
+    "familiarity-ladder-single/fl-transcode-t4-all.report.json": "fda14a69aeca3348ae69a1616d271c1856e70ec523be74d0bdda67791de38d2f",
+    "familiarity-ladder-single/fl-transcode-t4-focus.report.json": "65ed6070c955c03eb684b05e718533acb755f1ce9a778318bcd320f35ce943e5",
+    "familiarity-ladder-single/fl-transcode-t4-others.report.json": "0cb191aeef667c1c82c53b18076230e3e1f7033b9acf77c4f002967a3d836a28",
+    "familiarity-ladder-single/fl-transcode-t5-all.report.json": "693688da6107cdafbd8902c5d659420602ff21f75840b2690f4d2e17cb8ffb74",
+    "familiarity-ladder-single/fl-transcode-t5-focus.report.json": "6858c711c374b641c40e603fe059af2b65576cac54a3144e2fb3f462d0065445",
+    "familiarity-ladder-single/fl-transcode-t5-others.report.json": "20be69f670c9943697d76805c015c5999681face9a184a944a6baf7abcff6533",
+    "familiarity-ladder-single/fl-video-edit-t4-all.report.json": "acf172d8ed55285547d2ca0459d00566a37d56080ec1261fccc40b63325cafbd",
+    "familiarity-ladder-single/fl-video-edit-t5-all.report.json": "45a63c82200b2c8e90fba3fb4160ed656f2a9894a4e9ca931dd488db4f97e851"
+  }
+}

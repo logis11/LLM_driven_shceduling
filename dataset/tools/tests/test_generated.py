@@ -1,5 +1,7 @@
-"""The generated layer (9.19 spec): the grid definition, the cells, the composition rules (decisions 1–3, 10), the
-splits and seeds (decision 6), the flap-stress set (decision 7), and what each set's manifest records (decisions 4–6)."""
+"""The generated layer (9.19 spec; 9.20 spec): the grid definition, the cells, the composition rules (9.19 decisions
+1–3, 10), the splits and seeds (9.19 decision 6), the flap-stress set (9.19 decision 7), what each set's manifest
+records (9.19 decisions 4–6); the distractor grid (9.20 decisions 1–4) and the familiarity ladder (9.20 decisions
+5–7)."""
 
 import hashlib
 import importlib
@@ -9,7 +11,8 @@ import pytest
 import yaml
 
 from gen import c1_sets, cells, compose, lint_grids, load_definition, modes_of, ordered_pairs, seed_of
-from gen.cells import ranked_pairs
+from gen.cells import COMPILER_NAMES, focus_name, known_names, names_of, ranked_pairs
+from wlc.grid import NAME_TIERS
 from gen.compose import timeline_bytes
 from wlc import Timeline
 from wlc.linter import lint_bound_sources
@@ -27,8 +30,9 @@ def layer(repo_root):
     dataset = repo_root / "dataset"
     defn = load_definition(dataset / "grids.yaml")
     modes = modes_of(dataset / "timelines" / "coreset")
-    by_set = cells(defn, modes)
-    return {"defn": defn, "modes": modes, "by_set": by_set, "sets": c1_sets(dataset / "timelines" / "coreset"),
+    sets = c1_sets(dataset / "timelines" / "coreset")
+    by_set = cells(defn, modes, sets)
+    return {"defn": defn, "modes": modes, "by_set": by_set, "sets": sets,
             "by_id": {c["id"]: c for s in by_set.values() for c in s}}
 
 
@@ -44,12 +48,13 @@ def spans(items):
     return [(parse_us(x["from"]), parse_us(x["to"])) for x in items]
 
 
-def test_the_definition_names_the_sixteen_modes_the_240_pairs_and_the_three_sets(layer):
+def test_the_definition_names_the_sixteen_modes_the_240_pairs_and_the_five_sets(layer):
     assert layer["modes"] == MODES
     assert len(ordered_pairs(layer["modes"])) == 240 == len({p for p in ordered_pairs(layer["modes"])})
     assert {k: len(v) for k, v in layer["by_set"].items()} == {"transition-grid": 480, "return-grid": 720,
-                                                              "flap-stress": 24}
-    assert len(layer["by_id"]) == 1224
+                                                              "flap-stress": 24, "distractor-grid": 272,
+                                                              "familiarity-ladder": 66}
+    assert len(layer["by_id"]) == 1562
 
 
 def test_departs_form_moves_every_task_at_the_boundary_and_scales_the_batch_job(layer):
@@ -181,11 +186,11 @@ def test_seeds_are_keyed_draws_from_the_cell_id_and_distinct(layer):
     cell_id = "tr-browsing-to-office-departs"
     expected = int.from_bytes(hashlib.sha256(f"seed|transition-grid|{cell_id}".encode()).digest()[:4], "big")
     assert layer["by_id"][cell_id]["seed"] == seed_of("transition-grid", cell_id) == expected
-    assert len({c["seed"] for c in layer["by_id"].values()}) == 1224
+    assert len({c["seed"] for c in layer["by_id"].values()}) == 1562
 
 
 def test_every_cell_loads_as_a_timeline_with_sourced_bound_values(layer, library, repo_root, tmp_path):
-    """The 1,224 cells written and read back through the loader's structural checks and the bound-source lint."""
+    """The 1,562 cells written and read back through the loader's structural checks and the bound-source lint."""
     registry = yaml.safe_load((repo_root / "dataset" / "sources.yaml").read_text())["sources"]
     errors = []
     for cell in layer["by_id"].values():
@@ -194,7 +199,8 @@ def test_every_cell_loads_as_a_timeline_with_sourced_bound_values(layer, library
         errors.extend(lint_bound_sources(path, registry))
         timeline = Timeline(path, library)
         assert timeline.id == cell["id"] and timeline.seed == cell["seed"]
-        assert len(timeline.segments) == len(cell["placements"])
+        expected_segments = 2 if cell["set"] == "distractor-grid" else len(cell["placements"])
+        assert len(timeline.segments) == expected_segments
     assert errors == []
 
 
@@ -211,6 +217,22 @@ def test_the_grid_definition_lint(repo_root, tmp_path):
     assert any("not in registry" in e for e in errors)
     assert any("carries no source tag or label" in e for e in errors)
     assert any("split must be by pair or by seed" in e for e in errors)
+    bad = yaml.safe_load((repo_root / "dataset" / "grids.yaml").read_text())
+    ladder = bad["sets"]["familiarity-ladder"]
+    ladder["tier4_names"]["code"] = "a-name-longer-than-fifteen"
+    ladder["tier4_names"]["make"] = "chrome"
+    ladder["tier3"]["render"]["kdenlive_render"]["source"] = "no-such-source"
+    bad["sets"]["distractor-grid"]["relations"].append("by-smell")
+    bad["sets"]["distractor-grid"]["programs"][1]["total_work"] = "6s"
+    bad["comm_limit"].pop("source")
+    path.write_text(yaml.safe_dump(bad))
+    errors = lint_grids(path, registry)
+    assert any("exceeds the 15-character comm limit" in e for e in errors)
+    assert any("is a real name" in e for e in errors)
+    assert any("tier3[render]" in e and "not in registry" in e for e in errors)
+    assert any("unknown relations" in e for e in errors)
+    assert any("total_work must be `span`" in e for e in errors)
+    assert any("comm_limit carries no source tag" in e for e in errors)
 
 
 def test_the_committed_manifests_pin_the_generator_and_record_each_cells_coordinates(repo_root, layer):
@@ -237,3 +259,144 @@ def test_the_committed_manifests_pin_the_generator_and_record_each_cells_coordin
             if "split" in cell:
                 coords["split"] = cell["split"]
             assert manifest["grid"][rel] == coords
+
+
+# ---- 9.20: the distractor grid -------------------------------------------------------------------------------------
+
+
+def test_a_cross_mode_cell_is_the_focus_form_with_the_focus_kept_on_a(layer):
+    """9.20 decision 1 on office <- compile: the same tasks as `tr-office-to-compile-focus` (B's set arriving at
+    60 s, the build scaled to its span), but the focus and the input stay with the writer to 118/120 s and both
+    segments are office, the second with compile's scenario tag added."""
+    cell = composed(layer, "dx-office-with-compile")
+    twin = composed(layer, "tr-office-to-compile-focus")
+    assert cell["tasks"] == twin["tasks"]
+    assert task(cell, "build-s1")["bind"]["spawn_count"] == 106 and task(cell, "build-s1")["source"]["spawn_count"] == "design"
+    assert spans(cell["segments"]) == [(0, 60 * S), (60 * S, 120 * S)]
+    assert [s["mode"] for s in cell["segments"]] == ["office", "office"]
+    assert cell["segments"][0]["scenario"] == ["S1", "S2", "S4"]
+    assert cell["segments"][1]["scenario"] == ["S1", "S2", "S4", "S11"]
+    assert cell["segments"][1]["attributes"] == {"background_wanted": True}
+    assert cell["focus"] == [{"from": "0s", "to": "120s", "task": "writer-s0"}]
+    assert cell["input"] == [{"from": "2s", "to": "118s", "task": "writer-s0"}]
+    assert twin["focus"] == [{"from": "0s", "to": "60s", "task": "writer-s0"}, {"from": "60s", "to": "120s", "task": "editor-s1"}]
+    assert "operations" not in cell or all(op["task"].endswith("-s0") for op in cell["operations"])
+
+
+def test_a_batch_mode_a_keeps_its_job_alive_to_the_end_and_its_operations_at_their_fraction(layer):
+    """A = render: the editor's preview render sits at its C1 fraction (30 s of 2–58 s) of the 2–118 s window; the
+    export is scaled to the 118 s span, design."""
+    cell = composed(layer, "dx-render-with-mail")
+    assert cell["operations"] == [{"at": "60s", "name": "preview-render", "task": "editor-s0"}]
+    bulk = task(cell, "bulk-s0")
+    c1 = layer["sets"]["render"]
+    c1_bulk = next(t for t in c1["tasks"] if t["id"] == "bulk")
+    expected_us = round(parse_us(c1_bulk["bind"]["total_work"]) * (118 * S) / (58 * S) / 1000) * 1000
+    assert parse_us(bulk["bind"]["total_work"]) == expected_us and bulk["source"]["total_work"] == "design"
+
+
+def test_the_out_of_vocabulary_cells_bring_one_measured_program(layer):
+    """9.20 decision 2: `element-desktop` to the file's end, `7z` with its work bound to the 60 s span (design);
+    the scenario tags the authored C4 files gave them; sixteen modes each."""
+    oov = [c for c in layer["by_set"]["distractor-grid"] if c["grid"]["relation"] == "out-of-vocabulary"]
+    assert len(oov) == 32 and {c["grid"]["b"] for c in oov} == {"element-desktop", "7z"}
+    assert all(c["grid"]["focus_name_shared"] is False for c in oov)
+    cell = composed(layer, "dx-dev-with-7z")
+    assert task(cell, "distractor") == {"id": "distractor", "name": "7z", "archetype": "file-archiver", "arrive": "60s",
+                                        "bind": {"total_work": "60s"}, "source": {"total_work": "design"}}
+    assert cell["segments"][1]["scenario"] == ["S11", "S16"]
+    cell = composed(layer, "dx-gaming-with-element-desktop")
+    assert task(cell, "distractor") == {"id": "distractor", "name": "element-desktop", "archetype": "chat-client",
+                                        "arrive": "60s", "depart": "120s"}
+    assert cell["segments"][1]["scenario"] == ["S9", "S5"]
+    assert cell["focus"] == [{"from": "0s", "to": "120s", "task": "game-s0"}]
+    assert cell["input"] == []
+
+
+def test_the_26_cells_whose_focus_holders_share_a_name_are_pre_committed_misses(layer):
+    """9.20 decision 3: `code` over dev, compile, ml-train, indexing; `kdenlive` over video-edit, render, transcode,
+    backup; `chrome` over browsing and meeting — 12 + 12 + 2 ordered pairs."""
+    groups = [["compile", "dev", "indexing", "ml-train"], ["backup", "render", "transcode", "video-edit"],
+              ["browsing", "meeting"]]
+    expected = {f"dx-{a}-with-{b}" for g in groups for a in g for b in g if a != b}
+    shared = {c["id"] for c in layer["by_set"]["distractor-grid"] if c["grid"]["focus_name_shared"]}
+    assert shared == expected and len(shared) == 26
+    for cell_id in ("dx-dev-with-compile", "dx-browsing-with-meeting"):
+        data = composed(layer, cell_id)
+        assert data["segments"][1]["attributes"]["pre_committed_miss"] is True
+        assert "pre_committed_miss" not in data["segments"][0]["attributes"]
+    assert "pre_committed_miss" not in composed(layer, "dx-dev-with-office")["segments"][1]["attributes"]
+    idle = composed(layer, "dx-idle-with-office")   # no focus holder: nothing to share, the label stays idle
+    assert idle["focus"] == [] and [s["mode"] for s in idle["segments"]] == ["idle", "idle"]
+
+
+# ---- 9.20: the familiarity ladder ----------------------------------------------------------------------------------
+
+
+def test_the_ladder_has_one_cell_per_distinct_name_set_and_two_tier_3_cells(layer):
+    """9.20 decisions 5–6: tiers 4 and 5 over the sixteen modes in the carrier forms that rename something, forms
+    with the same name set collapsed into `all`; tier 3 where the job ran under its own opaque name."""
+    ladder = layer["by_set"]["familiarity-ladder"]
+    by_tier = {}
+    for c in ladder:
+        by_tier.setdefault(c["grid"]["tier"], []).append(c)
+    assert {t: len(v) for t, v in by_tier.items()} == {3: 2, 4: 32, 5: 32}
+    grid = {c["id"]: c["grid"] for c in ladder}
+    assert grid["fl-dev-t4-all"]["carriers"] == ["all", "focus"] and "fl-dev-t4-others" not in grid
+    assert grid["fl-idle-t4-all"]["carriers"] == ["all", "others"] and "fl-idle-t4-focus" not in grid
+    assert grid["fl-browsing-t5-all"]["carriers"] == ["all", "focus"]   # every browsing name is `chrome`
+    assert {grid[f"fl-office-t4-{c}"]["carrier"] for c in ("all", "focus", "others")} == {"all", "focus", "others"}
+    assert grid["fl-render-t3"] == {"mode": "render", "tier": 3, "carrier": "others", "carriers": ["others"],
+                                    "renamed": {"kdenlive_render": "melt-7"},
+                                    "sources": {"kdenlive_render": "meas-ci:background:2026-10-03c"}}
+    assert grid["fl-backup-t3"]["renamed"] == {"deja-dup": "duplicity"}
+    assert grid["fl-backup-t3"]["sources"] == {"deja-dup": "meas-ci:background:2026-10-04"}
+
+
+def test_ladder_names_follow_the_table_the_keyed_draws_and_the_comm_limit(layer):
+    """9.20 decision 7: tier 4 from the table, tier 5 four lowercase letters not equal to any known name, one
+    substitute per real name within a file (counts preserved), every name within 15 characters, the child name and
+    the member names renamed with `design` sources, `wineserver` untouched, the tier on the segment, 60 s files."""
+    defn, sets = layer["defn"], layer["sets"]
+    table = defn["sets"]["familiarity-ladder"]["tier4_names"]
+    known = known_names(defn, sets)
+    assert set(COMPILER_NAMES) <= known and set(NAME_TIERS[1]) <= known
+    for cell in layer["by_set"]["familiarity-ladder"]:
+        data = composed(layer, cell["id"])
+        tier = cell["grid"]["tier"]
+        rename = cell["rename"]
+        for real, new in rename.items():
+            assert len(new) <= 15
+            if tier == 4:
+                assert new == table[real]
+            elif tier == 5:
+                assert len(new) == 4 and new.islower() and new.isalpha() and new not in known
+        assert len(set(rename.values())) == len(rename)
+        (segment,) = data["segments"]
+        assert segment["familiarity"] == tier and parse_us(segment["to"]) == 60 * S
+        names = []
+        for t in data["tasks"]:
+            names.append(t["name"])
+            bind = t.get("bind") or {}
+            if "child_name" in bind:
+                names.append(bind["child_name"])
+                if bind["child_name"] in rename.values():
+                    assert t["source"]["child_name"] == "design"
+            if "member_names" in bind:
+                names.extend(bind["member_names"])
+                if any(n in rename.values() for n in bind["member_names"]):
+                    assert t["source"]["member_names"] == "design"
+        assert not (set(rename) & set(names))   # every renamed real name is gone
+        assert set(rename.values()) <= set(names)
+        assert "wineserver" not in names
+    browsing = composed(layer, "fl-browsing-t5-all")
+    assert len({t["name"] for t in browsing["tasks"]}) == 1 and sum(t.get("count", 1) for t in browsing["tasks"]) == 5
+    compile_others = composed(layer, "fl-compile-t4-others")
+    build = task(compile_others, "build-s0")
+    assert (build["name"], build["bind"]["child_name"]) == ("build-runner", "c-compiler")
+    assert build["source"]["child_name"] == "design" and build["source"]["spawn_count"] == "design"
+    assert task(compile_others, "editor-s0")["name"] == "code"
+    render_t3 = composed(layer, "fl-render-t3")
+    bulk = task(render_t3, "bulk-s0")
+    assert bulk["name"] == "melt-7" and bulk["bind"]["program"] == "kdenlive_render"
+    assert bulk["bind"]["total_work"] == "16.545s" and bulk["source"]["total_work"] == "meas-ci:background:2026-10-03c"

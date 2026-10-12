@@ -29,9 +29,9 @@
     "coreset-single/c4-compile.workload.json": "b43695906c2ed09556fe9fb76d90bc4276aacd81c077eb1ade71b792b06f51ff",
     "coreset-single/c4-gaming.workload.json": "f055ed4e00ac976fc9304849880432457053968fa5f7d377c761791a6c67e8d7",
     "coreset-single/c4-office.workload.json": "4c44221e2050a929b4ccc06c716aa7a42b2286d7c29f13760761ba1d9411cbce",
-    "coreset-single/c5-t3.workload.json": "5a8dc02955be8986a40c2c850fce14574399427773443708ed21ac050dec46e2",
     "coreset-single/c5-t4.workload.json": "2d0e2e90881d1f34d96f20d383e6ac83387cdedaa575e95742f47d4145f7d83d",
     "coreset-single/c5-t5.workload.json": "1a4f304ac250451695d4bd55a9a80f110020d7b5623cb7adcdc48372af0236ba",
+    "coreset-single/c6-alias.workload.json": "43fa8fb9d5cdd31787f2d842d0d7541438a9847110d948ec9973ff00efc046da",
     "coreset-single/c6-dual.workload.json": "512d6780dcc89dfe8541dad8dd42d586d9f75342f10d840317dcea599df0d56b",
     "coreset-single/c6-fold.workload.json": "90a8b39a58533024b2cbeaf46a3b4fa7e22770f0f271b69f011c3b7294a5831c",
     "coreset-single/c6-spoof.workload.json": "23deca8198683f3822ee168d08d38fe6f74c777d821313564e3cc471d195ae94",
@@ -485,18 +485,6 @@
       ],
       "utilization": 0.127
     },
-    "coreset-single/c5-t3.workload.json": {
-      "demand_class": "calibration",
-      "segments": [
-        {
-          "index": 0,
-          "t_end_us": 60000000,
-          "t_start_us": 0,
-          "utilization": 0.128
-        }
-      ],
-      "utilization": 0.128
-    },
     "coreset-single/c5-t4.workload.json": {
       "demand_class": "calibration",
       "segments": [
@@ -510,6 +498,18 @@
       "utilization": 0.128
     },
     "coreset-single/c5-t5.workload.json": {
+      "demand_class": "calibration",
+      "segments": [
+        {
+          "index": 0,
+          "t_end_us": 60000000,
+          "t_start_us": 0,
+          "utilization": 0.128
+        }
+      ],
+      "utilization": 0.128
+    },
+    "coreset-single/c6-alias.workload.json": {
       "demand_class": "calibration",
       "segments": [
         {
@@ -811,9 +811,9 @@
     "coreset-single/c4-compile.report.json": "81cccc27567a584a0c36d771a6d4b23319bda6d4dbc19410c2f196807db729b7",
     "coreset-single/c4-gaming.report.json": "ff29dec818e426cff11e7fe9a29f3e24141c55054bc66006158208642ac77fad",
     "coreset-single/c4-office.report.json": "fb39fbf03fceb588849f0f49e162e69e50497c692d55bbb1699583c87b13090f",
-    "coreset-single/c5-t3.report.json": "0fde8fa8274f381fd26848a37f0498e97eeed3b5fbb18f3ac00c22970f2d2e06",
     "coreset-single/c5-t4.report.json": "0fde8fa8274f381fd26848a37f0498e97eeed3b5fbb18f3ac00c22970f2d2e06",
     "coreset-single/c5-t5.report.json": "0fde8fa8274f381fd26848a37f0498e97eeed3b5fbb18f3ac00c22970f2d2e06",
+    "coreset-single/c6-alias.report.json": "0fde8fa8274f381fd26848a37f0498e97eeed3b5fbb18f3ac00c22970f2d2e06",
     "coreset-single/c6-dual.report.json": "d4e77d7ba204acdf649cd5a7019b2b23cf1652b3a32b718907ec3c14b65f1a48",
     "coreset-single/c6-fold.report.json": "57d89e81bef9917e908bbc5aeea085aa002b9213209bd6f245e6066485247386",
     "coreset-single/c6-spoof.report.json": "ffe3e1cba57fa429cf747532eadc918c16478eb11e111d69acf84a83581624a0",

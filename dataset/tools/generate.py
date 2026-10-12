@@ -163,7 +163,8 @@ def main():
             print(f"  - {message}", file=sys.stderr)
         return 1
     defn = load_definition(dataset / "grids.yaml")
-    by_set = cells(defn, modes_of(dataset / "timelines" / "coreset"))
+    timelines = dataset / "timelines" / "coreset"
+    by_set = cells(defn, modes_of(timelines), c1_sets(timelines))
     if args.sets:
         only = args.sets.split(",")
         unknown = sorted(set(only) - set(by_set))

@@ -112,7 +112,7 @@ BATCH_C7 = {"compile", "ml-train", "render", "transcode", "indexing", "backup"}
 def test_derived_files_carry_their_base_terms_verbatim(spec):
     bases = {wid: f["base"] for wid, f in spec["files"].items() if "base" in f}
     expected = {"c4-office": "c1-office", "c4-compile": "c1-compile", "c4-gaming": "c1-gaming",
-                "c5-t3": "c1-media", "c5-t4": "c1-media", "c5-t5": "c1-media",
+                "c5-t4": "c1-media", "c5-t5": "c1-media", "c6-alias": "c1-media",
                 "c6-spoof": "c1-browsing", "c6-fold": "c1-browsing"}
     expected.update({f"c7-{m}": f"c1-{m}" for m in C7_MODES if m != "mail"})
     expected["c2-p2a-idle"] = "c2-p2a"

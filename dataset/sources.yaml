@@ -301,6 +301,11 @@ sources:
       only until the schema freeze; the linter rejects any meas-pending tag
       after freeze.
 
+  # ---- ground of the generated layer's name limit (9.20 decision 7) --------------------
+  linux-sched-h:
+    type: deployed-system
+    notes: "Linux kernel source, include/linux/sched.h at v6.17: `TASK_COMM_LEN = 16`, the comm field NUL-terminated and zero-padded, so a process name is at most 15 characters. Grounds `comm_limit` in dataset/grids.yaml: every name the generated layer sets is checked against it."
+
   # ---- grounds of the flap-stress set's intervals (9.19 decision 7; the hold-time plan's step 3) ----
 
   feral-gamemode:

@@ -185,7 +185,7 @@
     {
       "background_wanted": true,
       "mode": "media",
-      "pre_committed_miss": 0,
+      "pre_committed_miss": 1,
       "segments": 5,
       "tiers": {
         "t1": 2,
@@ -854,16 +854,6 @@
         "tier": 2
       }
     ],
-    "c5-t3": [
-      {
-        "background_wanted": true,
-        "mode": "media",
-        "scenario": [
-          "S13"
-        ],
-        "tier": 3
-      }
-    ],
     "c5-t4": [
       {
         "background_wanted": true,
@@ -882,6 +872,17 @@
           "S13"
         ],
         "tier": 5
+      }
+    ],
+    "c6-alias": [
+      {
+        "background_wanted": true,
+        "mode": "media",
+        "pre_committed_miss": true,
+        "scenario": [
+          "S13"
+        ],
+        "tier": 3
       }
     ],
     "c6-dual": [

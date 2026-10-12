@@ -1,16 +1,12 @@
 # C5 — familiarity ladder (building-plan §3 C5): same structure and
 # archetypes as c1-media; only the name tier changes, so any recognition
 # difference is attributable to the name alone. Tiers 1-2 already appear
-# across C1; these files cover tiers 3-5.
+# across C1; these two files are the authored cells of tiers 4 and 5 — the
+# generated ladder (dataset/grids.yaml, 9.20) covers tiers 3-5 over every mode.
+# The tier-3 file authored here until 2026-10-12 (indexers' names on the two
+# players) is C6's `c6-alias`: another program's real name is a name collision,
+# not the player's own opaque name (9.20 decision 8).
 variants:
-  - id: c5-t3   # opaque real names (corpus-recallable, not inferable)
-    from: c1-media.timeline.yaml
-    ops:
-      - patch-task: {id: video, name: baloo_file}
-      - patch-task: {id: music, name: tracker-miner-f}
-      - patch-segment: {index: 0, familiarity: 3}
-      - patch-meta: {demand: calibration}
-
   - id: c5-t4   # nonexistent-compositional (inferable from word semantics)
     from: c1-media.timeline.yaml
     ops:

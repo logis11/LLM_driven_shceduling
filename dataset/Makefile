@@ -7,7 +7,7 @@ dataset:            ## derive variants + grid, compile timelines -> build/ + man
 variants:           ## the RQ0 gate spec's sensitivity variants -> build/ + variants manifest (needs `dataset`)
 	$(PY) tools/variants.py
 
-generated:          ## the generated layer: the C3 grids composed from the C1 task sets -> generated/ (not committed) + build/ + one manifest per set
+generated:          ## the generated layer: the sets grids.yaml names, composed or renamed from the C1 task sets -> generated/ (not committed) + build/ + one manifest per set
 	$(PY) tools/generate.py
 
 lint:               ## the checks before a compile: repo + timeline lints (no writes; the canonical lints run inside the compile)

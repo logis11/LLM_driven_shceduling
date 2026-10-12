@@ -214,12 +214,8 @@ files:
     terms:
       - {entity: game.chain.1, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
 
-  # ---- C5 — familiarity ladder: c1-media's terms verbatim (a differing number is a bug signal)
-  c5-t3:
-    base: c1-media
-    terms:
-      - {entity: music, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
-      - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
+  # ---- C5 — familiarity ladder: c1-media's terms verbatim (a differing number is a bug signal).
+  # The tier-3 file of this section until 2026-10-12, c5-t3, is C6's c6-alias (9.20 decision 8).
   c5-t4:
     base: c1-media
     terms:
@@ -232,6 +228,11 @@ files:
       - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
 
   # ---- C6 — resolution limits
+  c6-alias:   # c1-media's players under two indexers' real names (until 2026-10-12 c5-t3): c1-media's terms verbatim
+    base: c1-media
+    terms:
+      - {entity: music, metric: job, aggregate: miss_rate, direction: lower, weight: 1.0}
+      - {entity: video, metric: job, aggregate: miss_rate, direction: lower, weight: 0.5}
   c6-spoof:
     base: c1-browsing
     terms:

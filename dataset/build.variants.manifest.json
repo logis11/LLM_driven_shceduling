@@ -909,7 +909,7 @@
   },
   "inputs": {
     "dataset/archetypes.yaml": "c6af7623c5164bdf1eb267f6335d4269dcbb6c7508fbc6331aab2724f782762d",
-    "dataset/build.manifest.json": "d10bcd42a31ea0617133bccf739941ecf347dab296c68a5ab5bc6a4000377d4d",
+    "dataset/build.manifest.json": "fad7192d2a290c9d0b9f9563a45a0f9834b8c48403c4c88d84ae1869107accd3",
     "dataset/variants.yaml": "6ad716708aabc29483007c86e3b7e3026369ef683d0c868b54378e59bcf8c454"
   }
 }
