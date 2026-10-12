@@ -304,15 +304,16 @@ def test_oracle_over_the_coreset_reproduces_the_measured_graded_set(table, boot,
             else:
                 headline += 1
                 headline_files.add(doc["meta"]["id"])
-    # re-measured on the 2026-10-11 blessed set (9.17): 51 files, one terminal snapshot each; c6-dual's
+    # re-measured on the 2026-10-12 blessed set (9.20): 51 files, one terminal snapshot each; c6-dual's
     # nineteen ambiguous query points — its two set changes and the seventeen focus moves of its alternation
     # (rule 6), the only focus-only query points in the set, every other focus move coinciding with an arrival;
-    # 77 graded points over 50 files, six in pre-committed-miss segments; 71 headline points over 45 files,
-    # unchanged from the 2026-10-09 set (130/51/2 there; the 8.4 facts on the Phase 7 set were 134/50/2,
-    # 82/49/10 and 72/44)
+    # 77 graded points over 50 files, seven in pre-committed-miss segments — c6-alias's one point joined them
+    # when c5-t3 became the name-collision alias (9.20 decision 8); 70 headline points over 44 files (the
+    # 2026-10-11 set: 77/50/6 and 71/45; the 2026-10-09 set 130/51/2; the 8.4 facts on the Phase 7 set
+    # 134/50/2, 82/49/10 and 72/44)
     assert (points, terminal, ambiguous) == (147, 51, 19)
-    assert (graded, len(graded_files), miss) == (77, 50, 6)
-    assert (headline, len(headline_files)) == (71, 45)
+    assert (graded, len(graded_files), miss) == (77, 50, 7)
+    assert (headline, len(headline_files)) == (70, 44)
 
 
 # --------------------------------------------------------------- the command
