@@ -73,6 +73,18 @@ def _write_text(text, out):
         out.write_text(text, encoding="utf-8")
 
 
+def _write_lines(lines, out):
+    """One JSON line per trace line, streamed to the file: a large workload's trace (c6-dual's millions of lines) is
+    never held as one string beside its line objects (9.21 D12)."""
+    out = pathlib.Path(out)
+    opener = (lambda: gzip.open(out, "wt", encoding="utf-8")) if out.suffix == ".gz" else \
+        (lambda: open(out, "w", encoding="utf-8"))
+    with opener() as f:
+        for line in lines:
+            f.write(json.dumps(line, separators=(",", ":")))
+            f.write("\n")
+
+
 def generate(workload_path, schedule_path, out_path, replay=None):
     """Write the trace for (workload, schedule) to `out_path`; with `replay`,
     copy that trace instead. Nothing is written until every input passed."""
@@ -97,7 +109,8 @@ def generate(workload_path, schedule_path, out_path, replay=None):
     except RunFileError as exc:
         raise MockSimulatorError(f"{workload_path}: {exc}") from None
     lines = _lines(doc, run, sched)
-    _write_text("".join(json.dumps(l, separators=(",", ":")) + "\n" for l in lines), out_path)
+    del doc, run                       # the trace alone is written; a large workload's objects go first (9.21 D12)
+    _write_lines(lines, out_path)
 
 
 def _lines(doc, run, sched):

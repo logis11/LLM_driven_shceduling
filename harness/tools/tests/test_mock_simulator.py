@@ -2,6 +2,7 @@
 hand workload and over the whole coreset, the replay of the fixture traces,
 and the command."""
 
+import gc
 import gzip
 import json
 import subprocess
@@ -207,17 +208,21 @@ def test_every_coreset_file_flows_through_records_with_no_message(tmp_path):
     for path in files:
         doc = json.loads(path.read_text())
         wid = doc["meta"]["id"]
-        for condition in ("fixed", "oracle"):
-            schedule, _ = daemon.run(doc, condition, table, boot)
-            sp = _write(tmp_path, schedule, f"{wid}-{condition}.json")
-            out = tmp_path / f"{wid}-{condition}.trace.jsonl"
-            simulator.generate(path, sp, out)
+        schedules = {condition: _write(tmp_path, daemon.run(doc, condition, table, boot)[0], f"{wid}-{condition}.json")
+                     for condition in ("fixed", "oracle")}
+        del doc                                                   # 9.21 D12: one file's objects at a time — the
+        for condition, sp in schedules.items():                   # runner's 16 GB held c6-dual's doc, run file,
+            out = tmp_path / f"{wid}-{condition}.trace.jsonl"     # trace and fourteen million rows at once and killed
+            simulator.generate(path, sp, out)                     # the suite
             run = read_run_file(path)
             result = compute(run, read_trace(out), read_config_schedule(sp))
             assert result.guards == [], (wid, condition, result.guards)     # tick_count
             busy = next(r["value"] for r in result.rows
                         if r["entity"] == "lane" and r["metric"] == "busy")
             assert 0 < busy <= run.t_end, (wid, condition, busy, run.t_end)  # utilisation_sanity
+            del result, run
+            out.unlink()
+            gc.collect()
 
 
 # ------------------------------------------------------------------ replay

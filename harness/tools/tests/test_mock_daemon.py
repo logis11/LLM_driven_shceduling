@@ -292,18 +292,20 @@ def test_oracle_over_the_coreset_reproduces_the_measured_graded_set(table, boot,
                 ambiguous += 1
         lp = tmp_path / f"{doc['meta']['id']}.json"
         lp.write_text(json.dumps(log))
-        rows, messages = grade_log(Run(doc["meta"]["id"], "oracle", "prior", "", "", lp, path, PRIOR))
+        wid = doc["meta"]["id"]
+        del doc, schedule                                         # 9.21 D12: one file's objects at a time
+        rows, messages = grade_log(Run(wid, "oracle", "prior", "", "", lp, path, PRIOR))
         assert messages == [], messages                              # the oracle is perfect where graded
         for r in rows:
             if r["metric"] != "mode_correct":
                 continue
             graded += 1
-            graded_files.add(doc["meta"]["id"])
+            graded_files.add(wid)
             if r["pre_committed_miss"]:
                 miss += 1
             else:
                 headline += 1
-                headline_files.add(doc["meta"]["id"])
+                headline_files.add(wid)
     # re-measured on the 2026-10-12 blessed set (9.20): 51 files, one terminal snapshot each; c6-dual's
     # nineteen ambiguous query points — its two set changes and the seventeen focus moves of its alternation
     # (rule 6), the only focus-only query points in the set, every other focus move coinciding with an arrival;
