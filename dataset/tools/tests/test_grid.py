@@ -10,7 +10,7 @@ import json
 import pytest
 import yaml
 
-from gen import coverage
+from gen import coverage as gen_coverage   # `coverage` is this module's fixture below
 from wlc import grid
 
 MODES = ["browsing", "office", "mail", "dev", "photo", "meeting", "gaming",
@@ -94,7 +94,7 @@ def generated_manifests(repo_root):
 
 
 def test_committed_grid_matches_the_timelines_and_the_generated_manifests(repo_root):
-    assert coverage.write(repo_root / "dataset" / "timelines", generated_manifests(repo_root),
+    assert gen_coverage.write(repo_root / "dataset" / "timelines", generated_manifests(repo_root),
                           repo_root / "dataset" / "coverage-grid.json", check=True) == []
 
 
@@ -102,7 +102,7 @@ def test_committed_grid_matches_the_timelines_and_the_generated_manifests(repo_r
 
 @pytest.fixture(scope="module")
 def generated(repo_root):
-    return coverage.build_generated_grid(generated_manifests(repo_root))
+    return gen_coverage.build_generated_grid(generated_manifests(repo_root))
 
 
 def test_generated_tables_one_per_set_over_the_true_cells_alone(generated):
@@ -148,10 +148,10 @@ def test_a_manifest_without_segment_labels_is_refused(tmp_path):
     path = tmp_path / "build.toy.manifest.json"
     path.write_text(json.dumps({"grid": {"toy-single/x.workload.json": {"a": "office"}}}))
     with pytest.raises(grid.GridError, match="predates"):
-        coverage.build_generated_grid([path])
+        gen_coverage.build_generated_grid([path])
     with pytest.raises(grid.GridError, match="no manifest"):
-        coverage.build_generated_grid([tmp_path / "build.none.manifest.json"])
-    text = coverage.render_generated({"toy": {"files": 1, "segments_total": 1, "cells": [
+        gen_coverage.build_generated_grid([tmp_path / "build.none.manifest.json"])
+    text = gen_coverage.render_generated({"toy": {"files": 1, "segments_total": 1, "cells": [
         {"mode": "office", "background_wanted": True, "tiers": {t: 0 for t in grid.TIERS}, "segments": 0, grid.MISS_KEY: 0}]}})
     assert "generated toy: 1 files, 1 segments" in text
 
