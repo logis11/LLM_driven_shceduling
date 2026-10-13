@@ -9,7 +9,7 @@
 | step | when | needs |
 |---|---|---|
 | 3, the precedent search | sub-task 9.19's spec session; its range sets the flap-stress intervals | nothing |
-| 0, the need measured with no rule | right after Phase 10's integration, in the RQ0 run's pipeline | the flap-stress set (9.19), the C4 files, the Layer 2 cost aggregates (9.21), the real simulator and daemon; `oracle` and `random` only, no LLM |
+| 0, the need measured with no rule | right after Phase 10's integration, in the RQ0 run's pipeline | the flap-stress set (9.19), the C4 files, the flip count and its cost — the `flip_cost` reporting line over the flip aggregates (delivered in 9.21: the configuration changes applied, those on a query graded config-incorrect, the per-switch excess summed over the wrong switches into MLFQ, the file's score beside them; metrics doc §8) — the real simulator and daemon; `oracle` and `random` only, no LLM |
 | 1, 2, 4, 5, 6 | the RQ4 experiment spec's session, after step 0 and before any LLM condition runs | step 0's result |
 
 Both later blocks are on the Phase 10 backlog in `_dev/TODO.md`.
@@ -32,13 +32,13 @@ Both later blocks are on the Phase 10 backlog in `_dev/TODO.md`.
 
 ## Dataset prerequisites
 
-- The flap-stress set: a few generated files, each a chain of mode changes from the C1 task sets at short fixed intervals (several values), splittable by seed.
-- The 3-segment return grid A → B → A over the 240 ordered mode pairs with the middle length as a variant (60 s, 10 s, 2 s), splittable by pair.
+- The flap-stress set: a few generated files, each a chain of mode changes from the C1 task sets at short fixed intervals (several values), splittable by seed — built in 9.19 (24 files, `dataset/build.flap-stress.manifest.json`, `split` per file), confirmed present in 9.21.
+- The 3-segment return grid A → B → A over the 240 ordered mode pairs with the middle length as a variant (60 s, 10 s, 2 s), splittable by pair — built in 9.19 (720 files, `dataset/build.return-grid.manifest.json`, `split` per file), confirmed present in 9.21; an experiment spec selects either half by `files.select` on `split`.
 - Both carry no realism claim and are recorded as design.
 
 ## Hands to
 
 - Daemon: steps 1, 2, 4, 5 (the rule's implementation, the tuning run).
-- Harness: the flip count and its Layer 2 cost as aggregates; the sweep in the RQ4 experiment spec and report.
+- Harness: the flip count and its Layer 2 cost as aggregates — delivered in 9.21 as the `flip_cost` line; a flip's cost beyond the per-switch excess is defined in the RQ4 experiment spec's session on real traces; the sweep in the RQ4 experiment spec and report.
 - Dataset: the two generated sets above.
 - Docs: daemon guide §9.3 restated to the decision taken; the final memo names the plan.
