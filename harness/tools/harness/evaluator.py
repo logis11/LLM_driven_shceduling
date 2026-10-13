@@ -10,9 +10,10 @@ schema, the compiled files, the pinned scoring spec's terms, the guard
 registry, the registries of criterion and line types, and the pins' bytes.
 
 `evaluate` reads a spec and the harness's four output files — aggregates,
-scores, guards, grades — verifies the pins, computes every file's score per
-condition, applies the criterion, echoes the spec's pre-registered
-statements, and returns the report: one JSON document
+scores, guards, grades — verifies the pins, expands the spec's selections
+from the generated layer's manifests (9.21 decision 6; `manifests.py`),
+computes every file's score per condition, applies the criterion, echoes the
+spec's pre-registered statements, and returns the report: one JSON document
 (schema `report.schema.json`) whose every number carries the fields that
 locate it. A pin mismatch, an incomplete run set, or an unknown type is a
 refusal (`GateError`), never a verdict. A non-exempt guard failure on a run
@@ -35,7 +36,7 @@ import jsonschema
 import yaml
 
 from . import aggregates as agg
-from . import grader, guards, scorer, scoring
+from . import grader, guards, manifests, scorer, scoring
 from .outputs import read_csv
 
 HARNESS = pathlib.Path(__file__).resolve().parents[2]
@@ -92,6 +93,7 @@ def _pin_errors(spec, root):
     pins = spec.get("pins") or {}
     named = [(name, pins.get(name)) for name in PINS]
     named += [(f"variants/{name}", pin) for name, pin in sorted((pins.get("variants") or {}).items())]
+    named += [(f"generated/{name}", pin) for name, pin in sorted((pins.get("generated") or {}).items())]
     for name, pin in named:
         if not isinstance(pin, dict):
             continue
@@ -108,6 +110,15 @@ def _pin_errors(spec, root):
 def _listed(spec):
     files = spec.get("files") or {}
     return list(files.get("judging") or []), list(files.get("reporting") or [])
+
+
+def _expanded(spec, root):
+    """The spec with its selections expanded (9.21 decision 6), the selected files' compiled paths and their axes;
+    a selection that cannot be expanded is a `GateError`."""
+    try:
+        return manifests.expand(spec, root)
+    except ValueError as err:
+        raise GateError(str(err)) from None
 
 
 def _variants(spec):
@@ -132,6 +143,10 @@ def lint_spec(spec_path, schema_path, build_dir, root):
     if errors:
         return errors
     build_dir = pathlib.Path(build_dir)
+    try:
+        spec, paths, _axes = manifests.expand(spec, root)          # 9.21 decision 6: the selections as ids
+    except ValueError as err:
+        return [str(err)] + _pin_errors(spec, root)
     judging, reporting = _listed(spec)
     variants = _variants(spec)
     conditions = spec["conditions"]
@@ -186,7 +201,7 @@ def lint_spec(spec_path, schema_path, build_dir, root):
     # the compiled files and the derived exclusions
     with_miss = []
     for wid in judging + reporting + variants:
-        path = build_dir / f"{wid}.workload.json"
+        path = manifests.workload_path(wid, paths, build_dir)
         if not path.is_file():
             errors.append(f"file {wid!r} is not in the build ({build_dir})")
             continue
@@ -615,12 +630,38 @@ def line_longest_wait(rs, params, ctx):
             "any_past_reopen": any(r["past_reopen"] for r in rows)}
 
 
+def line_flip_cost(rs, params, ctx):
+    """9.21 decision 7 (the hold-time plan's step 1): per listed file and recognizing run, the number of
+    configuration changes the daemon applied, the number of those whose query the grader marked `config_correct`
+    0, the sum of the per-switch excess over the wrong changes that were switches into MLFQ (`aggregates.py`,
+    `flip_aggregates`), and the run's file score beside them, read off the scores file (empty where the file has no
+    scoring terms)."""
+    per_run = {}
+    for r in rs.agg_rows:
+        if (r["entity"] == "schedule" and r["metric"] == "config_interval" and r["aggregate"] in agg.FLIP_AGGREGATES
+                and not r["window_start_us"] and not r["window_end_us"]):
+            per_run.setdefault(_identity(r), {})[r["aggregate"]] = r["value"]
+    rows = []
+    for key in sorted(per_run):
+        values = per_run[key]
+        if not all(a in values for a in agg.FLIP_AGGREGATES):
+            continue
+        score = rs.file_rows.get(key)
+        rows.append({**dict(zip(agg.IDENTITY, key)),
+                     "changes": int(Decimal(values["change_count"])),
+                     "wrong_changes": int(Decimal(values["wrong_change_count"])),
+                     "wrong_switch_excess_us": values["wrong_switch_excess_sum"],
+                     "score": score["score"] if score else ""})
+    return {"type": "flip_cost", "rows": rows,
+            "changes_total": sum(r["changes"] for r in rows), "wrong_total": sum(r["wrong_changes"] for r in rows)}
+
+
 LINES = {"sensitivity": line_sensitivity, "g_band": line_g_band, "seed_standard_error": line_seed_standard_error,
          "floor_band": line_floor_band,
          "exclusion_accuracy": line_exclusion_accuracy, "layer1_headline": line_layer1_headline,
          "random_beats_oracle": line_random_beats_oracle, "note": line_note,
          "variant_set": line_variant_set, "trace_replay": line_trace_replay, "bounding_pair": line_bounding_pair,
-         "input_wake_count": line_input_wake_count, "longest_wait": line_longest_wait}
+         "input_wake_count": line_input_wake_count, "longest_wait": line_longest_wait, "flip_cost": line_flip_cost}
 
 
 # --------------------------------------------------------------- evaluate
@@ -650,7 +691,8 @@ def evaluate(spec_path, aggregates_path, scores_path, guards_path, grades_path, 
                                                                     guards_path, grades_path)
     except (OSError, ValueError) as exc:
         raise GateError(str(exc)) from None
-    rs = _Set(spec, agg_rows, score_rows, guard_rows, grade_rows)
+    expanded, _paths, axes = _expanded(spec, root)              # 9.21 decision 6
+    rs = _Set(expanded, agg_rows, score_rows, guard_rows, grade_rows)
     rs.check_complete()
 
     guard_report = []
@@ -660,7 +702,8 @@ def evaluate(spec_path, aggregates_path, scores_path, guards_path, grades_path, 
                              "exemption_reason": reason or "", "invalidating": False})
 
     verdict, detail, gaps, shown, ctx = CRITERIA[crit["type"]](rs, crit, guard_report)
-    ctx.update({"gaps": gaps, "scoring_spec_path": pathlib.Path(root) / spec["pins"]["scoring_spec"]["path"]})
+    ctx.update({"gaps": gaps, "scoring_spec_path": pathlib.Path(root) / spec["pins"]["scoring_spec"]["path"],
+                "axes": axes})                                   # {selected file: (manifest name, its axes)}
 
     scores_out = [{**{c: r[c] for c in agg.IDENTITY}, "score": r["score"], "weight_sum": r["weight_sum"],
                    "n_terms": int(r["n_terms"]), "n_no_headroom": int(r["n_no_headroom"]),
@@ -818,6 +861,13 @@ def render(report) -> str:
             out.append("")
             out.append(_table(["run", "task", "longest wait (µs)", "margin (µs)", "past reopen"],
                               [[_ident(r), r["entity"], r["longest_wait_us"], r["margin_us"], r["past_reopen"]]
+                               for r in line["rows"]]))
+        elif t == "flip_cost":
+            out.append(f"Configuration changes over the listed files' recognizing runs: {line['changes_total']}, "
+                       f"of which {line['wrong_total']} on a query graded config-incorrect.")
+            out.append("")
+            out.append(_table(["run", "changes", "wrong changes", "wrong-switch excess into MLFQ (µs)", "score"],
+                              [[_ident(r), r["changes"], r["wrong_changes"], r["wrong_switch_excess_us"], r["score"]]
                                for r in line["rows"]]))
         out.append("")
     fails = [r for r in report["guards"] if r["result"] == "fail"]

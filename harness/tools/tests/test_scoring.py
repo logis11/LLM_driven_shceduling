@@ -344,3 +344,126 @@ def test_a_variant_file_reads_its_bases_terms_with_the_windows_on_its_own_segmen
     odd = _workload(tmp_path / "c2-p1a@odd.workload.json", [(0, 99_435_000)])
     with pytest.raises(ValueError, match="c2-p1a@odd.*segments"):
         with_variants(spec, {"c2-p1a@odd": odd})
+
+
+# ---- 9.21: the generated layer's rule --------------------------------------------------------------------------------
+
+def _generated_manifest():
+    """A manifest in the dataset's form over four shapes of generated file (the records 9.21 decisions 1 and 4 add)."""
+    S = 1_000_000
+
+    def segs(*bounds):
+        return [{"index": i, "t_start_us": a, "t_end_us": b, "utilization": 0.0} for i, (a, b) in enumerate(bounds)]
+
+    files = {
+        "transition-grid-single/tr-compile-to-office-departs.workload.json": (
+            segs((0, 60 * S), (60 * S, 120 * S)),
+            [{"mode": "compile", "suffix": 0, "segments": [0], "input": True},
+             {"mode": "office", "suffix": 1, "segments": [1], "input": True}]),
+        "distractor-grid-single/dx-office-with-compile.workload.json": (
+            segs((0, 60 * S), (60 * S, 120 * S)),
+            [{"mode": "office", "suffix": 0, "segments": [0, 1], "input": True},
+             {"mode": "compile", "suffix": 1, "segments": [], "input": False}]),
+        "return-grid-single/rt-video-edit-to-office-2s.workload.json": (
+            segs((0, 60 * S), (60 * S, 62 * S), (62 * S, 122 * S)),
+            [{"mode": "video-edit", "suffix": 0, "segments": [0], "input": True},
+             {"mode": "office", "suffix": 1, "segments": [1], "input": False},
+             {"mode": "video-edit", "suffix": 2, "segments": [2], "input": True}]),
+        "familiarity-ladder-single/fl-idle-t5-all.workload.json": (
+            segs((0, 60 * S)), [{"mode": "idle", "suffix": 0, "segments": [0], "input": False}]),
+        "familiarity-ladder-single/fl-media-t4-all.workload.json": (
+            segs((0, 60 * S)), [{"mode": "media", "suffix": 0, "segments": [0], "input": False}]),
+        "transition-grid-single/tr-office-to-gaming-focus.workload.json": (
+            segs((0, 60 * S), (60 * S, 120 * S)),
+            [{"mode": "office", "suffix": 0, "segments": [0], "input": True},
+             {"mode": "gaming", "suffix": 1, "segments": [1], "input": False}]),
+    }
+    return {"artifacts": {rel: "0" * 64 for rel in files},
+            "demand": {rel: {"demand_class": "calibration", "utilization": 0.0, "segments": sg} for rel, (sg, _) in files.items()},
+            "grid": {rel: {"placements": pl, "segments": []} for rel, (_, pl) in files.items()}}
+
+
+_C1 = {
+    "c1-office": {"terms": [{"entity": "writer", "metric": "ready_wait", "cause": "wake", "channel": "input",
+                             "aggregate": "p99", "direction": "lower", "weight": 1.0}]},
+    "c1-compile": {"terms": [{"entity": "editor", "metric": "ready_wait", "cause": "wake", "channel": "input",
+                              "aggregate": "p99", "direction": "lower", "weight": 1.0},
+                             {"entity": "build", "metric": "turnaround", "aggregate": "turnaround", "direction": "lower",
+                              "weight": 1.0}]},
+    "c1-video-edit": {"terms": [{"entity": "editor", "metric": "ready_wait", "cause": "wake", "channel": "timer",
+                                 "aggregate": "p99", "direction": "lower", "weight": 1.0}]},
+    "c1-media": {"terms": [{"entity": "music", "metric": "job", "aggregate": "miss_rate", "direction": "lower",
+                            "weight": 1.0}]},
+    "c1-gaming": {"terms": [{"entity": "game.chain.1", "metric": "job", "aggregate": "miss_rate", "direction": "lower",
+                             "weight": 1.0}]},
+}
+
+
+def test_the_generated_rule_derives_each_placements_c1_terms_suffixed_and_windowed():
+    """9.21 decisions 1–3 on four shapes: a transition's two placements each windowed to its segment, the batch term
+    unwindowed; the distractor's A over the whole file (no window) and B labelled nowhere (no term); a 2 s middle
+    without an input window dropping its keystroke term while the timer-channel terms around it stay; an idle
+    placement deriving nothing (no entry); a periodic term without a window when the placement spans the file."""
+    from harness.scoring import generated_entries, with_generated, windows_from_spec
+    S = 1_000_000
+    spec = {"files": dict(_C1)}
+    entries = generated_entries(spec, _generated_manifest())
+    assert sorted(entries) == ["dx-office-with-compile", "fl-media-t4-all", "rt-video-edit-to-office-2s",
+                               "tr-compile-to-office-departs", "tr-office-to-gaming-focus"]
+    # the chain head's id is formed by the compiler from its task's, so the suffix sits before `.chain.1`
+    assert [(t["entity"], t.get("window")) for t in entries["tr-office-to-gaming-focus"]["terms"]] == [
+        ("writer-s0", {"start_us": 0, "end_us": 60 * S}), ("game-s1.chain.1", {"start_us": 60 * S, "end_us": 120 * S})]
+    tr = entries["tr-compile-to-office-departs"]["terms"]
+    assert [(t["entity"], t.get("window")) for t in tr] == [
+        ("editor-s0", {"start_us": 0, "end_us": 60 * S}), ("build-s0", None),
+        ("writer-s1", {"start_us": 60 * S, "end_us": 120 * S})]
+    assert tr[0]["channel"] == "input" and tr[0]["weight"] == 1.0 and tr[1]["metric"] == "turnaround"
+    assert entries["dx-office-with-compile"]["terms"] == [dict(_C1["c1-office"]["terms"][0], entity="writer-s0")]
+    rt = entries["rt-video-edit-to-office-2s"]["terms"]
+    assert [(t["entity"], t["channel"], t["window"]) for t in rt] == [
+        ("editor-s0", "timer", {"start_us": 0, "end_us": 60 * S}),
+        ("editor-s2", "timer", {"start_us": 62 * S, "end_us": 122 * S})]
+    assert entries["fl-media-t4-all"]["terms"] == [dict(_C1["c1-media"]["terms"][0], entity="music-s0")]
+    out = with_generated(spec, _generated_manifest(), only={"tr-compile-to-office-departs", "fl-idle-t5-all"})
+    assert set(out["files"]) == set(_C1) | {"tr-compile-to-office-departs"}
+    assert windows_from_spec(out, "tr-compile-to-office-departs") == {
+        ("editor-s0", "ready_wait"): [(0, 60 * S)], ("writer-s1", "ready_wait"): [(60 * S, 120 * S)]}
+    assert spec["files"].keys() == set(_C1)                       # a copy
+    with pytest.raises(ValueError, match="cannot also have an entry"):
+        with_generated({"files": dict(_C1, **{"dx-office-with-compile": {"terms": []}})}, _generated_manifest())
+
+
+def test_the_generated_rule_refuses_a_manifest_without_placements_and_a_non_contiguous_label():
+    from harness.scoring import generated_entries
+    m = _generated_manifest()
+    rel = "distractor-grid-single/dx-office-with-compile.workload.json"
+    old = m["grid"].pop(rel)
+    m["grid"][rel] = {"a": "office"}
+    with pytest.raises(ValueError, match="predates 9.21"):
+        generated_entries({"files": dict(_C1)}, m)
+    m["grid"][rel] = dict(old, placements=[{"mode": "office", "suffix": 0, "segments": [0, 2], "input": True}])
+    m["demand"][rel]["segments"].append({"index": 2, "t_start_us": 120_000_000, "t_end_us": 180_000_000, "utilization": 0.0})
+    with pytest.raises(ValueError, match="not contiguous"):
+        generated_entries({"files": dict(_C1)}, m)
+
+
+def test_the_committed_spec_derives_terms_for_the_toy_set_and_lints_clean_on_the_ladder():
+    """The rule over the committed spec: the fixture's toy set (a dev -> ml-train departs pair: the editor's keystroke
+    P99 in the first segment, the training run's editor P99 and job turnaround in the second), and — when the
+    generated build is present — every ladder file's derived terms against its compiled file."""
+    from harness.scoring import generated_entries, lint_generated
+    from harness import manifests
+    spec = load_spec(SPEC_PATH)
+    toy = manifests.load(REPO / "harness" / "tools" / "tests" / "fixtures" / "mock-experiment" / "build.toy-grid.manifest.json")
+    entries = generated_entries(spec, toy)
+    assert [(t["entity"], t["metric"], t.get("window")) for t in entries["tg-a"]["terms"]] == [
+        ("editor-s0", "ready_wait", {"start_us": 0, "end_us": 50_000}),
+        ("hog-s1", "turnaround", None)]                           # ml-train's keystroke term dropped: no input window
+    ladder = REPO / "dataset" / "build.familiarity-ladder.manifest.json"
+    if not (REPO / "dataset" / "build" / "familiarity-ladder-single").is_dir():
+        pytest.skip("the generated build is not present")
+    assert lint_generated(spec, ladder) == []
+    derived = generated_entries(spec, manifests.load(ladder))
+    assert "fl-idle-t4-all" not in derived and "fl-idle-t5-all" not in derived
+    assert len(derived) == 64 and all("-s0" in t["entity"] for e in derived.values() for t in e["terms"])
+    assert [t["entity"] for t in derived["fl-gaming-t5-all"]["terms"]] == ["game-s0.chain.1"]

@@ -481,7 +481,7 @@ statements:
 # SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-12, the 9.20
 # entry; 2026-10-11, the 9.18 and 9.22 entries); the variant manifests pin the rebuilt files the sensitivity lines read.
 pins:
-  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 9cd9a155db7a6f9521a73c89a5159736e7b9ff185a63fbf61b2cc453bc38e360}
+  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 0ff71b1ff946f5e45dceea3c13b4008d32a13255ed637d46989a2867b7474bbc}
   guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.1", sha256: 24ccb875ff666615de75d80bc5351b7f5c62713d605438844938f9ab6ef1676c}
   driver_table: {path: daemon/driver-table/prior.yaml, sha256: 6e271dd042b38c23b85459cec7545fde990aec9be5a2c8bd6081690d98243f7f}
   dataset:      {path: dataset/build.manifest.json, sha256: fad7192d2a290c9d0b9f9563a45a0f9834b8c48403c4c88d84ae1869107accd3}

@@ -19,6 +19,18 @@ its terms verbatim — or, when its ground truth flips the base's
 work carries no term, Phase 7 spec decision 10); a variant that declares no
 base must differ from its base (identical terms without the declaration are a
 forgotten line, not a decision).
+
+The generated layer (9.21 spec, decisions 1–3) has no entries: `with_generated`
+derives a generated file's terms at run time from the C1 entries, as
+`with_variants` derives a variant's from its base's — per placement the
+manifest records (`manifests.py`), the `c1-<mode>` entry's terms with the
+placement's id suffix on the entity, the latency and periodic terms windowed to
+the segments the placement is labelled in (no window when they span the file),
+the batch terms unwindowed; a placement labelled in no segment carries none
+(the distractor grid's B); a placement without an input window drops its
+`channel: input` terms alone; an idle placement carries none, as `c1-idle` has
+no entry. `lint_generated` checks the derived entries against the compiled
+generated files as `lint_spec` checks the authored ones.
 """
 
 import json
@@ -27,6 +39,7 @@ import pathlib
 import jsonschema
 import yaml
 
+from . import manifests
 from .reader import RESERVED_ENTITIES, RunFileError, read_run_file
 
 HARNESS = pathlib.Path(__file__).resolve().parents[2]
@@ -104,6 +117,55 @@ def segment_bounds(compiled_path):
     return ({int(s["t_start"]) for s in segments}, {int(s["t_end"]) for s in segments})
 
 
+def lint_terms(wid, entry, compiled):
+    """One entry's terms against the compiled workload at `compiled`: the entity exists, the metric and aggregate
+    form a scored pair with its direction, the weight is positive, the filters belong to their metric, each window
+    lies inside the file and on its segment boundaries (9.14 decision 5). Error strings, empty when legal."""
+    errors = []
+    compiled = pathlib.Path(compiled)
+    if not compiled.exists():
+        return [f"{wid}: no compiled workload at {compiled}"]
+    try:
+        run = read_run_file(compiled)
+    except (RunFileError, OSError, ValueError) as exc:
+        return [f"{wid}: compiled workload unreadable: {exc}"]
+    for i, t in enumerate(entry.get("terms") or []):
+        if not isinstance(t, dict) or any(k not in t for k in _TERM_KEYS):
+            continue                      # the schema already said what is missing
+        where = f"{wid}: term {i} ({t['entity']}/{t['metric']}): "
+        if t["entity"] not in run.tasks and t["entity"] not in RESERVED_ENTITIES:
+            errors.append(f"{where}no task with that id in the compiled workload")
+        pair = (t["metric"], t["aggregate"])
+        if pair not in LEGAL:
+            errors.append(f"{where}{t['metric']} with {t['aggregate']} is not a scored "
+                          f"combination (spec decision 6)")
+        elif t["direction"] != LEGAL[pair]:
+            errors.append(f"{where}direction must be {LEGAL[pair]!r} for {t['aggregate']}")
+        if isinstance(t["weight"], bool) or not isinstance(t["weight"], (int, float)) or t["weight"] <= 0:
+            errors.append(f"{where}weight must be a positive number")
+        if t["metric"] == "ready_wait" and not t.get("cause"):
+            errors.append(f"{where}a ready_wait term names its cause")
+        if t["metric"] != "ready_wait" and "cause" in t:
+            errors.append(f"{where}cause is a ready_wait filter only")
+        if "channel" in t and (t["metric"] != "ready_wait" or t.get("cause") != "wake"):
+            errors.append(f"{where}channel is a filter of a ready_wait term with cause wake only")
+        win = t.get("window")
+        if isinstance(win, dict) and all(isinstance(win.get(k), int) for k in ("start_us", "end_us")):
+            if not (0 <= win["start_us"] < win["end_us"] <= run.t_end):
+                errors.append(f"{where}window [{win['start_us']}, {win['end_us']}] is not "
+                              f"inside [0, T_end={run.t_end}] or is empty")
+            else:
+                # 9.14 decision 5: a window is a segment by design, so each bound must be a
+                # ground-truth segment boundary of the compiled file; a stale window in
+                # either direction fails here
+                starts, ends = segment_bounds(compiled)
+                if win["start_us"] not in starts or win["end_us"] not in ends:
+                    errors.append(f"{where}window [{win['start_us']}, {win['end_us']}] does not lie on "
+                                  f"the file's segment boundaries (starts {sorted(starts)}, "
+                                  f"ends {sorted(ends)})")
+    return errors
+
+
 def lint_spec(spec_path, schema_path, build_dir, recipes_dir):
     """Returns a list of error strings; empty means the spec is legal."""
     spec_path = pathlib.Path(spec_path)
@@ -125,48 +187,11 @@ def lint_spec(spec_path, schema_path, build_dir, recipes_dir):
         if not isinstance(entry, dict):
             continue
         compiled = build_dir / f"{wid}.workload.json"
-        if not compiled.exists():
-            errors.append(f"{wid}: no compiled workload at {compiled}")
+        term_errors = lint_terms(wid, entry, compiled)
+        errors.extend(term_errors)
+        if any(e.endswith(f"no compiled workload at {compiled}") or "compiled workload unreadable" in e
+               for e in term_errors):
             continue
-        try:
-            run = read_run_file(compiled)
-        except (RunFileError, OSError, ValueError) as exc:
-            errors.append(f"{wid}: compiled workload unreadable: {exc}")
-            continue
-        for i, t in enumerate(entry.get("terms") or []):
-            if not isinstance(t, dict) or any(k not in t for k in _TERM_KEYS):
-                continue                      # the schema already said what is missing
-            where = f"{wid}: term {i} ({t['entity']}/{t['metric']}): "
-            if t["entity"] not in run.tasks and t["entity"] not in RESERVED_ENTITIES:
-                errors.append(f"{where}no task with that id in the compiled workload")
-            pair = (t["metric"], t["aggregate"])
-            if pair not in LEGAL:
-                errors.append(f"{where}{t['metric']} with {t['aggregate']} is not a scored "
-                              f"combination (spec decision 6)")
-            elif t["direction"] != LEGAL[pair]:
-                errors.append(f"{where}direction must be {LEGAL[pair]!r} for {t['aggregate']}")
-            if isinstance(t["weight"], bool) or not isinstance(t["weight"], (int, float)) or t["weight"] <= 0:
-                errors.append(f"{where}weight must be a positive number")
-            if t["metric"] == "ready_wait" and not t.get("cause"):
-                errors.append(f"{where}a ready_wait term names its cause")
-            if t["metric"] != "ready_wait" and "cause" in t:
-                errors.append(f"{where}cause is a ready_wait filter only")
-            if "channel" in t and (t["metric"] != "ready_wait" or t.get("cause") != "wake"):
-                errors.append(f"{where}channel is a filter of a ready_wait term with cause wake only")
-            win = t.get("window")
-            if isinstance(win, dict) and all(isinstance(win.get(k), int) for k in ("start_us", "end_us")):
-                if not (0 <= win["start_us"] < win["end_us"] <= run.t_end):
-                    errors.append(f"{where}window [{win['start_us']}, {win['end_us']}] is not "
-                                  f"inside [0, T_end={run.t_end}] or is empty")
-                else:
-                    # 9.14 decision 5: a window is a segment by design, so each bound must be a
-                    # ground-truth segment boundary of the compiled file; a stale window in
-                    # either direction fails here
-                    starts, ends = segment_bounds(compiled)
-                    if win["start_us"] not in starts or win["end_us"] not in ends:
-                        errors.append(f"{where}window [{win['start_us']}, {win['end_us']}] does not lie on "
-                                      f"the file's segment boundaries (starts {sorted(starts)}, "
-                                      f"ends {sorted(ends)})")
         if "base" not in entry and wid in bases and bases[wid] in files:
             base_entry = files[bases[wid]]
             if isinstance(base_entry, dict) and entry.get("terms") == base_entry.get("terms"):
@@ -209,8 +234,9 @@ def _where(path):
     return ("/".join(str(p) for p in parts) + ": ") if parts else ""
 
 
-__all__ = ["LEGAL", "SPEC_PATH", "SCHEMA_PATH", "base_id", "label_changing_variants", "lint_spec", "load_spec",
-           "variant_bases", "with_variants"]
+__all__ = ["LEGAL", "SPEC_PATH", "SCHEMA_PATH", "base_id", "generated_entries", "label_changing_variants",
+           "lint_generated", "lint_spec", "lint_terms", "load_spec", "suffixed", "variant_bases", "with_generated",
+           "with_variants"]
 
 
 def base_id(workload_id):
@@ -275,3 +301,89 @@ def interactive_from_spec(spec, workload_id):
     if not entry:
         return ()
     return tuple(dict.fromkeys(t["entity"] for t in entry["terms"] if t["metric"] == "ready_wait"))
+
+
+def suffixed(entity, k):
+    """A C1 entity under a placement's id suffix: the task id carries `-s<k>`, and a chain head's `.chain.<n>` — the
+    compiler's member id, formed from the task id — comes after it (`game.chain.1` -> `game-s0.chain.1`)."""
+    if ".chain." in entity:
+        head, tail = entity.split(".chain.", 1)
+        return f"{head}-s{k}.chain.{tail}"
+    return f"{entity}-s{k}"
+
+
+def generated_entries(spec, manifest, only=None):
+    """{workload id: entry} the generated-layer rule derives (9.21 decisions 1–3) for the manifest's files, or for the
+    ids in `only`. Per placement the manifest records: the `c1-<mode>` entry's terms, the entity suffixed `-s<k>`,
+    the latency and periodic terms windowed to the placement's labelled segments (no window when they span the
+    file), the batch terms unwindowed; nothing from a placement labelled in no segment, from one whose mode has no
+    entry (idle), nor the `channel: input` terms of one without an input window. A file deriving no term has no
+    entry. A manifest without placements predates the record and is an error."""
+    out = {}
+    demand = manifest.get("demand") or {}
+    for wid, record in manifests.records(manifest).items():
+        if only is not None and wid not in only:
+            continue
+        if "placements" not in record:
+            raise ValueError(f"{wid}: the manifest records no placements (it predates 9.21); run `make generated`")
+        segments = {int(s["index"]): (int(s["t_start_us"]), int(s["t_end_us"]))
+                    for s in (demand.get(record["_artifact"]) or {}).get("segments") or []}
+        if not segments:
+            raise ValueError(f"{wid}: the manifest records no segment bounds under demand")
+        t_end = max(end for _, end in segments.values())
+        terms = []
+        for placement in record["placements"]:
+            entry = spec["files"].get(f"c1-{placement['mode']}")
+            labelled = sorted(int(i) for i in placement["segments"])
+            if entry is None or not labelled:
+                continue
+            if labelled != list(range(labelled[0], labelled[-1] + 1)):
+                raise ValueError(f"{wid}: placement -s{placement['suffix']} is labelled in segments {labelled}, "
+                                 "which are not contiguous; the rule windows one span")
+            start, end = segments[labelled[0]][0], segments[labelled[-1]][1]
+            whole = start == 0 and end == t_end
+            for term in entry.get("terms") or []:
+                if term["metric"] == "ready_wait" and term.get("channel") == "input" and not placement["input"]:
+                    continue                                   # decision 3: no keystroke to read
+                t = {k: v for k, v in term.items() if k != "window"}
+                t["entity"] = suffixed(term["entity"], placement["suffix"])
+                if term["metric"] not in BATCH_METRICS and not whole:
+                    t["window"] = {"start_us": start, "end_us": end}
+                terms.append(t)
+        if terms:
+            out[wid] = {"terms": terms}
+    return out
+
+
+def with_generated(spec, manifest, only=None):
+    """A copy of the scoring spec with the generated-layer rule's entries added for the manifest's files (or the ids
+    in `only`); a generated file that already has an entry is an error — the rule, not an entry, scores it."""
+    out = dict(spec, files=dict(spec["files"]))
+    for wid, entry in generated_entries(spec, manifest, only).items():
+        if wid in out["files"]:
+            raise ValueError(f"{wid}: a generated file is scored by the rule and cannot also have an entry")
+        out["files"][wid] = entry
+    return out
+
+
+def lint_generated(spec, manifest_path):
+    """The rule's entries for one generated manifest against the set's compiled files (9.21 decision 1): every
+    derived term passes `lint_terms`. Error strings, empty when legal; a missing build is an error that names the
+    step to run."""
+    manifest_path = pathlib.Path(manifest_path)
+    if not manifest_path.is_file():
+        return [f"{manifest_path.name}: no manifest (run `make -C dataset generated`)"]
+    manifest = manifests.load(manifest_path)
+    try:
+        entries = generated_entries(spec, manifest)
+    except ValueError as err:
+        return [f"{manifest_path.name}: {err}"]
+    paths = manifests.artifact_paths(manifest_path, manifest)
+    errors = []
+    for wid, entry in sorted(entries.items()):
+        compiled = paths[wid]
+        if not compiled.is_file():
+            errors.append(f"{wid}: no compiled workload at {compiled} (run `make -C dataset generated`)")
+            continue
+        errors.extend(lint_terms(wid, entry, compiled))
+    return errors

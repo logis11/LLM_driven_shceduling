@@ -149,6 +149,30 @@
       "$ref": "#/$defs/workload"
      },
      "description": "rebuilt judging files the sensitivity lines read (9.14 decisions 10, 12): run under the primary boot default alone, never judged, listed neither as judging nor as reporting"
+    },
+    "select": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+       "manifest",
+       "where"
+      ],
+      "properties": {
+       "manifest": {
+        "type": "string",
+        "minLength": 1,
+        "description": "the name of a generated set's manifest pinned under pins/generated"
+       },
+       "where": {
+        "type": "object",
+        "minProperties": 1,
+        "description": "a condition on the manifest's grid records: every named key equal to its value (`split: measurement`, `form: focus`, `tier: 5`)"
+       }
+      }
+     },
+     "description": "9.21 decision 6: files selected from a generated set's manifest by its axes, expanded to ids before anything else runs and added to `reporting` (every generated file is reporting material); the lint checks the manifest is pinned and the keys exist"
     }
    }
   },
@@ -556,6 +580,22 @@
        },
        "description": "per run, the longest ready_wait over every task and cause against the starvation floor, flagged past the reopen point (9.11 D19; 9.14 decision 10)"
       }
+     },
+     {
+      "if": {
+       "properties": {
+        "type": {
+         "const": "flip_cost"
+        }
+       }
+      },
+      "then": {
+       "additionalProperties": false,
+       "properties": {
+        "type": true
+       },
+       "description": "9.21 decision 7 (the hold-time plan's step 1): per listed file and recognizing run, the configuration changes applied, those on a query graded config-incorrect, the per-switch excess summed over the wrong switches into MLFQ, and the file's score beside them"
+      }
      }
     ]
    }
@@ -620,6 +660,13 @@
       "$ref": "#/$defs/pin"
      },
      "description": "one pin per variant manifest the lines read (9.14 decision 12), keyed by the variant set's name"
+    },
+    "generated": {
+     "type": "object",
+     "additionalProperties": {
+      "$ref": "#/$defs/pin"
+     },
+     "description": "one pin per generated set's manifest a selection or a line reads (9.21 decisions 5, 6), keyed by the set's name (`return-grid`, `flap-stress`, …)"
     }
    }
   },

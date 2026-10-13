@@ -232,3 +232,46 @@ def test_scorer_floors_are_overridable_with_the_same_default():
     assert editor and all(t["no_headroom"] == 1 for t in editor)
     s1 = next(f for f in files_r if f["condition"] == "random" and f["seed"] == "s1" and f["boot_default"] == "")
     assert s1["score"] == "2.250000" and s1["n_no_headroom"] == 3
+
+
+def test_flip_aggregates_on_mock_switch(fixture_dir, tmp_path):
+    """9.21 decision 7 on mock-switch's schedule (boot MLFQ; entry 1 MLFQ with a shorter slice; entry 2 FIFO; entry
+    3 MLFQ, the switch whose excess the worked derivation gives as 100 µs): three configuration changes; with a log
+    of three queries graded correct, wrong, wrong, two of them wrong, and the wrong switch into MLFQ (entry 3)
+    contributing its excess — 100 µs; the wrong FIFO entry contributes nothing (no window into FIFO)."""
+    import json
+    from harness.reader import read_config_schedule, read_recognition_log
+    d = fixture_dir("mock-switch")
+    rows, _ = records.build(d / "run.json", d / "trace.jsonl", table="calibrated",
+                            schedule_path=d / "config-schedule.json")
+    aggregates = agg.compute_aggregates(rows, interactive=("editor",))
+    schedule = read_config_schedule(d / "config-schedule.json")
+    queries = [{"t_set_change": t, "telemetry": {"t_us": t, "processes": []}, "validation": "unmodified",
+                "latency_us": 100, "proposal": {"system": {"mode": "dev", "background_wanted": True}}}
+               for t in (500, 10500, 40500)]
+    (tmp_path / "log.json").write_text(json.dumps({"workload_id": "mock-switch", "condition": "llm_algo",
+                                                   "seed": None, "telemetry": "names", "queries": queries}))
+    log = read_recognition_log(tmp_path / "log.json")
+    grades = [{"metric": "config_correct", "t": 500, "value": 1}, {"metric": "config_correct", "t": 10500, "value": 0},
+              {"metric": "config_correct", "t": 40500, "value": 0}, {"metric": "mode_correct", "t": 40500, "value": 1}]
+    out = {r["aggregate"]: r["value"] for r in agg.flip_aggregates(aggregates, schedule, log, grades)}
+    assert out == {"change_count": "3.000000000000", "wrong_change_count": "2.000000000000",
+                   "wrong_switch_excess_sum": "100.000000000000"}
+    flip_rows = agg.flip_aggregates(aggregates, schedule, log, grades)
+    assert all(r["entity"] == "schedule" and r["metric"] == "config_interval" and r["index"] == "" for r in flip_rows)
+    assert {r["workload_id"] for r in flip_rows} == {"mock-switch"} and all(r["condition"] == "llm_algo" for r in flip_rows)
+    validate_rows(flip_rows, AGGREGATES_SCHEMA)
+    # every query correct: changes stay, nothing is wrong, no excess
+    out = {r["aggregate"]: r["value"] for r in agg.flip_aggregates(
+        aggregates, schedule, log, [dict(g, value=1) for g in grades])}
+    assert out["change_count"] == "3.000000000000" and out["wrong_change_count"] == "0.000000000000"
+    assert out["wrong_switch_excess_sum"] == "0.000000000000"
+    # an ungraded query (no config_correct row) is a change and never a wrong one
+    out = {r["aggregate"]: r["value"] for r in agg.flip_aggregates(aggregates, schedule, log, grades[:1])}
+    assert out["wrong_change_count"] == "0.000000000000"
+    # a one-entry schedule (the fixed condition's) has no change
+    (tmp_path / "one.json").write_text(json.dumps({"workload_id": "mock-switch", "condition": "fixed",
+                                                   "schedule": [json.loads((d / "config-schedule.json").read_text())["schedule"][0]]}))
+    out = {r["aggregate"]: r["value"] for r in agg.flip_aggregates(aggregates, read_config_schedule(tmp_path / "one.json"), log, grades)}
+    assert out["change_count"] == "0.000000000000"
+    assert agg.flip_aggregates([], schedule, log, grades) == []

@@ -375,3 +375,30 @@ def test_variant_lines_are_linted_against_the_lists(tmp_path):
     spec["files"]["variants"] = ["mock-score"]                                   # listed twice
     sp.write_text(yaml.safe_dump(spec, sort_keys=False))
     assert any("variants and as judging" in e for e in lint_spec(sp, SPEC_SCHEMA, build, REPO))
+
+
+def test_the_flip_cost_line_reads_the_flip_aggregates_and_the_runs_score(tmp_path):
+    """9.21 decision 7: the three flip aggregates of a recognizing run become one row with the run's file score
+    beside them; a run without the three rows has no row; the totals sum the rows."""
+    from harness import aggregates as agg
+    rows = read_csv(INPUTS["aggregates"], agg.COLUMNS)
+    seed_one = next(r for r in rows if r["condition"] == "random" and r["seed"] == "s1")
+    for aggregate, value in (("change_count", "4.000000000000"), ("wrong_change_count", "1.000000000000"),
+                             ("wrong_switch_excess_sum", "250.000000000000")):
+        rows.append({**{k: seed_one[k] for k in agg.IDENTITY}, "entity": "schedule", "metric": "config_interval",
+                     "aggregate": aggregate, "cause": "", "channel": "", "window_start_us": "", "window_end_us": "",
+                     "index": "", "value": value})
+    rows.sort(key=agg.sort_key)
+    write_csv(rows, agg.COLUMNS, tmp_path / "aggregates.csv")
+    spec = yaml.safe_load((FX / "experiment.yaml").read_text())
+    spec["reporting_lines"].append({"type": "flip_cost"})
+    (tmp_path / "spec.yaml").write_text(yaml.safe_dump(spec, sort_keys=False))
+    report = _evaluate(tmp_path / "spec.yaml", aggregates=tmp_path / "aggregates.csv")
+    line = _line(report, "flip_cost")
+    assert line["rows"] == [{"workload_id": "mock-score", "condition": "random", "table": "prior", "seed": "s1",
+                             "boot_default": "", "telemetry": "names", "changes": 4, "wrong_changes": 1,
+                             "wrong_switch_excess_us": "250.000000000000", "score": "1.639359"}]
+    assert line["changes_total"] == 4 and line["wrong_total"] == 1
+    assert "wrong-switch excess into MLFQ" in render(report)
+    import jsonschema
+    jsonschema.Draft202012Validator(json.loads(REPORT_SCHEMA.read_text())).validate(report)

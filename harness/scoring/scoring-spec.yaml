@@ -69,6 +69,24 @@
 # The audio : video weighting 1.0 : 0.5 on the media files is a stated
 # assumption (an audio dropout is heard at once; a dropped frame at 60 Hz
 # often is not).
+#
+# The generated layer (9.21, decisions 1–3) has no entries here. A generated
+# file's terms are derived when the harness runs, by one rule over the C1
+# entries below (harness/tools/harness/scoring.py, `with_generated`), as a
+# variant's are derived from its base's: for each placement the set's manifest
+# records — a mode's C1 task set under one id suffix (`-s0`, `-s1`, …) — the
+# `c1-<mode>` entry's terms, the entity's task id carrying the suffix (the chain
+# head `game.chain.1` becomes `game-s0.chain.1`, the compiler forming a member's
+# id from its task's), the latency and periodic terms windowed to the segments
+# the placement is labelled in (no
+# window when they span the file), the batch terms unwindowed. A placement
+# labelled in no segment carries no term (the distractor grid's arriving set:
+# the score reads the labelled situation, the arrival's effect on it is in the
+# labelled set's terms); a placement the generator gave no input window
+# (a segment of 4 s or less) drops its `channel: input` terms alone, since they
+# would read no row; an idle placement carries none, as c1-idle has no entry.
+# The rule's expansion is linted against the compiled generated files
+# (scoring_lint, `lint_generated`) as these entries are against the core set.
 
 files:
 

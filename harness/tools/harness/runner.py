@@ -37,7 +37,8 @@ from typing import Dict, List, Optional
 import yaml
 
 from . import aggregates as agg
-from . import evaluator, grader, guards, records, scorer, scoring
+from . import evaluator, grader, guards, manifests, records, scorer, scoring
+from .reader import read_config_schedule, read_recognition_log
 from .outputs import write_csv
 
 HARNESS = pathlib.Path(__file__).resolve().parents[2]
@@ -113,6 +114,7 @@ class RunSpec:
 def expand(spec_path, machine: Machine, root) -> List[RunSpec]:
     spec = evaluator.load_spec(spec_path)
     root = pathlib.Path(root)
+    spec, paths, _axes = manifests.expand(spec, root)             # 9.21 decision 6: the selections as ids
     table_doc = yaml.safe_load((root / spec["pins"]["driver_table"]["path"]).read_text())
     role = str((table_doc or {}).get("role", ""))
     primary = spec["boot_defaults"]["primary"]
@@ -124,7 +126,7 @@ def expand(spec_path, machine: Machine, root) -> List[RunSpec]:
     variants = list(spec["files"].get("variants") or [])          # 9.14 decision 12: the primary boot default alone
     shapes = list(spec["telemetry"])                                # 9.17: every condition under every shape listed
     for wid in files + variants:
-        workload = machine.build_dir / f"{wid}.workload.json"
+        workload = manifests.workload_path(wid, paths, machine.build_dir)
         for shape in shapes:
             for condition in spec["conditions"]:
                 if condition == "fixed":
@@ -271,12 +273,20 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
     exp_dir.mkdir(parents=True, exist_ok=True)
     result = Result(report=None, experiment_dir=exp_dir)
     runs = expand(spec_path, machine, root)
+    spec, _paths, axes = manifests.expand(spec, root)              # 9.21 decision 6: the selected files and their sets
     # the scoring spec, with an entry per variant file (9.14 decision 12: scored on its base's terms, its windows
-    # on its own segments); each run is aggregated as soon as its records are built, so a run's rows — fourteen
+    # on its own segments) and per selected generated file (9.21 decision 1: the rule over the C1 entries, from the
+    # set's pinned manifest); each run is aggregated as soon as its records are built, so a run's rows — fourteen
     # million for c6-dual — live only until its aggregates exist, never all runs' at once
     scoring_spec = scoring.with_variants(scoring.load_spec(scoring_path),
                                          {wid: machine.build_dir / f"{wid}.workload.json"
                                           for wid in (spec["files"].get("variants") or [])})
+    selected_by_set = {}
+    for wid, (set_name, _record) in axes.items():
+        selected_by_set.setdefault(set_name, set()).add(wid)
+    for set_name, wids in sorted(selected_by_set.items()):
+        manifest = manifests.load(root / pins["generated"][set_name]["path"])
+        scoring_spec = scoring.with_generated(scoring_spec, manifest, only=wids)
 
     built: Dict[tuple, dict] = {}           # identity -> {run, dir, aggregates, messages}
     for run in runs:
@@ -308,7 +318,20 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
             aggregates = agg.compute_aggregates(rows, scoring.windows_from_spec(scoring_spec, run.workload_id),
                                                 scoring.interactive_from_spec(scoring_spec, run.workload_id))
             del rows
-            built[run.identity] = {"run": run, "dir": run_dir, "aggregates": aggregates, "messages": list(messages)}
+            grade_rows_run = []
+            if run.condition != "fixed":
+                # Layer 1 for this run now, so the flip aggregates (9.21 decision 7) can read its graded queries
+                grade_rows_run, _gmessages = grader.grade_log(grader.Run(
+                    workload_id=run.workload_id, condition=run.condition, table=run.table, seed=run.seed,
+                    boot_default=run.boot_default, log=run_dir / "log.json", workload=run.workload_file,
+                    table_path=table_path, telemetry=run.telemetry))
+                records.write_csv(grade_rows_run, run_dir / "recognition-records.csv")
+                aggregates = aggregates + agg.flip_aggregates(
+                    aggregates, read_config_schedule(run_dir / "schedule.json"),
+                    read_recognition_log(run_dir / "log.json"), grade_rows_run)
+                aggregates.sort(key=agg.sort_key)
+            built[run.identity] = {"run": run, "dir": run_dir, "aggregates": aggregates, "messages": list(messages),
+                                   "grade_rows": grade_rows_run}
         except (RunError, ValueError, OSError) as exc:
             for name in ("schedule.json", "log.json", "trace.jsonl", "trace.rerun.jsonl", "records.csv"):
                 (run_dir / name).unlink(missing_ok=True)
@@ -360,13 +383,7 @@ def run_experiment(spec_path, machine: Machine, root) -> Result:
                                   "table": run.table, "seed": run.seed, "boot_default": run.boot_default,
                                   "telemetry": run.telemetry,
                                   "log": str(run_dir / "log.json"), "workload": str(run.workload_file)})
-        rows, _messages = grader.grade_log(grader.Run(workload_id=run.workload_id, condition=run.condition,
-                                                      table=run.table, seed=run.seed,
-                                                      boot_default=run.boot_default, log=run_dir / "log.json",
-                                                      workload=run.workload_file, table_path=table_path,
-                                                      telemetry=run.telemetry))
-        records.write_csv(rows, run_dir / "recognition-records.csv")
-        grade_rows.extend(rows)
+        grade_rows.extend(b["grade_rows"])                      # graded in the main loop, beside its aggregates
     (exp_dir / "grade-manifest.json").write_text(json.dumps(gmanifest, indent=1) + "\n")
     grades = grader.compute_grades(grade_rows, bootstrap=grader.Bootstrap())
     write_csv(grades, grader.COLUMNS, exp_dir / "grades.csv")

@@ -23,6 +23,17 @@ row's `t` lies in it; "the rest of that config
 interval outside any window" is the interval's wake rows in neither. A variant
 is written only when both sides have rows.
 
+The flip aggregates (9.21 spec, decision 7; the hold-time plan's step 1) are
+three more rows over the config schedule, computed by `flip_aggregates` from
+what already exists — the schedule, the recognition log, the run's graded
+queries and the per-switch excess rows above: the number of configuration
+changes the daemon applied (an applied entry whose algorithm, params or cap
+differ from the entry before it), the number of those whose query the grader
+marked `config_correct` 0 (one query yields one schedule entry, data-contracts
+§7, so entry k is query k − 1's), and the sum of the per-switch excess over the
+wrong changes that were switches into MLFQ, where the excess is defined. They
+are emitted for a recognizing run only; `fixed` consults no recognizer.
+
 Values are written as decimal strings at a fixed precision (`fmt`) so identical
 records give identical files: twelve places here, because the scorer divides
 these values and its own six-place shares must be exact to their last digit
@@ -32,6 +43,7 @@ computed exactly on the integer records with numpy's "linear" convention
 neighbours; R type 7), so no float noise reaches the file.
 """
 
+import json
 from decimal import ROUND_HALF_EVEN, Decimal
 from fractions import Fraction
 
@@ -46,6 +58,7 @@ IDENTITY = ("workload_id", "condition", "table", "seed", "boot_default", "teleme
 COLUMNS = IDENTITY + ("entity", "metric", "aggregate", "cause", "channel",
                       "window_start_us", "window_end_us", "index", "value")
 PROVENANCES = ("unmodified", "clamped", "held", "fallback")
+FLIP_AGGREGATES = ("change_count", "wrong_change_count", "wrong_switch_excess_sum")   # 9.21 decision 7
 
 
 def fmt(x, places=PLACES) -> str:
@@ -236,6 +249,49 @@ def compute_aggregates(rows, windows=None, interactive=()):
 
     out.sort(key=sort_key)
     return out
+
+
+def _config_of(entry):
+    return (entry.algorithm, json.dumps(entry.params, sort_keys=True), entry.batch_bandwidth_cap)
+
+
+def flip_aggregates(agg_rows, schedule, log, grade_rows):
+    """The three flip rows (9.21 decision 7) for one recognizing run, from the run's aggregate rows (its identity, its
+    `t_end`, its per-switch excess rows), its config schedule, its recognition log and its graded queries
+    (`grader.grade_log` rows). An entry applied at or after `T_end` is ignored (data-contracts §7); a query without a
+    `config_correct` row — ungraded, or no driver table — counts as a change but never as a wrong one."""
+    if not agg_rows:
+        return []
+    identity = {k: agg_rows[0][k] for k in IDENTITY}
+    t_end = next((int(Decimal(r["value"])) for r in agg_rows
+                  if r["entity"] == "lane" and r["metric"] == "busy" and r["aggregate"] == "t_end"), None)
+    wrong_at = {int(r["t"]) for r in grade_rows if r["metric"] == "config_correct" and int(r["value"]) == 0}
+    excess = {}
+    for r in agg_rows:
+        if r["metric"] == "switch_window" and r["aggregate"] == "excess_switch" and r["index"] != "":
+            excess[int(r["index"])] = excess.get(int(r["index"]), Fraction(0)) + Fraction(Decimal(r["value"]))
+    changes = wrong = 0
+    excess_sum = Fraction(0)
+    entries = schedule.entries
+    for k in range(1, len(entries)):
+        entry = entries[k]
+        if t_end is not None and entry.t_us >= t_end:
+            continue
+        if _config_of(entry) == _config_of(entries[k - 1]):
+            continue
+        changes += 1
+        query = log.queries[k - 1] if k - 1 < len(log.queries) else None
+        if query is None or query.t_set_change not in wrong_at:
+            continue
+        wrong += 1
+        if entry.algorithm == "MLFQ" and entries[k - 1].algorithm != "MLFQ":
+            excess_sum += excess.get(k, Fraction(0))
+    rows = []
+    for aggregate, value in zip(FLIP_AGGREGATES, (changes, wrong, excess_sum)):
+        rows.append({**identity, "entity": "schedule", "metric": "config_interval", "aggregate": aggregate,
+                     "cause": "", "channel": "", "window_start_us": "", "window_end_us": "", "index": "",
+                     "value": fmt(value)})
+    return rows
 
 
 def sort_key(row):
