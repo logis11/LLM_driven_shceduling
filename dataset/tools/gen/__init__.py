@@ -6,4 +6,4 @@ compose.py  one cell -> one timeline (9.10 D44's placement; the batch jobs scale
 """
 
 from .cells import cells, lint_grids, load_definition, modes_of, ordered_pairs, seed_of
-from .compose import c1_sets, compose
+from .compose import c1_sets, compose, compose_full, grid_record, render_bytes

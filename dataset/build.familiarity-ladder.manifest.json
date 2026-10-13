@@ -868,9 +868,27 @@
         "others"
       ],
       "mode": "backup",
+      "placements": [
+        {
+          "input": true,
+          "mode": "backup",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "deja-dup": "duplicity"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "backup",
+          "pre_committed_miss": false,
+          "tier": 3
+        }
+      ],
       "sources": {
         "deja-dup": "meas-ci:background:2026-10-04"
       },
@@ -882,10 +900,28 @@
         "all"
       ],
       "mode": "backup",
+      "placements": [
+        {
+          "input": true,
+          "mode": "backup",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "deja-dup": "backup-tool",
         "kdenlive": "video-editor"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "backup",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-backup-t4-focus.workload.json": {
@@ -894,9 +930,27 @@
         "focus"
       ],
       "mode": "backup",
+      "placements": [
+        {
+          "input": true,
+          "mode": "backup",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "kdenlive": "video-editor"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "backup",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-backup-t4-others.workload.json": {
@@ -905,9 +959,27 @@
         "others"
       ],
       "mode": "backup",
+      "placements": [
+        {
+          "input": true,
+          "mode": "backup",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "deja-dup": "backup-tool"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "backup",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-backup-t5-all.workload.json": {
@@ -916,10 +988,28 @@
         "all"
       ],
       "mode": "backup",
+      "placements": [
+        {
+          "input": true,
+          "mode": "backup",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "deja-dup": "cncp",
         "kdenlive": "rrqy"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "backup",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-backup-t5-focus.workload.json": {
@@ -928,9 +1018,27 @@
         "focus"
       ],
       "mode": "backup",
+      "placements": [
+        {
+          "input": true,
+          "mode": "backup",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "kdenlive": "pqxi"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "backup",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-backup-t5-others.workload.json": {
@@ -939,9 +1047,27 @@
         "others"
       ],
       "mode": "backup",
+      "placements": [
+        {
+          "input": true,
+          "mode": "backup",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "deja-dup": "kktf"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "backup",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-browsing-t4-all.workload.json": {
@@ -951,9 +1077,27 @@
         "focus"
       ],
       "mode": "browsing",
+      "placements": [
+        {
+          "input": true,
+          "mode": "browsing",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "chrome": "web-browser"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "browsing",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-browsing-t5-all.workload.json": {
@@ -963,9 +1107,27 @@
         "focus"
       ],
       "mode": "browsing",
+      "placements": [
+        {
+          "input": true,
+          "mode": "browsing",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "chrome": "hnjz"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "browsing",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-compile-t4-all.workload.json": {
@@ -974,11 +1136,29 @@
         "all"
       ],
       "mode": "compile",
+      "placements": [
+        {
+          "input": true,
+          "mode": "compile",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "cc1": "c-compiler",
         "code": "text-editor",
         "make": "build-runner"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "compile",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-compile-t4-focus.workload.json": {
@@ -987,9 +1167,27 @@
         "focus"
       ],
       "mode": "compile",
+      "placements": [
+        {
+          "input": true,
+          "mode": "compile",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "code": "text-editor"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "compile",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-compile-t4-others.workload.json": {
@@ -998,10 +1196,28 @@
         "others"
       ],
       "mode": "compile",
+      "placements": [
+        {
+          "input": true,
+          "mode": "compile",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "cc1": "c-compiler",
         "make": "build-runner"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "compile",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-compile-t5-all.workload.json": {
@@ -1010,11 +1226,29 @@
         "all"
       ],
       "mode": "compile",
+      "placements": [
+        {
+          "input": true,
+          "mode": "compile",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "cc1": "xsfc",
         "code": "owcp",
         "make": "lgar"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "compile",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-compile-t5-focus.workload.json": {
@@ -1023,9 +1257,27 @@
         "focus"
       ],
       "mode": "compile",
+      "placements": [
+        {
+          "input": true,
+          "mode": "compile",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "code": "pyzd"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "compile",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-compile-t5-others.workload.json": {
@@ -1034,10 +1286,28 @@
         "others"
       ],
       "mode": "compile",
+      "placements": [
+        {
+          "input": true,
+          "mode": "compile",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "cc1": "mvhh",
         "make": "qvho"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "compile",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-dev-t4-all.workload.json": {
@@ -1047,9 +1317,27 @@
         "focus"
       ],
       "mode": "dev",
+      "placements": [
+        {
+          "input": true,
+          "mode": "dev",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "code": "text-editor"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "dev",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-dev-t5-all.workload.json": {
@@ -1059,9 +1347,27 @@
         "focus"
       ],
       "mode": "dev",
+      "placements": [
+        {
+          "input": true,
+          "mode": "dev",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "code": "jsrx"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "dev",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-gaming-t4-all.workload.json": {
@@ -1070,6 +1376,16 @@
         "all"
       ],
       "mode": "gaming",
+      "placements": [
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "FAudio_AudioCli": "audio-client",
         "Task worker thr": "game-worker",
@@ -1080,6 +1396,14 @@
         "winepulse_mainl": "audio-mainloop",
         "winepulse_timer": "audio-timer"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-gaming-t4-focus.workload.json": {
@@ -1088,9 +1412,27 @@
         "focus"
       ],
       "mode": "gaming",
+      "placements": [
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "Troy.exe": "game-engine"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-gaming-t4-others.workload.json": {
@@ -1099,6 +1441,16 @@
         "others"
       ],
       "mode": "gaming",
+      "placements": [
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "FAudio_AudioCli": "audio-client",
         "Task worker thr": "game-worker",
@@ -1108,6 +1460,14 @@
         "winepulse_mainl": "audio-mainloop",
         "winepulse_timer": "audio-timer"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-gaming-t5-all.workload.json": {
@@ -1116,6 +1476,16 @@
         "all"
       ],
       "mode": "gaming",
+      "placements": [
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "FAudio_AudioCli": "bkyi",
         "Task worker thr": "adtc",
@@ -1126,6 +1496,14 @@
         "winepulse_mainl": "bapt",
         "winepulse_timer": "ndig"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-gaming-t5-focus.workload.json": {
@@ -1134,9 +1512,27 @@
         "focus"
       ],
       "mode": "gaming",
+      "placements": [
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "Troy.exe": "xqhe"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-gaming-t5-others.workload.json": {
@@ -1145,6 +1541,16 @@
         "others"
       ],
       "mode": "gaming",
+      "placements": [
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "FAudio_AudioCli": "vdvu",
         "Task worker thr": "xkej",
@@ -1154,6 +1560,14 @@
         "winepulse_mainl": "wlad",
         "winepulse_timer": "wkec"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-idle-t4-all.workload.json": {
@@ -1163,12 +1577,30 @@
         "others"
       ],
       "mode": "idle",
+      "placements": [
+        {
+          "input": false,
+          "mode": "idle",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "dbus-daemon": "message-bus",
         "gnome-shell": "desktop-shell",
         "pipewire": "audio-server",
         "systemd": "service-mgr"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "idle",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-idle-t5-all.workload.json": {
@@ -1178,12 +1610,30 @@
         "others"
       ],
       "mode": "idle",
+      "placements": [
+        {
+          "input": false,
+          "mode": "idle",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "dbus-daemon": "xdhu",
         "gnome-shell": "vvct",
         "pipewire": "qumc",
         "systemd": "eblo"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "idle",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-indexing-t4-all.workload.json": {
@@ -1192,10 +1642,28 @@
         "all"
       ],
       "mode": "indexing",
+      "placements": [
+        {
+          "input": true,
+          "mode": "indexing",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "code": "text-editor",
         "tracker-miner-f": "file-indexer"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "indexing",
+          "pre_committed_miss": true,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-indexing-t4-focus.workload.json": {
@@ -1204,9 +1672,27 @@
         "focus"
       ],
       "mode": "indexing",
+      "placements": [
+        {
+          "input": true,
+          "mode": "indexing",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "code": "text-editor"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "indexing",
+          "pre_committed_miss": true,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-indexing-t4-others.workload.json": {
@@ -1215,9 +1701,27 @@
         "others"
       ],
       "mode": "indexing",
+      "placements": [
+        {
+          "input": true,
+          "mode": "indexing",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "tracker-miner-f": "file-indexer"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "indexing",
+          "pre_committed_miss": true,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-indexing-t5-all.workload.json": {
@@ -1226,10 +1730,28 @@
         "all"
       ],
       "mode": "indexing",
+      "placements": [
+        {
+          "input": true,
+          "mode": "indexing",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "code": "ntoo",
         "tracker-miner-f": "iakw"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "indexing",
+          "pre_committed_miss": true,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-indexing-t5-focus.workload.json": {
@@ -1238,9 +1760,27 @@
         "focus"
       ],
       "mode": "indexing",
+      "placements": [
+        {
+          "input": true,
+          "mode": "indexing",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "code": "lrja"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "indexing",
+          "pre_committed_miss": true,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-indexing-t5-others.workload.json": {
@@ -1249,9 +1789,27 @@
         "others"
       ],
       "mode": "indexing",
+      "placements": [
+        {
+          "input": true,
+          "mode": "indexing",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "tracker-miner-f": "llcc"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "indexing",
+          "pre_committed_miss": true,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-mail-t4-all.workload.json": {
@@ -1261,9 +1819,27 @@
         "focus"
       ],
       "mode": "mail",
+      "placements": [
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "thunderbird-bin": "mail-reader"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-mail-t5-all.workload.json": {
@@ -1273,9 +1849,27 @@
         "focus"
       ],
       "mode": "mail",
+      "placements": [
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "thunderbird-bin": "iynp"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-media-t4-all.workload.json": {
@@ -1285,9 +1879,27 @@
         "focus"
       ],
       "mode": "media",
+      "placements": [
+        {
+          "input": false,
+          "mode": "media",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "mpv": "media-player"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "media",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-media-t5-all.workload.json": {
@@ -1297,9 +1909,27 @@
         "focus"
       ],
       "mode": "media",
+      "placements": [
+        {
+          "input": false,
+          "mode": "media",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "mpv": "tvvh"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "media",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-meeting-t4-all.workload.json": {
@@ -1309,9 +1939,27 @@
         "focus"
       ],
       "mode": "meeting",
+      "placements": [
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "chrome": "web-browser"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-meeting-t5-all.workload.json": {
@@ -1321,9 +1969,27 @@
         "focus"
       ],
       "mode": "meeting",
+      "placements": [
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "chrome": "nnhd"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-ml-train-t4-all.workload.json": {
@@ -1332,10 +1998,28 @@
         "all"
       ],
       "mode": "ml-train",
+      "placements": [
+        {
+          "input": true,
+          "mode": "ml-train",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "code": "text-editor",
         "python": "model-trainer"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "ml-train",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-ml-train-t4-focus.workload.json": {
@@ -1344,9 +2028,27 @@
         "focus"
       ],
       "mode": "ml-train",
+      "placements": [
+        {
+          "input": true,
+          "mode": "ml-train",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "code": "text-editor"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "ml-train",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-ml-train-t4-others.workload.json": {
@@ -1355,9 +2057,27 @@
         "others"
       ],
       "mode": "ml-train",
+      "placements": [
+        {
+          "input": true,
+          "mode": "ml-train",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "python": "model-trainer"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "ml-train",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-ml-train-t5-all.workload.json": {
@@ -1366,10 +2086,28 @@
         "all"
       ],
       "mode": "ml-train",
+      "placements": [
+        {
+          "input": true,
+          "mode": "ml-train",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "code": "wzfc",
         "python": "qmhy"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "ml-train",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-ml-train-t5-focus.workload.json": {
@@ -1378,9 +2116,27 @@
         "focus"
       ],
       "mode": "ml-train",
+      "placements": [
+        {
+          "input": true,
+          "mode": "ml-train",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "code": "wirx"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "ml-train",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-ml-train-t5-others.workload.json": {
@@ -1389,9 +2145,27 @@
         "others"
       ],
       "mode": "ml-train",
+      "placements": [
+        {
+          "input": true,
+          "mode": "ml-train",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "python": "hwgl"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "ml-train",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-office-t4-all.workload.json": {
@@ -1400,11 +2174,29 @@
         "all"
       ],
       "mode": "office",
+      "placements": [
+        {
+          "input": true,
+          "mode": "office",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "chrome": "web-browser",
         "soffice.bin": "doc-writer",
         "thunderbird-bin": "mail-reader"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "office",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-office-t4-focus.workload.json": {
@@ -1413,9 +2205,27 @@
         "focus"
       ],
       "mode": "office",
+      "placements": [
+        {
+          "input": true,
+          "mode": "office",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "soffice.bin": "doc-writer"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "office",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-office-t4-others.workload.json": {
@@ -1424,10 +2234,28 @@
         "others"
       ],
       "mode": "office",
+      "placements": [
+        {
+          "input": true,
+          "mode": "office",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "chrome": "web-browser",
         "thunderbird-bin": "mail-reader"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "office",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-office-t5-all.workload.json": {
@@ -1436,11 +2264,29 @@
         "all"
       ],
       "mode": "office",
+      "placements": [
+        {
+          "input": true,
+          "mode": "office",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "chrome": "dlwd",
         "soffice.bin": "nklw",
         "thunderbird-bin": "ovqj"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "office",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-office-t5-focus.workload.json": {
@@ -1449,9 +2295,27 @@
         "focus"
       ],
       "mode": "office",
+      "placements": [
+        {
+          "input": true,
+          "mode": "office",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "soffice.bin": "pmhn"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "office",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-office-t5-others.workload.json": {
@@ -1460,10 +2324,28 @@
         "others"
       ],
       "mode": "office",
+      "placements": [
+        {
+          "input": true,
+          "mode": "office",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "chrome": "yeva",
         "thunderbird-bin": "tlod"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "office",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-photo-t4-all.workload.json": {
@@ -1473,9 +2355,27 @@
         "focus"
       ],
       "mode": "photo",
+      "placements": [
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "gimp": "image-editor"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-photo-t5-all.workload.json": {
@@ -1485,9 +2385,27 @@
         "focus"
       ],
       "mode": "photo",
+      "placements": [
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "gimp": "wgbg"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-render-t3.workload.json": {
@@ -1496,9 +2414,27 @@
         "others"
       ],
       "mode": "render",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "kdenlive_render": "melt-7"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 3
+        }
+      ],
       "sources": {
         "kdenlive_render": "meas-ci:background:2026-10-03c"
       },
@@ -1510,10 +2446,28 @@
         "all"
       ],
       "mode": "render",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "kdenlive": "video-editor",
         "kdenlive_render": "clip-exporter"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-render-t4-focus.workload.json": {
@@ -1522,9 +2476,27 @@
         "focus"
       ],
       "mode": "render",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "kdenlive": "video-editor"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-render-t4-others.workload.json": {
@@ -1533,9 +2505,27 @@
         "others"
       ],
       "mode": "render",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "kdenlive_render": "clip-exporter"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-render-t5-all.workload.json": {
@@ -1544,10 +2534,28 @@
         "all"
       ],
       "mode": "render",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "kdenlive": "pxzo",
         "kdenlive_render": "jgex"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-render-t5-focus.workload.json": {
@@ -1556,9 +2564,27 @@
         "focus"
       ],
       "mode": "render",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "kdenlive": "iorq"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-render-t5-others.workload.json": {
@@ -1567,9 +2593,27 @@
         "others"
       ],
       "mode": "render",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "kdenlive_render": "qapo"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-transcode-t4-all.workload.json": {
@@ -1578,10 +2622,28 @@
         "all"
       ],
       "mode": "transcode",
+      "placements": [
+        {
+          "input": true,
+          "mode": "transcode",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "HandBrakeCLI": "video-encoder",
         "kdenlive": "video-editor"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "transcode",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-transcode-t4-focus.workload.json": {
@@ -1590,9 +2652,27 @@
         "focus"
       ],
       "mode": "transcode",
+      "placements": [
+        {
+          "input": true,
+          "mode": "transcode",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "kdenlive": "video-editor"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "transcode",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-transcode-t4-others.workload.json": {
@@ -1601,9 +2681,27 @@
         "others"
       ],
       "mode": "transcode",
+      "placements": [
+        {
+          "input": true,
+          "mode": "transcode",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "HandBrakeCLI": "video-encoder"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "transcode",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-transcode-t5-all.workload.json": {
@@ -1612,10 +2710,28 @@
         "all"
       ],
       "mode": "transcode",
+      "placements": [
+        {
+          "input": true,
+          "mode": "transcode",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "HandBrakeCLI": "deay",
         "kdenlive": "tari"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "transcode",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-transcode-t5-focus.workload.json": {
@@ -1624,9 +2740,27 @@
         "focus"
       ],
       "mode": "transcode",
+      "placements": [
+        {
+          "input": true,
+          "mode": "transcode",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "kdenlive": "ajlg"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "transcode",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-transcode-t5-others.workload.json": {
@@ -1635,9 +2769,27 @@
         "others"
       ],
       "mode": "transcode",
+      "placements": [
+        {
+          "input": true,
+          "mode": "transcode",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "HandBrakeCLI": "tijw"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "transcode",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     },
     "familiarity-ladder-single/fl-video-edit-t4-all.workload.json": {
@@ -1647,9 +2799,27 @@
         "focus"
       ],
       "mode": "video-edit",
+      "placements": [
+        {
+          "input": true,
+          "mode": "video-edit",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "kdenlive": "video-editor"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "video-edit",
+          "pre_committed_miss": false,
+          "tier": 4
+        }
+      ],
       "tier": 4
     },
     "familiarity-ladder-single/fl-video-edit-t5-all.workload.json": {
@@ -1659,9 +2829,27 @@
         "focus"
       ],
       "mode": "video-edit",
+      "placements": [
+        {
+          "input": true,
+          "mode": "video-edit",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        }
+      ],
       "renamed": {
         "kdenlive": "qtrk"
       },
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "video-edit",
+          "pre_committed_miss": false,
+          "tier": 5
+        }
+      ],
       "tier": 5
     }
   },
@@ -1695,10 +2883,11 @@
     "dataset/timelines/coreset/c1-transcode.timeline.yaml": "eabb5e6fefa5276c1cfbbbba5bc4d25eb7d5da79dfa34952292c91e1577e2fd0",
     "dataset/timelines/coreset/c1-video-edit.timeline.yaml": "a4ad1c87c721bf0c26cd1759be55ac625436b6a5aa8e6f24ef5777ff9e9adc9b",
     "dataset/tools/compile.py": "1e6b1dd3d7a44ae4d9e8081afb0f22d1770d29b2b3cac48aae03e38673e7140a",
-    "dataset/tools/gen/__init__.py": "4d33de4322db81eb70ee8f702122853a25f995f7dfecb93868721ea94377ffe0",
+    "dataset/tools/gen/__init__.py": "a33d2e35d5ae166052bb5f541f3ab90468ae9735284433a51a9e29eaabcc4a1e",
     "dataset/tools/gen/cells.py": "5b8ef682222ecc0ac91306c8afb8bc560a52949b016c3b6b236f2b04f371ac7c",
-    "dataset/tools/gen/compose.py": "6c67041c1c60c26fa7b375d49c137b233eb2b3f07a78c48cc2a0cb0e82b3f7dc",
-    "dataset/tools/generate.py": "341b8b940efe1a3568791414582ac05360352648a90f30b8caf04d04f74c550f",
+    "dataset/tools/gen/compose.py": "d8a8b03103aaded64fb364bbf4636f33bc8e02ac3e37f7b5de0377bb5d499b8e",
+    "dataset/tools/gen/coverage.py": "d6abaa6a3221f8015b9a78bd04cee8bca51b762247b2d5d99c3eca7c923116ab",
+    "dataset/tools/generate.py": "6dc108bf6c437759f2890a8cae128f93ce0baf0b981c2565a6adcc4b68f1dd2e",
     "dataset/tools/wlc/__init__.py": "8af88d31985ddc82e26504b9d88cad31a1b11a7b2d869314e47c0a399e35ef06",
     "dataset/tools/wlc/compiler.py": "35d1bcee6ff15875b0b2d524fde20fd8533d8bc4850526f72137241c0da45402",
     "dataset/tools/wlc/deriver.py": "6e725a858c8aabe03b7d52f0719c877fb4cffcc011117850fe33aadb688974ae",

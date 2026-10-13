@@ -27,6 +27,7 @@ import pathlib
 
 import yaml
 
+from wlc.grid import MISS_KEY, segment_tier
 from wlc.units import parse_us
 
 SCALED = ("total_work", "spawn_count")   # the bound values a span scales (decision 1)
@@ -117,6 +118,25 @@ def _meta(cell):
     return {"id": cell["id"], "seed": cell["seed"], "demand": "calibration"}
 
 
+def _placement(mode, k, segments, windows):
+    """One placement's record (9.21 decision 1): the mode, the id suffix, the segments it is labelled in, whether the
+    generator gave it an input window."""
+    return {"mode": mode, "suffix": k, "segments": list(segments), "input": bool(windows)}
+
+
+def grid_record(data, placements):
+    """What the manifest's grid record carries per file beside the cell's coordinates (9.21 decisions 1 and 4): the
+    placements and each segment's labels — mode, `background_wanted`, tier (the `familiarity` annotation, else the
+    coverage tool's name rule), `pre_committed_miss`."""
+    segments = []
+    for seg in data["segments"]:
+        attributes = seg.get("attributes") or {}
+        segments.append({"mode": seg["mode"], "background_wanted": bool(attributes.get("background_wanted")),
+                         "tier": int(segment_tier(seg, data["tasks"])),
+                         MISS_KEY: bool(attributes.get(MISS_KEY, False))})
+    return {"placements": placements, "segments": segments}
+
+
 def _compose_distractor(cell, sets, defn):
     """9.20 decisions 1–3: A over both segments (its tasks, focus and input to the file's end), the arrival at the
     boundary without tracks, the second segment A's label with the arrival's scenario tags added."""
@@ -124,10 +144,12 @@ def _compose_distractor(cell, sets, defn):
     L = parse_us(defn["segment_length"])
     seg_a, tasks, windows, focus, operations = _place(sets[cell["a"]], 0, 0, L, 2 * L, no_input_below,
                                                        track_end=2 * L)
+    placements = [_placement(cell["a"], 0, [0, 1], windows)]   # A is labelled in both segments
     arrival = cell["arrival"]
     if "mode" in arrival:
         seg_b, tasks_b, _, _, _ = _place(sets[arrival["mode"]], 1, L, 2 * L, 2 * L, no_input_below, tracks=False)
         tasks.extend(tasks_b)
+        placements.append(_placement(arrival["mode"], 1, [], []))   # B is labelled nowhere (9.21 decision 2)
         added = list(seg_b.get("scenario") or [])
     else:
         program = arrival["program"]
@@ -151,7 +173,7 @@ def _compose_distractor(cell, sets, defn):
     data = {"meta": _meta(cell), "segments": [seg_a, second], "tasks": tasks, "input": windows, "focus": focus}
     if operations:
         data["operations"] = operations
-    return data
+    return data, placements
 
 
 def _compose_ladder(cell, sets, defn):
@@ -179,17 +201,18 @@ def _compose_ladder(cell, sets, defn):
     data = {"meta": _meta(cell), "segments": [seg], "tasks": tasks, "input": windows, "focus": focus}
     if operations:
         data["operations"] = operations
-    return data
+    return data, [_placement(cell["a"], 0, [0], windows)]
 
 
-def compose(cell, sets, defn):
-    """The cell's timeline as a raw dict: meta, segments, tasks, input, focus, operations."""
+def compose_full(cell, sets, defn):
+    """The cell's timeline as a raw dict — meta, segments, tasks, input, focus, operations — with its placements'
+    records (9.21 decision 1)."""
     if cell["set"] == "distractor-grid":
         return _compose_distractor(cell, sets, defn)
     if cell["set"] == "familiarity-ladder":
         return _compose_ladder(cell, sets, defn)
     no_input_below = parse_us(defn["no_input_below"])
-    segments, tasks, windows, focus, operations = [], [], [], [], []
+    segments, tasks, windows, focus, operations, placements = [], [], [], [], [], []
     for k, (mode, start, end, alive_until) in enumerate(cell["placements"]):
         seg, ts, ws, fs, ops = _place(sets[mode], k, start, end, alive_until, no_input_below)
         segments.append(seg)
@@ -197,10 +220,16 @@ def compose(cell, sets, defn):
         windows.extend(ws)
         focus.extend(fs)
         operations.extend(ops)
+        placements.append(_placement(mode, k, [k], ws))   # the k-th placement labels the k-th segment
     data = {"meta": _meta(cell), "segments": segments, "tasks": tasks, "input": windows, "focus": focus}
     if operations:
         data["operations"] = operations
-    return data
+    return data, placements
+
+
+def compose(cell, sets, defn):
+    """The cell's timeline as a raw dict: meta, segments, tasks, input, focus, operations."""
+    return compose_full(cell, sets, defn)[0]
 
 
 def describe(cell):
@@ -226,6 +255,11 @@ def describe(cell):
             f"(interval source {g['interval_source']}); {cell['split']} seed")
 
 
-def timeline_bytes(cell, sets, defn):
+def render_bytes(cell, data):
+    """The timeline file's bytes for a composed cell: the header comment, then the dict as sorted YAML."""
     header = HEADER.format(set=cell["set"], desc=describe(cell))
-    return (header + yaml.safe_dump(compose(cell, sets, defn), sort_keys=True)).encode()
+    return (header + yaml.safe_dump(data, sort_keys=True)).encode()
+
+
+def timeline_bytes(cell, sets, defn):
+    return render_bytes(cell, compose(cell, sets, defn))

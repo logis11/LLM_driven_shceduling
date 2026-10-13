@@ -14,7 +14,7 @@ The cells come from `dataset/grids.yaml` over the sixteen C1 timelines (`gen.cel
 the compile report beside the artifact — into `dataset/build/<set>-<mode>/`. The set's manifest,
 `dataset/build.<set>.manifest.json`, pins the compile's inputs plus the definition, the generator and the C1
 timelines by content, every artifact and report by hash, the demand per file, and under `grid` each file's
-coordinates and split (decisions 4–6). The compile mirrors `compile.compile_one` over a different root so the core
+coordinates and split (decisions 4–6) with its placements and its segments' labels (9.21 decisions 1 and 4). The compile mirrors `compile.compile_one` over a different root so the core
 compiler and the core set's manifest stay as they are (spec invariant).
 """
 
@@ -31,7 +31,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
 import compile as compile_tool  # noqa: E402
 from gen import c1_sets, cells, lint_grids, load_definition, modes_of  # noqa: E402
-from gen.compose import timeline_bytes  # noqa: E402
+from gen.compose import compose_full, grid_record, render_bytes  # noqa: E402
 from wlc import Timeline, TimelineError, compile_timeline  # noqa: E402
 from wlc.compiler import MODES, canonical_bytes  # noqa: E402
 from wlc.linter import lint_bound_sources, lint_canonical  # noqa: E402
@@ -57,7 +57,9 @@ def generator_inputs(root):
 
 
 def write_timelines(root, defn, by_set):
-    """Writes every cell's timeline under generated/<set>/, removes stale ones; returns {set: [(cell, path)]}."""
+    """Writes every cell's timeline under generated/<set>/, removes stale ones; returns {set: [(cell, path, record)]},
+    the record what the manifest's grid section carries beside the cell's coordinates (9.21: the placements and the
+    segments' labels, `gen.compose.grid_record`)."""
     sets = c1_sets(pathlib.Path(root) / "dataset" / "timelines" / "coreset")
     out = {}
     for set_name, set_cells in by_set.items():
@@ -67,11 +69,12 @@ def write_timelines(root, defn, by_set):
         out[set_name] = []
         for cell in set_cells:
             path = directory / f"{cell['id']}.timeline.yaml"
-            data = timeline_bytes(cell, sets, defn)
+            composed, placements = compose_full(cell, sets, defn)
+            data = render_bytes(cell, composed)
             if not path.is_file() or path.read_bytes() != data:
                 path.write_bytes(data)
             wanted.add(path.name)
-            out[set_name].append((cell, path))
+            out[set_name].append((cell, path, grid_record(composed, placements)))
         for stale in directory.glob("*.timeline.yaml"):
             if stale.name not in wanted:
                 stale.unlink()
@@ -109,14 +112,14 @@ def build_set(root, set_name, placed, jobs=None):
     """Returns (manifest, artifacts {relpath: bytes}, errors, reports) for one set."""
     root = pathlib.Path(root)
     jobs = min(jobs or compile_tool.default_jobs(), max(1, len(placed)))
-    args = [(root, set_name, path) for _, path in placed]
+    args = [(root, set_name, path) for _, path, _ in placed]
     if jobs == 1:
         results = [_job(a) for a in args]
     else:
         with concurrent.futures.ProcessPoolExecutor(max_workers=jobs) as pool:
             results = list(pool.map(_job, args, chunksize=8))
     artifacts, demand, errors, reports, report_of, grid = {}, {}, [], [], {}, {}
-    for (cell, _), (cell_errors, built) in zip(placed, results):
+    for (cell, _, record), (cell_errors, built) in zip(placed, results):
         errors.extend(cell_errors)
         for out, data, entry, report, timeline_id, mode in built:
             artifacts[out] = data
@@ -126,6 +129,7 @@ def build_set(root, set_name, placed, jobs=None):
             coords = dict(cell["grid"])
             if "split" in cell:
                 coords["split"] = cell["split"]
+            coords.update(record)   # 9.21: the placements and the segments' labels
             grid[out] = coords
     reports.sort(key=lambda r: (r[0], r[1]))
     inputs = compile_tool.input_files(root) + generator_inputs(root)
@@ -177,7 +181,7 @@ def main():
     status = 0
     for set_name, set_placed in placed.items():
         errors = []
-        for _, path in set_placed:
+        for _, path, _ in set_placed:
             errors.extend(lint_bound_sources(path, registry))
         manifest, artifacts, build_errors, reports = build_set(root, set_name, set_placed, jobs=args.jobs)
         errors.extend(build_errors)

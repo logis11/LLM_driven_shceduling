@@ -1,13 +1,16 @@
 """Coverage grid (Phase 7 spec, decisions 1 and 11): one row per driver-table
 cell — mode × background_wanted — with the five familiarity-tier columns;
 `ambiguous` reported outside the 32; pre-committed-miss segments counted in
-their cell and marked; an empty cell is a coverage error."""
+their cell and marked; an empty cell is a coverage error. The generated
+layer's tables (9.21 decision 4) beside it, one per set, from the committed
+manifests' segment labels."""
 
 import json
 
 import pytest
 import yaml
 
+from gen import coverage
 from wlc import grid
 
 MODES = ["browsing", "office", "mail", "dev", "photo", "meeting", "gaming",
@@ -85,10 +88,72 @@ def test_per_file_rows_carry_the_attribute(coverage):
     assert all("pre_committed_miss" not in r for r in rows)
 
 
-def test_committed_grid_matches_the_timelines(repo_root):
-    assert grid.write(repo_root / "dataset" / "timelines",
-                      repo_root / "dataset" / "coverage-grid.json",
-                      check=True) == []
+def generated_manifests(repo_root):
+    sets = yaml.safe_load((repo_root / "dataset" / "grids.yaml").read_text())["sets"]
+    return [repo_root / "dataset" / f"build.{name}.manifest.json" for name in sets]
+
+
+def test_committed_grid_matches_the_timelines_and_the_generated_manifests(repo_root):
+    assert coverage.write(repo_root / "dataset" / "timelines", generated_manifests(repo_root),
+                          repo_root / "dataset" / "coverage-grid.json", check=True) == []
+
+
+# --- 9.21: the generated layer's tables ---------------------------------
+
+@pytest.fixture(scope="module")
+def generated(repo_root):
+    return coverage.build_generated_grid(generated_manifests(repo_root))
+
+
+def test_generated_tables_one_per_set_over_the_true_cells_alone(generated):
+    """Every C1 file is the `true` side of its mode, so every generated segment lands in a `true` cell; the file
+    and segment counts are the sets' (480 × 2, 720 × 3, 24 × 9, 272 × 2, 66 × 1)."""
+    assert {s: (t["files"], t["segments_total"]) for s, t in generated.items()} == {
+        "transition-grid": (480, 960), "return-grid": (720, 2160), "flap-stress": (24, 216),
+        "distractor-grid": (272, 544), "familiarity-ladder": (66, 66)}
+    for table in generated.values():
+        assert [(c["mode"], c["background_wanted"]) for c in table["cells"]] == [(m, w) for m in MODES for w in (True, False)]
+        for cell in table["cells"]:
+            assert sum(cell["tiers"].values()) == cell["segments"]
+            if not cell["background_wanted"]:
+                assert cell["segments"] == 0
+
+
+def test_the_ladder_fills_tiers_4_and_5_for_every_mode_and_tier_3_where_the_definition_names_one(generated):
+    by_mode = {c["mode"]: c for c in generated["familiarity-ladder"]["cells"] if c["background_wanted"]}
+    for mode in MODES:
+        assert by_mode[mode]["tiers"]["t4"] >= 1 and by_mode[mode]["tiers"]["t5"] >= 1, mode
+        assert by_mode[mode]["tiers"]["t4"] == by_mode[mode]["tiers"]["t5"]
+        assert by_mode[mode]["tiers"]["t1"] == by_mode[mode]["tiers"]["t2"] == 0
+    assert {m for m, c in by_mode.items() if c["tiers"]["t3"]} == {"render", "backup"}
+    assert sum(c["tiers"]["t4"] for c in by_mode.values()) == sum(c["tiers"]["t5"] for c in by_mode.values()) == 32
+
+
+def test_every_transition_cell_holds_sixty_segments_and_indexing_true_is_always_a_miss(generated):
+    for table_name, per_mode in (("transition-grid", 60), ("return-grid", 135), ("distractor-grid", 34)):
+        for cell in generated[table_name]["cells"]:
+            if cell["background_wanted"]:
+                assert cell["segments"] == per_mode, (table_name, cell["mode"])
+                if cell["mode"] == "indexing":
+                    assert cell["pre_committed_miss"] == per_mode   # inherited from c1-indexing's annotation
+    # 9.20 decision 3: the 26 cells whose focus holders share a name mark their second segment; beside indexing's
+    dx = {c["mode"]: c["pre_committed_miss"] for c in generated["distractor-grid"]["cells"] if c["background_wanted"]}
+    assert dx["browsing"] == 1 and dx["meeting"] == 1          # chrome: browsing <-> meeting
+    assert dx["dev"] == dx["compile"] == dx["ml-train"] == 3   # code: dev / compile / ml-train / indexing
+    assert dx["video-edit"] == dx["render"] == dx["transcode"] == dx["backup"] == 3   # kdenlive
+    assert dx["office"] == 0
+
+
+def test_a_manifest_without_segment_labels_is_refused(tmp_path):
+    path = tmp_path / "build.toy.manifest.json"
+    path.write_text(json.dumps({"grid": {"toy-single/x.workload.json": {"a": "office"}}}))
+    with pytest.raises(grid.GridError, match="predates"):
+        coverage.build_generated_grid([path])
+    with pytest.raises(grid.GridError, match="no manifest"):
+        coverage.build_generated_grid([tmp_path / "build.none.manifest.json"])
+    text = coverage.render_generated({"toy": {"files": 1, "segments_total": 1, "cells": [
+        {"mode": "office", "background_wanted": True, "tiers": {t: 0 for t in grid.TIERS}, "segments": 0, grid.MISS_KEY: 0}]}})
+    assert "generated toy: 1 files, 1 segments" in text
 
 
 def test_coverage_errors_are_empty_on_the_coreset(coverage):

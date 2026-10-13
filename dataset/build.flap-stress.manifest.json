@@ -1473,6 +1473,136 @@
       "b": "gaming",
       "interval": "10s",
       "interval_source": "tuned",
+      "placements": [
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "measurement"
     },
     "flap-stress-single/flap-mail-to-gaming-10s-tuning.workload.json": {
@@ -1480,6 +1610,136 @@
       "b": "gaming",
       "interval": "10s",
       "interval_source": "tuned",
+      "placements": [
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "tuning"
     },
     "flap-stress-single/flap-mail-to-gaming-2s-measurement.workload.json": {
@@ -1487,6 +1747,136 @@
       "b": "gaming",
       "interval": "2s",
       "interval_source": "design",
+      "placements": [
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": false,
+          "mode": "mail",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": false,
+          "mode": "mail",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": false,
+          "mode": "mail",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": false,
+          "mode": "mail",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "measurement"
     },
     "flap-stress-single/flap-mail-to-gaming-2s-tuning.workload.json": {
@@ -1494,6 +1884,136 @@
       "b": "gaming",
       "interval": "2s",
       "interval_source": "design",
+      "placements": [
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": false,
+          "mode": "mail",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": false,
+          "mode": "mail",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": false,
+          "mode": "mail",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": false,
+          "mode": "mail",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "tuning"
     },
     "flap-stress-single/flap-mail-to-gaming-30s-measurement.workload.json": {
@@ -1501,6 +2021,136 @@
       "b": "gaming",
       "interval": "30s",
       "interval_source": "systemd-oomd",
+      "placements": [
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "measurement"
     },
     "flap-stress-single/flap-mail-to-gaming-30s-tuning.workload.json": {
@@ -1508,6 +2158,136 @@
       "b": "gaming",
       "interval": "30s",
       "interval_source": "systemd-oomd",
+      "placements": [
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "tuning"
     },
     "flap-stress-single/flap-mail-to-gaming-5s-measurement.workload.json": {
@@ -1515,6 +2295,136 @@
       "b": "gaming",
       "interval": "5s",
       "interval_source": "feral-gamemode",
+      "placements": [
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "measurement"
     },
     "flap-stress-single/flap-mail-to-gaming-5s-tuning.workload.json": {
@@ -1522,6 +2432,136 @@
       "b": "gaming",
       "interval": "5s",
       "interval_source": "feral-gamemode",
+      "placements": [
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": true,
+          "mode": "mail",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "mail",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "tuning"
     },
     "flap-stress-single/flap-meeting-to-photo-10s-measurement.workload.json": {
@@ -1529,6 +2569,136 @@
       "b": "photo",
       "interval": "10s",
       "interval_source": "tuned",
+      "placements": [
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "measurement"
     },
     "flap-stress-single/flap-meeting-to-photo-10s-tuning.workload.json": {
@@ -1536,6 +2706,136 @@
       "b": "photo",
       "interval": "10s",
       "interval_source": "tuned",
+      "placements": [
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "tuning"
     },
     "flap-stress-single/flap-meeting-to-photo-2s-measurement.workload.json": {
@@ -1543,6 +2843,136 @@
       "b": "photo",
       "interval": "2s",
       "interval_source": "design",
+      "placements": [
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "photo",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "photo",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "photo",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "photo",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "measurement"
     },
     "flap-stress-single/flap-meeting-to-photo-2s-tuning.workload.json": {
@@ -1550,6 +2980,136 @@
       "b": "photo",
       "interval": "2s",
       "interval_source": "design",
+      "placements": [
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "photo",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "photo",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "photo",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "photo",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "tuning"
     },
     "flap-stress-single/flap-meeting-to-photo-30s-measurement.workload.json": {
@@ -1557,6 +3117,136 @@
       "b": "photo",
       "interval": "30s",
       "interval_source": "systemd-oomd",
+      "placements": [
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "measurement"
     },
     "flap-stress-single/flap-meeting-to-photo-30s-tuning.workload.json": {
@@ -1564,6 +3254,136 @@
       "b": "photo",
       "interval": "30s",
       "interval_source": "systemd-oomd",
+      "placements": [
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "tuning"
     },
     "flap-stress-single/flap-meeting-to-photo-5s-measurement.workload.json": {
@@ -1571,6 +3391,136 @@
       "b": "photo",
       "interval": "5s",
       "interval_source": "feral-gamemode",
+      "placements": [
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "measurement"
     },
     "flap-stress-single/flap-meeting-to-photo-5s-tuning.workload.json": {
@@ -1578,6 +3528,136 @@
       "b": "photo",
       "interval": "5s",
       "interval_source": "feral-gamemode",
+      "placements": [
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": true,
+          "mode": "photo",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": false,
+          "mode": "meeting",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "photo",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "meeting",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "tuning"
     },
     "flap-stress-single/flap-render-to-gaming-10s-measurement.workload.json": {
@@ -1585,6 +3665,136 @@
       "b": "gaming",
       "interval": "10s",
       "interval_source": "tuned",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "measurement"
     },
     "flap-stress-single/flap-render-to-gaming-10s-tuning.workload.json": {
@@ -1592,6 +3802,136 @@
       "b": "gaming",
       "interval": "10s",
       "interval_source": "tuned",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "tuning"
     },
     "flap-stress-single/flap-render-to-gaming-2s-measurement.workload.json": {
@@ -1599,6 +3939,136 @@
       "b": "gaming",
       "interval": "2s",
       "interval_source": "design",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": false,
+          "mode": "render",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": false,
+          "mode": "render",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": false,
+          "mode": "render",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": false,
+          "mode": "render",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "measurement"
     },
     "flap-stress-single/flap-render-to-gaming-2s-tuning.workload.json": {
@@ -1606,6 +4076,136 @@
       "b": "gaming",
       "interval": "2s",
       "interval_source": "design",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": false,
+          "mode": "render",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": false,
+          "mode": "render",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": false,
+          "mode": "render",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": false,
+          "mode": "render",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "tuning"
     },
     "flap-stress-single/flap-render-to-gaming-30s-measurement.workload.json": {
@@ -1613,6 +4213,136 @@
       "b": "gaming",
       "interval": "30s",
       "interval_source": "systemd-oomd",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "measurement"
     },
     "flap-stress-single/flap-render-to-gaming-30s-tuning.workload.json": {
@@ -1620,6 +4350,136 @@
       "b": "gaming",
       "interval": "30s",
       "interval_source": "systemd-oomd",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "tuning"
     },
     "flap-stress-single/flap-render-to-gaming-5s-measurement.workload.json": {
@@ -1627,6 +4487,136 @@
       "b": "gaming",
       "interval": "5s",
       "interval_source": "feral-gamemode",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "measurement"
     },
     "flap-stress-single/flap-render-to-gaming-5s-tuning.workload.json": {
@@ -1634,6 +4624,136 @@
       "b": "gaming",
       "interval": "5s",
       "interval_source": "feral-gamemode",
+      "placements": [
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            0
+          ],
+          "suffix": 0
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            1
+          ],
+          "suffix": 1
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            2
+          ],
+          "suffix": 2
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            3
+          ],
+          "suffix": 3
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            4
+          ],
+          "suffix": 4
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            5
+          ],
+          "suffix": 5
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            6
+          ],
+          "suffix": 6
+        },
+        {
+          "input": false,
+          "mode": "gaming",
+          "segments": [
+            7
+          ],
+          "suffix": 7
+        },
+        {
+          "input": true,
+          "mode": "render",
+          "segments": [
+            8
+          ],
+          "suffix": 8
+        }
+      ],
+      "segments": [
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        },
+        {
+          "background_wanted": true,
+          "mode": "gaming",
+          "pre_committed_miss": false,
+          "tier": 3
+        },
+        {
+          "background_wanted": true,
+          "mode": "render",
+          "pre_committed_miss": false,
+          "tier": 1
+        }
+      ],
       "split": "tuning"
     }
   },
@@ -1667,10 +4787,11 @@
     "dataset/timelines/coreset/c1-transcode.timeline.yaml": "eabb5e6fefa5276c1cfbbbba5bc4d25eb7d5da79dfa34952292c91e1577e2fd0",
     "dataset/timelines/coreset/c1-video-edit.timeline.yaml": "a4ad1c87c721bf0c26cd1759be55ac625436b6a5aa8e6f24ef5777ff9e9adc9b",
     "dataset/tools/compile.py": "1e6b1dd3d7a44ae4d9e8081afb0f22d1770d29b2b3cac48aae03e38673e7140a",
-    "dataset/tools/gen/__init__.py": "4d33de4322db81eb70ee8f702122853a25f995f7dfecb93868721ea94377ffe0",
+    "dataset/tools/gen/__init__.py": "a33d2e35d5ae166052bb5f541f3ab90468ae9735284433a51a9e29eaabcc4a1e",
     "dataset/tools/gen/cells.py": "5b8ef682222ecc0ac91306c8afb8bc560a52949b016c3b6b236f2b04f371ac7c",
-    "dataset/tools/gen/compose.py": "6c67041c1c60c26fa7b375d49c137b233eb2b3f07a78c48cc2a0cb0e82b3f7dc",
-    "dataset/tools/generate.py": "341b8b940efe1a3568791414582ac05360352648a90f30b8caf04d04f74c550f",
+    "dataset/tools/gen/compose.py": "d8a8b03103aaded64fb364bbf4636f33bc8e02ac3e37f7b5de0377bb5d499b8e",
+    "dataset/tools/gen/coverage.py": "d6abaa6a3221f8015b9a78bd04cee8bca51b762247b2d5d99c3eca7c923116ab",
+    "dataset/tools/generate.py": "6dc108bf6c437759f2890a8cae128f93ce0baf0b981c2565a6adcc4b68f1dd2e",
     "dataset/tools/wlc/__init__.py": "8af88d31985ddc82e26504b9d88cad31a1b11a7b2d869314e47c0a399e35ef06",
     "dataset/tools/wlc/compiler.py": "35d1bcee6ff15875b0b2d524fde20fd8533d8bc4850526f72137241c0da45402",
     "dataset/tools/wlc/deriver.py": "6e725a858c8aabe03b7d52f0719c877fb4cffcc011117850fe33aadb688974ae",

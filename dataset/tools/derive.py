@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Run the variant deriver + coverage-grid generator over dataset/timelines.
+"""Run the variant deriver + coverage-grid generator over dataset/timelines, the generated layer's coverage tables
+over its committed manifests (9.21 decision 4).
 
 Usage: derive.py [--check] [--require-coverage] [--repo ROOT]
   --check             re-derive and fail on drift against the committed
@@ -16,9 +17,21 @@ import argparse
 import pathlib
 import sys
 
+import yaml
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
+from gen import coverage  # noqa: E402
 from wlc import deriver, grid  # noqa: E402
+
+
+def generated_manifests(root):
+    """One committed manifest per set the grid definition names: `dataset/build.<set>.manifest.json`."""
+    grids = root / "dataset" / "grids.yaml"
+    if not grids.is_file():
+        return []
+    sets = (yaml.safe_load(grids.read_text()) or {}).get("sets") or {}
+    return [root / "dataset" / f"build.{name}.manifest.json" for name in sets]
 
 
 def main():
@@ -32,8 +45,8 @@ def main():
     timelines = root / "dataset" / "timelines"
 
     errors = deriver.run(timelines, check=args.check)
-    errors += grid.write(timelines, root / "dataset" / "coverage-grid.json",
-                         check=args.check)
+    errors += coverage.write(timelines, generated_manifests(root), root / "dataset" / "coverage-grid.json",
+                             check=args.check)
     if args.require_coverage and not errors:
         errors += grid.coverage_errors(grid.build_grid(timelines))
     if errors:
@@ -41,10 +54,10 @@ def main():
         for message in errors:
             print(f"  - {message}", file=sys.stderr)
         return 1
-    coverage = grid.build_grid(timelines)
+    table = coverage.build(timelines, generated_manifests(root))
     print(("verified" if args.check else "derived") +
-          f" — {coverage['segments_total']} segments on the grid")
-    print(grid.render(coverage))
+          f" — {table['segments_total']} segments on the grid")
+    print(grid.render(table) + coverage.render_generated(table["generated"]))
     return 0
 
 

@@ -10,7 +10,7 @@ import json
 import pytest
 import yaml
 
-from gen import c1_sets, cells, compose, lint_grids, load_definition, modes_of, ordered_pairs, seed_of
+from gen import c1_sets, cells, compose, compose_full, grid_record, lint_grids, load_definition, modes_of, ordered_pairs, seed_of
 from gen.cells import COMPILER_NAMES, focus_name, known_names, names_of, ranked_pairs
 from wlc.grid import NAME_TIERS
 from gen.compose import timeline_bytes
@@ -258,7 +258,57 @@ def test_the_committed_manifests_pin_the_generator_and_record_each_cells_coordin
             coords = dict(cell["grid"])
             if "split" in cell:
                 coords["split"] = cell["split"]
+            coords.update(grid_record(*compose_full(cell, layer["sets"], layer["defn"])))   # 9.21 decisions 1, 4
             assert manifest["grid"][rel] == coords
+
+
+# ---- 9.21: the manifest's record of each file — its placements and its segments' labels ------------------------------
+
+
+def record(layer, cell_id):
+    return grid_record(*compose_full(layer["by_id"][cell_id], layer["sets"], layer["defn"]))
+
+
+def test_a_placement_record_names_the_mode_the_suffix_the_labelled_segments_and_the_input_window(layer):
+    """9.21 decision 1: the k-th placement of a composed grid file labels the k-th segment; a placement in a
+    segment of `no_input_below` or less has no input window (9.19 decision 3), so its record says `input: false`
+    (decision 3 drops its keystroke terms)."""
+    assert record(layer, "tr-compile-to-office-departs")["placements"] == [
+        {"mode": "compile", "suffix": 0, "segments": [0], "input": True},
+        {"mode": "office", "suffix": 1, "segments": [1], "input": True}]
+    assert record(layer, "tr-media-to-office-focus")["placements"][0] == \
+        {"mode": "media", "suffix": 0, "segments": [0], "input": False}   # the players have no keystroke stream
+    middle = record(layer, "rt-office-to-dev-2s")["placements"]
+    assert [p["suffix"] for p in middle] == [0, 1, 2] and [p["segments"] for p in middle] == [[0], [1], [2]]
+    assert [p["input"] for p in middle] == [True, False, True]   # dev for 2 s shows no keystroke
+    flap = next(c for c in layer["by_set"]["flap-stress"] if c["id"].startswith("flap-mail-to-gaming-2s"))
+    placements = grid_record(*compose_full(flap, layer["sets"], layer["defn"]))["placements"]
+    assert len(placements) == 9 and placements[0]["input"] is True
+    assert all(p["input"] is False for p in placements[1:])   # 2 s alternations: no window for mail, none for gaming
+
+
+def test_a_distractor_cell_records_a_over_both_segments_and_b_labelled_nowhere(layer):
+    """9.21 decisions 1–2: A is labelled in both segments and keeps its input window to the file's end; B's task set
+    arrives under suffix 1 and is labelled in no segment (so it carries no scoring term); a program arrival is one
+    task, not a placement."""
+    assert record(layer, "dx-office-with-compile")["placements"] == [
+        {"mode": "office", "suffix": 0, "segments": [0, 1], "input": True},
+        {"mode": "compile", "suffix": 1, "segments": [], "input": False}]
+    assert record(layer, "dx-compile-with-7z")["placements"] == [
+        {"mode": "compile", "suffix": 0, "segments": [0, 1], "input": True}]
+
+
+def test_segment_labels_carry_mode_attribute_tier_and_miss(layer):
+    """9.21 decision 4: the coverage table's inputs — the ladder's segment at its tier, a distractor cell's second
+    segment a pre-committed miss where the focus holders share a name, indexing/true inheriting c1-indexing's miss."""
+    assert record(layer, "fl-compile-t4-focus")["segments"] == [
+        {"mode": "compile", "background_wanted": True, "tier": 4, "pre_committed_miss": False}]
+    assert record(layer, "fl-render-t3")["segments"][0]["tier"] == 3
+    shared = record(layer, "dx-dev-with-compile")["segments"]
+    assert [s["pre_committed_miss"] for s in shared] == [False, True] and [s["mode"] for s in shared] == ["dev", "dev"]
+    assert all(s["pre_committed_miss"] for s in record(layer, "tr-office-to-indexing-departs")["segments"][1:])
+    assert record(layer, "tr-office-to-indexing-departs")["segments"][0]["pre_committed_miss"] is False
+    assert record(layer, "fl-idle-t5-all")["placements"] == [{"mode": "idle", "suffix": 0, "segments": [0], "input": False}]
 
 
 # ---- 9.20: the distractor grid -------------------------------------------------------------------------------------

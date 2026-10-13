@@ -1,5 +1,5 @@
 # REFERENCES — master citation index
-> Status: normative · Created 2026-08-26 · Updated 2026-10-12
+> Status: normative · Created 2026-08-26 · Updated 2026-10-13
 
 The single index answering "what do we cite, in what form, for what claim." One id namespace across the whole project: these ids are the `source:` tag prefixes in the dataset (via `dataset/sources.yaml`) and the bibkeys in the paper. This file owns every citation string and every citation-constituent field (`url`, `accessed`, `pinned_version`); the yaml registry holds machine/derivation fields only and must be a subset of this index (lint: every yaml id has an entry here; entries here without a yaml counterpart are paper-only references).
 
@@ -321,6 +321,11 @@ Status legend: `verified` (coordinates confirmed against primary sources, date g
 - cite: Linux kernel source. `include/linux/sched/ext.h`, tag v6.12: `enum scx_public_consts { SCX_SLICE_DFL = 20 * 1000000, /* 20ms */ SCX_SLICE_INF = U64_MAX, /* infinite, implies nohz */ }`; the same `SCX_SLICE_DFL` at v6.17 (`ext.h:20`) and v7.0 (`ext.h:30`). `kernel/sched/ext.c`, tag v6.17: `SCX_WATCHDOG_MAX_TIMEOUT = 30 * HZ` (`:17`); `@timeout_ms`: "The maximum amount of time, in milliseconds, that a runnable task should be able to wait before being scheduled. The maximum timeout may not exceed the default timeout of 30 seconds. Defaults to the maximum allowed timeout value of 30 seconds." (`:749–757`); a task runnable past it ends the scheduler with `SCX_EXIT_ERROR_STALL`, "%s[%d] failed to run for %u.%03us" (`:3645–3662`); the timeout taken from `ops->timeout_ms` or the maximum (`:5649–5654`). github.com/torvalds/linux/blob/<tag>/… (v6.12 accessed 2026-09-12; v6.17 and v7.0 accessed 2026-10-07).
 - role: existence claims only — the sched_ext class's default slice, `SCX_SLICE_DFL`, is 20 ms in a shipped kernel: one point of the RQ0 gate spec's boot-default sensitivity sweep (`harness/boot-defaults/ostep-slice-20000us.json`); and the kernel ejects a BPF scheduler when a runnable task waits past a timeout of at most and by default 30 s, the bound the `starvation_floor` guard borrows as its threshold, by design (`harness/guards/guard-spec.yaml`). Does not name the boot default's values.
 - status: verified (2026-09-12, v6.12; 2026-10-07, `ext.h` at v6.17 and v7.0 and `ext.c` at v6.17 read — `ext.c` byte-identical to the copy of the 9.11 search record S4-05 — and Ubuntu's `linux-hwe-7.0` 7.0.0-34.34~24.04.1 diff touching no line of `ext.h`)
+
+### `gh-hosted-runners`
+- cite: GitHub Docs, "GitHub-hosted runners reference", section "Standard GitHub-hosted runners for public repositories": the Linux x64 row (`ubuntu-latest`, `ubuntu-24.04`, `ubuntu-22.04`) — processor 4, memory 16 GB, storage (SSD) 14 GB; the private-repository table's Linux row 2 / 8 GB / 14 GB. docs.github.com/en/actions/reference/runners/github-hosted-runners (accessed 2026-10-13).
+- role: existence claim only — the vendor's stated specification of the standard Linux runner the dataset's CI runs on. Grounds the dataset README's criterion for revisiting the generated layer's build-every-run strategy (9.21 decision 8): the build's size is read against the runner's 14 GB of storage.
+- status: verified (2026-10-13; the page read on that date)
 
 ### `linux-sched-h`
 - cite: Linux kernel source, `include/linux/sched.h`, tag v6.17: `enum { TASK_COMM_LEN = 16, };` ("Define the task command name length as enum, then it can be visible to BPF programs"); `struct task_struct`'s `char comm[TASK_COMM_LEN];` — "executable name, excluding path", set with `set_task_comm()`, "strscpy_pad() to ensure it is always NUL-terminated and zero-padded". github.com/torvalds/linux/blob/v6.17/include/linux/sched.h (accessed 2026-10-12).
