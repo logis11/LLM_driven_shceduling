@@ -274,6 +274,7 @@ def test_other_conditions_and_wrong_seed_pairings_are_refused(table, boot):
 # --------------------------------------------- the 8.4 measured facts (dec. 19)
 
 @needs_build
+@pytest.mark.coreset_wide
 def test_oracle_over_the_coreset_reproduces_the_measured_graded_set(table, boot, tmp_path):
     files = sorted(p for p in BUILD.glob("*.workload.json") if "@" not in p.name)   # the variants (9.14 D8) aside
     assert len(files) == 51                                     # the blessed set of 2026-10-09 (9.13 D7)

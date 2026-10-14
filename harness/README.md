@@ -43,7 +43,8 @@ Everything runs from this directory with Python 3.12 and `tools/requirements.txt
 pip install -r tools/requirements.txt -r ../dataset/tools/requirements.txt
 make -C ../dataset dataset        # compiles dataset/build/coreset-single
 make lint                         # fixtures, scoring spec, guard spec, experiment specs, boot defaults
-make test                         # the suite, about 90 s
+make test                         # the suite without the two coreset-wide mock tests, what CI runs; about 20 min after the build
+make test-full                    # the whole suite; the two coreset-wide tests hold about 10 GB resident, more than a 16 GB CI runner
 make smoke                        # the whole pipeline on the mocks over every scored coreset file, 5–8 min
 ```
 
@@ -69,7 +70,7 @@ python3 tools/evaluate.py --spec experiments/rq0-gate.yaml --aggregates … --sc
 
 Three files are data the code obeys and never a constant in code: the scoring spec, the guard spec, and the per-experiment spec. The first two are frozen; the RQ0 gate spec pins their bytes by SHA-256 along with the prior driver table and the dataset build manifest, and the evaluator refuses to judge if any pin no longer matches. A change to a frozen file is an entry in `CHANGELOG.md` made before any run reads it, and a new pin. The reasons behind every number in the RQ0 gate spec are written in that file, beside the number.
 
-CI runs `make lint` and `make test` on every push (`.github/workflows/harness.yml`) and the smoke on `main`, on demand, and on pull requests that touch the harness, the dataset, or the driver table (`harness-smoke.yml`).
+CI runs `make lint` and `make test` on every push (`.github/workflows/harness.yml`; `make test-full` runs at home, since the two coreset-wide mock tests exceed the runner's memory) and the smoke on `main`, on demand, and on pull requests that touch the harness, the dataset, or the driver table (`harness-smoke.yml`).
 
 ## Where the definitions are
 

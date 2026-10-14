@@ -3,10 +3,11 @@
 The pytest suite for the harness, the hand-written fixtures it checks the code against, and the two mocks that stand in for the daemon and the simulator.
 
 ```
-python3 -m pytest tools/tests -q        # from harness/; or make test
+python3 -m pytest tools/tests -q -m "not coreset_wide"   # from harness/; or make test — what CI runs
+python3 -m pytest tools/tests -q                         # or make test-full — the whole suite
 ```
 
-About 250 tests in 90 seconds. A handful drive the runner end to end on the mocks over compiled coreset files and are skipped when `dataset/build/coreset-single` is absent; build it with `make -C ../dataset dataset` to run them.
+About 300 tests. A handful drive the runner end to end on the mocks over compiled coreset files and are skipped when `dataset/build/coreset-single` is absent; build it with `make -C ../dataset dataset` to run them. Two of those, marked `coreset_wide`, read all 51 files and build every record row of each (`test_every_coreset_file_flows_through_records_with_no_message`, `test_oracle_over_the_coreset_reproduces_the_measured_graded_set`); they hold about 10 GB resident at c6-dual, more than the 16 GB CI runner leaves, so `make test` leaves them out and `make test-full` runs them. The marker is registered in `conftest.py`.
 
 ## How the suite is built
 

@@ -20,4 +20,4 @@ jobs:
       - run: make -C dataset generated   # the generated layer's sets; `check` reads every manifest (9.19)
       - run: make -C dataset check       # the build the harness reads is the blessed one (9.18)
       - run: make -C harness lint
-      - run: make -C harness test
+      - run: make -C harness test    # without the two coreset-wide mock tests, which exceed the runner's 16 GB; `make -C harness test-full` at home (9.21)

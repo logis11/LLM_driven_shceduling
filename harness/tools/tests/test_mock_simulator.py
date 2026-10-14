@@ -200,6 +200,7 @@ def test_contract_invalid_input_is_refused(tmp_path):
 
 
 @needs_build
+@pytest.mark.coreset_wide
 def test_every_coreset_file_flows_through_records_with_no_message(tmp_path):
     table = read_driver_table(PRIOR)
     boot = json.loads(BOOT.read_text())
