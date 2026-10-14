@@ -4,7 +4,7 @@ The one sweep that brings the public docs, the memos and the guidebook volumes a
 
 ## Scope
 
-- Every item handed to 9.15: the 9.15 line in `_dev/TODO.md`, every "Hands to 9.15" line in the slices' changelogs under `_dev/research/jioh/` (9.12's and 9.10's in full), and the 2026-10-10 dataset audit's items.
+- Every item handed to 9.15: the 9.15 line in `_dev/TODO.md`, every "Hands to 9.15" line in the slices' changelogs under `_dev/research/jioh/` (9.12's and 9.10's in full), the 2026-10-10 dataset audit's items, and the items of `_dev/docs/audit/jioh/2026-10-14-record-gaps-and-doc-staleness-for-9.15.md`.
 - `docs/` (the guidebook included), `dataset/README.md`, the memos.
 - A root `LICENSE` and `dataset/LICENSE`.
 - The final memo to 인경민 and 박이안.
