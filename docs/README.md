@@ -1,6 +1,6 @@
 # Docs index
 
-> Status: normative · Created 2026-08-27 · Updated 2026-10-08
+> Status: normative · Created 2026-08-27 · Updated 2026-10-14
 
 Prose only, organized by domain — one `##` section per area below, the full index table at the bottom. Statuses: **normative** (states what is; kept current) · **draft** (content real, form not final) · **record** (append-only history; never rewritten). Decision history lives in `_dev/archive/`; machine-read files live outside `docs/` (see the placement rule in `CLAUDE.md`).
 
@@ -16,6 +16,19 @@ A textbook series that teaches the whole research from zero operating-systems ba
 - [guidebook/vol-04-experiment-design.md](guidebook/vol-04-experiment-design.md) — 공부용 (Korean): the apparatus that turns the claim into numbers — the floor-and-ceiling normalisation that makes a miss rate and a makespan comparable, holding the executor fixed and swapping only the recognizer, the seven conditions and what each isolates, the two measurement layers, what is counted and which four aggregates are actually scored, how a file's score is composed, the eight guards checked apart from any score, what the workloads must contain and the information asymmetry that defines them, why the simulator draws nothing at run time, and what is committed to a file before any result is seen
 - [guidebook/vol-05-shared-vocabulary.md](guidebook/vol-05-shared-vocabulary.md) — 공부용 (Korean): the vocabulary's actual content — the one list four places read and why there is no mapping layer between them, the shape of one recognizer answer and which block is the contract, the sixteen modes with the chain from label to segment to scenario catalogue to cited source, the boundaries between neighbouring names and how the dataset drew them, the single attribute with its vacuous-true rule and its batch-mode reading, the ground-truth-only labels and what each does in grading, the admission test applied to real candidates including one that passed and was still rejected, four scenarios labelled by hand, and what freezing a vocabulary means with every change since ratification
 - [guidebook/vol-06-archetypes-and-grounding.md](guidebook/vol-06-archetypes-and-grounding.md) — 공부용 (Korean): where the archetype numbers come from — a process as the scheduler sees it and what an archetype may not contain, the six primitives and why periodic work uses TIMER, the three-step definition and every schema field including the distribution language, the four grades of evidence, the twelve entries, existence closed by harvesting and sufficiency closed only by verification, counts as numbers, what meas-ci measured and how it corrected a model, `compiler-child` followed from source sentence to sampled event stream, and every weak spot gathered in one place. Each source sentence is quoted from the primary text with the copy and access date given in place; where the primary text disagrees with the repository's description of it, the volume follows the primary text and marks the gap rather than correcting the repository
+
+## Dataset guidebook (`guidebook/dataset/`)
+
+Eight volumes on the workload dataset alone, end to end, in Korean with English terms, for a reader new to operating systems: every decision with its recorded reason, every count checked against the tree (2026-10-14). Index and reading order: [guidebook/dataset/README.md](guidebook/dataset/README.md).
+
+- [guidebook/dataset/01-the-big-picture.md](guidebook/dataset/01-the-big-picture.md) — 공부용 (Korean): what the dataset is for, the three layers, the tree and pipeline, the sets at a glance, where the numbers come from, how the consumers read it
+- [guidebook/dataset/02-the-archetype-library.md](guidebook/dataset/02-the-archetype-library.md) — 공부용 (Korean): the 29 entries of `archetypes.yaml`, each field, each slice's entries with their measured values and decisions, the library's past and its stated limits
+- [guidebook/dataset/03-timeline-to-canonical-workload.md](guidebook/dataset/03-timeline-to-canonical-workload.md) — 공부용 (Korean): the timeline and canonical formats field by field, the compiler traced by hand, seeds and determinism, demand, lints, the format's history
+- [guidebook/dataset/04-the-coreset.md](guidebook/dataset/04-the-coreset.md) — 공부용 (Korean): the 32 cells, the seven groups, every one of the 51 files, the C7 derivation, the 78 variants, the coverage grid, 24 → 51
+- [guidebook/dataset/05-the-generated-layer.md](guidebook/dataset/05-the-generated-layer.md) — 공부용 (Korean): why a generated layer, `grids.yaml` and the generator, the five sets cell by cell, the manifests' grid records, how a generated file is scored
+- [guidebook/dataset/06-grounding-measurement-verification.md](guidebook/dataset/06-grounding-measurement-verification.md) — 공부용 (Korean): citations and tags, the verification standard, the `meas-ci` campaigns and the stability rule, the 2026-09-13 findings, the audits, the slices as research
+- [guidebook/dataset/07-build-gate-manifests-ci-tests.md](guidebook/dataset/07-build-gate-manifests-ci-tests.md) — 공부용 (Korean): the seven manifests, blessing and pins, `make check` and the `--check` flags with worked failures, the `make` targets, CI and the runner, the test suites
+- [guidebook/dataset/08-decision-chronicle.md](guidebook/dataset/08-decision-chronicle.md) — 공부용 (Korean): the decisions from the 2026-08-23 design meeting to 9.21 with their recorded reasons, the reversals, what is open
 
 ## Research
 
@@ -132,3 +145,12 @@ Point-in-time notes to a named reader; each is absorbed into a normative doc or 
 | [memos/2026-09-20-dataset-validity-review.md](memos/2026-09-20-dataset-validity-review.md) | what the dataset's grounding and measurement establish for each research claim, and the four things to carry into the paper | memo |
 | [memos/2026-10-07-timer-skip-rule-for-the-simulator.md](memos/2026-10-07-timer-skip-rule-for-the-simulator.md) | to 인경민: the TIMER skip rule that replaces backlog, and what the simulator, the trace and the contract change | memo |
 | [memos/2026-10-08-declared-scheduling-class.md](memos/2026-10-08-declared-scheduling-class.md) | to 인경민, 박이안: the declared-class field, the executor's idle rule, and the frozen-contract change they need | memo |
+| [guidebook/dataset/README.md](guidebook/dataset/README.md) | 공부용: the dataset guidebook's index, reading order and conventions | draft |
+| [guidebook/dataset/01-the-big-picture.md](guidebook/dataset/01-the-big-picture.md) | 공부용: what the dataset is, its three layers, its tree, its sets, its consumers | draft |
+| [guidebook/dataset/02-the-archetype-library.md](guidebook/dataset/02-the-archetype-library.md) | 공부용: the 29 archetype entries, their fields, values, decisions and limits | draft |
+| [guidebook/dataset/03-timeline-to-canonical-workload.md](guidebook/dataset/03-timeline-to-canonical-workload.md) | 공부용: the two formats and the compiler, traced by hand | draft |
+| [guidebook/dataset/04-the-coreset.md](guidebook/dataset/04-the-coreset.md) | 공부용: every core-set file, the variants, the coverage grid, the set's history | draft |
+| [guidebook/dataset/05-the-generated-layer.md](guidebook/dataset/05-the-generated-layer.md) | 공부용: the generated layer's definition, generator, five sets, manifests and scoring | draft |
+| [guidebook/dataset/06-grounding-measurement-verification.md](guidebook/dataset/06-grounding-measurement-verification.md) | 공부용: grounding, the measurement campaigns, the verification standard, the findings and audits | draft |
+| [guidebook/dataset/07-build-gate-manifests-ci-tests.md](guidebook/dataset/07-build-gate-manifests-ci-tests.md) | 공부용: manifests, pins, the gate, make targets, CI, tests | draft |
+| [guidebook/dataset/08-decision-chronicle.md](guidebook/dataset/08-decision-chronicle.md) | 공부용: the dataset's decisions in date order, reversals, open items | draft |
