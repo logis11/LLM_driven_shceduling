@@ -4,13 +4,22 @@
 variants:
   # Name-collision spoof: a process NAMED chrome bound to cpu-batch — the
   # stated limit of name-based recognition (F5). Authored by name collision
-  # only; path-mismatch spoofing is out of schema.
+  # only; path-mismatch spoofing is out of schema. Until the spoof arrives
+  # nothing unwanted runs (background_wanted true by the vocabulary's
+  # convention); from 20 s the spoof is sustained work nobody asked for
+  # (false), and the snapshot shows one more `chrome` and nothing else, so the
+  # segment is a pre-committed miss (9.23 D2).
   - id: c6-spoof
     from: c1-browsing.timeline.yaml
     ops:
       - add-task: {id: spoof, name: chrome, archetype: cpu-batch,
                    arrive: 20s, bind: {total_work: 30s, program: spoof}, source: {total_work: design, program: design}}
-      - patch-segment: {index: 0, attributes: {background_wanted: true, spoof: true}}
+      - set-segments:
+          - {from: 0s, to: 20s, mode: browsing, attributes: {background_wanted: true},
+             scenario: [S2]}
+          - {from: 20s, to: 60s, mode: browsing,
+             attributes: {background_wanted: false, spoof: true, pre_committed_miss: true},
+             scenario: [S2]}
 
       - patch-meta: {demand: calibration}
 
@@ -28,8 +37,10 @@ variants:
       - patch-meta: {demand: calibration}
 
   # Fold-internal change: browsing becomes a call in the browser — the call
-  # runs under the browser's own name, so the canonical set does not change and
-  # no query fires; a guaranteed miss, pre-registered as a scope boundary.
+  # runs under the browser's own name, so the names stay {chrome}. The call adds
+  # one `chrome` (5 → 6), a count change, so a query fires at 30 s (data-contracts
+  # §5, rule 1), and nothing in the snapshot says call: the meeting segment is a
+  # pre-committed miss, pre-registered as a scope boundary (9.23 D1).
 
   - id: c6-fold
     from: c1-browsing.timeline.yaml
@@ -40,7 +51,8 @@ variants:
       - set-segments:
           - {from: 0s, to: 30s, mode: browsing, attributes: {background_wanted: true},
              scenario: [S2]}
-          - {from: 30s, to: 60s, mode: meeting, attributes: {background_wanted: true},
+          - {from: 30s, to: 60s, mode: meeting,
+             attributes: {background_wanted: true, pre_committed_miss: true},
              scenario: [S3, S2]}
       - add-task: {id: call, name: chrome, archetype: video-call,
                    arrive: 30s, depart: 60s}

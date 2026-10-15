@@ -87,10 +87,11 @@ files:
 
 # derived from the `pre_committed_miss` annotation in the compiled files; the lint
 # checks it (Phase 8 spec, decision 13). These files leave recognition accuracy;
-# three of them judge (the gate needs labels, not recognizability) and three —
-# c1-indexing and c7-backup, idle-class files, and c6-alias, the name-collision
-# alias (9.20 decision 8) — report.
-layer1_exclusions: [c1-indexing, c6-alias, c7-backup, c7-ml-train, c7-render, c7-transcode]
+# three of them judge (the gate needs labels, not recognizability) and five —
+# c1-indexing and c7-backup, idle-class files, and the C6 limits: c6-alias, the
+# name-collision alias (9.20 decision 8), c6-fold from the call's arrival and
+# c6-spoof from the spoof's (9.23 D1, D2) — report.
+layer1_exclusions: [c1-indexing, c6-alias, c6-fold, c6-spoof, c7-backup, c7-ml-train, c7-render, c7-transcode]
 
 guard_exemptions:
   - guard: provenance_share
@@ -481,12 +482,12 @@ statements:
 # SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-12, the 9.20
 # entry; 2026-10-11, the 9.18 and 9.22 entries); the variant manifests pin the rebuilt files the sensitivity lines read.
 pins:
-  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 0ff71b1ff946f5e45dceea3c13b4008d32a13255ed637d46989a2867b7474bbc}
+  scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 2ad757b6196ae1839a76b4f1b2a96d156eee84b40375dec9bd5f66116b6ca14e}
   guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.1", sha256: 24ccb875ff666615de75d80bc5351b7f5c62713d605438844938f9ab6ef1676c}
   driver_table: {path: daemon/driver-table/prior.yaml, sha256: 6e271dd042b38c23b85459cec7545fde990aec9be5a2c8bd6081690d98243f7f}
-  dataset:      {path: dataset/build.manifest.json, sha256: fad7192d2a290c9d0b9f9563a45a0f9834b8c48403c4c88d84ae1869107accd3}
+  dataset:      {path: dataset/build.manifest.json, sha256: c5f7fa5a59f34bc88f8bb22acd6ec58b0e1ade91b806166a7bbb49c38b0bc23a}
   variants:
-    all: {path: dataset/build.variants.manifest.json, sha256: 03f14b2c5520edaf304915a2c773f8ac30436a9f88ea9cd2d8b319949c3605d5}
+    all: {path: dataset/build.variants.manifest.json, sha256: 8986b58a2de1f1b1f2d621917f224f0d8218b3cb56fc82e5900b115ff0a60b99}
 
 criterion:
   type: k_of_n_gap

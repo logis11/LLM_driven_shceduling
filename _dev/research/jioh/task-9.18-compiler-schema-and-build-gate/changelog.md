@@ -38,6 +38,8 @@ Spec decision 8; the 9.17 hand-off (TODO 9.18 (d)). Old state: `test_coreset.py`
 
 ## D6 — the rebuild, re-bless and re-pin (2026-10-11)
 
+> Corrected by 9.23 D7 (the base counts for indexing, compile and ml-train are the whole base file's; over the counterpart's span they are 28, 358 and 1,629 distinct times).
+
 Spec invariants; decision 9. `make dataset` (51 artifacts and their reports, 22 min) then `make variants` (78 variants, 33 min), 16:33–17:28 KST. The first `check_build` run failed on 102 errors and exposed a defect in D3's code: `compile.py` keyed the manifest's `reports` section by the artifact's path, not the report's, so the section overwrote the artifact hashes in `check_build`'s union (`test_manifest.py` asserts the right keys and would have caught it; it compiles the set, 24 min, and had not been run). Fixed (`report_path(rel)` as the key); the artifacts and reports on disk are the compile's and unchanged, so the two manifests were rewritten in place for the fixed key form — `inputs` recomputed on the fixed compiler, every `artifacts` and `reports` entry checked against the file on disk, the variants manifest's `dataset/build.manifest.json` input re-hashed — rather than recompiled; `make check` (D7) is the authority that the rewritten manifests are what the tools write.
 
 Pins: dataset manifest `976a943ce0f0ae9eb8395006e22c19d9fe01c6149da774e0071c9d48d3f16dd6`, variants manifest `6c244f17a99408d6d7ea07429043d33f1eeddb927ac9b7efc0184b5785a54358`, scoring spec `1f7e9e3039332def5062bb09c121b9116d7c12a21850539b3ab1cb80e9b8c434` (comments only). The RQ0 gate spec carries the three; `harness/CHANGELOG.md` has the entry.

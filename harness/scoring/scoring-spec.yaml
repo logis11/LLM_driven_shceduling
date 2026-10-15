@@ -87,6 +87,15 @@
 # would read no row; an idle placement carries none, as c1-idle has no entry.
 # The rule's expansion is linted against the compiled generated files
 # (scoring_lint, `lint_generated`) as these entries are against the core set.
+# A placement's batch term is its C1 entry's turnaround. The job's size is
+# bound to the span it must be alive in (9.19 decision 1), beside company its
+# C1 file did not have, so it may finish under some rows and not others; no
+# job is sure to outlive its file under every row (arrival, its own CPU and its
+# own blocks fit inside the file). A row under which it does not finish scores
+# the censored bound, the file's end less the arrival (metrics doc §9), worse
+# than every finishing value; two such rows tie (9.23 D3). Expected no
+# headroom: the idle-class placements (indexing, backup), whose job ends at the
+# same time under every row, as for the six core files above.
 
 files:
 

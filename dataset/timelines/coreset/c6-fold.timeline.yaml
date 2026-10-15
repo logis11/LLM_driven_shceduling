@@ -26,6 +26,7 @@ segments:
   to: 30s
 - attributes:
     background_wanted: true
+    pre_committed_miss: true
   from: 30s
   mode: meeting
   scenario:

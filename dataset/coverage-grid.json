@@ -16,10 +16,10 @@
     {
       "background_wanted": false,
       "mode": "browsing",
-      "pre_committed_miss": 0,
-      "segments": 1,
+      "pre_committed_miss": 1,
+      "segments": 2,
       "tiers": {
-        "t1": 1,
+        "t1": 2,
         "t2": 0,
         "t3": 0,
         "t4": 0,
@@ -133,7 +133,7 @@
     {
       "background_wanted": true,
       "mode": "meeting",
-      "pre_committed_miss": 0,
+      "pre_committed_miss": 1,
       "segments": 2,
       "tiers": {
         "t1": 2,
@@ -3019,6 +3019,7 @@
       {
         "background_wanted": true,
         "mode": "meeting",
+        "pre_committed_miss": true,
         "scenario": [
           "S3",
           "S2"
@@ -3030,6 +3031,15 @@
       {
         "background_wanted": true,
         "mode": "browsing",
+        "scenario": [
+          "S2"
+        ],
+        "tier": 1
+      },
+      {
+        "background_wanted": false,
+        "mode": "browsing",
+        "pre_committed_miss": true,
         "scenario": [
           "S2"
         ],
@@ -3217,5 +3227,5 @@
       }
     ]
   },
-  "segments_total": 66
+  "segments_total": 67
 }

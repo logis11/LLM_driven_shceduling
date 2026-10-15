@@ -22,9 +22,11 @@ MODES = ["browsing", "office", "mail", "dev", "photo", "meeting", "gaming",
 # 7.3 the fifteen remaining false cells: all 32 instanced. Five segments are
 # pre-committed misses (decision 3): indexing/true and the ml-train, render,
 # transcode, backup false cells; media/true since c6-alias (9.20 decision 8), the
-# name-collision alias beside the authored ladder files.
+# name-collision alias beside the authored ladder files; meeting/true and
+# browsing/false since c6-fold's call and c6-spoof's spoof (9.23 D1, D2).
 MISS_CELLS = {("indexing", True), ("ml-train", False), ("render", False),
-              ("transcode", False), ("backup", False), ("media", True)}
+              ("transcode", False), ("backup", False), ("media", True),
+              ("meeting", True), ("browsing", False)}
 
 
 @pytest.fixture(scope="module")

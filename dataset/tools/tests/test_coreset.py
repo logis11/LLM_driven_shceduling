@@ -375,7 +375,7 @@ def test_c7_and_derived_files_declare_calibration(repo_root):
 
 def test_c6_fold_names_unchanged(coreset):
     # 9.10 D30: the meeting segment adds the call, a `chrome` task on video-call from 30 s; the browsing
-    # tasks are the base's and the process names stay {chrome}, so the canonical set does not change
+    # tasks are the base's and the process names stay {chrome} — only the count changes (9.23 D1)
     base, _ = coreset["c1-browsing"]
     variant, _ = coreset["c6-fold"]
     base_events, variant_events = events_by_id(base), events_by_id(variant)
@@ -384,6 +384,21 @@ def test_c6_fold_names_unchanged(coreset):
         assert variant_events[task_id] == event
     assert {e["name"] for e in variant_events.values()} == {e["name"] for e in base_events.values()} == {"chrome"}
     assert len(variant["ground_truth"]) == 2
+
+
+def test_c6_limits_are_pre_committed_misses(coreset):
+    """9.23 D1, D2: each C6 segment whose label the names cannot reach carries `pre_committed_miss` —
+    `c6-alias` whole, `c6-fold` from the call's arrival, `c6-spoof` from the spoof's (its label `false`
+    there, nothing unwanted running before it); `c6-dual`'s segment is `ambiguous` and ungraded."""
+    def misses(wid):
+        return [((s["t_start"], s["t_end"]), bool((s.get("attributes") or {}).get("pre_committed_miss")))
+                for s in coreset[wid][0]["ground_truth"]]
+    assert misses("c6-alias") == [((0, 60_000_000), True)]
+    assert misses("c6-fold") == [((0, 30_000_000), False), ((30_000_000, 60_000_000), True)]
+    assert misses("c6-spoof") == [((0, 20_000_000), False), ((20_000_000, 60_000_000), True)]
+    spoof = coreset["c6-spoof"][0]["ground_truth"]
+    assert [s["attributes"]["background_wanted"] for s in spoof] == [True, False]
+    assert spoof[1]["attributes"]["spoof"] is True and "spoof" not in spoof[0]["attributes"]
 
 
 def test_no_file_fails_on_its_demand(coreset, schema):

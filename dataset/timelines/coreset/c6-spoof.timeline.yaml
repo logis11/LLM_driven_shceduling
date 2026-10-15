@@ -19,8 +19,16 @@ operations:
 segments:
 - attributes:
     background_wanted: true
-    spoof: true
   from: 0s
+  mode: browsing
+  scenario:
+  - S2
+  to: 20s
+- attributes:
+    background_wanted: false
+    pre_committed_miss: true
+    spoof: true
+  from: 20s
   mode: browsing
   scenario:
   - S2

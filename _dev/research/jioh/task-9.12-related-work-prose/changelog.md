@@ -245,6 +245,7 @@ Compiled effect: none.
 
 ## D14 — the load-bearing pair restated: two real jobs beside an editor, with opposite correct policies, differing in behaviour and in declared class (2026-10-08)
 > Amended by D88 (the premise's other lines: research-proposal.md:129, :617, research-claims.md:23, :214–216, background-guide.md:115; the past-10 ms shares read from the pair the dataset carries).
+> Corrected by 9.23 D9 (the headroom "the RQ0 gate then measures … as it is" was measured as zero by 9.14 decision 2 — no row reaches the idle-class indexer — so RQ0 judges `c2-p1a` and reports `c2-p1b`).
 
 By 인지오's decision, scope-card items 6 and 47 (with 9.6 D17, D21, D32 and 9.10 D6, D12's hand-offs): `docs/related-work.md:18`'s "an ML training run versus a file indexer, both manifesting as one CPU-saturating process beside an editor — is constructed so that the two situations are behaviorally indistinguishable in principle, yet demand opposite policies. No refinement of this quadrant can separate them; the distinguishing information exists only in what the processes *are*, not in what they *do*", and `docs/research-proposal.md:627`'s "no behavioural heuristic can separate them even in principle", are restated to 9.10 D6: two real jobs beside an editor with opposite correct policies.
 
