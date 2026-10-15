@@ -54,12 +54,14 @@ def report_bytes(report):
 
 def input_files(root):
     """The files the compile reads besides the timelines, pinned by content in the manifest's `inputs` (9.18 spec,
-    decision 5): the library, the schema, the compiler's sources, the stimulus and replay streams."""
+    decision 5): the library, the schema, the compiler's sources, the stimulus, launch and replay streams (the launch
+    streams 9.23 B1)."""
     dataset = root / "dataset"
     files = [dataset / "archetypes.yaml", dataset / "schema" / "workload.schema.json",
              dataset / "tools" / "compile.py"]
     files += sorted((dataset / "tools" / "wlc").glob("*.py"))
     files += sorted((dataset / "stimulus").glob("*.jsonl"))
+    files += sorted((dataset / "launch").glob("*.json.gz"))
     files += sorted((dataset / "replay").glob("*.json.gz"))
     return files
 

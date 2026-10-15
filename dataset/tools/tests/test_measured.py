@@ -50,7 +50,9 @@ def test_measured_task_is_one_explicit_stream(tmp_path, library):
     # 9.5 D74: no TIMER — a timer wake is a WAIT on the task's timer channel, woken at its absolute time
     assert set(ops) <= {"WAIT", "RUN"} and ops.count("RUN") <= ops.count("WAIT")
     wakes = [e for e in canonical["events"] if e["op"] == "wake"]
-    assert len(wakes) == ops.count("WAIT") > 0
+    # one WAIT per wake and the one past the last, on its channel, until the depart (9.23 N1)
+    assert len(wakes) + 1 == ops.count("WAIT") > 1
+    assert arrive["program"][-1] == {"op": "WAIT", "channel": wakes[-1]["channel"]}
     waits = [s["channel"] for s in arrive["program"] if s["op"] == "WAIT"]
     assert set(waits) == {"timer:ed", "input:ed"}
     timer = [w["t"] for w in wakes if w["channel"] == "timer:ed"]
@@ -102,7 +104,9 @@ def test_playback_archetype_runs_the_whole_lifetime(tmp_path, library):
     # 9.5 D75: one periodic job per frame — TIMER at the measured period over the lifetime, each with its cycle's run
     period = library.entry("video-player")["params"]["period"]["value_us"]
     timers = [s for s in arrive["program"] if s["op"] == "TIMER"]
-    assert {s["period_us"] for s in timers} == {period} and len(timers) == -(-20_000_000 // period)
+    # and the next tick, past the depart, the program's last step (9.23 N1)
+    assert arrive["program"][-1]["op"] == "TIMER"
+    assert {s["period_us"] for s in timers} == {period} and len(timers) == -(-20_000_000 // period) + 1
     assert not [e for e in canonical["events"] if e["op"] == "wake"]
     assert report["per_task"]["v"] == sum(s["us"] for s in arrive["program"] if s["op"] == "RUN")
 

@@ -322,6 +322,8 @@ def _periodic_unroll(build, seed, iid, params, t0, t1, launch=None, replay=None)
             build.demand_us += run
         t += period
         k += 1
+    # 9.23 N1: the next tick, at or past the depart, so the task waits on its next frame when the user closes it
+    build.program.append({"op": "TIMER", "period_us": period})
 
 
 def _measured_unroll(build, timeline, task, iid, params, wakes):
@@ -414,6 +416,7 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
                 events.append((t, run, "input"))
                 k += 1
     events.sort(key=lambda e: (e[0], e[2] != "timer"))
+    wake_channel = channel
     for t, run, kind in events:
         wake_channel = timer_channel if kind == "timer" else channel   # D74: a timer wake carries no deadline
         wakes.append((t, iid, wake_channel))
@@ -421,8 +424,9 @@ def _measured_unroll(build, timeline, task, iid, params, wakes):
         if run:   # a zero input_run is measured, not missing: the input woke the task and cost no CPU (D48)
             build.program.append({"op": "RUN", "us": run})
             build.demand_us += run
-    if not build.program:  # alive but silent: block forever
-        build.program = [{"op": "WAIT", "channel": channel}]
+    # alive but silent, or past its last wake (9.23 N1): it waits again, on its last wake's channel, until the user
+    # closes it
+    build.program.append({"op": "WAIT", "channel": wake_channel})
 
 
 # ---- launch phases (9.10 D21, D133, D136–D138) -------------------------------
@@ -556,8 +560,8 @@ def _interactive_unroll(build, timeline, task, iid, params, wakes):
             build.program.append({"op": "RUN", "us": burst})
             build.demand_us += burst
             k += 1
-    if not build.program:  # alive but never typed into: block forever
-        build.program = [{"op": "WAIT", "channel": channel}]
+    # alive but never typed into, or past its last input (9.23 N1): it waits on its input until the user closes it
+    build.program.append({"op": "WAIT", "channel": channel})
 
 
 # ---- finite jobs (cpu-batch and the one-table-set batch loops: file-archiver, game-download, incremental-backup, …) ----

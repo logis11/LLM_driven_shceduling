@@ -127,18 +127,18 @@ The generated timelines pass the same lints as the authored ones — the bound v
 
 ## Commands
 
-Needs Python 3.12+ with `pip install -r tools/requirements.txt` (PyYAML, jsonschema, pytest).
+Needs Python 3.12+ with `pip install -r tools/requirements.txt` (PyYAML, jsonschema-rs, pytest, numpy, each at the exact version it names).
 
 ```
 make dataset    # derive variants + grid, compile everything (each artifact with its compile report beside it), refresh the manifest
 make variants   # the RQ0 gate spec's sensitivity variants -> build/ + build.variants.manifest.json (needs `dataset`)
 make generated  # the generated layer: grids.yaml + the C1 timelines -> generated/<set>/ (not committed) -> build/<set>-single/ + build.<set>.manifest.json, one per set
-make lint       # the checks before a compile: repo + timeline lints, the bound values' sources among them (no writes; seconds)
+make lint       # the checks before a compile: repo + timeline lints, the bound values' sources and zero `meas-pending` among them (no writes; seconds)
 make test       # invariant test suite (pytest, tools/tests/); the tests that read the set take the blessed build when the hashes match
-make check      # the gate, after `dataset variants generated`: derive --check, every manifest equal to its committed bytes, build/ equal to their union
+make check      # the gate, after `dataset variants generated`: derive --check, every manifest, derived timeline and the coverage grid equal to its committed bytes, build/ equal to the manifests' union
 ```
 
-The compile, the variants and the generated sets run one timeline (one set-and-file) per worker process, as many as the CPU has (`--jobs N` to change); the canonical lints run inside the compile on every artifact, validated by `jsonschema-rs`. CI (`.github/workflows/dataset.yml`) runs `lint` / `dataset` / `variants` / `generated` / `test` / `check` on every PR and push to `main`, and by hand (`workflow_dispatch`) on any branch — one Linux run that compiles every set once and compares what it wrote with the committed manifests. **The generated layer is built in every run** (9.21 decision 8), in the dataset workflow and in both harness workflows: on the standard Linux runner (4 vCPU; `gh-hosted-runners` in `docs/references.md`) the five sets take 5 min 13 s of a 12 min 04 s run (CI run 38243554308, 2026-10-12), 1,562 artifacts, `build/` 6.8 GB of the runner's 14 GB of storage with the core set's 0.7 GB beside it. The strategy is revisited when a set is added — the naturalistic set on the backlog would be the occasion — or when the generated step's time or the build's size against the runner's storage moves the whole run past what a push can wait for; an on-demand build or a pinned subset would then be weighed, each at the cost of an exception to `check`'s rule that `build/` equals the union of every manifest. If you edit any timeline, variant file, `archetypes.yaml`, a stream or the compiler, run `make dataset variants generated` and commit every manifest with it; if you edit `grids.yaml`, the generator or a C1 timeline, `make generated` and the generated manifests, one per set — otherwise `check` fails. `compile.py --check`, `variants.py --check` and `generate.py --check` remain for an independent in-memory verification; they are not in the gate.
+The compile, the variants and the generated sets run one timeline (one set-and-file) per worker process, as many as the CPU has (`--jobs N` to change); the canonical lints run inside the compile on every artifact, validated by `jsonschema-rs`. CI (`.github/workflows/dataset.yml`) runs `lint` / `dataset` / `variants` / `generated` / `test` / `check` on every PR and push to `main`, and by hand (`workflow_dispatch`) on any branch — one Linux run that compiles every set once and compares what it wrote with the committed manifests. **The generated layer is built in every run** (9.21 decision 8), in the dataset workflow and in both harness workflows: on the standard Linux runner (4 vCPU; `gh-hosted-runners` in `docs/references.md`) the five sets take 5 min 13 s of a 12 min 04 s run (CI run 38243554308, 2026-10-12), 1,562 artifacts, `build/` 6.8 GB of the runner's 14 GB of storage with the core set's 0.7 GB beside it. The strategy is revisited when a set is added — the naturalistic set on the backlog would be the occasion — or when the generated step's time or the build's size against the runner's storage moves the whole run past what a push can wait for; an on-demand build or a pinned subset would then be weighed, each at the cost of an exception to `check`'s rule that `build/` equals the union of every manifest. If you edit any timeline, variant file, `archetypes.yaml`, a stream or the compiler, run `make dataset variants generated` and commit every manifest, derived timeline and the coverage grid with it; if you edit `grids.yaml`, the generator or a C1 timeline, `make generated` and the generated manifests, one per set — otherwise `check` fails. `compile.py --check`, `variants.py --check` and `generate.py --check` remain for an independent in-memory verification; they are not in the gate.
 
 ## Tools map
 
@@ -148,8 +148,8 @@ tools/derive.py        # CLI: variant recipes -> derived timelines + coverage gr
 tools/variants.py      # CLI: the sensitivity variants + their manifest (+ --check)
 tools/generate.py      # CLI: grids.yaml + the C1 timelines -> the generated sets' timelines, artifacts, reports and manifests (+ --check)
 tools/gen/             # the generator: cells.py (the definition, the 240 pairs, keyed seeds and splits), compose.py (a C1 task set into a segment, D44)
-tools/check_build.py   # CLI: every manifest equals its committed bytes; build/ equals their union — every file pinned, every pin present
-tools/lint.py          # CLI: all lints (+ --freeze for freeze-readiness)
+tools/check_build.py   # CLI: every manifest, derived timeline and the coverage grid equals its committed bytes; build/ equals the manifests' union — every file pinned, every pin present
+tools/lint.py          # CLI: all lints (+ --freeze rejects `meas-pending`; `make lint` passes it)
 tools/wlc/             # wlc, the workload compiler — the library behind those CLIs:
                        #   timeline.py / compiler.py  parse + compile
                        #   deriver.py                 variants: / inherit() / inject: sugar

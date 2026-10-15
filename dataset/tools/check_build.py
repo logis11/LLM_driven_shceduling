@@ -8,7 +8,10 @@ artifacts and reports), `dataset/build.variants.manifest.json` (the variant
 artifacts) and one `dataset/build.<set>.manifest.json` per generated set that
 `dataset/grids.yaml` names (artifacts and reports). Each manifest on disk equals
 its committed bytes (`git show HEAD:<path>`): the build steps rewrote them, so
-equality says the rebuild reproduces the committed sets. And `dataset/build/`
+equality says the rebuild reproduces the committed sets. So does every other
+file the build steps rewrite — each derived timeline its variant spec names and
+`dataset/coverage-grid.json` (9.23 B2) — so a regenerated file left uncommitted
+fails, and the blob an artifact's `derived_from` names is in git. And `dataset/build/`
 equals the union of the manifests: every file present with the pinned hash,
 every pinned entry present, no file pinned by none. A missing build directory
 fails. Writes nothing.
@@ -37,6 +40,18 @@ def manifests(root):
     return out
 
 
+def rewritten(root):
+    """The other files the build steps rewrite, repo-relative: every derived timeline a variant spec names
+    (`<id>.timeline.yaml` beside the spec, as the deriver writes it) and the coverage grid (9.23 B2)."""
+    root = pathlib.Path(root)
+    out = []
+    for spec_path in sorted((root / "dataset" / "timelines").glob("**/*.variant.yaml")):
+        spec = yaml.safe_load(spec_path.read_text()) or {}
+        out += [(spec_path.parent / f"{v['id']}.timeline.yaml").relative_to(root).as_posix()
+                for v in spec.get("variants") or []]
+    return out + ["dataset/coverage-grid.json"]
+
+
 def committed_bytes(root, rel):
     """The file's bytes at HEAD, or None when git has no such file."""
     done = subprocess.run(["git", "-C", str(root), "show", f"HEAD:{rel}"], capture_output=True)
@@ -44,10 +59,12 @@ def committed_bytes(root, rel):
 
 
 def check_committed(root):
-    """Returns error strings; empty when every manifest equals its committed bytes (9.22 spec, decision 1)."""
-    errors = []
-    for rel in manifests(root):
+    """Returns error strings; empty when every manifest (9.22 spec, decision 1) and every other file the build
+    rewrites (9.23 B2) equals its committed bytes."""
+    errors, pinned = [], manifests(root)
+    for rel in pinned + rewritten(root):
         path = root / rel
+        kind = "a manifest" if rel in pinned else "a file"
         if not path.is_file():
             errors.append(f"{rel}: missing (run {BUILD_STEPS} first)")
             continue
@@ -55,7 +72,7 @@ def check_committed(root):
         if committed is None:
             errors.append(f"{rel}: not in git at HEAD")
         elif committed != path.read_bytes():
-            errors.append(f"{rel}: the build wrote a manifest that differs from the committed one — "
+            errors.append(f"{rel}: the build wrote {kind} that differs from the committed one — "
                           "re-bless (commit it) if the change is intended")
     return errors
 

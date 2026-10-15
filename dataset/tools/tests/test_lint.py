@@ -81,12 +81,12 @@ TIMER, RUN = {"op": "TIMER", "period_us": 10}, {"op": "RUN", "us": 5}
 
 
 @pytest.mark.parametrize("program,ok", [
-    ([TIMER, RUN], True),                                                   # TIMER literally first
+    ([TIMER, RUN, TIMER], True),                                            # TIMER literally first (the last, 9.23 N1)
     ([{"op": "LOOP", "count": "unbounded", "body": [TIMER, RUN]}], True),   # a LOOP head whose body begins with TIMER
     ([RUN, TIMER], False),                                                  # a run before the first tick
     ([{"op": "LOOP", "count": "unbounded", "body": [RUN, TIMER]}], False),
     ([{"op": "WAIT", "channel": "timer:a"}, RUN, TIMER], False),            # a wait before the first tick
-    ([{"op": "WAIT", "channel": "timer:a"}, RUN], True),                    # no TIMER: the rule does not apply
+    ([{"op": "WAIT", "channel": "timer:a"}, RUN, {"op": "WAIT", "channel": "timer:a"}], True),   # no TIMER: no rule
 ])
 def test_timer_first_invariant(schema, program, ok):
     """9.11 D11, D33 (9.13 spec decision 8): a program that contains a TIMER anywhere has a TIMER as its first
@@ -347,7 +347,7 @@ def test_a_heavy_event_states_its_runs_and_no_gap(tmp_path):
 def test_canonical_focus_track_names_live_top_level_tasks_in_order(schema, focus, expect):
     """9.17 spec decisions 2 and 3: the canonical focus list names top-level tasks within their pinned lifetimes, in
     time order, never overlapping."""
-    doc = canonical_of([{"op": "WAIT", "channel": "input:a"}, {"op": "RUN", "us": 5}])
+    doc = canonical_of([{"op": "WAIT", "channel": "input:a"}, {"op": "RUN", "us": 5}, {"op": "WAIT", "channel": "input:a"}])
     doc["focus"] = focus
     errors = lint_canonical(doc, schema)
     if expect is None:

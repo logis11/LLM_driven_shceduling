@@ -132,6 +132,8 @@ def test_a_periodic_entry_takes_the_cycle_runs_in_order_on_its_own_grid(tmp_path
     prog = _program(canonical, "v")
     period = lib.entry("video-call")["params"]["period"]["value_us"]
     timers = [i for i, s in enumerate(prog) if s["op"] == "TIMER"]
+    assert prog[-1] == {"op": "TIMER", "period_us": period}   # the next tick, past the depart (9.23 N1)
+    timers = timers[:-1]
     assert len(timers) == -(-20_000_000 // period) and all(prog[i]["period_us"] == period for i in timers)
     runs = [prog[i + 1]["us"] if i + 1 < len(prog) and prog[i + 1]["op"] == "RUN" else 0 for i in timers]
     offset = report["replay"]["v"]["offset_us"]

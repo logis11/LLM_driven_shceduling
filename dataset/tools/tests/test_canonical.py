@@ -136,7 +136,64 @@ def test_input_wakes_inside_windows(fixture_path, library):
     editor = next(e for e in canonical["events"]
                   if e["op"] == "arrive" and e["id"] == "editor")
     waits = [i for i in editor["program"] if i["op"] == "WAIT"]
-    assert len(waits) == len(wake_events)  # one WAIT per wake, input or timer
+    # one WAIT per wake, input or timer, and the one it waits on past its last wake until it departs (9.23 N1)
+    assert len(waits) == len(wake_events) + 1
+    assert editor["program"][-1] == {"op": "WAIT", "channel": wake_events[-1]["channel"]}
+
+
+def test_no_program_runs_out(fixture_path, library):
+    """9.23 N1: a segment-bound task's program ends with the blocking step its loop takes next — a WAIT, a TIMER — or
+    an unbounded LOOP; a task without a pinned depart, top-level or spawned, ends with EXIT."""
+    ends = set()
+    for name in ("fx-mixed.timeline.yaml", "fx-game.timeline.yaml", "fx-oversub.timeline.yaml"):
+        _, canonical, _ = compiled(fixture_path, library, name)
+        for event in (e for e in canonical["events"] if e["op"] == "arrive"):
+            last = event["program"][-1]
+            if event.get("depart") is not None:
+                assert last["op"] in ("WAIT", "TIMER") or (last["op"] == "LOOP" and last["count"] == "unbounded"), event["id"]
+                ends.add(last["op"])
+            else:
+                assert last["op"] == "EXIT", event["id"]
+            assert all(s["program"][-1]["op"] == "EXIT" for s in event.get("spawn_table") or [])
+    assert {"WAIT", "LOOP"} <= ends
+
+
+def _with_spawn(canonical):
+    return next(e for e in canonical["events"] if e["op"] == "arrive" and e.get("spawn_table"))
+
+
+def test_lint_catches_a_spawned_childs_wake_to_an_unknown_task(fixture_path, library, schema):
+    """9.23 B4: a WAKE in a spawn-table entry's program resolves as a top-level program's does."""
+    _, canonical, report = compiled(fixture_path, library, "fx-mixed.timeline.yaml")
+    child = _with_spawn(canonical)["spawn_table"][0]
+    child["program"].insert(0, {"op": "WAKE", "target": "nobody"})
+    errors = lint_canonical(canonical, schema, report=report, mode="single")
+    assert errors == [f"{child['id']}: WAKE targets unknown task 'nobody'"]
+
+
+def test_lint_catches_a_name_past_the_comm_limit(fixture_path, library, schema):
+    """9.23 B4: 15 characters and the terminator (linux-sched-h), on a top-level task and a spawned child alike."""
+    _, canonical, report = compiled(fixture_path, library, "fx-mixed.timeline.yaml")
+    build = _with_spawn(canonical)
+    build["name"] = "a" * 15
+    assert lint_canonical(canonical, schema, report=report, mode="single") == []
+    build["name"] = build["spawn_table"][0]["name"] = "a" * 16
+    errors = lint_canonical(canonical, schema, report=report, mode="single")
+    assert len(errors) == 2 and all("longer than 15 characters" in e for e in errors)
+
+
+def test_lint_catches_a_program_that_runs_out(fixture_path, library, schema):
+    """9.23 B4, N1: a segment-bound program without its trailing blocking step runs out before its depart; a finite
+    or spawned program without EXIT runs out without one."""
+    _, canonical, report = compiled(fixture_path, library, "fx-mixed.timeline.yaml")
+    editor = next(e for e in canonical["events"] if e["op"] == "arrive" and e["id"] == "editor")
+    editor["program"].pop()
+    child = _with_spawn(canonical)["spawn_table"][0]
+    child["program"].pop()
+    errors = lint_canonical(canonical, schema, report=report, mode="single")
+    assert "editor: the program ends with RUN, so it runs out before its depart" in errors
+    assert any(e.startswith(f"{child['id']}: the program ends with ") and e.endswith("without EXIT") for e in errors)
+    assert len(errors) == 2
 
 
 def test_demand_estimate(fixture_path, library):

@@ -4,7 +4,8 @@ Three lint layers, each returning a list of error strings:
   repo lints       registry subset, archetype provenance, meas-pending freeze
   timeline lints   structural rules (delegated to Timeline's loader)
   canonical lints  event ordering, id uniqueness, FORK <-> spawn_table,
-                   channel resolution, JSON-Schema validation
+                   channel resolution, the comm limit, programs' ends,
+                   JSON-Schema validation
 """
 
 import json
@@ -21,6 +22,7 @@ REQUIRED_ARCHETYPE_FIELDS = (
     "scalable", "validation_stats", "modeling_notes")
 LIFETIMES = {"segment-bound", "finite", "spawned"}
 DECLARED_CLASSES = {"normal", "idle"}   # 9.13 spec decision 2: widened only when an entry carries batch or real-time work
+COMM_LIMIT = 15   # TASK_COMM_LEN 16 less the terminator (linux-sched-h)
 SAMPLING = {"per-instance", "per-task", "per-iteration"}
 
 
@@ -320,11 +322,30 @@ def lint_canonical(canonical, schema, report=None, mode=None, name=""):
                           f"awaited by {target!r}")
 
     known = set(waits)
+    for entry in arrivals:   # 9.23 B4: a spawned child's WAKE resolves as a top-level task's does
+        for record in [entry] + list(entry.get("spawn_table") or []):
+            for target in _wake_targets(record["program"]):
+                if target not in known:
+                    errors.append(f"{prefix}{record['id']}: WAKE targets unknown "
+                                  f"task {target!r}")
+
+    # 9.23 B4: a name within the kernel's comm limit, 15 characters and the terminator (linux-sched-h)
     for entry in arrivals:
-        for target in _wake_targets(entry["program"]):
-            if target not in known:
-                errors.append(f"{prefix}{entry['id']}: WAKE targets unknown "
-                              f"task {target!r}")
+        for record in [entry] + list(entry.get("spawn_table") or []):
+            if len(record["name"]) > COMM_LIMIT:
+                errors.append(f"{prefix}{record['id']}: name {record['name']!r} longer than "
+                              f"{COMM_LIMIT} characters (the comm limit)")
+
+    # 9.23 B4, N1: no program runs out — a task without a pinned depart ends with EXIT, a segment-bound task with
+    # the blocking step its loop takes next (WAIT, TIMER) or an unbounded LOOP, so it is blocked when the user closes it
+    for entry in arrivals:
+        records = [(entry, entry.get("depart") is not None)]
+        records += [(spawn, False) for spawn in entry.get("spawn_table") or []]
+        for record, bound in records:
+            ends_with = _end_violation(record["program"], bound)
+            if ends_with:
+                errors.append(f"{prefix}{record['id']}: the program ends with {ends_with}, so it runs out "
+                              + ("before its depart" if bound else "without EXIT"))
 
     # 9.17: the focus track names top-level tasks within their pinned lifetimes, in time order, never overlapping
     by_id = {e["id"]: e for e in arrivals}
@@ -379,6 +400,18 @@ def _timer_first_violation(program):
     if first is not None and first["op"] == "TIMER":
         return None
     return first["op"] if first is not None else "nothing"
+
+
+def _end_violation(program, bound):
+    """None when the program ends as its lifetime requires; otherwise what it ends with instead."""
+    last = program[-1] if program else None
+    if bound:
+        if last is not None and (last["op"] in ("WAIT", "TIMER")
+                                 or (last["op"] == "LOOP" and last.get("count") == "unbounded")):
+            return None
+    elif last is not None and last["op"] == "EXIT":
+        return None
+    return last["op"] if last is not None else "nothing"
 
 
 def _wait_channels(program):

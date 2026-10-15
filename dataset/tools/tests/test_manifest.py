@@ -3,6 +3,7 @@
 import hashlib
 import importlib
 import json
+import re
 
 import pytest
 
@@ -74,8 +75,25 @@ def test_manifest_pins_the_compile_inputs_by_content(repo_root):
             "dataset/tools/wlc/compiler.py", "dataset/tools/wlc/sampling.py"} <= pinned
     assert any(p.startswith("dataset/stimulus/") and p.endswith(".jsonl") for p in pinned)
     assert any(p.startswith("dataset/replay/") and p.endswith(".json.gz") for p in pinned)
+    assert any(p.startswith("dataset/launch/") and p.endswith(".json.gz") for p in pinned)
     assert not any("__pycache__" in p for p in pinned)
     manifest = json.loads((repo_root / "dataset" / "build.manifest.json").read_text())
     assert set(manifest["inputs"]) == pinned
     for rel, digest in manifest["inputs"].items():
         assert compile_tool.sha256((repo_root / rel).read_bytes()) == digest, rel
+
+
+def test_every_stream_directory_the_tools_open_is_pinned(repo_root):
+    """9.23 B1: each kind of stream the compiler or the linter opens — `<dir>/<name><ext>` — has every such file
+    pinned, so a stream directory added later cannot fall outside the manifest's inputs."""
+    tools = repo_root / "dataset" / "tools"
+    sources = [tools / "compile.py"] + sorted((tools / "wlc").glob("*.py"))
+    opened = {m for path in sources
+              for m in re.findall(r'(?:parents\[2\]|parent) / "([a-z-]+)" / f"\{\w+\}(\.[\w.]+)"', path.read_text())}
+    assert {("stimulus", ".jsonl"), ("launch", ".json.gz"), ("replay", ".json.gz")} <= opened
+    pinned = {p.relative_to(repo_root).as_posix() for p in compile_tool.input_files(repo_root)}
+    for directory, ext in sorted(opened):
+        files = sorted((repo_root / "dataset" / directory).glob(f"*{ext}"))
+        assert files, directory
+        for path in files:
+            assert path.relative_to(repo_root).as_posix() in pinned, path

@@ -98,6 +98,8 @@ def test_a_periodic_entry_bins_the_replay_onto_its_cycle_grid(tmp_path, repo_roo
     period = lib.entry("video-player")["params"]["period"]["value_us"]
     prog = arrive["program"]
     timers = [i for i, s in enumerate(prog) if s["op"] == "TIMER"]
+    assert prog[-1] == {"op": "TIMER", "period_us": period}   # the next tick, past the depart (9.23 N1)
+    timers = timers[:-1]
     # the grid from the arrival, unchanged (D138)
     assert len(timers) == -(-18_000_000 // period)
     runs = [prog[i + 1]["us"] if i + 1 < len(prog) and prog[i + 1]["op"] == "RUN" else 0 for i in timers]

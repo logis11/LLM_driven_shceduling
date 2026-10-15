@@ -69,3 +69,26 @@ def test_a_generated_sets_manifest_joins_the_union_when_the_grid_definition_name
         "inputs": {}, "artifacts": {"transition-grid-single/tr-a-to-b-departs.workload.json": sha(b"G\n")},
         "reports": {"transition-grid-single/tr-a-to-b-departs.report.json": sha(b"RG\n")}, "demand": {}, "grid": {}}))
     assert check_build.check(root) == []
+
+
+def test_a_rewritten_file_left_uncommitted_fails_as_a_manifest_does(tmp_path):
+    """9.23 B2: every derived timeline a variant spec names and the coverage grid equal their committed bytes."""
+    import subprocess
+    root = make_repo(tmp_path)
+    coreset = root / "dataset" / "timelines" / "coreset"
+    coreset.mkdir(parents=True)
+    (coreset / "c9.variant.yaml").write_text(json.dumps({"variants": [{"id": "c9-x", "from": "c9.timeline.yaml"}]}))
+    (coreset / "c9-x.timeline.yaml").write_text("derived\n")
+    (root / "dataset" / "coverage-grid.json").write_text("{}\n")
+    assert check_build.rewritten(root) == ["dataset/timelines/coreset/c9-x.timeline.yaml", "dataset/coverage-grid.json"]
+    git = ["git", "-C", str(root), "-c", "user.name=t", "-c", "user.email=t@t"]
+    subprocess.run(git[:3] + ["init", "-q"], check=True)
+    subprocess.run(git + ["add", "-A"], check=True)
+    subprocess.run(git + ["commit", "-q", "-m", "bless"], check=True)
+    assert check_build.check_committed(root) == []
+    (coreset / "c9-x.timeline.yaml").write_text("re-derived\n")
+    (root / "dataset" / "coverage-grid.json").unlink()
+    errors = check_build.check_committed(root)
+    assert [e.split(":")[0] for e in errors] == ["dataset/timelines/coreset/c9-x.timeline.yaml",
+                                                 "dataset/coverage-grid.json"]
+    assert "the build wrote a file that differs" in errors[0] and "missing" in errors[1]
