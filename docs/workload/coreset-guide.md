@@ -1,6 +1,6 @@
 # Coreset 안내 — 51개 workload를 하나씩 뜯어보기
 
-> Status: draft · Created 2026-09-08 · Updated 2026-10-16
+> Status: draft · Created 2026-09-08 · Updated 2026-10-17
 
 이 문서는 **공부용 문서**예요. dataset이 무엇이고, 어떻게 만들어지고, 51개 coreset 파일 각각이 무슨 상황을 담고 있으며 어떤 숫자를 갖고 있는지를 OS/시스템 지식이 거의 없는 사람 기준으로 풀어 써요. 설계의 규범적 근거는 building-plan(`docs/workload/building-plan.md`), archetype의 규범적 정의는 archetype-plan(`docs/workload/archetype-plan.md`), 실행 semantics는 interpretation contract(`docs/simulator/interpretation-contract.md`)에 있어요. 이 문서는 그 셋을 읽을 수 있게 만드는 다리이고, 숫자는 `dataset/build.manifest.json`이 hash로 고정한 `coreset-single`의 51개 파일(2026-10-16에 re-bless된 build)과 그 manifest의 `demand` 기록, 그리고 timeline과 `dataset/archetypes.yaml`에서 직접 읽은 값이에요.
 
@@ -139,7 +139,7 @@ TIMER — 주기와 deadline이 있는 periodic job — 를 쓰는 건 playback�
 - `timer:<task id>`: 역시 run file의 `wake` event가 깨워요. 측정된 앱의 thread가 스스로 깨던 것(timer component, 4.1절)을 compile 때 절대 시각의 wake로 펼친 것이고, deadline이 없어요. 주기적으로 보이지만 TIMER가 아니에요.
 - `chain:<task id>`: game chain의 앞 멤버가 `WAKE`로 깨워요.
 - `job:<task id>`: build의 job 하나 안에서 멤버들이 job의 부모-자식 순서대로 서로 `WAKE`해요(5.4절).
-- `children:<task id>`: orchestrator(`make`, `dkms`)가 마지막 `FORK` 뒤에 기다리는 channel. executor는 orchestrator가 spawn한 마지막 자식이 끝날 때 이 WAIT를 완료시켜요(그때 살아 있는 자식이 없으면 막지 않고 바로). 이건 interpretation contract의 FORK·WAIT 규칙이고, reference simulator(`simulator/src/sim.cpp`)는 아직 구현하지 않아서 그 simulator에서는 `make`가 run 끝까지 거기서 막혀 있어요(12장).
+- `children:<task id>`: orchestrator(`make`, `dkms`)가 마지막 `FORK` 뒤에 기다리는 channel. orchestrator가 spawn한 마지막 자식이 끝날 때 executor가 이 WAIT를 완료시킨다(그때 살아 있는 자식이 없으면 막지 않고 바로)는 규칙이 interpretation contract의 FORK·WAIT에 제안돼 있고, 인경민이 동의하면 효력이 생겨요(`docs/data-contracts.md` §14의 2026-10-16 항목). reference simulator(`simulator/src/sim.cpp`)는 아직 구현하지 않아서 그 simulator에서는 `make`가 run 끝까지 거기서 막혀 있어요(12장).
 
 **operation.** 측정된 앱 넷은 사용자가 시킨 일 하나를 측정해서 들고 있어요: `web-browser`의 page-load(측정 길이 중앙값 약 0.47 s), `image-editor`의 unsharp mask(약 2.36 s), `video-editor`의 preview-render(약 11.4 s), `mail-client`의 send(약 2.9 s). timeline의 `operations` track이 `{at, task, name}`으로 시작 시각만 정하고, compiler가 측정된 길이표에서 길이를 뽑아 그 구간 동안 operation의 component가 task의 다른 wake를 대신하게 해요(그 구간에는 keystroke도 안 생겨요). operation은 그 task의 input window 안에서만 시작하고 window 하나에 하나예요(design). 60 s C1 base에서는 2–58 s window의 30 s(mail의 send는 40 s), 길이를 바꾸거나 자른 파일에서는 window 안의 같은 비율 자리에 놓여요(예: `c7-browsing`의 2–24.385 s window에서 13.1925 s, `c1-transcode`의 2–4,760 s window에서 2,381 s). C2와 C3의 파일은 각자의 표에 적힌 시각에 놓여요. operation은 event op가 아니라 task의 WAIT/RUN stream 안으로 compile되고, compile report(`build/coreset-single/<id>.report.json`의 `operations`)가 시각과 길이를 적어요.
 
@@ -585,7 +585,7 @@ core set 51개(`dataset/build.manifest.json`의 `demand`):
 
 파생 관계: C4 = C1 + injection, C5 = C1 + rename, C7 = C1 + unwanted job 또는 같은 job의 label flip, C2의 b = a + 배경 task 교체와 segment 1 수정, C6 셋은 `c1-media`나 `c1-browsing` 파생. 진짜 새로 쓴 timeline은 23개(C1 16, C2의 base 3, C3 3, `c6-dual`)이고 나머지 28개는 `*.variant.yaml` recipe 다섯 개로 생성돼요(11장). 파생 파일은 base의 seed를 물려받아서 "변경한 것 외에는 byte-identical"이 보장돼요.
 
-**core set 밖의 짝.** generated layer(1장)가 C3–C5의 rate 주장을 맡아요: C3에는 transition grid(480개 = 16 mode의 순서쌍 240 × 두 form: 경계에서 A의 task가 떠나는 `departs`, A가 남고 focus만 옮기는 `focus`), return grid A → B → A(720개 = 240쌍 × 가운데 segment 60·10·2 s), flap-stress set(24개, hold-time 조정 재료; 간격 5·10·30 s는 GameMode, tuned, systemd-oomd의 debounce 값, 2 s는 design); C4에는 distractor grid(272개: 사용자는 mode A에 머물고 60초에 다른 process set이 도착 — B의 C1 task set 전체(240쌍) 또는 어느 mode에도 속하지 않는 측정된 program 하나); C5에는 familiarity ladder(66개: 16 mode × tier 3–5, 이름을 바꾸는 범위 — focus를 가진 task의 이름 / 나머지 / 전부 — 를 축으로).
+**core set 밖의 짝.** generated layer(1장)가 C3–C5의 rate 주장을 맡아요: C3에는 transition grid(480개 = 16 mode의 순서쌍 240 × 두 form: 경계에서 A의 task가 떠나는 `departs`, A가 남고 focus만 옮기는 `focus`), return grid A → B → A(720개 = 240쌍 × 가운데 segment 60·10·2 s), flap-stress set(24개, hold-time 조정 재료; 간격 5·10·30 s는 GameMode, tuned, systemd-oomd의 debounce 값, 2 s는 design); C4에는 distractor grid(272개: 사용자는 mode A에 머물고 60초에 다른 process set이 도착 — B의 C1 task set 전체(240쌍) 또는 어느 mode에도 속하지 않는 측정된 program 하나); C5에는 familiarity ladder(66개: 16 mode × tier 4·5, 그리고 render와 backup의 job을 tier 3 이름(`melt-7`, `duplicity`)으로; 이름을 바꾸는 범위 — focus를 가진 task의 이름 / 나머지 / 전부 — 를 축으로).
 
 **RQ0에서의 역할**(`harness/experiments/rq0-gate.yaml`; RQ0는 gate 실험: 이 workload에서 configuration이 애초에 중요한가). 파일이 판정(judging)하는 조건은 label이 바뀌는 쌍의 한쪽이고 그 채점 term이 설계상 row 차이를 담는 것이에요. 판정 파일 19개: C2 쌍의 normal-class 쪽(`c2-p1a`, `c2-p2a`, `c2-p2b`, `c2-p3a`), job에 row의 몫이 닿는 batch C1 base 넷(`c1-compile`, `c1-ml-train`, `c1-render`, `c1-transcode`), C7 counterpart 열하나(browsing, office, dev, photo, meeting, gaming, video-edit, compile, ml-train, render, transcode). 나머지 32개는 reporting-only예요: interactive·periodic C1 base, `c1-gaming`(별도 line), idle 쌍, idle-class 일을 가진 여섯 파일(`c1-indexing`, `c7-indexing`, `c2-p1b`, `c1-backup`, `c7-backup`, `c2-p3b`), `c7-mail`, `c7-media`, C3, C4, C5, C6, 그리고 `c2-p2a-idle`. C3–C6는 돌고 보고되지만 Layer 2(scheduling 채점) aggregation에서는 빠져요. 그리고 `pre_committed_miss` segment를 가진 여덟 파일은 Layer 1(recognition 정확도)에서 빠져요(`layer1_exclusions`, 12장).
 
@@ -919,7 +919,7 @@ focus: browser 0–60, 게임 60–300, video 300–420.
 
 recognizer (4): 0 s `chrome ×5` → 60 s `FAudio_AudioCli, Task worker thr ×4, Troy.exe ×7, dxvk-cs, dxvk-submit, element-desktop, steam, winepulse_mainl, winepulse_timer, wineserver`(focus `Troy.exe`) → 300 s `mpv ×2` → 420 s 빈 집합.
 
-harness: 게임 segment의 chain은 lane_share 1.45라 **설계상 frame을 계속 놓쳐요.** backlog 규칙이 실제로 작동하는 파일. utilization은 파일 평균 0.9006이지만 게임 segment 안은 1.5062. 세 segment의 primary metric이 다 달라요(browser latency → frame miss → media job). 참고로 `game.chain.1`은 60초에, `video`와 `music`은 300초에 등장하는 TIMER task예요. TIMER의 t₀는 task가 TIMER를 처음 실행한 시각이고, lint가 TIMER를 첫 명령으로 강제하니 그 task의 도착 시각이에요(3장). lane이 바빠도 그래요: schedule 없이 돌리면 `video`는 300,000,000 µs에 도착해 300,010,000에야 lane을 처음 받지만, 첫 job의 deadline은 300,033,348 = 도착 + 33,348이에요. harness는 t₀를 그 task의 첫 `ready(cause = timer_tick)` line의 시각으로 읽어요. reference simulator는 도착할 때 막힘 없이 소비된 첫 TIMER에 그 line을 아직 내지 않아서(12장), 지금은 harness가 읽는 t₀가 도착보다 `game.chain.1`은 한 주기(60,016,667), `video`는 열한 주기(300,366,828), `music`은 아홉 주기(300,446,715) 늦어요.
+harness: 게임 segment의 chain은 lane_share 1.45라 **설계상 frame을 계속 놓쳐요.** backlog 규칙이 실제로 작동하는 파일. utilization은 파일 평균 0.9006이지만 게임 segment 안은 1.5062. 세 segment의 primary metric이 다 달라요(browser latency → frame miss → media job). 참고로 `game.chain.1`은 60초에, `video`와 `music`은 300초에 등장하는 TIMER task예요. TIMER의 t₀는 task가 TIMER를 처음 실행한 시각이고, lint가 TIMER를 첫 명령으로 강제하니 그 task의 도착 시각이에요(3장). lane이 바빠도 그래요: schedule 없이 돌리면 `video`는 300,000,000 µs에 도착해 300,010,000에야 lane을 처음 받지만, 첫 job의 deadline은 300,033,348 = 도착 + 33,348이에요. harness는 t₀를 그 task의 첫 `ready(cause = timer_tick)` line의 시각으로 읽어요. reference simulator는 도착할 때 막힘 없이 소비된 첫 TIMER에 그 line을 아직 내지 않아서(12장), 같은 run(schedule 없이)에서 지금 harness가 읽는 t₀는 도착보다 `game.chain.1`은 한 주기(60,016,667), `video`는 열한 주기(300,366,828), `music`은 아홉 주기(300,446,715) 늦어요. 몇 주기 늦는지는 각 task가 처음 막히는 때에 달려서 설정마다 달라지고, 적어도 한 주기 늦다는 것만 모든 run에서 같아요.
 
 #### `c3-creation` — 창작
 
@@ -990,7 +990,7 @@ harness: base의 term(editor input P99, build turnaround). 주입된 것들은 C
 
 ### C5 — familiarity ladder
 
-`c1-media`와 **structure, archetype, seed, 숫자가 전부 같고 이름만 달라요.** test suite(`dataset/tools/tests/test_coreset.py`)가 "이름 외 byte-identical"을 강제해요. 성능 숫자는 c1-media와 같아야 하고, 다르면 bug. 이 둘은 recognition 정확도 측정(Layer 1) 쪽 재료예요. authored 파일 둘은 tier 4와 5의 사례이고, tier 3–5의 rate 주장은 generated familiarity ladder가 맡아요.
+`c1-media`와 **structure, archetype, seed, 숫자가 전부 같고 이름만 달라요.** test suite(`dataset/tools/tests/test_coreset.py`)가 "이름 외 byte-identical"을 강제해요. 성능 숫자는 c1-media와 같아야 하고, 다르면 bug. 이 둘은 recognition 정확도 측정(Layer 1) 쪽 재료예요. authored 파일 둘은 tier 4와 5의 사례이고, tier 4·5의 rate 주장은 generated familiarity ladder가 맡아요(tier 3은 render와 backup의 job 두 cell).
 
 tier 정의:
 1. transparent (`chrome`, `code`, `mpv`)
