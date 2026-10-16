@@ -4,6 +4,8 @@ An editor and a batch task under a schedule that switches algorithm twice: boot 
 
 Scheduler behaviour assumed here, beyond the fixtures README list: MLFQ with 3 queues, slice 2000 µs, growth 2, stamped by entry 1 at 600 µs beside the boot entry (the boot default's own slice is 10 ms since 2026-09-11 and governs nothing here, since no task runs before 600); a task that consumes a full slice is demoted and one that blocks before its slice ends keeps its level, so a burst ending at the instant its slice does is demoted as it blocks (MLFQ rules 3–4, `docs/simulator/simulator-guide.md` §5); a fresh slice at every dispatch and at every boost; at a slice boundary the lane goes to the head of the highest non-empty queue, a demoted or preempted task joining the tail of its queue (rule 2: always run from the highest non-empty queue, round-robin within a queue); a wake into a strictly higher queue preempts at once, a wake into the same or a lower queue waits for the slice boundary; slice expiry with no competitor demotes without a `run_end` (a competitor: a ready task in the holder's new queue or a higher one); a switch **out of** MLFQ applies at the running task's slice boundary (the drain); a switch **out of** FIFO applies immediately and the running task is treated as freshly dispatched by MLFQ (the memo's rule (a)); the boost timer restarts at `t_apply` (metrics doc §11, items 7–8, both confirmed). `x_mlfq_level` lines are written for `hog` and `editor` whenever a demotion or a boost changes their level, up to `T_end` (`probe` never leaves Q0; the cold start at 40600 writes none).
 
+Re-derived 2026-10-17 (9.15): `editor`, whose first instruction is a WAIT, blocks in its arrival step, with no `ready` line and no occupancy, as the reference simulator's arrival step does (`simulator/src/sim.cpp`, `on_arrive`; fixtures README, item 4). The earlier derivation scheduled it at 0 for a zero-length occupancy; it ran no work there and kept its level, so nothing after 0 changes.
+
 ## Run file
 
 | task | name | arrive | depart | program | RUN total |
@@ -29,7 +31,7 @@ The trace carries the applied instants; the schedule carries the params. `W_sing
 
 | t | event |
 |---|---|
-| 0 | boot config. `editor` arrives, reaches WAIT, blocks (zero-length occupancy). Set change → query. |
+| 0 | boot config. `editor` arrives and executes its first instruction, a WAIT, in its arrival step: it blocks there, with no `ready` line and no occupancy. Set change → query. |
 | 600 | entry 1 applies (MLFQ, 2000 slice): same algorithm, levels kept, lane idle. |
 | 10000 | `hog` arrives, lane free, runs in Q0. Set change → query. |
 | 12000 | `hog`'s slice ends: demoted to Q1 (`x_mlfq_level` 0→1). Entry 2 (FIFO) applies here, after the drain. Under FIFO the hog keeps the lane. |
@@ -60,7 +62,6 @@ The trace carries the applied instants; the schedule carries the params. `W_sing
 
 | ready | pairs with | value |
 |---|---|---|
-| `editor` 0 `arrive` | `run_start` 0 | 0 |
 | `hog` 10000 `arrive` | `run_start` 10000 | 0 |
 | `editor` 20000 `wake` | `run_start` 42600 | 22600 |
 | `probe` 40000 `arrive` | `run_start` 44600 | 4600 |
@@ -72,7 +73,7 @@ The trace carries the applied instants; the schedule carries the params. `W_sing
 
 | task | occupancy (clipped) | `cpu_delivered` | `demand` | `completed` | `preempt_count` |
 |---|---|---|---|---|---|
-| `editor` | [0,0] [42600,44600] [49100,53100] [62600,64600] [68600,69600] [90000,93000] | 2000 + 4000 + 2000 + 1000 + 3000 = 12000 | 12000 | 0 (`depart`) | 2 (44600, 64600) |
+| `editor` | [42600,44600] [49100,53100] [62600,64600] [68600,69600] [90000,93000] | 2000 + 4000 + 2000 + 1000 + 3000 = 12000 | 12000 | 0 (`depart`) | 2 (44600, 64600) |
 | `hog` | [10000,42600] [45100,49100] [53100,62600] [64600,68600] [69600,90000] [93000,100000 clip] | 32600 + 4000 + 9500 + 4000 + 20400 + 7000 = 77500 | 300000 | 0 | 5 (42600, 49100, 62600, 68600, 90000) |
 | `probe` | [44600,45100] | 500 | 500 | 0 (`depart`) | 0 |
 
@@ -92,7 +93,7 @@ The trace carries the applied instants; the schedule carries the params. `W_sing
 | index 2, FIFO, t = 12000 | `editor`, `hog` | `editor` 44600 `preempt`; `hog` 42600 `preempt` | 2 (`editor`, `hog`) | 0 — not into MLFQ |
 | index 3, MLFQ, t = 40600 | `editor`, `hog`, `probe` | `editor` 44600 `preempt`; `hog` 42600 `preempt`; `probe` 45100 `block` | 2 (`editor`, `hog`) | 12500 — see below |
 
-The window closes when the last counted hog has received `W_single` = 6000 of CPU since 40600. `hog`: 2000 in [40600, 42600], 4000 in [45100, 49100] → 6000 at 49100. `editor`: 2000 in [42600, 44600], 4000 in [49100, 53100] → 6000 at 53100. `t_close` = 53100, value = 53100 − 40600 = 12500. Under a wall-clock window of 6000, [40600, 46600], both descents would have ended past the window, the hog's by 2500 µs and the editor's by 6500 µs — the case that led to the lane-time definition (memo §7).
+The window closes when the last counted hog has received `W_single` = 6000 of CPU since 40600. `hog`: 2000 in [40600, 42600], 4000 in [45100, 49100] → 6000 at 49100. `editor`: 2000 in [42600, 44600], 4000 in [49100, 53100] → 6000 at 53100. `t_close` = 53100, value = 53100 − 40600 = 12500. Under the memo's first window, `W_single · H` on the wall clock (memo §4) — 12000 µs with the two hogs, [40600, 52600] — the hog's descent (49100) falls inside and the editor's (53100) 500 µs past it: a counted hog's descent outlasting the window, the case that led to the lane-time definition (memo §7).
 
 The FIFO row's hog count is the memo's known bias in the other direction: both tasks' first `run_end` after 12000 is a preempt only because MLFQ took over at 40600. The count is informational there; the value is 0 regardless.
 
@@ -105,7 +106,7 @@ The FIFO row's hog count is the memo's known bias in the other direction: both t
 
 **`busy`** — 12000 + 77500 + 500 = 90000.
 
-Total 28 rows.
+Total 27 rows.
 
 ## The aggregates, by hand (metrics doc §8)
 

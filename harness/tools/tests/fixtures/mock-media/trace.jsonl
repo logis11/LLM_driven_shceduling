@@ -4,15 +4,15 @@
 {"event":"task_arrive","t":0,"task":"video","source":"file"}
 {"event":"task_arrive","t":0,"task":"music","source":"file"}
 {"event":"ready","t":0,"task":"video","cause":"arrive"}
-{"event":"ready","t":0,"task":"music","cause":"arrive"}
-{"event":"run_start","t":0,"task":"video"}
 {"event":"ready","t":0,"task":"video","cause":"timer_tick"}
+{"event":"ready","t":0,"task":"music","cause":"arrive"}
+{"event":"ready","t":0,"task":"music","cause":"timer_tick"}
+{"event":"run_start","t":0,"task":"video"}
 {"event":"run_end","t":6667,"task":"video","reason":"block","blocked_on":"timer"}
 {"event":"deadline","t":6667,"task":"video","due":16667,"met":true,"slack_us":10000}
 {"event":"run_start","t":6667,"task":"music"}
-{"event":"ready","t":6667,"task":"music","cause":"timer_tick"}
 {"event":"run_end","t":9167,"task":"music","reason":"block","blocked_on":"timer"}
-{"event":"deadline","t":9167,"task":"music","due":56667,"met":true,"slack_us":47500}
+{"event":"deadline","t":9167,"task":"music","due":50000,"met":true,"slack_us":40833}
 {"event":"ready","t":16667,"task":"video","cause":"timer_tick"}
 {"event":"run_start","t":16667,"task":"video"}
 {"event":"task_arrive","t":20000,"task":"scan","source":"file"}
@@ -21,7 +21,7 @@
 {"event":"deadline","t":23334,"task":"video","due":33334,"met":true,"slack_us":10000}
 {"event":"run_start","t":23334,"task":"scan"}
 {"event":"ready","t":33334,"task":"video","cause":"timer_tick"}
-{"event":"ready","t":56667,"task":"music","cause":"timer_tick"}
+{"event":"ready","t":50000,"task":"music","cause":"timer_tick"}
 {"event":"run_end","t":70000,"task":"scan","reason":"exit"}
 {"event":"task_end","t":70000,"task":"scan","reason":"exit"}
 {"event":"run_start","t":70000,"task":"video"}
@@ -33,7 +33,7 @@
 {"event":"run_start","t":83334,"task":"music"}
 {"event":"ready","t":83335,"task":"video","cause":"timer_tick"}
 {"event":"run_end","t":85834,"task":"music","reason":"block","blocked_on":"timer"}
-{"event":"deadline","t":85834,"task":"music","due":106667,"met":true,"slack_us":20833}
+{"event":"deadline","t":85834,"task":"music","due":100000,"met":true,"slack_us":14166}
 {"event":"run_start","t":85834,"task":"video"}
 {"event":"run_end","t":92501,"task":"video","reason":"block","blocked_on":"timer"}
 {"event":"deadline","t":92501,"task":"video","due":100002,"met":true,"slack_us":7501}

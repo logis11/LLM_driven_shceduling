@@ -4,6 +4,8 @@ A three-stage frame pipeline, the game chain reduced: the head ticks on a TIMER 
 
 The ids are `input`, `engine`, `display` on purpose: the reader must find the chain by following WAKE targets from the TIMER-headed task, not by a naming convention.
 
+Re-derived 2026-10-17 (9.15): `input`'s leading TIMER executes in its arrival step, without the lane, consuming tick 0 there, and `engine` and `display`, whose first instruction is a WAIT (their loop's body counting), block in theirs with no `ready` line, as the reference simulator's arrival step does (`simulator/src/sim.cpp`, `on_arrive`; fixtures README, items 3 and 4). The earlier derivation made `engine` and `display` ready at 0 and ran each WAIT at the stage's first dispatch, on a wake stored before it.
+
 ## Run file
 
 | task | name | arrive | depart | program | RUN total |
@@ -19,9 +21,9 @@ Chain: `input` → `engine` → `display` (head `input`, tail `display`). Frame 
 
 | t | event |
 |---|---|
-| 0 | all three chain tasks arrive; `input` first. `input` runs: tick 0 is now → instant `ready(timer_tick)` inside the occupancy; RUN 900. `engine` and `display` are ready (arrive) and wait. |
-| 900 | `input` wakes `engine` (`engine` has not yet executed its WAIT, so the wake is stored) and reaches TIMER; tick 1 not due → blocks. `deadline` for the head's job 0: completion 900, due 16667. `engine` runs: its WAIT completes instantly on the stored wake → `ready(wake)` at 900 inside the occupancy. RUN 2600. |
-| 3500 | `engine` wakes `display` (stored) and blocks on WAIT. `display` runs: WAIT instant → `ready(wake)` at 3500 inside. RUN 2100. |
+| 0 | all three chain tasks arrive, in file order. `input` executes its TIMER in its arrival step: tick 0 is now, consumed without blocking → `ready(arrive)` and `ready(timer_tick)` at 0. `engine` and `display` execute their WAIT in their arrival step and block there, with no `ready` line. `input` runs: RUN 900. |
+| 900 | `input` wakes `engine` (blocked in its WAIT since its arrival → `ready(wake)` at 900) and reaches TIMER; tick 1 not due → blocks. `deadline` for the head's job 0: completion 900, due 16667. `engine` runs: RUN 2600. |
+| 3500 | `engine` wakes `display` (blocked in its WAIT since its arrival → `ready(wake)` at 3500) and blocks on WAIT. `display` runs: RUN 2100. |
 | 5600 | `display` blocks. **Frame 0 complete at 5600.** |
 | 15000 | `hog` arrives, lane free, runs. |
 | 16667 | tick 1: `input` ready; `hog` holds the lane (FIFO). |
@@ -42,11 +44,9 @@ Chain: `input` → `engine` → `display` (head `input`, tail `display`). Frame 
 | ready | pairs with | value |
 |---|---|---|
 | `input` 0 `arrive` | `run_start` 0 | 0 |
-| `input` 0 `timer_tick` | inside [0, 900] | 0 |
-| `engine` 0 `arrive` | `run_start` 900 | 900 |
-| `display` 0 `arrive` | `run_start` 3500 | 3500 |
-| `engine` 900 `wake` | inside [900, 3500] (line follows `run_start`) | 0 |
-| `display` 3500 `wake` | inside [3500, 5600] | 0 |
+| `input` 0 `timer_tick` | `run_start` 0 | 0 |
+| `engine` 900 `wake` | `run_start` 900 | 0 |
+| `display` 3500 `wake` | `run_start` 3500 | 0 |
 | `hog` 15000 `arrive` | `run_start` 15000 | 0 |
 | `input` 16667 `timer_tick` | `run_start` 29000 | 12333 |
 | `engine` 29900 `wake` | `run_start` 29900 | 0 |
@@ -55,7 +55,7 @@ Chain: `input` → `engine` → `display` (head `input`, tail `display`). Frame 
 | `engine` 35500 `wake` | `run_start` 35500 | 0 |
 | `display` 38100 `wake` | `run_start` 38100 | 0 |
 
-Chain stages' WAIT completions are `cause=wake`, like keystrokes; each completes the stage's next `WAIT chain:<stage>`, so the rows carry `channel=chain`.
+Chain stages' WAIT completions are `cause=wake`, like keystrokes; each completes the stage's next `WAIT chain:<stage>`, so the rows carry `channel=chain`. `engine` and `display` have no `arrive` row: they block in their arrival step.
 
 **`job`** — entity is the chain head; frame k completion = the end of the tail's k-th iteration; value = completion − tick k.
 
@@ -84,4 +84,4 @@ The head's `deadline` lines say 900 / 29900 / 35500, all met. They measure the i
 
 **`busy`** — 2700 + 7800 + 6300 + 14000 = 30800.
 
-Total 34 rows.
+Total 32 rows.

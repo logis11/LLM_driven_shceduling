@@ -5,9 +5,13 @@ The generator emits a contract-valid trace (data-contracts §9) for any
 workload and config schedule from one rule that models no scheduling: at every
 stimulus instant — a pinned arrival, a pinned wake, a periodic task's tick, and
 each chain stage's wake in turn — the stimulated task is `ready`, runs for
-exactly 1 µs, and ends its run. A finite task exits after its last stimulus
-run, a segment-bound task departs at its pinned depart, spawn children arrive
-with their parent, every periodic job gets a met `deadline` line, and each
+exactly 1 µs, and ends its run. A task whose first instruction is a WAIT (a
+LOOP's body counting), a spawn child included, blocks in its arrival step as
+the reference simulator's does (`simulator/src/sim.cpp` `on_arrive`, `spawn`):
+its arrival is no stimulus, with no `ready` line and no run, and its first run
+is the wake that completes that WAIT. A finite task exits after its last
+stimulus run, a segment-bound task departs at its pinned depart, spawn children
+arrive with their parent, every periodic job gets a met `deadline` line, and each
 schedule entry before the workload's end gets its `config_applied` line at its
 stamped time. Same-instant lines: config entries in list order, then arrivals
 in file order, then the rest, a run closing before a run opening.
@@ -113,6 +117,18 @@ def generate(workload_path, schedule_path, out_path, replay=None):
     _write_lines(lines, out_path)
 
 
+def _first_op(program):
+    """The op a program executes first, a LOOP's body counting."""
+    for op in program:
+        if op.get("op") != "LOOP":
+            return op.get("op")
+        if op.get("count") != 0:
+            inner = _first_op(op.get("body", []))
+            if inner is not None:
+                return inner
+    return None
+
+
 def _lines(doc, run, sched):
     t_end = run.t_end
     entries = sched["schedule"]
@@ -129,15 +145,19 @@ def _lines(doc, run, sched):
 
     # stimuli per task, in file order of first appearance
     stimuli = defaultdict(list)
-    order, parent_of = [], {}
+    order, parent_of, wait_first = [], {}, set()
     for ev in doc["events"]:
         if ev.get("op") == "arrive":
             order.append(ev["id"])
             stimuli[ev["id"]].append((int(ev["t"]), "arrive"))
+            if _first_op(ev["program"]) == "WAIT":
+                wait_first.add(ev["id"])
             for child in ev.get("spawn_table", []):
                 order.append(child["id"])
                 parent_of[child["id"]] = ev["id"]
                 stimuli[child["id"]].append((int(ev["t"]), "arrive"))
+                if _first_op(child["program"]) == "WAIT":
+                    wait_first.add(child["id"])
         elif ev.get("op") == "wake":
             stimuli[ev["target"]].append((int(ev["t"]), "wake"))
     ticks = {}
@@ -163,6 +183,8 @@ def _lines(doc, run, sched):
         emit(arrive_t, arrival)
         groups = defaultdict(list)
         for t, cause in sorted(stimuli[tid], key=lambda s: s[0]):
+            if cause == "arrive" and tid in wait_first:
+                continue                   # blocked in its arrival step: no ready line, no run
             groups[t].append(cause)
         finite = info.depart is None and info.period_us is None
         instants = sorted(groups)

@@ -104,12 +104,15 @@ def test_header_and_config_lines(tmp_path):
 
 def test_one_unit_run_per_stimulus(tmp_path):
     _, lines = _lines(tmp_path)
-    # segment-bound editor: arrival, two queued wakes at one instant, one wake, the depart
+    # segment-bound editor, WAIT-first: blocked in its arrival step (no ready line, no run),
+    # two queued wakes at one instant, one wake, the depart
+    assert _of(lines, "editor", "task_arrive") == [{"event": "task_arrive", "t": 0, "task": "editor",
+                                                    "source": "file"}]
     assert [(l["t"], l["cause"]) for l in _of(lines, "editor", "ready")] == \
-        [(0, "arrive"), (500, "wake"), (500, "wake"), (700, "wake")]
-    assert [l["t"] for l in _of(lines, "editor", "run_start")] == [0, 500, 700]
+        [(500, "wake"), (500, "wake"), (700, "wake")]
+    assert [l["t"] for l in _of(lines, "editor", "run_start")] == [500, 700]
     assert [(l["t"], l["reason"], l["blocked_on"]) for l in _of(lines, "editor", "run_end")] == \
-        [(1, "block", "wait"), (501, "block", "wait"), (701, "block", "wait")]
+        [(501, "block", "wait"), (701, "block", "wait")]
     assert _of(lines, "editor", "task_end") == [{"event": "task_end", "t": 1000, "task": "editor",
                                                  "reason": "depart"}]
     # finite batch task: exits after its first run
@@ -128,9 +131,9 @@ def test_one_unit_run_per_stimulus(tmp_path):
     assert _of(lines, "game.chain.1", "deadline") == [
         {"event": "deadline", "t": t + 1, "task": "game.chain.1", "due": t + 300, "met": True,
          "slack_us": 299} for t in (0, 300, 600, 900)]
-    # chain stage: woken at each tick
+    # chain stage, WAIT-first: no arrival line, woken at each tick (its first at its arrival)
     assert [(l["t"], l["cause"]) for l in _of(lines, "game.chain.2", "ready")] == \
-        [(0, "arrive"), (0, "wake"), (300, "wake"), (600, "wake"), (900, "wake")]
+        [(0, "wake"), (300, "wake"), (600, "wake"), (900, "wake")]
     assert _of(lines, "game.chain.2", "deadline") == []
     # orchestrator and children: children arrive with the parent, every one exits
     assert _of(lines, "build.c1", "task_arrive") == [{"event": "task_arrive", "t": 200,
@@ -146,12 +149,13 @@ def test_same_instant_order_is_config_arrivals_then_the_rest(tmp_path):
     at0 = [l["event"] for l in lines if l.get("t") == 0]
     assert at0[:2] == ["config_applied", "config_applied"]
     assert at0[2:5] == ["task_arrive"] * 3
-    # a run closing at t precedes a run opening at t (the 500 µs wake follows no run, so use 1)
+    # a run closing at t precedes a run opening at t (the editor's first run is the 500 µs wake's,
+    # its arrival being no run, so use 501)
     doc = json.loads(json.dumps(TINY))
-    doc["events"].append({"op": "wake", "t": 1, "channel": "input:editor", "target": "editor"})
+    doc["events"].append({"op": "wake", "t": 501, "channel": "input:editor", "target": "editor"})
     _, lines = _lines(tmp_path, doc)
-    at1 = [l["event"] for l in lines if l.get("task") == "editor" and l["t"] == 1]
-    assert at1 == ["run_end", "ready", "run_start"]
+    at501 = [l["event"] for l in lines if l.get("task") == "editor" and l["t"] == 501]
+    assert at501 == ["run_end", "ready", "run_start"]
 
 
 def test_records_build_is_consistent_on_the_hand_workload(tmp_path):
@@ -159,7 +163,7 @@ def test_records_build_is_consistent_on_the_hand_workload(tmp_path):
     rows, messages = build(tmp_path / "w.json", out, schedule_path=tmp_path / "s.json")
     assert messages == []
     by = {(r["entity"], r["metric"], r["t"]): r for r in rows}
-    assert by[("lane", "busy", 1000)]["value"] == 3 + 4 + 4 + 1 + 1 + 2
+    assert by[("lane", "busy", 1000)]["value"] == 2 + 4 + 4 + 1 + 1 + 2
     assert [by[("game.chain.1", "job", t)]["value"] for t in (0, 300, 600, 900)] == [1, 1, 1, 1]
     assert by[("batch", "completed", 101)]["value"] == 1
     assert by[("batch", "turnaround", 101)]["value"] == 1
@@ -168,6 +172,35 @@ def test_records_build_is_consistent_on_the_hand_workload(tmp_path):
     switches = [r for r in rows if r["metric"] == "switch_window"]
     assert [(r["index"], r["value"], r["hogs"]) for r in switches] == [(1, 0, 0), (2, 0, 0)]
     assert all(r["value"] == 0 for r in rows if r["metric"] == "ready_wait")
+
+
+def test_a_wait_first_task_blocks_in_its_arrival_step(tmp_path):
+    """A task whose first instruction is a WAIT, a spawned child included, blocks in its arrival
+    step as the reference simulator's does: no ready line and no run until a wake completes it;
+    a finite one that is never woken never runs and never ends."""
+    doc = {"meta": {"id": "tiny"}, "ground_truth": [], "events": [
+        {"op": "arrive", "t": 0, "id": "build", "name": "make", "fork_cap": 2,
+         "program": [{"op": "RUN", "us": 1}, {"op": "FORK"}, {"op": "FORK"}, {"op": "EXIT"}],
+         "spawn_table": [{"id": "build.j1", "name": "gcc",
+                          "program": [{"op": "WAIT", "channel": "job:build.j1"}, {"op": "RUN", "us": 3},
+                                      {"op": "EXIT"}]},
+                         {"id": "build.j2", "name": "gcc",
+                          "program": [{"op": "WAIT", "channel": "job:build.j2"}, {"op": "RUN", "us": 3},
+                                      {"op": "EXIT"}]}]},
+        {"op": "wake", "t": 50, "channel": "job:build.j1", "target": "build.j1"},
+    ]}
+    out, lines = _lines(tmp_path, doc, {**SCHEDULE, "schedule": SCHEDULE["schedule"][:1]})
+    assert _of(lines, "build.j1", "task_arrive")[0]["t"] == 0
+    assert [(l["t"], l["cause"]) for l in _of(lines, "build.j1", "ready")] == [(50, "wake")]
+    assert [l["t"] for l in _of(lines, "build.j1", "task_end")] == [51]
+    assert _of(lines, "build.j2", "task_arrive")[0]["source"] == "spawn"
+    assert [l["event"] for l in lines if l.get("task") == "build.j2"] == ["task_arrive"]
+    rows, messages = build(tmp_path / "w.json", out, schedule_path=tmp_path / "s.json")
+    assert messages == []
+    by = {(r["entity"], r["metric"]): r for r in rows}
+    assert by[("build.j2", "completed")]["value"] == 0 and by[("build.j2", "cpu_delivered")]["value"] == 0
+    assert not [r for r in rows if r["metric"] == "ready_wait" and r["cause"] == "arrive"
+                and r["entity"].startswith("build.j")]
 
 
 def test_generation_is_byte_identical_across_reruns(tmp_path):

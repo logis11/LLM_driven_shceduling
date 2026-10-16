@@ -456,22 +456,25 @@ def test_skipped_ticks_are_missed_job_rows_without_a_value():
     assert r.guards == []
 
 
-def test_t0_is_the_first_timer_tick_line_not_the_arrival():
-    """A head arriving on a busy lane executes its first TIMER at its first dispatch; the
-    grid starts there (metrics doc §11, item 4)."""
+def test_t0_is_the_first_timer_tick_line_at_the_arrival_not_the_first_dispatch():
+    """A head arriving on a busy lane executes its leading TIMER in its arrival step: its first
+    ready(timer_tick) line is at the arrival, before its first dispatch, and the grid starts
+    there (metrics doc §11, item 4)."""
     run = runfile(1000, [task("v", period=100)], chains=[["v"]])
     events = _timer_trace([
-        {"event": "run_start", "t": 40, "task": "v"},
-        {"event": "ready", "t": 40, "task": "v", "cause": "timer_tick"},          # t0 = 40, tick 0
+        {"event": "ready", "t": 0, "task": "v", "cause": "timer_tick"},           # t0 = 0, tick 0, at the arrival
+        {"event": "run_start", "t": 40, "task": "v"},                              # first dispatch: the lane frees at 40
         {"event": "run_end", "t": 50, "task": "v", "reason": "block", "blocked_on": "timer"},
-        {"event": "deadline", "t": 50, "task": "v", "due": 140, "met": True, "slack_us": 90},
-        {"event": "ready", "t": 140, "task": "v", "cause": "timer_tick"},         # tick 1 at 140
-        {"event": "run_start", "t": 140, "task": "v"},
-        {"event": "run_end", "t": 150, "task": "v", "reason": "block", "blocked_on": "timer"},
-        {"event": "deadline", "t": 150, "task": "v", "due": 240, "met": True, "slack_us": 90},
+        {"event": "deadline", "t": 50, "task": "v", "due": 100, "met": True, "slack_us": 50},
+        {"event": "ready", "t": 100, "task": "v", "cause": "timer_tick"},         # tick 1 at 100
+        {"event": "run_start", "t": 100, "task": "v"},
+        {"event": "run_end", "t": 110, "task": "v", "reason": "block", "blocked_on": "timer"},
+        {"event": "deadline", "t": 110, "task": "v", "due": 200, "met": True, "slack_us": 90},
     ])
     r = compute(run, events)
-    assert [(j["t"], j["value"]) for j in rows_of(r, "job", "v")] == [(40, 10), (140, 10)]
+    assert [(j["t"], j["value"]) for j in rows_of(r, "job", "v")] == [(0, 50), (100, 10)]
+    assert [(w["cause"], w["value"]) for w in rows_of(r, "ready_wait", "v") if w["t"] == 0] == \
+        [("arrive", 40), ("timer_tick", 40)]                                      # both wait for the dispatch
     assert r.guards == []
 
 

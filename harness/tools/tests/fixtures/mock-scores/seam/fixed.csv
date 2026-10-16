@@ -3,7 +3,6 @@ mock-p1a,fixed,,,,names,mock@0,fffffffffffffffffffffffffffffffffffffffffffffffff
 mock-p1a,fixed,,,,names,mock@0,ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,editor,cpu_delivered,120000,15000,,,,,,,,,,,,,
 mock-p1a,fixed,,,,names,mock@0,ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,editor,demand,120000,15000,,,,,,,,,,,,,
 mock-p1a,fixed,,,,names,mock@0,ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,editor,preempt_count,120000,0,,,,,,,,,,,,,
-mock-p1a,fixed,,,,names,mock@0,ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,editor,ready_wait,0,0,arrive,,,,,,,,,,,,
 mock-p1a,fixed,,,,names,mock@0,ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,editor,ready_wait,8000,0,wake,input,,,,,,,,,,,
 mock-p1a,fixed,,,,names,mock@0,ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,editor,ready_wait,30000,0,wake,input,,,,,,,,,,,
 mock-p1a,fixed,,,,names,mock@0,ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,editor,ready_wait,54500,4000,wake,input,,,,,,,,,,,

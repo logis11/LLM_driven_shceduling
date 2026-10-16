@@ -2,6 +2,8 @@
 
 The guards' fixture (8.3): a schedule that mixes all four provenances, a recognition log whose `validation` sequence mirrors it, ground-truth segments for the staleness check, and a trace shaped so that one run-level guard fails by design (config age) while the rest pass — the starvation floor among them, `batch`'s 1.95 s wait inside its 30 s; a test reads the same run against 1 s for the fail path. Condition `llm_vocab` on the prior table. Scheduler: the boot MLFQ governs nothing (no task runs before 600); entry 1 stamps FIFO at 600 and every later entry keeps FIFO, so the lane runs first-come-first-served with no preemption. All times µs.
 
+Re-derived 2026-10-17 (9.15): `editor`, whose first instruction is a WAIT, blocks in its arrival step, with no `ready` line and no occupancy, as the reference simulator's arrival step does (`simulator/src/sim.cpp`, `on_arrive`; fixtures README, item 4). The earlier derivation scheduled it at 0 for a zero-length occupancy; it ran no work there, so nothing after 0 changes beyond the trace's SHA-256.
+
 ## Run file
 
 | task | name | arrive | depart | program | RUN total |
@@ -40,7 +42,7 @@ The daemon queries at every pinned set change: 0 (`code`), 50000 (`python3`), 10
 
 | t | event |
 |---|---|
-| 0 | boot config (index 0). `editor` arrives, reaches WAIT, blocks (zero-length occupancy). |
+| 0 | boot config (index 0). `editor` arrives and executes its first instruction, a WAIT, in its arrival step: it blocks there, with no `ready` line and no occupancy. |
 | 600 | entry 1 applies: MLFQ → FIFO, a switch with nobody runnable (`switch_window` value 0, no hogs). |
 | 50000 | `hog` arrives; lane free; runs. |
 | 90000 | entry 2 (`held`) applies: FIFO stays FIFO. |
@@ -52,11 +54,11 @@ The daemon queries at every pinned set change: 0 (`code`), 50000 (`python3`), 10
 | 2700000 | keystroke 2; RUN 4000; blocks at 2704000. |
 | 3000000 | `T_end`. `editor` departs. |
 
-## Records (25 rows)
+## Records (24 rows)
 
-**`ready_wait`**: `editor` 0/arrive → 0; `hog` 50000/arrive → 0; `batch` 100000/arrive → `run_start` 2050000 → **1950000**; `editor` 2600000/wake → 0; `editor` 2700000/wake → 0.
+**`ready_wait`**: `hog` 50000/arrive → 0; `batch` 100000/arrive → `run_start` 2050000 → **1950000**; `editor` 2600000/wake → 0; `editor` 2700000/wake → 0.
 
-**Lifetime**: `editor` [0,0] [2600000,2604000] [2700000,2704000] → `cpu_delivered` 8000, `demand` 8000, `completed` 0 (depart), `preempt_count` 0. `hog` [50000,2050000] → 2000000 / 2000000, `completed` 1 at 2050000, `turnaround` 2000000. `batch` [2050000,2550000] → 500000 / 500000, `completed` 1 at 2550000, `turnaround` 2450000. No preemptions under FIFO.
+**Lifetime**: `editor` [2600000,2604000] [2700000,2704000] → `cpu_delivered` 8000, `demand` 8000, `completed` 0 (depart), `preempt_count` 0. `hog` [50000,2050000] → 2000000 / 2000000, `completed` 1 at 2050000, `turnaround` 2000000. `batch` [2050000,2550000] → 500000 / 500000, `completed` 1 at 2550000, `turnaround` 2450000. No preemptions under FIFO.
 
 **`config_interval`**: 0 → 600 (`fallback`, 600); 600 → 90000 (`unmodified`, 89400); 90000 → 100600 (`held`, 10600); 100600 → 3000000 (`clamped`, 2899400). Entry 4 has no line.
 

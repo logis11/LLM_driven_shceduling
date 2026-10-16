@@ -277,9 +277,10 @@ def compute(run, events: Iterable[dict], schedule=None) -> Result:
         period = run.tasks[head].period_us
         # Each ready(timer_tick) line marks the consumption of one tick: the latest
         # grid tick at or before the line's time, the grid being t0 + k*period with
-        # t0 the task's first TIMER execution — its first ready(timer_tick) line
-        # (metrics doc §11, assumption 4; the TIMER-first invariant fixes a task's
-        # first instruction, not its first dispatch). A tick consumed late sits
+        # t0 the task's first TIMER execution — its first ready(timer_tick) line,
+        # at its arrival: the TIMER-first invariant makes the TIMER the task's first
+        # instruction and the executor executes it in the arrival step, on a free
+        # lane or a busy one (metrics doc §11, assumption 4). A tick consumed late sits
         # before its line, never at it. Every unconsumed tick between two
         # consumptions was skipped: a job with no work and no completion, missed.
         # The j-th consumption is the tail's j-th iteration, since a skipped tick
