@@ -17,6 +17,14 @@ Chunk K10, Harness guide and metrics (wave 3). 2 open rows. The file has 344 lin
 - Sources: SX-0287 (TODO 9.15 line (from the 2026-10-11 audit), `_dev/TODO.md:179`); SX-0714 (audit 2026-10-10 docs-staleness additions (pre-registration numbers), `jioh/2026-10-10-dataset-audit-before-9.15.md:55`)
 - Notes: `harness/experiments/rq0-gate.yaml` `boot_defaults`: primary `ostep`; alternatives `ostep-slice-500us`, `-700us`, `-900us`, `-1200us`, `-2000us`, `-3000us`, `-5000us`, `-14000us`, `-20000us`, `-100000us`. The hand-offs' :279 has drifted to :281.
 
+### W-0870 · open
+- At: `docs/harness/metrics.md` §6.2, line 148 ("… fixes a task's first instruction, not its first dispatch, so a head arriving on a busy lane executes its first TIMER later than it arrives"); §11 item 4, line 309 ("so `t₀` is the task's first dispatch … later on a busy lane")
+- Change: Once 인지오 answers K03's t₀ question (## Questions from the waves): under the simulator's reading, restate both to the arrival (the leading TIMER executes in the arrival step); under the harness mocks' reading, both stand.
+- Final word: As W-0869: `simulator/src/sim.cpp:734–737`, `:674` execute the leading TIMER at arrival; the first-dispatch reading is 9.14 decision 1's.
+- Sources: `logs/K03.md` ## Fix round 1 (rows for other chunks), mismatch 1
+- Cross-ref: W-0869; W-0448
+- Notes: found in K03. Waits on 인지오's answer. The harness code and fixtures with the same reading (`harness/tools/harness/primitives.py:282`'s comment, `harness/tools/tests/test_primitives.py:459–475`, `harness/tools/tests/fixtures/README.md` lines 14 and 55, the `mock-media` fixture) are code outside the sweep, 인지오's call with the answer. The dataset guidebook vol-07 `:1534` quotes `linter.py`'s comment and this line; it follows the answer (K14).
+
 ## Also on this file, not for editing from this list
 
 - W-0481 · waits on 인지오 — Which number does the hold-time plan's no-rule measurement carry — the need for a hold time measured with hold time 0 and no hysteresis on the flap-stress set and the C4 files, under `oracle` and `random`, right after P… Blocks: The step label at `docs/harness/metrics.md:251` (§8, the flip-count row; the §13 entry at :328 is a dated record). Rows W-0454 and W-0456 (the daemon guide §9.…

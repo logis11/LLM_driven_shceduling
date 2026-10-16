@@ -72,6 +72,14 @@ Chunk K09, Simulator and daemon docs (wave 2). 8 open rows. The file has 76 line
 - Cross-ref: W-0436; W-0435; W-0832; W-0445
 - Notes: found in K05. No other row on this file carries W-0743's rule (W-0436 is the 2,430 example in the same paragraph). W-0832 (the RQ0 gate spec's (g)) cites the contract text once this lands. The simulator guide's worked run (W-0445, this chunk's other file) meets the same W-0744 scope.
 
+### W-0863 · open
+- At: `docs/simulator/interpretation-contract.md` the opening paragraph, line 6 ("(Pipeline: `archetypes.yaml + timeline (+ scenario catalog) + seed → workload`; see docs/workload/building-plan.md.)")
+- Change: Restate the pipeline to the compiler's inputs: the compiler reads no scenario catalog, and the seed is in the timeline's `meta`.
+- Final word: K02's full pass of the building plan (N2): its §1 line "`archetypes.yaml` + timeline (+ scenario catalog) + seed → workload" restated — `dataset/tools/wlc/compiler.py` reads no catalog and the seed is in the timeline's `meta`.
+- Sources: `logs/K02.md` ## Rows for other chunks (X4), ## New rows found (N2)
+- Cross-ref: W-0859
+- Notes: found in K02.
+
 ## Also on this file, not for editing from this list
 
 - W-0441 · blocked, simulator TIMER (on the spec's list) — ## 3 Event grammar — six primitives, the `TIMER(period)` row, line 31 ("Late iterations accumulate as backlog; they are not silently skippe…

@@ -175,6 +175,14 @@ Chunk K13, Dataset guidebook, volumes 5-6 (wave 3). 20 open rows. The file has 1
 - Cross-ref: W-0564; W-0565
 - Notes: found in K01. W-0564 closes the tier-rule note and row 1707; W-0565 restates §2.4 to the registry as it stands; apply together.
 
+### W-0872 · open
+- At: `docs/guidebook/dataset/06-grounding-measurement-verification.md` §3.6 결정 5 — 측정 장소, open note line 420, and §14.3 item 13, line 1688 (W-0570's place)
+- Change: When applying W-0570, name the archetype plan's §2, "Observation venues", as where the statement lives; it is in the archetype plan only, and W-0570's note "Waits on another row's `dataset/README.md` rows (W-0238)" points at a file that does not restate it.
+- Final word: As W-0871.
+- Sources: `logs/K04.md` ## Rows for other chunks
+- Cross-ref: W-0570; W-0238; W-0871
+- Notes: found in K04.
+
 ## Also on this file, not for editing from this list
 
 - W-0582 · closed, carried — Waits on Phase 10's RQ0 run, nothing owed in 9.15: the Phase 10 section line `_dev/TODO.md:190` ('… judge per the RQ0 gate spec') carries it, and the RQ0 gate…

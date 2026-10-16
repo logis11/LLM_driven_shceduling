@@ -2,14 +2,14 @@
 
 Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. The file has 182 lines at `d5cc7711`.
 
-### W-0192 · open · full pass
+### W-0192 · applied · full pass
 - At: `dataset/README.md` the whole file
 - Change: Full pass against the code: check every statement about the dataset in the file against `dataset/` (the timelines, `archetypes.yaml`, the manifests, `coverage-grid.json`, the tools) and correct what is stale; each correction not already a row is logged as a new row in the chunk log.
 - Final word: 9.15 spec decision 4: the docs that explain the dataset — `docs/workload/`, `dataset/README.md`, `docs/data-contracts.md`, the harness guide's records and dataset chapters — get a full pass against the code; staleness an agent notices outside its rows becomes a new row. Precedence by decision 3: the code and data as they stand (`dataset/`, `harness/`, `simulator/`, the committed manifests) first.
 - Sources: 9.15 spec decision 4 (`jioh/task-9.15-docs-memos-and-guidebook-corrections.md:30`)
 - Notes: —
 
-### W-0193 · open
+### W-0193 · applied
 - At: `dataset/README.md` ## Layout, the `archetypes.yaml` line, line 8 ("(fully measured, v0.2)"); ## Rules of the tree, "Zero `meas-pending`" bullet, line 171 ("The library is fully measured")
 - Change: Restate "fully measured" so it does not claim `game-task-chain` (the frame-chain entry) is measured: 28 of the library's 29 entries are measured in our CI campaigns (`category_source: meas`) and `game-task-chain` is grounded in the LAVD talk's figures (`category_source: lavd-ossna24`, values from slides s12/s13 and `steamos-refresh`); e.g. "28 of 29 entries measured, no `meas-pending` value". Line 171 likewise: the library holds no `meas-pending` value. The version v0.2 stands.
 - Final word: The library is at v0.2 (data-contracts §14, 2026-10-09; 9.13, the rebuild sub-task) with 29 entries, 28 measured (`category_source: meas`) and `game-task-chain` from `lavd-ossna24` (`dataset/archetypes.yaml:1712–1713`); zero `meas-pending` is enforced by the freeze lint (`make lint` runs `lint.py --freeze` since 9.23 D13, the freeze-lint decision).
@@ -17,7 +17,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0219; W-0238; W-0224
 - Notes: Checked at HEAD: `dataset/archetypes.yaml` has 29 entries; 27 `category_source: meas` lines plus `game-download-idle` inheriting `game-download`'s by YAML merge (`:1448–1449`), and `game-task-chain` `category_source: lavd-ossna24` (`:1713`), its values sourced `lavd-ossna24:s12`, `lavd-ossna24:s13` and `steamos-refresh`. The record-gaps audit's v0.2 item for this line is already applied (line 8 says v0.2). The library file's own header comment still says "(v0.1)" (`dataset/archetypes.yaml:1`) — a pinned manifest input, not this row.
 
-### W-0194 · open
+### W-0194 · applied
 - At: `dataset/README.md` ## Layout, the tree block, lines 7–30
 - Change: Add to the Layout block, each with what it holds and what reads it: `stimulus/` (the three SWELL-KW keystroke streams `swell-word-c1.jsonl`, `swell-outlook-c23.jsonl`, `swell-ie-c1.jsonl` and their index `streams.json`, CC-BY-NC-SA-4.0, replayed by the compiler into the input windows of the four typing entries `office-writer`, `code-editor`, `mail-client`, `web-browser`); `launch/` (ten `launch-<entry>.json.gz` launch-phase streams the compiler replays for a task arriving after 0 s, 9.10 D140/D136); `replay/` (six `replay-<entry>.json.gz` one-repeat streams the `replay` sensitivity variants compile from, written byte-stable by `tools/meas/replay_fold_in.py`); `meas/streams/` (182 measurement-campaign stream files read by `tools/meas/loop/pool_runs.py`, not by the compile or the lint); `variants.yaml` and `build.variants.manifest.json`. The stimulus, launch and replay stream files (19) are pinned in the manifests' inputs (9.23 D11).
 - Final word: 9.14 D10 (the trace replay; the stream directories handed to the dataset docs) with 9.10 D140 (`dataset/launch/` holds one stream file per entry with a launch phase, ten files) and 9.23 D11 (the launch streams pinned in the manifests' inputs): `dataset/stimulus/` the SWELL-KW keystroke streams (`streams.json`, three `.jsonl`), `dataset/launch/` the ten launch streams, `dataset/replay/` six streams (`replay-code-editor`, `replay-cpu-batch-python3`, `replay-package-upgrade`, `replay-renderer-hidden`, `replay-video-call`, `replay-web-browser`) written by `dataset/tools/meas/replay_fold_in.py`; `compile.py`'s `input_files` pins `stimulus/*.jsonl`, `launch/*.json.gz` and `replay/*.json.gz` — core manifest 33 inputs, each generated manifest 55. The 9.10 scope card hands `dataset/README.md` to 9.15 to be brought to 9.10's content (D13's `network-bulk` already absent).
@@ -26,7 +26,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Resolved at merge: Rows disagreed on `meas/streams/`: SX-0814 and SX-1086 (from the record-gaps audit §2 item 6) say the compile or the lint reads it; SX-0683 says only `pool_runs.py`. Code: `dataset/tools/compile.py:55–66` (`input_files`) reads `stimulus/*.jsonl`, `launch/*.json.gz`, `replay/*.json.gz` and nothing under `meas/`; no `meas/streams` path in `dataset/tools/wlc/*.py`, `lint.py` or `compile.py`; `dataset/tools/meas/loop/pool_runs.py:67` opens `dataset/meas/streams`. So `meas/streams/` is the measurement tooling's input, not the compile's or the lint's.
 - Notes: Directory contents listed at HEAD: `dataset/stimulus/` (streams.json, swell-ie-c1.jsonl, swell-outlook-c23.jsonl, swell-word-c1.jsonl), `dataset/launch/` (audio-player, chat-client, game-client, mail-client, office-writer, renderer-hidden, video-call, video-editor, video-player, web-browser), `dataset/replay/` (six files), `dataset/meas/streams/` (182 files). `streams.json` is not among the pinned inputs (`compile.py:63` pins `*.jsonl`). S10-158 is the 9.10 scope card's coverage row for `dataset/README.md` and merges here. The stimulus streams' licence also feeds the data-availability row (W-0218).
 
-### W-0195 · open
+### W-0195 · applied
 - At: `dataset/README.md` ## Layout, the `build.manifest.json` line, line 24 ("+ per-file static demand (utilization, demand_class)")
 - Change: Add a scoping clause where the README describes the manifest's demand: the static estimate is recorded per file and per ground-truth segment, each task's demand spread uniformly over its arrival to its pinned depart or the file's end, so a batch job that outlives its file reads as offered demand above one lane, not as the lane's load — `c2-p1a` 14.505 over the file and 35.7721 in its second segment, `c2-p2a` and `c2-p2a-idle` 9.3829 and 28.5251.
 - Final word: The 2026-10-10 dataset audit (reviewed 2026-10-11) and the record-gaps audit §2 item 5: the manifest's static estimate spreads a job's whole `total_work` (1,389.885 s for `c2-p1a`'s training run, 727.170 s for `c2-p2a`'s download) over its lifetime to the file's end, so a job outliving its file reads offered demand; the 2026-09-20 validity memo §4 asks for a scoping sentence or an in-file clip. No decision chose the clip (a compiler change); the scoping sentence is the doc-side remedy.
@@ -34,7 +34,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0220; W-0202
 - Notes: Checked at HEAD: `dataset/build.manifest.json` `demand` keyed `coreset-single/<file>.workload.json`: `c2-p1a` utilization 14.505, segments 0.5272 and 35.7721; `c2-p2a` and `c2-p2a-idle` 9.3829, segments 0.9651 and 28.5251. `dataset/tools/wlc/estimate.py:1–13` states the spreading rule and the per-segment record. The line also says "per-file" only, while the record is per file and per segment. SX-0718 also names the Demand-window bullet (line 170), whose restatement is W-0202. SX-0308's line 25 is line 24 at HEAD. One clause; the full sentence is the building plan's.
 
-### W-0196 · open
+### W-0196 · applied
 - At: `dataset/README.md` ## Layout, the `meas/` line, line 27 ("meas-ci campaign outputs: analysis summary + verified name tables")
 - Change: Restate the `meas/` line so `summary.json` reads as what it is: the Phase 2 campaign analysis of 2026-08-28 (the one-run `meas-cli-r1` campaign with `kernel-build-j8`, `clamscan`, `network-bulk` phases), read by no tool and source of no current value, kept as a record — or drop it from the line if the file is removed.
 - Final word: The 2026-10-10 dataset audit: `dataset/meas/summary.json` is an orphaned pre-rebuild analysis (2026-08-28), read by no tool; 9.3 decision 5 left it unchanged; no current dataset value comes from it.
@@ -43,7 +43,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Waits on: W-0784 (인지오's answer; the row applies once it is given, or is logged as waiting)
 - Notes: Checked at HEAD: the file was added by `d7cfd762` and `8416025f` (2026-08-28, Phase 2 meas-ci fold-in); its keys begin `cli_repeats` → `meas-cli-r1` → phases `idle-baseline`, `network-bulk`, `kernel-build-j8`, `clamscan`, …; no `dataset/tools` code reads `meas/summary.json` (the only `summary.json` readers are `launch.summary.json` and `swell_streams.py`'s own output). It is cited by `docs/memos/2026-09-13-critical-findings.md` (lines 51, 135, 158, 196) and the older guidebook (`docs/guidebook/vol-06-archetypes-and-grounding.md:2185`), which argues for keeping it. Removing the file is a data change outside 9.15's docs scope; the README describes it as it stands. The guidebook's "README:18, the campaign summary" is line 27, "analysis summary", at HEAD.
 
-### W-0197 · open
+### W-0197 · applied
 - At: `dataset/README.md` ## Layout, the `meas/` line, line 27 ("verified name tables (names/: run 1; names/run-2/: the Phase 7 dkms run)")
 - Change: State that the name tables verify the pre-rebuild names (`tracker-miner-fs-3`, `clamscan`, `gamescope`, `python3`) and that the names the timelines use now (`unattended-upgr`, `tracker-miner-f`, `deja-dup`, `python`, `melt-7`) rest on the comm recorded in each measurement campaign's trace, so "verified name tables" is not read as covering today's timeline names.
 - Final word: Dataset guidebook vol-06 ch.14 mismatch row 16: `dataset/meas/names/` holds the Phase 2 and Phase 7 name-verification runs over pre-Phase-9 names, made with the pre-fix level logic; the current names rest on the comm in each campaign's trace (vol-06 §6.8). No record says the grounding moved or re-runs the fixed `verify_names.py`.
@@ -51,7 +51,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0194; W-0196
 - Notes: The data files are records and stay unchanged. The missing decision (names grounded by the campaign traces; whether a re-run of the fixed `verify_names.py` is owed) is a for-인지오 item from the dataset guidebook vol-06 note at line 850, another row. `dataset/meas/names/` at HEAD: names-arch.json, names-fedora.json, names-ubuntu.json, run-2/.
 
-### W-0198 · open
+### W-0198 · applied
 - At: `dataset/README.md` ## Workload Dataset › ### Canonical format, the example block lines 55–75: `ground_truth` lines 63–64, `focus` line 67, the editor's `arrive` line 70
 - Change: In the canonical example, rename the segment attribute `"wanted"` to `"background_wanted"` in both ground-truth segments, and bring the times to the compiled `c2-p1a`: the second segment's `t_end`, the focus interval's `t_end` and the editor's `depart` 180000000 → 99435000. The `meta` hashes stay marked illustrative (the compiled file's are timeline `@ba4dd1d…`, archetypes `@46e1050…`).
 - Final word: The segment attribute is `background_wanted` (`docs/recognition-vocabulary.md` §1; flagged by the 2026-09-13 critical-findings memo §C and the record-gaps audit §2 item 6). The compiled `c2-p1a` (`dataset/build/coreset-single/c2-p1a.workload.json`): ground truth dev 0–60,000,000 µs and ml-train 60,000,000–99,435,000 µs, focus `editor` 0–99,435,000, the editor's `depart` 99,435,000 (the timeline `dataset/timelines/coreset/c2-p1a.timeline.yaml:13–30`, 9.10 D80, D86).
@@ -59,7 +59,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0199
 - Notes: Checked at HEAD in the compiled file. SX-0813 also asks for the editor's program; that is W-0199. `dataset/schema/workload.schema.json:62` describes attributes as "Mode attributes (e.g. wanted)" — a schema description in a pinned manifest input, not a docs edit; noted for 인지오's code sweep if wanted.
 
-### W-0199 · open
+### W-0199 · applied
 - At: `dataset/README.md` ## Workload Dataset › ### Canonical format, the example's editor program lines 70–73 (`WAIT input:editor`, `RUN 23439`, wake on `input:editor` at 2098333); the `wake` bullet, line 80 ("keystrokes, network replies…")
 - Change: Stop showing the measured editor as WAIT(input)/RUN pairs alone: its program waits mostly on its own timer components' channel (`timer:<id>`), keystrokes arriving on `input:<id>` — in the compiled `c2-p1a` the editor opens `WAIT timer:editor`, `RUN 22`, and receives 10,819 timer wakes against 525 input wakes (`c1-dev` 6,456 against 186, `c1-office` 3,064 against 270, `c1-mail` 5,371 against 35). Mark the example abridged or re-quote an excerpt of the compiled file (first input wake at 2,090,485 µs), drop the pre-rebuild numbers (23439), and let the `wake` bullet name the timer-component wakes beside keystrokes.
 - Final word: Record-gaps audit §2 item 13 and the dataset guidebook vol-01 §2.5 open note, verified at HEAD: in every compiled interactive file the timer-component wakes outnumber the keystroke wakes by one to two orders of magnitude; the periodic entries (`c1-media`, `c1-meeting`) have no wake events, their programs unrolled TIMER/RUN sequences. The editor's example numbers and `desktop-interactive` are from the pre-rebuild files.
@@ -67,7 +67,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0198; W-0200
 - Notes: Counted at HEAD in `dataset/build/coreset-single/`: `c2-p1a` editor 10,819 `timer:editor` and 525 `input:editor` wakes, program 22,689 ops ending with a trailing `WAIT timer:editor` (9.23 D16, the no-program-runs-out decision: the program ends with a WAIT on its last wake's channel, `dataset/tools/wlc/compiler.py:427–429`). The record-gaps item's "LOOP bodies" for the periodic entries is wrong at HEAD (unrolled TIMER/RUN, e.g. `c1-media` music 1,210 TIMER, 1,209 RUN).
 
-### W-0200 · open
+### W-0200 · applied
 - At: `dataset/README.md` new (### Canonical format, near the `wake` bullet, line 80, or ### Coresets)
 - Change: State that the compiled files' keystrokes are replayed from SWELL-KW streams for four applications — LibreOffice Writer and VS Code from the Word stream, Thunderbird from the Outlook stream, Chrome from the Internet Explorer stream (`dataset/stimulus/streams.json`) — and that the editors of Kdenlive and GIMP receive none: their measured driven phases are mouse-driven operations carried as the applications' own timer components, so their interaction terms read the timer wakes (`channel: timer`).
 - Final word: 9.14 D2 (2026-10-09, the editors' stimulus read on the compiled files): the Kdenlive editors (`c1-video-edit`, `c1-render`, `c1-transcode`, `c1-backup`, `c2-p3a`, `c2-p3b`, `c3-creation`, `c7-video-edit`, `c7-render`, `c7-transcode`, `c7-backup`) and GIMP's (`c1-photo`, `c3-creation`, `c7-photo`) have no input-channel wake — no keystroke stream exists for them — so their fourteen interaction terms read `channel: timer`, the other 25 `input`; keystroke streams exist for four applications (Word into LibreOffice Writer and VS Code, Outlook into Thunderbird, Internet Explorer into Chrome). 9.14 D6 later moved `c7-mail` to `timer`.
@@ -75,7 +75,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0194; W-0199
 - Notes: The scoring spec's counts moved after 9.14 D2: `harness/scoring/scoring-spec.yaml` at HEAD has 24 `channel: input` terms and 15 `channel: timer` (`c7-mail` moved by 9.14 D6); the README need not state counts. Pairs with the stream-directory row (W-0194).
 
-### W-0201 · open
+### W-0201 · applied
 - At: `dataset/README.md` ## Workload Dataset › ### Coresets, line 88 ("One compiled set, 51 workloads (66 labeled segments)")
 - Change: Change the segment count from 66 to 67; the file count 51 stands.
 - Final word: 9.23 D2 (the `c6-spoof` split at the spoof's arrival, 20 s), applied in 9.23 D10 (the rebuild): the core set has 51 files and 67 labelled segments (66 before; 66 on the 32 driver-table cells and `c6-dual`'s `ambiguous` segment outside); `dataset/coverage-grid.json` `segments_total` 67; `dataset/build.manifest.json` 51 core artifacts.
@@ -83,7 +83,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0206
 - Notes: Checked at HEAD: `dataset/coverage-grid.json` `segments_total` 67 (19 segments on `false` cells, 47 on `true`, 8 pre-committed-miss segments per SX-0596). C6, the resolution-limit group, holds 6 segments (`c6-alias` 1, `c6-dual` 1, `c6-fold` 2, `c6-spoof` 2). The record-gaps audit (§2 item 1) and dataset guidebook vol-01/vol-04 call 66 current; both predate 9.23 D2. SX-0983 also asks to check the C6 row against the split `c6-spoof`: W-0206.
 
-### W-0202 · open
+### W-0202 · applied
 - At: `dataset/README.md` ## Workload Dataset › ### Coresets, the set table row, line 92 ("lane-scaled so total demand targets one CPU lane (~100–150%)"); ## Rules of the tree, "Demand window." bullet, line 170 ("must land in the ~100–150% window … Files outside it get redesigned, not waved through")
 - Change: Restate the demand window as retired: the compiler records each `-single` file's static utilization per file and per ground-truth segment under `demand` in the manifest, reported only — no file fails on it or is redesigned for it; the `oversubscribed` class names a file designed to hold contention, `calibration` one that is not. Drop or restate the "Demand window." bullet accordingly, and drop "targets … (~100–150%)" from line 92's set-table row (the core set lane-scaled to a single lane, its demand recorded in the manifest).
 - Final word: 9.14 decision 4 (2026-10-09): the demand window retires as a gate — the compiler records demand per file and per segment in the manifest and never fails a file on it; the `oversubscribed` class marks a file designed to hold contention, its demand a measured fact reported, not a window held (`dataset/tools/wlc/estimate.py:1–13`: "retired as a gate on 2026-10-09 (9.14 decision 4)"; `docs/workload/building-plan.md` §5a, line 188: the compiler "never fails a file on it").
@@ -91,21 +91,21 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0195
 - Notes: No lint enforces the window; the tests `test_no_demand_window_gates_a_file` and `test_no_file_fails_on_its_demand` say so (SX-1083). The TODO line's hand-off `dataset/README.md:77,131` has drifted to 92 and 170. 9.14 decision 4 has no recorded reason (record-gaps §1 item 5) — another row. The same staleness in `docs/simulator/interpretation-contract.md` §7, `docs/background-guide.md` §5 and the 2026-09-20 memo §4 belongs to other groups. Dataset guidebook vol-07 §8.7 (lines 1498–1506) describes this README as stale and is restated once this lands (another row).
 
-### W-0203 · open
+### W-0203 · applied
 - At: `dataset/README.md` ## Workload Dataset › ### Coresets, the group table: C1 row, line 98 ("the ground where a name whitelist looks perfect"); C5 row, line 102 ("A whitelist scores zero on the invented tiers by construction")
 - Change: Restate the two rows' `whitelist` wording to the two name-table conditions: C1 (the single-situation calibration group) is where the strongest name table (`strongest_name_table`) is expected to score perfectly, while the shipped catalogue (`shipped_catalogue`, CachyOS's ananicy-cpp rules) keys every bound name in only 7 of 50 files; in C5 (the familiarity ladder) both name tables have no rule for the invented names of tiers 4–5 and score zero there by construction.
 - Final word: 9.12 D6 (the `whitelist` condition becomes two) as amended by D91, D105, D109 and D115: `shipped_catalogue` reproduces the CachyOS catalogue (`ananicy-rules` at `03ef03fb`) as CachyOS installs and enables it with ananicy-cpp, matched by the basename of each process's `argv[0]`, untruncated (D105), and answers RQ2 (research question 2, "does that reading beat what shipping systems do?"); `strongest_name_table` is a rule list in the catalogue's design covering the software the dataset presents as known, with no rule for Family 3's unregistered software or the invented names of familiarity tiers 4–5, carries the paper's claim (D115), is the condition expected to score perfectly on the C1 calibration files, and fails structurally on world knowledge; on ananicy-cpp's key the catalogue keys 19 of the 35 bound names and every name in only 7 of 50 files (D109); "a faithful reproduction of what shipping systems do today" and "the whitelist approach real operating systems currently use" restated to the two conditions (D91).
 - Sources: S12-045 (9.12 D6, `task-9.12-related-work-prose/changelog.md:114`); SX-0132 (TODO 9.15 line (from 9.12 D6), `_dev/TODO.md:179`)
 - Notes: Code: the condition identifiers `shipped_catalogue` and `strongest_name_table` in `harness/tools/harness/evaluator.py:47` (`CONDITIONS`) and `harness/guards/guard-spec.yaml:126` (S12-045's notes cite `:116`; the line is 126 at HEAD).
 
-### W-0204 · open
+### W-0204 · applied
 - At: `dataset/README.md` ## Workload Dataset › ### Coresets, the group table, C2 row, line 99 ("When two workloads **behave identically** and differ only in intent — an ML training run vs. an indexer nobody asked for, a game download vs. a virus scan …")
 - Change: Restate the C2 (intent-pair group) row to the rebuilt pairs and drop "behave identically" and "differ only in intent": the unwanted side is a measured job of its own, differing in name and in behaviour — P1 the training run (`python`, `cpu-batch`'s `python3` program) against Tracker's first index of a home (`tracker-miner-f`, `file-indexer`, `initiated: session`); P2 the user-started game download (`steam`, `game-download`) against Ubuntu's stock unattended upgrade (`unattended-upgr`, `package-upgrade`), not a virus scan — 163 µs against 1.8 ms between voluntary blocks, one 84-thread process against 916 processes, about 700 s of CPU against 26 s, nice 10 against nice 19; P3 the video editor's export (`kdenlive_render`) against Déjà Dup's scheduled backup (`deja-dup`, `incremental-backup`), which flips the mode and `initiated`, not `background_wanted`. The "+ 1" is `c2-p2a-idle`.
 - Final word: The 2026-10-10 audit record's "C2 direction, and A1 closed (2026-10-11, 인지오)": the C2 text ("behaviorally identical", "differ only in intent") is restated to the rebuilt state — the unwanted side is a measured job of its own (`file-indexer`, `package-upgrade`, `incremental-backup`) differing in name and behaviour; P3 flips the mode and `initiated`, not `background_wanted`. 9.12 D15 amended by D89 and D101: P2 is `c2-p2a` (`game-download`) against `c2-p2b` (`package-upgrade`, not a virus scan — 9.10 D3), both keeping a CPU 91–99 % busy beside the game, differing in run shape (163 µs against 1.8 ms), structure (84 threads in one process against 916 processes), size (about 700 s against 26 s) and declared priority (the download nice 10 for three quarters of its CPU, the upgrade nice 19); D89: whether the user wants the work is not in its behaviour and its declared class does not settle it; the name, read with what is known of the software, carries it. 9.10 rebound the backup to Déjà Dup (D119), the indexer to `file-indexer`; 9.13 D4 added `c2-p2a-idle`.
 - Sources: SX-0277 (TODO 9.15 line (from the 2026-10-11 audit), `_dev/TODO.md:179`); SX-0452 (9.7 scope card, Out of 9.7 (To 9.15), `task-9.7-background-io/scope-card.md:35`); SX-0980 (guidebook dataset vol-04 ch.13 mismatch list (§13.8, dataset README), `dataset/04-the-coreset.md:2173`)
 - Notes: Checked at HEAD: `dataset/timelines/coreset/c2-p1a.timeline.yaml:22` (`python`, `cpu-batch`, `program: python3`); `c2-pairs.variant.yaml:12–19` (P1b `tracker-miner-f`/`file-indexer`, `initiated: session`), `:27–33` (P2b `unattended-upgr`/`package-upgrade`), `:45–55` (P3b `deja-dup`/`incremental-backup`, mode `backup`, `initiated: scheduled`); `c2-p2a.timeline.yaml:28` (download `steam`/`game-download`); `c2-p3a.timeline.yaml:14–15` (render, `initiated: user`). The row's "differ in exactly one segment" still holds (each recipe patches segment 1 and the job).
 
-### W-0205 · open
+### W-0205 · applied
 - At: `dataset/README.md` ## Workload Dataset › ### Coresets, the group table, C6 row, line 103 ("a change happening inside one process (browser tab → video call)")
 - Change: Restate the fold clause to the compiled `c6-fold`: the call runs under the browser's own name as a sixth `chrome` task arriving at 30 s — a count change, so a query fires at 30 s (data-contracts §5, telemetry rule 1) — and nothing in the snapshot says call (a sixth `chrome` is also what a new tab shows), so the meeting segment (30–60 s) is a pre-committed miss.
 - Final word: 9.23 D1 (2026-10-14, `c6-fold`'s meeting segment a pre-committed miss): since 9.10 D30 a `chrome` task on `video-call` arrives at 30 s beside the browser and its four hidden renderers, so the snapshot goes from `chrome ×5` to `chrome ×6`; telemetry rule 1 makes a count-only change a set change, so a query fires at 30 s; nothing in the 30 s snapshot says call, so the meeting label cannot be reached from the names; the meeting segment (30–60 s) carries `pre_committed_miss: true`, the browsing segment keeps its graded 0 s point.
@@ -113,7 +113,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0206
 - Notes: Not named by 9.23 D1's hand-off (the README does not say "no query fires"), but the row's "inside one process" reads as no visible change; checked against `dataset/timelines/coreset/c6-fold.timeline.yaml:19–56` (segments 0–30 s browsing, 30–60 s meeting with `pre_committed_miss: true`; task `call`, `chrome`, `video-call`, arrive 30 s) and `c6.variant.yaml:39–57`.
 
-### W-0206 · open
+### W-0206 · applied
 - At: `dataset/README.md` ## Workload Dataset › ### Coresets, the group table, C6 row, line 103 ("A miner named `chrome` … These are known, pre-committed misses")
 - Change: State the spoof file as split at the spoof's arrival: `c6-spoof` is browsing with `background_wanted: true` to 20 s, then browsing with `background_wanted: false`, `spoof: true` and a pre-committed miss from the miner's (a `chrome`-named `cpu-batch` job) arrival at 20 s. Restate the closing sentence to the three files that are pre-committed misses — `c6-alias` (whole), `c6-fold` (from the call's arrival at 30 s), `c6-spoof` (from 20 s) — and `c6-dual` (two equally-active foregrounds) as `ambiguous`, outside the 32 driver-table cells, not a pre-committed miss.
 - Final word: 9.23 D2 (2026-10-14, `c6-spoof` split at the spoof's arrival): the segments are 0–20 s browsing, `background_wanted: true`; 20–60 s browsing, `background_wanted: false`, `spoof: true`, `pre_committed_miss: true`; scenario `[S2]` on both; `c6-spoof` joins the RQ0 gate spec's `layer1_exclusions`. Hands to 9.15 "`docs/workload/building-plan.md` §3 C6 (`:103`, `:118`)" — building-plan.md's `:103` is its C4 heading, and `dataset/README.md:103` is the C6 row at 9.23's commit and at HEAD, so both places get the change.
@@ -121,7 +121,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0201; W-0205
 - Notes: No raw row carried 9.23 D2's change for this row. Checked at HEAD: `dataset/timelines/coreset/c6-spoof.timeline.yaml:19–35` (the two segments), `:55–60` (task `spoof`, `chrome`, `cpu-batch`, `program: spoof`, arrive 20 s); `c6-alias.timeline.yaml:12–15` (`pre_committed_miss: true`); `c6-dual.timeline.yaml:13–15` (mode `ambiguous`, `dual_active: true`). The building plan's C6 heading and spoof bullet (`docs/workload/building-plan.md:117–118`) are another row.
 
-### W-0207 · open
+### W-0207 · applied
 - At: `dataset/README.md` ## Workload Dataset › ### Coresets, the group table, C7 row, line 104 ("interactive modes gain an unwanted scan")
 - Change: Replace "interactive modes gain an unwanted scan" with the job they gain: Ubuntu 24.04's stock unattended upgrade's install stage (`package-upgrade`, shown as `unattended-upgr`), arriving at 0 s bound whole at its measured CPU total of 26.385 s.
 - Final word: 9.10 D3 (with D36–D44): the interactive counterparts' unwanted job is Ubuntu's stock unattended upgrade (`unattended-upgr`, `package-upgrade`, `meas-ci:background:2026-10-01`), not a `clamscan` scan; the same name in every file, tier 1 (D43); 9.12 D15 restates the scan wording elsewhere.
@@ -129,7 +129,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0208; W-0209
 - Notes: Checked at HEAD: `dataset/timelines/coreset/c7.variant.yaml:7–14` (the header) and the `add-task` of `unattended-upgr`/`package-upgrade` at `:77`, `:92`, `:108`, `:122`, `:135`, `:149`, `:161`, `:174`, `:187`, `:207` (`c7-browsing`, `c7-office`, `c7-mail`, `c7-dev`, `c7-photo`, `c7-meeting`, `c7-gaming`, `c7-media`, `c7-video-edit`, `c7-idle`). The same row's C2 counterpart wording ("a game download vs. a virus scan") is W-0204.
 
-### W-0208 · open
+### W-0208 · applied
 - At: `dataset/README.md` ## Workload Dataset › ### Coresets, the group table, C7 row, line 104 ("Every driver-table cell has a one-diff pair")
 - Change: Restate "one-diff pair" to what a C7 (attribute-counterpart group) pair differs in: the unwanted job added or the job re-cast and the label, and — the counterpart being its C1 base's first C seconds, C the job's measured CPU total (26.385 s for the interactive counterparts; 39.435 s indexing, 1,389.885 s ml-train, 2,970.871 s transcode) — also its length, its input window (2 s to C − 2 s) and its operation times (at the base's fractions of the window); its keystrokes are its base's over the slice, less those inside its own operations.
 - Final word: 9.18 D1 (the slice rule, 2026-10-11, not amended): a derived input window lying inside a base window of its task carries `slice_of: {from, to, index}` and the compiler draws the stimulus offset for that base window, so a counterpart's keystrokes are its base's over the slice less those inside its own operations (a subset, not equality). With the C7 mechanism: each counterpart is its base's first C seconds (9.10 D41, D78), its operations at the base's fractions (9.10 D44), so a pair differs also in length, input window and operation times. The 2026-10-10 audit's A1 (option (ii), decided 2026-10-11) is applied by 9.18 D1.
@@ -137,7 +137,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0207; W-0209
 - Notes: The slice rule itself is already in the README's Rules of the tree (line 169, "A derived file's keystrokes are its base's"); only the C7 row is owed. C values checked in `dataset/timelines/coreset/c7.variant.yaml` header (`:11–13` 26.385 s; `:24–29` indexing 39.435 s; `:31–35` ml-train 1,389.885 s; `:37–40` transcode 2,970.871 s). The recipe's own comment (`c7.variant.yaml:2–3`, "a one-diff pair") is a timeline-variant comment, not this row. The building plan's C7 text ("one-diff pair") is another row.
 
-### W-0209 · open
+### W-0209 · applied
 - At: `dataset/README.md` ## Workload Dataset › ### Coresets, the group table, C7 row, line 104 ("the five cells that differ by intent alone ship as pre-committed misses")
 - Change: Add that the mail pair's counterpart holds no keystroke: `c7-mail` is `c1-mail`'s first 26.385 s and `c1-mail`'s 35 keystrokes all fall between 45.9 s and 53.1 s, so `c7-mail` reports only — its term reading the mailer's own timer wakes (`channel: timer`) with no `base` — and the mail mode's attribute is unmeasured.
 - Final word: 9.14 D6 (2026-10-09, 인지오's option A of three, amending the 9.14 spec's decision 2): `c7-mail` is `c1-mail`'s first 26.385 s and its mailer has no input-channel wake; `c7-mail` is reporting-only, its term reading the mailer's own wakes (`channel: timer`) with no `base`; the mail pair's attribute is unmeasured. Still true after 9.18 made a counterpart's keystrokes its base's over the slice (the base holds none in its first 26.385 s).
@@ -145,7 +145,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0207; W-0208
 - Notes: The README's C7 row names no file today; one clause may be enough.
 
-### W-0210 · open
+### W-0210 · applied
 - At: `dataset/README.md` ## Workload Dataset › ### Coresets, line 106 (the `c2-p2a-idle` paragraph: "to bracket a stock desktop's treatment of the download's nice-10 work")
 - Change: Add the limitation itself, or point to where the dataset docs state it: the task model carries no nice, so the simulated download competes at full standing although on `game-download`'s 30 pooled repeats nice 10 does 75.33 % of SteamCMD's thread group's CPU (73.56–77.57 % per repeat; nice 0 24.67 %) — its interference with the game in `c2-p2a` overstated and the headroom there inflated, in the hypothesis's favour; `package-upgrade`'s nice-19 work, 2.67 % of its pooled CPU (2.30–3.36 % per repeat, `apt-check` nearly all of it), is likewise carried at full standing.
 - Final word: 9.11 D6 (nice is not carried; the download's nice-10 work bounded by a check) as restated by 9.11 D20 (2026-10-08): on `game-download`'s 30 pooled repeats of `meas-ci:background:2026-09-19`, nice 10 does 75.33 % of SteamCMD's thread group's CPU (73.56–77.57 % per repeat), nice 0 24.67 %; `package-upgrade`'s nice-19 work, 2.67 % of its pooled CPU (2.30–3.36 % per repeat, `apt-check` nearly all of it), is likewise carried at full standing; nice is as recorded at task exit. The simulated download competes at full standing, so its interference with the game in `c2-p2a` is overstated and the headroom inflated, in the hypothesis's favour. 9.11 D16 qualifies the weight ("about a tenth" for nice 10) to where the download and the game share a task group. 9.13 D4 added the bounding pair.
@@ -153,7 +153,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0221
 - Notes: Not named by the TODO line (which names the measurement overview and the background guide); the README describes `game-download`. The editing agent may judge a pointer enough. `dataset/archetypes.yaml:1448–1455` (`game-download-idle`'s modeling note) already states "75 % of its CPU at nice 10".
 
-### W-0211 · open
+### W-0211 · applied
 - At: `dataset/README.md` ## Workload Dataset › ### Generated layer, the intro paragraph line 110 and the set table lines 114–117
 - Change: Say that in the generated layer an arrival is a program start: a task arriving mid-file replays one measured launch repeat from its arrival (9.10 D136), its steady stream beginning when the launch phase ends; most launch phases outlast a 60 s segment (mail 409 s, browser 421 s, video editor 241 s, call 210 s, game client 906 s, hidden renderer 1,051 s; office writer, chat client and the two players 31–54 s), so the segments where tasks arrive depict applications launching and the C1 files stay the steady-state material. Recognition (RQ1, reading the situation from process names) is untouched; the replay reaches Layer 2 (scheduling).
 - Final word: 9.23 D4 (2026-10-14, not amended): 9.10 D136 stands as the generated layer's behaviour — a task arriving mid-file replays one measured launch repeat from its arrival, its steady stream beginning when the phase ends; tasks arrive mid-file in 300 of the transition grid's 480 files, 630 of the return grid's 720, all 24 flap-stress files, 166 of the distractor grid's 272, none of the familiarity ladder's; most launch phases outlast a 60 s segment, so the segments where tasks arrive depict applications launching and the C1 files stay the steady-state material. Recognition (RQ1) is untouched — telemetry is a pure function of the pinned events; the replay reaches Layer 2: the terms of B and the returning A, the per-switch excess and the `flip_cost` line.
@@ -161,7 +161,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0212; W-0213
 - Notes: SX-0386 is the umbrella row for 9.23 D4–D6 on this section ("Duplicate of the line-179 rows"); it merges here, the closest, and its D5 and D6 halves are W-0212 and W-0213. Nothing in the README mentions launch at HEAD (grep). The compiler's launch replay: `dataset/tools/wlc/compiler.py:432–463` (`_load_launch`).
 
-### W-0212 · open
+### W-0212 · applied
 - At: `dataset/README.md` ## Workload Dataset › ### Generated layer, the set table: `return-grid` row line 115 ("A departing at each boundary") and `flap-stress` row line 116
 - Change: State in both rows that every task set departs at its boundary, so each boundary closes one mode's programs and launches the other's (the arriving set replaying its launch); every boundary is a set change under both telemetry shapes, and the launch load is the same under every condition.
 - Final word: 9.23 D5 (2026-10-14, not amended): the return grid (A → B → A) and the flap-stress set keep their form — every task set departs at its boundary — so under 9.23 D4 each boundary closes one mode's programs and launches the other's; every boundary is a set change under both telemetry shapes; the launch load is the same under every condition (it sets the size of a stale configuration's cost, not its direction); a window-switch regime (A staying, the focus returning) is a question for the RQ4 (phase-shift) experiment spec.
@@ -169,7 +169,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0211; W-0213
 - Notes: —
 
-### W-0213 · open
+### W-0213 · applied
 - At: `dataset/README.md` ## Workload Dataset › ### Generated layer, the set table: `transition-grid` row line 114 ("differ in the focus alone") and `distractor-grid` row line 117 ("the focus alone differing")
 - Change: Restate both clauses: the 240 twin pairs (`tr-<A>-to-<B>-focus` in the transition grid, `dx-<A>-with-<B>` in the distractor grid's cross-mode cells) share the task set and the name sequence and differ in the focus, the input, the labels and the random draws (different keyed seeds; per-task programs differ in 1,528 of 1,590 tasks, file demand by a median 17 %) — a recognition pair, which no experiment spec or scoring rule pairs for Layer 2.
 - Final word: 9.23 D6 (2026-10-14, not amended): the 240 pairs `dx-<A>-with-<B>` and `tr-<A>-to-<B>-focus` have identical task lists and different seeds (`dataset/tools/gen/cells.py`, SHA-256 over `seed|<set>|<cell id>`); names-only telemetry is identical in all 240, focus telemetry in the 26 whose focus holders share a name; per-task programs differ in 1,528 of 1,590 tasks, file demand by a median 17 %; they are a recognition pair, not paired for scheduling; their seeds stay.
@@ -177,14 +177,14 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0211; W-0212
 - Notes: Line 117's sentence on the 26 cells whose focus holders share a name ("show the same telemetry as their focus-form twins … pre-committed miss … `focus_name_shared`") still holds under D6 (focus telemetry identical in those 26).
 
-### W-0214 · open
+### W-0214 · applied
 - At: `dataset/README.md` ## Workload Dataset › ### Generalsets, lines 124–126 ("Lands with the naturalistic generator in a later phase (build-order step 7, `docs/workload/building-plan.md`)")
 - Change: Restate the section to the backlog status: not built and on no phase line — the naturalistic generator, the generalset and the full condition matrix wait on the backlog for a source for Linux-desktop co-occurrence and transition frequency, which 9.10's search did not find; the generated layer (above) stands beside the core set meanwhile.
 - Final word: Direction of 2026-10-11 (인지오, Phase 9 spec decision 9): a generated layer stands beside the core set, which stays; the naturalistic set (the building plan's Layer 3b) stays in the backlog for the frequency claims, its prerequisite a source for Linux-desktop co-occurrence and transition frequency that 9.10's search did not find. 9.13 D1: the dataset ships the single-lane set alone (no `-native` sets).
 - Sources: SX-0722 (audit 2026-10-10 backlog note, `jioh/2026-10-10-dataset-audit-before-9.15.md:148`)
 - Notes: Checked: `_dev/TODO.md:196` (backlog: "Naturalistic generator + generalset + full condition matrix — its prerequisite is a source for Linux-desktop co-occurrence and transition frequency, which 9.10's search did not find (audit record 2026-10-11)"); `docs/workload/building-plan.md:150` ("The naturalistic set (§4) stays in the backlog").
 
-### W-0215 · open
+### W-0215 · applied
 - At: `dataset/README.md` ## Commands, the CI paragraph, line 141 ("`build/` 6.8 GB of the runner's 14 GB of storage with the core set's 0.7 GB beside it")
 - Change: Restate the storage clause: 6.8 GB is the whole `build/`, which already holds `coreset-single/`'s 1.6 GB — the core set's 51 artifacts (678 MB, 678,172,716 B after 9.23's rebuild) and the 78 sensitivity variants with the compile reports — rather than the core set sitting beside it.
 - Final word: 9.21 spec decision 8 (the generated layer built in every run) states the measurements of 9.20 D10 (CI run 38243554308, 2026-10-12): 5 min 13 s of a 12 min 04 s run, 1,562 artifacts, `build/` 6.8 GB. 9.23's rebuild sizes: the core set 678,172,716 B over 51 files.
@@ -192,14 +192,14 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Resolved at merge: SX-0841 judged "the core set's 0.7 GB" correct and the clause optional; SX-1085 (dataset guidebook vol-07 §8.11, `du`) says the 6.8 GB already includes the core set. Measured at HEAD: `du -sh dataset/build` 6.8G, `dataset/build/coreset-single` 1.6G; `_dev/research/jioh/task-9.21-consumer-work-for-the-generated-layer/changelog.md:65` and the 9.21 spec (`:46`) give `build/` 6.8 GB as the whole build. So the 0.7 GB figure is right for the 51 artifacts but "beside it" misreads as additional; the clause is restated.
 - Notes: The 78 variants are about 1.03 GB (dataset guidebook vol-07 line 1143).
 
-### W-0216 · open
+### W-0216 · not applicable
 - At: `dataset/README.md` ## Rules of the tree, line 165 ("archetype authoring follows `docs/workload/archetype-plan.md`"); ## Where to go deeper table, line 181
 - Change: Keep the pointer to the archetype plan but scope it to the plan's rules (§1–§3, §5–§6), the inventory being the library itself, once the plan marks its §4 superseded; no README change if the plan itself carries the scoping.
 - Final word: Record-gaps audit §2 item 15: archetype authoring follows the archetype plan's rules (§1–§3, §5–§6); the inventory is the library itself (`dataset/archetypes.yaml`).
 - Sources: SX-0838 (record-gaps §2 item 15, `jioh/2026-10-14-record-gaps-and-doc-staleness-for-9.15.md:40`)
 - Notes: Depends on the archetype plan's own row (another row: `docs/workload/archetype-plan.md` §4 marked superseded). Low weight.
 
-### W-0217 · open
+### W-0217 · applied
 - At: `dataset/README.md` ## Rules of the tree, "Every parameter value is sourced." bullet, line 167 ("Measured values are tagged `meas-ci:<workflow>:<run>`; raw data lives on the GitHub release named in the tag's registry entry")
 - Change: Restate the tag form to the campaign locator, `meas-ci:<workflow>:<campaign>` — the campaign's launch date `YYYY-MM-DD`, a letter for a second campaign of that workflow on that date, a run number only for a one-run campaign from before that form — and say where the raw data lives: each campaign's raw records are one GitHub release (the per-campaign releases, e.g. `meas-ci-2026-09-18`, `meas-ci-build-2026-09-18`, listed in `docs/workload/measurement-overview.md` §9), with the rule mapping a tag to its release, in place of "the GitHub release named in the tag's registry entry" (the `meas-ci` registry entry names no release).
 - Final word: 9.5 D27 (the campaign locator) as `docs/references.md`'s id rule states it (`docs/references.md:14`): measurement → `meas-ci`, with the campaign in the locator (`meas-ci:<workflow>:<campaign>`), the campaign the launch date of its first batch (`YYYY-MM-DD`, a letter added for a second campaign of the same workflow that date); its runs may be several, each repeat's run id in the pooled record, and its raw records are one release; a single run number identifies a one-run campaign from before this form. The registry entry (`dataset/sources.yaml:278–286`, `locator_pattern` `^[a-z0-9_-]+:(\d+|\d{4}-\d{2}-\d{2}[a-z]?)$`) names no release; the tag-to-release mapping (`meas-ci-<workflow>-<date>`, the 9.5 interactive/playback campaigns `meas-ci-<date>`) is written nowhere.
@@ -207,7 +207,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0223; W-0218
 - Notes: The 2026-10-10 audit's data-availability finding (release URLs and asset hashes beside the values) is W-0218. Dataset guidebook vol-06 note at line 1118 also names this sentence (another row).
 
-### W-0218 · open
+### W-0218 · applied
 - At: `dataset/README.md` new (a data-availability and licence section; anchor near ## Rules of the tree, "Every parameter value is sourced", line 167)
 - Change: Add a data-availability and licence statement: the code is under MIT (the root `LICENSE`) and the dataset's data and release assets under CC-BY-NC-SA-4.0 (`dataset/LICENSE`), Jioh In, Kyungmin Inn and Ian Park the copyright holders; the stimulus streams under `dataset/stimulus/` are cut from SWELL-KW (Koldijk et al., 2014, DANS; `swell-icmi14`), CC-BY-NC-SA-4.0; each `meas-ci` campaign's raw records are one GitHub release, with its URL and asset hash (in one table, not beside every value); the releases were published by hand from the workflow artifacts (the `meas-*` workflows end at `actions/upload-artifact`).
 - Final word: The 2026-10-10 audit's data-availability finding: no release URL or asset hash stands beside the values (only the `dataset/replay/` streams carry release and asset); no LICENSE; the SWELL-derived `dataset/stimulus/` is CC-BY-NC-SA; the releases are made by hand (the workflows end at upload-artifact). 9.15 spec decision 12 fixes the licences: a root `LICENSE` puts the code under MIT; `dataset/LICENSE` puts the dataset's data and its release assets under CC-BY-NC-SA-4.0; both name Jioh In, Kyungmin Inn and Ian Park as the copyright holders; `dataset/LICENSE` credits SWELL-KW (Koldijk et al., 2014, DANS) for the stimulus streams.
@@ -215,7 +215,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0194; W-0217
 - Notes: The release list is `docs/workload/measurement-overview.md` §9's (its own row brings it to the 9.10 campaigns). A per-value release field would be a data change touching pinned inputs (`dataset/archetypes.yaml` → re-bless of all seven manifests and the RQ0 gate spec's re-pin), so the table form is the docs-scope remedy. The licence files themselves (`LICENSE`, `dataset/LICENSE`) are their own rows. `docs/workload/building-plan.md` §7 ("workflow files released, anyone can re-run"; the privacy-scrub tool "ships in the artifact regardless") is stale on the same point (another row's target).
 
-### W-0844 · open
+### W-0844 · applied
 - At: `dataset/README.md` ## Commands, the CI paragraph, line 141 (the build-every-run criterion; "the runner's 14 GB of storage", `gh-hosted-runners`); the data-availability statement (new, W-0218)
 - Change: Cite `gh-actions-limits` for the 6 h job limit, stated beside `gh-hosted-runners`' 14 GB in the build criterion (W-0755's answer), and `gh-artifact-retention` for the 90-day retention of a workflow's artifacts in the statement that releases are made by hand before a campaign's artifacts expire (W-0732's second part).
 - Final word: 인지오's answers (2026-10-16): W-0755 (b) — no threshold; the README states 9.23 D18's dataset run 38722675475 (2026-10-15: the generated step 7 min 23 s of 17 min 04 s; `build/` 6.8 GB) and the two ceilings, the runner's 14 GB (`gh-hosted-runners`) and the 6 h job limit (`gh-actions-limits`); W-0754 (a) — the new entry `gh-actions-limits`; W-0732, second part (d) — releases stay manual, made when a campaign is pooled and before the 90-day artifact retention (`gh-artifact-retention`). K01 minted both entries.

@@ -29,3 +29,11 @@ Chunk K18, Docs index (wave 5). 4 open rows. The file has 156 lines at `d5cc7711
 - Final word: 9.10 D33 (2026-10-01, amended by D163: S12's name is `python`) with D2: the scenario catalog lists, per row, the names the files bind, each name with its existence ground (its package on Ubuntu 24.04 and the observation that showed its `comm`), the scenario's existence cited from a benchmark definition only where one defines it; the catalog is not a record of co-occurrence (D2: the core set's task sets are design).
 - Sources: S10-078 (9.10 D33, `task-9.10-scenarios-timelines/changelog.md:719`)
 - Notes: The catalog itself is not yet rewritten (`docs/workload/scenario-catalog.md` header Updated 2026-09-10); its rewrite is another row, and spec decision 6 has the index follow a doc's changed content.
+
+### W-0874 · open
+- At: `docs/README.md` line 69 (the workload docs' reading order and the developer README); the archetype plan's entries, line 72 and the Full index line 121 ("how one process kind is specified and grounded")
+- Change: Add to the dataset reading path `dataset/tools/meas/README.md` (the measurement tooling's map), `dataset/meas-releases.yaml` (the release map) and the licences `LICENSE` and `dataset/LICENSE`; lines 72 and 121 may add "and the library's inventory".
+- Final word: K04 (wave 1, review passed 2026-10-16): `LICENSE` and `dataset/LICENSE` (9.15 spec decision 12; W-0239, W-0240), `dataset/tools/meas/README.md` (W-0751's answer), the release map (W-0732's answer); the archetype plan's §4 holds the 29-entry inventory (W-0231).
+- Sources: `logs/K04.md` ## Rows for other chunks
+- Cross-ref: W-0711; W-0710
+- Notes: found in K04.

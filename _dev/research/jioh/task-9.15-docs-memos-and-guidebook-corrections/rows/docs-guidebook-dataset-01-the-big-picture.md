@@ -184,6 +184,14 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 24 open rows. The file has 1
 - Cross-ref: W-0547; the final-memo row W-0718 and the for-인지오 row W-0774
 - Notes: Checked at HEAD: `simulator/src/sim.cpp:876` dies with 'WAKE target is not a top-level task' (the file last changed 2026-10-10, `6bf9d850`). Apply with or after the final memo: the final-memo row W-0718 and the for-인지오 row W-0774 (; it asks 인지오 to confirm the simulator, not the dataset, changes). Same matter as vol-04 §10.7's note (W-0547).
 
+### W-0865 · open
+- At: `docs/guidebook/dataset/01-the-big-picture.md` §3.8 building plan의 "세 layer"와 scenario 목록, the diagram lines 695–697 ("Layer 1/2/3") and line 700 ("scenario 목록이 Layer 2입니다" and the "Layer 1" name note); the open notes on the name collision, §1.3 line 93 and §9.8 line 1630; the glossary preamble line 1461; §4.2 line 761 (quoting `dataset/archetypes.yaml:1`)
+- Change: Name the dataset's layers as W-0742's answer does — the archetype library, the scenario catalog, the timelines — and keep "Layer 1/2" for the evaluation layers alone; close the notes at lines 93 and 1630 with the answer (the research-claims chain's links "link 1"–"link 7", C1–C7 the core set's file groups). Line 761's quotation follows W-0853 (the header's "Layer 1", in the batched rebuild after wave 4) with W-0492.
+- Final word: 인지오's answer to W-0742 (2026-10-16, (a)); K02 renamed the building plan's §1 diagram (ARCHETYPE LIBRARY, SCENARIO CATALOG, TIMELINES) and its headings §2–§4.
+- Sources: `logs/K02.md` ## Rows for other chunks (X6, restated in fix round 2)
+- Cross-ref: W-0742; W-0492; W-0853
+- Notes: found in K02. W-0742 blocks "the dataset guidebook vol-01 §1.4 note and any rename sweep; also the open note at :93"; no row of this file carried them.
+
 ## Also on this file, not for editing from this list
 
 - W-0507 · blocked, simulator TIMER (outside the spec's list) — §2.4 여섯 개의 primitive, open note line 288

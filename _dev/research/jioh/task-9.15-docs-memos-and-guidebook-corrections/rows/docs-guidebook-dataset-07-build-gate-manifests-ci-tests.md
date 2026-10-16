@@ -105,3 +105,11 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 13 open rows. The file has 1
 - Sources: SX-1098 (guidebook dataset vol-07 open note (§8.2), `dataset/07-build-gate-manifests-ci-tests.md:1445`)
 - Waits on: W-0756 (인지오's answer; the row applies once it is given, or is logged as waiting)
 - Notes: Waits on the interpretation contract's §7 rows (, e.g. W-0438) and the for-인지오 row from W-0756.
+
+### W-0864 · open
+- At: `docs/guidebook/dataset/07-build-gate-manifests-ci-tests.md` §8.3 규칙 2, the 기록된 이유 paragraph, line 1453 (quoting building plan §2.2's two bullets)
+- Change: Restate both quotations to §2.2 as K02 left it: (1) "Reference by id: … a timeline's bound values each carry a `source:` entry, checked by the linter" in place of "Reference-only: higher layers use archetype ids; the linter rejects inline numerics in Layers 2–3"; (2) the (name, archetype) binding "happens in the timeline", not "in the scenario catalog or the timeline".
+- Final word: K02 (wave 1, review passed 2026-10-16): §2.2 restated (W-0089; N25: the compiler reads no catalog, every binding is a timeline task's `name`/`archetype` pair, `dataset/tools/wlc/timeline.py`); W-0742's answer (the dataset's layers named, not numbered).
+- Sources: `logs/K02.md` ## Rows for other chunks (X5, extended in fix round 1), fix round 1 item 7 (N25)
+- Cross-ref: W-0089; W-0742
+- Notes: found in K02.

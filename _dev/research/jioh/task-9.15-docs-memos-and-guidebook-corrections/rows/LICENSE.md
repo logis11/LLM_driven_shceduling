@@ -2,7 +2,7 @@
 
 Chunk K04, Dataset README, archetype plan and licences (wave 1). 1 open rows. A new file.
 
-### W-0239 · open
+### W-0239 · applied
 - At: `LICENSE` new
 - Change: Create a root `LICENSE`: the MIT licence for the code, copyright Jioh In, Kyungmin Inn and Ian Park.
 - Final word: 9.15 spec decision 12 (licences): a root `LICENSE` puts the code under MIT; `dataset/LICENSE` puts the dataset's data and its release assets under CC-BY-NC-SA-4.0; both name Jioh In, Kyungmin Inn and Ian Park as the copyright holders; `dataset/LICENSE` credits SWELL-KW (Koldijk et al., 2014, DANS) for the stimulus streams. It answers the 2026-10-10 dataset audit's data-availability item (no LICENSE in the repository).

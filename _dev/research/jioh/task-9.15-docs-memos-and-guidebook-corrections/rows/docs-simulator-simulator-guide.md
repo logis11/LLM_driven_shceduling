@@ -55,6 +55,14 @@ Chunk K09, Simulator and daemon docs (wave 2). 7 open rows. The file has 321 lin
 - Cross-ref: W-0449; W-0447
 - Notes: Not a backlog-versus-skip row, so not blocked, though the section's TIMER passages are (row W-0449). `simulator/src/notes.md:123–125` still records a t₀ conflict with metrics §11 item 4 that the metrics doc has since resolved (item 4 now says the first TIMER execution). The task counts are the 2026-10-08 build's; recount on the current build if quoted.
 
+### W-0869 · open
+- At: `docs/simulator/simulator-guide.md` ## 9, ### 9.2 TIMER's t₀, lines 279–281 (W-0448's place)
+- Change: When applying W-0448, write t₀ as 인지오 answers K03's t₀ question (## Questions from the waves): under the simulator's reading, t₀ is the arrival — the simulator executes a TIMER-first program's leading TIMER in the arrival step, busy lane or not — not W-0448's "so t₀ is the task's first dispatch".
+- Final word: K03's fix round 1 (review round 2 passed): `simulator/src/sim.cpp:734–737` (`on_arrive`) and `:753–754` (`spawn`) call `step()` at the arrival and `:674` sets `timer_next = now_`; on `c3-evening` with no schedule `video` arrives 300,000,000, first `run_start` 300,010,000, first `deadline` due 300,033,348 = arrival + P. 9.11 D11 and D33 carry no first-dispatch wording; the first-dispatch reading is 9.14 decision 1's and its changelog's.
+- Sources: `logs/K03.md` ## Fix round 1 (items 2–3; rows for other chunks), ## Review round 2
+- Cross-ref: W-0448; W-0870; W-0183
+- Notes: found in K03. Waits on 인지오's answer to K03's t₀ question. W-0448's Final word paraphrases 9.11 D11 as "so t₀ is the task's first dispatch"; D11's text does not say that (K03 fix round 1 item 3).
+
 ## Also on this file, not for editing from this list
 
 - W-0449 · blocked, simulator TIMER (on the spec's list) — ## 4 The instruction set, ### `{ "op": "TIMER", "period_us": P }`, lines 126–141 (the backlog sentence :127, "Worked example of the backlog…

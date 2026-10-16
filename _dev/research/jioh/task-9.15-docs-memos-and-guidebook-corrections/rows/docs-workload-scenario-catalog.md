@@ -2,14 +2,14 @@
 
 Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file has 36 lines at `d5cc7711`.
 
-### W-0135 · open · full pass
+### W-0135 · applied · full pass
 - At: `docs/workload/scenario-catalog.md` the whole file
 - Change: Full pass against the code: check every statement about the dataset in the file against `dataset/` (the timelines, `archetypes.yaml`, the manifests, `coverage-grid.json`, the tools) and correct what is stale; each correction not already a row is logged as a new row in the chunk log.
 - Final word: 9.15 spec decision 4: the docs that explain the dataset — `docs/workload/`, `dataset/README.md`, `docs/data-contracts.md`, the harness guide's records and dataset chapters — get a full pass against the code; staleness an agent notices outside its rows becomes a new row. Precedence by decision 3: the code and data as they stand (`dataset/`, `harness/`, `simulator/`, the committed manifests) first.
 - Sources: 9.15 spec decision 4 (`jioh/task-9.15-docs-memos-and-guidebook-corrections.md:30`)
 - Notes: —
 
-### W-0136 · open
+### W-0136 · applied
 - At: `docs/workload/scenario-catalog.md` title and header notes lines 1–8 (header line 2 'Status: normative · … · Updated 2026-09-10'; line 4's Source-column sentence); the scenario table lines 10–29 (the 'Taxonomy source(s)' column; rows S1, S2, S4, S6 and S16, which no other row names); ## Notes, note 1 line 33 and note 3 line 35
 - Change: Rewrite the catalog to 9.10 D33's content: per row the names the files bind, each with its existence ground (its Ubuntu 24.04 package and the observation that showed its comm), the scenario's existence cited from a benchmark definition only where one defines it — the Source column grounds existence only, never co-occurrence; the names no file binds and every source line the 2026-09-13 verification found wrong leave; restate the header's Source-column sentence (line 4) and note 1's coverage check against the definitions; note 3 (spoofing by name collision) stands; add 9.10 D168's tag rule (a segment's scenario tags name every catalog scenario whose program the segment shows); bump the header's Updated. Rows S1, S2, S4, S6 and S16 take D33's content here; the other rows have their own rows (W-0138 to W-0153).
 - Final word: 9.10 D33 (the catalog's content) as amended by D163 (S12's name is `python`, the observed comm), with D2 (the Source column states existence only, never co-occurrence) and D168 (a segment's `scenario` names each catalog scenario whose program is alive in the segment, the program's scenario as D33's table gives it; a task with no `depart` counts in the segment its arrival falls in): the scenario catalog lists, per row, the names the files bind, each with its existence ground — its package on Ubuntu 24.04 and the observation that showed its comm (D25) — and the scenario's existence cited from a benchmark definition only where one defines it. Leaving names: `evince`, `firefox`, `teams-for-linux`, `slack`, `darktable`, `blender`, `transmission-daemon`, `cargo`, `rustc`, `ollama`, `vlc`, `updatedb`, `rsync`, `rclone`, `tar`, `xz`, `freshclam`, `Xorg`. Leaving source lines: the 2,430-process figure, a DynamoRio build (memo A1); interbench's Compile load, which forks nothing (C-interbench-9); ananicy types read as categories (C-ananicy-rules-4, -7); LAVD's 'companion apps' (C-lavd-16); SchedCP's ML workloads (C-schedcp-3); the Steam toggle as a wanted/unwanted decision (C-steam-4); SYSmark's 'archiving analogue' (C-sysmark30-2); the ClamAV scheduled-scan pattern (C-plain-2; D3). D33's rows not covered elsewhere: S1 office | `soffice.bin` | PCMark 10 Productivity runs LibreOffice Writer (S2-13); SYSmark 30 Office Applications; CpsMark+ document manipulation lists products, not process names (C-cpsmark-3); comm observed (`office-writer`). S2 browsing | `chrome` | PCMark 10 Web Browsing (S2-13); CpsMark+ Internet service; comm observed (`web-browser`). S4 mail | `thunderbird-bin` | CpsMark+ Internet service (Outlook); SYSmark 30 keeps Outlook open (S2-15); comm observed (`mail-client`); D25. S6 photo | `gimp` | PCMark 10 Photo Editing (S2-13); CpsMark+ graphic design. S16 archive | `7z` | SYSmark 30 General Productivity's archive workload (S2-15). The notes: note 1's coverage check restated against the definitions; note 2's P1 pair two real jobs (D6); note 3's spoof stands; note 4 is D25's comm rule.
@@ -17,7 +17,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Cross-ref: W-0137; W-0153
 - Notes: D33's table is `_dev/research/jioh/task-9.10-scenarios-timelines/changelog.md:689–710`. Labels in it: S2-nn and S4-nn are source ids of 9.10's search files (`_dev/research/jioh/task-9.10-scenarios-timelines/search/S2-project-docs.md`, `S4-ci-observability.md`); C-<source>-n are the 2026-09-13 verification's verdicts; 'memo A1' is a finding of the 2026-09-13 critical-findings memo. Compiled names checked at HEAD (every `name` in the base `dataset/build/coreset-single/*.workload.json`): none of `clamscan`, `borg`, `ffmpeg`, `zoom`, `discord`, `spotify`, `game.exe`, `gamescope`, `python3`, `tracker-miner-fs-3` is bound; bound include `python`, `tracker-miner-f`, `unattended-upgr`, `kdenlive_render`, `deja-dup`, `HandBrakeCLI`, `mpv`, `chrome`, `element-desktop`, `Troy.exe` and the chain members, `7z`, `soffice.bin`, `thunderbird-bin`, `gimp`, `kdenlive`, `code`, `make` and the build members, `dkms`. The program-to-scenario map the tags follow is `dataset/tools/tests/test_coreset.py:491–500` (`SCENARIO_OF`, `SCENARIO_OF_PROGRAM`, 9.10 D168). The ids S1–S18 keep their numbers: the timelines' `scenario` tags use them. `docs/recognition-vocabulary.md:11`'s co-occurrence claim (D2) is another target's row; `dataset/tools/wlc/grid.py` `NAME_TIERS` still carrying unbound names is code (outside the sweep).
 
-### W-0137 · open
+### W-0137 · applied
 - At: `docs/workload/scenario-catalog.md` header note 'Schema decision — names only, no paths' line 6, consequence (a) ('recognizer and whitelist receive identical name-only input — clean comparison')
 - Change: Name the two name-table conditions in place of 'whitelist': the recognizer, the shipped catalogue (`shipped_catalogue`) and the strongest name table (`strongest_name_table`) receive the same name-only input; qualify that the shipped catalogue's lookup first maps each bound name to its process's `argv[0]` basename, the key ananicy-cpp uses.
 - Final word: 9.12 D6 as amended by D91, D105, D109 and D115: the `whitelist` condition becomes two — `shipped_catalogue`, the CachyOS catalogue (`ananicy-rules` at `03ef03fb`) as CachyOS installs and enables it with ananicy-cpp, matched by the basename of each process's `argv[0]`, untruncated (D105), answering RQ2 (research question 2: does that reading beat what shipping systems do?), and `strongest_name_table`, a rule list in the catalogue's design covering the software the dataset presents as known, with no rule for Family 3's unregistered software or the invented names of familiarity tiers 4–5, carrying the paper's claim (D115); 'a faithful reproduction of what shipping systems do today' and 'the whitelist approach real operating systems currently use' restated to the two conditions (D91); on ananicy-cpp's key the catalogue keys 19 of the 35 bound names and every name in only 7 of 50 files (D109). 9.12 D105: the shipped-catalogue list is built by mapping each bound task to its process's `argv[0]` basename before the lookup.
@@ -25,14 +25,14 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Cross-ref: W-0136
 - Notes: Code: `harness/tools/harness/evaluator.py:47`; `harness/guards/guard-spec.yaml:126`. 9.12 D105 (`_dev/research/jioh/task-9.12-related-work-prose/changelog.md:1582`) says the mapping is built with the two rule lists, which have no phase yet (owner 박이안). Consequence (b) and note 3 (Family 5, the spoofing family, authored by name collision) stand (9.10 D33).
 
-### W-0138 · open
+### W-0138 · applied
 - At: `docs/workload/scenario-catalog.md` the scenario table, row S3 'Video conferencing | zoom · teams-for-linux', line 14
 - Change: Rewrite S3 (meeting) as a call in the browser: name `chrome`, grounded on PCMark 10 Video Conferencing (S2-13) and Teams on Linux being a browser web app (S2-26); drop `zoom` and `teams-for-linux`.
 - Final word: 9.10 D24 with D33's row: 'S3 meeting | `chrome` (a call in the browser) | PCMark 10 Video Conferencing (S2-13); Teams on Linux a browser web app (S2-26); D24'; one video-call task per call (D14).
 - Sources: S10-055 (9.10 D24, `task-9.10-scenarios-timelines/changelog.md:526`)
 - Notes: Code: the call is bound as `chrome` on `video-call` in `c1-meeting`, `c6-fold`'s meeting segment and `c7-meeting`; `dataset/tools/tests/test_coreset.py:492` maps `video-call` to S3.
 
-### W-0139 · open
+### W-0139 · applied
 - At: `docs/workload/scenario-catalog.md` the scenario table, row S5 'Voice chat companion (overlay on S9/S2) | discord (+ renderer children)', line 16
 - Change: Rewrite S5 as the chat client: name `element-desktop`, shown idle with no messages arriving, its composition design (no benchmark defines it); drop `discord`, 'overlay on S9/S2', the ananicy comms class and LAVD's 'companion apps' (C-lavd-16).
 - Final word: 9.10 D23 with D24 and D33's row: 'S5 chat client | `element-desktop` | no benchmark defines it; the composition is design (D2); the overlay role withdrawn (9.8 D7; D23)' — Element shown idle, no messages arriving; Discord's overlay does not run on Linux.
@@ -40,7 +40,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Cross-ref: W-0152
 - Notes: Code: `element-desktop` (`chat-client`) is bound in `c3-evening` and `c4-gaming`. Note 2's mention of S5's overlay is W-0152's.
 
-### W-0140 · open
+### W-0140 · applied
 - At: `docs/workload/scenario-catalog.md` the scenario table, row S7 'Video editing / rendering | kdenlive · blender · ffmpeg (render children)', line 18
 - Change: Rewrite S7 (video edit and export) to `kdenlive` and the export's `kdenlive_render` (with its `melt-7`), grounded on PCMark 10 Video Editing (S2-13) and SYSmark 30 Advanced Content Creation (S2-15); drop `blender` and 'ffmpeg (render children)', which had no source.
 - Final word: 9.10 D10 as resolved by D101–D111: the render is Kdenlive 23.08.5's own export of the video-editor project through its render dialog at the shipped default profile (MP4-H264/AAC, x264 veryfast, CRF 23), task `kdenlive_render` on `cpu-batch`'s `kdenlive_render` program, its child `melt-7` doing 99.6 % of the CPU; ffmpeg's tables retired. D33's row: 'S7 video edit, export | `kdenlive`, the export's process (D10) | PCMark 10 Video Editing (S2-13); SYSmark 30 Advanced Content Creation (S2-15)'. 9.12 D102: 9.10 D111's and D125's lines pass through as 9.10 decided them.
@@ -48,21 +48,21 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Cross-ref: W-0148
 - Notes: Code: `kdenlive_render` is bound in `c1-render`, `c2-p3a`, `c7-render`, `kdenlive` in eleven files; `test_coreset.py:500` maps the `kdenlive_render` program to S7; 9.10 D168 tags the transcode segments S7 too (Kdenlive open beside the encode). `melt-7` is pooled into the `kdenlive_render` task (`dataset/archetypes.yaml:914`), not a separate bound name. S12-279's S15 half (9.10 D125) is W-0148's.
 
-### W-0141 · open
+### W-0141 · applied
 - At: `docs/workload/scenario-catalog.md` the scenario table, row S8 'Batch transcode (background bulk) | HandBrakeCLI · ffmpeg', line 19
 - Change: Rewrite S8 (transcode) to `HandBrakeCLI` only, grounded on CpsMark+'s HandBrake workload as its code runs it (H.264, the default preset); drop `ffmpeg` and the SchedCP batch-workloads source.
 - Final word: 9.10 D11 as amended by D95 and resolved by D91–D100: the transcode is CpsMark+'s HandBrake workload read from the benchmark's own code as H.264 — Big Buck Bunny's 4K 30 fps H.264 clip encoded whole by HandBrakeCLI 1.7.2's default preset 'Fast 1080p30' (x264) to 1920×1080 H.264 in MP4 — task `HandBrakeCLI` on the entry `video-transcoder`. D33's row: 'S8 transcode | `HandBrakeCLI` | CpsMark+'s HandBrake workload (D11)'. 9.12 D102: no doc names H.265; the S8 row passes through as 9.10 decided it.
 - Sources: S10-028 (9.10 D11, `task-9.10-scenarios-timelines/changelog.md:222`); S10-121 (9.10 D100, `task-9.10-scenarios-timelines/changelog.md:1816`); S12-278 (9.12 D102, `task-9.12-related-work-prose/changelog.md:1548`)
 - Notes: Code: `HandBrakeCLI` (`video-transcoder`) is bound in `c1-transcode`, `c3-creation`, `c7-transcode`; 9.10 D168 removed S8 from the render segments (S8's one program is in none of them).
 
-### W-0142 · open
+### W-0142 · applied
 - At: `docs/workload/scenario-catalog.md` the scenario table, row S9 'Gaming (native + Proton) | steam · steamwebhelper · gamescope · wineserver · <game>.exe (Proton)', line 20
 - Change: Rewrite S9 (gaming) to `Troy.exe` and its named threads, `wineserver` and `steam` (the logged-out client), grounded on `lavd-ossna24` slide 16, stating the client's logged-out state and the omitted threads; drop `steamwebhelper`, `gamescope`, `<game>.exe`, PCMark 10 Gaming, Windows Game Mode and ananicy.
 - Final word: 9.10 D19 with D22, D24, D26 and D33's row: 'S9 gaming | `Troy.exe` and its threads, `wineserver`, `steam` | the chain's source `lavd-ossna24` slide 16 (D26); the Steam client logged out, its state stated (D22); the game's other threads omitted (D19)'.
 - Sources: S10-049 (9.10 D19, `task-9.10-scenarios-timelines/changelog.md:394`); S10-053 (9.10 D22, `task-9.10-scenarios-timelines/changelog.md:489`)
 - Notes: Code: the eight gaming files bind `Troy.exe` ×7, `Task worker thr` ×4, `dxvk-cs`, `dxvk-submit`, `winepulse_mainl`, `winepulse_timer`, `FAudio_AudioCli` (`member_names: lavd-ossna24:s16`), `wineserver`, and `steam` on `game-client`.
 
-### W-0143 · open
+### W-0143 · applied
 - At: `docs/workload/scenario-catalog.md` the scenario table, row S10 'Game/content download (background, wanted) | steam (download workers) · transmission-daemon', line 21
 - Change: Rewrite S10 as a game install the user starts during play: name `steam` only (SteamCMD's measurement, the substitution stated; `transmission-daemon` leaves), grounded on Valve's default pause (`steam-downloads`) and the steam-for-linux #8821 report that a user-started install proceeds; drop the 'wanted/unwanted decision as a real user-facing toggle' reading (C-steam-4) and the ananicy download class.
 - Final word: 9.10 D7, with D24 (the download keeps the name `steam`, the SteamCMD substitution stated) and D142 (bound whole at 727.170 s), carried by D33's row: 'S10 game install during play | `steam` | Valve's default pause (`steam-downloads`); a user-started install proceeds (steam-for-linux #8821; D7)'. The download is a wanted install of another game the user starts during play, initiated: user. 9.7 D29/D31: the Steam download is `game-download` on SteamCMD (a stated approximation).
@@ -70,7 +70,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Cross-ref: W-0147; W-0148; W-0149; W-0152
 - Notes: Code: `game-download` shown `steam` in `c2-p2a` and `c2-p2a-idle` (`game-download-idle`, the bounding check's idle half, 9.13). SX-0455 (the 9.7 scope card) also names S14, S15 and S17 with the changes of W-0147, W-0148 and W-0149; its S14 clause (no ananicy 'indexer class' exists) is folded into W-0147. The P2 sentence is W-0152's.
 
-### W-0144 · open
+### W-0144 · applied
 - At: `docs/workload/scenario-catalog.md` the scenario table, row S11 'Software development: edit + compile', line 22 (names `code · make · gcc · cc1 · ld · cargo · rustc · dkms`; sources incl. 'kernel-build characterization (2,430 short-lived procs, arXiv 1705.05937)', 'interbench Compile load', 'SchedCP (make -j)', 'dkms: `dkms-man`, `dkms-debian`')
 - Change: Rewrite S11 (development and compile) to D33's content: names `code`, `make` and its jobs' members (`sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`), `dkms` and the module build's members; grounds the kernel build (9.6), DKMS's kernel hooks in Ubuntu's dkms package (the `dkms` references entry) and SYSmark 25's scenario description (C-sysmark25-1); `ld`, `cargo` and `rustc`, the 2,430-process figure, interbench's Compile load, SchedCP and the `dkms-man`/`dkms-debian` sources leave.
 - Final word: 9.10 D4 as resolved by D46–D59 and D33's row: 'S11 development and compile | `code`, `make` and its jobs' members, `dkms` | the kernel build (9.6); DKMS's hooks (D4); SYSmark 25 names compilation only in a scenario description (C-sysmark25-1)'; the unwanted counterpart is the observed DKMS autoinstall, task `dkms` (D59), the module build's members carrying their observed comms (`sh`, `x86_64-linux-gn`, `cc1`, `as`, `fixdep`, `rm`, `mkdir`, `dirname`; D55). 9.10 D34 with 9.12 D102: `dkms-man` and `dkms-debian` leave the registry and the line is restated without them in the same edit; 9.10 D159 minted the `dkms` and `nvidia-open-kernel-modules` entries in `docs/references.md`. 9.12 D103: the line's K1 and K3 verdicts (from 9.6) apply — the '2,430 short-lived procs' figure misattributed (a DynamoRio build), SchedCP's venue per C-schedcp-4.
@@ -78,7 +78,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Resolved at merge: 9.12 D103 asks the K1/K3 corrections on line 22 (the 2,430 figure misattributed; SchedCP's venue); 9.10 D33, which 9.12 D102 passes through, removes both sources from the row, which settles the corrections: no source line is kept to correct.
 - Notes: Code: `make` with `sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm` in `c1-compile`, `c3-workday`, `c4-compile`, `c6-dual`; `c7-compile` binds `dkms` (`module-build-orchestrator`) with `sh`, `x86_64-linux-gn`, `cc1`, `as`, `fixdep`, `rm`, `mkdir`, `dirname`. `test_coreset.py:496` maps `code-editor`, `build-orchestrator`, `module-build-orchestrator` to S11. Removing `dkms-man`/`dkms-debian` from `docs/references.md` is the references chunk's row. S12-226's final word concerns `grounding-sources.md:32` (9.12 D47); for this line it hands only item 63's verdicts.
 
-### W-0145 · open
+### W-0145 · applied
 - At: `docs/workload/scenario-catalog.md` the scenario table, row S12 'ML training / local AI (background CPU/GPU hog, wanted) | python3 (pytorch train) · ollama', line 23
 - Change: Rewrite S12 (ML training) to the name `python`, grounded on PyTorch's basic MNIST example (the `pytorch-examples` references entry); drop `python3`, `ollama`, 'local AI', 'background CPU/GPU hog', UL Procyon and SchedCP.
 - Final word: 9.10 D12 with D33 as amended by D163: 'S12 ML training | `python` | PyTorch's basic MNIST example (S2-31; D12)' — the name is `python`, the observed comm (D84, D90), not `python3`. 9.12 D102: the S12 row passes through as 9.10 decided it; the wording rule is 'an actual training run that does not claim desktop users train MNIST' (9.10 D12).
@@ -86,7 +86,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Cross-ref: W-0164
 - Notes: Code: `name: python` on `cpu-batch` `program: python3` (`dataset/timelines/coreset/c2-p1a.timeline.yaml:22–23`), bound in `c1-ml-train`, `c2-p1a`, `c7-ml-train`; `test_coreset.py:500` maps the `python3` program to S12. 9.10 D34 removed `procyon` from `dataset/sources.yaml`; its `docs/references.md` entry stays, corrected (9.12 D102). The coreset guide's training wording is W-0164's.
 
-### W-0146 · open
+### W-0146 · applied
 - At: `docs/workload/scenario-catalog.md` the scenario table, row S13 'Media playback (audio/video) | mpv · vlc · spotify', line 24
 - Change: Rewrite S13 (media) to `mpv` for both video and audio, grounded on PCMark 10's video-playback battery profile; drop `vlc`, `spotify`, interbench's Audio (50 ms/5%) and Video (16.7 ms/40%) task models and the ananicy audio class.
 - Final word: 9.10 D24 with D33's row: 'S13 media | `mpv` (video and audio) | PCMark 10's Video playback, Battery Life Profile (S2-13); D24'. 9.5 D11: interbench's Audio/Video/X emulations are no longer cited (the playback entries measured, 9.5 D19 → D25 → D70).
@@ -94,7 +94,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Cross-ref: W-0150
 - Notes: Code: `mpv` (`video-player`, `audio-player`) is bound in `c1-media`, `c3-evening`, `c7-media`. SX-0402's S18 half (drop interbench's 'None/X' baseline) is W-0150's.
 
-### W-0147 · open
+### W-0147 · applied
 - At: `docs/workload/scenario-catalog.md` the scenario table, row S14 'File indexing (background, unwanted-deferrable) | tracker-miner-fs-3 · baloo_file · updatedb', line 25
 - Change: Rewrite S14 (file indexing) to `tracker-miner-f` only, grounded on Tracker 3.7.1 in the default install and its crawl rule; drop 'unwanted-deferrable', `tracker-miner-fs-3`, `baloo_file`, `updatedb`, the ananicy 'ioclass idle indexer class' and the 'shipped defaults … plocate timers are stock background services' source.
 - Final word: 9.10 D5 as amended by D60 and D66 (the set is HippoCamp's Bei profile, a home-like file set, not a real user's or Mahoney's) and D79 (initiated: session), with D81: the indexing files show Tracker 3.7.1 indexing a home-like file set from an empty database — the unasked side a first index at login, the asked side the same work after the user's reset; Tracker schedules no rescan by default. D33's row: 'S14 indexing | `tracker-miner-f` | Tracker 3.7.1 in the default install (S2-01), its crawl rule (S2-04); D5'.
@@ -102,14 +102,14 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Cross-ref: W-0143
 - Notes: Code: `file-indexer` shown `tracker-miner-f` in `c1-indexing`, `c2-p1b`, `c7-indexing` (declared `idle`, 9.13 D5); `c6-alias` uses `baloo_file` and `tracker-miner-f` only as names over `c1-media`'s players. The 9.7 scope card (W-0143, in W-0143) adds that no ananicy 'indexer class' exists.
 
-### W-0148 · open
+### W-0148 · applied
 - At: `docs/workload/scenario-catalog.md` the scenario table, row S15 'Backup / sync (background) | rsync · borg · rclone', line 26
 - Change: Rewrite S15 (backup) to Déjà Dup's `deja-dup` (its tree `duplicity` and `gpg`), grounded on Déjà Dup in the extended install with its weekly periodic backup (S2-03, S4-05); drop `rsync`, `borg`, `rclone`, the ananicy backup class and SYSmark's 'archiving analogue'.
 - Final word: 9.10 D8 as resolved by D112–D125: the scheduled, wanted backup is Déjà Dup's periodic weekly incremental, task `deja-dup` on the entry `incremental-backup` (D119, D120), its tree `duplicity` and `gpg`; `file-backup` (borg's first backup) left the library. D33's row: 'S15 backup | Déjà Dup's processes (observed with D8) | Déjà Dup in the extended install, periodic every 7 days once on (S2-03, S4-05); D8'; D125 names the processes: `deja-dup`, `duplicity`, `gpg`. 9.12 D102: D125's lines pass through.
 - Sources: S10-021 (9.10 D8, `task-9.10-scenarios-timelines/changelog.md:159`); S10-127 (9.10 D125, `task-9.10-scenarios-timelines/changelog.md:2311`)
 - Notes: Code: the files bind one task `deja-dup` on `incremental-backup` (`c1-backup`, `c2-p3b`, `c7-backup`), the tree pooled (`dataset/archetypes.yaml:1668–1693`: duplicity 0.569–0.576 of the CPU, deja-dup 0.283–0.291, gpg 0.134–0.140); `duplicity` and `gpg` are not separately bound names.
 
-### W-0149 · open
+### W-0149 · applied
 - At: `docs/workload/scenario-catalog.md` the scenario table, row S17 'Malware scan (background, unwanted-now) | clamscan · freshclam', line 28
 - Change: Replace the S17 row's content in place, keeping the id S17: the stock unattended upgrade, name `unattended-upgr`, existence grounded on the default install with the upgrade enabled by default (S2-01, S2-03, S2-30); drop 'Malware scan', `clamscan`, `freshclam` and the ClamAV scheduled-scan source.
 - Final word: 9.10 D3 as resolved by D36–D40 and D45: the unasked anti-virus scan (`clamscan`) is replaced by the stock Ubuntu 24.04 unattended upgrade's install stage, archetype `package-upgrade`, shown as `unattended-upgr` (D40), measured as `meas-ci:background:2026-10-01` (D45); D33's row: 'S17 → the stock unattended upgrade | `unattended-upgr` (observed with D3) | in the default install, enabled by default (S2-01, S2-03, S2-30); D3'. 9.12 D15 notes that 9.10 D3 already handed the row.
@@ -118,7 +118,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Resolved at merge: SX-1119 (with record-gaps §2 item 12) reads S17 as 'malware scan' with no file since the rebuild and asks to state that no file instances it or to restate the names. The records and the code settle it: 9.10 D33's table redefines S17 as the stock unattended upgrade; 9.10 D168's test maps `package-upgrade` to S17 (`dataset/tools/tests/test_coreset.py:498`); the eleven segments tagged S17 (`c2-p2b`, `c2-pairs.variant.yaml:33`, and the ten C7 counterparts, `c7.variant.yaml:81–211`) all show `unattended-upgr`. The row keeps its id with the new content; no retag.
 - Notes: A for-인지오 row elsewhere on 'S17 has no file' closes as answered on `test_coreset.py:498` and 9.10 D33. `dataset/tools/wlc/grid.py` `NAME_TIERS` still carrying `clamscan` is code (outside the sweep). The P2 sentence is W-0152's; the coreset guide's `clamscan` passages W-0166's.
 
-### W-0150 · open
+### W-0150 · applied
 - At: `docs/workload/scenario-catalog.md` the scenario table, row S18 'System baseline (always-on, [system] scope) | gnome-shell · Xorg · pipewire · systemd · dbus-daemon', line 29
 - Change: Rewrite S18 (session) to the four session names in the idle files only (`gnome-shell`, `pipewire`, `systemd`, `dbus-daemon`), stating that the depicted Wayland session at idle runs no X server; drop `Xorg`, 'always-on', the '[system] scope' and interbench 'None/X' sources and 'present in every segment by construction'.
 - Final word: 9.10 D28 as amended by D172, with D165 and D173 for `c7-idle`: the four session entries (`compositor-shell`, `audio-server`, `service-manager`, `message-bus`; shown `gnome-shell`, `pipewire`, `systemd`, `dbus-daemon`) are carried only by the idle files `c1-idle` and `c7-idle`, where their measured idle, blanked-session state holds; every other file states the session processes omitted. D33's row: 'S18 session | `gnome-shell`, `pipewire`, `systemd`, `dbus-daemon` | the idle files only (D28)'; 'present in every segment by construction' is withdrawn. 9.9 D26 (amended by D30, D31; corrected by D27, D30, D43): `system-daemon` is removed and the `xorg` task retired — no `Xorg` or `Xwayland` on the GNOME 46 Wayland session at idle; 9.10 D172: the application entries are X11 clients of Xvfb, the session entries a Wayland session's. 9.5 D11: interbench's 'None/X' baseline is no longer cited.
@@ -126,7 +126,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Cross-ref: W-0158
 - Notes: Code: `dataset/timelines/coreset/c1-idle.timeline.yaml:11–17`; the four names are bound in `c1-idle` and `c7-idle` only; `test_coreset.py:498–499` maps the four entries to S18. The coreset guide's S18 sentence is W-0158's.
 
-### W-0151 · open
+### W-0151 · applied
 - At: `docs/workload/scenario-catalog.md` ## Notes, note 2, line 34, first sentence ('the F2 load-bearing pair is S12 vs S14 (both one CPU-saturating process beside S11's editor, opposite correct policies)')
 - Change: Restate note 2's P1 sentence: the load-bearing pair of F2 (the intent-pair family) is S12 (ML training) against S14 (indexing) as two real, measured jobs beside S11's editor — the MNIST training run against Tracker's first index — differing in name, behaviour, declared class and label, with opposite correct policies; it stays load-bearing as it stands. Adding that RQ0 (the gate experiment) judges `c2-p1a` and reports `c2-p1b` is optional: the note names scenarios, not RQ0's judging.
 - Final word: 9.10 D6 as carried by D33 (and D81): note 2's P1 pair is two real jobs (the MNIST training run against Tracker's first index), not one CPU-saturating process each; keep the opposite correct policies. 9.12 D14 (amended by D88): the two sides differ in behaviour and in declared class. 9.23 D9: P1 stays load-bearing as it stands; RQ0 judges `c2-p1a` and reports `c2-p1b` (9.14 decision 2), the indexer's declared idle class settling its side.
@@ -134,7 +134,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Cross-ref: W-0152; W-0168; W-0182
 - Notes: SX-0620 was found by grep (9.23's hand-off does not name the catalog). The same note's P2 / F2-combination sentence is W-0152's. The coreset guide's P1 rows are W-0168 and W-0182.
 
-### W-0152 · open
+### W-0152 · applied
 - At: `docs/workload/scenario-catalog.md` ## Notes, note 2, line 34, second sentence ('S10's wanted-download cell and S5's companion overlay are the F2 combination rows'); rows S10 (line 21) and S17 (line 28)
 - Change: Where the catalog names pair P2, state it as the user-started game install (S10) against the unattended upgrade (S17), each beside the game, the files differing only in segment 1's job and label; drop S5's companion overlay from note 2 (its overlay role is withdrawn).
 - Final word: 9.10 D42 with D45 and D142: pair P2 is `c2-p2a` (a game install the user starts during play, `game-download` bound whole at 727.170 s, still running at the file's end) against `c2-p2b` (the unattended upgrade, `package-upgrade`, `unattended-upgr`); segment 1 is 26.385 s (the upgrade's CPU total) in both files, so the files are 86.385 s and differ only in segment 1's job and label. 9.10 D23: S5's overlay role is withdrawn (9.8 D7).
@@ -142,7 +142,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Cross-ref: W-0151; W-0143; W-0149; W-0139
 - Notes: The catalog has no rows named P2; 'the scenario catalog's P2 rows' is read as note 2's mention and the S10 and S17 rows (W-0143, W-0149). Code: `dataset/timelines/coreset/c2-pairs.variant.yaml:21–33` (P2b, `[S9, S17]`); the bounding pair `c2-p2a`/`c2-p2a-idle` (9.13). Whether 'F2 combination rows' still names anything once S5's overlay leaves is the editing agent's call.
 
-### W-0153 · open
+### W-0153 · applied
 - At: `docs/workload/scenario-catalog.md` ## Notes, note 4, line 36 ('the meas-ci name-verification workflow (docs/workload/building-plan.md §7) confirms each name …'; 'Browser default: … firefox only where the coverage-grid fill wants name variety'); the Processes column lines 12–29
 - Change: Restate note 4 as D25's comm rule: a task's name is its kernel comm — the exec'd basename cut to 15 bytes, a script its own name, a prctl rename its new name — observed where a campaign or the names workflow shows it (e.g. `tracker-miner-f`, `thunderbird-bin`, `unattended-upgr`, `x86_64-linux-gn`, C5's tier-4 strings); write every name in the Processes column as its observed comm; the `firefox` clause leaves (no file binds `firefox`).
 - Final word: 9.10 D25 (unamended): a task's name is its kernel comm — the exec'd basename cut to 15 bytes, a script its own name, a prctl rename its new name — observed where a campaign or the names workflow shows it: `tracker-miner-f`, `thunderbird-bin`, `unattended-upgr`, `x86_64-linux-gn`, and C5's tier-4 strings cut to 15 bytes. 9.10 D33: note 4's name verification is D25's comm rule; `firefox` is among the names no file binds.
@@ -150,10 +150,18 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Cross-ref: W-0136
 - Notes: Code: the C5 tier-4 names compile as `audio-stream-he` and `video-playback-` (`c5-t4`); 9.23's canonical lints include the comm limit (a name over 15 bytes fails).
 
-### W-0833 · open
+### W-0833 · applied
 - At: `docs/workload/scenario-catalog.md` the scenario table, row S11 'Software development: edit + compile', line 22, its sources cell ('dkms: `dkms-man`, `dkms-debian`')
 - Change: Cite `dkms` — the entry for Ubuntu's dkms package, the package the campaign read — in place of `dkms-man` and `dkms-debian`, whose `docs/references.md` entries K01 removed.
 - Final word: 인지오's answer to W-0071 (2026-10-15, (a)): 9.10 D34's seven ids leave `dataset/sources.yaml`, then the references chunk removes `dubroy-chi10`, `chang-chi21`, `dkms-man`, `dkms-debian`, `mozilla-testpilot10` and `singervine-slate10` and restates their citing lines; applied in K01 (the entries removed; `dkms`'s role no longer names them).
 - Sources: W-0071; `logs/K01.md` ## Rows for other chunks
 - Cross-ref: W-0144
 - Notes: found in K01. W-0144 rewrites the whole S11 row to 9.10 D33's content and already drops both ids for `dkms`; the two entries no longer exist, so the line now names ids that resolve to nothing. Apply with W-0144.
+
+### W-0885 · open
+- At: `docs/workload/scenario-catalog.md` header, line 4 ("Where a taxonomy source names a Windows application, the mapping is recorded in the Source column")
+- Change: Restore the mappings the rewrite dropped — SYSmark 30's Word (S1, also CpsMark+'s document manipulation), Premiere and Photoshop (S7), WinZip → 7-Zip (S16), which `sysmark30`'s role lists — or restate the header to the mappings the column records (Outlook → Thunderbird, S4; Photoshop → GIMP, S6).
+- Final word: K02's last review (passed 2026-10-16), finding 6.
+- Sources: `logs/K02.md` ## Review round 1 (the last), finding 6; `docs/references.md` `sysmark30`
+- Cross-ref: W-0135; W-0136
+- Notes: found in K02's review. K02's file: a follow-up chunk.

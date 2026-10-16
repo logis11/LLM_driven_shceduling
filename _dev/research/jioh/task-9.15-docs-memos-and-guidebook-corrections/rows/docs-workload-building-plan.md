@@ -2,14 +2,14 @@
 
 Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file has 226 lines at `d5cc7711`.
 
-### W-0084 · open · full pass
+### W-0084 · applied · full pass
 - At: `docs/workload/building-plan.md` the whole file
 - Change: Full pass against the code: check every statement about the dataset in the file against `dataset/` (the timelines, `archetypes.yaml`, the manifests, `coverage-grid.json`, the tools) and correct what is stale; each correction not already a row is logged as a new row in the chunk log.
 - Final word: 9.15 spec decision 4: the docs that explain the dataset — `docs/workload/`, `dataset/README.md`, `docs/data-contracts.md`, the harness guide's records and dataset chapters — get a full pass against the code; staleness an agent notices outside its rows becomes a new row. Precedence by decision 3: the code and data as they stand (`dataset/`, `harness/`, `simulator/`, the committed manifests) first.
 - Sources: 9.15 spec decision 4 (`jioh/task-9.15-docs-memos-and-guidebook-corrections.md:30`)
 - Notes: —
 
-### W-0085 · open
+### W-0085 · applied
 - At: `docs/workload/building-plan.md` §0 'Design tension and the two-set resolution' lines 13–21 (the two-set table: Core set / Naturalistic set) and line 30 (paper framing); §1 'Three-layer architecture' line 42 ('The naturalistic generator emits timelines too, so both sets share one compile path …'); §4 'Layer 3b — Naturalistic set' lines 152–164 (its opening as a planned set); §5 'Build order' item (7) line 178 ('on gate pass: generator → naturalistic set …') and line 181 ('The RQ0 gate needs authored labels, so naturalistic files are unsuitable for it; running the gate before investing in the generator …')
 - Change: Restate the plan's layers to the dataset as built: the core set (51 authored files: existence cases, the controlled pairs, the resolution limits) beside the generated layer (§3a: five sets, 1,562 files, carrying the rate claims, design with no realism claim), and the naturalistic set (Layer 3b) in the backlog — its prerequisite a source for Linux-desktop co-occurrence and transition frequency, which 9.10's search did not find. Restate §0's two-set table and paper framing to that, §1:42's shared-compile-path sentence to the generated layer's generator (`dataset/tools/generate.py`, timelines as build products), §4's opening as a backlogged design rather than a planned build step, and §5's item (7) and line 181 accordingly.
 - Final word: The 2026-10-10 dataset audit's 'Direction taken on the open item' (2026-10-11, 인지오), recorded as Phase 9 spec decision 9 (the generated layer): a generated layer stands beside the core set, which stays; each group whose claim is a rate has a generated set enumerating its factor in full from the sixteen C1 (single-situation calibration) task sets, labelled design with no realism claim; the authored files remain as existence cases; the naturalistic set stays in the backlog for the frequency claims. Built by 9.19–9.21: transition grid 480, return grid 720, flap-stress 24, distractor grid 272, familiarity ladder 66 files (1,562). The _dev/TODO.md Backlog line 'Naturalistic generator + generalset + full condition matrix — its prerequisite is a source for Linux-desktop co-occurrence and transition frequency, which 9.10's search did not find (audit record 2026-10-11)' carries the naturalistic set.
@@ -17,7 +17,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0086; W-0087; W-0120; W-0121; W-0122
 - Notes: §3a (line 137) and its last sentence (line 150, 'The naturalistic set (§4) stays in the backlog') already carry the structure; §0, §1:42, §4's opening and §5 do not. Counts checked: dataset/build.manifest.json artifacts 51; dataset/build.<set>.manifest.json artifacts 480, 720, 24, 272, 66. SX-0721's one-compile-mode clause is W-0087's; §0's size row is W-0086's; §4's citations are W-0120–W-0122. §4:164's driver table tuning set ('disjoint from the core set and from the naturalistic set') is not part of this change.
 
-### W-0086 · open
+### W-0086 · applied
 - At: `docs/workload/building-plan.md` §0 table line 21 ('50 files, 64 segments (C1–C7)'); §3 heading line 78 ('Layer 3a — Core set (authored timelines; 50 files)'); ### C2 heading line 89 ('3 pairs = 6 files'); ### Counts and reuse line 127 ('C1×16 + C2×6 + C3×3 + C4×3 + C5×2 + C6×4 + C7×16 = 50 files, 64 segments'; 'the other 27 are scripted derivations from five recipe files'); §5 build order item (4) line 173 ('→ 50 files')
 - Change: State the core set as 51 files and 67 segments: C1 (single-situation calibration) 16 files / 16 segments; C2 (intent pairs) 7 files / 14 segments — the three pairs plus `c2-p2a-idle`, the idle-class half of `c2-p2a`'s bounding check, outside the judging set; C3 (transition arcs) 3 / 10; C4 (distractor injection) 3 / 3; C5 (familiarity ladder) 2 / 2; C6 (resolution limits) 4 / 6; C7 (attribute counterparts) 16 / 16. The group sum with C2×7; the C2 heading's file count; the derived files 28 (51 less the 23 novel designs) from the five recipe files; §5 (4)'s '50 files' as 51.
 - Final word: The tree at HEAD: dataset/build.manifest.json lists 51 artifacts (`c2-p2a-idle` added by 9.13 on 2026-10-09 for 9.11 D21's bounding check, 9.13 spec decision 4); dataset/coverage-grid.json `segments_total` 67 since 9.23 D2 split `c6-spoof` at the spoof's arrival (9.23 D10's rebuild: '67 segments (66 before)'; 64 at Phase 7). Per group from coverage-grid.json `per_file`: C1 16, C2 14, C3 10, C4 3, C5 2, C6 6 (`c6-spoof` 2, `c6-fold` 2, `c6-alias` 1, `c6-dual` 1), C7 16.
@@ -26,7 +26,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Resolved at merge: The raw rows disagree on the segment count: SX-0972 and SX-0978 (from the dataset guidebook) and the record-gaps survey behind SX-0788 say 66, written before 9.23 D2; dataset/coverage-grid.json at HEAD reads `segments_total` 67, as 9.23 D10 records. 67 is used.
 - Notes: Novel designs 23: the sixteen C1 files, `c2-p1a`, `c2-p2a`, `c2-p3a`, the three arcs, `c6-dual`. Derived 28: `c2-p1b`, `c2-p2b`, `c2-p2a-idle`, `c2-p3b` (c2-pairs.variant.yaml); the three `c4-*` (c4.variant.yaml); `c5-t4`, `c5-t5` (c5.variant.yaml); `c6-spoof`, `c6-alias`, `c6-fold` (c6.variant.yaml); the sixteen `c7-*` (c7.variant.yaml). SX-0972 also names §0's two-mode paragraph and SX-0978/SX-1101 line 173's '× 2 modes' — those are W-0087's. The Counts paragraph's 'C7 = C1 with one unwanted job or one rename' is W-0113's.
 
-### W-0087 · open
+### W-0087 · applied
 - At: `docs/workload/building-plan.md` §0 lines 23–30 ('Each set compiles in **two modes**, giving **four release artifacts**' :23; the artifact table :25–28 with the `coreset-native`, `generalset-native` row :28; the paper framing's 'each in lane-scaled and native-demand form' :30); §5 build order item (4) line 173 ('50 files × 2 modes'); §5a lane-scaling bullet line 187 ('CI invariant: the `-native` and `-single` variants of one timeline differ only in the declared-scalable fields')
 - Change: State one compile mode, `single` (lane-scaled): remove 'two modes' and 'four release artifacts', the native row of the artifact table and the native half of the paper framing; the shipped artifacts are `coreset-single` and the generated sets' `<set>-single`; drop '× 2 modes' from §5 (4); replace §5a's native-versus-single CI invariant with what the code holds (the compiler knows one mode; the test `test_single_is_the_only_mode`).
 - Final word: 9.5 follow-ups spec decision 14 ('Native compiled set dropped. The dataset ships the single-lane set only'; recorded at 9.5 H2, the 2026-09-16 grill), applied by 9.13 D1 (2026-10-09; no later decision amends it): `dataset/tools/wlc/compiler.py:31` MODES = ("single",), a request for `native` refused (:49–50); the CI invariant became `test_single_is_the_only_mode` (`dataset/tools/tests/test_invariants.py:82`); docs/data-contracts.md §14's 2026-10-09 entry records it.
@@ -34,21 +34,21 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0085; W-0086; W-0092
 - Notes: dataset/build/ holds `coreset-single` and the five generated sets' `-single` directories only. The artifact table's `generalset-single` row is the naturalistic set's, in the backlog (W-0085). 9.13 D1's hand-off names `building-plan.md:28` only; the other native mentions are listed so one edit removes them. SX-0003 placed the CI invariant in §1; it is §5a:187. Line 187's 'measured on multi-core machines' is W-0092's; line 173's '50 files' is W-0086's.
 
-### W-0088 · open
+### W-0088 · applied
 - At: `docs/workload/building-plan.md` §1 'Three-layer architecture' line 38 ('Layer 2  SCENARIO CATALOG    which processes co-occur'); header line 4 ('SCENARIO_CATALOG (S1–S18, names-only schema, source-column rules)')
 - Change: Restate Layer 2's gloss to the scenario catalog's role — which scenarios and process names exist, each grounded for its existence — not which processes co-occur (which programs share a segment is design).
 - Final word: 9.10 D33 with 9.10 D2: the scenario catalog is a list of existence-grounded scenarios and names; it does not say which processes co-occur; which programs share a segment of a core-set file is the experiment's composition, labelled design.
 - Sources: S10-077 (9.10 D33, `task-9.10-scenarios-timelines/changelog.md:719`)
 - Notes: Not named by 9.10 D33's hand-off (the catalog rewritten; `docs/recognition-vocabulary.md:11`'s co-occurrence claim); found carrying the same claim. Line 4's header names the catalog without the co-occurrence claim; it changes only if the catalog's description does.
 
-### W-0089 · open
+### W-0089 · applied
 - At: `docs/workload/building-plan.md` §1 line 44 (the binding rule: 'numeric behavior parameters exist only in Layer 1 … no file copies a number'); §2.2 line 73 ('the linter rejects inline numerics in Layers 2–3'); §6 'Provenance manifest and linter' lines 190–196 ('Layers 2–3 carry no inline numerics (reference-only rule); the linter enforces both' :194, the CI list :195, the payoff :196)
 - Change: State that a timeline's bound values (each task's `bind` keys, and its `count` when stated) carry a `source:` map whose entries are registry tags or one of the labels design, convention, arithmetic, and that the linter checks them against `dataset/sources.yaml`, so the provenance claim covers the timelines' bound values; qualify §1's binding rule and §2.2's 'rejects inline numerics in Layers 2–3' to match.
 - Final word: 9.10 D32 (a value no source states is labelled for what it is; the provenance claim covers the timelines' bound values through their `source:` maps, checked by the linter against the registry), the field and lint landed by 9.18 (9.18 spec decision 4, 9.18 D2, 2026-10-11): `dataset/tools/wlc/linter.py:199–230` `lint_bound_sources` requires a `source` entry for every bound value and nothing else, each entry one source tag, a list of tags, or one of BOUND_LABELS = (design, convention, arithmetic), tags checked against the registry; `dataset/tools/wlc/timeline.py:139` carries the map.
 - Sources: S10-074 (9.10 D32, `task-9.10-scenarios-timelines/changelog.md:677`)
 - Notes: Example: `dataset/timelines/coreset/c1-compile.timeline.yaml:19–21` binds spawn_count 2908 (meas-ci:build:2026-09-18), parallelism_cap 8 (design), child_name cc1 (meas-ci:build:2026-09-18). 9.10 D32 handed the field and lint to 9.13; 9.18 added them (record-gaps survey §1 item 8).
 
-### W-0090 · open
+### W-0090 · applied
 - At: `docs/workload/building-plan.md` §2 'Layer 1 — Archetype library' › §2.1 'Initial archetype inventory (~12 entries)' lines 52–69 (heading, the twelve-row table, the `meas-pending` sentence at :69)
 - Change: Mark §2.1 as the Phase 1 inventory and restate it to the current library, or replace the table with a pointer to it: `dataset/archetypes.yaml` holds 29 entries, 28 measured (`category_source: meas`) and `game-task-chain` on `lavd-ossna24`; no entry is `meas-pending`, so line 69's sentence on placeholders goes or is marked historical. The per-entry restatements are W-0091–W-0097.
 - Final word: The library at HEAD (dataset/archetypes.yaml): 29 entries — office-writer, code-editor, mail-client, web-browser, image-editor, video-editor, video-player, audio-player, video-call, renderer-hidden, chat-client, game-client, cpu-batch, compiler-child, build-orchestrator, module-build-orchestrator, module-compiler-child, file-archiver, game-download, game-download-idle, package-upgrade, file-indexer, video-transcoder, incremental-backup, game-task-chain, compositor-shell, audio-server, service-manager, message-bus; 28 with `category_source: meas`, `game-task-chain` with `lavd-ossna24`; three declare `idle` (game-download-idle, file-indexer, incremental-backup). The record-gaps survey §2 item 2 (29 entries, 28 measured); 9.5 D19 (the fold-in that began the measured library).
@@ -56,7 +56,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0091; W-0092; W-0093; W-0094; W-0095; W-0096; W-0097
 - Notes: §2's pin (line 48) already says the section is superseded in detail by docs/workload/archetype-plan.md. Seen in passing: §2.2 line 76 ('Fewer archetypes than scenarios is expected (~12 vs 18)'). S10-154 is the 9.10 scope card's umbrella (9.15 brings the building plan to 9.10's content over §2.1, §3 C1, C2, C3, C6, C7, §4, §6, §7), covered by this file's 9.10 rows (W-0088, -005, -011, -014–-017, -019–-023, -028–-034, -041–-043).
 
-### W-0091 · open
+### W-0091 · applied
 - At: `docs/workload/building-plan.md` §2.1 table rows `audio-playback` line 56, `video-playback` line 57, `desktop-interactive` line 58
 - Change: Replace the three interbench-grounded rows with the nine measured interactive entries — office-writer, code-editor, mail-client, web-browser, image-editor, video-editor, video-player, audio-player, video-call — from the same-machine campaigns (`meas-ci:interactive:2026-09-18/19/20`, `meas-ci:playback:2026-09-18/20`); no interbench Audio/Video/X value and no `dhakal-chi18`/`roeser-rw24` grounding remains.
 - Final word: 9.5 D2 (`desktop-interactive` split per application); 9.5 D19, superseded by D25, itself superseded by D70 (the nine measured entries regenerated whole from the same-machine campaigns replace `desktop-interactive`, `audio-playback` and `video-playback`; the hand-off stands); D7 as amended by D23 (`dhakal-chi18` and `roeser-rw24` ground no dataset value; Dhakal's data only the stimulus-sensitivity check's alternate stream); D11 (interbench's Audio/Video/X emulations no longer cited).
@@ -64,7 +64,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0090; W-0127
 - Notes: Campaign locators as SX-0414 gives them; check each entry's scope in dataset/archetypes.yaml when writing. The §7:209 input-inter-arrival restatement is W-0127.
 
-### W-0092 · open
+### W-0092 · applied
 - At: `docs/workload/building-plan.md` §2.1 table row `game-task-chain` line 59 ('per-schedule runtime ~260 µs–1.65 ms; ~300 tasks, ~90% long-lived; 70–75% wakeups from waiting syscalls; 16.7 ms frame budget (`lavd-ossna24`)'); §5a 'Lane scaling and the demand budget' first bullet line 187 ('measured on multi-core machines — the gaming chain's utilization and worker concurrency')
 - Change: Restate the `game-task-chain` row to what the entry carries: the chain only (chain_length 16 game members plus the compiler's `wineserver` member), per-schedule runtimes as `lavd-ossna24`'s average-to-maximum wording with its two named examples (260 µs, 1.65 ms), 70–75 % of scheduling events initiated by waiting syscalls, the frame period 16,667 µs tagged `steamos-refresh` (design) — no '~300 tasks', '~90 % long-lived' or '16.7 ms frame budget' from LAVD. In §5a drop 'measured on multi-core machines', keeping LAVD's concentration statistic (top 30–40 tasks = 95 % of scheduling) as what the lane scaling leans on, the scaling stated as our calibration.
 - Final word: 9.4 D2 (`frame_period` 16,667 µs re-tagged `steamos-refresh`, design: the deck states no frame period or frame budget), D3 (the archetype is the chain only; `n_tasks` 300, a system-wide count, removed; lane scaling is our calibration, in `modeling_notes`), D4 (wineserver a chain member, `wineserver_run` 260 µs), D5 (`chain_length` 16), D6 (`per_schedule_run` anchors 260 / 1,650 µs labelled as the source's two named runtimes; '70–75 % of scheduling events initiated by waiting syscalls'), D7 (`frac_long_lived` 0.90 and `frac_wakeups_from_wait` removed as inert); the 9.4 scope card's item 12 (no slide states the machine).
@@ -72,7 +72,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0087; W-0090
 - Notes: The 9.4 scope card hands `building-plan.md:59, :167`; :167 is now :187. Code: `c1-gaming.timeline.yaml` binds Troy.exe on game-task-chain (lane_share 0.9, member_names); the compiler adds `wineserver` (`dataset/tools/wlc/grid.py:59` CONSTRUCTOR_NAMES). Line 187's native CI invariant is W-0087's.
 
-### W-0093 · open
+### W-0093 · applied
 - At: `docs/workload/building-plan.md` §2.1 table rows `cpu-batch` line 60 ('full-core burn (`interbench:man-burn`)'), `compiler-child` line 61 ('2,430 procs per kernel build (`ocallahan-atc17`); lifetime CDF (`meas-pending`)'), `build-orchestrator` line 62
 - Change: Restate the three rows to the measured entries: `cpu-batch` a batch loop (RUN a measured run, SLEEP the block after it) whose tables the `program` binding chooses (`python3`, `kdenlive_render`), no `interbench:man-burn`; `compiler-child` the six-member object job (`sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`) with one measured quantile table per (role, structural step), `meas-ci:build:2026-09-18`, no `meas-pending` lifetime CDF; `build-orchestrator` make's fork/wait loop with its measured `dispatch_overhead` table and six spawn-table entries per object job, `fork_cap` = `parallelism_cap` × 6, `parallelism_cap` 8 (the `nproc` rule on an eight-thread desktop). '2,430 procs per kernel build' goes as a kernel-build figure (it is a DynamoRio build's); `ocallahan-atc17` may stay for the short-lived structure ('make forks and execs 2430 processes, mostly short-lived'), the compile family otherwise grounded in the dataset's measured build. Optionally add the DKMS pair `module-build-orchestrator` / `module-compiler-child` (seven members, `objtool` too).
 - Final word: 9.6 D2, D19 (amended by D20), D20, D22 (corrected by D25) and D31 (folded in, 2026-09-19): one make job is six spawn-table entries woken in parent-child order, each member's CPU from its (role, step) quantile table tagged `meas-ci:build:2026-09-18`; `fork_cap` is the timeline's `parallelism_cap` × 6 (`dataset/tools/wlc/compiler.py:699`); the three entries carry `category_source: meas`; `cpu-batch`'s tables chosen by `program` (at HEAD `python3` and `kdenlive_render`, dataset/archetypes.yaml:884–964); D4: `parallelism_cap` 8, the `nproc` rule on an eight-thread desktop; D37: the DKMS job has seven members. 9.12 D47 as amended by D76 and D103 (item 63's lines, `building-plan.md:61–62` among them, applied from their recorded K1/K3 verdicts): `ocallahan-atc17` kept for 'make forks and execs 2430 processes, mostly short-lived', not a kernel build's count; the compile family otherwise grounded in the dataset's measured build (a warm `-j8` linux-6.6 defconfig build, 5,957 forks under 719 make processes, 2,857 six-member object jobs; `cc1_step_1` p50 367.6 ms). 9.10 resized `spawn_count`: `c1-compile` binds 2,908 object jobs at cap 8 — spawn table 17,448 entries, `fork_cap` 48.
@@ -80,7 +80,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0090
 - Notes: Code versus record: `dataset/timelines/coreset/c1-compile.timeline.yaml:21` (and `c7-compile`'s ops in c7.variant.yaml:221–223) label `parallelism_cap: design`, while 9.6 D4 and `build-orchestrator`'s modeling_notes (dataset/archetypes.yaml:1071–1073) call it the `nproc` rule (record-gaps survey §1 item 4: no record says which label wins). That question is the for-인지오 rows on the record-gaps item (W-0767, target for-인지오). Write the value and its reason; if a label is written, the code's (`design`) until 인지오 answers.
 
-### W-0094 · open
+### W-0094 · applied
 - At: `docs/workload/building-plan.md` §2.1 table rows `io-stream` line 63 and `background-crawler` line 64; §7 Workflows item 1 line 203 ('Covers: compiler-child, build-orchestrator, io-stream, background-crawler, network-bulk, system-daemon baselines')
 - Change: Remove `background-crawler` and `io-stream` from the inventory and from §7's coverage list; the indexer is the measured `file-indexer` (declared `idle`, shown as `tracker-miner-f`), the archive and backup jobs `file-archiver` and `incremental-backup`.
 - Final word: 9.7 D5 (2026-09-19): `background-crawler` leaves the library (no timeline bound it; its values were an idle miner's housekeeping wakes times `updatedb.plocate`'s duty); 9.10 re-created an everyday indexer from its own measurement as `file-indexer` (declared `idle`, bound as `tracker-miner-f` in `c1-indexing`, `c2-p1b`, `c7-indexing`). 9.7 D1 and D31: `io-stream` replaced per bound program (`file-archiver` for `7z`; `file-backup`, itself replaced by 9.10's `incremental-backup`). 9.12 D47: items 66–69 (9.7, 9.7 D17, 9.8, 9.9) pass through to 9.15 from their recorded verdicts.
@@ -88,7 +88,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0090; W-0095; W-0096; W-0097; W-0098; W-0126
 - Notes: S12-219 (9.12 D47's pass-through of items 66, 68 and 69 over lines 63–64, 66, 67, 82, 203–204 and 209) is an umbrella over this row and W-0096, W-0097, W-0098; placed here. Item 67 (9.7 D17's `interbench` lines) touches the interbench citations of lines 56–58, 60 and 63 (W-0091, W-0093, this row). §7:203's instrument description is W-0126.
 
-### W-0095 · open
+### W-0095 · applied
 - At: `docs/workload/building-plan.md` §2.1 table row `network-bulk` line 65; §7 Workflows item 1 line 203 (its 'network-bulk' in the coverage list)
 - Change: Remove the `network-bulk` row and its §7 coverage mention: the game download is the measured `game-download` (and its idle-class twin `game-download-idle`), the mail send an operation of the `mail-client` task.
 - Final word: 9.10 D13 (unamended): each mail file carries one send operation of its mail-client task inside the task's keystroke window; the thunderbird send tasks on network-bulk were dropped and network-bulk left dataset/archetypes.yaml (after 9.7 D1 and D31 had moved the steam download to `game-download`).
@@ -96,7 +96,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0090; W-0094
 - Notes: —
 
-### W-0096 · open
+### W-0096 · applied
 - At: `docs/workload/building-plan.md` §2.1 table row `electron-comms` line 66; §7 Workflows item 2 line 204 ('Also referees OQ-3 (electron-comms vs chromium renderer CDF comparison)')
 - Change: Remove the `electron-comms` row and §7's OQ-3 referee sentence; the measured entries replacing it are `renderer-hidden` (a hidden tab's renderer, one per site), `chat-client` (`element-desktop`) and `game-client` (`steam`), with no heartbeat TIMER period.
 - Final word: 9.8 D1 and D25 (2026-09-22; amended by D26, D31 and 9.5 D84): `electron-comms` split per bound program into measured entries, every binding rebound or retired (the `steamwebhelper` and `zoom` helper tasks retired); 9.10 D16 removed `renderer-visible` (one browser window; the page in use is `web-browser`'s renderer, 9.5 D84); 9.10 D15 set the hidden tabs' `count: 4`. At HEAD the library holds `renderer-hidden`, `chat-client`, `game-client`.
@@ -104,7 +104,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0090; W-0094; W-0098
 - Notes: Code: `c4-gaming` and `c3-evening` bind `element-desktop` on chat-client; every gaming file binds `steam` on game-client. The renderer count is W-0098's.
 
-### W-0097 · open
+### W-0097 · applied
 - At: `docs/workload/building-plan.md` §2.1 table row `system-daemon` line 67; §7 Workflows item 1 line 203 ('system-daemon baselines')
 - Change: Remove the `system-daemon` row and its §7 coverage mention; name the four measured session entries — `compositor-shell` (GNOME Shell), `audio-server` (the PipeWire stack), `service-manager` (`systemd`), `message-bus` (`dbus-daemon`) — each per-thread components with wake rates and gap/run quantile tables (`meas-ci:session:2026-09-24`).
 - Final word: 9.9 D26 (2026-09-24; amended by D30 and D31, corrected by D27, D30 and D43): four measured entries replace `system-daemon`, no SLEEP/RUN lognormal; the `xorg` task retired (no Xorg or Xwayland on the GNOME 46 Wayland session at idle); `wineserver` a game-chain member since 9.4 D4. At HEAD `c1-idle` binds gnome-shell, pipewire, systemd, dbus-daemon to the four entries (dataset/timelines/coreset/c1-idle.timeline.yaml:11–17).
@@ -112,7 +112,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0090; W-0094; W-0126
 - Notes: —
 
-### W-0098 · open
+### W-0098 · applied
 - At: `docs/workload/building-plan.md` §3 'Layer 3a — Core set' browser-default paragraph line 82 ('Renderer multiplicity is defined against the Chromium process model (`dubroy-chi10`, `mozilla-testpilot10`, `chang-chi21` + `meas-ci` Xvfb counts); firefox bindings reuse it as a stated approximation'); §7 'User-behavioral parameters' paragraph line 209 ('tab counts (`dubroy-chi10`, `mozilla-testpilot10`, `chang-chi21`)')
 - Change: Restate the renderer count without the three tab studies: a file showing Chrome depicts one window of five tabs — five the median per-client peak of concurrent tabs in Firefox's Linux telemetry (`glam`) — the page in use being `web-browser`'s own renderer and the other four tabs four `renderer-hidden` tasks, one page renderer per tab as observed in Chrome on the runner (`meas-ci:desktop:2026-10-04`); state the floor (the pages hold no subframes, so a real page's cross-site iframes take renderers this count leaves out); drop the firefox clause (no timeline binds firefox). At :209 the tab count's ground is `glam`.
 - Final word: 9.10 D15 as amended by D127 and resolved by D16, D126–D131 (one window of five tabs, four renderer-hidden tasks, Chrome 154 observed on the runner; the spare and Chrome's own WebUI and extension renderers stay in web-browser; no renderer-visible task; D126's stated floor). 9.10 D34 as answered by 9.12 D102: `dubroy-chi10`, `chang-chi21` and `mozilla-testpilot10` are cited by none of the owned prose; 9.15 removes their docs/references.md entries and restates in the same edit the lines still citing them (`building-plan.md:82` and `:189`, now :209). Code: `c1-browsing.timeline.yaml:19–21` binds `count: 4` with `source: {count: [glam, "meas-ci:desktop:2026-10-04"]}`.
@@ -120,7 +120,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0094; W-0096; W-0127; W-0734
 - Notes: The three ids are still entries in dataset/sources.yaml (:210, :217, :225; 9.10 D34's registry removal, handed to 9.13, not done — record-gaps survey §1 item 3): the docs/references.md removal must follow the registry's or `make lint` fails (dataset/tools/wlc/linter.py:36–42) — the references chunk's concern. 9.12 D102 asks this restatement to land in the same edit as that removal. W-0094's item 68 (9.8's renderer lines) also points here. :209's input and tool clauses are W-0127 and W-0734.
 
-### W-0099 · open
+### W-0099 · applied
 - At: `docs/workload/building-plan.md` §3 '### C1 — Single-situation calibration' line 85, the per-mode task sets
 - Change: Restate each C1 (single-situation calibration) set to the names its file binds: office {soffice.bin, chrome ×5 (web-browser and four renderer-hidden), thunderbird-bin}; gaming {Troy.exe's chain on game-task-chain with its member names and the compiler's `wineserver`, steam on game-client} (no game.exe, no gamescope); compile {code, make on build-orchestrator: 2,908 six-process object jobs (child_name cc1) at cap 8, the kernel build bound whole}; media {mpv ×2 — video-player, audio-player} (no spotify); browsing {chrome ×5}; idle {gnome-shell, pipewire, systemd, dbus-daemon — the four session processes, carried in the idle files only; no other file carries the session}; mail {thunderbird-bin}; dev {code}; photo {gimp}; video-edit {kdenlive}; ml-train {code, python — PyTorch's basic MNIST example on cpu-batch's python3 program}; render {kdenlive, kdenlive_render}; transcode {kdenlive, HandBrakeCLI on video-transcoder}; backup {kdenlive, deja-dup on incremental-backup, scheduled and wanted}; indexing {code, tracker-miner-f on file-indexer, user-initiated, a pre-committed miss}; meeting {chrome on video-call, one task} (no zoom, no audio or helper bindings).
 - Final word: 9.10 D8 as resolved by D119–D121 and D125 (c1-backup: deja-dup on incremental-backup from 2 s, total_work 165.668 s, the segment 277 s; scheduled and wanted, tier 1); D10 as resolved by D111 (c1-render: kdenlive_render on cpu-batch, program kdenlive_render, from 2 s, total_work 16.545 s, its 60 s segment kept); D18 as applied by D141 (the user's build: make on build-orchestrator, spawn_count 2,908 six-process object jobs, child_name cc1, parallelism_cap 8, a warm -j8 defconfig build bound whole); D24 with D14 and D26 (c1-media two mpv tasks; c1-gaming Troy.exe with its member names and wineserver, steam on game-client, gamescope gone; c1-meeting one chrome task on video-call, D14 dropping the duplicate task and the video-playback/audio-playback/helper bindings); D28 as amended by D172 (the session processes appear only in the idle files); D12 (python on cpu-batch's python3 program); D5 (tracker-miner-f on file-indexer). 9.12 D102 passes 9.10 D111's and D125's lines through as 9.10 decided them.
@@ -128,7 +128,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0100; W-0101; W-0106; W-0108; W-0114
 - Notes: Read at HEAD from dataset/timelines/coreset/c1-*.timeline.yaml (task names and archetypes). c1-idle.timeline.yaml:1 still says 'idle / [system] only' (data). The tier-3 name `tracker-miner-f` replaces `tracker-miner-fs-3` here as at C5 (W-0108). S10-125, S10-128 and S12-280 also cover C2 P3 (W-0106) and C7's backup sentence (W-0114); SX-0973 also covers 'batch jobs are sized to finish inside the segment' (W-0101).
 
-### W-0100 · open
+### W-0100 · applied
 - At: `docs/workload/building-plan.md` §3 C1 line 85 ('Task sets are lifted from the segment that already carried the mode, the source named in each file's header')
 - Change: State the C1 task sets as design — the composition chosen for each file's claim, no realism claim on which programs share a segment — and drop the sentence that presents them as lifted from a sourced segment (a file header's 'lifted from' names its lineage, not an observed set).
 - Final word: 9.10 D2 (unamended): which programs share a segment of a core-set file is the experiment's composition, labelled design; no core-set file presents its task set as how desktops behave; program existence, situations, states, counts, the arcs' order and the recipes' premises remain realism claims decided at their own items; 'the timeline headers state calibration and lineage, not observed sets'.
@@ -136,7 +136,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0099; W-0101
 - Notes: The C1 headers still say 'Task set lifted from …' (e.g. c1-backup.timeline.yaml:2, c1-dev.timeline.yaml:2) — data, unchanged by 9.10 D2.
 
-### W-0101 · open
+### W-0101 · applied
 - At: `docs/workload/building-plan.md` §3 C1 heading line 84 ('16 files, one per mode') and line 85 ('one 60 s segment each'; 'batch jobs are sized to finish inside the segment so the base carries a turnaround term')
 - Change: State that each batch job is bound whole at its measured size and the batch bases lengthen to hold it — each base's segment the smallest whole second by which the job ends under every policy: c1-compile 1,594 s, c1-ml-train 1,612 s, c1-transcode 4,762 s, c1-backup 277 s; c1-render and c1-indexing keep 60 s (their jobs end inside it) — so the base carries a turnaround term on a finished job; the interactive C1 files and those two are 60 s.
 - Final word: 9.10 D17 with D161's exception for injections: a batch job in a core-set file runs its measured whole at the input its decision fixed and the file's lengths follow the job (c1-compile 1,594 s, c1-ml-train 1,612 s, c1-transcode 4,762 s, c1-backup 277 s; c1-render and c1-indexing 60 s), each base's segment the smallest whole second by which the job ends under every policy (D78's arithmetic, D90's form); c4-office's injected 7z stays a 6 s burst, design (D161).
@@ -144,14 +144,14 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0099; W-0100
 - Notes: Segment ends checked in dataset/build.manifest.json `demand`. §0's 'compressed event-time' (:20) may need the same note. Seen in passing at line 87: '`c1-gaming` lands inside the oversubscription regime through its `lane_share` binding while the other five sit well below one lane' — at HEAD C1 has sixteen files and c1-gaming's utilization is 0.9153, below one lane, while the four long batch bases read 0.9897–0.9993 (dataset/build.manifest.json); the full pass restates it.
 
-### W-0102 · open
+### W-0102 · applied
 - At: `docs/workload/building-plan.md` §3 C1 role line 86 ('this is where the whitelist should score perfectly'); §3 C5 line 113 ('The whitelist scores structurally zero on tiers 4–5; that contrast is a headline result')
 - Change: Restate both to the two name-table conditions: at :86 the strongest-name-table condition (`strongest_name_table`) is the one expected to score perfectly on the C1 calibration files — not the shipped-catalogue condition (`shipped_catalogue`), which on ananicy-cpp's key keys every bound name of a file in only 7 of 50 files; at :113 both name-table conditions carry no rule for the invented names of familiarity tiers 4–5, the strongest name table's structural zero there being the headline contrast.
 - Final word: 9.12 D6 as amended by D91, D105, D109 and D115: the `whitelist` condition becomes two — the shipped catalogue (`ananicy-rules` at `03ef03fb` as CachyOS installs and enables it with ananicy-cpp, matched by the basename of each process's `argv[0]`, untruncated, D105), which answers RQ2 (research question 2, 'does that reading beat what shipping systems do?'); and the strongest name table, a rule list in the catalogue's design covering the software the dataset presents as known, with no rule for Family 3's unregistered software or the invented names of tiers 4–5, which carries the paper's claim (D115) and is 'the condition `docs/workload/building-plan.md:86` expects to score perfectly on the single-situation calibration files'; on ananicy-cpp's key the catalogue keys 19 of the 35 bound names and every bound name of a file in 7 of 50 files (D109).
 - Sources: S12-041 (9.12 D6, `task-9.12-related-work-prose/changelog.md:114`); SX-0143 (TODO 9.15 line (from 9.12 D6), `_dev/TODO.md:179`)
 - Notes: Condition identifiers in code: `harness/tools/harness/evaluator.py:47` CONDITIONS (`shipped_catalogue`, `strongest_name_table`); harness/guards/guard-spec.yaml. D109's '7 of 50 files' counts the 50 files compiled then. Seen in passing on line 86: 'In the RQ0 gate the six batch bases judge … the ten interactive and periodic bases are reporting-only' — the RQ0 gate spec (harness/experiments/rq0-gate.yaml:55–58) judges four batch C1 bases (c1-compile, c1-ml-train, c1-render, c1-transcode) and reports c1-indexing and c1-backup with the idle-class files (9.14 decision 2).
 
-### W-0103 · open
+### W-0103 · applied
 - At: `docs/workload/building-plan.md` §3 '### C2 — Intent pairs, one-segment diffs' lines 89–94 (the intro 'All segments identical except one' :90; the three pair bullets :91–93; 'Per Q7, each pair is a one-segment diff between two otherwise byte-identical files' :94)
 - Change: Restate C2 (the intent-pair group) to the files as built: in each pair the second file's segment-1 job is a measured job of its own (`file-indexer`, `package-upgrade`, `incremental-backup`), differing from the first's in name, behaviour and declared class — not 'behaviorally identical', not 'differing only in intent'; P1 and P2 flip `background_wanted` (P1 also the mode, ml-train → indexing), P3 flips the mode (render → backup) and `initiated` (user → scheduled) with both sides wanted; the shared tasks and segment 0 stay byte-identical (the one-segment-diff discipline holds for the files' other events); the rate claim on intent runs on the sixteen C1–C7 pairs, no new C2 pairs generated; drop `clamscan`, `borg`, `ffmpeg`, `python3-train`, `tracker-miner-fs-3`.
 - Final word: The 2026-10-10 dataset audit's 'C2 direction, and A1 closed' (2026-10-11, 인지오): the building plan's C2 text ('behaviorally identical', 'differ only in intent') is restated to the rebuilt state — the unwanted side a measured job of its own (file-indexer, package-upgrade, incremental-backup) differing in name and in behaviour; P3 flips the mode and `initiated`, not `background_wanted`; the rate claim on intent runs on the sixteen C1–C7 pairs, no new C2 pairs; the three authored pairs remain, P1 the RQ0 load-bearing one. Read with 9.12 D14, D15 and D88 (the pairs differ in behaviour and declared class; what recognition adds over both is measured; D15 as amended by D89 and D101 gives P2's measured differences: 163 µs against 1.8 ms between blocks, one 84-thread process against 916 processes, about 700 s of CPU against 26 s, nice 10 on three quarters of the download's CPU) and 9.23 D9 (W-0104).
@@ -159,7 +159,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0086; W-0104; W-0105; W-0106
 - Notes: Code: dataset/timelines/coreset/c2-pairs.variant.yaml:1–3 ('the one-segment-diff discipline is structural'); dataset/tools/tests/test_coreset.py:62 `test_p1_pair_differs_in_segment_one_only` (the editor's events and segment 0 byte-identical). Segment 1 at HEAD: c2-p1a ml-train/true vs c2-p1b indexing/false/session; c2-p2a gaming/true/user (download) vs c2-p2b gaming/false (package-upgrade); c2-p3a render/true/user vs c2-p3b backup/true/scheduled. `c2-p2a-idle` (9.13; the idle half of 9.11 D21's bounding check, outside the judging set) is a fourth derived C2 file — the heading's '3 pairs = 6 files' is W-0086's. Per-pair rows: W-0104 (P1), W-0105 (P2), W-0106 (P3).
 
-### W-0104 · open
+### W-0104 · applied
 - At: `docs/workload/building-plan.md` §3 C2 P1 bullet line 91 ('P1 (load-bearing): {code, python3-train} vs {code, tracker-miner-fs-3} — behaviorally identical CPU saturation beside an editor; opposite correct policies (S12 vs S14)')
 - Change: Restate P1 (the load-bearing intent pair) as two measured jobs beside the editor `code`: `c2-p1a`'s training run (`python`, PyTorch's basic MNIST example on cpu-batch's python3 program, bound whole at 1,389.885 s and still running at the file's end, so no turnaround term reads it) against `c2-p1b`'s first index (`tracker-miner-f` on file-indexer, 39.435 s, `initiated: session`); segment 1 is 39.435 s in both files (60–99.435 s); the pair differs in segment 1 by name, behaviour and label, with opposite correct policies (S12 vs S14); drop 'behaviorally identical CPU saturation'. Keep 'load-bearing', stated as it stands: RQ0 (the gate experiment) judges `c2-p1a` and reports `c2-p1b` (9.14 decision 2), the indexer's declared `idle` class settling its own side.
 - Final word: 9.10 D6 as applied by D80, D81, D86 and D90: P1 is two real jobs beside the editor — c2-p1a the training run (1,389.885 s after D90, still running at the file's end, D86) against c2-p1b Tracker's first index (39.435 s); segment 1 39.435 s in both files; the pair differs in segment 1 by name, behaviour and label, with opposite correct policies. 9.23 D9 (2026-10-14): P1 stays the load-bearing pair, stated as it stands — it carries the recognition claim (telling the wanted training run from the unwanted indexer, which a whitelist cannot) and its scheduling headroom on c2-p1a's side; per 9.14 decision 2 RQ0 judges c2-p1a and reports c2-p1b, the executor's strict idle rule placing the idle-class indexer below every row, so that side's headroom is zero. The C2 wording is 9.10 D6's and 9.12 D14, D15 and D88's.
@@ -167,7 +167,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0103; W-0108
 - Notes: Code: c2-p1a.timeline.yaml (python on cpu-batch, program python3, total_work 1389.885 s, arrive 60 s; file ends 99.435 s; segment 1 ml-train/true, S11, S12); c2-pairs.variant.yaml:12–19 (c2-p1b: tracker-miner-f on file-indexer, 39.435 s; segment 1 indexing/false/session, S11, S14); harness/experiments/rq0-gate.yaml:55 judging c2-p1a, :61 reporting c2-p1b. §0 line 10 ('The load-bearing F2 pair must differ in exactly one segment') also names the pair.
 
-### W-0105 · open
+### W-0105 · applied
 - At: `docs/workload/building-plan.md` §3 C2 P2 bullet line 92 ('P2: {game + steam download workers} vs {game + clamscan} — same game-plus-background shape; wanted flips (S10 vs S17)')
 - Change: Restate P2: {Troy.exe's chain and steam, + a game install the user starts during play — `steam` on `game-download`, bound whole at the fresh install's CPU total 727.170 s, still running at the file's end} against {the same game + the unattended upgrade — `unattended-upgr` on `package-upgrade`, 26.385 s}; segment 1 is 26.385 s in both files (60–86.385 s); `background_wanted` flips (S10 against S17).
 - Final word: 9.10 D142 with D7, D24, D42 and D45: P2 is {Troy.exe's chain and steam, + a game install the user starts during play: steam on game-download, bound whole at the fresh install's CPU total 727.170 s, still running at the file's end} against {the same game + the unattended upgrade: unattended-upgr on package-upgrade}; segment 1 is 26.385 s in both files; the label's wanted flips (S10 against S17). 9.12 D15 (amended by D89, D101) gives the pair's measured differences (W-0103).
@@ -175,7 +175,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0103; W-0128
 - Notes: Code: c2-p2a.timeline.yaml (steam on game-download, total_work 727.170 s, arrive 60 s; file ends 86.385 s; segment 1 gaming/true, background download, initiated user, S9, S10); c2-pairs.variant.yaml:26–33 (c2-p2b: unattended-upgr on package-upgrade, 26.385 s; segment 1 false, S9, S17). `c2-p2a-idle` (c2-pairs.variant.yaml:35–43) is c2-p2a with the download on `game-download-idle`, outside the judging set, read by 9.14's bounding check alone. W-0128's P2 item is the same change (placed at W-0128).
 
-### W-0106 · open
+### W-0106 · applied
 - At: `docs/workload/building-plan.md` §3 C2 P3 bullet line 93 ('P3: {kdenlive + ffmpeg render} vs {kdenlive + borg} — user-initiated bulk vs scheduled bulk (S7/S8 vs S15)')
 - Change: Restate P3 as {kdenlive + `kdenlive_render`, Kdenlive's own export (cpu-batch's kdenlive_render program, 16.545 s of CPU from 60 s, ending by about 99.5 s)} against {kdenlive + `deja-dup`, Déjà Dup's scheduled weekly incremental on incremental-backup, 165.668 s}, user-initiated export against scheduled backup; segment 1 runs 60–326 s in both files so the backup ends inside it; the mode flips (render → backup) and `initiated` (user → scheduled), both sides wanted; the scenario reference S7 vs S15 (the export is S7 since 9.10 D168).
 - Final word: 9.10 D8 as resolved by D123 and D125, with D10 as resolved by D105–D111: pair P3 is {kdenlive + kdenlive_render export} (c2-p3a, user-initiated) against {kdenlive + deja-dup incremental} (c2-p3b, scheduled); segment 1 runs 60–326 s in both files so the backup ends inside it; the export ends by about 99.5 s; D168 moved the render segments' tag from S8 to S7 only. The 2026-10-11 C2 direction: P3 flips the mode and `initiated`, not `background_wanted`.
@@ -183,14 +183,14 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0099; W-0103
 - Notes: Code: c2-p3a.timeline.yaml (kdenlive_render on cpu-batch, program kdenlive_render, total_work 16.545 s, arrive 60 s; segment 1 render/true/user, 60–326 s, S7); c2-pairs.variant.yaml:45–56 (c2-p3b: deja-dup on incremental-backup, 165.668 s; segment 1 backup/true/scheduled, S7, S15).
 
-### W-0107 · open
+### W-0107 · applied
 - At: `docs/workload/building-plan.md` §3 '### C3 — Mode-transition arcs' lines 98–100 (workday 'Ordering grounded in the CpsMark+ CA cooperative workflow (`cpsmark-tbench23`).' :98; evening arc '(+discord overlay)' :99; creation arc '(grounded in CpsMark+ CC and SYSmark 30 ACC's photo↔video multitasking workload)' :100)
 - Change: State each arc's order as design: CpsMark+'s CA workflow cited only for the existence of the browsing → office → mail transitions (c3-workday's compile segment has no CpsMark+ counterpart); SYSmark 30 Advanced Content Creation cited for the existence of photo editing beside a background encode, CpsMark+ holding photo → video → transcode only as a subsequence with no handoff stated; c3-evening has no candidate source. Restate the evening arc's '+discord overlay' as the chat client `element-desktop` (on chat-client).
 - Final word: 9.10 D29 (unamended): the order of the three arcs is design; a benchmark that defines a transition is cited for that transition's existence only — CpsMark+'s CA workflow for browsing → office → mail (C-cpsmark-5); SYSmark 30 ACC for photo editing beside a background encode ('A video encode is started in Adobe Premiere and sent to the background while Adobe Photoshop is launched and used to manipulate photos in the foreground', C-sysmark30-3); CpsMark+'s order holds photo → video → transcode only as a subsequence, no handoff stated (C-cpsmark-12); c3-evening has no candidate in any class. 9.10 D23, D24: the chat client is `element-desktop`.
 - Sources: S10-064 (9.10 D29, `task-9.10-scenarios-timelines/changelog.md:634`); S10-065 (9.10 D29, `task-9.10-scenarios-timelines/changelog.md:634`); SX-0975 (guidebook dataset vol-04 ch.13 mismatch list (§13.8, building plan), `dataset/04-the-coreset.md:2171`)
 - Notes: Code: c3-evening.timeline.yaml binds element-desktop on chat-client 60–300 s beside the game; c3-workday browsing → office → compile → mail; c3-creation photo → video-edit → transcode (HandBrakeCLI). Line 101's role paragraph is already restated (W-0129). The dataset guidebook's mismatch list (SX-0975) names the same ordering sentence.
 
-### W-0108 · open
+### W-0108 · applied
 - At: `docs/workload/building-plan.md` §3 '### C5 — Familiarity ladder' tier list item 3, line 110 ('opaque (tracker-miner-fs-3, cc1, baloo_file)')
 - Change: Write the tier-3 example as `tracker-miner-f`, the name the dataset binds.
 - Final word: 9.20 (2026-10-12) and the code: the indexer's comm is `tracker-miner-f` (the kernel's 15-character `comm` limit, `linux-sched-h`); tier 3 is a program's own real name carrying no meaning. `dataset/tools/wlc/grid.py:49–51` NAME_TIERS tier 3 = {tracker-miner-f, cc1, baloo_file, updatedb, ld, cc1plus, dkms, the game chain's thread names}; `tracker-miner-fs-3` is in no tier.
@@ -198,7 +198,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0099; W-0104
 - Notes: `c1-indexing.timeline.yaml` binds `tracker-miner-f`; the old name also stands at :85 (C1 indexing set, W-0099) and :91 (P1, W-0104). Seen in passing: tier 2's example `gamescope` (:109) is bound by no timeline since 9.10 D24, though NAME_TIERS still lists it at tier 2.
 
-### W-0109 · open
+### W-0109 · applied
 - At: `docs/workload/building-plan.md` §3 '### C6 — Resolution-limit files (4 files, pre-committed misses)' heading line 117 and the 'name-collision spoof' bullet line 118
 - Change: In the spoof bullet state that `c6-spoof` is split at the spoof's arrival: 0–20 s browsing, `background_wanted: true`; 20–60 s browsing, `background_wanted: false`, `spoof: true`, a pre-committed miss — the oracle reads browsing/`false` from 20 s. Restate the heading's 'pre-committed misses' to the files as annotated: `c6-alias` whole, `c6-fold` from the call's arrival at 30 s and `c6-spoof` from the spoof's arrival at 20 s are pre-committed misses; `c6-dual` is not one (its one segment is `ambiguous`, outside grading).
 - Final word: 9.23 D2 (2026-10-14, not amended): `c6-spoof` (the C6 resolution-limit group's name-collision spoof file) is split at the spoof's arrival — 0–20 s browsing, `background_wanted: true`; 20–60 s browsing, `background_wanted: false`, `spoof: true`, `pre_committed_miss: true`; scenario S2 on both; the oracle reads browsing/`false` from 20 s and applies that row (cap 0.05) to the miner; `c6-spoof` joins the RQ0 gate spec's `layer1_exclusions`. With 9.23 D1 (`c6-fold`'s meeting segment a pre-committed miss) the C6 pre-committed misses are `c6-alias` (whole), `c6-fold` from 30 s and `c6-spoof` from 20 s.
@@ -207,7 +207,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Resolved at merge: 9.23 D2's hand-off cites `building-plan.md` §3 C6 '(`:103`, `:118`)'. The building plan is unchanged since 9.20 (cb74b879) and its :103 is the C4 heading; dataset/README.md:103 is the C6 row (another target's row). The building plan's change is at the C6 heading and spoof bullet (:117–118).
 - Notes: Code: c6.variant.yaml:12–23 (c6-spoof: chrome on cpu-batch, program spoof, total_work 30 s (design), arrive 20 s; the two segments); c6-dual.timeline.yaml one segment `ambiguous`, dual_active, 0–12,072 s; c6.variant.yaml:31–37 (c6-alias: pre_committed_miss and spoof). dataset/build.manifest.json: c6-spoof utilization 0.0164 to 20 s, 0.7664 after.
 
-### W-0110 · open
+### W-0110 · applied
 - At: `docs/workload/building-plan.md` §3 C6 'name-collision spoof' bullet line 118 and 'dual-active ambiguity' bullet line 121
 - Change: State `c6-spoof`'s chrome-named batch job (its 30 s of work, program `spoof`) and `c6-dual`'s co-occurrence (gaming while actively awaiting a compile) as design: a kernel build beside a game appears only as a stress test (make -j30), not as usage; `c6-dual` is the limit file the oracle cannot label.
 - Final word: 9.10 D31 (with 9.23 D2 and 9.17 D1): c6-dual's co-occurrence (gaming while actively awaiting a compile) is design, the limit file the oracle cannot label — a kernel build beside a game appears only as a stress test (make -j30), not usage; the editor-and-game focus alternates every 688 s (9.17 D1); c6-spoof's chrome-named batch job is design by construction, and since 9.23 D2 the spoof's segment from its 20 s arrival is browsing, `background_wanted: false`, spoof, a pre-committed miss.
@@ -215,7 +215,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0109
 - Notes: Code: c6.variant.yaml:15–16 (`source: {total_work: design, program: design}`); c6-dual.timeline.yaml (Troy.exe chain lane_share 0.6, code, make with 2,908 jobs from 10 s; 12,072 s). The spoof's split at 20 s is W-0109's. 9.17 D1's alternating focus is handed to the coreset guide's narrative, not to this bullet.
 
-### W-0111 · open
+### W-0111 · applied
 - At: `docs/workload/building-plan.md` §3 C6 'fold-internal change' bullet line 120 ('browser tabs become a video call; the canonical set is unchanged, so no query fires — a guaranteed miss, pre-registered as a scope boundary')
 - Change: Restate the fold bullet: browser tabs become a video call — a `chrome` task on `video-call` arrives at 30 s in the running browser, its launch phase replayed; the snapshot goes from `chrome ×5` to `chrome ×6`, a count-only change, so a query fires at 30 s (telemetry rule 1), but nothing in the names says call, so the meeting segment (30–60 s) is a pre-committed miss (`pre_committed_miss: true`), pre-registered as a scope boundary; the browsing segment keeps its graded 0 s point.
 - Final word: 9.10 D30 (c6-fold carries a chrome task on video-call from 30 s, the call opened in the running browser with its launch phase replayed, D134) as reversed in part by 9.23 D1 (2026-10-14, not amended): telemetry rule 1 (docs/data-contracts.md §5, frozen 2026-09-06) makes the count change chrome ×5 → chrome ×6 a query point at 30 s; 9.10 D30's 'the canonical set does not change at the boundary' did not hold; the 30 s snapshot does not say call (a sixth chrome is also what a new tab shows), so the meeting segment carries `pre_committed_miss: true`; the browsing segment keeps its graded 0 s point.
@@ -223,7 +223,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0109
 - Notes: Code: c6.variant.yaml:39–60 (the comment; the call task, arrive 30 s, depart 60 s; meeting segment pre_committed_miss: true, scenario S3, S2); c6-fold.timeline.yaml:29. 9.23 D1 also hands every other doc saying no query fires in c6-fold (the coreset guide's c6-fold entry and its :995; the dataset guidebook vol-01's open note) — other targets' rows.
 
-### W-0112 · open
+### W-0112 · applied
 - At: `docs/workload/building-plan.md` §3 '### C7 — Attribute counterparts' line 124 ('The ten interactive modes inject one unwanted job — `clamscan` bound to `cpu-batch`, the same name in every file so the ten `false` cells differ only in mode, tier 1 so no pair changes familiarity tier, arriving at 0 s with `total_work` equal to the segment so the label holds at every instant')
 - Change: Restate the interactive sentence of C7 (the attribute-counterpart group): the ten interactive counterparts inject the stock Ubuntu 24.04 unattended upgrade's install stage — `package-upgrade` shown as `unattended-upgr`, the same name in every file, tier 1 — arriving at 0 s bound whole at its measured CPU total C = 26.385 s; each counterpart is its base's first C seconds, one segment labelled `background_wanted: false`, every base task departing at C, the input window 2 s to C − 2 s and each operation at its fraction of the window, so on one lane the job is alive at every instant of the segment under every policy.
 - Final word: 9.10 D3 as resolved by D39–D41 and D43–D45: the ten interactive counterparts inject the stock unattended upgrade (package-upgrade, shown unattended-upgr, familiarity tier 1, D43) arriving at 0 s and bound whole at its measured CPU total C = 26.385 s (package-upgrade folded in at nine repeats, D45); D41 with D44: each counterpart is its base's first C seconds, one segment labelled false, the base's tasks departing at C, the keystroke window 2 s to C − 2 s and each operation at its fraction of the window; D45's correction: under the whole lane the job ends about 0.13 s after the file. 9.17 D1 renamed the keystroke track `input`.
@@ -231,7 +231,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0113; W-0114; W-0115; W-0116; W-0128
 - Notes: Code: c7.variant.yaml:7–18 (header) and e.g. :74–87 (c7-browsing: add-task unattended-upgr on package-upgrade, total_work 26.385 s, source meas-ci:background:2026-10-01; segment 0–26.385 s false, background package-upgrade, scenario S2, S17; set-input 2–24.385 s; set-focus 0–26.385 s). No timeline binds `clamscan`. SX-0977 (the dataset guidebook vol-04's mismatch list) also names the compile rename (W-0113) and the one-diff wording (W-0115).
 
-### W-0113 · open
+### W-0113 · applied
 - At: `docs/workload/building-plan.md` §3 C7 line 124 ('`compile` renames `make` to `dkms`, the module rebuild the distro runs on a kernel change'); ### Counts and reuse line 127 ('C7 = C1 with one unwanted job or one rename and the label flipped')
 - Change: Replace the rename with the measured module rebuild: `c7-compile` is `c1-compile`'s first C = 225.458 s with an observed DKMS autoinstall in place of the user's build — NVIDIA's 595 open module (nvidia-dkms-595-open 595.91.07) rebuilt for 2026-09-23's security kernel 7.0.0-34 by the stock unattended upgrade — task `dkms` on `module-build-orchestrator` (spawning `module-compiler-child`, child_name cc1, parallelism_cap 8) from 0 s bound whole, the editor departing at C, `initiated: scheduled`, one segment `false`; the compile pair differs in behaviour as well as name. Restate line 127's 'or one rename' to match.
 - Final word: 9.10 D4 as resolved by D46–D59: c7-compile no longer renames make to dkms; it is c1-compile's first C seconds with an observed DKMS autoinstall — NVIDIA's 595 open module (nvidia-dkms-595-open 595.91.07) rebuilt for 2026-09-23's security kernel 7.0.0-34 by the stock unattended upgrade — task dkms on module-build-orchestrator (spawning module-compiler-child), parallelism_cap 8, child_name cc1, arriving at 0 s bound whole, C = 225.458 s, initiated scheduled; D56 as applied by D59 (module-build-orchestrator and module-compiler-child folded in from meas-ci:background:2026-10-02, 26 landings; C the build's CPU as compiled under the file's seed).
@@ -239,7 +239,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0086; W-0112; W-0114; W-0115
 - Notes: Code: c7.variant.yaml:20–23 and :57–60 (header) and :218–230 (c7-compile ops: patch-task build → name dkms, archetype module-build-orchestrator, arrive 0 s, bind parallelism_cap 8 (source design), child_name cc1; segment 0–225.458 s compile, false, initiated scheduled; the segment at tier 3 as its base's, D55).
 
-### W-0114 · open
+### W-0114 · applied
 - At: `docs/workload/building-plan.md` §3 C7 line 124 ('indexing the other way round'; '`ml-train`, `render`, `transcode`, `backup` have no same-mode unwanted name a distro or vendor runs under a distinct string (Jellyfin's transcoder runs as plain `ffmpeg`), so the label flips alone and the file ships as a pre-committed miss')
 - Change: State that every batch counterpart is its base's first C seconds, C its job's CPU total, the job from 0 s bound whole, the editor departing at C, input 2 s to C − 2 s, one segment `false`: c7-indexing C = 39.435 s (Tracker's index, `initiated: session`, a first login), c7-ml-train 1,389.885 s, c7-transcode 2,970.871 s, c7-render 16.545 s, c7-backup 165.668 s; for ml-train, render, transcode and backup the label flips alone on the same job and name and the file ships as a pre-committed miss. Restate the backup clause: an unasked backup under its own name exists (dpkg's daily `dpkg-db-backup`), but it finished in the second it started on the one desktop observed and cannot hold a backup segment.
 - Final word: 9.10 D81 with D78 and D79, the same form taken by D90, D100, D111 and D125 for the other batch counterparts: c7-indexing is c1-indexing's first C = 39.435 s, Tracker's index (tracker-miner-f on file-indexer) from 0 s bound whole, the editor departing at C, one segment false, initiated: session; c7-ml-train (C = 1,389.885 s), c7-transcode (2,970.871 s), c7-render (16.545 s) and c7-backup (165.668 s) likewise, the label flipped on the same job and name, each still a pre-committed miss. 9.10 D9 (unamended; restatement applied in c7.variant.yaml by D163): c7-backup stays the label flip on the same scheduled Déjà Dup run, a pre-committed miss; dpkg's daily dpkg-db-backup exists but finished in the second it started on the one desktop observed.
@@ -247,7 +247,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0099; W-0112; W-0113; W-0115
 - Notes: Code: c7.variant.yaml:24–69 (header: the C values; 'Jellyfin runs its transcoder as plain `ffmpeg` and Plex as `Plex Transcoder`'; D9's backup premise at :53–55, :68) and :232–297 (ops; ml-train, render, transcode and backup carry `pre_committed_miss: true`; c7-indexing `initiated: session`, no annotation). c1-indexing is the user-initiated `true` cell, itself a pre-committed miss, and c7-indexing the `false` cell, as for every other mode — c7.variant.yaml:4–5 still says 'indexing the other way round'; check the clause against the files before keeping it.
 
-### W-0115 · open
+### W-0115 · applied
 - At: `docs/workload/building-plan.md` §3 C7 line 124 ('One counterpart per mode, `c7-<mode>` derived from `c1-<mode>`, so every driver-table cell has a one-diff pair')
 - Change: Restate 'one-diff pair' to the mechanism: each counterpart is its base's first C seconds, so a C7 pair differs in the unwanted job (interactive), the DKMS build (compile) or the label alone (the other batch modes), and also in the file's length, the input window (2 s to C − 2 s) and the operation times (at the base's fractions); its keystrokes are its base's over the same instants, less those inside the counterpart's own operations — a subset, not equality.
 - Final word: 9.18 D1 (the slice rule, 2026-10-11, not amended): a derived input window lying inside one of its base's windows of the same task carries `slice_of: {from, to, index}` and the compiler draws the stimulus offset for that base window, so a counterpart's keystrokes are its base's over the slice, less those inside its own operations; read with 9.10 D41, D44 and D78 (each counterpart its base's first C seconds, operations at the base's fractions). The 2026-10-10 dataset audit's A1 (closed 2026-10-11 as option (ii)): the cross-file 'one-diff pair' wording overstates — length, window, operation times and keystroke slice differ.
@@ -255,7 +255,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0112; W-0113; W-0114; W-0116
 - Notes: Code: `slice_of` in the twelve derived C7 timelines with an input window (e.g. dataset/timelines/coreset/c7-browsing.timeline.yaml:9); dataset/tools/wlc/deriver.py:48–57; dataset/tools/wlc/compiler.py:232, :405. SX-0326 also asks to name the injected job as the unattended upgrade's install stage (W-0112). c7.variant.yaml:2–3 still says 'one-diff pair' (data).
 
-### W-0116 · open
+### W-0116 · applied
 - At: `docs/workload/building-plan.md` §3 C7 line 124 (new sentence)
 - Change: Add that `c7-mail`'s slice holds no keystroke — `c1-mail`'s keystrokes fall after the counterpart's 26.385 s — so the file is reporting-only and the mail mode's attribute is unmeasured.
 - Final word: 9.14 D6 as restated after 9.18: `c7-mail`'s slice holds no keystroke; the file is reporting-only and the mail mode's attribute is unmeasured.
@@ -263,7 +263,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0112; W-0115
 - Notes: Code: harness/experiments/rq0-gate.yaml:48, :62 and :278 list c7-mail as reporting, 'its cut holds no keystroke'. The 2026-10-10 audit's A1 table: the mail base's input wakes in [0, 26.385 s) 0, the counterpart's 0.
 
-### W-0117 · open
+### W-0117 · applied
 - At: `docs/workload/building-plan.md` §3a 'Generated layer — the grids over the C1 task sets' composition-rules paragraph line 139 and the set bullets lines 142–148
 - Change: State in the composition rules that an arrival in the generated layer is a program start: a task arriving mid-file replays one measured launch repeat from its arrival (9.10 D136), its steady stream beginning when the launch phase ends — so the segments where tasks arrive depict applications launching (most launch phases outlast a 60 s segment) and the C1 (single-situation calibration) files remain the steady-state material; recognition (RQ1) is untouched, the replay reaching Layer 2 (B's and the returning A's terms, the per-switch excess, `flip_cost`).
 - Final word: 9.23 D4 (2026-10-14, by 인지오's decision): 9.10 D136 stands as the layer's behaviour — a task arriving mid-file replays one measured launch repeat from its arrival, its steady stream beginning when the phase ends; the segments where tasks arrive depict applications launching, the C1 files the steady state; tasks arrive mid-file in 300 of the transition grid's 480 files, 630 of the return grid's 720, all 24 flap-stress files, 166 of the distractor grid's 272 and none of the familiarity ladder's; launch phases: mail 409 s, browser 421 s, video editor 241 s, call 210 s, game client 906 s, hidden renderer 1,051 s, office writer, chat client and the two players 31–54 s. Recognition (RQ1) is untouched (telemetry a pure function of the pinned events); the replay reaches Layer 2.
@@ -271,7 +271,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0118; W-0119
 - Notes: SX-0387 (the _dev/TODO.md line-187 entry handing 9.23 D4–D6) is placed here; its D5 and D6 parts are W-0119 and W-0118. 9.23 D4 changed nothing in the data.
 
-### W-0118 · open
+### W-0118 · applied
 - At: `docs/workload/building-plan.md` §3a 'Transition grid' bullet line 142 ('The focus form and the C4 cross-mode distractor cell … share the multiset sequence and differ in the focus alone') and 'Distractor grid' bullet line 147 ('the transition grid's focus form with the focus kept on A — the same open programs, the focus alone differing, so the pair isolates the focus field's worth')
 - Change: Restate both clauses: the twins (`tr-<A>-to-<B>-focus` and `dx-<A>-with-<B>`, 240 pairs) share the task set and the name sequence and differ in the focus, the input, the labels and the random draws (different seeds) — a recognition pair; drop 'isolates the focus field's worth' (the focus field's Layer-2 worth is measured by running both telemetry shapes on the same files, 9.17 spec decision 5).
 - Final word: 9.23 D6 (2026-10-14, by 인지오's decision): the twins have identical task lists and different seeds (`dataset/tools/gen/cells.py`, SHA-256 over `seed|<set>|<cell id>`); names-only telemetry is identical in all 240, focus telemetry in the 26 whose focus holders share a name; the workloads differ — per-task programs in 1,528 of 1,590 tasks, file demand by a median 17 %; their scoring terms differ by design (9.21 spec decision 2); no experiment spec or scoring rule pairs them for Layer 2; the seeds stay.
@@ -279,7 +279,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0117
 - Notes: 9.23 D6 changed nothing in the data.
 
-### W-0119 · open
+### W-0119 · applied
 - At: `docs/workload/building-plan.md` §3a 'Return grid' bullet line 143 ('A → B → A over the same pairs, A departing at each boundary') and 'Flap-stress set' bullet line 144
 - Change: State in both bullets that each boundary closes one mode's programs and launches the other's — every task set departs at its boundary, so every boundary is a set change under both telemetry shapes (names only, and with the focus); the launch load is the same under every condition, setting the size of a stale configuration's cost, not its direction.
 - Final word: 9.23 D5 (2026-10-14, by 인지오's decision): the return grid and the flap-stress set keep their form — every task set departs at its boundary, so under 9.23 D4 each boundary closes one mode's programs and launches the other's; every boundary is a set change under both telemetry shapes, as the hold-time plan defines a flap-stress file ('a generated workload whose process set changes several times at short intervals'); the launch load is the same under every condition; a window-switch regime (A staying, the focus returning) is a question for the RQ4 experiment spec.
@@ -287,7 +287,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0117
 - Notes: The _dev/TODO.md Backlog line 'A form-2 return grid (A stays, the focus moves to B and back …)' carries the window-switch form. 9.23 D5 changed nothing in the data.
 
-### W-0120 · open
+### W-0120 · applied
 - At: `docs/workload/building-plan.md` §4 'Layer 3b — Naturalistic set' segment-durations bullet line 156 ('the ~3-min switch rate independently corroborated by `zhang-chb15`') and switching-structure bullet line 157 ('**Switching structure: hub-and-spoke, not uniform-random.** `zhang-chb15`'s core finding is that a few hub tasks dominate switching …')
 - Change: Remove the `zhang-chb15` corroboration clause from line 156 and restate line 157 without it: hub-and-spoke switching has no source left, so the bullet states it as unsourced, left open for the backlogged naturalistic generator (or drops it).
 - Final word: 9.10 D1 (2026-10-01, unamended): a reference whose copy is unreachable or paywalled is dropped; `zhang-chb15` (Zhang, Sun, Chai and Aghajan, Computers in Human Behavior 49, 2015, the task-switching log study) has no reachable copy, so its dataset/sources.yaml and docs/references.md entries leave (both gone at HEAD) and the prose citing it is rewritten without it — the naturalistic generator's hub-and-spoke switching losing its only source. 9.12 D102: none of 9.12's owned prose cites it.
@@ -295,7 +295,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0085; W-0121; W-0122
 - Notes: The hand-off's `building-plan.md:137` has drifted to :156–157. 9.10 D35 (W-0121) rewrites the same paragraph and leaves the switching shape open in the Backlog item 'Naturalistic generator'; apply the two together.
 
-### W-0121 · open
+### W-0121 · applied
 - At: `docs/workload/building-plan.md` §4 lines 156–158 (segment durations :156; switching structure :157, with DesktopBench's A→B→A split and 'Optional sanity check: DesktopBench inter-action timings'; distractor injection :158)
 - Change: Rewrite §4's grounding to 9.10 D35: `gonzalez-chi04`'s about 3 min per event (one continuous use of a device or one interaction with a person, by shadowing) and 11 min 28 s as the mean continuous segment of central and peripheral working spheres only; `mark-chi05` with its wording fixes; the switching shape marked unsourced; DesktopBench (`focal-arxiv26`) cited only as an evaluation-shape precedent — composed from templates, not observed, its inter-action timings a fixed 6.0 s — with the 'inter-action timings' sanity check removed; SWELL-KW and BEHACOM named as the generator's candidate observations; the generator's design left open.
 - Final word: 9.10 D35 (unamended; the generator's design stays open in the Backlog item 'Naturalistic generator'): gonzalez-chi04 gives about 3 min per event (one continuous use of a device or one interaction with a person, by shadowing; C-gonzalez-3) and 11 min 28 s as the mean continuous segment of central and peripheral working spheres only (C-gonzalez-1); mark-chi05 with its wording fixes (C-mark05-2, -3); hub-and-spoke switching is unsourced (its only source, zhang-chb15, dropped by D1); DesktopBench is composed from templates, not observed, its inter-action timings a fixed 6.0 s, cited only as an evaluation-shape precedent (C-focal-1, -4); the generator's candidate observations are SWELL-KW (focus sequences, dwell median 9.1 s, A → B → A returns after 83.4 % of episodes; 25 students and interns in a Windows 7 lab, 2012, CC BY-NC-SA 4.0) and BEHACOM (foreground program and switches per minute, 12 users on their own computers, 4 on Linux).
@@ -303,7 +303,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0085; W-0120; W-0122
 - Notes: 9.10 D35 also hands a docs/references.md entry for BEHACOM where the docs cite it (the references chunk's); if this rewrite cites BEHACOM, that entry must exist (with a verified passage, or marked unverified, spec decision 3). Line 157's 'the CpsMark+ CA workflow grounds the canonical excursion ordering around an office hub' falls under 9.10 D29 (an order is design; a benchmark cited for a transition's existence only). Apply with W-0120 and W-0122.
 
-### W-0122 · open
+### W-0122 · applied
 - At: `docs/workload/building-plan.md` §4 segment-durations bullet line 156 ('(The "23 minutes to resume" figure exists only in a 2006 interview, `mark-gallup06` — cite as interview or omit.)')
 - Change: Drop the parenthetical with the §4 rewrite, or restate it per C-gallup-1 — the figure is absent from the four Mark et al. CHI papers searched, 'only source' is not shown, and CHI 2005 reports a comparable 25 min 26 s — in the same edit that corrects or removes `mark-gallup06`'s docs/references.md entry.
 - Final word: 9.10 D169 (2026-10-07) with 9.12 D102 and D106: the references-only entries `czerwinski-chi04`, `mark-chi08`, `mark-chi14` and `mark-gallup06` are corrected to their 2026-09-13 verdicts or removed, and `videogui-arxiv24` (provisional) settled; 9.12 D102 confirmed none is cited by the owned prose and named `mark-gallup06`'s citing lines to restate with it (`source-vetting.md:76`, `building-plan.md:136`, now :156). C-gallup-1 (compare/K4.md:68–69): 'The figure is absent from the four Mark et al. CHI papers searched. "Only source" and "no peer-reviewed paper" go beyond that search. CHI 2005 reports a comparable 25 min 26 s.'
@@ -311,7 +311,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0085; W-0120; W-0121
 - Notes: The hand-off's :136 has drifted to :156. Whether `mark-gallup06` is corrected or removed is the docs/references.md chunk's call (its entry is at docs/references.md:305); this line follows it.
 
-### W-0123 · open
+### W-0123 · applied
 - At: `docs/workload/building-plan.md` §5a demand-budget bullet line 188 ('the compiler records each `-single` workload's utilization per file and per ground-truth segment in `dataset/build.manifest.json`')
 - Change: Add the scoping sentence: the manifest's static estimate spreads a batch job's whole `total_work` over its lifetime to the file's end, so a file whose job outlives it records offered demand, not load the lane carries — `c2-p1a` 14.505 over the file and 35.7721 lanes in its second segment, `c2-p2a` and `c2-p2a-idle` 9.3829 and 28.5251 — and these figures are not read as oversubscription.
 - Final word: The 2026-10-10 dataset audit's docs-staleness addition on the manifest's demand and the record-gaps survey §2 item 5: a job outliving its file has its whole `total_work` counted over arrival-to-file-end in the manifest's static demand record (dataset/tools/wlc/estimate.py; 9.14 decision 4); the 2026-09-20 validity memo §4 asks for a scoping sentence or an in-file clip; no decision chose the clip, a compiler change with a re-bless.
@@ -319,7 +319,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0124
 - Notes: Values read at HEAD from dataset/build.manifest.json `demand`: c2-p1a 14.505 (segment 1, 60–99.435 s, 35.7721); c2-p2a and c2-p2a-idle 9.3829 (segment 1, 60–86.385 s, 28.5251). The jobs: c2-p1a's training run 1,389.885 s of work, c2-p2a's download 727.170 s. The same sentence may be owed at dataset/README.md's manifest line too (another target's row; SX-0810 leaves the place to the editing agent).
 
-### W-0124 · open
+### W-0124 · applied
 - At: `docs/workload/building-plan.md` §5a demand-budget bullet line 188 ('For C7 that puts the interactive counterparts at the regime's ceiling and `c7-gaming` at two and a half lanes')
 - Change: Restate `c7-gaming`'s figure to the manifest's 1.9149 lanes.
 - Final word: The manifest at HEAD (dataset/build.manifest.json `demand`): `c7-gaming` utilization 1.9149 (one segment, 0–26.385 s).
@@ -327,7 +327,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0123
 - Notes: The other interactive counterparts at HEAD: c7-idle 1.0007, c7-office 1.0251, c7-browsing 1.0268, c7-mail 1.0545, c7-photo 1.0967, c7-media 1.1267, c7-dev 1.2129, c7-meeting 1.24, c7-video-edit 1.5618; 'the regime's ceiling' names the retired demand window's 150 % (9.14 decision 4). Seen in passing on the same bullet: 'the two derived C6 files' predates `c6-alias` — three derived C6 files declare `demand: calibration` (c6.variant.yaml), `c6-dual` is oversubscribed.
 
-### W-0125 · open
+### W-0125 · applied
 - At: `docs/workload/building-plan.md` §7 'Measurement campaign — meas-ci' line 200 ('Outputs get registry tags `meas-ci:<workflow>:<run>`'); 'Scope discipline' paragraph line 207 ('Machine-relative absolutes (CPU %, IO throughput, io-wait fractions) are recorded with the runner spec and rank as *convention informed by measurement*, never desktop truth. Each workflow runs N times; spread is reported.')
 - Change: Restate to the wording `dataset/sources.yaml`'s `meas-ci` notes give: the locator names the campaign (`meas-ci:<workflow>:<campaign>`, the launch date of the campaign's first batch; a run number names a one-run campaign from before that form); a measured value is this software on this machine — a GitHub-hosted ubuntu-24.04 runner pinned to one CPU of the AMD EPYC 7763, its runner spec written into the archetype's scope — never desktop truth, a source claim and not 'convention informed by measurement'; repeats are added until the stability rule holds (the 95 % confidence half-width within 5 % of the mean or 1 µs, over at least five same-machine repeats); drop 'IO throughput, io-wait fractions' (none was measured).
 - Final word: 9.5 D10 as amended by D26 (repeats added until the stability rule holds) and D27 (the locator names the campaign): a measured value is a source claim whose source is the campaign `meas-ci:<workflow>:<campaign>`, its scope the recorded runner spec and the pinned application version — 'never desktop truth' survives as that stated scope, not as a downgrade to 'convention informed by measurement'; 9.7 D17 (c): the I/O clause replaced by what the campaigns measure (per-wake runs and waits, per-process CPU and block-I/O delay at exit, network waits and bytes per wake). `dataset/sources.yaml:278–295` (the `meas-ci` notes) carries the wording.
@@ -335,7 +335,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0126
 - Notes: §7's workflow list is W-0126.
 
-### W-0126 · open
+### W-0126 · applied
 - At: `docs/workload/building-plan.md` §7 Workflows item 1 line 203 ('real `make -jN` build, `tar`/`xz`, `rsync`, `clamscan`, `updatedb` with two sidecars — a process-lifecycle event tracer (netlink proc events: exact fork/exec/exit timestamps) and a 1 s `/proc` state sampler')
 - Change: Correct the Phase 2 instrument description (forkstat's whole-second timestamps, a 0.5 s sampler — not 'exact' and '1 s'), or restate §7's workflows to the current campaigns: one pinned single-core run under `perf sched record` on the measured CPU (per-schedule run, wait and delay, fork and comm events, wakes) plus a taskstats listener (per-process CPU, elapsed time, block-I/O delay and runnable wait at exit), with the retired entries removed from the coverage list (W-0094, W-0095, W-0097).
 - Final word: 9.6 D3 (2026-09-17, by 인지오's decision): the build archetypes' one observation is a new linux-6.6 defconfig run under the shared single-core tooling, instrumented by `perf sched record` on the measured CPU and a taskstats listener on its cpumask with delay accounting; forkstat and the 0.5 s `/proc` sampler are superseded for the build phases (forkstat carries no CPU; the sampler censors processes shorter than its interval); `meas-ci:cli:3` (four vCPUs, unpinned) leaves the archetypes and stays in the campaign results for reference. The 9.6 scope card: the Phase 2 instruments were whole-second forkstat timestamps and a 0.5 s sampler.
@@ -343,7 +343,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0094; W-0097; W-0125; W-0128
 - Notes: The 9.7 scope card hands the same line (to 9.12). If line 203 is kept as the Phase 2 plan's history, it says so and its instrument facts are corrected; the editing agent decides whether it reads as history or a current claim. `clamscan` is bound by no timeline (W-0128).
 
-### W-0127 · open
+### W-0127 · applied
 - At: `docs/workload/building-plan.md` §7 'User-behavioral parameters are literature-grounded (Role C), not measured' paragraph line 209 ('input inter-arrival (`dhakal-chi18`, family shape `roeser-rw24`)'; 'Validation notes: `desktop-interactive`'s validation is rescoped accordingly'); §2.1 line 58's `dhakal-chi18`/`roeser-rw24` (replaced by W-0091)
 - Change: Restate the paragraph's input clause: keystroke input is a replayed SWELL-KW stream (`swell-icmi14`; 9.5 D4, D18), not `dhakal-chi18`/`roeser-rw24`, which ground no dataset value — Dhakal's data serves only the stimulus-sensitivity check's alternate stream; drop the `desktop-interactive` validation sentence (the entry no longer exists).
 - Final word: 9.5 D7 as amended by 9.5 D23: `dhakal-chi18` and `roeser-rw24` ground no dataset value (paper-only); `dhakal-chi18` re-entered as a data artifact whose only role is the alternate stream of the stimulus-sensitivity check; the interactive values come from the measured campaigns under SWELL-KW streams (9.5 D4, D18); 9.5 D2 and D19 → D25 → D70 retired `desktop-interactive`.
@@ -351,7 +351,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0091; W-0098; W-0734
 - Notes: dataset/sources.yaml:29 holds `swell-icmi14`; `dhakal-chi18` is not in the registry. The paragraph's tool sentence is W-0734 (waits on 인지오); its tab-count clause is W-0098.
 
-### W-0128 · open
+### W-0128 · applied
 - At: `docs/workload/building-plan.md` §9 'Remaining open before schema freeze' item 5 line 225 ('finite top-level tasks (clamscan, 7z, render jobs) depart at scheduler-dependent times')
 - Change: Replace `clamscan` among the examples of finite top-level tasks with a job the dataset binds (e.g. the unattended upgrade `unattended-upgr`, the index `tracker-miner-f`, the backup `deja-dup`); no timeline binds `clamscan`.
 - Final word: 9.10 D3 replaced the C7 (attribute-counterpart) files' injected `clamscan` with the unattended package upgrade (`package-upgrade`, process `unattended-upgr`); no timeline binds `clamscan` (dataset/timelines: no match).
@@ -359,7 +359,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0105; W-0112; W-0126
 - Notes: SX-1116 (the dataset guidebook vol-08 §12.8 mismatch table row 7) also names C2 P2 (W-0105), C7 (W-0112) and §7:203 (W-0126), whose changes those rows carry; its line-225 item is placed here. Item 5's question itself (canonical-set timing under emergent departs) is unchanged by this row.
 
-### W-0834 · open
+### W-0834 · applied
 - At: `docs/workload/building-plan.md` §3 browser-default paragraph line 82 ('Renderer multiplicity is defined against the Chromium process model (`dubroy-chi10`, `mozilla-testpilot10`, `chang-chi21` + `meas-ci` Xvfb counts)'); §7 'User-behavioral parameters' paragraph line 209 ('tab counts (`dubroy-chi10`, `mozilla-testpilot10`, `chang-chi21`)')
 - Change: Drop the three removed ids at both lines: the tab count and the one window are `glam`'s — Firefox's Linux telemetry (9.10 D15, D16).
 - Final word: 인지오's answer to W-0071 (2026-10-15, (a)), applied in K01: `dubroy-chi10`, `chang-chi21` and `mozilla-testpilot10` left `docs/references.md`. 9.10 D15 (the renderer count follows Firefox's Linux tab telemetry and an observed Chrome) and D16 (one browser window, at the same statistic: the median per-client peak of concurrent windows in Firefox's Linux telemetry, 1; `renderer-visible` leaves the library).
@@ -367,7 +367,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0098; W-0127
 - Notes: found in K01. W-0098 carries the full restatement of both lines (one window of five tabs, four `renderer-hidden` tasks, one renderer per tab observed in Chrome, `meas-ci:desktop:2026-10-04`); the removal it waited on is done. :209's other clauses are W-0127 and W-0734.
 
-### W-0835 · open
+### W-0835 · applied
 - At: `docs/workload/building-plan.md` §4 segment-durations bullet line 156 ('(The "23 minutes to resume" figure exists only in a 2006 interview, `mark-gallup06` — cite as interview or omit.)')
 - Change: Drop the parenthetical (W-0122's first option): `mark-gallup06` has left `docs/references.md`. If a resumption figure is wanted, cite CHI 2005's 25 min 26 s from `mark-chi05`, whose role now carries it.
 - Final word: K01's decision 3 (`logs/K01.md`): `mark-gallup06` removed (W-0041) — no dataset value or decision uses its 23 min 15 s; 9.12 D102 hands the entry out with the lines citing it; the 2026-09-13 verification's C-gallup-1 points to CHI 2005's comparable 25 min 26 s (that verification's read R10, p. 326), now in `mark-chi05`'s role (W-0007).
@@ -375,13 +375,29 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0122; W-0121
 - Notes: found in K01. W-0122 left the choice to the references chunk; the entry is removed, so the parenthetical goes. W-0121 rewrites the same paragraph (9.10 D35).
 
-### W-0836 · open
+### W-0836 · applied
 - At: `docs/workload/building-plan.md` ## 8 'Standing rules inherited by all of the above', line 215 ('**Citation tiers** are carried per-entry in docs/references.md: scholarly (numbered bib) vs deployed-system (footnote; existence claims only).')
 - Change: Restate the tier line to `docs/references.md`'s citation-tier rule as K01 left it: deployed-system (footnote) supports existence claims, the system's own documented design or behaviour stated as that source's at its pinned version or accessed date, and a figure the source publishes stated as its report with the date read, the window and how it is computed — never a behavioural or statistical claim stated as ours or a population's; and name the fifth type, talk, conference abstract or news report (footnote tier; its claims the speaker's or reporter's, a number only as its report with its date).
 - Final word: 9.12 D112 (2026-10-09, the deployed-system tier widened) and 9.12 D113 (2026-10-09, the talk, conference-abstract or news-report type), applied in K01 to `docs/references.md`'s id-minting and citation-tier rules (W-0001, W-0002).
 - Sources: W-0002; W-0001; `logs/K01.md` ## Rows for other chunks
 - Cross-ref: W-0839; W-0848
 - Notes: found in K01. Take the wording from `docs/references.md`'s citation-tier rule as committed after wave 0. The same old rule stands in `docs/workload/grounding-sources.md:77` (W-0839) and in `dataset/sources.yaml:14–16`'s header comment (a data file; K01's mismatch M1, outside the sweep).
+
+### W-0873 · open
+- At: `docs/workload/building-plan.md` §2.1, the 29-entry table ("the quick-reference inventory", its pin)
+- Change: Make the table agree with the archetype plan's §4 inventory (the 29 entries grouped by compile path: measured stream 16, batch loop 8, builds 4, chain 1), or point to it.
+- Final word: K04 decision 8 and W-0231 (the plan's §4 replaced by the 29 entries, grouped by `compiler.py`'s dispatch); K02 decision 2 (§2.1 restated, 29 entries in 23 rows, each campaign tag read from `validation_stats.run`).
+- Sources: `logs/K04.md` ## Rows for other chunks; `logs/K02.md` ## Decisions 2
+- Cross-ref: W-0090; W-0231
+- Notes: found in K04. Both files' chunks have run (wave 1): a follow-up chunk.
+
+### W-0884 · open
+- At: `docs/workload/building-plan.md` §1 line 44 ("the editor's events and segment 0 byte-identical (`test_p1_pair_differs_in_segment_one_only`)"); §3 line 99 ("A file showing Chrome depicts one window of five tabs"); §3a line 178 ("each cell's seed drawing its own programs"); §5a line 220 ("The calibration class is declared by each recipe (Phase 7)"); §7 line 235 (the **Workflows** list; "traced by `perf sched record` on that CPU")
+- Change: (1) Line 44: scope the test as line 112 does — the compiled files hold the editor's events identical, the test P1's shared arrival, segment 0 and the spans (it compares arrive events only, `dataset/tools/tests/test_coreset.py:58–59`). (2) Line 99: except the call — `c1-meeting` and `c7-meeting` bind one `chrome` task on `video-call` and no renderers (9.10 D14); 9.10 D15's rule is for the files that show the browser (the `web-browser` task). (3) Line 178: the seed draws each cell's event streams, not "programs", which elsewhere in the doc means an application. (4) Line 220: the C1 files declare `demand: calibration` in their own timelines' `meta`; only the derived files' recipes carry `patch-meta: {demand: calibration}`. (5) Line 235: scope the Workflows list to the workflows whose campaigns the data carries, or name the other four (`meas-costs`, `meas-probe`, `meas-long-probe`, `meas-sched`); `session`'s four entries were traced on every CPU, the processes confined to one.
+- Final word: K02's last review (passed 2026-10-16, no material finding): findings 1, 2, 4, 5 and 7, left for the editing agent to fix or log; finding 3 (§4's Coverage bullet) is a correct change, only unlogged, and needs no edit.
+- Sources: `logs/K02.md` ## Review round 1 (the last), findings 1–5, 7
+- Cross-ref: W-0098; W-0118; W-0123; W-0126
+- Notes: found in K02's review. K02's file: a follow-up chunk.
 
 ## Also on this file, not for editing from this list
 
@@ -391,4 +407,4 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - W-0132 · closed, already-applied — The building plan already uses 9.17's terms: :139 'the input window with the C1's 2 s margins', :147 'A's focus and input run to the file's end', :142 and :148…
 - W-0133 · closed, already-applied — Line 144 ('Flap-stress set (`flap-stress`, 24 files) … Each file under two seeds, tuning and measurement. Role: the hold-time plan's tuning and test material.'…
 - W-0134 · closed, already-applied — Line 188 ('… a measured fact: the compiler records each `-single` workload's utilization per file and per ground-truth segment in `dataset/build.manifest.json`…
-- W-0734 · waits on 인지오 — Is the collection and privacy-scrub tool still promised? What the records and code say: grill 2026-08-26 D8 (`_dev/archive/2026-08-26-workload-generation-grill.md:29`) promised it ships 'as an open falsification invitat… Blocks: `docs/workload/building-plan.md:209`, `docs/workload/grounding-sources.md:48` (W-0295), the dataset guidebook vol-02 §12.2 note and vol-06's mismatch row, the…
+- W-0734 · answered (b), applied in K02 — Is the collection and privacy-scrub tool still promised? What the records and code say: grill 2026-08-26 D8 (`_dev/archive/2026-08-26-workload-generation-grill.md:29`) promised it ships 'as an open falsification invitat… Blocks: `docs/workload/building-plan.md:209`, `docs/workload/grounding-sources.md:48` (W-0295), the dataset guidebook vol-02 §12.2 note and vol-06's mismatch row, the…

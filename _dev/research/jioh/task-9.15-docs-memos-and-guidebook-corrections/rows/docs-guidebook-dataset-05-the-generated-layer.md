@@ -83,6 +83,14 @@ Chunk K13, Dataset guidebook, volumes 5-6 (wave 3). 10 open rows. The file has 2
 - Sources: SX-1030 (guidebook dataset vol-05 ch.16 not-yet-run table (§16.4), the 9.15 row, `dataset/05-the-generated-layer.md:2028`)
 - Notes: Apply after the chunks owning those docs commit (other groups' rows).
 
+### W-0866 · open
+- At: `docs/guidebook/dataset/05-the-generated-layer.md` §1.3, line 80 ("building plan(`docs/workload/building-plan.md` §4)이 Layer 3b로 계획한"); §17.1 저장소 용어, line 2047 ("Layer 3b")
+- Change: Drop the layer number and name the set as the building plan now does (its §4, "The timelines: the naturalistic set (backlog)").
+- Final word: 인지오's answer to W-0742 (2026-10-16, (a)): the dataset's layers are named, not numbered; K02 renamed the building plan's headings.
+- Sources: `logs/K02.md` ## Rows for other chunks (X6); its last review, finding 8 (line 80)
+- Cross-ref: W-0742; W-0865
+- Notes: found in K02 (line 80 by K02's last review).
+
 ## Also on this file, not for editing from this list
 
 - W-0561 · closed, already-applied — vol-05:1731 and :2003 already state the code's rule and that 9.21 D1's list differs; that list describes the recorded shape ('`input` is whether the generator…

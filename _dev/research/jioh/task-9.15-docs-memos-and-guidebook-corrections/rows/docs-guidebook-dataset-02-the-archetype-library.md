@@ -64,6 +64,14 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 6 open rows. The file has 16
 - Cross-ref: W-0154; W-0161
 - Notes: found in K03. `docs/data-contracts.md` §2, in the same list, now lists the 29 entries too (K05, W-0245); the paragraph's other docs land with their own chunks.
 
+### W-0871 · open
+- At: `docs/guidebook/dataset/02-the-archetype-library.md` §12.1 library 수준의 scale 한계, open note line 1468 (W-0516's place)
+- Change: When applying W-0516, name `docs/workload/archetype-plan.md` §2, "Observation venues", as where the library-level scale limitation is stated; `dataset/README.md` does not restate it. W-0516's apply-after ("the `dataset/README.md` library-scale row (W-0238)") is the archetype plan's row W-0238, applied in K04.
+- Final word: K04 (wave 1, review passed 2026-10-16): W-0238 applied in the archetype plan's §2, "Observation venues", 9.5 follow-ups spec decision 13's sentence kept verbatim (K04 decision 7); the work list's "Settled at merge": the statement goes in the archetype plan, and the README does not restate it.
+- Sources: `logs/K04.md` ## Rows for other chunks
+- Cross-ref: W-0516; W-0238; W-0872
+- Notes: found in K04.
+
 ## Also on this file, not for editing from this list
 
 - W-0517 · blocked, simulator TIMER (outside the spec's list) — §1.5 TIMER와 WAIT(timer), open note line 135

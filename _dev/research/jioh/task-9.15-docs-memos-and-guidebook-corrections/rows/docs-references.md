@@ -556,6 +556,30 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0069
 - Notes: Verified passages on file: 9.12 search records S3-11 (`_dev/research/jioh/task-9.12-related-work-prose/search/S3-traces-datasets.md:367`, two SHA-256) and S3-23 (`:651`), audit records A2-12 and A2-13 (`A-audit.md:130`, `:134`, the PDFs). SX-0190 also hands Cooper et al. (W-0069). C3 is the core set's transition-arc group, C4 its distractor-injection group.
 
+### W-0860 · open
+- At: `docs/references.md`, a new entry in ## Grounding — deployed-system (footnotes); `docs/workload/scenario-catalog.md` S3's Source cell ("(9.10 D24)")
+- Change: Mint a deployed-system entry, by the id rule, for Microsoft's "Microsoft Teams progressive web app now available on Linux" (Microsoft Teams Blog, post 3669846, 2022-11-07), the passage verified on file in 9.10's search record S2-26 (copy SHA-256 `67a9c24cf44b60861e96fec2ea19a50a40b7b5f950116726a284d8374c581637`); then the scenario catalog's S3 row cites the entry in place of "(9.10 D24)".
+- Final word: K02 decision 15: S3 states the fact with 9.10 D24 as its record, since only the references chunk mints entries (9.15 spec decision 5).
+- Sources: `logs/K02.md` ## Rows for other chunks (X1), ## Decisions 15; 9.10 search record S2-26
+- Cross-ref: W-0138
+- Notes: found in K02. Both files' chunks have run (K01, K02): a follow-up chunk. The citation rule: `docs/references.md`'s id-minting rule first; a `dataset/sources.yaml` entry only if the dataset derives values or structure from the source.
+
+### W-0861 · open
+- At: `docs/references.md` the `meas-ci` entry's cite, its list of campaigns cited only in prose (it names only `meas-ci:costs:2026-10-08`)
+- Change: Add `meas-ci:names:2` to the list, with its workflow run and where its raw records are: an asset (`meas-names2.zip`) of release `meas-ci-2026-08-28`, which `dataset/meas-releases.yaml` does not map (the map covers the campaigns the data carries).
+- Final word: W-0738's answer (9.10 D25: a name derived by the rule is confirmed where a campaign or `meas-ci:names:2` shows it); the scenario catalog's note 4 and `dataset/README.md`'s names rule cite it, and no data file does (grep over `dataset/`); `gh release list`: `meas-ci-2026-08-28` "meas-ci raw data: cli:3, gui:2, names:1, names:2".
+- Sources: `logs/K02.md` ## Rows for other chunks (X2), ## Fix round resumed item 3; the dataset guidebook vol-06 `:426` (the workflow artifact's expiry, 2026-12-09), `:617`, `:844`
+- Cross-ref: W-0732; W-0738; W-0153
+- Notes: found in K02. The building plan's §7 already states that the map leaves `names:2` out (K02, fix round resumed). Both files' chunks have run: a follow-up chunk.
+
+### W-0862 · open
+- At: `docs/references.md` the `cpsmark-tbench23` entry's role ("the existence of the office, browsing, mail, photo, transcode and archive scenarios (the scenario catalog's S1, S2, S4, S6, S8 and S16)")
+- Change: Align the role with 9.10 D33's S16 row, which grounds the archive scenario on SYSmark 30 alone, as the scenario catalog now does: drop S16 from the role, or record why CpsMark+ also grounds it.
+- Final word: 9.10 D33 (the catalog's table; S16 on `sysmark30`); K02 rewrote the catalog to D33's table (W-0136).
+- Sources: `logs/K02.md` ## Rows for other chunks (X3); 9.10 D33
+- Cross-ref: W-0136; W-0789
+- Notes: found in K02. Both files' chunks have run: a follow-up chunk.
+
 ## Also on this file, not for editing from this list
 
 - W-0071 · answered (a), applied in K01 — The five entries 9.10 D34 and 9.12 D102 remove from `docs/references.md` (`dubroy-chi10`, `chang-chi21`, `dkms-man`, `dkms-debian`, `mozilla-testpilot10`) are still registry ids in `dataset/sources.yaml` (`:175`, `:183`… Blocks: The removal of the five entries at `docs/references.md:80–88`, `:279–287`, `:295–298` (and `singervine-slate10` at `:300–303`), and the same-edit restatement o…

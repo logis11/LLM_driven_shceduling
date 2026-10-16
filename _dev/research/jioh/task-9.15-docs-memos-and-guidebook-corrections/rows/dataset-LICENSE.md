@@ -2,7 +2,7 @@
 
 Chunk K04, Dataset README, archetype plan and licences (wave 1). 1 open rows. A new file.
 
-### W-0240 · open
+### W-0240 · applied
 - At: `dataset/LICENSE` new
 - Change: Create `dataset/LICENSE`: the dataset's data and its release assets under CC-BY-NC-SA-4.0, copyright Jioh In, Kyungmin Inn and Ian Park, crediting SWELL-KW (Koldijk et al., 2014; DANS, doi:10.17026/dans-x55-69zp) for the stimulus streams under `dataset/stimulus/`.
 - Final word: 9.15 spec decision 12 (licences): `dataset/LICENSE` puts the dataset's data and its release assets under CC-BY-NC-SA-4.0, names Jioh In, Kyungmin Inn and Ian Park as the copyright holders, and credits SWELL-KW (Koldijk et al., 2014, DANS) for the stimulus streams; the root `LICENSE` puts the code under MIT. It answers the 2026-10-10 dataset audit's data-availability item (no LICENSE; the SWELL-derived `dataset/stimulus/` is CC-BY-NC-SA).

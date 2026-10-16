@@ -283,6 +283,14 @@ Chunk K03, Coreset guide (wave 1). 35 open rows. The file has 1060 lines at `d5c
 - Resolved at merge: The raw rows disagree on the keystroke count: 9.14 D2/D6 give 35; `docs/daemon/prior-table-pair-review.md:54` (written after 9.18) gives 33 input wakes. The compiled `dataset/build/coreset-single/c1-mail.workload.json` has 35 wakes on `input:mailer`, between 45.936 s and 53.066 s (and 5,371 on `timer:mailer`): 35.
 - Notes: The pair review's '33' (`docs/daemon/prior-table-pair-review.md:54`, the mail row) is stale against the compiled file — that doc's row, not this group's. The rest of the C7 table (`clamscan`, 60 s, utilizations) is W-0166's.
 
+### W-0886 · open
+- At: `docs/workload/coreset-guide.md` §10, `c3-evening`'s harness note, line 922, last sentence ("지금은 harness가 읽는 t₀가 도착보다 `game.chain.1`은 한 주기(60,016,667), `video`는 열한 주기(300,366,828), `music`은 아홉 주기(300,446,715) 늦어요")
+- Change: Tie the offsets to the run they come from, the no-schedule run (the boot default) named two sentences earlier — e.g. "같은 run에서 harness가 읽는 t₀는 …"; only k ≥ 1 holds for every run.
+- Final word: K03's review round 2 (passed 2026-10-16), minor item 1: another configuration changes when each task first blocks, and so each k.
+- Sources: `logs/K03.md` ## Review round 2
+- Cross-ref: W-0183; W-0869
+- Notes: found in K03's review. K03's file: a follow-up chunk. If 인지오 answers K03's t₀ question with the harness mocks' reading, the passage is restated with that answer.
+
 ## Also on this file, not for editing from this list
 
 - W-0189 · blocked, simulator TIMER (on the spec's list) — ## 3 primitive table, `TIMER(P)` row line 111 ('지나간 tick은 backlog로 쌓여 즉시 완료') and the TIMER/SLEEP paragraph line 118 ('늦으면 밀린 tick이 쌓여요 … 따…

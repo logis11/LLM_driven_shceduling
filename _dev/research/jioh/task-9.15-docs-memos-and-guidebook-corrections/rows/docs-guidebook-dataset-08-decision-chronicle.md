@@ -76,6 +76,14 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 8 open rows. The file has 20
 - Cross-ref: W-0601; W-0606
 - Notes: found in K03. W-0606 covers only row 1's segment count, W-0601 only the v0.1 row (1853). Row 1852's other doc, `docs/data-contracts.md` §2, now lists the 29 entries (K05, W-0245); the other docs these rows name land with their own chunks. Whether §12.8 is updated row by row or closed once 9.15's rows are applied is the editing agent's call (W-0606).
 
+### W-0868 · open
+- At: `docs/guidebook/dataset/08-decision-chronicle.md` §12.8 문서와 tree의 불일치 (2026-10-14 현재), table rows 1 (line 1851, "core set 50개, segment 64개(building plan, …)"), 6 (line 1856, two compile modes, `coreset-native`) and 7 (line 1857, C7's `clamscan`)
+- Change: Restate or close these rows' building-plan and scenario-catalog side: both now state the tree — 51 files and 67 segments (W-0086), one compile mode (W-0087), no `clamscan` (W-0128) and S17 the unattended upgrade (W-0149).
+- Final word: K02 (wave 1, review passed 2026-10-16).
+- Sources: `logs/K02.md` ## Rows for other chunks (X7)
+- Cross-ref: W-0606; W-0857; W-0601
+- Notes: found in K02. X7's other parts are carried by open rows whose apply-after rows K02 has applied: the dataset guidebook vol-01's §5.1, §5.2 and §5.6 notes (W-0498, W-0499, W-0500, W-0503) and vol-04 §13.8 (W-0549). Whether §12.8 is updated row by row or closed once 9.15's rows are applied is the editing agent's call (W-0606), as W-0857 says.
+
 ## Also on this file, not for editing from this list
 
 - W-0607 · closed, already-applied — vol-08:271 already states the final word, accurate at HEAD; the generalset's backlog line is `_dev/TODO.md:196`.

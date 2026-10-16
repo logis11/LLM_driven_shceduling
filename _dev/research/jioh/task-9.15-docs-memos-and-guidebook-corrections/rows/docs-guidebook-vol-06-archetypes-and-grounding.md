@@ -83,6 +83,14 @@ Chunk K16, Research guidebook, volumes 4-6 (wave 4). 9 open rows. The file has 4
 - Cross-ref: W-0680
 - Notes: found in K01. W-0680 covers 1162, 1180, 2519, 2534–2584 and 3954–3956 for the three tab-count ids; this row adds `singervine-slate10` (2564, inside W-0680's passage) and the tier-rule quote at 1168.
 
+### W-0867 · open
+- At: `docs/guidebook/vol-06-archetypes-and-grounding.md` ## 1.6 archetype이 사는 층, the diagram lines 170–172 and its gloss line 175; lines 132 and 179 (quoting the old building-plan and archetype-plan texts: "bound in Layer 2/3", "numeric behavior parameters exist only in Layer 1")
+- Change: Name the dataset's layers (the archetype library, the scenario catalog, the timelines) in the diagram and its gloss; restate the two quotations to the building plan and the archetype plan as they now read.
+- Final word: 인지오's answer to W-0742 (2026-10-16, (a)); K02 (the building plan's §1 diagram and §2–§4 headings) and K04 (the archetype plan's "Normative for the archetype library", "(bound in the timelines)", "Linter rules for the library").
+- Sources: `logs/K02.md` ## Rows for other chunks (X6); `logs/K04.md` 인지오's answers (W-0742)
+- Cross-ref: W-0742; W-0673
+- Notes: found in K02.
+
 ## Also on this file, not for editing from this list
 
 - W-0682 · blocked, simulator TIMER (on the spec's list) — ## 2.2 여섯 개를 하나씩 → ### TIMER lines 251–259 (the quoted contract row 253, '늦어진 반복은 backlog로 쌓이고' 255, the backlog paragraph 259); ## 2.5 주기…
