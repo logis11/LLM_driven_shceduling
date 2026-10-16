@@ -62,6 +62,14 @@ Chunk K08, Related work, claims and vocabulary prose (wave 2). 8 open rows. The 
 - Resolved at merge: The sources disagreed on the count: the record-gaps survey (§2 item 10) says 'four now, including `c6-alias`', and the dataset guidebook vol-01 open note (§5.3) says only `c6-alias` carries the annotation. Read the timelines and the gate spec: three C6 files carry it, each on a segment (`c6-alias` whole, `c6-fold` from 30 s, `c6-spoof` from 20 s); `c6-dual` carries none. The record-gaps count includes `c6-dual`; the guidebook note predates 9.23 D1 and D2.
 - Notes: The attribute-side list matches the gate spec's `layer1_exclusions`.
 
+### W-0846 · open
+- At: `docs/terminology.md` ## Artifacts, **meas-ci** entry, lines 67–69 ('the source id for our CI measurement campaign (`meas-ci:<workflow>:<run>`). Supports structural/shape claims about software behavior only; see dataset/sources.yaml.')
+- Change: Restate the entry's role to `meas-ci`'s role as K01 restated it in `docs/references.md` (W-0053): a measured value is this software on this machine — a GitHub-hosted ubuntu-24.04 runner pinned to one CPU of the AMD EPYC 7763 — never desktop truth; repeats are added until the stability rule holds.
+- Final word: 9.5 D10 (one wording for measured absolutes across slices) as amended by 9.5 D26 (repeats added until the stability rule holds) and D27 (the locator names the campaign), applied in K01 to `meas-ci`'s role (W-0053), checked against `dataset/tools/meas/stability.py`.
+- Sources: W-0053; `logs/K01.md` ## Rows for other chunks
+- Cross-ref: W-0420
+- Notes: found in K01 (the log gives lines 66–68; the entry is at 67–69). W-0420 restates the same entry's locator and role; apply together.
+
 ## Also on this file, not for editing from this list
 
 - W-0427 · closed, not-found — The **Archetype** entry (`docs/terminology.md:53–56`) defines the term and names neither the retired three nor the nine measured entries; there is no text the…

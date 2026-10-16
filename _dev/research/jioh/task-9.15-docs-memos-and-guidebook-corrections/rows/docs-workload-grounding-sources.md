@@ -123,6 +123,14 @@ Chunk K06, Measurement and grounding docs (wave 2). 15 open rows. The file has 8
 - Cross-ref: W-0290; W-0294
 - Notes: The hand-off names :81; :74's "CNNIC study" is the same study by name. :40's "15M-log / ~3k-user" study is W-0294's. Verified: no `zhang-chb15` in docs/references.md or dataset/sources.yaml at HEAD.
 
+### W-0839 · open
+- At: `docs/workload/grounding-sources.md` line 77, the scope-discipline paragraph ('a deployed-system citation may support only *existence claims* ("this scenario/setting/category exists in shipped software") — never empirical, behavioral, or statistical claims'); the Role C table, line 40
+- Change: Restate line 77's rule to the citation-tier rule as `docs/references.md` now states it (9.12 D112's three clauses for deployed-system; the talk, conference abstract or news report type at the footnote tier, 9.12 D113). In Role C, the entries K01 left for its sources: `behacom-dib20` (new — BEHACOM, the Data in Brief article and its Mendeley deposit, one entry) and `czerwinski-chi04` (kept, its role corrected to C-czerwinski-1: a one-week self-report diary of user-defined tasks, 10 people analysed, means and SDs).
+- Final word: 9.12 D112 and D113, applied in K01 to the citation-tier and id-minting rules (W-0002, W-0001). K01's decisions 2 (`czerwinski-chi04` kept: `grounding-sources.md:40` cites it and W-0294's rewrite keeps it) and 4 (BEHACOM as one entry, W-0014).
+- Sources: W-0002; W-0014; `logs/K01.md` ## Decisions, 2 and 4
+- Cross-ref: W-0294; W-0296; W-0836; W-0848
+- Notes: found in K01. W-0294 rewrites the Role C table (Czerwinski et al. restated); W-0296 names BEHACOM in the negative-result paragraph and can cite `behacom-dib20`. The dataset guidebook vol-02 quotes line 77 (W-0848).
+
 ## Also on this file, not for editing from this list
 
 - W-0734 · waits on 인지오 — Is the collection and privacy-scrub tool still promised? What the records and code say: grill 2026-08-26 D8 (`_dev/archive/2026-08-26-workload-generation-grill.md:29`) promised it ships 'as an open falsification invitat… Blocks: `docs/workload/building-plan.md:209`, `docs/workload/grounding-sources.md:48` (W-0295), the dataset guidebook vol-02 §12.2 note and vol-06's mismatch row, the…

@@ -167,6 +167,14 @@ Chunk K13, Dataset guidebook, volumes 5-6 (wave 3). 20 open rows. The file has 1
 - Resolved at merge: The raw row asked to add 9.23's D10 and D17 pins to the table. Read the 9.16 TODO line: the table mirrors it, and the line carries no 9.23 pins, only D15's smoke; D17's pins supersede D10's and are what the 2026-10-11 review's item checks. So the table gains the smoke row and names D17's pins as current.
 - Notes: Checked at HEAD: `shasum -a 256` of the seven manifests and the scoring spec equals D17's values and the RQ0 gate spec's pins. The same change on vol-08 §12.2's list is W-0604.
 
+### W-0847 · open
+- At: `docs/guidebook/dataset/06-grounding-measurement-verification.md` line 144 (the id rule's scholarly bullet, examples `cpsmark-tbench23`, `lavd-ossna24`), line 159 (the tier rule: 'Supports **existence claims only**'), the §2.4 registry table lines 175–185, the §14.4 mismatch rows at lines 1703 (9.10 D34's seven ids, "9.13에서 적용되지 않음"), 1707 (the tier rule, "미반영") and 1718 (`chang-chi21`'s role)
+- Change: Copy the rules as `docs/references.md` now states them — five source types, the scholarly example no longer `lavd-ossna24` (re-typed to the talk type), the deployed-system tier as 9.12 D112 widened it; the registry table to the 19 ids `dataset/sources.yaml` keeps; the three mismatch rows resolved (the seven ids left the registry, W-0791; the tier rule widened, W-0002; `chang-chi21` removed, W-0071). The 2026-09-13 reads table (lines 472–474) is history: at most a note that the ids left.
+- Final word: 인지오's answers to W-0071 (a) and W-0072 (a), applied in K01; W-0789's answer as corrected in stage A (the registry keeps 19 ids; `sysmark25`, `rt-app`, `focal-arxiv26`, `mark-chi05` removed; `logs/A1-registry.md`); 9.12 D112 and D113, applied in K01 (W-0001, W-0002).
+- Sources: W-0001; W-0002; W-0071; W-0789; `logs/K01.md` ## Rows for other chunks
+- Cross-ref: W-0564; W-0565
+- Notes: found in K01. W-0564 closes the tier-rule note and row 1707; W-0565 restates §2.4 to the registry as it stands; apply together.
+
 ## Also on this file, not for editing from this list
 
 - W-0582 · closed, carried — Waits on Phase 10's RQ0 run, nothing owed in 9.15: the Phase 10 section line `_dev/TODO.md:190` ('… judge per the RQ0 gate spec') carries it, and the RQ0 gate…

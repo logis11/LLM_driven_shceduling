@@ -149,3 +149,11 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Sources: S10-059 (9.10 D25, `task-9.10-scenarios-timelines/changelog.md:548`)
 - Cross-ref: W-0136
 - Notes: Code: the C5 tier-4 names compile as `audio-stream-he` and `video-playback-` (`c5-t4`); 9.23's canonical lints include the comm limit (a name over 15 bytes fails).
+
+### W-0833 · open
+- At: `docs/workload/scenario-catalog.md` the scenario table, row S11 'Software development: edit + compile', line 22, its sources cell ('dkms: `dkms-man`, `dkms-debian`')
+- Change: Cite `dkms` — the entry for Ubuntu's dkms package, the package the campaign read — in place of `dkms-man` and `dkms-debian`, whose `docs/references.md` entries K01 removed.
+- Final word: 인지오's answer to W-0071 (2026-10-15, (a)): 9.10 D34's seven ids leave `dataset/sources.yaml`, then the references chunk removes `dubroy-chi10`, `chang-chi21`, `dkms-man`, `dkms-debian`, `mozilla-testpilot10` and `singervine-slate10` and restates their citing lines; applied in K01 (the entries removed; `dkms`'s role no longer names them).
+- Sources: W-0071; `logs/K01.md` ## Rows for other chunks
+- Cross-ref: W-0144
+- Notes: found in K01. W-0144 rewrites the whole S11 row to 9.10 D33's content and already drops both ids for `dkms`; the two entries no longer exist, so the line now names ids that resolve to nothing. Apply with W-0144.

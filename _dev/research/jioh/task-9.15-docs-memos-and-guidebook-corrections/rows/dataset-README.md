@@ -215,6 +215,14 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0194; W-0217
 - Notes: The release list is `docs/workload/measurement-overview.md` §9's (its own row brings it to the 9.10 campaigns). A per-value release field would be a data change touching pinned inputs (`dataset/archetypes.yaml` → re-bless of all seven manifests and the RQ0 gate spec's re-pin), so the table form is the docs-scope remedy. The licence files themselves (`LICENSE`, `dataset/LICENSE`) are their own rows. `docs/workload/building-plan.md` §7 ("workflow files released, anyone can re-run"; the privacy-scrub tool "ships in the artifact regardless") is stale on the same point (another row's target).
 
+### W-0844 · open
+- At: `dataset/README.md` ## Commands, the CI paragraph, line 141 (the build-every-run criterion; "the runner's 14 GB of storage", `gh-hosted-runners`); the data-availability statement (new, W-0218)
+- Change: Cite `gh-actions-limits` for the 6 h job limit, stated beside `gh-hosted-runners`' 14 GB in the build criterion (W-0755's answer), and `gh-artifact-retention` for the 90-day retention of a workflow's artifacts in the statement that releases are made by hand before a campaign's artifacts expire (W-0732's second part).
+- Final word: 인지오's answers (2026-10-16): W-0755 (b) — no threshold; the README states 9.23 D18's dataset run 38722675475 (2026-10-15: the generated step 7 min 23 s of 17 min 04 s; `build/` 6.8 GB) and the two ceilings, the runner's 14 GB (`gh-hosted-runners`) and the 6 h job limit (`gh-actions-limits`); W-0754 (a) — the new entry `gh-actions-limits`; W-0732, second part (d) — releases stay manual, made when a campaign is pooled and before the 90-day artifact retention (`gh-artifact-retention`). K01 minted both entries.
+- Sources: W-0754; W-0755; W-0732; `logs/K01.md` ## Rows for other chunks and ## Review round 1, minor finding 2
+- Cross-ref: W-0215; W-0218
+- Notes: found in K01. K01's reviewer: `docs/references.md`'s `gh-actions-limits` role already says the dataset README states the 6 h limit beside the 14 GB — true only once this lands; this chunk must land it.
+
 ## Also on this file, not for editing from this list
 
 - W-0219 · closed, already-applied — README line 8 names none of the retired `desktop-interactive`, `audio-playback`, `video-playback`; the 'fully measured' wording this row's notes flag is W-0193.

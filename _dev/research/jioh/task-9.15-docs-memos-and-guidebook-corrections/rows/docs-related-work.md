@@ -193,6 +193,22 @@ Chunk K08, Related work, claims and vocabulary prose (wave 2). 24 open rows. The
 - Cross-ref: W-0382
 - Notes: Ids at HEAD in `docs/references.md`: present — `scx`, `lavd-ossna24`, `corbet-lwn24`, `ananicy`, `ananicy-rules`, `gamemode-docs`, `schedext-docs`, `feral-gamemode`, `ghost-sosp21`, `decima-sigcomm19`, `firm-osdi20`, `park-neurips19`, `asa-arxiv25`, `schedcp-mlsys25`, `tuxbot-arxiv26`, `vulcan-arxiv25`, `kgent-ebpf24`, `jadhav-arxiv25`, `eevdf-tr95`, `ostep`, `corbato-sjcc62`; `tuneagent-arxiv25` (to be re-minted `tuneagent-kdd26`); absent — AKTS, LumOS, the LPC 2024 slides, the LPC 2025 abstract(s), LWN 1051430, SteamOS's LAVD support, the CachyOS default install, the Xbox Support article, Apple's two pages. The references chunk runs first and mints them; this map uses the ids it mints. The production-scheduler sentence also cites LPC 2025 contribution 2099 (D8, W-0369), which D25's list does not name beside contribution 2039; the references chunk's entry for the LPC 2025 abstracts decides whether one entry covers both. The heading 'Reference placeholders' is not restated by any decision.
 
+### W-0841 · open
+- At: `docs/related-work.md` ## Reference placeholders, the key map, line 70 ('| tuneagent | TuneAgent | arXiv '25 | verify id |')
+- Change: Map `tuneagent` to `tuneagent-kdd26` — the KDD '26 paper, DOI 10.1145/3770855.3817987; 'verify id' goes.
+- Final word: 9.12 D24 (TuneAgent cited as the KDD '26 paper by DOI 10.1145/3770855.3817987, `tuneagent-kdd26`, its arXiv versions named), applied in K01: `tuneagent-arxiv25` re-minted `tuneagent-kdd26` (W-0063).
+- Sources: W-0063; `logs/K01.md` ## Rows for other chunks
+- Cross-ref: W-0390; W-0381; W-0842
+- Notes: found in K01. W-0390 rewrites the whole table and W-0381 restates line 32's sentence with the same id; the id now exists in `docs/references.md`.
+
+### W-0842 · open
+- At: `docs/related-work.md` line 8 (## Scheduling mechanisms), lines 18–20 (## Behavioral inference inside the scheduler, with the LAVD note), lines 32–36 (## LLM agents for kernel policy), line 40 (## Semantic recognition shipped today)
+- Change: Cite the entries K01 minted or renamed where the restated sentences use them: `schedext-lpc24`, `lu-lpc25`, `dai-lpc25`, `edge-lwn26` (talk, conference abstract or news report); `steamos-lavd`, `cachyos-settings`, `xbox-gamemode`, `apple-gamemode`, `apple-lssupportsgamemode` (deployed-system); `lumos-mlsys25`, `akts-arxiv26`, `tuneagent-kdd26` (scholarly); the key map (W-0390, W-0841) gains their keys.
+- Final word: the 9.12 restatements of these lines, each in its row — D8 (sched_ext's production schedulers per operator: the LPC 2024 slides, LPC 2025 contributions 2039 and 2099, LWN 1051430), D9 (SteamOS ships LAVD), D3 (CachyOS installs ananicy-cpp by default), D2 as amended by D94 (Apple's Game Mode pages), D45 as amended by D74 (Microsoft's Xbox Support article), D12 (the recognition-measurement priority statement), D111 (LumOS beside TuxBot), D24 (TuneAgent); K01 minted the entries (W-0021, W-0023, W-0033, W-0034, W-0039, W-0058, W-0061, W-0063).
+- Sources: W-0021; W-0023; W-0033; W-0034; W-0039; W-0058; W-0061; `logs/K01.md` ## Rows for other chunks
+- Cross-ref: W-0368; W-0369; W-0375; W-0383; W-0384; W-0385; W-0386; W-0387; W-0390; W-0841
+- Notes: found in K01. Which id goes in which sentence follows each line's row; spell the ids as `docs/references.md` now does.
+
 ## Also on this file, not for editing from this list
 
 - W-0391 · closed, not-found — `grep -rn 'H.265\|H.256\|HEVC\|x265'` over `docs/`, `dataset/README.md` and `dataset/sources.yaml` finds only `docs/references.md`'s `cpsmarkplus` entry, which…

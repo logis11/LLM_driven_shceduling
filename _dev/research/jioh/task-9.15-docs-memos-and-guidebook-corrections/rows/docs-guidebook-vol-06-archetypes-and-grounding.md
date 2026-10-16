@@ -75,6 +75,14 @@ Chunk K16, Research guidebook, volumes 4-6 (wave 4). 9 open rows. The file has 4
 - Cross-ref: W-0673
 - Notes: Other uses of meas-ci:cli:3 in the volume (:1277, :1279, :1341, :1349, :2727, :2808, :2816, :3016–3022, :3135, :3241, :3257) are the one-run form and stay; :2727's account of reading GITHUB_RUN_NUMBER 3 is a dated verification and stays. At HEAD the timelines cite campaign locators (e.g. meas-ci:desktop:2026-10-04 in c1-browsing.timeline.yaml).
 
+### W-0849 · open
+- At: `docs/guidebook/vol-06-archetypes-and-grounding.md` lines 1162 (`dubroy-chi10`, `chang-chi21` row), 1168 (the quoted old tier rule, 'Supports **existence claims only**'), 1180 (`mozilla-testpilot10` row), 2519 (the quoted archetype-plan sentence naming the three ids), 2564 (the paragraph on `singervine-slate10`), 3954–3956 (the three ids among the sources read)
+- Change: Restate the lines naming the removed entries — `dubroy-chi10`, `chang-chi21`, `mozilla-testpilot10` and `singervine-slate10` — and the quoted tier rule at 1168 to the rule as 9.12 D112 widened it.
+- Final word: 인지오's answer to W-0071 (2026-10-15, (a)): the five entries, `singervine-slate10` with them, leave `docs/references.md`, applied in K01; 9.12 D112 (the deployed-system tier widened), applied in K01 (W-0002).
+- Sources: W-0071; W-0002; `logs/K01.md` ## Rows for other chunks
+- Cross-ref: W-0680
+- Notes: found in K01. W-0680 covers 1162, 1180, 2519, 2534–2584 and 3954–3956 for the three tab-count ids; this row adds `singervine-slate10` (2564, inside W-0680's passage) and the tier-rule quote at 1168.
+
 ## Also on this file, not for editing from this list
 
 - W-0682 · blocked, simulator TIMER (on the spec's list) — ## 2.2 여섯 개를 하나씩 → ### TIMER lines 251–259 (the quoted contract row 253, '늦어진 반복은 backlog로 쌓이고' 255, the backlog paragraph 259); ## 2.5 주기…

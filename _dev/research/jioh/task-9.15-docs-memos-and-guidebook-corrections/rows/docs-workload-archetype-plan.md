@@ -106,3 +106,11 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 13 open rows. T
 - Cross-ref: W-0231
 - Resolved at merge: The extraction agents placed it in `dataset/README.md`, in this plan, or in measurement-overview §11. 9.5's decision says "once at the library level": the library is `dataset/archetypes.yaml`, whose header is a pinned input of all seven manifests (an edit forces their re-bless and the RQ0 gate spec's re-pin); among the docs, this plan is the one whose subject is the library ("Archetype Library — Writing Plan", normative for it), while the README describes the dataset as a whole and measurement-overview §11 the runner's limits on each measured value. So the statement goes here, once.
 - Notes: 28 entries carry `category_source: meas` (`game-download-idle` reusing `game-download`'s tables); the raw "27" is corrected. Not stated anywhere at HEAD (grep of `dataset/archetypes.yaml`, `dataset/README.md`, `docs/`). The dataset guidebook vol-02 §12.1 open note asks for it (`docs/guidebook/dataset/02-the-archetype-library.md:1468`). `dataset/README.md` and measurement-overview §11 do not restate it ("stated once").
+
+### W-0837 · open
+- At: `docs/workload/archetype-plan.md` §3 Multiplicity, Static multiplicity bullet, line 40 ('renderer counts from the tab-count literature (`dubroy-chi10`, `mozilla-testpilot10`, `chang-chi21` — defined against the Chromium process model)')
+- Change: Drop the three removed ids; the renderer count's sources are `glam` and `meas-ci:desktop:2026-10-04`.
+- Final word: 인지오's answer to W-0071 (2026-10-15, (a)), applied in K01: the three entries left `docs/references.md`. 9.10 D15: the renderer count follows Firefox's Linux tab telemetry (`glam`) and an observed Chrome.
+- Sources: W-0071; `logs/K01.md` ## Rows for other chunks
+- Cross-ref: W-0230
+- Notes: found in K01. W-0230 carries the full restatement of the bullet; the removal it waited on is done.

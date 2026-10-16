@@ -113,3 +113,11 @@ Chunk K06, Measurement and grounding docs (wave 2). 14 open rows. The file has 1
 - Sources: S12-274 (9.12 D102, `task-9.12-related-work-prose/changelog.md:1546`); S10-148 (9.10 D169, `task-9.10-scenarios-timelines/changelog.md:2990`); SX-0052 (TODO 9.15 line (from 9.10 D169), `_dev/TODO.md:179`); SX-0175 (TODO 9.15 line (from 9.12 audit D102), `_dev/TODO.md:179`)
 - Cross-ref: W-0299
 - Notes: Record — append-only: an appended dated note naming each corrected line; the rev.3 text stays. `mark-gallup06` is still in docs/references.md (:305) at HEAD; whether it is corrected or removed is the references chunk's — the note states the verdict either way. Lines 11 and 96 also carry the CNNIC shape (W-0299).
+
+### W-0840 · open
+- At: `docs/workload/source-vetting.md` ROLE C — C1, "Gloria Mark line [rev.3 — attributions corrected against full texts]", line 76 (a record: corrections are appended dated notes)
+- Change: In the appended dated note, add that `mark-chi08`, `mark-chi14` and `mark-gallup06` left `docs/references.md` in task 9.15, and that `czerwinski-chi04` stays, corrected to C-czerwinski-1.
+- Final word: K01's decisions 2–3 under 9.10 D169 (the references-only entries go to 9.10 D34's split: an entry stays, corrected, where current prose cites it, otherwise it is removed): `mark-chi08` and `mark-chi14` are cited by no current doc, removed (W-0008); `mark-gallup06` removed (W-0041); `czerwinski-chi04` is cited by `grounding-sources.md:40`, kept with its role corrected (W-0009).
+- Sources: W-0008; W-0041; W-0311; `logs/K01.md` ## Decisions, 2 and 3
+- Cross-ref: W-0311
+- Notes: found in K01. W-0311 writes the same appended note (the verdicts on González & Mark, Czerwinski et al., the 23 min 15 s); this is one more sentence in it, not a second note.

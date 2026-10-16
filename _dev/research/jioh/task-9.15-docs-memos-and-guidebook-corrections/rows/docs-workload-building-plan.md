@@ -359,6 +359,30 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0105; W-0112; W-0126
 - Notes: SX-1116 (the dataset guidebook vol-08 §12.8 mismatch table row 7) also names C2 P2 (W-0105), C7 (W-0112) and §7:203 (W-0126), whose changes those rows carry; its line-225 item is placed here. Item 5's question itself (canonical-set timing under emergent departs) is unchanged by this row.
 
+### W-0834 · open
+- At: `docs/workload/building-plan.md` §3 browser-default paragraph line 82 ('Renderer multiplicity is defined against the Chromium process model (`dubroy-chi10`, `mozilla-testpilot10`, `chang-chi21` + `meas-ci` Xvfb counts)'); §7 'User-behavioral parameters' paragraph line 209 ('tab counts (`dubroy-chi10`, `mozilla-testpilot10`, `chang-chi21`)')
+- Change: Drop the three removed ids at both lines: the tab count and the one window are `glam`'s — Firefox's Linux telemetry (9.10 D15, D16).
+- Final word: 인지오's answer to W-0071 (2026-10-15, (a)), applied in K01: `dubroy-chi10`, `chang-chi21` and `mozilla-testpilot10` left `docs/references.md`. 9.10 D15 (the renderer count follows Firefox's Linux tab telemetry and an observed Chrome) and D16 (one browser window, at the same statistic: the median per-client peak of concurrent windows in Firefox's Linux telemetry, 1; `renderer-visible` leaves the library).
+- Sources: W-0071; `logs/K01.md` ## Rows for other chunks; `_dev/research/jioh/task-9.10-scenarios-timelines/changelog.md:287` (D15), `:307` (D16)
+- Cross-ref: W-0098; W-0127
+- Notes: found in K01. W-0098 carries the full restatement of both lines (one window of five tabs, four `renderer-hidden` tasks, one renderer per tab observed in Chrome, `meas-ci:desktop:2026-10-04`); the removal it waited on is done. :209's other clauses are W-0127 and W-0734.
+
+### W-0835 · open
+- At: `docs/workload/building-plan.md` §4 segment-durations bullet line 156 ('(The "23 minutes to resume" figure exists only in a 2006 interview, `mark-gallup06` — cite as interview or omit.)')
+- Change: Drop the parenthetical (W-0122's first option): `mark-gallup06` has left `docs/references.md`. If a resumption figure is wanted, cite CHI 2005's 25 min 26 s from `mark-chi05`, whose role now carries it.
+- Final word: K01's decision 3 (`logs/K01.md`): `mark-gallup06` removed (W-0041) — no dataset value or decision uses its 23 min 15 s; 9.12 D102 hands the entry out with the lines citing it; the 2026-09-13 verification's C-gallup-1 points to CHI 2005's comparable 25 min 26 s (that verification's read R10, p. 326), now in `mark-chi05`'s role (W-0007).
+- Sources: W-0041; W-0122; `logs/K01.md` ## Decisions, 3
+- Cross-ref: W-0122; W-0121
+- Notes: found in K01. W-0122 left the choice to the references chunk; the entry is removed, so the parenthetical goes. W-0121 rewrites the same paragraph (9.10 D35).
+
+### W-0836 · open
+- At: `docs/workload/building-plan.md` ## 8 'Standing rules inherited by all of the above', line 215 ('**Citation tiers** are carried per-entry in docs/references.md: scholarly (numbered bib) vs deployed-system (footnote; existence claims only).')
+- Change: Restate the tier line to `docs/references.md`'s citation-tier rule as K01 left it: deployed-system (footnote) supports existence claims, the system's own documented design or behaviour stated as that source's at its pinned version or accessed date, and a figure the source publishes stated as its report with the date read, the window and how it is computed — never a behavioural or statistical claim stated as ours or a population's; and name the fifth type, talk, conference abstract or news report (footnote tier; its claims the speaker's or reporter's, a number only as its report with its date).
+- Final word: 9.12 D112 (2026-10-09, the deployed-system tier widened) and 9.12 D113 (2026-10-09, the talk, conference-abstract or news-report type), applied in K01 to `docs/references.md`'s id-minting and citation-tier rules (W-0001, W-0002).
+- Sources: W-0002; W-0001; `logs/K01.md` ## Rows for other chunks
+- Cross-ref: W-0839; W-0848
+- Notes: found in K01. Take the wording from `docs/references.md`'s citation-tier rule as committed after wave 0. The same old rule stands in `docs/workload/grounding-sources.md:77` (W-0839) and in `dataset/sources.yaml:14–16`'s header comment (a data file; K01's mismatch M1, outside the sweep).
+
 ## Also on this file, not for editing from this list
 
 - W-0129 · closed, already-applied — Line 101 ('Role (restated 2026-10-11): existence cases — transitions of these shapes, in these orders, occur. The rate claims on transition recognition … are t…

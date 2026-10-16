@@ -411,6 +411,14 @@ Chunk K07, Research proposal (wave 2). 53 open rows. The file has 953 lines at `
 - Cross-ref: W-0345
 - Notes: Line 414's EDF row is read with it (W-0345). `liu-jacm73`'s role clause in docs/references.md ('above utilisation 1 no feasible schedule exists (p. 56); how EDF behaves there it does not say') is another chunk's.
 
+### W-0843 · open
+- At: `docs/research-proposal.md`, the lines whose 9.12 restatements cite the new entries (the rows cross-referenced below give each line)
+- Change: Cite the entries K01 minted by their ids: `man-sched`, `man-sched-setattr`, `linux-sched-eevdf`, `linux-sched-deadline`, `ubuntu-hwe-config`, `apple-qos`, `apple-energy-guide`, `xnu-sched`, `win-sched-priorities`, `win-priority-boosts`, `debian-sid-indexes`, `debian-code-search`, `plocate-ubuntu`, `plocate-debian`, `findutils-debian`, `locate-ubuntu`, `obs-studio`, `obs-kb-encoding`, `cargo-book`, `pipewire-conf`, `jackd-man`, `ardour-manual`, `steamdeck-store`, `llamacpp`, `vllm-docs`, `ollama-docs`, `localscore`, `artificialanalysis`, `meas-local` (locator `meas-local:m1pro-llm:2026-10-08`), `li-expcs07`, `becker-arxiv18`, `tam-emnlp24`, `sprague-iclr25`, `atil-eval4nlp25`, `cooper-arxiv26`, `wowah-mmsys11`, `chambers-imc05`.
+- Final word: the 9.12 restatements of the proposal, each in its row — among them D26 (Linux's declared scheduling classes), D27 (sched_ext on the depicted desktop's kernel), D13 as amended by D49, D64 and D78 (the cooperation limit), D34 as amended by D65 and D92 (OBS, `cargo build`, `updatedb`), D35 as amended by D66 and D90 (media deadlines), D48 as amended by D77 (constrained decoding), D51 as amended by D59, D60, D107 and D110 (the recognizer's latency), D57 (others' switch costs), D40 as amended by D71 (the reasoning field's quality), D39 as amended by D70 (polling and session length); K01 minted the entries (W-0035, W-0036, W-0044–W-0050, W-0055, W-0068–W-0070).
+- Sources: W-0035; W-0036; W-0044; W-0045; W-0046; W-0047; W-0048; W-0049; W-0050; W-0055; W-0068; W-0069; W-0070; `logs/K01.md` ## Rows for other chunks
+- Cross-ref: W-0315; W-0317; W-0322; W-0323; W-0326; W-0329; W-0334; W-0336; W-0338; W-0339; W-0341; W-0342; W-0343; W-0348
+- Notes: found in K01. The cross-refs are the proposal rows whose text names one of these sources (a grep of this file; the list may be incomplete); which id goes on which line follows each row.
+
 ## Also on this file, not for editing from this list
 
 - W-0365 · closed, superseded — 9.12 D114 removed line 756 (인경민's team area) from D30's hand-off; the team-area wording is left to 인지오 and 인경민.

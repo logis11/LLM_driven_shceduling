@@ -124,6 +124,14 @@ Chunk K06, Measurement and grounding docs (wave 2). 15 open rows. The file has 1
 - Cross-ref: W-0265; W-0268; W-0275
 - Notes: Code: dataset/archetypes.yaml:1448–1457 (`game-download-idle`: "measured download runs 75 % of its CPU at nice 10 … (9.11 D20)"); harness/experiments/rq0-gate.yaml:214–217 (`bounding_pair` a `c2-p2a`, b `c2-p2a-idle`); dataset/README.md:106. The TODO line also names docs/background-guide.md for the same limitation (another row). The doc's §2 lists neither `package-upgrade` nor `game-download-idle` (W-0265).
 
+### W-0838 · open
+- At: `docs/workload/measurement-overview.md` §10 Literature, "The drive and the states" table, line 162 (`mozilla-testpilot10` | one visible renderer per window)
+- Change: `mozilla-testpilot10` has left `docs/references.md`; the row cannot cite it. K01 proposes `glam` in its place (one window: the median per-client peak of concurrent windows in Firefox's Linux telemetry is 1, 9.10 D16); W-0274, resolved at merge, removes the row instead (it grounds `renderer-visible`'s state, and that entry left the library under D16). Apply one.
+- Final word: 인지오's answer to W-0071 (2026-10-15, (a)), applied in K01. 9.10 D16 (one browser window, at the median per-client peak of concurrent windows in Firefox's Linux telemetry, 1; `renderer-visible` leaves the library).
+- Sources: W-0071; `logs/K01.md` ## Rows for other chunks; `_dev/research/jioh/task-9.10-scenarios-timelines/changelog.md:307` (D16)
+- Cross-ref: W-0274
+- Notes: found in K01. The two rows differ on the remedy: W-0274 removes the row, K01 restates it to `glam`.
+
 ## Also on this file, not for editing from this list
 
 - W-0279 · waits on 인지오 — The threat sentence's per-entry list (W-0273) carries "the two renderers 1.06–1.23×" and `video-editor` 1.3–1.4×, read on 2026-09-27. Since then `renderer-visible` left the library (9.10 D16), `renderer-hidden` was re-f… Blocks: the renderer and `video-editor` clauses of the threat sentence at docs/workload/measurement-overview.md:98 (W-0273); nothing else in the row

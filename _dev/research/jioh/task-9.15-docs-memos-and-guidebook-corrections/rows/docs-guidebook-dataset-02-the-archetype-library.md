@@ -48,6 +48,14 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 6 open rows. The file has 16
 - Sources: SX-0916 (guidebook dataset vol-02 open note (§12.1), `dataset/02-the-archetype-library.md:1468`)
 - Notes: Apply after the row that states it — the `dataset/README.md` library-scale row (W-0238).
 
+### W-0848 · open
+- At: `docs/guidebook/dataset/02-the-archetype-library.md` line 413 (quotes `docs/workload/grounding-sources.md`'s citation-tier rule: "a deployed-system citation may support only *existence claims* … never empirical, behavioral, or statistical claims.")
+- Change: Quote the rule as it now stands — the deployed-system tier as 9.12 D112 widened it, and the talk, conference abstract or news report type — from `grounding-sources.md:77` once W-0839 lands, or from `docs/references.md`'s citation-tier rule.
+- Final word: 9.12 D112 and D113, applied in K01 to `docs/references.md`'s rules (W-0002, W-0001).
+- Sources: W-0002; `logs/K01.md` ## Rows for other chunks
+- Cross-ref: W-0839; W-0836
+- Notes: found in K01. The grounding docs (wave 2) restate line 77 before this volume's chunk (wave 3).
+
 ## Also on this file, not for editing from this list
 
 - W-0517 · blocked, simulator TIMER (outside the spec's list) — §1.5 TIMER와 WAIT(timer), open note line 135
