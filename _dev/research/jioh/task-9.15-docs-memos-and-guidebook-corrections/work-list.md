@@ -12,7 +12,7 @@ Built from the three extraction agents' raw rows (9.12's changelog; 9.10's chang
   - not applicable: 1 — W-0216 (K04);
   - withdrawn: 1 — W-0854 (K03's fix round 1);
   - final memo: 19;
-  - follow-up, outside the chunks: 23 — W-0832; the data and code rows W-0851–W-0853, W-0855, W-0856 and W-0875–W-0883, for one batched rebuild after wave 4; the doc rows W-0860–W-0862, W-0873 and W-0884–W-0887, on files whose chunks have run, for a follow-up chunk;
+  - follow-up, outside the chunks: 24 — W-0832; the data and code rows W-0851–W-0853, W-0855, W-0856, W-0875–W-0883 and W-0889, for one batched rebuild after wave 4; the doc rows W-0860–W-0862, W-0873 and W-0884–W-0887, on files whose chunks have run, for a follow-up chunk;
   - for 인지오: 37 (answers applied in K01: W-0071, W-0072, W-0754, and K01's parts of W-0732, W-0736, W-0750; in K03 and K05, their parts of W-0729–W-0732, W-0737, W-0738, W-0742–W-0748 and W-0750; in K02 and K04, their parts of W-0071, W-0729–W-0734, W-0737, W-0738, W-0742, W-0744–W-0748, W-0750–W-0752 and W-0754–W-0756);
   - outside the sweep (code and data files): 16 (W-0784's answer applied in K04);
   - blocked, simulator TIMER, on the spec's list: 6;
