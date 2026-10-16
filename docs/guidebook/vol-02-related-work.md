@@ -46,9 +46,7 @@
 
 이 권의 인용문은 원칙적으로 1차 자료 원문에서 읽은 것입니다. 판본이 여럿인 문헌은 어느 판본의 문장인지를 문장마다 구분했습니다.
 
-**확인 필요** 표시가 남은 자리는 한 군데뿐입니다. 게임 모드가 게임 중에 업데이트나 알림을 미루는지에 대한 것이고, 제조사 문서에서 그 서술을 찾지 못했습니다. 그 자리에 무엇을 확인해야 하는지와 왜 확인하지 못했는지가 함께 적혀 있습니다.
-
-그 밖에 확정하지 못한 것이 하나 더 있습니다. 한 논문의 게재 학회가 저자들의 저장소에만 적혀 있고 논문집 쪽 서지 정보를 확인하지 못했습니다. 그 자리에도 무엇이 확정되지 않았는지를 적어뒀습니다.
+**확인 필요** 표시가 남은 자리는 없습니다.
 
 그리고 논문이 아닌 자료를 인용한 곳이 있습니다. 저자들의 공개 저장소, 제품 문서, 발표 자료입니다. 그런 곳은 **논문이 아니라는 것을 그 자리에서 밝히고** 씁니다. 저장소의 설명 문구를 논문의 초록인 것처럼 인용하면 안 되기 때문입니다.
 
@@ -220,19 +218,20 @@ workload가 무엇인지, 그리고 그게 현실을 대표하는지입니다.
 
 세 번째는 우리가 직접 잰 것입니다. 어떻게 쟀는지를 재현 가능하게 적어야 합니다.
 
-### 세 등급
+### 네 종류
 
-이 연구는 인용을 세 등급으로 나눠서 관리합니다.
+이 연구는 인용을 네 종류로 나눠서 관리합니다.
 
-| 등급 | 무엇인가 | 어디에 실리나 | 무엇을 뒷받침할 수 있나 |
+| 종류 | 무엇인가 | 어디에 실리나 | 무엇을 뒷받침할 수 있나 |
 |---|---|---|---|
-| scholarly | 심사를 거친 학술 문헌 | 번호 붙은 참고문헌 목록 | 실험적, 행동적, 통계적 주장 |
-| deployed-system | 배포된 소프트웨어의 문서나 저장소 | 각주에 URL과 확인 날짜와 판본 | **존재 주장만** |
-| measurement | 우리가 직접 측정한 것 | 실행 식별자와 함께 | 우리 측정 범위 안의 값 |
+| scholarly | 심사를 거친 학술 문헌 | 번호 붙은 참고문헌 목록 | 그 문헌의 역할 안에서 실험적, 행동적, 통계적 주장 |
+| deployed-system | 배포된 소프트웨어의 문서나 저장소 | 각주에 URL과 확인 날짜와 판본 | 존재 주장, 그 시스템이 스스로 문서에 적은 설계와 동작(그 판본이나 확인 날짜의 것으로), 그 출처가 공개한 수치(그 출처의 보고로, 읽은 날짜와 범위와 계산 방법을 붙여) |
+| 발표 자료, 학회 초록, 기사 | 발표 슬라이드, 학회 발표 초록, 기사 | 각주에 URL과 확인 날짜 | 발표자나 기자의 주장으로만. 숫자는 그 보고로, 날짜를 붙여 |
+| measurement | 우리가 직접 측정한 것 | 측정 campaign의 식별자와 함께 | 우리 측정 범위 안의 값 |
 
-가운데 등급의 제약이 핵심입니다. **배포된 시스템은 그런 것이 존재한다는 것만 증명합니다.**
+가운데 두 종류의 제약이 핵심입니다. **배포된 시스템의 문서는 그런 것이 존재하고, 그 시스템이 스스로 어떻게 동작한다고 적었는지까지를 증명합니다.** 발표 자료는 발표자가 그날 그렇게 보고했다는 것까지를 증명합니다.
 
-게임 실행 파일 목록을 쓰는 기능이 있다는 것은 그 제품 문서로 보일 수 있습니다. 하지만 "그래서 사용자들이 이렇게 행동한다"거나 "그 방식이 얼마나 효과적이다"는 그 문서로 뒷받침할 수 없습니다. 그건 다른 종류의 주장이고 다른 종류의 근거가 필요합니다.
+process 이름으로 규칙을 찾는 daemon이 있고 이름을 어떻게 대조하는지는 그 문서와 코드로 보일 수 있습니다. 하지만 "그래서 사용자들이 이렇게 행동한다"거나 "그 방식이 얼마나 효과적이다"는 그 문서로 뒷받침할 수 없습니다. 행동이나 통계에 관한 주장을 논문 자신의 것이나 사용자 집단의 것으로 쓰려면 다른 종류의 근거가 필요합니다.
 
 이 구분을 지키지 않으면 논문이 조용히 무너집니다. 심사자는 이런 것을 잘 찾아냅니다.
 
@@ -259,7 +258,7 @@ workload가 무엇인지, 그리고 그게 현실을 대표하는지입니다.
 - design 절에서는 거절한 대안이 적혀 있는지를 봅니다. 없으면 검토하지 않았거나 숨기는 것입니다.
 - 어디에 실렸는지가 얼마나 걸러졌는지를 말해줍니다. 정식 학회는 여러 차례 심사를 거쳤고, workshop은 아이디어 단계이며, arXiv는 심사가 없습니다. arXiv를 인용할 때는 판본 번호를 적고 정식 게재 여부를 다시 확인해야 합니다.
 - evaluation에서 가장 중요한 질문은 무엇과 비교했는가입니다. 저자가 이길 수 있는 상대를 고른 것은 아닌지 의심해야 합니다. 이어서 어떤 workload인지, 평균인지 꼬리인지, 몇 번 돌렸는지, 어디까지가 측정인지를 봅니다.
-- 인용은 세 등급으로 나뉩니다. 심사를 거친 학술 문헌은 실험적이고 통계적인 주장을 뒷받침할 수 있고, 배포된 시스템의 문서는 존재 주장만 뒷받침할 수 있으며, 직접 측정한 값은 재현 가능하게 적어야 합니다.
+- 인용은 네 종류로 나뉩니다. 심사를 거친 학술 문헌은 실험적이고 통계적인 주장을 뒷받침할 수 있고, 배포된 시스템의 문서는 존재와 그 시스템이 스스로 적은 설계와 동작, 그리고 그 출처가 공개한 수치를 그 출처의 것으로 뒷받침할 수 있으며, 발표 자료와 학회 초록과 기사는 발표자나 기자의 주장으로만 쓸 수 있고, 직접 측정한 값은 재현 가능하게 적어야 합니다.
 - 1차 자료를 직접 확인한 것만 인용합니다. 널리 인용되는 수치가 어느 심사 논문에도 없는 경우가 실제로 있습니다.
 - 찾아봤는데 없더라는 것도 확인의 결과입니다. "아직 확인하지 못했다"와 "확인했고 거기에 없다"는 다른 진술이고, 뒤엣것은 심사자가 직접 검증할 수 있는 주장입니다.
 
@@ -417,7 +416,7 @@ quantum 자체의 크기에 대해서도 한 줄 적습니다.
 
 단계 분류가 **각 사용자의 선언(또는 희망)이 아니라 성능과 프로그램 크기에 따라** 자동으로 이루어진다는 것입니다.
 
-> **이 연구에서는.** 두 번째 문장이 이 연구가 서 있는 자리를 1962년 논문이 먼저 짚은 장면입니다. 앞 권에서 프로그램의 자기 선언을 믿을 수 없다는 것을 봤는데, 이 논문은 그것을 설계 원칙으로 명시하고 declarations 옆에 hopes라는 단어를 나란히 적었습니다. 선언은 희망이라는 것입니다.
+> **이 연구에서는.** 두 번째 문장이 이 연구가 서 있는 자리를 1962년 논문이 먼저 짚은 장면입니다. 앞 권에서 프로그램의 자기 선언이 일부 프로그램에만 있고 프로그램마다 고정돼 있다는 것을 봤는데, 이 논문은 선언에 기대지 않는 것을 설계 원칙으로 명시하고 declarations 옆에 hopes라는 단어를 나란히 적었습니다. 선언은 희망이라는 것입니다.
 >
 > 그리고 이 연구는 그 원칙을 그대로 유지합니다. 언어 모델은 프로그램의 자기 선언을 읽지 않습니다. 프로그램이 무엇인지를 밖에서 판단합니다. 행동 관찰에서 판단을 가져오던 자리를 세상에 대한 지식으로 바꾸는 것이지, 프로그램에게 물어보는 것이 아닙니다.
 
@@ -555,7 +554,7 @@ multimedia와 대화형 응용은 사건 기반 모형에 맞지만 **batch 응�
 
 ### 네 개의 개념
 
-이 계열을 이해하려면 네 단어를 알아야 합니다. 논문의 서론에 네 개가 한 문단에 다 나옵니다.
+이 계열을 이해하려면 네 단어를 알아야 합니다. 셋은 논문의 서론(3쪽)에 한 문단으로 나옵니다. virtual time, virtual eligible time, virtual deadline입니다. 넷째인 lag는 서론에는 나오지 않고 2절 "Assumptions"(4쪽)에서 정의되며, virtual time의 식은 3절 "The EEVDF Algorithm"(6쪽)에 있습니다.
 
 **virtual time.** 실제 시계와 별개로 도는 시계입니다. 논문의 정의는 적분으로 되어 있습니다.
 
@@ -579,7 +578,7 @@ virtual time 한 단위 안에 활성 client 전부가 들어가도록 시계가
 
 **virtual eligible time과 virtual deadline.** 논문은 이 둘을 한 문장에 함께 정의합니다.
 
-> "Based on the client share and on the service time that the client has already received, the scheduler associates to each client's request a virtual eligible time and a virtual dead line which are the corresponding starting and finishing times of servicing the request in the fluid-flow model."
+> "Based on the client share and on the service time that the client has already received, the scheduler associates to each client's request a virtual eligible time and a virtual deadline which are the corresponding starting and finishing times of servicing the request in the fluid-flow model."
 
 각 요청에 두 시각이 붙는데, 그 둘은 **이상적인 흐름 모형에서 그 요청을 처리하기 시작하는 시각과 끝내는 시각**이라는 것입니다. 그리고 그 시각은 client의 몫과 **이미 받은 처리 시간**으로 정해집니다.
 
@@ -655,9 +654,9 @@ quantum 크기 q인 시스템에서는 **어떤 비율 배분 알고리즘이든
 
 **그러니까 위의 한계는 아무 때나 성립하는 것이 아닙니다.** lag이 0이 아닌 client가 경쟁에서 빠지거나 합류하면 조건이 깨집니다. 논문은 그 경우를 뒤에서 따로 다루는데, 인용할 때는 조건을 함께 적어야 합니다.
 
-> **이 연구에서는.** 이 계열의 개념이 이 연구에 직접 쓰이지는 않습니다. 이 연구의 시뮬레이터가 돌리는 알고리즘 넷 중 fair-share 계열이 하나 있지만, 그것은 누적 사용량 기반의 단순한 형태이고 eligible time이나 lag 한계를 구현하지 않습니다.
+> **이 연구에서는.** 이 계열의 개념이 이 연구에 직접 쓰이지는 않습니다. 이 연구의 시뮬레이터가 돌리는 알고리즘 넷(MLFQ, EDF, LOTTERY, FIFO) 중 비율 배분 계열은 LOTTERY 하나이고, 두 class 사이를 추첨으로 나누는 단순한 형태라서 virtual time, eligible time, lag 한계를 구현하지 않습니다.
 >
-> 그럼에도 이 문헌이 필요한 이유가 둘입니다. 첫째, 지금 Linux의 기본 scheduler가 이 알고리즘이므로 비교 대상을 서술할 때 원 문헌이 필요합니다. 둘째, 앞 장에서 본 ASA의 평가가 기본 scheduler로 삼은 것이 정확히 이것입니다. "기본값을 이겼다"는 주장을 읽으려면 그 기본값이 무엇을 보장하는지를 알아야 합니다.
+> 그럼에도 이 문헌이 필요한 이유가 둘입니다. 첫째, 지금 Linux의 기본 scheduler가 이 알고리즘이므로 비교 대상을 서술할 때 원 문헌이 필요합니다. kernel 문서에 따르면 Linux는 task마다 virtual run time과 lag를 세고, lag가 0 이상인 task 가운데 virtual deadline이 가장 이른 것을 다음에 실행합니다. 잠든 task의 lag는 시간이 지나며 줄어들고, 깨어난 task가 어디에 놓이는지는 이 잠든 task 처리 방식이 정합니다. 그 전의 CFS도 각 task의 virtual run time을 공정한 몫에 대어 셌습니다. 앞 권의 MLFQ가 CPU를 어떻게 썼는지로 task를 단계에 나누는 것과 달리, 이 계열은 공정한 몫에 대어 셉니다. 둘째, 뒤에서 볼 ASA의 평가가 기본 scheduler로 삼은 것이 정확히 이것입니다. "기본값을 이겼다"는 주장을 읽으려면 그 기본값이 무엇을 보장하는지를 알아야 합니다.
 
 > **논문으로.** 이 계열을 related work에서 다룰 때 지켜야 할 선이 여기 있습니다. 이 논문이 보장하는 것은 **비율 배분의 정확도**이지 대화형 응답성이 아닙니다. lag 한계는 "누구도 자기 몫에서 quantum 하나 이상 벗어나지 않는다"는 말이고, "사용자가 빠르다고 느낀다"는 말이 아닙니다. 둘을 섞으면 인용 범위를 넘습니다.
 
@@ -671,7 +670,7 @@ quantum 크기 q인 시스템에서는 **어떤 비율 배분 알고리즘이든
 
 - Miller, R. B. (1968). Response time in man-computer conversational transactions. *Proc. AFIPS Fall Joint Computer Conference (FJCC '68)*, 267–277.
 
-이 논문은 사람과 컴퓨터가 주고받는 여러 종류의 상호작용을 열여덟 가지 주제로 나누고, 각각에 대해 허용 가능한 응답 시간을 제시합니다.
+이 논문은 사람과 컴퓨터가 주고받는 여러 종류의 상호작용을 열일곱 가지 주제로 나누고(269쪽, "The seventeen types of response category and response time"), 각각에 대해 허용 가능한 응답 시간을 제시합니다.
 
 그중 첫 번째 주제가 "Response to control activation", 즉 조작에 대한 반응입니다.
 
@@ -689,15 +688,17 @@ quantum 크기 q인 시스템에서는 **어떤 비율 배분 알고리즘이든
 
 숙련된 타이피스트에게는 이것도 너무 느릴 수 있다는 것입니다.
 
-**이 단서가 중요합니다.** 0.1초는 편안한 목표가 아니라 느슨한 상한입니다.
+**이 단서가 중요합니다.** 0.1초는 0.1~0.2초라는 범위의 엄격한 쪽 끝이고, 숙련자에게는 그것도 느릴 수 있다는 것입니다.
 
-### 널리 인용되는 2차 출처
+그리고 이 값들은 측정한 결과가 아니라 지침입니다. Miller는 자기가 제시한 지연들을 "the best calculated guesses by the author"라고 부르고, "indicative rather than conclusive"로 받아들이라고 적습니다. 실험 참가자를 시험한 것도 아니고, 0.1초에 대한 출처를 따로 대지도 않습니다.
 
-- Nielsen, J. (1993). *Usability Engineering*. Academic Press. 5장 "Usability Heuristics"의 응답 시간 절.
+### Miller를 다시 적은 출처
+
+- Nielsen, J. (1993). *Usability Engineering*. Academic Press. 5장의 응답 시간 절. 아래 문장은 저자가 웹에 올린 발췌문("Excerpt from Chapter 5 in my book Usability Engineering, from 1993")에서 읽었습니다. 장 제목은 그 발췌문에 적혀 있지 않아 확인하지 못했습니다.
 
 > "0.1 second is about the limit for having the user feel that the system is reacting instantaneously"
 
-인터페이스 설계 쪽에서 이 값이 널리 알려진 것은 이 책 덕분입니다. 그리고 이 책은 자기 출처로 Miller의 1968년 논문을 명시하고 있습니다.
+인터페이스 설계 쪽에서 이 값이 널리 알려진 것은 이 책 덕분입니다. 그런데 이 책은 이 문장 바로 앞에 Miller(1968)와 Card 등(1991)을 출처로 적어 둡니다. **Nielsen은 Miller를 다시 적은 것이지, 0.1초의 두 번째 근거가 아닙니다.** 같은 값을 두 출처가 말한다고 근거가 두 배가 되지는 않습니다.
 
 ### 범위를 알려주는 세 번째 출처
 
@@ -713,11 +714,11 @@ quantum 크기 q인 시스템에서는 **어떤 비율 배분 알고리즘이든
 
 라는 결과가 나왔다고 적혀 있습니다.
 
-숙련자와 비숙련자 모두 느려지고 실수가 늘었으며, 이 짧은 지연조차 타이핑이라는 빠른 과정에서는 방해가 됐다는 것입니다.
+0.1~0.5초 범위 안에서 지연이 길수록 숙련자와 비숙련자 모두 느려지고 실수가 늘었으며, 이 짧은 지연조차 타이핑이라는 빠른 과정에서는 방해가 됐다는 것입니다. **범위 안에서의 경향입니다.** 0.1초에서 이미 느려졌다는 측정이 아니고, 0.1초가 느슨한 쪽 끝이라는 뜻도 아닙니다.
 
 **여기서 인용 규율의 실제 사례가 나옵니다.** 이 결과는 Long의 연구인데, 우리가 읽은 것은 Shneiderman의 리뷰 논문입니다. 그러면 인용은 "Shneiderman이 보고한 Long의 결과"로 해야지, Long을 직접 인용하면 안 됩니다. 저장소의 인용 기록에 이 점이 명시되어 있습니다.
 
-> **이 연구에서는.** 세 문헌이 함께 쓰입니다. 0.1초라는 임계값 자체는 Miller가 근거이고, Nielsen이 그것을 널리 알린 2차 근거이며, Shneiderman은 그 값이 여유로운 목표가 아니라 느슨한 상한이라는 것을 보여주는 범위입니다.
+> **이 연구에서는.** 0.1초라는 임계값의 근거는 Miller의 지침 하나입니다. 키를 누른 뒤 화면에 글자가 보이기까지 0.1~0.2초라는 범위의 엄격한 쪽 끝을, Miller가 단 숙련자 단서를 이유로 설계로 골랐습니다. Nielsen은 Miller를 다시 적은 것이라 두 번째 근거로 세지 않습니다. Shneiderman이 보고한 Long의 결과는 0.1~0.5초 범위 안에서의 경향입니다. 측정으로 하는 교차 확인은 따로 있습니다. Deber 등(2015)이 잰 지연 감지 문턱값으로, 화면을 직접 두드릴 때 69밀리초, 간접 표면을 두드릴 때 96밀리초입니다(tapping 세션 12번). 저자들은 키 입력을 간접 tapping 쪽에 놓고, 100밀리초라는 교과서 값이 자기들의 95퍼센트 신뢰구간 안에 든다고 적습니다.
 >
 > 그리고 이 값이 측정에 어떻게 쓰이는지도 정해져 있습니다. 사용자가 기다리는 성격의 task가 깨어난 뒤 실행되기까지의 지연이 이 값을 넘은 비율을 셉니다. 다만 이 비율 하나만 보지 않고 백분위수 값들도 함께 봅니다. 비율은 넘었는지 여부만 세기 때문에 얼마나 크게 넘었는지를 버리기 때문입니다.
 
@@ -743,24 +744,24 @@ MLFQ의 규칙을 설명할 때 이 책의 정리를 인용합니다. 앞 권에
 
 **그런데 표준이라고 부를 만한 값이 존재하지 않습니다.** 실제 운영체제들의 값은 각자 다르고, 왜 그 값인지에 대한 공개된 근거도 없습니다.
 
-이 연구는 이 문제를 이렇게 풀었습니다. **한 출처의 예제를 통째로 가져다 씁니다.**
+이 연구는 이 문제를 이렇게 풀었습니다. **한 교과서의 한 장이 예제에 쓰는 값들을 가져다 씁니다.** 예제 하나에서 통째로 가져온 것은 아닙니다. 같은 장(8장)의 예제 세 개에서 왔습니다.
 
 가져온 값과 그 근거는 이렇습니다.
 
 | 설정 | 값 | 이 책의 어디 |
 |---|---|---|
-| queue 개수 | 3 | 8장의 예제들이 "a three-queue scheduler"로 돌아가고, 모든 그림에 Q2, Q1, Q0이 나옵니다 |
-| 최상위 slice | 10 밀리초 | 첫 번째 예제가 "with a time slice of 10 ms (and with the allotment set equal to the time slice)"입니다 |
-| slice 증가 비율 | 2 | "Lower Priority, Longer Quanta"라는 제목의 그림이 10밀리초, 20밀리초, 40밀리초로 갑니다 |
-| boost 간격 | 100 밀리초 | 그림 하나가 "a priority boost every 100 ms (which is likely too small of a value, but used here for the example)"로 설명됩니다 |
+| queue 개수 | 3 | 첫 번째 예제(Example 1, 4쪽)가 "a three-queue scheduler"입니다. Figure 8.2–8.6에 Q2, Q1, Q0이 나오고, Figure 8.1은 queue 여덟 개(Q1–Q8)를 그립니다 |
+| 최상위 slice | 10 밀리초 | 같은 Example 1이 "with a time slice of 10 ms (and with the allotment set equal to the time slice)"입니다 |
+| slice 증가 비율 | 2 | "Lower Priority, Longer Quanta"라는 제목의 Figure 8.6(9쪽)이 10밀리초, 20밀리초, 40밀리초로 갑니다 |
+| boost 간격 | 100 밀리초 | Figure 8.4(6–7쪽)가 "a priority boost every 100 ms (which is likely too small of a value, but used here for the example)"로 설명됩니다 |
 
-### 왜 통째로 가져오는가
+### 왜 한 장의 예제들에서 가져오는가
 
 값을 여러 출처에서 하나씩 골라 조합할 수도 있습니다. queue 개수는 이 논문에서, slice는 저 커널 소스에서, boost 간격은 또 다른 데서.
 
 그렇게 하면 **그 조합 자체가 어디에도 없는 새로운 설정이 됩니다.** 각 값에는 출처가 있지만 그 조합에는 출처가 없습니다. 심사자가 "왜 이 조합입니까"라고 물으면 답할 말이 없습니다.
 
-한 출처에서 통째로 가져오면 최소한 "이 교과서의 예제 설정"이라고 말할 수 있습니다. 방어 가능한 형태입니다.
+한 장의 예제들에서 가져오면 최소한 "이 교과서 8장의 예제들이 쓰는 값"이라고 말할 수 있습니다. 방어 가능한 형태입니다.
 
 이 원칙이 저장소 문서에 한 문장으로 적혀 있습니다. 한 텍스트에서 나온 설정은 하나의 주장이고, 여러 출처에서 조립한 값은 쓰지 않는다는 것입니다.
 
@@ -774,9 +775,9 @@ boost 간격 100밀리초에 대해 이 책은 "which is likely too small of a v
 
 > **이 연구에서는.** 이 단서를 숨기지 않고 그대로 인용합니다. 우리가 가져온 값이 그 책 스스로 "아마 너무 작다"고 말한 값이라는 사실을 문서에 적어뒀습니다.
 >
-> 그리고 그 값 하나 때문에 결론이 뒤집히지 않는지 확인하는 절차를 미리 계획에 넣었습니다. 최상위 slice를 0.5밀리초부터 100밀리초까지 아홉 가지로 바꿔가며 전체 실험을 다시 돌리고, 결론이 유지되는지 봅니다. 유지되지 않으면 결론을 하나의 값이 아니라 범위로 보고합니다.
+> 그리고 그 값 하나 때문에 결론이 뒤집히지 않는지 확인하는 절차를 미리 계획에 넣었습니다. 최상위 slice를 0.5, 0.7, 0.9, 1.2, 2, 3, 5, 14, 20, 100밀리초의 열 가지로 바꿔가며 기본 설정을 그대로 쓰는 조건을 다시 돌리고, 결론이 유지되는지 봅니다. 유지되지 않으면 결론을 하나의 값이 아니라 범위로 보고합니다.
 >
-> 이 아홉 개 값도 아무렇게나 고른 것이 아닙니다. 각각에 이유가 붙어 있습니다. 예를 들어 그중 하나는 실제 Linux의 fair-share scheduler가 쓰는 최소 단위이고, 다른 하나는 정책 교체 기능이 쓰는 기본값이며, 또 다른 하나는 상용 유닉스 계열의 표에서 나온 값입니다.
+> 이 열 개 값도 아무렇게나 고른 것이 아닙니다. 각각에 이유가 붙어 있습니다. 뼈대는 설정 범위의 양 끝(0.5밀리초와 100밀리초)과 실제 시스템의 기본값 셋입니다. Linux의 기본 scheduler가 CPU 하나일 때 쓰는 기본 slice(0.7밀리초), 상용 유닉스 계열의 표에서 나온 최상위 quantum(2밀리초), 정책 교체 기능의 기본 slice(20밀리초)입니다. 나머지는 실험 파일의 주기 작업들이 갖는 경계값 양쪽에 놓은 점들입니다.
 
 ### 모델과 예제가 다른 지점
 
@@ -794,13 +795,13 @@ boost 간격 100밀리초에 대해 이 책은 "which is likely too small of a v
 
 고전 문헌과 별개로, 지금 돌아가는 시스템들이 실제로 어떤 값을 쓰는지도 확인해두면 감이 잡힙니다. 이 값들은 전부 소스 코드나 공식 문서에서 직접 읽어 확인한 것입니다.
 
-**Linux의 fair-share scheduler.** CFS 시절의 소스에는 목표 지연이 6밀리초, 최소 단위가 0.75밀리초로 적혀 있습니다. EEVDF로 바뀐 뒤에는 기본 slice가 0.75밀리초입니다. 둘 다 소스의 주석에 코어 수에 따라 늘어난다는 설명이 붙어 있습니다.
+**Linux의 fair-share scheduler.** CFS 시절의 소스에는 목표 지연이 6밀리초, 최소 단위가 0.75밀리초로 적혀 있고, 둘 다 코어 수에 따라 늘어난다는 설명이 주석에 붙어 있습니다. EEVDF로 바뀐 뒤에는 기본 slice(`sysctl_sched_base_slice`)가 kernel v6.6부터 v6.14까지 0.75밀리초, v6.15부터 0.70밀리초입니다. 이 값도 CPU 수에 따라 1 + log₂(온라인 CPU 수, 8까지 셈)배로 늘어나서, CPU 4개인 이 연구의 측정 runner에서는 2.1밀리초입니다.
 
 **Linux의 정책 교체 기능.** 기본 slice 상수가 20밀리초로 정의되어 있습니다.
 
 **상용 유닉스 계열의 MLFQ.** 우선순위 단계가 60개이고, 표로 각 단계의 quantum이 정해져 있으며, 초당 한 번 전체를 훑으면서 조정하는 함수가 돕니다. 기본 설정에서 quantum은 최상위가 2밀리초, 최하위가 20밀리초입니다.
 
-이 값들을 나란히 놓으면 폭이 꽤 넓습니다. 0.75밀리초부터 20밀리초까지입니다. **어느 하나를 표준이라고 부를 수 없다는 것이 이 목록이 보여주는 사실입니다.**
+이 값들을 나란히 놓으면 폭이 꽤 넓습니다. 0.7밀리초부터 20밀리초까지입니다. **어느 하나를 표준이라고 부를 수 없다는 것이 이 목록이 보여주는 사실입니다.**
 
 > **논문으로.** 이 목록 자체가 논문에서 쓰입니다. "왜 교과서 예제를 기준으로 삼았는가"에 대한 답이 "실제 시스템들의 값이 이만큼 흩어져 있고 표준이 없기 때문"이고, 그 흩어짐을 보이는 것이 이 목록입니다.
 >
@@ -815,14 +816,14 @@ boost 간격 100밀리초에 대해 이 책은 "which is likely too small of a v
 - 이 논문은 다섯 가지 가정 아래 단일 프로세서의 주기적 작업만 다룹니다. 과부하 상황은 다루지 않으므로 그 서술에 인용할 수 없습니다.
 - 1994년 Waldspurger와 Weihl의 논문이 lottery scheduling의 원조입니다. 소비율이 할당된 몫에 비례한다는 것이 보장이고, 10밀리초 quantum이면 1초 이하 구간에서도 합리적인 수준의 공정성이 나온다고 스스로 적었습니다. 부류 사이의 비율은 말하지 않습니다.
 - 원조와 교과서가 다른 지점이 둘입니다. 원조는 새 프로그램을 최상위가 아니라 크기에 따른 단계에 놓고, 잠든 프로그램을 우대하는 대신 아래로 내립니다. 인용할 때 구분해야 합니다.
-- 이 논문은 단계 분류가 "각 사용자의 선언(또는 희망)이 아니라 성능과 프로그램 크기에 따라" 전적으로 자동이라고 명시합니다. 프로그램의 자기 선언을 믿지 않는다는 원칙이 1962년부터 있었고, 그 자동 분류가 읽을 수 있는 것이 행동과 크기뿐이라는 것이 이 연구가 지적하는 빈칸입니다.
+- 이 논문은 단계 분류가 "각 사용자의 선언(또는 희망)이 아니라 성능과 프로그램 크기에 따라" 전적으로 자동이라고 명시합니다. 프로그램의 자기 선언에 기대지 않는다는 원칙이 1962년부터 있었고, 그 자동 분류가 읽을 수 있는 것이 행동과 크기뿐이라는 것이 이 연구가 지적하는 빈칸입니다.
 - 1995년 EEVDF 기술보고서가 지금 Linux scheduler의 기반입니다. 연도를 1996년으로 잘못 적는 인용이 흔한데, 원문 표지의 각주에 1996년 1월 개정이라고 적혀 있는 것이 그 착오의 출처입니다.
 - EEVDF의 네 개념은 이렇습니다. virtual time은 활성 client 가중치 합의 역수를 쌓은 시계라서 경쟁이 심하면 느려지고 줄면 빨라집니다. virtual eligible time과 virtual deadline은 이상적 흐름 모형에서 그 요청을 처리하기 시작하고 끝내는 시각이며, eligible time이 현재 virtual time 이하일 때만 그 요청이 후보가 됩니다. lag은 받아야 할 처리 시간과 실제로 받은 처리 시간의 차이입니다.
 - 알고리즘은 한 문장입니다. 자격을 얻은 요청 중 virtual deadline이 가장 이른 것에 다음 quantum을 줍니다. eligible time이 이 논문의 고유 기여이고, virtual deadline은 다른 비율 배분 알고리즘에도 있습니다.
 - 보장은 lag의 한계입니다. 요청이 quantum보다 길지 않으면 lag이 −q와 q 사이에 묶입니다. 그리고 같은 논문이 그 한계가 어떤 비율 배분 알고리즘도 넘을 수 없는 값임을 따로 증명합니다. 다만 이 한계는 lag이 0인 client에 대해서만 사건이 일어나는 steady 구간의 이야기이므로, 인용할 때 조건을 함께 적어야 합니다.
-- 0.1초라는 값은 1968년 Miller의 논문이 원 출처이고, 1993년 Nielsen의 책이 널리 알린 2차 출처이며, 1984년 Shneiderman의 리뷰가 그 값이 여유로운 목표가 아님을 보여줍니다. Shneiderman이 보고한 것은 Long의 연구이므로 Shneiderman을 통해 인용해야 합니다.
-- 이 연구는 실험의 기본 scheduler 설정을 한 교과서의 예제에서 통째로 가져왔습니다. 여러 출처에서 값을 조합하면 그 조합 자체에 출처가 없어지기 때문입니다. 그 교과서가 자기 값에 붙인 단서까지 그대로 인용하고, 값 하나 때문에 결론이 뒤집히는지 확인하는 절차를 미리 계획에 넣어뒀습니다.
-- 실제 시스템들의 slice 값은 0.75밀리초부터 20밀리초까지 흩어져 있습니다. 표준이 없다는 사실 자체가 근거로 쓰입니다.
+- 0.1초라는 값은 1968년 Miller의 지침이 근거입니다. 키 입력의 화면 반응 0.1~0.2초라는 범위의 엄격한 쪽 끝을, 숙련자에게는 그것도 느릴 수 있다는 Miller의 단서를 이유로 설계로 골랐습니다. 1993년 Nielsen의 책은 Miller를 다시 적은 것이라 두 번째 근거가 아닙니다. 1984년 Shneiderman의 리뷰가 보고한 Long의 결과는 0.1~0.5초 범위 안에서 지연이 길수록 나빠진다는 경향이고, Shneiderman을 통해 인용해야 합니다. 측정으로 하는 교차 확인은 Deber 등(2015)의 감지 문턱값(69밀리초와 96밀리초)입니다.
+- 이 연구는 실험의 기본 scheduler 설정을 한 교과서의 한 장, OSTEP 8장의 예제 세 개가 쓰는 값에서 가져왔습니다. queue 셋과 최상위 slice 10밀리초는 Example 1, 단계마다 두 배는 Figure 8.6, boost 100밀리초는 Figure 8.4입니다. 여러 출처에서 값을 조합하면 그 조합 자체에 출처가 없어지기 때문입니다. 그 교과서가 자기 값에 붙인 단서까지 그대로 인용하고, 값 하나 때문에 결론이 뒤집히는지 확인하는 절차를 미리 계획에 넣어뒀습니다.
+- 실제 시스템들의 slice 값은 0.7밀리초부터 20밀리초까지 흩어져 있습니다. Linux의 기본 slice는 v6.15부터 0.70밀리초이고 CPU 수에 따라 늘어납니다. 표준이 없다는 사실 자체가 근거로 쓰입니다.
 
 ---
 
@@ -858,19 +859,19 @@ boost 간격 100밀리초에 대해 이 책은 "which is likely too small of a v
 >
 > 하나는 **논문 원문**입니다. 저자 중 한 명이 소속 기관 페이지에 올려둔 SOSP '21 논문 PDF 전문을 읽었습니다(2026-09-12 확인). 첫 쪽에 588쪽, 마지막 쪽에 604쪽이 찍혀 있어 서지 정보의 쪽 범위도 함께 확인됐습니다.
 >
-> 다른 하나는 **저자들이 공개한 코드 저장소의 설명 문서**입니다. 논문에 없는 운용상의 설명이 그쪽에만 있어서, 그 부분은 저장소에서 가져왔다고 표시하고 그대로 씁니다. 저자가 같아도 논문이 아니므로 인용할 때 구분해야 합니다.
+> 다른 하나는 **저자들이 공개한 코드 저장소의 설명 문서**입니다(`google/ghost-userspace`, 커밋 `9ca0a1fb`, 2023-11-08의 README). 논문에 없는 운용상의 설명이 그쪽에만 있어서, 그 부분은 저장소에서 가져왔다고 표시하고 그대로 씁니다. 저자가 같아도 논문이 아니므로 인용할 때 구분해야 합니다.
 
 ### 무엇을 하는가
 
-논문의 초록 첫 문장입니다.
+논문의 초록 첫 두 문장입니다.
 
 > "We present ghOSt, our infrastructure for delegating kernel scheduling decisions to userspace code. ghOSt is designed to support the rapidly evolving needs of our data center workloads and platforms."
 
 **kernel의 scheduling 결정을 user space 코드로 위임하는 기반 구조**라는 것입니다. our라는 단어가 두 번 나오는데, 저자 대부분이 한 대형 사업자 소속이고 자기네 데이터센터를 위해 만들었다는 뜻입니다.
 
-저자들의 저장소는 같은 시스템을 이렇게 설명합니다.
+왜 이런 것을 만들었는지는 뒤에서 자세히 보는데, 한 줄로 줄이면 이렇습니다. 수많은 기계에 걸쳐 정책을 거듭 고쳐 보고 싶은데, 그때마다 새 kernel을 배포하거나 기계를 재부팅할 수는 없었습니다. 초록과 2절(3쪽)이 이 동기를 적습니다.
 
-> "ghOSt is a general-purpose delegation of scheduling policy implemented on top of the Linux kernel. The ghOSt framework provides a rich API that receives scheduling decisions for processes from userspace and actuates them as transactions."
+저자들의 저장소는 같은 시스템을 이렇게 설명합니다.
 
 > "ghOSt is a general-purpose delegation of scheduling policy implemented on top of the Linux kernel. The ghOSt framework provides a rich API that receives scheduling decisions for processes from userspace and actuates them as transactions."
 
@@ -884,7 +885,7 @@ kernel 위에 얹은 범용 정책 위임 장치이고, user space에서 온 sch
 
 논문이 그 구조를 더 정확히 적습니다.
 
-> "ghOSt's kernel side is implemented as a scheduling class, akin to the commonly used CFS class. This scheduling class provides userspace code with a rich API to define arbitrary scheduling policies. To help the agents make scheduling decisions, the kernel exposes thread state to the agents via messages and status words. The agents then instruct the kernel on scheduling decisions via transactions and system calls."
+> "ghOSt's kernel side is implemented as a scheduling class, akin to the commonly used CFS class. This scheduling class provides userspace code with a rich API to define arbitrary scheduling policies. To help the agents make scheduling decisions, the kernel exposes thread state to the agents via messages and status words […]. The agents then instruct the kernel on scheduling decisions via transactions and system calls […]."
 
 kernel 쪽은 CFS와 나란한 **scheduling class**로 구현되어 있고, kernel은 thread 상태를 message와 status word로 밖에 내보내며, agent는 transaction과 system call로 결정을 돌려보냅니다.
 
@@ -922,13 +923,13 @@ kernel 코드를 짜려면 C를 써야 하고, kernel 안에서는 쓸 수 있�
 
 논문의 서론이 동기를 셋으로 나눕니다. 첫째, 정책을 잘 고르면 실제로 크게 좋아집니다. 논문은 선행 연구의 수치를 그대로 인용합니다.
 
-> "the Shinjuku request scheduler optimized highly dispersive workloads – workloads with a mix of short and long requests – improving request tail latency and throughput by an order of magnitude. The Tableau scheduler for virtual machine workloads demonstrated improved throughput by 1.6× and latency by 17× under multi-tenant scenarios. The Caladan scheduler focused on resource interference between foreground low-latency apps and background best effort apps, improving network request tail latency by as much as 11,000×."
+> "the Shinjuku request scheduler […] optimized highly dispersive workloads – workloads with a mix of short and long requests – improving request tail latency and throughput by an order of magnitude. The Tableau scheduler for virtual machine workloads […] demonstrated improved throughput by 1.6× and latency by 17× under multi-tenant scenarios. The Caladan scheduler […] focused on resource interference between foreground low-latency apps and background best effort apps, improving network request tail latency by as much as 11,000×."
 
 **앞 권에서 배운 "좋은 scheduling의 정의는 상황마다 다르다"가 이 목록의 모양입니다.** 짧은 요청과 긴 요청이 섞인 상황, 여러 손님이 한 기계를 나눠 쓰는 상황, 전면 작업과 배경 작업이 부딪치는 상황. 각각에 맞춘 scheduler가 각각 큰 개선을 보고했습니다.
 
 둘째, 그럼에도 실제로 배포하기가 어렵습니다.
 
-> "Designing, implementing, and deploying new scheduling policies across a large fleet is an exacting task. It requires developers to design policies capable of balancing the specific performance requirements of many applications. The implementation must conform with a complex kernel architecture, and errors will, in many cases, crash the entire system or otherwise severely impede performance due to unintended side effects. Even when successful, the disruptive nature of an upgrade carries its own opportunity cost in host and application downtime. This creates a challenging conflict between risk-minimization and progress."
+> "Designing, implementing, and deploying new scheduling policies across a large fleet is an exacting task. It requires developers to design policies capable of balancing the specific performance requirements of many applications. The implementation must conform with a complex kernel architecture, and errors will, in many cases, crash the entire system or otherwise severely impede performance due to unintended side effects […]. Even when successful, the disruptive nature of an upgrade carries its own opportunity cost in host and application downtime. This creates a challenging conflict between risk-minimization and progress."
 
 마지막 문장이 이 장의 요지입니다. **위험을 줄이는 것과 앞으로 나아가는 것 사이의 갈등**입니다.
 
@@ -946,7 +947,7 @@ kernel 코드를 짜려면 C를 써야 하고, kernel 안에서는 쓸 수 있�
 
 이 시스템은 기계를 여러 구역으로 나눌 수 있게 합니다. 논문의 서술입니다.
 
-> "ghOSt supports multiple concurrent policies on a single machine using enclaves. A system can be partitioned into multiple independent enclaves, at CPU granularity, each of which runs its own policy. […] From a scheduling perspective, the enclaves are isolated. Partitioning makes sense especially when running different workloads on a single machine. It is often useful to set the granularity of these enclaves by machine topology, such as per-NUMA-socket or per-AMD-CCX. Enclaves also help in isolating faults, limiting the damage of an agent-crash to the enclave it belongs to."
+> "ghOSt supports multiple concurrent policies on a single machine using enclaves. A system can be partitioned into multiple independent enclaves, at CPU granularity, each of which runs its own policy. […] From a scheduling perspective, the enclaves are isolated. Partitioning makes sense especially when running different workloads on a single machine. It is often useful to set the granularity of these enclaves by machine topology, such as per-NUMA-socket or per-AMD-CCX […]. Enclaves also help in isolating faults, limiting the damage of an agent-crash to the enclave it belongs to […]."
 
 CPU 단위로 기계를 독립된 구역으로 쪼개고, 각 구역이 자기 정책을 돌립니다. 구역 나누기의 기준으로는 기계의 지형이 유용하다고 적혀 있습니다.
 
@@ -990,7 +991,7 @@ core가 수백 개인 기계에서는 전체에 하나의 정책을 쓰는 것�
 
 **첫째, 다른 클래스보다 낮은 우선순위에 둡니다.**
 
-> "One of ghOSt's design goals is enabling easy adoption on existing systems. So even if a ghOSt policy is faulty, we still want ghOSt-managed threads to interact well with other threads in the system. We want to avoid ghOSt threads causing unintended consequences for other threads, such as starvation, priority inversion, deadlock, etc. We achieve this goal by assigning ghOSt's kernel scheduler class a lower priority than the default scheduler class — typically CFS — in the kernel's scheduling class hierarchy. The result is that most threads in the system will preempt ghOSt threads."
+> "One of ghOSt's design goals is enabling easy adoption on existing systems. So even if a ghOSt policy is faulty, we still want ghOSt-managed threads to interact well with other threads in the system. We want to avoid ghOSt threads causing unintended consequences for other threads, such as starvation, priority inversion, deadlock, etc. We achieve this goal by assigning ghOSt's kernel scheduler class a lower priority […] than the default scheduler class — typically CFS — in the kernel's scheduling class hierarchy. The result is that most threads in the system will preempt ghOSt threads."
 
 **정책이 고장 나 있어도 시스템의 대부분 thread가 ghOSt thread를 밀어낼 수 있습니다.** 피해가 구조적으로 제한됩니다. 뒤에서 볼 sched_ext의 클래스 순서도 같은 발상입니다.
 
@@ -1029,7 +1030,7 @@ core가 수백 개인 기계에서는 전체에 하나의 정책을 쓰는 것�
 
 서론이 그 의미를 정리합니다.
 
-> "We show that ghOSt's overheads are small and range from 265 ns for message delivery, several hundred nanoseconds to context-switch into an agent, and 888 ns to schedule a thread, making ghOSt scheduling overheads only slightly higher than in existing kernel schedulers. With amortization, these overheads allow just a single ghOSt agent to schedule over 2 million threads per second."
+> "We show that ghOSt's overheads are small and range from 265 ns for message delivery, several hundred nanoseconds to context-switch into an agent, and 888 ns to schedule a thread, making ghOSt scheduling overheads only slightly higher than in existing kernel schedulers. With amortization, these overheads allow just a single ghOSt agent to schedule over 2 million threads per second (Fig. 5)."
 
 **agent 하나가 초당 200만 개의 thread를 배치할 수 있다**는 것입니다.
 
@@ -1045,7 +1046,7 @@ core가 수백 개인 기계에서는 전체에 하나의 정책을 쓰는 것�
 
 그리고 이 비교에서 더 중요한 대목이 따로 있습니다. 전용 시스템은 core를 점유하고 놓지 않습니다.
 
-> "Fig. 6c shows that when we co-locate a batch application with a RocksDB workload managed by Shinjuku, the batch application cannot get any CPU resources even when the RocksDB load is low."
+> "Fig. 6c shows that when we co-locate a batch application with a RocksDB workload managed by Shinjuku, the batch application cannot get any CPU resources even when the RockDB [sic] load is low."
 
 부하가 낮을 때도 배경 작업이 CPU를 한 톨도 못 받습니다. ghOSt 쪽은 정책 17줄을 더해서 남는 자원을 배경 작업에 주고, 꼬리 지연은 그대로 유지했습니다.
 
@@ -1077,7 +1078,9 @@ core가 수백 개인 기계에서는 전체에 하나의 정책을 쓰는 것�
 
 그리고 그 개선의 출처를 솔직하게 밝힙니다.
 
-> "Prior to socket- and CCX-aware optimizations, the ghOSt policy led to nearly 2x worse latency for query type A and was on par with CFS for query type B and C. […] The NUMA and CCX optimizations were critical in achieving parity with CFS as they delivered 27% and 10% throughput improvements, respectively."
+> "The NUMA and CCX optimizations were critical in achieving parity with CFS as they delivered 27% and 10% throughput improvements, respectively. […] Prior to socket- and CCX-aware optimizations, the ghOSt policy led to nearly 2x worse latency for query type A and was on par with CFS for query type B and C (i.e., within 10%)."
+
+두 문장은 원문에서 이 순서로, 서로 다른 문단에 있습니다. 앞 문장은 처리량을 CFS와 비교하는 문단에, 뒤 문장은 꼬리 지연을 다루는 다음 문단에 있습니다.
 
 **지형 최적화를 넣기 전에는 오히려 2배 가까이 나빴습니다.** 좋은 결과가 틀에서 저절로 나온 것이 아니라 정책을 다듬어서 나왔다는 것입니다.
 
@@ -1113,14 +1116,15 @@ core가 수백 개인 기계에서는 전체에 하나의 정책을 쓰는 것�
 
 핵심은 kernel이 그 프로그램을 실행하기 전에 검사한다는 점입니다. 무한 루프를 돌지 않는지, 접근하면 안 되는 메모리를 건드리지 않는지 확인합니다.
 
-### 문서가 내세우는 네 가지
+### 문서가 내세우는 다섯 가지
 
 > "* sched_ext exports a full scheduling interface so that any scheduling algorithm can be implemented on top.
 > * The BPF scheduler can group CPUs however it sees fit and schedule them together, as tasks aren't tied to specific CPUs at the time of wakeup.
 > * The BPF scheduler can be turned on and off dynamically anytime.
-> * The system integrity is maintained no matter what the BPF scheduler does. The default scheduling behavior is restored anytime an error is detected, a runnable task stalls, or on invoking the SysRq key sequence `SysRq-S`."
+> * The system integrity is maintained no matter what the BPF scheduler does. The default scheduling behavior is restored anytime an error is detected, a runnable task stalls, or on invoking the SysRq key sequence `SysRq-S`.
+> * When the BPF scheduler triggers an error, debug information is dumped to aid debugging. The debug dump is passed to and printed out by the scheduler binary. The debug dump can also be accessed through the `sched_ext_dump` tracepoint. The SysRq key sequence `SysRq-D` triggers a debug dump. This doesn't terminate the BPF scheduler and can only be read through the tracepoint."
 
-넷째 항목이 앞의 연구와 같은 발상입니다. **BPF scheduler가 무슨 짓을 하든 시스템의 무결성은 유지됩니다.** 오류가 감지되거나, 실행 가능한 task가 멈춰 있거나, 특정 키 조합을 누르면 기본 동작으로 되돌아갑니다.
+넷째 항목이 앞의 연구와 같은 발상입니다. **BPF scheduler가 무슨 짓을 하든 시스템의 무결성은 유지됩니다.** 오류가 감지되거나, 실행 가능한 task가 멈춰 있거나, 특정 키 조합을 누르면 기본 동작으로 되돌아갑니다. 다섯째 항목은 그렇게 오류가 났을 때 디버깅 정보를 남긴다는 것입니다.
 
 ### 정확히 짚어야 할 두 가지
 
@@ -1205,7 +1209,7 @@ sched_ext는 틀만 제공합니다. 실제 정책은 따로 짜야 합니다. �
 
 ### 어떤 scheduler들이 있나
 
-저장소에는 여러 정책이 들어 있습니다. 각자의 설명 문서에서 첫 줄을 옮기면 이렇습니다.
+저장소에는 여러 정책이 들어 있습니다. 각자의 설명 문서는 모두 같은 소개 문장으로 시작하고, 그 다음 개요(Overview) 절에 정책마다의 설명이 있습니다. 개요 절의 첫 줄을 옮기면 이렇습니다.
 
 **scx_rusty** — "A multi-domain, BPF / user space hybrid scheduler. The BPF portion of the scheduler does a simple round robin in each domain, and the user space portion (written in Rust) calculates the load factor of each domain, and informs BPF of how tasks should be load balanced accordingly."
 
@@ -1239,7 +1243,16 @@ sched_ext는 틀만 제공합니다. 실제 정책은 따로 짜야 합니다. �
 
 **배포판이 패키지로 제공할 수 있다는 것이지, 기본으로 켜서 출하한다는 뜻이 아닙니다.** 저장소 어디에도 특정 배포판이 이 중 하나를 기본값으로 쓴다는 진술은 없습니다.
 
-> **논문으로.** 이 구분이 중요합니다. "이미 배포판이 이걸 기본으로 쓴다"고 쓰면 심사자가 근거를 요구할 것이고, 이 저장소로는 뒷받침되지 않습니다. 쓸 수 있는 것은 "패키지로 제공된다", "두 대형 사업자가 도입을 진행 중이라고 밝혔다"까지입니다.
+실제로 어디서 얼마나 도는지는 sched_ext 관리자들과 운영자 쪽 발표자들이 저장소 밖에서 스스로 보고합니다.
+
+- sched_ext 관리자들이 2024년 Linux Plumbers Conference(LPC)에서 쓴 슬라이드 "sched_ext status and plans"(시간표상 발표자는 Meta 소속)는 "scx_layered deployed in 1M+ machines with significant perf gains"라고 적습니다. 그 기계를 누가 운영하는지도, 어떻게 셌는지도 슬라이드에는 없습니다.
+- Meta의 발표자들은 LPC 2025의 발표 초록(contribution 2039)에서 scx_layered를 "the entire Reality Labs GPU fleet with tens of thousands of GPUs"에 배포했다고 보고합니다.
+- 같은 학회의 다른 Meta 발표자들은 초록(contribution 2099)에서 scx_lavd를 fleet 전체의 기본 scheduler 후보로 소개합니다. 배포했다는 말은 아닙니다.
+- Valve의 SteamOS 3.8은 scx_lavd를 사용자가 직접 고르는 CPU scheduler로 제공합니다. 설치되고 설정까지 돼 있지만 기본으로 켜져 있지는 않습니다.
+
+그러니 이 진술들이 말하는 것은 "대규모로 배포할 수 있다"가 아닙니다. **기본값이 아닌 정책이, 운영자가 보고하는 대로, fleet 규모에서 돌고 있다**는 것입니다. 모두 보고한 쪽 자신의 말이고(100만 대는 sched_ext 관리자들의 슬라이드, Reality Labs의 GPU fleet은 Meta 발표자들, SteamOS는 Valve) 바깥에서 관찰한 값이 아닙니다.
+
+> **논문으로.** 이 구분이 중요합니다. "이미 배포판이 이걸 기본으로 쓴다"고 쓰면 심사자가 근거를 요구할 것이고, 이 저장소로는 뒷받침되지 않습니다. 쓸 수 있는 것은 "배포판이 패키지로 제공할 수 있다"와, 각 보고를 보고한 쪽의 말로 적는 것까지입니다. sched_ext 관리자들의 슬라이드가 적은 100만 대, Meta 발표자들이 보고한 Reality Labs GPU fleet의 scx_layered, Valve가 사용자 선택으로 제공하는 scx_lavd가 그렇습니다. 슬라이드와 학회 초록은 각주 등급의 출처라서, 숫자는 보고자와 날짜를 붙여 적습니다.
 
 ## 3.5 이 갈래가 이 연구에 주는 것
 
@@ -1247,7 +1260,7 @@ sched_ext는 틀만 제공합니다. 실제 정책은 따로 짜야 합니다. �
 
 정리하면 이 갈래의 결론은 하나입니다.
 
-**scheduling 정책을 실행 중에 바꾸는 일은 이제 가능합니다.** 재부팅도, kernel 재빌드도 필요 없습니다. 실패해도 기본값으로 돌아갑니다.
+**scheduling 정책을 실행 중에 바꾸는 일은 이제 가능합니다.** 새 kernel을 배포하지도, 기계를 재부팅하지도 않습니다. 실패해도 기본값으로 돌아갑니다.
 
 앞 권에서 스위치와 목록을 구분했습니다. 게임 모드가 하는 동작 자체는 잘 만들어져 있고, 없는 것은 그 스위치를 언제 눌러야 하는지 아는 능력이라고요.
 
@@ -1274,7 +1287,7 @@ sched_ext는 틀만 제공합니다. 실제 정책은 따로 짜야 합니다. �
 ## 3장 정리
 
 - 이 갈래는 "어떤 정책이 좋은가"가 아니라 "정책을 바꾸는 것 자체가 왜 어려운가"를 붙잡습니다. 원래는 kernel을 고치고 다시 빌드하고 재부팅해야 했고, 그래서 실험이 느리고 배포가 위험했습니다.
-- ghOSt는 scheduling 결정을 user space로 위임하고 kernel은 그것을 transaction으로 실행합니다. kernel 쪽은 CFS와 나란한 scheduling class이고, thread 상태를 message로 내보내고 결정을 transaction으로 돌려받습니다. transaction이 필요한 이유는 한 agent가 다른 CPU까지 지휘하는 구조를 지원하기 위해서입니다.
+- ghOSt는 scheduling 결정을 user space의 agent로 위임하고 kernel은 그것을 transaction으로 실행합니다. 수많은 기계에 걸쳐 정책을 거듭 고치되 그때마다 새 kernel을 배포하거나 재부팅하지 않으려는 필요에서 나왔습니다. kernel 쪽은 CFS와 나란한 scheduling class이고, thread 상태를 message로 내보내고 결정을 transaction으로 돌려받습니다. transaction이 필요한 이유는 한 agent가 다른 CPU까지 지휘하는 구조를 지원하기 위해서입니다.
 - 안전은 세 겹입니다. ghOSt의 클래스가 기본 클래스보다 낮은 우선순위라서 대부분의 thread가 ghOSt thread를 밀어낼 수 있고, 구역을 없애면 그 안의 thread가 기본 scheduler로 돌아가며, 실행 가능한 thread를 정해진 밀리초 안에 배치하지 않으면 kernel이 그 구역을 자동으로 없앱니다.
 - 부담은 나노초 단위입니다. thread 하나를 배치하는 데 888나노초이고, 참고로 CFS의 문맥 교환이 599나노초입니다. agent 하나가 초당 200만 개의 thread를 배치할 수 있다고 보고합니다.
 - 평가에서 읽어야 할 것이 있습니다. 서론은 실제 서비스에서 꼬리 지연이 5에서 30퍼센트 좋아졌다고 적는데, 본문을 보면 그 값은 큰 message의 99.9 백분위수 이상에서 나온 것이고, 작은 message의 99.99 백분위수 이상에서는 최대 1.7배 나빴습니다. 검색 서비스에서도 지형 최적화를 넣기 전에는 2배 가까이 나빴다고 스스로 적습니다. 서론만 읽으면 보이지 않는 조건입니다.
@@ -1283,7 +1296,7 @@ sched_ext는 틀만 제공합니다. 실제 정책은 따로 짜야 합니다. �
 - 흔한 오해 둘을 원문 확인으로 바로잡았습니다. 이 문서는 BPF 검사기가 무엇을 보장하는지 일반적으로 진술하지 않으며, 감시 타이머라는 말도 나오지 않습니다. 감시 타이머는 정책 모음 저장소의 문서에 나옵니다.
 - 그 저장소에는 서로 다른 목표를 겨냥한 정책이 여럿 들어 있습니다. 대화형 우선, 공정성, 지역성, 마감 기반이 각각 따로 있습니다. 모든 상황에 맞는 하나가 없다는 사실이 이 목록으로 드러납니다.
 - 그중 하나는 빠른 결정을 kernel 안에서 하고 느린 판단을 밖에서 하는 분업 구조를 씁니다. 이 시리즈의 연구와 같은 발상입니다.
-- 배포 현황에 대해 저장소가 뒷받침하는 것은 배포판이 패키지로 제공할 수 있다는 것과 두 대형 사업자가 도입을 진행 중이라는 진술까지입니다. 어떤 배포판이 기본으로 켠다는 진술은 없습니다.
+- 배포 현황에 대해 저장소가 뒷받침하는 것은 배포판이 패키지로 제공할 수 있다는 것과 두 대형 사업자가 도입을 진행 중이라는 진술까지입니다. 어떤 배포판이 기본으로 켠다는 진술은 없습니다. 저장소 밖에서는 관리자들과 운영자 쪽 발표자들이 스스로 보고합니다. sched_ext 관리자들의 LPC 2024 슬라이드(발표자는 Meta 소속)는 scx_layered가 100만 대 넘는 기계에 배포됐다고 적지만 그 기계의 운영자도 센 방법도 적지 않습니다. Meta의 발표자들은 scx_layered를 Reality Labs의 GPU fleet에 배포했다고 보고하고, scx_lavd를 기본 fleet scheduler 후보로 소개합니다. Valve의 SteamOS 3.8은 scx_lavd를 사용자가 고르는 scheduler로 제공합니다. 기본값이 아닌 정책이 운영자의 보고대로 fleet 규모에서 돌고 있다는 것입니다.
 - 이 갈래의 결론은 액추에이터가 이미 완성됐다는 것입니다. 이 연구는 그 위에 얹을 센서를 만듭니다. 그리고 실행 계층이 이미 검증됐다는 사실이 시뮬레이터 기반 평가를 정당화하는 논리의 절반입니다.
 
 ---
@@ -1308,11 +1321,11 @@ sched_ext는 틀만 제공합니다. 실제 정책은 따로 짜야 합니다. �
 
 **MLFQ의 강등 규칙.** task가 주어진 시간을 다 쓰면 우선순위를 낮추고, 스스로 잠들면 유지합니다. 이 규칙 하나로 계산 작업과 대화형 작업이 자동으로 분류됩니다. 프로그램이 무엇인지 전혀 몰라도 됩니다.
 
-**fair-share의 누적 회계.** 각 task가 지금까지 쓴 시간을 가중치로 나눈 값을 추적하고, 가장 뒤처진 것을 실행합니다. 자고 있는 동안에는 그 값이 올라가지 않으니, 깨어났을 때 자연스럽게 앞줄에 섭니다. MLFQ가 규칙으로 하는 일을 구조적으로 하는 셈입니다.
+**fair-share의 누적 회계.** 각 task가 지금까지 쓴 시간을 가중치로 나눈 값을 공정한 몫에 대어 셉니다. CFS는 가장 뒤처진 것을 실행했고, 지금의 EEVDF는 몫보다 덜 받은(lag가 0 이상인) task 가운데 virtual deadline이 가장 이른 것을 실행합니다. 깨어난 task가 줄의 어디에 서는지는 잠든 task를 어떻게 처리하느냐가 정합니다. EEVDF에서는 잠든 task의 lag가 시간이 지나며 줄어듭니다. MLFQ가 CPU를 쓴 모양으로 task를 단계에 나누는 것과 달리, 이 계열은 분류하지 않고 몫을 셉니다.
 
 두 방식 모두 재료가 같습니다. **시간과 횟수입니다.**
 
-## 4.3 scx_lavd: 이 계열의 가장 발전한 형태
+## 4.3 scx_lavd: 지연 민감도를 추정하는 게임용 scheduler
 
 ### 무엇인가
 
@@ -1328,45 +1341,48 @@ sched_ext는 틀만 제공합니다. 실제 정책은 따로 짜야 합니다. �
 
 **첫째, 각 task가 얼마나 지연에 민감한지를 측정합니다. 둘째, 그 정보를 여러 scheduling 결정에 씁니다.**
 
+설명 문서와 코드를 보면 구체적으로 이렇습니다. 각 task의 지연 민감도를 그 task가 기다리는 빈도와 깨우는 빈도, 실행 시간, 가중치로 추정합니다. 그 값을 깨우는 task와 깨워지는 task 사이로, 사슬을 따라 전파합니다. 그리고 그 값으로 task의 virtual deadline과 time slice를 정합니다.
+
 앞 권에서 fair-share 계열이 각 task에 가상의 마감을 부여한다고 했습니다. 이 방식은 그 마감을 정할 때 지연 민감도를 반영합니다. 민감한 task에게 이른 마감을 주면 먼저 실행됩니다.
 
 ### 어디서 나왔나
 
 > "scx_lavd is initially motivated by gaming workloads."
 
-게임 workload에서 출발했습니다. 그리고 저장소는 이 정책이 실전에서 쓸 만하다고 표시하고 있습니다.
+게임 workload에서, 끊김(stutter)을 줄이려는 동기로 출발했습니다. 그리고 저장소는 이 정책이 실전에서 쓸 만하다고 표시하고 있습니다. 설명 문서의 "Production Ready?"라는 제목 아래 이렇게 적혀 있습니다.
 
-> "Production Ready?: Yes, scx_lavd should be performant across various CPU architectures."
+> "Yes, scx_lavd should be performant across various CPU architectures."
 
 ### 게임에서 실제로 무슨 일이 벌어지는가
 
 이 정책을 만든 사람이 2024년 한 공개 행사에서 발표한 자료가 있습니다. 이 연구팀이 그 자료를 확인해서 숫자를 기록해뒀습니다.
 
-발표 자료가 보고하는 게임 실행 중의 실제 모습은 이렇습니다.
+발표 자료가 보고하는 게임 실행 중의 실제 모습은 이렇습니다. 모두 발표자가 2024-04-17에 보고한 값이고, 어떤 게임과 어떤 기계에서 잰 것인지는 적혀 있지 않습니다.
 
 | 관찰 | 값 |
 |---|---|
 | 실행 중인 task 수 | 약 300개 |
 | 그중 오래 사는 task의 비율 | 약 90퍼센트 |
 | 상위 30에서 40개 task가 차지하는 scheduling 비중 | 95퍼센트 |
-| 상위 15에서 20개가 차지하는 비중 | 60에서 70퍼센트 |
-| 한 번 실행될 때의 시간 | 약 260마이크로초에서 1.65밀리초 |
-| 대기 계열 system call에서 깨어나는 비율 | 70에서 75퍼센트 |
-| frame 예산 | 16.7밀리초 |
+| 게임 고유의 task 15에서 20개가 차지하는 비중 | 60에서 70퍼센트 |
+| 한 번 실행될 때의 시간 | 평균 몇백 마이크로초에서 최대 몇 밀리초. 예로 든 것이 wineserver 260마이크로초, task worker 1.65밀리초 |
+| 대기 계열 system call에서 시작되는 scheduling 사건의 비율 | 70에서 75퍼센트 |
+
+발표 자료에는 frame 주기나 frame 예산이 적혀 있지 않습니다. 데이터셋의 게임이 쓰는 frame 주기 16.7밀리초는 다른 출처, Steam Deck 화면의 기본 60Hz에서 왔습니다.
 
 이 표에서 읽어야 할 것이 셋입니다.
 
 **첫째, task가 많지만 대부분은 별로 안 씁니다.** 300개가 돌지만 그중 30에서 40개가 전체의 95퍼센트를 차지합니다. 나머지 260개는 거의 놀고 있습니다.
 
-**둘째, 한 번에 쓰는 시간이 짧습니다.** 260마이크로초에서 1.65밀리초입니다. 앞 권에서 본 time slice가 밀리초 단위였던 것을 떠올리면, 이 task들은 slice를 다 쓰지 않고 내려간다는 뜻입니다.
+**둘째, 한 번에 쓰는 시간이 짧습니다.** 평균 몇백 마이크로초, 길어도 몇 밀리초입니다. 앞 권에서 본 time slice가 밀리초 단위였던 것을 떠올리면, 이 task들은 slice를 다 쓰지 않고 내려간다는 뜻입니다.
 
-**셋째, 대부분 다른 것을 기다리다가 깨어납니다.** 70에서 75퍼센트가 대기 계열 system call에서 깨어납니다. 앞 권에서 본 chain 구조입니다. 서로가 서로를 깨우면서 frame 하나를 만들어냅니다.
+**셋째, 대부분 다른 것을 기다리다가 깨어납니다.** scheduling 사건의 70에서 75퍼센트가 대기 계열 system call에서 시작됩니다. 앞 권에서 본 chain 구조입니다. 서로가 서로를 깨우면서 frame 하나를 만들어냅니다.
 
-> **이 연구에서는.** 이 숫자들이 실제로 이 연구의 데이터셋을 만드는 데 쓰였습니다. 가상의 게임 workload를 만들 때 task를 몇 개로 하고 각각이 얼마나 쓰게 할지를 정해야 하는데, 그 근거가 이 발표 자료입니다.
+> **이 연구에서는.** 이 숫자들이 실제로 이 연구의 데이터셋을 만드는 데 쓰였습니다. 데이터셋의 게임 workload를 만들 때 task를 몇 개로 하고 각각이 얼마나 쓰게 할지를 정해야 하는데, 그 근거가 이 발표 자료입니다. 사슬의 길이 16은 "게임 고유의 task 15에서 20개" 안에서 고른 값이고, wineserver와 task worker의 실행 시간, 사슬 구성원의 thread 이름도 이 자료에서 왔습니다. 사슬을 하나의 직선으로 놓는 형태는 이 연구의 설계입니다.
 >
-> 특히 "상위 소수가 대부분을 차지한다"는 관찰이 중요하게 쓰였습니다. 이 연구의 실험은 core 하나만 쓰는데, 그러면 300개 task를 그대로 넣을 수 없습니다. 상위 몇 개로 줄여야 하고, 그 축소가 정당한지를 이 통계로 뒷받침합니다.
+> 특히 "상위 소수가 대부분을 차지한다"는 관찰이 중요하게 쓰였습니다. 이 연구의 실험은 core 하나만 쓰는데, 그러면 300개 task를 그대로 넣을 수 없습니다. 사슬과 wineserver 밖의 게임 thread는 넣지 않았고, 그 생략이 정당한지를 이 통계로 뒷받침합니다. 자료가 상위 30에서 40개 밖의 task는 따로 설명하지 않기 때문입니다.
 >
-> 다만 인용 등급을 지켜야 합니다. 이건 발표 자료이므로 논문의 각주 수준으로 다뤄야 하고, 같은 내용을 다룬 기사 형태의 2차 자료를 함께 인용하는 방식으로 정리해뒀습니다.
+> 다만 인용 등급을 지켜야 합니다. 이건 발표 자료이므로 논문의 각주 수준으로 다루고, 숫자는 발표자가 2024-04-17에 보고한 값으로 적습니다. LWN의 기사(Corbet, "Sched_ext at LPC 2024", 2024-09-26)는 같은 scheduler를 다룬 Min의 LPC 2024 발표를 전한 것으로, 정성적인 서술에만 인용하고 그 숫자는 쓰지 않습니다. 기사의 "typically no more than 100µs at a time"은 발표 자료 13쪽의 "a few 100s usec on average to a few msec maximum"과 다릅니다.
 
 ## 4.4 왜 게임이 이 문제를 드러내는가
 
@@ -1378,7 +1394,7 @@ sched_ext는 틀만 제공합니다. 실제 정책은 따로 짜야 합니다. �
 
 이 정책이 하려는 것이 정확히 그 문제를 푸는 것입니다. **task가 어떤 사슬에 속해 있는지, 그 사슬이 얼마나 급한지를 행동에서 추정해서** 마감에 반영합니다.
 
-**그리고 상당 부분 성공합니다.** 실전에서 쓸 만하다고 표시되어 있고, 게임 성능 개선 사례로 언급됩니다.
+설명 문서는 이 정책을 실전에서 쓸 만하다고 표시하고, Valve는 SteamOS 3.8에서 이 정책을 사용자가 고를 수 있는 CPU scheduler로 제공합니다.
 
 ## 4.5 이 갈래의 한계
 
@@ -1400,32 +1416,30 @@ task 하나의 성질을 알면 그 task를 어떻게 대우할지 정할 수 �
 
 앞 권에서 봤듯이 좋은 scheduling의 정의 자체가 상황에 따라 달라집니다. **정의를 바꾸려면 상황을 알아야 하고, 상황은 task 하나의 성질이 아닙니다.**
 
-### 둘째, 행동 채널로는 원리적으로 안 되는 것이 있습니다
+### 둘째, 사용자가 원하는지는 행동 채널에 없습니다
 
 이게 더 근본적인 지점입니다.
 
 앞 권에서 든 예를 다시 가져옵니다. 이 연구가 실험에서 실제로 쓰는 대비입니다.
 
-한쪽에는 사용자가 직접 시작한 머신러닝 학습이 돌고 있고, 편집기가 옆에 켜져 있습니다. 다른 쪽에는 파일 색인 작업이 예약 실행으로 돌고 있고, 역시 편집기가 켜져 있습니다.
+한쪽에는 사용자가 직접 시작한 머신러닝 학습이 돌고 있고, 편집기가 옆에 켜져 있습니다. PyTorch의 기본 MNIST 예제를 CPU로 돌린 실제 학습입니다. 다른 쪽에는 GNOME의 파일 색인기 Tracker가 홈 폴더를 처음 색인하고 있고, 역시 편집기가 켜져 있습니다.
 
 scheduler가 관찰할 수 있는 것을 나열해봅시다.
 
-- CPU를 계속 쓰는 process가 하나 있다
-- 짧게 깨어났다 자는 process가 하나 있다
-- 디스크를 읽는다
-- 가끔 잠든다
+- 학습: thread 하나가 한 번 잡으면 평균 69초 넘게 잠들지 않고 계산한다. 선언한 class는 기본값이다
+- 색인기: process 다섯 개가 평균 2밀리초도 안 되게 실행하고 잠들기를 반복한다. 스스로 가장 낮은 class(`SCHED_IDLE`, nice 19, I/O도 idle class)에 들어가 있다
 
-**두 상황에서 이 관찰이 전부 동일합니다.** 설계상 동일하게 만들었습니다.
+**두 상황의 행동은 다르고, 선언한 class도 다릅니다.** 측정한 실제 작업을 그대로 넣었으니 당연합니다.
 
 그런데 올바른 대우는 정반대입니다. 앞쪽은 사용자가 결과를 기다리고 있으니 빨리 끝나야 하고, 뒤쪽은 아무도 부탁하지 않았으니 방해하면 안 됩니다.
 
-**이 차이를 행동 관찰로 알아낼 방법이 없습니다.** 이 갈래를 아무리 정교하게 다듬어도 마찬가지입니다. 구분에 필요한 정보가 관찰 가능한 데이터에 존재하지 않기 때문입니다.
+**행동의 차이가 이 구분을 말해주지는 않습니다.** 오래 붙잡고 계산하는 작업이 사용자가 원한 작업이라는 규칙은 없습니다. 이 갈래를 아무리 정교하게 다듬어도, 행동은 "누가 이 일을 원했는가"를 담고 있지 않습니다. 선언한 class도 그것을 정하지 못합니다. 이 쌍에서는 색인기가 스스로를 낮춰 두어 한쪽이 정리되지만, 원하지 않는 작업이 늘 그렇게 선언하는 것은 아닙니다. 사용자가 원하는지는 **이름**이 실어 나르고, 그 이름은 그 소프트웨어에 대해 알려진 것과 함께 읽어야 합니다.
 
 > **논문으로.** 이 논증의 형태가 중요합니다. "저 방법은 성능이 부족하다"가 아니라 **"저 방법의 입력 채널에 그 정보가 없다"**입니다.
 >
 > 앞엣것은 상대가 개선하면 무너지는 주장입니다. 뒤엣것은 개선으로 무너지지 않습니다. 그래서 이 연구는 뒤엣것으로 논증합니다.
 >
-> 그리고 그 논증을 말로만 하지 않고 **데이터셋으로 만들어뒀습니다.** 행동이 동일하고 올바른 설정이 다른 workload 쌍을 실제로 작성해서, 실험에서 그 쌍을 직접 돌립니다. 주장이 아니라 측정 대상이 됩니다.
+> 그리고 그 논증을 말로만 하지 않고 **데이터셋으로 만들어뒀습니다.** 올바른 설정이 정반대인 실제 작업 한 쌍을 측정해서 넣었고, 실험에서 그 쌍을 직접 돌립니다. 이 쌍이 묻는 것은 "색인기의 선언을 이미 존중하는 기준선 위에 상황 인식이 무엇을 더하는가"입니다. 색인기 쪽에서는 색인기가 스스로 선언한 idle class를 실행부의 엄격한 idle 규칙이 존중해서 그 여지가 0이라, 첫 관문 실험(RQ0)은 학습 쪽 파일로 판정하고 색인기 쪽 파일은 보고만 합니다.
 
 ## 4.6 그래도 이 연구는 이 계열을 버리지 않습니다
 
@@ -1446,11 +1460,11 @@ scheduler가 관찰할 수 있는 것을 나열해봅시다.
 ## 4장 정리
 
 - 이 갈래는 scheduler가 스스로 관찰해서 더 똑똑해질 수 있는가를 묻습니다. 이 연구의 가장 직접적인 반대 입장이라서 정확히 알아야 합니다.
-- MLFQ의 강등 규칙과 fair-share의 누적 회계가 이미 이 갈래에 속합니다. 두 방식 모두 재료가 시간과 횟수뿐입니다.
-- 이 계열의 가장 발전한 형태가 scx_lavd입니다. 각 task가 얼마나 지연에 민감한지를 측정하고 그 정보를 마감 부여에 씁니다. 게임 workload에서 출발했고 실전에서 쓸 만하다고 표시되어 있습니다.
-- 이 정책을 만든 사람의 발표 자료에 게임 실행 중의 실제 통계가 있습니다. task가 약 300개인데 상위 30에서 40개가 전체 scheduling의 95퍼센트를 차지하고, 한 번 실행이 260마이크로초에서 1.65밀리초이며, 70에서 75퍼센트가 대기 계열 system call에서 깨어납니다. 이 숫자들이 이 연구의 데이터셋 설계에 쓰였습니다.
+- MLFQ의 강등 규칙과 fair-share의 누적 회계가 이미 이 갈래에 속합니다. MLFQ는 CPU를 쓴 모양으로 task를 단계에 나누고, fair-share는 공정한 몫에 대어 셉니다. 두 방식 모두 재료가 시간과 횟수뿐입니다.
+- scx_lavd는 각 task의 지연 민감도를 기다림과 깨움의 빈도, 실행 시간, 가중치로 추정하고, 깨우는 쪽과 깨워지는 쪽 사이로 사슬을 따라 전파하며, 그 값으로 virtual deadline과 time slice를 정합니다. 게임에서 끊김을 줄이려는 동기로 출발했고 실전에서 쓸 만하다고 표시되어 있습니다.
+- 이 정책을 만든 사람의 발표 자료에 게임 실행 중의 통계가 있습니다(발표자가 2024-04-17에 보고한 값). task가 약 300개인데 상위 30에서 40개가 전체 scheduling의 95퍼센트를 차지하고, 한 번 실행이 평균 몇백 마이크로초에서 최대 몇 밀리초이며, scheduling 사건의 70에서 75퍼센트가 대기 계열 system call에서 시작됩니다. frame 예산은 적혀 있지 않습니다. 이 숫자들이 이 연구의 데이터셋 설계에 쓰였습니다.
 - 게임이 이 갈래의 한계를 잘 드러내는 이유는 chain 구조 때문입니다. 각 단계의 작은 대기가 쌓여서 마감을 넘기는데, scheduler는 각 task를 따로 봅니다.
-- 이 갈래의 한계는 두 층위입니다. 알아내는 것이 task 하나의 성질이지 machine 전체의 상황이 아니라는 것, 그리고 행동이 동일하고 올바른 대우가 다른 경우를 원리적으로 구분할 수 없다는 것입니다.
+- 이 갈래의 한계는 두 층위입니다. 알아내는 것이 task 하나의 성질이지 machine 전체의 상황이 아니라는 것, 그리고 사용자가 그 일을 원하는지가 행동에 없다는 것입니다. 이 연구가 쓰는 학습 대 색인기 쌍은 행동도 선언한 class도 다르지만, 그 차이가 누가 원했는지를 말해주지 않습니다. 선언한 class도 그것을 정하지 못하고, 이름을 그 소프트웨어에 대해 알려진 것과 함께 읽어야 합니다.
 - 두 번째 논증의 형태가 중요합니다. 성능이 부족하다가 아니라 입력 채널에 그 정보가 없다는 것입니다. 앞엣것은 상대가 개선하면 무너지지만 뒤엣것은 무너지지 않습니다.
 - 이 연구는 행동 관찰을 대체하지 않고 그대로 씁니다. 계산 작업 부류를 판별하는 규칙도 행동 기반으로 고정해뒀습니다. 이름으로 판별하면 무엇을 측정했는지 알 수 없어지기 때문입니다.
 
@@ -1548,7 +1562,7 @@ job 하나가 여러 **stage**로 나뉘고, 각 stage는 자기 입력 데이�
 
 행동 공간을 정하는 문제도 양 극단이 막혀 있습니다.
 
-> "As a naive approach, consider a solution, that given the embeddings, returns the assignment for all executors to job stages in one shot. This approach has to choose actions from an exponentially large set of combinations. On the other extreme, consider a solution that invokes the scheduling agent to pick one stage every time an executor becomes available. This approach has a much smaller action space (O(# stages)), but it requires long sequences of actions to schedule a given set of jobs. In RL, both large action spaces and long action sequences increase sample complexity and slow down training."
+> "As a naive approach, consider a solution, that given the embeddings […], returns the assignment for all executors to job stages in one shot. This approach has to choose actions from an exponentially large set of combinations. On the other extreme, consider a solution that invokes the scheduling agent to pick one stage every time an executor becomes available. This approach has a much smaller action space (O(# stages)), but it requires long sequences of actions to schedule a given set of jobs. In RL, both large action spaces and long action sequences increase sample complexity and slow down training […]."
 
 한 번에 전부 배정하면 경우의 수가 지수적으로 커지고, 하나씩 배정하면 행동의 수가 너무 길어집니다. **둘 다 학습을 어렵게 만듭니다.**
 
@@ -1568,13 +1582,13 @@ job 하나가 여러 **stage**로 나뉘고, 각 stage는 자기 입력 데이�
 
 목표가 평균 작업 완료 시간의 최소화일 때 보상이 이렇게 정의됩니다.
 
-> "Decima gives the agent a reward r_k after each action based on its high-level scheduling objective. For example, if the objective is to minimize the average JCT, Decima penalizes the agent r_k = −(t_k − t_{k−1})J_k after the kth action, where J_k is the number of jobs in the system during the interval."
+> "Decima gives the agent a reward r_k after each action based on its high-level scheduling objective. For example, if the objective is to minimize the average JCT, Decima penalizes the agent r_k = −(t_k − t_{k−1})J_k after the kth action, where J_k is the number of jobs in the system during the interval [t_{k−1}, t_k)."
 
 **시스템 안에 남아 있는 job의 수에, 그 상태가 지속된 시간을 곱한 만큼 벌점을 줍니다.**
 
 그리고 왜 그 형태인지를 밝힙니다.
 
-> "This objective minimizes the average number of jobs in the system, and hence, by Little's law, it effectively minimizing the average JCT."
+> "This objective minimizes the average number of jobs in the system, and hence, by Little's law […], it effectively minimizing the average JCT."
 
 시스템 안의 평균 job 수를 줄이는 것이 대기 이론의 법칙에 의해 평균 완료 시간을 줄이는 것과 같다는 것입니다.
 
@@ -1584,7 +1598,7 @@ job 하나가 여러 **stage**로 나뉘고, 각 stage는 자기 입력 데이�
 
 초록의 "hand-tuned scheduling heuristics"가 본문에서는 일곱 개입니다.
 
-> "In our evaluation, we compare Decima's performance to that of seven baseline algorithms: (1) Spark's default FIFO scheduling […] (2) A shortest-job-first critical-path heuristic (SJF-CP) […] (3) Simple fair scheduling […] (4) Naive weighted fair scheduling […] (5) A carefully-tuned weighted fair scheduling […] (6) The standard multi-resource packing algorithm from Tetris […] (7) Graphene*, an adaptation of Graphene for Decima's discrete executor classes"
+> "In our evaluation, we compare Decima's performance to that of seven baseline algorithms: (1) Spark's default FIFO scheduling […] (2) A shortest-job-first critical-path heuristic (SJF-CP) […] (3) Simple fair scheduling […] (4) Naive weighted fair scheduling […] (5) A carefully-tuned weighted fair scheduling […] (6) The standard multi-resource packing algorithm from Tetris […] (7) Graphene*, an adaptation of Graphene […] for Decima's discrete executor classes"
 
 **앞 권에서 배운 알고리즘들이 그대로 있습니다.** FIFO, 짧은 일 먼저, 공정 분배. 그리고 그것들의 가중치 붙인 변형과, 튜닝을 거친 변형이 있습니다.
 
@@ -1598,7 +1612,7 @@ job 하나가 여러 **stage**로 나뉘고, 각 stage는 자기 입력 데이�
 
 **21퍼센트는 batch 도착 실험의 값입니다.**
 
-> "We randomly sample jobs from six different input sizes (2, 5, 10, 20, 50, and 100 GB) and all 22 TPC-H queries, producing a heavy-tailed distribution: 23% of the jobs contain 82% of the total work. A combination of 20 random jobs (unseen in training) arrives as a batch, and we measure their average JCT."
+> "We randomly sample jobs from six different input sizes (2, 5, 10, 20, 50, and 100 GB) and all 22 TPC-H […] queries, producing a heavy-tailed distribution: 23% of the jobs contain 82% of the total work. A combination of 20 random jobs (unseen in training) arrives as a batch, and we measure their average JCT."
 
 표준 질의 모음에서 20개를 뽑아 한꺼번에 던지고 평균 완료 시간을 재는 실험입니다. **23퍼센트의 job이 전체 작업량의 82퍼센트를 차지하는 꼬리가 두꺼운 분포**입니다.
 
@@ -1612,17 +1626,17 @@ job 하나가 여러 **stage**로 나뉘고, 각 stage는 자기 입력 데이�
 
 job 1,000개가 평균 45초 간격으로 계속 들어오고, 그 결과 cluster 부하가 85퍼센트가 되는 상황입니다.
 
-> "Decima's average JCT is 29% lower. In particular, Decima shines during busy, high-load periods […] Decima maintains a lower concurrent job count than the tuned heuristic particularly during the busy period in hours 7–9, where Decima completes jobs about 2× faster."
+> "Decima's average JCT is 29% lower. In particular, Decima shines during busy, high-load periods […] Decima maintains a lower concurrent job count than the tuned heuristic particularly during the busy period in hours 7–9, where Decima completes jobs about 2× faster […]."
 
 **전체로는 29퍼센트이고, 두 배는 부하가 몰린 7시에서 9시 구간의 값입니다.** 초록의 "up to 2x improvement during periods of high cluster load"가 정확히 이 구간을 가리킵니다.
 
 개선이 어디서 나오는지도 밝힙니다.
 
-> "Decima's performance gain comes from finishing small jobs faster […] Decima achieves this by assigning more executors to the small jobs."
+> "Decima's performance gain comes from finishing small jobs faster […] Decima achieves this by assigning more executors to the small jobs […]."
 
 작은 job에 executor를 더 주는 것입니다. 그런데 무작정 더 주면 자원이 낭비됩니다.
 
-> "The right number of executors for each job is workload-dependent: indiscriminately giving small jobs more executors would use cluster resources inefficiently."
+> "The right number of executors for each job is workload-dependent: indiscriminately giving small jobs more executors would use cluster resources inefficiently […]."
 
 **얼마나 더 줄지가 workload마다 다르다는 것**, 그 값을 사람이 정하지 않고 배웠다는 것이 이 논문의 주장입니다.
 
@@ -1632,7 +1646,7 @@ job 1,000개가 평균 45초 간격으로 계속 들어오고, 그 결과 cluste
 
 > "Finally, we train Decima for at least 50,000 iterations for all experiments."
 
-> "We implemented Decima's training framework using TensorFlow, and we use 16 workers to compute episodes with the same job sequence in parallel during training. Each training iteration, including interaction with the simulator, model inference and model update from all training workers, takes roughly 1.5 seconds on a machine with Intel Xeon E5-2640 CPU and Nvidia Tesla P100 GPU."
+> "We implemented Decima's training framework using TensorFlow […], and we use 16 workers to compute episodes with the same job sequence in parallel during training. Each training iteration, including interaction with the simulator, model inference and model update from all training workers, takes roughly 1.5 seconds on a machine with Intel Xeon E5-2640 CPU and Nvidia Tesla P100 GPU."
 
 **모든 실험에 최소 5만 번의 반복**, 반복 한 번에 약 1.5초, 그것도 병렬 작업자 16개와 GPU 한 장을 쓴 경우입니다. 두 숫자를 곱하면 실험 하나마다 20시간 남짓입니다.
 
@@ -1650,7 +1664,7 @@ job 1,000개가 평균 45초 간격으로 계속 들어오고, 그 결과 cluste
 
 ### 환경이 바뀌면
 
-이 연구가 스스로 밝힌 한계입니다.
+이 연구가 스스로 밝힌 한계입니다(7.4절, 11쪽).
 
 > "When training with a mixed set of workloads that cover the whole interarrival time range, Decima can learn a more general policy. This policy fits less strongly to a specific interarrival time distribution and therefore becomes more robust to workload changes."
 
@@ -1696,7 +1710,7 @@ job 1,000개가 평균 45초 간격으로 계속 들어오고, 그 결과 cluste
 
 ### 네 개의 벤치마크
 
-> "We evaluated FIRM on a set of end-to-end interactive and responsive real-world microservice benchmarks: (i) DeathStarBench, consisting of Social Network, Media Service, and Hotel Reservation microservice applications, and (ii) Train-Ticket, consisting of the Train-Ticket Booking Service."
+> "We evaluated FIRM on a set of end-to-end interactive and responsive real-world microservice benchmarks: (i) DeathStarBench […], consisting of Social Network, Media Service, and Hotel Reservation microservice applications, and (ii) Train-Ticket […], consisting of the Train-Ticket Booking Service."
 
 두 개의 공개 벤치마크 모음에서 나온 네 개의 응용입니다.
 
@@ -1706,7 +1720,7 @@ job 1,000개가 평균 45초 간격으로 계속 들어오고, 그 결과 cluste
 
 규모도 적혀 있습니다.
 
-> "These benchmarks contain 36, 38, 15, and 41 unique microservices, respectively; cover all workflow patterns; and use various programming languages including Java, Python, Node.js, Go, C/C++, Scala, PHP, and Ruby. All microservices are deployed in separate Docker containers."
+> "These benchmarks contain 36, 38, 15, and 41 unique microservices, respectively; cover all workflow patterns […]; and use various programming languages including Java, Python, Node.js, Go, C/C++, Scala, PHP, and Ruby. All microservices are deployed in separate Docker containers."
 
 각각 서비스가 15개에서 41개이고, 언어가 여덟 가지 섞여 있습니다.
 
@@ -1754,7 +1768,7 @@ CPU 시간, memory 대역폭, 마지막 단계 cache의 용량, 디스크 입출
 
 초록의 세 개의 "up to"가 본문에서 이렇게 풀립니다. 비교 대상은 둘입니다. 하나는 컨테이너 관리 도구의 기본 자동 확장이고, 다른 하나는 네트워크에서 쓰는 고전적인 증감 방식입니다.
 
-> "We observed that the AIMD-based method, albeit simple, outperforms the Kubernetes autoscaling approach by 1.7× on average and by 1.6× in the worst case. In contrast, FIRM: 1. Outperformed both baselines by up to 6× and 11×, which leads to 9× and 16× fewer SLO violations; 2. Lowered the overall requested CPU limit by 29–62%, and increased the average cluster-level CPU utilization by up to 33%; 3. Reduced the number of dropped or timed out user requests by up to 8×."
+> "We observed that the AIMD-based method, albeit simple, outperforms the Kubernetes autoscaling approach by 1.7× on average and by 1.6× in the worst case. In contrast, FIRM: 1. Outperformed both baselines by up to 6× and 11×, which leads to 9× and 16× fewer SLO violations; 2. Lowered the overall requested CPU limit by 29–62%, as shown in Fig. 11(b), and increased the average cluster-level CPU utilization by up to 33%; and 3. Reduced the number of dropped or timed out user requests by up to 8× as shown in Fig. 11(c)."
 
 **16배는 둘 중 약한 쪽과의 차이이고, 강한 쪽과는 9배입니다.** 그리고 62퍼센트는 29에서 62퍼센트라는 범위의 위쪽 끝입니다.
 
@@ -1788,7 +1802,7 @@ CPU 시간, memory 대역폭, 마지막 단계 cache의 용량, 디스크 입출
 
 그리고 그중 일곱 개는 실제 시스템을 뒤에 붙이고, 다섯 개는 시뮬레이터를 씁니다.
 
-> "Seven of the environments use real systems in the backend. For the remaining five environments, which have well-understood dynamics, we provide a simulator to facilitate easier setup and faster RL training."
+> "Seven of the environments use real systems in the backend […]. For the remaining five environments, which have well-understood dynamics, we provide a simulator to facilitate easier setup and faster RL training."
 
 시뮬레이터를 쓰는 쪽은 **동작이 잘 이해된** 문제들이라는 단서가 붙어 있습니다.
 
@@ -1848,7 +1862,7 @@ CPU 시간, memory 대역폭, 마지막 단계 cache의 용량, 디스크 입출
 
 논문이 그림으로 설명하는 예가 정확합니다.
 
-> "If the arrival sequence after time t consists of a burst of large jobs, the job queue will grow and the agent will receive low rewards. In contrast, a stream of lightweight jobs will lead to short queues and large rewards. The problem is that this difference in reward is independent of the action at time t; rather, it is caused purely by the randomness in the job arrival process. In these environments, the agents cannot tell whether two reward feedbacks differ due to disparate input processes, or due to the quality of the actions."
+> "If the arrival sequence after time t consists of a burst of large jobs (e.g., job sequence 1), the job queue will grow and the agent will receive low rewards. In contrast, a stream of lightweight jobs (e.g., job sequence 2) will lead to short queues and large rewards. The problem is that this difference in reward is independent of the action at time t; rather, it is caused purely by the randomness in the job arrival process. In these environments, the agents cannot tell whether two reward feedbacks differ due to disparate input processes, or due to the quality of the actions."
 
 **같은 상태에서 같은 행동을 했는데 보상이 전혀 다르게 나옵니다.** 그 차이가 내가 잘해서인지 운이 좋아서인지 구분할 수 없습니다.
 
@@ -1860,11 +1874,11 @@ CPU 시간, memory 대역폭, 마지막 단계 cache의 용량, 디스크 입출
 
 **끝이 없는 문제입니다.**
 
-> "In practice, production computer systems (e.g., Spark schedulers, load balancers, cache controllers, etc.) are long running and host services indefinitely. This creates an infinite horizon MDP that prevents the RL agents from performing episodic training."
+> "In practice, production computer systems (e.g., Spark schedulers, load balancers, cache controllers, etc.) are long running and host services indefinitely. This creates an infinite horizon MDP […] that prevents the RL agents from performing episodic training."
 
 **시스템은 끝나지 않습니다.** 게임은 이기거나 지면 끝나고, 그 끝에 점수를 매길 수 있습니다. scheduler에는 끝이 없습니다. 끝이 없으면 "이 판의 결과가 얼마였다"는 기준점을 만들 수 없습니다.
 
-> "Moreover, the discounted total reward formulation in the episodic case might not be suitable — an action in a long running system can have impact beyond a fixed discounting window. For example, scheduling a large job on a slow server blocks future small jobs, no matter whether the small jobs arrive immediately after the large job or much farther in the future over the course of the lifetime of the large job."
+> "Moreover, the discounted total reward formulation in the episodic case might not be suitable — an action in a long running system can have impact beyond a fixed discounting window. For example, scheduling a large job on a slow server blocks future small jobs (affecting job runtime in the rewards), no matter whether the small jobs arrive immediately after the large job or much farther in the future over the course of the lifetime of the large job."
 
 먼 미래의 보상을 깎아서 보는 통상의 방식도 맞지 않습니다. **긴 작업을 느린 서버에 올리면 그 작업이 사는 내내 뒤에 오는 작업을 막는데**, 그 피해가 얼마나 뒤에 오느냐와 무관하게 같은 크기이기 때문입니다.
 
@@ -1878,11 +1892,11 @@ CPU 시간, memory 대역폭, 마지막 단계 cache의 용량, 디스크 입출
 
 **모형의 정확도가 문제의 복잡도에 따라 무너집니다.**
 
-> "First, discrepancies between simulation and reality prevent direct generalization. For example, in database query optimization, existing simulators or query planners use offline cost models to predict query execution time (as a proxy for the reward). However, the accuracy of the cost model quickly degrades as the query gets more complex due to both variance in the underlying data distribution and system-specific artifacts."
+> "First, discrepancies between simulation and reality prevent direct generalization. For example, in database query optimization, existing simulators or query planners use offline cost models to predict query execution time (as a proxy for the reward). However, the accuracy of the cost model quickly degrades as the query gets more complex due to both variance in the underlying data distribution and system-specific artifacts […]."
 
 **실제 시스템은 느립니다.**
 
-> "Second, interactions with some real systems can be slow. In adaptive video streaming, for example, the agent controls the bitrate for each chunk of a video. Thus, the system returns a reward to the agent only after a video chunk is downloaded, which typically takes a few seconds. Naively using the same training method from simulation would take a single-threaded agent more than 10 years to complete training in reality."
+> "Second, interactions with some real systems can be slow. In adaptive video streaming, for example, the agent controls the bitrate for each chunk of a video. Thus, the system returns a reward to the agent only after a video chunk is downloaded, which typically takes a few seconds. Naively using the same training method from simulation […] would take a single-threaded agent more than 10 years to complete training in reality."
 
 **시뮬레이터에서 하던 방식 그대로 실제 시스템에서 학습하면 10년이 넘게 걸립니다.**
 
@@ -1892,7 +1906,7 @@ CPU 시간, memory 대역폭, 마지막 단계 cache의 용량, 디스크 입출
 
 논문이 드는 구체적인 예가 무섭습니다. 부하 분산 환경에서 학습한 agent가, 처음에 본 작업 크기 분포가 둘로 갈린 모양이었기 때문에 **작은 작업 전용으로 서버 하나를 비워두는 정책**을 배웠습니다. 그런데 분포가 바뀌자 그 비워둔 서버가 그냥 낭비가 되어 전체 처리량이 떨어졌습니다.
 
-> "Therefore, to deploy training algorithms online, these problems require RL to train robust policies that ensure safety."
+> "Therefore, to deploy training algorithms online, these problems require RL to train robust policies that ensure safety […]."
 
 #### 넷째, 기존 heuristic과의 이해 가능성 경쟁
 
@@ -1926,11 +1940,13 @@ CPU 시간, memory 대역폭, 마지막 단계 cache의 용량, 디스크 입출
 
 ## 5.5 이 갈래의 공통 한계
 
-세 논문을 놓고 보면 공통된 성질이 보입니다.
+세 논문을 놓고 보면 공통된 성질이 둘 보입니다. 둘 다 밖에서 덧붙인 평가가 아니라 이 논문들이 스스로 적은 것이고, 뒤에서 볼 언어 모델 연구 SchedCP도 최신 판본의 2절(2쪽)에서 이 갈래의 한계로 이 둘을 요약합니다.
 
 ### 재학습이 필요합니다
 
 각 논문이 학습시킨 모델은 그 환경에 맞춰 학습된 것입니다. 다른 cluster, 다른 workload, 다른 하드웨어로 옮기면 다시 학습해야 합니다.
+
+논문들이 스스로 그렇게 적습니다. Decima는 앞에서 본 대로, 특정 도착 분포로만 학습하면 그 분포에 맞춰지고 여러 workload로 학습해야 변화에 견딘다고 적습니다(7.4절, 11쪽). FIRM은 workload와 시스템이 바뀔 때 빨리 다시 학습하려고 전이 학습을 씁니다. 전이 학습을 쓴 agent는 약 2 000번 반복에서 수렴했고, 모든 microservice를 agent 하나로 학습한 경우는 약 15 000번이 걸렸다고 보고합니다(3, 10, 13쪽). 1 000번이 약 30분입니다. 줄였지만 여전히 다시 학습하는 것입니다. Park는 시뮬레이션과 현실의 간극, 느린 실제 시스템, 학습 중의 성능 저하를 실제 배포의 어려움으로 꼽습니다(3.3절, 5쪽).
 
 데이터센터에서는 감당할 만합니다. 기계가 수천 대이고 workload가 반복되니 학습 비용을 나눌 수 있습니다.
 
@@ -1942,9 +1958,9 @@ CPU 시간, memory 대역폭, 마지막 단계 cache의 용량, 디스크 입출
 
 강화학습 모델은 사람이 정해준 것 안에서 최적화합니다. 어떤 값을 관측할지, 어떤 행동이 가능한지, 무엇을 보상으로 삼을지를 전부 사람이 먼저 정해야 합니다.
 
-**그러면 그 틀 밖의 정보는 모델에 도달하지 않습니다.**
+**그러면 그 틀 밖의 정보는 모델에 도달하지 않습니다.** Park가 앞에서 "문제마다 맞는 표현을 찾는 일이 중심 과제"라고 적은 것이 이 한계를 안쪽에서 본 모습입니다.
 
-앞 장에서 본 대비를 다시 봅시다. 사용자가 시작한 학습과 예약된 색인 작업. 관측 항목에 "CPU 사용률"과 "깨어나는 빈도"만 있다면, 모델이 아무리 잘 학습해도 두 상황을 구분하지 못합니다. 구분에 필요한 정보가 관측 항목에 없기 때문입니다.
+앞 장에서 본 대비를 다시 봅시다. 사용자가 시작한 학습과 아무도 부탁하지 않은 색인 작업. 관측 항목에 "CPU 사용률"과 "깨어나는 빈도"만 있다면, 모델은 두 작업의 행동 차이는 배울 수 있어도 사용자가 그 일을 원했는지는 배울 수 없습니다. 그 정보가 관측 항목에 없기 때문입니다.
 
 **즉 이 갈래는 앞 장의 갈래와 같은 한계를 공유합니다.** 방법이 규칙에서 학습으로 바뀌었을 뿐, 읽는 채널은 여전히 행동입니다.
 
@@ -1962,7 +1978,7 @@ CPU 시간, memory 대역폭, 마지막 단계 cache의 용량, 디스크 입출
 
 ### 문제 인식이 같습니다
 
-초록의 첫 문장입니다.
+초록의 첫 문장과 둘째 문장의 앞부분입니다.
 
 > "Modern operating system schedulers employ a single, static policy, which struggles to deliver optimal performance across the diverse and dynamic workloads of contemporary systems. This "one-policy-fits-all" approach leads to significant compromises in fairness, throughput, and latency"
 
@@ -2017,13 +2033,13 @@ kernel 안의 탐침, 프로세스 정보 파일 체계, 그리고 **데스크�
 
 **그런데 목록 어디에도 프로세스의 이름이 없습니다.** 초점이 있는 프로세스의 CPU 사용률은 읽지만, 그 프로세스가 무엇인지는 읽지 않습니다. 관측 항목 전체가 수치입니다.
 
-앞 장에서 정리한 대비를 여기에 대보면 결론이 바로 나옵니다. 사용자가 시작한 학습과 예약된 색인 작업은 이 표의 모든 칸에서 같은 값을 낼 수 있습니다. **이 표에 그 구분을 담을 칸이 없습니다.**
+앞 장에서 정리한 대비를 여기에 대보면 결론이 바로 나옵니다. 사용자가 시작한 학습과 아무도 부탁하지 않은 색인 작업은 이 표의 여러 칸에서 다른 값을 내겠지만, 그 값 어디에도 "누가 이 일을 원했는가"는 들어 있지 않습니다. **이 표에 그 구분을 담을 칸이 없습니다.**
 
 ### 전문 정책의 목록
 
 무엇 중에서 고르는지도 본문에 있습니다.
 
-> "The expert scheduler set available to ASA includes: scx_p2dq, scx_bpfland, scx_nest, scx_lavd, scx_simple, scx_flash, scx_rusty"
+> "The expert scheduler set available to ASA includes: scx_p2dq […], scx_bpfland […], scx_nest […], scx_lavd […], scx_simple, scx_flash […], scx_rusty […], and the baseline EEVDF […]."
 
 일곱 개이고, 여기에 기본 scheduler가 비교 대상으로 더해집니다.
 
@@ -2085,7 +2101,7 @@ kernel 안의 탐침, 프로세스 정보 파일 체계, 그리고 **데스크�
 
 28개 상황을 알아맞히는 정확도가 미세 조정 전 96.83퍼센트, 후 99.19퍼센트입니다.
 
-> **이 연구에서는.** 이 대목을 정확히 다뤄야 합니다. 뒤 장에서 언어 모델 계열을 다룰 때 "인식 자체를 따로 재는 평가는 그쪽에 대응물이 없다"고 말하게 되는데, **그 서술은 언어 모델 계열에 대해서만 성립합니다.** 이쪽은 잽니다.
+> **이 연구에서는.** 이 대목을 정확히 다뤄야 합니다. 인식 자체를 따로 잰 측정은 이쪽만 있는 것도 아닙니다. 언어 모델 계열에도 가장 가까운 측정이 둘 있습니다. 하나는 뒤 장에서 볼 SchedCP가 연구 질문들 옆에 적은 분류 결과 하나(작업 8개를 모두 맞혔다는 것)입니다. 다른 하나는 AKTS(arXiv 2609.12276v2)라는 원고로, 작은 언어 모델(Qwen2.5의 0.5B, 1.5B, 3B)이 부하 telemetry를 보고 정책 번호를 고르게 했더니 40번 중 20번을 맞혀 우연 수준이었다고 4.2절에 보고합니다. 우리가 찾아본 범위(2026-10-08까지의 문헌)에서는, 언어 모델이 **프로세스 이름에서** 데스크톱 상황을 알아보는 정확도를 정답 라벨에 대어 잰 선행 연구는 없습니다. 그 범위를 넘어 "인식을 잰 연구가 없다"고 쓰면 틀립니다.
 >
 > 그러니 이 연구의 측정 계층이 완전히 새로운 것은 아닙니다. 다른 것은 **무엇을 정답으로 놓았느냐**입니다. 이쪽의 정답은 "이 실험이 28개 중 몇 번 상황인가"이고, 상황의 목록은 실험 설계자가 정한 28개입니다. 이 연구의 정답은 상황을 기술하는 어휘의 각 항목이고, 같은 상황에 여러 번 물었을 때의 일관성과 방해 요소가 섞였을 때의 견고함을 따로 봅니다.
 >
@@ -2099,7 +2115,7 @@ kernel 안의 탐침, 프로세스 정보 파일 체계, 그리고 **데스크�
 
 이쪽은 시스템 행동에서 패턴을 읽습니다. 이 연구는 프로세스의 이름에서 상황을 읽습니다.
 
-그러니까 이쪽은 앞 장에서 정리한 행동 채널의 한계를 그대로 가집니다. 골격이 아무리 같아도, 행동이 동일하고 의도가 다른 상황은 구분하지 못합니다.
+그러니까 이쪽의 인식기는 앞 장에서 정리한 행동 채널의 한계를 그대로 가집니다. 사용자가 그 일을 원했는지는 수치에 담기지 않으므로, 골격이 아무리 같아도 그 구분은 하지 못합니다. 반대로 이 연구의 인식기는 세상에 대한 지식으로 이름을 읽으므로 대상 기계에서 학습할 필요가 없습니다. 다만 이건 인식기에 한한 말입니다.
 
 ### 기계별 대응표는 누가 만드는가
 
@@ -2172,9 +2188,9 @@ kernel 안의 탐침, 프로세스 정보 파일 체계, 그리고 **데스크�
 - Park은 이 갈래를 위한 실험 환경으로 열두 개의 시스템 최적화 문제를 하나의 인터페이스로 묶었습니다. 그중 일곱 개는 실제 시스템을 뒤에 붙이고 다섯 개는 시뮬레이터를 씁니다.
 - Park의 핵심은 시스템에 강화학습을 쓰는 것이 왜 어려운지에 대한 네 갈래 정리입니다. 첫째, 공간의 대부분에서 보상이 똑같이 나빠 방향을 알 수 없고, 문제마다 맞는 표현을 찾는 일이 아직 풀리지 않은 영역이 있습니다. 둘째, 밖에서 들어오는 일감의 무작위성 때문에 같은 상태에서 같은 행동을 해도 보상이 다르게 나오고, 시스템은 끝나지 않아서 한 판의 결과라는 기준점을 만들 수 없습니다. 셋째, 시뮬레이션과 현실이 다르고 실제 시스템은 느리며 학습 중인 정책이 시스템을 망가뜨릴 수 있습니다. 넷째, 시스템 분야에는 이미 읽을 수 있고 고칠 수 있는 heuristic이 많아서 학습 기반이 이해 가능성에서도 그만큼은 되어야 합니다.
 - 이 정리의 인용 가치가 높은 이유는 밖에서 던지는 비판이 아니라 이 갈래를 만든 사람들이 스스로 적은 난점 목록이기 때문입니다. Park의 저자 중 한 명이 Decima의 제1저자입니다.
-- 이 갈래의 공통 한계는 둘입니다. 환경이 바뀌면 재학습이 필요하다는 것, 그리고 사람이 미리 정해준 관측 항목과 행동 공간 안에서만 움직인다는 것입니다. 두 번째 때문에 방법이 규칙에서 학습으로 바뀌었을 뿐 읽는 채널은 여전히 행동입니다.
+- 이 갈래의 공통 한계는 둘입니다. 환경이 바뀌면 재학습이 필요하다는 것, 그리고 사람이 미리 정해준 관측 항목과 행동 공간 안에서만 움직인다는 것입니다. 둘 다 이 논문들이 스스로 적었고(Decima 7.4절, FIRM의 전이 학습 약 2 000번 대 약 15 000번, Park 3.3절), 뒤의 언어 모델 연구가 요약합니다. 두 번째 때문에 방법이 규칙에서 학습으로 바뀌었을 뿐 읽는 채널은 여전히 행동입니다.
 - ASA는 이 연구와 골격이 같습니다. 하나의 정책 대신 일곱 개의 전문 정책을 두고 상황에 맞는 것을 고르며, 정책 교체 기능으로 실제로 바꿉니다. 판정이 흔들리지 않도록 6초 창의 시간 가중 투표를 쓰고, 그 값은 4초보다 짧으면 잡음에 흔들리고 10초보다 길면 늦게 반응한다는 실험으로 정했습니다.
-- ASA가 읽는 항목은 CPU, 메모리, 디스크, 프로세스, scheduling, 네트워크의 여섯 갈래 수치입니다. 창에 초점이 있는 프로세스의 사용률과 입력 이벤트 같은 데스크톱 신호가 들어 있지만, 목록 어디에도 프로세스의 이름이 없습니다. 그래서 행동이 같고 의도가 다른 두 상황을 담을 칸이 없습니다.
+- ASA가 읽는 항목은 CPU, 메모리, 디스크, 프로세스, scheduling, 네트워크의 여섯 갈래 수치입니다. 창에 초점이 있는 프로세스의 사용률과 입력 이벤트 같은 데스크톱 신호가 들어 있지만, 목록 어디에도 프로세스의 이름이 없습니다. 그래서 사용자가 그 일을 원했는지를 담을 칸이 없습니다.
 - ASA의 벤치마크는 대화형 응용 넷과 배경 부하 일곱을 짝지은 28개 상황이고, 이 연구의 데이터셋 구성과 발상이 가깝습니다. 다른 점은 배경 부하가 사용자가 원한 것인지 아닌지를 구분하는 축이 없다는 것입니다.
 - ASA의 초록에 있던 이음매는 본문에서 해소됩니다. 기계별 대응표는 사람이 쓰는 것이 아니라 대상 기계에서 후보 scheduler를 전부 돌려보고 채웁니다. 초록의 "재학습 없이"는 인식 모델의 재학습을 가리키는 말이지 기계별 준비가 없다는 뜻이 아닙니다. 이 연구가 내세울 수 있는 차이는 채널 하나로 좁혀지고, 좁히는 편이 논증을 강하게 만듭니다.
 - ASA는 인식 정확도를 따로 보고합니다. 28개 상황 분류가 미세 조정 전 96.83퍼센트, 후 99.19퍼센트입니다. 그러므로 인식을 따로 잰다는 발상 자체는 이 연구가 처음이 아니며, 논문에서 그 점을 흐리면 안 됩니다. 다른 것은 무엇을 정답으로 놓았느냐입니다.
@@ -2198,7 +2214,7 @@ kernel 안의 탐침, 프로세스 정보 파일 체계, 그리고 **데스크�
 
 ### 인용
 
-- Zheng, Y., Hu, Y., Zhang, W., & Quinn, A. (2025). Towards Agentic OS: An LLM Agent Framework for Linux Schedulers. arXiv:2509.01245 (v4, 2025-09-30). ML for Systems @ NeurIPS 2025.
+- Zheng, Y., Hu, Y., Zhang, W., & Quinn, A. (2025). Towards Agentic OS: An LLM Agent Framework for Linux Schedulers. arXiv:2509.01245 (v4, 2025-09-30). NeurIPS 2025 Workshop on ML for Systems; arXiv의 journal-ref는 "MLforSystem 2025".
 
 이 연구를 정확히 아는 것이 중요합니다. 문제 인식이 거의 같기 때문입니다.
 
@@ -2206,9 +2222,9 @@ kernel 안의 탐침, 프로세스 정보 파일 체계, 그리고 **데스크�
 
 이 논문은 arXiv에 판본이 넷 올라와 있습니다. 2025년 9월 1일, 9월 3일, 9월 26일, 9월 30일 순이고, **네 번째가 최신입니다.** 2026년 9월 12일 기준으로 다섯 번째 판본은 없습니다.
 
-게재 정보도 arXiv의 서지 항목에 붙어 있습니다. 학회 게재란에 **ML for Systems 2025**라고 적혀 있습니다. 앞에서 정리한 대로 이것은 정식 학회가 아니라 workshop이고, 그래서 주장의 범위를 workshop 수준으로 읽어야 합니다.
+게재 정보도 arXiv의 서지 항목에 붙어 있습니다. 학회 게재란(journal-ref)에 **MLforSystem 2025**라고 적혀 있습니다. NeurIPS 2025의 ML for Systems workshop입니다. 앞에서 정리한 대로 이것은 정식 학회가 아니라 workshop이고, 그래서 주장의 범위를 workshop 수준으로 읽어야 합니다.
 
-판본마다 길이가 다르다는 점이 중요합니다. 두 번째 판본은 정식 학회 형식의 긴 원고이고, 최신 판본은 workshop 형식의 짧은 원고입니다. 길게 썼다가 다시 짧은 형태로 돌아온 것입니다.
+판본마다 길이가 다르다는 점이 중요합니다. 첫째와 둘째 판본은 같은 8쪽짜리 학회 형식 원고이고, 셋째와 넷째 판본은 6쪽짜리 workshop 형식 원고입니다. 처음에 길게 썼다가 짧은 형태로 줄인 것입니다. 그 전에 짧은 판본이 있었던 것은 아닙니다.
 
 **그러니 "이 논문에 무엇이 적혀 있다"고 말할 때 어느 판본인지를 밝혀야 합니다.** 긴 원고에만 있는 내용을 짧은 판본을 인용하며 쓰면 안 됩니다.
 
@@ -2220,15 +2236,15 @@ kernel 안의 탐침, 프로세스 정보 파일 체계, 그리고 **데스크�
 
 **같은 저자들이 낸 Linux scheduler 후속 논문은 없습니다.** 2026년 9월 12일 기준으로, 이 논문의 저자 중 한 명이 참여한 arXiv 원고를 전부 훑었습니다. 그 사이에 여러 편이 나왔지만 scheduler 정책을 다루는 것은 없습니다. 가장 가까운 것이 GPU를 대상으로 같은 확장 방식을 적용한 연구인데, 대상이 다릅니다.
 
-**다른 연구팀에서 나온 인접 연구는 둘 있습니다.** 이 권을 쓸 때까지 이 연구의 인용 기록에 없던 것이라 여기 적어둡니다.
+**다른 연구팀에서 나온 인접 연구는 둘 있습니다.**
 
-하나는 kernel 설정을 언어 모델로 조율하는 연구입니다(arXiv:2605.15026, v2 2026-07-14). 최대 41개의 Linux 설정 항목을 살아 있는 호스트에서 조율하고, 빠른 순환과 느린 순환을 나누며, 모든 변경이 형식 검증을 거친 뒤에야 kernel에 닿습니다. 이 연구의 검증기와 같은 발상입니다.
+하나는 kernel 설정을 언어 모델로 조율하는 연구 TuxBot입니다(arXiv:2605.15026, v2 2026-07-14). 최대 41개의 Linux 설정 항목을 살아 있는 호스트에서 조율하고, 빠른 순환과 느린 순환을 나누며, 모든 변경이 형식 검증을 거친 뒤에야 kernel에 닿습니다. 이 연구의 검증기와 같은 발상입니다.
 
-다른 하나는 시스템 heuristic 자체를 언어 모델로 합성하는 연구입니다(arXiv:2512.25065, v2 2026-06-16). 언어 모델이 쓸 수 있는 코드를 **상태 없는 결정 함수**로 제한하고, 제약된 언어로만 쓰게 해서 안전 성질을 구조적으로 보장합니다. 대상은 가상 기계 배치, 캐시 축출, 계층형 메모리입니다.
+다른 하나는 시스템 heuristic 자체를 언어 모델로 합성하는 연구 Vulcan입니다(arXiv:2512.25065, 현재 v3 2026-09-28, 저자 비고란에 "Accepted for publication at EuroSys 2027"). 언어 모델이 쓸 수 있는 코드를 **상태 없는 결정 함수**로 제한하고, 제약된 언어로만 쓰게 해서 안전 성질을 구조적으로 보장합니다. 대상은 가상 기계 배치, 캐시 축출, 계층형 메모리입니다.
 
 > **이 연구에서는.** 두 번째 연구의 발상이 이 연구와 같은 방향입니다. **언어 모델의 출력이 닿을 수 있는 범위를 구조로 좁히면 검증이 쉬워진다**는 것입니다. 이 연구는 그 좁히기를 더 멀리 밀어붙입니다. 출력이 제한된 언어의 코드도 아니고 고정된 어휘의 항목 하나입니다.
 >
-> 다만 이 두 연구는 서지 정보와 초록만 확인했고 본문은 읽지 않았습니다. 이 연구의 인용 기록에 항목은 만들어뒀지만 **아직 인용할 수 없는 상태로 표시해뒀습니다.** 본문을 읽은 뒤에 related work에 넣을지, 넣는다면 어느 소절에 넣을지를 정해야 합니다.
+> 두 연구는 본문 전체를 읽었고(TuxBot v2와 Vulcan v3, 2026-10-07), 이 연구의 인용 기록에 검증된 항목으로 들어 있습니다. 저장소의 related work 초고가 둘 다 언어 모델 갈래의 인접 연구로 다룹니다. 둘 다 인식을 재지는 않습니다.
 
 > **논문으로.** 이 확인 자체가 왜 필요한지가 이 절에서 드러납니다. 이 갈래는 1년 사이에 인접 연구가 둘 더 생겼습니다. 제출 직전에 다시 훑지 않으면 심사자가 아는 논문을 저자가 모르는 상황이 생깁니다.
 
@@ -2242,7 +2258,7 @@ kernel 안의 탐침, 프로세스 정보 파일 체계, 그리고 **데스크�
 
 최신 판본의 서론은 그 결과를 구체적으로 적습니다.
 
-> "Operating system schedulers face a fundamental challenge: kernel policies cannot understand what applications need, leading to suboptimal performance as Linux's EEVDF scheduler applies one-size-fits-all policies to diverse workloads."
+> "Operating system schedulers face a fundamental challenge: kernel policies cannot understand what applications need, leading to suboptimal performance as Linux's EEVDF scheduler […] applies one-size-fits-all policies to diverse workloads."
 
 앞 장에서 본 그 EEVDF입니다. 기본 scheduler가 다양한 workload에 하나의 정책을 적용한다는 것입니다.
 
@@ -2336,7 +2352,7 @@ kernel 안의 탐침, 프로세스 정보 파일 체계, 그리고 **데스크�
 
 **커널 빌드.**
 
-> "For kernel compilation (tinyconfig, "make -j 172" on 6.14 source), SchedCP achieves 1.63× speedup with scx_rusty initially, then iterative refinement selects scx_layered for 16% additional gain, reaching 1.79× total improvement over EEVDF."
+> "For kernel compilation (tinyconfig, "make -j 172" on 6.14 source), SchedCP achieves 1.63× speedup with scx_rusty initially, then iterative refinement selects scx_layered for 16% additional gain, reaching 1.79× total improvement over EEVDF […]."
 
 여기서 정확히 읽어야 할 것이 있습니다. **1.79배라는 숫자는 반복을 거친 뒤의 결과이고, 새로 만든 코드가 아니라 기존 scheduler를 고른 결과입니다.** 첫 시도는 1.63배였습니다.
 
@@ -2348,7 +2364,7 @@ kernel 안의 탐침, 프로세스 정보 파일 체계, 그리고 **데스크�
 
 원고가 덧붙인 문장도 의미가 있습니다.
 
-> "Pre-trained RL approaches show no improvement, likely because they require costly hardware/workload-specific retraining."
+> "Pre-trained RL approaches […] show no improvement, likely because they require costly hardware/workload-specific retraining."
 
 앞 장에서 정리한 학습 기반 접근의 한계를 이 논문도 같은 이유로 지적하고 있습니다.
 
@@ -2356,7 +2372,7 @@ kernel 안의 탐침, 프로세스 정보 파일 체계, 그리고 **데스크�
 
 **응답 시간 측정 도구.**
 
-> "On schbench, initial AI configuration (scx_bpfland) underperformed, but three refinement iterations identified scx_rusty as superior: 2.11× better P99 latency and 1.60× higher throughput versus EEVDF, demonstrating effective learning from feedback."
+> "On schbench […], initial AI configuration (scx_bpfland) underperformed, but three refinement iterations identified scx_rusty as superior: 2.11× better P99 latency and 1.60× higher throughput versus EEVDF […], demonstrating effective learning from feedback."
 
 **첫 시도가 기본값보다 나빴다는 것을 그대로 적었습니다.** 정직한 보고입니다.
 
@@ -2368,7 +2384,7 @@ P99 지연이 13퍼센트 나쁘고 처리량이 19퍼센트 낮았습니다.
 
 **배치 작업.** 여기가 유일하게 새 코드를 만든 사례입니다.
 
-> "For 8 diverse batch workloads (file compression, video transcoding, software testing, data analytics) with long-tail distributions (40 parallel tasks: 39 short, one long), sched-agent correctly identified the optimization goal and workload pattern, implementing Longest Job First (LJF) scheduling to achieve 20% average latency reduction."
+> "For 8 diverse batch workloads (file compression, video transcoding, software testing, data analytics) with long-tail distributions (40 parallel tasks: 39 short, one long), sched-agent correctly identified the optimization goal and workload pattern, implementing Longest Job First (LJF) scheduling to achieve 20% average latency reduction […]."
 
 짧은 작업 39개와 긴 작업 1개라는 구조를 알아보고 정책을 직접 만들어냈다는 것입니다.
 
@@ -2392,7 +2408,7 @@ P99 지연이 13퍼센트 나쁘고 처리량이 19퍼센트 낮았습니다.
 
 생성 비용은 이렇습니다.
 
-> "Generation efficiency improved 13× (to 2.5 minutes) with \$0.45 synthesis cost per workload."
+> "Generation efficiency improved 13× (to 2.5 minutes) with \$0.45 synthesis cost per workload, demonstrating economic viability alongside performance gains."
 
 긴 판본은 같은 것을 이렇게 적었습니다. 아래는 **긴 판본에만 있는 문장이고, 금액이 다릅니다.**
 
@@ -2408,7 +2424,7 @@ P99 지연이 13퍼센트 나쁘고 처리량이 19퍼센트 낮았습니다.
 
 그리고 그 33분이 세 번의 시도 중 성공한 한 번이라는 것도 밝힙니다.
 
-> "We tested Claude Code, the state-of-the-art LLM agent, with "write a FIFO scheduler in eBPF" from an empty folder, with all permissions and bash access. Of three attempts, only one succeeded. The second attempt produced pseudo-code after 6 minutes trying, and the third generated a scheduler tracer instead after 8 minutes of development."
+> "We tested Claude Code […], the state-of-the-art LLM agent, with "write a FIFO scheduler in eBPF" from an empty folder, with all permissions and bash access. Of three attempts, only one succeeded. The second attempt produced pseudo-code after 6 minutes trying, and the third generated a scheduler tracer instead after 8 minutes of development."
 
 세 번 중 한 번만 성공했고, 나머지 둘은 각각 6분 뒤에 의사 코드를, 8분 뒤에 엉뚱한 도구를 내놨습니다.
 
@@ -2482,7 +2498,7 @@ P99 지연이 13퍼센트 나쁘고 처리량이 19퍼센트 낮았습니다.
 
 **둘째, 대상이 다릅니다.**
 
-저쪽은 서버와 배치 작업을 다룹니다. 커널 빌드, 응답 시간 측정 도구, 파일 압축과 영상 변환입니다. 이런 것들은 **최적화할 대상이 명확한 하나의 작업**입니다.
+저쪽은 주어진 workload 하나를 최적화합니다. 평가에 돌린 것도 커널 빌드, 응답 시간 측정 도구(schbench), 그리고 파일 압축과 영상 변환 같은 배치 작업입니다. 동기를 말할 때 edge 기기와 개인 기기도 언급하지만, 평가한 것은 **최적화할 대상이 명확한 하나의 작업**입니다.
 
 데스크톱은 다릅니다. 최적화할 작업 하나가 있는 것이 아니라 **상황이 계속 흘러갑니다.** 같은 기계가 저녁 여덟 시에는 게임기이고 아홉 시에는 빌드 서버입니다.
 
@@ -2492,7 +2508,7 @@ P99 지연이 13퍼센트 나쁘고 처리량이 19퍼센트 낮았습니다.
 
 이게 가장 실질적인 차이입니다.
 
-저쪽은 최종 성능만 잽니다. 앞에서 본 대로입니다.
+저쪽의 연구 질문 넷은 모두 최종 성능과 비용에 관한 것이고, 인식에 관해서는 분류 결과 한 문장(큰 모델이 작업 8개를 모두 맞혔다)이 전부입니다. 앞에서 본 대로입니다.
 
 이 연구는 **인식 자체를 따로 잽니다.** 언어 모델이 내놓은 상황 판단을 정답 라벨과 대조해서 채점합니다. 정확도, 반복 실행 시의 일관성, 방해 요소가 섞였을 때의 견고함을 따로 봅니다.
 
@@ -2502,15 +2518,17 @@ P99 지연이 13퍼센트 나쁘고 처리량이 19퍼센트 낮았습니다.
 
 > **논문으로.** 이 세 가지 차이가 논문에서 이 연구를 방어하는 핵심입니다. 심사자가 "이건 그 연구의 데스크톱 판 아닌가"라고 물을 것이고, 답은 출력 계약과 측정 계층입니다.
 >
-> 그리고 두 번째 방어가 더 강합니다. 인식을 따로 재는 것은 저쪽 평가에 대응물이 없습니다. 저자들이 그 질문을 넣으려다 뺀 흔적까지 있으니, 그 자리가 비어 있다는 것은 확인된 사실입니다.
+> 그리고 두 번째 방어가 더 강합니다. 인식을 따로 재는 연구 질문은 저쪽 평가에 없습니다. 저자들이 그 질문을 넣으려다 뺀 흔적까지 있으니, 그 자리가 비어 있다는 것은 확인된 사실입니다.
 >
-> 다만 이 지적을 논문에 쓸 때는 조심해야 합니다. 주석 처리된 연구 질문을 근거로 드는 것은 공격적으로 읽힐 수 있습니다. 안전한 서술은 "그 연구의 평가는 최종 성능만 다룬다"까지이고, 그건 제출된 원고만으로도 확인됩니다.
+> 다만 이 지적을 논문에 쓸 때는 조심해야 합니다. 주석 처리된 연구 질문을 근거로 드는 것은 공격적으로 읽힐 수 있습니다. 안전한 서술은 "그 연구의 연구 질문 넷은 최종 성능과 비용을 다루고, 인식에 관해서는 분류 결과 하나를 보고한다"까지이고, 그건 제출된 원고만으로도 확인됩니다.
 
 ## 6.3 Kgent: 자연어에서 kernel 확장 만들기
 
 ### 인용
 
 - Zheng, Y., Yang, Y., Chen, M., & Quinn, A. (2024). Kgent: Kernel Extensions Large Language Model Agent. *Proc. SIGCOMM 2024 Workshop on eBPF and Kernel Extensions (eBPF '24)*, 30–36. DOI 10.1145/3672197.3673434.
+
+> **확인한 방식.** 이 절의 인용문은 UC Santa Cruz가 공개한 이 논문의 사본(eScholarship, CC BY 4.0)에서 읽었습니다(2026-10-08). 이 사본으로 2026-10-09에 인용문 전부를 다시 대조했습니다.
 
 앞 연구와 저자가 겹칩니다. 시기적으로 먼저이고, scheduler가 아니라 kernel 확장 일반을 다룹니다.
 
@@ -2548,7 +2566,7 @@ P99 지연이 13퍼센트 나쁘고 처리량이 19퍼센트 낮았습니다.
 
 논문은 실패를 두 종류로 나누고, 왜 나누는지를 밝힙니다.
 
-> "We split the prompts for which Kgent fails to correctly synthesize an eBPF program into two categories: False Negative (FNs), which are the percentage of prompts for which Kgent fails to synthesize a verified eBPF program, and False Positives (FPs), which are the percentage of prompts for which Kgent synthesizes a verified eBPF program that does not correctly implement the prompt."
+> "[…] we split the prompts for which Kgent fails to correctly synthesize an eBPF program into two categories: False Negative (FNs), which are the percentage of prompts for which Kgent fails to synthesize a verified eBPF program, and False Positives (FPs), which are the percentage of prompts for which Kgent synthesizes a verified eBPF program that does not correctly implement the prompt."
 
 **검증을 통과한 프로그램을 아예 못 만든 경우가 앞쪽, 검증은 통과했는데 요청한 일을 하지 않는 경우가 뒤쪽**입니다.
 
@@ -2565,10 +2583,10 @@ P99 지연이 13퍼센트 나쁘고 처리량이 19퍼센트 낮았습니다.
 | 직접 생성만 | 67.5% | 2.5% | 30% |
 | + 되먹임 | 32.5% | 7.5% | 60% |
 | + 이해와 기호 실행 | 17.5% | 5% | 77.5% |
-| 사람의 전문 지식으로 대체 | 72.5% | 2.5% | 25% |
+| 사람의 전문 지식으로 대체 | 25% | 2.5% | 72.5% |
 | **최종 구성** | **17.5%** | **2.5%** | **80%** |
 
-**최종 구성의 거짓 양성 비율이 2.5퍼센트입니다.**
+**최종 구성의 거짓 양성 비율이 2.5퍼센트입니다.** 사람의 전문 지식으로 대체한 구성은 정확도가 72.5퍼센트이고, 최종 구성은 거짓 양성을 늘리지 않고 그보다 높은 80퍼센트입니다. 논문의 본문도 그렇게 적습니다.
 
 표를 읽으면 더 흥미로운 것이 보입니다.
 
@@ -2576,7 +2594,7 @@ P99 지연이 13퍼센트 나쁘고 처리량이 19퍼센트 낮았습니다.
 
 **되먹임을 넣으면 정확도가 두 배가 되는데 거짓 양성도 세 배가 됩니다.** 더 자주 성공하게 만드는 장치가 더 자주 잘못 통과시키기도 한 것입니다.
 
-> "Including the comprehension and symbolic execution component also improves Kgent's effectiveness substantially—accuracy improves to 77.5%, while the false positive rate moves to 5%. Including the eBPFNLDataset dataset in training comes with a relatively small impact on Kgent's accuracy—it only improves by 2.5%. However, training using the eBPFNLDataset dataset does bring Kgent's false positive rate back down to the baseline of 2.5%"
+> "Including the comprehension engine and symbolic execution component also improves Kgent's effectiveness substantially—accuracy improves to 77.5%, while the false positive rate moves to 5%. Including the eBPFNLDataset dataset in training comes with a relatively small impact on Kgent's accuracy—it only improves by 2.5%. However, training using the eBPFNLDataset dataset does bring Kgent's false positive rate back down to the baseline of 2.5%"
 
 기호 실행을 더하면 5퍼센트로 내려가고, 데이터셋을 학습에 넣으면 정확도는 2.5퍼센트포인트만 오르지만 **거짓 양성이 처음 수준인 2.5퍼센트까지 내려옵니다.**
 
@@ -2592,9 +2610,9 @@ P99 지연이 13퍼센트 나쁘고 처리량이 19퍼센트 낮았습니다.
 
 ### kernel 설정 조율
 
-- Lin, H., Li, Y., Luo, H., Lin, Z., Zhang, L., Xing, M., & Wu, Y. (2025). TuneAgent: Agentic Operating System Kernel Tuning with Reinforcement Learning. arXiv:2508.12551 (v2, 2026-05-31).
+- Lin, H., Li, Y., Luo, H., Lin, Z., Zhang, L., Xing, M., & Wu, Y. (2026). TuneAgent: Agentic Operating System Kernel Tuning with Reinforcement Learning. *Proc. KDD '26*. DOI 10.1145/3770855.3817987. 원고: arXiv:2508.12551 (v1의 제목은 "OS-R1", v2부터 "TuneAgent", v2 2026-05-31).
 
-kernel의 설정 항목을 언어 모델과 강화학습으로 조율합니다.
+kernel의 빌드 설정(build configuration)을 언어 모델과 강화학습으로 조율합니다. 실행 중인 시스템의 값을 바꾸는 것이 아니라, 조율한 설정으로 kernel을 다시 빌드하고 배포해서 벤치마크를 돌려야 효과가 납니다(v2 1절).
 
 > "Linux kernel tuning is essential for optimizing operating system (OS) performance, yet remains challenging due to the complex kernel space, sparse performance feedback, and strong workload sensitivity."
 
@@ -2604,7 +2622,7 @@ kernel의 설정 항목을 언어 모델과 강화학습으로 조율합니다.
 
 결과는 최대 5.6퍼센트 개선입니다.
 
-> **인용 정보 정정.** 이 논문의 서지 정보에서 세 가지를 확인했고, 그중 둘은 정정입니다(2026-09-12 확인).
+> **인용 정보 정정.** 이 논문의 서지 정보에서 세 가지를 확인했습니다(첫째와 둘째는 2026-09-12, 셋째는 2026-10-08).
 >
 > **첫째, 제목이 바뀌었습니다.** 첫 판본의 제목은 "OS-R1: Agentic Operating System Kernel Tuning with Reinforcement Learning"이었습니다. 시스템 이름 자체가 OS-R1에서 TuneAgent로 바뀌었습니다.
 >
@@ -2612,9 +2630,7 @@ kernel의 설정 항목을 언어 모델과 강화학습으로 조율합니다.
 >
 > 두 판본은 2025년 8월 18일과 2026년 5월 31일에 올라왔습니다. 초록도 다시 쓰였습니다. 첫 판본은 "효율, 확장성, 일반화" 세 가지를 어려움으로 들었는데, 현재 판본은 "복잡한 kernel 공간, 드문 성능 신호, 강한 workload 민감성"으로 바뀌었습니다. 최대 5.6퍼센트라는 결과 숫자는 두 판본이 같습니다.
 >
-> **셋째, 게재 학회는 저자들의 저장소에만 적혀 있습니다.** 저장소의 설명 문서 첫머리에 KDD 2026이라고 명시되어 있습니다. 다만 arXiv의 서지 정보에는 학회 게재란이 비어 있고, 이 권을 쓰는 환경에서 그 학회의 논문집에 접근할 수 없어 논문집 쪽 서지 정보는 확인하지 못했습니다.
->
-> 그러니 지금 말할 수 있는 것은 **"저자들이 자기 저장소에 KDD 2026 게재라고 적어두었다"**까지입니다. 제출 전에 논문집에서 쪽 번호와 식별자를 확정해야 합니다.
+> **셋째, 게재 학회가 확정됐습니다.** KDD '26 논문이고, DOI 10.1145/3770855.3817987입니다. DOI의 Crossref 기록이 제목, 학회, 출판일(2026-08-08), 저자 일곱 명을 적고, v2 PDF도 그 학회와 DOI를 적습니다. 이 연구는 그 DOI 기록으로 인용하고, arXiv 판본은 두 이름(v1 "OS-R1", v2 "TuneAgent")을 함께 밝힙니다.
 
 > **논문으로.** 이 사례가 arXiv 인용을 다시 확인해야 하는 이유를 한꺼번에 보여줍니다. 시스템 이름이 바뀌었고, 저자가 바뀌었고, 초록이 다시 쓰였고, 게재 정보가 생겼습니다.
 >
@@ -2624,7 +2640,7 @@ kernel의 설정 항목을 언어 모델과 강화학습으로 조율합니다.
 
 - Jadhav, P., Jin, H., Deelman, E., & Balaprakash, P. (2025). Evaluating the Efficacy of LLM-Based Reasoning for Multiobjective HPC Job Scheduling. arXiv:2506.02025 (v2, 2025-09-03).
 
-**판본과 게재 여부를 확인했습니다.** 2026년 9월 12일 기준으로 두 번째 판본이 최신이고, 2025년 9월 3일 이후 개정되지 않았습니다. 서지 정보의 비고란에 "work under review"라고 적혀 있습니다. **아직 심사 중이고 게재된 곳이 없습니다.**
+**판본과 게재 여부를 확인했습니다.** 2026년 10월 8일에 다시 확인했을 때도 두 번째 판본이 최신이고, 2025년 9월 3일 이후 개정되지 않았습니다. 서지 정보의 비고란에 "work under review"라고 적혀 있습니다. **아직 심사 중이고 게재된 곳이 없습니다.** 원고로 인용합니다.
 
 이쪽은 접근이 다릅니다. **언어 모델이 scheduler 자체입니다.**
 
@@ -2658,7 +2674,7 @@ kernel의 설정 항목을 언어 모델과 강화학습으로 조율합니다.
 |---|---|---|---|
 | SchedCP | 제어 계층 | scheduler 코드 또는 설정 | 없음 |
 | Kgent | 개발 도구 | kernel 확장 코드 | 없음 |
-| TuneAgent | 조율 과정 | kernel 설정값 | 없음 |
+| TuneAgent | 조율 과정 | kernel 빌드 설정 | 없음 |
 | HPC 작업 배치 | 결정 경로 | 배치 결정 자체 | 있음 |
 | **이 연구** | **제어 계층** | **상황 신호** | **없음** |
 
@@ -2671,7 +2687,7 @@ kernel의 설정 항목을 언어 모델과 강화학습으로 조율합니다.
 ## 6장 정리
 
 - 이 갈래는 언어 모델의 지식을 kernel 정책에 끌어옵니다. 이 연구와 가장 가까우므로 정확히 알아야 합니다.
-- SchedCP는 arXiv 판본이 넷이고 최신은 네 번째이며, 서지 정보의 학회 게재란에 ML for Systems 2025가 적혀 있습니다. workshop이므로 주장의 범위를 그 수준으로 읽어야 합니다. 판본마다 길이가 달라서, 긴 판본에만 있는 문장을 짧은 판본을 인용하며 쓰면 안 됩니다. 이 장은 어느 판본의 문장인지를 매번 밝힙니다.
+- SchedCP는 arXiv 판본이 넷이고 최신은 네 번째이며, 서지 정보의 학회 게재란에 MLforSystem 2025가 적혀 있습니다(NeurIPS 2025의 ML for Systems workshop). 첫째와 둘째 판본은 같은 8쪽 원고, 셋째와 넷째는 6쪽 원고입니다. workshop이므로 주장의 범위를 그 수준으로 읽어야 합니다. 판본마다 길이가 달라서, 긴 판본에만 있는 문장을 짧은 판본을 인용하며 쓰면 안 됩니다. 이 장은 어느 판본의 문장인지를 매번 밝힙니다.
 - 후속 논문 확인 결과, 같은 저자들이 낸 Linux scheduler 후속 논문은 없습니다. 다만 다른 연구팀에서 인접 연구가 둘 나왔습니다. kernel 설정을 언어 모델로 조율하면서 모든 변경을 형식 검증에 통과시키는 연구와, 언어 모델이 쓸 수 있는 코드를 상태 없는 결정 함수로 제한해 안전 성질을 구조적으로 보장하는 연구입니다. 뒤엣것의 발상이 이 연구와 같은 방향이고, 이 연구는 그 좁히기를 더 멀리 밀어붙입니다.
 - 판본 대조에서 실제로 달랐던 곳이 있습니다. 원고 소스의 "code and configure"가 최신 판본에서 "code and configurations"로 고쳐졌고, 생성 비용이 긴 판본의 0.5달러에서 최신 판본의 0.45달러로 달라졌습니다. 원고 소스만 읽고 옮겼다면 틀린 문장과 틀린 숫자를 인용할 뻔했습니다.
 - SchedCP가 가장 가까운 선행 연구입니다. 문제 인식이 거의 같습니다. kernel 정책이 응용의 필요를 이해하지 못하는 semantic gap이 있고, 그 해법은 더 좋은 모델이 아니라 의미 추론과 실행을 분리하는 제어 계층이라는 것입니다.
@@ -2679,13 +2695,13 @@ kernel의 설정 항목을 언어 모델과 강화학습으로 조율합니다.
 - 결과는 커널 빌드에서 반복 세 번 뒤 1.79배, 응답 시간 측정 도구에서 P99 2.11배 개선입니다. 첫 시도가 기본값보다 나빴던 사례도 그대로 보고합니다. 새 코드를 만든 것은 배치 작업 실험 하나이고, 거기서 20퍼센트 개선입니다.
 - 비용을 정직하게 보고합니다. 최적화 전에는 33분과 221번의 호출과 6달러가 들었고, 전문 개발자가 5분이면 하는 일이라고 스스로 적었습니다.
 - 평가의 연구 질문 넷이 모두 최종 성능과 비용에 관한 것입니다. 언어 모델이 workload를 얼마나 정확히 이해했는가를 따로 재는 질문은 없습니다. 공개된 원고 소스에 그런 질문이 주석 처리된 채 남아 있습니다.
-- 이 연구와의 차이는 셋입니다. 출력이 정책이 아니라 신호라는 것, 대상이 서버 작업이 아니라 흘러가는 데스크톱 상황이라는 것, 그리고 인식 자체를 따로 잰다는 것입니다. 마지막이 가장 실질적입니다. 최종 성능만 보면 어느 고리가 끊어졌는지 알 수 없기 때문입니다.
+- 이 연구와의 차이는 셋입니다. 출력이 정책이 아니라 신호라는 것, 대상이 주어진 workload 하나가 아니라 흘러가는 데스크톱 상황이라는 것(SchedCP는 동기에서 edge와 개인 기기를 언급하지만 평가한 것은 커널 빌드, schbench, 배치 작업입니다), 그리고 인식 자체를 따로 잰다는 것입니다. 마지막이 가장 실질적입니다. 최종 성능만 보면 어느 고리가 끊어졌는지 알 수 없기 때문입니다.
 - SchedCP가 제어 계층을 필요하다고 본 이유는 스스로 겪은 실패입니다. 언어 모델 에이전트에게 권한을 주고 eBPF scheduler를 짜라고 했더니 세 번 중 한 번만 성공했고, 성공한 한 번에 33분과 221번의 호출과 6달러가 들었습니다. 그리고 그 에이전트는 root 권한을 요구했고 시험 중에 시스템을 멈출 수 있었으며 되돌아가기 장치가 없었습니다.
 - 그 비용을 최적화 대상과 나란히 놓으면 이 구조가 어떤 환경을 전제하는지 보입니다. 최적화한 커널 빌드가 원래 13.57초이고 8.31초가 됐는데, 첫 생성에 33분과 6달러, 최적화 후에도 2.5분과 0.45달러가 듭니다. 같은 workload가 반복되는 환경을 전제한 구조입니다.
 - Kgent는 자연어로 kernel 확장을 쓰게 합니다. 언어 모델의 출력을 그대로 믿지 않고 검증기를 통과시킨다는 발상이 이 연구와 공통됩니다.
 - Kgent의 거짓 양성 비율은 초록에 없고 본문에 있습니다. 최종 구성에서 2.5퍼센트입니다. 논문은 실패를 둘로 나누는데, 검증을 통과한 것을 못 만드는 실패는 쓸모의 문제이고 틀린 것을 통과시키는 실패는 안전의 문제라고 구분합니다.
 - Kgent의 구성 요소별 표가 좋은 ablation study의 본보기입니다. 되먹임을 넣으면 정확도가 30퍼센트에서 60퍼센트로 두 배가 되는데 거짓 양성도 2.5퍼센트에서 7.5퍼센트로 세 배가 됩니다. 좋아지는 지표와 나빠지는 지표를 함께 보여주지 않았다면 묻혔을 사실입니다.
-- kernel 설정을 조율하는 연구는 확인 과정에서 세 가지가 드러났습니다. 시스템 이름이 OS-R1에서 TuneAgent로 바뀌었고, 저자 일곱 명 중 한 명이 바뀌었으며, 게재 학회가 저자들의 저장소에만 적혀 있습니다. 이름이 바뀐 것이 특히 위험합니다. 옛 이름으로 검색하면 나오지 않고, 두 연구를 별개로 세는 실수도 가능합니다.
+- kernel 빌드 설정을 조율하는 연구는 판본 사이에 시스템 이름이 OS-R1에서 TuneAgent로 바뀌었고, 저자 일곱 명 중 한 명이 바뀌었습니다. 게재 학회는 DOI 기록으로 KDD '26임이 확인됩니다. 이름이 바뀐 것이 특히 위험합니다. 옛 이름으로 검색하면 나오지 않고, 두 연구를 별개로 세는 실수도 가능합니다.
 - 고성능 컴퓨팅 작업 배치 연구는 언어 모델을 결정 경로에 직접 둡니다. 그 결과 추론 품질과 계산 비용 사이의 상충 때문에 실시간 배치가 어렵다는 결론에 도달했습니다. 이 갈래 전체의 경계를 보여주는 결과입니다.
 
 ---
@@ -2696,11 +2712,11 @@ kernel의 설정 항목을 언어 모델과 강화학습으로 조율합니다.
 
 지금까지 본 세 갈래는 전부 연구입니다. 논문이 있고 실험이 있습니다.
 
-이 장에서 다루는 것은 연구가 아닙니다. **지금 수백만 대의 컴퓨터에서 실제로 돌고 있는 소프트웨어입니다.**
+이 장에서 다루는 것은 연구가 아닙니다. **지금 출하되어 실제로 돌고 있는 소프트웨어입니다.** Windows와 macOS는 게임 모드를 운영체제에 넣어 출하하고, CachyOS라는 Linux 배포판은 ananicy-cpp라는 daemon을 community가 관리하는 규칙 목록과 함께 기본으로 설치해 켜 둡니다. 몇 대의 컴퓨터에서 도는지는 세지 않습니다. 그 숫자를 뒷받침할 출처가 없습니다.
 
-그리고 그 소프트웨어들이 하는 일이 이 연구가 하려는 일과 같습니다. **프로그램의 이름을 보고 상황을 판단해서 시스템 설정을 바꿉니다.**
+그중 이름 목록 daemon이 하는 일이 이 연구가 하려는 일과 같은 종류입니다. **프로그램의 이름을 보고 시스템 설정을 바꿉니다.** 다만 판단하는 방법이 다릅니다. 사람이 미리 표에 적어뒀습니다.
 
-다만 판단하는 방법이 다릅니다. 사람이 미리 표에 적어뒀습니다.
+게임 모드는 조금 다릅니다. 이름이 아니라 "앞에 있는 게임"이라는 범주에 반응하고, 무엇을 게임으로 알아보는지는 공개되어 있지 않습니다. 이 장에서 같이 보는 이유는 둘이 함께 "이미 배포된 상황 대응"의 지형을 이루기 때문입니다.
 
 **그래서 이 장의 대상이 이 연구의 진짜 비교 상대입니다.** 기본 scheduler가 아니라 이쪽입니다.
 
@@ -2708,7 +2724,7 @@ kernel의 설정 항목을 언어 모델과 강화학습으로 조율합니다.
 
 ### 무엇을 확인했는가
 
-> **확인한 방식.** 제조사가 공개한 개발자 문서를 읽었습니다(2026-09-12 확인). 개념 설명 페이지 하나와 함수 설명 페이지 셋입니다. 아래 인용문은 전부 그 네 페이지에서 나옵니다.
+> **확인한 방식.** 제조사가 공개한 개발자 문서를 읽었습니다(2026-09-12 확인, 2026-10-09 다시 대조). 개념 설명 페이지 하나와, 독점 자원을 포기하는 함수 `ReleaseExclusiveCpuSets`를 포함한 함수 설명 페이지 셋입니다. 아래의 개발자 문서 인용문은 전부 그 네 페이지에서 나옵니다. 같은 함수 목록을 싣는 header 페이지까지 다섯 페이지가 이 연구의 인용 기록에 있습니다. 그리고 세 번째 질문의 답은 Microsoft의 Xbox 지원 문서 하나에서 나옵니다(2026-10-09 확인).
 >
 > 그리고 **지금 이 문서들은 옛 문서로 분류되어 있습니다.** 개념 페이지의 첫머리에 이렇게 적혀 있습니다.
 >
@@ -2788,13 +2804,15 @@ CPU 말고 다른 자원도 언급됩니다.
 
 ### 세 번째 질문: 업데이트나 알림을 미루는가
 
-> **확인 필요.** 이 항목만 확인하지 못했습니다.
->
-> 게임 중에 업데이트 설치나 재시작 알림을 미룬다는 서술은 널리 퍼져 있고, 실제로 Windows의 설정 화면에 그런 문구가 있다고 알려져 있습니다. 그러나 **제조사가 발행한 문서 중 이 권에서 읽을 수 있었던 것에는 그 서술이 없습니다.** 위의 네 페이지 어디에도 업데이트, 드라이버 설치, 재시작 알림에 대한 언급이 없습니다.
->
-> 그 서술을 담고 있을 법한 제조사의 지원 문서가 하나 있는데, 그 페이지는 내용을 스크립트로 그려내는 방식이라 이 권을 쓰는 환경에서 본문을 읽을 수 없었습니다. 제3자 매체와 커뮤니티 글에는 같은 문장이 여러 곳에 있지만, 이 연구의 인용 규율상 그것으로는 뒷받침되지 않습니다.
->
-> 확인해야 할 것은 하나입니다. **제조사가 발행한 문서에 게임 중 업데이트나 알림을 미룬다는 서술이 있는가.** 있으면 그 문서를 인용하고, 없으면 없다고 확정해서 적어야 합니다.
+**미룹니다. 범위는 Windows Update의 driver 설치와 재시작 알림입니다.** Microsoft의 Xbox 지원 문서가 이렇게 적습니다.
+
+> "When you're running a game, Game Mode: Prevents Windows Update from performing driver installations and sending restart notifications"
+
+같은 문서에 "Game Mode is turned on by default."라는 문장도 있습니다. 그리고 2018년 10월 2일의 Microsoft 발표(Xbox Wire)가 같은 내용을 이렇게 적습니다.
+
+> "Game Mode suppresses Windows Update driver installs and blocks Windows Update interruptions such as restart notifications while you're gaming"
+
+> **확인한 방식.** 이 지원 문서는 내용을 스크립트로 그려내는 방식이라, 2026-10-09에 브라우저로 그려낸 화면에서 본문을 읽었고, 같은 문장이 2018-12-30의 인터넷 아카이브 사본에도 있음을 확인했습니다. 위의 개발자 문서 다섯 페이지에는 업데이트, driver 설치, 재시작 알림에 대한 언급이 없습니다. 찾아봤고 없다는 것도 함께 남겨둡니다. 무엇을 게임으로 알아보는지는 이 지원 문서에도 적혀 있지 않습니다.
 
 ### 그 밖에 확인된 것들
 
@@ -2826,6 +2844,16 @@ CPU 말고 다른 자원도 언급됩니다.
 
 설정에서 끄면 0을 돌려줍니다.
 
+### 옆에 놓을 것: macOS의 게임 모드
+
+macOS에도 게임 모드가 있습니다. Apple의 지원 문서(2026-10-07 확인)는 Apple silicon Mac과 macOS Sonoma 14 이상에서 이렇게 동작한다고 적습니다.
+
+> "When your game enters full screen, Game Mode automatically turns on for that game"
+
+켜지면 게임에 "the highest priority access to your CPU and GPU, lowering usage for background tasks"를 준다고 적습니다. 그리고 macOS 26부터는 앱이 자기 설정 파일(Info.plist)에 `LSSupportsGameMode`라는 키를 적어 게임 모드 지원을 선언할 수 있습니다. 개발자 문서는 "If you don't include this key in your Info.plist, Game Mode might not turn on for your game."이라고 적습니다.
+
+**무엇을 게임으로 알아보는지는 Apple의 두 페이지 어디에도 없습니다.** Windows와 같습니다. 켜지는 조건은 전체 화면이라는 창 상태이고, 선언은 선택 사항입니다.
+
 ### 여기서 읽을 수 있는 것
 
 **자원 모델이 구체적입니다.** 막연한 우선순위 상향이 아니라 **독점적인 CPU 집합**입니다. 특정 core를 이 응용에만 배정한다는 뜻입니다. 그리고 자원마다 회수 규칙이 다릅니다. core는 초점을 잃으면 회수되고, 메모리는 한 번 주면 회수하지 않습니다.
@@ -2834,7 +2862,9 @@ CPU 말고 다른 자원도 언급됩니다.
 
 **사용자가 끌 수 있습니다.** 설정에서 끄면 함수가 0을 돌려줍니다.
 
-**그리고 판별 방법은 문서에 없습니다.** 자동으로 된다는 사실만 있습니다.
+**게임 중에는 Windows Update를 미룹니다.** driver 설치와 재시작 알림입니다.
+
+**그리고 판별 방법은 문서에 없습니다.** 자동으로 된다는 사실만 있습니다. macOS도 같습니다.
 
 > **이 연구에서는.** 마지막 항목이 이 연구의 실험 설계에 영향을 줍니다. 이 연구는 이름 목록 기반 인식을 비교 조건으로 두는데, **그 조건을 이 시스템에서 재현할 수 없습니다.** 판별 방법이 공개되어 있지 않으니 충실히 재현했다고 주장할 근거가 없습니다.
 >
@@ -2884,7 +2914,7 @@ CPU 말고 다른 자원도 언급됩니다.
 
 **이게 앞 권에서 말한 이름 기반 인식의 실제 구현입니다.** 그리고 명령줄 인자까지 본다는 점을 눈여겨볼 만합니다.
 
-이 연구가 언어 모델에게 보여주는 것은 **이보다 좁습니다.** 프로세스 이름과 그 개수뿐이고, 경로도 명령줄도 없습니다. 데이터셋을 얼릴 때 그렇게 정했습니다.
+이 연구가 언어 모델에게 보여주는 것은 **이보다 좁습니다.** 프로세스 이름과 그 개수, 그리고 어느 프로세스가 window focus를 쥐고 있는지뿐이고, 경로도 명령줄도 없습니다. 데이터셋을 얼릴 때 그렇게 정했고, focus를 쥔 프로세스는 2026-10-11에 더했습니다.
 
 즉 배포된 표가 볼 수 있는 것보다 **적게 보고도 되는지**를 묻는 셈입니다. 스스로에게 더 불리한 조건을 건 것입니다.
 
@@ -3113,7 +3143,7 @@ C++로 다시 만든 판본의 문서에 전체 목록이 있습니다.
 
 한 가지 더 확인된 것이 있습니다. 이 연구의 핵심 구분과 직접 연결됩니다.
 
-앞 권에서 게임 중 다운로드 예를 들었습니다. 사용자가 그 다운로드를 기다리고 있는지 아닌지에 따라 올바른 대우가 정반대라고요.
+앞 권에서 게임 중 Steam 다운로드 예를 들었습니다. 사용자가 그 다운로드를 기다리고 있는지 아닌지에 따라 올바른 대우가 정반대라고요. 데이터셋이 그리는 것은 사용자가 게임 중에 직접 시작한 다른 게임의 설치이고, Steam은 그런 설치를 곧바로 돌립니다. 반면 Steam 자신의 업데이트 다운로드는 업데이트가 나오면 자동으로 다운로드 줄에 들어갑니다. 그러니 "steam이 내려받는 중"이라는 이름 하나로는 둘 중 무엇인지 정해지지 않습니다.
 
 **그 구분이 실제 소프트웨어에 설정 항목으로 존재합니다.**
 
@@ -3151,7 +3181,7 @@ C++로 다시 만든 판본의 문서에 전체 목록이 있습니다.
 
 **같은 입력을 쓰고, 같은 종류의 출력을 내되, 표를 지식으로 바꾼다.**
 
-입력이 같습니다. 프로세스 이름입니다. 정확히는 이 연구 쪽이 조금 더 좁습니다. 표는 명령줄 인자까지 볼 수 있지만, 이 연구는 이름과 개수만 봅니다.
+입력이 같습니다. 프로세스 이름입니다. 정확히는 이 연구 쪽이 조금 더 좁습니다. 표는 명령줄 인자까지 볼 수 있지만, 이 연구는 이름과 그 개수, 그리고 어느 프로세스가 window focus를 쥐고 있는지만 봅니다.
 
 출력의 종류가 같습니다. 상황에 대한 판단입니다.
 
@@ -3167,11 +3197,12 @@ C++로 다시 만든 판본의 문서에 전체 목록이 있습니다.
 
 ## 7장 정리
 
-- 이 장의 대상은 연구가 아니라 지금 실제로 돌고 있는 소프트웨어입니다. 프로그램 이름을 보고 상황을 판단해 시스템 설정을 바꾸는데, 판단을 사람이 미리 표에 적어뒀습니다.
+- 이 장의 대상은 연구가 아니라 지금 출하되어 돌고 있는 소프트웨어입니다. Windows와 macOS는 게임 모드를 출하하고, CachyOS는 ananicy-cpp를 규칙 목록과 함께 기본으로 켜 둡니다. 이름 목록 daemon은 프로그램 이름을 보고 시스템 설정을 바꾸는데, 판단을 사람이 미리 표에 적어뒀습니다. 게임 모드는 이름이 아니라 앞에 있는 게임이라는 범주에 반응합니다.
 - Windows의 게임 모드는 제조사의 개발자 문서 네 페이지에서 확인했습니다. 자원 모델은 독점 CPU 집합과 GPU 우선순위 상향이고, 전면에 있고 초점을 가져야 독점 자원을 받으며, 초점을 잃으면 회수됩니다. 메모리는 한 번 주면 회수하지 않습니다. 사용자가 설정에서 끌 수 있습니다. 이 API들은 Windows 10 버전 1809부터 폐기 예정으로 표시되어 있습니다.
 - 게임 판별 방법은 **제조사 문서에 명시되어 있지 않습니다.** 문서가 말하는 것은 "대부분의 Windows 게임에서 사용자의 조치도 개발자의 작업도 없이 기본으로 동작한다"까지입니다. 개발자가 명시적으로 선언하는 경로가 따로 있지만 필수가 아니고 작품 단위로 허가받아야 합니다. 그러므로 "게임 모드는 게임 목록을 쓴다"고 논문에 쓸 수 없습니다. 쓸 수 있는 것은 판별 방법이 공개 문서에 기술되어 있지 않다는 사실이고, 그 사실 자체가 공개 소프트웨어 쪽을 비교 대상으로 택한 이유가 됩니다.
 - 배경 작업에 대해서는 억제가 아니라 격리입니다. 독점을 포기하면 "다른 프로세스와 나눠 써야 하고", "다른 프로세스와 시스템 활동이 게임과 같은 core에 배치되기 때문에 지연이 높아진다"고 적혀 있습니다. 뒤집어 읽으면 독점 상태에서는 그 core에 다른 것이 들어오지 못한다는 뜻입니다.
-- 게임 중 업데이트나 알림을 미루는지는 확인하지 못했습니다. 읽을 수 있었던 제조사 문서 어디에도 그 서술이 없고, 그 서술을 담고 있을 법한 지원 문서는 본문을 읽을 수 없는 형태였습니다. 제3자 매체에는 같은 문장이 여럿 있지만 이 연구의 인용 규율상 그것으로는 뒷받침되지 않습니다.
+- 게임 중에는 Windows Update의 driver 설치와 재시작 알림을 미룹니다. Microsoft의 Xbox 지원 문서가 그렇게 적고(2026-10-09 확인), 개발자 문서 다섯 페이지에는 그 서술이 없습니다.
+- macOS의 게임 모드는 Apple silicon과 Sonoma 14 이상에서 게임이 전체 화면에 들어가면 켜지고, macOS 26부터는 앱이 `LSSupportsGameMode`로 지원을 선언할 수 있습니다. 무엇을 게임으로 알아보는지는 Apple도 문서로 밝히지 않았습니다.
 - Linux 쪽의 우선순위 조정 데몬은 전부 공개되어 있습니다. 실행 파일 이름으로 프로세스를 찾아 표를 뒤지고 설정을 적용합니다. 이름이 같아도 실행 인자로 구분할 수 있습니다.
 - 설정할 수 있는 항목이 넓습니다. CPU 우선순위, scheduling policy 자체, 입출력 우선순위, 메모리 부족 시 죽일 순서, core 고정까지 포함합니다.
 - 널리 쓰이는 카탈로그를 2026년 9월 12일 시점의 커밋 `03ef03fb`에서 직접 세어보니 규칙 파일 361개에 항목 15,813개였고, 그중 13,528개가 게임으로 분류되어 있었습니다. 전체의 85.5퍼센트입니다. 분류 정의는 열다섯 개인데 실제로 쓰이는 것은 열세 가지입니다.
@@ -3418,7 +3449,7 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 
 > **확인한 방식.** 제조사의 제품 개요 페이지를 읽었습니다(2026-09-12 확인). 아래 인용문은 그 페이지에서 나옵니다. 개별 벤치마크의 기술 문서는 읽지 않았습니다.
 
-모음에 들어 있는 것이 아홉 개이고, 그중 셋이 인공지능 작업입니다.
+모음에 들어 있는 것이 열 개이고, 그중 넷이 인공지능 작업입니다. 하나("AI Inference Benchmark for Android")는 Android 스마트폰용이고, 아래는 나머지 셋입니다.
 
 **기기에서 도는 언어 모델.**
 
@@ -3476,9 +3507,9 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 
 그리고 결정적으로, **이 연구가 필요로 하는 구조가 어디에도 없습니다.**
 
-이 연구가 필요로 하는 것은 이렇습니다. **행동이 완전히 동일하고, 올바른 설정이 정반대인 workload 쌍.**
+이 연구가 필요로 하는 것은 이렇습니다. **올바른 설정이 정반대이고, 그 차이가 행동이나 선언한 class로 정해지지 않는 작업 쌍.**
 
-그런 쌍은 우연히 만들어지지 않습니다. 설계해서 만들어야 합니다. 두 workload가 CPU 사용 패턴, 깨어나는 빈도, 잠드는 방식까지 같도록 맞추고, 프로세스 이름만 다르게 해야 합니다.
+그런 쌍은 기존 도구에 없어서 직접 만들어야 합니다. 지금의 데이터셋은 두 workload의 행동을 똑같이 맞춰 흉내 내지 않고, 실제 작업을 측정해서 넣습니다. 사용자가 시작한 학습과 아무도 부탁하지 않은 파일 색인이 그런 쌍이고, 두 작업은 행동도 선언한 class도 다릅니다. 그래도 그 차이가 누가 원했는지를 말해주지는 않습니다. 그것을 실어 나르는 것은 이름입니다.
 
 **그리고 각 workload에 정답 라벨이 붙어 있어야 합니다.** 언어 모델의 인식을 채점하려면 정답이 필요하기 때문입니다. 기존 벤치마크에는 그런 라벨이 없습니다.
 
@@ -3499,7 +3530,7 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 - 다른 제조사의 사무용 벤치마크도 시나리오가 넷이고, 문서 작업, 일반 생산성, 사진 편집, 고급 콘텐츠 제작입니다. 프로그램 설치 자체를 workload로 삼는 항목과, 사진 편집과 영상 편집 사이를 오가는 다중 작업 항목이 있습니다. 섞인 상황을 만들기는 하지만 그 상황이 무엇인지를 알려주는 라벨은 없고 점수만 나옵니다.
 - 전문가용 벤치마크 모음에는 기기에서 직접 도는 언어 모델, 이미지 생성, 컴퓨터 시각 작업이 시나리오로 들어 있습니다. 기기에서 도는 인공지능 작업이 데스크톱 시나리오로 실재한다는 근거가 됩니다.
 - 세 제조사가 독립적으로 거의 같은 프로그램 목록에 도달했습니다. 데이터셋에 넣을 작업을 고를 때 "우리가 보기에 이게 대표적이다"가 아니라 그 합의를 근거로 쓸 수 있습니다. 다만 셋 다 배포된 제품의 문서이므로 존재 주장까지이고, 겹친다는 사실을 실제 사용 행태에 대한 주장으로 옮기면 안 됩니다.
-- 이 연구가 데이터셋을 새로 만든 이유는 하나입니다. 어느 도구에도 의도가 라벨로 붙어 있지 않습니다. 그리고 행동이 동일하고 올바른 설정이 정반대인 workload 쌍은 우연히 만들어지지 않고 설계해야 합니다. 인식을 채점하려면 정답 라벨도 필요합니다.
+- 이 연구가 데이터셋을 새로 만든 이유는 하나입니다. 어느 도구에도 의도가 라벨로 붙어 있지 않습니다. 그리고 올바른 설정이 정반대이고 그 차이가 행동이나 선언한 class로 정해지지 않는 작업 쌍은 기존 도구에 없어서, 실제 작업을 측정해 직접 넣어야 합니다. 인식을 채점하려면 정답 라벨도 필요합니다.
 
 ---
 
@@ -3531,28 +3562,33 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 
 ```text
                 무엇을 만드는가
-                
+
                 정책을 생성한다          신호를 만들고 고른다
               ┌─────────────────────┬─────────────────────┐
               │                     │                     │
    행동을     │  학습된 scheduler   │  MLFQ, fair-share   │
    읽는다     │  Decima             │  scx_lavd           │
               │  FIRM               │  ASA                │
-              │                     │                     │
+              │                     │  AKTS               │
   무 ─────────┼─────────────────────┼─────────────────────┤
   엇          │                     │                     │
   을          │  LLM agent 계열     │  ★ 이 연구          │
-  읽          │  SchedCP            │                     │
-  는          │  Kgent              │  지금 이 칸에 있는  │
-  가          │  TuneAgent          │  것은 정적인        │
-              │                     │  이름 표뿐          │
-   이름과     │                     │  Game Mode          │
-   지식을     │                     │  우선순위 조정 데몬 │
+  읽          │  SchedCP, Kgent     │                     │
+  는          │  Vulcan             │  지금 배포된 것은   │
+  가          │  TuneAgent, TuxBot  │  정적인 이름 표     │
+              │  HPC 작업 배치      │  하나뿐:            │
+   이름과     │                     │  ananicy-cpp의      │
+   지식을     │                     │  규칙 목록          │
    읽는다     │                     │                     │
               └─────────────────────┴─────────────────────┘
 
-   그리고 네 칸 전체의 아래에 mechanism 계열이 깔려 있다
-   ghOSt, sched_ext — 어느 칸의 결정이든 실제로 실행하는 층
+   그림 밖에 두는 것
+   선언: Linux의 class와 unit, macOS의 QoS, 게임이 Feral GameMode에
+         보내는 요청, LSSupportsGameMode
+   창 상태 trigger: 게임 모드(앞에 있거나 전체 화면인 게임)
+   → 둘 다 인식이 아니다
+
+   ghOSt, sched_ext — 정책을 바꾸는 시스템이 실제로 작동하게 하는 장치
 ```
 
 ## 9.4 칸을 하나씩 읽기
@@ -3569,35 +3605,35 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 
 지금 실제로 돌아가는 scheduler 대부분이 여기 있습니다. MLFQ의 강등 규칙, fair-share의 누적 회계.
 
-그리고 이 칸의 가장 발전한 형태가 지연 민감도를 추정하는 정책과, 인식한 뒤 전문 정책을 고르는 연구입니다.
+그리고 지연 민감도를 추정하는 scx_lavd와, 인식한 뒤 전문 정책을 고르는 ASA가 이 칸에 있습니다. 언어 모델이 telemetry를 읽고 검증된 정책 가운데서 고르는 AKTS도 여기 둡니다. 언어 모델을 쓰지만 읽는 것이 이름이 아니라 수치이기 때문입니다.
 
-**한계는 채널입니다.** 행동이 동일하고 의도가 다른 상황을 구분할 수 없습니다.
+**한계는 채널입니다.** 사용자가 그 일을 원하는지는 행동에 없습니다. 이 연구의 학습 대 색인기 쌍처럼 행동도 선언한 class도 다른 두 작업이라도, 그 차이가 누가 원했는지를 말해주지는 않습니다.
 
 ### 왼쪽 아래: 이름과 지식을 읽고 정책을 생성
 
-언어 모델로 kernel 정책을 만들어내는 최근 연구들입니다.
+언어 모델로 kernel 정책이나 설정을 만들어내는 최근 연구들입니다.
 
-읽는 채널이 바뀌었습니다. 행동만이 아니라 소스 코드, 문서, 프로파일 결과까지 읽고 의미를 해석합니다.
+읽는 채널이 바뀌었습니다. 프로세스 이름과 프로파일, telemetry, 설정 항목의 schema까지 읽고 의미를 해석합니다. 그리고 그것을 정책 코드(SchedCP, Kgent, Vulcan), 설정과 parameter(TuneAgent, TuxBot), 작업 배치 결정(HPC 작업 배치 연구)으로 바꿉니다.
 
-**대상이 서버 작업입니다.** 최적화할 대상이 명확한 하나의 workload를 놓고 시간을 들여 분석합니다.
+**평가한 대상은 서버, HPC 작업 대기열, 그리고 SchedCP의 경우 노트북 하나입니다.** 최적화할 대상이 명확한 하나의 workload를 놓고 시간을 들여 분석합니다.
 
 ### 오른쪽 아래: 이름과 지식을 읽고 신호를 만듦
 
 **이 칸이 이 연구의 자리입니다.**
 
-그리고 이 칸이 비어 있지 않습니다. 앞 장에서 본 이름 표들이 여기 있습니다.
-
-게임 모드도, 우선순위 조정 데몬도, 정확히 이 일을 합니다. 이름을 읽고, 상황을 판단하고, 미리 정해진 설정을 적용합니다.
+그리고 이 칸이 완전히 비어 있지는 않습니다. 앞 장에서 본 우선순위 조정 daemon, ananicy-cpp의 규칙 목록이 여기 있습니다. 지금 배포된 인식기 가운데 문서로 확인되는 것은 이 정적인 이름 표 하나입니다. 이름을 읽고, 미리 정해진 설정을 적용합니다.
 
 **다만 판단하는 방법이 정적입니다.** 사람이 미리 적어둔 표를 뒤집니다.
 
+게임 모드는 이 칸에 넣지 않습니다. 게임 모드가 반응하는 것은 이름이 아니라 앞에 있거나 전체 화면인 게임이라는 창 상태이고, 무엇을 게임으로 보는지도 공개되지 않았습니다. 프로그램의 선언(Linux의 scheduling class와 unit, macOS의 QoS, 게임이 Feral GameMode에 보내는 요청, `LSSupportsGameMode`)도 넣지 않습니다. 선언은 프로그램이 스스로 말하는 것이지 시스템이 알아보는 것이 아닙니다. 둘 다 인식이 아니라서 그림 밖에 둡니다.
+
 그러니까 정확히 말하면 이렇습니다. **이 칸의 정적인 자리는 차 있고, 동적인 자리가 비어 있습니다.**
 
-### 아래에 깔린 층
+### 그림 아래의 실행 장치
 
-네 칸 전부의 아래에 실행 계층이 있습니다. 정책을 갈아 끼울 수 있게 만든 연구들입니다.
+정책을 갈아 끼울 수 있게 만든 연구들, ghOSt와 sched_ext는 그림 아래에 따로 적었습니다.
 
-이건 축 위의 한 점이 아니라 **모든 칸이 딛고 서는 바닥**입니다. 어느 칸의 결정이든 실제 시스템에서 작동하려면 이 층이 필요합니다.
+이건 축 위의 한 점이 아닙니다. **정책을 바꾸는 시스템이 실제 kernel에서 작동하게 하는 장치**입니다. 신호를 만드는 쪽이든 정책을 만드는 쪽이든, 그 결과를 실제 시스템에 반영하려면 이런 장치를 거칩니다.
 
 ## 9.5 이 그림이 말하는 것
 
@@ -3605,9 +3641,9 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 
 **데스크톱의 상황 인식이 있어야 할 자리는 오른쪽 아래 칸입니다.**
 
-왼쪽 위와 오른쪽 위는 행동을 읽으므로 의도를 볼 수 없습니다. 왼쪽 아래는 의미를 읽지만 그것을 서버 작업의 정책 합성에 씁니다.
+왼쪽 위와 오른쪽 위는 행동이나 수치를 읽으므로 사용자가 원하는지를 볼 수 없습니다. 왼쪽 아래는 의미를 읽지만 그것을 정책 코드, 설정, 작업 결정으로 바꾸고, 평가한 대상은 서버와 HPC 대기열, SchedCP의 노트북 하나입니다.
 
-**그리고 오른쪽 아래 칸에는 지금 정적인 이름 표만 있습니다.**
+**그리고 오른쪽 아래 칸에 지금 배포된 인식기로 문서에서 확인되는 것은 정적인 이름 표 하나입니다.** 우리가 찾아본 범위(2026-10-08까지의 문헌)에서는, 언어 모델이 프로세스 이름에서 데스크톱 상황을 알아보는 정확도를 정답 라벨에 대어 잰 선행 연구도 없습니다.
 
 이 연구가 하려는 것은 그 칸의 동적인 자리를 채우는 것입니다. **이름 표가 읽는 것을 읽고, 이름 표가 만드는 것을 만들되, 표를 지식으로 바꾸는 것입니다.**
 
@@ -3642,10 +3678,10 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 - 지형도의 축을 고르는 것 자체가 주장입니다. 좋은 축은 이 연구가 서 있는 자리를 드러내고 빈칸이 자연스럽게 보이는 축입니다.
 - 이 연구가 고른 두 축은 무엇을 읽는가와 무엇을 만드는가입니다. 행동을 읽는가 이름과 지식을 읽는가, 그리고 정책을 생성하는가 신호를 만들어 고르는가입니다.
 - 왼쪽 위는 학습된 scheduler입니다. 재학습 비용과 미리 정해진 관측 항목이 한계입니다.
-- 오른쪽 위는 지금 실제로 돌아가는 scheduler 대부분과 그 계열의 최신 연구들입니다. 채널이 한계입니다.
-- 왼쪽 아래는 언어 모델로 정책을 만드는 최근 연구들입니다. 채널은 바뀌었지만 대상이 서버 작업입니다.
-- 오른쪽 아래가 이 연구의 자리이고, 완전히 비어 있지는 않습니다. 정적인 이름 표들이 이미 여기서 정확히 같은 일을 하고 있습니다. 비어 있는 것은 동적인 자리입니다.
-- 네 칸 전부의 아래에 정책을 갈아 끼우는 실행 계층이 깔려 있습니다. 축 위의 한 점이 아니라 모두가 딛는 바닥입니다.
+- 오른쪽 위는 지금 실제로 돌아가는 scheduler 대부분과 scx_lavd, ASA, 그리고 telemetry를 읽는 AKTS입니다. 채널이 한계입니다. 사용자가 원하는지는 행동에 없습니다.
+- 왼쪽 아래는 언어 모델로 정책 코드, 설정, 작업 결정을 만드는 최근 연구들입니다. 채널은 바뀌었지만 평가한 대상이 서버, HPC 대기열, SchedCP의 노트북 하나입니다.
+- 오른쪽 아래가 이 연구의 자리이고, 완전히 비어 있지는 않습니다. 정적인 이름 표 하나(ananicy-cpp의 규칙 목록)가 이미 여기서 같은 종류의 일을 하고 있습니다. 비어 있는 것은 동적인 자리입니다. 게임 모드의 창 상태 trigger와 프로그램의 선언은 인식이 아니라서 그림 밖에 둡니다.
+- ghOSt와 sched_ext는 축 위의 한 점이 아니라, 정책을 바꾸는 시스템이 실제로 작동하게 하는 장치입니다.
 - 축은 유일한 정답이 아닙니다. 판단 빈도나 지식의 출처를 축으로 삼아도 말이 되는 그림이 나옵니다. 다만 좋은 축에는 조건이 있습니다. 연구들이 실제로 그 축에서 갈려야 하고, 그 축이 결과의 차이를 설명해야 하며, 빈칸이 진짜로 비어 있어야 합니다.
 
 ---
@@ -3676,7 +3712,7 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 | behavior 계열 | 지연 민감도를 이미 추정하는데 왜 부족한가 | task 하나의 성질이지 machine의 상황이 아니고, 채널이 행동이다 |
 | 학습된 scheduler | 인식한 뒤 고르는 구조가 이미 있다 | 기여는 골격이 아니라 채널이다 |
 | LLM 계열 | 이건 그 연구의 데스크톱 판 아닌가 | 출력 계약과 측정 계층이 다르다 |
-| 이름 표 | 게임 모드가 이미 있다 | 그건 경쟁자가 아니라 우리의 baseline이다 |
+| 이름 표 | 게임 모드가 이미 있다 | 게임 모드는 다른 범주(앞에 있는 게임에 자원)이고 판별 방법이 비공개다. baseline은 CachyOS의 규칙 목록이 보여주는 이름 표라는 설계를 두 조건으로 세운 것이다. 그 목록을 배포된 그대로 재현한 조건과, 같은 설계로 데이터셋이 알려진 것으로 내놓는 소프트웨어를 덮는 가장 강한 이름 표다 |
 
 **이 표가 related work 절의 설계도입니다.**
 
@@ -3690,7 +3726,7 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 
 이 순서가 우연이 아닙니다.
 
-**실행 계층을 맨 앞에 둔 이유.** 이 갈래는 경쟁자가 아니라 전제입니다. 먼저 "이건 우리가 딛고 서는 바닥이다"를 정리해두면, 뒤의 이야기가 그 위에서 진행됩니다. 그리고 시뮬레이터 기반 평가의 정당화도 여기서 미리 깔립니다.
+**실행 계층을 맨 앞에 둔 이유.** 이 갈래는 경쟁자가 아니라 전제입니다. 먼저 "이건 우리 신호를 받아 쓰는 쪽이 실제 시스템에서 작동하는 길이다"를 정리해두면, 뒤의 이야기가 그 위에서 진행됩니다. 그리고 시뮬레이터 기반 평가의 정당화도 여기서 미리 깔립니다.
 
 **이름 표를 맨 뒤에 둔 이유.** 이것이 진짜 baseline이기 때문입니다. 마지막에 두면 그다음에 오는 위치 정리와 자연스럽게 이어지고, 독자의 머리에 "그러니까 이 연구는 저 표를 대체하려는 것"이 남은 채로 다음 절로 넘어갑니다.
 
@@ -3700,9 +3736,9 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 
 초고의 메모 중에 이런 것이 있습니다. 행동 기반 추론 계열에 대한 것입니다.
 
-**그 계열의 가장 발전한 연구를 후하게 인용하라**는 내용입니다. 이유가 둘 적혀 있습니다.
+**그 계열의 대표 연구인 scx_lavd를 후하게 인용하라**는 내용입니다. 이유가 둘 적혀 있습니다.
 
-첫째, 그 연구가 실제 제품에 쓰인다는 사실이 **데스크톱 scheduling이 중요하다는 것을 뒷받침**해줍니다. 이 연구에 유리한 근거입니다.
+첫째, Valve가 그 개발을 후원하고 SteamOS 3.8에서 사용자가 고르는 scheduler로 출하한다는 사실이 **데스크톱 scheduling이 중요하다는 것을 뒷받침**해줍니다. 설치와 설정은 돼 있지만 기본으로 켜져 있지는 않습니다. 그래도 이 연구에 유리한 근거입니다.
 
 둘째, 그것이 **이 연구가 반대하는 입장의 가장 강한 버전**이기 때문입니다.
 
@@ -3730,9 +3766,9 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 
 **한 논문은 시스템 이름이 바뀌었습니다.** 첫 판본과 지금 판본의 제목이 다르고, 저자 일곱 명 중 한 명도 다릅니다. 옛 이름으로 검색하면 지금 판본이 나오지 않고, 반대로 두 판본을 별개의 연구로 세는 실수도 가능합니다.
 
-**한 논문은 길이가 오갔습니다.** 짧은 형태로 올라갔다가 학회 형식의 긴 원고가 됐다가 다시 짧은 형태로 돌아왔습니다. 그래서 "이 논문에 이렇게 적혀 있다"고 말할 때 어느 판본인지가 중요합니다. 실제로 그 논문의 어떤 문장은 최종 판본에서 표현이 고쳐졌고, 어떤 금액은 값 자체가 달라졌습니다.
+**한 논문은 판본마다 길이가 다릅니다.** 처음 두 판본은 학회 형식의 긴 원고였고, 뒤의 두 판본은 workshop 형식의 짧은 원고로 줄었습니다. 그래서 "이 논문에 이렇게 적혀 있다"고 말할 때 어느 판본인지가 중요합니다. 실제로 그 논문의 어떤 문장은 최종 판본에서 표현이 고쳐졌고, 어떤 금액은 값 자체가 달라졌습니다.
 
-**한 논문은 게재 정보가 생겼습니다.** 그 사이에 workshop 게재가 확정되어 서지 정보에 반영됐습니다. 다른 논문은 저자들의 저장소에만 게재 학회가 적혀 있고 서지 정보에는 아직 없습니다. 그런 경우에는 **"저자들이 자기 저장소에 그렇게 적어두었다"까지만** 말할 수 있습니다.
+**한 논문은 게재 정보가 생겼습니다.** 그 사이에 workshop 게재가 확정되어 서지 정보에 반영됐습니다. 다른 논문은 처음 확인할 때 저자들의 저장소에만 게재 학회가 적혀 있었습니다. 그런 동안에는 **"저자들이 자기 저장소에 그렇게 적어두었다"까지만** 말할 수 있습니다. 그 논문은 나중에 DOI 기록이 확인되어, 지금은 그 기록으로 인용합니다.
 
 **한 논문은 판본이 하나 그대로였습니다.** 그것도 확인의 결과입니다. 심사를 통과한 곳이 아직 없다는 뜻이고, 인용할 때 그 사실을 밝혀야 합니다.
 
@@ -3770,11 +3806,13 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 
 ### 등급을 지키기
 
-첫 장에서 정리한 세 등급이 이 권 전체에서 지켜졌습니다. 다시 짚으면 이렇습니다.
+첫 장에서 정리한 인용의 종류가 이 권 전체에서 지켜졌습니다. 다시 짚으면 이렇습니다.
 
 심사를 거친 학술 문헌은 실험적이고 통계적인 주장을 뒷받침할 수 있습니다.
 
-배포된 소프트웨어의 문서와 저장소는 **존재 주장만** 뒷받침합니다. 카탈로그에 항목이 만 오천 개 있다는 것은 셀 수 있으므로 사실이지만, 그것으로 "이름 기반 인식이 얼마나 효과적이다"를 말할 수는 없습니다.
+배포된 소프트웨어의 문서와 저장소는 존재와, 그 시스템이 스스로 적은 설계와 동작을 그 출처의 것으로 뒷받침합니다. 카탈로그에 항목이 만 오천 개 있다는 것은 셀 수 있으므로 사실이지만, 그것으로 "이름 기반 인식이 얼마나 효과적이다"를 말할 수는 없습니다.
+
+발표 자료와 학회 초록은 발표자의 보고로만 씁니다. scx_layered가 100만 대 넘는 기계에 배포됐다는 것은 sched_ext 관리자들의 슬라이드가 적은 보고이지, 이 연구가 확인한 사실이 아닙니다. 그 기계를 누가 운영하는지도 슬라이드에는 없습니다.
 
 직접 측정한 것은 어떻게 쟀는지를 재현 가능하게 적어야 합니다.
 
@@ -3810,7 +3848,7 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 - 가장 가까운 선행 연구의 후속 논문을 확인한 결과, 그 연구팀의 후속은 없었지만 다른 연구팀에서 인접 연구가 둘 나와 있었습니다. 확인하지 않았다면 심사자가 아는 논문을 저자가 모르는 상황이 됐을 것입니다.
 - 논문 원문을 읽은 것, 저자들의 저장소를 읽은 것, 같은 논문의 다른 판본, 초록과 본문을 각각 구분해서 적어야 합니다. 저장소의 설명을 논문의 초록처럼 인용하면 안 되고, 초록의 최대치를 본문의 범위인 것처럼 옮겨도 안 됩니다.
 - 확인은 남의 연구를 깎는 일이 아니라 자기 논문이 틀리지 않게 하는 일입니다. 초록만 읽고 적어둔 지적이 본문을 열어보니 틀렸던 경우가 이 권에 실제로 있습니다. 그것도 성공한 확인입니다.
-- 인용 등급을 지켜야 합니다. 배포된 소프트웨어의 문서는 존재 주장만 뒷받침합니다.
+- 인용의 네 종류를 지켜야 합니다. 학술 문헌은 그 역할 안에서 실험적, 통계적 주장을 뒷받침합니다. 배포된 소프트웨어의 문서와 저장소는 존재와, 그 시스템이 스스로 적은 설계와 동작과 공개한 수치를 그 출처의 것으로 뒷받침합니다. 발표 자료와 학회 초록과 기사는 발표자나 기자의 보고로만 씁니다. 직접 측정한 것은 우리 측정 범위 안의 값입니다.
 
 ---
 
@@ -3834,7 +3872,8 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 | 용어 | 뜻 |
 |---|---|
 | **scholarly** | 심사를 거친 학술 문헌. 실험적, 행동적, 통계적 주장을 뒷받침할 수 있다 |
-| **deployed-system** | 배포된 소프트웨어의 문서나 저장소. 존재 주장만 뒷받침한다 |
+| **deployed-system** | 배포된 소프트웨어의 문서나 저장소. 존재, 그 시스템이 스스로 적은 설계와 동작, 그 출처가 공개한 수치를 그 출처의 것으로 뒷받침한다 |
+| **talk, conference abstract, news report** | 발표 자료, 학회 발표 초록, 기사. 발표자나 기자의 주장으로만 쓰고, 숫자는 그 보고로 날짜를 붙여 적는다 |
 | **measurement** | 직접 측정한 값. 재현 가능하게 기록해야 한다 |
 
 ## 알고리즘과 시스템
@@ -3860,7 +3899,7 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 | **BPF** | kernel 안에서 사용자 프로그램을 안전하게 돌리는 장치. 실행 전에 검사를 거친다 |
 | **sched_ext** | BPF로 scheduler를 정의하고 실행 중에 켜고 끄는 표준 Linux 기능 |
 | **scx** | sched_ext 위에 올라간 정책 구현들을 모은 공식 저장소 |
-| **scx_lavd** | 지연 민감도를 측정해 가상 deadline에 반영하는 정책. 게임 workload에서 출발했다 |
+| **scx_lavd** | 각 task의 지연 민감도를 기다림·깨움의 빈도, 실행 시간, 가중치로 추정해 깨우는 쪽과 깨워지는 쪽 사이로 전파하고, 그 값으로 virtual deadline과 time slice를 정하는 정책. 게임에서 끊김을 줄이려는 동기로 출발했다 |
 
 ## 학습과 언어 모델 계열
 
@@ -3877,11 +3916,11 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 | **hot path** | 매 결정마다 지나가는 실행 경로. 여기에 느린 것을 두면 시스템이 멈춘다 |
 | **control plane** | 결정 경로 바깥에서 느리게 도는 층. 언어 모델이 놓이는 자리 |
 
-## 배포된 이름 표
+## 배포된 이름 표와 게임 모드
 
 | 용어 | 뜻 |
 |---|---|
-| **Game Mode** | 게임에 독점 CPU 집합과 GPU 우선순위를 주는 Windows 기능. 판별 방법은 제조사 문서에 기술되어 있지 않다 |
+| **Game Mode** | 앞에 있고 focus를 가진 게임에 독점 CPU 집합과 GPU 우선순위를 주는 Windows 기능. 게임 중에는 Windows Update의 driver 설치와 재시작 알림을 미룬다. 판별 방법은 제조사 문서에 기술되어 있지 않다. macOS에도 전체 화면 게임에서 켜지는 게임 모드가 있다 |
 | **exclusive CPU set** | 특정 core를 한 응용에만 배정하는 것. 포기하면 다른 프로세스와 같은 core를 나눠 쓰게 된다 |
 | **ananicy** | 프로세스 이름으로 표를 뒤져 우선순위를 조정하는 Linux 데몬 |
 | **rules catalog** | 그 데몬이 참조하는 이름과 분류의 목록. 커뮤니티가 손으로 관리한다 |
@@ -3916,7 +3955,7 @@ thread의 동작을 여러 국면으로 나누고, 각 국면에 일어날 일�
 
 - related work의 각 문단이 어떤 반론을 흡수하는지 표로 정리할 수 있다.
 - 가장 가까운 선행 연구와의 차이를 세 가지로 나눠 말할 수 있다.
-- 인용을 세 등급으로 나누고 각 등급의 표기 방식을 말할 수 있다.
+- 인용을 네 종류로 나누고 각 종류의 표기 방식을 말할 수 있다.
 
 **확인 규율 확인**
 
