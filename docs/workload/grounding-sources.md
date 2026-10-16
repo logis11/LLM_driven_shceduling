@@ -24,7 +24,7 @@ The library's per-process values are our own measurement (Role D), but for the g
 | source | what it is | what it justifies |
 |---|---|---|
 | rt-app (scheduler-tools; used by ARM and Linaro, per LWN) | Reproducible workload simulator; JSON specs of periodic tasks (period, runtime, deadline) | Our `pattern` schema is near-isomorphic to rt-app's task model — cite as the precedent for JSON-specified synthetic task behavior |
-| interbench (Kolivas) | Emulates interactive tasks (audio, video, X, gaming) under background loads (Burn: CPU-bound threads; Write: streaming disk writes; compile-like), measuring latency, jitter, missed deadlines | The precedent for the *foreground-interactive + background-bulk* structure of Family 2 (same process set, different intent) only; it supplies no parameter values — its Audio/Video/X emulations are no longer cited by the dataset, and its gaming load uses as much CPU as it can get, with no deadlines |
+| interbench (Kolivas) | Emulates interactive tasks (audio, video, X, gaming) under background loads (Burn: CPU-bound threads; Write: streaming disk writes; compile-like), measuring latency, jitter, missed deadlines | The precedent for the *foreground-interactive + background-bulk* structure of Family 2 (jobs that differ in intent beside the same situation) only; it supplies no parameter values — its Audio/Video/X emulations are no longer cited by the dataset, and its gaming load uses as much CPU as it can get, with no deadlines |
 | schbench (Mason, 2016) | Wakeup-latency benchmark reporting tail percentiles (P99): at v1.0 wakeup and request latency at p50/p90/p99/p99.9 and requests per second at p20/p50/p90 | Precedent for our latency metrics (tail-focused, not mean), and a citation precedent (SchedCP cites it); it grounds no archetype |
 | hackbench | A benchmark and a stress test for the Linux kernel scheduler (many communicating tasks; LWN notes it is most often used for load-balancing changes); it reports one completion time | Existence only, cited for the contrast with schbench; it grounds no archetype |
 | LAVD (Changwoo Min's OSS NA 2024 slides, `lavd-ossna24`; scx_lavd's source and README at `v1.1.3`, `scx`; LWN's reports of the LPC 2024 and 2025 talks, `corbet-lwn24`, `edge-lwn26`) | Min's reported characterization of gaming workloads (2024-04-17): around 300 tasks scheduled while a game runs, most long-lived; per-schedule runtimes of a few hundred µs on average to a few ms; tasks tightly linked in waiter–waker chains (Wine components, DXVK threads, PipeWire audio servers, task workers); scx_lavd motivated by reducing stutter | The game chain's reported values — per-schedule runtimes, chain length and member names (`game-task-chain`) — stated as Min's report with its date, the chain's form design; the chain's 16,667 µs frame period is the Steam Deck's 60 Hz refresh (`steamos-refresh`), not LAVD's. Also that desktop and gaming scheduling is a live production concern: Valve sponsors LAVD and ships it in SteamOS 3.8 as a scheduler the user selects, not enabled by default (`steamos-lavd`), and Meta's speakers presented it as a candidate default fleet scheduler (`dai-lpc25`) |
@@ -50,14 +50,14 @@ Grounds every value of the 28 measured archetypes (`docs/workload/measurement-ov
 
 User-behavioral parameters are not measured from users: the keystroke timing is a replayed SWELL-KW stream (Role C); the tab count and the one browser window are `glam`'s, a figure Firefox's Linux telemetry publishes; the core set's segment durations are design or the bound job's measured length (`docs/workload/building-plan.md` §3), Role C's figures serving `c6-dual`'s focus alternation and the naturalistic set. **Live-usage validation was not performed and is a stated limitation** (`docs/workload/measurement-overview.md` §11).
 
-## The negative result — why the suite is synthetic (write this into §5.5's preamble)
+## The negative result — why the suite is synthetic
 
 State it as a finding, not an apology: **no public trace gives desktop process trees with names over time.** The nearest data that exists, and why each falls short:
 
 | candidate | why it falls short for us |
 |---|---|
 | Enterprise / VDI / cloud workload traces (Azure, Google cluster traces, VDI characterization studies) | Server/VM granularity; no consumer applications; process identity absent or hashed |
-| DARPA OpTC | Process-create events with image paths, from Windows 10 enterprise endpoints, not personal desktops |
+| DARPA OpTC (`darpa-optc`) | Process-create events with image paths, from Windows 10 enterprise endpoints, not personal desktops |
 | Desktop trace studies (older workload characterization literature) | Aggregate statistics survive; raw timelines with names were never released, largely for privacy (unsourced: no study is named) |
 | HCI logging datasets (SWELL-KW, BEHACOM) | Foreground application names over time — SWELL-KW per keystroke in a lab, BEHACOM per minute from natural use on Linux and Windows — without the process-level detail (children, cgroups, background processes) the executor needs |
 
@@ -66,7 +66,7 @@ The absence is structural: process names are exactly the field privacy review st
 ## Anti-roles — sources that look relevant but must not be used as grounding
 
 - **Phoronix Test Suite / UnixBench**: performance measurement of a machine, not scenario definitions; citing them as scenario grounding invites "you benchmarked the wrong thing."
-- **Mobile app-usage datasets (launch prediction, screen-time)**: tempting for switching statistics, but mobile foreground-exclusivity makes the concurrency structure disanalogous to desktop multitasking; a reviewer who knows the dataset will catch it. Carat, whose samples list several running apps, is noted and not used.
+- **Mobile app-usage datasets (launch prediction, screen-time)**: tempting for switching statistics, but mobile foreground-exclusivity makes the concurrency structure disanalogous to desktop multitasking; a reviewer who knows the dataset will catch it. Carat, whose samples list several running apps (`carat-top1000`), is noted and not used.
 - **The SchedCP evaluation workloads**: cite as related-work context, not as grounding — reusing them would concede the desktop framing.
 
 ## Citation-tier rule (style for the paper)

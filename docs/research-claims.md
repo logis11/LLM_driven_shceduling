@@ -75,7 +75,8 @@ research questions treat them as one.
   MECHANISM 1 -- combination
   Discord means something different depending on what runs beside it.
   A flat list cannot express context.
-        tested by Family 2, same process set, different intent
+        tested by Family 2, jobs that differ in intent beside
+        the same situation
 
   MECHANISM 2 -- world knowledge
   A Godot-built indie game is a game that nobody registered.
