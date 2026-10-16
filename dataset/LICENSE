@@ -5,9 +5,10 @@ Copyright (c) 2026 Jioh In, Kyungmin Inn and Ian Park
 
 The Licensed Material is the dataset's data:
 
-  - every file under `dataset/` other than its code — the code, `dataset/tools/`
-    and `dataset/Makefile`, is under the repository's MIT licence (`LICENSE` at
-    the repository root);
+  - every file under `dataset/` other than its code and the 136M Keystrokes
+    windows — the code, `dataset/tools/` and `dataset/Makefile`, is under the
+    repository's MIT licence (`LICENSE` at the repository root); the windows
+    are under their source's terms (below);
   - the workloads compiled from it (`dataset/build/`), as the committed
     manifests pin them;
   - the assets of the measurement releases that hold the campaigns' raw
@@ -43,8 +44,10 @@ The input windows `dataset/meas/streams/aalto-*` and their index
   to use for non-commercial use in your own research or projects with
   attribution to the authors".
 
-They keep the inter-key timings, and no key value; their use is also subject
-to that source's terms.
+They keep the inter-key timings, and no key value. They are not part of the
+Licensed Material: they are distributed under that source's terms —
+non-commercial use, with attribution to its authors — and this licence grants
+no rights in them.
 
 =======================================================================
 
