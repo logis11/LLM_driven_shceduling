@@ -239,6 +239,14 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0206; W-0396
 - Notes: found in K08. K04's file: a follow-up chunk.
 
+### W-0922 · open
+- At: `dataset/README.md` "Sensitivity variants", the table's `corner-low`/`corner-high` row ("the session daemons' and the Tracker indexer's are not swept")
+- Change: Drop "and the Tracker indexer's": only the session daemons' values go unswept.
+- Final word: `file-indexer` carries no stability exception — its scope: "the stability rule holds on all three values" (`dataset/archetypes.yaml`); the exception 9.6 D29 named was the block of `cpu-batch`'s old `tracker` program (`99368c44`), retired with that program. W-0898 drops the same exception from `dataset/variants.yaml`'s `:94` comment.
+- Sources: `logs/K11.md` ## Rows for other chunks (X1), N37, ## Review round 1 (9.6 D29 checked)
+- Cross-ref: W-0898
+- Notes: found in K11. K04's file: a follow-up chunk.
+
 ## Also on this file, not for editing from this list
 
 - W-0219 · closed, already-applied — README line 8 names none of the retired `desktop-interactive`, `audio-playback`, `video-playback`; the 'fully measured' wording this row's notes flag is W-0193.

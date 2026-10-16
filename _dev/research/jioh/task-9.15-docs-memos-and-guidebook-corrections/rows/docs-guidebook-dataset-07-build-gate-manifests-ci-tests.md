@@ -113,3 +113,11 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 13 open rows. The file has 1
 - Sources: `logs/K02.md` ## Rows for other chunks (X5, extended in fix round 1), fix round 1 item 7 (N25)
 - Cross-ref: W-0089; W-0742
 - Notes: found in K02.
+
+### W-0923 · open
+- At: `docs/guidebook/dataset/07-build-gate-manifests-ci-tests.md` the pin quotations `fad7192d…` / `03f14b2c…` at lines 355, 508–510, 526–527 and 599 (the pin table's last row) — W-0590's places
+- Change: Apply W-0590 with the 2026-10-16 re-bless's pins as the current ones — dataset `b6017a10…`, variants `087ef27c…`, scoring spec `2ad757b6…`, guard spec `24ccb875…`, driver table `0fba4b3c…`, generated `a8eebb33…` / `2e57a6c1…` / `dd6a7c24…` / `264d3333…` / `58a34d65…` — with 9.23 D17's (W-0590's final word) as the pins just before, and the pin history gaining the 2026-10-16 row.
+- Final word: `harness/experiments/rq0-gate.yaml` `pins` and `harness/CHANGELOG.md`'s 2026-10-16 entry (9.15's batched rebuild, `37c2e233`; the driver table re-pinned for W-0777); the dataset pin chain `fad7192d` → `c5f7fa5a` → `81d3213d` → `b6017a10` (2026-10-14, 2026-10-15, 2026-10-16). Recomputed with `shasum -a 256` by K11 and K13 and their reviewers, 2026-10-17.
+- Sources: `logs/K11.md` ## Rows for other chunks (X4), ## Decisions 1, ## Review round 2; `logs/K13.md` W-0581's row, ## Review round 2
+- Cross-ref: W-0590; W-0485; W-0581
+- Notes: found in K11. K14's file (wave 4). W-0590's final word (9.23 D17's pins) predates the 2026-10-16 re-pin.
