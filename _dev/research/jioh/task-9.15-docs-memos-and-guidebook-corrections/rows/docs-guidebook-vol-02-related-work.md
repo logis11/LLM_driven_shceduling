@@ -2,7 +2,7 @@
 
 Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 3927 lines at `d5cc7711`.
 
-### W-0627 · open
+### W-0627 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 2.2 timesharing의 시작 lines 280–429; ## 2.5 fair-share의 이론 lines 518–665
 - Change: Check ch. 2.2 and 2.5 against OSTEP ch. 8 (revised Rule 4), Corbató pp. 341–342, the kernel's sched-eevdf.rst and sched-design-CFS.rst and the EEVDF technical report, and restate where they differ: MLFQ classifies tasks by CPU use (Corbató's level classification 'entirely automatic'); CFS and EEVDF account against a fair share — a virtual run time and lag per task, the eligible task with the earliest virtual deadline next, a sleeping task's lag decaying — their sleeper handling shaping a waking task's place.
 - Final word: 9.12 D18 (locator per D101: docs/related-work.md:16's second sentence): MLFQ classifies tasks by CPU use (OSTEP ch. 8, revised Rule 4; Corbató's level classification 'entirely automatic'); CFS and EEVDF account against a fair share — a virtual run time and lag per task, the eligible task with the earliest virtual deadline next, a sleeping task's lag decaying — their sleeper handling shaping a waking task's place; key map mlfq → ostep with corbato-sjcc62, eevdf → eevdf-tr95 with the kernel's sched-eevdf.rst and sched-design-CFS.rst.
@@ -10,7 +10,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0628
 - Notes: Scope-card item 60: 9.12 read vol-02's quotations against the same copies as the entries they quote; their corrections are applied by 9.15. The quotation fixes inside these chapters — :558 ('lag' defined in the EEVDF report's §2, p. 4, not its introduction) and :582 ('virtual dead line' → 'virtual deadline') — are W-0628's.
 
-### W-0628 · open
+### W-0628 · applied
 - At: `docs/guidebook/vol-02-related-work.md` chapters 2–8, the lines 9.12 D53 and D97 list: ### 네 개의 개념 lines 558, 582; ## 2.6 0.1초는 어디서 왔나 lines 674, 696; ## 3.2 ghOSt lines 865, 873/875, 887, 925, 931, 949, 993, 1032, 1048, 1080; ## 3.3–3.4 lines 1116, 1208; ## 4.3 line 1339; ## 5.2–5.4 lines 1571, 1757, 1851, 1867; ## 5.6 lines 1965–1967; ## 6.2 lines 2209, 2211, 2395; ## 6.3 lines 2551, 2568, 2579; ## 6장 정리 line 2674; ## 7.2 lines 2791–2797 and ## 7장 정리 line 3174; ## 8.4 line 3421; and the 22 marker drops in chapters 4–6 the V60 report lists
 - Change: Correct each quotation and the claim around it to its source as the V60 quotation report's row gives it (_dev/research/jioh/task-9.12-related-work-prose/search/V60-vol02-quotations.md): :1080 the two ghOSt §4.4 sentences in source order with '(i.e., within 10%)' restored; :1867 Park's dropped '(affecting job runtime in the rewards)' marked; :2579 Kgent's 'the comprehension engine and symbolic execution component'; :2568 Kgent Table 1's human-expertise row as the source has it — in the guidebook's column order 만들지 못함 25 %, 틀린 것을 통과시킴 2.5 %, 정확도 72.5 %; :558 'lag' defined in the EEVDF report's §2 (p. 4); :582 'virtual deadline'; :674 Miller's seventeen topics; :2209 and :2674 SchedCP's journal-ref 'MLforSystem 2025'; :2211 no earlier short version (v1 and v2 the same 8-page manuscript, v3 and v4 6 pages); :3421 Procyon's ten benchmarks; :865 the abstract's first two sentences and :1965 the first sentence and the start of the second; :1032 '(Fig. 5)' kept or its drop marked; :949 both drops ('[40]', '(see §3.4)') marked; :875, a verbatim repeat of :873, removed; :1116 five bullets, :1208 the Overview line after a shared first line; the small corrections (:1048 the source's 'RockDB' kept or marked, :1339, :1571, :1757, :1851, :2395, :2551) and every marker drop given an elision mark.
 - Final word: 9.12 D53 (vol-02's quotations read against their sources) as amended by D97 and D98: 277 quotation passages by D97's counting rule — 238 exact, 39 differ (28 of them only dropping citation or cross-reference markers), none missing. Substantive corrections: :1080 (ghOSt §4.4, p. 599, two sentences joined in reverse order behind an elision hiding '(i.e., within 10%)'), :1867 (Park drops '(affecting job runtime in the rewards)'), :2579 (Kgent, 'the comprehension engine and symbolic execution component'), :2568 (Kgent Table 1, the human-expertise row's columns swapped: accuracy 72.5 %, false positive 2.5 %, false negative 25 %). Claims around the quotes: :558 ('lag' defined in §2 p. 4, virtual time formally in §3 p. 6), :674 (Miller's seventeen topics, 'The seventeen types of response category and response time', p. 269), :2209 and :2674 (SchedCP's journal-ref 'MLforSystem 2025'), :2211 (no earlier short version), :2791–2797 and :3174 (the Windows Update question settled by 9.12 D45), :3421 (Procyon lists ten benchmarks, one 'AI Inference Benchmark for Android'). Nuances: :865 (the abstract's first two sentences) and :1965 (D97: the first sentence and the start of the second; :1967 filed with :865), :1116 (five bullets in sched-ext.rst, not four), :1208 (each scx README's Overview line after a shared first line), :696 (the Nielsen chapter title not in the copy), :875 duplicates :873. Small: :582 'virtual deadline' (moved here by D97), :1048 RocksDB/RockDB, :1339, :1571, :1757, :1851, :2395, :2551, and the marker drops (:887, :925, :931, :949 both drops, :993, :1032 '(Fig. 5)' re-graded by D97, and the 22 in chapters 4–6). D98: two record copies replaced by fixed captures (Nielsen's NN/g excerpt; Microsoft's Game Mode concept page); the ghOSt README quotations' source is google/ghost-userspace at 9ca0a1fb.
@@ -18,7 +18,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0627; W-0629; W-0632; W-0647; W-0636; W-0637; W-0638; W-0640; W-0641; W-0642; W-0644
 - Notes: Checked at HEAD: :674 still reads '열여덟 가지 주제', :582 'virtual dead line', :875 repeats :873 verbatim, :2568 reads '| 사람의 전문 지식으로 대체 | 72.5% | 2.5% | 25% |' under the columns 만들지 못함 | 틀린 것을 통과시킴 | 정확도. The Windows Update lines (:2791–2797, :3174) are applied with ch. 7.2's restatement (W-0644). The registry points D53 also lists (gamemode-docs' fifth page, the source of :2777; hackbench's version; rt-app's README.in for :3299) are docs/references.md's. :696: 9.11 D31 marked Nielsen's chapter title not verified; D98's fixed capture holds 'Excerpt from Chapter 5 in my book Usability Engineering, from 1993' but not the title. S12-326 and S12-327 (9.12's scope card, the boundary line and item 60) and SX-0228, SX-0236 (the TODO 9.15 line) carry the same corrections; SX-0236's D98 half is W-0647. The per-chapter checks of 9.12 D17–D24 (W-0627, W-0632, W-0636–W-0642) apply in the same pass.
 
-### W-0629 · open
+### W-0629 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 2.6 0.1초는 어디서 왔나 → ### 범위를 알려주는 세 번째 출처, the '이 연구에서는' box line 720; ## 2장 정리 line 823
 - Change: Restate both: the 0.1 s threshold is Miller's guideline — the strict end of Miller's 0.1–0.2 s keystroke-echo range, taken by design on Miller's caveat about skilled typists; Nielsen restates Miller and is not a second grounding ('2차 근거', '2차 출처' leave); Long's 0.1–0.5 s keystroke-to-print delays, as Shneiderman reports them, show a trend within that range, not that 0.1 s is a loose upper bound ('느슨한 상한', '여유로운 목표가 아님' leave); Deber et al.'s measured detection thresholds (69 / 96 ms direct / indirect tapping, 12 tapping sessions) are the cross-check.
 - Final word: 9.11 D1 (2026-10-07) as amended by 9.11 D24 (2026-10-08) and D27: T_interaction (the interaction-latency threshold) stays 100 000 µs (0.1 s), labelled design — the strict end of Miller's 0.1–0.2 s key-to-visual-echo range (miller-fjcc68, p. 271, Topic 1; Miller's delays 'the best calculated guesses by the author', 'indicative rather than conclusive'), taken on Miller's caveat that the range may be too slow for skilled typists; Nielsen (nielsen-ue93) restates Miller and Card et al. as advice, not a second grounding; cross-checked against a measured detection threshold (deber-chi15: tapping 69 / 96 ms direct / indirect, 12 tapping sessions); Long, as reported by Shneiderman (shneiderman-csur84, p. 268), found a trend within 0.1–0.5 s keystroke-to-print delays, not that 0.1 s is the loose end. 9.12 D63 states Miller's echo limit the same way. Matches docs/harness/metrics.md:289, :296.
@@ -26,7 +26,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0628
 - Notes: The same chapter's :674 ('열여덟 가지 주제' → seventeen) and :696 (Nielsen's chapter title unverified) are W-0628's (9.12 D53). docs/harness/metrics.md:296 is the model wording; deber-chi15 has a docs/references.md entry.
 
-### W-0630 · open
+### W-0630 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 2.7 교과서를 인용한다는 것 → ### 그런데 이 연구는 설정값까지 가져왔습니다 lines 746 and 752 (the value table's queue row); ### 왜 통째로 가져오는가 lines 757–763; ## 2장 정리 line 824
 - Change: Restate 'one source's example taken whole' (:746 '한 출처의 예제를 통째로', the heading at :757, :763, :824) to the values of three worked examples of one chapter, OSTEP chapter 8 — three queues and a 10 ms top slice from Example 1 (p. 4), doubling from Figure 8.6 (p. 9), the 100 ms boost from Figure 8.4 (pp. 6–7) — and the queue-count row (:752 '모든 그림에 Q2, Q1, Q0이 나옵니다') to 'Figures 8.2–8.6 have Q2, Q1, Q0; Figure 8.1 draws eight queues (Q1–Q8)'.
 - Final word: 9.11 D8 (2026-10-07, the boot default's OSTEP grounding) as extended by 9.11 D28: the boot default's four MLFQ values stand and are the values OSTEP chapter 8's worked examples use — three queues and a 10 ms top slice from Example 1 (p. 4), doubling from Figure 8.6 (p. 9), the 100 ms boost from Figure 8.4 (pp. 6–7) — three examples of one chapter, not one example taken whole; 'every figure has Q2, Q1, Q0' → Figures 8.2–8.6 have them, Figure 8.1 draws eight queues (Q1–Q8); the allotment equals the slice as in Example 1 and departs from Figure 8.6 (D28). Handed to 9.15 by 9.11 D33.
@@ -34,7 +34,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0631
 - Notes: The table's allotment row (the top slice with the allotment equal to the time slice) already agrees with 9.11 D28; Figure 8.6 gives two slices at the top two levels. SX-0101 (the TODO 9.15 line's 9.11 D8 and D2 item for vol-02) is merged here; its 0.70 ms half is W-0631.
 
-### W-0631 · open
+### W-0631 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 2.8 실제 시스템의 숫자들 lines 797 and 803; ## 2장 정리 line 825
 - Change: Restate EEVDF's base slice at :797 ('EEVDF로 바뀐 뒤에는 기본 slice가 0.75밀리초'): 0.75 ms on kernels v6.6–v6.14, 0.70 ms from v6.15 (sysctl_sched_base_slice), scaled by 1 + ilog2(min(online CPUs, 8)) (2.1 ms on the runner's 4 CPUs); the range's low end at :803 and :825 ('0.75밀리초부터 20밀리초까지') becomes 0.7 ms. :797's CFS-era figures (6 ms target latency, 0.75 ms minimum granularity) are historical and stay.
 - Final word: 9.11 D2 (2026-10-07) as labelled by 9.11 D25 (2026-10-08): Linux's base slice is 750 µs at v6.6–v6.14 and 700 µs from v6.15 (sysctl_sched_base_slice), scaled by 1 + ilog2(min(online CPUs, 8)); the sweep's Linux point moves from 750 µs to 700 µs (0.70 ms), the unscaled one-CPU value taken by design for the simulator's one lane (the runner reads 2.1 ms at 4 CPUs); the project does not use v6.6–v6.14. Handed to 9.15 by 9.11 D33.
@@ -42,7 +42,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0630
 - Notes: Checked: harness/experiments/rq0-gate.yaml:37 lists ostep-slice-700us among the ten alternatives. W-0630's 0.75 ms half (merged at W-0630).
 
-### W-0632 · open
+### W-0632 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 3.2 ghOSt: 결정을 user space로 넘기기 lines 851–1091
 - Change: Check ch. 3.2 against the SOSP '21 paper's Abstract, §2 p. 3, §3 p. 5 and §3.4 p. 8 and restate where it differs: ghOSt delegates kernel scheduling decisions to userspace agents, motivated by the need to iterate on policy across a fleet without deploying a new kernel or rebooting; 'without kernel rebuilds' leaves wherever the chapter says it.
 - Final word: 9.12 D17: ghOSt delegates kernel scheduling decisions to userspace agents, motivated by the need to iterate on policy across a fleet without deploying a new kernel or rebooting (SOSP '21 Abstract and §2 p. 3); 'without kernel rebuilds' leaves.
@@ -50,7 +50,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0628; W-0647
 - Notes: Scope-card item 60: 9.12 read vol-02's quotations against the same copies as the entries they quote; their corrections are applied by 9.15. The chapter's quotation fixes (:865, :875, :887, :925, :931, :949, :993, :1032, :1048, :1080, 'the ghOSt order') are W-0628's; the eight README quotations' attribution is W-0647.
 
-### W-0633 · open
+### W-0633 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 3.4 그 위에 실제로 올라간 scheduler들 → ### 얼마나 실제로 쓰이나 lines 1226–1242 (the '논문으로' box at 1242)
 - Change: Add the operators' own statements beside the repository's: Meta reports scx_layered deployed on '1M+ machines' (LPC 2024 slides 'sched_ext status and plans') and across its Reality Labs GPU fleet (LPC 2025 contribution 2039); scx_lavd is offered as an opt-in scheduler in Valve's SteamOS 3.8 and presented by Meta as a candidate default fleet scheduler (LPC 2025 contribution 2099); the conclusion is a non-default policy deployed at fleet scale as its operator reports, not 'deployable at scale'; the '논문으로' box (:1242) follows.
 - Final word: 9.12 D8 as amended by D113: the production-scheduler sentence is per scheduler, each attributed to its operator — scx_layered: Meta reports it deployed on '1M+ machines' (LPC 2024 slides 'sched_ext status and plans') and across its Reality Labs GPU fleet (LPC 2025 contribution 2039); scx_lavd: offered as an opt-in scheduler in Valve's SteamOS 3.8 and presented by Meta as a candidate default fleet scheduler (LPC 2025 contribution 2099); scx_rusty leaves; the conclusion is a non-default policy deployed at fleet scale as its operator reports, not 'deployable at scale'. The LPC slides, the LPC abstract and LWN 1051430 are minted under the new talk, conference-abstract or news-report type (D113).
@@ -58,7 +58,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0634; W-0635; W-0639; W-0643; W-0644; W-0645
 - Notes: The new docs/references.md entries are the references chunk's. SX-0227 (the TODO 9.15 line's umbrella for 9.12 D2, D8, D10, D12, D14 and D16 on vol-02) is merged here; its other halves are W-0634 (D10), W-0635 (D14), W-0639 (D12), W-0643 (D8's :2699), W-0644 (D2) and W-0645 (D16).
 
-### W-0634 · open
+### W-0634 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 4.3 scx_lavd: 이 계열의 가장 발전한 형태 (heading line 1315) → ### 무엇인가 line 1331; ## 9.4 → ### 오른쪽 위: 행동을 읽고 신호를 만듦 line 3572; glossary ## 정책 교체 계층 line 3863 (scx_lavd row)
 - Change: Drop the superlative at :3572 ('이 칸의 가장 발전한 형태') and in the heading at :1315 ('이 계열의 가장 발전한 형태'); check :1331 and :3863 against the inputs: scx_lavd estimates each task's latency criticality from its wait and wake frequencies, runtime and weight, propagates it between wakers and wakees along task chains, and uses it to set the task's virtual deadline and time slice; it was motivated by gaming workloads, to reduce stuttering.
 - Final word: 9.12 D10: scx_lavd estimates each task's latency criticality from its wait and wake frequencies, runtime and weight, propagating it between wakers and wakees along task chains, and uses it to set the task's virtual deadline and time slice; it was motivated by gaming workloads, to reduce stuttering (README). Cited to the scx_lavd README and lat_cri.bpf.c at scx v1.1.3 and lavd-ossna24 slides 22 and 25. 'The most developed recent instance' and 'where mis-scheduling within a task chain surfaces as stutter' leave.
@@ -66,7 +66,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0633; W-0635; W-0646
 - Notes: :1315's heading was not named by the hand-off; it carries the same superlative (noted by 9.12's extraction). :3572 is also on W-0646 (9.12 D83/D116's placement of the cell); :3574 on W-0635 (D14).
 
-### W-0635 · open
+### W-0635 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 4장 정리 line 1453; ## 5장 정리 line 2177; ## 9.4 → ### 오른쪽 위: 행동을 읽고 신호를 만듦 line 3574
 - Change: State the behaviour channel's limit through the pairs as 9.12 restated them: the P1 pair's training run and indexer differ in behaviour and in declared class, so the limit is not 'behaviour identical, intent different, separable by no behavioural rule in principle' (:1453 '원리적으로 구분할 수 없다', :2177 '행동이 같고 의도가 다른 두 상황', :3574 '행동이 동일하고 의도가 다른 상황'); it is that whether the user wants the work is not in its behaviour and its declared class does not settle it — the name, read with what is known of the software, carries it.
 - Final word: 9.12 D14 (the P1 premise) as amended by D88 and corrected by 9.23 D9: the P1 pair (the training-run-against-indexer pair) is two real jobs beside an editor with opposite correct policies, differing in behaviour and in declared class — the training side (c2-p1a) is PyTorch's basic MNIST example on the CPU, an actual training run that does not claim desktop users train MNIST (9.6 D32, 9.10 D12), one thread, 69.49 s ±27.3 % between voluntary blocks, default policy at nice 0; the indexer side (c2-p1b) is GNOME's Tracker indexing a home folder, five processes, 1.876 ms between voluntary blocks, SCHED_IDLE, nice 19 and the idle I/O class set by the program on itself; the dataset's indexer runs 0.844–0.849 of its CPU past a 10 ms slice (D88, replacing D14's 9.6 figures). The pair tests what recognition adds over a baseline that already honours the indexer's declared class; 9.14 decision 2 measured that headroom as zero, so the RQ0 gate (RQ0, the gate experiment: does configuration matter on these workloads at all) judges c2-p1a and reports c2-p1b, the indexer's declared idle class settling its side (9.23 D9). 'behaviorally indistinguishable in principle', 'No refinement of this quadrant can separate them', 'exists only in what the processes are', 'no behavioural heuristic can separate them even in principle' and 'which the F2 pair defeats by construction' leave. 9.12 D89 (on D15) gives the channel's limit: whether the user wants the work is not in its behaviour and its declared class does not settle it; the name, read with what is known of the software, carries it.
@@ -74,7 +74,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0633; W-0634; W-0638; W-0646
 - Notes: :2177's ASA reading list (six metric groups, no process name) agrees with 9.12 D21 and stays; only its last sentence changes. :3574 sits beside W-0634 (D10's superlative at :3572) and W-0646 (the cell's placement).
 
-### W-0636 · open
+### W-0636 · not applicable
 - At: `docs/guidebook/vol-02-related-work.md` ## 5.2 Decima from line 1471; ## 5.3 FIRM from line 1665; ## 5.4 Park lines 1763–1926 (### 열두 개가 무엇인가 line 1781)
 - Change: Check ch. 5.2–5.4 against the same passages: the Decima and FIRM descriptions stand; Park is an open platform of twelve system-optimization environments for learning-augmented systems, not a generalization of the setting.
 - Final word: 9.12 D19 (locator per D101: docs/related-work.md:24's second sentence): the Decima and FIRM clauses kept; 'Park generalizes the setting' becomes 'Park offers an open platform of twelve system-optimization environments for learning-augmented systems'; 9.12 D81 later restates the sentence's opening clause.
@@ -82,7 +82,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0628; W-0637
 - Notes: Scope-card item 60: 9.12 read vol-02's quotations against the same copies as the entries they quote; their corrections are applied by 9.15. Park's omission at :1867 and the small corrections at :1571, :1757, :1851 are W-0628's.
 
-### W-0637 · open
+### W-0637 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 5.2 Decima → ### 학습에 얼마나 드는가 line 1629 and ### 환경이 바뀌면 line 1651; ## 5.5 이 갈래의 공통 한계 lines 1927–1950; chapter 5 generally
 - Change: Check ch. 5 against the learned papers: the learned line's two limits stay — per-workload training and a human-formalized problem space — stated by the learned papers themselves and summarized by later LLM work, not 'by now well documented'; each limit cites its primary: Decima §7.4 p. 11, FIRM pp. 3, 10, 13 (transfer learning, about 2 000 against 15 000 iterations), Park §3.3 p. 5; SchedCP v4 §2 p. 2 as the summary.
 - Final word: 9.12 D20: the learned line's two limits stay — per-workload training and a human-formalized problem space — but 'by now well documented' becomes 'stated by the learned papers themselves and summarized by later LLM work'; each limit cites its primary: Decima §7.4 p. 11, FIRM pp. 3, 10, 13 (transfer learning, ~2 000 against ~15 000 iterations), Park §3.3 p. 5; SchedCP v4 §2 p. 2 as the summary.
@@ -90,7 +90,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0628; W-0636
 - Notes: Scope-card item 60: 9.12 read vol-02's quotations against the same copies as the entries they quote; their corrections are applied by 9.15.
 
-### W-0638 · open
+### W-0638 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 5.6 ASA: 골격이 같은 연구 lines 1951–2159 (:2110, :2148, :2177–2180 already agree)
 - Change: Check ch. 5.6 against the ASA paper and restate where it differs: ASA classifies the workload from OS metrics with a model trained once offline, smooths its predictions by time-weighted voting, and switches among expert sched_ext schedulers through a per-machine mapping table; its recognizer reads behavioural metrics with no process identity; each new machine needs a measurement pass that builds the mapping table, with optional fine-tuning; 'requires offline training per deployment context' leaves wherever the chapter says it; 'ours … requires no training on the target machine' stays, scoped to the recognizer.
 - Final word: 9.12 D21: ASA classifies the workload from OS metrics with a model trained once offline, smooths its predictions by time-weighted voting, and switches among expert sched_ext schedulers through a per-machine mapping table; its recognizer reads behavioural metrics with no process identity; each new machine needs a measurement pass that builds the mapping table, with optional fine-tuning; 'requires offline training per deployment context' leaves; 'ours … requires no training on the target machine' stays, scoped to the recognizer. 9.12 D116 later places ASA in the behaviour-reading, signal-producing cell.
@@ -98,7 +98,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0628; W-0635; W-0639
 - Notes: Scope-card item 60: 9.12 read vol-02's quotations against the same copies as the entries they quote; their corrections are applied by 9.15. :2088 inside this chapter is W-0639 (9.12 D12); :1965–1967's quotation nuance is W-0628's; :2177 also carries W-0635 (D14).
 
-### W-0639 · open
+### W-0639 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 5.6 ASA → ### 인식 정확도를 따로 잽니다, the '이 연구에서는' box line 2088
 - Change: Restate the box's 'the LLM line has no evaluation that measures recognition itself' ('인식 자체를 따로 재는 평가는 그쪽에 대응물이 없다'): AKTS measures LLM recognition on telemetry (Qwen2.5 0.5B/1.5B/3B route telemetry at 20 of 40 correct, chance) and SchedCP reports an 8-of-8 classification outcome; to our knowledge — the literature searched through 2026-10-08 — no prior work measures an LLM's accuracy at recognizing a desktop situation from process identity against ground-truth labels. :2092, :2180 and :2465 already agree and stay.
 - Final word: 9.12 D12: to our knowledge — the literature searched through 2026-10-08 — no prior work measures an LLM's accuracy at recognizing a desktop situation from process identity against ground-truth labels; the three nearest measurements are named with their figures: ASA (arXiv 2511.11628v1: base classifier 96.83 %, 99.19 % after online fine-tuning; an XGBoost-led ensemble over behavioural metrics, no process identity), SchedCP (arXiv 2509.01245v4 p. 5: 'Claude Opus successfully classified all 8 workloads at $0.15 per analysis, while Claude Sonnet failed', an outcome beside its four research questions), AKTS (arXiv 2609.12276v2, §4.2: Qwen2.5 0.5B/1.5B/3B route telemetry at 20/40 correct, chance; 16 of 48 of the 0.5B model's decisions not a valid index). 'prior LLM-scheduling work measures end-to-end performance only' is restated to the same three.
@@ -106,7 +106,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0633; W-0638; W-0646
 - Notes: vol-02 does not otherwise introduce AKTS (grep at HEAD); the box names it with its citation. AKTS's placement in the figure is W-0646's.
 
-### W-0640 · open
+### W-0640 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 6.2 SchedCP: 가장 가까운 선행 연구 lines 2197–2508
 - Change: Check ch. 6.2 against SchedCP v4's Abstract, §3 p. 3, §4 p. 4 and §5 p. 4 and restate where it differs: SchedCP optimizes a given workload (its evaluation runs kernel compilation, schbench and batch workloads), though it names edge and personal devices among its motivations — not 'a given server or batch workload'.
 - Final word: 9.12 D23: SchedCP's description stands, cited to v4's locators (Abstract; §3 p. 3; §4 p. 4; §5 p. 4); 'SchedCP optimizes a given server or batch workload' becomes 'SchedCP optimizes a given workload (its evaluation runs kernel compilation, schbench and batch workloads), though it names edge and personal devices among its motivations'. 9.12 D82 later restates docs/related-work.md:34's first sentence.
@@ -114,7 +114,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0628
 - Notes: Scope-card item 60: 9.12 read vol-02's quotations against the same copies as the entries they quote; their corrections are applied by 9.15. The journal-ref 'MLforSystem 2025' (:2209, :2674), the short-version claim (:2211) and :2395 are W-0628's.
 
-### W-0641 · open
+### W-0641 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 6.3 Kgent: 자연어에서 kernel 확장 만들기 lines 2509–2590
 - Change: Check ch. 6.3 against the Kgent paper as read 2026-10-08 from the open-access eScholarship copy (CC BY 4.0, SHA-256 1292f750…): Kgent's description stands; any 'DOI record not re-checked (ACM DL unreachable)' status leaves.
 - Final word: 9.12 D22: Kgent's sentence stands; kgent-ebpf24's status — read 2026-10-08 from the open-access eScholarship copy (https://escholarship.org/content/qt3jg1f0jr/qt3jg1f0jr.pdf, CC BY 4.0, SHA-256 1292f750…); 'DOI record not re-checked (ACM DL unreachable)' leaves.
@@ -122,7 +122,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0628
 - Notes: Scope-card item 60: 9.12 read vol-02's quotations against the same copies as the entries they quote; their corrections are applied by 9.15. Kgent's Table 1 human-expertise row (:2568), the 'comprehension engine' omission (:2579) and :2551 are W-0628's.
 
-### W-0642 · open
+### W-0642 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 6.4 인접한 두 시도 → ### kernel 설정 조율 lines 2591–2652 (the TuneAgent citation line 2595, the '인용 정보 정정' box lines 2607–2617); ## 6장 정리 line 2688; also ## 이 권의 표기 line 51 and ## 10.6 인용 규율 line 3735, which say a venue is known only from the authors' repository
 - Change: Check ch. 6.4 against the sources and restate: TuneAgent tunes the kernel's build configuration (not 'kernel parameters'); it is the KDD '26 paper, DOI 10.1145/3770855.3817987, cited by that record with its arXiv versions named (v1 'OS-R1', v2 'TuneAgent'), so the claims that its venue is written only on the authors' repository and the proceedings record unchecked (:51, :2615–2617, :2688, :3735) are restated to the DOI record; Jadhav et al. stay a preprint (arXiv 2506.02025v2, under review, re-checked 2026-10-08).
 - Final word: 9.12 D24: 'tune kernel parameters [tuneagent]' becomes 'tune the kernel's build configuration [tuneagent]'; TuneAgent is cited as the KDD '26 paper by DOI 10.1145/3770855.3817987 (tuneagent-kdd26), its arXiv versions named (v1 'OS-R1', v2 'TuneAgent'); Jadhav et al. kept as a preprint (arXiv 2506.02025v2, under review, re-checked 2026-10-08); the alternate candidate arXiv 2511.11612 leaves jadhav-arxiv25's role line. 9.12 D42, D72 and D111 later add TuxBot beside the tuning efforts.
@@ -130,7 +130,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0628
 - Notes: Scope-card item 60: 9.12 read vol-02's quotations against the same copies as the entries they quote; their corrections are applied by 9.15. Found while locating: :51, :2688 and :3735 carry the same TuneAgent venue claim (:3735 uses it as the example of a venue known only from a repository). TuxBot (9.12 D42, D72, D111) is added to docs/related-work.md; vol-02 does not mention it and no hand-off adds it here.
 
-### W-0643 · open
+### W-0643 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 7.1 이 장이 다루는 것 line 2699
 - Change: Restate 'software running right now on millions of computers' ('지금 수백만 대의 컴퓨터에서 실제로 돌고 있는 소프트웨어입니다') to what 9.12 D2 and D3 ground, with no count: Windows and macOS ship Game Mode, and CachyOS installs ananicy-cpp with the community catalogue enabled by default.
 - Final word: 9.12 D8 with D2 and D3: Game Mode and the priority daemons are grounded as shipped (Windows and macOS Game Mode; ananicy-cpp with the catalogue enabled by default on CachyOS), with no count of machines; the 'millions of computers' sentence had no source behind it.
@@ -138,7 +138,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0633; W-0644
 - Notes: —
 
-### W-0644 · open
+### W-0644 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 7.2 Windows의 게임 모드 lines 2707–2844 (### 세 번째 질문: 업데이트나 알림을 미루는가 lines 2789–2797, still '확인 필요'); ## 7장 정리 line 3174; ## 이 권의 표기 line 49 (the one remaining '확인 필요')
 - Change: Restate ch. 7.2 to 9.12 D2: Windows Game Mode gives the focused foreground game exclusive CPU sets and GPU priority, is on by default for most games, and how it recognises a game is undocumented; the third question is answered from the Xbox Support article — Windows Update's driver installs and restart notifications are held back during play (rendered 2026-10-09) — so its '확인 필요' box (:2791–2797), the summary bullet (:3174) and the notation section's 'one 확인 필요 remains' (:49) follow; macOS Game Mode is stated beside Windows from Apple's pages.
 - Final word: 9.12 D2 as amended by D45, with D94 for macOS: Windows Game Mode — exclusive CPU sets and GPU priority for the focused foreground game, on by default for most games, recognition undocumented; Windows Update's driver installs and restart notifications held back during play (Xbox Support, rendered 2026-10-09); macOS Game Mode (Sonoma 14 or later, Apple silicon) turns on when a game enters full screen, from macOS 26 an app declares support with LSSupportsGameMode, how the system recognises a game not documented (D94).
@@ -146,7 +146,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0628; W-0633; W-0643
 - Notes: 9.12 D53 also lists :2791–2797 and :3174 (W-0628); they are applied here. The '확인한 방식' box (:2711, 'one concept page and three function pages') changes with D53's registry point: a fifth page (ReleaseExclusiveCpuSets) is the only source of :2777. The Xbox Support entry joins docs/references.md's gamemode key (9.12 D99) — the references chunk's.
 
-### W-0645 · open
+### W-0645 · applied
 - At: `docs/guidebook/vol-02-related-work.md` ## 7.5 사용자가 원한 배경 작업이라는 축 line 3116
 - Change: Restate the recalled example: the game-time download the dataset depicts is an install of another game the user starts during play, which Steam runs at once; Steam's own update downloads queue themselves when an update releases and by default pause when a game launches; the name steam downloading alone does not settle which.
 - Final word: 9.12 D16: a Steam download is in general not user-initiated — games are put into the download queue automatically when an update releases, and by default queued downloads pause when a game launches (Steam FAQs 4F9E-6328-E9B8-47F9 and 71AB-698D-57EB-178C); the dataset depicts an install of another game the user starts during play, which Steam runs at once (steam-for-linux #8821; initiated: user); the name steam downloading alone does not settle which.
@@ -154,7 +154,7 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 20 open rows. The file has 
 - Cross-ref: W-0633
 - Notes: —
 
-### W-0646 · open
+### W-0646 · applied
 - At: `docs/guidebook/vol-02-related-work.md` # 9장 · 지형도: 두 축과 빈칸 → ## 9.3 지형도 figure lines 3530–3556; ## 9.4 칸을 하나씩 읽기 (### 오른쪽 위 lines 3568–3574, ### 왼쪽 아래 lines 3576–3582, ### 오른쪽 아래 lines 3584–3594, ### 아래에 깔린 층 lines 3596–3600); ## 9.5 이 그림이 말하는 것 lines 3602–3612; ## 9장 정리 lines 3640–3652
 - Change: Check the figure and the cell readings against 9.12 D83 and D116 and restate where they differ: ASA (and AKTS, an LLM selecting among verified policies from telemetry) sit in the behaviour-reading, signal-producing cell; the LLM line turns what it reads into policy code, configuration and parameters or job decisions, evaluated on servers, HPC queues and, for SchedCP, a laptop (:3582 '대상이 서버 작업입니다'); in the identity-reading, signal-producing cell — this work's — the one documented recognizer deployed today is a static name table, ananicy-cpp's catalogue; Game Mode (a window-state trigger) and declarations (Linux classes and units, macOS QoS, a game's request to Feral GameMode, LSSupportsGameMode) are named in one clause as not recognition and leave the figure; ghOSt and sched_ext let a policy-replacing system take effect rather than being the floor every cell stands on (:3596–3600).
 - Final word: 9.12 D83 as amended by D116: the LLM line turns what it reads — process names and profiles, telemetry, knob schemas — into policy code (SchedCP, Kgent, Vulcan), configuration and parameters (TuneAgent, TuxBot), job decisions (Jadhav et al.) or a selection among verified policies from telemetry (AKTS), evaluated on servers, HPC queues and, for SchedCP, a laptop; ASA and AKTS sit in the behaviour-reading, signal-producing cell (D116); in the cell that reads process identity and produces a signal — the cell this work fills — the one documented recognizer deployed today is a static name table (ananicy-cpp's catalogue); declarations (Linux classes and units, macOS QoS, a game's request to Feral GameMode, LSSupportsGameMode) and window-state triggers (Game Mode's foreground or full-screen trigger) are named in one clause as not recognition and stay outside the figure (D116); mechanisms such as ghOSt and sched_ext let a policy-replacing system take effect (not 'underlie all quadrants').

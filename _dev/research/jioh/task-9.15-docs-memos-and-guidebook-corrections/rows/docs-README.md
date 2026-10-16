@@ -45,3 +45,19 @@ Chunk K18, Docs index (wave 5). 4 open rows. The file has 156 lines at `d5cc7711
 - Sources: `logs/K08.md` ## Rows for other chunks (X2)
 - Cross-ref: W-0742; W-0916
 - Notes: found in K08.
+
+### W-0937 · open
+- At: `docs/README.md` ## Guidebook (`guidebook/`), the vol-02 line, line 14 ("what the three citation tiers may support"; "the two places nothing published could settle are marked as open rather than filled"), and the vol-03 line, line 15 ("the five things a proposal may never do"; "the six-link chain"); the Full index's vol-03 row, line 128 ("the claim's six links"), is W-0915's
+- Change: vol-02's line: the three citation tiers → four kinds (the deployed-system tier widened; the talk, conference-abstract and news-report type added), and no place left open (the Windows Update question settled by Microsoft's Xbox Support article, the TuneAgent venue by its DOI record). vol-03's line: the five prohibitions → four, starvation not among them; the six-link chain → the seven-link chain (link 1–link 7).
+- Final word: K15 (wave 4, review passed 2026-10-17): vol-02 §1.5's citation tiers restated to four kinds after `docs/references.md:22–24` (N14; the deployed-system tier per 9.12 D112, the talk type per D113); the two open places closed (W-0644: the Xbox Support article answers the third question; W-0642: TuneAgent at KDD '26, DOI 10.1145/3770855.3817987); vol-03 §4.2 "네 가지 금지", starvation no longer a prohibition (W-0656); the chain as link 1–link 7 (W-0916, 인지오's answer to W-0742 (a)).
+- Sources: `logs/K15.md` ## Rows for other chunks (X1); ## Review round 2, finding 7
+- Cross-ref: W-0915; W-0656; W-0916; W-0742; W-0939
+- Notes: found in K15. Line 128's "six links" → seven is already W-0915; K15's X1 names it too.
+
+### W-0939 · open
+- At: `docs/README.md` ## Guidebook (`guidebook/`), the paragraph's "the four in-text devices" (line 11), the vol-04 line (line 16: "the seven conditions and what each isolates") and the vol-06 line (line 18: "the twelve entries"); the Full index's vol-06 row (line 131)
+- Change: vol-04's line: the seven conditions → eight (the two name-table conditions, `shipped_catalogue` and `strongest_name_table`). vol-06's line and row: scoped to the 2026-09-13 library, pointing to the dataset guidebook vol 2 for the current one. The device list: the guidebook README now also lists vol-06's "재구축 이후" mark.
+- Final word: K16 (wave 4, review passed 2026-10-17): vol-04's conditions are the eight of `harness/tools/harness/evaluator.py` `CONDITIONS` (`fixed`, `random`, `shipped_catalogue`, `strongest_name_table`, `llm_vocab`, `llm_algo`, `llm_full`, `oracle`; W-0662, 9.12 D6); vol-06 gains a head note scoping it to the 2026-09-13 library of twelve, the current 29-entry library in the dataset guidebook vol 2 (W-0673); the guidebook README's device list gains the "재구축 이후 (2026-10-17)" mark (K16 decision 2).
+- Sources: `logs/K16.md` ## Rows for other chunks (X1)
+- Cross-ref: W-0710; W-0662; W-0673; W-0937
+- Notes: found in K16. The vol-06 part meets W-0710's lines 18 and 131 (the twelve entries); one edit serves both.

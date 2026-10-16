@@ -427,6 +427,22 @@ Chunk K07, Research proposal (wave 2). 53 open rows. The file has 953 lines at `
 - Cross-ref: W-0296; W-0354
 - Notes: found in K06. Both files' chunks have run (K06, K07): a follow-up chunk.
 
+### W-0940 · open
+- At: `docs/research-proposal.md` ### Family 2 — Same process set, different intent ★, the heading, line 628; `docs/research-claims.md` ## Two mechanisms, currently measured as one, line 78 ("tested by Family 2, same process set, different intent")
+- Change: Restate Family 2's name in both files: the pairs' background jobs do not share a process set — they differ in name and behaviour, P1's also in declared class, P2's in its programs' declared priority (W-0942) — as the research guidebook vol-04's heading now reads ("같은 상황 옆에서 의도가 갈리는 작업").
+- Final word: 9.12 D14 and D15 (as amended by D88, D89 and D101; 9.23 D9), as both docs now apply them: each pair is two real jobs, differing in behaviour and declared class or priority as measured. K16 decision 7: vol-04's heading changed (W-0667); the proposal's and the claims document's name left to their committed chunks (K07, K08).
+- Sources: `logs/K16.md` ## Rows for other chunks (X2); ## Decisions 7
+- Cross-ref: W-0667; W-0325; W-0355; W-0942
+- Notes: found in K16. Both files' chunks have run (K07, K08): a follow-up chunk.
+
+### W-0942 · open
+- At: `docs/research-proposal.md` ### Family 2, its lead, line 630 ("Pairs of real jobs whose correct policies differ, which also differ in behaviour and declared class as measured")
+- Change: "differ in behaviour and declared class" holds for P1 only: P2's programs differ in declared priority (nice), both P2 files declaring `normal`; restate the lead so it holds for both pairs.
+- Final word: W-0667's final word (9.12 D15): P2 differs in declared priority (the download at nice 10 for three quarters of its CPU, the upgrade at nice 19); 9.11 D6: nice is not carried by the task model — the compiled `c2-p2a` and `c2-p2b` carry `declared_class: normal` on every arrive, and the RQ0 gate spec's `bounding_pair` `c2-p2a`/`c2-p2a-idle` brackets the difference (`harness/experiments/rq0-gate.yaml:214–217`).
+- Sources: `logs/K16.md` ## Fix round 1, item 3 (X5, with mismatch M3)
+- Cross-ref: W-0667; W-0940; W-0325
+- Notes: found in K16. K07's file: a follow-up chunk. K16's M3 (W-0667's "declared-priority baseline" against a task model with no nice) needs no code change: vol-04 states the code.
+
 ## Also on this file, not for editing from this list
 
 - W-0365 · closed, superseded — 9.12 D114 removed line 756 (인경민's team area) from D30's hand-off; the team-area wording is left to 인지오 and 인경민.

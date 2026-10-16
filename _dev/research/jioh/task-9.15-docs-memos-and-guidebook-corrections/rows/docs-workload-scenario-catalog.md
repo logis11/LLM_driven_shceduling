@@ -165,3 +165,11 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Sources: `logs/K02.md` ## Review round 1 (the last), finding 6; `docs/references.md` `sysmark30`
 - Cross-ref: W-0135; W-0136
 - Notes: found in K02's review. K02's file: a follow-up chunk.
+
+### W-0941 · open
+- At: `docs/workload/scenario-catalog.md` the scenario table, row S2, line 13 ("`chrome` (`web-browser`; four `renderer-hidden` tabs)"); or `docs/workload/archetype-plan.md` §3, line 42 ("Counts never appear in the scenario catalog")
+- Change: Align the two: either S2's cell drops the count (the four hidden renderers are bound in `c1-browsing` as `count: 4`, with its source), or the archetype plan's rule admits the count S2 names. Optional.
+- Final word: `docs/workload/archetype-plan.md:42`: a count is bound in the timeline with a source — a task's `count` (`c1-browsing`'s `count: 4` hidden renderers) or a knob the entry's `binding_params` names; the compiled `c1-browsing` shows five `chrome` (the window in use and four hidden tabs' renderers).
+- Sources: `logs/K16.md` ## Rows for other chunks (X3)
+- Cross-ref: W-0670; W-0892
+- Notes: found in K16. Both files' chunks have run (K02, K04): a follow-up chunk.

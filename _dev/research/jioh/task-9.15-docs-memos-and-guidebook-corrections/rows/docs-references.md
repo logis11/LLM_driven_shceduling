@@ -660,6 +660,14 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0357; W-0358; W-0728
 - Notes: found in K07. Both files' chunks have run (K01, K07): a follow-up chunk.
 
+### W-0938 · open
+- At: `docs/references.md` the `ghost-userspace` entry's role, line 717 ("the research guidebook vol-02's eight README quotations (`:873`, `:875`, `:911`, `:917`, `:955`, `:957`, `:975`, `:1003`)"); the `schedcp-mlsys25` entry's status, line 748 ("vol-02's `:2457`")
+- Change: `ghost-userspace`'s role: eight README quotations → seven, now at vol-02 `:876`, `:912`, `:918`, `:956`, `:958`, `:976`, `:1004`. `schedcp-mlsys25`'s status: vol-02 `:2457` → `:2473` (the quoted v4 research question "How effectively can SchedCP understand workloads?"). Or section locators in place of line numbers: §3.2 (ghOSt) for the quotations, §6.2 (SchedCP) "무엇을 평가했는가" for the question.
+- Final word: W-0628, applied in K15 (9.12 D53 as amended by D97 and D98): vol-02's `:875` repeated `:873` verbatim and was removed, moving every later line; the line numbers are vol-02's as K15 left it, re-read in K15's last review.
+- Sources: `logs/K15.md` ## Rows for other chunks (X2); ## Review round 1, finding 4
+- Cross-ref: W-0628; W-0647
+- Notes: found in K15. K01's file: a follow-up chunk.
+
 ## Also on this file, not for editing from this list
 
 - W-0071 · answered (a), applied in K01 — The five entries 9.10 D34 and 9.12 D102 remove from `docs/references.md` (`dubroy-chi10`, `chang-chi21`, `dkms-man`, `dkms-debian`, `mozilla-testpilot10`) are still registry ids in `dataset/sources.yaml` (`:175`, `:183`… Blocks: The removal of the five entries at `docs/references.md:80–88`, `:279–287`, `:295–298` (and `singervine-slate10` at `:300–303`), and the same-edit restatement o…
