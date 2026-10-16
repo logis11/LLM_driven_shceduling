@@ -146,7 +146,7 @@ Chunk K12, Dataset guidebook, volumes 3-4 (wave 3). 17 open rows. The file has 2
 - Cross-ref: W-0911; W-0912; W-0913; W-0535
 - Notes: found in K07. K07 left unfiled the chronicle lines (`08-decision-chronicle.md:1571`, `:1965`) and `05-the-generated-layer.md:1375`'s quoted spec line: they say the ladder covers tiers 3–5 as a whole.
 
-### W-0945 · open
+### W-0945 · applied
 - At: `docs/guidebook/dataset/04-the-coreset.md` §5.1 C2가 답하는 질문, line 932 (the proposal's Family 2 quoted as "Same process set, different intent", and its lead as "which also differ in behaviour and declared class as measured")
 - Change: Restate the two quotations to the proposal's current heading ("Jobs that differ in intent beside the same situation") and lead (the jobs differ in behaviour as measured, P1's in declared class too, P2's programs in declared priority (nice), which the task model does not carry, both P2 files declaring `normal`), in the volume's Korean.
 - Final word: W-0940 and W-0942, applied in F1 (`docs/research-proposal.md` ### Family 2 and its lead).
@@ -154,7 +154,7 @@ Chunk K12, Dataset guidebook, volumes 3-4 (wave 3). 17 open rows. The file has 2
 - Cross-ref: W-0940; W-0942
 - Notes: found in F1. K12's file: a follow-up chunk.
 
-### W-0950 · open
+### W-0950 · applied
 - At: `docs/guidebook/dataset/04-the-coreset.md` §11.2's table, line 1878 ("예외로 실린 값 15개(`carried_values`)"); §11.5, line 1932 ("이런 값 열다섯"); the glossary's exception-carried value row, line 2300 ("`carried_values`에 15개"); §11.6, line 1962 (the variants pin "2026-10-17의 값은 `087ef27c…`")
 - Change: `carried_values` holds 19 tables since `7b024003` (`renderer-hidden`'s `Compositor` and `PerfettoTrace`, gap and run each, added); the variants pin dated 2026-10-17 is `6c1c3e09…`, the 2026-10-17 re-pin.
 - Final word: W-0898, applied 2026-10-17 in the batched data rebuild (`7b024003`): `dataset/variants.yaml`'s `carried_values` gains the two quiet threads; `harness/experiments/rq0-gate.yaml` `pins.variants` re-pinned to `6c1c3e09…`.

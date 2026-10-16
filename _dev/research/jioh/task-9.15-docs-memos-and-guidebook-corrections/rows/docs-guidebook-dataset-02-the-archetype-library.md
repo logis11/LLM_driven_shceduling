@@ -80,6 +80,22 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 6 open rows. The file has 16
 - Cross-ref: W-0858; W-0888
 - Notes: found in K11's last review. K11's file: a follow-up chunk.
 
+### W-0952 · open
+- At: `docs/guidebook/dataset/02-the-archetype-library.md` §12.3's "왜 이렇게 정했나" box, line 1497 ("여섯 항목(…)의 compile된 흐름을 pooled repeat 하나의 실제 관측 wake 순서로 바꿔 넣습니다")
+- Change: The replay variant puts in each stream of its kind (wakes, runs with the block after each, cycles), not the wake order alone. The quoted reason ("one pooled repeat's measured wake sequence …") stays verbatim. In the volume's Korean.
+- Final word: W-0876, applied 2026-10-17 in the batched data rebuild (`7b024003`): each `dataset/replay/*.json.gz` carries its `kind` — `wakes` (`code-editor`, `web-browser`, `renderer-hidden`), `runs` with the block after each (`package-upgrade`, `cpu-batch`'s `python3`), `cycles` (`video-call`); `dataset/tools/wlc/compiler.py` `_replay_window` checks the kind; `dataset/variants.yaml`'s `trace-replay` comment and `dataset/tools/wlc/variants.py`'s docstring name the three kinds. The variants manifest's `replay` fields: the upgrade's runs in `c7-dev`, `c7-browsing` and `c7-meeting`, `python3`'s in `c2-p1a`, the call's cycles in `c7-meeting` — every replay file replays a batch job's runs. G3 applied the same restatement in vol-04 (its N2: §11.3's table, §11.4's replay axis, the glossary's `replay` row).
+- Sources: `logs/G3.md` ## Rows for other chunks (X1); `dataset/replay/*.json.gz` `kind`; `dataset/tools/wlc/compiler.py` `_replay_window`; `dataset/variants.yaml`'s `trace-replay` comment since `7b024003`
+- Cross-ref: W-0876; W-0951
+- Notes: found in G3. K11's file: a follow-up chunk.
+
+### W-0957 · open
+- At: `docs/guidebook/dataset/02-the-archetype-library.md` line 1, the H1 ("# 2권 · Archetype library: process 하나를 scheduler의 눈으로 적기"); `docs/guidebook/dataset/README.md` line 14, the volume table's vol-02 row, which quotes the title verbatim
+- Change: The title's "process 하나" (one process) keeps the term the archetype plan's §1 dropped; the plan now reads "one kind of program as the scheduler sees it". If the title changes, `docs/guidebook/dataset/README.md:14` follows it verbatim in the same change.
+- Final word: `docs/workload/archetype-plan.md` §1 (`:8`) reads "a **generative model of one kind of program as the scheduler sees it**" since `18127cc9` (2026-10-16, K04): most entries merge a measured application's whole process tree into one task; `compiler-child` is six tasks. The research guidebook vol-06's 재구축 이후 note (`docs/guidebook/vol-06-archetypes-and-grounding.md:83`) records the change; K18 restated `docs/README.md`'s archetype-plan line and its Full-index row to "one kind of program" (K18's N6).
+- Sources: `logs/K18.md` ## Fix round 1, Rows for other chunks (added) (X2); `docs/workload/archetype-plan.md` §1
+- Cross-ref: W-0874; W-0924
+- Notes: found in K18. K11's file: a follow-up chunk; `docs/guidebook/dataset/README.md` is K18's file, edited in the same change.
+
 ## Also on this file, not for editing from this list
 
 - W-0517 · blocked, simulator TIMER (outside the spec's list) — §1.5 TIMER와 WAIT(timer), open note line 135

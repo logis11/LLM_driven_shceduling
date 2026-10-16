@@ -127,3 +127,11 @@ Chunk K10, Harness guide and metrics (wave 3). 14 open rows. The file has 1400 l
 - Sources: `logs/K10.md` ## Review round 3, non-blocking note
 - Cross-ref: W-0472; W-0473
 - Notes: found in K10's last review. K10's file: a follow-up chunk.
+
+### W-0951 · open
+- At: `docs/harness/harness-and-records-guide.md` §19.4, the reporting-line table's `trace_replay` row, line 1378 ("judging 파일 넷(`c7-dev`, `c7-browsing`, `c7-meeting`, `c2-p1a`)을 compile된 stream 대신 측정된 repeat 하나의 wake 순서로 다시 지어 돌려요")
+- Change: Trace-replay restated from "measured wake order" alone to the three stream kinds: wakes, runs with the block after each, and cycles. Every replay file also replays a batch job's runs. In the guide's Korean.
+- Final word: W-0876, applied 2026-10-17 in the batched data rebuild (`7b024003`): each `dataset/replay/*.json.gz` carries its `kind` — `wakes` (`code-editor`, `web-browser`, `renderer-hidden`), `runs` with the block after each (`package-upgrade`, `cpu-batch`'s `python3`), `cycles` (`video-call`); `dataset/tools/wlc/compiler.py` `_replay_window` checks the kind; `dataset/variants.yaml`'s `trace-replay` comment and `dataset/tools/wlc/variants.py`'s docstring name the three kinds. The variants manifest's `replay` fields: the upgrade's runs in `c7-dev`, `c7-browsing` and `c7-meeting`, `python3`'s in `c2-p1a`, the call's cycles in `c7-meeting` — every replay file replays a batch job's runs. G3 applied the same restatement in vol-04 (its N2: §11.3's table, §11.4's replay axis, the glossary's `replay` row).
+- Sources: `logs/G3.md` ## Rows for other chunks (X1); `dataset/replay/*.json.gz` `kind`; `dataset/tools/wlc/compiler.py` `_replay_window`; `dataset/variants.yaml`'s `trace-replay` comment since `7b024003`
+- Cross-ref: W-0876; W-0952; W-0953; W-0954; W-0955
+- Notes: found in G3. K10's file: a follow-up chunk. A quotation of the `replay` set's reason or the RQ0 gate spec's stays verbatim (`dataset/variants.yaml:91`, the set's `reason`, still says "one pooled repeat's measured wake sequence"; B1's log).

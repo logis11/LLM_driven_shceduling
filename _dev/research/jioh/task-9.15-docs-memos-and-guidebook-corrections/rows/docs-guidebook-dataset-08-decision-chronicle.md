@@ -92,6 +92,22 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 8 open rows. The file has 20
 - Cross-ref: W-0602; W-0580; W-0932; W-0933
 - Notes: found in K14. K14's file: with W-0602, after the final memo.
 
+### W-0955 · open
+- At: `docs/guidebook/dataset/08-decision-chronicle.md` §8.4, the **replay** definition, line 1304 ("측정된 반복 하나의 실제 wake 순서를 그대로 재생해 task를 만드는 방식"); §14.2's glossary, the **replay** row, line 1982 (the same words)
+- Change: Restated to the three stream kinds (wakes, runs with the block after each, cycles) where the text means the trace-replay variant. In the volume's Korean.
+- Final word: W-0876, applied 2026-10-17 in the batched data rebuild (`7b024003`): each `dataset/replay/*.json.gz` carries its `kind` — `wakes` (`code-editor`, `web-browser`, `renderer-hidden`), `runs` with the block after each (`package-upgrade`, `cpu-batch`'s `python3`), `cycles` (`video-call`); `dataset/tools/wlc/compiler.py` `_replay_window` checks the kind; `dataset/variants.yaml`'s `trace-replay` comment and `dataset/tools/wlc/variants.py`'s docstring name the three kinds. The variants manifest's `replay` fields: the upgrade's runs in `c7-dev`, `c7-browsing` and `c7-meeting`, `python3`'s in `c2-p1a`, the call's cycles in `c7-meeting` — every replay file replays a batch job's runs. G3 applied the same restatement in vol-04 (its N2: §11.3's table, §11.4's replay axis, the glossary's `replay` row).
+- Sources: `logs/G3.md` ## Rows for other chunks (X1); `dataset/replay/*.json.gz` `kind`; `dataset/tools/wlc/compiler.py` `_replay_window`; `dataset/variants.yaml`'s `trace-replay` comment since `7b024003`
+- Cross-ref: W-0876; W-0951
+- Notes: found in G3. K14's file: a follow-up chunk.
+
+### W-0956 · open
+- At: `docs/guidebook/dataset/08-decision-chronicle.md` §12.8's table, rows 1 and 2, their 2026-10-17 cells, lines 1873–1874 ("`docs/README.md`의 coreset guide 설명 줄에는 "all 50 coreset files"가 남아 있음"; "… "the twelve archetypes"가 남아 있음")
+- Change: Mark both cells fixed: `docs/README.md`'s coreset-guide line now reads "the 29 archetypes" and "all 51 core-set files".
+- Final word: W-0710, applied 2026-10-17 in K18: `docs/README.md:77` restated (29 entries in `dataset/archetypes.yaml`; 51 artifacts in `dataset/build.manifest.json`; the coreset guide's §4 "archetype 29개" and §10 "51개 파일 상세").
+- Sources: `logs/K18.md` ## Rows for other chunks (X1); `dataset/archetypes.yaml`; `dataset/build.manifest.json`
+- Cross-ref: W-0710; W-0602; W-0934
+- Notes: found in K18. K14's file: with W-0602's pass, after the final memo (K18's note), as W-0934.
+
 ## Also on this file, not for editing from this list
 
 - W-0607 · closed, already-applied — vol-08:271 already states the final word, accurate at HEAD; the generalset's backlog line is `_dev/TODO.md:196`.
