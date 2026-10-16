@@ -1,5 +1,5 @@
 # Data Contracts — every format in the project, with examples
-> Status: normative · Created 2026-08-28 · Updated 2026-10-16
+> Status: normative · Created 2026-08-28 · Updated 2026-10-17
 
 Everything the three of us build talks to everything else through data — a file one side writes and another side reads. Each such format is a **contract**: as long as both sides honor it, we can work independently and integration stays boring. This document lists every contract in the project, shows what each one looks like with examples — real where the dataset's files hold them (§2–§4), illustrative elsewhere — and explains every example in plain sentences. Same audience as `background-guide.md`: general CS knowledge is enough, no OS background needed.
 
@@ -44,7 +44,7 @@ flowchart TB
 
 Read it as one piece of data's life story:
 
-1. **Compile time** (already done, lives in `dataset/`): the **archetype** library says how each kind of process behaves, **timelines** say which processes are on stage when and what each moment truly means, and **wlc** — the workload compiler — combines them, rolls all the dice once, and writes **canonical workload files**. This half is finished and frozen; nobody re-runs it during experiments.
+1. **Compile time** (already done, lives in `dataset/`): the **archetype** library says how each kind of program behaves, **timelines** say which processes are on stage when and what each moment truly means, and **wlc** — the workload compiler — combines them, rolls all the dice once, and writes **canonical workload files**. This half is finished and frozen; nobody re-runs it during experiments.
 2. Each consumer's **own loader** extracts its permitted **view** of the workload file — the dataset tree produces no views and knows nothing about its consumers: it provides the library, the timelines, the compiler and the manifests, from which the raw canonical files are built. The simulator's loader keeps the **run file** view (the events, stripped of the answer key) and discards everything else at the parse boundary; the daemon's loader keeps the **visible projection** view (just the process names, counts, pinned lifetimes, each task's declared scheduling class and its focus intervals). The information asymmetry is enforced by each loader discarding what its program may not see — structurally, at the boundary, so nothing downstream could branch on it even by accident.
 3. The **daemon** takes the visible projection and runs the whole recognition pipeline offline: it renders the projection into **telemetry** snapshots, feeds each one to a **recognizer** (the LLM, or one of the two name tables — `shipped_catalogue`, the CachyOS catalogue as ananicy-cpp applies it, and `strongest_name_table`, the strongest name table in that catalogue's design — or random; one per experimental condition; the oracle condition reads `ground_truth` instead of the projection), validates and clamps what comes back, maps it to scheduler settings, and writes two outputs: a **config schedule** (for the simulator) and a **recognition log** (for the grader).
 4. The **simulator** takes the run file plus a config schedule and plays the workload out under it, writing a **trace** of everything that happened.
@@ -69,7 +69,7 @@ The dotted lines are the deliberate cheat paths, and they are the experiment's c
 
 ---
 
-## 2. Archetype — how one kind of process behaves
+## 2. Archetype — how one kind of program behaves
 
 **Frozen (v0.2, 2026-10-09 — §14). File: `dataset/archetypes.yaml`. Read only by wlc, at compile time — the simulator never sees archetypes.**
 
@@ -103,7 +103,7 @@ cpu-batch:
   binding_params: [total_work, program]
 ```
 
-In sentences: this archetype describes a process that computes until its job is done, measured on the programs the dataset binds to it: PyTorch's basic MNIST training example (`program: python3`, its process shown as `python`) and Kdenlive's export of a project (`kdenlive_render`, the tree in which `melt-7` does the work); the `chrome` spoof of `c6-spoof` binds it too, as one uninterrupted RUN by construction (`program: spoof`). Its behavior `program` is a loop: a run drawn from the bound program's measured runs between voluntary blocks, then the block that followed such a run, until `total_work` of CPU is spent, then exit; a zero block means the program ran on, so the runs either side of it are one RUN. The `program` binding chooses which tables are drawn, never the task's display name. The entry carries no job size of its own, because how *big* the job is depends on the scenario, not on the kind of process — so `total_work` and `program` are listed under `binding_params`, meaning "the timeline that uses me must supply these values"; a file binding a measured program binds its measured CPU total, the whole job. Its `lifetime: finite` says the process ends by finishing its work (whenever the scheduler lets that happen), rather than by the user closing it. `category_source: meas` records that the behavior class is what our CI measurements show: programs runnable for the whole of their job on one dominant thread. (The real entry carries three more fields this excerpt trims: `scalable`, the fields the lane-scaling compile pass may transform — none here; `validation_stats`, the campaign runs and what each observation covered; and `modeling_notes`, prose recording every modeling judgment.)
+In sentences: this archetype describes a process that computes until its job is done, measured on the programs the dataset binds to it: PyTorch's basic MNIST training example (`program: python3`, its process shown as `python`) and Kdenlive's export of a project (`kdenlive_render`, the tree in which `melt-7` does the work); the `chrome` spoof of `c6-spoof` binds it too, as one uninterrupted RUN by construction (`program: spoof`). Its behavior `program` is a loop: a run drawn from the bound program's measured runs between voluntary blocks, then the block that followed such a run, until `total_work` of CPU is spent, then exit; a zero block means the program ran on, so the runs either side of it are one RUN. The `program` binding chooses which tables are drawn, never the task's display name. The entry carries no job size of its own, because how *big* the job is depends on the scenario, not on the kind of program — so `total_work` and `program` are listed under `binding_params`, meaning "the timeline that uses me must supply these values"; a file binding a measured program binds its measured CPU total, the whole job. Its `lifetime: finite` says the process ends by finishing its work (whenever the scheduler lets that happen), rather than by the user closing it. `category_source: meas` records that the behavior class is what our CI measurements show: programs runnable for the whole of their job on one dominant thread. (The real entry carries three more fields this excerpt trims: `scalable`, the fields the lane-scaling compile pass may transform — none here; `validation_stats`, the campaign runs and what each observation covered; and `modeling_notes`, prose recording every modeling judgment.)
 
 ### Example B — a measured application, `code-editor` (abridged)
 
@@ -145,7 +145,7 @@ In sentences: this archetype describes one application a human is actively using
 
 **Frozen. Files: `dataset/timelines/coreset/*.timeline.yaml` (the core set's 51 scenarios — 23 written by hand, 28 derived from them by a recipe and committed beside them) and `*.variant.yaml` (the five derivation recipes); the generated layer's timelines, which `dataset/tools/generate.py` writes from `dataset/grids.yaml` into `dataset/generated/<set>/` (not committed; §14, 2026-10-11). Read only by wlc.**
 
-A timeline is a scenario script — written by hand for the core set, by the generator for the generated layer. Where an archetype says how one process *behaves*, a timeline says which processes *exist*, over what time span, and — crucially — what the machine is *really* being used for at each moment, which becomes the workload's hidden ground truth.
+A timeline is a scenario script — written by hand for the core set, by the generator for the generated layer. Where an archetype says how one kind of program *behaves*, a timeline says which processes *exist*, over what time span, and — crucially — what the machine is *really* being used for at each moment, which becomes the workload's hidden ground truth.
 
 ### Example A — a complete timeline, `c2-p1a` (the real file, its header comment left out)
 
