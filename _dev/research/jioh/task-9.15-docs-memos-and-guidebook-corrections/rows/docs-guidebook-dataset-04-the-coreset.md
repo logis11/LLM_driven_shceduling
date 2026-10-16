@@ -162,7 +162,7 @@ Chunk K12, Dataset guidebook, volumes 3-4 (wave 3). 17 open rows. The file has 2
 - Cross-ref: W-0898; W-0945
 - Notes: found in F4. K12's file: a follow-up chunk. F4 found no other superseded manifest or blob hash in the file (a scripted check against `7b024003^`'s core and variants manifests). §11.5's heading (line 1927, "예외로 실린 열다섯 값") carries the same count.
 
-### W-0961 · open
+### W-0961 · applied
 - At: `docs/guidebook/dataset/04-the-coreset.md` §2.1, line 259 ("**archetype** — process 한 종류가 CPU 위에서 어떻게 행동하는지를 적은 생성 모형"); §14.1's glossary `archetype` row, line 2208 ("process 한 종류의 행동을 적은 생성 모형")
 - Change: Restate "한 종류의 process" / "process 한 종류" to "프로그램 한 종류" in each definition, nothing else. In the volume's Korean.
 - Final word: `docs/workload/archetype-plan.md` §1 (`:8`) reads "a **generative model of one kind of program as the scheduler sees it**" since `18127cc9` (2026-10-16, K04): most entries merge a measured application's whole process tree into one task (`dataset/archetypes.yaml`'s measured entries: "one task carries the whole process tree merged (D14)"); `compiler-child` is six tasks. H2 restated vol-02's title (W-0957) and its two definitions (its N1: `:9` and the glossary's `archetype` row `:1543`) to "프로그램 한 종류"; K18 restated `docs/README.md`'s archetype-plan line and its Full-index row to "one kind of program" (its N6).

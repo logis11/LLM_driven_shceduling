@@ -138,7 +138,7 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 13 open rows. The file has 1
 - Cross-ref: W-0876; W-0951; W-0933
 - Notes: found in G3. K14's file: a follow-up chunk.
 
-### W-0963 · open
+### W-0963 · applied
 - At: `docs/guidebook/dataset/07-build-gate-manifests-ci-tests.md` §8.3, line 1527 ("`archetype`은 한 종류의 process 행동(예: `code-editor`, `build-orchestrator`, `cpu-batch`)을 측정된 분포로 적은 library entry"); §9.1's glossary, line 1727 ("`archetype` — 한 종류의 process 행동을 측정된 분포로 적은 library entry")
 - Change: Restate "한 종류의 process 행동" to the behaviour of "프로그램 한 종류" in both, nothing else. In the volume's Korean.
 - Final word: `docs/workload/archetype-plan.md` §1 (`:8`) reads "a **generative model of one kind of program as the scheduler sees it**" since `18127cc9` (2026-10-16, K04): most entries merge a measured application's whole process tree into one task (`dataset/archetypes.yaml`'s measured entries: "one task carries the whole process tree merged (D14)"); `compiler-child` is six tasks. H2 restated vol-02's title (W-0957) and its two definitions (its N1: `:9` and the glossary's `archetype` row `:1543`) to "프로그램 한 종류"; K18 restated `docs/README.md`'s archetype-plan line and its Full-index row to "one kind of program" (its N6).

@@ -121,7 +121,7 @@ Chunk K12, Dataset guidebook, volumes 3-4 (wave 3). 14 open rows. The file has 2
 - Cross-ref: W-0746
 - Notes: found in K12's last review. K12's file: a follow-up chunk. The section's table already lists the two entries as "(부모가 만듦)".
 
-### W-0960 · open
+### W-0960 · applied
 - At: `docs/guidebook/dataset/03-timeline-to-canonical-workload.md` §17.1's glossary `archetype` row, line 2271 ("한 종류의 process가 CPU를 어떻게 쓰는지 적은 행동 모형")
 - Change: Restate "한 종류의 process" / "process 한 종류" to "프로그램 한 종류" in each definition, nothing else. In the volume's Korean.
 - Final word: `docs/workload/archetype-plan.md` §1 (`:8`) reads "a **generative model of one kind of program as the scheduler sees it**" since `18127cc9` (2026-10-16, K04): most entries merge a measured application's whole process tree into one task (`dataset/archetypes.yaml`'s measured entries: "one task carries the whole process tree merged (D14)"); `compiler-child` is six tasks. H2 restated vol-02's title (W-0957) and its two definitions (its N1: `:9` and the glossary's `archetype` row `:1543`) to "프로그램 한 종류"; K18 restated `docs/README.md`'s archetype-plan line and its Full-index row to "one kind of program" (its N6).

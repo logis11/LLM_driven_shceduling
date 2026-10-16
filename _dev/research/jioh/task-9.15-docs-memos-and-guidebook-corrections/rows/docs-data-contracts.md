@@ -170,6 +170,14 @@ Chunk K05, Data contracts (wave 1). 20 open rows. The file has 563 lines at `d5c
 - Cross-ref: W-0935
 - Notes: found in F3. K05's file: a follow-up chunk.
 
+### W-0967 · open
+- At: `docs/data-contracts.md` §1's compile-time step, line 47 ("the **archetype** library says how each kind of process behaves"); §2's heading, line 72 ("## 2. Archetype — how one kind of process behaves"); §2, `cpu-batch`'s paragraph, line 106 ("how *big* the job is depends on the scenario, not on the kind of process"); §3's opening, line 148 ("Where an archetype says how one process *behaves*")
+- Change: Restate "kind of process" / "one process", where it names what an archetype models, to "kind of program" ("how each kind of program behaves", "how one kind of program behaves", "not on the kind of program", "how one kind of program *behaves*"), nothing else. Wording only: no rule of the frozen archetype contract changes; no link in the repository targets §2's heading anchor.
+- Final word: `docs/workload/archetype-plan.md` §1 (`:8`) reads "a **generative model of one kind of program as the scheduler sees it**" since `18127cc9` (2026-10-16, K04): most entries merge a measured application's whole process tree into one task (`dataset/archetypes.yaml`'s measured entries: "one task carries the whole process tree merged (D14)"); `compiler-child` is six tasks. I1 restated the dataset guidebook's other definitions (W-0958–W-0963; its N1–N3) and I2 the coreset guide's three (`:62`, `:70`, `:1218`; its N1) to "프로그램 한 종류"; H2 restated vol-02's (W-0957; its N1); K18 restated `docs/README.md`'s archetype-plan line and its Full-index row to "one kind of program" (its N6).
+- Sources: `logs/I1.md` ## Rows for other chunks (X3); `logs/I2.md` ## Rows for other chunks (X2), ## Review round 1 (line 106); `docs/workload/archetype-plan.md` §1
+- Cross-ref: W-0964; W-0966
+- Notes: found in I1 and I2 (line 106 in I2's review round 1). K05's file: a follow-up chunk. A frozen contract: the owning chunk decides whether §13's freeze rule (every change to a frozen contract dated in §14) reaches a wording change (I2's X2).
+
 ## Also on this file, not for editing from this list
 
 - W-0261 · blocked, simulator TIMER (on the spec's list) — ## 4. Workload (canonical), ### Example B, sentence (2) on line 246 ("The metronome ticks on a fixed grid, so a late frame doesn't push the…
