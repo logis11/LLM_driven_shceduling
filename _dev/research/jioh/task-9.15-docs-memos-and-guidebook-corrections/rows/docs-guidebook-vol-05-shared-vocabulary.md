@@ -32,3 +32,11 @@ Chunk K16, Research guidebook, volumes 4-6 (wave 4). 4 open rows. The file has 2
 - Sources: S12-098 (9.12 D15, `task-9.12-related-work-prose/changelog.md:283`); SX-0234 (TODO 9.15 line (from 9.12 D14, D15), `_dev/TODO.md:179`)
 - Cross-ref: W-0669; W-0670
 - Notes: At HEAD the segments' background label is package-upgrade in 22 places and download in 2 (grep 'background: ' dataset/timelines/coreset/); every C7 file's background is package-upgrade (e.g. c7-browsing.timeline.yaml:25, c7-gaming.timeline.yaml:14); no timeline binds clamscan; c2-p2b binds unattended-upgr (c2-p2b.timeline.yaml:65). docs/recognition-vocabulary.md:50 still gives av-scan as an example of the background key (another chunk's doc). :1197's 'chrome × 13' is W-0670's. SX-0234 (the TODO 9.15 line's D14/D15 item for vol-05) is merged here; its D14 part is W-0669.
+
+### W-0892 · open
+- At: `docs/guidebook/vol-05-shared-vocabulary.md` the telemetry count examples copied from the daemon guide's old §3, beyond W-0670's lines 468, 486 and 1197: `chrome × 13` lines 691, 913, 1010, 2249, 2274, 2285, 2344; `cc1 × 100` lines 707, 839, 1206; `game.exe × 300` lines 950, 1029, 2334
+- Change: Restate each example to what the compiled files show: `c1-browsing`, five `chrome`; `c1-compile`, `code` and `make` with six child names (`sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`) × 2,908; `c1-gaming`, 18 tasks — `Troy.exe` × 7, `Task worker thr` × 4, `wineserver`, `dxvk-cs`, `dxvk-submit`, `winepulse_mainl`, `winepulse_timer`, `FAudio_AudioCli`, `steam`.
+- Final word: K09's W-0453 restated the daemon guide's §3 count examples to the compiled files (`chrome × 5`, thousands of `sh`/`gcc`/`cc1`/`as` beside `make`, `Troy.exe × 7`), checked on `c1-browsing`, `c1-compile` and `c1-gaming` at the manifest `b6017a10…` (K09 review round 2).
+- Sources: `logs/K09.md` ## Rows for other chunks (X2), the W-0453 row, ## Review round 2; `dataset/build/coreset-single/c1-browsing.workload.json`, `c1-compile.workload.json`, `c1-gaming.workload.json`
+- Cross-ref: W-0670; W-0893; W-0453
+- Notes: found in K09. W-0670 keeps :468, :486 and :1197.

@@ -2,7 +2,7 @@
 
 Chunk K09, Simulator and daemon docs (wave 2). 8 open rows. The file has 76 lines at `d5cc7711`.
 
-### W-0433 · open
+### W-0433 · applied
 - At: `docs/simulator/interpretation-contract.md` ## 3 Event grammar, the `WAKE(target)` row, line 33 ("make `target` runnable (waker–waiter edges)")
 - Change: State that a WAKE's target may name any task of the file, a spawn-table child included, as the compile trees' parent–child wiring uses.
 - Final word: 9.6 D19 (the compile trees' child-targeted WAKEs) and 9.23 D14 (the canonical lints, from finding B4: a spawned child's WAKE resolves as a top-level task's does; `dataset/tools/wlc/linter.py:324–330`): at HEAD the workload schema's WAKE target is any task id, the canonical linter resolves a WAKE target against top-level and spawned ids alike, and the core set's compile trees use child targets.
@@ -10,28 +10,28 @@ Chunk K09, Simulator and daemon docs (wave 2). 8 open rows. The file has 76 line
 - Resolved at merge: The code disagrees with itself: the dataset (schema, linter, compiled files) allows child targets, while the reference simulator's loader refuses a WAKE whose target is not a top-level task (`simulator/src/sim.cpp:876`, "WAKE target is not a top-level task"). The latest decisions on the matter (9.6 D19's wiring, 9.23 D14's lint) take the dataset's side, and the contract's row does not restrict the target, so the sentence clarifies the frozen contract rather than changing it. The loader's refusal belongs to the final memo (another row).
 - Notes: The 2026-10-10 audit's blocker 1 (`_dev/docs/audit/jioh/2026-10-10-dataset-audit-before-9.15.md:18`); record-gaps §1 item 9: the heads-up memo promised "input format unchanged", and the simulator loader refuses five files because of child-targeted WAKEs.
 
-### W-0434 · open
+### W-0434 · applied
 - At: `docs/simulator/interpretation-contract.md` ## 4 Canonical format, the `events` bullet, line 45 ("`{t, op: arrive, name, program, depart?}`")
 - Change: Restate the arrive event's shape to `{t, op: arrive, id, name, declared_class, program, depart?, spawn_table?, fork_cap?}`, with one clause on `declared_class` — the scheduling class the program declares for itself, `normal` or `idle`, an idle task running only when no other-class task is runnable — and the orchestrator's `spawn_table` and `fork_cap` (§5).
 - Final word: The workload schema's `arrive_event` requires t, op, id, name, declared_class, program and allows depart, spawn_table, fork_cap (`dataset/schema/workload.schema.json` `$defs.arrive_event`); `declared_class` is required on every task record from the closed set `normal`/`idle` since 9.13 (data-contracts §4 and §14, 2026-10-09), a spawn-table entry carrying it too.
 - Sources: SX-0819 (record-gaps §2 item 9, `jioh/2026-10-14-record-gaps-and-doc-staleness-for-9.15.md:34`); SX-0919 (guidebook dataset vol-03 ch.16 mismatch table row 1 (§16.1, interpretation contract), `dataset/03-timeline-to-canonical-workload.md:2206`)
 - Notes: Verified at HEAD: compiled arrive events carry `declared_class`, `id`, `name`, `op`, `t`, `program`/`depart`, and `c1-compile`'s `make` carries `fork_cap` 48 and a 17,448-entry `spawn_table`. Wording: `docs/data-contracts.md:244` (every task record carries `declared_class`); the idle rule as the pair review's header states it (`docs/daemon/prior-table-pair-review.md:13`; 9.11 D5).
 
-### W-0435 · open
+### W-0435 · applied
 - At: `docs/simulator/interpretation-contract.md` ## 5 Lifetime classes, the table lines 51–55 (the `segment-bound` row: "pinned in the arrive event | exogenous — user closes it")
 - Change: State that no program runs out of instructions: a segment-bound program ends blocked — its last step a WAIT, a TIMER or an unbounded LOOP — and its pinned depart removes it; a finite or spawned task ends with EXIT.
 - Final word: 9.23 D16 (no program runs out, 2026-10-15, not amended), enforced by the 9.23 D14 canonical lint: the compiler completes a segment-bound program with the blocking step its loop takes next — a wake-driven program a trailing WAIT on its last wake's channel (N wakes meet N + 1 WAITs), a timer-driven program the next TIMER, whose tick falls at or past the depart — so it ends blocked (WAIT, TIMER or an unbounded LOOP) and the depart removes it; the resident single WAIT is unchanged; a task without a pinned depart, top-level or spawned, ends with EXIT. Nothing new executes inside the span. Not a TIMER-rule (backlog-versus-skip) item.
 - Sources: SX-0374 (TODO 9.15 line (from 9.23 D16), `_dev/TODO.md:179`); SX-0645 (9.23 D16, `task-9.23-guidebook-findings/changelog.md:150`)
 - Notes: Not a TIMER-rule row (spec decision 9). The reference simulator (2026-10-10) reads a program that runs out as done and emits a second `task_end` at the depart (`simulator/src/sim.cpp:661`, `on_depart` :838), per 9.23 D16; after D16 no compiled program runs out, so the sentence and the data agree. The final memo names the rule (another row). The same §5's FORK paragraph is row W-0436.
 
-### W-0436 · open
+### W-0436 · applied
 - At: `docs/simulator/interpretation-contract.md` ## 5 Lifetime classes, the FORK semantics paragraph, line 57 ("(e.g. 2,430 compiler children, lifetimes already drawn) … (parallelism cap; cap value is a binding-time parameter, default `-j8` by stated convention)")
 - Change: Replace the 2,430 example — a DynamoRio build's process count (`ocallahan-atc17`), never a timeline's — with the dataset's own build: `c1-compile`'s `make` carries a 17,448-entry spawn table (2,908 object jobs × six processes: `sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`) and `fork_cap` 48, the compiled cap being the timeline's `parallelism_cap` (8) × 6.
 - Final word: 9.6 D19–D22 and D25 (the three measured archetypes, 2026-09-19; D19 amended by D20, D22 corrected by D25; folded in at D31): `compiler-child` is the six-member object job (`sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`) with one measured quantile table per (role, structural step); `build-orchestrator` carries the measured `dispatch_overhead` table and six spawn-table entries per object job, the compiled `fork_cap` = parallelism_cap × 6 (`dataset/tools/wlc/compiler.py:699`); `cpu-batch` is a batch loop (RUN a measured run, SLEEP the block after it) whose tables the `program` binding chooses (at HEAD `python3` and `kdenlive_render`, `dataset/archetypes.yaml:884–964`). All three carry `category_source: meas`. `c1-compile` binds 2,908 object jobs at cap 8: spawn table 17,448 entries, `fork_cap` 48. 9.12 D103 (item 63's pass-through lines applied from their recorded verdicts; D47 as amended by D76 and D103): the 2,430 is a DynamoRio build's count (`ocallahan-atc17`, "make forks and execs 2430 processes, mostly short-lived"); the compile family is otherwise grounded in the dataset's measured build (a warm `-j8` linux-6.6 build, 5,957 forks under 719 make processes, 2,857 six-member object jobs; `cc1_step_1` p50 367.6 ms).
 - Sources: S12-225 (9.12 D103, `task-9.12-related-work-prose/changelog.md:1559`); SX-0025 (TODO 9.15 line (from 9.6, the three archetypes), `_dev/TODO.md:179`); SX-0169 (TODO 9.15 line (from 9.12 audit D103), `_dev/TODO.md:179`); SX-0822 (record-gaps §2 item 9, `jioh/2026-10-14-record-gaps-and-doc-staleness-for-9.15.md:34`); SX-0921 (guidebook dataset vol-03 ch.16 mismatch table row 3 (§16.1, interpretation contract), `dataset/03-timeline-to-canonical-workload.md:2208`)
 - Notes: Checked at HEAD: `dataset/build/coreset-single/c1-compile.workload.json` (its SHA-256 equals `dataset/build.manifest.json`'s entry): `editor`/`code` arrives at 0 with depart 1,594,000,000 µs; `build`/`make` at 2,000,000 µs, `fork_cap` 48, a 17,448-entry spawn table, 2,908 of each of `sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`, all `declared_class` normal; `make`'s program ends `WAIT children:build`, `EXIT`. `dataset/timelines/coreset/c1-compile.timeline.yaml:20` `parallelism_cap: 8`. The cap's label is open: 9.6 D4 and `build-orchestrator`'s `modeling_notes` say convention, `c1-compile`'s source map says design (record-gaps §1 item 4) — keep the sentence off a label or follow that item's resolution. The 2,430 is named as DynamoRio's in the 2026-09-13 critical-findings memo (A1).
 
-### W-0437 · open
+### W-0437 · applied
 - At: `docs/simulator/interpretation-contract.md` ## 6 Constructor specialization — chain topology, line 63 ("(input → engine → … → display)" and "(Open item: whether wineserver joins this constructed graph or stays a separate `system-daemon` binding — decided at constructor implementation, recorded in `modeling_notes`.)")
 - Change: Replace "input → engine → … → display" with the source's "from a user input to display update" (the linear relay is the dataset's linearisation; no intermediate stage is named), and close the open item: wineserver is a member of the constructed chain, one member `<iid>.wineserver` inserted right after the head (9.4 D4); `system-daemon` no longer exists.
 - Final word: 9.4 D8 (residual wording, 2026-09-13): the source says "from a user input to display update", no intermediate stage named, and the linear relay is the dataset's linearisation. 9.4 D4 (wineserver is a member of the chain, 2026-09-13): the game-chain constructor inserts one member `<iid>.wineserver`, named `wineserver`, right after the chain's head; the `wineserver → system-daemon` binding was removed. 9.9 D26 (2026-09-24; amended by D30, D31; corrected by D27, D30, D43): `system-daemon` is removed and four measured entries replace it — `compositor-shell` (GNOME Shell), `audio-server` (the PipeWire stack), `service-manager` (`systemd`), `message-bus` (`dbus-daemon`) — each a set of per-thread components with wake rates and gap/run quantile tables; the `xorg` task is retired.
@@ -39,7 +39,7 @@ Chunk K09, Simulator and daemon docs (wave 2). 8 open rows. The file has 76 line
 - Resolved at merge: SX-0390 (the 9.4 scope card's hand-off) carries three changes on this doc: its two §6 changes are this row; its §7 change ("measured on multi-core machines") is row W-0439.
 - Notes: Verified at HEAD: the compiled `c1-gaming` carries one `wineserver` task (18 arrive events: 16 chain members, `game.wineserver`, `steam`; record-gaps §2 item 13). 9.4 scope card item 10 (`_dev/research/jioh/task-9.4-gaming/scope-card.md:45`): slide 17 names only "a user input" and "display update"; "engine" is ours.
 
-### W-0438 · open
+### W-0438 · applied
 - At: `docs/simulator/interpretation-contract.md` ## 7 Lane scaling and the demand budget, first bullet, line 67 ("Two compile modes per timeline: `-native` (as-measured, released only, never executed here) and `-single` (lane-scaled; the only thing this simulator runs).")
 - Change: Restate to the one compile mode: every timeline compiles once, lane-scaled (`single`); drop the `-native` mode and the sentence naming two.
 - Final word: The 9.5 follow-ups spec's decision 14 (the native compiled set dropped, 2026-09-16), applied by 9.13 D1 (2026-10-09): the compiler knows one mode, `single` (`dataset/tools/wlc/compiler.py:31` MODES = ("single",), a request for `native` refused); the dataset ships the single-lane set `coreset-single` alone. No later decision reverses it.
@@ -47,7 +47,7 @@ Chunk K09, Simulator and daemon docs (wave 2). 8 open rows. The file has 76 line
 - Cross-ref: W-0439; W-0440
 - Notes: The same bullet's "(measured on multi-core machines)" is row W-0439; the next bullet, the demand budget, is row W-0440.
 
-### W-0439 · open
+### W-0439 · applied
 - At: `docs/simulator/interpretation-contract.md` ## 7 Lane scaling and the demand budget, first bullet, line 67 ("Archetype values whose sources are machine-aggregate (measured on multi-core machines) are scaled to the single lane …")
 - Change: Drop "measured on multi-core machines" as the stated reason for lane scaling where it rests on the LAVD talk: no slide states the machine or core count of its characterisation traces; the rule itself (machine-aggregate values scaled by a compile pass, per-archetype declared fields with the evidence in `modeling_notes`) stays.
 - Final word: 9.4 scope card item 12 (the `scalable` rule and its "lane-scaling defense", 2026-09-13): the concentration statistics (C-lavd-10, C-lavd-11) are supported, as a scheduling-frequency share; "measured on multi-core machines" (C-lavd-15) is not in the source — no slide states the machine, core count or OS of the characterisation traces; kind: design on a partly unsupported premise.
@@ -56,7 +56,7 @@ Chunk K09, Simulator and daemon docs (wave 2). 8 open rows. The file has 76 line
 - Resolved at merge: Split from W-0437 (the 9.4 scope card's hand-off of `interpretation-contract.md:58, :62, :66`), whose other two changes are row W-0437, so each passage's change stands as its own row.
 - Notes: The hand-off's :66 has drifted to :67. If the parenthetical reads as a generic definition of "machine-aggregate" rather than the LAVD claim, restating it as "figures of a whole machine" without the multi-core assertion meets the item.
 
-### W-0440 · open
+### W-0440 · applied
 - At: `docs/simulator/interpretation-contract.md` ## 7 Lane scaling and the demand budget, the "Demand budget" bullet, line 68 ("every compiled `-single` workload's aggregate demand lands in the measurable oversubscription regime (~100–150% of the lane); the per-file oracle-vs-random admission test (open-questions record Q8) is the enforcement mechanism")
 - Change: Restate the bullet as recorded demand: the static demand estimate is reported per file and per segment in the manifest, never a budget a file must meet; drop the ~100–150 % window and the admission test as its enforcement — the per-file oracle-vs-random test is the RQ0 gate's own per-file reading, not a demand check.
 - Final word: 9.14 decision 4 (the demand window retires as a gate, 2026-10-09; no recorded reason, record-gaps §1 item 5): the ~100–150 % window is no longer a gate; demand is measured and reported per file and per segment in the manifest (`dataset/tools/wlc/estimate.py`, "retired as a gate on 2026-10-09"; building plan §5a, "never fails a file on it"); the per-file oracle-vs-random admission test is the gate.
@@ -64,7 +64,7 @@ Chunk K09, Simulator and daemon docs (wave 2). 8 open rows. The file has 76 line
 - Cross-ref: W-0438
 - Notes: At HEAD 31 of the 51 core files' manifest utilization is below one lane and `c2-p1a` reads 14.505 (`dataset/build.manifest.json`). SX-1087 (the dataset guidebook vol-07's open note) names lines 67–68 together; its line-67 part is row W-0438, and its point that the README's rule 1 ("the doc wins — fix the code") points the wrong way here is that note's own for-인지오 row elsewhere. 9.14 decision 4 has no recorded reason: the doc states the fact only.
 
-### W-0859 · open
+### W-0859 · applied
 - At: `docs/simulator/interpretation-contract.md` ## 5 Lifetime classes, the FORK semantics paragraph, line 57 ("At run time the fork/wait-for-slot loop (parallelism cap; …) consumes the table in order."); ## 3 Event grammar, the `WAIT(channel)` row, line 32 ("block until a WAKE (or exogenous wake event) on `channel`")
 - Change: Write W-0743's rule into the FORK and WAIT text: the executor completes an orchestrator's `WAIT children:<id>` when the last child it spawned ends, and without blocking (a zero-wait `ready` line) when none is live at the WAIT. Wherever this file writes W-0744's parenthetical on the trailing WAIT's channel (W-0435's sentence), scope it to the code: for the measured interactive entries usually their timer channel, in the core set and its sensitivity variants always — 34 generated `mail-client` (`thunderbird-bin`) tasks end on `input:`.
 - Final word: 인지오's answer to W-0743 (2026-10-16, (a)): the rule is written into the interpretation contract's FORK and WAIT text and `docs/data-contracts.md`, with a §14 entry; no data change. Applied in K05 to `docs/data-contracts.md` §4 Example B (3) and its §14 2026-10-16 entry. 인지오's answer to W-0744 (2026-10-16, (a)), counted over `build/coreset-single/` only; K05's count over every `*-single` build: the core set's 24 tasks with both channels and the variants' 37 all end on `timer:`, the generated layer's 1,279 end 1,245 on `timer:` and 34 on `input:` (27 return grid, 6 transition grid, 1 distractor grid).
@@ -72,7 +72,7 @@ Chunk K09, Simulator and daemon docs (wave 2). 8 open rows. The file has 76 line
 - Cross-ref: W-0436; W-0435; W-0832; W-0445
 - Notes: found in K05. No other row on this file carries W-0743's rule (W-0436 is the 2,430 example in the same paragraph). W-0832 (the RQ0 gate spec's (g)) cites the contract text once this lands. The simulator guide's worked run (W-0445, this chunk's other file) meets the same W-0744 scope.
 
-### W-0863 · open
+### W-0863 · applied
 - At: `docs/simulator/interpretation-contract.md` the opening paragraph, line 6 ("(Pipeline: `archetypes.yaml + timeline (+ scenario catalog) + seed → workload`; see docs/workload/building-plan.md.)")
 - Change: Restate the pipeline to the compiler's inputs: the compiler reads no scenario catalog, and the seed is in the timeline's `meta`.
 - Final word: K02's full pass of the building plan (N2): its §1 line "`archetypes.yaml` + timeline (+ scenario catalog) + seed → workload" restated — `dataset/tools/wlc/compiler.py` reads no catalog and the seed is in the timeline's `meta`.

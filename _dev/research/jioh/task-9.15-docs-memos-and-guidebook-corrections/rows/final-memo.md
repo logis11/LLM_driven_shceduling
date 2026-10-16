@@ -118,7 +118,7 @@ Drafted after the doc chunks (spec decision 13). 19 rows.
 
 ### W-0826 · final-memo
 - At: new
-- Change: Tell 인경민 and 박이안 the 'What is not claimed' entry 9.15 adds to `docs/research-claims.md`: the size of the scheduling gain is not claimed beyond the measured workloads — every CPU value one AMD EPYC 7763 core's on a hosted runner (Xvfb, no GPU, no sound device, no human); another CPU changes each program's speed by its own factor (a Xeon Platinum 8573C: `cc1` 0.72×, `fixdep` 0.50× the EPYC's time), which the venue variants' common factor of 0.8–1.25 does not reproduce; recognition reads no CPU value.
+- Change: Tell 인경민 and 박이안 the 'What is not claimed' entry 9.15 adds to `docs/research-claims.md`: the scheduling result is not claimed to transfer to another CPU or another machine's configuration — every CPU value one AMD EPYC 7763 core's on a hosted runner (Xvfb, no GPU, no sound device, no human); another CPU changes each program's speed by its own factor (a Xeon Platinum 8573C: `cc1` 0.72×, `fixdep` 0.50× the EPYC's time), which the venue variants' common factor of 0.8–1.25 does not reproduce; recognition reads no CPU value.
 - Final word: 인지오's answers to W-0752 and W-0753 (2026-10-16).
 - Sources: W-0752; W-0753; `docs/workload/measurement-overview.md` §11; `dataset/variants.yaml:35–44`
 - Cross-ref: W-0825
@@ -146,6 +146,14 @@ Drafted after the doc chunks (spec decision 13). 19 rows.
 - Final word: 인지오's answer to W-0742 (2026-10-16).
 - Sources: W-0742
 - Cross-ref: W-0825
+- Notes: —
+
+### W-0894 · final-memo
+- At: new
+- Change: Tell 인경민 that the simulator guide's wording quoted by `simulator/src/notes.md` §4 gaps 1 and 3 is restated: §5 now names the one cap the configuration sets, `batch_bandwidth_cap`, a work-conserving ceiling on the batch class, not yet implemented — gap 1 stays owed as conformance item (d) (W-0720); §9.2 is closed on TIMER's t₀ being the arrival, which the simulator already does (`simulator/src/sim.cpp:674`, `:734–737`) — gap 3 owes nothing. No edit to 인경민's tree.
+- Final word: drafted as option (b) of K09's question from the waves; 인지오 confirms or drops it at the final memo's review (9.15 spec decision 13).
+- Sources: `simulator/src/notes.md` §4; `docs/simulator/simulator-guide.md` §5, §9.2; W-0446; W-0448; W-0869; 인지오's answer to K03's t₀ question (2026-10-16)
+- Cross-ref: W-0720
 - Notes: —
 
 ## Also aimed at the final memo, not for drafting from this list

@@ -91,6 +91,14 @@ Chunk K16, Research guidebook, volumes 4-6 (wave 4). 9 open rows. The file has 4
 - Cross-ref: W-0742; W-0673
 - Notes: found in K02.
 
+### W-0893 · open
+- At: `docs/guidebook/vol-06-archetypes-and-grounding.md` ## 9.4 line 2532 ("`count: 12` … 인식기는 `chrome × 13`을 봅니다"); line 2630 ("인식기는 `game.exe × 300`을 봅니다"); ## 12.9 lines 3736 ("`game.exe × 300`, `steam`, `steamwebhelper × 3`, `wineserver`, `gamescope`") and 3738 (the heading "### game.exe × 300")
+- Change: Restate each count example to what the compiled files show: `c1-browsing`, five `chrome` (the window in use and four hidden tabs' renderers); `c1-gaming`, 18 tasks — `Troy.exe` × 7, `Task worker thr` × 4, `wineserver`, `dxvk-cs`, `dxvk-submit`, `winepulse_mainl`, `winepulse_timer`, `FAudio_AudioCli`, `steam`.
+- Final word: K09's W-0453 restated the daemon guide's §3 count examples to the compiled files (`chrome × 5`, `Troy.exe × 7`), checked on `c1-browsing` and `c1-gaming` at the manifest `b6017a10…` (K09 review round 2).
+- Sources: `logs/K09.md` ## Rows for other chunks (X2), the W-0453 row, ## Review round 2; `dataset/build/coreset-single/c1-browsing.workload.json`, `c1-gaming.workload.json`
+- Cross-ref: W-0892; W-0453; W-0675; W-0678; W-0680
+- Notes: found in K09. :2532 sits between W-0678's and W-0680's ## 9.4 lines (2528; 2534–2584) and :3736–3738 in W-0675's ## 12.9 passage (3718–3789); those rows restate the retired entries and the tab-count sources, this one the counts the recognizer sees.
+
 ## Also on this file, not for editing from this list
 
 - W-0682 · blocked, simulator TIMER (on the spec's list) — ## 2.2 여섯 개를 하나씩 → ### TIMER lines 251–259 (the quoted contract row 253, '늦어진 반복은 backlog로 쌓이고' 255, the backlog paragraph 259); ## 2.5 주기…

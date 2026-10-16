@@ -580,6 +580,14 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0136; W-0789
 - Notes: found in K02. Both files' chunks have run: a follow-up chunk.
 
+### W-0891 · open
+- At: `docs/references.md`, new entries; `docs/daemon/daemon-guide.md` §9 Open questions, ### 9.3 Hold time and hysteresis, line 188 ("hardware-state governors in milliseconds … capacity provisioning in minutes", the two scales named without values)
+- Change: Mint entries, by the id-minting and citation-tier rules, for the debounce precedents 9.19's precedent search read on 2026-10-11 and left without one — the Linux cpufreq governors (`schedutil`'s `rate_limit_us`, `ondemand`'s `sampling_rate`), Android's `interactive` governor (`min_sample_time` 80 ms), the Linux scheduler's `sysctl_sched_migration_cost` (0.5 ms), the Kubernetes HorizontalPodAutoscaler (downscale stabilization 5 min), the Kubernetes cluster autoscaler (10 min), AWS EC2 Auto Scaling's default cooldown (300 s), RFC 2439, BGP route flap damping (5–15 min); then the daemon guide's §9.3 gives the hardware-state governor scale (0.5–80 ms) and the capacity-provisioning scale (5–15 min) their values, citing the entries.
+- Final word: 9.19 D4 (2026-10-11): `feral-gamemode`, `tuned` and `systemd-oomd` got entries; "The other precedents of the table above ground no dataset value and have no entry; the table carries their coordinates for the daemon guide's §9.3 (9.15) and the RQ4 experiment spec." K09 decision 5: the daemon guide's §9.3 states only cited values, so the two scales stay without values until their entries exist.
+- Sources: `logs/K09.md` ## Rows for other chunks (X1), ## Decisions 5; `_dev/research/jioh/task-9.19-generator-and-the-c3-grids/changelog.md` ## P (each system's mechanism, value and primary source, read 2026-10-11), ## D4
+- Cross-ref: W-0455
+- Notes: found in K09. Both files' chunks have run (K01, K09): a follow-up chunk. The citation rule: `docs/references.md`'s id-minting rule first, each entry verified against its primary text; no `dataset/sources.yaml` entry, since no dataset value derives from these sources (9.19 D4).
+
 ## Also on this file, not for editing from this list
 
 - W-0071 · answered (a), applied in K01 — The five entries 9.10 D34 and 9.12 D102 remove from `docs/references.md` (`dubroy-chi10`, `chang-chi21`, `dkms-man`, `dkms-debian`, `mozilla-testpilot10`) are still registry ids in `dataset/sources.yaml` (`:175`, `:183`… Blocks: The removal of the five entries at `docs/references.md:80–88`, `:279–287`, `:295–298` (and `singervine-slate10` at `:300–303`), and the same-edit restatement o…
