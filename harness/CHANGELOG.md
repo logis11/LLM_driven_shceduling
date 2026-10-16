@@ -2,6 +2,10 @@
 
 The harness tree's own record of what its committed data files and programs changed, newest first. The scoring spec (`scoring/scoring-spec.yaml`) and the guard spec (`guards/guard-spec.yaml`) are frozen here (Phase 8 spec, decision 19): a change to either after its freeze is an entry below before any run reads it, and the RQ0 gate spec (`experiments/rq0-gate.yaml`) pins the frozen bytes by hash. The metrics doc and the data contracts keep their own changelogs.
 
+## 2026-10-17 — the conformance statement's (g) cites the contracts (jioh 9.15)
+
+- **RQ0 gate spec**, `experiments/rq0-gate.yaml`, statement `simulator-conformance` (9.15 W-0832): (g) cites the contract text in place of the work-list row — the interpretation contract's `WAIT(channel)` row and FORK semantics, and `docs/data-contracts.md` §4 Example B and §14's 2026-10-16 entry, where the rule is proposed, in force once the simulator's owner agrees; the RQ0 gate spec requires it of the run. Text only; nothing pins the RQ0 gate spec.
+
 ## 2026-10-16 — the conformance statement's (c) and (g); the driver table's ticket rule; the dataset re-pinned on the compiler and lint cleanup; `mock-switch` re-derived (jioh 9.15)
 
 - **RQ0 gate spec**, `experiments/rq0-gate.yaml`, statement `simulator-conformance` (9.15 W-0758): the closing sentence reads "(c) and (f) the simulator does today" in place of (f) alone — (c), a switch into MLFQ as a cold start and a same-algorithm entry letting the granted slice finish, is in the reference simulator since `6bf9d850` (2026-10-10; `simulator/src/sim.cpp`, U1 and U2); (f), the frame chain's woken stages in EDF's deadline class, as before. A seventh item, (g): an orchestrator's `WAIT children:<id>` completes when the last child it spawned ends, and without blocking when none is live at the WAIT (9.15 W-0743). The simulator does not yet do it (`on_task_end` returns only a fork slot), and without it `c1-compile`'s build-turnaround term (judging, weight 1.0) is censored alike under every condition. The run does not start until each of the seven is shown on the hand fixtures. Nothing pins the RQ0 gate spec.
