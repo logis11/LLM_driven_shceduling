@@ -947,7 +947,7 @@ harness: 240초 이후 kdenlive는 input window가 없어요(사용자가 변환
 
 ### C4 — distractor injection
 
-C1 파일의 clone에 무관한 process 하나를 30초에 주입. label은 그대로. 원본과 pair로 비교해서 "답이 흔들렸나"를 봐요. seed는 원본에서 물려받고, term은 base의 것을 그대로 써요(scoring spec의 `base`). 이 셋은 그런 상황이 존재한다는 사례이고 rate 주장은 generated distractor grid가 맡아요. 셋 다 reporting-only예요.
+C1 파일의 clone에 무관한 프로그램 하나를 30초에 주입. label은 그대로. 원본과 pair로 비교해서 "답이 흔들렸나"를 봐요. seed는 원본에서 물려받고, term은 base의 것을 그대로 써요(scoring spec의 `base`). 이 셋은 그런 상황이 존재한다는 사례이고 rate 주장은 generated distractor grid가 맡아요. 셋 다 reporting-only예요.
 
 #### `c4-gaming` — 게임 중 chat client 켜짐
 
