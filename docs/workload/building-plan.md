@@ -32,7 +32,7 @@ Paper framing: "we validate the controlled claims on an authored suite and the r
 Everything composes through three layers, named for what they hold. Lower layers never reference higher ones.
 
 ```
-ARCHETYPE LIBRARY   how one process behaves                  (dataset/archetypes.yaml)
+ARCHETYPE LIBRARY   how one kind of program behaves          (dataset/archetypes.yaml)
 SCENARIO CATALOG    which scenarios and process names exist  (docs/workload/scenario-catalog.md, S1–S18)
 TIMELINES           how tasks arrange in time               (dataset/timelines/coreset/*.timeline.yaml; the generated sets, §3a)
 ```
@@ -49,7 +49,7 @@ The binding rule: **behaviour parameters live in the archetype library.** Timeli
 
 > **Pin:** this section is superseded in detail by **docs/workload/archetype-plan.md**, which is normative for the archetype library. The tables below remain as the quick-reference inventory.
 
-An archetype is a named, sourced behavior specification for one process kind. Format follows the rt-app JSON task model as explicit precedent. Every numeric field carries a `source:` tag (§6).
+An archetype is a named, sourced behavior specification for one kind of program. Format follows the rt-app JSON task model as explicit precedent. Every numeric field carries a `source:` tag (§6).
 
 ### 2.1 Archetype inventory (29 entries)
 

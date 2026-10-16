@@ -173,7 +173,7 @@ archetype의 숫자는 인식기에도 driver table에도 닿지 않는다. 그 
 마지막으로 archetype이 전체 구조에서 어디 있는지를 한 번 봅니다.
 
 ```text
-   ARCHETYPE LIBRARY   프로세스 하나가 어떻게 행동하나        archetypes.yaml
+   ARCHETYPE LIBRARY   한 종류의 프로그램이 어떻게 행동하나    archetypes.yaml
    SCENARIO CATALOG    어떤 상황과 프로세스 이름이 있나        S1–S18
    TIMELINES           task들이 시간 위에 어떻게 놓이나        *.timeline.yaml
 ```
@@ -3936,7 +3936,7 @@ tasks:
 
 | 용어 | 뜻 |
 |---|---|
-| **archetype** | scheduler가 보는 모습대로 적은 프로세스 하나의 생성 모형. 사건의 흐름을 만들어내는 규칙과 파라미터의 묶음 |
+| **archetype** | scheduler가 보는 모습대로 적은 한 종류의 프로그램의 생성 모형(예전 계획 문서에서는 프로세스 하나). 사건의 흐름을 만들어내는 규칙과 파라미터의 묶음 |
 | **event stream** | 시각과 사건이 이어진 흐름. scheduler에게 프로세스는 이것이 전부다 |
 | **generative model** | 데이터를 요약한 것이 아니라 데이터를 만들어낼 수 있는 규칙 |
 | **task** | scheduler가 실행 여부를 결정하는 단위 하나. 대개 thread 하나 |

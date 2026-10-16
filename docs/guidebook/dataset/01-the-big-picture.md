@@ -691,7 +691,7 @@ focus:    [{from: 0s, to: 60s, task: editor}]
 이 책의 "세 층"은 데이터가 지나가는 세 형태(archetype → timeline → canonical workload)입니다. 그런데 `docs/workload/building-plan.md` §1은 "three-layer architecture"라는 말을 조금 다르게 씁니다.
 
 ```text
-ARCHETYPE LIBRARY   한 process가 어떻게 행동하나            (archetypes.yaml)
+ARCHETYPE LIBRARY   프로그램 한 종류가 어떻게 행동하나       (archetypes.yaml)
 SCENARIO CATALOG    어떤 scenario와 process 이름이 존재하나  (docs/workload/scenario-catalog.md, S1–S18)
 TIMELINES           task들이 시간 속에 어떻게 놓이나          (*.timeline.yaml; generated layer의 timeline도)
 ```
