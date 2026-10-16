@@ -1,6 +1,6 @@
 # Work-list rows — the final memo to 인경민 and 박이안
 
-Drafted after the doc chunks (spec decision 13). 16 rows.
+Drafted after the doc chunks (spec decision 13). 19 rows.
 
 ### W-0713 · final-memo
 - At: new
@@ -61,7 +61,7 @@ Drafted after the doc chunks (spec decision 13). 16 rows.
 - Final word: The RQ0 gate spec's `simulator-conformance` statement (`harness/experiments/rq0-gate.yaml:323–342`, 9.14 decision 1; RQ0 is the gate experiment): before the RQ0 run the simulator must show, on the hand fixtures replayed with their traces compared line by line, (a) the zero-wait ready line, (b) the TIMER skip rule, (c) a switch into MLFQ as a cold start and a same-algorithm entry letting the granted slice finish, (d) `batch_bandwidth_cap` as a work-conserving ceiling, (e) the strict idle class, (f) the chain's woken stages in EDF's deadline class; the run does not start until each is shown. The code at HEAD (`simulator/src/sim.cpp`, last commit `6bf9d850`, 2026-10-10) implements (c) and (f) and owes (a), (b), (d), (e), as the 2026-10-10 audit's blocker 2 found.
 - Sources: SX-0310 (TODO 9.15 line (from the 2026-10-11 audit), `_dev/TODO.md:179`); SX-0688 (audit 2026-10-10 blocker 2, `jioh/2026-10-10-dataset-audit-before-9.15.md:19`); 9.15 spec decision 9 (`jioh/task-9.15-docs-memos-and-guidebook-corrections.md:50`); 9.15 spec decision 13 (`jioh/task-9.15-docs-memos-and-guidebook-corrections.md:66`)
 - Cross-ref: W-0714; W-0758
-- Notes: Checked at HEAD: (a) a WAIT satisfied from a mailbox or a passed TIMER continues with no `ready` line (`sim.cpp:675–678`, `:686–691`), and `advance()` re-enqueues with cause `arrive` (memo_261010 Part C); (b) `sim.cpp:675` consumes overdue ticks at once (backlog); (d) no occurrence of `bandwidth` in `sim.cpp` (memo_261010 Part A item 4, 'not implemented'); (e) no occurrence of `declared_class`; (c) U1/U2 at `sim.cpp:44–52`, `:205–208`, `:589–605`, shown against the `mock-switch` trace (memo_261010 Part B); (f) B2 periodic class with the waker's deadline carried down the chain (`sim.cpp:34–38`, `deliver()`), answered 2026-10-10. The gate statement's own sentence '(f) the simulator does today; the others its owner holds as owed' predates the U port and is logged for 인지오 (W-0758). The assembly's spec-derived line (9.15 spec decision 9: the skip rule and zero-wait `ready` line owed) overlaps (a) and (b). memo_261010 Part A item 6 still lists a starvation safety net as owed on the simulator's side; 9.12 D114 records that no executor starvation bound is planned (9.11 D7 took no executor net; 9.11 D19 reconsiders one with 인경민 only if the dry runs show waits near 30 s) — the memo can say so. It carries 9.15 spec decisions 9 and 13: the final memo names the simulator's TIMER skip rule (item (b)) and the zero-wait `ready` line (item (a)) as owed; the docs keep the backlog rule until the skip rule lands (the Phase 10 TIMER line).
+- Notes: Checked at HEAD: (a) a WAIT satisfied from a mailbox or a passed TIMER continues with no `ready` line (`sim.cpp:675–678`, `:686–691`), and `advance()` re-enqueues with cause `arrive` (memo_261010 Part C); (b) `sim.cpp:675` consumes overdue ticks at once (backlog); (d) no occurrence of `bandwidth` in `sim.cpp` (memo_261010 Part A item 4, 'not implemented'); (e) no occurrence of `declared_class`; (c) U1/U2 at `sim.cpp:44–52`, `:205–208`, `:589–605`, shown against the `mock-switch` trace (memo_261010 Part B); (f) B2 periodic class with the waker's deadline carried down the chain (`sim.cpp:34–38`, `deliver()`), answered 2026-10-10. The gate statement's own sentence '(f) the simulator does today; the others its owner holds as owed' predates the U port and is logged for 인지오 (W-0758). The assembly's spec-derived line (9.15 spec decision 9: the skip rule and zero-wait `ready` line owed) overlaps (a) and (b). memo_261010 Part A item 6 still lists a starvation safety net as owed on the simulator's side; 9.12 D114 records that no executor starvation bound is planned (9.11 D7 took no executor net; 9.11 D19 reconsiders one with 인경민 only if the dry runs show waits near 30 s) — the memo can say so. It carries 9.15 spec decisions 9 and 13: the final memo names the simulator's TIMER skip rule (item (b)) and the zero-wait `ready` line (item (a)) as owed; the docs keep the backlog rule until the skip rule lands (the Phase 10 TIMER line). Amended 2026-10-16 (W-0758's answer): the list gains (g), an orchestrator's `WAIT children:<id>` completed when the last child it spawned ends and without blocking when none is live (W-0743), owed by the simulator today.
 
 ### W-0721 · final-memo
 - At: new
@@ -121,6 +121,30 @@ Drafted after the doc chunks (spec decision 13). 16 rows.
 - Change: Tell 인경민 and 박이안 the 'What is not claimed' entry 9.15 adds to `docs/research-claims.md`: the size of the scheduling gain is not claimed beyond the measured workloads — every CPU value one AMD EPYC 7763 core's on a hosted runner (Xvfb, no GPU, no sound device, no human); another CPU changes each program's speed by its own factor (a Xeon Platinum 8573C: `cc1` 0.72×, `fixdep` 0.50× the EPYC's time), which the venue variants' common factor of 0.8–1.25 does not reproduce; recognition reads no CPU value.
 - Final word: 인지오's answers to W-0752 and W-0753 (2026-10-16).
 - Sources: W-0752; W-0753; `docs/workload/measurement-overview.md` §11; `dataset/variants.yaml:35–44`
+- Cross-ref: W-0825
+- Notes: —
+
+### W-0827 · final-memo
+- At: new
+- Change: Propose to 인경민 and 박이안 that the `render` gloss in `docs/recognition-vocabulary.md` §1 widen from 'an offline 3D/graphics render' to 'an offline render — a 3D scene or a video project rendered to a file'; no label or file changes; applied with a §5 entry once agreed (the vocabulary's §4: a change to a mode is an all-three decision).
+- Final word: 인지오's answer to W-0432 (2026-10-16).
+- Sources: W-0432; `dataset/tools/meas/llm/prompt.json` (the 9.12 stand-in prompt carrying §1's menu verbatim); `kdenlive` in `docs/references.md` (the render dialog starts `kdenlive_render`)
+- Cross-ref: W-0825
+- Notes: Every render segment (`c1-render`, `c7-render`, `c2-p3a` segment 1, the generated files over the render mode) binds Kdenlive's export (9.10 D10).
+
+### W-0828 · final-memo
+- At: new
+- Change: Propose to 인경민 and 박이안 the trace rule for an MLFQ slice expiring with no other task runnable: one continuing occupancy — the holder demoted (`x_mlfq_level`) and kept on the lane, no `run_end(preempt)`/`run_start` pair — answering 인경민's mock-switch Q2 (`simulator/notes/note1010.md`); 인경민 implements it with the RUN→RUN fix (`simulator/memo/memo_261010.md` Part C), one change to the MLFQ baseline traces; the harness mock stands. Written into the metrics doc and the interpretation contract with a `docs/data-contracts.md` §14 entry once agreed.
+- Final word: 인지오's answer to W-0736 (2026-10-16).
+- Sources: W-0736; Linux v6.12 `kernel/sched/core.c:6655` (`__schedule()`: no switch counted when `prev == next`)
+- Cross-ref: W-0723
+- Notes: The CPU each task receives is the same under either reading; `preempt_count` is reported, in no scored term.
+
+### W-0829 · final-memo
+- At: new
+- Change: Tell 인경민 and 박이안 two renamings in the docs, no content with them: the research-claims chain's links are 'link 1'–'link 7' (seven links; the doc said 'six'), the core set's file groups keeping C1–C7; the dataset's layers are named (the archetype library, the scenario catalog, the timelines), 'Layer 1/2' keeping the evaluation layers.
+- Final word: 인지오's answer to W-0742 (2026-10-16).
+- Sources: W-0742
 - Cross-ref: W-0825
 - Notes: —
 
