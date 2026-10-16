@@ -107,6 +107,14 @@ Chunk K13, Dataset guidebook, volumes 5-6 (wave 3). 10 open rows. The file has 2
 - Cross-ref: W-0581; W-0929
 - Notes: found in K13. K13's files: a follow-up chunk after the batch after wave 4.
 
+### W-0962 · open
+- At: `docs/guidebook/dataset/05-the-generated-layer.md` §2.1, line 192 ("`archetype` — process 한 종류의 행동 모형"); §17.1's glossary `archetype` row, line 2090 ("process 한 종류의 행동 모형")
+- Change: Restate "한 종류의 process" / "process 한 종류" to "프로그램 한 종류" in each definition, nothing else. In the volume's Korean.
+- Final word: `docs/workload/archetype-plan.md` §1 (`:8`) reads "a **generative model of one kind of program as the scheduler sees it**" since `18127cc9` (2026-10-16, K04): most entries merge a measured application's whole process tree into one task (`dataset/archetypes.yaml`'s measured entries: "one task carries the whole process tree merged (D14)"); `compiler-child` is six tasks. H2 restated vol-02's title (W-0957) and its two definitions (its N1: `:9` and the glossary's `archetype` row `:1543`) to "프로그램 한 종류"; K18 restated `docs/README.md`'s archetype-plan line and its Full-index row to "one kind of program" (its N6).
+- Sources: `logs/H2.md` ## Rows for other chunks (X2); W-0957; `logs/H2.md` ## New rows found and applied (N1); `logs/K18.md` ## Fix round 1 (N6); `docs/workload/archetype-plan.md` §1
+- Cross-ref: W-0957; W-0959; W-0960; W-0961; W-0963
+- Notes: found in H2. K13's file: a follow-up chunk.
+
 ## Also on this file, not for editing from this list
 
 - W-0561 · closed, already-applied — vol-05:1731 and :2003 already state the code's rule and that 9.21 D1's list differs; that list describes the recorded shape ('`input` is whether the generator…

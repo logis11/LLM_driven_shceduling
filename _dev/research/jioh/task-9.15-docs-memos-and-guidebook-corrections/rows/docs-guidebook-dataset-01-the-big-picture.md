@@ -208,6 +208,22 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 24 open rows. The file has 1
 - Cross-ref: —
 - Notes: found in K11's last review. K11's file: a follow-up chunk.
 
+### W-0958 · open
+- At: `docs/guidebook/dataset/01-the-big-picture.md` §8.1's heading, line 1378 ("## 8.1 2권 · Archetype library: process 하나를 scheduler의 눈으로 적기"); chapter 8's opening (line 1376) copies each volume's title verbatim ("각 권의 제목과 … 그대로 옮기고")
+- Change: Restate the heading to vol-02's current title: "## 8.1 2권 · Archetype library: 프로그램 한 종류를 scheduler의 눈으로 적기".
+- Final word: W-0957, applied in H2: vol-02's H1 reads "# 2권 · Archetype library: 프로그램 한 종류를 scheduler의 눈으로 적기", and `docs/guidebook/dataset/README.md:14`'s link text with it (the archetype plan's §1, "one kind of program as the scheduler sees it", since `18127cc9`). No link targets the heading's anchor (H2's grep over `docs/`).
+- Sources: `logs/H2.md` ## Rows for other chunks (X1); W-0957
+- Cross-ref: W-0957; W-0959
+- Notes: found in H2. K11's file: a follow-up chunk.
+
+### W-0959 · open
+- At: `docs/guidebook/dataset/01-the-big-picture.md` §3.1's 용어 box, line 494 ("`archetype`은 한 종류의 process가 scheduler에게 어떻게 보이는지를 적은, 출처가 붙은 생성 모델"); §3.2, line 498 ("항목 하나가 process 행동의 한 종류입니다"); §9.3's glossary `archetype` row, line 1543 ("한 종류의 process가 scheduler에게 어떻게 보이는지를 적은, 출처가 붙은 생성 모델")
+- Change: Restate "한 종류의 process" (lines 494, 1543) and "process 행동의 한 종류" (line 498) to "프로그램 한 종류" in each, nothing else. In the volume's Korean.
+- Final word: `docs/workload/archetype-plan.md` §1 (`:8`) reads "a **generative model of one kind of program as the scheduler sees it**" since `18127cc9` (2026-10-16, K04): most entries merge a measured application's whole process tree into one task (`dataset/archetypes.yaml`'s measured entries: "one task carries the whole process tree merged (D14)"); `compiler-child` is six tasks. H2 restated vol-02's title (W-0957) and its two definitions (its N1: `:9` and the glossary's `archetype` row `:1543`) to "프로그램 한 종류"; K18 restated `docs/README.md`'s archetype-plan line and its Full-index row to "one kind of program" (its N6).
+- Sources: `logs/H2.md` ## Rows for other chunks (X2); W-0957; `logs/H2.md` ## New rows found and applied (N1); `logs/K18.md` ## Fix round 1 (N6); `docs/workload/archetype-plan.md` §1
+- Cross-ref: W-0957; W-0958; W-0960; W-0961; W-0962; W-0963
+- Notes: found in H2. K11's file: a follow-up chunk. Line 494 is the archetype plan's sentence before `18127cc9` nearly word for word.
+
 ## Also on this file, not for editing from this list
 
 - W-0507 · blocked, simulator TIMER (outside the spec's list) — §2.4 여섯 개의 primitive, open note line 288

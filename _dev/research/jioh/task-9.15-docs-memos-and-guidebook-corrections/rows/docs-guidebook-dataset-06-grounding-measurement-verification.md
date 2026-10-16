@@ -207,7 +207,7 @@ Chunk K13, Dataset guidebook, volumes 5-6 (wave 3). 20 open rows. The file has 1
 - Cross-ref: W-0580
 - Notes: found in K13. Applied with W-0580, after the final memo.
 
-### W-0953 · open
+### W-0953 · applied
 - At: `docs/guidebook/dataset/06-grounding-measurement-verification.md` §15.1's glossary, the trace-replay check's row, line 1813 ("측정된 wake 순서를 그대로 재생한 variant로 판정이 같은지 보는 Phase 10의 점검")
 - Change: The trace-replay variant restated to the three stream kinds (wakes, runs with the block after each, cycles), not the wake order alone. In the volume's Korean.
 - Final word: W-0876, applied 2026-10-17 in the batched data rebuild (`7b024003`): each `dataset/replay/*.json.gz` carries its `kind` — `wakes` (`code-editor`, `web-browser`, `renderer-hidden`), `runs` with the block after each (`package-upgrade`, `cpu-batch`'s `python3`), `cycles` (`video-call`); `dataset/tools/wlc/compiler.py` `_replay_window` checks the kind; `dataset/variants.yaml`'s `trace-replay` comment and `dataset/tools/wlc/variants.py`'s docstring name the three kinds. The variants manifest's `replay` fields: the upgrade's runs in `c7-dev`, `c7-browsing` and `c7-meeting`, `python3`'s in `c2-p1a`, the call's cycles in `c7-meeting` — every replay file replays a batch job's runs. G3 applied the same restatement in vol-04 (its N2: §11.3's table, §11.4's replay axis, the glossary's `replay` row).
