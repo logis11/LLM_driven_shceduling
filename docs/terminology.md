@@ -51,8 +51,8 @@ timelines are hand-authored or derived from one by a recipe; the generated
 layer's timelines are emitted by the generator from `dataset/grids.yaml`.
 `archetypes.yaml + timeline (+ scenario catalog) + seed → workload`.
 
-**Archetype** — a sourced generative model of how one process kind behaves, as
-the scheduler sees it: a program over the six-primitive event grammar plus
+**Archetype** — a sourced generative model of how one kind of program behaves,
+as the scheduler sees it: a program over the six-primitive event grammar plus
 parameter distributions. An entry of the dataset's archetype library; never
 carries a process name. See docs/workload/archetype-plan.md and
 docs/simulator/interpretation-contract.md.
