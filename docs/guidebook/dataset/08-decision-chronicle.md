@@ -1,6 +1,6 @@
 # 8권 · 의사결정 연대기: 2026-08-23부터 지금까지
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-14
+> Status: draft · Created 2026-10-14 · Updated 2026-10-17
 
 **이 데이터셋의 모양을 정한 결정들은 언제, 왜, 무엇을 대신해서 내려졌고, 무엇이 아직 열려 있나.**
 
@@ -89,7 +89,7 @@
 - **recognizer** — process 이름 목록을 읽고 지금의 mode와 attribute를 맞히는 쪽입니다. 연구의 주인공은 LLM recognizer입니다.
 - **oracle과 random** — 비교용 recognizer 두 개입니다. oracle은 정답을 그대로 답하고, random은 무작위로 답합니다.
 - **RQ0** — 연구의 첫 관문 질문입니다. "정답을 알면(oracle) 무작위(random)보다 scheduling 결과가 측정 가능하게 좋아지는가"를 묻습니다. 이 질문을 판정하는 규칙 파일이 **RQ0 gate spec**(`harness/experiments/rq0-gate.yaml`)입니다.
-- **RQ1–RQ5** — 연구 제안서(`docs/research-proposal.md`)의 나머지 질문입니다. RQ1은 "process 이름과 개수만으로 LLM이 상황을 맞히는가", RQ2는 "맞히면 scheduling이 측정 가능하게 좋아지는가(무인식, whitelist 대비)", RQ3는 "mode와 attribute라는 어휘로 충분한가", RQ4는 "추론 지연을 감안하면 상황이 얼마나 오래 지속되어야 이득인가", RQ5는 "driver table이라는 측정 도구 자체가 건전한가"입니다.
+- **RQ1–RQ5** — 연구 제안서(`docs/research-proposal.md`)의 나머지 질문입니다. RQ1은 "process 이름과 개수만으로 LLM이 상황을 맞히는가", RQ2는 "맞히면 scheduling이 측정 가능하게 좋아지는가", RQ3는 "mode와 attribute라는 어휘로 충분한가", RQ4는 "추론 지연을 감안하면 상황이 얼마나 오래 지속되어야 이득인가", RQ5는 "driver table이라는 측정 도구 자체가 건전한가"입니다. RQ2의 비교 대상은 상황을 모르는 경우, 그리고 배포판이 기본으로 켜는 이름 catalogue를 재현한 조건(`shipped_catalogue`)과 그 catalogue의 설계 안에서 가장 강한 이름 표(`strongest_name_table`)입니다. RQ2에 답하는 것은 `shipped_catalogue`와의 비교이고, `strongest_name_table`을 이기는 것은 논문의 주장입니다(9.12 D6, D115). 처음의 `whitelist` 조건 하나가 이 둘로 나뉜 과정은 8장에서 봅니다.
 
 이 권 전체에 걸쳐 나오는 이름 몇 개도 미리 적습니다.
 
@@ -124,7 +124,7 @@
 - **구간 2, 첫 데이터셋(2026-08-26 → 09-06).** Phase 1의 문서 작업, Phase 2의 compiler와 24개 파일, Phase 3의 검증과 contract freeze입니다. 3장과 4장에서 다룹니다.
 - **구간 3, 넓히기(2026-09-09 → 09-12).** Phase 7이 32개 cell을 모두 채우면서 파일이 50개가 됩니다. Phase 8이 RQ0 gate spec을 처음 확정합니다. 5장에서 다룹니다.
 - **구간 4, 다시 짓기(2026-09-13 → 10-10).** critical findings, Phase 9 spec, 아홉 개의 research slice, 한 번의 rebuild, 한 번의 consumer rework입니다. 6장, 7장, 8장에서 다룹니다.
-- **구간 5, 다시 넓히기와 마무리(2026-10-10 → 지금).** audit, generated layer, focus, build gate와 build time, 그리고 아직 열려 있는 9.15와 9.16입니다. 9장, 10장, 12장에서 다룹니다.
+- **구간 5, 다시 넓히기와 마무리(2026-10-10 → 지금).** audit, generated layer, focus, build gate와 build time, 이 guidebook이 찾은 결함의 처리(9.23), 그리고 아직 열려 있는 9.15와 9.16입니다. 9장, 10장, 12장에서 다룹니다.
 
 11장은 시간 순서를 잠시 벗어나, 뒤집힌 결정만 모아 "전 → 후 → 이유 → 날짜"로 정리합니다.
 
@@ -234,7 +234,7 @@ Q8은 공개 데이터셋을 쓸 수 없는 이유도 적어 둡니다. Google B
 
 - **D6 — `meas-ci` 채택.** `meas-ci`는 GitHub Actions의 runner에서 직접 측정하는 방식입니다. grill은 여기에 "trust-scoping package"를 붙였습니다. CI runner의 측정은 구조와 모양에 대한 주장(fork 구조, 개수, 수명 모양, 주기, 이름 문자열)만 뒷받침하고, 기계에 따라 달라지는 절댓값(CPU %, I/O 처리량)은 "convention informed by measurement"로만 쓰며 "never desktop truth"라고 적었습니다. 그리고 "Each workflow runs N times and reports spread."
 - **D7 — D-live 해체.** 실제 사용자의 데스크톱을 재야 했던 값(타이핑 간격, tab 개수)은 문헌으로 옮겼습니다. 타이핑 간격은 `dhakal-chi18`(136M Keystrokes 연구), tab 개수는 `dubroy-chi10` 등입니다.
-- **D8 — meas-live 완전히 제외.** 이유는 "No teammate Linux desktops known; a standing 'validate later' conditional would leave published results provisional"입니다. 다만 수집 도구와 개인정보 제거 도구는 artifact로 함께 배포한다고 적었습니다. 이 "배포한다"는 약속은 2026-09-13 critical finding B7에서 "The privacy-scrub tool that `building-plan.md:189` says 'ships in the artifact' is not in the repository"라는 지적을 받습니다.
+- **D8 — meas-live 완전히 제외.** 이유는 "No teammate Linux desktops known; a standing 'validate later' conditional would leave published results provisional"입니다. 다만 수집 도구와 개인정보 제거 도구는 artifact로 함께 배포한다고 적었습니다. 이 "배포한다"는 약속은 2026-09-13 critical finding B7에서 "The privacy-scrub tool that `building-plan.md:189` says 'ships in the artifact' is not in the repository"라는 지적을 받습니다. 2026-10-16에 인지오가 그 약속을 거두었고(9.15 작업 목록 W-0734), 실제 desktop에서의 검증은 `docs/workload/measurement-overview.md` §11이 적는 한계("Real-desktop validation is deferred")로 남았습니다. 같은 날 인지오는 실제 desktop과의 비교를 열지 않고 이 범위를 논문의 한계로 싣기로 정했습니다(W-0753).
 
 나중에 D6의 "절댓값은 convention"이라는 범위는 크게 바뀝니다. Phase 9에서 CI runner 측정이 archetype 값의 주된 근거가 되고, 대신 측정을 CPU 하나에 고정하고 한 CPU model(AMD EPYC 7763)로 묶는 규칙이 생깁니다. 7장에서 그 과정을 봅니다.
 
@@ -368,7 +368,7 @@ spec에는 test suite의 "charter"도 있습니다. "Same timeline + same librar
 
 이 일곱 결정이 지금 어떻게 되었는지 미리 봅니다. 결정 1의 세 track은 2026-10-11에 네 track이 됩니다. 키 입력 창의 track 이름이 `focus`에서 `input`으로 바뀌고, `focus`라는 이름은 창 focus를 뜻하는 새 track이 가져갑니다(9.17 D1, 10장). 결정 5의 keyed substream과 결정 6의 lockfile 패턴은 그대로입니다. 결정 7의 hard-fail은 2026-10-09에 사라집니다(9.14 결정 4, 8장).
 
-> **열린 자리.** 2.3의 형식을 정한 grill의 이유는 archive로 남지 않았습니다. 2026-08-28 archive가 "task-2.3 format grill"을 "Still owed … not reconstructible here" 목록에 넣었습니다(3.7절). spec에 적힌 한 줄짜리 이유(예: 결정 1, 5) 외의 논거는 기록에 없습니다. 이것은 결정이 아니라 기록의 공백이므로, 이제 와서 정할 사람은 없습니다. 다만 9.16의 exit audit이 "모든 결정에 기록된 근거가 있는가"를 볼 때 이 공백이 다시 드러날 수 있습니다.
+2.3의 형식을 정한 grill의 이유는 그때 archive로 남지 않았습니다. 2026-08-28 archive가 "task-2.3 format grill"을 "Still owed … not reconstructible here" 목록에 넣었습니다(3.7절). 2026-10-16에 인지오가 기억하는 대로 적은 archive(`_dev/archive/2026-08-27-phase-2-grills-rationales.md`, 9.15 작업 목록 W-0741)가 생겨, 2.3에 대해서는 결정 6(lockfile pattern)의 이유를 되살렸습니다. 결정 1, 2, 5는 결정의 문장이나 다른 기록이 이유를 적고, 결정 3(focus track)과 결정 7(demand window)은 나중의 결정이 대체했습니다(3.7절).
 
 ## 3.4 2.4 — core timelines (2026-08-28)
 
@@ -456,6 +456,8 @@ spec에는 test suite의 "charter"도 있습니다. "Same timeline + same librar
 이 문장이 말하는 바를 분명히 적어 둡니다. Phase 2의 grill(Q1–Q7), 2.3의 형식 grill, 2.6의 grill, 2.4의 grill, 측정 batch를 대체한 결정, grid 서명의 이유는 그 대화 속에만 있었고 저장소에 남지 않았습니다. 결정 자체는 spec(Phase 2, 2.3, 2.4, 2.6의 spec 파일)과 TODO 줄에 남았습니다. 하지만 spec에 적힌 한 줄짜리 이유를 넘는 논거, 예를 들어 "왜 C1 파일은 60 s이고 기본 segment는 120 s인가"(2.4 결정 3)나 "왜 N=5인가"(2.6 결정 3)에 대한 논거는 없습니다.
 
 그리고 이 공백 중 하나는 실제로 나중에 문제가 되었습니다. 2026-09-18에 9.6 D10(같은 기계 반복과 안정성 기준으로 반복 횟수를 정한 결정)은 "the task 2.6 spec §3 states 'N=5 matrix' without a ground"라고 적고, 다섯 번이라는 횟수를 버리고 안정성 기준으로 반복 횟수를 정하기로 합니다(7장). 이유가 기록되지 않은 결정은, 다시 볼 때 지킬 근거도 없다는 것을 보여 주는 예입니다.
+
+2026-10-16에 이 공백의 일부가 메워졌습니다. 인지오가 그 session들의 이유를 아는 대로 적은 archive를 남기기로 했고(9.15 작업 목록 W-0741), `_dev/archive/2026-08-27-phase-2-grills-rationales.md`가 그 기록입니다. session의 대화 기록은 남아 있지 않으므로 인지오가 기억하는 것에서 썼습니다. 되살린 이유는 셋입니다. 2.4 결정 4(파생 파일은 seed를 바꿀 수 없음)는 "a rule is enforced by refusal, not by a warning"이고, deriver는 첫 커밋 `63c677dc`부터 거부합니다. 2.4 결정 3의 길이(C1 60 s, 기본 segment 120 s)는 어떤 출처도 그 길이를 말하지 않으므로 고른 값, 곧 design입니다. 2.3 결정 6의 lockfile pattern은 build가 입력에서 바이트 단위로 다시 만들어지는 파생물이라는 것입니다. 나머지는 결정의 문장이나 다른 기록이 이유를 적고 있거나(2.3 결정 1, 2, 5, 2.4 결정 1, 2.6 결정 2), 나중의 결정이 대체했거나(예: 2.6의 N = 5는 Phase 9의 안정성 기준), 단계를 조직한 결정입니다.
 
 ## 3.8 Phase 2가 끝났을 때의 데이터셋
 
@@ -736,7 +738,7 @@ Phase 7이 만든 구조, 즉 C1 열여섯과 C7 열여섯의 쌍, 32개 cell을
 
 ## 6.2 열세 개의 critical finding
 
-검증의 결과는 `docs/memos/2026-09-13-critical-findings.md`에 정리되었습니다. 이 memo는 "Nothing in the repository was changed; resolution is left to the owners of each file"이라고 적습니다. finding은 네 묶음입니다.
+검증의 결과는 `docs/memos/2026-09-13-critical-findings.md`에 정리되었습니다. 이 memo는 "Nothing in the repository was changed; resolution is left to the owners of each file"이라고 적습니다. memo의 요약은 네 묶음(A, B, C, D)이고, 열세 개의 finding은 A1–A5, B1–B7, C입니다. D는 원문과 대조하지 못한 출처의 목록이고 finding이 아닙니다(인지오의 답, 2026-10-16; 9.15 작업 목록 W-0749). 그래서 memo의 내용은 finding 열셋과 원문과 대조하지 못한 출처의 목록 하나입니다.
 
 **A — 원문이 저장소의 설명과 다름.**
 
@@ -758,9 +760,9 @@ Phase 7이 만든 구조, 즉 C1 열여섯과 C7 열여섯의 쌍, 32개 cell을
 
 **C — 측정 fold-in 뒤에 남은 낡은 문장.** 예를 들어 `docs/references.md`가 `meas-ci`를 "reserved (no runs yet …)"라고 적고 있었습니다.
 
-**D — 원문과 대조하지 못한 출처.** `chang-chi21`(ACM이 403을 돌려줌)과 `cpsmark-tbench23`(ScienceDirect가 자동 접근을 거부함)는 `verified`로 표시되어 있었지만 원문을 읽지 못했습니다.
+**D — 원문과 대조하지 못한 출처(finding이 아닌 목록).** `chang-chi21`(ACM이 403을 돌려줌)과 `cpsmark-tbench23`(ScienceDirect가 자동 접근을 거부함)는 `verified`로 표시되어 있었지만 원문을 읽지 못했습니다. 그 뒤 `cpsmark-tbench23`은 Wayback에 보관된 출판사 PDF로 같은 날 전문을 읽었고(`docs/references.md`의 status), `chang-chi21`은 2026-10-16에 registry와 `docs/references.md`에서 빠졌습니다(9.10 D34, 9.12 D102).
 
-- **placeholder**는 측정이나 출처가 없는 자리를 임시로 채운 값입니다. phase 9의 기준으로는 tag 없이 "placeholder"라는 label을 달아야 하는 값입니다.
+- **placeholder**는 측정이나 출처가 없는 자리를 임시로 채운 값입니다. Phase 9 spec 결정 1은 출처 없는 값의 label로 convention, arithmetic, design과 함께 "placeholder"를 들었지만, 2026-10-16에 인지오가 placeholder label을 두지 않기로 정했습니다(9.15 작업 목록 W-0750). 측정을 기다리는 값은 `meas-pending`을 달고, `make lint`의 freeze가 library의 parameter와 timeline의 bound value에서 그것을 거부합니다.
 
 ## 6.3 측정 audit과 compile audit이 보탠 것
 
@@ -1133,7 +1135,7 @@ slice의 작업 방식은 9.4를 시작하면서 2026-09-13에 정해졌습니�
 
 **9.10 D32(timeline에 묶인 값도 library의 규칙을 따른다는 결정).** "each value a timeline binds carries `source: <id>:<locator>` or a label for what it is (design, convention, arithmetic), checked by the linter." 근거는 "The provenance claim covers only the library today"였습니다. 그리고 "9.10 sets the content; the field and the lint are a schema change, 9.13's." 즉 내용은 9.10이 정하고, 필드와 lint는 9.13(rebuild)이 넣기로 했습니다. 9.10 D160(2026-10-06)은 그 내용을 `bound-values.md`에 목록으로 만들었습니다.
 
-> **열린 자리.** 9.13은 이 필드를 넣지 않았습니다. 2026-10-10 audit의 A2가 이것을 찾았고("9.10 D32 decided `source:`/label on every bound value with a lint, 'the field and the lint are 9.13's'; `timeline.py` has no source slot"), 2026-10-11에 9.18 D2가 넣었습니다(10장). 이 빈틈이 생긴 이유는 기록되어 있지 않습니다. 9.13의 spec의 scope 목록에 이 필드가 없었다는 것만 확인됩니다.
+9.13은 이 필드를 넣지 않았습니다. 2026-10-10 audit의 A2가 이것을 찾았고("9.10 D32 decided `source:`/label on every bound value with a lint, 'the field and the lint are 9.13's'; `timeline.py` has no source slot"), 2026-10-11에 9.18 D2가 넣었습니다(10장). 2026-10-14에 이 권은 이 빈틈이 생긴 이유가 기록에 없다고 적었습니다. 2026-10-16에 인지오가 그것을 "놓친 인계"로 기록하기로 정했습니다(9.15 작업 목록 W-0740). 9.10 D32가 필드와 lint를 9.13에 넘겼는데 9.13의 spec이 그것을 받지 않았고, audit이 잡았습니다.
 
 ## 7.11 9.11 — scheduler 쪽의 상수와 근거 (2026-10-07 → 10-08)
 
@@ -1164,7 +1166,7 @@ slice의 작업 방식은 9.4를 시작하면서 2026-09-13에 정해졌습니�
 
 - **9.12 D6.** `whitelist` 조건이 둘로 나뉩니다. 배포된 catalogue(`shipped_catalogue`)와 가장 강한 이름 표(`strongest_name_table`)입니다. 9.14의 guard spec이 이것을 모든 frozen 목록에 반영했습니다.
 - **9.12 D110.** 노트북에서 잰 측정에 `meas-local`이라는 registry 형식이 생겼습니다(`meas-local:m1pro-llm:2026-10-08`).
-- **9.12 D113.** 발표, 학회 초록, 뉴스 기사를 위한 id 유형이 생겼습니다. "footnote tier, their claims the speaker's or reporter's." 2026-10-10 audit의 A3는 `lavd-ossna24`가 아직 이 유형으로 바뀌지 않았다고 지적합니다.
+- **9.12 D113.** 발표, 학회 초록, 뉴스 기사를 위한 id 유형이 생겼습니다. "footnote tier, their claims the speaker's or reporter's." 2026-10-10 audit의 A3는 `lavd-ossna24`가 아직 이 유형으로 바뀌지 않았다고 지적합니다. 2026-10-15에 인지오가 re-type하기로 정했고(9.15 작업 목록 W-0072), `docs/references.md`의 entry는 talk·학회 초록·뉴스 기사의 절로 옮겨져 숫자를 "Min's reported figures of 2024-04-17"로 적습니다. 값과 data 파일은 바뀌지 않았고, `dataset/sources.yaml`의 registry는 이 id를 여전히 `type: deployed-system`으로 둡니다(이 `type`은 lint하지 않습니다).
 - **9.12 D55–D116(audit).** slice 자신의 audit이 D30–D53의 대부분을 고쳤습니다. 예를 들어 D61은 D41을 뒤집었습니다. "the indexer does *not* leave a third idle — 88–91 % busy once indexing."
 
 ## 7.13 이 구간의 중간 점검들
@@ -1266,7 +1268,7 @@ slice들이 끝났을 때 library는 스물여덟 개, 9.13이 하나를 더해 
 
 "`build/` stays uncommitted"입니다. 그리고 D7은 9.15에 최종 memo의 수치(681 MB, `c6-dual` 190 MB)를, 9.16에 "the full dataset lint with schema validation takes about 41 minutes and the bless 22 on this machine"을 넘겼습니다. 이 41분과 22분이 이틀 뒤 9.22의 출발점이 됩니다.
 
-현재 tree가 이 수를 그대로 가지는지 확인했습니다. `dataset/build.manifest.json`의 `artifacts`는 51개이고, `dataset/timelines/coreset/`에는 timeline 51개와 recipe 다섯 개(`c2-pairs`, `c4`, `c5`, `c6`, `c7`의 `*.variant.yaml`)가 있고, `dataset/coverage-grid.json`의 `segments_total`은 66, `empty_cells`는 비어 있습니다.
+현재 tree가 이 수를 그대로 가지는지 확인했습니다. `dataset/build.manifest.json`의 `artifacts`는 51개이고, `dataset/timelines/coreset/`에는 timeline 51개와 recipe 다섯 개(`c2-pairs`, `c4`, `c5`, `c6`, `c7`의 `*.variant.yaml`)가 있고, `dataset/coverage-grid.json`의 `empty_cells`는 비어 있습니다. `segments_total`은 2026-10-14에 66이었고, 2026-10-17에는 67입니다. 9.23 D2(2026-10-14)가 `c6-spoof`의 segment를 spoof가 도착하는 20 s에서 둘로 나누었기 때문입니다(10.7).
 
 ## 8.4 9.14 — consumer rework의 결정들 (2026-10-09 grill, 2026-10-10 완료)
 
@@ -1274,7 +1276,7 @@ slice들이 끝났을 때 library는 스물여덟 개, 9.13이 하나를 더해 
 
 **9.14 결정 1 — 모든 소비자는 지금의 simulator가 아니라 비준된 contract를 기준으로 쓴다.** "Primitives, mocks, fixtures, scoring statements, pair review and gate spec read the simulator as the docs state it: the TIMER skip rule (9.11 D3, D17), the zero-wait `ready` line, a cold start into MLFQ, a same-algorithm entry letting the granted slice finish, the batch bandwidth cap, the strict idle class, and the frame chain in EDF's deadline class." 그리고 gate spec에 conformance statement를 넣었습니다. 실제 simulator가 RQ0 실행 전에 이 행동들을 보여야 한다는 것입니다. 이 결정 때문에 harness와 simulator 사이에 "약속된 행동"과 "구현된 행동"의 차이가 생겼고, 그 차이가 지금의 열린 자리 중 하나입니다(12장).
 
-- **conformance statement**는 RQ0 gate spec 안에 "실제 simulator가 이 여섯 행동을 보여야 실행할 수 있다"고 적은 목록입니다.
+- **conformance statement**는 RQ0 gate spec 안의 목록으로, 실제 simulator가 보여야 RQ0를 실행할 수 있는 행동들을 적습니다. 9.14에서는 (a)–(f)의 여섯이었고, 2026-10-16에 (g)가 더해져 일곱입니다(12.4).
 
 **9.14 결정 2와 그 수정 — judging set 19개, K 10.** 처음 결정은 20개, K 11이었습니다. 바뀐 이유가 데이터셋의 rebuild에서 나왔습니다. 첫째, idle class 작업을 가진 여섯 파일(`c1-indexing`, `c7-indexing`, `c2-p1b`, `c1-backup`, `c7-backup`, `c2-p3b`)이 빠졌습니다. "the executor's idle rule places the background task below every row and the cap is work-conserving, so no row reaches it." 둘째, `c7-meeting`이 다시 들어왔습니다. "the measured call's cycle runs consume the boot slice in about a fifth of its cycles, so the tie with the boot default that moved it out in 8.8 no longer holds." 그리고 2026-10-09의 수정으로 `c7-mail`도 빠졌습니다. "its cut, the base's first 26.385 s, holds no keystroke — `c1-mail`'s 35 fall between 45.9 s and 53.1 s." 결과는 "The judging set is 19, K 10 by the same reading". 현재의 `harness/experiments/rq0-gate.yaml`에서 `files.judging`은 19개, `k`는 10, `g`는 0.5임을 확인했습니다.
 
@@ -1284,7 +1286,7 @@ slice들이 끝났을 때 library는 스물여덟 개, 9.13이 하나를 더해 
 
 > "The compiler records demand per file, as now, and per segment, newly, in the manifest, and never fails on it. The pair review reads each judging file's contended segment's demand where it reports the regime per pair. The building plan's §5a paragraph is restated: the `oversubscribed` class marks a file designed to hold contention, its demand a measured fact reported, not a window held."
 
-> **왜 이렇게 정했나.** 9.14 spec의 결정 4와 changelog D4(window 정책을 지우고 segment별 수요를 manifest에 더한 기록)는 새 규칙만 적고, 이유를 따로 적지 않습니다. 기록된 이유는 없습니다. 기록이 보여 주는 배경은 둘입니다. 하나는 9.13 reads R5입니다. `oversubscribed` class 열 개 중 아홉 개가 창 밖이었고, 그 원인을 R5는 9.10 D17(batch job을 통째로 묶고 파일 길이가 따라가게 한 결정)과 9.10 D90(학습 job을 통째로 묶은 fold-in), 9.10 D142(다운로드를 통째로 묶은 결정)로 적었습니다. 다른 하나는 Phase 3의 3.1과 Phase 7의 7.7이 이미 적어 둔 "demand bounds throughput, not latency, headroom"입니다. 결정 4는 그 위에서 2026-08-26의 demand-budget rule을 "기록하는 사실"로 내렸습니다(9.14 결정 4, 2026-10-09). D4는 pair review가 읽을 경쟁 segment의 수요도 적었습니다. `c2-p1a`의 두 번째 segment가 35.77 lane(학습 job을 통째로 묶었으므로), `c2-p3a` 0.45, `c3-workday`의 compile segment 0.96과 mail segment 1.03입니다.
+> **왜 이렇게 정했나.** 9.14 spec의 결정 4와 changelog D4(window 정책을 지우고 segment별 수요를 manifest에 더한 기록)는 새 규칙만 적고, 이유를 따로 적지 않습니다. 이유는 2026-10-16에 인지오가 적었습니다(9.15 작업 목록 W-0737). 9.10 D17이 모든 job을 측정한 그대로 통째로 묶으므로 파일의 수요는 측정에서 따라 나오고, 그것을 창 안에 붙잡으려면 측정된 길이를 구부려야 했습니다. 그래서 수요는 붙잡지 않고 파일별, segment별로 기록하며, pair review가 경합하는 segment를 읽습니다. 기록이 보여 주는 배경은 둘입니다. 하나는 9.13 reads R5입니다. `oversubscribed` class 열 개 중 아홉 개가 창 밖이었고, 그 원인을 R5는 9.10 D17(batch job을 통째로 묶고 파일 길이가 따라가게 한 결정)과 9.10 D90(학습 job을 통째로 묶은 fold-in), 9.10 D142(다운로드를 통째로 묶은 결정)로 적었습니다. 다른 하나는 Phase 3의 3.1과 Phase 7의 7.7이 이미 적어 둔 "demand bounds throughput, not latency, headroom"입니다. 결정 4는 그 위에서 2026-08-26의 demand-budget rule을 "기록하는 사실"로 내렸습니다(9.14 결정 4, 2026-10-09). D4는 pair review가 읽을 경쟁 segment의 수요도 적었습니다. `c2-p1a`의 두 번째 segment가 35.77 lane(학습 job을 통째로 묶었으므로), `c2-p3a` 0.45, `c3-workday`의 compile segment 0.96과 mail segment 1.03입니다.
 
 이로써 2026-08-23 Q8의 admission checklist 2번에서 "Q1's oversubscription rule is the mechanism"이라는 부분이 완전히 빠졌습니다. 남은 것은 "an oracle-vs-random gap measurable on that workload", 즉 Phase 7이 RQ0 gate의 파일별 기준으로 만든 부분입니다.
 
@@ -1313,7 +1315,7 @@ rebuild된 데이터셋은 이전보다 여덟 배 컸습니다(8.2절의 R4). 9
 
 그리고 Phase 10에 비용 하나를 넘겼습니다. "the records build on `c6-dual` costs about 40 minutes a run … the RQ0 run's 100 `random` seeds on that file are a cost to plan for."
 
-> **열린 자리.** `c6-dual`의 records build 비용(실행 하나에 약 40분, random seed 100개 계획)은 Phase 10의 RQ0 실행에서 계획해야 할 비용으로 남아 있습니다. 9.14의 handoff는 "a cheaper records path is a task of its own"이라고 적습니다. 정할 사람은 인지오이고, 아직 그 task는 TODO에 줄로 만들어지지 않았습니다(12장).
+> **열린 자리.** `c6-dual`의 records build 비용(실행 하나에 약 40분, random seed 100개 계획)은 Phase 10의 RQ0 실행에서 계획해야 할 비용으로 남아 있습니다. 9.14의 handoff는 "a cheaper records path is a task of its own"이라고 적었습니다. 2026-10-16에 인지오는 지금 어느 대응도 고르지 않기로 하고, 비용을 Phase 10의 TODO 줄에 올렸습니다(9.15 작업 목록 W-0757). 그 줄은 비용을 "about 40 minutes a run on the mock trace (9.14 D14), about 67 hours for the `random` condition's 100 seeds on that file alone"으로, 메모리를 "one run's memory peak its 14.5 million rows, a machine under about 8 GB free swapping (9.14 D13)"으로 적고, 이 파일이 보고만 하는 파일임을 적습니다. 대응은 실제 simulator로 잰 비용 위에서 Phase 10에 정합니다. 선택지는 "a cheaper records path, N changed under the RQ0 gate spec's `n-grounding` statement (a harness changelog entry before any run), or the cost carried"입니다(12.4).
 
 9.14의 끝은 "the dataset and harness CI jobs are green at the end"였습니다(결정 14). 다만 세 CI workflow가 `main`으로의 push에서만 돌았기 때문에, 이 branch에서는 그 step들을 local에서 돌렸습니다. 이 "CI가 이 manifest를 한 번도 compile한 적이 없다"는 사실은 다음 날 audit의 A4가 됩니다.
 
@@ -1457,7 +1459,7 @@ audit 기록에는 인지오가 2026-10-11에 제기한 "Open" 절이 있습니�
 
 # 10장 · Phase 9 셋째 구간: focus, build gate, build time, generated layer
 
-이 장은 "2026-10-11부터 2026-10-14까지 더해진 여섯 sub-task가 데이터셋에 무엇을 더하고 고쳤나"라는 질문에 답합니다. 실행 순서는 9.17 → 9.18 → 9.22 → 9.19 → 9.20 → 9.21이었고, 이 장도 그 순서를 따릅니다. 이 구간이 끝났을 때 데이터셋은 core set 51개, variant 78개, generated layer 1,562개를 가지게 되었고, 그 전부를 CI가 매번 build합니다.
+이 장은 "2026-10-11부터 2026-10-15까지 더해진 일곱 sub-task가 데이터셋에 무엇을 더하고 고쳤나"라는 질문에 답합니다. 실행 순서는 9.17 → 9.18 → 9.22 → 9.19 → 9.20 → 9.21 → 9.23이었고, 이 장도 그 순서를 따릅니다. 9.23은 이 guidebook이 찾은 결함을 처리한 sub-task로, 2026-10-14에 더해졌습니다(10.7). 이 구간이 끝났을 때 데이터셋은 core set 51개, variant 78개, generated layer 1,562개를 가지게 되었고, 그 전부를 CI가 매번 build합니다.
 
 ## 10.1 9.17 — focus가 telemetry에 (2026-10-11)
 
@@ -1568,7 +1570,7 @@ CI run 38131040159는 checkout부터 끝까지 6분 34초였습니다. 9.22 D6�
 
 **9.20 결정 5–7 / D4, D6, D7 — familiarity ladder.** tier 4와 5를 열여섯 mode에 대해, 이름을 바꾸는 대상(focus 주인만, 나머지만, 전부)을 축으로 만들되 결과가 같은 cell은 하나로 접었습니다. "eight modes with one program … give one cell per tier, eight give three — 32 per tier, 64 over tiers 4 and 5, plus the two tier-3 cells: 66." tier 3은 측정 기록에서 찾았습니다. render의 `kdenlive_render` → `melt-7`("the child holding 99.6 % of the render's CPU"), backup의 `deja-dup` → `duplicity`(57 %)입니다. tier 4의 이름은 손으로 쓴 표이고 design입니다. tier 5의 이름은 네 글자 소문자의 keyed draw입니다. 15글자 한계의 근거로 kernel의 `TASK_COMM_LEN`을 `linux-sched-h`(v6.17의 `include/linux/sched.h`)로 references에 넣었습니다.
 
-- **familiarity ladder**는 C1 파일의 이름을 tier 3–5의 이름으로 바꿔 만든 파일 66개입니다. 이름이 낯설어질수록 recognizer가 어떻게 되는지 재려는 것입니다.
+- **familiarity ladder**는 C1 task set의 이름을 tier 4와 5의 이름으로, render와 backup의 job은 tier 3의 이름으로도 바꿔 만든 파일 66개입니다. 이름이 낯설어질수록 recognizer가 어떻게 되는지 재려는 것입니다.
 
 **9.20 결정 8 / D8 — `c5-t3`가 `c6-alias`가 되다.** "The recipe moves from the C5 recipe file to the C6 one under the id `c6-alias` — two players wearing indexers' names, the name-collision limit beside `c6-spoof`. Its segment drops `familiarity: 3` and gains `spoof: true` and `pre_committed_miss: true`; tasks, archetypes and seed are unchanged." 이유는 audit의 C5 방향입니다. tier 3은 "the program's own real name that carries no meaning"인데, `c5-t3`는 다른 프로그램(색인기)의 진짜 이름을 플레이어에 씌운 것이므로 tier가 아니라 이름 충돌의 한계라는 것입니다. core set을 다시 build했고 "51 artifacts, 50 byte-identical"이었습니다. scoring spec의 entry는 C6 section으로 옮겨 "terms verbatim"으로 다시 freeze했고(`9cd9a155…`), RQ0 gate spec의 reporting 목록과 Layer-1 제외 목록이 `c6-alias`를 갖게 되었습니다.
 
@@ -1588,15 +1590,33 @@ CI run 38131040159는 checkout부터 끝까지 6분 34초였습니다. 9.22 D6�
 
 **9.21 결정 5, 6 / D6 — 파일의 축은 manifest join으로, 선택은 축으로.** records는 바뀌지 않습니다. 실험 spec은 `files.select`와 `pins.generated`로 manifest에서 축에 따라 파일을 고릅니다. "The RQ0 gate spec keeps its explicit lists."
 
-**9.21 결정 7 / D7 — flip 개수와 그 비용.** daemon이 적용한 설정 변경 수, 그중 채점기가 틀렸다고 한 것, 그 틀린 전환이 만든 초과 대기의 합을 한 줄로 보고합니다. "No new primitive, metric or records column." 이것이 hold-time 계획 step 1의 재료입니다.
+**9.21 결정 7 / D7 — flip 개수와 그 비용.** daemon이 적용한 설정 변경 수, 그중 채점기가 틀렸다고 한 것, 그 틀린 전환이 만든 초과 대기의 합을 한 줄로 보고합니다. "No new primitive, metric or records column." 이것이 hold-time 계획의 규칙 없는 측정(그 step 1)의 재료입니다.
 
 **9.21 결정 8 / D8 — generated layer는 모든 CI run에서 build한다.** 측정이 근거입니다. "5 min 13 s of a 12 min 04 s run on the 4-vCPU runner; 1,562 artifacts, `build/` 6.8 GB." runner의 저장 공간은 새 reference `gh-hosted-runners`(GitHub Docs, 2026-10-13 읽음)의 "4 vCPU, 16 GB RAM and 14 GB SSD"입니다. 필요할 때만 build하거나 일부만 pin하는 안은 기각되었습니다. 이유는 "both put an exception into the gate's rule that `build/` equals the union of every manifest." 다시 볼 기준도 README에 적었습니다. set이 더해질 때, 또는 step의 시간이나 build 크기가 runner의 저장 공간에 다가갈 때입니다.
 
 **9.21 D11–D13 — CI에서 죽은 test.** dataset CI는 run 38390052552에서 11분 58초로 초록이었습니다. harness CI는 두 번(38387289484, 38396745220) coreset 전체를 도는 mock test 두 개에서 runner가 process를 죽였습니다. D12는 그 원인을 집에서 쟀습니다. 두 test가 `c6-dual` 하나에 대해 workload, trace의 줄 객체와 문자열, run file, rows를 한꺼번에 들고 있어서 "peak resident set 7.66 GB"였습니다. test 도구를 고쳐 한 파일의 객체만 들게 했지만, `compute`가 파일의 모든 row를 list로 돌려주는 바닥은 남았습니다. 그래서 D13(2026-10-14)은 두 test에 `coreset_wide` marker를 붙였습니다. "`make -C harness test` runs the suite with `-m "not coreset_wide"` (296 of 298 tests) and is what `harness.yml` runs; `make -C harness test-full` runs the whole suite and is run at home." 이유는 "Marking the tests rather than slicing the set inside them keeps each test's assertion whole — 51 files, the 8.4 measured graded set — where it runs." 이후 harness run 38547043521이 초록이었습니다(2026-10-14 wrap-up commit).
 
-## 10.7 지금의 데이터셋
+## 10.7 9.23 — guidebook이 찾은 것 (2026-10-14 → 10-15)
 
-이 구간이 끝났을 때의 데이터셋을 tree에서 세어 확인했습니다.
+이 dataset guidebook의 여덟 권을 쓴 사람들이 tree, manifest, code, 기록을 읽다가 scoring, 데이터셋, gate에 관한 발견을 모았습니다(`_dev/docs/audit/jioh/2026-10-14-guidebook-findings.md`, `5709a079` 기준. scoring과 데이터셋의 A1–A8, gate·CI·lint의 B1–B5). 문서의 낡은 곳은 이 목록에 넣지 않고 9.15로 보냈습니다. 그 발견을 처리한 것이 sub-task 9.23입니다. 인지오가 2026-10-14의 grill에서 하나씩 tree에 대조한 뒤 정했고, 기록은 `_dev/research/jioh/task-9.23-guidebook-findings/changelog.md`의 D1–D18입니다.
+
+**9.23 D1, D2 — C6의 두 파일에 pre-committed miss.** `c6-fold`에서는 30 s에 통화의 `chrome` task가 도착해 snapshot이 `chrome ×5`에서 `chrome ×6`이 되고, 개수의 변화도 집합의 변화이므로 그때 query가 생깁니다. "Nothing in the 30 s snapshot says call — a sixth `chrome` is also what a new tab shows — so the meeting label cannot be reached from the names." 그래서 meeting segment(30–60 s)가 pre-committed miss가 되었습니다(D1). `c6-spoof`의 segment 하나는 `background_wanted: true`였는데, 그 `true`는 `c1-browsing`에서 물려받았을 뿐 기록된 이유가 없었습니다. "from 20 s the spoof is sustained CPU work nobody asked for, and the snapshot shows one more `chrome` and nothing else." 그래서 spoof가 도착하는 20 s에서 나누어 뒤 segment를 `false`와 pre-committed miss로 두었습니다(D2). core set의 segment는 66개에서 67개가 되었고, RQ0 gate spec의 `layer1_exclusions`에 두 파일이 들어갔습니다.
+
+**9.23 D3–D6 — generated layer를 읽는 법.** 넷 다 데이터를 바꾸지 않고 읽는 법을 정했습니다. D3은 생성된 파일의 batch term이 turnaround를 유지하고, job이 끝나지 않는 row는 censored bound를 받는다고 정했습니다(scoring spec은 머리글만 바뀜). D4는 generated layer에서도 도착이 program의 시작이고 측정된 launch 단계를 재생한다고 정했습니다(9.10 D136). 기록된 이유는 "the generated layer exists to answer the research questions, not to make a claim"입니다. D5는 return grid와 flap-stress가 형태를 유지하고 경계마다 한 mode의 program을 닫고 다른 mode의 program을 연다고 정했고, D6은 transition grid의 focus 형태와 distractor grid의 cross-mode cell이 recognition 쌍이며 seed는 그대로라고 정했습니다.
+
+**9.23 D8 — library의 문장 하나.** `code-editor`의 validation scope는 "Read over 12,068 s, the span `c6-dual` holds it focused"라고 적었는데, 9.17 이후 `c6-dual`의 편집기가 focus를 가장 오래 가지는 구간은 686–688 s입니다. 문장을 "the span `c6-dual` held it focused before its focus alternated with the game every 688 s (9.17 D1)"로 고쳤고, probe의 길이와 읽은 값은 그대로입니다. library의 바이트가 바뀌었으므로 모든 artifact의 바이트도 바뀌었습니다.
+
+**9.23 D10 — 첫 rebuild (2026-10-14).** D1, D2, D3, D8을 한 번에 build했습니다. "2 of the core set's 51 change beyond it, `c6-fold` and `c6-spoof`", 나머지 artifact는 library hash만 달라졌습니다. RQ0 gate spec의 pin은 dataset `c5f7fa5a…`, variants `8986b58a…`, scoring spec `2ad757b6…`이 되었습니다.
+
+**9.23 D11–D16 — gate, lint, CI, 그리고 program의 끝 (2026-10-15).** 모두 인지오의 결정입니다. D11은 compiler가 읽는데 manifest가 pin하지 않던 launch stream 열 개를 `inputs`에 넣었습니다(core 33, generated 55). D12는 `make check`가 build가 다시 쓰는 파생 timeline과 `coverage-grid.json`도 commit된 바이트와 비교하게 했습니다. 그 전에는 "A derived timeline regenerated and left uncommitted passed CI, its artifact's `derived_from` naming a blob not in git"였습니다. D13은 `make lint`가 freeze lint를 돌리게 했습니다. D14는 canonical lint에 셋을 더했습니다. spawn된 child의 WAKE 대상, 15자를 넘는 이름, program의 끝입니다. D15는 두 requirements 파일을 집 기계의 버전으로 고정하고(runner가 그날의 최신 버전을 설치해, pytest 9.1.1에서 dataset test가 실패한 적이 있습니다), 집 기계에서 4시간 50분이 걸리는 smoke를 손으로만 돌리게 했습니다. D16은 D14를 쓰다가 찾은 것입니다. segment-bound program 7,400개가 depart 전에 할 일이 없어 끝나 버렸고, interpretation contract와 harness의 mock은 그 task를 막혀 있다고 읽는데 reference simulator는 끝났다고 읽었습니다. 그래서 program을 다음 blocking 명령으로 끝맺게 했습니다. wake로 움직이는 program은 마지막 wake의 channel에서 WAIT로, timer로 움직이는 program은 다음 TIMER로 끝납니다. "Nothing new executes"라고 기록은 적습니다.
+
+**9.23 D17, D18 — 둘째 rebuild와 CI (2026-10-15).** D11–D16을 한 번에 build했고, 모든 artifact가 D16으로 바뀌었습니다(끝에 붙은 명령을 빼면 이전 hash와 같습니다). pin은 dataset `81d3213d…`, variants `7079e677…`이 되었습니다. D18은 그 tree를 손으로 CI에 돌린 기록입니다. dataset run 38722675475가 17분 04초에 초록이었고, runner가 일곱 manifest, 파생 timeline, coverage grid를 바이트 단위로 재현했습니다. harness run 38722678829도 초록이었습니다.
+
+D7은 기록 두 곳(9.18 D6의 base keystroke 수, `c6-dual`의 utilization)을 바로잡았고, D9는 P1 pair가 RQ0에서 맡는 역할을 지금 상태대로 적었습니다. 9.23은 데이터셋 문서의 정정을 9.15에 넘겼고, 9.15는 그 정정 중에 인지오가 정한 data와 code의 수정을 2026-10-16에 묶어 다시 build했습니다(12.1, 13장).
+
+## 10.8 지금의 데이터셋
+
+이 구간이 끝났을 때의 데이터셋을 tree에서 세어 확인했습니다. 2026-10-17에 다시 세어도 파일 수는 같습니다.
 
 | 묶음 | 파일 수 | 확인한 곳 |
 |---|---|---|
@@ -1687,9 +1707,9 @@ generated layer는 480 + 720 + 24 + 272 + 66 = 1,562개입니다. TODO의 9.20 �
 | `electron-comms` | `renderer-hidden`, `renderer-visible`, `chat-client`, `game-client` (`renderer-visible`은 뒤에 삭제) | 두 값이 관찰된 어떤 process도 그리지 않음 | 2026-09-20 → 09-22, 9.8 D1, D25 |
 | `system-daemon` | `compositor-shell`, `audio-server`, `service-manager`, `message-bus` | 두 집단이 검색한 모든 class에서 다름 | 2026-09-22 → 09-24, 9.9 D1, D26 |
 | tracker rescan에 별도 entry `indexer-rescan` (D12–D15) | 철회, `cpu-batch`에 남음 | 포화도를 job 위에서 다시 계산하니 0.954–0.962 | 2026-09-19, 9.6 D16 |
-| library v0.1 | v0.2 | `declared_class`의 추가 | 2026-10-09, 9.13 결정 9 |
+| library v0.1 | v0.2 | `declared_class`의 추가 | 2026-10-09, 9.13 결정 9 (파일의 머리 주석은 2026-10-16, 9.15) |
 
-> **열린 자리.** library의 판 번호는 기록과 파일이 어긋납니다. 9.13 결정 9는 "The library's stated version moves from v0.1 to v0.2 in the data-contracts §2 and the dataset README"라고 정했고, 현재 `dataset/archetypes.yaml`의 첫 줄은 여전히 "(v0.1)"입니다. 2026-10-10 audit이 이것을 문서의 낡은 곳으로 적었고, 9.15 줄에 "`dataset/archetypes.yaml:1` '(v0.1)'"로 들어가 있습니다. 고치는 일은 9.15(WIP)의 것입니다.
+library의 판 번호는 2026-10-14에 기록과 파일이 어긋나 있었습니다. 9.13 결정 9는 "The library's stated version moves from v0.1 to v0.2 in the data-contracts §2 and the dataset README"라고 정했는데, `dataset/archetypes.yaml`의 첫 줄은 "(v0.1)"이었습니다. 2026-10-10 audit이 이것을 낡은 곳으로 적었고, 9.15 줄에 "`dataset/archetypes.yaml:1` '(v0.1)'"로 들어갔습니다. 2026-10-16에 인지오가 머리 주석을 고치기로 정했고(9.15 작업 목록 W-0778), 9.15의 묶은 rebuild(커밋 `37c2e233`)에서 첫 줄이 "(v0.2)"가 되었습니다. library는 모든 manifest의 입력이므로, 이 한 줄 때문에 모든 manifest가 다시 bless되고 RQ0 gate spec이 다시 pin되었습니다(같은 rebuild의 다른 수정과 함께 한 번).
 
 ## 11.6 측정의 방법
 
@@ -1736,7 +1756,7 @@ generated layer는 480 + 720 + 24 + 272 + 66 = 1,562개입니다. TODO의 9.20 �
 
 # 12장 · 지금 열려 있는 자리
 
-이 장은 "2026-10-14 현재, 데이터셋과 그 주변에서 무엇이 아직 정해지지 않았거나 실행되지 않았고, 누가 정하나"라는 질문에 답합니다. 각 항목은 기록에서 인용하고, 무엇이 미정인지, 어떤 선택지나 전제 조건이 있는지, 누가 정하는지를 적습니다. 출처는 주로 `_dev/TODO.md`의 9.15, 9.16, Phase 10, Backlog 줄과, 각 spec과 handoff의 열린 항목입니다. TODO는 다른 session이 동시에 고칠 수 있는 파일이므로, 이 장의 인용은 2026-10-14에 읽은 상태입니다.
+이 장은 "2026-10-14 현재, 데이터셋과 그 주변에서 무엇이 아직 정해지지 않았거나 실행되지 않았고, 누가 정하나"라는 질문에 답합니다. 각 항목은 기록에서 인용하고, 무엇이 미정인지, 어떤 선택지나 전제 조건이 있는지, 누가 정하는지를 적습니다. 출처는 주로 `_dev/TODO.md`의 9.15, 9.16, Phase 10, Backlog 줄과, 각 spec과 handoff의 열린 항목입니다. TODO는 다른 session이 동시에 고칠 수 있는 파일이므로, 이 장의 인용은 2026-10-14에 읽은 상태입니다. 그 뒤 닫히거나 바뀐 자리는 2026-10-17에 다시 읽어 고쳐 적었습니다.
 
 ## 12.1 9.15 — 문서, memo, guidebook 정정 (WIP, 2026-10-14부터)
 
@@ -1760,7 +1780,7 @@ generated layer는 480 + 720 + 24 + 272 + 66 = 1,562개입니다. TODO의 9.20 �
 
 > **열린 자리.** 9.15의 미정 사항은 셋입니다. (1) 작업 목록과 chunk 구분은 인지오가 검토하기 전입니다(결정 1). (2) spec의 유일한 열린 항목은 "The final memo's language — decided at the memo step"입니다. 정할 사람은 인지오입니다. (3) 9.15는 끝나는 조건(결정 14)이 정해져 있습니다. 모든 작업 목록 행이 닫히고, 모든 chunk가 reviewer를 통과해 commit되고, 인지오가 모든 chunk log를 읽고, 기록된 모든 "code와 결정의 불일치"에 인지오가 답하고, 모든 memo가 열림/닫힘 줄을 갖고, 최종 memo가 commit되는 것입니다. 지금은 그 전입니다.
 
-**최종 memo가 실을 것.** spec 결정 13과 TODO는 최종 memo의 내용을 정해 두었습니다. "the field `declared_class` on every archetype entry and every task record …, the closed set `normal` and `idle` …; the archetype contract at v0.2 … — and tells 인경민 the simulator loads files up to 190 MB (`c6-dual`), the set 681 MB in all", 그리고 "the simulator loader's refusal of child-targeted WAKEs (`simulator/src/sim.cpp:874-904`; `c1-compile`, `c7-compile`, `c3-workday`, `c4-compile`, `c6-dual`; 9.6 D19), the four executor conformance items owed, the telemetry's focus and the generated layer." 그리고 spec 결정 13이 더하는 것은 "the memos still open, the simulator's skip rule and zero-wait `ready` line as owed, and the licences chosen"입니다. 박이안에게는 9.14 결정 11의 recognition log 항목 두 개("the formatted prompt kept in the recognition log, the chat template's inserted date … fixed or recorded")가 frozen contract의 질문으로 갑니다.
+**최종 memo가 실을 것.** spec 결정 13과 TODO는 최종 memo의 내용을 정해 두었습니다. "the field `declared_class` on every archetype entry and every task record …, the closed set `normal` and `idle` …; the archetype contract at v0.2 … — and tells 인경민 the simulator loads files up to 190 MB (`c6-dual`), the set 681 MB in all"(190 MB와 681 MB는 9.13의 bless 때의 크기입니다. 9.23 D8은 최종 memo의 크기 행에 9.23 D10의 rebuild(2026-10-14) 뒤 크기, 곧 `c6-dual` 187,601,756 bytes와 core set 678,168,083 bytes를 넘겼고, 다음 날 9.23 D17의 rebuild가 그 크기를 바꾸었습니다. 그래서 최종 memo가 실을 크기는 D17 뒤의 것, 곧 `c6-dual` 187.6 MB(187,601,795 bytes)와 core set 678 MB(51개 파일, 678,172,716 bytes)입니다. 2026-10-17의 build에서도 같은 크기입니다), 그리고 "the simulator loader's refusal of child-targeted WAKEs (`simulator/src/sim.cpp:874-904`; `c1-compile`, `c7-compile`, `c3-workday`, `c4-compile`, `c6-dual`; 9.6 D19), the four executor conformance items owed, the telemetry's focus and the generated layer." 그리고 spec 결정 13이 더하는 것은 "the memos still open, the simulator's skip rule and zero-wait `ready` line as owed, and the licences chosen"입니다. 박이안에게는 9.14 결정 11의 recognition log 항목 두 개("the formatted prompt kept in the recognition log, the chat template's inserted date … fixed or recorded")가 frozen contract의 질문으로 갑니다.
 
 ## 12.2 9.16 — exit audit (아직 시작 전)
 
@@ -1772,7 +1792,9 @@ generated layer는 480 + 720 + 24 + 272 + 66 = 1,562개입니다. TODO의 9.20 �
 - "venue mix listed per timeline (9.5 spec decision 13)"
 - release에서 pool을 재현: 주기 entry 셋의 `cycle` block은 `meas-ci-2026-09-18`과 `meas-ci-2026-09-20`에서 `pool.py` `cc51eb8`로, session entry는 `meas-ci-session-2026-09-24`에서, `mail-client`의 77반복 idle pool은 `meas-ci-2026-09-18`과 `meas-ci-2026-09-28`에서 `0aa25ac`로
 - "every entry's `declared_class` rests on 9.11's class census"
-- sub-task마다의 manifest와 pin(9.17 `625e431f…`, 9.18 `976a943c…`, 9.22 `d10bcd42…`, 9.19, 9.20, 9.21의 생성 manifest들, scoring spec `0ff71b1f…`)
+- sub-task마다의 manifest와 pin(9.17 `625e431f…`, 9.18 `976a943c…`, 9.22 `d10bcd42…`, 9.19, 9.20, 9.21의 생성 manifest들, scoring spec `0ff71b1f…`). pin은 그 뒤 9.23 D10(2026-10-14: dataset `c5f7fa5a…`, variants `8986b58a…`, scoring spec `2ad757b6…`)과 9.23 D17(2026-10-15: dataset `81d3213d…`, variants `7079e677…`)을 거쳐, 2026-10-17에는 9.15의 2026-10-16 re-pin이 현재입니다. dataset `b6017a10…`, variants `087ef27c…`, scoring spec `2ad757b6…`, guard spec `24ccb875…`, driver table `0fba4b3c…`, 생성 manifest는 transition grid `a8eebb33…`, return grid `2e57a6c1…`, flap-stress `dd6a7c24…`, distractor grid `264d3333…`, familiarity ladder `58a34d65…`입니다(`harness/CHANGELOG.md`, `harness/experiments/rq0-gate.yaml`의 `pins`)
+- 9.23(D15)에서: 최종 build 위에서 집 기계로 돌리는 full smoke(`make -C harness smoke`)와 그 시간의 기록
+- 9.15에서: `renderer-hidden`과 `video-editor`의 idle pool에 대한 burstiness와 window 읽기의 재실행, 그리고 stability ledger(허용 오차를 맞춘 양, 예외로 실은 양, 가장 큰 반폭)
 - "every timeline's `source` map agrees entry for entry with `_dev/research/jioh/task-9.10-scenarios-timelines/bound-values.md` (the lint checks form, not that each tag is the right ground)"
 - CI run 38131040159와 38243554308의 재현, "`gh-hosted-runners` read 2026-10-13"
 
@@ -1792,11 +1814,11 @@ Phase 10의 TODO 줄은 "Swap mocks for the real simulator and daemon, end-to-en
 
 **3. TIMER 문서.** 2026-10-14에 9.15에서 넘어온 줄입니다. "TIMER docs restated to the skip rule once 인경민's simulator implements it … the simulator-side TIMER rows 9.15 leaves blocked." 전제 조건은 인경민이 simulator에 skip 규칙을 구현하는 것입니다.
 
-**4. simulator의 blocker.** 9장에서 본 두 가지입니다. loader의 child-targeted WAKE 거부와, conformance 항목 (a) zero-wait `ready` 줄, (b) TIMER skip 규칙, (d) `batch_bandwidth_cap`, (e) 엄격한 idle class의 구현입니다. 인경민의 2026-10-10 memo는 이것들을 "Implementation owed (the docs already answer)"에 넣었습니다. 9.14 결정 1이 gate spec에 conformance statement를 넣었으므로, 이 넷이 구현되기 전에는 RQ0 실행이 허용되지 않습니다.
+**4. simulator의 blocker.** 9장에서 본 두 가지입니다. loader의 child-targeted WAKE 거부와, conformance 항목 (a) zero-wait `ready` 줄, (b) TIMER skip 규칙, (d) `batch_bandwidth_cap`, (e) 엄격한 idle class의 구현입니다. 인경민의 2026-10-10 memo는 이것들을 "Implementation owed (the docs already answer)"에 넣었습니다. 9.14 결정 1이 gate spec에 conformance statement를 넣었으므로, 이것들이 구현되기 전에는 RQ0 실행이 허용되지 않습니다. 2026-10-16에 인지오가 statement를 고쳤습니다(9.15 작업 목록 W-0758, W-0743). 끝 문장이 "(c) and (f) the simulator does today"가 되었고(cold start로 MLFQ에 들어가는 (c)는 `simulator/src/sim.cpp`의 2026-10-10 수정에 있음), 일곱째 항목 (g)가 더해졌습니다. "an orchestrator's WAIT children:<id> completes when the last child it spawned ends, and without blocking when none is live at the WAIT". (g)가 없으면 `c1-compile`의 build turnaround term(judging, weight 1.0)이 모든 조건에서 똑같이 censored가 되기 때문입니다. (g)의 규칙은 interpretation contract와 `docs/data-contracts.md`에 제안으로 적혀 있고 인경민이 동의하면 효력을 가지며, RQ0 gate spec은 실행에 그것을 요구합니다. 그래서 지금 빚으로 남은 conformance 항목은 (a), (b), (d), (e), (g)의 다섯입니다(`harness/experiments/rq0-gate.yaml`의 `simulator-conformance`).
 
-**5. `c6-dual`의 비용.** 9.14 handoff의 "the records build on `c6-dual` costs about 40 minutes a run … the RQ0 run's 100 `random` seeds on that file are a cost to plan for"입니다. "a cheaper records path is a task of its own"이라고 적혔지만, 아직 TODO에 줄이 없습니다.
+**5. `c6-dual`의 비용.** 9.14 handoff의 "the records build on `c6-dual` costs about 40 minutes a run … the RQ0 run's 100 `random` seeds on that file are a cost to plan for"입니다. "a cheaper records path is a task of its own"이라고 적혔지만, 2026-10-14에는 TODO에 줄이 없었습니다. 2026-10-16에 인지오가 지금 어느 대응도 고르지 않고 비용을 Phase 10의 TODO 줄에 올렸습니다(9.15 작업 목록 W-0757). 그 줄은 `random` 조건의 seed 100개에 이 파일 하나로 약 67시간, 한 run의 memory 최고점이 1,450만 row라고 적고, 대응(더 싼 records 경로, gate spec의 `n-grounding` statement 아래에서 N을 바꾸기, 비용을 그대로 지기)은 실제 simulator로 잰 비용 위에서 Phase 10에 정한다고 적습니다(8.5).
 
-> **열린 자리.** Phase 10의 시작은 인경민의 통합 gate와 박이안의 daemon에 달려 있습니다(TODO). simulator 쪽 네 항목과 loader 수정은 인경민이, `c6-dual` records 비용의 처리 방법은 인지오가 정합니다. trace-replay 점검의 실행 결과에 따라 "what a disagreement leads to"가 이미 gate spec에 고정되어 있어야 한다는 것이 TODO 줄의 조건입니다.
+> **열린 자리.** Phase 10의 시작은 인경민의 통합 gate와 박이안의 daemon에 달려 있습니다(TODO). simulator 쪽 다섯 항목과 loader 수정은 인경민이, `c6-dual` records 비용의 대응은 Phase 10에 인지오가 정합니다. trace-replay 점검의 실행 결과에 따라 "what a disagreement leads to"가 이미 gate spec에 고정되어 있어야 한다는 것이 TODO 줄의 조건입니다.
 
 ## 12.5 Backlog
 
@@ -1804,7 +1826,7 @@ Backlog의 데이터셋 관련 줄은 다섯입니다.
 
 **naturalistic generator와 generalset.** "Naturalistic generator + generalset + full condition matrix — its prerequisite is a source for Linux-desktop co-occurrence and transition frequency, which 9.10's search did not find (audit record 2026-10-11)." 2026-08-26 grill D18의 build 순서 (7)이 아직 남아 있는 것입니다. 전제 조건은 출처입니다. 9.10 D35는 hub-and-spoke 전환을 "unsourced"로 표시하고 "left to the naturalistic generator's own search"로 남겼습니다.
 
-**hold time과 hysteresis.** 계획(`_dev/docs/plan/jioh/hold-time-and-hysteresis.md`)의 목표는 "Decide whether the daemon needs flap protection, and if so fix the policy's form and values before the RQ4 run, with the values chosen on files disjoint from the ones measured." step 3(선례 검색)은 9.19의 spec session에서 끝났고(5–30 s), step 1의 재료(flap-stress set, return grid, `flip_cost` 보고 줄)는 9.19와 9.21이 만들었습니다. 남은 것은 둘입니다. step 0은 "the need measured with no rule … right after Phase 10's integration, in the RQ0 run's pipeline; no LLM needed. If the cost is below the floor the plan ends there and daemon guide §9.3 records the measurement." steps 1, 2, 4, 5, 6은 "in the RQ4 experiment spec's session, after step 0 and before any LLM condition runs."
+**hold time과 hysteresis.** 계획(`_dev/docs/plan/jioh/hold-time-and-hysteresis.md`)의 목표는 "Decide whether the daemon needs flap protection, and if so fix the policy's form and values before the RQ4 run, with the values chosen on files disjoint from the ones measured." step 3(선례 검색)은 9.19의 spec session에서 끝났고(5–30 s), 규칙 없이 필요를 재는 측정의 재료(flap-stress set, return grid, `flip_cost` 보고 줄)는 9.19와 9.21이 만들었습니다. 남은 것은 둘입니다. 첫째는 그 측정, 계획의 step 1입니다. "the need measured with no rule — the flap-stress set and the C4 files under `oracle` and `random`, the wrong-flip count and its Layer 2 cost — right after Phase 10's integration, in the RQ0 run's pipeline; no LLM needed. If the cost is below the floor the plan ends there and daemon guide §9.3 records the measurement." 둘째는 steps 2, 4, 5, 6이고 "in the RQ4 experiment spec's session, after step 1 and before any LLM condition runs"입니다. 2026-10-14의 TODO는 이 측정을 step 0, 나머지를 steps 1, 2, 4, 5, 6이라고 적었는데, 계획 안에서 When 표와 Steps 목록의 번호가 달랐기 때문입니다. 2026-10-16에 인지오가 Steps 목록의 번호(step 1)로 정했고(9.15 작업 목록 W-0481), TODO의 두 줄이 그렇게 고쳐졌습니다. 계획의 When 표는 개발 기록으로 남아 0이라고 적습니다.
 
 **form-2 return grid.** "A form-2 return grid (A stays, the focus moves to B and back; 9.19 spec, open item): not built; decided in the RQ4 experiment spec's session if that run needs it — a form axis on `dataset/grids.yaml`'s return-grid, 720 files more, its own re-bless."
 
@@ -1812,7 +1834,7 @@ Backlog의 데이터셋 관련 줄은 다섯입니다.
 
 **held-out-rows arm.** "after the main experiments, on the calibrated table: blank a row to the schema defaults, compare `llm_vocab` and `llm_algo` on the files that exercise it." 설계는 Phase 7(2026-09-10)에 고정되었습니다. 전제 조건은 "Needs the calibrated table, whose per-row tuning pool must itself cover all 32 cells … the throwaway pool's definition (7.7 / Phase 8) decides that."
 
-> **열린 자리.** 다섯 backlog 항목은 모두 정할 자리가 정해져 있습니다. naturalistic set은 출처가 생길 때, hold time step 0은 Phase 10 통합 직후, 나머지 hold time steps와 form-2 return grid는 RQ4 실험 spec session에서, 원치 않는 job의 개수는 RQ1 실험 spec session에서, held-out-rows arm은 calibrated table이 생긴 뒤입니다. 모두 인지오가 정합니다.
+> **열린 자리.** 다섯 backlog 항목은 모두 정할 자리가 정해져 있습니다. naturalistic set은 출처가 생길 때, hold time의 규칙 없는 측정(step 1)은 Phase 10 통합 직후, 나머지 hold time steps와 form-2 return grid는 RQ4 실험 spec session에서, 원치 않는 job의 개수는 RQ1 실험 spec session에서, held-out-rows arm은 calibrated table이 생긴 뒤입니다. 모두 인지오가 정합니다.
 
 ## 12.6 executor 질문들 — 두 방향
 
@@ -1820,17 +1842,17 @@ Backlog의 데이터셋 관련 줄은 다섯입니다.
 
 **인지오가 인경민에게 물은 셋 (heads-up memo §4, Phase 9 결정 7).**
 
-1. **LOTTERY — editor 자신의 burst 꼬리가 batch class일 때 batch share는 어떻게 나뉘나.** 이 질문의 전제는 2026-09-13의 compile된 editor가 "CPU의 91–92%가 burst 첫 10 ms 뒤"에 있었다는 것입니다. 그 뒤 9.5가 editor를 측정한 entry로 바꿨고, 9.14 결정 8은 prior table의 문장을 "the measured per-keystroke work (about 5 ms for the writer and the mail client, about 78 ms for VS Code …)"로 다시 썼습니다. 이 질문에 대한 인경민의 명시적인 답은 이 권이 읽은 기록에서 찾지 못했습니다(확인 필요). 인경민의 2026-10-10 memo는 cap에 대해 "**not implemented.** The field is not read from the config. B1 currently acts only through LOTTERY's class split"이라고 적습니다.
+1. **LOTTERY — editor 자신의 burst 꼬리가 batch class일 때 batch share는 어떻게 나뉘나.** 이 질문의 전제는 2026-09-13의 compile된 editor가 "CPU의 91–92%가 burst 첫 10 ms 뒤"에 있었다는 것입니다. 그 뒤 9.5가 editor를 측정한 entry로 바꿨고, 9.14 결정 8은 prior table의 문장을 "the measured per-keystroke work (about 5 ms for the writer and the mail client, about 78 ms for VS Code …)"로 다시 썼습니다. 인경민이 글로 적은 답은 이 권이 읽은 기록에서 찾지 못했지만, 답은 reference simulator의 code에 있습니다. `simulator/src/sim.cpp`의 LOTTERY 주석은 "tickets split batch : non-batch = share : (1−share), equal tickets per task within a class … ① if both classes are runnable, pick the class by share; ② pick uniformly inside it. Only runnable tasks hold tickets"라고 적습니다. 즉 class 안에서는 모든 task가 같은 표를 가지고, editor 자신의 burst 꼬리가 batch class일 때도 마찬가지입니다. 2026-10-16에 9.15가 prior table의 compile row 문장을 이 규칙으로 고쳤고, driver table의 pin이 `0fba4b3c…`가 되었습니다(값은 그대로, 9.15 작업 목록 W-0777). 인경민의 2026-10-10 memo는 cap에 대해 "**not implemented.** The field is not read from the config. B1 currently acts only through LOTTERY's class split"이라고 적습니다.
 2. **EDF — frame chain의 stage는 deadline class인가 residual class인가.** 답이 있습니다. 인경민의 2026-10-10 memo는 "Answered on 2026-10-10: the EDF chain-stage class (deadline class, inherited deadline, no change)"라고 적고, audit은 conformance 항목 (f) "chain stages in EDF's deadline class"를 "implemented"로 적습니다.
 3. **editor가 아직 RUN 중일 때 키 입력이 오면.** contract 쪽의 답은 9.14 결정 1이 소비자의 기준으로 정한 "the zero-wait `ready` line"입니다. 구현은 빚입니다. 인경민의 memo는 "RUN→RUN boundary fix: one occupancy, zero-wait `ready(cause)`, `x_run_cont`"를 "Implementation owed"에 넣었고, audit은 conformance 항목 (a)를 "owed"로 적습니다.
 
 **인경민이 인지오에게 물은 셋 (2026-10-10 memo, "Questions for jioh").**
 
 1. **TIMER backlog 대 frame drop.** 2026-09-29의 note에 대해 인지오의 memo(2026-10-07)가 "TIMER's backlog rule is replaced by a skip rule"이라고 답했습니다. 다만 9.15 spec 결정 9가 적듯이 simulator는 지금도 backlog 규칙을 돌리고 있고, skip 규칙의 구현은 인경민의 빚입니다.
-2. **`fork_cap`의 의미.** note(`simulator/notes/note1010.md`)는 "is `fork_cap` what makes child birth times emergent?", 필드가 없을 때의 의미, 그리고 critical finding B3(측정된 동시 compiler process 16)을 묻습니다. 인경민의 memo는 현재 동작을 "`fork_cap` absent: treated as unbounded"로 적습니다. 이 권이 읽은 기록에서 인지오의 답을 찾지 못했습니다(확인 필요).
-3. **`mock-switch` Q1–Q3.** `mock-switch`는 FIFO에서 MLFQ로 바뀌는 순간을 손으로 계산해 둔 harness의 mock fixture입니다(Phase 6의 6.1). 인경민의 memo는 세 질문을 "Q1 (44600 vs MLFQ rule 2), Q2 (lone slice expiry: one occupancy or a pair), Q3 (guide §4½ needs a fifth instruction)"으로 요약합니다(note1010.md의 마지막 절). 이것도 답을 찾지 못했습니다(확인 필요).
+2. **`fork_cap`의 의미.** note(`simulator/notes/note1010.md`)는 "is `fork_cap` what makes child birth times emergent?", 필드가 없을 때의 의미, 그리고 critical finding B3(측정된 동시 compiler process 16)을 묻습니다. 인경민의 memo는 현재 동작을 "`fork_cap` absent: treated as unbounded"로 적습니다. 답은 9.6 D19(2026-09-19, 인지오의 결정)에 있습니다. 형식에서는 top-level task만 task를 만들 수 있고 "`fork_cap` bounding its live children"이며, object job 하나는 여섯 구성원(`sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`)의 spawn-table entry입니다. 그래서 compiler는 `fork_cap`을 `parallelism_cap` × 6으로 쓰고(`dataset/tools/wlc/compiler.py`의 `_orchestrator_unroll`, "jobs in flight, six members each"; `-j8`이면 48), 동시에 도는 job 수를 make의 jobserver처럼 묶습니다. child가 언제 태어나는지는 slot이 비는 때이므로 scheduling이 정합니다. compiler는 spawn table을 가진 모든 `arrive` event에 `fork_cap`을 쓰므로(`_arrive_event`) 필드가 없는 경우는 compile된 파일에 생기지 않고, simulator는 그것을 event에서 읽습니다(`simulator/src/sim.cpp`의 loader).
+3. **`mock-switch` Q1–Q3.** `mock-switch`는 FIFO에서 MLFQ로 바뀌는 순간을 손으로 계산해 둔 harness의 mock fixture입니다(Phase 6의 6.1). 인경민의 memo는 세 질문을 "Q1 (44600 vs MLFQ rule 2), Q2 (lone slice expiry: one occupancy or a pair), Q3 (guide §4½ needs a fifth instruction)"으로 요약합니다(note1010.md의 마지막 절). 셋 다 답이 있습니다. Q1은 mock이 틀렸습니다. 44600에 editor가 Q1으로 내려가면 Q0에서 기다리던 `probe`가 lane을 받아야 하고(MLFQ 규칙 2), 2026-10-16에 9.15가 fixture를 그 시점부터 다시 유도했습니다(커밋 `d5443eb0`, 9.15 작업 목록 W-0804). Q2는 2026-10-16에 인지오가 "한 번의 점유"로 정했습니다(W-0736). 다른 task가 실행 가능하지 않을 때 slice가 끝나면 holder를 내리고 lane에 그대로 두며, `run_end`/`run_start` 쌍을 내지 않습니다. 근거는 Linux v6.12 `kernel/sched/core.c`의 `__schedule()`(같은 task를 다시 고르면 context switch로 세지 않음, `docs/references.md`의 `linux-sched-core`)이고, mock과 그 `expected.csv`는 그대로입니다. trace 계약이 frozen이므로 이 규칙은 최종 memo가 인경민과 박이안에게 제안하고, 동의하면 계약 문서에 들어갑니다. Q3는 9.23 D16이 답했습니다. 편집기의 program이 끝에 WAIT를 하나 더 가지게 되어, guide §4½의 "next instruction WAIT → blocks"가 맞게 되었습니다.
 
-> **열린 자리.** audit의 "Recommended order before 9.15 proper"는 첫 항목으로 "Heads-up to 경민 now on the loader refusal (blocker 1) with the counts and the contract reading; answer his three open questions"를 적었습니다. 위의 2와 3에 대한 답이 기록에 없으므로, 답을 보냈는지는 확인 필요입니다. 답할 사람은 인지오입니다. LOTTERY 질문(인지오가 물은 1번)은 답할 사람이 인경민이고, 그 답이 prior table의 LOTTERY wanted row 문장에 영향을 준다는 것이 heads-up memo의 설명이었습니다.
+audit의 "Recommended order before 9.15 proper"는 첫 항목으로 "Heads-up to 경민 now on the loader refusal (blocker 1) with the counts and the contract reading; answer his three open questions"를 적었습니다. 2026-10-14에 이 권은 그 heads-up과 답을 보냈는지를 열린 자리로 적었습니다. 인지오의 답은 "보내지 않았다"입니다(2026-10-16, 9.15 작업 목록 W-0735). 최종 memo가 loader의 child-targeted WAKE 거부를 인경민에게 처음 알리고, 위의 답들(인지오가 물은 셋이 모두 답해졌다는 것과 인경민이 물은 셋의 답)을 전합니다. 최종 memo는 9.15의 마지막 단계이고 2026-10-17에는 아직 쓰이지 않았습니다.
 
 ## 12.7 spec과 handoff에 남은 작은 열린 항목들
 
@@ -1844,20 +1866,20 @@ Backlog의 데이터셋 관련 줄은 다섯입니다.
 
 ## 12.8 문서와 tree의 불일치 (2026-10-14 현재)
 
-마지막으로, 공개 문서가 지금의 데이터셋과 다르게 말하는 곳을 적습니다. 이것들은 모두 9.15의 작업 목록에 있거나 들어갈 항목이고, 9.15 spec 결정 3에 따라 code와 data가 이깁니다. 이 시리즈의 각 권은 이 경우 tree의 값을 씁니다.
+마지막으로, 2026-10-14에 공개 문서가 그때의 데이터셋과 다르게 말하던 곳을 적습니다. 이것들은 모두 9.15의 작업 목록에 있거나 들어갈 항목이었고, 9.15 spec 결정 3에 따라 code와 data가 이깁니다. 이 시리즈의 각 권은 이 경우 tree의 값을 씁니다. 앞의 세 열은 2026-10-14의 표이고, 마지막 열은 2026-10-17에 다시 읽은 상태입니다(guidebook과 memo 밖의 공개 문서).
 
-| 문서가 말하는 것 | tree의 사실 | 확인한 곳 |
-|---|---|---|
-| core set 50개, segment 64개(building plan, background guide, coreset guide 등) | 51개, 66개 | `build.manifest.json` 51개, `coverage-grid.json`의 `segments_total` 66 |
-| archetype 열두 개(`docs/data-contracts.md` §2의 "There are twelve" 등) | 29개, 그중 28개 측정 | `dataset/archetypes.yaml`의 key 29개 |
-| library v0.1(`archetypes.yaml` 첫 줄) | v0.2로 정함(9.13 결정 9) | `dataset/archetypes.yaml:1` |
-| demand window를 규칙으로(`dataset/README.md`, interpretation contract §7 등) | 2026-10-09에 gate에서 물러남, 기록만 | 9.14 결정 4, `dataset/tools/wlc/estimate.py` |
-| TIMER의 backlog 규칙(interpretation contract §3, `docs/data-contracts.md`) | harness는 skip 규칙을 읽고, simulator는 아직 backlog | 9.15 spec 결정 9 |
-| 두 compile mode, `coreset-native` | single 하나 | 9.13 D1 |
-| C7의 원치 않는 job `clamscan` | `package-upgrade`(`unattended-upgr`) | 9.10 D3 |
-| RQ0 judging 25개, K = 13 | 19개, K = 10 | `harness/experiments/rq0-gate.yaml` |
-| `c5-t3` | `c6-alias` | 9.20 D8, `dataset/timelines/coreset/` |
-| README 예시의 attribute `wanted` | `background_wanted` | 2026-08-28 archive, critical finding C |
+| 문서가 말하는 것 (2026-10-14) | tree의 사실 | 확인한 곳 | 2026-10-17 |
+|---|---|---|---|
+| core set 50개, segment 64개(building plan, background guide, coreset guide 등) | 51개, 66개 | `build.manifest.json` 51개, `coverage-grid.json`의 `segments_total` 66 | 고쳐짐. tree는 이제 51개, 67개(9.23 D2가 `c6-spoof`를 20 s에서 둘로 나눔; `coverage-grid.json`의 `segments_total` 67). building plan과 coreset guide가 51개, 67개를 적고(9.15), background guide에도 50과 64가 남지 않음. `docs/README.md`의 coreset guide 설명 줄에는 "all 50 coreset files"가 남아 있음 |
+| archetype 열두 개(`docs/data-contracts.md` §2의 "There are twelve" 등) | 29개, 그중 28개 측정 | `dataset/archetypes.yaml`의 key 29개 | 고쳐짐. data contracts §2와 coreset guide가 29개를 적음(9.15). `docs/README.md`의 coreset guide 설명 줄에는 "the twelve archetypes"가 남아 있음 |
+| library v0.1(`archetypes.yaml` 첫 줄) | v0.2로 정함(9.13 결정 9) | `dataset/archetypes.yaml:1` | 고쳐짐. 첫 줄이 "(v0.2)"(2026-10-16, 커밋 `37c2e233`, 11.5) |
+| demand window를 규칙으로(`dataset/README.md`, interpretation contract §7 등) | 2026-10-09에 gate에서 물러남, 기록만 | 9.14 결정 4, `dataset/tools/wlc/estimate.py` | 고쳐짐. README의 규칙 "Demand is reported, not held"와 contract §7의 "reported, not held"(9.15) |
+| TIMER의 backlog 규칙(interpretation contract §3, `docs/data-contracts.md`) | harness는 skip 규칙을 읽고, simulator는 아직 backlog | 9.15 spec 결정 9 | 그대로. 문서는 simulator가 skip 규칙을 구현할 때까지 backlog 규칙을 적고, 그 정정은 Phase 10의 TIMER 줄에 있음(12.4) |
+| 두 compile mode, `coreset-native` | single 하나 | 9.13 D1 | 고쳐짐. building plan, coreset guide, contract §7이 single 하나를 적음(9.15) |
+| C7의 원치 않는 job `clamscan` | `package-upgrade`(`unattended-upgr`) | 9.10 D3 | 고쳐짐. building plan, scenario catalog의 S17(무인 업그레이드), coreset guide(9.15) |
+| RQ0 judging 25개, K = 13 | 19개, K = 10 | `harness/experiments/rq0-gate.yaml` | guidebook과 memo 밖의 공개 문서에 남은 곳 없음(grep) |
+| `c5-t3` | `c6-alias` | 9.20 D8, `dataset/timelines/coreset/` | 고쳐짐. coreset guide가 `c6-alias`를 적고, 남은 `c5-t3`는 날짜가 붙은 기록(data contracts §14의 2026-10-12 항목, coreset guide의 내력 문장, harness guide(`docs/harness/harness-and-records-guide.md`)의 familiarity tier 문단에 붙은 괄호)뿐임 |
+| README 예시의 attribute `wanted` | `background_wanted` | 2026-08-28 archive, critical finding C | 고쳐짐(README, 9.15) |
 
 # 13장 · 한 장짜리 연표
 
@@ -1894,7 +1916,9 @@ Backlog의 데이터셋 관련 줄은 다섯입니다.
 | 2026-10-11 | audit 해결(A1 ii, A3 그대로)과 방향(generated layer, focus, C4·C5·C2). Phase 9 결정 9–10, TODO에 9.17–9.22. 9.17 focus, 9.18 gate, 9.22 build 시간(CI 38131040159), 9.19 grid 480/720/24(CI 38135623993) | audit 기록; 각 spec과 changelog |
 | 2026-10-12 | 9.20: distractor 272, ladder 66, `c5-t3` → `c6-alias`(CI 38243554308) | `task-9.20-c4-and-c5-grids.md`; changelog |
 | 2026-10-13 | 9.21 grill과 작업: 규칙에 의한 채점, coverage 표, `files.select`, `flip_cost`, 매 run build | `task-9.21-consumer-work-for-the-generated-layer.md`; changelog |
-| 2026-10-14 | 9.21 D13 `coreset_wide` marker, harness run 38547043521 초록. 9.15 grill → spec, WIP. simulator 쪽 TIMER 행을 Phase 10으로 | `task-9.21-…/changelog.md`; `task-9.15-docs-memos-and-guidebook-corrections.md`; `_dev/TODO.md` |
+| 2026-10-14 | 9.21 D13 `coreset_wide` marker, harness run 38547043521 초록. 9.15 grill → spec, WIP. simulator 쪽 TIMER 행을 Phase 10으로. 이 guidebook의 발견 목록, 9.23 grill과 D1–D10(C6의 pre-committed miss, segment 67개, rebuild) | `task-9.21-…/changelog.md`; `task-9.15-docs-memos-and-guidebook-corrections.md`; `_dev/TODO.md`; `_dev/docs/audit/jioh/2026-10-14-guidebook-findings.md`; `task-9.23-guidebook-findings/changelog.md` |
+| 2026-10-15 | 9.23 D11–D18: launch stream을 inputs에, `check`가 파생 timeline과 coverage grid도, `make lint`의 freeze, canonical lint 셋, requirements 고정과 smoke는 손으로, program이 depart 전에 끝나지 않게. rebuild(CI 38722675475, 38722678829) | `task-9.23-guidebook-findings/changelog.md`; `harness/CHANGELOG.md` |
+| 2026-10-16 | 9.15: 작업 목록의 질문에 대한 인지오의 답(일부는 2026-10-15). 그 답의 data와 code 수정을 묶은 rebuild(쓰이지 않는 compile 경로 삭제, bound value의 freeze, release map, 머리 주석과 library v0.2), driver table re-pin | `_dev/research/jioh/task-9.15-docs-memos-and-guidebook-corrections/work-list.md`; `harness/CHANGELOG.md` |
 
 # 14장 · 용어 정리
 
@@ -1931,8 +1955,8 @@ Backlog의 데이터셋 관련 줄은 다섯입니다.
 - **C3** — 여러 mode를 이어 붙인 하루의 흐름(arc) 파일입니다. 지금은 existence case입니다.
 - **C4** — label을 바꾸지 않는 방해 요소(distractor)를 넣은 파일입니다. 지금은 existence case입니다.
 - **C5** — 이름의 친숙도를 바꾼 파일입니다. 지금은 `c5-t4`, `c5-t5`가 있습니다.
-- **C6** — 맞힐 수 없음을 미리 인정한 파일(pre-committed miss) 묶음입니다. `c6-dual`, `c6-fold`, `c6-spoof`, `c6-alias`가 있습니다.
-- **C7** — attribute counterpart 묶음입니다. C1 base와 같은 mode에서 `background_wanted`만 `false`로 뒤집은 열여섯 파일입니다.
+- **C6** — 이름으로는 원리적으로 맞힐 수 없는 경우(resolution limit)의 묶음입니다. `c6-dual`, `c6-fold`, `c6-spoof`, `c6-alias`가 있습니다. `c6-alias`는 전체가, `c6-fold`와 `c6-spoof`는 뒤 segment가 pre-committed miss이고(9.23 D1, D2), `c6-dual`의 segment는 `ambiguous`입니다.
+- **C7** — attribute counterpart 묶음입니다. C1 base마다 하나씩, 그 mode의 `background_wanted: false` 쪽을 담은 열여섯 파생 파일입니다. base의 처음 C초이고, 원하지 않은 배경 작업을 더하거나 base의 job을 아무도 원하지 않은 것으로 둡니다.
 - **counterpart** — base 파일에서 한 가지만 바꿔 파생한 짝 파일입니다.
 - **familiarity tier** — process 이름이 얼마나 알아보기 쉬운지를 1–5로 나눈 등급입니다.
 - **pre-committed miss** — 어떤 관찰자도 맞힐 수 없다고 미리 선언하고 정확도 채점에서 빼는 segment입니다.
@@ -1962,7 +1986,7 @@ Backlog의 데이터셋 관련 줄은 다섯입니다.
 - **return grid** — A → B → A 세 segment 파일 720개입니다. 가운데 길이를 60 s, 10 s, 2 s로 바꿉니다.
 - **flap / flap-stress set** — 설정이 적용되었다가 곧 되돌아가는 것 / process 집합이 짧은 간격으로 여러 번 바뀌는 24개 파일입니다.
 - **hold time / hysteresis** — 설정 적용 뒤 N초 동안 새 답을 무시하는 규칙 / 같은 답이 K번 연속이어야 적용하는 규칙입니다.
-- **familiarity ladder** — C1 파일의 이름을 tier 3–5 이름으로 바꾼 66개 파일입니다.
+- **familiarity ladder** — C1 task set의 이름을 tier 4와 5의 이름으로 바꾸고, render와 backup의 job은 tier 3의 이름(`melt-7`, `duplicity`)으로도 바꾼 66개 파일입니다.
 - **canonical set** — 구조적 정보(조상, cgroup, 이름의 동일성)만으로 접은 process 집합입니다. 그 변화가 의미 있는 변화입니다.
 - **headroom** — 좋은 설정과 나쁜 설정의 결과 차이가 날 여지입니다.
 - **discriminative construction** — 경쟁 가설을 서로 갈라놓도록 workload를 일부러 구성한다는 기준입니다.
@@ -1988,7 +2012,7 @@ Backlog의 데이터셋 관련 줄은 다섯입니다.
 - **simulator / daemon / harness** — workload와 설정 일정을 받아 CPU 하나의 실행을 흉내 내는 프로그램(인경민) / recognizer를 돌려 설정 일정을 내는 프로그램(박이안) / trace를 채점하고 RQ0을 판정하는 도구(인지오)입니다.
 - **trace** — simulator가 실행 중 일어난 scheduling 사건을 한 줄씩 적은 출력 파일입니다.
 - **campaign** — CI runner에서 같은 측정을 여러 번 반복한 한 묶음입니다. raw 기록은 GitHub release로 공개합니다.
-- **critical finding** — 2026-09-13의 원문 대조 검증이 찾은, 데이터셋의 근거가 틀렸거나 빈 곳에 대한 지적입니다(A1–A5, B1–B7, C, D).
+- **critical finding** — 2026-09-13의 원문 대조 검증이 찾은, 데이터셋의 근거가 틀렸거나 빈 곳에 대한 지적입니다. A1–A5, B1–B7, C의 열세 개이고, 함께 실린 D는 원문과 대조하지 못한 출처의 목록입니다.
 - **oracle / random / fixed** — 정답을 그대로 답하는 / 무작위로 답하는 / 기본 설정 하나만 쓰는 비교 조건입니다.
 - **whitelist** — 프로그램 이름마다 규칙을 미리 적은 표로 상황을 정하는 비교 조건입니다. 지금은 `shipped_catalogue`와 `strongest_name_table`로 나뉩니다.
 - **RQ0** — 정답을 알면 무작위보다 결과가 측정 가능하게 좋아지는가를 묻는 첫 관문 질문입니다.
@@ -1998,7 +2022,7 @@ Backlog의 데이터셋 관련 줄은 다섯입니다.
 - **K와 g** — 판정 파일 중 K개 이상에서 gap이 g 이상이어야 한다는 통과 기준입니다. 지금 K = 10, g = 0.5입니다.
 - **N** — random 조건을 돌리는 seed의 개수입니다.
 - **boot default / boot-default sweep** — recognizer가 답하기 전의 기본 설정 / 그 값을 바꿔 가며 민감도를 보는 사전 등록 점검입니다.
-- **conformance statement** — 실제 simulator가 RQ0 실행 전에 보여야 할 행동 목록입니다.
+- **conformance statement** — 실제 simulator가 RQ0 실행 전에 보여야 할 행동 목록입니다. 2026-10-16부터 (a)–(g)의 일곱입니다(12.4).
 - **Layer 1 / Layer 2** — recognizer가 맞혔는가 / 그 답으로 고른 설정이 결과를 좋게 했는가를 재는 층입니다.
 - **telemetry** — daemon이 recognizer에게 보여 주는 입력입니다. 이름 → 개수의 목록과, 2026-10-11부터 focus 주인입니다.
 - **query point** — process 집합(지금은 focus 포함)이 의미 있게 바뀌어 recognizer에게 다시 묻는 순간입니다.
