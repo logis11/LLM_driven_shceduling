@@ -44,14 +44,6 @@ sources:
 
   # ---- behavior parameters (Role B) --------------------------------------
 
-  rt-app:
-    type: deployed-system
-    notes: >-
-      Establishes the JSON task-model precedent: run/period/deadline in
-      microseconds; timer{ref,period} gives drift-free absolute periodic wakes
-      (the precedent for our TIMER primitive). Schema-shape precedent only;
-      no numeric values are derived from it.
-
   lavd-ossna24:
     type: deployed-system
     locator_pattern: "^s\\d+$"
@@ -74,10 +66,11 @@ sources:
     type: scholarly
     locator_pattern: "^sec-[0-9.]+$"
     notes: >-
-      "make forks and execs 2430 processes, mostly short-lived" (sec-4.3,
-      Linux kernel-build workload; written "2430" in the paper). Grounds the
-      fork-burst count and short-lived character of compiler children only;
-      the paper gives no lifetime distribution.
+      "make forks and execs 2430 processes, mostly short-lived" (sec-4.3;
+      written "2430" in the paper). The workload is a `make -j8` build of
+      DynamoRio 6.1.0 (sec-4.1), not a Linux kernel build. Grounds only the
+      existence and short-lived character of compiler children; the paper
+      gives no lifetime distribution.
 
   coetzee-arxiv12:
     type: scholarly
@@ -126,35 +119,6 @@ sources:
       Content Creation (incl. a multitasking workload switching photo<->video
       editing). A second industry taxonomy beside PCMark.
 
-  sysmark25:
-    type: deployed-system
-    notes: >-
-      Existence only (9.10 D33): the Productivity scenario's description
-      names software development (code compilation), no compiler or IDE in
-      any application list; Productivity, Creativity and Responsiveness are
-      SYSmark 2018's scenarios as well.
-
-  procyon:
-    type: deployed-system
-    notes: >-
-      Establishes existence of a local-AI-inference desktop scenario (S12
-      precedent). Public docs are light on internals; scenario-existence
-      citation only.
-
-  gamemode-docs:
-    type: deployed-system
-    notes: >-
-      Establishes that a foreground-game resource-priority category ships in
-      a major OS: exclusive/priority CPU access for the focused foreground
-      game, granted as exclusive CPU sets to an app that is in the foreground
-      and has focus, with a user opt-out in Settings; documented APIs
-      (expandedresources.h). Existence of the category and of the whitelist
-      design point only. NOT established here, per the verification note in
-      docs/references.md (2026-09-12): how a game is detected, and whether
-      background activity is suppressed, updates deferred or notifications
-      held. The conceptual portal page carrying those claims has not been
-      read; do not derive them from this source.
-
   steam-downloads:
     type: deployed-system
     notes: >-
@@ -172,21 +136,6 @@ sources:
       the value 16667 us is 1/60 s arithmetic and the display-paced modeling
       is ours (archetypes.yaml modeling_notes).
 
-  dkms-man:
-    type: deployed-system
-    notes: >-
-      Establishes the DKMS framework and its autoinstall action / autoinstaller
-      service: kernel modules rebuilt and installed for a newly booted kernel
-      without user action, under the process name `dkms` (S11 unwanted
-      counterpart, C7). Existence only.
-
-  dkms-debian:
-    type: deployed-system
-    notes: >-
-      Establishes that dkms is a packaged distribution component whose stated
-      purpose includes rebuilding modules as kernels are upgraded (S11 unwanted
-      counterpart, C7). Existence only.
-
   # ---- segment structure & user behavior (Role C) ------------------------
 
   gonzalez-chi04:
@@ -197,48 +146,6 @@ sources:
       per person-day; ~3 min per task and ~2 min 11 s per tool/document
       before switching. Averages only, knowledge workers. (The figures our
       earlier docs attributed to CHI 2005/2008 live here.)
-
-  mark-chi05:
-    type: scholarly
-    notes: >-
-      Companion figure ~11 min per working sphere before switching; internal
-      vs external interruptions roughly equal (managers 59.2%/40.8%).
-      Averages only.
-
-
-
-  dubroy-chi10:
-    type: scholarly
-    notes: >-
-      Logged concurrent-tab distributions: modal count 1, per-user medians
-      mostly 1-6, long right tail (max 42). Scope limits: N=21 recruited tab
-      users, 2009 single-process Firefox. No public dataset.
-
-  chang-chi21:
-    type: scholarly
-    notes: >-
-      Modern tab-behavior corrector: median tab-overwhelm threshold 8 tabs
-      (IQR 5-12); ~8% of participants had >10 tabs open at a capped snapshot.
-      Self-report, not logging — justifies a fatter modern tail over the
-      2010 logged data, not a distribution.
-
-  mozilla-testpilot10:
-    type: deployed-system
-    notes: >-
-      Only large-N logged concurrent-tab data: mean ~3.2 tabs (N~27k, one
-      week, 2010); median per-user weekly max <8; 25% of users reached >=11.
-      Only aggregate tables survive (mirror). Carries the honest-limitation
-      line: no post-2010 large-scale logged tab distribution exists publicly.
-
-  focal-arxiv26:
-    type: scholarly
-    notes: >-
-      Establishes the A->B->A interruption session structure (100 sessions:
-      long creative task interrupted by short browsing) and 320 interleaved
-      multitask sessions with app names + window titles. Structure precedent
-      only: preprint, and the sessions are scripted reconstructions from
-      VideoGUI, not natural usage. Data terms restrict redistribution;
-      methodological reuse is unrestricted.
 
   # ---- grounds of the timelines' bound values (9.10 D32; 9.18) -------------
 
