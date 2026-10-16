@@ -1,6 +1,7 @@
 # workload dataset 다시 만들기 예고 — 무엇이 바뀌고 무엇이 그대로인지, 인경민께 질문 세 개
 
-> Status: memo · Created 2026-09-13 · Updated 2026-10-08
+> Status: memo · Created 2026-09-13 · Updated 2026-10-17
+> 닫힘 — 예고한 dataset rebuild와 그 위의 결정 rework는 끝났어요(9.13, 9.14). 두 분 프로그램의 형식에 생긴 변화는 `docs/data-contracts.md` §14에, rebuild된 dataset은 `dataset/README.md`에 있어요. §4의 세 질문은 모두 답이 있어요(아래 정정 2026-10-17).
 > From 인지오 to 인경민, 박이안. 가벼운 예고예요. workload dataset의 근거를 원문과 build에 대조해 봤더니 고칠 게 꽤 나와서, dataset을 한 번 다시 만들고 그 위에 올린 결정들을 다시 해요. 두 분 프로그램의 입출력 형식은 이번 작업 범위 밖이에요. 인경민께는 executor 질문이 세 개 있어요(§4).
 
 ## 1. 왜 — 찾은 것 요약
@@ -49,3 +50,15 @@
 ## 정정 (2026-10-08)
 
 "두 분 프로그램의 입출력 형식은 이번 작업 범위 밖이에요"에 예외가 하나 생겼어요: workload와 run file에 task의 scheduling class 필드가 들어가요. 무엇이 들어가는지, executor 규칙, 세 사람의 합의가 필요한 이유는 `2026-10-08-declared-scheduling-class.md`에 적었어요.
+
+## 정정 (2026-10-17)
+
+2026-10-08의 정정 뒤에 생긴 것까지 적어요.
+
+- **머리말의 "두 분 프로그램의 입출력 형식은 이번 작업 범위 밖이에요", §3의 "config schedule, recognition log, trace, telemetry 형식과 invocation contract는 이번 범위 밖이에요"와 "형식은 그대로예요".** class 필드 말고도 예외가 더 생겼어요.
+  - **focus (9.17, 2026-10-11).** canonical workload 파일에 네 번째 top-level key `focus`가 생겼어요 — top-level task마다 window focus를 가진 구간이에요. telemetry snapshot에는 focus를 가진 process의 이름이 들어가고(`focus`, 없으면 `null`), focus가 바뀌면 snapshot이 하나 나와요. daemon은 보여 줄 모양을 `--telemetry focus|names` flag로 받고, recognition log는 보여 준 모양을 top-level `telemetry`에 적어요(`docs/data-contracts.md` §4, §5 규칙 6, §8, §11, §14의 2026-10-11 entry). simulator가 읽는 run file(`meta.id`, `events`)은 그대로예요.
+  - **spawn된 child가 child를 WAKE (9.6 D19).** instruction 형식은 그대로지만 쓰임이 새로 생겼어요: rebuild된 compile tree는 object job마다 spawn table의 여섯 member를 부모-자식 순서로 WAIT/WAKE로 이어서, spawn된 child가 다른 child를 깨워요. 형식이 허용하는 쓰임이고, canonical lint가 spawn된 child의 WAKE target이 풀리는지 검사해요(9.23 D14). 그런데 simulator의 loader는 WAKE target을 top-level `arrive` id에서만 찾아서 이 파일들을 거부해요("WAKE target is not a top-level task", `simulator/src/sim.cpp:876`). build된 1,691개 중 201개예요: core 파일 `c1-compile`, `c7-compile`(판정), `c3-workday`, `c4-compile`, `c6-dual`(보고), 앞의 두 파일의 sensitivity variant 여덟 개(`@corner-high`, `@corner-low`, `@venue-x0.8`, `@venue-x1.25`), 그리고 generated 파일 188개(transition grid 60, return grid 90, distractor grid 32, familiarity ladder 6).
+- **§4 '인경민께 — executor 질문 세 개'.** 세 질문 모두 답이 있어요.
+  1. LOTTERY에서 non-batch class가 비었을 때: simulator가 정해 두었어요. 두 class가 모두 runnable일 때만 `batch_share`로 class를 고르고, 아니면 runnable한 class 안에서 균등하게 뽑아요 — runnable한 task만 ticket을 가져요(`simulator/src/sim.cpp:329–334`, `:364–372`; 인경민의 status memo `simulator/memo/memo_261001.md`, 2026-10-01).
+  2. EDF에서 frame chain의 깨어나는 stage(head 뒤의 `wineserver`와 stage 2–16)는 deadline class이고, frame의 deadline(head의 tick + 한 주기)을 물려받아요(2026-10-10, `simulator/notes/note-for-jioh-edf-chain-stage-class.md`의 'Answer').
+  3. editor가 RUN 중일 때 온 keystroke는 기억돼요: wake는 깊이를 가진 mailbox에 쌓이고 잃지 않아요(`docs/harness/metrics.md` §11 2번; simulator의 mailbox).

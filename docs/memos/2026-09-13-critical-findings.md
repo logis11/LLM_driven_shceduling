@@ -1,6 +1,7 @@
 # Critical findings from reading the archetype sources against their primary texts
 
-> Status: memo · Created 2026-09-13 · Updated 2026-09-13
+> Status: memo · Created 2026-09-13 · Updated 2026-10-17
+> Closed — Phase 9 rebuilt the workload dataset on these findings; what each one changed is recorded in the dataset guidebook vol-06 §4.4 (`docs/guidebook/dataset/06-grounding-measurement-verification.md`), the current values and their grounds in `dataset/archetypes.yaml`, `dataset/sources.yaml` and `docs/references.md`.
 
 Findings from checking `dataset/archetypes.yaml` and its grounding documents against the primary sources and against the compiler, measurement summary and raw measurement release. Each finding gives what the repository states (with file and line), what the primary text or artifact shows (with the copy read and the date), and what it affects. Nothing in the repository was changed; resolution is left to the owners of each file.
 

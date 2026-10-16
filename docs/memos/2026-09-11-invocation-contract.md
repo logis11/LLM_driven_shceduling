@@ -1,6 +1,7 @@
 # Invocation contract 안내 — harness가 daemon과 simulator를 실행하는 명령의 모양 (contract 10)
 
-> Status: memo · Created 2026-09-11 · Updated 2026-09-11
+> Status: memo · Created 2026-09-11 · Updated 2026-10-17
+> 열림 — 규범인 `docs/data-contracts.md` §11(contract 10)의 명령 모양대로 실행되는 두 프로그램이 남았어요: simulator는 아직 위치 인자로 workload와 schedule을 받고 trace를 stdout에 써요(`simulator/src/sim.cpp`의 `main`), daemon은 이 저장소에 아직 없어요(`daemon/`에는 driver table과 그 도구뿐). 담당 인경민(simulator), 박이안(daemon).
 > From 인지오 to 인경민, 박이안. data contract 하나가 새로 생겼어요: **harness가 daemon과 simulator를 어떤 명령으로 실행하는가.** 이 memo는 그 명령의 모양과 규칙만 적어요. 두 프로그램의 입출력 파일 형식(config schedule, recognition log, trace)은 하나도 안 바뀌었어요. 규범 문서는 `docs/data-contracts.md` §11이고, 이 memo는 그걸 풀어 쓴 거예요. 급하면 §2와 §3만 읽어도 돼요.
 
 ## 1. 한 문단 요약
@@ -55,3 +56,10 @@ simulator — 같은 run:
 - 규범 문서: `docs/data-contracts.md` §11 (contract 10). 이 memo와 다른 점이 있으면 그쪽이 맞아요.
 - 실제로 이 모양으로 돌아가는 예시: `harness/tools/tests/mocks/mock_daemon.py`, `harness/tools/tests/mocks/mock_simulator.py`. 두 분 프로그램이 오면 버릴 test double이지만, "이 flag로 실행되면 이 파일이 나온다"를 눈으로 확인하기엔 충분해요. 실행 방법은 각 파일 맨 위 docstring에 있어요.
 - boot default 파일과 schema: `harness/boot-defaults/ostep.json`, `harness/boot-defaults/schema/boot-default.schema.json`.
+
+## 정정 (2026-10-17)
+
+두 군데가 지금의 contract와 달라요. 규범은 여전히 `docs/data-contracts.md` §11이에요.
+
+- **§4 박이안 줄의 조건 이름 "(`fixed`, `random`, `whitelist`, `llm_vocab`, `llm_algo`, `llm_full`, `oracle`)".** 지금은 여덟 개예요: `fixed`, `random`, `shipped_catalogue`, `strongest_name_table`, `llm_vocab`, `llm_algo`, `llm_full`, `oracle`. `whitelist`가 이름 표 조건 둘로 나뉘었어요(9.12 D6). `shipped_catalogue`는 CachyOS가 ananicy-cpp와 함께 설치해 켜는 catalogue(`ananicy-rules`, `03ef03fb` 시점)를 각 process의 `argv[0]` basename으로 맞춰 그대로 재현하고, `strongest_name_table`은 그 catalogue의 설계를 따라 dataset이 알려진 software로 내놓는 것을 덮는 rule 목록이에요. harness(`harness/tools/harness/evaluator.py`의 `CONDITIONS`)와 daemon guide §4의 표가 이미 이 이름을 써요.
+- **§2의 daemon 명령, §3 1번의 "한 번의 실행 = run 하나", §4 박이안 줄의 flag 목록.** daemon은 필수 flag를 하나 더 받아요: `--telemetry focus|names`, recognizer에게 보여 주는 telemetry의 모양이에요 — `focus`는 이름 → 개수 multiset에 window focus를 가진 process의 이름을 더한 것, `names`는 multiset만이에요(2026-10-11, 9.17; `docs/data-contracts.md` §5 규칙 6, §14). 그래서 run 하나는 워크로드 파일 하나 × 조건 하나 × telemetry 모양 하나 × (난수 조건이면) seed 하나이고, recognition log는 보여 준 모양을 top-level `telemetry`에 적어요(§8).

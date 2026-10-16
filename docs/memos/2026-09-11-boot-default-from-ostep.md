@@ -1,6 +1,7 @@
 # Boot default 변경 안내 — MLFQ 기본값을 OSTEP 예시 그대로, slice 2 ms에서 10 ms로
 
-> Status: memo · Created 2026-09-11 · Updated 2026-09-11
+> Status: memo · Created 2026-09-11 · Updated 2026-10-17
+> 닫힘 — boot default의 값과 출처는 `docs/recognition-vocabulary.md` §2와 `harness/boot-defaults/`에, sweep은 RQ0 gate spec(`harness/experiments/rq0-gate.yaml`, statement `boot-default-sweep`)에 있어요. §5의 질문 1·2는 인경민의 status memo §6(`simulator/memo/memo_261001.md`)이 답했고, 정식 답은 2026-10-08 declared-class memo §4의 4번이 받아요. 질문 3의 답은 아래 정정에 있어요.
 > From 인지오 to 인경민, 박이안. scheduler의 **boot default configuration**(모든 config schedule의 t = 0 entry이자 `fixed` condition)의 값을 바꿨어요. 이 memo는 왜 바꿨는지, 무엇이 얼마로 바뀌었는지, 그리고 simulator와 daemon 쪽에 무엇이 달라지고 무엇이 그대로인지를 적어요. 규범 문서는 §8에 링크했어요. 급하면 §1과 §5만 읽어도 돼요. §5에 인경민께 여쭤볼 질문 세 개가 있어요(세 번째는 8.3에서 추가한, starvation 안전망의 길이).
 
 ## 1. 한 문단 요약
@@ -125,3 +126,20 @@ batch-class memo에 "runnable한 task는 batch든 아니든, cap이 얼마든, *
 - `daemon/driver-table/prior.yaml` — 바뀐 entry 값. `daemon/tools/drivertable/config_schema.py` — 기본값.
 - `docs/references.md` — `ostep`, `illumos-ts`, `linux-sched-fair`, `waldspurger-osdi94`의 role 줄.
 - `harness/tools/tests/fixtures/README.md` — mock 두 개의 정합성 처리.
+
+## 정정 (2026-10-17)
+
+§3 '조사 결과 — 표준은 없다'는 "2026-09-11에 원문을 직접 읽어 확인한 것만" 적었다고 했지만, 그중 몇 개는 읽지 않은 것이었어요. 주장마다 지금 확인된 사실을 적어요(9.11 D14, D31; id는 `../references.md`). 이 중 어느 것도 boot default를 받치지 않아요 — boot default는 OSTEP 8장 하나에 기대요(9.11 D8).
+
+- **맞아요.** OSTEP의 "쉬운 답이 없다"(`ostep`, p. 8). 강의 노트의 "사실 이 표를 잘 설정하는 법은 아무도 모른다" — A. Arpaci-Dusseau의 CS 537 handout 'Multilevel Feedback Queue Schedulers'(2000년 봄)의 "in reality no one really knows how to configure these tables well"(`arpacidusseau-uw00`, p. 3). 표의 illumos/Solaris TS 행: level 60개, hz 1000에서 최상위 2 ms부터 최하위 20 ms까지, `ts_update`가 1초에 한 번 굶은 thread를 50–59 level로 올려요(`illumos-ts`). 표의 MINIX 3 행: queue 16개, quantum 200 ms, 5초마다 강등된 process를 한 level 올려요(`minix3-sched`). sched_ext의 기본 slice 20 ms(`linux-sched-ext`). bpfland의 1 ms — 기본 최대 slice예요(`scx`, release `v1.1.3`).
+- **고쳐요.**
+  - Linux(CFS/EEVDF)의 "기본 slice 0.75 ms"(§3), 그리고 §2의 "Linux는 0.75 ms"와 §4 5번의 "Linux 0.75 ms": 750 µs는 v6.6–v6.14의 값이에요. v6.15부터는 0.70 ms이고, 커널이 이 값에 1 + log2(online CPU 수, 8까지)를 곱해요(`linux-sched-fair`). 이 프로젝트가 쓰는 커널은 모두 v6.15 이후예요. RQ0 gate spec의 sweep에서 Linux 지점은 0.7 ms예요(`harness/boot-defaults/ostep-slice-700us.json`): simulator의 lane 하나에 맞춰, 곱하지 않은 CPU 하나의 값을 설계로 골랐어요(runner의 CPU 4개에서는 2.1 ms).
+  - "lavd 0.5–5 ms": 보통 slice는 0.5–5 ms이고, `--no-slice-boost`를 주지 않으면 켜져 있는 slice boost가 오래 도는 task의 slice를 500 ms까지 늘려요. "rusty 1–20 ms": 범위가 아니라 값 둘이에요 — 20 ms, 그리고 host가 꽉 찼을 때 1 ms(`scx`, release `v1.1.3`).
+  - "macOS, FreeBSD, Windows는 사용량을 감쇠시켜": FreeBSD(버전 4.3)는 OSTEP가 그렇다고 써요(`ostep`, p. 9). macOS와 Windows는 찾아보지 않았어요.
+- **못 찾았어요.** 교과서들(Silberschatz, Stallings)이 예시 숫자만 준다는 것 — 읽은 사본이 없어요. 논문들이 level마다 slice 2배를 "관례"라고 한다는 것 — 그런 논문을 못 찾았어요.
+- **확인할 수 없어요.** "실제로 출하된 table 기반 MLFQ는 둘뿐" — 없다는 것을 다 보일 수 없는 주장이에요.
+
+두 군데를 더 고쳐요.
+
+- **제목의 "OSTEP 예시 그대로", §1의 "OSTEP 8장의 예시 설정을 통째로", §4 1번의 "OSTEP 8장 예시 전체".** 네 값은 예시 하나가 아니라 8장의 worked example 셋이 쓰는 값이에요: queue 3개와 최상위 slice 10 ms는 예시 1(p. 4), level마다 2배는 그림 8.6(p. 9), boost 100 ms는 그림 8.4(pp. 6–7). 그림 8.1은 queue를 8개 그려요(9.11 D8; `docs/recognition-vocabulary.md` §2). 값은 그대로예요.
+- **§5 질문 3과 그 전제("runnable한 task는 batch든 아니든, cap이 얼마든, bounded window 안에 반드시 진행한다", 1 000 000 µs 임시값).** executor에는 starvation 안전망이 없어요 — 인경민의 status memo §6 질문 3의 답이에요. harness의 `starvation_floor` guard가 모든 task의 대기를 30 s(30 000 000 µs)로 묶고, 이 값은 sched_ext의 watchdog이 넘지 못하게 하는 상한을 설계로 빌린 거예요(9.11 D7, D19; `harness/guards/guard-spec.yaml`, `linux-sched-ext`). 1 000 000 µs 임시값은 없어졌어요.

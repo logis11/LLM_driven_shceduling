@@ -1,6 +1,7 @@
 # The declared scheduling class — a field in the workload, a rule in the executor
 
-> Status: memo · Created 2026-10-08 · Updated 2026-10-09
+> Status: memo · Created 2026-10-08 · Updated 2026-10-17
+> Open — §4's items 1 and 4: the idle rule of §2 in the executor, which the simulator does not implement yet (its loader reads no `declared_class`; the RQ0 gate spec's conformance item (e)), and the status memo's §6 answers 1 and 2 confirmed as the reply the RQ0 gate spec's statement `executor-assumptions` asks for; owner 인경민. Items 2 and 3 are answered (§1's 2026-10-09 line; `docs/data-contracts.md` §14, 2026-10-09).
 > From 인지오 to 인경민 and 박이안. Decisions D4–D6, D16, D18, D19, D26 and D34 of task 9.11 (`_dev/research/jioh/task-9.11-scheduler-constants/changelog.md`). Archetype entries gain a field that the workload and the run file carry, a change to three frozen contracts — the archetype, the workload and the run file, four if the visible projection shows it (§3) — that needs the three of us (`docs/data-contracts.md` §13). The heads-up memo of 2026-09-13 said your programs' input and output formats were outside the rebuild; this field is the exception.
 
 ## 1. The field
@@ -29,3 +30,9 @@ The recognizer's view (`docs/data-contracts.md` §4, "The two derived views": na
 2. 박이안: whether the visible projection shows the class.
 3. Both: the contract change agreed — the archetype, the workload and the run file carry the class of §1 — so that the rebuild can add the field with an entry in `docs/data-contracts.md` §14.
 4. 인경민: your status memo's §6 answers 1 and 2 (`simulator/memo/memo_261001.md`) confirmed as your reply to the boot-default memo's questions 1 and 2 (`docs/memos/2026-09-11-boot-default-from-ostep.md` §5) — a waking deadline task takes the lane from a residual slice at once; same-microsecond events follow your rule D1, config changes first, then insertion order. The RQ0 gate spec's executor assumptions, and whether `c7-meeting` and `c7-media` re-enter its judging set, are restated on them.
+
+## Correction (2026-10-17)
+
+One statement above is corrected; the field and the rule are unchanged.
+
+- **§1, "`c5-t3` shows two media players as `tracker-miner-f` and `baloo_file`, and they stay `normal`."** The file is now `c6-alias` (9.20, 2026-10-12; `docs/data-contracts.md` §14): `c1-media`'s two players under the two indexers' real names — `video` as `baloo_file`, `music` as `tracker-miner-f` — its segment carrying `spoof: true` and `pre_committed_miss: true` and no familiarity tier (`dataset/timelines/coreset/c6.variant.yaml`). Both players still declare `normal`.

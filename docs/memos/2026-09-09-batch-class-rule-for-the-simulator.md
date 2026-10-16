@@ -1,6 +1,7 @@
 # The batch class — who the cap applies to, and the rule the simulator should use to decide it
 
-> Status: memo · Created 2026-09-09 · Updated 2026-09-09
+> Status: memo · Created 2026-09-09 · Updated 2026-10-17
+> Open — §7 item 3, `batch_bandwidth_cap` applied as a ceiling on the batch class while a non-batch task is runnable, with its accounting window written down: the simulator does not read the field yet (the RQ0 gate spec's conformance item (d)); with it items 5 and 6, the rules in the simulator's semantics notes and the two unit tests, as the simulator's own record keeps them open (`simulator/memo/memo_261010.md` Part A, items 4, 5, 8 and 11); owner 인경민. Rules B1 and B2 are in the simulator (`simulator/src/sim.cpp`, stage S).
 > From 인지오 to 인경민. Specifies the one behavioural rule the config schema promises but nobody has written yet: which tasks are in the **batch class** that `batch_bandwidth_cap` bounds. Comes out of the prior driver table's pair review (`docs/daemon/prior-table-pair-review.md`). Absorb into the simulator guide once implemented. No OS background assumed; the worked examples carry the argument.
 
 ## 1. The problem in plain words
@@ -84,3 +85,9 @@ What the rule does *not* fix and is not meant to: it cannot tell an editor's lon
 5. **Write both rules into the simulator's semantics notes**, beside the switch rules from the 2026-09-08 memo, so the config schema's sentence "frozen in the simulator's docs" becomes true.
 6. **Two unit tests that pin the rule:** (a) a task running 1 ms then sleeping 5.7 ms in a loop is never batch-class, however long it runs; (b) a TIMER head waking a two-stage chain whose stages run longer than a slice is never batch-class, while a plain task with the same bursts is batch-class 2 ms into each burst and non-batch again after it blocks.
 7. **Optional diagnostic, no contract change:** emit `x_batch_class {t, task, in}` when a task enters or leaves the class. The harness ignores `x_` lines; a check tool beside it can then verify the rule against traces the way `check_mlfq_levels.py` does for switch windows.
+
+## Correction (2026-10-17)
+
+Two statements above are corrected; rules B1 and B2 and the cap's meaning are unchanged.
+
+- **§3, "The starvation safety net is separate and unchanged: every runnable task, batch or not, makes progress within a bounded window regardless of the cap."** and **§7 item 3, "Keep the starvation safety net independent of the cap."** The executor builds no starvation safety net (the declared-class memo, `2026-10-08-declared-scheduling-class.md` §2; 9.11 D7, D19). The harness's `starvation_floor` guard bounds every task's wait at 30 s, by design: a run in which any task waits longer fails it (`harness/guards/guard-spec.yaml`). The cap is unchanged — one configuration field, `null` or 0.05–0.95 (`docs/recognition-vocabulary.md` §2) — and is still to be enforced by the executor on the batch class; the simulator does not read it yet (`simulator/memo/memo_261010.md` Part A, item 4).

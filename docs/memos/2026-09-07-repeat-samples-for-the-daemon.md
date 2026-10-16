@@ -1,6 +1,7 @@
 # Repeat samples for the daemon — what run-to-run consistency needs from the recognition log
 
-> Status: memo · Created 2026-09-07 · Updated 2026-09-07
+> Status: memo · Created 2026-09-07 · Updated 2026-10-17
+> Open — the ask of §3: a repeat index in the recognition log that groups N independent samples of one query point, settled with a line in `docs/data-contracts.md` §8, whose envelope carries none yet (`docs/harness/metrics.md` §7 leaves run-to-run consistency waiting on it); owner 박이안.
 > From 인지오 to 박이안. Written at the end of the Phase 5 spec session, where the metric definitions were fixed. One item concerns the daemon. It is not urgent for your Phase 1 milestone (`fixed`/`random`/`oracle` through the validator), but it shapes how the LLM-facing record mode should be designed, so it is better known now than discovered at integration.
 
 ## 1. The metric, in plain terms
@@ -38,3 +39,9 @@ What the harness will *not* do is guess: if a log carries no repeat index, it is
 The oracle's behaviour on `c6-dual`'s off-menu labels (the no-crash contract in `daemon-guide`) is unchanged and still deferred. The algorithm-choice accuracy metric for `llm_algo` (proposal §4.6) is computed by the harness from the log's `proposal.subsystems.cpu_scheduler.algorithm` against the calibrated driver table's default for the true row; it needs nothing from the daemon beyond what the log already carries.
 
 When you settle the repeat index, a one-line addition to `data-contracts.md` §8 plus a changelog entry is enough; the harness's log reader will follow it. The full session record is `_dev/archive/2026-09-07-phase-5-primitive-metrics.md`.
+
+## Correction (2026-10-17)
+
+One statement above is corrected; the ask of §3 is unchanged.
+
+- **§3, "because `fixed`, `oracle`, and `whitelist` are deterministic".** The `whitelist` condition is now two conditions (9.12 D6), `shipped_catalogue` and `strongest_name_table` (`harness/tools/harness/evaluator.py`, `CONDITIONS`; `docs/daemon/daemon-guide.md` §4). The first reproduces the CachyOS catalogue (`ananicy-rules` at `03ef03fb`) as CachyOS installs and enables it with ananicy-cpp, matched by the basename of each process's `argv[0]`; the second is a rule list in the catalogue's design covering the software the dataset presents as known. Both are name-keyed tables and so deterministic, like `fixed` and `oracle`: the sentence holds for them.

@@ -1,6 +1,7 @@
 # Trace clarifications for the simulator — what the harness needs from the trace, and why
 
-> Status: memo · Created 2026-09-07 · Updated 2026-09-07
+> Status: memo · Created 2026-09-07 · Updated 2026-10-17
+> Open — item 1 of §8, a `ready` line at every completion of a blocking primitive, at zero wait when it did not block: owed by the simulator, which passes a backlogged TIMER tick or a mailbox-satisfied WAIT without one (`simulator/src/sim.cpp`), the RQ0 gate spec's simulator-conformance item (a) (`harness/experiments/rq0-gate.yaml`); owner 인경민. Items 2–4 have their answers: wakes queue with depth in the simulator's mailbox, its same-instant rule D1 is written in `simulator/steps/README.md`, and it emits the `deadline` lines (`docs/harness/metrics.md` §11 items 2, 3 and 6).
 > From 인지오 to 인경민. Written at the end of the Phase 5 spec session, where the metric definitions were fixed by hand-writing mock traces. Nothing here changes the trace format: no new event type, no new field. Everything here is a clarification of what an existing line means, plus one piece of advice. Please read it before deciding the open questions in `simulator-guide.md` §9, because three of them decide whether the harness can compute the paper's numbers at all.
 
 ## 1. The one-paragraph version
