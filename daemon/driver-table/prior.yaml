@@ -295,7 +295,7 @@ rows:
       LOTTERY:
         params: {batch_share: 0.5, timeslice_us: 10000}
         basis: theory
-        justification: "Lottery makes consumption proportional to allocated shares (Waldspurger & Weihl 1994, §1), which is a wanted build's contract; the share equals the cap so the two cannot disagree; the 10 ms quantum is the boot value by the same-granularity rule (design). How LOTTERY splits tickets inside the batch class while the editor's own burst tail is batch class is the simulator's rule (batch-class memo §7 item 3), asked of 인경민 in the heads-up memo and not yet answered."
+        justification: "Lottery makes consumption proportional to allocated shares (Waldspurger & Weihl 1994, §1), which is a wanted build's contract; the share equals the cap so the two cannot disagree; the 10 ms quantum is the boot value by the same-granularity rule (design). Inside a class every task holds equal tickets, the editor's own burst tail included while it is batch class — the reference simulator's rule (simulator/src/sim.cpp:328–366: the class drawn by batch_share when both are runnable, uniform within it, only runnable tasks holding tickets; recognition-vocabulary §2, waldspurger-osdi94)."
         sources: [waldspurger-osdi94]
   - mode: compile
     background_wanted: false

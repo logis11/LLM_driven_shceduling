@@ -338,8 +338,11 @@ statements:
       when no other-class task is runnable and preempted at once when one wakes,
       under every algorithm (the 2026-10-08 declared-class memo); (f) the frame
       chain's woken stages in EDF's deadline class with the frame's deadline
-      (recognition-vocabulary §2, 2026-10-06). (f) the simulator does today; the
-      others its owner holds as owed. The run does not start until each is shown.
+      (recognition-vocabulary §2, 2026-10-06); (g) an orchestrator's WAIT
+      children:<id> completes when the last child it spawned ends, and without
+      blocking when none is live at the WAIT (9.15 W-0743). (c) and (f) the
+      simulator does today; the others its owner holds as owed. The run does not
+      start until each is shown.
   - id: g-grounding
     text: >
       g = 0.5 reads: recognition accounts for at least half of the achievable
@@ -479,15 +482,15 @@ statements:
       for a true row, its C7 counterpart for a false row, plus any C2 or C3 segment
       labelled with that row.
 
-# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-15 and 2026-10-14,
-# the 9.23 entries; 2026-10-12, the 9.20 entry; 2026-10-11, the 9.18 and 9.22 entries); the variant manifests pin the rebuilt files the sensitivity lines read.
+# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-16, the 9.15 entry;
+# 2026-10-15 and 2026-10-14, the 9.23 entries; 2026-10-12, the 9.20 entry; 2026-10-11, the 9.18 and 9.22 entries); the variant manifests pin the rebuilt files the sensitivity lines read.
 pins:
   scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 2ad757b6196ae1839a76b4f1b2a96d156eee84b40375dec9bd5f66116b6ca14e}
   guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.1", sha256: 24ccb875ff666615de75d80bc5351b7f5c62713d605438844938f9ab6ef1676c}
-  driver_table: {path: daemon/driver-table/prior.yaml, sha256: 6e271dd042b38c23b85459cec7545fde990aec9be5a2c8bd6081690d98243f7f}
-  dataset:      {path: dataset/build.manifest.json, sha256: 81d3213d0443283a0eb456e19dee2b4216305db4e0c134f18ddd66ca74031ae0}
+  driver_table: {path: daemon/driver-table/prior.yaml, sha256: 0fba4b3c9822054fad19ef150d1395d91e679d42b6299166b9a89f50ad27960c}
+  dataset:      {path: dataset/build.manifest.json, sha256: b6017a10c0ae6644492836a92ee5ab35205397c8c8d6912d2fbcf43870a430c0}
   variants:
-    all: {path: dataset/build.variants.manifest.json, sha256: 7079e677bab864d21ef4a674079ac9ec2fa9758ba3a53a87879f77542cb282d9}
+    all: {path: dataset/build.variants.manifest.json, sha256: 087ef27ca434a21ea346baf3ed454997255bc1e8e2379238169994f27060edcd}
 
 criterion:
   type: k_of_n_gap
