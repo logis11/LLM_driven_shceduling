@@ -1524,7 +1524,7 @@ harness suite는 9.18에서 284개 중 283개 통과(26분 44초), 9.19에서 28
 
 **규칙.** "Timelines bind `(name, archetype)` and supply only the knobs listed in the archetype's `binding_params`."
 
-`archetype`은 한 종류의 process 행동(예: `code-editor`, `build-orchestrator`, `cpu-batch`)을 측정된 분포로 적은 library entry입니다. `binding_params`는 그 entry가 timeline에서 값을 받을 수 있다고 선언한 손잡이들입니다(예: `build-orchestrator`의 `spawn_count`, `parallelism_cap`, `child_name`). timeline은 "이 이름의 process가 이 archetype으로 이때 도착한다"와 그 손잡이 값만 적습니다.
+`archetype`은 프로그램 한 종류의 행동(예: `code-editor`, `build-orchestrator`, `cpu-batch`)을 측정된 분포로 적은 library entry입니다. `binding_params`는 그 entry가 timeline에서 값을 받을 수 있다고 선언한 손잡이들입니다(예: `build-orchestrator`의 `spawn_count`, `parallelism_cap`, `child_name`). timeline은 "이 이름의 process가 이 archetype으로 이때 도착한다"와 그 손잡이 값만 적습니다.
 
 **기록된 이유.** building plan의 §2.2가 두 가지를 적습니다. 첫째, "Reference by id: the scenario catalog and the timelines name archetypes by id; a timeline's bound values each carry a `source:` entry, checked by the linter (§1, §6)." 둘째, "Name/behavior separation: an archetype never fixes a process name. The (name, archetype) binding happens in the timeline — this is what makes C5's name-swap and C6's name-collision files expressible without touching behavior." 2026-10-14의 §2.2는 첫째를 "Reference-only: higher layers use archetype ids; the linter rejects inline numerics in Layers 2–3"으로, 둘째의 binding 자리를 "in the scenario catalog or the timeline"으로 적었습니다. 9.15가 building plan을 code에 맞춰 고쳤습니다. compiler는 scenario catalog를 읽지 않고, 모든 binding은 timeline task의 `name`과 `archetype` 쌍입니다(`dataset/tools/wlc/timeline.py`). 또 dataset의 층은 이제 번호가 아니라 이름(archetype library, scenario catalog, timeline)으로 부릅니다(인지오의 2026-10-16 결정, 9.15 작업 목록 W-0742). C5는 familiarity ladder 그룹(같은 행동, 낯선 이름), C6는 resolution limit 그룹(같은 이름, 다른 행동)입니다. 이름과 행동이 분리되어 있어야 둘 중 하나만 바꾼 파일을 만들 수 있습니다. 그리고 §6의 "Payoff"는 이 분리가 출처 추적을 가능하게 한다고 적습니다(8.4).
 
@@ -1724,7 +1724,7 @@ C7 그룹의 interactive counterpart는 C1 base의 처음 C초를 잘라 원하�
 
 **입력 쪽**
 
-- `archetype` — 한 종류의 process 행동을 측정된 분포로 적은 library entry. (8.3)
+- `archetype` — 프로그램 한 종류의 행동을 측정된 분포로 적은 library entry. (8.3)
 - `library` — archetype 29개를 담은 `dataset/archetypes.yaml`. (2.3)
 - `binding_params` — archetype이 timeline에서 값을 받을 수 있다고 선언한 손잡이 목록. (8.3)
 - `source` tag / `source` map — 숫자의 출처. library에서는 parameter마다, timeline에서는 `bind`와 같은 key를 가진 map으로 답니다. 값은 registry tag, tag의 목록, 또는 `design`·`convention`·`arithmetic` label입니다. (8.4)

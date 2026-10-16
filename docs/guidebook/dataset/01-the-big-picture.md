@@ -487,15 +487,15 @@ workload에는 사람이 없습니다. 대신 사람이 남기는 흔적이 네 
                                                              + build.manifest.json (lockfile)
 ```
 
-- **archetype**은 행동의 library입니다. "VS Code라는 종류의 process는 scheduler의 눈에 이렇게 행동한다"를 분포와 출처로 적습니다. 이름도, 개수도, 의미도 모릅니다.
+- **archetype**은 행동의 library입니다. "VS Code라는 종류의 프로그램은 scheduler의 눈에 이렇게 행동한다"를 분포와 출처로 적습니다. 이름도, 개수도, 의미도 모릅니다.
 - **timeline**은 시나리오 대본입니다. "0초부터 60초까지 `code`라는 이름의 task 하나가 `code-editor` archetype대로 행동하고, 사용자는 2초부터 58초까지 타이핑하며, 이 구간의 정답은 `dev`다"라고 적습니다. 행동의 숫자는 하나도 적지 않고 archetype을 이름으로 가리킵니다.
 - **canonical workload**는 compile된 결과입니다. **wlc**(workload compiler, `dataset/tools/wlc/`)가 timeline과 library와 seed를 받아 모든 분포에서 구체적인 값을 뽑고, 2장에서 본 JSON 파일을 씁니다.
 
-> **용어.** `archetype`은 한 종류의 process가 scheduler에게 어떻게 보이는지를 적은, 출처가 붙은 생성 모델입니다. 여섯 primitive로 된 program 틀과 매개변수 분포로 이루어집니다. `timeline`은 사람이 읽고 쓰는 시나리오 파일로, label 붙은 구간과 (이름, archetype) 묶음을 시간 축에 놓습니다. `canonical workload`는 timeline을 compile한 JSON 파일로, simulator와 harness가 읽는 유일한 형식입니다. `wlc`는 그 compiler입니다.
+> **용어.** `archetype`은 프로그램 한 종류가 scheduler에게 어떻게 보이는지를 적은, 출처가 붙은 생성 모델입니다. 여섯 primitive로 된 program 틀과 매개변수 분포로 이루어집니다. `timeline`은 사람이 읽고 쓰는 시나리오 파일로, label 붙은 구간과 (이름, archetype) 묶음을 시간 축에 놓습니다. `canonical workload`는 timeline을 compile한 JSON 파일로, simulator와 harness가 읽는 유일한 형식입니다. `wlc`는 그 compiler입니다.
 
 ## 3.2 archetype: 행동의 library
 
-`dataset/archetypes.yaml`은 1,946줄이고(2026-10-17), 최상위 key `archetypes` 아래에 항목 29개가 있습니다(tree에서 센 값). 항목 하나가 process 행동의 한 종류입니다. 2026-10-14 현재의 29개를 값을 정한 sub-task에 따라 묶으면 이렇습니다(각 항목의 `scope`와 `validation_stats`, 그리고 sub-task changelog에서 옮긴 분류입니다).
+`dataset/archetypes.yaml`은 1,946줄이고(2026-10-17), 최상위 key `archetypes` 아래에 항목 29개가 있습니다(tree에서 센 값). 항목 하나가 프로그램 한 종류의 행동입니다. 2026-10-14 현재의 29개를 값을 정한 sub-task에 따라 묶으면 이렇습니다(각 항목의 `scope`와 `validation_stats`, 그리고 sub-task changelog에서 옮긴 분류입니다).
 
 | 묶음 | 항목 | 값을 정한 sub-task |
 |---|---|---|
@@ -1375,7 +1375,7 @@ timeline 한 줄 편집
 
 이 장은 "이 권이 큰 그림만 그리고 넘긴 질문들은 각각 어느 권에서 답을 찾으면 되는가"에 답합니다. 나머지 일곱 권은 각자 한 층이나 한 측면을 깊이 팝니다. 순서대로 읽어도 되지만, 하려는 일에 따라 필요한 권부터 펴도 됩니다. 각 권의 제목과 그 권이 맨 앞에 굵게 적은 질문을 그대로 옮기고, 무엇을 찾을 수 있는지를 적습니다.
 
-## 8.1 2권 · Archetype library: process 하나를 scheduler의 눈으로 적기
+## 8.1 2권 · Archetype library: 프로그램 한 종류를 scheduler의 눈으로 적기
 
 **답하는 질문**: `archetypes.yaml`의 29개 항목은 각각 무엇을 어떻게 흉내 내고, 그 숫자들은 어디서 왔나.
 
@@ -1540,7 +1540,7 @@ timeline 한 줄 편집
 | `input` | 키 입력 창 track. 그 창 안에 실제 사람의 타이핑 시각을 재생 | 2.11 |
 | `focus` | 창 focus를 쥔 task의 시간 track. recognizer에게 이름으로 보임. 정답의 일부가 아님 | 2.11 |
 | `operations` | 측정된 무거운 동작(`page-load`, `send`, `unsharp-mask`, `preview-render`)의 발생 시각 | 2.11 |
-| `archetype` | 한 종류의 process가 scheduler에게 어떻게 보이는지를 적은, 출처가 붙은 생성 모델. 이름·개수·의미를 모름 | 3.1 |
+| `archetype` | 프로그램 한 종류가 scheduler에게 어떻게 보이는지를 적은, 출처가 붙은 생성 모델. 이름·개수·의미를 모름 | 3.1 |
 | `timeline` | 사람이 쓰는 시나리오 파일. label 구간과 (이름, archetype) 묶음을 시간 축에 놓음 | 3.1 |
 | canonical workload | timeline을 compile한 JSON. simulator와 harness가 읽는 유일한 형식. key는 `meta`, `ground_truth`, `focus`, `events` | 3.1 |
 | `wlc` | workload compiler. timeline + library + seed → canonical workload | 3.1 |

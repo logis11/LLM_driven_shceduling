@@ -6,7 +6,7 @@
 
 ---
 
-이 권은 workload dataset 가운데 손으로 쓴 부분, 곧 core set을 파일 단위로 읽습니다. dataset 전체는 세 층으로 쌓여 있습니다. 맨 아래에는 process 하나가 CPU 위에서 어떻게 행동하는지를 적은 archetype library(`dataset/archetypes.yaml`)가 있습니다. 그 위에 "어떤 프로그램들이 함께 도는가"를 적은 scenario catalog가 있고, 맨 위에 시간축 위에 상황을 배치한 timeline이 있습니다. core set은 이 맨 위층에서 사람이 직접 쓴 timeline 51개와, 그 timeline을 compile해서 나온 workload 파일 51개입니다. 다른 권들이 archetype이 무엇인지, compile이 timeline을 어떻게 event 목록으로 바꾸는지, 생성된 grid(generated layer)가 무엇을 늘어놓는지를 다룬다면, 이 권은 "그래서 이 51개 파일은 각각 무엇을 묻기 위해 거기 있는가"를 다룹니다.
+이 권은 workload dataset 가운데 손으로 쓴 부분, 곧 core set을 파일 단위로 읽습니다. dataset 전체는 세 층으로 쌓여 있습니다. 맨 아래에는 프로그램 한 종류가 CPU 위에서 어떻게 행동하는지를 적은 archetype library(`dataset/archetypes.yaml`)가 있습니다. 그 위에 "어떤 프로그램들이 함께 도는가"를 적은 scenario catalog가 있고, 맨 위에 시간축 위에 상황을 배치한 timeline이 있습니다. core set은 이 맨 위층에서 사람이 직접 쓴 timeline 51개와, 그 timeline을 compile해서 나온 workload 파일 51개입니다. 다른 권들이 archetype이 무엇인지, compile이 timeline을 어떻게 event 목록으로 바꾸는지, 생성된 grid(generated layer)가 무엇을 늘어놓는지를 다룬다면, 이 권은 "그래서 이 51개 파일은 각각 무엇을 묻기 위해 거기 있는가"를 다룹니다.
 
 core set의 조직 원리는 한 문장입니다. building plan(`docs/workload/building-plan.md` §3)은 "Every file exists to make a specific measurement possible; if a file's absence breaks no RQ, it doesn't belong."이라고 적습니다. 파일마다 측정 하나를 가능하게 만들려고 존재하고, 그 파일이 없어도 어떤 연구 질문도 깨지지 않는다면 그 파일은 있을 이유가 없다는 뜻입니다. 그래서 이 권은 파일마다 같은 질문을 던집니다. 이 파일은 어떤 상황을 적는가, 어떤 label을 다는가, 짝이나 base와 무엇이 다른가, compile하면 어떤 모양이 되는가, 그리고 그 모양을 정한 결정은 언제 누가 왜 내렸는가.
 
@@ -256,7 +256,7 @@ core set 51개가 모두 같은 무게로 쓰이는 것은 아닙니다. 가장 
 
 - **timeline** — 사람이 쓰는 authoring 형식입니다. `dataset/timelines/coreset/<id>.timeline.yaml`. 시간축 위에 segment와 label, 그리고 (process 이름, archetype) 묶음을 배치합니다.
 - **workload** — compile 결과입니다. `dataset/build/coreset-single/<id>.workload.json`. 시뮬레이터가 읽는 유일한 형식이고, 모든 시각이 정수 마이크로초(µs)입니다.
-- **archetype** — process 한 종류가 CPU 위에서 어떻게 행동하는지를 적은 생성 모형입니다. `dataset/archetypes.yaml`에 29개가 있습니다(2026-10-14 tree). 이름도 개수도 의미도 모릅니다. 이름과 개수는 timeline이 붙입니다.
+- **archetype** — 프로그램 한 종류가 CPU 위에서 어떻게 행동하는지를 적은 생성 모형입니다. `dataset/archetypes.yaml`에 29개가 있습니다(2026-10-14 tree). 이름도 개수도 의미도 모릅니다. 이름과 개수는 timeline이 붙입니다.
 - **compile** — timeline과 archetype library와 seed를 받아 workload를 만드는 단계입니다. `dataset/tools/compile.py`가 하고, 모든 무작위성을 이 단계에서 해소합니다. 같은 timeline, 같은 library, 같은 seed면 결과는 byte 단위로 같습니다.
 
 ## 2.2 worked example: `c1-dev`
@@ -2205,7 +2205,7 @@ memo §6은 이 시점에 찾은 사실 하나를 적습니다. `c7-meeting`과 
 | core set (coreset) | 손으로 쓴 timeline 51개와 그 compile 결과. 파일 하나가 측정 하나를 가능하게 하도록 설계됨 |
 | timeline | 사람이 쓰는 authoring 형식(`*.timeline.yaml`). segment, label, (이름, archetype) 묶음을 시간축에 배치 |
 | workload | compile 결과(`*.workload.json`). 시뮬레이터가 읽는 유일한 형식, 시각은 정수 µs. top-level key는 `meta`, `ground_truth`, `focus`, `events` |
-| archetype | process 한 종류의 행동을 적은 생성 모형. 이름·개수·의미를 모름. `dataset/archetypes.yaml`에 29개 |
+| archetype | 프로그램 한 종류의 행동을 적은 생성 모형. 이름·개수·의미를 모름. `dataset/archetypes.yaml`에 29개 |
 | compile | timeline + library + seed → workload. 모든 무작위성을 여기서 해소하고, 같은 입력이면 byte 단위로 같은 결과 |
 | seed | timeline의 정수. 모든 추첨이 `(seed, key들, index)`의 SHA-256에서 나오므로, 한 task를 바꿔도 다른 task의 추첨은 그대로. 파생 파일은 base의 seed를 물려받음 |
 | report | compile이 artifact 옆에 쓰는 요약(`demand_us`, `duration_us`, `utilization`, `per_task` 등) |

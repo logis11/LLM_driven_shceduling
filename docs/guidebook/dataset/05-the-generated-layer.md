@@ -189,7 +189,7 @@ C1(single-situation calibration)은 한 파일에 한 mode만 담은 열여섯 �
 여기서 몇 가지 용어를 풉니다.
 
 - `task` — timeline 안의 process 하나(또는 같은 process 여러 개, `count`). `id`(파일 안에서 유일한 이름표), `name`(recognizer가 보게 될 process 이름), `archetype`(행동 모형의 이름), `arrive`(도착 시각), 그리고 경우에 따라 `depart`(떠나는 시각)와 `bind`(archetype의 parameter 중 timeline이 값을 정해 주는 것)를 가집니다.
-- `archetype` — process 한 종류의 행동 모형. "VS Code처럼 깨고 돈다", "kernel build처럼 자식 process를 낳는다" 같은 규칙과 측정된 수치의 묶음입니다. `dataset/archetypes.yaml`에 29개가 있습니다. archetype은 이름을 모릅니다. 이름은 timeline이 붙입니다.
+- `archetype` — 프로그램 한 종류의 행동 모형. "VS Code처럼 깨고 돈다", "kernel build처럼 자식 process를 낳는다" 같은 규칙과 측정된 수치의 묶음입니다. `dataset/archetypes.yaml`에 29개가 있습니다. archetype은 이름을 모릅니다. 이름은 timeline이 붙입니다.
 - task set — 한 C1 파일에 있는 task 전부. generated layer에서 "mode의 task set"이라고 하면 `c1-<mode>.timeline.yaml`의 `tasks` 목록을 뜻합니다.
 - segment-bound task — `depart`가 정해진 task. 사용자가 창을 닫는 시각은 외부에서 주어지는 사건이라 미리 못 박습니다.
 - finite task — `depart`가 없는 task. 자기 일을 다 하면 스스로 끝납니다(build, 학습, 인코딩, 백업처럼). 언제 끝나는지는 scheduler가 CPU를 얼마나 주느냐에 달려 있어 미리 정할 수 없습니다. 이런 task가 batch 작업입니다.
@@ -2087,7 +2087,7 @@ generated layer를 설명해야 하는 문서들의 고쳐 쓰기는 9.15에서 
 | recognizer | process 이름 목록에서 mode와 attribute를 맞히려는 쪽 (1.1) |
 | RQ0–RQ4 | 연구 질문. 측정 가능성, 상황 읽기, 가치, vocabulary 충분성, timing (1.3) |
 | task | timeline 안의 process 하나(또는 `count`개). `id`, `name`, `archetype`, `arrive`, `depart`, `bind`를 가짐 (2.1) |
-| archetype | process 한 종류의 행동 모형. 이름을 모름. `dataset/archetypes.yaml`에 29개 (2.1) |
+| archetype | 프로그램 한 종류의 행동 모형. 이름을 모름. `dataset/archetypes.yaml`에 29개 (2.1) |
 | task set | 한 C1 파일의 task 전부 (2.1) |
 | segment-bound task | `depart`가 고정된 task (2.1) |
 | finite task / batch 작업 | `depart` 없이 자기 일을 다 하면 끝나는 task (2.1) |

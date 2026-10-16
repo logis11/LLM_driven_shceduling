@@ -6,7 +6,7 @@
 
 ---
 
-이 연구의 workload dataset은 세 층으로 되어 있습니다. 맨 아래에는 **archetype** library(`dataset/archetypes.yaml`)가 있습니다. archetype은 "어떤 종류의 process가 CPU를 어떻게 쓰는가"를 적어 둔 행동 모형이고, 29개 중 28개가 CI runner에서 직접 측정한 값입니다(나머지 하나, 게임 chain은 발표 자료에 기댑니다). 이름도, 개수도, 그 process가 무슨 의미인지도 모릅니다. 그 위에 **timeline**(`dataset/timelines/coreset/*.timeline.yaml`)이 있습니다. timeline은 사람이 쓰는 연출 대본입니다. 어떤 이름의 process가 언제 등장해 언제 퇴장하는지, 그 순간 사용자가 실제로 무엇을 하고 있는지(정답 label), 사용자가 어느 창을 보고 어디에 타자를 치는지를 적습니다. 맨 위에는 **canonical workload**(`dataset/build/coreset-single/*.workload.json`)가 있습니다. 이것은 simulator, recognizer를 돌리는 daemon, 채점하는 harness가 실제로 먹는 파일입니다. 확률분포는 하나도 남아 있지 않고, 모든 값이 정수 microsecond로 확정되어 있습니다.
+이 연구의 workload dataset은 세 층으로 되어 있습니다. 맨 아래에는 **archetype** library(`dataset/archetypes.yaml`)가 있습니다. archetype은 "어떤 종류의 프로그램이 CPU를 어떻게 쓰는가"를 적어 둔 행동 모형이고, 29개 중 28개가 CI runner에서 직접 측정한 값입니다(나머지 하나, 게임 chain은 발표 자료에 기댑니다). 이름도, 개수도, 그 프로그램이 무슨 의미인지도 모릅니다. 그 위에 **timeline**(`dataset/timelines/coreset/*.timeline.yaml`)이 있습니다. timeline은 사람이 쓰는 연출 대본입니다. 어떤 이름의 process가 언제 등장해 언제 퇴장하는지, 그 순간 사용자가 실제로 무엇을 하고 있는지(정답 label), 사용자가 어느 창을 보고 어디에 타자를 치는지를 적습니다. 맨 위에는 **canonical workload**(`dataset/build/coreset-single/*.workload.json`)가 있습니다. 이것은 simulator, recognizer를 돌리는 daemon, 채점하는 harness가 실제로 먹는 파일입니다. 확률분포는 하나도 남아 있지 않고, 모든 값이 정수 microsecond로 확정되어 있습니다.
 
 이 권은 가운데와 위 사이, 즉 **timeline이 canonical workload가 되는 길**을 다룹니다. 두 포맷의 field 하나하나가 무슨 뜻인지, 그리고 둘 사이를 잇는 compiler **wlc**(workload compiler, `dataset/tools/wlc/`)가 어떤 순서로 무엇을 하는지를 설명합니다. archetype이 어떻게 측정되었는지는 archetype library를 다루는 권에서, 51개 coreset 파일이 각각 어떤 질문에 답하는지는 coreset 파일을 하나씩 다루는 권에서, 1,562개의 generated 파일은 generated layer를 다루는 권에서, 민감도 variant와 build gate의 CI 운영은 각각 그 주제를 다루는 권에서 설명합니다. 이 권은 그 모든 권이 공유하는 "문법책"에 해당합니다. 설명하는 것은 2026-10-14 기준의 tree이고, 그 뒤 2026-10-17까지 바뀐 것(sub-task 9.23이 더한 canonical lint 셋과 program의 끝 규칙, launch stream의 고정, sub-task 9.15 안에서 지운 compiler 경로, timeline 머리 주석의 생략 문장, schema의 설명과 compiler·loader의 docstring)은 해당 절에 반영했습니다. 포맷과 compiler는 2026-08-27(Phase 2, 처음 compiler를 만든 날)부터 2026-10-17(sub-task 9.15 안에서 정한 dataset 수정이 두 번째 rebuild로 들어간 날)까지 여러 번 바뀌었고, 각 변화가 언제 왜 일어났는지는 15장에, 문서와 tree가 어긋나는 곳은 16장에 모았습니다.
 
@@ -2268,7 +2268,7 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 
 | 용어 | 종류 | 뜻 |
 |---|---|---|
-| `archetype` | project | 한 종류의 process가 CPU를 어떻게 쓰는지 적은 행동 모형. `dataset/archetypes.yaml`의 entry 하나. 이름·개수·의미를 모름(머리말) |
+| `archetype` | project | 프로그램 한 종류가 CPU를 어떻게 쓰는지 적은 행동 모형. `dataset/archetypes.yaml`의 entry 하나. 이름·개수·의미를 모름(머리말) |
 | `timeline` | project | 사람이 쓰는 연출 대본 YAML. 어떤 이름의 task가 언제 등장·퇴장하는지, 각 순간의 정답, 사용자의 손과 눈(1.1) |
 | `canonical workload` | project | compile 결과물 JSON, simulator가 읽는 유일한 포맷. 분포 없이 정수 µs만(1.1, 7장) |
 | `wlc` | project | workload compiler, `dataset/tools/wlc/`(머리말, 9장) |
