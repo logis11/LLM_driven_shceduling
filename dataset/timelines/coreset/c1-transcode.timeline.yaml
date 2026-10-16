@@ -9,6 +9,7 @@
 # compiled under the file's seed, 4,761.296 s — so the turnaround term reads a
 # finished job (D78's arithmetic); focus keeps the 2 s margins and the preview
 # render sits at the window's middle, as the base's 30 s in 2–58 s (D96).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-transcode
   seed: 114

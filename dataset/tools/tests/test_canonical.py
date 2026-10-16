@@ -258,3 +258,30 @@ def test_a_single_table_set_batch_loop_needs_no_program_binding(library):
     with pytest.raises(ValueError):
         compiler._batch_loop(compiler._TaskBuild("x", "x", "normal"), library.entry("cpu-batch")["params"],
                              {"bind": {"total_work": "2s"}}, "seed", "x")
+
+
+def test_an_entry_matching_no_compile_path_is_refused(tmp_path):
+    # 9.15 (W-0746): the compiler has five paths — the chain and module-build constructors, a measured entry, a fork
+    # loop, a batch loop. An entry that is none of them, here a plain loop of a sampled run and a sleep (the shape
+    # the deleted unbounded-loop path compiled), is refused at compile time rather than compiled some other way.
+    import pytest
+    import yaml
+    from wlc import Library
+    library_path = tmp_path / "archetypes.yaml"
+    library_path.write_text(yaml.safe_dump({"archetypes": {"plain-loop": {
+        "category_source": "meas", "declared_class": "normal",
+        "pattern": {"program": [{"loop": [{"RUN": "x"}, {"SLEEP": "y"}]}]},
+        "params": {"x": {"dist": "constant", "value_us": 5, "sampling": "per-task", "source": "design"},
+                   "y": {"dist": "constant", "value_us": 10, "sampling": "per-task", "source": "design"}},
+        "lifetime": "segment-bound", "binding_params": [], "scalable": [], "validation_stats": {},
+        "modeling_notes": "probe"}}}))
+    library = Library(library_path)
+    timeline_path = tmp_path / "probe.timeline.yaml"
+    timeline_path.write_text(yaml.safe_dump({
+        "meta": {"id": "probe", "seed": 1},
+        "segments": [{"from": "0s", "to": "10s", "mode": "office", "attributes": {"background_wanted": True}}],
+        "tasks": [{"id": "loop", "name": "x", "archetype": "plain-loop", "arrive": "0s", "depart": "10s"}],
+        "focus": []}))
+    timeline = Timeline(timeline_path, library)
+    with pytest.raises(ValueError, match="'plain-loop' matches no compile path"):
+        compile_timeline(timeline, library, "single")

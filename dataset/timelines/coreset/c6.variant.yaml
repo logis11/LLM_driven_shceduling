@@ -9,6 +9,7 @@ variants:
   # convention); from 20 s the spoof is sustained work nobody asked for
   # (false), and the snapshot shows one more `chrome` and nothing else, so the
   # segment is a pre-committed miss (9.23 D2).
+  # The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
   - id: c6-spoof
     from: c1-browsing.timeline.yaml
     ops:
@@ -28,6 +29,7 @@ variants:
   # (KDE Baloo) and `tracker-miner-f` (GNOME Tracker). Another program's real name
   # on the whole foreground — the limit `c6-spoof` does not show. No recognizer
   # reaches `media` from these names, so the segment is a pre-committed miss.
+  # The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
   - id: c6-alias
     from: c1-media.timeline.yaml
     ops:
@@ -47,6 +49,7 @@ variants:
     # the call runs its observed launch phase first: the call opened in the
     # running browser, binned onto its cycle grid (meas-ci:desktop:2026-10-04b;
     # 9.10 D30, D134, D136, D138)
+    # The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
     ops:
       - set-segments:
           - {from: 0s, to: 30s, mode: browsing, attributes: {background_wanted: true},

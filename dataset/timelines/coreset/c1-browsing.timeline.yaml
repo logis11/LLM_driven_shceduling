@@ -4,6 +4,7 @@
 # five-tab window: five tabs from Firefox's Linux telemetry (glam; 9.10 D15,
 # D16), one renderer per tab observed in Chrome (meas-ci:desktop:2026-10-04;
 # 9.10 D126-D129, D131).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-browsing
   seed: 105

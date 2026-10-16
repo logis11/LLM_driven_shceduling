@@ -1,4 +1,4 @@
-# dataset/archetypes.yaml — Layer 1 archetype library (v0.1)
+# dataset/archetypes.yaml — Layer 1 archetype library (v0.2)
 #
 # One entry per process behavior kind: the rule-plus-parameters bundle that
 # emits a task's event stream. Normative writing plan: docs/workload/
@@ -1791,10 +1791,12 @@ archetypes:
       wine among the system tasks). The entry models the chain only: the source
       counts ~300 tasks scheduled system-wide while a game runs (s12,
       including system tasks) and says nothing about what the tasks outside
-      its top 30-40 do, so no tail population is constructed here; how many
-      further game threads a timeline carries, and bound to what, is the
-      timeline's. Two source facts the encoding does not model: "Around 90%
-      are long-living tasks; only 10% of tasks are terminated" (s12, window
+      its top 30-40 do, so no tail population is constructed here. The game's
+      threads beyond the chain and wineserver are omitted, here and in every
+      timeline that binds the entry: the source puts 95% of scheduling in its
+      top 30-40 tasks (s12) and describes none outside them (9.10 D19). Two
+      source facts the encoding does not model: "Around 90% are long-living
+      tasks; only 10% of tasks are terminated" (s12, window
       unstated) — every member here lives for the whole segment; "70-75% of
       scheduling is initiated by waiting system calls" against 25-30%
       preemption (s14) — the wake mix here is fixed by the wiring (one

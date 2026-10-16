@@ -9,6 +9,7 @@
 # D162). kdenlive, started at 120 s, runs its observed launch phase first,
 # replayed, traced to its 240 s settle (meas-ci:desktop:2026-10-05; 9.10 D21,
 # D132-D138, D146).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c3-creation
   seed: 303

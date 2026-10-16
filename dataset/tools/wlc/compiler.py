@@ -1,21 +1,28 @@
 """timeline + archetypes.yaml -> canonical workload (interpretation-contract §2–§7).
 
 Compile time resolves all randomness; run time resolves all timing that
-scheduling can influence. Concretely:
+scheduling can influence. A task compiles by one of five paths, chosen from
+its library entry (`_compile_instance`); an entry that matches none of them
+is refused:
 
-- Bounded per-iteration sequences are unrolled with per-iteration draws
-  (input-driven bursts, finite jobs, spawn tables); unbounded (segment-bound)
-  loops compile to LOOP-unbounded bodies whose per-iteration params degrade
-  to per-task draws (contract §5: per-iteration sampling only when bounded).
-- Archetype WAIT operands that name a `<x>_wait` param are *blocked-time*
-  waits with no waker task and compile to SLEEP(sampled); WAIT operands
-  without one are real channels (input, children, chain wiring).
 - The chain constructor (contract §6) expands game-task-chain at compile
-  time into chain_length driven members.
-- The lane-scaling pass (the one compile mode, `single`) transforms
-  declared-scalable fields only — for game-task-chain, chain RUN values are
-  scaled so the chain's aggregate demand is lane_share of the lane. The
-  unscaled `native` mode left with the native set (9.5 spec decision 14, 9.13).
+  time into chain_length driven members, each an unbounded LOOP.
+- The module build (`constructor: module-build`, module-build-orchestrator):
+  the measured build's jobs in the order it ran them, each a spawn-table job
+  tree after one dispatch run, then the build's serial tail as a batch loop.
+- A measured entry (timer components, replayed stimulus, operations or a
+  measured per-cycle run): one explicit time-ordered stream of wakes, or of
+  TIMER cycles, over the task's lifetime.
+- A fork loop (build-orchestrator): one dispatch run and one six-member
+  object job per spawn, the spawn table unrolled at compile time.
+- A batch loop (`constructor: batch-loop`): runs drawn from the bound
+  program's measured runs between drawn blocks until the bound CPU total is
+  spent.
+
+The lane-scaling pass (the one compile mode, `single`) transforms
+declared-scalable fields only — for game-task-chain, chain RUN values are
+scaled so the chain's aggregate demand is lane_share of the lane. The
+unscaled `native` mode left with the native set (9.5 spec decision 14, 9.13).
 """
 
 import bisect
@@ -127,31 +134,28 @@ def _arrive_event(build):
 
 def _compile_instance(timeline, library, task, iid, mode, wakes):
     entry = library.entry(task["archetype"])
-    if entry["pattern"].get("constructor") == "chain":
+    constructor = entry["pattern"].get("constructor")
+    if constructor == "chain":
         return _chain_constructor(timeline, task, iid, entry, mode)
 
     build = _TaskBuild(iid, task["name"], entry["declared_class"])
     build.arrive = task["arrive"]
     build.depart = task["depart"]
-    lifespan = (task["depart"] or timeline.duration_us) - task["arrive"]
     seed = timeline.seed
     params = entry.get("params") or {}
     program = entry["pattern"]["program"]
 
-    if entry["pattern"].get("constructor") == "module-build":
+    if constructor == "module-build":
         _module_build_unroll(build, library, task, iid, seed, params, entry)
     elif library.is_measured(task["archetype"]):
         _measured_unroll(build, timeline, task, iid, params, wakes)
-    elif library.has_input_channel(task["archetype"]):
-        _interactive_unroll(build, timeline, task, iid, params, wakes)
     elif _is_fork_loop(program):
         _orchestrator_unroll(build, library, task, iid, seed, params, program)
-    elif entry["pattern"].get("constructor") == "batch-loop":
+    elif constructor == "batch-loop":
         _batch_loop(build, params, task, seed, iid)
-    elif entry["lifetime"] == "finite":
-        _finite_unroll(build, task, iid, seed, params, program)
     else:
-        _unbounded_loop(build, iid, seed, params, program, lifespan)
+        raise ValueError(f"{iid}: archetype {task['archetype']!r} matches no compile path — it is not the chain or "
+                         "module-build constructor, not a measured entry, not a fork loop and not a batch loop")
     return [build]
 
 
@@ -169,51 +173,10 @@ def _flatten(program):
             yield step
 
 
-def _resolve_wait(operand, params, iid):
-    """`WAIT: x` -> SLEEP param name if `x_wait` exists, else a channel."""
-    if f"{operand}_wait" in params:
-        return ("sleep-param", f"{operand}_wait")
-    return ("channel", f"{operand}:{iid}")
-
-
 def _draw(params, name, seed, iid, k):
     param = params[name]
     index = 0 if param.get("sampling") == "per-task" else k
     return sampling.sample(param, seed, iid, name, index)
-
-
-# ---- segment-bound unbounded loops (entries without measured components) --
-
-def _unbounded_loop(build, iid, seed, params, program, lifespan):
-    body, cycle_run, cycle_wall, period = [], 0, 0, None
-    steps = list(_flatten(program))
-    for step in steps:
-        (op, operand), = step.items()
-        if op == "RUN":
-            us = _draw(params, operand, seed, iid, 0)
-            body.append({"op": "RUN", "us": us})
-            cycle_run += us
-            cycle_wall += us
-        elif op == "SLEEP":
-            us = _draw(params, operand, seed, iid, 0)
-            body.append({"op": "SLEEP", "us": us})
-            cycle_wall += us
-        elif op == "TIMER":
-            period = _draw(params, operand, seed, iid, 0)
-            body.append({"op": "TIMER", "period_us": period})
-        elif op == "WAIT":
-            kind, value = _resolve_wait(operand, params, iid)
-            if kind == "sleep-param":
-                us = _draw(params, value, seed, iid, 0)
-                body.append({"op": "SLEEP", "us": us})
-                cycle_wall += us
-            else:
-                body.append({"op": "WAIT", "channel": value})
-        else:
-            raise ValueError(f"unexpected op {op!r} in unbounded loop of {iid}")
-    build.program = [{"op": "LOOP", "count": "unbounded", "body": body}]
-    cycle = period if period is not None else max(cycle_wall, 1)
-    build.demand_us = round(cycle_run / cycle * lifespan)
 
 
 # ---- measured archetypes (9.5 fold-in: D9, D13, D16, D17, D18) ----------------
@@ -538,32 +501,6 @@ def _replay_batch_ops(replay, total, iid):
     return ops
 
 
-# ---- input-driven tasks (desktop-interactive) -------------------------------
-
-def _interactive_unroll(build, timeline, task, iid, params, wakes):
-    seed = timeline.seed
-    channel = f"input:{iid}"
-    k = 0
-    for window in timeline.input:
-        if window["task"] != task["id"]:
-            continue
-        t = window["from"]
-        while True:
-            gap = _draw(params, "input_gap", seed, iid, k)
-            t += gap
-            if t >= window["to"]:
-                break
-            fraction = _draw(params, "burst_fraction", seed, iid, k)
-            burst = max(1, round(fraction * gap))
-            wakes.append((t, iid, channel))
-            build.program.append({"op": "WAIT", "channel": channel})
-            build.program.append({"op": "RUN", "us": burst})
-            build.demand_us += burst
-            k += 1
-    # alive but never typed into, or past its last input (9.23 N1): it waits on its input until the user closes it
-    build.program.append({"op": "WAIT", "channel": channel})
-
-
 # ---- finite jobs (cpu-batch and the one-table-set batch loops: file-archiver, game-download, incremental-backup, …) ----
 
 def _batch_loop(build, params, task, seed, iid):
@@ -614,38 +551,6 @@ def _batch_ops(runs, blocks, total, seed, iid, tag):
     if pending:
         ops.append({"op": "RUN", "us": pending})
     return ops
-
-
-def _finite_unroll(build, task, iid, seed, params, program):
-    total_work = parse_us(task["bind"]["total_work"])
-    steps = list(_flatten(program))
-    has_loop = any("loop" in step for step in program)
-    if not has_loop:  # cpu-batch shape: RUN(total_work); EXIT
-        build.program = [{"op": "RUN", "us": total_work}, {"op": "EXIT"}]
-        build.demand_us = total_work
-        return
-    k, done = 0, 0
-    while done < total_work:
-        for step in steps:
-            (op, operand), = step.items()
-            if op == "EXIT":
-                continue
-            if op == "RUN":
-                us = _draw(params, operand, seed, iid, k)
-                build.program.append({"op": "RUN", "us": us})
-                done += us
-            elif op == "WAIT":
-                kind, value = _resolve_wait(operand, params, iid)
-                if kind == "sleep-param":
-                    us = _draw(params, value, seed, iid, k)
-                    build.program.append({"op": "SLEEP", "us": us})
-                else:
-                    build.program.append({"op": "WAIT", "channel": value})
-            else:
-                raise ValueError(f"unexpected op {op!r} in finite loop of {iid}")
-        k += 1
-    build.program.append({"op": "EXIT"})
-    build.demand_us = done
 
 
 # ---- orchestrators (build-orchestrator) -------------------------------------
@@ -801,29 +706,6 @@ def _module_build_unroll(build, library, task, iid, seed, params, entry):
     build.program += _batch_ops(params["tail_run"], params["tail_block"], tail, seed, iid, "tail")
     build.program.append({"op": "EXIT"})
     build.demand_us += tail
-
-
-def _spawned_program(child, entry, seed, parent_iid, index):
-    params = entry.get("params") or {}
-    for step in _flatten(entry["pattern"]["program"]):
-        (op, operand), = step.items()
-        if op == "RUN":
-            us = sampling.sample(params[operand], seed,
-                                 parent_iid, "spawn", index, operand)
-            child.program.append({"op": "RUN", "us": us})
-            child.demand_us += us
-        elif op == "WAIT":
-            kind, value = _resolve_wait(operand, params, child.id)
-            if kind == "sleep-param":
-                us = sampling.sample(params[value], seed,
-                                     parent_iid, "spawn", index, value)
-                child.program.append({"op": "SLEEP", "us": us})
-            else:
-                child.program.append({"op": "WAIT", "channel": value})
-        elif op == "EXIT":
-            child.program.append({"op": "EXIT"})
-        else:
-            raise ValueError(f"unexpected op {op!r} in spawned program")
 
 
 # ---- chain constructor (game-task-chain, contract §6) -----------------------

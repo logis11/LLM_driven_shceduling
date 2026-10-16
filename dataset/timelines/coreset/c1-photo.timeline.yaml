@@ -1,5 +1,6 @@
 # C1 — single-situation calibration: pure photo (building-plan §3 C1; Phase 7
 # spec decision 8). Task set lifted from c3-creation segment 0 (gimp alone).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-photo
   seed: 109

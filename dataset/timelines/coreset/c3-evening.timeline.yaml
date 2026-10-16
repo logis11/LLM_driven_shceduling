@@ -8,6 +8,12 @@
 # their observed launch phases first, replayed
 # (meas-ci:desktop:2026-10-04b; 9.10 D21, D132-D138); the game chain arrives
 # steady, its source holding no launch data (D19, D21).
+# The game's threads beyond the chain and `wineserver` are omitted: the source
+# puts 95% of scheduling in its top 30-40 tasks and describes none outside
+# them (lavd-ossna24 s12; 9.10 D19).
+# The Steam client is in its measured state: logged out, no account, no
+# library, no game behind it, no `gameoverlayui` (9.10 D22; 9.8 D6).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c3-evening
   seed: 302

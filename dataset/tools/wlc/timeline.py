@@ -1,11 +1,14 @@
 """Timeline loader + structural validation (task-2.3 spec §1–§4).
 
-A timeline is meta + four tracks:
-  segments: [{from, to, mode, attributes?, scenario?}]   -> ground_truth
-  tasks:    [{id, name, archetype, arrive, depart?, bind?, count?}]
-  input:    [{from, to, task, slice_of?}]   the keystroke windows — where the replayed stimulus lands (one user, one
-            typing hand); `slice_of: {from, to, index}` names the stream window this one is a slice of (9.18)
-  focus:    [{from, to, task}]   the window-focus track — which top-level task holds the focus (9.17); -> canonical `focus`
+A timeline is meta + four tracks and an optional fifth:
+  segments:   [{from, to, mode, attributes?, scenario?}]   -> ground_truth
+  tasks:      [{id, name, archetype, arrive, depart?, bind?, count?}]
+  input:      [{from, to, task, slice_of?}]   the keystroke windows — where the replayed stimulus lands (one user, one
+              typing hand); `slice_of: {from, to, index}` names the stream window this one is a slice of (9.18)
+  focus:      [{from, to, task}]   the window-focus track — which top-level task holds the focus (9.17); -> canonical
+              `focus`
+  operations: [{at, task, name}]   optional — a measured archetype's operation placed at a point in time (9.5
+              follow-ups spec, decisions 8–9)
 """
 
 import pathlib

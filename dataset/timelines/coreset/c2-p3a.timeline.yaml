@@ -1,9 +1,10 @@
 # C2 P3 (base) — {kdenlive + its export}: user-initiated bulk; the variant
 # swaps in Déjà Dup's scheduled weekly incremental (scheduled bulk). The export
 # is `cpu-batch`'s `kdenlive_render` bound whole from 60 s (9.10 D105, D106).
-# Segment 1 runs in both files to the smallest whole second by which the
-# variant's backup, arriving at 60 s, ends under every policy, so each file's
-# job ends inside it (9.10 D123); the export ends by about 99.5 s.
+# Segment 1 runs 60–326 s in both files; the length is 9.10 D123's, set on a
+# shared lane; under the idle class (9.13) the variant's backup does not end
+# inside it and is scored by progress (9.14); the export ends by about 99.5 s.
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c2-p3a
   seed: 203

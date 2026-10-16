@@ -34,6 +34,9 @@ MISS_KEY = "pre_committed_miss"
 
 # Default name→tier lookup (C5 ladder, building-plan §3). Tiers 4–5 exist
 # only via explicit annotation or invented names listed here by authoring.
+# A name no timeline binds tags no segment; such names stay so that a tier-5
+# draw avoids a real program's name (9.20 decision 7: a draw equal to a known
+# name is redrawn, gen/cells.py `known_names`).
 NAME_TIERS = {
     1: {"firefox", "blender", "chrome", "code", "make", "steam", "discord",
         "thunderbird", "thunderbird-bin", "spotify", "gimp", "kdenlive", "ffmpeg", "mpv",

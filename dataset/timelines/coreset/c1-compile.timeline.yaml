@@ -4,6 +4,7 @@
 # (meas-ci:build:2026-09-18; 9.6 D5, D30, D31; 9.10 D17, D18). The segment is
 # the smallest whole second by which the build ends under every policy (9.10
 # D78's arithmetic, D90's form).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-compile
   seed: 103

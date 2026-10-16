@@ -12,6 +12,7 @@
 # (meas-ci:build:2026-09-18; 9.10 D17, D18); the compile segment ends at the
 # smallest whole second by which it ends under every policy (9.10 D78's
 # arithmetic, D100's form), the mail segment after it.
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c3-workday
   seed: 301

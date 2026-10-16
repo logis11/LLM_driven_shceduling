@@ -73,6 +73,7 @@
 variants:
   - id: c7-browsing
     from: c1-browsing.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
       - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
                    arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
@@ -88,6 +89,7 @@ variants:
 
   - id: c7-office
     from: c1-office.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
       - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
                    arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
@@ -104,6 +106,7 @@ variants:
 
   - id: c7-mail
     from: c1-mail.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
       - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
                    arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
@@ -118,6 +121,7 @@ variants:
 
   - id: c7-dev
     from: c1-dev.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
       - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
                    arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
@@ -131,6 +135,7 @@ variants:
 
   - id: c7-photo
     from: c1-photo.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
       - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
                    arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
@@ -145,6 +150,7 @@ variants:
 
   - id: c7-meeting
     from: c1-meeting.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
       - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
                    arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
@@ -157,6 +163,12 @@ variants:
 
   - id: c7-gaming
     from: c1-gaming.timeline.yaml
+    # the game's threads beyond the chain and `wineserver` are omitted: the source
+    # puts 95% of scheduling in its top 30-40 tasks and describes none outside
+    # them (lavd-ossna24 s12; 9.10 D19)
+    # the Steam client is in its measured state: logged out, no account, no
+    # library, no game behind it, no `gameoverlayui` (9.10 D22; 9.8 D6)
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
       - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
                    arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
@@ -170,6 +182,7 @@ variants:
 
   - id: c7-media
     from: c1-media.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
       - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
                    arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
@@ -183,6 +196,7 @@ variants:
 
   - id: c7-video-edit
     from: c1-video-edit.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
       - add-task: {id: upgrade, name: unattended-upgr, archetype: package-upgrade,
                    arrive: 0s, bind: {total_work: 26.385s}, source: {total_work: "meas-ci:background:2026-10-01"}}
@@ -217,6 +231,7 @@ variants:
 
   - id: c7-compile
     from: c1-compile.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
       - patch-task: {id: build, name: dkms, archetype: module-build-orchestrator, arrive: 0s,
                      bind: {parallelism_cap: 8, child_name: cc1},
@@ -231,6 +246,7 @@ variants:
 
   - id: c7-indexing
     from: c1-indexing.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
       - patch-task: {id: hog, arrive: 0s}
       - set-segments: [{from: 0s, to: 39.435s, mode: indexing,
@@ -243,6 +259,7 @@ variants:
 
   - id: c7-ml-train
     from: c1-ml-train.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
       - patch-task: {id: hog, arrive: 0s}
       - set-segments: [{from: 0s, to: 1389.885s, mode: ml-train,
@@ -256,6 +273,7 @@ variants:
 
   - id: c7-render
     from: c1-render.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
       - patch-task: {id: bulk, arrive: 0s}
       - set-segments: [{from: 0s, to: 16.545s, mode: render,
@@ -270,6 +288,7 @@ variants:
 
   - id: c7-transcode
     from: c1-transcode.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
       - patch-task: {id: batch, arrive: 0s}
       - set-segments: [{from: 0s, to: 2970.871s, mode: transcode,
@@ -284,6 +303,7 @@ variants:
 
   - id: c7-backup
     from: c1-backup.timeline.yaml
+    # the desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28)
     ops:
       - patch-task: {id: bulk, arrive: 0s}
       - set-segments: [{from: 0s, to: 165.668s, mode: backup,

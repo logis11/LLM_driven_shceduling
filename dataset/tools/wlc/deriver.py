@@ -7,11 +7,13 @@ via a closed op set applied to the raw yaml:
       - id: c2-p1b                  # output meta.id and filename
         from: c2-p1a.timeline.yaml  # base, relative to the spec file
         ops:
-          - rename: {from: python3, to: tracker-miner-fs-3}
+          - patch-task: {id: hog, name: tracker-miner-f, archetype: file-indexer,
+                         arrive: 60s, bind: {total_work: 39.435s}, source: {...}}
           - patch-segment: {index: 1, mode: indexing,
-                            attributes: {background_wanted: false}}
-          - patch-task: {id: bulk, name: deja-dup, archetype: incremental-backup}
-          - add-task: {id: overlay, name: discord, ...}
+                            attributes: {background_wanted: false, initiated: session}}
+          - add-task: {id: injected-chat, name: element-desktop,   # as c4.variant.yaml's c4-gaming
+                       archetype: chat-client, arrive: 30s, depart: 60s}
+          - rename: {from: <name>, to: <name>}   # every task of that display name
           - set-segments: [...]     # wholesale segment-list replacement
           - set-input: [...]        # the keystroke windows, replaced whole; a window inside one of the
                                     # base's windows of its task is written as that window's slice (9.18)

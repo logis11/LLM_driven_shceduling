@@ -5,6 +5,7 @@
 # D119, D120). The segment is the smallest whole second by which the backup ends
 # under every policy (9.10 D78's arithmetic, D90's form); the preview render sits
 # at the focus window's middle (D96).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-backup
   seed: 116

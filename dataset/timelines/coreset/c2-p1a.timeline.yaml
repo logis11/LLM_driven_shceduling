@@ -6,6 +6,7 @@
 # `tracker-miner-f` (D6, D80). Segment 1 is as long as the index's measured CPU
 # total, 39.435 s, in both files, so each job is alive at every instant of it
 # under every policy; the training runs on past the file's end (D80, D86).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c2-p1a
   seed: 201

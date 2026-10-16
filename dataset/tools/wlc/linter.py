@@ -1,7 +1,8 @@
 """Dataset linter — building-plan §6 + the schema-declared canonical invariants.
 
 Three lint layers, each returning a list of error strings:
-  repo lints       registry subset, archetype provenance, meas-pending freeze
+  repo lints       registry subset, archetype provenance, meas-pending freeze,
+                   every meas-ci campaign mapped to its release
   timeline lints   structural rules (delegated to Timeline's loader)
   canonical lints  event ordering, id uniqueness, FORK <-> spawn_table,
                    channel resolution, the comm limit, programs' ends,
@@ -199,10 +200,11 @@ def _check_tag(where, tag, registry):
 BOUND_LABELS = ("design", "convention", "arithmetic")   # 9.10 D32: a value no source states is labelled for what it is
 
 
-def lint_bound_sources(path, registry):
+def lint_bound_sources(path, registry, freeze=False):
     """9.18 spec, decision 4 (9.10 D32): every value a timeline binds — the `bind` keys and the task's `count` when
     stated — has an entry in the task's `source` map, and nothing else does; an entry is one source tag, a list of
-    source tags, or one of BOUND_LABELS. Tags are checked against the registry as the library's are."""
+    source tags, or one of BOUND_LABELS. Tags are checked against the registry as the library's are, and under
+    `freeze` a bound value tagged meas-pending fails as a library param does."""
     errors = []
     raw = yaml.safe_load(pathlib.Path(path).read_text())
     name = pathlib.Path(path).name
@@ -235,6 +237,73 @@ def lint_bound_sources(path, registry):
                         errors.append(f"{where}: source of {key!r} lists the label {tag!r}; a label stands alone")
                 else:
                     errors.extend(_check_tag(f"{where}.{key}", tag, registry))
+                    if freeze and tag == "meas-pending":
+                        errors.append(f"{where}.{key}: meas-pending after freeze")
+    return errors
+
+
+# ---- measurement releases ---------------------------------------------------
+
+MEAS_CI_TAG = re.compile(r"meas-ci:([a-z0-9_-]+:[0-9a-z-]+)")
+SHA256_HEX = re.compile(r"[0-9a-f]{64}")
+
+
+def _strings(node):
+    if isinstance(node, dict):
+        for value in node.values():
+            yield from _strings(value)
+    elif isinstance(node, list):
+        for value in node:
+            yield from _strings(value)
+    elif isinstance(node, str):
+        yield node
+
+
+def meas_ci_tags(paths):
+    """{`meas-ci:<workflow>:<campaign>` tag: [file names carrying it]} over the YAML values of `paths` — every
+    source tag and referee with a campaign locator; a bare `meas-ci` names no campaign and is not collected."""
+    tags = {}
+    for path in paths:
+        path = pathlib.Path(path)
+        for value in _strings(yaml.safe_load(path.read_text())):
+            if MEAS_CI_TAG.fullmatch(value):
+                tags.setdefault(value, [])
+                if path.name not in tags[value]:
+                    tags[value].append(path.name)
+    return tags
+
+
+def lint_releases(releases_path, paths):
+    """9.15 (W-0732): every `meas-ci` campaign tag the data carries resolves to at least one GitHub release in the
+    release map (dataset/meas-releases.yaml), and every mapped release states its tag, its URL and each asset's
+    sha256. A workflow's artifacts are deleted after 90 days, so a campaign without a release fails here."""
+    errors = []
+    campaigns = (yaml.safe_load(pathlib.Path(releases_path).read_text()) or {}).get("campaigns") or {}
+    for campaign, releases in sorted(campaigns.items()):
+        if not MEAS_CI_TAG.fullmatch(str(campaign)):
+            errors.append(f"release map: {campaign!r} is not a meas-ci:<workflow>:<campaign> tag")
+        if not isinstance(releases, list) or not releases:
+            errors.append(f"release map: {campaign} names no release")
+            continue
+        for release in releases:
+            tag = release.get("release")
+            if not tag:
+                errors.append(f"release map: {campaign}: a release without its tag")
+                continue
+            url = str(release.get("url", ""))
+            if not (url.startswith("https://github.com/") and url.endswith(f"/releases/tag/{tag}")):
+                errors.append(f"release map: {campaign}: {tag}'s url {url!r} is not its GitHub release page")
+            assets = release.get("assets")
+            if not isinstance(assets, list) or not assets:
+                errors.append(f"release map: {campaign}: {tag} lists no asset")
+                continue
+            for asset in assets:
+                if not asset.get("name") or not SHA256_HEX.fullmatch(str(asset.get("sha256", ""))):
+                    errors.append(f"release map: {campaign}: {tag}: asset {asset.get('name')!r} needs a name and a "
+                                  "64-hex sha256")
+    for tag, files in sorted(meas_ci_tags(paths).items()):
+        if tag not in campaigns:
+            errors.append(f"{tag} (in {', '.join(sorted(files))}) resolves to no release in the release map")
     return errors
 
 

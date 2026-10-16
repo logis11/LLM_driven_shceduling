@@ -1,6 +1,7 @@
 # C1 — single-situation calibration: pure media (building-plan §3 C1).
 # Also the C5 familiarity-ladder base: tiers rebind these archetypes under
 # other name tiers (c5.variant.yaml).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-media
   seed: 104

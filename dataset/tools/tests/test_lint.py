@@ -354,3 +354,68 @@ def test_canonical_focus_track_names_live_top_level_tasks_in_order(schema, focus
         assert errors == []
     else:
         assert len(errors) == 1 and expect in errors[0], errors
+
+
+def test_freeze_rejects_a_bound_value_tagged_meas_pending(tmp_path):
+    """9.15 (W-0750): a value awaiting measurement carries meas-pending, which the freeze rejects in a timeline's bound
+    values as in the library's params."""
+    registry = dict(REGISTRY, **{"meas-pending": {"type": "measurement"}})
+    path = tmp_path / "probe.timeline.yaml"
+    path.write_text(yaml.safe_dump({"meta": {"id": "probe", "seed": 1}, "segments": [], "input": [], "focus": [],
+                                    "tasks": [bound_task({"total_work": "1s", "program": "p"},
+                                                         source={"total_work": "meas-pending",
+                                                                 "program": ["glam", "meas-pending"]})]}))
+    assert lint_bound_sources(path, registry) == []
+    assert lint_bound_sources(path, registry, freeze=True) == [
+        "probe.timeline.yaml: task 'job'.program: meas-pending after freeze",
+        "probe.timeline.yaml: task 'job'.total_work: meas-pending after freeze"]
+
+
+def test_real_timelines_are_freeze_clean(repo_root):
+    registry = yaml.safe_load((repo_root / "dataset" / "sources.yaml").read_text())["sources"]
+    errors = []
+    for path in sorted((repo_root / "dataset" / "timelines").glob("**/*.timeline.yaml")):
+        errors.extend(lint_bound_sources(path, registry, freeze=True))
+    assert errors == []
+
+
+def _cited(dataset):
+    return [dataset / "archetypes.yaml", dataset / "grids.yaml",
+            *sorted((dataset / "timelines").glob("**/*.timeline.yaml")),
+            *sorted((dataset / "timelines").glob("**/*.variant.yaml"))]
+
+
+def test_every_cited_campaign_has_its_release(repo_root):
+    """9.15 (W-0732): every meas-ci campaign the data cites resolves to a release in dataset/meas-releases.yaml, each
+    release with its page and each asset's sha256."""
+    from wlc.linter import lint_releases, meas_ci_tags
+    dataset = repo_root / "dataset"
+    assert lint_releases(dataset / "meas-releases.yaml", _cited(dataset)) == []
+    mapped = yaml.safe_load((dataset / "meas-releases.yaml").read_text())["campaigns"]
+    assert set(meas_ci_tags(_cited(dataset))) <= set(mapped)
+
+
+def test_release_lint_reports_an_unmapped_campaign_and_a_malformed_entry(tmp_path):
+    from wlc.linter import lint_releases
+    data = tmp_path / "probe.timeline.yaml"
+    data.write_text(yaml.safe_dump({"tasks": [{"source": {"total_work": "meas-ci:background:2099-01-01",
+                                                          "count": ["glam", "meas-ci:desktop:2099-01-02"]}}],
+                                    "validation": {"referee": "meas-ci"}}))
+    url = "https://github.com/o/r/releases/tag/{}"
+    releases = tmp_path / "meas-releases.yaml"
+    releases.write_text(yaml.safe_dump({"campaigns": {
+        "meas-ci:desktop:2099-01-02": [{"release": "meas-ci-desktop-2099-01-02", "url": url.format("other"),
+                                        "assets": [{"name": "a.zip", "sha256": "abc"}]}]}}))
+    errors = lint_releases(releases, [data])
+    assert len(errors) == 3, errors
+    assert "meas-ci-desktop-2099-01-02's url" in errors[0]
+    assert "asset 'a.zip' needs a name and a 64-hex sha256" in errors[1]
+    assert errors[2].startswith("meas-ci:background:2099-01-01 (in probe.timeline.yaml) resolves to no release")
+    releases.write_text(yaml.safe_dump({"campaigns": {
+        "meas-ci:desktop:2099-01-02": [{"release": "meas-ci-desktop-2099-01-02",
+                                        "url": url.format("meas-ci-desktop-2099-01-02"),
+                                        "assets": [{"name": "a.zip", "sha256": "0" * 64}]}],
+        "meas-ci:background:2099-01-01": [{"release": "meas-ci-background-2099-01-01",
+                                           "url": url.format("meas-ci-background-2099-01-01"),
+                                           "assets": [{"name": "b.zip", "sha256": "f" * 64}]}]}}))
+    assert lint_releases(releases, [data]) == []

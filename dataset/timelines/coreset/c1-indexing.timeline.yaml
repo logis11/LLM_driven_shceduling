@@ -6,6 +6,7 @@
 # editor it ends inside the 60 s segment under every policy (D78). The label
 # differs from the unwanted case by intent alone, which names and behaviour
 # cannot show — a pre-committed miss.
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-indexing
   seed: 115

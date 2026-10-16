@@ -59,7 +59,7 @@
             "minLength": 1
           },
           "attributes": {
-            "description": "Mode attributes (e.g. wanted): flat scalar map.",
+            "description": "Mode attributes (e.g. background_wanted): flat scalar map.",
             "type": "object",
             "additionalProperties": {"type": ["string", "number", "boolean"]}
           },
@@ -139,7 +139,7 @@
           "items": {"$ref": "#/$defs/spawn_entry"}
         },
         "fork_cap": {
-          "description": "Parallelism cap for the fork/wait-for-slot loop (binding-time value, e.g. 8 for -j8). Only meaningful with spawn_table.",
+          "description": "Parallelism cap for the fork/wait-for-slot loop: the build's parallelism cap times the six entries of an object job (e.g. 48 for -j8). Only meaningful with spawn_table.",
           "type": "integer",
           "minimum": 1
         }

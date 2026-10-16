@@ -7,6 +7,12 @@
 # measured fresh install bound whole at its CPU total, 727.170 s
 # (meas-ci:background:2026-09-19; 9.10 D17, D142); the file ends while it runs
 # (D86's form).
+# The game's threads beyond the chain and `wineserver` are omitted: the source
+# puts 95% of scheduling in its top 30-40 tasks and describes none outside
+# them (lavd-ossna24 s12; 9.10 D19).
+# The Steam client is in its measured state: logged out, no account, no
+# library, no game behind it, no `gameoverlayui` (9.10 D22; 9.8 D6).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c2-p2a
   seed: 202

@@ -7,7 +7,8 @@ With `set_ftrace_filter` and `set_graph_function` both naming the one function, 
 its duration printed by the tracer, preceded by a marker above 10 µs (`+`, `!`, `#`, `*`, `@`, `$`), or an
 opening and a closing line (`durations`). The duration
 is the tracer's entry-to-return time, so it holds the part of the tracer's own cost that falls between its two
-timestamps; the campaign's calibration pass (`__x64_sys_getpid`) measures that part on the same machine.
+timestamps; the campaign's calibration pass (`__task_pid_nr_ns`, the whole of getpid's work, under a getpid loop;
+`__x64_sys_getpid` is not traceable on the runner's 6.17.0-1022-azure kernel) measures that part on the same machine.
 
     graph_durations.py <trace> <function>   → JSON on stdout: n and the duration statistics in ns
 """

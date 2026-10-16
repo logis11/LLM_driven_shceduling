@@ -1,0 +1,584 @@
+# dataset/meas-releases.yaml — where the raw records behind each measured value
+# are kept: for every `meas-ci:<workflow>:<campaign>` tag the library
+# (archetypes.yaml), the timelines, their variant recipes or the grid definition
+# (grids.yaml) carry, the GitHub release or releases that hold the campaign's raw
+# records, and each asset's sha256 as GitHub's API reports it
+# (`gh release view <tag> --json assets`, field `digest`; read 2026-10-16).
+#
+# Companion to sources.yaml's `meas-ci` entry, which a tag resolves through to
+# its docs/references.md entry. An input of no manifest.
+#
+# Rules (enforced by the dataset linter, `make lint`):
+#   - every campaign tag the data carries has an entry here; a tag without one
+#     fails — a workflow's artifacts are deleted after 90 days, so a campaign's
+#     release is made before then
+#   - an entry lists each release holding the campaign's records, with its tag,
+#     its release page and each asset's name and sha256 (64 hex digits)
+#   - a release that holds several campaigns appears under each, with the
+#     assets its description names for that campaign: `meas-ci-2026-09-18`
+#     holds `meas-ci:interactive:2026-09-18`, the first 43 repeats of
+#     `meas-ci:interactive:2026-09-19` and `meas-ci:playback:2026-09-18`;
+#     `meas-ci-2026-09-28` the other 34 repeats of `meas-ci:interactive:2026-09-19`;
+#     `meas-ci-2026-09-20` `meas-ci:interactive:2026-09-20` and
+#     `meas-ci:playback:2026-09-20`
+
+campaigns:
+  meas-ci:background:2026-09-19:
+    - release: meas-ci-background-2026-09-19
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-background-2026-09-19
+      assets:
+        - {name: gated-reports.zip, sha256: 7d4b20d90a14ac61aa5351c30f4e9bda83d59c55887337515dbeb65c6f996937}
+        - {name: meas-background-7z-r1-full.zip, sha256: b088e940ee18ea77a602f8fd2980bee95c9eeb78c6878e470bcb2611dae3ab33}
+        - {name: meas-background-7z-r2-full.zip, sha256: 90b02be3bcf1367587c244a7739dae5f699606673a9e706be5374bdbbff63faa}
+        - {name: meas-background-7z-r3-full.zip, sha256: ddf4fa37b955e6a89e288643aa68cee0c641cc0211a75ae9b765dd7d2e3dd2ac}
+        - {name: meas-background-7z-r4-full.zip, sha256: 84e141a288662060ec4492b3767ea591a7c752e00cfe452e4f6082d0b0e0cc9e}
+        - {name: meas-background-7z-r5-full.zip, sha256: d98e43b6cb558ce8237fddd319602ec6051cbf95ccc4720d87c28363c30d2e9b}
+        - {name: meas-background-7z-r6-full.zip, sha256: 6ab66ffd9c1649e1c002bfcd4898fee15c25b746934a4c5fdf98508d35ae8641}
+        - {name: meas-background-borg-r1-full.zip, sha256: d4113e00cf26ab067fe7ced0e963549f3bf07f879232f3f45559b85777273e7d}
+        - {name: meas-background-borg-r10-full.zip, sha256: 92931975f7eb9fa1db46e60d8edbaec90bb32738a8474065c74655def89ecd1d}
+        - {name: meas-background-borg-r11-full.zip, sha256: bc80fdb9ca82cb059c70024932edad6e03d220fe3da7f9293ee7e61e5d6b637d}
+        - {name: meas-background-borg-r12-full.zip, sha256: e3ba69c97d5443af717f1d907cc850bf46992baa2e009efb989eb53064e91030}
+        - {name: meas-background-borg-r13-full.zip, sha256: 2e8c0db96c4a752a28bc2e5b86856196d6c17ab362dc8e3fa5c53cd55907cc43}
+        - {name: meas-background-borg-r14-full.zip, sha256: 3e601323519ede4872c4b54e8ca3c29456b33405c1852fcb2f19f90419f65786}
+        - {name: meas-background-borg-r15-full.zip, sha256: 196b809c1d44e747e55e223ab14f16649438986f4cdf4b946f355f240d7ed21e}
+        - {name: meas-background-borg-r16-full.zip, sha256: 1e3191b0f9513232880812125a54a7c2654801c25b5591ddce3c19129edd5a0b}
+        - {name: meas-background-borg-r17-full.zip, sha256: ffd6bff47c09c78901eb6e1456bc65aba5bc8a81d328f8ca5ea11d52c1c56a5b}
+        - {name: meas-background-borg-r18-full.zip, sha256: ddd839d22dcb7a1c56d140461805b639b150d7865960ce8d9cd3229357e16e9b}
+        - {name: meas-background-borg-r19-full.zip, sha256: 31109b71e2915079903abb6299ec7afd58d7738fa76c851fd0f7388ffe0bd68a}
+        - {name: meas-background-borg-r2-full.zip, sha256: 3bf7106e741ae66f3a54a7d289dad4120c135719fe26aa789696167964b0193d}
+        - {name: meas-background-borg-r20-full.zip, sha256: b56eb16aa143d2f892b2a7a51e957773704235392faaaec090ff1ca12fdfc6b8}
+        - {name: meas-background-borg-r21-full.zip, sha256: 57336b05c6f09346f66515a09366e3ab6d6de6c5a293d35131f8b26df2db2dcd}
+        - {name: meas-background-borg-r22-full.zip, sha256: 90b19939bd8953fcf38c321c0c59eed2945e4625a666a440687fee2e0c287322}
+        - {name: meas-background-borg-r23-full.zip, sha256: 071c2789decae0912201ab60a16505ee11cf84dc4662fa7794c1dced4cc1aace}
+        - {name: meas-background-borg-r24-full.zip, sha256: 0147f7b413d54462da2c3d0ac86c0b86615b2b296ba3ea03a1828e3bf211811e}
+        - {name: meas-background-borg-r25-full.zip, sha256: c47be3ddad294f1347188b585d1fa9202ace35d5ced5b43a39c7f81cae3ccabe}
+        - {name: meas-background-borg-r26-full.zip, sha256: b2e45dc7a2971d3d2755b6d2d291ccbff1ed1f5c993b36edb2e08bb5475e6fa6}
+        - {name: meas-background-borg-r27-full.zip, sha256: 7e4d94ec6b9f177b4a3838243bacb1d345afb6f091dbd4299fe1986b2dacf1c8}
+        - {name: meas-background-borg-r28-full.zip, sha256: 240028e3ae845b468481a3b3ba75b21f162cb26ee8fc8a8ae04bd27a9bf5a11e}
+        - {name: meas-background-borg-r29-full.zip, sha256: 99f95c882bc08ff504ed9eb92e9b612b59e2dcb8bfc77d7971f3d8a9a67318a5}
+        - {name: meas-background-borg-r3-full.zip, sha256: 74639f32799bf26650e0653e3a5235e14a25ec1c11b0fc4ec7673932a0bfd30d}
+        - {name: meas-background-borg-r30-full.zip, sha256: 5793bbeea1119482584869b47a425bcad45b543023840d2faf59e1787444c12c}
+        - {name: meas-background-borg-r31-full.zip, sha256: 6208166883fcde63f02133a990445176c4022057c9bc35a7048579d4223e995e}
+        - {name: meas-background-borg-r4-full.zip, sha256: 6875eab86e5b0d7432911d5f66b7043f52c74264c1bbc8d33fa67c6e978fe499}
+        - {name: meas-background-borg-r5-full.zip, sha256: a022a9672bd76dc9b8276d86f7315c68f383a118c6077a6fc8691c9cc3c88938}
+        - {name: meas-background-borg-r6-full.zip, sha256: 532e8be060f935338c68707e5a0632ce04e45a27275be45b986ca8a8469e1ba0}
+        - {name: meas-background-borg-r7-full.zip, sha256: bd8337e8a2975fc2c06ebe31d8239eacc3d3f30554896fbf9afa8df689aba3dd}
+        - {name: meas-background-borg-r8-full.zip, sha256: a642cc012cf8a5e2e199178ff04a1c6b5d6ab5be35f3d1ac96e2a999bafd844d}
+        - {name: meas-background-borg-r9-full.zip, sha256: be3c5daf6c90dc1baf6187fb5f16b435f43d06c2302203d323a6e3299a94ef2a}
+        - {name: meas-background-steamcmd-r1-full.zip, sha256: 7f6e58a240c4a71890c7b8b6f085a9e81f9b58dba473203ff69bc7977886d9cb}
+        - {name: meas-background-steamcmd-r10-full.zip, sha256: 75c457663ece1312893a207a6a7940896d2cc70a26e1e61fe6f884d0b0d642f2}
+        - {name: meas-background-steamcmd-r11-full.zip, sha256: 8974c0709c6dbc931621eced3f653b89ef58bfb8b372e3711395963c913ffe30}
+        - {name: meas-background-steamcmd-r12-full.zip, sha256: 1afd5f83195ce632b78e55f230c8ef2541e02511a1a0c606ae760a6d2100a114}
+        - {name: meas-background-steamcmd-r13-full.zip, sha256: 062b062e444d16368751e2b23bf1ab9fada9f01f6ca7bcfa9b6931fc679bd082}
+        - {name: meas-background-steamcmd-r14-full.zip, sha256: cb2462032e62485396b00ba3832efc4393db0f4fdfc2f0e37485dca430122eb0}
+        - {name: meas-background-steamcmd-r15-full.zip, sha256: 9d56ebf16c81eb68c97de8221ca0e5080c0c399b318a029405610f32e1f46dfc}
+        - {name: meas-background-steamcmd-r16-full.zip, sha256: 2a0b7fe92472d506a3babdd6062f1f68aef714819c79bb7d4e81f72f343610b5}
+        - {name: meas-background-steamcmd-r17-full.zip, sha256: 38b1df16414591e3f113a0f0c18b6efc4802722e807ab38a15c04807d72ff327}
+        - {name: meas-background-steamcmd-r18-full.zip, sha256: aac8c35715e9be583d86723e7b92cdb8278fcc1e0d479ec78fbb7720c14f21f8}
+        - {name: meas-background-steamcmd-r19-full.zip, sha256: 5dc2a370792baeca8bc2254f566d06fae7aa3d24919b974ce1b4cbc62305f3fd}
+        - {name: meas-background-steamcmd-r2-full.zip, sha256: 67a209c93469c9140ec3c10a281fec82fc97ab01d79d2d194251bb94629c0083}
+        - {name: meas-background-steamcmd-r20-full.zip, sha256: 1b57334b4ed8ae7d94f9af8ec0671fc4ced9d7c3197e2291a25fd2a2d5326c19}
+        - {name: meas-background-steamcmd-r21-full.zip, sha256: 8912d6e5488fce7c12e479e0d0d27819a2cc903fb684d0fe0176e886c9a815f8}
+        - {name: meas-background-steamcmd-r22-full.zip, sha256: 6f4bae308f1a7dbc18d03993d5d6a77c3c07755b3f01b0f61ee7460f9689a047}
+        - {name: meas-background-steamcmd-r23-full.partial.zip, sha256: 036db7e80598e396815d488a1a4aed3949e24fe4985a31e2d8735f4b7949030c}
+        - {name: meas-background-steamcmd-r24-full.zip, sha256: 6e7758aae0c8c1476297d8f78cab1bb052963e36b8e973dd17a65831b2aeb882}
+        - {name: meas-background-steamcmd-r25-full.zip, sha256: 8d1ae967a53405c14e4d867fdbef3ba8bb74020cf5272f77cf8b9cbdb5640377}
+        - {name: meas-background-steamcmd-r26-full.zip, sha256: ab7ff3574babc8ca2926f4d7cddd39a1404a2041438b2ccbb7960736abbfc718}
+        - {name: meas-background-steamcmd-r27-full.zip, sha256: 41932f249b82d4f2e3add1d54b447a64df29fbecb8cf3c600453a3a6917f6ea5}
+        - {name: meas-background-steamcmd-r28-full.zip, sha256: c143928235aabb2cd0aa2cf9dd8aa03a08b984ebcd2e71fdb39194e2bad36d96}
+        - {name: meas-background-steamcmd-r29-full.zip, sha256: c5fdcc3dc7ea54fb098b59d978cd8482a4e60f00ccea32e3b87031bc3a88c823}
+        - {name: meas-background-steamcmd-r3-full.zip, sha256: 02bd799c7e7f2f941f7d70bff49d9c56580332fadc04c054cb009d7604c47f64}
+        - {name: meas-background-steamcmd-r30-full.zip, sha256: c439b82353ca542f4698650d05e7ffa8eddee94f4a9d254f1c7db15868d96e9b}
+        - {name: meas-background-steamcmd-r31-full.zip, sha256: f2a547c82088e9778da62897eadb4acf9d63aa81501883224561bd00f31c6e76}
+        - {name: meas-background-steamcmd-r32-full.zip, sha256: 9bf38de62a414e99fcf53221ce17bec62fb774acb52bee43ff3937e853bd34c3}
+        - {name: meas-background-steamcmd-r33-full.zip, sha256: b6c825f931c94251517a01ed7da762003265ca60078134e6d3368a078cfc1e4d}
+        - {name: meas-background-steamcmd-r34-full.zip, sha256: 4437cfa22cfc22e63791853c0438bbf164d7e513afaf8af9105ae9197e1b62de}
+        - {name: meas-background-steamcmd-r4-full.zip, sha256: 301cafa5cbdde240a9172862ba311d81d1ffc6b2a51a771b5af26af6a916ce9c}
+        - {name: meas-background-steamcmd-r5-full.zip, sha256: 09c726345f31a33a889a994155215981e434fe4065073317570f720419cdd22c}
+        - {name: meas-background-steamcmd-r6-full.zip, sha256: 771b611cc45b89c4bcf3b067d2822956f2c9a7b9b2ac82aa0cd19c3e7545cebd}
+        - {name: meas-background-steamcmd-r7-full.zip, sha256: f24b168e2de0b2f7f1853f6b32c37059ebd1e0036e3a739d92d855bcdf96d36f}
+        - {name: meas-background-steamcmd-r8-full.zip, sha256: 4af5b746f9b3d97087bf1887dac3e2fb1a3b4c9cbe24022bae376d2dadc48563}
+        - {name: meas-background-steamcmd-r9-full.zip, sha256: f4cd02b6dcabf0b53d4dcd490ba5896aa117bb524517950fe9174d15d7e19d3b}
+        - {name: steam-download-stats-09-19-2026-04.zip, sha256: 3fc89e34d31e3222bd76cb3eb1760e4292fbbad824a1dc35e7e0645498d19896}
+  meas-ci:background:2026-10-01:
+    - release: meas-ci-background-2026-10-01
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-background-2026-10-01
+      assets:
+        - {name: gated-reports.zip, sha256: a2e5d3f44e860b5cce02a79f6443f7d6476203707d9e5564e46dc1502310c25e}
+        - {name: meas-background-upgrade-r1-dry-36843481310.zip, sha256: 0d953c2558d0a9a94621100132139f2baaed952d7a1506c04fa1f56b68a5a94d}
+        - {name: meas-background-upgrade-r1-full-36847549673.zip, sha256: 827251650c811ccad6d033ae65b8a26f3015531d19cb46a9bba52d4bfd8a9be9}
+        - {name: meas-background-upgrade-r2-full-36847096521.zip, sha256: 73a0a0a7c9ffe7bb65326a36da4a45ba7a169f1bea43ecda03942b0bb13ed650}
+        - {name: meas-background-upgrade-r3-full-36847096521.zip, sha256: 8505186b8665812d4affcce3f36fe5d1b07080b54c7f8cab3d219d5e86a834e4}
+        - {name: meas-background-upgrade-r4-full-36848289469.zip, sha256: ab60df2a66fd572fa1d7e7d180f6bab98d29a5107eb70d97710d50a63a75c7e1}
+        - {name: meas-background-upgrade-r5-full-36847549673.zip, sha256: 690bc2b0fda186043b3f6083116c2ead8243bd023dc2380e844f6553ef129915}
+        - {name: meas-background-upgrade-r6-full-36851095354.zip, sha256: 75495c8595c0f03bbc44eadb0f75966e213d80453c989f58d82ef03e0d16ecc5}
+        - {name: meas-background-upgrade-r7-full-36851095354.zip, sha256: a71d4e2b6992c0048d3cf1a960d41dfa4391f11f8423442208fd70bdb6c6c2ec}
+        - {name: meas-background-upgrade-r8-full-36851095354.zip, sha256: 0da911b39b08107c1b8eb1312901fff149e65af67c24592b07a3ba6e5b2bf6a7}
+        - {name: meas-background-upgrade-r9-full-36851095354.zip, sha256: 9a9007d6ec8a7b31c4c65d5eb3af6cf5714bef3e2d7010c5cebe86f7fbecc97d}
+        - {name: upgrade-layer.txt, sha256: b137960b535edc27c16e04454779edc65d0fdc2b32f9a55a6335f22031df87d9}
+  meas-ci:background:2026-10-02:
+    - release: meas-ci-background-2026-10-02
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-background-2026-10-02
+      assets:
+        - {name: gated-reports.zip, sha256: 7b14f61b28fd80af7124a6620499052ff450e8e4f2235889a815315b33577d9c}
+        - {name: meas-background-dkms-r1-dry-36980404122.zip, sha256: 66507f6f35d12519d50f07c27ebc4c90304577fd2a5860658699d573f2552fb3}
+        - {name: meas-background-dkms-r1-dry-36982322419.zip, sha256: 9570e253affe83fe36131122552d0c6d4131d16e10bf4646925f42871adb673a}
+        - {name: meas-background-dkms-r1-full-36984969195.zip, sha256: 6238acddfc9ccf9be31bd58ae764b4a0fc45a421ea89e330efd8e7fd2381b196}
+        - {name: meas-background-dkms-r10-full-36987468347.zip, sha256: 22ed4921ac8dfef043e2582633e5e53f6416a3724e39c6973c0bdd6b8d0725ab}
+        - {name: meas-background-dkms-r10-full-36987471634.zip, sha256: 4253bfeaef9789c60a8216ecf9b7710e1bf638ddc0bd1743cfbb2cf3241b24e1}
+        - {name: meas-background-dkms-r11-full-36987468347.zip, sha256: 69c4aac5a2dbef9bcc556c508c76d1e5105390f5001749d56cd2b37e48a65ea0}
+        - {name: meas-background-dkms-r11-full-36987471634.zip, sha256: 168b3c55395e8f7948c587227d410f5e8452c9989cc9536e127b78cc3a524b36}
+        - {name: meas-background-dkms-r12-full-36987471634.zip, sha256: 80c4c155f1b9f7978c97b8116d9577b7d9f8f4975db2bcbe9da0999c2ed8fa84}
+        - {name: meas-background-dkms-r13-full-36987366998.zip, sha256: 841990cf3b36ec9c46cbf8e5686d58f8911f5048241cfe02c3df0f0266f1850f}
+        - {name: meas-background-dkms-r14-full-36987366998.zip, sha256: 5294a2214a31e567074c0d80e0c6357410f7963dd8fdeb57e17623df3a43d5d2}
+        - {name: meas-background-dkms-r15-full-36987366998.zip, sha256: 2716d8b65e6dc26743cac78339f41fc64a8b15c54ba899ec9f34cbeef8badfe2}
+        - {name: meas-background-dkms-r16-full-36987366998.zip, sha256: 877fbbd73c697aeda5d57407144641a7f4d1e212e2139e8c41478fc2385b60ad}
+        - {name: meas-background-dkms-r17-full-36989503010.zip, sha256: e27c869f70b0f62ffd90e575685515c775c18212e21f19dca4a422fac8421e0e}
+        - {name: meas-background-dkms-r18-full-36987366998.zip, sha256: b18f041d49754f33cb70d9d219d53e5615cb3bb553fab30236f2a16de0b18660}
+        - {name: meas-background-dkms-r19-full-36989807453.zip, sha256: 9316b9b49554038b1a1f43888eb2c3ef661c1caf1efd305e7f37ea07a91e8bd0}
+        - {name: meas-background-dkms-r2-full-36984969195.zip, sha256: 60434b5c67a7501790e5859a9f0ce74469e52b0b9d8bcc1707420a5bbe8a738f}
+        - {name: meas-background-dkms-r20-full-36989807453.zip, sha256: 422c1bd140641921dae881a08cefb1aca67d4d9d234dabb8c89c0be65aa98301}
+        - {name: meas-background-dkms-r21-full-36989807453.zip, sha256: 2100554b4f1277a5489e1ea977636286013ac64afeb153cfaac1df6d9ac338c4}
+        - {name: meas-background-dkms-r22-full-36987366998.zip, sha256: 60fa57194fe0cfb41a46cd4ee795c29add138d9b053627411d4fe144becfdcb7}
+        - {name: meas-background-dkms-r23-full-36989807453.zip, sha256: 28e4c6437f1e2cd53c867e968f2d0b9758ef1b9ed0df64ec54ff88a204d6d59f}
+        - {name: meas-background-dkms-r3-full-36984969195.zip, sha256: b3d2a19afebc87f59e75ac9dd2a73490134eb1ac74d91391d31fee6e574ddd5f}
+        - {name: meas-background-dkms-r4-full-36985028429.zip, sha256: 8f2e46591ecf58a86280fa8db1e52d86b47829778adcfcfd1239609ce76d391a}
+        - {name: meas-background-dkms-r5-full-36984969195.zip, sha256: befe23a62d064ffab42802a156371069dd7107f67167a1c3e55c017705a7a037}
+        - {name: meas-background-dkms-r6-full-36987366998.zip, sha256: ad81b67402136ce88380e2998cad5baa03660f425607679e2269c1e1c56bd23e}
+        - {name: meas-background-dkms-r7-full-36987468347.zip, sha256: 7ea35fc58f84347566f247a8b97031decbfd474157b5770b0a8a009dc8f55116}
+        - {name: meas-background-dkms-r7-full-36987471634.zip, sha256: cdcbe1f558f9ba3f689c2bc826933f13410e662dac214defee6db20ce45b3c2b}
+        - {name: meas-background-dkms-r8-full-36987366998.zip, sha256: ea892308e5a70bf1b5b9e946a733d537f1dc09932e911bd94219ba2602d11699}
+        - {name: meas-background-dkms-r9-full-36987366998.zip, sha256: 99d38ef79b67a908e8d3a540741029145880d5f429f6aed62b400e0d29399efe}
+  meas-ci:background:2026-10-02b:
+    - release: meas-ci-background-2026-10-02b
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-background-2026-10-02b
+      assets:
+        - {name: gated-reports.zip, sha256: d6eb958a6ce450f23ed8ff072da55a5256934b3445251e3d226653c41cc50c4e}
+        - {name: meas-background-tracker-r1-dry-37001819621.zip, sha256: f4d588861f1fbd88f2f3474287721d4b36d8a0845a38e550a99ca9e0f0d9a3ce}
+        - {name: meas-background-tracker-r1-dry-37002910488.zip, sha256: 49eaa6617fe8855391df53073671ba6a7cd6f117fc7d38399cfa54fb45f0ea7d}
+        - {name: meas-background-tracker-r1-dry-37010496980.zip, sha256: c13f9fb7cd4bbef039ed01033e74e98c3d34ed001f6db9424eebccccc7320f02}
+        - {name: meas-background-tracker-r1-full-37014118970.zip, sha256: 4b3e842172244d262e3e8db49a08876e2d6d078e676f0d76527837c6ed297945}
+        - {name: meas-background-tracker-r1-full-37014119153.zip, sha256: 0d5f472fea5d1ed1a1f7c096948fd5d3bbbfcb7295f313853ed552875bbcb90d}
+        - {name: meas-background-tracker-r1-full-37075720148.zip, sha256: 28bdc195f7c7a14ffa9730e511592239e590bb076582f5c1bfccbfe53b205134}
+        - {name: meas-background-tracker-r1-full-37077892756.zip, sha256: 44bce723cb052a8e3295d216b069a2627678c3ae01c7de9d0947b078d24724ed}
+        - {name: meas-background-tracker-r10-full-37079295954.zip, sha256: 0abdd6ae10099957f6423949449ef34d236659712a6419cbda2a92a4970f0b82}
+        - {name: meas-background-tracker-r11-full-37079168920.zip, sha256: a0bb47afb55be249aa7a1935003d7ac8b4872e14ff9bda6707a20ca1201ec3a0}
+        - {name: meas-background-tracker-r12-full-37079763885.zip, sha256: 9857b4fc33bbde788018ac911668943f537402af8aaac6d85a607a0c2c9ab26c}
+        - {name: meas-background-tracker-r13-full-37079168920.zip, sha256: 4e8bece63254989827628baa58fbe7f9fccdfe9341c5d62f44a22093cf70c5ab}
+        - {name: meas-background-tracker-r14-full-37079295954.zip, sha256: fd1a15648af2afd52ce267c48d3e255ea8a560740dafbd068a850b720d03efd0}
+        - {name: meas-background-tracker-r15-full-37079295954.zip, sha256: dca5dae5550a5f712f77f330fcad08ca896b66bdd4e9465fbc4e7edf5eb16893}
+        - {name: meas-background-tracker-r16-full-37079532509.zip, sha256: a765f0cfce8c53774e2b9a5f6f3d769f9e106720edd4a322536664de2f0d9ac4}
+        - {name: meas-background-tracker-r17-full-37079168920.zip, sha256: cb0525a334607f2717ccb2fd2481deb8207ebd9bd047f51713b511b10c84f745}
+        - {name: meas-background-tracker-r18-full-37080669302.zip, sha256: 6dfc56c136b8f9a1d2fae8afd31875ddea45dcf244dbd5696704502fc3080a55}
+        - {name: meas-background-tracker-r2-full-37013699563.zip, sha256: e3ddbe99b902278ff10e485add1b9e264c5791c81e80a22f305813c367b0cc94}
+        - {name: meas-background-tracker-r2-full-37075720148.zip, sha256: 431a0134b4c20ebbe2eee4c810cbb17a3c26ca120bde74cbf73954cf339d117b}
+        - {name: meas-background-tracker-r2-full-37077613408.zip, sha256: 559a429dcf2f9316ebb2907e5fbbd998e7883a560b918e18575bb07a8fddfd03}
+        - {name: meas-background-tracker-r3-full-37014118970.zip, sha256: 4496415e3d1a3031cc485c02212ee18b2ea9b839242e7ed1457e31f8c5838709}
+        - {name: meas-background-tracker-r3-full-37014119153.zip, sha256: 535c4a04c034f9a2c2f1a0cd7f56a543a575574f3f07d96959489501569526b6}
+        - {name: meas-background-tracker-r3-full-37076270628.zip, sha256: 036a765391cfd64d4bc14db82daf7e00f88e76c29621418a95fe91ec1f4065b1}
+        - {name: meas-background-tracker-r3-full-37077613408.zip, sha256: 2936f5fc32c6913f2051b073f980c8ec562e7defba2415c5a4d0f5c4eb30b683}
+        - {name: meas-background-tracker-r4-full-37013775432.zip, sha256: 63f8bd4294ee52f66c6a4eaa32c567a18b371facc84b0088e33f4ecc2f6d35e8}
+        - {name: meas-background-tracker-r4-full-37075720148.zip, sha256: d0ee72aa95e0d21a1fac9526e467cd93ed09e88ffdaa64310d0c7f299097005e}
+        - {name: meas-background-tracker-r4-full-37077654870.zip, sha256: 78bd5eb3bd684a10dccf52dea4a717168eec76b127aa3015f53914feff6cc34f}
+        - {name: meas-background-tracker-r5-full-37013699563.zip, sha256: 7f1179ec0990c8c782129543c2666ddf932ddf40c3216f39dbfeee57065e063e}
+        - {name: meas-background-tracker-r5-full-37075720148.zip, sha256: be682bb215a7e70e3fb9c7897a548b0a7164bd77d93065791915046b29933392}
+        - {name: meas-background-tracker-r5-full-37077654870.zip, sha256: f8afc783b35ac16d81af44354d4a41c7e43d9485adbe7eed313a901acb87b835}
+        - {name: meas-background-tracker-r6-full-37079532509.zip, sha256: d7babf68ec4ee963f983a2e2bd2237af1843d1b95934c07d8d78c30a95a96eec}
+        - {name: meas-background-tracker-r7-full-37079168920.zip, sha256: f1f658bccc506b470e876efa7a7d7982ac4735a58be8b9d6d4da4cb902ebb961}
+        - {name: meas-background-tracker-r8-full-37080205717.zip, sha256: f72e963064acf5acf57070ee7891af5600f640a5ab5410197e376f41c0eb15c2}
+        - {name: meas-background-tracker-r9-full-37079168920.zip, sha256: d6ec563a67421a5fdacf883ccd823fa3c9adf645f2000e49bb784b9b0a393571}
+  meas-ci:background:2026-10-03:
+    - release: meas-ci-background-2026-10-03
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-background-2026-10-03
+      assets:
+        - {name: gated-reports.zip, sha256: fc05751949839a7d1a974c7c78eac92319452c32b31a623f43c619b321a6ff1a}
+        - {name: meas-background-mnist-madvise-r1-full-37093570964.zip, sha256: f435b5ae9cee7b20d6b163a00f43552c0c86b6765bbd825385b8e744f5c73d57}
+        - {name: meas-background-mnist-madvise-r2-full-37093570964.zip, sha256: aa666d3676c970e8e0b8d5230f3e503b1446c4996dcb1aa459813c349528daaa}
+        - {name: meas-background-mnist-madvise-r3-full-37093781292.zip, sha256: 7462006560b6fc244b9b46ce2b6b4cc61b618eded8302240eaa07c1bdfb6b33d}
+        - {name: meas-background-mnist-madvise-r4-full-37093612595.zip, sha256: 75a0c489f9da84874db5babb33768ada14ad836ed0bb01268bb32890b4ac5459}
+        - {name: meas-background-mnist-madvise-r5-full-37093612595.zip, sha256: 93e7ccae1031a7229a8ea74a1e5089d1282b1f552ed4123e463806b6768b6200}
+        - {name: meas-background-mnist-r1-dry-37089156376.zip, sha256: 8db65abfdd1af97faf33d1641cdaf00818ac82375202440ddd70a2f7bf4abe05}
+        - {name: meas-background-mnist-r1-full-37091275421.zip, sha256: ac822661f1b3b14c714b06436938062641c3fd17c5e8765e4cb99d80cecb955a}
+        - {name: meas-background-mnist-r2-full-37091275421.zip, sha256: 11be94a456d8d0cc402578721147755f954890aff29f22f6e935f47cee537050}
+        - {name: meas-background-mnist-r3-full-37091313419.zip, sha256: 0bcd3e94b957e08a9a08a7d61d441c00e6191c75fb81cb21c57d2b285fe6b013}
+        - {name: meas-background-mnist-r4-full-37091275421.zip, sha256: 7e817f80eac882f18b9e32d838a0a2c444a0eb61c5a49b934a3eccff87c6493d}
+        - {name: meas-background-mnist-r5-full-37091275421.zip, sha256: f5012c79dad338d6807f25378223f0e400716d9ccb05b0735a01a60666e32e0d}
+        - {name: meas-background-mnist-r6-full-37093607991.zip, sha256: dcbef27a63d802da06b84ab2570f469002f0c58798559743ae3abe572133c255}
+  meas-ci:background:2026-10-03b:
+    - release: meas-ci-background-2026-10-03b
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-background-2026-10-03b
+      assets:
+        - {name: gated-reports.zip, sha256: ed14bdc341aebb311f54b106f3b969a4227177bc8566aba6b6504eb7e266a887}
+        - {name: meas-background-handbrake-r1-dry-37103205438.zip, sha256: f8cf162bbb16ef8a74b2a8b92f7a43e7bd83621c8e52892db1ef26384e47a2db}
+        - {name: meas-background-handbrake-r1-full-37109133562.zip, sha256: da4edeaf7c2f4d67a8a68d2a6992dbc66f40d81260b0a91f21016beace13d8a8}
+        - {name: meas-background-handbrake-r1-probe-37100242887.zip, sha256: 4c648a247e89b0c8d57a7e4f4ea6d037625ef1b77ea140857c5463e3001ef525}
+        - {name: meas-background-handbrake-r2-dry-37105339193.zip, sha256: decb14e5a10693ee171994c6d54968a4551a4db0356dc31ef325e50181694507}
+        - {name: meas-background-handbrake-r2-full-37109133562.zip, sha256: 977342c12daa5fe5e852982d933ca77e9c4bba7b57af4473a6290f948825a783}
+        - {name: meas-background-handbrake-r2-probe-37100242887.zip, sha256: a5668b2a3d7024c252d776967f5aa1e241010e8e1ccc97eea4d3ed5738f1eef0}
+        - {name: meas-background-handbrake-r3-full-37109133562.zip, sha256: 04ee9c5bf47a9f3fde6253c787a54a0307145737fda1d81b77ec489937984e4d}
+        - {name: meas-background-handbrake-r4-full-37109333265.zip, sha256: 3f2d297dd74b2381947eedc5c03b6b3669a598c28ebeb528ea4b74b3f067068f}
+        - {name: meas-background-handbrake-r5-full-37109333265.zip, sha256: c826ce7f0be6e6d5a0e4355653d36fd9be7fafcbe286a7ca0dea6bf90c15ede5}
+  meas-ci:background:2026-10-03c:
+    - release: meas-ci-background-2026-10-03c
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-background-2026-10-03c
+      assets:
+        - {name: gated-reports.zip, sha256: 2dc166387f405824c401e5a4a3f48fa441baa15f847e4dfb95b52b5782a96c39}
+        - {name: meas-background-kdenlive-r1-dry-37121829327.zip, sha256: 9b717f3798e1f90e668cf743ac5dd11379dc89ede0359f7658e12bb141722698}
+        - {name: meas-background-kdenlive-r1-full-37124818629.zip, sha256: fd7c1dc0055b9ecc0f440796cc0d7be481e84103c30e6c46b9251b0667b37628}
+        - {name: meas-background-kdenlive-r10-full-37126020125.zip, sha256: 8d013517eca1d3fad96390fc9457a88bcb234c5241832fb21f18643366d79c96}
+        - {name: meas-background-kdenlive-r11-full-37125847561.zip, sha256: 1377753a55a7b26cba119e97b7b74b58a0c530c9b31cb194ad8c8a78a1b78518}
+        - {name: meas-background-kdenlive-r12-full-37125789856.zip, sha256: ece2aa4874fe1e0e62b1a708ab08b6f1d77b1388d68e6eeea99dc77cc1323ba0}
+        - {name: meas-background-kdenlive-r13-full-37126020125.zip, sha256: 89e820d41e16f4501c2f1abd460b84e115bbf8a3f296e9c911ae79fd8da55621}
+        - {name: meas-background-kdenlive-r14-full-37125789856.zip, sha256: bd88a399b583e29bd15f47677f96fc73eb330058407150540fed3dda01e289d4}
+        - {name: meas-background-kdenlive-r15-full-37125789856.zip, sha256: 1091d33975e2e152c3e832508b878e908c915fcff61ed7a20710f4ffe7c4259f}
+        - {name: meas-background-kdenlive-r16-full-37126535233.zip, sha256: be64f9ea0ffca071823e77d38bbe49a3d04edef89da2573c2690a99d5209fedc}
+        - {name: meas-background-kdenlive-r17-full-37125789856.zip, sha256: c5a51f293505bae779e42b5e94218cb13b110853bafe30cf7303847905f142d3}
+        - {name: meas-background-kdenlive-r18-full-37125789856.zip, sha256: 7eebcec00caa045446eb8b54935c016488c69a62dc56bed44ebf7be5361bbbfa}
+        - {name: meas-background-kdenlive-r19-full-37125789856.zip, sha256: 6cfeeb35ae88ec4e93984644fb258b273874fffd688dafa1b4e073dad0b5c911}
+        - {name: meas-background-kdenlive-r2-dry-37122809400.zip, sha256: 2a041864f6b41ce607ebc7bc9db98752dbe39b0d188f9484930b53a5b62acf71}
+        - {name: meas-background-kdenlive-r2-dry-37123567963.zip, sha256: ffde520eb4fac1179cb1bcab46be070341076dfcfd018ae354c270a2416066c2}
+        - {name: meas-background-kdenlive-r2-full-37124818629.zip, sha256: f84fb8d494c94b96631834f25ffe987bebaef30f4d0823c83d2f52c31f392789}
+        - {name: meas-background-kdenlive-r20-full-37126535233.zip, sha256: d5c9f4683f19bf1dfdcc4f6c8ed6b103c7bc8e00211b5c1964fb5df79e27c4a2}
+        - {name: meas-background-kdenlive-r21-full-37125789856.zip, sha256: 868c054554b5e163c6155a0dc66069f9e6894005ddbb46f01225b470261d4499}
+        - {name: meas-background-kdenlive-r22-full-37125789856.zip, sha256: eb4c92aeba91da7c897a19723d3ee8e43fc87583ae138d7ac02192b89e6749f9}
+        - {name: meas-background-kdenlive-r23-full-37127200770.zip, sha256: 1101b9cb97ac2aad4b6387cf4b1412bcd3cdaf8c3b1863bb59fa14edef1ab77b}
+        - {name: meas-background-kdenlive-r24-full-37127200770.zip, sha256: 8359231a872f9e5ce574a0ed8c936ca811fd01f11965a5a31e4d72be35ea6e7a}
+        - {name: meas-background-kdenlive-r25-full-37127913545.zip, sha256: b38ee8818f16c2f7281e3e2968ec3d996841ddc039f581687768d93263a36fc6}
+        - {name: meas-background-kdenlive-r26-full-37125789856.zip, sha256: ffb6dba3be1da4d531fc3e931a69ae225aa1cad6f9e3afd6ffca59e39bf33667}
+        - {name: meas-background-kdenlive-r27-full-37127738977.zip, sha256: 9f56c0fdd04206d025e567a9921a6f5e5601f4eb915e31a6e479ebf3fa690cba}
+        - {name: meas-background-kdenlive-r28-full-37127200770.zip, sha256: 2c9d86ce99810c7f2ea4d79225c76b4341f54d4daa6cacdd94fad2dcfe1d22f8}
+        - {name: meas-background-kdenlive-r29-full-37125789856.zip, sha256: 2500eb87408c1f77caa2e44e9814ee09ece7e286f07c06eb708e882d1a5c1127}
+        - {name: meas-background-kdenlive-r3-full-37124818629.zip, sha256: d96066600b2aac1f00389664f773a966069b464cc6ac44d38920f94e95fdf4b1}
+        - {name: meas-background-kdenlive-r30-full-37125789856.zip, sha256: e9c1ce10ca8f792710f9b6026ca58d9aafc33aa2ea26f214e137b4bcf79096ed}
+        - {name: meas-background-kdenlive-r4-full-37124854279.zip, sha256: e587e4c9deac603b262bee64a102b47f81bd3b2b095a2c4f29249ff76b5e87f7}
+        - {name: meas-background-kdenlive-r5-full-37125022331.zip, sha256: 9148940e95a5ace4ab200e82f6dde62e1d8c3a7652fe08d53201b716e0927e83}
+        - {name: meas-background-kdenlive-r6-full-37126020125.zip, sha256: c3cc07781ddf7d2a30f579e51adfecc3a06e694d91dd8df0944f50395218e580}
+        - {name: meas-background-kdenlive-r7-full-37125789856.zip, sha256: 06239440f031cf77b2fd85711313144ec6b664ab1f064585f1a6f6a203c7c7f6}
+        - {name: meas-background-kdenlive-r8-full-37125847561.zip, sha256: 825314a097ab93b7d9d91d4c12136101c85089bf03cfe84c23e5e03a63b785c5}
+        - {name: meas-background-kdenlive-r9-full-37125789856.zip, sha256: 47f00476efa52167d777ea022835442177cb070d341e96c11754ce0744b30570}
+  meas-ci:background:2026-10-04:
+    - release: meas-ci-background-2026-10-04
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-background-2026-10-04
+      assets:
+        - {name: gated-reports.zip, sha256: 1e41685211114200bc467cfd9fe9b8de4c0d50f84d4324f096fe91844fb4e7fa}
+        - {name: meas-background-dejadup-r1-dry-37171455182.zip, sha256: 9ef79db26164e021bc8a7132899c1ad4dfd4ac9b7e7a9adc9dc1af2ee6b27502}
+        - {name: meas-background-dejadup-r1-dry-37173423412.zip, sha256: a4eb960d3c6258995ecff9beaf70318a7fd02f6958fa3f7627b110e2ffeff4b7}
+        - {name: meas-background-dejadup-r1-dry-37174202662.zip, sha256: 5c9fbebd0e770a01f4caf030d556b78afeeec1e6b42ff1883106f7885967797f}
+        - {name: meas-background-dejadup-r1-full-37177612398.zip, sha256: f04daddf7a2cddaa828a79b92a93ce324b1a851289c8797d3e9704caaa113ece}
+        - {name: meas-background-dejadup-r10-full-37180281641.zip, sha256: b559b7110590f050d6061fdd96b9d1855088b71eb7799adcffa1920b64373b89}
+        - {name: meas-background-dejadup-r11-full-37180430331.zip, sha256: b68ce193cae4e6de878de0ee9d5a6cad909d80509cda2eb040a057202c87b813}
+        - {name: meas-background-dejadup-r12-full-37180238545.zip, sha256: d699df6ed47e610167e57cfd9edac9456c39d0af92a46e750debd408ce5a6046}
+        - {name: meas-background-dejadup-r13-full-37180238545.zip, sha256: fe497d3e595d159a0255af9acf5d7b7e7b3ed500ac6285925fce0f6671f12273}
+        - {name: meas-background-dejadup-r14-full-37180982965.zip, sha256: f87cf6236b139875459e6e78ec0be46cb596101568d54ef6242b9b5549447f0d}
+        - {name: meas-background-dejadup-r15-full-37180238545.zip, sha256: bc107cae6bd9850c440ca24b2504f4c260f4add8081fd2c7081feaeb55e7a696}
+        - {name: meas-background-dejadup-r16-full-37180238545.zip, sha256: ebb229ef032656269323421c6fc1b281606c68cb54b36e8fc854aa48bd426daf}
+        - {name: meas-background-dejadup-r17-full-37182261621.zip, sha256: 535cd9497a6a5ed917a99de07511b862f77a1ca52e45a0413c14b9f2098f2301}
+        - {name: meas-background-dejadup-r18-full-37180238545.zip, sha256: 89b81900ea840b99ef480494939b90297bc0e4c22c5a1725823296a6d7b29f66}
+        - {name: meas-background-dejadup-r19-full-37181647319.zip, sha256: eda435948d9e2222c93b6955c02791bd9155bef810bb22e6ef18d3bc2bde46ad}
+        - {name: meas-background-dejadup-r2-dry-37174980221.zip, sha256: ee0440e77cf54a87ffba684eaabf090ac4f10424781ac191036accb0afdfe55c}
+        - {name: meas-background-dejadup-r2-full-37177612398.zip, sha256: 1f1f539641ceaf2715a766bd0fe20b2d229aed61034fb792f198c8973dd85a98}
+        - {name: meas-background-dejadup-r20-full-37180238545.zip, sha256: c885dc48c102ac33daa074ec05a4f2851d5e0d1941f47be679ca4ce0e5654430}
+        - {name: meas-background-dejadup-r21-full-37181647319.zip, sha256: dee08b73fe6b2e4201b9c74ec26d8507f141bbf5dd72cd49bf7781e57e22257c}
+        - {name: meas-background-dejadup-r22-full-37181647319.zip, sha256: 5d72f8bf2cab6def0bf12007707d7cb9f5a6491e2b2270d64892ccf17f231512}
+        - {name: meas-background-dejadup-r23-full-37180238545.zip, sha256: 313cb37a690fad97c27d63f8a4b99320a535906fe516e0bc09c81126c2862052}
+        - {name: meas-background-dejadup-r24-full-37182261621.zip, sha256: f05e1d45900fd5ab4699f11e796478706242db62315f6b06ac85bb36ef58755e}
+        - {name: meas-background-dejadup-r25-full-37180238545.zip, sha256: 85d53d76a8f3b1656be42ed896b00478dbd5e005540420703ac00b3e779578e7}
+        - {name: meas-background-dejadup-r26-full-37180238545.zip, sha256: 6952c660c8e3911ab86856942c65cd1c4a5a30961e1132350a75d78d12422e81}
+        - {name: meas-background-dejadup-r27-full-37182754648.zip, sha256: b191641c7b3312583659b7ac9d879ea8e870172be06353a2566622c645959477}
+        - {name: meas-background-dejadup-r28-full-37182754648.zip, sha256: 17668df50794ddf6a73f9554ed4387f51da556a10389b7aa4c1ebe1d6f5b7380}
+        - {name: meas-background-dejadup-r29-full-37180238545.zip, sha256: e47d618da98eeff35725213c78ad995b341210655fc7e5e5b34b91d1347d5655}
+        - {name: meas-background-dejadup-r3-full-37177897212.zip, sha256: 2f04730d13d67640bb67e00504773fe6be55a78f62d6bca581b08fd6c0375b0d}
+        - {name: meas-background-dejadup-r30-full-37180238545.zip, sha256: 10ae19ad6ad4cf78316ef80ad5c065020062afbad9d8f06c41e5cd68061e0f6e}
+        - {name: meas-background-dejadup-r4-full-37177580623.zip, sha256: 16c539e3ab4484e01e4ac8d11ac1b5dd749a26ff87addb723f2072fd8c1f1e18}
+        - {name: meas-background-dejadup-r5-full-37177612398.zip, sha256: c0c97ed3bf6c3687c632d9cd9e902418568542901031ff846daf8651a71e8e5d}
+        - {name: meas-background-dejadup-r6-full-37180238545.zip, sha256: a8c3f870f565a68e323b0f572193000bdcc2a4b4df3e81bc6fc9e526bffabbbe}
+        - {name: meas-background-dejadup-r7-full-37180238545.zip, sha256: e5d07ab4d0d4ffd4a5b46fb5cb6b44f2ffcf030c6663ef71f220991d3d1f39e6}
+        - {name: meas-background-dejadup-r8-full-37180238545.zip, sha256: 771cf5a102198e4cc9a67b41d0f491e36c08de98d23aa3b73a54bc7ebabbe1db}
+        - {name: meas-background-dejadup-r9-full-37180430331.zip, sha256: c8ada20d99d279468d53c26e27d3e86dc09afb3327f280508553c1f3b336e514}
+  meas-ci:build:2026-09-18:
+    - release: meas-ci-build-2026-09-18
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-build-2026-09-18
+      assets:
+        - {name: gated-reports.zip, sha256: bb4e9fb427ad33e9d90a61b48f66f09e06222c356bcd3afbc5b03e1035d17a02}
+        - {name: meas-build-r10.zip, sha256: f3cef3fade704a9a5e35bb54aa2aa5346e7c749a9623812b6f5f243c310baf53}
+        - {name: meas-build-r11.zip, sha256: 99a74e5f543552ec526e1379230f63257168d72854ff46b25dec9e6f056f2d62}
+        - {name: meas-build-r12.zip, sha256: 5a2973deaabe8f712828e33f56e1f9b881573eca0e0540c79b9843f6986f1f10}
+        - {name: meas-build-r13.zip, sha256: 8683ccf9fb06c430141ce09c531dc5a01f4e5d73727fc0907c173acbcd9764e6}
+        - {name: meas-build-r14.zip, sha256: 61709c6ae7536a73bee2fa13d5e853ff9f0b134850059cea0b5687d83eb8089b}
+        - {name: meas-build-r15.zip, sha256: 782ccf3b0004340a67d69216a99c75d76204bd7415aae415fac15c816a7b54e8}
+        - {name: meas-build-r16.zip, sha256: 0d4f9d71c935299468c08abbf6eea068295ba264d8f24c727b21b1b1ad48acdc}
+        - {name: meas-build-r17.zip, sha256: 8ee60e46441102b2ef0f090097cb67fb606ddd639762f004f452531a2150ef2b}
+        - {name: meas-build-r18.zip, sha256: 0620282eba9db72ef54d4560c6109df63261e487ed39677bfc5039910814c5a9}
+        - {name: meas-build-r4.zip, sha256: 61fb4cc831319ac7c56df12a463230a62d5799aa8a74b5d3fd62625a1d7a1d8b}
+        - {name: meas-build-r5.zip, sha256: fc4b8bb6dbc68d82b103d05db28bd05fd4884573d4f9512cff27da791527b493}
+        - {name: meas-build-r7.zip, sha256: 5aa65227730c58b1ce0f98cbaa28e771cc2b4cf6641d26d70c817a3647987471}
+        - {name: meas-build-r8.zip, sha256: 7c965d15062a4fd819011a68ca99a41a40d88a1cb1b2b70cef0cd3da1ffa7823}
+        - {name: meas-build-r9.zip, sha256: 340a2443763bdda3f7057d3a3956178fe9f07a3acb7e110386c5926089fb319b}
+  meas-ci:desktop:2026-09-20:
+    - release: meas-ci-desktop-2026-09-20
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-desktop-2026-09-20
+      assets:
+        - {name: gated-reports-runs-51-57.zip, sha256: 833d795cce50d2dc1624846cb80b0b66bb660bf75f8aa264b6a435c2d1cc9b8e}
+        - {name: gated-reports.zip, sha256: 86a31ece728763e6eb4c7ee1ffc641cd5b14b2ce77c6e9c48534b4aae8718d4c}
+        - {name: meas-desktop-chrome-hidden-r1.zip, sha256: 5fab60b4c73e3187784f16e4ef120b41c1a8f6ef530ab4526cf9e79c78ff1f9b}
+        - {name: meas-desktop-chrome-hidden-r10-run35585759158.zip, sha256: c142cc963a3808f53d73ae429b365f5ad28ae87f5e8db36b1825c78857e37f5c}
+        - {name: meas-desktop-chrome-hidden-r10-run35585978825.zip, sha256: e51b13202147acf1e6b69c930309756cfb10ed7040e27cb6d8487fce7320d8ac}
+        - {name: meas-desktop-chrome-hidden-r10-run35586404781.zip, sha256: afc85c118ce621a98dc073980035d558178712b1775133354268665561d5b65f}
+        - {name: meas-desktop-chrome-hidden-r10.zip, sha256: 1b2b26ff4a838889be44e712801adddf8e7d617d0bab9d7d475b28443acadbf6}
+        - {name: meas-desktop-chrome-hidden-r11.zip, sha256: 63ea915b3acb644dfe0d834da6d4d214b4d02d0fa64850db0c5edcf085e6d49c}
+        - {name: meas-desktop-chrome-hidden-r12.zip, sha256: 42189eda8c98afa6f8b3e8327c8d44e6e872030e7fdcf6d15595a107c0411009}
+        - {name: meas-desktop-chrome-hidden-r13.zip, sha256: 1da157344dca7de8311a9c9dbcea4365ebe043cdc5b56a634bdbf8d6c6b12051}
+        - {name: meas-desktop-chrome-hidden-r14.zip, sha256: 6a18ea0907c2a7f7249e346f8decafde5c8c82634516c61f8c101375a6163dce}
+        - {name: meas-desktop-chrome-hidden-r15.zip, sha256: 5d2ae064a1f8667bb2d3d2439abfc464a195bcc86ff708fd952774f896d13816}
+        - {name: meas-desktop-chrome-hidden-r16.zip, sha256: f35f90c41364ee6222ac9066394bad3aee1521e6e835193842da3cad48eccd4c}
+        - {name: meas-desktop-chrome-hidden-r2.zip, sha256: 4f714c5d01e76c31d52546f971ba8412985cbfe418aa2bc899e85d10e3cf900c}
+        - {name: meas-desktop-chrome-hidden-r3.zip, sha256: ed78997c2c4186512a190c790ce100bb2ad7066d76051a464676800b20e0786a}
+        - {name: meas-desktop-chrome-hidden-r4.zip, sha256: 838f6cd6b46a3f4b30860a77892a495751700de1589154981101e709519a066f}
+        - {name: meas-desktop-chrome-hidden-r5.zip, sha256: 89f2cf3b434835d0f251d58fe7c7a2e99962fba5748e4fac4d27703a0effd736}
+        - {name: meas-desktop-chrome-hidden-r6.zip, sha256: 3a7cc095bc75ad3c57a9ffe4ea32c30a412af9d16fa01a736b33511321a8c076}
+        - {name: meas-desktop-chrome-hidden-r7.zip, sha256: 65df9b8b5ac448489dea230d32d82a0db06549b281c32bc7f3cdef1e0ee09348}
+        - {name: meas-desktop-chrome-hidden-r8.zip, sha256: 36f00295bdaff2a3300a37ecca3c53a43d3fcfb8022c143e0ab8cddaf3ee02cf}
+        - {name: meas-desktop-chrome-hidden-r9.zip, sha256: 9ab85c722c5b555f4720ce1586bbd45aaea469d987757112f0b3bd3ae08a2aa5}
+        - {name: meas-desktop-chrome-visible-r1.zip, sha256: 86926c8beacc3f1e13ff20ff2f3ed062578c83398f0c8bccda28e03604b309a0}
+        - {name: meas-desktop-chrome-visible-r10.zip, sha256: 7b618f70f3ed7d13f17b5305a6025d0504183268693e43a9241de07da642116d}
+        - {name: meas-desktop-chrome-visible-r11.zip, sha256: b82844fbe0c980761f44931ce035e340b22c16777cfd7d9966442ef3b97c900a}
+        - {name: meas-desktop-chrome-visible-r2.zip, sha256: a70cb397a2c304d76a69054cce6a3a5258f2c45a772fc1b58e2711a8bd9a4fa8}
+        - {name: meas-desktop-chrome-visible-r3.zip, sha256: d4a34f27487557ae86d16df2aeac7839049d05843730b6e1ec4a70d929081028}
+        - {name: meas-desktop-chrome-visible-r4.zip, sha256: 5d4207b4d7576c83719fd5f171b42bedd543141871a4ba0392b6746333d6f87e}
+        - {name: meas-desktop-chrome-visible-r5.zip, sha256: 11576854101542487a19f87a782e188de2af79b3750989ea6b8df26c4631b5ee}
+        - {name: meas-desktop-chrome-visible-r6.zip, sha256: 31724be873e6d04cfefbe41b1913ec6d1d860dd5265349b2fdca774d278d00fd}
+        - {name: meas-desktop-chrome-visible-r7.zip, sha256: 299b734eaeca23234fc200a7f0fa02f269e82d4ff8309c81b0f4494a110efd0e}
+        - {name: meas-desktop-chrome-visible-r8.zip, sha256: 6e4d8773fd2b15b7d9c40b929d6e618aa36cc52f568e36a64fd3098c088a02ad}
+        - {name: meas-desktop-chrome-visible-r9.zip, sha256: fa0378f791e73d7693d3484b46323b09b7a53ba2e1c34ddfbc1de97ac514c914}
+        - {name: meas-desktop-element-r1.zip, sha256: b9a108003dc870c49da54db98063a84b47eccc3f99f8a6baea2a100842ca3895}
+        - {name: meas-desktop-element-r10.zip, sha256: b5e7890a43c29662af9d28d9747fe29ab2a45173f5fa4f22251582e196f40698}
+        - {name: meas-desktop-element-r11.zip, sha256: 6303d90ab775d28eca87fcd0107e5e49711d2ba21e5684d1cbf2736b580b931b}
+        - {name: meas-desktop-element-r12.zip, sha256: 949de2f198234727400bdc4a87686d4f085d81dcb6d6ebcd3111c30fbcc2935c}
+        - {name: meas-desktop-element-r13.zip, sha256: cc33a24821fd94a5f2a894210ff202e158c7ec11dd5607f2af0c2a9da4a78405}
+        - {name: meas-desktop-element-r14.zip, sha256: cdd212377c2d78e326f08a053cc268a9a77b737a753a2449627985a401b7f132}
+        - {name: meas-desktop-element-r15.zip, sha256: 13f8de8e1575d61b501208c79b21eeb2cd5886b3eda4cdace4eb73dd4a232e9a}
+        - {name: meas-desktop-element-r16.zip, sha256: a32b7a2cbf5df197b2a662cf96152c430cda3a5b4da997ff83529452ef724871}
+        - {name: meas-desktop-element-r17-run35597073549.zip, sha256: a2556c1ae7d23321999bfacfc0fab7a58a94d38b048c28420f68c5fcad138a9d}
+        - {name: meas-desktop-element-r17.zip, sha256: aefb1d8116eac80db37c71573cb721a8351780d2dcbef485de0bdf402d97a2b3}
+        - {name: meas-desktop-element-r2.zip, sha256: 3cc76e28f56a31df633ab93ef49f56e139a2959fb21704d94e58d7988f46c320}
+        - {name: meas-desktop-element-r3.zip, sha256: d2815e8db477a23ade365f4a89ecfb1ef99ffb189c4d9add87a5504c6f785d26}
+        - {name: meas-desktop-element-r4.zip, sha256: 3b51a331c8af08760689dbec5e59b37ae8c9aa949f9a5ac74f499104199e9eb4}
+        - {name: meas-desktop-element-r5.zip, sha256: fc355b71bd9e988effaddf8b1bee18c8ee28f6fa998e5f12758fe10e8a732286}
+        - {name: meas-desktop-element-r6.zip, sha256: cfe6961229f78c8405beb2af4224f28932f0f1eb890e8a1905d4c543204bff5a}
+        - {name: meas-desktop-element-r7.zip, sha256: 0adfd12a72890b17270b781a71a13e443fe887311fb2208812b6adba185ef3a7}
+        - {name: meas-desktop-element-r8.zip, sha256: fd7eec0065e9ab60099fb958152cddea5b59b8ebebdf7ad0c268434cf69147d7}
+        - {name: meas-desktop-element-r9.zip, sha256: 4b1d60c2601ca91e6ed45fb2d9b90a605376fcba8eba8cbeb4566a220e565582}
+        - {name: meas-desktop-steam-r1.zip, sha256: bd3dcaad874485594acbe35b55d90514facc26894980b32d6be037a945cab9c5}
+        - {name: meas-desktop-steam-r10.zip, sha256: abfce740bfc89549c514c8a000ee4d62d23c2f7c947abe364e1b0ab0273ddf1c}
+        - {name: meas-desktop-steam-r11.zip, sha256: 735acf96295b36e9b8b1bc67fc91859351ebacd4f2b0f88d09859d82fb0b0fb1}
+        - {name: meas-desktop-steam-r12.zip, sha256: 8cc893cc558103ba480a0f8cf050484670714f09e1e73734cab08a1debcc9891}
+        - {name: meas-desktop-steam-r2.zip, sha256: 0b2f0d70c17bf3c54f65d4f4996082e73fd05737adbfa21bd1929d0205df9c6b}
+        - {name: meas-desktop-steam-r3.zip, sha256: 255522efcc4d67664e3a539aa1d9c8750af2a5377f4e3fc66fea8dda3631d345}
+        - {name: meas-desktop-steam-r4.zip, sha256: ec0e6e8f65276867b05183266c6e8f8d21d6ec007df5ddb73b54ca1de21416c7}
+        - {name: meas-desktop-steam-r5.zip, sha256: 0b2fa178200797afe6adc3969bb07c916abbd25fa839bc2846e87bfc6cfd174f}
+        - {name: meas-desktop-steam-r6.zip, sha256: 9102eedd6ec42ef683969cebd3e6c35102f5bd2f4f4320bf8bdd84d1b65de13d}
+        - {name: meas-desktop-steam-r7.zip, sha256: 342cc7abf81b55e9ccd234d4e4e3253f98a46ccebc0d2e7a7c0238497e25ecb2}
+        - {name: meas-desktop-steam-r8.zip, sha256: 52c18dd45fc2e0337d16843bf307643654345be61ab8136a68fc9d14432a5a45}
+        - {name: meas-desktop-steam-r9.zip, sha256: 01f30ae7b2fa9d9d8e937cd761087d2ceaed0204da62a51769d96c89cb3d0078}
+  meas-ci:desktop:2026-10-04:
+    - release: meas-ci-desktop-2026-10-04
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-desktop-2026-10-04
+      assets:
+        - {name: gated-reports.zip, sha256: 402bdc43a3776265b72d4c4f3f38b77508253ae99c716d4ed921ac595743d245}
+        - {name: meas-desktop-chrome-tabs-r1-dry-37193532949.zip, sha256: 972d17694493de8056f078b60c4b590cc2ce3ba8c297a5f77aad9ad3020d2a9f}
+        - {name: meas-desktop-chrome-tabs-r1-dry-37193972113.zip, sha256: 4e9f1b43afac890242004bf7769e9fef6f1fdcda740a63583f5785f5cb6a1802}
+        - {name: meas-desktop-chrome-tabs-r1.zip, sha256: 7c4f6e0bdcb7c219b01d83207e9a927679c563e75f7fc2d77a0a40a64e4f5350}
+        - {name: meas-desktop-chrome-tabs-r2.zip, sha256: c762449031034d463ee09847cba61415959089197748f5efecc48e38df9ce697}
+        - {name: meas-desktop-chrome-tabs-r3.zip, sha256: 893e66cba00cdaf15901cd030d458e1ac3655a5c875c6a54fd10069aef067c27}
+        - {name: meas-desktop-chrome-tabs-r4.zip, sha256: 536e0d716b637a6667798db39c8a10e3993dbf20a975ec643c5fbfbf8c100af2}
+        - {name: meas-desktop-chrome-tabs-r5.zip, sha256: cc052c3ed860053e8a4f04c9f361c89a38ca2b6b315c2947e2fe6230c3f4be56}
+  meas-ci:desktop:2026-10-04b:
+    - release: meas-ci-desktop-2026-10-04b
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-desktop-2026-10-04b
+      assets:
+        - {name: gated-reports.zip, sha256: e6e404ca9ecf9883bca8d60e290169927063f3efa98d519f8a227efe31048bda}
+        - {name: meas-desktop-launch-chrome-hidden-r1-dry-37205258362.zip, sha256: fceac11cde247df84d5ccecaaf741a8bfdba2480e999c743cbca02ea8ffbd44f}
+        - {name: meas-desktop-launch-chrome-hidden-r1-dry-37206212175.zip, sha256: f85daf4421ef9cf42b5885afcaf0fcc582ea0842ec69197784d0ba1507a37544}
+        - {name: meas-desktop-launch-chrome-hidden-r1.zip, sha256: ad7cef7da169dfcca3c22baa6c95525f3e883056613020fbf186edd64123a465}
+        - {name: meas-desktop-launch-chrome-hidden-r2.zip, sha256: ff25f93d6b06955e2402db0685a43c77f41987e0d9bebcef0059c001a05ee65e}
+        - {name: meas-desktop-launch-chrome-hidden-r3.zip, sha256: 5bd73e62b7789a4647f7ff28c590be23514f854623114664a81250b9263c12ed}
+        - {name: meas-desktop-launch-chrome-hidden-r4.zip, sha256: f9793b24ffe2b88409cf86308baee3582521ddcaf749fb4f5dc8c959c7134e83}
+        - {name: meas-desktop-launch-chrome-hidden-r5.zip, sha256: e05fb137359ed694642e499cff69754e40b7a35f8081a6ca53f46cc481b86d5e}
+        - {name: meas-desktop-launch-chrome-r1-dry-37205258362.zip, sha256: dfd73c7eede2928a0c9fadba79c5cf059fdf0394e8e7a5f99c89dcacf2e451e0}
+        - {name: meas-desktop-launch-chrome-r1-dry-37206212175.zip, sha256: 83ecf33d4b9230c4c9b2d00fc122e88261cf15c95a17952f1b95e867b60c5702}
+        - {name: meas-desktop-launch-chrome-r1.zip, sha256: 5d1ab9c0c532b0b646fdc8f350c2449601b72d848836b80006ce035e312bd62e}
+        - {name: meas-desktop-launch-chrome-r2.zip, sha256: 85d3bf382673faef824948782fa699d7bc68c0b70bfc85fc371b5e76cee3ae66}
+        - {name: meas-desktop-launch-chrome-r3.zip, sha256: 162df68468a5fc815a13ffa7439cce33d23d8b11df840847fc1d9994e9eb01be}
+        - {name: meas-desktop-launch-chrome-r4.zip, sha256: f05f5fd8dedae982cde81e53b10042de1ba1a8bee9735fca7107f864a3621ff8}
+        - {name: meas-desktop-launch-chrome-r5.zip, sha256: 9491d3737c90eb81418e0ae0e1cf8f5e9ffeacec94ea077f5cc3a1afcb64db7f}
+        - {name: meas-desktop-launch-element-r1-dry-37205258362.zip, sha256: 283dc35067b89a4af8351324f4728e558814a286c34acc9338bf1836313fc362}
+        - {name: meas-desktop-launch-element-r1-dry-37206212175.zip, sha256: bf9ba44879edb5e7815e185f272c4f3de180aeb60e87ee7e139009a479891511}
+        - {name: meas-desktop-launch-element-r1.zip, sha256: adfe6834f4f2fae43fadf82a69408ba1cec0e2ee425ac49116f0b54c879b0d02}
+        - {name: meas-desktop-launch-element-r2.zip, sha256: f25228373a3a78dac39dbdc5f80ae230891c357bea5e26c6908c5d6292b710a2}
+        - {name: meas-desktop-launch-element-r3.zip, sha256: 531086c9521d91e6988be2be63825f2eb6625ed1d169e7d3f12481c0a957d20e}
+        - {name: meas-desktop-launch-element-r4.zip, sha256: 0f944d714a3acb45f2b7e0edc452073907e3f9564bfd9234b800a1456891aa88}
+        - {name: meas-desktop-launch-element-r5.zip, sha256: ea91670e0b78f66d9d5e763445a91e8ec940b26522e25ec293c9ed14ac3643db}
+        - {name: meas-desktop-launch-kdenlive-r1-dry-37205258362.zip, sha256: 69866ba9842f700150c297895237264bc65bcdc382ba82dd973b764915a62f71}
+        - {name: meas-desktop-launch-kdenlive-r1-dry-37205626346.zip, sha256: d5064b4d50cf5fe1ac0ac70777d96cf3ab87f789cfc06f253f99197eec01cf91}
+        - {name: meas-desktop-launch-kdenlive-r1-dry-37205972804.zip, sha256: 910d02f726f8f10317fbcae241cb89436e9325779df18ae116fc70234c0e8a12}
+        - {name: meas-desktop-launch-kdenlive-r1.zip, sha256: 2d4f7648fc3264f257db33276fc2d482367eac08fc6107d5b2422d8e059ec61f}
+        - {name: meas-desktop-launch-kdenlive-r2.zip, sha256: 03b2d66167cae3fa7d188f68b6e6a767d656e159924bab42320a26863c3ef3da}
+        - {name: meas-desktop-launch-kdenlive-r3.zip, sha256: 9d3dbfecbc42e5ec46b98673824190f8798c0aed86e2c9c5cb75e665d2308eff}
+        - {name: meas-desktop-launch-kdenlive-r4.zip, sha256: 8846f4f89db680bc4344552ed31ae4dafc910abeb0a3ee6cccd0dcde34ecbce1}
+        - {name: meas-desktop-launch-kdenlive-r5.zip, sha256: d3f5288ad522c5ad4fd162ae7e04850b7e12e03643b8175b6a26247980f3ba2b}
+        - {name: meas-desktop-launch-mpv-audio-r1-dry-37205258362.zip, sha256: 69a404f16dc37b4bd21515171d9db1364a8842170a6094746cb82f79077ac9cc}
+        - {name: meas-desktop-launch-mpv-audio-r1.zip, sha256: 256d343e324ddfd8d7d617072f3b6b06d636b8f4e97d29259933d0ecd426c47a}
+        - {name: meas-desktop-launch-mpv-audio-r2.zip, sha256: d91054855d7011496fb874845714b2082976d2e5d26929c1e6a4035c6bdd177c}
+        - {name: meas-desktop-launch-mpv-audio-r3.zip, sha256: 83a1f0433d4fa8d76e8d895f9ed812a61af8fa285d35582f7d10ac6ae8ffd934}
+        - {name: meas-desktop-launch-mpv-audio-r4.zip, sha256: 149db1c3e4a571af492dde0701f0b7742264afcb7d8be88100275c5e37b83613}
+        - {name: meas-desktop-launch-mpv-audio-r5.zip, sha256: 9d742f4d10c45b036c523b7c885093e94c667751be0d688dd6befb2b696cde16}
+        - {name: meas-desktop-launch-mpv-video-r1-dry-37205258362.zip, sha256: a39a118077c2c33ebf10de4ebd365d21e3a19608b29af18807b2d19736c09a4c}
+        - {name: meas-desktop-launch-mpv-video-r1.zip, sha256: 545df2003ebfb2fb133879c730917ebac4073c6f1d3c5957d163e8d99b7074fc}
+        - {name: meas-desktop-launch-mpv-video-r2.zip, sha256: 607c06ce743fbe499755d4575ae9ed451bd7b763b3e3badfd7becdc59e36c8d8}
+        - {name: meas-desktop-launch-mpv-video-r3.zip, sha256: d007b46fc8194f13e09d6977f309153a96c950adc1ea19be1156ea20949f468e}
+        - {name: meas-desktop-launch-mpv-video-r4.zip, sha256: 18bb001cef337a52f192a1d5e365333273cbbe0d19a71121df5f28ee2048a401}
+        - {name: meas-desktop-launch-mpv-video-r5.zip, sha256: 00ec81ac0904b489c0ec83667224c583a04824a86fb2820d3c324150425d6f85}
+        - {name: meas-desktop-launch-soffice-r1-dry-37205258362.zip, sha256: 24c27116b66da6b892276b651d1e33f7bb73c2d02f03fd0a391edb2815ac7586}
+        - {name: meas-desktop-launch-soffice-r1-dry-37205626346.zip, sha256: ef3da84e1e9be8da74cf1f96848b5d4f118957f02b66739ac85479e53d530f10}
+        - {name: meas-desktop-launch-soffice-r1.zip, sha256: c42c19e32cc279c87eca8cf1e2c10f763ac13a986010ae163e97fbce921be031}
+        - {name: meas-desktop-launch-soffice-r2.zip, sha256: be36953619244dc8f569e60db5e57153c0b022104cdbaaeb71bd36d7bc2f3d68}
+        - {name: meas-desktop-launch-soffice-r3.zip, sha256: afeda1e373e92ba2919472ad0f377ff84044d8b7d62068f505cd729466ba1fdc}
+        - {name: meas-desktop-launch-soffice-r4.zip, sha256: 256beb728e64bac71ecb1af496aab9848b43b5fde23fe299613d783fce396a7b}
+        - {name: meas-desktop-launch-soffice-r5.zip, sha256: 36b06833fe70a19a6b890adbb4826c2ac4e49128446ca89495339d4864656bbe}
+        - {name: meas-desktop-launch-steam-r1-dry-37205258362.zip, sha256: ab826317a5914a03af1064482647fbfed1f71d6df5bc0cd291fa2a2d8f628c6a}
+        - {name: meas-desktop-launch-steam-r1.zip, sha256: 958fbfebe09a623895a1b968069b44f19ed38e31443a9fc2af079a1955035eb3}
+        - {name: meas-desktop-launch-steam-r2.zip, sha256: 069281e783b47cd5823366fb5018d8c9542c3821ff6b756a6473266740286750}
+        - {name: meas-desktop-launch-steam-r3.zip, sha256: 669748da766bb7439baaf14118bc6c499c38687a254424386f3b936198bce251}
+        - {name: meas-desktop-launch-steam-r4.zip, sha256: ed4ad18ac35b447461b41b5d2732d96a92b2c463845bcbcb084b727c1a48fe15}
+        - {name: meas-desktop-launch-steam-r5.zip, sha256: d9aee3819798dabb86948275b23ed3209e0190e50c84e878bb371f96fc81e318}
+        - {name: meas-desktop-launch-thunderbird-send-r1-dry-37205258362.zip, sha256: 789b6b25d25ebc365e23cd032359be77447d9e7a19f76e4ce919b976d55a8099}
+        - {name: meas-desktop-launch-thunderbird-send-r1-dry-37206212175.zip, sha256: 3404b64222cdd149b3e4164065afc5859f059f5a640574ef8a2fa58567b6271d}
+        - {name: meas-desktop-launch-thunderbird-send-r1.zip, sha256: f1a20bc2c31981598532a2e25bc1e12c5e4a87423d15f639aa507d463b7c90af}
+        - {name: meas-desktop-launch-thunderbird-send-r2.zip, sha256: 45df21a57fa8f02057c0578d1d30d247defaf9349fd371c5853954c23c568174}
+        - {name: meas-desktop-launch-thunderbird-send-r3.zip, sha256: 3dc9fb7cc25941b226739d1d77beba400f43f39ec026b7590bd221cebf611d64}
+        - {name: meas-desktop-launch-thunderbird-send-r4.zip, sha256: 35fe2bea7e5281a716fd36d0afe6cfb5b85a8d62a4aa64b5d6acc98771bfe730}
+        - {name: meas-desktop-launch-thunderbird-send-r5.zip, sha256: a2c0c73e6279695b0084e42c03e5d3711bc0d20faff228a880f81aedf24bb6c9}
+        - {name: meas-desktop-launch-webrtc-r1-dry-37205258362.zip, sha256: 4a5814381b9a17c79c031c1e9db6b661bffa51e79658bcf0f298db74733b9d45}
+        - {name: meas-desktop-launch-webrtc-r1-dry-37206212175.zip, sha256: 8379012df9d55b5f1f28aca29c624c6ee88da9bab0fd34545a3fe4d8671e9bf2}
+        - {name: meas-desktop-launch-webrtc-r1.zip, sha256: 32487db7fe5d9387680d13b25a619bc71be362de149f40cfa4317dfe1e2d455e}
+        - {name: meas-desktop-launch-webrtc-r2.zip, sha256: e8d9b8e1368bd3a365fbc185f26699dd263dd75b12e8dba30c83a63d5e6cd47f}
+        - {name: meas-desktop-launch-webrtc-r3.zip, sha256: 97037352c62fd1a2f8d792038d6955e9cd6cace782afea4af794a092bea36259}
+        - {name: meas-desktop-launch-webrtc-r4.zip, sha256: a9c28a96b34750ffb95c42126d7bae5b55c7125b75acd013f3dfe62bae3ec78e}
+        - {name: meas-desktop-launch-webrtc-r5.zip, sha256: 510ebf2a6b33dc47f047ce63f4234b1d8486df6abfb816d22f7c7d52921a389e}
+  meas-ci:desktop:2026-10-05:
+    - release: meas-ci-desktop-2026-10-05
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-desktop-2026-10-05
+      assets:
+        - {name: gated-reports.zip, sha256: e52b55c7179c2a7dee693fffa234fb2072e4ceab35575096cd784b54f65afaab}
+        - {name: meas-desktop-launch-kdenlive-r1-full-37272498504.zip, sha256: a288938857918f7713a907d4c864df5e20fb3ece2193e79296d28b30818276d1}
+        - {name: meas-desktop-launch-kdenlive-r2-full-37272194466.zip, sha256: 9544471bbf541ac74c75cf33e7acb788b7dcf287f673a553cbac2ca9c5b44554}
+        - {name: meas-desktop-launch-kdenlive-r3-full-37272194466.zip, sha256: 899eebdd3dec0dd7bf279b9dfd8ec3052f603310931abb344ff6dc5a1530c0cc}
+        - {name: meas-desktop-launch-kdenlive-r4-full-37272194466.zip, sha256: a7878a9e90527800c7597b2727bf96412d098e41c2a46f9861e94c927034d83a}
+        - {name: meas-desktop-launch-kdenlive-r5-full-37272194466.zip, sha256: 574d78c93dd03505727e08cd2f5a127db8887ea83a67e6cc61eba790a4f85524}
+  meas-ci:desktop:2026-10-05b:
+    - release: meas-ci-desktop-2026-10-05b
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-desktop-2026-10-05b
+      assets:
+        - {name: gated-reports.zip, sha256: 3a7c9e88989f2653d7c9eb58b633065d9d4c7370cabe9ee8aa2404d23500ea4f}
+        - {name: meas-desktop-chrome-hidden-r1-full-37281847886.zip, sha256: 8d76d9774b57f544f8c71dc911a87f7514e8d5c99cb9af903d0577d2386a5c4c}
+        - {name: meas-desktop-chrome-hidden-r2-full-37282164033.zip, sha256: b8b39e4e32e94fea0cfb4b0f39bb60f2816fbb2cf4080beb3843fa7570482cc8}
+        - {name: meas-desktop-chrome-hidden-r3-full-37281847886.zip, sha256: 116df9195eabfb7da324e53ed7162decfa0c44d7bf10828a3316f24860306f05}
+        - {name: meas-desktop-chrome-hidden-r4-full-37281764593.zip, sha256: 4975d090992a07143bbc5527a8b84d345c409fbaa4bf4d2f47e890170af0ce12}
+        - {name: meas-desktop-chrome-hidden-r5-full-37281847886.zip, sha256: 0085799726b2aa6f819d5d221a8f086a8acf88b4027c2a379d00ddfaa0063570}
+        - {name: meas-desktop-launch-chrome-hidden-r1-full-37281764593.zip, sha256: bbf3f457b3113087d2fbe07b6795128e4ea678bff5c5fc5609b8a502a161e212}
+        - {name: meas-desktop-launch-chrome-hidden-r2-full-37282164033.zip, sha256: 23b08d1d5c716ebe432b30fa4a763c4fbf3cc113aea3af96773b05b8f7a9010d}
+        - {name: meas-desktop-launch-chrome-hidden-r3-full-37281764593.zip, sha256: e84dd271bd3d0c87e23c90a9ddc283695e2f34a66f6cbd667f3bdec9cca9650f}
+        - {name: meas-desktop-launch-chrome-hidden-r4-full-37281764593.zip, sha256: 211a34ae66ebd70be68e8e084daba1d68e76d9788c593b14535cd967d3a9fe5e}
+        - {name: meas-desktop-launch-chrome-hidden-r5-full-37281764593.zip, sha256: 0bba6f1ad3ef210765b742cd67f3551fa68d26cd73d6e69cdf2f917ff72e8628}
+  meas-ci:interactive:2026-09-18:
+    - release: meas-ci-2026-09-18
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-2026-09-18
+      assets:
+        - {name: meas-interactive-six.zip, sha256: db3a1cc8042f7612e6ad7ae8f80f5620fa73650d803185c0eadce629111c810d}
+  meas-ci:interactive:2026-09-19:
+    - release: meas-ci-2026-09-18
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-2026-09-18
+      assets:
+        - {name: meas-interactive-six.zip, sha256: db3a1cc8042f7612e6ad7ae8f80f5620fa73650d803185c0eadce629111c810d}
+    - release: meas-ci-2026-09-28
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-2026-09-28
+      assets:
+        - {name: meas-interactive-thunderbird-send-windows-45-78.zip, sha256: 16df2693d6f6e841f0ad7e005ea1173677138a3897b0ac9f0b08312524265f75}
+  meas-ci:interactive:2026-09-20:
+    - release: meas-ci-2026-09-20
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-2026-09-20
+      assets:
+        - {name: meas-interactive-chrome.zip, sha256: b3a0a8a1544724811f27593ae773febb0339ae67ca8f320b48213961feaf9489}
+        - {name: meas-interactive-code-windows-1-22.zip, sha256: 60667543eaee090565172750e26ab24c4b4837aa641967be2ced7f955d7a89a0}
+        - {name: meas-interactive-code-windows-23-42.zip, sha256: 6ccfb4df7ebb025cfd1f5ed9df1605f1e0e9b4b557f543d74ceea53da922e42d}
+  meas-ci:interactive:2026-09-25:
+    - release: meas-ci-2026-09-25
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-2026-09-25
+      assets:
+        - {name: meas-interactive-code-windows-1-22.zip, sha256: 71fd51172291124acfdebf3e9ae80345454d6d0dcf47b74ff6514958f5ec49d9}
+        - {name: meas-interactive-code-windows-23-44.zip, sha256: f4071ffb29928a5fba7b602b3c84ec97bf501d20535eaeeb82f79d17b6e75cc7}
+  meas-ci:interactive:2026-09-27:
+    - release: meas-ci-2026-09-27
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-2026-09-27
+      assets:
+        - {name: meas-interactive-thunderbird-send-windows-1-8.zip, sha256: 42e447816736ccd1cd6721947ebeb95b00d1cb4fb940f35a13e5a232cb9aeae3}
+  meas-ci:interactive:2026-10-05:
+    - release: meas-ci-interactive-2026-10-05
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-interactive-2026-10-05
+      assets:
+        - {name: gated-reports.zip, sha256: 870f9ab93bdfb05981ee7f1f3cf0d107f0a8051f3f43bfdf4640d5b78af1f095}
+        - {name: meas-interactive-kdenlive-r1-idle-37273046929.zip, sha256: d5fbf4fa83723cdd2ce1d729160c9d3064d7f4aaf36cce6e8b37cea5dc482113}
+        - {name: meas-interactive-kdenlive-r10-idle-37276032133.zip, sha256: 27f0b5c0497415bc4c20f9398b9a3e9c06928a85d44bd547fa768ece2f69272d}
+        - {name: meas-interactive-kdenlive-r11-idle-37276716093.zip, sha256: 2624bcfabbbb0008007776f25d2618858e4a9293cc45c598820758733830270d}
+        - {name: meas-interactive-kdenlive-r12-idle-37276104518.zip, sha256: f08b135e88b05f8cd7bb82e0987ccc145c32430bef2a6f4169ae00d5fa17c558}
+        - {name: meas-interactive-kdenlive-r13-idle-37276716093.zip, sha256: 49441758559003bc3bd68a311070147962931fb09f68e8d3a495c7e29d64b774}
+        - {name: meas-interactive-kdenlive-r14-idle-37276032133.zip, sha256: e37aae1f7f856012b6d605d6b7c251779d95b8e7e5760c0c79b22bedc6afacc8}
+        - {name: meas-interactive-kdenlive-r15-idle-37276412197.zip, sha256: 15e7e54beea560fcd8a473441b4b1ae575beb366eeebaafd5e0a63ea8e25db54}
+        - {name: meas-interactive-kdenlive-r16-idle-37276412197.zip, sha256: 4bb881fafe37e3242f99eee00cd8ccfd8d1584b0ca018e8db1bafccf03e9215c}
+        - {name: meas-interactive-kdenlive-r2-idle-37272192539.zip, sha256: 02c0d8f45b9da30ff019ec4c6fc75a15dd3213c9f891a0032578fa864adf7c11}
+        - {name: meas-interactive-kdenlive-r3-idle-37272322853.zip, sha256: 76551d1b07b92946934a91f9629d54601e02a9cbd8810a1e683531cf6d254f4b}
+        - {name: meas-interactive-kdenlive-r4-idle-37272322853.zip, sha256: 9f80d8d855da4899e22b9174a9ec7ba0aea5c5826a4609b437abff190d4c1a09}
+        - {name: meas-interactive-kdenlive-r5-idle-37272322853.zip, sha256: b9272c121804b7ee4b826382ce57a05adea7720ad535c1f5d56fedb1c22f9d60}
+        - {name: meas-interactive-kdenlive-r6-idle-37274147650.zip, sha256: db0a6d992bd0d6cb5ddd1e3cb4b9bf69dc254233d6c59a9a54a876ad38aaa558}
+        - {name: meas-interactive-kdenlive-r7-idle-37275048679.zip, sha256: c8c34d331a24c1b3beb98b8ef721d270e4fd36044fb7b3f941340292a33f66a6}
+        - {name: meas-interactive-kdenlive-r8-idle-37275048679.zip, sha256: 7d680877123852c0ff9430f72fc1c43ad89a1f9d72bf92d3cc6968f32661861b}
+        - {name: meas-interactive-kdenlive-r9-idle-37276032133.zip, sha256: b5a4b85fcc0d4e631dacd26d5b4fdf9c1b2b4fcb2cec978b4a040f2c8ea363c9}
+  meas-ci:playback:2026-09-18:
+    - release: meas-ci-2026-09-18
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-2026-09-18
+      assets:
+        - {name: meas-playback-six.zip, sha256: 8d8eb38a04582f19aed7e752fa245455bbbd8287d79691eec10906440e5bb292}
+  meas-ci:playback:2026-09-20:
+    - release: meas-ci-2026-09-20
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-2026-09-20
+      assets:
+        - {name: meas-playback-webrtc.zip, sha256: f05bcba1950449cf09e325f041f4cccfb53a5e092641f99283b8882d9b9cda05}
+  meas-ci:session:2026-09-24:
+    - release: meas-ci-session-2026-09-24
+      url: https://github.com/logis11/LLM_driven_shceduling/releases/tag/meas-ci-session-2026-09-24
+      assets:
+        - {name: gated-reports.zip, sha256: 5872a18956ef37170f78ed750c648f64d77ec409361fd38b8db15de8c41d30bf}
+        - {name: meas-session-session-r47.zip, sha256: 112c603cbdcc661115fea4dccdb234bbf7e59878900cabcf2889228eda1a0729}
+        - {name: meas-session-session-r48.zip, sha256: f158d214acdc0a82de51dbda581cd1a5b98401eedbb4da228d2a6455480a84f7}
+        - {name: meas-session-session-r49.zip, sha256: 3deb50a79d3c3f527cec8e9cf776fbcb99524fcdb71a4951a15662a60f3b3506}
+        - {name: meas-session-session-r51.zip, sha256: 4f1495a45031ac8a37889cdb4a33d717be9d40ff8313a54059208569589cdf2c}
+        - {name: meas-session-session-r58.zip, sha256: 959f80ba01372b5cad6434d644cf3615940c594379f9d55d83248e62d0441661}
+        - {name: meas-session-session-r60.zip, sha256: 2cc1457cfea770e3fd7408cf73385de1113e58d848bdfb8a1008751e363bab99}
+        - {name: meas-session-session-r61.zip, sha256: 0a353f043e6eb2f04d70036d9db42fa1af022502291254302e2ced104d1bf0d7}
+        - {name: meas-session-session-r62.zip, sha256: 58997d4a442eb553a04ac900a79bf011a2969656fa8b4f1cb4d63c93b4aae623}
+        - {name: meas-session-session-r63.zip, sha256: bd0847e855c0a2d9555b126aeeb19a87b40f50fa1c9d4343210dc86a093c4f4e}
+        - {name: meas-session-session-r68.zip, sha256: 651c5f8f0c780ce20e85b6fbc7c645b51f7a12423680b0c38dd3c9cf856532aa}
+        - {name: meas-session-session-r69.zip, sha256: a0ad7b903505ef29ad996bac6f38f4ac7d29b0f75403a03140e4be84eaa7d0ea}
+        - {name: meas-session-session-r71.zip, sha256: 28411746f28753c591df72c4f6628478c1757893c5b2f0e8a3848421478b6a54}
+        - {name: meas-session-session-r72.zip, sha256: 6390e9c4856a2251c6a70a44188456223ec5de8962dd69b15584cdb306486f91}
+        - {name: meas-session-session-r73.zip, sha256: 161a252fb2fcbae626b3b93fb69674adbc989f69d77c954853d2b9516561d9fb}
+        - {name: meas-session-session-r74.zip, sha256: 53107c89edd899a74e35fe8b4d3b6c6009d1ee515364bbe98d7488a9b6578645}
+        - {name: meas-session-session-r75.zip, sha256: c4ad6940a0134c90f8884b43bcb645029fc8b82b6e544b41d45e6df897172bda}
+        - {name: meas-session-session-r76.zip, sha256: b2da80c18e177305dc75d339e249c5ad41f1ba482d84550e93c9077931019f32}
+        - {name: meas-session-session-r77.zip, sha256: a57fcb33252ee66d6559931b7917a7bbf5a920b8595a0f1c50c908888a6fcdb7}
+        - {name: meas-session-session-r79.zip, sha256: e3ff5bc8b09d2b5206517e3de1726692086a06e93df69f82384137bf9ae63c9b}
+        - {name: meas-session-session-r83.zip, sha256: cbe3614092cf9e6d2674d96cddb4ad83a84c2eb9a98c8554caf11d24ad83e3e4}
+        - {name: meas-session-session-r85.zip, sha256: 317ba76fc4231d6b234500377fb8ca766c874699c22188f4cf28888ab6fe8721}
+        - {name: meas-session-session-r86.zip, sha256: 6cad1ecf3ecc0231996c9cbebd311a27f7d1eb96f96245a6a6eb426779976822}
+        - {name: meas-session-session-r87.zip, sha256: da02b0cab092fc1b2b0ebbd2ec782290924978c9f01ad4874bd0fe1f9b6f8be2}
+        - {name: meas-session-session-r88.zip, sha256: f817a6c544cc122eb424ba2d77be9aca0bc8c48a4b207708a18e5b2665295f71}

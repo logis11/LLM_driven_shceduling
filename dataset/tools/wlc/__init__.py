@@ -1,7 +1,7 @@
 """wlc — workload compiler: timeline + archetypes.yaml -> canonical workload.
 
 Contract: docs/simulator/interpretation-contract.md (canonical semantics),
-_dev/docs/spec/task-2.3-timeline-compiler.md (format + tooling decisions),
+_dev/docs/spec/jioh/task-2.3-timeline-compiler.md (format + tooling decisions),
 dataset/schema/workload.schema.json (output shape).
 """
 

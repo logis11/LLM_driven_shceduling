@@ -3,6 +3,7 @@
 # call's own task set (c6-fold's meeting segment is the browser unchanged).
 # One call, one task: video-call is the whole measured call, its audio and
 # video threads together, its periodic job the 10 ms audio frame.
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-meeting
   seed: 111
