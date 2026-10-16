@@ -113,7 +113,7 @@ Chunk K12, Dataset guidebook, volumes 3-4 (wave 3). 14 open rows. The file has 2
 - Cross-ref: W-0519; W-0520; W-0523; W-0524; W-0530
 - Notes: Entries with their own rows: the schema's `program` sentence (W-0519), the deriver (W-0520), the README manifest sentence (W-0523), 9.18 D6's counts (W-0524). The other entries' rows sit in, (interpretation contract) and (schema, docstrings, the memo). The README entry's quotation of `requirements.txt` ('PyYAML>=6.0, jsonschema-rs>=0.29, …') is stale since 9.23 D15's exact pins.
 
-### W-0928 · open
+### W-0928 · applied
 - At: `docs/guidebook/dataset/03-timeline-to-canonical-workload.md` §9.5, line 1447 ("재건으로 모든 대화형 entry가 측정된 entry가 되면서 어느 entry도 닿지 않게 되었습니다")
 - Change: Say that no compiled task reached the three paths, and that `_unbounded_loop`'s two entries, `compiler-child` and `module-compiler-child`, are spawned children no timeline binds at the top level; "the interactive entries became measured" accounts for `_interactive_unroll` alone.
 - Final word: K12's last review (round 3, R12, minor); W-0746's answer: in the old dispatch (`git show 37c2e233^:dataset/tools/wlc/compiler.py:141–154`) `compiler-child` and `module-compiler-child` (lifetime `spawned`) fell through to `_unbounded_loop`, and no timeline binds either as a top-level task.

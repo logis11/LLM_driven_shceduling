@@ -209,6 +209,14 @@ Chunk K08, Related work, claims and vocabulary prose (wave 2). 24 open rows. The
 - Cross-ref: W-0368; W-0369; W-0375; W-0383; W-0384; W-0385; W-0386; W-0387; W-0390; W-0841
 - Notes: found in K01. Which id goes in which sentence follows each line's row; spell the ids as `docs/references.md` now does.
 
+### W-0944 · open
+- At: `docs/related-work.md` ## Behavioral inference inside the scheduler, line 16 (the bracket "[eevdf-tr95, linux-sched-eevdf; the kernel's `sched-design-CFS.rst`]"); ## Reference placeholders, the key map's `eevdf` row, line 63 ("the kernel's `sched-design-CFS.rst` at mainline `7b63ef2d`"; "the CFS document has no `docs/references.md` entry yet")
+- Change: Cite `linux-sched-cfs` in place of the bare file name in both places; the key map's row drops "has no `docs/references.md` entry yet".
+- Final word: W-0904, applied in F1: the deployed-system entry `linux-sched-cfs` (`Documentation/scheduler/sched-design-CFS.rst` at `7b63ef2d`) now exists in `docs/references.md`, and the proposal's §1.1 cites it; W-0904's related-work part is this row.
+- Sources: `logs/F1.md` ## Rows for other chunks (X1); W-0904; `docs/references.md` `linux-sched-cfs`
+- Cross-ref: W-0904; W-0372
+- Notes: found in F1. K08's file: a follow-up chunk.
+
 ## Also on this file, not for editing from this list
 
 - W-0391 · closed, not-found — `grep -rn 'H.265\|H.256\|HEVC\|x265'` over `docs/`, `dataset/README.md` and `dataset/sources.yaml` finds only `docs/references.md`'s `cpsmarkplus` entry, which…

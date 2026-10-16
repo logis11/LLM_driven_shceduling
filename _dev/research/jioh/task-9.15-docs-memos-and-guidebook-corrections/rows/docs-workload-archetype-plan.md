@@ -115,7 +115,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 13 open rows. T
 - Cross-ref: W-0230
 - Notes: found in K01. W-0230 carries the full restatement of the bullet; the removal it waited on is done.
 
-### W-0887 · open
+### W-0887 · applied
 - At: `docs/workload/archetype-plan.md` §5, the field list, line 110 ("`sampling` (per-instance | per-task | per-iteration — interpretation-contract §5)", listed as a field of the entry)
 - Change: Move `sampling` into the numeric params' description: it is a key of each numeric param (312 params carry it), no entry has a top-level `sampling`, and the linter checks it per param (`dataset/tools/wlc/linter.py:145`); the plan's own linter sentence (`:117`) already treats it so.
 - Final word: K04's fifth review (passed 2026-10-16), its one nit.

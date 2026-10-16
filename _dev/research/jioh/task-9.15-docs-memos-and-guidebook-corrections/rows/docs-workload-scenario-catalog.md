@@ -158,7 +158,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Cross-ref: W-0144
 - Notes: found in K01. W-0144 rewrites the whole S11 row to 9.10 D33's content and already drops both ids for `dkms`; the two entries no longer exist, so the line now names ids that resolve to nothing. Apply with W-0144.
 
-### W-0885 · open
+### W-0885 · applied
 - At: `docs/workload/scenario-catalog.md` header, line 4 ("Where a taxonomy source names a Windows application, the mapping is recorded in the Source column")
 - Change: Restore the mappings the rewrite dropped — SYSmark 30's Word (S1, also CpsMark+'s document manipulation), Premiere and Photoshop (S7), WinZip → 7-Zip (S16), which `sysmark30`'s role lists — or restate the header to the mappings the column records (Outlook → Thunderbird, S4; Photoshop → GIMP, S6).
 - Final word: K02's last review (passed 2026-10-16), finding 6.
@@ -166,10 +166,18 @@ Chunk K02, Building plan and scenario catalog (wave 1). 19 open rows. The file h
 - Cross-ref: W-0135; W-0136
 - Notes: found in K02's review. K02's file: a follow-up chunk.
 
-### W-0941 · open
+### W-0941 · applied
 - At: `docs/workload/scenario-catalog.md` the scenario table, row S2, line 13 ("`chrome` (`web-browser`; four `renderer-hidden` tabs)"); or `docs/workload/archetype-plan.md` §3, line 42 ("Counts never appear in the scenario catalog")
 - Change: Align the two: either S2's cell drops the count (the four hidden renderers are bound in `c1-browsing` as `count: 4`, with its source), or the archetype plan's rule admits the count S2 names. Optional.
 - Final word: `docs/workload/archetype-plan.md:42`: a count is bound in the timeline with a source — a task's `count` (`c1-browsing`'s `count: 4` hidden renderers) or a knob the entry's `binding_params` names; the compiled `c1-browsing` shows five `chrome` (the window in use and four hidden tabs' renderers).
 - Sources: `logs/K16.md` ## Rows for other chunks (X3)
 - Cross-ref: W-0670; W-0892
 - Notes: found in K16. Both files' chunks have run (K02, K04): a follow-up chunk.
+
+### W-0947 · applied
+- At: `docs/workload/scenario-catalog.md` header, line 8, the generated-tag sentence ("A generated segment carries the tags of the C1 segment its task set comes from (9.19 spec, decision 3) … so a transition grid focus-form file's second segment does not add the tags of A's programs that stay")
+- Change: Restate to 9.10 D168's one rule as the generator applies it since `7b024003`: a generated segment also names every other placement's program alive in it, a task with no `depart` counting in the segment its arrival falls in, so a transition-grid `focus`-form second segment names A's staying programs beside B's (214 files); the distractor grid keeps 9.20 spec decision 1's label copy (M1).
+- Final word: 인지오's answer to K02's M8 (2026-10-16, (b)): one rule, 9.10 D168, in both layers (W-0890, applied in the batched data rebuild `7b024003`); `dataset/tools/gen/compose.py:10–13`, `:256–264`.
+- Sources: `logs/F2.md` ## Rows for other chunks (X1); `logs/F4.md` ## Rows for other chunks (X1); `logs/B1-data-rebuild.md` W-0890
+- Cross-ref: W-0890; W-0929
+- Notes: found in F2 (X1) and F4 (X1), one row for both. Applied in F1 as W-0890's doc part (F1's decision 7), the tag sentence stating the distractor grid's label copy as the code's exception.

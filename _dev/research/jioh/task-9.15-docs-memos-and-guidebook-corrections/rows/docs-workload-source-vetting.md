@@ -121,3 +121,11 @@ Chunk K06, Measurement and grounding docs (wave 2). 14 open rows. The file has 1
 - Sources: W-0008; W-0041; W-0311; `logs/K01.md` ## Decisions, 2 and 3
 - Cross-ref: W-0311
 - Notes: found in K01. W-0311 writes the same appended note (the verdicts on González & Mark, Czerwinski et al., the 23 min 15 s); this is one more sentence in it, not a second note.
+
+### W-0946 · open
+- At: `docs/workload/source-vetting.md` #### B2. rt-app, line 55 ("github.com/scheduler-tools/rt-app, GPLv2"); ### CROSS-CUTTING ITEM 2 — Version pinning, line 90 ("rt-app github.com/scheduler-tools/rt-app GPLv2"; its appended note restates no licence for rt-app) (a record: corrections are appended dated notes)
+- Change: In an appended dated note naming lines 55 and 90: rt-app's licence as read at `d6f8be4` — the `src/` files that carry a header grant GPL version 2 "or (at your option) any later version" (GPL-2.0-or-later), `libdl/dl_syscalls.h` version 2 only, `src/rt-app_taskgroups.c`, `src/rt-app_taskgroups.h` and `libdl/dl_syscalls.c` no header, `COPYING.in` the GPL v2 text.
+- Final word: W-0902, applied in F1 (`docs/references.md` `rt-app`'s cite, all thirteen `.c`/`.h` files read 2026-10-17; F1's decision 3).
+- Sources: `logs/F1.md` ## Rows for other chunks (X3), ## Decisions 3; W-0902; `docs/references.md` `rt-app`
+- Cross-ref: W-0902
+- Notes: found in F1. K06's file: a follow-up chunk.

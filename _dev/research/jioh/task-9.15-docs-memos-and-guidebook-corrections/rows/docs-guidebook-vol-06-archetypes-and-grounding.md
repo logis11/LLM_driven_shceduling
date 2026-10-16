@@ -99,7 +99,7 @@ Chunk K16, Research guidebook, volumes 4-6 (wave 4). 9 open rows. The file has 4
 - Cross-ref: W-0892; W-0453; W-0675; W-0678; W-0680
 - Notes: found in K09. :2532 sits between W-0678's and W-0680's ## 9.4 lines (2528; 2534–2584) and :3736–3738 in W-0675's ## 12.9 passage (3718–3789); those rows restate the retired entries and the tab-count sources, this one the counts the recognizer sees.
 
-### W-0943 · open
+### W-0943 · applied
 - At: `docs/guidebook/vol-06-archetypes-and-grounding.md` chapter 11's summary mark, line 3509, and §12.8's mark, line 3795 (each a "재구축 이후 (2026-10-17)" mark saying `compiler-child`'s note still calls `ocallahan-atc17` and `coetzee-arxiv12` "kernel-build literature")
 - Change: Once the batch after wave 4 lands W-0851, restate the two marks to what the landed `compiler-child` note says.
 - Final word: K16's mismatch M2 and its last review: `dataset/archetypes.yaml:1031` `compiler-child`'s `modeling_notes` still read "The kernel-build literature …" at HEAD `8a03dff1`, so the marks are true now; W-0851 (the batch after wave 4) restates the note as the registry note reads (W-0790).

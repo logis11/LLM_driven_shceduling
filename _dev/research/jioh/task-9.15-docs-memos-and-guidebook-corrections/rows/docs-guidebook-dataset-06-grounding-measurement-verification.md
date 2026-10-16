@@ -191,7 +191,7 @@ Chunk K13, Dataset guidebook, volumes 5-6 (wave 3). 20 open rows. The file has 1
 - Cross-ref: W-0567; W-0578
 - Notes: found in K06. The `:936` "about one per 22 minutes" copies `_dev/research/jioh/measurement-campaign-workflow.md` (K06's M3; a `_dev/` record, not edited).
 
-### W-0931 · open
+### W-0931 · applied
 - At: `docs/guidebook/dataset/06-grounding-measurement-verification.md` §6.4, the quote of `dataset/tools/meas/runner_spec.py`'s docstring and the parenthetical marking it as the Phase 2 sentence against 9.5 D10
 - Change: Once W-0882 restates the docstring, quote it as restated and drop the parenthetical.
 - Final word: 9.5 D10/D26 (a measured value is a source claim scoped to the runner, not a downgrade to convention); W-0882 restates `runner_spec.py:2–3` in the batch after wave 4 (K13's M3).

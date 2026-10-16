@@ -91,7 +91,7 @@ Chunk K13, Dataset guidebook, volumes 5-6 (wave 3). 10 open rows. The file has 2
 - Cross-ref: W-0742; W-0865
 - Notes: found in K02 (line 80 by K02's last review).
 
-### W-0929 · open
+### W-0929 · applied
 - At: `docs/guidebook/dataset/05-the-generated-layer.md` §2.5's table (`scenario` among what carries over unchanged), §3.3 ("generator는 그것을 그대로 복사합니다"), §5.2 step (6); the worked-example figures the regenerated transition-grid files move (§6.3, §7.6, §7.7 sizes and hashes; §12.8)
 - Change: Once W-0890 lands: state 9.10 D168's one rule — a `focus`-form transition file's second segment carries B's C1 tags and those of A's programs that stay — and re-read the worked-example figures, with a bless row in §12.8.
 - Final word: 인지오's answer to K02's M8 (2026-10-16, (b)): one rule, 9.10 D168, in both layers (W-0890, in the batch after wave 4). Until then the volume describes the generator at HEAD, which copies B's C1 tags alone (`dataset/tools/gen/compose.py`, 214 files; K13's M1).
@@ -99,7 +99,7 @@ Chunk K13, Dataset guidebook, volumes 5-6 (wave 3). 10 open rows. The file has 2
 - Cross-ref: W-0890; W-0930
 - Notes: found in K13. K13's file: a follow-up chunk after the batch after wave 4.
 
-### W-0930 · open
+### W-0930 · applied
 - At: `docs/guidebook/dataset/05-the-generated-layer.md` §12.8 (the bless rows and "the current pins") and its worked-example artifact sizes; `docs/guidebook/dataset/06-grounding-measurement-verification.md` §14.2 (the pins rows)
 - Change: After the rebuild of the batch after wave 4 (its data rows W-0851–W-0853, W-0855, W-0856, W-0875–W-0883, W-0889, W-0890, W-0898–W-0901): add its re-bless as a row in both tables, restate "the current pins" to it, and re-read vol-05's worked-example artifact sizes.
 - Final word: K13's decision 1: both volumes name 9.15's 2026-10-16 re-bless as current (dataset `b6017a10…`, variants `087ef27c…`, generated `a8eebb33…` / `2e57a6c1…` / `dd6a7c24…` / `264d3333…` / `58a34d65…`), 9.23 D17's as the pins just before; the batch after wave 4 re-blesses again.

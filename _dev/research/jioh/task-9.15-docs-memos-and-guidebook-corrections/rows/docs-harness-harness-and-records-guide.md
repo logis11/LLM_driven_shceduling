@@ -120,7 +120,7 @@ Chunk K10, Harness guide and metrics (wave 3). 14 open rows. The file has 1400 l
 - Notes: found in stage A (A4; lines 616–624 by A5's reviewer). Read the walkthrough's values off `worked.md` and `expected.csv` (the switch's `index`, the hogs and their CPU intervals). The fixture's switch excess is now 0 µs (the 46000 keystroke arrives while the editor waits preempted in Q1; its WAIT completes at 50100 with zero wait); the boost excess stays 600 µs; the 60600 boost window is 20,000 µs.
 
 
-### W-0921 · open
+### W-0921 · applied
 - At: `docs/harness/harness-and-records-guide.md` §15.3, line 1233 ("두 player의 측정된 cycle 중 가장 긴 것이 video 11.5 ms, music 0.8 ms"), beside §15.1's `c7-media` row, line 1188 ("측정된 table로는 … video의 최악 cycle이 16.0 ms")
 - Change: Name §15.3's figures as the longest cycles the compiled `c1-media` carries ("compiled `c1-media`에 실린 cycle 중 가장 긴 것"), so they read apart from §15.1's measured-table maximum.
 - Final word: K10's last review (round 3, non-blocking note): §15.1 follows the RQ0 gate spec's note, the measured table's maximum (`harness/experiments/rq0-gate.yaml:407`, "16.0 ms at most"); §15.3's 11.5 ms and 0.8 ms are the longest cycles of the compiled `c1-media`, sampled from those tables (the compiled `c7-media`'s are 7.3 ms and 0.8 ms). Both are correct for what they describe; the reviewer marks the edit optional.

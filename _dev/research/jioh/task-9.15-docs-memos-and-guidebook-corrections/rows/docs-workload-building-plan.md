@@ -383,7 +383,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0839; W-0848
 - Notes: found in K01. Take the wording from `docs/references.md`'s citation-tier rule as committed after wave 0. The same old rule stands in `docs/workload/grounding-sources.md:77` (W-0839) and in `dataset/sources.yaml:14–16`'s header comment (a data file; K01's mismatch M1, outside the sweep).
 
-### W-0873 · open
+### W-0873 · applied
 - At: `docs/workload/building-plan.md` §2.1, the 29-entry table ("the quick-reference inventory", its pin)
 - Change: Make the table agree with the archetype plan's §4 inventory (the 29 entries grouped by compile path: measured stream 16, batch loop 8, builds 4, chain 1), or point to it.
 - Final word: K04 decision 8 and W-0231 (the plan's §4 replaced by the 29 entries, grouped by `compiler.py`'s dispatch); K02 decision 2 (§2.1 restated, 29 entries in 23 rows, each campaign tag read from `validation_stats.run`).
@@ -391,7 +391,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0090; W-0231
 - Notes: found in K04. Both files' chunks have run (wave 1): a follow-up chunk.
 
-### W-0884 · open
+### W-0884 · applied
 - At: `docs/workload/building-plan.md` §1 line 44 ("the editor's events and segment 0 byte-identical (`test_p1_pair_differs_in_segment_one_only`)"); §3 line 99 ("A file showing Chrome depicts one window of five tabs"); §3a line 178 ("each cell's seed drawing its own programs"); §5a line 220 ("The calibration class is declared by each recipe (Phase 7)"); §7 line 235 (the **Workflows** list; "traced by `perf sched record` on that CPU")
 - Change: (1) Line 44: scope the test as line 112 does — the compiled files hold the editor's events identical, the test P1's shared arrival, segment 0 and the spans (it compares arrive events only, `dataset/tools/tests/test_coreset.py:58–59`). (2) Line 99: except the call — `c1-meeting` and `c7-meeting` bind one `chrome` task on `video-call` and no renderers (9.10 D14); 9.10 D15's rule is for the files that show the browser (the `web-browser` task). (3) Line 178: the seed draws each cell's event streams, not "programs", which elsewhere in the doc means an application. (4) Line 220: the C1 files declare `demand: calibration` in their own timelines' `meta`; only the derived files' recipes carry `patch-meta: {demand: calibration}`. (5) Line 235: scope the Workflows list to the workflows whose campaigns the data carries, or name the other four (`meas-costs`, `meas-probe`, `meas-long-probe`, `meas-sched`); `session`'s four entries were traced on every CPU, the processes confined to one.
 - Final word: K02's last review (passed 2026-10-16, no material finding): findings 1, 2, 4, 5 and 7, left for the editing agent to fix or log; finding 3 (§4's Coverage bullet) is a correct change, only unlogged, and needs no edit.
@@ -399,7 +399,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0098; W-0118; W-0123; W-0126
 - Notes: found in K02's review. K02's file: a follow-up chunk.
 
-### W-0903 · open
+### W-0903 · applied
 - At: `docs/workload/building-plan.md` §7, line 239 ("segment durations are the naturalistic set's (§4)"); §4, line 187 (the **Switching structure** bullet: "Hub-and-spoke switching lost its only source, a task-switching log study with no reachable copy, when that source was dropped (9.10 D1)")
 - Change: (1) Line 239: the core set's segment durations are design or the bound job's measured length (§3), `c6-dual`'s 688 s focus alternation `gonzalez-chi04`'s mean, Role C's figures serving the naturalistic set (§4). (2) Line 187: "Hub-and-spoke switching is unsourced."
 - Final word: K06's review round 1, findings 5 and 8, applied to `docs/workload/grounding-sources.md` Role D and Role C: the building plan's §3 (C1's 60 s files; a batch base's segment the smallest whole second by which its job ends, 9.10 D78) and §4 (backlog); `c6-dual.timeline.yaml:32–33` cites `gonzalez-chi04` for the 688 s; the public docs carry no account of Phase 9 corrections (`_dev/research/jioh/research-slice-workflow.md:23`).
@@ -407,7 +407,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0884; W-0294
 - Notes: found in K06. K02's file: a follow-up chunk.
 
-### W-0912 · open
+### W-0912 · applied
 - At: `docs/workload/building-plan.md` §3 C5, line 133 ("the ladder over the sixteen modes at tiers 3–5 … is generated (§3a)")
 - Change: Match §3a (`:174`): the generated ladder renames every mode's task set at tiers 4 and 5, plus two tier-3 cells (render's and backup's jobs as `melt-7` and `duplicity`).
 - Final word: `dataset/grids.yaml` `familiarity-ladder` (`tiers: [4, 5]`; its `tier3` holds `render` → `melt-7`, `backup` → `duplicity`); `dataset/build.familiarity-ladder.manifest.json`: 66 files, 32 at tier 4, 32 at tier 5, 2 at tier 3 (counted in K07, N24); the building plan's §3a (`:174`).

@@ -419,7 +419,7 @@ Chunk K07, Research proposal (wave 2). 53 open rows. The file has 953 lines at `
 - Cross-ref: W-0315; W-0317; W-0322; W-0323; W-0326; W-0329; W-0334; W-0336; W-0338; W-0339; W-0341; W-0342; W-0343; W-0348
 - Notes: found in K01. The cross-refs are the proposal rows whose text names one of these sources (a grep of this file; the list may be incomplete); which id goes on which line follows each row.
 
-### W-0896 · open
+### W-0896 · applied
 - At: `docs/research-proposal.md` §5.5 (Workloads), its preamble; `docs/workload/grounding-sources.md` line 53, the heading "The negative result — why the suite is synthetic (write this into §5.5's preamble)"
 - Change: Write the negative result into §5.5's preamble in its narrowed form — no public trace gives desktop process trees with names over time (9.10 D35) — or drop the heading's directive from grounding-sources.
 - Final word: K06 decision 13: the directive was kept, since the proposal's §5.5 does not carry the paragraph at HEAD and whether it should is the proposal's chunk's to settle; K07 ran beside K06 in wave 2 and its log does not take it up. 9.10 D35 (the negative result narrowed).
@@ -427,7 +427,7 @@ Chunk K07, Research proposal (wave 2). 53 open rows. The file has 953 lines at `
 - Cross-ref: W-0296; W-0354
 - Notes: found in K06. Both files' chunks have run (K06, K07): a follow-up chunk.
 
-### W-0940 · open
+### W-0940 · applied
 - At: `docs/research-proposal.md` ### Family 2 — Same process set, different intent ★, the heading, line 628; `docs/research-claims.md` ## Two mechanisms, currently measured as one, line 78 ("tested by Family 2, same process set, different intent")
 - Change: Restate Family 2's name in both files: the pairs' background jobs do not share a process set — they differ in name and behaviour, P1's also in declared class, P2's in its programs' declared priority (W-0942) — as the research guidebook vol-04's heading now reads ("같은 상황 옆에서 의도가 갈리는 작업").
 - Final word: 9.12 D14 and D15 (as amended by D88, D89 and D101; 9.23 D9), as both docs now apply them: each pair is two real jobs, differing in behaviour and declared class or priority as measured. K16 decision 7: vol-04's heading changed (W-0667); the proposal's and the claims document's name left to their committed chunks (K07, K08).
@@ -435,7 +435,7 @@ Chunk K07, Research proposal (wave 2). 53 open rows. The file has 953 lines at `
 - Cross-ref: W-0667; W-0325; W-0355; W-0942
 - Notes: found in K16. Both files' chunks have run (K07, K08): a follow-up chunk.
 
-### W-0942 · open
+### W-0942 · applied
 - At: `docs/research-proposal.md` ### Family 2, its lead, line 630 ("Pairs of real jobs whose correct policies differ, which also differ in behaviour and declared class as measured")
 - Change: "differ in behaviour and declared class" holds for P1 only: P2's programs differ in declared priority (nice), both P2 files declaring `normal`; restate the lead so it holds for both pairs.
 - Final word: W-0667's final word (9.12 D15): P2 differs in declared priority (the download at nice 10 for three quarters of its CPU, the upgrade at nice 19); 9.11 D6: nice is not carried by the task model — the compiled `c2-p2a` and `c2-p2b` carry `declared_class: normal` on every arrive, and the RQ0 gate spec's `bounding_pair` `c2-p2a`/`c2-p2a-idle` brackets the difference (`harness/experiments/rq0-gate.yaml:214–217`).

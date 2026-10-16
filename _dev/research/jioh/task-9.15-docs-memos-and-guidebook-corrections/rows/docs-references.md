@@ -556,7 +556,7 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0069
 - Notes: Verified passages on file: 9.12 search records S3-11 (`_dev/research/jioh/task-9.12-related-work-prose/search/S3-traces-datasets.md:367`, two SHA-256) and S3-23 (`:651`), audit records A2-12 and A2-13 (`A-audit.md:130`, `:134`, the PDFs). SX-0190 also hands Cooper et al. (W-0069). C3 is the core set's transition-arc group, C4 its distractor-injection group.
 
-### W-0860 · open
+### W-0860 · applied
 - At: `docs/references.md`, a new entry in ## Grounding — deployed-system (footnotes); `docs/workload/scenario-catalog.md` S3's Source cell ("(9.10 D24)")
 - Change: Mint a deployed-system entry, by the id rule, for Microsoft's "Microsoft Teams progressive web app now available on Linux" (Microsoft Teams Blog, post 3669846, 2022-11-07), the passage verified on file in 9.10's search record S2-26 (copy SHA-256 `67a9c24cf44b60861e96fec2ea19a50a40b7b5f950116726a284d8374c581637`); then the scenario catalog's S3 row cites the entry in place of "(9.10 D24)".
 - Final word: K02 decision 15: S3 states the fact with 9.10 D24 as its record, since only the references chunk mints entries (9.15 spec decision 5).
@@ -564,7 +564,7 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0138
 - Notes: found in K02. Both files' chunks have run (K01, K02): a follow-up chunk. The citation rule: `docs/references.md`'s id-minting rule first; a `dataset/sources.yaml` entry only if the dataset derives values or structure from the source.
 
-### W-0861 · open
+### W-0861 · applied
 - At: `docs/references.md` the `meas-ci` entry's cite, its list of campaigns cited only in prose (it names only `meas-ci:costs:2026-10-08`)
 - Change: Add `meas-ci:names:2` to the list, with its workflow run and where its raw records are: an asset (`meas-names2.zip`) of release `meas-ci-2026-08-28`, which `dataset/meas-releases.yaml` does not map (the map covers the campaigns the data carries).
 - Final word: W-0738's answer (9.10 D25: a name derived by the rule is confirmed where a campaign or `meas-ci:names:2` shows it); the scenario catalog's note 4 and `dataset/README.md`'s names rule cite it, and no data file does (grep over `dataset/`); `gh release list`: `meas-ci-2026-08-28` "meas-ci raw data: cli:3, gui:2, names:1, names:2".
@@ -572,7 +572,7 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0732; W-0738; W-0153
 - Notes: found in K02. The building plan's §7 already states that the map leaves `names:2` out (K02, fix round resumed). Both files' chunks have run: a follow-up chunk.
 
-### W-0862 · open
+### W-0862 · applied
 - At: `docs/references.md` the `cpsmark-tbench23` entry's role ("the existence of the office, browsing, mail, photo, transcode and archive scenarios (the scenario catalog's S1, S2, S4, S6, S8 and S16)")
 - Change: Align the role with 9.10 D33's S16 row, which grounds the archive scenario on SYSmark 30 alone, as the scenario catalog now does: drop S16 from the role, or record why CpsMark+ also grounds it.
 - Final word: 9.10 D33 (the catalog's table; S16 on `sysmark30`); K02 rewrote the catalog to D33's table (W-0136).
@@ -580,7 +580,7 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0136; W-0789
 - Notes: found in K02. Both files' chunks have run: a follow-up chunk.
 
-### W-0891 · open
+### W-0891 · applied
 - At: `docs/references.md`, new entries; `docs/daemon/daemon-guide.md` §9 Open questions, ### 9.3 Hold time and hysteresis, line 188 ("hardware-state governors in milliseconds … capacity provisioning in minutes", the two scales named without values)
 - Change: Mint entries, by the id-minting and citation-tier rules, for the debounce precedents 9.19's precedent search read on 2026-10-11 and left without one — the Linux cpufreq governors (`schedutil`'s `rate_limit_us`, `ondemand`'s `sampling_rate`), Android's `interactive` governor (`min_sample_time` 80 ms), the Linux scheduler's `sysctl_sched_migration_cost` (0.5 ms), the Kubernetes HorizontalPodAutoscaler (downscale stabilization 5 min), the Kubernetes cluster autoscaler (10 min), AWS EC2 Auto Scaling's default cooldown (300 s), RFC 2439, BGP route flap damping (5–15 min); then the daemon guide's §9.3 gives the hardware-state governor scale (0.5–80 ms) and the capacity-provisioning scale (5–15 min) their values, citing the entries.
 - Final word: 9.19 D4 (2026-10-11): `feral-gamemode`, `tuned` and `systemd-oomd` got entries; "The other precedents of the table above ground no dataset value and have no entry; the table carries their coordinates for the daemon guide's §9.3 (9.15) and the RQ4 experiment spec." K09 decision 5: the daemon guide's §9.3 states only cited values, so the two scales stay without values until their entries exist.
@@ -588,7 +588,7 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0455
 - Notes: found in K09. Both files' chunks have run (K01, K09): a follow-up chunk. The citation rule: `docs/references.md`'s id-minting rule first, each entry verified against its primary text; no `dataset/sources.yaml` entry, since no dataset value derives from these sources (9.19 D4).
 
-### W-0895 · open
+### W-0895 · applied
 - At: `docs/references.md`, new entries; `docs/workload/grounding-sources.md` the negative result's DARPA OpTC row and the anti-roles' mobile row (Carat), each named there without an id
 - Change: Mint entries, by the id-minting and citation-tier rules (deployed-system or scholarly, as each type falls), for DARPA OpTC (process-create events with image paths, Windows 10 enterprise endpoints) and Carat (several running apps per sample, each with a foreground/background priority), on the passages the 2026-09-13 verification read (compare report K5, C-plain-7 and C-plain-8) and 9.10 D35; then grounding-sources' negative-result row and mobile anti-role cite them by id.
 - Final word: K06 decision 10: DARPA OpTC and Carat are named in plain text, without an id, since minting is the references chunk's alone (9.15 spec decision 5); their verified passages are on file.
@@ -596,7 +596,7 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0296
 - Notes: found in K06. Both files' chunks have run (K01, K06): a follow-up chunk. The citation rule: `docs/references.md`'s id-minting rule first; a `dataset/sources.yaml` entry only if the dataset derives values or structure from the source.
 
-### W-0902 · open
+### W-0902 · applied
 - At: `docs/references.md` the `rt-app` entry's cite (its licence, "GPLv2")
 - Change: Check the licence at `d6f8be4` and align the cite: the 2026-09-13 verification read every source header as GPL version 2 "or (at your option) any later version" (GPL-2.0-or-later).
 - Final word: the 2026-09-13 verification, compare report K1, row "Licence identifiers" (which names `C-rt-app-4 references.md:143`); 9.11 D12 aligned hackbench's and stress-ng's licence identifiers the same way.
@@ -604,15 +604,15 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0073
 - Notes: found in K06. K01's file: a follow-up chunk. W-0073 (the entry's role line, blocked on the simulator's TIMER) is another line of the same entry.
 
-### W-0904 · open
+### W-0904 · applied
 - At: `docs/references.md`, a new entry; `docs/research-proposal.md` §1.1 (the CFS design document named by its file: one task per CPU); `docs/related-work.md:16` (the second sentence's bracket naming the file) and its key map's `eevdf` row
 - Change: Mint an entry, by the id-minting and citation-tier rules, for the kernel's `Documentation/scheduler/sched-design-CFS.rst` at mainline `7b63ef2d`, with the passages the 9.12 records read: ":18–19" (CFS models an "ideal, precise multi-tasking CPU"), ":26–27" ("On real hardware, we can run only a single task at once"), ":45–47", ":51–53" ("various algorithm variants to recognize sleepers"), ":96–105" ("has no heuristics whatsoever"); then the proposal's §1.1, `docs/related-work.md:16` and the key map's `eevdf` row cite the id in place of the file name.
 - Final word: 9.12 D18 (`sched-design-CFS.rst` at mainline `7b63ef2d`); K07 decision 4 and K08 decision 2: the file is named, not given an id, since minting is the references chunk's (9.15 spec decision 5).
 - Sources: `logs/K07.md` ## Rows for other chunks (X1); `logs/K08.md` ## Rows for other chunks (X1), ## Decisions 2; 9.12 search record S2-04; 9.12 audit record A5-02
-- Cross-ref: W-0314; W-0372
+- Cross-ref: W-0314; W-0372; W-0944
 - Notes: found in K07 (X1) and K08 (X1): one entry for both. All three files' chunks have run (K01, K07, K08): a follow-up chunk. The citation rule: `docs/references.md`'s id-minting rule first; a `dataset/sources.yaml` entry only if the dataset derives values or structure from the source.
 
-### W-0905 · open
+### W-0905 · applied
 - At: `docs/references.md`, new entries; `docs/research-proposal.md` §2.2 **Cooperation** bullet (Baloo, ClamAV, borg and restic named there without ids)
 - Change: Mint entries for KDE Baloo's self-declared classes (`src/file/priority.cpp`; 9.11 search record S2-24) and for ClamAV's, borg's and restic's declaring nothing (9.11 search records S2-25, S2-26); then the proposal's §2.2 Cooperation bullet cites them.
 - Final word: 9.12 D13 (the proposal's Cooperation bullet: which background tools declare themselves); K07 decision 4: sources without an entry are named, not given an id.
@@ -620,7 +620,7 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0334
 - Notes: found in K07. Both files' chunks have run (K01, K07): a follow-up chunk. The citation rule as W-0904.
 
-### W-0906 · open
+### W-0906 · applied
 - At: `docs/references.md` the `ostep` entry's cite and role (chapter 8 only)
 - Change: Widen the cite and the role to chapter 7, "Scheduling: Introduction": §7.4–§7.6 (SJF's and STCF's optimality under their assumptions) and §7.9 ("No More Oracle"), which the proposal's §1.1 cites.
 - Final word: 9.12 D32, D63 (records S1-03, A2-04); K07 decision 5: `ostep` is cited for chapter 7 although its entry names chapter 8 only — the same book.
@@ -628,7 +628,7 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0316
 - Notes: found in K07. Both files' chunks have run (K01, K07): a follow-up chunk.
 
-### W-0907 · open
+### W-0907 · applied
 - At: `docs/references.md` the `meas-ci` entry's cite, its list of campaigns cited only in prose
 - Change: Add `meas-ci:sched:2026-10-07` (run 37601932147; the runner kernel's `sched_rr_timeslice_ms` 100 and base slice) with its release; `dataset/meas-releases.yaml` does not map it.
 - Final word: 9.11 changelog D2, D23 (the runner's scheduler tunables); K07 decision 6: the proposal cites `SCHED_RR`'s 100 ms to `meas-ci:sched:2026-10-07`, a campaign in neither the release map nor the `meas-ci` entry's list.
@@ -636,7 +636,7 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0315; W-0861
 - Notes: found in K07. W-0861 adds `meas-ci:names:2` to the same list: one edit for both. Both files' chunks have run (K01, K07): a follow-up chunk.
 
-### W-0908 · open
+### W-0908 · applied
 - At: `docs/references.md` the `vulkan` and `gstreamer` entries' roles
 - Change: Each role names the proposal's deadline glossary beside the TIMER statements it already names: for `vulkan`, a late game frame shown at the next vertical blank under FIFO presentation; for `gstreamer`, a video sink dropping a frame past its lateness.
 - Final word: 9.12 D90; the proposal's glossary **Deadline** cites both (W-0345, applied in K07).
@@ -644,7 +644,7 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0345; W-0418; W-0074
 - Notes: found in K07. The roles' TIMER statements are not this row's (W-0074, blocked on the simulator's TIMER, is on `mpv` and `chromium`). The background guide's **deadline** row also cites Vulkan's FIFO presentation (W-0418, K08). Both files' chunks have run: a follow-up chunk.
 
-### W-0909 · open
+### W-0909 · applied
 - At: `docs/references.md` the `waldspurger-osdi94` entry's role
 - Change: The role gains §2.2: allocation proportional to tickets in expectation, its accuracy improving with √n; E[n] = 1/p lotteries to a first win; "will eventually win", with no bound — cited in the proposal's §4.5 and its glossary **Lottery scheduling**.
 - Final word: 9.12 D36, D67.
@@ -652,7 +652,7 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0346
 - Notes: found in K07. Both files' chunks have run (K01, K07): a follow-up chunk.
 
-### W-0910 · open
+### W-0910 · applied
 - At: `docs/references.md` the `ananicy-rules` entry's role
 - Change: The role gains the entries 9.12 D5 and D85 read at `03ef03fb`, as existence claims: `reaper`, `bitwig-studio`, `ArdourGUI`, `lmms` and `audacity` as `Player-Audio`; Discord as `Chat`; Godot's editor builds as `Game`; `node` as `BG_CPUIO`; `blender` and `resolve` as `Heavy_CPU` — cited in the proposal's Family 3.
 - Final word: 9.12 D5, D85; 인지오's answer to W-0728 ((c), applied in K07: Family 3 keeps the registration failures, the Blender/Resolve row leaves).
@@ -660,7 +660,7 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0357; W-0358; W-0728
 - Notes: found in K07. Both files' chunks have run (K01, K07): a follow-up chunk.
 
-### W-0938 · open
+### W-0938 · applied
 - At: `docs/references.md` the `ghost-userspace` entry's role, line 717 ("the research guidebook vol-02's eight README quotations (`:873`, `:875`, `:911`, `:917`, `:955`, `:957`, `:975`, `:1003`)"); the `schedcp-mlsys25` entry's status, line 748 ("vol-02's `:2457`")
 - Change: `ghost-userspace`'s role: eight README quotations → seven, now at vol-02 `:876`, `:912`, `:918`, `:956`, `:958`, `:976`, `:1004`. `schedcp-mlsys25`'s status: vol-02 `:2457` → `:2473` (the quoted v4 research question "How effectively can SchedCP understand workloads?"). Or section locators in place of line numbers: §3.2 (ghOSt) for the quotations, §6.2 (SchedCP) "무엇을 평가했는가" for the question.
 - Final word: W-0628, applied in K15 (9.12 D53 as amended by D97 and D98): vol-02's `:875` repeated `:873` verbatim and was removed, moving every later line; the line numbers are vol-02's as K15 left it, re-read in K15's last review.

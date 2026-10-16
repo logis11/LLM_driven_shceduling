@@ -223,7 +223,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0215; W-0218
 - Notes: found in K01. K01's reviewer: `docs/references.md`'s `gh-actions-limits` role already says the dataset README states the 6 h limit beside the 14 GB — true only once this lands; this chunk must land it.
 
-### W-0911 · open
+### W-0911 · applied
 - At: `dataset/README.md` ## Layout, the `familiarity-ladder/` tree line, line 25 ("each mode's task set with its names substituted at tiers 3-5")
 - Change: Tiers 4 and 5 for every mode, plus render's and backup's jobs at tier 3 (`melt-7`, `duplicity`); 66 files.
 - Final word: As W-0912.
@@ -231,7 +231,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0912; W-0913; W-0914
 - Notes: found in K07. K04's file: a follow-up chunk.
 
-### W-0918 · open
+### W-0918 · applied
 - At: `dataset/README.md` ### Coresets, the group table's C6 row, line 119 ("A miner named `chrome`, a `cpu-batch` job arriving at 20 s")
 - Change: "A miner named `chrome`, a `cpu-batch` job arriving at 20 s" → "A `cpu-batch` job named `chrome` arriving at 20 s".
 - Final word: `dataset/timelines/coreset/c6-spoof.timeline.yaml:52–58` binds `archetype: cpu-batch` under the name `chrome`; 9.12 D88: no cryptocurrency miner is read or measured. `docs/research-claims.md`'s C6 entry says "a CPU job named chrome" (K08).
@@ -239,7 +239,7 @@ Chunk K04, Dataset README, archetype plan and licences (wave 1). 27 open rows. T
 - Cross-ref: W-0206; W-0396
 - Notes: found in K08. K04's file: a follow-up chunk.
 
-### W-0922 · open
+### W-0922 · applied
 - At: `dataset/README.md` "Sensitivity variants", the table's `corner-low`/`corner-high` row ("the session daemons' and the Tracker indexer's are not swept")
 - Change: Drop "and the Tracker indexer's": only the session daemons' values go unswept.
 - Final word: `file-indexer` carries no stability exception — its scope: "the stability rule holds on all three values" (`dataset/archetypes.yaml`); the exception 9.6 D29 named was the block of `cpu-batch`'s old `tracker` program (`99368c44`), retired with that program. W-0898 drops the same exception from `dataset/variants.yaml`'s `:94` comment.

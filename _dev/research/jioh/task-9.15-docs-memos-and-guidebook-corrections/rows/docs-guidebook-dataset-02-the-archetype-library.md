@@ -72,7 +72,7 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 6 open rows. The file has 16
 - Cross-ref: W-0516; W-0238; W-0872
 - Notes: found in K04.
 
-### W-0926 · open
+### W-0926 · applied
 - At: `docs/guidebook/dataset/02-the-archetype-library.md` line 1458 (W-0858's paragraph: "data-contracts §2는 "There are 29"로 시작하며"); line 1281 ("9.10 D28 … session process가 idle 파일에만 나오고 다른 모든 파일은 그것을 생략")
 - Change: (1) `:1458` → "data-contracts §2의 그 문단은 "There are 29"라고 적으며". (2) `:1281` scoped to the core set, as vol-01 §3.3 now words it ("그 밖의 core 파일").
 - Final word: K11's last review (round 2, minor findings 1 and 3). (1) `docs/data-contracts.md` §2 opens with the "Frozen (v0.2, …)" line and the `declared_class` paragraph; "There are 29" is its third paragraph (`:78`). (2) 인지오's answer to K02's M7 (2026-10-16, (a)): D28 reads as the core set's rule; the generated layer binds the four session processes in 182 files, 62 of them beside another mode's programs (vol-05 §2.6, W-0888).

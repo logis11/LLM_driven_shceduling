@@ -200,7 +200,7 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 24 open rows. The file has 1
 - Cross-ref: W-0865; W-0487; W-0742; W-0392; W-0400
 - Notes: found in K08.
 
-### W-0925 · open
+### W-0925 · applied
 - At: `docs/guidebook/dataset/01-the-big-picture.md` §4.1, line 754 ("`dataset/.gitignore`가 `dataset/build/`와 `dataset/generated/`를 무시하도록 적고")
 - Change: Name the repository root's `.gitignore` (lines 2–3) as the file holding the two rules.
 - Final word: K11's last review (round 2, minor finding 2): no `dataset/.gitignore` exists or ever did (`git log --all -- dataset/.gitignore`); the two rules are the root `.gitignore`'s lines 2–3 (`git check-ignore -v`).

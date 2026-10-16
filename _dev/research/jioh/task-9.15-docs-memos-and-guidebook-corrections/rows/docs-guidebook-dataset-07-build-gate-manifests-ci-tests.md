@@ -122,7 +122,7 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 13 open rows. The file has 1
 - Cross-ref: W-0590; W-0485; W-0581
 - Notes: found in K11. K14's file (wave 4). W-0590's final word (9.23 D17's pins) predates the 2026-10-16 re-pin.
 
-### W-0933 · open
+### W-0933 · applied
 - At: `docs/guidebook/dataset/07-build-gate-manifests-ci-tests.md` §1.4 (`c1-dev`'s `meta`), §1.5 and §2.2 (sizes), §2.3 (the library's hashes and their history table), §2.4 (the input prefixes), §2.5 (the core manifest's first lines), §2.8 (the excerpt and the records), §3.3 (the pins block and diagram), §3.4 (the changelog dates), §3.5 (the messages), §3.7 (a history row and a generated-table column), §4.6 case 2, §6.12 (the Linux-run sentence), §7.2, §7.4 and §7.7 (the test counts), §7.6 (the harness count); `docs/guidebook/dataset/08-decision-chronicle.md` §12.2 (the current pins) and §13 (a row)
 - Change: After the rebuild of the batch after wave 4, re-read the sizes, hashes, pins, input counts and test counts these places quote and restate them to it: its re-bless the current pins, a fourth row in §2.3's library history (with W-0853's header), a history row and a column in §3.7, a row in vol-08 §13.
 - Final word: K14's decisions 1–2: both volumes name 9.15's 2026-10-16 re-bless (`37c2e233`) as current, read 2026-10-17 at HEAD `d1774570` — dataset `b6017a10…`, variants `087ef27c…`, scoring spec `2ad757b6…`, guard spec `24ccb875…`, driver table `0fba4b3c…`; 488 test functions, 540 collected; harness 298 / 296. The batch after wave 4 (its data and code rows W-0851–W-0853, W-0855, W-0856, W-0875–W-0883, W-0889, W-0890, W-0898–W-0901, W-0919, W-0920, W-0927) re-blesses again; W-0890 adds a generator test and W-0889 changes the harness's tests.

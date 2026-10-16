@@ -162,6 +162,14 @@ Chunk K05, Data contracts (wave 1). 20 open rows. The file has 563 lines at `d5c
 - Resolved at merge: W-0253's notes state the fact ("c2-p1a's hog is now named `python` … not `python3` as §3 Example A and §5's telemetry examples show") without a row for §5, §6, §8. Checked: the compiled `dataset/build/coreset-single/c2-p1a.workload.json` arrive `hog` has `name: python`; `dataset/archetypes.yaml:896–899` names the tables `python3_run`/`python3_block`, chosen by the `program` binding, never by the display name (`:946–949`). So `python3` is the program binding and `python` the process name.
 - Notes: §3's Example A (W-0249) and Example B's recipe (W-0253) carry their own `python3` fixes. The §8 example's `"workload_id": "c2-p1a"` ties it to the file; the §5 snapshot at `t_us` 60000000 is the same file's.
 
+### W-0949 · open
+- At: `docs/data-contracts.md` ## 7. Config schedule, the "In sentences" paragraph, line 390 ("The simulator applies each entry at its time as just another event")
+- Change: The sentence holds for every entry but a switch out of MLFQ, EDF or LOTTERY, which applies at the drain, the next time the lane is free: point to `docs/harness/metrics.md` §11 items 7–9, or add a §14 entry. A frozen contract (§13): 인지오's call.
+- Final word: `docs/harness/metrics.md` §11 item 8 (a switch out of any algorithm but FIFO applies at the running task's slice boundary; confirmed with 인경민 on 2026-09-09); `simulator/src/sim.cpp:573–574`, `:825–828` (its U3, 2026-10-10).
+- Sources: `logs/F3.md` ## Rows for other chunks (X1)
+- Cross-ref: W-0935
+- Notes: found in F3. K05's file: a follow-up chunk.
+
 ## Also on this file, not for editing from this list
 
 - W-0261 · blocked, simulator TIMER (on the spec's list) — ## 4. Workload (canonical), ### Example B, sentence (2) on line 246 ("The metronome ticks on a fixed grid, so a late frame doesn't push the…
