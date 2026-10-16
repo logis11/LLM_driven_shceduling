@@ -1190,7 +1190,7 @@ RQ0 gate("perfect recognition이 random보다 나은 headroom이 있나")의 jud
 | `c1-idle`, `c7-idle` | 보고만. 성능 metric 없음(scoring spec에 entry가 없어요) |
 | C3 (3), C4 (3), C5 (2: `c5-t4`, `c5-t5`), C6 (4: `c6-alias`, `c6-dual`, `c6-fold`, `c6-spoof`) | 보고만. RQ0 gate spec은 이들을 Layer 2 aggregation에서 빼요. C5는 `c1-media`의 player를 tier 4·5 이름으로 바꾼 것이라 성능 숫자가 `c1-media`와 같아야 하고, 다르면 bug 신호예요. C6은 recognition의 해상도 한계: `c6-dual`은 `ambiguous`, 나머지 셋은 미리 약속된 miss가 있어요 |
 | `c2-p2a-idle` | 보고만. `c2-p2a`에서 download의 class만 idle로 바꾼 bounding check의 짝(19.4의 `bounding_pair`) |
-| Layer-1 exclusion 8개(`c1-indexing`, `c6-alias`, `c6-fold`, `c6-spoof`, `c7-backup`, `c7-ml-train`, `c7-render`, `c7-transcode`) | `pre_committed_miss` segment를 가진 파일들. recognition accuracy(Layer 1)의 headline에서만 빠져요. 이 중 `c7-ml-train`, `c7-render`, `c7-transcode`는 judging이고(gate는 label만 있으면 돼요), 나머지 다섯은 보고만 해요 |
+| Layer-1 exclusion 8개(`c1-indexing`, `c6-alias`, `c6-fold`, `c6-spoof`, `c7-backup`, `c7-ml-train`, `c7-render`, `c7-transcode`) | `pre_committed_miss` segment를 가진 파일들. 그 segment 안의 query point가 recognition accuracy(Layer 1)의 headline에서만 빠져요 — 여섯 파일은 segment 하나가 파일 전체라 전부 빠지고, `c6-fold`는 통화가 오는 30초부터, `c6-spoof`는 spoof가 시작하는 20초부터라 그 앞의 point는 headline에 남아요(grader가 point마다 그 segment의 표시를 봐요, 17장). 이 중 `c7-ml-train`, `c7-render`, `c7-transcode`는 judging이고(gate는 label만 있으면 돼요), 나머지 다섯은 보고만 해요 |
 
 ### 15.2 파일별 term
 
@@ -1230,7 +1230,7 @@ C2의 latency/frame term은 60초부터 파일 끝까지만 봐요(P1 99.435초,
 
 **`c1-compile`의 trade-off.** constrained objective 대신 weight 1.0 : 1.0으로 했어요. normalised share는 이미 `fixed`(boot 설정, cap 없음) 대비 부호가 있어서, build를 늦추는 config는 makespan share가 음수로 나오고 weight가 그 교환비예요. 별도의 constraint 형태는 필요 없었어요. mode 이름이 `compile`이라 build도 상황 그 자체예요. 이 파일은 judging이에요. build의 turnaround는 `make`가 `WAIT children:build`를 지나 `EXIT`해야 나오는데(7.6), 그 완료 규칙이 RQ0 gate spec의 simulator-conformance 항목 (g)예요. 그게 없으면 build term이 모든 condition에서 똑같이 censored돼요(못 끝난 job은 `T_end` − 등장으로 채점, metrics doc의 normalisation 절).
 
-**`c1-media`의 audio/video weighting.** music 1.0 : video 0.5, stated assumption이에요(audio가 끊기면 바로 들리지만 frame 하나 빠진 건 못 알아챌 때가 많아요; 문헌 검색 안 함). 단, 이 파일에서는 어떤 legal config도 tick을 놓칠 수 없어요. 두 player(둘 다 `mpv`)의 측정된 cycle 중 가장 긴 것이 video 11.5 ms(주기 33.3 ms), music 0.8 ms(주기 49.6 ms)라서, video는 21.9 ms 넘게 기다려야 miss인데 music이 줄 수 있는 대기는 0.8 ms, 반대는 48.8 ms 대 11.5 ms예요. 그래서 두 miss rate가 전부 0이고 floor 규칙대로 "no headroom"이 나와요. weight는 contention이 있는 media 구간을 위해 적어두는 거예요. C5 두 파일과 `c6-alias`도 `c1-media`의 player 그대로라 같아요.
+**`c1-media`의 audio/video weighting.** music 1.0 : video 0.5, stated assumption이에요(audio가 끊기면 바로 들리지만 frame 하나 빠진 건 못 알아챌 때가 많아요; 문헌 검색 안 함). 단, 이 파일에서는 어떤 legal config도 tick을 놓칠 수 없어요. compiled `c1-media`에 실린 두 player(둘 다 `mpv`)의 cycle 중 가장 긴 것이 video 11.5 ms(주기 33.3 ms), music 0.8 ms(주기 49.6 ms)라서(측정된 table에서 sample된 값이에요. 15.1의 `c7-media` row가 적는 16.0 ms는 table 자체의 최댓값이고요), video는 21.9 ms 넘게 기다려야 miss인데 music이 줄 수 있는 대기는 0.8 ms, 반대는 48.8 ms 대 11.5 ms예요. 그래서 두 miss rate가 전부 0이고 floor 규칙대로 "no headroom"이 나와요. weight는 contention이 있는 media 구간을 위해 적어두는 거예요. C5 두 파일과 `c6-alias`도 `c1-media`의 player 그대로라 같아요.
 
 ### 15.4 사람에게 전달되는 숫자
 
