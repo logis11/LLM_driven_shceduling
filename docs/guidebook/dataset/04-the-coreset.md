@@ -929,7 +929,7 @@ segment 0–277 s `backup`, `true`, `initiated: scheduled`, `[S7, S15]`. input 2
 
 ## 5.1 C2가 답하는 질문
 
-C2(intent pairs 그룹)는 연구 전체의 핵심 증거를 담으려고 만들어졌습니다. 연구 제안서는 이 계열을 Family 2("Same process set, different intent")라고 부르고 "The paper's core evidence"라고 적습니다. 같은 전경 옆에서 올바른 scheduling 정책이 다른 쌍입니다. 제안서는 그 job들이 측정에서 행동과 선언한 class도 다르다고 적습니다("Pairs of real jobs whose correct policies differ, which also differ in behaviour and declared class as measured"). 그중에서도 "training run + 편집기"와 "indexer + 편집기"를 제안서는 "the P1 pair, the load-bearing one"이라고 부릅니다. 둘 다 "CPU를 오래 쓰는 process 하나 + 편집기"인데, 하나는 사용자가 시킨 일이고 하나는 아무도 시키지 않은 일입니다.
+C2(intent pairs 그룹)는 연구 전체의 핵심 증거를 담으려고 만들어졌습니다. 연구 제안서는 이 계열을 Family 2("Jobs that differ in intent beside the same situation")라고 부르고 "The paper's core evidence"라고 적습니다. 같은 상황 옆에서 올바른 scheduling 정책이 다른 실제 job들의 쌍입니다. 제안서는 그 job들이 측정에서 행동도 다르고, P1(training run 대 indexer 쌍)의 job들은 선언한 class도, P2(게임 다운로드 대 upgrade 쌍)의 프로그램들은 선언한 priority(nice)도 다르다고 적습니다. task model은 nice를 싣지 않으므로 P2의 두 파일은 모두 `normal`을 선언합니다("Pairs of real jobs whose correct policies differ, which also differ in behaviour as measured — P1's jobs in declared class too, P2's programs in declared priority (nice), which the task model does not carry, both P2 files declaring `normal`"). 그중에서도 "training run + 편집기"와 "indexer + 편집기"를 제안서는 "the P1 pair, the load-bearing one"이라고 부릅니다. 둘 다 "CPU를 오래 쓰는 process 하나 + 편집기"인데, 하나는 사용자가 시킨 일이고 하나는 아무도 시키지 않은 일입니다.
 
 C2(intent pair 그룹)의 구조는 2026-08-23 설계 회의의 Q7에서 정해졌습니다. "Family 2 pairs are pairs of segments … two files identical in every segment but one." 두 파일은 한 segment만 빼고 모든 segment가 같습니다. building plan §3 C2는 이것을 "Each pair is a one-segment diff: its files share segment 0, the file's length and every event of the shared tasks, arrivals and wakes, in the compiled files"라고 적습니다. 따로 쓴 두 시나리오를 비교하는 것보다 통제가 단단합니다.
 
@@ -1875,7 +1875,7 @@ variant가 필요한 이유는 dataset의 값 가운데 일부가 불확실하�
 
 | 경로 | 하는 일 |
 |---|---|
-| `dataset/variants.yaml` | 정의: 판정 파일 19개의 YAML anchor `judging`, set 9개(`sets`), 예외로 실린 값 15개(`carried_values`) |
+| `dataset/variants.yaml` | 정의: 판정 파일 19개의 YAML anchor `judging`, set 9개(`sets`), 예외로 실린 값의 표 19개(`carried_values`) |
 | `dataset/tools/variants.py` | CLI. set마다, base마다 variant를 만들고 schema와 canonical lint를 돌린 뒤 manifest를 씀 |
 | `dataset/tools/wlc/variants.py` | transform 구현 |
 | `dataset/build.variants.manifest.json` | lockfile. `inputs` 3개(library, core manifest, `variants.yaml`의 hash)와 `artifacts` 78개 |
@@ -1891,7 +1891,7 @@ variant가 필요한 이유는 dataset의 값 가운데 일부가 불확실하�
 | `scale-chain` | game chain member(`game.chain.*`와 `game.wineserver`)의 RUN에만 `factor`를 곱함 | 아니요 |
 | `segment-length` | timeline의 segment 하나를 `length`로 바꾸고, 그 뒤의 segment·도착·떠남·focus·operation을 차이만큼 밀어 냄 | 예, pin된 library로 |
 | `carried-bounds` | `carried_values`의 표를 `low`면 (1 − half_width), `high`면 (1 + half_width)배 한 library 사본 | 예, 그 사본으로 |
-| `trace-replay` | 지정된 entry의 compile된 흐름을 측정된 반복 하나의 wake 순서로 바꿈 | 예, pin된 library와 replay 흐름으로 |
+| `trace-replay` | 지정된 entry의 compile된 흐름을 측정된 반복 하나의 흐름으로 바꿈. 흐름의 종류는 entry를 따름: 측정 entry는 wake 순서(`wakes`), batch job은 run과 그 뒤의 block(`runs`), 주기 entry는 cycle(`cycles`) | 예, pin된 library와 replay 흐름으로 |
 
 다시 compile하지 않는 두 transform의 variant는 manifest에 `utilization`이 없습니다. compile report가 없기 때문입니다. 2026-10-14 manifest에서 venue와 chain의 44개 항목은 `utilization`이 비어 있고, 나머지 34개는 값이 있습니다.
 
@@ -1922,14 +1922,14 @@ variant가 필요한 이유는 dataset의 값 가운데 일부가 불확실하�
 
 **carried 값 축.** 안정성 기준을 통과하지 못하고 예외로 실린 값을 그 95 % 구간의 양 끝으로 옮깁니다. 이유: "every exception-carried value at the lower bound of its stated 95 % interval (statement `re-measurement-contingency` of the RQ0 gate spec)". 이 variant에서 판정 수가 바뀌면 RQ0 gate spec의 `re-measurement-contingency`가 작동해, 해당 entry를 다시 측정한 뒤에야 결과를 보고합니다. 파일 열하나는 그 값을 가진 entry를 담은 판정 파일입니다.
 
-**replay 축.** 이유: "one pooled repeat's measured wake sequence in place of the compiled stream, for the four judging files that cover every term shape (9.14 decision 10; the 2026-09-26 burstiness finding)". compile된 흐름은 각 component의 비율과 분포를 재현하지만 gap의 순서나 component들이 함께 깨어나는 모양은 재현하지 않는다는 것이 2026-09-26의 burstiness finding입니다. 그래서 term 모양마다 판정 파일 하나(편집기 latency `c7-dev`, browser latency `c7-browsing`, 주기 통화 `c7-meeting`, batch progress `c2-p1a`)를 측정된 wake 순서로 다시 만들어 판정이 같은 쪽에 떨어지는지 봅니다. RQ0 gate spec의 `trace_replay` line은 두 build에서 gap이 g의 같은 쪽에 있고 차이가 0.17보다 작으면 일치로 봅니다.
+**replay 축.** 이유: "one pooled repeat's measured wake sequence in place of the compiled stream, for the four judging files that cover every term shape (9.14 decision 10; the 2026-09-26 burstiness finding)". compile된 흐름은 각 component의 비율과 분포를 재현하지만 gap의 순서나 component들이 함께 깨어나는 모양은 재현하지 않는다는 것이 2026-09-26의 burstiness finding입니다. 그래서 term 모양마다 판정 파일 하나(편집기 latency `c7-dev`, browser latency `c7-browsing`, 주기 통화 `c7-meeting`, batch progress `c2-p1a`)를 측정된 흐름으로 다시 만들어 판정이 같은 쪽에 떨어지는지 봅니다. 흐름 여섯은 종류가 셋입니다. `code-editor`, `web-browser`, `renderer-hidden`은 wake 순서(`wakes`), `package-upgrade`와 `cpu-batch`의 `python3`는 run과 그 뒤의 block(`runs`), `video-call`은 cycle(`cycles`)입니다(각 흐름 파일의 `kind`; `dataset/variants.yaml`의 `trace-replay` 주석은 2026-10-17부터 이렇게 적습니다). set의 reason은 "wake sequence"라고만 적지만, variants manifest의 `replay` 항목을 보면 네 파일 모두 batch job의 run 흐름(`c7-dev`, `c7-browsing`, `c7-meeting`의 upgrade, `c2-p1a`의 `python3`)도 다시 만들고, `c7-meeting`은 통화의 cycle 흐름도 다시 만듭니다. RQ0 gate spec의 `trace_replay` line은 두 build에서 gap이 g의 같은 쪽에 있고 차이가 0.17보다 작으면 일치로 봅니다.
 
-## 11.5 carried values: 예외로 실린 열다섯 값
+## 11.5 carried values: 예외로 실린 값의 표 열아홉 개
 
 - **stability rule** — 측정값을 실을 때의 기준입니다. 반복들 사이의 평균에 대한 95 % 구간의 반폭이 평균의 5 % 이하(또는 1 µs 이하)이고 반복이 다섯 번 이상이어야 합니다(`docs/workload/measurement-overview.md` §6).
 - **exception-carried value** — 이 기준을 통과하지 못했지만, 퍼짐이 프로그램이 아니라 기계나 세션에서 온다는 이유로 반폭을 명시한 채 실린 값입니다.
 
-`variants.yaml`의 `carried_values`는 이런 값 열다섯을 반폭과 함께 적습니다.
+`variants.yaml`의 `carried_values`는 이런 값을 표 단위로 열아홉 줄, 반폭과 함께 적습니다. 한 줄이 entry 하나의 component나 program 하나에 딸린 표(gap, run 또는 block의 표) 하나입니다. 2026-10-17에 `renderer-hidden`의 `Compositor`와 `PerfettoTrace`가 gap과 run 표 둘씩 더해져 열다섯 줄에서 열아홉 줄이 되었습니다(9.15 작업 목록 W-0898). 두 thread의 값은 `meas-ci:desktop:2026-10-05b`부터 session 사이에서 변하는 값으로 실렸지만(9.10 D156), 그 전까지 corner set이 훑지 않았습니다.
 
 | entry | component / 표 | 반폭 | 출처 결정 |
 |---|---|---|---|
@@ -1941,6 +1941,10 @@ variant가 필요한 이유는 dataset의 값 가운데 일부가 불확실하�
 | `renderer-hidden` | `chrome` run | 11.4 % | 9.8 D17 |
 | `renderer-hidden` | `Chrome_ChildIOT` gap | 6.5 % | 9.8 D21, D24, D26 |
 | `renderer-hidden` | `Chrome_ChildIOT` run | 7.5 % | 같음 |
+| `renderer-hidden` | `Compositor` gap | 17.6 % | 9.8 D21, D24, D26 (9.10 D156) |
+| `renderer-hidden` | `Compositor` run | 12.3 % | 같음 |
+| `renderer-hidden` | `PerfettoTrace` gap | 17.6 % | 같음 |
+| `renderer-hidden` | `PerfettoTrace` run | 9.3 % | 같음 |
 | `game-client` | `steamwebhelper` run | 5.3 % | 9.8 D17, D18 |
 | `game-client` | `steam` run | 10.1 % | 같음 |
 | `game-client` | `IPC:CSteamEngin` run | 8.8 % | 같음 |
@@ -1949,7 +1953,7 @@ variant가 필요한 이유는 dataset의 값 가운데 일부가 불확실하�
 | `cpu-batch` (`python3`) | `python3_block` | 10.8 % | 같음 |
 | `module-build-orchestrator` | `tail_block` | 8.35 % | 9.10 D58 |
 
-`variants.yaml` 주석은 이 목록에 없는 예외 값도 적습니다. 세션 daemon의 PID 1과 system bus 값(9.9 D48), Tracker indexer의 block(9.6 D29)은 그 값을 담은 파일이 모두 보고 파일이라 sweep하지 않습니다.
+`variants.yaml` 주석은 이 목록에 없는 예외 값도 적습니다. 세션 daemon의 PID 1과 system bus 값(9.9 D48)은 그 값을 담은 파일이 모두 보고 파일이라 sweep하지 않습니다. 이 주석은 2026-10-16까지 Tracker indexer의 block(9.6 D29)도 그런 값으로 적었지만, 지금의 `file-indexer`는 세 값 모두에서 stability rule을 지키므로(항목의 scope: "the stability rule holds on all three values") 그 구절은 2026-10-17에 주석에서 빠졌습니다.
 
 ## 11.6 RQ0 gate spec이 variant를 읽는 방식
 
@@ -1959,7 +1963,7 @@ RQ0 gate spec의 `files.variants`가 78개를 모두 이름으로 나열하고, 
 
 variant는 base의 term으로 채점됩니다. 9.14 D11(variant 파일은 base의 term으로, 자기 segment 위의 window로 채점된다는 결정, 2026-10-09)이 `scoring.with_variants`를 만들었습니다. 기록된 계기는 "a variant run … would have been aggregated without its windows and never scored — every sensitivity line reading an empty gap"입니다. 이것이 없었다면 variant run은 window 없이 합산되어 채점되지 않았고, 모든 민감도 line이 빈 gap을 읽었을 것이라는 뜻입니다. `segment-length` variant는 segment 경계가 옮겨지므로 window도 variant 자신의 segment를 따라갑니다.
 
-pin은 RQ0 gate spec의 `pins.variants.all`입니다. 2026-10-17의 값은 `087ef27ca434a21ea346baf3ed454997255bc1e8e2379238169994f27060edcd`이고, `shasum -a 256 dataset/build.variants.manifest.json`이 같은 값을 냅니다. 이 pin은 9.14 D12(2026-10-09)에 처음 걸렸고 그 뒤 9.17, 9.18, 9.22, 9.20, 9.23(D10, D17), 9.15(2026-10-16의 rebuild)를 거치며 다시 걸렸습니다. core manifest가 바뀌면 variants manifest의 `inputs`도 바뀌기 때문입니다.
+pin은 RQ0 gate spec의 `pins.variants.all`입니다. 2026-10-17의 값은 `6c1c3e09277f6368d84d88fa15adea27a9cea1d028859dc4f6f2e63568684f0a`이고(그날의 re-pin, `harness/CHANGELOG.md`의 2026-10-17 항목 가운데 dataset을 다시 pin한 것), `shasum -a 256 dataset/build.variants.manifest.json`이 같은 값을 냅니다. 이 pin은 9.14 D12(2026-10-09)에 처음 걸렸고 그 뒤 9.17, 9.18, 9.22, 9.20, 9.23(D10, D17), 9.15(2026-10-16의 rebuild, 2026-10-17의 묶은 data rebuild)를 거치며 다시 걸렸습니다. core manifest가 바뀌면 variants manifest의 `inputs`도 바뀌기 때문입니다.
 
 ---
 
@@ -2235,7 +2239,7 @@ memo §6은 이 시점에 찾은 사실 하나를 적습니다. `c7-meeting`과 
 | `focus` | 창 focus track. 사용자가 마지막으로 앞에 띄운 창이 focus를 가짐 |
 | operation | 측정된 archetype의 무거운 동작(`page-load`, `send`, `unsharp-mask`, `preview-render`)을 특정 시각에 일으킴 |
 | launch phase | 중간에 시작한 application의 실행 순간부터 settle 끝까지. 측정된 반복 하나의 wake 순서를 재생 |
-| replay | 분포로 요약하지 않고 측정된 반복 하나의 wake 순서를 그대로 재생하는 것 |
+| replay | 분포로 요약하지 않고 측정된 반복 하나를 그대로 재생하는 것. launch phase는 wake 순서를, trace-replay variant(11.3절)는 entry에 따라 wake 순서, batch job의 run과 그 뒤의 block, 또는 주기 entry의 cycle을 재생 |
 | comm | 15 byte로 잘린 kernel의 process 이름. task의 `name`은 comm(9.10 D25) |
 
 ## 14.3 recognition과 label
@@ -2297,7 +2301,7 @@ memo §6은 이 시점에 찾은 사실 하나를 적습니다. `c7-meeting`과 
 | sensitivity variant | 판정 파일 하나를 한 축에서만 바꾼 workload(`<base>@<set>`). 78개, 민감도 line만 읽음 |
 | transform | variant를 만드는 변환. `scale-runs`, `scale-chain`, `segment-length`, `carried-bounds`, `trace-replay` |
 | stability rule | 측정값을 실을 때의 기준. 95 % 구간 반폭이 평균의 5 % 이하(또는 1 µs), 반복 5회 이상 |
-| exception-carried value | stability rule을 통과하지 못했지만 퍼짐이 기계나 세션에서 온다는 이유로 반폭과 함께 실린 값. `carried_values`에 15개 |
+| exception-carried value | stability rule을 통과하지 못했지만 퍼짐이 기계나 세션에서 온다는 이유로 반폭과 함께 실린 값. `carried_values`에 표 19개 |
 | coverage grid | `dataset/coverage-grid.json`. segment를 32개 cell × tier 다섯으로 센 표. 빈 cell이면 CI 실패 |
 | `NAME_TIERS` | `grid.py`의 이름 → tier 표. 표에 없는 이름은 tier 5 |
 | 모든 policy에서 끝나는 가장 작은 정수 초 | batch 파일의 길이 규칙. 도착 + job CPU + job block + 다른 task의 CPU를 올림(9.10 D78의 산술, `tools/end_bound.py`) |
