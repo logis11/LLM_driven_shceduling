@@ -129,7 +129,7 @@ memo의 판정은 한 줄입니다. "Verdict: sound for the recognition claim, b
 tree를 세어 보면 다음과 같습니다(2026-10-17, `grep -c '^### '`와 python으로 센 값).
 
 - `docs/references.md`: `### ` 제목 164개, 모두 서로 다른 id. 섹션별로 scholarly 26개, deployed-system 95개, talk·학회 초록·뉴스 6개, measurement 3개(`meas-ci`, `meas-local`, `meas-pending`), "Related work only (never in the yaml registry)" 34개입니다.
-- `dataset/sources.yaml`: 19개 id. `type`별로 scholarly 5개, deployed-system 12개, measurement 2개.
+- `dataset/sources.yaml`: 19개 id. `type`별로 scholarly 5개, deployed-system 11개, talk·학회 초록·뉴스 1개(`lavd-ossna24`), measurement 2개.
 
 > **왜 이렇게 정했나.** 두 장부의 분업은 2026-08-26의 workload 생성 grill 결정 D5("Citation ownership flipped", `_dev/archive/2026-08-26-workload-generation-grill.md`)이며 Phase 1 spec decision 1로 이어졌습니다. 기록된 이유는 "`cite` was unlintable presentation — dropped from the yaml"입니다. 인용 문자열은 사람용 표현이라 기계가 검사할 수 없으니 yaml에서 빼고, 기계가 검사할 수 있는 필드만 yaml에 남겼다는 뜻입니다. 같은 날 D4는 "notes split"을 정했습니다. registry의 `notes`는 출처가 무엇을 성립시키는지와 그 범위의 한계만 적고, 우리가 그 위에 얹은 모델링은 archetype 쪽 `modeling_notes`에 적는다는 규칙입니다. 그 결과 `sources.yaml` 머리말에는 "A source tag justifies values and described structure, never field names"라는 문장이 있습니다. 출처는 값과 구조를 정당화할 뿐, 우리가 지은 필드 이름까지 정당화하지는 않습니다.
 
@@ -150,7 +150,7 @@ tree를 세어 보면 다음과 같습니다(2026-10-17, `grep -c '^### '`와 py
 
 > **왜 이렇게 정했나.** id 규칙은 2026-08-26 grill D1(Phase 1 decision 2)입니다. 기록은 단위와 형식을 정하고, arXiv 번호에 대해서는 "(they live in the citation fields)"라고 그 번호가 있을 자리만 적습니다. 금지의 이유는 따로 적혀 있지 않습니다. 기록된 이유는 없습니다. `meas-ci`의 locator가 run 번호에서 캠페인 날짜로 바뀐 것은 9.5 D27(2026-09-18)이며, 이유는 이렇게 기록되어 있습니다. 9.5 D26과 9.6 D11 이후 캠페인 하나는 "first batch, repeats added one at a time, retries after the machine gate"로 여러 run에 걸치므로, run 번호 하나로는 캠페인을 가리킬 수 없다는 것입니다.
 
-위의 talk type과 `meas-local` 형식은 2026-10-09에 9.12(관련 연구 서술 조각)가 인지오의 결정으로 더했습니다. 9.12 D110은 노트북 측정을 위한 `meas-local:<machine>-<subject>:<date>` 형식을(그 첫 항목 `meas-local:m1pro-llm:2026-10-08`), 9.12 D113은 발표·학회 초록·뉴스 기사를 위한 type을 만들었고(기록은 이것을 "a fifth type"이라 부릅니다), D113은 `lavd-ossna24`와 `corbet-lwn24`를 이 type으로 옮겼습니다. 두 결정은 9.15의 `references.md` 정리(2026-10-16)에서 규칙 문단에 반영되었고, 그때 scholarly의 예도 `lavd-ossna24`에서 `ghost-sosp21`로 바뀌었습니다. 다만 기계가 읽는 `dataset/sources.yaml`은 `lavd-ossna24`의 `type`을 아직 `deployed-system`으로 적고, 머리말의 규칙도 세 type과 "existence claims only"를 적습니다(linter는 `type` 값을 검사하지 않습니다).
+위의 talk type과 `meas-local` 형식은 2026-10-09에 9.12(관련 연구 서술 조각)가 인지오의 결정으로 더했습니다. 9.12 D110은 노트북 측정을 위한 `meas-local:<machine>-<subject>:<date>` 형식을(그 첫 항목 `meas-local:m1pro-llm:2026-10-08`), 9.12 D113은 발표·학회 초록·뉴스 기사를 위한 type을 만들었고(기록은 이것을 "a fifth type"이라 부릅니다), D113은 `lavd-ossna24`와 `corbet-lwn24`를 이 type으로 옮겼습니다. 두 결정은 9.15의 `references.md` 정리(2026-10-16)에서 규칙 문단에 반영되었고, 그때 scholarly의 예도 `lavd-ossna24`에서 `ghost-sosp21`로 바뀌었습니다. 기계가 읽는 `dataset/sources.yaml`은 2026-10-17에 따라왔습니다(9.15, 인지오의 답에 따라). `lavd-ossna24`의 `type`은 `references.md`의 type 이름 그대로 "talk, conference abstract or news report"이고, 머리말의 규칙은 `type` 값으로 id 규칙의 type들(scholarly, deployed-system, talk, conference abstract or news report, measurement)을 적고, 각 type의 등급은 등급 규칙(2.3절)의 문장을 줄여 옮깁니다. 각주에 함께 적는 URL, accessed date, pinned version과 괄호 속 예는 빠졌습니다. 등급 규칙에는 measurement의 등급이 없어서 머리말도 적지 않습니다. 그 전의 머리말은 type 셋(scholarly, deployed-system, measurement)과 deployed-system의 "existence claims only"를 적었습니다. linter는 `type` 값을 검사하지 않고, `sources.yaml`은 어느 manifest의 입력도 아니어서 이 변경으로 다시 bless한 manifest는 없습니다.
 
 ## 2.3 인용 등급 규칙과 상태 표시
 
@@ -174,7 +174,7 @@ deployed-system 등급의 넓힘은 9.12 D112(2026-10-09, 인지오의 결정)�
 | 묶음(주석 머리말) | id | type | `locator_pattern` | tree에서 태그로 쓰인 횟수 |
 |---|---|---|---|---|
 | stimulus recordings | `swell-icmi14` | scholarly | `^(word\|outlook\|ie)-c[0-9]+$` | 4 (archetypes) |
-| behavior parameters (Role B) | `lavd-ossna24` | deployed-system(`references.md`에서는 talk type, 2.2절) | `^s\d+$` | 12 (archetypes, gaming timelines) |
+| behavior parameters (Role B) | `lavd-ossna24` | talk, conference abstract or news report(2.2절) | `^s\d+$` | 12 (archetypes, gaming timelines) |
 | | `ocallahan-atc17` | scholarly | `^sec-[0-9.]+$` | 0 |
 | | `coetzee-arxiv12` | scholarly | `^sec-[0-9.]+$` | 0 |
 | scenario taxonomy (Role A) | `cpsmark-tbench23` | scholarly | `^(table-\d+\|sec-[0-9.]+)$` | 0 |

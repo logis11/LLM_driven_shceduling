@@ -11,9 +11,18 @@
 #   - source tags in dataset files are `<id>` or `<id>:<locator>`; when an entry
 #     declares `locator_pattern`, the linter validates the locator against it;
 #     no `locator_pattern` = bare-id tags only
-#   - `type`: scholarly | deployed-system | measurement (citation tier follows
-#     via docs/references.md: scholarly -> numbered bib; deployed-system -> footnote,
-#     existence claims only)
+#   - `type`: one of the docs/references.md id rule's types — scholarly |
+#     deployed-system | talk, conference abstract or news report | measurement
+#     (citation tier follows via docs/references.md's citation-tier rule:
+#     scholarly -> numbered bibliography, empirical, behavioral and statistical
+#     claims within its stated role; deployed-system -> footnote, existence
+#     claims, the system's own documented design or behaviour stated as that
+#     source's at its pinned version or accessed date, and a figure the source
+#     publishes stated as its report with the date read, the window and how it
+#     is computed, never a behavioural or statistical claim stated as the
+#     paper's own or as a population's; talk, conference abstract or news
+#     report -> footnote, its claims the speaker's or reporter's, never the
+#     paper's own, a number it carries stated only as its report, with its date)
 #   - `notes`: what the source establishes and its scope limits — never our
 #     modeling on top of it (that lives in archetypes.yaml `modeling_notes`).
 #     A source tag justifies values and described structure, never field names.
@@ -46,7 +55,7 @@ sources:
   # ---- behavior parameters (Role B) --------------------------------------
 
   lavd-ossna24:
-    type: deployed-system
+    type: "talk, conference abstract or news report"
     locator_pattern: "^s\\d+$"
     notes: >-
       Talk slides; observations established: ~300 tasks scheduled system-wide
