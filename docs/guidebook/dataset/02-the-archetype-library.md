@@ -1,6 +1,6 @@
 # 2권 · Archetype library: process 하나를 scheduler의 눈으로 적기
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-14
+> Status: draft · Created 2026-10-14 · Updated 2026-10-17
 
 **`archetypes.yaml`의 29개 항목은 각각 무엇을 어떻게 흉내 내고, 그 숫자들은 어디서 왔나.**
 
@@ -52,9 +52,9 @@ scheduler 입장에서 task 하나는 이런 사건들의 흐름일 뿐입니다
 
 scheduler는 task가 "VS Code"인지 "LibreOffice"인지 모릅니다. 사용자가 그 창을 보고 있는지, 그 작업이 중요한지도 모릅니다. 이 연구는 바로 그 빈자리 — scheduler가 모르는 이름과 의도를 LLM이 process 이름에서 읽어 낼 수 있는가 — 를 묻습니다. 그래서 dataset은 두 가지를 엄격히 분리합니다. **이름**은 timeline이 붙이고, **행동**은 archetype이 정합니다.
 
-`docs/workload/archetype-plan.md`(archetype 작성 규칙 문서. 그 §4의 열두 항목 목록은 지금 library와 맞지 않아 낡았지만, §1–§3과 §5–§6의 규칙은 여전히 유효합니다)는 이 분리를 "boundary rules" 두 문장으로 적습니다. 첫째, scheduler가 관찰할 수 없는 것은 archetype에 살 수 없다 — process **이름**(timeline이 붙임), **개수**(binding 때 정해짐), **의미**(segment label의 일. segment는 timeline 안에서 하나의 상황 label이 유지되는 시간 구간)는 구조적으로 빠진다. 둘째, `source:` tag는 **값과 기술된 구조**를 정당화할 뿐 **field 이름**을 정당화하지 않는다 — field 이름은 이 schema가 지어낸 것이고, 항목의 모양이 출처에 기댄 부분은 `modeling_notes`에 따로 적는다.
+`docs/workload/archetype-plan.md`(archetype 작성 규칙 문서. 2026-10-16에 9.15가 지금 library에 맞게 고쳐 썼고, §4는 29개 항목을 compile 경로별로 나열합니다)는 이 분리를 "boundary rules" 두 문장으로 적습니다. 첫째, scheduler가 관찰할 수 없는 것은 archetype에 살 수 없다 — process **이름**(timeline이 붙임), **개수**(binding 때 정해짐), **의미**(segment label의 일. segment는 timeline 안에서 하나의 상황 label이 유지되는 시간 구간)는 구조적으로 빠진다. 둘째, `source:` tag는 **값과 기술된 구조**를 정당화할 뿐 **field 이름**을 정당화하지 않는다 — field 이름은 이 schema가 지어낸 것이고, 항목의 모양이 출처에 기댄 부분은 `modeling_notes`에 따로 적는다.
 
-> **왜 이렇게 정했나.** archetype-plan §1은 이유를 "what the scheduler cannot observe cannot live in an archetype"이라고만 적습니다. 실험 설계 쪽의 근거는 `docs/research-proposal.md`의 "The information asymmetry is the core of the design" 문단입니다. 이름(`name`)은 model(LLM)에게만, 행동(`pattern`)은 simulator에게만, 정답(`ground_truth`)은 oracle 조건과 채점기에게만 보인다는 것이고, "This must be enforced in code"라고 덧붙입니다. 이름과 행동이 서로 다른 층에 살아야 이 비대칭을 지킬 수 있습니다. core set(손으로 만든 workload 파일 묶음, 지금 51개)의 C2 짝 파일(예: `c2-p1a`/`c2-p1b`)은 이 분리를 이용해 한 segment만 다른 두 파일을 만듭니다(`docs/workload/building-plan.md`의 C2: "All segments identical except one").
+> **왜 이렇게 정했나.** archetype-plan §1은 이유를 "what the scheduler cannot observe cannot live in an archetype"이라고만 적습니다. 실험 설계 쪽의 근거는 `docs/research-proposal.md`의 "The information asymmetry is the core of the design" 문단입니다. 이름(`name`)은 model(LLM)에게만, 행동(`pattern`)은 simulator에게만, 정답(`ground_truth`)은 oracle 조건과 채점기에게만 보인다는 것이고, "This must be enforced in code"라고 덧붙입니다. 이름과 행동이 서로 다른 층에 살아야 이 비대칭을 지킬 수 있습니다. core set(손으로 만든 workload 파일 묶음, 지금 51개)의 C2 짝 파일(예: `c2-p1a`/`c2-p1b`)은 이 분리를 이용해 한 segment만 다른 두 파일을 만듭니다(`docs/workload/building-plan.md`의 C2, "Intent pairs, one-segment diffs": "The shared tasks and segment 0 stay byte-identical").
 
 > **코드로.** compiler는 archetype의 이름(`office-writer`)을 workload 파일에 쓰지 않습니다. 각 task의 `arrive` 사건에는 timeline이 준 `name`(예: `soffice.bin`)과 `declared_class`와 풀어진 program만 들어갑니다(`dataset/tools/wlc/compiler.py`의 `_arrive_event`). 그래서 simulator와 recognizer 어느 쪽도 archetype id를 볼 수 없습니다.
 
@@ -97,7 +97,7 @@ archetype의 행동은 여섯 개의 **primitive**(문법의 기본 명령)로 �
 - **WAIT + RUN + WAKE**: `[WAIT chain:game.wineserver, RUN 341μs, WAKE game.chain.2]`를 LOOP로 감쌉니다. 앞 단계에게 깨워지면 일하고, 다음 단계를 깨웁니다. `c1-gaming`의 `wineserver` member입니다(4.1절).
 - **RUN + FORK×6**: `make`가 job 하나를 시작할 때 dispatch CPU를 쓰고 자식 여섯을 띄웁니다. `c1-compile`의 `build` task가 이것을 2,908번 반복합니다(6.1절).
 
-> **왜 이렇게 정했나.** TIMER가 primitive가 된 이유는 archetype-plan §6의 OQ-6 해소(open question 6, "문법이 충분한가")에 적혀 있습니다. "The gap was absolute time, not IO bandwidth: TIMER closes it (drift-free periodic demand)." 상대 SLEEP을 반복하면 task가 늦을수록 주기가 늘어나, 나쁜 scheduler 설정 아래에서 수요가 저절로 줄어듭니다. interpretation-contract §3은 이를 "relative sleeps drift under delay, silently lowering demand exactly under bad configs"라고 적고 "Periodic tasks use TIMER, never SLEEP loops"를 규칙으로 둡니다. 문법의 모양 자체는 rt-app(`rt-app`, Linux scheduler 시험용 workload 생성기)의 JSON task model을 선례로 인용합니다(`dataset/sources.yaml`의 `rt-app` notes: "the precedent for our TIMER primitive. Schema-shape precedent only; no numeric values are derived from it").
+> **왜 이렇게 정했나.** TIMER가 primitive가 된 이유는 archetype-plan §6의 OQ-6 해소(open question 6, "문법이 충분한가")에 적혀 있습니다. "The gap was absolute time, not IO bandwidth: TIMER closes it (drift-free periodic demand)." 상대 SLEEP을 반복하면 task가 늦을수록 주기가 늘어나, 나쁜 scheduler 설정 아래에서 수요가 저절로 줄어듭니다. interpretation-contract §3은 이를 "relative sleeps drift under delay, silently lowering demand exactly under bad configs"라고 적고 "Periodic tasks use TIMER, never SLEEP loops"를 규칙으로 둡니다. 문법의 모양 자체는 rt-app(`rt-app`, Linux scheduler 시험용 workload 생성기)의 JSON task model을 선례로 인용합니다(`docs/references.md`의 `rt-app` 항목 role: "JSON task-model precedent (run/period/deadline in µs); schema-shape citation for archetypes and the TIMER primitive (`timer{ref,period}`)"). 숫자는 하나도 가져오지 않고 데이터셋 파일 어디도 이 id를 인용하지 않으므로, `rt-app`은 2026-10-16에 `dataset/sources.yaml` registry에서 빠졌습니다. 그 references.md 항목은 문서들이 인용하므로 남아 있습니다.
 
 ## 1.4 program에서 task의 일생으로
 
@@ -154,7 +154,7 @@ executor(simulator에서 algorithm의 결정을 실행하는 부분) 쪽 규칙�
 
 > **왜 이렇게 정했나.** 엄격한 규칙(다른 class가 있으면 0 %)은 커널의 약 0.3 %와 다릅니다. 9.11 D5는 이 차이를 "The deviation, stated"로 적고, 두 대안을 버린 이유를 기록합니다. 커널 가중치를 그대로 쓰는 안(B)은 "only LOTTERY has a weight to carry them, so no one rule holds under every algorithm", 최소 몫을 보장하는 엄격한 class 안(C)은 "its window and mechanism come from no source"라서 택하지 않았습니다.
 
-> **열린 자리.** 실제 Ubuntu desktop에서 idle 선언이 얼마나 먹히는지는 task group(커널이 CPU를 나눌 때 하나로 묶는 process 집단. Linux에서는 cgroup으로 만들고, systemd는 이것을 `app.slice`, `background.slice` 같은 slice로 관리합니다) 배치에 달려 있습니다. 9.11 D16(2026-10-08)은 커널의 idle 규칙이 "같은 task group 안의 형제들 사이"에서만 작동한다는 것을 sched(7) man page로 확인했습니다. Tracker는 `background.slice`에서 돌고 editor는 `app.slice`에서 돌기 때문에, 두 slice의 가중치(30 대 100)로 Tracker 쪽 group이 둘 다 바쁠 때 CPU의 약 23 %를 받습니다. 그러니 simulator의 indexer는 실제 desktop의 indexer보다 editor를 덜 방해하고, indexing 파일의 headroom은 과소평가됩니다. 이것은 `file-indexer` 항목의 `modeling_notes`에 한계로 적혀 있습니다. 반대로 Déjà Dup의 backup은 editor와 같은 `app.slice`에서 돌므로 엄격한 규칙이 실제와 맞습니다(10장).
+> **왜 이렇게 정했나 — 엄격한 idle 규칙의 한계(9.11 D16, 2026-10-08).** 실제 Ubuntu desktop에서 idle 선언이 얼마나 먹히는지는 task group(커널이 CPU를 나눌 때 하나로 묶는 process 집단. Linux에서는 cgroup으로 만들고, systemd는 이것을 `app.slice`, `background.slice` 같은 slice로 관리합니다) 배치에 달려 있습니다. 9.11 D16(2026-10-08)은 커널의 idle 규칙이 "같은 task group 안의 형제들 사이"에서만 작동한다는 것을 sched(7) man page로 확인했습니다. Tracker는 `background.slice`에서 돌고 editor는 `app.slice`에서 돌기 때문에, 두 slice의 가중치(30 대 100)로 Tracker 쪽 group이 둘 다 바쁠 때 CPU의 약 23 %를 받습니다. 그러니 simulator의 indexer는 실제 desktop의 indexer보다 editor를 덜 방해하고, indexing 파일의 headroom은 과소평가됩니다. 이것은 `file-indexer` 항목의 `modeling_notes`에 한계로 적혀 있습니다. 반대로 Déjà Dup의 backup은 editor와 같은 `app.slice`에서 돌므로 엄격한 규칙이 실제와 맞습니다(10장).
 
 마지막으로, 개수를 한 번 확인해 두겠습니다. 이 권은 항목이 29개라고 말합니다. 다음 명령이 그 근거입니다(2026-10-14, `jioh/dataset-rebuild` branch).
 
@@ -171,9 +171,9 @@ $ grep -cE '^  [a-z][a-z0-9-]*:' dataset/archetypes.yaml
 
 ## 2.1 파일 전체의 모양
 
-`dataset/archetypes.yaml`은 1,941줄입니다. 맨 위 약 70줄은 주석으로 된 **encoding rules**(이 파일을 쓰는 규칙)이고, 그 아래 `archetypes:` 한 줄 밑에 29개 항목이 이어집니다. 항목의 key가 곧 **archetype id**입니다(`office-writer:` 같은 것). 항목들 사이에는 어느 연구 slice의 어느 campaign에서 왔는지 적은 구분 주석이 있습니다(예: `# ---- measured per-application archetypes — 9.5 same-machine campaigns …`).
+`dataset/archetypes.yaml`은 1,943줄입니다(2026-10-17). 맨 위 약 70줄은 주석으로 된 **encoding rules**(이 파일을 쓰는 규칙)이고, 그 아래 `archetypes:` 한 줄 밑에 29개 항목이 이어집니다. 항목의 key가 곧 **archetype id**입니다(`office-writer:` 같은 것). 항목들 사이에는 어느 연구 slice의 어느 campaign에서 왔는지 적은 구분 주석이 있습니다(예: `# ---- measured per-application archetypes — 9.5 same-machine campaigns …`).
 
-머리 주석의 첫 줄은 `# dataset/archetypes.yaml — Layer 1 archetype library (v0.1)`입니다. 그런데 `dataset/README.md`와 `docs/data-contracts.md` §2는 이 library를 v0.2라고 부르고, data-contracts §1의 계약표는 "frozen (v0.1)"이라고 적습니다. 9.13 spec decision 9(dataset rebuild sub-task의 결정, "The library's stated version moves from v0.1 to v0.2 in the data-contracts §2 and the dataset README")는 버전을 v0.2로 올리기로 했고, 실제로 바뀐 곳은 README와 data-contracts §2뿐입니다. yaml 머리 주석은 그대로 v0.1로 남아 있습니다. 지금의 정답은 v0.2입니다(9.13의 결정과 data-contracts §14의 2026-10-09 changelog).
+머리 주석의 첫 줄은 `# dataset/archetypes.yaml — Layer 1 archetype library (v0.2)`입니다(2026-10-17). version은 `dataset/README.md`, `docs/data-contracts.md` §1의 계약표와 §2와 같습니다. 9.13 spec decision 9(dataset rebuild sub-task의 결정, "The library's stated version moves from v0.1 to v0.2 in the data-contracts §2 and the dataset README")가 버전을 v0.2로 올렸을 때 실제로 바뀐 곳은 README와 data-contracts §2뿐이어서, yaml 머리 주석과 data-contracts §1은 한동안 v0.1로 남아 있었습니다. 2026-10-16에 9.15가 둘 다 v0.2로 고쳤습니다(머리 주석은 9.15의 재빌드, commit `37c2e233`). "Layer 1"은 데이터셋의 층에 번호를 붙이던 옛 이름입니다. 2026-10-16부터 저장소 문서는 데이터셋의 층을 이름으로만 부르고(archetype library, scenario 목록, timeline), "Layer 1"은 인식 정확도라는 측정 층만을 뜻합니다. 머리 주석의 이 두 단어를 고칠지는 인지오가 정할 일로 남아 있습니다. 이 파일은 모든 manifest의 입력이라, 주석 한 줄을 고쳐도 일곱 manifest가 다시 bless되기 때문입니다.
 
 머리 주석은 이 파일의 schema가 "our invention"이라고 밝힙니다. 그리고 각 field의 규칙을 짧게 나열합니다. 이 장의 2.2–2.7절은 그 규칙을 하나씩 풀어 설명한 것입니다.
 
@@ -219,7 +219,7 @@ library의 숫자는 맨 숫자로 적히지 않습니다. 모든 숫자는 `{di
 
 **1) `constant`** — 값 하나. 예: `period: {dist: constant, value_us: 33348, sampling: per-task, source: "meas-ci:playback:2026-09-18"}`. 시간이 아닌 값은 `value`를 씁니다(`chain_length: {dist: constant, value: 16, …}`).
 
-**2) `lognormal`** — 로그정규분포. 머리 주석은 `{median_us, sigma_log}`로 적고 compiler가 `median * exp(sigma_log * z)`로 뽑는다고 말합니다. 지금 library에서 lognormal을 쓰는 곳은 `game-task-chain`의 `per_schedule_run` 하나이고, 그것도 median과 sigma 대신 `anchor_min_us: 260, anchor_max_us: 1650`이라는 두 기준점을 줍니다. compiler는 두 값을 5번째와 95번째 percentile로 읽어 median을 √(260×1650) ≈ 655 μs, sigma_log를 ln(1650/655)/1.645 ≈ 0.562로 계산합니다(`sampling.py`의 `anchored_lognormal_params`; 이 숫자는 9.4 slice의 scope card에도 "compiled median 655 µs, σ_log 0.562"로 기록되어 있습니다). lognormal을 기본 family로 쓰는 것은 archetype-plan §6의 OQ-5 해소가 정한 **convention**(관례)입니다("lognormal by convention").
+**2) `lognormal`** — 로그정규분포. 머리 주석은 `{median_us, sigma_log}`로 적고 compiler가 `median * exp(sigma_log * z)`로 뽑는다고 말합니다. 지금 library에서 lognormal을 쓰는 곳은 `game-task-chain`의 `per_schedule_run` 하나이고, 그것도 median과 sigma 대신 `anchor_min_us: 260, anchor_max_us: 1650`이라는 두 기준점을 줍니다. compiler는 두 값을 5번째와 95번째 percentile로 읽어 median을 √(260×1650) ≈ 655 μs, sigma_log를 ln(1650/655)/1.645 ≈ 0.562로 계산합니다(`sampling.py`의 `anchored_lognormal_params`; 이 숫자는 9.4 slice의 scope card에도 "compiled median 655 µs, σ_log 0.562"로 기록되어 있습니다). 출처가 범위만 줄 때 lognormal을 쓰는 것은 archetype-plan §6의 OQ-5 해소가 정한 **convention**(관례)입니다("lognormal remains the convention where a source gives only a span"). 측정된 분포는 아래의 quantile 표로 싣습니다.
 
 **3) `quantiles`** — 측정한 분포를 그대로 싣는 표입니다. 9.5 slice가 2026-09-15에 도입했습니다(9.5 D17, "measured distributions are encoded as quantile tables"). 생김새는 이렇습니다.
 
@@ -235,7 +235,7 @@ input_run:
 
 `p`의 열 개 숫자는 순서대로 p1, p5, p10, p25, p50, p75, p90, p95, p99, p99.9 percentile입니다(μs). `min`과 `max`는 관측된 최솟값과 최댓값입니다. `means`의 열한 개 숫자는 min–p1, p1–p5, …, p99.9–max의 열한 구간 각각에서 실제로 관측된 표본의 평균입니다. 위 예는 `office-writer`의 key 하나당 CPU입니다. 중간값 3.23 ms, 99번째 percentile 11.4 ms, 가장 긴 것 194 ms입니다.
 
-> **왜 이렇게 정했나.** 9.5 D17이 기록한 이유는 측정된 분포가 lognormal에 맞지 않았다는 것입니다. "the log-sigma implied by p90 and by p99 differ by 2–3× for VS Code's per-input run (0.41 vs 1.07), Thunderbird's (0.33 vs 0.92) … Writer's idle gap is bimodal (p50 102 ms, p90 600 ms); the mpv decode worker (0.58 vs 0.49) and the WebRTC audio thread (0.30 vs 0.29) alone fit a log-normal." 분포 family를 억지로 정하는 대신 관측을 표로 싣기로 한 것입니다. 출처가 median이나 mean만 줄 때는 lognormal convention이 그대로 남습니다.
+> **왜 이렇게 정했나.** 9.5 D17이 기록한 이유는 측정된 분포가 lognormal에 맞지 않았다는 것입니다. "the log-sigma implied by p90 and by p99 differ by 2–3× for VS Code's per-input run (0.41 vs 1.07), Thunderbird's (0.33 vs 0.92) … Writer's idle gap is bimodal (p50 102 ms, p90 600 ms); the mpv decode worker (0.58 vs 0.49) and the WebRTC audio thread (0.30 vs 0.29) alone fit a log-normal." 분포 family를 억지로 정하는 대신 관측을 표로 싣기로 한 것입니다. 출처가 범위만 줄 때는(`game-task-chain`의 두 기준점) lognormal convention이 그대로 남습니다(archetype-plan §6의 OQ-5).
 
 > **왜 이렇게 정했나.** `min`, `max`, `means`는 처음부터 있던 것이 아닙니다. 9.5 D71(2026-09-24, "the compiled entries reproduce what was measured")이 추가했습니다. 그 전에는 열 개의 percentile 사이를 직선으로 이어 뽑았는데, 2026-09-24의 review가 이 방식이 평균을 지키지 못한다는 것을 찾았습니다. 기록된 숫자는 "3 % off at the median, 17 % at the 90th percentile for runs; 9 % and 53 % for gaps"입니다. 지금 compiler는 draw가 떨어질 구간을 고른 뒤, 그 구간 안에서 lo + (hi − lo)·v^a 꼴의 곡선을 따라 뽑습니다. 지수 a는 그 구간의 평균이 측정된 평균과 같아지도록 정합니다. 그래서 percentile도 지키고 표 전체의 평균도 지킵니다(`sampling.py`의 `_quantile_sample` 주석: "the percentiles are kept and so is the table's mean").
 
@@ -404,13 +404,15 @@ measured 항목의 `modeling_notes`에는 거의 항상 같은 문단이 두 개
 
 source tag는 `<id>` 또는 `<id>:<locator>`입니다. `id`는 `dataset/sources.yaml`의 key이고, `docs/references.md`가 그 id의 정식 인용 정보를 가집니다. linter는 두 파일이 맞는지 확인합니다. sources.yaml의 모든 id는 references.md에 `` ### `<id>` `` 제목으로 있어야 합니다("subset lint").
 
-`dataset/sources.yaml`에는 지금 30개 id가 있습니다(scholarly 9, deployed-system 19, measurement 2; python으로 세어 확인). type은 셋입니다.
+`dataset/sources.yaml`에는 2026-10-17에 19개 id가 있습니다(scholarly 5, deployed-system 12, measurement 2; python으로 세어 확인). 2026-10-16에 데이터셋 파일 어디도 인용하지 않는 id 열한 개가 빠졌습니다(그 전에는 30개). type은 셋입니다.
 
 - `scholarly`: 학술 문헌(번호 붙은 참고문헌). 경험적·통계적 주장을 받칠 수 있습니다.
-- `deployed-system`: 제품·프로젝트 문서(각주). 존재 주장만 받칠 수 있습니다("this scenario/setting/category exists in shipped software").
+- `deployed-system`: 제품·프로젝트 문서(각주). 존재 주장("this scenario/setting/category exists in shipped software"), 그 시스템이 스스로 문서화한 설계나 동작(그 판의 그 출처의 말로), 그 출처가 공개한 숫자(그 출처의 보고로)를 받칠 수 있고, 행동·통계 주장을 논문 자신의 것이나 모집단의 것으로 받치지는 못합니다.
 - `measurement`: 우리 측정. `meas-ci`와 자리표시자 `meas-pending` 둘.
 
-이 구분은 `docs/workload/grounding-sources.md`의 **citation-tier rule**(인용 등급 규칙)에서 옵니다. "a deployed-system citation may support only *existence claims* … never empirical, behavioral, or statistical claims."
+`docs/references.md`에는 넷째 등급, talk·학회 초록·뉴스 보도가 있습니다(9.12 D113). 그 주장은 발표자나 기자의 것으로만, 숫자는 그 보고로 날짜와 함께 적습니다. `lavd-ossna24`가 이 등급이지만, registry의 `type`은 셋뿐이라 `sources.yaml`에서는 `deployed-system`으로 남아 있습니다.
+
+이 구분은 `docs/references.md`의 **citation-tier rule**(인용 등급 규칙)에서 오고, `docs/workload/grounding-sources.md`가 같은 규칙을 이렇게 옮깁니다. "a deployed-system citation supports existence claims …; the system's own documented design or behaviour, stated as that source's at its pinned version or accessed date; and a figure the source publishes, stated as its report with the date read, the window and how it is computed — never a behavioural or statistical claim stated as the paper's own or as a population's. A talk's, conference abstract's or news report's claims are the speaker's or reporter's, a number stated only as its report with its date." deployed-system 등급을 이렇게 넓힌 것은 9.12 D112입니다(2026-10-16에 9.15가 적용).
 
 **locator**는 출처 안의 위치입니다. sources.yaml의 항목이 `locator_pattern`(정규식)을 가지면 linter가 locator를 그 정규식으로 검사합니다. archetype library에 쓰이는 tag는 다음 셋 종류입니다(library 전체를 python으로 훑어 모은 목록).
 
@@ -425,9 +427,9 @@ source tag는 `<id>` 또는 `<id>:<locator>`입니다. `id`는 `dataset/sources.
 
 library에 쓰인 workflow는 여섯입니다. `interactive`(9.5의 typing·편집 application), `playback`(9.5의 재생·통화), `build`(9.6의 kernel build), `background`(9.7과 9.10의 batch job들), `desktop`(9.8의 browser 조각·comms, 9.10의 launch와 tab 수), `session`(9.9의 desktop session process).
 
-**design, convention, arithmetic.** 출처가 말하지 않은 값은 source tag를 달지 않고, 그 값이 무엇인지 이름표를 붙입니다. Phase 9 decision 1(검증 기준, 2026-09-13)의 문장입니다. "A value no source states carries no source tag and is labelled for what it is: convention, arithmetic, placeholder, or design." archetype library에서는 이 이름표가 field가 아니라 `modeling_notes`나 `scope` 산문 안에 적힙니다(예: `game-task-chain`의 "16667 us is 1/60 s arithmetic — design, ours"). timeline 쪽에서는 bound value마다 `source:` 지도에 tag 또는 이름표(`design`, `convention`, `arithmetic`)를 직접 적고, linter가 확인합니다(9.10 D32, linter의 `BOUND_LABELS`). 예를 들어 `c1-compile`은 `source: {spawn_count: "meas-ci:build:2026-09-18", parallelism_cap: design, child_name: "meas-ci:build:2026-09-18"}`라고 적습니다.
+**design, convention, arithmetic.** 출처가 말하지 않은 값은 source tag를 달지 않고, 그 값이 무엇인지 이름표를 붙입니다. Phase 9 decision 1(검증 기준, 2026-09-13)의 문장입니다. "A value no source states carries no source tag and is labelled for what it is: convention, arithmetic, placeholder, or design." 다만 데이터셋에는 `placeholder` 이름표가 없습니다. 측정을 기다리는 값은 `meas-pending` tag를 달고 freeze가 그것을 거부합니다(2.10절; 2026-10-16, 인지오의 결정). archetype library에서는 이 이름표가 field가 아니라 `modeling_notes`나 `scope` 산문 안에 적힙니다(예: `game-task-chain`의 "16667 us is 1/60 s arithmetic — design, ours"). timeline 쪽에서는 bound value마다 `source:` 지도에 tag 또는 이름표(`design`, `convention`, `arithmetic`)를 직접 적고, linter가 확인합니다(9.10 D32, linter의 `BOUND_LABELS`). 예를 들어 `c1-compile`은 `source: {spawn_count: "meas-ci:build:2026-09-18", parallelism_cap: design, child_name: "meas-ci:build:2026-09-18"}`라고 적습니다.
 
-> **열린 자리.** `parallelism_cap` 8의 이름표가 문서마다 다릅니다. `build-orchestrator`의 `modeling_notes`와 9.6 D4(2026-09-17)는 이것을 "convention, grounds cited"(desktop의 `nproc` 규칙을 8-thread desktop에 적용한 관례)로 적는데, `c1-compile` timeline의 `source:` 지도는 `parallelism_cap: design`이라고 적습니다. 어느 쪽이 맞는지 정한 기록은 찾지 못했습니다. 값(8)은 같으므로 compile 결과에는 영향이 없습니다. 어느 이름표로 통일할지, 누가 정할지는 기록에 없습니다(확인 필요).
+> **왜 이렇게 정했나 — `parallelism_cap` 8은 `design`.** `build-orchestrator`의 `modeling_notes`와 9.6 D4(2026-09-17)는 이 값을 "convention, grounds cited"(desktop의 `nproc` 규칙을 8-thread desktop에 적용한 관례)로 적습니다. 그 뒤 2026-10-06의 9.10 D160(core set timeline이 묶는 값을 출처 tag나 이름표와 함께 나열한 결정)이 compile의 cap을 `design`으로 적었고(9.6 D4, D7을 근거로), `c1-compile` timeline의 `source:` 지도가 그것을 따릅니다(`parallelism_cap: design`). timeline에 묶인 값으로서의 이름표는 이 나중의 결정이 정합니다. 값(8)은 같으므로 compile 결과에는 영향이 없습니다.
 
 ## 2.9 한 항목을 끝까지 따라가기: `office-writer`
 
@@ -555,7 +557,7 @@ simulator는 이 task를 이렇게 실행합니다. 0.30초에 timer wake가 오
 
 **registry 정합.** sources.yaml의 모든 id는 references.md에 있어야 합니다.
 
-**`meas-pending`은 0개.** `meas-pending`은 "CI 측정을 기다리는 자리표시자"라는 뜻의 sentinel tag입니다. 원래 설계에서는 schema freeze 뒤에 linter가 이것을 거부하기로 되어 있었습니다(sources.yaml: "the linter rejects it after the schema freeze"). 지금 이 규칙은 `lint_repo(..., freeze=True)`로 켜지는데, `make lint`는 `--freeze` 없이 돕니다. 대신 `make test`의 `test_repo_is_freeze_clean`이 실제 repository를 `freeze=True`로 lint하고 오류가 없어야 통과합니다. 그러니 "library에 `meas-pending`이 하나도 없다"는 것은 `make test`가 지킵니다. `dataset/README.md`의 규칙 문장은 "Zero `meas-pending`. The library is fully measured; the linter keeps it that way."입니다. 확인: 2026-10-14에 `grep -c meas-pending dataset/archetypes.yaml`은 1을 돌려주는데, 그 한 줄은 머리 주석의 설명문입니다. 숫자에 붙은 `meas-pending`은 없습니다.
+**`meas-pending`은 0개.** `meas-pending`은 "CI 측정을 기다리는 자리표시자"라는 뜻의 sentinel tag입니다. 원래 설계에서는 schema freeze 뒤에 linter가 이것을 거부하기로 되어 있었습니다(sources.yaml: "the linter rejects it after the schema freeze"). 이 규칙은 `lint_repo(..., freeze=True)`로 켜지고, 2026-10-15의 9.23 D13부터 `make lint`가 `lint.py --freeze`로 돌아 library의 숫자에 `meas-pending`이 하나라도 있으면 실패합니다("meas-pending after freeze"). 2026-10-16부터는 freeze가 timeline의 bound value에도 적용됩니다(`lint_bound_sources`). `make test`의 `test_repo_is_freeze_clean`과 `test_real_timelines_are_freeze_clean`도 실제 repository를 freeze로 lint합니다. `dataset/README.md`의 규칙 문장은 "A value awaiting a measurement campaign is tagged `meas-pending`; `make lint`'s freeze rejects the tag in the library's parameters and in the timelines' bound values. The library holds none"입니다. 확인: 2026-10-17에 `grep -c meas-pending dataset/archetypes.yaml`은 1을 돌려주는데, 그 한 줄은 머리 주석의 설명문입니다. 숫자에 붙은 `meas-pending`은 없습니다.
 
 **timeline 쪽 규칙(참고).** archetype 자체의 규칙은 아니지만, timeline이 archetype을 부를 때의 규칙도 있습니다. timeline은 archetype의 `binding_params`에 있는 이름만, 빠짐없이 넣어야 하고(`wlc/timeline.py`), 넣은 값마다 source tag 또는 `design`/`convention`/`arithmetic` 이름표를 달아야 합니다(`lint_bound_sources`, 9.10 D32와 9.18). 이 부분은 timeline을 다루는 권에서 자세히 다룹니다.
 
@@ -572,16 +574,16 @@ archetype 항목이 가리키거나, archetype 측정과 관련된 파일들이 
 | `dataset/launch/launch-<entry>.json.gz` | launch phase 녹화 열 개(repeat마다 phase 길이와 wake 목록) | compiler, linter |
 | `dataset/replay/replay-*.json.gz` | trace-replay 변형용 관측 흐름 여섯 개(`code-editor`, `cpu-batch-python3`, `package-upgrade`, `renderer-hidden`, `video-call`, `web-browser`) | compiler(`variants.yaml`의 `replay` 집합이 쓸 때만) |
 | `dataset/meas/streams/` | 측정 campaign이 repeat마다 재생한 600초 key 창들(`word-r<k>.jsonl` 56개, `ie-r<k>` 38개, `outlook-r<k>` 8개, `aalto-r<k>` 78개)과 창 선택 기록(`windows.json`, `aalto-windows.json`) | 측정 도구(`dataset/tools/meas/loop/pool_runs.py` 등) |
-| `dataset/meas/names/` | process 이름 검증 기록(`meas-ci:names:2`, Ubuntu·Fedora·Arch에서 이름이 실제로 그렇게 보이는지) | 사람, 이름 tier 설계 |
-| `dataset/meas/summary.json` | Phase 2(2026-08-28)의 옛 CLI·GUI 측정 요약 | 지금 library의 어떤 값도 이것에서 오지 않음(11장) |
+| `dataset/meas/names/` | 재구축 이전의 이름을 검증한 Phase 2와 Phase 7의 기록(`meas-ci:names:2`, Ubuntu·Fedora·Arch에서 이름이 실제로 그렇게 보이는지; `run-2/`는 dkms run). 역사로 남음. 지금 이름의 근거는 campaign이 추적한 `comm`(9.10 D25) | 어떤 도구도 읽지 않음 |
+| (`dataset/meas/summary.json`) | Phase 2(2026-08-28)의 옛 CLI·GUI 측정 요약. 2026-10-16에 지워짐(commit `37c2e233`; 그 전 commit에서 읽을 수 있음) | 어떤 도구도 읽지 않았음. 지금 library의 어떤 값도 이것에서 오지 않음(11장) |
 
 `dataset/meas/streams/`의 이름 때문에 헷갈리기 쉽습니다. 여기 있는 것은 compile된 workload의 wake 흐름이 아니라, **측정할 때 application에 재생해 준 입력 창**입니다. 9.5 slice는 SWELL-KW 녹화를 600초 창으로 잘라 repeat k가 k번째 창을 재생하게 했습니다(9.5 D12: "repeat r replays the r-th 600 s window of recorded time … `dataset/meas/streams/<app>-r<r>.jsonl`, committed"). `aalto-r<k>`는 stimulus 민감도 검사(3.6절)에 쓴 136M Keystrokes 데이터의 창입니다. 그래서 `word-r*` 파일 수(56)가 Word 녹화의 창 수이고, `code-editor`가 44번째 창에서 멈춘 이야기(5.3절)가 이 파일들과 이어집니다.
 
-> **열린 자리.** 이 권을 맡길 때 받은 목록에는 `dataset/meas/`의 README와 `dataset/tools/meas/`의 README가 있었지만, 2026-10-14 현재 두 디렉터리 모두 README 파일이 없습니다(`ls`로 확인). 측정 도구의 설명은 각 slice의 `campaign/method.md`, `_dev/research/jioh/measurement-campaign-workflow.md`, `docs/workload/measurement-overview.md`에 흩어져 있습니다. 측정 방법을 다루는 6권이 이것을 모아 설명합니다.
+측정 도구의 지도는 `dataset/tools/meas/README.md`입니다(2026-10-16에 9.15가 씀). 하위 폴더와 도구마다 campaign 계열, 단계(run, 분석, pool, fold-in), 입구를 적고, 각 도구의 docstring이 말하지 않는 것은 주장하지 않습니다. 측정 방법은 각 slice의 `campaign/method.md`, `_dev/research/jioh/measurement-campaign-workflow.md`, `docs/workload/measurement-overview.md`가 설명하고, 측정 방법을 다루는 6권이 이것을 모아 설명합니다. `dataset/meas/`에는 README가 없고, `dataset/README.md`의 Layout이 그 안의 것을 적습니다.
 
 # 3장 · 숫자는 어떻게 얻었나 — tag를 읽을 만큼만
 
-이 장은 "`meas-ci:interactive:2026-09-18`이라는 tag 뒤에 무엇이 있나"에 답합니다. 28개 항목의 숫자가 모두 이런 tag를 달고 있으므로, tag가 무엇을 약속하고 무엇을 약속하지 않는지 알아야 4장부터의 숫자를 바르게 읽을 수 있습니다. 측정 방법 전체와 검증 기준(값이 원 자료에서 다시 나오는지, 출처가 원문과 맞는지)은 측정 방법을 다루는 6권이 자세히 다룹니다. 이 장은 tag를 읽는 데 필요한 만큼만 설명합니다. 기준 문서는 `docs/workload/measurement-overview.md`(측정 개요; status draft, 2026-09-29)와 `dataset/sources.yaml`의 `meas-ci` notes입니다. 단, measurement-overview의 항목 표(§2, §9)는 2026-09-28에서 멈춰 있어 지금 library와 다릅니다. 그 표는 23개 항목을 세고 `file-backup`, `renderer-visible`처럼 지금 없는 항목을 담으며, 9.10 slice가 2026-10-01 이후 만든 일곱 항목을 빠뜨립니다. 지금 measured 항목은 28개입니다.
+이 장은 "`meas-ci:interactive:2026-09-18`이라는 tag 뒤에 무엇이 있나"에 답합니다. 28개 항목의 숫자가 모두 이런 tag를 달고 있으므로, tag가 무엇을 약속하고 무엇을 약속하지 않는지 알아야 4장부터의 숫자를 바르게 읽을 수 있습니다. 측정 방법 전체와 검증 기준(값이 원 자료에서 다시 나오는지, 출처가 원문과 맞는지)은 측정 방법을 다루는 6권이 자세히 다룹니다. 이 장은 tag를 읽는 데 필요한 만큼만 설명합니다. 기준 문서는 `docs/workload/measurement-overview.md`(측정 개요; status draft, 2026-09-29 작성, 2026-10-17 갱신)와 `dataset/sources.yaml`의 `meas-ci` notes입니다. measurement-overview의 항목 표(§2)는 2026-10-17에 9.15가 다시 써서 지금 library의 measured 항목 28개를 담습니다. 이 권을 처음 쓴 2026-10-14에는 그 표가 2026-09-28에서 멈춰 23개 항목을 세고, `file-backup`, `renderer-visible`처럼 이미 없는 항목을 담고 있었습니다.
 
 ## 3.1 CI runner 측정 한 번의 모양
 
@@ -619,7 +621,7 @@ measurement-overview §5가 정의를 모읍니다.
 ## 3.3 repeat, campaign, machine gate
 
 - **repeat**: 새 runner에서 도는 job 하나 전체. measurement-overview §3: "the level at which the largest random variation enters, and so the unit the rule counts." 같은 job 안의 표본이 아니라 job 하나가 반복 단위입니다.
-- **campaign**: 한 측정의 모든 repeat. tag `meas-ci:<workflow>:<첫 batch를 띄운 날짜>`가 campaign을 가리킵니다. campaign의 원 자료는 GitHub release로 공개합니다(예: release `meas-ci-2026-09-18`, `meas-ci-background-2026-10-04`).
+- **campaign**: 한 측정의 모든 repeat. tag `meas-ci:<workflow>:<첫 batch를 띄운 날짜>`가 campaign을 가리킵니다. campaign의 원 자료는 GitHub release로 공개합니다(예: release `meas-ci-2026-09-18`, `meas-ci-background-2026-10-04`). `dataset/meas-releases.yaml`이 데이터가 인용하는 campaign 23개마다 그 release(하나 이상)와 각 asset의 SHA-256을 적고, `make lint`가 지도에 없는 tag를 실패시킵니다(2026-10-16). release는 campaign을 모을 때 손으로 만들고, GitHub이 workflow의 artifact를 지우는 90일이 지나기 전에 만듭니다(`gh-artifact-retention`).
 - **landing**: 일부 기록(특히 DKMS campaign)은 job이 목표 machine에 내려앉아 완료된 것을 landing이라 부릅니다. 같은 repeat 번호가 두 번 landing한 경우도 모두 pool에 넣었습니다(9.10 D58: "repeats 7, 10 and 11 landed twice, every landing pooled").
 - **machine gate**: runner의 CPU 모델이 AMD EPYC 7763이 아니면 job을 약 20초 안에, 아무것도 설치하기 전에 멈추는 장치입니다(`dataset/tools/meas/machine_gate.sh`). 멈춘 job은 repeat로 세지 않습니다.
 
@@ -679,7 +681,7 @@ gaming은 이 dataset에서 특별합니다. game을 CI runner에서 잴 수 없
 
 **무엇을 흉내 내나.** Windows game을 Linux에서 Proton(Wine 기반 호환 계층)으로 돌릴 때, 사용자 입력에서 화면 갱신까지 한 frame을 만드는 task들의 사슬입니다. timeline에서는 game process 이름 `Troy.exe`(LAVD 발표가 예로 든 game의 process 이름)로 나타납니다.
 
-**어디서 왔나.** `lavd-ossna24`: Changwoo Min의 발표 "Optimizing Scheduler for Linux Gaming"(Open Source Summit North America 2024, 2024-04-17)의 slide입니다(`docs/references.md`의 cite 줄). LAVD는 sched_ext(BPF program으로 Linux scheduler를 바꿔 끼우는 장치) 기반 scheduler이고(`docs/workload/source-vetting.md`의 B5가 그 code를 `github.com/sched-ext/scx`로 적음; `docs/workload/grounding-sources.md`는 gaming scheduling이 실제 문제라는 근거로 "Valve ships it"를 적음), 이 발표는 game이 돌 때 scheduler가 보는 task들을 `perf sched record`로 관찰한 결과를 보여 줍니다. `sources.yaml`은 이 출처가 세운 사실들을 slide 번호와 함께 적습니다. 게임 중 system 전체에서 약 300개 task가 scheduling되고(s12), 그중 약 90 %가 오래 사는 task이며, schedule당 runtime은 평균 수백 μs에서 최대 수 ms이고(wineserver 약 260 μs, worker 약 1.65 ms, s13), scheduling의 70–75 %가 대기 system call에서 시작되며(s14), task들이 입력에서 화면까지 waker–waiter graph로 묶여 있다(s16–s17)는 것입니다. 그리고 "States no frame period or frame budget"이라고 덧붙입니다. 이 출처의 type은 deployed-system이고, "Slides are footnote-tier despite carrying numbers"입니다.
+**어디서 왔나.** `lavd-ossna24`: Changwoo Min의 발표 "Optimizing Scheduler for Linux Gaming"(Open Source Summit North America 2024, 2024-04-17)의 slide입니다(`docs/references.md`의 cite 줄). LAVD는 sched_ext(BPF program으로 Linux scheduler를 바꿔 끼우는 장치) 기반 scheduler이고(`docs/workload/source-vetting.md`의 B5가 그 code를 `github.com/sched-ext/scx`로 적음; `docs/workload/grounding-sources.md`는 gaming scheduling이 실제 문제라는 근거로 "Valve ships it"를 적음), 이 발표는 game이 돌 때 scheduler가 보는 task들을 `perf sched record`로 관찰한 결과를 보여 줍니다. `sources.yaml`은 이 출처가 세운 사실들을 slide 번호와 함께 적습니다. 게임 중 system 전체에서 약 300개 task가 scheduling되고(s12), 그중 약 90 %가 오래 사는 task이며, schedule당 runtime은 평균 수백 μs에서 최대 수 ms이고(wineserver 약 260 μs, worker 약 1.65 ms, s13), scheduling의 70–75 %가 대기 system call에서 시작되며(s14), task들이 입력에서 화면까지 waker–waiter graph로 묶여 있다(s16–s17)는 것입니다. 그리고 "States no frame period or frame budget"이라고 덧붙입니다. registry(`sources.yaml`)에서 이 출처의 type은 deployed-system이고, notes는 "Slides are footnote-tier despite carrying numbers"라고 적습니다. `docs/references.md`는 2026-10-16부터 이것을 talk·학회 초록·뉴스 보도 등급(2.8절)에 두고, 그 숫자를 Min이 2024-04-17에 보고한 값으로, chain의 꼴을 design으로 적습니다(9.12 D113).
 
 **program.** 이 항목은 `pattern.constructor: chain`입니다. compiler는 task 하나를 member 17개로 펼칩니다. 첫 member(머리)만 timer로 깨어나고, 나머지는 앞 member의 WAKE로 깨어나 일하고 다음 member를 깨웁니다.
 
@@ -720,7 +722,7 @@ program:                     # per constructed chain member
 
 > **왜 이렇게 정했나 — 쓰이지 않던 두 param(9.4 D7, 2026-09-13).** `frac_long_lived`(0.90)와 `frac_wakeups_from_wait`(0.70–0.75)는 어떤 도구도 읽지 않았습니다(memo B1). 둘을 지우고, 두 사실은 "encoding이 모델링하지 않는 것"으로 `modeling_notes`에 locator와 함께 남겼습니다. 모든 member는 segment 내내 살고, wake의 종류 섞임은 배선(머리 하나가 TIMER, 나머지는 WAIT)으로 고정됩니다.
 
-> **열린 자리 — per-wake RUN의 과소평가(9.4 D9, 2026-09-17).** 9.5 follow-ups spec decision 4가 RUN을 "wake 한 번의 수요"로 정의하자(preemption 뒤 재개는 앞 wake에 합침), 출처의 "schedule당 runtime"을 wake당 RUN으로 읽는 것이 수요를 줄여 잡는다는 점이 드러났습니다. preemption으로 끊긴 schedule은 wake 하나를 여러 조각으로 셉니다. 크기는 같은 발표의 slide 14가 묶어 줍니다(preemption이 scheduling 사건의 25–30 %, pie의 `sched_preempt` 28.78 %). 평균으로 wake당 약 1.4 schedule이고, slice 길이에 다가가는 긴 work task(1.65 ms worker 대 발표의 1.5 ms slice 예)에서 더 크며, 짧은 coordination task에서는 1에 가깝습니다. 결정은 "No value changed"였고, 대신 9.14(consumer rework)가 gaming 파일의 민감도 검사로 chain member RUN을 ×1.0–1.4 이상으로 훑기로 넘겼습니다. 버린 대안은 기준점을 1/0.71로 늘리기("assumes preemption independent of run length and task, which the slice mechanism contradicts")였습니다. 2026-10-10의 dataset audit(A3)는 이 항목을 "resolved as is"로 닫았습니다. "The figures stand as the talk's reported values; the chain-x1.2 and chain-x1.4 variants are the sensitivity check." `variants.yaml`의 chain 배율 변형이 이 검사입니다.
+> **왜 이렇게 정했나 — per-wake RUN의 과소평가는 값을 바꾸지 않음(9.4 D9, 2026-09-17).** 9.5 follow-ups spec decision 4가 RUN을 "wake 한 번의 수요"로 정의하자(preemption 뒤 재개는 앞 wake에 합침), 출처의 "schedule당 runtime"을 wake당 RUN으로 읽는 것이 수요를 줄여 잡는다는 점이 드러났습니다. preemption으로 끊긴 schedule은 wake 하나를 여러 조각으로 셉니다. 크기는 같은 발표의 slide 14가 묶어 줍니다(preemption이 scheduling 사건의 25–30 %, pie의 `sched_preempt` 28.78 %). 평균으로 wake당 약 1.4 schedule이고, slice 길이에 다가가는 긴 work task(1.65 ms worker 대 발표의 1.5 ms slice 예)에서 더 크며, 짧은 coordination task에서는 1에 가깝습니다. 결정은 "No value changed"였고, 대신 9.14(consumer rework)가 gaming 파일의 민감도 검사로 chain member RUN을 ×1.0–1.4 이상으로 훑기로 넘겼습니다. 버린 대안은 기준점을 1/0.71로 늘리기("assumes preemption independent of run length and task, which the slice mechanism contradicts")였습니다. 2026-10-10의 dataset audit(A3)는 이 항목을 "resolved as is"로 닫았습니다. "The figures stand as the talk's reported values; the chain-x1.2 and chain-x1.4 variants are the sensitivity check." `variants.yaml`의 chain 배율 변형이 이 검사입니다.
 
 > **왜 이렇게 정했나 — member 이름(9.10 D26, 2026-10-01).** 9.4가 남긴 "`game.exe` 이름" 문제를 9.10이 풀었습니다. 머리 `Troy.exe`, 다음 `wineserver`, 이어서 `Task worker thr` 넷 → `dxvk-cs` → `dxvk-submit`, `winepulse_mainl`, `winepulse_timer` → `FAudio_AudioCli`, 이름 없는 나머지 여섯은 `Troy.exe`. 근거는 slide 16의 tree(tgid 7781, node 열 개)와 edge 수(`Task worker thr → dxvk-cs` 각 약 10,000, `dxvk-cs → dxvk-submit` 30,970, `winepulse_timer → FAudio_AudioCli` 10,213)이고, Wine이 process 이름을 `.exe`로 바꾼다는 사실입니다. archetype은 이름을 정하지 않는다는 원칙대로, 이름은 항목이 아니라 timeline의 `member_names`에 들어갑니다.
 
@@ -812,7 +814,7 @@ component는 Chromium 기반 구조를 그대로 보입니다. `gpu/VizComposito
 - **session 사이에서 변하는 component(9.5 D57, 2026-09-20).** `utility/libuv-worker`의 비율은 한 run 안에서는 ±10.6 %만 변하는데 repeat 사이에서는 ±39.0 % 변했습니다. 기록된 이유: "Repeats tighten the estimate of such a value's mean; they do not narrow the spread, which is the application's behaviour and is what the dataset should carry." 그래서 이 component의 세 값(wake 비율 5.382/s ±5.63 %, gap 평균 185.8 ms, run 평균 0.0102 ms)은 반폭과 함께 실립니다.
 - **44에서 멈춤(9.5 D73, D99).** keys-only campaign은 Word 녹화의 44번째 창에서 멈췄고, 당시에는 그것이 녹화의 마지막 창으로 읽혔습니다. 나중에 녹화가 57개 창(입력 있는 창 56개)을 가진다는 것이 확인됐습니다. 9.5 D99(2026-09-29)는 campaign을 늘리지 않고, 44 repeat에서 per-input 값 둘이 stability rule을 통과한다는 것을 확인하는 쪽을 택했습니다(SWELL-KW 99.26 ms ±4.84 %, 136M 103.9 ms ±3.01 %). 버린 대안은 45–57번째 창으로 campaign을 늘리기였습니다.
 - **stimulus 민감도.** 136M 아래 1.029배(0.968–1.090), 차이 없음.
-- **긴 span 검사와 extension host 사건(9.10 D144, D154, D158).** `c6-dual`(C6 그룹의 파일로, compile을 기다리며 game을 하는 두 전경이 똑같이 활성인 상황; 사용자의 kernel build 전체를 담아 깁니다)은 VS Code를 12,068초 동안 초점에 둡니다. 두 번의 long-phase probe에서, 600초 창마다 commit된 파일로 되돌리면 per-input run 평균이 9.5의 같은 창 repeat 대비 1.00(0.97–1.03), 추세 없음이었습니다(한 줄을 계속 늘려 친 probe의 상승은 그 줄 길이 때문이었음). 그러나 두 probe 모두에서 VS Code의 extension host(TypeScript·JSON language server를 가진 process)가 2–4개 창 동안 창당 최대 400초 CPU를 쓰다가, VS Code가 host를 갈아 끼우는 일이 있었습니다(한 session 6,100–8,500초, 다른 session 10,700–12,050초). 그 동안 per-input run 평균은 실린 값의 최대 3.9배였습니다. 결정은 "The episode is not carried"였습니다.
+- **긴 span 검사와 extension host 사건(9.10 D144, D154, D158).** `c6-dual`(C6 그룹의 파일로, compile을 기다리며 game을 하는 두 전경이 똑같이 활성인 상황; 사용자의 kernel build 전체를 담아 깁니다)은 2026-10-11의 9.17 D1 전까지 VS Code를 12,068초 동안 초점에 두었습니다. 9.17 D1(focus track을 들인 결정) 뒤로는 editor와 game이 688초마다 번갈아 초점을 쥐어, 지금 editor가 한 번에 초점을 쥐는 구간은 688초입니다. 두 번의 long-phase probe는 그 전의 12,068초 span을 읽었고, probe의 길이와 결과는 그대로입니다(항목의 scope는 2026-10-14의 9.23 D8로 "Read over 12,068 s, the span `c6-dual` held it focused before its focus alternated with the game every 688 s (9.17 D1)"라고 고쳐 적습니다). 두 probe에서, 600초 창마다 commit된 파일로 되돌리면 per-input run 평균이 9.5의 같은 창 repeat 대비 1.00(0.97–1.03), 추세 없음이었습니다(한 줄을 계속 늘려 친 probe의 상승은 그 줄 길이 때문이었음). 그러나 두 probe 모두에서 VS Code의 extension host(TypeScript·JSON language server를 가진 process)가 2–4개 창 동안 창당 최대 400초 CPU를 쓰다가, VS Code가 host를 갈아 끼우는 일이 있었습니다(한 session 6,100–8,500초, 다른 session 10,700–12,050초). 그 동안 per-input run 평균은 실린 값의 최대 3.9배였습니다. 결정은 "The episode is not carried"였습니다.
 - **launch 없음.** core set에서 VS Code를 파일 중간에 켜는 곳이 없어 launch가 없습니다.
 
 ## 5.4 `mail-client` — Thunderbird로 답장 쓰고 보내기
@@ -946,7 +948,7 @@ program:
 
 > **왜 이렇게 정했나 — `-j8`와 cap 8(9.6 D4, 2026-09-17).** cap의 기본값은 8로 유지하되, 근거를 바꿨습니다. 예전 근거는 "between interbench's documented -j4 and desktop nproc conventions"였는데, 9.6 D4가 기록한 바로는 interbench의 `-j4`는 make를 실제로 돌리지도 않는 emulation의 이름표였고 뒤쪽 절반은 출처가 없었습니다. 새 근거는 build 도구들의 기본값입니다. "every vendor default found is `nproc` or a memory-capped variant"(make, ninja, cargo, dpkg, Debian kernel handbook, rpm, Gentoo, dkms, Phoronix Test Suite). 이 `nproc` 규칙을 8-thread desktop에 적용하면 8입니다. 이름표는 "convention, grounds cited", binding 때 바꿀 수 있습니다. 문헌에서 관측된 desktop build 하나(O'Callahan 등의 rr 논문, Dell XPS15 8-thread laptop)도 `-j8`이었습니다. CPU 하나에 묶으면 `nproc`이 1이 되므로 workflow는 `-j8`을 명시합니다.
 
-> **열린 자리 — `-j8`의 비용.** 같은 run에 `-j1` phase를 미리 등록한 불변성 검사로 넣었습니다. 결과: `-j1`에서 `cc1`의 process당 CPU는 `-j8`의 0.90배(repeat별 0.87–0.92)였습니다. 즉 CPU 하나에서 `-j8`로 돌리면 compile당 CPU가 약 10 % 더 듭니다. 미리 정한 대로 이것은 재결정이 아니라 "a stated limitation of these values"로 scope에 적혔고, 3.4절의 5 % 기준선이 바로 이 10 %의 절반입니다. venue가 측정값에 주는 영향 전반에 대해서는 9.6 D32(2026-09-20)가 "The venue's effect is untested, and the test belongs to the consumer"라고 적고, 9.14(dataset을 쓰는 쪽의 rework)에 민감도 검사를 넘겼습니다. 측정된 CPU 값을 정해진 배율로 위아래로 바꿔 judging set을 다시 돌렸을 때 판정이 바뀌는지 보는 검사이고, simulation만으로 할 수 있습니다.
+> **왜 이렇게 정했나 — `-j8`의 비용은 진술된 한계(9.6 D4, D9; 9.6 D32).** 같은 run에 `-j1` phase를 미리 등록한 불변성 검사로 넣었습니다. 결과: `-j1`에서 `cc1`의 process당 CPU는 `-j8`의 0.90배(repeat별 0.87–0.92)였습니다. 즉 CPU 하나에서 `-j8`로 돌리면 compile당 CPU가 약 10 % 더 듭니다. 미리 정한 대로 이것은 재결정이 아니라 "a stated limitation of these values"로 scope에 적혔고, 3.4절의 5 % 기준선이 바로 이 10 %의 절반입니다. venue가 측정값에 주는 영향 전반에 대해서는 9.6 D32(2026-09-20)가 "The venue's effect is untested, and the test belongs to the consumer"라고 적고, 9.14(dataset을 쓰는 쪽의 rework)에 민감도 검사를 넘겼습니다. 2026-10-09의 9.14 decision 10이 그 검사를 `venue-x0.8`/`venue-x1.25` variant로 만들었습니다(12.2절). 판정 파일 19개의 측정된 RUN을 공통 배율로 위아래로 바꿔 판정이 바뀌는지 보는 검사입니다.
 
 > **왜 이렇게 정했나 — 나머지 job은 모델링하지 않음(9.6 D9, 2026-09-18).** build의 job 5,254개 중 object job 2,908개만 spawn table에 넣습니다. archive 681, helper 1,537, probe 90, link 38개는 "unmodelled per build"이고, 합쳐서 build CPU의 3 % 미만입니다. 기록된 이유: 다른 job 종류의 비율은 "kbuild's for this tree"여서 다른 build로 옮겨지지 않습니다.
 
@@ -1014,7 +1016,7 @@ warm 캐시만 싣습니다. 캐시를 비운(cold) 상태에서는 `cc1`이 중
 
 > **왜 이렇게 정했나 — MNIST(9.10 D12, 2026-10-01).** 예전 `python3`는 "a PyTorch 2.14 CPU training loop of 300 steps over synthetic images"였습니다. 9.6 D32는 그것이 실제 학습이 아니라 CPU를 포화시키는 batch task의 대역이라고 범위를 좁혔고, 9.10 D12가 PyTorch 자신의 예제로 바꿨습니다. 기록된 이유: 관측된 desktop ML 학습 workload를 찾지 못했고(Procyon은 inference를 잼), "A definition that is not ours". 주장하지 않는 것도 적었습니다. desktop 사용자가 MNIST를 학습한다는 주장은 하지 않고, GPU 학습은 runner에서 관측할 수 없습니다. `sources.yaml`의 `pytorch-examples` notes: "Identifies the job; no claim about what or how often desktop users train."
 
-> **열린 자리 — huge page 설정(9.10 D87, D88, 2026-10-03).** runner의 커널은 transparent huge pages(THP, 큰 memory page를 자동으로 쓰는 기능)를 `always` 모드로 돌리는데, Ubuntu desktop 커널의 기본값은 `madvise`입니다. 9.10 D87은 runner의 모드를 그대로 두고 측정하되, `madvise`로 다섯 job을 따로 돌려 보기로 했습니다. 결과(D88): `madvise`에서 같은 학습이 CPU를 1.144배(95 % 구간 ×1.102–×1.185) 더 썼고, 시작의 두 sleep 말고는 block이 없었습니다. 결정은 "D87 kept"입니다. 실린 값은 runner(`always`)의 것이고, desktop 기본 설정이면 job이 약 14 % 더 길다는 것이 scope에 한계로 적혀 있습니다. `video-transcoder`의 scope도 같은 THP 차이를 적습니다.
+> **왜 이렇게 정했나 — huge page 설정은 runner의 것(9.10 D87, D88, 2026-10-03).** runner의 커널은 transparent huge pages(THP, 큰 memory page를 자동으로 쓰는 기능)를 `always` 모드로 돌리는데, Ubuntu desktop 커널의 기본값은 `madvise`입니다. 9.10 D87은 runner의 모드를 그대로 두고 측정하되, `madvise`로 다섯 job을 따로 돌려 보기로 했습니다. 결과(D88): `madvise`에서 같은 학습이 CPU를 1.144배(95 % 구간 ×1.102–×1.185) 더 썼고, 시작의 두 sleep 말고는 block이 없었습니다. 결정은 "D87 kept"입니다. 실린 값은 runner(`always`)의 것이고, desktop 기본 설정이면 job이 약 14 % 더 길다는 것이 scope에 한계로 적혀 있습니다. `video-transcoder`의 scope도 같은 THP 차이를 적습니다.
 
 **`kdenlive_render` — Kdenlive의 export.** `video-editor` 항목의 project(20초 1920×1080 30 fps H.264 clip에 unsharp 효과)를 Kdenlive의 render dialog로, 기본 profile MP4-H264/AAC(x264 `veryfast`, CRF 23, GOP 15, AAC 160 kb/s, processing thread 하나)로 내보내는 job입니다. dialog가 띄우는 `kdenlive_render`와 그것이 돌리는 `melt-7`의 tree이고, task 이름은 tree의 뿌리인 `kdenlive_render`입니다. 30 repeat.
 
@@ -1075,7 +1077,7 @@ warm 캐시만 싣습니다. 캐시를 비운(cold) 상태에서는 `cc1`이 중
 
 > **왜 이렇게 정했나 — warm(9.7 D8)과 thread 여덟(9.7 D9).** warm을 읽는 이유: cold phase의 읽기 대기는 consumer drive가 아니라 "SSD"로만 문서화된 runner 디스크를 재게 되고, desktop backup의 캐시 상태를 말하는 출처가 없으며, runner의 16 GB memory가 set 대부분을 담습니다. cold 수치는 결과에 남겼습니다. thread 여덟인 이유: 7-Zip은 machine의 CPU 수에 맞춰 thread를 정하는데, CPU 하나에 묶으면 CPU 하나짜리 machine을 그리게 되므로 9.6 D4의 "8-thread desktop의 `nproc`" 규칙을 따랐습니다.
 
-> **열린 자리 — 한 CPU에 thread 여덟.** 여덟 thread가 한 CPU를 나눠 쓰는데, desktop에서는 대부분 나란히 돌 것입니다. 미리 등록한 검사(9.7 D15, D23): 모든 repeat에서 thread 여덟이 byte당 CPU를 thread 하나보다 1.04–1.10배 더 썼습니다. 또 thread 하나짜리 검사에서 한 thread가 두 방식 중 하나를 보였는데(repeat 1, 2, 6은 중간 gap 0.36–0.39초에 906–941 wake, repeat 3, 4, 5는 0.40–0.74 ms에 1,246–1,575 wake), 원인은 밝혀지지 않았습니다("for a cause not identified").
+> **왜 이렇게 정했나 — 한 CPU에 thread 여덟은 진술된 한계(9.7 D15, D23).** 여덟 thread가 한 CPU를 나눠 쓰는데, desktop에서는 대부분 나란히 돌 것입니다. 미리 등록한 검사(9.7 D15, D23): 모든 repeat에서 thread 여덟이 byte당 CPU를 thread 하나보다 1.04–1.10배 더 썼습니다. 또 thread 하나짜리 검사에서 한 thread가 두 방식 중 하나를 보였는데(repeat 1, 2, 6은 중간 gap 0.36–0.39초에 906–941 wake, repeat 3, 4, 5는 0.40–0.74 ms에 1,246–1,575 wake), 원인은 밝혀지지 않았습니다("for a cause not identified").
 
 ## 7.3 `game-download` — SteamCMD로 게임 설치 파일 받기
 
@@ -1089,11 +1091,11 @@ warm 캐시만 싣습니다. 캐시를 비운(cold) 상태에서는 `cc1`이 중
 
 > **왜 이렇게 정했나 — 121.0 Mbps(9.7 D11, 2026-09-19).** Valve가 공개한 국가별 "Average Download Rate"를 받은 byte로 가중한 중간값입니다(238개 국가 행; 2026-09-19 04:44 UTC에 받은 판). 받은 byte가 모집단의 올바른 가중치라는 것이 기록된 이유이고, 다른 표 읽기(network 표의 가중 중간값 128.9, 국가 가중 평균 131.3)도 7 % 안이었습니다. 버린 대안은 비가중 중간값 65.7 Mbps 등입니다. Azure 링크 자체는 VM당 12,500 Mbps 상한이라 desktop 대역폭이 아니고, client는 속도가 오르면 연결을 늘리므로 속도가 구조를 바꿉니다(D10). 그래서 조인 링크를 읽습니다.
 
-> **열린 자리 — 링크 모델이 값을 움직인다(9.7 D25, 2026-09-20).** 조이는 방식을 token bucket에서 `fq_codel` queue로 바꾸자 repeat 사이 흩어짐이 크게 줄었습니다(network wait의 변동계수 20.5 %→1.9 %). 그러나 두 방식의 값 차이도 컸습니다. token bucket 아래 network wait +43 %, wake당 byte +35 %, wake당 run +17 %. `modeling_notes`: "a far larger effect than 9.5 D23's stimulus sensitivity (+1 % to +12 %), so the queue discipline moves this archetype more than the choice of recording moved those." 그리고 "no source here establishes that consumer equipment manages its queue this way". 실제 가정용 장비가 `fq_codel`처럼 queue를 관리한다는 근거는 없다는 것입니다. 링크의 지연도 runner가 Valve server까지 가는 경로 그대로여서 통제되지 않았습니다. repeat들은 runner가 뽑은 Steam site에 따라 갈렸고(서부 14, 동부 13, 중부 3), 지역이 network wait 분산의 64 %를 설명했습니다.
+> **왜 이렇게 정했나 — `fq_codel`을 유지하고, 링크 모델이 값을 움직인다는 것을 적음(9.7 D25, 2026-09-20).** 조이는 방식을 token bucket에서 `fq_codel` queue로 바꾸자 repeat 사이 흩어짐이 크게 줄었습니다(network wait의 변동계수 20.5 %→1.9 %). 그러나 두 방식의 값 차이도 컸습니다. token bucket 아래 network wait +43 %, wake당 byte +35 %, wake당 run +17 %. `modeling_notes`: "a far larger effect than 9.5 D23's stimulus sensitivity (+1 % to +12 %), so the queue discipline moves this archetype more than the choice of recording moved those." 그리고 "no source here establishes that consumer equipment manages its queue this way". 실제 가정용 장비가 `fq_codel`처럼 queue를 관리한다는 근거는 없다는 것입니다. 링크의 지연도 runner가 Valve server까지 가는 경로 그대로여서 통제되지 않았습니다. repeat들은 runner가 뽑은 Steam site에 따라 갈렸고(서부 14, 동부 13, 중부 3), 지역이 network wait 분산의 64 %를 설명했습니다.
 
 > **왜 이렇게 정했나 — 새 설치만(9.7 D12; 9.10 D7).** update(이미 설치한 게임의 갱신)는 새 chunk만 받아 binary delta로 고치므로 다른 일입니다. 익명으로 이전 공개 build를 설치할 수 있는지 probe했지만 불가능했습니다(9.7 D20 (3)). 그래서 새 설치만 싣습니다. 9.10 D7(2026-10-01)은 이 측정에 맞춰 `c2-p2a`의 다운로드가 그리는 상황을 고쳤습니다. 게임 중의 배경 update가 아니라 "the user starting to install another game while playing — wanted, `initiated: user`". 근거: Steam은 게임이 켜지면 다운로드를 기본으로 멈추고(Valve FAQ), 게임 중 Install을 누르면 바로 받기 시작합니다(steam-for-linux issue #8821). `c2-p2a`는 60초에 이 task를 띄우고 `total_work: 727.170s`(새 설치의 CPU 전체, 9.10 D142)를 묶습니다.
 
-> **열린 자리 — nice 10의 일(9.11 D6, D20).** SteamCMD의 CPU 중 약 75 %(30 repeat에서 75.33 %, repeat별 73.56–77.57 %)는 nice 10으로 돕니다. 거의 모두 `CContentUpdateC` thread입니다. 나머지 HTTP·IPC thread는 nice 0입니다. 이 dataset은 nice를 싣지 않으므로(1.6절), 시뮬레이션의 다운로드는 온전한 지위로 경쟁합니다. 9.11 D6의 기록: "On a stock desktop EEVDF gives nice-10 work about a tenth of the CPU against a busy nice-0 thread … so the download's interference with the game in `c2-p2a` is overstated, and the headroom there inflated, in the hypothesis's favour." 이 한계의 크기를 재려고 만든 것이 다음 항목입니다.
+> **왜 이렇게 정했나 — nice 10의 일은 온전한 지위로(9.11 D6, D20).** SteamCMD의 CPU 중 약 75 %(30 repeat에서 75.33 %, repeat별 73.56–77.57 %)는 nice 10으로 돕니다. 거의 모두 `CContentUpdateC` thread입니다. 나머지 HTTP·IPC thread는 nice 0입니다. 이 dataset은 nice를 싣지 않으므로(1.6절), 시뮬레이션의 다운로드는 온전한 지위로 경쟁합니다. 9.11 D6의 기록: "On a stock desktop EEVDF gives nice-10 work about a tenth of the CPU against a busy nice-0 thread … so the download's interference with the game in `c2-p2a` is overstated, and the headroom there inflated, in the hypothesis's favour." 이 한계의 크기를 재려고 만든 것이 다음 항목입니다.
 
 **tracing 비용.** 이 항목의 값은 socket 읽기·쓰기를 모두 기록하는 `perf trace` 아래에서 쟀습니다. 같은 설치를 그것 없이 돌리면 CPU가 0.975배(0.970–0.981), 시간이 0.991배였습니다. 즉 실린 run은 실제보다 약 2.5 % 많은 CPU 아래서 읽힌 것이고, 그 추가 CPU가 run의 어디에 떨어지는지는 재지 않았습니다(`modeling_notes`).
 
@@ -1132,7 +1134,7 @@ game-download-idle:
 
 > **왜 이렇게 정했나 — chroot와 빠진 단계(9.10 D37, D38).** chroot에서는 init이 돌지 않으므로 `libc6`의 postinst가 `systemctl daemon-reexec`와 재부팅 필요 알림을 건너뛰고, unit의 `apt-helper wait-online` 단계는 싣지 않았습니다. scope는 이것을 그대로 적습니다. `locales` 일은 설치가 나열한 locale 수에 비례하며 영어 설치는 18개입니다.
 
-> **열린 자리 — nice 19의 일(9.11 D20, 2026-10-08).** 이 job의 CPU 중 2.67 %(repeat별 2.30–3.36 %)는 nice 19로 돈 `apt-check`와 `dpkg`의 것입니다. 이것도 온전한 지위로 실립니다. 9.11 D20은 이것을 `game-download`와 함께 "nice가 실리지 않는 경우" 둘째로 기록했습니다.
+> **왜 이렇게 정했나 — nice 19의 일도 온전한 지위로(9.11 D20, 2026-10-08).** 이 job의 CPU 중 2.67 %(repeat별 2.30–3.36 %)는 nice 19로 돈 `apt-check`와 `dpkg`의 것입니다. 이것도 온전한 지위로 실립니다. 9.11 D20은 이것을 `game-download`와 함께 "nice가 실리지 않는 경우" 둘째로 기록했습니다.
 
 ## 7.6 `file-indexer` — Tracker의 첫 색인
 
@@ -1172,7 +1174,7 @@ game-download-idle:
 
 > **왜 이렇게 정했나 — 두 갈래의 run(9.10 D122, 2026-10-04).** 첫 batch에서 run between blocks 평균이 repeat 2, 4는 1.40 ms, repeat 1, 3, 5는 2.02–2.09 ms로 갈렸습니다(±26.3 %, 72 repeat 필요). 원인은 dry run 단계에서 deja-dup이 duplicity의 log를 pipe로 읽는 방식이었습니다. 거의 매 쓰기마다 읽는 경우와 몰아서 읽는 경우가 있었고, 둘 다 `SCHED_IDLE`로 한 CPU 위에서 도는 pipe 작성자와 읽는 쪽의 끼어들기가 그 갈림을 만들었습니다("the interleaving of a pipe's writer and reader on one CPU"). 결정: 30 repeat까지 돌리고 그래도 실패하면 예외로 싣는다. 30에서 ±4.4 %로 통과했습니다. 28개 repeat 중 2개는 거의 매번 읽기, 26개는 몰아 읽기였습니다.
 
-> **열린 자리 — 그리지 않는 것(9.10 D118).** Déjà Dup은 두 달에 한 번(주간 실행 약 9번에 1번) 새 cache로 비밀번호를 물으며 restore 시험을 하는데, 이것은 그리지 않았습니다.
+> **왜 이렇게 정했나 — restore 시험은 그리지 않음(9.10 D118).** Déjà Dup은 두 달에 한 번(주간 실행 약 9번에 1번) 새 cache로 비밀번호를 물으며 restore 시험을 하는데, 이것은 그리지 않았습니다.
 
 ## 7.9 `module-build-orchestrator`와 `module-compiler-child` — NVIDIA kernel module의 DKMS 재빌드
 
@@ -1202,7 +1204,7 @@ task 이름은 `dkms`이고, 자식들은 관측된 comm을 그대로 씁니다(
 
 > **왜 이렇게 정했나 — nice 19의 `apt-check`와 `dpkg`는 이 항목에 없다(9.13 reads R3, 2026-10-09).** 9.11 D20(2026-10-08)은 DKMS landing 10의 CPU 중 2.024 s(0.85 %)가 nice 19의 `apt-check`와 `dpkg`라는 것을 보고, 이 일이 항목의 table에 들어 있는지 9.13에 물었습니다. 9.13은 원 자료를 다시 받지 않고 pooling code와 pooled 결과로 이것을 닫았습니다(`_dev/research/jioh/task-9.13-rebuild/reads.md`의 R3). job의 정의는 "every process rooted at a `dkms_autoinstaller` run the kernel install causes"이고, 분석 code(`dataset/tools/meas/background/analyze.py`의 `hook_subtrees`)는 hook을 실행한 pid에서 fork 기록을 따라 **아래로만** 내려가며 자손을 모읍니다. `dpkg`와 `unattended-upgrade`는 hook의 조상이고 `apt-check`는 hook 밖에서 돌므로 어느 것도 들어오지 않습니다. 26 landing의 꼬리 CPU를 process 이름별로 보면 `cp`, `depmod`, `dkms`, `strip`, `zstd` 등만 나옵니다. 0.85 %는 단계 전체(업그레이드 tree 포함)를 더한 값이었습니다. 남은 단서 하나: `hook_subtrees`는 thread id로 짝을 짓는데, 약 17,000 task가 도는 단계 안에서 id 재사용을 막지 않습니다. 원 자료로 확인하는 방법도 R3에 적혀 있습니다(release `meas-ci-background-2026-10-02`의 landing 10 asset에서 nice-19 행의 pid를 hook subtree와 대조; subtree 안의 nice-19 CPU는 0이어야 함). 이 확인은 하지 않았습니다(미실행).
 
-> **열린 자리 — Secure Boot.** chroot에 boot loader와 `shim-signed`가 없어서 module에 서명하지 않았습니다. Secure Boot desktop이라면 module 다섯에 서명하는 일이 더해집니다(scope).
+> **왜 이렇게 정했나 — Secure Boot 서명은 그리지 않음(항목의 scope).** chroot에 boot loader와 `shim-signed`가 없어서 module에 서명하지 않았습니다. Secure Boot desktop이라면 module 다섯에 서명하는 일이 더해집니다(scope).
 
 # 8장 · browser 조각과 comms: 숨은 tab과 chat client
 
@@ -1234,7 +1236,7 @@ task 이름은 `dkms`이고, 자식들은 관측된 comm을 그대로 씁니다(
 
 > **왜 이렇게 정했나 — 1,030초 유예 settle과 Chrome 154(9.10 D152, D156, 2026-10-05).** 3,600초 probe에서 page thread는 steady phase의 첫 4분 동안 wake당 0.106, 0.083, 0.077, 0.080 ms를 쓰다가 일곱째 분부터 0.055–0.060 ms로 내려앉았습니다. 그래서 유예 settle을 630초에서 1,030초(630 + 360 + 여유 40)로 늘리고 다시 쟀습니다. 다시 잰 campaign은 Chrome 154에서 돌았는데, Google의 repository가 현재 판만 내려주기 때문입니다. 9.8의 19 repeat(152/153)와 비교하면 page thread가 1.72배, `Chrome_ChildIOT`가 2.51배 자주 깨고, renderer 전체 0.211 대 0.169 wakes/s였습니다. 결정은 이 항목을 154의 5 repeat로 접어 넣고, `web-browser`는 152/153 그대로 두는 것이었습니다. scope: "`web-browser` stays 152 and 153's, the two halves of one browser on two builds." 한 browser의 두 반쪽이 서로 다른 판에서 왔다는 한계를 밝힌 것입니다.
 
-> **열린 자리 — 600초 창의 흔들림.** 같은 3,600초 probe에서 600초 창은 wake를 모든 위치에서 수준의 3.7 % 안에 두었지만, CPU는 −7.2 %에서 +10.4 %까지 흔들렸습니다. 약 1,800초 간격으로 되풀이되는 episode(page thread 0.072–0.075 ms, `Chrome_ChildIOT` 0.243–0.247/s) 때문이고, 1,800초까지 어느 길이도 최악 위치에서 5 %를 지키지 못했습니다(−5.9 %). 이것은 scope에 "stated"로 남았습니다.
+> **왜 이렇게 정했나 — 600초 창의 흔들림은 진술됨(항목의 scope).** 같은 3,600초 probe에서 600초 창은 wake를 모든 위치에서 수준의 3.7 % 안에 두었지만, CPU는 −7.2 %에서 +10.4 %까지 흔들렸습니다. 약 1,800초 간격으로 되풀이되는 episode(page thread 0.072–0.075 ms, `Chrome_ChildIOT` 0.243–0.247/s) 때문이고, 1,800초까지 어느 길이도 최악 위치에서 5 %를 지키지 못했습니다(−5.9 %). 이것은 scope에 "stated"로 남았습니다.
 
 ## 8.2 `chat-client` — 아무 메시지도 오지 않는 Element Desktop
 
@@ -1256,7 +1258,7 @@ task 이름은 `dkms`이고, 자식들은 관측된 comm을 그대로 씁니다(
 
 **`electron-comms`.** 예전 library의 "거의 쉬면서 짧게 주기적으로 깨고 renderer 자식을 가진" 항목이었습니다. core set에서 125개 task가 이것에 묶여 있었습니다(`chrome` renderer 102, `steamwebhelper` 9, `steam` 6, `thunderbird` 3, `discord` 3, `zoom` 2). 9.8 D1(2026-09-20)이 이것을 프로그램마다 나눴습니다. 기록된 이유: "the entry's two values describe no process that was observed." heartbeat 중간값 1.85초는 Element main process(gap 0.40–0.43초)와 그 GPU·network helper(3.84–3.92초)의 기하 중심이었고, 1.85초 근처에서 깨는 process는 없었습니다. heartbeat당 일 289 μs도 helper(128–197 μs)와 main(531–857 μs) 사이에 있었고, 측정에 Element renderer는 하나도 없었습니다. 이 값들은 2026-08의 `meas-ci:gui:2`(vCPU 넷, CPU 고정 없음)에서 왔습니다. 9.8 D25(2026-09-22)의 fold-in으로 네 항목이 그 자리를 채웠습니다(`renderer-hidden`, `renderer-visible`, `chat-client`, `game-client`). binding은 이렇게 정리됐습니다. `thunderbird` → `mail-client`(9.8 D9), `discord` → `chat-client`, `steam` → `game-client`, `zoom` helper는 은퇴(9.8 D8), `steamwebhelper` 아홉은 은퇴(`game-client` tree가 이미 담음).
 
-**`renderer-visible`.** 9.8의 visible renderer 항목입니다. 9.10 D16(2026-10-01)이 Chrome 파일을 창 하나로 그리기로 하며 library를 떠났습니다(8.1절). 그 campaign은 release `meas-ci-desktop-2026-09-20`에 남아 있습니다. `docs/workload/measurement-overview.md`의 항목 표는 아직 이 항목을 셉니다.
+**`renderer-visible`.** 9.8의 visible renderer 항목입니다. 9.10 D16(2026-10-01)이 Chrome 파일을 창 하나로 그리기로 하며 library를 떠났습니다(8.1절). 그 campaign은 release `meas-ci-desktop-2026-09-20`에 남아 있습니다. `docs/workload/measurement-overview.md`의 항목 표도 2026-10-17부터 이 항목을 세지 않습니다(9.15).
 
 # 9장 · daemon과 session process
 
@@ -1299,7 +1301,7 @@ component 이름은 `<instance>/<comm>` 꼴입니다(task 하나가 한 프로�
 
 > **왜 이렇게 정했나 — session 사이에서 변하는 값(9.9 D29, D48).** `pid1/systemd`의 세 값과 `system-bus/dbus-daemon`의 세 값은 "session 사이에서 변함" 예외로 반폭과 함께 실립니다. pid 1: wake 비율 ±1.9 %, gap 평균 ±1.9 %, run 평균 ±7.8 %. system bus: 셋 다 ±11 % 안팎. long-phase probe 36, 41, 44에서 60초마다 창을 밀어 보니 한 run 안에서도 상당히 움직였습니다(pid 1 ±5.0–18.4 %, system bus ±13.6–47.0 %). scope는 "the spread lies in part within a run"이라고 적습니다. 대안이었던 repeat 추가는 bus 하나에 약 115 landing(약 230 job)이 더 필요했고, 그 값은 초당 0.014번 깨는 component의 것이라 택하지 않았습니다(9.9 D29: "~115 more landings for the bus (~230 jobs) for 0.0093, 0.075, 0.014 wakes/s").
 
-> **열린 자리 — 측정 venue가 바깥 wake를 많이 만든다.** 9.9 D27이 걸러낸 바깥 wake는 실린 wake보다 많았습니다. 예를 들어 `service-manager`의 scope는 `php8.3-fpm.service`가 phase마다 180–188번, `systemd-networkd`가 5–15번 pid 1을 깨웠다고 적고(둘 다 desktop에서는 안 돌거나 기본으로 꺼진 것), 실린 pid 1 wake는 phase당 114–139번입니다. 걸러내는 규칙은 package manifest와 trace 추적에 기대고, trace가 원인을 보여 주지 못한 wake(예: `job launched by pid 1: (install) 9 install systemd`)는 남겼습니다. 실제 사용자 desktop의 idle session과 비교한 검증은 없습니다(3.7절의 "Real-desktop validation is deferred").
+> **왜 이렇게 정했나 — 바깥 wake를 거르는 규칙(9.9 D27), 그리고 측정 venue가 바깥 wake를 많이 만든다는 것.** 9.9 D27이 걸러낸 바깥 wake는 실린 wake보다 많았습니다. 예를 들어 `service-manager`의 scope는 `php8.3-fpm.service`가 phase마다 180–188번, `systemd-networkd`가 5–15번 pid 1을 깨웠다고 적고(둘 다 desktop에서는 안 돌거나 기본으로 꺼진 것), 실린 pid 1 wake는 phase당 114–139번입니다. 걸러내는 규칙은 package manifest와 trace 추적에 기대고, trace가 원인을 보여 주지 못한 wake(예: `job launched by pid 1: (install) 9 install systemd`)는 남겼습니다. 실제 사용자 desktop의 idle session과 비교한 검증은 없습니다. 그것은 진술된 한계입니다(3.7절의 "Real-desktop validation is deferred", measurement-overview §11).
 
 # 10장 · idle class를 선언하는 세 항목
 
@@ -1334,14 +1336,14 @@ idle task가 영원히 굶을 수 있다는 점도 기록에 있습니다. memo 
 
 ## 10.3 실제 desktop과의 차이
 
-> **열린 자리 — 같은 idle, 다른 group.** 9.11 D16(2026-10-08)이 밝힌 대로, 커널의 idle 규칙은 같은 task group(cgroup) 안의 형제들 사이에서만 작동합니다(sched(7): "a thread's nice value has an effect for scheduling decisions only relative to other threads in the same task group"). Ubuntu 24.04에서:
+> **왜 이렇게 정했나 — 같은 idle, 다른 group(9.11 D16).** 9.11 D16(2026-10-08)이 밝힌 대로, 커널의 idle 규칙은 같은 task group(cgroup) 안의 형제들 사이에서만 작동합니다(sched(7): "a thread's nice value has an effect for scheduling decisions only relative to other threads in the same task group"). Ubuntu 24.04에서:
 >
 > - **indexer**: Tracker의 unit은 `Slice=background.slice`이고, GNOME이 띄운 editor는 `app.slice` 아래의 scope에 있습니다. 두 slice의 CPU weight는 30과 100이므로, 둘 다 바쁘면 `background.slice`가 약 30/130 ≈ 23 %를 받습니다. 그러니 실제 desktop의 indexer는 simulator의 indexer(0 %)보다 editor를 더 방해합니다. "the headroom the indexer files can show is understated"(`file-indexer`의 `modeling_notes`).
 > - **backup**: Déjà Dup의 monitor는 XDG autostart로 뜨므로 application scope, 즉 editor와 같은 `app.slice` 안입니다. 여기서는 idle weight 3 대 1,024와 즉시 preemption이 그대로 적용되어, 엄격한 규칙이 실제와 맞습니다(`incremental-backup`의 `modeling_notes`: "the strict class matches the depicted desktop's treatment").
 >
-> 9.11 D16이 읽지 못했다고 적은 것도 있습니다. snap으로 깐 app의 scope 배치, 이미 실행 중인 Déjà Dup 안의 backup, CPU 설정을 가진 다른 `app.slice` unit, Steam이 띄운 game이 도는 곳. 이 차이를 simulator에 넣을지(예: group 단위 가중치)는 기록상 결정되지 않았고, 현재 규칙은 "design for the scheduler under test"로 남아 있습니다.
+> 9.11 D16이 읽지 못했다고 적은 것도 있습니다. snap으로 깐 app의 scope 배치, 이미 실행 중인 Déjà Dup 안의 backup, CPU 설정을 가진 다른 `app.slice` unit, Steam이 띄운 game이 도는 곳. simulator는 task group의 가중치를 모델링하지 않습니다. 9.11 D16은 엄격한 idle 규칙을 "design for the scheduler under test"로 두고, indexer의 `background.slice` 몫(약 23 %)과 위의 읽지 못한 것들을 한계로 적었습니다. 이 한계는 `file-indexer`의 `modeling_notes`(엄격한 규칙이 맞는 backup 쪽은 `incremental-backup`의 `modeling_notes`), 그리고 scoring spec의 머리 주석(`harness/scoring/scoring-spec.yaml`: "where the indexer's slice would take about 23 % (9.11 D16)")에 적혀 있습니다.
 
-> **열린 자리 — idle I/O class는 싣지 않음(9.11 D33).** 두 프로그램은 CPU뿐 아니라 I/O에서도 idle class를 선언합니다(`ionice -c3`). simulator가 CPU lane 하나만 schedule하므로 이것은 싣지 않습니다. 측정 venue에서도 디스크 I/O scheduler가 `none`이어서 idle I/O class가 효과가 없었습니다(`incremental-backup` scope).
+> **왜 이렇게 정했나 — idle I/O class는 싣지 않음(9.11 D33).** 두 프로그램은 CPU뿐 아니라 I/O에서도 idle class를 선언합니다(`ionice -c3`). simulator가 CPU lane 하나만 schedule하므로 이것은 싣지 않습니다. 측정 venue에서도 디스크 I/O scheduler가 `none`이어서 idle I/O class가 효과가 없었습니다(`incremental-backup` scope).
 
 > **왜 이렇게 정했나 — class는 항목의 것.** memo 2026-10-08 §1: "The class is the entry's, never the name's: `c5-t3` shows two media players as `tracker-miner-f` and `baloo_file`, and they stay `normal`." 그 파일은 2026-10-12에 `c6-alias`로 옮겨졌습니다(C5 그룹, 즉 같은 행동에 점점 낯선 process 이름을 붙이는 familiarity ladder 그룹에서, 이름 기반 인식의 한계를 보이는 C6 그룹으로). indexer의 이름을 단 media player는 여전히 `normal`입니다. `c6.variant.yaml`의 주석은 이 파일을 "Another program's real name on the whole foreground"라 부르고, "No recognizer reaches `media` from these names, so the segment is a pre-committed miss"라고 적습니다. 이름만으로는 이 segment가 media 재생이라는 것을 알 수 없으므로, 처음부터 놓칠 것으로 등록해 둔 파일이라는 뜻입니다.
 
@@ -1351,7 +1353,7 @@ idle task가 영원히 굶을 수 있다는 점도 기록에 있습니다. memo 
 
 ## 11.1 Phase 2의 열두 항목
 
-library의 첫 설계는 `docs/workload/archetype-plan.md`(2026-08-25 작성)입니다. 그 §2의 생각은 **two-tier grounding**(두 단계의 근거)이었습니다. 1단계, 항목이 존재해도 되는 근거는 이미 행동 분류를 가진 출처에서 "수확"합니다(interbench의 interactive·load 메뉴, LAVD의 gaming task chain, kernel build 문헌의 fork 폭주, ananicy-rules의 `type` 분류). 2단계, 항목들이 충분한지는 인용이 아니라 우리 측정(`meas-ci`)으로 확인합니다. 그 §4가 열두 항목을 나열합니다. 지금 보면 낡은 목록이지만, 역사로서 정리하면 이렇습니다.
+library의 첫 설계는 `docs/workload/archetype-plan.md`(2026-08-25 작성)입니다. 그 첫 판의 §2의 생각은 **two-tier grounding**(두 단계의 근거)이었습니다. 1단계, 항목이 존재해도 되는 근거는 이미 행동 분류를 가진 출처에서 "수확"합니다(interbench의 interactive·load 메뉴, LAVD의 gaming task chain, kernel build 문헌의 fork 폭주, ananicy-rules의 `type` 분류). 2단계, 항목들이 충분한지는 인용이 아니라 우리 측정(`meas-ci`)으로 확인합니다. 그 §4가 열두 항목을 나열했습니다. 2026-10-16에 9.15가 §2를 "1단계는 측정으로 근거를 얻는다"로, §4를 지금의 29개 항목으로 고쳐 썼으므로, 열두 항목 목록은 그 전의 commit(예: `18127cc9^`)에서 읽을 수 있습니다. 역사로서 정리하면 이렇습니다.
 
 | 옛 항목 | 무엇이었나 | 숫자의 출처 | 지금은 |
 |---|---|---|---|
@@ -1368,7 +1370,7 @@ library의 첫 설계는 `docs/workload/archetype-plan.md`(2026-08-25 작성)입
 | `electron-comms` | 거의 쉬며 짧게 깸, renderer 자식 | `meas-ci:gui:2`의 Element | 네 항목으로 분할(9.8) |
 | `system-daemon` | 거의 쉼, 가끔 sub-ms wake | `meas-ci:gui:2`의 server daemon 51개 | 네 항목으로 분할(9.9) |
 
-`meas-ci:cli:3`과 `meas-ci:gui:2`는 Phase 2(2026-08-27–28)의 측정입니다. vCPU 넷짜리 runner에서 CPU 고정 없이, `forkstat`(process 생성·종료 기록기)과 `/proc` sampler(CLI workflow는 0.5초, GUI workflow는 0.2초 간격; critical findings memo C)로 쟀습니다(critical findings memo가 읽은 release `meas-ci-2026-08-28`의 `spec.json`: `nproc` 4, AMD EPYC 9V74, 16 GB). 그 요약이 지금도 `dataset/meas/summary.json`에 남아 있지만, 지금 library의 어떤 값도 그것에서 오지 않습니다. 당시에는 아직 측정하지 않은 값에 `meas-pending`을 달아 두었다가, 이 두 측정이 그것을 모두 채웠습니다(`test_repo_is_freeze_clean`의 docstring: "All meas-pending placeholders have been folded in (cli:3/gui:2)").
+`meas-ci:cli:3`과 `meas-ci:gui:2`는 Phase 2(2026-08-27–28)의 측정입니다. vCPU 넷짜리 runner에서 CPU 고정 없이, `forkstat`(process 생성·종료 기록기)과 `/proc` sampler(CLI workflow는 0.5초, GUI workflow는 0.2초 간격; critical findings memo C)로 쟀습니다(critical findings memo가 읽은 release `meas-ci-2026-08-28`의 `spec.json`: `nproc` 4, AMD EPYC 9V74, 16 GB). 그 요약은 `dataset/meas/summary.json`에 남아 있다가, 어떤 도구도 읽지 않아 2026-10-16에 지워졌습니다(commit `37c2e233`; 그 전의 commit에서 읽을 수 있습니다). 지금 library의 어떤 값도 그것에서 오지 않습니다. 당시에는 아직 측정하지 않은 값에 `meas-pending`을 달아 두었다가, 이 두 측정이 그것을 모두 채웠습니다(`test_repo_is_freeze_clean`의 docstring: "All meas-pending placeholders have been folded in (cli:3/gui:2)").
 
 이 library가 compile한 core set에는 지금 기준으로 보면 이상한 모습들이 있었습니다.
 
@@ -1400,7 +1402,7 @@ library의 첫 설계는 `docs/workload/archetype-plan.md`(2026-08-25 작성)입
 
 **C.** measurement fold-in 뒤에도 낡은 문장이 남은 문서들. **D.** 원문을 읽지 못한 출처 둘(`chang-chi21`, `cpsmark-tbench23`).
 
-Phase 9 spec은 이 13개 발견에, 같은 날의 검사에서 memo가 빠뜨린 여섯 가지를 더했습니다(interbench의 Compile load는 process를 fork하지 않음, 다운로드 sleep "~5.7 ms"가 어떤 판의 library와도 맞지 않음, Roeser의 Table 3이 항목이 convention이라 부른 흩어짐을 보고함, LAVD slide 12와 16의 wineserver, CpsMark+가 "time-shared compositions"와 모순됨, `chang-chi21`의 세부).
+발견은 A1–A5, B1–B7, C의 13개이고, D는 발견이 아니라 원문을 읽지 못한 출처의 목록입니다(2026-10-16, 인지오의 읽기). Phase 9 spec은 이 13개 발견에, 같은 날의 검사에서 memo가 빠뜨린 여섯 가지를 더했습니다(interbench의 Compile load는 process를 fork하지 않음, 다운로드 sleep "~5.7 ms"가 어떤 판의 library와도 맞지 않음, Roeser의 Table 3이 항목이 convention이라 부른 흩어짐을 보고함, LAVD slide 12와 16의 wineserver, CpsMark+가 "time-shared compositions"와 모순됨, `chang-chi21`의 세부).
 
 ## 11.3 Phase 9의 결정: 한 항목은 한 observation
 
@@ -1453,7 +1455,7 @@ decision 2의 직접적인 결과는, 거의 모든 항목이 우리 CI 측정�
 - `discord` → `element-desktop`(`chat-client`); `zoom` helper 은퇴; `steamwebhelper` task 은퇴. 9.8 D7, D8, D25.
 - `Xorg` 은퇴. 9.9 D26.
 
-이 변화들 때문에, `docs/workload/archetype-plan.md` §4, `docs/data-contracts.md` §2의 "There are twelve" 문단과 예시, `docs/workload/coreset-guide.md` §4 이후, `docs/workload/scenario-catalog.md`의 process 이름 열, `docs/workload/measurement-overview.md`의 항목 표는 지금 library와 다릅니다. 이 문서들을 바로잡는 일은 docs·memo·guidebook 정리 sub-task(9.15, 2026-10-14 현재 WIP)의 몫입니다. 그때까지는 `dataset/archetypes.yaml`과 그 `scope`·`modeling_notes`, slice changelog들이 정답입니다.
+이 권을 처음 쓴 2026-10-14에는 이 변화들 때문에 `docs/workload/archetype-plan.md` §4, `docs/data-contracts.md` §2의 "There are twelve" 문단과 예시, `docs/workload/coreset-guide.md` §4 이후, `docs/workload/scenario-catalog.md`의 process 이름 열, `docs/workload/measurement-overview.md`의 항목 표가 library와 달랐습니다. docs·memo·guidebook 정리 sub-task 9.15가 2026-10-16과 10-17에 이 문서들을 지금 library에 맞게 고쳤습니다. archetype plan §4와 coreset guide §4는 29개 항목을 나열하고, data-contracts §2는 "There are 29"로 시작하며, scenario 목록은 지금 timeline이 묶는 이름을, measurement overview §2는 measured 항목 28개를 적습니다. 그래도 문서와 데이터가 다르면 `dataset/archetypes.yaml`과 그 `scope`·`modeling_notes`, slice changelog들이 기준입니다.
 
 # 12장 · 기록이 스스로 밝히는 한계
 
@@ -1465,7 +1467,7 @@ decision 2의 직접적인 결과는, 거의 모든 항목이 우리 CI 측정�
 
 지금 library에서 이 경계(composition seam)는 한 곳입니다. LAVD 발표의 이름 없는 machine(여러 core)에서 온 `game-task-chain`과, runner의 core 하나에서 잰 나머지 28개 항목이 gaming 파일에서 만납니다. chain은 `lane_share`로 크기를 맞추지만, 그 맞춤은 "our calibration, not the source's"입니다(`modeling_notes`). runner 항목들끼리도 측정 날짜와 프로그램 판이 다르지만, 모두 같은 CPU 모델(EPYC 7763) 위에서 쟀습니다.
 
-> **열린 자리 — 이 문장은 아직 tree에 없습니다.** decision 13은 이 한계를 "stated once at the library level"이라고 정했지만, 2026-10-14 현재 `dataset/archetypes.yaml` 머리 주석, `dataset/README.md`, `docs/` 어디에도 이 문장이 없습니다(repository 전체를 "composition seam", "relative scale", "scale bridge"로 검색해 확인; spec과 slice scope card에만 있음). `_dev/TODO.md`의 9.15 줄(docs·memo·guidebook 정리, WIP)이 "library-level scale limitation stated (spec decision 13)"를 할 일로 들고 있습니다. 함께 넘겨진 두 일 중 9.14의 민감도 검사는 아래 12.2절의 `venue-x0.8`/`venue-x1.25`와 `chain-x1.2`/`chain-x1.4` 변형으로 들어갔고, 9.16(exit audit)의 "venue mix listed per timeline"은 아직 열려 있습니다.
+> **왜 이렇게 정했나 — 이 문장이 놓인 곳.** decision 13은 이 한계를 "stated once at the library level"이라고 정했지만, 이 권을 처음 쓴 2026-10-14에는 `dataset/archetypes.yaml` 머리 주석, `dataset/README.md`, `docs/` 어디에도 이 문장이 없었습니다(spec과 slice scope card에만 있었음). 2026-10-16에 9.15가 이 문장을 library를 주제로 하는 문서인 `docs/workload/archetype-plan.md` §2의 "Observation venues" 문단에 decision 13의 문장 그대로 적었습니다. `dataset/README.md`와 measurement-overview §11은 이것을 다시 적지 않습니다. `archetypes.yaml` 머리 주석에 넣지 않은 것은, 그 파일을 고치면 일곱 manifest가 모두 다시 bless되고 RQ0 gate spec이 다시 pin되기 때문입니다(9.15 작업 목록 `_dev/research/jioh/task-9.15-docs-memos-and-guidebook-corrections/work-list.md`의 "Settled at merge"). 함께 넘겨진 두 일 가운데 9.14의 민감도 검사는 아래 12.2절의 `venue-x0.8`/`venue-x1.25`와 `chain-x1.2`/`chain-x1.4` 변형으로 들어갔고, 9.16(exit audit)의 "venue mix listed per timeline"은 9.16의 할 일로 남아 있습니다.
 
 ## 12.2 venue의 한계
 
@@ -1477,9 +1479,9 @@ runner는 실제 desktop이 아닙니다. 항목들의 scope가 적는 venue 한
 - **tracing 비용.** `perf sched record`가 일부 thread의 run을 길게 만들었고(untraced control의 run 평균 비율 0.72–0.98), SteamCMD의 `perf trace`는 CPU를 약 2.5 % 더 쓰게 했습니다. 실린 값은 traced 값입니다.
 - **사람 없음.** 입력은 2012년 Windows 녹화의 재생이고(key만), 이미지·영상 편집은 script입니다.
 
-> **왜 이렇게 정했나 — 이 한계를 다루는 방식.** 9.6 D32(2026-09-20): "The venue's effect is untested, and the test belongs to the consumer." 그 결과가 RQ0 gate spec의 `venue-x0.8`과 `venue-x1.25` 변형입니다(`dataset/variants.yaml`). judging 파일 19개에서 chain을 뺀 모든 측정 RUN 값을 1/1.25배와 1.25배로 바꿔 다시 판정합니다. 1.25는 design이고, 그 근거로 "a design bracket containing the two measured venue effects — the ×1.144 huge-page ratio … and the tracing overhead's ×1.02 to ×1.16"을 적습니다. 판정 개수가 이 축에서 움직이면 판정을 범위로 보고합니다(9.14 decision 10). chain에는 따로 `chain-x1.2`, `chain-x1.4`가 있습니다(4.1절).
+> **왜 이렇게 정했나 — 이 한계를 다루는 방식.** 9.6 D32(2026-09-20): "The venue's effect is untested, and the test belongs to the consumer." 그 결과가 RQ0 gate spec의 `venue-x0.8`과 `venue-x1.25` 변형입니다(`dataset/variants.yaml`). judging 파일 19개에서 chain을 뺀 모든 측정 RUN 값을 1/1.25배와 1.25배로 바꿔 다시 판정합니다. 1.25는 design이고, 그 근거로 "a design bracket containing the two measured venue effects — the ×1.144 huge-page ratio … and the tracing overhead's ×1.02 to ×1.16"을 적습니다. 판정 개수가 이 축에서 움직이면 판정을 범위로 보고합니다(9.14 decision 10). chain에는 따로 `chain-x1.2`, `chain-x1.4`가 있습니다(4.1절). 이 괄호는 다른 CPU 기종을 나타내지 않습니다. 다른 CPU는 program마다 다른 배율로 빠르기를 바꾸므로(3.3절의 Intel Xeon: `cc1` 0.72배, `fixdep` 0.50배) 공통 배율 하나로는 재현되지 않습니다. 2026-10-16에 인지오는 괄호를 그대로 두고 이 한계를 적기로 했고, `docs/research-claims.md`의 "What is not claimed"와 measurement-overview §11이 그것을 적습니다.
 
-> **열린 자리 — 실제 desktop 검증.** measurement-overview §11: "Real-desktop validation is deferred." 실제 사용자 desktop에서 같은 프로그램을 재어 맞춰 보는 일은 하지 않았습니다. 2026-08-26의 grill 결정(D8)은 "meas-live dropped from the research entirely"였고, 대신 수집 도구와 개인정보 제거 도구를 "open falsification invitation"으로 내놓기로 했는데, critical findings memo(B7)가 그 도구가 repository에 없다고 지적했습니다. 2026-10-14에 repository의 `.py`와 `.sh` 파일을 "scrub"으로 검색했을 때도 그런 도구는 없었습니다(유일하게 걸린 `dataset/tools/meas/campaign/fold_in.py`의 한 줄은 Kdenlive의 clip monitor를 "scrubs"(훑는다)라는 뜻으로 쓴 것임).
+> **왜 이렇게 정했나 — 실제 desktop 검증은 진술된 한계.** measurement-overview §11: "Real-desktop validation is deferred." 실제 사용자 desktop에서 같은 프로그램을 재어 맞춰 보는 일은 하지 않았습니다. 2026-08-26의 grill 결정(D8)은 "meas-live dropped from the research entirely"였고, 대신 수집 도구와 개인정보 제거 도구를 "open falsification invitation"으로 내놓기로 했는데, critical findings memo(B7)가 그 도구가 repository에 없다고 지적했습니다. 2026-10-14에 repository의 `.py`와 `.sh` 파일을 "scrub"으로 검색했을 때도 그런 도구는 없었습니다(유일하게 걸린 `dataset/tools/meas/campaign/fold_in.py`의 한 줄은 Kdenlive의 clip monitor를 "scrubs"(훑는다)라는 뜻으로 쓴 것임). 2026-10-16에 인지오는 그 도구의 약속을 거두었습니다. 문서들은 약속을 지우고, 실제 desktop 검증은 진술된 한계로 남습니다(measurement-overview §11). 같은 날 인지오는 실제 desktop과의 비교를 열지 않고 runner라는 범위를 논문에 그대로 싣기로 했습니다(`docs/research-claims.md`의 "What is not claimed"). 실제 desktop 검증을 나중에 연다면, 도구는 그 계획 안에서 정합니다.
 
 ## 12.3 wake 흐름은 분포를 재현하지 순서를 재현하지 않습니다
 
@@ -1490,7 +1492,7 @@ compiler는 component마다 gap을 표에서 서로 독립으로 뽑습니다(9.
 
 batch-loop 항목의 단계 순서(7.1절), heavy event의 몰림(`CHTTPClientThre`의 burst, 4.2절)도 같은 종류의 한계입니다.
 
-이것은 측정으로 크기가 재어졌습니다. `dataset/tools/meas/burstiness.py`(이 비교를 하는 도구)는 repeat마다 측정된 wake 흐름과, 같은 구간을 compile한 흐름을 1 ms, 10 ms, 100 ms, 1 s bin으로 세어 dispersion(분산/평균; Poisson이면 1, 크면 몰려 옴)을 비교합니다. measurement-overview §8의 결과: "at 1–100 ms, measured wake counts are 1.9–11× more dispersed than compiled ones for `chat-client`, `code-editor`, `web-browser`, `mail-client` and `game-client` — a stated threat to validity." 실제는 compile된 것보다 1.9–11배 더 몰려서 깹니다. scheduler에게 몰림은 중요합니다. 같은 평균 부하라도 몰려 오면 대기 시간의 꼬리가 길어지기 때문입니다.
+이것은 측정으로 크기가 재어졌습니다. `dataset/tools/meas/burstiness.py`(이 비교를 하는 도구)는 repeat마다 측정된 wake 흐름과, 같은 구간을 compile한 흐름을 1 ms, 10 ms, 100 ms, 1 s bin으로 세어 dispersion(분산/평균; Poisson이면 1, 크면 몰려 옴)을 비교합니다. measurement-overview §8은 이것을 "a stated threat to validity"로 적고, 1–100 ms에서 측정된 것의 dispersion을 compile된 것의 dispersion으로 나눈 비율을 항목마다 적습니다(carried repeat의 중앙값, 2026-09-27에 읽음). `chat-client` 3.3–11배, `code-editor` 2.6–3.4배, `web-browser` 2.8–3.4배, `mail-client` 1.9–3.0배, `game-client` 1.9–3.0배로, 이 다섯 항목에서 실제는 compile된 것보다 1.9–11배 더 몰려서 깹니다. `video-editor`(1.3–1.4배)와 `renderer-hidden`(1.06–1.15배)은 차이가 작고(둘 다 지금 실린 pool이 아니라 그때의 campaign에서 읽은 값), `audio-server`, `service-manager`, `message-bus`는 약 1이며, `compositor-shell`과 `office-writer`는 오히려 compile된 흐름이 더 몰려 있습니다(1 미만). scheduler에게 몰림은 중요합니다. 같은 평균 부하라도 몰려 오면 대기 시간의 꼬리가 길어지기 때문입니다.
 
 > **왜 이렇게 정했나 — 이 한계를 다루는 방식.** `dataset/variants.yaml`의 `replay` 변형이 이 한계를 위한 것입니다(9.14 decision 12). 네 judging 파일(`c7-dev`, `c7-browsing`, `c7-meeting`, `c2-p1a`)에서, 여섯 항목(`code-editor`, `web-browser`, `renderer-hidden`, `video-call`, `package-upgrade`, `cpu-batch`의 `python3`)의 compile된 흐름을 pooled repeat 하나의 실제 관측 wake 순서로 바꿔 넣습니다(`dataset/replay/`, 2.11절). 이유: "one pooled repeat's measured wake sequence in place of the compiled stream, for the four judging files that cover every term shape (… the 2026-09-26 burstiness finding)". library 항목 자체는 바뀌지 않습니다. 항목에 `replay` param을 넣는 것은 이 변형 집합을 만들 때뿐이고, linter는 그 파일이 `dataset/replay/`에 있는지만 확인합니다.
 
@@ -1498,7 +1500,7 @@ batch-loop 항목의 단계 순서(7.1절), heavy event의 몰림(`CHTTPClientTh
 
 - **대표성.** stability rule은 "this software on this machine"에서의 정밀도(재현성)를 보장할 뿐입니다(3.7절).
 - **멈춤의 낙관.** 첫 통과에서 멈춰서, 기준선에 붙은 값의 95 % 구간은 실제로 약 91–94 %만 덮습니다(3.4절).
-- **예외로 실린 값.** 다섯 예외 class의 값(3.5절)은 5 % 밖일 수 있고, 반폭이 scope에 적혀 있습니다. 규칙: "no reported result may rest on a difference smaller than a stated half-width." RQ0 gate spec은 이 값들을 모두 95 % 구간의 아래 끝과 위 끝으로 옮긴 `corner-low`, `corner-high` 변형으로 판정이 바뀌는지 봅니다(`variants.yaml`의 `carried_values` 목록: `code-editor`의 `libuv-worker`, `renderer-hidden`의 넷, `game-client`의 넷, `cpu-batch` `python3`의 둘, `module-build-orchestrator`의 꼬리 block). judging 파일이 담지 않는 항목의 값(session daemon의 pid 1과 system bus, Tracker의 block)은 훑지 않습니다.
+- **예외로 실린 값.** 다섯 예외 class의 값(3.5절)은 5 % 밖일 수 있고, 반폭이 scope에 적혀 있습니다. 규칙: "no reported result may rest on a difference smaller than a stated half-width." RQ0 gate spec은 이 값들을 모두 95 % 구간의 아래 끝과 위 끝으로 옮긴 `corner-low`, `corner-high` 변형으로 판정이 바뀌는지 봅니다(`variants.yaml`의 `carried_values` 목록: `code-editor`의 `libuv-worker`, `renderer-hidden`의 넷, `game-client`의 넷, `cpu-batch` `python3`의 둘, `module-build-orchestrator`의 꼬리 block). judging 파일이 담지 않는 항목의 값(session daemon의 pid 1과 system bus)은 훑지 않습니다. `variants.yaml`의 주석은 Tracker의 block도 그런 값으로 적지만, 지금의 `file-indexer`는 세 값 모두에서 stability rule을 지킵니다(항목의 scope: "the stability rule holds on all three values"). 그 주석은 `cpu-batch`의 옛 `tracker` program(9.6 D29의 예외) 때의 것입니다.
 - **녹화의 끝.** `mail-client`와 `web-browser`의 일부 값은 녹화 창이 바닥나 규칙 밖에 있습니다(5.4절, 5.5절).
 
 ## 12.5 항목별로 기록된 한계 모음
@@ -1577,12 +1579,13 @@ batch-loop 항목의 단계 순서(7.1절), heavy event의 몰림(`CHTTPClientTh
 | `sampling` | 숫자를 몇 번 뽑나: `per-instance`(spawn 자식마다), `per-task`(task마다 한 번), `per-iteration`(반복마다, 반복 수가 정해질 때만)(1.4) |
 | source tag | 숫자의 출처 `<id>` 또는 `<id>:<locator>`(2.8) |
 | locator | 출처 안의 위치(slide 번호, 조건, campaign 등). `locator_pattern`으로 검사(2.8) |
-| registry | `dataset/sources.yaml`. 출처 id 30개(2.8) |
+| registry | `dataset/sources.yaml`. 출처 id 19개(2026-10-17; 2.8) |
+| release 지도 | `dataset/meas-releases.yaml`. 데이터가 인용하는 `meas-ci` campaign마다 원 자료를 담은 release와 asset의 SHA-256. `make lint`가 검사(3.3) |
 | subset lint | registry의 모든 id가 `docs/references.md`에 있어야 한다는 검사(2.8) |
-| citation tier | scholarly(경험적 주장 가능), deployed-system(존재 주장만), measurement(2.8) |
+| citation tier | scholarly(경험적 주장 가능), deployed-system(존재, 그 시스템 자신의 설계와 동작, 그 출처가 공개한 숫자를 그 출처의 말로), talk·학회 초록·뉴스 보도(발표자나 기자의 주장으로만), measurement(2.8) |
 | design / convention / arithmetic | 출처 없는 값에 붙이는 이름표: 우리 선택 / 관례 / 계산(2.8) |
-| `meas-pending` | 측정을 기다리는 자리표시자 tag. 지금 library에 0개(2.10) |
-| freeze | `meas-pending`을 거부하는 lint 모드. `make test`가 실제 repository에 적용(2.10) |
+| `meas-pending` | 측정을 기다리는 자리표시자 tag. 지금 library와 timeline에 0개(2.10) |
+| freeze | `meas-pending`을 거부하는 lint 모드. `make lint`가 `--freeze`로 켬(9.23 D13), library의 매개변수와 timeline의 bound value 모두에(2.10) |
 | `lifetime` | `segment-bound`(timeline이 끝을 정함), `finite`(EXIT에 닿으면 끝), `spawned`(부모의 FORK로 생김)(1.4) |
 | `spawns` / `spawned_by` | orchestrator와 자식 항목을 잇는 field(2.2) |
 | `binding_params` | timeline이 반드시 값을 넣어야 하는 손잡이 이름 목록(2.2) |

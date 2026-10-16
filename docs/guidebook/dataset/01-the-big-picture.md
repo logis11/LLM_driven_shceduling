@@ -1,6 +1,6 @@
 # 1권 · 데이터셋의 큰 그림
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-14
+> Status: draft · Created 2026-10-14 · Updated 2026-10-17
 
 **이 데이터셋은 무엇이고, 연구에서 어떤 일을 맡으며, 왜 이런 모양인가.**
 
@@ -46,7 +46,7 @@
 
 운영체제는 이 빈틈을 지금 손으로 쓴 목록으로 메웁니다. Windows와 macOS의 Game Mode는 알려진 게임 실행 파일의 목록을 가지고 다닙니다. Linux의 scheduling class는 application이 스스로 "나는 배경 작업이다"라고 선언해 주기를 기다립니다. 모든 목록은 누군가가 어느 시점에 software의 의미를 손으로 적어 둔 것이고, 모든 목록은 영원히 불완전합니다. 목록에 오르지 않은 software는 아무 대접도 받지 못합니다.
 
-이 연구의 제안서(`docs/research-proposal.md`, 제목 "A Semantic Recognition Layer for Operating Systems")는 그 목록을 추론으로 바꾸자고 제안합니다. 대형 언어 모델(LLM)은 인터넷을 읽으면서 Steam이 무엇인지, `cc1`이 compiler의 일부라는 것, `tracker-miner-f`가 GNOME의 파일 indexer라는 것을 이미 배웠습니다. 그러니 실행 중인 process 이름의 목록을 LLM에게 보여 주고 "이 기계는 지금 게임에 쓰이고 있고, 뒤에서 도는 작업은 사용자가 원한 것이다" 같은 판단을 받아, 그 판단을 scheduler 설정으로 바꾸자는 것입니다. 제안서는 이 판단을 **recognition layer**(인식 계층)라고 부르고, 연구가 위험에 걸어 두는 주장을 이렇게 적습니다(`docs/research-claims.md`): "행동이 똑같고 옳은 정책이 다른 workload에서, process 이름을 읽는 언어 모델은 그 차이를 되찾고, 이름 whitelist는 되찾지 못한다."
+이 연구의 제안서(`docs/research-proposal.md`, 제목 "A Semantic Recognition Layer for Operating Systems")는 그 목록을 추론으로 바꾸자고 제안합니다. 대형 언어 모델(LLM)은 인터넷을 읽으면서 Steam이 무엇인지, `cc1`이 compiler의 일부라는 것, `tracker-miner-f`가 GNOME의 파일 indexer라는 것을 이미 배웠습니다. 그러니 실행 중인 process 이름의 목록을 LLM에게 보여 주고 "이 기계는 지금 게임에 쓰이고 있고, 뒤에서 도는 작업은 사용자가 원한 것이다" 같은 판단을 받아, 그 판단을 scheduler 설정으로 바꾸자는 것입니다. 제안서는 이 판단을 **recognition layer**(인식 계층)라고 부르고, 연구가 위험에 걸어 두는 주장을 이렇게 적습니다(`docs/research-claims.md`, "The claim"): "옳은 정책이 다르고, 행동도 선언된 scheduling class(2.9)도 그 차이를 정하지 못하는 workload에서, process 이름을 읽는 언어 모델은 그 차이를 되찾고, 가장 강한 이름 표(strongest name table)는 되찾지 못한다." 가장 강한 이름 표가 무엇인지는 1.3에서 봅니다.
 
 ## 1.2 두 개의 loop: 느린 인식과 빠른 scheduling
 
@@ -80,17 +80,20 @@
 |---|---|---|
 | `fixed` | 인식 없음. 늘 기본 설정 | 바닥: 상황 인식이 없을 때의 점수 |
 | `random` | 상황을 무작위로 고름 | 대조군: 쓸모없는 recognizer의 점수 |
-| `whitelist` | 알려진 process 이름을 하드코딩된 목록과 대조 | 오늘의 OS가 하는 일(Game Mode). 이겨야 할 기준선 |
+| `shipped_catalogue` | 배포판이 실제로 켜 두는 이름 목록을 재현: CachyOS가 ananicy-cpp로 설치해 켜는 catalogue(`ananicy-rules`의 commit `03ef03fb`)를 각 process의 `argv[0]` basename과, 자르지 않은 채로 대조 | 오늘의 배포된 시스템이 하는 일. 이것을 이기면 RQ2(오늘의 시스템을 이기는가, 1.5)에 답함 |
+| `strongest_name_table` | 같은 catalogue의 설계를 따르되, 데이터셋이 "알려진" software로 내놓는 program 모두에 규칙을 둔 이름 목록. 등록되지 않은 software와 만들어 낸 이름(familiarity tier 4–5, 5.2)에는 규칙이 없음 | 이름 표가 할 수 있는 최선. 연구의 주장은 이것을 이기는 것 |
 | `llm_vocab`, `llm_algo`, `llm_full` | LLM에게 묻되, 단계적으로 더 많은 권한을 줌 | 시험 대상 |
 | `oracle` | workload 파일에 숨겨진 정답을 그대로 읽음 | 천장: 완벽한 인식의 점수 |
 
-`oracle`이 반칙처럼 들리지만, 이것이 데이터셋이 존재하는 이유 중 하나입니다. 데이터셋의 모든 workload 파일에는 **ground truth**가 숨어 있습니다. 매 순간 그 파일이 어떤 상황을 나타내는지 파일을 쓴 사람이 붙여 둔 정답 label입니다. `oracle`은 그 label을 읽기만 하므로 틀릴 수 없고, 그래서 이 executor 위에서 어떤 recognizer도 넘을 수 없는 천장이 됩니다. 실험의 질문은 언제나 "LLM이 `random`과 `oracle` 사이 어디에 떨어지는가, 그리고 `whitelist`를 넘는가"입니다.
+(condition 이름은 harness 코드의 것입니다: `harness/tools/harness/evaluator.py`의 `CONDITIONS`.)
+
+`oracle`이 반칙처럼 들리지만, 이것이 데이터셋이 존재하는 이유 중 하나입니다. 데이터셋의 모든 workload 파일에는 **ground truth**가 숨어 있습니다. 매 순간 그 파일이 어떤 상황을 나타내는지 파일을 쓴 사람이 붙여 둔 정답 label입니다. `oracle`은 그 label을 읽기만 하므로 틀릴 수 없고, 그래서 이 executor 위에서 어떤 recognizer도 넘을 수 없는 천장이 됩니다. 실험의 질문은 언제나 "LLM이 `random`과 `oracle` 사이 어디에 떨어지는가, 그리고 두 이름 표를 넘는가"입니다. `docs/research-claims.md`의 RQ2 절은 shipped catalogue를 넘으면 RQ2에 답하고, 가장 강한 이름 표를 넘는 것이 주장이라고 적습니다.
 
 > **용어.** `ground truth`는 workload 파일 안의 정답 label 목록입니다. 시간 구간마다 그 구간의 상황(mode와 attribute)을 적습니다. `oracle` condition과 인식 정확도를 채점하는 grader만 읽습니다.
 
 이 연구는 측정을 두 층으로 나눕니다. **Layer 1**은 인식 정확도입니다. recognizer의 답을 ground truth label과 바로 비교하므로 simulator가 끼어들지 않습니다. **Layer 2**는 소비자 성능입니다. 각 condition의 설정으로 simulator를 돌린 뒤 trace(simulator가 남기는 시간표, 1.6)에서 응답 시간, frame 놓침 비율 같은 지표를 계산합니다(`docs/terminology.md`, "Layer 1", "Layer 2"). 둘을 나눈 이유는 "제대로 읽었지만 scheduling은 나아지지 않았다"를 다른 결과와 구별할 수 있게 하려는 것입니다.
 
-> **열린 자리 — 이름 충돌 주의.** 이 저장소에서 "Layer 1"이라는 말은 두 가지 뜻으로 쓰입니다. 실험 쪽 문서(`docs/terminology.md`, `docs/research-claims.md`)에서는 인식 정확도라는 측정 층을 뜻하고, 데이터셋 설계 문서(`docs/workload/building-plan.md` §1)에서는 archetype library라는 데이터 층을 뜻합니다. 같은 저장소에서 "C1"부터 "C7"도 두 가지 뜻입니다. `docs/research-claims.md`는 연구 주장을 이루는 일곱 고리를 C1–C7로 부르고("C1: 옳은 설정이 다른 현실적 상황이 존재하고 그 차이는 측정 가능하다" 등), 데이터셋은 core set의 일곱 파일 group을 C1–C7로 부릅니다. 이 책에서 C1–C7은 언제나 파일 group을 뜻하고, 매번 group 이름을 함께 적습니다. 두 이름 충돌을 정리할지는 기록에 정해진 바가 없습니다.
+> **용어 — "Layer 1", "Layer 2"와 C1–C7.** 이 저장소에서 "Layer 1"과 "Layer 2"는 위의 두 측정 층만을 뜻합니다. 예전에는 데이터셋 설계 문서(`docs/workload/building-plan.md` §1)가 archetype library라는 데이터 층도 "Layer 1"이라고 불렀고, `docs/research-claims.md`가 연구 주장을 이루는 고리들을 C1–C7로 불러 core set의 일곱 파일 group(C1–C7)과 이름이 겹쳤습니다. 2026-10-16에 인지오가 두 충돌을 정리했습니다(9.15 작업 목록 `_dev/research/jioh/task-9.15-docs-memos-and-guidebook-corrections/work-list.md`에서 이름 충돌을 물은 항목 W-0742의 답). 데이터셋의 층은 번호가 아니라 이름으로 부르고(archetype library, scenario 목록, timeline; 3.8), 연구 주장의 고리는 "link 1"부터 "link 7"까지로 부르며("link 1: 옳은 설정이 다른 현실적 상황이 존재하고 그 차이는 측정 가능하다" 등), C1–C7은 core set의 파일 group만을 뜻합니다. 이 책도 C1–C7을 쓸 때 매번 group 이름을 함께 적습니다.
 
 ## 1.4 recognizer의 답은 어떤 모양인가: mode 하나와 attribute 하나
 
@@ -123,15 +126,13 @@ ground truth에는 메뉴에 없는 label 하나가 더 나올 수 있습니다.
 
 mode가 열여섯이고 attribute가 참·거짓 둘이므로 상황의 칸은 16 × 2 = 32개입니다. 이 32칸이 **driver table**의 행입니다. driver table은 daemon 쪽에 있는 고정된 표로, (mode, `background_wanted`) 한 쌍을 scheduler 설정 하나로 바꿉니다. 설정은 scheduling algorithm 하나(MLFQ, EDF, LOTTERY, FIFO 가운데 하나. 각각은 2.2에서 풉니다)와 그 parameter, 그리고 batch 작업이 쓸 수 있는 CPU 몫의 상한(`batch_bandwidth_cap`)으로 이루어집니다(`docs/recognition-vocabulary.md` §2). recognizer가 할 일은 맞는 행에 도착하는 것입니다. 데이터셋 쪽에서 이 32칸은 중요한 의미를 갖습니다. 데이터셋은 32칸 모두에 적어도 하나의 정답 구간이 있도록 만들어져 있고, CI가 그것을 검사합니다. 5장에서 다시 봅니다.
 
-ground truth의 구간에는 recognizer에게 보이지 않는 설명용 key가 더 붙을 수 있습니다. `background`(배경 작업이 무엇인지, 예: `download`), `initiated`(누가 시작했는지: `user`, `scheduled`, 그리고 timeline에서 쓰이는 `session`), `dual_active`, `spoof`, `pre_committed_miss`(어떤 recognizer도 이름과 행동으로 닿을 수 없는 구간이라는 표시, 5.3)입니다. 이것들은 채점 결과를 나누어 보고하거나 실패를 분석할 때만 씁니다(`docs/recognition-vocabulary.md` §1).
-
-> **열린 자리.** `docs/recognition-vocabulary.md` §1은 `initiated`의 값으로 `user`와 `scheduled`만 적습니다. 그런데 timeline 가운데 `c2-p1b`와 `c7-indexing`(둘 다 첫 login 때 도는 Tracker의 첫 indexing)은 `initiated: session`을 씁니다(9.10 D79, 이 indexing을 첫 login 때의 것으로 정한 결정). 이 값은 채점되지 않는 설명용 key이므로 결과를 바꾸지 않지만, 어휘 문서에 반영할지는 문서 정리 sub-task 9.15의 몫으로 남아 있습니다.
+ground truth의 구간에는 recognizer에게 보이지 않는 설명용 key가 더 붙을 수 있습니다. `background`(배경 작업이 무엇인지, 예: `download`), `initiated`(누가 시작했는지: `user`, `scheduled`, `session`), `dual_active`, `spoof`, `pre_committed_miss`(어떤 recognizer도 이름과 행동으로 닿을 수 없는 구간이라는 표시, 5.3)입니다. `session`은 desktop session 자체가 login 때 아무도 시키지 않고 시작하는 일로, `c2-p1b`와 `c7-indexing`(둘 다 첫 login 때 도는 Tracker의 첫 indexing)이 씁니다(9.10 D79, 이 indexing을 첫 login 때의 것으로 정한 결정). 이것들은 채점 결과를 나누어 보고하거나 실패를 분석할 때만 씁니다(`docs/recognition-vocabulary.md` §1).
 
 ## 1.5 RQ0: 아무 모델도 없이 먼저 여는 문지기 실험
 
-연구 질문은 RQ0부터 RQ5까지 여섯 개입니다(`docs/research-claims.md`). 데이터셋 독자에게 가장 중요한 것은 첫 번째, **RQ0**입니다. RQ0는 "이 workload들에서 설정이 애초에 중요한가?"를 묻습니다. LLM 없이 `random`과 `oracle`만 돌려 봅니다. 완벽한 인식이 무작위 추측보다 별로 낫지 않다면, 이 workload들에서는 인식의 질이 중요하지 않다는 뜻이고, 어떤 prompt engineering도 실험을 살릴 수 없습니다. 그래서 RQ0는 milestone이 아니라 문(gate)으로 설계되었습니다. 문서가 이름 붙인 실패 방식은 이것입니다. scheduler의 행동 기반 heuristic이 너무 좋아서 잘못된 분류를 스스로 고쳐 버리는 경우입니다. compiler를 interactive class에 넣어도 MLFQ가 몇 번의 time slice(한 번에 주는 최대 실행 시간, 2.2) 만에 알아서 끌어내린다면, 인식이 맞든 틀리든 결과가 같아집니다.
+연구 질문은 RQ0부터 RQ5까지 여섯 개입니다(`docs/research-claims.md`). 데이터셋 독자에게 가장 중요한 것은 첫 번째, **RQ0**입니다. RQ0는 "이 workload들에서 설정이 애초에 중요한가?"를 묻습니다. LLM 없이 `fixed`, `random`, `oracle` 세 condition만 돌려 봅니다(RQ0 gate spec의 `conditions`, 아래). 완벽한 인식이 무작위 추측보다 별로 낫지 않다면, 이 workload들에서는 인식의 질이 중요하지 않다는 뜻이고, 어떤 prompt engineering도 실험을 살릴 수 없습니다. 그래서 RQ0는 milestone이 아니라 문(gate)으로 설계되었습니다. 문서가 이름 붙인 실패 방식은 이것입니다. scheduler의 행동 기반 heuristic이 너무 좋아서 잘못된 분류를 스스로 고쳐 버리는 경우입니다. compiler를 interactive class에 넣어도 MLFQ가 몇 번의 time slice(한 번에 주는 최대 실행 시간, 2.2) 만에 알아서 끌어내린다면, 인식이 맞든 틀리든 결과가 같아집니다.
 
-나머지 질문은 짧게만 적습니다. RQ1은 모델이 process 이름에서 상황을 읽을 수 있는가(Layer 1 인식 정확도), RQ2는 그 읽기가 오늘의 시스템(`fixed`, `whitelist`)을 이기는가, RQ3는 모델에게 권한을 얼마나 줘야 하는가(`llm_vocab`·`llm_algo`·`llm_full`의 사다리), RQ4는 인식 지연을 갚으려면 한 상황이 얼마나 오래 지속되어야 하는가, RQ5는 측정 도구인 driver table 자체가 건전한가입니다. 데이터셋의 일부 파일 집합은 이 질문들을 위해 따로 만들어졌습니다. 예를 들어 generated layer의 return grid는 RQ4의 "낡은 설정의 비용"을 재기 위한 것입니다(5장).
+나머지 질문은 짧게만 적습니다. RQ1은 모델이 process 이름에서 상황을 읽을 수 있는가(Layer 1 인식 정확도), RQ2는 그 읽기가 오늘의 시스템(`fixed`, 그리고 배포판의 이름 목록을 재현한 `shipped_catalogue`)을 이기는가, RQ3는 모델에게 권한을 얼마나 줘야 하는가(`llm_vocab`·`llm_algo`·`llm_full`의 사다리), RQ4는 인식 지연을 갚으려면 한 상황이 얼마나 오래 지속되어야 하는가, RQ5는 측정 도구인 driver table 자체가 건전한가입니다. 데이터셋의 일부 파일 집합은 이 질문들을 위해 따로 만들어졌습니다. 예를 들어 generated layer의 return grid는 RQ4의 "낡은 설정의 비용"을 재기 위한 것입니다(5장).
 
 RQ0 문지기 실험의 실행은 사전 등록 파일 하나로 고정되어 있습니다. `harness/experiments/rq0-gate.yaml`, 저장소가 **RQ0 gate spec**이라고 부르는 파일입니다. 이 파일은 harness가 실행 matrix로 읽는 데이터이고, 데이터셋과 직접 맞물리는 부분은 이렇습니다.
 
@@ -140,15 +141,13 @@ RQ0 문지기 실험의 실행은 사전 등록 파일 하나로 고정되어 �
 - **judging file**은 19개입니다. "label이 다른 짝의 한쪽이고, 채점 항목이 driver table 행들의 차이를 설계상 드러내는" 파일만 판정에 들어갑니다(statement `judging-set`). C2 intent pair group의 normal-class 쪽 넷(`c2-p1a`, `c2-p2a`, `c2-p2b`, `c2-p3a`), C1 calibration group 가운데 batch 작업이 행의 몫 차이에 닿는 넷(`c1-compile`, `c1-ml-train`, `c1-render`, `c1-transcode`), C7 attribute counterpart group의 열한 개입니다.
 - **reporting file**은 32개입니다. 나머지 core set 파일 전부로, 돌리고 보고하지만 판정에는 들어가지 않습니다. 19 + 32 = 51로 core set 전체입니다.
 - **판정 기준**은 `k_of_n_gap`입니다. 한 파일의 점수는 그 파일의 채점 항목들을 (fixed − condition) / (fixed − oracle)로 정규화한 몫의 가중합입니다. 즉 `oracle`이 `fixed`보다 얼마나 나아지는지를 1로 놓고, 비교 대상 condition이 그중 얼마를 차지하는지를 봅니다. g = 0.5는 "인식이 얻을 수 있는 개선의 적어도 절반을 설명한다", 다시 말해 `random`이 `oracle`의 여유분 가운데 절반 이하만 차지한다는 뜻입니다(statement `g-grounding`; 기록은 "어떤 출처도 이 값을 뒷받침하지 않는, 실행 전에 고정한 최소 효과"라고 적습니다). K = 10은 judging file 19개의 과반입니다(statement `k-grounding`). 판정은 이 조건을 만족하는 judging file의 개수를 세고, 그 개수가 K 이상이면 문을 통과한 것으로 읽습니다(spec의 표현으로 "보고서는 K가 무엇이든 개수를 출력하고, K는 통과선을 긋는다").
-- **pin**: spec은 데이터셋을 SHA-256으로 못 박습니다. `pins.dataset`은 `dataset/build.manifest.json`의 hash `fad7192d…`이고, `pins.variants.all`은 `dataset/build.variants.manifest.json`의 hash `03f14b2c…`입니다. 이 권을 쓰면서 두 파일의 현재 hash를 계산해 보았고, 둘 다 pin과 같았습니다.
+- **pin**: spec은 데이터셋을 SHA-256으로 못 박습니다. `pins.dataset`은 `dataset/build.manifest.json`의 hash `b6017a10…`이고, `pins.variants.all`은 `dataset/build.variants.manifest.json`의 hash `087ef27c…`입니다(2026-10-16의 re-pin, `harness/CHANGELOG.md`의 2026-10-16 항목). 2026-10-17에 두 파일의 hash를 계산해 보았고, 둘 다 pin과 같았습니다.
 
-> **왜 이렇게 정했나.** judging file 수와 K는 2026-10-09에 다시 정해졌습니다(9.14 decision 2, 재구축된 데이터 위에서 소비자 쪽 결정을 다시 한 sub-task의 두 번째 결정). 그 전 spec은 25개 judging file과 K = 13이었습니다. `harness/experiments/rq0-gate.yaml`의 statement `k-grounding`은 "K = 10은 19개 judging file의 과반으로 읽는다(2026-10-09까지는 같은 읽기로 25개 중 13개)"라고 적습니다. 바뀐 이유는 judging 규칙 자체가 아니라 재구축된 파일들에 그 규칙을 다시 적용한 결과입니다. 예를 들어 idle class 작업을 품은 여섯 파일은 executor 규칙상 어떤 행도 배경 작업에 닿지 못해서 reporting으로 옮겨졌습니다(statement `idle-class-files`).
-
-> **열린 자리.** `docs/terminology.md`의 "RQ0 gate spec" 항목은 아직 "25 judging files, K = 13"이라고 적습니다. 지금의 사실은 19개와 K = 10이고, 출처는 `harness/experiments/rq0-gate.yaml`의 `files.judging`과 `criterion.k`입니다. 문서 정정은 9.15(문서·memo·guidebook 정정 sub-task)의 목록에 있습니다.
+> **왜 이렇게 정했나.** judging file 수와 K는 2026-10-09에 다시 정해졌습니다(9.14 decision 2, 재구축된 데이터 위에서 소비자 쪽 결정을 다시 한 sub-task의 두 번째 결정). 그 전 spec은 25개 judging file과 K = 13이었습니다. `harness/experiments/rq0-gate.yaml`의 statement `k-grounding`은 "K = 10은 19개 judging file의 과반으로 읽는다(2026-10-09까지는 같은 읽기로 25개 중 13개)"라고 적습니다. 바뀐 이유는 judging 규칙 자체가 아니라 재구축된 파일들에 그 규칙을 다시 적용한 결과입니다. 예를 들어 idle class 작업을 품은 여섯 파일은 executor 규칙상 어떤 행도 배경 작업에 닿지 못해서 reporting으로 옮겨졌습니다(statement `idle-class-files`). `docs/terminology.md`의 "RQ0 gate spec" 항목도 19개 judging file과 K = 10을 적습니다.
 
 연구의 무게가 실리는 실험 하나도 알아 둘 만합니다. `docs/research-claims.md`는 "논문은 matrix가 아니라 한 쌍 위에 선다"고 쓰고, 그 쌍으로 "ML training 실행 + editor"(`ml-train`, 원한 배경 작업)와 "파일 indexer + editor"(`indexing`, 원치 않는 배경 작업)를 듭니다. 데이터셋에서 이 쌍은 `c2-p1a`와 `c2-p1b`, C2 intent pair group의 첫 번째 쌍(P1)입니다. 두 파일은 첫 60초 동안 editor만 있는 `dev` 구간을 공유하고, 두 번째 구간에서만 다릅니다.
 
-> **열린 자리 — "행동이 똑같다"는 문장의 현재 상태.** `docs/research-claims.md`(2026-09-12 갱신)는 이 쌍을 "둘 다 editor 옆에서 CPU를 계속 쓰는 process 하나이고, 어떤 행동 heuristic도 원리적으로 둘을 구별하지 못한다"고 설명합니다. 재구축 이후의 데이터에서는 이 문장이 그대로 맞지 않습니다. `c2-p1a`의 training은 `cpu-batch` archetype의 `python3` program(PyTorch의 MNIST 예제를 측정한 값)을 쓰고, `c2-p1b`의 indexer는 Tracker의 첫 indexing을 따로 측정한 `file-indexer` archetype을 씁니다. 둘은 측정된 표가 다르고, indexer는 스스로 SCHED_IDLE을 선언하므로 `declared_class: idle`입니다(program이 스스로 선언하는 scheduling class, 2.9). 2026-10-11의 데이터셋 감사 기록(`_dev/docs/audit/jioh/2026-10-10-dataset-audit-before-9.15.md`, "C2 direction", C2 intent pair group에 대한 방향)은 "unwanted 쪽은 자기 자신의 측정된 작업이며 이름과 행동이 모두 다르다"로 building plan의 C2 intent pair group 문장을 고쳐 쓰기로 정하고 그 일을 문서 정정 sub-task 9.15에 넘겼습니다. 같은 기록은 intent에 대한 비율 주장은 C1 calibration group과 C7 attribute counterpart group의 열여섯 쌍이 맡고 C2 intent pair group의 쌍을 새로 생성하지는 않는다고 정했습니다.
+> **왜 이렇게 정했나 — 재구축된 P1 쌍.** 재구축 전의 `docs/research-claims.md`는 이 쌍을 "둘 다 editor 옆에서 CPU를 계속 쓰는 process 하나이고, 어떤 행동 heuristic도 원리적으로 둘을 구별하지 못한다"고 설명했습니다. 재구축된 두 파일에서 unwanted 쪽은 자기 자신의 측정된 작업이고, 이름과 행동이 모두 다릅니다. `c2-p1a`의 training은 `cpu-batch` archetype의 `python3` program(PyTorch의 MNIST 예제를 측정한 값)을 쓰고, `c2-p1b`의 indexer는 Tracker의 첫 indexing을 따로 측정한 `file-indexer` archetype을 씁니다. 둘은 측정된 표가 다르고, indexer는 스스로 SCHED_IDLE을 선언하므로 `declared_class: idle`입니다(program이 스스로 선언하는 scheduling class, 2.9). 2026-10-11의 데이터셋 감사 기록(`_dev/docs/audit/jioh/2026-10-10-dataset-audit-before-9.15.md`, "C2 direction", C2 intent pair group에 대한 방향)이 이 쌍의 문장을 "unwanted 쪽은 자기 자신의 측정된 작업이며 이름과 행동이 모두 다르다"로 고쳐 쓰기로 정했고, 9.15(문서·memo·guidebook 정정 sub-task)가 `docs/research-claims.md`("Two real jobs beside an editor … They differ in behaviour … and in declared class")와 building plan §3의 C2 intent pair group 절을 그렇게 고쳤습니다. 2026-10-14의 9.23 D9(P1을 그대로 무게가 실리는 쌍으로 둔 결정)는 P1이 여전히 그 쌍이라고 적습니다. P1은 원한 training과 원치 않는 indexer를 구별하는 인식 주장을 싣고, `c2-p1a` 쪽의 scheduling 여유(headroom)를 싣습니다. RQ0 문지기 실험은 `c2-p1a`를 판정하고 `c2-p1b`는 보고만 합니다(9.14 decision 2). indexer 쪽은 그 선언된 idle class가 이미 정하기 때문입니다. 같은 감사 기록은 intent에 대한 비율 주장은 C1 calibration group과 C7 attribute counterpart group의 열여섯 쌍이 맡고 C2 intent pair group의 쌍을 새로 생성하지는 않는다고 정했습니다.
 
 ## 1.6 세 개의 program: simulator, daemon, harness
 
@@ -305,19 +304,18 @@ task의 행동은 크게 세 모양으로 나뉩니다. 이 구분은 데이터�
     { "op": "RUN",  "us": 12 },
     { "op": "WAIT", "channel": "timer:editor" },
     { "op": "RUN",  "us": 7 },
-    // … 이런 WAIT/RUN 쌍이 모두 6,642개
+    // … 이런 WAIT/RUN 쌍이 모두 6,642개, 그리고 맨 끝에 WAIT 하나
+    { "op": "WAIT", "channel": "timer:editor" }
   ] }
 ```
 
-한 줄씩 읽어 봅시다. editor는 t = 0에 나타나고, 정확히 t = 60 s에 사라집니다(`depart: 60000000`, 모든 시간은 microsecond 정수입니다). 처음에는 `timer:editor` channel에서 기다립니다. 거기로 wake가 오면 119 µs 일하고, 다시 기다리고, 12 µs 일하고… 이 반복이 program 전체입니다. program은 13,284개 명령, 즉 WAIT 6,642개와 RUN 6,642개입니다.
+한 줄씩 읽어 봅시다. editor는 t = 0에 나타나고, 정확히 t = 60 s에 사라집니다(`depart: 60000000`, 모든 시간은 microsecond 정수입니다). 처음에는 `timer:editor` channel에서 기다립니다. 거기로 wake가 오면 119 µs 일하고, 다시 기다리고, 12 µs 일하고… 이 반복이 program 전체입니다. program은 13,285개 명령, 즉 WAIT 6,643개와 RUN 6,642개입니다. 마지막 명령은 마지막 wake의 channel에서 기다리는 `WAIT timer:editor`입니다. 2026-10-15의 9.23 D16(어떤 program도 떠나기 전에 바닥나지 않게 한 결정)부터, 떠나는 시각이 고정된 program은 막힌 채로 끝나고 떠나는 순간 사라집니다. wake로 움직이는 program은 마지막 wake의 channel에서 기다리는 WAIT로 끝나는데, 측정된 interactive 항목은 대개 timer 성분의 깨어남이 마지막이라 그 channel이 `timer:<id>`입니다.
 
-그 wake들은 어디서 올까요? 파일의 나머지 `events`에 있습니다. 이 파일에는 wake event가 6,642개 있고, 그 가운데 6,456개는 `timer:editor`로, 186개는 `input:editor`로 갑니다. `timer:editor`의 wake는 VS Code의 여러 thread가 측정에서 보인 주기적 깨어남(compositor, IO thread 등)을 합친 것이고, `input:editor`의 wake는 사용자의 키 입력입니다. 키 입력은 2012년에 기록된 실제 사람의 타이핑 시각(SWELL-KW 기록, 6장)을 재생한 것이며, 이 파일에서 첫 키 입력은 t = 12.752609 s에 도착합니다. program을 따라가 보면 2,551번째 명령이 처음으로 `WAIT input:editor`이고, 그 키가 오면 editor는 59,020 µs, 약 59 ms를 일합니다. timer성 깨어남 뒤의 RUN은 중앙값이 34 µs로 짧고, 키 입력 뒤의 RUN은 중앙값이 약 80 ms로 깁니다.
+그 wake들은 어디서 올까요? 파일의 나머지 `events`에 있습니다. 이 파일에는 wake event가 6,642개 있고, 그 가운데 6,456개는 `timer:editor`로, 186개는 `input:editor`로 갑니다. `timer:editor`의 wake는 VS Code의 여러 thread가 측정에서 보인 주기적 깨어남(compositor, IO thread 등)을 합친 것이고, `input:editor`의 wake는 사용자의 키 입력입니다. 키 입력은 2012년에 기록된 실제 사람의 타이핑 시각(SWELL-KW 기록, 6장)을 재생한 것이며, 이 파일에서 첫 키 입력은 t = 12.752609 s에 도착합니다. program을 따라가 보면 2,551번째 명령이 처음으로 `WAIT input:editor`이고, 그 키가 오면 editor는 59,020 µs, 약 59 ms를 일합니다. timer성 깨어남 뒤의 RUN은 중앙값이 33 µs로 짧고, 키 입력 뒤의 RUN은 중앙값이 약 80 ms로 깁니다.
 
 program의 RUN을 모두 더하면 19,913,142 µs, 약 19.9초입니다. 60초짜리 파일에서 이 task가 lane의 약 33 %를 원한다는 뜻이고, 이 값은 compile report의 `utilization 0.3318857`과 정확히 같습니다.
 
-> **코드로.** compiler(`dataset/tools/wlc/compiler.py`)는 측정된 application archetype의 여러 timer 성분과 재생된 키 입력을 task 하나의 명시적인 사건 흐름으로 합칩니다. `dataset/archetypes.yaml`의 머리 주석은 이 규칙을 "각 timer wake는 task의 timer channel에 대한 WAIT이며 마감이 없다(9.5 D74)"라고 적고(9.5 D74는 interactive 측정 sub-task 9.5의 결정), 마감이 있는 TIMER는 재생·통화 archetype과 game chain만 쓴다고 적습니다.
-
-> **열린 자리.** `docs/data-contracts.md` §4와 `dataset/README.md`의 예시는 editor의 program을 `WAIT input:editor`와 `RUN`이 번갈아 나오는 모양으로 보여 줍니다. 실제로 compile된 측정 기반 editor에서는 timer성 깨어남이 키 입력보다 한두 자릿수 많습니다(`c1-dev`에서 6,456 대 186). 예시는 단순화이며, 예시의 숫자(`23439`, `253642`)와 archetype 이름 `desktop-interactive`는 재구축 이전 파일의 것입니다. 지금의 사실은 위에서 꺼낸 값입니다.
+> **코드로.** compiler(`dataset/tools/wlc/compiler.py`)는 측정된 application archetype의 여러 timer 성분과 재생된 키 입력을 task 하나의 명시적인 사건 흐름으로 합칩니다. `dataset/archetypes.yaml`의 머리 주석은 이 규칙을 "각 timer wake는 task의 timer channel에 대한 WAIT이며 마감이 없다(9.5 D74)"라고 적고(9.5 D74는 interactive 측정 sub-task 9.5의 결정), 마감이 있는 TIMER는 재생·통화 archetype과 game chain만 쓴다고 적습니다. `docs/data-contracts.md` §4와 `dataset/README.md`의 예시(compile된 `c2-p1a`의 editor)도 같은 모양을 보여 줍니다. 측정 기반 editor에서는 timer성 깨어남이 키 입력보다 한두 자릿수 많습니다(`c1-dev`에서 6,456 대 186).
 
 ### 주기 작업 둘: `c1-media`의 `mpv` 두 개
 
@@ -371,7 +369,7 @@ program의 RUN을 모두 더하면 19,913,142 µs, 약 19.9초입니다. 60초�
     … ] }
 ```
 
-Linux kernel build의 object 파일 하나를 만드는 일은 실제로 process 여섯 개(`sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`)가 이어서 하는 일입니다. 데이터셋은 그 여섯을 "작업 하나"로 묶어 spawn table에 연속으로 적고, 작업 2,908개를 적습니다. 그래서 spawn table은 2,908 × 6 = 17,448개 항목입니다. `make`의 program은 RUN 2,908개(작업마다 한 번의 dispatch 비용)와 FORK 17,448개, 그리고 마지막의 `WAIT children:build`와 `EXIT`로 되어 있습니다. 자식들끼리는 `WAKE`와 `job:` channel로 부모-자식 순서를 지킵니다. 예를 들어 `build.j1.sh`는 일한 뒤 `build.j1.gcc`를 깨우고 자기 channel `job:build.j1.sh`에서 기다립니다. 동시에 살아 있을 수 있는 자식 수의 상한이 `fork_cap`이고, 그 값 48은 `-j8`(동시 작업 8개)에 작업당 process 여섯을 곱한 것입니다.
+Linux kernel build의 object 파일 하나를 만드는 일은 실제로 process 여섯 개(`sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`)가 이어서 하는 일입니다. 데이터셋은 그 여섯을 "작업 하나"로 묶어 spawn table에 연속으로 적고, 작업 2,908개를 적습니다. 그래서 spawn table은 2,908 × 6 = 17,448개 항목입니다. `make`의 program은 RUN 2,908개(작업마다 한 번의 dispatch 비용)와 FORK 17,448개, 그리고 마지막의 `WAIT children:build`와 `EXIT`로 되어 있습니다. 자식들끼리는 `WAKE`와 `job:` channel로 부모-자식 순서를 지킵니다. 예를 들어 `build.j1.sh`는 일한 뒤 `build.j1.gcc`를 깨우고 자기 channel `job:build.j1.sh`에서 기다립니다. 동시에 살아 있을 수 있는 자식 수의 상한이 `fork_cap`이고, 그 값 48은 `-j8`(동시 작업 8개)에 작업당 process 여섯을 곱한 것입니다. 마지막의 `WAIT children:build`는 어떤 task도 `WAKE`로 깨우지 않습니다. executor가 `make`의 마지막 자식이 끝날 때 이 WAIT를 끝내고, 그때 살아 있는 자식이 없으면 막지 않고 지나보낸다는 규칙이 2026-10-16에 계약(`docs/simulator/interpretation-contract.md` §3의 `WAIT(channel)` 줄과 §5의 FORK 문단)에 제안되었고, 인경민이 동의하면 효력을 갖습니다. RQ0 gate spec의 statement `simulator-conformance`는 이것을 항목 (g)로 RQ0 실행 전에 요구합니다. 2026-10-17의 simulator는 자식이 끝날 때 fork 자리만 돌려주고 이 WAIT를 끝내지 않습니다(`simulator/src/sim.cpp`의 `on_task_end`).
 
 **어떤** 자식이 생기는지와 각 자식이 **무엇을** 하는지는 compile 때 정해져 파일에 있습니다. 그러나 각 자식이 **언제** 시작하는지는 파일에 없습니다. 그것은 scheduler가 `make`와 자식들에게 CPU를 얼마나 주느냐에 따라 실행 중에 정해집니다. 이 구분이 다음 절의 주제입니다.
 
@@ -437,7 +435,7 @@ simulator는 이 필드를 존중해야 합니다. `idle` task는 다른 class�
 
 task마다 `id`와 `name`이 따로 있습니다(`docs/background-guide.md` §5). `id`는 파일 안에서 고유한 관리용 신원이고(`editor`, `renderers.3`, `build.j1.cc1`), `name`은 recognizer가 process 목록에서 보게 될 이름입니다(`code`, `chrome`, `cc1`). 이름은 겹칠 수 있고, 거짓말을 할 수도 있습니다. `c6-spoof`라는 파일은 CPU를 많이 쓰는 batch 작업에 일부러 `chrome`이라는 이름을 붙여, 이름 기반 인식이 사칭에 어떻게 반응하는지 봅니다. 그래서 simulator는 `id`로 scheduling하고, `name`은 "누군가 입혀 놓은 label"로 취급해야 합니다.
 
-데이터셋은 **이름만** 담고 실행 파일 경로나 command line은 담지 않습니다. 이것은 scenario 목록 문서(`docs/workload/scenario-catalog.md`)의 머리에 적힌 "names only, no paths" 결정입니다. 기록된 이유는 셋입니다. 근거로 삼는 출처들이 process **이름**은 증언하지만 경로는 증언하지 않으므로 경로는 출처 없는 값이 됩니다. 경로가 들어가면 인식 주장이 "이름의 의미"가 아니라 "경로 heuristic"으로 오염됩니다. 그리고 이름만 있으면 recognizer와 whitelist가 똑같은 입력을 받아 비교가 깨끗해집니다.
+데이터셋은 **이름만** 담고 실행 파일 경로나 command line은 담지 않습니다. 이것은 scenario 목록 문서(`docs/workload/scenario-catalog.md`)의 머리에 적힌 "names only, no paths" 결정입니다. 기록된 이유는 셋입니다. 근거로 삼는 출처 어디도 실행 파일 경로를 증언하지 않으므로(benchmark 안내서도 process 이름이 아니라 제품 이름을 적습니다) 경로는 출처 없는 값이 됩니다. 경로가 들어가면 인식 주장이 "이름의 의미"가 아니라 "경로 heuristic"으로 오염됩니다. 그리고 이름만 있으면 recognizer와 두 이름 표 condition(`shipped_catalogue`, `strongest_name_table`)이 똑같이 이름만의 입력을 받아 비교가 깨끗해집니다. shipped catalogue는 각 이름을 그 process의 `argv[0]` basename으로 먼저 바꿔 찾습니다. ananicy-cpp가 대조하는 key가 그것이기 때문입니다(9.12 D105).
 
 이름의 길이도 실제를 따릅니다. generated layer는 자기가 만드는 모든 이름이 kernel의 `comm` 한도인 15글자 안에 드는지 검사합니다(`dataset/grids.yaml`의 `comm_limit: {chars: 15, source: linux-sched-h}`; 출처는 kernel의 `include/linux/sched.h`가 정한 `TASK_COMM_LEN` 16 byte). core set의 timeline도 실제 process 목록에 보이는 잘린 이름을 씁니다. `tracker-miner-fs-3`가 아니라 `tracker-miner-f`, `unattended-upgrade`가 아니라 `unattended-upgr`인 이유입니다.
 
@@ -497,7 +495,7 @@ workload에는 사람이 없습니다. 대신 사람이 남기는 흔적이 네 
 
 ## 3.2 archetype: 행동의 library
 
-`dataset/archetypes.yaml`은 1,941줄이고, 최상위 key `archetypes` 아래에 항목 29개가 있습니다(tree에서 센 값). 항목 하나가 process 행동의 한 종류입니다. 2026-10-14 현재의 29개를 값을 정한 sub-task에 따라 묶으면 이렇습니다(각 항목의 `scope`와 `validation_stats`, 그리고 sub-task changelog에서 옮긴 분류입니다).
+`dataset/archetypes.yaml`은 1,943줄이고(2026-10-17), 최상위 key `archetypes` 아래에 항목 29개가 있습니다(tree에서 센 값). 항목 하나가 process 행동의 한 종류입니다. 2026-10-14 현재의 29개를 값을 정한 sub-task에 따라 묶으면 이렇습니다(각 항목의 `scope`와 `validation_stats`, 그리고 sub-task changelog에서 옮긴 분류입니다).
 
 | 묶음 | 항목 | 값을 정한 sub-task |
 |---|---|---|
@@ -555,7 +553,7 @@ code-editor:
 
 ## 3.3 timeline: 시나리오 대본
 
-timeline은 YAML 파일이고, `dataset/timelines/coreset/`에 51개가 있습니다. `c1-office`를 전부 읽어 보겠습니다. 주석까지 합쳐 30줄입니다.
+timeline은 YAML 파일이고, `dataset/timelines/coreset/`에 51개가 있습니다. `c1-office`를 전부 읽어 보겠습니다. 주석까지 합쳐 31줄입니다.
 
 ```yaml
 # C1 — single-situation calibration: pure office (building-plan §3 C1).
@@ -563,6 +561,7 @@ timeline은 YAML 파일이고, `dataset/timelines/coreset/`에 51개가 있습�
 # five-tab window: five tabs from Firefox's Linux telemetry (glam; 9.10 D15,
 # D16), one renderer per tab observed in Chrome (meas-ci:desktop:2026-10-04;
 # 9.10 D126-D129, D131).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-office
   seed: 101
@@ -590,7 +589,7 @@ focus:
   - {from: 0s, to: 60s, task: writer}
 ```
 
-문장으로 옮기면 이렇습니다. 이 파일은 60초 동안의 "순수한 사무 작업"입니다. 정답 구간은 하나이고, mode는 `office`, 배경 작업은 없으므로 관례대로 `background_wanted: true`입니다. `scenario` tag `S1`, `S2`, `S4`는 이 구간이 scenario 목록의 "문서 작업", "웹 browsing", "e-mail" 장면에 해당한다고 표시합니다(3.8). 무대에는 LibreOffice Writer(`soffice.bin`), Chrome 창(`chrome`), Chrome의 숨은 tab renderer 네 개(모두 `chrome`), Thunderbird(`thunderbird-bin`)가 0초부터 60초까지 있습니다. 사용자는 2초부터 58초까지 Writer에 타이핑하고, focus는 처음부터 끝까지 Writer에 있습니다. `seed: 101`은 이 파일의 주사위 번호이고, `demand: calibration`은 이 파일이 경쟁을 품도록 설계되지 않았다는 표시입니다.
+문장으로 옮기면 이렇습니다. 이 파일은 60초 동안의 "순수한 사무 작업"입니다. 정답 구간은 하나이고, mode는 `office`, 배경 작업은 없으므로 관례대로 `background_wanted: true`입니다. `scenario` tag `S1`, `S2`, `S4`는 이 구간이 scenario 목록의 "사무", "browsing", "메일" 장면에 해당한다고 표시합니다(3.8). 무대에는 LibreOffice Writer(`soffice.bin`), Chrome 창(`chrome`), Chrome의 숨은 tab renderer 네 개(모두 `chrome`), Thunderbird(`thunderbird-bin`)가 0초부터 60초까지 있습니다. 사용자는 2초부터 58초까지 Writer에 타이핑하고, focus는 처음부터 끝까지 Writer에 있습니다. `seed: 101`은 이 파일의 주사위 번호이고, `demand: calibration`은 이 파일이 경쟁을 품도록 설계되지 않았다는 표시입니다. 머리 주석의 마지막 줄은 이 파일이 desktop의 session process(GNOME Shell, PipeWire, systemd, D-Bus)를 뺐다고 적습니다. session process는 idle 파일 둘에만 있고, 그 밖의 core 파일은 모두 그것을 뺍니다(9.10 D28). 이 줄은 2026-10-16에 `c1-idle`을 뺀 손으로 쓴 core timeline 22개의 머리에 더해졌습니다.
 
 `renderers` 항목에만 `source`가 붙은 것을 눈여겨보세요. `count: 4`라는 숫자를 timeline이 정했기 때문입니다. 규칙은 이렇습니다. task가 `bind`나 `count`로 값을 주면, 같은 key를 가진 `source` map을 함께 적어야 합니다. 값마다 출처 tag 하나, tag 목록, 또는 `design` / `convention` / `arithmetic` 가운데 하나의 label을 씁니다. 여기서 4라는 수는 Firefox의 Linux telemetry(`glam`)가 보여 준 "창 하나에 tab 다섯"과, Chrome이 tab 하나에 renderer 하나를 띄운다는 측정(`meas-ci:desktop:2026-10-04`)에서 왔습니다. 화면에 보이는 tab 하나는 `browser`가 맡으니 나머지 네 tab의 renderer가 넷입니다.
 
@@ -647,7 +646,7 @@ compiler는 파일을 언제나 같은 byte로 씁니다. key를 정렬하고 �
 
 ## 3.6 compile 한 번을 손으로 따라가기: `c1-dev`
 
-이제 `c1-dev.timeline.yaml`(주석까지 20줄)이 어떻게 863,919 byte짜리 `c1-dev.workload.json`이 되는지 단계별로 따라가 보겠습니다. timeline은 이렇습니다.
+이제 `c1-dev.timeline.yaml`(주석까지 21줄)이 어떻게 863,958 byte짜리 `c1-dev.workload.json`이 되는지 단계별로 따라가 보겠습니다. timeline은 이렇습니다.
 
 ```yaml
 meta:     {id: c1-dev, seed: 107, demand: calibration}
@@ -659,13 +658,13 @@ focus:    [{from: 0s, to: 60s, task: editor}]
 
 **1단계 — 읽고 검사합니다.** `Timeline` loader(`dataset/tools/wlc/timeline.py`)가 시간을 microsecond로 바꾸고 구조를 검사합니다. archetype `code-editor`가 library에 있는가, segment-bound이므로 `depart`가 있는가, `bind`가 `binding_params`와 정확히 맞는가(여기서는 둘 다 비어 있음), input 창이 task의 수명 안에 있고 focus 구간 안에 있는가, 등입니다.
 
-**2단계 — `meta`를 씁니다.** `id`는 그대로, `derived_from`은 `dataset/timelines/coreset/c1-dev.timeline.yaml@cbf1349a…`, `sampled`는 `{"seed": 107, "archetypes": "archetypes.yaml@a2cc1957…"}`가 됩니다. `@` 뒤의 두 hex는 git이 그 파일 내용에 매기는 blob hash입니다. 이 권을 쓰면서 `git hash-object`로 두 파일을 계산해 보았고, 두 값이 그대로 나왔습니다. 그러니 파일의 숫자 하나를 보고 "어느 대본의 어느 판, 어느 library의 어느 판에서 나왔는가"를 정확히 되짚을 수 있습니다.
+**2단계 — `meta`를 씁니다.** `id`는 그대로, `derived_from`은 `dataset/timelines/coreset/c1-dev.timeline.yaml@7450b5e9…`, `sampled`는 `{"seed": 107, "archetypes": "archetypes.yaml@818b41b8…"}`가 됩니다. `@` 뒤의 두 hex는 git이 그 파일 내용에 매기는 blob hash입니다. 2026-10-17에 `git rev-parse HEAD:<경로>`로 두 파일의 blob hash를 계산해 보았고, 두 값이 그대로 나왔습니다. 두 값 모두 2026-10-16에 바뀌었습니다. 그날 9.15의 재빌드가 timeline의 머리 주석과 library의 주석·`modeling_notes`를 고쳤기 때문입니다(그 전에는 `@cbf1349a…`와 `@46e10504…`). 그러니 파일의 숫자 하나를 보고 "어느 대본의 어느 판, 어느 library의 어느 판에서 나왔는가"를 정확히 되짚을 수 있습니다.
 
 **3단계 — 정답과 focus를 옮깁니다.** 구간 하나가 `{"t_start": 0, "t_end": 60000000, "mode": "dev", "attributes": {"background_wanted": true}}`가 됩니다. `scenario` tag는 compiler가 무시하므로 옮겨지지 않습니다. focus는 `[{"t_start": 0, "t_end": 60000000, "task": "editor"}]`가 됩니다.
 
-**4단계 — task의 사건 흐름을 만듭니다.** 이것이 compile의 본체입니다. `code-editor`의 각 timer 성분(`gpu/VizCompositorTh`, `renderer/Compositor`, …)에 대해, compiler는 수명 0–60초 전체에 걸쳐 측정된 간격 분포에서 깨어날 시각을 차례로 뽑고, 깨어날 때마다 측정된 run 분포에서 RUN 길이를 뽑습니다. 그다음 재생할 키 입력을 놓습니다. archetype의 `stimulus`가 가리키는 기록 `swell-word-c1`(Word를 쓰는 실제 사람들의 입력 event 82,634개, 그 가운데 키 입력 78,014개, 이어 붙인 길이 약 33,863초; `dataset/stimulus/streams.json`)에서, archetype이 `kinds: [key]`로 고른 키 입력만 가지고 56초 길이 창에 들어갈 연속된 조각 하나를 고릅니다. 조각의 시작점은 seed에서 뽑은 균등 난수 × (기록 전체 길이 − 창 길이)입니다. 조각 안의 키 입력마다 창 안의 시각을 계산해 `input:editor` wake를 놓고, `input_run` 분포에서 그 입력에 대한 RUN 길이를 뽑습니다. 마지막으로 모든 깨어남을 시각 순으로 합쳐, task의 program(WAIT 한 번, RUN 한 번의 쌍 6,642개)과 `wake` event 6,642개를 씁니다.
+**4단계 — task의 사건 흐름을 만듭니다.** 이것이 compile의 본체입니다. `code-editor`의 각 timer 성분(`gpu/VizCompositorTh`, `renderer/Compositor`, …)에 대해, compiler는 수명 0–60초 전체에 걸쳐 측정된 간격 분포에서 깨어날 시각을 차례로 뽑고, 깨어날 때마다 측정된 run 분포에서 RUN 길이를 뽑습니다. 그다음 재생할 키 입력을 놓습니다. archetype의 `stimulus`가 가리키는 기록 `swell-word-c1`(Word를 쓰는 실제 사람들의 입력 event 82,634개, 그 가운데 키 입력 78,014개, 이어 붙인 길이 약 33,863초; `dataset/stimulus/streams.json`)에서, archetype이 `kinds: [key]`로 고른 키 입력만 가지고 56초 길이 창에 들어갈 연속된 조각 하나를 고릅니다. 조각의 시작점은 seed에서 뽑은 균등 난수 × (기록 전체 길이 − 창 길이)입니다. 조각 안의 키 입력마다 창 안의 시각을 계산해 `input:editor` wake를 놓고, `input_run` 분포에서 그 입력에 대한 RUN 길이를 뽑습니다. 마지막으로 모든 깨어남을 시각 순으로 합쳐, task의 program(WAIT 한 번, RUN 한 번의 쌍 6,642개와, 마지막 wake의 channel에서 기다리는 WAIT 하나)과 `wake` event 6,642개를 씁니다.
 
-**5단계 — 검사하고 씁니다.** compile 안에서 canonical lint가 돕니다. schema 검증(`jsonschema-rs`), event가 시각 순인가, task id가 고유한가, TIMER가 있는 program은 TIMER로 시작하는가, FORK가 있으면 spawn table이 있는가, WAIT하는 channel에 wake가 오는가, WAKE의 대상이 알려진 task인가, focus 구간이 올바른가. 통과하면 `c1-dev.workload.json`을 쓰고, 그 옆에 compile report `c1-dev.report.json`을 씁니다.
+**5단계 — 검사하고 씁니다.** compile 안에서 canonical lint가 돕니다. schema 검증(`jsonschema-rs`), event가 시각 순인가, task id가 고유한가, TIMER가 있는 program은 TIMER로 시작하는가, FORK가 있으면 spawn table이 있는가, WAIT하는 channel에 wake가 오는가, WAKE의 대상이 알려진 task인가, focus 구간이 올바른가. 2026-10-15의 9.23 D14가 셋을 더했습니다. spawn된 자식의 WAKE 대상도 top-level task의 것처럼 풀리는가, 이름이 kernel `comm` 한도(15글자) 안에 드는가, program이 바닥나지 않는가(떠나는 시각이 없는 task는 EXIT로, 떠나는 시각이 고정된 task는 막힌 채로 끝나는가)입니다. 통과하면 `c1-dev.workload.json`을 쓰고, 그 옆에 compile report `c1-dev.report.json`을 씁니다.
 
 ```json
 { "demand_class": "calibration", "demand_us": 19913142, "duration_us": 60000000,
@@ -673,7 +672,7 @@ focus:    [{from: 0s, to: 60s, task: editor}]
   "utilization": 0.3318857 } ], "per_task": { "editor": 19913142 }, "utilization": 0.3318857 }
 ```
 
-**6단계 — lockfile에 적습니다.** 모든 파일을 compile한 뒤 `build.manifest.json`에 이 파일의 hash(`23581593…`), report의 hash(`cdbb308b…`), 그리고 수요 기록(`calibration`, utilization 0.3319)을 적습니다. 이 권을 쓰면서 디스크의 `c1-dev.workload.json`을 `shasum -a 256`으로 계산해 보았고, manifest의 값과 같았습니다.
+**6단계 — lockfile에 적습니다.** 모든 파일을 compile한 뒤 `build.manifest.json`에 이 파일의 hash(`c50b516a…`), report의 hash(`cdbb308b…`), 그리고 수요 기록(`calibration`, utilization 0.3319)을 적습니다. 2026-10-17에 디스크의 `c1-dev.workload.json`을 `shasum -a 256`으로 계산해 보았고, manifest의 값과 같았습니다.
 
 > **코드로.** 위 4단계에서 키 입력 조각의 시작점은 `dataset/tools/wlc/compiler.py`의 `offset = round(sampling.uniform(seed, iid, "stimulus", outer["index"]) * max(0, span - (outer["to"] - outer["from"]))) + …`로 계산됩니다. 여기서 `outer`는 보통 그 창 자신이지만, 파생 파일의 창이 원본 창의 일부(`slice_of`)이면 원본 창입니다. 그래서 C7 attribute counterpart group의 파일처럼 원본을 앞부분만 잘라 만든 파일은 원본과 같은 시작점을 받아, 잘린 구간 안의 키 입력이 원본과 byte 단위로 같습니다(9.18 spec 결정 1).
 
@@ -692,16 +691,14 @@ focus:    [{from: 0s, to: 60s, task: editor}]
 이 책의 "세 층"은 데이터가 지나가는 세 형태(archetype → timeline → canonical workload)입니다. 그런데 `docs/workload/building-plan.md` §1은 "three-layer architecture"라는 말을 조금 다르게 씁니다.
 
 ```text
-Layer 1  ARCHETYPE LIBRARY   한 process가 어떻게 행동하나   (archetypes.yaml)
-Layer 2  SCENARIO CATALOG    어떤 process들이 함께 나타나나  (docs/workload/scenario-catalog.md, S1–S18)
-Layer 3  TIMELINES           장면들이 시간 속에 어떻게 놓이나 (*.timeline.yaml)
+ARCHETYPE LIBRARY   한 process가 어떻게 행동하나            (archetypes.yaml)
+SCENARIO CATALOG    어떤 scenario와 process 이름이 존재하나  (docs/workload/scenario-catalog.md, S1–S18)
+TIMELINES           task들이 시간 속에 어떻게 놓이나          (*.timeline.yaml; generated layer의 timeline도)
 ```
 
-그리고 같은 절이 "두 workload 형식"으로 timeline과 canonical을 따로 셉니다. 즉 building plan에서 compile된 canonical 파일은 layer가 아니라 출력 형식이고, 그 대신 scenario 목록이 Layer 2입니다. 두 그림은 충돌하지 않습니다. 같은 구조를 저작하는 쪽(building plan)과 데이터가 흐르는 쪽(이 책)에서 본 것입니다. 다만 "Layer 1"이라는 말이 실험 쪽에서는 인식 정확도를 뜻한다는 점(1.3)까지 겹치므로, 이 책은 데이터셋의 층을 말할 때 "Layer 1"이라는 이름 대신 "archetype library"라고 씁니다.
+그리고 같은 절이 "두 workload 형식"으로 timeline과 canonical을 따로 셉니다. 즉 building plan에서 compile된 canonical 파일은 layer가 아니라 출력 형식이고, 그 대신 scenario 목록이 가운데 층입니다. 두 그림은 충돌하지 않습니다. 같은 구조를 저작하는 쪽(building plan)과 데이터가 흐르는 쪽(이 책)에서 본 것입니다. building plan은 세 층에 번호를 붙이지 않고 이름으로 부르며, "이 프로젝트 문서의 'Layer 1'과 'Layer 2'는 평가 층(인식 정확도와 소비자 성능)이지 이 셋이 아니다"라고 적습니다(2026-10-16부터; 1.3의 용어 상자). 이 책도 데이터셋의 층을 "archetype library", "scenario 목록", "timeline"이라고 이름으로 부릅니다.
 
-**scenario 목록**(`docs/workload/scenario-catalog.md`)은 어떤 process들이 함께 나타나는 장면이 실제로 존재하는지를 출처와 함께 적은 산문 문서입니다. 장면은 S1부터 S18까지 열여덟 개입니다. S1은 문서 작업, S2는 웹 browsing, S3는 영상 회의, S4는 e-mail, S5는 게임 옆의 음성 채팅, S6은 사진 편집, S7은 영상 편집과 render, S8은 batch 변환, S9는 gaming, S10은 게임·콘텐츠 download, S11은 software 개발, S12는 ML training, S13은 미디어 재생, S14는 파일 indexing, S15는 backup과 동기화, S16은 압축 파일 작업, S17은 malware 검사, S18은 시스템 기본 상태입니다. timeline의 구간은 `scenario` tag로 이 장면들을 가리키지만, compiler는 그 tag를 읽지 않습니다. tag는 "이 구간의 조합은 이런 장면으로 실재한다"는 설명이고, 출처는 그 장면의 **존재**만 증언합니다(9.10 D2 "core set의 task 구성은 design이다"와 9.10 D33 "scenario 목록은 데이터셋이 묶는 것을 적고, 각 줄은 성립하는 존재 주장이다").
-
-> **열린 자리.** scenario 목록의 process 이름 열은 재구축 이전의 묶음(`clamscan`, `borg`, `ffmpeg`, `zoom`, `spotify`, `game.exe`, `gamescope`, `tracker-miner-fs-3` 등)을 아직 적고 있습니다. 지금의 timeline은 `Troy.exe`, `element-desktop`, `unattended-upgr`, `deja-dup`, `python`, `tracker-miner-f`, `kdenlive_render`, `HandBrakeCLI`, `7z` 등을 씁니다. S17(malware 검사)은 `clamscan`이 빠진 뒤로 어떤 파일도 그 프로그램을 묶지 않지만, C7 attribute counterpart group의 interactive 구간에는 tag로 남아 있습니다. scenario 목록의 정정은 문서 정정 sub-task 9.15의 작업 목록에 있습니다(`clamscan`을 자동 업데이트로 바꾼 9.10 D3이 9.15에 넘긴 항목 "scenario catalog S17 row replaced", 곧 S17 malware 검사 줄을 바꾸라는 항목).
+**scenario 목록**(`docs/workload/scenario-catalog.md`)은 어떤 scenario와 process 이름이 존재하는지를, 그 존재의 출처와 함께 적은 산문 문서입니다. 어떤 process들이 함께 도는지는 적지 않습니다. 장면은 S1부터 S18까지 열여덟 개입니다. S1은 사무, S2는 웹 browsing, S3는 회의(browser 안의 영상 통화), S4는 메일, S5는 chat client, S6은 사진 편집, S7은 영상 편집과 export, S8은 영상 변환(transcode), S9는 gaming, S10은 게임 중의 게임 설치, S11은 개발과 compile, S12는 ML training, S13은 미디어 재생, S14는 파일 indexing, S15는 backup, S16은 압축(archive), S17은 무인 자동 업그레이드(2026-10-01의 9.10 D3이 malware 검사를 이것으로 바꾸며 id는 그대로 둠), S18은 desktop session입니다. timeline의 구간은 `scenario` tag로 이 장면들을 가리키지만, compiler는 그 tag를 읽지 않습니다. tag는 "이 구간의 조합은 이런 장면으로 실재한다"는 설명이고, 출처는 그 장면의 **존재**만 증언합니다(9.10 D2 "core set의 task 구성은 design이다"와 9.10 D33 "scenario 목록은 데이터셋이 묶는 것을 적고, 각 줄은 성립하는 존재 주장이다"). 목록의 이름 열은 2026-10-16에 9.15가 지금 timeline이 묶는 이름(`Troy.exe`, `element-desktop`, `unattended-upgr`, `deja-dup`, `python`, `tracker-miner-f`, `kdenlive_render`, `HandBrakeCLI`, `7z` 등)으로 고쳐 썼고, S17 줄도 무인 자동 업그레이드(`unattended-upgr`, `package-upgrade` archetype)로 바뀌었습니다.
 
 ## 3.9 결정론은 실제로 어떻게 지켜지나
 
@@ -713,7 +710,7 @@ Layer 3  TIMELINES           장면들이 시간 속에 어떻게 놓이나 (*.t
 4. **출처의 hash.** `meta.derived_from`과 `meta.sampled.archetypes`에 git blob hash가 들어가므로, timeline의 주석 한 글자만 바뀌어도 파일의 byte가 바뀝니다. 이것은 의도된 성질입니다. 대본이 바뀌었는데 결과가 같은 척하지 않습니다.
 5. **lockfile과 CI.** compile된 파일 자체는 저장소에 넣지 않습니다. 대신 hash 목록인 manifest를 넣고, CI가 매번 처음부터 다시 compile해서 hash를 비교합니다(4장).
 
-> **열린 자리.** 2026-10-10 감사는 결정론에 남은 위험 하나를 "PLAUSIBLE"로 적었습니다. 분포에서 값을 뽑을 때 쓰는 수학 함수(`pow`, `exp`, `log`)가 반올림 전에 platform마다 미세하게 다를 수 있다는 것입니다. 감사는 이 위험이 "Linux CI 실행 한 번으로 닫힌다"고 적었고, 그 실행은 2026-10-12에 있었습니다. 9.20(C4 distractor grid와 C5 familiarity ladder를 만든 sub-task)의 changelog D11은 CI run 38243554308이 Linux runner에서 일곱 manifest(core set, variants, generated 다섯)를 재현했다고 적습니다. 걸린 시간은 모두 12분 04초였고, 그 가운데 `dataset` 1분 36초, `variants` 2분 48초, `generated` 5분 13초, `test` 2분 05초, `check` 5초였습니다. 이 권은 그 run의 log를 직접 열어 보지 않았고, 기록을 옮겼습니다.
+> **열린 자리 — 마지막 bless는 아직 runner에서 돌지 않았습니다.** 2026-10-10 감사는 결정론에 남은 위험 하나를 "PLAUSIBLE"로 적었습니다. 분포에서 값을 뽑을 때 쓰는 수학 함수(`pow`, `exp`, `log`)가 반올림 전에 platform마다 미세하게 다를 수 있다는 것입니다. 감사는 이 위험이 "Linux CI 실행 한 번으로 닫힌다"고 적었고, 2026-10-12의 실행이 그것을 닫았습니다. 9.20(C4 distractor grid와 C5 familiarity ladder를 만든 sub-task)의 changelog D11은 CI run 38243554308이 Linux runner에서 일곱 manifest(core set, variants, generated 다섯)를 재현했다고 적습니다. 걸린 시간은 모두 12분 04초였고, 그 가운데 `dataset` 1분 36초, `variants` 2분 48초, `generated` 5분 13초, `test` 2분 05초, `check` 5초였습니다. 그 뒤 다시 bless된 판도 runner에서 재현되었습니다. 2026-10-15의 9.23 D18은 dataset run 38722675475가 9.23 D17이 bless한 일곱 manifest와 파생 timeline, coverage grid를 byte 단위로 재현했다고 적습니다. 2026-10-16에 9.15의 재빌드가 일곱 manifest를 다시 bless했고(core manifest `b6017a10…`), 2026-10-17 현재 그 판은 아직 CI runner에서 돌지 않았습니다(`gh run list`에서 가장 최근의 dataset run이 38722675475). 최종 상태의 재현은 출구 감사 sub-task 9.16이 읽습니다. 이 권은 두 run의 log를 직접 열어 보지 않았고, 기록을 옮겼습니다.
 
 ---
 
@@ -723,14 +720,16 @@ Layer 3  TIMELINES           장면들이 시간 속에 어떻게 놓이나 (*.t
 
 ## 4.1 tree 한눈에
 
-2026-10-14의 `dataset/`는 이렇게 생겼습니다(`ls`로 확인한 구조입니다. `README.md`의 Layout 블록은 아래의 `stimulus/`, `launch/`, `replay/`, `meas/streams/`를 빠뜨리고 있습니다).
+2026-10-17의 `dataset/`는 이렇게 생겼습니다(`ls`로 확인한 구조입니다. `README.md`의 Layout 블록도 같은 파일들을 적습니다).
 
 ```text
 dataset/
-├── README.md                    개발자용 개요 (182줄) — 가장 최신의 전체 설명
+├── README.md                    개발자용 개요 (233줄) — 가장 최신의 전체 설명
 ├── Makefile                     모든 작업의 입구 (23줄)
-├── archetypes.yaml              ① 행동 library: 29개 archetype (1,941줄)
-├── sources.yaml                 ① 출처 registry: 30개 id (339줄)
+├── LICENSE                      데이터의 licence: CC-BY-NC-SA-4.0
+├── archetypes.yaml              ① 행동 library: 29개 archetype (1,943줄)
+├── sources.yaml                 ① 출처 registry: 19개 id (246줄)
+├── meas-releases.yaml           측정 campaign → 원시 기록이 있는 GitHub release와 asset의 SHA-256 (lint가 검사)
 ├── grids.yaml                   ② generated layer의 정의: 다섯 집합 (137줄)
 ├── variants.yaml                ② RQ0 sensitivity variant의 정의: 아홉 집합 (126줄)
 ├── schema/
@@ -740,8 +739,8 @@ dataset/
 ├── stimulus/                    ① 재생하는 키 입력 기록: streams.json + 3 *.jsonl
 ├── launch/                      ① program 실행 직후 구간의 관찰: 10 *.json.gz
 ├── replay/                      ① trace-replay variant용 관찰 흐름: 6 *.json.gz
-├── meas/                        측정 campaign이 남긴 자료: summary.json, names/, streams/
-├── tools/                       모든 실행 도구 (compiler, deriver, generator, lint, check, 측정 도구, test)
+├── meas/                        측정 campaign이 남긴 자료: names/, streams/
+├── tools/                       모든 실행 도구 (compiler, deriver, generator, lint, check, 측정 도구와 그 지도 meas/README.md, test)
 │
 ├── build.manifest.json          ④ core set의 lockfile (commit됨)
 ├── build.variants.manifest.json ④ variant의 lockfile (commit됨)
@@ -758,9 +757,11 @@ dataset/
 
 **`archetypes.yaml`** — 3장에서 본 행동 library입니다. compiler, linter, test가 읽고, 모든 manifest가 그 내용을 hash로 고정합니다.
 
-> **열린 자리.** 이 파일의 머리 주석은 자신을 "Layer 1 archetype library (v0.1)"이라고 부르지만, `dataset/README.md`와 `docs/data-contracts.md` §2는 v0.2라고 부릅니다. 2026-10-09의 9.13 spec 결정 9는 "library의 표기 version을 v0.1에서 v0.2로 올린다"고 정했고 그 대상으로 data-contracts §2와 README를 적었습니다. 파일 머리의 v0.1은 그때 고쳐지지 않았습니다. 2026-10-10 감사가 이 불일치를 문서 정리 목록에 넣었습니다.
+> **열린 자리 — 머리 주석의 "Layer 1".** 이 파일의 머리 주석은 2026-10-16부터 자신을 "Layer 1 archetype library (v0.2)"라고 부릅니다. version은 `dataset/README.md`, `docs/data-contracts.md` §1·§2와 같습니다. 그 전의 "(v0.1)"은 2026-10-09의 9.13 spec 결정 9("library의 표기 version을 v0.1에서 v0.2로 올린다")가 data-contracts §2와 README만 고치고 남긴 것이었고, 2026-10-10 감사가 문서 정리 목록에 올린 뒤 9.15의 재빌드(commit `37c2e233`)에서 고쳐졌습니다. 남은 "Layer 1"은 데이터셋의 층에 번호를 붙이던 옛 이름입니다(1.3의 용어 상자). 이 주석을 "the archetype library (v0.2)"로 고칠지는 인지오가 정할 일로, 문서 정정이 끝난 뒤의 재빌드 목록에 올라 있습니다. 이 파일은 모든 manifest의 입력이라 주석 한 줄을 고쳐도 일곱 manifest가 다시 bless되고 RQ0 gate spec이 다시 pin됩니다.
 
-**`sources.yaml`** — 데이터셋이 값이나 구조를 끌어오는 출처의 기계용 목록입니다. 30개 id가 있고, 종류는 scholarly 9개, deployed-system 19개, measurement 2개입니다(tree에서 센 값). 인용 문자열은 여기 없고 `docs/references.md`에 있습니다. 이 둘의 관계는 6장에서 봅니다.
+**`sources.yaml`** — 데이터셋이 값이나 구조를 끌어오는 출처의 기계용 목록입니다. 2026-10-17에 19개 id가 있고, 종류는 scholarly 5개, deployed-system 12개, measurement 2개입니다(tree에서 센 값). 2026-10-16에 데이터셋 파일 어디도 인용하지 않는 id 열한 개가 빠졌습니다(그 전에는 30개).
+
+**`meas-releases.yaml`** — 데이터가 인용하는 `meas-ci` campaign마다, 그 원시 기록을 담은 GitHub release(하나 이상)와 각 asset의 SHA-256을 적은 지도입니다(2026-10-16). compile은 읽지 않고, `make lint`가 지도에 없는 campaign tag를 실패시킵니다(6.2). 인용 문자열은 여기 없고 `docs/references.md`에 있습니다. 이 둘의 관계는 6장에서 봅니다.
 
 **`grids.yaml`** — generated layer의 정의입니다. 구간 길이(`segment_length: 60s`), 키 입력을 두지 않는 짧은 구간의 경계(`no_input_below: 4s`), 이름 길이 한도(`comm_limit: {chars: 15, source: linux-sched-h}`), 그리고 다섯 집합(`transition-grid`, `return-grid`, `flap-stress`, `distractor-grid`, `familiarity-ladder`)의 축과 값을 적습니다. generator가 이 파일과 C1 calibration group의 열여섯 timeline만으로 1,562개 timeline을 만듭니다.
 
@@ -783,9 +784,9 @@ compile은 timeline과 library 말고도 몇 가지 기록 파일을 읽습니�
 - **`stimulus/`** — 재생할 사람의 입력 기록입니다. `swell-word-c1.jsonl`(Word 사용 중의 입력, 82,634개 event), `swell-outlook-c23.jsonl`, `swell-ie-c1.jsonl` 세 흐름과 그 색인 `streams.json`이 있습니다. 출처는 SWELL-KW라는 공개 연구 자료(`swell-icmi14`: 2012년 Windows 실험실에서 25명의 지식 노동자가 약 3시간씩 일한 기록)이고, 데이터셋은 그 가운데 시각만 씁니다. 어떤 키를 눌렀는지는 쓰지 않습니다. archetype의 `stimulus` 매개변수가 흐름 이름을 가리키고, compiler가 input 창마다 그 흐름의 조각을 재생합니다(3.6).
 - **`launch/`** — program을 막 켰을 때의 구간을 관찰한 기록입니다. 열 개의 archetype(`audio-player`, `chat-client`, `game-client`, `mail-client`, `office-writer`, `renderer-hidden`, `video-call`, `video-editor`, `video-player`, `web-browser`)에 대해 하나씩 있습니다. timeline이 파일 중간에 program을 켜는 경우(예: C3 transition arc group의 파일에서 두 번째 구간에 문서 편집기가 켜질 때), compiler는 그 task의 처음 부분에 이 기록을 재생하고 그다음 평상시 흐름을 이어 붙입니다(9.10 D21과 D136–D138, launch 구간을 관찰해 재생하기로 한 결정들).
 - **`replay/`** — 측정된 실제 깨어남 순서를 그대로 담은 흐름 여섯 개입니다. compile된 흐름은 측정의 분포를 맞추지만 순서와 동시 깨어남은 잃습니다. 그 차이가 결과를 바꾸는지 보려고, `replay`라는 variant 집합이 이 흐름들로 네 파일을 다시 만듭니다(5장).
-- **`meas/`** — 측정 campaign이 저장소에 남긴 자료입니다. 이름 검증 표(`names/`: 배포판 container에 package를 설치해 실제 `comm` 문자열을 기록한 것), 측정 campaign이 쓴 입력 흐름의 창(`streams/`, 182개 파일), 2026-08의 첫 campaign 요약(`summary.json`)이 있습니다. compile은 이 디렉터리를 읽지 않습니다.
+- **`meas/`** — 측정 campaign이 저장소에 남긴 자료입니다. 재구축 이전의 이름을 검증한 Phase 2와 Phase 7의 기록(`names/`: 배포판 container에 package를 설치해 실제 `comm` 문자열을 기록한 것. 역사로 남아 있고 어떤 도구도 읽지 않습니다. 지금 이름의 근거는 campaign이 추적한 `comm`입니다, 9.10 D25)과, 측정 campaign이 쓴 입력 흐름의 창(`streams/`, 182개 파일)이 있습니다. 2026-08의 첫 campaign 요약 `summary.json`은 어떤 도구도 읽지 않아 2026-10-16에 지워졌습니다(commit `37c2e233`; 그 전의 commit에서 읽을 수 있습니다). compile은 이 디렉터리를 읽지 않습니다.
 
-> **열린 자리.** compiler는 `launch/`의 흐름을 읽어 artifact에 반영하지만, core set의 lockfile인 `build.manifest.json`의 `inputs`는 이 흐름들을 고정하지 않습니다. `inputs`의 23개 항목은 library 1개, `replay/` 6개, schema 1개, `stimulus/`의 `*.jsonl` 3개, compiler 원천 파일 12개(`compile.py`와 `wlc/*.py` 11개)입니다. 이 권을 쓰면서 `dataset/tools/compile.py`의 `input_files` 함수를 읽어 확인했습니다. 함수의 docstring도 "library, schema, compiler의 원천, stimulus와 replay 흐름"만 적습니다. `launch/` 파일이 바뀌면 artifact의 hash가 바뀌므로 `make check`는 실패하지만, 그 실패가 어느 입력 때문인지는 manifest의 `inputs`에서 보이지 않습니다. 이것이 의도인지 빠뜨림인지는 기록에서 찾지 못했습니다. 2026-10-10 감사의 A4("manifest가 약 75개 입력 가운데 둘만 고정한다")를 고친 9.18 결정 5의 문장도 "compiler의 원천 파일과 stimulus와 replay 흐름"만 적습니다. 결정은 데이터셋 소유자인 인지오의 몫입니다.
+> **왜 이렇게 정했나 — launch 흐름도 고정합니다.** compiler는 파일 중간에 켜지는 task마다 `launch/`의 흐름을 읽습니다. 이 권을 처음 쓴 2026-10-14에는 core set의 lockfile인 `build.manifest.json`의 `inputs`가 이 흐름들을 고정하지 않아(`inputs` 23개), launch 흐름이 바뀌면 artifact의 hash만 바뀌고 어느 입력 때문인지는 `inputs`에서 보이지 않았습니다. 2026-10-10 감사의 A4("manifest가 약 75개 입력 가운데 둘만 고정한다")를 고친 9.18 결정 5의 문장도 "compiler의 원천 파일과 stimulus와 replay 흐름"만 적었습니다. 2026-10-15의 9.23 D11이 `dataset/tools/compile.py`의 `input_files`에 `launch/*.json.gz`를 더해, 지금 core manifest의 `inputs`는 33개(library 1개, schema 1개, compiler 원천 파일 12개, `stimulus/` 흐름 3개, `replay/` 흐름 6개, `launch/` 흐름 10개)입니다. 같은 결정의 test `test_every_stream_directory_the_tools_open_is_pinned`는 compiler와 linter가 여는 모든 흐름 파일이 고정되었는지 검사합니다.
 
 ## 4.5 build/, manifest, coverage-grid.json: lockfile 묶음
 
@@ -800,23 +801,23 @@ compile은 timeline과 library 말고도 몇 가지 기록 파일을 읽습니�
 | `distractor-grid-single/` | 544 | 844 MB | 272개 workload와 report |
 | `familiarity-ladder-single/` | 132 | 96 MB | 66개 workload와 report |
 
-(파일 수와 크기는 `ls`와 `du`로 센 값입니다. `coreset-single/`의 1.6 GB 가운데 core set 51개와 그 report가 647 MB, variant 78개가 983 MB입니다. `dataset/README.md`가 말하는 "core set의 0.7 GB"는 앞의 647 MB입니다.)
+(파일 수와 크기는 `ls`와 `du`로 센 값입니다. `coreset-single/`의 1.6 GB 가운데 core set 51개와 그 report가 647 MB, variant 78개가 983 MB입니다. `dataset/README.md`가 말하는 "core set의 51개 artifact(678 MB)"는 앞의 647 MB를 10진 단위로 센 것입니다. `du`는 2진 단위로 셉니다.)
 
 디렉터리 이름 끝의 `-single`은 "lane 하나에 맞춘 판"이라는 뜻입니다. 예전에는 측정된 수요를 그대로 둔 `-native` 판도 함께 만들었지만, 2026-10-09에 없어졌습니다(5장의 "왜 이렇게 정했나" 참고). 이름만 남아 있습니다.
 
 **manifest 일곱 개** — `build/`를 commit하지 않는 대신, `build/`가 정확히 무엇이어야 하는지를 hash로 적은 파일을 commit합니다. npm의 `package-lock.json`이 "설치된 `node_modules`는 정확히 이것이어야 한다"를 적는 것과 같은 역할입니다.
 
-- `build.manifest.json`(core set): 네 구획. `inputs`(compile이 읽은 파일 23개의 SHA-256), `artifacts`(workload 51개의 SHA-256), `reports`(compile report 51개의 SHA-256), `demand`(파일마다 수요 class와 utilization, 구간마다 utilization).
+- `build.manifest.json`(core set): 네 구획. `inputs`(compile이 읽은 파일 33개의 SHA-256), `artifacts`(workload 51개의 SHA-256), `reports`(compile report 51개의 SHA-256), `demand`(파일마다 수요 class와 utilization, 구간마다 utilization).
 - `build.variants.manifest.json`: `inputs` 3개(library, core manifest, `variants.yaml`)와 `artifacts` 78개. artifact마다 원본, 원본의 hash, 집합, 변환, utilization을 적습니다.
-- `build.<set>.manifest.json` 다섯 개: core manifest의 구획에 더해 `grid` 구획이 있습니다. 파일마다 그 파일이 grid의 어느 칸인지(좌표), tuning과 measurement 가운데 어느 쪽인지(나눈 집합만), 어떤 C1 calibration group의 task 묶음이 어느 구간에 놓였는지(`placements`), 구간마다의 label(`segments`)을 적습니다. `inputs`는 45개로, compile의 입력에 더해 `grids.yaml`, generator 코드, C1 calibration group의 timeline 열여섯을 고정합니다.
+- `build.<set>.manifest.json` 다섯 개: core manifest의 구획에 더해 `grid` 구획이 있습니다. 파일마다 그 파일이 grid의 어느 칸인지(좌표), tuning과 measurement 가운데 어느 쪽인지(나눈 집합만), 어떤 C1 calibration group의 task 묶음이 어느 구간에 놓였는지(`placements`), 구간마다의 label(`segments`)을 적습니다. `inputs`는 55개로, compile의 입력에 더해 `grids.yaml`, generator 코드, C1 calibration group의 timeline 열여섯을 고정합니다.
 
 > **용어.** `manifest`는 이 데이터셋의 lockfile입니다. build가 읽은 입력과 만든 결과를 SHA-256으로 적은 JSON 파일이고, commit됩니다. `blessed build`는 그 hash들이 commit된 build, 즉 "공식으로 인정된" build입니다. 데이터를 바꾸면 다시 build해서 새 hash를 manifest에 적고 commit하는데, 기록은 이 일을 "re-bless"라고 부릅니다.
 
-**`coverage-grid.json`** — core set의 모든 구간이 driver table의 32칸(16 mode × `background_wanted`)과 이름 친숙도 tier에 어떻게 퍼져 있는지 센 표입니다. 32칸 각각의 구간 수, tier별 구간 수, `pre_committed_miss` 구간 수를 적고, 비어 있는 칸 목록(`empty_cells`, 지금은 빈 목록), 32칸 밖의 구간(`outside`: `c6-dual`의 `ambiguous` 구간 하나), 파일별 구간 label, 전체 구간 수(`segments_total: 66`), 그리고 generated 집합마다의 같은 표를 담습니다. `make dataset`이 다시 쓰고, `make check`가 어긋남을 검사합니다.
+**`coverage-grid.json`** — core set의 모든 구간이 driver table의 32칸(16 mode × `background_wanted`)과 이름 친숙도 tier에 어떻게 퍼져 있는지 센 표입니다. 32칸 각각의 구간 수, tier별 구간 수, `pre_committed_miss` 구간 수를 적고, 비어 있는 칸 목록(`empty_cells`, 지금은 빈 목록), 32칸 밖의 구간(`outside`: `c6-dual`의 `ambiguous` 구간 하나), 파일별 구간 label, 전체 구간 수(`segments_total: 67`), 그리고 generated 집합마다의 같은 표를 담습니다. `make dataset`이 다시 쓰고, `make check`가 어긋남을 검사합니다.
 
 ## 4.6 tools/: 도구 지도
 
-`dataset/tools/`에는 README가 없습니다. 도구 수준의 설명은 `dataset/README.md`의 "Tools map"과 각 module의 docstring뿐입니다. 큰 덩어리만 적습니다.
+`dataset/tools/` 자체에는 README가 없습니다. 도구 수준의 설명은 `dataset/README.md`의 "Tools map", 각 module의 docstring, 그리고 측정 도구의 지도인 `dataset/tools/meas/README.md`(2026-10-16에 9.15가 씀)입니다. 큰 덩어리만 적습니다.
 
 | 경로 | 무엇을 위한 것인가 |
 |---|---|
@@ -824,18 +825,18 @@ compile은 timeline과 library 말고도 몇 가지 기록 파일을 읽습니�
 | `derive.py` | 명령행 입구: recipe → 파생 timeline, 그리고 `coverage-grid.json` |
 | `variants.py` | 명령행 입구: sensitivity variant와 그 manifest |
 | `generate.py` | 명령행 입구: `grids.yaml` + C1 calibration group의 timeline → generated timeline, artifact, report, manifest |
-| `check_build.py` | 명령행 입구: 모든 manifest가 commit된 byte와 같은가, `build/`가 manifest들의 합집합과 같은가 |
-| `lint.py` | 명령행 입구: compile 전의 검사 |
+| `check_build.py` | 명령행 입구: 모든 manifest, 모든 파생 timeline, `coverage-grid.json`이 commit된 byte와 같은가, `build/`가 manifest들의 합집합과 같은가 |
+| `lint.py` | 명령행 입구: compile 전의 검사(`--freeze`면 `meas-pending`을 거부; `make lint`가 넘김) |
 | `wlc/` | workload compiler library: `timeline.py`(읽기), `compiler.py`(compile), `deriver.py`(recipe), `sampling.py`(열쇠 붙은 뽑기), `units.py`(시간 단위), `estimate.py`(수요 기록), `linter.py`(lint 규칙), `grid.py`(coverage grid), `library.py`, `variants.py` |
 | `gen/` | generator: `cells.py`(정의 → 칸), `compose.py`(칸 하나 → timeline 하나), `coverage.py`(generated 집합의 coverage 표) |
-| `meas/` | 측정 campaign 도구(sampler, 분석기, 이름 검증, fold-in, 안정성 규칙). compile은 읽지 않음 |
+| `meas/` | 측정 campaign 도구(sampler, 분석기, 이름 검증, fold-in, 안정성 규칙). 지도는 `tools/meas/README.md`. compile은 읽지 않음 |
 | `stimulus/build_streams.py` | SWELL-KW 기록에서 `stimulus/`의 흐름을 만든 일회성 도구 |
 | `end_bound.py`, `beyond_hash.py` | 보조 도구: batch 작업이 어떤 정책에서도 끝나는 시각 계산(9.10 D78의 산술), library 변경이 어느 artifact를 바꾸는지 확인 |
 | `tests/` | pytest test 파일 33개와 `conftest.py`, `fixtures/` |
 
-필요한 Python 환경은 Python 3.12 이상과 `tools/requirements.txt`의 package(PyYAML, jsonschema-rs, pytest, numpy)입니다.
+필요한 Python 환경은 Python 3.12와 `tools/requirements.txt`의 package입니다. package는 판까지 정확히 고정되어 있습니다(PyYAML 6.0.1, jsonschema-rs 0.29.1, pytest 8.3.4, numpy 1.26.4; 2026-10-15의 9.23 D15). `make`는 `PY=python3.12`를 주지 않으면 `python3`를 씁니다(`dataset/Makefile`의 `PY ?= python3`). `dataset/README.md`의 Commands 절도 같은 것을 적습니다.
 
-> **열린 자리.** `dataset/README.md`의 Commands 절은 requirements를 "PyYAML, jsonschema, pytest"라고 적어 numpy를 빠뜨리고 jsonschema-rs를 jsonschema로 적습니다. 2026-10-10 감사의 문서 정리 목록에 "README:99 omits numpy"로 올라 있습니다.
+> **왜 이렇게 정했나 — Python 3.12.** 모든 CI 실행과 bless된 build가 3.12를 썼고, 다른 판에서 같은 byte가 나오는지는 확인한 적이 없습니다. 2026-10-16에 인지오가 README의 "3.12 이상"을 "3.12"로 고정하기로 정했습니다(9.15 작업 목록에서 interpreter 판을 물은 항목 W-0745의 답). 같은 날의 확인 기록은 numpy 1.26.4가 Python 3.13용 wheel을 내지 않는다는 것도 적습니다.
 
 ## 4.7 pipeline: make 명령 여섯 개
 
@@ -843,45 +844,45 @@ compile은 timeline과 library 말고도 몇 가지 기록 파일을 읽습니�
 
 ```mermaid
 flowchart LR
-    L["make lint<br/>compile 전 검사<br/>(아무것도 쓰지 않음)"] --> D
+    L["make lint<br/>compile 전 검사, --freeze<br/>(아무것도 쓰지 않음)"] --> D
     D["make dataset<br/>derive.py: recipe → 파생 timeline, coverage grid<br/>compile.py: timeline 51개 → build/coreset-single/ + build.manifest.json"] --> V
     V["make variants<br/>variants.py: 78개 variant → build/coreset-single/&lt;base&gt;@&lt;set&gt; + build.variants.manifest.json"] --> G
     G["make generated<br/>generate.py: grids.yaml + C1 calibration timeline → generated/&lt;set&gt;/ → build/&lt;set&gt;-single/ + build.&lt;set&gt;.manifest.json"] --> T
     T["make test<br/>pytest tools/tests"] --> C
-    C["make check<br/>derive.py --check --require-coverage<br/>check_build.py"]
+    C["make check<br/>derive.py --check --require-coverage<br/>check_build.py: manifest, 파생 timeline, coverage grid = commit된 byte"]
 ```
 
 하나씩 무엇을 하는지만 적습니다.
 
-1. **`make lint`**는 compile 전의 검사입니다. 출처 registry의 모든 id가 `docs/references.md`에 있는가, archetype의 필수 필드가 있는가, 모든 출처 tag가 registry로 풀리고 locator가 형식에 맞는가, timeline의 `bind`·`count`와 `source` map의 key가 맞는가, timeline 구조 규칙(겹치지 않는 구간, focus 안의 input 등), generated layer 정의의 형식과 이름 길이. 아무것도 쓰지 않고 몇 초 만에 끝납니다. canonical lint(compile된 파일에 대한 검사)는 여기서 돌지 않고 compile 안에서 돕니다.
+1. **`make lint`**는 compile 전의 검사입니다. 출처 registry의 모든 id가 `docs/references.md`에 있는가, archetype의 필수 필드가 있는가, 모든 출처 tag가 registry로 풀리고 locator가 형식에 맞는가, timeline의 `bind`·`count`와 `source` map의 key가 맞는가, timeline 구조 규칙(겹치지 않는 구간, focus 안의 input 등), generated layer 정의의 형식과 이름 길이, 데이터가 인용하는 모든 `meas-ci` campaign이 `meas-releases.yaml`의 release로 풀리는가. `make lint`는 `lint.py --freeze`로 돌므로(2026-10-15의 9.23 D13), library의 매개변수나 timeline의 bound value에 `meas-pending` tag가 하나라도 있으면 실패합니다("meas-pending after freeze", `dataset/tools/wlc/linter.py`; timeline 쪽은 2026-10-16부터). 아무것도 쓰지 않고 몇 초 만에 끝납니다. canonical lint(compile된 파일에 대한 검사)는 여기서 돌지 않고 compile 안에서 돕니다.
 2. **`make dataset`**은 두 단계입니다. 먼저 `derive.py`가 recipe 다섯 개를 적용해 파생 timeline 28개를 쓰고 `coverage-grid.json`을 다시 만듭니다. 그다음 `compile.py`가 timeline 51개를 모두 compile해서 `build/coreset-single/`에 workload와 report를 쓰고 `build.manifest.json`을 다시 씁니다. 파일 하나에 worker process 하나를 쓰므로 CPU 수만큼 병렬로 돕니다.
 3. **`make variants`**는 `variants.yaml`의 아홉 집합을 만듭니다. RUN 값을 곱하는 변환은 이미 compile된 파일 위에서 하고, 구간 길이를 바꾸거나 library 값을 바꾸거나 관찰 흐름으로 바꾸는 변환은 원본 timeline을 다시 compile합니다. 결과는 `build/coreset-single/<base>@<set>.workload.json`이고, variant의 `meta.id`는 `<base>@<set>`입니다.
 4. **`make generated`**는 generated layer 전체를 만듭니다. 집합마다 칸을 나열하고, 칸마다 timeline을 쓰고, 그 timeline을 core set과 똑같이 compile하고, 집합의 manifest를 씁니다.
 5. **`make test`**는 test suite를 돌립니다. core set을 읽는 test는 `build/`의 파일이 manifest의 hash와 같으면 그것을 그대로 읽고, 다르면 새로 compile합니다.
-6. **`make check`**는 문지기입니다. `derive.py --check --require-coverage`가 파생 timeline과 coverage grid가 다시 만들어도 같은지, 32칸 가운데 빈 칸이 없는지 검사하고, `check_build.py`가 두 가지를 검사합니다. (a) 디스크의 manifest 일곱 개가 각각 `git show HEAD:<경로>`의 byte와 같은가. 앞 단계들이 manifest를 다시 썼으므로, 같다는 것은 "다시 build한 결과가 commit된 것과 같다"는 뜻입니다. (b) `build/`가 manifest들의 합집합과 정확히 같은가. 고정된 모든 파일이 그 hash로 있고, 고정되지 않은 파일이 하나도 없어야 합니다. 아무것도 쓰지 않습니다.
+6. **`make check`**는 문지기입니다. `derive.py --check --require-coverage`가 파생 timeline과 coverage grid가 다시 만들어도 같은지, 32칸 가운데 빈 칸이 없는지 검사하고, `check_build.py`가 두 가지를 검사합니다. (a) 디스크의 manifest 일곱 개, recipe가 쓰는 파생 timeline 28개, `coverage-grid.json`이 각각 `git show HEAD:<경로>`의 byte와 같은가(파생 timeline과 grid는 2026-10-15의 9.23 D12부터). 앞 단계들이 이 파일들을 다시 썼으므로, 같다는 것은 "다시 build한 결과가 commit된 것과 같다"는 뜻입니다. 그래서 파생 timeline을 다시 만들고 commit하지 않으면 `make check`가 실패합니다. (b) `build/`가 manifest들의 합집합과 정확히 같은가. 고정된 모든 파일이 그 hash로 있고, 고정되지 않은 파일이 하나도 없어야 합니다. 아무것도 쓰지 않습니다.
 
 > **왜 이렇게 정했나.** 지금의 "build 단계가 재현성을 증명하고, `check`는 비교만 한다"는 구조는 2026-10-11의 9.22 spec 결정 1(build 시간을 줄인 sub-task)에서 왔습니다. 기록된 이유는 그 전에는 `lint`, `dataset`, `test`, `check`가 각자 전체를 다시 compile해서 CI 한 번에 3.5시간이 걸렸다는 것입니다(9.18 D7의 측정). 같은 sub-task의 결정 3은 schema 검증 library를 `jsonschema-rs`로 바꾸었는데, 95 MB짜리 `c7-transcode`에서 `jsonschema`가 141초, `fastjsonschema`가 19.7초, `jsonschema-rs`가 1.4초 걸린 측정이 근거로 적혀 있습니다. 9.22(build 시간을 줄인 sub-task) 이후 CI 실행(run 38131040159)은 6분 34초였습니다(9.22 D6).
 
 ## 4.8 CI와 build 전략
 
-`.github/workflows/dataset.yml`은 `main`으로의 push와 pull request마다, 그리고 어떤 branch에서든 손으로(`workflow_dispatch`) 돌릴 수 있습니다. Linux runner 하나에서 위 여섯 target을 차례로 돌려, 모든 집합을 한 번씩 compile하고 commit된 manifest와 비교합니다. 2026-10-12의 실행(run 38243554308)은 12분 04초 걸렸고, 그 가운데 generated layer가 5분 13초였습니다. 그때 artifact는 1,562개 generated 파일을 포함했고, `build/`가 runner 저장 공간 14 GB 가운데 6.8 GB를 썼습니다(`dataset/README.md`; 9.20 D11).
+`.github/workflows/dataset.yml`은 `main`으로의 push와 pull request마다, 그리고 어떤 branch에서든 손으로(`workflow_dispatch`) 돌릴 수 있습니다. Linux runner 하나에서 위 여섯 target을 차례로 돌려, 모든 집합을 한 번씩 compile하고 commit된 manifest와 비교합니다. `dataset/README.md`가 적는 가장 최근의 측정은 2026-10-15의 dataset run 38722675475로, 17분 04초 걸렸고 그 가운데 generated 단계가 7분 23초였습니다(9.23 D18). 그보다 앞선 2026-10-12의 run 38243554308은 12분 04초, generated 단계 5분 13초였습니다(9.20 D11). 두 run 모두 1,562개 generated 파일을 포함했고, `build/`는 runner 저장 공간 14 GB 가운데 6.8 GB를 씁니다.
 
-> **왜 이렇게 정했나.** generated layer를 매 CI 실행마다 build하기로 한 것은 2026-10-13의 9.21 spec 결정 8(generated layer의 소비자 작업 sub-task)입니다. 기록된 이유는 다른 두 길 — 필요할 때만 build하기, 일부만 고정해 build하기 — 이 모두 `check`의 규칙 "`build/`는 모든 manifest의 합집합과 같다"에 예외를 넣어야 한다는 것입니다. 같은 기록은 이 전략을 다시 볼 때도 적습니다. 새 집합이 추가될 때(backlog의 naturalistic set이 그 계기가 될 것), 또는 generated 단계의 시간이나 build 크기가 push가 기다릴 수 있는 한도를 넘을 때입니다. runner의 사양(4 vCPU, 16 GB RAM, 14 GB SSD)은 `docs/references.md`의 `gh-hosted-runners` 항목에서 왔습니다.
+> **왜 이렇게 정했나.** generated layer를 매 CI 실행마다 build하기로 한 것은 2026-10-13의 9.21 spec 결정 8(generated layer의 소비자 작업 sub-task)입니다. 기록된 이유는 다른 두 길 — 필요할 때만 build하기, 일부만 고정해 build하기 — 이 모두 `check`의 규칙 "`build/`는 모든 manifest의 합집합과 같다"에 예외를 넣어야 한다는 것입니다. 같은 기록은 이 전략을 다시 볼 때도 적습니다. 새 집합이 추가될 때(backlog의 naturalistic set이 그 계기가 될 것), 또는 generated 단계의 시간이나 build 크기가 push가 기다릴 수 있는 한도를 넘을 때입니다. 다시 볼 숫자 기준은 두지 않았습니다(2026-10-16, 인지오의 결정). README는 대신 가장 최근의 측정값과 두 천장을 적습니다. runner의 저장 공간 14 GB(`gh-hosted-runners`)와, job 하나가 강제로 끝나기 전까지 돌 수 있는 6시간(`gh-actions-limits`: "Each job in a workflow can run for up to 6 hours of execution time")입니다. runner의 사양(4 vCPU, 16 GB RAM, 14 GB SSD)은 `docs/references.md`의 `gh-hosted-runners` 항목에서 왔습니다.
 
 ## 4.9 tree의 규칙
 
 `dataset/README.md`의 "Rules of the tree"는 데이터셋을 고칠 때 지켜야 할 규칙을 적습니다. 지금 유효한 규칙은 이렇습니다.
 
-- **의미는 문서에, 기계 검사는 코드에.** compiler는 `docs/simulator/interpretation-contract.md`를 구현하고, 집합 설계는 `docs/workload/building-plan.md`를 따릅니다. 코드와 문서가 다르면 문서가 이기고 코드를 고칩니다.
+- **의미는 문서에, 기계 검사는 코드에.** compiler는 `docs/simulator/interpretation-contract.md`를 구현하고, 집합 설계는 `docs/workload/building-plan.md`를, archetype 작성은 `docs/workload/archetype-plan.md`를 따릅니다. 의미는 문서가 정합니다. 코드와 문서가 다르면 그 일에 대한 가장 최근의 기록된 결정이 정합니다. 결정을 놓친 문서는 그 결정에 맞게 고치고, 결정 없이 문서에서 벗어난 코드는 고칩니다. 동결된 계약은 동결 규칙으로만 바뀝니다(`docs/data-contracts.md` §13: 세 사람 모두의 합의와 §14 항목). 이 문장은 2026-10-16에 인지오가 정한 것으로, 그 전의 "문서가 이기고 코드를 고친다"를 대신합니다.
 - **행동 매개변수는 `archetypes.yaml`에만.** timeline은 (이름, archetype)을 묶고, archetype의 `binding_params`가 허락한 knob만 줍니다.
-- **모든 매개변수 값에는 출처가 있습니다.** library의 숫자는 `source` tag로, timeline의 bound value는 `source` map으로(6장).
+- **모든 매개변수 값에는 출처가 있습니다.** library의 숫자는 `source` tag로, timeline의 bound value는 `source` map으로(6장). `meas-ci` tag는 `meas-releases.yaml`이 그 campaign의 release로 이어 주고, lint가 지도에 없는 tag를 실패시킵니다.
+- **task의 이름은 kernel `comm`입니다**(9.10 D25). campaign이 돌린 program이면 그 campaign이 관찰한 `comm`입니다. 아니면 kernel의 규칙으로 얻은 이름이고, campaign이나 이름 workflow(`meas-ci:names:2`)가 그 이름을 보여 주는 곳에서만 그것으로 확인됩니다. compile된 core 파일들이 담는 이름 44개는 네 종류입니다. 첫째, campaign이 추적한 `comm`입니다(대부분이 이것입니다. `python`은 학습 run에서 관찰된 `comm`, 9.10 D84). 둘째, game chain의 thread 이름으로, LAVD 발표 자료의 16번 slide(`lavd-ossna24` s16)에서 왔고 `wineserver`는 compiler가 붙입니다. 셋째, tier 4와 tier 5의 지어낸 이름입니다(design, 5.2). 넷째, 일부러 넣은 spoof입니다(`c6-spoof`의 `chrome`, `c6-alias`가 두 재생기에 붙인 `baloo_file`과 `tracker-miner-f`; design).
 - **generated layer는 design입니다.** generated 파일은 C1 calibration group의 task 묶음을 `grids.yaml`의 규칙대로 조합하거나 이름을 바꿀 뿐이고, 실제 desktop에 대해 아무것도 주장하지 않습니다.
 - **파생 파일의 키 입력은 원본의 것입니다.** 원본 창의 일부인 파생 창은 `slice_of`로 그 사실을 적고, compiler는 원본 창의 시작점을 씁니다.
-- **`meas-pending`은 없습니다.** library는 모두 측정되었고, linter가 그 상태를 지킵니다. `meas-pending`은 "측정을 기다리는 임시값"이라는 표시였습니다.
+- **수요는 보고만 하고 붙들지 않습니다.** compiler는 `-single` 파일마다 정적 utilization을 파일과 구간별로 manifest의 `demand`에 적고, 어떤 파일도 그것으로 실패하거나 다시 설계되지 않습니다(9.14 결정 4, `dataset/tools/wlc/estimate.py`). 예전의 "~100–150 % 창" 규칙은 2026-10-09에 물러났습니다(5.5).
+- **`meas-pending`은 없습니다.** 측정을 기다리는 값은 `meas-pending` tag를 달고, `make lint`의 freeze가 library의 매개변수와 timeline의 bound value 모두에서 그 tag를 거부합니다(4.7). library는 하나도 품지 않습니다. 28개 항목은 측정되었고 `game-task-chain`은 LAVD 발표의 숫자에 기댑니다.
 - **모든 archetype과 모든 task에 `declared_class`.**
 - **TIMER가 먼저.** TIMER를 어디서든 쓰는 program은 처음 실행하는 명령이 TIMER여야 합니다. 그래야 TIMER의 기준 시각 t₀가 task의 도착 시각이 됩니다(canonical lint).
-
-> **열린 자리 — README에 남은 옛 규칙.** 같은 목록에는 "Demand window: `oversubscribed` class의 모든 `-single` 파일은 정적 추정으로 ~100–150 % 창 안에 들어야 하고, 벗어난 파일은 다시 설계한다"는 규칙이 아직 있습니다. 이 규칙은 2026-10-09에 9.14 결정 4로 문지기에서 물러났습니다. `dataset/tools/wlc/estimate.py`의 docstring은 "2026-10-09에 gate에서 은퇴했다. 모든 파일의 수요는 manifest가 보고하는 측정 사실이고, 어떤 build도 그것으로 실패하지 않는다"고 적고, `docs/workload/building-plan.md` §5a는 "compiler는 … 파일을 그것으로 실패시키지 않는다"고 적습니다. 지금 이 창을 강제하는 lint는 없습니다. README 정정은 문서 정정 sub-task 9.15의 작업 목록에 있습니다.
 
 ## 4.10 무엇을 고치면 무엇을 다시 돌리나
 
@@ -909,14 +910,14 @@ flowchart LR
 
 | 집합 | 파일 | label 구간 | 어디에 | 무엇을 위해 |
 |---|---|---|---|---|
-| core set | 51 | 66 | `build/coreset-single/` | 하나의 파일이 하나의 주장을 맡는, 손으로 설계한 집합. RQ0 문지기 실험이 도는 곳 |
+| core set | 51 | 67 | `build/coreset-single/` | 하나의 파일이 하나의 주장을 맡는, 손으로 설계한 집합. RQ0 문지기 실험이 도는 곳 |
 | sensitivity variant | 78 | (원본과 같음) | `build/coreset-single/<base>@<set>` | RQ0 문지기 실험의 판정이 측정의 불확실성에 흔들리는지 보는 보고선 |
 | generated layer | 1,562 | 3,946 | `build/<set>-single/` 다섯 곳 | 한 요인을 빠짐없이 나열해 비율을 재는 design 집합 |
 | naturalistic set (generalset) | 0 | — | 없음 | backlog. 실제 사용 분포를 흉내 내는 집합 |
 
-core set의 66구간은 32칸 grid 위의 65구간과 grid 밖의 `ambiguous` 구간 하나입니다(`coverage-grid.json`의 `segments_total: 66`, `outside` 목록). generated layer의 3,946구간은 다섯 집합의 구간 수를 더한 값입니다(transition grid 960, return grid 2,160, flap stress 216, distractor grid 544, familiarity ladder 66).
+core set의 67구간은 32칸 grid 위의 66구간과 grid 밖의 `ambiguous` 구간 하나입니다(`coverage-grid.json`의 `segments_total: 67`, `outside` 목록). generated layer의 3,946구간은 다섯 집합의 구간 수를 더한 값입니다(transition grid 960, return grid 2,160, flap stress 216, distractor grid 544, familiarity ladder 66).
 
-> **열린 자리 — 50인가 51인가.** `docs/workload/building-plan.md` §0과 §3의 "Counts and reuse"는 core set을 "50 files, 64 segments"라고 적고, `docs/background-guide.md` §5와 §7도 "50 workload files"라고 적습니다. 지금의 사실은 51개 파일, 66구간이고, 출처는 tree와 `build.manifest.json`(artifact 51개), `coverage-grid.json`(`segments_total: 66`), `dataset/README.md`입니다. 51번째 파일 `c2-p2a-idle`은 2026-10-09에 재구축 sub-task 9.13이 더했고, 늘어난 구간 둘은 재구축된 C2 intent pair group(지금 14구간)과 C6 resolution-limit group(지금 5구간)에서 왔습니다.
+> **왜 이렇게 정했나 — 51개 파일, 67구간이 된 길.** Phase 7 이후의 core set은 50개 파일, 64구간이었습니다. 51번째 파일 `c2-p2a-idle`은 2026-10-09에 재구축 sub-task 9.13이 더했고, 재구축된 C2 intent pair group(14구간)과 C6 resolution-limit group에서 구간이 늘어 66구간이 되었습니다. 2026-10-14의 9.23 D2는 `c6-spoof`를 사칭 작업이 도착하는 20초에서 두 구간으로 나누었습니다. 사칭 작업은 아무도 시키지 않은 지속 작업인데 snapshot에는 `chrome` 하나가 더 보일 뿐이라는 것이 기록된 이유입니다(`harness/CHANGELOG.md`의 2026-10-14 항목). 그래서 C6 resolution-limit group이 6구간이 되어 지금의 67구간입니다. 9.15에서 `docs/workload/building-plan.md` §0과 §3, `docs/background-guide.md`도 51개 파일을 적습니다.
 
 ## 5.2 core set의 일곱 group
 
@@ -929,14 +930,14 @@ core set의 파일은 일곱 group으로 나뉘고, 파일 이름의 앞자리 `
 | C3 transition arc(상황이 바뀌는 흐름) | 3 | 10 | 이런 모양의 전환이 실재한다는 것을 보이는 존재 사례 |
 | C4 distractor injection(엉뚱한 process 끼우기) | 3 | 3 | 상관없는 process가 끼어들 때 판단이 잘못 뒤집히지 않는가(존재 사례) |
 | C5 familiarity ladder(이름 친숙도 사다리) | 2 | 2 | 이름을 알아볼 수 없게 되어도 인식이 버티는가(존재 사례) |
-| C6 resolution limit(설계상 실패 지점) | 4 | 5 | 이름 기반 인식이 원리적으로 어디서 깨지는가 |
+| C6 resolution limit(설계상 실패 지점) | 4 | 6 | 이름 기반 인식이 원리적으로 어디서 깨지는가 |
 | C7 attribute counterpart(attribute의 반대편) | 16 | 16 | 배경 작업이 원치 않는 것일 때 판단이 뒤집히는가. mode마다 하나 |
 
 (파일 수와 구간 수는 tree와 `coverage-grid.json`의 `per_file`에서 센 값입니다. `dataset/README.md`의 표는 C2 intent pair group을 "6 (3 pairs) + 1"로 적어 같은 7을 다르게 셉니다.)
 
 각 group을 한두 문단으로 봅니다.
 
-**C1 calibration group.** mode마다 파일 하나, 열여섯 개입니다. 각 파일은 그 mode의 `true` 칸 하나를 담습니다. interactive와 periodic mode의 파일은 60초이고(`c1-office`, `c1-dev`, `c1-media` 등), batch 작업을 담은 파일은 그 작업이 어떤 정책에서도 끝나는 길이로 늘어나 있습니다(`c1-compile` 1,594초, `c1-ml-train` 1,612초, `c1-transcode` 4,762초, `c1-backup` 277초). 모두 `demand: calibration`이고 seed는 101–116입니다. building plan은 이 group의 역할을 "인식의 바닥, executor 대응의 확인, 그리고 정직한 기준선 — 이름 whitelist가 완벽한 점수를 받아야 하는 곳"이라고 적습니다. generated layer 전체가 이 열여섯 파일의 task 묶음만으로 만들어지므로, C1 calibration group은 데이터셋 전체의 재료 상자이기도 합니다.
+**C1 calibration group.** mode마다 파일 하나, 열여섯 개입니다. 각 파일은 그 mode의 `true` 칸 하나를 담습니다. interactive와 periodic mode의 파일은 60초이고(`c1-office`, `c1-dev`, `c1-media` 등), batch 작업을 담은 파일은 그 작업이 어떤 정책에서도 끝나는 길이로 늘어나 있습니다(`c1-compile` 1,594초, `c1-ml-train` 1,612초, `c1-transcode` 4,762초, `c1-backup` 277초). 모두 `demand: calibration`이고 seed는 101–116입니다. building plan은 이 group의 역할을 "인식의 바닥, executor 대응의 확인, 그리고 정직한 기준선 — 가장 강한 이름 표(`strongest_name_table`)가 완벽한 점수를 받을 것으로 예상되는 곳"이라고 적습니다. 배포판의 catalogue를 재현한 `shipped_catalogue`는 그렇지 않습니다. ananicy-cpp가 대조하는 key로 세어 보면, 그 catalogue는 센 때의 core 파일 50개 가운데 7개에서만 파일이 묶는 모든 이름을 찾습니다(9.12 D109). generated layer 전체가 이 열여섯 파일의 task 묶음만으로 만들어지므로, C1 calibration group은 데이터셋 전체의 재료 상자이기도 합니다.
 
 **C2 intent pair group.** 세 쌍과 한 개입니다. 쌍의 두 파일은 첫 구간을 공유하고 두 번째 구간에서만 다릅니다. P1은 editor 옆의 training(`python`)과 editor 옆의 Tracker indexing(`tracker-miner-f`)입니다. 연구의 무게가 실리는 쌍이고(1.5), 두 번째 구간은 indexing의 측정된 CPU 총량인 39.435초입니다. P2는 게임 옆의 Steam download(`steam`, 원함)와 게임 옆의 자동 업데이트(`unattended-upgr`, 원치 않음)입니다. P3는 Kdenlive 옆의 export(`kdenlive_render`, mode `render`)와 Kdenlive 옆의 정기 backup(`deja-dup`, mode `backup`)입니다. 일곱 번째 파일 `c2-p2a-idle`은 `c2-p2a`의 download를 `idle` class로 바꾼 것으로, 판정 집합 밖에서 RQ0 gate spec의 "bounding check"만 읽습니다. 기록된 목적은 "일반 desktop이 download의 nice-10 작업을 다루는 방식을 위아래로 묶는 것"입니다(`dataset/README.md`).
 
@@ -948,25 +949,25 @@ core set의 파일은 일곱 group으로 나뉘고, 파일 이름의 앞자리 `
 
 > **용어.** `familiarity tier`는 process **이름**이 언어 모델에게 얼마나 알아보기 쉬운지의 등급입니다. building plan §3의 C5 familiarity ladder group 절의 정의로 1은 투명한 이름(`firefox`), 2는 반쯤 불투명한 이름(`soffice.bin`), 3은 그 program 자신의 실제 이름이지만 뜻이 드러나지 않는 것(`cc1`, `tracker-miner-f`), 4는 존재하지 않지만 단어로 뜻을 짐작할 수 있는 이름, 5는 존재하지 않고 짐작도 할 수 없는 이름입니다. 행동이 아니라 이름의 성질이고, 정확도를 나눠 보고하는 열쇠로만 씁니다.
 
-**C6 resolution-limit group.** 이름 기반 인식이 **설계상** 실패하는 지점을 파일로 만든 넷입니다. building plan은 이것을 "한계를 주장만 하지 않고 측정하려고 싣는다"고 적습니다. `c6-spoof`는 `chrome`이라는 이름을 단 CPU batch 작업이 20초에 나타나는 파일, `c6-alias`는 두 재생기가 실제 indexer의 이름(`baloo_file`, `tracker-miner-f`)을 쓰는 파일, `c6-fold`는 브라우저 안에서 browsing이 영상 통화로 바뀌는 파일(통화도 `chrome`이라는 이름으로 돎), `c6-dual`은 게임과 build를 기다리는 editor가 똑같이 활발한, 정답이 `ambiguous`인 12,072초짜리 파일입니다.
+**C6 resolution-limit group.** 이름 기반 인식이 **설계상** 실패하는 지점을 파일로 만든 넷입니다. building plan은 이것을 "한계를 주장만 하지 않고 측정하려고 싣는다"고 적습니다. `c6-spoof`는 `chrome`이라는 이름을 단 CPU batch 작업이 20초에 나타나는 파일(20초부터는 `background_wanted: false`인 browsing 구간), `c6-alias`는 두 재생기가 실제 indexer의 이름(`baloo_file`, `tracker-miner-f`)을 쓰는 파일, `c6-fold`는 브라우저 안에서 browsing이 영상 통화로 바뀌는 파일(통화도 `chrome`이라는 이름으로 돎), `c6-dual`은 게임과 build를 기다리는 editor가 똑같이 활발한, 정답이 `ambiguous`인 12,072초짜리 파일입니다. 이 가운데 셋이 pre-committed miss를 답니다. `c6-alias`는 파일 전체, `c6-fold`는 통화가 도착하는 30초부터, `c6-spoof`는 사칭 작업이 도착하는 20초부터입니다(5.3).
 
-> **열린 자리 — `c6-fold`에서 질의가 생기는가.** `docs/workload/building-plan.md` §3의 C6 resolution-limit group 절은 `c6-fold`를 "canonical set이 바뀌지 않아 query가 일어나지 않는, 보장된 실패"라고 적습니다. 그러나 2026-10-01의 9.10 D30이 통화 장면에 실제 통화 task(`call`, 이름 `chrome`, 30초 도착)를 더한 뒤로, 30초에 `chrome`의 개수가 5에서 6으로 늘어납니다. telemetry 규칙 1("개수만 바뀌어도 snapshot이 생긴다", 7장)에 따라 30초에 snapshot 하나가 생깁니다. 이 권을 쓰면서 harness의 mock daemon으로 `c6-fold`의 snapshot을 계산해 보았고, `{chrome: 5} → {chrome: 6}`으로 세 snapshot(0초, 30초, 60초)이 나왔습니다. 9.10 D30의 기록은 "이름 집합은 `{chrome}` 그대로이므로 파일은 보장된 실패로 남는다"고 적으므로, 이름만 보면 판단할 근거가 없다는 핵심은 유지됩니다. building plan의 "query가 일어나지 않는다"는 문장은 9.10 D30이 문서 정정 sub-task 9.15에 넘긴 정정 항목("`building-plan.md` §3 C6 fold sentence", 곧 building plan의 C6 resolution-limit group 절에 있는 fold 문장)입니다.
+> **왜 이렇게 정했나 — `c6-fold`에서는 30초에 질의가 생깁니다.** 2026-10-01의 9.10 D30이 통화 장면에 실제 통화 task(`call`, 이름 `chrome`, 30초 도착)를 더한 뒤로, 30초에 `chrome`의 개수가 5에서 6으로 늘어납니다. telemetry 규칙 1("개수만 바뀌어도 snapshot이 생긴다", 7장)에 따라 30초에 snapshot 하나가 생기므로, 9.10 D30의 "canonical set이 경계에서 바뀌지 않는다"는 성립하지 않았습니다. 이 권을 쓰면서 harness의 mock daemon으로 `c6-fold`의 snapshot을 계산해 보았을 때도 `{chrome: 5} → {chrome: 6}`으로 세 snapshot(0초, 30초, 60초)이 나왔습니다. 2026-10-14의 9.23 D1이 이것을 받아들였습니다. 질의는 생기지만 snapshot의 어디에도 통화라는 말이 없으므로(여섯 번째 `chrome`은 새 tab을 연 것과도 같아 보입니다), 회의 구간(30–60초)에 `pre_committed_miss: true`를 달아 인식 정확도(Layer 1)의 대표값에서 빼고, RQ0 gate spec의 `layer1_exclusions`에도 넣었습니다. browsing 구간은 0초의 채점 지점을 그대로 가집니다. building plan §3의 C6 resolution-limit group 절도 9.15에서 그렇게 고쳐졌습니다("a query fires at 30 s … the meeting segment (30–60 s) is a pre-committed miss").
 
 **C7 attribute counterpart group.** mode마다 하나, 열여섯 개입니다. 각 파일은 같은 mode의 C1 calibration group 파일에서 파생되어 그 mode의 `false` 칸을 담습니다(indexing만 반대로, `c1-indexing`이 사용자가 시작한 `true` 칸입니다). interactive mode 열 개는 원본의 처음 26.385초를 잘라 쓰고, 0초에 원치 않는 자동 업데이트(`unattended-upgr`, `package-upgrade` archetype)를 끼웁니다. 26.385초는 그 업데이트의 측정된 CPU 총량이라, 업데이트가 구간의 모든 순간에 살아 있습니다. `c7-compile`은 사용자의 build 대신 자동 업데이트가 일으킨 DKMS module rebuild(`dkms`)를 씁니다. `c7-indexing`은 같은 Tracker indexing을 첫 login 때의 것(`initiated: session`)으로 씁니다. 나머지 batch mode 넷(`c7-ml-train`, `c7-render`, `c7-transcode`, `c7-backup`)은 같은 작업을 그대로 두고 label만 뒤집습니다. 그 mode들에는 배포판이나 vendor가 다른 이름으로 돌리는 "원치 않는 같은 종류의 작업"이 없기 때문입니다. 그래서 이 넷은 pre-committed miss입니다(5.3).
 
 > **왜 이렇게 정했나.** C7 attribute counterpart group은 2026-09-10의 Phase 7(core set의 attribute coverage를 채운 phase)에서 생겼습니다. 계기는 Phase 6(driver table 초안과 채점 spec을 만든 phase)의 driver table 쌍 검토가 찾은 것으로, 당시 coverage grid가 mode × 친숙도만 세었기 때문에 core set이 32칸 가운데 17칸만 채우고 있었다는 사실입니다(Phase 7 spec 서문). Phase 7 spec 결정 1은 "32칸 모두를 core set에 담되, 모든 `false` 칸은 같은 mode의 `true` 원본과 한 곳만 다른 쌍으로 담는다"고 정했습니다. 2026-09-10의 memo(`docs/memos/2026-09-10-coreset-before-and-after-phase-7.md`)는 이 변화로 파일이 24개에서 50개로, 채워진 칸이 17개에서 32개로 늘었다고 적습니다(재구축 이전의 숫자입니다).
 
-> **열린 자리 — "한 곳만 다른 쌍"이라는 표현.** `dataset/README.md`와 building plan §3의 C7 attribute counterpart group 절은 C1 calibration group 파일과 C7 attribute counterpart group 파일의 쌍을 "one-diff pair"(한 곳만 다른 쌍)라고 부릅니다. 2026-10-10 감사의 A1은 이 표현이 지나치다고 적었습니다. counterpart는 원본보다 짧고, 키 입력 창과 operation 시각도 다릅니다. 그 가운데 키 입력 조각 문제는 9.18(compiler와 build gate를 고친 sub-task)이 고쳤습니다(3.6의 코드로 상자). 길이와 창과 operation 시각의 차이는 design으로 남아 있습니다(9.10 D41 "counterpart는 원본의 처음 C초"와 9.10 D44 "잘린 counterpart는 원본의 배치를 비례로 유지한다"). 같은 파일 안에서 condition끼리 비교하는 RQ0 문지기 실험의 headroom(`fixed`에서 `oracle`까지 얻을 수 있는 개선의 폭)에는 영향이 없다는 것이 감사의 판단입니다.
+> **왜 이렇게 정했나 — C7의 짝은 "한 곳만 다른 쌍"이 아닙니다.** 예전의 `dataset/README.md`와 building plan §3의 C7 attribute counterpart group 절은 C1 calibration group 파일과 C7 attribute counterpart group 파일의 쌍을 "one-diff pair"(한 곳만 다른 쌍)라고 불렀습니다. 2026-10-10 감사의 A1은 이 표현이 지나치다고 적었습니다. counterpart는 원본보다 짧고, 키 입력 창과 operation 시각도 다릅니다. 길이와 창과 operation 시각의 차이는 design입니다(9.10 D41 "counterpart는 원본의 처음 C초"와 9.10 D44 "잘린 counterpart는 원본의 배치를 비례로 유지한다"). 키 입력은 2026-10-11의 9.18 D1(compiler와 build gate를 고친 sub-task의 첫 결정)부터 잘린 구간에서 원본의 것을 그대로 씁니다(3.6의 코드로 상자; counterpart 자신의 operation 안에 떨어지는 키 입력은 빠짐). 9.15에서 두 문서는 "one-diff pair"를 버리고 이 차이를 적습니다. README의 C7 줄은 "a pair differs in more than the job and the label"(쌍은 job과 label 말고도 다르다)이라고 적고, building plan의 C7 절은 "A C7 pair is not a one-diff pair"라고 적은 뒤 차이를 하나씩 나열합니다. 같은 파일 안에서 condition끼리 비교하는 RQ0 문지기 실험의 headroom(`fixed`에서 `oracle`까지 얻을 수 있는 개선의 폭)에는 영향이 없다는 것이 감사의 판단입니다.
 
 ## 5.3 coverage grid와 pre-committed miss
 
-core set의 65개 grid 구간은 driver table의 32칸 위에 퍼져 있고, CI는 비어 있는 칸이 하나라도 있으면 실패합니다(`make check`의 `derive.py --require-coverage`). 2026-10-14의 `coverage-grid.json`에서 `empty_cells`는 빈 목록이고, `background_wanted: false` 구간은 18개입니다(C7 attribute counterpart group 16개와 `c2-p1b`, `c2-p2b`의 두 번째 구간; tree에서 센 값).
+core set의 66개 grid 구간은 driver table의 32칸 위에 퍼져 있고, CI는 비어 있는 칸이 하나라도 있으면 실패합니다(`make check`의 `derive.py --require-coverage`). 2026-10-17의 `coverage-grid.json`에서 `empty_cells`는 빈 목록이고, `background_wanted: false` 구간은 19개입니다(C7 attribute counterpart group 16개, `c2-p1b`와 `c2-p2b`의 두 번째 구간, `c6-spoof`의 20–60초 구간; tree에서 센 값).
 
 몇몇 구간은 정답 label을 달고 있지만 어떤 recognizer도 이름과 행동만으로는 그 label에 닿을 수 없습니다. 데이터셋은 그런 구간을 숨기지 않고 표시해서 싣습니다.
 
 > **용어.** `pre-committed miss`는 이름과 행동으로는 어떤 recognizer도 닿을 수 없는 label을 가진 구간입니다. timeline에서 `pre_committed_miss: true`로 표시하고, 인식 정확도 계산에서 빠지며 따로 보고됩니다. `oracle` condition은 여전히 그 칸의 driver table 행을 측정합니다(`docs/terminology.md`). 실험 전에 "여기서는 틀릴 것"을 미리 약속해 둔다는 뜻에서 pre-committed입니다.
 
-grid 위의 pre-committed miss는 여섯 칸, 각각 한 구간입니다(`coverage-grid.json`과 `dataset/tools/tests/test_grid.py`의 `MISS_CELLS`).
+grid 위의 pre-committed miss는 여덟 칸, 각각 한 구간입니다(`coverage-grid.json`과 `dataset/tools/tests/test_grid.py`의 `MISS_CELLS`).
 
 | 칸 | 파일 | 왜 닿을 수 없나 |
 |---|---|---|
@@ -976,10 +977,10 @@ grid 위의 pre-committed miss는 여섯 칸, 각각 한 구간입니다(`covera
 | `transcode` / `false` | `c7-transcode` | 같은 변환에 label만 뒤집음 |
 | `backup` / `false` | `c7-backup` | 같은 backup에 label만 뒤집음 |
 | `media` / `true` | `c6-alias` | 재생기가 다른 program(indexer)의 실제 이름을 씀 |
+| `meeting` / `true` | `c6-fold`(30초부터) | browser 안의 통화가 여섯 번째 `chrome`으로 보일 뿐, 이름 어디에도 통화가 없음(9.23 D1) |
+| `browsing` / `false` | `c6-spoof`(20초부터) | `chrome`이라는 이름의 batch 작업이 이미 있던 `chrome`들 사이에 하나 더 보일 뿐(9.23 D2) |
 
-RQ0 gate spec의 `layer1_exclusions`가 이 여섯 파일을 인식 정확도에서 빼는 목록과 같습니다.
-
-> **열린 자리.** `docs/terminology.md`의 "Pre-committed miss" 항목은 "세 개의 C6 파일"(C6 resolution-limit group의 파일)과 attribute 쪽 다섯 구간을 적습니다. 지금 `pre_committed_miss` 표시를 단 C6 resolution-limit group 파일은 `c6-alias` 하나뿐입니다. `c6-spoof`와 `c6-fold`는 group 설명으로는 "설계상 실패"이지만 timeline에 그 표시가 없고(tree에서 확인), `c6-dual`은 `ambiguous`라 grid 밖에 있습니다.
+RQ0 gate spec의 `layer1_exclusions`가 이 여덟 파일(`c1-indexing`, `c6-alias`, `c6-fold`, `c6-spoof`, `c7-backup`, `c7-ml-train`, `c7-render`, `c7-transcode`)을 인식 정확도에서 빼는 목록과 같습니다. C6 resolution-limit group에서 이 표시를 단 파일은 셋이고(`c6-alias`는 파일 전체, `c6-fold`는 30초부터, `c6-spoof`는 20초부터), `docs/terminology.md`의 "Pre-committed miss" 항목도 이 셋을 적습니다. `c6-dual`은 `ambiguous`라 grid 밖에 있습니다.
 
 ## 5.4 판정 파일과 보고 파일
 
@@ -995,13 +996,11 @@ compiler는 파일마다 정적 수요를 계산해 manifest의 `demand`에 적�
 
 몇 가지 값을 보면 감이 옵니다(manifest에서 꺼낸 값). `c1-office`는 0.027로, 사무 작업 넷이 lane의 3 %도 쓰지 않습니다. `c1-dev`는 0.332, `c1-gaming`은 0.915, `c1-compile`은 0.998입니다. `c7-gaming`은 1.915로 lane 두 개 가까이를 원합니다. `c3-workday`는 구간마다 0.003, 0.005, 0.960, 1.025로, build 구간에서만 경쟁이 생깁니다.
 
-> **열린 자리 — 수요 숫자를 읽을 때의 주의.** `c2-p1a`의 utilization은 14.505이고, 두 번째 구간은 35.772입니다. lane 서른다섯 개라는 뜻이 아닙니다. 이 파일의 training은 1,389.885초 분량의 일을 들고 오지만 파일은 99.435초에서 끝나도록 설계되어 있어서(training이 구간의 모든 순간에 살아 있게 하려고), 정적 추정이 그 일 전체를 짧은 수명에 펴기 때문입니다. `c2-p2a`(9.38)도 같은 이유입니다. 2026-10-10 감사는 이 값을 "제공된 수요(offered demand)"로 읽어야 한다고 적고, 범위를 밝히는 문장이나 파일 안에서 잘라 계산하는 방법을 제안했습니다(감사의 문서 정리 목록). 어느 쪽을 택할지는 기록에 정해지지 않았습니다.
+> **왜 이렇게 정했나 — 제공된 수요(offered demand).** `c2-p1a`의 utilization은 14.505이고, 두 번째 구간은 35.772입니다. lane 서른다섯 개를 쓴다는 뜻이 아닙니다. 정적 추정은 각 task의 수요를 도착부터 고정된 떠남 또는 파일 끝까지 고르게 펴는데, 이 파일의 training은 1,389.885초 분량의 일을 들고 오지만 파일은 99.435초에서 끝나도록 설계되어 있어서(training이 구간의 모든 순간에 살아 있게 하려고) 그 일 전체가 짧은 수명에 펴지기 때문입니다. `c2-p2a`와 `c2-p2a-idle`(9.3829, 두 번째 구간 28.5251)도 같은 이유입니다. 그래서 파일 끝을 넘어 사는 작업이 있는 파일의 수요는 lane이 실제로 지는 부하가 아니라 제공된 수요로 읽고, 과부하로 읽지 않습니다. 2026-10-10 감사는 범위를 밝히는 문장과 파일 안에서 잘라 계산하는 방법을 제안했습니다. 9.15는 추정을 자르지 않는 코드를 그대로 두고 앞의 길을 택해, `dataset/README.md`의 "Demand is reported, not held"와 building plan §5a가 이 문장을 적습니다.
 
-> **왜 이렇게 정했나 — 수요 창의 은퇴.** 처음 규칙(2026-08-26 grill D15, 2026-08-27 task 2.3 결정 7)은 `oversubscribed` 파일의 수요가 lane의 약 100–150 % 안에 들어야 하고, 벗어나면 linter가 build를 실패시키는 것이었습니다. 이유는 "경쟁이 없으면 어떤 정책도 차이가 없다"였습니다. 2026-10-09의 9.14 결정 4는 이 창을 문지기에서 내렸습니다. 기록된 배경은 재구축 직후(재구축 sub-task 9.13의 확인 기록 R5) 당시 `oversubscribed` 파일 10개 가운데 9개가 창 밖에 있었다는 것입니다(예: `c2-p1a` 14.51, `c2-p3a` 0.44). 그 이유는 C2 intent pair group의 batch 작업들이 측정된 CPU 총량 그대로 짧은 파일에 묶였기 때문입니다. 지금 규칙은 building plan §5a의 문장 그대로입니다. "수요 class는 설계 의도의 이름이고, 파일의 compile된 수요에 대해서는 아무것도 말하지 않는다. compile된 수요는 측정된 사실이며, compiler는 그것을 파일과 구간마다 기록하고 그것으로 파일을 실패시키지 않는다."
+> **왜 이렇게 정했나 — 수요 창의 은퇴.** 처음 규칙(2026-08-26 grill D15, 2026-08-27 task 2.3 결정 7)은 `oversubscribed` 파일의 수요가 lane의 약 100–150 % 안에 들어야 하고, 벗어나면 linter가 build를 실패시키는 것이었습니다. 이유는 "경쟁이 없으면 어떤 정책도 차이가 없다"였습니다. 2026-10-09의 9.14 결정 4는 이 창을 문지기에서 내렸습니다. 그 결정의 기록에는 이유가 없었고, 2026-10-16에 인지오가 이유를 적었습니다(9.15 작업 목록에서 창을 은퇴시킨 이유를 물은 항목 W-0737의 답). 9.10 D17이 모든 작업을 측정된 그대로 통째로 묶으므로 파일의 수요는 측정에서 따라 나오고, 창 안에 붙들려면 측정된 길이를 구부려야 했으므로, 수요는 붙들지 않고 파일과 구간마다 보고하며, 경쟁이 있는 구간은 쌍 검토(`docs/daemon/prior-table-pair-review.md`)가 읽는다는 것입니다. 재구축 직후(재구축 sub-task 9.13의 확인 기록 R5)에는 `oversubscribed` 파일 10개 가운데 9개가 창 밖에 있었습니다(예: `c2-p1a` 14.51, `c2-p3a` 0.44). C2 intent pair group의 batch 작업들이 측정된 CPU 총량 그대로 짧은 파일에 묶였기 때문입니다. 지금 규칙은 building plan §5a의 문장 그대로입니다. "수요 class는 설계 의도의 이름이고, 파일의 compile된 수요에 대해서는 아무것도 말하지 않는다. compile된 수요는 측정된 사실이며, compiler는 그것을 파일과 구간마다 기록하고 그것으로 파일을 실패시키지 않는다."
 
-> **왜 이렇게 정했나 — `-native` 판의 은퇴.** 원래 계획(2026-08-26 grill D16)은 timeline 집합 둘(core set, generalset)을 각각 두 방식으로 compile해 네 개의 공개 artifact를 만드는 것이었습니다. `-single`은 lane 하나에 맞춘 판(실험이 도는 판), `-native`는 측정된 수요 그대로의 판(재사용을 위해 공개하지만 실험에서 돌리지 않는 판)입니다. 2026-09-16의 9.5 spec 결정 14가 `-native`를 버렸고, 2026-10-09에 재구축 sub-task 9.13이 compiler에서 지웠습니다. 기록된 이유는 같은 spec의 결정 13에서 왔습니다. library의 archetype들은 서로 다른 관찰 환경에서 왔고 그 상대적 크기가 서로 맞춰져 있지 않으므로, "측정된 그대로"의 판이 하나의 기계를 나타낸다고 말할 수 없다는 것입니다. 지금 lane scaling의 대상은 `game-task-chain`의 `lane_share` 하나뿐입니다.
-
-> **열린 자리.** `docs/workload/building-plan.md` §0의 표("Each set compiles in two modes, giving four release artifacts")와 §5의 "50 files × 2 modes", `docs/terminology.md`의 "Workload variants" 항목("each timeline compiles in two modes")은 아직 `-native`를 적습니다. 지금의 사실은 `coreset-single` 하나이고, 출처는 `docs/data-contracts.md` §14의 2026-10-09 항목과 tree입니다.
+> **왜 이렇게 정했나 — `-native` 판의 은퇴.** 원래 계획(2026-08-26 grill D16)은 timeline 집합 둘(core set, generalset)을 각각 두 방식으로 compile해 네 개의 공개 artifact를 만드는 것이었습니다. `-single`은 lane 하나에 맞춘 판(실험이 도는 판), `-native`는 측정된 수요 그대로의 판(재사용을 위해 공개하지만 실험에서 돌리지 않는 판)입니다. 2026-09-16의 9.5 spec 결정 14가 `-native`를 버렸고, 2026-10-09에 재구축 sub-task 9.13이 compiler에서 지웠습니다. 기록된 이유는 같은 spec의 결정 13에서 왔습니다. library의 archetype들은 서로 다른 관찰 환경에서 왔고 그 상대적 크기가 서로 맞춰져 있지 않으므로, "측정된 그대로"의 판이 하나의 기계를 나타낸다고 말할 수 없다는 것입니다. 지금 lane scaling의 대상은 `game-task-chain`의 `lane_share` 하나뿐입니다. 9.15에서 `docs/workload/building-plan.md` §0("Every set compiles in one mode, `single`")과 `docs/terminology.md`의 "Compile mode" 항목도 한 방식만 적습니다.
 
 ## 5.6 sensitivity variant 78개
 
@@ -1009,7 +1008,7 @@ variant는 RQ0 문지기 실험의 판정이 데이터셋의 불확실한 부분
 
 | 집합 | 변환 | 대상 | 개수 | 무엇을 흔드나 |
 |---|---|---|---|---|
-| `venue-x0.8`, `venue-x1.25` | `scale-runs` | 판정 파일 19개 | 19 + 19 | 측정 환경(runner)의 효과. chain을 뺀 모든 RUN을 1/1.25배와 1.25배 |
+| `venue-x0.8`, `venue-x1.25` | `scale-runs` | 판정 파일 19개 | 19 + 19 | 측정 환경의 공통 배율. chain을 뺀 모든 RUN을 0.8배(1/1.25)와 1.25배 |
 | `chain-x1.2`, `chain-x1.4` | `scale-chain` | `c2-p2a`, `c2-p2b`, `c7-gaming` | 3 + 3 | game chain의 RUN을 1.2배와 1.4배 |
 | `seg1-30s`, `seg1-120s` | `segment-length` | C2 intent pair group의 판정 파일 넷(`c2-p1a`, `c2-p2a`, `c2-p2b`, `c2-p3a`) | 4 + 4 | C2 intent pair group 쌍의 첫 구간 길이(60초, design)를 반으로, 두 배로 |
 | `corner-low`, `corner-high` | `carried-bounds` | 11개 파일 | 11 + 11 | 안정성 규칙의 예외로 실린 값들을 95 % 구간의 아래·위 끝으로 |
@@ -1017,7 +1016,7 @@ variant는 RQ0 문지기 실험의 판정이 데이터셋의 불확실한 부분
 
 variant 파일 이름은 `<base>@<set>.workload.json`이고 `meta.id`도 `<base>@<set>`이지만, `meta.derived_from`과 `meta.sampled`는 원본의 것을 그대로 둡니다. workload 형식에는 변환을 적을 칸이 없으므로, 어떤 변환을 했는지는 variant manifest가 기록합니다. variant는 판정되지 않습니다. RQ0 gate spec은 "어떤 보고선 아래서 판정 수가 움직이면, 판정을 그 축에 걸친 범위로 보고한다"고 적습니다(statement `sensitivity-lines`).
 
-> **왜 이렇게 정했나.** variant는 2026-10-09의 9.14 결정 10과 12에서 왔습니다. 기록된 이유는 RQ0 gate spec의 보고선들 — "어떤 것이 scheduling 결과를 움직이는가"를 묻는 모든 확인 — 이 실제로 build된 variant 파일을 필요로 했다는 것입니다. `venue` 배율 1.25는 측정된 두 환경 효과(huge page의 ×1.144, tracing 부담의 ×1.02–1.16)를 품는 design 괄호이고(`variants.yaml`의 reason), `replay`는 compile된 흐름이 측정된 흐름보다 1–100 ms 척도에서 덜 뭉쳐 있다는 2026-09-26의 발견(burstiness finding)에 대한 대응입니다.
+> **왜 이렇게 정했나.** variant는 2026-10-09의 9.14 결정 10과 12에서 왔습니다. 기록된 이유는 RQ0 gate spec의 보고선들 — "어떤 것이 scheduling 결과를 움직이는가"를 묻는 모든 확인 — 이 실제로 build된 variant 파일을 필요로 했다는 것입니다. `venue` 배율 1.25는 측정된 두 환경 효과(huge page의 ×1.144, tracing 부담의 ×1.02–1.16)를 품는 design 괄호이고(`variants.yaml`의 reason), 다른 CPU 기종을 나타내지는 않습니다. 다른 CPU는 program마다 다른 배율로 빠르기를 바꾸기 때문입니다. 9.6의 build campaign에서 Intel Xeon Platinum 8573C는 `cc1`을 EPYC 7763 시간의 0.72배에, `fixdep`을 0.50배에 돌렸고, 공통 배율 하나로는 그것을 재현하지 못합니다. 그래서 2026-10-16에 인지오는 괄호를 그대로 두고 이 한계를 적기로 했고, `docs/research-claims.md`의 "What is not claimed"는 scheduling 결과가 다른 CPU나 다른 기계 구성으로 옮겨 간다고 주장하지 않는다는 항목을 얻었습니다. `replay`는 compile된 흐름이 측정된 흐름보다 1–100 ms 척도에서 덜 뭉쳐 있다는 2026-09-26의 발견(burstiness finding)에 대한 대응입니다.
 
 ## 5.7 generated layer: 비율을 재는 다섯 집합
 
@@ -1051,7 +1050,7 @@ generated 파일도 pre-committed miss를 가질 수 있습니다. distractor gr
 
 ## 5.8 naturalistic set: backlog
 
-데이터셋 설계의 처음 그림(`docs/workload/building-plan.md` §0, §4)에는 집합이 둘이었습니다. 통제(control)를 맡는 손으로 쓴 core set과, 현실성(realism)을 맡는 생성된 naturalistic set입니다. building plan은 그 긴장을 이렇게 적습니다. 완전히 통제된 suite는 "고른 시나리오만 골랐다"는 비판을, 완전히 표본 추출된 suite는 "어떤 가설도 실제로 검증되지 않았다"는 비판을 부릅니다. 그래서 두 집합에 다른 역할을 줍니다. naturalistic set은 구간 길이를 문헌의 두꺼운 꼬리 분포에서 뽑고(작업 하나에 약 3분, working sphere 하나에 약 12분; `gonzalez-chi04`), 몇 개의 중심 작업 사이를 오가는 hub-and-spoke 전환 구조(`zhang-chb15`)를 따르며, 32칸을 모두 채워야 합니다.
+데이터셋 설계의 처음 그림에는 집합이 둘이었습니다. 통제(control)를 맡는 손으로 쓴 core set과, 현실성(realism)을 맡는 생성된 naturalistic set입니다. building plan(`docs/workload/building-plan.md` §0)은 그 긴장을 이렇게 적습니다. 완전히 통제된 suite는 "고른 시나리오만 골랐다"는 비판을, 완전히 표본 추출된 suite는 "어떤 가설도 실제로 검증되지 않았다"는 비판을 부릅니다. 지금 building plan §0은 통제 쪽을 역할이 다른 두 집합(core set과 generated layer)으로 답하고, 현실성 쪽은 backlog의 세 번째 집합인 naturalistic set에 남깁니다. building plan §4는 naturalistic set이 기댈 재료를 이렇게 적습니다. 구간 길이는 `gonzalez-chi04`의 사건 하나에 약 3분(3분 08초)과 working sphere 안에서 전환 전까지의 평균 연속 구간 11분 28초이고, 분포 꼴을 주는 출처는 없습니다. 전환 구조는 출처가 없습니다. hub-and-spoke 전환은 유일한 출처였던 작업 전환 log 연구가 사본을 구할 수 없어 빠지면서 근거를 잃었습니다(9.10 D1). 그리고 naturalistic set은 driver table의 32칸(16 mode × `background_wanted`)을 모두 채워야 하고, core set이 쓰는 것과 같은 32칸 coverage 표로 검사됩니다. 칸을 비우는 generator는 예외로 봐주지 않고 매개변수를 다시 잡습니다.
 
 > **용어.** `generalset`은 naturalistic set의 compile된 이름(`generalset-single`)입니다. 아직 만들어지지 않았습니다.
 
@@ -1067,7 +1066,7 @@ generated 파일도 pre-committed miss를 가질 수 있습니다. distractor gr
 | 2026-08-27–28 | Phase 2(첫 생성) | archetype 12개(문헌 기반), compiler, core timeline 24개 × 두 compile 방식 = artifact 48개 |
 | 2026-09-06 | Phase 3(검증과 protocol 동결) | 파일마다 수요를 manifest에 기록, 소비자 쪽 계약 다섯 개 동결 |
 | 2026-09-10–11 | Phase 7(attribute coverage) | C7 attribute counterpart group 신설, 24 → 50개 파일, 17 → 32칸 |
-| 2026-09-13 | 치명적 발견 memo | 출처를 원문과 대조하다 13건의 문제 발견 → Phase 9(재구축) 시작 |
+| 2026-09-13 | 치명적 발견 memo | 출처를 원문과 대조하다 13건의 발견과 원문을 읽지 못한 출처의 목록 하나 → Phase 9(재구축) 시작 |
 | 2026-09-13 – 10-08 | 9.1–9.12 영역별 조사와 측정 | archetype을 전부 이 프로젝트의 측정으로 다시 채움(29개 가운데 28개) |
 | 2026-10-09 | 9.13 재구축과 bless, 9.14 소비자 rework | 51개 파일, `declared_class`, `-native` 폐지, 수요 창 은퇴, 판정 19개와 K = 10, variant 78개 |
 | 2026-10-11 | 9.17, 9.18, 9.22, 9.19 | focus track과 telemetry, bound value의 `source`, build 시간 단축, generated layer의 첫 세 집합 |
@@ -1096,7 +1095,7 @@ generated 파일도 pre-committed miss를 가질 수 있습니다. distractor gr
 2. **출처 tag 목록**: 한 값이 둘 이상의 관찰에서 함께 나올 때. 예: `c1-office`의 renderer 수 `count: [glam, "meas-ci:desktop:2026-10-04"]`.
 3. **label 하나**: 어떤 출처도 그 값을 말하지 않을 때, 그 값이 무엇인지를 정직하게 적는 이름입니다. `design`, `convention`, `arithmetic` 셋 가운데 하나이고, label은 목록에 섞지 않고 혼자 씁니다.
 
-> **용어.** `design`은 실험이 자기 목적을 위해 고른 값입니다(파일 길이, 끼우는 작업, label 뒤집기, `lane_share`). `convention`은 널리 받아들여진 관행을 따른 값입니다(예: 동시 작업 수 `-j8`, 분포 꼴로 lognormal). `arithmetic`은 다른 값에서 계산한 값입니다(예: 60 Hz의 한 frame = 1/60초 = 16,667 µs). 셋 다 "출처가 있는 척하지 않는다"는 표시입니다. 정의는 `dataset/tools/wlc/linter.py`의 `BOUND_LABELS`(9.10 D32: "어떤 출처도 말하지 않는 값은 그것이 무엇인지로 표시한다")와 재구축 phase(Phase 9) spec의 결정 1("출처 없는 값은 tag 없이 convention, arithmetic, placeholder, design 가운데 무엇인지로 표시한다")에 있습니다.
+> **용어.** `design`은 실험이 자기 목적을 위해 고른 값입니다(파일 길이, 끼우는 작업, label 뒤집기, `lane_share`). `convention`은 널리 받아들여진 관행을 따른 값입니다(예: 동시 작업 수 `-j8`, 분포 꼴로 lognormal). `arithmetic`은 다른 값에서 계산한 값입니다(예: 60 Hz의 한 frame = 1/60초 = 16,667 µs). 셋 다 "출처가 있는 척하지 않는다"는 표시입니다. 정의는 `dataset/tools/wlc/linter.py`의 `BOUND_LABELS`(9.10 D32: "어떤 출처도 말하지 않는 값은 그것이 무엇인지로 표시한다")와 재구축 phase(Phase 9) spec의 결정 1("출처 없는 값은 tag 없이 convention, arithmetic, placeholder, design 가운데 무엇인지로 표시한다")에 있습니다. 다만 데이터셋에는 `placeholder`라는 label이 없습니다. 측정을 기다리는 값은 `meas-pending` tag를 달고, `make lint`의 freeze가 그것을 거부합니다(4.7, 4.9; 2026-10-16, 인지오의 결정).
 
 2026-10-10의 감사는 library의 숫자를 세어 보았습니다. 끝단의 숫자 6,953개 가운데 96.6 %가 측정값이었고, 출처 tag를 단 객체 312개 가운데 97.4 %가 `meas-ci` tag였습니다(감사 기록의 "Sound, and verified" 표, Library provenance 행). 나머지는 문헌과 label입니다.
 
@@ -1111,8 +1110,8 @@ code-editor:                    meas-ci:                             ### `meas-c
   params:                         type: measurement                  - cite: this work — CI measurement
     input_run:                    locator_pattern:                     campaign; workflow files and raw
       source: "meas-ci:  ──────▶    "^[a-z0-9_-]+:(\d+|\d{4}-   ──▶    outputs released in the artifact …
-        interactive:                 \d{2}-\d{2}[a-z]?)$"            - role: structural/shape claims
-        2026-09-25"               notes: "Our CI measurement           about software behavior only …
+        interactive:                 \d{2}-\d{2}[a-z]?)$"            - role: a measured value is this
+        2026-09-25"               notes: "Our CI measurement           software on this machine …
                                     campaigns … never desktop        - status: in use …
                                     truth …"
 ```
@@ -1121,7 +1120,7 @@ code-editor:                    meas-ci:                             ### `meas-c
 2. `sources.yaml`의 `meas-ci` 항목은 `locator_pattern`을 가지고 있으므로, linter는 나머지 `interactive:2026-09-25`가 그 정규식에 맞는지 봅니다. 꼴은 `<workflow>:<campaign 시작 날짜>`입니다.
 3. `sources.yaml`의 모든 id는 `docs/references.md`에 항목이 있어야 합니다. 이것도 linter가 검사합니다("subset lint").
 4. `docs/references.md`의 항목이 인용 문자열(`cite`), 그 출처가 뒷받침할 수 있는 주장의 범위(`role`), 확인 상태(`status`)를 가집니다.
-5. 측정 tag는 한 단계 더 갑니다. archetype의 `validation_stats.run`이 그 campaign의 어느 GitHub Actions 실행들이 반복 측정이었는지 적고(`code-editor`는 44번), campaign의 원시 기록은 GitHub release로 공개됩니다(`docs/workload/measurement-overview.md` §3).
+5. 측정 tag는 한 단계 더 갑니다. archetype의 `validation_stats.run`이 그 campaign의 어느 GitHub Actions 실행들이 반복 측정이었는지 적고(`code-editor`는 44번), campaign의 원시 기록은 GitHub release로 공개됩니다(`docs/workload/measurement-overview.md` §3). `dataset/meas-releases.yaml`이 데이터가 인용하는 campaign tag마다 그 원시 기록을 담은 release(하나 이상)와 각 asset의 SHA-256을 적고, `make lint`는 지도에 없는 campaign tag를 실패시킵니다(2026-10-16). release는 campaign을 모을 때 손으로 만들고, GitHub이 workflow의 artifact를 지우는 90일이 지나기 전에 만듭니다(`gh-artifact-retention`).
 
 두 파일의 역할 나누기가 중요합니다. `docs/references.md`는 모든 인용 문자열의 주인이고, 사람이 읽는 문서입니다. `dataset/sources.yaml`은 기계가 읽는 목록으로, 인용 문자열 없이 종류와 locator 형식과 "이 출처가 무엇을 확립하는가"(`notes`)만 담습니다. `sources.yaml`의 머리 주석은 `notes`에 "우리가 그 위에 덧붙인 modeling은 적지 않는다(그것은 archetype의 `modeling_notes`의 일)"고 적습니다. 출처를 하나 더하는 순서도 정해져 있습니다. `docs/references.md`의 id 규칙으로 id를 만들고, 거기 항목을 더하고, 데이터셋이 그 출처에서 값이나 구조를 끌어올 때만 `sources.yaml`에도 더합니다.
 
@@ -1129,24 +1128,25 @@ code-editor:                    meas-ci:                             ### `meas-c
 
 ## 6.3 출처의 등급
 
-모든 출처가 같은 무게를 갖지는 않습니다. `docs/references.md`의 "Citation-tier rule"과 `sources.yaml`의 `type`이 등급을 정합니다.
+모든 출처가 같은 무게를 갖지는 않습니다. `docs/references.md`의 "Citation-tier rule"이 등급을 정합니다. 2026-10-16에 9.15가 9.12 D112(deployed-system 등급을 넓힌 결정)와 D113(talk·학회 초록·뉴스 보도 등급을 더한 결정)을 그 규칙에 적용했습니다. `sources.yaml`의 `type`은 여전히 셋(scholarly, deployed-system, measurement)이라, registry에서 `lavd-ossna24`는 `deployed-system`으로 남아 있습니다.
 
 | 등급 | id 꼴 | 뒷받침할 수 있는 주장 | 예 |
 |---|---|---|---|
 | scholarly(학술) | `<첫 저자 성 또는 체계 이름>-<venue><연도 두 자리>` | 그 출처의 역할 안에서 경험적·행동적·통계적 주장 | `gonzalez-chi04`, `swell-icmi14`, `cpsmark-tbench23` |
-| deployed-system(배포된 software) | 프로젝트 이름, 연도 없음 | **존재 주장만** ("이런 장면·설정·범주가 배포된 software에 있다") | `tuned`, `linux-sched-h`, `steam-downloads`, 그리고 발표 자료인 `lavd-ossna24` |
-| measurement(우리 측정) | `meas-ci` + locator | software 행동의 구조와 모양에 대한 주장만. 이 기계 위의 이 software | `meas-ci:build:2026-09-18` |
+| deployed-system(배포된 software) | 프로젝트 이름, 연도 없음 | 존재 주장("이런 장면·설정·범주가 배포된 software에 있다"), 그 시스템이 스스로 문서화한 설계나 동작(그 판의 그 출처의 말로), 그 출처가 공개한 숫자(그 출처의 보고로, 읽은 날짜와 함께). 행동·통계 주장을 논문 자신의 것이나 모집단의 것으로 적지는 못함 | `tuned`, `linux-sched-h`, `steam-downloads` |
+| talk·학회 초록·뉴스 보도 | `<발표자 성 또는 체계 이름>-<venue><연도 두 자리>` | 발표자나 기자의 주장으로만. 숫자는 그 보고로, 날짜와 함께 | `lavd-ossna24` |
+| measurement(우리 측정) | `meas-ci` + locator | 이 기계 위의 이 software에 대한 측정값. desktop의 진실이 아님 | `meas-ci:build:2026-09-18` |
 | label | `design` / `convention` / `arithmetic` | 출처 주장이 아님. 값의 성격을 밝힘 | `lane_share: design` |
 
 > **용어.** `role`(references.md 항목의)은 그 출처가 뒷받침할 수 있는 주장의 범위입니다. 출처는 자기 role 밖에서 인용하지 않습니다. 예를 들어 deployed-system 출처는 "GameMode의 reaper가 5초 간격으로 돈다"는 **존재**는 말해 줄 수 있지만, "desktop 사용자가 평균 몇 초마다 창을 바꾼다" 같은 행동 통계는 말해 줄 수 없습니다.
 
-2026-10-14 현재 `sources.yaml`의 30개 id 가운데 scholarly가 9개, deployed-system이 19개, measurement가 2개(`meas-ci`와 임시값 표시 `meas-pending`)입니다(tree에서 센 값).
+2026-10-17 현재 `sources.yaml`의 19개 id 가운데 scholarly가 5개, deployed-system이 12개, measurement가 2개(`meas-ci`와 측정을 기다리는 값의 표시 `meas-pending`)입니다(tree에서 센 값). 2026-10-16에 데이터셋 파일 어디도 인용하지 않는 id 열한 개가 registry에서 빠졌고(그 전에는 30개), 그 `docs/references.md` 항목은 문서가 인용하는 한 남습니다.
 
-> **열린 자리.** `lavd-ossna24`(game chain의 숫자를 대는 LAVD 발표 자료)는 `docs/references.md`에서 "talk slides — 숫자를 담고 있지만 footnote 등급"으로 적혀 있습니다. 2026-10-10 감사의 A3는 "footnote 등급은 존재 주장만 뒷받침한다는 저장소 자신의 규칙"과 이 출처가 8개 파일(판정 파일 셋 포함)의 game chain 속도를 정한다는 사실 사이의 긴장을 지적했습니다. 2026-10-11에 인지오는 "그대로 둔다. 숫자는 발표자가 보고한 값으로 서고, `chain-x1.2`와 `chain-x1.4` variant가 민감도 확인이다"라고 결정했습니다(감사 기록의 "Resolutions"). 관련 연구 문장을 다룬 sub-task 9.12의 결정 D113이 만든 "talk"(발표 자료) 종류로 이 항목을 다시 분류하는 일은 감사 시점에 아직 적용되지 않은 것으로 적혀 있습니다.
+> **왜 이렇게 정했나 — `lavd-ossna24`의 숫자는 발표자가 보고한 값.** `lavd-ossna24`(game chain의 숫자를 대는 LAVD 발표 자료)는 8개 파일(판정 파일 셋 포함)의 game chain 속도를 정합니다. 2026-10-10 감사의 A3는 이것과 "footnote 등급은 존재 주장만 뒷받침한다"는 당시 저장소 자신의 규칙 사이의 긴장을 지적했고, 2026-10-11에 인지오는 "그대로 둔다. 숫자는 발표자가 보고한 값으로 서고, `chain-x1.2`와 `chain-x1.4` variant가 민감도 확인이다"라고 결정했습니다(감사 기록의 "Resolutions"). 2026-10-16에 9.15는 관련 연구 문장을 다룬 sub-task 9.12의 결정 D113대로 `docs/references.md`에서 이 항목을 talk 등급으로 옮기고, 그 숫자를 Min이 2024-04-17에 보고한 값으로, chain의 꼴을 design으로 적었습니다(2026-10-15, 인지오의 결정). 값과 데이터 파일은 바뀌지 않았습니다.
 
 ## 6.4 meas-ci: 우리가 직접 잰 숫자
 
-library의 숫자 대부분은 이 프로젝트가 GitHub Actions의 hosted runner에서 직접 잰 것입니다. 측정 방법의 개요는 `docs/workload/measurement-overview.md`(draft, 2026-09-29)가 적습니다.
+library의 숫자 대부분은 이 프로젝트가 GitHub Actions의 hosted runner에서 직접 잰 것입니다. 측정 방법의 개요는 `docs/workload/measurement-overview.md`(draft, 2026-09-29 작성, 2026-10-17 갱신)가 적습니다.
 
 ```text
 실제 program + 현실적인 조작
@@ -1166,7 +1166,7 @@ library의 숫자 대부분은 이 프로젝트가 GitHub Actions의 hosted runn
 
 언제 반복을 멈출지는 **안정성 규칙**이 정합니다(measurement-overview §6). 하나의 CPU 기종(AMD EPYC 7763)에서 돈 job만 세고, 반복 사이의 95 % t 구간 반폭이 평균의 5 % 이하(또는 그보다 크면 1 µs 이하)가 될 때까지, 최소 다섯 번 반복합니다. 5 %라는 값 자체는 design으로 적혀 있습니다("비교로 보고되는 가장 작은 효과, kernel build의 `-j8`과 `-j1` 사이 10 %의 절반"). 이 규칙을 끝내 지키지 못한 값은 다섯 가지 예외 부류 가운데 하나로, 반폭과 범위와 반복 수를 scope에 적어 싣습니다(§7). 그렇게 실린 값이 RQ0 gate spec의 `corner-low`/`corner-high` variant가 흔드는 바로 그 값들입니다(5.6).
 
-measurement의 역할은 좁게 정해져 있습니다. `docs/references.md`의 `meas-ci` 항목은 그 role을 "software 행동의 구조와 모양에 대한 주장만(fork 구조, 개수, 수명 모양, 주기, heartbeat, comm 문자열). 기계에 상대적인 절대값은 runner 사양을 달고 '측정이 알려 준 convention'으로 취급한다. desktop 성능 주장은 하지 않는다"고 적습니다. measurement-overview §11은 같은 말을 이렇게 맺습니다. "모든 측정값은 이 기계 위의 이 software다. … 값들은 desktop의 진실이 아니다. 적힌 정밀도는 그 구성 위의 정밀도, 곧 재현성이며, 대표성과는 다른 성질이다. 실제 desktop 검증은 미뤄져 있다."
+measurement의 역할은 좁게 정해져 있습니다. `docs/references.md`의 `meas-ci` 항목은 그 role을 "측정값은 이 기계 위의 이 software — GitHub이 운영하는 ubuntu-24.04 runner를 AMD EPYC 7763 CPU 하나에 고정한 것으로, runner 사양은 archetype의 scope에 적힌다 — 이고, 결코 desktop의 진실이 아니다"라고 적습니다. measurement-overview §11은 같은 말을 이렇게 맺습니다. "모든 측정값은 이 기계 위의 이 software다. … 값들은 desktop의 진실이 아니다. 적힌 정밀도는 그 구성 위의 정밀도, 곧 재현성이며, 대표성과는 다른 성질이다. 실제 desktop 검증은 미뤄져 있다." 2026-10-16에 인지오는 실제 desktop과의 비교를 열지 않고 이 범위를 논문에 그대로 싣기로 했고, `docs/research-claims.md`의 "What is not claimed"가 그것을 적습니다(scheduling 결과는 다른 CPU나 다른 기계 구성으로 옮겨 간다고 주장하지 않음).
 
 > **왜 이렇게 정했나.** CI runner에서만 잰다는 것은 재구축 phase(Phase 9) spec의 결정 5("우리의 측정은 CI runner에서만 한다. runner가 관찰할 수 없는 것은 문헌이나 공개 trace에서 오거나 인지오의 결정으로 간다. 이것은 진술된 한계다")입니다. 그 뿌리는 2026-08-26 grill D6("meas-ci를 신뢰 범위 package와 함께 채택")과 D8("meas-live, 즉 사람의 실제 desktop 측정은 연구에서 완전히 뺀다")에 있습니다. D8에 기록된 이유는 팀원 가운데 Linux desktop을 쓰는 사람이 없었고, "나중에 검증하겠다"는 조건을 걸어 두면 발표된 결과가 영원히 잠정적이 된다는 것이었습니다.
 
@@ -1186,7 +1186,7 @@ measurement의 역할은 좁게 정해져 있습니다. `docs/references.md`의 
 
 지금의 데이터셋은 두 번째 판입니다. 첫 판은 2026-08-28에 24개 파일로 만들어졌고, 2026-09-10에 50개로 늘었습니다. 그때의 archetype library는 문헌에서 숫자를 가져온 열두 개 항목(`desktop-interactive`, `audio-playback`, `io-stream`, `system-daemon` 등)이었습니다.
 
-2026-09-13에 그 출처들을 원문과 대조한 검토가 13건의 문제를 찾았습니다(`docs/memos/2026-09-13-critical-findings.md`). 대표적인 것을 그 memo의 요약표대로 옮기면 이렇습니다.
+2026-09-13에 그 출처들을 원문과 대조한 검토가 13건의 발견(A1–A5, B1–B7, C)을 적었습니다(`docs/memos/2026-09-13-critical-findings.md`). 그 memo의 요약표에 있는 열네 번째 줄 D는 원문을 읽지 못한 출처의 목록으로, 발견이 아닙니다(2026-10-16, 인지오의 읽기). 대표적인 것을 그 memo의 요약표대로 옮기면 이렇습니다.
 
 - **A1.** `build-orchestrator`의 "kernel build당 2,430개 process"는 Linux kernel build가 아니라 DynamoRio 6.1.0 build의 숫자였습니다. 같은 memo는 실제로 측정한 kernel build의 compiler 계열 process 중앙값이 11,883개라고 적습니다.
 - **A2.** game chain의 16.7 ms frame 예산은 그 출처로 적힌 LAVD 발표 자료에 없었습니다. 지금은 Steam Deck 사양(`steamos-refresh`)의 60 Hz에서 계산한 arithmetic 값(16,667 µs)으로 적힙니다.
@@ -1249,7 +1249,7 @@ simulator가 이 view에 기대는 계약은 세 가지입니다.
 
 `declared_class`는 events와 함께 simulator에 도착하므로, simulator가 strict idle 규칙을 적용해야 합니다(2.9).
 
-> **열린 자리 — simulator가 거부하는 파일 다섯 개.** 2026-10-10 감사의 blocker 1은 simulator의 loader(`simulator/src/sim.cpp` 874–904행 부근)가 `WAKE`의 대상을 top-level `arrive` id에서만 찾는다는 것을 찾았습니다. 재구축된 build 구조에서는 object 작업 하나의 여섯 process가 spawn table 안에서 서로를 `WAKE`로 깨우므로(9.6 D19, 2.5의 `c1-compile` 예), 다섯 파일 — `c1-compile`, `c7-compile`(둘 다 판정 파일), `c3-workday`, `c4-compile`, `c6-dual` — 이 거부됩니다. schema는 어떤 task id든 대상으로 허락합니다. 이 권을 쓰면서 확인한 2026-10-14의 simulator code도 여전히 "WAKE target is not a top-level task"로 멈춥니다(876행). 문서 정리 sub-task 9.15의 TODO 항목은 이 거부를 인경민에게 보낼 마지막 memo의 내용으로 적고 있습니다. 데이터셋을 바꿀지 simulator를 바꿀지는 기록에 정해지지 않았지만, 감사는 "schema가 허락하고, 쓰임이 새로우며, 경민에게 알리지 않았다"고 적었습니다.
+> **열린 자리 — simulator가 거부하는 파일.** 2026-10-10 감사의 blocker 1은 simulator의 loader(`simulator/src/sim.cpp`)가 `WAKE`의 대상을 top-level `arrive` id에서만 찾는다는 것을 찾았습니다. 재구축된 build 구조에서는 object 작업 하나의 여섯 process가 spawn table 안에서 서로를 `WAKE`로 깨우므로(9.6 D19, 2.5의 `c1-compile` 예), core set의 다섯 파일 — `c1-compile`, `c7-compile`(둘 다 판정 파일), `c3-workday`, `c4-compile`, `c6-dual` — 과 RQ0 gate spec이 돌리는 compile variant 여덟(`c1-compile`과 `c7-compile`의 `corner-low`, `corner-high`, `venue-x0.8`, `venue-x1.25`), compile을 품은 generated 파일 188개가 거부됩니다. schema는 어떤 task id든 대상으로 허락합니다. 2026-10-17의 simulator code도 여전히 "WAKE target is not a top-level task"로 멈춥니다(876행; 이 파일은 2026-10-10 이후 바뀌지 않았습니다). 고치는 쪽은 simulator입니다. 2026-10-15의 9.23 D14(인지오의 결정)가 compile 안의 canonical lint에 "spawn된 자식의 WAKE 대상도 top-level task의 것처럼 풀린다"를 넣어, 데이터셋은 이 쓰임을 그대로 지킵니다. 감사는 "schema가 허락하고, 쓰임이 새로우며, 경민에게 알리지 않았다"고 적고 바로 알리기를 권했지만, 그 알림은 보내지 않았습니다(2026-10-16, 인지오의 답). 그래서 문서 정리 sub-task 9.15가 끝에 인경민과 박이안에게 보낼 마지막 memo가 이 거부를 처음 알립니다. simulator가 이 파일들을 받아들일 때까지 이 자리는 열려 있습니다.
 
 ## 7.3 daemon: visible projection과 telemetry
 
@@ -1337,7 +1337,7 @@ c1-office:
 
 RQ0 gate spec(`harness/experiments/rq0-gate.yaml`)의 `pins`는 다섯 파일을 SHA-256으로 고정합니다. 채점 spec, guard spec, prior driver table, 그리고 데이터셋의 두 manifest입니다. 머리 주석의 규칙은 "실행이 시작된 뒤에는, 어떤 실행보다 먼저 만든 `harness/CHANGELOG.md`의 항목 없이는 아무것도 바뀌지 않는다"입니다.
 
-데이터셋 쪽에서 이것이 뜻하는 바는 이렇습니다. core set의 artifact 하나라도 byte가 바뀌면 `build.manifest.json`의 hash가 바뀌고, 그러면 RQ0 gate spec의 `pins.dataset`이 더는 맞지 않습니다. harness는 고정된 hash와 실제 파일을 대조하므로, 데이터셋을 바꾼 사람은 manifest를 다시 commit하고(re-bless), harness changelog에 항목을 쓰고, spec의 pin을 다시 맞춰야(re-pin) 합니다. 재구축 이후 이 사슬은 여러 번 돌았습니다. 기록에 남은 dataset pin만 해도 9.17(focus track)의 `625e431f…`, 9.18(bound value의 출처와 build gate)의 `976a943c…`, 9.22(build 시간)의 `d10bcd42…`를 거쳐 9.20(distractor grid와 familiarity ladder)의 `fad7192d…`가 지금의 값입니다.
+데이터셋 쪽에서 이것이 뜻하는 바는 이렇습니다. core set의 artifact 하나라도 byte가 바뀌면 `build.manifest.json`의 hash가 바뀌고, 그러면 RQ0 gate spec의 `pins.dataset`이 더는 맞지 않습니다. harness는 고정된 hash와 실제 파일을 대조하므로, 데이터셋을 바꾼 사람은 manifest를 다시 commit하고(re-bless), harness changelog에 항목을 쓰고, spec의 pin을 다시 맞춰야(re-pin) 합니다. 재구축 이후 이 사슬은 여러 번 돌았습니다. 기록에 남은 dataset pin만 해도 9.17(focus track)의 `625e431f…`, 9.18(bound value의 출처와 build gate)의 `976a943c…`, 9.22(build 시간)의 `d10bcd42…`, 9.20(distractor grid와 familiarity ladder)의 `fad7192d…`, 9.23(guidebook을 쓰며 찾은 것을 고친 sub-task)의 `c5f7fa5a…`(2026-10-14)와 `81d3213d…`(2026-10-15)를 거쳐, 9.15의 재빌드(2026-10-16)가 남긴 `b6017a10…`이 2026-10-17의 값입니다(`harness/CHANGELOG.md`).
 
 > **용어.** `pin`은 사전 등록 파일이 다른 파일의 SHA-256을 적어 "이 실험은 정확히 이 파일 위에서 돈다"고 고정하는 것입니다. `re-pin`은 고정된 파일이 바뀐 뒤 그 hash를 새 값으로 다시 적는 일입니다.
 
@@ -1458,7 +1458,7 @@ timeline 한 줄 편집
 
 # 9장 · 용어 정리
 
-이 권에서 풀어 쓴 용어를 모두 모았습니다. 용어는 영어 그대로 두고 뜻은 한국어로 적습니다. "처음"은 그 용어를 처음 풀어 쓴 절입니다. 같은 이름이 두 뜻으로 쓰이는 경우(Layer 1, C1–C7)는 표 아래에 따로 적었습니다.
+이 권에서 풀어 쓴 용어를 모두 모았습니다. 용어는 영어 그대로 두고 뜻은 한국어로 적습니다. "처음"은 그 용어를 처음 풀어 쓴 절입니다. 예전에 두 뜻으로 쓰였던 이름(Layer 1, C1–C7)은 표 아래에 따로 적었습니다.
 
 ## 9.1 운영체제와 scheduling 용어
 
@@ -1491,11 +1491,12 @@ timeline 한 줄 편집
 | recognition layer | process 이름 등에서 기계의 상황을 읽어 여러 subsystem에 공유하는 인식 계층. 이 연구의 제안 | 1.1 |
 | `recognizer` | 기계가 어떤 상황에 있는지 알아내는 부분. condition마다 바뀜 | 1.3 |
 | `executor` | 상황이 주어졌을 때 설정을 적용해 scheduling하는 부분. 모든 condition에서 같음 | 1.3 |
-| `condition` | 실험 사다리의 한 칸, 곧 recognizer 하나: `fixed`, `random`, `whitelist`, `llm_vocab`, `llm_algo`, `llm_full`, `oracle` | 1.3 |
+| `condition` | 실험 사다리의 한 칸, 곧 recognizer 하나: `fixed`, `random`, `shipped_catalogue`, `strongest_name_table`, `llm_vocab`, `llm_algo`, `llm_full`, `oracle` | 1.3 |
 | `oracle` | ground truth를 그대로 읽는 condition. 완벽한 인식의 천장 | 1.3 |
-| `whitelist` | 알려진 process 이름 목록과 대조하는 condition. 오늘의 OS(Game Mode)를 재현 | 1.3 |
+| `shipped_catalogue` | 배포판(CachyOS)이 ananicy-cpp로 켜 두는 이름 catalogue를 재현한 condition. 각 process의 `argv[0]` basename으로 대조. 이것을 이기면 RQ2에 답함 | 1.3 |
+| `strongest_name_table` | 같은 catalogue의 설계로, 데이터셋이 알려진 것으로 내놓는 software 모두에 규칙을 둔 이름 표 condition. 연구의 주장이 이겨야 하는 상대 | 1.3 |
 | `ground truth` | workload 파일 안의 정답 label 구간 목록. `oracle`과 grader만 읽음 | 1.3 |
-| Layer 1 / Layer 2 (실험) | 인식 정확도(답과 정답을 바로 비교) / 소비자 성능(trace에서 읽은 지표) | 1.3 |
+| Layer 1 / Layer 2 | 인식 정확도(답과 정답을 바로 비교) / 소비자 성능(trace에서 읽은 지표). 데이터셋의 층에는 쓰지 않음(9.8) | 1.3 |
 | `system` block | recognizer 답 가운데 세계에 대한 주장(mode와 attribute). 데이터셋의 label과 같은 어휘 | 1.4 |
 | `mode` | 구간에 기계가 주로 무엇에 쓰이는지. 닫힌 메뉴 열여섯 개 가운데 하나 | 1.4 |
 | `ambiguous` | 정답을 하나로 정할 수 없는 구간에만 붙는 ground-truth 전용 label. 정확도에서 빠짐 | 1.4 |
@@ -1503,7 +1504,7 @@ timeline 한 줄 편집
 | ground-truth 설명 key | `background`, `initiated`, `dual_active`, `spoof`, `pre_committed_miss`. 채점되지 않고 결과를 나누거나 분석할 때만 씀 | 1.4 |
 | `driver table` | (mode, `background_wanted`) 32쌍을 scheduler 설정으로 바꾸는 daemon 쪽 고정 표 | 1.4 |
 | 설정(config) | scheduling algorithm 하나와 그 parameter, 그리고 `batch_bandwidth_cap`(batch 작업 몫의 상한) | 1.4 |
-| RQ0 | "이 workload들에서 설정이 애초에 중요한가"를 `random`과 `oracle`만으로 묻는 문지기 실험 | 1.5 |
+| RQ0 | "이 workload들에서 설정이 애초에 중요한가"를 모델 없이 `fixed`, `random`, `oracle`만으로 묻는 문지기 실험 | 1.5 |
 | RQ1–RQ5 | 이름으로 상황을 읽는가 / 오늘의 시스템을 이기는가 / 권한이 얼마나 필요한가 / 상황이 얼마나 오래 가야 지연을 갚는가 / driver table이 건전한가 | 1.5 |
 | RQ0 gate spec | RQ0 문지기 실험의 사전 등록 파일 `harness/experiments/rq0-gate.yaml` | 1.5 |
 | judging file / reporting file | RQ0 문지기 실험의 판정에 들어가는 파일 19개 / 돌리고 보고만 하는 파일 32개 | 1.5 |
@@ -1560,7 +1561,7 @@ timeline 한 줄 편집
 
 | 용어 | 뜻 | 처음 |
 |---|---|---|
-| core set | 손으로 설계한 51개 파일, 66개 구간. 파일 하나가 주장 하나 | 5.1 |
+| core set | 손으로 설계한 51개 파일, 67개 구간. 파일 하나가 주장 하나 | 5.1 |
 | C1 calibration group | mode마다 하나, 그 mode의 `true` 칸을 담는 쉬운 파일 열여섯. generated layer의 재료 | 5.2 |
 | C2 intent pair group | 첫 구간을 공유하고 두 번째 구간에서만 다른 세 쌍과 `c2-p2a-idle` | 5.2 |
 | C3 transition arc group | 상황이 바뀌는 흐름 셋. 존재 사례 | 5.2 |
@@ -1588,15 +1589,16 @@ timeline 한 줄 편집
 | `source` map | timeline task의 `bind`와 `count`와 같은 key를 가진 출처 map | 3.3 |
 | `design` / `convention` / `arithmetic` | 출처 없는 값의 성격: 실험이 고른 값 / 널리 받아들여진 관행 / 다른 값에서 계산한 값 | 6.1 |
 | `docs/references.md` | 모든 인용 문자열의 주인. 항목마다 `cite`, `role`, `status` | 6.2 |
-| `dataset/sources.yaml` | 데이터셋이 끌어오는 출처의 기계용 목록. `references.md`의 부분집합 | 6.2 |
+| `dataset/sources.yaml` | 데이터셋이 끌어오는 출처의 기계용 목록. `references.md`의 부분집합. 2026-10-17에 19개 id | 6.2 |
+| `dataset/meas-releases.yaml` | 데이터가 인용하는 `meas-ci` campaign마다 원시 기록을 담은 release와 asset의 SHA-256. `make lint`가 검사 | 6.2 |
 | `role` | 출처가 뒷받침할 수 있는 주장의 범위 | 6.3 |
-| scholarly / deployed-system / measurement | 출처 등급: 학술(역할 안의 경험적 주장) / 배포된 software(존재 주장만) / 우리 측정(구조와 모양 주장만) | 6.3 |
+| scholarly / deployed-system / talk·초록·보도 / measurement | 출처 등급: 학술(역할 안의 경험적 주장) / 배포된 software(존재, 그 시스템 자신의 설계와 동작, 그 출처가 공개한 숫자를 그 출처의 말로) / 발표·학회 초록·뉴스 보도(발표자나 기자의 주장으로만) / 우리 측정(이 기계 위의 이 software) | 6.3 |
 | `meas-ci` | 이 프로젝트의 CI 측정. tag 꼴 `meas-ci:<workflow>:<campaign 시작 날짜>` | 6.2 |
 | `campaign` | 한 측정을 반복한 묶음. tag 하나가 campaign 하나 | 6.4 |
 | `runner` | GitHub Actions가 job을 돌리는 가상 기계. 측정은 ubuntu-24.04, 4 vCPU, AMD EPYC 7763만 셈 | 6.4 |
 | repeat | 새 runner 위의 측정 job 하나 전체. 안정성 규칙이 세는 단위 | 6.4 |
 | stability rule | 반복 사이 95 % t 구간 반폭이 평균의 5 %(또는 1 µs) 이하가 될 때까지, 최소 다섯 번 반복 | 6.4 |
-| `meas-pending` | 측정을 기다리는 임시값 표시. 지금 library에 없고 linter가 막음 | 4.9 |
+| `meas-pending` | 측정을 기다리는 값의 tag. `make lint`의 freeze가 library와 timeline의 bound value 모두에서 거부. 지금 하나도 없음 | 4.9 |
 
 ## 9.6 소비자 쪽 용어
 
@@ -1625,7 +1627,9 @@ timeline 한 줄 편집
 | audit | 여러 감사자가 데이터셋을 독립적으로 본 기록. 이 권은 2026-10-10의 것을 자주 인용 | 1.8, 8.9 |
 | fidelity map 등급 | 2026-10-10 감사의 현실 충실도 등급: FAITHFUL(충실), PROXY(대용품), STYLISED(양식화), DESIGN(설계), UNGROUNDED(근거 없음) | 6.7 |
 
-## 9.8 두 뜻으로 쓰이는 이름
+## 9.8 예전에 두 뜻으로 쓰였던 이름
 
-- **Layer 1, Layer 2.** 실험 쪽 문서(`docs/terminology.md`, `docs/research-claims.md`)에서는 인식 정확도와 소비자 성능이라는 두 측정 층입니다. 데이터셋 설계 문서(`docs/workload/building-plan.md` §1)에서 Layer 1은 archetype library, Layer 2는 scenario 목록, Layer 3은 timeline입니다. 이 시리즈는 데이터셋의 층을 말할 때 "archetype library", "scenario 목록", "timeline"이라고 이름으로 부릅니다.
-- **C1–C7.** 데이터셋에서는 core set의 일곱 파일 group(C1 calibration부터 C7 attribute counterpart까지)입니다. `docs/research-claims.md`에서는 연구 주장을 이루는 일곱 고리입니다(C1 "옳은 설정이 다른 현실적 상황이 존재하고 그 차이는 측정 가능하다"부터 C7 "신호가 다른 소비자에게 일반화된다"까지). 이 시리즈의 C1–C7은 언제나 파일 group이고, 매번 group 이름을 함께 적습니다.
+2026-10-16에 인지오가 두 이름 충돌을 정리했습니다(1.3의 용어 상자). 그 전의 문서와 기록을 읽을 때를 위해 옛 쓰임을 함께 적습니다.
+
+- **Layer 1, Layer 2.** 인식 정확도와 소비자 성능이라는 두 측정 층만을 뜻합니다(`docs/terminology.md`, `docs/research-claims.md`, RQ0 gate spec과 harness의 이름). 예전의 데이터셋 설계 문서(`docs/workload/building-plan.md` §1)에서는 Layer 1이 archetype library, Layer 2가 scenario 목록, Layer 3이 timeline이었습니다. 지금 building plan과 이 시리즈는 데이터셋의 층을 "archetype library", "scenario 목록", "timeline"이라고 이름으로 부릅니다.
+- **C1–C7.** core set의 일곱 파일 group(C1 calibration부터 C7 attribute counterpart까지)만을 뜻합니다. 예전의 `docs/research-claims.md`는 연구 주장을 이루는 고리를 C1–C7로 불렀고, 지금은 "link 1"부터 "link 7"까지로 부릅니다(link 1 "옳은 설정이 다른 현실적 상황이 존재하고 그 차이는 측정 가능하다"부터 link 7 "신호가 다른 소비자에게 일반화된다"까지). 이 시리즈는 C1–C7을 쓸 때 매번 group 이름을 함께 적습니다.
