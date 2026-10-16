@@ -512,10 +512,10 @@ Phase 9 spec과 2026-10-10 감사는 이 memo의 발견을 "13"개로 셉니다(
 
 | 발견 | 무엇이 틀렸나 | 그 뒤 무엇이 바뀌었나 |
 |---|---|---|
-| A1 | `ocallahan-atc17`의 2,430은 DynamoRio build | 9.6이 kernel build를 직접 재어(`meas-ci:build:2026-09-18`) `build-orchestrator`가 측정된 build 전체를 묶게 됨: object job 2,908개, `parallelism_cap` 8(9.10 D18). 카탈로그의 2,430 출처 줄은 9.10 D33이 뺌. `sources.yaml`과 `references.md`의 문장은 9.15(2026-10-16)에서 DynamoRio build로 고쳐짐(2.4절) |
+| A1 | `ocallahan-atc17`의 2,430은 DynamoRio build | 9.6이 kernel build를 직접 재어(`meas-ci:build:2026-09-18`) `build-orchestrator`가 측정된 build 전체를 묶게 됨: object job 2,908개, `parallelism_cap` 8(9.10 D18). 카탈로그의 2,430 출처 줄은 9.10 D33이 뺌. `sources.yaml`과 `references.md`의 문장은 9.15(2026-10-16)에서 DynamoRio build로 고쳐짐(2.4절). `compiler-child`의 `modeling_notes`는 2026-10-17에 같은 내용으로 고쳐짐 |
 | A2 | 16.7 ms frame budget이 LAVD 슬라이드에 없음 | 9.4 D2: `frame_period` 16,667 µs는 그대로, 태그를 `lavd-ossna24` → `steamos-refresh`로, "design — display-paced at the Steam Deck LCD default refresh … 1/60 s arithmetic"으로 표시. LAVD registry notes에 "States no frame period or frame budget" 추가 |
 | A3 | Roeser의 158 ms는 로그 척도 위치인데 평균으로 저장·샘플; 논문 자신의 pause 성분(≈253 ms)은 안 쓰고 Dhakal의 평균으로 닫음 | 9.5가 `desktop-interactive`를 응용 프로그램별 측정 archetype으로 대체(9.5 D2, D19). 타이핑 자극은 SWELL-KW 기록을 재생(9.5 D4). `dhakal-chi18`과 `roeser-rw24`는 "Paper-only after Phase 9"(역할 줄 2026-09-14 정정) |
-| A4 | Coetzee의 짧은 프로세스는 `cp`, `mkdir` | `compiler-child`가 측정값으로 바뀌면서 "corroborates" 주장이 사라짐. `coetzee-arxiv12`는 지금 아무 값도 받치지 않음 |
+| A4 | Coetzee의 짧은 프로세스는 `cp`, `mkdir` | `compiler-child`가 측정값으로 바뀌면서 `coetzee-arxiv12`가 받치는 값이 없어짐. 그 항목의 `modeling_notes`에는 "coetzee-arxiv12 sec-9 corroborates"가 2026-10-16까지 남았고, 2026-10-17에 9.15의 재빌드가 Coetzee는 리눅스 커널 빌드의 짧게 사는 많은 프로세스를 `cp`와 `mkdir`을 예로 수 없이 말한다고 고쳐 적음. `coetzee-arxiv12`는 지금 아무 값도 받치지 않음 |
 | A5 | `ananicy-rules`의 `type`은 처방(prescription)이지 행동 분류가 아님; 수확 규칙이 고르지 않게 적용됨 | 28개 측정 항목의 `category_source`가 모두 `meas`가 됨(나머지 하나 `game-task-chain`은 `lavd-ossna24`). `ananicy-rules`는 `sources.yaml`에 없음. 9.12 D1은 이것을 비교 조건이 재현하는 이름 기반 카탈로그로 다룸(근거가 아니라 비교 대상). 그 조건은 9.12 D6, D105 이후 `shipped_catalogue`(CachyOS가 ananicy-cpp와 함께 설치하고 켜는 카탈로그를 `03ef03fb` 시점 그대로, 각 process의 `argv[0]` basename으로 맞춤)이고, 옛 `whitelist` 조건의 다른 반쪽은 `strongest_name_table` |
 | B1 | `game-task-chain`의 두 파라미터는 컴파일러가 읽지 않음; tail 파라미터는 슬라이드 태그를 단 placeholder; `n_tasks: 300`은 개수를 archetype 안에 둠 | 9.4 D3: `n_tasks`, `tail_idle_gap`, `tail_run` 삭제, 게임 파일마다 284개 tail task가 사라짐. 9.4 D7: 읽히지 않던 두 파라미터 정리 |
 | B2 | `compiler-child.disk_wait`의 `sigma_log: 0.8`은 측정 태그를 단 placeholder | 9.6이 `compiler-child`를 단계별 CPU 표로 다시 측정, `disk_wait` 파라미터가 사라짐 |
@@ -751,7 +751,7 @@ trigger 파일은 실행할 프로그램, 반복 번호(모든 프로그램에 �
 | 파일/폴더 | 역할 |
 |---|---|
 | `machine_gate.sh`, `pin.sh`, `phase.sh` | CPU 모델 확인, CPU 고정, 단계의 시작과 끝 기록 |
-| `runner_spec.py` | runner 사양을 `spec.json`으로 기록. docstring은 Phase 2의 문장("machine-relative absolutes rank as convention-informed-by-measurement and carry this record")을 아직 적지만, 9.5 D10 이후 측정값은 runner로 범위를 정한 출처 주장입니다(6.1절) |
+| `runner_spec.py` | runner 사양을 `spec.json`으로 기록. docstring: "Record the runner spec: a measured value is a source claim scoped to the runner this record describes, not a downgrade to convention (9.5 D10, D26)." 측정값은 runner로 범위를 정한 출처 주장입니다(6.1절) |
 | `stability.py` | 모든 캠페인이 공유하는 stability rule(7장): `TOLERANCE = 0.05`, t 배수 `t975`, `stability`, `ratio_stability` |
 | `stopping.py` | 멈춤 규칙을 관찰된 퍼짐에서 모의실험(9.5 D88) |
 | `distribution.py` | 측정 분포를 표로 만드는 방법: 열 개 분위수 p1…p99.9, 최솟값과 최댓값, 열한 구간의 평균 |
@@ -1049,7 +1049,7 @@ timeline은 측정 단계보다 훨씬 긴 시간 동안 프로그램을 붙잡�
 **민감도 variant.** 측정의 한계가 결과에 얼마나 닿는지를 보기 위해, 9.14 decision 10과 12는 판정 파일들의 variant를 만들어 RQ0 gate spec에 고정했습니다(`dataset/variants.yaml`, 아홉 set, artifact 78개). 측정과 관련된 것은 셋입니다.
 
 - `venue-x0.8`, `venue-x1.25`(`scale-runs`): 게임 chain을 뺀 모든 RUN을 ×0.8과 ×1.25로. 이유 문장은 "the venue factor's lower edge, 1/1.25 (9.6 D32; the bracket contains the ×1.144 huge-page ratio of 9.10 D88 and the tracing overhead's ×1.02–1.16)"입니다. runner라는 장소가 값을 얼마나 흔들 수 있는지에 대한 설계상의 괄호입니다.
-- `corner-low`, `corner-high`(`carried-bounds`): 예외로 담은 값(`carried_values` 15개)을 반폭의 양 끝으로 옮겨 다시 compile.
+- `corner-low`, `corner-high`(`carried-bounds`): 예외로 담은 값(`carried_values`의 표 19개)을 반폭의 양 끝으로 옮겨 다시 compile. 2026-10-17에 `renderer-hidden`의 `Compositor`와 `PerfettoTrace`(세션 사이에서 변하는 값, 7.5절의 표)가 gap과 run 표 둘씩 더해져 15개에서 19개가 되었습니다(9.15 기록 `logs/B1-data-rebuild.md`).
 - `replay`(`trace-replay`): 위의 trace-replay check.
 
 2026-10-10 감사의 fidelity map은 "venue sweep ×0.8–1.25 narrower than the measured 0.50–0.72× cross-CPU spread"라고 적었습니다. 9.6이 잰 CPU 모델 사이의 차이(Xeon Platinum 8573C가 `cc1`을 EPYC 시간의 0.72배, `fixdep`을 0.50배에 돌림)가 venue variant의 괄호보다 넓다는 뜻입니다. 인지오가 2026-10-16에 괄호를 그대로 두기로 정했습니다(9.15 작업 목록 W-0752). 괄호(×1/1.25, ×1.25)가 담는 것은 측정된 두 장소 효과, 곧 huge page 비율 ×1.144와 추적 overhead ×1.02–1.16이고, CPU 모델은 아닙니다. 다른 CPU 모델은 프로그램마다 다른 비율로 속도를 바꾸므로 공통 배수 하나로 재현되지 않습니다. 이 한계는 세 곳에 적혀 있습니다. `docs/research-claims.md`의 "What is not claimed"(scheduling 결과가 다른 CPU나 다른 기계 구성으로 옮겨 간다고 주장하지 않음), `measurement-overview.md` §11의 CPU 모델 항목, 그리고 venue variant를 설명하는 문서들(`dataset/README.md`의 Sensitivity variants 절, harness guide의 RQ0 gate 장)입니다. 이 variant들은 Phase 10에서 처음 돌아갑니다(미실행).
@@ -1670,7 +1670,7 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 | `renderer-hidden`의 pool(`meas-ci:desktop:2026-10-05b`)과 `video-editor`의 유휴 pool(`meas-ci:interactive:2026-10-05`)에서 burstiness와 시간 창을 다시 읽고 `measurement-overview.md`의 위협 문장을 그 값으로(8.5절) | 9.15 (2026-10-16) |
 | stability ledger: 허용 오차를 통과한 값, 예외 class마다 담은 값, 담은 가장 넓은 반폭을 조각들의 pooled record에서 스크립트로 계산해 `measurement-overview.md`의 stability 절에(13.1절) | 9.15 (2026-10-16; 2026-09-20 memo §3) |
 
-2026-10-11 검토의 항목("the five gate pins and the generated layer's pins equal the committed bytes")이 대는 것은 그때의 커밋된 바이트입니다. 위 표의 하위 작업 시점 hash 뒤에 9.23 D10(2026-10-14)과 D17(2026-10-15), 그리고 9.15의 rebuild(2026-10-16; `harness/CHANGELOG.md`의 2026-10-16 항목)가 다시 bless와 pin을 했습니다. 2026-10-17 현재의 pin은 9.15의 것입니다. dataset manifest `b6017a10…`, variants manifest `087ef27c…`, scoring spec `2ad757b6…`(9.23 D10), guard spec `24ccb875…`, driver table `0fba4b3c…`(RQ0 gate spec의 `pins`), 그리고 생성 층의 다섯 manifest `a8eebb33…`(transition grid), `2e57a6c1…`(return grid), `dd6a7c24…`(flap-stress), `264d3333…`(distractor grid), `58a34d65…`(familiarity ladder)입니다. 9.23 D17의 값(dataset `81d3213d…`, variants `7079e677…`, 생성 층 `826c719c…`/`392d6071…`/`97ba813f…`/`919bb2c0…`/`b6f82df5…`)은 그 바로 앞의 pin입니다.
+2026-10-11 검토의 항목("the five gate pins and the generated layer's pins equal the committed bytes")이 대는 것은 그때의 커밋된 바이트입니다. 위 표의 하위 작업 시점 hash 뒤에 9.23 D10(2026-10-14)과 D17(2026-10-15), 그리고 9.15의 두 rebuild(2026-10-16과 2026-10-17; `harness/CHANGELOG.md`의 두 날짜의 항목)가 다시 bless와 pin을 했습니다. 2026-10-17 현재의 pin은 9.15의 2026-10-17 것입니다. dataset manifest `d52e7bd4…`, variants manifest `6c1c3e09…`, scoring spec `2ad757b6…`(9.23 D10), guard spec `24ccb875…`, driver table `0fba4b3c…`(RQ0 gate spec의 `pins`), 그리고 생성 층의 다섯 manifest `4bb7a444…`(transition grid), `ec7ca574…`(return grid), `79a6c5c4…`(flap-stress), `3478a908…`(distractor grid), `415cfbd6…`(familiarity ladder)입니다. 9.15의 2026-10-16 값(dataset `b6017a10…`, variants `087ef27c…`, 생성 층 `a8eebb33…`/`2e57a6c1…`/`dd6a7c24…`/`264d3333…`/`58a34d65…`)이 그 바로 앞의 pin이고, 9.23 D17의 값(dataset `81d3213d…`, variants `7079e677…`, 생성 층 `826c719c…`/`392d6071…`/`97ba813f…`/`919bb2c0…`/`b6f82df5…`)이 그 앞입니다.
 
 그리고 13.3절에서 본 대로, 2026-09-28의 coverage sweep이 9.5–9.9를 닫았으므로 "a later review of them is this audit's"입니다. 9.9 D27이 넘긴 "9.5–9.8 ran beside the same `php-fpm` and workflow loops"(다른 캠페인의 component에도 runner 배경의 wake가 섞였을 수 있음)도 이 감사가 볼 거리입니다.
 

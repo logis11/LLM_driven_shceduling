@@ -171,9 +171,9 @@ $ grep -cE '^  [a-z][a-z0-9-]*:' dataset/archetypes.yaml
 
 ## 2.1 파일 전체의 모양
 
-`dataset/archetypes.yaml`은 1,943줄입니다(2026-10-17). 맨 위 약 70줄은 주석으로 된 **encoding rules**(이 파일을 쓰는 규칙)이고, 그 아래 `archetypes:` 한 줄 밑에 29개 항목이 이어집니다. 항목의 key가 곧 **archetype id**입니다(`office-writer:` 같은 것). 항목들 사이에는 어느 연구 slice의 어느 campaign에서 왔는지 적은 구분 주석이 있습니다(예: `# ---- measured per-application archetypes — 9.5 same-machine campaigns …`).
+`dataset/archetypes.yaml`은 1,946줄입니다(2026-10-17). 맨 위 약 70줄은 주석으로 된 **encoding rules**(이 파일을 쓰는 규칙)이고, 그 아래 `archetypes:` 한 줄 밑에 29개 항목이 이어집니다. 항목의 key가 곧 **archetype id**입니다(`office-writer:` 같은 것). 항목들 사이에는 어느 연구 slice의 어느 campaign에서 왔는지 적은 구분 주석이 있습니다(예: `# ---- measured per-application archetypes — 9.5 same-machine campaigns …`).
 
-머리 주석의 첫 줄은 `# dataset/archetypes.yaml — Layer 1 archetype library (v0.2)`입니다(2026-10-17). version은 `dataset/README.md`, `docs/data-contracts.md` §1의 계약표와 §2와 같습니다. 9.13 spec decision 9(dataset rebuild sub-task의 결정, "The library's stated version moves from v0.1 to v0.2 in the data-contracts §2 and the dataset README")가 버전을 v0.2로 올렸을 때 실제로 바뀐 곳은 README와 data-contracts §2뿐이어서, yaml 머리 주석과 data-contracts §1은 한동안 v0.1로 남아 있었습니다. 2026-10-16에 9.15가 둘 다 v0.2로 고쳤습니다(머리 주석은 9.15의 재빌드, commit `37c2e233`). "Layer 1"은 데이터셋의 층에 번호를 붙이던 옛 이름입니다. 2026-10-16부터 저장소 문서는 데이터셋의 층을 이름으로만 부르고(archetype library, scenario 목록, timeline), "Layer 1"은 인식 정확도라는 측정 층만을 뜻합니다. 머리 주석의 이 두 단어를 고칠지는 인지오가 정할 일로 남아 있습니다. 이 파일은 모든 manifest의 입력이라, 주석 한 줄을 고쳐도 일곱 manifest가 다시 bless되기 때문입니다.
+머리 주석의 첫 줄은 `# dataset/archetypes.yaml — the archetype library (v0.2)`입니다(2026-10-17). version은 `dataset/README.md`, `docs/data-contracts.md` §1의 계약표와 §2와 같습니다. 9.13 spec decision 9(dataset rebuild sub-task의 결정, "The library's stated version moves from v0.1 to v0.2 in the data-contracts §2 and the dataset README")가 버전을 v0.2로 올렸을 때 실제로 바뀐 곳은 README와 data-contracts §2뿐이어서, yaml 머리 주석과 data-contracts §1은 한동안 v0.1로 남아 있었습니다. 2026-10-16에 9.15가 둘 다 v0.2로 고쳤습니다(머리 주석은 9.15의 재빌드, commit `37c2e233`). 2026-10-16까지 첫 줄은 "Layer 1 archetype library"였습니다. "Layer 1"은 데이터셋의 층에 번호를 붙이던 옛 이름입니다. 2026-10-16부터 저장소 문서는 데이터셋의 층을 이름으로만 부르고(archetype library, scenario 목록, timeline), "Layer 1"은 인식 정확도라는 측정 층만을 뜻합니다(인지오의 결정, 9.15 작업 목록 W-0742). 머리 주석의 이 두 단어는 2026-10-17에 9.15의 두 번째 재빌드(commit `7b024003`)에서 빠졌습니다. 이 파일은 모든 manifest의 입력이라, 주석 한 줄을 고쳐도 일곱 manifest가 다시 bless되고 RQ0 gate spec이 다시 pin됩니다.
 
 머리 주석은 이 파일의 schema가 "our invention"이라고 밝힙니다. 그리고 각 field의 규칙을 짧게 나열합니다. 이 장의 2.2–2.7절은 그 규칙을 하나씩 풀어 설명한 것입니다.
 
@@ -181,7 +181,7 @@ $ grep -cE '^  [a-z][a-z0-9-]*:' dataset/archetypes.yaml
 
 `dataset/tools/wlc/linter.py`의 `REQUIRED_ARCHETYPE_FIELDS`는 모든 항목이 가져야 하는 field 아홉 개를 정합니다. `category_source`, `declared_class`, `pattern`, `params`, `lifetime`, `binding_params`, `scalable`, `validation_stats`, `modeling_notes`입니다. 하나씩 봅니다.
 
-**`category_source`** — 이 항목이 나타내는 "행동 부류"가 어디서 왔는지 적습니다. archetype-plan §2는 이를 **Tier-1 provenance**(항목이 존재해도 되는 근거)라고 부릅니다. 원래 설계에서는 interbench, ananicy-rules 같은 기존 분류표의 이름을 적게 되어 있었습니다. 지금은 29개 중 28개가 `meas`입니다. `meas`는 "이 행동 부류는 우리 측정에서 관찰한 것"이라는 뜻입니다. 나머지 하나 `game-task-chain`만 `lavd-ossna24`(LAVD 발표 자료)입니다.
+**`category_source`** — 이 항목이 나타내는 "행동 부류"가 어디서 왔는지 적습니다. 머리 주석은 이를 "the Tier-1 ground of the entry's existence"(항목이 존재해도 되는 근거, archetype-plan §2의 Tier 1)라고 적습니다(2026-10-17부터; 그 전에는 "Tier-1 provenance"). archetype-plan §5의 field 목록은 지금도 "Tier-1 provenance"라고 부릅니다. 원래 설계에서는 interbench, ananicy-rules 같은 기존 분류표의 이름을 적게 되어 있었습니다. 지금은 29개 중 28개가 `meas`입니다. `meas`는 "이 행동 부류는 우리 측정에서 관찰한 것"이라는 뜻입니다. 나머지 하나 `game-task-chain`만 `lavd-ossna24`(LAVD 발표 자료)입니다.
 
 **`declared_class`** — 1.6절에서 설명했습니다. `normal` 또는 `idle`, 기본값 없음.
 
@@ -303,7 +303,7 @@ stimulus:
   {stream: swell-word-c1, kinds: [key], sampling: per-task, source: "swell-icmi14:word-c1"}
 ```
 
-`stream`은 `dataset/stimulus/<stream>.jsonl` 파일 이름입니다. 이 파일은 `{"t_us": 6620100, "kind": "key"}` 같은 줄의 목록입니다. `kinds: [key]`는 key 사건만 쓰라는 뜻입니다(click, wheel, drag는 버림). 녹화는 SWELL-KW(`swell-icmi14`: 2012년 지식 노동자 25명이 각각 약 3시간 동안 Windows에서 일한 기록, 키 하나하나의 timestamp와 그때 앞에 있던 application이 남아 있음)에서 왔습니다. 세 stream이 있습니다. `swell-word-c1`(Word, 조건 c1, 82,634줄), `swell-outlook-c23`(Outlook, 조건 c2와 c3, 7,584줄), `swell-ie-c1`(Internet Explorer, 조건 c1, 21,671줄).
+`stream`은 `dataset/stimulus/<stream>.jsonl` 파일 이름입니다. 이 파일은 `{"t_us": 6620100, "kind": "key"}` 같은 줄의 목록입니다. `kinds: [key]`는 key 사건만 쓰라는 뜻입니다(click, wheel, drag는 버림). 녹화는 SWELL-KW(`swell-icmi14`: 2012년 학생과 인턴 25명이 실험실의 Windows에서 각각 약 3시간 동안 지식 노동 과제를 한 기록, 키 하나하나의 timestamp와 그때 앞에 있던 application이 남아 있음)에서 왔습니다. 세 stream이 있습니다. `swell-word-c1`(Word, 조건 c1, 82,634줄), `swell-outlook-c23`(Outlook, 조건 c2와 c3, 7,584줄), `swell-ie-c1`(Internet Explorer, 조건 c1, 21,671줄).
 
 compiler는 timeline의 `input` 창마다, 녹화에서 창 길이만큼의 연속한 구간을 seed로 정한 위치에서 잘라 재생합니다. key 하나하나가 `WAIT input:<task id>` + `RUN`이 되고, 그 RUN의 길이는 `input_run` table에서 뽑습니다.
 
@@ -986,7 +986,7 @@ job 하나의 깨어나는 순서는 `sh` → `gcc` → `cc1` → `gcc` → `as`
 
 > **왜 이렇게 정했나 — structural step(9.6 D20, 2026-09-19).** member마다 "자기 자식의 fork와 exit로 나뉜 구간"마다 한 번씩 RUN합니다(`sh` 넷, `gcc` 셋, 나머지 하나). 기록된 이유: repeat 4의 2,857개 job에서 넷은 거의 항상 한 번 깨는데(`cc1` 99.3 %), `sh`는 5–7번, `gcc`는 4–7번 깨고, 첫 run이 크고(중간값 0.72 ms와 1.70 ms) 뒤의 run은 작았습니다(0.01–0.34 ms). "so one table per role describes neither." 그래서 (role, step)마다 table 하나, 모두 열한 개입니다. `modeling_notes`는 정직하게 적습니다. 모델의 4와 3은 구조이지 wake 횟수가 아니고, step과 member는 서로 독립으로 뽑힙니다.
 
-> **왜 이렇게 정했나 — 문헌은 존재만 받친다.** `modeling_notes`: "The kernel-build literature grounds the class's existence and short-lived character only (ocallahan-atc17 sec-4.3, 'make forks and execs 2430 processes, mostly short-lived'; coetzee-arxiv12 sec-9 corroborates)." 숫자는 하나도 문헌에서 오지 않습니다. 그리고 2026-09-13의 critical findings memo(A1)가 밝혔듯, O'Callahan의 2,430 process는 Linux kernel build가 아니라 DynamoRio 6.1.0의 build였습니다(§4.1: "make builds DynamoRio [8] (version 6.1.0) with make -j8"). 이 인용은 지금 "짧은 process를 많이 쏟아 내는 build가 있다"는 존재만 받칩니다. Coetzee의 문장도 실제로 말하는 짧은 process는 compiler가 아니라 `cp`와 `mkdir`이었습니다(memo A4). 우리 측정의 kernel build는 build당 29,035개 process를 띄웠습니다(9.6 D9).
+> **왜 이렇게 정했나 — 문헌은 존재만 받친다.** `modeling_notes`: "The literature grounds the class's existence and short-lived character only: ocallahan-atc17's "make forks and execs 2430 processes, mostly short-lived" (sec-4.3) is a `make -j8` build of DynamoRio 6.1.0 (sec-4.1), and coetzee-arxiv12 names the Linux kernel build's many short-lived processes, its examples `cp` and `mkdir`, with no count (sec-9)". 숫자는 하나도 문헌에서 오지 않습니다. 2026-09-13의 critical findings memo(A1)가 밝혔듯, O'Callahan의 2,430 process는 Linux kernel build가 아니라 DynamoRio 6.1.0의 build였습니다(§4.1: "make builds DynamoRio [8] (version 6.1.0) with make -j8"). 이 인용은 "짧은 process를 많이 쏟아 내는 build가 있다"는 존재만 받칩니다. Coetzee의 문장도 실제로 말하는 짧은 process는 compiler가 아니라 `cp`와 `mkdir`이었습니다(memo A4). 2026-10-16까지의 메모는 두 논문을 "The kernel-build literature"로 묶고 Coetzee가 "corroborates"한다고 적었고, 2026-10-17에 9.15의 재빌드(commit `7b024003`)가 출처 등록부(`dataset/sources.yaml`)의 메모에 맞춰 위처럼 고쳤습니다. 우리 측정의 kernel build는 build당 29,035개 process를 띄웠습니다(9.6 D9).
 
 warm 캐시만 싣습니다. 캐시를 비운(cold) 상태에서는 `cc1`이 중간값으로 두 번 깨고 깰 때마다 183 μs의 디스크 대기가 있었는데, 이것은 "reported beside the pool and not carried"입니다(9.6 D8 iii, D9). 9.6 D5(2026-09-17)는 archetype이 warm `-j8` phase를 읽고, cold 수치는 campaign 결과에 남기며, timeline이 어느 상황을 그릴지는 9.10의 몫이라고 적습니다. build에 대해 warm을 고른 이유를 따로 적은 문장은 없습니다(기록된 이유는 없습니다). backup과 archive에 대해 같은 선택을 하며 9.7 D8이 든 이유는 7.2절에서 봅니다.
 
@@ -1278,7 +1278,7 @@ task 이름은 `dkms`이고, 자식들은 관측된 comm을 그대로 씁니다(
 
 **공통 한계.** GNOME Shell은 unit drop-in으로 `--headless --virtual-monitor 1920x1080@60`으로 시작했고 seat에 display 장치도 vblank도 없습니다. 소리 장치가 없어 WirePlumber는 null sink를 씁니다. 측정 CPU에는 CPU별 kernel thread가 함께 돌았고(repeat마다 11,608–15,472번 schedule-in, 보고만 함), 측정 CPU 위의 바깥 사용자 공간 일은 phase의 0.00097–0.0022 %로 2 × 10⁻⁴ 상한 아래였습니다(9.9 D20, D22).
 
-**어디에 쓰이나.** 9.10 D28(2026-10-01)은 session process가 idle 파일(`c1-idle`, `c7-idle`)에만 나오고 다른 모든 파일은 그것을 생략했다고 밝힌다고 정했습니다. `Xorg` task는 은퇴했습니다(9.9 D26). Mutter 46.2의 X11 정책이 "on demand"(필요할 때만 띄움)여서 어떤 측정에서도 `Xorg`나 `Xwayland`가 보이지 않았고, `xorg`를 `compositor-shell`에 묶으면 두 번 세게 되기 때문입니다.
+**어디에 쓰이나.** 9.10 D28(2026-10-01)은 core set에서 session process가 idle 파일(`c1-idle`, `c7-idle`)에만 나오고 그 밖의 core 파일은 모두 그것을 생략했다고 밝힌다고 정했습니다. generated layer는 idle을 놓는 곳마다 이 넷을 싣습니다. 182개 파일이 이들을 묶고, 그중 62개에서는 세션이 다른 mode의 프로그램 옆에서 돕니다. 이 62개는 design 조합입니다(인지오의 결정, 2026-10-16; building plan §3a; generated layer를 다루는 5권 2.6절). `Xorg` task는 은퇴했습니다(9.9 D26). Mutter 46.2의 X11 정책이 "on demand"(필요할 때만 띄움)여서 어떤 측정에서도 `Xorg`나 `Xwayland`가 보이지 않았고, `xorg`를 `compositor-shell`에 묶으면 두 번 세게 되기 때문입니다.
 
 ## 9.2 네 항목의 숫자
 
@@ -1455,7 +1455,7 @@ decision 2의 직접적인 결과는, 거의 모든 항목이 우리 CI 측정�
 - `discord` → `element-desktop`(`chat-client`); `zoom` helper 은퇴; `steamwebhelper` task 은퇴. 9.8 D7, D8, D25.
 - `Xorg` 은퇴. 9.9 D26.
 
-이 권을 처음 쓴 2026-10-14에는 이 변화들 때문에 `docs/workload/archetype-plan.md` §4, `docs/data-contracts.md` §2의 "There are twelve" 문단과 예시, `docs/workload/coreset-guide.md` §4 이후, `docs/workload/scenario-catalog.md`의 process 이름 열, `docs/workload/measurement-overview.md`의 항목 표가 library와 달랐습니다. docs·memo·guidebook 정리 sub-task 9.15가 2026-10-16과 10-17에 이 문서들을 지금 library에 맞게 고쳤습니다. archetype plan §4와 coreset guide §4는 29개 항목을 나열하고, data-contracts §2는 "There are 29"로 시작하며, scenario 목록은 지금 timeline이 묶는 이름을, measurement overview §2는 measured 항목 28개를 적습니다. 그래도 문서와 데이터가 다르면 `dataset/archetypes.yaml`과 그 `scope`·`modeling_notes`, slice changelog들이 기준입니다.
+이 권을 처음 쓴 2026-10-14에는 이 변화들 때문에 `docs/workload/archetype-plan.md` §4, `docs/data-contracts.md` §2의 "There are twelve" 문단과 예시, `docs/workload/coreset-guide.md` §4 이후, `docs/workload/scenario-catalog.md`의 process 이름 열, `docs/workload/measurement-overview.md`의 항목 표가 library와 달랐습니다. docs·memo·guidebook 정리 sub-task 9.15가 2026-10-16과 10-17에 이 문서들을 지금 library에 맞게 고쳤습니다. archetype plan §4와 coreset guide §4는 29개 항목을 나열하고, data-contracts §2의 그 문단은 "There are 29"라고 적으며, scenario 목록은 지금 timeline이 묶는 이름을, measurement overview §2는 measured 항목 28개를 적습니다. 그래도 문서와 데이터가 다르면 `dataset/archetypes.yaml`과 그 `scope`·`modeling_notes`, slice changelog들이 기준입니다.
 
 # 12장 · 기록이 스스로 밝히는 한계
 
@@ -1500,7 +1500,7 @@ batch-loop 항목의 단계 순서(7.1절), heavy event의 몰림(`CHTTPClientTh
 
 - **대표성.** stability rule은 "this software on this machine"에서의 정밀도(재현성)를 보장할 뿐입니다(3.7절).
 - **멈춤의 낙관.** 첫 통과에서 멈춰서, 기준선에 붙은 값의 95 % 구간은 실제로 약 91–94 %만 덮습니다(3.4절).
-- **예외로 실린 값.** 다섯 예외 class의 값(3.5절)은 5 % 밖일 수 있고, 반폭이 scope에 적혀 있습니다. 규칙: "no reported result may rest on a difference smaller than a stated half-width." RQ0 gate spec은 이 값들을 모두 95 % 구간의 아래 끝과 위 끝으로 옮긴 `corner-low`, `corner-high` 변형으로 판정이 바뀌는지 봅니다(`variants.yaml`의 `carried_values` 목록: `code-editor`의 `libuv-worker`, `renderer-hidden`의 넷, `game-client`의 넷, `cpu-batch` `python3`의 둘, `module-build-orchestrator`의 꼬리 block). judging 파일이 담지 않는 항목의 값(session daemon의 pid 1과 system bus)은 훑지 않습니다. `variants.yaml`의 주석은 Tracker의 block도 그런 값으로 적지만, 지금의 `file-indexer`는 세 값 모두에서 stability rule을 지킵니다(항목의 scope: "the stability rule holds on all three values"). 그 주석은 `cpu-batch`의 옛 `tracker` program(9.6 D29의 예외) 때의 것입니다.
+- **예외로 실린 값.** 다섯 예외 class의 값(3.5절)은 5 % 밖일 수 있고, 반폭이 scope에 적혀 있습니다. 규칙: "no reported result may rest on a difference smaller than a stated half-width." RQ0 gate spec은 이 값들을 모두 95 % 구간의 아래 끝과 위 끝으로 옮긴 `corner-low`, `corner-high` 변형으로 판정이 바뀌는지 봅니다(`variants.yaml`의 `carried_values` 목록, 2026-10-17에 표 19개: `code-editor`의 `libuv-worker`, `renderer-hidden`의 component 여섯(residual, `HangWatcher`, page thread `chrome`, 조용한 thread `Chrome_ChildIOT`, `Compositor`, `PerfettoTrace`), `game-client`의 넷, `cpu-batch` `python3`의 둘, `module-build-orchestrator`의 꼬리 block). `Compositor`와 `PerfettoTrace`는 2026-10-17에 목록에 들어왔습니다. 그 전에는 `meas-ci:desktop:2026-10-05b`부터 session 사이에서 변하는 값으로 실렸는데도(9.10 D156) corner set이 훑지 않았습니다. judging 파일이 담지 않는 항목의 값(session daemon의 pid 1과 system bus)은 훑지 않습니다. `variants.yaml`의 주석은 2026-10-16까지 Tracker의 block도 훑지 않는 값으로 적었지만, 지금의 `file-indexer`는 세 값 모두에서 stability rule을 지키고(항목의 scope: "the stability rule holds on all three values"), 그 구절은 2026-10-17에 주석에서 빠졌습니다. 그 구절은 `cpu-batch`의 옛 `tracker` program(9.6 D29의 예외) 때의 것이었습니다.
 - **녹화의 끝.** `mail-client`와 `web-browser`의 일부 값은 녹화 창이 바닥나 규칙 밖에 있습니다(5.4절, 5.5절).
 
 ## 12.5 항목별로 기록된 한계 모음
@@ -1644,7 +1644,7 @@ batch-loop 항목의 단계 순서(7.1절), heavy event의 몰림(`CHTTPClientTh
 | scale 한계 / composition seam | 다른 venue에서 온 항목들의 크기가 서로 맞춰지지 않았다는 library 수준 한계(12.1) |
 | dispersion / burstiness | bin당 wake 수의 분산/평균. 실제 흐름이 compile된 흐름보다 1.9–11배 몰려 옴(12.3) |
 | 민감도 변형 | RQ0 gate spec이 쓰는 변형 파일: `venue-x0.8`·`venue-x1.25`, `chain-x1.2`·`chain-x1.4`, `corner-low`·`corner-high`, `replay`(12.2–12.4) |
-| SWELL-KW | 지식 노동자 25명의 2012년 Windows 작업 기록. typing 항목의 입력 녹화(2.4) |
+| SWELL-KW | 학생과 인턴 25명이 2012년 Windows 실험실에서 지식 노동 과제를 한 기록. typing 항목의 입력 녹화(2.4) |
 | 136M Keystrokes | 외운 문장을 받아 적는 typing 녹화(`dhakal-chi18`). 민감도 검사에만 씀(3.6) |
 | LAVD | sched_ext 기반 gaming scheduler와 그 발표(`lavd-ossna24`, 2024). game chain의 출처(4.1) |
 | interbench | Con Kolivas의 interactive scheduling benchmark. 옛 항목들의 숫자 출처(5.8, 11.1) |

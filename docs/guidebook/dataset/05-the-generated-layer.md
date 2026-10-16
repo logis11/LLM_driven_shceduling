@@ -261,7 +261,7 @@ C1에서 generated 파일로 옮겨 갈 때 그대로 가는 것과 새로 정�
 | 그대로 가는 것 | 새로 정해지는 것 |
 |---|---|
 | task의 `name`, `archetype`, `count` | task의 `id` (뒤에 `-s<k>`가 붙음) |
-| segment의 `mode`, `attributes`(예: `initiated: user`, `pre_committed_miss: true`), `scenario` 목록 | segment의 시작과 끝 시각 |
+| segment의 `mode`, `attributes`(예: `initiated: user`, `pre_committed_miss: true`), C1의 `scenario` 목록 | segment의 시작과 끝 시각, 그리고 `scenario`에 더해지는 꼬리표(그 segment에 살아 있는 다른 placement의 프로그램 것; 5.2) |
 | `bind`의 값 가운데 크기와 무관한 것(`parallelism_cap`, `child_name`, `program`, `lane_share`, `member_names`)과 그 `source` 표시 | batch 작업의 `total_work`·`spawn_count` (비례로 줄고 `source`가 `design`이 됨) |
 | C1의 `input` 창 여백(2 s)과 operation의 창 안 비율 | 창과 operation의 절대 시각 |
 | — | `meta.id`, `meta.seed` (cell id에서 keyed hash로) |
@@ -372,7 +372,7 @@ familiarity-ladder:
 
 여기서 `scenario`의 값 `S5`, `S16`은 scenario catalog(`docs/workload/scenario-catalog.md`)의 행 번호입니다. S5는 "voice-chat companion"(게임하면서 켜 두는 음성 채팅 같은 동반 프로그램), S16은 "archive burst"(압축 파일을 만들거나 푸는 짧은 폭주)입니다. segment의 `scenario` 목록은 compiler가 읽지 않는 설명용 꼬리표입니다.
 
-이 권에 나오는 scenario 번호를 한 번에 풀어 둡니다(`docs/workload/scenario-catalog.md`의 행 이름). 각 C1 파일의 segment가 이 꼬리표를 달고 있고, generator는 그것을 그대로 복사합니다.
+이 권에 나오는 scenario 번호를 한 번에 풀어 둡니다(`docs/workload/scenario-catalog.md`의 행 이름). 각 C1 파일의 segment가 이 꼬리표를 달고 있고, generator는 그것을 복사한 뒤, 그 segment 안에 다른 placement의 프로그램이 살아 있으면 그 프로그램의 꼬리표를 더합니다(9.10 D168; 5.2).
 
 | 번호 | 행 | 번호 | 행 |
 |---|---|---|---|
@@ -602,7 +602,7 @@ distractor cell의 placement가 하나뿐이라는 점에 주의하십시오. A�
 
 분자는 새 파일에서 이 작업이 살아 있어야 하는 길이, 분모는 C1에서 살아 있어야 했던 길이입니다. `total_work`는 ms 단위로 반올림하고(`round(…/1000)*1000` µs), 소수 셋째 자리까지 초로 씁니다. `spawn_count`는 정수로 반올림하되 최소 1입니다. 값이 실제로 바뀌었을 때만 그 값의 `source` 항목을 `design`으로 바꿉니다. 바뀌지 않았으면 C1의 출처 꼬리표가 그대로 남습니다.
 
-**(6) segment.** C1 segment에서 `from`과 `to`를 뺀 모든 키(`mode`, `attributes`, `scenario`, 있으면 `familiarity`)를 복사하고 `from = start`, `to = end`로 둡니다.
+**(6) segment.** C1 segment에서 `from`과 `to`를 뺀 모든 키(`mode`, `attributes`, `scenario`, 있으면 `familiarity`)를 복사하고 `from = start`, `to = end`로 둡니다. 여기서 `scenario`는 C1의 꼬리표 그대로이고, 다른 placement의 꼬리표는 모든 placement를 놓은 뒤 `compose_full`이 더합니다(아래).
 
 **(7) `input` 창.** C1의 창 하나 `[w.from, w.to]`마다 새 창을 `[start + w.from, track_end − (T − w.to)]`로 만듭니다. `track_end`는 보통 `end`(segment의 끝)이고, distractor의 A처럼 track이 segment를 넘어 이어질 때만 다른 값입니다. C1의 창은 언제나 `[2 s, T − 2 s]`이므로 새 창은 `[start + 2 s, track_end − 2 s]`입니다. 시작이 끝보다 앞서지 않으면(`lo < hi`가 아니면) 창을 버립니다.
 
@@ -615,6 +615,8 @@ at = lo + round((C1의 at − a) × (hi − lo) / (b − a))
 ```
 
 창이 없으면 operation도 사라집니다(9.19 D2: "dropped with the window").
+
+**scenario 꼬리표 더하기.** placement를 모두 놓은 뒤 `compose_full`이 segment마다 다른 placement의 task를 훑어, 그 segment 안에 살아 있는 task의 꼬리표가 목록에 없으면 뒤에 덧붙입니다. 9.10 D168의 규칙입니다. segment의 `scenario`는 그 안에 프로그램이 살아 있는 catalog scenario를 모두 적습니다. 꼬리표는 archetype마다의 표 `SCENARIO_OF`에서 오고, `cpu-batch`만 묶인 `program`으로 고릅니다(`SCENARIO_OF_PROGRAM`: `kdenlive_render`는 S7, `python3`는 S12, C6의 `spoof`는 S2). core set을 같은 규칙으로 확인하는 `tests/test_coreset.py`의 표와 같습니다. "살아 있다"는 `alive_in`이 정합니다. `depart`가 있는 task는 도착과 떠남이 segment와 겹치면 살아 있고, `depart`가 없는 task(batch 작업)는 도착 시각이 떨어지는 segment에서만 셉니다. 일반 경로에서 자기 segment를 넘어 남는 placement는 transition grid `focus` 형태의 A뿐이므로, 꼬리표가 더해지는 자리는 그 형태의 둘째 segment입니다. 240개 가운데 214개에서 A의 남는 프로그램의 꼬리표가 B의 C1 꼬리표 뒤에 붙습니다(예: `tr-compile-to-office-focus`의 둘째 segment는 `[S1, S2, S4, S11]`). 나머지 26개 가운데 14개는 B의 꼬리표가 이미 A의 것을 모두 담고 있고, 12개는 B에 없는 A의 꼬리표가 batch 작업의 것뿐이라 둘째 segment에서 세지 않습니다(이 수는 이 권을 고치면서 C1 timeline에서 다시 셌습니다). 이 규칙은 2026-10-17에 generator에 들어왔고(인지오의 결정, 2026-10-16: 9.10 D168 하나의 규칙을 두 층 모두에), 그 전에는 둘째 segment가 B의 C1 꼬리표만 가졌습니다. compiler는 꼬리표를 읽지 않고 workload 계약에도 꼬리표가 없어서, 이 규칙이 214개 artifact에 낸 차이는 `meta.derived_from`의 timeline hash뿐입니다. 같은 재구축에서 모든 artifact가 library hash(`meta.sampled.archetypes`)에서도 달라졌는데, 그것은 library의 머리 주석과 notes 때문입니다(12.8). 어떤 점수 term이나 harness 코드도 꼬리표를 읽지 않습니다(9.10 D168).
 
 **`tracks=False`.** distractor grid에서 B의 task set처럼 "사용자가 한 번도 돌아보지 않는 도착"을 넣을 때는 task만 넣고 `input`, `focus`, operation을 만들지 않습니다.
 
@@ -703,6 +705,8 @@ meta:
 3. `arrival`이 프로그램이면 task 하나 `{id: distractor, name, archetype, arrive: 60s}`를 만듭니다. `total_work: span`이면 `bind: {total_work: 60s}`, `source: {total_work: design}`을, 아니면 `depart: 120s`를 줍니다.
 4. 두 번째 segment는 A의 segment를 복사해 60–120 s로 두고, scenario 목록에 B(또는 프로그램)의 꼬리표를 덧붙입니다.
 5. `focus_name_shared`가 `true`이면 두 번째 segment의 attributes에 `pre_committed_miss: true`를 더합니다.
+
+4단계는 A의 label을 통째로 복사합니다. 9.20 decision 1이 그렇게 정했습니다. "both segments are labelled A — the second segment's scenario list is A's with B's added"(`compose.py`의 module docstring은 이것을 "the second segment is A's label again with the arrival's scenario tags added"로 적습니다). 5.2의 규칙(9.10 D168)은 batch 작업(`depart`가 없는 task)을 도착한 첫 segment에서만 셉니다. 2.2의 표에서 batch 작업을 가진 mode는 여섯입니다. 그 가운데 `compile`(`make`, S11)과 `render`(`kdenlive_render`, S7)에서는 끝까지 남는 편집기(`code`, `kdenlive`)가 같은 꼬리표를 가지므로, 복사한 label과 규칙이 같은 목록을 냅니다. 나머지 네 mode(`backup`, `indexing`, `ml-train`, `transcode`)에서는 batch 작업의 꼬리표를 A의 남는 프로그램 누구도 갖지 않으므로, 그 꼬리표는 복사로만 두 번째 segment에 남습니다. 그래서 둘은 이 네 mode × 도착 17가지 = 68개 파일에서 다릅니다. 예를 들어 `dx-backup-with-7z`의 두 번째 segment는 `[S7, S15, S16]`이고, 규칙대로라면 `[S7, S16]`입니다(16.2).
 
 **`_compose_ladder`** (9.20 decisions 5–7).
 1. mode의 C1을 `_place(…, k=0, start=0, end=60s, alive_until=60s)`로 놓습니다. batch 작업은 58 s에 맞춰 줄어듭니다.
@@ -961,10 +965,11 @@ wake event는 30,380개입니다. `timer:<task>` channel 30,271개(task의 측�
 | seed | 1,857,729,296 | 130,314,076 |
 | `editor-s0`의 떠남 | 60 s | 120 s |
 | `build-s0`의 `spawn_count` | 106 (58 s 기준) | 216 (118 s 기준) |
-| `input`, `focus`, segment, B의 task | 같음 | 같음 |
+| `input`, `focus`, segment의 `mode`와 `attributes`, B의 task | 같음 | 같음 |
+| 둘째 segment의 `scenario` | `[S1, S2, S4]` | `[S1, S2, S4, S11]` (남는 `code`의 S11; `make`는 batch 작업이라 첫 segment에서만 셈, 5.2) |
 | 정적 사용률 (파일 / seg 0 / seg 1) | 0.5313 / 0.5121 / 0.5506 | 1.0104 / 0.9309 / 1.09 |
 
-테스트 `test_focus_form_keeps_a_alive_to_the_end_and_moves_the_input_with_the_focus`가 이 차이를 고정합니다. editor가 120 s까지 남고, A의 batch 작업이 118 s에 맞춰 커지고, `input`과 `focus`와 B 쪽 task는 `departs`와 똑같다는 것입니다.
+테스트 `test_focus_form_keeps_a_alive_to_the_end_and_moves_the_input_with_the_focus`가 이 차이를 고정합니다. editor가 120 s까지 남고, A의 batch 작업이 118 s에 맞춰 커지고, `input`과 `focus`와 B 쪽 task는 `departs`와 똑같다는 것입니다. 둘째 segment의 꼬리표는 `test_a_focus_form_second_segment_names_a_s_staying_programs_beside_b_s`가 고정합니다(그런 파일이 214개인지도 봅니다).
 
 recognizer가 보는 것으로 옮기면, 60 s 이후의 snapshot에서 `departs`는 `code`가 사라지고 `focus` 형태는 `code`가 남아 있습니다. 두 형태 모두 `make`와 그 자식들은 계속 보입니다. batch 작업은 떠남이 고정되어 있지 않아 telemetry에서 사라지지 않기 때문입니다(`docs/data-contracts.md` §5: "a finite task that exits never disappears from telemetry"). focus holder는 두 형태 모두 60 s에 `code`에서 `soffice.bin`으로 바뀝니다.
 
@@ -1639,7 +1644,7 @@ placement 기록의 모양은 set마다 이렇게 다릅니다(9.21 D1의 "Shape
 
 ## 12.8 다시 bless하기와 pin의 역사
 
-"bless"는 이 저장소에서 "build를 다시 해서 나온 manifest를 commit해 공식 기준으로 삼는다"는 뜻입니다. generated manifest는 2026-10-11부터 2026-10-16까지 여섯 번 bless되었습니다. hash 앞 8자리로 적습니다.
+"bless"는 이 저장소에서 "build를 다시 해서 나온 manifest를 commit해 공식 기준으로 삼는다"는 뜻입니다. generated manifest는 2026-10-11부터 2026-10-17까지 일곱 번 bless되었습니다. hash 앞 8자리로 적습니다.
 
 | 시점 | `transition-grid` | `return-grid` | `flap-stress` | `distractor-grid` | `familiarity-ladder` | 무엇이 바뀌었나 |
 |---|---|---|---|---|---|---|
@@ -1649,8 +1654,9 @@ placement 기록의 모양은 set마다 이렇게 다릅니다(9.21 D1의 "Shape
 | 9.23 D10 (2026-10-14) | `3035cfe3` | `2e381b42` | `90cc782a` | `e61fd777` | `1a7d35d7` | library의 `code-editor` scope 문장이 바뀌어(9.23 D8) 모든 artifact가 library hash(`meta.sampled.archetypes`)에서만 다름 |
 | 9.23 D17 (2026-10-15) | `826c719c` | `392d6071` | `97ba813f` | `919bb2c0` | `b6f82df5` | `inputs`에 launch 기록 10개(9.23 D11); 고정된 떠남을 가진 program이 자기 loop의 다음 WAIT이나 TIMER로 끝나게 됨(9.23 D16) |
 | 9.15 (2026-10-16) | `a8eebb33` | `2e57a6c1` | `dd6a7c24` | `264d3333` | `58a34d65` | compiler의 쓰이지 않던 경로 삭제, lint, library와 C1 timeline의 주석 등(`harness/CHANGELOG.md` 2026-10-16). 모든 artifact가 library hash에서만 다르고, `inputs`가 고친 C1 timeline과 도구를 고정 |
+| 9.15 (2026-10-17) | `4bb7a444` | `ec7ca574` | `79a6c5c4` | `3478a908` | `415cfbd6` | generator가 9.10 D168의 꼬리표 규칙을 따르게 되어(`gen/compose.py`, 5.2) `transition-grid`의 `focus` 형태 timeline 214개가 바뀌고, 그 artifact가 `meta.derived_from`에서도 다름. 그 밖에는 library의 머리 주석과 notes 때문에 모든 artifact가 library hash에서만 다름. `inputs`에서는 library, schema, `c1-idle`, `gen/compose.py`, `wlc/compiler.py`·`timeline.py`·`variants.py`의 hash가 바뀜. `grid`, `demand`, `reports`는 그대로(`harness/CHANGELOG.md` 2026-10-17) |
 
-9.21 D1은 "checked section by section against `HEAD`"라고 적습니다. 다시 bless할 때 artifact가 바뀌지 않았다는 것을 section마다 확인했다는 뜻입니다. 9.20 spec의 invariant도 같은 원칙입니다. "The 9.19 sets' artifacts are unchanged; their manifests move only where they pin the generator and the grid definition by content." 이 hash들은 마지막 audit(9.16)이 재현할 목록으로 넘겨졌습니다(`_dev/TODO.md` 9.16 줄). 2026-10-17 tree의 다섯 manifest의 SHA-256은 마지막 줄(9.15)의 값과 같습니다.
+9.21 D1은 "checked section by section against `HEAD`"라고 적습니다. 다시 bless할 때 artifact가 바뀌지 않았다는 것을 section마다 확인했다는 뜻입니다. 9.20 spec의 invariant도 같은 원칙입니다. "The 9.19 sets' artifacts are unchanged; their manifests move only where they pin the generator and the grid definition by content." 이 hash들은 마지막 audit(9.16)이 재현할 목록으로 넘겨졌습니다(`_dev/TODO.md` 9.16 줄). 2026-10-17 tree의 다섯 manifest의 SHA-256은 마지막 줄(9.15, 2026-10-17)의 값과 같습니다.
 
 # 13장 · 생성한 파일은 어떻게 점수를 받나
 
@@ -2031,6 +2037,7 @@ README의 문장: "If you edit any timeline, variant file, `archetypes.yaml`, a 
 | 4 | 9.19 D3: 각 manifest의 `inputs`가 "44 paths" | 지금은 55 | 9.21이 `gen/coverage.py`를 더해 45, 9.23 D11이 launch 기록 10개를 더해 55. 어긋남이 아니라 시간 차 (12.3) |
 | 5 | `dataset/tools/gen/__init__.py`의 docstring이 `cells.py`와 `compose.py`만 나열(9.21 뒤) | 9.15(2026-10-16)에서 `coverage.py`가 더해짐 | 해소 |
 | 6 | audit 기록의 open 항목 "the set has 64 segments over 32 driver-table cells" | core set은 67 segment | 2026-10-09(`c2-p2a-idle`, 66)과 2026-10-14(`c6-spoof`를 나눔, 67)의 변화. 이 기록의 논지와 무관 (1.3) |
+| 7 | 인지오의 결정(2026-10-16): 9.10 D168 하나의 꼬리표 규칙을 두 층 모두에 | 일반 경로는 규칙을 따름(2026-10-17). `distractor-grid`는 9.20 decision 1의 label 복사를 유지해, batch 작업의 꼬리표를 A의 남는 프로그램 누구도 갖지 않는 네 mode(`backup`, `indexing`, `ml-train`, `transcode`)의 68개 파일에서 두 번째 segment에 그 작업의 꼬리표가 남음 | 점수에는 영향 없음(꼬리표를 읽는 term이나 harness 코드가 없음). 인지오에게 넘긴 발견(9.15 기록 `logs/B1-data-rebuild.md`) (5.7) |
 
 ## 16.3 기록이 열어 둔 결정 (미정)
 

@@ -8,7 +8,7 @@
 
 이 연구의 workload dataset은 세 층으로 되어 있습니다. 맨 아래에는 **archetype** library(`dataset/archetypes.yaml`)가 있습니다. archetype은 "어떤 종류의 process가 CPU를 어떻게 쓰는가"를 적어 둔 행동 모형이고, 29개 중 28개가 CI runner에서 직접 측정한 값입니다(나머지 하나, 게임 chain은 발표 자료에 기댑니다). 이름도, 개수도, 그 process가 무슨 의미인지도 모릅니다. 그 위에 **timeline**(`dataset/timelines/coreset/*.timeline.yaml`)이 있습니다. timeline은 사람이 쓰는 연출 대본입니다. 어떤 이름의 process가 언제 등장해 언제 퇴장하는지, 그 순간 사용자가 실제로 무엇을 하고 있는지(정답 label), 사용자가 어느 창을 보고 어디에 타자를 치는지를 적습니다. 맨 위에는 **canonical workload**(`dataset/build/coreset-single/*.workload.json`)가 있습니다. 이것은 simulator, recognizer를 돌리는 daemon, 채점하는 harness가 실제로 먹는 파일입니다. 확률분포는 하나도 남아 있지 않고, 모든 값이 정수 microsecond로 확정되어 있습니다.
 
-이 권은 가운데와 위 사이, 즉 **timeline이 canonical workload가 되는 길**을 다룹니다. 두 포맷의 field 하나하나가 무슨 뜻인지, 그리고 둘 사이를 잇는 compiler **wlc**(workload compiler, `dataset/tools/wlc/`)가 어떤 순서로 무엇을 하는지를 설명합니다. archetype이 어떻게 측정되었는지는 archetype library를 다루는 권에서, 51개 coreset 파일이 각각 어떤 질문에 답하는지는 coreset 파일을 하나씩 다루는 권에서, 1,562개의 generated 파일은 generated layer를 다루는 권에서, 민감도 variant와 build gate의 CI 운영은 각각 그 주제를 다루는 권에서 설명합니다. 이 권은 그 모든 권이 공유하는 "문법책"에 해당합니다. 설명하는 것은 2026-10-14 기준의 tree이고, 그 뒤 2026-10-17까지 바뀐 것(sub-task 9.23이 더한 canonical lint 셋과 program의 끝 규칙, launch stream의 고정, sub-task 9.15 안에서 지운 compiler 경로와 timeline 머리 주석의 생략 문장)은 해당 절에 반영했습니다. 포맷과 compiler는 2026-08-27(Phase 2, 처음 compiler를 만든 날)부터 2026-10-16(sub-task 9.15 안에서 인지오가 정한 dataset 수정이 한 번의 rebuild로 들어간 날)까지 여러 번 바뀌었고, 각 변화가 언제 왜 일어났는지는 15장에, 문서와 tree가 어긋나는 곳은 16장에 모았습니다.
+이 권은 가운데와 위 사이, 즉 **timeline이 canonical workload가 되는 길**을 다룹니다. 두 포맷의 field 하나하나가 무슨 뜻인지, 그리고 둘 사이를 잇는 compiler **wlc**(workload compiler, `dataset/tools/wlc/`)가 어떤 순서로 무엇을 하는지를 설명합니다. archetype이 어떻게 측정되었는지는 archetype library를 다루는 권에서, 51개 coreset 파일이 각각 어떤 질문에 답하는지는 coreset 파일을 하나씩 다루는 권에서, 1,562개의 generated 파일은 generated layer를 다루는 권에서, 민감도 variant와 build gate의 CI 운영은 각각 그 주제를 다루는 권에서 설명합니다. 이 권은 그 모든 권이 공유하는 "문법책"에 해당합니다. 설명하는 것은 2026-10-14 기준의 tree이고, 그 뒤 2026-10-17까지 바뀐 것(sub-task 9.23이 더한 canonical lint 셋과 program의 끝 규칙, launch stream의 고정, sub-task 9.15 안에서 지운 compiler 경로, timeline 머리 주석의 생략 문장, schema의 설명과 compiler·loader의 docstring)은 해당 절에 반영했습니다. 포맷과 compiler는 2026-08-27(Phase 2, 처음 compiler를 만든 날)부터 2026-10-17(sub-task 9.15 안에서 정한 dataset 수정이 두 번째 rebuild로 들어간 날)까지 여러 번 바뀌었고, 각 변화가 언제 왜 일어났는지는 15장에, 문서와 tree가 어긋나는 곳은 16장에 모았습니다.
 
 웹 개발자의 세계에 비유하면 이렇습니다. timeline은 사람이 손으로 쓰는 `package.json`이고, canonical workload는 기계가 만든 `package-lock.json`입니다. lockfile에는 "대략 이 버전쯤"이 없고 정확한 해시가 박혀 있듯, canonical workload에는 "평균 5 ms쯤"이 없고 `{"op":"RUN","us":4832}` 같은 확정된 숫자만 있습니다. 그리고 같은 `package.json`과 같은 registry 상태에서 같은 lockfile이 나와야 하듯, 같은 timeline과 같은 archetype library와 같은 seed에서는 바이트 하나까지 같은 workload가 나와야 합니다. 이 결정성이 왜 실험의 생명줄인지, compiler가 그것을 어떻게 지키는지가 이 권의 중심 이야기입니다.
 
@@ -534,7 +534,7 @@ tree의 library에서 `WAIT: input`을 가진 archetype은 여섯입니다. `off
 | `mail-client` | `swell-outlook-c23` | `swell-icmi14:outlook-c23` |
 | `web-browser` | `swell-ie-c1` | `swell-icmi14:ie-c1` |
 
-`stimulus` — task를 깨우는 외부 입력의 흐름입니다. 이 dataset에서는 실제 사람이 남긴 키보드 기록을 재생한 것입니다. `SWELL-KW` — 사무 작업자의 키보드·마우스 기록을 모은 공개 dataset입니다(`swell-icmi14`, 참가자 25명, 약 3시간씩). 그 기록에서 Word, Outlook, Internet Explorer를 쓰는 동안의 사건을 뽑아 `dataset/stimulus/*.jsonl`에 `{t_us, kind}` 줄로 저장했습니다. Word stream(`swell-word-c1.jsonl`)에는 사건이 82,634개 있습니다(`dataset/stimulus/streams.json`). 네 archetype은 그중 `kind`가 `key`인 사건만 재생합니다.
+`stimulus` — task를 깨우는 외부 입력의 흐름입니다. 이 dataset에서는 실제 사람이 남긴 키보드 기록을 재생한 것입니다. `SWELL-KW` — 실험실에서 지식 노동 과제(Word로 보고서 쓰기, Outlook으로 메일, Internet Explorer로 browsing)를 한 학생과 인턴의 키보드·마우스 기록을 모은 공개 dataset입니다(`swell-icmi14`, 참가자 25명, 약 3시간씩). 그 기록에서 Word, Outlook, Internet Explorer를 쓰는 동안의 사건을 뽑아 `dataset/stimulus/*.jsonl`에 `{t_us, kind}` 줄로 저장했습니다. Word stream(`swell-word-c1.jsonl`)에는 사건이 82,634개 있습니다(`dataset/stimulus/streams.json`). 네 archetype은 그중 `kind`가 `key`인 사건만 재생합니다.
 
 `image-editor`(GIMP)와 `video-editor`(Kdenlive)는 `WAIT: input`은 있지만 stimulus가 없습니다. 이 둘에게 입력 창은 "키 입력이 떨어지는 곳"이 아니라 "사용자가 앞에서 작업하는 동안의 활동 패턴(`focus_components`)으로 바뀌는 구간"입니다(11.2절). 9.14의 hand-off가 이 사실을 문서에 적으라고 남겼습니다. "keystroke streams for four applications, none for Kdenlive and GIMP."
 
@@ -635,7 +635,7 @@ operations:
 
 timeline이 적는 것은 **시작 시각뿐**입니다. 동작이 얼마나 걸리는지는 compile 때 측정된 길이 분포(`params.operations.<name>.duration`)에서 뽑습니다. `c3-workday`를 compile하면 page load는 465,188 µs, 메일 전송은 2,923,590 µs가 나옵니다(그 파일의 compile report `operations` 항목). 동작 구간 안에서는 동작 자체의 측정된 활동 패턴(`components`)이 평소 패턴을 대신하고, 그 구간에 떨어질 키 입력은 버립니다(11.2절).
 
-loader의 규칙(`_load_operations`)은 셋입니다. `at`, `task`, `name`이 있어야 하고, `name`이 그 task archetype의 operation 이름 중 하나여야 하며, `at`이 task의 수명 안(`arrive ≤ at < depart`)이어야 합니다.
+loader의 규칙(`_load_operations`)은 셋입니다. `at`, `task`, `name`이 있어야 하고, `name`이 그 task archetype의 operation 이름 중 하나여야 하며, `at`이 task의 수명 안(`arrive ≤ at < depart`)이어야 합니다. operation이 그 task의 입력 창 안에서, 창 하나에 하나씩 시작해야 한다는 9.10 D20의 규칙(아래)은 loader가 보지 않습니다. 2026-10-17부터 loader의 docstring이 이것을 적고("the loader checks the task's lifetime alone, and tests/test_coreset.py holds the core set to the rule"), `test_every_operation_starts_inside_an_input_window_of_its_task_one_per_window`가 commit된 core set에 대해 지킵니다. 그날 core set의 operation 23개가 모두 규칙을 지켰습니다(9.15 기록 `logs/B1-data-rebuild.md`).
 
 > **왜 이렇게 정했나.** operation을 timeline에 놓는 형식은 9.5 follow-up spec의 결정 8–9입니다(loader docstring이 "9.5 follow-ups spec, decisions 8–9"를 가리킵니다). 시각을 정하는 규칙은 9.10 D20(2026-10-01)입니다. "every focus window on a task whose entry carries an operation holds one of it, starting 28 s after the window opens", 즉 operation을 가진 앱의 입력 창마다 하나씩, 창이 열리고 28 s 뒤(2 s에 열리는 창이면 30 s)에 놓습니다. 이 값은 design입니다. 길이를 늘인 base 파일은 창의 비율을 지킵니다. 9.10 D96은 `c1-transcode`의 미리보기 렌더를 창의 한가운데에 두었습니다. 기록된 이유는 "at the literal 30 s the render would meet the encode's first 28 s (HandBrakeCLI's scan)", 30 s에 두면 인코딩 job이 처음 28 s 동안 하는 파일 스캔과 겹치기 때문입니다. 그래서 `c1-transcode`의 operation은 2,381 s, `c1-backup`의 것은 138.5 s에 있습니다. 길이를 줄인 counterpart도 같은 비율 규칙(9.10 D44)을 따라, `c7-mail`의 전송은 22.385 s 창의 38/56 지점인 17.189821 s에 있습니다.
 
@@ -860,11 +860,11 @@ meta:
 "meta": {
   "derived_from": "dataset/timelines/coreset/c1-office.timeline.yaml@1b5295f96a851b62184a3a1dbe3f575f45bb3bbc",
   "id": "c1-office",
-  "sampled": {"archetypes": "archetypes.yaml@818b41b8fd6a759c950d523fbc681c21c112434e", "seed": 101}
+  "sampled": {"archetypes": "archetypes.yaml@143e2f4b65bbbf280e8ccbd5a961a4491035fe81", "seed": 101}
 }
 ```
 
-`@` 뒤의 `1b5295f9…`는 이 timeline 파일의 git blob hash입니다. `git hash-object dataset/timelines/coreset/c1-office.timeline.yaml`로 확인하면 같은 값이 나옵니다. `818b41b8…`은 `dataset/archetypes.yaml`의 blob hash입니다(2026-10-17 tree. timeline이나 library의 byte가 바뀔 때마다 두 hash도 바뀝니다). `demand: calibration`은 canonical `meta`에 없고 compile report의 `demand_class`로만 갑니다.
+`@` 뒤의 `1b5295f9…`는 이 timeline 파일의 git blob hash입니다. `git hash-object dataset/timelines/coreset/c1-office.timeline.yaml`로 확인하면 같은 값이 나옵니다. `143e2f4b…`은 `dataset/archetypes.yaml`의 blob hash입니다(2026-10-17 tree. timeline이나 library의 byte가 바뀔 때마다 두 hash도 바뀝니다). `demand: calibration`은 canonical `meta`에 없고 compile report의 `demand_class`로만 갑니다.
 
 ```yaml
 segments:
@@ -1090,7 +1090,7 @@ canonical 파일은 JSON object 하나이고, key가 정확히 네 개입니다.
 "meta": {
   "derived_from": "dataset/timelines/coreset/c2-p1a.timeline.yaml@a0effee93e945b3d39f8aa3501475f31896d58d8",
   "id": "c2-p1a",
-  "sampled": {"archetypes": "archetypes.yaml@818b41b8fd6a759c950d523fbc681c21c112434e", "seed": 201}
+  "sampled": {"archetypes": "archetypes.yaml@143e2f4b65bbbf280e8ccbd5a961a4491035fe81", "seed": 201}
 }
 ```
 
@@ -1101,7 +1101,7 @@ canonical 파일은 JSON object 하나이고, key가 정확히 네 개입니다.
 
 schema는 `sampled`를 이렇게 설명합니다. "every concrete number in this file traces to its distribution via this pair (contract §1, RNG-free simulator)." 파일 안의 어떤 숫자든, 이 두 hash가 가리키는 timeline과 library, 그리고 seed만 있으면 어느 분포에서 어떻게 뽑혔는지 다시 계산할 수 있다는 뜻입니다.
 
-**git blob hash란.** `git_blob_hex`(`wlc/library.py`)는 파일 바이트 앞에 `blob <길이>\0`을 붙여 SHA-1을 계산합니다. `git hash-object`와 같은 값입니다. git 저장소가 없어도 계산할 수 있고, 내용이 같으면 언제 어디서 계산해도 같습니다. schema의 설명은 이것을 "the commit it was compiled from", "the library commit"이라고 부르지만, 실제로는 commit hash가 아니라 그 파일 내용의 hash입니다(interpretation contract §1, §4는 2026-10-16부터 `<git blob hash>`라고 적습니다). 그래서 commit하지 않은 수정본을 compile해도 `derived_from`이 바뀝니다.
+**git blob hash란.** `git_blob_hex`(`wlc/library.py`)는 파일 바이트 앞에 `blob <길이>\0`을 붙여 SHA-1을 계산합니다. `git hash-object`와 같은 값입니다. git 저장소가 없어도 계산할 수 있고, 내용이 같으면 언제 어디서 계산해도 같습니다. 이 값은 commit hash가 아니라 그 파일 내용의 hash입니다. schema의 설명은 2026-10-17부터 이것을 "the git blob hash of its content"라고 적고(그 전에는 "the commit it was compiled from", "the library commit"), interpretation contract §1, §4는 2026-10-16부터 `<git blob hash>`라고 적습니다. 그래서 commit하지 않은 수정본을 compile해도 `derived_from`이 바뀝니다.
 
 > **코드로.** `compile_one`(`dataset/tools/compile.py`)이 `rel_path = path.relative_to(root).as_posix()`로 저장소 기준 경로를 만들어 `compile_timeline`에 넘기고, `compile_timeline`이 `f"{rel}@{timeline.blob_hex}"`로 `derived_from`을 만듭니다. library hash는 `Library` 생성자가 한 번 계산합니다.
 
@@ -1444,7 +1444,7 @@ tree의 library 29개 entry가 각각 어느 경로로 가는지 이 권을 쓰�
 | `_chain_constructor` | `game-task-chain` |
 | (부모가 만듦) | `compiler-child`, `module-compiler-child` |
 
-2026-10-16 전에는 경로가 셋 더 있었습니다. input channel이 있는 entry의 `_interactive_unroll`, finite entry의 `_finite_unroll`, 그 밖의 `_unbounded_loop`입니다. 재건 전 library의 문헌 기반 archetype(예: `desktop-interactive`, 입력 간격을 분포에서 뽑고 CPU를 "간격의 몇 분의 일"로 정하던 모형)을 위한 경로였고, 재건으로 모든 대화형 entry가 측정된 entry가 되면서 어느 entry도 닿지 않게 되었습니다. 어디서도 불리지 않던 `_spawned_program`도 있었습니다. 인지오가 2026-10-16에 이 넷을 지우기로 정했고(9.15), 그 자리에 어느 경로에도 맞지 않는 entry를 거절하는 분기가 들어왔습니다. 경로를 지운 것만으로는 어느 artifact도 바뀌지 않았지만, `compiler.py`가 manifest의 `inputs`이므로 manifest를 다시 bless하고 RQ0 gate spec의 pin을 다시 걸었습니다(13.5절). 거절은 `dataset/tools/tests/test_canonical.py`의 `test_an_entry_matching_no_compile_path_is_refused`가 지킵니다.
+2026-10-16 전에는 경로가 셋 더 있었습니다. input channel이 있는 entry의 `_interactive_unroll`, finite entry의 `_finite_unroll`, 그 밖의 `_unbounded_loop`입니다. 재건 전 library의 문헌 기반 archetype(예: `desktop-interactive`, 입력 간격을 분포에서 뽑고 CPU를 "간격의 몇 분의 일"로 정하던 모형)을 위한 경로였습니다. 재건 뒤에는 compile되는 어떤 task도 이 셋에 닿지 않았습니다. `_interactive_unroll`에 닿지 않은 까닭은 재건으로 모든 대화형 entry가 측정된 entry가 되어 `_measured_unroll`이 먼저 받았기 때문입니다. `_finite_unroll`에 떨어질 finite entry는 없었습니다(finite entry는 모두 `batch-loop`, `module-build`이거나 `FORK`가 있는 빌드였습니다). `_unbounded_loop`에 떨어지는 entry는 lifetime이 `spawned`인 `compiler-child`와 `module-compiler-child` 둘이었지만, 둘 다 부모가 만드는 자식이어서 어느 timeline도 맨 위 task로 묶지 않습니다(위 표의 "(부모가 만듦)"; `git show 37c2e233^:dataset/tools/wlc/compiler.py`의 분기). 어디서도 불리지 않던 `_spawned_program`도 있었습니다. 인지오가 2026-10-16에 이 넷을 지우기로 정했고(9.15), 그 자리에 어느 경로에도 맞지 않는 entry를 거절하는 분기가 들어왔습니다. 경로를 지운 것만으로는 어느 artifact도 바뀌지 않았지만, `compiler.py`가 manifest의 `inputs`이므로 manifest를 다시 bless하고 RQ0 gate spec의 pin을 다시 걸었습니다(13.5절). 거절은 `dataset/tools/tests/test_canonical.py`의 `test_an_entry_matching_no_compile_path_is_refused`가 지킵니다.
 
 ---
 
@@ -1706,7 +1706,7 @@ tree의 `c7-compile` artifact에서 `dkms`는 `fork_cap` 48, spawn table 9,980�
 
 ## 11.9 게임 chain: constructor와 lane scaling
 
-`game-task-chain`은 library에서 유일하게 측정값이 아니라 문헌(LAVD 발표 자료)에 기댄 entry이고, 유일하게 모양 자체가 parameter인 entry입니다. modeling note는 "The only entry whose topology is a parameter: the compiler's chain constructor expands it into `chain_length` ordinary tasks with WAIT/WAKE channels wired from the head to the last member"라고 적습니다.
+`game-task-chain`은 library에서 유일하게 측정값이 아니라 문헌(LAVD 발표 자료)에 기댄 entry이고, 유일하게 모양 자체가 parameter인 entry입니다. modeling note는 "The only entry whose topology is a parameter: the compiler's chain constructor expands it into chain_length members plus the wineserver member, chain_length + 1 ordinary tasks, with WAIT/WAKE channels wired from the head to the last member"라고 적습니다(2026-10-17부터. 그 전의 "`chain_length` ordinary tasks"는 `wineserver` 구성원을 세지 않았습니다).
 
 `chain constructor` — archetype 하나를 compile 때 여러 개의 평범한 task로 펼치는 compiler의 특별한 경로입니다. contract §6은 이것을 "resolved at load time, not in the interpreter"라고 적습니다. 펼친 뒤에는 모든 구성원이 평범한 program이고, 특별함은 초기화에만 있습니다. `chain head` — chain의 첫 구성원, TIMER로 깨어나 frame을 시작하는 task입니다.
 
@@ -2204,9 +2204,9 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 
 9.19(2026-10-11)부터 9.21(2026-10-13)까지 generated layer가 생겼습니다. 9.19의 결정 4가 compiler와의 관계를 정했습니다. "The generator emits ordinary timeline YAML that the existing compiler compiles — no canonical artifact is produced directly." generated layer는 C1 timeline들을 조합하거나 이름을 바꾼 평범한 timeline 1,562개를 만들고, 이 권에서 설명한 compiler가 그것을 core set과 똑같이 compile합니다. 포맷도 compiler도 바뀌지 않았습니다. generated layer는 그 주제를 다루는 권에서 설명합니다.
 
-## 15.13 9.23(2026-10-14–15)과 9.15(2026-10-16): 검사를 채우고 경로를 지우다
+## 15.13 9.23(2026-10-14–15)과 9.15(2026-10-16–17): 검사를 채우고 경로를 지우다
 
-이 권(2026-10-14)이 찾은 어긋남 가운데 compiler와 build gate에 관한 것을 sub-task 9.23이 고쳤습니다(`_dev/research/jioh/task-9.23-guidebook-findings/changelog.md`). launch stream을 manifest의 `inputs`에 고정했고(D11, 13.5절), `make check`가 파생 timeline과 coverage grid를 commit된 byte와 비교하게 했고(D12, 13.7절), `make lint`가 freeze로 돌게 했고(D13, 14.1절), canonical lint 셋을 더했고(D14, 13.2절), 의존성 version을 정확히 고정했고(D15, 10.6절), segment-bound program이 퇴장 전에 바닥나지 않고 막힌 채로 끝나게 했습니다(D16, 11.1절, 11.5절). D16 때문에 모든 artifact의 byte가 바뀌었지만 새로 실행되는 것은 없고 compile report는 byte 그대로였습니다(D17). 이어 9.15(문서 정정 sub-task) 안에서 인지오가 정한 dataset 수정이 한 번의 rebuild로 들어갔습니다(2026-10-16). 닿지 않던 compiler 경로 넷을 지우고 맞는 경로가 없는 entry를 거절하게 했고(9.5절), freeze를 timeline의 묶인 값까지 넓혔고(14.4절), 측정 release 지도와 그 lint를 더했고(14.1절), 손으로 쓴 timeline의 머리 주석에 파일이 싣지 않는 것(session process, chain 밖의 게임 thread)과 Steam client의 측정된 상태를 적었습니다(6.1절, 6.3절). 머리 주석과 library의 byte가 바뀌었으므로 모든 artifact의 hash가 바뀌어, 일곱 manifest를 다시 bless하고 RQ0 gate spec을 다시 pin했습니다.
+이 권(2026-10-14)이 찾은 어긋남 가운데 compiler와 build gate에 관한 것을 sub-task 9.23이 고쳤습니다(`_dev/research/jioh/task-9.23-guidebook-findings/changelog.md`). launch stream을 manifest의 `inputs`에 고정했고(D11, 13.5절), `make check`가 파생 timeline과 coverage grid를 commit된 byte와 비교하게 했고(D12, 13.7절), `make lint`가 freeze로 돌게 했고(D13, 14.1절), canonical lint 셋을 더했고(D14, 13.2절), 의존성 version을 정확히 고정했고(D15, 10.6절), segment-bound program이 퇴장 전에 바닥나지 않고 막힌 채로 끝나게 했습니다(D16, 11.1절, 11.5절). D16 때문에 모든 artifact의 byte가 바뀌었지만 새로 실행되는 것은 없고 compile report는 byte 그대로였습니다(D17). 이어 9.15(문서 정정 sub-task) 안에서 인지오가 정한 dataset 수정이 한 번의 rebuild로 들어갔습니다(2026-10-16). 닿지 않던 compiler 경로 넷을 지우고 맞는 경로가 없는 entry를 거절하게 했고(9.5절), freeze를 timeline의 묶인 값까지 넓혔고(14.4절), 측정 release 지도와 그 lint를 더했고(14.1절), 손으로 쓴 timeline의 머리 주석에 파일이 싣지 않는 것(session process, chain 밖의 게임 thread)과 Steam client의 측정된 상태를 적었습니다(6.1절, 6.3절). 머리 주석과 library의 byte가 바뀌었으므로 모든 artifact의 hash가 바뀌어, 일곱 manifest를 다시 bless하고 RQ0 gate spec을 다시 pin했습니다. 2026-10-17의 두 번째 rebuild는 정정 작업이 찾은 문장을 code와 data에서 고쳤습니다. schema의 `meta.derived_from`·`meta.sampled.archetypes`·`wake_event` 설명(git blob hash, 재생된 입력과 측정 entry의 timer 성분 wake), compiler module docstring의 chain 구성원 수(`chain_length` + 1), loader의 `_load_operations` docstring(9.10 D20의 operation 규칙, 4.5절)과 그 규칙의 test, variants module docstring의 replay stream 세 종류(`wakes`, `runs`, `cycles`), library의 머리 주석과 notes, `c1-idle`의 머리 주석입니다. core artifact는 `meta`에서만 바뀌었습니다. 같은 rebuild는 compiler 밖에서 행동도 바꿨습니다. generator가 9.10 D168의 꼬리표 규칙을 따르게 되어 transition grid `focus` 형태 timeline 214개의 두 번째 segment가 바뀌었고(5권 5.2절), `variants.yaml`의 `carried_values`에 숨은 탭 renderer의 두 thread가 더해져 corner variant 넷이 `meta` 밖에서도 바뀌었습니다(7권 2.11절). 다시 일곱 manifest를 bless하고 RQ0 gate spec을 pin했습니다(`harness/CHANGELOG.md`의 2026-10-17 항목).
 
 ---
 
@@ -2231,12 +2231,12 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 **2026-10-14에 여기 있던 나머지는 고쳐졌습니다.**
 
 - interpretation contract: §4 arrive event의 `id`와 `declared_class`, §5 FORK의 예(`c1-compile`의 17,448칸), §6의 `wineserver`, §7의 compile mode와 demand budget — 2026-10-16(9.15).
-- workload schema의 설명: `attributes`의 예(`background_wanted`)와 `fork_cap`의 예(48) — 2026-10-16(9.15). `program`의 문장은 2026-10-15부터 lint가 지킵니다(9.23 D14, 7.10절).
+- workload schema의 설명: `attributes`의 예(`background_wanted`)와 `fork_cap`의 예(48) — 2026-10-16(9.15). `meta.derived_from`과 `meta.sampled.archetypes`(commit이 아니라 git blob hash), `wake_event`(재생된 입력과 측정 entry의 timer 성분 wake) — 2026-10-17(9.15). `program`의 문장은 2026-10-15부터 lint가 지킵니다(9.23 D14, 7.10절).
 - `dataset/README.md`: canonical 예제의 `background_wanted`, demand window 문장("Demand is reported, not held"), Commands 절의 requirements(Python 3.12와 정확히 고정한 version), Layout 블록의 `stimulus/`·`launch/`·`replay/` — 2026-10-16(9.15). manifest의 inputs를 "(library, schema, compiler sources, streams)"라고 적는 문장은 9.23 D11이 launch stream을 고정한 뒤로 맞습니다.
 - `docs/data-contracts.md`의 예제들: `c2-p1a`, `count`, `c2-p1b`의 recipe, `Troy.exe` chain, `make`의 17,448칸과 `fork_cap` 48, `c1-browsing`의 `chrome` 다섯 — 2026-10-16(9.15).
 - `docs/background-guide.md` §5의 window 문장 — 2026-10-17(9.15).
 - `docs/recognition-vocabulary.md` §1의 `initiated`(`session`) — 2026-10-16(9.15).
-- 코드 안의 문서: `wlc/__init__.py`의 spec 경로, `wlc/deriver.py`의 docstring 예제, `wlc/timeline.py`의 다섯 번째 track `operations` — 2026-10-16(9.15).
+- 코드 안의 문서: `wlc/__init__.py`의 spec 경로, `wlc/deriver.py`의 docstring 예제, `wlc/timeline.py`의 다섯 번째 track `operations` — 2026-10-16(9.15). `wlc/compiler.py` module docstring의 chain 구성원 수, `wlc/timeline.py` `_load_operations` docstring의 9.10 D20 규칙, `wlc/variants.py` module docstring의 replay stream 세 종류 — 2026-10-17(9.15).
 - task 2.4 결정 4의 "warns"와 deriver의 거절: 결정문이 잘못 적은 말이고, 거절하는 이유는 2026-10-16의 archive가 적습니다(5.4절).
 - 9.18 D6의 키 입력 수: 9.23 D7이 바로잡았습니다(11.4절).
 
@@ -2317,7 +2317,7 @@ audit의 결정("focus enters the telemetry")을 구현하면서 키 입력 창�
 | `declared_class` | project | task가 바인딩한 archetype entry의 scheduling class, `normal` 또는 `idle`. timeline에는 없음(3.7) |
 | `input` track | project | 사용자가 타자를 치는 창의 목록. compile 때 키 입력 wake로 녹음(4.2) |
 | `stimulus` | project | task를 깨우는 외부 입력의 흐름. 여기서는 실제 타자 기록의 재생(4.2) |
-| `SWELL-KW` | project | 사무 작업자의 키보드·마우스 기록 공개 dataset(`swell-icmi14`). stimulus의 원천(4.2) |
+| `SWELL-KW` | project | 실험실에서 지식 노동 과제를 한 학생과 인턴 25명의 키보드·마우스 기록 공개 dataset(`swell-icmi14`). stimulus의 원천(4.2) |
 | `slice_of` | project | 파생 입력 창이 base 창의 조각임을 적는 표시. deriver가 씀. canonical에는 없음(4.3) |
 | `focus` track | project | 어느 top-level task의 창이 앞에 있는가. 필수. canonical의 `focus` key가 됨(4.4) |
 | `operation` | project | 앱 안의 무거운 동작(page load, 메일 전송 등). 시작 시각만 적고 길이는 compile 때 뽑음(4.5) |
