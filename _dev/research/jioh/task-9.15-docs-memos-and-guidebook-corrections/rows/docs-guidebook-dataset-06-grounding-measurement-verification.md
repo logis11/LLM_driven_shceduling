@@ -183,6 +183,14 @@ Chunk K13, Dataset guidebook, volumes 5-6 (wave 3). 20 open rows. The file has 1
 - Cross-ref: W-0570; W-0238; W-0871
 - Notes: found in K04.
 
+### W-0897 · open
+- At: `docs/guidebook/dataset/06-grounding-measurement-verification.md` §7.5, the exceptions table lines 931–937; §2.9 `grounding-sources.md`, lines 265–311, and the role glossary row line 1752; the §2.9 open note line 289 and the §14.4 table row line 1713 (W-0567's places)
+- Change: (1) §7.5's table to `docs/workload/measurement-overview.md` §7 as K06 left it: the machine row — `python3`'s blocks with `khugepaged` at ±27.3 % and ±10.8 %, the DKMS tail ±8.35 %, `renderer-hidden`'s and `game-client`'s run means, `clamscan` and `tracker` gone; `renderer-hidden`'s quiet threads (`Chrome_ChildIOT`, `Compositor`, `PerfettoTrace`) in the between-sessions row; the residual at 5.0–7.2 wakes per renderer per phase; `MemoryInfra` about one per 47 min (8 over 22,800 s), not one per 22 min (`:936`). (2) §2.9 and the glossary row to grounding-sources' roles as now written: Role B "Process behavior parameters: precedents, and LAVD's reported figures for the game chain"; Role D "Our own measurement: 'this software on this machine'", every measured value. (3) When applying W-0567, close the `:289` note and the `:1713` row on the corrected grounding-sources.
+- Final word: K06 (wave 2, review passed): measurement-overview §7 (N13–N17; decision 5: `web-browser`'s `heavy_events` `count: 8`, `span_s: 22800.1`) and grounding-sources' Role B and Role D headings (decision 9, amended in fix round 1).
+- Sources: `logs/K06.md` ## Rows for other chunks (X3, amended in fix round 1), ## New rows found in these files and applied (N13–N17), ## Decisions 5, 9
+- Cross-ref: W-0567; W-0578
+- Notes: found in K06. The `:936` "about one per 22 minutes" copies `_dev/research/jioh/measurement-campaign-workflow.md` (K06's M3; a `_dev/` record, not edited).
+
 ## Also on this file, not for editing from this list
 
 - W-0582 · closed, carried — Waits on Phase 10's RQ0 run, nothing owed in 9.15: the Phase 10 section line `_dev/TODO.md:190` ('… judge per the RQ0 gate spec') carries it, and the RQ0 gate…

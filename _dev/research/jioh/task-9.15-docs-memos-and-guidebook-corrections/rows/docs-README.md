@@ -37,3 +37,11 @@ Chunk K18, Docs index (wave 5). 4 open rows. The file has 156 lines at `d5cc7711
 - Sources: `logs/K04.md` ## Rows for other chunks
 - Cross-ref: W-0711; W-0710
 - Notes: found in K04.
+
+### W-0915 · open
+- At: `docs/README.md` ## Full index, the guidebook vol-03 row, line 128 ("the claim's six links")
+- Change: "the claim's six links" → seven links, written "link 1"–"link 7".
+- Final word: 인지오's answer to W-0742 (2026-10-16, (a)), applied in K08 to `docs/research-claims.md` ## The chain ("link 1"–"link 7", seven links).
+- Sources: `logs/K08.md` ## Rows for other chunks (X2)
+- Cross-ref: W-0742; W-0916
+- Notes: found in K08.

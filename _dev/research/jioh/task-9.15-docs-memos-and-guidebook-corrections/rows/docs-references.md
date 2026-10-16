@@ -588,6 +588,78 @@ Chunk K01, References (wave 0). 70 open rows. The file has 649 lines at `d5cc771
 - Cross-ref: W-0455
 - Notes: found in K09. Both files' chunks have run (K01, K09): a follow-up chunk. The citation rule: `docs/references.md`'s id-minting rule first, each entry verified against its primary text; no `dataset/sources.yaml` entry, since no dataset value derives from these sources (9.19 D4).
 
+### W-0895 · open
+- At: `docs/references.md`, new entries; `docs/workload/grounding-sources.md` the negative result's DARPA OpTC row and the anti-roles' mobile row (Carat), each named there without an id
+- Change: Mint entries, by the id-minting and citation-tier rules (deployed-system or scholarly, as each type falls), for DARPA OpTC (process-create events with image paths, Windows 10 enterprise endpoints) and Carat (several running apps per sample, each with a foreground/background priority), on the passages the 2026-09-13 verification read (compare report K5, C-plain-7 and C-plain-8) and 9.10 D35; then grounding-sources' negative-result row and mobile anti-role cite them by id.
+- Final word: K06 decision 10: DARPA OpTC and Carat are named in plain text, without an id, since minting is the references chunk's alone (9.15 spec decision 5); their verified passages are on file.
+- Sources: `logs/K06.md` ## Rows for other chunks (X1), ## Decisions 10; the 2026-09-13 verification's compare report K5 (C-plain-7, C-plain-8); 9.10 D35
+- Cross-ref: W-0296
+- Notes: found in K06. Both files' chunks have run (K01, K06): a follow-up chunk. The citation rule: `docs/references.md`'s id-minting rule first; a `dataset/sources.yaml` entry only if the dataset derives values or structure from the source.
+
+### W-0902 · open
+- At: `docs/references.md` the `rt-app` entry's cite (its licence, "GPLv2")
+- Change: Check the licence at `d6f8be4` and align the cite: the 2026-09-13 verification read every source header as GPL version 2 "or (at your option) any later version" (GPL-2.0-or-later).
+- Final word: the 2026-09-13 verification, compare report K1, row "Licence identifiers" (which names `C-rt-app-4 references.md:143`); 9.11 D12 aligned hackbench's and stress-ng's licence identifiers the same way.
+- Sources: `logs/K06.md` ## Rows for other chunks (X5)
+- Cross-ref: W-0073
+- Notes: found in K06. K01's file: a follow-up chunk. W-0073 (the entry's role line, blocked on the simulator's TIMER) is another line of the same entry.
+
+### W-0904 · open
+- At: `docs/references.md`, a new entry; `docs/research-proposal.md` §1.1 (the CFS design document named by its file: one task per CPU); `docs/related-work.md:16` (the second sentence's bracket naming the file) and its key map's `eevdf` row
+- Change: Mint an entry, by the id-minting and citation-tier rules, for the kernel's `Documentation/scheduler/sched-design-CFS.rst` at mainline `7b63ef2d`, with the passages the 9.12 records read: ":18–19" (CFS models an "ideal, precise multi-tasking CPU"), ":26–27" ("On real hardware, we can run only a single task at once"), ":45–47", ":51–53" ("various algorithm variants to recognize sleepers"), ":96–105" ("has no heuristics whatsoever"); then the proposal's §1.1, `docs/related-work.md:16` and the key map's `eevdf` row cite the id in place of the file name.
+- Final word: 9.12 D18 (`sched-design-CFS.rst` at mainline `7b63ef2d`); K07 decision 4 and K08 decision 2: the file is named, not given an id, since minting is the references chunk's (9.15 spec decision 5).
+- Sources: `logs/K07.md` ## Rows for other chunks (X1); `logs/K08.md` ## Rows for other chunks (X1), ## Decisions 2; 9.12 search record S2-04; 9.12 audit record A5-02
+- Cross-ref: W-0314; W-0372
+- Notes: found in K07 (X1) and K08 (X1): one entry for both. All three files' chunks have run (K01, K07, K08): a follow-up chunk. The citation rule: `docs/references.md`'s id-minting rule first; a `dataset/sources.yaml` entry only if the dataset derives values or structure from the source.
+
+### W-0905 · open
+- At: `docs/references.md`, new entries; `docs/research-proposal.md` §2.2 **Cooperation** bullet (Baloo, ClamAV, borg and restic named there without ids)
+- Change: Mint entries for KDE Baloo's self-declared classes (`src/file/priority.cpp`; 9.11 search record S2-24) and for ClamAV's, borg's and restic's declaring nothing (9.11 search records S2-25, S2-26); then the proposal's §2.2 Cooperation bullet cites them.
+- Final word: 9.12 D13 (the proposal's Cooperation bullet: which background tools declare themselves); K07 decision 4: sources without an entry are named, not given an id.
+- Sources: `logs/K07.md` ## Rows for other chunks (X2), ## Decisions 4; 9.11 search records S2-24, S2-25, S2-26
+- Cross-ref: W-0334
+- Notes: found in K07. Both files' chunks have run (K01, K07): a follow-up chunk. The citation rule as W-0904.
+
+### W-0906 · open
+- At: `docs/references.md` the `ostep` entry's cite and role (chapter 8 only)
+- Change: Widen the cite and the role to chapter 7, "Scheduling: Introduction": §7.4–§7.6 (SJF's and STCF's optimality under their assumptions) and §7.9 ("No More Oracle"), which the proposal's §1.1 cites.
+- Final word: 9.12 D32, D63 (records S1-03, A2-04); K07 decision 5: `ostep` is cited for chapter 7 although its entry names chapter 8 only — the same book.
+- Sources: `logs/K07.md` ## Rows for other chunks (X3), ## Decisions 5
+- Cross-ref: W-0316
+- Notes: found in K07. Both files' chunks have run (K01, K07): a follow-up chunk.
+
+### W-0907 · open
+- At: `docs/references.md` the `meas-ci` entry's cite, its list of campaigns cited only in prose
+- Change: Add `meas-ci:sched:2026-10-07` (run 37601932147; the runner kernel's `sched_rr_timeslice_ms` 100 and base slice) with its release; `dataset/meas-releases.yaml` does not map it.
+- Final word: 9.11 changelog D2, D23 (the runner's scheduler tunables); K07 decision 6: the proposal cites `SCHED_RR`'s 100 ms to `meas-ci:sched:2026-10-07`, a campaign in neither the release map nor the `meas-ci` entry's list.
+- Sources: `logs/K07.md` ## Rows for other chunks (X4), ## Decisions 6; `logs/K06.md` ## Fix round 1, finding 4 (the release `meas-ci-sched-2026-10-07`, titled "9.11 runner read of the scheduler tunables", named in `docs/workload/measurement-overview.md` §9)
+- Cross-ref: W-0315; W-0861
+- Notes: found in K07. W-0861 adds `meas-ci:names:2` to the same list: one edit for both. Both files' chunks have run (K01, K07): a follow-up chunk.
+
+### W-0908 · open
+- At: `docs/references.md` the `vulkan` and `gstreamer` entries' roles
+- Change: Each role names the proposal's deadline glossary beside the TIMER statements it already names: for `vulkan`, a late game frame shown at the next vertical blank under FIFO presentation; for `gstreamer`, a video sink dropping a frame past its lateness.
+- Final word: 9.12 D90; the proposal's glossary **Deadline** cites both (W-0345, applied in K07).
+- Sources: `logs/K07.md` ## Rows for other chunks (X5)
+- Cross-ref: W-0345; W-0418; W-0074
+- Notes: found in K07. The roles' TIMER statements are not this row's (W-0074, blocked on the simulator's TIMER, is on `mpv` and `chromium`). The background guide's **deadline** row also cites Vulkan's FIFO presentation (W-0418, K08). Both files' chunks have run: a follow-up chunk.
+
+### W-0909 · open
+- At: `docs/references.md` the `waldspurger-osdi94` entry's role
+- Change: The role gains §2.2: allocation proportional to tickets in expectation, its accuracy improving with √n; E[n] = 1/p lotteries to a first win; "will eventually win", with no bound — cited in the proposal's §4.5 and its glossary **Lottery scheduling**.
+- Final word: 9.12 D36, D67.
+- Sources: `logs/K07.md` ## Rows for other chunks (X6)
+- Cross-ref: W-0346
+- Notes: found in K07. Both files' chunks have run (K01, K07): a follow-up chunk.
+
+### W-0910 · open
+- At: `docs/references.md` the `ananicy-rules` entry's role
+- Change: The role gains the entries 9.12 D5 and D85 read at `03ef03fb`, as existence claims: `reaper`, `bitwig-studio`, `ArdourGUI`, `lmms` and `audacity` as `Player-Audio`; Discord as `Chat`; Godot's editor builds as `Game`; `node` as `BG_CPUIO`; `blender` and `resolve` as `Heavy_CPU` — cited in the proposal's Family 3.
+- Final word: 9.12 D5, D85; 인지오's answer to W-0728 ((c), applied in K07: Family 3 keeps the registration failures, the Blender/Resolve row leaves).
+- Sources: `logs/K07.md` ## Rows for other chunks (X7)
+- Cross-ref: W-0357; W-0358; W-0728
+- Notes: found in K07. Both files' chunks have run (K01, K07): a follow-up chunk.
+
 ## Also on this file, not for editing from this list
 
 - W-0071 · answered (a), applied in K01 — The five entries 9.10 D34 and 9.12 D102 remove from `docs/references.md` (`dubroy-chi10`, `chang-chi21`, `dkms-man`, `dkms-debian`, `mozilla-testpilot10`) are still registry ids in `dataset/sources.yaml` (`:175`, `:183`… Blocks: The removal of the five entries at `docs/references.md:80–88`, `:279–287`, `:295–298` (and `singervine-slate10` at `:300–303`), and the same-edit restatement o…

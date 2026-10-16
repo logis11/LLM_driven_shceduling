@@ -138,6 +138,14 @@ Chunk K12, Dataset guidebook, volumes 3-4 (wave 3). 17 open rows. The file has 2
 - Cross-ref: W-0530
 - Notes: Apply after the listed docs are corrected. Line 2173 calls the README's '51개 파일, 66개 segment' current — since 9.23 D10 it is 67 (the README count row is another row's). Line 2177's terminology 'the three C6 files' now holds (three carry `pre_committed_miss`).
 
+### W-0914 · open
+- At: `docs/guidebook/dataset/04-the-coreset.md` §8.1 C5가 답하는 질문, line 1384 ("열여섯 mode 전체를 tier 3–5로", with its quotation of the building plan's line 133); §12.5 표를 읽어 보기, line 2044 ("생성 ladder가 tier 3–5를 모든 mode에 늘어놓는")
+- Change: Tiers 4 and 5 for every mode, plus the two tier-3 cells (render's and backup's jobs, `melt-7` and `duplicity`); `:1384`'s quotation follows the building plan's line 133 as W-0912 restates it.
+- Final word: As W-0912.
+- Sources: `logs/K07.md` ## Rows for other chunks (fix round 1), X11
+- Cross-ref: W-0911; W-0912; W-0913; W-0535
+- Notes: found in K07. K07 left unfiled the chronicle lines (`08-decision-chronicle.md:1571`, `:1965`) and `05-the-generated-layer.md:1375`'s quoted spec line: they say the ladder covers tiers 3–5 as a whole.
+
 ## Also on this file, not for editing from this list
 
 - W-0550 · closed, carried — `_dev/TODO.md:200` (Backlog: 'Unwanted jobs to measure — how many the attribute's `false` side needs is decided in the RQ1 experiment spec's session …') carrie…

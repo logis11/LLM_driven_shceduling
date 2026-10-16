@@ -399,6 +399,22 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0098; W-0118; W-0123; W-0126
 - Notes: found in K02's review. K02's file: a follow-up chunk.
 
+### W-0903 · open
+- At: `docs/workload/building-plan.md` §7, line 239 ("segment durations are the naturalistic set's (§4)"); §4, line 187 (the **Switching structure** bullet: "Hub-and-spoke switching lost its only source, a task-switching log study with no reachable copy, when that source was dropped (9.10 D1)")
+- Change: (1) Line 239: the core set's segment durations are design or the bound job's measured length (§3), `c6-dual`'s 688 s focus alternation `gonzalez-chi04`'s mean, Role C's figures serving the naturalistic set (§4). (2) Line 187: "Hub-and-spoke switching is unsourced."
+- Final word: K06's review round 1, findings 5 and 8, applied to `docs/workload/grounding-sources.md` Role D and Role C: the building plan's §3 (C1's 60 s files; a batch base's segment the smallest whole second by which its job ends, 9.10 D78) and §4 (backlog); `c6-dual.timeline.yaml:32–33` cites `gonzalez-chi04` for the 688 s; the public docs carry no account of Phase 9 corrections (`_dev/research/jioh/research-slice-workflow.md:23`).
+- Sources: `logs/K06.md` ## Fix round 1 (findings 5, 8), ## Rows for other chunks (added), X6
+- Cross-ref: W-0884; W-0294
+- Notes: found in K06. K02's file: a follow-up chunk.
+
+### W-0912 · open
+- At: `docs/workload/building-plan.md` §3 C5, line 133 ("the ladder over the sixteen modes at tiers 3–5 … is generated (§3a)")
+- Change: Match §3a (`:174`): the generated ladder renames every mode's task set at tiers 4 and 5, plus two tier-3 cells (render's and backup's jobs as `melt-7` and `duplicity`).
+- Final word: `dataset/grids.yaml` `familiarity-ladder` (`tiers: [4, 5]`; its `tier3` holds `render` → `melt-7`, `backup` → `duplicity`); `dataset/build.familiarity-ladder.manifest.json`: 66 files, 32 at tier 4, 32 at tier 5, 2 at tier 3 (counted in K07, N24); the building plan's §3a (`:174`).
+- Sources: `logs/K07.md` ## Fix round 1 (resumed run), N24, and ## Rows for other chunks (fix round 1), X9
+- Cross-ref: W-0911; W-0913; W-0914
+- Notes: found in K07. K02's file: a follow-up chunk. The dataset guidebook vol-04 `:1384` quotes this line (W-0914).
+
 ## Also on this file, not for editing from this list
 
 - W-0129 · closed, already-applied — Line 101 ('Role (restated 2026-10-11): existence cases — transitions of these shapes, in these orders, occur. The rate claims on transition recognition … are t…

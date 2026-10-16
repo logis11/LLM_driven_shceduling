@@ -103,3 +103,11 @@ Chunk K15, Research guidebook, volumes 1-3 (wave 4). 13 open rows. The file has 
 - Final word: 9.11 D1 (2026-10-07) as amended by 9.11 D24 (2026-10-08) and D27: T_interaction (the interaction-latency threshold) stays 100 000 µs (0.1 s), labelled design — the strict end of Miller's 0.1–0.2 s key-to-visual-echo range (miller-fjcc68, p. 271, Topic 1; Miller's delays 'the best calculated guesses by the author', 'indicative rather than conclusive'), taken on Miller's caveat that the range may be too slow for skilled typists; Nielsen (nielsen-ue93) restates Miller and Card et al. as advice, not a second grounding; cross-checked against a measured detection threshold (deber-chi15: tapping 69 / 96 ms direct / indirect, 12 tapping sessions); Long, as reported by Shneiderman (shneiderman-csur84, p. 268), found a trend within 0.1–0.5 s keystroke-to-print delays, not that 0.1 s is the loose end. 9.12 D63 states Miller's echo limit the same way. Matches docs/harness/metrics.md:289, :296.
 - Sources: SX-0092 (TODO 9.15 line (from 9.11 D1, D24), `_dev/TODO.md:179`); SX-0517 (9.11 D24, `task-9.11-scheduler-constants/changelog.md:337`)
 - Notes: docs/harness/metrics.md:289 and :296 are the model wording.
+
+### W-0916 · open
+- At: `docs/guidebook/vol-03-the-research.md` # 6장 · 주장을 이루는 C1부터 C7까지 (heading line 1642, the contents entry line 22), the chain's list (lines 1655–1668), ### 일곱 개인데 왜 사슬은 여섯이라고 하나 (lines 1673–1683), and the later uses of C1–C7 as the chain's links
+- Change: The chain's links C1–C7 → "link 1"–"link 7", seven links (the passage on "six links" restated); the third link carries the focus holder (the names, their counts and the focus holder).
+- Final word: 인지오's answer to W-0742 (2026-10-16, (a)), applied in K08 (`docs/research-claims.md` ## The chain: "link 1"–"link 7", seven links); W-0394 (the third link: names, their counts and the focus holder), applied in K08.
+- Sources: `logs/K08.md` ## Rows for other chunks (X3)
+- Cross-ref: W-0742; W-0394; W-0915
+- Notes: found in K08. C1–C7 stay the core set's file groups wherever the volume names those.

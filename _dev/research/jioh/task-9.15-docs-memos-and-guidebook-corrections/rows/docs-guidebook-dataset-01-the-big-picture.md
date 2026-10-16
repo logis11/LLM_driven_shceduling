@@ -192,6 +192,14 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 24 open rows. The file has 1
 - Cross-ref: W-0742; W-0492; W-0853
 - Notes: found in K02. W-0742 blocks "the dataset guidebook vol-01 §1.4 note and any rename sweep; also the open note at :93"; no row of this file carried them.
 
+### W-0917 · open
+- At: `docs/guidebook/dataset/01-the-big-picture.md` §1.5 RQ0: 아무 모델도 없이 먼저 여는 문지기 실험, line 132 ("LLM 없이 `random`과 `oracle`만 돌려 봅니다"); the open notes at lines 93 and 1630–1631 (W-0865's) and line 151 (W-0487's)
+- Change: (1) Line 132: RQ0 runs `fixed`, `random` and `oracle`. (2) When applying W-0865 and W-0487, close the notes on what K08 applied: the name-collision notes (`:93`, `:1630–1631`) on W-0742 (a) — the dataset's layers named, the chain's links "link 1"–"link 7"; the `:151` note ("행동이 똑같다") on W-0392 and W-0400 — the P1 pair two real jobs, differing in behaviour and declared class.
+- Final word: `harness/experiments/rq0-gate.yaml` `conditions: [fixed, random, oracle]`; 인지오's answer to W-0742 (2026-10-16, (a)); W-0392 and W-0400, applied in K08.
+- Sources: `logs/K08.md` ## Rows for other chunks (X4)
+- Cross-ref: W-0865; W-0487; W-0742; W-0392; W-0400
+- Notes: found in K08.
+
 ## Also on this file, not for editing from this list
 
 - W-0507 · blocked, simulator TIMER (outside the spec's list) — §2.4 여섯 개의 primitive, open note line 288

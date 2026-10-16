@@ -291,6 +291,14 @@ Chunk K03, Coreset guide (wave 1). 35 open rows. The file has 1060 lines at `d5c
 - Cross-ref: W-0183; W-0869
 - Notes: found in K03's review. K03's file: a follow-up chunk. If 인지오 answers K03's t₀ question with the harness mocks' reading, the passage is restated with that answer.
 
+### W-0913 · open
+- At: `docs/workload/coreset-guide.md` ## 9, the "core set 밖의 짝" paragraph, line 588 ("familiarity ladder(66개: 16 mode × tier 3–5, …)")
+- Change: 16 mode × tier 4·5, plus render's and backup's jobs at tier 3 (`melt-7`, `duplicity`); the guide's Korean kept.
+- Final word: As W-0912.
+- Sources: `logs/K07.md` ## Rows for other chunks (fix round 1), X10
+- Cross-ref: W-0911; W-0912; W-0914
+- Notes: found in K07. K03's file: a follow-up chunk.
+
 ## Also on this file, not for editing from this list
 
 - W-0189 · blocked, simulator TIMER (on the spec's list) — ## 3 primitive table, `TIMER(P)` row line 111 ('지나간 tick은 backlog로 쌓여 즉시 완료') and the TIMER/SLEEP paragraph line 118 ('늦으면 밀린 tick이 쌓여요 … 따…

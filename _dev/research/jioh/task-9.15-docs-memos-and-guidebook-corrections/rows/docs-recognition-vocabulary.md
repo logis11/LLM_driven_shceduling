@@ -2,14 +2,14 @@
 
 Chunk K08, Related work, claims and vocabulary prose (wave 2). 4 open rows. The file has 180 lines at `d5cc7711`.
 
-### W-0428 · open
+### W-0428 · applied
 - At: `docs/recognition-vocabulary.md` preamble, line 11 ('… keying it to the scenario catalog (`workload/scenario-catalog.md`), whose co-occurrence patterns are grounded in cited sources …')
 - Change: Restate the clause: each labelled segment's `scenario` tags name every catalog scenario whose program the segment shows; the catalog grounds each scenario's and each bound name's existence, cited per row, not which programs run together — the core set's task sets (which programs share a segment) are design. 'whose co-occurrence patterns are grounded in cited sources' and the closing claim that every term is backed by the citations that justified authoring a workload for it are brought in line.
 - Final word: 9.10 D33 (the scenario catalog lists what the dataset binds, each line an existence claim that holds), with D2 and D168: the core set's task sets are design — which programs share a segment is the experiment's composition, chosen for the claim the file makes; no core-set file presents its task set as how desktops behave (D2); the catalog grounds each scenario's and each name's existence (its package on Ubuntu 24.04 and the observation that showed its `comm`), citing a benchmark definition only where one defines the scenario (D33); a segment's `scenario` tags name every catalog scenario whose program is alive in the segment, descriptive keys no scoring term reads (D168).
 - Sources: S10-076 (9.10 D33, `task-9.10-scenarios-timelines/changelog.md:719`)
 - Notes: 9.10 D168 cites this line as where the tags are described ('The tags are descriptive keys to the catalog (`docs/recognition-vocabulary.md:11`)'). The doc is normative with its own §5 Changelog (line 170); a wording change with no value changed has had a dated 'No value changed' entry by convention.
 
-### W-0429 · open
+### W-0429 · applied
 - At: `docs/recognition-vocabulary.md` ## 1. The `system` block, ### Attributes, line 46 (the `false` examples 'a scheduled scan, an indexer's rescan'; the batch-mode example 'an indexer's scheduled rescan'); ### Ground-truth annotations, line 50 (the `background` example '`av-scan`')
 - Change: Restate the examples to what the files carry: at :46 the `false` examples become the stock unattended upgrade (an update install nobody started now) and an indexer's first index of a home at login (work the session starts unasked); the batch-mode example 'an indexer's scheduled rescan' becomes the same first index at login; at :50 the `background` example `av-scan` becomes `package-upgrade` (beside `download`).
 - Final word: 9.10 D3 (the unasked anti-virus scan replaced by the stock unattended upgrade) as resolved by D40 and D45: the unwanted job of the ten interactive C7 counterparts and of `c2-p2b` is the unattended upgrade (`package-upgrade`, shown `unattended-upgr`), and the descriptive key `background` reads `package-upgrade` in place of `av-scan`; 9.10 D5 as amended by D66 and D79: there is no scheduled rescan — Tracker 3.7.1 schedules none (`crawling-interval` -1); the unasked indexing is Tracker's first index of a home at login from an empty database, `initiated: session`. At HEAD the timelines carry `background: package-upgrade` (22) and `background: download` (2) and no `av-scan` (grep of `dataset/timelines/coreset/`).
@@ -17,7 +17,7 @@ Chunk K08, Related work, claims and vocabulary prose (wave 2). 4 open rows. The 
 - Cross-ref: W-0430
 - Notes: S10-108 and S10-114 are 9.10 D79's and D81's repeats of D5's hand-off. Line numbers at HEAD: the raw rows' 'line 44' is :46. The same line :50 also gets `initiated: session` (W-0430).
 
-### W-0430 · open
+### W-0430 · applied
 - At: `docs/recognition-vocabulary.md` ## 1. The `system` block, ### Ground-truth annotations (never recognizer-facing), line 50 ('`initiated` (`user` | `scheduled`)')
 - Change: Add `session` to the values of the descriptive key `initiated` — `user` | `scheduled` | `session` — with its meaning: work the desktop session itself starts, unasked, at login (Tracker's first index in `c2-p1b` and `c7-indexing`); `scheduled` keeps meaning a timer's job; the key stays ungraded. Add a dated §5 changelog entry (no graded value changed).
 - Final word: 9.10 D79 (2026-10-03), applied by D81 and D164: the descriptive key `initiated` gains a third value, `session` — work the desktop session itself starts, unasked, at login; `c7-indexing` and `c2-p1b` carry it; `scheduled` keeps meaning a timer's job; `c1-indexing` says `user`. At HEAD the core-set timelines carry `initiated: user` 7 times, `scheduled` 13, `session` 6 (grep of `dataset/timelines/coreset/`; e.g. `c2-p1b.timeline.yaml:24`, `c7-indexing.timeline.yaml:22`, `c2-pairs.variant.yaml:18`, `c7.variant.yaml:237`).
@@ -25,7 +25,7 @@ Chunk K08, Related work, claims and vocabulary prose (wave 2). 4 open rows. The 
 - Cross-ref: W-0429
 - Notes: The vocabulary's §4 rule names adding or removing a mode, promoting an annotation to a graded attribute, changing an attribute's semantics and changing the config schema as three-owner decisions; a value of a descriptive, ungraded key is none of these, and 9.10 D79 decided it. S10-113 is D81's repeat of the hand-off; SX-0844, SX-0941, SX-0985 are the dataset guidebook's open notes (vol-01 §1.4, vol-03 §16.1, vol-04 §13.8).
 
-### W-0431 · open
+### W-0431 · applied
 - At: `docs/recognition-vocabulary.md` ## 2, ### Provenance of the boot default, the 'Sensitivity check' paragraph, line 122 ('pre-registered in the RQ0 gate spec … 2026-09-12 … a sweep of nine alternative boot defaults … at 0.5, 0.7, 0.9, 1.2, 2, 3, 5, 20, and 100 ms')
 - Change: Restate the sweep to ten alternative boot defaults — the top slice at 0.5, 0.7, 0.9, 1.2, 2, 3, 5, 14, 20 and 100 ms, each point's reason in the RQ0 gate spec — and the date to the spec as reworked on the rebuilt dataset (2026-10-09, 9.14); the rest of the paragraph stands. Add a dated §5 changelog entry (no value changed); the 2026-09-12 entry stays as the record of that date.
 - Final word: The RQ0 gate spec at HEAD (`harness/experiments/rq0-gate.yaml:35–39`, `boot_defaults.alternatives`; the sensitivity line `:122–125`): ten alternatives, `ostep-slice-500us`, `-700us`, `-900us`, `-1200us`, `-2000us`, `-3000us`, `-5000us`, `-14000us`, `-20000us`, `-100000us` — the ten points of 2026-10-09 (9.14 spec decision 9; changelog D7), five backbone points the dataset does not inform and five threshold points either side of the rebuilt judging files' steps, the 14 ms point added above the call's 12.2 ms ninth-decile cycle; only the `fixed` run varies; with it the spec judges 19 files at K = 10, g = 0.5, N = 100 (9.14 spec decision 2 as amended 2026-10-09).
@@ -34,4 +34,4 @@ Chunk K08, Related work, claims and vocabulary prose (wave 2). 4 open rows. The 
 
 ## Also on this file, not for editing from this list
 
-- W-0432 · waits on 인지오 — The ratified vocabulary glosses the mode `render` as 'an offline 3D/graphics render' (`docs/recognition-vocabulary.md:34`). Since 9.10 D10 every render file binds an offline video export — Kdenlive's `kdenlive_render` e… Blocks: the `render` row at docs/recognition-vocabulary.md:34 (and its §5 changelog entry if it changes); also the open note at docs/guidebook/dataset/04-the-coreset.m…
+- W-0432 · answered (a), proposed; left as it stands in K08 until 인경민 and 박이안 agree (W-0827) — The ratified vocabulary glosses the mode `render` as 'an offline 3D/graphics render' (`docs/recognition-vocabulary.md:34`). Since 9.10 D10 every render file binds an offline video export — Kdenlive's `kdenlive_render` e… Blocks: the `render` row at docs/recognition-vocabulary.md:34 (and its §5 changelog entry if it changes); also the open note at docs/guidebook/dataset/04-the-coreset.m…
