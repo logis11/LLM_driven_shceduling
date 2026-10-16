@@ -56,6 +56,14 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 6 open rows. The file has 16
 - Cross-ref: W-0839; W-0836
 - Notes: found in K01. The grounding docs (wave 2) restate line 77 before this volume's chunk (wave 3).
 
+### W-0858 · open
+- At: `docs/guidebook/dataset/02-the-archetype-library.md` §11.5, closing paragraph line 1456 ('이 변화들 때문에, `docs/workload/archetype-plan.md` §4, `docs/data-contracts.md` §2의 "There are twelve" 문단과 예시, `docs/workload/coreset-guide.md` §4 이후, … 지금 library와 다릅니다.')
+- Change: Drop `docs/workload/coreset-guide.md` §4 from the list of docs that differ from the library: since K03 the guide's §4 holds the library's 29 entries.
+- Final word: K03 (wave 1, review passed 2026-10-16): W-0161 rewrote the guide's §4 to the 29 entries, grouped by kind, with §4.8's summary table of all 29.
+- Sources: `logs/K03.md` ## Rows for other chunks; W-0161
+- Cross-ref: W-0154; W-0161
+- Notes: found in K03. `docs/data-contracts.md` §2, in the same list, now lists the 29 entries too (K05, W-0245); the paragraph's other docs land with their own chunks.
+
 ## Also on this file, not for editing from this list
 
 - W-0517 · blocked, simulator TIMER (outside the spec's list) — §1.5 TIMER와 WAIT(timer), open note line 135

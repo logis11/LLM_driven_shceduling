@@ -64,6 +64,14 @@ Chunk K09, Simulator and daemon docs (wave 2). 8 open rows. The file has 76 line
 - Cross-ref: W-0438
 - Notes: At HEAD 31 of the 51 core files' manifest utilization is below one lane and `c2-p1a` reads 14.505 (`dataset/build.manifest.json`). SX-1087 (the dataset guidebook vol-07's open note) names lines 67–68 together; its line-67 part is row W-0438, and its point that the README's rule 1 ("the doc wins — fix the code") points the wrong way here is that note's own for-인지오 row elsewhere. 9.14 decision 4 has no recorded reason: the doc states the fact only.
 
+### W-0859 · open
+- At: `docs/simulator/interpretation-contract.md` ## 5 Lifetime classes, the FORK semantics paragraph, line 57 ("At run time the fork/wait-for-slot loop (parallelism cap; …) consumes the table in order."); ## 3 Event grammar, the `WAIT(channel)` row, line 32 ("block until a WAKE (or exogenous wake event) on `channel`")
+- Change: Write W-0743's rule into the FORK and WAIT text: the executor completes an orchestrator's `WAIT children:<id>` when the last child it spawned ends, and without blocking (a zero-wait `ready` line) when none is live at the WAIT. Wherever this file writes W-0744's parenthetical on the trailing WAIT's channel (W-0435's sentence), scope it to the code: for the measured interactive entries usually their timer channel, in the core set and its sensitivity variants always — 34 generated `mail-client` (`thunderbird-bin`) tasks end on `input:`.
+- Final word: 인지오's answer to W-0743 (2026-10-16, (a)): the rule is written into the interpretation contract's FORK and WAIT text and `docs/data-contracts.md`, with a §14 entry; no data change. Applied in K05 to `docs/data-contracts.md` §4 Example B (3) and its §14 2026-10-16 entry. 인지오's answer to W-0744 (2026-10-16, (a)), counted over `build/coreset-single/` only; K05's count over every `*-single` build: the core set's 24 tasks with both channels and the variants' 37 all end on `timer:`, the generated layer's 1,279 end 1,245 on `timer:` and 34 on `input:` (27 return grid, 6 transition grid, 1 distractor grid).
+- Sources: W-0743 and W-0744 answers; `logs/K05.md` ## Rows for other chunks (X1), ## Fix round 2; `dataset/tools/wlc/compiler.py`; `dataset/build/*-single/`
+- Cross-ref: W-0436; W-0435; W-0832; W-0445
+- Notes: found in K05. No other row on this file carries W-0743's rule (W-0436 is the 2,430 example in the same paragraph). W-0832 (the RQ0 gate spec's (g)) cites the contract text once this lands. The simulator guide's worked run (W-0445, this chunk's other file) meets the same W-0744 scope.
+
 ## Also on this file, not for editing from this list
 
 - W-0441 · blocked, simulator TIMER (on the spec's list) — ## 3 Event grammar — six primitives, the `TIMER(period)` row, line 31 ("Late iterations accumulate as backlog; they are not silently skippe…

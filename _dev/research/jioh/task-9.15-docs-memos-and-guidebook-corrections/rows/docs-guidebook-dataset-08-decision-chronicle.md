@@ -68,6 +68,14 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 8 open rows. The file has 20
 - Cross-ref: W-0601
 - Notes: Line 1256's quotation of 9.13 D7 ('at 66 segments') is a record of its day and stays. Line 1269 is found by the same fact (not in the raw row).
 
+### W-0857 · open
+- At: `docs/guidebook/dataset/08-decision-chronicle.md` §12.8 문서와 tree의 불일치 (2026-10-14 현재), table lines 1851–1860 — the rows whose stale docs include the coreset guide: 1851 (core set 50, 64 segments), 1852 (twelve archetypes), 1854 (the demand window as a rule), 1856 (two compile modes, `coreset-native`), 1857 (`clamscan`), 1859 (`c5-t3`)
+- Change: Restate or close these rows' mentions of the coreset guide once wave 1 lands: `docs/workload/coreset-guide.md` now states the tree — 51 files and 67 segments, the 29 entries, one compile mode, demand reported and never a gate, `package-upgrade` (`unattended-upgr`) in place of `clamscan`, `c6-alias` in place of `c5-t3`.
+- Final word: K03 (wave 1, review passed 2026-10-16): the coreset guide's full pass (W-0154) with W-0155 (51 files, 67 segments), W-0161 (the 29 entries), W-0166 (`package-upgrade`), W-0174 (the native mode removed), W-0175 (demand reported, no lint), W-0178 (`c6-alias`).
+- Sources: `logs/K03.md` ## Rows for other chunks; W-0154; W-0155; W-0161; W-0166; W-0174; W-0175; W-0178
+- Cross-ref: W-0601; W-0606
+- Notes: found in K03. W-0606 covers only row 1's segment count, W-0601 only the v0.1 row (1853). Row 1852's other doc, `docs/data-contracts.md` §2, now lists the 29 entries (K05, W-0245); the other docs these rows name land with their own chunks. Whether §12.8 is updated row by row or closed once 9.15's rows are applied is the editing agent's call (W-0606).
+
 ## Also on this file, not for editing from this list
 
 - W-0607 · closed, already-applied — vol-08:271 already states the final word, accurate at HEAD; the generalset's backlog line is `_dev/TODO.md:196`.
