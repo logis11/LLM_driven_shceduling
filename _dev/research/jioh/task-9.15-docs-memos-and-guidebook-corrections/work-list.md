@@ -5,12 +5,12 @@ Built from the three extraction agents' raw rows (9.12's changelog; 9.10's chang
 ## Counts
 
 - Raw rows: 1,638 — 331 from 9.12's changelog, 161 from 9.10's, 1,146 from the other sources.
-- Work-list rows: 849 — 787 merged from the raw rows, 18 added where a resolution needed one, 24 from the spec (decisions 4, 10, 12, 13), 3 found in stage A (W-0830–W-0832), 17 found in K01 (W-0833–W-0849).
+- Work-list rows: 852 — 787 merged from the raw rows, 18 added where a resolution needed one, 24 from the spec (decisions 4, 10, 12, 13), 3 found in stage A (W-0830–W-0832), 17 found in K01 (W-0833–W-0849), 3 found in stage A's review and K01's mismatches (W-0850–W-0852).
 - By class:
-  - open, in scope: 586 (15 of them wait on one of 인지오's answers; 2 deferred until the final memo is committed: W-0580, W-0602);
+  - open, in scope: 587 (15 of them wait on one of 인지오's answers; 2 deferred until the final memo is committed: W-0580, W-0602);
   - applied: 70 — K01 (W-0001–W-0070);
   - final memo: 19;
-  - follow-up, outside the chunks: 1;
+  - follow-up, outside the chunks: 3 (W-0832; the data rows W-0851, W-0852, for one batched rebuild after wave 4);
   - for 인지오: 37 (answers applied in K01: W-0071, W-0072, W-0754, and K01's parts of W-0732, W-0736, W-0750);
   - outside the sweep (code and data files): 16;
   - blocked, simulator TIMER, on the spec's list: 6;
@@ -335,3 +335,5 @@ Reasons for the rows closed other than as applied or dev history:
 ## Follow-up rows
 
 - **W-0832** · `harness/experiments/rq0-gate.yaml`, the simulator-conformance statement's (g) — cites "(9.15 W-0743)"; once the chunks owning the interpretation contract and `docs/data-contracts.md` §14 have landed W-0743's rule (`WAIT children:<id>` completes when the last child spawned under that id ends, with zero wait if none is live), cite that contract text instead. No pin covers the RQ0 gate spec's text. Found in stage A (A3); after wave 2.
+- **W-0851** · `dataset/archetypes.yaml:1031–1032`, `compiler-child`'s `modeling_notes` — "The kernel-build literature grounds the class's existence and short-lived character only (ocallahan-atc17 sec-4.3 …; coetzee-arxiv12 sec-9 corroborates)": restate as the registry note now reads (W-0790): `ocallahan-atc17`'s 2,430 processes are a `make -j8` build of DynamoRio 6.1.0 (critical findings memo A1; 9.10 D33), and `coetzee-arxiv12`'s examples are `cp` and `mkdir` (C-coetzee-1). A manifest input: every manifest re-blessed and the RQ0 gate spec's `pins.dataset` and `pins.variants` re-pinned, `make check` passing — batched with W-0852 and any data rows waves 1–4 find, in one rebuild after wave 4. Found in K01 (M2).
+- **W-0852** · `dataset/sources.yaml`, the notes of `gonzalez-chi04` (`:141–147`, "~12 min per working sphere … ~3 min per task and ~2 min 11 s per tool") and `swell-icmi14` (`:29–43`, "25 knowledge workers") — restate to 9.10 D35 (per event; 11 min 28 s, central and peripheral spheres) and the verification C-swell-1 (25 students and interns). Input of no manifest; `make -C dataset lint` passing. In the same commit as W-0851. Found in K01 (M4).

@@ -113,9 +113,9 @@ Chunk K10, Harness guide and metrics (wave 3). 14 open rows. The file has 1400 l
 - Notes: Code: `.github/workflows/harness-smoke.yml:1–23` (on demand; the comment at :5), `harness/Makefile:15–16`, `harness/tools/smoke.py` (`--files N`). :1337's "48개 파일" and "약 5–8분" are 8.6's figures on the old files; :1337 is not named by the raw row but states the same thing. Not named by 9.23's hand-off (the guidebook only).
 
 ### W-0830 · open
-- At: `docs/harness/harness-and-records-guide.md` ## 7, the `mock-switch` paragraph, line 629 ("거기서는 창이 46600에 닫히고 hog는 53100에야 맨 밑에 닿아서 … 지금은 창이 53100에 닫혀요")
+- At: `docs/harness/harness-and-records-guide.md` ## 7, the `mock-switch` walkthrough, lines 616–624 ("→ H = 1", the hog's CPU intervals, `hogs=1`, `index=2`) and the paragraph at line 629 ("거기서는 창이 46600에 닫히고 hog는 53100에야 맨 밑에 닿아서 … 지금은 창이 53100에 닫혀요")
 - Change: Restate on the re-derived fixture: under the first, wall-clock definition the window closes at 46600, before the hog reaches the bottom queue at 49100 and the editor at 53100; under the CPU-received definition the window is 12,500 µs and closes at 53100, covering both; the editor counts as a hog (alive at the switch, its first `run_end` after it a preempt at 44600).
 - Final word: 인지오's answers to W-0804 and W-0736 (2026-10-16), applied by stage A's fixture re-derivation (`logs/A4-fixture.md`).
 - Sources: `harness/tools/tests/fixtures/mock-switch/worked.md`, `expected.csv`, `trace.jsonl` (re-derived 2026-10-16); `harness/tools/check_mlfq_levels.py` on the fixture (window 12500, until 53100; all covered).
-- Notes: found in stage A (A4). The fixture's switch excess is now 0 µs (the 46000 keystroke arrives while the editor waits preempted in Q1; its WAIT completes at 50100 with zero wait); the boost excess stays 600 µs; the 60600 boost window is 20,000 µs.
+- Notes: found in stage A (A4; lines 616–624 by A5's reviewer). Read the walkthrough's values off `worked.md` and `expected.csv` (the switch's `index`, the hogs and their CPU intervals). The fixture's switch excess is now 0 µs (the 46000 keystroke arrives while the editor waits preempted in Q1; its WAIT completes at 50100 with zero wait); the boost excess stays 600 µs; the 60600 boost window is 20,000 µs.
 

@@ -21,3 +21,10 @@ Chunk K10, Harness guide and metrics (wave 3). 2 open rows. The file has 344 lin
 
 - W-0481 · waits on 인지오 — Which number does the hold-time plan's no-rule measurement carry — the need for a hold time measured with hold time 0 and no hysteresis on the flap-stress set and the C4 files, under `oracle` and `random`, right after P… Blocks: The step label at `docs/harness/metrics.md:251` (§8, the flip-count row; the §13 entry at :328 is a dated record). Rows W-0454 and W-0456 (the daemon guide §9.…
 - W-0482 · closed, already-applied — Line 74 lists `fixed`, `random`, `shipped_catalogue`, `strongest_name_table`, `llm_vocab`, `llm_algo`, `llm_full`, `oracle` and says "the two name-table condit…
+
+### W-0850 · open
+- At: `docs/harness/metrics.md` §10 (the fixtures paragraph), line 320 ("`mock-switch` (MLFQ → FIFO → MLFQ with a config schedule, one hog, …)")
+- Change: "one hog" → two hogs (the batch task and the editor, each counted by its first preempt after the switch), as the re-derived fixture has it.
+- Final word: 인지오's answer to W-0804 (2026-10-16), applied by stage A (`logs/A4-fixture.md`).
+- Sources: `harness/tools/tests/fixtures/mock-switch/expected.csv` (`hogs` 2 on both `switch_window` rows and the 60600 `boost_window` row); `harness/tools/tests/fixtures/README.md` (the `mock-switch` row).
+- Notes: found in stage A (A5's reviewer).
