@@ -1,6 +1,6 @@
 # Work-list rows — the final memo to 인경민 and 박이안
 
-Drafted after the doc chunks (spec decision 13). 14 rows.
+Drafted after the doc chunks (spec decision 13). 16 rows.
 
 ### W-0713 · final-memo
 - At: new
@@ -106,6 +106,22 @@ Drafted after the doc chunks (spec decision 13). 14 rows.
 - Change: State the licences chosen: the code under MIT (root `LICENSE`), the dataset's data and release assets under CC-BY-NC-SA-4.0 (`dataset/LICENSE`), holders Jioh In, Kyungmin Inn and Ian Park, SWELL-KW credited for the stimulus streams.
 - Final word: 9.15 spec decision 13: beyond the TODO line's items the final memo carries the memos still open, the simulator's skip rule and zero-wait `ready` line as owed, and the licences chosen.
 - Sources: 9.15 spec decision 12 (`jioh/task-9.15-docs-memos-and-guidebook-corrections.md:62`)
+- Notes: —
+
+### W-0825 · final-memo
+- At: new
+- Change: Propose to 인경민 and 박이안 that the claim the experiment puts at risk be stated in scheduling-score terms: the configuration selected from the model's reading of the process names scores better than the strongest name table's on the RQ0 judging files; recognition accuracy (RQ1) becomes the account of the gap, and the RQ5 ladder's share of perfect recognition's gain the model captures — (fixed − model) / (fixed − perfect recognition) — the headline. A proposal: the claims document is the three owners'; 9.15 does not apply it.
+- Final word: 인지오, 2026-10-16 (answering W-0753's discussion): the paper's weight belongs on whether the model's recognition improves scheduling. Grounds on record: the claim at `docs/research-claims.md:23–25`, as 9.12 D88 and D6 restate it (W-0392, W-0393), still reads 'recovers the difference', a recognition criterion, and ## The load-bearing experiment calls the claim 'demonstrated by construction' when the model separates the pair; 9.14 decision 2 and 9.23 D9 measured P1's headroom on `c2-p1b` as zero (the indexer's own `SCHED_IDLE`, below every row), so P1's scheduling headroom is `c2-p1a`'s alone and P2 (`c2-p2a`, `c2-p2b`) is the one label pair with both sides judged.
+- Sources: 인지오's answer of 2026-10-16; `harness/experiments/rq0-gate.yaml:55–61` (judging and reporting lists); 9.23 D9 (`task-9.23-guidebook-findings/changelog.md:82`)
+- Cross-ref: W-0392; W-0393; W-0400; W-0752; W-0753
+- Notes: The RQ5 ladder is `docs/research-claims.md` ### RQ5's illustrative table (fixed, name table, variant A, perfect recognition, perfect config).
+
+### W-0826 · final-memo
+- At: new
+- Change: Tell 인경민 and 박이안 the 'What is not claimed' entry 9.15 adds to `docs/research-claims.md`: the size of the scheduling gain is not claimed beyond the measured workloads — every CPU value one AMD EPYC 7763 core's on a hosted runner (Xvfb, no GPU, no sound device, no human); another CPU changes each program's speed by its own factor (a Xeon Platinum 8573C: `cc1` 0.72×, `fixdep` 0.50× the EPYC's time), which the venue variants' common factor of 0.8–1.25 does not reproduce; recognition reads no CPU value.
+- Final word: 인지오's answers to W-0752 and W-0753 (2026-10-16).
+- Sources: W-0752; W-0753; `docs/workload/measurement-overview.md` §11; `dataset/variants.yaml:35–44`
+- Cross-ref: W-0825
 - Notes: —
 
 ## Also aimed at the final memo, not for drafting from this list
