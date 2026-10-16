@@ -702,6 +702,23 @@ def test_the_9_5_control_record_states_the_components_no_ratio_is_read_for(repo_
             assert "No ratio is read" not in e["notes"], aid
 
 
+def test_the_library_s_readings_name_only_the_phases_the_control_ran(repo_root):
+    # 9.15 W-0900, W-0901: the launch phases (9.10 D133), video-editor's re-measured idle phase (9.10 D146) and the
+    # hidden renderer's re-measured steady phase (9.10 D152, D156) came after the 2026-09-27 control; the fold-ins
+    # scope the record's reading (fold_reading), and the library carries what they write (the regeneration tests)
+    import yaml
+    from meas import control_report
+    lib = yaml.safe_load((repo_root / "dataset" / "archetypes.yaml").read_text())["archetypes"]
+    read = {aid: e["modeling_notes"] for aid, e in lib.items() if "Untraced control" in (e.get("modeling_notes") or "")}
+    assert set(control_report.CONTROL_RAN) < set(read)
+    for aid, notes in read.items():
+        pairs = control_report.CONTROL_RAN.get(aid, ())
+        assert (control_report.ALL_PHASES in notes) == (not pairs), aid
+        assert all(new in notes for _old, new in pairs), aid
+        assert ("launch" in (lib[aid]["params"] or {})) == bool(pairs), aid   # every entry with a launch phase, no other
+    assert control_report.fold_reading("code-editor", "Untraced control: one.") == "Untraced control: one."
+
+
 def test_the_page_carries_the_lines_stated_for_an_archetype(monkeypatch):
     from meas import control_report
     monkeypatch.setitem(control_report.NOTES_STATED, "chat-client", "Stated in the notes.")

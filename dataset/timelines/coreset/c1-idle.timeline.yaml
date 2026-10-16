@@ -1,4 +1,7 @@
-# C1 — single-situation calibration: idle / [system] only (building-plan §3).
+# C1 — single-situation calibration: idle, the desktop session alone (S18) —
+# Ubuntu 24.04's GNOME 46 Wayland session at idle, blanked, its four session
+# processes `gnome-shell`, `pipewire`, `systemd` and `dbus-daemon` (9.10 D28;
+# building-plan §3).
 meta:
   id: c1-idle
   seed: 106

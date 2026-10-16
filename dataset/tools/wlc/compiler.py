@@ -6,7 +6,8 @@ its library entry (`_compile_instance`); an entry that matches none of them
 is refused:
 
 - The chain constructor (contract §6) expands game-task-chain at compile
-  time into chain_length driven members, each an unbounded LOOP.
+  time into chain_length members plus the wineserver member, chain_length + 1
+  tasks, each an unbounded LOOP.
 - The module build (`constructor: module-build`, module-build-orchestrator):
   the measured build's jobs in the order it ran them, each a spawn-table job
   tree after one dispatch run, then the build's serial tail as a batch loop.

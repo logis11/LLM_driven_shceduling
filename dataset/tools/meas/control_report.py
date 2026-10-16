@@ -90,6 +90,38 @@ PAGE_STATED = {
                         "(z −0.37) and its run mean 0.0197 against 0.0198 ms (z −0.07), the residual (`MemoryInfra`) "
                         "0.0034 against 0.0033 /s (z +0.10) and 0.193 against 0.188 ms (z +0.19) — no disagreement."),
 }
+# the reading as an entry's notes carry it, scoped to the phases the control ran (9.15 W-0900, W-0901): an entry's
+# launch phase (9.10 D133), `video-editor`'s idle phase re-measured past Kdenlive's launch tail (9.10 D146) and the
+# hidden renderer's re-measured steady phase (9.10 D152, D156) came after the 2026-09-27 control. The fold-ins apply
+# each (old, new) pair to the record's `notes` (fold_reading); the records keep the reading as written.
+ALL_PHASES = "six jobs each ran every carried phase twice"
+CONTROL_RAN = {
+    **{aid: ((ALL_PHASES, "six jobs each ran every carried phase but the launch phase (9.10 D133, after the "
+                          "2026-09-27 control) twice"),)
+       for aid in ("office-writer", "mail-client", "web-browser", "video-player", "audio-player", "video-call",
+                   "chat-client", "game-client")},
+    "video-editor": ((ALL_PHASES,
+                      "six jobs each ran twice the driven and operation phases and the idle phase as 9.5 carried it, "
+                      "120 s past a 30 s settle (the carried idle phase, past a 240 s settle, 9.10 D146, and the "
+                      "launch phase, 9.10 D133, came after the 2026-09-27 control)"),),
+    "renderer-hidden": ((ALL_PHASES,
+                         "six jobs each ran twice the steady phase `meas-ci:desktop:2026-09-20` measured, on Google "
+                         "Chrome 153 past a 630 s grace-settle (the phase the entry carries, on Google Chrome 154 past "
+                         "a 1,030 s grace-settle, 9.10 D152 and D156, and its launch phase, 9.10 D133, came after the "
+                         "2026-09-27 control)"),
+                        ("Perf's effect on the carried values, which stay the traced ones —",
+                         "Perf's effect read on that phase, the carried values staying the traced ones —")),
+}
+
+
+def fold_reading(archetype, notes):
+    """The control record's reading as `archetype`'s modeling_notes carry it (CONTROL_RAN); a reading without the
+    named text is returned as it is."""
+    for old, new in CONTROL_RAN.get(archetype, ()):
+        notes = notes.replace(old, new, 1)
+    return notes
+
+
 VERSIONS_99 = {"gnome-shell": ("gnome-shell",), "pipewire": ("pipewire", "wireplumber"), "systemd": ("systemd",),
                "dbus-daemon": ("dbus-daemon",)}
 NAME = {"campaign": re.compile(r"^meas-(?:interactive|playback)-(.+)-r(\d+)-control$"),

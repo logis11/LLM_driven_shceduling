@@ -19,7 +19,7 @@
           "minLength": 1
         },
         "derived_from": {
-          "description": "Source timeline at the commit it was compiled from: `<timeline-path>@<git-hex>`.",
+          "description": "Source timeline and the git blob hash of its content as compiled (`git hash-object`): `<timeline-path>@<git-hex>`.",
           "type": "string",
           "pattern": "^.+@[0-9a-f]{7,40}$"
         },
@@ -31,7 +31,7 @@
           "properties": {
             "seed": {"type": "integer", "minimum": 0},
             "archetypes": {
-              "description": "`archetypes.yaml@<git-hex>` — the library commit sampled from.",
+              "description": "`archetypes.yaml@<git-hex>` — the git blob hash of the library's content sampled from (`git hash-object`).",
               "type": "string",
               "pattern": "^archetypes\\.yaml@[0-9a-f]{7,40}$"
             }
@@ -146,7 +146,7 @@
       }
     },
     "wake_event": {
-      "description": "Exogenous wake at a pinned absolute time (pre-sampled aperiodic input, e.g. keystrokes). The target task blocks on WAIT(channel) (contract §4).",
+      "description": "Exogenous wake at a pinned absolute time, pre-sampled at compile time: a replayed input event (keystrokes, on `input:<task>`) or a measured entry's timer-component wake (on `timer:<task>`). The target task blocks on WAIT(channel) (contract §4).",
       "type": "object",
       "required": ["t", "op", "target", "channel"],
       "additionalProperties": false,

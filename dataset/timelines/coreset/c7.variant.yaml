@@ -1,8 +1,11 @@
 # C7 — attribute counterparts (building-plan §3 C7; Phase 7 spec decisions 4–7,
-# 10). One counterpart per mode, derived from its C1 base, so every driver-table
-# cell has a one-diff pair: the base is the `true` cell, the counterpart the
-# `false` cell of the same mode (indexing the other way round — c1-indexing is
-# the user-initiated `true` cell).
+# 10). One counterpart per mode, derived from its C1 base: the base is the `true`
+# cell, the counterpart the `false` cell of the same mode. A pair differs in more
+# than the unwanted job (the interactive modes), the module build (compile) or
+# the label alone (indexing and the batch modes): the counterpart is its base's
+# first C seconds, so it differs also in length, input window and operation
+# times, and its keystrokes are its base's over the slice, less those inside its
+# own operations (9.18 D1).
 #
 # Interactive modes (9.10 D3, D36–D44): one injected unwanted job — the stock
 # Ubuntu 24.04 unattended upgrade's install stage, `package-upgrade`

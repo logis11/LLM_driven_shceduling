@@ -25,6 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from pool import build_census, stimulus_check  # noqa: E402  — D69: one definition of the build census; D81 the check
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from distribution import quantile_table, yaml_table  # noqa: E402
+from control_report import fold_reading  # noqa: E402  — the reading scoped to the phases the control ran
 
 RUN_TAG = {"interactive": "meas-ci:interactive:3", "playback": "meas-ci:playback:3"}  # the D3 campaign; --tag overrides
 # D79: a run whose idle phase comes from another campaign — the pool it is read from and that campaign's tag
@@ -574,7 +575,7 @@ def main():
             if only - set(ARCHETYPES):
                 raise SystemExit(f"--only names no 9.5 archetype: {', '.join(sorted(only - set(ARCHETYPES)))}")
         elif rest[0] == "--control" and len(rest) > 1:
-            CONTROL.update({a: r["notes"] for a, r in json.load(open(rest[1]))["archetypes"].items()}); rest = rest[2:]
+            CONTROL.update({a: fold_reading(a, r["notes"]) for a, r in json.load(open(rest[1]))["archetypes"].items()}); rest = rest[2:]
         elif rest[0] in flags and len(rest) > 1 and "=" in rest[1]:
             key, val = rest[1].split("=", 1); flags[rest[0]][key] = val; rest = rest[2:]
         else:

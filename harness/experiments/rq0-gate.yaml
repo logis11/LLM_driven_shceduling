@@ -86,11 +86,13 @@ files:
              c7-dev@replay, c7-browsing@replay, c7-meeting@replay, c2-p1a@replay]
 
 # derived from the `pre_committed_miss` annotation in the compiled files; the lint
-# checks it (Phase 8 spec, decision 13). These files leave recognition accuracy;
-# three of them judge (the gate needs labels, not recognizability) and five —
-# c1-indexing and c7-backup, idle-class files, and the C6 limits: c6-alias, the
-# name-collision alias (9.20 decision 8), c6-fold from the call's arrival and
-# c6-spoof from the spoof's (9.23 D1, D2) — report.
+# checks it (Phase 8 spec, decision 13). The grader drops from recognition
+# accuracy the points inside these files' pre-committed-miss segments
+# (harness/tools/harness/grader.py): the whole file for six, c6-fold from the call's
+# arrival and c6-spoof from the spoof's (9.23 D1, D2), their earlier points
+# staying in. Three of them judge (the gate needs labels, not recognizability) and
+# five — c1-indexing and c7-backup, idle-class files, and the C6 limits: c6-alias,
+# the name-collision alias (9.20 decision 8), c6-fold and c6-spoof — report.
 layer1_exclusions: [c1-indexing, c6-alias, c6-fold, c6-spoof, c7-backup, c7-ml-train, c7-render, c7-transcode]
 
 guard_exemptions:
@@ -441,20 +443,26 @@ statements:
       with 인경민 before the verdict is read (9.11 D19).
   - id: re-measurement-contingency
     text: >
-      The values the library carries under the stability rule's exceptions —
-      the editor's utility/libuv-worker wake rate and gap mean (9.5 D57, D99: ±39 %
-      across repeats, ±10.6 % within one), the training run's runs between blocks
-      and block per run (9.6 D29; 9.10 D87: ±27 % and ±11 %), the renderers'
-      sparse residuals (9.8 D27: ±9 to ±18 %), the DKMS tail's block per run
-      (9.10 D58: ±8.35 %), pid 1's run mean and the system bus's three values
-      (9.9 D48: ±7.8 % and ±11 %) — are carried with their half-widths, not
-      re-measured (9.5 D88's reading of the stated precision). If the
-      carried-half-width lines move any judging file across g, the verdict is
-      reported as a range over that axis and the entry whose value moved it is
-      re-measured at a count fixed now — the count the stability rule projects at
-      the carried spread (9.9 D48: 55 repeats for pid 1, 102 to 108 for the bus;
-      9.5 D88's stopping method for the others) — before the result is reported,
-      as a harness changelog entry and a second bless.
+      The values the library carries under the stability rule's exceptions — the
+      editor's utility/libuv-worker wake rate and gap mean (9.5 D57, D99: ±39 %
+      across repeats, ±10.6 % within one), the training run's runs between
+      blocks and block per run (9.6 D29; 9.10 D87: ±27 % and ±11 %), the hidden
+      renderer's (renderer-hidden) sparse residual (9.8 D27; 9.10 D156: ±20.2 %
+      its wake rate and gap mean, ±61.3 % its run mean), its two run means that
+      follow the machine (9.8 D17: HangWatcher ±18.1 %, chrome ±11.4 %) and its
+      three quiet threads whose rate varies between sessions (9.5 D57, 9.8 D26;
+      9.10 D156: Chrome_ChildIOT, Compositor and PerfettoTrace, ±6.5 % to
+      ±17.6 %), the Steam client's (game-client) four run means (9.8 D17, D18:
+      ±5.3 % to ±10.1 %), the DKMS tail's block per run (9.10 D58: ±8.35 %), pid 1's
+      run mean and the system bus's three values (9.9 D48: ±7.8 % and ±11 %) —
+      are carried with their half-widths, not re-measured (9.5 D88's reading of
+      the stated precision). If the carried-half-width lines move any judging
+      file across g, the verdict is reported as a range over that axis and the
+      entry whose value moved it is re-measured at a count fixed now — the count
+      the stability rule projects at the carried spread (9.9 D48: 55 repeats for
+      pid 1, 102 to 108 for the bus; 9.5 D88's stopping method for the others) —
+      before the result is reported, as a harness changelog entry and a second
+      bless.
   - id: layer1-interval
     text: >
       The Layer-1 headline's interval is a seeded cluster bootstrap over files
@@ -485,15 +493,15 @@ statements:
       for a true row, its C7 counterpart for a false row, plus any C2 or C3 segment
       labelled with that row.
 
-# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-16, the 9.15 entry;
+# SHA-256 of the frozen files at the re-pin (harness/CHANGELOG.md, 2026-10-17 and 2026-10-16, the 9.15 entries;
 # 2026-10-15 and 2026-10-14, the 9.23 entries; 2026-10-12, the 9.20 entry; 2026-10-11, the 9.18 and 9.22 entries); the variant manifests pin the rebuilt files the sensitivity lines read.
 pins:
   scoring_spec: {path: harness/scoring/scoring-spec.yaml, sha256: 2ad757b6196ae1839a76b4f1b2a96d156eee84b40375dec9bd5f66116b6ca14e}
   guard_spec:   {path: harness/guards/guard-spec.yaml, version: "1.1", sha256: 24ccb875ff666615de75d80bc5351b7f5c62713d605438844938f9ab6ef1676c}
   driver_table: {path: daemon/driver-table/prior.yaml, sha256: 0fba4b3c9822054fad19ef150d1395d91e679d42b6299166b9a89f50ad27960c}
-  dataset:      {path: dataset/build.manifest.json, sha256: b6017a10c0ae6644492836a92ee5ab35205397c8c8d6912d2fbcf43870a430c0}
+  dataset:      {path: dataset/build.manifest.json, sha256: d52e7bd45d842b76ce8d21155548b7c54587e008881d9724cdd89ad4468324a7}
   variants:
-    all: {path: dataset/build.variants.manifest.json, sha256: 087ef27ca434a21ea346baf3ed454997255bc1e8e2379238169994f27060edcd}
+    all: {path: dataset/build.variants.manifest.json, sha256: 6c1c3e09277f6368d84d88fa15adea27a9cea1d028859dc4f6f2e63568684f0a}
 
 criterion:
   type: k_of_n_gap

@@ -32,7 +32,8 @@ sources:
     notes: >-
       SWELL-KW uLog recordings (DANS doi:10.17026/dans-x55-69zp v4,
       CC-BY-NC-SA-4.0): per-keystroke and per-click/drag/wheel timestamps with
-      the focused application, 25 knowledge workers, ~3 h each, free
+      the focused application, 25 students and interns doing knowledge-work
+      tasks in a lab, ~3 h each, free
       composition on Windows (2012). Establishes the replayed input streams
       of the measured interactive archetypes — timing only (keys and
       positions unused): word-c1 (Word, neutral condition), outlook-c23
@@ -141,11 +142,16 @@ sources:
   gonzalez-chi04:
     type: scholarly
     notes: >-
-      Establishes the working-sphere averages: ~12 min per working sphere
-      (11 min 28 s raw; 12 min 18 s excluding brief disruptions), ~10 spheres
-      per person-day; ~3 min per task and ~2 min 11 s per tool/document
-      before switching. Averages only, knowledge workers. (The figures our
-      earlier docs attributed to CHI 2005/2008 live here.)
+      Establishes two shadowing statistics, in their units: ~3 min (3 min
+      08 s) per event — one continuous use of a device or one interaction
+      with a person, formal meetings excluded; and 11 min 28 s, the mean
+      continuous segment in a working sphere before switching, central and
+      peripheral spheres only (13 min 49 s over all spheres; 12 min 18 s when
+      switches shorter than 2 min are ignored; the paper's average time per
+      working sphere is 33 min 32 s). Also ~10 spheres per person-day and
+      ~2 min 11 s per tool/document before switching. Means and SDs only,
+      14 shadowed knowledge workers. (The figures our earlier docs attributed
+      to CHI 2005/2008 live here.)
 
   # ---- grounds of the timelines' bound values (9.10 D32; 9.18) -------------
 

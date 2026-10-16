@@ -6,9 +6,9 @@ Usage: analyze.py <dir> [--json OUT]
   downloaded by `gh run download`.
 
 Per parameter target it reports median / sigma_log fits with per-repeat
-values (the N-run spread the scope package requires). Structural/shape
-claims only; absolutes carry the runner spec recorded in each repeat's
-spec.json (building-plan §7).
+values (the N-run spread the scope package requires). A measured value is
+a source claim scoped to the runner recorded in each repeat's spec.json,
+not a downgrade to convention (9.5 D10, D26).
 """
 
 import argparse

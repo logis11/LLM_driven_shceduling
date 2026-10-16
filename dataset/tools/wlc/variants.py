@@ -12,8 +12,10 @@ RUN of every task but the frame chain's members by a factor; `scale-chain` the
 chain members' RUNs alone. Transforms that recompile with the pinned library:
 `segment-length` edits the base timeline's segment bounds and shifts what
 follows; `carried-bounds` scales the named tables in a copy of the library;
-`trace-replay` points the named entries at observed wake streams
-(dataset/replay/) and recompiles.
+`trace-replay` points the named entries at observed streams (dataset/replay/) —
+`wakes` for a measured entry, `runs` and the block after each for a batch
+entry, `cycles` for a periodic one, the kind compiler.py's `_replay_window`
+checks — and recompiles.
 """
 
 import copy

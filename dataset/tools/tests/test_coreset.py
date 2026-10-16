@@ -336,8 +336,9 @@ def test_c7_backup_is_its_bases_first_c_seconds(coreset):
 
 
 def test_p3_pair_segment_one_holds_the_backup_in_both_files(coreset):
-    """9.10 D123: pair P3's segment 1 runs from 60 s to the second the backup needs in both files, which keep one length
-    and differ only in segment 1's job — the export in c2-p3a, the scheduled incremental shown as `deja-dup` in c2-p3b."""
+    """Pair P3's segment 1 runs 60–326 s in both files, which keep one length and differ only in segment 1's job — the
+    export in c2-p3a, the scheduled incremental shown as `deja-dup` in c2-p3b. The length is 9.10 D123's, set on a
+    shared lane; under the idle class (9.13) the backup does not end inside it and is scored by progress (9.14)."""
     base, _ = coreset["c2-p3a"]
     variant, _ = coreset["c2-p3b"]
     spans = lambda c: [(g["t_start"], g["t_end"]) for g in c["ground_truth"]]
@@ -498,6 +499,23 @@ SCENARIO_OF = {"office-writer": "S1", "web-browser": "S2", "renderer-hidden": "S
                "file-archiver": "S16", "package-upgrade": "S17", "compositor-shell": "S18", "audio-server": "S18",
                "service-manager": "S18", "message-bus": "S18"}
 SCENARIO_OF_PROGRAM = {"kdenlive_render": "S7", "python3": "S12", "spoof": "S2"}   # the spoof shows `chrome` (S2)
+
+
+def test_every_operation_starts_inside_an_input_window_of_its_task_one_per_window(repo_root, library):
+    # 9.10 D20 (its 'focus window' the `input` track since 9.17): an operation starts only inside its task's input
+    # window, and each input window of a task whose entry carries an operation holds one; the loader checks only the
+    # task's lifetime (timeline.py `_load_operations`)
+    count = 0
+    for path in sorted((repo_root / "dataset" / "timelines").glob("**/*.timeline.yaml")):
+        t = Timeline(path, library)
+        for op in t.operations:
+            assert any(w["task"] == op["task"] and w["from"] <= op["at"] < w["to"] for w in t.input), (t.id, op)
+        for w in t.input:
+            if library.operations(t.task_by_id[w["task"]]["archetype"]):
+                held = [op for op in t.operations if op["task"] == w["task"] and w["from"] <= op["at"] < w["to"]]
+                assert len(held) == 1, (t.id, w, held)
+        count += len(t.operations)
+    assert count == 23
 
 
 def test_every_segment_tags_the_scenarios_of_the_programs_it_shows(repo_root, library):

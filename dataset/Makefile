@@ -10,7 +10,7 @@ variants:           ## the RQ0 gate spec's sensitivity variants -> build/ + vari
 generated:          ## the generated layer: the sets grids.yaml names, composed or renamed from the C1 task sets -> generated/ (not committed) + build/ + one manifest per set
 	$(PY) tools/generate.py
 
-lint:               ## the checks before a compile: repo + timeline lints, zero meas-pending (no writes; the canonical lints run inside the compile)
+lint:               ## the checks before a compile: repo + timeline lints, the bound values' sources, the grid definition, the release map, and zero meas-pending among them (no writes; the canonical lints run inside the compile)
 	$(PY) tools/lint.py --freeze
 
 test:               ## invariant test suite

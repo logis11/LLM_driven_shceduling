@@ -98,6 +98,39 @@ def test_focus_form_keeps_a_alive_to_the_end_and_moves_the_input_with_the_focus(
     assert [s["mode"] for s in focus["segments"]] == ["compile", "office"]
 
 
+def test_a_focus_form_second_segment_names_a_s_staying_programs_beside_b_s(layer):
+    """9.10 D168 in the generated layer (인지오's answer to K02's M8, 2026-10-16): in the `focus` form A's programs stay
+    past the boundary, so the second segment names their scenarios beside B's C1 tags; a task with no `depart` — A's
+    batch job — counts in the segment its arrival falls in. The `departs` form keeps B's tags alone."""
+    focus = composed(layer, "tr-ml-train-to-office-focus")
+    assert [s["scenario"] for s in focus["segments"]] == [["S11", "S12"], ["S1", "S2", "S4", "S11"]]
+    assert composed(layer, "tr-ml-train-to-office-departs")["segments"][1]["scenario"] == ["S1", "S2", "S4"]
+    assert composed(layer, "tr-transcode-to-idle-focus")["segments"][1]["scenario"] == ["S18", "S7"]
+    assert composed(layer, "tr-office-to-browsing-focus")["segments"][1]["scenario"] == ["S2", "S1", "S4"]
+    gained = [c["id"] for c in layer["by_set"]["transition-grid"] if c["grid"]["form"] == "focus"
+              and composed(layer, c["id"])["segments"][1]["scenario"] != layer["sets"][c["b"]]["segments"][0]["scenario"]]
+    assert len(gained) == 214
+
+
+def test_every_transition_return_and_flap_segment_tags_the_programs_alive_in_it(layer):
+    """9.10 D168's rule, as tests/test_coreset.py holds the core set to it and with its map, over every file of the
+    transition grid, the return grid and the flap-stress set: a segment names each scenario whose program is alive in
+    it, a task with no `depart` counting in the segment its arrival falls in."""
+    from test_coreset import SCENARIO_OF, SCENARIO_OF_PROGRAM
+    for name in ("transition-grid", "return-grid", "flap-stress"):
+        for cell in layer["by_set"][name]:
+            data = composed(layer, cell["id"])
+            for seg in data["segments"]:
+                a, b = parse_us(seg["from"]), parse_us(seg["to"])
+                shown = set()
+                for t in data["tasks"]:
+                    arrive = parse_us(t["arrive"])
+                    if (a <= arrive < b) if "depart" not in t else (arrive < b and parse_us(t["depart"]) > a):
+                        shown.add(SCENARIO_OF_PROGRAM[t["bind"]["program"]] if t["archetype"] == "cpu-batch"
+                                  else SCENARIO_OF[t["archetype"]])
+                assert set(seg["scenario"]) == shown and len(seg["scenario"]) == len(shown), (cell["id"], seg["from"])
+
+
 def test_layout_keeps_d44s_margins_and_operation_fractions(layer):
     """Decision 3 (9.10 D44) on mail -> idle -> mail with a 10 s middle: the send at 38/56 of each window; the idle
     middle shows its four system tasks with no input and no focus."""

@@ -22,9 +22,13 @@
 #                    `high` side — shorter gaps, runs and blocks on the low side, longer
 #                    on the high — in a copy of the library; the files recompiled with it
 #   trace-replay     the named entries' streams replaced by one pooled repeat's observed
-#                    wake sequence over the carried phase (dataset/replay/, built by
-#                    dataset/tools/meas/replay_fold_in.py from the raw releases); the
-#                    files recompiled with the pinned library and those streams
+#                    stream over the carried phase, of the kind the file carries: its
+#                    wakes (`wakes`: code-editor, web-browser, renderer-hidden), its runs
+#                    and the block after each (`runs`: package-upgrade, cpu-batch's
+#                    python3) or its medium cycles (`cycles`: video-call)
+#                    (dataset/replay/, built by dataset/tools/meas/replay_fold_in.py from
+#                    the raw releases); the files recompiled with the pinned library and
+#                    those streams
 
 judging: &judging
   [c2-p1a, c2-p2a, c2-p2b, c2-p3a, c1-compile, c1-ml-train, c1-render, c1-transcode,
@@ -91,8 +95,7 @@ sets:
 # each entry's scope states, as the corner sets read them. `table` names the parameter
 # (a component's `gap` or `run` table, or a program's run or block table) the half-width
 # scales. Values on entries no judging file holds (the session daemons' pid 1 and
-# system bus, 9.9 D48; the Tracker indexer's block, 9.6 D29) are not swept: the files
-# holding them are reporting-only.
+# system bus, 9.9 D48) are not swept: the files holding them are reporting-only.
 carried_values:
   - {entry: code-editor, component: "utility/libuv-worker", table: gap, half_width: 0.0563,
      source: "9.5 D57, D99: gap mean 185.8 ms ±5.63 % (wake rate 5.382/s ±5.63 %); across repeats the rate spreads ±39.0 %, the sessions' own, inside the pooled table"}
@@ -110,6 +113,14 @@ carried_values:
      source: "9.8 D21, D24, D26 (9.10 D156): wake rate 0.0176/s and gap mean 56.8 s, ±6.5 %, a rate that varies between sessions"}
   - {entry: renderer-hidden, component: "Chrome_ChildIOT", table: run, half_width: 0.075,
      source: "9.8 D21, D24, D26 (9.10 D156): run mean 0.0324 ms ±7.5 %"}
+  - {entry: renderer-hidden, component: "Compositor", table: gap, half_width: 0.176,
+     source: "9.8 D21, D24, D26 (9.10 D156): wake rate 0.0083/s and gap mean 120.0 s, ±17.6 %, a rate that varies between sessions"}
+  - {entry: renderer-hidden, component: "Compositor", table: run, half_width: 0.123,
+     source: "9.8 D21, D24, D26 (9.10 D156): run mean 0.0226 ms ±12.3 %"}
+  - {entry: renderer-hidden, component: "PerfettoTrace", table: gap, half_width: 0.176,
+     source: "9.8 D21, D24, D26 (9.10 D156): wake rate 0.0083/s and gap mean 120.0 s, ±17.6 %, a rate that varies between sessions"}
+  - {entry: renderer-hidden, component: "PerfettoTrace", table: run, half_width: 0.093,
+     source: "9.8 D21, D24, D26 (9.10 D156): run mean 0.0209 ms ±9.3 %"}
   - {entry: game-client, component: "steamwebhelper", table: run, half_width: 0.053,
      source: "9.8 D17, D18: run mean 0.0695 ms ±5.3 %, the runner's speed"}
   - {entry: game-client, component: "steam", table: run, half_width: 0.101,

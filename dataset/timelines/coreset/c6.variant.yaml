@@ -1,6 +1,6 @@
-# C6 — resolution-limit files (building-plan §3 C6), the two derived ones
-# (c6-dual is a novel base). Pre-committed misses, shipped so the limits
-# are concrete.
+# C6 — resolution-limit files (building-plan §3 C6), the three derived ones
+# (c6-spoof, c6-alias, c6-fold; c6-dual is a novel base). Pre-committed misses,
+# shipped so the limits are concrete.
 variants:
   # Name-collision spoof: a process NAMED chrome bound to cpu-batch — the
   # stated limit of name-based recognition (F5). Authored by name collision

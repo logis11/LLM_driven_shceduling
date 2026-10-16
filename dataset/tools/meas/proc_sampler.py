@@ -9,8 +9,9 @@ which the kernel prints for the main thread only, and `tctxt`
 {tid: [voluntary, nonvoluntary]} from every /proc/<pid>/task/<tid>/status, so
 wakes can be summed over the same threads /proc/<pid>/stat's CPU covers.
 
-Linux-only; runs until SIGINT/SIGTERM. Structural/shape claims only —
-absolutes carry the runner spec (building-plan §7).
+Linux-only; runs until SIGINT/SIGTERM. A measured value is a source claim
+scoped to the runner its spec.json records, not a downgrade to convention
+(9.5 D10, D26).
 """
 
 import argparse

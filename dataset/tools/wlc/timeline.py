@@ -227,7 +227,9 @@ class Timeline:
     def _load_operations(self, raw, library):
         """operations: [{at, task, name}] — a measured archetype's heavy operation placed at a point in time
         (9.5 follow-ups spec, decisions 8–9); its length is drawn from the operation's measured duration at
-        compile time, so only the start is authored. Whether it may start only inside an input window is 9.10's."""
+        compile time, so only the start is authored. An operation starts only inside one of its task's input windows,
+        one per window (9.10 D20, whose 'focus window' is the `input` track since 9.17); the loader checks the task's
+        lifetime alone, and tests/test_coreset.py holds the core set to the rule."""
         self.operations = []
         for op in raw.get("operations") or []:
             for field in ("at", "task", "name"):

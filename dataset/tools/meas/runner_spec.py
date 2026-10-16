@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Record the runner spec (building-plan §7: machine-relative absolutes rank
-as convention-informed-by-measurement and carry this record)."""
+"""Record the runner spec: a measured value is a source claim scoped to the
+runner this record describes, not a downgrade to convention (9.5 D10, D26)."""
 
 import json
 import os

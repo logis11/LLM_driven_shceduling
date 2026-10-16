@@ -22,6 +22,7 @@ if TOOLS not in sys.path:
     sys.path.insert(0, TOOLS)
 from meas.distribution import quantile_table, yaml_table  # noqa: E402
 from meas.desktop.pool import _cp  # noqa: E402  — campaign/pool.py, for its build census (9.5 D69)
+from meas.control_report import fold_reading  # noqa: E402  — the reading scoped to the phases the control ran
 
 TAG = "meas-ci:desktop:2026-09-20"
 # the campaigns an entry may be folded from: 9.8's, and 9.10 D152's for the hidden renderer past its page thread's
@@ -382,7 +383,7 @@ def main():
     args = sys.argv[1:]
     if "--control" in args and args.index("--control") + 1 < len(args):
         i = args.index("--control")
-        CONTROL.update({a: r["notes"] for a, r in json.load(open(args[i + 1]))["archetypes"].items()})
+        CONTROL.update({a: fold_reading(a, r["notes"]) for a, r in json.load(open(args[i + 1]))["archetypes"].items()})
         del args[i:i + 2]
     only = None
     if "--only" in args and args.index("--only") + 1 < len(args):
