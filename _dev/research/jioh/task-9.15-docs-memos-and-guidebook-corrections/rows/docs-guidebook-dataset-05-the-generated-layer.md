@@ -87,3 +87,11 @@ Chunk K13, Dataset guidebook, volumes 5-6 (wave 3). 10 open rows. The file has 2
 
 - W-0561 · closed, already-applied — vol-05:1731 and :2003 already state the code's rule and that 9.21 D1's list differs; that list describes the recorded shape ('`input` is whether the generator…
 - W-0481 · waits on 인지오 — Which number does the hold-time plan's no-rule measurement carry — the need for a hold time measured with hold time 0 and no hysteresis on the flap-stress set and the C4 files, under `oracle` and `random`, right after P… Blocks: The step label at `docs/harness/metrics.md:251` (§8, the flip-count row; the §13 entry at :328 is a dated record). Rows W-0454 and W-0456 (the daemon guide §9.…
+
+### W-0831 · open
+- At: `docs/guidebook/dataset/05-the-generated-layer.md`, the `flip_cost` paragraph, line 1807 ("3 changes, 2 wrong, excess 100 µs")
+- Change: Restate on the re-derived `mock-switch` fixture: its switch excess is 0 µs, so the flip test substitutes a non-zero stand-in for the entry-3 switch's `excess_switch` and checks that the wrong switch into MLFQ adds it and the wrong FIFO change adds nothing ("3 changes, 2 wrong", the wrong-switch excess sum equal to the stand-in).
+- Final word: 인지오's answer to W-0804 (2026-10-16), applied by stage A (`logs/A4-fixture.md`, `logs/A5-fixups.md`).
+- Sources: `harness/tools/tests/test_scorer.py` (`test_flip_aggregates_on_mock_switch`, `test_excess_aggregates_on_mock_switch`, as committed after stage A); `harness/tools/tests/fixtures/mock-switch/worked.md`.
+- Notes: found in stage A (A4). Read the stand-in's value from the committed test.
+
