@@ -1301,7 +1301,7 @@ slice들이 끝났을 때 library는 스물여덟 개, 9.13이 하나를 더해 
 **9.14 결정 10과 12 — 사전 등록된 민감도 점검과 variant 집합.** 점검 항목은 venue factor(측정된 모든 RUN을 ×1/1.25와 ×1.25로), chain scale(×1.2, ×1.4), segment 길이(C2 쌍의 60 s를 30 s, 120 s로), 예외로 실린 값의 반폭, trace replay, download bounding check 등입니다. 이것들을 돌릴 파일을 9.14 안에서 미리 build하고 pin했습니다. 결과는 "Nine variant sets, 78 artifacts: 19 + 19 venue, 3 + 3 chain, 4 + 4 segment-length, 11 + 11 corner, 4 replay"입니다. `dataset/variants.yaml`이 그 정의이고, compiler에 variant 변환이 이름 있는 mode로 더해졌습니다. 현재 `dataset/build.variants.manifest.json`의 artifact가 78개임을 확인했습니다.
 
 - **variant**는 core set의 파일을 정해진 변환(배율, 길이 변경, 측정 trace 재생 등)으로 바꿔 만든 민감도 점검용 파일입니다. variant 집합을 다루는 권에서 자세히 설명합니다.
-- **replay**는 측정된 반복 하나의 실제 wake 순서를 그대로 재생해 task를 만드는 방식입니다(`dataset/replay/`). 분포에서 뽑는 보통의 compile과 비교하기 위해 씁니다.
+- **replay**는 측정된 반복 하나에서 관찰한 stream을 sampling 대신 그대로 재생해 task를 만드는 방식입니다(`dataset/replay/`). stream은 entry에 따라 세 가지 가운데 하나입니다. 편집기, browser, 보이지 않는 Chrome renderer(`code-editor`, `web-browser`, `renderer-hidden`)는 wake 순서와 각 wake의 run(`wakes`), batch job(`package-upgrade`, `cpu-batch`의 `python3`)은 run과 그 뒤의 block(`runs`), 영상 통화(`video-call`)는 cycle마다의 work(`cycles`)입니다(각 파일의 `kind`; 9.14 changelog D10, 2026-10-09). variants manifest를 보면 replay set의 네 파일은 모두 batch job 하나의 run을 재생합니다. 분포에서 뽑는 보통의 compile과 비교하기 위해 씁니다.
 
 **9.14 결정 11 — Layer 1과 RQ4의 항목은 넘긴다.** 9.12에서 나온 recognizer 쪽 항목들은 gate spec이 아니라 Phase 10의 실험 spec들로 넘겼습니다.
 
@@ -1979,7 +1979,7 @@ audit의 "Recommended order before 9.15 proper"는 첫 항목으로 "Heads-up to
 - **stimulus** — 측정이나 compile 때 프로그램에 넣는 입력(키 입력의 시각 열)입니다.
 - **SWELL-KW** — 사무 작업 중의 키 입력을 기록한 공개 데이터셋입니다. 데이터셋의 키 입력 stream이 여기서 옵니다.
 - **variant** — core set의 파일을 정해진 변환으로 바꾼 민감도 점검용 파일입니다. 78개가 있습니다.
-- **replay** — 측정된 반복 하나의 실제 wake 순서를 그대로 재생해 task를 만드는 방식입니다.
+- **replay** — 측정된 반복 하나에서 관찰한 stream을 그대로 재생해 task를 만드는 방식입니다. stream은 entry에 따라 wake 순서(`wakes`), batch job의 run과 그 뒤의 block(`runs`), 주기 task의 cycle(`cycles`)입니다.
 - **generated layer** — 생성기로 만드는, 현실성을 주장하지 않고 요인을 빠짐없이 나열한 파일 묶음입니다. 1,562개입니다.
 - **existence case** — "이런 상황이 존재한다"만 보여 주는 파일입니다. 비율의 표본이 아닙니다.
 - **240개 순서쌍** — 열여섯 mode에서 서로 다른 두 mode를 순서 있게 고르는 경우의 수(16 × 15)입니다.

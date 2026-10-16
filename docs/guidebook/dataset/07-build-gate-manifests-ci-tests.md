@@ -12,7 +12,7 @@
 
 답은 네 가지 장치로 이루어져 있습니다. 첫째, `manifest`라는 committed lockfile 일곱 개가 build의 입력과 출력을 hash로 고정합니다. 둘째, `make check`라는 gate가 방금 만든 build를 committed manifest와 바이트 단위로 비교합니다. 셋째, GitHub Actions의 CI가 깨끗한 Linux 기계에서 처음부터 다시 build하고 같은 비교를 합니다. 넷째, dataset과 harness의 test suite가 compiler의 불변식과 build의 모양을 확인합니다. 그리고 이 manifest들의 hash를 다시 실험 쪽의 사전 등록 파일이 `pin`으로 붙잡습니다. 이 권은 이 사슬을 입력 파일 하나에서 실험 사양의 hash 한 줄까지 따라갑니다.
 
-이 권은 compiler의 내부(무엇을 어떻게 sampling하는지), core set의 설계, generated layer의 grid 설계, sensitivity variant의 의미, 측정 campaign 자체는 다루지 않습니다. 그것들은 각각 compiler 권, coreset 권, generated layer 권, variants 권, 측정 campaign 권에서 다룹니다. 여기서는 그것들이 만든 바이트가 어떻게 고정되고 검증되는지만 봅니다.
+이 권은 compiler의 내부(무엇을 어떻게 sampling하는지), core set의 설계, generated layer의 grid 설계, sensitivity variant의 의미, 측정 campaign 자체는 다루지 않습니다. 그것들은 각각 compiler 권, coreset 권, generated layer 권, coreset 권의 sensitivity variant 장, 측정 campaign 권에서 다룹니다. 여기서는 그것들이 만든 바이트가 어떻게 고정되고 검증되는지만 봅니다.
 
 ---
 
@@ -202,7 +202,7 @@ task-2.3 decision 6의 마지막 문장은 "Release artifacts publish from tagge
 몇 가지 용어를 먼저 정리합니다.
 
 - `core set` (`coreset`) — 사람이 설계한 51개의 workload입니다(`dataset/timelines/coreset/`). RQ0 실험이 이 파일들 위에서 돌아갑니다.
-- `sensitivity variant` — RQ0 gate spec이 결론의 견고함을 확인하려고 쓰는, core set 파일을 한 가지 방식으로 변형한 사본입니다. 측정값을 0.8배나 1.25배로 키우거나(venue factor), 첫 segment 길이를 바꾸거나, 측정된 wake 순서를 그대로 재생하는 식입니다(variants 권에서 다룹니다). `dataset/variants.yaml`이 아홉 개 set을 정의합니다.
+- `sensitivity variant` — RQ0 gate spec이 결론의 견고함을 확인하려고 쓰는, core set 파일을 한 가지 방식으로 변형한 사본입니다. 측정값을 0.8배나 1.25배로 키우거나(venue factor), 첫 segment 길이를 바꾸거나, 측정에서 관찰한 stream을 sampling 대신 그대로 재생하는 식입니다(coreset 권의 sensitivity variant 장에서 다룹니다). 재생하는 stream은 entry에 따라 wake 순서, batch job의 run과 그 뒤의 block, 주기 task의 cycle 가운데 하나입니다(2.4). `dataset/variants.yaml`이 아홉 개 set을 정의합니다.
 - `mode` — 사용자가 지금 어떤 상황에 있는지의 이름입니다. `dev`, `office`, `gaming`, `compile`, `idle` 등 16개가 있고, segment의 정답 label이 이것입니다. C1 그룹은 mode마다 그 mode 하나만 담은 파일을 하나씩 가집니다.
 - `generated layer` — C1 파일들의 task set을 규칙에 따라 조합한 다섯 개의 설계 집합입니다(`dataset/grids.yaml`). transition grid(두 mode 사이의 전환 480개), return grid(A → B → A 720개), flap-stress(빠른 전환 반복 24개), distractor grid(상황은 그대로인데 다른 process가 끼어드는 272개), familiarity ladder(process 이름만 낯설게 바꾼 66개)입니다.
 
@@ -315,7 +315,7 @@ core manifest의 `inputs`는 33개입니다. 2026-10-17의 목록은 다음과 �
 | `dataset/replay/replay-video-call.json.gz` | `fbf0b9e9833b` |
 | `dataset/replay/replay-web-browser.json.gz` | `c433285bdea5` |
 
-여기 나온 세 종류의 stream을 정리합니다. `stimulus stream`은 SWELL-KW 연구의 실제 키 입력 기록에서 뽑은 키 입력 시각열로, 편집기 같은 interactive task의 `input` 창에 재생됩니다(`dataset/stimulus/`). `launch stream`은 application이 파일 중간에 시작될 때 그 시작 단계의 wake들을 관찰된 그대로 재생하는 데 쓰입니다(`dataset/launch/`, entry 열 개에 하나씩, 측정 campaign 권). `replay stream`은 측정 campaign에서 관찰한 한 번의 wake 순서 전체로, `trace-replay` variant가 sampling 대신 그대로 재생합니다(`dataset/replay/`).
+여기 나온 세 종류의 stream을 정리합니다. `stimulus stream`은 SWELL-KW 연구의 실제 키 입력 기록에서 뽑은 키 입력 시각열로, 편집기 같은 interactive task의 `input` 창에 재생됩니다(`dataset/stimulus/`). `launch stream`은 application이 파일 중간에 시작될 때 그 시작 단계의 wake들을 관찰된 그대로 재생하는 데 쓰입니다(`dataset/launch/`, entry 열 개에 하나씩, 측정 campaign 권). `replay stream`은 측정 campaign의 반복 하나에서 관찰한 stream으로, `trace-replay` variant가 sampling 대신 그대로 재생합니다(`dataset/replay/`, entry 여섯 개에 하나씩). 파일의 `kind`가 행의 모양을 정하며, 셋입니다. `code-editor`, `web-browser`, `renderer-hidden`은 wake 순서와 각 wake의 run(`wakes`), batch job인 `package-upgrade`와 `cpu-batch`의 `python3`는 run과 그 뒤의 block(`runs`), 영상 통화 `video-call`은 매 cycle의 시작, work, 길이(`cycles`)입니다. compiler의 `_replay_window`는 entry가 요구하는 종류와 파일의 `kind`가 다르면 build를 실패시킵니다. variants manifest의 `replay` 항목을 보면 네 replay variant 파일은 모두 batch job 하나의 run을 재생하고(`c7-dev`, `c7-browsing`, `c7-meeting`은 upgrade, `c2-p1a`는 `python3`), 그 옆에서 `c7-dev`와 `c2-p1a`는 편집기의 wake를, `c7-browsing`은 browser와 renderer 네 개의 wake를, `c7-meeting`은 통화의 cycle을 재생합니다.
 
 목록은 `compile.py`의 `input_files` 함수가 만듭니다. library, schema, `compile.py`, `wlc/*.py`(정렬), `stimulus/*.jsonl`(정렬), `launch/*.json.gz`(정렬), `replay/*.json.gz`(정렬)입니다. timeline 파일은 이 목록에 없습니다. timeline은 각 artifact의 `meta.derived_from`에 git blob hash로 이미 들어가 있어서, timeline을 고치면 그 timeline의 artifact hash가 바뀌기 때문입니다. docstring이 "The files the compile reads besides the timelines, pinned by content in the manifest's `inputs`"라고 적는 이유입니다.
 
@@ -1666,7 +1666,7 @@ C7 그룹의 interactive counterpart는 C1 base의 처음 C초를 잘라 원하�
 - `deriver` — variant recipe를 실행하는 `wlc/deriver.py`. (4.3)
 - `slice_of` — 파생 파일의 input 창이 base의 어느 창을 잘라 낸 것인지 적는 field. compiler는 base 창 기준으로 stimulus offset을 뽑습니다. (8.7)
 - `stimulus stream` — 실제 키 입력 기록(SWELL-KW)에서 뽑은 키 입력 시각열, `dataset/stimulus/`. (2.4)
-- `replay stream` — 측정에서 관찰한 wake 순서 전체를 재생용으로 담은 파일, `dataset/replay/`. (2.4)
+- `replay stream` — 측정의 반복 하나에서 관찰한 stream을 `trace-replay` variant의 재생용으로 담은 파일, `dataset/replay/`. `kind`에 따라 wake 순서(`wakes`), batch job의 run과 그 뒤의 block(`runs`), 주기 task의 cycle(`cycles`)을 담습니다. (2.4)
 - `launch stream` — application이 파일 중간에 시작될 때의 시작 단계 wake를 담은 파일, `dataset/launch/`. compiler가 읽고, 2026-10-15부터 manifest의 `inputs`에 있습니다(9.23 D11). (2.4)
 - `build product` — 입력에서 언제든 다시 만들 수 있어 commit하지 않는 산출물. `build/`와 `generated/`가 그렇습니다. (1.5)
 
