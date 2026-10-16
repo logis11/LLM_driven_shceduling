@@ -11,7 +11,7 @@
 | 권 | 제목 | 답하는 질문 |
 |---|---|---|
 | 1 | [데이터셋의 큰 그림](01-the-big-picture.md) | 이 데이터셋은 무엇이고, 연구에서 어떤 일을 맡으며, 왜 이런 모양인가 |
-| 2 | [Archetype library: process 하나를 scheduler의 눈으로 적기](02-the-archetype-library.md) | `archetypes.yaml`의 29개 항목은 각각 무엇을 어떻게 흉내 내고, 그 숫자들은 어디서 왔나 |
+| 2 | [Archetype library: 프로그램 한 종류를 scheduler의 눈으로 적기](02-the-archetype-library.md) | `archetypes.yaml`의 29개 항목은 각각 무엇을 어떻게 흉내 내고, 그 숫자들은 어디서 왔나 |
 | 3 | [Timeline에서 canonical workload로: 포맷과 compiler](03-timeline-to-canonical-workload.md) | 사람이 쓴 timeline 파일 하나가 어떤 규칙으로 simulator가 읽는 workload JSON이 되나 |
 | 4 | [51개의 coreset: 파일마다 어떤 질문에 답하나](04-the-coreset.md) | core set의 파일 하나하나는 무슨 상황을 적고, 어떤 label을 달고, 어떤 질문에 답하나 |
 | 5 | [Generated layer: 열여섯 task set으로 만든 1,562개 파일](05-the-generated-layer.md) | 왜 손으로 쓴 core set 옆에 생성한 층이 있고, 그 파일들은 어떤 규칙으로 만들어지며 어떻게 점수를 받나 |

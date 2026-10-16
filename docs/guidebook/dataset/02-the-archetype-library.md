@@ -1,4 +1,4 @@
-# 2권 · Archetype library: process 하나를 scheduler의 눈으로 적기
+# 2권 · Archetype library: 프로그램 한 종류를 scheduler의 눈으로 적기
 
 > Status: draft · Created 2026-10-14 · Updated 2026-10-17
 
@@ -6,7 +6,7 @@
 
 ---
 
-이 dataset은 scheduler 실험에 먹일 가짜 desktop 작업을 만듭니다. 만드는 과정은 세 층으로 나뉩니다. 맨 아래층이 이 권의 주제인 **archetype library**(`dataset/archetypes.yaml`)입니다. 여기에는 "이런 종류의 process는 CPU를 이런 모양으로 쓴다"는 행동 규칙과 그 숫자가 들어 있습니다. 그 위층이 **timeline**(`dataset/timelines/coreset/<id>.timeline.yaml`)입니다. timeline은 "이 파일에서는 `soffice.bin`이라는 이름의 task 하나가 0초에 나타나 60초에 사라지고, 그 task는 `office-writer` archetype처럼 행동한다"처럼 이름과 시간과 archetype을 엮습니다. 마지막으로 compiler(`wlc`, `dataset/tools/wlc/`)가 timeline과 library를 읽어, 무작위성을 모두 풀어낸 **workload 파일**(`dataset/build/<set>-single/<id>.workload.json`)을 씁니다. simulator는 이 workload 파일만 읽습니다. archetype은 compile할 때 한 번 읽히고 사라집니다.
+이 dataset은 scheduler 실험에 먹일 가짜 desktop 작업을 만듭니다. 만드는 과정은 세 층으로 나뉩니다. 맨 아래층이 이 권의 주제인 **archetype library**(`dataset/archetypes.yaml`)입니다. 여기에는 "이런 종류의 프로그램은 CPU를 이런 모양으로 쓴다"는 행동 규칙과 그 숫자가 들어 있습니다. 그 위층이 **timeline**(`dataset/timelines/coreset/<id>.timeline.yaml`)입니다. timeline은 "이 파일에서는 `soffice.bin`이라는 이름의 task 하나가 0초에 나타나 60초에 사라지고, 그 task는 `office-writer` archetype처럼 행동한다"처럼 이름과 시간과 archetype을 엮습니다. 마지막으로 compiler(`wlc`, `dataset/tools/wlc/`)가 timeline과 library를 읽어, 무작위성을 모두 풀어낸 **workload 파일**(`dataset/build/<set>-single/<id>.workload.json`)을 씁니다. simulator는 이 workload 파일만 읽습니다. archetype은 compile할 때 한 번 읽히고 사라집니다.
 
 그래서 이 dataset에서 "숫자"가 사는 곳은 거의 이 library 하나뿐입니다. `dataset/README.md`의 "Rules of the tree"는 이것을 규칙으로 적어 둡니다. "Behavior parameters live in `archetypes.yaml`, never inline in a timeline" — 행동을 정하는 숫자는 `archetypes.yaml`에만 있고, timeline은 archetype이 허락한 손잡이(`binding_params`)에만 값을 넣습니다. 그러니 "이 workload에서 editor가 key 하나에 CPU를 몇 ms 쓰나", "build는 process를 몇 개 띄우나", "game은 몇 ms마다 깨어나나" 같은 질문의 답은 모두 이 library에서 시작합니다.
 
@@ -1494,7 +1494,7 @@ batch-loop 항목의 단계 순서(7.1절), heavy event의 몰림(`CHTTPClientTh
 
 이것은 측정으로 크기가 재어졌습니다. `dataset/tools/meas/burstiness.py`(이 비교를 하는 도구)는 repeat마다 측정된 wake 흐름과, 같은 구간을 compile한 흐름을 1 ms, 10 ms, 100 ms, 1 s bin으로 세어 dispersion(분산/평균; Poisson이면 1, 크면 몰려 옴)을 비교합니다. measurement-overview §8은 이것을 "a stated threat to validity"로 적고, 1–100 ms에서 측정된 것의 dispersion을 compile된 것의 dispersion으로 나눈 비율을 항목마다 적습니다(carried repeat의 중앙값, 2026-09-27에 읽음). `chat-client` 3.3–11배, `code-editor` 2.6–3.4배, `web-browser` 2.8–3.4배, `mail-client` 1.9–3.0배, `game-client` 1.9–3.0배로, 이 다섯 항목에서 실제는 compile된 것보다 1.9–11배 더 몰려서 깹니다. `video-editor`(1.3–1.4배)와 `renderer-hidden`(1.06–1.15배)은 차이가 작고(둘 다 지금 실린 pool이 아니라 그때의 campaign에서 읽은 값), `audio-server`, `service-manager`, `message-bus`는 약 1이며, `compositor-shell`과 `office-writer`는 오히려 compile된 흐름이 더 몰려 있습니다(1 미만). scheduler에게 몰림은 중요합니다. 같은 평균 부하라도 몰려 오면 대기 시간의 꼬리가 길어지기 때문입니다.
 
-> **왜 이렇게 정했나 — 이 한계를 다루는 방식.** `dataset/variants.yaml`의 `replay` 변형이 이 한계를 위한 것입니다(9.14 decision 12). 네 judging 파일(`c7-dev`, `c7-browsing`, `c7-meeting`, `c2-p1a`)에서, 여섯 항목(`code-editor`, `web-browser`, `renderer-hidden`, `video-call`, `package-upgrade`, `cpu-batch`의 `python3`)의 compile된 흐름을 pooled repeat 하나의 실제 관측 wake 순서로 바꿔 넣습니다(`dataset/replay/`, 2.11절). 이유: "one pooled repeat's measured wake sequence in place of the compiled stream, for the four judging files that cover every term shape (… the 2026-09-26 burstiness finding)". library 항목 자체는 바뀌지 않습니다. 항목에 `replay` param을 넣는 것은 이 변형 집합을 만들 때뿐이고, linter는 그 파일이 `dataset/replay/`에 있는지만 확인합니다.
+> **왜 이렇게 정했나 — 이 한계를 다루는 방식.** `dataset/variants.yaml`의 `replay` 변형이 이 한계를 위한 것입니다(9.14 decision 12). 네 judging 파일(`c7-dev`, `c7-browsing`, `c7-meeting`, `c2-p1a`)에서, 여섯 항목(`code-editor`, `web-browser`, `renderer-hidden`, `video-call`, `package-upgrade`, `cpu-batch`의 `python3`)의 compile된 흐름을 pooled repeat 하나에서 실제로 관측한 흐름으로 바꿔 넣습니다(`dataset/replay/`, 2.11절). 넣는 흐름은 항목마다 종류가 정해져 있습니다(각 흐름 파일의 `kind`). `code-editor`, `web-browser`, `renderer-hidden`은 관측된 wake를 그 시각과 run 그대로(`wakes`), `package-upgrade`와 `cpu-batch`의 `python3`는 관측된 run과 그 뒤의 block을 시간 순서대로(`runs`), `video-call`은 주기는 그대로 두고 cycle마다 관측된 CPU 양을 차례로(`cycles`) 넣습니다. variants manifest의 `replay` 항목을 보면 네 파일 모두 batch job의 run 흐름(`c7-dev`, `c7-browsing`, `c7-meeting`의 `package-upgrade`, `c2-p1a`의 `python3`)을 바꿔 넣고, `c7-meeting`은 통화의 cycle 흐름도 바꿔 넣습니다. 이유: "one pooled repeat's measured wake sequence in place of the compiled stream, for the four judging files that cover every term shape (… the 2026-09-26 burstiness finding)". 이 이유는 "wake sequence"라고만 적지만, `variants.yaml`의 `trace-replay` 주석은 2026-10-17부터 위의 세 종류를 적습니다. library 항목 자체는 바뀌지 않습니다. 항목에 `replay` param을 넣는 것은 이 변형 집합을 만들 때뿐이고, linter는 그 파일이 `dataset/replay/`에 있는지만 확인합니다. 흐름 파일의 종류가 항목이 요구하는 것과 맞는지는 compiler(`dataset/tools/wlc/compiler.py`의 `_replay_window`)가 확인하고, 맞지 않으면 build가 실패합니다.
 
 ## 12.4 stability rule이 보장하지 않는 것
 
@@ -1540,7 +1540,7 @@ batch-loop 항목의 단계 순서(7.1절), heavy event의 몰림(`CHTTPClientTh
 
 | 용어 | 뜻 |
 |---|---|
-| archetype | 한 종류의 process가 CPU를 쓰는 모양을 적은 규칙과 숫자 묶음. `dataset/archetypes.yaml`의 항목 하나(1장) |
+| archetype | 프로그램 한 종류가 CPU를 쓰는 모양을 적은 규칙과 숫자 묶음. `dataset/archetypes.yaml`의 항목 하나(1장) |
 | archetype library | `dataset/archetypes.yaml` 전체. dataset의 맨 아래층이며 행동 숫자가 사는 유일한 곳(머리말) |
 | archetype id | 항목의 key(`office-writer` 등). workload 파일에는 쓰이지 않음(1.1) |
 | timeline | 이름, 시각, archetype을 엮어 파일 하나의 상황을 적은 문서(`dataset/timelines/coreset/<id>.timeline.yaml`)(머리말) |
