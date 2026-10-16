@@ -415,7 +415,7 @@ Chunk K02, Building plan and scenario catalog (wave 1). 45 open rows. The file h
 - Cross-ref: W-0911; W-0913; W-0914
 - Notes: found in K07. K02's file: a follow-up chunk. The dataset guidebook vol-04 `:1384` quotes this line (W-0914).
 
-### W-0964 · open
+### W-0964 · applied
 - At: `docs/workload/building-plan.md` §1's layer diagram, line 35 ("ARCHETYPE LIBRARY   how one process behaves                  (dataset/archetypes.yaml)"); §2's lead sentence, line 52 ("An archetype is a named, sourced behavior specification for one process kind.")
 - Change: Restate "how one process behaves" to "how one kind of program behaves" (the diagram's path column re-padded) and "for one process kind" to "for one kind of program", nothing else. The diagram's two renderings follow in the same change: the dataset guidebook vol-01 §3.8's (W-0965) and the research guidebook vol-06 §1.6's (W-0968).
 - Final word: `docs/workload/archetype-plan.md` §1 (`:8`) reads "a **generative model of one kind of program as the scheduler sees it**" since `18127cc9` (2026-10-16, K04): most entries merge a measured application's whole process tree into one task (`dataset/archetypes.yaml`'s measured entries: "one task carries the whole process tree merged (D14)"); `compiler-child` is six tasks. I1 restated the dataset guidebook's other definitions (W-0958–W-0963; its N1–N3) and I2 the coreset guide's three (`:62`, `:70`, `:1218`; its N1) to "프로그램 한 종류"; H2 restated vol-02's (W-0957; its N1); K18 restated `docs/README.md`'s archetype-plan line and its Full-index row to "one kind of program" (its N6).

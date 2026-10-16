@@ -224,7 +224,7 @@ Chunk K11, Dataset guidebook, volumes 1-2 (wave 3). 24 open rows. The file has 1
 - Cross-ref: W-0957; W-0958; W-0960; W-0961; W-0962; W-0963
 - Notes: found in H2. K11's file: a follow-up chunk. Line 494 is the archetype plan's sentence before `18127cc9` nearly word for word.
 
-### W-0965 · open
+### W-0965 · applied
 - At: `docs/guidebook/dataset/01-the-big-picture.md` §3.8's diagram, line 694 ("ARCHETYPE LIBRARY   한 process가 어떻게 행동하나            (archetypes.yaml)"), which §3.8 presents as the building plan §1's (line 691)
 - Change: Restate "한 process가 어떻게 행동하나" to "프로그램 한 종류가 어떻게 행동하나", the path column re-padded, nothing else; in the same change as W-0964 (the building plan's line 35). In the volume's Korean.
 - Final word: As W-0964. I1 restated the volume's other definitions of an archetype to "프로그램 한 종류" (W-0958, W-0959; its N2, §3.1's archetype bullet, line 490).

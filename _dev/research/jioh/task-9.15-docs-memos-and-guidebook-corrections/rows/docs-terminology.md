@@ -70,7 +70,7 @@ Chunk K08, Related work, claims and vocabulary prose (wave 2). 8 open rows. The 
 - Cross-ref: W-0420
 - Notes: found in K01 (the log gives lines 66–68; the entry is at 67–69). W-0420 restates the same entry's locator and role; apply together.
 
-### W-0966 · open
+### W-0966 · applied
 - At: `docs/terminology.md` ## Artifacts, the **Archetype** entry, line 54 ("a sourced generative model of how one process kind behaves, as the scheduler sees it")
 - Change: Restate "how one process kind behaves" to "how one kind of program behaves", nothing else.
 - Final word: `docs/workload/archetype-plan.md` §1 (`:8`) reads "a **generative model of one kind of program as the scheduler sees it**" since `18127cc9` (2026-10-16, K04): most entries merge a measured application's whole process tree into one task (`dataset/archetypes.yaml`'s measured entries: "one task carries the whole process tree merged (D14)"); `compiler-child` is six tasks. I1 restated the dataset guidebook's other definitions (W-0958–W-0963; its N1–N3) and I2 the coreset guide's three (`:62`, `:70`, `:1218`; its N1) to "프로그램 한 종류"; H2 restated vol-02's (W-0957; its N1); K18 restated `docs/README.md`'s archetype-plan line and its Full-index row to "one kind of program" (its N6).

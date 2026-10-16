@@ -107,7 +107,7 @@ Chunk K16, Research guidebook, volumes 4-6 (wave 4). 9 open rows. The file has 4
 - Cross-ref: W-0851; W-0790; W-0675
 - Notes: found in K16. K16's file: a follow-up chunk after the batch's rebuild.
 
-### W-0968 · open
+### W-0968 · applied
 - At: `docs/guidebook/vol-06-archetypes-and-grounding.md` §1.6's layer diagram, line 176 ("ARCHETYPE LIBRARY   프로세스 하나가 어떻게 행동하나        archetypes.yaml"), a rendering of the building plan §1's; chapter 13's glossary (## archetype의 바탕), the `archetype` row, line 3939 ("scheduler가 보는 모습대로 적은 프로세스 하나의 생성 모형")
 - Change: (1) Line 176 follows W-0964 (the building plan's line 35) in the same change. (2) Line 3939: restate it to the plan's term as the volume's §1.2 mark words it (line 83, "한 종류의 프로그램"), or mark it as line 83 marks §1.2's quotation of the plan's 2026-09-13 sentence (lines 67, 69). Each restated or marked at the owning chunk's judgement (K16's practice for this period-anchored volume). In the volume's Korean.
 - Final word: `docs/workload/archetype-plan.md` §1 (`:8`) reads "a **generative model of one kind of program as the scheduler sees it**" since `18127cc9` (2026-10-16, K04): most entries merge a measured application's whole process tree into one task (`dataset/archetypes.yaml`'s measured entries: "one task carries the whole process tree merged (D14)"); `compiler-child` is six tasks. I1 restated the dataset guidebook's other definitions (W-0958–W-0963; its N1–N3) and I2 the coreset guide's three (`:62`, `:70`, `:1218`; its N1) to "프로그램 한 종류"; H2 restated vol-02's (W-0957; its N1); K18 restated `docs/README.md`'s archetype-plan line and its Full-index row to "one kind of program" (its N6). The volume's §1.2 mark (line 83, "재구축 이후 (2026-10-17)") already records the change.

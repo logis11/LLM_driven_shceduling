@@ -299,7 +299,7 @@ Chunk K03, Coreset guide (wave 1). 35 open rows. The file has 1060 lines at `d5c
 - Cross-ref: W-0911; W-0912; W-0914
 - Notes: found in K07. K03's file: a follow-up chunk.
 
-### W-0969 · open
+### W-0969 · applied
 - At: `docs/workload/coreset-guide.md` §10, ### C4 — distractor injection, the group's opening sentence, line 950 ("C1 파일의 clone에 무관한 process 하나를 30초에 주입")
 - Change: "무관한 process 하나" → "무관한 프로그램 하나" (or the sentence names `c4-compile`'s five tasks), nothing else. In the guide's Korean.
 - Final word: The compiled files (`dataset/build/coreset-single/c4-*.workload.json`): `c4-gaming` and `c4-office` inject one task each at 30 s (`injected-chat`, `element-desktop`; `injected-burst`, `7z`), `c4-compile` five, all named `chrome` (`injected-browser`, `injected-renderers.1`–`.4`) — one program, Chrome with four hidden-tab renderers, as the guide's own `c4-compile` entry states (line 985, "30 s `+chrome ×5`"). The guide keeps Korean "프로그램" for a real application (§4's heading; I2's decision 1).
