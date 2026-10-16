@@ -192,3 +192,7 @@ Citation strings, pins and roles are `docs/references.md`'s; the roles the sourc
 **Summary Verdict Table**
 
 - **Lines 110, 113, 114, 117, 119–127**: the role and basis columns read as corrected above — CpsMark+ is a Role A anchor for existence only, its "+B mix", "+C ordering", "workflow ordering" and "sensitivity table" void (line 10); SYSmark 25 adds nothing over SYSmark 2018 (line 40); Procyon grounds no dataset scenario (line 43); interbench's constants ground no value (line 15); schbench's SchedCP citation is at kernel.googlesource.com (line 14); hackbench, stress-ng and the kernel-build row ground no archetype (lines 61, 67, 70), the 2,430 processes a DynamoRio build; LAVD's numbers are Min's reported figures of a talk, footnote tier (line 17); the CNNIC study is dropped (line 75); the Gloria Mark averages are per event and per segment (line 11); SWELL-KW is open and replayed (line 81); DesktopBench is released and cited for an evaluation shape only (line 83).
+
+**Role B and cross-cutting item 2**
+
+- **Lines 55, 90** (rt-app, "GPLv2"): at the pin `d6f8be4`, read file by file on 2026-10-17, the nine `src/` files that carry a licence header grant GPL version 2 "or (at your option) any later version" (GPL-2.0-or-later); `libdl/dl_syscalls.h` grants version 2 only; `src/rt-app_taskgroups.c`, `src/rt-app_taskgroups.h` and `libdl/dl_syscalls.c` carry no header; `COPYING.in` is the GPL version 2 text.
