@@ -205,7 +205,7 @@ Chunk K13, Dataset guidebook, volumes 5-6 (wave 3). 20 open rows. The file has 1
 - Final word: K13 closed the §2.1–§2.4 notes against the code (W-0562–W-0566, W-0847); §14.1 is W-0580's, deferred until the final memo is committed (9.15 spec decision 13).
 - Sources: `logs/K13.md` ## Rows for other chunks (X6), ## Decisions 9
 - Cross-ref: W-0580
-- Notes: found in K13. Applied with W-0580, after the final memo.
+- Notes: found in K13. Applied with W-0580, after the final memo. L1 (2026-10-17) held it with W-0580: the bullet's "열린 자리" list does not name the registry's type; the registry has followed the talk type since 2026-10-17 (L1), so the restatement can say so.
 
 ### W-0953 · applied
 - At: `docs/guidebook/dataset/06-grounding-measurement-verification.md` §15.1's glossary, the trace-replay check's row, line 1813 ("측정된 wake 순서를 그대로 재생한 variant로 판정이 같은지 보는 Phase 10의 점검")

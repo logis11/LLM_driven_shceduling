@@ -108,6 +108,14 @@ Chunk K14, Dataset guidebook, volumes 7-8 (wave 4). 8 open rows. The file has 20
 - Cross-ref: W-0710; W-0602; W-0934
 - Notes: found in K18. K14's file: with W-0602's pass, after the final memo (K18's note), as W-0934.
 
+### W-0972 · open
+- At: `docs/guidebook/dataset/08-decision-chronicle.md` §7.12's 9.12 D113 bullet, its last clause, line 1169 ("`dataset/sources.yaml`의 registry는 이 id를 여전히 `type: deployed-system`으로 둡니다(이 `type`은 lint하지 않습니다)")
+- Change: The last clause becomes: on 인지오's answer of 2026-10-17 ((b)) the registry follows D112 and D113; `lavd-ossna24`'s `type` is the talk, conference abstract or news report type, and the header's `type` rule is restated. In the volume's Korean.
+- Final word: 인지오's answer (b) of 2026-10-17 to the work list's "K13 (M2), K01 (M1) · the registry's `lavd-ossna24` type", applied in L1: `dataset/sources.yaml:58` gives `lavd-ossna24` the type "talk, conference abstract or news report", and the header's `type` rule (`:14–25`) lists `docs/references.md`'s id-rule types (scholarly, deployed-system, talk, conference abstract or news report, measurement) with each tier in the citation-tier rule's wording, condensed, none for measurement. The registry's 19 ids: scholarly 5, deployed-system 11, talk, conference abstract or news report 1 (`lavd-ossna24`), measurement 2 (L1's count by `yaml.safe_load`). L1 applied the same tally in the dataset guidebook vol-06 §2.1 (its N1, `:132`).
+- Sources: `logs/L1.md` ## Rows for other chunks (X3); `dataset/sources.yaml` as L1 leaves it
+- Cross-ref: W-0970; W-0971
+- Notes: found in L1. K14's file: a follow-up chunk.
+
 ## Also on this file, not for editing from this list
 
 - W-0607 · closed, already-applied — vol-08:271 already states the final word, accurate at HEAD; the generalset's backlog line is `_dev/TODO.md:196`.
