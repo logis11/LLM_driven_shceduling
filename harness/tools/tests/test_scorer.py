@@ -136,14 +136,16 @@ def test_percentile_is_numpy_linear_and_exact():
 
 def test_excess_aggregates_on_mock_switch(fixture_dir):
     """Metrics doc §8 on mock-switch's worked values: the switch window [40600, 53100] holds the
-    46000 wake (100), the boost windows [60600, 69600] and [80600, 86600] hold the 62000 wake (600),
-    the rest of the MLFQ interval holds the 90000 wake (0): excess 100 (switch), 600 (boost)."""
+    50100 wake (0: keystroke 2 reached the editor at 46000 while it was ready in Q1 mid-burst,
+    preempted behind the hog, so it was queued and its next WAIT completed at 50100 with zero wait),
+    the boost windows [60600, 80600] and [80600, 86600] hold the 62000 wake (600), the rest of the
+    MLFQ interval holds the 90000 wake (0): excess 0 (switch), 600 (boost)."""
     d = fixture_dir("mock-switch")
     rows, _ = records.build(d / "run.json", d / "trace.jsonl", table="calibrated",
                             schedule_path=d / "config-schedule.json")
     out = {(r["aggregate"], r["index"]): r["value"]
            for r in agg.compute_aggregates(rows, interactive=("editor",)) if r["metric"] == "switch_window"}
-    assert out[("excess_switch", "3")] == "100.000000000000"
+    assert out[("excess_switch", "3")] == "0.000000000000"
     assert out[("excess_boost", "3")] == "600.000000000000"
     assert out[("share_inside_switch_windows", "")] == "0.125000000000"
 
@@ -236,15 +238,22 @@ def test_scorer_floors_are_overridable_with_the_same_default():
 
 def test_flip_aggregates_on_mock_switch(fixture_dir, tmp_path):
     """9.21 decision 7 on mock-switch's schedule (boot MLFQ; entry 1 MLFQ with a shorter slice; entry 2 FIFO; entry
-    3 MLFQ, the switch whose excess the worked derivation gives as 100 µs): three configuration changes; with a log
-    of three queries graded correct, wrong, wrong, two of them wrong, and the wrong switch into MLFQ (entry 3)
-    contributing its excess — 100 µs; the wrong FIFO entry contributes nothing (no window into FIFO)."""
+    3 MLFQ): three configuration changes; with a log of three queries graded correct, wrong, wrong, two of them
+    wrong, and the wrong switch into MLFQ (entry 3) contributing its excess; the wrong FIFO entry contributes nothing
+    (no window into FIFO). The fixture's own switch excess for entry 3 is 0 µs (worked.md, "The aggregates, by hand"), so the entry-3
+    `excess_switch` row's value is replaced by a 250 µs stand-in: the stand-in is what makes the contribution
+    visible — 250 µs when entry 3 is wrong, 0 when every query is correct."""
     import json
     from harness.reader import read_config_schedule, read_recognition_log
     d = fixture_dir("mock-switch")
     rows, _ = records.build(d / "run.json", d / "trace.jsonl", table="calibrated",
                             schedule_path=d / "config-schedule.json")
     aggregates = agg.compute_aggregates(rows, interactive=("editor",))
+    stand_in = "250.000000000000"
+    entry3 = [i for i, r in enumerate(aggregates) if r["metric"] == "switch_window"
+              and r["aggregate"] == "excess_switch" and r["index"] == "3"]
+    assert len(entry3) == 1 and aggregates[entry3[0]]["value"] == "0.000000000000"
+    aggregates[entry3[0]] = dict(aggregates[entry3[0]], value=stand_in)
     schedule = read_config_schedule(d / "config-schedule.json")
     queries = [{"t_set_change": t, "telemetry": {"t_us": t, "processes": []}, "validation": "unmodified",
                 "latency_us": 100, "proposal": {"system": {"mode": "dev", "background_wanted": True}}}
@@ -256,7 +265,7 @@ def test_flip_aggregates_on_mock_switch(fixture_dir, tmp_path):
               {"metric": "config_correct", "t": 40500, "value": 0}, {"metric": "mode_correct", "t": 40500, "value": 1}]
     out = {r["aggregate"]: r["value"] for r in agg.flip_aggregates(aggregates, schedule, log, grades)}
     assert out == {"change_count": "3.000000000000", "wrong_change_count": "2.000000000000",
-                   "wrong_switch_excess_sum": "100.000000000000"}
+                   "wrong_switch_excess_sum": stand_in}
     flip_rows = agg.flip_aggregates(aggregates, schedule, log, grades)
     assert all(r["entity"] == "schedule" and r["metric"] == "config_interval" and r["index"] == "" for r in flip_rows)
     assert {r["workload_id"] for r in flip_rows} == {"mock-switch"} and all(r["condition"] == "llm_algo" for r in flip_rows)

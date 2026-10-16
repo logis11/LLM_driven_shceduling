@@ -2,7 +2,7 @@
 
 An editor and a batch task under a schedule that switches algorithm twice: boot MLFQ → FIFO (the recognizer named FIFO at the batch task's arrival) → MLFQ (named at a third task's arrival). Condition `llm_algo` on the calibrated table. The fixture exercises the `switch_window` primitive (metrics doc §6.9) in both directions, the `boost_window` primitive (§6.10, added 2026-09-11), the config schedule as the harness's third input, and the `x_mlfq_level` check tool. All times µs.
 
-Scheduler behaviour assumed here, beyond the fixtures README list: MLFQ with 3 queues, slice 2000 µs, growth 2, stamped by entry 1 at 600 µs beside the boot entry (the boot default's own slice is 10 ms since 2026-09-11 and governs nothing here, since no task runs before 600); a task that consumes a full slice is demoted and one that blocks keeps its level; a fresh slice at every dispatch and at every boost; a wake into a strictly higher queue preempts at once, a wake into the same or a lower queue waits for the slice boundary; slice expiry with no competitor demotes without a `run_end`; a switch **out of** MLFQ applies at the running task's slice boundary (the drain); a switch **out of** FIFO applies immediately and the running task is treated as freshly dispatched by MLFQ (the memo's rule (a)); the boost timer restarts at `t_apply` (metrics doc §11, items 7–8, both confirmed). `x_mlfq_level` lines are written for the hog only, whenever its level changes.
+Scheduler behaviour assumed here, beyond the fixtures README list: MLFQ with 3 queues, slice 2000 µs, growth 2, stamped by entry 1 at 600 µs beside the boot entry (the boot default's own slice is 10 ms since 2026-09-11 and governs nothing here, since no task runs before 600); a task that consumes a full slice is demoted and one that blocks before its slice ends keeps its level, so a burst ending at the instant its slice does is demoted as it blocks (MLFQ rules 3–4, `docs/simulator/simulator-guide.md` §5); a fresh slice at every dispatch and at every boost; at a slice boundary the lane goes to the head of the highest non-empty queue, a demoted or preempted task joining the tail of its queue (rule 2: always run from the highest non-empty queue, round-robin within a queue); a wake into a strictly higher queue preempts at once, a wake into the same or a lower queue waits for the slice boundary; slice expiry with no competitor demotes without a `run_end` (a competitor: a ready task in the holder's new queue or a higher one); a switch **out of** MLFQ applies at the running task's slice boundary (the drain); a switch **out of** FIFO applies immediately and the running task is treated as freshly dispatched by MLFQ (the memo's rule (a)); the boost timer restarts at `t_apply` (metrics doc §11, items 7–8, both confirmed). `x_mlfq_level` lines are written for `hog` and `editor` whenever a demotion or a boost changes their level, up to `T_end` (`probe` never leaves Q0; the cold start at 40600 writes none).
 
 ## Run file
 
@@ -35,19 +35,22 @@ The trace carries the applied instants; the schedule carries the params. `W_sing
 | 12000 | `hog`'s slice ends: demoted to Q1 (`x_mlfq_level` 0→1). Entry 2 (FIFO) applies here, after the drain. Under FIFO the hog keeps the lane. |
 | 20000 | keystroke 1: `editor` ready; FIFO never preempts; it waits. |
 | 40000 | `probe` arrives, ready, waits. Set change → query. |
-| 40600 | entry 3 (MLFQ) applies at once. Cold start: `hog` running, treated as freshly dispatched in Q0 with a 2000 slice; `editor` (ready 20000) and `probe` (ready 40000) pending in Q0. |
-| 42600 | `hog`'s cold slice ends → demoted to Q1 (0→1). Q0 is non-empty → `hog` preempted. `editor` runs (waited 22600), RUN 3000; its Q0 slice is consumed at 44600 → Q1. |
-| 45600 | `editor` blocks. `probe` runs (waited 5600), RUN 500. |
-| 46000 | keystroke 2: `editor` ready in Q1; `probe` runs in Q0 → no preemption; `editor` waits. |
-| 46100 | `probe` blocks forever. `editor` runs in Q1 (waited 100; 3000 < the 4000 slice) → blocks at 49100, stays Q1. |
-| 49100 | `hog` resumes in Q1, fresh 4000 slice. |
-| 53100 | `hog`'s Q1 slice ends → Q2 (1→2), no competitor, keeps running. |
-| 60600 | boost (40600 + 20000): everything to Q0; `hog` (2→0) gets a fresh 2000 slice. |
+| 40600 | entry 3 (MLFQ) applies at once. Cold start: `hog` running, treated as freshly dispatched in Q0 with a 2000 slice; `editor` (ready 20000) and `probe` (ready 40000) pending in Q0, in that order. |
+| 42600 | `hog`'s cold slice ends → demoted to Q1 (0→1). Q0 is non-empty → `hog` preempted. `editor` runs (waited 22600), RUN 3000. |
+| 44600 | `editor`'s Q0 slice ends with 1000 of the burst left → demoted to Q1 (0→1), behind `hog`. `probe` (Q0) outranks both → `editor` preempted. `probe` runs (waited 4600), RUN 500. |
+| 45100 | `probe` blocks forever, in Q0. Q1 holds `hog` (since 42600), then `editor` (since 44600): `hog` runs, fresh 4000 slice. |
+| 46000 | keystroke 2: `editor` is ready in Q1, mid-burst, not waiting → the wake is queued for its next WAIT. |
+| 49100 | `hog`'s Q1 slice ends → Q2 (1→2); `editor` (Q1) outranks → `hog` preempted. `editor` runs, fresh 4000 slice. |
+| 50100 | `editor` finishes the burst; its WAIT completes at once on the queued keystroke → `ready(wake)` inside the occupancy; RUN 3000. |
+| 53100 | `editor`'s burst and its Q1 slice end together: it has burned the whole slice → Q2 (1→2) as it blocks. `hog` resumes in Q2. |
+| 60600 | boost (40600 + 20000): everything to Q0 (`editor` 2→0, `hog` 2→0); `hog` gets a fresh 2000 slice. |
 | 62000 | keystroke 3: `editor` ready in Q0; `hog` is Q0 → no preemption; `editor` waits. |
-| 62600 | `hog`'s slice ends → Q1 (0→1); `editor` (Q0) outranks → `hog` preempted. `editor` runs (waited 600); Q0 slice consumed at 64600 → Q1; blocks at 65600. |
-| 65600 | `hog` resumes in Q1; 69600 → Q2 (1→2). |
-| 80600 | boost: `hog` → Q0 (2→0); 82600 → Q1; 86600 → Q2. |
-| 90000 | keystroke 4: `editor` (Q0 since the 80600 boost) over `hog` Q2 → `hog` preempted at once; `editor` runs (waited 0) → blocks at 93000. `hog` resumes. |
+| 62600 | `hog`'s slice ends → Q1 (0→1); `editor` (Q0) outranks → `hog` preempted. `editor` runs (waited 600), RUN 3000. |
+| 64600 | `editor`'s Q0 slice ends with 1000 left → Q1 (0→1), behind `hog` → `editor` preempted. `hog` runs in Q1, fresh 4000 slice. |
+| 68600 | `hog`'s Q1 slice ends → Q2 (1→2); `editor` (Q1) outranks → `hog` preempted. `editor` runs, finishes the burst, blocks at 69600 before its slice ends, stays Q1. |
+| 69600 | `hog` resumes in Q2; its 8000 slice expires at 77600 with no competitor: no `run_end`, no level change. |
+| 80600 | boost: `editor` → Q0 (1→0), `hog` → Q0 (2→0); `hog` 82600 → Q1, 86600 → Q2, no competitor either time. |
+| 90000 | keystroke 4: `editor` (Q0 since the 80600 boost) over `hog` Q2 → `hog` preempted at once; `editor` runs (waited 0). At 92000 its Q0 slice ends → Q1 (0→1), still above `hog` → keeps the lane; blocks at 93000. `hog` resumes. |
 | 100000 | `T_end`. `editor` and `probe` depart. `hog` still holds the lane. |
 | 322500 | `hog` exits (10000 + 300000 of work + 12500 of others' occupancy; past the window). |
 
@@ -60,8 +63,8 @@ The trace carries the applied instants; the schedule carries the params. `W_sing
 | `editor` 0 `arrive` | `run_start` 0 | 0 |
 | `hog` 10000 `arrive` | `run_start` 10000 | 0 |
 | `editor` 20000 `wake` | `run_start` 42600 | 22600 |
-| `probe` 40000 `arrive` | `run_start` 45600 | 5600 |
-| `editor` 46000 `wake` | `run_start` 46100 | 100 |
+| `probe` 40000 `arrive` | `run_start` 44600 | 4600 |
+| `editor` 50100 `wake` (keystroke 2, queued at 46000) | inside occupancy [49100, 53100] | 0 |
 | `editor` 62000 `wake` | `run_start` 62600 | 600 |
 | `editor` 90000 `wake` | `run_start` 90000 | 0 |
 
@@ -69,9 +72,9 @@ The trace carries the applied instants; the schedule carries the params. `W_sing
 
 | task | occupancy (clipped) | `cpu_delivered` | `demand` | `completed` | `preempt_count` |
 |---|---|---|---|---|---|
-| `editor` | [0,0] [42600,45600] [46100,49100] [62600,65600] [90000,93000] | 12000 | 12000 | 0 (`depart`) | 0 |
-| `hog` | [10000,42600] [49100,62600] [65600,90000] [93000,100000 clip] | 32600 + 13500 + 24400 + 7000 = 77500 | 300000 | 0 | 3 (42600, 62600, 90000) |
-| `probe` | [45600,46100] | 500 | 500 | 0 (`depart`) | 0 |
+| `editor` | [0,0] [42600,44600] [49100,53100] [62600,64600] [68600,69600] [90000,93000] | 2000 + 4000 + 2000 + 1000 + 3000 = 12000 | 12000 | 0 (`depart`) | 2 (44600, 64600) |
+| `hog` | [10000,42600] [45100,49100] [53100,62600] [64600,68600] [69600,90000] [93000,100000 clip] | 32600 + 4000 + 9500 + 4000 + 20400 + 7000 = 77500 | 300000 | 0 | 5 (42600, 49100, 62600, 68600, 90000) |
+| `probe` | [44600,45100] | 500 | 500 | 0 (`depart`) | 0 |
 
 **`config_interval`**
 
@@ -86,18 +89,18 @@ The trace carries the applied instants; the schedule carries the params. `W_sing
 
 | switch | alive at t_apply | first `run_end` after t_apply | hogs | value |
 |---|---|---|---|---|
-| index 2, FIFO, t = 12000 | `editor`, `hog` | `editor` 45600 `block`; `hog` 42600 `preempt` | 1 (`hog`) | 0 — not into MLFQ |
-| index 3, MLFQ, t = 40600 | `editor`, `hog`, `probe` | `editor` 45600 `block`; `hog` 42600 `preempt`; `probe` 46100 `block` | 1 (`hog`) | 12500 — see below |
+| index 2, FIFO, t = 12000 | `editor`, `hog` | `editor` 44600 `preempt`; `hog` 42600 `preempt` | 2 (`editor`, `hog`) | 0 — not into MLFQ |
+| index 3, MLFQ, t = 40600 | `editor`, `hog`, `probe` | `editor` 44600 `preempt`; `hog` 42600 `preempt`; `probe` 45100 `block` | 2 (`editor`, `hog`) | 12500 — see below |
 
-The window closes when the hog has received `W_single` = 6000 of CPU since 40600: 2000 in [40600, 42600], nothing while the editor and the probe hold the lane, the remaining 4000 in [49100, 53100]. `t_close` = 53100, value = 53100 − 40600 = 12500. Under a wall-clock window of 6000 the same descent would have ended 6500 µs past the window — the case that led to the lane-time definition (memo §7).
+The window closes when the last counted hog has received `W_single` = 6000 of CPU since 40600. `hog`: 2000 in [40600, 42600], 4000 in [45100, 49100] → 6000 at 49100. `editor`: 2000 in [42600, 44600], 4000 in [49100, 53100] → 6000 at 53100. `t_close` = 53100, value = 53100 − 40600 = 12500. Under a wall-clock window of 6000, [40600, 46600], both descents would have ended past the window, the hog's by 2500 µs and the editor's by 6500 µs — the case that led to the lane-time definition (memo §7).
 
-The FIFO row's hog count is the memo's known bias in the other direction: the hog's first occupancy after 12000 ends in a preempt only because MLFQ took over 30 ms later. The count is informational there; the value is 0 regardless.
+The FIFO row's hog count is the memo's known bias in the other direction: both tasks' first `run_end` after 12000 is a preempt only because MLFQ took over at 40600. The count is informational there; the value is 0 regardless.
 
 **`boost_window`** (§6.10) — inside the MLFQ interval entered at 40600 (entry 3, boost 20000), one row per boost instant `40600 + k · 20000` before the interval's end at `T_end`: 60600 and 80600 (100600 is past `T_end`). Each is sized like a switch window from its instant, with `W_single` = 6000 from entry 3, clipped at the next boost.
 
 | boost | alive | first `run_end` after | hogs | window | value |
 |---|---|---|---|---|---|
-| 60600 | `editor`, `hog`, `probe` | `editor` 65600 `block`; `hog` 62600 `preempt`; `probe` none | 1 (`hog`) | 2000 in [60600, 62600], 4000 more in [65600, 69600] → [60600, 69600] | 9000 |
+| 60600 | `editor`, `hog`, `probe` | `editor` 64600 `preempt`; `hog` 62600 `preempt`; `probe` none | 2 (`editor`, `hog`) | `hog`: 2000 in [60600, 62600], 4000 more in [64600, 68600] → 6000 at 68600; `editor`: 2000 in [62600, 64600], 1000 in [68600, 69600], then blocked until 90000 → 3000 by the next boost; clipped there → [60600, 80600] | 20000 |
 | 80600 | `editor`, `hog`, `probe` | `editor` 93000 `block`; `hog` 90000 `preempt`; `probe` none | 1 (`hog`) | uninterrupted → [80600, 86600] | 6000 |
 
 **`busy`** — 12000 + 77500 + 500 = 90000.
@@ -106,13 +109,13 @@ Total 28 rows.
 
 ## The aggregates, by hand (metrics doc §8)
 
-The interactive task is `editor` (the one the scoring spec names). Wake rows: 20000 → 22600, 46000 → 100, 62000 → 600, 90000 → 0.
+The interactive task is `editor` (the one the scoring spec names). Wake rows: 20000 → 22600, 50100 → 0 (keystroke 2, queued at 46000 while the editor was mid-burst), 62000 → 600, 90000 → 0.
 
-- **Switch window** for entry 3: [40600, 53100]. Inside: the 46000 row (100). Boost grid from `t_apply`: 60600, 80600 (100600 is past `T_end`). Each boost window by the same rule: at 60600 the hog (first `run_end` after: 62600 `preempt`) receives 2000 in [60600, 62600] and 4000 more in [65600, 69600] → [60600, 69600]; at 80600 the hog (first `run_end` after: 90000 `preempt`) runs uninterrupted → [80600, 86600]. Inside the boost windows: the 62000 row (600). Rest of the MLFQ interval outside any window: the 90000 row (0).
-- **Per-switch excess, switch variant**: 100 − 0 = **100 µs**. **Boost variant**: 600 − 0 = **600 µs**. The switch cost a sixth of a boost here: the pending editor took the lane at the hog's first cold slice.
+- **Switch window** for entry 3: [40600, 53100]. Inside: the 50100 row (0). Boost grid from `t_apply`: 60600, 80600 (100600 is past `T_end`). Each boost window by the same rule: at 60600 two hogs (first `run_end` after: `editor` 64600 `preempt`, `hog` 62600 `preempt`); the hog has its 6000 at 68600, the editor only 3000 by the next boost, so the window is clipped there → [60600, 80600]; at 80600 the hog (first `run_end` after: 90000 `preempt`) runs uninterrupted → [80600, 86600]. Inside the boost windows: the 62000 row (600). Rest of the MLFQ interval outside any window: the 90000 row (0).
+- **Per-switch excess, switch variant**: 0 − 0 = **0 µs**. **Boost variant**: 600 − 0 = **600 µs**. The switch window's one keystroke reached the editor mid-burst and paired with zero wait, so the switch variant carries nothing; the boost variant carries the 600 µs the 62000 keystroke waited for the hog's Q0 slice to end.
 - **Share of the window inside switch windows**: 12500 / 100000 = **0.125**.
 - The 20000 row (22600) falls in the FIFO interval and belongs to no window: that is FIFO's own cost, carried by the P99 term, not by these aggregates.
 
 ## The check tool
 
-`x_mlfq_level` shows the hog's demotions after the switch at 40600: 0→1 at 42600, 1→2 (the bottom) at 53100. The window closes at 53100, so the last demotion is **covered**, at the edge: the lane-time window and the simulator's demotion agree to the microsecond because both count the same 6000 µs of the hog's CPU. `check_mlfq_levels.py` reports that and exits 0. Its second test moves the 1→2 line to 55000, a simulator whose demotion lags its CPU accounting, and sees the miss reported.
+`x_mlfq_level` shows the two counted hogs' demotions after the switch at 40600: `hog` 0→1 at 42600 and 1→2 (the bottom) at 49100; `editor` 0→1 at 44600 and 1→2 at 53100. The window closes at 53100, so both last demotions are **covered**, the editor's at the edge: the lane-time window and the simulator's demotion agree to the microsecond because both count the same 6000 µs of the editor's CPU. `check_mlfq_levels.py` reports that and exits 0. Its second test moves the 1→2 line at 53100 to 55000, a simulator whose demotion lags its CPU accounting, and sees the miss reported.

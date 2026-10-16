@@ -18,7 +18,7 @@ def run_tool(d, trace):
 
 
 def test_mock_switch_window_covers_the_hogs_last_demotion(fixture_dir):
-    # lane-time window [40600, 53100]: the hog's 1→2 demotion at 53100 is its edge
+    # lane-time window [40600, 53100]: the editor's 1→2 demotion at 53100 is its edge (the hog's is at 49100)
     d = fixture_dir("mock-switch")
     p = run_tool(d, d / "trace.jsonl")
     assert p.returncode == 0, p.stdout + p.stderr
@@ -27,7 +27,7 @@ def test_mock_switch_window_covers_the_hogs_last_demotion(fixture_dir):
 
 
 def test_a_demotion_past_the_window_is_reported(fixture_dir, tmp_path):
-    # a simulator whose hog reaches the bottom later than its CPU accounting says
+    # a simulator whose editor reaches the bottom later than its CPU accounting says
     d = fixture_dir("mock-switch")
     lines = (d / "trace.jsonl").read_text().splitlines()
     out = []
