@@ -59,7 +59,7 @@ generated 파일은 이렇게 소비돼요.
 dataset은 세 층으로 쌓여 있어요. timeline이 archetype id와 scenario tag를 가리키고, 반대 방향 참조는 없어요.
 
 ```
-ARCHETYPE LIBRARY   한 종류의 process가 어떻게 행동하나      dataset/archetypes.yaml
+ARCHETYPE LIBRARY   프로그램 한 종류가 어떻게 행동하나         dataset/archetypes.yaml
 SCENARIO CATALOG    어떤 사용 상황과 이름이 있나 (S1–S18)      docs/workload/scenario-catalog.md
 TIMELINES           scenario들이 시간 위에 어떻게 배치되나     dataset/timelines/coreset/*.timeline.yaml
                                         │
@@ -67,7 +67,7 @@ TIMELINES           scenario들이 시간 위에 어떻게 배치되나     data
                               CANONICAL WORKLOAD JSON                dataset/build/coreset-single/*.workload.json
 ```
 
-**archetype library.** "process 한 종류가 scheduler 눈에 어떻게 보이나"의 model. scheduler에게 process는 이름도 의미도 없고 오직 event stream이에요. 언제 runnable해지고, 얼마나 실행하고, 무엇을 기다리고, 누구를 깨우고, 언제 fork하고 exit하는가. archetype은 그 stream을 만드는 규칙 + parameter 분포예요. 29개 중 28개는 우리 CI의 측정 campaign에서 값을 가져왔고, 하나(`game-task-chain`)는 LAVD를 소개한 OSS NA 2024 발표 slide(`lavd-ossna24`)에서 가져왔어요(4장). archetype은 이름을 갖지 않아요. `video-player`라는 archetype은 "mpv가 30 fps 동영상을 재생할 때 33.3 ms 주기마다 측정된 만큼 일한다"만 알고, 그 task가 recognizer에게 무슨 이름으로 보일지는 timeline이 정해요(`c5-t5`에서는 같은 archetype이 `qzvd`로 보여요).
+**archetype library.** "프로그램 한 종류가 scheduler 눈에 어떻게 보이나"의 model. scheduler에게 process는 이름도 의미도 없고 오직 event stream이에요. 언제 runnable해지고, 얼마나 실행하고, 무엇을 기다리고, 누구를 깨우고, 언제 fork하고 exit하는가. archetype은 그 stream을 만드는 규칙 + parameter 분포예요. 29개 중 28개는 우리 CI의 측정 campaign에서 값을 가져왔고, 하나(`game-task-chain`)는 LAVD를 소개한 OSS NA 2024 발표 slide(`lavd-ossna24`)에서 가져왔어요(4장). archetype은 이름을 갖지 않아요. `video-player`라는 archetype은 "mpv가 30 fps 동영상을 재생할 때 33.3 ms 주기마다 측정된 만큼 일한다"만 알고, 그 task가 recognizer에게 무슨 이름으로 보일지는 timeline이 정해요(`c5-t5`에서는 같은 archetype이 `qzvd`로 보여요).
 
 **scenario catalog.** dataset의 파일이 묶는 사용 상황(scenario)과 그 이름들의 목록. S1(office)부터 S18(session process)까지 18개. 각 행은 그 상황과 이름이 실제로 있다는 근거를 외부 출처(PCMark, SYSmark, CpsMark+ 같은 benchmark, LAVD의 OSS NA 2024 발표 slide `lavd-ossna24` 등)로 대요. 어느 것들이 한 segment에 같이 나타나는지는 실험의 구성이라 design이에요. 숫자는 없어요. 이름과 근거만. timeline의 segment가 `scenario: [S1, S2]`처럼 tag로 가리켜요.
 
@@ -1215,7 +1215,7 @@ core set 밖의 파생도 있어요: `build/coreset-single/`의 sensitivity vari
 | **workload** | 실험 하나를 완전히 적은 canonical JSON. `meta`, `ground_truth`, `focus`, `events` |
 | **run file** | simulator가 읽는 workload의 view: `events`와 id. `ground_truth`와 `focus`는 빠짐 |
 | **timeline** | 사람이 쓰는 authoring YAML. compile되어 workload가 됨 |
-| **archetype** | process 한 종류의 행동 model. program + parameter 분포(대부분 측정된 분위수 표). 이름 없음 |
+| **archetype** | 프로그램 한 종류의 행동 model. program + parameter 분포(대부분 측정된 분위수 표). 이름 없음 |
 | **scenario** | 사용 상황 하나와 그 process 이름들. S1–S18. segment의 근거 tag |
 | **segment** | label(mode + attributes)이 붙은 시간 구간. core set에 67개 |
 | **mode** | 16개 label 중 하나. machine이 주로 뭘 하고 있나 |
