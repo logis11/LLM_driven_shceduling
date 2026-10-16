@@ -63,6 +63,14 @@ Chunk K09, Simulator and daemon docs (wave 2). 7 open rows. The file has 321 lin
 - Cross-ref: W-0448; W-0870; W-0183
 - Notes: found in K03. Waits on 인지오's answer to K03's t₀ question. W-0448's Final word paraphrases 9.11 D11 as "so t₀ is the task's first dispatch"; D11's text does not say that (K03 fix round 1 item 3).
 
+### W-0936 · open
+- At: `docs/simulator/simulator-guide.md` ## 9, ### 9.3 Simultaneous events (line 292), still written as an open question
+- Change: Mark §9.3 decided, as §9.1 and §9.2 are: the simulator's rule D1, config entries first and then insertion order; the RQ0 gate spec's `executor-assumptions` (2) takes it; 인경민's formal reply is still pending (the declared-class memo §4 item 4).
+- Final word: `simulator/steps/README.md:97` (D1, §9.3's same-instant order: kind priority, then insertion sequence, the config apply first); `simulator/memo/memo_261001.md` §6; `docs/harness/metrics.md` §11 item 3; `harness/experiments/rq0-gate.yaml` `executor-assumptions` (2); `docs/memos/2026-10-08-declared-scheduling-class.md` §4 item 4 (the formal reply asked).
+- Sources: `logs/K17.md` ## Rows for other chunks (X2)
+- Cross-ref: W-0447; W-0448
+- Notes: found in K17. K09's file: a follow-up chunk. Line 113 ("your §9.3 tie-break rule decides"), §9.5 (`:302`) and the glossary's tie-break row (`:318`) refer to §9.3's rule.
+
 ## Also on this file, not for editing from this list
 
 - W-0449 · blocked, simulator TIMER (on the spec's list) — ## 4 The instruction set, ### `{ "op": "TIMER", "period_us": P }`, lines 126–141 (the backlog sentence :127, "Worked example of the backlog…

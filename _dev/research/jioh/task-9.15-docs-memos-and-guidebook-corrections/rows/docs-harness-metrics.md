@@ -36,3 +36,11 @@ Chunk K10, Harness guide and metrics (wave 3). 2 open rows. The file has 344 lin
 - Final word: 인지오's answer to W-0804 (2026-10-16), applied by stage A (`logs/A4-fixture.md`).
 - Sources: `harness/tools/tests/fixtures/mock-switch/expected.csv` (`hogs` 2 on both `switch_window` rows and the 60600 `boost_window` row); `harness/tools/tests/fixtures/README.md` (the `mock-switch` row).
 - Notes: found in stage A (A5's reviewer).
+
+### W-0935 · open
+- At: `docs/harness/metrics.md` §6.9, line 178 ("The simulator does not yet: `Mlfq::start()` keeps each task's level, so a switch MLFQ → FIFO → MLFQ resumes the old levels — owed"); §11 item 9, line 314 ("The simulator does not yet: `on_config_apply` re-arms the running task with the incoming params' slice at once — owed")
+- Change: Restate both sentences to the code: since `6bf9d850` (2026-10-10) a switch into MLFQ resets every task to Q0 (U1), and a same-algorithm entry leaves the running task its granted slice (U2), as the RQ0 gate spec's conformance statement says ((c) done).
+- Final word: `simulator/src/sim.cpp` at `6bf9d850`: U1 and U2 stated at `:47–48`, `Mlfq::start` (`:208–209`) and the same-algorithm branch (`:607`); `simulator/memo/memo_261010.md` Part B, D1; `harness/experiments/rq0-gate.yaml` `simulator-conformance`, "(c) and (f) the simulator does today" (W-0758's answer (a)).
+- Sources: `logs/K17.md` ## Rows for other chunks (X1), ## Review round 1
+- Cross-ref: W-0758; W-0687
+- Notes: found in K17. K10's file: a follow-up chunk.
