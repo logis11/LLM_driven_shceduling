@@ -1,6 +1,6 @@
 # 4권 · 51개의 coreset: 파일마다 어떤 질문에 답하나
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-14
+> Status: draft · Created 2026-10-14 · Updated 2026-10-17
 
 **core set의 파일 하나하나는 무슨 상황을 적고, 어떤 label을 달고, 어떤 질문에 답하나.**
 
@@ -12,7 +12,7 @@ core set의 조직 원리는 한 문장입니다. building plan(`docs/workload/b
 
 웹 개발자의 세계에 빗대면 core set은 snapshot test 모음과 비슷합니다. 각 test는 하나의 동작을 고정된 입력으로 확인하고, test 이름만 봐도 무엇을 지키는지 알 수 있어야 합니다. core set의 파일 이름(`c1-office`, `c7-dev`, `c2-p1b`)도 그렇게 읽히도록 지어졌습니다. 다만 여기서 "기대값"은 scheduler의 출력이 아니라, 파일 안에 적힌 정답 label(`ground_truth`)입니다. recognizer는 그 정답을 보지 못한 채 process 이름만 보고 상황을 맞혀야 하고, scheduler 실험은 그 정답을 그대로 읽는 oracle 조건과 무작위 조건을 비교합니다.
 
-이 권은 2026-10-14의 tree를 기준으로 씁니다. 파일 수, segment 수, compile된 event 수, utilization은 모두 그날 tree에서 shell 명령과 짧은 Python으로 직접 세었고, 셀 때마다 어디서 셌는지 적었습니다. 몇몇 문서(`docs/workload/coreset-guide.md`, `docs/workload/scenario-catalog.md`, building plan의 일부)는 Phase 9 재구축 이전의 dataset을 묘사합니다. 그런 곳은 마지막 장 직전에 무엇이 낡았는지 그대로 적었습니다.
+이 권은 2026-10-14의 tree를 기준으로 썼고, 2026-10-17에 그 뒤의 변화(sub-task 9.23이 정한 `c6-fold`·`c6-spoof`의 label과 program 끝의 규칙, sub-task 9.15가 timeline 머리 주석에 더한 생략 문장)에 맞춰 다시 셌습니다. 파일 수, segment 수, compile된 event 수, byte 수, utilization은 모두 tree에서 shell 명령과 짧은 Python으로 직접 세었고, 셀 때마다 어디서 셌는지 적었습니다. 2026-10-14에 Phase 9 재구축 이전의 dataset을 묘사하던 문서들은 9.15가 고쳤습니다(13.8절).
 
 ---
 
@@ -73,7 +73,7 @@ core set의 조직 원리는 한 문장입니다. building plan(`docs/workload/b
 
 여기에 menu 밖의 label이 하나 더 있습니다. **`ambiguous`**는 ground truth에만 나오는 label입니다. 똑같이 활발한 foreground가 둘이라서 정답 mode를 하나로 정할 수 없는 segment에 붙습니다. recognizer는 이 label을 고를 수 없고 언제나 16개 중 하나를 골라야 하며, `ambiguous` segment는 정확도 채점에서 빠지고 따로 보고됩니다. core set에서 이 label을 단 segment는 `c6-dual`의 하나뿐입니다.
 
-> **열린 자리.** `render`의 정의는 "an offline 3D/graphics render"이지만, Phase 9 재구축 뒤 core set의 render 파일이 묶는 일은 Kdenlive의 영상 export(`kdenlive_render`, 9.10 D10 — render 파일들이 관찰된 Kdenlive export를 묶는다는 결정)입니다. 기록은 vocabulary 문장과 이 binding의 차이를 따로 다루지 않습니다. 이 문장을 고칠지는 vocabulary의 주인인 인지오가 정할 일이고, 9.15(docs와 memo를 고치는 Phase 9 sub-task)의 목록에도 이 항목은 없습니다. 확인 필요.
+> **열린 자리.** `render`의 정의는 "an offline 3D/graphics render"이지만, Phase 9 재구축 뒤 core set의 render 파일이 묶는 일은 Kdenlive의 영상 export(`kdenlive_render`, 9.10 D10 — render 파일들이 관찰된 Kdenlive export를 묶는다는 결정)입니다. 2026-10-16에 인지오가 이 풀이를 "an offline render — a 3D scene or a video project rendered to a file"로 넓히기로 했습니다. 기존 media의 변환인 `transcode`와는 그대로 구별됩니다. mode의 변경은 vocabulary §4에 따라 세 사람(인지오, 인경민, 박이안)이 정하는 일이라, Phase 9의 final memo가 인경민과 박이안에게 제안하고 두 사람이 동의하면 vocabulary가 §5 기록과 함께 고칩니다. label도 파일도 바뀌지 않습니다. 두 사람의 답 대기.
 
 ## 1.3 하나뿐인 graded attribute: `background_wanted`
 
@@ -130,7 +130,7 @@ label이 실제로 쓰이는 순간은 **query point**입니다.
 - **telemetry snapshot** — recognizer에게 보이는 것의 한 장면입니다. 살아 있는 process 이름과 개수의 multiset, 그리고 창 focus를 가진 process의 이름으로 이루어집니다(`docs/data-contracts.md` §5).
 - **query point** — snapshot이 바뀌는 순간입니다. 바뀔 때마다 recognizer에게 한 번 묻습니다. process가 도착하거나, 고정된 시각에 떠나거나, focus가 옮겨질 때 생깁니다.
 
-한 query point의 답은 그 시각을 덮는 segment의 label로 채점됩니다. 2026-10-14 tree에서 `harness/tools/tests/mocks/daemon.py`의 `snapshots` 함수로 51개 파일의 query point를 직접 세어 보면 모두 147개입니다. 9.17(focus를 telemetry에 넣은 Phase 9 sub-task)의 changelog D4가 기록한 "147 query points over 51 files"와 같습니다. 이 가운데 51개는 파일 끝의 마지막 snapshot이고(정답을 매길 segment가 없습니다), 19개는 `c6-dual`의 `ambiguous` segment 안에 있습니다. 남은 77개가 채점 대상이고, 그중 7개는 다음 절에서 설명할 pre-committed miss segment 안에 있어 headline 정확도에서 빠집니다. 그래서 headline 정확도는 44개 파일의 70개 query point로 계산됩니다. 이 숫자들은 9.20(distractor grid와 familiarity ladder를 만든 Phase 9 sub-task)의 changelog D10에 "77 points over 50 files, now seven of them in pre-committed-miss segments … and 70 headline points over 44 files"로 기록되어 있고, 위의 직접 계산과도 맞습니다.
+한 query point의 답은 그 시각을 덮는 segment의 label로 채점됩니다. 2026-10-14 tree에서 `harness/tools/tests/mocks/daemon.py`의 `snapshots` 함수로 51개 파일의 query point를 직접 세어 보면 모두 147개입니다. 9.17(focus를 telemetry에 넣은 Phase 9 sub-task)의 changelog D4가 기록한 "147 query points over 51 files"와 같습니다. 이 가운데 51개는 파일 끝의 마지막 snapshot이고(정답을 매길 segment가 없습니다), 19개는 `c6-dual`의 `ambiguous` segment 안에 있습니다. 남은 77개(50개 파일)가 채점 대상이고, 그중 9개는 다음 절에서 설명할 pre-committed miss segment 안에 있어 headline 정확도에서 빠집니다. 그래서 headline 정확도는 44개 파일의 68개 query point로 계산됩니다. 9.20(distractor grid와 familiarity ladder를 만든 Phase 9 sub-task)의 changelog D10은 "77 points over 50 files, now seven of them in pre-committed-miss segments … and 70 headline points over 44 files"로 기록했고, 9.23 D1, D2(2026-10-14)가 `c6-fold`의 30 s 점과 `c6-spoof`의 20 s 점을 pre-committed miss로 옮겨 일곱이 아홉, 70이 68이 되었습니다(9.23 D10). 2026-10-17 tree에서 같은 함수로 다시 세어도 같습니다.
 
 ## 1.7 ground truth에만 붙는 annotation들
 
@@ -141,12 +141,12 @@ segment의 `attributes`에는 `background_wanted` 말고도 다른 key가 붙을
 | `background` | `download`, `package-upgrade` | background 작업이 무엇인가 | `c2-p2a`(`download`), `c2-p2b`와 interactive C7 열 개(`package-upgrade`) |
 | `initiated` | `user`, `scheduled`, `session` | 그 작업을 누가 시작했나 | 사용자가 시작한 batch(`c1-render` 등), 예약 작업(`c1-backup` 등), 로그인 시 세션이 시작한 작업(`c7-indexing`, `c2-p1b`) |
 | `dual_active` | `true` | 똑같이 활발한 foreground 둘 | `c6-dual` |
-| `spoof` | `true` | 다른 프로그램의 이름을 단 process가 있음 | `c6-spoof`, `c6-alias` |
+| `spoof` | `true` | 다른 프로그램의 이름을 단 process가 있음 | `c6-spoof`(20 s부터), `c6-alias` |
 | `pre_committed_miss` | `true` | 이름과 행동으로는 어떤 recognizer도 닿을 수 없는 label | 아래 절 |
 
 segment에는 `attributes` 밖에 `familiarity`(1–5의 정수)도 붙을 수 있습니다. 이름이 얼마나 알아보기 쉬운지를 적은 annotation이고, core set에서는 `c5-t4`와 `c5-t5` 두 파일에만 붙습니다. 1.9절에서 설명합니다.
 
-> **열린 자리.** vocabulary §1은 `initiated`의 값을 `user | scheduled` 둘로만 적습니다. timeline에는 세 번째 값 `session`이 쓰입니다. 이 값은 9.10 D79(`c7-indexing`의 segment가 "`initiated: session`"이라고 말한다는 결정, 2026-10-03)가 "work the desktop session itself starts, unasked, at login"이라는 뜻으로 만들었고, vocabulary에 추가하는 일은 9.15로 넘겨졌습니다. 2026-10-14 현재 vocabulary 문서에는 아직 반영되지 않았습니다.
+세 번째 값 `session`은 9.10 D79(`c7-indexing`의 segment가 "`initiated: session`"이라고 말한다는 결정, 2026-10-03)가 "work the desktop session itself starts, unasked, at login"이라는 뜻으로 만들었습니다. vocabulary §1은 2026-10-16부터 이 값을 `user`, `scheduled`와 함께 적습니다(vocabulary §5의 2026-10-16 기록).
 
 ## 1.8 pre-committed miss와 `ambiguous`
 
@@ -156,7 +156,7 @@ segment에는 `attributes` 밖에 `familiarity`(1–5의 정수)도 붙을 수 �
 
 > **왜 이렇게 정했나.** Phase 7 spec decision 3이 이런 cell을 "pre-committed miss in the C6 sense"로 배송한다고 정했습니다. archive가 적은 이유는 다음과 같습니다. "Scoring them would charge the model for a distinction no observer of names and behaviour could make; leaving them empty would break the all-32 target." 채점하면 어떤 관찰자도 할 수 없는 구분을 모델 탓으로 돌리게 되고, 비워 두면 32개 cell 목표가 깨진다는 뜻입니다. 이렇게 하면 cell은 채워지고, label을 직접 읽는 `oracle` 조건은 그 row의 scheduling 성능을 여전히 잴 수 있습니다. annotation 이름 `pre_committed_miss`는 7.1(grid에 attribute 축을 넣은 Phase 7 sub-task, 2026-09-10)의 chat 결정으로 생겼습니다. 기존 `initiated`로는 표시할 수 없었다고 archive는 적습니다. `c2-p3b`는 `scheduled`인데도 완전히 알아볼 수 있는 파일이었기 때문입니다.
 
-2026-10-14 tree에서 `pre_committed_miss: true`를 단 segment는 정확히 여섯 개입니다(`dataset/coverage-grid.json`의 `per_file`과 `dataset/tools/tests/test_grid.py`의 `MISS_CELLS`).
+2026-10-17 tree에서 `pre_committed_miss: true`를 단 segment는 정확히 여덟 개입니다(`dataset/coverage-grid.json`의 `per_file`과 `dataset/tools/tests/test_grid.py`의 `MISS_CELLS`).
 
 | 파일 | cell | 왜 닿을 수 없나 |
 |---|---|---|
@@ -166,12 +166,14 @@ segment에는 `attributes` 밖에 `familiarity`(1–5의 정수)도 붙을 수 �
 | `c7-transcode` | `transcode/false` | 같은 encode job에 label만 뒤집음 |
 | `c7-backup` | `backup/false` | 같은 backup job에 label만 뒤집음 |
 | `c6-alias` | `media/true` | player 둘이 indexer의 진짜 이름을 달고 있음 |
+| `c6-fold`(30 s부터) | `meeting/true` | 브라우저 안의 통화가 `chrome`을 하나 더할 뿐, snapshot 어디에도 통화라는 단서가 없음 |
+| `c6-spoof`(20 s부터) | `browsing/false` | 아무도 시키지 않은 CPU 작업이 신뢰받는 이름 `chrome`으로 와서, snapshot에는 `chrome`이 하나 늘 뿐 |
 
-앞의 다섯은 "의도만 다른 cell"이고, README(`dataset/README.md`)는 이를 "the five cells that differ by intent alone ship as pre-committed misses"라고 적습니다. 여섯 번째인 `c6-alias`는 이름 충돌(name collision)의 한계를 보여 주는 파일로, 2026-10-12에 C5(familiarity ladder 그룹)에서 C6(resolution limit 그룹)으로 옮겨질 때 annotation을 얻었습니다(8장, 9장).
+앞의 다섯은 "의도만 다른 cell"이고, README(`dataset/README.md`)는 이를 "The five cells that differ by intent alone — `c1-indexing` and the four batch counterparts — ship as pre-committed misses"라고 적습니다. 여섯 번째인 `c6-alias`는 이름 충돌(name collision)의 한계를 보여 주는 파일로, 2026-10-12에 C5(familiarity ladder 그룹)에서 C6(resolution limit 그룹)으로 옮겨질 때 annotation을 얻었습니다(8장, 9장). 나머지 둘은 C6의 `c6-fold`와 `c6-spoof`가 파일의 뒤 구간에 갖는 것으로, 9.23 D1, D2(2026-10-14)가 정했습니다(9.3절, 9.5절).
 
 `ambiguous`는 pre-committed miss와 다릅니다. pre-committed miss는 정답 label이 분명히 있지만 recognizer가 닿을 수 없는 경우이고, `ambiguous`는 정답 label 자체를 정할 수 없는 경우입니다. 그래서 `ambiguous` segment는 `background_wanted`도 갖지 않습니다. Phase 3 archive가 이 lint 규칙을 적습니다. "every segment carries a boolean `background_wanted`; on `mode: ambiguous` it must be absent (the label itself is the explicit marker)."
 
-> **열린 자리.** C6(resolution limit 그룹)의 파일 넷은 문서에서 모두 "pre-committed misses"로 불립니다(building plan §3 C6 제목, README의 C6 행). 그런데 annotation을 단 것은 `c6-alias` 하나입니다. `c6-spoof`의 label은 `browsing`이고 이름만 보고도 닿을 수 있으니 채점 대상인 것이 자연스럽습니다. 문제는 `c6-fold`입니다. 기록(9.10 D30, 2026-10-01)은 "the canonical set does not change at the boundary and the file stays the guaranteed miss it was built as"라고 적습니다. 그러나 telemetry 규칙 1(이름별 개수가 바뀌어도 snapshot이 생긴다, `docs/data-contracts.md` §5)에 따라 30 s에 `chrome`이 5개에서 6개가 되면 query point가 생깁니다. 2026-10-14에 mock daemon(`harness/tools/tests/mocks/daemon.py`)으로 직접 돌려 보면 `c6-fold`의 query point는 0 s, 30 s, 60 s 셋입니다. 30 s의 query point는 `meeting` segment에 놓이고, annotation이 없으므로 grader(`harness/tools/harness/grader.py`)는 이 점을 headline 정확도에 넣습니다. 이름(`chrome ×6`)은 통화를 드러내지 않으니 이 점은 설계상 오답일 가능성이 큽니다. 이 점을 headline에서 뺄지(annotation 추가, 또는 `layer1_exclusions`에 추가)는 기록에 결정이 없습니다. 확인 필요. 결정할 사람은 RQ0 gate spec과 dataset의 주인인 인지오입니다.
+> **왜 이렇게 정했나.** C6(resolution limit 그룹)의 파일 넷은 예전 문서에서 모두 "pre-committed misses"로 불렸지만(building plan §3 C6 제목, README의 C6 행), 2026-10-14까지 annotation을 단 것은 `c6-alias` 하나였습니다. 이 권이 그날 두 파일을 짚었고, sub-task 9.23이 같은 날 정했습니다. **`c6-fold`**(9.23 D1). 9.10 D30 이후 `video-call`의 `chrome` task가 30 s에 도착하므로 snapshot은 `chrome ×5`에서 `chrome ×6`이 됩니다. telemetry 규칙 1(개수만 바뀌어도 snapshot이 생긴다, `docs/data-contracts.md` §5)에 따라 30 s에 query가 생기는데, snapshot 어디에도 통화라는 단서가 없습니다(여섯 번째 `chrome`은 새 탭이 열려도 똑같이 보입니다). 그래서 meeting segment(30–60 s)가 pre-committed miss가 되었고, browsing segment는 0 s의 채점점을 그대로 갖습니다. **`c6-spoof`**(9.23 D2). spoof가 도착하는 20 s에서 파일을 둘로 나누었습니다. 0–20 s는 `browsing`, `background_wanted: true`이고, 20–60 s는 `browsing`, `background_wanted: false`, `spoof: true`, `pre_committed_miss: true`입니다. 20 s부터 spoof는 아무도 시키지 않은 지속적인 CPU 작업이고, snapshot에는 `chrome` 하나가 늘 뿐 다른 단서가 없기 때문입니다. 두 파일은 RQ0 gate spec의 `layer1_exclusions`에 들어갔고, oracle의 채점점은 50개 파일의 77개 그대로이되 그중 pre-committed miss가 일곱에서 아홉으로, headline이 70개에서 44개 파일의 68개로 바뀌었습니다(1.6절).
 
 ## 1.9 familiarity tier: 이름이 얼마나 알아보기 쉬운가
 
@@ -187,7 +189,12 @@ building plan §3 C5(familiarity ladder 그룹)가 다섯 등급을 정의합니
 | 4 | nonexistent-compositional | 존재하지 않는 이름이지만 단어로 뜻이 추론됨 | `video-playback-` |
 | 5 | nonexistent-opaque | 존재하지 않고 아무것도 추론할 수 없음 | `qzvd` |
 
-tier 4와 5는 "말뭉치에서 기억해 내기"와 "단어 조합으로 추론하기"를 갈라내려고 있습니다. building plan은 이름 목록(whitelist)으로 일하는 방식이 tier 4–5에서 구조적으로 0점이 되며 그 대비가 headline 결과라고 적습니다. 여기서 **whitelist**는 실제 OS들이 쓰는 방식, 곧 알려진 process 이름을 범주에 대응시켜 둔 표입니다.
+tier 4와 5는 "말뭉치에서 기억해 내기"와 "단어 조합으로 추론하기"를 갈라내려고 있습니다. building plan은 이름 표로 일하는 두 조건 모두 tier 4–5의 지어낸 이름에 규칙을 갖지 않으며, 그중 가장 강한 이름 표가 거기서 구조적으로 0점이 되는 것이 headline 대비라고 적습니다("the strongest name table's structural zero there is the headline contrast"). 이름 표 조건은 둘입니다.
+
+- **출하된 catalogue 조건**(`shipped_catalogue`) — CachyOS가 ananicy-cpp와 함께 설치하고 켜는 그대로의 rule catalogue(`ananicy-rules`, commit `03ef03fb`)를 재현합니다. 각 process의 `argv[0]` basename(잘리지 않은 이름)으로 맞춥니다. 그 key로는 dataset이 묶는 이름 35개 중 19개만 catalogue에 있고, 파일 50개 중 7개에서만 모든 이름을 덮습니다(9.12 D105, D109). proposal은 이 조건을 넘는 것이 "RQ2's question about what shipping systems do"에 답한다고 적습니다. RQ2 전체는 "Does correct reading produce measurably better scheduling than (a) no situation awareness, and (b) the name-keyed catalogue a shipping Linux distribution enables by default and the strongest name table in its design?"이고, 이름 표 조건 둘은 모두 그 (b)에 들어 있습니다.
+- **가장 강한 이름 표 조건**(`strongest_name_table`) — catalogue와 같은 설계의 규칙 목록으로, dataset이 알려진 것으로 내세우는 소프트웨어를 모두 덮습니다. Family 3(등록되지 않은 소프트웨어)이나 tier 4–5의 지어낸 이름에는 규칙이 없습니다. 논문의 주장은 이 조건에 대한 비교가 지고(9.12 D115), C1 파일에서는 완벽하게 맞힐 것으로 기대되며, 이름 밖의 지식이 필요한 곳에서는 구조적으로 실패합니다.
+
+예전 문서들이 "whitelist"(실제 OS들이 쓰는 방식)라고 부르던 하나의 조건이 9.12 D6과 그 수정(D91, D105, D109, D115)으로 이 둘이 되었습니다(조건 id는 `harness/tools/harness/evaluator.py`와 `harness/guards/guard-spec.yaml`).
 
 segment의 tier는 대부분 annotation이 아니라 이름에서 자동으로 나옵니다. `dataset/tools/wlc/grid.py`의 `segment_tier` 함수가 그 segment에 살아 있는 모든 task의 이름(그리고 build orchestrator의 자식 이름, game chain의 member 이름과 `wineserver`)을 `NAME_TIERS` 표에서 찾아 **가장 높은(가장 불투명한)** tier를 고릅니다. 표에 없는 이름은 5가 됩니다. `familiarity` annotation이 있으면 그 값을 그대로 씁니다. 그래서 `c1-office`는 `soffice.bin` 하나 때문에 tier 2이고, `c1-compile`은 `cc1` 때문에 tier 3입니다.
 
@@ -237,7 +244,7 @@ core set 51개가 모두 같은 무게로 쓰이는 것은 아닙니다. 가장 
 
 보고 파일 32개는 판정 파일이 아닌 core set 파일 전부입니다. RQ0 gate spec의 주석이 목록을 정리합니다. interactive·periodic C1(calibration 그룹) base, 따로 line을 가진 `c1-gaming`, idle pair(`c1-idle`, `c7-idle`), idle class 파일 여섯, `c7-mail`, `c7-media`, C3(transition arc 그룹)·C4(distractor injection 그룹)·C5(familiarity ladder 그룹)·C6(resolution limit 그룹), 그리고 bounding check용 `c2-p2a-idle`입니다. 그 밖에 판정 파일을 변형한 78개의 sensitivity variant가 있습니다. variant는 판정에 쓰이지 않고 민감도 line만 읽습니다(11장).
 
-> **코드로.** `rq0-gate.yaml`의 `layer1_exclusions`는 `[c1-indexing, c6-alias, c7-backup, c7-ml-train, c7-render, c7-transcode]`입니다. 주석은 이 목록이 compile된 파일의 `pre_committed_miss` annotation에서 나오고 lint가 확인한다고 적습니다. 이 여섯 파일은 recognition 정확도(Layer 1)에서 빠집니다. 그중 셋(`c7-ml-train`, `c7-render`, `c7-transcode`)은 판정 파일로 남습니다. 주석의 이유는 "the gate needs labels, not recognizability"입니다. gate에 필요한 것은 label이지 알아볼 수 있음이 아니라는 뜻입니다.
+> **코드로.** `rq0-gate.yaml`의 `layer1_exclusions`는 `[c1-indexing, c6-alias, c6-fold, c6-spoof, c7-backup, c7-ml-train, c7-render, c7-transcode]`입니다. 주석은 이 목록이 compile된 파일의 `pre_committed_miss` annotation에서 나오고 lint가 확인한다고 적습니다(`harness/tools/harness/evaluator.py`가 annotation을 가진 파일의 목록과 비교). 이 여덟 파일은 recognition 정확도(Layer 1)에서 빠집니다. 목록은 파일 단위이지만 채점자(`harness/tools/harness/grader.py`)가 빼는 것은 annotation이 붙은 segment의 query point라서, `c6-fold`와 `c6-spoof`의 0 s 점은 headline에 남습니다. 여덟 가운데 셋(`c7-ml-train`, `c7-render`, `c7-transcode`)은 판정 파일로 남고, 다섯은 보고 파일입니다. 주석의 이유는 "the gate needs labels, not recognizability"입니다. gate에 필요한 것은 label이지 알아볼 수 있음이 아니라는 뜻입니다.
 
 ---
 
@@ -254,11 +261,12 @@ core set 51개가 모두 같은 무게로 쓰이는 것은 아닙니다. 가장 
 
 ## 2.2 worked example: `c1-dev`
 
-`c1-dev.timeline.yaml`은 20줄입니다. 그대로 옮기면 다음과 같습니다.
+`c1-dev.timeline.yaml`은 21줄입니다. 그대로 옮기면 다음과 같습니다.
 
 ```yaml
 # C1 — single-situation calibration: pure dev (building-plan §3 C1; Phase 7
 # spec decision 8). Task set lifted from c2-p1a segment 0 (the editor alone).
+# The desktop's session processes are omitted, their active state unobservable on the runner (9.10 D28).
 meta:
   id: c1-dev
   seed: 107
@@ -281,7 +289,7 @@ focus:
 
 위에서부터 읽겠습니다.
 
-**머리 주석.** 이 파일이 C1(calibration 그룹)의 "pure dev" 파일이고, Phase 7 spec decision 8(새 C1 base는 그 mode를 이미 담던 segment에서 task set을 들어 올려 만든다는 결정)에 따라 `c2-p1a`의 첫 segment에서 편집기만 들어 올렸다고 적습니다. 주석은 compile된 사건에는 영향을 주지 않습니다. 그러나 workload의 `meta.derived_from`이 timeline 파일의 git blob hash를 적기 때문에, 주석 한 글자를 바꿔도 artifact의 hash가 바뀝니다. 9.10 D30의 기록은 `c3-creation`의 머리 주석 변경이 그렇게 manifest로 옮겨졌다고 적고, 9.20 D10의 기록은 생성 파일의 머리 주석 문구를 바꿨더니 모든 생성 artifact가 바뀌어 문구를 되돌렸다고 적습니다.
+**머리 주석.** 이 파일이 C1(calibration 그룹)의 "pure dev" 파일이고, Phase 7 spec decision 8(새 C1 base는 그 mode를 이미 담던 segment에서 task set을 들어 올려 만든다는 결정)에 따라 `c2-p1a`의 첫 segment에서 편집기만 들어 올렸다고 적습니다. 셋째 줄은 desktop의 session process를 이 파일이 싣지 않는다는 것을 적습니다(9.10 D28, 2026-10-16에 더함). 주석은 compile된 사건에는 영향을 주지 않습니다. 그러나 workload의 `meta.derived_from`이 timeline 파일의 git blob hash를 적기 때문에, 주석 한 글자를 바꿔도 artifact의 hash가 바뀝니다. 9.10 D30의 기록은 `c3-creation`의 머리 주석 변경이 그렇게 manifest로 옮겨졌다고 적고, 9.20 D10의 기록은 생성 파일의 머리 주석 문구를 바꿨더니 모든 생성 artifact가 바뀌어 문구를 되돌렸다고 적습니다.
 
 **`meta`.** 세 key가 있습니다.
 
@@ -308,14 +316,14 @@ focus:
 
 ## 2.3 compile하면 무엇이 되나
 
-2026-10-14의 `build/coreset-single/c1-dev.workload.json`을 열면 top-level key가 넷입니다. `meta`, `ground_truth`, `focus`, `events`.
+2026-10-17의 `build/coreset-single/c1-dev.workload.json`을 열면 top-level key가 넷입니다. `meta`, `ground_truth`, `focus`, `events`.
 
 - `meta`는 `id: c1-dev`, `derived_from`(timeline 경로와 그 git blob hash), `sampled`(seed 107과 library의 blob hash)입니다.
 - `ground_truth`는 `{t_start: 0, t_end: 60000000, mode: dev, attributes: {background_wanted: true}}` 하나입니다.
 - `focus`는 `{t_start: 0, t_end: 60000000, task: editor}` 하나입니다.
 - `events`에는 arrive event 하나와 wake event 6,642개가 있습니다.
 
-arrive event는 `{t: 0, op: arrive, id: editor, name: code, declared_class: normal, depart: 60000000, program: […]}`입니다. `program`은 명령 13,284개짜리 목록이고, 처음은 이렇게 시작합니다.
+arrive event는 `{t: 0, op: arrive, id: editor, name: code, declared_class: normal, depart: 60000000, program: […]}`입니다. `program`은 명령 13,285개짜리 목록이고(wake 하나마다 WAIT과 RUN 한 쌍, 그리고 끝에 마지막 wake의 channel로 `WAIT timer:editor` 하나; 9.23 D16), 처음은 이렇게 시작합니다.
 
 ```text
 WAIT timer:editor → RUN 119 µs → WAIT timer:editor → RUN 12 µs → WAIT timer:editor → RUN 7 µs → …
@@ -365,21 +373,21 @@ compile된 `c7-dev`는 arrive event 둘(`code`, `unattended-upgr`), wake 2,823�
 
 `c1-dev`에 나오지 않은 key와 규칙을 마저 정리합니다. 뒤의 파일 설명이 이것들을 그대로 씁니다.
 
-**`bind`.** archetype이 "timeline이 정해 줘야 하는 값"으로 선언한 parameter(`binding_params`)에 값을 줍니다. 예를 들어 `cpu-batch`는 `total_work`(CPU 총량)와 `program`(어떤 측정된 프로그램의 표를 쓸지)을, `build-orchestrator`는 `spawn_count`(object job 수), `parallelism_cap`(동시 job 상한, 곧 `-j`), `child_name`(자식 이름)을, `game-task-chain`은 `lane_share`와 `member_names`를 받습니다. `bind`의 key는 archetype의 `binding_params`와 정확히 같아야 하고, 그 밖의 숫자를 timeline에 적으면 lint가 거부합니다(task-2.3 decision 2, 2026-08-27). building plan §1이 이 규칙을 "numeric behavior parameters exist only in Layer 1"이라고 적습니다.
+**`bind`.** archetype이 "timeline이 정해 줘야 하는 값"으로 선언한 parameter(`binding_params`)에 값을 줍니다. 예를 들어 `cpu-batch`는 `total_work`(CPU 총량)와 `program`(어떤 측정된 프로그램의 표를 쓸지)을, `build-orchestrator`는 `spawn_count`(object job 수), `parallelism_cap`(동시 job 상한, 곧 `-j`), `child_name`(자식 이름)을, `game-task-chain`은 `lane_share`와 `member_names`를 받습니다. `bind`의 key는 archetype의 `binding_params`와 정확히 같아야 하고, 그 밖의 숫자를 timeline에 적으면 lint가 거부합니다(task-2.3 decision 2, 2026-08-27). building plan §1이 이 규칙을 "behaviour parameters live in the archetype library"라고 적습니다.
 
 **`count`.** 같은 task를 여러 개 띄웁니다. `count: 4`면 `renderers.1`부터 `renderers.4`까지 네 개의 arrive event가 생깁니다.
 
 **`source`.** `bind`나 `count`가 있는 task는 같은 key를 가진 `source` map을 가져야 합니다. 값은 출처 태그(`"meas-ci:background:2026-10-03"`), 태그 목록(`[glam, "meas-ci:desktop:2026-10-04"]`), 또는 라벨 하나(`design`, `convention`, `arithmetic`)입니다. 9.10 D32(timeline에 묶인 값은 출처 태그나 design 라벨을 단다는 결정, 2026-10-01)가 내용을 정했고, 9.18 D2(그 field와 lint를 실제로 만든 결정, 2026-10-11)가 구현했습니다. 9.18 이전에는 timeline에 출처 칸 자체가 없었습니다.
 
-- **meas-ci** — 이 프로젝트가 GitHub Actions runner에서 직접 한 측정입니다. `meas-ci:<workflow>:<campaign 날짜>` 꼴의 태그로 인용하고, 원자료는 GitHub release로 공개합니다. 같은 날 두 번째 campaign이면 날짜 뒤에 `b`, `c`가 붙습니다(9.10 D76).
+- **meas-ci** — 이 프로젝트가 GitHub Actions runner에서 직접 한 측정입니다. `meas-ci:<workflow>:<campaign 날짜>` 꼴의 태그로 인용하고, 원자료는 campaign을 pool할 때 손으로 만든 GitHub release로 공개합니다. campaign마다의 release와 asset의 sha256은 `dataset/meas-releases.yaml`에 있고, lint가 인용된 campaign마다 그 항목을 요구합니다(2026-10-16). 같은 날 두 번째 campaign이면 날짜 뒤에 `b`, `c`가 붙습니다(9.10 D76).
 
 **`demand`.** `meta.demand`는 그 파일이 무엇을 위해 설계되었는지를 적습니다. `oversubscribed`(기본값)는 "contention, 곧 CPU 다툼을 담도록 설계된 파일", `calibration`은 "그렇게 설계되지 않은 파일"입니다. 2026-10-14 tree에서 `oversubscribed`는 11개(C2(intent pair 그룹) 일곱, C3(transition arc 그룹) 셋, `c6-dual` 하나), `calibration`은 40개입니다(`build.manifest.json`의 `demand`에서 셈).
 
 - **utilization** — compile된 파일이 lane을 얼마나 요구하는지의 정적 추정입니다. 파일 안 모든 task의 CPU 요구 합을 파일 길이로 나눈 값이고, 1이면 lane 하나를 꽉 채웁니다. manifest의 `demand` 절에 파일별, segment별로 기록됩니다.
 
-> **왜 이렇게 정했나.** 예전에는 `oversubscribed` 파일의 utilization이 약 100–150 % 안에 들어야 한다는 build gate가 있었습니다(task-2.3 decision 7, 2026-08-27). 9.14 decision 4(demand window를 gate에서 내린 결정, 2026-10-09)가 이를 폐지했습니다. 9.13의 read R5가 `oversubscribed` 파일 10개 중 9개가 창 밖에 있다는 것을 찾았는데, 이유는 `c2-p1a`와 `c2-p2a`가 training run과 download를 짧은 파일 안에 CPU 총량 그대로 묶었기 때문이었습니다. 9.14 spec은 결정을 이렇게 적습니다. "the `oversubscribed` class marks a file designed to hold contention, its demand a measured fact reported, not a window held." class는 설계 의도를 적고, demand는 보고되는 측정 사실일 뿐 지켜야 할 창이 아니라는 뜻입니다.
+> **왜 이렇게 정했나.** 예전에는 `oversubscribed` 파일의 utilization이 약 100–150 % 안에 들어야 한다는 build gate가 있었습니다(task-2.3 decision 7, 2026-08-27). 9.14 decision 4(demand window를 gate에서 내린 결정, 2026-10-09)가 이를 폐지했습니다. 9.13의 read R5가 `oversubscribed` 파일 10개 중 9개가 창 밖에 있다는 것을 찾았는데, 이유는 `c2-p1a`와 `c2-p2a`가 training run과 download를 짧은 파일 안에 CPU 총량 그대로 묶었기 때문이었습니다. 9.14 spec은 결정을 이렇게 적습니다. "the `oversubscribed` class marks a file designed to hold contention, its demand a measured fact reported, not a window held." class는 설계 의도를 적고, demand는 보고되는 측정 사실일 뿐 지켜야 할 창이 아니라는 뜻입니다. 9.14의 기록은 왜 물러났는지를 적지 않았는데, 2026-10-16에 인지오가 이유를 밝혔습니다. 9.10 D17이 job을 측정한 그대로 통째로 묶은 뒤로는 파일의 demand가 측정에서 따라 나오므로, 창 안에 붙들어 두려면 측정한 길이를 구부려야 했다는 것입니다.
 
-> **열린 자리.** `dataset/README.md`의 "Coresets" 표는 아직 "lane-scaled so total demand targets one CPU lane (~100–150%)"라고 적고, "Rules of the tree"에는 "Files outside it get redesigned"라는 문장이 남아 있습니다. 둘 다 9.14 decision 4 이전의 문장입니다. 현재 사실은 `dataset/tools/wlc/estimate.py`와 building plan §5a가 적는 대로, 기록만 하고 파일을 실패시키지 않는다는 것입니다. 이 문장의 수정은 9.15의 몫으로 남아 있습니다.
+`dataset/README.md`도 2026-10-16부터 이것을 "Demand is reported, not held"라는 규칙으로 적고, Coresets 표는 `coreset-single`을 "each file's demand recorded in the manifest"라고 적습니다.
 
 utilization을 읽을 때 한 가지 주의가 있습니다. 정적 추정은 job의 CPU 총량 **전체**를 파일 안에서 요구된 것으로 셉니다. 그래서 job이 파일보다 오래 사는 두 파일은 숫자가 매우 큽니다. `c2-p1a`는 14.505(두 번째 segment 35.7721), `c2-p2a`와 `c2-p2a-idle`은 9.3829(두 번째 segment 28.5251)입니다. 이 숫자는 "lane을 14배 넘게 쓴다"는 뜻이 아닙니다. 1,389.885 s짜리 training run과 727.170 s짜리 download의 CPU를 39.435 s, 26.385 s 길이의 segment에 몰아 계산했다는 뜻입니다(5장).
 
@@ -424,22 +432,22 @@ work-conserving(일이 있으면 lane을 놀리지 않는) policy라면 어떤 �
 
 ## 3.2 일곱 그룹의 표
 
-파일 수와 segment 수는 2026-10-14 tree에서 셌습니다(`ls dataset/timelines/coreset/*.timeline.yaml | wc -l`은 51, `dataset/coverage-grid.json`의 `per_file`에서 그룹별 segment 합은 66).
+파일 수와 segment 수는 2026-10-17 tree에서 셌습니다(`ls dataset/timelines/coreset/*.timeline.yaml | wc -l`은 51, `dataset/coverage-grid.json`의 `per_file`에서 그룹별 segment 합은 67).
 
 | 그룹 | 이름 | 파일 | segment | 맡는 질문 |
 |---|---|---|---|---|
-| C1 | single-situation calibration | 16 | 16 | 한 파일에 분명한 상황 하나. recognizer가 쉬운 경우를 맞히는가. 모든 것이 넘어야 할 바닥이고, 이름 whitelist가 완벽해 보이는 곳 |
-| C2 | intent pairs | 7 (3쌍 + 1) | 14 | 의도만 다르고 나머지가 같은 두 상황을 무엇이 가를 수 있는가. 쌍의 두 파일은 한 segment만 다르다 |
+| C1 | single-situation calibration | 16 | 16 | 한 파일에 분명한 상황 하나. recognizer가 쉬운 경우를 맞히는가. 모든 것이 넘어야 할 바닥이고, 가장 강한 이름 표(`strongest_name_table`)가 완벽하게 맞힐 것으로 기대되는 곳 |
+| C2 | intent pairs | 7 (3쌍 + 1) | 14 | 같은 전경 옆에서 사용자가 원하는 배경 job과 아무도 요청하지 않은 배경 job을 무엇이 가를 수 있는가. 두 번째 파일의 job은 첫 파일의 것과 이름과 행동이 다른, 따로 측정된 job이다(P3은 사용자가 시작한 export 대 예약된 backup으로, `background_wanted`가 아니라 mode와 `initiated`가 다르다). 쌍의 두 파일은 한 segment(그 job과 segment label)만 다르다. + 1은 bounding check 파일 `c2-p2a-idle` |
 | C3 | transition arcs | 3 | 10 | 이런 모양, 이런 순서의 전환이 존재한다는 존재 사례 |
 | C4 | distractor injection | 3 | 3 | 상황 중간에 상관없는 process가 나타나도 읽기가 뒤집히지 않는가의 존재 사례 |
 | C5 | familiarity ladder | 2 | 2 | 이름이 덜 알아볼 만해질수록 recognition이 버티는가(tier 4와 5의 존재 사례) |
-| C6 | resolution limits | 4 | 5 | 이름 기반 recognition이 설계상 어디서 깨지는가 |
+| C6 | resolution limits | 4 | 6 | 이름 기반 recognition이 설계상 어디서 깨지는가 |
 | C7 | attribute counterparts | 16 | 16 | 배경 작업이 원치 않는 것일 때 읽기가 뒤집히는가. mode마다 `false` cell 하나 |
-| 합 | | 51 | 66 | |
+| 합 | | 51 | 67 | |
 
-segment 66개 가운데 65개가 32개 cell 위에 놓이고, `c6-dual`의 `ambiguous` 하나가 cell 밖에 놓입니다(`coverage-grid.json`의 `segments_total: 66`, `outside` 한 줄).
+segment 67개 가운데 66개가 32개 cell 위에 놓이고, `c6-dual`의 `ambiguous` 하나가 cell 밖에 놓입니다(`coverage-grid.json`의 `segments_total: 67`, `outside` 한 줄). 2026-10-14에는 66개였고, 9.23 D2가 `c6-spoof`를 20 s에서 둘로 나누어 67개가 되었습니다(9.23 D10).
 
-질문 열의 문장은 `dataset/README.md`의 그룹 표를 옮긴 것인데, 두 곳은 README가 낡았습니다. README의 C2(intent pair 그룹) 행은 "a game download vs. a virus scan"이라고 적지만 virus scan은 9.10 D3(원치 않는 anti-virus scan을 Ubuntu 기본 unattended upgrade로 바꾼 결정, 2026-10-01)으로 사라졌고, C7(attribute counterpart 그룹) 행의 "interactive modes gain an unwanted scan"도 같은 이유로 지금은 unattended upgrade입니다.
+질문 열의 문장은 `dataset/README.md`의 그룹 표를 줄여 옮긴 것입니다.
 
 ## 3.3 새로 설계한 파일과 파생한 파일
 
@@ -448,9 +456,9 @@ segment 66개 가운데 65개가 32개 cell 위에 놓이고, `c6-dual`의 `ambi
 - novel 23개: C1(calibration 그룹) 16개, C2(intent pair 그룹)의 a-파일 3개(`c2-p1a`, `c2-p2a`, `c2-p3a`), C3(transition arc 그룹) 3개, `c6-dual`.
 - 파생 28개: C2(intent pair 그룹)의 b-파일 3개와 `c2-p2a-idle`, C4(distractor injection 그룹) 3개, C5(familiarity ladder 그룹) 2개, C6(resolution limit 그룹)의 3개(`c6-alias`, `c6-fold`, `c6-spoof`), C7(attribute counterpart 그룹) 16개.
 
-- **recipe** — 이 프로젝트에서 파생 timeline을 만드는 명세 파일 `*.variant.yaml`입니다. `variants:` 아래에 출력 하나마다 `id`, `from`(base timeline), `ops`(적용할 연산 목록)를 적습니다. recipe는 다섯 개입니다. `c2-pairs.variant.yaml`(56행), `c4.variant.yaml`(45행), `c5.variant.yaml`(24행), `c6.variant.yaml`(47행), `c7.variant.yaml`(297행).
+- **recipe** — 이 프로젝트에서 파생 timeline을 만드는 명세 파일 `*.variant.yaml`입니다. `variants:` 아래에 출력 하나마다 `id`, `from`(base timeline), `ops`(적용할 연산 목록)를 적습니다. recipe는 다섯 개입니다. `c2-pairs.variant.yaml`(72행), `c4.variant.yaml`(53행), `c5.variant.yaml`(26행), `c6.variant.yaml`(62행), `c7.variant.yaml`(317행).
 
-building plan §3 "Counts and reuse"는 이 관계를 "novel timeline designs number 23 … the other 27 are scripted derivations from five recipe files — build the derivation scripts, not the files"라고 적습니다. 27은 `c2-p2a-idle`이 생기기 전의 숫자입니다. 2026-10-09에 9.13(Phase 9의 재build sub-task)이 `c2-p2a-idle`을 더해 파생 파일이 28개가 되었고, building plan의 그 문단은 아직 고쳐지지 않았습니다.
+building plan §3 "Counts and reuse"는 이 관계를 "Genuinely novel timeline designs number 23 … the other 28 are scripted derivations from five recipe files … — build the derivation scripts, not the files"라고 적습니다. 2026-10-09에 9.13(Phase 9의 재build sub-task)이 `c2-p2a-idle`을 더해 파생 파일이 27개에서 28개가 되었습니다.
 
 ## 3.4 파생 관계 그림
 
@@ -514,7 +522,7 @@ scoring spec 머리 주석에는 core set 설계와 직결되는 규칙이 둘 �
 
 ## 4.1 C1이 답하는 질문
 
-C1(single-situation calibration 그룹)은 core set의 바닥입니다. 한 파일에 상황 하나, mode 하나, segment 하나입니다. building plan §3 C1은 그 역할을 "recognition floor; executor mapping sanity; and the honest baseline — **this is where the whitelist should score perfectly**"라고 적습니다. recognition이 넘어야 할 바닥이고, mode가 scheduler 설정으로 제대로 옮겨지는지 확인하는 곳이며, 이름 whitelist가 완벽하게 맞히는 것이 정상인 곳이라는 뜻입니다. 여기서 whitelist가 지면 그것은 whitelist의 문제가 아니라 파일의 문제입니다.
+C1(single-situation calibration 그룹)은 core set의 바닥입니다. 한 파일에 상황 하나, mode 하나, segment 하나입니다. building plan §3 C1은 그 역할을 "recognition floor; executor mapping sanity; and the honest baseline — **this is where the strongest name table (`strongest_name_table`) is expected to score perfectly**"라고 적습니다. recognition이 넘어야 할 바닥이고, mode가 scheduler 설정으로 제대로 옮겨지는지 확인하는 곳이며, 가장 강한 이름 표가 완벽하게 맞히는 것이 정상인 곳이라는 뜻입니다(1.9절). 여기서 그 표가 지면 그것은 표의 문제가 아니라 파일의 문제입니다. 같은 문장은 출하된 catalogue(`shipped_catalogue`)는 그렇지 않다고 덧붙입니다. 그 key로는 core 파일 50개 중 7개에서만 묶인 이름을 모두 덮기 때문입니다(9.12 D109).
 
 C1(calibration 그룹)에는 두 번째 역할도 있습니다. C1의 task set 16개는 다른 거의 모든 것의 재료입니다. C4(distractor injection 그룹), C5(familiarity ladder 그룹), C7(attribute counterpart 그룹), C6(resolution limit 그룹)의 셋이 C1 파일에서 파생되고, generated layer의 1,562개 파일도 이 16개 task set만으로 조합됩니다. 그래서 C1 파일 하나의 task 구성은 "이 mode를 하나의 task set으로 대표하면 이렇다"는 dataset 전체의 약속이 됩니다.
 
@@ -528,7 +536,7 @@ C1(calibration 그룹)에는 두 번째 역할도 있습니다. C1의 task set 1
 
 > **왜 이렇게 정했나.** archive decision 9는 새 base를 `set-segments`로 파생하는 대안을 기각한 이유를 적습니다. 그렇게 하면 C1(calibration 그룹)의 절반이 생성 파일이 되고, 그래도 batch job 크기를 바꾸는 연산이 따로 필요했다는 것입니다. 그래서 새 base는 손으로 쓴 C1 파일로, 출처를 머리에 적는 방식이 되었습니다.
 
-들어 올린 task set이라는 설명은 Phase 9에서 의미가 바뀌었습니다. 9.10 D2(core set의 task set은 design이라는 결정)는 building plan §3 C1(calibration 그룹)의 "Task sets are lifted from the segment that already carried the mode" 문장을 design으로 다시 쓰라고 9.15에 넘겼습니다. 들어 올렸다는 것은 계보일 뿐, 그 구성이 관찰된 데스크톱이라는 주장이 아니라는 뜻입니다.
+들어 올린 task set이라는 설명은 Phase 9에서 의미가 바뀌었습니다. 9.10 D2(core set의 task set은 design이라는 결정)에 따라 building plan §3 C1(calibration 그룹)은 이제 "Each task set is design, the composition the file's claim needs, with no realism claim on which programs share a segment (9.10 D2); a file header's 'lifted from' names its lineage, not an observed set"라고 적습니다(원문은 'lifted from'을 큰따옴표로 적습니다). 들어 올렸다는 것은 계보일 뿐, 그 구성이 관찰된 데스크톱이라는 주장이 아니라는 뜻입니다.
 
 ## 4.3 공통 모양과 길이 규칙
 
@@ -566,12 +574,12 @@ RQ0 gate에서 C1(calibration 그룹)은 둘로 갈립니다. 네 batch base(`c1
 
 segment는 0–60 s `browsing`, `background_wanted: true`, `[S2]`. input은 browser 2–58 s, focus는 browser 0–60 s, operation `page-load`가 30 s입니다. keystroke 흐름은 SWELL-KW의 Internet Explorer 녹화(`swell-ie-c1`)입니다.
 
-**compile된 모양.** arrive event 5개(모두 `chrome`), wake 3,852개(timer 3,729, input 123), artifact 513,959 byte, utilization 0.0164, `calibration`. query point는 0 s와 60 s 둘입니다. 이름이 `chrome ×5` 하나뿐이라 tier는 1입니다.
+**compile된 모양.** arrive event 5개(모두 `chrome`), wake 3,852개(timer 3,729, input 123), artifact 514,175 byte, utilization 0.0164, `calibration`. query point는 0 s와 60 s 둘입니다. 이름이 `chrome ×5` 하나뿐이라 tier는 1입니다.
 
 **짝과 파생.** 이 파일은 C1(calibration 그룹) 가운데 가장 많이 쓰이는 base입니다. `c6-spoof`, `c6-fold`, `c7-browsing`이 이 파일에서 나옵니다.
 
 **정한 결정.**
-- 9.10 D15(탭 수는 Firefox Linux telemetry의 중앙값, renderer 수는 runner에서 관찰한다는 결정, 2026-10-01)와 D131(Chrome 파일 열 개가 `renderer-hidden` 넷을 갖는다는 결정, 2026-10-04). 이유: 이전의 renderer 수(이 파일은 11)는 출처가 없었습니다. Mozilla의 GLAM 집계에서 Firefox Linux 사용자의 동시 탭 수 최댓값 중앙값이 4.67이라 탭 다섯으로 잡았고, runner에서 Chrome 154에 그 탭 다섯을 열었더니 다섯 번 모두 쓰는 탭 외에 page renderer 넷과 spare 하나가 떴습니다(`meas-ci:desktop:2026-10-04`). `source`의 `[glam, "meas-ci:desktop:2026-10-04"]`가 이 두 근거입니다.
+- 9.10 D15(탭 수는 Firefox Linux telemetry의 중앙값, renderer 수는 runner에서 관찰한다는 결정, 2026-10-01)와 D131(Chrome 파일 열 개가 `renderer-hidden` 넷을 갖는다는 결정, 2026-10-04). 이유: 이전의 renderer 수(이 파일은 11)는 출처가 없었습니다. Mozilla의 GLAM 집계에서 Firefox Linux 사용자의 동시 탭 수 최댓값 중앙값이 4.67이라 탭 다섯으로 잡았고, runner에서 Chrome 154에 그 탭 다섯을 열었더니 다섯 번 모두 쓰는 탭 외에 page renderer 넷과 spare 하나가 떴습니다(`meas-ci:desktop:2026-10-04`). `source`의 `[glam, "meas-ci:desktop:2026-10-04"]`가 이 두 근거입니다. 이 넷은 실제 사이트를 보는 경우의 바닥값입니다. 9.10 D126은 측정한 page에 subframe이 없다고 적고, 실제 page의 cross-site iframe(광고, embed, 로그인 widget)은 site isolation 아래에서 renderer를 따로 띄우므로 이 count가 그것을 빼며, 얼마나 더 되는지는 읽은 출처가 말하지 않는다고 적습니다(D131이 이 문장을 renderer 수를 적는 문서마다 넘겼습니다).
 - 9.10 D16(창은 하나뿐이라 `renderer-visible` task가 사라진다는 결정, 2026-10-01). 이유: Firefox Linux telemetry에서 사용자별 동시 창 수 최댓값의 중앙값이 1이었습니다.
 - 9.10 D127(spare와 WebUI renderer는 `web-browser` 안에 남고 `renderer-hidden`은 다른 탭의 page renderer만 센다는 결정, 2026-10-04).
 - 9.10 D20(operation이 있는 application의 focus 창마다 operation 하나를 focus 안에서 시작한다는 결정)이 30 s의 page load를 정했습니다.
@@ -592,7 +600,7 @@ segment는 0–60 s `browsing`, `background_wanted: true`, `[S2]`. input은 brow
 
 segment 0–60 s `office`, `true`, `[S1, S2, S4]`. input은 writer 2–58 s, focus는 writer 0–60 s. operation은 없습니다.
 
-**compile된 모양.** arrive 7개, wake 3,334개(timer 3,064, input 270), 443,076 byte, utilization 0.0270, `calibration`. query point 0 s와 60 s. `soffice.bin`이 tier 2라 segment는 tier 2입니다.
+**compile된 모양.** arrive 7개, wake 3,334개(timer 3,064, input 270), 443,368 byte, utilization 0.0270, `calibration`. query point 0 s와 60 s. `soffice.bin`이 tier 2라 segment는 tier 2입니다.
 
 **짝과 파생.** `c4-office`(7z 압축 injection), `c7-office`(unattended upgrade injection)가 이 파일에서 나옵니다.
 
@@ -608,7 +616,7 @@ segment 0–60 s `office`, `true`, `[S1, S2, S4]`. input은 writer 2–58 s, foc
 
 segment 0–60 s `mail`, `true`, `[S4]`. input 2–58 s(`swell-outlook-c23`, SWELL-KW의 Outlook 녹화), focus 0–60 s, operation `send` 40 s.
 
-**compile된 모양.** arrive 1개, wake 5,406개(timer 5,371, input 35), 703,491 byte, utilization 0.0287. keystroke 35개는 모두 45.9 s와 53.1 s 사이에 몰려 있습니다. RQ0 gate spec이 이 사실을 적는데, 재생 흐름의 offset이 Outlook 녹화의 타이핑 구간 하나에 떨어졌기 때문입니다.
+**compile된 모양.** arrive 1개, wake 5,406개(timer 5,371, input 35), 703,530 byte, utilization 0.0287. keystroke 35개는 모두 45.9 s와 53.1 s 사이에 몰려 있습니다. RQ0 gate spec이 이 사실을 적는데, 재생 흐름의 offset이 Outlook 녹화의 타이핑 구간 하나에 떨어졌기 때문입니다.
 
 **짝과 파생.** `c7-mail`. 위의 keystroke 위치 때문에 `c7-mail`(앞 26.385 s)에는 keystroke가 하나도 없고, 그래서 `c7-mail`은 보고 파일입니다(10장).
 
@@ -628,7 +636,7 @@ segment 0–60 s `mail`, `true`, `[S4]`. input 2–58 s(`swell-outlook-c23`, SWE
 
 segment 0–60 s `dev`, `true`, `[S11]`. input 2–58 s, focus 0–60 s.
 
-**compile된 모양.** arrive 1개, wake 6,642개(timer 6,456, input 186), 863,919 byte, utilization 0.3319. 2장의 worked example입니다.
+**compile된 모양.** arrive 1개, wake 6,642개(timer 6,456, input 186), 863,958 byte, utilization 0.3319. 2장의 worked example입니다.
 
 **짝과 파생.** `c7-dev`. `c7-dev`는 RQ0의 판정 파일이고 trace-replay variant(11장)의 대상이기도 합니다.
 
@@ -646,7 +654,7 @@ segment 0–60 s `dev`, `true`, `[S11]`. input 2–58 s, focus 0–60 s.
 
 segment 0–60 s `photo`, `true`, `[S6]`. input 2–58 s가 적혀 있지만 이 archetype은 keystroke를 받지 않으므로 input wake는 0입니다. focus 0–60 s, operation `unsharp-mask` 30 s.
 
-**compile된 모양.** arrive 1개, wake 511개(모두 timer), 76,318 byte, utilization 0.0442.
+**compile된 모양.** arrive 1개, wake 511개(모두 timer), 76,363 byte, utilization 0.0442.
 
 **채점에서의 결과.** keystroke wake가 없으므로 scoring spec은 이 파일의 term을 `channel: timer`로 둡니다. 9.14 D2(재구축된 파일 위의 scoring spec, 2026-10-09)가 "fourteen of the scored editors have no input-channel wake at all — every file of the video editor … and of the image editor"를 찾고, 이 열네 term을 timer channel로 읽게 했습니다. 이 term이 재는 것은 keystroke의 echo가 아니라 application 자신의 반응성입니다.
 
@@ -664,10 +672,10 @@ segment 0–60 s `photo`, `true`, `[S6]`. input 2–58 s가 적혀 있지만 이
 
 segment 0–60 s `meeting`, `true`, `[S3]`. input 없음, focus voice 0–60 s.
 
-**compile된 모양.** arrive 1개, wake 0개, 334,458 byte, utilization 0.2387. wake event가 하나도 없는 이유는 주기 task가 `TIMER`와 `LOOP` 명령으로 compile되어 시뮬레이터가 스스로 깨우기 때문입니다.
+**compile된 모양.** arrive 1개, wake 0개, 334,491 byte, utilization 0.2387. wake event가 하나도 없는 이유는 주기 task가 `TIMER`와 `RUN`을 주기마다 펼친 목록(명령 12,001개, 끝은 퇴장 뒤의 tick을 기다리는 `TIMER`)으로 compile되어 시뮬레이터가 스스로 깨우기 때문입니다.
 
 - **TIMER** — 시뮬레이터 primitive 중 하나로, 정해진 주기로 task를 깨웁니다. drift 없이 t₀ + k·주기에 깨웁니다.
-- **LOOP** — 명령 목록을 정해진 횟수만큼 되풀이하는 VM 내부 제어 흐름입니다. 일곱 번째 primitive가 아니라 묶음 표기입니다.
+- **LOOP** — 명령 목록을 되풀이하는 VM 내부 제어 흐름입니다. 일곱 번째 primitive가 아니라 묶음 표기이고, core set에서는 게임 chain의 구성원만 씁니다(4.11절).
 
 **짝과 파생.** `c7-meeting`(판정 파일).
 
@@ -691,15 +699,15 @@ segment 0–60 s `meeting`, `true`, `[S3]`. input 없음, focus voice 0–60 s.
 
 segment 0–60 s `gaming`, `true`, `[S9]`. input 없음(`input: []`), focus game 0–60 s.
 
-**compile된 모양.** arrive 18개, 곧 chain member 16개(이름 `Troy.exe` ×7, `Task worker thr` ×4, `dxvk-cs`, `dxvk-submit`, `winepulse_mainl`, `winepulse_timer`, `FAudio_AudioCli`)와 compiler가 붙이는 `wineserver`, 그리고 `steam`입니다. wake 18,062개(모두 timer), 2,296,310 byte, utilization 0.9153. chain member 이름이 tier 3이라 segment는 tier 3입니다.
+**compile된 모양.** arrive 18개, 곧 chain member 16개(이름 `Troy.exe` ×7, `Task worker thr` ×4, `dxvk-cs`, `dxvk-submit`, `winepulse_mainl`, `winepulse_timer`, `FAudio_AudioCli`)와 compiler가 붙이는 `wineserver`, 그리고 `steam`입니다. wake 18,062개(모두 timer), 2,296,348 byte, utilization 0.9153. chain member 이름이 tier 3이라 segment는 tier 3입니다.
 
 **짝과 파생.** `c4-gaming`(chat client injection), `c7-gaming`(unattended upgrade injection).
 
 **정한 결정.**
-- 9.10 D19(gaming 파일은 game chain만 갖고 게임의 다른 thread는 생략을 명시한다는 결정, 2026-10-01). 이유: LAVD 자료 slide 12의 "Around 300 tasks are scheduled while running a game", "Top 30-40 most frequently scheduled tasks take 95% of scheduling" 말고는 나머지 thread의 행동을 묘사한 출처가 없습니다.
+- 9.10 D19(gaming 파일은 game chain만 갖고 게임의 다른 thread는 생략을 명시한다는 결정, 2026-10-01). 이유: LAVD 자료 slide 12의 "Around 300 tasks are scheduled while running a game", "Top 30-40 most frequently scheduled tasks take 95% of scheduling" 말고는 나머지 thread의 행동을 묘사한 출처가 없습니다. 2026-10-16부터 이 파일의 머리 주석이 그 생략을 적습니다.
 - 9.10 D24가 `gamescope`를 뺐습니다. Ubuntu 24.04에 package가 없고 runner에는 화면이 없어 compositor의 일을 관찰할 수 없기 때문입니다.
 - 9.10 D26(chain member 이름은 chain 출처의 slide 16 이름을 쓴다는 결정, 2026-10-01). 예전의 `game.exe ×300`을 대체했습니다. `source`의 `"lavd-ossna24:s16"`이 그 locator입니다.
-- 9.10 D22(gaming 파일은 로그아웃 상태의 Steam client를 유지하고 그 상태를 명시한다는 결정). 9.8 D6이 Steam 계정 사용을 금지했습니다.
+- 9.10 D22(gaming 파일은 로그아웃 상태의 Steam client를 유지하고 그 상태를 명시한다는 결정). 9.8 D6이 Steam 계정 사용을 금지했습니다. 2026-10-16부터 머리 주석이 그 상태(로그아웃, 계정·library 없음, 뒤에서 도는 게임 없음, `gameoverlayui` 없음)를 적습니다.
 - `lane_share: 0.9`는 design입니다(9.10 D31, "design: a calibration size").
 
 **RQ0에서.** 판정 파일이 아니지만 자기 보고 line이 있습니다. RQ0 gate spec의 note는 "Not judging: no pair, so no attribute variation, and the file was chosen on its demand after reading demand numbers"라고 적습니다. Phase 3(2026-09-06)에서 demand를 읽은 뒤 이 파일을 판정에 넣으면, gap 크기와 상관된 축을 따라 파일을 고르는 셈이 되기 때문입니다.
@@ -717,7 +725,7 @@ segment 0–60 s `gaming`, `true`, `[S9]`. input 없음(`input: []`), focus game
 
 segment 0–60 s `media`, `true`, `[S13]`. input 없음, focus video 0–60 s.
 
-**compile된 모양.** arrive 2개, wake 0개(주기 task의 LOOP), 167,903 byte, utilization 0.1280.
+**compile된 모양.** arrive 2개, wake 0개(주기 task는 자기 TIMER로 깨어남), 167,969 byte, utilization 0.1280.
 
 **짝과 파생.** C1(calibration 그룹) 가운데 이름 실험의 base입니다. `c5-t4`, `c5-t5`(이름을 tier 4, 5로 바꿈), `c6-alias`(indexer의 진짜 이름을 붙임), `c7-media`(upgrade injection)가 여기서 나옵니다. building plan §1은 그 이유를 "the familiarity ladder (C5) is definable as 'same archetype, different name,' guaranteeing that recognition differences come from the name alone"이라고 적습니다.
 
@@ -737,7 +745,7 @@ segment 0–60 s `media`, `true`, `[S13]`. input 없음, focus video 0–60 s.
 
 segment 0–60 s `video-edit`, `true`, `[S7]`. input 2–58 s(keystroke 흐름 없음), focus 0–60 s, operation `preview-render` 30 s.
 
-**compile된 모양.** arrive 1개, wake 17,232개(모두 timer), 2,243,593 byte, utilization 0.4586.
+**compile된 모양.** arrive 1개, wake 17,232개(모두 timer), 2,243,632 byte, utilization 0.4586.
 
 **짝과 파생.** `c7-video-edit`(판정 파일). **정한 결정.** Phase 7 spec decision 8, `c2-p3a` segment 0에서 kdenlive만 들어 올림(seed 108). 9.10 D20의 preview render.
 
@@ -755,7 +763,7 @@ segment 0–60 s `video-edit`, `true`, `[S7]`. input 2–58 s(keystroke 흐름 �
 
 segment 0–1,594 s `compile`, `true`, `[S11]`. input 2–1,592 s, focus 0–1,594 s.
 
-**compile된 모양.** arrive 2개, spawn table 항목 17,448개(2,908 × 6), `fork_cap` 48(8 × 6), wake 181,026개(timer 178,482, input 2,544), 30,140,466 byte, utilization 0.9982. query point는 0 s, 2 s(build와 자식 이름들이 한꺼번에 나타남), 1,594 s. snapshot에는 `cc1 ×2908`을 비롯한 자식 이름이 2 s부터 끝까지 보입니다. telemetry 규칙은 "spawn children appear when their parent does"이기 때문입니다.
+**compile된 모양.** arrive 2개, spawn table 항목 17,448개(2,908 × 6), `fork_cap` 48(8 × 6), wake 181,026개(timer 178,482, input 2,544), 30,140,505 byte, utilization 0.9982. query point는 0 s, 2 s(build와 자식 이름들이 한꺼번에 나타남), 1,594 s. snapshot에는 `cc1 ×2908`을 비롯한 자식 이름이 2 s부터 끝까지 보입니다. telemetry 규칙은 "spawn children appear when their parent does"이기 때문입니다.
 
 **짝과 파생.** `c4-compile`(Chrome injection), `c7-compile`(DKMS module build로 교체).
 
@@ -780,7 +788,7 @@ segment 0–1,594 s `compile`, `true`, `[S11]`. input 2–1,592 s, focus 0–1,5
 
 segment 0–1,612 s `ml-train`, `true`, `[S11, S12]`. input 2–1,610 s, focus 0–1,612 s.
 
-**compile된 모양.** arrive 2개, wake 184,363개(timer 182,379, input 1,984), 24,229,965 byte, utilization 0.9982.
+**compile된 모양.** arrive 2개, wake 184,363개(timer 182,379, input 1,984), 24,230,004 byte, utilization 0.9982.
 
 **짝과 파생.** `c7-ml-train`(같은 job에 label만 뒤집은 pre-committed miss).
 
@@ -802,7 +810,7 @@ segment 0–1,612 s `ml-train`, `true`, `[S11, S12]`. input 2–1,610 s, focus 0
 
 segment 0–60 s `render`, `true`, `initiated: user`, `[S7]`. input 2–58 s, focus 0–60 s, operation `preview-render` 30 s.
 
-**compile된 모양.** arrive 2개, wake 16,296개(모두 timer), 2,124,900 byte, utilization 0.7339. query point 0 s, 2 s, 60 s.
+**compile된 모양.** arrive 2개, wake 16,296개(모두 timer), 2,124,939 byte, utilization 0.7339. query point 0 s, 2 s, 60 s.
 
 **짝과 파생.** `c7-render`(pre-committed miss).
 
@@ -826,7 +834,7 @@ segment 0–60 s `render`, `true`, `initiated: user`, `[S7]`. input 2–58 s, fo
 
 segment 0–4,762 s `transcode`, `true`, `initiated: user`, `[S8, S7]`. input 2–4,760 s, focus 0–4,762 s, operation `preview-render` 2,381 s.
 
-**compile된 모양.** arrive 2개, wake 1,015,553개(모두 timer), 152,752,501 byte(core set에서 두 번째로 큰 파일), utilization 0.9993.
+**compile된 모양.** arrive 2개, wake 1,015,553개(모두 timer), 152,752,546 byte(core set에서 두 번째로 큰 파일), utilization 0.9993.
 
 **짝과 파생.** `c7-transcode`(pre-committed miss). `c3-creation`의 마지막 segment도 같은 job을 묶습니다.
 
@@ -851,7 +859,7 @@ segment 0–4,762 s `transcode`, `true`, `initiated: user`, `[S8, S7]`. input 2�
 
 segment 0–60 s `indexing`, `background_wanted: true`, `initiated: user`, `pre_committed_miss: true`, `[S11, S14]`. input 2–58 s, focus 0–60 s.
 
-**compile된 모양.** arrive 2개(`code`는 `normal`, `tracker-miner-f`는 `idle`), wake 6,855개(timer 6,808, input 47), 1,749,269 byte, utilization 0.7477. query point 0 s, 2 s, 60 s. `tracker-miner-f`가 tier 3이라 segment는 tier 3.
+**compile된 모양.** arrive 2개(`code`는 `normal`, `tracker-miner-f`는 `idle`), wake 6,855개(timer 6,808, input 47), 1,749,308 byte, utilization 0.7477. query point 0 s, 2 s, 60 s. `tracker-miner-f`가 tier 3이라 segment는 tier 3.
 
 **왜 pre-committed miss인가.** 이 파일은 `indexing`의 **`true`** cell입니다. 머리 주석은 "The label differs from the unwanted case by intent alone, which names and behaviour cannot show — a pre-committed miss"라고 적습니다. 같은 indexer가 같은 일을 하는데, 사용자가 시켰는지만 다릅니다. Tracker는 기본적으로 사용자가 부탁하지 않은 때에 도는 프로그램이므로, recognizer가 `tracker-miner-f`를 보고 `false`라고 답하는 것은 합리적입니다. 그래서 miss는 counterpart(`c7-indexing`)가 아니라 이쪽 base에 있습니다. 2026-09-10 memo §4.1이 같은 이유를 적습니다.
 
@@ -879,7 +887,7 @@ segment 0–60 s `indexing`, `background_wanted: true`, `initiated: user`, `pre_
 
 segment 0–277 s `backup`, `true`, `initiated: scheduled`, `[S7, S15]`. input 2–275 s, focus 0–277 s, operation `preview-render` 138.5 s(창의 가운데).
 
-**compile된 모양.** arrive 2개(`deja-dup`은 `idle`), wake 62,851개(모두 timer), 8,256,866 byte, utilization 0.9897. query point 0 s, 2 s, 277 s.
+**compile된 모양.** arrive 2개(`deja-dup`은 `idle`), wake 62,851개(모두 timer), 8,256,905 byte, utilization 0.9897. query point 0 s, 2 s, 277 s.
 
 **짝과 파생.** `c7-backup`(pre-committed miss). C2(intent pair 그룹)의 `c2-p3b`도 같은 job을 묶습니다.
 
@@ -905,13 +913,13 @@ segment 0–277 s `backup`, `true`, `initiated: scheduled`, `[S7, S15]`. input 2
 
 모든 task가 0–60 s. segment 0–60 s `idle`, `true`, `[S18]`. `input: []`, `focus: []`. 창이 없으므로 focus가 비어 있는 유일한 C1(calibration 그룹)입니다.
 
-**compile된 모양.** arrive 4개, wake 59개, 8,326 byte, utilization 0.0004. 이름 넷이 모두 tier 2라 segment는 tier 2입니다.
+**compile된 모양.** arrive 4개, wake 59개, 8,401 byte, utilization 0.0004. 이름 넷이 모두 tier 2라 segment는 tier 2입니다.
 
 **짝과 파생.** `c7-idle`.
 
 **정한 결정.**
 - Phase 3의 3.2(2026-09-06): `attributes: {}`이던 segment를 `background_wanted: true`로 고쳤습니다. vacuous-true convention을 지키지 않았다는 것이 기록된 이유이고, 이 수정으로 ground truth와 artifact hash가 바뀌었습니다.
-- 9.10 D28(세션 process는 idle 파일에만 나오고 다른 파일은 생략을 명시한다는 결정, 2026-10-01). 이유: 세션 archetype은 "one idle Ubuntu 24.04 desktop session"에서 관찰된 것이라, 사용 중인 세션은 다른 상태이고 runner에서 관찰할 수 없습니다. 그래서 다른 파일에는 세션 process가 없습니다. catalog의 S18(system baseline) 행에 있던 "present in every segment by construction"도 이 결정으로 철회되었습니다.
+- 9.10 D28(세션 process는 idle 파일에만 나오고 다른 파일은 생략을 명시한다는 결정, 2026-10-01). 이유: 세션 archetype은 "one idle Ubuntu 24.04 desktop session"에서 관찰된 것이라, 사용 중인 세션은 다른 상태이고 runner에서 관찰할 수 없습니다. 그래서 다른 파일에는 세션 process가 없고, 2026-10-16부터는 `c1-idle`을 뺀 손으로 쓴 core timeline 22개의 머리 주석과 파생 recipe의 주석(`c7-idle` 제외)이 그 생략을 적습니다. catalog의 S18(system baseline) 행에 있던 "present in every segment by construction"도 이 결정으로 철회되었습니다.
 
 **RQ0에서.** 보고 파일이고 scoring 항목이 없습니다(성능 지표 없음).
 
@@ -921,15 +929,15 @@ segment 0–277 s `backup`, `true`, `initiated: scheduled`, `[S7, S15]`. input 2
 
 ## 5.1 C2가 답하는 질문
 
-C2(intent pairs 그룹)는 연구 전체의 핵심 증거를 담으려고 만들어졌습니다. 연구 제안서는 이 계열을 Family 2("Same process set, different intent")라고 부르고 "The paper's core evidence"라고 적습니다. process 집합과 행동이 거의 같은데 올바른 scheduling 정책이 다른 쌍입니다. 그중에서도 "training run + 편집기"와 "indexer + 편집기"를 제안서는 "the sharpest pair in the whole design"이라고 부릅니다. 둘 다 "CPU를 오래 쓰는 process 하나 + 편집기"인데, 하나는 사용자가 시킨 일이고 하나는 아무도 시키지 않은 일입니다.
+C2(intent pairs 그룹)는 연구 전체의 핵심 증거를 담으려고 만들어졌습니다. 연구 제안서는 이 계열을 Family 2("Same process set, different intent")라고 부르고 "The paper's core evidence"라고 적습니다. 같은 전경 옆에서 올바른 scheduling 정책이 다른 쌍입니다. 제안서는 그 job들이 측정에서 행동과 선언한 class도 다르다고 적습니다("Pairs of real jobs whose correct policies differ, which also differ in behaviour and declared class as measured"). 그중에서도 "training run + 편집기"와 "indexer + 편집기"를 제안서는 "the P1 pair, the load-bearing one"이라고 부릅니다. 둘 다 "CPU를 오래 쓰는 process 하나 + 편집기"인데, 하나는 사용자가 시킨 일이고 하나는 아무도 시키지 않은 일입니다.
 
-C2(intent pair 그룹)의 구조는 2026-08-23 설계 회의의 Q7에서 정해졌습니다. "Family 2 pairs are pairs of segments … two files identical in every segment but one." 두 파일은 한 segment만 빼고 모든 segment가 같습니다. building plan §3 C2는 이것을 "a tighter control than two independently authored scenarios"라고 적습니다. 따로 쓴 두 시나리오를 비교하는 것보다 통제가 단단하다는 뜻입니다.
+C2(intent pair 그룹)의 구조는 2026-08-23 설계 회의의 Q7에서 정해졌습니다. "Family 2 pairs are pairs of segments … two files identical in every segment but one." 두 파일은 한 segment만 빼고 모든 segment가 같습니다. building plan §3 C2는 이것을 "Each pair is a one-segment diff: its files share segment 0, the file's length and every event of the shared tasks, arrivals and wakes, in the compiled files"라고 적습니다. 따로 쓴 두 시나리오를 비교하는 것보다 통제가 단단합니다.
 
 C2(intent pair 그룹)의 세 쌍은 모두 같은 틀입니다. segment 0은 60 s이고 두 파일에서 같습니다. segment 1에 batch job 하나가 60 s에 도착하고, 두 파일은 그 job과 segment 1의 label만 다릅니다. 같은 seed를 쓰므로 두 파일의 편집기·게임은 사건 하나하나까지 같습니다.
 
 ## 5.2 "behaviorally identical"이 더 이상 참이 아니게 된 일
 
-building plan §3 C2(intent pair 그룹)는 P1(training run 대 indexer 쌍)을 아직 "behaviorally identical CPU saturation beside an editor"라고 적습니다. Phase 9 이전에는 이 말이 구조적으로 참이었습니다. `c2-p1b`는 `c2-p1a`의 `python3` 표를 그대로 두고 이름만 `tracker-miner-fs-3`으로 바꾼 파일이었기 때문입니다.
+building plan §3 C2(intent pair 그룹)는 2026-10-14까지 P1(training run 대 indexer 쌍)을 "behaviorally identical CPU saturation beside an editor"라고 적었습니다. Phase 9 이전에는 이 말이 구조적으로 참이었습니다. `c2-p1b`는 `c2-p1a`의 `python3` 표를 그대로 두고 이름만 `tracker-miner-fs-3`으로 바꾼 파일이었기 때문입니다.
 
 9.10 D6(`c2-p1b`의 indexer는 측정된 indexer 자신의 표를 쓴다는 결정, 2026-10-01)이 이것을 바꿨습니다.
 
@@ -937,7 +945,7 @@ building plan §3 C2(intent pair 그룹)는 P1(training run 대 indexer 쌍)을 
 
 audit(2026-10-10/11)의 "C2 direction"은 C2(intent pair 그룹)의 서술을 이렇게 고쳐 쓰라고 정했습니다. "the unwanted side is a measured job of its own (file-indexer, package-upgrade, incremental-backup), differing in name and in behaviour; P3 flips the mode and `initiated`, not `background_wanted`." 원치 않는 쪽은 저마다 측정된 job이고 이름도 행동도 다르며, P3(export 대 backup 쌍)는 `background_wanted`가 아니라 mode와 `initiated`를 뒤집는다는 뜻입니다. 같은 audit은 "The rate claim on intent runs on the sixteen C1–C7 pairs; no new C2 pairs are generated. The three authored pairs remain, the P1 pair the RQ0 load-bearing one."이라고도 적었습니다. intent에 대한 비율 주장은 C1(calibration 그룹) base와 C7(attribute counterpart 그룹) counterpart의 pair 열여섯 개가 맡고, C2(intent pair 그룹) 세 쌍은 그대로 남되 P1(training run 대 indexer 쌍)이 RQ0의 load-bearing pair라는 것입니다.
 
-> **열린 자리.** building plan §3 C2(intent pair 그룹) 본문은 아직 "behaviorally identical", `python3-train`, `tracker-miner-fs-3`, `clamscan`, `ffmpeg`, `borg`를 적습니다. audit의 C2 direction이 이 문장을 재구축 상태로 다시 쓰라고 정했고, 그 일은 9.15에 남아 있습니다.
+building plan §3 C2(intent pair 그룹)는 2026-10-16에 이 방향대로 고쳐졌습니다. 지금은 "In each pair the second file's segment-1 job is a measured job of its own — `file-indexer`, `package-upgrade`, `incremental-backup` — differing from the first's in name and behaviour, and in P1 and P3 in declared class too"라고 적고, P3는 mode(render → backup)와 `initiated`(user → scheduled)를 뒤집는다고 적습니다.
 
 ## 5.3 C2의 채점과 RQ0에서의 역할
 
@@ -969,7 +977,7 @@ RQ0 gate spec의 민감도 line 가운데 `seg1-30s`와 `seg1-120s`는 네 판�
 
 input은 editor 2–97.435 s, focus는 editor 0–99.435 s. `meta.demand`는 적혀 있지 않아 기본값 `oversubscribed`입니다. seed 201.
 
-**compile된 모양.** arrive 2개, wake 11,344개(timer 10,819, input 525), 1,477,726 byte. utilization은 파일 14.505, segment 0 0.5272, segment 1 35.7721입니다. 2.5절에서 말했듯 segment 1의 숫자는 1,389.885 s짜리 job의 CPU 전체를 39.435 s에 몰아 센 정적 추정이지, 실제로 lane 35개를 쓴다는 뜻이 아닙니다. 9.14 D4는 이 segment의 demand를 "35.77 lanes (second segment)"로 기록합니다. query point는 0 s, 60 s, 99.435 s입니다.
+**compile된 모양.** arrive 2개, wake 11,344개(timer 10,819, input 525), 1,477,765 byte. utilization은 파일 14.505, segment 0 0.5272, segment 1 35.7721입니다. 2.5절에서 말했듯 segment 1의 숫자는 1,389.885 s짜리 job의 CPU 전체를 39.435 s에 몰아 센 정적 추정이지, 실제로 lane 35개를 쓴다는 뜻이 아닙니다. 9.14 D4는 이 segment의 demand를 "35.77 lanes (second segment)"로 기록합니다. query point는 0 s, 60 s, 99.435 s입니다.
 
 **정한 결정.**
 - 9.10 D12와 D85, D90: training은 PyTorch MNIST 예제, CPU 총량 1,389.885 s(4.15절과 같은 job).
@@ -994,7 +1002,7 @@ recipe `c2-pairs.variant.yaml`의 연산 둘로 만듭니다.
 
 결과로 segment 1은 60–99.435 s `indexing`, `background_wanted: false`, `initiated: session`, `[S11, S14]`(S11은 software development, S14는 file indexing scenario)이 됩니다. 나머지는 `c2-p1a`와 같습니다.
 
-**compile된 모양.** arrive 2개(`code` normal, `tracker-miner-f` idle), wake 11,344개(timer 10,819, input 525 — `c2-p1a`와 같은 수), 2,346,496 byte. utilization은 파일 0.9238, segment 1 1.5272입니다. 편집기의 wake가 `c2-p1a`와 똑같은 이유는 seed가 같고 추첨이 task id로 열쇠가 걸려 있기 때문입니다(2.2절). 두 파일이 다른 곳은 `hog` task와 segment 1의 label뿐입니다.
+**compile된 모양.** arrive 2개(`code` normal, `tracker-miner-f` idle), wake 11,344개(timer 10,819, input 525 — `c2-p1a`와 같은 수), 2,346,535 byte. utilization은 파일 0.9238, segment 1 1.5272입니다. 편집기의 wake가 `c2-p1a`와 똑같은 이유는 seed가 같고 추첨이 task id로 열쇠가 걸려 있기 때문입니다(2.2절). 두 파일이 다른 곳은 `hog` task와 segment 1의 label뿐입니다.
 
 **정한 결정.**
 - 9.10 D6(측정된 indexer 자신의 표, 5.2절).
@@ -1003,7 +1011,7 @@ recipe `c2-pairs.variant.yaml`의 연산 둘로 만듭니다.
 
 **채점.** 편집기 P99(window 60–99.435 s) 하나. 원치 않는 index에는 term이 없습니다. RQ0에서는 보고 파일입니다(idle class, 1.11절).
 
-> **열린 자리.** "P1이 RQ0의 load-bearing pair"라는 기록(audit의 C2(intent pair 그룹) direction)과 9.14 decision 2의 결과가 어긋나 보입니다. 9.14는 `c2-p1b`를 idle class 때문에 보고 파일로 돌렸으므로, P1(training run 대 indexer 쌍)에서 판정에 남은 것은 `c2-p1a` 하나입니다. RQ0 gate spec은 "the C2 pairs' normal-class halves"를 판정에 넣는다고 적으니 의도된 결과이지만, P1이 쌍으로서 RQ0 판정에 기여하지는 않습니다. audit의 문장이 9.14 이전의 상태를 말한 것인지는 기록에 따로 적혀 있지 않습니다. 확인 필요.
+> **왜 이렇게 정했나.** "P1이 RQ0의 load-bearing pair"라는 audit의 문장과 9.14 decision 2의 결과(`c2-p1b`는 idle class라서 보고 파일)가 어긋나 보였는데, 9.23 D9(2026-10-14)가 P1을 지금 모습 그대로 load-bearing pair로 적기로 했습니다. P1은 recognition의 주장, 곧 사용자가 원한 training run과 아무도 시키지 않은 indexer를 구별하는 일(이름 표로는 할 수 없음)을 지고, scheduling의 headroom은 `c2-p1a` 쪽에서 집니다. RQ0가 `c2-p1a`를 판정하고 `c2-p1b`를 보고하는 것은 설계대로입니다(9.14 decision 2). 실행기의 엄격한 idle 규칙은 idle class indexer를 모든 row 아래에 두므로 `c2-p1b` 쪽 headroom은 0이고, indexer가 스스로 선언한 class가 그 쪽을 정합니다. audit의 문장은 그날의 기록이라 그대로 둡니다.
 
 ## 5.5 P2 — `c2-p2a`(원하는 다운로드) 대 `c2-p2b`(원치 않는 upgrade)
 
@@ -1026,7 +1034,7 @@ recipe `c2-pairs.variant.yaml`의 연산 둘로 만듭니다.
 
 `input: []`, focus game 0–86.385 s. 기본값 `oversubscribed`, seed 202.
 
-**compile된 모양.** arrive 19개(chain 17 + `steam` 둘), wake 26,010개(모두 timer), 12,888,001 byte. utilization 파일 9.3829, segment 0 0.9651, segment 1 28.5251(727.170 s의 CPU를 26.385 s에 몰아 센 값). query point 0 s, 60 s(`steam`이 둘이 됨), 86.385 s.
+**compile된 모양.** arrive 19개(chain 17 + `steam` 둘), wake 26,010개(모두 timer), 12,888,039 byte. utilization 파일 9.3829, segment 0 0.9651, segment 1 28.5251(727.170 s의 CPU를 26.385 s에 몰아 센 값). query point 0 s, 60 s(`steam`이 둘이 됨), 86.385 s.
 
 **정한 결정.**
 - 9.10 D7(`c2-p2a`의 원하는 다운로드는 게임 중 사용자가 시작한 다른 게임의 설치라는 결정, 2026-10-01). 이유: Valve의 FAQ(`steam-downloads`)는 "Steam automatically pauses your downloads when a game is launched"라고 적고, steam-for-linux 이슈 #8821은 게임 중 Install을 누르면 바로 받기 시작한다고 보고합니다. 그래서 "게임 중 배경 update 다운로드"라는 옛 그림은 기본 동작에 어긋나고, "사용자가 직접 시작한 설치"가 실제로 일어나는 상황입니다. segment 1에 `initiated: user`가 붙은 이유입니다.
@@ -1055,7 +1063,7 @@ segment 1은 60–86.385 s `gaming`, `background_wanted: false`, `background: pa
 
 - **`package-upgrade`** — Ubuntu 24.04의 `apt-daily-upgrade.service`가 하루치 보안 업데이트(2026-07-27의 glibc 업데이트)를 설치하는 단계를 측정한 batch-loop archetype입니다. CPU의 대부분은 `locale-gen`이 돌리는 `localedef` 18번입니다.
 
-**compile된 모양.** arrive 19개, wake 26,010개, 3,396,076 byte, utilization 1.2706(segment 1 1.9651). query point 0 s, 60 s, 86.385 s.
+**compile된 모양.** arrive 19개, wake 26,010개, 3,396,114 byte, utilization 1.2706(segment 1 1.9651). query point 0 s, 60 s, 86.385 s.
 
 **정한 결정.**
 - 9.10 D3(원치 않는 anti-virus scan을 Ubuntu 기본 unattended upgrade로 바꾼 결정, 2026-10-01). 이유: ClamAV 문서는 스스로를 "not a traditional anti-virus or endpoint security suite"라고 부르고, 어떤 ClamAV package도 예약 scan을 싣지 않으며, ClamTk는 "no longer maintained"이고 Debian popcon에서 정기 사용이 0.11 %입니다. 반대로 `unattended-upgrades`는 Ubuntu 24.04 데스크톱 기본 layer에 있고 기본으로 켜져 매일 돕니다. `background_wanted: false`의 정의("work nobody asked for right now")에 맞는 실제 기본 작업입니다.
@@ -1079,7 +1087,7 @@ recipe의 연산 하나:
 
 - **`game-download-idle`** — `game-download`의 표, 수명, 크기 조정 규칙, 검증 기록을 YAML anchor로 그대로 공유하고, `declared_class: idle`과 짧은 modelling note만 자기 내용으로 가진 library 항목입니다.
 
-**compile된 모양.** arrive 19개(18개 normal, 다운로드 하나 idle), wake 26,010개, 12,888,009 byte(`c2-p2a`보다 8 byte 큼 — id 문자열과 class 문자열의 길이 차), utilization 9.3829. segment, label, attribute, event 시각이 `c2-p2a`와 모두 같습니다. `dataset/tools/tests/test_coreset.py`의 `test_idle_download_variant_differs_in_the_class_alone`가 "두 compile 결과는 다운로드 task의 class만 다르다"를 test합니다.
+**compile된 모양.** arrive 19개(18개 normal, 다운로드 하나 idle), wake 26,010개, 12,888,047 byte(`c2-p2a`보다 8 byte 큼 — id 문자열과 class 문자열의 길이 차), utilization 9.3829. segment, label, attribute, event 시각이 `c2-p2a`와 모두 같습니다. `dataset/tools/tests/test_coreset.py`의 `test_idle_download_variant_differs_in_the_class_alone`가 "두 compile 결과는 다운로드 task의 class만 다르다"를 test합니다.
 
 **왜 이 파일이 있나.** 이 파일은 recognition도 scheduling 이득도 직접 재지 않습니다. RQ0 gate spec의 `bounding_pair` line이 `c2-p2a`와 이 파일을 함께 읽습니다. 그 이유를 이해하려면 nice를 알아야 합니다.
 
@@ -1089,11 +1097,11 @@ recipe의 연산 하나:
 
 **채점과 RQ0.** scoring spec 항목은 `base: c2-p2a`이고 term도 `c2-p2a`와 같습니다. RQ0에서는 판정 파일이 아니라 보고 파일이며, `bounding_pair` line의 b쪽입니다. 그 line의 reason은 "the two files are byte-identical but for the download task's declared class — carried at full standing as measured (a), or in the idle class (b) … The verdict on each is reported and the difference stated as the reach of carrying the nice-10 work at full standing"입니다.
 
-이 파일 때문에 core set은 50개에서 51개가 되었고, segment는 64개에서 66개가 되었습니다(`c2-p2a-idle`의 segment 둘). 그 뒤의 문서 몇은 아직 50개를 적습니다(13장).
+이 파일 때문에 core set은 50개에서 51개가 되었고, segment는 64개에서 66개가 되었습니다(`c2-p2a-idle`의 segment 둘). 2026-10-14에 9.23 D2가 `c6-spoof`를 둘로 나누어 segment는 67개가 되었습니다.
 
 ## 5.7 P3 — `c2-p3a`(직접 시작한 export) 대 `c2-p3b`(예약된 backup)
 
-P3(export 대 backup 쌍)는 다른 두 쌍과 성격이 다릅니다. 두 파일 모두 segment 1이 `background_wanted: true`입니다. 다른 것은 mode(`render` 대 `backup`)와 `initiated`(`user` 대 `scheduled`)입니다. building plan §3 C2(intent pair 그룹)는 P3를 "user-initiated bulk vs scheduled bulk"라고 적습니다. 그러니 P3는 attribute가 아니라 mode를 가르는 쌍입니다. 그래도 C2에 있는 이유는 두 상황이 "편집기 + 무거운 bulk 작업"으로 같은 모양이기 때문입니다. Phase 7 archive는 `pre_committed_miss` annotation을 새로 만든 이유로 이 쌍을 듭니다. "the existing `initiated` could not, since P3b is `scheduled` and fully recognizable." `deja-dup`이라는 이름이 backup을 그대로 드러내기 때문입니다.
+P3(export 대 backup 쌍)는 다른 두 쌍과 성격이 다릅니다. 두 파일 모두 segment 1이 `background_wanted: true`입니다. 다른 것은 mode(`render` 대 `backup`)와 `initiated`(`user` 대 `scheduled`)입니다. building plan §3 C2(intent pair 그룹)는 P3를 "user-initiated export against scheduled backup"이라고 적습니다. 그러니 P3는 attribute가 아니라 mode를 가르는 쌍입니다. 그래도 C2에 있는 이유는 두 상황이 "편집기 + 무거운 bulk 작업"으로 같은 모양이기 때문입니다. Phase 7 archive는 `pre_committed_miss` annotation을 새로 만든 이유로 이 쌍을 듭니다. "the existing `initiated` could not, since P3b is `scheduled` and fully recognizable." `deja-dup`이라는 이름이 backup을 그대로 드러내기 때문입니다.
 
 ### `c2-p3a` — 영상 편집 중 직접 시작한 export
 
@@ -1111,7 +1119,7 @@ P3(export 대 backup 쌍)는 다른 두 쌍과 성격이 다릅니다. 두 파�
 
 input 2–324 s, focus 0–326 s, operation `preview-render` 30 s. seed 203, 기본값 `oversubscribed`.
 
-**compile된 모양.** arrive 2개, wake 73,890개(모두 timer), 9,708,648 byte, utilization 파일 0.4401(segment 0 0.3893, segment 1 0.4515). query point 0 s, 60 s, 326 s.
+**compile된 모양.** arrive 2개, wake 73,890개(모두 timer), 9,708,687 byte, utilization 파일 0.4401(segment 0 0.3893, segment 1 0.4515). query point 0 s, 60 s, 326 s.
 
 **정한 결정.**
 - 9.10 D10, D105–D107: export는 Kdenlive 자신의 export(4.16절과 같은 job).
@@ -1121,7 +1129,7 @@ input 2–324 s, focus 0–326 s, operation `preview-render` 30 s. seed 203, 기
 
 **채점.** 편집기 `ready_wait` P99(timer, window 60–326 s, 1.0)와 export turnaround(0.5). 9.14 decision 6이 이 term을 progress에서 turnaround로 바꿨습니다. 측정된 export는 어떤 row에서도 끝나므로 받은 CPU는 움직일 수 없고, 끝나는 시각은 움직일 수 있기 때문입니다. RQ0 판정 파일입니다.
 
-> **열린 자리.** `c2-p3a.timeline.yaml`의 머리 주석은 "the export ends by about 99.5 s"라고 적습니다. 이 숫자는 9.10 D125가 segment 1을 60–120 s로 읽었을 때의 값이고, 9.10 D162(2026-10-06)가 지금 길이로 다시 읽어 88.713 s로 고쳤습니다. 주석은 아직 고쳐지지 않았습니다. timeline 주석은 artifact의 byte에 들어가므로, 고치면 이 파일과 파생 파일의 hash가 바뀌고 RQ0 gate spec의 pin도 다시 걸어야 합니다. 이 수정을 맡은 곳은 기록에 없습니다. 미정.
+`c2-p3a.timeline.yaml`의 머리 주석은 "the export ends by about 99.5 s"라고 적습니다. 이 숫자는 9.10 D125가 segment 1을 60–120 s로 읽었을 때의 값이고, 9.10 D162(2026-10-06)가 지금 길이로 다시 읽어 export가 모든 policy에서 88.713 s까지 끝난다는 것을 확인했습니다. 그러니 "about 99.5 s까지"는 여전히 참인 상한이고, 고칠 것도 다시 bless할 것도 없습니다.
 
 ### `c2-p3b` — 영상 편집 중 돈 예약 backup
 
@@ -1139,13 +1147,13 @@ recipe의 연산 둘:
 
 segment 1은 60–326 s `backup`, `background_wanted: true`, `initiated: scheduled`, `[S7, S15]`(S7은 video editing, S15는 backup/sync scenario)가 됩니다.
 
-**compile된 모양.** arrive 2개(`deja-dup`은 idle), wake 73,890개, 9,709,308 byte, utilization 0.8975(segment 1 1.0122). query point 0 s, 60 s, 326 s.
+**compile된 모양.** arrive 2개(`deja-dup`은 idle), wake 73,890개, 9,709,347 byte, utilization 0.8975(segment 1 1.0122). query point 0 s, 60 s, 326 s.
 
 **정한 결정.** 9.10 D8, D112–D125: Déjà Dup의 주간 incremental(4.19절과 같은 job). 9.10 D123, D125: segment 1은 backup이 그 안에서 끝나는 가장 작은 정수 초. 9.10 D162가 여유 0.337 s를 확인했습니다.
 
 **채점.** 편집기 P99(timer, window 60–326 s, 1.0)와 backup progress(0.25). scoring spec 주석은 "the idle-class backup gets the editor's idle lane only, about 162 s of its 165.7 s, and does not finish"라고 적습니다. idle class라서 편집기가 쉬는 틈에만 돌고, 그래서 파일 안에서 끝나지 못합니다. 이것이 길이 계산(work-conserving policy에서 끝나는 상한)과 어긋나 보이는 이유는, idle class는 다른 task가 runnable하지 않을 때만 돌기 때문에 길이 계산의 전제가 그대로 맞지 않기 때문입니다. RQ0에서는 보고 파일입니다(idle class).
 
-> **열린 자리.** P3(export 대 backup 쌍)의 segment 1 길이는 backup이 "모든 work-conserving policy에서" 끝나도록 정했는데(9.10 D123), scoring spec은 같은 backup이 idle class라서 파일 안에서 끝나지 못한다고 적습니다. idle class가 9.13(2026-10-09)에 들어오기 전에 길이를 정했기 때문으로 보입니다. 기록은 이 차이를 progress term으로 처리했다고만 적고, segment 길이를 다시 볼지는 정하지 않았습니다. 미정. 결정할 사람은 인지오입니다.
+> **왜 이렇게 정했나.** P3(export 대 backup 쌍)의 segment 1 길이는 backup이 "모든 work-conserving policy에서" 끝나도록 정했는데(9.10 D123), idle class가 9.13(2026-10-09)에 들어온 뒤로 backup은 편집기가 쉬는 틈에만 돌아 파일 안에서 끝나지 못합니다. 2026-10-16에 인지오가 길이를 그대로 두기로 했습니다. segment 1은 두 파일 모두 60–326 s이고, `c2-p3a.timeline.yaml`의 머리 주석이 지금의 사실을 적습니다. "the length is 9.10 D123's, set on a shared lane; under the idle class (9.13) the variant's backup does not end inside it and is scored by progress (9.14); the export ends by about 99.5 s"입니다. `c2-p3b`의 recipe 주석도 같은 문장을 적습니다.
 
 ---
 
@@ -1155,7 +1163,7 @@ segment 1은 60–326 s `backup`, `background_wanted: true`, `initiated: schedul
 
 C3(transition arcs 그룹)는 한 파일 안에서 상황이 바뀌는 모습을 보여 줍니다. building plan §3 C3는 이 파일들을 "Multi-segment sequences whose boundaries are real label changes (query points that must flip)"라고 적습니다. segment 경계가 진짜 label 변화이고, 그 경계의 query point에서 recognizer의 답이 바뀌어야 합니다.
 
-처음에는 이 세 파일이 전환 recognition을 재는 도구였습니다. 2026-10-11 이후의 역할은 존재 사례입니다. building plan은 "Role (restated 2026-10-11): existence cases — transitions of these shapes, in these orders, occur."라고 적고, 비율 주장(경계에서의 recognition 지연과 정확도, 방향, 순서 있는 모든 mode 쌍, 낡은 설정의 비용)은 generated layer의 transition grid와 return grid의 몫이라고 덧붙입니다. 이유도 적혀 있습니다. "the three arcs hold about eight boundaries in all, each ordered pair at most once, and carry no statistical claim." 세 arc를 합쳐 경계가 여덟 개쯤이고 순서 있는 쌍마다 많아야 한 번이니 통계적 주장을 실을 수 없다는 뜻입니다. 2026-10-14 tree에서 세면 경계는 `c3-workday` 셋, `c3-evening` 둘, `c3-creation` 둘로 일곱 개입니다.
+처음에는 이 세 파일이 전환 recognition을 재는 도구였습니다. 2026-10-11 이후의 역할은 존재 사례입니다. building plan은 "Role (restated 2026-10-11): existence cases — transitions of these shapes, in these orders, occur."라고 적고, 비율 주장(경계에서의 recognition 지연과 정확도, 방향, 순서 있는 모든 mode 쌍, 낡은 설정의 비용)은 generated layer의 transition grid와 return grid의 몫이라고 덧붙입니다. 이유도 적혀 있습니다. "the three arcs hold seven boundaries in all (`c3-workday` three, `c3-evening` and `c3-creation` two each), each ordered pair at most once, and carry no statistical claim." 세 arc를 합쳐 경계가 일곱 개이고 순서 있는 쌍마다 많아야 한 번이니 통계적 주장을 실을 수 없다는 뜻입니다.
 
 > **왜 이렇게 정했나.** 9.19 spec decision 8(손으로 쓴 arc는 그대로 두고 존재 사례로 삼는다는 결정, 2026-10-11)은 "`c3-workday`, `c3-evening` and `c3-creation` are unchanged, their pins unchanged; their role is existence cases"라고 적습니다. 파일은 바꾸지 않고 역할만 다시 정했기 때문에 hash도 RQ0 gate spec의 pin도 그대로입니다.
 
@@ -1201,7 +1209,7 @@ scoring spec의 C3(transition arc 그룹) term은 task별입니다. 주석은 "P
 
 input은 browser 2–58 s, writer 62–118 s, mailer 1,487–1,543 s. focus는 browser 0–60 s, writer 60–1,485 s, mailer 1,485–1,545 s. operation은 `page-load` 30 s, `send` 1,525 s입니다. build 동안(120–1,485 s)에는 input 창이 없지만 focus는 writer에 남습니다. 9.17의 authoring 규칙("does not leave when typing stops")이 그대로 적용된 모습입니다.
 
-**compile된 모양.** arrive 8개, spawn table 17,448개, wake 92,827개(timer 92,621, input 206), 18,781,559 byte, utilization 0.888(segment별 0.0031, 0.0053, 0.9597, 1.0251). query point는 0 s, 60 s, 120 s, 1,485 s, 1,545 s의 다섯입니다.
+**compile된 모양.** arrive 8개, spawn table 17,448개, wake 92,827개(timer 92,621, input 206), 18,781,853 byte, utilization 0.888(segment별 0.0031, 0.0053, 0.9597, 1.0251). query point는 0 s, 60 s, 120 s, 1,485 s, 1,545 s의 다섯입니다.
 
 mail segment가 tier 3인 이유는 grid의 규칙 때문입니다. `make`는 `depart`가 없는 finite task라서, grid는 도착 뒤의 모든 segment에 그 이름(과 자식 이름 `cc1`)을 셉니다. build가 실제로는 1,485 s 전에 끝나도 마찬가지입니다. telemetry도 같습니다. 위의 query point 표를 보면 1,485 s snapshot에 `cc1 ×2908`이 그대로 있습니다. 9.21 D2의 기록은 이 관례를 "the segment after a batch mode departs … still counts the finished job's names … The core set's table has the same convention; left as is"라고 적습니다.
 
@@ -1240,7 +1248,7 @@ mail segment가 tier 3인 이유는 grid의 규칙 때문입니다. `make`는 `d
 
 input은 browser 2–58 s, focus는 browser 0–60 s, game 60–300 s, video 300–420 s. operation `page-load` 30 s.
 
-**compile된 모양.** arrive 26개(browser 1, renderer 4, chain 17, chat 1, steam 1, player 2), wake 107,145개(timer 107,068, input 77), 13,997,551 byte, utilization 0.9006(segment별 0.0139, 1.5062, 0.1327). query point 0 s, 60 s, 300 s, 420 s.
+**compile된 모양.** arrive 26개(browser 1, renderer 4, chain 17, chat 1, steam 1, player 2), wake 107,145개(timer 107,068, input 77), 13,997,908 byte, utilization 0.9006(segment별 0.0139, 1.5062, 0.1327). query point 0 s, 60 s, 300 s, 420 s.
 
 **정한 결정.**
 - 9.10 D29: 순서는 design. 이 arc에는 후보 출처가 없었습니다.
@@ -1270,7 +1278,7 @@ input은 browser 2–58 s, focus는 browser 0–60 s, game 60–300 s, video 300
 
 input은 gimp 2–118 s, kdenlive 122–238 s. focus는 gimp 0–120 s, kdenlive 120–3,212 s. operation은 `unsharp-mask` 30 s, `preview-render` 150 s.
 
-**compile된 모양.** arrive 3개, wake 35,653개(모두 timer — GIMP와 Kdenlive는 keystroke 흐름이 없습니다), 5,332,484 byte, utilization 0.9417(segment별 0.0151, 0.0169, 1.0165). query point 0 s, 120 s, 240 s, 3,212 s.
+**compile된 모양.** arrive 3개, wake 35,653개(모두 timer — GIMP와 Kdenlive는 keystroke 흐름이 없습니다), 5,332,574 byte, utilization 0.9417(segment별 0.0151, 0.0169, 1.0165). query point 0 s, 120 s, 240 s, 3,212 s.
 
 **정한 결정.**
 - 9.10 D29: 순서는 design. SYSmark 30 ACC가 "photo editing beside a background encode"를 정의하므로 이런 겹침의 존재 근거입니다.
@@ -1287,7 +1295,7 @@ input은 gimp 2–118 s, kdenlive 122–238 s. focus는 gimp 0–120 s, kdenlive
 
 ## 7.1 C4가 답하는 질문
 
-C4(distractor injection 그룹)는 상황과 상관없는 process가 중간에 나타날 때 recognizer의 답이 잘못 뒤집히지 않는지를 봅니다. README의 질문 문장은 "If an irrelevant process appears mid-situation (Discord pops up during a game, chrome opens during a compile), does the reading wrongly flip?"입니다. 문장 속 Discord는 9.10 D24 이전의 이름이고, 지금 파일의 chat client는 Element입니다.
+C4(distractor injection 그룹)는 상황과 상관없는 process가 중간에 나타날 때 recognizer의 답이 잘못 뒤집히지 않는지를 봅니다. README의 질문 문장은 "If an irrelevant process appears mid-situation (a chat client, Element, during a game; chrome during a compile; a `7z` archive burst during office work), does the reading wrongly flip?"입니다.
 
 - **distractor** — 이 프로젝트의 용어로, label을 바꾸지 않아야 하는 끼어든 process입니다. 이름이 다른 mode를 떠올리게 하거나 아무 mode에도 속하지 않아서 recognizer를 흔들 수 있습니다.
 
@@ -1322,7 +1330,7 @@ recipe `c4.variant.yaml`은 세 파일 모두 같은 연산 셋을 씁니다. `a
 
 segment는 하나, 0–1,594 s `compile`, `background_wanted: true`, `[S11, S2]`. input과 focus는 `c1-compile`과 같습니다(editor). seed 103(상속).
 
-**compile된 모양.** arrive 7개, spawn table 17,448개, wake 189,792개(timer 187,248, input 2,544), 31,562,905 byte, utilization 0.9994. query point는 0 s, 2 s, 30 s(`chrome ×5` 등장), 60 s(사라짐), 1,594 s의 다섯입니다. 30 s와 60 s의 두 점이 distractor의 순간입니다. 이때도 정답은 `compile/true`입니다.
+**compile된 모양.** arrive 7개, spawn table 17,448개, wake 189,792개(timer 187,248, input 2,544), 31,563,205 byte, utilization 0.9994. query point는 0 s, 2 s, 30 s(`chrome ×5` 등장), 60 s(사라짐), 1,594 s의 다섯입니다. 30 s와 60 s의 두 점이 distractor의 순간입니다. 이때도 정답은 `compile/true`입니다.
 
 **정한 결정.**
 - 9.10 D21, D132–D138: 끼어든 browser는 launch phase를 먼저 재생합니다(`meas-ci:desktop:2026-10-04b`). renderer 넷은 9.10 D152(`renderer-hidden`을 page thread가 가라앉은 뒤로 다시 잰 결정, 1,030 s grace-settle)에 맞춰 다시 추적한 launch 흐름을 씁니다(`meas-ci:desktop:2026-10-05b`). 9.10 D140의 기록에서 browser의 launch phase는 420.6 s이므로, 30 s 동안만 있는 이 Chrome은 처음부터 끝까지 launch 작업 중입니다.
@@ -1343,7 +1351,7 @@ segment는 하나, 0–1,594 s `compile`, `background_wanted: true`, `[S11, S2]`
 
 segment 0–60 s `gaming`, `true`, `[S9, S5]`. input 없음, focus game. seed 102.
 
-**compile된 모양.** arrive 19개, wake 27,177개(모두 timer), 3,670,997 byte, utilization 0.9638. query point 0 s, 30 s, 60 s.
+**compile된 모양.** arrive 19개, wake 27,177개(모두 timer), 3,671,081 byte, utilization 0.9638. query point 0 s, 30 s, 60 s.
 
 **정한 결정.**
 - 9.10 D23: chat client는 메시지 없는 idle 상태, id는 `injected-chat`(예전 `injected-overlay`).
@@ -1364,7 +1372,7 @@ segment 0–60 s `gaming`, `true`, `[S9, S5]`. input 없음, focus game. seed 10
 
 segment 0–60 s `office`, `true`, `[S1, S2, S4, S16]`(S16(archive burst)은 archive/compression burst scenario). seed 101.
 
-**compile된 모양.** arrive 8개, wake 3,334개(`c1-office`와 같은 수 — 7z는 batch loop라 wake event가 없습니다), 443,217 byte, utilization 0.1270. query point 0 s, 30 s, 60 s. 60 s snapshot에는 `7z ×1`만 남습니다. finite task는 telemetry에서 사라지지 않기 때문입니다(`docs/data-contracts.md` §5: "a finite task that exits never disappears from telemetry").
+**compile된 모양.** arrive 8개, wake 3,334개(`c1-office`와 같은 수 — 7z는 batch loop라 wake event가 없습니다), 443,509 byte, utilization 0.1270. query point 0 s, 30 s, 60 s. 60 s snapshot에는 `7z ×1`만 남습니다. finite task는 telemetry에서 사라지지 않기 때문입니다(`docs/data-contracts.md` §5: "a finite task that exits never disappears from telemetry").
 
 **정한 결정.**
 - 9.10 D161(`c4-office`의 7z는 6 s, design, injection에 대한 9.10 D17의 예외라는 결정, 2026-10-06). 이유: 9.7이 측정한 job은 CPU 4,882–5,283 s입니다. 통째로 돌리면 `c4-office`가 약 5,100 s로 늘어나 `c1-office`와의 짝이 깨지고, 더 작은 입력을 정할 출처는 없습니다. 그래서 injection은 실험자의 개입(phase decision 3: 실험의 개입과 calibration 크기는 design)으로 보고 크기를 design으로 둡니다. recipe 주석은 "part of 9.7's measured archive of the Mahoney set, the set cached"라고 적습니다.
@@ -1379,9 +1387,9 @@ segment 0–60 s `office`, `true`, `[S1, S2, S4, S16]`(S16(archive burst)은 arc
 
 C5(familiarity ladder 그룹)는 process 이름이 덜 알아볼 만해질 때 recognition이 버티는지를 봅니다. building plan §3 C5의 핵심 문장은 "Same structure and archetypes; only the name tier changes"와 "Because all tiers bind identical archetypes, any recognition difference is attributable to the name alone"입니다. 행동은 그대로이고 이름만 바뀌므로, recognition의 차이는 이름 탓으로만 돌릴 수 있습니다. 1.9절의 다섯 tier가 여기서 쓰입니다.
 
-이 그룹이 연구에서 중요한 이유는 whitelist와의 대비입니다. building plan은 "The whitelist scores structurally zero on tiers 4–5; that contrast is a headline result"라고 적습니다. 실제 OS의 이름 목록 방식은 존재하지 않는 이름을 결코 맞힐 수 없지만, 언어모델은 `video-playback-`처럼 단어가 뜻을 드러내는 이름(tier 4)에서는 추론할 수 있을지 모릅니다. tier 5(`qzvd`)에서는 누구도 이름으로는 알 수 없습니다.
+이 그룹이 연구에서 중요한 이유는 이름 표와의 대비입니다. building plan은 "Neither name-table condition — the shipped catalogue (`shipped_catalogue`) nor the strongest name table (`strongest_name_table`) — carries a rule for the invented names of tiers 4–5; the strongest name table's structural zero there is the headline contrast"라고 적습니다(1.9절). 이름 표는 존재하지 않는 이름을 결코 맞힐 수 없지만, 언어모델은 `video-playback-`처럼 단어가 뜻을 드러내는 이름(tier 4)에서는 추론할 수 있을지 모릅니다. tier 5(`qzvd`)에서는 누구도 이름으로는 알 수 없습니다.
 
-core set에 남은 C5(familiarity ladder 그룹) 파일은 둘, 곧 `c1-media`를 tier 4와 tier 5로 바꾼 것입니다. 2026-10-12 이후 이 둘도 존재 사례입니다. building plan은 "The two authored files, `c1-media` at tiers 4 and 5, are existence cases; the ladder over the sixteen modes at tiers 3–5 … is generated"라고 적습니다. generated layer의 familiarity ladder가 열여섯 mode 전체를 tier 3–5로 늘어놓습니다(66개 파일).
+core set에 남은 C5(familiarity ladder 그룹) 파일은 둘, 곧 `c1-media`를 tier 4와 tier 5로 바꾼 것입니다. 2026-10-12 이후 이 둘도 존재 사례입니다. building plan은 "The two authored files, `c1-media` at tiers 4 (`c5-t4`) and 5 (`c5-t5`), are existence cases"라고 적습니다. 비율은 generated layer의 familiarity ladder(66개 파일)가 맡습니다. ladder는 열여섯 mode 모두를 tier 4와 5로 늘어놓고, tier 3은 render와 backup의 두 cell에만 둡니다. 그 두 mode의 job이 측정에서 뜻을 드러내지 않는 자기 자식의 이름(`melt-7`, `duplicity`)으로 돌았기 때문입니다(`dataset/grids.yaml`의 `familiarity-ladder`, 8.2절).
 
 ## 8.2 `c5-t3`가 C5를 떠난 이유
 
@@ -1414,7 +1422,7 @@ recipe의 연산:
 
 segment 0–60 s `media`, `background_wanted: true`, `familiarity: 4`, `[S13]`. focus video. seed 104.
 
-**compile된 모양.** arrive 2개, wake 0개, 167,937 byte, utilization 0.1280(`c1-media`와 같음). query point 0 s, 60 s. 첫 snapshot은 `audio-stream-he ×1, video-playback- ×1`, focus `video-playback-`입니다.
+**compile된 모양.** arrive 2개, wake 0개, 168,003 byte, utilization 0.1280(`c1-media`와 같음). query point 0 s, 60 s. 첫 snapshot은 `audio-stream-he ×1, video-playback- ×1`, focus `video-playback-`입니다.
 
 **정한 결정.** 9.10 D25(task 이름은 kernel comm이라는 결정)가 원래 이름 `video-playback-svc`와 `audio-stream-helper`를 15 byte로 잘라 지금의 이름으로 만들었습니다. kernel의 `TASK_COMM_LEN`이 16 byte(마지막 NUL 포함)라서 진짜 Linux에서는 이렇게 잘려 보이기 때문입니다. 잘린 이름도 단어가 남아 있어 tier 4의 성질("inferable from word semantics")을 지킵니다.
 
@@ -1424,7 +1432,7 @@ segment 0–60 s `media`, `background_wanted: true`, `familiarity: 4`, `[S13]`. 
 
 recipe의 연산은 `c5-t4`와 같은 꼴에 이름 `qzvd`, `xkrr`, `familiarity: 5`입니다. segment 0–60 s `media`, `true`, `familiarity: 5`, `[S13]`.
 
-**compile된 모양.** arrive 2개, wake 0개, 167,915 byte, utilization 0.1280. query point 0 s, 60 s.
+**compile된 모양.** arrive 2개, wake 0개, 167,981 byte, utilization 0.1280. query point 0 s, 60 s.
 
 이 파일에서 이름으로 `media`를 맞힐 방법은 없습니다. 그래도 pre-committed miss가 아닌 이유는, 이 파일이 재려는 것이 바로 그 실패의 크기(이름이 아무것도 말해 주지 않을 때 recognizer가 무엇을 하는가)이기 때문입니다. tier별로 정확도를 쪼개 보는 것이 이 그룹의 목적이고, `familiarity`가 그 쪼갬의 열쇠입니다(1.9절).
 
@@ -1434,24 +1442,24 @@ recipe의 연산은 `c5-t4`와 같은 꼴에 이름 `qzvd`, `xkrr`, `familiarity
 
 ## 9.1 C6가 답하는 질문
 
-C6(resolution limits 그룹)는 이름 기반 recognition이 **설계상** 어디서 깨지는지를 보여 줍니다. building plan §3 C6의 제목은 "Resolution-limit files (4 files, pre-committed misses)"이고, 마지막 파일의 설명은 "Shipped as a file so the limit is concrete, not rhetorical"입니다. 한계를 말로만 주장하지 않고, 실제로 측정되는 파일로 내놓는다는 뜻입니다.
+C6(resolution limits 그룹)는 이름 기반 recognition이 **설계상** 어디서 깨지는지를 보여 줍니다. building plan §3 C6은 "Resolution-limit files (4 files)"이고, 그 가운데 셋이 pre-committed miss를 갖는다고 적습니다("Three carry pre-committed misses, annotated `pre_committed_miss`: `c6-alias` whole, `c6-fold` from the call's arrival at 30 s, `c6-spoof` from the spoof's arrival at 20 s"). 마지막 파일의 설명은 "Shipped as a file so the limit is concrete, not rhetorical"입니다. 한계를 말로만 주장하지 않고, 실제로 측정되는 파일로 내놓는다는 뜻입니다.
 
-연구 제안서의 Family 5("Adversarial and boundary")가 이 그룹의 출발점입니다. 제안서의 표에는 "Miner renamed to `chrome.exe` — Misreading expected — the structural limit of name-based recognition", "Compile + music playback — Genuinely ambiguous; humans would disagree", "Chrome with 40 tabs, one playing video — Invisible at process granularity — a resolution limit, not a recognition failure"가 있습니다. C6(resolution limit 그룹)의 네 파일은 이 셋과, 2026-10-12에 더해진 이름 충돌 하나입니다.
+연구 제안서의 Family 5("Adversarial and boundary")가 이 그룹의 출발점이고, 제안서의 표는 C6(resolution limit 그룹)의 네 파일을 그대로 적습니다. "A sustained CPU-bound job nobody asked for, named `chrome`, arriving at 20 s beside the browser's five (`c6-spoof`)", "Two media players under two indexers' real names, `baloo_file` and `tracker-miner-f` (`c6-alias`)", "Gaming while actively awaiting a `-j8` kernel build (`c6-dual`)", "A video call opened at 30 s in the running browser, a sixth `chrome` (`c6-fold`)"입니다. 이름 충돌 `c6-alias`는 2026-10-12에 더해졌습니다.
 
 | 파일 | 한계 | annotation |
 |---|---|---|
-| `c6-spoof` | 신뢰받는 이름(`chrome`)을 단 다른 프로그램 | `spoof: true` |
+| `c6-spoof` | 신뢰받는 이름(`chrome`)을 단 다른 프로그램 | 20 s부터 `background_wanted: false`, `spoof: true`, `pre_committed_miss: true` |
 | `c6-alias` | foreground 전체가 다른 프로그램의 실제 이름을 달고 있음 | `spoof: true`, `pre_committed_miss: true` |
-| `c6-fold` | 한 프로그램 안에서 상황이 바뀜(탭이 통화가 됨) | 없음 |
+| `c6-fold` | 한 프로그램 안에서 상황이 바뀜(탭이 통화가 됨) | 30 s부터의 meeting segment에 `pre_committed_miss: true` |
 | `c6-dual` | 똑같이 활발한 foreground 둘 | `dual_active: true`, mode `ambiguous` |
 
-1.8절에서 짚었듯, 문서들은 C6(resolution limit 그룹) 네 파일을 모두 "pre-committed misses"라고 부르지만 annotation은 `c6-alias`에만 있습니다.
+1.8절에서 보았듯, C6(resolution limit 그룹)의 세 파일이 annotation을 갖습니다. `c6-alias`는 파일 전체, `c6-fold`는 30 s부터, `c6-spoof`는 20 s부터입니다. `c6-dual`은 pre-committed miss가 아니라 `ambiguous`입니다.
 
 ## 9.2 C6의 채점과 RQ0에서의 역할
 
 scoring spec에서 `c6-alias`, `c6-spoof`, `c6-fold`는 base를 선언하고 base의 term을 그대로 되풀이합니다(`c6-alias`는 `c1-media`의 둘, `c6-spoof`와 `c6-fold`는 `c1-browsing`의 browser P99). `c6-dual`은 novel 파일이라 자기 term을 가집니다. chain miss rate(1.0)와 편집기 P99(input, 1.0)입니다.
 
-RQ0에서는 네 파일 모두 보고 파일이고 Layer 2 합산에서 빠집니다. `c6-alias`는 `layer1_exclusions`에도 들어 있습니다. `c6-dual`은 `guard_exemptions`에 이름이 있습니다. 그 이유는 RQ0 gate spec이 적습니다. "c6-dual's ground truth is `mode: ambiguous` with no `background_wanted`; the vocabulary admits no legal oracle answer inside that segment, so the oracle condition runs it on fallback by construction and the fallback share is 1." `ambiguous` 안에서는 oracle조차 고를 답이 없어서 fallback(boot 기본 설정)으로 돌고, 그래서 fallback 비율을 보는 guard에서 이 파일만 면제됩니다.
+RQ0에서는 네 파일 모두 보고 파일이고 Layer 2 합산에서 빠집니다. `c6-alias`, `c6-fold`, `c6-spoof`는 `layer1_exclusions`에도 들어 있습니다. `c6-dual`은 `guard_exemptions`에 이름이 있습니다. 그 이유는 RQ0 gate spec이 적습니다. "c6-dual's ground truth is `mode: ambiguous` with no `background_wanted`; the vocabulary admits no legal oracle answer inside that segment, so the oracle condition runs it on fallback by construction and the fallback share is 1." `ambiguous` 안에서는 oracle조차 고를 답이 없어서 fallback(boot 기본 설정)으로 돌고, 그래서 fallback 비율을 보는 guard에서 이 파일만 면제됩니다.
 
 C6(resolution limit 그룹) 파일 셋(`c6-alias`, `c6-spoof`, `c6-fold`)은 recipe에 `demand: calibration`을 명시하고(Phase 7 spec decision 7), `c6-dual`은 기본값 `oversubscribed`입니다.
 
@@ -1466,22 +1474,27 @@ recipe `c6.variant.yaml`의 연산:
 ```yaml
 - add-task: {id: spoof, name: chrome, archetype: cpu-batch,
              arrive: 20s, bind: {total_work: 30s, program: spoof}, source: {total_work: design, program: design}}
-- patch-segment: {index: 0, attributes: {background_wanted: true, spoof: true}}
+- set-segments:
+    - {from: 0s, to: 20s, mode: browsing, attributes: {background_wanted: true},
+       scenario: [S2]}
+    - {from: 20s, to: 60s, mode: browsing,
+       attributes: {background_wanted: false, spoof: true, pre_committed_miss: true},
+       scenario: [S2]}
 - patch-meta: {demand: calibration}
 ```
 
-segment 0–60 s `browsing`, `background_wanted: true`, `spoof: true`, `[S2]`. input browser 2–58 s, focus browser, operation `page-load` 30 s. seed 105.
+segment는 둘입니다. 0–20 s `browsing`, `background_wanted: true`, `[S2]`, 그리고 20–60 s `browsing`, `background_wanted: false`, `spoof: true`, `pre_committed_miss: true`, `[S2]`. input browser 2–58 s, focus browser, operation `page-load` 30 s. seed 105.
 
 - **`cpu-batch`의 `spoof` program** — 설계상 한 번의 끊기지 않는 RUN입니다. library의 `cpu-batch` 설명은 "The `chrome` spoof is one uninterrupted RUN by construction"이라고 적습니다.
 
-**compile된 모양.** arrive 6개(모두 `chrome`), wake 3,852개(`c1-browsing`과 같은 수), 514,103 byte, utilization 0.5164. query point 0 s, 20 s, 60 s. 20 s의 snapshot은 `chrome ×6`으로, 개수만 하나 늘어납니다. 60 s snapshot에는 `chrome ×1`이 남는데, 끝난 spoof 작업이 telemetry에서 사라지지 않기 때문입니다.
+**compile된 모양.** arrive 6개(모두 `chrome`), wake 3,852개(`c1-browsing`과 같은 수), 514,442 byte, utilization 0.5164(segment별 0.0164, 0.7664). query point 0 s, 20 s, 60 s. 20 s의 snapshot은 `chrome ×6`으로, 개수만 하나 늘어납니다. 60 s snapshot에는 `chrome ×1`이 남는데, 끝난 spoof 작업이 telemetry에서 사라지지 않기 때문입니다.
 
 **정한 결정.**
 - 이 파일은 2026-08-28의 첫 core set부터 있었습니다. 이름 충돌로만 만든다는 원칙은 scenario catalog의 "names only, no paths" 결정에서 옵니다. catalog는 "Family 5 spoofing is authored as *name collision* (a process simply bearing a trusted name), which is exactly the stated resolution limit; path-mismatch detection is future work"라고 적습니다. 실행 파일 경로를 담으면 출처 없는 값이 생기고 recognition 주장을 오염시키기 때문에 경로는 schema에 없습니다.
 - Phase 3의 telemetry 동결(2026-09-06): 규칙 1(개수만 바뀌어도 snapshot)은 이 파일 때문에 중요하다고 기록되었습니다. "under a names-only rule `c6-spoof` would have 1 query point instead of 3 — its spoofing `chrome` arriving among 13 existing ones would never be seen." 지금은 13개가 아니라 5개 사이에 도착합니다(9.10 D131 이후).
 - 9.10 D31: 20 s 도착과 `chrome`이라는 이름의 batch job은 design. `bound-values.md`는 30 s와 `program: spoof`를 "design: by construction"으로 적습니다.
 
-> **열린 자리.** 이 파일의 segment는 `background_wanted: true`이고 `pre_committed_miss`가 없습니다. vocabulary의 정의로 보면, 이름을 속인 CPU-bound 작업은 아무도 부탁하지 않은 일이니 `false`가 맞을 수도 있습니다. 기록된 이유는 없습니다. 이 label이 그대로면, 이름으로 `browsing/true`라고 답하는 recognizer는 "맞힌" 것으로 채점되고, 이 파일이 보여 주는 한계는 recognition 정확도가 아니라 scheduling 결과(속인 작업이 브라우저의 설정을 받음)에서만 드러납니다. 확인 필요. 결정할 사람은 인지오입니다.
+> **왜 이렇게 정했나.** 2026-10-14까지 이 파일은 segment 하나(`browsing`, `background_wanted: true`, `spoof: true`)였고, 이름으로 `browsing/true`라고 답하는 recognizer가 "맞힌" 것으로 채점되었습니다. 9.23 D2(2026-10-14)가 spoof가 도착하는 20 s에서 파일을 나누었습니다. 기록된 이유는 20 s부터 spoof가 아무도 시키지 않은 지속적인 CPU 작업이고, snapshot에는 `chrome` 하나가 늘 뿐 다른 단서가 없다는 것입니다. 그래서 oracle은 20 s부터 `browsing/false`를 읽고 그 row(상한 0.05)를 miner에 적용하며, 이 파일은 `layer1_exclusions`에 들어갔습니다. 이름으로 판단하는 recognizer가 고를 `browsing/true` row의 근거(`daemon/driver-table/prior.yaml`, miner를 lane의 절반으로 묶음)는 그대로 둡니다.
 
 ## 9.4 `c6-alias` — 남의 이름을 단 foreground 전체
 
@@ -1498,11 +1511,11 @@ recipe의 연산:
 
 segment 0–60 s `media`, `background_wanted: true`, `spoof: true`, `pre_committed_miss: true`, `[S13]`. focus video. seed 104.
 
-**compile된 모양.** arrive 2개, wake 0개, 167,961 byte, utilization 0.1280. query point 0 s, 60 s. 첫 snapshot은 `baloo_file ×1, tracker-miner-f ×1`, focus `baloo_file`입니다. 이름 둘이 모두 tier 3이라 segment는 tier 3입니다.
+**compile된 모양.** arrive 2개, wake 0개, 168,027 byte, utilization 0.1280. query point 0 s, 60 s. 첫 snapshot은 `baloo_file ×1, tracker-miner-f ×1`, focus `baloo_file`입니다. 이름 둘이 모두 tier 3이라 segment는 tier 3입니다.
 
-**왜 pre-committed miss인가.** recipe 주석은 "Another program's real name on the whole foreground — the limit `c6-spoof` does not show. No recognizer reaches `media` from these names, so the segment is a pre-committed miss"라고 적습니다. `c6-spoof`는 진짜 프로그램들 사이에 가짜 하나가 섞인 경우라 label에 닿을 수 있지만, 이 파일은 보이는 이름 전부가 indexer라서 어떤 recognizer도 `media`에 닿을 수 없습니다.
+**왜 pre-committed miss인가.** recipe 주석은 "Another program's real name on the whole foreground — the limit `c6-spoof` does not show. No recognizer reaches `media` from these names, so the segment is a pre-committed miss"라고 적습니다. `c6-spoof`에서는 진짜 브라우저의 이름이 그대로 보이므로 mode `browsing`까지는 이름으로 닿을 수 있고, 닿을 수 없는 것은 20 s부터의 `false`입니다(9.3절). 이 파일은 보이는 이름 전부가 indexer의 것이라 어떤 recognizer도 mode `media`에조차 닿을 수 없습니다.
 
-**정한 결정.** 9.20 spec decision 8(2026-10-12), 8.2절의 이유. RQ0 gate spec의 보고 목록에서 `c5-t3`가 `c6-alias`로 바뀌었고 `layer1_exclusions`에 들어갔습니다. headline 정확도의 채점점은 9.17 D4가 기록한 71개(45개 파일)에서, 9.20 D10이 기록한 70개(44개 파일)로 줄었습니다. `c6-alias`의 채점점 하나가 pre-committed miss 쪽으로 옮겨 갔기 때문입니다.
+**정한 결정.** 9.20 spec decision 8(2026-10-12), 8.2절의 이유. RQ0 gate spec의 보고 목록에서 `c5-t3`가 `c6-alias`로 바뀌었고 `layer1_exclusions`에 들어갔습니다. headline 정확도의 채점점은 9.17 D4가 기록한 71개(45개 파일)에서, 9.20 D10이 기록한 70개(44개 파일)로 줄었습니다. `c6-alias`의 채점점 하나가 pre-committed miss 쪽으로 옮겨 갔기 때문입니다. 9.23 D1, D2가 다시 68개(44개 파일)로 줄였습니다(1.6절).
 
 ## 9.5 `c6-fold` — 브라우저 안에서 시작된 통화
 
@@ -1513,21 +1526,21 @@ recipe의 연산:
 ```yaml
 - set-segments:
     - {from: 0s, to: 30s, mode: browsing, attributes: {background_wanted: true}, scenario: [S2]}
-    - {from: 30s, to: 60s, mode: meeting, attributes: {background_wanted: true}, scenario: [S3, S2]}
+    - {from: 30s, to: 60s, mode: meeting, attributes: {background_wanted: true, pre_committed_miss: true}, scenario: [S3, S2]}
 - add-task: {id: call, name: chrome, archetype: video-call, arrive: 30s, depart: 60s}
 - patch-meta: {demand: calibration}
 ```
 
-segment는 둘입니다. 0–30 s `browsing`(S2, web browsing), 30–60 s `meeting`(S3 video conferencing과 S2). 둘 다 `background_wanted: true`. input browser 2–58 s, focus browser 0–60 s, operation `page-load` 30 s. seed 105.
+segment는 둘입니다. 0–30 s `browsing`(S2, web browsing), 30–60 s `meeting`(S3 video conferencing과 S2). 둘 다 `background_wanted: true`이고, meeting segment는 `pre_committed_miss: true`입니다. input browser 2–58 s, focus browser 0–60 s, operation `page-load` 30 s. seed 105.
 
-**compile된 모양.** arrive 6개(모두 `chrome`), wake 3,852개, 680,862 byte, utilization 0.3144(segment별 0.0164, 0.6123). segment 1의 utilization이 큰 것은 통화의 launch phase가 처음 수십 초 동안 CPU를 꽉 쓰기 때문입니다(9.10 D140의 기록: 통화의 launch는 약 10–70 s에 포화). query point 0 s, 30 s, 60 s.
+**compile된 모양.** arrive 6개(모두 `chrome`), wake 3,852개, 681,137 byte, utilization 0.3144(segment별 0.0164, 0.6123). segment 1의 utilization이 큰 것은 통화의 launch phase가 처음 수십 초 동안 CPU를 꽉 쓰기 때문입니다(9.10 D140의 기록: 통화의 launch는 약 10–70 s에 포화). query point 0 s, 30 s, 60 s.
 
 **정한 결정.**
 - 처음 설계(2026-08-28)는 `c1-browsing`의 task를 그대로 두고 segment만 둘로 나눈 것이었습니다. Phase 3 archive는 이 파일을 "never seen", 곧 30 s에 아무 snapshot도 생기지 않는 파일로 기록합니다.
 - 9.10 D30(`c6-fold`의 meeting segment는 그 label대로 통화를 보인다는 결정, 2026-10-01). 이유: 9.10 D24 이후 meeting은 브라우저 안의 통화이고(Linux의 Teams는 web app), Chromium은 통화의 WebRTC와 오디오 thread를 자기 process 안에서 돌립니다. 그래서 브라우저 안에서 시작한 통화는 새 process 이름을 더하지 않습니다. D30 이전에는 meeting segment에 브라우저의 idle과 타이핑만 있었는데, 이제 이름과 행동이 한 관찰에서 옵니다.
 - 9.10 D134, D136, D138: 통화는 이미 settle을 지난 Chrome 안에서 열린 통화의 launch phase를 먼저 재생하고, 그 재생을 10 ms cycle 격자에 맞춰 넣습니다.
 
-> **열린 자리.** 1.8절에서 적은 문제입니다. 9.10 D30은 "the canonical set does not change at the boundary and the file stays the guaranteed miss it was built as"라고 적지만, 통화 task가 더해진 뒤에는 30 s에 `chrome`의 개수가 5에서 6으로 바뀝니다. telemetry 규칙 1에 따라 이것은 snapshot이고 query point입니다. 2026-10-14에 mock daemon으로 확인한 query point는 0 s(`chrome ×5`), 30 s(`chrome ×6`), 60 s(빈 집합)입니다. 그러니 "query가 일어나지 않는다"는 building plan §3 C6(resolution limit 그룹)의 문장("the canonical set is unchanged, so no query fires")은 지금 tree에서 참이 아닙니다. 참으로 남는 것은, 30 s의 snapshot이 이름으로는 통화를 드러내지 않는다는 점입니다. 이 segment에는 `pre_committed_miss`가 없어서 grader는 30 s의 점을 headline 정확도에 넣습니다. 확인 필요. 결정할 사람은 인지오입니다.
+> **왜 이렇게 정했나.** 9.10 D30은 "the canonical set does not change at the boundary and the file stays the guaranteed miss it was built as"라고 적었지만, 통화 task가 더해진 뒤에는 30 s에 `chrome`의 개수가 5에서 6으로 바뀝니다. telemetry 규칙 1에 따라 이것은 snapshot이고 query point입니다(mock daemon으로 세면 0 s의 `chrome ×5`, 30 s의 `chrome ×6`, 60 s의 빈 집합). 9.23 D1(2026-10-14)이 이것을 받아들였습니다. 30 s에 query가 생기지만 snapshot 어디에도 통화라는 단서가 없으므로(여섯 번째 `chrome`은 새 탭이 열려도 똑같이 보입니다), meeting segment(30–60 s)를 pre-committed miss로 표시해 Layer 1(recognition 정확도)의 headline에서 빼고, 이 파일을 `layer1_exclusions`에 넣었습니다. building plan §3 C6도 "a count-only change, so a query fires at 30 s"라고 적습니다.
 
 ## 9.6 `c6-dual` — 똑같이 활발한 foreground 둘
 
@@ -1541,7 +1554,7 @@ segment는 둘입니다. 0–30 s `browsing`(S2, web browsing), 30–60 s `meeti
 
 segment는 하나, 0–12,072 s `ambiguous`, `attributes: {dual_active: true}`, `[S9, S11]`. `background_wanted`는 없습니다. input 창은 편집기가 focus를 가진 아홉 구간(2–688 s, 1,376–2,064 s, … 11,008–11,696 s)이고, focus는 0 s 편집기에서 시작해 688 s마다 게임과 번갈아 18개 구간입니다. seed 601, 기본값 `oversubscribed`.
 
-**compile된 모양.** core set에서 가장 큰 파일입니다. arrive 19개(chain 17, `code`, `make`), spawn table 17,448개, wake 1,371,292개(timer 1,357,541, input 13,751), 187,601,756 byte, utilization 0.8388. query point 20개, 곧 0 s, 10 s(build 도착), 688 s부터 11,696 s까지 focus가 바뀌는 17번, 12,072 s입니다. 9.17 D1의 기록은 이 17번을 "the core set's only focus-only query points"라고 적습니다. 이름 집합은 그대로이고 focus만 바뀌는 query point가 core set에서 이 파일에만 있다는 뜻입니다.
+**compile된 모양.** core set에서 가장 큰 파일입니다. arrive 19개(chain 17, `code`, `make`), spawn table 17,448개, wake 1,371,292개(timer 1,357,541, input 13,751), 187,601,795 byte, utilization 0.8388. query point 20개, 곧 0 s, 10 s(build 도착), 688 s부터 11,696 s까지 focus가 바뀌는 17번, 12,072 s입니다. 9.17 D1의 기록은 이 17번을 "the core set's only focus-only query points"라고 적습니다. 이름 집합은 그대로이고 focus만 바뀌는 query point가 core set에서 이 파일에만 있다는 뜻입니다.
 
 **정한 결정.**
 - 2026-08-26 grill D21(dual-active label 규칙 비준): 진짜 애매한 dual-active 상태는 문서화된 resolution limit이고 "shipped as a third C6 file ('even the oracle cannot assign a label')"입니다.
@@ -1549,11 +1562,11 @@ segment는 하나, 0–12,072 s `ambiguous`, `attributes: {dual_active: true}`, 
 - 9.10 D18과 D141: build는 측정된 kernel build 전체. 파일 길이는 10 s + build CPU 1,363.243 s + 다른 task(chain과 편집기)의 CPU 10,698.551 s = 12,071.794 s, 올림 12,072 s(3시간 21분)입니다. 게임이 lane의 0.6을 쥐고 있어서 build는 lane의 약 0.11만 받으므로 길어졌습니다. 예전 값은 85개 object job이었습니다.
 - `lane_share: 0.6`과 이 동시 구성은 design입니다(9.10 D31, "`c6-dual`'s co-occurrence").
 - 9.17 D1(`c6-dual`의 focus는 688 s마다 번갈아 오간다는 결정, 2026-10-11). 이유: 688 s는 "the mean continuous segment in a working sphere before switching, 11 min 28 s"로, González와 Mark의 CHI 2004 논문(`gonzalez-chi04`)이 보고한 값입니다. 규칙적인 교대, 편집기 먼저, 2 s의 타이핑 시작 여유는 design입니다.
-- 9.10 D143–D145, D154, D158: 12,068 s 동안 편집기를 몰아 쓰는 일이 측정된 phase(600 s)를 크게 넘으므로 긴 probe로 확인했습니다. 첫 probe에서는 같은 줄에 글자가 계속 쌓여 VS Code가 느려지다 멈췄고(약 11,400 s), 두 번째 probe(창마다 파일을 원래대로 되돌림)에서는 평균 비율 1.001로 유지되었습니다. 다만 18–19번째 창(10,711–12,050 s)에서 확장 host가 CPU를 104 s, 398 s 쓰는 사건이 있었고, 이 사건은 "stated, not carried", 곧 명시하되 싣지 않았습니다.
+- 9.10 D143–D145, D154, D158: 9.17 전에는 이 파일이 편집기를 12,068 s 동안 내내 focus에 두었는데, 그것이 측정된 phase(600 s)를 크게 넘으므로 긴 probe로 확인했습니다. 9.17 D1 이후 편집기의 focus는 게임과 688 s마다 번갈아서 가장 긴 연속 구간이 686–688 s이고, probe의 길이와 읽은 값은 그대로입니다. library의 `code-editor` scope가 이것을 "the span `c6-dual` held it focused before its focus alternated with the game every 688 s (9.17 D1)"로 적습니다(9.23 D8). 첫 probe에서는 같은 줄에 글자가 계속 쌓여 VS Code가 느려지다 멈췄고(약 11,400 s), 두 번째 probe(창마다 파일을 원래대로 되돌림)에서는 평균 비율 1.001로 유지되었습니다. 다만 18–19번째 창(10,711–12,050 s)에서 확장 host가 CPU를 104 s, 398 s 쓰는 사건이 있었고, 이 사건은 "stated, not carried", 곧 명시하되 싣지 않았습니다.
 
 **채점.** chain miss rate(1.0)와 편집기 P99(input, 1.0). 정답 mode가 없으니 recognition 정확도에서는 빠지고, Layer 2 합산에서도 빠집니다.
 
-> **열린 자리.** 이 파일은 시뮬레이션 비용이 큽니다. 9.14 D13–D14와 그 handoff는 `c6-dual` 한 run의 records build가 약 40분(trace 4,200만 줄)이 걸리고, RQ0 run의 `random` seed 100개를 이 파일에서 돌리는 비용을 계획해야 한다고 적습니다. 더 싼 records 경로는 Phase 10의 별도 작업으로 남아 있습니다. 미실행.
+> **열린 자리.** 이 파일은 시뮬레이션 비용이 큽니다. 9.14 D13–D14와 그 handoff는 `c6-dual` 한 run의 records build가 mock trace에서 약 40분(trace 4,200만 줄)이 걸리고, 한 run의 memory 최고점이 1,450만 행이라 여유 memory가 약 8 GB 아래인 기계에서는 swap이 생긴다고 적습니다. `random` 조건의 seed 100개를 이 파일 하나에 돌리면 약 67시간입니다. 2026-10-16에 인지오는 대응을 지금 고르지 않고 Phase 10에서 실제 simulator의 측정된 비용을 보고 정하기로 했습니다. 더 싼 records 경로, RQ0 gate spec의 `n-grounding` statement에 따른 N의 변경(어느 run보다 먼저 harness changelog에 기록), 또는 비용을 그대로 지는 것 가운데 하나입니다(`_dev/TODO.md`의 Phase 10 줄). 이 파일은 보고 파일입니다.
 
 ---
 
@@ -1567,11 +1580,11 @@ building plan §3 C7(attribute counterpart 그룹)은 역할을 두 가지로 �
 
 - **headroom** — 한 workload에서 얻을 수 있는 개선의 여지입니다. oracle(정답 label을 그대로 읽는 조건)과 비교 조건 사이의 점수 차로 잽니다.
 
-C7(attribute counterpart 그룹)이 없던 때(Phase 7 이전)에는 `false` segment가 두 개(`c2-p1b`, `c2-p2b`)뿐이어서, 항상 `true`라고 답하는 recognizer의 attribute 정확도가 약 95 %였습니다(2026-09-10 memo §1). C7이 생긴 뒤 `false` segment는 열여덟 개입니다. 2026-10-14 `coverage-grid.json`에서 세면 cell 위 segment 65개 가운데 `false`가 18개이고, 항상 `true`라고 답하면 segment 기준으로 47/65, 약 72 %를 맞힙니다(이 권의 계산). Phase 7 archive가 기록한 값은 63개 중 18개, 약 71 %였습니다. 둘의 차이는 `c2-p2a-idle`이 `true` segment 둘을 더한 것입니다. 그래서 7.5(Phase 7의 pair review sub-task)는 attribute 정확도의 headline을 raw accuracy가 아니라 balanced accuracy(true recall과 false recall의 평균)에 confusion matrix를 곁들인 것으로 하자고 정했습니다. 항상 `true`라고 답하면 balanced accuracy는 정확히 50 %가 됩니다.
+C7(attribute counterpart 그룹)이 없던 때(Phase 7 이전)에는 `false` segment가 두 개(`c2-p1b`, `c2-p2b`)뿐이어서, 항상 `true`라고 답하는 recognizer의 attribute 정확도가 약 95 %였습니다(2026-09-10 memo §1). C7이 생긴 뒤 `false` segment는 열여덟 개가 되었고, 9.23 D2가 `c6-spoof`의 뒤 segment를 더해 지금은 열아홉 개입니다. 2026-10-17 `coverage-grid.json`에서 세면 cell 위 segment 66개 가운데 `false`가 19개이고, 항상 `true`라고 답하면 segment 기준으로 47/66, 약 71 %를 맞힙니다(이 권의 계산). Phase 7 archive가 기록한 값은 63개 중 18개, 약 71 %였습니다. 그 뒤 `c2-p2a-idle`이 `true` segment 둘을, `c6-spoof`의 분할이 `false` segment 하나를 더했습니다. 그래서 7.5(Phase 7의 pair review sub-task)는 attribute 정확도의 headline을 raw accuracy가 아니라 balanced accuracy(true recall과 false recall의 평균)에 confusion matrix를 곁들인 것으로 하자고 정했습니다. 항상 `true`라고 답하면 balanced accuracy는 정확히 50 %가 됩니다.
 
 ## 10.2 recipe 문법: 파생이 어떻게 일어나나
 
-C7(attribute counterpart 그룹)의 열여섯 파일은 recipe 하나, `c7.variant.yaml`(297행)에서 나옵니다. recipe가 무엇이고 어떻게 돌아가는지를 먼저 정리합니다. C2(intent pair 그룹), C4(distractor injection 그룹), C5(familiarity ladder 그룹), C6(resolution limit 그룹)의 파생도 같은 장치를 씁니다.
+C7(attribute counterpart 그룹)의 열여섯 파일은 recipe 하나, `c7.variant.yaml`(317행)에서 나옵니다. recipe가 무엇이고 어떻게 돌아가는지를 먼저 정리합니다. C2(intent pair 그룹), C4(distractor injection 그룹), C5(familiarity ladder 그룹), C6(resolution limit 그룹)의 파생도 같은 장치를 씁니다.
 
 **형식.** recipe는 `variants:` 아래에 출력 하나마다 항목 하나를 둡니다.
 
@@ -1585,7 +1598,7 @@ variants:
       - ...
 ```
 
-building plan §1은 timeline 형식을 설명하며 "`variants:`/`inherit()`/`inject:` sugar"라는 말을 씁니다. 이 말은 처음 설계 때의 이름입니다. task-2.4 decision 1(파생은 선언적 variant 명세와 범용 deriver 하나로 한다는 결정, 2026-08-28)이 대응을 적습니다. "`inherit()` = `from:`, `inject:` = an add-task op, `variants:` = several outputs of one spec." 지금의 recipe 파일에는 `inherit()`나 `inject:`라는 글자가 없고, `from:`과 `add-task`가 그 자리를 합니다.
+building plan §1은 예전에 timeline 형식을 설명하며 "`variants:`/`inherit()`/`inject:` sugar"라는 말을 썼습니다. 처음 설계 때의 이름이고, 지금은 "variant recipes (`*.variant.yaml`) that derive a file from a base through a closed op set"이라고 적습니다. task-2.4 decision 1(파생은 선언적 variant 명세와 범용 deriver 하나로 한다는 결정, 2026-08-28)이 옛 이름과의 대응을 적습니다. "`inherit()` = `from:`, `inject:` = an add-task op, `variants:` = several outputs of one spec." 지금의 recipe 파일에는 `inherit()`나 `inject:`라는 글자가 없고, `from:`과 `add-task`가 그 자리를 합니다.
 
 **연산.** `dataset/tools/wlc/deriver.py`의 `OPS`는 아홉 개로 닫혀 있습니다.
 
@@ -1595,7 +1608,7 @@ building plan §1은 timeline 형식을 설명하며 "`variants:`/`inherit()`/`i
 | `patch-segment` | segment 하나의 field를 덮어씀 | C2, C4, C5, C6 |
 | `patch-task` | task 하나의 field를 덮어씀 | C2, C5, C6, C7 |
 | `add-task` | task 하나를 더함 | C4, C6, C7 |
-| `set-segments` | segment 목록 전체를 교체 | C6(`c6-fold`), C7 |
+| `set-segments` | segment 목록 전체를 교체 | C6(`c6-spoof`, `c6-fold`), C7 |
 | `set-input` | keystroke 창 전체를 교체(base 창의 slice면 `slice_of`를 적음) | C7 |
 | `set-focus` | focus track 전체를 교체 | C7 |
 | `set-operations` | operation 목록 전체를 교체 | C7 |
@@ -1620,7 +1633,7 @@ Phase 9 이후의 counterpart는 다릅니다. 9.10 D41(interactive counterpart�
 5. operation이 base에서의 비율 위치로 옮겨진다.
 6. keystroke는 base의 것을 잘라 쓴다(10.5절).
 
-3–6은 "앞 C초를 잘라 낸다"는 한 가지 결정의 결과입니다. 9.18의 TODO hand-off는 9.15에 이 사실을 문서로 고쳐 쓰라고 넘기며 C7(attribute counterpart 그룹)의 "one-diff pair" 문구를 "length, window, operation times differ; the keystrokes are now the base's over the slice"로 바꾸라고 적습니다. 길이와 창과 operation 시각은 다르지만, keystroke는 이제 그 구간에서 base의 것이라는 뜻입니다.
+3–6은 "앞 C초를 잘라 낸다"는 한 가지 결정의 결과입니다. building plan §3 C7은 2026-10-16부터 이것을 "A C7 pair is not a one-diff pair"라고 적습니다. counterpart는 원치 않는 job(또는 module build, 또는 label)에 더해 파일 길이, input 창, operation 시각이 base와 다르고, keystroke는 같은 시각의 base의 것에서 자기 operation 안에 든 것을 뺀 것, 곧 같음이 아니라 부분집합입니다(9.18 D1).
 
 비교할 때는 counterpart를 base 전체가 아니라 base의 앞 C초와 비교합니다. 9.10 D41의 hand-off가 "the pair review and the scoring spec compare each counterpart with its base's first C seconds"라고 적습니다.
 
@@ -1667,7 +1680,7 @@ counterpart의 편집기가 받는 keystroke는 base의 편집기가 같은 구�
 
 photo, video-edit, render, transcode, backup은 GIMP와 Kdenlive라 keystroke가 없습니다. 9.18 D6의 기록("browsing 85 → 79 (the six inside the page load), office 102 → 91, dev 47 → 47, mail 0 → 0 …")은 서로 다른 시각의 수로 센 값이고, browsing, office, dev, mail에서 위 표의 괄호 안 숫자와 같습니다. browsing에서 줄어든 여섯 개는 counterpart의 page load(13.1925 s) 안에 떨어진 keystroke입니다.
 
-> **열린 자리.** 9.18 D6은 indexing을 "46 → 27", compile을 "2354 → 358", ml-train을 "1844 → 1 628"로 적습니다. counterpart 쪽 수(27, 358, 1,628)는 위 표와 같지만 base 쪽 수가 위 표(28, 358, 1,629)와 다릅니다. 9.18 D6의 base 수가 무엇을 센 것인지(앞 C초가 아니라 base 전체였는지, 다른 build에서 센 것인지)는 기록에서 확인하지 못했습니다. 확인 필요. 이 차이는 subset 관계에는 영향이 없습니다.
+9.18 D6은 indexing을 "46 → 27", compile을 "2354 → 358", ml-train을 "1844 → 1 628"로 적습니다. counterpart 쪽 수(27, 358, 1,628)는 위 표와 같지만, base 쪽 수는 앞 C초가 아니라 base 파일 전체의 서로 다른 시각의 수입니다. 앞 C초로 세면 위 표의 괄호 안 숫자 28, 358, 1,629입니다. 9.23 D7(2026-10-14)이 이렇게 바로잡고 9.18 D6 옆에 그것을 가리키는 메모를 남겼습니다. subset 관계는 어느 쪽으로 세어도 성립합니다.
 
 ## 10.6 interactive counterpart 열 개
 
@@ -1688,7 +1701,7 @@ photo, video-edit, render, transcode, backup은 GIMP와 Kdenlive라 keystroke가
 | `c7-video-edit` | `kdenlive` + upgrade | 2–24.385 s / `preview-render` 13.1925 s | S7, S17 | 2 | 9,836 (9,836/0) | 1.5618 | 판정 |
 | `c7-idle` | 세션 넷 + upgrade | 없음(focus도 없음) | S18, S17 | 5 | 46 (46/0) | 1.0007 | 보고 |
 
-숫자는 2026-10-14의 compile 결과와 `build.manifest.json`에서 셌습니다. 모든 파일의 query point는 0 s와 26.385 s 둘입니다. utilization이 1을 넘는 것은 26.385 s짜리 job이 26.385 s 파일 안에 통째로 있고(그것만으로 1.0) 그 위에 base의 부하가 얹히기 때문입니다. building plan §5a는 이 결과를 "For C7 that puts the interactive counterparts at the regime's ceiling"이라고 적습니다. 같은 문단의 "`c7-gaming` at two and a half lanes"는 Phase 7 당시(chain 1.46)의 숫자이고, 지금은 1.9149입니다.
+숫자는 2026-10-14의 compile 결과와 `build.manifest.json`에서 셌습니다. 모든 파일의 query point는 0 s와 26.385 s 둘입니다. utilization이 1을 넘는 것은 26.385 s짜리 job이 26.385 s 파일 안에 통째로 있고(그것만으로 1.0) 그 위에 base의 부하가 얹히기 때문입니다. building plan §5a는 이 결과를 "For C7 that puts the interactive counterparts at 1.0007–1.5618 lanes and `c7-gaming` at 1.9149"라고 적습니다.
 
 > **왜 이렇게 정했나.** C7(attribute counterpart 그룹) 파일이 `oversubscribed`가 아니라 `calibration`을 명시하는 이유는 Phase 7 spec decision 7과 7.5 grill (a)가 적습니다. Phase 7 archive decision 8은 "`oversubscribed` cannot hold for a uniform op (gaming's base alone is 1.46)"라고 적고, 7.5 grill은 "a counterpart's demand is its base's plus the injected job by construction; the pair, not the window, is the control"이라고 적습니다. counterpart의 demand는 구성상 base의 demand에 넣은 job을 더한 것이고, 통제 장치는 demand 창이 아니라 짝이라는 뜻입니다.
 
@@ -1739,7 +1752,7 @@ recipe의 연산:
 
 `spawn_count`가 없는 것에 주의하십시오. 이 archetype의 `binding_params`는 `parallelism_cap`과 `child_name` 둘뿐입니다. job의 순서와 수는 측정된 landing 하나(9.10 D59: landing 23, medoid)에서 옵니다.
 
-**compile된 모양.** arrive 2개(`code`, `dkms`), spawn table 9,980개, `fork_cap` 48, wake 25,391개(timer 24,993, input 398), 7,060,613 byte, utilization 1.1866. query point 0 s와 225.458 s. 첫 snapshot에는 자식 이름이 개수와 함께 다 보입니다. `sh ×2253`, `x86_64-linux-gn ×1557`, `cc1 ×1557`, `as ×1412`, `rm ×1644`, `mkdir ×1125`, `dirname ×232`, `fixdep ×200`입니다(합 9,980). `dkms`와 `cc1`이 tier 3이라 segment는 tier 3이고, 이것은 base `c1-compile`(`cc1` 때문에 tier 3)과 같습니다.
+**compile된 모양.** arrive 2개(`code`, `dkms`), spawn table 9,980개, `fork_cap` 48, wake 25,391개(timer 24,993, input 398), 7,060,652 byte, utilization 1.1866. query point 0 s와 225.458 s. 첫 snapshot에는 자식 이름이 개수와 함께 다 보입니다. `sh ×2253`, `x86_64-linux-gn ×1557`, `cc1 ×1557`, `as ×1412`, `rm ×1644`, `mkdir ×1125`, `dirname ×232`, `fixdep ×200`입니다(합 9,980). `dkms`와 `cc1`이 tier 3이라 segment는 tier 3이고, 이것은 base `c1-compile`(`cc1` 때문에 tier 3)과 같습니다.
 
 **정한 결정.**
 - Phase 7의 7.3(2026-09-10): batch counterpart의 이름 규칙(Phase 7 spec decision 6)에 따라 `compile/false`는 `make` → `dkms`로 이름을 바꿨습니다. 이름 검증 workflow(`meas-ci:names:2`)가 Ubuntu, Fedora, Arch container에서 `dkms`를 runtime 수준으로 확인했고, Fedora는 kernel-install hook과 `dkms.service`까지 싣고 있었다고 archive는 적습니다.
@@ -1772,7 +1785,7 @@ recipe의 연산:
 
 job은 바뀌지 않습니다. 같은 `file-indexer`, 같은 이름 `tracker-miner-f`, 같은 `total_work: 39.435s`를 0 s로 당기고, 파일을 C = 39.435 s에서 자릅니다.
 
-**compile된 모양.** arrive 2개(`tracker-miner-f`는 idle), wake 4,631개(timer 4,604, input 27), 1,459,942 byte, utilization 1.0937. query point 0 s와 39.435 s. tier 3.
+**compile된 모양.** arrive 2개(`tracker-miner-f`는 idle), wake 4,631개(timer 4,604, input 27), 1,459,981 byte, utilization 1.0937. query point 0 s와 39.435 s. tier 3.
 
 **pre-committed miss가 아닌 이유.** 이 파일의 label(`false`)은 Tracker의 기본 성격과 맞습니다. 2026-09-10 memo §4.2는 "S14의 indexer가 기본적으로 unwanted라 recognizer가 맞힐 수 있는 쪽"이라고 적습니다. miss는 반대편 `c1-indexing`에 있습니다.
 
@@ -1806,25 +1819,25 @@ job은 바뀌지 않습니다. 같은 `file-indexer`, 같은 이름 `tracker-min
 
 ### `c7-ml-train`
 
-base `c1-ml-train`의 앞 C = 1,389.885 s. training(`python`, `cpu-batch` `python3`)이 0 s에 도착하고 편집기가 1,389.885 s에 떠납니다. segment `ml-train`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S11, S12]`. input 2–1,387.885 s(`slice_of` 2–1,610 s). arrive 2개, wake 158,589개(timer 156,836, input 1,753), 20,825,531 byte, utilization 1.1405. query point 0 s, 1,389.885 s.
+base `c1-ml-train`의 앞 C = 1,389.885 s. training(`python`, `cpu-batch` `python3`)이 0 s에 도착하고 편집기가 1,389.885 s에 떠납니다. segment `ml-train`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S11, S12]`. input 2–1,387.885 s(`slice_of` 2–1,610 s). arrive 2개, wake 158,589개(timer 156,836, input 1,753), 20,825,570 byte, utilization 1.1405. query point 0 s, 1,389.885 s.
 
 C는 9.10 D90의 CPU 총량이고, 길이 형식은 recipe가 적듯 "D78's form"입니다. 편집기 P99(input) 하나로 채점됩니다. RQ0 판정 파일이며 `layer1_exclusions`에 들어 있습니다. venue 둘, corner 둘의 variant가 붙고, corner는 training run의 두 block 값(`python3_run` ±27.3 %, `python3_block` ±10.8 %)을 움직입니다.
 
 ### `c7-render`
 
-base `c1-render`의 앞 C = 16.545 s. export(`kdenlive_render`)가 0 s에 도착하고 편집기가 16.545 s에 떠납니다. segment `render`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S7]`. input 2–14.545 s, operation `preview-render` 8.2725 s(창의 가운데). 9.10 D111은 이 preview render가 편집기가 떠나는 순간 잘린다고 기록합니다("cut at the editor's departure, ~8.3 s of it"). arrive 2개, wake 6,619개(모두 timer), 861,718 byte, utilization 1.6189. query point 0 s, 16.545 s.
+base `c1-render`의 앞 C = 16.545 s. export(`kdenlive_render`)가 0 s에 도착하고 편집기가 16.545 s에 떠납니다. segment `render`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S7]`. input 2–14.545 s, operation `preview-render` 8.2725 s(창의 가운데). 9.10 D111은 이 preview render가 편집기가 떠나는 순간 잘린다고 기록합니다("cut at the editor's departure, ~8.3 s of it"). arrive 2개, wake 6,619개(모두 timer), 861,757 byte, utilization 1.6189. query point 0 s, 16.545 s.
 
 편집기 P99(timer)로 채점되고, RQ0 판정 파일이며 `layer1_exclusions`에 있습니다. venue variant 둘이 붙습니다.
 
 ### `c7-transcode`
 
-base `c1-transcode`의 앞 C = 2,970.871 s. encode(`HandBrakeCLI`)가 0 s에 도착합니다. segment `transcode`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S8, S7]`. input 2–2,968.871 s, operation `preview-render` 1,485.4355 s(창의 가운데, 9.10 D44와 D96). arrive 2개, wake 632,587개(모두 timer), 95,061,320 byte(core set에서 세 번째로 큼), utilization 1.3727. query point 0 s, 2,970.871 s.
+base `c1-transcode`의 앞 C = 2,970.871 s. encode(`HandBrakeCLI`)가 0 s에 도착합니다. segment `transcode`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S8, S7]`. input 2–2,968.871 s, operation `preview-render` 1,485.4355 s(창의 가운데, 9.10 D44와 D96). arrive 2개, wake 632,587개(모두 timer), 95,061,365 byte(core set에서 세 번째로 큼), utilization 1.3727. query point 0 s, 2,970.871 s.
 
 편집기 P99(timer)로 채점되고, RQ0 판정 파일이며 `layer1_exclusions`에 있습니다. venue variant 둘이 붙습니다.
 
 ### `c7-backup`
 
-base `c1-backup`의 앞 C = 165.668 s. backup(`deja-dup`)이 0 s에 도착합니다. segment `backup`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S7, S15]`. input 2–163.668 s, operation `preview-render` 82.834 s. arrive 2개(`deja-dup`은 idle), wake 39,672개(모두 timer), 5,200,734 byte, utilization 1.4032. query point 0 s, 165.668 s.
+base `c1-backup`의 앞 C = 165.668 s. backup(`deja-dup`)이 0 s에 도착합니다. segment `backup`, `false`, `initiated: scheduled`, `pre_committed_miss: true`, `[S7, S15]`. input 2–163.668 s, operation `preview-render` 82.834 s. arrive 2개(`deja-dup`은 idle), wake 39,672개(모두 timer), 5,200,773 byte, utilization 1.4032. query point 0 s, 165.668 s.
 
 > **왜 이렇게 정했나.** 9.10 D9(`c7-backup`은 예약 run의 label flip으로 남고 그 전제를 다시 적는다는 결정, 2026-10-01)가 이유를 적습니다. 자기 이름으로 도는 원치 않는 backup은 있습니다. dpkg의 `dpkg-db-backup.timer`가 매일 돕니다. 그러나 Mint 22.1 데스크톱 하나에서 관찰했을 때 "finished in the second it started"였고, changelog는 "A sub-second job cannot hold a backup segment"라고 적습니다. 1초 안에 끝나는 일로는 backup segment를 채울 수 없으니, 같은 예약 run에 label만 뒤집는 형식을 지킨다는 뜻입니다.
 
@@ -1832,7 +1845,7 @@ base `c1-backup`의 앞 C = 165.668 s. backup(`deja-dup`)이 0 s에 도착합니
 
 ## 10.10 의도만 다른 다섯 cell
 
-C7(attribute counterpart 그룹)이 만든 cell 가운데 "의도만 다른" 것은 다섯입니다. `indexing/true`(`c1-indexing`), `ml-train/false`(`c7-ml-train`), `render/false`(`c7-render`), `transcode/false`(`c7-transcode`), `backup/false`(`c7-backup`)입니다. 2026-09-10 memo §4.3은 이것을 "전부 '같은 이름, 같은 일, 의도만 다름'이에요"라고 요약합니다. 이 다섯이 Phase 7이 배송한 attribute 쪽의 pre-committed miss이고, 2026-10-12에 이름 충돌의 `c6-alias`가 더해져 annotation은 여섯 segment에 있습니다(1.8절).
+C7(attribute counterpart 그룹)이 만든 cell 가운데 "의도만 다른" 것은 다섯입니다. `indexing/true`(`c1-indexing`), `ml-train/false`(`c7-ml-train`), `render/false`(`c7-render`), `transcode/false`(`c7-transcode`), `backup/false`(`c7-backup`)입니다. 2026-09-10 memo §4.3은 이것을 "전부 '같은 이름, 같은 일, 의도만 다름'이에요"라고 요약합니다. 이 다섯이 Phase 7이 배송한 attribute 쪽의 pre-committed miss이고, 2026-10-12에 이름 충돌의 `c6-alias`가, 2026-10-14에 `c6-fold`와 `c6-spoof`의 뒤 segment가 더해져 annotation은 여덟 segment에 있습니다(1.8절).
 
 이 다섯 cell의 row도 RQ0에서 측정은 됩니다. `oracle`은 label을 그대로 읽으므로 그 row의 설정을 적용하고, 그 결과는 scheduling 성능으로 남습니다. recognition 정확도에서만 빠집니다. 그래서 `c7-ml-train`, `c7-render`, `c7-transcode`는 Layer 1에서는 빠지면서도 RQ0의 판정 파일입니다. 7.7 grill Q4의 문장은 "the gate needs labels, not recognizability"입니다.
 
@@ -1901,7 +1914,7 @@ variant가 필요한 이유는 dataset의 값 가운데 일부가 불확실하�
 
 각 set의 이유는 `variants.yaml`과 RQ0 gate spec의 `reason`에 적혀 있습니다.
 
-**venue(장비) 축.** 측정한 장비와 데스크톱의 차이를 bracket으로 덮습니다. 이유: "the venue factor's lower edge, 1/1.25 (9.6 D32; the bracket contains the ×1.144 huge-page ratio of 9.10 D88 and the tracing overhead's ×1.02–1.16)". bracket 안에 들어가는 두 측정값이 근거입니다. 하나는 9.10 D88(MNIST training이 데스크톱 kernel의 huge page 모드 `madvise`에서 CPU를 ×1.144 더 쓴다는 측정)이고, 다른 하나는 9.5의 untraced control(측정 도구 `perf`가 값에 주는 영향이 ×1.02–1.16)입니다. chain은 자기 축이 따로 있어서 뺍니다.
+**venue(장비) 축.** game chain의 member를 뺀 모든 task의 RUN에 공통 배율 하나(0.8 또는 1.25)를 곱합니다(`dataset/tools/wlc/variants.py`의 `scale_runs`). 이유: "the venue factor's lower edge, 1/1.25 (9.6 D32; the bracket contains the ×1.144 huge-page ratio of 9.10 D88 and the tracing overhead's ×1.02–1.16)". bracket(×1/1.25부터 ×1.25까지)이 담는 것은 측정된 두 환경 효과입니다. 하나는 9.10 D88(MNIST training이 데스크톱 kernel의 huge page 모드 `madvise`에서 CPU를 ×1.144 더 쓴다는 측정)이고, 다른 하나는 9.5의 untraced control(측정 도구 `perf`가 값에 주는 영향이 ×1.02–1.16)입니다. bracket은 다른 CPU 기종을 나타내지 않습니다. 다른 CPU는 program마다 다른 배율로 빠르기를 바꾸기 때문입니다. 9.6의 build campaign에서 Intel Xeon Platinum 8573C는 `cc1`을 EPYC 7763 시간의 0.72배에, `fixdep`을 0.50배에 돌렸고, 공통 배율 하나로는 그것을 재현하지 못합니다. 2026-10-16에 인지오는 bracket을 그대로 두고 이 한계를 적기로 했습니다(9.15 작업 목록 W-0752). `docs/research-claims.md`의 "What is not claimed"는 scheduling 결과가 다른 CPU나 다른 기계 구성으로 옮겨 간다고 주장하지 않는다는 항목을 갖고, `dataset/README.md`의 Sensitivity variants 절과 `docs/workload/measurement-overview.md` §11도 같은 한계를 적습니다. chain은 자기 축이 따로 있어서 뺍니다.
 
 **chain 축.** game chain은 library에서 유일하게 측정이 아니라 문헌에서 온 archetype입니다. 이유: "the chain's per-schedule runtime read as the per-wake RUN understates a wake by the schedules it is cut into (9.4 D9; lavd-ossna24 s14, about 1.4 on average)". LAVD 자료의 per-schedule runtime을 wake 하나의 RUN으로 읽으면, wake 하나가 여러 schedule로 쪼개지는 만큼(평균 약 1.4배) 일을 과소평가한다는 뜻입니다. RQ0 gate spec은 1.4배에서 "the chain exceeds the lane in all three files (1.14 and 1.26 lanes), so the expected reading is that the gaming verdicts depend on the literature-grounded archetype's scale — its stated limitation, not a result"라고 미리 적습니다.
 
@@ -1946,7 +1959,7 @@ RQ0 gate spec의 `files.variants`가 78개를 모두 이름으로 나열하고, 
 
 variant는 base의 term으로 채점됩니다. 9.14 D11(variant 파일은 base의 term으로, 자기 segment 위의 window로 채점된다는 결정, 2026-10-09)이 `scoring.with_variants`를 만들었습니다. 기록된 계기는 "a variant run … would have been aggregated without its windows and never scored — every sensitivity line reading an empty gap"입니다. 이것이 없었다면 variant run은 window 없이 합산되어 채점되지 않았고, 모든 민감도 line이 빈 gap을 읽었을 것이라는 뜻입니다. `segment-length` variant는 segment 경계가 옮겨지므로 window도 variant 자신의 segment를 따라갑니다.
 
-pin은 RQ0 gate spec의 `pins.variants.all`입니다. 2026-10-14의 값은 `03f14b2c5520edaf304915a2c773f8ac30436a9f88ea9cd2d8b319949c3605d5`이고, `shasum -a 256 dataset/build.variants.manifest.json`이 같은 값을 냅니다. 이 pin은 9.14 D12(2026-10-09)에 처음 걸렸고 그 뒤 9.17, 9.18, 9.22, 9.20을 거치며 다시 걸렸습니다. core manifest가 바뀌면 variants manifest의 `inputs`도 바뀌기 때문입니다.
+pin은 RQ0 gate spec의 `pins.variants.all`입니다. 2026-10-17의 값은 `087ef27ca434a21ea346baf3ed454997255bc1e8e2379238169994f27060edcd`이고, `shasum -a 256 dataset/build.variants.manifest.json`이 같은 값을 냅니다. 이 pin은 9.14 D12(2026-10-09)에 처음 걸렸고 그 뒤 9.17, 9.18, 9.22, 9.20, 9.23(D10, D17), 9.15(2026-10-16의 rebuild)를 거치며 다시 걸렸습니다. core manifest가 바뀌면 variants manifest의 `inputs`도 바뀌기 때문입니다.
 
 ---
 
@@ -1963,10 +1976,10 @@ pin은 RQ0 gate spec의 `pins.variants.all`입니다. 2026-10-14의 값은 `03f1
 | key | 내용 |
 |---|---|
 | `cells` | 32개 항목. 각 `{mode, background_wanted, segments, tiers: {t1..t5}, pre_committed_miss}` |
-| `empty_cells` | segment가 하나도 없는 cell의 이름 목록. 2026-10-14에 `[]` |
+| `empty_cells` | segment가 하나도 없는 cell의 이름 목록. 2026-10-17에 `[]` |
 | `outside` | cell 밖의 segment. `[{file: c6-dual, mode: ambiguous, segment: 0, tier: 3}]` |
 | `per_file` | 51개 파일 각각의 segment 줄 목록. 줄마다 `{mode, tier, scenario, background_wanted, pre_committed_miss?}` |
-| `segments_total` | 66 |
+| `segments_total` | 67 |
 | `generated` | generated layer 다섯 set의 같은 꼴 표(`cells`, `files`, `segments_total`) |
 
 ## 12.3 어떻게 만들어지나
@@ -1988,18 +2001,19 @@ tier는 1.9절에서 말한 `segment_tier`가 정합니다. segment에 `familiar
 
 ## 12.4 CI가 강제하는 방식
 
-`dataset/Makefile`의 `check` target 첫 줄은 `$(PY) tools/derive.py --check --require-coverage`입니다. `--check`는 파생 timeline과 grid를 다시 만들어 commit된 byte와 다르면 실패하고(drift 검사), `--require-coverage`는 빈 cell이 하나라도 있으면 실패합니다. CI workflow `.github/workflows/dataset.yml`이 `make -C dataset check`를 돌립니다. 테스트 쪽에서는 `dataset/tools/tests/test_grid.py`가 pre-committed miss cell의 집합을 `MISS_CELLS`로 고정해 둡니다. `{("indexing", True), ("ml-train", False), ("render", False), ("transcode", False), ("backup", False), ("media", True)}`.
+`dataset/Makefile`의 `check` target 첫 줄은 `$(PY) tools/derive.py --check --require-coverage`입니다. `--check`는 파생 timeline과 grid를 다시 만들어 디스크의 파일과 다르면 실패하고(drift 검사), `--require-coverage`는 빈 cell이 하나라도 있으면 실패합니다. 둘째 줄의 `check_build.py`는 2026-10-15부터 파생 timeline과 `coverage-grid.json`을 commit된 byte(`git show HEAD:<path>`)와도 비교합니다(9.23 D12). 그래서 `make dataset`이 다시 만들고 commit하지 않은 grid나 파생 timeline도 실패합니다. 그 전에는 디스크의 파일이 새로 파생한 결과와 같기만 하면 통과했습니다. CI workflow `.github/workflows/dataset.yml`이 `make -C dataset check`를 돌립니다. 테스트 쪽에서는 `dataset/tools/tests/test_grid.py`가 pre-committed miss cell의 집합을 `MISS_CELLS`로 고정해 둡니다. `{("indexing", True), ("ml-train", False), ("render", False), ("transcode", False), ("backup", False), ("media", True), ("meeting", True), ("browsing", False)}`.
 
 > **왜 이렇게 정했나.** Phase 7 spec decision 11(grid는 driver-table cell마다 한 줄, 32줄에 tier 열 다섯이고 빈 cell이면 CI가 실패한다는 결정)의 기록된 이유는 archive decision 11의 한 문장입니다. "Report-only was rejected as the failure mode of August." 보고만 하는 방식은 8월에 실패한 바로 그 방식이라 기각했다는 뜻입니다. 2026-08-28에 사람이 서명한 표는 mode × tier만 보여 주어 attribute의 `false` 쪽이 두 segment뿐이라는 것을 드러내지 못했습니다(13장). 7.1의 기록은 빈 cell 검사를 7.1부터 매번 보고하되 7.3에서 Makefile이 `--require-coverage`를 쓰기 시작할 때부터 치명적으로 만들어, 그 사이(7.2) CI가 초록으로 남게 했다고 적습니다.
 
 ## 12.5 표를 읽어 보기
 
-`python3.12 tools/derive.py --check --require-coverage`를 2026-10-14에 돌리면 다음이 찍힙니다(이 명령은 아무것도 쓰지 않습니다).
+`python3.12 tools/derive.py --check --require-coverage`를 2026-10-17에 돌리면 다음이 찍힙니다(이 명령은 아무것도 쓰지 않습니다. generated set의 표는 생략).
 
 ```text
+verified — 67 segments on the grid
 cell                t1  t2  t3  t4  t5  segs  miss
 browsing/true        5   0   0   0   0     5     0
-browsing/false       1   0   0   0   0     1     0
+browsing/false       2   0   0   0   0     2     1
 office/true          0   3   0   0   0     3     0
 office/false         0   1   0   0   0     1     0
 mail/true            1   0   1   0   0     2     0
@@ -2008,7 +2022,7 @@ dev/true             3   0   0   0   0     3     0
 dev/false            1   0   0   0   0     1     0
 photo/true           2   0   0   0   0     2     0
 photo/false          1   0   0   0   0     1     0
-meeting/true         2   0   0   0   0     2     0
+meeting/true         2   0   0   0   0     2     1
 meeting/false        1   0   0   0   0     1     0
 gaming/true          0   0   8   0   0     8     0
 gaming/false         0   0   2   0   0     2     0
@@ -2031,27 +2045,27 @@ backup/false         1   0   0   0   0     1     1
 idle/true            0   1   0   0   0     1     0
 idle/false           0   1   0   0   0     1     0
 outside the grid: ambiguous ×1 (c6-dual, tier 3)
-total segments: 66 (65 on the grid, 1 outside)
+total segments: 67 (66 on the grid, 1 outside)
 empty cells: 0
 ```
 
 표에서 읽을 수 있는 것을 몇 가지 짚습니다.
 
-**`false` cell은 대부분 하나뿐입니다.** 열여섯 `false` cell 가운데 열넷은 segment가 하나, 곧 그 mode의 C7(attribute counterpart 그룹) counterpart 하나입니다. 둘(`gaming/false`, `indexing/false`)만 C2(intent pair 그룹) b-파일이 하나씩 더해 둘입니다. generated layer는 `false` cell을 하나도 채우지 않습니다. `gen/coverage.py`의 docstring은 "every C1 task set is the `true` side of its mode, so the generated layer fills the sixteen `true` cells alone"이라고 적습니다. 그러니 attribute의 `false` 쪽은 지금 core set의 18개 segment에만 기대고 있습니다.
+**`false` cell은 대부분 하나뿐입니다.** 열여섯 `false` cell 가운데 열셋은 segment가 하나, 곧 그 mode의 C7(attribute counterpart 그룹) counterpart 하나입니다. 셋은 둘입니다. `gaming/false`와 `indexing/false`는 C2(intent pair 그룹) b-파일이 하나씩, `browsing/false`는 `c6-spoof`의 뒤 segment가 더했습니다. generated layer는 `false` cell을 하나도 채우지 않습니다. `gen/coverage.py`의 docstring은 "every C1 task set is the `true` side of its mode, so the generated layer fills the sixteen `true` cells alone"이라고 적습니다. 그러니 attribute의 `false` 쪽은 지금 core set의 19개 segment에만 기대고 있습니다.
 
 > **열린 자리.** 이 사실은 9.20 spec decision 9(원치 않는 job 측정은 backlog에 남고 그 시기를 적는다는 결정, 2026-10-12)와 이어집니다. 지금 interactive counterpart 열 개는 원치 않는 이름 하나(`unattended-upgr`)를 공유합니다. "How many unwanted jobs the attribute claim needs is decided in the RQ1 experiment spec's session; the campaigns run after Phase 10's RQ0 run and before the RQ1 run." 원치 않는 job이 몇 개 필요한지는 RQ1 실험 spec 회의에서 정하고, 측정은 RQ0 run 뒤 RQ1 run 전에 합니다. audit의 backlog는 후보를 우선순위대로 적습니다. `gnome-software`와 `packagekitd`, `snapd` 자동 refresh, `updatedb.plocate`, `update-initramfs`, `mandb`와 `apt-get update`입니다. 9.20 D5는 이것을 "a validity limit for RQ1's attribute accuracy, not for RQ0"이라고 적습니다. 미정.
 
-**tier 4와 5는 `media/true`에만 있습니다.** C5(familiarity ladder 그룹)의 두 파일입니다. 나머지 tier의 분포는 이름이 정합니다. browsing, dev, photo, meeting, video-edit, ml-train, render, backup은 tier 1, office, transcode, idle은 tier 2, gaming, compile, indexing은 tier 3입니다. 생성 ladder가 tier 3–5를 모든 mode에 늘어놓는 이유가 이것입니다.
+**tier 4와 5는 `media/true`에만 있습니다.** C5(familiarity ladder 그룹)의 두 파일입니다. 나머지 tier의 분포는 이름이 정합니다. browsing, dev, photo, meeting, video-edit, ml-train, render, backup은 tier 1, office, transcode, idle은 tier 2, gaming, compile, indexing은 tier 3입니다. 생성 ladder가 tier 4와 5를 모든 mode에 늘어놓고, 측정된 job이 뜻을 드러내지 않는 자기 자식의 이름으로 도는 render와 backup에 tier 3 cell을 더한 이유가 이것입니다(8.2절).
 
 **`mail/true`의 tier 3 하나는 `c3-workday`의 mail segment입니다.** 12.3절의 finite task 규칙 때문입니다.
 
-**miss 열.** 여섯 cell에 1이 있습니다. 1.8절의 여섯 파일입니다.
+**miss 열.** 여덟 cell에 1이 있습니다. 1.8절의 여덟 segment입니다.
 
 **`ambiguous`는 표 밖에 한 줄로 남습니다.** `c6-dual`입니다.
 
 ## 12.6 표 안의 낡은 이름
 
-`grid.py`의 `NAME_TIERS`는 어느 timeline도 묶지 않는 이름을 아직 담고 있습니다. tier 1의 `firefox`, `blender`, `discord`, `thunderbird`, `spotify`, `ffmpeg`, `python3`, `rsync`, `tar`, `xz`, `borg`, `rclone`, `zoom`, `slack`, `vlc`, `game.exe`, `transmission-daemon`, `clamscan`, `evince`, `darktable`, `ollama`, tier 2의 `gamescope`, `steamwebhelper`, `freshclam`, `Xorg`, tier 3의 `updatedb`, `ld`, `cc1plus`입니다. 대부분은 Phase 9 재구축 전의 binding이거나 scenario catalog의 옛 이름입니다. 표에 쓰이지 않는 이름은 결과에 영향을 주지 않습니다. 다만 이 파일을 고치면 12.3절의 이유로 core manifest와 RQ0 gate spec의 pin이 움직이므로, 정리는 pin을 다시 거는 sub-task와 함께 해야 합니다. 기록에 이 정리를 맡은 곳은 없습니다. 미정.
+`grid.py`의 `NAME_TIERS`는 어느 timeline도 묶지 않는 이름을 아직 담고 있습니다. tier 1의 `firefox`, `blender`, `discord`, `thunderbird`, `spotify`, `ffmpeg`, `python3`, `rsync`, `tar`, `xz`, `borg`, `rclone`, `zoom`, `slack`, `vlc`, `game.exe`, `transmission-daemon`, `clamscan`, `evince`, `darktable`, `ollama`, tier 2의 `gamescope`, `steamwebhelper`, `freshclam`, `Xorg`, tier 3의 `updatedb`, `ld`, `cc1plus`입니다. 대부분은 Phase 9 재구축 전의 binding이거나 scenario catalog의 옛 이름입니다. 2026-10-16에 인지오가 이 이름들을 남기기로 했고, `grid.py`의 주석이 이유를 적습니다. 어느 timeline도 묶지 않는 이름은 어떤 segment에도 tier를 주지 않고, tier 5 이름을 뽑을 때 실제 프로그램의 이름과 같으면 다시 뽑게 하는 목록(9.20 decision 7, `gen/cells.py`의 `known_names`)으로 쓰입니다.
 
 ---
 
@@ -2142,7 +2156,7 @@ memo §6은 이 시점에 찾은 사실 하나를 적습니다. `c7-meeting`과 
 
 이 변화의 공통 원칙은 9.10 D17의 "No `total_work` or `spawn_count` describes part of a job"과, Phase 9 spec의 phase decision 2 "one observation per situation"(상황 하나에 관찰 하나)입니다. 9.10 spec의 invariant는 "Reliability of the dataset comes before development effort, by 인지오's direction at stage 3"이라고 적습니다. dataset의 신뢰성이 개발 노력보다 먼저라는 인지오의 지시입니다.
 
-결과로 파일이 크게 무거워졌습니다. 9.13의 read R4가 그 변화를 기록합니다. 2026-09-26의 single-lane set은 50개 파일에 외부 wake event 531,740개, 84 MB였고, 2026-10-09에는 4,496,190개, 666 MB였으며, 같은 날 bless된 51개 파일 set은 4,522,200개, 681 MB였습니다. R4가 적은 이유는 "the kernel build whole in `c6-dual` …, the transcode whole …, four `renderer-hidden` tasks per Chrome file …, the launch replays …, with every measured wake of every component carried as its own event"입니다. 2026-10-14 tree에서 core 51개 artifact를 직접 합하면 678,167,934 byte, wake event 4,502,685개, arrive event 289개, spawn table 항목 79,772개입니다. bless 뒤의 재build(9.17의 focus track, 9.18의 keystroke slice)가 숫자를 조금 바꿨습니다.
+결과로 파일이 크게 무거워졌습니다. 9.13의 read R4가 그 변화를 기록합니다. 2026-09-26의 single-lane set은 50개 파일에 외부 wake event 531,740개, 84 MB였고, 2026-10-09에는 4,496,190개, 666 MB였으며, 같은 날 bless된 51개 파일 set은 4,522,200개, 681 MB였습니다. R4가 적은 이유는 "the kernel build whole in `c6-dual` …, the transcode whole …, four `renderer-hidden` tasks per Chrome file …, the launch replays …, with every measured wake of every component carried as its own event"입니다. 2026-10-17 tree에서 core 51개 artifact를 직접 합하면 678,172,716 byte, wake event 4,502,685개, arrive event 289개, spawn table 항목 79,772개입니다. bless 뒤의 재build(9.17의 focus track, 9.18의 keystroke slice, 9.23의 program 끝의 WAIT과 TIMER)가 숫자를 조금 바꿨습니다.
 
 ## 13.6 9.13: 51번째 파일과 단일 set (2026-10-09)
 
@@ -2150,37 +2164,29 @@ memo §6은 이 시점에 찾은 사실 하나를 적습니다. `c7-meeting`과 
 
 - **native compile mode 폐지.** 9.13 spec decision 5: "The native compile mode leaves the compiler, the lints and the manifest; the lane-scaling pass is the only pass." 이 결정은 9.5 spec decision 14(2026-09-16)에서 시작되었고, 그 이유는 library의 archetype들이 서로 다른 관찰 장소에서 왔고 그 상대적 크기가 서로 보정되어 있지 않다는 것이었습니다. 이제 `coreset-single` 하나만 있습니다.
 - **`declared_class`.** 모든 library entry와 모든 task 기록이 scheduling class(`normal` 또는 `idle`)를 가집니다. `file-indexer`와 `incremental-backup`이 `idle`이라서 indexing과 backup 파일 여섯이 9.14에서 보고 파일이 되었습니다.
-- **`c2-p2a-idle`.** 5.6절. 파일 51개, segment 66개가 되었습니다.
+- **`c2-p2a-idle`.** 5.6절. 파일 51개, segment 66개가 되었습니다(2026-10-14에 9.23 D2가 `c6-spoof`를 나누어 지금은 67개).
 
-## 13.7 9.14 이후 (2026-10-09 → 2026-10-13)
+## 13.7 9.14 이후 (2026-10-09 → 2026-10-16)
 
 - **9.14**(소비자 쪽 재작업, 2026-10-09/10): demand window를 gate에서 내렸고(decision 4), 판정 파일을 19개, K를 10으로 정했으며(decision 2와 그 수정), 78개 variant를 build해 pin했습니다(decision 12). scoring spec은 49개 파일, term 75개가 되었습니다("78 before" — gaming 셋의 compositor term과 meeting 둘의 video term이 사라지고 `c2-p2a-idle`의 둘이 더해진 결과).
 - **9.17**(focus를 telemetry에 넣은 sub-task, 2026-10-11): keystroke 창의 이름이 `input`이 되고, 창 focus를 적는 새 `focus` track과 workload의 넷째 top-level key가 생겼습니다. `c6-dual`의 688 s 교대가 이때 정해졌습니다.
 - **9.18**(compiler, schema, build gate, 2026-10-11): counterpart의 keystroke가 base의 것이 되었고(`slice_of`), timeline의 모든 bound 값이 `source` map을 갖게 되었습니다.
 - **9.19, 9.20**(generated layer, 2026-10-11/12): C3(transition arc 그룹)와 C4(distractor injection 그룹)와 C5(familiarity ladder 그룹)의 손으로 쓴 파일이 존재 사례가 되었고, `c5-t3`가 `c6-alias`가 되었습니다.
 - **9.21**(generated layer의 소비자 쪽, 2026-10-13): generated 파일의 채점 규칙과 coverage 표를 만들었습니다. core set의 파일은 바뀌지 않았습니다.
+- **9.23**(이 guidebook이 찾은 어긋남, 2026-10-14/15): `c6-fold`의 meeting segment와 `c6-spoof`의 20 s 뒤 segment를 pre-committed miss로 만들었고(D1, D2. segment 67개), 퇴장 전에 할 일이 바닥나던 segment-bound program의 끝에 WAIT이나 TIMER를 붙여 모두 막힌 채로 퇴장을 맞게 했습니다(D16. 모든 artifact의 byte가 바뀌고 demand는 그대로).
+- **9.15**(문서 정정, 2026-10-16): 손으로 쓴 timeline의 머리 주석과 recipe 주석이 파일이 싣지 않는 것(session process, chain 밖의 게임 thread)과 Steam client의 측정된 상태를 적게 되었습니다. task와 label은 바뀌지 않았습니다.
 
 ## 13.8 무엇이 어디서 낡았나
 
-아래 문서들은 2026-10-14 현재 core set을 옛 상태로 묘사합니다. 수정은 모두 9.15(docs, memo, guidebook을 고치는 Phase 9 sub-task, 아직 열려 있음)의 몫입니다. 이 권은 이 문서들의 규칙(rule)은 가져오되, 목록(inventory)과 숫자는 tree를 따랐습니다.
+2026-10-14에 이 절은 core set을 옛 상태로 묘사하는 문서를 길게 적었습니다(`docs/workload/coreset-guide.md`, `docs/workload/scenario-catalog.md`, `docs/workload/building-plan.md`, `dataset/README.md`, `docs/recognition-vocabulary.md`, `docs/terminology.md`). 9.15(docs, memo, guidebook을 고치는 Phase 9 sub-task)가 2026-10-16–17에 그 문서들을 지금의 tree에 맞게 고쳤습니다. coreset guide는 51개 파일을, scenario catalog는 9.10 D33대로 dataset이 실제로 묶는 이름과 존재 근거를, building plan은 51개 파일·67개 segment와 재구축 뒤의 그룹들을, README는 그룹 표의 unattended upgrade와 "Demand is reported, not held"를, vocabulary는 `initiated`의 `session`과 지금의 `background_wanted` 예를, terminology는 판정 파일 19개와 K = 10을 적습니다. 남은 것은 셋입니다.
 
-**`docs/workload/coreset-guide.md`**(Status draft, Updated 2026-10-11). 제목부터 "50개 workload를 하나씩 뜯어보기"이고, 2026-10-11에 고친 곳은 §2와 §7의 `input`/`focus` 문단뿐입니다. §4는 archetype 열둘(`desktop-interactive`, `electron-comms`, `system-daemon` 등 지금 library에 없는 것들), §5는 "300 tasks"와 `coreset-native` mode, §8은 demand window 규칙과 24개 파일의 utilization 표, §10의 파일별 숫자는 2026-09-08 build(`c2-p1a` 60–180 s에 130 s hog `python3`, `c1-compile`의 자식 100개, `c1-gaming`의 `game.exe ×300`과 `gamescope`, `c5-t3`, C7(attribute counterpart 그룹)의 `clamscan`과 `av-scan`)입니다. 2026-10-14에 `grep -c -E 'clamscan|game\.exe|c5-t3|coreset-native|av-scan'`으로 세면 이 파일에서 40줄이 걸립니다.
-
-**`docs/workload/scenario-catalog.md`**(Updated 2026-09-10). 행의 scenario 제목(S1(office) office부터 S18(system baseline) system baseline까지)은 여전히 S 코드의 뜻으로 쓰이지만, process 이름 열은 재구축 전의 binding입니다(`zoom`, `discord`, `spotify`, `vlc`, `python3`, `tracker-miner-fs-3`, `rsync`, `borg`, `rclone`, `clamscan`, `freshclam`, `gamescope`, `<game>.exe`, `transmission-daemon`, `Xorg`). 9.10 D33(catalog는 dataset이 실제로 묶는 것을 존재 근거와 함께 적는다는 결정)이 고쳐 쓸 내용을 정했지만 아직 적용되지 않았습니다. 특히 S17(지금은 unattended upgrade) 행은 여전히 "Malware scan … clamscan · freshclam"인데, 어느 파일도 `clamscan`을 묶지 않습니다. S17 태그는 지금 interactive counterpart 열 개와 `c2-p2b`의 segment 1에 붙어 unattended upgrade를 가리킵니다. S18 행의 "present in every segment by construction"은 9.10 D28이 철회했습니다. S11(software development) 행의 "2,430 short-lived procs"는 DynamoRio build의 숫자입니다(13.4절).
-
-**`docs/workload/building-plan.md`**(normative, Updated 2026-10-12). §0의 "50 files, 64 segments"와 두 compile mode·네 release artifact, §3 C1(calibration 그룹)의 옛 task set(`game.exe`, `gamescope`, `spotify`, `zoom`, `borg`, `ffmpeg`, `python3`, `tracker-miner-fs-3`)과 "batch jobs are sized to finish inside the segment", §3 C2(intent pair 그룹)의 "behaviorally identical"과 `clamscan`, `ffmpeg`, `borg`, §3 C3(transition arc 그룹)의 "Ordering grounded in the CpsMark+ CA cooperative workflow"(9.10 D29는 순서를 design으로 정함), §3 C6(resolution limit 그룹) fold의 "no query fires"(9.5절), §3 C7(attribute counterpart 그룹)의 `clamscan`과 "compile renames `make` to `dkms`", "Counts and reuse"의 50 / 64 / 27, §5의 "50 files × 2 modes", §5a의 "`c7-gaming` at two and a half lanes"(지금 1.9149)가 낡았습니다. 반대로 §3의 C3, C4(distractor injection 그룹), C5(familiarity ladder 그룹) 역할 문단, §3a, §5a의 demand budget 문단은 2026-10-11/12에 고쳐져 현재 사실과 맞습니다.
-
-**`dataset/README.md`.** 그룹 표의 C2(intent pair 그룹) 행("a game download vs. a virus scan")과 C7(attribute counterpart 그룹) 행("interactive modes gain an unwanted scan"), "Coresets" 표의 "~100–150%", "Rules of the tree"의 demand window 문장이 낡았습니다. 51개 파일, 66개 segment, `c2-p2a-idle`, `c6-alias`의 설명은 현재와 맞습니다.
-
-**`docs/recognition-vocabulary.md`**(Updated 2026-10-08). `background_wanted`의 예("a scheduled scan, an indexer's rescan"), annotation 예의 `av-scan`, `initiated`의 값 목록에 `session`이 없는 것, `render`의 정의("an offline 3D/graphics render")가 지금 파일과 맞지 않습니다(1.2절, 1.7절).
-
-**`docs/terminology.md`.** counterpart 항목의 `clamscan`, pre-committed miss 항목의 "the three C6 files", RQ0 gate spec 항목의 "25 judging files, K = 13"(지금 19개, K = 10)이 낡았습니다.
+**`docs/recognition-vocabulary.md`의 `render`.** 풀이는 여전히 "an offline 3D/graphics render"이고, 넓힌 풀이는 Phase 9의 final memo가 제안합니다(1.2절).
 
 **`docs/memos/2026-09-10-coreset-before-and-after-phase-7.md`.** memo라서 그 시점의 기록으로 읽으면 됩니다. 이름과 숫자는 재구축 전의 것입니다.
 
-**tree 안의 작은 낡음.** `c2-p3a.timeline.yaml`의 "about 99.5 s"(5.7절), `grid.py`의 `NAME_TIERS`에 남은 옛 이름(12.6절)입니다. 둘 다 고치면 hash와 pin이 움직입니다.
+**tree 안의 작은 것 둘.** 둘 다 2026-10-16에 정해졌습니다. `c2-p3a.timeline.yaml`의 "about 99.5 s"는 참인 상한이라 그대로 두고, 머리 주석의 나머지를 지금의 사실로 고쳤습니다(5.7절). `grid.py`의 `NAME_TIERS`에 남은 옛 이름은 tier 5 추첨을 위해 남기고, 그 이유를 주석으로 적었습니다(12.6절).
 
-> **열린 자리.** 9.15의 TODO 목록(`_dev/TODO.md`)은 위 문서들의 수정 대부분을 이미 담고 있습니다. 9.10 D2(catalog의 Source 열은 존재만 적음, building plan C1(calibration 그룹) 문단은 design으로), D3(S17 행, 곧 지금의 unattended upgrade 행과 vocabulary 예), D29(transition arc의 grounding 문장), D33(catalog 재작성), D79(`initiated`의 `session`), 9.18의 C7(attribute counterpart 그룹) "one-diff pair" 문구, 9.20의 `c5-t3` → `c6-alias` 반영이 그 예입니다. 이 권이 새로 찾은 두 가지, 곧 `c6-fold`의 30 s query point(1.8절, 9.5절)와 `c6-spoof`의 label(9.3절)은 그 목록에 없습니다. 확인 필요.
+이 권이 2026-10-14에 새로 찾은 두 가지, 곧 `c6-fold`의 30 s query point(1.8절, 9.5절)와 `c6-spoof`의 label(9.3절)은 9.23 D1, D2가 같은 날 정했습니다.
 
 ---
 
@@ -2244,9 +2250,9 @@ memo §6은 이 시점에 찾은 사실 하나를 적습니다. `c7-meeting`과 
 | vacuous-true convention | 배경 작업이 없으면 `background_wanted`는 `true` |
 | same-job reading | batch mode에서는 batch job 자체가 attribute가 판단하는 배경 작업 |
 | ground-truth annotation | 채점 분석용 key. `background`, `initiated`(`user`, `scheduled`, `session`), `dual_active`, `spoof`, `pre_committed_miss` |
-| pre-committed miss | 이름과 행동으로 어떤 recognizer도 닿을 수 없는 label을 가진 segment. 정확도에서 빼고 따로 보고. 지금 여섯 segment |
+| pre-committed miss | 이름과 행동으로 어떤 recognizer도 닿을 수 없는 label을 가진 segment. 정확도에서 빼고 따로 보고. 지금 여덟 segment |
 | familiarity tier | 이름이 얼마나 알아보기 쉬운지의 등급. 1 transparent, 2 semi-opaque, 3 opaque(자기 이름이지만 뜻이 없음), 4 nonexistent-compositional, 5 nonexistent-opaque |
-| whitelist | 알려진 process 이름을 범주에 대응시켜 둔 표. 실제 OS들이 쓰는 방식 |
+| 이름 표 조건 | 알려진 process 이름을 범주에 대응시켜 둔 표로 답하는 두 조건. `shipped_catalogue`(CachyOS가 출하하는 ananicy-cpp catalogue의 재현)와 `strongest_name_table`(같은 설계로, dataset이 알려진 것으로 내세우는 소프트웨어를 모두 덮는 표). 예전 문서의 "whitelist" |
 | distractor | label을 바꾸지 않아야 하는 끼어든 process |
 | telemetry snapshot | recognizer에게 보이는 것: 이름·개수의 multiset과 focus 보유자 |
 | query point | snapshot이 바뀌는 순간. recognizer에게 한 번 물음. core 51개 파일에 147개 |
@@ -2267,7 +2273,7 @@ memo §6은 이 시점에 찾은 사실 하나를 적습니다. `c7-meeting`과 
 | K, g, N | 판정 기준. 판정 파일 19개 중 K = 10개 이상에서 oracle 대비 random의 gap이 g = 0.5 이상, random은 N = 100 seed |
 | `fixed` / `oracle` / `random` | recognition 없이 boot 기본 설정 / 정답 label을 그대로 읽음 / 32개 row에서 무작위로 뽑음 |
 | Layer 1 / Layer 2 | recognition 정확도 / scheduling 결과의 합산 |
-| `layer1_exclusions` | Layer 1에서 빠지는 파일 여섯(pre-committed miss annotation에서 유도) |
+| `layer1_exclusions` | Layer 1에서 빠지는 파일 여덟(pre-committed miss annotation에서 유도). 채점자가 빼는 것은 annotation이 붙은 segment의 query point |
 | headroom | 한 workload에서 얻을 수 있는 개선의 여지 |
 | term | 채점 항목 하나. entity, metric, aggregate, weight |
 | `ready_wait` P99 | 깨어난 task가 CPU를 받기까지 기다린 시간의 99번째 백분위 |
@@ -2338,10 +2344,11 @@ memo §6은 이 시점에 찾은 사실 하나를 적습니다. `c7-meeting`과 
 | 9.11 | scheduler 쪽 상수와 근거. declared class, nice |
 | 9.13 | 재build(2026-10-09). native 폐지, `declared_class`, `c2-p2a-idle`, bless |
 | 9.14 | 소비자 쪽 재작업(2026-10-09/10). demand window 폐지, 판정 19, variant 78 |
-| 9.15 | docs·memo·guidebook 수정. 열려 있음 |
+| 9.15 | docs·memo·guidebook 수정(2026-10-15부터)과 그 안에서 정한 dataset 수정(머리 주석의 생략 문장) |
 | 9.17 | focus를 telemetry에(2026-10-11). `input`/`focus` 분리 |
 | 9.18 | compiler, schema, build gate(2026-10-11). `slice_of`, `source` |
 | 9.19 / 9.20 / 9.21 | generated layer와 그 소비자 쪽(2026-10-11→13). `c5-t3` → `c6-alias` |
+| 9.23 | 이 guidebook이 찾은 어긋남(2026-10-14/15). `c6-fold`·`c6-spoof`의 pre-committed miss, segment 67개, program 끝의 WAIT·TIMER |
 
 ## 14.8 OS와 scheduling 용어
 
