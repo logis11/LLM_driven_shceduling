@@ -103,3 +103,10 @@ Chunk K13, Dataset guidebook, volumes 5-6 (wave 3). 10 open rows. The file has 2
 - Sources: `harness/tools/tests/test_scorer.py` (`test_flip_aggregates_on_mock_switch`, `test_excess_aggregates_on_mock_switch`, as committed after stage A); `harness/tools/tests/fixtures/mock-switch/worked.md`.
 - Notes: found in stage A (A4). Read the stand-in's value from the committed test.
 
+
+### W-0888 · open
+- At: `docs/guidebook/dataset/05-the-generated-layer.md`, wherever it states which files carry idle's set (the session processes `gnome-shell`, `pipewire`, `systemd`, `dbus-daemon`)
+- Change: State as `docs/workload/building-plan.md` §3a now does: 182 generated files carry the four (transition grid 60, return grid 90, distractor grid 32; the familiarity ladder's idle cells rename them); in 62 — the transition grid's 30 `focus`-form files with idle on either side and the distractor grid's 32 with idle — they run beside another mode's programs, a design composition: the names beside the applications as on a real desktop, the demand the idle state's (understating an active session), no scored term on an idle placement; in the other 120 the session runs only in idle segments.
+- Final word: 인지오's answer to K02's M7 (2026-10-16, work list "Questions from the waves").
+- Sources: `docs/workload/building-plan.md` §3a; 9.10 D28, D172; 9.19 spec decision 2; 9.20 spec decisions 1–2.
+- Notes: found in K02.
