@@ -1,6 +1,6 @@
 # 6권 · 근거, 측정, 검증: 숫자 하나가 믿을 수 있게 되는 길
 
-> Status: draft · Created 2026-10-14 · Updated 2026-10-14
+> Status: draft · Created 2026-10-14 · Updated 2026-10-17
 
 **데이터셋의 숫자와 구조는 어떤 기준으로 근거를 얻고, 우리가 직접 잰 것은 어떻게 재고 확인했으며, 틀린 것은 어떻게 찾아내 고쳤나.**
 
@@ -92,7 +92,7 @@ memo의 판정은 한 줄입니다. "Verdict: sound for the recognition claim, b
 ```
 
 - **scholarly**(학술 문헌): 동료 심사 논문이나 보관된 preprint입니다. 인용 규칙상 경험적, 행동적, 통계적 주장을 받칠 수 있습니다(단, 그 항목의 역할 범위 안에서).
-- **deployed-system**(배포된 시스템): 제품 문서, 소스 코드, 공개 데이터처럼 실제로 배포된 소프트웨어의 자료입니다. 원래 규칙은 "존재 주장만" 받칠 수 있다는 것이었습니다(2장에서 자세히).
+- **deployed-system**(배포된 시스템): 제품 문서, 소스 코드, 공개 데이터처럼 실제로 배포된 소프트웨어의 자료입니다. 원래 규칙은 "존재 주장만" 받칠 수 있다는 것이었고, 9.12 D112가 그 시스템이 문서로 밝힌 자기 설계와 자기 보고 수치까지 넓혔습니다(2.3절). 발표 슬라이드, 학회 초록, 뉴스 기사는 9.12 D113 이후 따로 한 type(talk, conference abstract or news report)이고, 역시 각주 등급이며 그 주장과 숫자는 발표자나 기자의 보고로만 적습니다. 게임 chain의 근거인 LAVD 발표(`lavd-ossna24`)가 이 type입니다. 그림에서는 deployed-system 칸에 함께 둡니다.
 - **measurement**(측정): 이 프로젝트가 GitHub Actions의 runner 위에서 직접 잰 값입니다. 출처 id는 `meas-ci`이고, 어느 캠페인인지를 locator로 붙입니다(`meas-ci:background:2026-10-01`).
 - **label**: 어떤 출처도 말하지 않는 값은 출처 태그 없이 무엇인지를 밝히는 꼬리표를 답니다. 지금 lint가 받는 꼬리표는 `design`(우리가 고른 설계값), `convention`(관례), `arithmetic`(다른 값에서 계산한 값) 셋입니다.
 
@@ -126,14 +126,14 @@ memo의 판정은 한 줄입니다. "Verdict: sound for the recognition claim, b
 
 웹 개발의 비유를 들자면, `references.md`는 사람이 읽는 의존성 설명서이고 `sources.yaml`은 빌드가 실제로 해석(resolve)하는 의존성 목록입니다. 빌드는 목록에 없는 패키지를 import하면 실패하고, 목록의 패키지가 설명서에 없어도 실패합니다.
 
-tree를 세어 보면 다음과 같습니다(`grep -c '^### '`와 python으로 센 값).
+tree를 세어 보면 다음과 같습니다(2026-10-17, `grep -c '^### '`와 python으로 센 값).
 
-- `docs/references.md`: `### ` 제목 119개. 그런데 `dhakal-chi18`이 두 번(35행과 65행) 나오므로 서로 다른 id는 118개입니다. 섹션별 제목 수는 scholarly 31개(중복 포함), deployed-system 64개, measurement 2개(`meas-ci`, `meas-pending`), "Related work only (never in the yaml registry)" 22개입니다.
-- `dataset/sources.yaml`: 30개 id. `type`별로 scholarly 9개, deployed-system 19개, measurement 2개.
+- `docs/references.md`: `### ` 제목 164개, 모두 서로 다른 id. 섹션별로 scholarly 26개, deployed-system 95개, talk·학회 초록·뉴스 6개, measurement 3개(`meas-ci`, `meas-local`, `meas-pending`), "Related work only (never in the yaml registry)" 34개입니다.
+- `dataset/sources.yaml`: 19개 id. `type`별로 scholarly 5개, deployed-system 12개, measurement 2개.
 
 > **왜 이렇게 정했나.** 두 장부의 분업은 2026-08-26의 workload 생성 grill 결정 D5("Citation ownership flipped", `_dev/archive/2026-08-26-workload-generation-grill.md`)이며 Phase 1 spec decision 1로 이어졌습니다. 기록된 이유는 "`cite` was unlintable presentation — dropped from the yaml"입니다. 인용 문자열은 사람용 표현이라 기계가 검사할 수 없으니 yaml에서 빼고, 기계가 검사할 수 있는 필드만 yaml에 남겼다는 뜻입니다. 같은 날 D4는 "notes split"을 정했습니다. registry의 `notes`는 출처가 무엇을 성립시키는지와 그 범위의 한계만 적고, 우리가 그 위에 얹은 모델링은 archetype 쪽 `modeling_notes`에 적는다는 규칙입니다. 그 결과 `sources.yaml` 머리말에는 "A source tag justifies values and described structure, never field names"라는 문장이 있습니다. 출처는 값과 구조를 정당화할 뿐, 우리가 지은 필드 이름까지 정당화하지는 않습니다.
 
-> **열린 자리.** `dhakal-chi18` 항목이 `references.md`에 두 번 있고 역할 문장이 서로 다릅니다. 35행은 "stimulus of the 9.5 campaign's stimulus-sensitivity check only"라고 하고, 65행은 "Role C, typing study … Paper-only after Phase 9"라고 합니다. 2026-10-10 감사가 이 중복을 지적했고 9.15의 할 일 목록에 올라 있습니다(`_dev/TODO.md` 9.15 줄, "`dhakal-chi18` duplicated (`:35`, `:65`)"). 어느 문장을 남길지는 9.15의 작업 목록에서 정해집니다.
+`dhakal-chi18` 항목은 한때 `references.md`에 두 번 있었고 역할 문장이 서로 달랐습니다("stimulus of the 9.5 campaign's stimulus-sensitivity check only"와 "Role C, typing study … Paper-only after Phase 9"). 2026-10-10 감사가 이 중복을 지적했고, 9.15의 `references.md` 정리(2026-10-16)가 둘을 한 항목으로 합쳤습니다. 지금 그 항목은 데이터(136M Keystrokes 데이터셋)를 cite에 함께 싣고, 역할 줄은 "the alternative stream of the 9.5 campaign's stimulus-sensitivity check only (follow-ups spec decision 11) … It grounds no archetype value"라고 적습니다(8.3절).
 
 ## 2.2 id를 만드는 규칙
 
@@ -141,61 +141,58 @@ tree를 세어 보면 다음과 같습니다(`grep -c '^### '`와 python으로 �
 
 `type`에 따라 id 모양이 정해집니다.
 
-- **scholarly** → `<label>-<venue><yy>`. label은 제1저자의 성(surname), 또는 모두가 시스템 이름으로 아는 경우 그 이름입니다(`cpsmark-tbench23`, `lavd-ossna24`). arXiv에만 있는 글은 venue 자리에 `arxiv`를 씁니다(`focal-arxiv26`). arXiv 번호 자체를 id로 쓰는 것은 금지입니다. 번호는 인용 문자열 안에 둡니다.
+- **scholarly** → `<label>-<venue><yy>`. label은 제1저자의 성(surname), 또는 모두가 시스템 이름으로 아는 경우 그 이름입니다(`cpsmark-tbench23`, `ghost-sosp21`). arXiv에만 있는 글은 venue 자리에 `arxiv`를 씁니다(`focal-arxiv26`). arXiv 번호 자체를 id로 쓰는 것은 금지입니다. 번호는 인용 문자열 안에 둡니다.
 - **deployed-system** → 프로젝트 이름, 연도 없음. 최신성은 `pinned_version`이 담습니다(`interbench`, `rt-app`, `steam-downloads`).
-- **measurement** → `meas-ci`, 그리고 어느 캠페인인지를 locator로 붙입니다: `meas-ci:<workflow>:<campaign>`. campaign은 그 캠페인 첫 batch를 띄운 날짜(`YYYY-MM-DD`)이고, 같은 workflow로 같은 날 두 번째 캠페인을 띄우면 글자를 붙입니다(`YYYY-MM-DDb`). 한 캠페인은 여러 run에 걸칠 수 있고, 각 반복의 run id는 pooled record에 남으며, 원자료는 release 하나입니다. run 번호 하나로 된 태그(`meas-ci:<workflow>:<run>`)는 이 형식 이전의, run 하나짜리 캠페인을 가리킵니다.
+- **talk, conference abstract or news report**(발표, 학회 초록, 뉴스 기사) → `<label>-<venue><yy>`. label은 발표자나 글쓴이의 성, 또는 시스템 이름입니다(`lavd-ossna24`, `corbet-lwn24`). 그 주장은 발표자나 기자의 것으로 적고, 그것이 담은 숫자는 날짜와 함께 그 보고로만 적습니다.
+- **measurement** → `meas-ci`, 그리고 어느 캠페인인지를 locator로 붙입니다: `meas-ci:<workflow>:<campaign>`. campaign은 그 캠페인 첫 batch를 띄운 날짜(`YYYY-MM-DD`)이고, 같은 workflow로 같은 날 두 번째 캠페인을 띄우면 글자를 붙입니다(`YYYY-MM-DDb`). 한 캠페인은 여러 run에 걸칠 수 있고, 각 반복의 run id는 pooled record에 남으며, 원자료는 release 하나입니다(2026-09-18부터 2026-09-20까지의 9.5 캠페인들은 release를 나눠 쓰고, 그 가운데 하나는 release 둘에 걸칩니다; 데이터가 인용하는 캠페인마다 그 release는 `dataset/meas-releases.yaml`이 적습니다, 9.1절). run 번호 하나로 된 태그(`meas-ci:<workflow>:<run>`)는 이 형식 이전의, run 하나짜리 캠페인을 가리킵니다. 이름이 붙은 개인 기계에서의 측정은 `meas-local`이고, locator는 `meas-local:<machine>-<subject>:<date>`입니다. 그 원자료는 기계의 hostname을 지운 release 하나이고, 숫자마다 기계의 사양과 반복 사이의 퍼짐을 함께 적습니다.
 
 규칙 끝에는 "Contributor recipe"가 있습니다. (1) 이 규칙을 읽고 id를 만든다, (2) `references.md`에 항목을 넣는다, (3) 데이터셋이 그 출처에서 값이나 구조를 끌어올 때만 `dataset/sources.yaml`에 넣는다. 이 저장소의 `CLAUDE.md` "Citations" 항목도 같은 순서를 적어 두었습니다.
 
 > **왜 이렇게 정했나.** id 규칙은 2026-08-26 grill D1(Phase 1 decision 2)입니다. 기록은 단위와 형식을 정하고, arXiv 번호에 대해서는 "(they live in the citation fields)"라고 그 번호가 있을 자리만 적습니다. 금지의 이유는 따로 적혀 있지 않습니다. 기록된 이유는 없습니다. `meas-ci`의 locator가 run 번호에서 캠페인 날짜로 바뀐 것은 9.5 D27(2026-09-18)이며, 이유는 이렇게 기록되어 있습니다. 9.5 D26과 9.6 D11 이후 캠페인 하나는 "first batch, repeats added one at a time, retries after the machine gate"로 여러 run에 걸치므로, run 번호 하나로는 캠페인을 가리킬 수 없다는 것입니다.
 
-> **열린 자리.** 2026-10-09에 9.12(관련 연구 서술 조각)가 id 규칙에 두 형식을 더하기로 인지오의 결정으로 정했습니다. 9.12 D110은 노트북 측정을 위한 `meas-local:<machine>-<subject>:<date>` 형식을, 9.12 D113은 발표·학회 초록·뉴스 기사를 위한 다섯 번째 type(`<label>-<venue><yy>`, footnote tier, 주장은 발표자나 기자의 것으로만)을 만들었습니다. D113은 `lavd-ossna24`와 `corbet-lwn24`를 이 type으로 옮기라고 했습니다. 그러나 2026-10-14 현재 `references.md`의 규칙 문단에는 두 형식이 아직 없습니다(`grep meas-local docs/references.md`가 비어 있습니다). 두 결정 모두 "Hands to 9.15"로 넘겨졌으므로, 반영은 9.15의 `references.md` 묶음(chunk)에서 이루어집니다.
+위의 talk type과 `meas-local` 형식은 2026-10-09에 9.12(관련 연구 서술 조각)가 인지오의 결정으로 더했습니다. 9.12 D110은 노트북 측정을 위한 `meas-local:<machine>-<subject>:<date>` 형식을(그 첫 항목 `meas-local:m1pro-llm:2026-10-08`), 9.12 D113은 발표·학회 초록·뉴스 기사를 위한 type을 만들었고(기록은 이것을 "a fifth type"이라 부릅니다), D113은 `lavd-ossna24`와 `corbet-lwn24`를 이 type으로 옮겼습니다. 두 결정은 9.15의 `references.md` 정리(2026-10-16)에서 규칙 문단에 반영되었고, 그때 scholarly의 예도 `lavd-ossna24`에서 `ghost-sosp21`로 바뀌었습니다. 다만 기계가 읽는 `dataset/sources.yaml`은 `lavd-ossna24`의 `type`을 아직 `deployed-system`으로 적고, 머리말의 규칙도 세 type과 "existence claims only"를 적습니다(linter는 `type` 값을 검사하지 않습니다).
 
 ## 2.3 인용 등급 규칙과 상태 표시
 
 id 규칙 바로 아래에 "Citation-tier rule"이 있습니다.
 
 - **scholarly** → 번호 붙은 참고문헌. "May support empirical, behavioral, and statistical claims within its stated role."
-- **deployed-system** → URL, 접근 날짜, 고정 버전을 단 각주. "Supports **existence claims only** ("this scenario/setting/category exists in shipped software") — never behavioral or statistical claims."
+- **deployed-system** → URL, 접근 날짜, 고정 버전을 단 각주. "Supports existence claims ("this scenario/setting/category exists in shipped software"); the system's own documented design or behaviour, stated as that source's at its pinned version or accessed date ("the kernel's documentation states …"); and a figure the source publishes, stated as its report with the date read, the window and how it is computed. Never a behavioural or statistical claim stated as the paper's own or as a population's."
+- **talk, conference abstract or news report** → URL과 접근 날짜를 단 각주. "Its claims are stated as the speaker's or reporter's, never as the paper's own; a number it carries is stated only as its report, with its date."
 - 항목의 `role:` 줄이 그 항목이 받칠 수 있는 주장을 말하며, 역할 밖으로 인용하지 않습니다.
 
 **존재 주장(existence claim)**이란 "배포된 소프트웨어에 이런 시나리오, 설정, 범주가 있다"는 주장입니다. 예를 들어 `steamos-refresh`(Valve의 SteamOS 3.2 업데이트 공지)는 "Steam Deck LCD의 기본 화면 주사율이 60 Hz이다"를 받칠 수 있지만, "게이머들이 60 fps로 게임한다"는 받칠 수 없습니다.
 
-상태 표시(status legend)는 세 가지입니다. `verified`(원문과 대조해 좌표를 확인함, 날짜 포함), `to-pin`(식별은 확실하나 정확한 URL이나 버전을 제출 전에 고정해야 함), `provisional`(식별이 불완전함 — 해결 전에는 인용하지 말 것). tree를 세어 보면 `status:` 줄은 `verified`로 시작하는 것이 109개, `verified-in-vetting`이 4개, `provisional`이 3개(굵은 글씨 둘 포함), `to-pin` 1개, `sentinel` 1개(`meas-pending`), "in use" 1개(`meas-ci`)입니다.
+상태 표시(status legend)는 세 가지입니다. `verified`(원문과 대조해 좌표를 확인함, 날짜 포함), `to-pin`(식별은 확실하나 정확한 URL이나 버전을 제출 전에 고정해야 함), `provisional`(식별이 불완전함 — 해결 전에는 인용하지 말 것). tree를 세어 보면(2026-10-17) `status:` 줄은 `verified`로 시작하는 것이 161개(그 가운데 `verified-in-vetting` 4개), "in use" 2개(`meas-ci`, `meas-local`), `sentinel` 1개(`meas-pending`)이고, `to-pin`이나 `provisional`로 시작하는 줄은 없습니다.
 
-> **열린 자리.** 9.12 D112(2026-10-09, 인지오의 결정)는 deployed-system 등급을 넓혔습니다. 존재 주장 외에 (i) 그 시스템이 문서로 밝힌 자기 설계나 동작을 그 버전의 것으로 밝혀 적는 것, (ii) 그 출처가 자기 보고로 발표한 수치를 날짜·창·계산법과 함께 그 출처의 보고로 적는 것을 허용합니다. 단 "never a behavioural or statistical claim stated as the paper's own or a population's"는 그대로입니다. 이유로 기록된 것은, 9.12의 여러 결정이 이미 deployed-system 출처로 존재 이상의 문장(sched_ext의 무결성, scx_lavd의 메커니즘, Linux에서 class를 누가 정하는지 등)을 받치고 있었다는 사실입니다. 이 확장도 `references.md:20–22`에는 아직 반영되지 않았고 9.15로 넘겨져 있습니다.
+deployed-system 등급의 넓힘은 9.12 D112(2026-10-09, 인지오의 결정)입니다. 존재 주장 외에 (i) 그 시스템이 문서로 밝힌 자기 설계나 동작을 그 버전의 것으로 밝혀 적는 것, (ii) 그 출처가 자기 보고로 발표한 수치를 날짜·창·계산법과 함께 그 출처의 보고로 적는 것을 허용합니다. 단 행동이나 통계에 대한 주장을 논문 자신의 것이나 모집단의 것으로 적는 일은 여전히 안 됩니다. 이유로 기록된 것은, 9.12의 여러 결정이 이미 deployed-system 출처로 존재 이상의 문장(sched_ext의 무결성, scx_lavd의 메커니즘, Linux에서 class를 누가 정하는지 등)을 받치고 있었다는 사실입니다. 9.15의 `references.md` 정리(2026-10-16)가 위의 규칙 문단과 해당 항목들의 역할 줄을 이 결정에 맞췄습니다.
 
-## 2.4 `sources.yaml`의 30개 id
+## 2.4 `sources.yaml`의 19개 id
 
-`sources.yaml`은 주석 머리말로 항목을 묶습니다. 아래 표는 30개 전부이며, 마지막 열은 이 권을 쓰며 tree를 직접 센 결과입니다. `dataset/archetypes.yaml`, `dataset/grids.yaml`, `dataset/variants.yaml`, `dataset/timelines/coreset/*.yaml`을 YAML로 읽어 `source` 또는 `category_source` 키 아래에 그 id가 몇 번 나오는지 셌습니다.
+`sources.yaml`은 주석 머리말로 항목을 묶습니다. 아래 표는 19개 전부이며(2026-10-17), 마지막 열은 tree를 직접 센 결과입니다. `dataset/archetypes.yaml`, `dataset/grids.yaml`, `dataset/variants.yaml`, `dataset/timelines/coreset/*.yaml`을 YAML로 읽어 `source` 또는 `category_source` 키 아래에 그 id가 몇 번 나오는지 셌습니다.
 
 | 묶음(주석 머리말) | id | type | `locator_pattern` | tree에서 태그로 쓰인 횟수 |
 |---|---|---|---|---|
 | stimulus recordings | `swell-icmi14` | scholarly | `^(word\|outlook\|ie)-c[0-9]+$` | 4 (archetypes) |
-| behavior parameters (Role B) | `rt-app` | deployed-system | — | 0 |
-| | `lavd-ossna24` | deployed-system | `^s\d+$` | 12 (archetypes, gaming timelines) |
+| behavior parameters (Role B) | `lavd-ossna24` | deployed-system(`references.md`에서는 talk type, 2.2절) | `^s\d+$` | 12 (archetypes, gaming timelines) |
 | | `ocallahan-atc17` | scholarly | `^sec-[0-9.]+$` | 0 |
 | | `coetzee-arxiv12` | scholarly | `^sec-[0-9.]+$` | 0 |
 | scenario taxonomy (Role A) | `cpsmark-tbench23` | scholarly | `^(table-\d+\|sec-[0-9.]+)$` | 0 |
-| | `pcmark10`, `sysmark30`, `sysmark25`, `procyon` | deployed-system | — | 0 |
-| | `gamemode-docs`, `steam-downloads` | deployed-system | — | 0 |
+| | `pcmark10`, `sysmark30` | deployed-system | — | 0 |
+| | `steam-downloads` | deployed-system | — | 0 |
 | | `steamos-refresh` | deployed-system | — | 1 (`frame_period`) |
-| | `dkms-man`, `dkms-debian` | deployed-system | — | 0 |
-| segment structure & user behavior (Role C) | `gonzalez-chi04`, `mark-chi05`, `dubroy-chi10`, `chang-chi21`, `focal-arxiv26` | scholarly | — | 0 |
-| | `mozilla-testpilot10` | deployed-system | — | 0 |
+| segment structure & user behavior (Role C) | `gonzalez-chi04` | scholarly | — | 0 |
 | grounds of the timelines' bound values | `pytorch-examples`, `kdenlive`, `glam` | deployed-system | — | 3, 3, 11 |
 | our measurements | `meas-ci` | measurement | `^[a-z0-9_-]+:(\d+\|\d{4}-\d{2}-\d{2}[a-z]?)$` | 376 |
 | | `meas-pending` | measurement | — | 0 (sentinel) |
 | generated layer's name limit | `linux-sched-h` | deployed-system | — | 1 (`grids.yaml`) |
 | flap-stress intervals | `feral-gamemode`, `tuned`, `systemd-oomd` | deployed-system | — | 1, 1, 1 |
 
-세어 보면 30개 중 11개(`swell-icmi14`, `lavd-ossna24`, `steamos-refresh`, `pytorch-examples`, `kdenlive`, `glam`, `meas-ci`, `linux-sched-h`, `feral-gamemode`, `tuned`, `systemd-oomd`)만 실제로 데이터셋 파일의 태그로 쓰입니다. 나머지 19개(sentinel `meas-pending` 포함)는 지금 아무 값도 받치지 않습니다. `cpsmark-tbench23`과 `pcmark10`처럼 archetype의 `modeling_notes`나 scope 문장 안에서 이름으로만 언급되는 것도 있습니다(예: `web-browser`의 page-load operation은 "design after PCMark 10 pp. 52–53 and CpsMark+ §4.3.3"라고 적혀 있습니다). 문장 속 언급은 태그가 아니므로 위의 세기에 들어가지 않습니다.
+세어 보면 19개 중 11개(`swell-icmi14`, `lavd-ossna24`, `steamos-refresh`, `pytorch-examples`, `kdenlive`, `glam`, `meas-ci`, `linux-sched-h`, `feral-gamemode`, `tuned`, `systemd-oomd`)가 데이터셋 파일의 태그로 쓰입니다. 나머지 8개 가운데 sentinel `meas-pending`을 뺀 7개는 태그가 아니라 데이터 파일의 주석이나 문장 속에서 이름으로 인용됩니다. `ocallahan-atc17`과 `coetzee-arxiv12`는 `compiler-child`의 `modeling_notes`에, `gonzalez-chi04`는 `c6-dual`의 머리 주석에, `steam-downloads`는 `c2-p2a`의 머리 주석에 있습니다. CpsMark+(`cpsmark-tbench23`)와 SYSmark 30(`sysmark30`)은 core timeline의 머리 주석(`c1-transcode`, `c3-workday`; `c3-creation`)에 이름으로 나오고, CpsMark+와 PCMark 10(`pcmark10`)은 archetype의 scope와 notes 문장 안에서 측정 입력의 근거로 나옵니다(예: `web-browser`의 page-load operation은 "design after PCMark 10 pp. 52–53 and CpsMark+ §4.3.3"라고 적혀 있습니다). 문장 속 언급은 태그가 아니므로 위의 세기에 들어가지 않습니다.
 
-이 상태가 된 경위는 이렇습니다. Phase 9 이전의 library는 interbench, LAVD, 작업 전환 연구 같은 문헌에서 값을 끌어왔습니다. Phase 9의 연구 조각들이 archetype을 하나씩 측정 기반으로 바꾸면서(12장), 그 문헌들은 값을 받치는 자리에서 물러나 존재 주장이나 논문 본문의 맥락으로만 남았습니다. 9.10 D34(2026-10-01)는 `procyon`, `dkms-man`, `dkms-debian`, `gamemode-docs`, `dubroy-chi10`, `chang-chi21`, `mozilla-testpilot10`가 `sources.yaml`을 떠난다고 결정하고 제거를 9.13에 넘겼습니다. 그러나 9.13의 changelog에는 `sources.yaml`에 대한 작업이 없고, tree에는 일곱 항목이 그대로 있습니다.
+이 상태가 된 경위는 이렇습니다. Phase 9 이전의 library는 interbench, LAVD, 작업 전환 연구 같은 문헌에서 값을 끌어왔습니다. Phase 9의 연구 조각들이 archetype을 하나씩 측정 기반으로 바꾸면서(12장), 그 문헌들은 값을 받치는 자리에서 물러나 존재 주장이나 논문 본문의 맥락으로만 남았습니다. 그 사이 registry는 2026-10-10 감사 시점의 23개에서, 9.18이 timeline 값의 근거로 `pytorch-examples`, `kdenlive`, `glam`을, 9.19가 flap-stress 간격의 근거로 `feral-gamemode`, `tuned`, `systemd-oomd`를, 9.20이 이름 길이 한도의 근거로 `linux-sched-h`를 더해 30개가 되었습니다. 감사는 "`dataset/sources.yaml`: 18 of 23 ids ground nothing"이라고 적었고, 9.10 D34(2026-10-01)는 `procyon`, `dkms-man`, `dkms-debian`, `gamemode-docs`, `dubroy-chi10`, `chang-chi21`, `mozilla-testpilot10`가 registry를 떠난다고 결정했지만 그 제거를 넘겨받은 9.13은 하지 않았습니다. 9.15가 이것을 정리했습니다(2026-10-16, 인지오의 답에 따라). D34의 일곱과, 어떤 데이터 파일도 태그로도 주석으로도 이름으로도 인용하지 않는 넷(`sysmark25`, `rt-app`, `focal-arxiv26`, `mark-chi05`)이 registry를 떠나 19개가 되었습니다. 데이터 파일이 이름으로 인용하는 `cpsmark-tbench23`, `pcmark10`, `sysmark30`은 registry의 규칙(데이터셋이 값이나 구조를 끌어오는 출처만)에 따라 남았습니다. 떠난 열한 개 가운데 본문이 인용하지 않는 다섯(`dkms-man`, `dkms-debian`, `dubroy-chi10`, `chang-chi21`, `mozilla-testpilot10`)은 `references.md`에서도 빠졌고(9.12 D102), `mozilla-testpilot10`의 분석 논문인 `singervine-slate10`도 함께 빠졌습니다. 나머지(`procyon`, `gamemode-docs`, `sysmark25`, `rt-app`, `focal-arxiv26`, `mark-chi05`)는 본문이 인용하므로 `references.md`에 paper-only 항목으로 남았습니다.
 
-> **열린 자리.** 2026-10-10 감사는 "`dataset/sources.yaml`: 18 of 23 ids ground nothing"이라고 적었습니다(감사 시점에는 id가 23개였습니다. 그 뒤 9.18이 timeline 값의 근거로 `pytorch-examples`, `kdenlive`, `glam`을, 9.19가 flap-stress 간격의 근거로 `feral-gamemode`, `tuned`, `systemd-oomd`를, 9.20이 이름 길이 한도의 근거로 `linux-sched-h`를 더해 30개가 되었습니다. `git log -S`로 각 id가 들어온 커밋을 확인했습니다). 아무것도 받치지 않는 id를 정리하는 일은 `_dev/TODO.md` 9.15 줄에 "`dataset/sources.yaml`'s ids that ground nothing and the `ocallahan-atc17` note"로 올라 있습니다. 9.10 D34가 결정한 일곱 항목의 제거가 9.13에서 빠진 것은 기록과 tree의 불일치이며, 9.15의 작업 목록이 그것을 받아야 합니다. 누가 결정하나: 이미 결정된 것(D34)의 적용이므로 9.15의 편집 agent가 적용하고 인지오가 chunk log를 읽습니다(9.15 spec decision 8).
-
-> **열린 자리.** `sources.yaml`의 `ocallahan-atc17` notes는 아직도 "(sec-4.3, Linux kernel-build workload; written "2430" in the paper)"라고 적고 있고, `references.md`의 같은 항목 role 줄도 "(§4.3, kernel-build workload; …)"라고 적고 있습니다. critical findings memo A1이 2026-09-13에 틀렸다고 밝힌 바로 그 문장입니다. 이 두 줄도 9.15 줄에 있습니다. 지금은 이 id가 어떤 값도 받치지 않으므로 compile 결과에는 영향이 없습니다.
+`ocallahan-atc17`의 두 문장도 고쳐졌습니다. `sources.yaml`의 notes는 "The workload is a `make -j8` build of DynamoRio 6.1.0 (sec-4.1), not a Linux kernel build. Grounds only the existence and short-lived character of compiler children"이라고 적고, `references.md`의 같은 항목 role 줄도 "of a `make -j8` build of DynamoRio 6.1.0 (§4.1), not a kernel build (the critical findings memo's A1)"라고 적습니다. critical findings memo A1이 2026-09-13에 틀렸다고 밝힌 "kernel-build workload"는 두 줄 모두에서 빠졌습니다. 이 id는 어떤 값도 받치지 않으므로 compile 결과와는 상관이 없습니다.
 
 ## 2.5 태그의 문법: `<id>`와 `<id>:<locator>`
 
@@ -215,9 +212,9 @@ registry 항목에 `locator_pattern`이 있으면 linter는 locator가 그 정�
 Phase 9 결정 1(3장)은 "A value no source states carries no source tag and is labelled for what it is: convention, arithmetic, placeholder, or design"이라고 정했습니다. 출처가 없는 값은 태그를 달지 않고, 무엇인지를 꼬리표로 밝힌다는 뜻입니다. 네 꼬리표의 뜻은 이렇습니다.
 
 - **design**: 실험을 위해 우리가 고른 값. 예: `c1-gaming`의 `lane_share: 0.9`, 생성 층(generated layer)의 segment 길이 60 s.
-- **convention**: 분야의 관례를 따른 값. 예: 측정 분포가 없을 때 lognormal을 쓰는 것(archetype-plan의 OQ-5, "lognormal by stated convention").
+- **convention**: 분야의 관례를 따른 값. 예: 출처가 범위만 줄 때 lognormal을 쓰는 것(archetype-plan의 OQ-5: "lognormal remains the convention where a source gives only a span", `game-task-chain`의 `per_schedule_run`).
 - **arithmetic**: 다른 값에서 계산한 값. 예: 16,667 µs = 1/60 s.
-- **placeholder**: 측정을 기다리며 임시로 넣은 값. 지금 데이터셋에는 남아 있지 않습니다.
+- **placeholder**: 측정을 기다리며 임시로 넣은 값. 지금의 규칙에는 이 꼬리표가 없습니다. 측정을 기다리는 값은 `meas-pending` 태그를 달고, `make lint`의 freeze가 그것을 거부하므로 데이터셋에 들어가지 않습니다(아래 "왜 이렇게 정했나"와 2.7절).
 
 이 꼬리표가 어디에 붙을 수 있는지는 층마다 다릅니다.
 
@@ -225,19 +222,20 @@ Phase 9 결정 1(3장)은 "A value no source states carries no source tag and is
 2. **timeline**: 각 task의 `source` map이 `bind`의 키와 `count`를 그대로 따라가며, 항목 하나는 태그 하나, 태그 목록, 또는 꼬리표 하나입니다. lint가 받는 꼬리표는 `BOUND_LABELS = ("design", "convention", "arithmetic")` 셋이고, 꼬리표는 혼자 서야 합니다(목록 안에 꼬리표를 섞으면 오류).
 3. **`grids.yaml`(생성 층의 정의)**: 숫자마다 출처나 꼬리표를 답니다. 예: flap-stress 간격 `{length: 2s, source: design}`, `{length: 5s, source: feral-gamemode}`, `{length: 10s, source: tuned}`, `{length: 30s, source: systemd-oomd}`; 이름 길이 한도 `comm_limit: {chars: 15, source: linux-sched-h}`.
 
-> **왜 이렇게 정했나.** timeline의 bound value에 출처나 꼬리표를 다는 규칙은 9.10 D32(2026-10-01)입니다. 기록된 이유는 `building-plan.md` §6의 provenance 주장이 library만 덮고 있었고, timeline 값에는 출처 칸이 없었으며(`timeline.py`; critical findings memo B7), 그런데도 `archetype-plan.md:40`은 count를 "binding-time parameters with a source tag"라고 부르고 있었다는 것입니다. 즉 문서가 이미 약속한 것을 실제로 만들자는 결정이었습니다. 9.10은 내용을 정하고 필드와 lint는 9.13에 넘겼는데, 2026-10-10 감사가 "Timeline bound values carry no source field"(감사의 A2)를 발견할 때까지 만들어지지 않았고, 9.18(2026-10-11)이 필드와 lint를 실제로 넣었습니다. 꼬리표 목록에 placeholder가 없는 이유는 기록에 따로 없습니다. 9.10 D32가 "a label (design, convention, arithmetic)"이라고 셋만 적었고 `linter.py`의 주석도 그 결정을 가리킵니다. 기록된 이유는 없습니다.
+> **왜 이렇게 정했나.** timeline의 bound value에 출처나 꼬리표를 다는 규칙은 9.10 D32(2026-10-01)입니다. 기록된 이유는 `building-plan.md` §6의 provenance 주장이 library만 덮고 있었고, timeline 값에는 출처 칸이 없었으며(`timeline.py`; critical findings memo B7), 그런데도 `archetype-plan.md:40`은 count를 "binding-time parameters with a source tag"라고 부르고 있었다는 것입니다. 즉 문서가 이미 약속한 것을 실제로 만들자는 결정이었습니다. 9.10은 내용을 정하고 필드와 lint는 9.13에 넘겼는데, 9.13의 spec이 그것을 받지 않아(넘긴 일이 빠진 것) 2026-10-10 감사가 "Timeline bound values carry no source field"(감사의 A2)를 발견할 때까지 만들어지지 않았고, 9.18(2026-10-11)이 필드와 lint를 실제로 넣었습니다. 꼬리표 목록이 셋인 것은 9.10 D32가 "a label (design, convention, arithmetic)"이라고 셋만 적었기 때문이고 `linter.py`의 주석도 그 결정을 가리킵니다. Phase 9 결정 1의 넷째 꼬리표 placeholder에 대해서는 인지오가 2026-10-16에 정했습니다(9.15 작업 목록 W-0750). 측정을 기다리는 값은 `meas-pending`을 달고, freeze가 그것을 거부하며, placeholder 꼬리표는 두지 않습니다. 이를 위해 freeze 검사가 library의 파라미터뿐 아니라 timeline의 bound value에도 걸리게 되었습니다(`lint_bound_sources(…, freeze=True)`, 9.15의 rebuild, 2026-10-16). Phase 9 spec의 "placeholder"는 개발 이력으로 남습니다.
 
 ## 2.7 linter가 지키는 것, 지키지 못하는 것
 
-`make -C dataset lint`는 `dataset/tools/lint.py`를 부르고, 그것은 세 가지 검사를 돌립니다.
+`make -C dataset lint`는 `dataset/tools/lint.py --freeze`를 부르고, 그것은 네 가지 검사를 돌립니다.
 
 | 검사 | 함수 | 무엇을 보나 |
 |---|---|---|
 | repo lint | `lint_repo` (`wlc/linter.py`) | `sources.yaml`의 모든 id가 `references.md`의 `### \`id\`` 제목으로 있는가(subset lint); 모든 archetype이 필수 필드 9개(`category_source`, `declared_class`, `pattern`, `params`, `lifetime`, `binding_params`, `scalable`, `validation_stats`, `modeling_notes`)를 갖는가; 모든 파라미터가 태그를 갖고 그 태그가 registry와 locator 패턴을 통과하는가; quantile 표가 열 개의 단조 증가 값과 min/max/구간 평균을 일관되게 갖는가 |
 | bound-source lint | `lint_bound_sources` | 각 timeline task의 `source` map이 `bind` 키와 `count`를 빠짐없이, 넘치지 않게 덮는가; 각 항목이 태그, 태그 목록, 또는 꼬리표 하나인가 |
 | grid lint | `lint_grids` (`gen/cells.py`) | `grids.yaml`의 모든 숫자에 출처나 꼬리표가 있는가; 생성 층이 쓰는 모든 이름이 15자 한도 안인가 |
+| release-map lint | `lint_releases` (`wlc/linter.py`) | library, timeline, variant recipe, `grids.yaml`이 담은 `meas-ci:<workflow>:<campaign>` 태그마다 `dataset/meas-releases.yaml`에 그 캠페인의 release가 있는가; 항목마다 release 태그, GitHub release 주소, asset마다 이름과 SHA-256이 있는가(9.15, 2026-10-16) |
 
-`meas-pending`, 곧 측정을 기다리는 임시값 표시는 "schema freeze" 이후에는 거부됩니다. `lint.py`는 `--freeze` 옵션이 있을 때만 이것을 거부하지만, `dataset/tools/tests/test_lint.py`가 `freeze=True`로 lint를 돌리므로 `make test`가 매번 "meas-pending이 하나도 없다"를 확인합니다. `dataset/README.md`의 "Zero `meas-pending`"이라는 규칙이 이렇게 지켜집니다.
+`meas-pending`, 곧 측정을 기다리는 임시값 표시는 "schema freeze" 이후에는 거부됩니다. 9.23 D13(2026-10-15)부터 `make lint`가 `lint.py --freeze`를 돌리므로 lint 자체가 이것을 거부하고("meas-pending after freeze"), 9.15(2026-10-16)부터는 library의 파라미터뿐 아니라 timeline의 bound value에 달린 `meas-pending`도 거부합니다. `dataset/tools/tests/test_lint.py`도 `freeze=True`로 돌립니다. `dataset/README.md`의 "No `meas-pending`"이라는 규칙이 이렇게 지켜집니다.
 
 linter가 지키지 못하는 것도 분명히 알아야 합니다. linter는 **형식**을 검사합니다. 태그가 registry에 있는지, locator가 패턴에 맞는지, 칸이 비지 않았는지. 그러나 그 태그가 **올바른 근거인지**는 검사하지 못합니다. `_dev/TODO.md`의 9.16 줄이 이것을 그대로 적습니다. "every timeline's `source` map agrees entry for entry with `_dev/research/jioh/task-9.10-scenarios-timelines/bound-values.md` (the lint checks form, not that each tag is the right ground)". 그래서 "이 태그가 정말 이 값을 말하는가"는 사람이 원문을 읽는 검증, 곧 3장과 4장의 일입니다. 1장의 2,430 사례도 형식으로는 완벽한 태그였습니다.
 
@@ -255,42 +253,35 @@ linter가 지키지 못하는 것도 분명히 알아야 합니다. linter는 **
 
 1. `total_work: 1389.885s`는 이 학습 작업이 쓰는 CPU 시간 총량입니다. 출처는 `meas-ci:background:2026-10-03`입니다.
 2. `sources.yaml`에서 `meas-ci`를 찾으면 type `measurement`, locator 패턴, 그리고 notes가 있습니다. notes는 "A measured value is this software on this machine: a GitHub-hosted ubuntu-24.04 runner, pinned to one CPU of the AMD EPYC 7763 only (machine gate) … never desktop truth"라고 이 출처가 무엇을 성립시키고 무엇을 성립시키지 않는지 적습니다.
-3. `references.md`의 `meas-ci` 항목은 role을 "structural/shape claims about software behavior only … machine-relative absolutes carry the runner spec … Never desktop-performance claims"로 적고, 캠페인을 어떻게 돌리고 언제 멈추는지는 `_dev/research/jioh/measurement-campaign-workflow.md`라고 가리킵니다.
+3. `references.md`의 `meas-ci` 항목은 role을 "a measured value is this software on this machine — a GitHub-hosted ubuntu-24.04 runner, pinned to one CPU of the AMD EPYC 7763 only (the machine gate), its runner spec written into the archetype's scope — never desktop truth"로 시작하고, status 줄에서 캠페인을 어떻게 돌리고 언제 멈추는지는 `_dev/research/jioh/measurement-campaign-workflow.md`라고 가리킵니다.
 4. locator `background:2026-10-03`은 workflow `meas-background.yml`로 2026-10-03에 띄운 캠페인입니다. `_dev/research/jioh/measurement-campaign-record.md`의 "9.10 — `cpu-batch`'s `python3`, PyTorch's basic MNIST example" 절에 이 캠페인의 반복 횟수, 값, 반폭이 있습니다. CPU 총량은 6회 반복의 평균 1,389.885 s, 95 % 반폭 ±4.04 %입니다(반복별 1,293.8–1,455.8 s).
-5. 원자료는 GitHub release `meas-ci-background-2026-10-03`에 있습니다.
+5. 원자료는 GitHub release `meas-ci-background-2026-10-03`에 있습니다. `dataset/meas-releases.yaml`이 이 캠페인 태그를 그 release의 주소와 asset마다의 SHA-256에 잇습니다(9.1절).
 6. `program: python3`에는 태그가 두 개 붙어 있습니다. `pytorch-examples`는 "무엇을 돌렸는가"(PyTorch examples 저장소의 Basic MNIST Example, 커밋 `acc295dc…`)의 존재 근거이고, `meas-ci:background:2026-10-03`은 그 프로그램을 잰 캠페인입니다. `references.md`의 `pytorch-examples` 역할 줄은 "Identifies the measurement's job; existence only, no claim that desktop users train MNIST or how often anyone trains"라고 범위를 못박습니다.
 
 이렇게 하나의 숫자는 timeline → registry → 인용 항목 → 캠페인 기록 → 원자료까지 끊기지 않고 이어져야 합니다. 10장에서는 같은 길을 반대 방향, 곧 측정 job에서 출발해 따라갑니다.
 
 ## 2.9 `grounding-sources.md`: 어떤 출처가 어떤 주장을 받칠 수 있나
 
-`docs/workload/grounding-sources.md`(Status: normative, Created 2026-08-25, Updated 2026-08-27)는 출처를 **역할(role)** A–D로 나눕니다. 역할이란 "이 출처는 어떤 종류의 근거를 제공하는가"입니다.
+`docs/workload/grounding-sources.md`(Status: normative, Created 2026-08-25, Updated 2026-10-17)는 출처를 **역할(role)** A–D로 나눕니다. 역할이란 "이 출처는 어떤 종류의 근거를 제공하는가"입니다. 9.15의 전체 정리(spec decision 4)가 이 문서를 지금의 데이터셋에 맞췄고, 표는 그 뒤의 모습입니다.
 
-| 역할 | 질문 | 문서가 든 출처 |
+| 역할 | 문서의 제목 줄 | 문서가 든 출처 |
 |---|---|---|
-| A — Scenario taxonomy | "이런 상황은 표준이지 상상이 아니다" | PCMark 10, SYSmark 30/25, UL Procyon, CpsMark+, Windows Game Mode, ananicy |
-| B — Process behavior parameters | "각 합성 프로세스가 문헌이 말하는 대로 행동한다" | rt-app, interbench, schbench, hackbench, LAVD, stress-ng, kernel build |
-| C — Segment structure and switching statistics | "timeline의 모양이 경험적으로 근거가 있다" | 작업 전환 로그 연구, SWELL-KW, DesktopBench(FOCAL) |
-| D — Measured validation | "합성이 현실과 맞는다" | 원래 팀 데스크톱 측정 → 2026-08-26에 `meas-ci`로 대체 |
+| A — Scenario taxonomy | "these situations are standard, not imagined": 각 출처는 시나리오가 출하된 벤치마크나 시스템에 있다는 것만 보이고, 얼마나 흔한지나 어떤 프로그램이 함께 도는지는 말하지 않음 | PCMark 10, SYSmark 30/25, UL Procyon, CpsMark+, game mode 시스템들(Windows Game Mode, macOS Game Mode, Feral GameMode), Steam의 download 설정, CachyOS의 ananicy 카탈로그 |
+| B — Process behavior parameters | "precedents, and LAVD's reported figures for the game chain": library의 프로세스별 값은 우리 측정(Role D)이고, 게임 chain만 `lavd-ossna24`의 보고 값. 나머지 커뮤니티 도구는 task 모형과 지표의 형식에 대한 선례일 뿐 데이터셋 값을 받치지 않음 | rt-app, interbench, schbench, hackbench, LAVD, stress-ng, kernel build |
+| C — Segment structure and switching statistics | "observed human timelines": core set의 segment 길이는 design이거나 묶인 작업의 측정 길이이고, 이 역할의 출처에 기대는 것은 `c6-dual`의 688 s focus 교대 하나(`gonzalez-chi04`); 나머지는 naturalistic set의 몫 | González & Mark CHI 2004, Mark 등 CHI 2005, Czerwinski 등 CHI 2004, SWELL-KW, BEHACOM, DesktopBench(FOCAL) |
+| D — Our own measurement | "'this software on this machine'": 측정된 archetype 28개의 모든 값. 사용자 쪽 값(키 입력 시각, 탭 수)은 사용자를 재지 않고 공개 기록에서 옴 | `meas-ci` |
 
-이 문서에는 지금도 유효한 규칙이 셋 있습니다.
+이 문서에는 규칙이 셋 있습니다.
 
-- **부정적 결과(the negative result).** "no public trace of desktop process timelines with process names exists." 이름이 붙은 데스크톱 프로세스 timeline의 공개 trace는 없다는 발견을, 사과가 아니라 결과로 진술하라는 규칙입니다. 이유도 적혀 있습니다. "process names are exactly the field privacy review strips, and process names are exactly what this research is about." 프라이버시 검토가 지우는 바로 그 필드가 이 연구의 주제라는 것입니다.
-- **반-역할(anti-roles).** Phoronix Test Suite나 UnixBench(기계의 성능 측정이지 시나리오 정의가 아님), 모바일 앱 사용 데이터셋(모바일의 전경 독점 구조가 데스크톱 멀티태스킹과 다름), SchedCP의 평가 workload(재사용하면 데스크톱 framing을 양보하게 됨)는 근거로 쓰지 말라는 목록입니다.
-- **등급 규칙 재진술.** deployed-system 인용은 존재 주장만 받친다는 규칙을 interbench에 빗대어 "the community *models* interactivity this way", not "desktops *behave* this way"라고 다시 적습니다.
+- **부정적 결과(the negative result).** "no public trace gives desktop process trees with names over time." 이름이 붙은 데스크톱 process tree를 시간에 따라 담은 공개 trace는 없다는 발견을, 사과가 아니라 결과로 진술하라는 규칙입니다. 처음의 문장("no public trace of desktop process timelines with process names exists")은 9.10 D35가 좁힌 지금의 모양이 되었습니다. BEHACOM은 자연스러운 사용에서 분 단위로 전경 실행 파일 이름을 공개하고, DARPA OpTC는 Windows 10 기업 endpoint의 process 생성 사건을 담기 때문입니다. 이유도 적혀 있습니다. "process names are exactly the field privacy review strips, and process names are exactly what this research is about." 프라이버시 검토가 지우는 바로 그 필드가 이 연구의 주제라는 것입니다.
+- **반-역할(anti-roles).** Phoronix Test Suite나 UnixBench(기계의 성능 측정이지 시나리오 정의가 아님), 모바일 앱 사용 데이터셋(모바일의 전경 독점 구조가 데스크톱 멀티태스킹과 다름; 여러 앱의 실행을 기록하는 Carat도 쓰지 않음), SchedCP의 평가 workload(재사용하면 데스크톱 framing을 양보하게 됨)는 근거로 쓰지 말라는 목록입니다.
+- **등급 규칙 재진술.** `references.md`의 등급 규칙(2.3절: deployed-system은 존재 주장, 그 시스템이 문서로 밝힌 자기 설계, 자기 보고 수치; talk와 뉴스는 발표자나 기자의 보고)을 범위의 규율로 다시 적고, interbench에 빗대어 "the community *models* interactivity this way", not "desktops *behave* this way"라고 덧붙입니다. "얼마나 자주, 얼마나 많이, 사용자가 어떻게"를 말하는 문장은 scholarly 출처나 우리 자신의 Role D 측정이 있어야 합니다.
 
-그러나 이 문서의 목록 상당 부분은 Phase 9 이후 낡았습니다. 낡은 부분을 현재 사실과 함께 적어 둡니다.
-
-- Role B의 interbench, schbench, hackbench, stress-ng는 지금 library의 어떤 값도 받치지 않습니다(2.4의 세기). interbench의 Audio/Video/X 상호작용 상수는 "no longer cited by the dataset (Phase 9, 9.5: no observation behind them; measured per-application archetypes replace them)"라고 `references.md`의 `interbench` 항목이 직접 적습니다.
-- LAVD 행의 "the 16ms-frame deadline"은 슬라이드에 없는 값이었고(A2), "Valve ships it; Meta adopted the scheduler server-side"는 2026-09-13 검증에서 MISATTRIBUTED 판정을 받았습니다(K2 C-lavd-18: LWN은 "headed for shipment in Steam Deck"라고 했고, Meta 이야기는 인용되지 않은 다른 LWN 기사에만 있음).
-- SWELL-KW를 "access-gated", "qualitative"로 적은 부분은 틀렸습니다. 검증(K4 C-swell-1)은 CONTRADICTED로 판정했습니다. DANS에서 CC BY-NC-SA 4.0으로 등록 없이 열려 있었습니다. 지금 SWELL-KW는 library에서 타이핑 자극으로 실제로 쓰입니다(`swell-icmi14`).
-- "Standing verification tasks" 1번의 `zhang-chb15`는 9.10 D1(2026-10-01)이 사본에 닿을 수 없다는 이유로 registry와 `references.md`에서 뺐습니다.
-
-> **열린 자리.** `grounding-sources.md`의 이 낡은 줄들은 9.15의 작업 목록에 있습니다(TODO 9.15 줄의 "from 9.10 (D1) … `grounding-sources.md:81`", "9.11 … `grounding-sources.md:29–30` brought to the corrected precedent entries", "9.12 … `docs/workload/grounding-sources.md:18`, `:30`, `:32`, `:74`"). 9.15 spec decision 4에 따라 데이터셋을 설명하는 `docs/workload/` 문서는 코드에 맞춰 전체를 다시 훑습니다. 그때까지 이 문서에서 가져갈 것은 역할 구분과 세 규칙이지 출처 목록이 아닙니다.
+이 권을 처음 쓸 때(2026-10-14) 이 문서의 목록에는 Phase 9 이후 낡은 줄이 여럿 있었습니다. Role B의 interbench, schbench, hackbench, stress-ng가 값을 받치는 것처럼 적혀 있었고, LAVD 행에 슬라이드에 없는 "the 16ms-frame deadline"(A2)과 2026-09-13 검증이 MISATTRIBUTED로 판정한 "Valve ships it; Meta adopted the scheduler server-side"(K2 C-lavd-18)가 있었으며, SWELL-KW는 "access-gated", "qualitative"(K4 C-swell-1, CONTRADICTED)로, 사본에 닿을 수 없어 9.10 D1이 뺀 `zhang-chb15`는 "Standing verification tasks" 1번에 남아 있었습니다. 9.15의 정리가 이것들을 모두 고쳤습니다. 지금 문서는 Role B의 커뮤니티 도구를 존재와 형식의 선례로만 적고(interbench는 "it supplies no parameter values"), LAVD 행은 Min의 2024-04-17 보고 값과 chain의 형식이 design이라는 것, 그리고 Valve가 SteamOS 3.8에서 사용자가 고르는 scheduler로 싣는다는 것(`steamos-lavd`)과 Meta의 발표자들이 fleet 기본 scheduler 후보로 소개했다는 것(`dai-lpc25`)을 적으며, SWELL-KW는 CC BY-NC-SA 4.0으로 열려 있는 데이터, `zhang-chb15`는 2026-10-01에 빠진 것으로 적습니다.
 
 ## 2.10 `source-vetting.md`: 첫 심사의 기록
 
-`docs/workload/source-vetting.md`(Status: record — append-only, Created 2026-08-25, Updated 2026-08-27)는 데이터셋을 처음 만들 때 후보 출처 약 20개를 심사한 기록입니다. rev. 2(2026-08-25)에서 CpsMark+를 "CONDITIONALLY USABLE"에서 "USABLE"로 올렸고, rev. 3(2026-08-26)에서 인용 오류 몇 개(작업 전환 연구의 저자, Gloria Mark 수치의 진짜 출처, kernel build 관련 arXiv 논문 두 편의 정체)를 고쳤습니다. 끝에는 출처별 판정표(Summary Verdict Table)가 있습니다.
+`docs/workload/source-vetting.md`(Status: record — append-only, Created 2026-08-25, Updated 2026-10-17)는 데이터셋을 처음 만들 때 후보 출처 약 20개를 심사한 기록입니다. rev. 2(2026-08-25)에서 CpsMark+를 "CONDITIONALLY USABLE"에서 "USABLE"로 올렸고, rev. 3(2026-08-26)에서 인용 오류 몇 개(작업 전환 연구의 저자, Gloria Mark 수치의 진짜 출처, kernel build 관련 arXiv 논문 두 편의 정체)를 고쳤습니다. 끝에는 출처별 판정표(Summary Verdict Table)가 있습니다.
 
 이 문서는 **기록(record)**이며 append-only입니다. 즉 그 시점에 무엇을 근거로 무엇을 판정했는지를 남기는 것이 목적이고, 나중에 틀린 것으로 밝혀져도 원문을 고치지 않습니다. 그래서 이 문서를 인용할 때는 "2026-08-25의 심사가 이렇게 판정했다"로 인용해야지, "이것이 사실이다"로 인용하면 안 됩니다.
 
@@ -308,7 +299,7 @@ linter가 지키지 못하는 것도 분명히 알아야 합니다. linter는 **
 
 이 표는 심사 기록이 가치 없다는 뜻이 아닙니다. 심사 기록은 "어디를 읽어야 하는가"의 지도로 쓸모가 있었고, 바로 그 지도를 원문과 하나하나 대조한 것이 2026-09-13 검증입니다. 차이는 방법에 있습니다. 첫 심사는 저장소가 이미 가진 설명을 들고 원문을 읽었고, 2026-09-13 검증은 저장소의 설명을 감춘 채 원문을 읽었습니다. 그 방법의 차이가 3장의 결정 1이 되었습니다.
 
-> **열린 자리.** 9.11 D12와 9.12의 여러 결정이 `source-vetting.md:52, 57, 58, 61, 64, 66, 67, 87, 90`의 선례(precedent) 문장을 고친 항목들로 바로잡으라고 넘겼습니다(TODO 9.15 줄). append-only 기록을 어떻게 "고치는가"는 9.15 spec decision 10이 memo에 대해 정한 방식("A memo's original text is never edited. A correction is appended as a `## Correction (<date>)` section")과 같은 방식을 쓸지, 줄 단위로 고칠지 아직 기록에 정해지지 않았습니다. 9.15의 편집 agent가 결정하고 log에 남기며, 인지오가 그 log를 읽습니다.
+9.11 D12와 9.12의 여러 결정이 `source-vetting.md:52, 57, 58, 61, 64, 66, 67, 87, 90`의 선례(precedent) 문장을 고친 항목들로 바로잡으라고 넘겼습니다(TODO 9.15 줄). 이 문서는 append-only 기록이므로 원문은 그대로 두고, 9.15가 끝에 "## Correction (2026-10-17)" 절을 덧붙였습니다. 그 절은 고친 줄마다 줄 번호를 이름 짓고 지금의 사실을 적습니다(예: "**Line 70** (kernel build): O'Callahan et al.'s 2,430 mostly short-lived processes are a `make -j8` build of DynamoRio 6.1.0, not a kernel build"). 위 표의 LAVD, kernel build, SWELL-KW, ananicy, Game Mode, schbench 판정도 그 절에 해당 줄 번호와 함께 들어 있고(17, 70, 81, 47, 46, 57–58행), 인용 문자열과 고정 버전과 역할은 `references.md`의 것, 출처들이 지금 맡는 역할은 `grounding-sources.md`의 것이라고 절의 첫 문장이 밝힙니다.
 
 ---
 
@@ -363,7 +354,7 @@ spec 원문은 이렇습니다.
 
 **(7) 출처가 말하지 않는 값은 꼬리표를 단다.** 2.6절에서 본 그대로입니다. 이 요소가 막는 실패의 예는 critical findings memo B2입니다. `compiler-child.disk_wait`의 `sigma_log: 0.8`은 측정 이전에 넣은 임시값이었는데, 중앙값만 측정값으로 바뀌면서 태그가 `meas-ci:cli:3`로 바뀌었고, 그 결과 측정되지 않은 퍼짐(spread)이 측정 태그를 달고 있었습니다(커밋 이력 `df2c5f5` → `349423b` → `8416025`).
 
-> **열린 자리.** 결정 1은 꼬리표를 넷(convention, arithmetic, placeholder, design)으로 적었고, timeline lint는 셋(placeholder 제외)을 받습니다(2.6절). 지금 데이터셋에 placeholder가 남아 있지 않으므로 실제 충돌은 없습니다. 장차 측정을 기다리는 값이 다시 생기면 그것을 어떻게 적을지는 기록에 정해져 있지 않습니다. 옛 방식은 `meas-pending` 태그였고, freeze 이후에는 lint가 거부합니다.
+결정 1은 꼬리표를 넷(convention, arithmetic, placeholder, design)으로 적었지만, timeline lint는 셋을 받습니다(`BOUND_LABELS = ("design", "convention", "arithmetic")`, `dataset/tools/wlc/linter.py`). timeline의 bound value에 대해서는 9.10 D32가 결정 1보다 뒤의 결정이고, D32는 셋만 적었습니다(2.6절). 측정을 기다리는 값은 `meas-pending` 태그를 달며, 9.23 D13(2026-10-15)부터 `make lint`가 `lint.py --freeze`를 돌려 그것을 거부합니다("meas-pending after freeze"). 그래서 측정을 기다리는 값은 freeze 뒤에 데이터셋에 들어올 수 없습니다. 인지오가 2026-10-16에 이 방식을 규칙으로 정했고(placeholder 꼬리표는 두지 않음), freeze 검사는 그날부터 timeline의 bound value에도 걸립니다(9.15 작업 목록 W-0750). 지금 library에도 timeline에도 `meas-pending`은 하나도 없습니다.
 
 ## 3.3 결정 2 — archetype 안에서 montage 금지
 
@@ -417,7 +408,7 @@ S4라는 부류가 있다는 점이 결정 2와 맞물립니다. 문헌, 문서,
 
 결정 5를 어떻게 적용했는지는 9.5 D3(2026-09-14)에 이유와 함께 기록되어 있습니다. 상호작용 프로그램 여섯 개의 값을 runner 측정 캠페인에서 가져오기로 하면서, 기록된 이유는 "인지오 judges values measured on 100–664 MHz machines two decades ago unable to back a current application"과 "the search found no newer per-input observation of a Linux editor, office suite, mail client, browser, image editor or video editor"였습니다. 문헌에 있는 Linux 데스크톱 측정은 20년 전 100–664 MHz 기계의 것이라 지금의 프로그램을 받칠 수 없다고 판단했고, 더 새로운 관찰은 찾지 못했다는 것입니다. 같은 날 9.5 D10은 runner에서 잰 절대값을 "convention informed by measurement"(측정으로 정보를 얻은 관례)라는 낮은 등급으로 두지 않고 "a source claim whose source is the run"으로 올렸습니다. 기록된 이유는 "the values are observations of that software on that machine, the only current Linux observations obtainable"이며, 낮은 등급으로 두면 "no interactive archetype would meet decision 2"라는 것이었습니다.
 
-> **열린 자리.** 결정 5와 결정 2를 함께 적용하면, 측정 장소가 다른 두 archetype을 한 timeline에 함께 두는 일이 생깁니다(예: runner에서 잰 편집기와 LAVD 발표에서 온 게임 chain). 9.5 follow-ups spec decision 13은 이것을 "Scale limitation at the composition seam"이라 부르고 "stated once at the library level"로 정했으며, 민감도 점검은 9.14에 넘겼습니다. 이 library 수준의 한계 문장은 9.15의 할 일("library-level scale limitation stated (spec decision 13)")로 남아 있습니다.
+결정 5와 결정 2를 함께 적용하면, 측정 장소가 다른 두 archetype을 한 timeline에 함께 두는 일이 생깁니다(예: runner에서 잰 편집기와 LAVD 발표에서 온 게임 chain). 9.5 follow-ups spec decision 13은 이것을 "Scale limitation at the composition seam"이라 부르고 "stated once at the library level"로 정했으며, 민감도 점검은 9.14에 넘겼습니다. 이 library 수준의 한계 문장은 9.15에서 archetype plan(`docs/workload/archetype-plan.md`) §2의 "Observation venues" 단락에 들어갔고, 그 문서에만 있습니다. "The library's archetypes come from more than one observation venue, and their relative scales are not calibrated to each other; a timeline composing a runner-measured task with a literature-grounded one carries that limitation." 장소는 둘입니다. 측정된 entry 28개(모든 값이 GitHub runner의 AMD EPYC 7763 코어 하나의 것)와, `lavd-ossna24` 발표 슬라이드에서 온 lane-scaled `game-task-chain`입니다. 민감도 점검은 venue variant `venue-x0.8`과 `venue-x1.25`(게임 chain을 뺀 모든 RUN을 0.8배와 1.25배로, 9.14 decision 12)입니다.
 
 ## 3.7 결정 6–8: 일의 구조, 팀 소통, 끝내는 조건
 
@@ -473,9 +464,11 @@ spec 끝의 "Open items"는 "The format and location of the verification records
 | R10 | `zhang-chb15`, `gonzalez-chi04`, `mark-chi05`, `mark-chi08`, `mark-chi14`, `czerwinski-chi04`, `mark-gallup06`, `swell-icmi14` |
 | R11 | `focal-arxiv26`, `videogui-arxiv24`, 출처 없이 적힌 일반 주장 C-plain-1–9 |
 
+이 표는 2026-09-13에 읽은 것의 기록입니다. 그 가운데 `zhang-chb15`는 2026-10-01(9.10 D1)에, `dkms-man`, `dkms-debian`, `dubroy-chi10`, `chang-chi21`, `mozilla-testpilot10`, `singervine-slate10`은 2026-10-16(9.15)에 `references.md`를 떠났습니다(2.4절). 같은 날 참고문헌 전용 항목 `mark-chi08`, `mark-chi14`, `mark-gallup06`, `videogui-arxiv24`도 `references.md`를 떠났습니다. 9.10 D169가 이 항목들을 9.15에 넘기며, 본문이 인용하는 항목은 판정에 맞게 고쳐 남기고 나머지는 빼도록 정했습니다.
+
 **(3) 비교(comparison), `compare/K1–K5`.** 읽기 결과를 저장소의 문장과 위치마다 맞대어 판정했습니다. K1은 R01과 R03, K2는 R02와 R04, K3은 R06과 R07, K4는 R08, R09, R10(그리고 DOI 아홉 개에 대한 Crossref 기록), K5는 R05와 R11을 비교합니다. 비교자는 읽기 결과만 믿지 않고 필요하면 원문을 다시 열었습니다(예: K1은 `interbench.c`의 `periodic_schedule()` 378–457행, `emulate_compile` 770–797행을 직접 열었습니다). README는 비교 단계에서 바로잡은 입력 오류 세 가지도 적어 둡니다. R11이 C-plain-9를 엉뚱한 도구에 대해 답한 것(K5가 다시 판정), R01이 C-hackbench-2에 붙인 "premise" 판정(K1이 정정), `claims.md`에서 자리를 잘못 잡은 C-plain-7 한 줄(K5가 지적).
 
-**(4) 측정 감사(measurement audit), `meas-report.md`.** 그때의 측정 요약 `dataset/meas/summary.json`을 원자료 release `meas-ci-2026-08-28`에서 다시 만들어 보고(재현 결과: `out_cli3.json`이 `summary.json`과 바이트 단위로 같았습니다, 1,083개 leaf field), 측정 방법을 감사하고, `meas-ci` 태그를 단 파라미터마다 M(measured, 재현됨), D(derived, 산술 확인), C(convention 또는 placeholder), X(불일치)로 분류했습니다. X 항목이 X1부터 X16까지 열여섯 개입니다(4.6절).
+**(4) 측정 감사(measurement audit), `meas-report.md`.** 그때의 측정 요약 `dataset/meas/summary.json`(Phase 2의 요약; 9.15가 2026-10-16에 지웠고(커밋 `37c2e233`), 그 앞의 커밋에서 읽을 수 있습니다)을 원자료 release `meas-ci-2026-08-28`에서 다시 만들어 보고(재현 결과: `out_cli3.json`이 `summary.json`과 바이트 단위로 같았습니다, 1,083개 leaf field), 측정 방법을 감사하고, `meas-ci` 태그를 단 파라미터마다 M(measured, 재현됨), D(derived, 산술 확인), C(convention 또는 placeholder), X(불일치)로 분류했습니다. X 항목이 X1부터 X16까지 열여섯 개입니다(4.6절).
 
 **(5) compile된 숫자 감사(compiled-number audit), `compiled-numbers-report.md`.** 우선순위 표, 짝 검토(pair review), scoring spec, guard spec, RQ0 gate spec, memo, spec들에 적힌 "compile된 파일이 이렇다"는 숫자 진술을 실제 build에 대고 판정했습니다. 판정 어휘는 `HOLDS`(성립), `STALE`(낡았으나 결론은 성립), `WRONG`(틀림), `UNCHECKABLE`(확인 불가)입니다(4.7절).
 
@@ -513,26 +506,26 @@ spec 끝의 "Open items"는 "The format and location of the verification records
 
 critical findings memo(`docs/memos/2026-09-13-critical-findings.md`, Status: memo, Created/Updated 2026-09-13)는 "Findings from checking `dataset/archetypes.yaml` and its grounding documents against the primary sources and against the compiler, measurement summary and raw measurement release"이며, "Nothing in the repository was changed; resolution is left to the owners of each file"라고 스스로를 규정합니다. 요약표에는 A1–A5(원문이 저장소의 설명과 모순), B1–B7(데이터셋과 도구), C(측정을 반영한 뒤 남은 낡은 문장), D(원문과 대조하지 않은 출처)가 있습니다.
 
-> **열린 자리.** Phase 9 spec과 2026-10-10 감사는 이 memo의 발견을 "13"개로 셉니다("The 13 findings in `docs/memos/2026-09-13-critical-findings.md`", "the 13 + 6 critical findings"). 그런데 memo의 요약표에는 A1–A5 다섯, B1–B7 일곱, C 하나, D 하나로 열네 행이 있습니다. 어느 행을 빼고 13으로 셌는지는 기록에 없습니다. 확인 필요. 이 권은 열네 행을 모두 다룹니다.
+Phase 9 spec과 2026-10-10 감사는 이 memo의 발견을 "13"개로 셉니다("The 13 findings in `docs/memos/2026-09-13-critical-findings.md`", "the 13 + 6 critical findings"). memo의 요약표에는 A1–A5 다섯, B1–B7 일곱, C 하나, D 하나로 열네 행이 있는데, 13은 A1–A5, B1–B7, C입니다. D는 원문과 대조하지 못한 출처의 목록이지 발견이 아닙니다(인지오의 답, 2026-10-16; 9.15 작업 목록 W-0749). 그래서 memo의 내용은 "발견 열셋과 읽지 못한 출처의 목록 하나"입니다. 이 권은 열네 행을 모두 다룹니다.
 
 아래 표는 각 발견이 무엇이었고, 그 뒤 어떤 결정이 그것을 다뤘는지입니다. "다룬 결정" 열은 그 주제를 실제로 바꾼 기록을 적은 것이며, 자세한 값은 archetype library를 다루는 2권과, timeline과 coreset을 다루는 3권과 4권이 다룹니다.
 
 | 발견 | 무엇이 틀렸나 | 그 뒤 무엇이 바뀌었나 |
 |---|---|---|
-| A1 | `ocallahan-atc17`의 2,430은 DynamoRio build | 9.6이 kernel build를 직접 재어(`meas-ci:build:2026-09-18`) `build-orchestrator`가 측정된 build 전체를 묶게 됨: object job 2,908개, `parallelism_cap` 8(9.10 D18). 카탈로그의 2,430 출처 줄은 9.10 D33이 뺌. `sources.yaml`과 `references.md`의 문장은 아직 남음(2.4절 열린 자리) |
+| A1 | `ocallahan-atc17`의 2,430은 DynamoRio build | 9.6이 kernel build를 직접 재어(`meas-ci:build:2026-09-18`) `build-orchestrator`가 측정된 build 전체를 묶게 됨: object job 2,908개, `parallelism_cap` 8(9.10 D18). 카탈로그의 2,430 출처 줄은 9.10 D33이 뺌. `sources.yaml`과 `references.md`의 문장은 9.15(2026-10-16)에서 DynamoRio build로 고쳐짐(2.4절) |
 | A2 | 16.7 ms frame budget이 LAVD 슬라이드에 없음 | 9.4 D2: `frame_period` 16,667 µs는 그대로, 태그를 `lavd-ossna24` → `steamos-refresh`로, "design — display-paced at the Steam Deck LCD default refresh … 1/60 s arithmetic"으로 표시. LAVD registry notes에 "States no frame period or frame budget" 추가 |
 | A3 | Roeser의 158 ms는 로그 척도 위치인데 평균으로 저장·샘플; 논문 자신의 pause 성분(≈253 ms)은 안 쓰고 Dhakal의 평균으로 닫음 | 9.5가 `desktop-interactive`를 응용 프로그램별 측정 archetype으로 대체(9.5 D2, D19). 타이핑 자극은 SWELL-KW 기록을 재생(9.5 D4). `dhakal-chi18`과 `roeser-rw24`는 "Paper-only after Phase 9"(역할 줄 2026-09-14 정정) |
 | A4 | Coetzee의 짧은 프로세스는 `cp`, `mkdir` | `compiler-child`가 측정값으로 바뀌면서 "corroborates" 주장이 사라짐. `coetzee-arxiv12`는 지금 아무 값도 받치지 않음 |
-| A5 | `ananicy-rules`의 `type`은 처방(prescription)이지 행동 분류가 아님; 수확 규칙이 고르지 않게 적용됨 | 28개 측정 항목의 `category_source`가 모두 `meas`가 됨(나머지 하나 `game-task-chain`은 `lavd-ossna24`). `ananicy-rules`는 `sources.yaml`에 없음. 9.12 D1은 이것을 `whitelist` 비교 조건이 재현하는 이름 기반 카탈로그로 다룸(근거가 아니라 비교 대상) |
+| A5 | `ananicy-rules`의 `type`은 처방(prescription)이지 행동 분류가 아님; 수확 규칙이 고르지 않게 적용됨 | 28개 측정 항목의 `category_source`가 모두 `meas`가 됨(나머지 하나 `game-task-chain`은 `lavd-ossna24`). `ananicy-rules`는 `sources.yaml`에 없음. 9.12 D1은 이것을 비교 조건이 재현하는 이름 기반 카탈로그로 다룸(근거가 아니라 비교 대상). 그 조건은 9.12 D6, D105 이후 `shipped_catalogue`(CachyOS가 ananicy-cpp와 함께 설치하고 켜는 카탈로그를 `03ef03fb` 시점 그대로, 각 process의 `argv[0]` basename으로 맞춤)이고, 옛 `whitelist` 조건의 다른 반쪽은 `strongest_name_table` |
 | B1 | `game-task-chain`의 두 파라미터는 컴파일러가 읽지 않음; tail 파라미터는 슬라이드 태그를 단 placeholder; `n_tasks: 300`은 개수를 archetype 안에 둠 | 9.4 D3: `n_tasks`, `tail_idle_gap`, `tail_run` 삭제, 게임 파일마다 284개 tail task가 사라짐. 9.4 D7: 읽히지 않던 두 파라미터 정리 |
 | B2 | `compiler-child.disk_wait`의 `sigma_log: 0.8`은 측정 태그를 단 placeholder | 9.6이 `compiler-child`를 단계별 CPU 표로 다시 측정, `disk_wait` 파라미터가 사라짐 |
 | B3 | 측정된 동시 실행은 compiler 계열 16개, archetype의 상한은 8 — 단위가 다름 | 9.6 D2: 단위를 "make job 하나 = 역할별 프로세스 사슬"로. job 하나가 여섯 프로세스(`sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`)이므로 상한 8 job은 compile된 파일에서 `fork_cap` 48 |
 | B4 | 끝없는 loop에 선언한 `per-iteration` 샘플링이 `per-task`로 compile됨; 측정 퍼짐은 프로세스 사이의 퍼짐 | 해당 항목 셋(`background-crawler`, `electron-comms`, `system-daemon`)이 모두 은퇴(9.7 D5, 9.8 D25, 9.9 D26)하고, 측정 항목은 스레드 종류별 component가 측정된 gap 표에서 wake마다 gap을 뽑는 형식으로 바뀜(9.5 D16, D17) |
 | B5 | `desktop-interactive`의 burst가 입력 간격의 절반 → 편집기가 CPU 약 50 % | 9.5가 편집기, 워드프로세서 등을 실제 프로그램으로 측정. 입력 하나당 CPU(`input_run`)가 측정값(예: LibreOffice Writer 중앙값 3.23 ms) |
 | B6 | `gnome-shell`, `Xorg`, `pipewire`가 서버 데몬 값의 `system-daemon`에 묶임; `wineserver`가 1,225 s를 잠 | 9.9가 `system-daemon`을 넷으로 나눠 유휴 Ubuntu 데스크톱 세션에서 측정, `xorg` 은퇴(9.9 D26). `wineserver`는 게임 chain의 구성원(9.4 D4, 260 µs, `lavd-ossna24:s13`) |
-| B7 | 작은 틈들: linter가 `category_source`의 값이 아닌 존재만 검사; timeline `count`에 출처 칸 없음; `background-crawler`는 어디에도 묶이지 않음; "2.4×" 모호; CpsMark+ Table 4 오용; `electron-comms` 심판 판정의 근거 부족; schbench/hackbench archetype은 만들어진 적 없음; privacy-scrub 도구가 저장소에 없음 | count 출처 칸: 9.10 D32 → 9.18의 `source` map과 lint. `background-crawler` 은퇴(9.7 D5). Table 4는 9.10 D34/D170이 "CC module's best graphics-card configuration performing 1.77 times its base configuration"으로 역할을 다시 씀. `electron-comms`는 9.8이 넷으로 나눠 측정. privacy-scrub 도구에 대한 해결 기록은 찾지 못함(확인 필요) |
+| B7 | 작은 틈들: linter가 `category_source`의 값이 아닌 존재만 검사; timeline `count`에 출처 칸 없음; `background-crawler`는 어디에도 묶이지 않음; "2.4×" 모호; CpsMark+ Table 4 오용; `electron-comms` 심판 판정의 근거 부족; schbench/hackbench archetype은 만들어진 적 없음; privacy-scrub 도구가 저장소에 없음 | count 출처 칸: 9.10 D32 → 9.18의 `source` map과 lint. `background-crawler` 은퇴(9.7 D5). Table 4는 9.10 D34/D170이 "CC module's best graphics-card configuration performing 1.77 times its base configuration"으로 역할을 다시 씀. `electron-comms`는 9.8이 넷으로 나눠 측정. privacy-scrub 도구의 약속은 거두어짐(인지오의 결정, 2026-10-16): 문서는 그 약속을 빼고, 실제 데스크톱 검증은 밝혀 둔 한계로 남음(`measurement-overview.md` §11; 11.3절) |
 | C | 측정 반영 후 남은 낡은 문장(`references.md:280`의 "reserved (no runs yet)", `archetype-plan`의 `meas-pending`, `building-plan`의 "1 s" sampler, coreset-guide의 "~5.7 ms", README의 `wanted`) | 대부분 9.15의 문서 정리로 넘어감. `references.md`의 `meas-ci` 항목은 지금 "status: in use …"로 바뀌어 있음 |
-| D | `chang-chi21`(ACM 403), `cpsmark-tbench23`(ScienceDirect 거부)를 원문과 대조하지 못했는데 둘 다 `verified` | 같은 검증의 R09가 `chang-chi21`을, R04가 `cpsmark-tbench23`을 다른 사본(Wayback 보관본 등)으로 읽음. 9.10 D1이 두 사본이 2026-10-01에도 닿는 것을 확인하고 유지 |
+| D | `chang-chi21`(ACM 403), `cpsmark-tbench23`(ScienceDirect 거부)를 원문과 대조하지 못했는데 둘 다 `verified` | 같은 검증의 R09가 `chang-chi21`을, R04가 `cpsmark-tbench23`을 다른 사본(Wayback 보관본 등)으로 읽음. 9.10 D1이 두 사본이 2026-10-01에도 닿는 것을 확인하고 유지. `chang-chi21`은 그 뒤 아무 값도 받치지 않고 본문도 인용하지 않아 9.15(2026-10-16)에서 registry와 `references.md`를 떠남(9.10 D34, 9.12 D102) |
 
 이 표에서 눈에 띄는 패턴이 있습니다. 문헌 값을 고친 경우보다, 문헌 값을 **측정으로 대체한** 경우가 훨씬 많습니다. 결정 2(montage 금지)와 결정 5(runner 측정)가 합쳐진 결과입니다. 문헌 하나로 archetype 전체를 덮을 수 없으면 직접 재는 쪽이 한 관찰을 얻는 유일한 길이었습니다.
 
@@ -545,7 +538,7 @@ Phase 9 spec의 Scope는 memo 밖의 발견 여섯 개를 따로 적었습니다
 3. **Roeser의 Table 3은 archetype이 "convention"이라 부른 퍼짐을 보고한다.** Table 3에는 fluent 퍼짐 0.29가 두 과제 모두에 있었습니다(R08). 즉 관례라고 적었던 값 일부는 실제로 출처에 있었습니다. 표시가 틀린 방향이 "출처가 있는데 없다고 함"인 드문 예입니다.
 4. **LAVD 슬라이드 12장과 16장의 wineserver.** 슬라이드 12장은 wine을 시스템 task로 분류하고, 16장의 그래프는 wineserver를 중심으로 한 구조를 보입니다(K2 C-lavd-4 `MISATTRIBUTED`). 9.4 D4가 wineserver를 chain의 구성원으로 넣고 260 µs(`lavd-ossna24:s13`)를 주었습니다.
 5. **CpsMark+는 "time-shared compositions"를 반박한다.** `archetype-plan.md:69`는 창작 프로그램이 시간을 나눠 쓰는 조합이라는 주장에 `cpsmark-tbench23:table-4`를 달았는데, Table 4는 작업별 하드웨어 민감도(GPU/CPU/저장장치) 표입니다. 그리고 K2 C-cpsmark-6은 저장소가 인용한 "1.77×"가 Table 4가 아니라 Table 5의 CC 모듈 수치라고 `MISATTRIBUTED` 판정했습니다.
-6. **`chang-chi21`의 세부.** K4는 "~8 %가 10개 넘는 탭을 열었다"는 `SUPPORTED`(정확히는 MTurk가 아닌 참가자 중 7.8 %), "Article 149"는 `UNVERIFIABLE`, "fatter modern tail"(현대의 탭 분포 꼬리가 더 두껍다)은 우리 해석(`OURS`)으로 판정했습니다. 지금 `chang-chi21`은 어떤 값도 받치지 않습니다.
+6. **`chang-chi21`의 세부.** K4는 "~8 %가 10개 넘는 탭을 열었다"는 `SUPPORTED`(정확히는 MTurk가 아닌 참가자 중 7.8 %), "Article 149"는 `UNVERIFIABLE`, "fatter modern tail"(현대의 탭 분포 꼬리가 더 두껍다)은 우리 해석(`OURS`)으로 판정했습니다. `chang-chi21`은 어떤 값도 받치지 않게 되었고, 9.15(2026-10-16)에서 registry와 `references.md`를 떠났습니다(2.4절).
 
 ## 4.6 측정 감사의 X 항목
 
@@ -663,7 +656,7 @@ heads-up memo는 이 감사의 요점을 팀에게 이렇게 전했습니다. "f
 
 넘겨진 한계 표(README의 "Known limitations of the current tools")는 각 한계와 그 담당 조각을 적습니다. 예를 들어 "No instrument measures I/O wait (#2)"는 9.6과 9.7, "Element starts no renderer process (#4)"는 9.8, "The tracker miner never indexes the corpus (#7)"는 9.7, 그리고 "names:1 and names:2 were produced by the pre-fix level logic"은 9.10에 넘겨졌습니다.
 
-> **열린 자리.** `dataset/meas/summary.json`은 9.3 결정 5대로 바뀌지 않았고, 지금의 데이터셋 값은 어느 것도 이 파일에서 오지 않습니다. 그런데 `dataset/README.md:18`은 여전히 이것을 "the campaign summary"라고 부릅니다. 2026-10-10 감사가 "`dataset/meas/summary.json` orphaned pre-rebuild analysis"라고 적었고, 9.15 줄에 올라 있습니다. 파일을 지울지, 역사적 기록으로 표시해 둘지는 아직 결정되지 않았습니다. 9.15의 편집 agent가 결정하고 log에 남기며, 인지오가 읽습니다(9.15 spec decision 2, 8).
+`dataset/meas/summary.json`은 9.3 결정 5대로 바뀌지 않았고, 데이터셋의 어떤 값도 이 파일에서 오지 않았습니다. 2026-10-10 감사가 "`dataset/meas/summary.json` orphaned pre-rebuild analysis"라고 적었고, 인지오가 2026-10-16에 지우기로 정했습니다(9.15 작업 목록 W-0784). 어떤 도구도 이 파일을 읽지 않았고(개발 이력의 비교 스크립트 하나만), 어느 manifest의 입력도 아니었습니다. 파일은 9.15의 rebuild 커밋 `37c2e233`(2026-10-16)에서 지워졌고, 그 앞의 커밋에서 읽을 수 있습니다. `dataset/README.md`의 `meas/` 줄은 이제 `names/`와 `streams/`만 적습니다(33–35행). 이 파일을 인용하는 memo들은 그 시점의 기록으로 그대로 둡니다.
 
 ## 5.3 같은 시기의 팀 소통: heads-up memo
 
@@ -681,7 +674,7 @@ heads-up memo는 이 감사의 요점을 팀에게 이렇게 전했습니다. "f
 
 이 장치는 두 단계를 거쳐 지금 모양이 되었습니다.
 
-**Phase 2(2026-08-28)의 첫 캠페인.** 2026-08-26의 grill D6은 "meas-ci adopted with the trust-scoping package"를 정했습니다. 원문은 "CI-runner measurement supports structural/shape claims only (fork structure, counts, lifetime shapes, periods, heartbeat rates, comm strings); machine-relative absolutes … are recorded with the runner spec and rank as 'convention informed by measurement', never desktop truth. Each workflow runs N times and reports spread. Framing: characterization of software behavior, never desktop-performance measurement." CI 측정은 구조와 모양에 대한 주장만 받치고, 기계에 따라 달라지는 절대값은 runner 사양과 함께 기록하되 "측정으로 정보를 얻은 관례" 등급으로 둔다는 것입니다. 같은 날 D8은 팀원의 실제 데스크톱에서 재는 "meas-live"를 연구에서 뺐습니다. 기록된 이유는 "No teammate Linux desktops known; a standing 'validate later' conditional would leave published results provisional"입니다. 이에 따라 task 2.6(`_dev/docs/spec/jioh/task-2.6-meas-ci.md`)이 두 보조 도구(netlink proc event로 프로세스 생성·종료를 잡는 tracer와 1 s 주기의 `/proc` sampler), "artifacts only, CI never writes to the repo", "N=5 matrix, dispatch-only", run 번호 태그(`meas-ci:<workflow>:<run>`)를 정했습니다. CLI workflow는 kernel defconfig build(`make -j8`)와 같은 소스 트리 위의 `tar`/`xz`, `rsync`, `updatedb`, `clamscan`, 그리고 kernel 소스 download를 `network-bulk` 측정으로 겸했고, GUI workflow는 Xvfb 위의 Chromium과 Element Desktop을, names workflow는 ubuntu/fedora/archlinux 컨테이너에서 프로세스 이름을 확인했습니다. 그 결과가 release `meas-ci-2026-08-28`과 `dataset/meas/summary.json`입니다.
+**Phase 2(2026-08-28)의 첫 캠페인.** 2026-08-26의 grill D6은 "meas-ci adopted with the trust-scoping package"를 정했습니다. 원문은 "CI-runner measurement supports structural/shape claims only (fork structure, counts, lifetime shapes, periods, heartbeat rates, comm strings); machine-relative absolutes … are recorded with the runner spec and rank as 'convention informed by measurement', never desktop truth. Each workflow runs N times and reports spread. Framing: characterization of software behavior, never desktop-performance measurement." CI 측정은 구조와 모양에 대한 주장만 받치고, 기계에 따라 달라지는 절대값은 runner 사양과 함께 기록하되 "측정으로 정보를 얻은 관례" 등급으로 둔다는 것입니다. 같은 날 D8은 팀원의 실제 데스크톱에서 재는 "meas-live"를 연구에서 뺐습니다. 기록된 이유는 "No teammate Linux desktops known; a standing 'validate later' conditional would leave published results provisional"입니다. 이에 따라 task 2.6(`_dev/docs/spec/jioh/task-2.6-meas-ci.md`)이 두 보조 도구(netlink proc event로 프로세스 생성·종료를 잡는 tracer와 1 s 주기의 `/proc` sampler), "artifacts only, CI never writes to the repo", "N=5 matrix, dispatch-only", run 번호 태그(`meas-ci:<workflow>:<run>`)를 정했습니다. CLI workflow는 kernel defconfig build(`make -j8`)와 같은 소스 트리 위의 `tar`/`xz`, `rsync`, `updatedb`, `clamscan`, 그리고 kernel 소스 download를 `network-bulk` 측정으로 겸했고, GUI workflow는 Xvfb 위의 Chromium과 Element Desktop을, names workflow는 ubuntu/fedora/archlinux 컨테이너에서 프로세스 이름을 확인했습니다. 그 결과가 release `meas-ci-2026-08-28`과 `dataset/meas/summary.json`입니다(뒤의 것은 9.15가 2026-10-16에 지웠습니다, 5.2절).
 
 **Phase 9의 다시 짓기.** 4장과 5장에서 본 감사가 이 첫 캠페인의 결함을 드러냈고, Phase 9의 연구 조각들은 측정 방법을 크게 바꿨습니다. 가장 큰 변화 넷을 순서대로 적습니다.
 
@@ -753,12 +746,12 @@ trigger 파일은 실행할 프로그램, 반복 번호(모든 프로그램에 �
 
 ## 6.4 도구 상자 `dataset/tools/meas/`
 
-`dataset/tools/meas/`에는 README가 없습니다. 도구마다 머리의 docstring이나 주석이 설명을 대신합니다(이 권을 쓰며 각 파일 머리를 읽었습니다). 공용 도구와 family 폴더를 나눠 정리합니다.
+`dataset/tools/meas/README.md`가 이 폴더의 지도입니다. 하위 폴더와 맨 위 도구마다 그 캠페인 family, 단계(run, analysis, pool, fold-in), 입구를 적고, 각 도구가 무엇을 하는지는 그 도구의 docstring이나 머리 주석에 맡깁니다(이 권을 쓰며 각 파일 머리를 읽었습니다). 공용 도구와 family 폴더를 나눠 정리합니다.
 
 | 파일/폴더 | 역할 |
 |---|---|
 | `machine_gate.sh`, `pin.sh`, `phase.sh` | CPU 모델 확인, CPU 고정, 단계의 시작과 끝 기록 |
-| `runner_spec.py` | runner 사양을 `spec.json`으로 기록("machine-relative absolutes rank as convention-informed-by-measurement and carry this record") |
+| `runner_spec.py` | runner 사양을 `spec.json`으로 기록. docstring은 Phase 2의 문장("machine-relative absolutes rank as convention-informed-by-measurement and carry this record")을 아직 적지만, 9.5 D10 이후 측정값은 runner로 범위를 정한 출처 주장입니다(6.1절) |
 | `stability.py` | 모든 캠페인이 공유하는 stability rule(7장): `TOLERANCE = 0.05`, t 배수 `t975`, `stability`, `ratio_stability` |
 | `stopping.py` | 멈춤 규칙을 관찰된 퍼짐에서 모의실험(9.5 D88) |
 | `distribution.py` | 측정 분포를 표로 만드는 방법: 열 개 분위수 p1…p99.9, 최솟값과 최댓값, 열한 구간의 평균 |
@@ -778,9 +771,9 @@ trigger 파일은 실행할 프로그램, 반복 번호(모든 프로그램에 �
 | `probe/` | runner 탐침과 입력 재생: `replay_stream.py`, `swell_streams.py`, `aalto_streams.py`, `appdefs.sh`, `feed.html`, `webrtc-loopback.html` 등 |
 | `sched/` | 9.11: `classes.py`(스레드마다 scheduling policy와 nice 기록), `tunables.sh` |
 
-이 도구들은 compile이 읽지 않습니다. `dataset/README.md`의 도구 지도는 `tools/meas/`를 "meas-ci campaign tooling"으로만 적습니다. 즉 데이터셋을 build하는 데는 필요 없고, 측정을 다시 하거나 pooled record에서 값을 다시 만들 때 필요합니다.
+이 도구들은 compile이 읽지 않습니다. 데이터셋을 build하는 데는 필요 없고, 측정을 다시 하거나 pooled record에서 값을 다시 만들 때 필요합니다. `dataset/README.md`의 도구 지도는 `tools/meas/`를 "the measurement campaigns' tooling, one folder per campaign family — map: tools/meas/README.md"로 적습니다.
 
-> **열린 자리.** 이 저장소에는 `dataset/tools/meas/`의 도구들을 한 곳에서 설명하는 문서가 없습니다(README 없음). 도구별 docstring과 workflow 문서의 "Tooling" 절이 그 역할을 나눠 하고 있습니다. 9.15 spec decision 4는 데이터셋을 설명하는 문서(`docs/workload/`, `dataset/README.md`)를 코드에 맞춰 전체 정리하도록 했으나, 도구 README를 새로 만드는 것은 그 범위에 명시되어 있지 않습니다. 필요한지는 인지오의 판단입니다.
+이 README는 9.15에서 생겼습니다. 이 권을 처음 쓸 때(2026-10-14)는 폴더의 도구를 한 곳에서 설명하는 문서가 없었고, 유일한 색인인 workflow 문서의 "Tooling" 절은 `session/`, `sched/`, `costs/`, `llm/`, `batch_fold_in.py`, `replay_fold_in.py`, `verify_names.py`를 이름 짓지 않았습니다. 인지오가 2026-10-16에 README를 쓰기로 정했고(9.15 작업 목록 W-0751), README는 docstring이 말하지 않는 것을 주장하지 않는 지도로 쓰였습니다.
 
 ## 6.5 job 하나가 하는 일
 
@@ -847,7 +840,7 @@ entry의 종류에 따라 담는 것이 다릅니다.
 
 이 표에는 두 가지 주의가 있습니다. 첫째, 9.3 README가 적은 대로 "names:1 and names:2 were produced by the pre-fix level logic". 두 표 모두 X14의 결함(카탈로그 이름 자체를 보지 않고 `runtime`을 줌)이 고쳐지기 전의 논리로 만들어졌습니다. 둘째, 표에 있는 이름들(`clamscan`, `borg`, `tracker-miner-fs-3`, `gamescope`, `python3` 등)은 Phase 9 이전 timeline의 이름이고, 지금 timeline이 쓰는 이름(`unattended-upgr`, `tracker-miner-f`, `deja-dup`, `python`, `melt-7` 등)의 상당수는 이 표에 없습니다. 지금 이름들의 근거는 각 측정 캠페인의 trace에 실제로 찍힌 comm입니다. 예를 들어 9.20의 생성 층에서 tier 3 이름 `melt-7`과 `duplicity`는 각각 `meas-ci:background:2026-10-03c`와 `meas-ci:background:2026-10-04`의 프로세스 이름 조사에 기댑니다(`grids.yaml`의 `source` 값과 TODO 9.16 줄).
 
-> **열린 자리.** 지금 timeline이 쓰는 이름을 고친 `verify_names.py`로 다시 확인한 run은 기록에 없습니다. 이름의 근거가 이름 검증 표에서 캠페인 trace로 옮겨 갔기 때문으로 보이나, 그렇게 결정했다는 기록은 찾지 못했습니다. 확인 필요. 9.16의 측정 감사가 각 이름의 근거를 확인할 자리입니다.
+지금 timeline이 쓰는 이름을 고친 `verify_names.py`로 다시 확인한 run은 없고, 하지 않습니다. 인지오가 2026-10-16에 이름의 근거를 이렇게 정했습니다(9.15 작업 목록 W-0738). 이름은 9.10 D25에 기댑니다. task의 이름은 그 process의 kernel `comm`이고, 캠페인이 돌린 프로그램이면 캠페인이 관찰한 `comm`, 아니면 kernel의 규칙으로 끌어내고 캠페인이나 `meas-ci:names:2`가 보여 주는 곳에서 확인한 것입니다. Phase 2와 Phase 7의 이름 표(`dataset/meas/names/`)는 이력이고, 어떤 도구도 읽지 않습니다. compile된 core 파일이 담은 이름 44개는 네 종류입니다. 캠페인이 추적한 `comm`(대부분; 학습 run의 `python`은 관찰된 `comm`), `lavd-ossna24` 슬라이드 16장의 게임 chain 스레드 이름(`wineserver`는 compiler가 붙임), tier 4와 tier 5의 이름(design), 그리고 일부러 붙인 가짜 이름(`c6-spoof`의 `chrome`, `c6-alias`의 `baloo_file`과 `tracker-miner-f`; design)입니다(`dataset/README.md`의 "A task's name is its kernel `comm`" 규칙).
 
 ## 6.9 입력 창: `dataset/meas/streams/`
 
@@ -930,15 +923,15 @@ workflow 문서의 "Before the first run" 절은 캠페인을 띄우기 전에 �
 
 | 예외 | 언제 | 예 | 처음 정한 결정 |
 |---|---|---|---|
-| 퍼짐이 기계를 따름(machine spread) | 값이 프로그램이 아니라 runner의 디스크나 속도를 따라 움직임: 한 반복 안의 모든 스레드 run이 함께 움직이고 wake 빈도는 약 1 % 안에 머묾 | 9.6의 디스크 block 값 넷(`clamscan` ±9.5 %, `python3` 둘, `tracker` ±15.1 %); 9.8의 renderer와 Steam client run 평균들 | 9.6 D29 (2026-09-20); 9.8 D17, D18 |
-| 세션마다 다름(between sessions) | 한 긴 run 안에서 단계 길이의 창을 밀어 보면 반복 사이보다 훨씬 덜 움직임 | `code-editor`의 `utility/libuv-worker`(한 run 안 ±10.6 %, 반복 사이 ±39 %); `service-manager`의 pid 1 run 평균(±7.8 %); `message-bus`(±11 %) | 9.5 D57 (2026-09-20) |
-| 드문 component(sparse) | 한 단계에 몇 번만 깨어나 퍼짐이 개수 자체의 퍼짐 | renderer residual(600 s 단계에 renderer당 1–5 wake) | 9.8 D27; 9.9 D33 |
-| run 안의 드문 사건(rare event) | 한 반복이 0번, 1번, 2번 잡는 사건이 component 평균을 끌고 감 | Chrome의 `MemoryInfra` heavy pass(약 22분에 한 번); Steam client의 HTTP burst | 9.5 D64; 9.8 D33 |
-| 기록이 바닥남(recording runs out) | 기록된 입력을 재생하는 단계인데 기록에 다음 창이 없음 | `mail-client`의 입력과 send(Outlook 8창; SWELL-KW 아래 입력당 평균 ±10.4 %); `web-browser`의 입력당 평균(38창, ±5.9 %) | 9.5 D32, D46 |
+| 퍼짐이 기계를 따름(machine spread) | 값이 프로그램이 아니라 runner의 디스크나 속도를 따라 움직임: 한 반복 안의 모든 스레드 run이 함께 움직이고 wake 빈도는 약 1 % 안에 머묾 | `cpu-batch`의 `python3`의 run between blocks와 block per run(±27.3 %, ±10.8 %; runner의 `khugepaged`); `module-build-orchestrator`의 tail block per run(±8.35 %; dkms의 진행 loop와 runner의 디스크); `renderer-hidden`과 `game-client`의 run 평균(±5.3–18.1 %) | 9.6 D29 (2026-09-20); 9.8 D17, D18 |
+| 세션마다 다름(between sessions) | 한 긴 run 안에서 단계 길이의 창을 밀어 보면 반복 사이보다 훨씬 덜 움직임 | `code-editor`의 `utility/libuv-worker`(한 run 안 ±10.6 %, 반복 사이 ±39 %); `renderer-hidden`의 조용한 스레드 `Chrome_ChildIOT`, `Compositor`, `PerfettoTrace`(±6.5–17.6 %); `service-manager`의 pid 1 run 평균(±7.8 %); `message-bus`의 system bus(±11 %) | 9.5 D57 (2026-09-20) |
+| 드문 component(sparse) | 한 단계에 몇 번만 깨어나 퍼짐이 개수 자체의 퍼짐 | `renderer-hidden`의 residual(단계마다 renderer당 5.0–7.2 wake) | 9.8 D27; 9.9 D33 |
+| run 안의 드문 사건(rare event) | 한 반복이 0번, 1번, 2번 잡는 사건이 component 평균을 끌고 감 | Chrome의 `MemoryInfra` heavy pass(유휴 단계 22,800 s에 8번, 약 47분에 한 번); Steam client의 HTTP burst | 9.5 D64; 9.8 D33 |
+| 기록이 바닥남(recording runs out) | 기록된 입력을 재생하는 단계인데 기록에 다음 창이 없음 | `mail-client`의 입력과 send(Outlook 8창; SWELL-KW 아래 입력당 평균 ±10.4 %, send의 `StreamTrans` run 평균 ±18.4 %); `web-browser`의 입력당 평균(38창, ±5.9 %) | 9.5 D32, D46 |
 
 예외로 담은 값에는 공통의 단서가 붙습니다. "No reported result may rest on a difference in such a value smaller than its stated half-width." 반폭이 ±15 %인 값으로는 15 %보다 작은 차이를 결과로 주장할 수 없습니다. 그리고 machine-spread 예외는 "only for a value that carries none of the effects the slice reports"입니다. 조각이 보고하는 효과가 기대는 값에는 쓸 수 없습니다. 그런 값이 흔들리면, 9.8 D18처럼 효과를 흔들리지 않는 관찰량으로 다시 진술합니다(Steam client의 보이기/최소화 비교를 run 평균 대신 wake 빈도 비율로).
 
-> **왜 이렇게 정했나.** machine-spread 예외의 이유는 9.6 D29에 있습니다. 네 값의 퍼짐이 runner의 디스크를 따르는데, machine gate는 CPU 모델만 잡고 디스크는 잡지 않으며(매번 같은 이름의 150 GB "Virtual Disk"), 반복을 늘려도 좁아지지 않았습니다(`tracker`는 6회에 ±11 %, 14회에 ±15 %). 그 값들이 job 시간에서 차지하는 몫도 함께 기록되었습니다(`clamscan` 2.4 %, `tracker` 4 %, `python3` 0.01 %). between-sessions 예외의 이유는 9.5 D57의 세 가지 발견입니다. 분석 탓이 아님(모든 반복에 같은 스레드), 단계의 위치 탓이 아님(긴 탐침 위에서 창을 밀어도 반복 사이만큼 움직이지 않음), 그리고 그 component가 단계 wake에서 차지하는 무게. 이 셋을 먼저 확인한 뒤에야 예외로 담습니다.
+> **왜 이렇게 정했나.** machine-spread 예외의 이유는 9.6 D29에 있습니다. 네 값의 퍼짐이 runner의 디스크를 따르는데, machine gate는 CPU 모델만 잡고 디스크는 잡지 않으며(매번 같은 이름의 150 GB "Virtual Disk"), 반복을 늘려도 좁아지지 않았습니다(`tracker`는 6회에 ±11 %, 14회에 ±15 %). 그 값들이 job 시간에서 차지하는 몫도 함께 기록되었습니다(`clamscan` 2.4 %, `tracker` 4 %, `python3` 0.01 %). 이것은 9.6의 캠페인 때의 값들이고, 지금 library가 이 예외로 담는 값은 위 표의 것들입니다(`clamscan`과 `tracker`의 값은 그 뒤 library에 없고, `python3`은 9.10의 MNIST 캠페인으로 다시 쟀습니다). between-sessions 예외의 이유는 9.5 D57의 세 가지 발견입니다. 분석 탓이 아님(모든 반복에 같은 스레드), 단계의 위치 탓이 아님(긴 탐침 위에서 창을 밀어도 반복 사이만큼 움직이지 않음), 그리고 그 component가 단계 wake에서 차지하는 무게. 이 셋을 먼저 확인한 뒤에야 예외로 담습니다.
 
 > **열린 자리.** 예외로 담은 값을 미리 정한 반복 수로 다시 잴지는 9.14 decision 3이 "pre-registered contingency"로 정했습니다. RQ0 gate spec의 반폭 줄(예외 값을 구간의 양 끝에 두고 다시 compile한 variant)이 판정 파일 하나라도 기준 g의 반대편으로 넘기면, 판정을 범위로 보고하고 그 entry를 다시 잽니다. 이것은 simulator가 계약대로 구현된 뒤 Phase 10의 RQ0 run에서 돌아갑니다. 아직 돌지 않았습니다(미실행).
 
@@ -1006,7 +999,7 @@ CPU 모델 하나만 받는 규칙의 비용은 버려지는 job입니다. `meas
 
 **방법.** 대조 job 하나가 측정 단계를 두 번 돕니다. 한 번은 캠페인과 똑같이 `perf sched record` 아래에서(traced), 한 번은 perf 없이(untraced). 두 번 모두 `/proc`(스레드마다 `schedstat`의 run 시간과 switch 수, `status`)를 읽습니다. job마다 값 하나당 비율(untraced ÷ traced)이 하나 나옵니다. 대상은 9.5의 아홉 응용, 9.8의 네 주체, 9.9의 세션으로 열네 주체이고, "Every archetype is controlled on itself"(decision 2)입니다. 주체마다 대조 job 여섯, 순서마다 셋씩(traced 먼저 셋, untraced 먼저 셋)이며, 반복별 비율의 95 % t 구간이 1을 빼면 차이로 읽습니다. 차이가 나면 그 archetype의 `modeling_notes`에 한계로 적고, **담은 값은 바꾸지 않습니다**. traced 값이 캠페인 전체와 같은 조건에서 잰 값이기 때문입니다. 원자료는 release 하나(`meas-ci-control-2026-09-27`)로 공개했습니다.
 
-**결과.** `measurement-overview.md` §8의 요약은 "Where a difference is resolved, a wake rate's ratio, untraced over traced, lies in 0.97–1.08, and a run mean's in 0.72–0.98: tracing lengthens some threads' runs"입니다. 차이가 해결된 곳에서 wake 빈도는 거의 그대로(0.97–1.08)이고, run 평균은 추적이 없을 때 최대 28 % 짧았습니다. 예를 들어 `code-editor`의 `utility/libuv-worker` run 평균 비율은 0.716(0.639–0.792), `audio-player`의 재생 CPU 점유율은 0.860(0.834–0.886), `video-call`은 0.952(0.934–0.971)였습니다. 세 slice 합쳐 148 job 중 87이 착지했고(84가 pool에 들어감) 61이 gate에 걸렸습니다(`measurement-campaign-record.md`).
+**결과.** `measurement-overview.md` §8의 요약은 "Where a difference is resolved, a wake rate's ratio, untraced over traced, lies in 0.97–1.08, and a run mean's in 0.72–0.98: tracing lengthens some threads' runs"입니다. 차이가 해결된 곳에서 wake 빈도는 거의 그대로(0.97–1.08)이고, run 평균은 추적이 없을 때 최대 28 % 짧았습니다. 예를 들어 `code-editor`의 `utility/libuv-worker` run 평균 비율은 0.716(0.639–0.792), `audio-player`의 재생 CPU 점유율은 0.860(0.834–0.886), `video-call`은 0.952(0.934–0.971)였습니다. 세 slice 합쳐 148 job 중 87이 착지했고(84가 pool에 들어감) 61이 gate에 걸렸습니다(`measurement-campaign-record.md`). 대조군은 2026-09-27에 entry들이 담고 있던 단계만 돌렸습니다. 그 뒤에 잰 세 묶음, 곧 열 entry의 launch 단계, `renderer-hidden`의 지금 안정 단계(`meas-ci:desktop:2026-10-05b`, Chrome 154), `video-editor`의 유휴 단계(`meas-ci:interactive:2026-10-05`)는 대조군을 거치지 않았고, `renderer-hidden`이 적은 비율은 Chrome 153의 이전 안정 단계에서 읽은 것입니다(`measurement-overview.md` §8).
 
 다른 캠페인들은 다른 방식의 교차 확인을 가졌습니다. build 캠페인은 perf가 센 CPU와 taskstats가 센 CPU를 비교했습니다(`cc1`에서 약 1.005–1.01). SteamCMD download는 socket 추적의 비용을 따로 쟀습니다(추적 없을 때 CPU 0.975). 둘 다 "같은 양을 두 장치로 재서 장치의 영향을 경계 짓는다"는 같은 생각입니다.
 
@@ -1035,7 +1028,7 @@ CPU 모델 하나만 받는 규칙의 비용은 버려지는 job입니다. `meas
 
 archetype이 담는 값은 단계 전체의 평균입니다. 그런데 단계 안에서 일이 고르게 일어나지 않으면, 평균은 그 사실을 숨깁니다. 2026-09-28의 검토가 이것을 지적했고, 그 결과 `dataset/tools/meas/windows.py`가 모든 담은 단계를 시간 창(100 s, 짧은 단계는 20 s)으로 나눠 component마다 wake 빈도, run 평균, CPU를 읽게 되었습니다(9.5 D85, D87; 9.8 D34; 9.9 D42). 값은 바꾸지 않고, 단계의 일부에서만 일하는 것이 보이면 scope에 적습니다. 예를 들어 `web-browser`의 page load 56회 가운데 반복마다 첫 번째가 739 ms와 CPU 545 ms로 나머지 55회 평균(485 ms, 341 ms)보다 무거웠고, 그 사실이 scope에 적혀 있습니다(9.5 D87).
 
-timeline은 측정 단계보다 훨씬 긴 시간 동안 프로그램을 붙잡아 둡니다(예: `c6-dual`은 12,068 s 동안 VS Code에 초점을 둡니다). 측정한 10분이 그 긴 시간에도 성립할까요? 9.10은 이것을 **span probe**(측정 단계보다 긴 탐침)로 확인했습니다(9.10 D143–D154, release `meas-ci-probes-2026-10-05`). 탐침은 반복이 아니며 어떤 값도 바꾸지 않습니다. 결과의 예를 몇 개 들면, `renderer-hidden`은 1,545 s 동안 wake 빈도는 유지되었으나 CPU는 그렇지 않았고, `code-editor`는 두 번째 탐침에서 매 창 전에 파일을 되돌리자 입력당 run 평균이 9.5의 같은 창 대비 1.00(0.97–1.03)이었습니다. 반면 첫 탐침에서는 줄 하나가 계속 길어지며 값이 올라갔고, 두 탐침 모두에서 VS Code의 extension host가 창 2–4개 동안 창당 최대 400 s의 CPU를 쓰는 일화가 있었는데, 그 일화는 담지 않고 scope에 밝혔습니다. 이렇게 확인한 뒤 `video-editor`의 유휴 단계는 Kdenlive의 launch 꼬리 뒤에서 다시 쟀습니다(9.10 D146, `meas-ci:interactive:2026-10-05`).
+timeline은 측정 단계보다 훨씬 긴 시간 동안 프로그램을 붙잡아 둡니다(예: `c6-dual`은 12,068 s 동안 VS Code에 초점을 두었습니다. 9.17 D1이 그 초점을 686–688 s마다 게임과 번갈아 쥐게 하기 전의 일이고, 그 12,068 s가 VS Code의 span probe를 읽은 길이입니다. library의 `code-editor` scope가 9.23 D8 이후 그렇게 적습니다. "Read over 12,068 s, the span `c6-dual` held it focused before its focus alternated with the game every 688 s (9.17 D1)". 탐침의 길이와 읽은 값은 그대로입니다). 측정한 10분이 그 긴 시간에도 성립할까요? 9.10은 이것을 **span probe**(측정 단계보다 긴 탐침)로 확인했습니다(9.10 D143–D154, release `meas-ci-probes-2026-10-05`). 탐침은 반복이 아니며 어떤 값도 바꾸지 않습니다. 결과의 예를 몇 개 들면, `renderer-hidden`은 1,545 s 동안 wake 빈도는 유지되었으나 CPU는 그렇지 않았고, `code-editor`는 두 번째 탐침에서 매 창 전에 파일을 되돌리자 입력당 run 평균이 9.5의 같은 창 대비 1.00(0.97–1.03)이었습니다. 반면 첫 탐침에서는 줄 하나가 계속 길어지며 값이 올라갔고, 두 탐침 모두에서 VS Code의 extension host가 창 2–4개 동안 창당 최대 400 s의 CPU를 쓰는 일화가 있었는데, 그 일화는 담지 않고 scope에 밝혔습니다. 이렇게 확인한 뒤 `video-editor`의 유휴 단계는 Kdenlive의 launch 꼬리 뒤에서 다시 쟀습니다(9.10 D146, `meas-ci:interactive:2026-10-05`).
 
 ## 8.5 compile이 측정을 재현하는가, 그리고 재현하지 못하는 것
 
@@ -1043,9 +1036,9 @@ timeline은 측정 단계보다 훨씬 긴 시간 동안 프로그램을 붙잡�
 
 **재현하는 것.** 테스트(`dataset/tools/tests/test_measured_fidelity.py` 등)가 확인합니다. 표에서 뽑은 값의 평균이 표의 평균과 같은가, component마다 gap 표가 암시하는 wake 빈도가 측정 빈도와 2 % 안인가, 그리고 측정 archetype마다 compile된 흐름이 담은 wake 빈도를 "within 5 % or four standard errors of the count (`feller-ipta50`)"로 맞추는가. 표준오차는 Feller의 갱신 과정(recurrent event) 정리에서 옵니다(9.5 D86이 확인되지 않은 `feller-tams49` 대신 책 `feller-ipta50`을 인용하도록 바꿈).
 
-**재현하지 못하는 것.** 컴파일러는 component마다 gap을 표에서 **독립적으로** 뽑습니다(9.5 D77). 그래서 각 component의 빈도와 gap 분포와 run 분포는 유지되지만, gap들이 실제로 어떤 순서로 왔는지(몰려서 오는지)와 여러 component가 함께 깨어나는지는 유지되지 않습니다. `dataset/tools/meas/burstiness.py`가 이것을 쟀습니다. 1 ms, 10 ms, 100 ms, 1 s 구간마다 wake 수를 세어 분산을 평균으로 나눈 값(dispersion; Poisson 흐름이면 1, 몰리면 1보다 큼)을 측정 흐름과 compile된 흐름에서 각각 구하고 그 비를 봅니다. TODO 9.15 줄에 적힌 결과는 이렇습니다. 1–100 ms에서 측정이 compile보다 `chat-client` 3.3–11배, `code-editor` 2.6–3.4배, `mail-client` 1.9–3.0배, `game-client` 1.9–3.0배, `web-browser` 2.8–3.4배, `video-editor` 1.3–1.4배, 두 renderer 1.06–1.23배 더 몰려 있고, `compositor-shell` 0.86–0.97, `office-writer` 0.60–0.91(compile된 쪽이 더 몰림)입니다.
+**재현하지 못하는 것.** 컴파일러는 component마다 gap을 표에서 **독립적으로** 뽑습니다(9.5 D77). 그래서 각 component의 빈도와 gap 분포와 run 분포는 유지되지만, gap들이 실제로 어떤 순서로 왔는지(몰려서 오는지)와 여러 component가 함께 깨어나는지는 유지되지 않습니다. `dataset/tools/meas/burstiness.py`가 이것을 쟀습니다. 1 ms, 10 ms, 100 ms, 1 s 구간마다 wake 수를 세어 분산을 평균으로 나눈 값(dispersion; Poisson 흐름이면 1, 몰리면 1보다 큼)을 측정 흐름과 compile된 흐름에서 각각 구하고 그 비를 봅니다. `measurement-overview.md` §8이 적은 결과(2026-09-27에 읽음, 담은 반복들의 중앙값)는 이렇습니다. 1–100 ms에서 측정이 compile보다 `chat-client` 3.3–11배, `code-editor` 2.6–3.4배, `web-browser` 2.8–3.4배, `mail-client` 1.9–3.0배, `game-client` 1.9–3.0배, `video-editor` 1.3–1.4배, `renderer-hidden` 1.06–1.15배 더 몰려 있고, `audio-server`, `service-manager`, `message-bus`는 약 1, `compositor-shell` 0.86–0.97, `office-writer` 0.60–0.91(compile된 쪽이 더 몰림)입니다. `video-editor`의 값은 `meas-ci:interactive:2026-09-18`의 유휴 단계에서, `renderer-hidden`의 값은 `meas-ci:desktop:2026-09-20`에서 읽은 것이고, 두 entry가 지금 담은 pool(`meas-ci:interactive:2026-10-05`, `meas-ci:desktop:2026-10-05b`)은 아직 읽지 않았습니다. 그 다시 읽기는 9.16의 측정 감사에 들어 있습니다(`_dev/TODO.md` 9.16 줄).
 
-이것은 **threat to validity**(타당성 위협)로 진술하기로 했습니다. 2026-09-26 검토가 정했고, 문서 진술은 9.15의 할 일입니다. 문장은 TODO에 이렇게 적혀 있습니다. "the compiled wake streams reproduce each component's rate, gap and run distributions, not the order of its gaps nor its components waking together." 그리고 이 위협이 결과에 영향을 주는지는 Phase 10의 **trace-replay check**로 확인합니다. 9.14 decision 10은 이것을 RQ0 gate spec에 사전 등록했습니다. `c7-dev`, `c7-browsing`, `c7-meeting`, `c2-p1a` 네 파일을 compile된 그대로 한 번, 측정된 wake 흐름(한 반복의 실제 순서)을 그대로 재생한 variant로 한 번 돌려, "each file's gap falls on the same side of g under both builds and differs by less than 0.17"이면 일치로 봅니다. 재생 흐름은 `dataset/replay/`에 있고, `replay_fold_in.py`가 release 원자료에서 만들며, `--check`로 바이트까지 재현됩니다.
+이것은 **threat to validity**(타당성 위협)로 진술하기로 2026-09-26 검토가 정했고, `measurement-overview.md` §8이 그 위협을 진술합니다. TODO에 적힌 문장은 이렇습니다. "the compiled wake streams reproduce each component's rate, gap and run distributions, not the order of its gaps nor its components waking together." 그리고 이 위협이 결과에 영향을 주는지는 Phase 10의 **trace-replay check**로 확인합니다. 9.14 decision 10은 이것을 RQ0 gate spec에 사전 등록했습니다. `c7-dev`, `c7-browsing`, `c7-meeting`, `c2-p1a` 네 파일을 compile된 그대로 한 번, 측정된 wake 흐름(한 반복의 실제 순서)을 그대로 재생한 variant로 한 번 돌려, "each file's gap falls on the same side of g under both builds and differs by less than 0.17"이면 일치로 봅니다. 재생 흐름은 `dataset/replay/`에 있고, `replay_fold_in.py`가 release 원자료에서 만들며, `--check`로 바이트까지 재현됩니다.
 
 > **열린 자리.** trace-replay check는 아직 돌지 않았습니다(미실행). simulator가 계약대로 구현된 뒤 Phase 10의 RQ0 run과 함께 돕니다. 불일치가 나오면 "disagreement stated as the compiled streams' ordering threat"입니다(9.14 decision 10). 그 뒤에 무엇을 할지(예: 순서를 보존하는 compile)는 기록에 정해지지 않았습니다.
 
@@ -1059,7 +1052,7 @@ timeline은 측정 단계보다 훨씬 긴 시간 동안 프로그램을 붙잡�
 - `corner-low`, `corner-high`(`carried-bounds`): 예외로 담은 값(`carried_values` 15개)을 반폭의 양 끝으로 옮겨 다시 compile.
 - `replay`(`trace-replay`): 위의 trace-replay check.
 
-> **열린 자리.** 2026-10-10 감사의 fidelity map은 "venue sweep ×0.8–1.25 narrower than the measured 0.50–0.72× cross-CPU spread"라고 적었습니다. 9.6이 잰 CPU 모델 사이의 차이(Xeon이 EPYC 시간의 0.50–0.72배)가 venue variant의 괄호보다 넓다는 뜻입니다. 이 괄호를 넓힐지에 대한 결정은 기록에 없습니다. 이 variant들도 Phase 10에서 처음 돌아갑니다(미실행).
+2026-10-10 감사의 fidelity map은 "venue sweep ×0.8–1.25 narrower than the measured 0.50–0.72× cross-CPU spread"라고 적었습니다. 9.6이 잰 CPU 모델 사이의 차이(Xeon Platinum 8573C가 `cc1`을 EPYC 시간의 0.72배, `fixdep`을 0.50배에 돌림)가 venue variant의 괄호보다 넓다는 뜻입니다. 인지오가 2026-10-16에 괄호를 그대로 두기로 정했습니다(9.15 작업 목록 W-0752). 괄호(×1/1.25, ×1.25)가 담는 것은 측정된 두 장소 효과, 곧 huge page 비율 ×1.144와 추적 overhead ×1.02–1.16이고, CPU 모델은 아닙니다. 다른 CPU 모델은 프로그램마다 다른 비율로 속도를 바꾸므로 공통 배수 하나로 재현되지 않습니다. 이 한계는 세 곳에 적혀 있습니다. `docs/research-claims.md`의 "What is not claimed"(scheduling 결과가 다른 CPU나 다른 기계 구성으로 옮겨 간다고 주장하지 않음), `measurement-overview.md` §11의 CPU 모델 항목, 그리고 venue variant를 설명하는 문서들(`dataset/README.md`의 Sensitivity variants 절, harness guide의 RQ0 gate 장)입니다. 이 variant들은 Phase 10에서 처음 돌아갑니다(미실행).
 
 ---
 
@@ -1069,15 +1062,17 @@ timeline은 측정 단계보다 훨씬 긴 시간 동안 프로그램을 붙잡�
 
 ## 9.1 왜 release인가
 
-측정 job의 결과는 GitHub Actions의 artifact로 올라갑니다. 그런데 artifact는 기한이 지나면 사라집니다. 9.10 D174 등 여러 기록이 "Actions artifacts expire after 90 days"라고 적고, phase spec decision 6은 `meas-ci:names:2` run의 artifact가 2026-12-09에 만료된다는 것을 Phase 9의 첫 일 가운데 하나로 꼽았습니다. 그래서 캠페인의 원자료는 GitHub **release**(저장소에 태그와 함께 붙는 영구 파일 묶음)로 옮깁니다. id 규칙과 workflow 문서는 이것을 "The raw records of a campaign are one release"라는 규칙으로 적습니다.
+측정 job의 결과는 GitHub Actions의 artifact로 올라갑니다. 그런데 artifact는 기한이 지나면 사라집니다. GitHub 문서는 "By default, checks, workflow runs, commit statuses, and the artifacts and log files generated by workflows are retained for 90 days before they are automatically deleted"라고 적고(`gh-artifact-retention`, 2026-10-16에 읽음), 9.10 D174 등 여러 기록이 같은 기한을 적으며, phase spec decision 6은 `meas-ci:names:2` run의 artifact가 2026-12-09에 만료된다는 것을 Phase 9의 첫 일 가운데 하나로 꼽았습니다. 그래서 캠페인의 원자료는 GitHub **release**(저장소에 태그와 함께 붙는 영구 파일 묶음)로 옮깁니다. id 규칙과 workflow 문서는 이것을 "The raw records of a campaign are one release"라는 규칙으로 적습니다. 다만 2026-09-18부터 2026-09-20까지의 9.5 캠페인들은 release를 나눠 쓰고(예: `meas-ci-2026-09-18`이 세 캠페인의 자료를 담고, `meas-ci:interactive:2026-09-19`는 `meas-ci-2026-09-18`과 `meas-ci-2026-09-28`에 걸침), id 규칙도 이제 그렇게 적습니다.
 
-release를 만드는 것은 바깥으로 공개되는 일이므로, workflow 문서의 loop 7단계는 "the raw records are released (outward-facing: ask first)"라고 적습니다. 실제로 여러 기록이 "by 인지오's decision"이나 "released on 인지오's go-ahead"로 release를 남깁니다(예: 9.12 D54의 `meas-ci-costs-2026-10-08`).
+release를 만드는 것은 바깥으로 공개되는 일이므로, workflow 문서의 loop 7단계는 "the raw records are released (outward-facing: ask first)"라고 적습니다. 실제로 여러 기록이 "by 인지오's decision"이나 "released on 인지오's go-ahead"로 release를 남깁니다(예: 9.12 D54의 `meas-ci-costs-2026-10-08`). release는 앞으로도 손으로 만듭니다(인지오의 결정, 2026-10-16; 9.15 작업 목록 W-0732). 모든 `meas-*` workflow는 `actions/upload-artifact`에서 끝나고, 캠페인을 pool할 때, artifact가 90일에 지워지기 전에 release를 만듭니다.
+
+데이터가 인용하는 캠페인과 그 release를 잇는 기계용 지도가 `dataset/meas-releases.yaml`입니다(9.15, 2026-10-16). 캠페인 태그마다 그 원자료를 담은 release의 태그, 주소, asset마다의 이름과 SHA-256(GitHub API의 `digest`)을 적습니다. 2026-10-16에 지도를 만들 때 데이터가 인용하는 캠페인 23개가 release 21개, 서로 다른 asset 463개에 이어졌고(지도의 asset 항목은 464개입니다. `meas-ci-2026-09-18`의 `meas-interactive-six.zip`이 `meas-ci:interactive:2026-09-18`과 `meas-ci:interactive:2026-09-19` 아래 모두 적혀 있기 때문입니다), 인용하는 캠페인 가운데 release가 없는 것은 없었습니다. `make lint`의 release-map lint(2.7절)가 지도에 없는 캠페인 태그를 실패시키므로, release가 없는 태그는 데이터에 들어올 수 없습니다. 이 지도는 어느 manifest의 입력도 아닙니다.
 
 release에는 착지한 반복만이 아니라 gate에 걸린 job의 report도 들어갑니다. 9.7 D37("the pooled records carry the jobs the gates stopped")의 취지이며, 예를 들어 `meas-ci-background-2026-10-02b`(Tracker)는 "18 pooled + 3 dry + 12 unpooled landings + 32 gated reports"를 담습니다. 무엇을 버렸는지도 공개된다는 뜻입니다.
 
 ## 9.2 release 목록
 
-2026-10-14에 `gh release list`로 확인한 release는 32개입니다. 제목은 release에 붙은 그대로이고, "담은 것"은 기록 문서들에서 옮겼습니다.
+2026-10-17에 `gh release list`로 확인한 release는 31개입니다(이 권의 처음 판은 32개라고 적었지만 표의 31행이 전부입니다). 제목은 release에 붙은 그대로이고, "담은 것"은 기록 문서들에서 옮겼습니다.
 
 | release | 제목 | 담은 것 |
 |---|---|---|
@@ -1115,7 +1110,14 @@ release에는 착지한 반복만이 아니라 gate에 걸린 job의 report도 �
 
 이름에 주의할 점이 있습니다. 2026-09-24의 session campaign release는 `meas-ci-session-2026-09-24`입니다. 이름이 `meas-ci-2026-09-24`인 release는 없습니다. 다만 `meas-ci-2026-09-18`과 `meas-ci-2026-09-20`은 2026-09-24에 공개되었습니다(9.5 D70의 fold-in 때). 그리고 release 이름의 날짜는 캠페인 태그의 날짜와 같은 규칙(첫 batch를 띄운 날)을 따르므로, 공개된 날과 다를 수 있습니다.
 
-> **열린 자리.** 2026-10-10 감사는 데이터 공개에 대해 네 가지를 적었습니다. "no release URL/asset hash beside values (only replay streams carry release+asset); no LICENSE; SWELL-derived `dataset/stimulus/` is CC-BY-NC-SA; releases made manually (workflows end at upload-artifact)." 값 옆에 release URL과 asset 해시가 없고(replay 흐름만 가짐), LICENSE가 없으며, SWELL에서 파생한 자극 흐름은 CC-BY-NC-SA 4.0이고, release는 손으로 만든다는 것입니다. 이 가운데 LICENSE는 9.15 spec decision 12(2026-10-14)가 정했습니다. "A root `LICENSE` puts the code under MIT; `dataset/LICENSE` puts the dataset's data and its release assets under CC-BY-NC-SA-4.0 … `dataset/LICENSE` credits SWELL-KW (Koldijk et al., 2014, DANS) for the stimulus streams." 파일은 아직 없습니다(9.15 진행 중). 값 옆의 URL과 해시, release 자동화는 결정이 없습니다. 또 `dataset/README.md`는 "raw data lives on the GitHub release named in the tag's registry entry"라고 적지만, `sources.yaml`의 `meas-ci` 항목은 어떤 release도 이름 짓지 않습니다. 태그에서 release 이름을 끌어내는 규칙(`meas-ci:<workflow>:<date>` → `meas-ci-<workflow>-<date>`, 단 9.5의 interactive/playback 캠페인은 `meas-ci-<date>`)도 어디에도 적혀 있지 않습니다. 이 문장은 9.15의 README 전체 정리에서 코드와 맞춰야 할 자리입니다.
+2026-10-10 감사는 데이터 공개에 대해 네 가지를 적었습니다. "no release URL/asset hash beside values (only replay streams carry release+asset); no LICENSE; SWELL-derived `dataset/stimulus/` is CC-BY-NC-SA; releases made manually (workflows end at upload-artifact)." 값 옆에 release URL과 asset 해시가 없고(replay 흐름만 가짐), LICENSE가 없으며, SWELL에서 파생한 자극 흐름은 CC-BY-NC-SA 4.0이고, release는 손으로 만든다는 것입니다. 9.15가 넷을 모두 다뤘습니다.
+
+- **LICENSE.** 9.15 spec decision 12(2026-10-14)대로 두 파일이 생겼습니다. 저장소 맨 위의 `LICENSE`는 코드를 MIT로, `dataset/LICENSE`는 데이터셋의 데이터(code가 아닌 `dataset/`의 파일, compile된 `dataset/build/`, 측정 release의 asset)를 CC-BY-NC-SA-4.0으로 둡니다. 저작권자는 Jioh In, Kyungmin Inn, Ian Park입니다. `dataset/LICENSE`는 자극 흐름과 SWELL-KW 입력 창의 출처로 SWELL-KW(Koldijk et al., 2014, DANS, CC-BY-NC-SA-4.0)를 밝히고, 136M Keystrokes에서 자른 `aalto-*` 창은 이 licence에 들지 않고 그 출처의 조건(비상업적 연구, 저자 표시)으로 배포된다고 적습니다(인지오의 결정, 2026-10-16).
+- **값 옆의 release 주소와 해시.** 캠페인 단위의 기계용 지도 `dataset/meas-releases.yaml`과 그 lint로 정했습니다(9.1절; 인지오의 결정, 2026-10-16). 사람용 요약은 `measurement-overview.md` §9의 release 표입니다.
+- **손으로 만드는 release.** 그대로 손으로 만들고, 문서가 그렇게 말합니다(9.1절).
+- **compile된 데이터셋의 공개.** `build/`는 공개하지 않습니다. 저장소와 commit된 manifest로 다시 만들고 확인합니다(`make dataset variants generated`, `make check`). 논문을 제출할 때 저장소의 태그와 compile된 build의 snapshot을 DOI를 발급하는 데이터 저장소에 올리고, 데이터는 CC-BY-NC-SA-4.0입니다(인지오의 결정, 2026-10-16; 9.15 작업 목록 W-0733).
+
+`dataset/README.md`는 이것을 "Licence and data availability" 절에 적습니다. 감사가 지적한 옛 문장 "raw data lives on the GitHub release named in the tag's registry entry"(registry 항목은 어떤 release도 이름 짓지 않았음)는 지금 "Each `meas-ci` campaign the data cites has its raw records on one or more GitHub releases of this repository; `meas-releases.yaml` lists each with its tag, its URL and every asset's sha256, and `make lint` fails a campaign tag it does not map"로 바뀌었습니다.
 
 ## 9.3 기록이 나뉘어 있는 곳
 
@@ -1130,11 +1132,11 @@ release에는 착지한 반복만이 아니라 gate에 걸린 job의 report도 �
 | 각 조각의 `campaign/machine-draws.md` | job마다 뽑힌 CPU 모델 | 캠페인마다 |
 | 각 조각의 `changelog.md` | 측정에 관한 결정(설계, 예외, 반복 추가, fold-in, release) | 조각마다 |
 | `dataset/archetypes.yaml`의 entry | `validation_stats`(`referee`, `run`, `stats`, `scope`), `modeling_notes` | 지금 값 |
-| `docs/workload/measurement-overview.md` | 사람을 위한 요약: 원칙, 측정 archetype, 파이프라인, 정의, 규칙, 예외, 검사, 문헌, 주장의 범위 | draft, 2026-09-29 |
+| `docs/workload/measurement-overview.md` | 사람을 위한 요약: 원칙, 측정 archetype, 파이프라인, 정의, 규칙, 예외, 검사, 캠페인과 release, 문헌, 주장의 범위 | draft, 2026-09-29 작성, 2026-10-17 갱신 |
 
 `measurement-campaign-record.md`의 첫 문단은 각 행을 어떻게 다시 만드는지까지 적습니다. "Each row regenerates with `dataset/tools/meas/loop/pool_runs.py <family>/<app> --since 10`"이고, 캠페인마다 `--since` 값(그 캠페인의 첫 run 번호)과 제외할 반복이 이어집니다(예: `chrome`: `--since 438 --exclude 16@35712250969`). 즉 이 기록은 결과의 사본이 아니라 결과를 다시 계산하는 명령의 목록이기도 합니다.
 
-> **열린 자리.** 두 사람용 요약이 낡았습니다. `measurement-overview.md`는 "The 23 archetypes"라고 하며 지금 library에 없는 `file-backup`, `renderer-visible`을 싣고, 9.10의 측정 entry 일곱(`module-build-orchestrator`, `module-compiler-child`, `package-upgrade`, `file-indexer`, `video-transcoder`, `incremental-backup`, `game-download-idle`)과 9.10의 release들을 빠뜨립니다(§9의 release 표가 9.9에서 멈춤). 지금 library의 측정 entry는 28개입니다(`archetypes.yaml`에서 `category_source: meas`인 항목 수). `measurement-campaign-record.md`의 맨 앞 Campaigns 표도 14개 태그만 싣고 9.10의 나머지 캠페인(Tracker, MNIST, HandBrake, Kdenlive export, Déjà Dup, Chrome 탭, launch, Kdenlive 유휴, 숨은 renderer)은 본문 절에만 있습니다. 감사는 이것을 "campaign-record master table omits 10 of 22 cited campaigns"로 적었습니다. `measurement-overview.md`의 정리는 9.15 줄에 있고, `_dev/` 아래의 campaign record는 9.15 spec decision 11("The existing files under `_dev/` are not touched")에 따라 9.15가 손대지 않습니다. 기록의 표를 고칠지는 정해지지 않았습니다.
+두 사람용 요약 가운데 `measurement-overview.md`는 9.15의 전체 정리(spec decision 4)가 library에 맞췄습니다. 이 권을 처음 쓸 때(2026-10-14) 그 문서는 "The 23 archetypes"라고 하며 지금 library에 없는 `file-backup`, `renderer-visible`을 싣고, 9.10의 측정 entry 일곱(`module-build-orchestrator`, `module-compiler-child`, `package-upgrade`, `file-indexer`, `video-transcoder`, `incremental-backup`, `game-download-idle`)과 9.10의 release들을 빠뜨렸습니다(§9의 release 표가 9.9에서 멈춤). 지금은 측정 entry 28개(`archetypes.yaml`에서 `category_source: meas`인 항목 수)를 §2에 싣고, §9의 release 표가 9.10의 캠페인 release까지 담습니다. 다른 하나인 `measurement-campaign-record.md`의 맨 앞 Campaigns 표는 14개 태그만 싣고 9.10의 나머지 캠페인(Tracker, MNIST, HandBrake, Kdenlive export, Déjà Dup, Chrome 탭, launch, Kdenlive 유휴, 숨은 renderer)은 본문 절에만 있습니다. 감사는 이것을 "campaign-record master table omits 10 of 22 cited campaigns"로 적었습니다. 이 기록은 `_dev/` 아래의 개발 이력이므로 9.15 spec decision 11("The existing files under `_dev/` are not touched")에 따라 그대로 둡니다. 9.10의 캠페인들은 기록의 본문 절과 `measurement-overview.md` §9, 그리고 `dataset/meas-releases.yaml`에서 찾을 수 있습니다.
 
 ## 9.4 다시 만들어 보는 길
 
@@ -1290,7 +1292,7 @@ C7 counterpart들은 `dataset/timelines/coreset/c7.variant.yaml`이라는 파생
 
 ## 11.1 장소의 목록
 
-`measurement-overview.md` §11은 측정값이 무엇을 주장하는지 한 문단으로 적습니다. "Every measured value is this software on this machine: a GitHub-hosted runner, one pinned AMD EPYC 7763 core shared with the runner's own agent, Xvfb or a headless session, no GPU, no display refresh, no sound device, no human, one CPU model over one period. The values are not desktop truth. The precision stated is precision on that configuration — reproducibility, a separate property from representativeness. Real-desktop validation is deferred."
+`measurement-overview.md` §11은 측정값이 무엇을 주장하는지 한 문단으로 적습니다. "Every measured value is this software on this machine: a GitHub-hosted runner, one pinned AMD EPYC 7763 core shared with the runner's own agent, no GPU, no display refresh, no sound device, no human, one CPU model over one period. The values are not desktop truth. The precision stated is precision on that configuration — reproducibility, a separate property from representativeness. Real-desktop validation is deferred." 디스플레이는 그 아래 항목들이 따로 적습니다(응용은 Xvfb의 X11 client로, 세션은 Wayland 세션에서 잼).
 
 항목별로 풀면 이렇습니다.
 
@@ -1301,7 +1303,7 @@ C7 counterpart들은 `dataset/timelines/coreset/c7.variant.yaml`이라는 파생
 | 소리 장치 | mpv는 `--ao=null`로, 오디오 서버를 거치지 않음. Azure 커널에 `CONFIG_SND`가 없음 | 9.5 D11; 9.9 D8 |
 | 사람 | 입력은 기록을 재생한 것(SWELL-KW 키만, 포인터 없음). GIMP와 Kdenlive는 관찰된 입력이 없어 스크립트로 만든 포인터 반복(design) | 9.5 D4, D5, D28; `measurement-overview.md` §4 |
 | 여러 CPU, 다른 CPU 모델 | 한 CPU에 고정, 한 모델(EPYC 7763), 한 기간 | 9.5 D21; 9.6 D10 |
-| 데스크톱의 디스플레이 서버 | 응용 entry는 Xvfb의 X11 client로 잼(예: Kdenlive의 `QXcbEventQueue`, mpv `--vo=x11`), 세션 entry는 Wayland 세션에서 잼; 둘을 함께 담은 파일은 없음; Wayland 데스크톱에서 각 프로그램이 어떻게 도는지는 관찰하지 않음 | 9.10 D172 (D28의 X11 문장을 다시 씀) |
+| 데스크톱의 디스플레이 서버 | 응용 entry는 Xvfb의 X11 client로 잼(예: Kdenlive의 `QXcbEventQueue`, mpv `--vo=x11`), 세션 entry는 Wayland 세션에서 잼; core 파일 가운데 둘을 함께 담은 것은 없음(생성 층의 62개 파일은 idle 세션의 이름을 응용 옆에 두는 design 조합, `building-plan.md` §3a); Wayland 데스크톱에서 각 프로그램이 어떻게 도는지는 관찰하지 않음 | 9.10 D172 (D28의 X11 문장을 다시 씀); 생성 층은 인지오의 결정(2026-10-16) |
 | 실시간 우선순위 부여 | 헤드리스 runner에서 RTKit(데스크톱 프로그램에 실시간 우선순위를 나눠 주는 서비스)이나 세션에 실시간 스레드를 청하는 프로그램은 venue가 주는 만큼만 받음: 통화의 오디오 worker도 NORMAL nice 0("no RTKit in the venue") | 9.11 class census (`classes/audit.md`) |
 | 사용 중인 데스크톱 세션 | 세션은 "terminal idle state"(화면이 잠기고 꺼짐)에서만 잼; 사용 중이거나 막 떠난 데스크톱은 덮지 않음 | 9.9 D9 ("a desktop in use or just left is not covered") |
 
@@ -1344,7 +1346,7 @@ C7 counterpart들은 `dataset/timelines/coreset/c7.variant.yaml`이라는 파생
 
 이 문단이 이 권 전체의 결론에 가깝습니다. 프로그램 하나하나의 수준에서는 이 데이터셋이 매우 단단하게 측정되어 있습니다. 그 위의 수준, 곧 무엇이 함께 얼마나 오래 도는가, 몇 개의 코어인가, 화면과 GPU와 소리와 사람은 설계이거나 대리이거나 없습니다. 그래서 RQ0의 통과가 말할 수 있는 것은 "실제 프로그램의 행동으로 조합한, 경쟁이 있는 단일 코어 상황 가운데 올바른 설정이 측정 가능하게 다른 상황이 존재한다"까지입니다.
 
-> **열린 자리.** 2026-09-20 memo §5는 이득 주장의 한계를 두 가지 방식으로 다룰 수 있다고 적었습니다. "Either carry that scoping into the paper, or run one bounded comparison against a real desktop with a display and a GPU and report the offset, which converts the limitation from unbounded to measured." 실제 데스크톱과의 한 번의 비교는 아직 결정되지도 실행되지도 않았습니다. 2026-08-26 grill D8은 팀원의 실제 데스크톱 측정("meas-live")을 연구에서 뺐고(이유: "No teammate Linux desktops known"), 그 결정은 그 뒤 바뀐 기록이 없습니다. 인지오가 결정할 자리입니다.
+2026-09-20 memo §5는 이득 주장의 한계를 두 가지 방식으로 다룰 수 있다고 적었습니다. "Either carry that scoping into the paper, or run one bounded comparison against a real desktop with a display and a GPU and report the offset, which converts the limitation from unbounded to measured." 인지오가 2026-10-16에 앞의 길을 골랐습니다(9.15 작업 목록 W-0753). 범위를 논문에 싣습니다. `docs/research-claims.md`의 "What is not claimed"에 한 항목이 있습니다. scheduling 결과가 다른 CPU나 다른 기계 구성으로 옮겨 간다고 주장하지 않으며, 모든 CPU 값은 hosted runner(Xvfb, GPU 없음, 소리 장치 없음, 사람 없음)의 AMD EPYC 7763 코어 하나의 것이라는 항목입니다. `measurement-overview.md` §11의 "Real-desktop validation is deferred"는 그대로이고, 실제 데스크톱과의 비교는 열지 않습니다. 2026-08-26 grill D8이 팀원의 실제 데스크톱 측정("meas-live")을 뺀 결정(이유: "No teammate Linux desktops known")도 그대로입니다. 같은 날 인지오는 그 대신 약속했던 수집·개인정보 제거 도구도 거두었습니다(4.4절 B7).
 
 ---
 
@@ -1514,7 +1516,7 @@ C7 counterpart들은 `dataset/timelines/coreset/c7.variant.yaml`이라는 파생
 - **costs 캠페인(D31, D50, D55).** 본문의 커널 비용과 LLM 지연 문장을 위해 데이터셋과 같은 기계에서 쟀습니다(`meas-ci:costs:2026-10-08`, 6.7절). 이 캠페인도 stability rule을 따랐고, 규칙 밖으로 나간 네 값(측정 CPU의 유휴 switch 빈도와 `schedule()` 빈도, 유휴 경로 pick 중앙값, newidle 평균)은 D55에서 인지오의 결정으로 목록에서 빠져 관찰 범위로만 남았습니다. 이유: "the workflow's exception … requires the exception be taken per value by 인지오 with stated half-width, range, repeat count and projection; no stated quantity rests on them." 예외를 쓰지 않고 목록에서 빼는 것이 더 정직했다는 판단입니다.
 - **D106.** `cpu-batch`의 `python3` 묶음을 설명하는 글은 그것을 실제 학습 run(PyTorch의 기본 MNIST 예제, CPU)이라고 부르되, 데스크톱 사용자가 MNIST를 학습한다고 주장하지 않는다. `references.md`의 `pytorch-examples` 항목이 이미 그렇게 적습니다(2.8절).
 - **D102.** 9.10이 넘긴 질문, 곧 `sources.yaml`을 떠나는 항목 가운데 본문이 아직 인용하는 것이 무엇인가에 답했습니다.
-- **D110, D112, D113.** `meas-local` 형식, deployed-system 등급의 확장, 발표와 뉴스 type(2.2–2.3절). 모두 9.15에서 `references.md`에 반영될 예정입니다.
+- **D110, D112, D113.** `meas-local` 형식, deployed-system 등급의 확장, 발표와 뉴스 type(2.2–2.3절). 셋 모두 9.15(2026-10-16)에서 `references.md`에 반영되었습니다.
 
 ---
 
@@ -1547,9 +1549,9 @@ C7 counterpart들은 `dataset/timelines/coreset/c7.variant.yaml`이라는 파생
 
 **무엇이 바뀌었나.**
 
-- 3번의 ledger는 `measurement-campaign-record.md`(캠페인마다 규칙이 덮는 값, 가장 넓은 반폭, 예외)와 각 entry의 scope 문장(9.5 D76, 2026-09-26: "the nine scopes state the stability rule and the values it was not held to"), 그리고 `measurement-overview.md` §7, §9에 담겼습니다. 라이브러리 전체의 요약 수치(규칙을 통과한 값의 수, 예외로 담은 값의 수, 가장 넓은 반폭)를 한곳에 모은 표는 찾지 못했습니다. 가장 가까운 것은 campaign record의 2026-09-24 단락("7 of the 133 values the rule is read on … have half-widths of 4.5 % or more")입니다. 확인 필요.
-- 4번의 demand window는 그 뒤 더 나아갔습니다. 9.14 decision 4(2026-10-09)가 그것을 gate에서 은퇴시켰습니다. "The compiler records demand per file … and per segment … and never fails on it. … the `oversubscribed` class marks a file designed to hold contention, its demand a measured fact reported, not a window held." memo의 "a file outside it is redesigned rather than waved through"는 그날로 낡은 문장이 되었습니다. `dataset/README.md:170`도 아직 그 규칙을 적고 있습니다(14.4절).
-- 5번은 각 entry의 scope와 `measurement-overview.md` §11에 들어갔습니다. 실제 데스크톱 비교는 열린 자리입니다(11.3절).
+- 3번의 ledger는 `measurement-campaign-record.md`(캠페인마다 규칙이 덮는 값, 가장 넓은 반폭, 예외)와 각 entry의 scope 문장(9.5 D76, 2026-09-26: "the nine scopes state the stability rule and the values it was not held to"), 그리고 `measurement-overview.md` §7, §9에 담겼습니다. 라이브러리 전체의 요약 수치(규칙을 통과한 값의 수, 예외 class마다 담은 값의 수, 담은 가장 넓은 반폭)를 한곳에 모은 표는 아직 없습니다. 가장 가까운 것은 campaign record의 2026-09-24 단락("7 of the 133 values the rule is read on … have half-widths of 4.5 % or more")입니다. 인지오가 2026-10-16에 이 요약을 만들기로 정했습니다(9.15 작업 목록 W-0739). 조각들의 pooled record 위에서 도는 스크립트가 계산하고 `measurement-overview.md`의 stability 절에 싣는 일이며, 9.16의 측정 감사에 들어 있습니다(`_dev/TODO.md` 9.16 줄).
+- 4번의 demand window는 그 뒤 더 나아갔습니다. 9.14 decision 4(2026-10-09)가 그것을 gate에서 은퇴시켰습니다. "The compiler records demand per file … and per segment … and never fails on it. … the `oversubscribed` class marks a file designed to hold contention, its demand a measured fact reported, not a window held." memo의 "a file outside it is redesigned rather than waved through"는 그날로 낡은 문장이 되었습니다. 은퇴의 이유는 인지오가 2026-10-16에 밝혔습니다(9.15 작업 목록 W-0737). 9.10 D17이 모든 작업을 측정된 그대로 통째로 묶으므로 파일의 수요는 측정에서 따라 나오고, 그것을 창 안에 맞추려면 측정된 길이를 구부려야 했다는 것입니다. 그래서 수요는 맞추지 않고 파일마다, segment마다 보고하며, 짝 검토(pair review)가 경합이 있는 segment를 읽습니다. `dataset/README.md`의 "Demand is reported, not held" 규칙이 이것을 이유와 함께 적습니다(14.4절).
+- 5번은 각 entry의 scope와 `measurement-overview.md` §11에 들어갔고, 2026-10-16에 인지오가 그 범위를 논문에 싣기로 정했습니다(`docs/research-claims.md`의 "What is not claimed"). 실제 데스크톱 비교는 열지 않습니다(11.3절).
 - "Untouched"의 segment 구성은 2026-10-11 감사의 열린 항목과 이어지고(13.4절), 생성 층(generated layer를 다루는 5권)과 backlog의 naturalistic set으로 갔습니다.
 
 memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 빠짐)를 인용하고 demand window를 규칙으로 적고 있지만, 9.15 spec decision 10에 따라 memo의 원문은 고치지 않고 `## Correction (<date>)` 절을 덧붙입니다.
@@ -1561,7 +1563,7 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 **무엇을 찾았고 무엇이 바뀌었나.**
 
 - **perf 자체의 영향을 잰 적이 없다.** → 추적 없는 대조군(8.2절). spec은 "The method of the untraced control set by the 2026-09-26 review of 9.5–9.9"로 시작합니다(2026-09-27 grill, 실행은 2026-09-27에 끝남, release `meas-ci-control-2026-09-27`).
-- **compile된 wake 흐름은 gap의 순서와 함께 깨어남을 재현하지 않는다.** → 타당성 위협 진술(9.15 줄, `burstiness.py`로 잰 숫자, 2026-09-27)과 Phase 10의 trace-replay check(8.5절).
+- **compile된 wake 흐름은 gap의 순서와 함께 깨어남을 재현하지 않는다.** → 타당성 위협 진술(`burstiness.py`로 잰 숫자, 2026-09-27; 9.15에서 `measurement-overview.md` §8에 실림)과 Phase 10의 trace-replay check(8.5절).
 - **캠페인 자신의 점검을 ±5 % 정밀도와 비교하면 모든 반복이 공유하는 차이를 놓친다.** → 9.5 D81이 자극 민감도 점검을 반복별 비율의 구간으로 읽게 바꿈(8.3절). 9.7 D36도 같은 방식.
 
 ## 13.3 2026-09-28: 9.5–9.9 검토와 coverage sweep
@@ -1611,10 +1613,10 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 
 이 검토들의 결과 가운데 일부는 매번 도는 검사가 되었습니다. build gate와 CI와 tests를 다루는 7권이 자세히 다루므로 목록만 적습니다.
 
-- repo lint(subset, 필수 필드, 태그와 locator, freeze), bound-source lint, grid lint(2.7절).
+- repo lint(subset, 필수 필드, 태그와 locator, freeze), bound-source lint(freeze 포함), grid lint, release-map lint(2.7절).
 - `declared_class`가 모든 entry와 task 기록에 있는지, TIMER-first(9.13).
 - C7 counterpart의 입력 wake가 기준의 처음 C초 입력 wake의 부분집합인지(9.18의 `test_c7_input_wakes_are_a_subset_of_the_bases_in_the_first_c_seconds`).
-- `check_build.py`: `build/`가 모든 manifest의 합집합과 같고, 각 manifest가 커밋된 바이트와 같은지(9.18, 9.22).
+- `check_build.py`: `build/`가 모든 manifest의 합집합과 같고, 각 manifest가 커밋된 바이트와 같은지(9.18, 9.22); 파생 timeline과 `coverage-grid.json`도 커밋된 바이트와 같은지(9.23 D12).
 - 측정 entry가 pooled record에서 다시 생성되는지(9.4절의 재생성 테스트들, 9.13 D8).
 - compile된 흐름이 측정 빈도를 지키는지(8.5절).
 - `--check` 모드: `compile.py`, `variants.py`, `generate.py`, `derive.py`, `replay_fold_in.py`, `batch_fold_in.py`.
@@ -1664,6 +1666,11 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 | flap-stress 간격의 세 출처를 release 태그에서 읽음; tier-3 이름 `melt-7`과 `duplicity`가 캠페인 기록에 기댐; `linux-sched-h`를 v6.17에서 읽음 | 9.19 D5, 9.20 D10 |
 | CI run 38131040159와 38243554308이 manifest들을 Linux에서 재현 | 9.22 D6, 9.20 D11 |
 | `gh-hosted-runners` 2026-10-13에 읽음 | 9.21 |
+| 마지막 build 위에서 집에서 도는 전체 smoke(`make -C harness smoke`), 걸린 시간 기록 | 9.23 D15 |
+| `renderer-hidden`의 pool(`meas-ci:desktop:2026-10-05b`)과 `video-editor`의 유휴 pool(`meas-ci:interactive:2026-10-05`)에서 burstiness와 시간 창을 다시 읽고 `measurement-overview.md`의 위협 문장을 그 값으로(8.5절) | 9.15 (2026-10-16) |
+| stability ledger: 허용 오차를 통과한 값, 예외 class마다 담은 값, 담은 가장 넓은 반폭을 조각들의 pooled record에서 스크립트로 계산해 `measurement-overview.md`의 stability 절에(13.1절) | 9.15 (2026-10-16; 2026-09-20 memo §3) |
+
+2026-10-11 검토의 항목("the five gate pins and the generated layer's pins equal the committed bytes")이 대는 것은 그때의 커밋된 바이트입니다. 위 표의 하위 작업 시점 hash 뒤에 9.23 D10(2026-10-14)과 D17(2026-10-15), 그리고 9.15의 rebuild(2026-10-16; `harness/CHANGELOG.md`의 2026-10-16 항목)가 다시 bless와 pin을 했습니다. 2026-10-17 현재의 pin은 9.15의 것입니다. dataset manifest `b6017a10…`, variants manifest `087ef27c…`, scoring spec `2ad757b6…`(9.23 D10), guard spec `24ccb875…`, driver table `0fba4b3c…`(RQ0 gate spec의 `pins`), 그리고 생성 층의 다섯 manifest `a8eebb33…`(transition grid), `2e57a6c1…`(return grid), `dd6a7c24…`(flap-stress), `264d3333…`(distractor grid), `58a34d65…`(familiarity ladder)입니다. 9.23 D17의 값(dataset `81d3213d…`, variants `7079e677…`, 생성 층 `826c719c…`/`392d6071…`/`97ba813f…`/`919bb2c0…`/`b6f82df5…`)은 그 바로 앞의 pin입니다.
 
 그리고 13.3절에서 본 대로, 2026-09-28의 coverage sweep이 9.5–9.9를 닫았으므로 "a later review of them is this audit's"입니다. 9.9 D27이 넘긴 "9.5–9.8 ran beside the same `php-fpm` and workflow loops"(다른 캠페인의 component에도 runner 배경의 wake가 섞였을 수 있음)도 이 감사가 볼 거리입니다.
 
@@ -1673,7 +1680,7 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 
 이 권 전체에 흩어진, 기록이 스스로 "stated limitation"으로 적은 것들을 한곳에 모읍니다. 각 줄은 그 한계를 처음 진술한 기록입니다.
 
-1. **장소.** 측정값은 "this software on this machine"이며 데스크톱의 진실이 아니다: runner, 한 CPU에 고정, EPYC 7763 하나, 한 기간, Xvfb 또는 헤드리스, GPU·주사율·소리·사람 없음(결정 5; 9.5 D10; `measurement-overview.md` §11). 실제 데스크톱 검증은 미뤄짐.
+1. **장소.** 측정값은 "this software on this machine"이며 데스크톱의 진실이 아니다: runner, 한 CPU에 고정, EPYC 7763 하나, 한 기간, Xvfb 또는 헤드리스, GPU·주사율·소리·사람 없음(결정 5; 9.5 D10; `measurement-overview.md` §11). 실제 데스크톱 검증은 미뤄짐. 이 범위는 논문에 실림(`docs/research-claims.md`의 "What is not claimed"; 인지오의 결정, 2026-10-16).
 2. **CPU 모델 하나.** `maricq-osdi18`의 권고(여러 VM, 여러 시간)를 비교 가능성을 위해 따르지 않음 — "a stated limitation of the library's precision"(workflow 문서).
 3. **정밀도는 재현성이지 대표성이 아님**(2026-09-20 memo §2).
 4. **멈춤의 낙관성.** 처음 통과에서 멈춘 반폭은 낙관적이며, 모의실험 결과 명목 95 %가 약 91–94 %를 덮음(9.5 D88; `chow-aoms65`).
@@ -1681,11 +1688,11 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 6. **예외로 담은 값.** 그 반폭보다 작은 차이에 어떤 결과도 기댈 수 없음(9.6 D29).
 7. **추적의 영향.** run 평균이 추적 아래에서 최대 약 28 % 길게 잡힘(0.72–0.98), entry별로 notes에 적음(9.5 D82 등).
 8. **자극.** SWELL-KW 하나(2012, Windows 실험실, 키만, 15.6 ms 양자화); 다른 타이핑으로 바꾸면 입력당 CPU가 −9 %에서 +34 % 달라짐(8.3절). 포인터 입력 없음; GIMP와 Kdenlive는 스크립트 포인터(design).
-9. **순서와 동시 깨어남.** compile된 흐름은 component의 빈도와 분포를 재현하나 gap의 순서와 함께 깨어남은 재현하지 않음(9.15 줄의 위협 진술; trace-replay check로 경계).
+9. **순서와 동시 깨어남.** compile된 흐름은 component의 빈도와 분포를 재현하나 gap의 순서와 함께 깨어남은 재현하지 않음(`measurement-overview.md` §8의 위협 진술; trace-replay check로 경계).
 10. **디스플레이와 GPU의 방향.** compositor 주기는 60 Hz이나 위상이 없음; CPU 래스터화가 run 길이를 과대(9.5 D24).
 11. **X11과 Wayland.** 응용은 X11 client로, 세션은 Wayland에서 잼; Wayland 데스크톱에서의 각 프로그램은 관찰 안 됨(9.10 D172).
 12. **조합.** task set, 동시 출현, 순서, 길이는 design; "the scheduling-benefit result holds on these compositions, which are not shown to be typical"(9.10 D2).
-13. **장소가 다른 archetype의 조합.** runner 측정과 문헌(게임 chain)의 규모가 서로 보정되지 않음 — library 수준의 한계로 진술할 것(9.5 follow-ups spec decision 13; 9.15 할 일).
+13. **장소가 다른 archetype의 조합.** runner 측정과 문헌(게임 chain)의 규모가 서로 보정되지 않음 — library 수준의 한계로 archetype plan §2의 "Observation venues" 단락이 진술함(9.5 follow-ups spec decision 13; 9.15).
 14. **게임 chain.** 발표 슬라이드의 보고 값; 심판 없음; per-schedule runtime을 wake당 RUN으로 읽어 아래쪽으로 치우침(9.4 D9).
 15. **declared class와 nice.** nice를 담지 않아 SteamCMD의 nice 10 일(75 %)과 업그레이드의 nice 19 일(2.7 %)이 보통 우선순위로 돎 — download의 방해가 과대, 가설에 유리(9.11 D6, D20); 색인기의 `background.slice` 몫(약 23 %)을 executor가 0으로 다룸 — 가설에 불리(9.11 D16).
 16. **세션 상태.** 세션 entry는 사람이 떠나 화면이 꺼진 상태만; 사용 중인 데스크톱은 덮지 않음(9.9 D9).
@@ -1694,28 +1701,28 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 
 ## 14.4 문서와 tree가 어긋나는 곳
 
-이 권을 쓰며 tree와 대조해 찾은 불일치를 모읍니다. 대부분 9.15의 대상이며, 지금의 사실과 그 출처를 함께 적습니다.
+이 권을 처음 쓸 때(2026-10-14) tree와 대조해 찾은 불일치를 모읍니다. 둘째 칸은 그때 문서가 말한 것, 셋째 칸은 2026-10-17의 사실과 그 출처입니다. 9.15가 대부분을 고쳤습니다.
 
-| 어디 | 문서가 말하는 것 | 지금의 사실(출처) |
+| 어디 | 2026-10-14에 문서가 말한 것 | 지금(2026-10-17) |
 |---|---|---|
-| critical findings memo의 개수 | spec과 감사: "13 findings" | memo 요약표는 14행(A1–A5, B1–B7, C, D). 13으로 센 근거는 기록에 없음(확인 필요) |
-| `dataset/sources.yaml` `ocallahan-atc17` notes, `docs/references.md:107` role | "Linux kernel-build workload" | DynamoRio 6.1.0 build(critical findings A1; K1 C-ocallahan-1) |
-| `dataset/sources.yaml`의 일곱 항목 | (그대로 있음) | 9.10 D34가 떠난다고 결정(`procyon`, `dkms-man`, `dkms-debian`, `gamemode-docs`, `dubroy-chi10`, `chang-chi21`, `mozilla-testpilot10`); 9.13에서 적용되지 않음 |
-| `dataset/sources.yaml` 전체 | — | 30개 id 중 11개만 데이터셋 파일의 태그로 쓰임(이 권의 세기) |
-| `docs/references.md` | `dhakal-chi18` 두 번(35, 65행), 역할 다름 | 중복(감사; 9.15) |
-| `docs/references.md` id 규칙 | type 셋(scholarly, deployed-system, measurement) | 9.12 D110(`meas-local`), D113(발표 type)이 결정됨; 미반영 |
-| `docs/references.md` 등급 규칙 | deployed-system은 "existence claims only" | 9.12 D112가 넓힘; 미반영 |
-| `dataset/README.md:167` | "Measured values are tagged `meas-ci:<workflow>:<run>`; raw data lives on the GitHub release named in the tag's registry entry" | 태그는 캠페인 날짜(9.5 D27); registry 항목은 release를 이름 짓지 않음 |
-| `dataset/README.md:170`(그리고 `:92`) | demand window ~100–150 %가 규칙, "Files outside it get redesigned" | 2026-10-09에 gate에서 은퇴(9.14 decision 4; `wlc/estimate.py`) |
-| `dataset/README.md:8` 대 `dataset/archetypes.yaml:1` | README "v0.2", yaml 머리말 "(v0.1)" | `data-contracts.md` §14(2026-10-09)가 contract를 v0.2로; yaml 머리말이 낡음(감사; 9.15) |
-| `dataset/README.md:18` | `dataset/meas/summary.json`을 "the campaign summary"로 | Phase 2의 고아 분석; 어떤 값도 여기서 오지 않음(감사; 9.3 decision 5) |
-| `docs/workload/measurement-overview.md` | "The 23 archetypes"; `file-backup`, `renderer-visible` 포함; release 표가 9.9에서 멈춤 | 측정 entry 28개; 두 entry는 library에 없음; 9.10의 캠페인 release 열둘과 탐침 release 둘, 9.11과 9.12의 release 셋이 표에 없음 |
-| `docs/workload/grounding-sources.md` | Role B의 interbench 등이 값을 받침; LAVD "16ms-frame deadline"; SWELL-KW "qualitative"; `zhang-chb15` | 2.9절 |
-| `docs/workload/source-vetting.md` | 2.10절의 표 | append-only 기록; 9.15의 처리 방식 미정 |
-| `_dev/research/jioh/measurement-campaign-record.md` Campaigns 표 | 태그 14개 | 9.10의 캠페인 여럿이 본문에만 있음(감사: "omits 10 of 22 cited campaigns"); 9.15 decision 11로 9.15 대상 아님 |
-| `dataset/meas/names/` | `tracker-miner-fs-3`, `clamscan` 등 이전 이름 | 지금 이름의 근거는 캠페인 trace의 comm(6.8절) |
-| privacy-scrub 도구 | `building-plan.md`가 "ships in the artifact" | 저장소에 없음(critical findings B7); 해결 기록을 찾지 못함(확인 필요) |
-| `docs/references.md` `chang-chi21` | role 줄의 "~8% had >10 open", "fatter modern tail" | K4: "fatter modern tail"은 우리 해석, "Article 149"는 확인 불가; 지금 어떤 값도 받치지 않음 |
+| critical findings memo의 개수 | spec과 감사: "13 findings"; memo 요약표는 14행(A1–A5, B1–B7, C, D) | 13은 A1–A5, B1–B7, C이고 D는 읽지 못한 출처의 목록(인지오의 답, 2026-10-16; 4.4절) |
+| `dataset/sources.yaml` `ocallahan-atc17` notes, `docs/references.md`의 같은 항목 role | "Linux kernel-build workload" | 두 줄 모두 DynamoRio 6.1.0의 `make -j8` build로 고쳐짐(9.15; critical findings A1; 2.4절) |
+| `dataset/sources.yaml`의 일곱 항목 | 9.10 D34가 떠난다고 결정했으나 9.13에서 적용되지 않아 그대로 있음(`procyon`, `dkms-man`, `dkms-debian`, `gamemode-docs`, `dubroy-chi10`, `chang-chi21`, `mozilla-testpilot10`) | 일곱 모두 registry를 떠남(9.15, 2026-10-16; 2.4절) |
+| `dataset/sources.yaml` 전체 | 30개 id 중 11개만 데이터셋 파일의 태그로 쓰임 | 19개 id, 11개가 태그, 7개가 데이터 파일 속 이름 인용, 1개가 sentinel(2.4절) |
+| `docs/references.md` | `dhakal-chi18` 두 번(35, 65행), 역할 다름 | 한 항목으로 합쳐짐(9.15; 2.1절) |
+| `docs/references.md` id 규칙 | type 셋(scholarly, deployed-system, measurement); scholarly의 예가 `lavd-ossna24` | talk·학회 초록·뉴스 type(9.12 D113)과 `meas-local` 형식(D110) 반영, scholarly의 예는 `ghost-sosp21`(9.15; 2.2절) |
+| `docs/references.md` 등급 규칙 | deployed-system은 "existence claims only" | 9.12 D112의 넓힌 규칙 반영(9.15; 2.3절) |
+| `dataset/README.md`의 측정 태그 문장 | "Measured values are tagged `meas-ci:<workflow>:<run>`; raw data lives on the GitHub release named in the tag's registry entry" | 태그는 캠페인 날짜(9.5 D27), release는 `dataset/meas-releases.yaml`이 잇고 lint가 지킴(README의 "Every parameter value is sourced"와 "Licence and data availability"; 9.2절) |
+| `dataset/README.md`의 demand window 규칙 | demand window ~100–150 %가 규칙, "Files outside it get redesigned" | "Demand is reported, not held"(2026-10-09에 gate에서 은퇴한 9.14 decision 4와 그 이유; 13.1절) |
+| `dataset/README.md:8` 대 `dataset/archetypes.yaml:1` | README "v0.2", yaml 머리말 "(v0.1)" | yaml 머리말도 "(v0.2)"(9.15의 rebuild, 2026-10-16) |
+| `dataset/README.md`의 `meas/` 줄 | `dataset/meas/summary.json`을 "the campaign summary"로 | 파일이 지워지고(커밋 `37c2e233`) `meas/` 줄은 `names/`와 `streams/`만 적음(5.2절) |
+| `docs/workload/measurement-overview.md` | "The 23 archetypes"; `file-backup`, `renderer-visible` 포함; release 표가 9.9에서 멈춤 | 측정 entry 28개, release 표가 9.10의 캠페인까지(9.15; 9.3절) |
+| `docs/workload/grounding-sources.md` | Role B의 interbench 등이 값을 받침; LAVD "16ms-frame deadline"; SWELL-KW "qualitative"; `zhang-chb15` | 9.15의 전체 정리로 고쳐짐(2.9절) |
+| `docs/workload/source-vetting.md` | 2.10절의 표; append-only 기록을 어떻게 고칠지 미정 | 원문은 그대로, 끝에 "## Correction (2026-10-17)" 절이 고친 줄을 줄 번호로 이름 지음(2.10절) |
+| `_dev/research/jioh/measurement-campaign-record.md` Campaigns 표 | 태그 14개 | 그대로: 개발 이력이라 9.15가 손대지 않음(spec decision 11; 9.3절) |
+| `dataset/meas/names/` | `tracker-miner-fs-3`, `clamscan` 등 이전 이름 | 이력으로 남김; 이름의 근거는 9.10 D25의 `comm` 규칙과 캠페인 trace(인지오의 결정, 2026-10-16; 6.8절) |
+| privacy-scrub 도구 | `building-plan.md`가 "ships in the artifact"; 저장소에 없음(critical findings B7) | 약속을 거둠, 실제 데스크톱 검증은 밝혀 둔 한계(인지오의 결정, 2026-10-16; 4.4절) |
+| `docs/references.md` `chang-chi21` | role 줄의 "~8% had >10 open", "fatter modern tail"(K4: 뒤의 것은 우리 해석, "Article 149"는 확인 불가) | 항목이 registry와 `references.md`를 떠남(9.15; 9.10 D34, 9.12 D102) |
 
 ---
 
@@ -1737,9 +1744,10 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 | burst, gap (1장) | 한 번 깨어나 CPU를 연속으로 쓰는 덩어리; 깨어남 사이의 간격 |
 | makespan (1장) | 일괄 작업이 모두 끝나기까지의 시간 |
 | scholarly (1장) | 동료 심사 논문이나 보관된 preprint 출처. 경험적·통계적 주장을 역할 안에서 받칠 수 있음 |
-| deployed-system (1장) | 배포된 소프트웨어의 문서, 소스, 데이터 출처. 원래 존재 주장만 받침(9.12 D112가 넓히기로 결정, 미반영) |
+| deployed-system (1장) | 배포된 소프트웨어의 문서, 소스, 데이터 출처. 존재 주장, 그 시스템이 문서로 밝힌 자기 설계, 자기 보고 수치를 받침(9.12 D112가 넓힘) |
+| talk, conference abstract or news report (1장, 2장) | 발표 슬라이드, 학회 초록, 뉴스 기사 출처. 각주 등급; 주장과 숫자는 발표자나 기자의 보고로만(9.12 D113; 예: `lavd-ossna24`) |
 | measurement, `meas-ci` (1장, 6장) | 이 프로젝트가 GitHub runner에서 직접 잰 측정, 그리고 그 출처 id |
-| label: design / convention / arithmetic / placeholder (1장, 2장) | 출처가 말하지 않는 값에 다는 꼬리표: 우리가 고른 설계값 / 관례 / 다른 값에서 계산한 값 / 측정을 기다리는 임시값(지금 없음) |
+| label: design / convention / arithmetic (1장, 2장) | 출처가 말하지 않는 값에 다는 꼬리표: 우리가 고른 설계값 / 관례 / 다른 값에서 계산한 값. Phase 9 결정 1이 적은 넷째 placeholder는 두지 않고, 측정을 기다리는 값은 `meas-pending` |
 | `references.md` (2장) | 사람이 읽는 인용 장부. 모든 출처 id의 `cite`, `role`, `status` |
 | `sources.yaml`, registry (2장) | 기계가 읽는 출처 장부. 데이터셋이 값이나 구조를 끌어오는 출처만, `type`과 `locator_pattern`과 `notes` |
 | subset lint (2장) | `sources.yaml`의 모든 id가 `references.md`에 항목을 가져야 한다는 검사 |
@@ -1747,14 +1755,15 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 | source 태그, locator (2장) | 값 옆의 `<id>` 또는 `<id>:<locator>`. locator는 출처 안의 위치(절, 슬라이드, 파일, 캠페인) |
 | `locator_pattern` (2장) | registry 항목이 locator에 요구하는 정규식 |
 | existence claim, 존재 주장 (2장) | "배포된 소프트웨어에 이런 시나리오, 설정, 범주가 있다"는 주장 |
-| citation-tier rule (2장) | 출처의 등급(scholarly는 번호 참고문헌, deployed-system은 각주)과 각 등급이 받칠 수 있는 주장 |
+| citation-tier rule (2장) | 출처의 등급(scholarly는 번호 참고문헌, deployed-system과 talk·뉴스는 각주)과 각 등급이 받칠 수 있는 주장 |
 | status: verified / to-pin / provisional (2장) | 원문과 좌표를 확인함 / 식별은 확실하나 버전 고정이 남음 / 식별이 불완전해 인용 금지 |
-| role A–D (2장) | `grounding-sources.md`의 출처 역할: A 시나리오 분류, B 프로세스 행동 파라미터, C segment 구조와 전환 통계, D 측정 검증(→ `meas-ci`) |
-| the negative result (2장) | 이름이 붙은 데스크톱 프로세스 timeline의 공개 trace는 없다는 발견 |
+| role A–D (2장) | `grounding-sources.md`의 출처 역할: A 시나리오 분류, B 프로세스 행동 파라미터(선례, 그리고 게임 chain에 대한 LAVD의 보고 값), C segment 구조와 전환 통계, D 우리 자신의 측정("this software on this machine", `meas-ci`) |
+| the negative result (2장) | 이름이 붙은 데스크톱 process tree를 시간에 따라 담은 공개 trace는 없다는 발견 |
 | anti-roles (2장) | 근거로 쓰면 안 되는 출처의 목록(PTS, 모바일 데이터, SchedCP 평가 workload) |
 | `source` map (2장) | timeline task의 `bind` 키와 `count`마다 태그나 꼬리표를 다는 칸(9.10 D32, 9.18) |
-| `meas-pending`, freeze (2장) | 측정을 기다리는 임시값 표시; schema freeze 이후 lint가 거부 |
-| `meas-local` (2장) | 노트북 같은 개인 기계의 측정 형식(9.12 D110, 미반영) |
+| `meas-pending`, freeze (2장) | 측정을 기다리는 값의 표시; `make lint`의 freeze가 library의 파라미터와 timeline의 bound value 모두에서 거부 |
+| `meas-local` (2장) | 노트북 같은 이름 붙은 개인 기계의 측정 형식(9.12 D110) |
+| `meas-releases.yaml`, release-map lint (2장, 9장) | 데이터가 인용하는 캠페인 태그마다 그 원자료 release와 asset의 SHA-256을 적은 지도, 그리고 지도에 없는 태그를 실패시키는 lint |
 | verification standard (3장) | Phase 9 결정 1: 원문 구절, 위치, 읽은 사본, 주장 전체(대상, 단위, 통계량, 범위, 모집단), 독립 읽기, 못 찾으면 미검증, 출처 없는 값은 꼬리표 |
 | montage (3장) | 한 archetype의 숫자를 서로 다른 관찰에서 가져와 이어 붙이는 것. 결정 2가 금지 |
 | observation (3장) | 하나의 연구 모집단, 하나의 trace, 하나의 측정 run. 우리 측정 run도 하나의 관찰 |
@@ -1762,7 +1771,7 @@ memo 자체는 바뀌지 않았습니다. memo는 `zhang-chb15`(2026-10-01에 �
 | RQ0, RQ0 gate spec (3장) | 첫 실험(연구 질문 0번)과 그 판정 규칙을 미리 고정한 문서(`harness/experiments/rq0-gate.yaml`) |
 | label flip, injection, `lane_share` (3장) | 같은 파일에서 정답 라벨만 바꾼 짝 만들기; 방해 프로그램 끼워 넣기; 게임 chain이 CPU 하나 중 얼마를 쓰도록 맞출지의 값 |
 | exit criteria (3장) | Phase 9를 끝내는 조건(결정 8): 세 감사를 최종 상태에서 다시 돌려 미해결이 없을 것 |
-| critical findings (4장) | 2026-09-13 memo가 적은 원문과 저장소의 불일치들(A1–A5, B1–B7, C, D) |
+| critical findings (4장) | 2026-09-13 memo가 적은 원문과 저장소의 불일치들: 발견 열셋(A1–A5, B1–B7, C)과 원문과 대조하지 못한 출처의 목록 하나(D) |
 | claim inventory (4장) | 저장소가 외부 출처에서 가져온 모든 주장의 목록(`claims.md`), 판정 없음 |
 | neutral topic (4장) | 저장소의 숫자와 표현을 뺀, 읽는 이에게 주는 질문(`topics.md`) |
 | independent read (4장) | 저장소의 설명을 모르는 채 원문을 읽은 기록(`reads/R01–R11`) |
