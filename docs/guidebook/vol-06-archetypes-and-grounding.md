@@ -10,6 +10,8 @@
 
 답해야 할 질문은 이겁니다. **archetype의 숫자들은 어디서 왔나.** 숫자 하나마다 그 숫자가 어느 문서의 어느 문장에서 나왔는지, 그 문서가 어떤 등급의 근거인지, 그 문장과 우리 숫자 사이에 우리가 무엇을 덧붙였는지를 봅니다. 그리고 그 사슬이 어디서 끊기는지도 봅니다. 이 권에서는 원문을 그대로 옮기는 자리가 많습니다. 숫자의 근거를 말하려면 그 숫자가 적힌 문장을 보여주는 것이 가장 정직하기 때문입니다.
 
+> **재구축 이후 (2026-10-17).** 이 권은 2026-09-13의 archetype library, 문헌에서 근거를 거둔 항목 열둘을 다룹니다. 그 뒤 데이터셋을 다시 지으면서 library가 바뀌었습니다. 지금 `dataset/archetypes.yaml`에는 항목이 29개 있고, 그중 28개가 우리 측정에서 행동 부류와 값을 얻었으며(`category_source: meas`), 게임의 `game-task-chain` 하나만 게임 scheduling 발표(`lavd-ossna24`)를 근거로 합니다. 이 권의 열둘 가운데 `audio-playback`, `video-playback`, `desktop-interactive`, `io-stream`, `background-crawler`, `network-bulk`, `electron-comms`, `system-daemon`은 library에 없고, `cpu-batch`, `compiler-child`, `build-orchestrator`, `game-task-chain`은 모양이 바뀌었습니다. 지금의 library는 데이터셋 가이드북 2권(`docs/guidebook/dataset/02-the-archetype-library.md`)이 다룹니다. 이 권은 archetype을 정의하고 근거의 등급을 매기는 방법을 그때의 library로 보여주는 기록으로 남고, 바뀐 항목을 지금의 것처럼 적은 대목에는 이 표시를 붙여 무엇이 그 자리를 대신했는지 적어둡니다.
+
 ---
 
 ## 목차
@@ -19,7 +21,7 @@
 3. [archetype 하나는 어떻게 정의되는가](#3장--archetype-하나는-어떻게-정의되는가)
 4. [한 항목에 적히는 것](#4장--한-항목에-적히는-것)
 5. [근거의 네 등급](#5장--근거의-네-등급)
-6. [열두 개의 목록](#6장--열두-개의-목록)
+6. [열두 개의 목록 (재구축 이전)](#6장--열두-개의-목록-재구축-이전)
 7. [존재의 근거: 수확](#7장--존재의-근거-수확)
 8. [충분함의 근거: 검증](#8장--충분함의-근거-검증)
 9. [개수도 숫자다](#9장--개수도-숫자다)
@@ -78,7 +80,9 @@ task 하나의 일생을 scheduler 쪽에서 적으면 이런 모양이 됩니�
 
 규칙은 모양이고 파라미터는 크기입니다. 이 권의 대부분은 **파라미터 쪽**, 즉 숫자들이 어디서 왔는지를 다룹니다. 다만 규칙의 모양에도 근거가 필요하고, 그 이야기도 함께 합니다.
 
-> **코드로.** archetype은 `dataset/archetypes.yaml` 한 파일에 들어 있습니다. 열두 개의 항목이 있고, 항목 하나가 archetype 하나입니다. 이 파일이 규범입니다. 무엇이 들어가야 하는지와 왜 그런지를 적은 설명 문서는 `docs/workload/archetype-plan.md`입니다. 둘이 어긋나면 파일이 맞습니다. 이 권에서도 둘이 어긋나는 자리가 여러 번 나오고, 그때마다 표시해둡니다.
+> **재구축 이후 (2026-10-17).** 계획 문서의 이 문장은 지금 "프로세스 하나"가 아니라 "한 종류의 프로그램"의 생성 모형이라고 적습니다. 대부분의 항목은 측정한 응용 프로그램의 프로세스 트리 전체를 task 하나로 합친 것이고, `compiler-child`는 object 작업 하나의 task 여섯입니다.
+
+> **코드로.** archetype은 `dataset/archetypes.yaml` 한 파일에 들어 있습니다. 이 권이 다루는 2026-09-13에는 열두 개의 항목이 있었고(지금은 29개), 항목 하나가 archetype 하나입니다. 이 파일이 규범입니다. 무엇이 들어가야 하는지와 왜 그런지를 적은 설명 문서는 `docs/workload/archetype-plan.md`입니다. 둘이 어긋나면 파일이 맞습니다. 이 권에서도 둘이 어긋나는 자리가 여러 번 나오고, 그때마다 표시해둡니다.
 
 ## 1.3 archetype이 모르는 셋
 
@@ -112,24 +116,26 @@ archetype은 자기가 어떤 상황에 쓰이는지 모릅니다. 똑같이 CPU
 
 이 경계가 왜 그렇게 중요한지는 4권에서 본 **정보 비대칭**을 떠올리면 보입니다. workload 파일 하나에 세 종류의 정보가 들어 있고, 각각을 볼 수 있는 쪽이 정해져 있다는 것이었습니다. 이름은 인식기만 보고, 행동은 시뮬레이터만 보고, 정답 라벨은 완벽한 인식 조건과 채점기만 봅니다.
 
-archetype은 그중 **행동**입니다. 그리고 행동이 이름과 섞이지 않아야 실험이 성립합니다. 이 연구의 핵심 주장은 "행동으로는 구분되지 않는 상황을 이름으로 구분할 수 있다"입니다. 그 주장을 시험하려면 행동이 정말로 같은 두 파일이 필요합니다.
+archetype은 그중 **행동**입니다. 그리고 행동이 이름과 섞이지 않아야 실험이 성립합니다. 인식 결과의 차이를 이름에 돌리려면, 이름을 바꿔도 행동이 한 글자도 바뀌지 않아야 하기 때문입니다.
 
-이 연구에서 가장 중요한 한 쌍의 파일을 다시 보겠습니다. 두 파일 모두 편집기 `code` 옆에서 CPU를 계속 쓰는 작업이 하나 도는데, 한쪽 이름은 `python3`이고 다른 쪽은 `tracker-miner-fs-3`입니다.
+이 연구에서 가장 중요한 한 쌍의 파일을 다시 보겠습니다. 두 파일 모두 편집기 `code` 옆에서 무거운 작업이 하나 도는데, 한쪽은 `python`이라는 이름의 학습이고 다른 쪽은 `tracker-miner-f`라는 이름의 색인기입니다.
 
 ```text
    파일 c2-p1a                         파일 c2-p1b
    ──────────────                      ──────────────
-   code     → desktop-interactive      code                → desktop-interactive
-   python3  → cpu-batch                tracker-miner-fs-3  → cpu-batch
+   code     → code-editor              code              → code-editor
+   python   → cpu-batch (python3)      tracker-miner-f   → file-indexer
 ```
 
-**두 줄의 오른쪽이 같습니다.** archetype이 이름을 모르기 때문에, 이름을 바꿔도 행동은 한 글자도 바뀌지 않습니다. 저장소는 두 파일이 그 한 곳 말고는 바이트 단위로 같다는 것을 자동 검사로 확인합니다.
+**두 줄의 오른쪽이 다릅니다.** 학습과 색인은 서로 다른 실제 작업이고, 각각 측정한 archetype에 묶입니다. 행동도 다르고, 색인기는 스스로 idle 등급을 선언합니다. 그래서 이 쌍은 "행동이 같은데 이름만 다른" 시험이 아니라, 색인기가 선언한 등급을 이미 존중하는 기준선 위에서 인식이 무엇을 더하는가를 묻는 시험입니다. RQ0 gate는 학습 쪽 `c2-p1a`로 판정하고 색인기 쪽 `c2-p1b`는 보고만 합니다.
 
-만약 archetype이 이름을 알고 있었다면 어떻게 될까요. 예를 들어 `python3`일 때만 계산량을 조금 늘리는 규칙이 archetype 안에 있었다면, 두 파일의 행동이 달라집니다. 그러면 모델이 두 파일을 구분했을 때 그게 이름을 읽어서인지 행동 차이 때문인지 알 수 없게 됩니다. **실험이 시험하려는 바로 그 변수에 다른 변수가 섞이는 것**입니다.
+같은 행동에 이름만 다른 파일은 따로 있습니다. 미디어 재생 파일(`c1-media`)의 `mpv` 둘을 지어낸 이름으로 바꾼 낯섦 사다리 파일들(`c5-t4`, `c5-t5`)은 archetype이 그대로이고 이름만 다릅니다. 이 파일들은 원본에서 이름만 바꾸는 조리법으로 만들어져서, 그 한 곳만 다르다는 것이 사람의 주의가 아니라 도구로 보장됩니다.
+
+만약 archetype이 이름을 알고 있었다면 어떻게 될까요. 예를 들어 `python`일 때만 계산량을 조금 늘리는 규칙이 archetype 안에 있었다면, 이름만 바꾼 두 파일의 행동이 달라집니다. 그러면 모델이 두 파일을 구분했을 때 그게 이름을 읽어서인지 행동 차이 때문인지 알 수 없게 됩니다. **실험이 시험하려는 바로 그 변수에 다른 변수가 섞이는 것**입니다. 지금의 `cpu-batch`는 어느 프로그램의 측정표를 쓸지를 `program`이라는 값으로 고르는데, 그것도 이름이 아니라 timeline이 채우는 값입니다.
 
 > **이 연구에서는.** 경계는 계획 문서에 두 문장으로 적혀 있습니다. 첫 문장은 방금 본 것입니다.
 >
-> > "what the scheduler cannot observe cannot live in an archetype — process *names* (bound in Layer 2/3), *counts* (§3), and *meaning* (segment-label concerns) are excluded by construction."
+> > "what the scheduler cannot observe cannot live in an archetype — process *names* (bound in the timelines), *counts* (§3), and *meaning* (segment-label concerns) are excluded by construction."
 >
 > scheduler가 관찰할 수 없는 것은 archetype 안에 살 수 없다. 이름과 개수와 의미는 **구성상** 빠져 있다. "구성상"이라는 말이 중요합니다. 조심해서 안 넣는 것이 아니라 넣을 자리 자체가 없게 만들어져 있다는 뜻입니다.
 >
@@ -167,28 +173,28 @@ archetype의 숫자는 인식기에도 driver table에도 닿지 않는다. 그 
 마지막으로 archetype이 전체 구조에서 어디 있는지를 한 번 봅니다.
 
 ```text
-   Layer 1  ARCHETYPE LIBRARY   프로세스 하나가 어떻게 행동하나     archetypes.yaml
-   Layer 2  SCENARIO CATALOG    어떤 프로세스들이 함께 뜨나          S1–S18
-   Layer 3  TIMELINES           상황들이 시간 위에 어떻게 놓이나     *.timeline.yaml
+   ARCHETYPE LIBRARY   프로세스 하나가 어떻게 행동하나        archetypes.yaml
+   SCENARIO CATALOG    어떤 상황과 프로세스 이름이 있나        S1–S18
+   TIMELINES           task들이 시간 위에 어떻게 놓이나        *.timeline.yaml
 ```
 
-여기서 Layer 1, 2, 3은 **데이터셋을 쌓는 층**입니다. 4권에서 본 **측정의** Layer 1, Layer 2와 이름이 같지만 다른 것입니다. 이 권에서 헷갈릴 만한 자리에서는 "데이터셋의 첫 층", "측정의 두 번째 층"처럼 풀어 쓰겠습니다.
+이 셋은 **데이터셋을 쌓는 층**이고, 번호가 아니라 담고 있는 것의 이름으로 부릅니다. 이 프로젝트의 문서에서 "Layer 1", "Layer 2"라는 번호는 4권에서 본 **측정의** 두 층, 인식 정확도와 설정의 효과만 가리킵니다. 예전에는 데이터셋의 층에도 Layer 1, 2, 3이라는 번호를 붙였는데, 측정의 층과 이름이 겹쳐서 2026년 10월에 이름으로 바뀌었습니다.
 
 데이터셋의 층에는 규칙이 하나 있습니다. **아래 층은 위 층을 모릅니다.** archetype은 상황 목록을 모르고, 상황 목록은 timeline을 모릅니다. 그리고 규칙이 하나 더 있습니다.
 
-> "The binding rule: **numeric behavior parameters exist only in Layer 1.** Scenarios reference archetypes by id; timelines reference scenarios and archetypes by id; no file copies a number."
+> "The binding rule: **behaviour parameters live in the archetype library.** Timelines reference scenarios and archetypes by id and bind only the values an entry names as its `binding_params` (counts, caps, total work, a program choice, a lane share, member names) and a task's `count`; each bound value carries an entry in the task's `source:` map — a registry tag, or one of the labels `design`, `convention`, `arithmetic` for a value no source states — checked by the linter against `dataset/sources.yaml`."
 
-행동을 나타내는 숫자 파라미터는 **데이터셋의 첫 층에만** 있다. 상황 목록은 archetype을 id로 가리키고, timeline은 상황과 archetype을 id로 가리키고, 어떤 파일도 숫자를 복사하지 않는다.
+행동을 나타내는 파라미터는 **archetype library에만** 있다. timeline은 상황과 archetype을 id로 가리키고, 항목이 `binding_params`로 이름을 댄 값(개수, 상한, 작업 크기, 프로그램 선택, lane의 몫, 구성원 이름)과 task의 개수만 채운다. 채운 값마다 task의 `source:`에 출처 표시가 붙고, 출처가 말하지 않는 값이면 `design`, `convention`, `arithmetic` 중 하나의 이름표가 붙으며, 검사 도구가 그것을 출처 등록부와 대조한다.
 
 데이터베이스를 설계해본 사람에게는 익숙한 규칙입니다. **정규화**입니다. 같은 값을 여러 테이블에 복사해두면 언젠가 하나만 고쳐지고 나머지는 옛날 값으로 남습니다. 그래서 값은 한 곳에 두고 나머지는 외래 키로 가리키게 합니다. 여기서 archetype id가 그 외래 키 역할을 합니다.
 
-이 규칙 덕에 생기는 이득이 계획 문서에 셋 적혀 있습니다. 문헌이나 측정이 바뀌면 파일 수십 개가 아니라 archetype 항목 하나만 고치면 된다는 것, 출처를 검사하는 도구가 한 층만 보면 된다는 것, 그리고 "같은 archetype에 다른 이름"이라는 파일을 만들 수 있어서 인식 결과의 차이가 이름 때문이라고 보장할 수 있다는 것입니다.
+이 규칙 덕에 생기는 이득이 계획 문서에 셋 적혀 있습니다. 문헌이나 측정이 바뀌면 파일 수십 개가 아니라 archetype 항목 하나만 고치면 된다는 것, 출처를 검사하는 도구가 library의 파라미터와 timeline이 채운 값을 둘 다 검사할 수 있다는 것, 그리고 "같은 archetype에 다른 이름"이라는 파일을 만들 수 있어서 인식 결과의 차이가 이름 때문이라고 보장할 수 있다는 것입니다.
 
 > **논문으로.** 이 층 구조와 숫자 한 곳 규칙은 논문에서 데이터셋 구성 절의 뼈대가 됩니다. 그리고 이 규칙이 논문에 쓸 수 있는 강한 문장 하나를 가능하게 합니다. 저장소 문서가 그 문장을 이렇게 적어둡니다.
 >
-> > "every numeric parameter in the dataset traces to an external source or to our released measurements."
+> > "every numeric parameter in the archetype library traces to an external source or to our released measurements, and every value a timeline binds carries its source or a label saying what it is."
 >
-> 데이터셋의 모든 숫자 파라미터는 외부 출처나 우리가 공개한 측정으로 추적된다. 그리고 이 문장이 사람의 주장이 아니라 **기계가 검사하는 사실**이라는 것이 핵심입니다. 숫자가 한 층에만 있으니 검사 도구가 그 층의 숫자마다 출처 표시가 붙어 있는지 확인할 수 있습니다. 다만 "추적된다"가 "그 출처가 그 숫자를 정말로 말한다"와 같은 뜻은 아닙니다. 이 둘의 간격이 이 권 뒤쪽의 주제입니다.
+> archetype library의 모든 숫자 파라미터는 외부 출처나 우리가 공개한 측정으로 추적되고, timeline이 채우는 값마다 출처나 그 값이 무엇인지 말하는 이름표가 붙는다. 그리고 이 문장이 사람의 주장이 아니라 **기계가 검사하는 사실**이라는 것이 핵심입니다. 검사 도구가 library의 숫자에도 timeline이 채운 값에도 출처 표시나 이름표가 붙어 있는지 확인합니다. 다만 "추적된다"가 "그 출처가 그 숫자를 정말로 말한다"와 같은 뜻은 아닙니다. 이 둘의 간격이 이 권 뒤쪽의 주제입니다.
 
 ---
 
@@ -197,10 +203,10 @@ archetype의 숫자는 인식기에도 driver table에도 닿지 않는다. 그 
 - scheduler에게 프로세스는 이름도 의미도 없고 사건의 흐름만 있습니다. 언제 실행 가능해지는지, 얼마나 도는지, 무엇을 기다리는지, 누구를 깨우는지, 언제 자식을 만들고 끝나는지입니다.
 - archetype은 그 흐름을 만들어내는 규칙과 파라미터의 묶음입니다. 데이터를 요약한 것이 아니라 데이터를 만들어내는 생성 모형입니다.
 - scheduler가 볼 수 없는 것은 archetype에 들어갈 수 없습니다. 이름, 개수, 의미 셋이 구성상 빠져 있고, 이름과 개수는 binding에서, 의미는 구간 라벨에서 붙습니다.
-- 이 경계가 실험을 지킵니다. archetype이 이름을 모르기 때문에 이름만 바꾼 두 파일의 행동이 바이트 단위로 같고, 그래서 인식 결과의 차이를 이름에 돌릴 수 있습니다.
+- 이 경계가 실험을 지킵니다. archetype이 이름을 모르기 때문에 이름만 바꾼 두 파일(낯섦 사다리)의 행동이 바이트 단위로 같고, 그래서 그 파일들에서는 인식 결과의 차이를 이름에 돌릴 수 있습니다. 핵심 한 쌍은 그런 쌍이 아니라, 서로 다른 실제 작업이 선언된 등급까지 다른 쌍입니다.
 - archetype의 숫자는 인식기에도 driver table에도 가지 않습니다. 가상의 기계를 짓는 데 쓰이고, 잘못 인식했을 때의 비용을 정합니다.
 - 그래서 숫자가 엉터리이면 인식 정확도는 멀쩡하고 설정의 효과를 재는 층이 오염됩니다. 너무 가벼운 숫자는 좋은 설정과 나쁜 설정의 차이를 지웁니다.
-- 데이터셋은 세 층으로 쌓이고 행동 숫자는 첫 층에만 있습니다. 데이터베이스 정규화와 같은 규칙이고, 덕분에 모든 숫자에 출처가 붙어 있는지를 기계로 검사할 수 있습니다.
+- 데이터셋은 세 층(archetype library, 상황 목록, timeline)으로 쌓이고 행동 숫자는 archetype library에만 있습니다. 데이터베이스 정규화와 같은 규칙이고, 덕분에 library의 모든 숫자와 timeline이 채운 모든 값에 출처나 이름표가 붙어 있는지를 기계로 검사할 수 있습니다.
 
 ---
 
@@ -449,6 +455,8 @@ TIMER가 아니라 SLEEP인 이유는 기본 설치된 daemon들이 어긋남 �
 >
 > 그리고 메모의 마지막 구절 "the encoding is ours"를 눈여겨볼 만합니다. SLEEP으로 적는다는 선택 자체는 어느 출처도 말해주지 않고 이 연구가 정한 것이라고 스스로 밝혀둔 것입니다. 이런 문장이 항목마다 붙어 있고, 그게 어떤 장치인지는 항목의 필드를 볼 때 자세히 봅니다.
 
+> **재구축 이후 (2026-10-17).** `system-daemon`은 library에 없습니다. 그 자리는 측정한 세션 항목 넷, `compositor-shell`(GNOME Shell), `audio-server`(PipeWire), `service-manager`(systemd), `message-bus`(dbus-daemon)이 대신합니다. 각각 thread별 구성 요소의 깨어나는 빈도와 간격·실행 길이의 분위수 표를 측정(`meas-ci:session:2026-09-24`)에서 가져옵니다. 이 절의 SLEEP 선택은 그때의 항목에 대한 이야기입니다.
+
 ---
 
 ## 2장 정리
@@ -463,6 +471,8 @@ TIMER가 아니라 SLEEP인 이유는 기본 설치된 daemon들이 어긋남 �
 - 그 착시는 한 방향으로만 치우쳐서 "잘못 알아도 손해가 적다"는 거짓 결론을 만듭니다. 그래서 TIMER가 여섯 번째 primitive로 들어왔습니다.
 - interbench도 절대 시각의 눈금을 쓰지만 놓친 주기를 버립니다. 이 연구의 TIMER는 쌓습니다. 출처의 숫자를 가져오면서 실행 방식은 가져오지 않은 경우입니다.
 - 주기가 없는 것이 성격인 daemon은 일부러 SLEEP으로 적습니다. 기준은 실제 프로그램이 절대 시각의 박자를 지키려 하는가입니다.
+
+> **재구축 이후 (2026-10-17).** 마지막 줄의 daemon은 그때의 `system-daemon`입니다. 지금 그 자리는 측정한 세션 항목 넷(`compositor-shell`, `audio-server`, `service-manager`, `message-bus`)이고, 각각 thread별 구성 요소의 깨어나는 빈도와 간격·실행 길이를 측정한 분위수 표로 듭니다.
 
 ---
 
@@ -782,9 +792,13 @@ z가 1 늘어날 때마다 값이 약 2.7배가 됩니다. `sigma_log`가 2이�
 >
 > 그러니 지금 문서만으로는 "archetype 분포를 lognormal로 정한 가정"을 덮는 민감도 분석이 계획되어 있다고 말할 수 없습니다. 무엇을 열어보면 되는지: 자연스러운 workload 묶음을 만드는 생성기의 설계가 나올 때 그 분석이 archetype 쪽까지 포함하는지 보면 됩니다. 그 생성기는 RQ0 gate를 통과한 뒤에 만들기로 되어 있어서 아직 확인할 대상이 없습니다.
 
+> **재구축 이후 (2026-10-17).** 이 절의 표와 예는 그때의 파일 것입니다. 지금 library에서 측정한 값은 측정한 그대로의 분위수 표로 들어갑니다. `dist: quantiles`가 열 개의 분위수(1에서 99.9 백분위)와 표본의 양 끝, 구간마다의 평균을 적고, compile 단계는 분위수 사이를 보간해서 값을 뽑습니다(`dataset/archetypes.yaml`의 머리말). `dist`를 적은 299곳 가운데 290곳이 이 표이고, `constant`가 여덟 곳, `lognormal`이 한 곳입니다. 계획 문서는 분포 가족의 질문을 "관찰한 그대로"로 닫았고, 로그 정규는 출처가 범위만 주는 자리의 관례로 남았습니다. 그 한 곳이 `game-task-chain`의 `per_schedule_run`이고, 발표의 두 값을 5와 95 백분위로 읽어 compile 단계가 중앙값과 흩어짐을 정합니다. 위의 확인 필요가 옮긴 계획 문서의 민감도 분석 문장은 지금 계획 문서에 없습니다.
+
 ## 4.3 손으로 따라가기: 사람의 키 입력 간격
 
 분포 표기가 가장 복잡한 항목을 하나 끝까지 봅니다. 사람이 앉아서 만지는 프로그램을 흉내 내는 `desktop-interactive`입니다. 그중 **키를 누르는 간격** 파라미터입니다.
+
+> **재구축 이후 (2026-10-17).** 이 절이 따라가는 키 입력 간격은 그때의 `desktop-interactive` 항목의 것입니다. 지금 library에는 그 항목이 없고, 데이터셋의 어떤 값도 Dhakal 외(CHI 2018)나 Roeser(2024)에서 오지 않습니다. 사람이 쓰는 프로그램 항목들의 키 입력 흐름은 SWELL-KW 데이터셋(Koldijk 외, 2014)의 실제 입력을 측정 캠페인에서 재생한 것이고, Dhakal의 데이터는 그 자극에 측정 결과가 얼마나 민감한지 보는 확인에서 다른 흐름으로만 쓰입니다. 이 절은 원문과 파일을 대조하는 방법의 기록으로 남습니다.
 
 ### 파일의 모습
 
@@ -975,6 +989,8 @@ X는 CPU를 0에서 100퍼센트 사이의 가변적인 양으로 쓰는 thread�
 >
 > 이것이 의도된 단순화인지, 파일의 표기를 바꿔야 하는 것인지 확인이 필요합니다. 무엇을 열어보면 되는지: 파일의 `sampling` 필드가 "원래 뜻하는 빈도"를 적는 자리인지 "실제로 뽑히는 빈도"를 적는 자리인지를 정한 기록입니다. 저장소에서 그 기록을 찾지 못했습니다.
 
+> **재구축 이후 (2026-10-17).** 이 확인 필요가 가리키는 세 항목(`background-crawler`, `electron-comms`, `system-daemon`)은 library에 없습니다. 그 자리의 측정 항목들은 깨어남의 간격과 실행 길이를 측정한 분위수 표로 들고 있고, task가 사는 동안의 깨어남을 하나하나 시각 순서대로 펼친 흐름으로 compile됩니다(`dataset/tools/wlc/compiler.py`의 머리말). 끝이 없는 반복을 task마다 한 번 뽑기로 바꾼다는 그때의 설명은 compile 코드에 남아 있지 않습니다.
+
 ## 4.5 lifetime: 어떻게 끝나나
 
 task가 끝나는 방식은 세 가지로 나뉩니다. 계약 문서의 표입니다.
@@ -1003,7 +1019,7 @@ compile 단계가 모든 무작위성을 해결하고, 실행 단계가 scheduli
 
 ```yaml
 cpu-batch:
-  binding_params: [total_work]
+  binding_params: [total_work]      # 2026-09-13. 지금은 [total_work, program]
 
 build-orchestrator:
   binding_params: [spawn_count, parallelism_cap, child_name]
@@ -1021,9 +1037,11 @@ build-orchestrator:
 
 이름만 적는다. 개수는 여기서 절대 값을 갖지 않는다. 쓰는 쪽이 따를 기본값은 메모의 문장으로만 적는다.
 
+> **재구축 이후 (2026-10-17).** 지금의 `cpu-batch`는 `binding_params`가 `[total_work, program]`입니다. `program`은 어느 프로그램의 측정표(자발적으로 멈추기 전까지 도는 길이와 그 뒤의 멈춤)를 쓸지 고릅니다. 측정한 프로그램(`python3`, `kdenlive_render`)을 묶는 파일은 `total_work`에 그 프로그램을 측정한 CPU 총량, 즉 작업 전체를 넣습니다. 그 작업들의 크기는 상황 설계가 아니라 측정에서 옵니다. `c6-spoof`가 `chrome`이라는 이름으로 끼워 넣는 계산 작업은 다릅니다. `program: spoof`와 `total_work: 30s`가 둘 다 설계로 정한 값이고, 그 작업은 측정표 없이 멈춤 없는 RUN 하나로 만들어집니다. 위에 옮긴 메모는 2026-09-13의 것입니다. `build-orchestrator`의 `spawn_count`에는 측정한 커널 빌드의 object 작업 수 2,908이 들어갑니다.
+
 ### CPU 한 자리에 맞추기
 
-`scalable`은 한 archetype에서만 비어 있지 않습니다. 게임의 `game-task-chain`입니다. 게임을 분석한 출처의 숫자는 코어가 여러 개인 기계에서 잰 것이라, CPU 자리 하나짜리 시뮬레이터에 그대로 넣으면 기계가 감당하지 못합니다. 그래서 compile 단계가 **지정된 값만, 지정된 규칙대로** 줄이도록 허락합니다. 나머지 열한 항목은 `scalable: []`, 빈 목록입니다. RUN의 길이는 기계와 무관한 CPU 요구량이라서 줄일 이유가 없다는 뜻입니다.
+`scalable`은 한 archetype에서만 비어 있지 않습니다. 게임의 `game-task-chain`입니다. 게임을 분석한 출처의 숫자는 코어가 여러 개인 기계에서 잰 것이라, CPU 자리 하나짜리 시뮬레이터에 그대로 넣으면 기계가 감당하지 못합니다. 그래서 compile 단계가 **지정된 값만, 지정된 규칙대로** 줄이도록 허락합니다. 나머지 열한 항목은 `scalable: []`, 빈 목록입니다(지금은 29개 중 28개). RUN의 길이는 기계와 무관한 CPU 요구량이라서 줄일 이유가 없다는 뜻입니다.
 
 어떤 규칙으로 줄이고 그 규칙의 근거가 무엇인지는 게임 항목을 볼 때, 그리고 compile을 다루는 다음 권에서 봅니다.
 
@@ -1110,15 +1128,17 @@ archetype의 경계를 정한 규칙은 두 문장입니다. 첫 문장은 sched
 - 숫자는 분포로 들어갑니다. 평균 하나로 적으면 scheduler를 실제로 괴롭히는 긴 꼬리가 사라지기 때문입니다.
 - 가장 많이 쓰이는 분포는 로그 정규입니다. 중앙값의 몇 배로 흩어지는 값이고, 평균이 중앙값보다 큽니다. 이 가족을 고른 것은 출처가 아니라 밝혀둔 관례입니다.
 - 계획 문서는 그 관례를 분포 가족 민감도 분석이 덮는다고 말하지만, 그 분석이 정의된 곳에서 바꿔 보는 대상은 구간 길이의 분포입니다.
-- 키 입력 간격 파라미터는 두 논문과 산수와 관례로 만들어졌습니다. Dhakal에서 전체 평균 238.66밀리초, Roeser에서 막힘없음 158밀리초와 멈칫 확률 0.34, 산수로 멈칫 평균 395밀리초, 관례로 흩어짐 0.35와 0.6입니다.
+- 그때의 키 입력 간격 파라미터는 두 논문과 산수와 관례로 만들어졌습니다(지금 데이터셋의 값은 이 두 논문에서 오지 않고, 키 입력은 SWELL-KW의 실제 입력을 재생합니다). Dhakal에서 전체 평균 238.66밀리초, Roeser에서 막힘없음 158밀리초와 멈칫 확률 0.34, 산수로 멈칫 평균 395밀리초, 관례로 흩어짐 0.35와 0.6입니다.
 - 원문과 대조하면 세 가지가 보입니다. Dhakal의 평균은 참가자들의 평균이고, Roeser의 158은 로그 척도의 위치여서 평균이라는 필드 이름과 어긋나고, Roeser에는 짝이 되는 멈칫 값 약 253밀리초가 따로 있었습니다.
 - 입력 한 번의 계산량은 직전 간격의 균등한 비율로 적었습니다. interbench 코드는 같은 범위를 차례로 올라가는 경사로 흉내 냅니다. 이 선택 때문에 사람이 만지는 창의 task가 시간의 절반을 계산합니다.
 - 뽑는 빈도에도 근거가 있습니다. 게임 task의 실행 길이를 task마다 한 번만 뽑는 것은 출처가 실행 시간이 안정적이라고 했기 때문입니다.
-- 끝이 없는 반복에서 반복마다 뽑기를 선언한 항목들이 있는데, 실제로는 task마다 한 번으로 바뀌어 뽑힙니다.
+- 그때는 끝이 없는 반복에서 반복마다 뽑기를 선언한 항목들이 있었고, compile 단계가 그것을 task마다 한 번 뽑기로 바꿨습니다(그 항목들은 지금 library에 없고, 지금의 compile 코드에는 그런 변환이 없습니다).
 - lifetime은 scheduling이 영향을 줄 수 있는 시각을 파일에 박지 않는다는 원칙에서 나옵니다. 계산 작업은 끝나는 시각이 scheduling의 결과여야 합니다.
 - 개수와 작업 크기는 archetype이 이름만 적고 값은 쓰는 쪽이 채웁니다.
 - 메모가 두 종류입니다. 출처가 무엇을 말하는지는 등록부에, 우리가 무엇을 지었는지는 항목에 적습니다. 출처 표시는 값과 서술된 구조를 정당화할 뿐 필드 이름을 정당화하지 않습니다.
 - 출처 표시의 모양은 기계로 검사되지만, 출처가 그 숫자를 정말 말하는지는 기계가 검사하지 않습니다.
+
+> **재구축 이후 (2026-10-17).** 이 정리는 그때의 library를 따릅니다. 지금 측정한 값은 측정한 그대로의 분위수 표(`dist: quantiles`)로 들어가고, 로그 정규는 출처가 범위만 주는 자리의 관례로 `game-task-chain`의 `per_schedule_run` 한 곳에만 남았습니다. 계획 문서는 분포 가족의 질문을 "관찰한 그대로"로 닫았고, 그 관례를 민감도 분석이 덮는다는 문장은 이제 없습니다. 키 입력 간격과 입력 한 번의 계산량을 지어내던 `desktop-interactive`도 library에 없습니다. 지금 키 입력을 받는 네 항목(`office-writer`, `code-editor`, `mail-client`, `web-browser`)은 SWELL-KW의 실제 입력을 재생하고, 입력 하나의 실행 길이를 측정한 표(`input_run`)에서 뽑습니다. 자리마다의 표시가 이 장의 각 절에 있습니다.
 
 ---
 
@@ -1155,19 +1175,21 @@ archetype 파일의 숫자에는 전부 출처 표시가 붙어 있습니다. �
 
 | 출처 id | 무엇 | archetype에서 쓰이는 곳 |
 |---|---|---|
-| `dhakal-chi18` | 1억 3천 6백만 번이 넘는 키 입력 분석 | 키 입력 간격의 평균 |
-| `roeser-rw24` | 타자 막힘을 섞임 분포로 모형화 | 키 입력 간격의 분포 가족 |
+| `dhakal-chi18` | 1억 3천 6백만 번이 넘는 키 입력 분석 | 그때 키 입력 간격의 평균. 지금은 값을 주지 않고, 자극 민감도 확인의 다른 흐름으로만 쓰임 |
+| `roeser-rw24` | 타자 막힘을 섞임 분포로 모형화 | 그때 키 입력 간격의 분포 가족. 지금은 데이터셋의 값을 주지 않음 |
 | `ocallahan-atc17` | 기록과 재생 시스템 논문 | 컴파일 자식 프로세스가 짧게 산다는 것, 그 개수 |
 | `coetzee-arxiv12` | 빌드 시스템 논문. 논문 원고로만 공개 | 위를 보조 |
-| `dubroy-chi10`, `chang-chi21` | 브라우저 탭 사용 연구 | 브라우저 프로세스 개수의 근거 |
+| `dubroy-chi10`, `chang-chi21` | 브라우저 탭 사용 연구 | 그때 브라우저 프로세스 개수의 근거. 2026-10-16에 인용 문서에서 빠졌고, 지금 개수는 Firefox의 Linux 사용 통계(`glam`)와 Chrome 측정에서 옴 |
 
 **"자기에게 정해진 역할 안에서"라는 조건이 핵심입니다.** 인용 문서의 항목마다 `role:` 줄이 있어서, 그 출처가 무엇에 쓰일 수 있는지가 적혀 있습니다. 앞 장에서 본 Dhakal 논문은 학술 문헌이지만 옮겨 치기 안의 간격만 뒷받침할 수 있고, 생각하느라 멈추는 시간은 뒷받침하지 못합니다. 학술 문헌이라고 무엇이든 말해주지는 않습니다.
 
 ## 5.3 둘째 등급: 배포된 소프트웨어
 
-> "**deployed-system** → footnote with URL + accessed date + pinned version. Supports **existence claims only** ("this scenario/setting/category exists in shipped software") — never behavioral or statistical claims."
+> "**deployed-system** → footnote with URL + accessed date + pinned version. Supports existence claims ("this scenario/setting/category exists in shipped software"); the system's own documented design or behaviour, stated as that source's at its pinned version or accessed date ("the kernel's documentation states …"); and a figure the source publishes, stated as its report with the date read, the window and how it is computed. Never a behavioural or statistical claim stated as the paper's own or as a population's."
 
-배포된 소프트웨어는 URL과 접속 날짜와 고정한 판본을 적은 각주로 인용한다. **존재에 대한 주장만** 뒷받침한다. "이런 상황, 설정, 분류가 실제로 배포된 소프트웨어에 있다"까지이고, 행동이나 통계에 대한 주장은 절대 뒷받침하지 않는다.
+배포된 소프트웨어는 URL과 접속 날짜와 고정한 판본을 적은 각주로 인용한다. 뒷받침하는 것은 셋이다. **존재에 대한 주장**("이런 상황, 설정, 분류가 실제로 배포된 소프트웨어에 있다"), 그 소프트웨어가 스스로 문서에 적은 설계와 동작("그 판본의 그 문서가 이렇게 적는다"는 형태로), 그리고 그 소스가 공개한 숫자(읽은 날짜와 기간과 계산법을 붙여 그 소스의 보고로). 행동이나 통계에 대한 주장을 논문 자신의 것이나 사람들 전체의 것으로 쓰는 일은 절대 없다.
+
+> **재구축 이후 (2026-10-17).** 인용 문서의 이 규칙은 2026년 10월에 이렇게 넓어졌습니다. 이 권이 쓰일 때의 규칙은 "존재 주장만"이었고, 아래의 설명은 그 규칙을 따라 쓴 것입니다. 행동과 통계를 우리 주장으로 쓰지 않는다는 핵심은 같습니다.
 
 벤치마크 도구, 오픈 소스 저장소, 제품 문서, 발표 슬라이드가 여기 들어갑니다. archetype과 관련된 것은 이렇습니다.
 
@@ -1176,8 +1198,8 @@ archetype 파일의 숫자에는 전부 출처 표시가 붙어 있습니다. �
 | `interbench` | 대화형 작업의 반응성을 재는 커뮤니티 벤치마크 |
 | `rt-app` | 주기적 부하를 JSON으로 적어 돌리는 도구 |
 | `ananicy-rules` | 프로세스 이름별 우선순위 규칙을 모은 커뮤니티 카탈로그 |
-| `lavd-ossna24` | 게임용 scheduler를 소개한 학회 발표 슬라이드 |
-| `mozilla-testpilot10` | Firefox 사용자 약 2만 7천 명의 탭 사용 기록 |
+| `lavd-ossna24` | 게임용 scheduler를 소개한 학회 발표 슬라이드. 2026년 10월에 발표·학회 초록·보도 기사라는 따로 된 종류로 옮겨짐 |
+| `mozilla-testpilot10` | Firefox 사용자 약 2만 7천 명의 탭 사용 기록. 2026-10-16에 인용 문서에서 빠짐 |
 
 ### 숫자가 적혀 있어도 둘째 등급입니다
 
@@ -1190,6 +1212,8 @@ LAVD 발표 슬라이드에는 숫자가 많습니다. 게임 하나가 task를 
 발표 슬라이드이므로 **숫자를 담고 있어도** 각주 등급이다. 본문에서 인용할 수 있는 글로는 LWN의 보도 기사와 짝지어 쓴다.
 
 **등급은 숫자가 있느냐가 아니라 그 숫자가 어떤 검증을 거쳤느냐로 정해집니다.** 슬라이드의 숫자는 발표자가 자기 분석을 요약한 것이고, 그 분석 방법과 데이터가 심사를 받지 않았습니다.
+
+> **재구축 이후 (2026-10-17).** 인용 문서는 발표, 학회 초록, 보도 기사를 따로 된 종류로 나눴고 `lavd-ossna24`를 그리로 옮겼습니다. 그 종류의 주장은 발표자나 기자의 것으로 적고, 숫자는 날짜와 함께 그 보고로만 적습니다. 지금 이 항목의 역할 줄은 숫자들을 Min이 2024-04-17에 보고한 값으로 적습니다. 각주로 인용한다는 것은 같습니다.
 
 ### 그러면 둘째 등급의 숫자를 파라미터로 써도 되나
 
@@ -1227,13 +1251,15 @@ LAVD 발표 슬라이드에는 숫자가 많습니다. 게임 하나가 task를 
 
 ## 5.4 셋째 등급: 우리 측정
 
-셋째는 이 연구가 직접 잰 것입니다. 출처 id는 `meas-ci` 하나이고, locator로 어떤 측정의 몇 번째 실행인지를 적습니다. `meas-ci:cli:3`은 명령줄 프로그램을 재는 측정의 세 번째 실행이라는 뜻입니다.
+셋째는 이 연구가 직접 잰 것입니다. 출처 id는 `meas-ci` 하나이고, locator로 어떤 측정 캠페인인지를 적습니다. 모양은 `meas-ci:<workflow>:<campaign>`이고, 캠페인은 그 첫 묶음을 띄운 날짜(YYYY-MM-DD, 같은 날 같은 작업 흐름의 둘째 캠페인이면 글자 하나를 붙임)로 적습니다. 예를 들어 `meas-ci:desktop:2026-10-04`입니다. 이 권이 다루는 2026년 8월의 측정은 그 형식 이전의 한 번짜리 캠페인이라 실행 번호로 적혀 있습니다. `meas-ci:cli:3`은 명령줄 프로그램을 재는 측정의 세 번째 실행이라는 뜻이고, 실행 번호로 적는 모양은 그런 한 번짜리 캠페인에 대해 지금도 유효합니다.
 
 인용 문서가 이 등급이 할 수 있는 것을 좁게 정합니다.
 
 > "structural/shape claims about software behavior only (fork structure, counts, lifetime shapes, periods, heartbeats, comm strings); machine-relative absolutes carry the runner spec and rank as convention-informed-by-measurement. Never desktop-performance claims. N-run spread reported."
 
 소프트웨어 행동의 **구조와 모양**에 대한 주장만 한다. 자식 프로세스를 만드는 구조, 개수, 수명 분포의 모양, 주기, 주기적 신호, 프로세스 이름 문자열이 여기 든다. 기계에 따라 달라지는 **절대값**에는 측정한 서버의 사양을 붙이고, "**측정으로 보강한 관례**" 등급으로 친다. 데스크톱 성능에 대한 주장은 절대 하지 않는다. 여러 번 돌려서 흩어짐을 보고한다.
+
+> **재구축 이후 (2026-10-17).** 위 문장은 2026-09-13의 역할 줄입니다. 지금 인용 문서의 `meas-ci` 역할 줄은, 측정한 값이 "이 소프트웨어를 이 기계에서 잰 것"(GitHub의 ubuntu-24.04 실행 서버에서 AMD EPYC 7763 CPU 하나에 고정)이고 데스크톱의 진실이 아니며, 실행 서버의 사양이 archetype의 범위에 적힌다고 적습니다. 기계에 따라 달라지는 값을 관례로 한 단계 낮추는 규칙은 없어졌고, 측정한 값은 그 범위가 붙은 측정 주장입니다. 반복은 안정성 규칙이 설 때까지 같은 기계에서 다섯 번 이상 더합니다.
 
 **셋째 등급 안에 등급이 둘 있는 셈입니다.**
 
@@ -1271,6 +1297,8 @@ LAVD 발표 슬라이드에는 숫자가 많습니다. 게임 하나가 task를 
 | 분포 가족 | 모든 분포를 로그 정규로 한 것 |
 | 산수 | 비율을 시간으로 바꾸기, 섞임 분포의 빈칸 채우기 |
 | 모양 | 프로그램의 순서, 사슬로 편 구조, 필드 이름 전부 |
+
+> **재구축 이후 (2026-10-17).** 표의 예는 그때의 항목들 것입니다. 컴파일러 자식의 90 대 10 나누기와 파일 복사·다운로드의 덩어리 크기는 지금 library에 없습니다. 지금 항목들은 측정한 분위수 표를 들고 있어서, 흩어짐과 덩어리 크기를 관례로 채우던 자리 대부분이 없어졌습니다. `make -j8`의 8은 지금도 설계로 정한 값입니다(8 thread 데스크톱의 `nproc` 규칙).
 
 **넷째 등급이 있다는 것 자체는 약점이 아닙니다.** 어떤 모형이든 출처가 말해주지 않는 빈칸이 생기고, 누군가는 그 빈칸을 채워야 합니다. 약점이 되는 것은 **채운 줄 모르게 채우는 것**입니다. 그래서 이 연구의 규칙은 넷째 등급을 없애는 것이 아니라 **넷째 등급이라고 적는 것**입니다.
 
@@ -1362,6 +1390,8 @@ LAVD 발표 슬라이드에는 숫자가 많습니다. 게임 하나가 task를 
 
 **이 연습에서 가져갈 것.** 출처 표시만 보고 등급을 정할 수 없습니다. 3번과 5번은 출처 표시가 가리키는 등급보다 실제 등급이 낮고, 7번은 표시가 가리키는 문서에 숫자가 없습니다. **메모를 읽어야 하고, 때로는 원문을 열어야 합니다.**
 
+> **재구축 이후 (2026-10-17).** 일곱 숫자는 모두 2026-09-13 library의 것입니다. 1번(소리 재생), 2·3번(키 입력), 4번(시스템 daemon), 5번(파일 복사)의 항목은 지금 없고, 6번의 컴파일러 자식은 측정한 분위수 표로 바뀌었습니다. 7번의 frame 주기 16,667은 지금 `steamos-refresh`(Steam Deck LCD의 기본 화면 갱신 60 Hz)를 근거로, 설계로 정한 값이라고 항목의 메모가 밝힙니다.
+
 ---
 
 ## 5장 정리
@@ -1377,9 +1407,13 @@ LAVD 발표 슬라이드에는 숫자가 많습니다. 게임 하나가 task를 
 - 인용의 확인 상태는 "그 문서가 맞다"를 말할 뿐 "그 문서가 우리 내용을 말한다"를 말하지 않습니다.
 - 등급은 출처 표시만 보고 정할 수 없습니다. 메모를 읽어야 하고, 때로는 원문을 열어야 합니다.
 
+> **재구축 이후 (2026-10-17).** 이 정리는 그때의 규칙을 따릅니다. 지금 인용 문서(`docs/references.md`)에서 배포된 소프트웨어는 존재 주장에 더해, 그 소프트웨어가 스스로 적은 설계와 동작과 공개한 숫자를 그 소스의 것으로 뒷받침합니다. 발표·학회 초록·보도 기사는 따로 된 종류가 되어 `lavd-ossna24`가 그리로 옮겨졌고, 그 숫자는 날짜와 함께 발표자의 보고로만 적습니다. 우리 측정은 "이 소프트웨어를 이 실행 서버에서 잰 것"이라는 범위가 붙은 측정 주장이고, 기계에 따라 달라지는 값을 관례로 낮추는 규칙은 없어졌습니다. 자리마다의 표시가 이 장의 각 절에 있습니다.
+
 ---
 
-# 6장 · 열두 개의 목록
+# 6장 · 열두 개의 목록 (재구축 이전)
+
+> **재구축 이후 (2026-10-17).** 이 장의 열두 항목은 2026-09-13의 library입니다. 지금 library의 29개 항목은 데이터셋 가이드북 2권이 하나씩 다룹니다. 아래 표와 각 항목에 무엇이 그 자리를 대신했는지 적어둡니다.
 
 ## 6.1 목록을 통째로
 
@@ -1407,6 +1441,8 @@ LAVD 발표 슬라이드에는 숫자가 많습니다. 게임 하나가 task를 
 - **IO**: 입출력 위주의 작업. interbench의 부하 목록과 ananicy 카탈로그의 분류에서 거둬왔습니다.
 - **structural-special**: 구조가 특별한 작업. 게임 scheduler 발표에서 거둬왔습니다.
 - **meas**: 문헌의 분류 체계가 없어서 우리 측정에서 부류 자체를 끌어낸 작업들입니다.
+
+> **재구축 이후 (2026-10-17).** 표의 열둘 가운데 지금 library에 있는 것은 `cpu-batch`, `compiler-child`, `build-orchestrator`, `game-task-chain` 넷뿐이고, 그 넷도 모양이 바뀌었습니다. 나머지 여덟의 자리는 이렇게 채워졌습니다. 소리·영상 재생과 사람이 만지는 창은 측정한 응용 프로그램 항목 아홉(`office-writer`, `code-editor`, `mail-client`, `web-browser`, `image-editor`, `video-editor`, `video-player`, `audio-player`, `video-call`)이 맡습니다. `electron-comms`는 묶인 프로그램마다 따로 잰 `renderer-hidden`, `chat-client`, `game-client`로, `system-daemon`은 세션 항목 넷(`compositor-shell`, `audio-server`, `service-manager`, `message-bus`)으로, `background-crawler`는 따로 잰 `file-indexer`로 바뀌었습니다. `io-stream`과 `network-bulk`의 자리는 묶인 작업마다 잰 `file-archiver`(7z), `incremental-backup`(Déjà Dup), `game-download`(Steam의 다운로드)가 채웠고, 일괄 변환과 무인 업그레이드도 각자의 측정 항목(`video-transcoder`, `package-upgrade`)을 얻었습니다. 컴파일 쪽에는 `dkms`의 모듈 빌드를 잰 두 항목(`module-build-orchestrator`, `module-compiler-child`)이 더해졌고, 같은 다운로드를 idle 등급으로 돌려보는 경계 확인용 `game-download-idle`도 있습니다.
 
 **앞의 넷과 마지막 하나의 성격이 다릅니다.** 앞의 넷은 누군가 이미 "이런 종류의 작업이 있다"고 정리해둔 것을 가져왔고, 마지막 하나는 그런 정리가 없었습니다. 이 차이는 다음 장에서 자세히 봅니다.
 
@@ -1466,6 +1502,8 @@ LAVD 발표 슬라이드에는 숫자가 많습니다. 게임 하나가 task를 
 >
 > 행동 전체를 판정할 기준이 없다. 실제 사용 중인 기계에서 검증하는 일은 하지 않았고, 이것은 밝혀둔 한계다. 대신 수집 도구와 개인정보 제거 도구를 공개해서, **누구든 자기 기계로 우리 분포를 반증해볼 수 있게** 한다.
 
+> **재구축 이후 (2026-10-17).** 이 항목은 library에 없고, 수집 도구와 개인정보 제거 도구를 공개하겠다는 약속은 2026-10-16에 거둬들여졌습니다. 실제 사용 중인 데스크톱에서의 검증은 하지 않으며, 그것은 측정 개요 문서(`docs/workload/measurement-overview.md`)의 한계 절에 밝혀둔 한계로 남습니다. 사람이 쓰는 프로그램은 지금 각자 측정한 항목이고, 키 입력은 SWELL-KW의 실제 입력을 재생합니다.
+
 ## 6.3 compute/batch 가족
 
 ### cpu-batch — 끝날 때까지 계산만
@@ -1490,6 +1528,8 @@ CPU를 완전히 쓰는 thread를 설정한 수만큼. 기본값은 4개.
 
 Burn의 thread 4개 구조는 가져오지 않는다. task 하나가 주어진 요구량을 포화시킨다. 몇 개인지는 binding에서 정한다.
 
+> **재구축 이후 (2026-10-17).** 지금의 `cpu-batch`는 `RUN(total_work) → EXIT` 한 덩어리가 아니라 batch loop입니다. 묶인 프로그램(`program`)의 측정한 실행 길이를 하나 뽑아 돌고, 그 뒤의 멈춤을 하나 뽑아 쉬기를 CPU 총량(`total_work`)을 다 쓸 때까지 되풀이합니다. 지금 묶인 프로그램은 PyTorch의 MNIST 학습(`python3`, 이름은 `python`)과 Kdenlive의 내보내기(`kdenlive_render`)이고, `c6-spoof`의 위장 작업이 끊김 없는 RUN 하나로 묶입니다. 영상 인코딩과 형식 변환은 따로 잰 `video-transcoder`로, 색인기는 `file-indexer`로 옮겨졌고, 바이러스 검사는 데이터셋에 없습니다. 부류의 근거도 interbench의 Burn이 아니라 측정입니다(`category_source: meas`).
+
 > **이 연구에서는.** 이 항목에 걸린 가장 중요한 결정이 메모 끝에 있습니다. 이 연구의 핵심 한 쌍에서 파일 색인기 `tracker-miner-fs-3`를 이 항목에 묶었다는 것입니다.
 >
 > > "it models an indexer in full-rescan CPU-saturating state so the P1 pair is behaviorally identical; the everyday low-intensity indexer remains background-crawler elsewhere (C4/S14). The two bindings of one name are intentional, not an inconsistency."
@@ -1499,6 +1539,8 @@ Burn의 thread 4개 구조는 가져오지 않는다. task 하나가 주어진 �
 > 파일 색인기가 늘 CPU를 포화시키지는 않습니다. 그런데 핵심 쌍은 "행동이 똑같다"가 전제라서, 머신러닝 학습과 똑같이 행동하는 순간의 색인기를 골랐습니다. 그 순간이 실제로 존재한다는 것이 이 선택의 근거입니다.
 
 > **확인 필요.** 메모가 "평소의 느린 색인기는 다른 곳에서 `background-crawler`로 남는다"고 하고 그 자리로 파일 묶음 C4와 상황 S14를 가리키는데, 지금 데이터셋의 timeline 파일 어디에도 `background-crawler`에 묶인 task가 없습니다. 파일 묶음 C4의 세 파일도 다른 archetype만 씁니다. 그러니 지금 상태에서 `tracker-miner-fs-3`가 등장하는 곳은 전부 CPU를 포화시키는 쪽입니다. 메모의 문장이 계획을 적은 것인지, 파일이 바뀌면서 문장이 남은 것인지 확인이 필요합니다.
+
+> **재구축 이후 (2026-10-17).** 위에 옮긴 메모는 지금 `dataset/archetypes.yaml`에 없습니다. 핵심 쌍의 색인기 `tracker-miner-f`는 이제 따로 잰 `file-indexer`에 묶이고, 스스로 idle 등급을 선언합니다. 그래서 쌍의 두 파일은 행동이 같지 않습니다. 학습과 색인은 서로 다른 실제 작업이고, 그 쌍은 색인기가 선언한 등급을 이미 존중하는 기준선 위에서 인식이 무엇을 더하는가를 묻습니다. 확인 필요가 물은 `background-crawler`는 library에서 빠졌고, 색인기는 지금 언제나 `file-indexer`에 묶입니다(`c1-indexing`, `c2-p1b`, `c7-indexing`).
 
 ### compiler-child와 build-orchestrator — 컴파일
 
@@ -1516,6 +1558,8 @@ Burn의 thread 4개 구조는 가져오지 않는다. task 하나가 주어진 �
 **숫자의 등급:** 부류의 존재는 첫째 등급 논문에서, 모든 파라미터 값은 셋째 등급 측정에서, 계산을 90 대 10으로 나눈 것과 동시 실행 수 8은 넷째 등급입니다.
 
 이 두 항목은 뒤에서 한 장을 들여 원문부터 끝까지 따라갑니다. 거기서 **출처 논문이 말하는 빌드가 저장소 문서의 설명과 다르다**는 것도 원문과 함께 봅니다.
+
+> **재구축 이후 (2026-10-17).** 지금의 `compiler-child`는 자식 하나가 아니라 object 작업 하나의 task 여섯(`sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`)이고, 역할과 구조상의 단계마다 측정한 분위수 표 하나를 듭니다. `build-orchestrator`는 측정한 `dispatch_overhead` 표를 들고, object 작업 하나마다 spawn table에 여섯 항목을 넣으며, 동시에 살 수 있는 항목 수 `fork_cap`은 `parallelism_cap` × 6입니다. `c1-compile`은 object 작업 2,908개를 상한 8로 묶습니다(spawn table 17,448항목, `fork_cap` 48). 셋 다 `category_source: meas`입니다. `dkms`는 같은 부모에 이름만 바꿔 묶이지 않고, `dkms`의 모듈 빌드를 따로 잰 `module-build-orchestrator`에 묶입니다.
 
 ## 6.4 IO 가족
 
@@ -1543,6 +1587,8 @@ Burn의 thread 4개 구조는 가져오지 않는다. task 하나가 주어진 �
 측정에서 흥미로운 점이 하나 있습니다. 파일 복사를 캐시가 따뜻한 상태에서 재면 비율이 0.276, 캐시를 비우고 재면 0.231이 나옵니다. 항목은 **캐시를 비운 쪽**을 골랐는데, 이유가 interbench의 Read 문장 괄호 안에 있습니다. "캐시 효과를 피하려고". 출처가 캐시를 피하는 부하를 정의했으니, 측정도 그 조건에 맞춘 것입니다.
 
 ### background-crawler — 뒤에서 천천히 훑는 색인기
+
+> **재구축 이후 (2026-10-17).** `background-crawler`는 2026-09-19에 library에서 빠졌습니다. 그것을 묶은 timeline이 하나도 없었고, 값은 한가한 색인기의 정리용 깨어남에 `updatedb.plocate`의 일하는 비율을 곱한 것이었습니다. 평소의 색인기는 그 뒤 따로 잰 `file-indexer`가 맡습니다. GNOME의 Tracker가 홈 폴더를 처음 색인하는 작업이고, 스스로 idle 등급을 선언하며, `c1-indexing`, `c2-p1b`, `c7-indexing`에 `tracker-miner-f`라는 이름으로 묶입니다. 이 절은 그때의 항목과 그 근거를 찾던 과정의 기록입니다.
 
 ```text
    반복: RUN(scan_burst 중앙값 1.6 ms) → WAIT(io 중앙값 5.9 ms)
@@ -1584,6 +1630,8 @@ Burn의 thread 4개 구조는 가져오지 않는다. task 하나가 주어진 �
 ## 6.5 structural-special 가족
 
 ### game-task-chain — 게임 하나
+
+> **재구축 이후 (2026-10-17).** 이 항목은 지금도 library에 있지만 모양이 바뀌었습니다. 사슬의 구성원 `chain_length`(16)개와 `wineserver` 구성원 하나, 모두 열일곱 task이고, 구성원의 이름은 timeline이 `member_names`로 채웁니다(슬라이드 16의 thread 이름). 사슬 밖의 284개, `n_tasks`, 쓰이지 않던 두 비율은 없습니다. 발표가 보고한 약 300개의 task 가운데 사슬과 `wineserver` 밖의 thread는 빼고, 그 사실을 게임 파일에 적습니다. `frame_period` 16,667에는 `steamos-refresh`(Steam Deck LCD의 기본 화면 갱신 60 Hz)가 근거로 붙고, 메모가 그것을 설계로 정한 값이라고 밝힙니다. 아래의 슬라이드 대조는 그때의 항목에 대한 것입니다.
 
 유일하게 **구조 자체가 파라미터인** 항목입니다. 다른 항목은 task 하나의 프로그램을 적는데, 이 항목은 task 약 300개가 서로를 깨우는 모양을 적습니다.
 
@@ -1736,6 +1784,8 @@ preemption은 scheduling의 25에서 30퍼센트뿐이다. 70에서 75퍼센트�
 
 ### electron-comms — 대부분 쉬다가 가끔 깨는 앱
 
+> **재구축 이후 (2026-10-17).** `electron-comms`는 library에 없습니다. 2026-09-22에 묶인 프로그램마다 따로 잰 항목으로 나뉘었습니다. 숨겨진 탭의 렌더러 `renderer-hidden`(사이트마다 렌더러 하나, Chromium의 site-per-process 모델), 채팅 앱 `chat-client`(`element-desktop`, Element Desktop 1.12.28을 실행 서버에 설치한 Synapse homeserver의 방 하나에 로그인시켜 메시지를 보내지 않고 쉬게 둔 상태), 게임 플랫폼 `game-client`(로그인하지 않은 Steam 클라이언트, `steam`)입니다. 정해진 heartbeat 주기의 TIMER는 없습니다. 보이는 탭의 렌더러 항목도 한때 있었지만 빠졌습니다. 쓰는 중인 페이지는 `web-browser`의 렌더러가 맡기 때문입니다. `steamwebhelper`와 `zoom`의 보조 task는 묶음에서 빠졌고, `c1-browsing`은 `renderer-hidden` task 넷을 듭니다. 아래 상자가 말하는, 로그인하지 않은 채로 띄운 Element는 그때의 측정입니다. 지금의 `chat-client`는 로그인한 채로 쟀고, 메시지를 보내지 않았으니 메시지가 오가며 생기는 깨어남이 없다는 한계만 남았습니다.
+
 ```text
    반복: TIMER(heartbeat 중앙값 1.85 s) → RUN(heartbeat_work 중앙값 289 us)
 ```
@@ -1751,6 +1801,8 @@ preemption은 scheduling의 25에서 30퍼센트뿐이다. 70에서 75퍼센트�
 > 그리고 한 가지 더. 실제 앱의 깨어남은 정확한 주기가 아닌데, 이 항목은 TIMER로 적었습니다. 메모가 이것도 "밝혀둔 단순화"라고 적습니다.
 
 ### system-daemon — 거의 쉬는 시스템 서비스
+
+> **재구축 이후 (2026-10-17).** `system-daemon`은 library에 없습니다. 2026-09-24에 측정한 세션 항목 넷이 그 자리를 대신했습니다. `compositor-shell`(GNOME Shell), `audio-server`(PipeWire 묶음), `service-manager`(systemd, pid 1과 사용자 manager), `message-bus`(dbus-daemon, system bus)이고, 각각 thread별 구성 요소의 깨어나는 빈도와 간격·실행 길이 분위수 표를 측정(`meas-ci:session:2026-09-24`)에서 가져옵니다. lognormal로 뽑는 SLEEP과 RUN은 없습니다. `Xorg`는 사람 없는 파일에서 빠졌습니다. Ubuntu 24.04의 GNOME 46 Wayland 세션은 사람이 없을 때 X 서버를 띄우지 않기 때문입니다. 그리고 `wineserver`는 이 항목에 묶이지 않고 게임 사슬의 구성원이 됐습니다. 프레임마다 260마이크로초를 돌고, CPU 한 자리에 맞춰 사슬과 함께 늘어납니다. 아래의 1,225초 이야기와 미정은 그때의 파일에 대한 것이고, 미정은 둘째 선택지에 가까운 쪽, 사슬에 `wineserver` 구성원 하나를 더하는 것으로 닫혔습니다.
 
 ```text
    반복: SLEEP(idle_gap 중앙값 11.2 s) → RUN(wake_burst 중앙값 155 us)
@@ -1803,7 +1855,9 @@ preemption은 scheduling의 25에서 30퍼센트뿐이다. 70에서 75퍼센트�
 - 게임 항목의 두 비율 파라미터는 원문과 맞지만 compile 단계가 읽지 않습니다. 사슬 모양은 원문 그림의 여러 고리를 한 줄로 편 우리 해석이고, 나머지 284개의 값은 슬라이드 표시가 붙은 우리 임시값입니다.
 - 두 예시값을 분포의 5퍼센트와 95퍼센트 지점으로 보고 중앙값 약 655마이크로초, 흩어짐 약 0.562를 역산했습니다. 그 해석은 넷째 등급입니다.
 - 측정에서 부류를 끌어낸 셋은 다운로드, 가끔 깨는 앱, 시스템 daemon입니다. 다운로드는 비율만 근거가 있고, 앱은 로그인하지 않은 대체 앱으로 쟀고, daemon은 흩어짐이 커서 다섯에 하나꼴로 60초 안에 한 번도 깨지 않습니다.
-- 게임 옆의 wineserver는 원문에서 게임 그래프의 일부인데 지금은 daemon으로 흉내 내집니다. 어디에 둘지는 정해지지 않았습니다.
+- 게임 옆의 wineserver는 원문에서 게임 그래프의 일부인데 그때는 daemon으로 흉내 냈고, 어디에 둘지가 정해지지 않았습니다.
+
+> **재구축 이후 (2026-10-17).** 이 정리는 그때의 열두 항목에 대한 것입니다. `wineserver`는 그 뒤 게임 사슬의 구성원이 됐고, 바뀐 나머지 자리는 각 항목의 표시와 이 장 첫머리의 표시에 적었습니다.
 
 ---
 
@@ -1838,6 +1892,8 @@ preemption은 scheduling의 25에서 30퍼센트뿐이다. 70에서 75퍼센트�
 > "**Tier 1 — existence of each archetype: closed by harvesting.** The inventory was harvested from sources that had already defined their own behavior categories: interbench's interactive and load menus, LAVD's gaming task-chain characterization, the kernel-build literature's compile fork-burst, and **`ananicy-rules`' `type` field — literally a community-maintained archetype taxonomy** (`Heavy_CPU`, `Game`, `Player`, `BG_CPUIO`, …). Each entry carries a `category_source:` naming the taxonomy it was harvested from — machine-checkable by the linter."
 
 각 archetype의 존재는 **수확으로** 닫는다. 목록은 **이미 자기 나름의 행동 분류를 정의해둔 출처들**에서 거둬들였다. interbench의 대화형 작업 목록과 부하 목록, LAVD의 게임 task 사슬 분석, 컴파일을 다룬 문헌의 fork 폭발, 그리고 ananicy 규칙의 `type` 필드다. 마지막 것은 **말 그대로 커뮤니티가 관리하는 archetype 분류 체계**다. 각 항목은 자기가 어느 분류 체계에서 수확됐는지를 `category_source`에 적는다.
+
+> **재구축 이후 (2026-10-17).** 계획 문서의 Tier 1은 지금 "수확으로 닫는다"가 아니라 "측정으로 근거를 댄다"입니다. library 29개 중 28개가 `category_source: meas`로, 이름 붙은 프로그램을 측정해서 관찰한 행동 부류를 근거로 하고, 게임의 `game-task-chain` 하나만 발표된 분석(`lavd-ossna24`)을 근거로 합니다. 이 장은 그 전의 방법, 수확의 기록입니다.
 
 **수확**이라는 말을 골라 쓴 이유가 있습니다. 발명하지 않았다는 것입니다. 밭에서 거둔 곡식처럼, 누군가 이미 키워둔 것을 거둬왔다는 뜻입니다.
 
@@ -1921,7 +1977,7 @@ interbench 스스로 게임을 "CPU를 최대한 쓰는 것"으로 단순화했�
 { "type": "Heavy_CPU", "nice": 9, "ioclass": "best-effort", "ionice": 7 }
 ```
 
-`BG_CPUIO`는 `background-crawler`의 `category_source`이고, `Heavy_CPU`는 `cpu-batch`를 **교차 확인**합니다. interbench의 Burn이 1차 근거이고, 다른 밭에서도 같은 부류가 따로 발견된다는 뜻입니다.
+`BG_CPUIO`는 그때 `background-crawler`의 `category_source`였고(지금 그 항목은 없음), `Heavy_CPU`는 `cpu-batch`를 **교차 확인**합니다. interbench의 Burn이 1차 근거이고, 다른 밭에서도 같은 부류가 따로 발견된다는 뜻입니다.
 
 > **이 연구에서는.** 인용 문서가 이 카탈로그에 대해 중요한 구분을 해둡니다. 같은 이름의 프로젝트가 두 갈래로 갈라져서 **분류 이름이 다르다**는 것입니다. 원래 Ananicy는 지금 소문자 분류(`game`, `compiler`)를 쓰고, 대문자 분류(`Heavy_CPU`, `BG_CPUIO`)는 "Depricated types"라는 제목 아래 주석으로 남겨뒀습니다. 대문자 분류는 CachyOS가 관리하는 카탈로그 쪽의 것입니다.
 >
@@ -1969,6 +2025,8 @@ CPU를 더 줘라, 최대한 조용하게 해라, 충분히 빠르되 시끄럽�
 >
 > 두 가지 읽기가 가능합니다. 하나, "문헌의 분류 체계"라는 말이 학술 문헌이나 벤치마크 목록을 뜻하고 ananicy는 한 항목에서만 예외로 쓰였다. 둘, `Chat`이나 `Service`는 처방이 같을 뿐 행동이 너무 달라서 부류의 근거로 쓸 수 없다고 판단했다. 둘째 읽기라면 그 판단은 `BG_CPUIO`에도 똑같이 적용되어야 합니다. `BG_CPUIO`도 행동이 다른 것들을 함께 담고 있기 때문입니다. 어느 쪽이었는지 적힌 기록을 저장소에서 찾지 못했습니다.
 
+> **재구축 이후 (2026-10-17).** 이 확인 필요가 물은 네 항목(`electron-comms`, `system-daemon`, `network-bulk`, `background-crawler`)은 모두 library에서 빠졌고, 지금은 거의 모든 항목이 측정에서 부류를 얻으므로 이 질문은 지금 library에 걸리지 않습니다.
+
 ## 7.5 정직하게 "측정"이라고 적은 셋
 
 그 질문과 별개로, 세 항목을 **어떻게 표시했는지**는 이 장에서 가장 본받을 만한 부분입니다. 계획 문서의 문장입니다.
@@ -1995,7 +2053,9 @@ CPU를 더 줘라, 최대한 조용하게 해라, 충분히 빠르되 시끄럽�
    network-bulk, electron-comms, system-daemon          ← meas
 ```
 
-> **논문으로.** 이 구분이 논문에서 한 문장이 됩니다. "열두 archetype 중 아홉은 기존 벤치마크, scheduler 분석, 커뮤니티 카탈로그의 분류에서 수확했고, 셋은 해당하는 분류가 없어 우리 측정에서 부류를 정의했다."
+> **재구축 이후 (2026-10-17).** 지금은 반대입니다. 29개 중 28개가 측정에서 부류를 끌어냈고(`meas`), 바깥 분석에 기대는 것은 `game-task-chain` 하나입니다. 위 그림의 아홉 가운데 `cpu-batch`, `compiler-child`, `build-orchestrator`는 측정한 모양으로 바뀌었고, 나머지는 library에 없습니다.
+
+> **논문으로.** 이 구분이 논문에서 한 문장이 됩니다(그때의 library 기준). "열두 archetype 중 아홉은 기존 벤치마크, scheduler 분석, 커뮤니티 카탈로그의 분류에서 수확했고, 셋은 해당하는 분류가 없어 우리 측정에서 부류를 정의했다."
 >
 > 이 문장이 막아주는 질문이 있습니다. 심사자가 "왜 채팅 앱이 따로 있나요, 그냥 배경 작업 아닌가요"라고 물으면, 그 부류는 **바깥 근거로 존재를 주장하지 않았다**고 답할 수 있습니다. 대신 측정이 그 부류의 행동을 보여줬다고 답합니다. 주장의 강도를 미리 낮춰뒀으니, 강도를 문제 삼는 질문이 성립하지 않습니다.
 
@@ -2006,6 +2066,8 @@ CPU를 더 줘라, 최대한 조용하게 해라, 충분히 빠르되 시끄럽�
 **하나, 수확은 값을 주지 않습니다.** 분류가 존재한다는 것과 그 분류의 숫자가 무엇인가는 다른 질문입니다. ananicy 카탈로그는 색인기라는 부류가 있다고 말하지만, 색인기가 몇 초마다 깨는지는 말하지 않습니다. `background-crawler`의 부류는 수확했고 값은 전부 측정했습니다.
 
 **둘, 수확은 경계를 주지 않습니다.** interbench의 X와 Audio가 서로 다른 부류라는 것은 말해주지만, 실제 프로그램 하나가 어느 쪽에 드는지는 말해주지 않습니다. 파일 색인기가 `cpu-batch`일 때도 있고 `background-crawler`일 때도 있다는 것은 수확이 아니라 우리 판단입니다.
+
+> **재구축 이후 (2026-10-17).** 하나와 둘의 예인 `background-crawler`는 library에서 빠졌고, 파일 색인기는 지금 언제나 `file-indexer`에 묶입니다.
 
 **셋, 수확은 충분함을 주지 않습니다.** 네 밭에서 거둔 부류를 전부 모아도, 그게 데스크톱에서 도는 모든 것을 덮는다는 보장은 없습니다. 네 밭이 전부 같은 곳을 비워뒀을 수 있습니다. **이게 다음 장의 질문입니다.**
 
@@ -2056,6 +2118,8 @@ CPU를 더 줘라, 최대한 조용하게 해라, 충분히 빠르되 시끄럽�
 - 세 항목은 정직하게 측정에서 부류를 끌어냈다고 표시했습니다. 그래서 어느 항목이 바깥 근거에 기대고 어느 항목이 우리 관찰에 기대는지 한눈에 보입니다.
 - 수확은 부류의 존재만 줍니다. 값도, 실제 프로그램이 어느 부류에 드는지의 경계도, 목록이 충분하다는 보장도 주지 않습니다.
 - 서로 모르는 두 곳이 같은 부류를 따로 세웠다면 그 부류의 존재는 강하게 뒷받침됩니다. 끝날 때까지 계산만 하는 작업이 그 예입니다.
+
+> **재구축 이후 (2026-10-17).** 이 정리는 그때의 방법, 수확의 기록입니다. 지금 계획 문서는 각 항목이 존재한다는 근거를 수확이 아니라 측정으로 댑니다. library 29개 중 28개가 `category_source: meas`로 이름 붙은 프로그램을 측정해서 관찰한 행동 부류에 기대고, 게임의 `game-task-chain` 하나만 발표된 분석(`lavd-ossna24`)에 기댑니다. 목록이 충분한가는 지금도 인용이 아니라 검증으로 닫고, 그 심판은 측정 캠페인입니다. 열두 항목 가운데 지금 library에 남은 것은 `cpu-batch`, `compiler-child`, `build-orchestrator`, `game-task-chain` 넷입니다.
 
 ---
 
@@ -2130,6 +2194,8 @@ CPU를 더 줘라, 최대한 조용하게 해라, 충분히 빠르되 시끄럽�
 
 **열두 개가 전부 한 번 이상 쓰이고, 열여덟 줄이 전부 채워집니다.** 이게 "덮는다"의 첫 번째 확인입니다. 다만 이 표는 **"만들 수 있다"**를 보여줄 뿐 **"똑같이 행동한다"**를 보여주지는 않습니다. 그 둘째 확인이 측정입니다.
 
+> **재구축 이후 (2026-10-17).** 이 표는 그때의 열두 항목으로 짠 것입니다. 지금 상황 목록(`docs/workload/scenario-catalog.md`)은 줄마다 파일이 묶는 이름과 그 archetype을 직접 적습니다. 예를 들어 S9(게임)는 `game-task-chain`과 `game-client`, S14(파일 색인)는 `file-indexer`, S17은 바이러스 검사가 아니라 무인 업그레이드(`package-upgrade`), S18(세션)은 세션 항목 넷입니다.
+
 > **코드로.** 계획 문서의 각 항목 설명 끝에 "Consumed by:"로 시작하는 사용처 줄이 있고, 위 표의 대부분이 거기서 나옵니다. 몇 칸은 실제 timeline 파일의 묶음에서 채웠습니다. 예를 들어 S4의 `network-bulk`는 메일을 보내는 `thunderbird`가 그 archetype에 묶인 파일이 있어서 들어갔습니다.
 
 ### 창작 앱은 두 archetype의 교대입니다
@@ -2147,6 +2213,8 @@ S6과 S7이 흥미롭습니다. 사진 편집기와 영상 편집기는 archetyp
 > 저장소 문서가 적어둔 Table 4의 내용은 이렇습니다. 출처 등록부는 "per-workload hardware sensitivity (table-4: CC up to 1.77x GPU-sensitive, CA ~1.0x)"라고 적습니다. 작업마다 **하드웨어 민감도**, 즉 GPU나 CPU나 저장장치를 좋은 것으로 바꿨을 때 얼마나 빨라지는가를 적은 표이고, 계산 위주의 창작 작업은 GPU에 최대 1.77배 민감하고 문서 작업은 거의 민감하지 않다는 것입니다.
 >
 > 그 내용이 맞다면, Table 4가 뒷받침하는 것은 "창작 작업은 계산 자원을 많이 쓰는 성격이 섞여 있다"이지 **"사람의 입력과 계산이 시간으로 교대한다"**는 구조가 아닙니다. 하드웨어 민감도 표에서 시간 교대를 읽어내려면 해석이 한 단계 더 필요합니다. 계획 문서의 "일치한다(consistent with)"가 어느 정도의 뒷받침을 뜻하는지, 원문 Table 4를 열어 확인이 필요합니다. 무엇을 열면 되는지: DOI 10.1016/j.tbench.2023.100084의 Table 4와 그 표를 설명하는 본문 문단입니다.
+
+> **재구축 이후 (2026-10-17).** 계획 문서에 위의 문장은 지금 없습니다. 사진 편집기(S6)는 GIMP를 잰 `image-editor`에, 영상 편집기(S7)는 Kdenlive를 잰 `video-editor`와 그 내보내기를 잰 `cpu-batch`의 `kdenlive_render`에 묶입니다. 원문은 2026-09-13에 Wayback 사본의 출판사 PDF로 전부 읽혔습니다. 인용 문서는 Table 4를 작업과 모듈마다의 하드웨어 민감도 표로 적고(1.77배는 CC 모듈에서 가장 좋은 그래픽 카드 구성을 기본 구성과 비교한 수), CpsMark+는 사무, 브라우징, 메일, 사진, 변환, 압축 상황의 존재만 뒷받침합니다. 시간 교대 구조를 그 표에 기대는 문장은 계획 문서에 남아 있지 않습니다.
 
 ## 8.4 심판이 실제로 판정한 사례
 
@@ -2182,7 +2250,9 @@ S6과 S7이 흥미롭습니다. 사진 편집기와 영상 편집기는 archetyp
 
 같은 실행에서 잰 판정 결과다. 한가한 chromium 탭 프로세스는 중앙값 약 1.61초, `sigma_log` 약 1.72로 깬다. **중앙값은 가깝고, 꼬리는 더 길다.** archetype을 나눌 근거는 없다. chromium 탭 프로세스는 계속 이 항목에 묶는다.
 
-> **코드로.** 값은 `dataset/meas/summary.json`의 `across_repeats` 아래 `element`와 `chromium` 항목에 있습니다. 측정 원자료는 저장소의 GitHub release `meas-ci-2026-08-28`에 `meas-gui.zip`으로 올라가 있고, 분석 코드는 `dataset/tools/meas/analyze.py`입니다.
+> **코드로.** 값은 `dataset/meas/summary.json`의 `across_repeats` 아래 `element`와 `chromium` 항목에 있었습니다. 측정 원자료는 저장소의 GitHub release `meas-ci-2026-08-28`에 `meas-gui.zip`으로 올라가 있고, 분석 코드는 `dataset/tools/meas/analyze.py`입니다.
+
+> **재구축 이후 (2026-10-17).** 이 판정의 두 쪽은 지금 각자 측정한 항목이 됐습니다(2026-09-22). 브라우저의 숨겨진 탭은 `renderer-hidden`, 채팅 앱은 `chat-client`입니다. 그리고 값이 들어 있던 `dataset/meas/summary.json`은 2026-10-16(커밋 `37c2e233`)에 지워졌습니다. 어떤 도구도 그 파일을 읽지 않았고 지금 데이터셋의 어떤 값도 거기서 오지 않기 때문입니다. 그 커밋 이전의 저장소에서는 읽을 수 있습니다.
 
 ### 이 판정을 다시 보면
 
@@ -2220,13 +2290,15 @@ schbench는 지연 지표의 선례이면서 **메시지를 주고받고 자주 
 
 초기 조사 문서도 hackbench에 대해 "Grounds many-task IPC burst archetype"이라고 적습니다. 여러 task가 통신하며 한꺼번에 몰리는 archetype의 근거라는 것입니다.
 
-그런데 열두 개 목록에는 **메시지를 주고받는 archetype이 없습니다.** WAKE를 쓰는 항목은 게임 사슬 하나뿐이고, 채팅 앱은 대부분 쉬다가 혼자 깨는 `electron-comms`로 흉내 냅니다.
+그런데 열두 개 목록에는 **메시지를 주고받는 archetype이 없습니다.** WAKE를 쓰는 항목은 게임 사슬 하나뿐이고, 채팅 앱은 대부분 쉬다가 혼자 깨는 `electron-comms`로 흉내 냈습니다(지금은 따로 잰 `chat-client`이고, 메시지가 오가지 않는 상태로 잰 것은 같습니다).
 
 > **확인 필요.** schbench와 hackbench를 근거로 거론된 "메시지를 주고받는 archetype"이 목록에 들어오지 않은 이유가 저장소에서 찾아지지 않습니다. 계획 문서의 열린 질문 해결 목록에도, 결정 기록에도 이 후보를 넣지 않기로 했다는 문장이 없습니다.
 >
 > 가능한 설명은 둘입니다. 하나, 목록을 만들 때 이 부류가 필요한 상황이 S1부터 S18까지에 없다고 판단했다. 채팅 앱의 측정에서 통신이 몰리는 모양이 보이지 않았다는 사실이 여기에 들어맞습니다. 다만 그 측정은 로그인하지 않아 메시지가 오가지 않는 상태였습니다. 둘, 근거 문서가 초기 계획을 적은 것이고 목록을 확정할 때 이 줄이 갱신되지 않았다.
 >
 > 이 연구의 규칙대로라면 이 질문은 인용이 아니라 검증으로 답해야 합니다. 메시지가 실제로 오가는 채팅 앱의 통계를 목록의 조합으로 재현할 수 있는가. 그 측정은 계정이 필요한 앱을 CI에서 돌릴 수 없다는 한계 때문에 아직 없습니다.
+
+> **재구축 이후 (2026-10-17).** 지금의 측정은 실행 서버에 Synapse homeserver를 설치하고, Element Desktop을 그 homeserver의 방 하나에 로그인시킨 채로 잽니다. `chat-client`의 값은 그 상태를 메시지 없이 쉬게 두고 잰 것입니다. 같은 측정이 정해진 속도로 메시지를 보내는 단계도 반복마다 돌렸고(그 속도는 설계입니다), 깨어남은 쉬는 상태가 초당 12.319번, 메시지가 오가는 단계가 49.150번이었습니다. 그 결과는 캠페인 결과에만 남고 어떤 archetype에도 들어가지 않습니다.
 
 ## 8.6 검증이 닿지 않는 곳
 
@@ -2259,6 +2331,8 @@ CI에서 돌릴 수 없는 상황이 있습니다.
 > **미실행.** 그리고 CI에서 돌릴 수 있는 상황에 대해서도, 목록의 조합으로 측정 통계를 재현하는 시험은 아직 돌린 적이 없습니다. 지금까지 한 일은 측정에서 파라미터를 뽑은 것과, 브라우저 탭 하나를 판정한 것까지입니다. 계획 문서는 이 주장을 "측정 실패가 항목을 더하는 절차 아래에서 잠정적"이라고 적어둡니다.
 >
 > 이 시험을 돌리려면 세 가지가 먼저 있어야 합니다. 시뮬레이터가 archetype 조합을 돌려 trace를 내야 하고, 그 trace에서 측정과 같은 통계를 뽑는 도구가 있어야 하고, 앞 절에서 본 "재현된다"의 기준이 정해져야 합니다. 저장소 문서에 이 시험의 일정은 적혀 있지 않습니다.
+
+> **재구축 이후 (2026-10-17).** 위 그림의 오른쪽 열은 거의 비었습니다. 화상 회의는 한 페이지 안의 loopback WebRTC 통화를 가짜 카메라와 마이크로 실행 서버에서 잰 `video-call`이고, 채팅 앱은 실행 서버의 homeserver 방 하나에 로그인한 Element Desktop, Steam 클라이언트는 계정 없이 띄운 `game-client`입니다. 사람의 키 입력은 SWELL-KW의 실제 입력을 측정 캠페인에서 재생합니다. 실행 서버에서 관찰할 수 없는 것은 게임의 frame 사슬이고(GPU가 없고, Proton은 Steam 클라이언트 아래에서만 돕니다), 그래서 `game-task-chain`은 LAVD 발표의 숫자를 근거로 하며 판정란이 `none`인 유일한 항목입니다. 계획 문서는 지금 상황마다 그 상황의 프로그램을 측정한 항목을 묶는다고 적고, 예외로 이 사슬과 다운로드의 `steam`을 듭니다. `steam`의 다운로드는 계정이 있어야 해서, 익명으로 로그인한 SteamCMD의 숫자를 밝혀둔 근사로 씁니다.
 
 > **논문으로.** 이 장의 내용이 논문에서 쓸 수 있는 문장의 경계를 정합니다.
 >
@@ -2335,6 +2409,8 @@ archetype은 작업 하나를 자식 하나로 흉내 냅니다. 그러면 동�
 >
 > 무엇을 열어보면 되는지: 측정 원자료(`meas-cli3.zip`)의 프로세스 생성 기록에서 `gcc`와 `cc1`의 부모 자식 관계를 따라가 작업 단위로 다시 세면 됩니다. 이 권은 그 재집계를 하지 않았습니다.
 
+> **재구축 이후 (2026-10-17).** 이 질문은 2026-09-19에 둘째 읽기로 닫혔습니다. 커널 빌드를 다시 재서, 지금의 `compiler-child`는 `make`의 작업 하나, 즉 object 작업 하나의 task 여섯(`sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`)을 역할과 단계마다 측정한 분위수 표로 듭니다. 부모의 상한은 `fork_cap` = `parallelism_cap` × 6이라 `-j8`이면 spawn table의 항목 48개가 동시에 살 수 있고, 작업 수도 측정한 2,908개입니다. 위 조합의 `code → desktop-interactive`는 지금 `code → code-editor`입니다.
+
 **수명.** 자식의 수명 중앙값은 측정에서 99,801마이크로초, 약 0.1초입니다. archetype의 자식은 수명을 직접 적지 않고 계산, 디스크 대기, 계산의 합으로 만듭니다. 세 중앙값을 더하면 12,900 + 3,600 + 1,440 = 17,940마이크로초로 측정 수명 중앙값의 약 5분의 1입니다. 다만 로그 정규 세 개를 더한 합의 분포는 세 중앙값의 합과 같지 않고, 무엇보다 **벽시계 수명은 scheduling의 결과**입니다. CPU를 기다린 시간이 수명에 들어갑니다. 이 비교도 시뮬레이션을 돌려야 의미가 있습니다. 이 파라미터들이 어떻게 만들어졌는지는 컴파일러 항목을 끝까지 따라가는 장에서 봅니다.
 
 **이 연습에서 가져갈 것.** 조합표로는 S11이 덮입니다. 측정과 나란히 놓으면 **동시에 사는 수의 단위**라는, 조합표에서는 보이지 않던 질문이 나옵니다. 검증이 인용보다 강한 이유가 이것입니다. 실제 숫자를 맞대야 드러나는 차이가 있습니다.
@@ -2353,6 +2429,8 @@ archetype은 작업 하나를 자식 하나로 흉내 냅니다. 그러면 동�
 - 검증은 CI에서 돌릴 수 있는 상황에만 닿습니다. 게임, 화상 회의, 사람의 입력은 조합표 수준의 확인에 머뭅니다.
 - CI에서 돌릴 수 있는 상황에 대해서도 조합이 측정을 재현하는지 보는 시험은 아직 돌린 적이 없습니다.
 - 컴파일 상황을 측정과 나란히 놓으면 동시에 사는 프로세스 수가 archetype의 상한 8과 측정의 최대 16으로 다릅니다. 측정이 세는 단위와 archetype이 흉내 내는 단위가 다를 수 있다는 질문이 숫자를 맞대야 드러납니다.
+
+> **재구축 이후 (2026-10-17).** 이 정리는 그때의 열두 항목에 대한 것이고, 자리마다의 표시가 이 장의 각 절에 있습니다. 지금 상황 목록은 줄마다 파일이 묶는 이름과 archetype을 직접 적고, 열여덟 상황은 29개 항목으로 조합됩니다. 창작 앱은 교대가 아니라 따로 잰 항목(`image-editor`, `video-editor`, 내보내기는 `cpu-batch`의 `kdenlive_render`)입니다. 브라우저의 숨겨진 탭과 채팅 앱은 2026-09-22에 각자 측정한 항목(`renderer-hidden`, `chat-client`)이 됐습니다. 실행 서버에서 잴 수 없는 것은 게임의 frame 사슬만 남았습니다. 화상 회의와 로그인한 채팅 앱과 계정 없는 Steam 클라이언트를 실행 서버에서 재고, 사람의 키 입력은 SWELL-KW의 실제 입력을 재생합니다. 컴파일의 단위 질문은 2026-09-19에 둘째 읽기로 닫혔습니다. 지금 `compiler-child`는 object 작업 하나의 task 여섯이고, 상한 8이면 spawn table의 항목 48개가 동시에 살 수 있습니다.
 
 ---
 
@@ -2385,6 +2463,8 @@ archetype은 작업 하나를 자식 하나로 흉내 냅니다. 그러면 동�
 > "Observation: counts matter differently to the two consumers. The executor needs actual task counts to schedule; the recognizer sees only the post-fold annotation (`chrome (25 procs)`), so order-of-magnitude fidelity suffices for recognition experiments — precision matters only for executor-load realism, which `meas-ci` covers for the CI-runnable entries."
 
 개수는 두 소비자에게 다르게 중요하다. executor는 scheduling하려면 실제 task 수가 필요하다. 인식기는 같은 이름을 하나로 접은 뒤의 표시(`chrome (25 procs)`)만 본다. 그러니 인식 실험에는 **자릿수만 맞으면** 충분하고, 정밀함은 executor에 거는 부하가 현실적인지에만 중요하다.
+
+> **재구축 이후 (2026-10-17).** 계획 문서의 이 관찰은 지금 "개수는 두 소비자 모두에게 중요하다"로 바뀌었습니다. 인식기는 snapshot에서 이름마다 그 개수를 보고, 개수만 바뀌어도 집합이 바뀐 것이라 질의가 나갑니다. 브라우저 안에서 화상 통화를 열어 `chrome`이 다섯에서 여섯이 되는 `c6-fold`와, `chrome`이라는 이름의 계산 작업이 끼어드는 `c6-spoof`가 바로 그 경우입니다. 아래의 "자릿수만 맞으면 된다"는 그때의 읽기입니다.
 
 ```text
                     chrome 12개 vs 25개의 차이가
@@ -2510,6 +2590,8 @@ compile 단계를 거친 뒤 `make`의 프로그램 앞부분은 이렇게 됩�
 >
 > 자식 수는 archetype이 아니라 timeline이 정하므로, 각 파일이 왜 그 수를 골랐는지는 파일을 다루는 권의 몫입니다. 여기서 짚을 것은 **기본값의 근거와 실제로 쓰인 값이 다를 수 있다**는 사실입니다. 기본값은 출처를 가리키고, 실제 값은 그 파일이 CPU 한 자리에서 원하는 부하 범위에 들어가도록 고른 설계입니다.
 
+> **재구축 이후 (2026-10-17).** 이 절의 숫자와 모양은 그때의 것입니다. 지금 `build-orchestrator`는 object 작업 `spawn_count`개를 미리 뽑아둔 spawn table로 받고, 작업 하나마다 여섯 항목(`sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`)을 넣으며, 동시에 살 수 있는 항목은 `fork_cap` = `parallelism_cap` × 6입니다. `spawn_count`에는 측정한 커널 빌드의 작업 수 2,908이 들어가고(`meas-ci:build:2026-09-18`), `build-orchestrator`를 묶는 core 파일 넷(`c1-compile`, `c3-workday`, `c4-compile`, `c6-dual`)이 모두 이 값을 씁니다. `c7-compile`의 빌드는 보안 커널 뒤의 DKMS 모듈 재빌드(`dkms`)여서 다른 항목 `module-build-orchestrator`에 묶이고, 측정한 작업 순서를 그대로 따르므로 `spawn_count`를 묶지 않습니다. 상한 8은 설계로 정한 값입니다(8 thread 데스크톱의 `nproc` 규칙). 그리고 인식기는 spawn table의 이름과 개수를 부모가 사는 동안의 것으로 보고, 자식이 태어나고 죽는 들고남은 보지 않습니다. 그래서 "들고남이 인식 쪽의 재료"라는 위의 둘째 이유는 지금 맞지 않습니다.
+
 ## 9.4 둘째 종류: 정적 다중성
 
 ### 개수를 직접 적는다
@@ -2530,6 +2612,8 @@ compile 단계를 거친 뒤 `make`의 프로그램 앞부분은 이렇게 됩�
 ```
 
 `count: 12`. 같은 이름, 같은 archetype의 task가 열두 개입니다. 여기에 사람이 만지는 창인 `chrome` 하나가 더해져서, 인식기는 `chrome × 13`을 봅니다.
+
+> **재구축 이후 (2026-10-17).** 정적 다중성의 예와 근거가 바뀌었습니다. 지금 `c1-browsing`은 쓰는 중인 창 `chrome`(`web-browser`) 하나와 숨겨진 탭의 렌더러 `chrome`(`renderer-hidden`) `count: 4`를 묶어서, 인식기는 `chrome × 5`를 봅니다. 개수 4에는 출처 표시가 붙습니다(`source: {count: [glam, "meas-ci:desktop:2026-10-04"]}`). 탭 다섯 개는 Firefox의 Linux 사용 통계(`glam`)에서, 탭 하나에 렌더러 하나는 Chrome을 직접 띄워 본 측정에서 왔습니다. 위에 옮긴 계획 문서의 문장은 2026-09-13의 것이고, 지금 계획 문서는 이 근거를 적습니다. 아래 절의 탭 개수 문헌(Dubroy 외, Mozilla Test Pilot과 그 분석 기사, Chang 외)은 2026-10-16에 인용 문서에서 빠졌습니다. 그 절은 그때의 근거를 원문으로 대조한 기록입니다.
 
 ### 탭 개수 문헌은 무엇을 말하나
 
@@ -2607,6 +2691,8 @@ compile 단계를 거친 뒤 `make`의 프로그램 앞부분은 이렇게 됩�
 >
 > 그러니 지금은 "모든 숫자에 출처 표시가 붙어 있는지 기계가 검사한다"는 약속이 개수에는 적용되지 않습니다. 계획 문서의 "출처 표시"가 archetype 메모의 문장을 뜻한 것인지, timeline에 출처를 적는 자리를 만들 계획이었는지 확인이 필요합니다.
 
+> **재구축 이후 (2026-10-17).** 두 자리 모두 닫혔습니다. 지금 브라우저가 있는 core 파일은 모두 숨겨진 탭 렌더러를 넷 들고(`c1-browsing`, `c1-office`, `c3-evening` 모두 `chrome × 5`), timeline이 채우는 값에는 `source:` 자리가 생겨(2026-10-11) 개수 4에도 출처 표시가 붙고 검사 도구가 그것을 확인합니다.
+
 ## 9.5 예외 하나: archetype 안에 개수가 있는 항목
 
 두 종류의 규칙을 보고 나면 한 항목이 눈에 걸립니다. 게임의 `game-task-chain`입니다.
@@ -2629,6 +2715,8 @@ n_tasks:
 >
 > 이 차이가 결과를 만드는 자리가 있습니다. 인식기는 `game.exe × 300`을 봅니다. 이 300은 다른 개수들처럼 timeline에서 파일마다 정한 값이 아니라, **모든 게임 파일에서 똑같이** archetype이 정한 값입니다. 게임마다 task 수가 다르다는 사실을 흉내 내려면 이 값을 binding으로 옮겨야 합니다. 무엇을 열어보면 되는지: 경계 규칙을 적은 결정에서 "개수"가 프로세스의 개수만 뜻하는지, 한 프로그램 안의 task 수까지 뜻하는지를 적은 기록입니다. 저장소에서 찾지 못했습니다.
 
+> **재구축 이후 (2026-10-17).** 이 충돌은 사라졌습니다. 지금 `game-task-chain`에는 `n_tasks`가 없고, 사슬의 구성원 수 `chain_length`(16)와 `wineserver` 구성원만 항목에 있습니다. 구성원의 이름은 timeline이 `member_names`로 채웁니다. 발표가 보고한 약 300개의 task 가운데 사슬과 `wineserver` 밖의 thread는 빼고, 그 사실을 파일에 적습니다. 인식기는 `c1-gaming`에서 task 열여덟 개를 봅니다. `Troy.exe` × 7, `Task worker thr` × 4, `wineserver`, `dxvk-cs`, `dxvk-submit`, `winepulse_mainl`, `winepulse_timer`, `FAudio_AudioCli`, 그리고 `steam`입니다.
+
 ---
 
 ## 9장 정리
@@ -2644,9 +2732,13 @@ n_tasks:
 - 브라우징 파일의 12라는 수를 끌어내는 산수는 적혀 있지 않지만, 탭 프로세스가 워낙 한가해서 12개든 20개든 CPU 부하가 1퍼센트를 넘지 않습니다. 자릿수만 맞으면 된다는 말이 산수로 뒷받침됩니다.
 - 게임 항목만 archetype 안에 task 수 300을 값으로 가집니다. 한 프로그램의 내부 구조로 읽으면 예외가 설명되지만, 경계 규칙과 문자 그대로는 충돌하고 그 읽기를 적은 기록이 없습니다.
 
+> **재구축 이후 (2026-10-17).** 이 정리의 숫자와 읽기는 그때의 것이고, 자리마다의 표시가 이 장의 각 절에 있습니다. 지금 개수는 두 소비자 모두에게 중요합니다. 인식기는 snapshot에서 이름마다 그 개수를 보고, 개수만 바뀌어도 질의가 나가므로, "인식기에게는 자릿수만 맞으면 충분하다"는 읽기는 맞지 않습니다. 창발적 다중성을 두는 이유도 첫째, 그 개수가 scheduling의 결과라는 것만 남았습니다. 인식기는 spawn table의 이름과 개수를 부모가 사는 동안의 것으로 보고, 자식이 태어나고 죽는 들고남은 보지 않습니다. 컴파일 작업은 논문의 2,430이 아니라 측정한 커널 빌드의 2,908개 object 작업이고(`meas-ci:build:2026-09-18`), 상한 8은 관례가 아니라 설계로 정한 값(8 thread 데스크톱의 `nproc` 규칙)이며, 작업 하나가 spawn table 여섯 항목이라 동시에 살 수 있는 항목은 `fork_cap` 48입니다. 브라우저는 `chrome × 5`입니다. 탭 다섯 개는 Firefox의 Linux 사용 통계(`glam`)에서, 탭 하나에 렌더러 하나는 Chrome을 직접 띄워 본 측정에서 왔고, 위의 탭 개수 문헌은 2026-10-16에 인용 문서에서 빠졌습니다. 게임 항목에는 task 수 300이 없어서, 경계 규칙과의 충돌도 사라졌습니다. 개수에는 timeline의 `source:`로 출처 표시가 붙습니다.
+
 ---
 
 # 10장 · 우리가 직접 잰 것
+
+> **재구축 이후 (2026-10-17).** 이 장은 2026년 8월의 첫 측정 캠페인(GitHub release `meas-ci-2026-08-28`, `meas-ci:cli:3`, `meas-ci:gui:2` 같은 한 번짜리 캠페인)을 다룹니다. 데이터셋을 다시 지으면서 2026-09-18부터 캠페인을 새로 돌려 library의 28개 항목을 측정에서 얻었습니다. 그 캠페인들은 안정성 규칙이 설 때까지 같은 기계에서 반복을 다섯 번 이상 더하고, 캠페인마다 원자료를 release로 남기며, `dataset/meas-releases.yaml`이 캠페인마다 release와 첨부 파일의 SHA-256을 적습니다. 이 장이 읽는 요약 파일 `dataset/meas/summary.json`은 2026-10-16(커밋 `37c2e233`)에 지워졌고, 그 커밋 이전의 저장소에서 읽을 수 있습니다. 지금의 측정은 데이터셋 가이드북 6권과 측정 개요 문서(`docs/workload/measurement-overview.md`)가 다룹니다.
 
 ## 10.1 왜 직접 재야 했나
 
@@ -2766,6 +2858,8 @@ CI 측정은 **소프트웨어 행동의 구조와 모양에 대한 주장만** 
 
 마지막 구절이 이 캠페인의 정체를 정합니다. "우리 CI 서버에서 make가 얼마나 빨랐다"는 아무 의미가 없습니다. "make는 자식을 이런 모양으로 만들고, 자식들은 이런 모양의 수명 분포를 가진다"는 의미가 있습니다. **소프트웨어가 어떻게 생겼는가**를 재는 것이지 **기계가 얼마나 좋은가**를 재는 것이 아닙니다.
 
+> **재구축 이후 (2026-10-17).** 구축 문서의 이 문장은 지금 없습니다. 측정한 값은 "이 소프트웨어를 이 실행 서버에서 잰 것"이라는 범위가 붙은 측정 주장이고, 기계에 따라 달라지는 값을 관례로 한 단계 낮추는 규칙은 없어졌습니다. 데스크톱의 진실이 아니라는 것은 같습니다.
+
 ### 모양과 절대값을 가르는 실제 사례
 
 측정에서 나온 숫자들을 둘로 나눠보면 이 구분이 구체적으로 보입니다.
@@ -2833,7 +2927,7 @@ release의 설명문이 어떤 묶음이 인용되는지를 적어둡니다.
 
 > "Stay meas-pending with stated findings: compiler disk_wait + background-crawler x3 (CI corpus page-cache-hot, foreground runs never throttle — cold-cache daemon-mode referee needed)."
 
-**발견을 적고 측정 대기로 남긴다.** 컴파일러의 디스크 대기와 색인기의 세 파라미터다. CI의 파일들이 이미 메모리 캐시에 올라가 있어서 디스크 대기가 거의 보이지 않았고, 앞에서 직접 돌린 검사는 절대 속도를 늦추지 않았다. **캐시를 비운 상태와 daemon 모드로 다시 재야 한다.**
+**발견을 적고 측정 대기로 남긴다.** 컴파일러의 디스크 대기와 색인기(그때의 `background-crawler`, 지금은 library에 없음)의 세 파라미터다. CI의 파일들이 이미 메모리 캐시에 올라가 있어서 디스크 대기가 거의 보이지 않았고, 앞에서 직접 돌린 검사는 절대 속도를 늦추지 않았다. **캐시를 비운 상태와 daemon 모드로 다시 재야 한다.**
 
 **이게 이 절차에서 가장 본받을 만한 부분입니다.** 1번 실행에서도 디스크 대기 값을 "거의 0"으로 적을 수는 있었습니다. 그런데 그건 디스크가 느리지 않아서가 아니라 **디스크를 아예 안 읽어서** 나온 값이었습니다. 측정 조건이 질문에 맞지 않았다는 것을 알아채고, 값을 넣지 않았습니다.
 
@@ -2903,6 +2997,8 @@ CI에서 돌릴 수 없는 프로그램은 **비슷한 다른 프로그램**으�
 >
 > 사람이 없는 상황만 담는 파일에서라면 이 근사가 크게 문제되지 않을 수 있습니다. 사람이 없으면 화면과 소리 서버도 할 일이 적기 때문입니다. 다만 그 판단이 어디에도 적혀 있지 않습니다. 무엇을 열어보면 되는지: 이 셋을 `system-daemon`에 묶기로 한 결정의 기록입니다. 찾지 못했습니다.
 
+> **재구축 이후 (2026-10-17).** 이 자리는 2026-09-24의 세션 측정으로 닫혔습니다. `gnome-shell`, `pipewire`, `systemd`, `dbus-daemon`은 이제 Ubuntu 24.04 GNOME 46 Wayland 세션을 사람 없이 잰 각자의 항목에 묶이고, `Xorg`는 그 세션에 없어서 파일에서 빠졌습니다.
+
 ### 표본의 크기
 
 측정이 준 분포 중 몇은 **표본이 아주 작습니다.**
@@ -2960,6 +3056,8 @@ TICK_US = 10_000  # USER_HZ=100 on the runners (spec.json corroborates)
 >
 > 계획 문서의 머리에는 "Updated 2026-09-10"이 적혀 있어서, 측정 이후에 한 번 이상 고쳐졌는데도 이 줄들은 갱신되지 않았습니다. 고쳐야 할 자리로 보이지만, 이 권은 산문 문서를 고치지 않습니다.
 
+> **재구축 이후 (2026-10-17).** 세 문서 모두 지금은 측정한 library를 적습니다. 인용 문서의 `meas-ci` 항목은 사용 중(in use)이고, 계획 문서와 구축 문서의 목록은 29개 항목을 적습니다.
+
 ---
 
 ## 10장 정리
@@ -2976,9 +3074,13 @@ TICK_US = 10_000  # USER_HZ=100 on the runners (spec.json corroborates)
 - 깨어남 간격 분포는 프로세스마다의 평균 간격을 모은 것이라, 흩어짐이 프로세스 사이에만 있습니다. 파일이 선언한 뽑는 빈도와 함께 봐야 할 사실입니다.
 - 산문 문서 세 곳이 아직 측정 전 상태를 적고 있습니다.
 
+> **재구축 이후 (2026-10-17).** 이 정리는 2026년 8월의 첫 캠페인에 대한 것입니다(이 장 첫머리의 표시). 지금 세 산문 문서는 모두 측정한 library를 적습니다. 측정한 값은 "이 소프트웨어를 이 실행 서버에서 잰 것"이라는 범위가 붙은 측정 주장이고, 기계에 따라 달라지는 값을 관례로 낮추는 규칙은 없어졌으며, 반복은 안정성 규칙이 설 때까지 같은 기계에서 다섯 번 이상 더합니다. 지금 캠페인은 깨어남마다의 실행과 대기를 scheduler trace에서 읽습니다. 대체 앱과 서버 daemon으로 잰 두 자리는 닫혔습니다. 채팅 앱은 실행 서버의 homeserver 방에 로그인한 Element Desktop(`chat-client`)으로, 화면과 소리 서버는 2026-09-24의 세션 측정으로 잽니다.
+
 ---
 
 # 11장 · 손으로 따라가기: compiler-child를 끝까지
+
+> **재구축 이후 (2026-10-17).** 이 장이 끝까지 따라가는 `compiler-child`는 2026-09-13의 모양, 자식 하나의 RUN → WAIT(disk) → RUN입니다. 지금의 `compiler-child`는 측정한 object 작업 하나, task 여섯(`sh`, `gcc`, `cc1`, `as`, `fixdep`, `rm`)이고, 역할과 구조상의 단계마다 측정한 분위수 표 하나를 듭니다(2026-09-19). 이 장의 산수(평균 맞추기, 앞뒤 90 대 10 나누기, 디스크 대기)는 지금 library에 없습니다. 첫째 칸의 이야기, `ocallahan-atc17`의 2,430이 Linux 커널이 아니라 DynamoRio 6.1.0 빌드의 수라는 것은 출처 등록부의 메모에 바로잡혀 있습니다. 이 장은 출처의 문장에서 뽑힌 숫자까지 근거의 사슬을 따라가는 방법의 기록으로 남습니다.
 
 ## 11.1 왜 이 항목인가
 
@@ -3404,9 +3506,13 @@ validation_stats:
 - 재현해야 할 수명 분포는 scheduling의 결과이고, 요구량의 합은 측정 수명의 약 5분의 1이며, 측정과 archetype이 세는 단위가 다를 수 있습니다. 비교는 아직 돌린 적이 없습니다.
 - 인용 문장만 대조하면 이번 어긋남은 드러나지 않습니다. 앞뒤 문단을 읽어야 드러납니다.
 
+> **재구축 이후 (2026-10-17).** 이 정리는 그때의 `compiler-child`를 따라간 것입니다(이 장 첫머리의 표시). 2,430이 DynamoRio 6.1.0을 `make -j8`로 빌드한 수라는 것은 지금 출처 등록부(`dataset/sources.yaml`)의 메모에 적혀 있습니다. 다만 `compiler-child`의 메모는 두 논문을 아직 "kernel-build literature"라고 부릅니다. 평균 맞추기, 앞뒤 90 대 10 나누기, 디스크 대기의 흩어짐은 지금 library에 없고, 지금의 값은 다시 잰 커널 빌드(2,908개 object 작업)에서 역할과 단계마다 측정한 분위수 표입니다.
+
 ---
 
 # 12장 · 근거가 약한 자리
+
+> **재구축 이후 (2026-10-17).** 이 장이 모은 약한 자리는 2026-09-13 library의 것입니다. 그 뒤 여러 자리가 닫혔습니다. 항목이 측정한 것으로 바뀌면서 관례로 채운 흩어짐과 덩어리 크기 대부분이 사라졌고, `wineserver`는 게임 사슬에 들어갔고, frame 주기에는 Steam Deck의 기본 화면 갱신(`steamos-refresh`)이 근거로 붙어 설계로 정한 값이라고 적혔고, 2,430의 workload는 출처 등록부에서 바로잡혔습니다. 아래 각 절의 표시가 무엇이 바뀌었는지 적습니다. 지금 library의 한계는 데이터셋 가이드북 2권과 6권이 다룹니다.
 
 ## 12.1 약한 자리를 모으는 이유
 
@@ -3431,6 +3537,8 @@ validation_stats:
 > "**Live-usage validation was not performed and is a stated limitation.** The collection + privacy-scrub tool (a CI-sidecar byproduct) ships in the artifact regardless, as an open falsification invitation: any user can run it against their own machine and check our synthetic distributions."
 
 **실제 사용 중인 기계에서 검증하는 일은 하지 않았고, 그것은 밝혀둔 한계다.** 수집 도구와 개인정보 제거 도구는 결과물에 함께 싣는다. **공개된 반증 초대**다. 누구든 자기 기계에서 돌려서 우리의 합성 분포를 확인해볼 수 있다.
+
+> **재구축 이후 (2026-10-17).** 구축 문서의 이 문장은 바뀌었습니다. 2026-10-16에 수집 도구와 개인정보 제거 도구를 공개하겠다는 약속이 거둬들여졌고, 실제 사용 중인 데스크톱에서 검증하지 않는다는 한계만 측정 개요 문서(`docs/workload/measurement-overview.md`)의 한계 절에 남았습니다. 그리고 `desktop-interactive`는 library에 없습니다. 사람이 쓰는 프로그램은 각자 측정한 항목(`office-writer`, `code-editor`, `mail-client`, `web-browser`, `image-editor`, `video-editor`)이 되었고, 키 입력은 SWELL-KW의 실제 입력을 재생합니다. 아래 표의 키 입력 숫자들과 미정은 그때의 항목에 대한 것입니다.
 
 ### 왜 판정할 수 없나
 
@@ -3469,6 +3577,8 @@ CI 서버에는 사람이 없습니다. 이 항목이 흉내 내는 것은 사�
 > 누가 정해야 하나: workload 데이터셋을 맡은 사람이 정할 수 있지만, 이 값이 파일마다 CPU 한 자리에 거는 부하를 크게 바꾸므로 측정의 두 번째 층을 돌리기 전에 정해야 합니다.
 
 > **미실행.** 반증 초대로 공개하겠다는 **개인정보 제거 도구**가 저장소에 아직 없습니다. 측정에 쓴 프로세스 상태 샘플러(`dataset/tools/meas/proc_sampler.py`)는 있지만, 사람의 기계에서 모은 기록에서 개인정보를 지우는 부분은 코드로 찾아지지 않습니다. 구축 문서는 이 도구를 결과물에 "싣는다(ships)"고 현재형으로 적습니다. 결과물을 공개하기 전에 만들어져야 하는 것이고, 전제 조건은 무엇을 개인정보로 보고 지울지의 규칙입니다.
+
+> **재구축 이후 (2026-10-17).** 이 미실행은 닫혔습니다. 도구를 만들지 않기로 했습니다(위의 표시).
 
 ## 12.3 판정하면 순환이 되는 항목: game-task-chain
 
@@ -3517,6 +3627,8 @@ LAVD와 비교해서 검증하면 순환이 된다. LAVD가 파라미터의 출�
 | task 수 300 | archetype 안의 개수. 모든 게임 파일에서 같음 |
 | wineserver | 원문은 게임 그래프의 일부로 보는데 한가한 daemon으로 흉내 냄 |
 
+> **재구축 이후 (2026-10-17).** 표의 여러 줄이 바뀌었습니다. frame 주기에는 `steamos-refresh`가 근거로 붙었고(설계), 나머지 284개와 `n_tasks`와 쓰이지 않던 두 비율은 항목에서 빠졌으며, `wineserver`는 사슬의 구성원이 됐습니다. 판정이 순환이라는 것, 사슬 길이 16과 사슬 모양과 실행 길이 분포가 우리 해석이라는 것은 같습니다. 출처의 종류는 발표·학회 초록·보도 기사로 옮겨졌습니다.
+
 **열두 항목 중 가장 긴 표입니다.** 그리고 이 항목이 이 연구에서 중요한 상황인 게임을 통째로 맡고 있습니다.
 
 ## 12.4 판정이 동어반복인 항목: 셋
@@ -3528,6 +3640,8 @@ LAVD와 비교해서 검증하면 순환이 된다. LAVD가 파라미터의 출�
 그래도 이 판정이 아무 의미가 없지는 않습니다. **시뮬레이터나 compile 단계가 적은 대로 만들었는가**를 확인합니다. 파일에는 50밀리초라고 적었는데 compile 결과가 다른 값이 되는 실수는 이 판정으로 잡힙니다. 판정하는 대상이 "모형이 현실과 맞나"가 아니라 **"도구가 모형을 제대로 옮겼나"**입니다.
 
 현실과 맞는지에 대해서는 출처가 스스로 한계를 밝힌 경우가 있습니다. interbench 설명서는 소리 재생 모형이 "잘 만든 오디오 프로그램이 했을 버퍼링을 무시한다"고 하고, 영상은 "60fps 재생으로는 꽤 무거운 편"이라고 합니다. **출처가 적어둔 한계가 그대로 이 archetype의 한계입니다.** 끝날 때까지 계산하는 작업의 출처인 Burn에는 그런 문장이 없는데, 모양이 "CPU를 완전히 쓴다" 하나뿐이라 한계를 적을 자리도 작습니다.
+
+> **재구축 이후 (2026-10-17).** 이 셋 가운데 소리 재생과 영상 재생은 library에 없고, 그 자리는 mpv를 측정한 `audio-player`와 `video-player`입니다. `cpu-batch`는 남았지만 지금은 묶은 프로그램(`python3`, `kdenlive_render`)을 측정한 캠페인이 판정란입니다. 지금 판정란이 `self-consistency`인 항목은 없습니다(29개 중 28개가 `meas-ci`, `game-task-chain`이 `none`).
 
 ## 12.5 관례로 정한 값
 
@@ -3572,6 +3686,8 @@ LAVD와 비교해서 검증하면 순환이 된다. LAVD가 파라미터의 출�
 | `electron-comms` | 불규칙한 깨어남을 정확한 주기 TIMER로 |
 | `system-daemon` | 주기가 없는 깨어남을 SLEEP으로 |
 
+> **재구축 이후 (2026-10-17).** 세 표의 항목 가운데 `desktop-interactive`, `io-stream`, `background-crawler`, `network-bulk`, `electron-comms`, `system-daemon`은 library에 없고, `compiler-child`와 `build-orchestrator`는 측정한 분위수 표를 듭니다(앞뒤 90 대 10 나누기도, 디스크 대기 흩어짐 0.8도, 부모 계산 흩어짐 0.5도 없음). `game-task-chain`의 나머지 task 값도 빠졌습니다. 항목별 줄에서 이 절이 모은 값, 곧 이 연구가 정한 값으로 남은 것은 넷이고, 지금은 각각 붙은 표시가 다릅니다. timeline의 출처 표시는 `design`(설계), `convention`(관례), `arithmetic`(산수)을 서로 다른 표시로 나눠 적습니다. 사슬 길이 16은 발표가 말한 "15에서 20개의 게임 task" 범위 안에서 고른 설계 값이라고 항목의 메모가 적습니다. `make -j8`의 8도 8 thread 데스크톱의 `nproc` 규칙으로 정한 설계 값이고, 8을 묶는 timeline마다 `parallelism_cap: design`이 붙습니다. 발표의 두 예시를 5퍼센트와 95퍼센트 지점으로 읽은 것은 관례입니다. 계획 문서가 분포 가족의 질문을 "관찰한 그대로"로 닫으면서 출처가 범위만 주는 자리에는 로그 정규를 쓰는 관례를 남겼고, 그 자리가 이 한 곳입니다. 그래프를 한 줄 사슬로 편 것은 항목의 메모가 우리 것이라고 밝힙니다. 전체 줄 가운데 분포 가족은 측정한 분위수 표로 바뀌었고, 필드 이름이 우리 것이라는 점은 그대로입니다(항목 파일의 머리말: 출처 표시는 값과 출처가 말한 구조를 뒷받침할 뿐 필드 이름은 뒷받침하지 않음).
+
 ### 이 목록이 말하는 것
 
 **열두 항목 중 넷째 등급의 값이 하나도 없는 항목은 없습니다.** 가장 단순한 `cpu-batch`조차 "thread 4개 구조를 가져오지 않는다"는 결정이 있습니다.
@@ -3611,6 +3727,8 @@ LAVD와 비교해서 검증하면 순환이 된다. LAVD가 파라미터의 출�
 
 그리고 사람이 없을 때의 시스템 프로세스 다섯 중 `gnome-shell`, `Xorg`, `pipewire`를 서버 daemon의 측정값으로 흉내 내는 것은, 측정을 다룬 장에서 봤듯이 **어디에도 근사라고 적혀 있지 않습니다.**
 
+> **재구축 이후 (2026-10-17).** 표의 근사 가운데 여럿이 사라졌습니다. 화상 회의는 압축과 풀기를 둘 다 잰 `video-call`이 됐고, `wineserver`는 사슬의 구성원이 됐고, 화면 합성 task(`gamescope`)는 게임 파일에서 빠졌고, 파일 색인기는 따로 잰 `file-indexer`가 됐습니다. 로그인하지 않은 Element로 Discord와 Slack을 대신한 근사도 닫혔습니다. 파일은 `element-desktop` 자체를 `chat-client`에 묶고, 그 값은 실행 서버의 homeserver 방 하나에 로그인한 Element Desktop에서 잰 것입니다. 남은 것은 메시지를 보내지 않고 쉬는 상태만 쟀다는 점입니다. 사람 없는 파일의 세션 프로세스는 이제 각자 측정한 항목이고, `Xorg`는 빠졌습니다. 탭 수의 근거도 Firefox의 Linux 사용 통계와 Chrome 측정으로 바뀌었습니다.
+
 ## 12.7 선언은 됐는데 실현되지 않은 것
 
 파일에 적혀 있고 출처나 규칙도 있는데, 실제 workload에는 반영되지 않는 것들입니다. 장마다 **확인 필요**로 적어둔 것을 모읍니다.
@@ -3636,6 +3754,8 @@ LAVD와 비교해서 검증하면 순환이 된다. LAVD가 파라미터의 출�
 ```
 
 이것들은 **틀린 값**이 아닙니다. 적힌 약속과 실제 동작 사이의 틈입니다. 그리고 틈은 둘 중 한쪽으로 닫힙니다. 약속을 지키도록 도구를 고치거나, 실제 동작에 맞게 약속을 고치거나.
+
+> **재구축 이후 (2026-10-17).** 여섯 가운데 넷이 닫혔습니다. 게임 항목의 쓰이지 않던 두 비율은 빠졌고, 끝이 없는 반복을 task마다 한 번 뽑기로 바꾸던 설명은 compile 코드에 없으며, `background-crawler`는 library에서 빠졌고, 정적 개수에는 timeline의 `source:` 자리가 생겼습니다. `category_source`는 지금도 검사 도구가 필드가 있는지만 봅니다.
 
 ## 12.8 적히지 않았던 것
 
@@ -3671,6 +3791,8 @@ LAVD와 비교해서 검증하면 순환이 된다. LAVD가 파라미터의 출�
      원문:   부류의 근거 논문이 이미 -j8로 돌렸음
      측정:   동시에 사는 컴파일러 계열 프로세스는 최대 16
 ```
+
+> **재구축 이후 (2026-10-17).** 이 일곱 가운데 여럿이 그 뒤 고쳐지거나 자리가 사라졌습니다. 2,430이 DynamoRio 6.1.0의 `make -j8` 빌드의 수라는 것은 출처 등록부(`dataset/sources.yaml`)의 메모에 바로잡혔습니다. frame 주기에는 Steam Deck의 기본 화면 갱신이 근거로 붙었습니다(설계). 키 입력의 158 ms와 디스크 대기 흩어짐 0.8은 그 항목들과 함께 사라졌고, 동시 실행 상한은 object 작업 여섯 단위로 다시 세게 됐습니다(`fork_cap` = `parallelism_cap` × 6). ananicy의 type을 수확의 근거로 쓰는 일은 항목이 존재한다는 근거가 수확에서 측정으로 바뀌면서 없어졌습니다. 다만 `compiler-child`의 메모에는 두 컴파일 논문을 "kernel-build literature"로 부르는 말과 두 번째 논문이 "보조한다"는 말이 아직 남아 있습니다(2026-10-17).
 
 ### 적힌 약점과 적히지 않은 약점
 
@@ -3735,6 +3857,8 @@ tasks:
 
 인식기는 이 파일에서 `game.exe × 300`, `steam`, `steamwebhelper × 3`, `wineserver`, `gamescope`를 봅니다. 인식기 쪽에서는 문제가 없습니다. 이름이 전부 5권에서 본 상황 S9의 이름입니다. 문제는 **executor가 받는 행동** 쪽입니다.
 
+> **재구축 이후 (2026-10-17).** 지금의 `c1-gaming`은 task 둘을 묶습니다. `Troy.exe`라는 이름의 `game-task-chain`(`lane_share: 0.9`, 구성원 이름은 슬라이드 16의 thread 이름)과 `game-client`에 묶인 `steam`입니다. compile하면 task 열여덟 개가 되고, 인식기는 `Troy.exe` × 7, `Task worker thr` × 4, `wineserver`, `dxvk-cs`, `dxvk-submit`, `winepulse_mainl`, `winepulse_timer`, `FAudio_AudioCli`, `steam`을 봅니다. `steamwebhelper` 셋과 `gamescope`는 빠졌고, `wineserver`는 사슬의 구성원입니다. 프레임마다 도는 260마이크로초가 사슬과 함께 `lane_share` 0.9에 맞춰 늘어나, 이 파일에서는 341마이크로초를 돕니다. CPU 한 자리 기준의 요구량은 약 92퍼센트입니다. 아래의 약점 지도는 그때의 파일의 것입니다.
+
 ### game.exe × 300
 
 ```text
@@ -3789,7 +3913,7 @@ tasks:
 ## 12장 정리
 
 - 근거가 약한 자리는 일곱 종류로 나뉩니다. 판정 기준이 없는 것, 판정이 순환인 것, 판정이 동어반복인 것, 관례로 정한 값, 밝혀둔 근사, 선언만 되고 실현되지 않은 것, 그리고 적히지 않았던 것입니다.
-- 사람이 만지는 창은 실제 사용 중인 기계로 검증하지 않았고, 대신 반증 도구를 공개하기로 했습니다. 그 개인정보 제거 도구는 아직 저장소에 없습니다.
+- 사람이 만지는 창은 실제 사용 중인 기계로 검증하지 않았고, 대신 반증 도구를 공개하기로 했었습니다. 그 약속은 2026-10-16에 거둬들여졌고, 검증하지 않았다는 한계만 남았습니다.
 - 그 항목은 타자 연구의 입력 간격에 창 끌기의 계산 무게를 붙여서, 사람이 창을 만지는 동안 시간의 절반을 계산합니다. 무엇을 흉내 내야 하는지가 정해져 있지 않습니다.
 - 게임 항목은 파라미터의 출처와 판정 기준이 같은 발표라서 판정하면 순환이 되고, CPU 한 자리에 맞추는 규칙의 방어도 같은 발표에서 옵니다. 약한 곳의 목록이 열두 항목 중 가장 깁니다.
 - 소리 재생, 영상 재생, 계산만 하는 작업의 판정은 항상 통과합니다. 모형이 현실과 맞는지가 아니라 도구가 모형을 제대로 옮겼는지를 확인합니다.
@@ -3799,6 +3923,8 @@ tasks:
 - 이 권이 원문을 열어 새로 찾은 약점은 대부분 확인된 것으로 표시된 자리에 있었습니다. 적어둔 약점은 약점이고, 적히지 않은 약점은 결함입니다.
 - 메모가 약점을 일관되게 적어둔 덕에 등급을 매길 수 있었고, 원문에서 확인할 자리가 좁혀졌고, 출처의 workload가 달라도 archetype의 값은 틀리지 않았다고 말할 수 있었습니다.
 - 게임 파일 하나에서 부하를 크게 좌우하는 두 task가 둘 다 약한 고리를 갖고 있습니다. 사슬의 박자는 출처가 확인되지 않았고, 화면 합성기는 근사입니다.
+
+> **재구축 이후 (2026-10-17).** 이 정리는 2026-09-13 library의 약한 자리를 따르고, 자리마다의 표시가 이 장의 각 절에 있습니다. 사람이 만지는 창의 항목(`desktop-interactive`)과 소리·영상 재생 항목은 library에 없고, 지금 판정란이 `meas-ci`가 아닌 항목은 `game-task-chain` 하나입니다. 이 연구가 정한 값 가운데 남은 넷은 지금 붙은 표시가 다릅니다. 사슬 길이 16(발표의 15에서 20 범위 안에서 고른 값)과 `make -j8`의 8은 설계로 정한 값이고, 발표의 두 예시를 5퍼센트와 95퍼센트 지점으로 읽은 것은 계획 문서가 출처가 범위만 주는 자리에 남긴 로그 정규의 관례이며, 그래프를 한 줄 사슬로 편 것은 우리 것입니다. 밝혀둔 근사 가운데 화상 회의, 채팅 앱, 파일 색인기, 세션 프로세스의 근사가 닫혔고, 선언만 되고 실현되지 않았던 여섯 가운데 넷이 닫혔습니다. 게임 파일에서 화면 합성 task는 빠졌고, frame 주기에는 Steam Deck의 기본 화면 갱신이 근거로 붙어 설계로 정한 값이라고 적혔습니다. 게임 항목을 발표로 판정하면 순환이 된다는 것은 같고, 항목은 그것을 판정란이 `none`인 이유로 적습니다.
 
 ---
 
@@ -3819,8 +3945,8 @@ tasks:
 | **binding** | 프로세스 이름과 archetype을 짝지어주는 것. timeline이나 상황 목록에서 일어난다 |
 | **timeline** | 사람이 손으로 쓰는 workload 설계 파일. 시간축 위에 구간과 라벨과 task를 놓는다 |
 | **trace** | 실행 중에 일어난 사건을 시각 순서로 기록한 것 |
-| **Layer 1 · 2 · 3** (데이터셋) | 데이터셋을 쌓는 세 층. archetype, 상황 목록, timeline. 행동 숫자는 첫 층에만 있다 |
-| **Layer 1 · 2** (측정) | 4권의 측정 두 층. 인식 정확도와 설정의 효과. 데이터셋의 층과 이름만 같다 |
+| **archetype library · scenario catalog · timelines** | 데이터셋을 쌓는 세 층. 번호가 아니라 이름으로 부른다(예전에는 Layer 1 · 2 · 3). 행동 숫자는 archetype library에만 있다 |
+| **Layer 1 · 2** (측정) | 4권의 측정 두 층. 인식 정확도와 설정의 효과. 이 프로젝트의 문서에서 Layer라는 번호는 이 둘만 가리킨다 |
 
 ## 여섯 primitive
 
@@ -3843,7 +3969,7 @@ tasks:
 
 | 용어 | 뜻 |
 |---|---|
-| **`category_source`** | 이 부류가 존재한다는 근거를 어느 분류 체계에서 거둬왔나. 없으면 `meas` |
+| **`category_source`** | 이 부류가 존재한다는 근거. 그때는 거둬온 분류 체계를, 없으면 `meas`를 적었다. 지금은 29개 중 28개가 `meas` |
 | **`pattern`** | primitive로 쓴 프로그램 |
 | **`params`** | 숫자 파라미터들. 하나하나가 분포이고 출처 표시가 붙는다 |
 | **`sampling`** | 값을 얼마나 자주 새로 뽑나. `per-instance`, `per-task`, `per-iteration` |
@@ -3858,7 +3984,7 @@ tasks:
 | **`binding_params`** | 쓰는 쪽이 채워야 하는 손잡이의 이름. 값은 적지 않는다 |
 | **`total_work`** | 계산 작업의 전체 크기. timeline이 채운다 |
 | **`spawn_count`** | 부모가 만들 자식 수. timeline이 채운다 |
-| **`parallelism_cap`** | 동시에 살아 있을 수 있는 자식 수의 상한. 기본값 8은 관례 |
+| **`parallelism_cap`** | 동시에 도는 작업 수의 상한. 8은 설계로 정한 값(8 thread 데스크톱의 `nproc` 규칙). 지금은 작업 하나가 spawn table 여섯 항목이라 `fork_cap`이 그 여섯 배 |
 | **`lane_share`** | 게임 사슬이 CPU 한 자리의 몇 할을 요구하게 맞출지. timeline이 채운다 |
 | **`scalable`** | CPU 한 자리에 맞추려고 compile 단계가 바꿔도 되는 값과 그 규칙. 게임 항목에만 있다 |
 | **`validation_stats`** | 재현해야 할 통계, 또는 판정할 수 없는 이유 |
@@ -3890,11 +4016,12 @@ tasks:
 | **locator** | 출처 안의 위치. `man-audio`, `s12`, `sec-4.3`, `cli:3` 같은 것 |
 | **`locator_pattern`** | 출처마다 허용하는 locator의 모양. 검사 도구가 확인한다 |
 | **scholarly** | 학술 문헌. 정해진 역할 안에서 행동과 통계에 대한 주장을 뒷받침한다 |
-| **deployed-system** | 배포된 소프트웨어의 문서, 저장소, 발표. 존재 주장만 뒷받침한다 |
-| **measurement** | 우리 측정. 구조와 모양에 대한 주장만 뒷받침한다 |
-| **convention informed by measurement** | 측정으로 보강한 관례. 기계에 따라 달라지는 절대값의 등급 |
+| **deployed-system** | 배포된 소프트웨어의 문서와 저장소. 존재 주장, 그 소프트웨어가 스스로 적은 설계와 동작, 그 소스가 공개한 숫자를 그 소스의 것으로 뒷받침한다(2026년 10월에 넓어짐. 그 전에는 존재 주장만) |
+| **talk, conference abstract or news report** | 발표, 학회 초록, 보도 기사. 주장은 발표자나 기자의 것으로, 숫자는 날짜와 함께 그 보고로만 적는다(2026년 10월에 따로 나뉨) |
+| **measurement** | 우리 측정. 이 소프트웨어를 이 실행 서버에서 잰 것이라는 범위가 붙은 주장 |
+| **convention informed by measurement** | 측정으로 보강한 관례. 그때 기계에 따라 달라지는 절대값의 등급이었고, 지금 규칙에는 없다 |
 | **`verified` · `to-pin` · `provisional`** | 인용이 확인된 정도. 그 문서가 맞는지를 말하고, 그 문서가 우리 내용을 말하는지는 말하지 않는다 |
-| **harvesting** | 수확. 이미 자기 분류를 정의해둔 출처에서 부류를 거둬오는 것. 부류의 존재를 닫는 방법. 계획 문서의 Tier 1 |
+| **harvesting** | 수확. 이미 자기 분류를 정의해둔 출처에서 부류를 거둬오는 것. 그때 계획 문서의 Tier 1. 지금의 Tier 1은 측정으로 근거를 댄다 |
 | **verification** | 검증. 목록의 조합이 측정을 재현하는지 보는 것. 목록의 충분함을 닫는 유일한 방법. 계획 문서의 Tier 2 |
 | **spanning** | 목록의 조합으로 상황 목록 S1부터 S18까지를 만들 수 있다는 주장 |
 | **taxonomy** | 분류 체계 |
@@ -3921,7 +4048,9 @@ tasks:
 | **cold cache** | 운영체제의 파일 캐시를 비운 상태. 디스크를 실제로 읽게 만든다 |
 | **daemon** | 사용자가 직접 실행하지 않았는데 뒤에서 늘 도는 시스템 프로그램 |
 
-## 열두 archetype
+## 열두 archetype (재구축 이전)
+
+이 표는 2026-09-13의 library입니다. 지금의 29개는 데이터셋 가이드북 2권에 있습니다.
 
 | 가족 | archetype | 흉내 내는 것 | 판정 |
 |---|---|---|---|
@@ -3944,18 +4073,18 @@ tasks:
 |---|---|---|---|
 | **`interbench`** | 대화형 반응성 벤치마크 | deployed-system | 설명서와 소스 코드를 읽음 |
 | **`rt-app`** | JSON으로 적는 주기 부하 도구 | deployed-system | 설명서를 읽음 |
-| **`lavd-ossna24`** | 게임 scheduler 발표 슬라이드 | deployed-system | 슬라이드 30장을 읽음 |
+| **`lavd-ossna24`** | 게임 scheduler 발표 슬라이드 | 그때 deployed-system, 지금 talk | 슬라이드 30장을 읽음 |
 | **`corbet-lwn24`** | 위 발표를 다룬 LWN 기사 | deployed-system | 읽음 |
 | **`ananicy-rules`** | 프로세스 이름별 우선순위 카탈로그 | deployed-system | 커밋 `03ef03fb`에서 항목을 찾음 |
-| **`dhakal-chi18`** | 키 입력 대규모 분석 | scholarly | 저자 공개 PDF를 읽음 |
-| **`roeser-rw24`** | 타자 막힘의 섞임 모형 | scholarly | 기관 저장소의 저자 원고를 읽음 |
+| **`dhakal-chi18`** | 키 입력 대규모 분석. 지금 데이터셋의 값은 주지 않고 자극 민감도 확인의 다른 흐름으로만 쓰임 | scholarly | 저자 공개 PDF를 읽음 |
+| **`roeser-rw24`** | 타자 막힘의 섞임 모형. 지금 데이터셋의 값은 주지 않음 | scholarly | 기관 저장소의 저자 원고를 읽음 |
 | **`ocallahan-atc17`** | 기록·재생 디버거 논문 | scholarly | 학회판과 확장판을 읽음 |
 | **`coetzee-arxiv12`** | 빌드 시스템 논문 원고 | scholarly | arXiv 원고를 읽음 |
-| **`dubroy-chi10`** | Firefox 탭 사용 연구 | scholarly | 저자 공개 PDF를 읽음 |
-| **`mozilla-testpilot10`** | Firefox 사용자 탭 기록 | deployed-system | 집계 안내 페이지와 분석 기사를 읽음 |
-| **`chang-chi21`** | 탭 부담 조사 | scholarly | 읽지 못함 |
+| **`dubroy-chi10`** | Firefox 탭 사용 연구. 2026-10-16에 인용 문서에서 빠짐 | scholarly | 저자 공개 PDF를 읽음 |
+| **`mozilla-testpilot10`** | Firefox 사용자 탭 기록. 2026-10-16에 인용 문서에서 빠짐(분석 기사 `singervine-slate10`과 함께) | deployed-system | 집계 안내 페이지와 분석 기사를 읽음 |
+| **`chang-chi21`** | 탭 부담 조사. 2026-10-16에 인용 문서에서 빠짐 | scholarly | 읽지 못함 |
 | **`cpsmark-tbench23`** | 사무용 데스크톱 벤치마크 논문 | scholarly | 읽지 못함 |
-| **`meas-ci`** | 우리 측정 | measurement | 요약 파일, 분석 코드, release 원자료의 사양 파일을 읽음 |
+| **`meas-ci`** | 우리 측정 | measurement | 요약 파일(2026-10-16에 지워짐), 분석 코드, release 원자료의 사양 파일을 읽음 |
 
 ## 주의할 표기
 
@@ -3963,8 +4092,8 @@ tasks:
 |---|---|
 | **Tier 1 · Tier 2** | 계획 문서의 존재 근거와 충분함 근거. 인용의 등급(scholarly, deployed-system)과 다른 말이다 |
 | **`fluent_mean_us`** | 이름은 평균이지만 원문의 158 ms는 로그 척도의 위치다 |
-| **2,430** | 원문에서는 DynamoRio 6.1.0 빌드의 값. 저장소 문서는 커널 빌드로 적는다 |
-| **`meas-ci:cli:3`** | 명령줄 측정의 세 번째 실행. 반복 다섯 개를 담고 있다. 세 번째 반복이 아니다 |
+| **2,430** | 원문에서는 DynamoRio 6.1.0 빌드의 값. 이 권이 쓰일 때 저장소 문서는 커널 빌드로 적었고, 지금 출처 등록부의 메모는 바로잡혀 있다 |
+| **`meas-ci:cli:3`** | 명령줄 측정의 세 번째 실행. 반복 다섯 개를 담고 있다. 세 번째 반복이 아니다. 실행 번호로 적는 것은 캠페인이 한 번짜리였던 그 이전의 모양이고, 지금 locator는 캠페인을 그 첫 묶음을 띄운 날짜로 적는다(`meas-ci:desktop:2026-10-04`) |
 | **`ananicy` · `ananicy-rules`** | 원래 Ananicy와 CachyOS 카탈로그. 대문자 분류 이름은 뒤쪽 것이다 |
 
 ---
@@ -3976,7 +4105,7 @@ tasks:
 - scheduler에게 프로세스가 무엇인지 한 문장으로 말하고, 그래서 archetype에 들어갈 수 없는 셋을 댈 수 있다.
 - archetype이 이름을 모른다는 규칙이 이름만 바꾼 한 쌍의 파일을 어떻게 가능하게 하는지 설명할 수 있다.
 - archetype의 숫자가 인식 정확도가 아니라 설정의 효과를 재는 층에 영향을 주는 이유를 말할 수 있다.
-- 행동 숫자가 데이터셋의 첫 층에만 있다는 규칙을 데이터베이스 정규화에 빗대어 설명할 수 있다.
+- 행동 숫자가 archetype library에만 있다는 규칙을 데이터베이스 정규화에 빗대어 설명할 수 있다.
 
 **primitive 확인**
 
@@ -4005,7 +4134,6 @@ tasks:
 **목록 확인**
 
 - 열두 archetype을 다섯 가족으로 나눠 나열할 수 있다.
-- 파일 색인기가 한 파일에서는 `cpu-batch`이고 다른 곳에서는 `background-crawler`인 이유를 말할 수 있다.
 - 게임 항목의 숫자 중 LAVD 발표 원문에 있는 것과 없는 것을 구분할 수 있다.
 - 화상 회의를 영상 재생에 묶은 것이 왜 근사인지, 왜 파라미터를 지어내지 않았는지 말할 수 있다.
 
@@ -4048,4 +4176,4 @@ tasks:
 - 적어둔 약점과 적히지 않은 약점이 논문에서 어떻게 다르게 작동하는지 말할 수 있다.
 - 인용 문장이 원문과 글자 그대로 맞아도 인용의 설명이 틀릴 수 있다는 것을 이 권의 사례로 보일 수 있다.
 
-다음 권은 이 archetype들을 불러다 쓰는 쪽을 봅니다. timeline이 archetype과 이름을 짝짓고, seed로 분포에서 값을 뽑고, 실행할 수 있는 workload 파일이 되기까지입니다.
+다음 권은 이 archetype들을 불러다 쓰는 쪽을 봅니다. timeline이 archetype과 이름을 짝짓고, seed로 분포에서 값을 뽑고, 실행할 수 있는 workload 파일이 되기까지입니다. 이 시리즈의 그 권은 쓰이지 않았고, 그 내용은 데이터셋 가이드북 3권(`docs/guidebook/dataset/03-timeline-to-canonical-workload.md`)이 다룹니다.

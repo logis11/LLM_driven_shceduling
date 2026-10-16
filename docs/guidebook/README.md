@@ -4,6 +4,8 @@
 
 운영체제를 전혀 모르는 상태에서 시작해서, 이 연구가 무엇을 주장하고 어떻게 검증하며 그 결과가 논문의 어느 부분이 되는지까지 갑니다.
 
+workload 데이터셋만 따로 처음부터 끝까지 다루는 [데이터셋 가이드북](dataset/README.md) 여덟 권이 함께 있습니다.
+
 ## 권 목록
 
 | 권 | 제목 | 답하는 질문 | 상태 |
@@ -13,9 +15,9 @@
 | 3 | [이 연구의 큰 그림](vol-03-the-research.md) | 무엇이 gap이고, recognition layer는 어떤 architecture이며, 무엇이 이 주장을 무너뜨리나 | 완성 |
 | 4 | [실험의 뼈대](vol-04-experiment-design.md) | 이 주장을 어떻게 측정 가능한 형태로 바꾸나 | 초고 |
 | 5 | [공유 어휘](vol-05-shared-vocabulary.md) | mode와 attribute는 왜 이 목록인가 | 완성 |
-| 6 | [Workload 1: 재료와 근거](vol-06-archetypes-and-grounding.md) | archetype의 숫자들은 어디서 왔나 | 완성 |
-| 7 | Workload 2: 조립과 compile | timeline이 어떻게 실행 가능한 workload가 되나 | 예정 |
-| 8 | Workload 3: 50개 coreset | 각 파일이 어떤 질문에 답하나 | 예정 |
+| 6 | [Workload 1: 재료와 근거](vol-06-archetypes-and-grounding.md) | archetype의 숫자들은 어디서 왔나. 2026-09-13의 library를 다룸. 지금의 library는 [데이터셋 가이드북 2권](dataset/02-the-archetype-library.md) | 완성 |
+| 7 | Workload 2: 조립과 compile | timeline이 어떻게 실행 가능한 workload가 되나 | [데이터셋 가이드북 3권](dataset/03-timeline-to-canonical-workload.md)이 답함 |
+| 8 | Workload 3: 51개 coreset | 각 파일이 어떤 질문에 답하나 | [데이터셋 가이드북 4권](dataset/04-the-coreset.md)이 답함 |
 | 9 | Simulator와 interpretation contract | workload가 어떻게 실행되는 task가 되나 | 예정 |
 | 10 | Config schema와 driver table | 어휘가 어떻게 scheduler 설정이 되나 | 예정 |
 | 11 | Daemon과 recognition | LLM에게 무엇을 보여주고 그 답을 왜 검증하나 | 예정 |
@@ -38,3 +40,7 @@
 - **미실행.** 결정은 됐지만 아직 돌리지 않은 자리. 언제 돌리기로 되어 있는지와 전제 조건을 적습니다.
 
 RQ0 너머의 계획은 대개 **제안** 또는 **미실행**으로 표시됩니다.
+
+6권에는 표시가 하나 더 있습니다.
+
+- **재구축 이후.** 2026-09-13의 archetype library를 지금의 것처럼 적은 대목 뒤에 붙습니다. 데이터셋을 다시 지은 작업(2026년 9–10월)이 그 자리를 무엇으로 바꿨는지를, 표시를 붙인 날짜와 함께 적습니다.
