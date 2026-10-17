@@ -56,9 +56,14 @@ focus holder (none when no window holds the focus). Behaviour, labels and PIDs
 stay out of it.
 
 Links 1 through 3 are properties of the workload space rather than of language
-models. They are what Phase 1 tests, with `random` against perfect recognition,
-before any prompt exists. If link 1 fails, no model recovers the paper. This is
-why section 5.3 is a gate rather than a milestone.
+models. Phase 1's committed spec (`harness/experiments/rq0-gate.yaml`) tests
+link 1, by RQ0: `random` against perfect recognition, before any prompt exists.
+Link 3 is held by how the dataset is built, and its limits are measured by the
+pre-committed misses: the segments shipped with `pre_committed_miss: true`
+because no recognizer can reach their label from names and behaviour; the
+headline accuracy excludes them and a second reported line includes them.
+Link 2 has no falsification condition yet. If link 1 fails, no model recovers
+the paper. This is why section 5.3 is a gate rather than a milestone.
 
 Link 7 is argued in section 4.4.4 and demonstrated nowhere, because the project
 builds one driver. Section 7 already states this as the proposal's most
