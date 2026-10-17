@@ -98,7 +98,7 @@ Execution order: 8.1 first (added 2026-09-11; every later sub-task reads the boo
 - [x] **8.9** Docs sweep — harness guide chapters for the upper half, docs index, terminology (RQ0 gate evaluator, per-experiment spec, guard spec), RQ0 preparation notes' stage ticks, proposal pointers; README sweep (added 2026-09-12): `harness/README.md` rewritten as a front door and one README per folder under `harness/` — what the folder is for, how its files are produced and read, how to run it — written as READMEs, not file indexes
 - [x] **8.10** Boost windows — a new primitive `boost_window` (one records row per boost instant inside an MLFQ interval, sized by the §6.9 rule and clipped at the next boost, on `switch_window`'s columns with a new `metric` value); the aggregates module computes the per-switch excess and its boost variant; `mock-switch`'s expected records gain its two hand-worked boost rows; metrics doc §6 primitive, §8, changelog; no simulator or daemon change (decided 2026-09-11 from 8.2's finding; 8.2 spec decision 9)
 
-### Phase 9 [WIP] — Workload dataset rebuild from the critical findings
+### Phase 9 [done] — Workload dataset rebuild from the critical findings
 Every finding in `docs/memos/2026-09-13-critical-findings.md` and the 2026-09-13 verification resolved against its primary source; the workload dataset rebuilt; the decisions the prior driver table and the RQ0 gate spec took from the workload data redone; citations outside the dataset held to the same standard; the docs that explain the workload dataset brought in line; the project back where Phase 8 ended, ready for the RQ0 run. Spec: `_dev/docs/spec/jioh/phase-9-workload-dataset-rebuild.md`.
 
 always work on branch `jioh/dataset-rebuild`
